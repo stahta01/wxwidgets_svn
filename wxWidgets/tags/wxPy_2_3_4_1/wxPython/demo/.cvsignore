@@ -1,0 +1,9 @@
+*.pyc
+.DS_Store
+.emacs.desktop
+b.bat
+hangman_dict.txt
+mimetypes_wdr
+setup.bat
+test.out
+tmphtml.txt
