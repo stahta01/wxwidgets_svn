@@ -4,7 +4,7 @@ rem using Inno Setup + ScriptMaker
 set src=%wxwin
 set dest=%src\deliver
 set webfiles=c:\wx2dev\wxWebSite
-set inno=1
+set inno=0
 
 Rem Set this to the required version
 set version=2.3.3
