@@ -94,6 +94,7 @@
 #undef __NETBSD__
 #undef __BSD__
 #undef __FREEBSD__
+#undef __OPENBSD__
 #define __VMS__
 #undef __ULTRIX__
 #undef __DATA_GENERAL__
@@ -914,6 +915,9 @@
 /* struct tm doesn't always have the tm_gmtoff field, define this if it does */
 #define WX_GMTOFF_IN_TM
 
+/* Define if you have poll(2) function */
+#define HAVE_POLL 1
+
 /* Define if you have pw_gecos field in struct passwd */
 #undef HAVE_PW_GECOS
 
@@ -1129,9 +1133,6 @@
 
 /* Define this if you have vswprintf() and related functions */
 #define HAVE_VSWPRINTF 1
-
-/* Define this if you have _vsnwprintf */
-#undef HAVE__VSNWPRINTF
 
 /* Define this if you are using gtk and gdk contains support for X11R6 XIM */
 #undef HAVE_XIM
