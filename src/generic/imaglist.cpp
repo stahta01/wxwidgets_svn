@@ -21,7 +21,6 @@
 #include "wx/generic/imaglist.h"
 #include "wx/icon.h"
 #include "wx/image.h"
-#include "wx/dc.h"
 
 //-----------------------------------------------------------------------------
 //  wxImageList
@@ -49,7 +48,7 @@ wxGenericImageList::~wxGenericImageList()
 
 int wxGenericImageList::GetImageCount() const
 {
-    return m_images.GetCount();
+    return m_images.Number();
 }
 
 bool wxGenericImageList::Create( int width, int height, bool WXUNUSED(mask), int WXUNUSED(initialCount) )
@@ -72,7 +71,7 @@ int wxGenericImageList::Add( const wxBitmap &bitmap )
         m_images.Append( new wxIcon( (const wxIcon&) bitmap ) );
     else
         m_images.Append( new wxBitmap(bitmap) );
-    return m_images.GetCount()-1;
+    return m_images.Number()-1;
 }
 
 int wxGenericImageList::Add( const wxBitmap& bitmap, const wxBitmap& mask )
@@ -92,16 +91,16 @@ int wxGenericImageList::Add( const wxBitmap& bitmap, const wxColour& maskColour 
 
 const wxBitmap *wxGenericImageList::GetBitmap( int index ) const
 {
-    wxNode *node = m_images.Item( index );
+    wxNode *node = m_images.Nth( index );
 
     wxCHECK_MSG( node, (wxBitmap *) NULL, wxT("wrong index in image list") );
 
-    return (wxBitmap*)node->GetData();
+    return (wxBitmap*)node->Data();
 }
 
 bool wxGenericImageList::Replace( int index, const wxBitmap &bitmap )
 {
-    wxNode *node = m_images.Item( index );
+    wxNode *node = m_images.Nth( index );
 
     wxCHECK_MSG( node, FALSE, wxT("wrong index in image list") );
 
@@ -117,14 +116,14 @@ bool wxGenericImageList::Replace( int index, const wxBitmap &bitmap )
     else
         newBitmap = new wxBitmap(bitmap) ;
 
-    if (index == (int) m_images.GetCount() - 1)
+    if (index == m_images.Number()-1)
     {
         m_images.DeleteNode( node );
         m_images.Append( newBitmap );
     }
     else
     {
-        wxNode *next = node->GetNext();
+        wxNode *next = node->Next();
         m_images.DeleteNode( node );
         m_images.Insert( next, newBitmap );
     }
@@ -134,7 +133,7 @@ bool wxGenericImageList::Replace( int index, const wxBitmap &bitmap )
 
 bool wxGenericImageList::Remove( int index )
 {
-    wxNode *node = m_images.Item( index );
+    wxNode *node = m_images.Nth( index );
 
     wxCHECK_MSG( node, FALSE, wxT("wrong index in image list") );
 
@@ -155,11 +154,11 @@ bool wxGenericImageList::GetSize( int index, int &width, int &height ) const
     width = 0;
     height = 0;
 
-    wxNode *node = m_images.Item( index );
+    wxNode *node = m_images.Nth( index );
 
     wxCHECK_MSG( node, FALSE, wxT("wrong index in image list") );
 
-    wxBitmap *bm = (wxBitmap*)node->GetData();
+    wxBitmap *bm = (wxBitmap*)node->Data();
     width = bm->GetWidth();
     height = bm->GetHeight();
 
@@ -169,11 +168,11 @@ bool wxGenericImageList::GetSize( int index, int &width, int &height ) const
 bool wxGenericImageList::Draw( int index, wxDC &dc, int x, int y,
                         int flags, bool WXUNUSED(solidBackground) )
 {
-    wxNode *node = m_images.Item( index );
+    wxNode *node = m_images.Nth( index );
 
     wxCHECK_MSG( node, FALSE, wxT("wrong index in image list") );
 
-    wxBitmap *bm = (wxBitmap*)node->GetData();
+    wxBitmap *bm = (wxBitmap*)node->Data();
 
     if (bm->IsKindOf(CLASSINFO(wxIcon)))
         dc.DrawIcon( * ((wxIcon*) bm), x, y);

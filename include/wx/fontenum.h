@@ -17,7 +17,7 @@
     #pragma interface "fontenum.h"
 #endif
 
-#include "wx/fontenc.h"
+#include "wx/font.h"
 
 // ----------------------------------------------------------------------------
 // wxFontEnumerator enumerates all available fonts on the system or only the
@@ -84,8 +84,6 @@ public:
     
 private:
     wxArrayString *m_Facenames, *m_Encodings;
-
-    DECLARE_NO_COPY_CLASS(wxFontEnumerator)
 };
 
 #endif // _WX_FONTENUM_H_

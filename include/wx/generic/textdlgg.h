@@ -66,7 +66,6 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxTextEntryDialog)
-    DECLARE_NO_COPY_CLASS(wxTextEntryDialog)
 };
 
 // ----------------------------------------------------------------------------

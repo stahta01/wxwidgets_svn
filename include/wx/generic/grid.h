@@ -360,10 +360,6 @@ public:
     // create a new object which is the copy of this one
     virtual wxGridCellEditor *Clone() const = 0;
 
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const = 0;
-
 protected:
     // the dtor is private because only DecRef() can delete us
     virtual ~wxGridCellEditor();
@@ -384,8 +380,6 @@ protected:
     // suppress the stupid gcc warning about the class having private dtor and
     // no friends
     friend class wxGridCellEditorDummyFriend;
-
-    DECLARE_NO_COPY_CLASS(wxGridCellEditor)
 };
 
 #if wxUSE_TEXTCTRL
@@ -417,9 +411,6 @@ public:
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellTextEditor; }
 
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 protected:
     wxTextCtrl *Text() const { return (wxTextCtrl *)m_control; }
 
@@ -456,9 +447,6 @@ public:
 
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellNumberEditor(m_min, m_max); }
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 
 protected:
     wxSpinCtrl *Spin() const { return (wxSpinCtrl *)m_control; }
@@ -534,9 +522,6 @@ public:
 
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellBoolEditor; }
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 
 protected:
     wxCheckBox *CBox() const { return (wxCheckBox *)m_control; }
@@ -573,16 +558,11 @@ public:
     virtual void SetParameters(const wxString& params);
 
     virtual wxGridCellEditor *Clone() const;
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 
 protected:
     wxComboBox *Combo() const { return (wxComboBox *)m_control; }
 
-// DJC - (MAPTEK) you at least need access to m_choices if you
-//                wish to override this class
-protected:
+private:
     wxString        m_startValue;
     wxArrayString   m_choices;
     bool            m_allowOthers;
@@ -770,8 +750,6 @@ private:
     void InitData();
 
     wxGridCellAttrProviderData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxGridCellAttrProvider)
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -860,7 +838,6 @@ private:
     wxGridCellAttrProvider *m_attrProvider;
 
     DECLARE_ABSTRACT_CLASS( wxGridTableBase );
-    DECLARE_NO_COPY_CLASS(wxGridTableBase)
 };
 
 
@@ -904,8 +881,6 @@ private:
     int m_id;
     int m_comInt1;
     int m_comInt2;
-
-    DECLARE_NO_COPY_CLASS(wxGridTableMessage)
 };
 
 
@@ -1122,13 +1097,11 @@ public:
     //
     void DrawTextRectangle( wxDC& dc, const wxString&, const wxRect&,
                             int horizontalAlignment = wxALIGN_LEFT,
-                            int verticalAlignment = wxALIGN_TOP,
-                            int textOrientation = wxHORIZONTAL );
+                            int verticalAlignment = wxALIGN_TOP );
 
     void DrawTextRectangle( wxDC& dc, const wxArrayString& lines, const wxRect&,
                             int horizontalAlignment = wxALIGN_LEFT,
-                            int verticalAlignment = wxALIGN_TOP,
-                            int textOrientation = wxHORIZONTAL );
+                            int verticalAlignment = wxALIGN_TOP );
 
 
     // Split a string containing newline chararcters into an array of
@@ -1240,7 +1213,6 @@ public:
     wxFont   GetLabelFont() { return m_labelFont; }
     void     GetRowLabelAlignment( int *horiz, int *vert );
     void     GetColLabelAlignment( int *horiz, int *vert );
-    int      GetColLabelTextOrientation();
     wxString GetRowLabelValue( int row );
     wxString GetColLabelValue( int col );
     wxColour GetGridLineColour() { return m_gridLineColour; }
@@ -1255,7 +1227,6 @@ public:
     void     SetLabelFont( const wxFont& );
     void     SetRowLabelAlignment( int horiz, int vert );
     void     SetColLabelAlignment( int horiz, int vert );
-    void     SetColLabelTextOrientation( int textOrientation );
     void     SetRowLabelValue( int row, const wxString& );
     void     SetColLabelValue( int col, const wxString& );
     void     SetGridLineColour( const wxColour& );
@@ -1331,12 +1302,6 @@ public:
     // auto size the grid, that is make the columns/rows of the "right" size
     // and also set the grid size to just fit its contents
     void     AutoSize();
-
-    // autosize row height depending on label text
-    void     AutoSizeRowLabelSize( int row );
-
-    // autosize column width depending on label text
-    void     AutoSizeColLabelSize( int col );
 
     // column won't be resized to be lesser width - this must be called during
     // the grid creation because it won't resize the column if it's already
@@ -1457,13 +1422,12 @@ public:
     void RegisterDataType(const wxString& typeName,
                           wxGridCellRenderer* renderer,
                           wxGridCellEditor* editor);
-    // DJC MAPTEK
-    virtual wxGridCellEditor* GetDefaultEditorForCell(int row, int col) const;
+    wxGridCellEditor* GetDefaultEditorForCell(int row, int col) const;
     wxGridCellEditor* GetDefaultEditorForCell(const wxGridCellCoords& c) const
         { return GetDefaultEditorForCell(c.GetRow(), c.GetCol()); }
-    virtual wxGridCellRenderer* GetDefaultRendererForCell(int row, int col) const;
-    virtual wxGridCellEditor* GetDefaultEditorForType(const wxString& typeName) const;
-    virtual wxGridCellRenderer* GetDefaultRendererForType(const wxString& typeName) const;
+    wxGridCellRenderer* GetDefaultRendererForCell(int row, int col) const;
+    wxGridCellEditor* GetDefaultEditorForType(const wxString& typeName) const;
+    wxGridCellRenderer* GetDefaultRendererForType(const wxString& typeName) const;
 
     // grid may occupy more space than needed for its rows/columns, this
     // function allows to set how big this extra space is
@@ -1717,7 +1681,6 @@ protected:
     int        m_rowLabelVertAlign;
     int        m_colLabelHorizAlign;
     int        m_colLabelVertAlign;
-    int        m_colLabelTextOrientation;
 
     bool       m_defaultRowLabelValues;
     bool       m_defaultColLabelValues;
@@ -1871,7 +1834,6 @@ protected:
 
     DECLARE_DYNAMIC_CLASS( wxGrid )
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxGrid)
 };
 
 // ----------------------------------------------------------------------------
@@ -2020,7 +1982,6 @@ private:
     wxControl* m_ctrl;
 
     DECLARE_DYNAMIC_CLASS(wxGridEditorCreatedEvent)
-    DECLARE_NO_COPY_CLASS(wxGridEditorCreatedEvent)
 };
 
 

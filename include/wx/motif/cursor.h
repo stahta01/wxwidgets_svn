@@ -17,7 +17,11 @@
 #endif
 
 #include "wx/bitmap.h"
-#include "wx/list.h"
+#if wxUSE_IMAGE
+#include "wx/image.h"
+#endif
+
+
 
 /* Cursor for one display, so we can choose the correct one for
 * the current display.

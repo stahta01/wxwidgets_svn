@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name:        dnd.h
 // Purpose:     Declaration of the wxDropTarget, wxDropSource class etc.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // RCS-ID:      $Id$
-// Copyright:   (c) 1998 Stefan Csomor
+// Copyright:   (c) 1998 AUTHOR
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -74,10 +74,21 @@ class WXDLLEXPORT wxDropTarget: public wxDropTargetBase
 class WXDLLEXPORT wxDropSource: public wxDropSourceBase
 {
 public:
-    // ctors: if you use default ctor you must call SetData() later!
-    //
-    // NB: the "wxWindow *win" parameter is unused and is here only for wxGTK
-    //     compatibility, as well as both icon parameters
+    // only left in for binary compatibility
+    /* constructor. set data later with SetData() */
+    wxDropSource( wxWindow *win ,
+                  const wxIcon &copy ,
+                  const wxIcon &move ,
+                  const wxIcon &none );
+
+    // only left in for binary compatibility
+    /* constructor for setting one data object */
+    wxDropSource( wxDataObject& data,
+                  wxWindow *win,
+                  const wxIcon &copy ,
+                  const wxIcon &move ,
+                  const wxIcon &none );
+
     wxDropSource( wxWindow *win = (wxWindow *)NULL,
                  const wxCursor &cursorCopy = wxNullCursor,
                  const wxCursor &cursorMove = wxNullCursor,
@@ -92,16 +103,14 @@ public:
 
     ~wxDropSource();
 
-    // do it (call this in response to a mouse button press, for example)
-    // params: if bAllowMove is false, data can be only copied
+    /* start drag action */
     virtual wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly);
-
+    
     wxWindow*     GetWindow() { return m_window ; }
     void SetCurrentDrag( void* drag ) { m_currentDrag = drag ; }
     void* GetCurrentDrag() { return m_currentDrag ; }
 	bool			MacInstallDefaultCursor(wxDragResult effect) ;
   protected :
-  	
     wxWindow        *m_window;
     void* m_currentDrag ;
 };

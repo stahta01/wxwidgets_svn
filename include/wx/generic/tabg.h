@@ -21,7 +21,6 @@
 #include "wx/hash.h"
 #include "wx/string.h"
 #include "wx/dialog.h"
-#include "wx/panel.h"
 
 class WXDLLEXPORT wxTabView;
 
@@ -103,7 +102,7 @@ public:
   wxTabView(long style = wxTAB_STYLE_DRAW_BOX | wxTAB_STYLE_COLOUR_INTERIOR);
   ~wxTabView();
 
-  inline int GetNumberOfLayers() const { return m_layers.GetCount(); }
+  inline int GetNumberOfLayers() const { return m_layers.Number(); }
   inline wxList& GetLayers() { return m_layers; }
 
   inline void SetWindow(wxWindow* wnd) { m_window = wnd; }

@@ -81,9 +81,7 @@
     #define DEFAULT_XRESOURCE_DIR "/usr/lib/X11/app-defaults"
 #endif
 
-#if wxUSE_RESOURCES
 static char *GetIniFile (char *dest, const char *filename);
-#endif
 
 // ============================================================================
 // implementation
@@ -228,8 +226,6 @@ int wxGetOsVersion(int *majorVsn, int *minorVsn)
 // Reading and writing resources (eg WIN.INI, .Xdefaults)
 // ----------------------------------------------------------------------------
 
-#if wxUSE_RESOURCES
-
 // Read $HOME for what it says is home, if not
 // read $USER or $LOGNAME for user name else determine
 // the Real User, then determine the Real home dir.
@@ -259,6 +255,8 @@ static char * GetIniFile (char *dest, const char *filename)
     }
     return dest;
 }
+
+#if wxUSE_RESOURCES
 
 static char *GetResourcePath(char *buf, const char *name, bool create = FALSE)
 {
@@ -1247,18 +1245,6 @@ void wxDoChangeBackgroundColour(WXWidget widget, wxColour& backgroundColour, boo
         NULL);
 }
 
-extern void wxDoChangeFont(WXWidget widget, wxFont& font)
-{
-    // Lesstif 0.87 hangs here, but 0.93 does not
-#if !wxCHECK_LESSTIF() || wxCHECK_LESSTIF_VERSION( 0, 93 )
-    Widget w = (Widget)widget;
-    XtVaSetValues( w,
-                   wxFont::GetFontTag(), font.GetFontType( XtDisplay(w) ),
-                   NULL );
-#endif
-
-}
-
 #endif
     // __WXMOTIF__
 
@@ -1269,17 +1255,3 @@ bool wxWindowIsVisible(Window win)
 
     return (wa.map_state == IsViewable);
 }
-
-wxString wxXmStringToString( const XmString& xmString )
-{
-    char *txt;
-    if( XmStringGetLtoR( xmString, XmSTRING_DEFAULT_CHARSET, &txt ) )
-    {
-        wxString str(txt);
-        XtFree (txt);
-        return str;
-    }
-
-    return wxEmptyString;
-}
-

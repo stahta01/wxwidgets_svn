@@ -141,7 +141,7 @@ bool wxDataObject::IsSupportedFormat(
     }
     else
     {
-        wxDataFormat* pFormats = new wxDataFormat[nFormatCount];
+        wxDataFormat*               pFormats = new wxDataFormat[nFormatCount];
         GetAllFormats( pFormats
                       ,vDir
                      );
@@ -183,7 +183,7 @@ bool wxFileDataObject::GetDataHere(
 
 size_t wxFileDataObject::GetDataSize() const
 {
-    size_t nRes = 0;
+    size_t                          nRes = 0;
 
     for (size_t i = 0; i < m_filenames.GetCount(); i++)
     {
@@ -201,7 +201,7 @@ bool wxFileDataObject::SetData(
 {
     m_filenames.Empty();
 
-    wxString sFile( (const char *)pBuf);  /* char, not wxChar */
+    wxString                        sFile( (const char *)pBuf);  /* char, not wxChar */
 
     AddFile(sFile);
 
@@ -225,65 +225,57 @@ wxBitmapDataObject::wxBitmapDataObject()
 }
 
 wxBitmapDataObject::wxBitmapDataObject(
-  const wxBitmap& rBitmap
+  const wxBitmap&                   rBitmap
 )
 : wxBitmapDataObjectBase(rBitmap)
 {
     Init();
     if ( m_bitmap.Ok() )
     {
-        m_pictHandle = m_bitmap.GetPict( &m_pictCreated ) ;
-    }
+		m_pngData = m_bitmap.GetPict() ;
+		m_pngSize = GetHandleSize( (Handle) m_pngData ) ;
+	}
 }
 
 wxBitmapDataObject::~wxBitmapDataObject()
 {
-    Clear();
+	if ( m_pngData && m_bitmap.GetBitmapType() != kMacBitmapTypePict )
+	{
+		KillPicture( (PicHandle) m_pngData ) ;
+	}
+	m_pngData = NULL ;
+	m_pngSize = 0 ;
 }
 
 void wxBitmapDataObject::SetBitmap(
   const wxBitmap&                   rBitmap
 )
 {
-    Clear();
+	if ( m_pngData && m_bitmap.GetBitmapType() != kMacBitmapTypePict )
+	{
+		KillPicture( (PicHandle) m_pngData ) ;
+	}
+	m_pngData = NULL ;
+	m_pngSize = 0 ;
     wxBitmapDataObjectBase::SetBitmap(rBitmap);
     if ( m_bitmap.Ok() )
     {
-        m_pictHandle = m_bitmap.GetPict( &m_pictCreated ) ;
-    }
-}
-
-void wxBitmapDataObject::Init() 
-{ 
-    m_pictHandle = NULL ;
-    m_pictCreated = false ;
-} 
-
-void wxBitmapDataObject::Clear() 
-{
-    if ( m_pictCreated && m_pictHandle )
-    {
-        KillPicture( (PicHandle) m_pictHandle ) ;
-    }
-    m_pictHandle = NULL ;
+		m_pngData = m_bitmap.GetPict() ;
+		m_pngSize = GetHandleSize( (Handle) m_pngData ) ;
+	}
 }
 
 bool wxBitmapDataObject::GetDataHere(
   void*                             pBuf
 ) const
 {
-    if (!m_pictHandle)
+    if (!m_pngData)
     {
         wxFAIL_MSG(wxT("attempt to copy empty bitmap failed"));
         return FALSE;
     }
-    memcpy(pBuf, *(Handle)m_pictHandle, GetHandleSize((Handle)m_pictHandle));
+    memcpy(pBuf, *(Handle)m_pngData, GetHandleSize((Handle)m_pngData));
     return TRUE;
-}
-
-size_t wxBitmapDataObject::GetDataSize() const
-{
-    return GetHandleSize((Handle)m_pictHandle) ;
 }
 
 bool wxBitmapDataObject::SetData(
@@ -294,12 +286,12 @@ bool wxBitmapDataObject::SetData(
     Clear();
     PicHandle picHandle = (PicHandle) NewHandle( nSize ) ;
     memcpy( *picHandle , pBuf , nSize ) ;
-    m_pictHandle = picHandle ;
-    m_pictCreated = false ;
+    m_pngData = picHandle ;
+	m_pngSize = GetHandleSize( (Handle) picHandle ) ;
     Rect frame = (**picHandle).picFrame ;
     
-    m_bitmap.SetPict( picHandle ) ;
-    m_bitmap.SetWidth( frame.right - frame.left ) ;
-    m_bitmap.SetHeight( frame.bottom - frame.top ) ;
+    m_bitmap.SetPict( m_pngData ) ;
+	m_bitmap.SetWidth( frame.right - frame.left ) ;
+	m_bitmap.SetHeight( frame.bottom - frame.top ) ;
     return m_bitmap.Ok();
 }

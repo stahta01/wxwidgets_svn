@@ -79,6 +79,7 @@ public:
     virtual bool Show(bool show = TRUE);
 
     // event handlers
+    bool OnClose();
     void OnCharHook(wxKeyEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
 
@@ -120,7 +121,6 @@ private:
 
     DECLARE_DYNAMIC_CLASS(wxDialog)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDialog)
 };
 
 #endif

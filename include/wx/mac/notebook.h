@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        notebook.h
 // Purpose:     MSW/GTK compatible notebook (a.k.a. property sheet)
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_NOTEBOOK_H_
@@ -135,7 +135,7 @@ public:
   virtual void Command(wxCommandEvent& event);
 protected:
     virtual wxNotebookPage *DoRemovePage(int page) ;
-    virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
+	virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
   // common part of all ctors
   void Init();
 

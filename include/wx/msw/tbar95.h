@@ -76,8 +76,8 @@ protected:
     // common part of all ctors
     void Init();
 
-    // create the native toolbar control
-    bool MSWCreateToolbar(const wxPoint& pos, const wxSize& size);
+    // create the toolbar control
+    bool MSWCreateToolbar(const wxPoint& pos, const wxSize& size, long style);
 
     // recreate the control completely
     void Recreate();
@@ -127,7 +127,6 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxToolBar)
-    DECLARE_NO_COPY_CLASS(wxToolBar)
 };
 
 #endif // wxUSE_TOOLBAR

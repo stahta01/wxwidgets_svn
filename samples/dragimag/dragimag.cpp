@@ -270,13 +270,13 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
 
 void MyCanvas::DrawShapes(wxDC& dc)
 {
-    wxNode* node = m_displayList.GetFirst();
+    wxNode* node = m_displayList.First();
     while (node)
     {
-        DragShape* shape = (DragShape*) node->GetData();
+        DragShape* shape = (DragShape*) node->Data();
         if (shape->IsShown())
           shape->Draw(dc);
-        node = node->GetNext();
+        node = node->Next();
     }
 }
 
@@ -295,25 +295,25 @@ void MyCanvas::EraseShape(DragShape* shape, wxDC& dc)
 
 void MyCanvas::ClearShapes()
 {
-    wxNode* node = m_displayList.GetFirst();
+    wxNode* node = m_displayList.First();
     while (node)
     {
-        DragShape* shape = (DragShape*) node->GetData();
+        DragShape* shape = (DragShape*) node->Data();
         delete shape;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_displayList.Clear();
 }
 
 DragShape* MyCanvas::FindShape(const wxPoint& pt) const
 {
-    wxNode* node = m_displayList.GetFirst();
+    wxNode* node = m_displayList.First();
     while (node)
     {
-        DragShape* shape = (DragShape*) node->GetData();
+        DragShape* shape = (DragShape*) node->Data();
         if (shape->HitTest(pt))
             return shape;
-        node = node->GetNext();
+        node = node->Next();
     }
     return (DragShape*) NULL;
 }

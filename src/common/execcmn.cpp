@@ -16,7 +16,7 @@
 
 // this file should never be compiled directly, just included by other code
 #ifndef _WX_USED_BY_WXEXECUTE_
-    #error "You should never directly build this file!"
+    #error "Please don't exclude this file from build!"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -65,8 +65,6 @@ private:
 
     // the size of the buffer
     size_t m_size;
-
-    DECLARE_NO_COPY_CLASS(wxStreamTempInputBuffer)
 };
 
 inline wxStreamTempInputBuffer::wxStreamTempInputBuffer()

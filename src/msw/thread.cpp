@@ -174,8 +174,6 @@ private:
     wxMutexError LockTimeout(DWORD milliseconds);
 
     HANDLE m_mutex;
-
-    DECLARE_NO_COPY_CLASS(wxMutexInternal)
 };
 
 // all mutexes are recursive under Win32 so we don't use mutexType
@@ -274,8 +272,6 @@ public:
 
 private:
     HANDLE m_semaphore;
-
-    DECLARE_NO_COPY_CLASS(wxSemaphoreInternal)
 };
 
 wxSemaphoreInternal::wxSemaphoreInternal(int initialcount, int maxcount)
@@ -540,8 +536,6 @@ private:
     wxThreadState m_state;      // state, see wxThreadState enum
     unsigned int  m_priority;   // thread priority in "wx" units
     DWORD         m_tid;        // thread id
-
-    DECLARE_NO_COPY_CLASS(wxThreadInternal)
 };
 
 THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)

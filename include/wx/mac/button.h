@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        button.h
 // Purpose:     wxButton class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_BUTTON_H_
@@ -42,7 +42,7 @@ class WXDLLEXPORT wxButton: public wxButtonBase
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxButtonNameStr);
 
-    virtual void MacHandleControlClick( WXWidget control , short controlpart ) ;
+	virtual void MacHandleControlClick( WXWidget control , short controlpart ) ;
     static wxSize GetDefaultSize();
 
   virtual void SetDefault();

@@ -207,9 +207,9 @@ public:
 #if WXWIN_COMPATIBILITY_2_2
         // deprecated:  Use GetItemParent instead.
     wxTreeItemId GetParent(const wxTreeItemId& item) const
-        { return GetItemParent( item ); }
+    	{ return GetItemParent( item ); }
 
-        // Expose the base class method hidden by the one above.
+    	// Expose the base class method hidden by the one above.
     wxWindow *GetParent() const { return wxScrolledWindow::GetParent(); }
 #endif  // WXWIN_COMPATIBILITY_2_2
 
@@ -467,7 +467,6 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxGenericTreeCtrl)
-    DECLARE_NO_COPY_CLASS(wxGenericTreeCtrl)
 };
 
 #if !defined(__WXMSW__) || defined(__WIN16__) || defined(__WXUNIVERSAL__)

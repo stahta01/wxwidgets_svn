@@ -41,8 +41,6 @@ public:
 private:
     // the DIB data
     void /* BITMAPINFO */ *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxBitmapDataObject)
 };
 
 // ----------------------------------------------------------------------------
@@ -103,8 +101,6 @@ public:
 private:
     // last data object we got data in
     wxDataObjectSimple *m_dataObjectLast;
-
-    DECLARE_NO_COPY_CLASS(wxURLDataObject)
 };
 
 #endif // _WX_MSW_OLE_DATAOBJ2_H

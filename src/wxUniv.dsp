@@ -649,6 +649,10 @@ SOURCE=.\generic\dirctrlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\generic\dirdlgg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\generic\dragimgg.cpp
 # End Source File
 # Begin Source File
@@ -956,14 +960,6 @@ SOURCE=.\msw\dir.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\dirdlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\enhmeta.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\evtloop.cpp
 # End Source File
 # Begin Source File
@@ -1017,10 +1013,6 @@ SOURCE=.\msw\main.cpp
 # Begin Source File
 
 SOURCE=.\msw\mimetype.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\minifram.cpp
 # End Source File
 # Begin Source File
 
@@ -1106,35 +1098,6 @@ SOURCE=.\msw\gsockmsw.c
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 
-# Begin Group "OLE Files"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\msw\ole\automtn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\dataobj.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\dropsrc.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\droptgt.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\oleutils.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\uuid.cpp
-# End Source File
-
-# End Group
 # End Group
 # Begin Group "Universal Files"
 
@@ -1780,10 +1743,6 @@ SOURCE=..\include\wx\imagxpm.h
 # Begin Source File
 
 SOURCE=..\include\wx\intl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\iosfwrap.h
 # End Source File
 # Begin Source File
 

@@ -5,6 +5,7 @@
 #! Author:  Vadim Zeitlin
 #! Created: 14.07.99
 #! Version: $Id$
+#! Changelist: 2003-02-25 - Juergen Ulbts - update from wxWindows 2.5.x/HEAD branch
 #!#############################################################################
 #${
     #! include the code which parses filelist.txt file and initializes

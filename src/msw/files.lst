@@ -409,7 +409,6 @@ ALL_HEADERS = \
 		imagtiff.h \
 		imagxpm.h \
 		intl.h \
-		iosfwrap.h \
 		ioswrap.h \
 		ipc.h \
 		ipcbase.h \
@@ -990,8 +989,6 @@ GUI_LOWLEVEL_OBJS = \
 		dde.o \
 		dialup.o \
 		dib.o \
-		dirdlg.o \
-		enhmeta.o \
 		evtloop.o \
 		font.o \
 		fontenum.o \
@@ -1005,7 +1002,6 @@ GUI_LOWLEVEL_OBJS = \
 		icon.o \
 		joystick.o \
 		main.o \
-		minifram.o \
 		palette.o \
 		pen.o \
 		popupwin.o \

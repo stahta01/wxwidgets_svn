@@ -142,11 +142,12 @@ bool wxNotebook::Create(wxWindow *parent,
                         const wxString& name)
 {
     // base init
-    if ( !CreateControl(parent, id, pos, size, style | wxTAB_TRAVERSAL,
-                        wxDefaultValidator, name) )
+    if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
-    if ( !MSWCreateControl(WC_TABCONTROL, _T(""), pos, size) )
+    // notebook, so explicitly specify 0 as last parameter
+    if ( !MSWCreateControl(WC_TABCONTROL, _T(""), pos, size,
+                style | wxTAB_TRAVERSAL) )
         return FALSE;
 
     SetBackgroundColour(wxColour(::GetSysColor(COLOR_BTNFACE)));
@@ -401,85 +402,70 @@ bool wxNotebook::InsertPage(int nPage,
                             bool bSelect,
                             int imageId)
 {
-    wxCHECK_MSG( pPage != NULL, FALSE, _T("NULL page in wxNotebook::InsertPage") );
-    wxCHECK_MSG( IS_VALID_PAGE(nPage) || nPage == GetPageCount(), FALSE,
-                 _T("invalid index in wxNotebook::InsertPage") );
+  wxASSERT( pPage != NULL );
+  wxCHECK( IS_VALID_PAGE(nPage) || nPage == GetPageCount(), FALSE );
 
+  // do add the tab to the control
 
-    // add a new tab to the control
-    // ----------------------------
+  // init all fields to 0
+  TC_ITEM tcItem;
+  memset(&tcItem, 0, sizeof(tcItem));
 
-    // init all fields to 0
-    TC_ITEM tcItem;
-    wxZeroMemory(tcItem);
+  if ( imageId != -1 )
+  {
+    tcItem.mask |= TCIF_IMAGE;
+    tcItem.iImage  = imageId;
+  }
 
-    // set the image, if any
-    if ( imageId != -1 )
-    {
-        tcItem.mask |= TCIF_IMAGE;
-        tcItem.iImage  = imageId;
-    }
+  if ( !strText.IsEmpty() )
+  {
+    tcItem.mask |= TCIF_TEXT;
+    tcItem.pszText = (wxChar *)strText.c_str(); // const_cast
+  }
 
-    // and the text
-    if ( !strText.IsEmpty() )
-    {
-        tcItem.mask |= TCIF_TEXT;
-        tcItem.pszText = (wxChar *)strText.c_str(); // const_cast
-    }
+  if ( TabCtrl_InsertItem(m_hwnd, nPage, &tcItem) == -1 ) {
+    wxLogError(wxT("Can't create the notebook page '%s'."), strText.c_str());
 
-    // fit the notebook page to the tab control's display area: this should be
-    // done before adding it to the notebook or TabCtrl_InsertItem() will
-    // change the notebooks size itself!
-    RECT rc;
-    rc.left = rc.top = 0;
-    GetSize((int *)&rc.right, (int *)&rc.bottom);
-    TabCtrl_AdjustRect(m_hwnd, FALSE, &rc);
-    pPage->SetSize(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
+    return FALSE;
+  }
 
+  // if the inserted page is before the selected one, we must update the
+  // index of the selected page
+  if ( nPage <= m_nSelection )
+  {
+    // one extra page added
+    m_nSelection++;
+  }
 
-    // finally do insert it
-    if ( TabCtrl_InsertItem(m_hwnd, nPage, &tcItem) == -1 ) {
-        wxLogError(wxT("Can't create the notebook page '%s'."), strText.c_str());
+  // save the pointer to the page
+  m_pages.Insert(pPage, nPage);
 
-        return FALSE;
-    }
+  // don't show pages by default (we'll need to adjust their size first)
+  HWND hwnd = GetWinHwnd(pPage);
+  SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_VISIBLE);
 
-    // succeeded: save the pointer to the page
-    m_pages.Insert(pPage, nPage);
+  // this updates internal flag too - otherwise it will get out of sync
+  pPage->Show(FALSE);
 
-    // hide the page: unless it is selected, it shouldn't be shown (and if it
-    // is selected it will be shown later)
-    HWND hwnd = GetWinHwnd(pPage);
-    SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_VISIBLE);
+  // fit the notebook page to the tab control's display area
+  RECT rc;
+  rc.left = rc.top = 0;
+  GetSize((int *)&rc.right, (int *)&rc.bottom);
+  TabCtrl_AdjustRect(m_hwnd, FALSE, &rc);
+  pPage->SetSize(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
 
-    // this updates internal flag too -- otherwise it would get out of sync
-    // with the real state
-    pPage->Show(FALSE);
+  // some page should be selected: either this one or the first one if there is
+  // still no selection
+  int selNew = -1;
+  if ( bSelect )
+    selNew = nPage;
+  else if ( m_nSelection == -1 )
+    selNew = 0;
 
+  if ( selNew != -1 )
+    SetSelection(selNew);
 
-    // now deal with the selection
-    // ---------------------------
-
-    // if the inserted page is before the selected one, we must update the
-    // index of the selected page
-    if ( nPage <= m_nSelection )
-    {
-        // one extra page added
-        m_nSelection++;
-    }
-
-    // some page should be selected: either this one or the first one if there
-    // is still no selection
-    int selNew = -1;
-    if ( bSelect )
-        selNew = nPage;
-    else if ( m_nSelection == -1 )
-        selNew = 0;
-
-    if ( selNew != -1 )
-        SetSelection(selNew);
-
-    return TRUE;
+  return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -603,8 +589,6 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
 // wxNotebook base class virtuals
 // ----------------------------------------------------------------------------
 
-#if wxUSE_CONSTRAINTS
-
 // override these 2 functions to do nothing: everything is done in OnSize
 
 void wxNotebook::SetConstraintSizes(bool WXUNUSED(recurse))
@@ -617,8 +601,6 @@ bool wxNotebook::DoPhase(int WXUNUSED(nPhase))
 {
   return TRUE;
 }
-
-#endif // wxUSE_CONSTRAINTS
 
 // ----------------------------------------------------------------------------
 // wxNotebook Windows message handlers

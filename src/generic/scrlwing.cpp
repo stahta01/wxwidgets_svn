@@ -82,8 +82,6 @@ private:
     wxScrollHelper *m_scrollHelper;
 
     bool m_hasDrawnWindow;
-
-    DECLARE_NO_COPY_CLASS(wxScrollHelperEvtHandler)
 };
 
 // ----------------------------------------------------------------------------
@@ -106,8 +104,6 @@ private:
     wxEventType m_eventType;
     int m_pos,
         m_orient;
-
-    DECLARE_NO_COPY_CLASS(wxAutoScrollTimer)
 };
 
 // ============================================================================
@@ -344,18 +340,23 @@ void wxScrollHelper::SetScrollbars(int pixelsPerUnitX,
     m_xScrollPosition = xPos;
     m_yScrollPosition = yPos;
 
-    int w = noUnitsX * pixelsPerUnitX;
-    int h = noUnitsY * pixelsPerUnitY;
-
     // For better backward compatibility we set persisting limits
     // here not just the size.  It makes SetScrollbars 'sticky'
     // emulating the old non-autoscroll behaviour.
 
-    m_targetWindow->SetVirtualSizeHints( w, h );
+    wxSize sz = m_targetWindow->GetClientSize();
+#if 1
+    int x = wxMax(noUnitsX * pixelsPerUnitX, sz.x);
+    int y = wxMax(noUnitsY * pixelsPerUnitY, sz.y);
+#else
+    int x = noUnitsX * pixelsPerUnitX;
+    int y = noUnitsY * pixelsPerUnitY;
+#endif
+    m_targetWindow->SetVirtualSizeHints( x, y );
 
     // The above should arguably be deprecated, this however we still need.
 
-    m_targetWindow->SetVirtualSize( w, h );
+    m_targetWindow->SetVirtualSize( x, y );
 
     if (do_refresh && !noRefresh)
         m_targetWindow->Refresh(TRUE, GetRect());
@@ -886,19 +887,16 @@ void wxScrollHelper::DoCalcUnscrolledPosition(int x, int y, int *xx, int *yy) co
 // Default OnSize resets scrollbars, if any
 void wxScrollHelper::HandleOnSize(wxSizeEvent& WXUNUSED(event))
 {
-    if( m_win->GetAutoLayout() || m_targetWindow->GetAutoLayout() )
+    if( m_win->GetAutoLayout() )
     {
         if ( m_targetWindow != m_win )
             m_targetWindow->FitInside();
 
         m_win->FitInside();
 
-        // FIXME:  Something is really weird here...  This should be
-        // called by FitInside above (and apparently is), yet the
-        // scrollsub sample will get the scrollbar wrong if resized
-        // quickly.  This masks the bug, but is surely not the right
-        // answer at all.
-        AdjustScrollbars();
+#if wxUSE_CONSTRAINTS
+        m_win->Layout();
+#endif
     }
     else
         AdjustScrollbars();
@@ -954,7 +952,7 @@ void wxScrollHelper::HandleOnChar(wxKeyEvent& event)
         yScrollOld = m_yScrollPosition;
 
     int dsty;
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_PAGEUP:
         case WXK_PRIOR:

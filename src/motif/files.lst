@@ -51,7 +51,6 @@ ALL_SOURCES = \
 		common/appcmn.cpp \
 		common/artprov.cpp \
 		common/artstd.cpp \
-		common/bmpbase.cpp \
 		common/choiccmn.cpp \
 		common/clipcmn.cpp \
 		common/clntdata.cpp \
@@ -182,6 +181,7 @@ ALL_SOURCES = \
 		motif/app.cpp \
 		motif/bitmap.cpp \
 		motif/bmpbuttn.cpp \
+		motif/brush.cpp \
 		motif/button.cpp \
 		motif/checkbox.cpp \
 		motif/checklst.cpp \
@@ -189,7 +189,6 @@ ALL_SOURCES = \
 		motif/clipbrd.cpp \
 		motif/colour.cpp \
 		motif/combobox.cpp \
-		motif/combobox_native.cpp \
 		motif/control.cpp \
 		motif/cursor.cpp \
 		motif/data.cpp \
@@ -199,7 +198,6 @@ ALL_SOURCES = \
 		motif/dcmemory.cpp \
 		motif/dcscreen.cpp \
 		motif/dialog.cpp \
-		motif/evtloop.cpp \
 		motif/filedlg.cpp \
 		motif/font.cpp \
 		motif/frame.cpp \
@@ -217,6 +215,7 @@ ALL_SOURCES = \
 		motif/minifram.cpp \
 		motif/msgdlg.cpp \
 		motif/palette.cpp \
+		motif/pen.cpp \
 		motif/radiobox.cpp \
 		motif/radiobut.cpp \
 		motif/region.cpp \
@@ -230,11 +229,8 @@ ALL_SOURCES = \
 		motif/textctrl.cpp \
 		motif/timer.cpp \
 		motif/toolbar.cpp \
-		motif/toplevel.cpp \
 		motif/utils.cpp \
 		motif/window.cpp \
-		x11/brush.cpp \
-		x11/pen.cpp \
 		unix/dialup.cpp \
 		unix/dir.cpp \
 		unix/fontenum.cpp \
@@ -382,7 +378,6 @@ ALL_HEADERS = \
 		imagtiff.h \
 		imagxpm.h \
 		intl.h \
-		iosfwrap.h \
 		ioswrap.h \
 		ipc.h \
 		ipcbase.h \
@@ -513,6 +508,7 @@ ALL_HEADERS = \
 		motif/app.h \
 		motif/bitmap.h \
 		motif/bmpbuttn.h \
+		motif/brush.h \
 		motif/button.h \
 		motif/checkbox.h \
 		motif/checklst.h \
@@ -549,6 +545,7 @@ ALL_HEADERS = \
 		motif/minifram.h \
 		motif/msgdlg.h \
 		motif/palette.h \
+		motif/pen.h \
 		motif/print.h \
 		motif/printdlg.h \
 		motif/private.h \
@@ -563,10 +560,8 @@ ALL_HEADERS = \
 		motif/statbox.h \
 		motif/stattext.h \
 		motif/textctrl.h \
-		motif/tglbtn.h \
 		motif/timer.h \
 		motif/toolbar.h \
-		motif/toplevel.h \
 		motif/window.h \
 		generic/accel.h \
 		generic/calctrl.h \
@@ -629,15 +624,12 @@ ALL_HEADERS = \
 		protocol/file.h \
 		protocol/ftp.h \
 		protocol/http.h \
-		protocol/protocol.h \
-		x11/brush.h \
-		x11/pen.h
+		protocol/protocol.h
 
 COMMONOBJS = \
 		appcmn.o \
 		artprov.o \
 		artstd.o \
-		bmpbase.o \
 		choiccmn.o \
 		clipcmn.o \
 		clntdata.o \
@@ -820,6 +812,7 @@ GUIOBJS = \
 		app.o \
 		bitmap.o \
 		bmpbuttn.o \
+		brush.o \
 		button.o \
 		checkbox.o \
 		checklst.o \
@@ -827,7 +820,6 @@ GUIOBJS = \
 		clipbrd.o \
 		colour.o \
 		combobox.o \
-		combobox_native.o \
 		control.o \
 		cursor.o \
 		data.o \
@@ -837,7 +829,6 @@ GUIOBJS = \
 		dcmemory.o \
 		dcscreen.o \
 		dialog.o \
-		evtloop.o \
 		filedlg.o \
 		font.o \
 		frame.o \
@@ -855,6 +846,7 @@ GUIOBJS = \
 		minifram.o \
 		msgdlg.o \
 		palette.o \
+		pen.o \
 		radiobox.o \
 		radiobut.o \
 		region.o \
@@ -868,11 +860,8 @@ GUIOBJS = \
 		textctrl.o \
 		timer.o \
 		toolbar.o \
-		toplevel.o \
 		utils.o \
-		window.o \
-		brush.o \
-		pen.o
+		window.o
 
 UNIXOBJS = \
 		dialup.o \

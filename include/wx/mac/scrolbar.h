@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        scrollbar.h
 // Purpose:     wxScrollBar class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SCROLBAR_H_
@@ -57,7 +57,7 @@ public:
     bool refresh = TRUE);
 
   void Command(wxCommandEvent& event);
-        virtual void                         MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
+		virtual void 						MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
 
 protected:
     int m_pageSize;

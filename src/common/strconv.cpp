@@ -58,8 +58,7 @@
     WXDLLEXPORT_DATA(wxMBConv) wxConvLibc,
                                wxConvFile,
                                wxConvISO8859_1,
-                               wxConvLocal,
-                               wxConvUTF8;
+                               wxConvLocal;
 #endif // wxUSE_WCHAR_T
 
 WXDLLEXPORT_DATA(wxMBConv *) wxConvCurrent = &wxConvLibc;
@@ -785,6 +784,12 @@ size_t IC_CharSet::WC2MB(char *buf, const wchar_t *psz, size_t n)
 
 #if defined(__WIN32__) && !defined(__WXMICROWIN__) && !defined(__WXUNIVERSAL__)
 
+#ifdef __WXWINE__
+    #define WINE_CAST (WCHAR *)
+#else
+    #define WINE_CAST
+#endif
+
 extern long wxCharsetToCodepage(const wxChar *charset); // from utils.cpp
 
 class CP_CharSet : public wxCharacterSet
@@ -804,7 +809,7 @@ public:
                                 0,              // flags (none)
                                 psz,            // input string
                                 -1,             // its length (NUL-terminated)
-                                buf,            // output string
+                                WINE_CAST buf,  // output string
                                 buf ? n : 0     // size of output buffer
                              );
 
@@ -819,7 +824,7 @@ public:
                              (
                                 m_CodePage,     // code page
                                 0,              // flags (none)
-                                psz,            // input string
+                                WINE_CAST psz,  // input string
                                 -1,             // it is (wide) NUL-terminated
                                 buf,            // output buffer
                                 buf ? n : 0,    // and its size

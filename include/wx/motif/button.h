@@ -17,6 +17,7 @@
 #endif
 
 #include "wx/control.h"
+#include "wx/gdicmn.h"
 
 WXDLLEXPORT_DATA(extern const char*) wxButtonNameStr;
 
@@ -50,9 +51,9 @@ public:
     static wxSize GetDefaultSize();
     
     // Implementation
-private:
-    virtual wxSize DoGetBestSize() const;
-    void SetDefaultShadowThicknessAndResize();
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
+    virtual void ChangeBackgroundColour();
+    virtual void ChangeForegroundColour();
 };
 
 #endif

@@ -340,7 +340,7 @@ void wxMenuBar::UnsetInvokingWindow( wxWindow *win )
     while (top_frame->GetParent() && !(top_frame->IsTopLevel()))
         top_frame = top_frame->GetParent();
 
-    // support for native key accelerators indicated by underscroes
+    /* support for native key accelerators indicated by underscroes */
     gtk_accel_group_detach( m_accel, ACCEL_OBJ_CAST(top_frame->m_widget) );
 #endif // GTK+ 1.2.1+
 
@@ -365,16 +365,16 @@ bool wxMenuBar::GtkAppend(wxMenu *menu, const wxString& title)
 {
     wxString str( wxReplaceUnderscore( title ) );
 
-    // This doesn't have much effect right now.
+    /* this doesn't have much effect right now */
     menu->SetTitle( str );
 
-    // GTK 1.2.0 doesn't have gtk_item_factory_get_item(), but GTK 1.2.1 has.
+    /* GTK 1.2.0 doesn't have gtk_item_factory_get_item(), but GTK 1.2.1 has. */
 #if GTK_CHECK_VERSION(1, 2, 1)
 
     wxString buf;
     buf << wxT('/') << str.c_str();
 
-    // local buffer in multibyte form
+    /* local buffer in multibyte form */
     char cbuf[400]; 
     strcpy(cbuf, wxGTK_CONV(buf) );
 
@@ -385,8 +385,8 @@ bool wxMenuBar::GtkAppend(wxMenu *menu, const wxString& title)
     entry.callback_action = 0;
     entry.item_type = (char *)"<Branch>";
 
-    gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  // what is 2 ?
-    // in order to get the pointer to the item we need the item text _without_ underscores 
+    gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  /* what is 2 ? */
+    /* in order to get the pointer to the item we need the item text _without_ underscores */
     wxString tmp = wxT("<main>/");
     const wxChar *pc;
     for ( pc = str; *pc != wxT('\0'); pc++ )
@@ -426,7 +426,7 @@ bool wxMenuBar::GtkAppend(wxMenu *menu, const wxString& title)
             //               see (and refactor :) similar code in Remove
             //               below.
 
-        wxFrame *frame = wxDynamicCast( m_invokingWindow, wxFrame );
+        wxFrame	*frame = wxDynamicCast( m_invokingWindow, wxFrame );
 
         if( frame )
             frame->UpdateMenuBarSize();
@@ -533,9 +533,9 @@ wxMenu *wxMenuBar::Remove(size_t pos)
     {
             // OPTIMISE ME:  see comment in GtkAppend
 
-    wxFrame *frame = wxDynamicCast( m_invokingWindow, wxFrame );
+	wxFrame	*frame = wxDynamicCast( m_invokingWindow, wxFrame );
 
-    if( frame )
+	if( frame )
             frame->UpdateMenuBarSize();
     }
 
@@ -864,9 +864,6 @@ wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
         
         label += *pc;
     }
-    
-    // wxPrintf( L"text %s label %s\n", text.c_str(), label.c_str() );
-
     return label;
 }
 
@@ -932,8 +929,7 @@ void wxMenuItem::DoSetText( const wxString& str )
 #if GTK_CHECK_VERSION(2, 0, 0)
         else if ( *pc == wxT('_') )    // escape underscores
         {
-            // m_text << wxT("__");    doesn't work
-            m_text << wxT("__");
+            m_text << wxT("__"); 
         }
         else if (*pc == wxT('/'))      // we have to escape slashes
         {
@@ -958,8 +954,6 @@ void wxMenuItem::DoSetText( const wxString& str )
         }
         ++pc;
     }
-    
-    // wxPrintf( L"str %s m_text %s\n", str.c_str(), m_text.c_str() );
     
     m_hotKey = wxT("");
 
@@ -1030,8 +1024,8 @@ bool wxMenuItem::IsChecked() const
 
 wxString wxMenuItem::GetFactoryPath() const
 {
-    // In order to get the pointer to the item we need the item
-    // text _without_ underscores in GTK 1.2
+    /* in order to get the pointer to the item we need the item text
+       _without_ underscores */
     wxString path( wxT("<main>/") );
 
     for ( const wxChar *pc = m_text.c_str(); *pc; pc++ )
@@ -1069,9 +1063,9 @@ void wxMenu::Init()
 
     m_owner = (GtkWidget*) NULL;
 
-    // Tearoffs are entries, just like separators. So if we want this
-    // menu to be a tear-off one, we just append a tearoff entry
-    // immediately.
+    /* Tearoffs are entries, just like separators. So if we want this
+       menu to be a tear-off one, we just append a tearoff entry
+       immediately. */
     if(m_style & wxMENU_TEAROFF)
     {
        GtkItemFactoryEntry entry;
@@ -1080,7 +1074,7 @@ void wxMenu::Init()
        entry.callback_action = 0;
        entry.item_type = (char *)"<Tearoff>";
        entry.accelerator = (gchar*) NULL;
-       gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  // what is 2 ?
+       gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  /* what is 2 ? */
        //GtkWidget *menuItem = gtk_item_factory_get_widget( m_factory, "<main>/tearoff" );
     }
 
@@ -1121,9 +1115,9 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem)
         entry.item_type = (char *)"<Separator>";
         entry.accelerator = (gchar*) NULL;
 
-        gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  // what is 2 ?
+        gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  /* what is 2 ? */
 
-        // this will be wrong for more than one separator. do we care?
+        /* this will be wrong for more than one separator. do we care? */
         menuItem = gtk_item_factory_get_widget( m_factory, "<main>/sep" );
 
         // we might have a separator inside a radio group
@@ -1131,10 +1125,10 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem)
     }
     else if ( mitem->IsSubMenu() )
     {
-        // text has "_" instead of "&" after mitem->SetText()
+        /* text has "_" instead of "&" after mitem->SetText() */
         wxString text( mitem->GetText() );
 
-        // local buffer in multibyte form
+        /* local buffer in multibyte form */
         char buf[200];
         strcpy( buf, "/" );
         strcat( buf, wxGTK_CONV( text ) );
@@ -1146,7 +1140,7 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem)
         entry.item_type = (char *)"<Branch>";
         entry.accelerator = (gchar*) NULL;
 
-        gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  // what is 2 ?
+        gtk_item_factory_create_item( m_factory, &entry, (gpointer) this, 2 );  /* what is 2 ? */
 
         wxString path( mitem->GetFactoryPath() );
         menuItem = gtk_item_factory_get_item( m_factory, wxGTK_CONV( path ) );
@@ -1314,6 +1308,7 @@ bool wxMenu::DoInsert(size_t pos, wxMenuItem *item)
     if ( !wxMenuBase::DoInsert(pos, item) )
         return FALSE;
 
+#ifdef __WXGTK12__
     // GTK+ doesn't have a function to insert a menu using GtkItemFactory (as
     // of version 1.2.6), so we first append the item and then change its
     // index
@@ -1332,6 +1327,12 @@ bool wxMenu::DoInsert(size_t pos, wxMenuItem *item)
     menu_shell->children = g_list_insert(menu_shell->children, data, pos);
 
     return TRUE;
+#else // GTK < 1.2
+    // this should be easy to do...
+    wxFAIL_MSG( wxT("not implemented") );
+
+    return FALSE;
+#endif // GTK 1.2/1.0
 }
 
 wxMenuItem *wxMenu::DoRemove(wxMenuItem *item)
@@ -1348,13 +1349,13 @@ wxMenuItem *wxMenu::DoRemove(wxMenuItem *item)
 
 int wxMenu::FindMenuIdByMenuItem( GtkWidget *menuItem ) const
 {
-    wxMenuItemList::Node    *node = m_items.GetFirst();
+    wxNode *node = m_items.First();
     while (node)
     {
-        wxMenuItem *item = node->GetData();
+        wxMenuItem *item = (wxMenuItem*)node->Data();
         if (item->GetMenuItem() == menuItem)
            return item->GetId();
-        node = node->GetNext();
+        node = node->Next();
     }
 
     return wxNOT_FOUND;

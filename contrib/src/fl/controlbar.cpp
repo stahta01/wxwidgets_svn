@@ -674,7 +674,7 @@ BarArrayT& wxFrameLayout::GetBars()
 
 void wxFrameLayout::SetBarState( cbBarInfo* pBar, int newState, bool updateNow )
 {
-    if ( newState == wxCBAR_FLOATING && !(mFloatingOn && pBar->mFloatingOn))
+    if ( newState == wxCBAR_FLOATING && !mFloatingOn )
 
         return;
 
@@ -824,7 +824,7 @@ void wxFrameLayout::ApplyBarProperties( cbBarInfo* pBar )
 
 void wxFrameLayout::RepositionFloatedBar( cbBarInfo* pBar )
 {
-    if ( !(mFloatingOn && pBar->mFloatingOn)) return;
+    if ( !mFloatingOn ) return;
 
     wxNode* pNode = mFloatedFrames.First();
 
@@ -871,8 +871,7 @@ void wxFrameLayout::DoSetBarState( cbBarInfo* pBar )
     }
     else
     {                   
-        if ( !(mFloatingOn && pBar->mFloatingOn) )
-          return;
+        if ( !mFloatingOn ) return;
 
         // float it
 
@@ -2128,9 +2127,9 @@ IMPLEMENT_DYNAMIC_CLASS( cbBarInfo, wxObject )
 cbBarInfo::cbBarInfo(void)
 
     : mpRow( NULL ),
+
       mpNext( NULL ),
-      mpPrev( NULL ),
-      mFloatingOn( TRUE )
+      mpPrev( NULL )
 {}
 
 cbBarInfo::~cbBarInfo()

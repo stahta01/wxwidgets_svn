@@ -24,13 +24,46 @@ class WXDLLEXPORT wxDC;
 class WXDLLEXPORT wxControl;
 class WXDLLEXPORT wxBitmap;
 class WXDLLEXPORT wxBitmapHandler;
-class WXDLLEXPORT wxBitmapRefData;
 class WXDLLEXPORT wxIcon;
 class WXDLLEXPORT wxMask;
 class WXDLLEXPORT wxCursor;
 class WXDLLEXPORT wxControl;
 class WXDLLEXPORT wxImage;
 class WXDLLEXPORT wxPalette;
+
+// ----------------------------------------------------------------------------
+// Bitmap data
+//
+// NB: this class is private, but declared here to make it possible inline
+//     wxBitmap functions accessing it
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxBitmapRefData : public wxGDIImageRefData
+{
+public:
+    wxBitmapRefData();
+    virtual ~wxBitmapRefData() { Free(); }
+
+    virtual void Free();
+
+public:
+    int           m_numColors;
+#if wxUSE_PALETTE
+    wxPalette     m_bitmapPalette;
+#endif // wxUSE_PALETTE
+    int           m_quality;
+
+    // MSW-specific
+    // ------------
+
+    // this field is solely for error checking: we detect selecting a bitmap
+    // into more than one DC at once or deleting a bitmap still selected into a
+    // DC (both are serious programming errors under Windows)
+    wxDC         *m_selectedInto;
+
+    // optional mask for transparent drawing
+    wxMask       *m_bitmapMask;
+};
 
 // ----------------------------------------------------------------------------
 // wxBitmap: a mono or colour bitmap
@@ -112,29 +145,21 @@ public:
     virtual bool LoadFile(const wxString& name, long type = wxBITMAP_TYPE_BMP_RESOURCE);
     virtual bool SaveFile(const wxString& name, int type, const wxPalette *cmap = NULL);
 
-    wxBitmapRefData *GetBitmapData() const
-        { return (wxBitmapRefData *)m_refData; }
+    wxBitmapRefData *GetBitmapData() const { return (wxBitmapRefData *)m_refData; }
+
+    int GetQuality() const { return (GetBitmapData() ? GetBitmapData()->m_quality : 0); }
+    void SetQuality(int q);
 
 #if wxUSE_PALETTE
-    wxPalette* GetPalette() const;
+    wxPalette* GetPalette() const { return (GetBitmapData() ? (& GetBitmapData()->m_bitmapPalette) : (wxPalette*) NULL); }
     void SetPalette(const wxPalette& palette);
 #endif // wxUSE_PALETTE
 
-    wxMask *GetMask() const;
-    void SetMask(wxMask *mask);
+    wxMask *GetMask() const { return (GetBitmapData() ? GetBitmapData()->m_bitmapMask : (wxMask*) NULL); }
+    void SetMask(wxMask *mask) ;
 
     bool operator==(const wxBitmap& bitmap) const { return m_refData == bitmap.m_refData; }
     bool operator!=(const wxBitmap& bitmap) const { return m_refData != bitmap.m_refData; }
-
-    // this function is internal and shouldn't be used, it risks to disappear
-    bool HasAlpha() const;
-
-#if WXWIN_COMPATIBILITY_2_4
-    // these functions do nothing and are only there for backwards
-    // compatibility
-    wxDEPRECATED( int GetQuality() const );
-    wxDEPRECATED( void SetQuality(int quality) );
-#endif // WXWIN_COMPATIBILITY_2_4
 
 #if WXWIN_COMPATIBILITY_2
     void SetOk(bool isOk);
@@ -152,10 +177,8 @@ public:
     void SetHBITMAP(WXHBITMAP bmp) { SetHandle((WXHANDLE)bmp); }
     WXHBITMAP GetHBITMAP() const { return (WXHBITMAP)GetHandle(); }
 
-#ifdef __WXDEBUG__
-    void SetSelectedInto(wxDC *dc);
-    wxDC *GetSelectedInto() const;
-#endif // __WXDEBUG__
+    void SetSelectedInto(wxDC *dc) { if (GetBitmapData()) GetBitmapData()->m_selectedInto = dc; }
+    wxDC *GetSelectedInto() const { return (GetBitmapData() ? GetBitmapData()->m_selectedInto : (wxDC*) NULL); }
 
     // Creates a bitmap that matches the device context's depth, from an
     // arbitray bitmap. At present, the original bitmap must have an associated
@@ -175,7 +198,8 @@ protected:
     // common part of all ctors
     void Init();
 
-    virtual wxGDIImageRefData *CreateData() const;
+    virtual wxGDIImageRefData *CreateData() const
+        { return new wxBitmapRefData; }
 
     // creates the bitmap from XPM data, supposed to be called from ctor
     bool CreateFromXpm(const char **bits);
@@ -184,12 +208,6 @@ protected:
     // creates the bitmap from wxImage, supposed to be called from ctor
     bool CreateFromImage(const wxImage& image, int depth);
 #endif // wxUSE_IMAGE
-
-#if wxUSE_DIB_FOR_BITMAP
-    void *CreateDIB(int width, int height, int depth);
-
-    void CopyDIBLine(void* src, void* dest, int count) const;
-#endif // wxUSE_DIB_FOR_BITMAP
 
 private:
 #ifdef __WIN32__

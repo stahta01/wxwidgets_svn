@@ -24,8 +24,6 @@
 #if wxUSE_CALENDARCTRL
 
 #include "wx/datetime.h"
-#include "wx/colour.h"
-#include "wx/font.h"
 
 // ----------------------------------------------------------------------------
 // wxCalendarCtrl flags

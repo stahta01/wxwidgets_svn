@@ -3,12 +3,12 @@
 // Purpose:     wxImageList class. Note: if your GUI doesn't have
 //              an image list equivalent, you can use the generic class
 //              in src/generic.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_IMAGLIST_H_
