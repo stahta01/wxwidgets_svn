@@ -609,10 +609,6 @@ SOURCE=..\..\src\common\sstream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\common\stdpbase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\common\stopwatch.cpp
 # End Source File
 # Begin Source File
@@ -651,10 +647,6 @@ SOURCE=..\..\src\common\txtstrm.cpp
 
 SOURCE=..\..\src\common\unzip.c
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\common\uri.cpp
 # End Source File
 # Begin Source File
 
@@ -1251,10 +1243,6 @@ SOURCE=..\..\include\wx\stack.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\wx\stdpaths.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\include\wx\stockitem.h
 # End Source File
 # Begin Source File
@@ -1304,10 +1292,6 @@ SOURCE=..\..\include\wx\txtstrm.h
 # Begin Source File
 
 SOURCE=..\..\include\wx\types.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\wx\uri.h
 # End Source File
 # Begin Source File
 

@@ -41,16 +41,12 @@ private:
 // now include the actual class declaration
 // ----------------------------------------------------------------------------
 
-#if defined(__PALMOS__)
-    #include "wx/palmos/taskbar.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
     #include "wx/msw/taskbar.h"
 #elif defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__)
     #include "wx/unix/taskbarx11.h"
-#elif defined (__WXMAC__) && defined(__WXMAC_OSX__)
+#elif defined(__DARWIN__)
     #include "wx/mac/taskbarosx.h"
-#elif defined (__WXCOCOA__)
-    #include "wx/cocoa/taskbar.h"
 #endif
 
 // ----------------------------------------------------------------------------

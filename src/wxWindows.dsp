@@ -754,10 +754,6 @@ SOURCE=.\common\statbar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\stdpbase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\stockitem.cpp
 # End Source File
 # Begin Source File
@@ -824,10 +820,6 @@ SOURCE=.\common\txtstrm.cpp
 
 SOURCE=.\common\unzip.c
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\uri.cpp
 # End Source File
 # Begin Source File
 
@@ -1517,10 +1509,6 @@ SOURCE=.\msw\statline.cpp
 # Begin Source File
 
 SOURCE=.\msw\stattext.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\stdpaths.cpp
 # End Source File
 # Begin Source File
 
@@ -2732,10 +2720,6 @@ SOURCE=..\include\wx\statusbr.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\stdpaths.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\stockitem.h
 # End Source File
 # Begin Source File
@@ -2841,10 +2825,6 @@ SOURCE=..\include\wx\txtstrm.h
 # Begin Source File
 
 SOURCE=..\include\wx\types.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\uri.h
 # End Source File
 # Begin Source File
 

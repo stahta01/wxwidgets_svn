@@ -44,10 +44,7 @@ functions that take a wxMouseEvent argument.
 
 \twocolwidtha{7cm}
 \begin{twocollist}\itemsep=0pt
-\twocolitem{{\bf EVT\_LEFT\_DOWN(func)}}{Process a wxEVT\_LEFT\_DOWN event. The
-handler of this event should normally call \helpref{event.Skip()}{wxeventskip} to
-allow the default processing to take place as otherwise the window under mouse
-wouldn't get the focus.}
+\twocolitem{{\bf EVT\_LEFT\_DOWN(func)}}{Process a wxEVT\_LEFT\_DOWN event.}
 \twocolitem{{\bf EVT\_LEFT\_UP(func)}}{Process a wxEVT\_LEFT\_UP event.}
 \twocolitem{{\bf EVT\_LEFT\_DCLICK(func)}}{Process a wxEVT\_LEFT\_DCLICK event.}
 \twocolitem{{\bf EVT\_MIDDLE\_DOWN(func)}}{Process a wxEVT\_MIDDLE\_DOWN event.}
@@ -192,8 +189,8 @@ values of {\it button} are:
 
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\tt wxMOUSE\_BTN\_LEFT}}{check if left button was pressed}
-\twocolitem{{\tt wxMOUSE\_BTN\_MIDDLE}}{check if middle button was pressed}
-\twocolitem{{\tt wxMOUSE\_BTN\_RIGHT}}{check if right button was pressed}
+\twocolitem{{\tt wxMOUSE\_BTN\_MIDDLE}}{check if left button was pressed}
+\twocolitem{{\tt wxMOUSE\_BTN\_RIGHT}}{check if left button was pressed}
 \twocolitem{{\tt wxMOUSE\_BTN\_ANY}}{check if any button was pressed}
 \end{twocollist}
 

@@ -114,6 +114,10 @@ bool wxToolBarToolBase::SetLongHelp(const wxString& help)
     return true;
 }
 
+wxToolBarToolBase::~wxToolBarToolBase()
+{
+}
+
 // ----------------------------------------------------------------------------
 // wxToolBarBase adding/deleting items
 // ----------------------------------------------------------------------------
@@ -419,14 +423,6 @@ bool wxToolBarBase::Realize()
 wxToolBarBase::~wxToolBarBase()
 {
     WX_CLEAR_LIST(wxToolBarToolsList, m_tools);
-
-    // notify the frame that it doesn't have a tool bar any longer to avoid
-    // dangling pointers
-    wxFrameBase *frame = wxDynamicCast(GetParent(), wxFrameBase);
-    if ( frame && frame->GetToolBar() == this )
-    {
-        frame->SetToolBar(NULL);
-    }
 }
 
 // ----------------------------------------------------------------------------
@@ -615,10 +611,8 @@ void wxToolBarBase::OnMouseEnter(int id)
     wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
     if( frame )
     {
-        wxString help;
-        wxToolBarToolBase* tool = id == wxID_ANY ? (wxToolBarToolBase*)NULL : FindById(id);
-        if(tool)
-            help = tool->GetLongHelp();
+        wxToolBarToolBase* tool = id == wxID_ANY ? (wxToolBarToolBase*)0 : FindById(id);
+        wxString help = tool ? tool->GetLongHelp() : wxString();
         frame->DoGiveHelp( help, id != wxID_ANY );
     }
 

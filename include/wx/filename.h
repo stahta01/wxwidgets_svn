@@ -149,7 +149,11 @@ public:
     void Assign(const wxString& path,
                 const wxString& name,
                 const wxString& ext,
-                wxPathFormat format = wxPATH_NATIVE);
+                wxPathFormat format = wxPATH_NATIVE)
+    {
+        // empty volume
+        Assign(wxEmptyString, path, name, ext, format);
+    }
 
     void AssignDir(const wxString& dir, wxPathFormat format = wxPATH_NATIVE);
 

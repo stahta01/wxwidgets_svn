@@ -204,7 +204,7 @@ wxGenericDirDialog::wxGenericDirDialog(wxWindow* parent, const wxString& title,
 
 #endif // !__SMARTPHONE__
 
-    m_input->SetFocus();
+    m_dirCtrl->SetFocus();
 
     SetAutoLayout( true );
     SetSizer( topsizer );

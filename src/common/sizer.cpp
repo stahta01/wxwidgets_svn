@@ -89,7 +89,6 @@ void wxSizerItem::Init()
     m_sizer = NULL;
     m_show = true;
     m_userData = NULL;
-    m_zoneRect = wxRect( 0, 0, 0, 0 );
 }
 
 void wxSizerItem::Init(const wxSizerFlags& flags)
@@ -109,7 +108,6 @@ wxSizerItem::wxSizerItem( int width, int height, int proportion, int flag, int b
     , m_proportion( proportion )
     , m_border( border )
     , m_flag( flag )
-    , m_zoneRect( 0, 0, 0, 0 )
     , m_show( true )
     , m_userData( userData )
 {
@@ -122,7 +120,6 @@ wxSizerItem::wxSizerItem( wxWindow *window, int proportion, int flag, int border
     , m_proportion( proportion )
     , m_border( border )
     , m_flag( flag )
-    , m_zoneRect( 0, 0, 0, 0 )
     , m_show( true )
     , m_userData( userData )
 {
@@ -142,7 +139,6 @@ wxSizerItem::wxSizerItem( wxSizer *sizer, int proportion, int flag, int border, 
     , m_proportion( proportion )
     , m_border( border )
     , m_flag( flag )
-    , m_zoneRect( 0, 0, 0, 0 )
     , m_show( true )
     , m_ratio( 0.0 )
     , m_userData( userData )
@@ -291,7 +287,6 @@ void wxSizerItem::SetDimension( wxPoint pos, wxSize size )
     if (IsSizer())
         m_sizer->SetDimension( pos.x, pos.y, size.x, size.y );
 
-    m_zoneRect = wxRect(pos, size);
     if (IsWindow())
         m_window->SetSize( pos.x, pos.y, size.x, size.y, wxSIZE_ALLOW_MINUS_ONE );
 
@@ -362,14 +357,12 @@ wxSizer::~wxSizer()
     WX_CLEAR_LIST(wxSizerItemList, m_children);
 }
 
-wxSizerItem* wxSizer::Insert( size_t index, wxSizerItem *item )
+void wxSizer::Insert( size_t index, wxSizerItem *item )
 {
     m_children.Insert( index, item );
 
     if( item->GetWindow() )
         item->GetWindow()->SetContainingSizer( this );
-
-    return item;
 }
 
 bool wxSizer::Remove( wxWindow *window )
@@ -767,9 +760,9 @@ bool wxSizer::DoSetItemMinSize( size_t index, int width, int height )
     return true;
 }
 
-wxSizerItem* wxSizer::GetItem( wxWindow *window, bool recursive )
+bool wxSizer::Show( wxWindow *window, bool show, bool recursive )
 {
-    wxASSERT_MSG( window, _T("GetItem for NULL window") );
+    wxASSERT_MSG( window, _T("Show for NULL window") );
 
     wxSizerItemList::compatibility_iterator node = m_children.GetFirst();
     while (node)
@@ -778,64 +771,17 @@ wxSizerItem* wxSizer::GetItem( wxWindow *window, bool recursive )
 
         if (item->GetWindow() == window)
         {
-            return item;
+            item->Show( show );
+
+            return true;
         }
         else if (recursive && item->IsSizer())
         {
-            wxSizerItem *subitem = item->GetSizer()->GetItem( window, true );
-            if (subitem)
-                return subitem;
+            if (item->GetSizer()->Show(window, show, recursive))
+                return true;
         }
 
         node = node->GetNext();
-    }
-
-    return NULL;
-}
-
-wxSizerItem* wxSizer::GetItem( wxSizer *sizer, bool recursive )
-{
-    wxASSERT_MSG( sizer, _T("GetItem for NULL sizer") );
-
-    wxSizerItemList::compatibility_iterator node = m_children.GetFirst();
-    while (node)
-    {
-        wxSizerItem *item = node->GetData();
-
-        if (item->GetSizer() == sizer)
-        {
-            return item;
-        }
-        else if (recursive && item->IsSizer())
-        {
-            wxSizerItem *subitem = item->GetSizer()->GetItem( sizer, true );
-            if (subitem)
-                return subitem;
-        }
-
-        node = node->GetNext();
-    }
-
-    return NULL;
-}
-
-wxSizerItem* wxSizer::GetItem( size_t index )
-{
-    wxCHECK_MSG( index < m_children.GetCount(),
-                 NULL,
-                 _T("GetItem index is out of range") );
-
-    return m_children.Item( index )->GetData();
-}
-
-bool wxSizer::Show( wxWindow *window, bool show, bool recursive )
-{
-    wxSizerItem *item = GetItem( window, recursive );
-
-    if ( item )
-    {
-         item->Show( show );
-         return true;
     }
 
     return false;
@@ -843,12 +789,26 @@ bool wxSizer::Show( wxWindow *window, bool show, bool recursive )
 
 bool wxSizer::Show( wxSizer *sizer, bool show, bool recursive )
 {
-    wxSizerItem *item = GetItem( sizer, recursive );
+    wxASSERT_MSG( sizer, _T("Show for NULL sizer") );
 
-    if ( item )
+    wxSizerItemList::compatibility_iterator node = m_children.GetFirst();
+    while (node)
     {
-         item->Show( show );
-         return true;
+        wxSizerItem     *item = node->GetData();
+
+        if (item->GetSizer() == sizer)
+        {
+            item->Show( show );
+
+            return true;
+        }
+        else if (recursive && item->IsSizer())
+        {
+            if (item->GetSizer()->Show(sizer, show, recursive))
+                return true;
+        }
+
+        node = node->GetNext();
     }
 
     return false;
@@ -856,15 +816,13 @@ bool wxSizer::Show( wxSizer *sizer, bool show, bool recursive )
 
 bool wxSizer::Show( size_t index, bool show)
 {
-    wxSizerItem *item = GetItem( index );
+    wxCHECK_MSG( index < m_children.GetCount(),
+                 false,
+                 _T("Show index is out of range") );
 
-    if ( item )
-    {
-         item->Show( show );
-         return true;
-    }
+    m_children.Item( index )->GetData()->Show( show );
 
-    return false;
+    return true;
 }
 
 void wxSizer::ShowItems( bool show )
@@ -1393,7 +1351,7 @@ void wxBoxSizer::RecalcSizes()
                 }
 
                 wxPoint child_pos( pt );
-                wxSize  child_size( size.x, height );
+                wxSize  child_size( wxSize( size.x, height) );
 
                 if (item->GetFlag() & (wxEXPAND | wxSHAPED))
                     child_size.x = m_size.x;
@@ -1419,7 +1377,7 @@ void wxBoxSizer::RecalcSizes()
                 }
 
                 wxPoint child_pos( pt );
-                wxSize  child_size( width, size.y );
+                wxSize  child_size( wxSize(width, size.y) );
 
                 if (item->GetFlag() & (wxEXPAND | wxSHAPED))
                     child_size.y = m_size.y;
@@ -1589,7 +1547,7 @@ static void GetStaticBoxBorders( wxStaticBox *box,
 
 #else
 #ifdef __WXGTK__
-    if ( box->GetLabel().empty() )
+    if ( box->GetLabel().IsEmpty() )
         *borderTop = 5;
     else
 #endif // __WXGTK__

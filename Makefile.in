@@ -58,7 +58,6 @@ EXTRALIBS_ODBC = @EXTRALIBS_ODBC@
 EXTRALIBS_GUI = @EXTRALIBS_GUI@
 EXTRALIBS_OPENGL = @EXTRALIBS_OPENGL@
 EXTRALIBS_SDL = @EXTRALIBS_SDL@
-EXTRALIBS_GNOMEPRINT = @EXTRALIBS_GNOMEPRINT@
 HOST_SUFFIX = @HOST_SUFFIX@
 
 ### Variables: ###
@@ -289,7 +288,6 @@ ALL_BASE_HEADERS =  \
 	wx/snglinst.h \
 	wx/sstream.h \
 	wx/stack.h \
-	wx/stdpaths.h \
 	wx/stockitem.h \
 	wx/stopwatch.h \
 	wx/strconv.h \
@@ -304,7 +302,6 @@ ALL_BASE_HEADERS =  \
 	wx/tokenzr.h \
 	wx/txtstrm.h \
 	wx/types.h \
-	wx/uri.h \
 	wx/utils.h \
 	wx/variant.h \
 	wx/vector.h \
@@ -375,7 +372,6 @@ ALL_BASE_SOURCES =  \
 	src/common/object.cpp \
 	src/common/process.cpp \
 	src/common/regex.cpp \
-	src/common/stdpbase.cpp \
 	src/common/sstream.cpp \
 	src/common/stopwatch.cpp \
 	src/common/strconv.cpp \
@@ -387,7 +383,6 @@ ALL_BASE_SOURCES =  \
 	src/common/tokenzr.cpp \
 	src/common/txtstrm.cpp \
 	src/common/unzip.c \
-	src/common/uri.cpp \
 	src/common/variant.cpp \
 	src/common/wfstream.cpp \
 	src/common/wxchar.cpp \
@@ -399,7 +394,6 @@ ALL_BASE_SOURCES =  \
 	src/unix/dir.cpp \
 	src/unix/mimetype.cpp \
 	src/unix/snglinst.cpp \
-	src/unix/stdpaths.cpp \
 	src/unix/threadpsx.cpp \
 	src/msw/basemsw.cpp \
 	src/msw/crashrpt.cpp \
@@ -415,12 +409,16 @@ ALL_BASE_SOURCES =  \
 	$(BASE_WINCE_SRC) \
 	src/mac/carbon/dirmac.cpp \
 	src/mac/carbon/mimetmac.cpp \
+	src/unix/baseunix.cpp \
 	src/mac/carbon/utilsexc.cpp \
 	src/mac/carbon/thread.cpp \
 	src/mac/carbon/macnotfy.cpp \
 	src/mac/carbon/morefilex/MoreFilesX.c \
-	src/mac/corefoundation/cfstring.cpp \
-	src/mac/corefoundation/stdpaths_cf.cpp \
+	src/unix/baseunix.cpp \
+	src/unix/dir.cpp \
+	src/unix/mimetype.cpp \
+	src/unix/snglinst.cpp \
+	src/unix/threadpsx.cpp \
 	src/os2/dir.cpp \
 	src/os2/mimetype.cpp \
 	src/os2/thread.cpp \
@@ -433,6 +431,7 @@ ALL_BASE_SOURCES =  \
 	src/unix/utilsunx.cpp \
 	src/mac/carbon/utils.cpp \
 	src/mac/carbon/uma.cpp \
+	src/unix/utilsunx.cpp \
 	src/msw/main.cpp \
 	src/msw/mslu.cpp \
 	src/msw/volume.cpp \
@@ -498,7 +497,6 @@ MONODLL_OBJECTS =  \
 	monodll_object.o \
 	monodll_process.o \
 	monodll_regex.o \
-	monodll_stdpbase.o \
 	monodll_sstream.o \
 	monodll_stopwatch.o \
 	monodll_strconv.o \
@@ -510,7 +508,6 @@ MONODLL_OBJECTS =  \
 	monodll_tokenzr.o \
 	monodll_txtstrm.o \
 	monodll_unzip.o \
-	monodll_uri.o \
 	monodll_variant.o \
 	monodll_wfstream.o \
 	monodll_wxchar.o \
@@ -585,7 +582,6 @@ MONOLIB_OBJECTS =  \
 	monolib_object.o \
 	monolib_process.o \
 	monolib_regex.o \
-	monolib_stdpbase.o \
 	monolib_sstream.o \
 	monolib_stopwatch.o \
 	monolib_strconv.o \
@@ -597,7 +593,6 @@ MONOLIB_OBJECTS =  \
 	monolib_tokenzr.o \
 	monolib_txtstrm.o \
 	monolib_unzip.o \
-	monolib_uri.o \
 	monolib_variant.o \
 	monolib_wfstream.o \
 	monolib_wxchar.o \
@@ -673,7 +668,6 @@ BASEDLL_OBJECTS =  \
 	basedll_object.o \
 	basedll_process.o \
 	basedll_regex.o \
-	basedll_stdpbase.o \
 	basedll_sstream.o \
 	basedll_stopwatch.o \
 	basedll_strconv.o \
@@ -685,7 +679,6 @@ BASEDLL_OBJECTS =  \
 	basedll_tokenzr.o \
 	basedll_txtstrm.o \
 	basedll_unzip.o \
-	basedll_uri.o \
 	basedll_variant.o \
 	basedll_wfstream.o \
 	basedll_wxchar.o \
@@ -745,7 +738,6 @@ BASELIB_OBJECTS =  \
 	baselib_object.o \
 	baselib_process.o \
 	baselib_regex.o \
-	baselib_stdpbase.o \
 	baselib_sstream.o \
 	baselib_stopwatch.o \
 	baselib_strconv.o \
@@ -757,7 +749,6 @@ BASELIB_OBJECTS =  \
 	baselib_tokenzr.o \
 	baselib_txtstrm.o \
 	baselib_unzip.o \
-	baselib_uri.o \
 	baselib_variant.o \
 	baselib_wfstream.o \
 	baselib_wxchar.o \
@@ -1101,8 +1092,7 @@ LOCALE_LINGUAS = ca cs da de el es fi fr hu id it ja nl pl ru sl sv tr uk zh zh_
 @COND_DEPS_TRACKING_1@CCC = $(top_builddir)./bk-deps $(CC)
 @COND_DEPS_TRACKING_0@CXXC = $(CXX)
 @COND_DEPS_TRACKING_1@CXXC = $(top_builddir)./bk-deps $(CXX)
-@COND_USE_PLUGINS_0@PLUGIN_ADV_EXTRALIBS = \
-@COND_USE_PLUGINS_0@	$(EXTRALIBS_SDL) $(EXTRALIBS_GNOMEPRINT)
+@COND_USE_PLUGINS_0@PLUGIN_ADV_EXTRALIBS = $(EXTRALIBS_SDL)
 @COND_USE_GUI_0@PORTNAME = base
 @COND_USE_GUI_1@PORTNAME = $(TOOLKIT_LOWERCASE)$(TOOLKIT_VERSION)
 @COND_TOOLKIT_MAC@WXBASEPORT = _carbon
@@ -1147,7 +1137,6 @@ COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN___wxtiff___depname = \
 @COND_SHARED_0_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@__install_wxtiff___depname \
 @COND_SHARED_0_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@	= install_wxtiff
 @COND_PLATFORM_MACOSX_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_unix.o
-@COND_PLATFORM_MACOS_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_apple.o
 @COND_PLATFORM_OS2_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_unix.o
 @COND_PLATFORM_UNIX_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_unix.o
 @COND_PLATFORM_WIN32_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_win32.o
@@ -1161,10 +1150,6 @@ COND_WXUSE_EXPAT_BUILTIN___wxexpat___depname = \
 @COND_WXUSE_EXPAT_BUILTIN@__wxexpat___depname = $(COND_WXUSE_EXPAT_BUILTIN___wxexpat___depname)
 @COND_SHARED_0_WXUSE_EXPAT_BUILTIN@__install_wxexpat___depname \
 @COND_SHARED_0_WXUSE_EXPAT_BUILTIN@	= install_wxexpat
-@COND_MONOLITHIC_0@EXTRALIBS_FOR_BASE = $(EXTRALIBS)
-@COND_MONOLITHIC_1@EXTRALIBS_FOR_BASE = $(EXTRALIBS) $(EXTRALIBS_GUI)
-@COND_MONOLITHIC_0@EXTRALIBS_FOR_GUI = $(EXTRALIBS_GUI)
-@COND_MONOLITHIC_1@EXTRALIBS_FOR_GUI = 
 @COND_PLATFORM_UNIX_0@PLUGIN_VERSION0 = $(WX_VERSION_NODOT)
 @COND_PLATFORM_UNIX_1@PLUGIN_VERSION0 = $(WX_VERSION)
 @COND_PLATFORM_UNIX_0@PLUGVERDELIM = 
@@ -1190,8 +1175,7 @@ COND_PLATFORM_UNIX_1_BASE_PLATFORM_HDR =  \
 	wx/unix/apptrait.h \
 	wx/unix/execute.h \
 	wx/unix/mimetype.h \
-	wx/unix/pipe.h \
-	wx/unix/stdpaths.h
+	wx/unix/pipe.h
 @COND_PLATFORM_UNIX_1@BASE_PLATFORM_HDR = $(COND_PLATFORM_UNIX_1_BASE_PLATFORM_HDR)
 COND_PLATFORM_WIN32_1_BASE_PLATFORM_HDR =  \
 	wx/msw/apptrait.h \
@@ -1206,20 +1190,9 @@ COND_PLATFORM_WIN32_1_BASE_PLATFORM_HDR =  \
 	wx/msw/wrapwin.h \
 	$(BASE_WINCE_HDR)
 @COND_PLATFORM_WIN32_1@BASE_PLATFORM_HDR = $(COND_PLATFORM_WIN32_1_BASE_PLATFORM_HDR)
-COND_TOOLKIT_COCOA_BASE_PLATFORM_HDR =  \
-	wx/unix/apptbase.h \
-	wx/unix/apptrait.h \
-	wx/unix/execute.h \
-	wx/unix/mimetype.h \
-	wx/unix/pipe.h \
-	wx/unix/stdpaths.h
-@COND_TOOLKIT_COCOA@BASE_PLATFORM_HDR = $(COND_TOOLKIT_COCOA_BASE_PLATFORM_HDR)
-COND_TOOLKIT_MAC_BASE_PLATFORM_HDR =  \
-	include/wx/mac/corefoundation/cfstring.h \
-	include/wx/mac/corefoundation/stdpaths.h
-@COND_TOOLKIT_MAC@BASE_PLATFORM_HDR = $(COND_TOOLKIT_MAC_BASE_PLATFORM_HDR)
+@COND_TOOLKIT_COCOA@BASE_PLATFORM_HDR = 
+@COND_TOOLKIT_MAC@BASE_PLATFORM_HDR = 
 @COND_PLATFORM_MACOSX_1@NET_PLATFORM_HDR = wx/unix/gsockunx.h
-@COND_PLATFORM_MACOS_1@NET_PLATFORM_HDR = include/wx/mac/carbon/gsockmac.h
 @COND_PLATFORM_OS2_1@NET_PLATFORM_HDR = wx/unix/gsockunx.h
 @COND_PLATFORM_UNIX_1@NET_PLATFORM_HDR = wx/unix/gsockunx.h
 @COND_PLATFORM_WIN32_1@NET_PLATFORM_HDR = \
@@ -1400,6 +1373,7 @@ COND_TOOLKIT_COCOA_GUI_HDR =  \
 	wx/cocoa/statbox.h \
 	wx/cocoa/statline.h \
 	wx/cocoa/stattext.h \
+	wx/cocoa/taskbar.h \
 	wx/cocoa/textctrl.h \
 	wx/cocoa/toolbar.h \
 	wx/cocoa/toplevel.h \
@@ -1413,9 +1387,7 @@ COND_TOOLKIT_COCOA_GUI_HDR =  \
 	wx/generic/paletteg.h \
 	wx/generic/region.h \
 	wx/generic/statusbr.h \
-	wx/generic/tabg.h \
-	include/wx/mac/corefoundation/cfstring.h \
-	include/wx/mac/corefoundation/stdpaths.h
+	wx/generic/tabg.h
 @COND_TOOLKIT_COCOA@GUI_HDR = $(COND_TOOLKIT_COCOA_GUI_HDR)
 COND_TOOLKIT_GTK_GUI_HDR =  \
 	wx/generic/colrdlgg.h \
@@ -2038,7 +2010,6 @@ COND_TOOLKIT_WINCE_GUI_HDR =  \
 	wx/msw/wince/textctrlce.h \
 	wx/msw/wince/resources.h
 @COND_TOOLKIT_WINCE@GUI_HDR = $(COND_TOOLKIT_WINCE_GUI_HDR)
-@COND_TOOLKIT_COCOA@ADVANCED_PLATFORM_HDR = include/wx/cocoa/taskbar.h
 @COND_TOOLKIT_GTK@ADVANCED_PLATFORM_HDR = \
 @COND_TOOLKIT_GTK@	wx/unix/joystick.h wx/unix/sound.h wx/unix/taskbarx11.h
 COND_TOOLKIT_MAC_ADVANCED_PLATFORM_HDR =  \
@@ -2402,25 +2373,6 @@ COND_USE_SOSYMLINKS_1___monodll___so_symlinks_inst_cmd = rm -f \
 @COND_USE_SOSYMLINKS_1@__monodll___so_symlinks_inst_cmd = $(COND_USE_SOSYMLINKS_1___monodll___so_symlinks_inst_cmd)
 @COND_PLATFORM_MACOSX_1@__BASE_PLATFORM_SRC_OBJECTS \
 @COND_PLATFORM_MACOSX_1@	= $(__BASE_MACOSX_SRC_OBJECTS)
-COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS =  \
-	monodll_dirmac.o \
-	monodll_mimetmac.o \
-	monodll_utilsexc.o \
-	monodll_thread.o \
-	monodll_macnotfy.o \
-	monodll_MoreFilesX.o \
-	monodll_cfstring.o \
-	monodll_stdpaths_cf.o \
-	monodll_DirectoryCopy.o \
-	monodll_FSpCompat.o \
-	monodll_FileCopy.o \
-	monodll_FullPath.o \
-	monodll_IterateDirectory.o \
-	monodll_MoreDesktopMgr.o \
-	monodll_MoreFiles.o \
-	monodll_MoreFilesExtras.o \
-	monodll_Search.o
-@COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS)
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS =  \
 	monodll_dir.o \
 	monodll_mimetype.o \
@@ -2433,7 +2385,6 @@ COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS =  \
 	monodll_dir.o \
 	monodll_mimetype.o \
 	monodll_snglinst.o \
-	monodll_stdpaths.o \
 	monodll_threadpsx.o
 @COND_PLATFORM_UNIX_1@__BASE_PLATFORM_SRC_OBJECTS = $(COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS)
 COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS =  \
@@ -2451,20 +2402,11 @@ COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS =  \
 	$(__BASE_WINCE_SRC_OBJECTS)
 @COND_PLATFORM_WIN32_1@__BASE_PLATFORM_SRC_OBJECTS = $(COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS)
 @COND_TOOLKIT_WINCE@__BASE_WINCE_SRC_OBJECTS = monodll_time.o
-COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS =  \
-	monodll_baseunix.o \
-	monodll_dir.o \
-	monodll_mimetype.o \
-	monodll_snglinst.o \
-	monodll_stdpaths.o \
-	monodll_threadpsx.o
-@COND_TOOLKIT_@__BASE_MACOSX_SRC_OBJECTS = $(COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS)
 COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS =  \
 	monodll_baseunix.o \
 	monodll_dir.o \
 	monodll_mimetype.o \
 	monodll_snglinst.o \
-	monodll_stdpaths.o \
 	monodll_threadpsx.o
 @COND_TOOLKIT_COCOA@__BASE_MACOSX_SRC_OBJECTS = $(COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS)
 COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS =  \
@@ -2472,26 +2414,22 @@ COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS =  \
 	monodll_dir.o \
 	monodll_mimetype.o \
 	monodll_snglinst.o \
-	monodll_stdpaths.o \
 	monodll_threadpsx.o
 @COND_TOOLKIT_GTK@__BASE_MACOSX_SRC_OBJECTS = $(COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS)
 COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS =  \
 	monodll_dirmac.o \
 	monodll_mimetmac.o \
+	monodll_baseunix.o \
 	monodll_utilsexc.o \
 	monodll_thread.o \
 	monodll_macnotfy.o \
-	monodll_MoreFilesX.o \
-	monodll_cfstring.o \
-	monodll_stdpaths_cf.o \
-	monodll_baseunix.o
+	monodll_MoreFilesX.o
 @COND_TOOLKIT_MAC@__BASE_MACOSX_SRC_OBJECTS = $(COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS)
 COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS =  \
 	monodll_baseunix.o \
 	monodll_dir.o \
 	monodll_mimetype.o \
 	monodll_snglinst.o \
-	monodll_stdpaths.o \
 	monodll_threadpsx.o
 @COND_TOOLKIT_MOTIF@__BASE_MACOSX_SRC_OBJECTS = $(COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS)
 COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS =  \
@@ -2499,7 +2437,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS =  \
 	monodll_dir.o \
 	monodll_mimetype.o \
 	monodll_snglinst.o \
-	monodll_stdpaths.o \
 	monodll_threadpsx.o
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS \
@@ -2511,7 +2448,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS =  \
 @COND_TOOLKIT_MAC@__BASE_AND_GUI_TOOLKIT_SRC_OBJECTS = \
 @COND_TOOLKIT_MAC@	monodll_utils.o monodll_uma.o
 @COND_PLATFORM_MACOSX_1@__NET_PLATFORM_SRC_OBJECTS = monodll_gsocket.o
-@COND_PLATFORM_MACOS_1@__NET_PLATFORM_SRC_OBJECTS = monodll_gsocket.o
 @COND_PLATFORM_OS2_1@__NET_PLATFORM_SRC_OBJECTS = monodll_gsocket.o
 @COND_PLATFORM_UNIX_1@__NET_PLATFORM_SRC_OBJECTS = monodll_gsocket.o
 @COND_PLATFORM_WIN32_1@__NET_PLATFORM_SRC_OBJECTS = \
@@ -2911,6 +2847,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS =  \
 	monodll_statbox.o \
 	monodll_statline2.o \
 	monodll_stattext.o \
+	monodll_taskbar.o \
 	monodll_textctrl.o \
 	monodll_toolbar.o \
 	monodll_tooltip.o \
@@ -2923,6 +2860,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS =  \
 	monodll_colrdlgg.o \
 	monodll_dirdlgg.o \
 	monodll_fdrepdlg.o \
+	monodll_filedlgg.o \
 	monodll_fontdlgg.o \
 	monodll_imaglist.o \
 	monodll_listctrl.o \
@@ -2932,10 +2870,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS =  \
 	monodll_statusbr.o \
 	monodll_tabg.o \
 	monodll_timer.o \
-	monodll_cfstring.o \
-	monodll_gsockosx.o \
-	monodll_stdpaths_cf.o \
-	monodll_utilsexc_cf.o
+	monodll_gsockosx.o
 @COND_TOOLKIT_COCOA@__GUI_SRC_OBJECTS = $(COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS)
 COND_TOOLKIT_GTK___GUI_SRC_OBJECTS =  \
 	monodll_accel.o \
@@ -3020,6 +2955,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS =  \
 	monodll_frame.o \
 	monodll_gauge.o \
 	monodll_gdiobj.o \
+	monodll_gsockosx.o \
 	monodll_hid.o \
 	monodll_icon.o \
 	monodll_listbox.o \
@@ -3066,9 +3002,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS =  \
 	monodll_statusbr.o \
 	monodll_tabg.o \
 	monodll_snglinst.o \
-	monodll_webkit.o \
-	monodll_gsockosx.o \
-	monodll_utilsexc_cf.o
+	monodll_webkit.o
 @COND_TOOLKIT_MAC@__GUI_SRC_OBJECTS = $(COND_TOOLKIT_MAC___GUI_SRC_OBJECTS)
 COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS =  \
 	monodll_accel.o \
@@ -3327,8 +3261,6 @@ COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS =  \
 	monodll_tbarwce.o \
 	monodll_textctrlce.o
 @COND_TOOLKIT_WINCE@__GUI_SRC_OBJECTS = $(COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS)
-@COND_TOOLKIT_COCOA@__ADVANCED_PLATFORM_SRC_OBJECTS = \
-@COND_TOOLKIT_COCOA@	monodll_taskbar.o monodll_taskbarcmn.o
 COND_TOOLKIT_GTK___ADVANCED_PLATFORM_SRC_OBJECTS =  \
 	monodll_taskbarcmn.o \
 	monodll_joystick.o \
@@ -3367,7 +3299,7 @@ COND_TOOLKIT_X11___ADVANCED_PLATFORM_SRC_OBJECTS =  \
 @COND_PLATFORM_UNIX_1@__HTML_SRC_PLATFORM_OBJECTS = monodll_chm.o
 @COND_TOOLKIT_MSW@__HTML_SRC_PLATFORM_OBJECTS = monodll_helpbest.o
 @COND_PLATFORM_UNIX_1_USE_PLUGINS_0@__PLUGIN_ADV_SRC_OBJECTS \
-@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= monodll_sound_sdl.o monodll_gprint.o
+@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= monodll_sound_sdl.o
 COND_MONOLITHIC_1_SHARED_0___monolib___depname = \
 	$(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)$(LIBEXT)
 @COND_MONOLITHIC_1_SHARED_0@__monolib___depname = $(COND_MONOLITHIC_1_SHARED_0___monolib___depname)
@@ -3377,25 +3309,6 @@ COND_MONOLITHIC_1_SHARED_0___monolib___depname = \
 @COND_GCC_PCH_1@	= .pch/wxprec_monolib/wx/wxprec.h.gch
 @COND_PLATFORM_MACOSX_1@__BASE_PLATFORM_SRC_OBJECTS_1 \
 @COND_PLATFORM_MACOSX_1@	= $(__BASE_MACOSX_SRC_OBJECTS_1)
-COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_1 =  \
-	monolib_dirmac.o \
-	monolib_mimetmac.o \
-	monolib_utilsexc.o \
-	monolib_thread.o \
-	monolib_macnotfy.o \
-	monolib_MoreFilesX.o \
-	monolib_cfstring.o \
-	monolib_stdpaths_cf.o \
-	monolib_DirectoryCopy.o \
-	monolib_FSpCompat.o \
-	monolib_FileCopy.o \
-	monolib_FullPath.o \
-	monolib_IterateDirectory.o \
-	monolib_MoreDesktopMgr.o \
-	monolib_MoreFiles.o \
-	monolib_MoreFilesExtras.o \
-	monolib_Search.o
-@COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS_1 = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_1)
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS_1 =  \
 	monolib_dir.o \
 	monolib_mimetype.o \
@@ -3408,7 +3321,6 @@ COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS_1 =  \
 	monolib_dir.o \
 	monolib_mimetype.o \
 	monolib_snglinst.o \
-	monolib_stdpaths.o \
 	monolib_threadpsx.o
 @COND_PLATFORM_UNIX_1@__BASE_PLATFORM_SRC_OBJECTS_1 = $(COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS_1)
 COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_1 =  \
@@ -3426,20 +3338,11 @@ COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_1 =  \
 	$(__BASE_WINCE_SRC_OBJECTS_1)
 @COND_PLATFORM_WIN32_1@__BASE_PLATFORM_SRC_OBJECTS_1 = $(COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_1)
 @COND_TOOLKIT_WINCE@__BASE_WINCE_SRC_OBJECTS_1 = monolib_time.o
-COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS_1 =  \
-	monolib_baseunix.o \
-	monolib_dir.o \
-	monolib_mimetype.o \
-	monolib_snglinst.o \
-	monolib_stdpaths.o \
-	monolib_threadpsx.o
-@COND_TOOLKIT_@__BASE_MACOSX_SRC_OBJECTS_1 = $(COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS_1)
 COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS_1 =  \
 	monolib_baseunix.o \
 	monolib_dir.o \
 	monolib_mimetype.o \
 	monolib_snglinst.o \
-	monolib_stdpaths.o \
 	monolib_threadpsx.o
 @COND_TOOLKIT_COCOA@__BASE_MACOSX_SRC_OBJECTS_1 = $(COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS_1)
 COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_1 =  \
@@ -3447,26 +3350,22 @@ COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_1 =  \
 	monolib_dir.o \
 	monolib_mimetype.o \
 	monolib_snglinst.o \
-	monolib_stdpaths.o \
 	monolib_threadpsx.o
 @COND_TOOLKIT_GTK@__BASE_MACOSX_SRC_OBJECTS_1 = $(COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_1)
 COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS_1 =  \
 	monolib_dirmac.o \
 	monolib_mimetmac.o \
+	monolib_baseunix.o \
 	monolib_utilsexc.o \
 	monolib_thread.o \
 	monolib_macnotfy.o \
-	monolib_MoreFilesX.o \
-	monolib_cfstring.o \
-	monolib_stdpaths_cf.o \
-	monolib_baseunix.o
+	monolib_MoreFilesX.o
 @COND_TOOLKIT_MAC@__BASE_MACOSX_SRC_OBJECTS_1 = $(COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS_1)
 COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS_1 =  \
 	monolib_baseunix.o \
 	monolib_dir.o \
 	monolib_mimetype.o \
 	monolib_snglinst.o \
-	monolib_stdpaths.o \
 	monolib_threadpsx.o
 @COND_TOOLKIT_MOTIF@__BASE_MACOSX_SRC_OBJECTS_1 = $(COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS_1)
 COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_1 =  \
@@ -3474,7 +3373,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_1 =  \
 	monolib_dir.o \
 	monolib_mimetype.o \
 	monolib_snglinst.o \
-	monolib_stdpaths.o \
 	monolib_threadpsx.o
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS_1 = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_1)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_1 \
@@ -3486,7 +3384,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_1 =  \
 @COND_TOOLKIT_MAC@__BASE_AND_GUI_TOOLKIT_SRC_OBJECTS_1 = \
 @COND_TOOLKIT_MAC@	monolib_utils.o monolib_uma.o
 @COND_PLATFORM_MACOSX_1@__NET_PLATFORM_SRC_OBJECTS_1 = monolib_gsocket.o
-@COND_PLATFORM_MACOS_1@__NET_PLATFORM_SRC_OBJECTS_1 = monolib_gsocket.o
 @COND_PLATFORM_OS2_1@__NET_PLATFORM_SRC_OBJECTS_1 = monolib_gsocket.o
 @COND_PLATFORM_UNIX_1@__NET_PLATFORM_SRC_OBJECTS_1 = monolib_gsocket.o
 @COND_PLATFORM_WIN32_1@__NET_PLATFORM_SRC_OBJECTS_1 \
@@ -3886,6 +3783,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_1 =  \
 	monolib_statbox.o \
 	monolib_statline2.o \
 	monolib_stattext.o \
+	monolib_taskbar.o \
 	monolib_textctrl.o \
 	monolib_toolbar.o \
 	monolib_tooltip.o \
@@ -3898,6 +3796,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_1 =  \
 	monolib_colrdlgg.o \
 	monolib_dirdlgg.o \
 	monolib_fdrepdlg.o \
+	monolib_filedlgg.o \
 	monolib_fontdlgg.o \
 	monolib_imaglist.o \
 	monolib_listctrl.o \
@@ -3907,10 +3806,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_1 =  \
 	monolib_statusbr.o \
 	monolib_tabg.o \
 	monolib_timer.o \
-	monolib_cfstring.o \
-	monolib_gsockosx.o \
-	monolib_stdpaths_cf.o \
-	monolib_utilsexc_cf.o
+	monolib_gsockosx.o
 @COND_TOOLKIT_COCOA@__GUI_SRC_OBJECTS_1 = $(COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_1)
 COND_TOOLKIT_GTK___GUI_SRC_OBJECTS_1 =  \
 	monolib_accel.o \
@@ -3995,6 +3891,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_1 =  \
 	monolib_frame.o \
 	monolib_gauge.o \
 	monolib_gdiobj.o \
+	monolib_gsockosx.o \
 	monolib_hid.o \
 	monolib_icon.o \
 	monolib_listbox.o \
@@ -4041,9 +3938,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_1 =  \
 	monolib_statusbr.o \
 	monolib_tabg.o \
 	monolib_snglinst.o \
-	monolib_webkit.o \
-	monolib_gsockosx.o \
-	monolib_utilsexc_cf.o
+	monolib_webkit.o
 @COND_TOOLKIT_MAC@__GUI_SRC_OBJECTS_1 = $(COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_1)
 COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_1 =  \
 	monolib_accel.o \
@@ -4302,8 +4197,6 @@ COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS_1 =  \
 	monolib_tbarwce.o \
 	monolib_textctrlce.o
 @COND_TOOLKIT_WINCE@__GUI_SRC_OBJECTS_1 = $(COND_TOOLKIT_WINCE___GUI_SRC_OBJECTS_1)
-@COND_TOOLKIT_COCOA@__ADVANCED_PLATFORM_SRC_OBJECTS_1 = \
-@COND_TOOLKIT_COCOA@	monolib_taskbar.o monolib_taskbarcmn.o
 COND_TOOLKIT_GTK___ADVANCED_PLATFORM_SRC_OBJECTS_1 =  \
 	monolib_taskbarcmn.o \
 	monolib_joystick.o \
@@ -4342,7 +4235,7 @@ COND_TOOLKIT_X11___ADVANCED_PLATFORM_SRC_OBJECTS_1 =  \
 @COND_PLATFORM_UNIX_1@__HTML_SRC_PLATFORM_OBJECTS_1 = monolib_chm.o
 @COND_TOOLKIT_MSW@__HTML_SRC_PLATFORM_OBJECTS_1 = monolib_helpbest.o
 @COND_PLATFORM_UNIX_1_USE_PLUGINS_0@__PLUGIN_ADV_SRC_OBJECTS_1 \
-@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= monolib_sound_sdl.o monolib_gprint.o
+@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= monolib_sound_sdl.o
 COND_MONOLITHIC_0_SHARED_1___basedll___depname = \
 	$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIX)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3)
 @COND_MONOLITHIC_0_SHARED_1@__basedll___depname = $(COND_MONOLITHIC_0_SHARED_1___basedll___depname)
@@ -4387,25 +4280,6 @@ COND_USE_SOSYMLINKS_1___basedll___so_symlinks_inst_cmd = rm -f \
 @COND_USE_SOSYMLINKS_1@__basedll___so_symlinks_inst_cmd = $(COND_USE_SOSYMLINKS_1___basedll___so_symlinks_inst_cmd)
 @COND_PLATFORM_MACOSX_1@__BASE_PLATFORM_SRC_OBJECTS_2 \
 @COND_PLATFORM_MACOSX_1@	= $(__BASE_MACOSX_SRC_OBJECTS_2)
-COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_2 =  \
-	basedll_dirmac.o \
-	basedll_mimetmac.o \
-	basedll_utilsexc.o \
-	basedll_thread.o \
-	basedll_macnotfy.o \
-	basedll_MoreFilesX.o \
-	basedll_cfstring.o \
-	basedll_stdpaths_cf.o \
-	basedll_DirectoryCopy.o \
-	basedll_FSpCompat.o \
-	basedll_FileCopy.o \
-	basedll_FullPath.o \
-	basedll_IterateDirectory.o \
-	basedll_MoreDesktopMgr.o \
-	basedll_MoreFiles.o \
-	basedll_MoreFilesExtras.o \
-	basedll_Search.o
-@COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS_2 = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_2)
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS_2 =  \
 	basedll_dir.o \
 	basedll_mimetype.o \
@@ -4418,7 +4292,6 @@ COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS_2 =  \
 	basedll_dir.o \
 	basedll_mimetype.o \
 	basedll_snglinst.o \
-	basedll_stdpaths.o \
 	basedll_threadpsx.o
 @COND_PLATFORM_UNIX_1@__BASE_PLATFORM_SRC_OBJECTS_2 = $(COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS_2)
 COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_2 =  \
@@ -4436,20 +4309,11 @@ COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_2 =  \
 	$(__BASE_WINCE_SRC_OBJECTS_2)
 @COND_PLATFORM_WIN32_1@__BASE_PLATFORM_SRC_OBJECTS_2 = $(COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_2)
 @COND_TOOLKIT_WINCE@__BASE_WINCE_SRC_OBJECTS_2 = basedll_time.o
-COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS_2 =  \
-	basedll_baseunix.o \
-	basedll_dir.o \
-	basedll_mimetype.o \
-	basedll_snglinst.o \
-	basedll_stdpaths.o \
-	basedll_threadpsx.o
-@COND_TOOLKIT_@__BASE_MACOSX_SRC_OBJECTS_2 = $(COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS_2)
 COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS_2 =  \
 	basedll_baseunix.o \
 	basedll_dir.o \
 	basedll_mimetype.o \
 	basedll_snglinst.o \
-	basedll_stdpaths.o \
 	basedll_threadpsx.o
 @COND_TOOLKIT_COCOA@__BASE_MACOSX_SRC_OBJECTS_2 = $(COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS_2)
 COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_2 =  \
@@ -4457,26 +4321,22 @@ COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_2 =  \
 	basedll_dir.o \
 	basedll_mimetype.o \
 	basedll_snglinst.o \
-	basedll_stdpaths.o \
 	basedll_threadpsx.o
 @COND_TOOLKIT_GTK@__BASE_MACOSX_SRC_OBJECTS_2 = $(COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_2)
 COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS_2 =  \
 	basedll_dirmac.o \
 	basedll_mimetmac.o \
+	basedll_baseunix.o \
 	basedll_utilsexc.o \
 	basedll_thread.o \
 	basedll_macnotfy.o \
-	basedll_MoreFilesX.o \
-	basedll_cfstring.o \
-	basedll_stdpaths_cf.o \
-	basedll_baseunix.o
+	basedll_MoreFilesX.o
 @COND_TOOLKIT_MAC@__BASE_MACOSX_SRC_OBJECTS_2 = $(COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS_2)
 COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS_2 =  \
 	basedll_baseunix.o \
 	basedll_dir.o \
 	basedll_mimetype.o \
 	basedll_snglinst.o \
-	basedll_stdpaths.o \
 	basedll_threadpsx.o
 @COND_TOOLKIT_MOTIF@__BASE_MACOSX_SRC_OBJECTS_2 = $(COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS_2)
 COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_2 =  \
@@ -4484,7 +4344,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_2 =  \
 	basedll_dir.o \
 	basedll_mimetype.o \
 	basedll_snglinst.o \
-	basedll_stdpaths.o \
 	basedll_threadpsx.o
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS_2 = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_2)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_2 \
@@ -4504,25 +4363,6 @@ COND_MONOLITHIC_0_SHARED_0___baselib___depname = \
 @COND_GCC_PCH_1@	= .pch/wxprec_baselib/wx/wxprec.h.gch
 @COND_PLATFORM_MACOSX_1@__BASE_PLATFORM_SRC_OBJECTS_3 \
 @COND_PLATFORM_MACOSX_1@	= $(__BASE_MACOSX_SRC_OBJECTS_3)
-COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_3 =  \
-	baselib_dirmac.o \
-	baselib_mimetmac.o \
-	baselib_utilsexc.o \
-	baselib_thread.o \
-	baselib_macnotfy.o \
-	baselib_MoreFilesX.o \
-	baselib_cfstring.o \
-	baselib_stdpaths_cf.o \
-	baselib_DirectoryCopy.o \
-	baselib_FSpCompat.o \
-	baselib_FileCopy.o \
-	baselib_FullPath.o \
-	baselib_IterateDirectory.o \
-	baselib_MoreDesktopMgr.o \
-	baselib_MoreFiles.o \
-	baselib_MoreFilesExtras.o \
-	baselib_Search.o
-@COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS_3 = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_3)
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS_3 =  \
 	baselib_dir.o \
 	baselib_mimetype.o \
@@ -4535,7 +4375,6 @@ COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS_3 =  \
 	baselib_dir.o \
 	baselib_mimetype.o \
 	baselib_snglinst.o \
-	baselib_stdpaths.o \
 	baselib_threadpsx.o
 @COND_PLATFORM_UNIX_1@__BASE_PLATFORM_SRC_OBJECTS_3 = $(COND_PLATFORM_UNIX_1___BASE_PLATFORM_SRC_OBJECTS_3)
 COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_3 =  \
@@ -4553,20 +4392,11 @@ COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_3 =  \
 	$(__BASE_WINCE_SRC_OBJECTS_3)
 @COND_PLATFORM_WIN32_1@__BASE_PLATFORM_SRC_OBJECTS_3 = $(COND_PLATFORM_WIN32_1___BASE_PLATFORM_SRC_OBJECTS_3)
 @COND_TOOLKIT_WINCE@__BASE_WINCE_SRC_OBJECTS_3 = baselib_time.o
-COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS_3 =  \
-	baselib_baseunix.o \
-	baselib_dir.o \
-	baselib_mimetype.o \
-	baselib_snglinst.o \
-	baselib_stdpaths.o \
-	baselib_threadpsx.o
-@COND_TOOLKIT_@__BASE_MACOSX_SRC_OBJECTS_3 = $(COND_TOOLKIT____BASE_MACOSX_SRC_OBJECTS_3)
 COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS_3 =  \
 	baselib_baseunix.o \
 	baselib_dir.o \
 	baselib_mimetype.o \
 	baselib_snglinst.o \
-	baselib_stdpaths.o \
 	baselib_threadpsx.o
 @COND_TOOLKIT_COCOA@__BASE_MACOSX_SRC_OBJECTS_3 = $(COND_TOOLKIT_COCOA___BASE_MACOSX_SRC_OBJECTS_3)
 COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_3 =  \
@@ -4574,26 +4404,22 @@ COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_3 =  \
 	baselib_dir.o \
 	baselib_mimetype.o \
 	baselib_snglinst.o \
-	baselib_stdpaths.o \
 	baselib_threadpsx.o
 @COND_TOOLKIT_GTK@__BASE_MACOSX_SRC_OBJECTS_3 = $(COND_TOOLKIT_GTK___BASE_MACOSX_SRC_OBJECTS_3)
 COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS_3 =  \
 	baselib_dirmac.o \
 	baselib_mimetmac.o \
+	baselib_baseunix.o \
 	baselib_utilsexc.o \
 	baselib_thread.o \
 	baselib_macnotfy.o \
-	baselib_MoreFilesX.o \
-	baselib_cfstring.o \
-	baselib_stdpaths_cf.o \
-	baselib_baseunix.o
+	baselib_MoreFilesX.o
 @COND_TOOLKIT_MAC@__BASE_MACOSX_SRC_OBJECTS_3 = $(COND_TOOLKIT_MAC___BASE_MACOSX_SRC_OBJECTS_3)
 COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS_3 =  \
 	baselib_baseunix.o \
 	baselib_dir.o \
 	baselib_mimetype.o \
 	baselib_snglinst.o \
-	baselib_stdpaths.o \
 	baselib_threadpsx.o
 @COND_TOOLKIT_MOTIF@__BASE_MACOSX_SRC_OBJECTS_3 = $(COND_TOOLKIT_MOTIF___BASE_MACOSX_SRC_OBJECTS_3)
 COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_3 =  \
@@ -4601,7 +4427,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_3 =  \
 	baselib_dir.o \
 	baselib_mimetype.o \
 	baselib_snglinst.o \
-	baselib_stdpaths.o \
 	baselib_threadpsx.o
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS_3 = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_3)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_3 \
@@ -4655,7 +4480,6 @@ COND_USE_SOSYMLINKS_1___netdll___so_symlinks_inst_cmd = rm -f \
 	$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
 @COND_USE_SOSYMLINKS_1@__netdll___so_symlinks_inst_cmd = $(COND_USE_SOSYMLINKS_1___netdll___so_symlinks_inst_cmd)
 @COND_PLATFORM_MACOSX_1@__NET_PLATFORM_SRC_OBJECTS_2 = netdll_gsocket.o
-@COND_PLATFORM_MACOS_1@__NET_PLATFORM_SRC_OBJECTS_2 = netdll_gsocket.o
 @COND_PLATFORM_OS2_1@__NET_PLATFORM_SRC_OBJECTS_2 = netdll_gsocket.o
 @COND_PLATFORM_UNIX_1@__NET_PLATFORM_SRC_OBJECTS_2 = netdll_gsocket.o
 @COND_PLATFORM_WIN32_1@__NET_PLATFORM_SRC_OBJECTS_2 \
@@ -4670,7 +4494,6 @@ COND_MONOLITHIC_0_SHARED_0___netlib___depname = \
 @COND_GCC_PCH_1@___pch_wxprec_netlib_wx_wxprec_h_gch___depname \
 @COND_GCC_PCH_1@	= .pch/wxprec_netlib/wx/wxprec.h.gch
 @COND_PLATFORM_MACOSX_1@__NET_PLATFORM_SRC_OBJECTS_3 = netlib_gsocket.o
-@COND_PLATFORM_MACOS_1@__NET_PLATFORM_SRC_OBJECTS_3 = netlib_gsocket.o
 @COND_PLATFORM_OS2_1@__NET_PLATFORM_SRC_OBJECTS_3 = netlib_gsocket.o
 @COND_PLATFORM_UNIX_1@__NET_PLATFORM_SRC_OBJECTS_3 = netlib_gsocket.o
 @COND_PLATFORM_WIN32_1@__NET_PLATFORM_SRC_OBJECTS_3 \
@@ -5043,6 +4866,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_2 =  \
 	coredll_statbox.o \
 	coredll_statline2.o \
 	coredll_stattext.o \
+	coredll_taskbar.o \
 	coredll_textctrl.o \
 	coredll_toolbar.o \
 	coredll_tooltip.o \
@@ -5055,6 +4879,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_2 =  \
 	coredll_colrdlgg.o \
 	coredll_dirdlgg.o \
 	coredll_fdrepdlg.o \
+	coredll_filedlgg.o \
 	coredll_fontdlgg.o \
 	coredll_imaglist.o \
 	coredll_listctrl.o \
@@ -5064,10 +4889,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_2 =  \
 	coredll_statusbr.o \
 	coredll_tabg.o \
 	coredll_timer.o \
-	coredll_cfstring.o \
-	coredll_gsockosx.o \
-	coredll_stdpaths_cf.o \
-	coredll_utilsexc_cf.o
+	coredll_gsockosx.o
 @COND_TOOLKIT_COCOA@__GUI_SRC_OBJECTS_2 = $(COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_2)
 COND_TOOLKIT_GTK___GUI_SRC_OBJECTS_2 =  \
 	coredll_accel.o \
@@ -5152,6 +4974,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_2 =  \
 	coredll_frame.o \
 	coredll_gauge.o \
 	coredll_gdiobj.o \
+	coredll_gsockosx.o \
 	coredll_hid.o \
 	coredll_icon.o \
 	coredll_listbox.o \
@@ -5198,9 +5021,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_2 =  \
 	coredll_statusbr.o \
 	coredll_tabg.o \
 	coredll_snglinst.o \
-	coredll_webkit.o \
-	coredll_gsockosx.o \
-	coredll_utilsexc_cf.o
+	coredll_webkit.o
 @COND_TOOLKIT_MAC@__GUI_SRC_OBJECTS_2 = $(COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_2)
 COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_2 =  \
 	coredll_accel.o \
@@ -5790,6 +5611,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_3 =  \
 	corelib_statbox.o \
 	corelib_statline2.o \
 	corelib_stattext.o \
+	corelib_taskbar.o \
 	corelib_textctrl.o \
 	corelib_toolbar.o \
 	corelib_tooltip.o \
@@ -5802,6 +5624,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_3 =  \
 	corelib_colrdlgg.o \
 	corelib_dirdlgg.o \
 	corelib_fdrepdlg.o \
+	corelib_filedlgg.o \
 	corelib_fontdlgg.o \
 	corelib_imaglist.o \
 	corelib_listctrl.o \
@@ -5811,10 +5634,7 @@ COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_3 =  \
 	corelib_statusbr.o \
 	corelib_tabg.o \
 	corelib_timer.o \
-	corelib_cfstring.o \
-	corelib_gsockosx.o \
-	corelib_stdpaths_cf.o \
-	corelib_utilsexc_cf.o
+	corelib_gsockosx.o
 @COND_TOOLKIT_COCOA@__GUI_SRC_OBJECTS_3 = $(COND_TOOLKIT_COCOA___GUI_SRC_OBJECTS_3)
 COND_TOOLKIT_GTK___GUI_SRC_OBJECTS_3 =  \
 	corelib_accel.o \
@@ -5899,6 +5719,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_3 =  \
 	corelib_frame.o \
 	corelib_gauge.o \
 	corelib_gdiobj.o \
+	corelib_gsockosx.o \
 	corelib_hid.o \
 	corelib_icon.o \
 	corelib_listbox.o \
@@ -5945,9 +5766,7 @@ COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_3 =  \
 	corelib_statusbr.o \
 	corelib_tabg.o \
 	corelib_snglinst.o \
-	corelib_webkit.o \
-	corelib_gsockosx.o \
-	corelib_utilsexc_cf.o
+	corelib_webkit.o
 @COND_TOOLKIT_MAC@__GUI_SRC_OBJECTS_3 = $(COND_TOOLKIT_MAC___GUI_SRC_OBJECTS_3)
 COND_TOOLKIT_MOTIF___GUI_SRC_OBJECTS_3 =  \
 	corelib_accel.o \
@@ -6249,8 +6068,6 @@ COND_USE_SOSYMLINKS_1___advdll___so_symlinks_inst_cmd = rm -f \
 	$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf2) \
 	$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
 @COND_USE_SOSYMLINKS_1@__advdll___so_symlinks_inst_cmd = $(COND_USE_SOSYMLINKS_1___advdll___so_symlinks_inst_cmd)
-@COND_TOOLKIT_COCOA@__ADVANCED_PLATFORM_SRC_OBJECTS_2 = \
-@COND_TOOLKIT_COCOA@	advdll_taskbar.o advdll_taskbarcmn.o
 COND_TOOLKIT_GTK___ADVANCED_PLATFORM_SRC_OBJECTS_2 =  \
 	advdll_taskbarcmn.o \
 	advdll_joystick.o \
@@ -6280,7 +6097,7 @@ COND_TOOLKIT_MAC___ADVANCED_PLATFORM_SRC_OBJECTS_2 =  \
 @COND_TOOLKIT_X11@	advdll_taskbarcmn.o advdll_joystick.o advdll_sound.o \
 @COND_TOOLKIT_X11@	advdll_taskbarx11.o
 @COND_PLATFORM_UNIX_1_USE_PLUGINS_0@__PLUGIN_ADV_SRC_OBJECTS_2 \
-@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= advdll_sound_sdl.o advdll_gprint.o
+@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= advdll_sound_sdl.o
 COND_MONOLITHIC_0_SHARED_0_USE_GUI_1___advlib___depname = \
 	$(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX)$(LIBEXT)
 @COND_MONOLITHIC_0_SHARED_0_USE_GUI_1@__advlib___depname = $(COND_MONOLITHIC_0_SHARED_0_USE_GUI_1___advlib___depname)
@@ -6289,8 +6106,6 @@ COND_MONOLITHIC_0_SHARED_0_USE_GUI_1___advlib___depname = \
 @COND_GCC_PCH_1@__advlib_PCH_INC = -I.pch/wxprec_advlib
 @COND_GCC_PCH_1@___pch_wxprec_advlib_wx_wxprec_h_gch___depname \
 @COND_GCC_PCH_1@	= .pch/wxprec_advlib/wx/wxprec.h.gch
-@COND_TOOLKIT_COCOA@__ADVANCED_PLATFORM_SRC_OBJECTS_3 = \
-@COND_TOOLKIT_COCOA@	advlib_taskbar.o advlib_taskbarcmn.o
 COND_TOOLKIT_GTK___ADVANCED_PLATFORM_SRC_OBJECTS_3 =  \
 	advlib_taskbarcmn.o \
 	advlib_joystick.o \
@@ -6320,7 +6135,7 @@ COND_TOOLKIT_MAC___ADVANCED_PLATFORM_SRC_OBJECTS_3 =  \
 @COND_TOOLKIT_X11@	advlib_taskbarcmn.o advlib_joystick.o advlib_sound.o \
 @COND_TOOLKIT_X11@	advlib_taskbarx11.o
 @COND_PLATFORM_UNIX_1_USE_PLUGINS_0@__PLUGIN_ADV_SRC_OBJECTS_3 \
-@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= advlib_sound_sdl.o advlib_gprint.o
+@COND_PLATFORM_UNIX_1_USE_PLUGINS_0@	= advlib_sound_sdl.o
 COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1___odbcdll___depname = \
 	$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIX)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3)
 @COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1@__odbcdll___depname = $(COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1___odbcdll___depname)
@@ -6794,7 +6609,6 @@ COND_TOOLKIT_MSW___LOWLEVEL_SRC_OBJECTS =  \
 	monodll_region.o \
 	monodll_renderer.o \
 	monodll_settings.o \
-	monodll_stdpaths.o \
 	monodll_timer.o \
 	monodll_tooltip.o \
 	monodll_toplevel.o \
@@ -6846,7 +6660,6 @@ COND_TOOLKIT_WINCE___LOWLEVEL_SRC_OBJECTS =  \
 	monodll_region.o \
 	monodll_renderer.o \
 	monodll_settings.o \
-	monodll_stdpaths.o \
 	monodll_timer.o \
 	monodll_tooltip.o \
 	monodll_toplevel.o \
@@ -7016,7 +6829,6 @@ COND_TOOLKIT_MSW___LOWLEVEL_SRC_OBJECTS_0 =  \
 	monolib_region.o \
 	monolib_renderer.o \
 	monolib_settings.o \
-	monolib_stdpaths.o \
 	monolib_timer.o \
 	monolib_tooltip.o \
 	monolib_toplevel.o \
@@ -7068,7 +6880,6 @@ COND_TOOLKIT_WINCE___LOWLEVEL_SRC_OBJECTS_0 =  \
 	monolib_region.o \
 	monolib_renderer.o \
 	monolib_settings.o \
-	monolib_stdpaths.o \
 	monolib_timer.o \
 	monolib_tooltip.o \
 	monolib_toplevel.o \
@@ -7238,7 +7049,6 @@ COND_TOOLKIT_MSW___LOWLEVEL_SRC_OBJECTS_8 =  \
 	coredll_region.o \
 	coredll_renderer.o \
 	coredll_settings.o \
-	coredll_stdpaths.o \
 	coredll_timer.o \
 	coredll_tooltip.o \
 	coredll_toplevel.o \
@@ -7290,7 +7100,6 @@ COND_TOOLKIT_WINCE___LOWLEVEL_SRC_OBJECTS_8 =  \
 	coredll_region.o \
 	coredll_renderer.o \
 	coredll_settings.o \
-	coredll_stdpaths.o \
 	coredll_timer.o \
 	coredll_tooltip.o \
 	coredll_toplevel.o \
@@ -7460,7 +7269,6 @@ COND_TOOLKIT_MSW___LOWLEVEL_SRC_OBJECTS_9 =  \
 	corelib_region.o \
 	corelib_renderer.o \
 	corelib_settings.o \
-	corelib_stdpaths.o \
 	corelib_timer.o \
 	corelib_tooltip.o \
 	corelib_toplevel.o \
@@ -7512,7 +7320,6 @@ COND_TOOLKIT_WINCE___LOWLEVEL_SRC_OBJECTS_9 =  \
 	corelib_region.o \
 	corelib_renderer.o \
 	corelib_settings.o \
-	corelib_stdpaths.o \
 	corelib_timer.o \
 	corelib_tooltip.o \
 	corelib_toplevel.o \
@@ -7771,7 +7578,7 @@ distclean: clean
 @COND_SHARED_0_WXUSE_EXPAT_BUILTIN@	$(INSTALL_DATA) $(LIBDIRNAME)/$(LIBPREFIX)wxexpat$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)$(LIBEXT) $(DESTDIR)$(libdir)
 
 @COND_MONOLITHIC_1_SHARED_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(MONODLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname)
-@COND_MONOLITHIC_1_SHARED_1@	$(SHARED_LD_CXX) $@ $(MONODLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__monodll___macinstnamecmd) $(__monodll___importlib) $(__monodll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(EXTRALIBS_XML) $(EXTRALIBS_HTML) $(EXTRALIBS_ODBC) $(PLUGIN_ADV_EXTRALIBS)
+@COND_MONOLITHIC_1_SHARED_1@	$(SHARED_LD_CXX) $@ $(MONODLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__monodll___macinstnamecmd) $(__monodll___importlib) $(__monodll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(EXTRALIBS_GUI) $(EXTRALIBS_XML) $(EXTRALIBS_HTML) $(EXTRALIBS_ODBC) $(PLUGIN_ADV_EXTRALIBS)
 @COND_MONOLITHIC_1_SHARED_1@	
 @COND_MONOLITHIC_1_SHARED_1@	$(__monodll___so_symlinks_cmd)
 
@@ -7797,7 +7604,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_monolib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(MONOLIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIX)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(BASEDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname)
-@COND_MONOLITHIC_0_SHARED_1@	$(SHARED_LD_CXX) $@ $(BASEDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__basedll___macinstnamecmd) $(__basedll___importlib) $(__basedll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+@COND_MONOLITHIC_0_SHARED_1@	$(SHARED_LD_CXX) $@ $(BASEDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__basedll___macinstnamecmd) $(__basedll___importlib) $(__basedll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS)
 @COND_MONOLITHIC_0_SHARED_1@	
 @COND_MONOLITHIC_0_SHARED_1@	$(__basedll___so_symlinks_cmd)
 
@@ -7823,7 +7630,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_baselib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(BASELIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIX)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(NETDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1@	$(SHARED_LD_CXX) $@ $(NETDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__netdll___macinstnamecmd) $(__netdll___importlib) $(__netdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
+@COND_MONOLITHIC_0_SHARED_1@	$(SHARED_LD_CXX) $@ $(NETDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__netdll___macinstnamecmd) $(__netdll___importlib) $(__netdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
 @COND_MONOLITHIC_0_SHARED_1@	
 @COND_MONOLITHIC_0_SHARED_1@	$(__netdll___so_symlinks_cmd)
 
@@ -7849,7 +7656,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_netlib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(NETLIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(COREDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	$(SHARED_LD_CXX) $@ $(COREDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__coredll___macinstnamecmd) $(__coredll___importlib) $(__coredll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
+@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	$(SHARED_LD_CXX) $@ $(COREDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__coredll___macinstnamecmd) $(__coredll___importlib) $(__coredll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(EXTRALIBS_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	$(__coredll___so_symlinks_cmd)
 
@@ -7875,7 +7682,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_corelib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(CORELIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(ADVDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__coredll___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	$(SHARED_LD_CXX) $@ $(ADVDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__advdll___macinstnamecmd) $(__advdll___importlib) $(__advdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(PLUGIN_ADV_EXTRALIBS)
+@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	$(SHARED_LD_CXX) $@ $(ADVDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__advdll___macinstnamecmd) $(__advdll___importlib) $(__advdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(EXTRALIBS_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(PLUGIN_ADV_EXTRALIBS)
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1@	$(__advdll___so_symlinks_cmd)
 
@@ -7901,7 +7708,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_advlib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(ADVLIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIX)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(ODBCDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1@	$(SHARED_LD_CXX) $@ $(ODBCDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__odbcdll___macinstnamecmd) $(__odbcdll___importlib) $(__odbcdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(EXTRALIBS_ODBC)
+@COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1@	$(SHARED_LD_CXX) $@ $(ODBCDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__odbcdll___macinstnamecmd) $(__odbcdll___importlib) $(__odbcdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(EXTRALIBS_ODBC)
 @COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_ODBC_1@	$(__odbcdll___so_symlinks_cmd)
 
@@ -7927,7 +7734,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_odbclib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(ODBCLIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_ODBC_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(DBGRIDDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__advdll___depname) $(__odbcdll___depname) $(__coredll___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_ODBC_1@	$(SHARED_LD_CXX) $@ $(DBGRIDDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__dbgriddll___macinstnamecmd) $(__dbgriddll___importlib) $(__dbgriddll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
+@COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_ODBC_1@	$(SHARED_LD_CXX) $@ $(DBGRIDDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__dbgriddll___macinstnamecmd) $(__dbgriddll___importlib) $(__dbgriddll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(EXTRALIBS_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_ODBC_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_GUI_1_USE_ODBC_1@	$(__dbgriddll___so_symlinks_cmd)
 
@@ -7953,7 +7760,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_dbgridlib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(DBGRIDLIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1_USE_HTML_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(HTMLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__coredll___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_HTML_1@	$(SHARED_LD_CXX) $@ $(HTMLDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__htmldll___macinstnamecmd) $(__htmldll___importlib) $(__htmldll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(EXTRALIBS_HTML)
+@COND_MONOLITHIC_0_SHARED_1_USE_HTML_1@	$(SHARED_LD_CXX) $@ $(HTMLDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__htmldll___macinstnamecmd) $(__htmldll___importlib) $(__htmldll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(EXTRALIBS_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(EXTRALIBS_HTML)
 @COND_MONOLITHIC_0_SHARED_1_USE_HTML_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_HTML_1@	$(__htmldll___so_symlinks_cmd)
 
@@ -7979,7 +7786,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_htmllib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(HTMLLIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIX)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(XMLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1@	$(SHARED_LD_CXX) $@ $(XMLDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__xmldll___macinstnamecmd) $(__xmldll___importlib) $(__xmldll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(EXTRALIBS_XML)
+@COND_MONOLITHIC_0_SHARED_1@	$(SHARED_LD_CXX) $@ $(XMLDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__xmldll___macinstnamecmd) $(__xmldll___importlib) $(__xmldll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(EXTRALIBS_XML)
 @COND_MONOLITHIC_0_SHARED_1@	
 @COND_MONOLITHIC_0_SHARED_1@	$(__xmldll___so_symlinks_cmd)
 
@@ -8005,7 +7812,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_xmllib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(XMLLIB_CXXFLAGS)
 
 @COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(XRCDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__htmldll___depname) $(__advdll___depname) $(__coredll___depname) $(__xmldll___depname) $(__basedll___depname)
-@COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	$(SHARED_LD_CXX) $@ $(XRCDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__xrcdll___macinstnamecmd) $(__xrcdll___importlib) $(__xrcdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
+@COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	$(SHARED_LD_CXX) $@ $(XRCDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__xrcdll___macinstnamecmd) $(__xrcdll___importlib) $(__xrcdll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(EXTRALIBS_GUI) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX) $(LIBDIRNAME)/$(LIBPREFIX)wx_base$(WXBASEPORT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX).$(DLLIMP_SUFFIX)
 @COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	
 @COND_MONOLITHIC_0_SHARED_1_USE_XRC_1@	$(__xrcdll___so_symlinks_cmd)
 
@@ -8031,7 +7838,7 @@ distclean: clean
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/wxprec_xrclib/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(XRCLIB_CXXFLAGS)
 
 @COND_SHARED_1_USE_GUI_1_USE_OPENGL_1@$(LIBDIRNAME)/$(DLLPREFIX)$(WXDLLNAMEPREFIXGUI)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl$(WXCOMPILER)$(VENDORTAG)$(WXDLLVERSIONTAG)$(dll___targetsuf3): $(GLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxexpat___depname) $(__wxzlib___depname) $(__wxodbc___depname) $(__wxregex___depname) $(__basedll___depname) $(__coredll___depname)
-@COND_SHARED_1_USE_GUI_1_USE_OPENGL_1@	$(SHARED_LD_CXX) $@ $(GLDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__gldll___macinstnamecmd) $(__gldll___importlib) $(__gldll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE) $(EXTRALIBS_FOR_GUI) $(__WXLIBGLDEP_CORE_p) $(__WXLIBGLDEP_BASE_p) $(__WXLIB_MONO_p) $(EXTRALIBS_OPENGL)
+@COND_SHARED_1_USE_GUI_1_USE_OPENGL_1@	$(SHARED_LD_CXX) $@ $(GLDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(__gldll___macinstnamecmd) $(__gldll___importlib) $(__gldll___soname_flags) $(dll___macver)  $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS) $(EXTRALIBS_GUI) $(__WXLIBGLDEP_CORE_p) $(__WXLIBGLDEP_BASE_p) $(__WXLIB_MONO_p) $(EXTRALIBS_OPENGL)
 @COND_SHARED_1_USE_GUI_1_USE_OPENGL_1@	
 @COND_SHARED_1_USE_GUI_1_USE_OPENGL_1@	$(__gldll___so_symlinks_cmd)
 
@@ -8076,12 +7883,12 @@ samples:
 @COND_USE_XRC_1@	(test -d utils/wxrc && cd utils/wxrc && $(MAKE) install) || true
 
 @COND_USE_GUI_1@install-afm: 
-@COND_USE_GUI_1@	$(INSTALL_DIR) $(DESTDIR)$(datadir)/wx/afm
-@COND_USE_GUI_1@	(cd $(srcdir) ; $(INSTALL_DATA)  misc/afm/*.afm $(DESTDIR)$(datadir)/wx/afm)
+@COND_USE_GUI_1@	$(INSTALL_DIR) $(DESTDIR)$(datadir)/wx/$(WX_RELEASE)/afm
+@COND_USE_GUI_1@	(cd $(srcdir) ; $(INSTALL_DATA)  misc/afm/*.afm $(DESTDIR)$(datadir)/wx/$(WX_RELEASE)/afm)
 
 @COND_USE_GUI_1@install-gsafm: 
-@COND_USE_GUI_1@	$(INSTALL_DIR) $(DESTDIR)$(datadir)/wx/gs_afm
-@COND_USE_GUI_1@	(cd $(srcdir) ; $(INSTALL_DATA)  misc/gs_afm/*.afm $(DESTDIR)$(datadir)/wx/gs_afm)
+@COND_USE_GUI_1@	$(INSTALL_DIR) $(DESTDIR)$(datadir)/wx/$(WX_RELEASE)/gs_afm
+@COND_USE_GUI_1@	(cd $(srcdir) ; $(INSTALL_DATA)  misc/gs_afm/*.afm $(DESTDIR)$(datadir)/wx/$(WX_RELEASE)/gs_afm)
 
 install-wxconfig: 
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
@@ -8355,9 +8162,6 @@ wxjpeg_jdmerge.o: $(srcdir)/src/jpeg/jdmerge.c
 wxtiff_tif_win32.o: $(srcdir)/src/tiff/tif_win32.c
 	$(CCC) -c -o $@ $(WXTIFF_CFLAGS) $<
 
-wxtiff_tif_apple.o: $(srcdir)/src/tiff/tif_apple.c
-	$(CCC) -c -o $@ $(WXTIFF_CFLAGS) $<
-
 wxtiff_tif_aux.o: $(srcdir)/src/tiff/tif_aux.c
 	$(CCC) -c -o $@ $(WXTIFF_CFLAGS) $<
 
@@ -8622,9 +8426,6 @@ monodll_process.o: $(srcdir)/src/common/process.cpp $(MONODLL_ODEP)
 monodll_regex.o: $(srcdir)/src/common/regex.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-monodll_stdpbase.o: $(srcdir)/src/common/stdpbase.cpp $(MONODLL_ODEP)
-	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 monodll_sstream.o: $(srcdir)/src/common/sstream.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
@@ -8657,9 +8458,6 @@ monodll_txtstrm.o: $(srcdir)/src/common/txtstrm.cpp $(MONODLL_ODEP)
 
 monodll_unzip.o: $(srcdir)/src/common/unzip.c $(MONODLL_ODEP)
 	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-monodll_uri.o: $(srcdir)/src/common/uri.cpp $(MONODLL_ODEP)
-	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 monodll_variant.o: $(srcdir)/src/common/variant.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
@@ -8700,31 +8498,16 @@ monodll_registry.o: $(srcdir)/src/msw/registry.cpp $(MONODLL_ODEP)
 monodll_time.o: $(srcdir)/src/msw/wince/time.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-monodll_DirectoryCopy.o: $(srcdir)/src/mac/carbon/morefile/DirectoryCopy.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
+monodll_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(MONODLL_ODEP)
+	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-monodll_FSpCompat.o: $(srcdir)/src/mac/carbon/morefile/FSpCompat.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
+monodll_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(MONODLL_ODEP)
+	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-monodll_FileCopy.o: $(srcdir)/src/mac/carbon/morefile/FileCopy.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
+monodll_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(MONODLL_ODEP)
+	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-monodll_FullPath.o: $(srcdir)/src/mac/carbon/morefile/FullPath.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-monodll_IterateDirectory.o: $(srcdir)/src/mac/carbon/morefile/IterateDirectory.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-monodll_MoreDesktopMgr.o: $(srcdir)/src/mac/carbon/morefile/MoreDesktopMgr.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-monodll_MoreFiles.o: $(srcdir)/src/mac/carbon/morefile/MoreFiles.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-monodll_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $(MONODLL_ODEP)
-	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-monodll_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(MONODLL_ODEP)
+monodll_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(MONODLL_ODEP)
 	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
 
 monodll_event.o: $(srcdir)/src/common/event.cpp $(MONODLL_ODEP)
@@ -9180,9 +8963,6 @@ monodll_xtixml.o: $(srcdir)/src/common/xtixml.cpp $(MONODLL_ODEP)
 monodll_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
-	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 @COND_PLATFORM_UNIX_1@monodll_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
@@ -9201,9 +8981,6 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monodll_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monodll_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 @COND_PLATFORM_UNIX_1@monodll_dir.o: $(srcdir)/src/unix/dir.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
@@ -9218,9 +8995,6 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monodll_dir.o: $(srcdir)/src/unix/dir.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monodll_dir.o: $(srcdir)/src/unix/dir.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_PLATFORM_WIN32_1@monodll_dir.o: $(srcdir)/src/msw/dir.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
@@ -9243,9 +9017,6 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monodll_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monodll_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@monodll_mimetype.o: $(srcdir)/src/msw/mimetype.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
@@ -9267,38 +9038,11 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monodll_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monodll_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monodll_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_PLATFORM_WIN32_1@monodll_snglinst.o: $(srcdir)/src/msw/snglinst.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_UNIX_1@monodll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@monodll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@monodll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@monodll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monodll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monodll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_MSW_USE_GUI_1@monodll_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_WINCE_USE_GUI_1@monodll_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@monodll_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
@@ -9315,17 +9059,11 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monodll_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monodll_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@monodll_thread.o: $(srcdir)/src/msw/thread.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_PLATFORM_OS2_1@monodll_thread.o: $(srcdir)/src/os2/thread.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
@@ -9357,55 +9095,10 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOS_1@monodll_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 @COND_PLATFORM_OS2_1@monodll_utilsexc.o: $(srcdir)/src/os2/utilsexc.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_utilsexc.o: $(srcdir)/src/cocoa/utilsexc.mm $(MONODLL_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monodll_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@monodll_utilsunx.o: $(srcdir)/src/unix/utilsunx.cpp $(MONODLL_ODEP)
@@ -9443,9 +9136,6 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 
 @COND_PLATFORM_WIN32_1@monodll_gsocket.o: $(srcdir)/src/msw/gsocket.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monodll_gsocket.o: $(srcdir)/src/mac/carbon/gsocket.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monodll_caret.o: $(srcdir)/src/generic/caret.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
@@ -10473,6 +10163,9 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@monodll_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(MONODLL_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
+
 @COND_USE_GUI_1_WXUNIV_1@monodll_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(MONODLL_ODEP)
 @COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
@@ -11391,16 +11084,10 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@monodll_treectrl.o: $(srcdir)/src/msw/treectrl.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monodll_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(MONODLL_ODEP)
+@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monodll_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monodll_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(MONODLL_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_drawer.o: $(srcdir)/src/cocoa/drawer.mm $(MONODLL_ODEP)
@@ -11432,6 +11119,21 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 
 @COND_TOOLKIT_PM_USE_GUI_1@monodll_sound.o: $(srcdir)/src/os2/sound.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
+
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monodll_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(MONODLL_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
+
+@COND_TOOLKIT_MSW_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONODLL_ODEP)
+@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
+
+@COND_TOOLKIT_WINCE_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONODLL_ODEP)
+@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
+
+@COND_TOOLKIT_MAC_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/mac/carbon/taskbar.cpp $(MONODLL_ODEP)
+@COND_TOOLKIT_MAC_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
+
+@COND_TOOLKIT_GTK_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/gtk/taskbar.cpp $(MONODLL_ODEP)
+@COND_TOOLKIT_GTK_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@monodll_mdig.o: $(srcdir)/src/generic/mdig.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
@@ -11736,9 +11438,6 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1@monodll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
-@COND_TOOLKIT_COCOA_USE_GUI_1@monodll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
 @COND_TOOLKIT_MOTIF_USE_GUI_1@monodll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_MOTIF_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
@@ -11747,21 +11446,6 @@ monodll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONODLL_ODEP)
 
 @COND_TOOLKIT_X11_USE_GUI_1@monodll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_X11_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_MSW_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_WINCE_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_MAC_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/mac/carbon/taskbar.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_MAC_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(MONODLL_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_GTK_USE_GUI_1@monodll_taskbar.o: $(srcdir)/src/gtk/taskbar.cpp $(MONODLL_ODEP)
-@COND_TOOLKIT_GTK_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_MSW_USE_GUI_1@monodll_joystick.o: $(srcdir)/src/msw/joystick.cpp $(MONODLL_ODEP)
 @COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $<
@@ -11901,9 +11585,6 @@ monolib_process.o: $(srcdir)/src/common/process.cpp $(MONOLIB_ODEP)
 monolib_regex.o: $(srcdir)/src/common/regex.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-monolib_stdpbase.o: $(srcdir)/src/common/stdpbase.cpp $(MONOLIB_ODEP)
-	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 monolib_sstream.o: $(srcdir)/src/common/sstream.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
@@ -11936,9 +11617,6 @@ monolib_txtstrm.o: $(srcdir)/src/common/txtstrm.cpp $(MONOLIB_ODEP)
 
 monolib_unzip.o: $(srcdir)/src/common/unzip.c $(MONOLIB_ODEP)
 	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-monolib_uri.o: $(srcdir)/src/common/uri.cpp $(MONOLIB_ODEP)
-	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 monolib_variant.o: $(srcdir)/src/common/variant.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
@@ -11979,31 +11657,16 @@ monolib_registry.o: $(srcdir)/src/msw/registry.cpp $(MONOLIB_ODEP)
 monolib_time.o: $(srcdir)/src/msw/wince/time.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-monolib_DirectoryCopy.o: $(srcdir)/src/mac/carbon/morefile/DirectoryCopy.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
+monolib_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(MONOLIB_ODEP)
+	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-monolib_FSpCompat.o: $(srcdir)/src/mac/carbon/morefile/FSpCompat.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
+monolib_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(MONOLIB_ODEP)
+	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-monolib_FileCopy.o: $(srcdir)/src/mac/carbon/morefile/FileCopy.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
+monolib_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(MONOLIB_ODEP)
+	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-monolib_FullPath.o: $(srcdir)/src/mac/carbon/morefile/FullPath.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-monolib_IterateDirectory.o: $(srcdir)/src/mac/carbon/morefile/IterateDirectory.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-monolib_MoreDesktopMgr.o: $(srcdir)/src/mac/carbon/morefile/MoreDesktopMgr.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-monolib_MoreFiles.o: $(srcdir)/src/mac/carbon/morefile/MoreFiles.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-monolib_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $(MONOLIB_ODEP)
-	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-monolib_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(MONOLIB_ODEP)
+monolib_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(MONOLIB_ODEP)
 	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
 
 monolib_event.o: $(srcdir)/src/common/event.cpp $(MONOLIB_ODEP)
@@ -12459,9 +12122,6 @@ monolib_xtixml.o: $(srcdir)/src/common/xtixml.cpp $(MONOLIB_ODEP)
 monolib_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
-	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 @COND_PLATFORM_UNIX_1@monolib_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
@@ -12480,9 +12140,6 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monolib_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monolib_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 @COND_PLATFORM_UNIX_1@monolib_dir.o: $(srcdir)/src/unix/dir.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
@@ -12497,9 +12154,6 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monolib_dir.o: $(srcdir)/src/unix/dir.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monolib_dir.o: $(srcdir)/src/unix/dir.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_PLATFORM_WIN32_1@monolib_dir.o: $(srcdir)/src/msw/dir.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
@@ -12522,9 +12176,6 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monolib_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monolib_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@monolib_mimetype.o: $(srcdir)/src/msw/mimetype.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
@@ -12546,38 +12197,11 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monolib_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monolib_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monolib_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_PLATFORM_WIN32_1@monolib_snglinst.o: $(srcdir)/src/msw/snglinst.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_UNIX_1@monolib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@monolib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@monolib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@monolib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monolib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monolib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_MSW_USE_GUI_1@monolib_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_WINCE_USE_GUI_1@monolib_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@monolib_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
@@ -12594,17 +12218,11 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@monolib_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@monolib_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@monolib_thread.o: $(srcdir)/src/msw/thread.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_PLATFORM_OS2_1@monolib_thread.o: $(srcdir)/src/os2/thread.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
@@ -12636,55 +12254,10 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOS_1@monolib_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 @COND_PLATFORM_OS2_1@monolib_utilsexc.o: $(srcdir)/src/os2/utilsexc.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_utilsexc.o: $(srcdir)/src/cocoa/utilsexc.mm $(MONOLIB_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@monolib_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@monolib_utilsunx.o: $(srcdir)/src/unix/utilsunx.cpp $(MONOLIB_ODEP)
@@ -12722,9 +12295,6 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 
 @COND_PLATFORM_WIN32_1@monolib_gsocket.o: $(srcdir)/src/msw/gsocket.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@monolib_gsocket.o: $(srcdir)/src/mac/carbon/gsocket.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monolib_caret.o: $(srcdir)/src/generic/caret.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
@@ -13752,6 +13322,9 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@monolib_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(MONOLIB_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
+
 @COND_USE_GUI_1_WXUNIV_1@monolib_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(MONOLIB_ODEP)
 @COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
@@ -14670,16 +14243,10 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@monolib_treectrl.o: $(srcdir)/src/msw/treectrl.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monolib_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(MONOLIB_ODEP)
+@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monolib_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@monolib_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(MONOLIB_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_drawer.o: $(srcdir)/src/cocoa/drawer.mm $(MONOLIB_ODEP)
@@ -14711,6 +14278,21 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 
 @COND_TOOLKIT_PM_USE_GUI_1@monolib_sound.o: $(srcdir)/src/os2/sound.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
+
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@monolib_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(MONOLIB_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
+
+@COND_TOOLKIT_MSW_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONOLIB_ODEP)
+@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
+
+@COND_TOOLKIT_WINCE_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONOLIB_ODEP)
+@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
+
+@COND_TOOLKIT_MAC_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/mac/carbon/taskbar.cpp $(MONOLIB_ODEP)
+@COND_TOOLKIT_MAC_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
+
+@COND_TOOLKIT_GTK_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/gtk/taskbar.cpp $(MONOLIB_ODEP)
+@COND_TOOLKIT_GTK_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@monolib_mdig.o: $(srcdir)/src/generic/mdig.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
@@ -15015,9 +14597,6 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1@monolib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
-@COND_TOOLKIT_COCOA_USE_GUI_1@monolib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
 @COND_TOOLKIT_MOTIF_USE_GUI_1@monolib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_MOTIF_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
@@ -15026,21 +14605,6 @@ monolib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(MONOLIB_ODEP)
 
 @COND_TOOLKIT_X11_USE_GUI_1@monolib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_X11_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_MSW_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_WINCE_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/msw/taskbar.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_MAC_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/mac/carbon/taskbar.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_MAC_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(MONOLIB_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_GTK_USE_GUI_1@monolib_taskbar.o: $(srcdir)/src/gtk/taskbar.cpp $(MONOLIB_ODEP)
-@COND_TOOLKIT_GTK_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_MSW_USE_GUI_1@monolib_joystick.o: $(srcdir)/src/msw/joystick.cpp $(MONOLIB_ODEP)
 @COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $<
@@ -15180,9 +14744,6 @@ basedll_process.o: $(srcdir)/src/common/process.cpp $(BASEDLL_ODEP)
 basedll_regex.o: $(srcdir)/src/common/regex.cpp $(BASEDLL_ODEP)
 	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-basedll_stdpbase.o: $(srcdir)/src/common/stdpbase.cpp $(BASEDLL_ODEP)
-	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
 basedll_sstream.o: $(srcdir)/src/common/sstream.cpp $(BASEDLL_ODEP)
 	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
@@ -15215,9 +14776,6 @@ basedll_txtstrm.o: $(srcdir)/src/common/txtstrm.cpp $(BASEDLL_ODEP)
 
 basedll_unzip.o: $(srcdir)/src/common/unzip.c $(BASEDLL_ODEP)
 	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-basedll_uri.o: $(srcdir)/src/common/uri.cpp $(BASEDLL_ODEP)
-	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
 basedll_variant.o: $(srcdir)/src/common/variant.cpp $(BASEDLL_ODEP)
 	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
@@ -15258,31 +14816,16 @@ basedll_registry.o: $(srcdir)/src/msw/registry.cpp $(BASEDLL_ODEP)
 basedll_time.o: $(srcdir)/src/msw/wince/time.cpp $(BASEDLL_ODEP)
 	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-basedll_DirectoryCopy.o: $(srcdir)/src/mac/carbon/morefile/DirectoryCopy.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
+basedll_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(BASEDLL_ODEP)
+	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-basedll_FSpCompat.o: $(srcdir)/src/mac/carbon/morefile/FSpCompat.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
+basedll_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(BASEDLL_ODEP)
+	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-basedll_FileCopy.o: $(srcdir)/src/mac/carbon/morefile/FileCopy.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
+basedll_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(BASEDLL_ODEP)
+	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-basedll_FullPath.o: $(srcdir)/src/mac/carbon/morefile/FullPath.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-basedll_IterateDirectory.o: $(srcdir)/src/mac/carbon/morefile/IterateDirectory.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-basedll_MoreDesktopMgr.o: $(srcdir)/src/mac/carbon/morefile/MoreDesktopMgr.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-basedll_MoreFiles.o: $(srcdir)/src/mac/carbon/morefile/MoreFiles.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-basedll_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $(BASEDLL_ODEP)
-	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-basedll_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(BASEDLL_ODEP)
+basedll_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(BASEDLL_ODEP)
 	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
 
 basedll_event.o: $(srcdir)/src/common/event.cpp $(BASEDLL_ODEP)
@@ -15327,9 +14870,6 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@basedll_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@basedll_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
 @COND_PLATFORM_UNIX_1@basedll_dir.o: $(srcdir)/src/unix/dir.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
@@ -15344,9 +14884,6 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@basedll_dir.o: $(srcdir)/src/unix/dir.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@basedll_dir.o: $(srcdir)/src/unix/dir.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
 @COND_PLATFORM_WIN32_1@basedll_dir.o: $(srcdir)/src/msw/dir.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
@@ -15369,9 +14906,6 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@basedll_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@basedll_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@basedll_mimetype.o: $(srcdir)/src/msw/mimetype.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
@@ -15393,29 +14927,8 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@basedll_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@basedll_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@basedll_snglinst.o: $(srcdir)/src/msw/snglinst.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_UNIX_1@basedll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@basedll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@basedll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@basedll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@basedll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@basedll_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@basedll_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
@@ -15432,17 +14945,11 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@basedll_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@basedll_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@basedll_thread.o: $(srcdir)/src/msw/thread.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@basedll_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
 @COND_PLATFORM_OS2_1@basedll_thread.o: $(srcdir)/src/os2/thread.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
@@ -15462,47 +14969,8 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOS_1@basedll_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
 @COND_PLATFORM_OS2_1@basedll_utilsexc.o: $(srcdir)/src/os2/utilsexc.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@basedll_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@basedll_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@basedll_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@basedll_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@basedll_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@basedll_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@basedll_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@basedll_utilsunx.o: $(srcdir)/src/unix/utilsunx.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $<
@@ -15615,9 +15083,6 @@ baselib_process.o: $(srcdir)/src/common/process.cpp $(BASELIB_ODEP)
 baselib_regex.o: $(srcdir)/src/common/regex.cpp $(BASELIB_ODEP)
 	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-baselib_stdpbase.o: $(srcdir)/src/common/stdpbase.cpp $(BASELIB_ODEP)
-	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
 baselib_sstream.o: $(srcdir)/src/common/sstream.cpp $(BASELIB_ODEP)
 	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
@@ -15650,9 +15115,6 @@ baselib_txtstrm.o: $(srcdir)/src/common/txtstrm.cpp $(BASELIB_ODEP)
 
 baselib_unzip.o: $(srcdir)/src/common/unzip.c $(BASELIB_ODEP)
 	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-baselib_uri.o: $(srcdir)/src/common/uri.cpp $(BASELIB_ODEP)
-	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
 baselib_variant.o: $(srcdir)/src/common/variant.cpp $(BASELIB_ODEP)
 	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
@@ -15693,31 +15155,16 @@ baselib_registry.o: $(srcdir)/src/msw/registry.cpp $(BASELIB_ODEP)
 baselib_time.o: $(srcdir)/src/msw/wince/time.cpp $(BASELIB_ODEP)
 	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-baselib_DirectoryCopy.o: $(srcdir)/src/mac/carbon/morefile/DirectoryCopy.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
+baselib_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(BASELIB_ODEP)
+	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-baselib_FSpCompat.o: $(srcdir)/src/mac/carbon/morefile/FSpCompat.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
+baselib_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(BASELIB_ODEP)
+	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-baselib_FileCopy.o: $(srcdir)/src/mac/carbon/morefile/FileCopy.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
+baselib_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(BASELIB_ODEP)
+	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-baselib_FullPath.o: $(srcdir)/src/mac/carbon/morefile/FullPath.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-baselib_IterateDirectory.o: $(srcdir)/src/mac/carbon/morefile/IterateDirectory.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-baselib_MoreDesktopMgr.o: $(srcdir)/src/mac/carbon/morefile/MoreDesktopMgr.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-baselib_MoreFiles.o: $(srcdir)/src/mac/carbon/morefile/MoreFiles.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-baselib_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $(BASELIB_ODEP)
-	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-baselib_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(BASELIB_ODEP)
+baselib_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(BASELIB_ODEP)
 	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
 
 baselib_event.o: $(srcdir)/src/common/event.cpp $(BASELIB_ODEP)
@@ -15762,9 +15209,6 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@baselib_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@baselib_baseunix.o: $(srcdir)/src/unix/baseunix.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
 @COND_PLATFORM_UNIX_1@baselib_dir.o: $(srcdir)/src/unix/dir.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
@@ -15779,9 +15223,6 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@baselib_dir.o: $(srcdir)/src/unix/dir.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@baselib_dir.o: $(srcdir)/src/unix/dir.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
 @COND_PLATFORM_WIN32_1@baselib_dir.o: $(srcdir)/src/msw/dir.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
@@ -15804,9 +15245,6 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@baselib_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@baselib_mimetype.o: $(srcdir)/src/unix/mimetype.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@baselib_mimetype.o: $(srcdir)/src/msw/mimetype.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
@@ -15828,29 +15266,8 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@baselib_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@baselib_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@baselib_snglinst.o: $(srcdir)/src/msw/snglinst.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_UNIX_1@baselib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@baselib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@baselib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_GTK@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@baselib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_X11@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@baselib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@baselib_stdpaths.o: $(srcdir)/src/unix/stdpaths.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@baselib_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
@@ -15867,17 +15284,11 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@baselib_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@baselib_threadpsx.o: $(srcdir)/src/unix/threadpsx.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
 @COND_PLATFORM_WIN32_1@baselib_thread.o: $(srcdir)/src/msw/thread.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@baselib_thread.o: $(srcdir)/src/mac/carbon/thread.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
 @COND_PLATFORM_OS2_1@baselib_thread.o: $(srcdir)/src/os2/thread.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
@@ -15897,47 +15308,8 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOS_1@baselib_utilsexc.o: $(srcdir)/src/mac/carbon/utilsexc.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
 @COND_PLATFORM_OS2_1@baselib_utilsexc.o: $(srcdir)/src/os2/utilsexc.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@baselib_dirmac.o: $(srcdir)/src/mac/carbon/dirmac.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@baselib_mimetmac.o: $(srcdir)/src/mac/carbon/mimetmac.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@baselib_macnotfy.o: $(srcdir)/src/mac/carbon/macnotfy.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@baselib_MoreFilesX.o: $(srcdir)/src/mac/carbon/morefilex/MoreFilesX.c $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@baselib_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@baselib_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOSX_1_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@baselib_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
 
 @COND_PLATFORM_UNIX_1@baselib_utilsunx.o: $(srcdir)/src/unix/utilsunx.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $<
@@ -15993,9 +15365,6 @@ netdll_net.o: $(srcdir)/src/msw/wince/net.cpp $(NETDLL_ODEP)
 @COND_PLATFORM_WIN32_1@netdll_gsocket.o: $(srcdir)/src/msw/gsocket.cpp $(NETDLL_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(NETDLL_CXXFLAGS) $<
 
-@COND_PLATFORM_MACOS_1@netdll_gsocket.o: $(srcdir)/src/mac/carbon/gsocket.cpp $(NETDLL_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(NETDLL_CXXFLAGS) $<
-
 netlib_fs_inet.o: $(srcdir)/src/common/fs_inet.cpp $(NETLIB_ODEP)
 	$(CXXC) -c -o $@ $(NETLIB_CXXFLAGS) $<
 
@@ -16043,9 +15412,6 @@ netlib_net.o: $(srcdir)/src/msw/wince/net.cpp $(NETLIB_ODEP)
 
 @COND_PLATFORM_WIN32_1@netlib_gsocket.o: $(srcdir)/src/msw/gsocket.cpp $(NETLIB_ODEP)
 @COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(NETLIB_CXXFLAGS) $<
-
-@COND_PLATFORM_MACOS_1@netlib_gsocket.o: $(srcdir)/src/mac/carbon/gsocket.cpp $(NETLIB_ODEP)
-@COND_PLATFORM_MACOS_1@	$(CXXC) -c -o $@ $(NETLIB_CXXFLAGS) $<
 
 coredll_event.o: $(srcdir)/src/common/event.cpp $(COREDLL_ODEP)
 	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
@@ -16191,16 +15557,13 @@ coredll_sound.o: $(srcdir)/src/cocoa/sound.mm $(COREDLL_ODEP)
 coredll_statline2.o: $(srcdir)/src/cocoa/statline2.mm $(COREDLL_ODEP)
 	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
+coredll_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(COREDLL_ODEP)
+	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
+
 coredll_utilsexc.o: $(srcdir)/src/cocoa/utilsexc.mm $(COREDLL_ODEP)
 	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
 coredll_regiong.o: $(srcdir)/src/generic/regiong.cpp $(COREDLL_ODEP)
-	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
-
-coredll_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(COREDLL_ODEP)
-	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
-
-coredll_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(COREDLL_ODEP)
 	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
 coredll_gsockpm.o: $(srcdir)/src/os2/gsockpm.cpp $(COREDLL_ODEP)
@@ -17187,12 +16550,6 @@ coredll_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1@coredll_printwin.o: $(srcdir)/src/msw/printwin.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
-@COND_TOOLKIT_MSW_USE_GUI_1@coredll_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_WINCE_USE_GUI_1@coredll_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
-
 @COND_TOOLKIT_MSW_USE_GUI_1@coredll_utilsgui.o: $(srcdir)/src/msw/utilsgui.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
@@ -17318,6 +16675,9 @@ coredll_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(COREDLL_ODEP)
 
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@coredll_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
+
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@coredll_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(COREDLL_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
 @COND_USE_GUI_1_WXUNIV_1@coredll_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(COREDLL_ODEP)
 @COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
@@ -18237,16 +17597,10 @@ coredll_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@coredll_treectrl.o: $(srcdir)/src/msw/treectrl.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@coredll_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(COREDLL_ODEP)
+@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@coredll_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@coredll_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@coredll_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(COREDLL_ODEP)
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@coredll_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(COREDLL_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@coredll_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(COREDLL_ODEP)
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(COREDLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@coredll_mdig.o: $(srcdir)/src/generic/mdig.cpp $(COREDLL_ODEP)
@@ -18687,16 +18041,13 @@ corelib_sound.o: $(srcdir)/src/cocoa/sound.mm $(CORELIB_ODEP)
 corelib_statline2.o: $(srcdir)/src/cocoa/statline2.mm $(CORELIB_ODEP)
 	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
+corelib_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(CORELIB_ODEP)
+	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
+
 corelib_utilsexc.o: $(srcdir)/src/cocoa/utilsexc.mm $(CORELIB_ODEP)
 	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
 corelib_regiong.o: $(srcdir)/src/generic/regiong.cpp $(CORELIB_ODEP)
-	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
-
-corelib_cfstring.o: $(srcdir)/src/mac/corefoundation/cfstring.cpp $(CORELIB_ODEP)
-	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
-
-corelib_stdpaths_cf.o: $(srcdir)/src/mac/corefoundation/stdpaths_cf.cpp $(CORELIB_ODEP)
 	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
 corelib_gsockpm.o: $(srcdir)/src/os2/gsockpm.cpp $(CORELIB_ODEP)
@@ -19683,12 +19034,6 @@ corelib_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1@corelib_printwin.o: $(srcdir)/src/msw/printwin.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
-@COND_TOOLKIT_MSW_USE_GUI_1@corelib_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_WINCE_USE_GUI_1@corelib_stdpaths.o: $(srcdir)/src/msw/stdpaths.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_WINCE_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
-
 @COND_TOOLKIT_MSW_USE_GUI_1@corelib_utilsgui.o: $(srcdir)/src/msw/utilsgui.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_MSW_USE_GUI_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
@@ -19814,6 +19159,9 @@ corelib_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(CORELIB_ODEP)
 
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@corelib_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_GTK_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
+
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@corelib_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(CORELIB_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
 @COND_USE_GUI_1_WXUNIV_1@corelib_filedlgg.o: $(srcdir)/src/generic/filedlgg.cpp $(CORELIB_ODEP)
 @COND_USE_GUI_1_WXUNIV_1@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
@@ -20733,16 +20081,10 @@ corelib_win32.o: $(srcdir)/src/univ/themes/win32.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@corelib_treectrl.o: $(srcdir)/src/msw/treectrl.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_WINCE_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@corelib_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(CORELIB_ODEP)
+@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@corelib_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@corelib_gsockosx.o: $(srcdir)/src/mac/corefoundation/gsockosx.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@corelib_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(CORELIB_ODEP)
-@COND_TOOLKIT_MAC_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@corelib_utilsexc_cf.o: $(srcdir)/src/mac/corefoundation/utilsexc_cf.cpp $(CORELIB_ODEP)
+@COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@corelib_gsockosx.o: $(srcdir)/src/mac/carbon/gsockosx.cpp $(CORELIB_ODEP)
 @COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0@	$(CXXC) -c -o $@ $(CORELIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_PM_USE_GUI_1_WXUNIV_0@corelib_mdig.o: $(srcdir)/src/generic/mdig.cpp $(CORELIB_ODEP)
@@ -21078,9 +20420,6 @@ advdll_eggtrayicon.o: $(srcdir)/src/gtk/eggtrayicon.c $(ADVDLL_ODEP)
 advdll_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(ADVDLL_ODEP)
 	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
 
-advdll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(ADVDLL_ODEP)
-	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
-
 @COND_TOOLKIT_MSW@advdll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVDLL_ODEP)
 @COND_TOOLKIT_MSW@	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
 
@@ -21089,9 +20428,6 @@ advdll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(ADVDLL_ODEP)
 
 @COND_TOOLKIT_MAC@advdll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVDLL_ODEP)
 @COND_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA@advdll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVDLL_ODEP)
-@COND_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_MOTIF@advdll_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVDLL_ODEP)
 @COND_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
@@ -21131,9 +20467,6 @@ advdll_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(ADVDLL_ODEP)
 
 @COND_TOOLKIT_MAC@advdll_taskbar.o: $(srcdir)/src/mac/carbon/taskbar.cpp $(ADVDLL_ODEP)
 @COND_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA@advdll_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(ADVDLL_ODEP)
-@COND_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
 
 @COND_TOOLKIT_GTK@advdll_taskbar.o: $(srcdir)/src/gtk/taskbar.cpp $(ADVDLL_ODEP)
 @COND_TOOLKIT_GTK@	$(CXXC) -c -o $@ $(ADVDLL_CXXFLAGS) $<
@@ -21204,9 +20537,6 @@ advlib_eggtrayicon.o: $(srcdir)/src/gtk/eggtrayicon.c $(ADVLIB_ODEP)
 advlib_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(ADVLIB_ODEP)
 	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
 
-advlib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(ADVLIB_ODEP)
-	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
-
 @COND_TOOLKIT_MSW@advlib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVLIB_ODEP)
 @COND_TOOLKIT_MSW@	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
 
@@ -21215,9 +20545,6 @@ advlib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(ADVLIB_ODEP)
 
 @COND_TOOLKIT_MAC@advlib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVLIB_ODEP)
 @COND_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA@advlib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVLIB_ODEP)
-@COND_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_MOTIF@advlib_taskbarcmn.o: $(srcdir)/src/common/taskbarcmn.cpp $(ADVLIB_ODEP)
 @COND_TOOLKIT_MOTIF@	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
@@ -21257,9 +20584,6 @@ advlib_gprint.o: $(srcdir)/src/gtk/gnome/gprint.cpp $(ADVLIB_ODEP)
 
 @COND_TOOLKIT_MAC@advlib_taskbar.o: $(srcdir)/src/mac/carbon/taskbar.cpp $(ADVLIB_ODEP)
 @COND_TOOLKIT_MAC@	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
-
-@COND_TOOLKIT_COCOA@advlib_taskbar.o: $(srcdir)/src/cocoa/taskbar.mm $(ADVLIB_ODEP)
-@COND_TOOLKIT_COCOA@	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<
 
 @COND_TOOLKIT_GTK@advlib_taskbar.o: $(srcdir)/src/gtk/taskbar.cpp $(ADVLIB_ODEP)
 @COND_TOOLKIT_GTK@	$(CXXC) -c -o $@ $(ADVLIB_CXXFLAGS) $<

@@ -30,26 +30,23 @@
     builds, running under 10.2 + only
 */
 #ifdef __WXMAC__
-#    if defined(__MACH__)
-#        define __WXMAC_OSX__
-#        define __WXMAC_CARBON__
-#        ifdef __WXMAC_XCODE__
-#            include "wx/mac/carbon/config_xcode.h"
-#        endif
-#    else
-#        if TARGET_CARBON
-#            define __WXMAC_CARBON__
-#        else
-#            define __WXMAC_CLASSIC__
-#        endif
-#    endif
-#endif
-
-/*
-    __WXOSX__ is a common define to wxMac (Carbon) and wxCocoa ports under OS X.
- */
-#if defined(__WXMAC_OSX__) || defined(__WXCOCOA__)
-#   define __WXOSX__
+    #if defined(__MACH__)
+        #define __WXMAC_OSX__ 1
+        #define __WXMAC_CARBON__ 1
+        #define __WXMAC_CLASSIC__ 0
+        #ifdef __WXMAC_XCODE__
+            #include "wx/mac/carbon/config_xcode.h"
+        #endif
+    #else
+        #define __WXMAC_OSX__ 0
+        #if TARGET_CARBON
+            #define __WXMAC_CARBON__ 1
+            #define __WXMAC_CLASSIC__ 0
+        #else
+            #define __WXMAC_CARBON__ 0
+            #define __WXMAC_CLASSIC__ 1
+        #endif
+    #endif
 #endif
 
 /*
@@ -465,9 +462,7 @@
    This macro can be used to check that the version of mingw32 compiler is
    at least maj.min
  */
-#if defined(__PALMOS__)
-#    include "wx/palmos/gccpriv.h"
-#elif ( defined( __GNUWIN32__ ) || defined( __MINGW32__ ) || \
+#if ( defined( __GNUWIN32__ ) || defined( __MINGW32__ ) || \
     defined( __CYGWIN__ ) || \
       (defined(__WATCOMC__) && __WATCOMC__ >= 1200) ) && \
     !defined(__DOS__) && !defined(__WXMOTIF__) && !defined(__WXGTK__) && !defined(__WXX11__)

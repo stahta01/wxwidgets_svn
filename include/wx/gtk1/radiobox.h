@@ -127,7 +127,7 @@ public:
 #endif // wxUSE_TOOLTIPS
 
     // reposition the radio buttons correctly unless justCalc == true and
-    // return the total size needed to accommodate them
+    // reutrn the total size needed to accomodate them
     wxSize LayoutItems(bool justCalc) const;
 
     virtual void DoSetSize( int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO );

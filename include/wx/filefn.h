@@ -131,7 +131,6 @@ enum wxSeekMode
 // Implemented in filefnwce.cpp
 #if defined( __WXWINCE__)
     typedef __int64 wxFileOffset;
-    typedef unsigned __int64 wxFileSize_t;
     #define wxFileOffsetFmtSpec _("I64")
     int wxOpen(const wxChar *filename, int oflag, int WXUNUSED(pmode));
     int wxAccess(const wxChar *name, int WXUNUSED(how));
@@ -174,9 +173,7 @@ enum wxSeekMode
 
     // detect compilers which have support for huge files (currently only
     // Digital Mars doesn't)
-    #ifndef __PALMOS__
     #include "wx/msw/private.h"
-    #endif
 
     #undef wxHAS_HUGE_FILES
     #if defined(__MINGW32__)
@@ -198,11 +195,10 @@ enum wxSeekMode
 
     #if wxHAS_HUGE_FILES
         typedef wxLongLong_t wxFileOffset;
-        typedef unsigned wxLongLong_t wxFileSize_t;
         #define wxFileOffsetFmtSpec wxLongLongFmtSpec
     #else
         typedef off_t wxFileOffset;
-        typedef unsigned long wxFileSize_t;
+        #define wxFileOffsetFmtSpec _("")
     #endif
 
     #define   wxClose      _close
@@ -218,12 +214,7 @@ enum wxSeekMode
                   _write(fd, (const char *)buf, nCount)
         #endif
     #else
-        #if defined(__WATCOMC__)
-            inline wxFileSize_t wxRead( int handle, void *buffer, wxFileSize_t len )
-                                { return ::read( handle, buffer, (unsigned int)len ); }
-            inline wxFileSize_t wxWrite( int handle, const void *buffer, wxFileSize_t len )
-                                { return ::write( handle, buffer, (unsigned int)len ); }
-        #elif defined(__DMC__)
+        #if defined(__DMC__) || defined(__WATCOMC__)
             #define wxRead        ::read
             #define wxWrite       ::write
         #else
@@ -307,7 +298,7 @@ enum wxSeekMode
     #endif
 
     // constants (unless already defined by the user code)
-    #if !defined(__BORLANDC__) && !defined(__WATCOMC__) && !defined(__PALMOS__)
+    #if !defined(__BORLANDC__) && !defined(__WATCOMC__)
         #ifndef O_RDONLY
             #define   O_RDONLY    _O_RDONLY
             #define   O_WRONLY    _O_WRONLY
@@ -330,12 +321,8 @@ enum wxSeekMode
     typedef off_t wxFileOffset;
     #ifdef _LARGE_FILES
         #define wxFileOffsetFmtSpec wxLongLongFmtSpec
-        wxCOMPILE_TIME_ASSERT( sizeof(off_t) == sizeof(wxLongLong_t),
-                                BadFileSizeType );
-        typedef unsigned wxLongLong_t wxFileSize_t;
     #else
         #define wxFileOffsetFmtSpec _T("")
-        typedef unsigned long wxFileSize_t;
     #endif
     // functions
     #define   wxClose      close
@@ -373,9 +360,9 @@ enum wxSeekMode
 // VisualAge C++ V4.0 cannot have any external linkage const decs
 // in headers included by more than one primary source
 //
-extern const wxFileSize_t wxInvalidOffset;
+extern const wxFileOffset wxInvalidOffset;
 #else
-const wxFileSize_t wxInvalidOffset = (wxFileSize_t)-1;
+const wxFileOffset wxInvalidOffset = (wxFileOffset)-1;
 #endif
 
 // ----------------------------------------------------------------------------

@@ -107,7 +107,6 @@ bool TestApp::OnCmdLineParsed(wxCmdLineParser& parser)
     return wxAppConsole::OnCmdLineParsed(parser);
 }
 
-#include "wx/uri.h"
 // Run
 //
 int TestApp::OnRun()

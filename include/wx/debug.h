@@ -198,17 +198,8 @@
 
  It may be used both within a function and in the global scope.
 */
-#ifdef __WATCOMC__
-    /* avoid "unused symbol" warning */
-    #define wxCOMPILE_TIME_ASSERT(expr, msg) \
-        class wxMAKE_UNIQUE_ASSERT_NAME { \
-          unsigned int msg: expr; \
-          wxMAKE_UNIQUE_ASSERT_NAME() { wxUnusedVar(msg); } \
-        }
-#else
-    #define wxCOMPILE_TIME_ASSERT(expr, msg) \
-        struct wxMAKE_UNIQUE_ASSERT_NAME { unsigned int msg: expr; }
-#endif
+#define wxCOMPILE_TIME_ASSERT(expr, msg) \
+    struct wxMAKE_UNIQUE_ASSERT_NAME { unsigned int msg: expr; }
 
 /*
    When using VC++ 6 with "Edit and Continue" on, the compiler completely

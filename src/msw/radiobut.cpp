@@ -182,22 +182,20 @@ void wxRadioButton::SetValue(bool value)
             {
                 wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
                                                    wxRadioButton);
-                if ( btn && btn->HasFlag(wxRB_SINGLE) )
+                if ( !btn )
                 {
-                    // A wxRB_SINGLE button isn't part of this group
+                    // the radio buttons in a group must be consecutive, so
+                    // there are no more of them
                     break;
                 }
-                
-                if (btn)
-                {
-                    btn->SetValue(false);
 
-                    if ( btn->HasFlag(wxRB_GROUP) )
-                    {
-                        // even if there are other radio buttons before this one,
-                        // they're not in the same group with us
-                        break;
-                    }
+                btn->SetValue(false);
+
+                if ( btn->HasFlag(wxRB_GROUP) )
+                {
+                    // even if there are other radio buttons before this one,
+                    // they're not in the same group with us
+                    break;
                 }
             }
         }
@@ -210,14 +208,13 @@ void wxRadioButton::SetValue(bool value)
             wxRadioButton *btn = wxDynamicCast(nodeAfter->GetData(),
                                                wxRadioButton);
 
-            if ( btn && (btn->HasFlag(wxRB_GROUP) || btn->HasFlag(wxRB_SINGLE) ) )
+            if ( !btn || btn->HasFlag(wxRB_GROUP) )
             {
                 // no more buttons or the first button of the next group
                 break;
             }
 
-            if (btn)
-                btn->SetValue(false);
+            btn->SetValue(false);
         }
     }
 }

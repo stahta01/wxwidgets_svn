@@ -232,6 +232,7 @@ public:
     bool PrintText(const wxString &htmltext, const wxString& basepath = wxEmptyString);
             // Print file / html-text w/o preview
 
+    void PrinterSetup();
     void PageSetup();
             // pop up printer or page setup dialog
 

@@ -652,7 +652,7 @@ public:
 
 wxXmlResourceHandler::wxXmlResourceHandler()
         : m_node(NULL), m_parent(NULL), m_instance(NULL),
-          m_parentAsWindow(NULL)
+          m_parentAsWindow(NULL), m_instanceAsWindow(NULL)
 {}
 
 
@@ -662,7 +662,7 @@ wxObject *wxXmlResourceHandler::CreateResource(wxXmlNode *node, wxObject *parent
     wxXmlNode *myNode = m_node;
     wxString myClass = m_class;
     wxObject *myParent = m_parent, *myInstance = m_instance;
-    wxWindow *myParentAW = m_parentAsWindow;
+    wxWindow *myParentAW = m_parentAsWindow, *myInstanceAW = m_instanceAsWindow;
 
     m_instance = instance;
     if (!m_instance && node->HasProp(wxT("subclass")) &&
@@ -692,13 +692,14 @@ wxObject *wxXmlResourceHandler::CreateResource(wxXmlNode *node, wxObject *parent
     m_class = node->GetPropVal(wxT("class"), wxEmptyString);
     m_parent = parent;
     m_parentAsWindow = wxDynamicCast(m_parent, wxWindow);
+    m_instanceAsWindow = wxDynamicCast(m_instance, wxWindow);
 
     wxObject *returned = DoCreateResource();
 
     m_node = myNode;
     m_class = myClass;
     m_parent = myParent; m_parentAsWindow = myParentAW;
-    m_instance = myInstance;
+    m_instance = myInstance; m_instanceAsWindow = myInstanceAW;
 
     return returned;
 }
@@ -787,34 +788,14 @@ wxString wxXmlResourceHandler::GetText(const wxString& param, bool translate)
             else
                 str2 << wxT('&') << *dt;
         }
-        // Remap \n to CR, \r to LF, \t to TAB, \\ to \:
+        // Remap \n to CR, \r to LF, \t to TAB:
         else if (*dt == wxT('\\'))
             switch (*(++dt))
             {
-                case wxT('n'):
-                    str2 << wxT('\n');
-                    break;
-                    
-                case wxT('t'):
-                    str2 << wxT('\t');
-                    break;
-                    
-                case wxT('r'):
-                    str2 << wxT('\r');
-                    break;
-
-                case wxT('\\') :
-                    // "\\" wasn't translated to "\" prior to 2.5.3.0:
-                    if (m_resource->CompareVersion(2,5,3,0) >= 0)
-                    {
-                        str2 << wxT('\\');
-                        break;
-                    }
-                    // else fall-through to default: branch below
-    
-                default:
-                    str2 << wxT('\\') << *dt;
-                    break;
+                case wxT('n') : str2 << wxT('\n'); break;
+                case wxT('t') : str2 << wxT('\t'); break;
+                case wxT('r') : str2 << wxT('\r'); break;
+                default       : str2 << wxT('\\') << *dt; break;
             }
         else str2 << *dt;
     }
@@ -1033,7 +1014,9 @@ wxSize wxXmlResourceHandler::GetSize(const wxString& param)
 
     if (is_dlg)
     {
-        if (m_parentAsWindow)
+        if (m_instanceAsWindow)
+            return wxDLG_UNIT(m_instanceAsWindow, wxSize(sx, sy));
+        else if (m_parentAsWindow)
             return wxDLG_UNIT(m_parentAsWindow, wxSize(sx, sy));
         else
         {
@@ -1072,7 +1055,9 @@ wxCoord wxXmlResourceHandler::GetDimension(const wxString& param, wxCoord defaul
 
     if (is_dlg)
     {
-        if (m_parentAsWindow)
+        if (m_instanceAsWindow)
+            return wxDLG_UNIT(m_instanceAsWindow, wxSize(sx, 0)).x;
+        else if (m_parentAsWindow)
             return wxDLG_UNIT(m_parentAsWindow, wxSize(sx, 0)).x;
         else
         {
@@ -1230,6 +1215,8 @@ static XRCID_record *XRCID_Records[XRCID_TABLE_SIZE] = {NULL};
 
 static int XRCID_Lookup(const wxChar *str_id, int value_if_not_found = -2)
 {
+    static int XRCID_LastID = wxID_HIGHEST;
+
     int index = 0;
 
     for (const wxChar *c = str_id; *c != wxT('\0'); c++) index += (int)*c;
@@ -1264,7 +1251,7 @@ static int XRCID_Lookup(const wxChar *str_id, int value_if_not_found = -2)
         }
         else
         {
-            (*rec_var)->id = wxNewId();
+            (*rec_var)->id = ++XRCID_LastID;
         }
     }
 

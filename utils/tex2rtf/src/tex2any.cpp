@@ -113,7 +113,7 @@ bool            winHelp = false;  // Output in Windows Help format if true, line
 bool            isInteractive = false;
 bool            runTwice = false;
 int             convertMode = TEX_RTF;
-bool            checkCurlyBraces = false;
+bool            checkCurleyBraces = false;
 bool            checkSyntax = false;
 bool            headerRule = false;
 bool            footerRule = false;
@@ -428,8 +428,8 @@ bool readInVerbatim = false;  // Within a verbatim, but not nec. verbatiminput
 // detection of \verb yet.
 // #define CHECK_BRACES 1
 
-unsigned long leftCurly = 0;
-unsigned long rightCurly = 0;
+unsigned long leftCurley = 0;
+unsigned long rightCurley = 0;
 static wxString currentFileName = _T("");
 
 bool read_a_line(wxChar *buf)
@@ -463,22 +463,22 @@ bool read_a_line(wxChar *buf)
     lastChar = ch;
     ch = getc(Inputs[CurrentInputIndex]);
 
-    if (checkCurlyBraces)
+    if (checkCurleyBraces)
     {
         if (ch == '{' && !readInVerbatim && lastChar != _T('\\'))
-           leftCurly++;
+           leftCurley++;
         if (ch == '}' && !readInVerbatim && lastChar != _T('\\'))
         {
-           rightCurly++;
-           if (rightCurly > leftCurly)
+           rightCurley++;
+           if (rightCurley > leftCurley)
            {
                wxString errBuf;
-               errBuf.Printf(_T("An extra right Curly brace ('}') was detected at line %lu inside file %s"), LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
+               errBuf.Printf(_T("An extra right Curley brace ('}') was detected at line %lu inside file %s"), LineNumbers[CurrentInputIndex], (const wxChar*) currentFileName.c_str());
                OnError((wxChar *)errBuf.c_str());
 
-               // Reduce the count of right Curly braces, so the mismatched count
+               // Reduce the count of right Curley braces, so the mismatched count
                // isn't reported on every line that has a '}' after the first mismatch
-               rightCurly--;
+               rightCurley--;
            }
         }
     }
@@ -639,17 +639,17 @@ bool read_a_line(wxChar *buf)
          ch = ' '; // No real end of file
       CurrentInputIndex --;
 
-      if (checkCurlyBraces)
+      if (checkCurleyBraces)
       {
-          if (leftCurly != rightCurly)
+          if (leftCurley != rightCurley)
           {
             wxString errBuf;
-            errBuf.Printf(_T("Curly braces do not match inside file %s\n%lu opens, %lu closes"),
-                          (const wxChar*) currentFileName.c_str(),leftCurly,rightCurly);
+            errBuf.Printf(_T("Curley braces do not match inside file %s\n%lu opens, %lu closes"),
+                          (const wxChar*) currentFileName.c_str(),leftCurley,rightCurley);
             OnError((wxChar *)errBuf.c_str());
           }
-          leftCurly = 0;
-          rightCurly = 0;
+          leftCurley = 0;
+          rightCurley = 0;
       }
 
       if (readingVerbatim)
@@ -849,13 +849,13 @@ bool read_a_line(wxChar *buf)
            wxStrncmp(buf, _T("\\end{toocomplex}"), 16) == 0)
     readInVerbatim = false;
 
-  if (checkCurlyBraces)
+  if (checkCurleyBraces)
   {
-      if (ch == EOF && leftCurly != rightCurly)
+      if (ch == EOF && leftCurley != rightCurley)
       {
         wxString errBuf;
-        errBuf.Printf(_T("Curly braces do not match inside file %s\n%lu opens, %lu closes"),
-            (const wxChar*) currentFileName.c_str(),leftCurly,rightCurly);
+        errBuf.Printf(_T("Curley braces do not match inside file %s\n%lu opens, %lu closes"),
+            (const wxChar*) currentFileName.c_str(),leftCurley,rightCurley);
         OnError((wxChar *)errBuf.c_str());
       }
   }
@@ -901,7 +901,7 @@ bool ParseNewCommand(wxChar *buffer, int *pos)
     int braceCount = 0;
     while (!end)
     {
-      wxChar ch = buffer[*pos];
+      char ch = buffer[*pos];
       if (ch == _T('{'))
         braceCount ++;
       else if (ch == _T('}'))
@@ -942,7 +942,7 @@ void MacroError(wxChar *buffer)
   wxChar macroBuf[200];
   macroBuf[0] = '\\';
   int i = 1;
-  wxChar ch;
+  char ch;
   while (((ch = buffer[i-1]) != '\n') && (ch != 0))
   {
     macroBuf[i] = ch;
@@ -1093,15 +1093,15 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
       }
     }
 
-    wxChar wxCh = buffer[pos];
+    char ch = buffer[pos];
     // End of optional argument -- pretend it's right brace for simplicity
-    if (thisArg->optional && (wxCh == _T(']')))
-      wxCh = _T('}');
+    if (thisArg->optional && (ch == ']'))
+      ch = '}';
 
-    switch (wxCh)
+    switch (ch)
     {
       case 0:
-      case _T('}'):  // End of argument
+      case '}':  // End of argument
       {
         if (buf_ptr > 0)
         {
@@ -1110,10 +1110,10 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
           chunk->value = copystring(BigBuffer);
           children.Append((wxObject *)chunk);
         }
-        if (wxCh == _T('}')) pos ++;
+        if (ch == '}') pos ++;
         return pos;
       }
-      case _T('\\'):
+      case '\\':
       {
         if (buf_ptr > 0)  // Finish off the string we've read so far
         {
@@ -1154,8 +1154,8 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
           bool end = false;
           while (!end)
           {
-            wxChar ch = buffer[pos];
-            if (ch == _T('}'))
+            int ch = buffer[pos];
+            if (ch == '}')
             {
               noBraces --;
               if (noBraces == 0)
@@ -1165,32 +1165,32 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
               }
               else
               {
-                wxTex2RTFBuffer[i] = _T('}');
+                wxTex2RTFBuffer[i] = '}';
                 i ++;
               }
               pos ++;
             }
-            else if (ch == _T('{'))
+            else if (ch == '{')
             {
-              wxTex2RTFBuffer[i] = _T('{');
+              wxTex2RTFBuffer[i] = '{';
               i ++;
               pos ++;
             }
-            else if (ch == _T('\\') && buffer[pos+1] == _T('}'))
+            else if (ch == '\\' && buffer[pos+1] == '}')
             {
-              wxTex2RTFBuffer[i] = _T('}');
+              wxTex2RTFBuffer[i] = '}';
               pos += 2;
               i++;
             }
-            else if (ch == _T('\\') && buffer[pos+1] == _T('{'))
+            else if (ch == '\\' && buffer[pos+1] == '{')
             {
-              wxTex2RTFBuffer[i] = _T('{');
+              wxTex2RTFBuffer[i] = '{';
               pos += 2;
               i++;
             }
             else
             {
-              wxTex2RTFBuffer[i] = ch;
+              wxTex2RTFBuffer[i] = (wxChar)ch;
               pos ++;
               i ++;
               if (ch == 0)
@@ -1218,7 +1218,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
         else if (wxStrncmp(buffer+pos, _T("verb"), 4) == 0)
         {
           pos += 4;
-          if (buffer[pos] == _T('*'))
+          if (buffer[pos] == '*')
             pos ++;
 
           // Find the delimiter character
@@ -1256,8 +1256,8 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
 
           children.Append((wxObject *)chunk);
         }
-        else
-        {
+    else
+    {
           wxChar *env = NULL;
           bool tmpParseToBrace = true;
           TexMacroDef *def = MatchMacro(buffer, &pos, &env, &tmpParseToBrace);
@@ -1310,10 +1310,10 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
       }
       // Parse constructs like {\bf thing} as if they were
       // \bf{thing}
-      case _T('{'):
+      case '{':
       {
         pos ++;
-        if (buffer[pos] == _T('\\'))
+        if (buffer[pos] == '\\')
         {
           if (buf_ptr > 0)
           {
@@ -1363,7 +1363,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
           }
         }
         else
-        {
+    {
          /*
           * If all else fails, we assume that we have
           * a pair of braces on their own, so return a `dummy' macro
@@ -1396,10 +1396,10 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
           arg->macroId = chunk->macroId;
 
           pos = ParseArg(arg, arg->children, buffer, pos, NULL, true, customMacroArgs);
-        }
+    }
         break;
       }
-      case _T('$'):
+      case '$':
       {
         if (buf_ptr > 0)
         {
@@ -1412,7 +1412,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
 
         pos ++;
 
-        if (buffer[pos] == _T('$'))
+        if (buffer[pos] == '$')
         {
           TexChunk *chunk = new TexChunk(CHUNK_TYPE_MACRO);
           chunk->no_args = 0;
@@ -1431,7 +1431,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
         }
         break;
       }
-      case _T('~'):
+      case '~':
       {
         if (buf_ptr > 0)
         {
@@ -1450,7 +1450,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
         children.Append((wxObject *)chunk);
         break;
       }
-      case _T('#'): // Either treat as a special TeX character or as a macro arg
+      case '#': // Either treat as a special TeX character or as a macro arg
       {
         if (buf_ptr > 0)
         {
@@ -1486,12 +1486,12 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
         }
         break;
       }
-      case _T('&'):
+      case '&':
       {
         // Remove white space before and after the ampersand,
         // since this is probably a table column separator with
         // some convenient -- but useless -- white space in the text.
-        while ((buf_ptr > 0) && ((BigBuffer[buf_ptr-1] == _T(' ')) || (BigBuffer[buf_ptr-1] == 9)))
+        while ((buf_ptr > 0) && ((BigBuffer[buf_ptr-1] == ' ') || (BigBuffer[buf_ptr-1] == 9)))
           buf_ptr --;
 
         if (buf_ptr > 0)
@@ -1505,7 +1505,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
 
         pos ++;
 
-        while (buffer[pos] == _T(' ') || buffer[pos] == 9)
+        while (buffer[pos] == ' ' || buffer[pos] == 9)
           pos ++;
 
         TexChunk *chunk = new TexChunk(CHUNK_TYPE_MACRO);
@@ -1516,13 +1516,13 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
         break;
       }
       // Eliminate end-of-line comment
-      case _T('%'):
+      case '%':
       {
-        wxCh = buffer[pos];
-        while (wxCh != 10 && wxCh != 13 && wxCh != 0)
+        ch = buffer[pos];
+        while (ch != 10 && ch != 13 && ch != 0)
         {
           pos ++;
-          wxCh = buffer[pos];
+          ch = buffer[pos];
         }
         if (buffer[pos] == 10 || buffer[pos] == 13)
         {
@@ -1534,7 +1534,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
       // Eliminate tab
       case 9:
       {
-        BigBuffer[buf_ptr] = _T(' ');
+        BigBuffer[buf_ptr] = ' ';
         BigBuffer[buf_ptr+1] = 0;
         buf_ptr ++;
         pos ++;
@@ -1542,7 +1542,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, wxChar *buffer, int pos, wxCha
       }
       default:
       {
-        BigBuffer[buf_ptr] = wxCh;
+        BigBuffer[buf_ptr] = ch;
         BigBuffer[buf_ptr+1] = 0;
         buf_ptr ++;
         pos ++;
@@ -2713,8 +2713,7 @@ void DefaultOnMacro(int macroId, int no_args, bool start)
       break;
     case ltPOUNDS:
       if (start)
-        // FIXME: this is valid only if the output is iso-8859-1
-        TexOutput(wxString::FromAscii("£"), true);
+        TexOutput(_T("£"), true);
       break;
     case ltSPECIALDOUBLEDOLLAR:  // Interpret as center
       OnMacro(ltCENTER, no_args, start);

@@ -110,6 +110,10 @@ wxImage wxNullImage;
 
 IMPLEMENT_DYNAMIC_CLASS(wxImage, wxObject)
 
+wxImage::wxImage()
+{
+}
+
 wxImage::wxImage( int width, int height, bool clear )
 {
     Create( width, height, clear );
@@ -1481,7 +1485,7 @@ bool wxImageHandler::CanRead( const wxString& name )
 
 bool wxImageHandler::CallDoCanRead(wxInputStream& stream)
 {
-    wxFileSize_t posOld = stream.TellI();
+    off_t posOld = stream.TellI();
     if ( posOld == wxInvalidOffset )
     {
         // can't test unseekable stream

@@ -468,7 +468,7 @@ struct WXDLLEXPORT wxPixelDataOut<wxBitmap>
         // the type of the class we're working with
         typedef wxBitmap ImageType;
 
-        class WXDLLEXPORT Iterator
+        class Iterator
         {
         public:
             // the pixel format we use

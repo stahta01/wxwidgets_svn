@@ -95,7 +95,7 @@
     #include <sys/stat.h>
 #endif
 
-#if defined(__WXMSW__) && !defined(__PALMOS__)
+#ifdef __WXMSW__
     #include "wx/msw/private.h"
 #endif
 
@@ -287,8 +287,13 @@ const wxChar *wxGetInstallPrefix()
 
 wxString wxGetDataDir()
 {
-    wxString dir = wxGetInstallPrefix();
-    dir <<  wxFILE_SEP_PATH << wxT("share") << wxFILE_SEP_PATH << wxT("wx");
+    wxString format = wxGetInstallPrefix();
+    format <<  wxFILE_SEP_PATH
+           << wxT("share") << wxFILE_SEP_PATH
+           << wxT("wx") << wxFILE_SEP_PATH
+           << wxT("%i.%i");
+    wxString dir;
+    dir.Printf(format.c_str(), wxMAJOR_VERSION, wxMINOR_VERSION);
     return dir;
 }
 
@@ -547,13 +552,10 @@ bool wxYieldIfNeeded()
 // Id generation
 static long wxCurrentId = 100;
 
-long wxNewId()
+long
+wxNewId (void)
 {
-    // skip the part of IDs space that contains hard-coded values:
-    if (wxCurrentId == wxID_LOWEST)
-        wxCurrentId = wxID_HIGHEST + 1;
-
-    return wxCurrentId++;
+  return wxCurrentId++;
 }
 
 long
@@ -809,19 +811,11 @@ wxString wxGetTextFromUser(const wxString& message, const wxString& caption,
 wxString wxGetPasswordFromUser(const wxString& message,
                                const wxString& caption,
                                const wxString& defaultValue,
-                               wxWindow *parent,
-                               wxCoord x, wxCoord y, bool centre )
+                               wxWindow *parent)
 {
     wxString str;
-    long style = wxTextEntryDialogStyle;
-
-    if (centre)
-        style |= wxCENTRE;
-    else
-        style &= ~wxCENTRE;
-
-    wxPasswordEntryDialog dialog(parent, message, caption, defaultValue,
-                             style, wxPoint(x, y));
+    wxTextEntryDialog dialog(parent, message, caption, defaultValue,
+                             wxOK | wxCANCEL | wxTE_PASSWORD);
     if ( dialog.ShowModal() == wxID_OK )
     {
         str = dialog.GetValue();

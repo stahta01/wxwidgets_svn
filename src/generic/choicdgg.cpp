@@ -218,9 +218,8 @@ size_t wxGetMultipleChoices(wxArrayInt& selections,
 {
     wxMultiChoiceDialog dialog(parent, message, caption, n, choices);
 
-    // call this even if selections array is empty and this then (correctly)
-    // deselects the first item which is selected by default
-    dialog.SetSelections(selections);
+    if ( !selections.IsEmpty() )
+        dialog.SetSelections(selections);
 
     if ( dialog.ShowModal() == wxID_OK )
         selections = dialog.GetSelections();

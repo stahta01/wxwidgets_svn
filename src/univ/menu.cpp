@@ -958,7 +958,7 @@ bool wxPopupMenuWindow::ProcessKeyDown(int key)
 
         default:
             // look for the menu item starting with this letter
-            if ( wxIsalnum((wxChar)key) )
+            if ( wxIsalnum(key) )
             {
                 // we want to start from the item after this one because
                 // if we're already on the item with the given accel we want to
@@ -2284,7 +2284,7 @@ void wxMenuBar::OnKeyDown(wxKeyEvent& event)
 
 int wxMenuBar::FindNextItemForAccel(int idxStart, int key, bool *unique) const
 {
-    if ( !wxIsalnum((wxChar)key) )
+    if ( !wxIsalnum(key) )
     {
         // we only support letters/digits as accels
         return -1;

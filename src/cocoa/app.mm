@@ -71,16 +71,13 @@ WX_IMPLEMENT_POSER(wxPoserNSApplication);
     the queue to ensure this method will return.
     See wxEventLoop::Exit() for more information.
 
-    This overridden method calls the superclass method with an untilDate
-    parameter that indicates nil should be returned if there are no pending
-    events.  That is, nextEventMatchingMask: should not wait for an event.
-    If nil is returned then idle event processing occurs until the user
-    does not request anymore idle events or until a real event comes through.
-
-    RN: Even though Apple documentation states that nil can be passed in place 
-    of [NSDate distantPast] in the untilDate parameter, this causes Jaguar (10.2)
-    to get stuck in some kind of loop deep within nextEventMatchingMask:, thus we 
-    need to explicitly pass [NSDate distantPast] instead.
+    RN: We used to use nil as the untilDate in previous versions since nil
+    is a shorter and more concise way of specifying an infinite amount of
+    time than [NSDate distantPast].  However, Apple neglects to mention in
+    their documentation that nil is not handled correctly in OSX 10.2
+    (and possibly lower) and when the call is reached the system comes to
+    a screeching halt, therefore we need to specify [NSDate distantPast]
+    explicitly so that wxCocoa will work correctly in OSX 10.2.
 */
    
 - (NSEvent *)nextEventMatchingMask:(unsigned int)mask untilDate:(NSDate *)expiration inMode:(NSString *)mode dequeue:(BOOL)flag

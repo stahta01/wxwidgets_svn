@@ -261,12 +261,12 @@ private:
 
     // tree ctrl images for the normal, selected, expanded and
     // expanded+selected states
-    int                 m_images[wxTreeItemIcon_Max];
+    short               m_images[wxTreeItemIcon_Max];
 
     wxCoord             m_x;            // (virtual) offset from top
     wxCoord             m_y;            // (virtual) offset from left
-    int                 m_width;        // width of this item
-    int                 m_height;       // height of this item
+    short               m_width;        // width of this item
+    unsigned char       m_height;       // height of this item
 
     // use bitfields to save size
     int                 m_isCollapsed :1;
@@ -765,7 +765,7 @@ void wxGenericTreeCtrl::Init()
 
     m_lastOnSame = false;
 
-#ifdef __WXMAC_CARBON__ 
+#if defined( __WXMAC__ ) && __WXMAC_CARBON__
     m_normalFont.MacCreateThemeFont( kThemeViewsFont ) ;
 #else
     m_normalFont = wxSystemSettings::GetFont( wxSYS_DEFAULT_GUI_FONT );

@@ -135,7 +135,7 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
-    if ( style & wxCENTRE )
+    if ( ( style & wxCENTRE ) == wxCENTRE )
         Centre( wxBOTH );
 
     m_textctrl->SetSelection(-1, -1);
@@ -180,23 +180,5 @@ void wxTextEntryDialog::SetTextValidator( wxTextValidator& validator )
 
 #endif
   // wxUSE_VALIDATORS
-
-// ----------------------------------------------------------------------------
-// wxPasswordEntryDialog
-// ----------------------------------------------------------------------------
-
-IMPLEMENT_CLASS(wxPasswordEntryDialog, wxTextEntryDialog)
-
-wxPasswordEntryDialog::wxPasswordEntryDialog(wxWindow *parent,
-                                     const wxString& message,
-                                     const wxString& caption,
-                                     const wxString& value,
-                                     long style,
-                                     const wxPoint& pos)
-                 : wxTextEntryDialog(parent, message, caption, value,
-                                     style | wxTE_PASSWORD, pos)
-{
-    // Only change from wxTextEntryDialog is the password style
-}
 
 #endif // wxUSE_TEXTDLG

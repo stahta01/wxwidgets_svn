@@ -236,12 +236,6 @@ dnl ### begin block 1_COND_PLATFORM_MACOSX_1 ###
         COND_PLATFORM_MACOSX_1=""
     fi
     AC_SUBST(COND_PLATFORM_MACOSX_1)
-dnl ### begin block 1_COND_PLATFORM_MACOSX_1_TOOLKIT_ ###
-    COND_PLATFORM_MACOSX_1_TOOLKIT_="#"
-    if test "x$PLATFORM_MACOSX" = "x1" -a "x$TOOLKIT" = "x" ; then
-        COND_PLATFORM_MACOSX_1_TOOLKIT_=""
-    fi
-    AC_SUBST(COND_PLATFORM_MACOSX_1_TOOLKIT_)
 dnl ### begin block 1_COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA ###
     COND_PLATFORM_MACOSX_1_TOOLKIT_COCOA="#"
     if test "x$PLATFORM_MACOSX" = "x1" -a "x$TOOLKIT" = "xCOCOA" ; then
@@ -284,12 +278,6 @@ dnl ### begin block 1_COND_PLATFORM_MACOSX_1_USE_SOVERSION_1 ###
         COND_PLATFORM_MACOSX_1_USE_SOVERSION_1=""
     fi
     AC_SUBST(COND_PLATFORM_MACOSX_1_USE_SOVERSION_1)
-dnl ### begin block 1_COND_PLATFORM_MACOS_1 ###
-    COND_PLATFORM_MACOS_1="#"
-    if test "x$PLATFORM_MACOS" = "x1" ; then
-        COND_PLATFORM_MACOS_1=""
-    fi
-    AC_SUBST(COND_PLATFORM_MACOS_1)
 dnl ### begin block 1_COND_PLATFORM_MAC_1 ###
     COND_PLATFORM_MAC_1="#"
     if test "x$PLATFORM_MAC" = "x1" ; then
@@ -422,24 +410,12 @@ dnl ### begin block 1_COND_SHARED_1_USE_GUI_1_USE_OPENGL_1 ###
         COND_SHARED_1_USE_GUI_1_USE_OPENGL_1=""
     fi
     AC_SUBST(COND_SHARED_1_USE_GUI_1_USE_OPENGL_1)
-dnl ### begin block 1_COND_TOOLKIT_ ###
-    COND_TOOLKIT_="#"
-    if test "x$TOOLKIT" = "x" ; then
-        COND_TOOLKIT_=""
-    fi
-    AC_SUBST(COND_TOOLKIT_)
 dnl ### begin block 1_COND_TOOLKIT_COCOA ###
     COND_TOOLKIT_COCOA="#"
     if test "x$TOOLKIT" = "xCOCOA" ; then
         COND_TOOLKIT_COCOA=""
     fi
     AC_SUBST(COND_TOOLKIT_COCOA)
-dnl ### begin block 1_COND_TOOLKIT_COCOA_USE_GUI_1 ###
-    COND_TOOLKIT_COCOA_USE_GUI_1="#"
-    if test "x$TOOLKIT" = "xCOCOA" -a "x$USE_GUI" = "x1" ; then
-        COND_TOOLKIT_COCOA_USE_GUI_1=""
-    fi
-    AC_SUBST(COND_TOOLKIT_COCOA_USE_GUI_1)
 dnl ### begin block 1_COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0 ###
     COND_TOOLKIT_COCOA_USE_GUI_1_WXUNIV_0="#"
     if test "x$TOOLKIT" = "xCOCOA" -a "x$USE_GUI" = "x1" -a "x$WXUNIV" = "x0" ; then
@@ -644,12 +620,6 @@ dnl ### begin block 1_COND_USE_ODBC_1 ###
         COND_USE_ODBC_1=""
     fi
     AC_SUBST(COND_USE_ODBC_1)
-dnl ### begin block 1_COND_USE_OPENGL_1 ###
-    COND_USE_OPENGL_1="#"
-    if test "x$USE_OPENGL" = "x1" ; then
-        COND_USE_OPENGL_1=""
-    fi
-    AC_SUBST(COND_USE_OPENGL_1)
 dnl ### begin block 1_COND_USE_PLUGINS_0 ###
     COND_USE_PLUGINS_0="#"
     if test "x$USE_PLUGINS" = "x0" ; then

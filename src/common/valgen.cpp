@@ -100,6 +100,10 @@ bool wxGenericValidator::Copy(const wxGenericValidator& val)
     return true;
 }
 
+wxGenericValidator::~wxGenericValidator()
+{
+}
+
 // Called to transfer data to the window
 bool wxGenericValidator::TransferToWindow(void)
 {
@@ -225,7 +229,7 @@ bool wxGenericValidator::TransferToWindow(void)
             {
                 pControl->SetStringSelection(* m_pString);
             }
-            if ((m_validatorWindow->GetWindowStyle() & wxCB_READONLY) == 0)
+            else
             {
                 pControl->SetValue(* m_pString);
             }
@@ -450,10 +454,7 @@ bool wxGenericValidator::TransferFromWindow(void)
     }
     else if (m_pString)
     {
-        if (m_validatorWindow->GetWindowStyle() & wxCB_READONLY)
-            *m_pString = pControl->GetStringSelection();
-        else
-            *m_pString = pControl->GetValue();
+        *m_pString = pControl->GetValue();
         return true;
     }
   } else

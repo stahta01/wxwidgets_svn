@@ -83,11 +83,6 @@
     }
 #endif
 
-#if wxUSE_UNICODE
-#define SQL_C_WXCHAR SQL_C_WCHAR
-#else
-#define SQL_C_WXCHAR SQL_C_CHAR
-#endif
 
 typedef float SFLOAT;
 typedef double SDOUBLE;
@@ -367,10 +362,10 @@ public:
     SWORD          i_sqlDataType;
 
     wxDbColFor();
-    ~wxDbColFor(){}
+    ~wxDbColFor();
 
     void           Initialize();
-    int            Format(int Nation, int dbDataType, SWORD sqlDataType, short columnLength, short decimalDigits);
+    int            Format(int Nation, int dbDataType, SWORD sqlDataType, short columnSize, short decimalDigits);
 };
 
 
@@ -383,8 +378,8 @@ public:
     wxChar       colName[DB_MAX_COLUMN_NAME_LEN+1];
     SWORD        sqlDataType;
     wxChar       typeName[128+1];
-    SWORD        columnLength;
-    SWORD        bufferSize;
+    SWORD        columnSize;
+    SWORD        bufferLength;
     short        decimalDigits;
     short        numPrecRadix;
     short        nullable;
@@ -624,7 +619,6 @@ public:
     bool         CreateView(const wxString &viewName, const wxString &colList, const wxString &pSqlStmt, bool attemptDrop=true);
     bool         DropView(const wxString &viewName);
     bool         ExecSql(const wxString &pSqlStmt);
-    bool         ExecSql(const wxString &pSqlStmt, wxDbColInf** columns, short& numcols);
     bool         GetNext(void);
     bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SDWORD FAR *cbReturned);
     bool         Grant(int privileges, const wxString &tableName, const wxString &userList = wxT("PUBLIC"));
@@ -756,8 +750,8 @@ int WXDLLEXPORT wxDbCreateDataSource(const wxString &driverName, const wxString 
 // the first time using SQL_FETCH_FIRST.  Continue to call it
 // using SQL_FETCH_NEXT until you've exhausted the list.
 bool WXDLLIMPEXP_ODBC
-wxDbGetDataSource(HENV henv, wxChar *Dsn, SWORD DsnMaxLength, wxChar *DsDesc,
-                  SWORD DsDescMaxLength, UWORD direction = SQL_FETCH_NEXT);
+wxDbGetDataSource(HENV henv, wxChar *Dsn, SWORD DsnMax, wxChar *DsDesc,
+                  SWORD DsDescMax, UWORD direction = SQL_FETCH_NEXT);
 
 
 // Change this to 0 to remove use of all deprecated functions
@@ -797,7 +791,7 @@ int   WXDLLIMPEXP_ODBC  NumberDbConnectionsInUse(void);
 bool SqlLog(sqlLog state, const wxChar *filename = SQL_LOG_FILENAME);
 
 bool WXDLLIMPEXP_ODBC
-GetDataSource(HENV henv, char *Dsn, SWORD DsnMaxLength, char *DsDesc, SWORD DsDescMaxLength,
+GetDataSource(HENV henv, char *Dsn, SWORD DsnMax, char *DsDesc, SWORD DsDescMax,
               UWORD direction = SQL_FETCH_NEXT);
 
 #endif  // Deprecated structures/classes/functions

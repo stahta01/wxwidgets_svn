@@ -12,9 +12,9 @@
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
     #include "wx/log.h"
+    #include "wx/tooltip.h"
     #include "wx/window.h"
 #endif //WX_PRECOMP
-#include "wx/tooltip.h"
 
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
@@ -26,17 +26,14 @@
 #import <AppKit/NSClipView.h>
 #import <Foundation/NSException.h>
 
+#include <objc/objc-runtime.h>
+
 // Turn this on to paint green over the dummy views for debugging
 #undef WXCOCOA_FILL_DUMMY_VIEW
 
 #ifdef WXCOCOA_FILL_DUMMY_VIEW
 #import <AppKit/NSBezierPath.h>
 #endif //def WXCOCOA_FILL_DUMMY_VIEW
-
-// A category for methods that are only present in Panther's SDK
-@interface NSView(wxNSViewPrePantherCompatibility)
-- (void)getRectsBeingDrawn:(const NSRect **)rects count:(int *)count;
-@end
 
 // ========================================================================
 // wxWindowCocoaHider
@@ -359,8 +356,12 @@ bool wxWindowCocoa::Cocoa_drawRect(const NSRect &rect)
     const NSRect *rects = &rect; // The bounding box of the region
     int countRects = 1;
     // Try replacing the larger rectangle with a list of smaller ones:
-    if ([GetNSView() respondsToSelector:@selector(getRectsBeingDrawn:count:)])
-        [GetNSView() getRectsBeingDrawn:&rects count:&countRects];
+NS_DURING
+    //getRectsBeingDrawn:count: is a optimization that is only available on
+    //Panthar (10.3) and higher.  Check to see if it supports it -
+    if ( [GetNSView() respondsToSelector:@selector(getRectsBeingDrawn:count:)] )    objc_msgSend(GetNSView(),@selector(getRectsBeingDrawn:count:),&rects,&countRects);
+NS_HANDLER
+NS_ENDHANDLER
     m_updateRegion = wxRegion(rects,countRects);
 
     wxPaintEvent event(m_windowId);
@@ -694,11 +695,6 @@ WXWidget wxWindow::GetHandle() const
     return m_cocoaNSView;
 }
 
-wxWindow* wxWindow::GetWxWindow() const
-{
-    return (wxWindow*) this;
-}
-
 void wxWindow::Refresh(bool eraseBack, const wxRect *rect)
 {
     [m_cocoaNSView setNeedsDisplay:YES];
@@ -706,14 +702,7 @@ void wxWindow::Refresh(bool eraseBack, const wxRect *rect)
 
 void wxWindow::SetFocus()
 {
-#ifdef __WXDEBUG__
-    bool bOK = 
-#endif
-        [GetNSView() lockFocusIfCanDraw];
-        
-    //Note that the normal lockFocus works on hidden and minimized windows
-    //and has no return value - which probably isn't what we want
-    wxASSERT(bOK);
+    // TODO
 }
 
 void wxWindow::DoCaptureMouse()
@@ -894,12 +883,8 @@ bool wxWindow::DoPopupMenu(wxMenu *menu, int x, int y)
 // Get the window with the focus
 wxWindow *wxWindowBase::DoFindFocus()
 {
-    wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa([NSView focusView]);
-    
-    if (!win)
-        return NULL;
-        
-    return win->GetWxWindow();
+    // TODO
+    return NULL;
 }
 
 /* static */ wxWindow *wxWindowBase::GetCapture()

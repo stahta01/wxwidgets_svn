@@ -15,8 +15,6 @@
 
 #include "wx/gauge.h"
 
-#if wxUSE_GAUGE 
-
 #if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
 #endif
@@ -80,6 +78,4 @@ int wxGauge::GetValue() const
 */
     return m_gaugePos ;
 }
-
-#endif // wxUSE_GAUGE 
 

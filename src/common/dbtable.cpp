@@ -434,7 +434,7 @@ void wxDbTable::setCbValueForColumn(int columnIndex)
             if (colDefs[columnIndex].Null)
                 colDefs[columnIndex].CbValue = SQL_NULL_DATA;
             else
-                if (colDefs[columnIndex].SqlCtype == SQL_C_WXCHAR)
+                if (colDefs[columnIndex].SqlCtype == SQL_C_CHAR)
                     colDefs[columnIndex].CbValue = SQL_NTS;
                 else
                     colDefs[columnIndex].CbValue = SQL_LEN_DATA_AT_EXEC(colDefs[columnIndex].SzDataObj);
@@ -779,7 +779,7 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
         // reliable!
         if (// *(pDb->dbInf.accessibleTables) == 'N' &&
             !pDb->TablePrivileges(tableName,wxT("SELECT"), pDb->GetUsername(), pDb->GetUsername(), tablePath))
-            s = wxT("Connecting user does not have sufficient privileges to access this table.\n");
+            s = wxT("Current logged in user does not have sufficient privileges to access this table.\n");
     }
 
     if (!s.IsEmpty())
@@ -998,7 +998,7 @@ void wxDbTable::BuildDeleteStmt(wxString &pSqlStmt, int typeOfDel, const wxStrin
                 // Get the ROWID value.  If not successful retreiving the ROWID,
                 // simply fall down through the code and build the WHERE clause
                 // based on the key fields.
-                if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
+                if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
                 {
                     pSqlStmt += wxT("ROWID = '");
                     pSqlStmt += rowid;
@@ -1216,7 +1216,7 @@ void wxDbTable::BuildUpdateStmt(wxString &pSqlStmt, int typeOfUpd, const wxStrin
                 // Get the ROWID value.  If not successful retreiving the ROWID,
                 // simply fall down through the code and build the WHERE clause
                 // based on the key fields.
-                if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
+                if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
                 {
                     pSqlStmt += wxT("ROWID = '");
                     pSqlStmt += rowid;
@@ -1283,7 +1283,7 @@ void wxDbTable::BuildWhereClause(wxString &pWhereClause, int typeOfWhere,
             }
             pWhereClause += pDb->SQLColumnName(colDefs[colNo].ColName);
 
-            if (useLikeComparison && (colDefs[colNo].SqlCtype == SQL_C_WXCHAR))
+            if (useLikeComparison && (colDefs[colNo].SqlCtype == SQL_C_CHAR))
                 pWhereClause += wxT(" LIKE ");
             else
                 pWhereClause += wxT(" = ");
@@ -1291,8 +1291,6 @@ void wxDbTable::BuildWhereClause(wxString &pWhereClause, int typeOfWhere,
             switch(colDefs[colNo].SqlCtype)
             {
                 case SQL_C_CHAR:
-                case SQL_C_WCHAR:
-                //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
                     colValue.Printf(wxT("'%s'"), (UCHAR FAR *) colDefs[colNo].PtrDataObj);
                     break;
                 case SQL_C_SHORT:
@@ -1397,7 +1395,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         switch(colDefs[i].DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
-                cout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << (int)(colDefs[i].SzDataObj / sizeof(wxChar)) << wxT(")");
+                cout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << colDefs[i].SzDataObj << wxT(")");
                 break;
             case DB_DATA_TYPE_INTEGER:
                 cout << pDb->GetTypeInfInteger().TypeName;
@@ -1459,7 +1457,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
 //            colDefs[i].DbDataType == DB_DATA_TYPE_BLOB)
         {
             wxString s;
-            s.Printf(wxT("(%d)"), (int)(colDefs[i].SzDataObj / sizeof(wxChar)));
+            s.Printf(wxT("(%d)"), colDefs[i].SzDataObj);
             sqlStmt += s;
         }
 
@@ -1533,7 +1531,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
                     colDefs[i].DbDataType ==  DB_DATA_TYPE_VARCHAR)
                 {
                     wxString s;
-                    s.Printf(wxT("(%d)"), (int)(colDefs[i].SzDataObj / sizeof(wxChar)));
+                    s.Printf(wxT("(%d)"), colDefs[i].SzDataObj);
                     sqlStmt += s;
                 }
             }
@@ -1675,7 +1673,7 @@ bool wxDbTable::CreateIndex(const wxString &idxName, bool unique, UWORD noIdxCol
             if (found)
             {
                 ok = pDb->ModifyColumn(tableName, pIdxDefs[i].ColName,
-                                        colDefs[j].DbDataType, (int)(colDefs[j].SzDataObj / sizeof(wxChar)),
+                                        colDefs[j].DbDataType, colDefs[j].SzDataObj,
                                         wxT("NOT NULL"));
 
                 if (!ok)
@@ -1737,7 +1735,7 @@ bool wxDbTable::CreateIndex(const wxString &idxName, bool unique, UWORD noIdxCol
             if ( colDefs[j].DbDataType ==  DB_DATA_TYPE_VARCHAR)
             {
                 wxString s;
-                s.Printf(wxT("(%d)"), (int)(colDefs[i].SzDataObj / sizeof(wxChar)));
+                s.Printf(wxT("(%d)"), colDefs[i].SzDataObj);
                 sqlStmt += s;
             }
         }
@@ -2092,8 +2090,6 @@ bool wxDbTable::IsColNull(UWORD colNo) const
     switch(colDefs[colNo].SqlCtype)
     {
         case SQL_C_CHAR:
-        case SQL_C_WCHAR:
-        //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
             return(((UCHAR FAR *) colDefs[colNo].PtrDataObj)[0] == 0);
         case SQL_C_SSHORT:
             return((  *((SWORD *) colDefs[colNo].PtrDataObj))   == 0);
@@ -2177,8 +2173,6 @@ void wxDbTable::ClearMemberVar(UWORD colNo, bool setToNull)
     switch(colDefs[colNo].SqlCtype)
     {
         case SQL_C_CHAR:
-        case SQL_C_WCHAR:
-        //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
             ((UCHAR FAR *) colDefs[colNo].PtrDataObj)[0]    = 0;
             break;
         case SQL_C_SSHORT:
@@ -2277,7 +2271,7 @@ void wxDbTable::SetColDefs(UWORD index, const wxString &fieldName, int dataType,
     colDefs[index].DbDataType       = dataType;
     colDefs[index].PtrDataObj       = pData;
     colDefs[index].SqlCtype         = cType;
-    colDefs[index].SzDataObj        = size;  //TODO: glt ??? * sizeof(wxChar) ???
+    colDefs[index].SzDataObj        = size;
     colDefs[index].KeyField         = keyField;
     colDefs[index].DerivedCol       = derivedCol;
     // Derived columns by definition would NOT be "Insertable" or "Updateable"
@@ -2315,13 +2309,13 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
             switch (pColInfs[index].dbDataType)
             {
                 case DB_DATA_TYPE_VARCHAR:
-                   pColDataPtrs[index].PtrDataObj = new wxChar[pColInfs[index].bufferSize+(1*sizeof(wxChar))];
-                   pColDataPtrs[index].SzDataObj  = pColInfs[index].bufferSize+(1*sizeof(wxChar));
-                   pColDataPtrs[index].SqlCtype   = SQL_C_WXCHAR;
+                   pColDataPtrs[index].PtrDataObj = new wxChar[pColInfs[index].bufferLength+1];
+                   pColDataPtrs[index].SzDataObj  = pColInfs[index].columnSize;
+                   pColDataPtrs[index].SqlCtype   = SQL_C_CHAR;
                    break;
                 case DB_DATA_TYPE_INTEGER:
                     // Can be long or short
-                    if (pColInfs[index].bufferSize == sizeof(long))
+                    if (pColInfs[index].bufferLength == sizeof(long))
                     {
                       pColDataPtrs[index].PtrDataObj = new long;
                       pColDataPtrs[index].SzDataObj  = sizeof(long);
@@ -2336,7 +2330,7 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
                     break;
                 case DB_DATA_TYPE_FLOAT:
                     // Can be float or double
-                    if (pColInfs[index].bufferSize == sizeof(float))
+                    if (pColInfs[index].bufferLength == sizeof(float))
                     {
                         pColDataPtrs[index].PtrDataObj = new float;
                         pColDataPtrs[index].SzDataObj  = sizeof(float);
@@ -2489,12 +2483,12 @@ bool wxDbTable::Refresh(void)
     if (CanUpdByROWID())
     {
         SDWORD cb;
-        wxChar rowid[wxDB_ROWID_LEN+1];
+        wxChar   rowid[wxDB_ROWID_LEN+1];
 
         // Get the ROWID value.  If not successful retreiving the ROWID,
         // simply fall down through the code and build the WHERE clause
         // based on the key fields.
-        if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
+        if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
         {
             whereClause += pDb->SQLTableName(queryTableName);
 //            whereClause += queryTableName;
@@ -2745,7 +2739,7 @@ void wxDbTable::SetCol(const int colNo, const wxVariant val)
             case SQL_VARCHAR:
                 csstrncpyt((wxChar *)(colDefs[colNo].PtrDataObj),
                            val.GetString().c_str(),
-                           colDefs[colNo].SzDataObj-1);  //TODO: glt ??? * sizeof(wxChar) ???
+                           colDefs[colNo].SzDataObj-1);
                 break;
             case SQL_C_LONG:
             case SQL_C_SLONG:

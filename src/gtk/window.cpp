@@ -230,12 +230,12 @@ static GdkGC *g_eraseGC = NULL;
 static wxWindowGTK  *g_captureWindow = (wxWindowGTK*) NULL;
 static bool g_captureWindowHasMouse = FALSE;
 
-wxWindowGTK  *g_focusWindow = (wxWindowGTK*) NULL;
+/* extern */ wxWindowGTK  *g_focusWindow = (wxWindowGTK*) NULL;
 
 // the last window which had the focus - this is normally never NULL (except
 // if we never had focus at all) as even when g_focusWindow is NULL it still
 // keeps its previous value
-wxWindowGTK *g_focusWindowLast = (wxWindowGTK*) NULL;
+static wxWindowGTK *g_focusWindowLast = (wxWindowGTK*) NULL;
 
 // If a window get the focus set but has not been realized
 // yet, defer setting the focus to idle time.
@@ -967,9 +967,6 @@ static void wxFillOtherKeyEventFields(wxKeyEvent& event,
     event.m_scanCode = gdk_event->keyval;
     event.m_rawCode = (wxUint32) gdk_event->keyval;
     event.m_rawFlags = 0;
-#if wxUSE_UNICODE
-    event.m_uniChar = gdk_keyval_to_unicode(gdk_event->keyval);
-#endif
     event.m_x = x;
     event.m_y = y;
     event.SetEventObject( win );
@@ -2046,11 +2043,11 @@ static gint gtk_window_focus_out_callback( GtkWidget *widget, GdkEventFocus *gdk
         wxFocusEvent event( wxEVT_KILL_FOCUS, win->GetId() );
         event.SetEventObject( win );
 
-        // even if we did process the event in wx code, still let GTK itself
-        // process it too as otherwise bad things happen, especially in GTK2
-        // where the text control simply aborts the program if it doesn't get
-        // the matching focus out event
-        (void)win->GetEventHandler()->ProcessEvent( event );
+        if (win->GetEventHandler()->ProcessEvent( event ))
+        {
+            gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "focus_out_event" );
+            return TRUE;
+        }
     }
 
     return FALSE;

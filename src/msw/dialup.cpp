@@ -1228,8 +1228,7 @@ static DWORD wxRasMonitorThread(wxRasThreadData *data)
                 // using wxLogLastError() from here is dangerous: we risk to
                 // deadlock the main thread if wxLog sends output to GUI
                 DWORD err = GetLastError();
-                wxMessageOutputDebug dbg;
-                dbg.Printf
+                wxMessageOutputDebug().Printf
                 (
                     wxT("WaitForMultipleObjects(RasMonitor) failed: 0x%08lx (%s)"),
                     err,

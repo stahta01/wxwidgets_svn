@@ -134,9 +134,7 @@ public:
 
 // NB: test for __UNIX__ before __WXMAC__ as under Darwin we want to use the
 //     Unix code (and otherwise __UNIX__ wouldn't be defined)
-#if defined(__PALMOS__)
-    #include "wx/palmos/apptbase.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
     #include "wx/msw/apptbase.h"
 #elif defined(__UNIX__) && !defined(__EMX__)
     #include "wx/unix/apptbase.h"
@@ -219,9 +217,7 @@ public:
 // include the platform-specific version of the classes above
 // ----------------------------------------------------------------------------
 
-#if defined(__PALMOS__)
-    #include "wx/palmos/apptrait.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
     #include "wx/msw/apptrait.h"
 #elif defined(__UNIX__) && !defined(__EMX__)
     #include "wx/unix/apptrait.h"

@@ -277,7 +277,7 @@ bool wxSingleInstanceCheckerImpl::Create(const wxString& name)
     }
 
     char buf[256];
-    wxFileSize_t count = file.Read(buf, WXSIZEOF(buf));
+    off_t count = file.Read(buf, WXSIZEOF(buf));
     if ( count == wxInvalidOffset )
     {
         wxLogError(_("Failed to read PID from lock file."));

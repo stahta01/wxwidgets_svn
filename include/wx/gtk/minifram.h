@@ -56,7 +56,6 @@ public:
             long style = wxDEFAULT_FRAME_STYLE | wxTINY_CAPTION_HORIZ,
             const wxString& name = wxFrameNameStr);
 
-    virtual void SetTitle( const wxString &title );
  // implementation
  
     bool   m_isDragging;

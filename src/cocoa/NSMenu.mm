@@ -16,11 +16,12 @@
 #endif // WX_PRECOMP
 
 #include "wx/cocoa/NSMenu.h"
-#include "wx/cocoa/ObjcPose.h"
+//#include "wx/cocoa/ObjcPose.h"
 
 #import <Foundation/NSNotification.h>
 #import <AppKit/NSMenu.h>
 
+#if 0 // There is no reason to pose for NSMenu at this time.
 // ============================================================================
 // @class wxPoserNSMenu
 // ============================================================================
@@ -28,21 +29,13 @@
 {
 }
 
-- (void)dealloc;
-
 @end // wxPoserNSMenu
 
 WX_IMPLEMENT_POSER(wxPoserNSMenu);
 @implementation wxPoserNSMenu : NSMenu
 
-- (void)dealloc
-{
-    wxCocoaNSMenu *menu = wxCocoaNSMenu::GetFromCocoa(self);
-    if(menu)
-        menu->Cocoa_dealloc();
-}
-
 @end // wxPoserNSMenu
+#endif // 0
 
 // ============================================================================
 // @class wxNSMenuNotificationObserver

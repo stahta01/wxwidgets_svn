@@ -9,18 +9,16 @@
                    template_append="wx_append_base">
         <sources>
             test.cpp
+            mbconv/main.cpp
+            formatconverter/formatconverter.cpp
+            regex/regex.cpp
+            regex/wxregex.cpp
+            fileconf/fileconf.cpp
+            filename/filename.cpp
+            filesys/filesys.cpp
             arrays/arrays.cpp
-            datetime/datetimetest.cpp
-            fileconf/fileconftest.cpp
-            filename/filenametest.cpp
-            filesys/filesystest.cpp
-            fontmap/fontmaptest.cpp
-            formatconverter/formatconvertertest.cpp
             hashes/hashes.cpp
-            longlong/longlongtest.cpp
-            mbconv/mbconvtest.cpp
-            regex/regextest.cpp
-            regex/wxregextest.cpp
+            longlong/longlong.cpp
             strings/strings.cpp
             strings/stdstrings.cpp
             strings/unicode.cpp
@@ -31,9 +29,9 @@
             streams/memstream.cpp
             streams/sstream.cpp
             streams/zlibstream.cpp
-            uris/uris.cpp
+            fontmap/fontmap.cpp
+            datetime/datetime.cpp
         </sources>
-        <wx-lib>net</wx-lib>
         <wx-lib>base</wx-lib>
     </exe>
 

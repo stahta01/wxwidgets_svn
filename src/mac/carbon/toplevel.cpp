@@ -521,6 +521,15 @@ pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , Ev
                 cursorPoint += cursorTarget->GetPosition() ;
         }
 
+        // update focus
+
+        if ( wxevent.GetEventType() == wxEVT_LEFT_DOWN )
+        {
+            // set focus to this window
+            if (currentMouseWindow->AcceptsFocus() && wxWindow::FindFocus()!=currentMouseWindow)
+                currentMouseWindow->SetFocus();
+        }
+
         // make tooltips current
         
     #if wxUSE_TOOLTIPS
@@ -533,15 +542,6 @@ pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , Ev
             result = noErr;
         else
         {
-            // if the user code did _not_ handle the event, then perform the
-            // default processing
-            if ( wxevent.GetEventType() == wxEVT_LEFT_DOWN )
-            {
-                // ... that is set focus to this window
-                if (currentMouseWindow->AcceptsFocus() && wxWindow::FindFocus()!=currentMouseWindow)
-                    currentMouseWindow->SetFocus();
-            }
-
             ControlPartCode dummyPart ;
             // if built-in find control is finding the wrong control (ie static box instead of overlaid
             // button, we cannot let the standard handler do its job, but must handle manually
@@ -948,14 +948,10 @@ void  wxTopLevelWindowMac::MacCreateRealWindow( const wxString& title,
 
     int x = (int)pos.x;
     int y = (int)pos.y;
-    
-    wxRect display = wxGetClientDisplayRect() ;
-
-    if ( x == wxDefaultPosition.x )
-        x = display.x ;
-    
-    if ( y == wxDefaultPosition.y )
-        y = display.y ;
+    if ( y < 50 )
+        y = 50 ;
+    if ( x < 20 )
+        x = 20 ;
 
     int w = WidthDefault(size.x);
     int h = HeightDefault(size.y);

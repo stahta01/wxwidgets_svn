@@ -35,7 +35,6 @@ wxNotebookXmlHandler::wxNotebookXmlHandler()
     XRC_ADD_STYLE(wxNB_FIXEDWIDTH);
     XRC_ADD_STYLE(wxNB_LEFT);
     XRC_ADD_STYLE(wxNB_RIGHT);
-    XRC_ADD_STYLE(wxNB_TOP);
     XRC_ADD_STYLE(wxNB_BOTTOM);
     AddWindowStyles();
 }
@@ -59,7 +58,7 @@ wxObject *wxNotebookXmlHandler::DoCreateResource()
 
             if (wnd)
                 m_notebook->AddPage(wnd, GetText(wxT("label")),
-                                         GetBool(wxT("selected")));
+                                         GetBool(wxT("selected"), 0));
             else
                 wxLogError(wxT("Error in resource."));
             return wnd;

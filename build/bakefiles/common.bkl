@@ -4,28 +4,17 @@
 <makefile>
 
     <requires version="0.1.4"/>
-
+    
     <!-- bakefile modules we need: -->
     <using module="datafiles"/>
 
     <!-- load python module with wxwindows helpers: -->
     <using module="wxwin"/>
 
-    <!-- DFE: Add a platform meaning regular MacOS (not OS X) -->
-    <!-- FIXME: This will be handled in Bakefile but for now I wanted to
-         get my changes to the wx bakefiles in the tree but invisible to
-         windows toolkits and their config.xxx settings -->
-    <if cond="FORMAT=='autoconf'">
-        <option name="PLATFORM_MACOS"/>
-    </if>
-    <if cond="FORMAT!='autoconf'">
-        <set var="PLATFORM_MACOS">0</set>
-    </if>
-
     <include file="config.bkl"/>
 
     <include file="plugins_deps.bkl"/>
-
+    
     <!-- ================================================================== -->
     <!--                     wxWidgets version numbers:                     -->
     <!-- ================================================================== -->
@@ -57,8 +46,8 @@
         <if cond="WX_STABLE_BRANCH=='1'">$(WX_RELEASE_NODOT)</if>
         <if cond="WX_STABLE_BRANCH=='0'">$(WX_VERSION_NODOT)</if>
     </set>
-
-
+    
+    
     <!-- ================================================================== -->
     <!--                     Names of libraries and DLLs:                   -->
     <!-- ================================================================== -->
@@ -67,7 +56,7 @@
         <if cond="USE_GUI=='0'">base</if>
         <if cond="USE_GUI=='1'">$(TOOLKIT_LOWERCASE)$(TOOLKIT_VERSION)</if>
     </set>
-
+    
     <set var="WXBASEPORT">
         <if cond="TOOLKIT=='MAC'">_carbon</if>
     </set>
@@ -96,7 +85,7 @@
     <set var="WXNAMESUFFIX">
         $(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)
     </set>
-
+    
     <set var="WXUNIVNAME">
         <if cond="WXUNIV=='1'">univ</if>
     </set>
@@ -134,7 +123,7 @@
         <if cond="PLATFORM_WIN32=='0'">$(WXVERSIONTAG)</if>
     </set>
 
-
+    
     <!-- =============================================================== -->
     <!--                    Names of component libraries:                -->
     <!-- =============================================================== -->
@@ -172,12 +161,12 @@
     <set var="WXLIB_MONO">
         <if cond="MONOLITHIC=='1'">$(mk.evalExpr(wxwin.mkLibName('mono')))</if>
     </set>
-
-
+    
+    
     <!-- =============================================================== -->
     <!--             Where to store built libraries and objects:         -->
     <!-- =============================================================== -->
-
+    
     <set var="DIR_SUFFIX_CPU">
         <if cond="FORMAT=='msevc4prj'">_$(CPU)</if>
     </set>
@@ -200,7 +189,7 @@
 
         <set var="BUILDDIR">$(OBJS)</set>
     </if>
-
+    
     <set var="LIBDIRNAME" make_var="1">
         <if cond="FORMAT=='autoconf'">$(top_builddir)lib</if>
         <if cond="FORMAT!='autoconf' and SHARED=='0'">
@@ -210,15 +199,15 @@
             $(nativePaths(TOP_SRCDIR))lib$(DIRSEP)$(COMPILER)$(DIR_SUFFIX_CPU)_dll$(CFG)
         </if>
     </set>
-
+    
     <if cond="FORMAT!='autoconf'">
         <set var="SETUPHDIR" make_var="1">
             $(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
         </set>
     </if>
+    
 
-
-
+    
     <!-- =============================================================== -->
     <!--                        Templates for libs:                      -->
     <!-- =============================================================== -->
@@ -255,7 +244,7 @@
     <set var="UNICODE_DEFINE">
         <if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
     </set>
-
+    
     <set var="UNICOWS_LIB">
         <if cond="MSLU=='1'">unicows</if>
     </set>
@@ -273,7 +262,7 @@
         </if>
         <define>$(NO_VC_CRTDBG)</define>
     </template>
-
+    
     <template id="anylib">
         <dirname>$(LIBDIRNAME)</dirname>
         <install-to>$(LIBDIR)</install-to>
@@ -293,8 +282,8 @@
         <install-if>SHARED=='0'</install-if>
         <pic>$(substituteFromDict(SHARED, {'0':'off', '1':'on'}))</pic>
     </template>
-
-
+    
+    
     <!-- deal with the need to copy setup.h here: -->
 
     <set var="IS_MSVC_PRJ">$(FORMAT in ['msvc6prj','msevc4prj'])</set>
@@ -339,7 +328,7 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
     <!-- =============================================================== -->
     <!--                         3rd party libs:                         -->
     <!-- =============================================================== -->
-
+    
     <!-- 3rd party libraries: -->
     <include file="regex.bkl"/>
     <include file="zlib.bkl"/>
@@ -349,23 +338,10 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
     <include file="odbc.bkl"/>
     <include file="expat.bkl"/>
 
-
+    
     <!-- =============================================================== -->
     <!--                  Templates for wxWidgets libs:                  -->
     <!-- =============================================================== -->
-
-    <!-- NB: in monolithic build, even wxBase-only must be linked against
-             GUI extralibs, otherwise there would be unresolved references.
-             The variables below are defined so that all libs are used
-             in monolithic build, but not in multilib one. -->
-    <set var="EXTRALIBS_FOR_BASE">
-        <if cond="MONOLITHIC=='1'">$(EXTRALIBS) $(EXTRALIBS_GUI)</if>
-        <if cond="MONOLITHIC=='0'">$(EXTRALIBS)</if>
-    </set>
-    <set var="EXTRALIBS_FOR_GUI">
-        <if cond="MONOLITHIC=='1'"></if>
-        <if cond="MONOLITHIC=='0'">$(EXTRALIBS_GUI)</if>
-    </set>
 
     <template id="wx" template="common_settings">
         <set var="wxid">$(wxwin.mk_wxid(id))</set>
@@ -376,10 +352,9 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
         <!-- this include is added by configure, we need to put other
              includes before it: -->
         <include cond="FORMAT!='autoconf'">$(TOP_SRCDIR)include</include>
-        <lib-path>$(LIBDIRNAME)</lib-path>
+        <lib-path>$(LIBDIRNAME)</lib-path>        
         <include cond="FORMAT!='autoconf'">$(SETUPHDIR)</include>
         <warnings>max</warnings>
-        <cppflags-watcom>-wcd=549 -wcd=656 -wcd=657 -wcd=667</cppflags-watcom>
     </template>
 
     <!-- for both GUI and wxBase libs/samples: -->
@@ -392,8 +367,8 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
         <sys-lib>$(LIB_ODBC)</sys-lib>
         <sys-lib>$(LIB_REGEX)</sys-lib>
         <sys-lib>$(LIB_EXPAT)</sys-lib>
-
-        <ldlibs>$(EXTRALIBS_FOR_BASE)</ldlibs>
+        
+        <ldlibs>$(EXTRALIBS)</ldlibs>
 
         <!-- system libraries on windows: -->
         <if cond="FORMAT!='autoconf'">
@@ -437,7 +412,7 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
 
     <!-- for GUI libs/samples: -->
     <template id="wx_append_nomono" template="wx_append_base_nomono">
-        <ldlibs>$(EXTRALIBS_FOR_GUI)</ldlibs>
+        <ldlibs>$(EXTRALIBS_GUI)</ldlibs>
     </template>
 
 
@@ -449,10 +424,10 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
         <!-- Always link against the wxWin library in monolithic build: -->
         <sys-lib>$(WXLIB_MONO)</sys-lib>
     </template>
-
+    
 
     <set var="WX_DISABLE_PRECOMP_HEADERS" overwrite="0">0</set>
-
+    
     <template id="wx_lib_b" template="wx,anylib">
         <set var="WXLIBNAME">$(wxwin.mkLibName(wxid))</set>
         <libname>$(WXLIBNAME)</libname>
@@ -474,7 +449,7 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
                 src/msw/gsockmsw.cpp
             </precomp-headers-exclude>
         </if>
-
+        
         <if cond="IS_MSVC_PRJ=='1' and BUILDING_LIB=='1'">
             <msvc-file-group>Common Sources:src/common/*</msvc-file-group>
             <msvc-file-group>MSW Sources:src/msw/*</msvc-file-group>
@@ -517,12 +492,12 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
         <include>$(INC_REGEX)</include>
         <include>$(INC_EXPAT)</include>
     </template>
-
+    
     <template id="wx_lib"
               template="wx_lib_b,wx_3rdparty_includes,msvc_setup_h"/>
     <template id="wx_base_lib"
               template="wx_lib_b,wx_3rdparty_includes,msvc_setup_h">
-        <define>wxUSE_GUI=0</define>
+        <define>wxUSE_GUI=0</define> 
     </template>
 
     <template id="wx_dll"
@@ -531,9 +506,9 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
     <template id="wx_base_dll"
               template="wx_dll_b,wx_3rdparty_dependencies,wx_3rdparty_includes"
               template_append="msvc_setup_h,wx_append_base_nomono">
-        <define>wxUSE_GUI=0</define>
+        <define>wxUSE_GUI=0</define> 
     </template>
-
+                           
     <!-- =============================================================== -->
     <!--             Templates for building wxWidgets plugins:           -->
     <!-- =============================================================== -->
@@ -555,7 +530,7 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
         <if cond="PLATFORM_UNIX=='0'"></if>
     </set>
     <set var="PLUGIN_VERSION">$(PLUGVERDELIM)$(PLUGIN_VERSION0)</set>
-
+    
     <set var="PLUGINSUFFIX">
         <if cond="UNICODE=='0' and BUILD=='release'"></if>
         <if cond="UNICODE=='0' and BUILD=='debug'">d</if>
@@ -577,7 +552,7 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
             <install-to>$(PLUGINS_INST_DIR)</install-to>
         </template>
     </define-rule>
-
+    
     <define-rule name="wx-gui-plugin" extends="module">
         <template template="wx">
             <dllname>
@@ -587,7 +562,7 @@ $(TAB)copy "$(DOLLAR)(InputPath)" $(SETUPHDIR)\wx\setup.h
             <install-to>$(PLUGINS_INST_DIR)</install-to>
         </template>
     </define-rule>
-
+    
     <!-- =============================================================== -->
     <!--               Support for wxWidgets samples and contrib:        -->
     <!-- =============================================================== -->

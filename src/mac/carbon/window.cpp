@@ -810,6 +810,8 @@ bool wxWindowMac::Create(wxWindowMac *parent, wxWindowID id,
     if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
+    parent->AddChild(this);
+
     m_windowVariant = parent->GetWindowVariant() ;
 
     if ( m_macIsUserPane )
@@ -863,7 +865,6 @@ void wxWindowMac::MacPostControlCreate(const wxPoint& pos, const wxSize& size)
     wxASSERT_MSG( m_peer != NULL && m_peer->Ok() , wxT("No valid mac control") ) ;
 
     m_peer->SetReference( (long) this ) ;
-    GetParent()->AddChild(this);
 
     MacInstallEventHandler( (WXWidget) m_peer->GetControlRef() );
 
@@ -1720,12 +1721,10 @@ wxSize wxWindowMac::DoGetBestSize() const
         {
             bestsize.bottom = 16 ;
         }
-#if wxUSE_SPINBTN 
         else if ( IsKindOf( CLASSINFO( wxSpinButton ) ) )
         {
             bestsize.bottom = 24 ;
         }
-#endif // wxUSE_SPINBTN 
         else
         {
             // return wxWindowBase::DoGetBestSize() ;
@@ -1870,14 +1869,11 @@ bool wxWindowMac::Show(bool show)
         return FALSE;
 
     // TODO use visibilityChanged Carbon Event for OSX
-    if ( m_peer )
-    {
-        bool former = MacIsReallyShown() ;
+    bool former = MacIsReallyShown() ;
 
-        m_peer->SetVisibility( show , true ) ;
-        if ( former != MacIsReallyShown() )
-            MacPropagateVisibilityChanged() ;
-    }
+    m_peer->SetVisibility( show , true ) ;
+    if ( former != MacIsReallyShown() )
+        MacPropagateVisibilityChanged() ;
     return TRUE;
 }
 

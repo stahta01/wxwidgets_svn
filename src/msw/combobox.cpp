@@ -257,7 +257,7 @@ WXLRESULT wxComboBox::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
             
         case CB_SETCURSEL:
             // Selection was set with SetSelection.  Update the value too.
-            if ((int)wParam > GetCount())
+            if (wParam < 0 || wParam > GetCount())
                 m_value = wxEmptyString;
             else
                 m_value = GetString(wParam);

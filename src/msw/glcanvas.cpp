@@ -39,12 +39,6 @@ WX_CHECK_BUILD_OPTIONS("wxGL")
 
 #include "wx/glcanvas.h"
 
-#if GL_EXT_vertex_array
-    #define WXUNUSED_WITHOUT_GL_EXT_vertex_array(name) name
-#else
-    #define WXUNUSED_WITHOUT_GL_EXT_vertex_array(name) WXUNUSED(name)
-#endif
-
 /*
   The following two compiler directives are specific to the Microsoft Visual
   C++ family of compilers
@@ -407,7 +401,7 @@ static void AdjustPFDForAttributes(PIXELFORMATDESCRIPTOR& pfd, int *attribList)
           pfd.iPixelType = PFD_TYPE_RGBA;
           break;
         case WX_GL_BUFFER_SIZE:
-          pfd.cColorBits = (BYTE)attribList[arg++];
+          pfd.cColorBits = attribList[arg++];
           break;
         case WX_GL_LEVEL:
           // this member looks like it may be obsolete
@@ -427,38 +421,38 @@ static void AdjustPFDForAttributes(PIXELFORMATDESCRIPTOR& pfd, int *attribList)
           pfd.dwFlags |= PFD_STEREO;
           break;
         case WX_GL_AUX_BUFFERS:
-          pfd.cAuxBuffers = (BYTE)attribList[arg++];
+          pfd.cAuxBuffers = attribList[arg++];
           break;
         case WX_GL_MIN_RED:
-          pfd.cColorBits = (BYTE)(pfd.cColorBits + (pfd.cRedBits = (BYTE)attribList[arg++]));
+          pfd.cColorBits += (pfd.cRedBits = attribList[arg++]);
           break;
         case WX_GL_MIN_GREEN:
-          pfd.cColorBits = (BYTE)(pfd.cColorBits + (pfd.cGreenBits = (BYTE)attribList[arg++]));
+          pfd.cColorBits += (pfd.cGreenBits = attribList[arg++]);
           break;
         case WX_GL_MIN_BLUE:
-          pfd.cColorBits = (BYTE)(pfd.cColorBits + (pfd.cBlueBits = (BYTE)attribList[arg++]));
+          pfd.cColorBits += (pfd.cBlueBits = attribList[arg++]);
           break;
         case WX_GL_MIN_ALPHA:
           // doesn't count in cColorBits
-          pfd.cAlphaBits = (BYTE)attribList[arg++];
+          pfd.cAlphaBits = attribList[arg++];
           break;
         case WX_GL_DEPTH_SIZE:
-          pfd.cDepthBits = (BYTE)attribList[arg++];
+          pfd.cDepthBits = attribList[arg++];
           break;
         case WX_GL_STENCIL_SIZE:
-          pfd.cStencilBits = (BYTE)attribList[arg++];
+          pfd.cStencilBits = attribList[arg++];
           break;
         case WX_GL_MIN_ACCUM_RED:
-          pfd.cAccumBits = (BYTE)(pfd.cAccumBits + (pfd.cAccumRedBits = (BYTE)attribList[arg++]));
+          pfd.cAccumBits += (pfd.cAccumRedBits = attribList[arg++]);
           break;
         case WX_GL_MIN_ACCUM_GREEN:
-          pfd.cAccumBits = (BYTE)(pfd.cAccumBits + (pfd.cAccumGreenBits = (BYTE)attribList[arg++]));
+          pfd.cAccumBits += (pfd.cAccumGreenBits = attribList[arg++]);
           break;
         case WX_GL_MIN_ACCUM_BLUE:
-          pfd.cAccumBits = (BYTE)(pfd.cAccumBits + (pfd.cAccumBlueBits = (BYTE)attribList[arg++]));
+          pfd.cAccumBits += (pfd.cAccumBlueBits = attribList[arg++]);
           break;
         case WX_GL_MIN_ACCUM_ALPHA:
-          pfd.cAccumBits = (BYTE)(pfd.cAccumBits + (pfd.cAccumAlphaBits = (BYTE)attribList[arg++]));
+          pfd.cAccumBits += (pfd.cAccumAlphaBits = attribList[arg++]);
           break;
         default:
           break;
@@ -545,7 +539,7 @@ wxPalette wxGLCanvas::CreateDefaultPalette()
     LOGPALETTE* pPal =
      (LOGPALETTE*) malloc(sizeof(LOGPALETTE) + paletteSize * sizeof(PALETTEENTRY));
     pPal->palVersion = 0x300;
-    pPal->palNumEntries = (WORD)paletteSize;
+    pPal->palNumEntries = paletteSize;
 
     /* build a simple RGB color palette */
     {
@@ -556,11 +550,11 @@ wxPalette wxGLCanvas::CreateDefaultPalette()
 
     for (i=0; i<paletteSize; ++i) {
         pPal->palPalEntry[i].peRed =
-            (BYTE)((((i >> pfd.cRedShift) & redMask) * 255) / redMask);
+            (((i >> pfd.cRedShift) & redMask) * 255) / redMask;
         pPal->palPalEntry[i].peGreen =
-            (BYTE)((((i >> pfd.cGreenShift) & greenMask) * 255) / greenMask);
+            (((i >> pfd.cGreenShift) & greenMask) * 255) / greenMask;
         pPal->palPalEntry[i].peBlue =
-            (BYTE)((((i >> pfd.cBlueShift) & blueMask) * 255) / blueMask);
+            (((i >> pfd.cBlueShift) & blueMask) * 255) / blueMask;
         pPal->palPalEntry[i].peFlags = 0;
     }
     }
@@ -639,9 +633,7 @@ void glColorPointerEXT(GLint WXUNUSED(size), GLenum WXUNUSED(type), GLsizei WXUN
 {
 }
 
-void glDrawArraysEXT(GLenum  WXUNUSED_WITHOUT_GL_EXT_vertex_array(mode),
-                     GLint   WXUNUSED_WITHOUT_GL_EXT_vertex_array(first),
-                     GLsizei WXUNUSED_WITHOUT_GL_EXT_vertex_array(count))
+void glDrawArraysEXT(GLenum mode, GLint first, GLsizei count)
 {
 #ifdef GL_EXT_vertex_array
     static PFNGLDRAWARRAYSEXTPROC proc = 0;
@@ -668,10 +660,7 @@ void glIndexPointerEXT(GLenum WXUNUSED(type), GLsizei WXUNUSED(stride), GLsizei 
 {
 }
 
-void glNormalPointerEXT(GLenum        WXUNUSED_WITHOUT_GL_EXT_vertex_array(type),
-                        GLsizei       WXUNUSED_WITHOUT_GL_EXT_vertex_array(stride),
-                        GLsizei       WXUNUSED_WITHOUT_GL_EXT_vertex_array(count),
-                        const GLvoid *WXUNUSED_WITHOUT_GL_EXT_vertex_array(pointer))
+void glNormalPointerEXT(GLenum type, GLsizei stride, GLsizei count, const GLvoid *pointer)
 {
 #ifdef GL_EXT_vertex_array
   static PFNGLNORMALPOINTEREXTPROC proc = 0;
@@ -690,11 +679,7 @@ void glTexCoordPointerEXT(GLint WXUNUSED(size), GLenum WXUNUSED(type), GLsizei W
 {
 }
 
-void glVertexPointerEXT(GLint         WXUNUSED_WITHOUT_GL_EXT_vertex_array(size),
-                        GLenum        WXUNUSED_WITHOUT_GL_EXT_vertex_array(type),
-                        GLsizei       WXUNUSED_WITHOUT_GL_EXT_vertex_array(stride),
-                        GLsizei       WXUNUSED_WITHOUT_GL_EXT_vertex_array(count),
-                        const GLvoid *WXUNUSED_WITHOUT_GL_EXT_vertex_array(pointer))
+void glVertexPointerEXT(GLint size, GLenum type, GLsizei stride, GLsizei count, const GLvoid *pointer)
 {
 #ifdef GL_EXT_vertex_array
   static PFNGLVERTEXPOINTEREXTPROC proc = 0;

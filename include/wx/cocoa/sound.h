@@ -2,51 +2,51 @@
 // Name:        sound.h
 // Purpose:     wxSound class (loads and plays short Windows .wav files).
 //              Optional on non-Windows platforms.
-// Authors:     David Elliott, Ryan Norton
-// Modified by: 
+// Author:      Ryan Norton
+// Modified by:
 // Created:     2004-10-02
 // RCS-ID:      $Id$
-// Copyright:   (c) 2004 David Elliott, Ryan Norton
+// Copyright:   (c) Ryan Norton
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_COCOA_SOUND_H_
 #define _WX_COCOA_SOUND_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "sound.h"
+#endif
+
+#if wxUSE_SOUND
+
 #include "wx/object.h"
-#include "wx/cocoa/ObjcRef.h"
 
 class WXDLLEXPORT wxSound : public wxSoundBase
 {
 public:
-    wxSound()
-    :   m_cocoaNSSound(NULL)
-    {}
-    wxSound(const wxString& fileName, bool isResource = false)
-    :   m_cocoaNSSound(NULL)
-    {   Create(fileName, isResource); }
-    wxSound(int size, const wxByte* data)
-    :   m_cocoaNSSound(NULL)
-    {   LoadWAV(data,size,true); }
-    wxSound(const wxSound& sound); // why not?
-    ~wxSound();
+  wxSound();
+  wxSound(const wxString& fileName, bool isResource = FALSE);
+  wxSound(int size, const wxByte* data);
+  ~wxSound();
 
 public:
-    bool Create(const wxString& fileName, bool isResource = false);
-    bool IsOk() const
-    {   return m_cocoaNSSound; }
-    static void Stop();
-    static bool IsPlaying();
+  bool  Create(const wxString& fileName, bool isResource = FALSE);
+  bool  IsOk() const { return m_hSnd != NULL; }
+  static void  Stop();
+  static bool IsPlaying();
 
-    void SetNSSound(WX_NSSound cocoaNSSound);
-    inline WX_NSSound GetNSSound()
-    {   return m_cocoaNSSound; }
+  inline WX_NSSound GetNSSound()
+  {		return m_hSnd;	}
 protected:  
-    bool DoPlay(unsigned flags) const;
-    bool LoadWAV(const wxUint8 *data, size_t length, bool copyData);
+  bool  DoPlay(unsigned flags) const;
+
 private:
-    WX_NSSound m_cocoaNSSound;
-    static const wxObjcAutoRefFromAlloc<struct objc_object *> sm_cocoaDelegate;
+    WX_NSSound m_hSnd; //NSSound handle
+    wxString m_sndname; //file path
+    int m_waveLength; //size of file in memory mode    
+    struct objc_object * m_cocoaSoundDelegate;
 };
 
-#endif //ndef _WX_COCOA_SOUND_H_
+#endif
+#endif
+    // _WX_COCOA_SOUND_H_

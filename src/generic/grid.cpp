@@ -206,7 +206,7 @@ public:
                   wxGridRowLabelWindow *rowLblWin,
                   wxGridColLabelWindow *colLblWin,
                   wxWindowID id, const wxPoint &pos, const wxSize &size );
-    ~wxGridWindow(){}
+    ~wxGridWindow();
 
     void ScrollWindow( int dx, int dy, const wxRect *rect );
 
@@ -413,7 +413,6 @@ static const size_t GRID_SCROLL_LINE_Y = GRID_SCROLL_LINE_X;
 // in these hash tables is the number of rows/columns)
 static const int GRID_HASH_SIZE = 100;
 
-#if 0
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
@@ -427,7 +426,6 @@ static inline int GetScrollY(int y)
 {
     return (y + GRID_SCROLL_LINE_Y - 1) / GRID_SCROLL_LINE_Y;
 }
-#endif
 
 // ============================================================================
 // implementation
@@ -502,11 +500,9 @@ void wxGridCellEditor::Show(bool show, wxGridCellAttr *attr)
             m_colBgOld = m_control->GetBackgroundColour();
             m_control->SetBackgroundColour(attr->GetBackgroundColour());
 
-	    // Workaround for GTK+1 font setting problem on some platforms
-#if !defined(__WXGTK__) || defined(__WXGTK20__)
             m_fontOld = m_control->GetFont();
             m_control->SetFont(attr->GetFont());
-#endif
+
             // can't do anything more in the base class version, the other
             // attributes may only be used by the derived classes
         }
@@ -525,14 +521,12 @@ void wxGridCellEditor::Show(bool show, wxGridCellAttr *attr)
             m_control->SetBackgroundColour(m_colBgOld);
             m_colBgOld = wxNullColour;
         }
-	// Workaround for GTK+1 font setting problem on some platforms
-#if !defined(__WXGTK__) || defined(__WXGTK20__)
+
         if ( m_fontOld.Ok() )
         {
             m_control->SetFont(m_fontOld);
             m_fontOld = wxNullFont;
         }
-#endif
     }
 }
 
@@ -1078,8 +1072,7 @@ void wxGridCellFloatEditor::StartingKey(wxKeyEvent& event)
     char tmpbuf[2];
     tmpbuf[0] = (char) keycode;
     tmpbuf[1] = '\0';
-    wxString strbuf(tmpbuf, *wxConvCurrent);
-    bool is_decimal_point = ( strbuf ==
+    bool is_decimal_point = ( wxString(tmpbuf, *wxConvCurrent) ==
       wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER) );
         if ( wxIsdigit(keycode) || keycode == '+' || keycode == '-'
             || is_decimal_point
@@ -1187,10 +1180,10 @@ bool wxGridCellFloatEditor::IsAcceptedKey(wxKeyEvent& event)
                 char tmpbuf[2];
                 tmpbuf[0] = (char) keycode;
                 tmpbuf[1] = '\0';
-                wxString strbuf(tmpbuf, *wxConvCurrent);
-                bool is_decimal_point = 
-                    ( strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT,
-                                                  wxLOCALE_CAT_NUMBER) );
+                bool is_decimal_point =
+                  ( wxString(tmpbuf, *wxConvCurrent) ==
+                    wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT,
+                                      wxLOCALE_CAT_NUMBER) );
                 if ( (keycode < 128) &&
                      (wxIsdigit(keycode) || tolower(keycode) == 'e' ||
                       is_decimal_point || keycode == '+' || keycode == '-') )
@@ -3704,6 +3697,11 @@ wxGridWindow::wxGridWindow( wxGrid *parent,
 }
 
 
+wxGridWindow::~wxGridWindow()
+{
+}
+
+
 void wxGridWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 {
     wxPaintDC dc( this );
@@ -4172,9 +4170,6 @@ void wxGrid::Init()
 
     m_extraWidth =
     m_extraHeight = 0;
-
-    m_scrollLineX = GRID_SCROLL_LINE_X;
-    m_scrollLineY = GRID_SCROLL_LINE_Y;
 }
 
 // ----------------------------------------------------------------------------
@@ -8914,7 +8909,7 @@ void wxGrid::SetDefaultEditor(wxGridCellEditor *editor)
 {
     RegisterDataType(wxGRID_VALUE_STRING,
                      GetDefaultRendererForType(wxGRID_VALUE_STRING),
-                     editor);
+                     editor);                     
 }
 
 // ----------------------------------------------------------------------------
@@ -9545,30 +9540,26 @@ void wxGrid::SetColSize( int col, int width )
 void wxGrid::SetColMinimalWidth( int col, int width )
 {
     if (width > GetColMinimalAcceptableWidth()) {
-        wxLongToLongHashMap::key_type key = (wxLongToLongHashMap::key_type)col;
-        m_colMinWidths[key] = width;
+        m_colMinWidths[col] = width;
     }
 }
 
 void wxGrid::SetRowMinimalHeight( int row, int width )
 {
     if (width > GetRowMinimalAcceptableHeight()) {
-        wxLongToLongHashMap::key_type key = (wxLongToLongHashMap::key_type)row;
-        m_rowMinHeights[key] = width;
+       m_rowMinHeights[row] = width;
     }
 }
 
 int wxGrid::GetColMinimalWidth(int col) const
 {
-    wxLongToLongHashMap::key_type key = (wxLongToLongHashMap::key_type)col;
-    wxLongToLongHashMap::const_iterator it = m_colMinWidths.find(key);
+    wxLongToLongHashMap::const_iterator it = m_colMinWidths.find(col);
     return it != m_colMinWidths.end() ? (int)it->second : m_minAcceptableColWidth;
 }
 
 int wxGrid::GetRowMinimalHeight(int row) const
 {
-    wxLongToLongHashMap::key_type key = (wxLongToLongHashMap::key_type)row;
-    wxLongToLongHashMap::const_iterator it = m_rowMinHeights.find(key);
+    wxLongToLongHashMap::const_iterator it = m_rowMinHeights.find(row);
     return it != m_rowMinHeights.end() ? (int)it->second : m_minAcceptableRowHeight;
 }
 
@@ -9900,7 +9891,7 @@ wxSize wxGrid::DoGetBestSize() const
 
     if (!width) width=100;
     if (!height) height=80;
-
+    
     // Round up to a multiple the scroll rate NOTE: this still doesn't get rid
     // of the scrollbars, is there any magic incantaion for that?
     int xpu, ypu;
@@ -9909,16 +9900,16 @@ wxSize wxGrid::DoGetBestSize() const
         width  += 1 + xpu - (width  % xpu);
     if (ypu)
         height += 1 + ypu - (height % ypu);
-
+    
     // limit to 1/4 of the screen size
     int maxwidth, maxheight;
     wxDisplaySize( & maxwidth, & maxheight );
     maxwidth /= 2;
-    maxheight /= 2;
+    maxheight /= 2;    
     if ( width > maxwidth ) width = maxwidth;
     if ( height > maxheight ) height = maxheight;
 
-
+    
     wxSize best(width, height);
     // NOTE: This size should be cached, but first we need to add calls to
     // InvalidateBestSize everywhere that could change the results of this

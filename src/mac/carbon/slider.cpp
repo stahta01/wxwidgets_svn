@@ -124,14 +124,9 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
 
 wxSlider::~wxSlider()
 {
-    // this is a special case, as we had to add windows as siblings we are 
-    // responsible for their disposal, but only if we are not part of a DestroyAllChildren
-    if ( m_parent && m_parent->IsBeingDeleted() == false )
-    {
-        delete m_macMinimumStatic ;
-        delete m_macMaximumStatic ;
-        delete m_macValueStatic ;
-    }
+    delete m_macMinimumStatic ;
+    delete m_macMaximumStatic ;
+    delete m_macValueStatic ;
 }
 
 int wxSlider::GetValue() const

@@ -54,6 +54,18 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_URL)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_MAXLEN)
 
 // ----------------------------------------------------------------------------
+// ctor
+// ----------------------------------------------------------------------------
+
+wxTextCtrlBase::wxTextCtrlBase()
+{
+}
+
+wxTextCtrlBase::~wxTextCtrlBase()
+{
+}
+
+// ----------------------------------------------------------------------------
 // style functions - not implemented here
 // ----------------------------------------------------------------------------
 
@@ -411,13 +423,6 @@ bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
             break;
 
         default:
-#if wxUSE_UNICODE
-            if ( event.GetUnicodeKey() )
-            {
-                ch = event.GetUnicodeKey();
-            }
-            else
-#endif
             if ( keycode < 256 && keycode >= 0 && wxIsprint(keycode) )
             {
                 // FIXME this is not going to work for non letters...

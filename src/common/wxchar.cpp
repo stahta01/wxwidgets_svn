@@ -53,7 +53,6 @@
 #endif
 
 #if defined(__MWERKS__) && __MSL__ >= 0x6000
-namespace std {}
 using namespace std ;
 #endif
 
@@ -614,22 +613,6 @@ int wxFputs(const wchar_t *ws, FILE *stream)
 }
 #endif // wxNEED_FPUTS
 
-#ifdef wxNEED_PUTS
-int wxPuts(const wxChar *ws)
-{
-    int rc = wxFputs(ws, stdout);
-    if ( rc != -1 )
-    {
-        if ( wxFputs(L"\n", stdout) == -1 )
-            return -1;
-
-        rc++;
-    }
-
-    return rc;
-}
-#endif // wxNEED_PUTS
-
 #ifdef wxNEED_PUTC
 int /* not wint_t */ wxPutc(wchar_t wc, FILE *stream)
 {
@@ -654,19 +637,9 @@ int vwscanf(const wxChar *format, va_list argptr)
 
 int vswscanf(const wxChar *ws, const wxChar *format, va_list argptr)
 {
-    // The best we can do without proper Unicode support in glibc is to
-    // convert the strings into MB representation and run ANSI version
-    // of the function. This doesn't work with %c and %s because of difference
-    // in size of char and wchar_t, though.
-    
-    wxCHECK_MSG( wxStrstr(format, _T("%s")) == NULL, -1,
-                 _T("incomplete vswscanf implementation doesn't allow %s") );
-    wxCHECK_MSG( wxStrstr(format, _T("%c")) == NULL, -1,
-                 _T("incomplete vswscanf implementation doesn't allow %c") );
-    
-    va_list argcopy;
-    wxVaCopy(argcopy, argptr);
-    return vsscanf(wxConvLibc.cWX2MB(ws), wxConvLibc.cWX2MB(format), argcopy);
+    wxFAIL_MSG( _T("TODO") );
+
+    return -1;
 }
 
 int vfwscanf(FILE *stream, const wxChar *format, va_list argptr)
@@ -1120,16 +1093,16 @@ WXDLLEXPORT size_t	wxInternalWcstombs (char * out, const wchar_t * in, size_t ou
 
 #include <CoreFoundation/CoreFoundation.h>
 
-#define cfalnumset CFCharacterSetGetPredefined(kCFCharacterSetAlphaNumeric)
-#define cfalphaset CFCharacterSetGetPredefined(kCFCharacterSetLetter)
-#define cfcntrlset CFCharacterSetGetPredefined(kCFCharacterSetControl)
-#define cfdigitset CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit)
+CFCharacterSetRef cfalnumset = CFCharacterSetGetPredefined(kCFCharacterSetAlphaNumeric);
+CFCharacterSetRef cfalphaset = CFCharacterSetGetPredefined(kCFCharacterSetLetter);
+CFCharacterSetRef cfcntrlset = CFCharacterSetGetPredefined(kCFCharacterSetControl);
+CFCharacterSetRef cfdigitset = CFCharacterSetGetPredefined(kCFCharacterSetDecimalDigit);
 //CFCharacterSetRef cfgraphset = kCFCharacterSetControl && !' '
-#define cflowerset CFCharacterSetGetPredefined(kCFCharacterSetLowercaseLetter)
+CFCharacterSetRef cflowerset = CFCharacterSetGetPredefined(kCFCharacterSetLowercaseLetter);
 //CFCharacterSetRef cfprintset = !kCFCharacterSetControl
-#define cfpunctset CFCharacterSetGetPredefined(kCFCharacterSetPunctuation)
-#define cfspaceset CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline)
-#define cfupperset CFCharacterSetGetPredefined(kCFCharacterSetUppercaseLetter)
+CFCharacterSetRef cfpunctset = CFCharacterSetGetPredefined(kCFCharacterSetPunctuation);
+CFCharacterSetRef cfspaceset = CFCharacterSetGetPredefined(kCFCharacterSetWhitespaceAndNewline);
+CFCharacterSetRef cfupperset = CFCharacterSetGetPredefined(kCFCharacterSetUppercaseLetter);
 
 WXDLLEXPORT int wxIsalnum(wxChar ch) { return CFCharacterSetIsCharacterMember(cfalnumset, ch); }
 WXDLLEXPORT int wxIsalpha(wxChar ch) { return CFCharacterSetIsCharacterMember(cfalphaset, ch); }

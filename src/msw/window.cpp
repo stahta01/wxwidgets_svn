@@ -2498,23 +2498,19 @@ WXLRESULT wxWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM l
                     // this should never happen
                     wxCHECK_MSG( win, 0,
                                  _T("FindWindowForMouseEvent() returned NULL") );
-                }
 
-                processed = win->HandleMouseEvent(message, x, y, wParam);
-
-                // if the app didn't eat the event, handle it in the default
-                // way, that is by giving this window the focus
-                if ( !processed )
-                {
                     // for the standard classes their WndProc sets the focus to
                     // them anyhow and doing it from here results in some weird
-                    // problems, so don't do it for them (unnecessary anyhow)
+                    // problems, but for our windows we want them to acquire
+                    // focus when clicked
                     if ( !win->IsOfStandardClass() )
                     {
                         if ( message == WM_LBUTTONDOWN && win->AcceptsFocus() )
                             win->SetFocus();
                     }
                 }
+
+                processed = win->HandleMouseEvent(message, x, y, wParam);
             }
             break;
 
@@ -3666,8 +3662,7 @@ wxWindowMSW::MSWOnDrawItem(int WXUNUSED_UNLESS_ODRAWN(id),
     {
         wxMenuItem *pMenuItem = (wxMenuItem *)(pDrawStruct->itemData);
 
-        wxCHECK_MSG( pMenuItem && pMenuItem->IsKindOf(CLASSINFO(wxMenuItem)),
-                         false, _T("MSWOnDrawItem: bad wxMenuItem pointer") );
+        wxCHECK( pMenuItem->IsKindOf(CLASSINFO(wxMenuItem)), false );
 
         // prepare to call OnDrawItem(): notice using of wxDCTemp to prevent
         // the DC from being released
@@ -3724,8 +3719,7 @@ wxWindowMSW::MSWOnMeasureItem(int id, WXMEASUREITEMSTRUCT *itemStruct)
     {
         wxMenuItem *pMenuItem = (wxMenuItem *)(pMeasureStruct->itemData);
 
-        wxCHECK_MSG( pMenuItem && pMenuItem->IsKindOf(CLASSINFO(wxMenuItem)),
-                        false, _T("MSWOnMeasureItem: bad wxMenuItem pointer") );
+        wxCHECK( pMenuItem->IsKindOf(CLASSINFO(wxMenuItem)), false );
 
         size_t w, h;
         bool rc = pMenuItem->OnMeasureItem(&w, &h);
@@ -4420,7 +4414,7 @@ static wxWindowMSW *FindWindowForMouseEvent(wxWindowMSW *win, int *x, int *y) //
 bool wxWindowMSW::HandleMouseEvent(WXUINT msg, int x, int y, WXUINT flags)
 {
     // the mouse events take consecutive IDs from WM_MOUSEFIRST to
-    // WM_MOUSELAST, so it's enough to subtract WM_MOUSEMOVE == WM_MOUSEFIRST
+    // WM_MOUSELAST, so it's enough to substract WM_MOUSEMOVE == WM_MOUSEFIRST
     // from the message id and take the value in the table to get wxWin event
     // id
     static const wxEventType eventsMouse[] =
@@ -4551,7 +4545,7 @@ wxKeyEvent wxWindowMSW::CreateKeyEvent(wxEventType evType,
     event.m_eventObject = (wxWindow *)this; // const_cast
     event.m_keyCode = id;
 #if wxUSE_UNICODE
-    event.m_uniChar = (wxChar) wParam;
+    event.m_uniChar = wParam;
 #endif
     event.m_rawCode = (wxUint32) wParam;
     event.m_rawFlags = (wxUint32) lParam;
@@ -5133,32 +5127,25 @@ WXWORD wxCharCodeWXToMSW(int id, bool *isVirtual)
 bool wxGetKeyState(wxKeyCode key)
 {
     bool bVirtual;
+    WORD vkey = wxCharCodeWXToMSW(key, &bVirtual);
+    SHORT state;
 
-//High order with GetAsyncKeyState only available on WIN32
-#ifdef __WIN32__    
-    //If the requested key is a LED key, return
-    //true if the led is pressed
-    if (key == WXK_NUMLOCK ||
-        key == WXK_CAPITAL ||
-        key == WXK_SCROLL)
+    switch (key)
     {
-#endif
-        //low order bit means LED is highlighted, 
-        //high order means key is down
-        //Here, for compat with other ports we want both
-        return GetKeyState( wxCharCodeWXToMSW(key, &bVirtual) ) != 0;
+    case WXK_NUMLOCK:
+    case WXK_CAPITAL:
+    case WXK_SCROLL:
+        // get the toggle state of the special key
+        state = GetKeyState(vkey);
+        break;
 
-#ifdef __WIN32__    
+    default:
+        // Get the current state of the physical key
+        state = GetAsyncKeyState(vkey);
+        break;
     }
-    else
-    {
-        //normal key
-        //low order bit means key pressed since last call
-        //high order means key is down
-        //We want only the high order bit - the key may not be down if only low order
-        return ( GetAsyncKeyState( wxCharCodeWXToMSW(key, &bVirtual) ) & (1<<15) ) != 0;
-    }
-#endif
+    // if the most significant bit is set then the key is down
+    return ( state & 0x0001 ) != 0;
 }
 
 wxWindow *wxGetActiveWindow()

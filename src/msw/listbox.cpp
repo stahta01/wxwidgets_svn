@@ -805,9 +805,8 @@ bool wxListBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     wxListBoxItem *pItem = (wxListBoxItem *)data;
 
     wxDCTemp dc((WXHDC)pStruct->hDC);
-    wxPoint pt1(pStruct->rcItem.left, pStruct->rcItem.top);
-    wxPoint pt2(pStruct->rcItem.right, pStruct->rcItem.bottom);
-    wxRect rect(pt1, pt2);
+    wxRect rect(wxPoint(pStruct->rcItem.left, pStruct->rcItem.top),
+                wxPoint(pStruct->rcItem.right, pStruct->rcItem.bottom));
 
     return pItem->OnDrawItem(dc, rect,
                              (wxOwnerDrawn::wxODAction)pStruct->itemAction,

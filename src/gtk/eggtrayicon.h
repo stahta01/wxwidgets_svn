@@ -1,8 +1,3 @@
-/*
-    Permission to use this file under wxWindows license granted by
-    the copyright holder, see eggtrayicon.c for details.
- */
-
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* eggtrayicon.h
  * Copyright (C) 2002 Anders Carlsson <andersca@gnu.org>

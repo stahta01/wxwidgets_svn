@@ -42,7 +42,7 @@
 #include "wx/log.h"
 #include <string.h>
 
-#if defined(__WXMSW__) && !defined(__PALMOS__)
+#ifdef __WXMSW__
 #include "wx/msw/wrapwin.h"
 #endif
 
@@ -122,12 +122,6 @@ wxRect::wxRect(const wxPoint& point1, const wxPoint& point2)
 wxRect::wxRect(const wxPoint& point, const wxSize& size)
 {
     x = point.x; y = point.y;
-    width = size.x; height = size.y;
-}
-
-wxRect::wxRect(const wxSize& size)
-{
-    x = 0; y = 0;
     width = size.x; height = size.y;
 }
 
@@ -544,7 +538,7 @@ void wxInitializeStockObjects ()
 
     GetThemeFont(kThemeSystemFont , GetApplicationScript() , fontName , &fontSize , &fontStyle ) ;
     sizeFont = fontSize ;
-#ifdef __WXMAC_CLASSIC__
+#if __WXMAC_CLASSIC__
     wxNORMAL_FONT = new wxFont (fontSize, wxMODERN, wxNORMAL, wxNORMAL , false , wxMacMakeStringFromPascal(fontName) );
 #else
     wxNORMAL_FONT = new wxFont () ;
@@ -569,7 +563,7 @@ void wxInitializeStockObjects ()
 #elif defined(__WXMAC__)
     wxSWISS_FONT = new wxFont (sizeFont, wxSWISS, wxNORMAL, wxNORMAL); /* Helv */
     wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
-#ifdef __WXMAC_CLASSIC__
+#if __WXMAC_CLASSIC__
   GetThemeFont(kThemeSmallSystemFont , GetApplicationScript() , fontName , &fontSize , &fontStyle ) ;
     wxSMALL_FONT = new wxFont (fontSize, wxSWISS, wxNORMAL, wxNORMAL , false , wxMacMakeStringFromPascal( fontName ) );
 #else
@@ -670,6 +664,10 @@ void wxDeleteStockLists()
 // ============================================================================
 // wxTheXXXList stuff (semi-obsolete)
 // ============================================================================
+
+wxBitmapList::wxBitmapList()
+{
+}
 
 wxBitmapList::~wxBitmapList ()
 {
@@ -860,7 +858,7 @@ wxFont *wxFontList::FindOrCreateFont(int pointSize,
             // a different font if we create it with empty facename, but it is
             // still better than never matching anything in the cache at all
             // in this case
-            if ( same && !facename.empty() )
+            if ( same && !facename.IsEmpty() )
             {
                 const wxString& fontFace = font->GetFaceName();
 

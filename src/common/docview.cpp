@@ -837,9 +837,11 @@ BEGIN_EVENT_TABLE(wxDocManager, wxEvtHandler)
 
 #if wxUSE_PRINTING_ARCHITECTURE
     EVT_MENU(wxID_PRINT, wxDocManager::OnPrint)
+    EVT_MENU(wxID_PRINT_SETUP, wxDocManager::OnPrintSetup)
     EVT_MENU(wxID_PREVIEW, wxDocManager::OnPreview)
 
     EVT_UPDATE_UI(wxID_PRINT, wxDocManager::OnUpdatePrint)
+    EVT_UPDATE_UI(wxID_PRINT_SETUP, wxDocManager::OnUpdatePrintSetup)
     EVT_UPDATE_UI(wxID_PREVIEW, wxDocManager::OnUpdatePreview)
 #endif
 END_EVENT_TABLE()
@@ -1003,6 +1005,22 @@ void wxDocManager::OnPrint(wxCommandEvent& WXUNUSED(event))
 #endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
+void wxDocManager::OnPrintSetup(wxCommandEvent& WXUNUSED(event))
+{
+#if wxUSE_PRINTING_ARCHITECTURE
+    wxWindow *parentWin = wxTheApp->GetTopWindow();
+    wxView *view = GetCurrentView();
+    if (view)
+        parentWin = view->GetFrame();
+
+    wxPrintDialogData data;
+
+    wxPrintDialog printerDialog(parentWin, &data);
+    printerDialog.GetPrintDialogData().SetSetupDialog(true);
+    printerDialog.ShowModal();
+#endif // wxUSE_PRINTING_ARCHITECTURE
+}
+
 void wxDocManager::OnPreview(wxCommandEvent& WXUNUSED(event))
 {
 #if wxUSE_PRINTING_ARCHITECTURE
@@ -1121,6 +1139,11 @@ void wxDocManager::OnUpdatePrint(wxUpdateUIEvent& event)
 {
     wxDocument *doc = GetCurrentDocument();
     event.Enable( (doc != (wxDocument*) NULL) );
+}
+
+void wxDocManager::OnUpdatePrintSetup(wxUpdateUIEvent& event)
+{
+    event.Enable( true );
 }
 
 void wxDocManager::OnUpdatePreview(wxUpdateUIEvent& event)
@@ -1814,6 +1837,10 @@ wxDocChildFrame::wxDocChildFrame(wxDocument *doc,
     m_childView = view;
     if (view)
         view->SetFrame(this);
+}
+
+wxDocChildFrame::~wxDocChildFrame()
+{
 }
 
 // Extend event processing to search the view's event table

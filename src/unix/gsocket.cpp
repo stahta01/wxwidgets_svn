@@ -117,7 +117,7 @@ int _System soclose(int);
 #  endif
 #endif
 
-#else
+#else 
    /* undefine for OSX - its really an int */
 #  ifdef __DARWIN__
 #    undef SOCKLEN_T
@@ -478,7 +478,11 @@ GSocketError GSocket::SetServer()
     m_error = GSOCK_IOERR;
     return GSOCK_IOERR;
   }
+#if defined(__EMX__) || defined(__VISAGECPP__)
+  ioctl(m_fd, FIONBIO, (char*)&arg, sizeof(arg));
+#else
   ioctl(m_fd, FIONBIO, &arg);
+#endif
   gs_gui_functions->Enable_Events(this);
 
   /* allow a socket to re-bind if the socket is in the TIME_WAIT
@@ -700,7 +704,7 @@ GSocketError GSocket::Connect(GSocketStream stream)
         int error;
         SOCKLEN_T len = sizeof(error);
 
-        getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (char*) &error, &len);
+        getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (void*) &error, &len);
 
         if (!error)
           return GSOCK_NOERROR;
@@ -987,7 +991,7 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
 
         m_establishing = false;
 
-        getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
+        getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (void*)&error, &len);
 
         if (error)
         {
@@ -1138,7 +1142,7 @@ void GSocket::UnsetCallback(GSocketEventFlags flags)
 GSocketError GSocket::GetSockOpt(int level, int optname,
                                 void *optval, int *optlen)
 {
-    if (getsockopt(m_fd, level, optname, (char*)optval, (SOCKLEN_T*)optlen) == 0)
+    if (getsockopt(m_fd, level, optname, optval, (SOCKLEN_T*)optlen) == 0)
     {
         return GSOCK_NOERROR;
     }
@@ -1148,7 +1152,7 @@ GSocketError GSocket::GetSockOpt(int level, int optname,
 GSocketError GSocket::SetSockOpt(int level, int optname,
                                 const void *optval, int optlen)
 {
-    if (setsockopt(m_fd, level, optname, (const char*)optval, optlen) == 0)
+    if (setsockopt(m_fd, level, optname, optval, optlen) == 0)
     {
         return GSOCK_NOERROR;
     }
@@ -1409,7 +1413,7 @@ void GSocket::Detected_Write()
 
     m_establishing = false;
 
-    getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
+    getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (void*)&error, &len);
 
     if (error)
     {
@@ -1705,11 +1709,7 @@ GSocketError GAddress_INET_SetPortName(GAddress *address, const char *port,
     return GSOCK_INVPORT;
   }
 
-#if defined(__WXPM__) && defined(__EMX__)
-  se = getservbyname(port, (char*)protocol);
-#else
   se = getservbyname(port, protocol);
-#endif
   if (!se)
   {
     /* the cast to int suppresses compiler warnings about subscript having the

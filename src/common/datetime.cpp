@@ -500,7 +500,7 @@ static bool GetNumericToken(size_t len, const wxChar*& p, unsigned long *number)
             break;
     }
 
-    return !s.empty() && s.ToULong(number);
+    return !s.IsEmpty() && s.ToULong(number);
 }
 
 // scans all alphabetic characters and returns the resulting string
@@ -542,8 +542,8 @@ wxDateTime::Tm::Tm(const struct tm& tm, const TimeZone& tz)
     mday = (wxDateTime::wxDateTime_t)tm.tm_mday;
     mon = (wxDateTime::Month)tm.tm_mon;
     year = 1900 + tm.tm_year;
-    wday = (wxDateTime::wxDateTime_t)tm.tm_wday;
-    yday = (wxDateTime::wxDateTime_t)tm.tm_yday;
+    wday = tm.tm_wday;
+    yday = tm.tm_yday;
 }
 
 bool wxDateTime::Tm::IsValid() const
@@ -559,7 +559,7 @@ void wxDateTime::Tm::ComputeWeekDay()
     // compute the week day from day/month/year: we use the dumbest algorithm
     // possible: just compute our JDN and then use the (simple to derive)
     // formula: weekday = (JDN + 1.5) % 7
-    wday = (wxDateTime::wxDateTime_t)((wxDateTime::WeekDay)(GetTruncatedJDN(mday, mon, year) + 2) % 7);
+    wday = (wxDateTime::WeekDay)(GetTruncatedJDN(mday, mon, year) + 2) % 7;
 }
 
 void wxDateTime::Tm::AddMonths(int monDiff)
@@ -1972,7 +1972,7 @@ wxDateTime& wxDateTime::SetToYearDay(wxDateTime::wxDateTime_t yday)
         // yday lies in December then
         if ( (mon == Dec) || (yday <= gs_cumulatedDays[isLeap][mon + 1]) )
         {
-            Set((wxDateTime::wxDateTime_t)(yday - gs_cumulatedDays[isLeap][mon]), mon, year);
+            Set(yday - gs_cumulatedDays[isLeap][mon], mon, year);
 
             break;
         }
@@ -2392,7 +2392,7 @@ wxString wxDateTime::Format(const wxChar *format, const TimeZone& tz) const
                         fmt += *p;
                     }
 
-                    if ( !fmt.empty() )
+                    if ( !fmt.IsEmpty() )
                     {
                         // we've only got the flags and width so far in fmt
                         fmt.Prepend(_T('%'));
@@ -2563,7 +2563,7 @@ const wxChar *wxDateTime::ParseRfc822Date(const wxChar* date)
         return (wxChar *)NULL;
     }
 
-    wxDateTime_t hour = (wxDateTime_t)(*p++ - _T('0'));
+    wxDateTime_t hour = *p++ - _T('0');
 
     if ( !wxIsdigit(*p) )
     {
@@ -2571,7 +2571,7 @@ const wxChar *wxDateTime::ParseRfc822Date(const wxChar* date)
     }
 
     hour *= 10;
-    hour = (wxDateTime_t)(hour + (*p++ - _T('0')));
+    hour += *p++ - _T('0');
 
     if ( *p++ != _T(':') )
     {
@@ -2583,7 +2583,7 @@ const wxChar *wxDateTime::ParseRfc822Date(const wxChar* date)
         return (wxChar *)NULL;
     }
 
-    wxDateTime_t min = (wxDateTime_t)(*p++ - _T('0'));
+    wxDateTime_t min = *p++ - _T('0');
 
     if ( !wxIsdigit(*p) )
     {
@@ -2591,7 +2591,7 @@ const wxChar *wxDateTime::ParseRfc822Date(const wxChar* date)
     }
 
     min *= 10;
-    min = (wxDateTime_t)(min + *p++ - _T('0'));
+    min += *p++ - _T('0');
 
     wxDateTime_t sec = 0;
     if ( *p++ == _T(':') )
@@ -2601,7 +2601,7 @@ const wxChar *wxDateTime::ParseRfc822Date(const wxChar* date)
             return (wxChar *)NULL;
         }
 
-        sec = (wxDateTime_t)(*p++ - _T('0'));
+        sec = *p++ - _T('0');
 
         if ( !wxIsdigit(*p) )
         {
@@ -2609,7 +2609,7 @@ const wxChar *wxDateTime::ParseRfc822Date(const wxChar* date)
         }
 
         sec *= 10;
-        sec = (wxDateTime_t)(sec + *p++ - _T('0'));
+        sec += *p++ - _T('0');
     }
 
     if ( *p++ != _T(' ') )
@@ -2964,7 +2964,7 @@ const wxChar *wxDateTime::ParseFormat(const wxChar *date,
                     wxString am, pm, token = GetAlphaToken(input);
 
                     GetAmPmStrings(&am, &pm);
-                    if (am.empty() && pm.empty())
+                    if (am.IsEmpty() && pm.IsEmpty())
                         return (wxChar *)NULL;  // no am/pm strings defined
                     if ( token.CmpNoCase(pm) == 0 )
                     {
@@ -3461,11 +3461,9 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
                 }
                 else // may be either day or year
                 {
-                    wxDateTime_t maxDays = (wxDateTime_t)(
-                        haveMon
+                    wxDateTime_t maxDays = haveMon
                         ? GetNumOfDaysInMonth(haveYear ? year : Inv_Year, mon)
-                        : 31
-                    );
+                        : 31;
 
                     // can it be day?
                     if ( (val == 0) || (val > (unsigned long)maxDays) )
@@ -3519,7 +3517,7 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
                     {
                         // no need to check in month range as always < 12, but
                         // the days are counted from 1 unlike the months
-                        day = (wxDateTime_t)(mon + 1);
+                        day = (wxDateTime_t)mon + 1;
                         haveDay = true;
                     }
                     else
@@ -3641,7 +3639,7 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
                 // we're in the current year then
                 if ( (year > 0) && (year <= (int)GetNumOfDaysInMonth(Inv_Year, mon)) )
                 {
-                    day = (wxDateTime_t)year;
+                    day = year;
 
                     haveMon = true;
                     haveYear = false;
@@ -4030,7 +4028,7 @@ void wxDateTimeHolidayAuthority::AddAuthority(wxDateTimeHolidayAuthority *auth)
 
 wxDateTimeHolidayAuthority::~wxDateTimeHolidayAuthority()
 {
-    // required here for Darwin
+    // nothing to do here
 }
 
 // ----------------------------------------------------------------------------

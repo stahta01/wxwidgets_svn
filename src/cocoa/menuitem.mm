@@ -34,7 +34,6 @@
 #import <AppKit/NSMenu.h>
 #import <Foundation/NSString.h>
 #import <AppKit/NSCell.h> // NSOnState, NSOffState
-#import <AppKit/NSEvent.h> // modifier key masks
 
 #if wxUSE_MENUS
 
@@ -60,7 +59,16 @@
     wxLogTrace(wxTRACE_COCOA,wxT("wxMenuItemAction"));
     wxMenuItem *item = wxMenuItem::GetFromCocoa(sender);
     wxCHECK_RET(item,wxT("wxMenuItemAction received but no wxMenuItem exists!"));
-    item->CocoaItemSelected();
+
+    wxMenu *menu = item->GetMenu();
+    wxCHECK_RET(menu,wxT("wxMenuItemAction received but wxMenuItem is not in a wxMenu"));
+    wxMenuBar *menubar = menu->GetMenuBar();
+    if(menubar)
+    {
+        wxFrame *frame = menubar->GetFrame();
+        wxCHECK_RET(frame, wxT("wxMenuBar MUST be attached to a wxFrame!"));
+        frame->ProcessCommand(item->GetId());
+    }
 }
 
 - (BOOL)validateMenuItem: (id)menuItem
@@ -69,7 +77,7 @@
     wxLogTrace(wxTRACE_COCOA,wxT("wxMenuItemAction"));
     wxMenuItem *item = wxMenuItem::GetFromCocoa(menuItem);
     wxCHECK_MSG(item,NO,wxT("validateMenuItem received but no wxMenuItem exists!"));
-    return item->Cocoa_validateMenuItem();
+    return item->IsEnabled();
 }
 
 @end //implementation wxNSMenuItemTarget
@@ -80,7 +88,7 @@
 IMPLEMENT_DYNAMIC_CLASS(wxMenuItem, wxObject)
 wxMenuItemCocoaHash wxMenuItemCocoa::sm_cocoaHash;
 
-wxObjcAutoRefFromAlloc<struct objc_object *> wxMenuItemCocoa::sm_cocoaTarget = [[wxNSMenuItemTarget alloc] init];
+struct objc_object *wxMenuItemCocoa::sm_cocoaTarget = [[wxNSMenuItemTarget alloc] init];
 
 // ----------------------------------------------------------------------------
 // wxMenuItemBase
@@ -102,44 +110,6 @@ wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
     return wxStripMenuCodes(text);
 }
 
-void wxMenuItemCocoa::CocoaSetKeyEquivalent()
-{
-    wxAcceleratorEntry *accel = GetAccel();
-    if(!accel)
-        return;
-
-    int accelFlags = accel->GetFlags();
-    int keyModifierMask = 0;
-    if(accelFlags & wxACCEL_ALT)
-        keyModifierMask |= NSAlternateKeyMask;
-    if(accelFlags & wxACCEL_CTRL)
-        keyModifierMask |= NSCommandKeyMask;
-    int keyCode = accel->GetKeyCode();
-    if(isalpha(keyCode))
-    {   // For alpha characters use upper/lower rather than NSShiftKeyMask
-        char alphaChar;
-        if(accelFlags & wxACCEL_SHIFT)
-            alphaChar = toupper(keyCode);
-        else
-            alphaChar = tolower(keyCode);
-        [m_cocoaNSMenuItem setKeyEquivalent:[NSString stringWithCString:&alphaChar length:1]];
-        [m_cocoaNSMenuItem setKeyEquivalentModifierMask:keyModifierMask];
-    }
-    else
-    {
-        if(accelFlags & wxACCEL_SHIFT)
-            keyModifierMask |= NSShiftKeyMask;
-        if(keyCode < 128) // low ASCII includes backspace/tab/etc.
-        {   char alphaChar = keyCode;
-            [m_cocoaNSMenuItem setKeyEquivalent:[NSString stringWithCString:&alphaChar length:1]];
-        }
-        else
-        {   // TODO
-        }
-        [m_cocoaNSMenuItem setKeyEquivalentModifierMask:keyModifierMask];
-    }
-}
-
 // ----------------------------------------------------------------------------
 // ctor & dtor
 // ----------------------------------------------------------------------------
@@ -157,23 +127,16 @@ wxMenuItemCocoa::wxMenuItemCocoa(wxMenu *pParentMenu,
     else
     {
         NSString *menuTitle = wxInitNSStringWithWxString([NSString alloc],wxStripMenuCodes(strName));
-        SEL action;
-        if(pSubMenu)
-            action = nil;
-        else
-            action = @selector(wxMenuItemAction:);
-        m_cocoaNSMenuItem = [[NSMenuItem alloc] initWithTitle:menuTitle action:action keyEquivalent:@""];
+        m_cocoaNSMenuItem = [[NSMenuItem alloc] initWithTitle:menuTitle action:@selector(wxMenuItemAction:) keyEquivalent:@""];
         sm_cocoaHash.insert(wxMenuItemCocoaHash::value_type(m_cocoaNSMenuItem,this));
+        [m_cocoaNSMenuItem setTarget:sm_cocoaTarget];
         if(pSubMenu)
         {
             wxASSERT(pSubMenu->GetNSMenu());
             [pSubMenu->GetNSMenu() setTitle:menuTitle];
             [m_cocoaNSMenuItem setSubmenu:pSubMenu->GetNSMenu()];
         }
-        else
-            [m_cocoaNSMenuItem setTarget: sm_cocoaTarget];
         [menuTitle release];
-        CocoaSetKeyEquivalent();
     }
 }
 
@@ -181,32 +144,6 @@ wxMenuItem::~wxMenuItem()
 {
     sm_cocoaHash.erase(m_cocoaNSMenuItem);
     [m_cocoaNSMenuItem release];
-}
-
-void wxMenuItem::CocoaItemSelected()
-{
-    wxMenu *menu = GetMenu();
-    wxCHECK_RET(menu,wxT("wxMenuItemAction received but wxMenuItem is not in a wxMenu"));
-    wxMenuBar *menubar = menu->GetMenuBar();
-    if(menubar)
-    {
-        wxFrame *frame = menubar->GetFrame();
-        wxCHECK_RET(frame, wxT("wxMenuBar MUST be attached to a wxFrame!"));
-        frame->ProcessCommand(GetId());
-    }
-    else
-    {
-        if(IsCheckable())
-            Toggle();
-        GetMenu()->SendEvent(GetId(), IsCheckable()?IsChecked():-1);
-    }
-}
-
-bool wxMenuItem::Cocoa_validateMenuItem()
-{
-    // TODO: do more sanity checking
-    // TODO: Do wxWindows validation here and avoid sending during idle time
-    return IsEnabled();
 }
 
 // ----------------------------------------------------------------------------
@@ -285,7 +222,6 @@ void wxMenuItem::SetText(const wxString& label)
     wxMenuItemBase::SetText(label);
     wxCHECK_RET(m_kind != wxITEM_SEPARATOR, wxT("Separator items do not have titles."));
     [m_cocoaNSMenuItem setTitle: wxNSStringWithWxString(wxStripMenuCodes(label))];
-    CocoaSetKeyEquivalent();
 }
 
 void wxMenuItem::SetCheckable(bool checkable)

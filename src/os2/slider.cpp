@@ -66,12 +66,11 @@ void wxSlider::AdjustSubControls(
     int                             nCy;
     int                             nCyf;
     char                            zBuf[300];
-    wxFont                          vFont = this->GetFont();
 
     wxGetCharSize( GetHWND()
                   ,&nCx
                   ,&nCy
-                  ,&vFont
+                  ,&this->GetFont()
                  );
 
     if ((m_windowStyle & wxSL_VERTICAL) != wxSL_VERTICAL)
@@ -82,10 +81,10 @@ void wxSlider::AdjustSubControls(
             int                     nMaxLen = 0;
 
             ::WinQueryWindowText((HWND)m_hStaticMin, 300, zBuf);
-            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &this->GetFont());
 
             ::WinQueryWindowText((HWND)m_hStaticMax, 300, zBuf);
-            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &this->GetFont());
 
             if (m_hStaticValue)
             {
@@ -133,10 +132,10 @@ void wxSlider::AdjustSubControls(
             int                     nMaxLen = 0;
 
             ::WinQueryWindowText((HWND)m_hStaticMin, 300, zBuf);
-            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &this->GetFont());
 
             ::WinQueryWindowText((HWND)m_hStaticMax, 300, zBuf);
-            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &this->GetFont());
 
             if (m_hStaticValue)
             {
@@ -486,7 +485,6 @@ void wxSlider::DoSetSize(
     int                             nCurrentX;
     int                             nCurrentY;
     char                            zBuf[300];
-    wxFont                          vFont = this->GetFont();
 
     //
     // Adjust for OS/2's reverse coordinate system
@@ -532,7 +530,7 @@ void wxSlider::DoSetSize(
     wxGetCharSize( GetHWND()
                   ,&nCx
                   ,&nCy
-                  ,&vFont
+                  ,&this->GetFont()
                  );
 
     if ((m_windowStyle & wxSL_VERTICAL) != wxSL_VERTICAL)
@@ -543,9 +541,9 @@ void wxSlider::DoSetSize(
             int                  nMaxLen = 0;
 
             ::WinQueryWindowText((HWND)m_hStaticMin, 300, zBuf);
-            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &this->GetFont());
             ::WinQueryWindowText((HWND)m_hStaticMax, 300, zBuf);
-            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &this->GetFont());
 
             if (m_hStaticValue)
             {
@@ -650,9 +648,9 @@ void wxSlider::DoSetSize(
             int                  nMaxLen;
 
             ::WinQueryWindowText((HWND)m_hStaticMin, 300, zBuf);
-            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMinLen, &nCyf, NULL, NULL, &this->GetFont());
             ::WinQueryWindowText((HWND)m_hStaticMax, 300, zBuf);
-            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &vFont);
+            GetTextExtent(zBuf, &nMaxLen, &nCyf, NULL, NULL, &this->GetFont());
             if (m_hStaticValue)
             {
                 int              nNewWidth = wxMax(nMinLen, nMaxLen);

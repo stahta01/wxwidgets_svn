@@ -133,12 +133,9 @@ public:
     // more readable flag testing methods
     // ----------------------------------
 
-#if 0
-    // it seems now in wxTextCtrlBase
     bool IsSingleLine() const { return !(GetWindowStyle() & wxTE_MULTILINE); }
-#endif
     bool IsPassword() const { return (GetWindowStyle() & wxTE_PASSWORD) != 0; }
-    bool WrapLines() const { return false; }
+    bool WrapLines() const { return FALSE; }
 
     // If the return values from and to are the same, there is no selection.
     virtual void GetSelection(long* from, long* to) const;

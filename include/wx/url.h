@@ -2,7 +2,7 @@
 // Name:        url.h
 // Purpose:     URL parser
 // Author:      Guilhem Lavaux
-// Modified by: Ryan Norton
+// Modified by:
 // Created:     20/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
@@ -20,7 +20,7 @@
 
 #if wxUSE_URL
 
-#include "wx/uri.h"
+#include "wx/object.h"
 #include "wx/protocol/protocol.h"
 
 #if wxUSE_PROTOCOL_HTTP
@@ -48,19 +48,18 @@ public:
 };
 #endif // wxUSE_URL_NATIVE
 
-class WXDLLIMPEXP_NET wxURL : public wxURI
+class WXDLLIMPEXP_NET wxURL : public wxObject
 {
 public:
-    wxURL(const wxString& sUrl);
-    wxURL(const wxURI& url);
+    wxURL(const wxString& url);
     virtual ~wxURL();
 
-    wxURL& operator = (const wxString& url);
-    wxURL& operator = (const wxURI& url);
-
+    wxString GetProtocolName() const { return m_protoinfo->m_protoname; }
+    wxString GetHostName() const     { return m_hostname; }
+    wxString GetURL() const          { return m_url; }
     wxProtocol& GetProtocol()        { return *m_protocol; }
     wxURLError GetError() const      { return m_error; }
-    wxString GetURL() const          { return m_url; }
+    wxString GetPath() const         { return m_path; }
 
     wxInputStream *GetInputStream();
 
@@ -69,21 +68,11 @@ public:
     void SetProxy(const wxString& url_proxy);
 #endif // wxUSE_SOCKETS
 
-#if WXWIN_COMPATIBILITY_2_4
-    //Use the proper wxURI accessors instead
-    wxString GetProtocolName() const { return m_scheme; }
-    wxString GetHostName() const     { return m_server; }
-    wxString GetPath() const         { return m_path; }
-
-    //Use wxURI instead - this does not work that well
     static wxString ConvertToValidURI(
                         const wxString& uri,
                         const wxChar* delims = wxT(";/?:@&=+$,")
                     );
-
-    //Use wxURI::Unescape instead
     static wxString ConvertFromURI(const wxString& uri);
-#endif
 
 protected:
     static wxProtoInfo *ms_protocols;
@@ -106,10 +95,13 @@ protected:
     wxProtocol *m_protocol;
 
     wxURLError m_error;
-    wxString m_url;
+    wxString m_protoname, m_hostname, m_servname, m_path, m_url;
+    wxString m_user, m_password;
     bool m_useProxy;
 
-    void Init(const wxString&);
+    bool PrepProto(wxString& url);
+    bool PrepHost(wxString& url);
+    bool PrepPath(wxString& url);
     bool ParseURL();
     void CleanData();
     bool FetchProtocol();
@@ -118,6 +110,10 @@ protected:
     friend class wxURLModule;
 
 private:
+    // VZ: can't use default copy ctor for this class, should write a correct
+    //     one! (TODO)
+    DECLARE_NO_COPY_CLASS(wxURL)
+
     DECLARE_DYNAMIC_CLASS(wxURL)
 };
 

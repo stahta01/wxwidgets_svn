@@ -298,35 +298,34 @@ bool wxFile::Close()
 // ----------------------------------------------------------------------------
 
 // read
-wxFileSize_t wxFile::Read(void *pBuf, wxFileSize_t nCount)
+size_t wxFile::Read(void *pBuf, size_t nCount)
 {
     wxCHECK( (pBuf != NULL) && IsOpened(), 0 );
 
-    wxFileSize_t iRc = wxRead(m_fd, pBuf, nCount);
+    int iRc = wxRead(m_fd, pBuf, nCount);
 
-    if ( iRc == wxInvalidOffset )
-    {
+    if ( iRc == -1 ) {
         wxLogSysError(_("can't read from file descriptor %d"), m_fd);
+        return (size_t)wxInvalidOffset;
     }
-
-    return iRc;
+    else
+        return (size_t)iRc;
 }
 
 // write
-wxFileSize_t wxFile::Write(const void *pBuf, wxFileSize_t nCount)
+size_t wxFile::Write(const void *pBuf, size_t nCount)
 {
     wxCHECK( (pBuf != NULL) && IsOpened(), 0 );
 
-    wxFileSize_t iRc = wxWrite(m_fd, pBuf, nCount);
+    int iRc = wxWrite(m_fd, pBuf, nCount);
 
-    if ( iRc == wxInvalidOffset )
-    {
+    if ( iRc == -1 ) {
         wxLogSysError(_("can't write to file descriptor %d"), m_fd);
         m_error = true;
-        iRc = 0;
+        return 0;
     }
-
-    return (wxFileSize_t)iRc;
+    else
+        return iRc;
 }
 
 // flush
@@ -352,7 +351,7 @@ bool wxFile::Flush()
 // ----------------------------------------------------------------------------
 
 // seek
-wxFileSize_t wxFile::Seek(wxFileOffset ofs, wxSeekMode mode)
+wxFileOffset wxFile::Seek(wxFileOffset ofs, wxSeekMode mode)
 {
     wxASSERT( IsOpened() );
 
@@ -374,60 +373,60 @@ wxFileSize_t wxFile::Seek(wxFileOffset ofs, wxSeekMode mode)
             break;
     }
 
-    if (ofs == (wxFileOffset) wxInvalidOffset)
+    if (ofs == wxInvalidOffset)
     {
         wxLogSysError(_("can't seek on file descriptor %d, large files support is not enabled."), m_fd);
         return wxInvalidOffset;
     }
-    wxFileSize_t iRc = wxSeek(m_fd, ofs, origin);
-    if ( iRc == wxInvalidOffset )
-    {
+    wxFileOffset iRc = wxSeek(m_fd, ofs, origin);
+    if ( iRc == -1 ) {
         wxLogSysError(_("can't seek on file descriptor %d"), m_fd);
+        return wxInvalidOffset;
     }
-
-    return iRc;
+    else
+        return iRc;
 }
 
-// get current file offset
-wxFileSize_t wxFile::Tell() const
+// get current wxFileOffset
+wxFileOffset wxFile::Tell() const
 {
     wxASSERT( IsOpened() );
 
-    wxFileSize_t iRc = wxTell(m_fd);
-    if ( iRc == wxInvalidOffset )
-    {
+    wxFileOffset iRc = wxTell(m_fd);
+    if ( iRc == -1 ) {
         wxLogSysError(_("can't get seek position on file descriptor %d"), m_fd);
+        return wxInvalidOffset;
     }
-
-    return iRc;
+    else
+        return iRc;
 }
 
 // get current file length
-wxFileSize_t wxFile::Length() const
+wxFileOffset wxFile::Length() const
 {
     wxASSERT( IsOpened() );
 
-    wxFileSize_t iRc = Tell();
-    if ( iRc != wxInvalidOffset ) {
-        // have to use const_cast :-(
-        wxFileSize_t iLen = ((wxFile *)this)->SeekEnd();
-        if ( iLen != wxInvalidOffset ) {
+    wxFileOffset iRc = Tell();
+    if ( iRc != -1 ) {
+        // @ have to use const_cast :-(
+        wxFileOffset iLen = ((wxFile *)this)->SeekEnd();
+        if ( iLen != -1 ) {
             // restore old position
-            if ( ((wxFile *)this)->Seek(iRc) == wxInvalidOffset ) {
+            if ( ((wxFile *)this)->Seek(iRc) == -1 ) {
                 // error
-                iLen = wxInvalidOffset;
+                iLen = -1;
             }
         }
 
         iRc = iLen;
     }
 
-    if ( iRc == wxInvalidOffset )
-    {
+    if ( iRc == -1 ) {
         wxLogSysError(_("can't find length of file on file descriptor %d"), m_fd);
+        return wxInvalidOffset;
     }
-
-    return iRc;
+    else
+        return iRc;
 }
 
 // is end of file reached?
@@ -435,28 +434,34 @@ bool wxFile::Eof() const
 {
     wxASSERT( IsOpened() );
 
-    wxFileSize_t iRc;
+    int iRc;
 
 #if defined(__DOS__) || defined(__UNIX__) || defined(__GNUWIN32__) || defined( __MWERKS__ ) || defined(__SALFORDC__)
     // @@ this doesn't work, of course, on unseekable file descriptors
-    wxFileSize_t ofsCur = Tell(),
+    wxFileOffset ofsCur = Tell(),
     ofsMax = Length();
     if ( ofsCur == wxInvalidOffset || ofsMax == wxInvalidOffset )
-        iRc = wxInvalidOffset;
+        iRc = -1;
     else
         iRc = ofsCur == ofsMax;
 #else  // Windows and "native" compiler
     iRc = wxEof(m_fd);
 #endif // Windows/Unix
 
-    if ( iRc == 1)
-        {}
-    else if ( iRc == 0 )
-        return false;
-    else if ( iRc == wxInvalidOffset )
-        wxLogSysError(_("can't determine if the end of file is reached on descriptor %d"), m_fd);
-    else
-        wxFAIL_MSG(_("invalid eof() return value."));
+    switch ( iRc ) {
+        case 1:
+            break;
+
+        case 0:
+            return false;
+
+        case -1:
+            wxLogSysError(_("can't determine if the end of file is reached on descriptor %d"), m_fd);
+                break;
+
+        default:
+            wxFAIL_MSG(_("invalid eof() return value."));
+    }
 
     return true;
 }

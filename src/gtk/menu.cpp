@@ -15,11 +15,11 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/menu.h"
 #include "wx/log.h"
 #include "wx/intl.h"
 #include "wx/app.h"
 #include "wx/bitmap.h"
+#include "wx/menu.h"
 
 #if wxUSE_ACCEL
     #include "wx/accel.h"
@@ -1053,24 +1053,13 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
     {
         wxString text = mitem->GetText();
         const wxBitmap *bitmap = &mitem->GetBitmap();
+        GdkPixmap *gdk_pixmap = bitmap->GetPixmap();
+        GdkBitmap *gdk_bitmap = bitmap->GetMask() ? bitmap->GetMask()->GetBitmap() : (GdkBitmap*) NULL;
 
 #ifdef __WXGTK20__
         menuItem = gtk_image_menu_item_new_with_mnemonic( wxGTK_CONV( text ) );
 
-        GtkWidget *image;
-        if (bitmap->HasPixbuf())
-        {
-            image = gtk_image_new_from_pixbuf(bitmap->GetPixbuf());
-        }
-        else
-        {
-            GdkPixmap *gdk_pixmap = bitmap->GetPixmap();
-            GdkBitmap *gdk_bitmap = bitmap->GetMask() ? 
-                                        bitmap->GetMask()->GetBitmap() :
-                                        (GdkBitmap*) NULL;
-            image = gtk_image_new_from_pixmap( gdk_pixmap, gdk_bitmap );
-        }
-        
+        GtkWidget *image = gtk_image_new_from_pixmap( gdk_pixmap, gdk_bitmap );
         gtk_widget_show(image);
 
         gtk_image_menu_item_set_image( GTK_IMAGE_MENU_ITEM(menuItem), image );
@@ -1084,8 +1073,6 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
         else
             gtk_menu_shell_insert(GTK_MENU_SHELL(m_menu), menuItem, pos);
 #else
-        GdkPixmap *gdk_pixmap = bitmap->GetPixmap();
-        GdkBitmap *gdk_bitmap = bitmap->GetMask() ? bitmap->GetMask()->GetBitmap() : (GdkBitmap*) NULL;
 
         menuItem = gtk_pixmap_menu_item_new ();
         GtkWidget *label = gtk_accel_label_new ( wxGTK_CONV( text ) );

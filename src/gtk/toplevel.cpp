@@ -28,7 +28,6 @@
 
 #include "wx/defs.h"
 
-#include "wx/toplevel.h"
 #include "wx/log.h"
 #include "wx/dialog.h"
 #include "wx/control.h"
@@ -135,16 +134,13 @@ static gint gtk_frame_focus_out_callback( GtkWidget *widget,
     // wxASSERT_MSG( (g_activeFrame == win), wxT("TLW deactivatd although it wasn't active") );
         
     // wxPrintf( wxT("inactive: %s\n"), win->GetTitle().c_str() );
+        
+    wxLogTrace(wxT("activate"), wxT("Activating frame %p (from focus_in)"), g_activeFrame);
+    wxActivateEvent event(wxEVT_ACTIVATE, FALSE, g_activeFrame->GetId());
+    event.SetEventObject(g_activeFrame);
+    g_activeFrame->GetEventHandler()->ProcessEvent(event);
 
-    if (g_activeFrame)
-    {
-        wxLogTrace(wxT("activate"), wxT("Activating frame %p (from focus_in)"), g_activeFrame);
-        wxActivateEvent event(wxEVT_ACTIVATE, FALSE, g_activeFrame->GetId());
-        event.SetEventObject(g_activeFrame);
-        g_activeFrame->GetEventHandler()->ProcessEvent(event);
-
-        g_activeFrame = NULL;
-    }
+    g_activeFrame = NULL;
         
     return FALSE;
 }
@@ -431,6 +427,10 @@ bool wxTopLevelWindowGTK::Create( wxWindow *parent,
     //     e.g. in wxTaskBarIconAreaGTK
     if (m_widget == NULL)
     {
+        GtkWindowType win_type = GTK_WINDOW_TOPLEVEL;
+        if (style & wxFRAME_TOOL_WINDOW)
+            win_type = GTK_WINDOW_POPUP;
+
         if (GetExtraStyle() & wxTOPLEVEL_EX_DIALOG)
         {
 #ifdef __WXGTK20__
@@ -447,13 +447,7 @@ bool wxTopLevelWindowGTK::Create( wxWindow *parent,
         }
         else
         {
-            m_widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-#if GTK_CHECK_VERSION(2,1,0)
-            if (style & wxFRAME_TOOL_WINDOW)
-                gtk_window_set_type_hint(GTK_WINDOW(m_widget),
-                                         GDK_WINDOW_TYPE_HINT_UTILITY);
-#endif
-
+            m_widget = gtk_window_new(win_type);
         }
     }
 

@@ -162,7 +162,6 @@ OBJECTS1=fs_inet.obj,\
 
 OBJECTS2=utilscmn.obj,\
 		rgncmn.obj,\
-		uri.obj,\
 		valgen.obj,\
 		validate.obj,\
 		valtext.obj,\
@@ -324,7 +323,6 @@ SOURCES = \
 		radiocmn.cpp,\
 		regex.cpp,\
 		taskbarcmn.cpp,\
-		uri.cpp,\
 		xti.cpp,\
 		xtistrm.cpp,\
 		xtixml.cpp
@@ -500,4 +498,3 @@ taskbarcmn.obj : taskbarcmn.cpp
 xti.obj : xti.cpp
 xtistrm.obj : xtistrm.cpp
 xtixml.obj : xtixml.cpp
-uri.obj : uri.cpp

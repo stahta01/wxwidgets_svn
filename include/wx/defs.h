@@ -14,6 +14,10 @@
 #ifndef _WX_DEFS_H_
 #define _WX_DEFS_H_
 
+#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#pragma interface "defs.h"
+#endif
+
 /*  ---------------------------------------------------------------------------- */
 /*  compiler and OS identification */
 /*  ---------------------------------------------------------------------------- */
@@ -76,6 +80,12 @@
 /*  This one is really annoying, since it occurs for each cast to (HANDLE)... */
 #   pragma warning(disable:4305)    /*  truncation of long to near ptr */
 #endif
+#endif /*  __VISUALC__ */
+
+/*  suppress some Watcom C++ warnings */
+#ifdef __WATCOMC__
+#   pragma warning 849 9            /*  Disable 'virtual function hidden' */
+#   pragma warning 549 9            /*  Disable 'operand contains compiler generated information' */
 #endif /*  __VISUALC__ */
 
 /*  suppress some Salford C++ warnings */
@@ -473,18 +483,7 @@ typedef int wxWindowID;
 /*  appending the current line number to the given identifier to reduce the */
 /*  probability of the conflict (it may still happen if this is used in the */
 /*  headers, hence you should avoid doing it or provide unique prefixes then) */
-#if defined(__VISUALC__) && (__VISUALC__ >= 1300)
-    /*
-       __LINE__ handling is completely broken in VC++ when using "Edit and
-       Continue" (/ZI option) and results in preprocessor errors if we use it
-       inside the macros. Luckily VC7 has another standard macro which can be
-       used like this and is even better than __LINE__ because it is globally
-       unique.
-     */
-#   define wxCONCAT_LINE(text)         wxCONCAT(text, __COUNTER__)
-#else /* normal compilers */
-#   define wxCONCAT_LINE(text)         wxCONCAT(text, __LINE__)
-#endif
+#define wxCONCAT_LINE(text)         wxCONCAT(text, __LINE__)
 #define wxMAKE_UNIQUE_NAME(text)    wxCONCAT_LINE(text)
 
 /*  symbolic constant used by all Find()-like functions returning positive */
@@ -786,8 +785,8 @@ typedef wxUint32 wxDword;
 #endif
 
 #ifdef __cplusplus
-/* And also define a couple of simple functions to cast pointer to/from it. */
-inline wxUIntPtr wxPtrToUInt(const void *p)
+/* And also define a simple function to cast pointer to it. */
+inline wxUIntPtr wxPtrToUInt(void *p)
 {
     /*
        VC++ 7.1 gives warnings about casts such as below even when they're
@@ -802,19 +801,6 @@ inline wxUIntPtr wxPtrToUInt(const void *p)
 
 #ifdef __VISUALC__
     #pragma warning(default: 4311)
-#endif
-}
-
-inline void *wxUIntToPtr(wxUIntPtr p)
-{
-#ifdef __VISUALC__
-    #pragma warning(disable: 4312) /* conversion to type of greater size */
-#endif
-
-    return wx_reinterpret_cast(void *, p);
-
-#ifdef __VISUALC__
-    #pragma warning(default: 4312)
 #endif
 }
 #endif /*__cplusplus*/
@@ -1067,6 +1053,12 @@ typedef float wxFloat32;
     #define wxUINT64_SWAP_ON_LE(val)  wxUINT64_SWAP_ALWAYS(val)
     #define wxUINT64_SWAP_ON_BE(val)  (val)
 #endif
+
+/*  Macros to convert from unsigned long to void pointer. */
+/*  High order truncation occurs if the respective type is not large enough. */
+#define WXPTRULONGSLICE (((wxBYTE_ORDER==wxBIG_ENDIAN)&&(sizeof(void*)==8)&&(sizeof(unsigned long)<8))?1:0)
+#define wxPtrToULong(p) (((unsigned long*)(&(p)))[WXPTRULONGSLICE])
+#define wxULongToPtr(p,n) (p=NULL,wxPtrToULong(p)=(unsigned long)(n),p)
 
 /*  ---------------------------------------------------------------------------- */
 /*  Geometric flags */
@@ -1874,10 +1866,7 @@ enum wxKeyCode
     WXK_SPACE   =    32,
     WXK_DELETE  =    127,
 
-    /* There are by design not compatable with unicode characters.
-       If you want to get a unicode character from a key event, use
-       wxKeyEvent::GetUnicodeKey instead.                           */
-    WXK_START   = 300, 
+    WXK_START   = 300,
     WXK_LBUTTON,
     WXK_RBUTTON,
     WXK_CANCEL,

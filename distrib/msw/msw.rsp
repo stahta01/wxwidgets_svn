@@ -86,7 +86,6 @@ include/wx/msw/*.ico
 include/wx/msw/*.bmp
 
 include/wx/msw/wince/*.h
-include/wx/msw/wince/*.rc
 
 samples/*.rc
 samples/*.xpm

@@ -46,6 +46,12 @@ public:
     // Recommended destructor :-)
     ~wxPostScriptDC();
 
+#if WXWIN_COMPATIBILITY_2_2
+    wxPostScriptDC( const wxString &output, bool interactive = false, wxWindow *parent = NULL )
+        { Create( output, interactive, parent ); }
+    bool Create ( const wxString &output, bool interactive = false, wxWindow *parent = NULL );
+#endif
+
   virtual bool Ok() const;
 
   virtual void BeginDrawing() {}
@@ -136,6 +142,11 @@ private:
     static float ms_PSScaleFactor;
 
 protected:
+#if wxUSE_PANGO
+    PangoContext *m_context;
+    PangoLayout *m_layout;
+    PangoFontDescription *m_fontdesc;
+#endif
 
     FILE*             m_pstream;    // PostScript output stream
     wxString          m_title;
@@ -151,6 +162,50 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS(wxPostScriptDC)
 };
+
+
+#if WXWIN_COMPATIBILITY_2_2
+// Print Orientation
+enum
+{
+    PS_PORTRAIT = wxPORTRAIT,
+    PS_LANDSCAPE = wxLANDSCAPE
+};
+
+// Print Actions
+enum
+{
+    PS_NONE = wxPRINT_MODE_NONE,
+    PS_PREVIEW = wxPRINT_MODE_PREVIEW,
+    PS_FILE = wxPRINT_MODE_FILE,
+    PS_PRINTER = wxPRINT_MODE_PRINTER
+};
+
+class wxPrintSetupData: public wxPrintData
+{
+public:
+    wxPrintSetupData() {}
+
+    void SetPrinterOrientation( int orient )
+        { SetOrientation( orient ); }
+    void SetPrinterMode( wxPrintMode mode )
+        { SetPrintMode( mode ); }
+    void SetAFMPath( const wxString &path )
+        { SetFontMetricPath( path ); }
+
+    void SetPaperName(const wxString& paper) { m_paperName = paper; }
+    void SetPrinterFile(const wxString& file) { m_printerFile = file; }
+    wxString GetPaperName() const { return m_paperName; }
+    wxString GetPrinterFile() const { return m_printerFile; };
+
+    wxString        m_paperName;
+    wxString        m_printerFile;
+};
+
+WXDLLEXPORT_DATA(extern wxPrintSetupData*) wxThePrintSetupData;
+WXDLLEXPORT extern void wxInitializePrintSetupData(bool init = true);
+#endif
+
 
 #endif
     // wxUSE_POSTSCRIPT

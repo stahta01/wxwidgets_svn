@@ -60,6 +60,10 @@ wxIndividualLayoutConstraint::wxIndividualLayoutConstraint()
     otherWin = (wxWindowBase *) NULL;
 }
 
+wxIndividualLayoutConstraint::~wxIndividualLayoutConstraint()
+{
+}
+
 void wxIndividualLayoutConstraint::Set(wxRelationship rel, wxWindowBase *otherW, wxEdge otherE, int val, int marg)
 {
     if (rel == wxSameAs)
@@ -300,7 +304,7 @@ bool wxIndividualLayoutConstraint::SatisfyConstraint(wxLayoutConstraints *constr
                 {
                     int x, y;
                     int w, h;
-                    win->GetBestSize(&w, &h);
+                    win->GetSize(&w, &h);
                     win->GetPosition(&x, &y);
                     value = x + w;
                     done = true;
@@ -453,7 +457,7 @@ bool wxIndividualLayoutConstraint::SatisfyConstraint(wxLayoutConstraints *constr
                 {
                     int x, y;
                     int w, h;
-                    win->GetBestSize(&w, &h);
+                    win->GetSize(&w, &h);
                     win->GetPosition(&x, &y);
                     value = h + y;
                     done = true;
@@ -621,7 +625,7 @@ bool wxIndividualLayoutConstraint::SatisfyConstraint(wxLayoutConstraints *constr
                     if (win)
                     {
                         int h;
-                        win->GetBestSize(&value, &h);
+                        win->GetSize(&value, &h);
                         done = true;
                         return true;
                     }
@@ -679,7 +683,7 @@ bool wxIndividualLayoutConstraint::SatisfyConstraint(wxLayoutConstraints *constr
                     if (win)
                     {
                         int w;
-                        win->GetBestSize(&w, &value);
+                        win->GetSize(&w, &value);
                         done = true;
                         return true;
                     }
@@ -954,6 +958,10 @@ wxLayoutConstraints::wxLayoutConstraints()
     centreY.SetEdge(wxCentreY);
     width.SetEdge(wxWidth);
     height.SetEdge(wxHeight);
+}
+
+wxLayoutConstraints::~wxLayoutConstraints()
+{
 }
 
 bool wxLayoutConstraints::SatisfyConstraints(wxWindowBase *win, int *nChanges)

@@ -24,7 +24,6 @@
 
 #if __MSL__ >= 0x6000
 #include "math.h"
-namespace std {}
 using namespace std ;
 #endif
 
@@ -782,8 +781,8 @@ void  wxDC::DoCrossHair( wxCoord x, wxCoord y )
 static double wxConvertWXangleToMACangle(double angle)
 {
     double newAngle = 90 - angle ;
-    while ( newAngle > 360 ) newAngle -= 360 ;
-    while ( newAngle < 0 ) newAngle += 360 ;
+    if ( newAngle < 0 )
+        newAngle += 360 ;
     return newAngle ;
 }
 
@@ -824,8 +823,9 @@ void  wxDC::DoDrawArc( wxCoord x1, wxCoord y1,
     }
     wxCoord alpha2 = wxCoord(radius2 - radius1);
     wxCoord alpha1 = wxCoord(wxConvertWXangleToMACangle(radius1));
-    while( alpha2 < 0 ) alpha2 += 360 ;
-    alpha2 = -alpha2 ;
+    if( (xx1 > xx2) || (yy1 > yy2) ) {
+        alpha2 *= -1;
+    }
     Rect r = { yyc - rad, xxc - rad, yyc + rad, xxc + rad };
     if(m_brush.GetStyle() != wxTRANSPARENT) {
         MacInstallBrush();
@@ -1321,12 +1321,17 @@ inline int    FixedToInt( Fixed inFixed )
 void  wxDC::DoDrawRotatedText(const wxString& str, wxCoord x, wxCoord y,
                               double angle)
 {
-    // TODO support text background color (only possible by hand, ATSUI does not support it)
     wxCHECK_RET( Ok(), wxT("wxDC::DoDrawRotatedText  Invalid window dc") );
+/*
+    if (angle == 0.0 )
+    {
+        DrawText(str, x, y);
+        return;
+    }
 
     if ( str.Length() == 0 )
         return ;
-
+*/      
     wxMacFastPortSetter helper(this) ;
     MacInstallFont() ;
 
@@ -1429,7 +1434,12 @@ void  wxDC::DoDrawText(const wxString& strtext, wxCoord x, wxCoord y)
         useDrawThemeText = false ;
 #endif
     MacInstallFont() ;
-
+    if ( 0 )
+    {
+        m_macFormerAliasState = IsAntiAliasedTextEnabled(&m_macFormerAliasSize);
+        SetAntiAliasedTextEnabled(true, 8);
+        m_macAliasWasEnabled = true ;
+    }
     FontInfo fi ;
     ::GetFontInfo( &fi ) ;
 #if TARGET_CARBON
@@ -1481,6 +1491,14 @@ void  wxDC::DoDrawText(const wxString& strtext, wxCoord x, wxCoord y)
 #endif
         {
             wxCharBuffer text = linetext.mb_str(wxConvLocal) ; 
+            if ( m_backgroundMode != wxTRANSPARENT )
+            {
+                Rect frame = { yy - fi.ascent + line*(fi.descent + fi.ascent + fi.leading)  ,xx , yy - fi.ascent + (line+1)*(fi.descent + fi.ascent + fi.leading) , xx + 10000 } ;
+                short width = ::TextWidth( text , 0 , strlen(text) ) ;
+                frame.right = frame.left + width ;
+
+                ::EraseRect( &frame ) ;
+            }
             ::DrawText( text , 0 , strlen(text) ) ;
          }
     }
@@ -1683,11 +1701,6 @@ void wxDC::MacInstallFont() const
     //        return ;
     Pattern blackColor ;
     MacSetupBackgroundForCurrentPort(m_backgroundBrush) ;
-    if ( m_backgroundMode != wxTRANSPARENT )
-    {
-        Pattern whiteColor ;
-        ::BackPat(GetQDGlobalsWhite(&whiteColor));
-    }
     if ( m_font.Ok() )
     {
         ::TextFont( m_font.MacGetFontNum() ) ;

@@ -699,7 +699,6 @@ wxDC* wxMacPrinter::PrintDialog(wxWindow *parent)
 
 bool wxMacPrinter::Setup(wxWindow *parent)
 {
-#if 0
     wxPrintDialog dialog(parent, & m_printDialogData);
     dialog.GetPrintDialogData().SetSetupDialog(TRUE);
     
@@ -711,8 +710,6 @@ bool wxMacPrinter::Setup(wxWindow *parent)
     }
     
     return (ret == wxID_OK);
-#endif
-    return wxID_CANCEL;
 }
 
 /*

@@ -53,6 +53,10 @@ wxCommand::wxCommand(bool canUndoIt, const wxString& name)
     m_commandName = name;
 }
 
+wxCommand::~wxCommand()
+{
+}
+
 // ----------------------------------------------------------------------------
 // Command processor
 // ----------------------------------------------------------------------------

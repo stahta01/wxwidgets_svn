@@ -15,8 +15,6 @@
 #include "wx/hashmap.h"
 #include "wx/bitmap.h"
 
-#include "wx/cocoa/ObjcRef.h"
-
 // ========================================================================
 // wxMenuItem
 // ========================================================================
@@ -51,13 +49,10 @@ public:
             return iter->second;
         return NULL;
     }
-    void CocoaItemSelected();
-    bool Cocoa_validateMenuItem();
 protected:
-    void CocoaSetKeyEquivalent();
     WX_NSMenuItem m_cocoaNSMenuItem;
     static wxMenuItemCocoaHash sm_cocoaHash;
-    static wxObjcAutoRefFromAlloc<struct objc_object *> sm_cocoaTarget;
+    static struct objc_object *sm_cocoaTarget;
 // ------------------------------------------------------------------------
 // Implementation
 // ------------------------------------------------------------------------

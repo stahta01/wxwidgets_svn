@@ -175,16 +175,28 @@ void PNGLINKAGEMODE wx_PNG_stream_writer( png_structp png_ptr, png_bytep data,
 // from pngerror.c
 // so that the libpng doesn't send anything on stderr
 void
-PNGLINKAGEMODE wx_png_error(png_structp WXUNUSED(png_ptr), png_const_charp message)
+PNGLINKAGEMODE wx_png_error(png_structp png_ptr, png_const_charp message)
 {
-    wxLogFatalError( wxString::FromAscii(message) );
+    wxPNGInfoStruct *info = WX_PNG_INFO(png_ptr);
+    if (info->verbose)
+        wxLogError( wxString::FromAscii(message) );
+
+#ifdef USE_FAR_KEYWORD
+    {
+       jmp_buf jmpbuf;
+       png_memcpy(jmpbuf,info->jmpbuf,sizeof(jmp_buf));
+       longjmp(jmpbuf, 1);
+    }
+#else
+    longjmp(info->jmpbuf, 1);
+#endif
 }
 
 void
 PNGLINKAGEMODE wx_png_warning(png_structp png_ptr, png_const_charp message)
 {
-    wxPNGInfoStruct *info = png_ptr ? WX_PNG_INFO(png_ptr) : NULL;
-    if ( !info || info->verbose )
+    wxPNGInfoStruct *info = WX_PNG_INFO(png_ptr);
+    if (info->verbose)
         wxLogWarning( wxString::FromAscii(message) );
 }
 
@@ -519,15 +531,14 @@ wxPNGHandler::LoadFile(wxImage *image,
 
     image->Destroy();
 
-    png_structp png_ptr = png_create_read_struct
-                          (
-                            PNG_LIBPNG_VER_STRING,
-                            (voidp) NULL,
-                            wx_png_error,
-                            wx_png_warning
-                          );
+    png_structp png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING,
+        (voidp) NULL,
+        (png_error_ptr) NULL,
+        (png_error_ptr) NULL );
     if (!png_ptr)
         goto error;
+
+    png_set_error_fn(png_ptr, (png_voidp)NULL, wx_png_error, wx_png_warning);
 
     // NB: please see the comment near wxPNGInfoStruct declaration for
     //     explanation why this line is mandatory
@@ -629,19 +640,15 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
     wxinfo.verbose = verbose;
     wxinfo.stream.out = &stream;
 
-    png_structp png_ptr = png_create_write_struct
-                          (
-                            PNG_LIBPNG_VER_STRING,
-                            NULL,
-                            wx_png_error,
-                            wx_png_warning
-                          );
+    png_structp png_ptr = png_create_write_struct( PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png_ptr)
     {
         if (verbose)
            wxLogError(_("Couldn't save PNG image."));
         return false;
     }
+
+    png_set_error_fn(png_ptr, (png_voidp)NULL, wx_png_error, wx_png_warning);
 
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (info_ptr == NULL)

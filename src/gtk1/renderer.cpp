@@ -24,12 +24,15 @@
     #pragma hdrstop
 #endif
 
-#include "wx/renderer.h"
+#ifndef WX_PRECOMP
+#endif // WX_PRECOMP
+
 #include <gtk/gtk.h>
 #include "wx/gtk/win_gtk.h"
 
 #include "wx/window.h"
 #include "wx/dc.h"
+#include "wx/renderer.h"
 
 #ifdef __WXGTK20__
     #include "wx/settings.h"

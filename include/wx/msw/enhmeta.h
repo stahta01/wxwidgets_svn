@@ -61,7 +61,7 @@ public:
     void SetHENHMETAFILE(WXHANDLE hMF) { Free(); m_hMF = hMF; }
 
 protected:
-    void Init();
+    void Init() { m_hMF = 0; }
     void Free();
     void Assign(const wxEnhMetaFile& mf);
 

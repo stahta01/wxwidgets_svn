@@ -3868,7 +3868,7 @@ void wxListMainWindow::RecalculatePositions(bool noRefresh)
         iconSpacing = 0;
 
     // Note that we do not call GetClientSize() here but
-    // GetSize() and subtract the border size for sunken
+    // GetSize() and substract the border size for sunken
     // borders manually. This is technically incorrect,
     // but we need to know the client area's size WITHOUT
     // scrollbars here. Since we don't know if there are
@@ -4399,7 +4399,7 @@ void wxListMainWindow::InsertItem( wxListItem &item )
 
     wxListLineData *line = new wxListLineData(this);
 
-    line->SetItem( item.m_col, item );
+    line->SetItem( 0, item );
 
     m_lines.Insert( line, id );
 
@@ -4662,7 +4662,7 @@ bool wxGenericListCtrl::Create(wxWindow *parent,
 
     m_mainWin = new wxListMainWindow( this, wxID_ANY, wxPoint(0,0), size, style );
 
-#ifdef  __WXMAC_CARBON__ 
+#if defined( __WXMAC__ ) && __WXMAC_CARBON__
     // Human Interface Guidelines ask us for a special font in this case
     if ( GetWindowVariant() == wxWINDOW_VARIANT_NORMAL )
     {

@@ -903,6 +903,13 @@ wxGenericFileDialog::wxGenericFileDialog(wxWindow *parent,
     m_path += defaultFile;
     m_filterExtension = wxEmptyString;
 
+    // interpret wildcards
+    wxArrayString wildDescriptions, wildFilters;
+    if ( !wxParseCommonDialogsFilter(m_wildCard, wildDescriptions, wildFilters) )
+    {
+        wxFAIL_MSG( wxT("Wrong file type description") );
+    }
+
     // layout
 
     bool is_pda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
@@ -971,7 +978,7 @@ wxGenericFileDialog::wxGenericFileDialog(wxWindow *parent,
         style2 |= wxLC_SINGLE_SEL;
 
     m_list = new wxFileCtrl( this, ID_LIST_CTRL,
-                             _T(""), ms_lastShowHidden,
+                             wildFilters[0], ms_lastShowHidden,
                              wxDefaultPosition, wxSize(540,200),
                              style2);
 
@@ -1014,7 +1021,11 @@ wxGenericFileDialog::wxGenericFileDialog(wxWindow *parent,
         mainsizer->Add( choicesizer, 0, wxEXPAND );
     }
 
-    SetWildcard(wildCard);
+    for (size_t n=0; n<wildFilters.GetCount(); n++)
+    {
+        m_choice->Append( wildDescriptions[n], (void*) new wxString( wildFilters[n] ) );
+    }
+    SetFilterIndex( 0 );
 
     SetAutoLayout( true );
     SetSizer( mainsizer );
@@ -1080,25 +1091,6 @@ void wxGenericFileDialog::DoSetFilterIndex(int filterindex)
     {
         m_filterExtension.clear();
     }
-}
-
-void wxGenericFileDialog::SetWildcard(const wxString& wildCard)
-{
-    wxFileDialogBase::SetWildcard(wildCard);
-
-    wxArrayString wildDescriptions, wildFilters;
-    const size_t count = wxParseCommonDialogsFilter(m_wildCard,
-                                                    wildDescriptions,
-                                                    wildFilters);
-    wxCHECK_RET( count, wxT("wxFileDialog: bad wildcard string") );
-
-    m_choice->Clear();
-    for ( size_t n = 0; n < count; n++ )
-    {
-        m_choice->Append( wildDescriptions[n], new wxString( wildFilters[n] ) );
-    }
-
-    SetFilterIndex( 0 );
 }
 
 void wxGenericFileDialog::SetFilterIndex( int filterindex )

@@ -591,6 +591,18 @@ bool wxHtmlEasyPrinting::DoPrint(wxHtmlPrintout *printout)
 
 
 
+void wxHtmlEasyPrinting::PrinterSetup()
+{
+    wxPrintDialogData printDialogData(*GetPrintData());
+    wxPrintDialog printerDialog(m_ParentWindow, &printDialogData);
+
+    printerDialog.GetPrintDialogData().SetSetupDialog(true);
+
+    if (printerDialog.ShowModal() == wxID_OK)
+        (*GetPrintData()) = printerDialog.GetPrintDialogData().GetPrintData();
+}
+
+
 
 void wxHtmlEasyPrinting::PageSetup()
 {

@@ -235,16 +235,6 @@
                         <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
                         <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
                     </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
                 </SETTING>
                 <SETTING><NAME>SystemSearchPaths</NAME>
                     <SETTING>
@@ -4534,24 +4524,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -6923,20 +6895,6 @@
                     <PATH>gsocket.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -7273,16 +7231,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>xrc</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -11579,24 +11527,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -13968,20 +13898,6 @@
                     <PATH>gsocket.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -15058,16 +14974,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>expat/lib</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -16296,24 +16202,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -16328,20 +16216,6 @@
                     <PATHROOT>Project</PATHROOT>
                     <ACCESSPATH>::include:</ACCESSPATH>
                     <PATH>wxshlba_cwc_d.pch++</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
             </LINKORDER>
@@ -16523,16 +16397,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>xrc</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -20581,24 +20445,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -22948,20 +22794,6 @@
                     <PATH>xmlrsall.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -23266,16 +23098,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>xrc</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -27383,24 +27205,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -29795,20 +29599,6 @@
                     <PATH>xmlrsall.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -30924,16 +30714,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>xrc</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -35076,24 +34856,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -37507,20 +37269,6 @@
                     <PATH>xmlrsall.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -37815,16 +37563,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>xrc</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -41994,24 +41732,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -44446,20 +44166,6 @@
                     <PATH>xmlrsall.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -44735,16 +44441,6 @@
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>::lib:</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>MacOS</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
                         <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
@@ -45773,24 +45469,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -45812,20 +45490,6 @@
                     <PATHROOT>Project</PATHROOT>
                     <ACCESSPATH>:mac:carbon:</ACCESSPATH>
                     <PATH>gsocket.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
             </LINKORDER>
@@ -45966,16 +45630,6 @@
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>::lib:</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>MacOS</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
                         <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
@@ -47013,24 +46667,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -47059,20 +46695,6 @@
                     <PATHROOT>Project</PATHROOT>
                     <ACCESSPATH>:mac:carbon:</ACCESSPATH>
                     <PATH>gsocket.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
             </LINKORDER>
@@ -47252,16 +46874,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>xrc</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -51621,24 +51233,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -54059,20 +53653,6 @@
                     <PATH>gsocket.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -54409,16 +53989,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>xrc</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -58778,24 +58348,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -61216,20 +60768,6 @@
                     <PATH>gsocket.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
             <SUBPROJECTLIST>
                 <SUBPROJECT>
@@ -61556,16 +61094,6 @@
                     <SETTING>
                         <SETTING><NAME>SearchPath</NAME>
                             <SETTING><NAME>Path</NAME><VALUE>expat/lib</VALUE></SETTING>
-                            <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
-                            <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
-                        </SETTING>
-                        <SETTING><NAME>Recursive</NAME><VALUE>true</VALUE></SETTING>
-                        <SETTING><NAME>FrameworkPath</NAME><VALUE>false</VALUE></SETTING>
-                        <SETTING><NAME>HostFlags</NAME><VALUE>All</VALUE></SETTING>
-                    </SETTING>
-                    <SETTING>
-                        <SETTING><NAME>SearchPath</NAME>
-                            <SETTING><NAME>Path</NAME><VALUE>mac/corefoundation</VALUE></SETTING>
                             <SETTING><NAME>PathFormat</NAME><VALUE>Unix</VALUE></SETTING>
                             <SETTING><NAME>PathRoot</NAME><VALUE>Project</VALUE></SETTING>
                         </SETTING>
@@ -62794,24 +62322,6 @@
                     <FILEKIND>Text</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -62826,20 +62336,6 @@
                     <PATHROOT>Project</PATHROOT>
                     <ACCESSPATH>::include:</ACCESSPATH>
                     <PATH>wxshlba_cwc.pch</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                    <PATH>cfstring.cpp</PATH>
-                    <PATHFORMAT>Unix</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>PathRelative</PATHTYPE>
-                    <PATHROOT>Project</PATHROOT>
-                    <ACCESSPATH>:common:</ACCESSPATH>
-                    <PATH>uri.cpp</PATH>
                     <PATHFORMAT>Unix</PATHFORMAT>
                 </FILEREF>
             </LINKORDER>
@@ -63920,14 +63416,6 @@
                 <PATHTYPE>PathRelative</PATHTYPE>
                 <PATHROOT>Project</PATHROOT>
                 <ACCESSPATH>:common:</ACCESSPATH>
-                <PATH>uri.cpp</PATH>
-                <PATHFORMAT>Unix</PATHFORMAT>
-            </FILEREF>
-            <FILEREF>
-                <TARGETNAME>wxshlb Mach-O debug</TARGETNAME>
-                <PATHTYPE>PathRelative</PATHTYPE>
-                <PATHROOT>Project</PATHROOT>
-                <ACCESSPATH>:common:</ACCESSPATH>
                 <PATH>:url.cpp</PATH>
                 <PATHFORMAT>MacOS</PATHFORMAT>
             </FILEREF>
@@ -64984,14 +64472,6 @@
                 <ACCESSPATH>:mac:carbon:</ACCESSPATH>
                 <PATH>:button.cpp</PATH>
                 <PATHFORMAT>MacOS</PATHFORMAT>
-            </FILEREF>
-            <FILEREF>
-                <TARGETNAME>wxshlb Mach-O debug</TARGETNAME>
-                <PATHTYPE>PathRelative</PATHTYPE>
-                <PATHROOT>Project</PATHROOT>
-                <ACCESSPATH>mac/corefoundation</ACCESSPATH>
-                <PATH>cfstring.cpp</PATH>
-                <PATHFORMAT>Unix</PATHFORMAT>
             </FILEREF>
             <FILEREF>
                 <TARGETNAME>wxshlb Mach-O debug</TARGETNAME>

@@ -212,7 +212,6 @@ wx/scopeguard.h
 wx/snglinst.h
 wx/sstream.h
 wx/stack.h
-wx/stdpaths.h
 wx/stockitem.h
 wx/stopwatch.h
 wx/strconv.h
@@ -227,7 +226,6 @@ wx/timer.h
 wx/tokenzr.h
 wx/txtstrm.h
 wx/types.h
-wx/uri.h
 wx/utils.h
 wx/variant.h
 wx/vector.h

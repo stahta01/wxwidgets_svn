@@ -433,8 +433,6 @@ int wxEntry(int& argc, wxChar **argv)
     {
 #ifdef __WXWINCE__
         ::ExitThread(3); // the same exit code as abort()
-#elif __PALMOS__
-        return -1;
 #else
         ::ExitProcess(3); // the same exit code as abort()
 #endif

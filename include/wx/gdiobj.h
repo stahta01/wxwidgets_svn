@@ -1,9 +1,7 @@
 #ifndef _WX_GDIOBJ_H_BASE_
 #define _WX_GDIOBJ_H_BASE_
 
-#if defined(__PALMOS__)
-#include "wx/palmos/gdiobj.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
 #include "wx/msw/gdiobj.h"
 #elif defined(__WXMOTIF__)
 #include "wx/motif/gdiobj.h"

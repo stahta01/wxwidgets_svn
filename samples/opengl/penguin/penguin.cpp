@@ -25,10 +25,6 @@
 #include "wx/wx.h"
 #endif
 
-#if !wxUSE_GLCANVAS
-    #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
-#endif
-
 #include "penguin.h"
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -58,6 +54,7 @@ bool MyApp::OnInit()
     menuBar->Append(fileMenu, wxT("&File"));
     frame->SetMenuBar(menuBar);
 
+#if wxUSE_GLCANVAS
     frame->SetCanvas( new TestGLCanvas(frame, wxID_ANY, wxDefaultPosition,
         wxSize(200, 200), wxSUNKEN_BORDER) );
 
@@ -68,6 +65,14 @@ bool MyApp::OnInit()
     frame->Show(true);
 
     return true;
+#else
+
+    wxMessageBox( _T("This sample has to be compiled with wxUSE_GLCANVAS"),
+        _T("Building error"), wxOK);
+
+    return false;
+
+#endif
 }
 
 IMPLEMENT_APP(MyApp)
@@ -81,7 +86,9 @@ MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
     const wxSize& size, long style)
     : wxFrame(frame, wxID_ANY, title, pos, size, style)
 {
+#if wxUSE_GLCANVAS
     m_canvas = NULL;
+#endif
 }
 
 /* Intercept menu commands */
@@ -90,6 +97,8 @@ void MyFrame::OnExit( wxCommandEvent& WXUNUSED(event) )
     // true is to force the frame to close
     Close(true);
 }
+
+#if wxUSE_GLCANVAS
 
 BEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
     EVT_SIZE(TestGLCanvas::OnSize)
@@ -258,3 +267,5 @@ void TestGLCanvas::InitGL()
     glEnable(GL_COLOR_MATERIAL);
 }
 
+
+#endif // #if wxUSE_GLCANVAS

@@ -1,14 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        strconv.cpp
 // Purpose:     Unicode conversion classes
-// Author:      Ove Kaaven, Robert Roebling, Vadim Zeitlin, Vaclav Slavik,
-//              Ryan Norton, Fredrik Roubert (UTF7)
+// Author:      Ove Kaaven, Robert Roebling, Vadim Zeitlin, Vaclav Slavik
 // Modified by:
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Ove Kaaven, Robert Roebling, Vaclav Slavik
 //              (c) 2000-2003 Vadim Zeitlin
-//              (c) 2004 Ryan Norton, Fredrik Roubert
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +168,7 @@ static size_t decode_utf16(const wxUint16* input, wxUint32& output)
 
 wxMBConv::~wxMBConv()
 {
-    // nothing to do here (necessary for Darwin linking probably)
+    // nothing to do here
 }
 
 const wxWCharBuffer wxMBConv::cMB2WC(const char *psz) const
@@ -217,131 +215,6 @@ const wxCharBuffer wxMBConv::cWC2MB(const wchar_t *pwz) const
     return buf;
 }
 
-const wxWCharBuffer wxMBConv::cMB2WC(const char *szString, size_t nStringLen, size_t* pOutSize) const
-{
-    wxASSERT(pOutSize != NULL);
-
-    const char* szEnd = szString + nStringLen + 1;
-    const char* szPos = szString;
-    const char* szStart = szPos;
-
-    size_t nActualLength = 0;
-    size_t nCurrentSize = nStringLen; //try normal size first (should never resize?)
-
-    wxWCharBuffer theBuffer(nCurrentSize);
-
-    //Convert the string until the length() is reached, continuing the
-    //loop every time a null character is reached
-    while(szPos != szEnd)
-    {
-        wxASSERT(szPos < szEnd); //something is _really_ screwed up if this rings true
-
-        //Get the length of the current (sub)string
-        size_t nLen = MB2WC(NULL, szPos, 0);
-
-        //Invalid conversion?
-        if( nLen == (size_t)-1 )
-        {
-            *pOutSize = 0;
-            theBuffer.data()[0u] = wxT('\0');
-            return theBuffer;
-        }
-
-
-        //Increase the actual length (+1 for current null character)
-        nActualLength += nLen + 1;
-
-        //if buffer too big, realloc the buffer
-        if (nActualLength > (nCurrentSize+1))
-        {
-            wxWCharBuffer theNewBuffer(nCurrentSize << 1);
-            memcpy(theNewBuffer.data(), theBuffer.data(), nCurrentSize * sizeof(wchar_t));
-            theBuffer = theNewBuffer;
-            nCurrentSize <<= 1;
-        }
-
-        //Convert the current (sub)string
-        if ( MB2WC(&theBuffer.data()[szPos - szStart], szPos, nLen + 1) == (size_t)-1 )
-        {
-            *pOutSize = 0;
-            theBuffer.data()[0u] = wxT('\0');
-            return theBuffer;
-        }
-
-        //Increment to next (sub)string
-        //Note that we have to use strlen here instead of nLen
-        //here because XX2XX gives us the size of the output buffer,
-        //not neccessarly the length of the string
-        szPos += strlen(szPos) + 1;
-    }
-
-    //success - return actual length and the buffer
-    *pOutSize = nActualLength;
-    return theBuffer;  
-}
-
-const wxCharBuffer wxMBConv::cWC2MB(const wchar_t *szString, size_t nStringLen, size_t* pOutSize) const
-{
-    wxASSERT(pOutSize != NULL);
-
-    const wchar_t* szEnd = szString + nStringLen + 1;
-    const wchar_t* szPos = szString;
-    const wchar_t* szStart = szPos;
-
-    size_t nActualLength = 0;
-    size_t nCurrentSize = nStringLen << 2; //try * 4 first
-
-    wxCharBuffer theBuffer(nCurrentSize);
-
-    //Convert the string until the length() is reached, continuing the
-    //loop every time a null character is reached
-    while(szPos != szEnd)
-    {
-        wxASSERT(szPos < szEnd); //something is _really_ screwed up if this rings true
-
-        //Get the length of the current (sub)string
-        size_t nLen = WC2MB(NULL, szPos, 0);
-
-        //Invalid conversion?
-        if( nLen == (size_t)-1 )
-        {
-            *pOutSize = 0;
-            theBuffer.data()[0u] = wxT('\0');
-            return theBuffer;
-        }
-
-        //Increase the actual length (+1 for current null character)
-        nActualLength += nLen + 1;
-        
-        //if buffer too big, realloc the buffer
-        if (nActualLength > (nCurrentSize+1))
-        {
-            wxCharBuffer theNewBuffer(nCurrentSize << 1);
-            memcpy(theNewBuffer.data(), theBuffer.data(), nCurrentSize);
-            theBuffer = theNewBuffer;
-            nCurrentSize <<= 1;
-        }
-
-        //Convert the current (sub)string
-        if(WC2MB(&theBuffer.data()[szPos - szStart], szPos, nLen + 1) == (size_t)-1 )
-        {
-            *pOutSize = 0;
-            theBuffer.data()[0u] = wxT('\0');
-            return theBuffer;
-        }
-
-        //Increment to next (sub)string
-        //Note that we have to use wxWcslen here instead of nLen
-        //here because XX2XX gives us the size of the output buffer,
-        //not neccessarly the length of the string
-        szPos += wxWcslen(szPos) + 1;
-    }
-
-    //success - return actual length and the buffer
-    *pOutSize = nActualLength;
-    return theBuffer;  
-}
-
 // ----------------------------------------------------------------------------
 // wxMBConvLibc
 // ----------------------------------------------------------------------------
@@ -355,210 +228,34 @@ size_t wxMBConvLibc::WC2MB(char *buf, const wchar_t *psz, size_t n) const
 {
     return wxWC2MB(buf, psz, n);
 }
+
 // ----------------------------------------------------------------------------
-// UTF-7 
+// UTF-7
 // ----------------------------------------------------------------------------
 
-// Implementation (C) 2004 Fredrik Roubert
+#if 0
+static char utf7_setD[]="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        "abcdefghijklmnopqrstuvwxyz"
+                        "0123456789'(),-./:?";
+static char utf7_setO[]="!\"#$%&*;<=>@[]^_`{|}";
+static char utf7_setB[]="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        "abcdefghijklmnopqrstuvwxyz"
+                        "0123456789+/";
+#endif
 
-//
-// BASE64 decoding table
-//
-static const unsigned char utf7unb64[] =
+// TODO: write actual implementations of UTF-7 here
+size_t wxMBConvUTF7::MB2WC(wchar_t * WXUNUSED(buf),
+                           const char * WXUNUSED(psz),
+                           size_t WXUNUSED(n)) const
 {
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0x3e, 0xff, 0xff, 0xff, 0x3f,
-    0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b,
-    0x3c, 0x3d, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-    0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
-    0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16,
-    0x17, 0x18, 0x19, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20,
-    0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
-    0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30,
-    0x31, 0x32, 0x33, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-};
-
-size_t wxMBConvUTF7::MB2WC(wchar_t *buf, const char *psz, size_t n) const
-{
-
-    size_t len = 0;
-
-    while (*psz && ((!buf) || (len < n)))
-    {
-        unsigned char cc = *psz++;
-        if (cc != '+')
-        {
-            // plain ASCII char
-            if (buf)
-                *buf++ = cc;
-            len++;
-        }
-        else if (*psz == '-')
-        {
-            // encoded plus sign
-            if (buf)
-                *buf++ = cc;
-            len++;
-            psz++;
-        }
-        else
-        {
-            // BASE64 encoded string
-            bool lsb;
-            unsigned char c;
-            unsigned int d, l;
-            for (lsb = false, d = 0, l = 0;
-                (cc = utf7unb64[(unsigned char)*psz]) != 0xff; psz++)
-            {
-                d <<= 6;
-                d += cc;
-                for (l += 6; l >= 8; lsb = !lsb)
-                {
-                    c = (unsigned char)((d >> (l -= 8)) % 256);
-                    if (lsb)
-                    {
-                        if (buf)
-                            *buf++ |= c;
-                        len ++;
-                    }
-                    else
-                        if (buf)
-                            *buf = (wchar_t)(c << 8);
-                }
-            }
-            if (*psz == '-')
-                psz++;
-        }
-    }
-    if (buf && (len < n))
-        *buf = 0;
-    return len;
+  return 0;
 }
 
-//
-// BASE64 encoding table
-//
-static const unsigned char utf7enb64[] =
+size_t wxMBConvUTF7::WC2MB(char * WXUNUSED(buf),
+                           const wchar_t * WXUNUSED(psz),
+                           size_t WXUNUSED(n)) const
 {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-    'w', 'x', 'y', 'z', '0', '1', '2', '3',
-    '4', '5', '6', '7', '8', '9', '+', '/'
-};
-
-//
-// UTF-7 encoding table
-//
-// 0 - Set D (directly encoded characters)
-// 1 - Set O (optional direct characters)
-// 2 - whitespace characters (optional)
-// 3 - special characters
-//
-static const unsigned char utf7encode[128] =
-{
-    3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 3, 2, 3, 3,
-    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 3, 0, 0, 0, 3,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 1, 1, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 3, 3
-};
-
-size_t wxMBConvUTF7::WC2MB(char *buf, const wchar_t 
-*psz, size_t n) const
-{
-
-
-    size_t len = 0;
-
-    while (*psz && ((!buf) || (len < n)))
-    {
-        wchar_t cc = *psz++;
-        if (cc < 0x80 && utf7encode[cc] < 1)
-        {
-            // plain ASCII char
-            if (buf)
-                *buf++ = (char)cc;
-            len++;
-        }
-#ifndef WC_UTF16
-        else if (((wxUint32)cc) > 0xffff)
-	    {
-            // no surrogate pair generation (yet?)
-            return (size_t)-1;
-        }
-#endif
-        else
-        {
-            if (buf)
-                *buf++ = '+';
-            len++;
-            if (cc != '+')
-            {
-                // BASE64 encode string
-                unsigned int lsb, d, l;
-                for (d = 0, l = 0;; psz++)
-                {
-                    for (lsb = 0; lsb < 2; lsb ++)
-                    {
-                        d <<= 8;
-                        d += lsb ? cc & 0xff : (cc & 0xff00) >> 8;
-
-                        for (l += 8; l >= 6; )
-                        {
-                            l -= 6;
-                            if (buf)
-                                *buf++ = utf7enb64[(d >> l) % 64];
-                            len++;
-                        }
-                    }
-                    cc = *psz;
-                    if (!(cc) || (cc < 0x80 && utf7encode[cc] < 1))
-                        break;
-                }
-                if (l != 0)
-                {
-                    if (buf)
-                        *buf++ = utf7enb64[((d % 16) << (6 - l)) % 64];
-                    len++;
-                }
-            }
-            if (buf)
-                *buf++ = '-';
-            len++;
-        }
-    }
-    if (buf && (len < n))
-        *buf = 0;
-    return len;
+  return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1590,416 +1287,6 @@ private:
 #endif // wxHAVE_WIN32_MB2WC
 
 // ============================================================================
-// Cocoa conversion classes
-// ============================================================================
-
-#if defined(__WXCOCOA__)
-
-// RN:  There is no UTF-32 support in either Core Foundation or
-// Cocoa.  Strangely enough, internally Core Foundation uses
-// UTF 32 internally quite a bit - its just not public (yet).
-
-#include <CoreFoundation/CFString.h>
-#include <CoreFoundation/CFStringEncodingExt.h>
-
-CFStringEncoding wxCFStringEncFromFontEnc(wxFontEncoding encoding)
-{
-    CFStringEncoding enc = kCFStringEncodingInvalidId ;
-    if ( encoding == wxFONTENCODING_DEFAULT )
-    {
-        enc = CFStringGetSystemEncoding();
-    }
-    else switch( encoding)
-    {
-        case wxFONTENCODING_ISO8859_1 :
-            enc = kCFStringEncodingISOLatin1 ;
-            break ;
-        case wxFONTENCODING_ISO8859_2 :
-            enc = kCFStringEncodingISOLatin2;
-            break ;
-        case wxFONTENCODING_ISO8859_3 :
-            enc = kCFStringEncodingISOLatin3 ;
-            break ;
-        case wxFONTENCODING_ISO8859_4 :
-            enc = kCFStringEncodingISOLatin4;
-            break ;
-        case wxFONTENCODING_ISO8859_5 :
-            enc = kCFStringEncodingISOLatinCyrillic;
-            break ;
-        case wxFONTENCODING_ISO8859_6 :
-            enc = kCFStringEncodingISOLatinArabic;
-            break ;
-        case wxFONTENCODING_ISO8859_7 :
-            enc = kCFStringEncodingISOLatinGreek;
-            break ;
-        case wxFONTENCODING_ISO8859_8 :
-            enc = kCFStringEncodingISOLatinHebrew;
-            break ;
-        case wxFONTENCODING_ISO8859_9 :
-            enc = kCFStringEncodingISOLatin5;
-            break ;
-        case wxFONTENCODING_ISO8859_10 :
-            enc = kCFStringEncodingISOLatin6;
-            break ;
-        case wxFONTENCODING_ISO8859_11 :
-            enc = kCFStringEncodingISOLatinThai;
-            break ;
-        case wxFONTENCODING_ISO8859_13 :
-            enc = kCFStringEncodingISOLatin7;
-            break ;
-        case wxFONTENCODING_ISO8859_14 :
-            enc = kCFStringEncodingISOLatin8;
-            break ;
-        case wxFONTENCODING_ISO8859_15 :
-            enc = kCFStringEncodingISOLatin9;
-            break ;
-
-        case wxFONTENCODING_KOI8 :
-            enc = kCFStringEncodingKOI8_R;
-            break ;
-        case wxFONTENCODING_ALTERNATIVE : // MS-DOS CP866
-            enc = kCFStringEncodingDOSRussian;
-            break ;
-
-//      case wxFONTENCODING_BULGARIAN :
-//          enc = ;
-//          break ;
-
-        case wxFONTENCODING_CP437 :
-            enc =kCFStringEncodingDOSLatinUS ;
-            break ;
-        case wxFONTENCODING_CP850 :
-            enc = kCFStringEncodingDOSLatin1;
-            break ;
-        case wxFONTENCODING_CP852 :
-            enc = kCFStringEncodingDOSLatin2;
-            break ;
-        case wxFONTENCODING_CP855 :
-            enc = kCFStringEncodingDOSCyrillic;
-            break ;
-        case wxFONTENCODING_CP866 :
-            enc =kCFStringEncodingDOSRussian ;
-            break ;
-        case wxFONTENCODING_CP874 :
-            enc = kCFStringEncodingDOSThai;
-            break ;
-        case wxFONTENCODING_CP932 :
-            enc = kCFStringEncodingDOSJapanese;
-            break ;
-        case wxFONTENCODING_CP936 :
-            enc =kCFStringEncodingDOSChineseSimplif ;
-            break ;
-        case wxFONTENCODING_CP949 :
-            enc = kCFStringEncodingDOSKorean;
-            break ;
-        case wxFONTENCODING_CP950 :
-            enc = kCFStringEncodingDOSChineseTrad;
-            break ;
-        case wxFONTENCODING_CP1250 :
-            enc = kCFStringEncodingWindowsLatin2;
-            break ;
-        case wxFONTENCODING_CP1251 :
-            enc =kCFStringEncodingWindowsCyrillic ;
-            break ;
-        case wxFONTENCODING_CP1252 :
-            enc =kCFStringEncodingWindowsLatin1 ;
-            break ;
-        case wxFONTENCODING_CP1253 :
-            enc = kCFStringEncodingWindowsGreek;
-            break ;
-        case wxFONTENCODING_CP1254 :
-            enc = kCFStringEncodingWindowsLatin5;
-            break ;
-        case wxFONTENCODING_CP1255 :
-            enc =kCFStringEncodingWindowsHebrew ;
-            break ;
-        case wxFONTENCODING_CP1256 :
-            enc =kCFStringEncodingWindowsArabic ;
-            break ;
-        case wxFONTENCODING_CP1257 :
-            enc = kCFStringEncodingWindowsBalticRim;
-            break ;
-//   This only really encodes to UTF7 (if that) evidently
-//        case wxFONTENCODING_UTF7 :
-//            enc = kCFStringEncodingNonLossyASCII ;
-//            break ;
-        case wxFONTENCODING_UTF8 :
-            enc = kCFStringEncodingUTF8 ;
-            break ;
-        case wxFONTENCODING_EUC_JP :
-            enc = kCFStringEncodingEUC_JP;
-            break ;
-        case wxFONTENCODING_UTF16 :
-            enc = kCFStringEncodingUnicode ;
-            break ;
-        case wxFONTENCODING_MACROMAN :
-            enc = kCFStringEncodingMacRoman ;
-            break ;
-        case wxFONTENCODING_MACJAPANESE :
-            enc = kCFStringEncodingMacJapanese ;
-            break ;
-        case wxFONTENCODING_MACCHINESETRAD :
-            enc = kCFStringEncodingMacChineseTrad ;
-            break ;
-        case wxFONTENCODING_MACKOREAN :
-            enc = kCFStringEncodingMacKorean ;
-            break ;
-        case wxFONTENCODING_MACARABIC :
-            enc = kCFStringEncodingMacArabic ;
-            break ;
-        case wxFONTENCODING_MACHEBREW :
-            enc = kCFStringEncodingMacHebrew ;
-            break ;
-        case wxFONTENCODING_MACGREEK :
-            enc = kCFStringEncodingMacGreek ;
-            break ;
-        case wxFONTENCODING_MACCYRILLIC :
-            enc = kCFStringEncodingMacCyrillic ;
-            break ;
-        case wxFONTENCODING_MACDEVANAGARI :
-            enc = kCFStringEncodingMacDevanagari ;
-            break ;
-        case wxFONTENCODING_MACGURMUKHI :
-            enc = kCFStringEncodingMacGurmukhi ;
-            break ;
-        case wxFONTENCODING_MACGUJARATI :
-            enc = kCFStringEncodingMacGujarati ;
-            break ;
-        case wxFONTENCODING_MACORIYA :
-            enc = kCFStringEncodingMacOriya ;
-            break ;
-        case wxFONTENCODING_MACBENGALI :
-            enc = kCFStringEncodingMacBengali ;
-            break ;
-        case wxFONTENCODING_MACTAMIL :
-            enc = kCFStringEncodingMacTamil ;
-            break ;
-        case wxFONTENCODING_MACTELUGU :
-            enc = kCFStringEncodingMacTelugu ;
-            break ;
-        case wxFONTENCODING_MACKANNADA :
-            enc = kCFStringEncodingMacKannada ;
-            break ;
-        case wxFONTENCODING_MACMALAJALAM :
-            enc = kCFStringEncodingMacMalayalam ;
-            break ;
-        case wxFONTENCODING_MACSINHALESE :
-            enc = kCFStringEncodingMacSinhalese ;
-            break ;
-        case wxFONTENCODING_MACBURMESE :
-            enc = kCFStringEncodingMacBurmese ;
-            break ;
-        case wxFONTENCODING_MACKHMER :
-            enc = kCFStringEncodingMacKhmer ;
-            break ;
-        case wxFONTENCODING_MACTHAI :
-            enc = kCFStringEncodingMacThai ;
-            break ;
-        case wxFONTENCODING_MACLAOTIAN :
-            enc = kCFStringEncodingMacLaotian ;
-            break ;
-        case wxFONTENCODING_MACGEORGIAN :
-            enc = kCFStringEncodingMacGeorgian ;
-            break ;
-        case wxFONTENCODING_MACARMENIAN :
-            enc = kCFStringEncodingMacArmenian ;
-            break ;
-        case wxFONTENCODING_MACCHINESESIMP :
-            enc = kCFStringEncodingMacChineseSimp ;
-            break ;
-        case wxFONTENCODING_MACTIBETAN :
-            enc = kCFStringEncodingMacTibetan ;
-            break ;
-        case wxFONTENCODING_MACMONGOLIAN :
-            enc = kCFStringEncodingMacMongolian ;
-            break ;
-        case wxFONTENCODING_MACETHIOPIC :
-            enc = kCFStringEncodingMacEthiopic ;
-            break ;
-        case wxFONTENCODING_MACCENTRALEUR :
-            enc = kCFStringEncodingMacCentralEurRoman ;
-            break ;
-        case wxFONTENCODING_MACVIATNAMESE :
-            enc = kCFStringEncodingMacVietnamese ;
-            break ;
-        case wxFONTENCODING_MACARABICEXT :
-            enc = kCFStringEncodingMacExtArabic ;
-            break ;
-        case wxFONTENCODING_MACSYMBOL :
-            enc = kCFStringEncodingMacSymbol ;
-            break ;
-        case wxFONTENCODING_MACDINGBATS :
-            enc = kCFStringEncodingMacDingbats ;
-            break ;
-        case wxFONTENCODING_MACTURKISH :
-            enc = kCFStringEncodingMacTurkish ;
-            break ;
-        case wxFONTENCODING_MACCROATIAN :
-            enc = kCFStringEncodingMacCroatian ;
-            break ;
-        case wxFONTENCODING_MACICELANDIC :
-            enc = kCFStringEncodingMacIcelandic ;
-            break ;
-        case wxFONTENCODING_MACROMANIAN :
-            enc = kCFStringEncodingMacRomanian ;
-            break ;
-        case wxFONTENCODING_MACCELTIC :
-            enc = kCFStringEncodingMacCeltic ;
-            break ;
-        case wxFONTENCODING_MACGAELIC :
-            enc = kCFStringEncodingMacGaelic ;
-            break ;
-//      case wxFONTENCODING_MACKEYBOARD :
-//          enc = kCFStringEncodingMacKeyboardGlyphs ;
-//          break ;
-        default :
-            // because gcc is picky
-            break ;
-    } ;
-    return enc ;
-}
-
-class wxMBConv_cocoa : public wxMBConv
-{
-public:
-    wxMBConv_cocoa()
-    {
-        Init(CFStringGetSystemEncoding()) ;
-    }
-
-    wxMBConv_cocoa(const wxChar* name)
-    {
-        Init( wxCFStringEncFromFontEnc(wxFontMapper::Get()->CharsetToEncoding(name, false) ) ) ;
-    }
-
-    wxMBConv_cocoa(wxFontEncoding encoding)
-    {
-        Init( wxCFStringEncFromFontEnc(encoding) );
-    }
-
-    ~wxMBConv_cocoa()
-    {
-    }
-
-    void Init( CFStringEncoding encoding)
-    {
-        m_encoding = encoding ;
-    }
-
-    size_t MB2WC(wchar_t * szOut, const char * szUnConv, size_t nOutSize) const
-    {
-        wxASSERT(szUnConv);
-
-        CFStringRef theString = CFStringCreateWithBytes (
-                                                NULL, //the allocator
-                                                (const UInt8*)szUnConv,
-                                                strlen(szUnConv),
-                                                m_encoding,
-                                                false //no BOM/external representation
-                                                );
-
-        wxASSERT(theString);
-
-        size_t nOutLength = CFStringGetLength(theString);
-
-        if (szOut == NULL)
-        {
-            CFRelease(theString);
-            return nOutLength;
-        }
-
-        CFRange theRange = { 0, nOutSize };
-
-#if SIZEOF_WCHAR_T == 4
-        UniChar* szUniCharBuffer = new UniChar[nOutSize];
-#endif
- 
-        CFStringGetCharacters(theString, theRange, szUniCharBuffer);
-        
-        CFRelease(theString);
-
-        szUniCharBuffer[nOutLength] = '\0' ;
-
-#if SIZEOF_WCHAR_T == 4
-        wxMBConvUTF16 converter ;
-        converter.MB2WC(szOut, (const char*)szUniCharBuffer , nOutSize ) ;
-        delete[] szUniCharBuffer;
-#endif
-    
-        return nOutLength;
-    }
-
-    size_t WC2MB(char *szOut, const wchar_t *szUnConv, size_t nOutSize) const
-    {
-        wxASSERT(szUnConv);
-        
-        size_t nRealOutSize;
-        size_t nBufSize = wxWcslen(szUnConv);
-        UniChar* szUniBuffer = (UniChar*) szUnConv;
-
-#if SIZEOF_WCHAR_T == 4
-        wxMBConvUTF16BE converter ;
-        nBufSize = converter.WC2MB( NULL , szUnConv , 0 );
-        szUniBuffer = new UniChar[ (nBufSize / sizeof(UniChar)) + 1] ;
-        converter.WC2MB( (char*) szUniBuffer , szUnConv, nBufSize + sizeof(UniChar)) ;
-        nBufSize /= sizeof(UniChar);
-#endif
-
-        CFStringRef theString = CFStringCreateWithCharactersNoCopy(
-                                NULL, //allocator
-                                szUniBuffer,
-                                nBufSize,
-                                kCFAllocatorNull //deallocator - we want to deallocate it ourselves
-                            );
-
-        wxASSERT(theString);
-
-        //Note that CER puts a BOM when converting to unicode
-        //so we  check and use getchars instead in that case
-        if (m_encoding == kCFStringEncodingUnicode)
-        {
-            if (szOut != NULL)
-                CFStringGetCharacters(theString, CFRangeMake(0, nOutSize - 1), (UniChar*) szOut);
-            
-            nRealOutSize = CFStringGetLength(theString) + 1;
-        }
-        else
-        {
-            CFStringGetBytes(
-                theString,
-                CFRangeMake(0, CFStringGetLength(theString)),
-                m_encoding,
-                0, //what to put in characters that can't be converted -
-                    //0 tells CFString to return NULL if it meets such a character
-                false, //not an external representation
-                (UInt8*) szOut,
-                nOutSize, 
-                (CFIndex*) &nRealOutSize
-                        );
-        }
-
-        CFRelease(theString);
-
-#if SIZEOF_WCHAR_T == 4
-        delete[] szUniBuffer;
-#endif
-
-        return  nRealOutSize - 1;
-    }
-
-    bool IsOk() const
-    {
-        return m_encoding != kCFStringEncodingInvalidId && 
-              CFStringIsEncodingAvailable(m_encoding);
-    }
-
-private:
-    CFStringEncoding m_encoding ;
-};
-
-#endif // defined(__WXCOCOA__)
-
-// ============================================================================
 // Mac conversion classes
 // ============================================================================
 
@@ -2056,8 +1343,7 @@ public:
 
         if (buf == NULL)
         {
-            //apple specs say at least 32
-            n = wxMax( 32 , byteInLen ) ;
+            n = byteInLen ;
             tbuf = (wchar_t*) malloc( n * SIZEOF_WCHAR_T) ;
         }
         ByteCount byteBufferLen = n * sizeof( UniChar ) ;
@@ -2097,8 +1383,8 @@ public:
 
         if (buf == NULL)
         {
-            //apple specs say at least 32
-            n = wxMax( 32 , ((byteInLen / SIZEOF_WCHAR_T) * 8) + SIZEOF_WCHAR_T );
+            // worst case
+            n = byteInLen * 2 ;
             tbuf = (char*) malloc( n ) ;
         }
 
@@ -2123,22 +1409,7 @@ public:
 
         size_t res = byteOutLen ;
         if ( buf  && res < n)
-        {
             buf[res] = 0;
-            
-            //we need to double-trip to verify it didn't insert any ? in place
-            //of bogus characters
-            wxWCharBuffer wcBuf(n);
-            size_t pszlen = wxWcslen(psz);
-            if ( MB2WC(wcBuf.data(), buf, n) == (size_t)-1 ||
-                        wxWcslen(wcBuf) != pszlen ||
-                        memcmp(wcBuf, psz, pszlen * sizeof(wchar_t)) != 0 )
-            {
-                // we didn't obtain the same thing we started from, hence
-                // the conversion was lossy and we consider that it failed
-                return (size_t)-1;
-            }
-        }
 
         return res ;
     }
@@ -2362,20 +1633,6 @@ wxMBConv *wxCSConv::DoCreate() const
 
             wxMBConv_mac *conv = m_name ? new wxMBConv_mac(m_name)
                                         : new wxMBConv_mac(m_encoding);
-            if ( conv->IsOk() )
-                 return conv;
-
-            delete conv;
-        }
-    }
-#endif
-#if defined(__WXCOCOA__)
-    {
-        if ( m_name || ( m_encoding <= wxFONTENCODING_UTF16 ) )
-        {
-
-            wxMBConv_cocoa *conv = m_name ? new wxMBConv_cocoa(m_name)
-                                          : new wxMBConv_cocoa(m_encoding);
             if ( conv->IsOk() )
                  return conv;
 

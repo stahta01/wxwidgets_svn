@@ -7,8 +7,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __PALMOS__
-
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
 #pragma implementation "imaglist.h"
 #endif
@@ -192,4 +190,4 @@ bool wxGenericImageList::Draw( int index, wxDC &dc, int x, int y,
     return true;
 }
 
-#endif // __PALMOS__
+

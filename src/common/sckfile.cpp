@@ -43,7 +43,7 @@ wxFileProto::~wxFileProto()
 
 wxInputStream *wxFileProto::GetInputStream(const wxString& path)
 {
-  wxFileInputStream* retval = new wxFileInputStream(wxURI::Unescape(path));
+  wxFileInputStream* retval = new wxFileInputStream(wxURL::ConvertFromURI(path));
   if (retval->Ok()) {
     return retval;
   } else {

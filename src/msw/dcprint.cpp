@@ -44,7 +44,6 @@
 #endif
 
 #include "wx/dcprint.h"
-#include "wx/printdlg.h"
 #include "math.h"
 
 #if wxUSE_COMMON_DIALOGS
@@ -283,26 +282,12 @@ static bool wxGetDefaultDeviceName(wxString& deviceName, wxString& portName)
 // Gets an HDC for the specified printer configuration
 WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
 {
-#if defined(__WXUNIVERSAL__) && (!defined(__WXMSW__) || wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW)
-
-#if 0
-    wxPostScriptPrintNativeData *data =
-        (wxPostScriptPrintNativeData *) printDataConst.GetNativeData();
-    // FIXME: how further ???
-#else
-    return 0;
-#endif
-
-#else // Postscript vs. native Windows
-
-    wxWindowsPrintNativeData *data =
-        (wxWindowsPrintNativeData *) printDataConst.GetNativeData();
-
-    data->TransferFrom( printDataConst );
+    wxPrintData printData = printDataConst;
+    printData.ConvertToNative();
 
     wxChar* driverName = (wxChar*) NULL;
 
-    wxString devNameStr = printDataConst.GetPrinterName();
+    wxString devNameStr = printData.GetPrinterName();
     wxChar* portName = (wxChar*) NULL; // Obsolete in WIN32
 
     const wxChar* deviceName;
@@ -313,7 +298,7 @@ WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
 
     LPDEVMODE lpDevMode = (LPDEVMODE) NULL;
 
-    HGLOBAL hDevMode = (HGLOBAL)(DWORD) data->GetDevMode();
+    HGLOBAL hDevMode = (HGLOBAL)(DWORD) printData.GetNativeData();
 
     if ( hDevMode )
         lpDevMode = (DEVMODE*) GlobalLock(hDevMode);
@@ -339,7 +324,6 @@ WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
         GlobalUnlock(hDevMode);
 
     return (WXHDC) hDC;
-#endif
 }
 
 // ----------------------------------------------------------------------------

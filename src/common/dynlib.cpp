@@ -99,27 +99,21 @@ const char *dlerror()
 
 void *dlopen(const char *path, int WXUNUSED(mode) /* mode is ignored */)
 {
+    int dyld_result;
     NSObjectFileImage ofile;
     NSModule handle = NULL;
 
-    int dyld_result = NSCreateObjectFileImageFromFile(path, &ofile);
-    if ( dyld_result != NSObjectFileImageSuccess )
+    dyld_result = NSCreateObjectFileImageFromFile(path, &ofile);
+    if (dyld_result != NSObjectFileImageSuccess)
     {
-        handle = NULL;
+        TranslateError(path, dyld_result);
     }
     else
     {
-        handle = NSLinkModule
-                 (
-                    ofile,
-                    path,
-                    NSLINKMODULE_OPTION_BINDNOW |
-                    NSLINKMODULE_OPTION_RETURN_ON_ERROR
-                 );
+        // NSLinkModule will cause the run to abort on any link error's
+        // not very friendly but the error recovery functionality is limited.
+        handle = NSLinkModule(ofile, path, NSLINKMODULE_OPTION_BINDNOW);
     }
-
-    if ( !handle )
-        TranslateError(path, dyld_result);
 
     return handle;
 }
@@ -132,16 +126,19 @@ int dlclose(void *handle)
 
 void *dlsym(void *handle, const char *symbol)
 {
-    // as on many other systems, C symbols have prepended underscores under
-    // Darwin but unlike the normal dlopen(), NSLookupSymbolInModule() is not
-    // aware of this
-    wxCharBuffer buf(strlen(symbol) + 1);
-    char *p = buf.data();
-    p[0] = '_';
-    strcpy(p + 1, symbol);
+    void *addr;
 
-    NSSymbol nsSymbol = NSLookupSymbolInModule( handle, p );
-    return nsSymbol ? NSAddressOfSymbol(nsSymbol) : NULL;
+    NSSymbol nsSymbol = NSLookupSymbolInModule( handle , symbol ) ;
+
+    if ( nsSymbol)
+    {
+        addr = NSAddressOfSymbol(nsSymbol);
+    }
+    else
+    {
+        addr = NULL;
+    }
+    return addr;
 }
 
 #endif // defined(__DARWIN__)
@@ -162,7 +159,7 @@ void *dlsym(void *handle, const char *symbol)
     #if defined(__HPUX__)
         const wxChar *wxDynamicLibrary::ms_dllext = _T(".sl");
     #elif defined(__DARWIN__)
-        const wxChar *wxDynamicLibrary::ms_dllext = _T(".bundle");
+        const wxChar *wxDynamicLibrary::ms_dllext = _T(".dylib");
     #else
         const wxChar *wxDynamicLibrary::ms_dllext = _T(".so");
     #endif
@@ -324,11 +321,12 @@ void wxDynamicLibrary::Unload(wxDllType handle)
 #endif
 }
 
-void *wxDynamicLibrary::DoGetSymbol(const wxString &name, bool *success) const
+void *wxDynamicLibrary::GetSymbol(const wxString &name, bool *success) const
 {
     wxCHECK_MSG( IsLoaded(), NULL,
                  _T("Can't load symbol from unloaded library") );
 
+    bool     failed = false;
     void    *symbol = 0;
 
     wxUnusedVar(symbol);
@@ -369,15 +367,6 @@ void *wxDynamicLibrary::DoGetSymbol(const wxString &name, bool *success) const
 #error  "runtime shared lib support not implemented"
 #endif
 
-    if ( success )
-        *success = symbol != NULL;
-
-    return symbol;
-}
-
-void *wxDynamicLibrary::GetSymbol(const wxString& name, bool *success) const
-{
-    void *symbol = DoGetSymbol(name, success);
     if ( !symbol )
     {
 #if defined(HAVE_DLERROR) && !defined(__EMX__)
@@ -394,13 +383,17 @@ void *wxDynamicLibrary::GetSymbol(const wxString& name, bool *success) const
             wxLogError(wxT("%s"), err);
         }
 #else
+        failed = true;
         wxLogSysError(_("Couldn't find symbol '%s' in a dynamic library"),
                       name.c_str());
 #endif
     }
+    if( success )
+        *success = !failed;
 
     return symbol;
 }
+
 
 /*static*/
 wxString

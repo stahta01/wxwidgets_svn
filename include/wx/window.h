@@ -368,7 +368,7 @@ public:
     {
         DoSetSizeHints(minW, minH, maxW, maxH, incW, incH);
     }
-
+    
     void SetSizeHints( const wxSize& minSize,
                        const wxSize& maxSize=wxDefaultSize,
                        const wxSize& incSize=wxDefaultSize)
@@ -377,7 +377,7 @@ public:
                        maxSize.x, maxSize.y,
                        incSize.x, incSize.y);
     }
-
+    
     virtual void DoSetSizeHints(int minW, int minH,
                                 int maxW = wxDefaultCoord, int maxH = wxDefaultCoord,
                                int incW = wxDefaultCoord, int incH = wxDefaultCoord );
@@ -502,7 +502,7 @@ public:
 
         // return the window which currently has the focus or NULL
     static wxWindow *FindFocus();
-
+    
     static wxWindow *DoFindFocus() /* = 0: implement in derived classes */;
 
         // can this window have focus?
@@ -1085,7 +1085,7 @@ protected:
     // returns the main window of composite control; this is the window
     // that FindFocus returns if the focus is in one of composite control's
     // windows
-    virtual wxWindow *GetMainWindowOfCompositeControl()
+    virtual wxWindow *GetMainWindowOfCompositeControl() 
         { return (wxWindow*)this; }
 
     // the window id - a number which uniquely identifies a window among
@@ -1310,14 +1310,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // include the declaration of the platform-specific class
-#if defined(__PALMOS__)
-    #ifdef __WXUNIVERSAL__
-        #define wxWindowNative wxWindowPalm
-    #else // !wxUniv
-        #define wxWindowPalm wxWindow
-    #endif // wxUniv/!wxUniv
-    #include "wx/palmos/window.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
     #ifdef __WXUNIVERSAL__
         #define wxWindowNative wxWindowMSW
     #else // !wxUniv
@@ -1419,7 +1412,7 @@ class WXDLLEXPORT wxWindowAccessible: public wxAccessible
 {
 public:
     wxWindowAccessible(wxWindow* win): wxAccessible(win) { if (win) win->SetAccessible(this); }
-    virtual ~wxWindowAccessible() {}
+    virtual ~wxWindowAccessible() {};
 
 // Overridables
 

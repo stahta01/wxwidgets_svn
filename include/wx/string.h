@@ -51,10 +51,6 @@
     #include <strings.h>    // for strcasecmp()
 #endif // HAVE_STRCASECMP_IN_STRINGS_H
 
-#ifdef __PALMOS__
-    #include <StringMgr.h>
-#endif
-
 #include "wx/wxchar.h"      // for wxChar
 #include "wx/buffer.h"      // for wxCharBuffer
 #include "wx/strconv.h"     // for wxConvertXXX() macros and wxMBConv classes
@@ -86,7 +82,7 @@ extern const unsigned int wxSTRING_MAXLEN;
 
 #else
 // maximum possible length for a string means "take all string" everywhere
-//  (as sizeof(StringData) is unknown here, we subtract 100)
+//  (as sizeof(StringData) is unknown here, we substract 100)
 const unsigned int wxSTRING_MAXLEN = UINT_MAX - 100;
 
 #endif
@@ -604,9 +600,27 @@ public:
 
 #endif // !wxUSE_STL
 
-// ----------------------------------------------------------------------------
-// wxString: string class trying to be compatible with std::string, MFC
-//           CString and wxWindows 1.x wxString all at once
+// ---------------------------------------------------------------------------
+// This is (yet another one) String class for C++ programmers. It doesn't use
+// any of "advanced" C++ features (i.e. templates, exceptions, namespaces...)
+// thus you should be able to compile it with practicaly any C++ compiler.
+// This class uses copy-on-write technique, i.e. identical strings share the
+// same memory as long as neither of them is changed.
+//
+// This class aims to be as compatible as possible with the new standard
+// std::string class, but adds some additional functions and should be at
+// least as efficient than the standard implementation.
+//
+// Performance note: it's more efficient to write functions which take "const
+// String&" arguments than "const char *" if you assign the argument to
+// another string.
+//
+// It was compiled and tested under Win32, Linux (libc 5 & 6), Solaris 5.5.
+//
+// To do:
+//  - ressource support (string tables in ressources)
+//  - more wide character (UNICODE) support
+//  - regular expressions support
 // ---------------------------------------------------------------------------
 
 class WXDLLIMPEXP_BASE wxString : public wxStringBase
@@ -1362,10 +1376,7 @@ class WXDLLIMPEXP_BASE wxStringBufferLength
 public:
     wxStringBufferLength(wxString& str, size_t lenWanted = 1024)
         : m_str(str), m_buf(NULL), m_len(0), m_lenSet(false)
-    { 
-        m_buf = m_str.GetWriteBuf(lenWanted); 
-        wxASSERT(m_buf != NULL);
-    }
+        { m_buf = m_str.GetWriteBuf(lenWanted); }
 
     ~wxStringBufferLength()
     {
@@ -1391,10 +1402,46 @@ private:
 // wxString comparison functions: operator versions are always case sensitive
 // ---------------------------------------------------------------------------
 
-// note that when wxUSE_STL == 1 the comparison operators taking std::string
-// are used and defining them also for wxString would only result in
-// compilation ambiguities when comparing std::string and wxString
-#if !wxUSE_STL
+#if wxUSE_STL
+
+inline bool operator==(const wxString& s1, const wxString& s2)
+    { return s1.compare(s2) == 0; }
+inline bool operator==(const wxString& s1, const wxChar  * s2)
+    { return s1.compare(s2) == 0; }
+inline bool operator==(const wxChar  * s1, const wxString& s2)
+    { return s2.compare(s1) == 0; }
+inline bool operator!=(const wxString& s1, const wxString& s2)
+    { return s1.compare(s2) != 0; }
+inline bool operator!=(const wxString& s1, const wxChar  * s2)
+    { return s1.compare(s2) != 0; }
+inline bool operator!=(const wxChar  * s1, const wxString& s2)
+    { return s2.compare(s1) != 0; }
+inline bool operator< (const wxString& s1, const wxString& s2)
+    { return s1.compare(s2) <  0; }
+inline bool operator< (const wxString& s1, const wxChar  * s2)
+    { return s1.compare(s2) <  0; }
+inline bool operator< (const wxChar  * s1, const wxString& s2)
+    { return s2.compare(s1) >  0; }
+inline bool operator> (const wxString& s1, const wxString& s2)
+    { return s1.compare(s2) >  0; }
+inline bool operator> (const wxString& s1, const wxChar  * s2)
+    { return s1.compare(s2) >  0; }
+inline bool operator> (const wxChar  * s1, const wxString& s2)
+    { return s2.compare(s1) <  0; }
+inline bool operator<=(const wxString& s1, const wxString& s2)
+    { return s1.compare(s2) <= 0; }
+inline bool operator<=(const wxString& s1, const wxChar  * s2)
+    { return s1.compare(s2) <= 0; }
+inline bool operator<=(const wxChar  * s1, const wxString& s2)
+    { return s2.compare(s1) >= 0; }
+inline bool operator>=(const wxString& s1, const wxString& s2)
+    { return s1.compare(s2) >= 0; }
+inline bool operator>=(const wxString& s1, const wxChar  * s2)
+    { return s1.compare(s2) >= 0; }
+inline bool operator>=(const wxChar  * s1, const wxString& s2)
+    { return s2.compare(s1) <= 0; }
+
+#else // if !wxUSE_STL
 
 inline bool operator==(const wxString& s1, const wxString& s2)
     { return (s1.Len() == s2.Len()) && (s1.Cmp(s2) == 0); }
@@ -1433,6 +1480,14 @@ inline bool operator>=(const wxString& s1, const wxChar  * s2)
 inline bool operator>=(const wxChar  * s1, const wxString& s2)
     { return s2.Cmp(s1) <= 0; }
 
+#endif // !wxUSE_STL
+
+// comparison with char
+inline bool operator==(wxChar c, const wxString& s) { return s.IsSameAs(c); }
+inline bool operator==(const wxString& s, wxChar c) { return s.IsSameAs(c); }
+inline bool operator!=(wxChar c, const wxString& s) { return !s.IsSameAs(c); }
+inline bool operator!=(const wxString& s, wxChar c) { return !s.IsSameAs(c); }
+
 #if wxUSE_UNICODE
 inline bool operator==(const wxString& s1, const wxWCharBuffer& s2)
     { return (s1.Cmp((const wchar_t *)s2) == 0); }
@@ -1453,11 +1508,15 @@ inline bool operator!=(const wxCharBuffer& s1, const wxString& s2)
     { return (s2.Cmp((const char *)s1) != 0); }
 #endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
+#if !wxUSE_STL
+
 wxString WXDLLIMPEXP_BASE operator+(const wxString& string1,  const wxString& string2);
 wxString WXDLLIMPEXP_BASE operator+(const wxString& string, wxChar ch);
 wxString WXDLLIMPEXP_BASE operator+(wxChar ch, const wxString& string);
 wxString WXDLLIMPEXP_BASE operator+(const wxString& string, const wxChar *psz);
 wxString WXDLLIMPEXP_BASE operator+(const wxChar *psz, const wxString& string);
+
+#endif // !wxUSE_STL
 
 #if wxUSE_UNICODE
 inline wxString operator+(const wxString& string, const wxWCharBuffer& buf)
@@ -1470,15 +1529,6 @@ inline wxString operator+(const wxString& string, const wxCharBuffer& buf)
 inline wxString operator+(const wxCharBuffer& buf, const wxString& string)
     { return (const char *)buf + string; }
 #endif // wxUSE_UNICODE/!wxUSE_UNICODE
-
-#endif // !wxUSE_STL
-
-// comparison with char (those are not defined by std::[w]string and so should
-// be always available)
-inline bool operator==(wxChar c, const wxString& s) { return s.IsSameAs(c); }
-inline bool operator==(const wxString& s, wxChar c) { return s.IsSameAs(c); }
-inline bool operator!=(wxChar c, const wxString& s) { return !s.IsSameAs(c); }
-inline bool operator!=(const wxString& s, wxChar c) { return !s.IsSameAs(c); }
 
 // ---------------------------------------------------------------------------
 // Implementation only from here until the end of file

@@ -64,7 +64,7 @@ class WXDLLEXPORT wxDirItemData : public wxTreeItemData
 {
 public:
     wxDirItemData(const wxString& path, const wxString& name, bool isDir);
-    ~wxDirItemData(){}
+    ~wxDirItemData();
     void SetNewDirName(const wxString& path);
 
     bool HasSubDirs() const;
@@ -177,7 +177,6 @@ protected:
                 int image = -1, int selectedImage = -1,
                 wxTreeItemData * data = NULL);
     //void FindChildFiles(wxTreeItemId id, int dirFlags, wxArrayString& filenames);
-    virtual wxTreeCtrl* CreateTreeCtrl(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long treeStyle);
 
     // Extract description and actual filter from overall filter string
     bool ExtractWildcard(const wxString& filterStr, int n, wxString& filter, wxString& description);
@@ -223,7 +222,7 @@ public:
 
     void Init();
 
-    ~wxDirFilterListCtrl() {}
+    ~wxDirFilterListCtrl() {};
 
     //// Operations
     void FillFilterList(const wxString& filter, int defaultFilter);

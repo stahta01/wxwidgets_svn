@@ -16,9 +16,6 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-
-#ifndef __PALMOS__
-
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
 #pragma implementation "notebook.h"
 #endif
@@ -708,4 +705,3 @@ bool wxNotebookTabView::OnTabPreActivate(int activateId, int deactivateId)
   return retval;
 }
 
-#endif // __PALMOS__

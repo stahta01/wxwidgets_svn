@@ -375,6 +375,10 @@ wxDirItemData::wxDirItemData(const wxString& path, const wxString& name,
     m_isDir = isDir;
 }
 
+wxDirItemData::~wxDirItemData()
+{
+}
+
 void wxDirItemData::SetNewDirName(const wxString& path)
 {
     m_path = path;
@@ -519,7 +523,7 @@ bool wxGenericDirCtrl::Create(wxWindow *parent,
     else
         filterStyle |= wxBORDER_SUNKEN;
 
-    m_treeCtrl = CreateTreeCtrl(this, wxID_TREECTRL,
+    m_treeCtrl = new wxTreeCtrl(this, wxID_TREECTRL,
                                 wxPoint(0,0), GetClientSize(), treeStyle);
 
     if (!filter.IsEmpty() && (style & wxDIRCTRL_SHOW_FILTERS))
@@ -551,19 +555,8 @@ bool wxGenericDirCtrl::Create(wxWindow *parent,
     ExpandDir(m_rootId); // automatically expand first level
 
     // Expand and select the default path
-    if (!m_defaultPath.empty())
-    {
+    if (!m_defaultPath.IsEmpty())
         ExpandPath(m_defaultPath);
-    }
-#ifdef __UNIX__
-    else
-    {
-        // On Unix, there's only one node under the (hidden) root node. It
-        // represents the / path, so the user would always have to expand it;
-        // let's do it ourselves
-        ExpandPath(wxT("/"));
-    }
-#endif
 
     SetBestSize(size);
     DoResize();
@@ -582,11 +575,6 @@ void wxGenericDirCtrl::Init()
     m_currentFilterStr = wxEmptyString; // Default: any file
     m_treeCtrl = NULL;
     m_filterListCtrl = NULL;
-}
-
-wxTreeCtrl* wxGenericDirCtrl::CreateTreeCtrl(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long treeStyle)
-{
-    return new wxTreeCtrl(parent, id, pos, size, treeStyle);
 }
 
 void wxGenericDirCtrl::ShowHidden( bool show )
@@ -1227,7 +1215,7 @@ void wxDirFilterListCtrl::FillFilterList(const wxString& filter, int defaultFilt
 {
     Clear();
     wxArrayString descriptions, filters;
-    size_t n = (size_t) wxParseCommonDialogsFilter(filter, descriptions, filters);
+    size_t n = (size_t) wxParseCommonDialogsFilter(filter, filters, descriptions);
 
     if (n > 0 && defaultFilter < (int) n)
     {
@@ -1557,11 +1545,7 @@ static wxBitmap CreateAntialiasedBitmap(const wxImage& img)
             if (smask > 2)
                 ps[0] = ps[1] = ps[2] = mr;
             else
-            {
-                ps[0] = (unsigned char)(sr >> 2);
-                ps[1] = (unsigned char)(sg >> 2);
-                ps[2] = (unsigned char)(sb >> 2);
-            }
+                ps[0] = sr >> 2, ps[1] = sg >> 2, ps[2] = sb >> 2;
             ps += 3;
         }
         p1 += size*2 * 3, p2 += size*2 * 3;

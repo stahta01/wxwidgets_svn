@@ -163,14 +163,14 @@ provokes warnings from some compilers and to avoid them you should use the
 {\tt \_PTR} versions of the macros above. For example, to define an array of
 pointers to {\tt double} you should use.
 
-Note that the above macros are generally only useful for 
+If that isn't complicated enough, the above macros are generally only useful for 
 wxObject types.  There are seperate macros for declaring an array of a simple type, 
 such as an int.
 
-The following simple types are supported:\\
+The following simple types are supported:
 int\\
 long\\
-size\_t\\
+size_t\\
 double
 
 To create an array of a simple type, simply append the type you want in CAPS to
@@ -531,7 +531,7 @@ The first version of the function is for wxArray and wxObjArray, the second is
 for wxSortedArray only.
 
 Searches the element in the array, starting from either beginning or the end
-depending on the value of {\it searchFromEnd} parameter. {\tt wxNOT\_FOUND} is
+depending on the value of {\it searchFromEnd} parameter. wxNOT\_FOUND is
 returned if the element is not found, otherwise the index of the element is
 returned.
 
@@ -633,7 +633,7 @@ elements of a wxArray (supposed to contain pointers).
 \func{void}{SetCount}{\param{size\_t }{count}, \param{T }{defval = T($0$)}}
 
 This function ensures that the number of array elements is at least 
-{\it count}. If the array has already {\it count} or more items, nothing is
+{\it count}. If the array has already {\it count} or mroe items, nothing is
 done. Otherwise, {\tt count - GetCount()} elements are added and initialized to
 the value {\it defval}.
 

@@ -237,8 +237,8 @@ static void ConvertWxToFileTime(FILETIME *ft, const wxDateTime& dt)
 {
     SYSTEMTIME st;
     st.wDay = dt.GetDay();
-    st.wMonth = (WORD)(dt.GetMonth() + 1);
-    st.wYear = (WORD)dt.GetYear();
+    st.wMonth = dt.GetMonth() + 1;
+    st.wYear = dt.GetYear();
     st.wHour = dt.GetHour();
     st.wMinute = dt.GetMinute();
     st.wSecond = dt.GetSecond();
@@ -449,18 +449,6 @@ void wxFileName::Assign(const wxString& fullpathOrig,
     SplitPath(fullname, NULL /* no path */, &name, &ext, format);
     SplitPath(fullpath, &volume, &path, NULL, NULL, format);
 #endif // __WXDEBUG__/!__WXDEBUG__
-
-    Assign(volume, path, name, ext, format);
-}
-
-void wxFileName::Assign(const wxString& pathOrig,
-                        const wxString& name,
-                        const wxString& ext,
-                        wxPathFormat format)
-{
-    wxString volume,
-             path;
-    SplitVolume(pathOrig, &volume, &path, format);
 
     Assign(volume, path, name, ext, format);
 }
@@ -1289,8 +1277,10 @@ wxString wxFileName::GetPathTerminators(wxPathFormat format)
 bool wxFileName::IsPathSeparator(wxChar ch, wxPathFormat format)
 {
     // wxString::Find() doesn't work as expected with NUL - it will always find
-    // it, so test for it separately
-    return ch != _T('\0') && GetPathSeparators(format).Find(ch) != wxNOT_FOUND;
+    // it, so it is almost surely a bug if this function is called with NUL arg
+    wxASSERT_MSG( ch != _T('\0'), _T("shouldn't be called with NUL") );
+
+    return GetPathSeparators(format).Find(ch) != wxNOT_FOUND;
 }
 
 // ----------------------------------------------------------------------------

@@ -3,9 +3,7 @@
 
 #include "wx/iconloc.h"
 
-#if defined(__PALMOS__)
-  #include "wx/palmos/icon.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
   #include "wx/msw/icon.h"
 #elif defined(__WXMOTIF__)
   #include "wx/motif/icon.h"

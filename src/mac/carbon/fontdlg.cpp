@@ -271,11 +271,6 @@ wxFontDialog::wxFontDialog(wxWindow *parent, const wxFontData&  data)
     Create(parent, data);
 }
 
-wxFontDialog::~wxFontDialog()
-{
-    // empty
-}
-
 void wxFontDialog::SetData(wxFontData& fontdata)
 {
     m_fontData = fontdata;

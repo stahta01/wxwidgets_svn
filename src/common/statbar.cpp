@@ -29,7 +29,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/frame.h"
     #include "wx/statusbr.h"
 #endif //WX_PRECOMP
 
@@ -62,14 +61,6 @@ wxStatusBarBase::~wxStatusBarBase()
     FreeWidths();
     FreeStacks();
     InitStyles();
-
-    // notify the frame that it doesn't have a status bar any longer to avoid
-    // dangling pointers
-    wxFrameBase *frame = wxDynamicCast(GetParent(), wxFrameBase);
-    if ( frame && frame->GetStatusBar() == this )
-    {
-        frame->SetStatusBar(NULL);
-    }
 }
 
 // ----------------------------------------------------------------------------

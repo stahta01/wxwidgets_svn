@@ -58,7 +58,7 @@ use:
   wxSystemOptions::SetOption(wxT("msw.remap"), 2);
 \end{verbatim}
 
-then colour remapping is switched off, and a transparent background used. But only
+then colour remapping is switched of, and a transparent background used. But only
 use this option under Windows XP with true colour:
 
 \begin{verbatim}
@@ -88,7 +88,7 @@ native toolbar ignores {\tt wxTB\_NOICONS} style. Also, toggling the
 
 \wxheading{Event handling}
 
-The toolbar class emits menu commands in the same way that a frame menubar does,
+The toolbar class emits menu commands in the same was that a frame menubar does,
 so you can use one EVT\_MENU macro for both a menu item and a toolbar button.
 The event handler functions take a wxCommandEvent argument. For most event macros,
 the identifier of the tool is passed, but for EVT\_TOOL\_ENTER the toolbar
@@ -473,7 +473,7 @@ Returns the value used for packing tools.
 
 \constfunc{int}{GetToolPos}{\param{int }{toolId}}
 
-Returns the tool position in the toolbar, or {\tt wxNOT\_FOUND} if the tool is not found.
+Returns the tool position in the toolbar, or wxNOT\_FOUND if the tool is not found.
 
 \membersection{wxToolBar::GetToolSeparation}\label{wxtoolbargettoolseparation}
 

@@ -29,7 +29,6 @@
 #endif
 
 #if defined(__MWERKS__) && __MSL__ >= 0x6000
-namespace std {}
 using namespace std ;
 #endif
 
@@ -706,7 +705,7 @@ bool wxVariantDataChar::Read(wxInputStream& str)
 
 bool wxVariantDataChar::Read(wxString& str)
 {
-    m_value = str.ToAscii()[0u];
+    m_value = str[(size_t)0];
     return true;
 }
 

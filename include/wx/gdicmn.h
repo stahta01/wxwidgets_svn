@@ -314,7 +314,6 @@ public:
         { }
     wxRect(const wxPoint& topLeft, const wxPoint& bottomRight);
     wxRect(const wxPoint& pos, const wxSize& size);
-    wxRect(const wxSize& size);
 
     // default copy ctor and assignment operators ok
 
@@ -482,7 +481,7 @@ private:
 class WXDLLEXPORT wxBitmapList : public wxList
 {
 public:
-    wxBitmapList(){}
+    wxBitmapList();
     ~wxBitmapList();
 
     void AddBitmap(wxBitmap *bitmap);

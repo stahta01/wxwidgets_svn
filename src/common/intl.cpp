@@ -1119,20 +1119,20 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName0,
   if ( !fileMsg.IsOpened() )
     return false;
 
-  // get the file size (assume it is less than 4Gb...)
-  size_t nSize = fileMsg.Length();
+  // get the file size
+  wxFileOffset nSize = fileMsg.Length();
   if ( nSize == wxInvalidOffset )
     return false;
 
   // read the whole file in memory
   m_pData = new size_t8[nSize];
-  if ( fileMsg.Read(m_pData, nSize) != nSize ) {
+  if ( fileMsg.Read(m_pData, (size_t)nSize) != (size_t)nSize ) {
     wxDELETEA(m_pData);
     return false;
   }
 
   // examine header
-  bool bValid = nSize > sizeof(wxMsgCatalogHeader);
+  bool bValid = (size_t)nSize > sizeof(wxMsgCatalogHeader);
 
   wxMsgCatalogHeader *pHeader = (wxMsgCatalogHeader *)m_pData;
   if ( bValid ) {
@@ -1157,7 +1157,7 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName0,
                    Swap(pHeader->ofsOrigTable));
   m_pTransTable = (wxMsgTableEntry *)(m_pData +
                    Swap(pHeader->ofsTransTable));
-  m_nSize = nSize;
+  m_nSize = (size_t)nSize;
 
   // now parse catalog's header and try to extract catalog charset and
   // plural forms formula from it:

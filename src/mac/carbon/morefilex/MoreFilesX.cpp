@@ -72,11 +72,9 @@
 #if defined(__MACH__)
 	#include <Carbon/Carbon.h>
 	#include <string.h>
-	#define BuildingMoreFilesXForMacOS9 0
 #else
 	#include <Carbon.h>
 	#include <string.h>
-	#define BuildingMoreFilesXForMacOS9 1
 #endif
 
 #include "MoreFilesX.h"

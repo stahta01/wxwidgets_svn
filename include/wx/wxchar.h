@@ -118,7 +118,7 @@
     #define wxHAVE_TCHAR_SUPPORT
 #elif defined(__DMC__)
     #define wxHAVE_TCHAR_SUPPORT
-#elif defined(__MINGW32__) && wxCHECK_W32API_VERSION( 1, 0 ) && !defined(__PALMOS__)
+#elif defined(__MINGW32__) && wxCHECK_W32API_VERSION( 1, 0 )
     #define wxHAVE_TCHAR_SUPPORT
     #include <stddef.h>
     #include <string.h>
@@ -242,24 +242,18 @@
 #ifdef wxHAVE_TCHAR_SUPPORT
     #include <ctype.h>
 
-    #if defined(__WATCOMC__) && defined(UNICODE)
-      #define WXWCHAR_T_CAST(c) (wint_t)(c)
-    #else
-      #define WXWCHAR_T_CAST(c) c
-    #endif
-    
     /* ctype.h functions */
-    #define  wxIsalnum(c)   _istalnum(WXWCHAR_T_CAST(c))
-    #define  wxIsalpha(c)   _istalpha(WXWCHAR_T_CAST(c))
-    #define  wxIscntrl(c)   _istcntrl(WXWCHAR_T_CAST(c))
-    #define  wxIsdigit(c)   _istdigit(WXWCHAR_T_CAST(c))
-    #define  wxIsgraph(c)   _istgraph(WXWCHAR_T_CAST(c))
-    #define  wxIslower(c)   _istlower(WXWCHAR_T_CAST(c))
-    #define  wxIsprint(c)   _istprint(WXWCHAR_T_CAST(c))
-    #define  wxIspunct(c)   _istpunct(WXWCHAR_T_CAST(c))
-    #define  wxIsspace(c)   _istspace(WXWCHAR_T_CAST(c))
-    #define  wxIsupper(c)   _istupper(WXWCHAR_T_CAST(c))
-    #define  wxIsxdigit(c)  _istxdigit(WXWCHAR_T_CAST(c))
+    #define  wxIsalnum   _istalnum
+    #define  wxIsalpha   _istalpha
+    #define  wxIscntrl   _istcntrl
+    #define  wxIsdigit   _istdigit
+    #define  wxIsgraph   _istgraph
+    #define  wxIslower   _istlower
+    #define  wxIsprint   _istprint
+    #define  wxIspunct   _istpunct
+    #define  wxIsspace   _istspace
+    #define  wxIsupper   _istupper
+    #define  wxIsxdigit  _istxdigit
 
     /*
        There is a bug in VC6 C RTL: toxxx() functions dosn't do anything with
@@ -399,11 +393,9 @@
         #define wxNEED_UNGETC
 
         #define wxNEED_FPUTS
-        #define wxNEED_PUTS
         #define wxNEED_PUTC
  
         int wxFputs(const wxChar *ch, FILE *stream);
-        int wxPuts(const wxChar *ws);
         int wxPutc(wxChar ch, FILE *stream);
         
         #ifdef __cplusplus
@@ -415,6 +407,7 @@
         #endif
 
         #define wxPutchar(wch) wxPutc(wch, stdout)
+        #define wxPuts(ws) wxFputs(ws, stdout)
             
         #define wxNEED_PRINTF_CONVERSION
         #define wxNEED_WX_STDIO_H
@@ -505,8 +498,7 @@
             #ifdef HAVE_PUTWS
                 #define wxPuts      putws
             #else
-                #define wxNEED_PUTS
-                int wxPuts(const wxChar *ws);
+                #define wxPuts(ws) wxFputs(ws, stdout)
             #endif
 
             /* we need %s to %ls conversion for printf and scanf etc */
@@ -699,12 +691,6 @@
             defined(__EMX__) || defined(__DJGPP__)
         #define wxStricmp stricmp
         #define wxStrnicmp strnicmp
-    #elif defined(__PALMOS__)
-        /* FIXME: There is no equivalent to strnicmp in the Palm OS API.  This 
-         * quick hack should do until one can be written. 
-         */
-        #define wxStricmp StrCaselessCompare
-        #define wxStrnicmp strnicmp       
     #elif defined(__SYMANTEC__) || defined(__VISUALC__) || \
             (defined(__MWERKS__) && defined(__INTEL__))
         #define wxStricmp _stricmp
@@ -1084,8 +1070,7 @@ WXDLLIMPEXP_BASE void *calloc( size_t num, size_t size );
         #define wxWX2WC wxMB2WC
     #endif
 #else /* !wxUSE_UNICODE */
-/* Why is this here?
-#error ha */
+#error ha
     /* No wxUSE_WCHAR_T: we have to do something (JACS) */
     #define wxMB2WC wxStrncpy
     #define wxWC2MB wxStrncpy

@@ -71,8 +71,6 @@ wxObject *wxFrameXmlHandler::DoCreateResource()
         frame->SetClientSize(GetSize());
     if (HasParam(wxT("pos")))
         frame->Move(GetPosition());
-    if (HasParam(wxT("icon")))
-        frame->SetIcon(GetIcon(wxT("icon"), wxART_FRAME_ICON));
 
     SetupWindow(frame);
 

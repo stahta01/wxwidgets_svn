@@ -68,7 +68,6 @@ bool WritePageHeader(wxPrintout *printout, wxDC *dc, wxChar *text, float mmToLog
 
 // The `main program' equivalent, creating the windows and returning the
 // main frame
-
 bool MyApp::OnInit(void)
 {
     m_testFont.Create(10, wxSWISS, wxNORMAL, wxNORMAL);
@@ -91,6 +90,7 @@ bool MyApp::OnInit(void)
     wxMenu *file_menu = new wxMenu;
 
     file_menu->Append(WXPRINT_PRINT, _T("&Print..."),              _T("Print"));
+    file_menu->Append(WXPRINT_PRINT_SETUP, _T("Print &Setup..."),              _T("Setup printer properties"));
     file_menu->Append(WXPRINT_PAGE_SETUP, _T("Page Set&up..."),              _T("Page setup"));
     file_menu->Append(WXPRINT_PREVIEW, _T("Print Pre&view"),              _T("Preview"));
 
@@ -105,6 +105,7 @@ bool MyApp::OnInit(void)
 #if defined(__WXMSW__) && wxTEST_POSTSCRIPT_IN_MSW
     file_menu->AppendSeparator();
     file_menu->Append(WXPRINT_PRINT_PS, _T("Print PostScript..."),              _T("Print (PostScript)"));
+    file_menu->Append(WXPRINT_PRINT_SETUP_PS, _T("Print Setup PostScript..."),              _T("Setup printer properties (PostScript)"));
     file_menu->Append(WXPRINT_PAGE_SETUP_PS, _T("Page Setup PostScript..."),              _T("Page setup (PostScript)"));
     file_menu->Append(WXPRINT_PREVIEW_PS, _T("Print Preview PostScript"),              _T("Preview (PostScript)"));
 #endif
@@ -152,11 +153,13 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 EVT_MENU(WXPRINT_QUIT, MyFrame::OnExit)
 EVT_MENU(WXPRINT_PRINT, MyFrame::OnPrint)
 EVT_MENU(WXPRINT_PREVIEW, MyFrame::OnPrintPreview)
+EVT_MENU(WXPRINT_PRINT_SETUP, MyFrame::OnPrintSetup)
 EVT_MENU(WXPRINT_PAGE_SETUP, MyFrame::OnPageSetup)
 EVT_MENU(WXPRINT_ABOUT, MyFrame::OnPrintAbout)
 #if defined(__WXMSW__) && wxTEST_POSTSCRIPT_IN_MSW
 EVT_MENU(WXPRINT_PRINT_PS, MyFrame::OnPrintPS)
 EVT_MENU(WXPRINT_PREVIEW_PS, MyFrame::OnPrintPreviewPS)
+EVT_MENU(WXPRINT_PRINT_SETUP_PS, MyFrame::OnPrintSetupPS)
 EVT_MENU(WXPRINT_PAGE_SETUP_PS, MyFrame::OnPageSetupPS)
 #endif
 END_EVENT_TABLE()
@@ -210,6 +213,17 @@ void MyFrame::OnPrintPreview(wxCommandEvent& WXUNUSED(event))
     frame->Show();
 }
 
+void MyFrame::OnPrintSetup(wxCommandEvent& WXUNUSED(event))
+{
+    wxPrintDialogData printDialogData(* g_printData);
+    wxPrintDialog printerDialog(this, & printDialogData);
+
+    printerDialog.GetPrintDialogData().SetSetupDialog(true /*show print setup dialog*/);
+    printerDialog.ShowModal();
+
+    (*g_printData) = printerDialog.GetPrintDialogData().GetPrintData();
+}
+
 void MyFrame::OnPageSetup(wxCommandEvent& WXUNUSED(event))
 {
     (*g_pageSetupData) = * g_printData;
@@ -240,6 +254,17 @@ void MyFrame::OnPrintPreviewPS(wxCommandEvent& WXUNUSED(event))
     frame->Centre(wxBOTH);
     frame->Initialize();
     frame->Show();
+}
+
+void MyFrame::OnPrintSetupPS(wxCommandEvent& WXUNUSED(event))
+{
+    wxPrintDialogData printDialogData(* g_printData);
+    wxGenericPrintDialog printerDialog(this, & printDialogData);
+
+    printerDialog.GetPrintDialogData().SetSetupDialog(true /*show print setup dialog*/);
+    printerDialog.ShowModal();
+
+    (*g_printData) = printerDialog.GetPrintDialogData().GetPrintData();
 }
 
 void MyFrame::OnPageSetupPS(wxCommandEvent& WXUNUSED(event))

@@ -352,9 +352,8 @@ void wxSimpleHelpProvider::AddHelp(wxWindowBase *window, const wxString& text)
 
 void wxSimpleHelpProvider::AddHelp(wxWindowID id, const wxString& text)
 {
-    wxLongToStringHashMap::key_type key = (wxLongToStringHashMap::key_type)id;
-    m_hashIds.erase(key);
-    m_hashIds[key] = text;
+    m_hashIds.erase((long)id);
+    m_hashIds[id] = text;
 }
 
 // removes the association

@@ -64,9 +64,9 @@ WX_SUBVERSION=$WX_VERSION.$wx_subrelease_number
 
 WX_MSW_VERSION=$wx_major_version_number$wx_minor_version_number$wx_release_number
 
-WX_CURRENT=4
+WX_CURRENT=3
 WX_REVISION=0
-WX_AGE=1
+WX_AGE=0
 
 
 dnl ------------------------------------------------------------------------
@@ -372,7 +372,6 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_NO_DEPS=no
   DEFAULT_wxUSE_NO_RTTI=no
   DEFAULT_wxUSE_NO_EXCEPTIONS=no
-  DEFAULT_wxUSE_RPATH=yes
   DEFAULT_wxUSE_PERMISSIVE=no
   DEFAULT_wxUSE_DEBUG_FLAG=yes
   DEFAULT_wxUSE_DEBUG_INFO=yes
@@ -401,7 +400,6 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_LIBXPM=no
   DEFAULT_wxUSE_LIBMSPACK=no
   DEFAULT_wxUSE_LIBSDL=no
-  DEFAULT_wxUSE_LIBGNOMEPRINT=no
   DEFAULT_wxUSE_ODBC=no
   DEFAULT_wxUSE_OPENGL=no
 
@@ -561,7 +559,6 @@ else
   DEFAULT_wxUSE_NO_DEPS=no
   DEFAULT_wxUSE_NO_RTTI=no
   DEFAULT_wxUSE_NO_EXCEPTIONS=no
-  DEFAULT_wxUSE_RPATH=yes
   DEFAULT_wxUSE_PERMISSIVE=no
   DEFAULT_wxUSE_DEBUG_FLAG=no
   DEFAULT_wxUSE_DEBUG_INFO=no
@@ -589,7 +586,6 @@ else
   DEFAULT_wxUSE_LIBXPM=yes
   DEFAULT_wxUSE_LIBMSPACK=yes
   DEFAULT_wxUSE_LIBSDL=no
-  DEFAULT_wxUSE_LIBGNOMEPRINT=no
   DEFAULT_wxUSE_ODBC=no
   DEFAULT_wxUSE_OPENGL=no
 
@@ -795,7 +791,6 @@ WX_ARG_SYS_WITH(libtiff,   [  --with-libtiff          use libtiff (TIFF file for
 WX_ARG_SYS_WITH(libxpm,    [  --with-libxpm           use libxpm (XPM file format)], wxUSE_LIBXPM)
 WX_ARG_WITH(libmspack,     [  --with-libmspack        use libmspack (CHM help files loading)], wxUSE_LIBMSPACK)
 WX_ARG_WITH(sdl,           [  --with-sdl              use SDL for audio on Unix], wxUSE_LIBSDL)
-WX_ARG_WITH(gnomeprint,    [  --with-gnomeprint       use GNOME print for audio printing under Unix], wxUSE_LIBGNOMEPRINT)
 WX_ARG_WITH(opengl,        [  --with-opengl           use OpenGL (or Mesa)], wxUSE_OPENGL)
 
 fi
@@ -843,7 +838,11 @@ WX_ARG_ENABLE(no_deps,       [  --enable-no_deps        create code without depe
 WX_ARG_ENABLE(compat22,      [  --enable-compat22       enable wxWidgets 2.2 compatibility], WXWIN_COMPATIBILITY_2_2)
 WX_ARG_ENABLE(compat24,      [  --disable-compat24      disable wxWidgets 2.4 compatibility], WXWIN_COMPATIBILITY_2_4, disable)
 
-WX_ARG_ENABLE(rpath,         [  --disable-rpath         disable use of rpath for uninstalled builds], wxUSE_RPATH)
+AC_ARG_ENABLE(rpath,         [  --enable-rpath=DIR      output the rpath flag from wx-config], [wxRPATH_DIR="$enableval"])
+
+if test "$wxRPATH_DIR" != "" -a "$wxRPATH_DIR" != "disable" -a "$wxRPATH_DIR" != "no"; then
+   WXCONFIG_RPATH="-Wl,-rpath -Wl,$wxRPATH_DIR"
+fi
 
 
 dnl ---------------------------------------------------------------------------
@@ -2517,6 +2516,24 @@ equivalent variable and GTK+ is version 1.2.3 or above.
         esac
 
         if test "$WXGTK20" = 1; then
+            if test "$wxUSE_PRINTING_ARCHITECTURE" = "yes" ; then
+                PKG_CHECK_MODULES(PANGOFT2, pangoft2,
+                    [
+                        CXXFLAGS="$CXXFLAGS $PANGOFT2_CFLAGS"
+                        # FIXME: GTK_LIBS already has a lot of what this is
+                        #        about to add, but we go ahead and just add
+                        #        it all again anyway.
+                        # This is not a good way to manage things.  And simply
+                        # uniq'ing the list later is hardly better.
+                        GUI_TK_LIBRARY="$GUI_TK_LIBRARY $PANGOFT2_LIBS"
+                    ],
+                    [
+                        AC_MSG_WARN([pangoft2 library not found, library will be compiled without printing support])
+                        wxUSE_PRINTING_ARCHITECTURE="no"
+                    ]
+                )
+            fi
+                
             save_CFLAGS="$CFLAGS"
             save_LIBS="$LIBS"
             CFLAGS="$CFLAGS $GTK_CFLAGS"
@@ -3269,7 +3286,6 @@ if test "$wxUSE_SHARED" = "yes"; then
     case "${host}" in
       *-*-linux* | *-*-gnu* )
         SAMPLES_RPATH_FLAG="-Wl,-rpath,\$(top_builddir)lib"
-        WXCONFIG_RPATH="-Wl,-rpath,\$libdir"
 	;;
 
       *-*-solaris2* )
@@ -3288,25 +3304,23 @@ if test "$wxUSE_SHARED" = "yes"; then
                 [
                     AC_MSG_RESULT([yes])
                     SAMPLES_RPATH_FLAG="-Wl,-rpath,\$(top_builddir)lib"
-                    WXCONFIG_RPATH="-Wl,-rpath,\$libdir"
-                ],[
+                ],
+                [
                     AC_MSG_RESULT([no])
                     AC_MSG_CHECKING([if the linker accepts -R])
                     LDFLAGS="$saveLdflags -Wl,-R,/"
                     AC_TRY_LINK(
                         [],[],
                         [
-                            AC_MSG_RESULT([yes])
-                            SAMPLES_RPATH_FLAG="-Wl,-R,\$(top_builddir)lib"
-                            WXCONFIG_RPATH="-Wl,-R,\$libdir"
-                        ],[
+                             AC_MSG_RESULT([yes])
+                             SAMPLES_RPATH_FLAG="-Wl,-R,\$(top_builddir)lib"],
+                        [
                             AC_MSG_RESULT([no])
                         ])                    
                 ])
             LDFLAGS="$saveLdflags"
         else
             SAMPLES_RPATH_FLAG="-R\$(top_builddir)lib"
-            WXCONFIG_RPATH="-R\$libdir"
         fi
       ;;
       
@@ -3329,20 +3343,14 @@ EOF
 	;;
       
     esac
+fi
 
-    if test $wxUSE_RPATH = "no"; then
-        SAMPLES_RPATH_FLAG=''
-        SAMPLES_RPATH_POSTLINK=''
-        WXCONFIG_RPATH=''
-    fi
-
-    SHARED=1
-
-else
-
+dnl do not 'else' this, it may be changed in the above conditional.
+if test "$wxUSE_SHARED" = "no"; then
     config_linkage_component="-static"
     SHARED=0
-
+else
+    SHARED=1
 fi
 
 
@@ -3395,8 +3403,8 @@ WX_LIBRARY_BASENAME_GUI="wx_${TOOLKIT_DIR}${TOOLKIT_VERSION}${WIDGET_SET}${lib_u
 if test "$wxUSE_MAC" = 1 -o "$wxUSE_COCOA" = 1; then
     dnl base name of the resource file for wxMac must be the same
     dnl as library installation base name (-install_name)
-    WX_RESOURCES_MACOSX_ASCII="libwx_${TOOLCHAIN_NAME}.${wx_release_number}.r"
-    WX_RESOURCES_MACOSX_DATA="libwx_${TOOLCHAIN_NAME}.${wx_release_number}.rsrc"
+    WX_RESOURCES_MACOSX_ASCII="libwx_${TOOLCHAIN_NAME}.${WX_CURRENT}.r"
+    WX_RESOURCES_MACOSX_DATA="libwx_${TOOLCHAIN_NAME}.${WX_CURRENT}.rsrc"
 
     dnl add the resources target for wxMac
     LIBWXMACRES="\$(top_builddir)lib/${WX_RESOURCES_MACOSX_ASCII}"
@@ -3421,14 +3429,14 @@ if test "$wxUSE_MAC" = 1 -o "$wxUSE_COCOA" = 1; then
     fi
 else
     dnl default value is to (silently) do nothing in the makefile
-    MACSETFILE="@true"
-    MACRESWXCONFIG="@true"
+    MACSETFILE="@#"
+    MACRESWXCONFIG="#"
 
     dnl confusingly, wxOS2 also uses MACRESCOMP in its post-link step
     if test "$wxUSE_PM" = 1; then
         MACRESCOMP="emxbind -ep"
     else
-        MACRESCOMP="@true"
+        MACRESCOMP="@#"
     fi
 fi
 
@@ -4580,26 +4588,6 @@ if test "$wxUSE_SOUND" = "yes"; then
   SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS sound"
 fi
 
-if test "$WXGTK20" = 1; then
-    if test "$wxUSE_PRINTING_ARCHITECTURE" = "yes" ; then
-        if test "$wxUSE_LIBGNOMEPRINT" = "yes" ; then
-        
-                PKG_CHECK_MODULES(LIBGNOMEPRINTUI, libgnomeprintui-2.2,
-                    [
-                        EXTRALIBS_GNOMEPRINT="$LIBGNOMEPRINTUI_LIBS"
-                        CXXFLAGS="$CXXFLAGS $LIBGNOMEPRINTUI_CFLAGS"
-                        AC_DEFINE(wxUSE_LIBGNOMEPRINT)
-                    ],
-                    [
-                        AC_MSG_WARN([libgnomeprintui not found, library will use standard PostScript printing])
-                        wxUSE_LIBGNOMEPRINT="no"
-                    ]
-                )
-        fi
-    fi
-fi
-
-
 if test "$wxUSE_CMDLINE_PARSER" = "yes"; then
   AC_DEFINE(wxUSE_CMDLINE_PARSER)
 fi
@@ -5622,7 +5610,7 @@ fi
 if test "$wxUSE_SYSTEM_OPTIONS" = "yes"; then
     AC_DEFINE(wxUSE_SYSTEM_OPTIONS)
     if test "$TOOLKIT" = "MSW" -o "$TOOLKIT" = "GTK" -o "$TOOLKIT" = "X11" -o \
-        "$TOOLKIT" = "MOTIF" -o "$TOOLKIT" = "COCOA"; then
+        "$TOOLKIT" = "MOTIF"; then
         SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS taskbar"
     fi
 fi
@@ -5820,7 +5808,7 @@ if test "$wxUSE_MAC" = 1 ; then
     LDFLAGS="$LDFLAGS -framework Carbon -framework Cocoa -framework System"
 fi
 if test "$wxUSE_COCOA" = 1 ; then
-    LDFLAGS="$LDFLAGS -framework Cocoa"
+    LDFLAGS="$LDFLAGS -framework Cocoa -framework System"
 fi
 
 dnl FIXME: should this be covered by the conditional above
@@ -6023,7 +6011,6 @@ AC_SUBST(EXTRALIBS_GUI)
 AC_SUBST(EXTRALIBS_OPENGL)
 AC_SUBST(EXTRALIBS_SDL)
 AC_SUBST(WITH_PLUGIN_SDL)
-AC_SUBST(EXTRALIBS_GNOMEPRINT)
 AC_SUBST(UNICODE)
 AC_SUBST(BUILD)
 AC_SUBST(DEBUG_INFO)
@@ -6259,14 +6246,10 @@ for subdir in `echo $SUBDIRS`; do
             if test ${subdir} = "samples"; then
                 makefiles="samples/Makefile.in samples/console/Makefile.in"
             elif test ${subdir} = "utils"; then
-                makefiles=""
-                for util in HelpGen tex2rtf ; do
-                    if test -d $srcdir/utils/$util ; then
-                        makefiles="utils/$util/Makefile.in \
-                                   utils/$util/src/Makefile.in \
-                                   $makefiles"
-                    fi
-                done
+                makefiles="utils/HelpGen/Makefile.in \
+                           utils/HelpGen/src/Makefile.in \
+                           utils/tex2rtf/Makefile.in \
+                           utils/tex2rtf/src/Makefile.in"
             else dnl assume that everything compiles for tests
                 makefiles=`(cd $srcdir ; find $subdir -name Makefile.in)`
             fi
@@ -6310,7 +6293,6 @@ echo "                                       odbc               ${wxUSE_ODBC}"
 echo "                                       expat              ${wxUSE_EXPAT}"
 echo "                                       libmspack          ${wxUSE_LIBMSPACK}"
 echo "                                       sdl                ${wxUSE_LIBSDL}"
-echo "                                       gnomeprint         ${wxUSE_LIBGNOMEPRINT}"
 
 echo ""
 

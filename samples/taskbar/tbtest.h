@@ -12,13 +12,7 @@
 class MyTaskBarIcon: public wxTaskBarIcon
 {
 public:
-#if defined(__WXCOCOA__)
-    MyTaskBarIcon(wxTaskBarIconType iconType = DEFAULT_TYPE)
-    :   wxTaskBarIcon(iconType)
-#else
-    MyTaskBarIcon()
-#endif
-    {}
+    MyTaskBarIcon() {};
 
     void OnLeftButtonDClick(wxTaskBarIconEvent&);
     void OnMenuRestore(wxCommandEvent&);
@@ -52,9 +46,6 @@ public:
 
 protected:
     MyTaskBarIcon   *m_taskBarIcon;
-#if defined(__WXCOCOA__)
-    MyTaskBarIcon   *m_dockIcon;
-#endif
 
 DECLARE_EVENT_TABLE()
 };

@@ -34,7 +34,6 @@
 #include "wx/filename.h"
 #include "wx/module.h"
 #include "wx/image.h"
-#include "wx/thread.h"
 
 #ifdef __WXGPE__
 #include <gpe/init.h>
@@ -98,10 +97,6 @@ extern bool g_isIdle;
 
 void wxapp_install_idle_handler();
 
-#if wxUSE_THREADS
-static wxMutex gs_idleTagsMutex;
-#endif
-
 //-----------------------------------------------------------------------------
 // wxYield
 //-----------------------------------------------------------------------------
@@ -137,7 +132,8 @@ bool wxApp::Yield(bool onlyIfNeeded)
     {
         // We need to remove idle callbacks or the loop will
         // never finish.
-        wxTheApp->RemoveIdleTag();
+        gtk_idle_remove( m_idleTag );
+        m_idleTag = 0;
         g_isIdle = TRUE;
     }
 
@@ -168,31 +164,20 @@ bool wxApp::Yield(bool onlyIfNeeded)
 // wxWakeUpIdle
 //-----------------------------------------------------------------------------
 
-// RR/KH: The wxMutexGui calls are not needed on GTK2 according to
-// the GTK faq, http://www.gtk.org/faq/#AEN500
-// The calls to gdk_threads_enter() and leave() are specifically noted
-// as not being necessary.  The MutexGui calls are still left in for GTK1.
-// Eliminating the MutexGui calls fixes the long-standing "random" lockup
-// when using wxPostEvent (which calls WakeUpIdle) from a thread.
-
 void wxApp::WakeUpIdle()
 {
-#ifndef __WXGTK20__
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
         wxMutexGuiEnter();
-#endif // wxUSE_THREADS_
-#endif // __WXGTK2__
+#endif
 
     if (g_isIdle)
         wxapp_install_idle_handler();
 
-#ifndef __WXGTK20__
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
         wxMutexGuiLeave();
-#endif // wxUSE_THREADS_
-#endif // __WXGTK2__
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -215,12 +200,7 @@ static gint wxapp_pending_callback( gpointer WXUNUSED(data) )
     // Sent idle event to all who request them.
     wxTheApp->ProcessPendingEvents();
 
-    {
-#if wxUSE_THREADS
-        wxMutexLocker lock(gs_idleTagsMutex);
-#endif
-        g_pendingTag = 0;
-    }
+    g_pendingTag = 0;
 
     // Flush the logged messages if any.
 #if wxUSE_LOG
@@ -268,13 +248,8 @@ static gint wxapp_idle_callback( gpointer WXUNUSED(data) )
 
     // Indicate that we are now in idle mode and event handlers
     // will have to reinstall the idle handler again.
-    {
-#if wxUSE_THREADS
-        wxMutexLocker lock(gs_idleTagsMutex);
-#endif
-        g_isIdle = TRUE;
-        wxTheApp->m_idleTag = 0;
-    }
+    g_isIdle = TRUE;
+    wxTheApp->m_idleTag = 0;
 
     // Send idle event to all who request them as long as
     // no events have popped up in the event queue.
@@ -382,10 +357,6 @@ static gint wxapp_poll_func( GPollFD *ufds, guint nfds, gint timeout )
 
 void wxapp_install_idle_handler()
 {
-#if wxUSE_THREADS
-    wxMutexLocker lock(gs_idleTagsMutex);
-#endif
-
     // GD: this assert is raised when using the thread sample (which works)
     //     so the test is probably not so easy. Can widget callbacks be
     //     triggered from child threads and, if so, for which widgets?
@@ -697,11 +668,3 @@ void wxApp::OnAssert(const wxChar *file, int line, const wxChar* cond, const wxC
 
 #endif // __WXDEBUG__
 
-void wxApp::RemoveIdleTag()
-{
-#if wxUSE_THREADS
-    wxMutexLocker lock(gs_idleTagsMutex);
-#endif
-    gtk_idle_remove( wxTheApp->m_idleTag );
-    wxTheApp->m_idleTag = 0;
-}

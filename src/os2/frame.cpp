@@ -51,6 +51,7 @@
 // globals
 // ----------------------------------------------------------------------------
 
+extern wxWindowList wxModelessWindows;
 extern wxList WXDLLEXPORT wxPendingDelete;
 
 #if wxUSE_MENUS_NATIVE
@@ -141,6 +142,7 @@ bool wxFrame::Create(
                                   ,rsName
                                  ))
         return FALSE;
+    wxModelessWindows.Append(this);
     return TRUE;
 } // end of wxFrame::Create
 
