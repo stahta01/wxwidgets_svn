@@ -35,40 +35,28 @@
 
 // what to test (in alphabetic order)?
 
-//#define TEST_ARRAYS
-//#define TEST_CMDLINE
+#define TEST_ARRAYS
+#define TEST_CMDLINE
 #define TEST_DATETIME
-//#define TEST_DIR
-//#define TEST_DLLLOADER
-//#define TEST_ENVIRON
-//#define TEST_EXECUTE
-//#define TEST_FILE
-//#define TEST_FILECONF
-//#define TEST_FILENAME
-//#define TEST_FTP
-//#define TEST_HASH
-//#define TEST_INFO_FUNCTIONS
-//#define TEST_LIST
-//#define TEST_LOG
-//#define TEST_LONGLONG
-//#define TEST_MIME
-//#define TEST_PATHLIST
-//#define TEST_REGISTRY
-//#define TEST_SOCKETS
-//#define TEST_STREAMS
-//#define TEST_STRINGS
-//#define TEST_THREADS
-//#define TEST_TIMER
+#define TEST_DIR
+#define TEST_DLLLOADER
+#define TEST_EXECUTE
+#define TEST_FILE
+#define TEST_FILECONF
+#define TEST_HASH
+#define TEST_LIST
+#define TEST_LOG
+#define TEST_LONGLONG
+#define TEST_MIME
+#define TEST_INFO_FUNCTIONS
+#define TEST_SOCKETS
+#define TEST_STRINGS
+#define TEST_THREADS
+#define TEST_TIMER
 //#define TEST_VCARD            -- don't enable this (VZ)
-//#define TEST_WCHAR
+#define TEST_WCHAR
 #define TEST_ZIP
-//#define TEST_ZLIB
-
-
-#ifdef TEST_DATETIME
-#include <math.h>
-#endif
-
+#define TEST_ZLIB
 
 // ----------------------------------------------------------------------------
 // test class for container objects
@@ -294,43 +282,6 @@ static void TestDllLoad()
 #endif // TEST_DLLLOADER
 
 // ----------------------------------------------------------------------------
-// wxGet/SetEnv
-// ----------------------------------------------------------------------------
-
-#ifdef TEST_ENVIRON
-
-#include <wx/utils.h>
-
-static wxString MyGetEnv(const wxString& var)
-{
-    wxString val;
-    if ( !wxGetEnv(var, &val) )
-        val = _T("<empty>");
-    else
-        val = wxString(_T('\'')) + val + _T('\'');
-
-    return val;
-}
-
-static void TestEnvironment()
-{
-    const wxChar *var = _T("wxTestVar");
-
-    puts("*** testing environment access functions ***");
-
-    printf("Initially getenv(%s) = %s\n", var, MyGetEnv(var).c_str());
-    wxSetEnv(var, _T("value for wxTestVar"));
-    printf("After wxSetEnv: getenv(%s) = %s\n",  var, MyGetEnv(var).c_str());
-    wxSetEnv(var, _T("another value"));
-    printf("After 2nd wxSetEnv: getenv(%s) = %s\n",  var, MyGetEnv(var).c_str());
-    wxUnsetEnv(var);
-    printf("After wxUnsetEnv: getenv(%s) = %s\n",  var, MyGetEnv(var).c_str());
-    printf("PATH = %s\n",  MyGetEnv(_T("PATH")));
-}
-
-#endif // TEST_ENVIRON
-
-// ----------------------------------------------------------------------------
 // wxExecute
 // ----------------------------------------------------------------------------
 
@@ -343,9 +294,9 @@ static void TestExecute()
     puts("*** testing wxExecute ***");
 
 #ifdef __UNIX__
-    #define COMMAND "cat -n ../../Makefile" // "echo hi"
+    #define COMMAND "echo hi"
     #define SHELL_COMMAND "echo hi from shell"
-    #define REDIRECT_COMMAND COMMAND // "date"
+    #define REDIRECT_COMMAND "date"
 #elif defined(__WXMSW__)
     #define COMMAND "command.com -c 'echo hi'"
     #define SHELL_COMMAND "echo hi"
@@ -404,7 +355,6 @@ static void TestExecute()
 #ifdef TEST_FILE
 
 #include <wx/file.h>
-#include <wx/ffile.h>
 #include <wx/textfile.h>
 
 static void TestFileRead()
@@ -481,55 +431,6 @@ static void TestTextFileRead()
     puts("");
 }
 
-static void TestFileCopy()
-{
-    puts("*** Testing wxCopyFile ***");
-
-    static const wxChar *filename1 = _T("testdata.fc");
-    static const wxChar *filename2 = _T("test2");
-    if ( !wxCopyFile(filename1, filename2) )
-    {
-        puts("ERROR: failed to copy file");
-    }
-    else
-    {
-        wxFFile f1(filename1, "rb"),
-                f2(filename2, "rb");
-
-        if ( !f1.IsOpened() || !f2.IsOpened() )
-        {
-            puts("ERROR: failed to open file(s)");
-        }
-        else
-        {
-            wxString s1, s2;
-            if ( !f1.ReadAll(&s1) || !f2.ReadAll(&s2) )
-            {
-                puts("ERROR: failed to read file(s)");
-            }
-            else
-            {
-                if ( (s1.length() != s2.length()) ||
-                     (memcmp(s1.c_str(), s2.c_str(), s1.length()) != 0) )
-                {
-                    puts("ERROR: copy error!");
-                }
-                else
-                {
-                    puts("File was copied ok.");
-                }
-            }
-        }
-    }
-
-    if ( !wxRemoveFile(filename2) )
-    {
-        puts("ERROR: failed to remove the file");
-    }
-
-    puts("");
-}
-
 #endif // TEST_FILE
 
 // ----------------------------------------------------------------------------
@@ -551,6 +452,39 @@ static const struct FileConfTestData
     { _T("value2"),                       _T("two") },
     { _T("novalue"),                      _T("default") },
 };
+
+static void DumpFileConfGroup(wxFileConfig& fileconf,
+                              const wxString& indent)
+{
+    long dummy;
+    wxString name;
+    bool cont;
+
+    printf("%s[%s]\n", indent.c_str(),
+           fileconf.GetPath().AfterLast(_T('/')).c_str());
+
+    // dump the subgroups
+    cont = fileconf.GetFirstGroup(name, dummy);
+    while ( cont )
+    {
+        fileconf.SetPath(name);
+        DumpFileConfGroup(fileconf, indent + _T("  "));
+        fileconf.SetPath(_T(".."));
+
+        cont = fileconf.GetNextGroup(name, dummy);
+    }
+
+    // and now the entries
+    cont = fileconf.GetFirstEntry(name, dummy);
+    while ( cont )
+    {
+        printf("\t%s = %s\n",
+               name.c_str(),
+               fileconf.Read(name.c_str(), _T("ERROR")).c_str());
+
+        cont = fileconf.GetNextEntry(name, dummy);
+    }
+}
 
 static void TestFileConfRead()
 {
@@ -579,110 +513,12 @@ static void TestFileConfRead()
     }
 
     // test enumerating the entries
-    puts("\nEnumerating all root entries:");
-    long dummy;
-    wxString name;
-    bool cont = fileconf.GetFirstEntry(name, dummy);
-    while ( cont )
-    {
-        printf("\t%s = %s\n",
-               name.c_str(),
-               fileconf.Read(name.c_str(), _T("ERROR")).c_str());
+    puts("\nEnumerating all entries:");
 
-        cont = fileconf.GetNextEntry(name, dummy);
-    }
+    DumpFileConfGroup(fileconf, _T(""));
 }
 
 #endif // TEST_FILECONF
-
-// ----------------------------------------------------------------------------
-// wxFileName
-// ----------------------------------------------------------------------------
-
-#ifdef TEST_FILENAME
-
-#include <wx/filename.h>
-
-static struct FileNameInfo
-{
-    const wxChar *fullname;
-    const wxChar *path;
-    const wxChar *name;
-    const wxChar *ext;
-} filenames[] =
-{
-    { _T("/usr/bin/ls"), _T("/usr/bin"), _T("ls"), _T("") },
-    { _T("/usr/bin/"), _T("/usr/bin"), _T(""), _T("") },
-    { _T("~/.zshrc"), _T("~"), _T(".zshrc"), _T("") },
-    { _T("../../foo"), _T("../.."), _T("foo"), _T("") },
-    { _T("foo.bar"), _T(""), _T("foo"), _T("bar") },
-    { _T("~/foo.bar"), _T("~"), _T("foo"), _T("bar") },
-    { _T("Mahogany-0.60/foo.bar"), _T("Mahogany-0.60"), _T("foo"), _T("bar") },
-    { _T("/tmp/wxwin.tar.bz"), _T("/tmp"), _T("wxwin.tar"), _T("bz") },
-};
-
-static void TestFileNameConstruction()
-{
-    puts("*** testing wxFileName construction ***");
-
-    for ( size_t n = 0; n < WXSIZEOF(filenames); n++ )
-    {
-        wxFileName fn(filenames[n].fullname, wxPATH_UNIX);
-
-        printf("Filename: '%s'\t", fn.GetFullPath().c_str());
-        if ( !fn.Normalize(wxPATH_NORM_ALL, _T(""), wxPATH_UNIX) )
-        {
-            puts("ERROR (couldn't be normalized)");
-        }
-        else
-        {
-            printf("normalized: '%s'\n", fn.GetFullPath().c_str());
-        }
-    }
-
-    puts("");
-}
-
-static void TestFileNameSplit()
-{
-    puts("*** testing wxFileName splitting ***");
-
-    for ( size_t n = 0; n < WXSIZEOF(filenames); n++ )
-    {
-        const FileNameInfo &fni = filenames[n];
-        wxString path, name, ext;
-        wxFileName::SplitPath(fni.fullname, &path, &name, &ext);
-
-        printf("%s -> path = '%s', name = '%s', ext = '%s'",
-               fni.fullname, path.c_str(), name.c_str(), ext.c_str());
-        if ( path != fni.path )
-            printf(" (ERROR: path = '%s')", fni.path);
-        if ( name != fni.name )
-            printf(" (ERROR: name = '%s')", fni.name);
-        if ( ext != fni.ext )
-            printf(" (ERROR: ext = '%s')", fni.ext);
-        puts("");
-    }
-
-    puts("");
-}
-
-static void TestFileNameComparison()
-{
-    // TODO!
-}
-
-static void TestFileNameOperations()
-{
-    // TODO!
-}
-
-static void TestFileNameCwd()
-{
-    // TODO!
-}
-
-#endif // TEST_FILENAME
 
 // ----------------------------------------------------------------------------
 // wxHashTable
@@ -816,13 +652,13 @@ static void TestListCtor()
 
 #include <wx/mimetype.h>
 
+static wxMimeTypesManager g_mimeManager;
+
 static void TestMimeEnum()
 {
-    wxPuts(_T("*** Testing wxMimeTypesManager::EnumAllFileTypes() ***\n"));
-
     wxArrayString mimetypes;
 
-    size_t count = wxTheMimeTypesManager->EnumAllFileTypes(mimetypes);
+    size_t count = g_mimeManager.EnumAllFileTypes(mimetypes);
 
     printf("*** All %u known filetypes: ***\n", count);
 
@@ -831,8 +667,7 @@ static void TestMimeEnum()
 
     for ( size_t n = 0; n < count; n++ )
     {
-        wxFileType *filetype =
-            wxTheMimeTypesManager->GetFileTypeFromMimeType(mimetypes[n]);
+        wxFileType *filetype = g_mimeManager.GetFileTypeFromMimeType(mimetypes[n]);
         if ( !filetype )
         {
             printf("nothing known about the filetype '%s'!\n",
@@ -856,34 +691,21 @@ static void TestMimeEnum()
         printf("\t%s: %s (%s)\n",
                mimetypes[n].c_str(), desc.c_str(), extsAll.c_str());
     }
-
-    puts("");
 }
 
 static void TestMimeOverride()
 {
     wxPuts(_T("*** Testing wxMimeTypesManager additional files loading ***\n"));
 
-    static const wxChar *mailcap = _T("/tmp/mailcap");
-    static const wxChar *mimetypes = _T("/tmp/mime.types");
+    wxString mailcap = _T("/tmp/mailcap"),
+             mimetypes = _T("/tmp/mime.types");
 
-    if ( wxFile::Exists(mailcap) )
-        wxPrintf(_T("Loading mailcap from '%s': %s\n"),
-                 mailcap,
-                 wxTheMimeTypesManager->ReadMailcap(mailcap) ? _T("ok") : _T("ERROR"));
-    else
-        wxPrintf(_T("WARN: mailcap file '%s' doesn't exist, not loaded.\n"),
-                 mailcap);
-
-    if ( wxFile::Exists(mimetypes) )
-        wxPrintf(_T("Loading mime.types from '%s': %s\n"),
-                 mimetypes,
-                 wxTheMimeTypesManager->ReadMimeTypes(mimetypes) ? _T("ok") : _T("ERROR"));
-    else
-        wxPrintf(_T("WARN: mime.types file '%s' doesn't exist, not loaded.\n"),
-                 mimetypes);
-
-    puts("");
+    wxPrintf(_T("Loading mailcap from '%s': %s\n"),
+             mailcap.c_str(),
+             g_mimeManager.ReadMailcap(mailcap) ? _T("ok") : _T("ERROR"));
+    wxPrintf(_T("Loading mime.types from '%s': %s\n"),
+             mimetypes.c_str(),
+             g_mimeManager.ReadMimeTypes(mimetypes) ? _T("ok") : _T("ERROR"));
 }
 
 static void TestMimeFilename()
@@ -901,7 +723,7 @@ static void TestMimeFilename()
     {
         const wxString fname = filenames[n];
         wxString ext = fname.AfterLast(_T('.'));
-        wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
+        wxFileType *ft = g_mimeManager.GetFileTypeFromExtension(ext);
         if ( !ft )
         {
             wxPrintf(_T("WARNING: extension '%s' is unknown.\n"), ext.c_str());
@@ -923,36 +745,6 @@ static void TestMimeFilename()
             delete ft;
         }
     }
-
-    puts("");
-}
-
-static void TestMimeAssociate()
-{
-    wxPuts(_T("*** Testing creation of filetype association ***\n"));
-
-    wxFileTypeInfo ftInfo(
-                            _T("application/x-xyz"),
-                            _T("xyzview '%s'"), // open cmd
-                            _T(""),             // print cmd
-                            _T("XYZ File")  // description
-                            _T(".xyz"),     // extensions
-                            NULL            // end of extensions
-                         );
-    ftInfo.SetShortDesc(_T("XYZFile")); // used under Win32 only
-
-    wxFileType *ft = wxTheMimeTypesManager->Associate(ftInfo);
-    if ( !ft )
-    {
-        wxPuts(_T("ERROR: failed to create association!"));
-    }
-    else
-    {
-        // TODO: read it back
-        delete ft;
-    }
-
-    puts("");
 }
 
 #endif // TEST_MIME
@@ -1252,7 +1044,7 @@ static void TestLongLongComparison()
        -0x1234,
     };
 
-    wxLongLongWx lls[2];
+    wxLongLong lls[2];
     lls[0] = ls[0];
     lls[1] = ls[1]; 
 
@@ -1286,145 +1078,6 @@ static void TestLongLongComparison()
 #endif // TEST_LONGLONG
 
 // ----------------------------------------------------------------------------
-// path list
-// ----------------------------------------------------------------------------
-
-#ifdef TEST_PATHLIST
-
-static void TestPathList()
-{
-    puts("*** Testing wxPathList ***\n");
-
-    wxPathList pathlist;
-    pathlist.AddEnvList("PATH");
-    wxString path = pathlist.FindValidPath("ls");
-    if ( path.empty() )
-    {
-        printf("ERROR: command not found in the path.\n");
-    }
-    else
-    {
-        printf("Command found in the path as '%s'.\n", path.c_str());
-    }
-}
-
-#endif // TEST_PATHLIST
-
-// ----------------------------------------------------------------------------
-// registry
-// ----------------------------------------------------------------------------
-
-// this is for MSW only
-#ifndef __WXMSW__
-    #undef TEST_REGISTRY
-#endif
-
-#ifdef TEST_REGISTRY
-
-#include <wx/msw/registry.h>
-
-// I chose this one because I liked its name, but it probably only exists under
-// NT
-static const wxChar *TESTKEY =
-    _T("HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\CrashControl");
-
-static void TestRegistryRead()
-{
-    puts("*** testing registry reading ***");
-
-    wxRegKey key(TESTKEY);
-    printf("The test key name is '%s'.\n", key.GetName().c_str());
-    if ( !key.Open() )
-    {
-        puts("ERROR: test key can't be opened, aborting test.");
-
-        return;
-    }
-
-    size_t nSubKeys, nValues;
-    if ( key.GetKeyInfo(&nSubKeys, NULL, &nValues, NULL) )
-    {
-        printf("It has %u subkeys and %u values.\n", nSubKeys, nValues);
-    }
-
-    printf("Enumerating values:\n");
-
-    long dummy;
-    wxString value;
-    bool cont = key.GetFirstValue(value, dummy);
-    while ( cont )
-    {
-        printf("Value '%s': type ", value.c_str());
-        switch ( key.GetValueType(value) )
-        {
-            case wxRegKey::Type_None:   printf("ERROR (none)"); break;
-            case wxRegKey::Type_String: printf("SZ"); break;
-            case wxRegKey::Type_Expand_String: printf("EXPAND_SZ"); break;
-            case wxRegKey::Type_Binary: printf("BINARY"); break;
-            case wxRegKey::Type_Dword: printf("DWORD"); break;
-            case wxRegKey::Type_Multi_String: printf("MULTI_SZ"); break;
-            default: printf("other (unknown)"); break;
-        }
-
-        printf(", value = ");
-        if ( key.IsNumericValue(value) )
-        {
-            long val;
-            key.QueryValue(value, &val);
-            printf("%ld", val);
-        }
-        else // string
-        {
-            wxString val;
-            key.QueryValue(value, val);
-            printf("'%s'", val.c_str());
-
-            key.QueryRawValue(value, val);
-            printf(" (raw value '%s')", val.c_str());
-        }
-
-        putchar('\n');
-
-        cont = key.GetNextValue(value, dummy);
-    }
-}
-
-static void TestRegistryAssociation()
-{
-    /*
-       The second call to deleteself genertaes an error message, with a
-       messagebox saying .flo is crucial to system operation, while the .ddf
-       call also fails, but with no error message
-    */
-
-    wxRegKey key;
-
-    key.SetName("HKEY_CLASSES_ROOT\\.ddf" );
-    key.Create();
-    key = "ddxf_auto_file" ;
-    key.SetName("HKEY_CLASSES_ROOT\\.flo" );
-    key.Create();
-    key = "ddxf_auto_file" ;
-    key.SetName("HKEY_CLASSES_ROOT\\ddxf_auto_file\\DefaultIcon");
-    key.Create();
-    key = "program,0" ;
-    key.SetName("HKEY_CLASSES_ROOT\\ddxf_auto_file\\shell\\open\\command");
-    key.Create();
-    key = "program \"%1\"" ;
-
-    key.SetName("HKEY_CLASSES_ROOT\\.ddf" );
-    key.DeleteSelf();
-    key.SetName("HKEY_CLASSES_ROOT\\.flo" );
-    key.DeleteSelf();
-    key.SetName("HKEY_CLASSES_ROOT\\ddxf_auto_file\\DefaultIcon");
-    key.DeleteSelf();
-    key.SetName("HKEY_CLASSES_ROOT\\ddxf_auto_file\\shell\\open\\command");
-    key.DeleteSelf();
-}
-
-#endif // TEST_REGISTRY
-
-// ----------------------------------------------------------------------------
 // sockets
 // ----------------------------------------------------------------------------
 
@@ -1432,6 +1085,7 @@ static void TestRegistryAssociation()
 
 #include <wx/socket.h>
 #include <wx/protocol/protocol.h>
+#include <wx/protocol/ftp.h>
 #include <wx/protocol/http.h>
 
 static void TestSocketServer()
@@ -1554,84 +1208,56 @@ static void TestSocketClient()
     }
 }
 
-#endif // TEST_SOCKETS
-
-// ----------------------------------------------------------------------------
-// FTP
-// ----------------------------------------------------------------------------
-
-#ifdef TEST_FTP
-
-#include <wx/protocol/ftp.h>
-
-static wxFTP ftp;
-
-#define FTP_ANONYMOUS
-
-#ifdef FTP_ANONYMOUS
-    static const char *directory = "/pub";
-    static const char *filename = "welcome.msg";
-#else
-    static const char *directory = "/etc";
-    static const char *filename = "issue";
-#endif
-
-static bool TestFtpConnect()
+static void TestProtocolFtp()
 {
-    puts("*** Testing FTP connect ***");
+    puts("*** Testing wxFTP download ***\n");
 
-#ifdef FTP_ANONYMOUS
+    wxLog::AddTraceMask(_T("ftp"));
+
     static const char *hostname = "ftp.wxwindows.org";
 
-    printf("--- Attempting to connect to %s:21 anonymously...\n", hostname);
-#else // !FTP_ANONYMOUS
-    static const char *hostname = "localhost";
+    printf("--- Attempting to connect to %s:21...\n", hostname);
 
-    char user[256];
-    fgets(user, WXSIZEOF(user), stdin);
-    user[strlen(user) - 1] = '\0'; // chop off '\n'
-    ftp.SetUser(user);
-
-    char password[256];
-    printf("Password for %s: ", password);
-    fgets(password, WXSIZEOF(password), stdin);
-    password[strlen(password) - 1] = '\0'; // chop off '\n'
-    ftp.SetPassword(password);
-
-    printf("--- Attempting to connect to %s:21 as %s...\n", hostname, user);
-#endif // FTP_ANONYMOUS/!FTP_ANONYMOUS
-
+    wxFTP ftp;
     if ( !ftp.Connect(hostname) )
     {
         printf("ERROR: failed to connect to %s\n", hostname);
-
-        return FALSE;
     }
     else
     {
         printf("--- Connected to %s, current directory is '%s'\n",
                hostname, ftp.Pwd().c_str());
-    }
+        if ( !ftp.ChDir(_T("pub")) )
+        {
+            puts("ERROR: failed to cd to pub");
+        }
 
-    return TRUE;
-}
+        wxArrayString files;
+        if ( !ftp.GetList(files) )
+        {
+            puts("ERROR: failed to get list of files");
+        }
+        else
+        {
+            printf("List of files under '%s':\n", ftp.Pwd().c_str());
+            size_t count = files.GetCount();
+            for ( size_t n = 0; n < count; n++ )
+            {
+                printf("\t%s\n", files[n].c_str());
+            }
+            puts("End of the file list");
+        }
 
-// test (fixed?) wxFTP bug with wu-ftpd >= 2.6.0?
-static void TestFtpWuFtpd()
-{
-    wxFTP ftp;
-    static const char *hostname = "ftp.eudora.com";
-    if ( !ftp.Connect(hostname) )
-    {
-        printf("ERROR: failed to connect to %s\n", hostname);
-    }
-    else
-    {
-        static const char *filename = "eudora/pubs/draft-gellens-submit-09.txt";
+        if ( !ftp.ChDir(_T("..")) )
+        {
+            puts("ERROR: failed to cd to ..");
+        }
+
+        static const char *filename = "welcome.msg";
         wxInputStream *in = ftp.GetInputStream(filename);
         if ( !in )
         {
-            printf("ERROR: couldn't get input stream for %s\n", filename);
+            puts("ERROR: couldn't get input stream");
         }
         else
         {
@@ -1645,7 +1271,7 @@ static void TestFtpWuFtpd()
             }
             else
             {
-                printf("Successfully retrieved the file.\n");
+                printf("\nContents of %s:\n%s\n", filename, data);
             }
 
             delete [] data;
@@ -1654,284 +1280,95 @@ static void TestFtpWuFtpd()
     }
 }
 
-static void TestFtpList()
-{
-    puts("*** Testing wxFTP file listing ***\n");
-
-    // test CWD
-    if ( !ftp.ChDir(directory) )
-    {
-        printf("ERROR: failed to cd to %s\n", directory);
-    }
-
-    printf("Current directory is '%s'\n", ftp.Pwd().c_str());
-
-    // test NLIST and LIST
-    wxArrayString files;
-    if ( !ftp.GetFilesList(files) )
-    {
-        puts("ERROR: failed to get NLIST of files");
-    }
-    else
-    {
-        printf("Brief list of files under '%s':\n", ftp.Pwd().c_str());
-        size_t count = files.GetCount();
-        for ( size_t n = 0; n < count; n++ )
-        {
-            printf("\t%s\n", files[n].c_str());
-        }
-        puts("End of the file list");
-    }
-
-    if ( !ftp.GetDirList(files) )
-    {
-        puts("ERROR: failed to get LIST of files");
-    }
-    else
-    {
-        printf("Detailed list of files under '%s':\n", ftp.Pwd().c_str());
-        size_t count = files.GetCount();
-        for ( size_t n = 0; n < count; n++ )
-        {
-            printf("\t%s\n", files[n].c_str());
-        }
-        puts("End of the file list");
-    }
-
-    if ( !ftp.ChDir(_T("..")) )
-    {
-        puts("ERROR: failed to cd to ..");
-    }
-
-    printf("Current directory is '%s'\n", ftp.Pwd().c_str());
-}
-
-static void TestFtpDownload()
-{
-    puts("*** Testing wxFTP download ***\n");
-
-    // test RETR
-    wxInputStream *in = ftp.GetInputStream(filename);
-    if ( !in )
-    {
-        printf("ERROR: couldn't get input stream for %s\n", filename);
-    }
-    else
-    {
-        size_t size = in->StreamSize();
-        printf("Reading file %s (%u bytes)...", filename, size);
-        fflush(stdout);
-
-        char *data = new char[size];
-        if ( !in->Read(data, size) )
-        {
-            puts("ERROR: read error");
-        }
-        else
-        {
-            printf("\nContents of %s:\n%s\n", filename, data);
-        }
-
-        delete [] data;
-        delete in;
-    }
-}
-
-static void TestFtpFileSize()
-{
-    puts("*** Testing FTP SIZE command ***");
-
-    if ( !ftp.ChDir(directory) )
-    {
-        printf("ERROR: failed to cd to %s\n", directory);
-    }
-
-    printf("Current directory is '%s'\n", ftp.Pwd().c_str());
-
-    if ( ftp.FileExists(filename) )
-    {
-        int size = ftp.GetFileSize(filename);
-        if ( size == -1 )
-            printf("ERROR: couldn't get size of '%s'\n", filename);
-        else
-            printf("Size of '%s' is %d bytes.\n", filename, size);
-    }
-    else
-    {
-        printf("ERROR: '%s' doesn't exist\n", filename);
-    }
-}
-
-static void TestFtpMisc()
-{
-    puts("*** Testing miscellaneous wxFTP functions ***");
-
-    if ( ftp.SendCommand("STAT") != '2' )
-    {
-        puts("ERROR: STAT failed");
-    }
-    else
-    {
-        printf("STAT returned:\n\n%s\n", ftp.GetLastResult().c_str());
-    }
-
-    if ( ftp.SendCommand("HELP SITE") != '2' )
-    {
-        puts("ERROR: HELP SITE failed");
-    }
-    else
-    {
-        printf("The list of site-specific commands:\n\n%s\n",
-               ftp.GetLastResult().c_str());
-    }
-}
-
-static void TestFtpInteractive()
-{
-    puts("\n*** Interactive wxFTP test ***");
-
-    char buf[128];
-
-    for ( ;; )
-    {
-        printf("Enter FTP command: ");
-        if ( !fgets(buf, WXSIZEOF(buf), stdin) )
-            break;
-
-        // kill the last '\n'
-        buf[strlen(buf) - 1] = 0;
-
-        // special handling of LIST and NLST as they require data connection
-        wxString start(buf, 4);
-        start.MakeUpper();
-        if ( start == "LIST" || start == "NLST" )
-        {
-            wxString wildcard;
-            if ( strlen(buf) > 4 )
-                wildcard = buf + 5;
-
-            wxArrayString files;
-            if ( !ftp.GetList(files, wildcard, start == "LIST") )
-            {
-                printf("ERROR: failed to get %s of files\n", start.c_str());
-            }
-            else
-            {
-                printf("--- %s of '%s' under '%s':\n",
-                       start.c_str(), wildcard.c_str(), ftp.Pwd().c_str());
-                size_t count = files.GetCount();
-                for ( size_t n = 0; n < count; n++ )
-                {
-                    printf("\t%s\n", files[n].c_str());
-                }
-                puts("--- End of the file list");
-            }
-        }
-        else // !list
-        {
-            char ch = ftp.SendCommand(buf);
-            printf("Command %s", ch ? "succeeded" : "failed");
-            if ( ch )
-            {
-                printf(" (return code %c)", ch);
-            }
-
-            printf(", server reply:\n%s\n\n", ftp.GetLastResult().c_str());
-        }
-    }
-
-    puts("\n*** done ***");
-}
-
-static void TestFtpUpload()
+static void TestProtocolFtpUpload()
 {
     puts("*** Testing wxFTP uploading ***\n");
 
-    // upload a file
-    static const char *file1 = "test1";
-    static const char *file2 = "test2";
-    wxOutputStream *out = ftp.GetOutputStream(file1);
-    if ( out )
-    {
-        printf("--- Uploading to %s ---\n", file1);
-        out->Write("First hello", 11);
-        delete out;
-    }
+    wxLog::AddTraceMask(_T("ftp"));
 
-    // send a command to check the remote file
-    if ( ftp.SendCommand(wxString("STAT ") + file1) != '2' )
+    static const char *hostname = "localhost";
+
+    printf("--- Attempting to connect to %s:21...\n", hostname);
+
+    wxFTP ftp;
+    ftp.SetUser("zeitlin");
+    ftp.SetPassword("insert your password here");
+    if ( !ftp.Connect(hostname) )
     {
-        printf("ERROR: STAT %s failed\n", file1);
+        printf("ERROR: failed to connect to %s\n", hostname);
     }
     else
     {
-        printf("STAT %s returned:\n\n%s\n",
-               file1, ftp.GetLastResult().c_str());
-    }
+        printf("--- Connected to %s, current directory is '%s'\n",
+               hostname, ftp.Pwd().c_str());
 
-    out = ftp.GetOutputStream(file2);
-    if ( out )
-    {
-        printf("--- Uploading to %s ---\n", file1);
-        out->Write("Second hello", 12);
-        delete out;
+        // upload a file
+        static const char *file1 = "test1";
+        static const char *file2 = "test2";
+        wxOutputStream *out = ftp.GetOutputStream(file1);
+        if ( out )
+        {
+            printf("--- Uploading to %s ---\n", file1);
+            out->Write("First hello", 11);
+            delete out;
+        }
+
+        out = ftp.GetOutputStream(file2);
+        if ( out )
+        {
+            printf("--- Uploading to %s ---\n", file1);
+            out->Write("Second hello", 12);
+            delete out;
+        }
     }
 }
 
-#endif // TEST_FTP
-
-// ----------------------------------------------------------------------------
-// streams
-// ----------------------------------------------------------------------------
-
-#ifdef TEST_STREAMS
-
-#include <wx/wfstream.h>
-#include <wx/mstream.h>
-
-static void TestFileStream()
+static void TestProtocolHttp()
 {
-    puts("*** Testing wxFileInputStream ***");
+    puts("*** Testing wxHTTP ***\n");
 
-    static const wxChar *filename = _T("testdata.fs");
+    wxLog::AddTraceMask(_T("http"));
+
+    static const char *hostname = "www.wxwindows.org";
+
+    printf("--- Attempting to connect to %s:80...\n", hostname);
+
+    wxHTTP http;
+    if ( !http.Connect(hostname) )
     {
-        wxFileOutputStream fsOut(filename);
-        fsOut.Write("foo", 3);
+        printf("ERROR: failed to connect to %s\n", hostname);
     }
-
-    wxFileInputStream fsIn(filename);
-    printf("File stream size: %u\n", fsIn.GetSize());
-    while ( !fsIn.Eof() )
+    else
     {
-        putchar(fsIn.GetC());
-    }
+        static const char *filename = "docs.htm";
+        wxInputStream *in = http.GetInputStream(filename);
+        if ( !in )
+        {
+            printf("ERROR: couldn't retrieve '%s'\n", filename);
+        }
+        else
+        {
+            size_t size = in->StreamSize();
+            printf("Reading file %s of type %s (%u bytes)...",
+                   filename, http.GetContentType().c_str(), size);
 
-    if ( !wxRemoveFile(filename) )
-    {
-        printf("ERROR: failed to remove the file '%s'.\n", filename);
-    }
+            char *data = new char[size];
+            if ( !in->Read(data, size) )
+            {
+                puts("ERROR: read error");
+            }
+            else
+            {
+                printf("\nContents of %s:\n%s\n", filename, data);
+            }
 
-    puts("\n*** wxFileInputStream test done ***");
+            delete [] data;
+            delete in;
+        }
+    }
 }
 
-static void TestMemoryStream()
-{
-    puts("*** Testing wxMemoryInputStream ***");
-
-    wxChar buf[1024];
-    wxStrncpy(buf, _T("Hello, stream!"), WXSIZEOF(buf));
-
-    wxMemoryInputStream memInpStream(buf, wxStrlen(buf));
-    printf(_T("Memory stream size: %u\n"), memInpStream.GetSize());
-    while ( !memInpStream.Eof() )
-    {
-        putchar(memInpStream.GetC());
-    }
-
-    puts("\n*** wxMemoryInputStream test done ***");
-}
-
-#endif // TEST_STREAMS
+#endif // TEST_SOCKETS
 
 // ----------------------------------------------------------------------------
 // timers
@@ -2232,49 +1669,41 @@ static void TestVCardWrite()
 #ifdef TEST_WCHAR
 
 #include <wx/strconv.h>
-#include <wx/fontenc.h>
-#include <wx/encconv.h>
 #include <wx/buffer.h>
 
 static void TestUtf8()
 {
     puts("*** Testing UTF8 support ***\n");
 
-    static const char textInUtf8[] =
-    {
-        208, 157, 208, 181, 209, 129, 208, 186, 208, 176, 208, 183, 208, 176,
-        208, 189, 208, 189, 208, 190, 32, 208, 191, 208, 190, 209, 128, 208,
-        176, 208, 180, 208, 190, 208, 178, 208, 176, 208, 187, 32, 208, 188,
-        208, 181, 208, 189, 209, 143, 32, 209, 129, 208, 178, 208, 190, 208,
-        181, 208, 185, 32, 208, 186, 209, 128, 209, 131, 209, 130, 208, 181,
-        208, 185, 209, 136, 208, 181, 208, 185, 32, 208, 189, 208, 190, 208,
-        178, 208, 190, 209, 129, 209, 130, 209, 140, 209, 142, 0
-    };
-
-    char buf[1024];
-    wchar_t wbuf[1024];
-    if ( wxConvUTF8.MB2WC(wbuf, textInUtf8, WXSIZEOF(textInUtf8)) <= 0 )
-    {
-        puts("ERROR: UTF-8 decoding failed.");
-    }
-    else
-    {
-        // using wxEncodingConverter
+    wxString testString = "français";
 #if 0
-        wxEncodingConverter ec;
-        ec.Init(wxFONTENCODING_UNICODE, wxFONTENCODING_KOI8);
-        ec.Convert(wbuf, buf);
-#else // using wxCSConv
-        wxCSConv conv(_T("koi8-r"));
-        if ( conv.WC2MB(buf, wbuf, 0 /* not needed wcslen(wbuf) */) <= 0 )
-        {
-            puts("ERROR: conversion to KOI8-R failed.");
-        }
-        else
+"************ French - Français ****************"
+"Juste un petit exemple pour dire que les français aussi"
+"ont à cœur de pouvoir utiliser tous leurs caractères ! :)";
 #endif
 
-        printf("The resulting string (in koi8-r): %s\n", buf);
+#if wxUSE_WCHAR_T
+    wxWCharBuffer wchBuf = testString.wc_str(wxConvUTF8);
+    const wchar_t *pwz = (const wchar_t *)wchBuf;
+    wxString testString2(pwz, wxConvLocal);
+
+    printf("Decoding '%s' => '%s'\n", testString.c_str(), testString2.c_str());
+
+    char *psz = "fran" "\xe7" "ais";
+    size_t len = strlen(psz);
+    wchar_t *pwz2 = new wchar_t[len + 1];
+    for ( size_t n = 0; n <= len; n++ )
+    {
+        pwz2[n] = (wchar_t)(unsigned char)psz[n];
     }
+
+    wxString testString3(pwz2, wxConvUTF8);
+    delete [] pwz2;
+
+    printf("Encoding '%s' -> '%s'\n", psz, testString3.c_str());
+#else
+    puts("WARNING: not compiled in.");
+#endif // wxUSE_WCHAR_T
 }
 
 #endif // TEST_WCHAR
@@ -2285,21 +1714,16 @@ static void TestUtf8()
 
 #ifdef TEST_ZIP
 
-#include "wx/filesys.h"
-#include "wx/fs_zip.h"
 #include "wx/zipstrm.h"
-
-static const wxChar *TESTFILE_ZIP = _T("testdata.zip");
 
 static void TestZipStreamRead()
 {
     puts("*** Testing ZIP reading ***\n");
 
-    static const wxChar *filename = _T("foo");
-    wxZipInputStream istr(TESTFILE_ZIP, filename);
+    wxZipInputStream istr(_T("idx.zip"), _T("IDX.txt"));
     printf("Archive size: %u\n", istr.GetSize());
 
-    printf("Dumping the file '%s':\n", filename);
+    puts("Dumping the file:");
     while ( !istr.Eof() )
     {
         putchar(istr.GetC());
@@ -2307,59 +1731,6 @@ static void TestZipStreamRead()
     }
 
     puts("\n----- done ------");
-}
-
-static void DumpZipDirectory(wxFileSystem& fs,
-                             const wxString& dir,
-                             const wxString& indent)
-{
-    wxString prefix = wxString::Format(_T("%s#zip:%s"),
-                                         TESTFILE_ZIP, dir.c_str());
-    wxString wildcard = prefix + _T("/*");
-
-    wxString dirname = fs.FindFirst(wildcard, wxDIR);
-    while ( !dirname.empty() )
-    {
-        if ( !dirname.StartsWith(prefix + _T('/'), &dirname) )
-        {
-            wxPrintf(_T("ERROR: unexpected wxFileSystem::FindNext result\n"));
-
-            break;
-        }
-
-        wxPrintf(_T("%s%s\n"), indent.c_str(), dirname.c_str());
-
-        DumpZipDirectory(fs, dirname,
-                         indent + wxString(_T(' '), 4));
-
-        dirname = fs.FindNext();
-    }
-
-    wxString filename = fs.FindFirst(wildcard, wxFILE);
-    while ( !filename.empty() )
-    {
-        if ( !filename.StartsWith(prefix, &filename) )
-        {
-            wxPrintf(_T("ERROR: unexpected wxFileSystem::FindNext result\n"));
-
-            break;
-        }
-
-        wxPrintf(_T("%s%s\n"), indent.c_str(), filename.c_str());
-
-        filename = fs.FindNext();
-    }
-}
-
-static void TestZipFileSystem()
-{
-    puts("*** Testing ZIP file system ***\n");
-
-    wxFileSystem::AddHandler(new wxZipFSHandler);
-    wxFileSystem fs;
-    wxPrintf(_T("Dumping all files in the archive %s:\n"), TESTFILE_ZIP);
-
-    DumpZipDirectory(fs, _T(""), wxString(_T(' '), 4));
 }
 
 #endif // TEST_ZIP
@@ -3209,7 +2580,7 @@ static void TestTimeParse()
     }
 }
 
-static void TestDateTimeInteractive()
+static void TestInteractive()
 {
     puts("\n*** interactive wxDateTime tests ***");
 
@@ -3384,32 +2755,6 @@ static void TestTimeZoneBug()
                date.GetWeekDayName(date.GetWeekDay()).c_str());
 
         date += wxDateSpan::Day();
-    }
-
-    puts("");
-}
-
-static void TestTimeSpanFormat()
-{
-    puts("\n*** wxTimeSpan tests ***");
-
-    static const char *formats[] =
-    {
-        _T("(default) %H:%M:%S"),
-        _T("%E weeks and %D days"),
-        _T("%l milliseconds"),
-        _T("(with ms) %H:%M:%S:%l"),
-        _T("100%% of minutes is %M"),       // test "%%"
-        _T("%D days and %H hours"),
-    };
-
-    wxTimeSpan ts1(1, 2, 3, 4),
-                ts2(111, 222, 333);
-    for ( size_t n = 0; n < WXSIZEOF(formats); n++ )
-    {
-        printf("ts1 = %s\tts2 = %s\n",
-               ts1.Format(formats[n]).c_str(),
-               ts2.Format(formats[n]).c_str());
     }
 
     puts("");
@@ -3702,55 +3047,9 @@ static void PrintArray(const char* name, const wxArrayString& array)
     }
 }
 
-static void PrintArray(const char* name, const wxArrayInt& array)
-{
-    printf("Dump of the array '%s'\n", name);
-
-    size_t nCount = array.GetCount();
-    for ( size_t n = 0; n < nCount; n++ )
-    {
-        printf("\t%s[%u] = %d\n", name, n, array[n]);
-    }
-}
-
-int wxCMPFUNC_CONV StringLenCompare(const wxString& first,
-                                    const wxString& second)
+static int StringLenCompare(const wxString& first, const wxString& second)
 {
     return first.length() - second.length();
-}
-
-int wxCMPFUNC_CONV IntCompare(int *first,
-                              int *second)
-{
-    return *first - *second;
-}
-
-int wxCMPFUNC_CONV IntRevCompare(int *first,
-                              int *second)
-{
-    return *second - *first;
-}
-
-static void TestArrayOfInts()
-{
-    puts("*** Testing wxArrayInt ***\n");
-
-    wxArrayInt a;
-    a.Add(1);
-    a.Add(17);
-    a.Add(5);
-    a.Add(3);
-
-    puts("Initially:");
-    PrintArray("a", a);
-
-    puts("After sort:");
-    a.Sort(IntCompare);
-    PrintArray("a", a);
-
-    puts("After reverse sort:");
-    a.Sort(IntRevCompare);
-    PrintArray("a", a);
 }
 
 #include "wx/dynarray.h"
@@ -4212,8 +3511,6 @@ int main(int argc, char **argv)
 #endif // TEST_STRINGS
 
 #ifdef TEST_ARRAYS
-    if ( 0 )
-    {
     wxArrayString a1;
     a1.Add("tiger");
     a1.Add("cat");
@@ -4257,8 +3554,6 @@ int main(int argc, char **argv)
     PrintArray("a1", a1);
 
     TestArrayOfObjects();
-    }
-    TestArrayOfInts();
 #endif // TEST_ARRAYS
 
 #ifdef TEST_DIR
@@ -4268,10 +3563,6 @@ int main(int argc, char **argv)
 #ifdef TEST_DLLLOADER
     TestDllLoad();
 #endif // TEST_DLLLOADER
-
-#ifdef TEST_ENVIRON
-    TestEnvironment();
-#endif // TEST_ENVIRON
 
 #ifdef TEST_EXECUTE
     TestExecute();
@@ -4306,23 +3597,9 @@ int main(int argc, char **argv)
 
 #ifdef TEST_FILE
     if ( 0 )
-    {
         TestFileRead();
-        TestTextFileRead();
-    }
-    TestFileCopy();
+    TestTextFileRead();
 #endif // TEST_FILE
-
-#ifdef TEST_FILENAME
-    TestFileNameSplit();
-    if ( 0 )
-    {
-        TestFileNameConstruction();
-        TestFileNameCwd();
-        TestFileNameComparison();
-        TestFileNameOperations();
-    }
-#endif // TEST_FILENAME
 
 #ifdef TEST_THREADS
     int nCPUs = wxThread::GetCPUCount();
@@ -4369,14 +3646,10 @@ int main(int argc, char **argv)
 
 #ifdef TEST_MIME
     wxLog::AddTraceMask(_T("mime"));
-    if ( 1 )
-    {
+    if ( 0 )
         TestMimeEnum();
-        TestMimeOverride();
-        TestMimeFilename();
-    }
-    else
-        TestMimeAssociate();
+    TestMimeOverride();
+    TestMimeFilename();
 #endif // TEST_MIME
 
 #ifdef TEST_INFO_FUNCTIONS
@@ -4384,50 +3657,16 @@ int main(int argc, char **argv)
     TestUserInfo();
 #endif // TEST_INFO_FUNCTIONS
 
-#ifdef TEST_PATHLIST
-    TestPathList();
-#endif // TEST_PATHLIST
-
-#ifdef TEST_REGISTRY
-    if ( 0 )
-        TestRegistryRead();
-    TestRegistryAssociation();
-#endif // TEST_REGISTRY
-
 #ifdef TEST_SOCKETS
     if ( 0 )
     {
         TestSocketServer();
-    }
         TestSocketClient();
-#endif // TEST_SOCKETS
-
-#ifdef TEST_FTP
-    wxLog::AddTraceMask(FTP_TRACE_MASK);
-    if ( TestFtpConnect() )
-    {
-            TestFtpFileSize();
-        if ( 0 )
-        {
-            TestFtpList();
-            TestFtpDownload();
-            TestFtpMisc();
-            TestFtpUpload();
-        }
-        if ( 0 )
-        TestFtpInteractive();
+        TestProtocolFtp();
+        TestProtocolFtpUpload();
     }
-    //else: connecting to the FTP server failed
-
-    if ( 0 )
-        TestFtpWuFtpd();
-#endif // TEST_FTP
-
-#ifdef TEST_STREAMS
-    if ( 0 )
-    TestFileStream();
-    TestMemoryStream();
-#endif // TEST_STREAMS
+    TestProtocolHttp();
+#endif // TEST_SOCKETS
 
 #ifdef TEST_TIMER
     TestStopWatch();
@@ -4453,9 +3692,8 @@ int main(int argc, char **argv)
 
         TestTimeZoneBug();
     }
-    TestTimeSpanFormat();
-    if ( 0 )
-        TestDateTimeInteractive();
+    if ( 1 )
+        TestInteractive();
 #endif // TEST_DATETIME
 
 #ifdef TEST_VCARD
@@ -4469,9 +3707,7 @@ int main(int argc, char **argv)
 #endif // TEST_WCHAR
 
 #ifdef TEST_ZIP
-    if ( 0 )
-        TestZipStreamRead();
-    TestZipFileSystem();
+    TestZipStreamRead();
 #endif // TEST_ZIP
 
 #ifdef TEST_ZLIB

@@ -153,7 +153,6 @@ BEGIN_EVENT_TABLE(wxWindow, wxWindowBase)
     EVT_SYS_COLOUR_CHANGED(wxWindow::OnSysColourChanged)
     EVT_INIT_DIALOG(wxWindow::OnInitDialog)
     EVT_IDLE(wxWindow::OnIdle)
-    EVT_SET_FOCUS(wxWindow::OnSetFocus)
 END_EVENT_TABLE()
 
 // ===========================================================================
@@ -310,6 +309,8 @@ wxWindow::~wxWindow()
 
     if (m_hWnd)
     {
+//      UnsubclassWin();
+
         if(!::WinDestroyWindow(GetHWND()))
             wxLogLastError(wxT("DestroyWindow"));
         //
@@ -358,12 +359,6 @@ bool wxWindow::Create(
     // set in those class create procs.  PM's basic windows styles are
     // very limited.
     //
-    ulCreateFlags |=  WS_VISIBLE;
-
-
-    if ( lStyle & wxCLIP_SIBLINGS )
-        ulCreateFlags |= WS_CLIPSIBLINGS;
-
     if (lStyle & wxCLIP_CHILDREN )
         ulCreateFlags |= WS_CLIPCHILDREN;
 
@@ -720,12 +715,19 @@ void wxWindow::SubclassWin(
     HWND                            hwnd = (HWND)hWnd;
 
     wxASSERT_MSG( !m_fnOldWndProc, wxT("subclassing window twice?") );
+
     wxCHECK_RET(::WinIsWindow(vHabmain, hwnd), wxT("invalid HWND in SubclassWin") );
+
+//  wxAssociateWinWithHandle(hwnd, this);
+
     m_fnOldWndProc = (WXFARPROC) ::WinSubclassWindow(hwnd, (PFNWP)wxWndProc);
+//    ::WinSetWindowULong(hwnd, QWL_USER, (ULONG)wxWndProc);
 } // end of wxWindow::SubclassWin
 
 void wxWindow::UnsubclassWin()
 {
+//    wxRemoveHandleAssociation(this);
+
     //
     // Restore old Window proc
     //
@@ -733,10 +735,11 @@ void wxWindow::UnsubclassWin()
 
     if (m_hWnd)
     {
+//        m_hWnd = 0;
+
         wxCHECK_RET( ::WinIsWindow(vHabmain, hwnd), wxT("invalid HWND in UnsubclassWin") );
 
         PFNWP                       fnProc = (PFNWP)::WinQueryWindowPtr(hwnd, QWP_PFNWP);
-
         if ( (m_fnOldWndProc != 0) && (fnProc != (PFNWP) m_fnOldWndProc))
         {
             WinSubclassWindow(hwnd, (PFNWP)m_fnOldWndProc);
@@ -1097,10 +1100,7 @@ void wxWindow::DoGetClientSize(
     RECTL                           vRect;
 
     hWndClient = ::WinWindowFromID(GetHwnd(), FID_CLIENT);
-    if( hWndClient == NULLHANDLE)
-       ::WinQueryWindowRect(GetHwnd(), &vRect);
-    else
-       ::WinQueryWindowRect(hWndClient, &vRect);
+    ::WinQueryWindowRect(hWndClient, &vRect);
 
     if (pWidth)
         *pWidth  = vRect.xRight;
@@ -1324,12 +1324,10 @@ int wxWindow::GetCharHeight() const
     hPs = ::WinGetPS(GetHwnd());
 
     if(!GpiQueryFontMetrics(hPs, sizeof(FONTMETRICS), &vFontMetrics))
-    {
-        ::WinReleasePS(hPs);
         return (0);
-    }
+    else
+        return(vFontMetrics.lMaxAscender + vFontMetrics.lMaxDescender);
     ::WinReleasePS(hPs);
-    return(vFontMetrics.lMaxAscender + vFontMetrics.lMaxDescender);
 } // end of wxWindow::GetCharHeight
 
 int wxWindow::GetCharWidth() const
@@ -1340,12 +1338,10 @@ int wxWindow::GetCharWidth() const
     hPs = ::WinGetPS(GetHwnd());
 
     if(!GpiQueryFontMetrics(hPs, sizeof(FONTMETRICS), &vFontMetrics))
-    {
-        ::WinReleasePS(hPs);
         return (0);
-    }
+    else
+        return(vFontMetrics.lAveCharWidth);
     ::WinReleasePS(hPs);
-    return(vFontMetrics.lAveCharWidth);
 } // end of wxWindow::GetCharWidth
 
 void wxWindow::GetTextExtent(
@@ -1707,11 +1703,7 @@ bool wxWindow::OS2TranslateMessage(
   WXMSG*                            pMsg
 )
 {
-#if wxUSE_ACCEL
-  return m_acceleratorTable.Translate(m_hWnd, pMsg);
-#else
-  return FALSE;
-#endif //wxUSE_ACCEL
+    return m_acceleratorTable.Translate(m_hWnd, pMsg);
 } // end of wxWindow::OS2TranslateMessage
 
 // ---------------------------------------------------------------------------
@@ -1726,6 +1718,11 @@ void wxWindow::UnpackCommand(
 , WORD*                             pCmd
 )
 {
+/*
+    *pId = LOWORD(wParam);
+    *phWnd = (WXHWND)lParam;
+    *pCmd = HIWORD(wParam);
+*/
     *pId = LOWORD(wParam);
     *phWnd = NULL;  // or may be GetHWND() ?
     *pCmd = LOWORD(lParam);
@@ -1851,6 +1848,17 @@ MRESULT wxWindow::OS2WindowProc(
     MRESULT                         mResult;
     WXHICON                         hIcon;
     WXHBRUSH                        hBrush;
+
+    //
+    // The return value
+    //
+//  union
+//  {
+//      bool                        bAllow;
+//      MRESULT                     mResult;
+//      WXHICON                     hIcon;
+//      WXHBRUSH                    hBrush;
+//  } vRc;
 
     //
     // For most messages we should return 0 when we do process the message
@@ -2106,15 +2114,6 @@ MRESULT wxWindow::OS2WindowProc(
             }
             break;
 #endif
-        case WM_ERASEBACKGROUND:
-            //
-            // Returning TRUE to requestw PM to paint the window background
-            // in SYSCLR_WINDOW. We don't really want that
-            //
-            bProcessed = HandleEraseBkgnd((WXHDC)(HPS)wParam);
-            mResult = (MRESULT)(FALSE);
-            break;
-
         //
         // Instead of CTLCOLOR messages PM sends QUERYWINDOWPARAMS to
         // things such as colors and fonts and such
@@ -2142,6 +2141,17 @@ MRESULT wxWindow::OS2WindowProc(
             bProcessed = HandlePresParamChanged(wParam);
             break;
 
+        // move this to wxFrame
+        case WM_ERASEBACKGROUND:
+            bProcessed = HandleEraseBkgnd((WXHDC)(HDC)wParam);
+            if (bProcessed)
+            {
+                //
+                // We processed the message, i.e. erased the background
+                //
+                mResult = (MRESULT)TRUE;
+            }
+            break;
 
         // move all drag and drops to wxDrg
         case WM_ENDDRAG:
@@ -2186,16 +2196,14 @@ MRESULT wxWindow::OS2WindowProc(
             }
             break;
     }
+
     if (!bProcessed)
     {
 #ifdef __WXDEBUG__
         wxLogTrace(wxTraceMessages, wxT("Forwarding %s to DefWindowProc."),
                    wxGetMessageName(uMsg));
 #endif // __WXDEBUG__
-        if (IsKindOf(CLASSINFO(wxFrame)))
-            mResult = ::WinDefWindowProc(m_hWnd, uMsg, wParam, lParam);
-        else
-            mResult = OS2DefWindowProc(uMsg, wParam, lParam);
+        mResult = OS2DefWindowProc(uMsg, wParam, lParam);
     }
     return mResult;
 } // end of wxWindow::OS2WindowProc
@@ -2339,8 +2347,6 @@ bool wxWindow::OS2Create(
     long                            lWidth1  = 20L;
     long                            lHeight1 = 20L;
     int                             nControlId = 0;
-    int                             nNeedsubclass = 0;
-    PCSZ                            pszClass = zClass;
 
     //
     // Find parent's size, if it exists, to set up a possible default
@@ -2380,21 +2386,6 @@ bool wxWindow::OS2Create(
     {
             nControlId = ulId;
     }
-    else
-    {
-        // no standard controls
-        if(wxString (wxT("wxFrameClass")) == wxString(zClass) )
-        {
-            pszClass =  WC_FRAME;
-            nNeedsubclass = 1;
-        }
-        else
-        {
-            nControlId = ulId;
-            if(nControlId < 0)
-                nControlId = FID_CLIENT;
-        }
-    }
 
     //
     // We will either have a registered class via string name or a standard PM Class via a long
@@ -2407,9 +2398,9 @@ bool wxWindow::OS2Create(
                                        ,(LONG)lY1
                                        ,(LONG)lWidth
                                        ,(LONG)lHeight
-                                       ,hOwner
+                                       ,NULLHANDLE
                                        ,HWND_TOP
-                                       ,(ULONG)nControlId
+                                       ,(ULONG)ulId
                                        ,pCtlData
                                        ,pPresParams
                                       );
@@ -2440,17 +2431,12 @@ bool wxWindow::OS2Create(
     wxAssociateWinWithHandle((HWND)m_hWnd
                              ,this
                             );
-    //
+    // 
     // Now need to subclass window.
     //
-    if(!nNeedsubclass)
-    {
-         wxAssociateWinWithHandle((HWND)m_hWnd,this);
-    }
-    else
-    {
-        SubclassWin(GetHWND());
-    }
+
+    SubclassWin(GetHWND());
+
     return TRUE;
 } // end of wxWindow::OS2Create
 
@@ -2654,113 +2640,78 @@ bool wxWindow::OS2OnDrawItem(
 , WXDRAWITEMSTRUCT*                 pItemStruct
 )
 {
-    wxDC                            vDc;
+    //
+    // I'll get to owner drawn stuff later
+    //
 
     //
-    // Is it a menu item?
+    // is it a menu item or control?
     //
-    if (vId == 0)
-    {
-
-#if wxUSE_OWNER_DRAWN
-        POWNERITEM                  pMeasureStruct = (POWNERITEM)pItemStruct;
-        wxMenuItem                  vMenuItem;
-        HDC                         hDC = ::GpiQueryDevice(pMeasureStruct->hps);
-
-        vDc.SetHDC( hDC
-                   ,FALSE
-                  );
-        vDc.SetHPS(pMeasureStruct->hps);
-
-        //
-        // We stored the CMenuItem itself into the menuitem text field so now
-        // we need to extract it.
-        //
-        ::WinSendMsg( pMeasureStruct->hItem
-                     ,MM_QUERYITEMTEXT
-                     ,MPFROM2SHORT( (USHORT)pMeasureStruct->idItem
-                                   ,(SHORT)(sizeof(wxMenuItem))
-                                  )
-                     ,(PSZ)&vMenuItem
-                    );
-
-        wxRect                      vRect( pMeasureStruct->rclItem.xLeft
-                                          ,pMeasureStruct->rclItem.yTop
-                                          ,pMeasureStruct->rclItem.xRight
-                                          ,pMeasureStruct->rclItem.yBottom
-                                         );
-
-        wxOwnerDrawn::wxODAction eAction;
-
-        //
-        // Attribute applies to menuitems, fsState to listbox and other controls
-        //
-        if (pMeasureStruct->fsAttribute == pMeasureStruct->fsAttributeOld)
-            eAction = wxOwnerDrawn::wxODDrawAll;
-        else
-            eAction = wxOwnerDrawn::wxODSelectChanged;
-
-        return(vMenuItem.OnDrawItem( vDc
-                                    ,vRect
-                                    ,eAction
-                                    ,(wxOwnerDrawn::wxODStatus)pMeasureStruct->fsAttribute
-                                   ));
-        //
-        // leave the fsAttribute and fsOldAttribute unchanged.  If different,
-        // the system will do the highlight or fraeming or disabling for us,
-        // otherwise, we'd have to do it ourselves.
-        //
-    }
-
     wxWindow*                       pItem = FindItem(vId);
 
+#if wxUSE_OWNER_DRAWN
     if (pItem && pItem->IsKindOf(CLASSINFO(wxControl)))
     {
         return ((wxControl *)pItem)->OS2OnDraw(pItemStruct);
     }
+    else if (pItem && pItem->IsKindOf(CLASSINFO(wxMenu)))
+    {
+        /*
+        // TODO: draw a menu item
+        //
+        POWNERITEM                  pDrawStruct = (OWNERITEM *)pItemStruct;
+        wxMenuItem*                 pMenuItem = (wxMenuItem *)(pDrawStruct->pItemData);
+
+        wxCHECK(pMenuItem->IsKindOf(CLASSINFO(wxMenuItem)), FALSE);
+
+        //
+        // Prepare to call OnDrawItem()
+        //
+        HPSdc;
+        dc.SetHDC((WXHDC)pDrawStruct->hDC, FALSE);
+        wxRect rect(pDrawStruct->rcItem.left, pDrawStruct->rcItem.top,
+                    pDrawStruct->rcItem.right - pDrawStruct->rcItem.left,
+                    pDrawStruct->rcItem.bottom - pDrawStruct->rcItem.top);
+
+        return pMenuItem->OnDrawItem
+                          (
+                            dc, rect,
+                            (wxOwnerDrawn::wxODAction)pDrawStruct->itemAction,
+                            (wxOwnerDrawn::wxODStatus)pDrawStruct->itemState
+                          );
+        */
+    }
+
+    else
+        return FALSE;
 #endif
-    return FALSE;
+    return TRUE;
 } // end of wxWindow::OS2OnDrawItem
 
-bool wxWindow::OS2OnMeasureItem(
-  int                               lId
-, WXMEASUREITEMSTRUCT*              pItemStruct
-)
+bool wxWindow::OS2OnMeasureItem(int id, WXMEASUREITEMSTRUCT *itemStruct)
 {
-    //
-    // Is it a menu item?
-    //
-    if (lId == 0)
+   // TODO: more owner drawn menu related stuff, get to it later
+/*
+#if wxUSE_OWNER_DRAWN
+    // is it a menu item?
+    if ( id == 0 )
     {
-        POWNERITEM                  pMeasureStruct = (POWNERITEM)pItemStruct;
-        wxMenuItem                  vMenuItem;
+        MEASUREITEMSTRUCT *pMeasureStruct = (MEASUREITEMSTRUCT *)itemStruct;
+        wxMenuItem *pMenuItem = (wxMenuItem *)(pMeasureStruct->itemData);
 
-        //
-        // We stored the CMenuItem itself into the menuitem text field so now
-        // we need to extract it.
-        //
-        ::WinSendMsg( pMeasureStruct->hItem
-                     ,MM_QUERYITEMTEXT
-                     ,MPFROM2SHORT( (USHORT)pMeasureStruct->idItem
-                                   ,(SHORT)(sizeof(wxMenuItem))
-                                  )
-                     ,(PSZ)&vMenuItem
-                    );
-        wxCHECK(vMenuItem.IsKindOf(CLASSINFO(wxMenuItem)), FALSE);
+        wxCHECK( pMenuItem->IsKindOf(CLASSINFO(wxMenuItem)), FALSE );
 
-        size_t                      lWidth  = (size_t)(pMeasureStruct->rclItem.xRight - pMeasureStruct->rclItem.xLeft);
-        size_t                      lHeight = (size_t)(pMeasureStruct->rclItem.yTop - pMeasureStruct->rclItem.yBottom);
-
-        return(vMenuItem.OnMeasureItem( &lWidth
-                                       ,&lHeight
-                                      ));
+        return pMenuItem->OnMeasureItem(&pMeasureStruct->itemWidth,
+                                        &pMeasureStruct->itemHeight);
     }
-    wxWindow*                      pItem = FindItem(id);
 
-    if (pItem && pItem->IsKindOf(CLASSINFO(wxControl)))
+    wxWindow *item = FindItem(id);
+    if ( item && item->IsKindOf(CLASSINFO(wxControl)) )
     {
-        return ((wxControl *)pItem)->OS2OnMeasure(pItemStruct);
+        return ((wxControl *)item)->MSWOnMeasure(itemStruct);
     }
+#endif  // owner-drawn menus
+*/
     return FALSE;
 }
 
@@ -2877,65 +2828,38 @@ bool wxWindow::HandlePaint()
          wxLogLastError("CreateRectRgn");
          return FALSE;
     }
-
     m_updateRegion = wxRegion(hRgn);
+/*
+    hPS = WinBeginPaint(GetHWND(), 0L, &vRect);
+    WinFillRect(hPS, &vRect, SYSCLR_WINDOW);
+    WinEndPaint(hPS);
+*/
     vEvent.SetEventObject(this);
-    if (!GetEventHandler()->ProcessEvent(vEvent))
-    {
-        HPS                         hPS;
-
-        hPS = ::WinBeginPaint( GetHwnd()
-                              ,NULLHANDLE
-                              ,&vRect
-                             );
-        if(hPS)
-        {
-            ::GpiCreateLogColorTable( hPS
-                                     ,0L
-                                     ,LCOLF_CONSECRGB
-                                     ,0L
-                                     ,(LONG)wxTheColourDatabase->m_nSize
-                                     ,(PLONG)wxTheColourDatabase->m_palTable
-                                    );
-            ::GpiCreateLogColorTable( hPS
-                                     ,0L
-                                     ,LCOLF_RGB
-                                     ,0L
-                                     ,0L
-                                     ,NULL
-                                    );
-
-            ::WinFillRect(hPS, &vRect,  GetBackgroundColour().GetPixel());
-            ::WinEndPaint(hPS);
-        }
-    }
     return (GetEventHandler()->ProcessEvent(vEvent));
 } // end of wxWindow::HandlePaint
 
-bool wxWindow::HandleEraseBkgnd(
-  WXHDC                             hDC
-)
+bool wxWindow::HandleEraseBkgnd(WXHDC hdc)
 {
-    SWP                             vSwp;
-
-    ::WinQueryWindowPos(GetHwnd(), &vSwp);
-    if (vSwp.fl & SWP_MINIMIZE)
+    // TODO:  will have to worry about this later as part of
+    //        the handling of changed presentation parameters
+    /*
+    if ( ::IsIconic(GetHwnd()) )
         return TRUE;
 
-    wxDC                            vDC;
+    wxDC dc;
 
-    vDC.m_hPS = (HPS)hDC; // this is really a PS
-    vDC.SetWindow(this);
-    vDC.BeginDrawing();
+    dc.SetHDC(hdc);
+    dc.SetWindow(this);
+    dc.BeginDrawing();
 
-    wxEraseEvent                    vEvent(m_windowId, &vDC);
+    wxEraseEvent event(m_windowId, &dc);
+    event.SetEventObject(this);
+    bool rc = GetEventHandler()->ProcessEvent(event);
 
-    vEvent.SetEventObject(this);
-
-    bool                            rc = GetEventHandler()->ProcessEvent(vEvent);
-
-    vDC.EndDrawing();
-    vDC.m_hPS = NULLHANDLE;
+    dc.EndDrawing();
+    dc.SelectOldObjects(hdc);
+    dc.SetHDC((WXHDC) NULL);
+    */
     return TRUE;
 } // end of wxWindow::HandleEraseBkgnd
 
@@ -2943,11 +2867,7 @@ void wxWindow::OnEraseBackground(
   wxEraseEvent&                     rEvent
 )
 {
-    RECTL                           vRect;
-    HPS                             hPS = rEvent.m_dc->m_hPS;
-
-    ::WinQueryWindowRect(GetHwnd(), &vRect);
-    ::WinFillRect(hPS, &vRect,  m_backgroundColour.GetPixel());
+    // TODO:
 }  // end of wxWindow::OnEraseBackground
 
 // ---------------------------------------------------------------------------
@@ -4052,46 +3972,4 @@ static void TranslateKbdEventToMouse(
 
     pWin->ScreenToClient(pX, pY);
 } // end of TranslateKbdEventToMouse
-
-// Find the wxWindow at the current mouse position, returning the mouse
-// position.
-wxWindow* wxFindWindowAtPointer(
-  wxPoint&                          rPt
-)
-{
-    return wxFindWindowAtPoint(wxGetMousePosition());
-}
-
-wxWindow* wxFindWindowAtPoint(
-  const wxPoint&                    rPt
-)
-{
-    POINTL                          vPt2;
-
-    vPt2.x = rPt.x;
-    vPt2.y = rPt.y;
-
-    HWND                            hWndHit = ::WinWindowFromPoint(HWND_DESKTOP, &vPt2, FALSE);
-    wxWindow*                       pWin = wxFindWinFromHandle((WXHWND)hWndHit) ;
-    HWND                            hWnd = hWndHit;
-
-    //
-    // Try to find a window with a wxWindow associated with it
-    //
-    while (!pWin && (hWnd != 0))
-    {
-        hWnd = ::WinQueryWindow(hWnd, QW_PARENT);
-        pWin = wxFindWinFromHandle((WXHWND)hWnd) ;
-    }
-    return pWin;
-}
-
-// Get the current mouse position.
-wxPoint wxGetMousePosition()
-{
-    POINTL                          vPt;
-
-    ::WinQueryPointerPos(HWND_DESKTOP, &vPt);
-    return wxPoint(vPt.x, vPt.y);
-}
 

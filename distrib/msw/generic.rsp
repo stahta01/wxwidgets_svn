@@ -1,5 +1,6 @@
 *.spec
 BuildCVS.txt
+acconfig.h
 *.m4
 autogen.sh
 configure
@@ -8,11 +9,15 @@ config.sub
 configure.in
 setup.h.in
 install-sh
+ltconfig
+ltmain.sh
 missing
 mkinstalldirs
 modules
 template.mak
 wx-config.in
+makefile.unx.in
+wxinstall
 setup.h_vms
 
 distrib/msw/*.rsp
@@ -36,7 +41,9 @@ locale/*.mo
 docs/readme.txt
 docs/readme_vms.txt
 docs/install.txt
+docs/release.txt
 docs/changes.txt
+docs/upgrade.txt
 docs/todo.txt
 docs/licence.txt
 docs/licendoc.txt
@@ -56,6 +63,9 @@ docs/tech/*.txt
 docs/tech/*.htm
 
 src/makeenvs/*.env
+src/make.env
+src/makeprog.env
+src/makelib.env
 
 src/*.inc
 src/mkdir
@@ -96,11 +106,7 @@ src/png/TODO
 src/png/*.1
 src/png/*.3
 src/png/*.5
-src/png/scripts/*.ppc
-src/png/scripts/*.bat
-src/png/scripts/makefile*
-src/png/scripts/*.com
-src/png/scripts/*.def
+src/png/scripts/*
 
 src/zlib/*.c
 src/zlib/*.h
@@ -261,7 +267,6 @@ samples/help/*.hhc
 samples/help/*.hpj
 samples/help/*.tex
 samples/help/*.ini
-samples/help/cshelp.txt
 samples/help/doc/*.html
 samples/help/doc/*.htm
 samples/help/doc/*.class

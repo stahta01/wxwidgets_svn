@@ -473,47 +473,6 @@ bool wxDirExists(const wxString& dir)
 }
 
 // ----------------------------------------------------------------------------
-// env vars
-// ----------------------------------------------------------------------------
-
-bool wxGetEnv(const wxString& var, wxString *value)
-{
-    // first get the size of the buffer
-    DWORD dwRet = ::GetEnvironmentVariable(var, NULL, 0);
-    if ( !dwRet )
-    {
-        // this means that there is no such variable
-        return FALSE;
-    }
-
-    if ( value )
-    {
-        (void)::GetEnvironmentVariable(var, value->GetWriteBuf(dwRet), dwRet);
-        value->UngetWriteBuf();
-    }
-
-    return TRUE;
-}
-
-bool wxSetEnv(const wxString& var, const wxChar *value)
-{
-    // some compilers have putenv() or _putenv() or _wputenv() but it's better
-    // to always use Win32 function directly instead of dealing with them
-#if defined(__WIN32__)
-    if ( !::SetEnvironmentVariable(var, value) )
-    {
-        wxLogLastError(_T("SetEnvironmentVariable"));
-
-        return FALSE;
-    }
-
-    return TRUE;
-#else // no way to set env vars
-    return FALSE;
-#endif
-}
-
-// ----------------------------------------------------------------------------
 // process management
 // ----------------------------------------------------------------------------
 
@@ -992,8 +951,6 @@ wxChar *wxLoadUserResource(const wxString& resourceName, const wxString& resourc
 // get display info
 // ----------------------------------------------------------------------------
 
-// See also the wxGetMousePosition in window.cpp
-// Deprecated: use wxPoint wxGetMousePosition() instead
 void wxGetMousePosition( int* x, int* y )
 {
     POINT pt;
@@ -1026,15 +983,6 @@ void wxDisplaySize(int *width, int *height)
     if ( width ) *width = GetDeviceCaps(dc, HORZRES);
     if ( height ) *height = GetDeviceCaps(dc, VERTRES);
 }
-
-void wxDisplaySizeMM(int *width, int *height)
-{
-    ScreenHDC dc;
-
-    if ( width ) *width = GetDeviceCaps(dc, HORZSIZE);
-    if ( height ) *height = GetDeviceCaps(dc, VERTSIZE);
-}
-
 
 // ---------------------------------------------------------------------------
 // window information functions

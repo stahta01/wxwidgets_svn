@@ -137,7 +137,6 @@ XDefaultDepth(Display *display, Screen *screen)
     DevQueryCaps(hdcScreen, CAPS_COLOR_PLANES, 1L, &lPlanes);
     DevQueryCaps(hdcScreen, CAPS_COLOR_BITCOUNT, 1L, &lBitsPerPixel);
     b = (int)lBitsPerPixel;
-    WinReleasePS(hpsScreen);
 #else
     b = GetDeviceCaps(*display, BITSPIXEL);
     d = GetDeviceCaps(*display, PLANES);
@@ -274,8 +273,10 @@ XCreateImage(Display *d, Visual *v,
 {
     XImage *img = (XImage *) XpmMalloc(sizeof(XImage));
 #ifdef __OS2__
+    HPS                  hps;
     BITMAPINFOHEADER2    bmih;
 
+    hps = WinGetScreenPS(HWND_DESKTOP);
     memset(&bmih, 0, sizeof(BITMAPINFOHEADER2));
     bmih.cbFix = sizeof(BITMAPINFOHEADER2);
     bmih.cx = width;
@@ -293,8 +294,7 @@ XCreateImage(Display *d, Visual *v,
 	    img->bitmap = CreateCompatibleBitmap(*d, width, height);
         } else*/ {
 #ifdef __OS2__
-        img->bitmap = GpiCreateBitmap(*d, &bmih, 0L, NULL, NULL);
-        WinReleasePS(*d);
+     img->bitmap = GpiCreateBitmap(hps, &bmih, 0L, NULL, NULL);
 #else
 	    img->bitmap = CreateBitmap(width, height, 1 /* plane */ ,
 				       depth /* bits per pixel */ , NULL);

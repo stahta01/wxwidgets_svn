@@ -61,9 +61,7 @@ class WXDLLEXPORT wxAppBase : public wxEvtHandler
 public:
     // the virtual functions which may/must be overridden in the derived class
     // -----------------------------------------------------------------------
-#ifdef __WXMAC_X__
-    virtual ~wxAppBase() {}  // Added min for Mac X
-#endif
+
         // called during the program initialization, returning FALSE from here
         // prevents the program from continuing - it's a good place to create
         // the top level program window and return TRUE.
@@ -171,7 +169,7 @@ public:
         // return the "main" top level window (if it hadn't been set previously
         // with SetTopWindow(), will return just some top level window and, if
         // there are none, will return NULL)
-    virtual wxWindow *GetTopWindow() const
+    wxWindow *GetTopWindow() const
     {
         if (m_topWindow)
             return m_topWindow;
@@ -372,7 +370,7 @@ public:
 // be in your main program (e.g. hello.cpp). Now IMPLEMENT_APP should add this
 // code if required.
 
-#if !wxUSE_GUI || defined(__WXMOTIF__) || defined(__WXGTK__) || defined(__WXPM__) || (defined(__WXMAC__) && defined(__UNIX__))
+#if !wxUSE_GUI || defined(__WXMOTIF__) || defined(__WXGTK__) || defined(__WXPM__)
     #define IMPLEMENT_WXWIN_MAIN \
         extern int wxEntry( int argc, char *argv[] ); \
         int main(int argc, char *argv[]) { return wxEntry(argc, argv); }

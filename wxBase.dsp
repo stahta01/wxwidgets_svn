@@ -32,16 +32,16 @@ RSC=rc.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "lib"
-# PROP BASE Intermediate_Dir "src/msw/BaseRelease"
+# PROP BASE Output_Dir "BaseRelease"
+# PROP BASE Intermediate_Dir "BaseRelease"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "lib"
-# PROP Intermediate_Dir "src/msw/BaseRelease"
+# PROP Output_Dir "BaseRelease"
+# PROP Intermediate_Dir "BaseRelease"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MT" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /Zi /O2 /I "$(WXWIN)\include" /I "$(WXWIN)\src\zlib" /D "NDEBUG" /D wxUSE_GUI=0 /D WIN95=1 /D "__WIN95__" /D "WIN32" /D "_WIN32" /D WINVER=0x400 /D "__WINDOWS__" /D "__WXMSW__" /D "__WIN32__" /D "_MT" /Yu"wx/wxprec.h" /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MT" /YX /FD /c
+# ADD CPP /nologo /MD /W4 /Zi /O1 /I "$(wx)\include" /I "$(wx)\src\zlib" /D "NDEBUG" /D wxUSE_GUI=0 /D WIN95=1 /D "__WIN95__" /D "WIN32" /D "_WIN32" /D WINVER=0x400 /D "__WINDOWS__" /D "__WXMSW__" /D "__WIN32__" /D "_MT" /Yu"wx/wxprec.h" /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -49,22 +49,22 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"lib\wxBase.lib"
+# ADD LIB32 /nologo
 
 !ELSEIF  "$(CFG)" == "wxBase - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "lib"
-# PROP BASE Intermediate_Dir "src/msw/BaseDebug"
+# PROP BASE Output_Dir "BaseDebug"
+# PROP BASE Intermediate_Dir "BaseDebug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "lib"
-# PROP Intermediate_Dir "src/msw/BaseDebug"
+# PROP Output_Dir "BaseDebug"
+# PROP Intermediate_Dir "BaseDebug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MT" /YX /FD /c
-# ADD CPP /nologo /MDd /W4 /Zi /Od /I "$(WXWIN)\include" /I "$(WXWIN)\src\zlib" /D "_DEBUG" /D DEBUG=1 /D WXDEBUG=1 /D "__WXDEBUG__" /D wxUSE_GUI=0 /D "__WIN95__" /D "WIN32" /D "_WIN32" /D WINVER=0x400 /D "__WINDOWS__" /D "__WIN32__" /D "__WXMSW__" /D "_MT" /Fr /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Zi /Od /I "$(wx)\include" /I "$(wx)\src\zlib" /D "_DEBUG" /D DEBUG=1 /D WXDEBUG=1 /D "__WXDEBUG__" /D wxUSE_GUI=0 /D "__WIN95__" /D "WIN32" /D "_WIN32" /D WINVER=0x400 /D "__WINDOWS__" /D "__WIN32__" /D "__WXMSW__" /D "_MT" /Yu"wx/wxprec.h" /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -72,7 +72,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo /o"lib/wxBase.bsc"
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"lib\wxBased.lib"
+# ADD LIB32 /nologo
 
 !ENDIF 
 
@@ -109,14 +109,6 @@ SOURCE=.\src\common\datstrm.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\common\db.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\common\dbtable.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\common\dynarray.cpp
 # End Source File
 # Begin Source File
@@ -146,10 +138,6 @@ SOURCE=.\src\common\fileconf.cpp
 # Begin Source File
 
 SOURCE=.\src\common\filefn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\common\filename.cpp
 # End Source File
 # Begin Source File
 
@@ -202,10 +190,6 @@ SOURCE=.\src\common\log.cpp
 # Begin Source File
 
 SOURCE=.\src\common\longlong.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\common\memory.cpp
 # End Source File
 # Begin Source File
 

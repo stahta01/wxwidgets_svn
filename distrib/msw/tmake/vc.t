@@ -155,14 +155,10 @@ HTMLOBJS = #$ ExpandList("WXHTMLOBJS");
 OBJECTS = $(COMMONOBJS) $(GENERICOBJS) $(MSWOBJS) $(HTMLOBJS)
 
 # Normal, static library
-all:    setuph dirs $(DUMMYOBJ) $(OBJECTS) $(PERIPH_TARGET) png zlib xpm jpeg tiff $(LIBTARGET)
-
-setuph:
-    cd $(WXDIR)\include\wx\msw
-    if not exist setup.h copy setup0.h setup.h
-    cd $(WXDIR)\src\msw
+all:    dirs $(DUMMYOBJ) $(OBJECTS) $(PERIPH_TARGET) png zlib xpm jpeg tiff $(LIBTARGET)
 
 dirs: $(MSWDIR)\$D $(COMMDIR)\$D $(GENDIR)\$D $(OLEDIR)\$D $(HTMLDIR)\$D
+
 
 $D:
     mkdir $D
@@ -334,6 +330,16 @@ $(CPPFLAGS2) /Od /Fo$(MSWDIR)\$D\treectrl.obj /c /Tp $(MSWDIR)\treectrl.cpp
 $(CPPFLAGS2) /Od /Fo$(HTMLDIR)\$D\helpfrm.obj /c /Tp $(HTMLDIR)\helpfrm.cpp
 <<
 
+# If taking wxWindows from CVS, setup.h doesn't exist yet.
+# Actually the 'if not exist setup.h' test doesn't work
+# (copies the file anyway)
+# we'll have to comment this rule out.
+
+# $(WXDIR)\include\wx\msw\setup.h: $(WXDIR)\include\wx\msw\setup0.h
+#    cd "$(WXDIR)"\include\wx\msw
+#    if not exist setup.h copy setup0.h setup.h
+#    cd "$(WXDIR)"\src\msw
+
 ..\common\$D\y_tab.obj:     ..\common\y_tab.c ..\common\lex_yy.c
         cl @<<
 $(CPPFLAGS2) /c ..\common\y_tab.c -DUSE_DEFINE -DYY_USE_PROTOS /Fo$@
@@ -469,10 +475,41 @@ allhlp: wxhlp
         nmake -f makefile.vc hlp
         cd $(THISDIR)
 
+#        cd $(WXDIR)\utils\wxhelp\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\tex2rtf\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxgraph\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxchart\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxtree\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxbuild\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxgrid\src
+#        nmake -f makefile.vc hlp
+
 allhtml: wxhtml
         cd $(WXDIR)\utils\dialoged\src
         nmake -f makefile.vc html
         cd $(THISDIR)
+
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\dialoged\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\hytext\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxhelp\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\tex2rtf\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxgraph\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxchart\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxtree\src
+#        nmake -f makefile.vc html
 
 allps: wxps referencps
         cd $(WXDIR)\utils\dialoged\src
@@ -484,12 +521,22 @@ allpdfrtf: pdfrtf
         nmake -f makefile.vc pdfrtf
         cd $(THISDIR)
 
+#        cd $(WXDIR)\utils\wxhelp\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\tex2rtf\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\wxgraph\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\wxchart\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\wxtree\src
+#        nmake -f makefile.vc ps
+#        cd $(THISDIR)
+
 $(DOCDIR)/winhelp/wx.hlp:         $(DOCDIR)/latex/wx/wx.rtf $(DOCDIR)/latex/wx/wx.hpj
         cd $(DOCDIR)/latex/wx
         -erase wx.ph
         hc wx
-        -erase $(DOCDIR)\winhelp\wx.hlp
-        -erase $(DOCDIR)\winhelp\wx.cnt
         move wx.hlp $(DOCDIR)\winhelp\wx.hlp
         move wx.cnt $(DOCDIR)\winhelp\wx.cnt
         cd $(THISDIR)
@@ -541,7 +588,6 @@ $(DOCDIR)\htmlhelp\wx.chm : $(DOCDIR)\html\wx\wx.htm $(DOCDIR)\html\wx\wx.hhp
 	cd $(DOCDIR)\html\wx
 	-hhc wx.hhp
     -mkdir ..\..\htmlhelp
-    -erase $(DOCDIR)\htmlhelp\wx.chm
     move wx.chm ..\..\htmlhelp
 	cd $(THISDIR)
 
@@ -583,8 +629,8 @@ $(WXDIR)\docs\ps\referenc.ps:	$(WXDIR)\docs\latex\wx\referenc.dvi
 # Optionally, a cached version of the .hhp file can be generated with hhp2cached.
 $(DOCDIR)\htb\wx.htb: $(DOCDIR)\html\wx\wx.htm
 	cd $(WXDIR)\docs\html\wx
-    -erase wx.zip wx.htb
-    zip wx.zip *.htm *.gif *.hhp *.hhc *.hhk
+    -erase /Y wx.zip wx.htb
+    zip32 wx.zip *.htm *.gif *.hhp *.hhc *.hhk
     -mkdir $(DOCDIR)\htb
     move wx.zip $(DOCDIR)\htb\wx.htb
     cd $(THISDIR)
@@ -596,14 +642,11 @@ touchmanual:
 updatedocs: touchmanual alldocs
 
 cleandocs:
-    -erase $(DOCDIR)\winhelp\wx.hlp
-    -erase $(DOCDIR)\winhelp\wx.cnt
-    -erase $(DOCDIR)\html\wx\*.htm
-    -erase $(DOCDIR)\pdf\wx.rtf
-    -erase $(DOCDIR)\latex\wx\wx.rtf
-    -erase $(DOCDIR)\latex\wx\WX.PH
-    -erase $(DOCDIR)\htmlhelp\wx.chm
-    -erase $(DOCDIR)\htb\wx.htb
+    -erase /Y $(DOCDIR)\html\wx\wx.htm
+    -erase /Y $(DOCDIR)\pdf\wx.rtf
+    -erase /Y $(DOCDIR)\latex\wx\wx.rtf
+    -erase /Y $(DOCDIR)\htmlhelp\wx.chm
+    -erase /Y $(DOCDIR)\htb\wx.htb
 
 # Start Word, running the GeneratePDF macro. MakeManual.dot should be in the
 # Office StartUp folder, and PDFMaker should be installed.

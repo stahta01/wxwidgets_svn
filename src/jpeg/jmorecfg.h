@@ -157,6 +157,11 @@ typedef short INT16;
 
 /* INT32 must hold at least signed 32-bit values. */
 
+#ifdef INT32
+#   undef INT32_DEFINED
+#   define INT32_DEFINED
+#endif /* INT32 defined */
+
 /* you may define INT32_DEFINED if it is already defined somewhere */
 #ifndef INT32_DEFINED
 #ifdef XMD_H
@@ -164,7 +169,7 @@ typedef short INT16;
 #define INT32_DEFINED
 #elif (_MSC_VER >= 1200) || (__BORLANDC__ >= 0x550) || \
       ((defined(__MINGW32__) || defined(__CYGWIN__)) \
-       && ((__GNUC__>2) || ((__GNUC__==2) && (__GNUC_MINOR__>=95))))
+       && ((__GNUC__>2) || ((__GNUC__==2) && (__GNUC_MINOR__>95))))
 /* INT32 is defined in windows.h  for these compilers */
 #define INT32_DEFINED
 #include <windows.h>

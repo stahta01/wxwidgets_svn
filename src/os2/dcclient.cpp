@@ -34,19 +34,17 @@
 
 struct WXDLLEXPORT wxPaintDCInfo
 {
-    wxPaintDCInfo( wxWindow* pWin
-                  ,wxDC*     pDC
-                 )
+    wxPaintDCInfo(wxWindow *win, wxDC *dc)
     {
-        m_hWnd = pWin->GetHWND();
-        m_hDC = pDC->GetHDC();
-        m_nCount = 1;
+        hwnd = win->GetHWND();
+        hdc = dc->GetHDC();
+        count = 1;
     }
 
-    WXHWND                          m_hWnd;   // window for this DC
-    WXHDC                           m_hDC;    // the DC handle
-    size_t                          m_nCount; // usage count
-}; // end of wxPaintDCInfot
+    WXHWND    hwnd;       // window for this DC
+    WXHDC     hdc;        // the DC handle
+    size_t    count;      // usage count
+};
 
 #include "wx/arrimpl.cpp"
 
@@ -84,68 +82,48 @@ static RECT        g_paintStruct;
 
 wxWindowDC::wxWindowDC()
 {
-    m_pCanvas = NULL;
+  m_pCanvas = NULL;
 }
 
-wxWindowDC::wxWindowDC(
-  wxWindow*                         pTheCanvas
-)
+wxWindowDC::wxWindowDC(wxWindow *the_canvas)
 {
-    ERRORID                         vError;
-    wxString                        sError;
-
-    m_pCanvas = pTheCanvas;
-    m_hDC = (WXHDC) ::WinOpenWindowDC(GetWinHwnd(pTheCanvas) );
-    m_nDCCount++;
-    //
-    // default under PM is that Window and Client DC's are the same
-    // so we offer a separate Presentation Space to use for the
-    // entire window.  Otherwise, calling BeginPaint will just create
-    // chached-micro client presentation space
-    //
-     m_hPS = GpiCreatePS( m_hab
-                         ,m_hDC
-                         ,&m_PageSize
-                         ,PU_PELS | GPIF_LONG | GPIA_ASSOC
-                        );
-    ::GpiAssociate(m_hPS, NULLHANDLE);
-    ::GpiAssociate(m_hPS, m_hDC);
-    // Set the wxWindows color table
-    if (!::GpiCreateLogColorTable( m_hPS
-                                  ,0L
-                                  ,LCOLF_CONSECRGB
-                                  ,0L
-                                  ,(LONG)wxTheColourDatabase->m_nSize
-                                  ,(PLONG)wxTheColourDatabase->m_palTable
-                                 ))
-    {
-        vError = ::WinGetLastError(vHabmain);
-        sError = wxPMErrorToStr(vError);
-        wxLogError("Unable to set current color table. Error: %s\n", sError);
-    }
-    SetBackground(wxBrush(m_pCanvas->GetBackgroundColour(), wxSOLID));
+  m_pCanvas = the_canvas;
+  m_hDC = (WXHDC) ::WinOpenWindowDC(GetWinHwnd(the_canvas) );
+  m_nDCCount++;
+  //
+  // default under PM is that Window and Client DC's are the same
+  // so we offer a separate Presentation Space to use for the
+  // entire window.  Otherwise, calling BeginPaint will just create
+  // chached-micro client presentation space
+  //
+   m_hPS = GpiCreatePS( m_hab
+                       ,m_hDC
+                       ,&m_PageSize
+                       ,PU_PELS | GPIF_LONG | GPIA_ASSOC
+                      );
+  ::GpiAssociate(m_hPS, NULLHANDLE);
+  ::GpiAssociate(m_hPS, m_hDC);
+  SetBackground(wxBrush(m_pCanvas->GetBackgroundColour(), wxSOLID));
 }
 
 wxWindowDC::~wxWindowDC()
 {
-    if (m_pCanvas && m_hDC)
-    {
-        SelectOldObjects(m_hDC);
+  if (m_pCanvas && m_hDC)
+  {
+    SelectOldObjects(m_hDC);
 
-        //
-        // In PM one does not explicitly close or release an open WindowDC
-        // They automatically close with the window, unless explicitly detached
-        // but we need to destroy our PS
-        //
-        if(m_hPS)
-        {
-            ::GpiAssociate(m_hPS, NULLHANDLE);
-            ::GpiDestroyPS(m_hPS);
-        }
-        m_hPS = NULLHANDLE;
-        m_hDC = NULLHANDLE;
-    }
-    m_nDCCount--;
+    //
+    // In PM one does not explicitly close or release an open WindowDC
+    // They automatically close with the window, unless explicitly detached
+    // but we need to destroy our PS
+    //
+    ::GpiAssociate(m_hPS, NULLHANDLE);
+    ::GpiDestroyPS(m_hPS);
+    m_hPS = NULLHANDLE;
+    m_hDC = NULLHANDLE;
+  }
+
+  m_nDCCount--;
 }
 
 // ----------------------------------------------------------------------------
@@ -154,64 +132,36 @@ wxWindowDC::~wxWindowDC()
 
 wxClientDC::wxClientDC()
 {
-    m_pCanvas = NULL;
+  m_pCanvas = NULL;
 }
 
-wxClientDC::wxClientDC(
-  wxWindow*                         pTheCanvas
-)
+wxClientDC::wxClientDC(wxWindow *the_canvas)
 {
-    SIZEL                           vSizl = { 0,0};
-    ERRORID                         vError;
-    wxString                        sError;
+  m_pCanvas = the_canvas;
 
-    m_pCanvas = pTheCanvas;
+  //
+  // default under PM is that Window and Client DC's are the same
+  //
+  m_hDC = (WXHDC) ::WinOpenWindowDC(GetWinHwnd(the_canvas));
 
-    //
-    // default under PM is that Window and Client DC's are the same
-    //
-    m_hDC = (WXHDC) ::WinOpenWindowDC(GetWinHwnd(pTheCanvas));
-    m_hPS = ::GpiCreatePS( wxGetInstance()
-                          ,m_hDC
-                          ,&vSizl
-                          ,PU_PELS | GPIF_LONG | GPIA_ASSOC
-                         );
-
-    // Set the wxWindows color table
-    if (!::GpiCreateLogColorTable( m_hPS
-                                  ,0L
-                                  ,LCOLF_CONSECRGB
-                                  ,0L
-                                  ,(LONG)wxTheColourDatabase->m_nSize
-                                  ,(PLONG)wxTheColourDatabase->m_palTable
-                                 ))
-    {
-        vError = ::WinGetLastError(vHabmain);
-        sError = wxPMErrorToStr(vError);
-        wxLogError("Unable to set current color table. Error: %s\n", sError);
-    }
-    //
-    // Default mode is BM_LEAVEALONE so we make no call Set the mix
-    //
-    SetBackground(wxBrush( m_pCanvas->GetBackgroundColour()
-                          ,wxSOLID
-                         )
-                 );
-} // end of wxClientDC::wxClientDC
+  //
+  // Default mode is BM_LEAVEALONE so we make no call Set the mix
+  //
+  SetBackground(wxBrush(m_pCanvas->GetBackgroundColour(), wxSOLID));
+}
 
 wxClientDC::~wxClientDC()
 {
-    if ( m_pCanvas && GetHdc() )
-    {
-        SelectOldObjects(m_hDC);
+  if ( m_pCanvas && GetHdc() )
+  {
+    SelectOldObjects(m_hDC);
 
-        //
-        // We don't explicitly release Device contexts in PM and
-        // the cached micro PS is already gone
-        //
-        m_hDC = 0;
-    }
-} // end of wxClientDC::~wxClientDC
+    // We don't explicitly release Device contexts in PM and
+    // the cached micro PS is already gone
+
+    m_hDC = 0;
+  }
+}
 
 // ----------------------------------------------------------------------------
 // wxPaintDC
@@ -241,72 +191,31 @@ wxPaintDC::wxPaintDC()
     m_hDC = 0;
 }
 
-wxPaintDC::wxPaintDC(
-  wxWindow*                         pCanvas
-)
+wxPaintDC::wxPaintDC(wxWindow *canvas)
 {
-    wxCHECK_RET(pCanvas, wxT("NULL canvas in wxPaintDC ctor"));
-    RECTL                           vRect;
+    wxCHECK_RET( canvas, wxT("NULL canvas in wxPaintDC ctor") );
 
 #ifdef __WXDEBUG__
-    if (g_isPainting <= 0)
+    if ( g_isPainting <= 0 )
     {
         wxFAIL_MSG( wxT("wxPaintDC may be created only in EVT_PAINT handler!") );
+
         return;
     }
 #endif // __WXDEBUG__
 
-    m_pCanvas = pCanvas;
+    m_pCanvas = canvas;
 
-    //
-    // Do we have a DC for this window in the cache?
-    //
-    wxPaintDCInfo*                  pInfo = FindInCache();
-
-    if (pInfo)
+    // do we have a DC for this window in the cache?
+    wxPaintDCInfo *info = FindInCache();
+    if ( info )
     {
-        m_hDC = pInfo->m_hDC;
-        pInfo->m_nCount++;
+        m_hDC = info->hdc;
+        info->count++;
     }
     else // not in cache, create a new one
     {
-        HPS                         hPS;
-
-        hPS = ::WinBeginPaint( GetWinHwnd(m_pCanvas)
-                              ,NULLHANDLE
-                              ,&g_paintStruct
-                             );
-        if(hPS)
-        {
-            POINTL                          vPoint[2];
-            LONG                            lControl;
-            LONG                            lColor;
-
-            m_hOldPS = m_hPS;
-            m_hPS = hPS;
-            ::GpiCreateLogColorTable( m_hPS
-                                     ,0L
-                                     ,LCOLF_CONSECRGB
-                                     ,0L
-                                     ,(LONG)wxTheColourDatabase->m_nSize
-                                     ,(PLONG)wxTheColourDatabase->m_palTable
-                                    );
-            ::GpiCreateLogColorTable( m_hPS
-                                     ,0L
-                                     ,LCOLF_RGB
-                                     ,0L
-                                     ,0L
-                                     ,NULL
-                                    );
-
-            ::WinFillRect(hPS, &g_paintStruct,  m_pCanvas->GetBackgroundColour().GetPixel());
-            ::WinQueryWindowRect( GetWinHwnd(m_pCanvas)
-                                 ,&m_vRclPaint
-                                );
-        }
-
-        m_bIsPaintTime   = TRUE;
-        m_hDC = (WXHDC) -1; // to satisfy those anonizmous efforts
+        m_hDC = (WXHDC)::WinBeginPaint(GetWinHwnd(m_pCanvas), NULLHANDLE, &g_paintStruct);
         ms_cache.Add(new wxPaintDCInfo(m_pCanvas, this));
     }
     SetBackground(wxBrush(m_pCanvas->GetBackgroundColour(), wxSOLID));
@@ -318,17 +227,16 @@ wxPaintDC::~wxPaintDC()
     {
         SelectOldObjects(m_hDC);
 
-        size_t                      nIndex;
-        wxPaintDCInfo*              pInfo = FindInCache(&nIndex);
+        size_t index;
+        wxPaintDCInfo *info = FindInCache(&index);
 
-        wxCHECK_RET( pInfo, wxT("existing DC should have a cache entry") );
+        wxCHECK_RET( info, wxT("existing DC should have a cache entry") );
 
-        if ( !--pInfo->m_nCount )
+        if ( !--info->count )
         {
             ::WinEndPaint(m_hPS);
-            m_hPS          = m_hOldPS;
-            m_bIsPaintTime = FALSE;
-            ms_cache.Remove(nIndex);
+
+            ms_cache.Remove(index);
         }
         //else: cached DC entry is still in use
 
@@ -337,23 +245,20 @@ wxPaintDC::~wxPaintDC()
     }
 }
 
-wxPaintDCInfo* wxPaintDC::FindInCache(
-  size_t*                           pIndex
-) const
+wxPaintDCInfo *wxPaintDC::FindInCache(size_t *index) const
 {
-    wxPaintDCInfo*                  pInfo = NULL;
-    size_t                          nCache = ms_cache.GetCount();
-
-    for (size_t n = 0; n < nCache; n++)
+    wxPaintDCInfo *info = NULL;
+    size_t nCache = ms_cache.GetCount();
+    for ( size_t n = 0; n < nCache; n++ )
     {
-        pInfo = &ms_cache[n];
-        if (pInfo->m_hWnd == m_pCanvas->GetHWND())
+        info = &ms_cache[n];
+        if ( info->hwnd == m_pCanvas->GetHWND() )
         {
-            if (pIndex)
-                *pIndex = n;
+            if ( index )
+                *index = n;
             break;
         }
     }
-    return pInfo;
-} // end of wxPaintDC::FindInCache
 
+    return info;
+}

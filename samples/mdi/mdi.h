@@ -64,7 +64,6 @@ public:
     void OnActivate(wxActivateEvent& event);
 
     void OnRefresh(wxCommandEvent& event);
-    void OnUpdateRefresh(wxUpdateUIEvent& event);
     void OnChangeTitle(wxCommandEvent& event);
     void OnChangePosition(wxCommandEvent& event);
     void OnChangeSize(wxCommandEvent& event);
@@ -72,6 +71,8 @@ public:
     void OnSize(wxSizeEvent& event);
     void OnMove(wxMoveEvent& event);
     void OnClose(wxCloseEvent& event);
+
+    void OnUpdateRefresh(wxUpdateUIEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

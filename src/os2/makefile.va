@@ -101,7 +101,6 @@ GENERICOBJS= \
   ..\generic\$D\choicdgg.obj \
   ..\generic\$D\colrdlgg.obj \
   ..\generic\$D\dcpsg.obj \
-  ..\generic\$D\dirctrlg.obj \
   ..\generic\$D\dragimgg.obj \
   ..\generic\$D\fontdlgg.obj \
   ..\generic\$D\grid.obj \
@@ -116,6 +115,7 @@ GENERICOBJS= \
   ..\generic\$D\logg.obj \
   ..\generic\$D\numdlgg.obj \
   ..\generic\$D\panelg.obj \
+  ..\generic\$D\plot.obj \
   ..\generic\$D\printps.obj \
   ..\generic\$D\prntdlgg.obj \
   ..\generic\$D\progdlgg.obj \
@@ -130,8 +130,7 @@ GENERICOBJS= \
   ..\generic\$D\tbarsmpl.obj \
   ..\generic\$D\textdlgg.obj \
   ..\generic\$D\tipdlg.obj \
-  ..\generic\$D\tipwin.obj \
-  ..\generic\$D\treectlg.obj \
+  ..\generic\$D\treectrl.obj \
   ..\generic\$D\treelay.obj \
   ..\generic\$D\wizard.obj
 
@@ -145,7 +144,6 @@ GENLIBOBJS= \
   choicdgg.obj \
   colrdlgg.obj \
   dcpsg.obj \
-  dirctrlg.obj \
   dragimgg.obj \
   fontdlgg.obj \
   grid.obj \
@@ -160,6 +158,7 @@ GENLIBOBJS= \
   logg.obj \
   numdlgg.obj \
   panelg.obj \
+  plot.obj \
   printps.obj \
   prntdlgg.obj \
   progdlgg.obj \
@@ -174,8 +173,7 @@ GENLIBOBJS= \
   tbarsmpl.obj \
   textdlgg.obj \
   tipdlg.obj \
-  tipwin.obj \
-  treectlg.obj \
+  treectrl.obj \
   treelay.obj \
   wizard.obj
 
@@ -191,7 +189,6 @@ COMMONOBJS = \
   ..\common\$D\cmdline.obj \
   ..\common\$D\cmndata.obj \
   ..\common\$D\config.obj \
-  ..\common\$D\cshelp.obj \
   ..\common\$D\ctrlcmn.obj \
   ..\common\$D\ctrlsub.obj \
   ..\common\$D\datetime.obj \
@@ -209,7 +206,6 @@ COMMONOBJS = \
   ..\common\$D\docview.obj \
   ..\common\$D\dynarray.obj \
   ..\common\$D\dynlib.obj \
-  ..\common\$D\effects.obj \
   ..\common\$D\encconv.obj \
   ..\common\$D\event.obj \
   ..\common\$D\extended.obj \
@@ -217,7 +213,6 @@ COMMONOBJS = \
   ..\common\$D\file.obj \
   ..\common\$D\fileconf.obj \
   ..\common\$D\filefn.obj \
-  ..\common\$D\filename.obj \
   ..\common\$D\filesys.obj \
   ..\common\$D\fontcmn.obj \
   ..\common\$D\fontmap.obj \
@@ -264,7 +259,6 @@ COMMONOBJS = \
   ..\common\$D\prntbase.obj \
   ..\common\$D\process.obj \
   ..\common\$D\protocol.obj \
-  ..\common\$D\quantize.obj \
   ..\common\$D\resource.obj \
   ..\common\$D\sckaddr.obj \
   ..\common\$D\sckfile.obj \
@@ -281,7 +275,6 @@ COMMONOBJS = \
   ..\common\$D\textfile.obj \
   ..\common\$D\timercmn.obj \
   ..\common\$D\tokenzr.obj \
-  ..\common\$D\treebase.obj \
   ..\common\$D\txtstrm.obj \
   ..\common\$D\unzip.obj \
   ..\common\$D\url.obj \
@@ -305,7 +298,6 @@ COMLIBOBJS1 = \
   cmdline.obj \
   cmndata.obj \
   config.obj \
-  cshelp.obj \
   ctrlcmn.obj \
   ctrlsub.obj \
   datetime.obj \
@@ -320,7 +312,6 @@ COMLIBOBJS1 = \
   docview.obj \
   dynarray.obj \
   dynlib.obj \
-  effects.obj \
   encconv.obj \
   event.obj \
   extended.obj \
@@ -328,7 +319,6 @@ COMLIBOBJS1 = \
   file.obj \
   fileconf.obj \
   filefn.obj \
-  filename.obj \
   filesys.obj \
   fontcmn.obj \
   fontmap.obj \
@@ -342,12 +332,12 @@ COMLIBOBJS1 = \
   gifdecod.obj \
   hash.obj \
   helpbase.obj \
-  http.obj
-
-COMLIBOBJS2 = \
+  http.obj \
   imagall.obj \
   imagbmp.obj \
-  image.obj \
+  image.obj
+
+COMLIBOBJS2 = \
   imaggif.obj \
   imagjpeg.obj \
   imagpcx.obj \
@@ -374,7 +364,6 @@ COMLIBOBJS2 = \
   prntbase.obj \
   process.obj \
   protocol.obj \
-  quantize.obj \
   resource.obj \
   sckaddr.obj \
   sckfile.obj \
@@ -386,14 +375,13 @@ COMLIBOBJS2 = \
   strconv.obj \
   stream.obj \
   string.obj \
-  tbarbase.obj
-
-COMLIBOBJS3 = \
+  tbarbase.obj \
   textcmn.obj \
   textfile.obj \
   timercmn.obj \
-  tokenzr.obj \
-  treebase.obj \
+  tokenzr.obj
+
+COMLIBOBJS3 = \
   txtstrm.obj \
   unzip.obj \
   url.obj \
@@ -433,7 +421,6 @@ OS2OBJS = \
   ..\os2\$D\dcprint.obj \
   ..\os2\$D\dcscreen.obj \
   ..\os2\$D\dialog.obj \
-  ..\os2\$D\dir.obj \
   ..\os2\$D\dirdlg.obj \
   ..\os2\$D\dnd.obj \
   ..\os2\$D\filedlg.obj \
@@ -443,8 +430,8 @@ OS2OBJS = \
   ..\os2\$D\fontutil.obj \
   ..\os2\$D\frame.obj \
   ..\os2\$D\gauge.obj \
-  ..\os2\$D\gdiimage.obj \
   ..\os2\$D\gdiobj.obj \
+  ..\os2\$D\gdiimage.obj \
   ..\os2\$D\gsocket.obj \
   ..\os2\$D\helpwin.obj \
   ..\os2\$D\icon.obj \
@@ -488,8 +475,7 @@ OS2OBJS = \
   ..\os2\$D\utils.obj \
   ..\os2\$D\utilsexc.obj \
   ..\os2\$D\wave.obj \
-  ..\os2\$D\window.obj \
-  ..\os2\$D\xpmhand.obj
+  ..\os2\$D\window.obj
 
 OS2LIBOBJS1 = \
   accel.obj \
@@ -514,7 +500,6 @@ OS2LIBOBJS1 = \
   dcprint.obj \
   dcscreen.obj \
   dialog.obj \
-  dir.obj \
   dirdlg.obj \
   dnd.obj \
   filedlg.obj \
@@ -536,10 +521,10 @@ OS2LIBOBJS1 = \
   mdi.obj \
   menu.obj \
   menuitem.obj \
-  metafile.obj
+  metafile.obj \
+  mimetype.obj
 
 OS2LIBOBJS2 = \
-  mimetype.obj \
   minifram.obj \
   msgdlg.obj \
   nativdlg.obj \
@@ -571,8 +556,7 @@ OS2LIBOBJS2 = \
   utils.obj \
   utilsexc.obj \
   wave.obj \
-  window.obj \
-  xpmhand.obj
+  window.obj
 
 HTMLOBJS = \
   ..\html\$D\helpctrl.obj \
@@ -643,7 +627,6 @@ $(COMLIBOBJS1):
   copy ..\common\$D\cmdline.obj
   copy ..\common\$D\cmndata.obj
   copy ..\common\$D\config.obj
-  copy ..\common\$D\cshelp.obj
   copy ..\common\$D\ctrlcmn.obj
   copy ..\common\$D\ctrlsub.obj
   copy ..\common\$D\datetime.obj
@@ -658,7 +641,6 @@ $(COMLIBOBJS1):
   copy ..\common\$D\docview.obj
   copy ..\common\$D\dynarray.obj
   copy ..\common\$D\dynlib.obj
-  copy ..\common\$D\effects.obj
   copy ..\common\$D\encconv.obj
   copy ..\common\$D\event.obj
   copy ..\common\$D\extended.obj
@@ -666,7 +648,6 @@ $(COMLIBOBJS1):
   copy ..\common\$D\file.obj
   copy ..\common\$D\fileconf.obj
   copy ..\common\$D\filefn.obj
-  copy ..\common\$D\filename.obj
   copy ..\common\$D\filesys.obj
   copy ..\common\$D\fontcmn.obj
   copy ..\common\$D\fontmap.obj
@@ -681,11 +662,11 @@ $(COMLIBOBJS1):
   copy ..\common\$D\hash.obj
   copy ..\common\$D\helpbase.obj
   copy ..\common\$D\http.obj
-
-$(COMLIBOBJS2):
   copy ..\common\$D\imagall.obj
   copy ..\common\$D\imagbmp.obj
   copy ..\common\$D\image.obj
+
+$(COMLIBOBJS2):
   copy ..\common\$D\imaggif.obj
   copy ..\common\$D\imagjpeg.obj
   copy ..\common\$D\imagpcx.obj
@@ -712,7 +693,6 @@ $(COMLIBOBJS2):
   copy ..\common\$D\prntbase.obj
   copy ..\common\$D\process.obj
   copy ..\common\$D\protocol.obj
-  copy ..\common\$D\quantize.obj
   copy ..\common\$D\resource.obj
   copy ..\common\$D\sckaddr.obj
   copy ..\common\$D\sckfile.obj
@@ -725,13 +705,12 @@ $(COMLIBOBJS2):
   copy ..\common\$D\stream.obj
   copy ..\common\$D\string.obj
   copy ..\common\$D\tbarbase.obj
-
-$(COMLIBOBJS3):
   copy ..\common\$D\textcmn.obj
   copy ..\common\$D\textfile.obj
   copy ..\common\$D\timercmn.obj
   copy ..\common\$D\tokenzr.obj
-  copy ..\common\$D\treebase.obj
+
+$(COMLIBOBJS3):
   copy ..\common\$D\txtstrm.obj
   copy ..\common\$D\unzip.obj
   copy ..\common\$D\url.obj
@@ -756,7 +735,6 @@ $(GENLIBOBJS):
   copy ..\generic\$D\colrdlgg.obj
   copy ..\generic\$D\dragimgg.obj
   copy ..\generic\$D\dcpsg.obj
-  copy ..\generic\$D\dirctrlg.obj
   copy ..\generic\$D\fontdlgg.obj
   copy ..\generic\$D\grid.obj
   copy ..\generic\$D\gridsel.obj
@@ -770,6 +748,7 @@ $(GENLIBOBJS):
   copy ..\generic\$D\logg.obj
   copy ..\generic\$D\numdlgg.obj
   copy ..\generic\$D\panelg.obj
+  copy ..\generic\$D\plot.obj
   copy ..\generic\$D\printps.obj
   copy ..\generic\$D\prntdlgg.obj
   copy ..\generic\$D\progdlgg.obj
@@ -784,8 +763,7 @@ $(GENLIBOBJS):
   copy ..\generic\$D\tbarsmpl.obj
   copy ..\generic\$D\textdlgg.obj
   copy ..\generic\$D\tipdlg.obj
-  copy ..\generic\$D\tipwin.obj
-  copy ..\generic\$D\treectlg.obj
+  copy ..\generic\$D\treectrl.obj
   copy ..\generic\$D\treelay.obj
   copy ..\generic\$D\wizard.obj
 
@@ -834,7 +812,6 @@ $(OS2LIBOBJS1):
   copy ..\os2\$D\dcprint.obj
   copy ..\os2\$D\dcscreen.obj
   copy ..\os2\$D\dialog.obj
-  copy ..\os2\$D\dir.obj
   copy ..\os2\$D\dirdlg.obj
   copy ..\os2\$D\dnd.obj
   copy ..\os2\$D\filedlg.obj
@@ -857,9 +834,9 @@ $(OS2LIBOBJS1):
   copy ..\os2\$D\menu.obj
   copy ..\os2\$D\menuitem.obj
   copy ..\os2\$D\metafile.obj
+  copy ..\os2\$D\mimetype.obj
 
 $(OS2LIBOBJS2):
-  copy ..\os2\$D\mimetype.obj
   copy ..\os2\$D\minifram.obj
   copy ..\os2\$D\msgdlg.obj
   copy ..\os2\$D\nativdlg.obj
@@ -892,7 +869,6 @@ $(OS2LIBOBJS2):
   copy ..\os2\$D\utilsexc.obj
   copy ..\os2\$D\wave.obj
   copy ..\os2\$D\window.obj
-  copy ..\os2\$D\xpmhand.obj
 
 # wxWindows library as DLL
 dll:
@@ -1014,15 +990,15 @@ $(WXDIR)\lib\wx.lib: \
 !else
 
 # Update the dynamic link library
-$(WXDIR)\lib\wx23.dll: $(OBJECTS)
+$(WXDIR)\lib\wx22.dll: $(OBJECTS)
     icc @<<
     /B" $(LINKFLAGS)" /Fe$@
     $(LIBS)
     $(DUMMYOBJ)
     $(OBJECTS)
-    $(WXDIR)\src\os2\wx23.def
+    $(WXDIR)\lib\wx22.def
 <<
-    implib $(WXDIR)\lib\wx23.lib $(WXDIR)\src\os2\wx23.def
+    implib $(WXDIR)\lib\wx22.lib $(WXDIR)\lib\wx22.def
 
 !endif
 
@@ -1118,7 +1094,7 @@ clean:  $(PERIPH_CLEAN_TARGET) clean_png clean_zlib clean_jpeg clean_xpm clean_t
         rd      ..\os2\$D
         del      $(LIBTARGET)
 !if "$(WXMAKINGDLL)" == "1"
-        erase /N ..\..\lib\wx23.lib
+        erase /N ..\..\lib\wx22.lib
 !endif
 
 cleanall: clean

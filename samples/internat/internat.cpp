@@ -28,6 +28,7 @@
 #include "wx/intl.h"
 #include "wx/file.h"
 #include "wx/log.h"
+#include "wx/fontmap.h"
 
 #if defined(__WXGTK__) || defined(__WXMOTIF__)
 #include "mondrian.xpm"
@@ -47,18 +48,17 @@ protected:
 class MyFrame: public wxFrame
 { 
 public:
-  MyFrame(wxFrame *frame, const char *title, int x, int y, int w, int h,
-          wxLocale& m_locale);
+  MyFrame(wxFrame *frame, const char *title, int x, int y, int w, int h);
 
-public:
+protected:
   void OnQuit(wxCommandEvent& event);
   void OnAbout(wxCommandEvent& event);
   void OnPlay(wxCommandEvent& event);
   void OnOpen(wxCommandEvent& event);
+  void OnPaint(wxPaintEvent& event);
 
+private:
   DECLARE_EVENT_TABLE()
-  
-  wxLocale& m_locale;
 };
 
 // ID for the menu commands
@@ -76,6 +76,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(MINIMAL_ABOUT, MyFrame::OnAbout)
   EVT_MENU(MINIMAL_TEST, MyFrame::OnPlay)
   EVT_MENU(MINIMAL_OPEN, MyFrame::OnOpen)
+
+  EVT_PAINT(MyFrame::OnPaint)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -84,27 +86,43 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-  wxString langs[] = {_T("(System default)"),
-                      _T("French"),
-                      _T("German"),
-                      _T("English"),
-                      _T("English (U.S.)")};
-  SetExitOnFrameDelete(FALSE);
-  int lng = wxGetSingleChoiceIndex(_T("Please choose language:"), _T("Language"), 
-                                   5, langs);
-  SetExitOnFrameDelete(TRUE);
-
-  switch (lng)
+  // set the language to use
+  const char *language = NULL;
+  const char *langid = NULL;
+  switch ( argc )
   {
-      case 0 : m_locale.Init(wxLANGUAGE_DEFAULT); break;
-      case 1 : m_locale.Init(wxLANGUAGE_FRENCH); break;
-      case 2 : m_locale.Init(wxLANGUAGE_GERMAN); break;
-      case 3 : m_locale.Init(wxLANGUAGE_ENGLISH); break;
-      case 4 : m_locale.Init(wxLANGUAGE_ENGLISH_US); break;
-      default:
-          return FALSE;
-  }
+      case 4:
+          {
+              wxFontEncoding enc = wxTheFontMapper->CharsetToEncoding(argv[3]);
+              if ( enc != wxFONTENCODING_SYSTEM )
+                wxFont::SetDefaultEncoding(enc);
+          }
 
+          // fall through
+
+      case 3:
+          language = argv[1];
+          langid = argv[2];
+          break;
+
+      case 2:
+          language = argv[1];
+          break;
+
+      case 1:
+          language = "french";
+          langid = "fr";
+  };
+
+  // there are very few systems right now which support locales other than "C"
+  m_locale.Init(NULL, "de", "");
+//  m_locale.Init(language, langid, "C");
+               // note that under GTK starting from version 1.2.8 if
+               // you set locale to "C" and then use ASCII characters above
+               // #128 in GUI elements, they will be truncated (it seems GTK
+               // replaces them by \0). You should use either "" (checks
+               // the value of LC_ALL etc. environment variables) or the form
+               // accepted by glibc, e.g cs_CZ. 
 
   // Initialize the catalogs we'll be using
   /* not needed any more, done in wxLocale ctor
@@ -115,12 +133,12 @@ bool MyApp::OnInit()
      it might not be installed on yours - just ignore the errrors
      or comment out this line then */
 #ifdef __LINUX__
-  //m_locale.AddCatalog("fileutils");  // 3) and another just for testing
+  m_locale.AddCatalog("fileutils");  // 3) and another just for testing
 #endif
   
   // Create the main frame window
   MyFrame *frame = new MyFrame((wxFrame *) NULL, _("International wxWindows App"),
-                               50, 50, 350, 60, m_locale);
+                               50, 50, 350, 60);
 
   // Give it an icon
   frame->SetIcon(wxICON(mondrian));
@@ -148,10 +166,8 @@ bool MyApp::OnInit()
 }
 
 // My frame constructor
-MyFrame::MyFrame(wxFrame *frame, const char *title, int x, int y, int w, int h, 
-                 wxLocale& l)
-       : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h)),
-         m_locale(l)
+MyFrame::MyFrame(wxFrame *frame, const char *title, int x, int y, int w, int h)
+       : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h))
 {
 }
 
@@ -162,17 +178,8 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-  wxString localeInfo;
-  localeInfo.Printf(_("Language: %s\n"
-                      "System locale name: %s\n"
-                      "Canonical locale name: %s\n"),
-                      m_locale.GetLocale(),
-                      m_locale.GetSysName().c_str(),
-                      m_locale.GetCanonicalName().c_str());
-
-  wxMessageDialog(this, wxString(_("I18n sample\n"
-                          "(c) 1998, 1999 Vadim Zeitlin and Julian Smart"))
-                          + wxT("\n\n") + localeInfo,
+  wxMessageDialog(this, _("I18n sample\n"
+                          "© 1998, 1999 Vadim Zeitlin and Julian Smart"),
                   _("About Internat"), wxOK | wxICON_INFORMATION).ShowModal();
 }
 
@@ -207,4 +214,12 @@ void MyFrame::OnOpen(wxCommandEvent&)
   // open a bogus file -- the error message should be also translated if you've
   // got wxstd.mo somewhere in the search path
   wxFile file("NOTEXIST.ING");
+}
+
+void MyFrame::OnPaint(wxPaintEvent&)
+{
+    wxPaintDC dc(this);
+    wxFont font(12, wxDEFAULT, wxNORMAL, wxNORMAL);
+    dc.SetFont(font);
+    dc.DrawText(_("International wxWindows App"), 10, 10);
 }

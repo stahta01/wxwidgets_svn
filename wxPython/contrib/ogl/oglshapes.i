@@ -337,8 +337,7 @@ public:
             return rv;
         }
     }
-
-    //~wxOGLConstraint();  The wxCompositShape takes ownership of the constraint
+    ~wxOGLConstraint();
 
     bool Evaluate();
     void SetSpacing(double x, double y);

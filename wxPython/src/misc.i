@@ -60,17 +60,8 @@ public:
             return tup;
         }
     }
-
-    %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.width = val
-        elif index == 1: self.height = val
-        else: raise IndexError
-"
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
 
 };
 
@@ -110,16 +101,8 @@ public:
             return *self == *p;
         }
     }
-    %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.width = val
-        elif index == 1: self.height = val
-        else: raise IndexError
-"
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
 };
 
 
@@ -157,16 +140,8 @@ public:
             return *self == *p;
         }
     }
-    %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.x = val
-        elif index == 1: self.y = val
-        else: raise IndexError
-"
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
 };
 
 //---------------------------------------------------------------------------
@@ -226,18 +201,9 @@ public:
         }
     }
 
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
     %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.x = val
-        elif index == 1: self.y = val
-        elif index == 2: self.width = val
-        elif index == 3: self.height = val
-        else: raise IndexError
-
     # override the __getattr__ made by SWIG
     def __getattr__(self, name):
         d = {
@@ -312,7 +278,6 @@ long wxNewId();
 void wxRegisterId(long id);
 %name(NewId) long wxNewId();
 %name(RegisterId) void wxRegisterId(long id);
-long wxGetCurrentId();
 
 void wxBell();
 void wxDisplaySize(int *OUTPUT, int *OUTPUT);
@@ -333,7 +298,6 @@ wxString wxGetOsDescription();
 void wxSleep(int secs);
 void wxUsleep(unsigned long milliseconds);
 bool wxYield();
-bool wxYieldIfNeeded();
 void wxEnableTopLevelWindows(bool enable);
 
 %inline %{

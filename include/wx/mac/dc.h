@@ -21,7 +21,6 @@
 #include "wx/icon.h"
 #include "wx/font.h"
 #include "wx/gdicmn.h"
-#include "wx/mac/aga.h"
 
 //-----------------------------------------------------------------------------
 // constants
@@ -48,65 +47,15 @@ extern int wxPageNumber;
 // wxDC
 //-----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxDC: public wxDCBase
+class WXDLLEXPORT wxDC: public wxObject
 {
-  DECLARE_DYNAMIC_CLASS(wxDC)
+  DECLARE_ABSTRACT_CLASS(wxDC)
 
   public:
 
-    wxDC();
-    ~wxDC();
+    wxDC(void);
+    ~wxDC(void);
     
-
-    // implement base class pure virtuals
-    // ----------------------------------
-
-    virtual void Clear();
-
-    virtual bool StartDoc( const wxString& WXUNUSED(message) ) { return TRUE; };
-    virtual void EndDoc(void) {};
-    
-    virtual void StartPage(void) {};
-    virtual void EndPage(void) {};
-
-    virtual void SetFont(const wxFont& font);
-    virtual void SetPen(const wxPen& pen);
-    virtual void SetBrush(const wxBrush& brush);
-    virtual void SetBackground(const wxBrush& brush);
-    virtual void SetBackgroundMode(int mode);
-    virtual void SetPalette(const wxPalette& palette);
-
-    virtual void DestroyClippingRegion();
-
-    virtual wxCoord GetCharHeight() const;
-    virtual wxCoord GetCharWidth() const;
-    virtual void DoGetTextExtent(const wxString& string,
-                                 wxCoord *x, wxCoord *y,
-                                 wxCoord *descent = NULL,
-                                 wxCoord *externalLeading = NULL,
-                                 wxFont *theFont = NULL) const;
-
-    virtual bool CanDrawBitmap() const;
-    virtual bool CanGetTextExtent() const;
-    virtual int GetDepth() const;
-    virtual wxSize GetPPI() const;
-
-    virtual void SetMapMode(int mode);
-    virtual void SetUserScale(double x, double y);
-
-    virtual void SetLogicalScale(double x, double y);
-    virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
-    virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
-    virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
-    virtual void SetLogicalFunction(int function);
-
-    virtual void SetTextForeground(const wxColour& colour) ;
-    virtual void SetTextBackground(const wxColour& colour) ;
-
-//
-//
-
-/*
     void BeginDrawing(void) {};
     void EndDrawing(void) {};
     
@@ -216,9 +165,20 @@ class WXDLLEXPORT wxDC: public wxDCBase
     }
 
     virtual bool CanGetTextExtent(void) const ;
+    virtual void GetTextExtent( const wxString &string, long *width, long *height,
+                     long *descent = NULL, long *externalLeading = NULL,
+                     wxFont *theFont = NULL, bool use16 = FALSE ) const ;
     virtual void GetTextExtent( const wxString &string, int *width, int *height,
                      int *descent = NULL, int *externalLeading = NULL,
-                     wxFont *theFont = NULL, bool use16 = FALSE ) const ;
+                     wxFont *theFont = NULL, bool use16 = FALSE ) const 
+    {
+    	long lwidth,lheight,ldescent,lexternal ;
+    	GetTextExtent( string, &lwidth,&lheight,&ldescent,&lexternal,theFont,use16 ) ;
+    	*width = lwidth ;
+    	*height = lheight ;
+    	if (descent) *descent = ldescent ;
+    	if (externalLeading) *externalLeading = lexternal ;
+    }
     virtual wxCoord GetCharWidth(void) const;
     virtual wxCoord GetCharHeight(void) const;
     
@@ -267,16 +227,27 @@ class WXDLLEXPORT wxDC: public wxDCBase
     inline wxSize GetSize(void) const { int w, h; GetSize(&w, &h); return wxSize(w, h); }
     virtual void GetSizeMM( long* width, long* height ) const;
     
+    virtual bool StartDoc( const wxString& WXUNUSED(message) ) { return TRUE; };
+    virtual void EndDoc(void) {};
+    virtual void StartPage(void) {};
+    virtual void EndPage(void) {};
     
+    virtual void SetMapMode( int mode );
     virtual int GetMapMode(void) const { return m_mappingMode; };
     
+    virtual void SetUserScale( double x, double y );
     virtual void GetUserScale( double *x, double *y );
+    virtual void SetLogicalScale( double x, double y );
     virtual void GetLogicalScale( double *x, double *y );
     
+    virtual void SetLogicalOrigin( long x, long y );
     virtual void GetLogicalOrigin( long *x, long *y );
+    virtual void SetDeviceOrigin( long x, long y );
     virtual void GetDeviceOrigin( long *x, long *y );
     virtual void SetInternalDeviceOrigin( long x, long y );
     virtual void GetInternalDeviceOrigin( long *x, long *y );
+
+    virtual void SetAxisOrientation( bool xLeftRight, bool yBottomUp );
     
     virtual void SetOptimization( bool WXUNUSED(optimize) ) {};
     virtual bool GetOptimization(void) { return m_optimize; };
@@ -290,140 +261,101 @@ class WXDLLEXPORT wxDC: public wxDCBase
     virtual long LogicalToDeviceXRel(long x) const;
     virtual long LogicalToDeviceYRel(long y) const;
 
-    void CalcBoundingBox( long x, long y );
-*/
-
-    void ComputeScaleAndOrigin(void);
   public:
   
+    void CalcBoundingBox( long x, long y );
+    void ComputeScaleAndOrigin(void);
     
-    wxCoord XDEV2LOG(wxCoord x) const
+    long XDEV2LOG(long x) const
 	{
 	  long new_x = x - m_deviceOriginX;
 	  if (new_x > 0) 
-	    return (wxCoord)((double)(new_x) / m_scaleX + 0.5) * m_signX + m_logicalOriginX;
+	    return (long)((double)(new_x) / m_scaleX + 0.5) * m_signX + m_logicalOriginX;
 	  else
-	    return (wxCoord)((double)(new_x) / m_scaleX - 0.5) * m_signX + m_logicalOriginX;
+	    return (long)((double)(new_x) / m_scaleX - 0.5) * m_signX + m_logicalOriginX;
 	}
-    wxCoord XDEV2LOGREL(wxCoord x) const
+    long XDEV2LOGREL(long x) const
 	{ 
 	  if (x > 0) 
-	    return (wxCoord)((double)(x) / m_scaleX + 0.5);
+	    return (long)((double)(x) / m_scaleX + 0.5);
 	  else
-	    return (wxCoord)((double)(x) / m_scaleX - 0.5);
+	    return (long)((double)(x) / m_scaleX - 0.5);
 	}
-    wxCoord YDEV2LOG(wxCoord y) const
+    long YDEV2LOG(long y) const
 	{
 	  long new_y = y - m_deviceOriginY;
 	  if (new_y > 0)
-	    return (wxCoord)((double)(new_y) / m_scaleY + 0.5) * m_signY + m_logicalOriginY;
+	    return (long)((double)(new_y) / m_scaleY + 0.5) * m_signY + m_logicalOriginY;
 	  else
-	    return (wxCoord)((double)(new_y) / m_scaleY - 0.5) * m_signY + m_logicalOriginY;
+	    return (long)((double)(new_y) / m_scaleY - 0.5) * m_signY + m_logicalOriginY;
 	}
-    wxCoord YDEV2LOGREL(wxCoord y) const
+    long YDEV2LOGREL(long y) const
 	{ 
 	  if (y > 0)
-	    return (wxCoord)((double)(y) / m_scaleY + 0.5);
+	    return (long)((double)(y) / m_scaleY + 0.5);
 	  else
-	    return (wxCoord)((double)(y) / m_scaleY - 0.5);
+	    return (long)((double)(y) / m_scaleY - 0.5);
 	}
-    wxCoord XLOG2DEV(wxCoord x) const
+    long XLOG2DEV(long x) const
 	{ 
 	  long new_x = x - m_logicalOriginX;
 	  if (new_x > 0)
-	    return (wxCoord)((double)(new_x) * m_scaleX + 0.5) * m_signX + m_deviceOriginX;
+	    return (long)((double)(new_x) * m_scaleX + 0.5) * m_signX + m_deviceOriginX;
 	  else
-	    return (wxCoord)((double)(new_x) * m_scaleX - 0.5) * m_signX + m_deviceOriginX;
+	    return (long)((double)(new_x) * m_scaleX - 0.5) * m_signX + m_deviceOriginX;
 	}
-    wxCoord XLOG2DEVREL(wxCoord x) const
+    long XLOG2DEVREL(long x) const
 	{ 
 	  if (x > 0)
-	    return (wxCoord)((double)(x) * m_scaleX + 0.5);
+	    return (long)((double)(x) * m_scaleX + 0.5);
 	  else
-	    return (wxCoord)((double)(x) * m_scaleX - 0.5);
+	    return (long)((double)(x) * m_scaleX - 0.5);
 	}
-    wxCoord YLOG2DEV(wxCoord y) const
+    long YLOG2DEV(long y) const
 	{
 	  long new_y = y - m_logicalOriginY;
 	  if (new_y > 0)
-	    return (wxCoord)((double)(new_y) * m_scaleY + 0.5) * m_signY + m_deviceOriginY;
+	    return (long)((double)(new_y) * m_scaleY + 0.5) * m_signY + m_deviceOriginY;
 	  else
-	    return (wxCoord)((double)(new_y) * m_scaleY - 0.5) * m_signY + m_deviceOriginY;
+	    return (long)((double)(new_y) * m_scaleY - 0.5) * m_signY + m_deviceOriginY;
 	}
-    wxCoord YLOG2DEVREL(wxCoord y) const
+    long YLOG2DEVREL(long y) const
 	{ 
 	  if (y > 0)
-	    return (wxCoord)((double)(y) * m_scaleY + 0.5);
+	    return (long)((double)(y) * m_scaleY + 0.5);
 	  else
-	    return (wxCoord)((double)(y) * m_scaleY - 0.5);
+	    return (long)((double)(y) * m_scaleY - 0.5);
 	}
   
-//
-
-protected:
-    virtual void DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
-                             int style = wxFLOOD_SURFACE);
-
-    virtual bool DoGetPixel(wxCoord x, wxCoord y, wxColour *col) const;
-
-    virtual void DoDrawPoint(wxCoord x, wxCoord y);
-    virtual void DoDrawLine(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2);
-
-    virtual void DoDrawArc(wxCoord x1, wxCoord y1,
-                           wxCoord x2, wxCoord y2,
-                           wxCoord xc, wxCoord yc);
-    
-    virtual void DoDrawEllipticArc(wxCoord x, wxCoord y, wxCoord w, wxCoord h,
-                                   double sa, double ea);
-
-    virtual void DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
-    virtual void DoDrawRoundedRectangle(wxCoord x, wxCoord y,
-                                        wxCoord width, wxCoord height,
-                                        double radius);
-    virtual void DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
-
-    virtual void DoCrossHair(wxCoord x, wxCoord y);
-
-    virtual void DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y);
-    virtual void DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,
-                              bool useMask = FALSE);
-
-    virtual void DoDrawText(const wxString& text, wxCoord x, wxCoord y);
-    virtual void DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y,
-                                   double angle);
-
-    virtual bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
-                        wxDC *source, wxCoord xsrc, wxCoord ysrc,
-                        int rop = wxCOPY, bool useMask = FALSE);
-
-    // this is gnarly - we can't even call this function DoSetClippingRegion()
-    // because of virtual function hiding
-    virtual void DoSetClippingRegionAsRegion(const wxRegion& region);
-    virtual void DoSetClippingRegion(wxCoord x, wxCoord y,
-                                     wxCoord width, wxCoord height);
-    virtual void DoGetClippingRegion(wxCoord *x, wxCoord *y,
-                                     wxCoord *width, wxCoord *height)
-    {
-        GetClippingBox(x, y, width, height);
-    }
-
-    virtual void DoGetSize(int *width, int *height) const;
-    virtual void DoGetSizeMM(int* width, int* height) const;
-
-    virtual void DoDrawLines(int n, wxPoint points[],
-                             wxCoord xoffset, wxCoord yoffset);
-    virtual void DoDrawPolygon(int n, wxPoint points[],
-                               wxCoord xoffset, wxCoord yoffset,
-                               int fillStyle = wxODDEVEN_RULE);
-
-
-
-//
-
   public:
-//begin wxmac
+    
+    bool         m_ok;
+    bool         m_colour;
+    
+    // not sure, what these mean
+    bool         m_clipping;      // Is clipping on right now ?
+    bool         m_isInteractive; // Is GetPixel possible ?
+    bool         m_autoSetting;   // wxMSW only ?
+    bool         m_dontDelete;    // wxMSW only ?
+    bool         m_optimize;      // wxMSW only ?
+    wxString     m_filename;      // Not sure where this belongs.
+    
+    wxPen        m_pen;
+    wxBrush      m_brush;
+    wxBrush      m_backgroundBrush;
+    wxColour     m_textForegroundColour;
+    wxColour     m_textBackgroundColour;
+    wxFont       m_font;
+    
+    int          m_logicalFunction;
+    int          m_backgroundMode;
+    int          m_textAlignment;    // gone in wxWin 2.0 ?
+    
+    int          m_mappingMode;
+    
+    // not sure what for, but what is a mm on a screen you don't know the size of?
     double       m_mm_to_pix_x,m_mm_to_pix_y; 
-    bool         m_needComputeScaleX,m_needComputeScaleY;         // not yet used
+    
     long         m_internalDeviceOriginX,m_internalDeviceOriginY;   // If un-scrolled is non-zero or
 								    // d.o. changes with scrolling.
 								    // Set using SetInternalDeviceOrigin().
@@ -431,6 +363,22 @@ protected:
     long         m_externalDeviceOriginX,m_externalDeviceOriginY;   // To be set by external classes
                                                                     // such as wxScrolledWindow
 								    // using SetDeviceOrigin()
+								    
+    long         m_deviceOriginX,m_deviceOriginY;                   // Sum of the two above.
+    
+    long         m_logicalOriginX,m_logicalOriginY;                 // User defined.
+
+    double       m_scaleX,m_scaleY;
+    double       m_logicalScaleX,m_logicalScaleY;
+    double       m_userScaleX,m_userScaleY;
+    long         m_signX,m_signY;
+    
+    bool         m_needComputeScaleX,m_needComputeScaleY;         // not yet used
+    
+    long         m_clipX1,m_clipY1,m_clipX2,m_clipY2;
+    long         m_minX,m_maxX,m_minY,m_maxY;
+
+//begin wxmac
 	GrafPtr				m_macPort ;
 	GWorldPtr			m_macMask ;
 
@@ -449,10 +397,10 @@ protected:
 	GrafPtr				m_macOrigPort ;
 	Rect					m_macClipRect ;
 	Point					m_macLocalOrigin ;
-	mutable AGAPortHelper	m_macPortHelper ;
+	
 	void					MacSetupPort() const ;
 	void					MacVerifySetup() const { if ( m_macPortId != m_macCurrentPortId ) MacSetupPort() ; } 
-	static void				MacInvalidateSetup() { m_macCurrentPortId++ ; }
+
 	static long m_macCurrentPortId ;
 };
 

@@ -2487,12 +2487,6 @@ SWIGEXPORT(void) initwindows2c() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("windows2c", windows2cMethods);
 	 d = PyModule_GetDict(m);
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED", PyInt_FromLong((long) wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED));
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING", PyInt_FromLong((long) wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING));
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING", PyInt_FromLong((long) wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING));
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED", PyInt_FromLong((long) wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED));
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_SPLITTER_UNSPLIT", PyInt_FromLong((long) wxEVT_COMMAND_SPLITTER_UNSPLIT));
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_SPLITTER_DOUBLECLICKED", PyInt_FromLong((long) wxEVT_COMMAND_SPLITTER_DOUBLECLICKED));
 	 PyDict_SetItemString(d,"wxSPLIT_HORIZONTAL", PyInt_FromLong((long) wxSPLIT_HORIZONTAL));
 	 PyDict_SetItemString(d,"wxSPLIT_VERTICAL", PyInt_FromLong((long) wxSPLIT_VERTICAL));
 	 PyDict_SetItemString(d,"wxSPLIT_DRAG_NONE", PyInt_FromLong((long) wxSPLIT_DRAG_NONE));

@@ -619,9 +619,6 @@ static BOOL PASCAL MakeBitmapAndPalette(HDC hDC, HANDLE hDIB,
             result = TRUE;
         }
     }
-
-	GlobalUnlock (hDIB);  // glt
-
     return(result);
 }
 

@@ -148,13 +148,25 @@ bool wxPostScriptPrinter::Print(wxWindow *parent, wxPrintout *printout, bool pro
         return FALSE;
     }
 
-    wxSize ScreenPixels = wxGetDisplaySize();
-    wxSize ScreenMM = wxGetDisplaySizeMM();
+    int logPPIScreenX = 0;
+    int logPPIScreenY = 0;
+    int logPPIPrinterX = 0;
+    int logPPIPrinterY = 0;
 
-    printout->SetPPIScreen( (int) ((ScreenPixels.GetWidth() * 25.4) / ScreenMM.GetWidth()),
-                            (int) ((ScreenPixels.GetHeight() * 25.4) / ScreenMM.GetHeight()) );
-    printout->SetPPIPrinter( wxPostScriptDC::GetResolution(),
-                             wxPostScriptDC::GetResolution() );
+    logPPIScreenX = 75;
+    logPPIScreenY = 75;
+
+    /*
+    // Correct values for X/PostScript?
+    logPPIPrinterX = 100;
+    logPPIPrinterY = 100;
+    */
+
+    logPPIPrinterX = wxPostScriptDC::GetResolution();
+    logPPIPrinterY = wxPostScriptDC::GetResolution();
+
+    printout->SetPPIScreen(logPPIScreenX, logPPIScreenY);
+    printout->SetPPIPrinter(logPPIPrinterX, logPPIPrinterY);
 
     // Set printout parameters
     printout->SetDC(dc);
@@ -336,16 +348,13 @@ void wxPostScriptPrintPreview::DetermineScaling()
 
     if (paper)
     {
-        wxSize ScreenPixels = wxGetDisplaySize();
-        wxSize ScreenMM = wxGetDisplaySizeMM();
-
-        m_previewPrintout->SetPPIScreen( (int) ((ScreenPixels.GetWidth() * 25.4) / ScreenMM.GetWidth()),
-                                         (int) ((ScreenPixels.GetHeight() * 25.4) / ScreenMM.GetHeight()) );
+        m_previewPrintout->SetPPIScreen(75, 75);
+        //      m_previewPrintout->SetPPIPrinter(100, 100);
         m_previewPrintout->SetPPIPrinter(wxPostScriptDC::GetResolution(), wxPostScriptDC::GetResolution()); 
 
         wxSize sizeDevUnits(paper->GetSizeDeviceUnits());
-        sizeDevUnits.x = (wxCoord)((float)sizeDevUnits.x * wxPostScriptDC::GetResolution() / 72.0);
-        sizeDevUnits.y = (wxCoord)((float)sizeDevUnits.y * wxPostScriptDC::GetResolution() / 72.0);
+        sizeDevUnits.x = (wxCoord)((float)sizeDevUnits.x * wxPostScriptDC::GetResolution() / 72.0); //VST
+        sizeDevUnits.y = (wxCoord)((float)sizeDevUnits.y * wxPostScriptDC::GetResolution() / 72.0); //VST
         wxSize sizeTenthsMM(paper->GetSize());
         wxSize sizeMM(sizeTenthsMM.x / 10, sizeTenthsMM.y / 10);
 

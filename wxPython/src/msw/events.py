@@ -972,8 +972,6 @@ class wxPyCommandEvent(wxPyCommandEventPtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
-wxNewEventType = eventsc.wxNewEventType
-
 
 
 #-------------- VARIABLE WRAPPERS ------------------

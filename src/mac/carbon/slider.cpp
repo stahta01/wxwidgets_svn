@@ -16,12 +16,10 @@
 #include "wx/slider.h"
 #include "wx/mac/uma.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxSlider, wxControl)
 
 BEGIN_EVENT_TABLE(wxSlider, wxControl)
 END_EVENT_TABLE()
-#endif
 
 
 
@@ -44,70 +42,13 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
            const wxValidator& validator,
            const wxString& name)
 {
-  Rect bounds ;
-  Str255 title ;
-  wxSize slsize;
-  int maxtextwidth, textheight;
-  
-  // Is control horizontal or vertical (Can be ambigous if user selects
-  // another style without also specifying horz or vert
-  if (!(style & wxSL_HORIZONTAL) && !(style & wxSL_VERTICAL)) {
-    // Default is horizontal so make it so
-    style |= wxSL_HORIZONTAL;
-  }
-  slsize = size;
-  // Check that size corresponds with users selection of vertical or
-  // horizontal slider and insert suitable default values
-  if (style & wxSL_HORIZONTAL) 
-    {
-      slsize.y = 15;      // Slider width
-      if (slsize.x == -1) {
-        slsize.x = 150;  // Slider default length
-      }
-    }
-  else
-    {
-      slsize.x = 15;      // Slider width
-      if (slsize.y == -1) {
-        slsize.y = 150;  // Slider default length
-      }
-    }
-  /* Set the height and width for the slider control region.  The actual 
-   * slider is set at 10 pixels across.  If the slider has labels then the
-   * control region must be large enough to contain these labels
-   */
-  if (style & wxSL_LABELS) 
-    {
-      wxString text;
-      int ht, wd;
-      
-      // Get maximum text label width and height
-      text.Printf("%d", minValue);
-      parent->GetTextExtent(text, &maxtextwidth, &textheight);
-      text.Printf("%d", maxValue);
-      parent->GetTextExtent(text, &wd, &ht);
-      if(ht > textheight) {
-        textheight = ht;
-      }
-      if (wd > maxtextwidth) {
-        maxtextwidth = wd;
-      }
-      
-      if (style & wxSL_VERTICAL) {
-        slsize.x = (15 + maxtextwidth + 2); // Slider wd plus mac text width
-      }
-      if (style & wxSL_HORIZONTAL) {
-        slsize.y = (15 + textheight);  // Slider ht plus text ht.
-      }
-    }
-  
-  MacPreControlCreate( parent , id ,  "" , pos , slsize , style,
-		       validator , name , &bounds , title ) ;
-  
-  m_macMinimumStatic = NULL ;
-  m_macMaximumStatic = NULL ;
-  m_macValueStatic = NULL ;
-  
+	Rect bounds ;
+	Str255 title ;
+	
+	MacPreControlCreate( parent , id ,  "" , pos , size ,style, validator , name , &bounds , title ) ;
+
+	m_macMinimumStatic = NULL ;
+
   m_lineSize = 1;
   m_tickFreq = 0;
 
@@ -115,70 +56,78 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
   m_rangeMin = minValue;
 
   m_pageSize = (int)((maxValue-minValue)/10);
-  
-  // Must modify bounds to that of the slider dimensions from slider
-  // dimensions plus text labels.
-  if (style & wxSL_LABELS)
-    {
-      if ( style & wxSL_HORIZONTAL )
+	if ( m_width == -1 )
 	{
-	  bounds.bottom = bounds.top + 15;
-          bounds.right -= (5 + maxtextwidth);
+		m_width = 20 ;
+		if ( style & wxSL_LABELS && style & wxSL_VERTICAL )
+			m_width += 24 ;
+		bounds.right = bounds.left + m_width ;
 	}
-      else  // Vertical slider
+	if ( m_height == -1 )
 	{
-          bounds.right = bounds.left + 15;
-          bounds.bottom -= (5 + textheight);
+		m_height = 20 ;
+		if ( style & wxSL_LABELS && style & wxSL_HORIZONTAL )
+			m_height += 24 ;
+		bounds.bottom = bounds.top + m_height ;
 	}
-    }
-  
-  m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds ,
-				title , true ,  value , minValue , maxValue, 
-				kControlSliderProc +  kControlSliderLiveFeedback + ( ( style & wxSL_AUTOTICKS ) ? kControlSliderHasTickMarks : 0 ) , (long) this ) ;
-  
-  wxASSERT_MSG( m_macControl != NULL , "No valid mac control" ) ;
-  
-  ::SetControlAction( m_macControl , wxMacLiveScrollbarActionUPP ) ;
-  
-  MacPostControlCreate() ;
-  
-  if ( style & wxSL_LABELS )
-    {
-      if ( style & wxSL_HORIZONTAL )
+	
+	if ( style & wxSL_LABELS && style & wxSL_HORIZONTAL )
 	{
-	  wxPoint leftpos( 0 , 15 ) ;
-	  wxPoint rightpos( m_width - (maxtextwidth + 20) , 15 ) ;
-	  wxPoint valuepos( m_width - maxtextwidth , 0 ) ;
-	  wxString valuestring ;
-	  
-	  valuestring.Printf( "%d" , minValue ) ;
-	  m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , leftpos ) ;
-
-	  valuestring.Printf( "%d" , maxValue ) ;
-	  m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , rightpos ) ;
-
-	  valuestring.Printf( "%d" , value ) ;
-	  m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , valuepos ) ;
+		bounds.top += 12 ; 
+		bounds.right -= 24 ;
 	}
-      else // Vertical slider
+			
+	if ( style & wxSL_LABELS && style & wxSL_VERTICAL )
 	{
-	  wxPoint toppos( 17 , 0 ) ;
-	  wxPoint bottompos( 17 , m_height - (textheight + 15) ) ;
-	  wxPoint valuepos( 0 , m_height - textheight ) ;
-	  wxString valuestring ;
-	  
-	  valuestring.Printf( "%d" , minValue ) ;
-	  m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , bottompos ) ;
-
-	  valuestring.Printf( "%d" , maxValue ) ;
-	  m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , toppos ) ;
-
-	  valuestring.Printf( "%d" , value ) ;
-	  m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , valuepos ) ;
+		bounds.left += 24 ;
+		bounds.top += 12 ;
 	}
-    }
-  
-  return true;
+			
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true ,  value , minValue , maxValue, 
+  			kControlSliderProc +  kControlSliderLiveFeedback + ( ( style & wxSL_AUTOTICKS ) ? kControlSliderHasTickMarks : 0 ) , (long) this ) ;
+	
+	wxASSERT_MSG( m_macControl != NULL , "No valid mac control" ) ;
+
+	::SetControlAction( m_macControl , wxMacLiveScrollbarActionUPP ) ;
+
+	MacPostControlCreate() ;
+
+	if ( style & wxSL_LABELS )
+	{
+		if ( style & wxSL_HORIZONTAL )
+		{
+			wxSize size( 24 , 12 ) ;
+			wxPoint leftpos( 0 , 0 ) ;
+			wxPoint	rightpos( m_width - 2 * 12 , 0 ) ;
+			wxPoint valuepos( m_width - 12 , 20 ) ;
+			wxString valuestring ;
+			
+			valuestring.Printf( "%d" , minValue ) ;				
+			m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , leftpos , size ) ;
+			valuestring.Printf( "%d" , maxValue ) ;				
+			m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , rightpos , size ) ;
+			valuestring.Printf( "%d" , value ) ;				
+			m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , valuepos , size ) ;
+		}
+		else
+		{
+			wxSize size( 24 , 12 ) ;
+			wxPoint toppos( 0 , 12 ) ;
+			wxPoint	bottompos( 0 , m_height - 12 ) ;
+			wxPoint valuepos( 20 , 0 ) ;
+			wxString valuestring ;
+			
+			valuestring.Printf( "%d" , minValue ) ;				
+			m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , bottompos , size ) ;
+			valuestring.Printf( "%d" , maxValue ) ;				
+			m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , toppos , size ) ;
+			valuestring.Printf( "%d" , value ) ;				
+			m_macMinimumStatic = new wxStaticText( this , -1 , valuestring , valuepos , size ) ;
+		}
+	}
+
+  return TRUE;
+
 }
 
 wxSlider::~wxSlider()
@@ -194,31 +143,17 @@ void wxSlider::SetValue(int value)
 {
 	wxString valuestring ;
 	valuestring.Printf( "%d" , value ) ;	
-	if ( m_macMinimumStatic )
+	if ( m_macMinimumStatic )			
 		m_macMinimumStatic->SetLabel( valuestring ) ;
  	SetControlValue( m_macControl , value ) ;
 }
 
 void wxSlider::SetRange(int minValue, int maxValue)
 {
-  wxString value;
+    m_rangeMin = minValue;
+    m_rangeMax = maxValue;
 
-  m_rangeMin = minValue;
-  m_rangeMax = maxValue;
-
-  // TODO
-  SetControlMinimum(m_macControl, m_rangeMin);
-  SetControlMaximum(m_macControl, m_rangeMax);
-  
-  if(m_macMinimumStatic) {
-    value.Printf("%d", m_rangeMin);
-    m_macMinimumStatic->SetLabel(value);
-  }
-  if(m_macMaximumStatic) {
-    value.Printf("%d", m_rangeMax);
-    m_macMaximumStatic->SetLabel(value);
-  }
-  SetValue(m_rangeMin);
+    // TODO
 }
 
 // For trackbars only

@@ -86,10 +86,6 @@
     #define pt2mm            0.352777777778
 #endif // Mac
 
-#ifndef DMPAPER_USER
-     #define DMPAPER_USER                256
-#endif
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -176,23 +172,7 @@ wxPrintData::wxPrintData()
     m_devMode = (void*) NULL;
     m_devNames = (void*) NULL;
 #elif defined( __WXMAC__ )
-#if TARGET_CARBON
-    m_macPageFormat = kPMNoPageFormat;
-    m_macPrintSettings = kPMNoPrintSettings;
-#else
-	m_macPrintInfo = (THPrint) NewHandleClear( sizeof( TPrint ) ) ;
-	(**m_macPrintInfo).iPrVersion = 0;					// something invalid 
-
-	(**m_macPrintInfo).prInfo.iHRes = 72;
-	(**m_macPrintInfo).prInfo.iVRes = 72;
-	Rect r1 = { 0, 0, 8*72 - 2 * 18, 11*72 - 2 * 36 } ;
-	(**m_macPrintInfo).prInfo.rPage = r1;// must have its top left & (0,0)
-
-	Rect r2 = { -18, -36, 8*72 - 18, 11*72 - 36  } ;
-	(**m_macPrintInfo).rPaper = r2;
-	(**m_macPrintInfo).prStl.iPageV = 11 * 120 ;				// 11 inches in 120th of an inch 
-	(**m_macPrintInfo).prStl.iPageH = 8 * 120 ;				// 8 inches in 120th of an inch 
-#endif
+    m_macPrintInfo = NULL ;
 #endif
     m_printOrientation = wxPORTRAIT;
     m_printNoCopies = 1;
@@ -225,12 +205,7 @@ wxPrintData::wxPrintData(const wxPrintData& printData)
     m_devMode = (void*) NULL;
     m_devNames = (void*) NULL;
 #elif defined( __WXMAC__ )
-#if TARGET_CARBON
-    m_macPageFormat = kPMNoPageFormat;
-    m_macPrintSettings = kPMNoPrintSettings;
-#else
-	m_macPrintInfo = NULL ;
-#endif
+    m_macPrintInfo = NULL ;
 #endif
     (*this) = printData;
 }
@@ -245,22 +220,8 @@ wxPrintData::~wxPrintData()
     if ( hDevNames )
         GlobalFree(hDevNames);
 #elif defined(__WXMAC__)
-#if TARGET_CARBON
-    if (m_macPageFormat != kPMNoPageFormat)
-    {
-    	(void)PMDisposePageFormat(m_macPageFormat);
-    	m_macPageFormat = kPMNoPageFormat;
-    }
-
-    if (m_macPrintSettings != kPMNoPrintSettings)
-    {
-        (void)PMDisposePrintSettings(m_macPrintSettings);
-        m_macPrintSettings = kPMNoPrintSettings;
-    }
-#else
-	wxASSERT( m_macPrintInfo ) ;
-	// we should perhaps delete 
-#endif
+    if ( m_macPrintInfo )
+        ::DisposeHandle( (Handle) m_macPrintInfo ) ;
 #endif
 }
 
@@ -443,10 +404,8 @@ void wxPrintData::ConvertToNative()
 
         if (m_paperId == wxPAPER_NONE)
         {
-        	// DEVMODE is in tenths of a milimeter
             devMode->dmPaperWidth = m_paperSize.x * 10;
             devMode->dmPaperLength = m_paperSize.y * 10;
-            devMode->dmPaperSize = DMPAPER_USER;
             devMode->dmFields |= DM_PAPERWIDTH;
             devMode->dmFields |= DM_PAPERLENGTH;
         }
@@ -622,7 +581,6 @@ void wxPrintData::ConvertFromNative()
         }
         else if ((devMode->dmFields & DM_PAPERWIDTH) && (devMode->dmFields & DM_PAPERLENGTH))
         {
-			// DEVMODE is in tenths of a milimeter
             m_paperSize.x = devMode->dmPaperWidth / 10;
             m_paperSize.y = devMode->dmPaperLength / 10;
             m_paperId = wxPAPER_NONE;
@@ -723,30 +681,34 @@ void wxPrintData::ConvertFromNative()
 #ifdef __WXMAC__
 void wxPrintData::ConvertToNative()
 {
-#ifdef TARGET_CARBON
-#else
-	(**m_macPrintInfo).prJob.iCopies = m_printNoCopies ;
-#endif
+    if ( !m_macPrintInfo )
+    {
+        m_macPrintInfo = (THPrint) NewHandleClear( sizeof( TPrint ) ) ;
+        if ( m_macPrintInfo )
+        {
+            ::PrintDefault( m_macPrintInfo ) ;
+            // todo setup the global pagesetup ?
+        }
+    }
+    if ( m_macPrintInfo )
+    {
+        (**m_macPrintInfo).prJob.iCopies = m_printNoCopies ;
+        (**m_macPrintInfo).prJob.iFstPage = 0 ;
+        (**m_macPrintInfo).prJob.iLstPage = 0 ;
+    }
 }
 
 void wxPrintData::ConvertFromNative()
 {
-#ifdef TARGET_CARBON
-#else
-	m_printNoCopies = (**m_macPrintInfo).prJob.iCopies ;
-#endif
+    if ( m_macPrintInfo )
+    {
+        m_printNoCopies = (**m_macPrintInfo).prJob.iCopies ;
+    }
 }
 #endif
 
 void wxPrintData::operator=(const wxPrintData& data)
 {
-#ifdef __WXMAC__
-#ifdef TARGET_CARBON
-#else
-	m_macPrintInfo = data.m_macPrintInfo ;
-	HandToHand( (Handle*) &m_macPrintInfo ) ;	
-#endif
-#endif
     m_printNoCopies = data.m_printNoCopies;
     m_printCollate = data.m_printCollate;
     m_printOrientation = data.m_printOrientation;
@@ -805,6 +767,8 @@ wxPrintDialogData::wxPrintDialogData()
 {
 #ifdef __WXMSW__
     m_printDlgData = NULL;
+#elif defined( __WXMAC__ )
+    m_macPrintInfo = NULL ;
 #endif
     m_printFromPage = 0;
     m_printToPage = 0;
@@ -826,6 +790,8 @@ wxPrintDialogData::wxPrintDialogData(const wxPrintDialogData& dialogData)
 {
 #ifdef __WXMSW__
     m_printDlgData = NULL;
+#elif defined( __WXMAC__ )
+    m_macPrintInfo = NULL ;
 #endif
     (*this) = dialogData;
 }
@@ -834,6 +800,8 @@ wxPrintDialogData::wxPrintDialogData(const wxPrintData& printData)
 {
 #ifdef __WXMSW__
     m_printDlgData = NULL;
+#elif defined( __WXMAC__ )
+    m_macPrintInfo = NULL ;
 #endif
     m_printFromPage = 0;
     m_printToPage = 0;
@@ -861,6 +829,9 @@ wxPrintDialogData::~wxPrintDialogData()
         GlobalFree(pd->hDevMode);
     if ( pd )
         delete pd;
+#elif defined(__WXMAC__)
+    if ( m_macPrintInfo )
+        ::DisposeHandle( (Handle) m_macPrintInfo ) ;
 #endif
 }
 
@@ -1042,22 +1013,31 @@ void wxPrintDialogData::SetOwnerWindow(wxWindow* win)
 #ifdef __WXMAC__
 void wxPrintDialogData::ConvertToNative()
 {
-#ifdef TARGET_CARBON
-#else
-	(**m_printData.m_macPrintInfo).prJob.iFstPage = m_printFromPage ;
-	(**m_printData.m_macPrintInfo).prJob.iLstPage = m_printToPage ;
-	m_printData.ConvertToNative() ;
-#endif
+    if ( !m_macPrintInfo )
+    {
+        m_macPrintInfo = (THPrint) NewHandleClear( sizeof( TPrint ) ) ;
+        if ( m_macPrintInfo )
+        {
+            ::PrintDefault( m_macPrintInfo ) ;
+            // todo setup the global pagesetup ?
+        }
+    }
+    if ( m_macPrintInfo )
+    {
+        (**m_macPrintInfo).prJob.iCopies = m_printNoCopies ;
+        (**m_macPrintInfo).prJob.iFstPage = m_printFromPage ;
+        (**m_macPrintInfo).prJob.iLstPage = m_printToPage ;
+    }
 }
 
 void wxPrintDialogData::ConvertFromNative()
 {
-#ifdef TARGET_CARBON
-#else
-	m_printData.ConvertFromNative() ;
-	m_printFromPage = (**m_printData.m_macPrintInfo).prJob.iFstPage ;
-	m_printToPage = (**m_printData.m_macPrintInfo).prJob.iLstPage ;
-#endif
+    if ( m_macPrintInfo )
+    {
+        m_printNoCopies = (**m_macPrintInfo).prJob.iCopies ;
+        m_printFromPage = (**m_macPrintInfo).prJob.iFstPage ;
+        m_printToPage = (**m_macPrintInfo).prJob.iLstPage ;
+    }
 }
 #endif
 
@@ -1095,6 +1075,8 @@ wxPageSetupDialogData::wxPageSetupDialogData()
 {
 #if defined(__WIN95__)
     m_pageSetupData = NULL;
+#elif defined( __WXMAC__ )
+    m_macPageSetupInfo = NULL ;
 #endif
     m_paperSize = wxSize(0, 0);
 
@@ -1119,6 +1101,8 @@ wxPageSetupDialogData::wxPageSetupDialogData(const wxPageSetupDialogData& dialog
 {
 #if defined(__WIN95__)
     m_pageSetupData = NULL;
+#elif defined( __WXMAC__ )
+    m_macPageSetupInfo = NULL ;
 #endif
     (*this) = dialogData;
 }
@@ -1127,6 +1111,8 @@ wxPageSetupDialogData::wxPageSetupDialogData(const wxPrintData& printData)
 {
 #if defined(__WIN95__)
     m_pageSetupData = NULL;
+#elif defined( __WXMAC__ )
+    m_macPageSetupInfo = NULL ;
 #endif
     m_paperSize = wxSize(0, 0);
     m_minMarginTopLeft = wxPoint(0, 0);
@@ -1160,6 +1146,9 @@ wxPageSetupDialogData::~wxPageSetupDialogData()
         GlobalFree(pd->hDevNames);
     if ( pd )
         delete pd;
+#elif defined( __WXMAC__ )
+    if( m_macPageSetupInfo )
+        ::DisposeHandle( (Handle) m_macPageSetupInfo ) ;
 #endif
 }
 
@@ -1257,7 +1246,7 @@ void wxPageSetupDialogData::ConvertToNative()
     pd->hwndOwner=(HWND)NULL;
 //    pd->hDevNames=(HWND)NULL;
     pd->hInstance=(HINSTANCE)NULL;
-	//   PAGESETUPDLG is in hundreds of a mm
+
     pd->ptPaperSize.x = m_paperSize.x * 100;
     pd->ptPaperSize.y = m_paperSize.y * 100;
 
@@ -1334,7 +1323,6 @@ void wxPageSetupDialogData::ConvertFromNative()
     m_getDefaultInfo = ((pd->Flags & PSD_RETURNDEFAULT) == PSD_RETURNDEFAULT);
     m_enableHelp = ((pd->Flags & PSD_SHOWHELP) == PSD_SHOWHELP);
 
-	//   PAGESETUPDLG is in hundreds of a mm
     m_paperSize.x = pd->ptPaperSize.x / 100;
     m_paperSize.y = pd->ptPaperSize.y / 100;
 
@@ -1365,52 +1353,62 @@ void wxPageSetupDialogData::SetOwnerWindow(wxWindow* win)
 #ifdef __WXMAC__
 void wxPageSetupDialogData::ConvertToNative()
 {
-	m_printData.ConvertToNative() ;
-	// on mac the paper rect has a negative top left corner, because the page rect (printable area) is at 0,0
-#ifdef TARGET_CARBON
-#else
-	(**m_printData.m_macPrintInfo).rPaper.left = int( ((double) m_minMarginTopLeft.x)*mm2pt ) ;
-	(**m_printData.m_macPrintInfo).rPaper.top = int( ((double) m_minMarginTopLeft.y)*mm2pt ) ;
+    if ( !m_macPageSetupInfo )
+    {
+        m_macPageSetupInfo = (THPrint) NewHandleClear( sizeof( TPrint ) ) ;
+        if ( m_macPageSetupInfo )
+        {
+            ::PrintDefault( m_macPageSetupInfo ) ;
+        }
+    }
+    if ( m_macPageSetupInfo )
+    {
+        // on mac the paper rect has a negative top left corner, because the page rect (printable area) is at 0,0
+        (**m_macPageSetupInfo).rPaper.left = int( ((double) m_minMarginTopLeft.x)*mm2pt ) ;
+        (**m_macPageSetupInfo).rPaper.top = int( ((double) m_minMarginTopLeft.y)*mm2pt ) ;
 
-	(**m_printData.m_macPrintInfo).rPaper.right = int( ((double) m_paperSize.x - m_minMarginTopLeft.x)*mm2pt ) ;
-	(**m_printData.m_macPrintInfo).rPaper.bottom = int( ((double) m_paperSize.y - m_minMarginTopLeft.y)*mm2pt ) ;
-	
-	(**m_printData.m_macPrintInfo).prInfo.rPage.left = 0 ;
-	(**m_printData.m_macPrintInfo).prInfo.rPage.top = 0 ;
-	(**m_printData.m_macPrintInfo).prInfo.rPage.right =  int( ((double) m_paperSize.x - m_minMarginTopLeft.x - m_minMarginBottomRight.x)*mm2pt ) ;
-	(**m_printData.m_macPrintInfo).prInfo.rPage.bottom =  int( ((double) m_paperSize.y - m_minMarginTopLeft.y - m_minMarginBottomRight.y)*mm2pt ) ;
-#endif
+        (**m_macPageSetupInfo).rPaper.right = int( ((double) m_paperSize.x - m_minMarginTopLeft.x)*mm2pt ) ;
+        (**m_macPageSetupInfo).rPaper.bottom = int( ((double) m_paperSize.y - m_minMarginTopLeft.y)*mm2pt ) ;
+
+        (**m_macPageSetupInfo).prInfo.rPage.left = 0 ;
+        (**m_macPageSetupInfo).prInfo.rPage.top = 0 ;
+        (**m_macPageSetupInfo).prInfo.rPage.right =  int( ((double) m_paperSize.x - m_minMarginTopLeft.x - m_minMarginBottomRight.x)*mm2pt ) ;
+        (**m_macPageSetupInfo).prInfo.rPage.bottom =  int( ((double) m_paperSize.y - m_minMarginTopLeft.y - m_minMarginBottomRight.y)*mm2pt ) ;
+
+        //TODO add custom fields in dialog for margins
+
+    }
 }
 
 void wxPageSetupDialogData::ConvertFromNative()
 {
-	m_printData.ConvertFromNative () ;
+    if ( m_macPageSetupInfo )
+    {
+        m_paperSize.x = ((double) (**m_macPageSetupInfo).rPaper.right - (**m_macPageSetupInfo).rPaper.left ) * pt2mm ;
+        m_paperSize.y = ((double) (**m_macPageSetupInfo).rPaper.bottom - (**m_macPageSetupInfo).rPaper.top ) * pt2mm ;
 
-#ifdef TARGET_CARBON
-#else
-	m_paperSize.x = ((double) (**m_printData.m_macPrintInfo).rPaper.right - (**m_printData.m_macPrintInfo).rPaper.left ) * pt2mm ;
-	m_paperSize.y = ((double) (**m_printData.m_macPrintInfo).rPaper.bottom - (**m_printData.m_macPrintInfo).rPaper.top ) * pt2mm ;
-			
-	m_minMarginTopLeft.x = ((double) -(**m_printData.m_macPrintInfo).rPaper.left ) * pt2mm ;
-	m_minMarginTopLeft.y = ((double) -(**m_printData.m_macPrintInfo).rPaper.top ) * pt2mm ;
+        m_minMarginTopLeft.x = ((double) -(**m_macPageSetupInfo).rPaper.left ) * pt2mm ;
+        m_minMarginTopLeft.y = ((double) -(**m_macPageSetupInfo).rPaper.top ) * pt2mm ;
 
-	m_minMarginBottomRight.x = ((double) (**m_printData.m_macPrintInfo).rPaper.right - (**m_printData.m_macPrintInfo).prInfo.rPage.right ) * pt2mm ;
-	m_minMarginBottomRight.y = ((double)(**m_printData.m_macPrintInfo).rPaper.bottom - (**m_printData.m_macPrintInfo).prInfo.rPage.bottom ) * pt2mm ;
-#endif
-	// adjust minimal values
-	//TODO add custom fields in dialog for margins
+        m_minMarginBottomRight.x = ((double) (**m_macPageSetupInfo).rPaper.right - (**m_macPageSetupInfo).prInfo.rPage.right ) * pt2mm ;
+        m_minMarginBottomRight.y = ((double)(**m_macPageSetupInfo).rPaper.bottom - (**m_macPageSetupInfo).prInfo.rPage.bottom ) * pt2mm ;
 
-	if ( m_marginTopLeft.x < m_minMarginTopLeft.x )
-		m_marginTopLeft.x = m_minMarginTopLeft.x ;
-		
-	if ( m_marginBottomRight.x < m_minMarginBottomRight.x )
-		m_marginBottomRight.x = m_minMarginBottomRight.x ;
+        // adjust minimal values
+        //TODO add custom fields in dialog for margins
 
-	if ( m_marginTopLeft.y < m_minMarginTopLeft.y )
-		m_marginTopLeft.y = m_minMarginTopLeft.y ;
-		
-	if ( m_marginBottomRight.y < m_minMarginBottomRight.y )
-		m_marginBottomRight.y = m_minMarginBottomRight.y ;
+        if ( m_marginTopLeft.x < m_minMarginTopLeft.x )
+            m_marginTopLeft.x = m_minMarginTopLeft.x ;
+
+        if ( m_marginBottomRight.x < m_minMarginBottomRight.x )
+            m_marginBottomRight.x = m_minMarginBottomRight.x ;
+
+        if ( m_marginTopLeft.y < m_minMarginTopLeft.y )
+            m_marginTopLeft.y = m_minMarginTopLeft.y ;
+
+        if ( m_marginBottomRight.y < m_minMarginBottomRight.y )
+            m_marginBottomRight.y = m_minMarginBottomRight.y ;
+
+    }
 }
 #endif
 

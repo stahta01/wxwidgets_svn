@@ -31,14 +31,11 @@
 #   include <fstream>
 #endif
 
-#ifndef __WXMAC_X__
-#  include <windows.h>
-#endif
-#include "wx/msgdlg.h"
-#include "wx/palette.h"
-#include "wx/bitmap.h"
-#include "wx/mac/pnghand.h"
-#include "wx/mac/pngread.h"
+#include <windows.h>
+#include <wx/palette.h>
+#include <wx/bitmap.h>
+#include <wx/mac/pnghand.h>
+#include <wx/mac/pngread.h>
 
 extern "C" {
 #include "png.h"
@@ -50,7 +47,7 @@ extern "C" void png_write_init PNGARG((png_structp png_ptr));
 extern CTabHandle wxMacCreateColorTable( int numColors ) ;
 extern void wxMacDestroyColorTable( CTabHandle colors )  ;
 extern void wxMacSetColorTableEntry( CTabHandle newColors , int index , int red , int green ,  int blue ) ;
-extern GWorldPtr wxMacCreateGWorld( int width , int height , int depth ) ;
+extern GWorldPtr wxMacCreateGWorld( int height , int width , int depth ) ;
 extern void wxMacDestroyGWorld( GWorldPtr gw ) ;
 
 void
@@ -118,8 +115,7 @@ wxPNGReader::Create(int width, int height, int depth, int colortype)
   {
   	wxMacDestroyGWorld( lpbi ) ;
   }
-  lpbi = wxMacCreateGWorld( Width , Height , Depth);
-  if (lpbi)
+  if (lpbi = wxMacCreateGWorld( Width , Height , Depth) )
   {
     EfeWidth = (long)(((long)Width*Depth + 31) / 32) * 4;
     int bitwidth = width ;

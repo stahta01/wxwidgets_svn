@@ -31,8 +31,6 @@
     #include "wx/wx.h"
 #endif
 
-#if wxUSE_SPINBTN
-
 #include "wx/spinctrl.h"
 #include "wx/os2/private.h"
 
@@ -294,5 +292,3 @@ void wxSpinCtrl::DoMoveWindow(int x, int y, int width, int height)
     }
 */
 }
-
-#endif //wxUSE_SPINBTN

@@ -57,37 +57,8 @@ char *contentsString = NULL;
 bool suppressNameDecoration = FALSE;
 bool OkToClose = TRUE;
 int passNumber = 1;
-int errorCount = 0;
 
 #ifndef NO_GUI
-
-extern char *BigBuffer;
-extern char *TexFileRoot;
-extern char *TexBibName;         // Bibliography output file name
-extern char *TexTmpBibName;      // Temporary bibliography output file name
-extern wxList ColourTable;
-extern TexChunk *TopLevel;
-extern char *PageStyle;
-extern char *BibliographyStyleString;
-extern char *DocumentStyleString;
-extern char *bitmapMethod;
-extern char *backgroundColourString;
-extern char *ContentsNameString;
-extern char *AbstractNameString;
-extern char *GlossaryNameString;
-extern char *ReferencesNameString;
-extern char *FiguresNameString;
-extern char *TablesNameString;
-extern char *FigureNameString;
-extern char *TableNameString;
-extern char *IndexNameString;
-extern char *ChapterNameString;
-extern char *SectionNameString;
-extern char *SubsectionNameString;
-extern char *SubsubsectionNameString;
-extern char *UpNameString;
-
-
 
 #if wxUSE_HELP
 wxHelpController *HelpInstance = NULL;
@@ -162,8 +133,6 @@ bool MyApp::OnInit()
   TmpFrameContentsName = new char[300];
   WinHelpContentsFileName = new char[300];
   RefName = new char[300];
-
-  ColourTable.DeleteContents(TRUE);
 
   int n = 1;
 
@@ -283,9 +252,9 @@ bool MyApp::OnInit()
     }
     else
     {
-      wxString buf;
-      buf.Printf("Invalid switch %s.\n", argv[i]);
-      OnError((char *)buf.c_str());
+      char buf[100];
+      sprintf(buf, "Invalid switch %s.\n", argv[i]);
+      OnError(buf);
       i++;
 #ifdef NO_GUI
       ShowOptions();
@@ -412,10 +381,7 @@ bool MyApp::OnInit()
       ReadCustomMacros((char*) (const char*) path);
 
     Go();
-    if (runTwice) 
-    {
-        Go();
-    }
+    if (runTwice) Go();
 #ifdef NO_GUI
     return 0;
 #else
@@ -460,99 +426,6 @@ int MyApp::OnExit()
 #if wxUSE_HELP
   delete HelpInstance;
 #endif // wxUSE_HELP
-
-    if (BigBuffer)
-    {
-      delete BigBuffer;
-      BigBuffer = NULL;
-    }
-    if (currentArgData)
-    {
-      delete currentArgData;
-      currentArgData = NULL;
-    }
-    if (TexFileRoot)
-    {
-      delete TexFileRoot;
-      TexFileRoot = NULL;
-    }
-    if (TexBibName)
-    {
-      delete TexBibName;
-      TexBibName = NULL;
-    }
-    if (TexTmpBibName)
-    {
-      delete TexTmpBibName;
-      TexTmpBibName = NULL;
-    }
-    if (FileRoot)
-    {
-      delete FileRoot;
-      FileRoot = NULL;
-    }
-    if (ContentsName)
-    {
-      delete ContentsName;
-      ContentsName = NULL;
-    }
-    if (TmpContentsName)
-    {
-      delete TmpContentsName;
-      TmpContentsName = NULL;
-    }
-    if (TmpFrameContentsName)
-    {
-      delete TmpFrameContentsName;
-      TmpFrameContentsName = NULL;
-    }
-    if (WinHelpContentsFileName)
-    {
-      delete WinHelpContentsFileName;
-      WinHelpContentsFileName = NULL;
-    }
-    if (RefName)
-    {
-      delete RefName;
-      RefName = NULL;
-    }
-    if (TopLevel)
-    {
-      delete TopLevel;
-      TopLevel = NULL;
-    }
-    if (MacroFile)
-    {
-      delete MacroFile;
-      MacroFile = NULL;
-    }
-    if (RTFCharset)
-    {
-      delete RTFCharset;
-      RTFCharset = NULL;
-    }
-
-    delete [] PageStyle;
-    delete [] BibliographyStyleString;
-    delete [] DocumentStyleString;
-    delete [] bitmapMethod;
-    delete [] backgroundColourString;
-    delete [] ContentsNameString;
-    delete [] AbstractNameString;
-    delete [] GlossaryNameString;
-    delete [] ReferencesNameString;
-    delete [] FiguresNameString;
-    delete [] TablesNameString;
-    delete [] FigureNameString;
-    delete [] TableNameString;
-    delete [] IndexNameString;
-    delete [] ChapterNameString;
-    delete [] SectionNameString;
-    delete [] SubsectionNameString;
-    delete [] SubsubsectionNameString;
-    delete [] UpNameString;
-    if (winHelpTitle)
-      delete[] winHelpTitle;
 
   // TODO: this simulates zero-memory leaks!
   // Otherwise there are just too many...
@@ -624,14 +497,12 @@ void MyFrame::OnCloseWindow(wxCloseEvent& event)
 
 void MyFrame::OnExit(wxCommandEvent& event)
 {
-  Close();
-//    this->Destroy();
+    this->Destroy();
 }
 
 void MyFrame::OnGo(wxCommandEvent& event)
 {
       passNumber = 1;
-      errorCount = 0;
       menuBar->EnableTop(0, FALSE);
       menuBar->EnableTop(1, FALSE);
       menuBar->EnableTop(2, FALSE);
@@ -788,13 +659,11 @@ void ChooseInputFile(bool force)
       ClearKeyWordTable();
       ResetContentsLevels(0);
       passNumber = 1;
-      errorCount = 0;
-
+      char buf[300];
       InputFile = copystring(s);
       wxString str = wxFileNameFromPath(InputFile);
-      wxString buf;
-      buf.Printf("Tex2RTF [%s]", str.c_str());
-      frame->SetTitle((char *)buf.c_str());
+      sprintf(buf, "Tex2RTF [%s]", (const char*) str);
+      frame->SetTitle(buf);
       OutputFile = NULL;
     }
   }
@@ -919,9 +788,9 @@ bool Go(void)
 #ifndef NO_GUI
     if (isInteractive)
     {
-      wxString buf;
-      buf.Printf("Working, pass %d...", passNumber);
-      frame->SetStatusText((char *)buf.c_str());
+      char buf[50];
+      sprintf(buf, "Working, pass %d...", passNumber);
+      frame->SetStatusText(buf);
     }
 #endif
     OkToClose = FALSE;
@@ -960,34 +829,21 @@ bool Go(void)
     TexCleanUp();
     startedSections = FALSE;
 
-    wxString buf;
+    char buf[100];
 #ifndef NO_GUI
     long tim = wxGetElapsedTime();
-    buf.Printf("Finished PASS #%d in %ld seconds.\n", passNumber, (long)(tim/1000.0));
-    OnInform((char *)buf.c_str());
-
-    if (errorCount)
-    {
-        buf.Printf("Errors encountered during this pass: %lu\n", errorCount);
-        OnInform((char *)buf.c_str());
-    }
-
+    sprintf(buf, "Finished PASS #%d in %ld seconds.\n", passNumber, (long)(tim/1000.0));
+    OnInform(buf);
     if (isInteractive)
     {
-      buf.Printf("Done, %d %s.", passNumber, (passNumber > 1) ? "passes" : "pass");
-      frame->SetStatusText((char *)buf.c_str());
+      sprintf(buf, "Done, %d %s.", passNumber, (passNumber > 1) ? "passes" : "pass");
+      frame->SetStatusText(buf);
     }
 #else
-    buf.Printf("Done, %d %s.", passNumber, (passNumber > 1) ? "passes" : "pass");
-    OnInform((char *)buf.c_str());
-    if (errorCount)
-    {
-        buf.Printf("Errors encountered during this pass: %lu\n", errorCount);
-        OnInform((char *)buf.c_str());
-    }
+    sprintf(buf, "Done, %d %s.", passNumber, (passNumber > 1) ? "passes" : "pass");
+    OnInform(buf);
 #endif
     passNumber ++;
-    errorCount = 0;
     OkToClose = TRUE;
     return TRUE;
   }
@@ -1002,8 +858,6 @@ bool Go(void)
 
 void OnError(char *msg)
 {
-  errorCount++;
-
 #ifdef NO_GUI
   cerr << "Error: " << msg << "\n";
   cerr.flush();
@@ -1017,7 +871,6 @@ void OnError(char *msg)
     cerr.flush();
   }
 #endif
-
 #ifdef __WXMSW__
     wxError(msg);
 #endif

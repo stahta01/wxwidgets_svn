@@ -9,7 +9,7 @@
 #                  (http://www.pythonware.com/products/xmlrpc/)
 #                  the code was developed and tested using version 0.9.8
 #
-# Author:      Greg Landrum (Landrum@RationalDiscovery.com)
+# Author:      greg Landrum (Landrum@RationalDiscovery.com)
 #
 # Copyright:   (c) 2000 by Greg Landrum and Rational Discovery LLC
 # Licence:     wxWindows license
@@ -102,7 +102,7 @@ class Handler(xmlrpcserver.RequestHandler):
       evt.rpcCondVar.wait()
     evt.rpcCondVar.release()
     evt.rpcStatusLock.acquire()
-    if evt.rpcStatus.stwxTheColourDatabaseatus == rpcEXCEPT:
+    if evt.rpcStatus.status == rpcEXCEPT:
       # The GUI threw an exception, release the status lock
       #  and re-raise the exception
       evt.rpcStatusLock.release()
@@ -128,7 +128,7 @@ class rpcMixin:
       host: (optional) the hostname for the server
       port: (optional) the port the server will use
     """
-    EVT_EXTERNAL_EVENT(swxTheColourDatabaseelf,self.OnExternal)
+    EVT_EXTERNAL_EVENT(self,self.OnExternal)
     if hasattr(self,'OnClose'):
       self._origOnClose = self.OnClose
     else:

@@ -133,28 +133,21 @@ wxSize wxSizerItem::CalcMin()
     if (IsSizer())
     {
         ret = m_sizer->GetMinSize();
-
         // if we have to preserve aspect ratio _AND_ this is
         // the first-time calculation, consider ret to be initial size
-        if ((m_flag & wxSHAPED) && !m_ratio)
-            SetRatio(ret);
+        if ((m_flag & wxSHAPED) && !m_ratio) SetRatio(ret);
     }
-    else
-    {
-        if ( IsWindow() && (m_flag & wxADJUST_MINSIZE) )
-        {
-            // check if the best (minimal, in fact) window size hadn't changed
-            // by chance: this may happen for, e.g. static text if its label
-            // changed
-            wxSize size = m_window->GetBestSize();
-            if ( size.x > m_minSize.x )
-                m_minSize.x = size.x;
-            if ( size.y > m_minSize.y )
-                m_minSize.y = size.y;
-        }
 
-        ret = m_minSize;
-    }
+/*
+    The minimum size of a window should be the
+    initial size, as saved in m_minSize, not the
+    current size.
+
+    else
+    if (IsWindow())
+        ret = m_window->GetSize();
+*/
+    else ret = m_minSize;
 
     if (m_flag & wxWEST)
         ret.x += m_border;
@@ -952,32 +945,21 @@ wxSize wxBoxSizer::CalcMin()
 //---------------------------------------------------------------------------
 
 wxStaticBoxSizer::wxStaticBoxSizer( wxStaticBox *box, int orient )
-                : wxBoxSizer( orient )
+  : wxBoxSizer( orient )
 {
     wxASSERT_MSG( box, wxT("wxStaticBoxSizer needs a static box") );
 
     m_staticBox = box;
 }
 
-static void GetStaticBoxBorders(wxStaticBox *box,
-                                int *borderTop, int *borderOther)
-{
-    // this has to be done platform by platform as there is no way to
-    // guess the thickness of a wxStaticBox border
-#ifdef __WXGTK__
-    if ( box->GetLabel().IsEmpty() )
-        *borderTop = 5;
-    else
-#endif // __WXGTK__
-        *borderTop = 15;
-
-    *borderOther = 5;
-}
-
 void wxStaticBoxSizer::RecalcSizes()
 {
-    int top_border, other_border;
-    GetStaticBoxBorders(m_staticBox, &top_border, &other_border);
+    // this will have to be done platform by platform
+    // as there is no way to guess the thickness of
+    // a wxStaticBox border
+    int top_border = 15;
+    if (m_staticBox->GetLabel().IsEmpty()) top_border = 5;
+    int other_border = 5;
 
     m_staticBox->SetSize( m_position.x, m_position.y, m_size.x, m_size.y );
 
@@ -996,8 +978,13 @@ void wxStaticBoxSizer::RecalcSizes()
 
 wxSize wxStaticBoxSizer::CalcMin()
 {
-    int top_border, other_border;
-    GetStaticBoxBorders(m_staticBox, &top_border, &other_border);
+    // This will have to be done platform by platform
+    // as there is no way to guess the thickness of
+    // a wxStaticBox border.
+
+    int top_border = 15;
+    if (m_staticBox->GetLabel().IsEmpty()) top_border = 5;
+    int other_border = 5;
 
     wxSize ret( wxBoxSizer::CalcMin() );
     ret.x += 2*other_border;

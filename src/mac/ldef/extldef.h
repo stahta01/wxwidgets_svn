@@ -1,10 +1,6 @@
 #pragma once
 
-#if defined(__UNIX__)
-  #include <HIToolbox/lists.h>
-#else
-  #include <Lists.h>
-#endif
+#include <Lists.h>
 #include <stdlib.h> 
 
 #define kExtLDEFID 128	// resource id of our LDEF resource
@@ -57,9 +53,7 @@ static void DisposeExtLDEFInfo( ListHandle lh)
 	ExtLDEFInfo* info = (ExtLDEFInfo* )  (**lh).refCon ;
 	if ( info )
 	{
-	#if !TARGET_CARBON
 		DisposeRoutineDescriptor( (RoutineDescriptor*) info->drawProc ) ;
-	#endif
 		free( (void*) (**lh).refCon ) ;
 	}
 }

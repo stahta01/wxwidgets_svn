@@ -53,10 +53,6 @@
     #include "wx/dnd.h"
 #endif // wxUSE_DRAG_AND_DROP
 
-#if wxUSE_HELP
-    #include "wx/cshelp.h"
-#endif // wxUSE_HELP
-
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
 #endif // wxUSE_TOOLTIPS
@@ -81,11 +77,6 @@ BEGIN_EVENT_TABLE(wxWindowBase, wxEvtHandler)
     EVT_SYS_COLOUR_CHANGED(wxWindowBase::OnSysColourChanged)
     EVT_INIT_DIALOG(wxWindowBase::OnInitDialog)
     EVT_MIDDLE_DOWN(wxWindowBase::OnMiddleClick)
-
-#if wxUSE_HELP
-    EVT_HELP(-1, wxWindowBase::OnHelp)
-#endif // wxUSE_HELP
-
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -162,9 +153,6 @@ void wxWindowBase::InitBase()
 #if wxUSE_CARET
     m_caret = (wxCaret *)NULL;
 #endif // wxUSE_CARET
-
-    // Whether we're using the current theme for this window (wxGTK only for now)
-    m_themeEnabled = FALSE;
 }
 
 // common part of window creation process
@@ -393,9 +381,8 @@ void wxWindowBase::Centre(int direction)
     xNew += posParent.x;
     yNew += posParent.y;
 
-    // move the window to this position (keeping the old size but using
-    // SetSize() and not Move() to allow xNew and/or yNew to be -1)
-    SetSize(xNew, yNew, width, height, wxSIZE_ALLOW_MINUS_ONE);
+    // move the centre of this window to this position
+    Move(xNew, yNew);
 }
 
 // fits the window around the children
@@ -403,14 +390,7 @@ void wxWindowBase::Fit()
 {
     if ( GetChildren().GetCount() > 0 )
     {
-        wxSize size = DoGetBestSize();
-
-        // for compatibility with the old versions and because it really looks
-        // slightly more pretty like this, add a pad
-        size.x += 7;
-        size.y += 14;
-
-        SetClientSize(size);
+        SetClientSize(DoGetBestSize());
     }
     //else: do nothing if we have no children
 }
@@ -429,7 +409,7 @@ wxSize wxWindowBase::DoGetBestSize() const
               node = node->GetNext() )
         {
             wxWindow *win = node->GetData();
-            if ( win->IsTopLevel() || wxDynamicCast(win, wxStatusBar) || !win->IsShown())
+            if ( win->IsTopLevel() || wxDynamicCast(win, wxStatusBar) )
             {
                 // dialogs and frames lie in different top level windows -
                 // don't deal with them here; as for the status bars, they
@@ -454,7 +434,8 @@ wxSize wxWindowBase::DoGetBestSize() const
                 maxY = wy + wh;
         }
 
-        return wxSize(maxX, maxY);
+        // leave a margin
+        return wxSize(maxX + 7, maxY + 14);
     }
     else
     {
@@ -856,64 +837,6 @@ void wxWindowBase::InitDialog()
     event.SetEventObject( this );
     GetEventHandler()->ProcessEvent(event);
 }
-
-// ----------------------------------------------------------------------------
-// context-sensitive help support
-// ----------------------------------------------------------------------------
-
-#if wxUSE_HELP
-
-// associate this help text with this window
-void wxWindowBase::SetHelpText(const wxString& text)
-{
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        helpProvider->AddHelp(this, text);
-    }
-}
-
-// associate this help text with all windows with the same id as this
-// one
-void wxWindowBase::SetHelpTextForId(const wxString& text)
-{
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        helpProvider->AddHelp(GetId(), text);
-    }
-}
-
-// get the help string associated with this window (may be empty)
-wxString wxWindowBase::GetHelpText() const
-{
-    wxString text;
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        text = helpProvider->GetHelp(this);
-    }
-
-    return text;
-}
-
-// show help for this window
-void wxWindowBase::OnHelp(wxHelpEvent& event)
-{
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        if ( helpProvider->ShowHelp(this) )
-        {
-            // skip the event.Skip() below
-            return;
-        }
-    }
-
-    event.Skip();
-}
-
-#endif // wxUSE_HELP
 
 // ----------------------------------------------------------------------------
 // tooltips

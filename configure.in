@@ -456,11 +456,11 @@ dnl
 dnl WX_INTERFACE_AGE = 0
 
 WX_MAJOR_VERSION_NUMBER=2
-WX_MINOR_VERSION_NUMBER=3
-WX_RELEASE_NUMBER=0
+WX_MINOR_VERSION_NUMBER=2
+WX_RELEASE_NUMBER=6
 
 WX_INTERFACE_AGE=0
-WX_BINARY_AGE=0
+WX_BINARY_AGE=6
 
 WX_VERSION=$WX_MAJOR_VERSION_NUMBER.$WX_MINOR_VERSION_NUMBER.$WX_RELEASE_NUMBER
 
@@ -505,14 +505,13 @@ dnl than checking it during run-time
 NEEDS_D_REENTRANT_FOR_R_FUNCS=0
 
 dnl the list of all available toolkits
-ALL_TOOLKITS="CYGWIN GTK MINGW MOTIF MAC WINE PM"
+ALL_TOOLKITS="CYGWIN GTK MINGW MOTIF WINE PM"
 
 dnl NB: these wxUSE_XXX constants have value of 0 or 1 unlike all the other ones
 dnl     which are either yes or no
 DEFAULT_wxUSE_GTK=0
 DEFAULT_wxUSE_MOTIF=0
 DEFAULT_wxUSE_MSW=0
-DEFAULT_wxUSE_MAC=0
 DEFAULT_wxUSE_WINE=0
 DEFAULT_wxUSE_PM=0
 
@@ -522,7 +521,6 @@ dnl nothing was found in the cache
 DEFAULT_DEFAULT_wxUSE_GTK=0
 DEFAULT_DEFAULT_wxUSE_MOTIF=0
 DEFAULT_DEFAULT_wxUSE_MSW=0
-DEFAULT_DEFAULT_wxUSE_MAC=0
 DEFAULT_DEFAULT_wxUSE_WINE=0
 DEFAULT_DEFAULT_wxUSE_PM=0
 
@@ -640,15 +638,6 @@ case "${host}" in
     DEFAULT_DEFAULT_wxUSE_PM=1
   ;;
 
-  *-*-darwin* )
-    USE_BSD=1
-    USE_MAC=1
-    AC_DEFINE(__MAC__)
-    AC_DEFINE(__BSD__)
-    AC_DEFINE(__UNIX__)
-    DEFAULT_DEFAULT_wxUSE_MAC=1
-  ;;
-
   *-*-beos* )
     dnl leave USE_UNIX on - BeOS is sufficiently Unix-like for this
     USE_BEOS=1
@@ -720,7 +709,6 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_LIBJPEG=no
   DEFAULT_wxUSE_LIBTIFF=no
   DEFAULT_wxUSE_ODBC=no
-  DEFAULT_wxUSE_FREETYPE=no
   DEFAULT_wxUSE_OPENGL=no
 
   DEFAULT_wxUSE_ON_FATAL_EXCEPTION=no
@@ -738,7 +726,6 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_JOYSTICK=no
   DEFAULT_wxUSE_DYNLIB_CLASS=no
   DEFAULT_wxUSE_LONGLONG=no
-  DEFAULT_wxUSE_GEOMETRY=no
 
   DEFAULT_wxUSE_AFM_FOR_POSTSCRIPT=no
   DEFAULT_wxUSE_NORMALIZED_PS_FONTS=no
@@ -790,6 +777,7 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_LISTBOX=no
   DEFAULT_wxUSE_LISTCTRL=no
   DEFAULT_wxUSE_NOTEBOOK=no
+  DEFAULT_wxUSE_PLOT=no
   DEFAULT_wxUSE_RADIOBOX=no
   DEFAULT_wxUSE_RADIOBTN=no
   DEFAULT_wxUSE_SASH=no
@@ -803,7 +791,6 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_STATLINE=no
   DEFAULT_wxUSE_STATUSBAR=yes
   DEFAULT_wxUSE_TABDIALOG=no
-  DEFAULT_wxUSE_TOGGLEBTN=no
   DEFAULT_wxUSE_TOOLBAR=no
   DEFAULT_wxUSE_TOOLBAR_NATIVE=no
   DEFAULT_wxUSE_TOOLBAR_SIMPLE=no
@@ -843,7 +830,6 @@ else
   DEFAULT_wxUSE_LIBJPEG=yes
   DEFAULT_wxUSE_LIBTIFF=yes
   DEFAULT_wxUSE_ODBC=no
-  DEFAULT_wxUSE_FREETYPE=no
   DEFAULT_wxUSE_OPENGL=no
 
   DEFAULT_wxUSE_ON_FATAL_EXCEPTION=yes
@@ -861,7 +847,6 @@ else
   DEFAULT_wxUSE_JOYSTICK=yes
   DEFAULT_wxUSE_DYNLIB_CLASS=yes
   DEFAULT_wxUSE_LONGLONG=yes
-  DEFAULT_wxUSE_GEOMETRY=yes
 
   DEFAULT_wxUSE_AFM_FOR_POSTSCRIPT=yes
   DEFAULT_wxUSE_NORMALIZED_PS_FONTS=yes
@@ -913,6 +898,7 @@ else
   DEFAULT_wxUSE_LISTBOX=yes
   DEFAULT_wxUSE_LISTCTRL=yes
   DEFAULT_wxUSE_NOTEBOOK=yes
+  DEFAULT_wxUSE_PLOT=yes
   DEFAULT_wxUSE_RADIOBOX=yes
   DEFAULT_wxUSE_RADIOBTN=yes
   DEFAULT_wxUSE_SASH=yes
@@ -926,7 +912,6 @@ else
   DEFAULT_wxUSE_STATLINE=yes
   DEFAULT_wxUSE_STATUSBAR=yes
   DEFAULT_wxUSE_TABDIALOG=no
-  DEFAULT_wxUSE_TOGGLEBTN=yes
   DEFAULT_wxUSE_TOOLBAR=yes
   DEFAULT_wxUSE_TOOLBAR_NATIVE=yes
   DEFAULT_wxUSE_TOOLBAR_SIMPLE=yes
@@ -973,7 +958,6 @@ if test "$wxUSE_GUI" = "yes"; then
 
 AC_ARG_WITH(gtk,           [  --with-gtk              use GTK+], [wxUSE_GTK="$withval" CACHE_GTK=1 TOOLKIT_GIVEN=1])
 AC_ARG_WITH(motif,         [  --with-motif            use Motif/Lesstif], [wxUSE_MOTIF="$withval" CACHE_MOTIF=1 TOOLKIT_GIVEN=1])
-AC_ARG_WITH(mac,           [  --with-mac              use Mac OS X], [wxUSE_MAC="$withval" TOOLKIT_GIVEN=1])
 AC_ARG_WITH(wine,          [  --with-wine             use WINE], [wxUSE_WINE="$withval" CACHE_WINE=1 TOOLKIT_GIVEN=1])
 AC_ARG_WITH(cygwin,        [  --with-cygwin           use Cygwin for MS-Windows], [wxUSE_CYGWIN="$withval" CACHE_CYGWIN=1 TOOLKIT_GIVEN=1])
 AC_ARG_WITH(mingw,         [  --with-mingw            use GCC Minimal MS-Windows], [wxUSE_MINGW="$withval" CACHE_MINGW=1 TOOLKIT_GIVEN=1])
@@ -987,7 +971,6 @@ AC_ARG_WITH(gtk-exec-prefix, [  --with-gtk-exec-prefix=PFX  Exec prefix where GT
 WX_ARG_SYS_WITH(libpng,    [  --with-libpng           use libpng (PNG image format)], wxUSE_LIBPNG)
 WX_ARG_SYS_WITH(libjpeg,   [  --with-libjpeg          use libjpeg (JPEG file format)], wxUSE_LIBJPEG)
 WX_ARG_SYS_WITH(libtiff,   [  --with-libtiff          use libtiff (TIFF file format)], wxUSE_LIBTIFF)
-WX_ARG_SYS_WITH(freetype,  [  --with-freetype         use freetype (font rasterizer)], wxUSE_FREETYPE)
 WX_ARG_WITH(opengl,        [  --with-opengl           use OpenGL (or Mesa)], wxUSE_OPENGL)
 
 fi
@@ -1047,7 +1030,6 @@ WX_ARG_ENABLE(wave,          [  --enable-wave           use wxWave class], wxUSE
 WX_ARG_ENABLE(fraction,      [  --enable-fraction       use wxFraction class], wxUSE_FRACTION)
 WX_ARG_ENABLE(dynlib,        [  --enable-dynlib         use wxLibrary class for DLL loading], wxUSE_DYNLIB_CLASS)
 WX_ARG_ENABLE(longlong,      [  --enable-longlong       use wxLongLong class], wxUSE_LONGLONG)
-WX_ARG_ENABLE(geometry,      [  --enable-geometry       use geometry class], wxUSE_GEOMETRY)
 WX_ARG_ENABLE(log,           [  --enable-log            use logging system], wxUSE_LOG)
 WX_ARG_ENABLE(streams,       [  --enable-streams        use wxStream etc classes], wxUSE_STREAMS)
 WX_ARG_ENABLE(file,          [  --enable-file           use wxFile classes], wxUSE_FILE)
@@ -1147,7 +1129,6 @@ if test "$wxUSE_CONTROLS" = "yes"; then
   DEFAULT_wxUSE_STATLINE=yes
   DEFAULT_wxUSE_STATUSBAR=yes
   DEFAULT_wxUSE_TAB_DIALOG=yes
-  DEFAULT_wxUSE_TOGGLEBTN=yes
   DEFAULT_wxUSE_TOOLBAR=yes
   DEFAULT_wxUSE_TOOLBAR_NATIVE=yes
   DEFAULT_wxUSE_TOOLBAR_SIMPLE=yes
@@ -1181,7 +1162,6 @@ elif test "$wxUSE_CONTROLS" = "no"; then
   DEFAULT_wxUSE_STATLINE=no
   DEFAULT_wxUSE_STATUSBAR=no
   DEFAULT_wxUSE_TAB_DIALOG=no
-  DEFAULT_wxUSE_TOGGLEBTN=no
   DEFAULT_wxUSE_TOOLBAR=no
   DEFAULT_wxUSE_TOOLBAR_NATIVE=no
   DEFAULT_wxUSE_TOOLBAR_SIMPLE=no
@@ -1216,7 +1196,6 @@ WX_ARG_ENABLE(statbox,     [  --enable-statbox        use wxStaticBox class], wx
 WX_ARG_ENABLE(statline,    [  --enable-statline       use wxStaticLine class], wxUSE_STATLINE)
 WX_ARG_ENABLE(statusbar,   [  --enable-statusbar      use wxStatusBar class], wxUSE_STATUSBAR)
 WX_ARG_ENABLE(tabdialog,   [  --enable-tabdialog      use wxTabControl class], wxUSE_TABDIALOG)
-WX_ARG_ENABLE(togglebtn,   [  --enable-togglebtn      use wxToggleButton class], wxUSE_TOGGLEBTN)
 WX_ARG_ENABLE(toolbar,     [  --enable-toolbar        use wxToolBar class], wxUSE_TOOLBAR)
 WX_ARG_ENABLE(tbarnative,  [  --enable-tbarnative     use native wxToolBar class], wxUSE_TOOLBAR_NATIVE)
 WX_ARG_ENABLE(tbarsmpl,    [  --enable-tbarsmpl       use wxToolBarSimple class], wxUSE_TOOLBAR_SIMPLE)
@@ -1237,6 +1216,7 @@ WX_ARG_ENABLE(tooltips,    [  --enable-tooltips       use wxToolTip class], wxUS
 WX_ARG_ENABLE(splines,     [  --enable-splines        use spline drawing code], wxUSE_SPLINES)
 WX_ARG_ENABLE(validators,  [  --enable-validators     use wxValidator and derived classes], wxUSE_VALIDATORS)
 WX_ARG_ENABLE(busyinfo,    [  --enable-busyinfo       use wxBusyInfo], wxUSE_BUSYINFO)
+WX_ARG_ENABLE(plot,        [  --enable-plot           use wxPlot], wxUSE_PLOT)
 WX_ARG_ENABLE(joystick,    [  --enable-joystick       compile in joystick support (Linux only)], wxUSE_JOYSTICK)
 
 dnl ---------------------------------------------------------------------------
@@ -1284,7 +1264,7 @@ else
 fi
 
 dnl we suppose that expr exists...
-NUM_TOOLKITS=`expr ${wxUSE_GTK:-0} + ${wxUSE_MOTIF:-0} + ${wxUSE_MAC:-0} + ${wxUSE_WINE:-0} + ${wxUSE_MINGW:-0} + ${wxUSE_CYGWIN:-0}`
+NUM_TOOLKITS=`expr ${wxUSE_GTK:-0} + ${wxUSE_MOTIF:-0} + ${wxUSE_WINE:-0} + ${wxUSE_MINGW:-0} + ${wxUSE_CYGWIN:-0}`
 
 dnl Allow wxUSE_PM only for OS/2 with EMX.
 dnl Path separator; ':' for unix.
@@ -1558,7 +1538,7 @@ GUI_TK_LINK=
 
 WXGTK12=
 WXGTK127=
-WXGTK20=
+WXGTK13=
 
 WXWINE=
 
@@ -1612,12 +1592,10 @@ fi
 if test "$wxUSE_GTK" = 1; then
     dnl avoid calling AM_PATH_GTK twice, so check first for the newer version
     dnl and only then, if it wasn't found, for an older one
-    AM_PATH_GTK_2_0(1.3.1, WXGTK20=1,[
-      AM_PATH_GTK(1.2.7, WXGTK127=1)
-      AM_PATH_GTK(1.2.3, WXGTK12=1)
-    ], gthread)
+    AM_PATH_GTK(1.2.7, WXGTK127=1)
+    AM_PATH_GTK(1.2.3, WXGTK12=1)
 
-    if test "$WXGTK12" != 1 -a "$WXGTK20" != 1; then
+    if test "$WXGTK12" != 1; then
         AC_MSG_ERROR([
             Please check that gtk-config is in path, the directory
             where GTK+ libraries are installed (returned by
@@ -1625,6 +1603,15 @@ if test "$wxUSE_GTK" = 1; then
             equivalent variable and GTK+ is version 1.2.3 or above.
         ])
     fi
+
+dnl it doesn't really work with 1.3.0 now...
+dnl    AM_PATH_GTK(1.3.0,
+dnl        WXGTK13=1,
+dnl        AM_PATH_GTK(1.2.1,
+dnl            WXGTK12=1,
+dnl            AC_MSG_ERROR(Is gtk-config in path and GTK+ is version 1.2.1 or above?)
+dnl        )
+dnl    )
 
     TOOLKIT_INCLUDE="$GTK_CFLAGS"
 
@@ -1692,18 +1679,13 @@ if test "$wxUSE_WINE" = 1; then
     GUIDIST=MSW_DIST
 fi
 
-dnl use standard macros to check for X headers/libs, this brings support
-dnl for the standard configure options --x-includes and --x-libraries;
-dnl the path to the X headers/libs is not only needed for motif, but also
-dnl by the OpenGL and XKBlib.h checks further down
-
-AC_PATH_XTRA
-CPPFLAGS="$CPPFLAGS $X_CFLAGS"
-LDFLAGS="$LDFLAGS $X_LIBS"
-
 if test "$wxUSE_MOTIF" = 1; then
+    dnl use standard macros to check for X headers/libs, this brings support
+    dnl for the standard configure options --x-includes and --x-libraries
+    AC_PATH_XTRA
+
     if test "$no_x" = "yes"; then
-      AC_MSG_ERROR(X11 not found, please use --x-includes and/or --x-libraries options)
+        AC_MSG_ERROR(X11 not found, please use --x-includes and/or --x-libraries options)
     fi
 
     GUI_TK_LIBRARY="$X_LIBS"
@@ -1868,12 +1850,6 @@ if test "$wxUSE_MOTIF" = 1; then
     GUIDIST=MOTIF_DIST
 fi
 
-if test "$wxUSE_MAC" = 1; then
-    TOOLKIT=MAC
-    dnl we can't call this MAC_DIST or autoconf thinks its a macro
-    GUIDIST=MACX_DIST
-fi
-
 if test "$wxUSE_PM" = 1; then
     TOOLKIT=PM
     GUIDIST=GTK_DIST
@@ -1919,9 +1895,6 @@ fi
     if test "$wxUSE_ZLIB" = "yes" ; then
         ALL_OBJECTS="${ALL_OBJECTS} \$(ZLIBOBJS)"
     fi
-    if test "$wxUSE_FREETYPE" = "yes" ; then
-        ALL_OBJECTS="${ALL_OBJECTS} \$(FREETYPEOBJS)"
-    fi
     ALL_DEPFILES="\$(GUIDEPS) \$(COMMONDEPS) \$(GENERICDEPS) \$(UNIXDEPS) \$(HTMLDEPS) \$(OGLDEPS)"
 
     PORT_FILES="src/\$(TOOLKITDIR)/files.lst"
@@ -1947,8 +1920,8 @@ else
     TOOLKIT_DEF="-D__WXBASE__"
 
     dnl the sources, their dependenices and the headers
-    ALL_OBJECTS="\$(BASE_OBJS) \$(BASE_UNIX_OBJS)"
-    ALL_DEPFILES="\$(BASE_DEPS) \$(BASE_UNIX_DEPS)"
+    ALL_OBJECTS="\$(BASE_OBJS) \${BASE_UNIX_OBJS}"
+    ALL_DEPFILES="\${BASE_DEPS} \${BASE_UNIX_DEPS}"
 
     if test "$wxUSE_ZLIB" = "yes" ; then
         ALL_OBJECTS="${ALL_OBJECTS} \$(ZLIBOBJS)"
@@ -2078,27 +2051,11 @@ if test "$wxUSE_SHARED" = "yes"; then
         WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS"
         WX_ALL="CREATE_LINKS"
       ;;
-      *-*-freebsd* | *-*-netbsd* )
+      *-*-freebsd* | *-*-netbsd*)
         SHARED_LD="${CC} -shared -o"
         PIC_FLAG="-fPIC"
-        if test "$wxUSE_OPENGL" = "yes"; then
-            WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS CREATE_INSTALLED_LINKS_GL"
-            WX_ALL="CREATE_LINKS CREATE_LINKS_GL"
-        else
-            WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS"
-            WX_ALL="CREATE_LINKS"
-        fi
-      ;;
-      *-*-darwin* )
-        SHARED_LD="libtool -dynamic -o"
-        PIC_FLAG="-fPIC"
-        if test "$wxUSE_OPENGL" = "yes"; then
-            WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS CREATE_INSTALLED_LINKS_GL"
-            WX_ALL="CREATE_LINKS CREATE_LINKS_GL"
-        else
-            WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS"
-            WX_ALL="CREATE_LINKS"
-        fi
+        WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS"
+        WX_ALL="CREATE_LINKS"
       ;;
       *-*-osf* )
         SHARED_LD="${CXX} -shared -o"
@@ -2197,18 +2154,12 @@ dnl defines HAVE_STRINGS_H (where some string functions live on AIX for example)
 AC_CHECK_HEADERS(strings.h)
 dnl defines HAVE_UNISTD_H
 AC_CHECK_HEADERS(unistd.h)
-dnl defines HAVE_FCNTL_H
-AC_CHECK_HEADERS(fcntl.h)
 dnl defines HAVE_WCHAR_H
 AC_CHECK_HEADERS(wchar.h)
 dnl defines HAVE_WCSTR_H
 AC_CHECK_HEADERS(wcstr.h)
 dnl defines HAVE_FNMATCH_H
 AC_CHECK_HEADERS(fnmatch.h)
-dnl defines HAVE_ICONV_H (Unix98 encoding conversion routines)
-AC_CHECK_HEADERS(iconv.h)
-dnl defines HAVE_LANGINFO_H (GNU libc locale parameters)
-AC_CHECK_HEADERS(langinfo.h)
 
 if test "$wxUSE_GUI" = "yes"; then
     if test "$wxUSE_UNIX" = "yes"; then
@@ -2272,7 +2223,6 @@ dnl check the sizes of integral types (give some reasonable default values for
 dnl cross-compiling)
 dnl   defines the size of certain types of variables in SIZEOF_<TYPE>
 AC_CHECK_SIZEOF(char, 1)
-AC_CHECK_SIZEOF(wchar_t, 4)
 AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(int *, 4)
 AC_CHECK_SIZEOF(int, 4)
@@ -2463,21 +2413,11 @@ AC_CHECK_FUNCS(vfork)
 dnl check for timegm() used by datetime.cpp
 AC_CHECK_FUNCS(timegm)
 
-dnl look for a functiopn to modify the environment
-AC_CHECK_FUNCS(putenv setenv, break)
-
 HAVE_SOME_SLEEP_FUNC=0
 if test "$USE_BEOS" = 1; then
     dnl BeOS has its own (wonder where did they get it from) sleep() function
     dnl in unistd.h
     AC_DEFINE(HAVE_SLEEP)
-    HAVE_SOME_SLEEP_FUNC=1
-fi
-
-if test "$USE_MAC" = 1; then
-    dnl Mac OS X has both nanosleep and usleep
-    dnl but only usleep is defined in unistd.h
-    AC_DEFINE(HAVE_USLEEP)
     HAVE_SOME_SLEEP_FUNC=1
 fi
 
@@ -2493,9 +2433,7 @@ if test "$HAVE_SOME_SLEEP_FUNC" != 1; then
                     POSIX4_LINK="-lposix4"
                 ],
                 [
-                    AC_CHECK_FUNCS(usleep,
-        		AC_DEFINE(HAVE_USLEEP),
-		    )
+                    AC_CHECK_FUNCS(usleep)
                     AC_MSG_WARN([wxSleep() function will not work])
                 ]
             )
@@ -2581,7 +2519,7 @@ if test "$wxUSE_THREADS" = "yes" ; then
     dnl find if POSIX threads are available
 
     dnl AIX calls the library libpthreads - thanks IBM!
-    if test "$USE_AIX" = 1; then
+    if test "$wxUSE_AIX" = 1; then
         THREADS_LIB=pthreads
     else
         THREADS_LIB=pthread
@@ -2599,15 +2537,9 @@ if test "$wxUSE_THREADS" = "yes" ; then
                 THREADS_OBJ="threadpsx.lo"
                 THREADS_LINK="c_r"
             ], [
-                dnl thread functions are in libcc_dynamic under Mac OS X/Darwin
-                AC_CHECK_LIB(cc_dynamic, pthread_create, [
-                    THREADS_OBJ="threadpsx.lo"
-                    THREADS_LINK="cc_dynamic"
-                ], [
-                    dnl VZ: SGI threads are not supported currently
-                    AC_CHECK_HEADER(sys/prctl.h, [
-                        THREADS_OBJ="threadsgi.lo"
-                    ])
+                dnl VZ: SGI threads are not supported currently
+                AC_CHECK_HEADER(sys/prctl.h, [
+                    THREADS_OBJ="threadsgi.lo"
                 ])
             ])
         ])
@@ -2693,14 +2625,6 @@ if test "$wxUSE_THREADS" = "yes" ; then
   ])
 
   THREADS_LINK="-l$THREADS_LINK"
-
-  dnl building MT programs under Solaris with the native compiler requires -mt
-  dnl switch
-  if test "$USE_SOLARIS" = "yes" -a "$GCC" != "yes"; then
-      CFLAGS="${CFLAGS} -mt"
-      CXXFLAGS="${CXXFLAGS} -mt"
-      LDFLAGS="${LDFLAGS} -mt"
-  fi
 fi
 
 dnl from if !MSW
@@ -2729,8 +2653,8 @@ else
   fi
 fi
 
-if test "$WXGTK20" = 1 ; then
-  AC_DEFINE_UNQUOTED(__WXGTK20__,$WXGTK20)
+if test "$WXGTK13" = 1 ; then
+  AC_DEFINE_UNQUOTED(__WXGTK13__,$WXGTK13)
   WXGTK12=1
 fi
 
@@ -2744,11 +2668,6 @@ fi
 
 if test "$WXWINE" = 1 ; then
   TOOLKIT_DEF="${TOOLKIT_DEF} -D__WXWINE__"
-fi
-
-if test "$wxUSE_MAC" = 1 ; then
-  TOOLKIT_DEF="${TOOLKIT_DEF} -D__UNIX__ -DTARGET_CARBON"
-  TOOLKIT_INCLUDE="${TOOLKIT_INCLUDE}"
 fi
 
 if test "$wxUSE_CYGWIN" = 1 ; then
@@ -2797,10 +2716,10 @@ CODE_GEN_FLAGS=
 CODE_GEN_FLAGS_CXX=
 if test "$GCC" = yes ; then
     if test "$wxUSE_NO_RTTI" = "yes" ; then
-        CODE_GEN_FLAGS_CXX="$CODE_GEN_FLAGS -fno-rtti"
+        CODE_GEN_FLAGS_CXX="$CODE_GEN_FLAGS_CXX -fno-rtti"
     fi
     if test "$wxUSE_NO_EXCEPTIONS" = "yes" ; then
-        CODE_GEN_FLAGS_CXX="$CODE_GEN_FLAGS -fno-exceptions"
+        CODE_GEN_FLAGS_CXX="$CODE_GEN_FLAGS_CXX -fno-exceptions"
     fi
     if test "$wxUSE_PERMISSIVE" = "yes" ; then
        CODE_GEN_FLAGS="$CODE_GEN_FLAGS -fpermissive"
@@ -2901,25 +2820,6 @@ if test "$wxUSE_LIBTIFF" = "yes" -o "$wxUSE_LIBTIFF" = "sys" ; then
                                            -lm))
     if test "x$TIFF_LINK" = "x" ; then
         AC_MSG_ERROR(system tiff library not found! Use --with-libtiff=yes to use the built-in one)
-    fi
-  fi
-fi
-
-FREETYPE_INCLUDE=
-if test "$wxUSE_FREETYPE" = "yes" -o "$wxUSE_FREETYPE" = "sys" ; then
-  AC_DEFINE(wxUSE_FREETYPE)
-  if test "$wxUSE_FREETYPE" = "yes" ; then
-    FREETYPE_INCLUDE="-I\${top_srcdir}/src/freetype"
-  else
-    FREETYPE_LINK=
-    AC_CHECK_HEADER(freetype.h,
-                    AC_CHECK_LIB(freetype, FT_Render_Glyph,
-                                 FREETYPE_LINK="-lfreetype",
-                                 ,
-                                 [-lm])
-                   )
-    if test "x$FREETYPE_LINK" = "x" ; then
-        AC_MSG_ERROR(system freetype library not found! Use --with-freetype=yes to use the built-in freetype)
     fi
   fi
 fi
@@ -3047,8 +2947,8 @@ if test "$wxUSE_LONGLONG" = "yes"; then
   AC_DEFINE(wxUSE_LONGLONG)
 fi
 
-if test "$wxUSE_GEOMETRY" = "yes"; then
-  AC_DEFINE(wxUSE_GEOMETRY)
+if test "$wxUSE_PLOT" = "yes"; then
+  AC_DEFINE(wxUSE_PLOT)
 fi
 
 if test "$wxUSE_DIALUP_MANAGER" = "yes" ; then
@@ -3317,14 +3217,10 @@ if test "$TOOLKIT" != "MSW"; then
 HAVE_DL_FUNCS=0
 HAVE_SHL_FUNCS=0
 if test "$wxUSE_DYNLIB_CLASS" = "yes"; then
-    if test "$USE_MAC" = 1; then
-        dnl Mac OS X needs dl_macosx.c to be compiled in to fake dlopen/dlerror
-        HAVE_DL_FUNCS=1
-    else
-        dnl the test is a bit complicated because we check for dlopen() both with
-        dnl and without -ldl and we also try to find shl_load() if there is no
-        dnl dlopen() on this system
-        AC_CHECK_FUNCS(dlopen,
+    dnl the test is a bit complicated because we check for dlopen() both with
+    dnl and without -ldl and we also try to find shl_load() if there is no
+    dnl dlopen() on this system
+    AC_CHECK_FUNCS(dlopen,
         [
             AC_DEFINE(HAVE_DLOPEN)
             HAVE_DL_FUNCS=1
@@ -3357,7 +3253,6 @@ if test "$wxUSE_DYNLIB_CLASS" = "yes"; then
         AC_CHECK_FUNCS(dlerror,
                        AC_DEFINE(HAVE_DLERROR),
                        AC_CHECK_LIB(dl, dlerror, AC_DEFINE(HAVE_DLERROR)))
-    fi
     fi
 
     if test "$HAVE_DL_FUNCS" = 0; then
@@ -3685,10 +3580,6 @@ if test "$wxUSE_TABDIALOG" = "yes"; then
     SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS tab"
 fi
 
-if test "$wxUSE_TOGGLEBTN" = "yes"; then
-  AC_DEFINE(wxUSE_TOGGLEBTN)
-fi
-
 if test "$wxUSE_TOOLBAR_SIMPLE" = "yes"; then
     AC_DEFINE(wxUSE_TOOLBAR_SIMPLE)
     wxUSE_TOOLBAR="yes"
@@ -3823,17 +3714,11 @@ OPENGL_LIBS="$OPENGL_LINK"
 
 dnl all additional libraries (except wxWindows itself) we link with
 dnl
-dnl note that we always link with -lm except for Mac OS X
-dnl extended.c uses floor() and is always linked in
-if test "$USE_MAC" = 1 ; then
-    EXTRA_LIBS="$LIBS $POSIX4_LINK $INET_LINK $WCHAR_LINK $THREADS_LINK $DMALLOC_LINK $DL_LINK $ZLIB_LINK -framework System"
-    CFLAGS="${CFLAGS} -fpascal-strings"
-    CPPFLAGS="${CPPFLAGS} -fpascal-strings"
-else
-    EXTRA_LIBS="$LIBS $POSIX4_LINK $INET_LINK $WCHAR_LINK $THREADS_LINK $DMALLOC_LINK $DL_LINK $ZLIB_LINK -lm"
-fi
+dnl note that we always link with -lm - extended.c uses floor() and is always
+dnl linked in
+EXTRA_LIBS="$LIBS $POSIX4_LINK $INET_LINK $WCHAR_LINK $THREADS_LINK $DMALLOC_LINK $DL_LINK $ZLIB_LINK -lm"
 if test "$wxUSE_GUI" = "yes"; then
-    EXTRA_LIBS="$GUILIBS $PNG_LINK $JPEG_LINK $TIFF_LINK $FREETYPE_LINK $EXTRA_LIBS"
+    EXTRA_LIBS="$GUILIBS $PNG_LINK $JPEG_LINK $TIFF_LINK $EXTRA_LIBS"
 fi
 
 dnl all the libraries needed to link wxWindows programs when using the
@@ -3841,7 +3726,7 @@ dnl makefile system without libtool
 LD_LIBS="\${top_builddir}/lib/${WX_LIBRARY_NAME_STATIC} $EXTRA_LIBS"
 
 dnl all -I options we must pass to the compiler
-INCLUDES="-I. -I\${top_builddir}/include -I\${top_srcdir}/include $ZLIB_INCLUDE $PNG_INCLUDE $JPEG_INCLUDE $TIFF_INCLUDE $FREETYPE_INCLUDE $TOOLKIT_INCLUDE"
+INCLUDES="-I. -I\${top_builddir}/include -I\${top_srcdir}/include $ZLIB_INCLUDE $PNG_INCLUDE $JPEG_INCLUDE $TIFF_INCLUDE $TOOLKIT_INCLUDE"
 
 dnl wxGTK does not need TOOLKIT includes in wx-config
 if test "$wxUSE_GTK" = 1; then
@@ -3870,9 +3755,8 @@ if test "$wxUSE_GUI" = "yes"; then
 
     dnl TODO some samples are never built so far:
     dnl      ipc, mfc, nativdlg, oleauto, ownerdrw, proplist
-    SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS controls dialogs dragimag \
-                     drawing dynamic event font fractal image menu \
-                     minimal richedit"
+    SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS controls dialogs dragimag drawing dynamic \
+                     font image menu minimal richedit"
 
     dnl this is needed to be able to find AFM files
     CPPFLAGS="$CPPFLAGS \$(EXTRADEFS) \$(APPEXTRADEFS)"
@@ -4052,7 +3936,7 @@ AC_OUTPUT([
               mkdir lib/wx/include/wx/${TOOLKIT_NAME}
             fi
             if test -f setup.h; then
-                cp -fp setup.h lib/wx/include/wx/${TOOLKIT_NAME}/setup.h
+                cp -f setup.h lib/wx/include/wx/${TOOLKIT_NAME}/setup.h
             fi
 
             dnl *move* setup.h to its final place
@@ -4067,7 +3951,7 @@ AC_OUTPUT([
               mkdir include/wx/${TOOLKIT_DIR}
             fi
             if test -f setup.h; then
-                cp -fp setup.h include/wx/${TOOLKIT_DIR}/setup.h
+                mv -f setup.h include/wx/${TOOLKIT_DIR}/setup.h
             fi
             
           ],

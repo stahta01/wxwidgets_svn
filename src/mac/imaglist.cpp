@@ -15,9 +15,7 @@
 
 #include "wx/stubs/imaglist.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxImageList, wxObject)
-#endif
 
 wxImageList::wxImageList()
 {
@@ -29,23 +27,16 @@ wxImageList::~wxImageList()
     // TODO: destroy image list handle, if any
 }
 
+
 // Attributes
 ////////////////////////////////////////////////////////////////////////////
 
 // Returns the number of images in the image list.
 int wxImageList::GetImageCount() const
 {
-  // TODO
-  return 0;
+    // TODO
+	return 0;
 }
-
-#if 0
-bool wxImageList::GetSize(int index, int &width, int &hieght) const
-{
-   // TODO
-   return false;
-}
-#endif
 
 // Operations
 ////////////////////////////////////////////////////////////////////////////

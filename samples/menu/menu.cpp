@@ -26,10 +26,9 @@
 
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
+
     #include <wx/log.h>
 #endif
-
-#include "copy.xpm"
 
 // ----------------------------------------------------------------------------
 // classes
@@ -78,6 +77,7 @@ public:
     void OnRightDown(wxMouseEvent& event);
 
     void OnUpdateCheckMenuItemUI(wxUpdateUIEvent& event);
+    void OnUpdatePopup(wxUpdateUIEvent& event) { event.Enable(FALSE); }
 
 private:
     wxMenu *CreateDummyMenu(wxString *title);
@@ -107,6 +107,17 @@ public:
 private:
     MyFrame *m_frame;
 
+    DECLARE_EVENT_TABLE()
+};
+
+class MyPopupMenu : public wxMenu
+{
+public:
+    MyPopupMenu(const wxString& title) : wxMenu(title) { }
+
+    void OnUpdateUI(wxUpdateUIEvent& event) { event.Enable(FALSE); }
+
+private:
     DECLARE_EVENT_TABLE()
 };
 
@@ -146,6 +157,8 @@ enum
 
     Menu_Popup_ToBeDeleted = 2000,
     Menu_Popup_ToBeGreyed,
+    Menu_Popup_ToBeGreyed2,
+    Menu_Popup_ToBeGreyed3,
     Menu_Popup_ToBeChecked,
     Menu_Popup_Submenu,
 
@@ -183,11 +196,17 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
     EVT_UPDATE_UI(Menu_Menu_Check, MyFrame::OnUpdateCheckMenuItemUI)
 
+    EVT_UPDATE_UI(Menu_Popup_ToBeGreyed3, MyFrame::OnUpdatePopup)
+
     EVT_RIGHT_DOWN(MyFrame::OnRightDown)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MyEvtHandler, wxEvtHandler)
     EVT_MENU(-1, MyEvtHandler::OnMenuEvent)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(MyPopupMenu, wxMenu)
+    EVT_UPDATE_UI(Menu_Popup_ToBeGreyed2, MyPopupMenu::OnUpdateUI)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -233,10 +252,6 @@ MyFrame::MyFrame()
     // create the menubar
     wxMenu *fileMenu = new wxMenu;
     fileMenu->Append(Menu_File_Quit, "E&xit\tAlt-X", "Quit toolbar sample" );
-    
-    wxMenuItem *bitmap_menu_item = new wxMenuItem( fileMenu, Menu_File_Quit, "Quit with &bitmap\tAlt-Q" );
-    bitmap_menu_item->SetBitmap( wxBitmap( copy_xpm ) );
-    fileMenu->Append( bitmap_menu_item ); 
 
     wxMenu *menubarMenu = new wxMenu;
     menubarMenu->Append(Menu_MenuBar_Append, "&Append menu\tCtrl-A",
@@ -625,13 +640,17 @@ void MyFrame::OnGetMenuItemInfo(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnRightDown(wxMouseEvent &event )
 {
-    wxMenu menu("Test popup");
+    MyPopupMenu menu("Test popup");
 
     menu.Append(Menu_Help_About, "&About");
     menu.Append(Menu_Popup_Submenu, "Submenu", CreateDummyMenu(NULL));
     menu.Append(Menu_Popup_ToBeDeleted, "To be deleted");
     menu.Append(Menu_Popup_ToBeChecked, "To be checked", "", TRUE);
     menu.Append(Menu_Popup_ToBeGreyed, "To be greyed");
+    menu.AppendSeparator();
+    // VZ: don't search for the word autogreyed in the dictionary...
+    menu.Append(Menu_Popup_ToBeGreyed2, "To be autogreyed");
+    menu.Append(Menu_Popup_ToBeGreyed3, "This one too");
     menu.AppendSeparator();
     menu.Append(Menu_File_Quit, "E&xit");
 

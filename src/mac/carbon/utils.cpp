@@ -18,7 +18,6 @@
 #include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/app.h"
-#include "wx/mac/uma.h"
 
 #include <ctype.h>
 
@@ -27,16 +26,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#ifndef __UNIX__
-// defined in unix/utilsunx.cpp for Mac OS X
-
-// get full hostname (with domain name if possible)
-bool wxGetFullHostName(wxChar *buf, int maxSize)
-{
-    return wxGetHostName(buf, maxSize);
-}
-
-// Get hostname only (without domain name)
+// Get full hostname (eg. DoDo.BSn-Germany.crg.de)
 bool wxGetHostName(char *buf, int maxSize)
 {
     // TODO
@@ -49,14 +39,6 @@ bool wxGetUserId(char *buf, int maxSize)
     // TODO
     return FALSE;
 }
-
-const wxChar* wxGetHomeDir(wxString *pstr)
-{
-	*pstr = wxMacFindFolder(  (short) kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder ) ;
-	return pstr->c_str() ;
-}
-
-
 
 // Get user name e.g. AUTHOR
 bool wxGetUserName(char *buf, int maxSize)
@@ -126,7 +108,6 @@ void wxFatalError(const wxString& msg, const wxString& title)
 {
     // TODO
 }
-#endif // !__UNIX__
 
 // Emit a beeeeeep
 void wxBell()
@@ -246,10 +227,7 @@ void wxEndBusyCursor()
     if ( gMacStoredActiveCursor )
     	::SetCursor( *gMacStoredActiveCursor ) ;
     else
-    {
-		Cursor 		MacArrow ;
-    	::SetCursor( GetQDGlobalsArrow( &MacArrow ) ) ;
-    }
+    	::SetCursor( &qd.arrow ) ;
    	gMacStoredActiveCursor = NULL ;
   }
 }
@@ -260,32 +238,11 @@ bool wxIsBusy()
   return (wxBusyCursorCount > 0);
 }    
 
-wxString wxMacFindFolder( short 					vol,
-								 OSType 				folderType,
-								 Boolean 				createFolder)
-{
-	short 		vRefNum  ;
-	long 		dirID ;
-	wxString strDir ;
-		
-	if ( FindFolder( vol, folderType, createFolder, &vRefNum, &dirID) == noErr)
-	{
-		FSSpec file ;
-		if ( FSMakeFSSpec( vRefNum , dirID , "\p" , &file ) == noErr )
-		{
-			strDir = wxMacFSSpec2UnixFilename( &file ) + "/" ;
-		}
-	}
-	return strDir ;
-}
-
-#ifndef __UNIX__
 char *wxGetUserHome (const wxString& user)
 {
     // TODO
     return NULL;
 }
-#endif
 
 // Check whether this window wants to process messages, e.g. Stop button
 // in long calculations.
@@ -314,36 +271,23 @@ bool wxColourDisplay()
 // Returns depth of screen
 int wxDisplayDepth()
 {
-	Rect globRect ; 
-	SetRect(&globRect, -32760, -32760, 32760, 32760);
-	GDHandle	theMaxDevice;
-
-	int theDepth = 8;
-	theMaxDevice = GetMaxDevice(&globRect);
-	if (theMaxDevice != nil)
-		theDepth = (**(**theMaxDevice).gdPMap).pixelSize;
+		// get max pixel depth
+		CGrafPtr port ;
+		GetCWMgrPort( &port ) ; 
+		GDHandle maxDevice ;
 		
-	return theDepth ;
+		maxDevice = GetMaxDevice( &port->portRect ) ;
+		if ( maxDevice )
+			return (**((**maxDevice).gdPMap)).pixelSize ;
+		else
+			return 8 ; 
 }
 
 // Get size of display
 void wxDisplaySize(int *width, int *height)
 {
-	BitMap screenBits;
-	GetQDGlobalsScreenBits( &screenBits );
-
-    *width = screenBits.bounds.right - screenBits.bounds.left  ;
-    *height = screenBits.bounds.bottom - screenBits.bounds.top ; 
-#if TARGET_CARBON
- 	SInt16 mheight ;
- 	GetThemeMenuBarHeight( &mheight ) ;
-     *height -= mheight ;
-#else
-     *height -= LMGetMBarHeight() ;
-#endif
+    *width = qd.screenBits.bounds.right - qd.screenBits.bounds.left  ;
+    *height = qd.screenBits.bounds.bottom - qd.screenBits.bounds.top ; 
+    *height -= LMGetMBarHeight() ;
 }
 
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
-{
-    return wxGenericFindWindowAtPoint(pt);
-}

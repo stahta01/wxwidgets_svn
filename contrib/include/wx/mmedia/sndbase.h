@@ -112,7 +112,7 @@ class WXDLLEXPORT wxSoundFormatBase {
 // Base class for sound streams
 //
 
-class WXDLLEXPORT wxSoundStream {
+class wxSoundStream {
  public:
   wxSoundStream();
   virtual ~wxSoundStream();

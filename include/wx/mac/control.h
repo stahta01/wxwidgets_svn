@@ -25,21 +25,13 @@ class WXDLLEXPORT wxControl : public wxControlBase
 
 public:
    wxControl();
-   wxControl(wxWindow *parent, wxWindowID id,
-             const wxPoint& pos = wxDefaultPosition,
-             const wxSize& size = wxDefaultSize, long style = 0,
-             const wxValidator& validator = wxDefaultValidator,
-             const wxString& name = wxControlNameStr)
-    {
-        Create(parent, id, pos, size, style, validator, name);
-    }
+   virtual ~wxControl();
 
     bool Create(wxWindow *parent, wxWindowID id,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize, long style = 0,
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxControlNameStr);
-   virtual ~wxControl();
 
    // Simulates an event
    virtual void Command(wxCommandEvent& event) { ProcessCommand(event); }
@@ -52,35 +44,32 @@ public:
    virtual void SetLabel(const wxString& title) ;
 
    wxList& GetSubcontrols() { return m_subControls; }
-   
+
    void OnEraseBackground(wxEraseEvent& event);
-   
-   virtual bool	         Enable(bool enabled) ;
-   virtual bool	         Show(bool show = TRUE) ;
-   
-   virtual void		 MacRedrawControl () ;
-   virtual void 	 MacHandleControlClick( ControlHandle control , SInt16 controlpart ) ;
-   virtual void	         MacPreControlCreate( wxWindow *parent, wxWindowID id, wxString label , 
-					      const wxPoint& pos,
-					      const wxSize& size, long style,
-					      const wxValidator& validator,
-					      const wxString& name ,
-					      Rect *outBounds ,
-					      StringPtr maclabel ) ;
-   virtual void		 MacPostControlCreate() ;
-   virtual void		 MacAdjustControlRect() ;
-   virtual ControlHandle MacGetContainerForEmbedding() ;
-   virtual void 	 MacSuperChangedPosition() ;
-   virtual void 	 MacSuperEnabled( bool enabled ) ;
-   virtual void 	 MacSuperShown( bool show ) ;
-   virtual bool		 MacCanFocus() const ;
-   
-   virtual void  	 DoSetSize(int x, int y,int width, int height,int sizeFlags ) ;
-   virtual void 	 OnKeyDown( wxKeyEvent &event ) ;
-   virtual void		 OnMouseEvent( wxMouseEvent &event ) ;
-   virtual void 	 OnPaint(wxPaintEvent& event) ;
-   virtual void		 Refresh(bool eraseBack = TRUE, const wxRect *rect = NULL) ;
-   ControlHandle	 GetMacControl() { return m_macControl ;}
+
+	 	virtual bool						Enable(bool enabled) ;
+	 	virtual bool						Show(bool show) ;
+	 		 	
+		virtual void 						MacHandleControlClick( ControlHandle control , SInt16 controlpart ) ;
+		virtual	void						MacPreControlCreate( wxWindow *parent, wxWindowID id, wxString label , 
+				           					 const wxPoint& pos,
+				           					 const wxSize& size, long style,
+				           					 const wxValidator& validator,
+				          					 const wxString& name , Rect *outBounds , StringPtr maclabel ) ;
+		virtual	void						MacPostControlCreate() ;
+		virtual void						MacAdjustControlRect() ;
+		virtual ControlHandle 	MacGetContainerForEmbedding() ;
+		virtual void 						MacSuperChangedPosition() ;
+		virtual void 						MacSuperEnabled( bool enabled ) ;
+		virtual void 						MacSuperShown( bool show ) ;
+		virtual bool						MacCanFocus() const ;
+
+		virtual void  								DoSetSize(int x, int y,int width, int height,int sizeFlags ) ;
+		virtual void 						OnKeyDown( wxKeyEvent &event ) ;
+		virtual void						OnMouseEvent( wxMouseEvent &event ) ;
+		virtual void 					OnPaint(wxPaintEvent& event) ;
+ 		virtual void						Refresh(bool eraseBack = TRUE, const wxRect *rect = NULL) ;
+		ControlHandle					GetMacControl() { return m_macControl ;}
 
 #if WXWIN_COMPATIBILITY
    virtual void SetButtonColour(const wxColour& WXUNUSED(col)) { }
@@ -102,13 +91,12 @@ protected:
 
 protected:
    // For controls like radiobuttons which are really composite
-	ControlHandle		m_macControl ;
-	bool				m_macControlIsShown ;
-   	wxList m_subControls;
-	int							m_macHorizontalBorder ;
-	int							m_macVerticalBorder ;
+		ControlHandle		m_macControl ;
+		int							m_macHorizontalBorder ;
+		int							m_macVerticalBorder ;
+   wxList m_subControls;
 
-   virtual wxSize DoGetBestSize() const;
+   virtual wxSize DoGetBestSize() const ;
 
 private:
    DECLARE_EVENT_TABLE()

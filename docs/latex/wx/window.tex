@@ -224,9 +224,6 @@ cause an erase background event to be generated.
 
 \constfunc{virtual void}{ClientToScreen}{\param{int* }{x}, \param{int* }{y}}
 
-\perlnote{In wxPerl this method returns a 2-element list intead of
-modifying its parameters.}
-
 \constfunc{virtual wxPoint}{ClientToScreen}{\param{const wxPoint\&}{ pt}}
 
 Converts to screen coordinates from coordinates relative to this window.
@@ -246,6 +243,7 @@ implements the following methods:\par
 \twocolitem{{\bf ClientToScreenXY(x, y)}}{Returns a 2-tuple, (x, y)}
 \end{twocollist}}
 }
+
 
 \membersection{wxWindow::Close}\label{wxwindowclose}
 
@@ -511,9 +509,6 @@ Returns a reference to the list of the window's children.
 
 \constfunc{virtual void}{GetClientSize}{\param{int* }{width}, \param{int* }{height}}
 
-\perlnote{In wxPerl this method takes no parameter and returns 
-a 2-element list {\tt ( width, height )}.}
-
 \constfunc{virtual wxSize}{GetClientSize}{\void}
 
 This gets the size of the window `client area' in pixels.  The client area is the
@@ -605,7 +600,7 @@ be used at all.
 
 Returns the grandparent of a window, or NULL if there isn't one.
 
-\membersection{wxWindow::GetHandle}\label{wxwindowgethandle}
+\membersection{wxWindow::GetHandle}
 
 \constfunc{void*}{GetHandle}{\void}
 
@@ -613,19 +608,6 @@ Returns the platform-specific handle of the physical window. Cast it to an appro
 handle, such as {\bf HWND} for Windows, {\bf Widget} for Motif or {\bf GtkWidget} for GTK.
 
 \pythonnote{This method will return an integer in wxPython.}
-
-\membersection{wxWindow::GetHelpText}\label{wxwindowgethelptext}
-
-\constfunc{virtual wxString}{GetHelpText}{\void}
-
-Gets the help text to be used as context-sensitive help for this window.
-
-Note that the text is actually stored by the current \helpref{wxHelpProvider}{wxhelpprovider} implementation,
-and not in the window object itself.
-
-\wxheading{See also}
-
-\helpref{SetHelpText}{wxwindowsethelptext}, \helpref{wxHelpProvider}{wxhelpprovider}
 
 \membersection{wxWindow::GetId}\label{wxwindowgetid}
 
@@ -702,15 +684,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl there are two methods instead of a single overloaded
-method:\par
-\indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf GetPosition()}}{Returns a Wx::Point}
-\twocolitem{{\bf GetPositionXY()}}{Returns a 2-element list
- {\tt ( x, y )}}
-\end{twocollist}
-}}
-
 \membersection{wxWindow::GetRect}\label{wxwindowgetrect}
 
 \constfunc{virtual wxRect}{GetRect}{\void}
@@ -769,15 +742,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl there are two methods instead of a single overloaded
-method:\par
-\indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf GetSize()}}{Returns a Wx::Size}
-\twocolitem{{\bf GetSizeWH()}}{Returns a 2-element list
- {\tt ( width, height )}}
-\end{twocollist}
-}}
-
 \membersection{wxWindow::GetTextExtent}
 
 \constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{x}, \param{int* }{y},
@@ -813,9 +777,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl this method takes only the {\tt string} and optionally
- {\tt font} parameters, and returns a 4-element list
- {\tt ( x, y, descent, externalLeading )}.}
 
 \membersection{wxWindow::GetTitle}\label{wxwindowgettitle}
 
@@ -1451,6 +1412,8 @@ Sent to the event handler when the window must be refreshed.
 
 \wxheading{Remarks}
 
+
+
 Use the EVT\_PAINT macro in an event table definition to intercept paint events.
 
 Note that In a paint event handler, the application must {\it always} create a \helpref{wxPaintDC}{wxpaintdc} object,
@@ -2028,19 +1991,6 @@ their parent windows.
 \helpref{wxWindow::GetForegroundColour}{wxwindowgetforegroundcolour},\rtfsp
 \helpref{wxWindow::SetBackgroundColour}{wxwindowsetbackgroundcolour},\rtfsp
 \helpref{wxWindow::GetBackgroundColour}{wxwindowgetbackgroundcolour}
-
-\membersection{wxWindow::SetHelpText}\label{wxwindowsethelptext}
-
-\func{virtual void}{SetHelpText}{\param{const wxString\& }{helpText}}
-
-Sets the help text to be used as context-sensitive help for this window.
-
-Note that the text is actually stored by the current \helpref{wxHelpProvider}{wxhelpprovider} implementation,
-and not in the window object itself.
-
-\wxheading{See also}
-
-\helpref{GetHelpText}{wxwindowgethelptext}, \helpref{wxHelpProvider}{wxhelpprovider}
 
 \membersection{wxWindow::SetId}\label{wxwindowsetid}
 

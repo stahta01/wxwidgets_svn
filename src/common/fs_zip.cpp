@@ -3,10 +3,8 @@
 // Purpose:     ZIP file system
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// CVS-ID:      $Id$
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifdef __GNUG__
@@ -25,7 +23,6 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/hash.h"
 #include "wx/filesys.h"
 #include "wx/zipstrm.h"
 #include "wx/fs_zip.h"
@@ -49,7 +46,6 @@ wxZipFSHandler::wxZipFSHandler() : wxFileSystemHandler()
     m_Archive = NULL;
     m_ZipFile = m_Pattern = m_BaseDir = wxEmptyString;
     m_AllowDirs = m_AllowFiles = TRUE;
-    m_DirsFound = NULL;
 }
 
 
@@ -58,8 +54,6 @@ wxZipFSHandler::~wxZipFSHandler()
 {
     if (m_Archive)         
         unzClose((unzFile)m_Archive);
-    if (m_DirsFound)
-        delete m_DirsFound;
 }
 
 
@@ -114,11 +108,8 @@ wxString wxZipFSHandler::FindFirst(const wxString& spec, int flags)
         m_Archive = NULL;
     }
 
-    if (GetProtocol(left) != wxT("file"))
-    {
-        wxLogError(_("ZIP handler currently supports only local files!"));
+    if (GetProtocol(left) != wxT("file")) 
         return wxEmptyString;
-    }
 
     switch (flags) 
     {
@@ -142,15 +133,7 @@ wxString wxZipFSHandler::FindFirst(const wxString& spec, int flags)
             unzClose((unzFile)m_Archive);
             m_Archive = NULL;        
         }
-        else 
-        {
-            if (m_AllowDirs)
-            {
-                delete m_DirsFound;
-                m_DirsFound = new wxHashTableLong();
-            }
-            return DoFind();
-        }
+        else return DoFind();
     }
     return wxEmptyString;
 }
@@ -169,41 +152,32 @@ wxString wxZipFSHandler::DoFind()
 {
     static char namebuf[1024]; // char, not wxChar!
     char *c;
-    wxString namestr, dir, filename;
+    wxString fn, dir, name;
     wxString match = wxEmptyString;
+    bool wasdir;
 
     while (match == wxEmptyString)
     {
         unzGetCurrentFileInfo((unzFile)m_Archive, NULL, namebuf, 1024, NULL, 0, NULL, 0);
         for (c = namebuf; *c; c++) if (*c == wxT('\\')) *c = wxT('/');
-        namestr = namebuf;
-
-        if (m_AllowDirs)
+        fn = namebuf;
+        if (fn.Length() > 0 && fn.Last() == wxT('/')) 
         {
-            dir = namestr.BeforeLast(wxT('/'));       
-            while (!dir.IsEmpty())
-            {
-                long key = 0;
-                for (size_t i = 0; i < dir.Length(); i++) key += (wxUChar)dir[i];
-                if (m_DirsFound->Get(key) == wxNOT_FOUND)
-                {
-                    m_DirsFound->Put(key, 1);
-                    filename = dir.AfterLast(wxT('/'));
-                    dir = dir.BeforeLast(wxT('/'));
-                    if (!filename.IsEmpty() && m_BaseDir == dir &&
-                                wxMatchWild(m_Pattern, filename, FALSE))
-                        match = m_ZipFile + wxT("#zip:") + dir + wxT("/") + filename;
-                }
-                else 
-                    break; // already tranversed
-            }
+            fn.RemoveLast();
+            wasdir = TRUE;
         }
+        else wasdir = FALSE;
 
-        filename = namestr.AfterLast(wxT('/'));
-        dir = namestr.BeforeLast(wxT('/'));
-        if (m_AllowFiles && !filename.IsEmpty() && m_BaseDir == dir &&
-                            wxMatchWild(m_Pattern, filename, FALSE))
-            match = m_ZipFile + wxT("#zip:") + namestr;
+        name = fn.AfterLast(wxT('/'));
+        dir = fn.BeforeLast(wxT('/'));
+
+        if (dir == m_BaseDir) 
+        {
+            if (m_AllowFiles && !wasdir && wxMatchWild(m_Pattern, name, FALSE))
+                match = m_ZipFile + wxT("#zip:") + fn;
+            if (m_AllowDirs && wasdir && wxMatchWild(m_Pattern, name, FALSE))
+                match = m_ZipFile + wxT("#zip:") + fn;
+        }
         
         if (unzGoToNextFile((unzFile)m_Archive) != UNZ_OK) 
         {

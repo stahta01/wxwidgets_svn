@@ -14,10 +14,10 @@
 	set def [.wxwindows]
 
 all :
-	make gtk
+	make motif
 	purge [...]
 	delete [...]*.obj;
-	make motif
+	make gtk
 	purge [...]
 	delete [...]*.obj;
 
@@ -30,37 +30,8 @@ gtk : setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.gtk]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [--.demos.bombs]
+	set default [--.samples.minimal]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [--.samples.calendar]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.caret]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.checklst]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.config]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.controls]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.dialogs]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.dnd]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.drawing]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.image]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.mdi]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.menu]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.minimal]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.resource]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [--.utils.dialoged.src]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [--]
 
 motif : setup.h
 	set default [.src.generic]
@@ -73,27 +44,21 @@ motif : setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [--.demos.bombs]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [--.samples.calendar]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.caret]
+	set default [--.samples.caret]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.checklst]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.config]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
+	set default [-.controls]
+	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.dialogs]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.drawing]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.image]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.mdi]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.menu]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.minimal]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.resource]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [--.utils.dialoged.src]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)

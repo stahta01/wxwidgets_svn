@@ -115,8 +115,10 @@ int wxGetDisplayDepth();
 void wxDisplaySize(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySize();
 
+#ifdef FOR_2_3
 void wxDisplaySizeMM(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySizeMM();
+#endif
 
 void wxSetCursor(wxCursor& cursor);
 
@@ -630,13 +632,6 @@ void wxLogSysError(const char *szFormat);
 
 
 //----------------------------------------------------------------------
-
-
-enum {
-    /* event type */
-    wxEVT_END_PROCESS
-};
-
 
 class wxProcessEvent : public wxEvent {
 public:

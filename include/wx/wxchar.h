@@ -366,7 +366,7 @@ typedef unsigned __WCHAR_TYPE__ wxUChar;
 #     define wxUChar unsigned char
 #   endif
 
-#   if defined(__FreeBSD__) || (defined(__APPLE__) && defined(__UNIX__))
+#   ifdef __FreeBSD__
 #     undef _T
 #   endif
 

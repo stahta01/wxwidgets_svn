@@ -1386,7 +1386,7 @@ wxDocTemplate *wxDocManager::SelectDocumentPath(wxDocTemplate **templates,
                 msgTitle = wxTheApp->GetAppName();
             else
                 msgTitle = wxString(_("File error"));
-
+            
             (void)wxMessageBox(_("Sorry, could not open this file."), msgTitle, wxOK | wxICON_EXCLAMATION,
                 parent);
 
@@ -1435,134 +1435,65 @@ wxDocTemplate *wxDocManager::SelectDocumentPath(wxDocTemplate **templates,
 }
 
 wxDocTemplate *wxDocManager::SelectDocumentType(wxDocTemplate **templates,
-                                                int noTemplates, bool sort)
+                                                int noTemplates)
 {
-    wxArrayString strings(sort);
-    wxDocTemplate **data = new wxDocTemplate *[noTemplates];
-    int i;
-    int n = 0;
-	for (i = 0; i < noTemplates; i++)
-	{
-		if (templates[i]->IsVisible())
-		{
-			strings.Add(templates[i]->m_description);
-			if (!sort)
-			{
-				data[n] = templates[i];
-				n ++;
-			}
-		}
-	}  // for
-
-	if (sort)
-	{
-		// Yes, this will be slow, but template lists
-		// are typically short.
-		int j;
-		n = strings.Count();
-		for (i = 0; i < n; i++)
-		{
-			for (j = 0; j < noTemplates; j++)
-			{
-				if (strings[i] == templates[j]->m_description)
-					data[i] = templates[j];
-			}
-		}
-	}
-
-    wxDocTemplate *theTemplate;
-
-    switch ( n )
-    {
-        case 0:
-            // no visible templates, hence nothing to choose from
-            theTemplate = NULL;
-            break;
-
-        case 1:
-            // don't propose the user to choose if he heas no choice
-            theTemplate = data[0];
-            break;
-
-        default:
-            // propose the user to choose one of several
-            theTemplate = (wxDocTemplate *)wxGetSingleChoiceData
-                          (
-                            _("Select a document template"),
-                            _("Templates"),
-                            strings,
-                            (void **)data,
-                            wxFindSuitableParent()
-                          );
-    }
-
-    delete[] data;
-
-    return theTemplate;
-}
-
-wxDocTemplate *wxDocManager::SelectViewType(wxDocTemplate **templates,
-                                            int noTemplates, bool sort)
-{
-    wxArrayString strings(sort);
-    wxDocTemplate **data = new wxDocTemplate *[noTemplates];
+    wxChar **strings = new wxChar *[noTemplates];
+    wxChar **data = new wxChar *[noTemplates];
     int i;
     int n = 0;
     for (i = 0; i < noTemplates; i++)
     {
-        wxDocTemplate *templ = templates[i];
-        if ( templ->IsVisible() && !templ->GetViewName().empty() )
+        if (templates[i]->IsVisible())
         {
-            strings.Add(templ->m_viewTypeName);
-			if (!sort)
-			{
-				data[n] = templ;
-				n ++;
-			}
+            strings[n] = (wxChar *)templates[i]->m_description.c_str();
+            data[n] = (wxChar *)templates[i];
+            n ++;
         }
     }
-
-	if (sort)
-	{
-		// Yes, this will be slow, but template lists
-		// are typically short.
-		int j;
-		n = strings.Count();
-		for (i = 0; i < n; i++)
-		{
-			for (j = 0; j < noTemplates; j++)
-			{
-				if (strings[i] == templates[j]->m_viewTypeName)
-					data[i] = templates[j];
-			}
-		}
-	}
-
-    wxDocTemplate *theTemplate;
-
-    // the same logic as above
-    switch ( n )
+    if (n == 0)
     {
-        case 0:
-            theTemplate = (wxDocTemplate *)NULL;
-            break;
-
-        case 1:
-            theTemplate = data[0];
-            break;
-
-        default:
-            theTemplate = (wxDocTemplate *)wxGetSingleChoiceData
-                          (
-                            _("Select a document view"),
-                            _("Views"),
-                            strings,
-                            (void **)data,
-                            wxFindSuitableParent()
-                          );
-
+        delete[] strings;
+        delete[] data;
+        return (wxDocTemplate *) NULL;
+    }
+    else if (n == 1)
+    {
+        wxDocTemplate *temp = (wxDocTemplate *)data[0];
+        delete[] strings;
+        delete[] data;
+        return temp;
     }
 
+    wxWindow* parent = wxFindSuitableParent();
+
+    wxDocTemplate *theTemplate = (wxDocTemplate *)wxGetSingleChoiceData(_("Select a document template"), _("Templates"), n,
+            strings, (void **)data, parent);
+    delete[] strings;
+    delete[] data;
+    return theTemplate;
+}
+
+wxDocTemplate *wxDocManager::SelectViewType(wxDocTemplate **templates,
+        int noTemplates)
+{
+    wxChar **strings = new wxChar *[noTemplates];
+    wxChar **data = new wxChar *[noTemplates];
+    int i;
+    int n = 0;
+    for (i = 0; i < noTemplates; i++)
+    {
+        if (templates[i]->IsVisible() && (templates[i]->GetViewName() != wxT("")))
+        {
+            strings[n] = (wxChar *)templates[i]->m_viewTypeName.c_str();
+            data[n] = (wxChar *)templates[i];
+            n ++;
+        }
+    }
+    wxWindow* parent = wxFindSuitableParent();
+
+    wxDocTemplate *theTemplate = (wxDocTemplate *)wxGetSingleChoiceData(_("Select a document view"), _("Views"), n,
+            strings, (void **)data, parent);
+    delete[] strings;
     delete[] data;
     return theTemplate;
 }
@@ -1857,8 +1788,6 @@ wxCommandProcessor::wxCommandProcessor(int maxCommands)
     m_maxNoCommands = maxCommands;
     m_currentCommand = (wxNode *) NULL;
     m_commandEditMenu = (wxMenu *) NULL;
-    m_undoAccelerator = wxT("\tCtrl+Z");
-    m_redoAccelerator = wxT("\tCtrl+Y");
 }
 
 wxCommandProcessor::~wxCommandProcessor()
@@ -1994,9 +1923,9 @@ void wxCommandProcessor::SetMenuStrings()
             if (commandName == wxT("")) commandName = _("Unnamed command");
             bool canUndo = command->CanUndo();
             if (canUndo)
-                buf = wxString(_("&Undo ")) + commandName + m_undoAccelerator;
+                buf = wxString(_("&Undo ")) + commandName;
             else
-                buf = wxString(_("Can't &Undo ")) + commandName + m_undoAccelerator;
+                buf = wxString(_("Can't &Undo ")) + commandName;
 
             m_commandEditMenu->SetLabel(wxID_UNDO, buf);
             m_commandEditMenu->Enable(wxID_UNDO, canUndo);
@@ -2007,24 +1936,24 @@ void wxCommandProcessor::SetMenuStrings()
                 wxCommand *redoCommand = (wxCommand *)m_currentCommand->Next()->Data();
                 wxString redoCommandName(redoCommand->GetName());
                 if (redoCommandName == wxT("")) redoCommandName = _("Unnamed command");
-                buf = wxString(_("&Redo ")) + redoCommandName + m_redoAccelerator;
+                buf = wxString(_("&Redo ")) + redoCommandName;
                 m_commandEditMenu->SetLabel(wxID_REDO, buf);
                 m_commandEditMenu->Enable(wxID_REDO, TRUE);
             }
             else
             {
-                m_commandEditMenu->SetLabel(wxID_REDO, _("&Redo") + m_redoAccelerator);
+                m_commandEditMenu->SetLabel(wxID_REDO, _("&Redo"));
                 m_commandEditMenu->Enable(wxID_REDO, FALSE);
             }
         }
         else
         {
-            m_commandEditMenu->SetLabel(wxID_UNDO, _("&Undo") + m_undoAccelerator);
+            m_commandEditMenu->SetLabel(wxID_UNDO, _("&Undo"));
             m_commandEditMenu->Enable(wxID_UNDO, FALSE);
 
             if (m_commands.Number() == 0)
             {
-                m_commandEditMenu->SetLabel(wxID_REDO, _("&Redo") + m_redoAccelerator);
+                m_commandEditMenu->SetLabel(wxID_REDO, _("&Redo"));
                 m_commandEditMenu->Enable(wxID_REDO, FALSE);
             }
             else
@@ -2034,7 +1963,7 @@ void wxCommandProcessor::SetMenuStrings()
                 wxCommand *redoCommand = (wxCommand *)m_commands.First()->Data();
                 wxString redoCommandName(redoCommand->GetName());
                 if (redoCommandName == wxT("")) redoCommandName = _("Unnamed command");
-                buf = wxString(_("&Redo ")) + redoCommandName + m_redoAccelerator;
+                buf = wxString(_("&Redo ")) + redoCommandName;
                 m_commandEditMenu->SetLabel(wxID_REDO, buf);
                 m_commandEditMenu->Enable(wxID_REDO, TRUE);
             }
@@ -2078,29 +2007,22 @@ wxFileHistory::~wxFileHistory()
 void wxFileHistory::AddFileToHistory(const wxString& file)
 {
     int i;
-
     // Check we don't already have this file
     for (i = 0; i < m_fileHistoryN; i++)
     {
-        if ( m_fileHistory[i] && (file == m_fileHistory[i]) )
-        {
-            // we do have it, move it to the top of the history
-            RemoveFileFromHistory (i);
-            AddFileToHistory (file);
+        if (m_fileHistory[i] && wxString(m_fileHistory[i]) == file)
             return;
-        }
-    }
-
-    // if we already have a full history, delete the one at the end
-    if ( m_fileMaxFiles == m_fileHistoryN )
-    {
-        RemoveFileFromHistory (m_fileHistoryN - 1);
-        AddFileToHistory (file);
-        return;
     }
 
     // Add to the project file history:
     // Move existing files (if any) down so we can insert file at beginning.
+
+    // First delete filename that has popped off the end of the array (if any)
+    if (m_fileHistoryN == m_fileMaxFiles)
+    {
+        delete[] m_fileHistory[m_fileMaxFiles-1];
+        m_fileHistory[m_fileMaxFiles-1] = (wxChar *) NULL;
+    }
     if (m_fileHistoryN < m_fileMaxFiles)
     {
         wxNode* node = m_fileMenus.First();
@@ -2121,46 +2043,30 @@ void wxFileHistory::AddFileToHistory(const wxString& file)
     }
     m_fileHistory[0] = copystring(file);
 
-    // this is the directory of the last opened file
-    wxString pathCurrent;
-    wxSplitPath( m_fileHistory[0], &pathCurrent, NULL, NULL );
     for (i = 0; i < m_fileHistoryN; i++)
-    {
-        if ( m_fileHistory[i] )
+        if (m_fileHistory[i])
         {
-            // if in same directory just show the filename; otherwise the full
-            // path
-            wxString pathInMenu, path, filename, ext;
-            wxSplitPath( m_fileHistory[i], &path, &filename, &ext );
-            if ( path == pathCurrent )
-            {
-                pathInMenu = filename;
-                if ( !ext.empty() )
-                    pathInMenu = pathInMenu + wxFILE_SEP_EXT + ext;
-            }
-            else
-            {
-                // absolute path; could also set relative path
-                pathInMenu = m_fileHistory[i];
-            }
-
             wxString buf;
-            buf.Printf(s_MRUEntryFormat, i + 1, pathInMenu.c_str());
+            buf.Printf(s_MRUEntryFormat, i+1, m_fileHistory[i]);
             wxNode* node = m_fileMenus.First();
             while (node)
             {
                 wxMenu* menu = (wxMenu*) node->Data();
-                menu->SetLabel(wxID_FILE1 + i, buf);
+                menu->SetLabel(wxID_FILE1+i, buf);
                 node = node->Next();
             }
         }
-    }
 }
 
 void wxFileHistory::RemoveFileFromHistory(int i)
 {
     wxCHECK_RET( i < m_fileHistoryN,
                  wxT("invalid index in wxFileHistory::RemoveFileFromHistory") );
+
+    wxNode* node = m_fileMenus.First();
+    while ( node )
+    {
+        wxMenu* menu = (wxMenu*) node->Data();
 
         // delete the element from the array (could use memmove() too...)
         delete [] m_fileHistory[i];
@@ -2170,12 +2076,6 @@ void wxFileHistory::RemoveFileFromHistory(int i)
         {
             m_fileHistory[j] = m_fileHistory[j + 1];
         }
-
-    wxNode* node = m_fileMenus.First();
-    while ( node )
-    {
-        wxMenu* menu = (wxMenu*) node->Data();
-
 
         // shuffle filenames up
         wxString buf;
@@ -2188,7 +2088,6 @@ void wxFileHistory::RemoveFileFromHistory(int i)
         node = node->Next();
 
         // delete the last menu item which is unused now
-        if (menu->FindItem(wxID_FILE1 + m_fileHistoryN - 1))
         menu->Delete(wxID_FILE1 + m_fileHistoryN - 1);
 
         // delete the last separator too if no more files are left

@@ -257,7 +257,6 @@ public:
     void SetToolPacking(int packing);
     void SetToolSeparation(int separation);
     wxSize GetToolMargins();
-    wxSize GetMargins();
     int GetToolPacking();
     int GetToolSeparation();
 

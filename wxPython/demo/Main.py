@@ -50,7 +50,7 @@ _treeList = [
                         'wxImage', 'wxMask', 'PrintFramework', 'wxOGL',
                         'PythonEvents', 'Threads',
                         'ActiveXWrapper_Acrobat', 'ActiveXWrapper_IE',
-                        'wxDragImage', "wxProcess", "FancyText",
+                        'wxDragImage', "FancyText",
                         ]),
 
     ('wxPython Library', ['Layoutf', 'wxScrolledMessageDialog',
@@ -172,7 +172,7 @@ class wxPythonDemo(wxFrame):
             self.ovr = wxHtmlWindow(self.nb, -1, size=(400, 400))
             self.nb.AddPage(self.ovr, "Overview")
 
-        else:  # hopefully I can remove this hacky code soon, see bug #216861
+        else:  # hopefully I can remove this hacky code soon
             panel = wxPanel(self.nb, -1)
             self.ovr = wxHtmlWindow(panel, -1, size=(400, 400))
             self.nb.AddPage(panel, "Overview")

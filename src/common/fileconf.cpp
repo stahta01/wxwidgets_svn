@@ -199,7 +199,19 @@ wxString wxFileConfig::GetGlobalDir()
   #elif defined(__WXSTUBS__)
     wxASSERT_MSG( FALSE, wxT("TODO") ) ;
   #elif defined(__WXMAC__)
-	strDir = wxMacFindFolder(  (short) kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder ) ;
+  {
+		short 		vRefNum  ;
+		long 		dirID ;
+		
+		if ( FindFolder( (short) kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefNum, &dirID) == noErr)
+		{
+			FSSpec file ;
+			if ( FSMakeFSSpec( vRefNum , dirID , "\p" , &file ) == noErr )
+			{
+				strDir = wxMacFSSpec2UnixFilename( &file ) + "/" ;
+ 			}
+		}
+  }
   #else // Windows
     wxChar szWinDir[MAX_PATH];
     ::GetWindowsDirectory(szWinDir, MAX_PATH);
@@ -218,13 +230,12 @@ wxString wxFileConfig::GetLocalDir()
 #ifndef __WXMAC__
   wxGetHomeDir(&strDir);
 
-#ifdef  __UNIX__
-#ifdef __VMS
-   if (strDir.Last() != wxT(']'))
-#endif
-   if (strDir.Last() != wxT('/')) strDir << wxT('/');
+#ifndef __VMS__
+# ifdef  __UNIX__
+  if (strDir.Last() != wxT('/')) strDir << wxT('/');
 #else
   if (strDir.Last() != wxT('\\')) strDir << wxT('\\');
+#endif
 #endif
 #else
 	// no local dir concept on mac
@@ -256,12 +267,12 @@ wxString wxFileConfig::GetLocalFileName(const wxChar *szFile)
 #ifdef __VMS__ // On VMS I saw the problem that the home directory was appended
    // twice for the configuration file. Does that also happen for other
    // platforms?
-   wxString str = wxT( '.' ); 
+   wxString str = wxT( ' ' ); 
 #else
    wxString str = GetLocalDir();
 #endif
    
-  #if defined( __UNIX__ ) && !defined( __VMS )
+  #ifdef  __UNIX__
     str << wxT('.');
   #endif
 

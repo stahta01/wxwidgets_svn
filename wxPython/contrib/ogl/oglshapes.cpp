@@ -7346,6 +7346,33 @@ static PyObject *_wrap_new_wxOGLConstraint(PyObject *self, PyObject *args, PyObj
     return _resultobj;
 }
 
+#define delete_wxOGLConstraint(_swigobj) (delete _swigobj)
+static PyObject *_wrap_delete_wxOGLConstraint(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxOGLConstraint * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:delete_wxOGLConstraint",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxOGLConstraint_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of delete_wxOGLConstraint. Expected _wxOGLConstraint_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        delete_wxOGLConstraint(_arg0);
+
+    wxPy_END_ALLOW_THREADS;
+}    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
 #define wxOGLConstraint_Evaluate(_swigobj)  (_swigobj->Evaluate())
 static PyObject *_wrap_wxOGLConstraint_Evaluate(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -12301,6 +12328,7 @@ static PyMethodDef oglshapescMethods[] = {
 	 { "wxOGLConstraint_Equals", (PyCFunction) _wrap_wxOGLConstraint_Equals, METH_VARARGS | METH_KEYWORDS },
 	 { "wxOGLConstraint_SetSpacing", (PyCFunction) _wrap_wxOGLConstraint_SetSpacing, METH_VARARGS | METH_KEYWORDS },
 	 { "wxOGLConstraint_Evaluate", (PyCFunction) _wrap_wxOGLConstraint_Evaluate, METH_VARARGS | METH_KEYWORDS },
+	 { "delete_wxOGLConstraint", (PyCFunction) _wrap_delete_wxOGLConstraint, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxOGLConstraint", (PyCFunction) _wrap_new_wxOGLConstraint, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyDrawnShape_base_OnEndSize", (PyCFunction) _wrap_wxPyDrawnShape_base_OnEndSize, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyDrawnShape_base_OnBeginSize", (PyCFunction) _wrap_wxPyDrawnShape_base_OnBeginSize, METH_VARARGS | METH_KEYWORDS },

@@ -14,11 +14,8 @@
 #endif
 
 #include "wx/button.h"
-#include "wx/panel.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
-#endif
 
 #include <wx/mac/uma.h>
 // Button
@@ -32,6 +29,8 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 {
 	Rect bounds ;
 	Str255 title ;
+	m_macHorizontalBorder = 2 ; // additional pixels around the real control
+	m_macVerticalBorder = 2 ;
 	
 	MacPreControlCreate( parent , id ,  label , pos , size ,style, validator , name , &bounds , title ) ;
 
@@ -54,63 +53,35 @@ void wxButton::SetDefault()
         btnOldDefault = panel->GetDefaultItem();
         panel->SetDefaultItem(this);
     }
-
-#ifdef __UNIX__
-	Boolean inData;
-	if ( btnOldDefault && btnOldDefault->m_macControl )
-	{
-  		inData = 0;
-		UMASetControlData( btnOldDefault->m_macControl , kControlButtonPart ,
-						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
-	}
-	if ( m_macControl )
-	{
-  		inData = 1;
-		UMASetControlData( m_macControl , kControlButtonPart ,
-						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
-	}
-#else
-	if ( btnOldDefault && btnOldDefault->m_macControl )
-	{
-		UMASetControlData( btnOldDefault->m_macControl , kControlButtonPart ,
-						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)0) ) ;
-	}
-	if ( m_macControl )
-	{
-		UMASetControlData( m_macControl , kControlButtonPart ,
-						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)1) ) ;
-	}
-#endif
+  
+  if ( btnOldDefault && btnOldDefault->m_macControl )
+  {
+		UMASetControlData( btnOldDefault->m_macControl , kControlButtonPart , kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)0) ) ;
+  }
+  if ( m_macControl )
+  {
+		UMASetControlData( m_macControl , kControlButtonPart , kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)1) ) ;
+  }
 }
 
 wxSize wxButton::DoGetBestSize() const
 {
-    int wBtn = m_label.Length() * 8 + 12 ;
-	int hBtn = 20 ;
-	
-	if ( wBtn < 80 )
-		wBtn = 80 ;
+    int wBtn = m_label.Length() * 8 + 12 + 2 * m_macHorizontalBorder;
+	int hBtn = 13 + 2 * m_macVerticalBorder;
 
     return wxSize(wBtn, hBtn);
 }
 
 wxSize wxButton::GetDefaultSize()
 {
-    int wBtn = 80 /* + 2 * m_macHorizontalBorder */ ; 
-	int hBtn = 20 /* +  2 * m_macVerticalBorder */ ;
+    int wBtn = 15 * 8 + 12 + 2 * 2;
+	int hBtn = 13 + 2 * 2;
 
     return wxSize(wBtn, hBtn);
 }
 
 void wxButton::Command (wxCommandEvent & event)
 {
-	if ( m_macControl )
-	{
-		HiliteControl( m_macControl , kControlButtonPart ) ;
-		unsigned long finalTicks ;
-		Delay( 8 , &finalTicks ) ;
-		HiliteControl( m_macControl , 0 ) ;
-	}
     ProcessCommand (event);
 }
 

@@ -13,7 +13,6 @@
 #pragma implementation "app.h"
 #endif
 
-#include "wx/window.h"
 #include "wx/frame.h"
 #include "wx/app.h"
 #include "wx/utils.h"
@@ -21,7 +20,6 @@
 #include "wx/pen.h"
 #include "wx/brush.h"
 #include "wx/cursor.h"
-#include "wx/intl.h"
 #include "wx/icon.h"
 #include "wx/palette.h"
 #include "wx/dc.h"
@@ -30,8 +28,7 @@
 #include "wx/log.h"
 #include "wx/module.h"
 #include "wx/memory.h"
-#include "wx/tooltip.h"
-#include "wx/menu.h"
+
 #if wxUSE_WX_RESOURCES
 #include "wx/resource.h"
 #endif
@@ -40,25 +37,13 @@
 
 // mac
 
-#ifndef __UNIX__
-  #if __option(profile)
+#if __option(profile)
 	#include <profiler.h>
-  #endif
 #endif
 
 #include "apprsrc.h"
 
-#include "wx/mac/uma.h"
-#include "wx/mac/macnotfy.h"
-
-#if wxUSE_SOCKETS
-    #ifdef __APPLE__
-        #include <OT/OpenTransport.h>
-    #else
-        #include <OpenTransport.h>
-        #include <OpenTptInternet.h>
-    #endif
-#endif
+#include <wx/mac/uma.h>
 
 extern char *wxBuffer;
 extern wxList wxPendingDelete;
@@ -67,14 +52,10 @@ extern wxList *wxWinMacControlList;
 
 wxApp *wxTheApp = NULL;
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxApp, wxEvtHandler)
 BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
     EVT_IDLE(wxApp::OnIdle)
-        EVT_END_SESSION(wxApp::OnEndSession)
-        EVT_QUERY_END_SESSION(wxApp::OnQueryEndSession)
 END_EVENT_TABLE()
-#endif
 
 
 const short	kMacMinHeap = (29 * 1024) ;
@@ -95,31 +76,31 @@ bool wxApp::s_macSupportPCMenuShortcuts = true ;
 long wxApp::s_macAboutMenuItemId = wxID_ABOUT ;
 wxString wxApp::s_macHelpMenuTitleName = "&Help" ;
 
-pascal OSErr AEHandleODoc( const AppleEvent *event , AppleEvent *reply , unsigned long refcon )
+OSErr AEHandleODoc( AppleEvent *event , AppleEvent *reply , long refcon )
 {
 	wxApp* app = (wxApp*) refcon ;
-	return wxTheApp->MacHandleAEODoc( (AppleEvent*) event , reply) ;
+	return wxTheApp->MacHandleAEODoc( event , reply) ;
 }
 
-pascal OSErr AEHandleOApp( const AppleEvent *event , AppleEvent *reply , unsigned long refcon )
+OSErr AEHandleOApp( AppleEvent *event , AppleEvent *reply , long refcon )
 {
 	wxApp* app = (wxApp*) refcon ;
-	return wxTheApp->MacHandleAEOApp( (AppleEvent*) event , reply ) ;
+	return wxTheApp->MacHandleAEOApp( event , reply ) ;
 }
 
-pascal OSErr AEHandlePDoc( const AppleEvent *event , AppleEvent *reply , unsigned long refcon )
+OSErr AEHandlePDoc( AppleEvent *event , AppleEvent *reply , long refcon )
 {
 	wxApp* app = (wxApp*) refcon ;
-	return wxTheApp->MacHandleAEPDoc( (AppleEvent*) event , reply ) ;
+	return wxTheApp->MacHandleAEPDoc( event , reply ) ;
 }
 
-pascal OSErr AEHandleQuit( const AppleEvent *event , AppleEvent *reply , unsigned long refcon )
+OSErr AEHandleQuit( AppleEvent *event , AppleEvent *reply , long refcon )
 {
 	wxApp* app = (wxApp*) refcon ;
-	return wxTheApp->MacHandleAEQuit( (AppleEvent*) event , reply) ;
+	return wxTheApp->MacHandleAEQuit( event , reply) ;
 }
 
-OSErr wxApp::MacHandleAEODoc(const AppleEvent *event , AppleEvent *reply)
+OSErr wxApp::MacHandleAEODoc(AppleEvent *event , AppleEvent *reply)
 {
 	ProcessSerialNumber PSN ;
 	PSN.highLongOfPSN = 0 ;
@@ -128,17 +109,17 @@ OSErr wxApp::MacHandleAEODoc(const AppleEvent *event , AppleEvent *reply)
 	return noErr ;
 }
 
-OSErr wxApp::MacHandleAEPDoc(const AppleEvent *event , AppleEvent *reply)
+OSErr wxApp::MacHandleAEPDoc(AppleEvent *event , AppleEvent *reply)
 {
 	return noErr ;
 }
 
-OSErr wxApp::MacHandleAEOApp(const AppleEvent *event , AppleEvent *reply)
+OSErr wxApp::MacHandleAEOApp(AppleEvent *event , AppleEvent *reply)
 {
 	return noErr ;
 }
 
-OSErr wxApp::MacHandleAEQuit(const AppleEvent *event , AppleEvent *reply)
+OSErr wxApp::MacHandleAEQuit(AppleEvent *event , AppleEvent *reply)
 {
 	wxWindow* win = GetTopWindow() ;
 	if ( win )
@@ -152,14 +133,14 @@ OSErr wxApp::MacHandleAEQuit(const AppleEvent *event , AppleEvent *reply)
 	return noErr ;
 }
 
-char StringMac[] = 	"\x0d\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f"
+char StringMac[] = 	"\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f"
 					"\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f"
 					"\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xae\xaf"
 					"\xb1\xb4\xb5\xb6\xbb\xbc\xbe\xbf"
 					"\xc0\xc1\xc2\xc4\xc7\xc8\xc9\xcb\xcc\xcd\xce\xcf"
 					"\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd8\xca\xdb" ;
 
-char StringANSI[] = "\x0a\xC4\xC5\xC7\xC9\xD1\xD6\xDC\xE1\xE0\xE2\xE4\xE3\xE5\xE7\xE9\xE8"
+char StringANSI[] = "\xC4\xC5\xC7\xC9\xD1\xD6\xDC\xE1\xE0\xE2\xE4\xE3\xE5\xE7\xE9\xE8"
 					"\xEA\xEB\xED\xEC\xEE\xEF\xF1\xF3\xF2\xF4\xF6\xF5\xFA\xF9\xFB\xFC"
 					"\x86\xBA\xA2\xA3\xA7\x95\xB6\xDF\xAE\xA9\x99\xB4\xA8\xC6\xD8"
 					"\xB1\xA5\xB5\xF0\xAA\xBA\xE6\xF8"
@@ -336,28 +317,15 @@ bool wxApp::Initialize()
   UMAInitToolbox( 4 ) ;
 	UMAShowWatchCursor() ;
 
-#ifdef __UNIX__
-    AEInstallEventHandler( kCoreEventClass , kAEOpenDocuments ,   AEHandleODoc ,
-                           (long) wxTheApp , FALSE ) ;
-    AEInstallEventHandler( kCoreEventClass , kAEOpenApplication , AEHandleOApp ,
-                           (long) wxTheApp , FALSE ) ;
-    AEInstallEventHandler( kCoreEventClass , kAEPrintDocuments ,  AEHandlePDoc ,
-                           (long) wxTheApp , FALSE ) ;
-    AEInstallEventHandler( kCoreEventClass , kAEQuitApplication , AEHandleQuit ,
-                           (long) wxTheApp , FALSE ) ;
-#else
-	AEInstallEventHandler( kCoreEventClass , kAEOpenDocuments ,   NewAEEventHandlerProc(AEHandleODoc) ,
-						   (long) wxTheApp , FALSE ) ;
-	AEInstallEventHandler( kCoreEventClass , kAEOpenApplication , NewAEEventHandlerProc(AEHandleOApp) ,
-						   (long) wxTheApp , FALSE ) ;
-	AEInstallEventHandler( kCoreEventClass , kAEPrintDocuments ,  NewAEEventHandlerProc(AEHandlePDoc) ,
-						   (long) wxTheApp , FALSE ) ;
-	AEInstallEventHandler( kCoreEventClass , kAEQuitApplication , NewAEEventHandlerProc(AEHandleQuit) ,
-						   (long) wxTheApp , FALSE ) ;
+	AEInstallEventHandler( kCoreEventClass , kAEOpenDocuments , NewAEEventHandlerProc(AEHandleODoc) , (long) wxTheApp , FALSE ) ;
+	AEInstallEventHandler( kCoreEventClass , kAEOpenApplication , NewAEEventHandlerProc(AEHandleOApp) , (long) wxTheApp , FALSE ) ;
+	AEInstallEventHandler( kCoreEventClass , kAEPrintDocuments , NewAEEventHandlerProc(AEHandlePDoc) , (long) wxTheApp , FALSE ) ;
+	AEInstallEventHandler( kCoreEventClass , kAEQuitApplication , NewAEEventHandlerProc(AEHandleQuit) , (long) wxTheApp  , FALSE ) ;
+#if 0
+	GUSISetup(GUSIwithInternetSockets);
 #endif
 
 
-#ifndef __UNIX__
   // test the minimal configuration necessary
 
 	long theSystem ;
@@ -394,7 +362,6 @@ bool wxApp::Initialize()
 		}
 	}
 	*/
-#endif
 
 	// if we encountered any problems so far, give the error code and exit immediately
 
@@ -410,17 +377,13 @@ bool wxApp::Initialize()
 	  return FALSE ;
   }
 
-#ifndef __UNIX__
-  #if __option(profile)
-	ProfilerInit( collectDetailed, bestTimeBase , 20000 , 40 ) ;
-  #endif
+#if __option(profile)
+	ProfilerInit( collectDetailed, bestTimeBase , 20000 , 30 ) ;
 #endif
 
   // now avoid exceptions thrown for new (bad_alloc)
 
-#ifndef __UNIX__
   std::__throws_bad_alloc = FALSE ;
-#endif
 
 	s_macCursorRgn = ::NewRgn() ;
 
@@ -430,15 +393,17 @@ bool wxApp::Initialize()
   wxBuffer = new char[BUFSIZ + 512];
 #endif
 
+/* No longer used
+#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+
+  streambuf* sBuf = new wxDebugStreamBuf;
+  ostream* oStr = new ostream(sBuf) ;
+  wxDebugContext::SetStream(oStr, sBuf);
+#endif
+*/
+
   wxClassInfo::InitializeClasses();
 
-#if wxUSE_RESOURCES
-//    wxGetResource(wxT("wxWindows"), wxT("OsVersion"), &wxOsVersion);
-#endif
-
-#if wxUSE_THREADS
-    wxPendingEventsLocker = new wxCriticalSection;
-#endif
   wxTheColourDatabase = new wxColourDatabase(wxKEY_STRING);
   wxTheColourDatabase->Initialize();
 
@@ -452,36 +417,19 @@ bool wxApp::Initialize()
   wxBitmap::InitStandardHandlers();
 
   wxModule::RegisterModules();
-  if (!wxModule::InitializeModules()) {
+  if (!wxModule::InitializeModules())
      return FALSE;
-  }
 
   wxWinMacWindowList = new wxList(wxKEY_INTEGER);
   wxWinMacControlList = new wxList(wxKEY_INTEGER);
 
-  wxMacCreateNotifierTable() ;
+	UMAShowArrowCursor() ;
 
-  UMAShowArrowCursor() ;
-  
   return TRUE;
 }
 
 void wxApp::CleanUp()
 {
-#if wxUSE_LOG
-    // flush the logged messages if any and install a 'safer' log target: the
-    // default one (wxLogGui) can't be used after the resources are freed just
-    // below and the user suppliedo ne might be even more unsafe (using any
-    // wxWindows GUI function is unsafe starting from now)
-    wxLog::DontCreateOnDemand();
-
-    // this will flush the old messages if any
-    delete wxLog::SetActiveTarget(new wxLogStderr);
-#endif // wxUSE_LOG
-
-    // One last chance for pending objects to be cleaned up
-    wxTheApp->DeletePendingObjects();
-
   wxModule::CleanUpModules();
 
 #if wxUSE_WX_RESOURCES
@@ -490,8 +438,19 @@ void wxApp::CleanUp()
 
   wxDeleteStockObjects() ;
 
-    // Destroy all GDI lists, etc.
-    wxDeleteStockLists();
+  // Destroy all GDI lists, etc.
+
+  delete wxTheBrushList;
+  wxTheBrushList = NULL;
+
+  delete wxThePenList;
+  wxThePenList = NULL;
+
+  delete wxTheFontList;
+  wxTheFontList = NULL;
+
+  delete wxTheBitmapList;
+  wxTheBitmapList = NULL;
 
   delete wxTheColourDatabase;
   wxTheColourDatabase = NULL;
@@ -501,58 +460,47 @@ void wxApp::CleanUp()
   delete[] wxBuffer;
   wxBuffer = NULL;
 
-  wxMacDestroyNotifierTable() ;
   if (wxWinMacWindowList)
     delete wxWinMacWindowList ;
 
-    delete wxPendingEvents;
-#if wxUSE_THREADS
-    delete wxPendingEventsLocker;
-    // If we don't do the following, we get an apparent memory leak.
-    ((wxEvtHandler&) wxDefaultValidator).ClearEventLocker();
-#endif
-
   wxClassInfo::CleanUpClasses();
 
-#ifndef __UNIX__
-  #if __option(profile)
-  ProfilerDump( "\papp.prof" ) ;
-  ProfilerTerm() ;
-  #endif
+#if __option(profile)
+	ProfilerDump( "\papp.prof" ) ;
+	ProfilerTerm() ;
 #endif
 
   delete wxTheApp;
   wxTheApp = NULL;
 
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
-    // At this point we want to check if there are any memory
-    // blocks that aren't part of the wxDebugContext itself,
-    // as a special case. Then when dumping we need to ignore
-    // wxDebugContext, too.
-    if (wxDebugContext::CountObjectsLeft(TRUE) > 0)
-    {
-        wxLogDebug(wxT("There were memory leaks."));
-        wxDebugContext::Dump();
-        wxDebugContext::PrintStatistics();
-    }
-    //  wxDebugContext::SetStream(NULL, NULL);
+  // At this point we want to check if there are any memory
+  // blocks that aren't part of the wxDebugContext itself,
+  // as a special case. Then when dumping we need to ignore
+  // wxDebugContext, too.
+  if (wxDebugContext::CountObjectsLeft() > 0)
+  {
+    wxTrace("There were memory leaks.\n");
+    wxDebugContext::Dump();
+    wxDebugContext::PrintStatistics();
+  }
+//  wxDebugContext::SetStream(NULL, NULL);
 #endif
 
-#if wxUSE_LOG
-    // do it as the very last thing because everything else can log messages
-    delete wxLog::SetActiveTarget(NULL);
-#endif // wxUSE_LOG
+  // do it as the very last thing because everything else can log messages
+  wxLog::DontCreateOnDemand();
+  // do it as the very last thing because everything else can log messages
+  delete wxLog::SetActiveTarget(NULL);
 
-	UMACleanupToolbox() ;
+	::PrClose() ;
 	if (s_macCursorRgn)
 		::DisposeRgn(s_macCursorRgn);
-
 	#if 0
 		TerminateAE() ;
 	#endif
 }
 
-int wxEntry( int argc, char *argv[] , bool enterLoop )
+int wxEntry( int argc, char *argv[] )
 {
 #ifdef __MWERKS__
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
@@ -565,25 +513,27 @@ int wxEntry( int argc, char *argv[] , bool enterLoop )
     wxDebugContext::SetCheckpoint();
 #endif
 #endif
-    if (!wxApp::Initialize()) {
-        return 0;
-    }
-   // create the application object or ensure that one already exists
-    if (!wxTheApp)
+  if (!wxApp::Initialize())
+    return FALSE;
+  if (!wxTheApp)
+  {
+    if (!wxApp::GetInitializerFunction())
     {
-        // The app may have declared a global application object, but we recommend
-        // the IMPLEMENT_APP macro is used instead, which sets an initializer
-        // function for delayed, dynamic app object construction.
-        wxCHECK_MSG( wxApp::GetInitializerFunction(), 0,
-                     wxT("No initializer - use IMPLEMENT_APP macro.") );
+      printf( "wxWindows error: No initializer - use IMPLEMENT_APP macro.\n" );
+      return 0;
+    };
 
-        wxTheApp = (wxApp*) (*wxApp::GetInitializerFunction()) ();
-    }
+  	wxTheApp = (wxApp*) (* wxApp::GetInitializerFunction()) ();
+  };
 
-    wxCHECK_MSG( wxTheApp, 0, wxT("You have to define an instance of wxApp!") );
+  if (!wxTheApp)
+  {
+    printf( "wxWindows error: wxTheApp == NULL\n" );
+    return 0;
+  };
 
 #ifdef __WXMAC__
-  argc = 0 ; // currently we don't support files as parameters
+  argc = 1 ; // currently we don't support files as parameters
 #endif
 
   wxTheApp->argc = argc;
@@ -599,58 +549,42 @@ int wxEntry( int argc, char *argv[] , bool enterLoop )
   // into wxTopLevelWindows by getting created
   // in OnInit().
 
+  if (!wxTheApp->OnInit()) return 0;
+
   int retValue = 0;
 
-	if ( wxTheApp->OnInit() )
-	{
-	    if ( enterLoop )
-	    {
-	        retValue = wxTheApp->OnRun();
-	    }
-	    else
-	        // We want to initialize, but not run or exit immediately.
-	        return 1;
-	}
-	//else: app initialization failed, so we skipped OnRun()
+  if (wxTheApp->Initialized()) retValue = wxTheApp->OnRun();
 
-	wxWindow *topWindow = wxTheApp->GetTopWindow();
-	if ( topWindow )
-	{
-	    // Forcibly delete the window.
-	    if ( topWindow->IsKindOf(CLASSINFO(wxFrame)) ||
-	            topWindow->IsKindOf(CLASSINFO(wxDialog)) )
-	    {
-	        topWindow->Close(TRUE);
-	        wxTheApp->DeletePendingObjects();
-	    }
-	    else
-	    {
-	        delete topWindow;
-	        wxTheApp->SetTopWindow(NULL);
-	    }
-	}
-	
-	wxTheApp->OnExit();
-	
-	wxApp::CleanUp();
-	
-	return retValue;
-}
+  if (wxTheApp->GetTopWindow())
+  {
+    delete wxTheApp->GetTopWindow();
+    wxTheApp->SetTopWindow(NULL);
+  }
+
+  wxTheApp->DeletePendingObjects();
+
+  wxTheApp->OnExit();
+
+  wxApp::CleanUp();
+
+  return retValue;
+};
 
 // Static member initialization
-wxAppInitializerFunction wxAppBase::m_appInitFn = (wxAppInitializerFunction) NULL;
+wxAppInitializerFunction wxApp::m_appInitFn = (wxAppInitializerFunction) NULL;
 
 wxApp::wxApp()
 {
   m_topWindow = NULL;
   wxTheApp = this;
-
+  m_className = "";
   m_wantDebugOutput = TRUE ;
-
+  m_appName = "";
   argc = 0;
   argv = NULL;
 
   m_printMode = wxPRINT_WINDOWS;
+
   m_exitOnFrameDelete = TRUE;
   m_auto3D = TRUE;
 }
@@ -706,14 +640,13 @@ void wxApp::Dispatch()
 
 void wxApp::OnIdle(wxIdleEvent& event)
 {
-   static bool s_inOnIdle = FALSE;
+  static bool inOnIdle = FALSE;
 
-    // Avoid recursion (via ProcessEvent default case)
-    if ( s_inOnIdle )
-        return;
+  // Avoid recursion (via ProcessEvent default case)
+  if (inOnIdle)
+    return;
 
-
-  s_inOnIdle = TRUE;
+  inOnIdle = TRUE;
 
   // 'Garbage' collection of windows deleted with Close().
   DeletePendingObjects();
@@ -729,17 +662,13 @@ void wxApp::OnIdle(wxIdleEvent& event)
   if (needMore)
     event.RequestMore(TRUE);
 
-    // If they are pending events, we must process them: pending events are
-    // either events to the threads other than main or events posted with
-    // wxPostEvent() functions
-    wxMacProcessNotifierAndPendingEvents();
-
-  s_inOnIdle = FALSE;
+  inOnIdle = FALSE;
 }
 
 void wxWakeUpIdle()
 {
-	wxMacWakeUp() ;
+    // **** please implement me! ****
+    // Wake up the idle handler processor, even if it is in another thread...
 }
 
 // Send idle event to all top-level windows
@@ -800,90 +729,45 @@ void wxApp::DeletePendingObjects()
   }
 }
 
-wxIcon
-wxApp::GetStdIcon(int which) const
+wxLog* wxApp::CreateLogTarget()
 {
-    switch(which)
-    {
-        case wxICON_INFORMATION:
-            return wxIcon("wxICON_INFO");
+    return new wxLogGui;
+}
 
-        case wxICON_QUESTION:
-            return wxIcon("wxICON_QUESTION");
-
-        case wxICON_EXCLAMATION:
-            return wxIcon("wxICON_WARNING");
-
-        default:
-            wxFAIL_MSG(wxT("requested non existent standard icon"));
-            // still fall through
-
-        case wxICON_HAND:
-            return wxIcon("wxICON_ERROR");
-    }
+wxWindow* wxApp::GetTopWindow() const
+{
+    if (m_topWindow)
+        return m_topWindow;
+    else if (wxTopLevelWindows.Number() > 0)
+        return (wxWindow*) wxTopLevelWindows.First()->Data();
+    else
+        return NULL;
 }
 
 void wxExit()
 {
-    wxLogError(_("Fatal error: exiting"));
-
-    wxApp::CleanUp();
+  wxApp::CleanUp();
 	::ExitToShell() ;
 }
 
-void wxApp::OnEndSession(wxCloseEvent& WXUNUSED(event))
-{
-    if (GetTopWindow())
-        GetTopWindow()->Close(TRUE);
-}
-
-// Default behaviour: close the application with prompts. The
-// user can veto the close, and therefore the end session.
-void wxApp::OnQueryEndSession(wxCloseEvent& event)
-{
-    if (GetTopWindow())
-    {
-        if (!GetTopWindow()->Close(!event.CanVeto()))
-            event.Veto(TRUE);
-    }
-}
-
-extern "C" void wxCYield() ;
-void wxCYield()
-{
-	wxYield() ;
-}
-
 // Yield to other processes
-
 static bool gs_inYield = FALSE;
 
 bool wxYield()
 {
-#ifdef __WXDEBUG__    
+#ifdef __WXDEBUG__
     if (gs_inYield)
         wxFAIL_MSG( wxT("wxYield called recursively" ) );
 #endif
 
     gs_inYield = TRUE;
     
-#if wxUSE_THREADS
-    YieldToAnyThread() ;
-#endif
-    EventRecord event ;
-
-	long sleepTime = 0 ; //::GetCaretTime();
-
-	while ( !wxTheApp->IsExiting() && WaitNextEvent(everyEvent, &event,sleepTime, wxApp::s_macCursorRgn))
-	{
-    	wxTheApp->MacHandleOneEvent( &event );
-	}
-
-	wxMacProcessNotifierAndPendingEvents() ;
+//	YieldToAnyThread() ;
+	SystemTask() ;
 
     gs_inYield = FALSE;
     
-    return TRUE;
+  return TRUE;
 }
 
 // Yield to incoming messages; but fail silently if recursion is detected.
@@ -899,12 +783,6 @@ bool wxYieldIfNeeded()
 
 void wxApp::MacSuspend( bool convertClipboard )
 {
-	// we have to deactive the window manually
-	
-	wxWindow* window = GetTopWindow() ;
-	if ( window )
-		window->MacActivate( MacGetCurrentEvent() , false ) ;
-		
 		s_lastMouseDown = 0 ;
 		if( convertClipboard )
 		{
@@ -927,10 +805,13 @@ void wxApp::MacResume( bool convertClipboard )
 
 void wxApp::MacConvertPrivateToPublicScrap()
 {
+	::ZeroScrap();
+	::TEToScrap();
 }
 
 void wxApp::MacConvertPublicToPrivateScrap()
 {
+	::TEFromScrap() ;
 }
 
 void wxApp::MacDoOneEvent()
@@ -957,7 +838,9 @@ void wxApp::MacDoOneEvent()
 
 	// repeaters
 
-	wxMacProcessNotifierAndPendingEvents() ;
+#if 0
+	wxMacProcessSocketEvents() ;
+#endif
 }
 
 void wxApp::MacHandleOneEvent( EventRecord *ev )
@@ -1012,7 +895,6 @@ void wxApp::MacHandleOneEvent( EventRecord *ev )
 		default:
 			break;
 	}
-	wxMacProcessNotifierAndPendingEvents() ;
 }
 
 void wxApp::MacHandleHighLevelEvent( EventRecord *ev )
@@ -1024,8 +906,6 @@ bool s_macIsInModalLoop = false ;
 
 void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
 {
-	wxToolTip::RemoveToolTips() ;
-
 	WindowRef window;
 	WindowRef frontWindow = UMAFrontNonFloatingWindow() ;
 	WindowAttributes frontWindowAttributes = NULL ;
@@ -1034,9 +914,6 @@ void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
 
 	short windowPart = ::FindWindow(ev->where, &window);
 	wxWindow* win = wxFindWinFromMacWindow( window ) ;
-
-	BitMap screenBits;
-	GetQDGlobalsScreenBits( &screenBits );
 
 	switch (windowPart)
 	{
@@ -1052,12 +929,10 @@ void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
 				s_lastMouseDown = 0;
 			}
 			break ;
-#if !TARGET_CARBON
 		case inSysWindow :
 			SystemClick( ev , window ) ;
 			s_lastMouseDown = 0;
 			break ;
-#endif
 		case inDrag :
 			if ( window != frontWindow && s_macIsInModalLoop && !(ev->modifiers & cmdKey ) )
 			{
@@ -1065,17 +940,13 @@ void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
 			}
 			else
 			{
-				DragWindow(window, ev->where, &screenBits.bounds);
+				DragWindow(window, ev->where, &qd.screenBits.bounds);
 				if (win)
 				{
 					GrafPtr port ;
 					GetPort( &port ) ;
 					Point pt = { 0, 0 } ;
-					#if TARGET_CARBON
-					SetPort( GetWindowPort(window) ) ;
-					#else
-					SetPort( (window) ) ;
-					#endif
+					SetPort( window ) ;
 					SetOrigin( 0 , 0 ) ;
 					LocalToGlobal( &pt ) ;
 					SetPort( port ) ;
@@ -1094,27 +965,23 @@ void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
 			s_lastMouseDown = 0;
 			break;
 		case inGrow:
-		  {
-				int growResult = GrowWindow(window , ev->where, &screenBits.bounds);
+				int growResult = GrowWindow(window , ev->where, &qd.screenBits.bounds);
 				if (growResult != 0)
 				{
 					int newWidth = LoWord(growResult);
 					int newHeight = HiWord(growResult);
 					int oldWidth, oldHeight;
 
+					win->GetSize(&oldWidth, &oldHeight);
+					if (newWidth == 0)
+						newWidth = oldWidth;
+					if (newHeight == 0)
+						newHeight = oldHeight;
 
 					if (win)
-					{
-						win->GetSize(&oldWidth, &oldHeight);
-						if (newWidth == 0)
-							newWidth = oldWidth;
-						if (newHeight == 0)
-							newHeight = oldHeight;
 						win->SetSize( -1, -1, newWidth, newHeight, wxSIZE_USE_EXISTING);
-					}
 				}
 				s_lastMouseDown = 0;
-		  }
 			break;
 		case inZoomIn:
 		case inZoomOut:
@@ -1123,13 +990,8 @@ void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
 					// TODO setup size event
 					ZoomWindow( window , windowPart , false ) ;
 					if (win)
-					{
-						Rect tempRect ;
-						
-						GetWindowPortBounds(window, &tempRect ) ;
-						win->SetSize( -1, -1, tempRect.right-tempRect.left ,
-							tempRect.bottom-tempRect.top, wxSIZE_USE_EXISTING);
-					}
+						win->SetSize( -1, -1, window->portRect.right-window->portRect.left ,
+							window->portRect.bottom-window->portRect.top, wxSIZE_USE_EXISTING);
 				}
 			s_lastMouseDown = 0;
 			break;
@@ -1139,17 +1001,6 @@ void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
 			break ;
 
 		case inContent :
-				{
-					GrafPtr port ;
-					GetPort( &port ) ;
-					#if TARGET_CARBON
-					SetPort( GetWindowPort(window) ) ;
-					#else
-					SetPort( (window) ) ;
-					#endif
-					SetOrigin( 0 , 0 ) ;
-					SetPort( port ) ;
-				}
 				if ( window != frontWindow )
 				{
 					if ( s_macIsInModalLoop )
@@ -1310,14 +1161,9 @@ long wxMacTranslateKey(unsigned char key, unsigned char code)
 
 void wxApp::MacHandleKeyDownEvent( EventRecord *ev )
 {
-	wxToolTip::RemoveToolTips() ;
-	
 	UInt32 menuresult = UMAMenuEvent(ev) ;
 	if ( HiWord( menuresult ) )
-	{
-		if ( !s_macIsInModalLoop )
 		MacHandleMenuSelect( HiWord( menuresult ) , LoWord( menuresult ) ) ;
-	}
 	else
 	{
 		short keycode ;
@@ -1437,28 +1283,18 @@ void wxApp::MacHandleUpdateEvent( EventRecord *ev )
 	{
 		win->MacUpdate( ev ) ;
 	}
-	else
-	{
-		// since there is no way of telling this foreign window to update itself
-		// we have to invalidate the update region otherwise we keep getting the same
-		// event over and over again
-		BeginUpdate( window ) ;
-		EndUpdate( window ) ;
-	}
 }
 
 void wxApp::MacHandleDiskEvent( EventRecord *ev )
 {
 	if ( HiWord( ev->message ) != noErr )
   {
- #if !TARGET_CARBON
 		OSErr err ;
 		Point point ;
  		SetPt( &point , 100 , 100 ) ;
 
-  		err = DIBadMount( point , ev->message ) ;
+  	err = DIBadMount( point , ev->message ) ;
 		wxASSERT( err == noErr ) ;
-#endif
 	}
 }
 
@@ -1522,8 +1358,7 @@ void wxApp::MacHandleOSEvent( EventRecord *ev )
 
 				wxWindow* currentMouseWindow = NULL ;
 
-				wxWindow::MacGetWindowFromPoint( wxPoint( ev->where.h , ev->where.v ) ,
-												 &currentMouseWindow ) ;
+				MacGetWindowFromPoint( wxPoint( ev->where.h , ev->where.v ) , &currentMouseWindow ) ;
 
 				if ( currentMouseWindow != wxWindow::s_lastMouseWindow )
 				{
@@ -1563,12 +1398,9 @@ void wxApp::MacHandleOSEvent( EventRecord *ev )
 
 				switch (windowPart)
 				{
-					// fixes for setting the cursor back from dominic mazzoni
 					case inMenuBar :
-					    UMAShowArrowCursor();
 						break ;
 					case inSysWindow :
-					    UMAShowArrowCursor();
 						break ;
 					default:
 						{
@@ -1578,9 +1410,6 @@ void wxApp::MacHandleOSEvent( EventRecord *ev )
 							wxWindow* win = wxFindWinFromMacWindow( window ) ;
 							if ( win )
 								win->MacMouseMoved( ev , windowPart ) ;
-							else 					   
-					    		UMAShowArrowCursor();
-
 						}
 						break;
 				}

@@ -2,14 +2,14 @@
 // Name:        No names yet.
 // Purpose:     Contrib. demo
 // Author:      Aleksandras Gluchovas
-// Modified by: 19990908 : mj
+// Modified by: 19990908 : mj10777@gmx.net
 //              19990909 :
 //              - rename to tabpgwin
 //              - restruction of Variable declaration
 //              - to prevent Warnings under MingGW32
-// Modified by: 19990909 : mj
+// Modified by: 19990909 : mj10777@gmx.net
 //              - mNoVertScroll TRUE = no / FALSE = Original Code
-//                the Original Code Paints a Vertical Scroll in wxPagedWindow
+//                the Original Code Paints a Vertical Scroll in wxPaggedWindow
 //                which is not needed in this Version. Use TRUE for this.
 // Created:     07/09/98
 // RCS-ID:      $Id$
@@ -60,7 +60,7 @@ public:
 
  virtual wxFont GetLabelingFont();
 
- // FOR NOW:: scrollbars are actually related to wxPagedWindow
+ // FOR NOW:: scrollbars are actually related to wxPaggedWindow
 
  wxScrollBar* mpTabScroll;
  wxScrollBar* mpHorizScroll;
@@ -154,9 +154,9 @@ public:
  * of Microsoft Developer Studio 4.xx
  */
 
-class wxPagedWindow : public wxTabbedWindow
+class wxPaggedWindow : public wxTabbedWindow
 {
- DECLARE_DYNAMIC_CLASS( wxPagedWindow )
+ DECLARE_DYNAMIC_CLASS( wxPaggedWindow )
  // the protected: public: changes prevents Warnings in gcc
 protected:
  bool         mScrollEventInProgress;
@@ -199,8 +199,8 @@ public:
 
 
 public:
- wxPagedWindow();
- ~wxPagedWindow();
+ wxPaggedWindow();
+ ~wxPaggedWindow();
 
  // NOTE:: use public methods of the base class
  //        to add "pages" to this window

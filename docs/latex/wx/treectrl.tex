@@ -1,7 +1,10 @@
 \section{\class{wxTreeCtrl}}\label{wxtreectrl}
 
-A tree control presents information as a hierarchy, with items that may be expanded
-to show further items. Items in a tree control are referenced by wxTreeItemId handles.
+A tree control presents information as a hierarchy, with items that may be
+expanded to show further items. Items in a tree control are referenced by
+wxTreeItemId handles. The only method of wxTreeItemId class which can be used
+is {\it IsOk()} which returns {\tt TRUE} if the handle is valid and 
+{\tt FALSE} otherwise.
 
 To intercept events from a tree control, use the event table macros described in \helpref{wxTreeEvent}{wxtreeevent}.
 
@@ -22,10 +25,6 @@ To intercept events from a tree control, use the event table macros described in
 \begin{twocollist}\itemsep=0pt
 \twocolitem{\windowstyle{wxTR\_HAS\_BUTTONS}}{Use this style to show + and - buttons to the
 left of parent items. Win32 only. }
-\twocolitem{\windowstyle{wxTR\_NO\_LINES}}{Use this style to hide vertical lines.
-Win32 only. }
-\twocolitem{\windowstyle{wxTR\_LINES\_AT\_ROOT}}{Use this style to show lines at the
-tree root. Win32 only.}
 \twocolitem{\windowstyle{wxTR\_EDIT\_LABELS}}{Use this style if you wish the user to be
 able to edit labels in the tree control.}
 \twocolitem{\windowstyle{wxTR\_MULTIPLE}}{Use this style to allow the user to
@@ -44,20 +43,27 @@ functions that take a \helpref{wxTreeEvent}{wxtreeevent} argument.
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\bf EVT\_TREE\_BEGIN\_DRAG(id, func)}}{Begin dragging with the left mouse button.}
 \twocolitem{{\bf EVT\_TREE\_BEGIN\_RDRAG(id, func)}}{Begin dragging with the right mouse button.}
+\twocolitem{{\bf EVT\_TREE\_END\_DRAG(id, func)}}{Drag ended (drop).}
 \twocolitem{{\bf EVT\_TREE\_BEGIN\_LABEL\_EDIT(id, func)}}{Begin editing a label. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
 \twocolitem{{\bf EVT\_TREE\_END\_LABEL\_EDIT(id, func)}}{Finish editing a label. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
 \twocolitem{{\bf EVT\_TREE\_DELETE\_ITEM(id, func)}}{Delete an item.}
 \twocolitem{{\bf EVT\_TREE\_GET\_INFO(id, func)}}{Request information from the application.}
 \twocolitem{{\bf EVT\_TREE\_SET\_INFO(id, func)}}{Information is being supplied.}
 \twocolitem{{\bf EVT\_TREE\_ITEM\_ACTIVATED(id, func)}}{The item has been activated, i.e. chosen by double clicking it with mouse or from keyboard}
-\twocolitem{{\bf EVT\_TREE\_ITEM\_COLLAPSED(id, func)}}{The item has been collapsed.}
-\twocolitem{{\bf EVT\_TREE\_ITEM\_COLLAPSING(id, func)}}{The item is being collapsed. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
-\twocolitem{{\bf EVT\_TREE\_ITEM\_EXPANDED(id, func)}}{The item has been expanded.}
-\twocolitem{{\bf EVT\_TREE\_ITEM\_EXPANDING(id, func)}}{The item is being expanded. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
+\twocolitem{{\bf EVT\_TREE\_ITEM\_COLLAPSED(id, func)}}{Parent has been collapsed.}
+\twocolitem{{\bf EVT\_TREE\_ITEM\_COLLAPSING(id, func)}}{Parent is being collapsed. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
+\twocolitem{{\bf EVT\_TREE\_ITEM\_EXPANDED(id, func)}}{Parent has been expanded.}
+\twocolitem{{\bf EVT\_TREE\_ITEM\_EXPANDING(id, func)}}{Parent is being expanded. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
 \twocolitem{{\bf EVT\_TREE\_SEL\_CHANGED(id, func)}}{Selection has changed.}
 \twocolitem{{\bf EVT\_TREE\_SEL\_CHANGING(id, func)}}{Selection is changing. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
 \twocolitem{{\bf EVT\_TREE\_KEY\_DOWN(id, func)}}{A key has been pressed.}
 \end{twocollist}%
+
+Note that to allow drag and drop in the tree control you must explicitly call 
+\helpref{Allow()}{wxnotifyeventallow} in the event handler, by default
+dragging is disabled. On the other hand, label editing is allowed by default
+for the controls with \windowstyle{wxTR\_EDIT\_LABELS} style but you can call 
+\helpref{Veto()}{wxnotifyeventveto} to prevent it from happening.
 
 \wxheading{See also}
 
@@ -135,25 +141,6 @@ Appends an item to the end of the branch identified by {\it parent}, return a ne
 
 If {\it image} > -1 and {\it selImage} is -1, the same image is used for
 both selected and unselected items.
-
-\membersection{wxTreeCtrl::AssignImageList}\label{wxtreectrlassignimagelist}
-
-\func{void}{AssignImageList}{\param{wxImageList*}{ imageList}}
-
-Sets the normal image list. Image list assigned with this method will
-be deleted by wxTreeCtrl's destructor (i.e. it takes ownership of it).
-
-See also \helpref{SetImageList}{wxtreectrlsetimagelist}.
-
-\membersection{wxTreeCtrl::AssignStateImageList}\label{wxtreectrlassignstateimagelist}
-
-\func{void}{AssignStateImageList}{\param{wxImageList*}{ imageList}}
-
-Sets the state image list. Image list assigned with this method will
-be deleted by wxTreeCtrl's destructor (i.e. it takes ownership of it).
-
-See also \helpref{SetStateImageList}{wxtreectrlsetstateimagelist}.
-
 
 \membersection{wxTreeCtrl::Collapse}\label{wxtreectrlcollapse}
 
@@ -579,11 +566,7 @@ Sets the indentation for the tree control.
 
 \func{void}{SetImageList}{\param{wxImageList*}{ imageList}}
 
-Sets the normal image list. Image list assigned with this method will
-{\bf not} be deleted by wxTreeCtrl's destructor, you must delete it yourself.
-
-See also \helpref{AssignImageList}{wxtreectrlassignimagelist}.
-
+Sets the normal image list.
 
 \membersection{wxTreeCtrl::SetItemBackgroundColour}\label{wxtreectrlsetitembackgroundcolour}
 
@@ -665,10 +648,6 @@ Sets the colour of the items text.
 \func{void}{SetStateImageList}{\param{wxImageList*}{ imageList}}
 
 Sets the state image list (from which application-defined state images are taken).
-Image list assigned with this method will
-{\bf not} be deleted by wxTreeCtrl's destructor, you must delete it yourself.
-
-See also \helpref{AssignStateImageList}{wxtreectrlassignstateimagelist}.
 
 \membersection{wxTreeCtrl::SortChildren}\label{wxtreectrlsortchildren}
 

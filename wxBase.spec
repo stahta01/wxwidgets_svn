@@ -1,5 +1,5 @@
 %define pref /usr
-%define ver 2.3.0
+%define ver 2.2.6
 %define rel 0
 
 Summary: wxBase library - non-GUI support classes of wxWindows toolkit
@@ -9,7 +9,7 @@ Release: %{rel}
 Copyright: wxWindows Licence
 Group: Development/Libraries
 Source: wxBase-%{ver}.tar.gz
-URL: none
+URL: http://www.wxwindows.org/
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Prefix: %{pref}
 BuildRoot: /var/tmp/%{name}-root
@@ -44,7 +44,6 @@ fi
 $MAKE
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make prefix=$RPM_BUILD_ROOT%{pref} install
 
 %clean

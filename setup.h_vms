@@ -16,8 +16,6 @@
 #pragma interface
 #endif
 
-#include <wx/vms_x_fix.h>
-
 /* never undefine inline or const keywords for C++ compilation */
 #ifndef __cplusplus
 
@@ -76,7 +74,7 @@
 #define __WXGTK127__ 1
 
 /* Define this if your version of GTK+ is greater than 1.3 */
-#undef __WXGTK20__
+#undef __WXGTK13__
 
 /*
  * Define to 1 for Unix[-like] system
@@ -114,17 +112,8 @@
 #undef STRICT
 #undef WINVER
 
-/* enable native status bar under Win32 */
-#ifdef __WIN95__
-#define wxUSE_NATIVE_STATUSBAR 1
-#endif
-
-/* enable rich edit under Win32 */
-#if defined(__WIN95__) && !defined(__TWIN32__) && !defined(__GNUWIN32_OLD__)
-#define wxUSE_RICHEDIT 1
-#else
+/* enable rich edit not on VMS (Win32 Only) */
 #define wxUSE_RICHEDIT 0
-#endif
 
 /*
  * Supports bool type
@@ -154,13 +143,13 @@
 #define wxODBC_FWD_ONLY_CURSORS 1
 #define wxODBC_BACKWARD_COMPATABILITY 0
 /*
- * Use freetype
- */
-#define wxUSE_FREETYPE 0
-/*
  * Use Threads
  */
+#ifndef __WXGTK__
 #define wxUSE_THREADS 1
+#else
+#define wxUSE_THREADS 0
+#endif
 /*
  * Have glibc2
  */
@@ -182,11 +171,6 @@
  * Don't use GUI (defined to 1 when compiling/using base only)
  */
 #define wxUSE_NOGUI 0
-
-/*
- * Catch fatal program exceptions
- */
-#define wxUSE_ON_FATAL_EXCEPTION 0
 
 /*
  * Use constraints mechanism
@@ -334,10 +318,6 @@
  */
 #define wxUSE_STATUSBAR 1
 /*
- * Use this control
- */
-#define wxUSE_TOGGLEBTN 1
-/*
  * Use Tab dialog class - obsolete, use wxNotebook instead
  */
 #define wxUSE_TAB_DIALOG 0
@@ -374,11 +354,6 @@
  * Use wxLongLong (a.k.a. int64) class
  */
 #define wxUSE_LONGLONG 1
-
-/*
- * Use geometry classes
- */
-#define wxUSE_GEOMETRY 1
 
 /*
  * Use wxFile class
@@ -460,6 +435,11 @@
 #define wxUSE_UNICODE 0
 
 /*
+ * Compile wxString with (limited) multibyte char support?
+ */
+#define wxUSE_MULTIBYTE 1
+
+/*
  * Work around a bug in GNU libc 5.x wcstombs() implementation.
  *
  * Note that you must link your programs with libc.a if you enable this and you
@@ -494,11 +474,7 @@
 /*
  * Use dnd
  */
-#ifdef __WXGTK__
-#define wxUSE_DRAG_AND_DROP 1
-#else
 #define wxUSE_DRAG_AND_DROP 0
-#endif
 /*
  * Use spline
  */
@@ -665,11 +641,8 @@
  * present */
 #define WX_GMTOFF_IN_TM
 
-/* Define if you have pw_gecos field in struct passwd */
-#undef HAVE_PW_GECOS
-
 /* Define if you have dlopen() */
-#define HAVE_DLOPEN 1
+#define HAVE_DLOPEN
 
 /* Define if you have gettimeofday() */
 #define HAVE_GETTIMEOFDAY
@@ -689,18 +662,6 @@
 /* Define if you have pthread_cancel */
 #define HAVE_PTHREAD_CANCEL 1
 
-/* Define if you have sigaction() */
-#define HAVE_SIGACTION 1
-
-/* Define if you have sigemptyset() */
-#define HAVE_SIGEMPTYSET 1
-
-/* Define if you have the putenv function.  */
-#define HAVE_PUTENV 1
-
-/* Define if you have the setenv function.  */
-#undef HAVE_SETENV
- 
 /* Define if you have shl_load() */
 #undef HAVE_SHL_LOAD
 
@@ -731,9 +692,6 @@
 /* The number of bytes in a char.  */
 #define SIZEOF_CHAR 1
 
-/* The number of bytes in a wchar_t.  */
-#define SIZEOF_WCHAR_T 4
-
 /* The number of bytes in a int.  */
 #define SIZEOF_INT 4
 
@@ -750,10 +708,7 @@
 #define SIZEOF_SHORT 2
 
 /* Define if you have the dlopen function.  */
-#define HAVE_DLOPEN 1
-
-/* Define if you have the dlerror function.  */
-#define HAVE_DLERROR 1
+#define HAVE_DLOPEN
 
 /* Define if you have the gethostname function.  */
 #define HAVE_GETHOSTNAME
@@ -774,7 +729,7 @@
 #undef HAVE_STRTOK_R
 
 /* Define if you have thr_setconcurrency function */
-#undef HAVE_THR_SETCONCURRENCY
+#undef HaVE_THR_SETCONCURRENCY
 
 /* Define if you have the uname function.  */
 #define HAVE_UNAME
@@ -811,12 +766,6 @@
 
 /* Define if you have the <wcstr.h> header file.  */
 #undef HAVE_WCSTR_H
-
-/* Define if you have the <iconv.h> header file.  */
-#define HAVE_ICONV_H 1
-
-/* Define if you have the <langinfo.h> header file.  */
-#define HAVE_LANGINFO_H 1
 
 /* Define this if you are using gtk and gdk contains support for X11R6 XIM */
 #undef HAVE_XIM

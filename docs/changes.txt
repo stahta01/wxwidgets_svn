@@ -1,33 +1,136 @@
-wxWindows 2 Change Log
-----------------------
+wxWindows 2.2 Change Log
+========================
 
-2.4.0
------
+INCOMPATIBLE CHANGES
+--------------------
 
-2.3.0
+wxMSW:
+
+- wxListCtrl::Find() parameter meaning changed, see docs for details
+  (starting item is now included in the search, use 0 to search from the
+   beginning)
+
+OTHER CHANGES
+-------------
+
+2.2.6
 -----
 
 wxBase:
 
 - fixed problem with wxURL when using static version of the library
-- wxZipFSHandler::FindFirst() and FindNext() now correctly list directories
-- wxMimeTypesManager now can create file associations too
-- wxCopyFile() respects the file permissions (Roland Scholz)
-- wxFTP::GetFileSize() added (Søren Erland Vestø)
-- wxDateTime::IsSameDate() bug fixed
-- wxTimeSpan::Format() now behaves more as expected, see docs
+- crash when reading certain malformed mailcap entries under Unix fixed
+- memory/resource leak in wxSocket::Accept() fixed (Kruba Fabien)
 
 All (GUI):
 
-- new wxToggleButton class (John Norris, Axel Schlueter)
-- wxCalendarCtrl now highlighting the date with time part bug fixed
-- wxADJUST_MINSIZE sizer flag added
-- FindOrCreateBrush/Pen() bug fix for invalid colour values
+- Spanish translations added (Luis Paúl Tomillo)
+- bug in wxDocMDIParentFrame::OnMRUFile() fixed
+- wxYieldIfNeeded added, to ignore yield recursion.
 
 wxMSW:
 
-- threads: bug in wxCondition::Broadcast fixed (Pieter van der Meulen)
-- fixed bug in MDI children flags (mis)handling
+- wxChoice sizing bug introduced in 2.2.5 fixed (oops) and calculating of
+  the size of initially empty wxChoice controls fixed as well
+- bug with negative coordinates being turned into huge positive ones in
+  EVT_MOVE fixed (Imad Jureidini)
+- jpeg library compilation fixed for newer versions of mingw32 and cygwin
+- controls which don't accept focus don't get it on left mouse click
+- wxToolBar::DeleteTool() in presence of toolbar controls fixed
+- wxDC::DeviceToLogical[XY] fixed (Chuck Messenger)
+
+wxGTK:
+
+- fixed configure bug: it didn't define HAVE_VSNPRINTF properly always
+- fixed keyboard input in wxSpinCtrl
+
+wxHTML:
+
+- fixed bug in parsing tags with whitespaces around '=' in tags,
+  e.g. <a href = "something.html"> 
+  
+2.2.5
+-----
+
+- fixed memory corruption/crash in wxStreamBuffer
+- wxTree/ListCtrl position fix (Mike Oliver)
+- Italian translations updated
+- Windows 2000 toolbar colours problem fixed
+
+2.2.4
+-----
+
+- chinese translations added
+- wxTreeEvent::GetPoint() returns correct position for ITEM_XXX_CLICK events
+
+2.2.3
+-----
+
+wxGTK:
+
+- frames created with wxDefaultSize will have some reasonable default size and
+  not be created with 0 size
+
+2.2.2
+-----
+
+wxGTK:
+
+- better (implicit) themes support
+
+2.2.1
+-----
+
+wxBase:
+
+- Fixed logic bug in wxDateTime::ParseDate.
+- wxDB: replaced German variable names with English.
+- wxDbGetConnection() did not check for the correct scrolling
+  of cursors when re-using a cached database connection.
+    
+All (GUI):
+
+- Corrected uninitialized variable in wxDocument constructor.
+- DocView now finds more appropriate parent frame for dialogs.
+- Filter index checked, then path to find correct doc template.
+- Unicode compile fixes.
+- Generic list control column sizing bug fixed.
+- Corrected wxComboBox validation behaviour.
+- Added EVT_UPDATE_UI_RANGE macro.
+- Some DB sample problems corrected.
+- wxGrid fixes.
+- Fixed low resolution problem with wxPostScriptDC.
+
+wxMSW:
+
+- Removed delayed loading for winmm in VC++ makefile (problems
+  reported); USE_GLCANVAS now a variable in makefile.vc.
+- Comments added to setup.h.
+- wxCommandEvent::IsChecked now works for menu items.
+- wxDEFAULT font size handled properly.
+- Mods for Cygwin 1.1.
+- Updated VC++ project and makefiles for consistency. DLL now
+  has version number in name.
+- Added insertion point functions implementation for wxComboBox.
+- Handle wxNO_FULL_REPAINT_ON_RESIZE for MDI children.
+- Fixed problem with iconizing miniframes.
+- Fixed bug with radiobox size being miscalculated if the label was
+  too long.
+- The MSW radiobutton now informs about its state in the event (m_int)
+  as wxGTK did.
+
+wxGTK:
+
+- Please see docs/gtk/changes.txt.
+
+wxMotif:
+
+- Small compilation fixes
+
+Documentation:
+
+- Added wxDb documentation.
+- Added notes for Cygwin 1.1 to MSW install.txt.
 
 2.2.0
 -----

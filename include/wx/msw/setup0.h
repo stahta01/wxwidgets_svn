@@ -266,8 +266,6 @@
 // Compile in wxLibrary class for run-time DLL loading and function calling.
 // Required by wxUSE_DIALUP_MANAGER.
 //
-// This setting is for Win32 only
-//
 // Default is 1.
 //
 // Recommended setting: 1
@@ -275,6 +273,8 @@
 
 // Set to 1 to use socket classes
 #define wxUSE_SOCKETS       1
+
+#if wxUSE_GUI
 
 // Set to 1 to enable virtual file systems (required by wxHTML)
 #define wxUSE_FILESYSTEM    1
@@ -291,6 +291,18 @@
 // Set to 1 to compile wxZlibInput/OutputStream classes. Also required by
 // wxUSE_LIBPNG.
 #define wxUSE_ZLIB          1
+
+#else // !wxUSE_GUI
+
+// although it is possible to compile all of those in wxBase, this is not done
+// by default
+#define wxUSE_FILESYSTEM    0
+#define wxUSE_FS_ZIP        0
+#define wxUSE_FS_INET       0
+#define wxUSE_ZIPSTREAM     0
+#define wxUSE_ZLIB          0
+
+#endif // wxUSE_GUI/!wxUSE_GUI
 
 // If enabled, the code written by Apple will be used to write, in a portable
 // way, float on the disk. See extended.c for the license which is different
@@ -365,7 +377,6 @@
 #define wxUSE_SPINCTRL     1
 #define wxUSE_STATLINE     1
 #define wxUSE_STATUSBAR    1
-#define wxUSE_TOGGLEBTN    1        // requires wxButton
 #define wxUSE_TOOLTIPS     1        // wxToolTip and wxWindow::SetToolTip()
 
 // Two status bar implementations are available under Win32: the generic one

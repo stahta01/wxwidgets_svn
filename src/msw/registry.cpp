@@ -315,9 +315,6 @@ bool wxRegKey::GetKeyInfo(size_t *pnSubKeys,
     #define REG_PARAM   (LPDWORD)
 #endif
 
-  // it might be unexpected to some that this function doesn't open the key
-  wxASSERT_MSG( IsOpened(), _T("key should be opened in GetKeyInfo") );
-
   m_dwLastError = ::RegQueryInfoKey
                   (
                     (HKEY) m_hKey,
@@ -345,8 +342,8 @@ bool wxRegKey::GetKeyInfo(size_t *pnSubKeys,
                   GetName().c_str());
     return FALSE;
   }
-
-  return TRUE;
+  else
+    return TRUE;
 #else // Win16
   wxFAIL_MSG("GetKeyInfo() not implemented");
 
@@ -826,9 +823,7 @@ bool wxRegKey::QueryValue(const wxChar *szValue, long *plValue) const
 
 #endif  //Win32
 
-bool wxRegKey::QueryValue(const wxChar *szValue,
-                          wxString& strValue,
-                          bool raw) const
+bool wxRegKey::QueryValue(const wxChar *szValue, wxString& strValue) const
 {
   if ( CONST_CAST Open() ) {
     #ifdef  __WIN32__
@@ -852,8 +847,8 @@ bool wxRegKey::QueryValue(const wxChar *szValue,
                                             &dwSize);
             strValue.UngetWriteBuf();
 
-            // expand the var expansions in the string unless disabled
-            if ( (dwType == REG_EXPAND_SZ) && !raw )
+            // always expand the var expansions in the string
+            if ( dwType == REG_EXPAND_SZ )
             {
                 DWORD dwExpSize = ::ExpandEnvironmentStrings(strValue, NULL, 0);
                 bool ok = dwExpSize != 0;

@@ -433,9 +433,6 @@ class wxWindowPtr(wxEvtHandlerPtr):
     def SetEventHandler(self, *_args, **_kwargs):
         val = apply(windowsc.wxWindow_SetEventHandler,(self,) + _args, _kwargs)
         return val
-    def SetExtraStyle(self, *_args, **_kwargs):
-        val = apply(windowsc.wxWindow_SetExtraStyle,(self,) + _args, _kwargs)
-        return val
     def SetTitle(self, *_args, **_kwargs):
         val = apply(windowsc.wxWindow_SetTitle,(self,) + _args, _kwargs)
         return val
@@ -1002,8 +999,6 @@ wxWindow_NewControlId = windowsc.wxWindow_NewControlId
 wxWindow_NextControlId = windowsc.wxWindow_NextControlId
 
 wxWindow_PrevControlId = windowsc.wxWindow_PrevControlId
-
-wxMenuItem_GetLabelFromText = windowsc.wxMenuItem_GetLabelFromText
 
 
 

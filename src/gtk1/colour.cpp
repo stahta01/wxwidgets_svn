@@ -15,7 +15,6 @@
 #include "wx/gdicmn.h"
 
 #include <gdk/gdk.h>
-#include <gdk/gdkx.h>
 #include <gdk/gdkprivate.h>
 
 //-----------------------------------------------------------------------------
@@ -29,13 +28,34 @@ public:
     ~wxColourRefData();
     
     void FreeColour();
+    void AllocColour( GdkColormap* cmap );
 
-public:
+private:
+    friend class wxColour;
+
     GdkColor     m_color;
     GdkColormap *m_colormap;
     bool         m_hasPixel;
+    
+    // reference counter for systems with <= 8-Bit display
+    static gushort colMapAllocCounter[ 256 ];
+};
 
-    friend class wxColour;
+gushort wxColourRefData::colMapAllocCounter[ 256 ] = 
+{  
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 wxColourRefData::wxColourRefData()
@@ -57,20 +77,39 @@ void wxColourRefData::FreeColour()
 {
     if (m_colormap)
     {
-#ifdef __WXGTK20__
-        if ((m_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
-            (m_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#else
         GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) m_colormap;
         if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
             (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#endif
         {
-            // What happens if the colour has not been allocated
-            // anew but has been found? RR.
-            gdk_colormap_free_colors( m_colormap, &m_color, 1 );
+            int idx = m_color.pixel;
+            colMapAllocCounter[ idx ] = colMapAllocCounter[ idx ] - 1;
+            
+            if (colMapAllocCounter[ idx ] == 0)
+                gdk_colormap_free_colors( m_colormap, &m_color, 1 );
         }
     }
+}
+
+void wxColourRefData::AllocColour( GdkColormap *cmap )
+{
+    if (m_hasPixel && (m_colormap == cmap))
+        return;
+
+    FreeColour();
+    
+    GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) cmap;
+    if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
+        (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
+    {
+        m_hasPixel = gdk_colormap_alloc_color( cmap, &m_color, FALSE, TRUE );
+        int idx = m_color.pixel;
+        colMapAllocCounter[ idx ] = colMapAllocCounter[ idx ] + 1;
+    }
+    else
+    {
+        m_hasPixel = gdk_color_alloc( cmap, &m_color );
+    }
+    m_colormap = cmap;
 }
 
 //-----------------------------------------------------------------------------
@@ -193,27 +232,7 @@ void wxColour::CalcPixel( GdkColormap *cmap )
 {
     if (!Ok()) return;
 
-    if ((M_COLDATA->m_hasPixel) && (M_COLDATA->m_colormap == cmap)) return;
-    
-    M_COLDATA->FreeColour();
-
-#ifdef __WXGTK20__
-    if ((cmap->visual->type == GDK_VISUAL_GRAYSCALE) ||
-        (cmap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#else
-    GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) cmap;
-    if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
-        (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#endif
-    {
-        M_COLDATA->m_hasPixel = gdk_colormap_alloc_color( cmap, &M_COLDATA->m_color, FALSE, TRUE );
-    }
-    else
-    { 
-        M_COLDATA->m_hasPixel = gdk_color_alloc( cmap, &M_COLDATA->m_color );
-    }
-
-    M_COLDATA->m_colormap = cmap;
+    M_COLDATA->AllocColour( cmap );
 }
 
 int wxColour::GetPixel() const
@@ -229,5 +248,4 @@ GdkColor *wxColour::GetColor() const
 
     return &M_COLDATA->m_color;
 }
-
 

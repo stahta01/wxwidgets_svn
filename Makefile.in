@@ -1281,6 +1281,26 @@ PYTHON_DIST:
 distclean:
 	$(RM) -r _dist_dir
 
+# VZ: the -only targets allow to do "make dist bzip-dist-only" without copying
+#     the files twice
+dist-only:
+	@echo "*** Creating wxWindows distribution in $(DISTDIR)..."
+	@cd _dist_dir; \
+	mv @DISTDIR@ @DISTDIR@-$(VER_SUFFIX); \
+	tar ch @DISTDIR@-$(VER_SUFFIX) | gzip -f9 > ../$(WXARCHIVE); \
+	mv @DISTDIR@-$(VER_SUFFIX) @DISTDIR@
+	@if test "$(USE_GUI)" = 1; then \
+	cd $(DISTDIR); \
+	mv samples wxSamples-$(VER_SUFFIX); \
+	echo "*** Creating wxSamples archive..."; \
+	tar ch wxSamples-$(VER_SUFFIX) | gzip -f9 > ../../$(WXSAMPLES); \
+	mv wxSamples-$(VER_SUFFIX) samples; \
+	mv demos wxDemos-$(VER_SUFFIX); \
+	echo "*** Creating wxDemos archive..."; \
+	tar ch wxDemos-$(VER_SUFFIX) | gzip -f9 > ../../$(WXDEMOS); \
+	mv wxDemos-$(VER_SUFFIX) demos; \
+	fi
+
 dist: @GUIDIST@
 	cp $(WXDIR)/src/files.lst $(DISTDIR)/src/
 	@echo "*** Creating wxWindows distribution in $(DISTDIR)..."
@@ -1291,11 +1311,28 @@ dist: @GUIDIST@
 	@if test "$(USE_GUI)" = 1; then \
 	cd $(DISTDIR); \
 	mv samples wxSamples-$(VER_SUFFIX); \
+	echo "*** Creating wxSamples archive..."; \
 	tar ch wxSamples-$(VER_SUFFIX) | gzip -f9 > ../../$(WXSAMPLES); \
 	mv wxSamples-$(VER_SUFFIX) samples; \
 	mv demos wxDemos-$(VER_SUFFIX); \
+	echo "*** Creating wxDemos archive..."; \
 	tar ch wxDemos-$(VER_SUFFIX) | gzip -f9 > ../../$(WXDEMOS); \
 	mv wxDemos-$(VER_SUFFIX) demos; \
+	fi
+
+bzip-dist-only:
+	@echo "*** Creating wxWindows distribution in $(DISTDIR)..."
+	@cd _dist_dir; tar ch @DISTDIR@ | bzip2 -f9 > $(WXARCHIVE_BZIP); mv $(WXARCHIVE_BZIP) ..
+	@if test "$(USE_GUI)" = 1; then \
+	cd $(DISTDIR); \
+	mv samples wxSamples-${VER_SUFFIX}; \
+	echo "*** Creating wxSamples archive..."; \
+	tar ch wxSamples-${VER_SUFFIX} | bzip2 -f9 > ../../$(WXSAMPLES_BZIP); \
+	mv wxSamples-${VER_SUFFIX} samples; \
+	mv demos wxDemos-${VER_SUFFIX}; \
+	echo "*** Creating wxDemos archive..."; \
+	tar ch wxDemos-${VER_SUFFIX} | bzip2 -f9 > ../../$(WXDEMOS_BZIP); \
+	mv wxDemos-${VER_SUFFIX} demos; \
 	fi
 
 bzip-dist: @GUIDIST@
@@ -1304,12 +1341,14 @@ bzip-dist: @GUIDIST@
 	cd _dist_dir; tar ch @DISTDIR@ | bzip2 -f9 > $(WXARCHIVE_BZIP); mv $(WXARCHIVE_BZIP) ..
 	@if test "$(USE_GUI)" = 1; then \
 	cd $(DISTDIR); \
-	mv samples wxSamples; \
-	tar ch wxSamples | bzip2 -f9 > ../../$(WXSAMPLES_BZIP); \
-	mv wxSamples samples; \
-	mv demos wxDemos; \
-	tar ch wxDemos | bzip2 -f9 > ../../$(WXDEMOS_BZIP); \
-	mv wxDemos demos; \
+	mv samples wxSamples-${VER_SUFFIX}; \
+	echo "*** Creating wxSamples archive..."; \
+	tar ch wxSamples-${VER_SUFFIX} | bzip2 -f9 > ../../$(WXSAMPLES_BZIP); \
+	mv wxSamples-${VER_SUFFIX} samples; \
+	mv demos wxDemos-${VER_SUFFIX}; \
+	echo "*** Creating wxDemos archive..."; \
+	tar ch wxDemos-${VER_SUFFIX} | bzip2 -f9 > ../../$(WXDEMOS_BZIP); \
+	mv wxDemos-${VER_SUFFIX} demos; \
 	fi
 
 debian-dist: @GUIDIST@ MANUAL_DIST PYTHON_DIST

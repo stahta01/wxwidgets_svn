@@ -118,7 +118,7 @@ Returns TRUE if the directory exists.
 
 \membersection{::wxDos2UnixFilename}
 
-\func{void}{wxDos2UnixFilename}{\param{wxChar *}{s}}
+\func{void}{Dos2UnixFilename}{\param{const wxString\& }{s}}
 
 Converts a DOS to a Unix filename by replacing backslashes with forward
 slashes.
@@ -630,45 +630,6 @@ is valid) if the dialog was cancelled.
 
 <wx/colordlg.h>
 
-\membersection{::wxGetMultipleChoices}\label{wxgetmultiplechoices}
-
-\func{size\_t}{wxGetMultipleChoices}{\\
- \param{wxArrayInt\& }{selections},\\
- \param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
-
-\func{size\_t}{wxGetMultipleChoices}{\\
- \param{wxArrayInt\& }{selections},\\
- \param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
-
-Pops up a dialog box containing a message, OK/Cancel buttons and a
-multiple-selection listbox. The user may choose an arbitrary (including 0)
-number of items in the listbox whose indices will be returned in 
-{\it selection} array. The initial contents of this array will be used to
-select the items when the dialog is shown.
-
-You may pass the list of strings to choose from either using {\it choices} 
-which is an array of {\it n} strings for the listbox or by using a single
-{\it aChoices} parameter of type \helpref{wxArrayString}{wxarraystring}.
-
-If {\it centre} is TRUE, the message text (which may include new line
-characters) is centred; if FALSE, the message is left-justified.
-
-\wxheading{Include files}
-
-<wx/choicdlg.h>
-
 \membersection{::wxGetNumberFromUser}\label{wxgetnumberfromuser}
 
 \func{long}{wxGetNumberFromUser}{
@@ -754,34 +715,18 @@ is centred; if FALSE, the message is left-justified.
 
 \membersection{::wxGetSingleChoice}\label{wxgetsinglechoice}
 
-\func{wxString}{wxGetSingleChoice}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
+\func{wxString}{wxGetSingleChoice}{\param{const wxString\& }{message}, \param{const wxString\& }{caption}, \param{int}{ n}, \param{const wxString\& }{choices[]},\\
+ \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1}, \param{int}{ y = -1},\\
+ \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
 
-\func{wxString}{wxGetSingleChoice}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
+Pops up a dialog box containing a message, OK/Cancel buttons and a single-selection
+listbox. The user may choose an item and press OK to return a string or
+Cancel to return the empty string.
 
-Pops up a dialog box containing a message, OK/Cancel buttons and a
-single-selection listbox. The user may choose an item and press OK to return a
-string or Cancel to return the empty string. Use 
-\helpref{wxGetSingleChoiceIndex}{wxgetsinglechoiceindex} if empty string is a
-valid choice and if you want to be able to detect pressing Cancel reliably.
+{\it choices} is an array of {\it n} strings for the listbox.
 
-You may pass the list of strings to choose from either using {\it choices} 
-which is an array of {\it n} strings for the listbox or by using a single
-{\it aChoices} parameter of type \helpref{wxArrayString}{wxarraystring}.
-
-If {\it centre} is TRUE, the message text (which may include new line
-characters) is centred; if FALSE, the message is left-justified.
+If {\it centre} is TRUE, the message text (which may include new line characters)
+is centred; if FALSE, the message is left-justified.
 
 \wxheading{Include files}
 
@@ -789,20 +734,12 @@ characters) is centred; if FALSE, the message is left-justified.
 
 \membersection{::wxGetSingleChoiceIndex}\label{wxgetsinglechoiceindex}
 
-\func{int}{wxGetSingleChoiceIndex}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
+\func{int}{wxGetSingleChoiceIndex}{\param{const wxString\& }{message}, \param{const wxString\& }{caption}, \param{int}{ n}, \param{const wxString\& }{choices[]},\\
  \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1}, \param{int}{ y = -1},\\
  \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
 
-\func{int}{wxGetSingleChoiceIndex}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
-
-As {\bf wxGetSingleChoice} but returns the index representing the selected
-string. If the user pressed cancel, -1 is returned.
+As {\bf wxGetSingleChoice} but returns the index representing the selected string.
+If the user pressed cancel, -1 is returned.
 
 \wxheading{Include files}
 
@@ -810,26 +747,12 @@ string. If the user pressed cancel, -1 is returned.
 
 \membersection{::wxGetSingleChoiceData}\label{wxgetsinglechoicedata}
 
-\func{wxString}{wxGetSingleChoiceData}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
- \param{const wxString\& }{client\_data[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
-
-\func{wxString}{wxGetSingleChoiceData}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{const wxString\& }{client\_data[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
+\func{wxString}{wxGetSingleChoiceData}{\param{const wxString\& }{message}, \param{const wxString\& }{caption}, \param{int}{ n}, \param{const wxString\& }{choices[]},\\
+ \param{const wxString\& }{client\_data[]}, \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1},\\
+ \param{int}{ y = -1}, \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
 
 As {\bf wxGetSingleChoice} but takes an array of client data pointers
-corresponding to the strings, and returns one of these pointers or NULL if
-Cancel was pressed. The {\it client\_data} array must have the same number of
-elements as {\it choices} or {\it aChoices}!
+corresponding to the strings, and returns one of these pointers.
 
 \wxheading{Include files}
 
@@ -925,22 +848,6 @@ Returns TRUE if the display is colour, FALSE otherwise.
 \func{int}{wxDisplayDepth}{\void}
 
 Returns the depth of the display (a value of 1 denotes a monochrome display).
-
-\membersection{::wxDisplaySize}
-
-\func{void}{wxDisplaySize}{\param{int *}{width}, \param{int *}{height}}
-
-\func{wxSize}{wxGetDisplaySize}{\void}
-
-Returns the display size in pixels.
-
-\membersection{::wxDisplaySizeMM}
-
-\func{void}{wxDisplaySizeMM}{\param{int *}{width}, \param{int *}{height}}
-
-\func{wxSize}{wxGetDisplaySizeMM}{\void}
-
-Returns the display size in millimeters.
 
 \membersection{::wxMakeMetafilePlaceable}\label{wxmakemetafileplaceable}
 
@@ -1490,7 +1397,7 @@ Find a menu item identifier associated with the given frame's menu bar.
 
 <wx/utils.h>
 
-\membersection{::wxFindWindowByLabel}\label{wxfindwindowbylabel}
+\membersection{::wxFindWindowByLabel}
 
 \func{wxWindow *}{wxFindWindowByLabel}{\param{const wxString\& }{label}, \param{wxWindow *}{parent=NULL}}
 
@@ -1517,20 +1424,6 @@ If no such named window is found, {\bf wxFindWindowByLabel} is called.
 \wxheading{Include files}
 
 <wx/utils.h>
-
-\membersection{::wxFindWindowAtPoint}\label{wxfindwindowatpoint}
-
-\func{wxWindow *}{wxFindWindowAtPoint}{\param{const wxPoint\& }{pt}}
-
-Find the deepest window at the given mouse position in screen coordinates,
-returning the window if found, or NULL if not.
-
-\membersection{::wxFindWindowAtPointer}\label{wxfindwindowatpointer}
-
-\func{wxWindow *}{wxFindWindowAtPointer}{\param{wxPoint\& }{pt}}
-
-Find the deepest window at the mouse pointer position, returning the window
-and current pointer position in screen coordinates.
 
 \membersection{::wxGetActiveWindow}\label{wxgetactivewindow}
 
@@ -1578,9 +1471,9 @@ under Windows, Linux and Solaris.
 
 <wx/utils.h>
 
-\membersection{::wxGetMousePosition}\label{wxgetmouseposition}
+\membersection{::wxGetMousePosition}
 
-\func{wxPoint}{wxGetMousePosition}{\void}
+\func{void}{wxGetMousePosition}{\param{int* }{x}, \param{int* }{y}}
 
 Returns the mouse position in screen coordinates.
 
@@ -2964,57 +2857,4 @@ This check is done even in release mode.
 This is the same as \helpref{wxCHECK2}{wxcheck2}, but 
 \helpref{wxFAIL\_MSG}{wxfailmsg} with the specified {\it msg} is called
 instead of wxFAIL() if the {\it condition} is false.
-
-\section{Environment access functions}\label{environfunctions}
-
-The functions in this section allow to access (get) or change value of
-environment variables in a portable way. They are currently implemented under
-Win32 and POSIX-like systems (Unix).
-
-% TODO add some stuff about env var inheriting but not propagating upwards (VZ)
-
-\wxheading{Include files}
-
-<wx/utils.h>
-
-\membersection{wxGetenv}\label{wxgetenvmacro}
-
-\func{wxChar *}{wxGetEnv}{\param{const wxString\&}{ var}}
-
-This is a macro defined as {\tt getenv()} or its wide char version in Unicode
-mode.
-
-Note that under Win32 it may not return correct value for the variables set
-with \helpref{wxSetEnv}{wxsetenv}, use \helpref{wxGetEnv}{wxgetenv} function
-instead.
-
-\membersection{wxGetEnv}\label{wxgetenv}
-
-\func{bool}{wxGetEnv}{\param{const wxString\&}{ var}, \param{wxString *}{value}}
-
-Returns the current value of the environment variable {\it var} in {\it value}.
-{\it value} may be {\tt NULL} if you just want to know if the variable exists
-and are not interested in its value.
-
-Returns {\tt TRUE} if the variable exists, {\tt FALSE} otherwise.
-
-\membersection{wxSetEnv}\label{wxsetenv}
-
-\func{bool}{wxSetEnv}{\param{const wxString\&}{ var}, \param{const wxChar *}{value}}
-
-Sets the value of the environment variable {\it var} (adding it if necessary)
-to {\it value}.
-
-Returns {\tt TRUE} on success.
-
-\membersection{wxUnsetEnv}\label{wxunsetenv}
-
-\func{bool}{wxUnsetEnv}{\param{const wxString\&}{ var}}
-
-Removes the variable {\it var} from the environment. 
-\helpref{wxGetEnv}{wxgetenv} will return {\tt NULL} after the call to this
-function.
-
-Returns {\tt TRUE} on success.
-
 

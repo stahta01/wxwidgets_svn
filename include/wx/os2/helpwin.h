@@ -14,8 +14,6 @@
 
 #include "wx/wx.h"
 
-#if wxUSE_HELP
-
 #include "wx/helpbase.h"
 
 class WXDLLEXPORT wxWinHelpController: public wxHelpControllerBase
@@ -48,8 +46,6 @@ private:
     bool Initialize(const wxString& rFile, int WXUNUSED(nServer) ) { return(Initialize(rFile)); }
     bool DisplaySection(const wxString& rSection) { return wxHelpControllerBase::DisplaySection(rSection); }
 };
-
-#endif //wxUSE_HELP
 
 #endif
     // _WX_HELPWIN_H_

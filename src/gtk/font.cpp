@@ -71,8 +71,6 @@ private:
     wxString        m_faceName;
     wxFontEncoding  m_encoding;
 
-    wxNativeFontInfo m_nativeFontInfo;
-
     friend class wxFont;
 };
 
@@ -122,16 +120,15 @@ wxFontRefData::wxFontRefData( const wxFontRefData& data )
     : m_scaled_xfonts(wxKEY_INTEGER)
 {
     Init(data.m_pointSize, data.m_family, data.m_style, data.m_weight,
-         data.m_underlined, data.m_faceName, data.m_encoding);
+        data.m_underlined, data.m_faceName, data.m_encoding);
 }
 
 wxFontRefData::wxFontRefData(int size, int family, int style,
-                             int weight, bool underlined,
-                             const wxString& faceName,
-                             wxFontEncoding encoding)
+    int weight, bool underlined, const wxString& faceName, wxFontEncoding encoding )
     : m_scaled_xfonts(wxKEY_INTEGER)
 {
-    Init(size, family, style, weight, underlined, faceName, encoding);
+    Init(size, family, style, weight,
+        underlined, faceName, encoding);
 }
 
 wxFontRefData::~wxFontRefData()
@@ -147,37 +144,6 @@ wxFontRefData::~wxFontRefData()
 }
 
 // ----------------------------------------------------------------------------
-// wxNativeFontInfo
-// ----------------------------------------------------------------------------
-
-bool wxNativeFontInfo::FromString(const wxString& s)
-{
-    wxStringTokenizer tokenizer(s, _T(";"));
-
-    wxString token = tokenizer.GetNextToken();
-    //
-    //  Ignore the version for now
-    //
-
-    xFontName = tokenizer.GetNextToken();
-    if(!xFontName)
-        return FALSE;
-        
-    return TRUE;
-}
-
-wxString wxNativeFontInfo::ToString() const
-{
-    wxString s;
-    
-    s.Printf("%d;%s", 
-             0,                         // version
-             xFontName.c_str());
-             
-    return s;
-}
-
-// ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
 
@@ -189,43 +155,13 @@ void wxFont::Init()
         wxTheFontList->Append( this );
 }
 
-wxFont::wxFont(const wxNativeFontInfo& info)
+wxFont::wxFont( const wxString& fontname, const wxFontData& fontdata )
 {
     Init();
 
-    Create(info.xFontName);
-}
-
-bool wxFont::Create(const wxNativeFontInfo& info)
-{
-    return Create(info.xFontName);
-}
-
-bool wxFont::Create( int pointSize,
-                     int family,
-                     int style,
-                     int weight,
-                     bool underlined,
-                     const wxString& face,
-                     wxFontEncoding encoding)
-{
-    m_refData = new wxFontRefData(pointSize, family, style, weight,
-                                  underlined, face, encoding);
-
-    return TRUE;
-}
-
-bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
-{
-    if( !fontname )
-    {
-         *this = wxSystemSettings::GetSystemFont( wxSYS_DEFAULT_GUI_FONT);
-         return TRUE;
-    }
+    wxCHECK_RET( !!fontname, _T("invalid font spec") );
 
     m_refData = new wxFontRefData();
-
-    M_FONTDATA->m_nativeFontInfo.xFontName = fontname;  // X font name
 
     wxString tmp;
 
@@ -233,7 +169,6 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
 
     tn.GetNextToken();                           // skip initial empty token
     tn.GetNextToken();                           // foundry
-
 
     M_FONTDATA->m_faceName = tn.GetNextToken();  // family
 
@@ -283,7 +218,7 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
     tn.GetNextToken();                           // avg width
 
     // deal with font encoding
-    M_FONTDATA->m_encoding = enc;
+    M_FONTDATA->m_encoding = fontdata.GetEncoding();
     if ( M_FONTDATA->m_encoding == wxFONTENCODING_SYSTEM )
     {
         wxString registry = tn.GetNextToken().MakeUpper(),
@@ -312,9 +247,20 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
             M_FONTDATA->m_encoding = wxFONTENCODING_KOI8;
         }
         //else: unknown encoding - may be give a warning here?
-        else
-            return FALSE;
     }
+}
+
+bool wxFont::Create( int pointSize,
+                     int family,
+                     int style,
+                     int weight,
+                     bool underlined,
+                     const wxString& face,
+                     wxFontEncoding encoding )
+{
+    m_refData = new wxFontRefData(pointSize, family, style, weight,
+                                  underlined, face, encoding);
+
     return TRUE;
 }
 
@@ -392,17 +338,6 @@ wxFontEncoding wxFont::GetEncoding() const
     return M_FONTDATA->m_encoding;
 }
 
-wxNativeFontInfo *wxFont::GetNativeFontInfo() const
-{
-    wxCHECK_MSG( Ok(), (wxNativeFontInfo *)NULL, wxT("invalid font") );
-
-    if(M_FONTDATA->m_nativeFontInfo.xFontName.IsEmpty())
-        GetInternalFont();
-
-    return new wxNativeFontInfo(M_FONTDATA->m_nativeFontInfo);
-}
-
-
 // ----------------------------------------------------------------------------
 // change font attributes
 // ----------------------------------------------------------------------------
@@ -412,7 +347,6 @@ void wxFont::SetPointSize(int pointSize)
     Unshare();
 
     M_FONTDATA->m_pointSize = pointSize;
-    M_FONTDATA->m_nativeFontInfo.xFontName.Clear();            // invalid now
 }
 
 void wxFont::SetFamily(int family)
@@ -420,7 +354,6 @@ void wxFont::SetFamily(int family)
     Unshare();
 
     M_FONTDATA->m_family = family;
-    M_FONTDATA->m_nativeFontInfo.xFontName.Clear();            // invalid now
 }
 
 void wxFont::SetStyle(int style)
@@ -428,7 +361,6 @@ void wxFont::SetStyle(int style)
     Unshare();
 
     M_FONTDATA->m_style = style;
-    M_FONTDATA->m_nativeFontInfo.xFontName.Clear();            // invalid now
 }
 
 void wxFont::SetWeight(int weight)
@@ -436,7 +368,6 @@ void wxFont::SetWeight(int weight)
     Unshare();
 
     M_FONTDATA->m_weight = weight;
-    M_FONTDATA->m_nativeFontInfo.xFontName.Clear();            // invalid now
 }
 
 void wxFont::SetFaceName(const wxString& faceName)
@@ -444,7 +375,6 @@ void wxFont::SetFaceName(const wxString& faceName)
     Unshare();
 
     M_FONTDATA->m_faceName = faceName;
-    M_FONTDATA->m_nativeFontInfo.xFontName.Clear();            // invalid now
 }
 
 void wxFont::SetUnderlined(bool underlined)
@@ -459,14 +389,6 @@ void wxFont::SetEncoding(wxFontEncoding encoding)
     Unshare();
 
     M_FONTDATA->m_encoding = encoding;
-    M_FONTDATA->m_nativeFontInfo.xFontName.Clear();            // invalid now
-}
-
-void wxFont::SetNativeFontInfo(const wxNativeFontInfo& info)
-{
-    Unshare();
-
-    M_FONTDATA->m_nativeFontInfo = info;
 }
 
 // ----------------------------------------------------------------------------
@@ -528,8 +450,7 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
                                            M_FONTDATA->m_weight,
                                            M_FONTDATA->m_underlined,
                                            M_FONTDATA->m_faceName,
-                                           M_FONTDATA->m_encoding,
-                                           &M_FONTDATA->m_nativeFontInfo.xFontName );
+                                           M_FONTDATA->m_encoding );
         }
 
         M_FONTDATA->m_scaled_xfonts.Append( int_scale, (wxObject*)font );

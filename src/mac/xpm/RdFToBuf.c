@@ -37,20 +37,18 @@
  * HeDu (hedu@cul-ipn.uni-kiel.de) 4/94
  */
 
-#include "wx/setup.h"
-
 #ifdef macintosh
 	#ifdef __std
 		#undef __std
 		#define __std()
 	#endif
+	#include <unistd.h>
 	#include <stat.h>
-	#include <unix.h>
-    #include <unistd.h>
 	#include <fcntl.h>
+	#include <unix.h>
 #endif
 
-#include "XpmI.h"
+#include "xpmi.h"
 #ifndef macintosh
 	#include <sys/stat.h>
 

@@ -165,8 +165,6 @@ bool wxResourceManager::Initialize()
 #endif
     
     m_popupMenu = new wxMenu;
-    m_popupMenu->Append(OBJECT_MENU_TITLE, "WIDGET TYPE");
-    m_popupMenu->AppendSeparator();
     m_popupMenu->Append(OBJECT_MENU_EDIT, "Edit properties");
     m_popupMenu->Append(OBJECT_MENU_DELETE, "Delete object");
     
@@ -2404,13 +2402,8 @@ void ObjectMenuProc(wxMenu *menu, wxCommandEvent& event)
     if (!data)
         return;
     
-    switch (event.GetId())
+    switch (event.GetInt())
     {
-    case OBJECT_MENU_TITLE:
-        {
-            event.Skip();
-            break;
-        }
     case OBJECT_MENU_EDIT:
         {
             wxResourceManager::GetCurrentResourceManager()->EditWindow(data);
@@ -2418,20 +2411,8 @@ void ObjectMenuProc(wxMenu *menu, wxCommandEvent& event)
         }
     case OBJECT_MENU_DELETE:
         {
-            // Before deleting a dialog, give the user a last chance
-            // change their mind, in case they accidentally right
-            // clicked the dialog rather than the widget they were
-            // aiming for.
-            if (data->IsKindOf(CLASSINFO(wxPanel)))
-            {
-                wxString str(wxT("Deleting dialog : "));
-                str += data->GetName();
-                if (wxMessageBox(wxT("Are you sure?"), str, wxYES_NO | wxCENTRE) == wxNO)
-                    return;
-            }
-
             wxResourceManager::GetCurrentResourceManager()->DeselectItemIfNecessary(data);
-
+            
             wxResourceManager::GetCurrentResourceManager()->SaveInfoAndDeleteHandler(data);
             wxResourceManager::GetCurrentResourceManager()->DeleteResource(data);
             wxResourceManager::GetCurrentResourceManager()->DeleteWindow(data);

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/mdi.cpp
-// Purpose:     MDI classes for wxMSW
+// Name:        mdi.cpp
+// Purpose:     MDI classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
@@ -304,7 +304,7 @@ void wxMDIParentFrame::SetWindowMenu(wxMenu* menu)
     }
 }
 
-void wxMDIParentFrame::OnSize(wxSizeEvent&)
+void wxMDIParentFrame::OnSize(wxSizeEvent& event)
 {
     if ( GetClientWindow() )
     {
@@ -1042,7 +1042,7 @@ long wxMDIChildFrame::MSWDefWindowProc(WXUINT message, WXUINT wParam, WXLPARAM l
 
 bool wxMDIChildFrame::MSWTranslateMessage(WXMSG* msg)
 {
-    return wxFrame::MSWTranslateMessage(msg);
+    return m_acceleratorTable.Translate(GetParent(), msg);
 }
 
 // ---------------------------------------------------------------------------
@@ -1088,31 +1088,25 @@ bool wxMDIChildFrame::ResetWindowStyle(void *vrect)
     wxMDIChildFrame* pChild = pFrameWnd->GetActiveChild();
     if (!pChild || (pChild == this))
     {
-        HWND hwndClient = GetWinHwnd(pFrameWnd->GetClientWindow());
-        DWORD dwStyle = ::GetWindowLong(hwndClient, GWL_EXSTYLE);
-
-        // we want to test whether there is a maximized child, so just set
-        // dwThisStyle to 0 if there is no child at all
-        DWORD dwThisStyle = pChild
-            ? ::GetWindowLong(GetWinHwnd(pChild), GWL_STYLE) : NULL;
+        DWORD dwStyle = ::GetWindowLong(GetWinHwnd(pFrameWnd->GetClientWindow()), GWL_EXSTYLE);
+        DWORD dwThisStyle = ::GetWindowLong(GetHwnd(), GWL_STYLE);
         DWORD dwNewStyle = dwStyle;
-        if ( dwThisStyle & WS_MAXIMIZE )
+        if (pChild != NULL && (dwThisStyle & WS_MAXIMIZE))
             dwNewStyle &= ~(WS_EX_CLIENTEDGE);
         else
             dwNewStyle |= WS_EX_CLIENTEDGE;
 
         if (dwStyle != dwNewStyle)
         {
-            // force update of everything
-            ::RedrawWindow(hwndClient, NULL, NULL,
-                           RDW_INVALIDATE | RDW_ALLCHILDREN);
-            ::SetWindowLong(hwndClient, GWL_EXSTYLE, dwNewStyle);
-            ::SetWindowPos(hwndClient, NULL, 0, 0, 0, 0,
+            HWND hwnd = GetWinHwnd(pFrameWnd->GetClientWindow());
+            ::RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ALLCHILDREN);
+            ::SetWindowLong(hwnd, GWL_EXSTYLE, dwNewStyle);
+            ::SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
                            SWP_FRAMECHANGED | SWP_NOACTIVATE |
                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
                            SWP_NOCOPYBITS);
             if (rect)
-                ::GetClientRect(hwndClient, rect);
+                ::GetClientRect(hwnd, rect);
 
             return TRUE;
         }
@@ -1140,7 +1134,7 @@ bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
         ccs.hWindowMenu = (HMENU) parent->GetWindowMenu()->GetHMenu();
     ccs.idFirstChild = wxFIRST_MDI_CHILD;
 
-    DWORD msStyle = MDIS_ALLCHILDSTYLES | WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN;
+    DWORD msStyle = WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN;
     if ( style & wxHSCROLL )
         msStyle |= WS_HSCROLL;
     if ( style & wxVSCROLL )
@@ -1260,7 +1254,6 @@ static void MDISetMenu(wxWindow *win, HMENU hmenuFrame, HMENU hmenuWindow)
     wxWindow *parent = win->GetParent();
     wxCHECK_RET( parent, wxT("MDI client without parent frame? weird...") );
 
-    ::SendMessage(GetWinHwnd(win), WM_MDIREFRESHMENU, 0, 0L);
     ::DrawMenuBar(GetWinHwnd(parent));
 }
 
@@ -1307,6 +1300,7 @@ static void RemoveWindowMenu(wxWindow *win, WXHMENU menu)
     // Try to insert Window menu in front of Help, otherwise append it.
     HMENU hmenu = (HMENU)menu;
     int N = GetMenuItemCount(hmenu);
+    bool success = FALSE;
     for ( int i = 0; i < N; i++ )
     {
         wxChar buf[256];
@@ -1320,6 +1314,7 @@ static void RemoveWindowMenu(wxWindow *win, WXHMENU menu)
 
         if ( wxStripMenuCodes(wxString(buf)).IsSameAs(_("Window")) )
         {
+            success = TRUE;
             ::RemoveMenu(hmenu, i, MF_BYPOSITION);
             break;
         }

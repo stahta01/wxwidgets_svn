@@ -14,11 +14,7 @@ WXDIR = $(WXWIN)
 
 !include $(WXDIR)\src\makevc.env
 
-!if "$(RM)" == ""
-RM= erase
-!endif
-
-all:    $(D) $(EXTRATARGETS) $(LIBTARGET)
+all:    $(EXTRATARGETS) $(LIBTARGET)
 
 $(D) :
 	mkdir $(D)
@@ -32,7 +28,7 @@ wxclean:
         nmake -f makefile.vc clean
 
 $(LIBTARGET): $(OBJECTS)
-	-$(RM) $(LIBTARGET)
+	-erase $(LIBTARGET)
 	$(implib) @<<
 -out:$(LIBTARGET)
 -machine:$(CPU)
@@ -40,10 +36,10 @@ $(OBJECTS)
 <<
 
 clean:
-        -$(RM) $(LIBTARGET)
-        -$(RM) $(OBJECTS)
-        -$(RM) *.exe
-        -$(RM) *.res
-        -$(RM) *.map
-        -$(RM) *.sbr
-        -$(RM) *.pdb
+        -erase $(LIBTARGET)
+        -erase $(OBJECTS)
+        -erase *.exe
+        -erase *.res
+        -erase *.map
+        -erase *.sbr
+        -erase *.pdb

@@ -65,11 +65,8 @@ static void SetTimeLabel(unsigned long val, wxStaticText *label);
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxProgressDialog, wxDialog)
-    EVT_BUTTON(wxID_CANCEL, wxProgressDialog::OnCancel)
-
-    EVT_SHOW(wxProgressDialog::OnShow)
-
-    EVT_CLOSE(wxProgressDialog::OnClose)
+   EVT_BUTTON(wxID_CANCEL, wxProgressDialog::OnCancel)
+   EVT_CLOSE(wxProgressDialog::OnClose)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(wxProgressDialog, wxDialog)
@@ -229,7 +226,7 @@ wxProgressDialog::wxProgressDialog(wxString const &title,
     Enable(TRUE); // enable this window
 
     // Update the display (especially on X, GTK)
-    wxYield();
+    wxYieldIfNeeded();
 
 #ifdef __WXMAC__
     MacUpdateImmediately();
@@ -288,7 +285,7 @@ wxProgressDialog::Update(int value, const wxString& newmsg)
 
         m_msg->SetLabel(newmsg);
 
-        wxYield();
+        wxYieldIfNeeded();
     }
 
     if ( (m_elapsed || m_remaining || m_estimated) && (value != 0) )
@@ -320,14 +317,14 @@ wxProgressDialog::Update(int value, const wxString& newmsg)
         // to do
         m_state = Finished;
 
-        wxYield();
+        wxYieldIfNeeded();
 
         (void)ShowModal();
     }
     else
     {
         // update the display
-        wxYield();
+        wxYieldIfNeeded();
     }
 
 #ifdef __WXMAC__
@@ -380,32 +377,15 @@ void wxProgressDialog::OnClose(wxCloseEvent& event)
     }
 }
 
-void wxProgressDialog::OnShow(wxShowEvent& event)
-{
-    // if the dialog is being hidden, it was closed, so reenable other windows
-    // now
-    if ( event.GetShow() )
-    {
-        ReenableOtherWindows();
-    }
-}
-
 // ----------------------------------------------------------------------------
 // destruction
 // ----------------------------------------------------------------------------
 
 wxProgressDialog::~wxProgressDialog()
 {
-    // normally this should have been already done, but just in case
-    ReenableOtherWindows();
-}
-
-void wxProgressDialog::ReenableOtherWindows()
-{
     if ( GetWindowStyle() & wxPD_APP_MODAL )
     {
         delete m_winDisabler;
-        m_winDisabler = (wxWindowDisabler *)NULL;
     }
     else
     {

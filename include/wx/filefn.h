@@ -25,7 +25,7 @@
 // ----------------------------------------------------------------------------
 
 // define off_t
-#if !defined(__WXMAC__) || defined(__UNIX__)
+#ifndef __WXMAC__
     #include  <sys/types.h>
 #else
     typedef long off_t;
@@ -252,26 +252,16 @@ WXDLLEXPORT bool wxRmdir(const wxString& dir, int flags = 0);
 #define wxFILE_SEP_DSK        wxT(':')
 #define wxFILE_SEP_PATH_DOS   wxT('\\')
 #define wxFILE_SEP_PATH_UNIX  wxT('/')
-#define wxFILE_SEP_PATH_MAC   wxT(':')
 
 // separator in the path list (as in PATH environment variable)
-// there is no PATH variable in Classic Mac OS so just use the
-// semicolon (it must be different from the file name separator)
 // NB: these are strings and not characters on purpose!
 #define wxPATH_SEP_DOS        wxT(";")
 #define wxPATH_SEP_UNIX       wxT(":")
-#define wxPATH_SEP_MAC        wxT(";")
 
 // platform independent versions
 #ifdef  __UNIX__
   #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_UNIX
   #define wxPATH_SEP          wxPATH_SEP_UNIX
-#elif defined(__MAC__)
-// TODO find out whether we can really switch back to native file names
-// previously this mac was emulating unix/win filename structures
-//  #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_MAC
-  #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_DOS
-  #define wxPATH_SEP          wxPATH_SEP_DOS
 #else   // Windows and OS/2
   #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_DOS
   #define wxPATH_SEP          wxPATH_SEP_DOS

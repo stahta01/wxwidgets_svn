@@ -40,15 +40,6 @@ public:
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
-    wxFont(const wxNativeFontInfo& info)
-    {
-        Init();
-
-        Create(info);
-    }
-
-    wxFont(const wxString& fontDesc);
-
     bool Create(int size,
                 int family,
                 int style,
@@ -56,8 +47,6 @@ public:
                 bool underlined = FALSE,
                 const wxString& face = wxEmptyString,
                 wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
-
-    bool Create(const wxNativeFontInfo& info);
 
     virtual ~wxFont();
 
@@ -72,7 +61,6 @@ public:
     virtual bool GetUnderlined() const;
     virtual wxString GetFaceName() const;
     virtual wxFontEncoding GetEncoding() const;
-    virtual wxNativeFontInfo* GetNativeFontInfo() const;
 
     virtual void SetPointSize(int pointSize);
     virtual void SetFamily(int family);
@@ -81,7 +69,6 @@ public:
     virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
-    virtual void SetNativeFontInfo(const wxNativeFontInfo& info);
 
     // implementation only from now on
     // -------------------------------

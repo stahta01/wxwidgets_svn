@@ -36,19 +36,6 @@ class WXDLLEXPORT wxDateSpan;
     #define inline
 #endif // Debug
 
-// not all c-runtimes are based on 1/1/1970 being (time_t) 0
-// set this to the corresponding value in seconds 1/1/1970 has on your
-// systems c-runtime
-
-#ifdef __WXMAC__
-#if __MSL__ < 0x6000
-	#define WX_TIME_BASE_OFFSET ( 2082844800L + 126144000L )
-#else
-	#define WX_TIME_BASE_OFFSET 0
-#endif
-#else
-	#define WX_TIME_BASE_OFFSET 0
-#endif
 /*
  * TODO
  *
@@ -113,7 +100,7 @@ class WXDLLEXPORT wxDateSpan;
 // wxInvalidDateTime)
 class WXDLLEXPORT wxDateTime;
 
-WXDLLEXPORT_DATA(extern const wxDateTime&) wxDefaultDateTime;
+WXDLLEXPORT_DATA(extern wxDateTime&) wxDefaultDateTime;
 #define wxInvalidDateTime wxDefaultDateTime
 
 // ----------------------------------------------------------------------------
@@ -773,9 +760,8 @@ public:
     // result of timezone shift)
     // ------------------------------------------------------------------------
 
-        // is the date valid? Note that this will return TRUE for non
-        // initialized objects but FALSE if *this == wxInvalidDateTime
-    inline bool IsValid() const { return m_time != wxInvalidDateTime.m_time; }
+        // is the date valid (TRUE even for non initialized objects)?
+    inline bool IsValid() const { return this != &wxInvalidDateTime; }
 
         // get the broken down date/time representation in the given timezone
         //

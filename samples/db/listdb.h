@@ -25,32 +25,32 @@
 
 const int LOOKUP_COL_LEN = 250;
 
+// Global database connection
+extern wxDb *READONLY_DB;
+
 // Clookup class
 class Clookup : public wxDbTable
 {
     public:
 
-        wxChar lookupCol[LOOKUP_COL_LEN+1];
+        char lookupCol[LOOKUP_COL_LEN+1];
 
-        Clookup(wxChar *tblName, wxChar *colName, wxDb *pDb, const wxString &defDir="");
+        Clookup(char *tblName, char *colName);
 
 };  // Clookup
-
 
 // Clookup2 class
 class Clookup2 : public wxDbTable
 {
     public:
 
-        wxChar lookupCol1[LOOKUP_COL_LEN+1];
-        wxChar lookupCol2[LOOKUP_COL_LEN+1];
+        char lookupCol1[LOOKUP_COL_LEN+1];
+        char lookupCol2[LOOKUP_COL_LEN+1];
 
-        Clookup2(wxChar *tblName, wxChar *colName1, wxChar *colName2, wxDb *pDb, const wxString &defDir="");
+        Clookup2(char *tblName, char *colName1, char *colName2, wxDb *pDb);
 
 };  // Clookup2
 
-
-// ClookUpDlg class
 class ClookUpDlg : public wxDialog
 {
     private:
@@ -69,20 +69,18 @@ class ClookUpDlg : public wxDialog
 
         // This is a generic lookup constructor that will work with any table and any column
         ClookUpDlg(wxWindow *parent,
-                    wxChar  *windowTitle,
-                    wxChar  *tableName,
-                    wxChar  *colName,
-                    wxChar  *where,
-                    wxChar  *orderBy,
-                    wxDb    *pDb,
-                    const wxString &defDir);
+                      char  *windowTitle,
+                      char  *tableName,
+                      char  *colName,
+                      char  *where,
+                      char  *orderBy);
 
         //
         // This is a generic lookup constructor that will work with any table and any column.
         // It extends the capabilites of the lookup dialog in the following ways:
         //
         //    1) 2 columns rather than one
-        //    2) The ability to select DISTINCT column values
+        // 2) The ability to select DISTINCT column values
         //
         // Only set distinctValues equal to true if necessary.  In many cases, the constraints
         // of the index(es) will enforce this uniqueness.  Selecting DISTINCT does require
@@ -97,23 +95,22 @@ class ClookUpDlg : public wxDialog
         // since it cannot be derived when you query using your own sql statement.
         //
         // The optional database connection can be used if you'd like the lookup class
-        // to use a database pointer other than the READONLY_DB of the app.  This is necessary
-        // if records are being saved, but not committed to the db, yet should be included
+        // to use a database pointer other than the global READONLY_DB.  This is necessary if
+        // records are being saved, but not committed to the db, yet should be included
         // in the lookup window.
         //
         ClookUpDlg(wxWindow *parent,
-                    wxChar  *windowTitle,
-                    wxChar  *tableName,
-                    wxChar  *dispCol1,                  // Must have at least 1 display column
-                    wxChar  *dispCol2,                  // Optional
-                    wxChar  *where,
-                    wxChar  *orderBy,
-                    wxDb    *pDb,                       // Database connection pointer
-                    const wxString &defDir,
-                    bool     distinctValues,            // e.g. SELECT DISTINCT ...
-                    wxChar  *selectStmt = 0,            // If you wish to query by SQLstmt (complicated lookups)
-                    int      maxLenCol1 = 0,            // Mandatory if querying by SQLstmt
-                    bool     allowOk    = TRUE);        // is the OK button enabled
+                      char  *windowTitle,
+                      char  *tableName,
+                      char  *dispCol1,                  // Must have at least 1 display column
+                      char  *dispCol2,                  // Optional
+                      char  *where,
+                      char  *orderBy,
+                      bool   distinctValues,            // e.g. SELECT DISTINCT ...
+                      char  *selectStmt = 0,            // If you wish to query by SQLstmt (complicated lookups)
+                      int    maxLenCol1 = 0,            // Mandatory if querying by SQLstmt
+                      wxDb  *pDb        = READONLY_DB,  // Database connection pointer
+                      bool   allowOk    = TRUE);        // is the OK button enabled
 
         void        OnButton( wxCommandEvent &event );
         void        OnCommand(wxWindow& win, wxCommandEvent& event);
@@ -121,7 +118,7 @@ class ClookUpDlg : public wxDialog
         void        OnActivate(bool) {};  // necessary for hot keys
 
 DECLARE_EVENT_TABLE()
-};  // class ClookUpDlg
+};
 
 #define LOOKUP_DIALOG                   500
 

@@ -27,11 +27,11 @@
 
 #define	__COMPILINGMOREFILES
 
-#include "morefile.h"
-#include "moreextr.h"
-#include "moredesk.h"
-#include "filecopy.h"
-#include "director.h"
+#include "MoreFile.h"
+#include "MoreExtr.h"
+#include "MoreDesk.h"
+#include "FileCopy.h"
+#include "Director.h"
 
 /*****************************************************************************/
 
@@ -52,14 +52,9 @@ enum
 ** stack space used when recursively calling CopyLevel and to hold
 ** global information that might be needed at any time. */
 
-#if PRAGMA_STRUCT_ALIGN
-    #pragma options align=mac68k
-#elif PRAGMA_STRUCT_PACKPUSH
-    #pragma pack(push, 2)
-#elif PRAGMA_STRUCT_PACK
-    #pragma pack(2)
+#if PRAGMA_ALIGN_SUPPORTED
+#pragma options align=mac68k
 #endif
-
 struct EnumerateGlobals
 {
 	Ptr			copyBuffer;			/* pointer to buffer used for file copy operations */
@@ -72,12 +67,8 @@ struct EnumerateGlobals
 	Str63		itemName;			/* the name of the current item */
 	CInfoPBRec	myCPB;				/* the parameter block used for PBGetCatInfo calls */
 };
-#if PRAGMA_STRUCT_ALIGN
-    #pragma options align=reset
-#elif PRAGMA_STRUCT_PACKPUSH
-    #pragma pack(pop)
-#elif PRAGMA_STRUCT_PACK
-    #pragma pack()
+#if PRAGMA_ALIGN_SUPPORTED
+#pragma options align=reset
 #endif
 
 typedef struct EnumerateGlobals EnumerateGlobals;
@@ -88,14 +79,9 @@ typedef EnumerateGlobals *EnumerateGlobalsPtr;
 ** stack space used when recursively calling GetLevelSize and to hold
 ** global information that might be needed at any time. */
 
-#if PRAGMA_STRUCT_ALIGN
-    #pragma options align=mac68k
-#elif PRAGMA_STRUCT_PACKPUSH
-    #pragma pack(push, 2)
-#elif PRAGMA_STRUCT_PACK
-    #pragma pack(2)
+#if PRAGMA_ALIGN_SUPPORTED
+#pragma options align=mac68k
 #endif
-
 struct PreflightGlobals
 {
 	OSErr			result;				/* temporary holder of results - saves 2 bytes of stack each level */
@@ -109,12 +95,8 @@ struct PreflightGlobals
 	unsigned long	tempBlocks;			/* temporary storage for calculations (save some stack space)  */
 	CopyFilterProcPtr copyFilterProc;	/* pointer to filter function */
 };
-#if PRAGMA_STRUCT_ALIGN
-    #pragma options align=reset
-#elif PRAGMA_STRUCT_PACKPUSH
-    #pragma pack(pop)
-#elif PRAGMA_STRUCT_PACK
-    #pragma pack()
+#if PRAGMA_ALIGN_SUPPORTED
+#pragma options align=reset
 #endif
 
 typedef struct PreflightGlobals PreflightGlobals;
@@ -214,9 +196,6 @@ static	void	GetLevelSize(long currentDirID,
 	} while ( theGlobals->result == noErr );
 }
 
-
-#if !TARGET_CARBON
-
 /*****************************************************************************/
 
 static	OSErr	PreflightDirectoryCopySpace(short srcVRefNum,
@@ -234,8 +213,7 @@ static	OSErr	PreflightDirectoryCopySpace(short srcVRefNum,
 	if ( error == noErr )
 	{
 		/* Convert freeBytes to free disk blocks (512-byte blocks) */
-		// dstFreeBlocks = (pb.ioVFreeBytes.hi << 23) + (pb.ioVFreeBytes.lo >> 9);
-		dstFreeBlocks = pb.ioVFreeBytes >> 9 ;
+		dstFreeBlocks = (pb.ioVFreeBytes.hi << 23) + (pb.ioVFreeBytes.lo >> 9);
 		
 		/* get allocation block size (always multiple of 512) and divide by 512
 		  to get number of 512-byte blocks per allocation block */
@@ -259,7 +237,7 @@ static	OSErr	PreflightDirectoryCopySpace(short srcVRefNum,
 
 	return ( error );
 }
-#endif
+
 /*****************************************************************************/
 
 static	void	CopyLevel(long sourceDirID,

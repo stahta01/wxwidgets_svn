@@ -467,9 +467,8 @@ static void usage()
 "   mode specific options are:\n"
 "       -p          do check parameter names (not done by default)\n"
 "\n", basename.c_str(), basename.c_str());
-#ifndef wxUSE_GUI
+
     exit(1);
-#endif
 }
 
 /*
@@ -1940,12 +1939,6 @@ static const char *GetCurrentTime(const char *timeFormat)
 
 /*
    $Log$
-   Revision 1.12  2000/10/09 13:53:33  juliansmart
-   Doc corrections; added HelpGen project files
-
-   Revision 1.11  2000/07/15 19:50:42  cvsuser
-   merged 2.2 branch
-
    Revision 1.10.2.2  2000/03/27 15:33:10  VZ
    don't trasnform output dir name to lower case
 

@@ -235,6 +235,11 @@ void wxListBox::SetupColours()
     SetForegroundColour(GetParent()->GetForegroundColour());
 }
 
+bool wxListBox::HasMultipleSelection() const
+{
+    return (m_windowStyle & wxLB_MULTIPLE) || (m_windowStyle & wxLB_EXTENDED);
+}
+
 // ----------------------------------------------------------------------------
 // implementation of wxListBoxBase methods
 // ----------------------------------------------------------------------------
@@ -446,11 +451,6 @@ void wxListBox::DoSetItemClientData(int n, void *clientData)
 
     if ( ListBox_SetItemData(GetHwnd(), n, clientData) == LB_ERR )
         wxLogDebug(wxT("LB_SETITEMDATA failed"));
-}
-
-bool wxListBox::HasMultipleSelection() const
-{
-    return (m_windowStyle & wxLB_MULTIPLE) || (m_windowStyle & wxLB_EXTENDED);
 }
 
 // Return number of selections and an array of selected integers
@@ -668,43 +668,41 @@ wxSize wxListBox::DoGetBestSize() const
 
 bool wxListBox::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
 {
-    wxEventType evtType;
     if ( param == LBN_SELCHANGE )
     {
-        evtType = wxEVT_COMMAND_LISTBOX_SELECTED;
+        wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, m_windowId);
+        event.SetEventObject( this );
+
+        wxArrayInt aSelections;
+        int n, count = GetSelections(aSelections);
+        if ( count > 0 )
+        {
+            n = aSelections[0];
+            if ( HasClientObjectData() )
+                event.SetClientObject( GetClientObject(n) );
+            else if ( HasClientUntypedData() )
+                event.SetClientData( GetClientData(n) );
+            event.SetString( GetString(n) );
+        }
+        else
+        {
+            n = -1;
+        }
+
+        event.m_commandInt = n;
+
+        return GetEventHandler()->ProcessEvent(event);
     }
     else if ( param == LBN_DBLCLK )
     {
-        evtType = wxEVT_COMMAND_LISTBOX_DOUBLECLICKED;
-    }
-    else
-    {
-        // some event we're not interested in
-        return FALSE;
-    }
+        wxCommandEvent event(wxEVT_COMMAND_LISTBOX_DOUBLECLICKED, m_windowId);
+        event.SetEventObject( this );
 
-    wxCommandEvent event(evtType, m_windowId);
-    event.SetEventObject( this );
-
-    wxArrayInt aSelections;
-    int n, count = GetSelections(aSelections);
-    if ( count > 0 )
-    {
-        n = aSelections[0];
-        if ( HasClientObjectData() )
-            event.SetClientObject( GetClientObject(n) );
-        else if ( HasClientUntypedData() )
-            event.SetClientData( GetClientData(n) );
-        event.SetString( GetString(n) );
+        return GetEventHandler()->ProcessEvent(event);
     }
-    else
-    {
-        n = -1;
-    }
+    //else:
 
-    event.m_commandInt = n;
-
-    return GetEventHandler()->ProcessEvent(event);
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------

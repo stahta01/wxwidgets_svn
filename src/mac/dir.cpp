@@ -36,15 +36,14 @@
 #include "wx/dir.h"
 #include "wx/filefn.h"          // for wxPathExists()
 
-#ifndef __WXMAC_X__
-  #include <windows.h>
-#endif
+#include <windows.h>
 
-#if defined(__WXMAC__) && !defined(__UNIX__)
-  #include "morefile.h"
-  #include "moreextr.h"
-  #include "fullpath.h"
-  #include "fspcompa.h"
+#ifdef __WXMAC__
+
+#include "morefile.h"
+#include "moreextr.h"
+#include "fullpath.h"
+#include "fspcompa.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -117,12 +116,8 @@ wxDirData::wxDirData(const wxString& dirname)
 	m_CPB.hFileInfo.ioVRefNum = fsspec.vRefNum ;
 	m_CPB.hFileInfo.ioNamePtr = m_name ;
 	m_index = 0 ;
-
-#ifdef __WXMAC_X__
-	// TODO: what are we supposed to do for Mac OS X
-#else
+	
 	FSpGetDirectoryID( &fsspec , &m_dirId , &m_isDir ) ;
-#endif
 }
 
 wxDirData::~wxDirData()
@@ -136,12 +131,9 @@ void wxDirData::Rewind()
 
 bool wxDirData::Read(wxString *filename)
 {
-    if ( !m_isDir )
-        return FALSE ;
+	if ( !m_isDir )
+		return FALSE ;
 		
-#if TARGET_CARBON
-	char c_name[256] ;
-#endif
     wxString result;
 
 	short err = noErr ;
@@ -154,13 +146,7 @@ bool wxDirData::Read(wxString *filename)
 		err = PBGetCatInfoSync((CInfoPBPtr)&m_CPB);
 		if ( err != noErr )
 			break ;
-
-#if TARGET_CARBON
-		p2cstrcpy( c_name, m_name ) ;
-		strcpy( (char *)m_name, c_name);
-#else
-		p2cstr( m_name ) ;
-#endif
+			
 		if ( ( m_CPB.dirInfo.ioFlAttrib & ioDirMask) != 0 && (m_flags & wxDIR_DIRS) ) //  we have a directory
 			break ;
 			
@@ -170,37 +156,17 @@ bool wxDirData::Read(wxString *filename)
         if ( ( m_CPB.hFileInfo.ioFlFndrInfo.fdFlags & kIsInvisible ) && !(m_flags & wxDIR_HIDDEN) ) // its hidden but we don't want it
 			continue ;
 
-		wxString file( m_name ) ;
-		if ( m_filespec.IsEmpty() || m_filespec == "*.*" )
-		{
-		}
-		else if ( m_filespec.Length() > 1 && m_filespec.Left(1) =="*" )
-		{
-			if ( file.Right( m_filespec.Length() - 1 ).Upper() != m_filespec.Mid(1).Upper() )
-			{
-				continue ;
-			}
-		}
-		else if ( m_filespec.Length() > 1 && m_filespec.Right(1) == "*" )
-		{
-			if ( file.Left( m_filespec.Length() - 1 ).Upper() != m_filespec.Left( m_filespec.Length() - 1 ).Upper() )
-			{
-				continue ;
-			}
-		}
-		else if ( file.Upper() != m_filespec.Upper() )
-		{
-			continue ;
-		}
-
 		break ;
 	}
 	if ( err != noErr )
 	{
 		return FALSE ;
 	}
-
-	*filename = (char*) m_name ;
+	FSSpec spec ;
+	
+	FSMakeFSSpecCompat(m_CPB.hFileInfo.ioVRefNum, m_dirId, m_name,&spec) ;
+								  
+	*filename = wxMacFSSpec2UnixFilename( &spec ) ;
 
     return TRUE;
 }

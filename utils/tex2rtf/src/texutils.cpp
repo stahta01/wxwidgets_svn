@@ -239,9 +239,9 @@ int ParseUnitArgument(char *unitArg)
       if (strcmp(units, "in") == 0)
         conversionFactor = 72.0;
       else if (strcmp(units, "cm") == 0)
-        conversionFactor = (float)72.0/(float)2.51;
+        conversionFactor = 72.0/2.51;
       else if (strcmp(units, "mm") == 0)
-        conversionFactor = (float)72.0/(float)25.1;
+        conversionFactor = 72.0/25.1;
       else if (strcmp(units, "pt") == 0)
         conversionFactor = 1;
     }
@@ -432,14 +432,7 @@ void ReadTexReferences(char *filename)
         istr.get(ch);
       }
       section[i] = 0;
-
-      // gt - needed to trick the hash table "TexReferences" into deleting the key 
-      // strings it creates in the Put() function, but not the item that is
-      // created here, as that is destroyed elsewhere.  Without doing this, there
-      // were massive memory leaks
-      TexReferences.DeleteContents(TRUE);
       TexReferences.Put(label, new TexRef(label, file, section, sectionName));
-      TexReferences.DeleteContents(FALSE);
     }
   }
 }

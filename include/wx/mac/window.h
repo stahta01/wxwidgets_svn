@@ -86,6 +86,7 @@ public:
 
     virtual void SetFocus();
 
+
     virtual void WarpPointer(int x, int y);
     virtual void CaptureMouse();
     virtual void ReleaseMouse();
@@ -161,8 +162,7 @@ public:
 
 	void MacClientToRootWindow( int *x , int *y ) const ;
 	void MacRootWindowToClient( int *x , int *y ) const ;
-	
-	virtual wxString MacGetToolTipString( wxPoint &where ) ;
+
 
     // simple accessors
     // ----------------
@@ -177,7 +177,6 @@ public:
 
     // event handlers
     // --------------
-	void OnSetFocus(wxFocusEvent& event) ;
     void OnEraseBackground(wxEraseEvent& event);
     void OnIdle(wxIdleEvent& event);
     void MacOnScroll(wxScrollEvent&event ) ;
@@ -221,12 +220,8 @@ public:
 
     // Responds to colour changes: passes event on to children.
     void OnSysColourChanged(wxSysColourChangedEvent& event);
+
 public :
-	virtual void						MacCreateRealWindow( const wxString& title,
-           const wxPoint& pos,
-           const wxSize& size,
-           long style,
-           const wxString& name ) ;
 	static bool							MacGetWindowFromPoint( const wxPoint &point , wxWindow** outWin ) ;
 	virtual void						MacActivate( EventRecord *ev , bool inIsActivating ) ;
 	virtual void						MacUpdate( EventRecord *ev ) ;
@@ -241,34 +236,23 @@ public :
 	virtual void						MacFireMouseEvent( EventRecord *ev ) ;
 	virtual bool						MacDispatchMouseEvent(wxMouseEvent& event ) ;
 	virtual void						MacEraseBackground( Rect *rect ) ;
-	virtual void 						MacPaintBorders() ;
-	// obsolete : only for link compatibility
 	virtual void 						MacPaint( wxPaintEvent &event ) ;
-	WindowRef							GetMacRootWindow() const  ;
+	WindowRef								GetMacRootWindow() const  ;
 
-	virtual ControlHandle 				MacGetContainerForEmbedding() ;
-	
-	virtual long						MacGetLeftBorderSize() const ;
-	virtual long						MacGetRightBorderSize() const ;
-	virtual long						MacGetTopBorderSize() const ;
-	virtual long						MacGetBottomBorderSize() const ;
-
-	static long							MacRemoveBordersFromStyle( long style ) ;
+	virtual ControlHandle 	MacGetContainerForEmbedding() ;
 	virtual void 						MacSuperChangedPosition() ;
 	virtual void						MacSuperShown( bool show ) ;
-	bool								MacIsReallyShown() const ;
-/*
+
 	bool										MacSetupFocusPort() ;
 	bool										MacSetupDrawingPort() ;
 	bool										MacSetupFocusClientPort() ;
 	bool										MacSetupDrawingClientPort() ;
-*/	
+	
 	virtual bool						MacSetPortFocusParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindow* rootwin )  ;
 	virtual bool						MacSetPortDrawingParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindow* rootwin )  ;
 
 	virtual void						MacGetPortParams(Point* localOrigin, Rect* clipRect, WindowRef *window , wxWindow** rootwin ) ;
 	virtual void						MacGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window  , wxWindow** rootwin) ;
-	virtual void						MacDoGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window  , wxWindow** rootwin) ;
 	MacWindowData*						MacGetWindowData() { return m_macWindowData ; }
 	static WindowRef					MacGetWindowInUpdate() { return s_macWindowInUpdate ; }
 	bool								MacIsWindowScrollbar( const wxScrollBar* sb ) { return (m_hScrollBar == sb || m_vScrollBar == sb) ; }
@@ -279,7 +263,6 @@ protected:
 
 	MacWindowData*				m_macWindowData ;
 	static WindowRef			s_macWindowInUpdate ;
-	RgnHandle					m_macUpdateRgn ;
 
 	int 									m_x ;
 	int 									m_y ;	
@@ -341,7 +324,6 @@ wxWindow* wxFindWinFromMacWindow( WindowRef inWindow ) ;
 void wxAssociateWinWithMacWindow(WindowRef inWindow, wxWindow *win) ;
 void wxRemoveMacWindowAssociation(wxWindow *win) ;
 
-/*
 class wxMacFocusHelper
 {
 public :
@@ -354,7 +336,6 @@ private :
 	GrafPtr		m_currentPort ;
 	bool			m_ok ;
 } ;
-*/
 
 class wxMacDrawingHelper
 {
@@ -369,7 +350,7 @@ private :
 	PenState 	m_savedPenState ;
 	bool			m_ok ;
 } ;
-/*
+
 class wxMacFocusClientHelper
 {
 public :
@@ -382,7 +363,7 @@ private :
 	GrafPtr		m_currentPort ;
 	bool			m_ok ;
 } ;
-*/
+
 class wxMacDrawingClientHelper
 {
 public :

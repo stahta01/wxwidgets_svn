@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"../lib/wx23_0.dll"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"../lib/wx22_6.dll"
 
 !ELSEIF  "$(CFG)" == "wxvc_dll - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../lib/wx23_0d.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../lib/wx22_6d.dll" /pdbtype:sept
 
 !ENDIF 
 
@@ -113,10 +113,6 @@ SOURCE=.\common\cmndata.cpp
 # Begin Source File
 
 SOURCE=.\common\config.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\cshelp.cpp
 # End Source File
 # Begin Source File
 
@@ -178,10 +174,6 @@ SOURCE=.\common\dynlib.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\effects.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\encconv.cpp
 # End Source File
 # Begin Source File
@@ -208,10 +200,6 @@ SOURCE=.\common\fileconf.cpp
 # Begin Source File
 
 SOURCE=.\common\filefn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\filename.cpp
 # End Source File
 # Begin Source File
 
@@ -387,10 +375,6 @@ SOURCE=.\common\protocol.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\quantize.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\resourc2.cpp
 # End Source File
 # Begin Source File
@@ -456,10 +440,6 @@ SOURCE=.\common\timercmn.cpp
 # Begin Source File
 
 SOURCE=.\common\tokenzr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\treebase.cpp
 # End Source File
 # Begin Source File
 
@@ -578,6 +558,10 @@ SOURCE=.\generic\panelg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\generic\plot.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\generic\progdlgg.cpp
 # End Source File
 # Begin Source File
@@ -602,10 +586,6 @@ SOURCE=.\generic\scrolwin.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\splash.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\splitter.cpp
 # End Source File
 # Begin Source File
@@ -627,14 +607,6 @@ SOURCE=.\generic\textdlgg.cpp
 # Begin Source File
 
 SOURCE=.\generic\tipdlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\tipwin.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\treectlg.cpp
 # End Source File
 # Begin Source File
 

@@ -45,6 +45,9 @@ Other add-on packages are available from the wxWindows Web site, such as:
 - tex2rtf3.zip. Tex2RTF: create Windows Help, HTML, and Word RTF files from
   the same document source.
 
+For instructions on compiling wxBase (wxWindows-without-GUI),
+please see docs/base/install.txt.
+
 General installation notes
 --------------------------
 
@@ -135,7 +138,7 @@ To build the DLL version using makefiles:
    suitable precompiled header file for compiling applications.
    The resulting libraries are called:
 
-      wx\lib\wx[version].lib(dll) (debug version)
+      wx\lib\wx[version]d.lib(dll) (debug version)
       wx\lib\wx[version].lib(dll) (release version, using FINAL=1)
 
 2. Invoke a sample makefile with 'nmake -f makefile.vc WXUSINGDLL=1'
@@ -398,9 +401,11 @@ Watcom C++ 10.6/11 compilation
 
 1. Make sure your WXWIN variable is set, and uses the DOS short
    name form.
-2. Change directory to wx\src\msw. Type 'wmake -f makefile.wat' to
+2. Change directory to wx\src\msw. Type
+   'wmake -f makefile.wat all' to
    make the wxWindows core library.
-3. Change directory to wx\samples\minimal and type 'wmake -f makefile.wat'
+3. Change directory to wx\samples\minimal and type
+   'wmake -f makefile.wat all'
    to make this sample. Repeat for other samples of interest.
 
 Note (1): makewat.env uses the odbc32.lib supplied in wxWindows' lib\watcom
@@ -410,8 +415,8 @@ options, the linker gives up. So the date/time option is switched
 off for Watcom C++. Also, wxAutomationObject is not compiled with
 Watcom C++.
 Note (3): if Watcom can't read the precompiled header when
-building a sample, try deleting src\msw\watcom.pch and
-compiling the sample again.
+building a sample or library, try deleting src\msw\watcom.pch and
+compiling again.
 Note (4): if you get _popen_ and _pclose_ link errors, try
 recompiling wxWindows with XPM support disabled in setup.h.
 Alternatively, make sure these lines exist at the top of
@@ -492,9 +497,9 @@ Here are the steps required:
   instructions with either of these packages.
 
 - If using Mingw32, you need some extra files to use the wxWindows
-  makefiles. You can find these files in ports/mingw32 on the
-  wxWindows ftp site or CD-ROM, as extra.zip. These should be extracted
-  to the Mingw32 directory. If you have alread downloaded rm, cp, mv
+  makefiles. You can find these files in ports/mingw32 on the ftp
+  site or CD-ROM, as extra.zip. These should be extracted to the Mingw32
+  directory. If you have alread downloaded bison, flex, make, rm, cp, mv
   from elsewhere, you won't need this.
 
   If using Mingw32 2.95 and below with wxWindows 2.1 or above, you
@@ -507,8 +512,8 @@ Here are the steps required:
   Run it before compiling.
 
 - For Cygwin, make sure there's a \tmp directory on your
-  Windows drive or bison will crash (actually you don't need
-  bison for ordinary wxWindows compilation: a pre-generated .c file is
+  Windows drive or bison will crash (actually you don't need this
+  for ordinary wxWindows compilation: a pre-generated .c file is
   supplied).
 
 - Edit wx/src/makeg95.env and set the MINGW32 variable at the top of

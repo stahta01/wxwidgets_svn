@@ -42,7 +42,6 @@
 #endif
 
 #if wxUSE_GUI
-    #include "wx/fontutil.h"
     #include "wx/msgdlg.h"
     #include "wx/fontdlg.h"
     #include "wx/choicdlg.h"
@@ -90,8 +89,6 @@ static wxFontEncoding gs_encodings[] =
     wxFONTENCODING_CP1256,
     wxFONTENCODING_CP1257,
     wxFONTENCODING_CP437,
-    wxFONTENCODING_UTF7,
-    wxFONTENCODING_UTF8,
 };
 
 // the descriptions for them
@@ -122,8 +119,6 @@ static const wxChar* gs_encodingDescs[] =
     wxTRANSLATE( "Windows Arabic (CP 1256)" ),
     wxTRANSLATE( "Windows Baltic (CP 1257)" ),
     wxTRANSLATE( "Windows/DOS OEM (CP 437)" ),
-    wxTRANSLATE( "Unicode 7 bit (UTF-7)" ),
-    wxTRANSLATE( "Unicode 8 bit (UTF-8)" ),
 };
 
 // and the internal names
@@ -145,17 +140,15 @@ static const wxChar* gs_encodingNames[] =
     wxT( "iso8859-14" ),
     wxT( "iso8859-15" ),
     wxT( "koi8-r" ),
-    wxT( "windows1250" ),
-    wxT( "windows1251" ),
-    wxT( "windows1252" ),
-    wxT( "windows1253" ),
-    wxT( "windows1254" ),
-    wxT( "windows1255" ),
-    wxT( "windows1256" ),
-    wxT( "windows1257" ),
-    wxT( "windows437" ),
-    wxT( "utf7" ),
-    wxT( "utf8" ),
+    wxT( "windows-1250" ),
+    wxT( "windows-1251" ),
+    wxT( "windows-1252" ),
+    wxT( "windows-1253" ),
+    wxT( "windows-1254" ),
+    wxT( "windows-1255" ),
+    wxT( "windows-1256" ),
+    wxT( "windows-1257" ),
+    wxT( "windows-437" ),
 };
 
 // ----------------------------------------------------------------------------
@@ -405,7 +398,7 @@ wxFontEncoding wxFontMapper::CharsetToEncoding(const wxString& charset,
 
         RestorePath(pathOld);
     }
-#endif // wxUSE_CONFIG
+#endif
 
     // if didn't find it there, try to reckognise it ourselves
     if ( encoding == wxFONTENCODING_SYSTEM )
@@ -423,10 +416,6 @@ wxFontEncoding wxFontMapper::CharsetToEncoding(const wxString& charset,
 
         if ( !cs || cs == wxT("US-ASCII") )
             encoding = wxFONTENCODING_DEFAULT;
-        else if ( cs == wxT("UTF-7") )
-            encoding = wxFONTENCODING_UTF7;
-        else if ( cs == wxT("UTF-8") )
-            encoding = wxFONTENCODING_UTF8;
         else if ( cs == wxT("KOI8-R") || cs == wxT("KOI8-U") )
             encoding = wxFONTENCODING_KOI8;
         else if ( cs.Left(3) == wxT("ISO") )
@@ -449,10 +438,14 @@ wxFontEncoding wxFontMapper::CharsetToEncoding(const wxString& charset,
                 }
             }
         }
-        else if ( cs.Left(8) == wxT("WINDOWS-") )
+        else if ( cs.Left(7) == wxT("WINDOWS") )
         {
+            const wxChar *p = cs.c_str() + 7;
+            if ( *p == wxT('-') )
+                p++;
+
             int value;
-            if ( wxSscanf(cs.c_str() + 8, wxT("%u"), &value) == 1 )
+            if ( wxSscanf(p, wxT("%u"), &value) == 1 )
             {
                 if ( value >= 1250 )
                 {
@@ -696,17 +689,17 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
                 wxFont font = retData.GetChosenFont();
 
                 *info = retData.EncodingInfo();
-                info->encoding = retData.GetEncoding();
+                info -> encoding = retData.GetEncoding();
 
 #if wxUSE_CONFIG
-                // remember this in the config
+            // remember this in the config
                 if ( ChangePath(FONTMAPPER_FONT_FROM_ENCODING_PATH, &pathOld) )
                 {
                     GetConfig()->Write(configEntry, info->ToString());
 
                     RestorePath(pathOld);
                 }
-#endif // wxUSE_CONFIG
+#endif
 
                 return TRUE;
             }
@@ -747,7 +740,7 @@ bool wxFontMapper::IsEncodingAvailable(wxFontEncoding encoding,
 {
     wxNativeEncodingInfo info;
 
-    if ( wxGetNativeFontEncoding(encoding, &info) )
+    if (wxGetNativeFontEncoding(encoding, &info))
     {
         info.facename = facename;
         return wxTestFontEncoding(info);

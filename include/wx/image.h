@@ -169,26 +169,13 @@ public:
     char unsigned *GetData() const;
     void SetData( char unsigned *data );
     void SetData( char unsigned *data, int new_width, int new_height );
-
-    // Mask functions
+    
     void SetMaskColour( unsigned char r, unsigned char g, unsigned char b );
     unsigned char GetMaskRed() const;
     unsigned char GetMaskGreen() const;
     unsigned char GetMaskBlue() const;
     void SetMask( bool mask = TRUE );
     bool HasMask() const;
-
-    // Palette functions
-    bool HasPalette() const;
-    const wxPalette& GetPalette() const;
-    void SetPalette(const wxPalette& palette);
-
-    // Option functions (arbitrary name/value mapping)
-    void SetOption(const wxString& name, const wxString& value);
-    void SetOption(const wxString& name, int value);
-    wxString GetOption(const wxString& name) const;
-    int GetOptionInt(const wxString& name) const;
-    bool HasOption(const wxString& name) const;
 
     unsigned long CountColours( unsigned long stopafter = (unsigned long) -1 );
     unsigned long ComputeHistogram( wxHashTable &h );
@@ -218,7 +205,7 @@ public:
     static void InitStandardHandlers();
 
 protected:
-    static wxList   sm_handlers;
+    static wxList sm_handlers;
 
 private:
     friend class WXDLLEXPORT wxImageHandler;

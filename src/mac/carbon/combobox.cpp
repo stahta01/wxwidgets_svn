@@ -14,12 +14,9 @@
 #endif
 
 #include "wx/combobox.h"
-#include "wx/menu.h"
 #include "wx/mac/uma.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxControl)
-#endif
 
 // right now we don't support editable comboboxes
 
@@ -47,9 +44,7 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 		SetControlData( m_macControl , kControlNoPart , kControlPopupButtonMenuHandleTag , sizeof( MenuHandle ) , (char*) &m_macPopUpMenuHandle) ;
 		for ( int i = 0 ; i < n ; i++ )
 		{
-			Str255 label;
-			wxMenuItem::MacBuildMenuString( label , NULL , NULL , choices[i] ,false);
-			AppendMenu( m_macPopUpMenuHandle , label ) ;
+			appendmenu( m_macPopUpMenuHandle , choices[i] ) ;
 		}
 		SetControlMinimum( m_macControl , 0 ) ;
 		SetControlMaximum( m_macControl , m_noStrings) ;
@@ -130,9 +125,7 @@ void wxComboBox::SetSelection(long from, long to)
 
 void wxComboBox::Append(const wxString& item)
 {
-	Str255 label;
-	wxMenuItem::MacBuildMenuString( label , NULL , NULL , item ,false);
-	AppendMenu( m_macPopUpMenuHandle , label ) ;
+	appendmenu( m_macPopUpMenuHandle , item ) ;
     m_noStrings ++;
 	SetControlMaximum( m_macControl , m_noStrings) ;
 }
@@ -177,16 +170,10 @@ int wxComboBox::FindString(const wxString& s) const
 
 wxString wxComboBox::GetString(int n) const
 {
-    Str255 p_text ;
-    char   c_text[255];
-    ::GetMenuItemText( m_macPopUpMenuHandle , n+1 , p_text ) ;
-#if TARGET_CARBON
-    p2cstrcpy( c_text, p_text ) ;
-#else
-	p2cstr( p_text ) ;
-    strcpy( c_text, (char *) p_text ) ;
-#endif
-    return wxString( c_text );
+	Str255 text ;
+    ::GetMenuItemText( m_macPopUpMenuHandle , n+1 , text ) ;
+    p2cstr( text ) ;
+    return wxString( text );
 }
 
 wxString wxComboBox::GetStringSelection() const

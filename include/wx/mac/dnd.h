@@ -25,11 +25,9 @@
 
 class WXDLLEXPORT wxWindow;
 
-#ifndef __WXMAC_X__
 class WXDLLEXPORT wxDataObject;
 class WXDLLEXPORT wxTextDataObject;
 class WXDLLEXPORT wxFileDataObject;
-#endif
 
 class WXDLLEXPORT wxDropTarget;
 class WXDLLEXPORT wxTextDropTarget;
@@ -37,12 +35,11 @@ class WXDLLEXPORT wxFileDropTarget;
 
 class WXDLLEXPORT wxDropSource;
 
-#ifndef __WXMAC_X__
 //-------------------------------------------------------------------------
 // wxDataObject
 //-------------------------------------------------------------------------
 
-class WXDLLEXPORT wxDataObject : public wxObject
+class WXDLLEXPORT wxDataObject: public wxObject
 {
 public:
   // all data formats (values are the same as in windows.h, do not change!)
@@ -141,8 +138,6 @@ private:
   wxString  m_files;
   
 };
-#endif
-
 //-------------------------------------------------------------------------
 // wxDropTarget
 //-------------------------------------------------------------------------
@@ -168,7 +163,6 @@ class WXDLLEXPORT wxDropTarget: public wxObject
     virtual wxDataFormat GetFormat(size_t n) const = 0;
 };
 
-#ifndef __WXMAC_X__
 //-------------------------------------------------------------------------
 // wxTextDropTarget
 //-------------------------------------------------------------------------
@@ -206,11 +200,19 @@ class WXDLLEXPORT wxFileDropTarget: public wxDropTarget
     virtual size_t GetFormatCount() const;
     virtual wxDataFormat GetFormat(size_t n) const;
 };
-#endif
 
 //-------------------------------------------------------------------------
 // wxDropSource
 //-------------------------------------------------------------------------
+
+enum wxDragResult
+  {
+    wxDragError,    // error prevented the d&d operation from completing
+    wxDragNone,     // drag target didn't accept the data
+    wxDragCopy,     // the data was successfully copied
+    wxDragMove,     // the data was successfully moved
+    wxDragCancel    // the operation was cancelled by user (not an error)
+  };
 
 class WXDLLEXPORT wxDropSource: public wxObject
 {

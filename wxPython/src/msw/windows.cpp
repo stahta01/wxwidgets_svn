@@ -4393,34 +4393,6 @@ static PyObject *_wrap_wxWindow_SetEventHandler(PyObject *self, PyObject *args, 
     return _resultobj;
 }
 
-#define wxWindow_SetExtraStyle(_swigobj,_swigarg0)  (_swigobj->SetExtraStyle(_swigarg0))
-static PyObject *_wrap_wxWindow_SetExtraStyle(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxWindow * _arg0;
-    long  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","exStyle", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Ol:wxWindow_SetExtraStyle",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxWindow_SetExtraStyle. Expected _wxWindow_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        wxWindow_SetExtraStyle(_arg0,_arg1);
-
-    wxPy_END_ALLOW_THREADS;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
 #define wxWindow_SetTitle(_swigobj,_swigarg0)  (_swigobj->SetTitle(_swigarg0))
 static PyObject *_wrap_wxWindow_SetTitle(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -9490,54 +9462,7 @@ static PyObject *_wrap_wxMenuItem_SetAccel(PyObject *self, PyObject *args, PyObj
     return _resultobj;
 }
 
-static PyObject *_wrap_wxMenuItem_GetLabelFromText(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxString * _result;
-    wxString * _arg0;
-    PyObject * _obj0 = 0;
-    char *_kwnames[] = { "text", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxMenuItem_GetLabelFromText",_kwnames,&_obj0)) 
-        return NULL;
-{
-#if PYTHON_API_VERSION >= 1009
-    char* tmpPtr; int tmpSize;
-    if (!PyString_Check(_obj0) && !PyUnicode_Check(_obj0)) {
-        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
-        return NULL;
-    }
-    if (PyString_AsStringAndSize(_obj0, &tmpPtr, &tmpSize) == -1)
-        return NULL;
-    _arg0 = new wxString(tmpPtr, tmpSize);
-#else
-    if (!PyString_Check(_obj0)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
-        return NULL;
-    }
-    _arg0 = new wxString(PyString_AS_STRING(_obj0), PyString_GET_SIZE(_obj0));
-#endif
-}
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = new wxString (wxMenuItem::GetLabelFromText(*_arg0));
-
-    wxPy_END_ALLOW_THREADS;
-}{
-    _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
-}
-{
-    if (_obj0)
-        delete _arg0;
-}
-{
-    delete _result;
-}
-    return _resultobj;
-}
-
 static PyMethodDef windowscMethods[] = {
-	 { "wxMenuItem_GetLabelFromText", (PyCFunction) _wrap_wxMenuItem_GetLabelFromText, METH_VARARGS | METH_KEYWORDS },
 	 { "wxMenuItem_SetAccel", (PyCFunction) _wrap_wxMenuItem_SetAccel, METH_VARARGS | METH_KEYWORDS },
 	 { "wxMenuItem_GetAccel", (PyCFunction) _wrap_wxMenuItem_GetAccel, METH_VARARGS | METH_KEYWORDS },
 	 { "wxMenuItem_GetHelp", (PyCFunction) _wrap_wxMenuItem_GetHelp, METH_VARARGS | METH_KEYWORDS },
@@ -9674,7 +9599,6 @@ static PyMethodDef windowscMethods[] = {
 	 { "wxWindow_TransferDataFromWindow", (PyCFunction) _wrap_wxWindow_TransferDataFromWindow, METH_VARARGS | METH_KEYWORDS },
 	 { "wxWindow_Show", (PyCFunction) _wrap_wxWindow_Show, METH_VARARGS | METH_KEYWORDS },
 	 { "wxWindow_SetTitle", (PyCFunction) _wrap_wxWindow_SetTitle, METH_VARARGS | METH_KEYWORDS },
-	 { "wxWindow_SetExtraStyle", (PyCFunction) _wrap_wxWindow_SetExtraStyle, METH_VARARGS | METH_KEYWORDS },
 	 { "wxWindow_SetEventHandler", (PyCFunction) _wrap_wxWindow_SetEventHandler, METH_VARARGS | METH_KEYWORDS },
 	 { "wxWindow_SetCursor", (PyCFunction) _wrap_wxWindow_SetCursor, METH_VARARGS | METH_KEYWORDS },
 	 { "wxWindow_SetClientSize", (PyCFunction) _wrap_wxWindow_SetClientSize, METH_VARARGS | METH_KEYWORDS },

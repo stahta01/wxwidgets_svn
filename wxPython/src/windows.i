@@ -348,7 +348,6 @@ public:
     //void SetPalette(wxPalette* palette);
     void SetCursor(const wxCursor&cursor);
     void SetEventHandler(wxEvtHandler* handler);
-    void SetExtraStyle(long exStyle);
     void SetTitle(const wxString& title);
     bool Show(bool show);
     bool TransferDataFromWindow();
@@ -709,10 +708,6 @@ public:
     const wxString& GetHelp();
     wxAcceleratorEntry *GetAccel();
     void SetAccel(wxAcceleratorEntry *accel);
-
-    static wxString GetLabelFromText(const wxString& text);
-
-    // TODO:  Add wxOwnerDrawn methods, also look at other ownerdrawn classes...
 
 };
 

@@ -20,6 +20,7 @@
   working with right types. This achieves the 2nd goal. As for the first one,
   we provide a special derivation of wxListBase called wxList which looks just
   like the old class.
+	Last change:  AC   27 Jan 101    4:38 pm
 */
 
 #ifndef _WX_LISTH__
@@ -245,9 +246,7 @@ public:
     wxListBase(void *object, ... /* terminate with NULL */);
 
 protected:
-        // copy ctor and assignment operator
-    wxListBase(const wxListBase& list)
-        { Init(); DoCopy(list); }
+        // assignment operator
     wxListBase& operator=(const wxListBase& list)
         { Clear(); DoCopy(list); return *this; }
 
@@ -323,6 +322,11 @@ private:
                *m_nodeLast;
 
     wxKeyType m_keyType;        // type of our keys (may be wxKEY_NONE)
+
+protected:
+        // copy ctor. This has to go below Init, or VC++ 1.5 will complain.
+    wxListBase(const wxListBase& list)
+        { Init(); DoCopy(list); }
 };
 
 // -----------------------------------------------------------------------------
@@ -484,9 +488,6 @@ class WXDLLEXPORT wxList : public wxObjectList
 {
 public:
     wxList(int key_type = wxKEY_NONE) : wxObjectList((wxKeyType)key_type) { }
-#ifdef __WXMAC_X__
-   ~wxList() {}   // Added min for Mac X
-#endif
 
     wxList& operator=(const wxList& list)
         { return (wxList&)wxListBase::operator=(list); }

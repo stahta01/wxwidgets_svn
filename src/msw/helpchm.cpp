@@ -102,48 +102,6 @@ bool wxCHMHelpController::DisplaySection(int section)
     return TRUE;
 }
 
-bool wxCHMHelpController::DisplayContextPopup(int contextId)
-{
-    if (m_helpFile.IsEmpty()) return FALSE;
-
-    wxString str = GetValidFilename(m_helpFile);
-
-    // We also have to specify the popups file (default is cshelp.txt).
-    // str += wxT("::/cshelp.txt");
-
-    HH_POPUP popup;
-    popup.cbStruct = sizeof(popup);
-    popup.hinst = (HINSTANCE) wxGetInstance();
-    popup.idString = contextId ;
-
-    GetCursorPos(& popup.pt);
-    popup.clrForeground = -1;
-    popup.clrBackground = -1;
-    popup.rcMargins.top = popup.rcMargins.left = popup.rcMargins.right = popup.rcMargins.bottom = -1;
-    popup.pszFont = NULL;
-    popup.pszText = NULL;
-
-    HtmlHelp(GetSuitableHWND(), (const wxChar*) str, HH_DISPLAY_TEXT_POPUP, (DWORD) & popup);
-    return TRUE;
-}
-
-bool wxCHMHelpController::DisplayTextPopup(const wxString& text, const wxPoint& pos)
-{
-    HH_POPUP popup;
-    popup.cbStruct = sizeof(popup);
-    popup.hinst = (HINSTANCE) wxGetInstance();
-    popup.idString = 0 ;
-    popup.pt.x = pos.x; popup.pt.y = pos.y;
-    popup.clrForeground = -1;
-    popup.clrBackground = -1;
-    popup.rcMargins.top = popup.rcMargins.left = popup.rcMargins.right = popup.rcMargins.bottom = -1;
-    popup.pszFont = NULL;
-    popup.pszText = (const wxChar*) text;
-
-    HtmlHelp(GetSuitableHWND(), NULL, HH_DISPLAY_TEXT_POPUP, (DWORD) & popup);
-    return TRUE;
-}
-
 bool wxCHMHelpController::DisplayBlock(long block)
 {
     return DisplaySection(block);

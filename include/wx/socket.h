@@ -348,12 +348,9 @@ public:
 
 typedef void (wxEvtHandler::*wxSocketEventFunction)(wxSocketEvent&);
 
-#define EVT_SOCKET(id, func) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_SOCKET, id, -1, \
-                              (wxObjectEventFunction) \
-                              (wxEventFunction) \
-                              (wxSocketEventFunction) & func, \
-                              (wxObject *) NULL ),
+#define EVT_SOCKET(id, func) { wxEVT_SOCKET, id, -1, \
+  (wxObjectEventFunction) (wxEventFunction) (wxSocketEventFunction) & func, \
+  (wxObject *) NULL },
 
 
 #endif
