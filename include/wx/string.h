@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -1261,7 +1261,7 @@ inline wxString operator+(const wxCharBuffer& buf, const wxString& string)
 
 #if defined(wxSTD_STRING_COMPATIBILITY) && wxUSE_STD_IOSTREAM
 
-#include "wx/iosfwrap.h"
+#include "wx/ioswrap.h"
 
 WXDLLEXPORT wxSTD istream& operator>>(wxSTD istream&, wxString&);
 WXDLLEXPORT wxSTD ostream& operator<<(wxSTD ostream&, const wxString&);

@@ -6,7 +6,7 @@
 // Created:     22.10.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CTRLSUB_H_BASE_
@@ -57,8 +57,6 @@ public:
     // -----------------
 
     virtual int GetCount() const = 0;
-    bool IsEmpty() const { return GetCount() == 0; }
-
     virtual wxString GetString(int n) const = 0;
     virtual void SetString(int n, const wxString& s) = 0;
     virtual int FindString(const wxString& s) const = 0;

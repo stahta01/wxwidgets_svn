@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -202,8 +202,6 @@ private:
     inline size_t32 Swap(size_t32 ui) const;
 
     bool          m_bSwapped;   // wrong endianness?
-
-    DECLARE_NO_COPY_CLASS(wxMsgCatalogFile)
 };
 
 
@@ -611,8 +609,6 @@ bool wxLocale::Init(const wxChar *szName,
   {
     // the argument to setlocale()
     szLocale = szShort;
-
-    wxCHECK_MSG( szLocale, FALSE, _T("no locale to set in wxLocale::Init()") );
   }
   m_pszOldLocale = wxSetlocale(LC_ALL, szLocale);
   if ( m_pszOldLocale == NULL )
@@ -772,13 +768,9 @@ bool wxLocale::Init(int language, int flags)
 #endif
 
 #ifndef WX_NO_LOCALE_SUPPORT
-     wxChar *szLocale = retloc ? wxStrdup(retloc) : NULL;
-    bool ret = Init(name, canonical, retloc,
-                    (flags & wxLOCALE_LOAD_DEFAULT) != 0,
-                    (flags & wxLOCALE_CONV_ENCODING) != 0);
-    if (szLocale)
-        free(szLocale);
-    return ret;
+    return Init(name, canonical, retloc,
+                (flags & wxLOCALE_LOAD_DEFAULT) != 0,
+                (flags & wxLOCALE_CONV_ENCODING) != 0);
 #endif
 }
 
@@ -1395,7 +1387,7 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
 {
     CreateLanguagesDB();
 
-    const size_t count = ms_languagesDB->GetCount();
+    size_t count = ms_languagesDB->GetCount();
     for ( size_t i = 0; i < count; i++ )
     {
         if ( ms_languagesDB->Item(i).Language == lang )
@@ -1405,42 +1397,6 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
     }
 
     return NULL;
-}
-
-/* static */
-const wxLanguageInfo *wxLocale::FindLanguageInfo(const wxString& locale)
-{
-    CreateLanguagesDB();
-
-    const wxLanguageInfo *infoRet = NULL;
-
-    const size_t count = ms_languagesDB->GetCount();
-    for ( size_t i = 0; i < count; i++ )
-    {
-        const wxLanguageInfo *info = &ms_languagesDB->Item(i);
-
-        if ( wxStricmp(locale, info->CanonicalName) == 0 ||
-                wxStricmp(locale, info->Description) == 0 )
-        {
-            // exact match, stop searching
-            infoRet = info;
-            break;
-        }
-
-        if ( wxStricmp(locale, info->CanonicalName.BeforeFirst(_T('_'))) == 0 )
-        {
-            // a match -- but maybe we'll find an exact one later, so continue
-            // looking
-            //
-            // OTOH, maybe we had already found a language match and in this
-            // case don't overwrite it becauce the entry for the default
-            // country always appears first in ms_languagesDB
-            if ( !infoRet )
-                infoRet = info;
-        }
-    }
-
-    return infoRet;
 }
 
 wxString wxLocale::GetSysName() const

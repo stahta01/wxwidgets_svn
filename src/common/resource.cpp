@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:    wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:    wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -119,25 +119,23 @@ void wxCleanUpResourceSystem()
         delete[] wxResourceBuffer;
 }
 
-#if 0
 void wxLogWarning(char *msg)
 {
     wxMessageBox(msg, _("Warning"), wxOK);
 }
-#endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxItemResource, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(wxResourceTable, wxHashTable)
 
 wxItemResource::wxItemResource()
 {
-    m_itemType = wxT("");
-    m_title = wxT("");
-    m_name = wxT("");
+    m_itemType = "";
+    m_title = "";
+    m_name = "";
     m_windowStyle = 0;
     m_x = m_y = m_width = m_height = 0;
     m_value1 = m_value2 = m_value3 = m_value5 = 0;
-    m_value4 = wxT("");
+    m_value4 = "";
     m_windowId = 0;
     m_exStyle = 0;
 }
@@ -232,7 +230,7 @@ bool wxResourceTable::ParseResourceFile(const wxString& filename)
 {
     wxExprDatabase db;
 
-    FILE *fd = wxFopen(filename, wxT("r"));
+    FILE *fd = wxFopen(filename, _T("r"));
     if (!fd)
         return FALSE;
     bool eof = FALSE;
@@ -343,7 +341,7 @@ wxControl *wxResourceTable::CreateItem(wxWindow *parent, const wxItemResource* c
                 //
                 bitmap.LoadFile(wxCROSS_BITMAP, wxBITMAP_TYPE_BMP_RESOURCE);
 #else
-                bitmap.LoadFile(wxT("cross_bmp"), wxBITMAP_TYPE_BMP_RESOURCE);
+                bitmap.LoadFile("cross_bmp", wxBITMAP_TYPE_BMP_RESOURCE);
 #endif
             control = new wxBitmapButton(parent, id, bitmap, pos, size,
                 childResource->GetStyle() | wxBU_AUTODRAW, wxDefaultValidator, childResource->GetName());
@@ -369,7 +367,7 @@ wxControl *wxResourceTable::CreateItem(wxWindow *parent, const wxItemResource* c
 #ifdef __WXMSW__
             // Use a default bitmap
             if (!bitmap.Ok())
-                bitmap.LoadFile(wxT("cross_bmp"), wxBITMAP_TYPE_BMP_RESOURCE);
+                bitmap.LoadFile("cross_bmp", wxBITMAP_TYPE_BMP_RESOURCE);
 #endif
 
             if (bitmap.Ok())
@@ -2647,7 +2645,7 @@ wxIcon wxResourceCreateIcon(const wxString& resource, wxResourceTable *table)
             }
         default:
             {
-#if defined( __WXGTK__ ) || defined( __WXMOTIF__ )
+#ifdef __WXGTK__
                 wxLogWarning(_("Icon resource specification %s not found."), (const wxChar*) resource);
                 break;
 #else
@@ -2737,15 +2735,6 @@ bool wxResourceParseData(const wxString& resource, wxResourceTable *table)
     return table->ParseResourceData(resource);
 }
 
-bool wxResourceParseData(const char* resource, wxResourceTable *table)
-{
-    wxString str(resource, wxConvLibc);
-    if (!table)
-        table = wxDefaultResourceTable;
-
-    return table->ParseResourceData(str);
-}
-
 bool wxResourceParseFile(const wxString& filename, wxResourceTable *table)
 {
     if (!table)
@@ -2809,7 +2798,7 @@ bool wxResourceParseIncludeFile(const wxString& f, wxResourceTable *table)
     if (!table)
         table = wxDefaultResourceTable;
 
-    FILE *fd = wxFopen(f, wxT("r"));
+    FILE *fd = wxFopen(f, _T("r"));
     if (!fd)
     {
         return FALSE;
@@ -3109,15 +3098,6 @@ bool wxResourceReadOneResourceString(char *s, wxExprDatabase& db, bool *eof, wxR
         *eof = TRUE;
     }
     return TRUE;
-}
-
-bool wxResourceParseString(const wxString& s, wxResourceTable *table)
-{
-#if wxUSE_UNICODE
-    return wxResourceParseString( (char*)s.mb_str().data() );
-#else
-    return wxResourceParseString( (char*)s.c_str() );
-#endif
 }
 
 bool wxResourceParseString(char *s, wxResourceTable *table)

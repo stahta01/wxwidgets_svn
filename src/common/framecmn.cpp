@@ -4,7 +4,7 @@
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -39,6 +39,11 @@
 #endif
 #if wxUSE_STATUSBAR
     #include "wx/statusbr.h"
+#endif
+
+// FIXME - temporary hack in absence of wxTLW in all ports!
+#ifndef wxTopLevelWindowNative
+    #define wxTopLevelWindow wxTopLevelWindowBase
 #endif
 
 // ----------------------------------------------------------------------------

@@ -81,6 +81,7 @@ public:
     virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
+    virtual void SetNativeFontInfo(const wxNativeFontInfo& info);
 
     virtual bool IsFixedWidth() const;
 
@@ -101,8 +102,6 @@ public:
      */
 
 protected:
-    virtual void DoSetNativeFontInfo(const wxNativeFontInfo& info);
-
     // common part of all ctors
     void Init();
 

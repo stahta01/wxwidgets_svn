@@ -6,7 +6,7 @@
 // Created:     10.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_RADIOBOX_H_BASE_
@@ -106,6 +106,8 @@ public:
     #include "wx/mac/radiobox.h"
 #elif defined(__WXPM__)
     #include "wx/os2/radiobox.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/radiobox.h"
 #endif
 
 #endif // wxUSE_RADIOBOX

@@ -55,8 +55,6 @@
 #include "wx/imaglist.h"
 #include "wx/dir.h"
 #include "wx/artprov.h"
-#include "wx/hash.h"
-#include "wx/file.h"        // for wxS_IXXX constants only
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -368,11 +366,16 @@ int wxFileIconsTable::GetIconID(const wxString& extension, const wxString& mime)
         m_HashTable.Put(extension, new wxFileIconEntry(newid));
         return newid;
     }
-    
-    wxBitmap tmpBmp;
-    tmpBmp.CopyFromIcon(ic);
-    wxImage img = tmpBmp.ConvertToImage();
-    
+#ifdef __WIN32__
+    wxBitmap myBitmap (ic.GetWidth(), ic.GetHeight() ) ;
+    wxMemoryDC memDC;
+    memDC.SelectObject( myBitmap );
+    memDC.DrawIcon(ic,0,0);
+    memDC.SelectObject( wxNullBitmap );
+    wxImage img = myBitmap.ConvertToImage();
+#else
+    wxImage img = ic.ConvertToImage();
+#endif
     delete ft;
 
     int id = m_ImageList.GetImageCount();
@@ -442,29 +445,37 @@ wxFileData::wxFileData( const wxString &name, const wxString &fname )
     if (name.length() == 2 && name[1u] == wxT(':'))
     {
         m_isDir = TRUE;
-        m_isExe =
-        m_isLink = FALSE;
+        m_isExe = m_isLink = FALSE;
         m_size = 0;
         return;
     }
-#endif // __DOS__ || __WINDOWS__
-
-    wxStructStat buff;
-
-#if defined(__UNIX__) && (!defined( __EMX__ ) && !defined(__VMS))
-    lstat( m_fileName.fn_str(), &buff );
-    m_isLink = S_ISLNK( buff.st_mode );
-#else // no lstat()
-    wxStat( m_fileName, &buff );
-    m_isLink = FALSE;
 #endif
 
-    m_isDir = (buff.st_mode & S_IFDIR) != 0;
-    m_isExe = (buff.st_mode & wxS_IXUSR) != 0;
+    wxStructStat buff;
+    wxStat( m_fileName, &buff );
+
+#if defined(__UNIX__) && (!defined( __EMX__ ) && !defined(__VMS))
+    struct stat lbuff;
+    lstat( m_fileName.fn_str(), &lbuff );
+    m_isLink = S_ISLNK( lbuff.st_mode );
+    struct tm *t = localtime( &lbuff.st_mtime );
+#else
+    m_isLink = FALSE;
+    struct tm *t = localtime( &buff.st_mtime );
+#endif
+
+//  struct passwd *user = getpwuid( buff.st_uid );
+//  struct group *grp = getgrgid( buff.st_gid );
+
+#ifdef __VISUALC__
+    m_isDir = ((buff.st_mode & _S_IFDIR ) == _S_IFDIR );
+#else
+	m_isDir = S_ISDIR( buff.st_mode );
+#endif // VC++
+    m_isExe = ((buff.st_mode & wxS_IXUSR ) == wxS_IXUSR );
 
     m_size = buff.st_size;
 
-    const struct tm * const t = localtime( &buff.st_mtime );
     m_hour = t->tm_hour;
     m_minute = t->tm_min;
     m_month = t->tm_mon+1;
@@ -472,10 +483,21 @@ wxFileData::wxFileData( const wxString &name, const wxString &fname )
     m_year = t->tm_year;
     m_year += 1900;
 
-    m_permissions.Printf(_T("%c%c%c"),
-                         buff.st_mode & wxS_IRUSR ? _T('r') : _T('-'),
-                         buff.st_mode & wxS_IWUSR ? _T('w') : _T('-'),
-                         buff.st_mode & wxS_IXUSR ? _T('x') : _T('-'));
+    char buffer[10];
+    sprintf( buffer, "%c%c%c",
+     ((( buff.st_mode & wxS_IRUSR ) == wxS_IRUSR ) ? 'r' : '-'),
+     ((( buff.st_mode & wxS_IWUSR ) == wxS_IWUSR ) ? 'w' : '-'),
+     ((( buff.st_mode & wxS_IXUSR ) == wxS_IXUSR ) ? 'x' : '-') );
+#if wxUSE_UNICODE
+    m_permissions = wxConvUTF8.cMB2WC( buffer );
+#else
+    m_permissions = buffer;
+#endif
+
+//    m_permissions.sprintf( wxT("%c%c%c"),
+//     ((( buff.st_mode & S_IRUSR ) == S_IRUSR ) ? wxT('r') : wxT('-')),
+//     ((( buff.st_mode & S_IWUSR ) == S_IWUSR ) ? wxT('w') : wxT('-')),
+//     ((( buff.st_mode & S_IXUSR ) == S_IXUSR ) ? wxT('x') : wxT('-')) );
 }
 
 wxString wxFileData::GetName() const
@@ -1223,12 +1245,6 @@ wxFileDialog::~wxFileDialog()
         wxConfig::Get()->Write(wxT("/wxWindows/wxFileDialog/ShowHidden"),
                                ms_lastShowHidden);
     }
-
-    const int count = m_choice->GetCount();
-    for ( int i = 0; i < count; i++ )
-    {
-        delete (wxString *)m_choice->GetClientData(i);
-    }
 }
 
 int wxFileDialog::ShowModal()
@@ -1295,13 +1311,13 @@ void wxFileDialog::OnTextChange( wxCommandEvent &WXUNUSED(event) )
         // not get the file whose name they typed.
         if (m_list->GetSelectedItemCount() > 0)
         {
-            long item = m_list->GetNextItem(-1, wxLIST_NEXT_ALL,
+    	    long item = m_list->GetNextItem(-1, wxLIST_NEXT_ALL,
                 wxLIST_STATE_SELECTED);
             while ( item != -1 )
-            {
+    	    {
                 m_list->SetItemState(item,0, wxLIST_STATE_SELECTED);
                 item = m_list->GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-            }
+    	    }
         }
     }
 }
@@ -1548,98 +1564,50 @@ void wxFileDialog::GetFilenames(wxArrayString& files) const
 // global functions
 // ----------------------------------------------------------------------------
 
-// common part of both wxFileSelectorEx() and wxFileSelector()
-static wxString
-DoSelectFile(const wxChar *title,
-             const wxChar *defaultDir,
-             const wxChar *defaultFileName,
-             const wxChar *defaultExtension,
-             int *indexDefaultExtension,
-             const wxChar *filter,
-             int flags,
-             wxWindow *parent,
-             int x,
-             int y)
-{
-    // the filter may be either given explicitly or created automatically from
-    // the default extension
-    wxString filterReal;
-    if ( filter )
-    {
-        // the user has specified the filter explicitly, use it
-        filterReal = filter;
-    }
-    else if ( !wxIsEmpty(defaultExtension) )
-    {
-        // create the filter to match the given extension
-        filterReal << wxT("*.") << defaultExtension;
-    }
-
-    wxFileDialog fileDialog(parent,
-                            title,
-                            defaultDir,
-                            defaultFileName,
-                            filterReal,
-                            flags,
-                            wxPoint(x, y));
-
-    wxString path;
-    if ( fileDialog.ShowModal() == wxID_OK )
-    {
-        path = fileDialog.GetPath();
-        if ( indexDefaultExtension )
-        {
-            *indexDefaultExtension = fileDialog.GetFilterIndex();
-        }
-    }
-
-    return path;
-}
-
 wxString
-wxFileSelectorEx(const wxChar *title,
-                 const wxChar *defaultDir,
-                 const wxChar *defaultFileName,
-                 int *indexDefaultExtension,
-                 const wxChar *filter,
+wxFileSelectorEx(const wxChar *message,
+                 const wxChar *default_path,
+                 const wxChar *default_filename,
+                 int *WXUNUSED(indexDefaultExtension),
+                 const wxChar *wildcard,
                  int flags,
                  wxWindow *parent,
-                 int x,
-                 int y)
+                 int x, int y)
 {
-    return DoSelectFile(title,
-                        defaultDir,
-                        defaultFileName,
-                        wxT(""),                // def ext determined by index
-                        indexDefaultExtension,
-                        filter,
-                        flags,
-                        parent,
-                        x,
-                        y);
+    // TODO: implement this somehow
+    return wxFileSelector(message, default_path, default_filename, wxT(""),
+                          wildcard, flags, parent, x, y);
 }
 
-wxString
-wxFileSelector(const wxChar *title,
-               const wxChar *defaultDir,
-               const wxChar *defaultFileName,
-               const wxChar *defaultExtension,
-               const wxChar *filter,
-               int flags,
-               wxWindow *parent,
-               int x,
-               int y)
+wxString wxFileSelector( const wxChar *title,
+                      const wxChar *defaultDir, const wxChar *defaultFileName,
+                      const wxChar *defaultExtension, const wxChar *filter, int flags,
+                      wxWindow *parent, int x, int y )
 {
-    return DoSelectFile(title,
-                        defaultDir,
-                        defaultFileName,
-                        defaultExtension,
-                        NULL,               // not interested in filter index
-                        filter,
-                        flags,
-                        parent,
-                        x,
-                        y);
+    wxString filter2;
+    if ( defaultExtension && !filter )
+        filter2 = wxString(wxT("*.")) + wxString(defaultExtension) ;
+    else if ( filter )
+        filter2 = filter;
+
+    wxString defaultDirString;
+    if (defaultDir)
+        defaultDirString = defaultDir;
+
+    wxString defaultFilenameString;
+    if (defaultFileName)
+        defaultFilenameString = defaultFileName;
+
+    wxFileDialog fileDialog( parent, title, defaultDirString, defaultFilenameString, filter2, flags, wxPoint(x, y) );
+
+    if ( fileDialog.ShowModal() == wxID_OK )
+    {
+        return fileDialog.GetPath();
+    }
+    else
+    {
+        return wxEmptyString;
+    }
 }
 
 static wxString GetWildcardString(const wxChar *ext)

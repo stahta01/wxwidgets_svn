@@ -6,7 +6,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -165,8 +165,7 @@ public:
                                    const wxString& label,
                                    const wxBitmap& bitmap,
                                    const wxRect& rect,
-                                   int flags = 0,
-                                   long style = 0);
+                                   int flags);
 
     virtual void DrawTextLine(wxDC& dc,
                               const wxString& text,
@@ -185,25 +184,21 @@ public:
 
     virtual void DrawSliderShaft(wxDC& dc,
                                  const wxRect& rect,
-                                 int lenThumb,
                                  wxOrientation orient,
                                  int flags = 0,
-                                 long style = 0,
                                  wxRect *rectShaft = NULL);
     virtual void DrawSliderThumb(wxDC& dc,
                                  const wxRect& rect,
                                  wxOrientation orient,
-                                 int flags = 0,
-                                 long style = 0);
+                                 int flags = 0);
     virtual void DrawSliderTicks(wxDC& dc,
                                  const wxRect& rect,
-                                 int lenThumb,
+                                 const wxSize& sizeThumb,
                                  wxOrientation orient,
                                  int start,
                                  int end,
-                                 int step = 1,
-                                 int flags = 0,
-                                 long style = 0)
+                                 int step,
+                                 int flags)
     {
         // we don't have the ticks in GTK version
     }
@@ -310,11 +305,8 @@ public:
     virtual wxCoord GetSliderDim() const { return 15; }
     virtual wxCoord GetSliderTickLen() const { return 0; }
     virtual wxRect GetSliderShaftRect(const wxRect& rect,
-                                      int lenThumb,
-                                      wxOrientation orient,
-                                      long style = 0) const;
+                                      wxOrientation orient) const;
     virtual wxSize GetSliderThumbSize(const wxRect& rect,
-                                      int lenThumb,
                                       wxOrientation orient) const;
     virtual wxSize GetProgressBarStep() const { return wxSize(16, 32); }
 
@@ -1618,10 +1610,6 @@ void wxGTKRenderer::DrawRadioButton(wxDC& dc,
         dc.SetBackground(*wxLIGHT_GREY_BRUSH);
         dc.Clear();
         DrawRadioBitmap(dc, rect, flags);
-
-        // must unselect the bitmap before setting a mask for it because of the
-        // MSW limitations
-        dc.SelectObject(wxNullBitmap);
         bitmap.SetMask(new wxMask(bitmap, *wxLIGHT_GREY));
     }
 
@@ -1633,8 +1621,7 @@ void wxGTKRenderer::DrawToolBarButton(wxDC& dc,
                                       const wxString& label,
                                       const wxBitmap& bitmap,
                                       const wxRect& rectOrig,
-                                      int flags,
-                                      long style)
+                                      int flags)
 {
     // we don't draw the separators at all
     if ( !label.empty() || bitmap.Ok() )
@@ -1874,14 +1861,13 @@ void wxGTKRenderer::DrawTab(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 wxSize wxGTKRenderer::GetSliderThumbSize(const wxRect& rect,
-                                         int lenThumb,
                                          wxOrientation orient) const
 {
     static const wxCoord SLIDER_THUMB_LENGTH = 30;
 
     wxSize size;
 
-    wxRect rectShaft = GetSliderShaftRect(rect, lenThumb, orient);
+    wxRect rectShaft = GetSliderShaftRect(rect, orient);
     if ( orient == wxHORIZONTAL )
     {
         size.x = wxMin(SLIDER_THUMB_LENGTH, rectShaft.width);
@@ -1897,19 +1883,15 @@ wxSize wxGTKRenderer::GetSliderThumbSize(const wxRect& rect,
 }
 
 wxRect wxGTKRenderer::GetSliderShaftRect(const wxRect& rect,
-                                         int lenThumb,
-                                         wxOrientation WXUNUSED(orient),
-                                         long style) const
+                                         wxOrientation WXUNUSED(orient)) const
 {
     return rect.Deflate(2*BORDER_THICKNESS, 2*BORDER_THICKNESS);
 }
 
 void wxGTKRenderer::DrawSliderShaft(wxDC& dc,
                                     const wxRect& rectOrig,
-                                    int lenThumb,
                                     wxOrientation orient,
                                     int flags,
-                                    long style,
                                     wxRect *rectShaft)
 {
     wxRect rect = rectOrig;
@@ -1936,8 +1918,7 @@ void wxGTKRenderer::DrawSliderShaft(wxDC& dc,
 void wxGTKRenderer::DrawSliderThumb(wxDC& dc,
                                     const wxRect& rectOrig,
                                     wxOrientation orient,
-                                    int flags,
-                                    long style)
+                                    int flags)
 {
     // draw the thumb border
     wxRect rect = rectOrig;

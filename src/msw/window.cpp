@@ -5,8 +5,8 @@
 // Modified by: VZ on 13.05.99: no more Default(), MSWOnXXX() reorganisation
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -56,17 +56,6 @@
 
 #if wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
-#endif
-
-#if wxUSE_ACCESSIBILITY
-    #include "wx/access.h"
-    #include <oleacc.h>
-    #ifndef WM_GETOBJECT
-        #define WM_GETOBJECT 0x003D
-    #endif
-    #ifndef OBJID_CLIENT
-        #define OBJID_CLIENT 0xFFFFFFFC
-    #endif
 #endif
 
 #include "wx/menuitem.h"
@@ -404,6 +393,17 @@ bool wxWindowMSW::Create(wxWindow *parent,
                          const wxString& name)
 {
     wxCHECK_MSG( parent, FALSE, wxT("can't create wxWindow without parent") );
+
+#if wxUSE_STATBOX
+    // wxGTK doesn't allow to create controls with static box as the parent so
+    // this will result in a crash when the program is ported to wxGTK - warn
+    // about it
+    //
+    // the correct solution is to create the controls as siblings of the
+    // static box
+    wxASSERT_MSG( !wxDynamicCast(parent, wxStaticBox),
+                  _T("wxStaticBox can't be used as a window parent!") );
+#endif // wxUSE_STATBOX
 
     if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
@@ -1463,10 +1463,14 @@ void wxWindowMSW::Refresh(bool eraseBack, const wxRect *rect)
 
 void wxWindowMSW::Update()
 {
+#ifdef __WXWINE__
+    ::UpdateWindow(GetHwnd());
+#else
     if ( !::UpdateWindow(GetHwnd()) )
     {
         wxLogLastError(_T("UpdateWindow"));
     }
+#endif
 
 #if defined(__WIN32__) && !defined(__WXMICROWIN__)
     // just calling UpdateWindow() is not enough, what we did in our WM_PAINT
@@ -2309,10 +2313,8 @@ LRESULT WXDLLEXPORT APIENTRY _EXPORT wxWndProc(HWND hWnd, UINT message, WPARAM w
 {
     // trace all messages - useful for the debugging
 #ifdef __WXDEBUG__
-#if wxUSE_LOG
     wxLogTrace(wxTraceMessages, wxT("Processing %s(wParam=%8lx, lParam=%8lx)"),
                wxGetMessageName(message), (long) wParam, lParam);
-#endif // wxUSE_LOG
 #endif // __WXDEBUG__
 
     wxWindowMSW *wnd = wxFindWinFromHandle((WXHWND) hWnd);
@@ -2838,20 +2840,6 @@ long wxWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam
             }
             break;
 
-#if wxUSE_ACCESSIBILITY
-        case WM_GETOBJECT:
-            {
-                //WPARAM dwFlags = (WPARAM) (DWORD) wParam;
-                LPARAM dwObjId = (LPARAM) (DWORD) lParam;
-
-                if (dwObjId == OBJID_CLIENT && GetOrCreateAccessible())
-                {
-                    return LresultFromObject(IID_IAccessible, wParam, (IUnknown*) GetAccessible()->GetIAccessible());
-                }
-                break;
-            }
-#endif
-
 #if defined(__WIN32__) && defined(WM_HELP)
         case WM_HELP:
             {
@@ -2899,30 +2887,14 @@ long wxWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam
                 processed = GetEventHandler()->ProcessEvent(evtCtx);
             }
             break;
-
-        case WM_MENUCHAR:
-            // we're only interested in our own menus, not MF_SYSMENU
-            if ( HIWORD(wParam) == MF_POPUP )
-            {
-                // handle menu chars for ownerdrawn menu items
-                int i = HandleMenuChar(toupper(LOWORD(wParam)), lParam);
-                if ( i != wxNOT_FOUND )
-                {
-                    rc.result = MAKELRESULT(i, MNC_EXECUTE);
-                    processed = TRUE;
-                }
-            }
-            break;
 #endif // __WIN32__
     }
 
     if ( !processed )
     {
 #ifdef __WXDEBUG__
-#if wxUSE_LOG
         wxLogTrace(wxTraceMessages, wxT("Forwarding %s to DefWindowProc."),
                    wxGetMessageName(message));
-#endif // wxUSE_LOG
 #endif // __WXDEBUG__
         rc.result = MSWDefWindowProc(message, wParam, lParam);
     }
@@ -3325,7 +3297,9 @@ bool wxWindowMSW::HandleCreate(WXLPCREATESTRUCT cs, bool *mayCreate)
 
 bool wxWindowMSW::HandleDestroy()
 {
-    SendDestroyEvent();
+    wxWindowDestroyEvent event((wxWindow *)this);
+    event.SetId(GetId());
+    (void)GetEventHandler()->ProcessEvent(event);
 
     // delete our drop target if we've got one
 #if wxUSE_DRAG_AND_DROP
@@ -4505,69 +4479,6 @@ bool wxWindowMSW::HandleKeyUp(WXWPARAM wParam, WXLPARAM lParam)
     return FALSE;
 }
 
-#ifdef __WIN32__
-
-int wxWindowMSW::HandleMenuChar(int chAccel, WXLPARAM lParam)
-{
-    const HMENU hmenu = (HMENU)lParam;
-
-    MENUITEMINFO mii;
-    wxZeroMemory(mii);
-    mii.cbSize = sizeof(MENUITEMINFO);
-    mii.fMask = MIIM_TYPE | MIIM_DATA;
-
-    // find if we have this letter in any owner drawn item
-    const int count = ::GetMenuItemCount(hmenu);
-    for ( int i = 0; i < count; i++ )
-    {
-        if ( ::GetMenuItemInfo(hmenu, i, TRUE, &mii) )
-        {
-            if ( mii.fType == MFT_OWNERDRAW )
-            {
-                //  dwItemData member of the MENUITEMINFO is a
-                //  pointer to the associated wxMenuItem -- see the
-                //  menu creation code
-                wxMenuItem *item = (wxMenuItem*)mii.dwItemData;
-
-                const wxChar *p = wxStrchr(item->GetText(), _T('&'));
-                while ( p++ )
-                {
-                    if ( *p == _T('&') )
-                    {
-                        // this is not the accel char, find the real one
-                        p = wxStrchr(p + 1, _T('&'));
-                    }
-                    else // got the accel char
-                    {
-                        // FIXME-UNICODE: this comparison doesn't risk to work
-                        // for non ASCII accelerator characters I'm afraid, but
-                        // what can we do?
-                        if ( wxToupper(*p) == chAccel )
-                        {
-                            return i;
-                        }
-                        else
-                        {
-                            // this one doesn't match
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        else // failed ot get the menu text?
-        {
-            // it's not fatal, so don't show error, but still log
-            // it
-            wxLogLastError(_T("GetMenuItemInfo"));
-        }
-    }
-
-    return wxNOT_FOUND;
-}
-
-#endif // __WIN32__
-
 // ---------------------------------------------------------------------------
 // joystick
 // ---------------------------------------------------------------------------
@@ -4860,12 +4771,6 @@ int wxCharCodeMSWToWX(int keySym)
         case VK_OEM_6:      id = ']'; break;
         case VK_OEM_7:      id = '\''; break;
 
-#ifdef VK_APPS
-        case VK_LWIN:       id = WXK_WINDOWS_LEFT; break;
-        case VK_RWIN:       id = WXK_WINDOWS_RIGHT; break;
-        case VK_APPS:       id = WXK_WINDOWS_MENU; break;
-#endif // VK_APPS defined
-
         default:
             id = 0;
     }
@@ -5055,7 +4960,7 @@ void wxSetKeyboardHook(bool doIt)
 
         // avoids warning about statement with no effect (FreeProcInstance
         // doesn't do anything under Win32)
-#if !defined(__WIN32__) && !defined(__NT__)
+#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) && !defined(__NT__) && !defined(__GNUWIN32__)
         FreeProcInstance(wxTheKeyboardHookProc);
 #endif
     }

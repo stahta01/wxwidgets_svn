@@ -3,9 +3,7 @@ ifeq ($(WXWIN),)
 WXWIN=../..
 endif
 
-include $(WXWIN)/src/makelib.g95
-
-LIBTARGET=$(WXWIN)/lib/libregex$(MIN_SUFFIX).a
+LIBTARGET=$(WXWIN)/lib/libregex.a
 
 OBJECTS= \
 		regcomp.o \

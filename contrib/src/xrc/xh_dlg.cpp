@@ -34,7 +34,6 @@ wxDialogXmlHandler::wxDialogXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxSYSTEM_MENU);
     XRC_ADD_STYLE(wxRESIZE_BORDER);
     XRC_ADD_STYLE(wxRESIZE_BOX);
-    XRC_ADD_STYLE(wxCLOSE_BOX);
     XRC_ADD_STYLE(wxDIALOG_MODAL);
     XRC_ADD_STYLE(wxDIALOG_MODELESS);
 

@@ -145,11 +145,8 @@ wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxStri
     return new wxFSFile(s,
                         right,
                         info->GetMime(),
-                        GetAnchor(location)
-#if wxUSE_DATETIME
-                        , wxDateTime::Now()
-#endif // wxUSE_DATETIME
-                        );
+                        GetAnchor(location),
+                        wxDateTime::Now());
 }
 
 

@@ -15,6 +15,8 @@
 #include "wx/mac/gdiobj.h"
 #elif defined(__WXPM__)
 #include "wx/os2/gdiobj.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/gdiobj.h"
 #endif
 
 #endif

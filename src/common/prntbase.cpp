@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -285,7 +285,7 @@ void wxPreviewControlBar::OnPrint(wxCommandEvent& WXUNUSED(event))
 
 void wxPreviewControlBar::OnChar(wxKeyEvent &event)
 {
-   switch(event.GetKeyCode())
+   switch(event.KeyCode())
    {
    case WXK_NEXT:
       OnNext(); break;

@@ -81,9 +81,7 @@
     #define DEFAULT_XRESOURCE_DIR "/usr/lib/X11/app-defaults"
 #endif
 
-#if wxUSE_RESOURCES
 static char *GetIniFile (char *dest, const char *filename);
-#endif
 
 // ============================================================================
 // implementation
@@ -228,8 +226,6 @@ int wxGetOsVersion(int *majorVsn, int *minorVsn)
 // Reading and writing resources (eg WIN.INI, .Xdefaults)
 // ----------------------------------------------------------------------------
 
-#if wxUSE_RESOURCES
-
 // Read $HOME for what it says is home, if not
 // read $USER or $LOGNAME for user name else determine
 // the Real User, then determine the Real home dir.
@@ -260,6 +256,8 @@ static char * GetIniFile (char *dest, const char *filename)
     return dest;
 }
 
+#if wxUSE_RESOURCES
+
 static char *GetResourcePath(char *buf, const char *name, bool create = FALSE)
 {
     if (create && wxFileExists (name) ) {
@@ -273,7 +271,7 @@ static char *GetResourcePath(char *buf, const char *name, bool create = FALSE)
         // Put in standard place for resource files if not absolute
         strcpy (buf, DEFAULT_XRESOURCE_DIR);
         strcat (buf, "/");
-        strcat (buf, wxFileNameFromPath (name).c_str());
+        strcat (buf, (const char*) wxFileNameFromPath (name));
     }
 
     if (create) {
@@ -335,9 +333,9 @@ bool wxWriteResource(const wxString& section, const wxString& entry, const wxStr
     }
 
     char resName[300];
-    strcpy (resName, section.c_str());
+    strcpy (resName, (const char*) section);
     strcat (resName, ".");
-    strcat (resName, entry.c_str());
+    strcat (resName, (const char*) entry);
 
     XrmPutStringResource (&database, resName, value);
     return TRUE;
@@ -481,7 +479,7 @@ void wxXMergeDatabases (wxApp * theApp, Display * display)
     wxString classname = theApp->GetClassName();
     char name[256];
     (void) strcpy (name, "/usr/lib/X11/app-defaults/");
-    (void) strcat (name, classname.c_str());
+    (void) strcat (name, (const char*) classname);
 
     /* Get application defaults file, if any */
     applicationDB = XrmGetFileDatabase (name);
@@ -674,9 +672,9 @@ bool wxSetDisplay(const wxString& display_name)
         Cardinal argc = 0;
 
         Display *display = XtOpenDisplay((XtAppContext) wxTheApp->GetAppContext(),
-            display_name.c_str(),
-            wxTheApp->GetAppName().c_str(),
-            wxTheApp->GetClassName().c_str(),
+            (const char*) display_name,
+            (const char*) wxTheApp->GetAppName(),
+            (const char*) wxTheApp->GetClassName(),
             NULL,
 #if XtSpecificationRelease < 5
             0, &argc,
@@ -1247,18 +1245,6 @@ void wxDoChangeBackgroundColour(WXWidget widget, wxColour& backgroundColour, boo
         NULL);
 }
 
-extern void wxDoChangeFont(WXWidget widget, wxFont& font)
-{
-    // Lesstif 0.87 hangs here, but 0.93 does not
-#if !wxCHECK_LESSTIF() || wxCHECK_LESSTIF_VERSION( 0, 93 )
-    Widget w = (Widget)widget;
-    XtVaSetValues( w,
-                   wxFont::GetFontTag(), font.GetFontType( XtDisplay(w) ),
-                   NULL );
-#endif
-
-}
-
 #endif
     // __WXMOTIF__
 
@@ -1268,27 +1254,4 @@ bool wxWindowIsVisible(Window win)
     XGetWindowAttributes(wxGlobalDisplay(), win, &wa);
 
     return (wa.map_state == IsViewable);
-}
-
-wxString wxXmStringToString( const XmString& xmString )
-{
-    char *txt;
-    if( XmStringGetLtoR( xmString, XmSTRING_DEFAULT_CHARSET, &txt ) )
-    {
-        wxString str(txt);
-        XtFree (txt);
-        return str;
-    }
-
-    return wxEmptyString;
-}
-
-XmString wxStringToXmString( const wxString& str )
-{
-    return XmStringCreateLtoR((char *)str.c_str(), XmSTRING_DEFAULT_CHARSET);
-}
-
-XmString wxStringToXmString( const char* str )
-{
-    return XmStringCreateLtoR((char *)str, XmSTRING_DEFAULT_CHARSET);
 }

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      msw/region.cpp
 // Purpose:   wxRegion implementation using Win32 API
-// Author:    Vadim Zeitlin
+// Author:    Markus Holzem, Vadim Zeitlin
 // Modified by:
 // Created:   Fri Oct 24 10:46:34 MET 1997
 // RCS-ID:    $Id$
@@ -70,14 +70,6 @@ public:
     }
 
     HRGN m_region;
-
-private:
-// Cannot use
-//  DECLARE_NO_COPY_CLASS(wxRegionRefData)
-// because copy constructor is explicitly declared above;
-// but no copy assignment operator is defined, so declare
-// it private to prevent the compiler from defining it:
-    wxRegionRefData& operator=(const wxRegionRefData&);
 };
 
 #define M_REGION (((wxRegionRefData*)m_refData)->m_region)

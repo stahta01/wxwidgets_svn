@@ -6,7 +6,7 @@
 // Created:     26.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CONTROL_H_BASE_
@@ -84,6 +84,8 @@ protected:
     #include "wx/mac/control.h"
 #elif defined(__WXPM__)
     #include "wx/os2/control.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/control.h"
 #endif
 
 #endif // wxUSE_CONTROLS

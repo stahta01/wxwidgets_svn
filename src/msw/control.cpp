@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -78,10 +78,11 @@ bool wxControl::Create(wxWindow *parent,
 bool wxControl::MSWCreateControl(const wxChar *classname,
                                  const wxString& label,
                                  const wxPoint& pos,
-                                 const wxSize& size)
+                                 const wxSize& size,
+                                 long style)
 {
     WXDWORD exstyle;
-    WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), &exstyle);
+    WXDWORD msStyle = MSWGetStyle(style, &exstyle);
 
     return MSWCreateControl(classname, msStyle, pos, size, label, exstyle);
 }

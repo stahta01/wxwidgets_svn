@@ -6,15 +6,13 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_DEBUG_H_
 #define   _WX_DEBUG_H_
 
-#ifndef __WXWINCE__
 #include  <assert.h>
-#endif
 #include  <limits.h>            // for CHAR_BIT used below
 
 #include  "wx/wxchar.h"         // for __TFILE__ and wxChar

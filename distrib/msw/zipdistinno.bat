@@ -271,7 +271,6 @@ echo Unzipping the Windows files into wxWindows-%version%
 unzip32 -o wxWindows-%version%-win.zip
 unzip32 -o wxWindows-%version%-VC.zip -d wxWindows-%version
 unzip32 -o wxWindows-%version%-BC.zip -d wxWindows-%version
-unzip32 -o wxWindows-%version%-CW.zip -d wxWindows-%version
 unzip32 -o wxWindows-%version%-HTMLHelp.zip
 unzip32 -o wxWindows-%version%-ExtraDoc.zip
 Rem Need Word file, for Remstar DB classes

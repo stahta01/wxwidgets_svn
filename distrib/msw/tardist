@@ -59,10 +59,6 @@ doinit()
   cp $WXSRC/docs/mac/readme.txt $WXDEST/readme-mac-${WXVER}.txt
   cp $WXSRC/docs/mac/install.txt $WXDEST/install-mac-${WXVER}.txt
   cp $WXSRC/docs/os2/install.txt $WXDEST/install-os2-${WXVER}.txt
-
-  # Make .mo files
-  cd $WXSRC/locale
-  make allmo
 }
 
 dospinwxgtk()
@@ -483,4 +479,5 @@ fi
 if [ "$SPINWXALL" = "1" ] || [ "$SPINEVERYTHING" = "1" ]; then
   dospinwxall
 fi
+
 

@@ -13,7 +13,7 @@
 //               so long as the above copyright and this permission statement
 //               are retained in all copies.
 //
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -103,7 +103,7 @@
     #elif defined(__MWERKS__)
         long wxmw_timezone = 28800;
         #define WX_TIMEZONE wxmw_timezone
-    #elif defined(__DJGPP__) || defined(__WINE__)
+    #elif defined(__DJGPP__)
         #include <sys/timeb.h>
         #include <values.h>
         static long wxGetTimeZone()
@@ -3237,7 +3237,7 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
 
     // tokenize the string
     size_t nPosCur = 0;
-    static const wxChar *dateDelimiters = _T(".,/-\t\r\n ");
+    static const wxChar *dateDelimiters = _T(".,/-\t\n ");
     wxStringTokenizer tok(p, dateDelimiters);
     while ( tok.HasMoreTokens() )
     {

@@ -53,9 +53,6 @@ public:
     // (see wxFileSystem for detailed explanation)
     void SetHtmlText(const wxString& html, const wxString& basepath = wxEmptyString, bool isdir = TRUE);
 
-    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
-    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = NULL);
-
     // [x,y] is position of upper-left corner of printing rectangle (see SetSize)
     // from is y-coordinate of the very first visible cell 
     // Returned value is y coordinate of first cell than didn't fit onto page.
@@ -77,8 +74,6 @@ private:
     wxFileSystem *m_FS;
     wxHtmlContainerCell *m_Cells;
     int m_MaxWidth, m_Width, m_Height;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlDCRenderer)
 };
 
 
@@ -128,9 +123,6 @@ public:
             // pg is one of wxPAGE_ODD, wxPAGE_EVEN and wx_PAGE_ALL constants.
             // You can set different header/footer for odd and even pages
 
-    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
-    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = NULL);
-
     void SetMargins(float top = 25.2, float bottom = 25.2, float left = 25.2, float right = 25.2, 
                     float spaces = 5);
             // sets margins in milimeters. Defaults to 1 inch for margins and 0.5cm for space
@@ -163,8 +155,6 @@ private:
     int m_HeaderHeight, m_FooterHeight;
     wxHtmlDCRenderer *m_Renderer, *m_RendererHdr;
     float m_MarginTop, m_MarginBottom, m_MarginLeft, m_MarginRight, m_MarginSpace;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlPrintout)
 };
 
 
@@ -213,9 +203,6 @@ public:
             // pg is one of wxPAGE_ODD, wxPAGE_EVEN and wx_PAGE_ALL constants.
             // You can set different header/footer for odd and even pages
 
-    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = 0);
-    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used)
-
     wxPrintData *GetPrintData() {return m_PrintData;}
     wxPageSetupDialogData *GetPageSetupData() {return m_PageSetupData;}
             // return page setting data objects. 
@@ -230,13 +217,8 @@ private:
     wxPrintData *m_PrintData;
     wxPageSetupDialogData *m_PageSetupData;
     wxString m_Name;
-    int m_FontsSizesArr[7];
-    int *m_FontsSizes;
-    wxString m_FontFaceFixed, m_FontFaceNormal;
     wxString m_Headers[2], m_Footers[2];
     wxFrame *m_Frame;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlEasyPrinting)
 };
 
 

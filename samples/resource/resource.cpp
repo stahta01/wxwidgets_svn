@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@
 #endif
 
 #if wxUSE_UNICODE
-// #error "This sample can't be compiled in Unicode mode."
+    #error "This sample can't be compiled in Unicode mode."
 #endif // wxUSE_UNICODE
 
 #include "wx/resource.h"
@@ -56,7 +56,7 @@
 // the TEXT resource, for some reason, so either run-time file loading
 // or file inclusion should be used.
 
-#if defined(__WXMSW__) && !wxUSE_UNICODE
+#if defined(__WXMSW__)
 // Under Windows, some compilers can't include
 // a whole .wxr file. So we use a .rc user-defined resource
 // instead. dialog1 will point to the whole .wxr 'file'.
@@ -83,9 +83,8 @@ MyApp::MyApp()
 // main frame
 bool MyApp::OnInit(void)
 {
-#if defined(__WXMSW__) && !wxUSE_UNICODE
+#if defined(__WXMSW__)
     // Load the .wxr 'file' from a .rc resource, under Windows.
-    // note that the resource really is a char*, not a wxChar*!
     dialog1 = wxLoadUserResource(wxT("dialog1"), wxT("WXRDATA"));
     menu1 = wxLoadUserResource(wxT("menu1"), wxT("WXRDATA"));
     // All resources in the file (only one in this case) get parsed
@@ -102,20 +101,20 @@ bool MyApp::OnInit(void)
 
     // Create the main frame window
     frame = new MyFrame( (wxFrame *) NULL, -1,
-                         wxT("wxWindows Resource Sample"),
+                         (char *) "wxWindows Resource Sample",
                          wxPoint(-1, -1), wxSize(300, 250) );
 
     // Give it a status line
     frame->CreateStatusBar(2);
 
-    wxMenuBar *menu_bar = wxResourceCreateMenuBar(wxT("menu1"));
+    wxMenuBar *menu_bar = wxResourceCreateMenuBar("menu1");
 
     // Associate the menu bar with the frame
     frame->SetMenuBar(menu_bar);
 
     // Make a panel
     frame->panel = new MyPanel( frame, -1, wxPoint(0, 0), wxSize(400, 400),
-                                0, wxT("MyMainFrame") );
+                                0, "MyMainFrame" );
     frame->Show(TRUE);
 
     SetTopWindow(frame);
@@ -125,7 +124,7 @@ bool MyApp::OnInit(void)
 
 MyApp::~MyApp()
 {
-#if defined(__WXMSW__) && !wxUSE_UNICODE
+#if defined(__WXMSW__)
     delete dialog1;
     delete menu1;
 #endif
@@ -170,8 +169,8 @@ MyFrame::MyFrame
 
 void MyFrame::OnAbout( wxCommandEvent& WXUNUSED(event) )
 {
-    wxMessageBox(wxT("wxWindows resource sample.\n")
-                 wxT("(c) Julian Smart"), wxT("About wxWindows sample"),
+    wxMessageBox("wxWindows resource sample.\n"
+                 "(c) Julian Smart", "About wxWindows sample",
                  wxICON_INFORMATION | wxOK);
 }
 
@@ -184,12 +183,12 @@ void MyFrame::OnTestDialog(wxCommandEvent& WXUNUSED(event) )
 {
     MyDialog *dialog = new MyDialog;
 
-    if (dialog->LoadFromResource(this, wxT("dialog1")))
+    if (dialog->LoadFromResource(this, "dialog1"))
     {
-        wxTextCtrl *text = (wxTextCtrl *)wxFindWindowByName(wxT("multitext3"), dialog);
+        wxTextCtrl *text = (wxTextCtrl *)wxFindWindowByName("multitext3", dialog);
         if (text)
         {
-            text->SetValue(wxT("wxWindows resource demo"));
+            text->SetValue("wxWindows resource demo");
         }
 
         dialog->ShowModal();

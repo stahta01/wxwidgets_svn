@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        data.cpp
 // Purpose:     Various data
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -20,6 +20,9 @@
 #endif
 
 #define _MAXPATHLEN 500
+
+// Useful buffer, initialized in CommonInit
+char *wxBuffer = NULL;
 
 // Windows List
 wxWindowList wxTopLevelWindows;
@@ -137,7 +140,7 @@ const wxChar *wxDoubleToStringStr = wxT("%.2f");
 const wxEventTable *wxEvtHandler::GetEventTable() const { return &wxEvtHandler::sm_eventTable; }
 
 const wxEventTable wxEvtHandler::sm_eventTable =
-    { NULL, &wxEvtHandler::sm_eventTableEntries[0] };
+	{ NULL, &wxEvtHandler::sm_eventTableEntries[0] };
 
 const wxEventTableEntry wxEvtHandler::sm_eventTableEntries[] = { { 0, 0, 0, NULL } };
 #endif

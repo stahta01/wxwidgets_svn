@@ -5,7 +5,7 @@
 // Modified by: Ron Lee
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) 1997 Julian Smart
+// Copyright:   (c) 1997 Julian Smart and Markus Holzem
 //              (c) 2001 Ron Lee <ron@debian.org>
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -44,6 +44,11 @@ class WXDLLEXPORT wxObject;
 class WXDLLEXPORT wxClassInfo;
 class WXDLLEXPORT wxHashTable;
 class WXDLLEXPORT wxObjectRefData;
+
+#if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
+    #include "wx/ioswrap.h"
+#endif
+
 
 // ----------------------------------------------------------------------------
 // wxClassInfo
@@ -305,11 +310,7 @@ name##PluginSentinel  m_pluginsentinel;
 #define wxDynamicCastThis(className) \
  (IsKindOf(&className::sm_class##className) ? (className *)(this) : (className *)0)
 
-#ifdef HAVE_CONST_CAST
-#define wxConstCast(obj, className) const_cast<className *>(obj)
-#else
 #define wxConstCast(obj, className) ((className *)(obj))
-#endif
 
 
 #ifdef __WXDEBUG__
@@ -324,6 +325,18 @@ inline void wxCheckCast(void *ptr)
 #define wxStaticCast(obj, className) ((className *)(obj))
 
 #endif  // __WXDEBUG__
+
+
+// for some reason Borland seems to need this include.
+#if wxUSE_STD_IOSTREAM                                \
+    && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)  \
+    && defined(__BORLANDC__)
+    #if wxUSE_IOSTREAMH
+        #include <iostream.h>
+    #else
+        #include <iostream>
+    #endif
+#endif // wxUSE_IOSTREAMH
 
 // ----------------------------------------------------------------------------
 // set up memory debugging macros
@@ -383,10 +396,6 @@ inline void wxCheckCast(void *ptr)
 
 #endif // WXDEBUG && wxUSE_MEMORY_TRACING
 
-#if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
-// needed by wxObject::Dump
-#include "wx/iosfwrap.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // wxObject: the root class of wxWindows object hierarchy

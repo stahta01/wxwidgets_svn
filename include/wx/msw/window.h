@@ -6,7 +6,7 @@
 //              elimination of Default(), ...
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -367,9 +367,6 @@ public:
     bool HandleChar(WXWPARAM wParam, WXLPARAM lParam, bool isASCII = FALSE);
     bool HandleKeyDown(WXWPARAM wParam, WXLPARAM lParam);
     bool HandleKeyUp(WXWPARAM wParam, WXLPARAM lParam);
-#ifdef __WIN32__
-    int HandleMenuChar(int chAccel, WXLPARAM lParam);
-#endif
 
     bool HandleQueryDragIcon(WXHICON *hIcon);
 

@@ -173,9 +173,6 @@ protected:
 #elif defined(__WXPM__)
     #include "wx/os2/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowOS2
-#elif defined(__WXMOTIF__)
-    #include "wx/motif/toplevel.h"
-    #define wxTopLevelWindowNative wxTopLevelWindowMotif
 #endif
 
 #ifdef __WXUNIVERSAL__
@@ -188,7 +185,7 @@ protected:
             // construction
             wxTopLevelWindow() { Init(); }
             wxTopLevelWindow(wxWindow *parent,
-                       wxWindowID winid,
+                       wxWindowID id,
                        const wxString& title,
                        const wxPoint& pos = wxDefaultPosition,
                        const wxSize& size = wxDefaultSize,
@@ -196,7 +193,7 @@ protected:
                        const wxString& name = wxFrameNameStr)
             {
                 Init();
-                Create(parent, winid, title, pos, size, style, name);
+                Create(parent, id, title, pos, size, style, name);
             }
 
             DECLARE_DYNAMIC_CLASS(wxTopLevelWindow)

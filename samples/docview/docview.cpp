@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -40,9 +40,6 @@
 #include "docview.h"
 #include "doc.h"
 #include "view.h"
-#ifdef __WXMAC__
-#include "wx/filename.h"
-#endif
 
 MyFrame *frame = (MyFrame *) NULL;
 
@@ -77,9 +74,6 @@ bool MyApp::OnInit(void)
     //// Create a template relating drawing documents to their views
     (void) new wxDocTemplate(m_docManager, _T("Drawing"), _T("*.drw"), _T(""), _T("drw"), _T("Drawing Doc"), _T("Drawing View"),
         CLASSINFO(DrawingDocument), CLASSINFO(DrawingView));
-#ifdef __WXMAC__
-    wxFileName::MacRegisterDefaultTypeAndCreator( "drw" , 'WXMB' , 'WXMA' ) ;
-#endif
     
     if (singleWindowMode)
     {
@@ -89,14 +83,9 @@ bool MyApp::OnInit(void)
         m_docManager->SetMaxDocsOpen(1);
     }
     else
-    {
         //// Create a template relating text documents to their views
         (void) new wxDocTemplate(m_docManager, _T("Text"), _T("*.txt"), _T(""), _T("txt"), _T("Text Doc"), _T("Text View"),
         CLASSINFO(TextEditDocument), CLASSINFO(TextEditView));
-#ifdef __WXMAC__
-        wxFileName::MacRegisterDefaultTypeAndCreator( "txt" , 'TEXT' , 'WXMA' ) ;
-#endif
-    }
     
     //// Create the main frame window
     frame = new MyFrame(m_docManager, (wxFrame *) NULL, -1, _T("DocView Demo"), wxPoint(0, 0), wxSize(500, 400), wxDEFAULT_FRAME_STYLE);

@@ -6,7 +6,7 @@
  * Created:     29.10.01 (extracted from wx/defs.h)
  * RCS-ID:      $Id$
  * Copyright:   (c) 1997-2001 wxWindows team
- * Licence:     wxWindows licence
+ * Licence:     wxWindows license
  */
 
 /* THIS IS A C FILE, DON'T USE C++ FEATURES (IN PARTICULAR COMMENTS) IN IT */
@@ -16,8 +16,7 @@
 
 
 /*
-    Codewarrior doesn't define any Windows symbols until some headers
-    are included
+    Codewarrior doesn't define any Windows symbols until some headers are included
 */
 #if __MWERKS__
     #include <stddef.h>
@@ -33,23 +32,7 @@
    first define Windows symbols if they're not defined on the command line: we
    can autodetect everything we need if _WIN32 is defined
  */
-#if defined(__CYGWIN32__) && !defined(__WXMOTIF__) && !defined(__WXGTK__) \
-    && !defined(__WXX11__)
-    /* for Cygwin, default to wxMSW unless otherwise specified */
-    #ifndef __WXMSW__
-        #define __WXMSW__
-    #endif
-
-    #ifndef _WIN32
-        #define _WIN32
-    #endif
-
-    #ifndef WIN32
-        #define WIN32
-    #endif
-#endif
-
-#if defined(_WIN32) || defined(WIN32) || defined(__NT__) || defined(__WXWINCE__)
+#if defined(_WIN32) || defined(WIN32) || defined(__NT__)
     #ifndef __WXMSW__
         #define __WXMSW__
     #endif
@@ -70,9 +53,15 @@
     #endif
 #endif
 
-#ifdef __WINE__
+#ifdef __WXWINE__
+    #ifndef __WIN32__
+        #define __WIN32__
+    #endif
     #ifndef __WIN95__
         #define __WIN95__
+    #endif
+    #ifndef STRICT
+        #define STRICT
     #endif
 #endif /* WINE */
 
@@ -162,7 +151,7 @@
         #define __HPUX__
     #endif /* HP-UX */
 
-    #if defined(__CYGWIN__) || defined(__WINE__)
+    #if defined(__CYGWIN__)
         #if !defined(wxSIZE_T_IS_UINT)
             #define wxSIZE_T_IS_UINT
         #endif
@@ -193,9 +182,6 @@
     #endif
     #ifndef __POWERPC__
         #define __POWERPC__ 1
-    #endif
-    #ifndef TARGET_CARBON
-        #define TARGET_CARBON 1
     #endif
 
     #if !defined(wxSIZE_T_IS_UINT) && !defined(wxSIZE_T_IS_ULONG)

@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_LAYOUTH__
@@ -68,11 +68,25 @@ enum wxRelationship
 
 class WXDLLEXPORT wxIndividualLayoutConstraint : public wxObject
 {
+    DECLARE_DYNAMIC_CLASS(wxIndividualLayoutConstraint)
+
+protected:
+    // To be allowed to modify the internal variables
+    friend class wxIndividualLayoutConstraint_Serialize;
+
+    // 'This' window is the parent or sibling of otherWin
+    wxWindowBase *otherWin;
+
+    wxEdge myEdge;
+    wxRelationship relationship;
+    int margin;
+    int value;
+    int percent;
+    wxEdge otherEdge;
+    bool done;
+
 public:
     wxIndividualLayoutConstraint();
-
-    // note that default copy ctor and assignment operators are ok
-
     ~wxIndividualLayoutConstraint();
 
     void Set(wxRelationship rel, wxWindowBase *otherW, wxEdge otherE, int val = 0, int marg = wxLAYOUT_DEFAULT_MARGIN);
@@ -134,23 +148,6 @@ public:
     // Get the value of this edge or dimension, or if this
     // is not determinable, -1.
     int GetEdge(wxEdge which, wxWindowBase *thisWin, wxWindowBase *other) const;
-
-protected:
-    // To be allowed to modify the internal variables
-    friend class wxIndividualLayoutConstraint_Serialize;
-
-    // 'This' window is the parent or sibling of otherWin
-    wxWindowBase *otherWin;
-
-    wxEdge myEdge;
-    wxRelationship relationship;
-    int margin;
-    int value;
-    int percent;
-    wxEdge otherEdge;
-    bool done;
-
-    DECLARE_DYNAMIC_CLASS(wxIndividualLayoutConstraint)
 };
 
 // ----------------------------------------------------------------------------
@@ -159,6 +156,8 @@ protected:
 
 class WXDLLEXPORT wxLayoutConstraints : public wxObject
 {
+    DECLARE_DYNAMIC_CLASS(wxLayoutConstraints)
+
 public:
     // Edge constraints
     wxIndividualLayoutConstraint left;
@@ -173,9 +172,6 @@ public:
     wxIndividualLayoutConstraint centreY;
 
     wxLayoutConstraints();
-
-    // note that default copy ctor and assignment operators are ok
-
     ~wxLayoutConstraints();
 
     bool SatisfyConstraints(wxWindowBase *win, int *noChanges);
@@ -184,8 +180,6 @@ public:
         return left.GetDone() && top.GetDone() &&
                width.GetDone() && height.GetDone();
     }
-
-    DECLARE_DYNAMIC_CLASS(wxLayoutConstraints)
 };
 
 #endif

@@ -6,7 +6,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -391,19 +391,6 @@ void wxWindow::Refresh(bool eraseBackground, const wxRect *rectClient)
 #endif // WXDEBUG_REFRESH
 
     wxWindowNative::Refresh(eraseBackground, &rectWin);
-
-    // Refresh all sub controls if any.
-    wxWindowList::Node *node = GetChildren().GetFirst();
-    while ( node )
-    {
-        wxWindow *win = node->GetData();
-        // Only refresh sub controls when it is visible 
-        // and when it is in the update region.
-        if(win->IsShown() && wxRegion(rectWin).Contains(win->GetRect()) != wxOutRegion)
-            win->Refresh(eraseBackground, &rectWin);
-            
-        node = node->GetNext();
-    }
 }
 
 // ----------------------------------------------------------------------------

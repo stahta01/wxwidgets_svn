@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/msw/region.h
 // Purpose:     wxRegion class
-// Author:      Julian Smart
+// Author:      Markus Holzem, Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$

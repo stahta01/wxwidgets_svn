@@ -1,122 +1,5 @@
-----------------------------
-wxWindows 2.5/2.6 Change Log
-----------------------------
-
-INCOMPATIBLE CHANGES SINCE 2.4.x
-================================
-
-OTHER CHANGES
-=============
-
-2.5.0
------
-
-All:
-
-- added wxDateSpan::operator==() and !=() (Lukasz Michalski)
-- use true/false throughout the library instead of TRUE/FALSE
-- wxStopWatch::Start() resumes the stop watch if paused, as per the docs
-- added wxDirTraverser::OnOpenError() to customize the error handling
-- added wxArray::SetCount()
-- wxFile, wxFFile, wxTextFile and wxTempFile now all use UTF-8 encoding
-  by default in Unicode mode
-- bug in wxDateTime with timezones on systems with tm_gmtoff in struct tm fixed
-- added wx/math.h (John Labenski)
-
-wxBase:
-
-- added Watcom makefiles
-
-All GUI ports:
-
-- added alpha channel support to wxImage
-- added wxCLOSE_BOX style for dialogs and frames
-- added wxSplitterWindow handler to XRC
-- added proportion to wxFlexGridSizer::AddGrowableRow/Col (Maxim Babitski)
-- added wxFlexGridSizer::SetFlexibleDirection() (Szczepan Holyszewski)
-- implemented GetEditControl for wxGenericTreeCtrl (Peter Stieber)
-- improved contrib/utils/convertrc parsing (David J. Cooke)
-- fixed handling of URLs and filenames in wxFileSystem
-- implemented alignment for wxGrid bool editor and renderer
-- support wxListCtrl columns alignment for all platforms and not just MSW
-- added wxToolBar Add/InsertTool(tool) (Janusz Piwowarski)
-- WXR resources can now be used in Unicode builds
-- it is now possible to use several wxFileHistory objects in the same menu
-  by giving them different base IDs (Dimitri Schoolwerth)
-
-- changed to type-safe wxSizerItemList for wxSizer child items
-    Deprecated:
-        wxSizer::Remove( wxWindow* )
-            - it does not function as Remove would usually be expected to
-              and destroy the window, use Detach instead
-        wxSizer::GetOption(),
-        wxSizer::SetOption()
-            - wxSizer 'option' parameter was renamed 'proportion' to better
-              reflect its action, use Get/SetProportion instead
-        wxKeyEvent::KeyCode()
-            - use GetKeyCode instead
-        wxList:: Number, First, Last, Nth
-            - use typesafe GetCount, GetFirst, GetLast, Item instead
-        wxNode:: Next, Previous, Data
-            - use typesafe Get* instead
-        wxListBase::operator wxList&()
-            - use typesafe lists instead
-
-Unix:
-
-- fixed compilation on systems with zlib installed but < 1.1.3 version
-- fixed compilation on Solaris 7 with large files support enabled
-
-wxGTK:
-
-- added support for label mnemonics to GTK+2 build (Michael Moss)
-- added native wxMessageDialog implementation for GTK+2 build
-- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
-- made wxTextCtrl::EmulateKeyPress() work for Delete and Backspace
-- fixed wxTopLevelWindow::ShowFullScreen to work with kwin, IceWM and
-  window managers that support _NET_WM_STATE_FULLSCREEN
-- added wxEVT_MENU_OPEN event generation
-- fixed bug in generic file selector causing incomplete file extensions to
-  be appended to filenames with no extension
-
-wxMSW:
-
-- possibility to use DIBs for wxBitmap implementation (Derry Bryson)
-- wxStaticBitmap doesn't stretch its bitmap any longer (like other ports)
-- support for accelerator keys in the owner drawn menus (Derry Bryson)
-- wxCaret::SetSize() doesn't hide the caret any longer as it used to
-- wxCheckListBox::Check() doesn't send CHECKLISTBOX_TOGGLE event any more
-- fixed bug with wxTR_EDIT_LABELS not workign with wxTR_MULTIPLE
-- fixes for compilation with OpenWatcom compiler
-- fixed wxStaticText best size calculation (was wrong by '&' width)
-- fixed calling wxFrame::Maximize(FALSE) before the window is shown
-- all libraries built with makefile.g95 have a _min or _cyg suffix
-  (for MinGW and Cygwin)
-
-wxMotif:
-
-- made wxFileDialog behaviour with complex wildcards more sensible (it still
-  does not support all the features other ports do); refer to wxFileDialog
-  documentation for a detailed explanation
-- implemented wxWakeUpIdle
-- for Motif 2.0, used the native combobox widget instead of the GPL'd
-  xmcombo; xmcombo is still used for Motif 1.x and Lesstif when compiled
-  with Motif 1.x compatibility
-- implemented wxToggleButton
-- wxRadioBox and wxStaticBox now use the default shadow (border) style
-  instead of a sunken border
-
-wxUniv:
-
-- controls in toolbars now supported
-
-wxHTML:
-
-- added SetFonts to HTML printing classes (Adrian Philip Look)
-
-
-OLD CHANGES
-===========
+wxWindows 2 Change Log
+----------------------
 
 INCOMPATIBLE CHANGES SINCE 2.2.x
 ================================
@@ -287,12 +170,47 @@ wxThread and related classes:
 OTHER CHANGES
 =============
 
+2.4.1
+-----
+
+All:
+
+- fixed wxLANGUAGE_CHINESE_TAIWAN to use zh_TW catalogs
+- added missing wx/quantize.h to install
+
+Unix (GUI):
+
+- fixed the "close" button of dialogs under KDE 3.1
+
+wxBase
+
+- compilation with wxUSE_ODBC=1 fixed (dbkeyg.h file was missing in the archive)
+- bug in wxDateTime with timezones on systems with tm_gmtoff in struct tm fixed
+- fixed bug in wxArray::Shrink() (Seth Manley)
+
+wxGTK:
+
+- added wxEVT_MENU_OPEN event generation
+- fixed bug in generic file selector causing incomplete file extensions to
+  be appended to filenames with no extension
+
+
 2.4.0
 -----
 
 wxMSW:
 
 - fixed loss of client data in wxChoice::SetString()
+
+wxGTK:
+
+- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
+
+All:
+
+- Improved contrib/utils/convertrc parsing (David J. Cooke)
+- Fixed handling of URLs and filenames in wxFileSystem
+- Implemented alignment for wxGrid bool editor and renderer
 
 2.3.4
 -----
@@ -310,10 +228,12 @@ Unix (Base/GUI):
 - shared library symbols are now versioned on platforms that support it (Linux)
 
 wxGTK:
+
 - Further work for GTK 2.0 and Unicode support.
 - Addition of native frame site grip.
 
 wxX11:
+
 - Unicode support through Pango library.
 
 wxMSW:

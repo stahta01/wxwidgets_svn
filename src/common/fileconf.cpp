@@ -7,7 +7,7 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997 Karsten Ballüder   &  Vadim Zeitlin
 //                       Ballueder@usa.net     <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -137,8 +137,6 @@ private:
   wxString  m_strLine;                  // line contents
   wxFileConfigLineList *m_pNext,        // next node
                        *m_pPrev;        // previous one
-
-    DECLARE_NO_COPY_CLASS(wxFileConfigLineList)
 };
 
 // ----------------------------------------------------------------------------
@@ -181,8 +179,6 @@ public:
   void SetValue(const wxString& strValue, bool bUser = TRUE);
   void SetDirty();
   void SetLine(wxFileConfigLineList *pLine);
-
-    DECLARE_NO_COPY_CLASS(wxFileConfigEntry)
 };
 
 // ----------------------------------------------------------------------------
@@ -252,8 +248,6 @@ public:
   // called by entries/subgroups when they're created/deleted
   void SetLastEntry(wxFileConfigEntry *pEntry) { m_pLastEntry = pEntry; }
   void SetLastGroup(wxFileConfigGroup *pGroup) { m_pLastGroup = pGroup; }
-
-    DECLARE_NO_COPY_CLASS(wxFileConfigGroup)
 };
 
 // ============================================================================
@@ -343,7 +337,7 @@ wxString wxFileConfig::GetGlobalFileName(const wxChar *szFile)
 
 wxString wxFileConfig::GetLocalFileName(const wxChar *szFile)
 {
-#ifdef __VMS__
+#ifdef __VMS__ 
     // On VMS I saw the problem that the home directory was appended
     // twice for the configuration file. Does that also happen for
     // other platforms?
@@ -389,7 +383,11 @@ void wxFileConfig::Init()
     {
         wxTextFile fileGlobal(m_strGlobalFile);
 
-        if ( fileGlobal.Open(m_conv/*ignored in ANSI build*/) )
+#if defined(__WXGTK20__) && wxUSE_UNICODE
+        if ( fileGlobal.Open( wxConvUTF8 ) ) 
+#else
+        if ( fileGlobal.Open() ) 
+#endif
         {
             Parse(fileGlobal, FALSE /* global */);
             SetRootPath();
@@ -404,7 +402,11 @@ void wxFileConfig::Init()
     if ( !m_strLocalFile.IsEmpty() && wxFile::Exists(m_strLocalFile) )
     {
         wxTextFile fileLocal(m_strLocalFile);
-        if ( fileLocal.Open(m_conv/*ignored in ANSI build*/) )
+#if defined(__WXGTK20__) && wxUSE_UNICODE
+        if ( fileLocal.Open( wxConvUTF8 ) ) 
+#else
+        if ( fileLocal.Open() ) 
+#endif
         {
             Parse(fileLocal, TRUE /* local */);
             SetRootPath();
@@ -419,12 +421,11 @@ void wxFileConfig::Init()
 // constructor supports creation of wxFileConfig objects of any type
 wxFileConfig::wxFileConfig(const wxString& appName, const wxString& vendorName,
                            const wxString& strLocal, const wxString& strGlobal,
-                           long style, wxMBConv& conv)
+                           long style)
             : wxConfigBase(::GetAppName(appName), vendorName,
                            strLocal, strGlobal,
                            style),
-              m_strLocalFile(strLocal), m_strGlobalFile(strGlobal),
-              m_conv(conv)
+              m_strLocalFile(strLocal), m_strGlobalFile(strGlobal)
 {
     // Make up names for files if empty
     if ( m_strLocalFile.IsEmpty() && (style & wxCONFIG_USE_LOCAL_FILE) )
@@ -461,14 +462,13 @@ wxFileConfig::wxFileConfig(const wxString& appName, const wxString& vendorName,
     }
 
     SetUmask(-1);
-
+    
     Init();
 }
 
 #if wxUSE_STREAMS
 
-wxFileConfig::wxFileConfig(wxInputStream &inStream, wxMBConv& conv)
-        : m_conv(conv)
+wxFileConfig::wxFileConfig(wxInputStream &inStream)
 {
     // always local_file when this constructor is called (?)
     SetStyle(GetStyle() | wxCONFIG_USE_LOCAL_FILE);
@@ -558,7 +558,7 @@ void wxFileConfig::Parse(wxTextBuffer& buffer, bool bLocal)
   wxString strLine;
 
   size_t nLineCount = buffer.GetLineCount();
-
+  
   for ( size_t n = 0; n < nLineCount; n++ )
   {
     strLine = buffer[n];
@@ -867,7 +867,7 @@ bool wxFileConfig::DoWriteString(const wxString& key, const wxString& szValue)
 {
     wxConfigPathChanger     path(this, key);
     wxString                strName = path.Name();
-
+  
     wxLogTrace( _T("wxFileConfig"),
                 _T("  Writing String '%s' = '%s' to Group '%s'"),
                 strName.c_str(),
@@ -955,7 +955,12 @@ bool wxFileConfig::Flush(bool /* bCurrentOnly */)
   {
     wxString line = p->Text();
     line += wxTextFile::GetEOL();
-    if ( !file.Write(line, m_conv) )
+#if wxUSE_UNICODE
+    wxCharBuffer buf = wxConvLocal.cWX2MB( line );
+    if ( !file.Write( (const char*)buf, strlen( (const char*) buf ) ) )
+#else
+    if ( !file.Write( line.c_str(), line.Len() ) )
+#endif
     {
       wxLogError(_("can't write user configuration file."));
       return FALSE;
@@ -1507,17 +1512,13 @@ wxFileConfigGroup *wxFileConfigGroup::AddSubgroup(const wxString& strName)
 
 bool wxFileConfigGroup::DeleteSubgroupByName(const wxChar *szName)
 {
-    wxFileConfigGroup * const pGroup = FindSubgroup(szName);
-
-    return pGroup ? DeleteSubgroup(pGroup) : FALSE;
+  return DeleteSubgroup(FindSubgroup(szName));
 }
 
 // Delete the subgroup and remove all references to it from
 // other data structures.
 bool wxFileConfigGroup::DeleteSubgroup(wxFileConfigGroup *pGroup)
 {
-    wxCHECK_MSG( pGroup, FALSE, _T("deleting non existing group?") );
-
     wxLogTrace( _T("wxFileConfig"),
                 _T("Deleting group '%s' from '%s'"),
                 pGroup->Name().c_str(),
@@ -1532,8 +1533,11 @@ bool wxFileConfigGroup::DeleteSubgroup(wxFileConfigGroup *pGroup)
                 _T("  text: '%s'"),
                 ((m_pLine) ? m_pLine->Text().c_str() : wxEmptyString) );
 
-    // delete all entries
-    size_t nCount = pGroup->m_aEntries.Count();
+    wxCHECK_MSG( pGroup != 0, FALSE, _T("deleting non existing group?") );
+
+        // delete all entries
+
+    size_t  nCount = pGroup->m_aEntries.Count();
 
     wxLogTrace(_T("wxFileConfig"),
                _T("Removing %lu Entries"),
@@ -1617,7 +1621,7 @@ bool wxFileConfigGroup::DeleteSubgroup(wxFileConfigGroup *pGroup)
             {
                 wxLogTrace( _T("wxFileConfig"),
                             _T("  ------- No previous group found -------") );
-
+                
                 wxASSERT_MSG( !pNewLast || m_pLine == 0,
                               _T("how comes it has the same line as we?") );
 

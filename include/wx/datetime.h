@@ -7,7 +7,7 @@
 // Created:     10.02.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DATETIME_H
@@ -36,7 +36,7 @@ class WXDLLEXPORT wxDateSpan;
 // rebuilt)
 
 // For Mingw32, causes a link error. (VZ: why?)
-#if defined( __WXDEBUG__) && !defined(__MINGW32__) && !(defined(_MSC_VER) && wxUSE_ACCESSIBILITY)
+#if defined( __WXDEBUG__) && !defined(__MINGW32__)
     #define wxDATETIME_DONT_INLINE
 
     #undef inline
@@ -1174,12 +1174,6 @@ private:
 // Beware about weeks: if you specify both weeks and days, the total number of
 // days added will be 7*weeks + days! See also GetTotalDays() function.
 //
-// Equality operators are defined for wxDateSpans. Two datespans are equal if
-// they both give the same target date when added to *every* source date.
-// Thus wxDateSpan::Months(1) is not equal to wxDateSpan::Days(30), because
-// they not give the same date when added to 1 Feb. But wxDateSpan::Days(14) is
-// equal to wxDateSpan::Weeks(2)
-//
 // Finally, notice that for adding hours, minutes &c you don't need this
 // class: wxTimeSpan will do the job because there are no subtleties
 // associated with those.
@@ -1525,24 +1519,6 @@ inline bool WXDLLEXPORT operator!=(const wxTimeSpan &t1, const wxTimeSpan &t2)
 // ----------------------------------------------------------------------------
 // wxDateSpan
 // ----------------------------------------------------------------------------
-
-// comparison
-// ----------
-
-// ds1 == d2 if and only if for every wxDateTime t t + ds1 == t + ds2
-inline WXDLLEXPORT bool operator==(const wxDateSpan& ds1,
-                                   const wxDateSpan& ds2)
-{
-    return ds1.GetYears() == ds2.GetYears() &&
-           ds1.GetMonths() == ds2.GetMonths() &&
-           ds1.GetTotalDays() == ds2.GetTotalDays();
-}
-
-inline WXDLLEXPORT bool operator!=(const wxDateSpan& ds1,
-                                   const wxDateSpan& ds2)
-{
-  return !(ds1 == ds2);
-}
 
 // arithmetics
 // -----------

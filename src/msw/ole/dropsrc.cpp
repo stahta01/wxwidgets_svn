@@ -6,7 +6,7 @@
 // Created:     10.05.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -40,9 +40,13 @@
 
 #include <windows.h>
 
-// for some compilers, the entire ole2.h must be included, not only oleauto.h
-#if wxUSE_NORLANDER_HEADERS || defined(__WATCOMC__)
+#if wxUSE_NORLANDER_HEADERS
     #include <ole2.h>
+#endif
+
+#ifndef __WIN32__
+    #include <ole2.h>
+    #include <olestd.h>
 #endif
 
 #include <oleauto.h>
@@ -67,8 +71,6 @@ public:
 private:
   DWORD         m_grfInitKeyState;  // button which started the d&d operation
   wxDropSource *m_pDropSource;      // pointer to C++ class we belong to
-
-    DECLARE_NO_COPY_CLASS(wxIDropSource)
 };
 
 // ============================================================================

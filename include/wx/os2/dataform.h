@@ -15,37 +15,46 @@
 class wxDataFormat
 {
 public:
-    wxDataFormat(unsigned int uFormat = wxDF_INVALID) { m_uFormat = uFormat; }
-    wxDataFormat(const wxChar* zFormat) { SetId(zFormat); }
+    // the clipboard formats under GDK are GdkAtoms
+    typedef unsigned short NativeFormat;
 
-    wxDataFormat& operator=(unsigned int uFormat) { m_uFormat = uFormat; return(*this); }
-    wxDataFormat& operator=(const wxDataFormat& rFormat) {m_uFormat = rFormat.m_uFormat; return(*this); }
+    wxDataFormat();
+    wxDataFormat(wxDataFormatId vType);
+    wxDataFormat(const wxString& rId);
+    wxDataFormat(const wxChar* pId);
+    wxDataFormat(NativeFormat vFormat);
 
-    //
-    // Comparison (must have both versions)
-    //
-    bool operator==(wxDataFormatId eFormat) const { return (m_uFormat == (unsigned int)eFormat); }
-    bool operator!=(wxDataFormatId eFormat) const { return (m_uFormat != (unsigned int)eFormat); }
-    bool operator==(const wxDataFormat& rFormat) const { return (m_uFormat == rFormat.m_uFormat); }
-    bool operator!=(const wxDataFormat& rFormat) const { return (m_uFormat != rFormat.m_uFormat); }
-         operator unsigned int(void) const { return m_uFormat; }
+    wxDataFormat& operator=(NativeFormat vFormat)
+        { SetId(vFormat); return *this; }
 
-    unsigned int GetFormatId(void) const { return (unsigned int)m_uFormat; }
-    unsigned int GetType(void) const { return (unsigned int)m_uFormat; }
+    // comparison (must have both versions)
+    bool operator==(NativeFormat vFormat) const
+        { return m_vFormat == (NativeFormat)vFormat; }
+    bool operator!=(NativeFormat vFormat) const
+        { return m_vFormat != (NativeFormat)vFormat; }
 
-    bool IsStandard(void) const;
+    // explicit and implicit conversions to NativeFormat which is one of
+    // standard data types (implicit conversion is useful for preserving the
+    // compatibility with old code)
+    NativeFormat GetFormatId() const { return m_vFormat; }
+    operator NativeFormat() const { return m_vFormat; }
 
-    void SetType(unsigned int uType){ m_uFormat = uType; }
+    void SetId(NativeFormat vFormat);
 
-    //
-    // String ids are used for custom types - this SetId() must be used for
+    // string ids are used for custom types - this SetId() must be used for
     // application-specific formats
-    //
-    wxString GetId(void) const;
-    void     SetId(const wxChar* pId);
+    wxString GetId() const;
+    void SetId(const wxChar* pId);
+
+    // implementation
+    wxDataFormatId GetType() const;
 
 private:
-    unsigned int                    m_uFormat;
-}; // end of CLASS wxDataFormat
+    wxDataFormatId                  m_vType;
+    NativeFormat                    m_vFormat;
+
+    void PrepareFormats();
+    void SetType(wxDataFormatId vType);
+};
 
 #endif // _WX_GTK_DATAFORM_H

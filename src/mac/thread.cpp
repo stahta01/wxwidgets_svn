@@ -527,7 +527,7 @@ void wxThread::Sleep(unsigned long milliseconds)
     do
     {
         YieldToAnyThread();
-    } while( clock() - start < milliseconds /  1000.0 * CLOCKS_PER_SEC ) ;
+    } while( clock() - start < (milliseconds * CLOCKS_PER_SEC) / 1000 ) ;
 }
 
 int wxThread::GetCPUCount()
@@ -902,3 +902,5 @@ bool WXDLLEXPORT wxIsWaitingForThread()
 #include "wx/thrimpl.cpp"
 
 #endif // wxUSE_THREADS
+
+// vi:sts=4:sw=4:et

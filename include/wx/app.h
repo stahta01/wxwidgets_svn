@@ -6,7 +6,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -33,17 +33,27 @@
 
 #include "wx/build.h"
 
-class WXDLLEXPORT wxApp;
-class WXDLLEXPORT wxCmdLineParser;
-class WXDLLEXPORT wxLog;
-class WXDLLEXPORT wxMessageOutput;
-
 // ----------------------------------------------------------------------------
 // typedefs
 // ----------------------------------------------------------------------------
+// Do includes first to insure that even wxBase consistently uses
+// the wxMSW case for defining wxAppInitializerFunction.
+// (otherwise, __WXMSW__ will not yet be set, if app.h is the
+//  first file to be included).
 
-// the type of the function used to create a wxApp object on program start up
-typedef wxApp* (*wxAppInitializerFunction)();
+#if (defined(__WXMSW__) && !defined(__WXMICROWIN__)) || defined (__WXPM__)
+    class WXDLLEXPORT wxApp;
+    typedef wxApp* (*wxAppInitializerFunction)();
+#else
+    // returning wxApp* won't work with gcc
+    #include "wx/object.h"
+
+    typedef wxObject* (*wxAppInitializerFunction)();
+#endif
+
+class WXDLLEXPORT wxCmdLineParser;
+class WXDLLEXPORT wxLog;
+class WXDLLEXPORT wxMessageOutput;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -425,6 +435,8 @@ protected:
         #include "wx/mac/app.h"
     #elif defined(__WXPM__)
         #include "wx/os2/app.h"
+    #elif defined(__WXSTUBS__)
+        #include "wx/stubs/app.h"
     #endif
 #else // !GUI
     // can't use typedef because wxApp forward declared as a class

@@ -6,7 +6,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -32,8 +32,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
 #endif // WX_PRECOMP
-
-#include "wx/artprov.h"
 
 #include "wx/univ/renderer.h"
 #include "wx/univ/inphand.h"
@@ -108,24 +106,21 @@ wxThemeInfo::wxThemeInfo(Constructor c,
         #endif
     }
 
-    wxTheme *theme = Create(nameDefTheme);
+    ms_theme = Create(nameDefTheme);
 
     // fallback to the first one in the list
-    if ( !theme && ms_allThemes )
+    if ( !ms_theme && ms_allThemes )
     {
-        theme = ms_allThemes->ctor();
+        ms_theme = ms_allThemes->ctor();
     }
 
     // abort if still nothing
-    if ( !theme )
+    if ( !ms_theme )
     {
         wxLogError(_("Failed to initialize GUI: no built-in themes found."));
 
         return FALSE;
     }
-
-    // Set the theme as current.
-    wxTheme::Set(theme);
 
     return TRUE;
 }
@@ -134,16 +129,6 @@ wxThemeInfo::wxThemeInfo(Constructor c,
 {
     wxTheme *themeOld = ms_theme;
     ms_theme = theme;
-
-    if ( ms_theme )
-    {
-        // automatically start using the art provider of the new theme if it
-        // has one
-        wxArtProvider *art = ms_theme->GetArtProvider();
-        if ( art )
-            wxArtProvider::PushProvider(art);
-    }
-
     return themeOld;
 }
 

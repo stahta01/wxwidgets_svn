@@ -8,7 +8,7 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997 Karsten Ballüder   Ballueder@usa.net
 //                       Vadim Zeitlin      <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_CONFBASE_H_
@@ -307,8 +307,6 @@ private:
   wxString      m_strName,      // name of entry (i.e. name only)
                 m_strOldPath;   // saved path
   bool          m_bChanged;     // was the path changed?
-
-    DECLARE_NO_COPY_CLASS(wxConfigPathChanger)
 };
 
 

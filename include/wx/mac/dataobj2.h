@@ -6,7 +6,7 @@
 // Created:     10/21/99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998, 1999 Vadim Zeitlin, Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GTK_DATAOBJ2_H_
@@ -36,16 +36,20 @@ public:
     // implement base class pure virtuals
     // ----------------------------------
 
-    virtual size_t GetDataSize() const ;
-    virtual bool GetDataHere(void *buf) const ;
+    virtual size_t GetDataSize() const { return m_pngSize; }
+    virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
 
-protected :
-    void Init() ;
-    void Clear() ;
+protected:
+    void Init() { m_pngData = (void *)NULL; m_pngSize = 0; }
+    void Clear() { free(m_pngData); }
+    void ClearAll() { Clear(); Init(); }
 
-    void* m_pictHandle ;
-    bool m_pictCreated ;
+    size_t      m_pngSize;
+    void       *m_pngData;
+
+    void DoConvertToPng();
+
 private:
     // Virtual function hiding supression
     size_t GetDataSize(const wxDataFormat& rFormat) const

@@ -26,9 +26,8 @@
 #if defined(__WXMSW__) && defined(__X__)
 #error "Target can't be both X and Windows"
 #elif !defined(__WXMOTIF__) && !defined(__WXMSW__) && !defined(__WXGTK__) && \
-      !defined(__WXPM__) && !defined(__WXMAC__) && !defined(__WXCOCOA__) && \
-      !defined(__X__) && !defined(__WXMGL__) && !defined(__WXX11__) && \
-      wxUSE_GUI
+      !defined(__WXPM__) && !defined(__WXMAC__) && !defined(__X__) && \
+      !defined(__WXMGL__) && !defined(__WXX11__) && wxUSE_GUI
 #ifdef __UNIX__
 #error "No Target! You should use wx-config program for compilation flags!"
 #else // !Unix
@@ -96,7 +95,7 @@
 // compiler defects workarounds
 // ----------------------------------------------------------------------------
 
-#if defined(__VISUALC__) && !defined(WIN32) && !defined(__WXWINCE__)
+#if defined(__VISUALC__) && !defined(WIN32)
     // VC1.5 does not have LPTSTR type
 #define LPTSTR  LPSTR
 #define LPCTSTR LPCSTR
@@ -157,7 +156,7 @@
     #elif defined(__WATCOMC__) && (__WATCOMC__ >= 1100)
         // Watcom 11+ supports bool
         #define HAVE_BOOL
-    #elif defined(__GNUWIN32__) || defined(__MINGW32__) || defined(__CYGWIN__)
+    #elif defined(__GNUWIN32__)
         // Cygwin supports bool
         #define HAVE_BOOL
     #elif defined(__VISAGECPP__)
@@ -175,26 +174,35 @@
     typedef unsigned int bool;
 #endif // bool
 
-// deal with TRUE/true stuff: we assume that if the compiler supports bool, it
-// supports true/false as well and that, OTOH, if it does _not_ support bool,
-// it doesn't support these keywords (this is less sure, in particular VC++
-// 4.x could be a problem here)
-#ifndef HAVE_BOOL
-    #define true ((bool)1)
-    #define false ((bool)0)
-#endif
+#ifdef __cplusplus
+    // define boolean constants: don't use true/false here as not all compilers
+    // support them but also redefine TRUE which could have been defined as 1
+    // by previous headers: this would be incorrect as our TRUE is supposed to
+    // be of type bool, just like true, not int
+    //
+    // however if the user code absolutely needs TRUE to be defined in its own
+    // way, it can predefine WX_TRUE_DEFINED to prevent the redefinition here
+    #ifdef TRUE
+        #ifndef WX_TRUE_DEFINED
+            #undef TRUE
+            #undef FALSE
+        #endif
+    #endif
 
-// for backwards compatibility, also define TRUE and FALSE
-//
-// note that these definitions should work both in C++ and C code, so don't
-// use true/false below
-#ifndef TRUE
-    #define TRUE 1
-#endif
+    #ifndef TRUE
+        #define TRUE  ((bool)1)
+        #define FALSE ((bool)0)
+    #endif
+#else // !__cplusplus
+    // the definitions above don't work for C sources
+    #ifndef TRUE
+        #define TRUE 1
+    #endif
 
-#ifndef FALSE
-    #define FALSE 0
-#endif
+    #ifndef FALSE
+        #define FALSE 0
+    #endif
+#endif // C++/!C++
 
 typedef short int WXTYPE;
 
@@ -223,12 +231,8 @@ typedef int wxWindowID;
 
 // check for explicit keyword support
 #ifndef HAVE_EXPLICIT
-    #if defined(__VISUALC__) && (__VISUALC__ >= 1100)
-        // VC++ 6.0 and 5.0 have explicit (what about the earlier versions?)
-        #define HAVE_EXPLICIT
-    #elif ( defined(__MINGW32__) || defined(__CYGWIN32__) ) \
-          && wxCHECK_GCC_VERSION(2, 95)
-        // GCC 2.95 has explicit, what about earlier versions?
+    #if defined(__VISUALC__) && (__VISUALC__ > 1200)
+        // VC++ 6.0 has explicit (what about the earlier versions?)
         #define HAVE_EXPLICIT
     #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x0520)
         // BC++ 4.52 doesn't support explicit, CBuilder 1 does
@@ -245,30 +249,12 @@ typedef int wxWindowID;
     #define wxEXPLICIT
 #endif // HAVE_EXPLICIT/!HAVE_EXPLICIT
 
-// check for static/const/reinterpret_cast<>()
-#ifndef HAVE_STATIC_CAST
-    #if defined(__VISUALC__) && (__VISUALC__ >= 1100)
-        // VC++ 6.0 and 5.0 have C++ casts (what about the earlier versions?)
-        #define HAVE_CXX_CASTS
-    #elif ( defined(__MINGW32__) || defined(__CYGWIN32__) ) \
-          && wxCHECK_GCC_VERSION(2, 95)
-        // GCC 2.95 has C++ casts, what about earlier versions?
-        #define HAVE_CXX_CASTS
-    #endif
-#endif // HAVE_STATIC_CAST
-
-#ifdef HAVE_CXX_CASTS
-    #ifndef HAVE_CONST_CAST
-        #define HAVE_CONST_CAST
-    #endif
-#endif // HAVE_CXX_CASTS
-
 // ----------------------------------------------------------------------------
 // portable calling conventions macros
 // ----------------------------------------------------------------------------
 
 // stdcall is used for all functions called by Windows under Windows
-#if defined(__WINDOWS__)
+#if defined(__WINDOWS__) && !defined(__WXWINE__)
     #if defined(__GNUWIN32__)
         #define wxSTDCALL __attribute__((stdcall))
     #else
@@ -335,7 +321,7 @@ typedef int wxWindowID;
         #define WXEXPORT _Export
         #define WXIMPORT _Export
     #endif
-#elif defined(__WXMAC__) || defined(__WXCOCOA__)
+#elif defined(__WXMAC__)    
     #ifdef __MWERKS__
         #define WXEXPORT __declspec(export)
         #define WXIMPORT __declspec(import)
@@ -403,15 +389,6 @@ class WXDLLEXPORT wxEvent;
 #    define ATTRIBUTE_PRINTF_4
 #    define ATTRIBUTE_PRINTF_5
 #  endif /* ATTRIBUTE_PRINTF */
-#endif
-
-// Macro to issue warning when using deprecated functions with gcc3 or MSVC7:
-#if wxCHECK_GCC_VERSION(3, 1)
-    #define wxDEPRECATED(x) x __attribute__ ((deprecated))
-#elif defined(__VISUALC__) && (__VISUALC__ >= 1300)
-    #define wxDEPRECATED(x) __declspec(deprecated) x
-#else
-    #define wxDEPRECATED(x) x
 #endif
 
 // everybody gets the assert and other debug macros
@@ -614,7 +591,7 @@ enum
 //            precision, so use the IEEE types for storage , and this for calculations
 
 typedef float wxFloat32 ;
-#if (defined( __WXMAC__ ) || defined(__WXCOCOA__))  && defined (__MWERKS__)
+#if defined( __WXMAC__ )  && defined (__MWERKS__)
     typedef short double wxFloat64;
 #else
     typedef double wxFloat64;
@@ -999,8 +976,7 @@ enum wxBorder
 #define wxICONIZE               0x4000
 #define wxMINIMIZE              wxICONIZE
 #define wxMAXIMIZE              0x2000
-#define wxCLOSE_BOX                 0x1000
-
+                                        // free flag value: 0x1000
 #define wxSYSTEM_MENU           0x0800
 #define wxMINIMIZE_BOX          0x0400
 #define wxMAXIMIZE_BOX          0x0200
@@ -1034,10 +1010,16 @@ enum wxBorder
 
 #define wxDEFAULT_FRAME_STYLE \
   (wxSYSTEM_MENU | wxRESIZE_BORDER | \
-   wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX | \
+   wxMINIMIZE_BOX | wxMAXIMIZE_BOX | \
    wxCAPTION | wxCLIP_CHILDREN)
 
-#define wxDEFAULT_DIALOG_STYLE  (wxSYSTEM_MENU | wxCAPTION | wxCLOSE_BOX)
+#if defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMGL__)
+#   define wxDEFAULT_DIALOG_STYLE  (wxSYSTEM_MENU | wxCAPTION)
+#else
+//  Under Unix, the dialogs don't have a system menu. Specifying wxSYSTEM_MENU
+//  here will make a close button appear.
+#   define wxDEFAULT_DIALOG_STYLE  wxCAPTION
+#endif
 
 /*
  * wxExtDialog style flags
@@ -1674,11 +1656,7 @@ enum wxKeyCode
     WXK_NUMPAD_SEPARATOR,
     WXK_NUMPAD_SUBTRACT,
     WXK_NUMPAD_DECIMAL,
-    WXK_NUMPAD_DIVIDE,
-
-    WXK_WINDOWS_LEFT,
-    WXK_WINDOWS_RIGHT,
-    WXK_WINDOWS_MENU
+    WXK_NUMPAD_DIVIDE
 };
 
 // Mapping modes (same values as used by Windows, don't change)
@@ -1846,8 +1824,6 @@ typedef void*       WXRECTPTR ;
 typedef void*       WXPOINTPTR ;
 typedef void*       WXHWND ;
 typedef void*       WXEVENTREF ;
-typedef void*		WXEVENTHANDLERREF ;
-typedef void*       WXEVENTHANDLERCALLREF ; 
 typedef void*       WXAPPLEEVENTREF ;
 typedef void*       WXHDC ;
 typedef void*       WXHMENU ;
@@ -1889,34 +1865,6 @@ typedef WindowPtr       WXWindow;
 typedef ControlHandle   WXWidget;
 */
 #endif
-
-#ifdef __WXCOCOA__
-
-#if defined(__OBJC__)
-    #include <objc/objc.h>
-    #define DECLARE_WXCOCOA_OBJC_CLASS(klass) \
-    @class klass;                   typedef klass *WX_##klass
-#elif defined(wxI_LIKE_OBJC_ID)
-    #define DECLARE_WXCOCOA_OBJC_CLASS(klass) \
-    typedef id WX_##klass
-#else // the goal is to get rid of this secion at some time!
-    #define DECLARE_WXCOCOA_OBJC_CLASS(klass) \
-    typedef void *WX_##klass
-#endif
-
-DECLARE_WXCOCOA_OBJC_CLASS(NSApplication);
-DECLARE_WXCOCOA_OBJC_CLASS(NSBox);
-DECLARE_WXCOCOA_OBJC_CLASS(NSButton);
-DECLARE_WXCOCOA_OBJC_CLASS(NSControl);
-DECLARE_WXCOCOA_OBJC_CLASS(NSMenu);
-DECLARE_WXCOCOA_OBJC_CLASS(NSMenuItem);
-DECLARE_WXCOCOA_OBJC_CLASS(NSPanel);
-DECLARE_WXCOCOA_OBJC_CLASS(NSTableView);
-DECLARE_WXCOCOA_OBJC_CLASS(NSTextField);
-DECLARE_WXCOCOA_OBJC_CLASS(NSWindow);
-DECLARE_WXCOCOA_OBJC_CLASS(NSView);
-typedef WX_NSView WXWidget; // wxWindows BASE definition
-#endif // __WXCOCOA__
 
 #if defined(__WXMSW__) || defined(__WXPM__)
 
@@ -1974,7 +1922,7 @@ typedef WXHWND          WXWidget;
 typedef unsigned int    WXWPARAM;
 typedef long            WXLPARAM;
 
-#if !defined(__WIN32__) || defined(__GNUWIN32__) || defined(__WXMICROWIN__)
+#if !defined(__WIN32__) || defined(__GNUWIN32__) || defined(__WXWINE__) || defined(__WXMICROWIN__)
 typedef int             (*WXFARPROC)();
 #else
 typedef int             (__stdcall *WXFARPROC)();
@@ -2075,10 +2023,6 @@ typedef void*           WXRegion;
 typedef void*           WXFont;
 typedef void*           WXImage;
 typedef void*           WXFontList;
-typedef void*           WXRendition;
-typedef void*           WXRenderTable;
-typedef void*           WXFontType; /* either a XmFontList or XmRenderTable */
-typedef void*           WXString;
 
 typedef unsigned long   Atom;  /* this might fail on a few architectures */
 

@@ -7,7 +7,7 @@
 // Created:      03/12/01
 // RCS-ID:       $Id$
 // Copyright:    (c) 2001 Ron Lee <ron@debian.org>
-// Licence:      wxWindows licence
+// Licence:      wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__

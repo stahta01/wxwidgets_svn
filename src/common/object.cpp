@@ -5,9 +5,9 @@
 // Modified by: Ron Lee
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) 1998 Julian Smart
+// Copyright:   (c) 1998 Julian Smart and Markus Holzem
 //              (c) 2001 Ron Lee <ron@debian.org>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -391,20 +391,23 @@ void MyFrame::InitWithReportItems()
 {
     m_listCtrl->SetImageList(m_imageListSmall, wxIMAGE_LIST_SMALL);
 
-    // note that under MSW for SetColumnWidth() to work we need to create the
-    // items with images initially even if we specify dummy image id
+    // under MSW for SetColumnWidth() to work we need to create the items with
+    // images initially
+#if 1
     wxListItem itemCol;
-    itemCol.SetText(_T("Column 1"));
-    itemCol.SetImage(-1);
+    itemCol.m_mask = wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE;
+    itemCol.m_text = _T("Column 1");
+    itemCol.m_image = -1;
     m_listCtrl->InsertColumn(0, itemCol);
-
-    itemCol.SetText(_T("Column 2"));
-    itemCol.SetAlign(wxLIST_FORMAT_CENTRE);
+    itemCol.m_text = _T("Column 2");
     m_listCtrl->InsertColumn(1, itemCol);
-
-    itemCol.SetText(_T("Column 3"));
-    itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
+    itemCol.m_text = _T("Column 3");
     m_listCtrl->InsertColumn(2, itemCol);
+#else
+    m_listCtrl->InsertColumn(0, _T("Column 1")); // , wxLIST_FORMAT_LEFT, 140);
+    m_listCtrl->InsertColumn(1, _T("Column 2")); // , wxLIST_FORMAT_LEFT, 140);
+    m_listCtrl->InsertColumn(2, _T("One More Column (2)")); // , wxLIST_FORMAT_LEFT, 140);
+#endif
 
     // to speed up inserting we hide the control temporarily
     m_listCtrl->Hide();
@@ -672,13 +675,6 @@ void MyListCtrl::LogColEvent(const wxListEvent& event, const wxChar *name)
 void MyListCtrl::OnColBeginDrag(wxListEvent& event)
 {
     LogColEvent( event, wxT("OnColBeginDrag") );
-
-    if ( event.GetColumn() == 0 )
-    {
-        wxLogMessage(_T("Resizing this column shouldn't work."));
-
-        event.Veto();
-    }
 }
 
 void MyListCtrl::OnColDragging(wxListEvent& event)

@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_LOG_H_
@@ -40,9 +40,7 @@ typedef unsigned long wxLogLevel;
 
 #if wxUSE_LOG
 
-#ifndef __WXWINCE__
 #include <time.h>   // for time_t
-#endif
 
 #include "wx/dynarray.h"
 
@@ -101,7 +99,7 @@ enum
     #define wxTraceOleCalls 0x0100  // OLE interface calls
 #endif
 
-#include "wx/iosfwrap.h"
+#include "wx/ioswrap.h"
 
 // ----------------------------------------------------------------------------
 // derive from this class to redirect (or suppress, or ...) log messages
@@ -143,19 +141,22 @@ public:
         // and iostream logs don't need it, but wxGuiLog does to avoid showing
         // 17 modal dialogs one after another)
     virtual void Flush();
+        // call to Flush() may be optimized: call it only if this function
+        // returns true (although Flush() also returns immediately if there is
+        // no messages, this functions is more efficient because inline)
+    bool HasPendingMessages() const { return m_bHasMessages; }
 
+    // only one sink is active at each moment
         // flush the active target if any
     static void FlushActive()
     {
         if ( !ms_suspendCount )
         {
             wxLog *log = GetActiveTarget();
-            if ( log )
+            if ( log && log->HasPendingMessages() )
                 log->Flush();
         }
     }
-
-    // only one sink is active at each moment
         // get current log target, will call wxApp::CreateLogTarget() to
         // create one if none exists
     static wxLog *GetActiveTarget();
@@ -221,11 +222,9 @@ public:
     // make dtor virtual for all derived classes
     virtual ~wxLog() { }
 
-
-    // this method exists for backwards compatibility only, don't use
-    bool HasPendingMessages() const { return TRUE; }
-
 protected:
+    bool m_bHasMessages; // any messages in the queue?
+
     // the logging functions that can be overriden
         // default DoLog() prepends the time stamp and a prefix corresponding
         // to the message to szString and then passes it to DoLogString()
@@ -368,8 +367,6 @@ private:
 
     // do we pass the messages to the old logger?
     bool m_bPassMessages;
-
-    DECLARE_NO_COPY_CLASS(wxLogChain)
 };
 
 // a chain log target which uses itself as the new logger
@@ -401,8 +398,6 @@ private:
 
     // the control we use
     wxTextCtrl *m_pTextCtrl;
-
-    DECLARE_NO_COPY_CLASS(wxLogTextCtrl)
 };
 
 #endif // wxUSE_TEXTCTRL
@@ -432,9 +427,7 @@ protected:
     wxArrayInt    m_aSeverity;      // one of wxLOG_XXX values
     wxArrayLong   m_aTimes;         // the time of each message
     bool          m_bErrors,        // do we have any errors?
-                  m_bWarnings,      // any warnings?
-                  m_bHasMessages;   // any messages at all?
-
+                  m_bWarnings;      // any warnings?
 };
 
 #endif // wxUSE_LOGGUI
@@ -483,8 +476,6 @@ protected:
 
 private:
     wxLogFrame *m_pLogFrame;      // the log frame
-
-    DECLARE_NO_COPY_CLASS(wxLogWindow)
 };
 
 #endif // wxUSE_LOGWINDOW
@@ -536,20 +527,6 @@ inline void WXDLLEXPORT wxLog##level(const wxChar *szFormat, ...) {}
 inline void WXDLLEXPORT wxVLog##level(arg1, const wxChar *szFormat, \
                                      va_list argptr) {}             \
 inline void WXDLLEXPORT wxLog##level(arg1, const wxChar *szFormat, ...) {}
-
-// Empty Class to fake wxLogNull
-class WXDLLEXPORT wxLogNull
-{
-public:
-    wxLogNull() {}
-};
-
-// Dummy macros to replace some functions.
-#define wxSysErrorCode() (unsigned long)0
-#define wxSysErrorMsg( X ) (const wxChar*)NULL
-
-// Fake symbolic trace masks... for those that are used frequently
-#define wxTRACE_OleCalls wxT("") // OLE interface calls
 
 #endif // wxUSE_LOG/!wxUSE_LOG
 
@@ -640,3 +617,4 @@ void WXDLLEXPORT wxSafeShowMessage(const wxString& title, const wxString& text);
 
 #endif  // _WX_LOG_H_
 
+// vi:sts=4:sw=4:et

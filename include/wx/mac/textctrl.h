@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        textctrl.h
 // Purpose:     wxTextCtrl class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TEXTCTRL_H_
@@ -151,11 +151,11 @@ public:
     void OnUpdateUndo(wxUpdateUIEvent& event);
     void OnUpdateRedo(wxUpdateUIEvent& event);
 
-       virtual bool MacCanFocus() const { return true ; }
+   	virtual bool MacCanFocus() const { return true ; }
     virtual bool MacSetupCursor( const wxPoint& pt ) ;
 
-    virtual void      MacSuperShown( bool show ) ;
-    virtual bool     Show(bool show = TRUE) ;
+    virtual void 	 MacSuperShown( bool show ) ;
+    virtual bool	 Show(bool show = TRUE) ;
 
 protected:
   virtual wxSize DoGetBestSize() const;

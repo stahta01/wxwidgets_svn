@@ -2,11 +2,11 @@
 // Name:        statusbr.h
 // Purpose:     native implementation of wxStatusBar. Optional; can use generic
 //              version instead.
-// Author:      Stefan Csomor
-// Modified by:
-// Created:     1998-01-01
+// Author:      AUTHOR
+// Modified by: 
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -102,7 +102,6 @@ ALL_HEADERS = \
 		datetime.inl \
 		datstrm.h \
 		db.h \
-		dbkeyg.h \
 		dbtable.h \
 		dde.h \
 		debug.h \
@@ -129,7 +128,6 @@ ALL_HEADERS = \
 		hash.h \
 		hashmap.h \
 		intl.h \
-		iosfwrap.h \
 		ioswrap.h \
 		ipc.h \
 		ipcbase.h \

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -48,7 +48,7 @@
 
 #include "wx/timer.h"
 
-#if !defined(__GNUWIN32__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__)
+#if !defined(__GNUWIN32__) && !defined(__WXWINE__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__)
     #include <direct.h>
 
     #ifndef __MWERKS__
@@ -78,10 +78,8 @@
     #include <lm.h>
 #endif // USE_NET_API
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
-    #ifndef __UNIX__
-        #include <io.h>
-    #endif
+#if defined(__WIN32__) && !defined(__WXWINE__) && !defined(__WXMICROWIN__)
+    #include <io.h>
 
     #ifndef __GNUWIN32__
         #include <shellapi.h>
@@ -602,16 +600,14 @@ bool wxGetEnv(const wxString& var, wxString *value)
 {
 #ifdef __WIN16__
     const wxChar* ret = wxGetenv(var);
-    if ( !ret )
-        return FALSE;
-
-    if ( value )
+    if (ret)
     {
         *value = ret;
+        return TRUE;
     }
-
-    return TRUE;
-#else // Win32
+    else
+        return FALSE;
+#else
     // first get the size of the buffer
     DWORD dwRet = ::GetEnvironmentVariable(var, NULL, 0);
     if ( !dwRet )
@@ -627,7 +623,7 @@ bool wxGetEnv(const wxString& var, wxString *value)
     }
 
     return TRUE;
-#endif // Win16/32
+#endif
 }
 
 bool wxSetEnv(const wxString& var, const wxChar *value)
@@ -664,8 +660,6 @@ struct wxFindByPidParams
 
     // the PID we're looking from
     DWORD pid;
-
-    DECLARE_NO_COPY_CLASS(wxFindByPidParams)
 };
 
 // wxKill helper: EnumWindows() callback which is used to find the first (top
@@ -889,6 +883,7 @@ bool wxShutdown(wxShutdownFlags wFlags)
         bOK = ::OpenProcessToken(GetCurrentProcess(),
                                  TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
                                  &hToken) != 0;
+#ifndef __WXWINE__
         if ( bOK )
         {
             TOKEN_PRIVILEGES tkp;
@@ -907,6 +902,7 @@ bool wxShutdown(wxShutdownFlags wFlags)
             // Cannot test the return value of AdjustTokenPrivileges.
             bOK = ::GetLastError() == ERROR_SUCCESS;
         }
+#endif
     }
 
     if ( bOK )
@@ -1129,7 +1125,7 @@ void wxSleep(int nSecs)
     if (gs_inTimer)
         return;
     if (nSecs <= 0)
-         return;
+        return;
 
     wxTheSleepTimer = new wxSleepTimer;
     gs_inTimer = TRUE;

@@ -4,8 +4,8 @@
 // Author:      Robert Roebling
 // Modified by: Vadim Zeitlin for Windows version
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _NOTEBOOK_H
@@ -117,15 +117,11 @@ public:
 
   // base class virtuals
   // -------------------
-
   virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
   virtual bool MSWOnScroll(int orientation, WXWORD nSBCode,
                            WXWORD pos, WXHWND control);
-
-#if wxUSE_CONSTRAINTS
   virtual void SetConstraintSizes(bool recurse = TRUE);
   virtual bool DoPhase(int nPhase);
-#endif // wxUSE_CONSTRAINTS
 
 protected:
   // common part of all ctors

@@ -6,7 +6,7 @@
 // Created:     28/06/1998
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:   	wxWindows licence
+// Licence:   	wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DATSTREAM_H_
@@ -60,8 +60,6 @@ protected:
 #if wxUSE_UNICODE
     wxMBConv& m_conv;
 #endif
-
-    DECLARE_NO_COPY_CLASS(wxDataInputStream)
 };
 
 class WXDLLEXPORT wxDataOutputStream
@@ -103,8 +101,6 @@ protected:
 #if wxUSE_UNICODE
     wxMBConv& m_conv;
 #endif
-
-    DECLARE_NO_COPY_CLASS(wxDataOutputStream)
 };
 
 #endif

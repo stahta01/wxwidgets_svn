@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        accel.cpp
 // Purpose:     wxAcceleratorTable
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -88,10 +88,10 @@ int wxAcceleratorTable::GetCommand( wxKeyEvent &event )
 {
     if (!Ok()) return -1;
 
-    wxAccelList::Node *node = M_ACCELDATA->m_accels.GetFirst();
+    wxNode *node = M_ACCELDATA->m_accels.First();
     while (node)
     {
-        wxAcceleratorEntry *entry = (wxAcceleratorEntry*)node->GetData();
+        wxAcceleratorEntry *entry = (wxAcceleratorEntry*)node->Data();
         if ((event.m_keyCode == entry->GetKeyCode()) &&
            (((entry->GetFlags() & wxACCEL_CTRL) == 0) || event.ControlDown()) &&
            (((entry->GetFlags() & wxACCEL_SHIFT) == 0) || event.ShiftDown()) &&
@@ -99,7 +99,7 @@ int wxAcceleratorTable::GetCommand( wxKeyEvent &event )
         {
             return entry->GetCommand();
         }
-        node = node->GetNext();
+        node = node->Next();
     }
 
     return -1;

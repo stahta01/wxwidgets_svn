@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
 // File:      region.cpp
 // Purpose:   Region class
-// Author:    Julian Smart
+// Author:    Markus Holzem/Julian Smart
 // Created:   Fri Oct 24 10:46:34 MET 1997
-// RCS-ID:    $Id$
-// Copyright: (c) 1997 Julian Smart
+// RCS-ID:      $Id$
+// Copyright: (c) 1997 Markus Holzem/Julian Smart
 // Licence:   wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -82,10 +82,10 @@ public:
 void wxRegionRefData::SetRects(const wxRectList& rectList)
 {
     DeleteRects();
-    m_usingRects = (rectList.GetCount() > 0);
+    m_usingRects = (rectList.Number() > 0);
     if (m_usingRects)
     {
-      m_rectCount = rectList.GetCount();
+      m_rectCount = rectList.Number();
       m_rects = new wxRect[m_rectCount];
     }
 

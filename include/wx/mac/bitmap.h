@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        bitmap.h
 // Purpose:     wxBitmap class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_BITMAP_H_
@@ -27,8 +27,7 @@ class WXDLLEXPORT wxIcon;
 class WXDLLEXPORT wxCursor;
 class WXDLLEXPORT wxImage;
 
-// A mask is a bitmap used for drawing bitmaps
-// it can be a monochrome bitmap or a multi-bit bitmap which transfers to alpha channels
+// A mask is a mono bitmap used for drawing bitmaps
 // transparently.
 class WXDLLEXPORT wxMask: public wxObject
 {
@@ -59,11 +58,8 @@ public:
   bool PointMasked(int x, int y);
   inline WXHBITMAP GetMaskBitmap() const { return m_maskBitmap; }
   inline void SetMaskBitmap(WXHBITMAP bmp) { m_maskBitmap = bmp; }
-  int GetDepth() const { return m_depth ; }
-  void SetDepth( int depth ) { m_depth = depth ; }
 protected:
   WXHBITMAP m_maskBitmap;
-  int m_depth ;
 };
 
 enum { kMacBitmapTypeUnknownType , kMacBitmapTypeGrafWorld, kMacBitmapTypePict , kMacBitmapTypeIcon } ;
@@ -88,8 +84,8 @@ public:
   wxPalette     m_bitmapPalette;
   int           m_quality;
 
-  int            m_bitmapType ;
-  WXHMETAFILE    m_hPict ;
+  int	        m_bitmapType ;
+  WXHMETAFILE	m_hPict ;
   WXHBITMAP     m_hBitmap;
   WXHICON       m_hIcon ;
   wxMask *      m_bitmapMask; // Optional mask
@@ -197,15 +193,17 @@ public:
   inline bool operator != (const wxBitmap& bitmap) const { return m_refData != bitmap.m_refData; }
 
   static void InitStandardHandlers();
+protected:
+
+  // TODO: Implementation
 public:
-  WXHBITMAP GetHBITMAP() const;
-  inline WXHICON GetHICON() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_hIcon : 0); }
-  WXHMETAFILE GetPict(bool *created = NULL ) const;
-
   void SetHBITMAP(WXHBITMAP bmp);
+  WXHBITMAP GetHBITMAP() const;
   void SetHICON(WXHICON ico);
-  void SetPict( WXHMETAFILE pict ) ;
-
+  inline WXHICON GetHICON() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_hIcon : 0); }
+  
+  WXHMETAFILE GetPict() const;
+  void SetPict(WXHMETAFILE pict) ;
   bool FreeResource(bool force = FALSE);
 };
 #endif

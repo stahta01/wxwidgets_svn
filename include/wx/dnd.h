@@ -6,7 +6,7 @@
 // Created:     26.05.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows Team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DND_H_BASE_
@@ -119,8 +119,6 @@ protected:
     wxCursor m_cursorCopy,
              m_cursorMove,
              m_cursorStop;
-
-    DECLARE_NO_COPY_CLASS(wxDropSourceBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -194,8 +192,6 @@ public:
 
 protected:
     wxDataObject *m_dataObject;
-
-    DECLARE_NO_COPY_CLASS(wxDropTargetBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -215,6 +211,8 @@ protected:
     #include "wx/mac/dnd.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dnd.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/dnd.h"
 #endif
 
 // ----------------------------------------------------------------------------

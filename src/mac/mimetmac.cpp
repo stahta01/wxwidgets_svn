@@ -6,7 +6,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef    __GNUG__
@@ -105,7 +105,7 @@ bool wxFileTypeImpl::GetDescription(wxString *desc) const
 
 size_t
 wxFileTypeImpl::GetAllCommands(wxArrayString * verbs, wxArrayString * commands,
-                   const wxFileType::MessageParameters& params) const
+			       const wxFileType::MessageParameters& params) const
 {
     wxFAIL_MSG( _T("wxFileTypeImpl::GetAllCommands() not yet implemented") );
     return 0;

@@ -24,6 +24,8 @@
 #define IS_WIN30_DIB( lpbi)  ((*(LPDWORD)( lpbi)) == sizeof( BITMAPINFOHEADER))
 
 WORD         DIBNumColors(LPSTR pv);
+WORD         PaletteSize(LPSTR lpbi);
+
 
 struct tagCURFILEHEADER { WORD wReserved;         // Always 0
                           WORD wResourceType;     // 2 = cursor
@@ -46,6 +48,7 @@ struct tagCURFILERES {
 typedef struct tagCURFILERES CURFILERES;
 
 HANDLE  ReadCur( LPTSTR szFileName, LPPOINT lpptHotSpot, int *W = 0, int *H = 0);
+HBITMAP ColorDDBToMonoDDB( HBITMAP hbm);
 HCURSOR MakeCursor( HANDLE hDIB, LPPOINT lpptHotSpot, HINSTANCE hInst);
 
 struct tagICONFILEHEADER {

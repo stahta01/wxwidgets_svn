@@ -6,7 +6,7 @@
 // Created:     04.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONTMAPPER_H_
@@ -188,8 +188,6 @@ protected:
     
 private:
     static wxFontMapper *sm_instance;
-
-    DECLARE_NO_COPY_CLASS(wxFontMapper)
 };
 
 // ----------------------------------------------------------------------------

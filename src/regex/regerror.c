@@ -1,8 +1,4 @@
-#ifdef __MWERKS__
-typedef long off_t ;
-#else
 #include <sys/types.h>
-#endif
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>

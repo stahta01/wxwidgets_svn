@@ -6,7 +6,7 @@
 // Created:     12.09.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _DYNARRAY_H
@@ -90,13 +90,11 @@ public:                                                             \
   void Alloc(size_t uiSize);                                        \
   void Shrink();                                                    \
                                                                     \
-  size_t GetCount() const { return m_nCount; }                      \
-  void SetCount(size_t n, T defval = T(0));                         \
-  bool IsEmpty() const { return m_nCount == 0; }                    \
-  size_t Count() const { return m_nCount; }                         \
+  size_t  GetCount() const { return m_nCount; }                     \
+  bool  IsEmpty() const { return m_nCount == 0; }                   \
+  size_t  Count() const { return m_nCount; }                        \
                                                                     \
   typedef T base_type;                                              \
-                                                                    \
 protected:                                                          \
   T& Item(size_t uiIndex) const                                     \
     { wxASSERT( uiIndex < m_nCount ); return m_pItems[uiIndex]; }   \
@@ -114,8 +112,8 @@ protected:                                                          \
   void Sort(CMPFUNC fnCompare);                                     \
                                                                     \
 private:                                                            \
-  void Grow(size_t nIncrement = 0);                                 \
-  bool Realloc(size_t nSize);                                       \
+                                                                    \
+  void    Grow(size_t nIncrement = 0);                              \
                                                                     \
   size_t  m_nSize,                                                  \
           m_nCount;                                                 \
@@ -168,12 +166,12 @@ public:                                                               \
     { return (T&)(base::Item(Count() - 1)); }                         \
                                                                       \
   int Index(T Item, bool bFromEnd = FALSE) const                      \
-    { return base::Index((base_type)Item, bFromEnd); }                \
+    { return base::Index(Item, bFromEnd); }                           \
                                                                       \
   void Add(T Item, size_t nInsert = 1)                                \
-    { base::Add((base_type)Item, nInsert); }                          \
+    { base::Add(Item, nInsert); }                                     \
   void Insert(T Item, size_t uiIndex, size_t nInsert = 1)             \
-    { base::Insert((base_type)Item, uiIndex, nInsert) ; }             \
+    { base::Insert(Item, uiIndex, nInsert) ; }                        \
                                                                       \
   void RemoveAt(size_t uiIndex, size_t nRemove = 1)                   \
     { base::RemoveAt(uiIndex, nRemove); }                             \

@@ -61,9 +61,6 @@
 /* Define this if your version of GTK+ is greater than 1.3 */
 #undef __WXGTK20__
 
-/* Define this if your version of Motif is greater than 2.0 */
-#undef __WXMOTIF20__
-
 /*
  * Define to 1 for Unix[-like] system
  */
@@ -97,7 +94,6 @@
 
 /* PowerPC Darwin & Mac OS X */
 #undef __POWERPC__
-#undef TARGET_CARBON
 
 /* MS-DOS with DJGPP */
 #undef __DOS__
@@ -107,21 +103,13 @@
 #undef __WINDOWS__
 #endif
 
-#ifndef __WIN95__
 #undef __WIN95__
-#endif
 #ifndef __WIN32__
 #undef __WIN32__
 #endif
-#ifndef __GNUWIN32__
 #undef __GNUWIN32__
-#endif
-#ifndef STRICT
 #undef STRICT
-#endif
-#ifndef WINVER
 #undef WINVER
-#endif
 
 /* enable native status bar under Win32 */
 #if defined(__WIN95__) && !defined(__WXUNIVERSAL__)
@@ -149,11 +137,6 @@
  * Define if your compiler supports the explicit keyword
  */
 #undef HAVE_EXPLICIT
-
-/*
- * Define if your compiler supports const_cast<>()
- */
-#undef HAVE_CONST_CAST
 
 /*
  * Use regex support
@@ -376,10 +359,6 @@
  */
 #define wxUSE_CHOICE 0
 /*
- * Use wxDisplay class
- */
-#define wxUSE_DISPLAY 0
-/*
  * Use this control
  */
 #define wxUSE_GAUGE 0
@@ -388,12 +367,12 @@
  */
 #define wxUSE_GRID 0
 /*
- * Use the new prototype wxGrid classes
- * (wxUSE_GRID must also be defined)
+ * Use this control
  */
 #define wxUSE_NEW_GRID 0
 /*
- * Use wxImageList class
+ * Use the new prototype wxGrid classes
+ * (wxUSE_GRID must also be defined)
  */
 #define wxUSE_IMAGLIST 0
 /*
@@ -769,10 +748,6 @@
  */
 #define WXWIN_COMPATIBILITY_2_2 0
 /*
- * Compatibility with 2.4 API
- */
-#define WXWIN_COMPATIBILITY_2_4 0
-/*
  * Enables debugging: memory tracing, assert, etc., contains debug level
  */
 #define WXDEBUG 0
@@ -984,9 +959,6 @@
 
 /* Define if you have vsnprintf() */
 #undef HAVE_VSNPRINTF
-
-/* Define if you have vsnprintf() declaration in the header */
-#undef HAVE_VSNPRINTF_DECL
 
 /* Define if you have usleep() */
 #undef HAVE_USLEEP

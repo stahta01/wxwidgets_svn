@@ -68,8 +68,8 @@ public:
     // returns associated wxWindow
     wxHtmlWindow *GetWindow() {return m_Window;}
 
-    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
-    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = NULL);
+    // sets fonts to be used when displaying HTML page.
+    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes);
 
     // Adds tags module. see wxHtmlTagsModule for details.
     static void AddModule(wxHtmlTagsModule *module);
@@ -176,8 +176,6 @@ private:
     wxString m_FontFaceFixed, m_FontFaceNormal;
             // html font sizes and faces of fixed and proportional fonts
 
-    DECLARE_NO_COPY_CLASS(wxHtmlWinParser)
-
 #if !wxUSE_UNICODE
     wxFontEncoding m_InputEnc, m_OutputEnc;
             // I/O font encodings
@@ -208,8 +206,6 @@ public:
 
 protected:
     wxHtmlWinParser *m_WParser; // same as m_Parser, but overcasted
-
-    DECLARE_NO_COPY_CLASS(wxHtmlWinTagHandler)
 };
 
 

@@ -397,7 +397,7 @@ void NotebookWidgetsPage::CreateNotebook()
                                 notebook->GetPageImage(n));
         }
 
-        m_sizerNotebook->Detach( notebook );
+        m_sizerNotebook->Remove(notebook);
         delete notebook;
 
         // restore selection

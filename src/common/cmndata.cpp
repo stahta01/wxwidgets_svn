@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -55,6 +55,11 @@
         #include <print.h>
         #include <commdlg.h>
     #endif // Win16
+
+    #ifdef __WXWINE__
+        #include <cderr.h>
+        #include <commdlg.h>
+    #endif
 
     #if defined(__WATCOMC__) || defined(__SC__) || defined(__SALFORDC__)
         #include <windowsx.h>
@@ -480,7 +485,10 @@ void wxPrintData::ConvertToNative()
 
         //// Orientation
 
+#ifndef __WXWINE__
         devMode->dmOrientation = m_printOrientation;
+#endif
+        devMode->dmFields = DM_ORIENTATION;
 
         //// Collation
 
@@ -512,6 +520,7 @@ void wxPrintData::ConvertToNative()
 
         devMode->dmFields |= DM_COLOR;
 
+#ifndef __WXWINE__
         //// Paper size
 
         if (m_paperId == wxPAPER_NONE)
@@ -535,6 +544,7 @@ void wxPrintData::ConvertToNative()
                 }
             }
         }
+#endif
 
         //// Duplex
 
@@ -603,10 +613,12 @@ void wxPrintData::ConvertFromNative()
     {
         LPDEVMODE devMode = (LPDEVMODE)GlobalLock(hDevMode);
 
+#ifndef __WXWINE__
         //// Orientation
 
         if (devMode->dmFields & DM_ORIENTATION)
             m_printOrientation = devMode->dmOrientation;
+#endif
 
         //// Collation
 
@@ -646,6 +658,7 @@ void wxPrintData::ConvertFromNative()
         else
             m_colour = TRUE;
 
+#ifndef __WXWINE__
         //// Paper size
 
         // We don't know size of user defined paper and some buggy drivers
@@ -699,6 +712,7 @@ void wxPrintData::ConvertFromNative()
             m_paperSize.y = 0;
             m_paperId = wxPAPER_NONE;
         }
+#endif
 
         //// Duplex
 
@@ -1467,11 +1481,11 @@ void wxPageSetupDialogData::ConvertFromNative()
 	OSStatus err = PMGetAdjustedPaperRect((PMPageFormat)m_printData.m_macPageFormat, &rPaper);
     if ( err == noErr )
     {
-	    m_paperSize.x = (int)(((double) rPaper.right - rPaper.left ) * pt2mm);
-	    m_paperSize.y = (int)(((double) rPaper.bottom - rPaper.top ) * pt2mm);
+	    m_paperSize.x = int(( rPaper.right - rPaper.left ) * pt2mm);
+	    m_paperSize.y = int(( rPaper.bottom - rPaper.top ) * pt2mm);
 
-	    m_minMarginTopLeft.x = (int)(((double) - rPaper.left ) * pt2mm);
-	    m_minMarginTopLeft.y = (int)(((double) - rPaper.top ) * pt2mm);
+	    m_minMarginTopLeft.x = int( ( - rPaper.left ) * pt2mm );
+	    m_minMarginTopLeft.y = int( ( - rPaper.top ) * pt2mm );
 
 //	    m_minMarginBottomRight.x = ((double) rPaper.right - (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.right ) * pt2mm;
 //	    m_minMarginBottomRight.y = ((double)(**(THPrint)m_printData.m_macPrintSettings).rPaper.bottom - (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.bottom ) * pt2mm;

@@ -6,7 +6,7 @@
 // Created:     13.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -155,21 +155,19 @@ bool wxOwnerDrawn::OnMeasureItem(size_t *pwidth, size_t *pheight)
       // Does BMP encroach on default check menu position?
       size_t adjustedWidth = m_bmpChecked.GetWidth() +
                              (wxSystemSettings::GetMetric(wxSYS_EDGE_X) * 2);
-//      if (ms_nDefaultMarginWidth < adjustedWidth)
-//          *pwidth += adjustedWidth - ms_nDefaultMarginWidth;
 
       // Do we need to widen margin to fit BMP?
-      if ((size_t)GetMarginWidth() != adjustedWidth)
+      if ((size_t)GetMarginWidth() < adjustedWidth)
           SetMarginWidth(adjustedWidth);
-        
+
       // add the size of the bitmap to our total size...
       *pwidth += GetMarginWidth(); 
   }
 
   // add the size of the bitmap to our total size - even if we don't have
   // a bitmap we leave room for one...
-  *pwidth += GetMarginWidth();
-  
+  *pwidth += GetMarginWidth(); 
+
   // make sure that this item is at least as
   // tall as the user's system settings specify
   if (*pheight < m_nMinHeight)

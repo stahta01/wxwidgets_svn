@@ -82,7 +82,7 @@ class WXDLLEXPORT wxExpr
 
   wxExpr(wxExprType the_type, wxChar *word_or_string, bool allocate);
   wxExpr(const wxString& functor);      // Assume this is a new clause - pass functor
-  wxExpr(wxExprType the_type, const wxString& word_or_string = wxT(""));
+  wxExpr(wxExprType the_type, const wxString& word_or_string = "");
   wxExpr(long the_integer);
   wxExpr(double the_real);
   wxExpr(wxList *the_list);
@@ -190,8 +190,6 @@ class WXDLLEXPORT wxExpr
   // so we can index into the wxExpr database and fish out the pointer.
   inline void SetClientData(wxObject *data) { client_data = data; }
   inline wxObject *GetClientData(void) const { return client_data; }
-
-    DECLARE_NO_COPY_CLASS(wxExpr)
 };
 
 class WXDLLEXPORT wxExprDatabase: public wxList
@@ -246,15 +244,11 @@ public:
 
     // Compatibility
     inline bool ReadProlog(wxChar *filename) { return Read(wxString(filename)); }
-    inline bool ReadPrologFromString(char *buffer)
-    {
-        return ReadFromString(wxString(buffer, wxConvLibc));
-    }
+    inline bool ReadPrologFromString(char *buffer) { return ReadFromString(wxString(buffer)); }
     inline void WriteProlog(FILE* stream) { Write(stream); }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxExprDatabase)
-    DECLARE_NO_COPY_CLASS(wxExprDatabase)
 };
 
 // Function call-style interface - some more convenience wrappers/unwrappers

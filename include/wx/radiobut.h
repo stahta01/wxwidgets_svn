@@ -6,7 +6,7 @@
 // Created:     07.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_RADIOBUT_H_BASE_
@@ -45,6 +45,8 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxRadioButtonNameStr;
     #include "wx/mac/radiobut.h"
 #elif defined(__WXPM__)
     #include "wx/os2/radiobut.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/radiobut.h"
 #endif
 
 #endif // wxUSE_RADIOBTN

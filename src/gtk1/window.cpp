@@ -1511,12 +1511,12 @@ wxWindowGTK *FindWindowForMouseEvent(wxWindowGTK *win, wxCoord& x, wxCoord& y)
         yy += pizza->yoffset;
     }
 
-    wxWindowList::Node  *node = win->GetChildren().GetFirst();
+    wxNode *node = win->GetChildren().First();
     while (node)
     {
-        wxWindowGTK *child = node->GetData();
+        wxWindowGTK *child = (wxWindowGTK*)node->Data();
 
-        node = node->GetNext();
+        node = node->Next();
         if (!child->IsShown())
             continue;
 
@@ -2275,6 +2275,21 @@ wxWindow *wxWindowBase::FindFocus()
     return (wxWindow *)g_focusWindow;
 }
 
+//-----------------------------------------------------------------------------
+// "destroy" event
+//-----------------------------------------------------------------------------
+
+// VZ: Robert commented the code using out so it generates warnings: should
+//     be either fixed or removed completely
+#if 0
+
+static void gtk_window_destroy_callback( GtkWidget* widget, wxWindow *win )
+{
+    wxWindowDestroyEvent event(win);
+    win->GetEventHandler()->ProcessEvent(event);
+}
+
+#endif // 0
 
 //-----------------------------------------------------------------------------
 // "realize" from m_widget
@@ -2720,7 +2735,10 @@ bool wxWindowGTK::Create( wxWindow *parent,
 
 wxWindowGTK::~wxWindowGTK()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent(this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
     if (g_focusWindow == this)
         g_focusWindow = NULL;
@@ -2927,6 +2945,11 @@ void wxWindowGTK::ConnectWidget( GtkWidget *widget )
 
     gtk_signal_connect( GTK_OBJECT(widget), "leave_notify_event",
       GTK_SIGNAL_FUNC(gtk_window_leave_callback), (gpointer)this );
+
+    // This keeps crashing on me. RR.
+    //
+    // gtk_signal_connect( GTK_OBJECT(widget), "destroy",
+    //  GTK_SIGNAL_FUNC(gtk_window_destroy_callback), (gpointer)this );
 }
 
 bool wxWindowGTK::Destroy()

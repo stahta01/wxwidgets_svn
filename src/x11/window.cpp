@@ -42,7 +42,6 @@
 #include "wx/log.h"
 #include "wx/fontutil.h"
 #include "wx/univ/renderer.h"
-#include "wx/hash.h"
 
 #if  wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
@@ -341,7 +340,10 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
 // Destructor
 wxWindowX11::~wxWindowX11()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent((wxWindow*) this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
     if (g_captureWindow == this)
         g_captureWindow = NULL;

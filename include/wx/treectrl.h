@@ -22,7 +22,9 @@
 #elif defined(__WXMAC__)
     #include "wx/generic/treectlg.h"
 #elif defined(__WXPM__)
-    #include "wx/os2/treectrl.h"
+    #include "wx/generic/treectlg.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/generic/treectlg.h"
 #endif
 
 /*

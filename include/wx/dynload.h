@@ -7,7 +7,7 @@
 // Created:      03/12/01
 // RCS-ID:       $Id$
 // Copyright:    (c) 2001 Ron Lee <ron@debian.org>
-// Licence:      wxWindows licence
+// Licence:      wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DYNAMICLOADER_H__
@@ -127,11 +127,6 @@ public:
         // (full or not), return TRUE on success
 
     bool Load(wxString libname, int flags = wxDL_DEFAULT);
-
-        // detach the library object from its handle, i.e. prevent the object
-        // from unloading the library in its dtor -- the caller is now
-        // responsible for doing this
-    wxDllType Detach() { wxDllType h = m_handle; m_handle = 0; return h; }
 
         // unload the library, also done automatically in dtor
 

@@ -27,7 +27,6 @@
 #include "wx/evtloop.h"
 #include "wx/timer.h"
 #include "wx/filename.h"
-#include "wx/hash.h"
 
 #include "wx/univ/theme.h"
 #include "wx/univ/renderer.h"
@@ -549,9 +548,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 
                 // Only erase background, paint in idle time.
                 win->SendEraseEvents();
-
-                // EXPERIMENT
-                //win->Update();
+                // win->Update();
             }
 
             return TRUE;
@@ -943,14 +940,14 @@ bool wxApp::SendIdleEvents(wxWindow* win)
     if (event.MoreRequested())
         needMore = TRUE;
 
-    wxWindowListNode* node = win->GetChildren().GetFirst();
+    wxNode* node = win->GetChildren().First();
     while (node)
     {
-        wxWindow* win = (wxWindow*) node->GetData();
+        wxWindow* win = (wxWindow*) node->Data();
         if (SendIdleEvents(win))
             needMore = TRUE;
 
-        node = node->GetNext();
+        node = node->Next();
     }
 
     win->OnInternalIdle();
@@ -960,10 +957,10 @@ bool wxApp::SendIdleEvents(wxWindow* win)
 
 void wxApp::DeletePendingObjects()
 {
-    wxNode *node = wxPendingDelete.GetFirst();
+    wxNode *node = wxPendingDelete.First();
     while (node)
     {
-        wxObject *obj = (wxObject *)node->GetData();
+        wxObject *obj = (wxObject *)node->Data();
 
         delete obj;
 
@@ -972,7 +969,7 @@ void wxApp::DeletePendingObjects()
 
         // Deleting one object may have deleted other pending
         // objects, so start from beginning of list again.
-        node = wxPendingDelete.GetFirst();
+        node = wxPendingDelete.First();
     }
 }
 

@@ -19,7 +19,6 @@
 #include "wx/panel.h"
 #include "wx/clipbrd.h"
 #include "wx/tokenzr.h"
-#include "wx/dcclient.h"
 
 #include "wx/univ/inphand.h"
 #include "wx/univ/renderer.h"

@@ -5,7 +5,7 @@ EXTRACPPFLAGS=-I$(WXDIR)\contrib\include;/DPROLOGIO
 
 !include $(WXDIR)\src\makewat.env
 
-OGLLIB = $(WXDIR)\lib\ogl.lib
+OGLLIB = $(WXDIR)\lib\ogl_w.lib
 THISDIR = $(WXDIR)\contrib\src\ogl
 OUTPUTDIR = $(THISDIR)\
 
@@ -21,5 +21,10 @@ $(OGLLIB): $(OBJECTS)
 	*wlib /b /c /n /P=256 $(OGLLIB) $(OBJECTS)
 
 clean:   .SYMBOLIC
-    -erase *.obj *.bak *.err *.pch $(OGLLIB) *.lbc
+    -erase *.obj 
+    -erase *.bak 
+    -erase *.err 
+    -erase *.pch 
+    -erase $(OGLLIB) 
+    -erase *.lbc
 

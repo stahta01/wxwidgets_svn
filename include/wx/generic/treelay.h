@@ -140,7 +140,6 @@ private:
     
 private:
     DECLARE_DYNAMIC_CLASS(wxTreeLayoutStored)
-    DECLARE_NO_COPY_CLASS(wxTreeLayoutStored)
 };
 
 // For backward compatibility

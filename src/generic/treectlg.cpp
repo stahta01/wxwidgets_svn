@@ -5,7 +5,7 @@
 // Created:     01/02/97
 // Modified:    22/10/98 - almost total rewrite, simpler interface (VZ)
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,6 +37,10 @@
 #include "wx/imaglist.h"
 #include "wx/settings.h"
 #include "wx/dcclient.h"
+
+#ifdef __WXMAC__
+    #include "wx/mac/private.h"
+#endif
 
 // -----------------------------------------------------------------------------
 // array types
@@ -120,8 +124,6 @@ public:
 
 private:
     wxGenericTreeCtrl *m_owner;
-
-    DECLARE_NO_COPY_CLASS(wxTreeRenameTimer)
 };
 
 // control used for in-place edit
@@ -145,7 +147,6 @@ private:
     bool                m_finished;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTreeTextCtrl)
 };
 
 // timer used to clear wxGenericTreeCtrl::m_findPrefix if no key was pressed
@@ -162,8 +163,6 @@ public:
 
 private:
     wxGenericTreeCtrl *m_owner;
-
-    DECLARE_NO_COPY_CLASS(wxTreeFindTimer)
 };
 
 // a tree item
@@ -303,8 +302,6 @@ private:
                                           // children but has a [+] button
     int                 m_isBold      :1; // render the label in bold font
     int                 m_ownsAttr    :1; // delete attribute when done
-
-    DECLARE_NO_COPY_CLASS(wxGenericTreeItem)
 };
 
 // =============================================================================
@@ -2128,7 +2125,20 @@ void wxGenericTreeCtrl::PaintItem(wxGenericTreeItem *item, wxDC& dc)
 
     if ( item->IsSelected() )
     {
+// under mac selections are only a rectangle in case they don't have the focus
+#ifdef __WXMAC__
+        if ( !m_hasFocus )
+        {
+            dc.SetBrush( *wxTRANSPARENT_BRUSH ) ;
+            dc.SetPen( wxPen( wxSystemSettings::GetColour( wxSYS_COLOUR_HIGHLIGHT ) , 1 , wxSOLID ) ) ;
+        }
+        else
+        {
+            dc.SetBrush( *m_hilightBrush ) ;
+        }
+#else
         dc.SetBrush(*(m_hasFocus ? m_hilightBrush : m_hilightUnfocusedBrush));
+#endif
     }
     else
     {
@@ -2309,10 +2319,25 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
 
                 if (HasFlag(wxTR_AQUA_BUTTONS))
                 {
+#ifdef __WXMAC__
+                    wxMacPortSetter helper(&dc) ;
+                    wxMacWindowClipper clipper(this) ;
+                    wxDC::MacSetupBackgroundForCurrentPort( MacGetBackgroundBrush() ) ;
+
+                    int loc_x = x - 5 ;
+                    int loc_y = y_mid - 6 ;
+                    MacWindowToRootWindow( & loc_x , & loc_y ) ;
+                    Rect bounds = { loc_y , loc_x , loc_y + 18 , loc_x + 12 } ;
+                    ThemeButtonDrawInfo info = { kThemeStateActive , item->IsExpanded() ? kThemeDisclosureDown : kThemeDisclosureRight ,
+                        kThemeAdornmentNone };
+                    DrawThemeButton( &bounds, kThemeDisclosureButton ,
+                        &info , NULL , NULL , NULL , NULL ) ;
+#else
                     if (item->IsExpanded())
                         dc.DrawBitmap( *m_arrowDown, x-5, y_mid-6, TRUE );
                     else
                         dc.DrawBitmap( *m_arrowRight, x-5, y_mid-6, TRUE );
+#endif
                 }
                 else
                 {
@@ -2545,7 +2570,7 @@ void wxGenericTreeCtrl::OnChar( wxKeyEvent &event )
     // home  : go to root
     // end   : go to last item without opening parents
     // alnum : start or continue searching for the item with this prefix
-    int keyCode = event.GetKeyCode();
+    int keyCode = event.KeyCode();
     switch ( keyCode )
     {
         case '+':

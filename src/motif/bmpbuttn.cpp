@@ -41,22 +41,30 @@ IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton, wxButton)
 
 wxBitmapButton::wxBitmapButton()
 {
-    m_marginX = m_marginY = wxDEFAULT_BUTTON_MARGIN;
+    m_marginX = wxDEFAULT_BUTTON_MARGIN; m_marginY = wxDEFAULT_BUTTON_MARGIN;
     m_insensPixmap = (WXPixmap) 0;
 }
 
-bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
-                            const wxBitmap& bitmap,
+bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bitmap,
                             const wxPoint& pos,
                             const wxSize& size, long style,
                             const wxValidator& validator,
                             const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, validator, name ) )
-        return false;
+    m_buttonBitmap = bitmap;
+    m_buttonBitmapOriginal = bitmap;
+    m_buttonBitmapSelected = bitmap;
+    m_buttonBitmapSelectedOriginal = bitmap;
 
-    m_bmpNormal = m_bmpNormalOriginal = bitmap;
-    m_bmpSelected = m_bmpSelectedOriginal = bitmap;
+    SetName(name);
+    SetValidator(validator);
+    parent->AddChild(this);
+
+    m_backgroundColour = parent->GetBackgroundColour() ;
+    m_foregroundColour = parent->GetForegroundColour() ;
+    m_windowStyle = style;
+    m_marginX = 0;
+    m_marginY = 0;
 
     /*
     int x = pos.x;
@@ -64,6 +72,11 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
     int width = size.x;
     int height = size.y;
     */
+
+    if (id == -1)
+        m_windowId = NewControlId();
+    else
+        m_windowId = id;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -84,31 +97,35 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
 #else
         xmPushButtonWidgetClass, parentWidget,
 #endif
-        // See comment for wxButton::SetDefault
-        // XmNdefaultButtonShadowThickness, 1, 
-        XmNrecomputeSize, False,
+        //                  XmNdefaultButtonShadowThickness, 1, // See comment for wxButton::SetDefault
         NULL);
 
     m_mainWidget = (WXWidget) buttonWidget;
 
+    m_font = parent->GetFont();
     ChangeFont(FALSE);
 
     ChangeBackgroundColour ();
 
     DoSetBitmap();
 
-    XtAddCallback (buttonWidget,
-                   XmNactivateCallback, (XtCallbackProc) wxButtonCallback,
-                   (XtPointer) this);
+    XtAddCallback (buttonWidget, XmNactivateCallback, (XtCallbackProc) wxButtonCallback,
+        (XtPointer) this);
 
     SetCanAddEventHandler(TRUE);
     
-    wxSize best = m_bmpNormal.Ok() ? GetBestSize() : wxSize(30, 30);
-    if( size.x != -1 ) best.x = size.x;
-    if( size.y != -1 ) best.y = size.y;
-
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
-                  pos.x, pos.y, best.x, best.y);
+    wxSize newSize = size;
+    
+    if (m_buttonBitmap.Ok())
+    {
+        int border = (style & wxNO_BORDER) ? 4 : 10;
+        if (newSize.x == -1)
+            newSize.x = m_buttonBitmap.GetWidth()+border;
+        if (newSize.y == -1)
+            newSize.y = m_buttonBitmap.GetHeight()+border;
+    }
+    
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, newSize.x, newSize.y);
 
     return TRUE;
 }
@@ -118,43 +135,42 @@ wxBitmapButton::~wxBitmapButton()
     SetBitmapLabel(wxNullBitmap);
 
     if (m_insensPixmap)
-        XmDestroyPixmap (DefaultScreenOfDisplay ((Display*) GetXDisplay()),
-                         (Pixmap) m_insensPixmap);
+        XmDestroyPixmap (DefaultScreenOfDisplay ((Display*) GetXDisplay()), (Pixmap) m_insensPixmap);
 }
 
 void wxBitmapButton::SetBitmapLabel(const wxBitmap& bitmap)
 {
-    m_bmpNormalOriginal = bitmap;
-    m_bmpNormal = bitmap;
+    m_buttonBitmapOriginal = bitmap;
+    m_buttonBitmap = bitmap;
 
     DoSetBitmap();
 }
 
 void wxBitmapButton::SetBitmapSelected(const wxBitmap& sel)
 {
-    m_bmpSelected = sel;
-    m_bmpSelectedOriginal = sel;
+    m_buttonBitmapSelected = sel;
+    m_buttonBitmapSelectedOriginal = sel;
 
     DoSetBitmap();
 };
 
 void wxBitmapButton::SetBitmapFocus(const wxBitmap& focus)
 {
-    m_bmpFocus = focus;
+    m_buttonBitmapFocus = focus;
     // Not used in Motif
 };
 
 void wxBitmapButton::SetBitmapDisabled(const wxBitmap& disabled)
 {
-    m_bmpDisabled = disabled;
-    m_bmpDisabledOriginal = disabled;
+    m_buttonBitmapDisabled = disabled;
+    m_buttonBitmapDisabledOriginal = disabled;
 
     DoSetBitmap();
 };
 
 void wxBitmapButton::DoSetBitmap()
 {
-    if (m_bmpNormalOriginal.Ok())
+    if (m_buttonBitmapOriginal.Ok())
     {
         Pixmap pixmap = 0;
         Pixmap insensPixmap = 0;
@@ -162,76 +178,69 @@ void wxBitmapButton::DoSetBitmap()
 
         // Must re-make the bitmap to have its transparent areas drawn
         // in the current widget background colour.
-        if (m_bmpNormalOriginal.GetMask())
+        if (m_buttonBitmapOriginal.GetMask())
         {
             int backgroundPixel;
-            XtVaGetValues((Widget) m_mainWidget,
-                          XmNbackground, &backgroundPixel,
-                          NULL);
+            XtVaGetValues((Widget) m_mainWidget, XmNbackground, &backgroundPixel,
+                NULL);
 
             wxColour col;
             col.SetPixel(backgroundPixel);
 
-            wxBitmap newBitmap =
-                wxCreateMaskedBitmap(m_bmpNormalOriginal, col);
-            m_bmpNormal = newBitmap;
+            wxBitmap newBitmap = wxCreateMaskedBitmap(m_buttonBitmapOriginal, col);
+            m_buttonBitmap = newBitmap;
 
-            pixmap = (Pixmap) m_bmpNormal.GetPixmap();
+            pixmap = (Pixmap) m_buttonBitmap.GetPixmap();
         }
         else
-            pixmap = (Pixmap) m_bmpNormal.GetLabelPixmap(m_mainWidget);
+            pixmap = (Pixmap) m_buttonBitmap.GetLabelPixmap(m_mainWidget);
 
-        if (m_bmpDisabledOriginal.Ok())
+        if (m_buttonBitmapDisabledOriginal.Ok())
         {
-            if (m_bmpDisabledOriginal.GetMask())
+            if (m_buttonBitmapDisabledOriginal.GetMask())
             {
                 int backgroundPixel;
-                XtVaGetValues((Widget) m_mainWidget,
-                              XmNbackground, &backgroundPixel,
-                              NULL);
+                XtVaGetValues((Widget) m_mainWidget, XmNbackground, &backgroundPixel,
+                    NULL);
 
                 wxColour col;
                 col.SetPixel(backgroundPixel);
 
-                wxBitmap newBitmap =
-                    wxCreateMaskedBitmap(m_bmpDisabledOriginal, col);
-                m_bmpDisabled = newBitmap;
+                wxBitmap newBitmap = wxCreateMaskedBitmap(m_buttonBitmapDisabledOriginal, col);
+                m_buttonBitmapDisabled = newBitmap;
 
-                insensPixmap = (Pixmap) m_bmpDisabled.GetPixmap();
+                insensPixmap = (Pixmap) m_buttonBitmapDisabled.GetPixmap();
             }
             else
-                insensPixmap = (Pixmap) m_bmpNormal.GetInsensPixmap(m_mainWidget);
+                insensPixmap = (Pixmap) m_buttonBitmap.GetInsensPixmap(m_mainWidget);
         }
         else
-            insensPixmap = (Pixmap) m_bmpNormal.GetInsensPixmap(m_mainWidget);
+            insensPixmap = (Pixmap) m_buttonBitmap.GetInsensPixmap(m_mainWidget);
 
         // Now make the bitmap representing the armed state
-        if (m_bmpSelectedOriginal.Ok())
+        if (m_buttonBitmapSelectedOriginal.Ok())
         {
-            if (m_bmpSelectedOriginal.GetMask())
+            if (m_buttonBitmapSelectedOriginal.GetMask())
             {
                 int backgroundPixel;
-                XtVaGetValues((Widget) m_mainWidget,
-                              XmNarmColor, &backgroundPixel,
-                              NULL);
+                XtVaGetValues((Widget) m_mainWidget, XmNarmColor, &backgroundPixel,
+                    NULL);
 
                 wxColour col;
                 col.SetPixel(backgroundPixel);
 
-                wxBitmap newBitmap =
-                    wxCreateMaskedBitmap(m_bmpSelectedOriginal, col);
-                m_bmpSelected = newBitmap;
+                wxBitmap newBitmap = wxCreateMaskedBitmap(m_buttonBitmapSelectedOriginal, col);
+                m_buttonBitmapSelected = newBitmap;
 
-                armPixmap = (Pixmap) m_bmpSelected.GetPixmap();
+                armPixmap = (Pixmap) m_buttonBitmapSelected.GetPixmap();
             }
             else
-                armPixmap = (Pixmap) m_bmpNormal.GetArmPixmap(m_mainWidget);
+                armPixmap = (Pixmap) m_buttonBitmap.GetArmPixmap(m_mainWidget);
         }
         else
-            armPixmap = (Pixmap) m_bmpNormal.GetArmPixmap(m_mainWidget);
+            armPixmap = (Pixmap) m_buttonBitmap.GetArmPixmap(m_mainWidget);
 
-        // <- the Get...Pixmap()-functions return the same pixmap!
-        if (insensPixmap == pixmap) 
+        if (insensPixmap == pixmap) // <- the Get...Pixmap()-functions return the same pixmap!
         {
             insensPixmap =
                 XCreateInsensitivePixmap(DisplayOfScreen(XtScreen((Widget) m_mainWidget)), pixmap);
@@ -270,11 +279,16 @@ wxSize wxBitmapButton::DoGetBestSize() const
 {
     wxSize ret( 30,30 );
 
-    if (m_bmpNormal.Ok())
+    if (m_buttonBitmap.Ok())
     {
         int border = (GetWindowStyle() & wxNO_BORDER) ? 4 : 10;
-        ret.x = m_bmpNormal.GetWidth()+border;
-        ret.y = m_bmpNormal.GetHeight()+border;
+        ret.x = m_buttonBitmap.GetWidth()+border;
+        ret.y = m_buttonBitmap.GetHeight()+border;
+    }
+
+    if (!HasFlag(wxBU_EXACTFIT))
+    {
+        if (ret.x < 80) ret.x = 80;
     }
 
     return ret;

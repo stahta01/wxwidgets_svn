@@ -6,7 +6,7 @@
 // Created:     09/17/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -282,7 +282,7 @@ void wxUsleep(
   unsigned long                     ulMilliseconds
 )
 {
-    ::DosSleep(ulMilliseconds/1000l);
+    ::DosSleep(ulMilliseconds);
 }
 
 void wxSleep(
@@ -1520,9 +1520,4 @@ wxBitmap wxDisableBitmap(
     return(wxNullBitmap);
 } // end of wxDisableBitmap
 
-COLORREF wxColourToRGB(
-  const wxColour&                   rColor
-)
-{
-    return(OS2RGB(rColor.Red(), rColor.Green(), rColor.Blue()));
-} // end of wxColourToRGB
+

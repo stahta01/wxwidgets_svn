@@ -5,8 +5,8 @@
 // Modified by: 20.11.99 (VZ): don't derive from wxBitmap any more
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -146,7 +146,8 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
     // delete the inverted mask bitmap we created as well
     ::DeleteObject(iconInfo.hbmMask);
 #else // Win16
-/*
+    // there are some functions in curico.cpp which probably could be used
+    // here...
     // This probably doesn't work.
     HBITMAP hBitmap = (HBITMAP) bmp.GetHBITMAP();
     HICON hIcon = MakeIconFromBitmap((HINSTANCE) wxGetInstance(), hBitmap);
@@ -155,8 +156,8 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
         SetHICON((WXHICON)hIcon);
         SetSize(bmp.GetWidth(), bmp.GetHeight());
     }
-*/
-    wxFAIL_MSG("Bitmap to icon conversion (including use of XPMs for icons) not implemented");
+
+//    wxFAIL_MSG("Bitmap to icon conversion (including use of XPMs for icons) not implemented");
 #endif // Win32/16
 #endif
 }

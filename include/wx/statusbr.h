@@ -6,7 +6,7 @@
 // Created:     05.02.00
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_STATUSBR_H_BASE_
@@ -21,7 +21,6 @@
 #if wxUSE_STATUSBAR
 
 #include "wx/list.h"
-#include "wx/dynarray.h"
 
 WX_DECLARE_LIST(wxString, wxListString);
 
@@ -112,8 +111,6 @@ protected:
     // stacks of previous values for PushStatusText/PopStatusText
     // this is created on demand, use GetStatusStack/GetOrCreateStatusStack
     wxListString **m_statusTextStacks;
-
-    DECLARE_NO_COPY_CLASS(wxStatusBarBase)
 };
 
 // ----------------------------------------------------------------------------

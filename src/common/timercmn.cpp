@@ -9,9 +9,9 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 //              (c) 1999 Guillermo Rodriguez <guille@iies.es>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -169,7 +169,6 @@ void wxStopWatch::Start(long t)
 {
     m_t0 = wxGetLocalTimeMillis() - t;
     m_pause = 0;
-    m_pauseCount = 0;
 }
 
 long wxStopWatch::GetElapsedTime() const

@@ -7,7 +7,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -486,7 +486,7 @@ wxMimeTypesManager::~wxMimeTypesManager()
 
 bool wxMimeTypesManager::Unassociate(wxFileType *ft)
 {
-#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WXWINE__)
     return m_impl->Unassociate(ft);
 #else
     return ft->Unassociate();
@@ -596,7 +596,7 @@ size_t wxMimeTypesManager::EnumAllFileTypes(wxArrayString& mimetypes)
 void wxMimeTypesManager::Initialize(int mcapStyle,
                                     const wxString& sExtraDir)
 {
-#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WXWINE__)
     EnsureImpl();
 
     m_impl->Initialize(mcapStyle, sExtraDir);
@@ -609,7 +609,7 @@ void wxMimeTypesManager::Initialize(int mcapStyle,
 // and this function clears all the data from the manager
 void wxMimeTypesManager::ClearData()
 {
-#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WXWINE__)
     EnsureImpl();
 
     m_impl->ClearData();

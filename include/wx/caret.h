@@ -224,8 +224,6 @@ public:
 
 private:
     wxCaret *m_caret;
-
-    DECLARE_NO_COPY_CLASS(wxCaretSuspend)
 };
 
 #endif // wxUSE_CARET

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GENERIC_SCROLLWIN_H_
@@ -70,17 +70,6 @@ public:
     virtual bool Layout();
 
     virtual void DoSetVirtualSize(int x, int y);
-
-#if WXWIN_COMPATIBILITY   
-     virtual void GetScrollUnitsPerPage(int *x_page, int *y_page) const;   
-     virtual void CalcUnscrolledPosition(int x, int y, float *xx, float *yy) const;
-     // Need to do this otherwise the compiler gets confuced 
-     // between float and int calls to this function.
-     void CalcUnscrolledPosition(int x, int y, int *xx, int *yy) const
-        { wxScrollHelper::CalcScrolledPosition(x, y, xx, yy); }
-     wxPoint CalcUnscrolledPosition(const wxPoint& pt) const
-        { return wxScrollHelper::CalcScrolledPosition(pt); }
-#endif // WXWIN_COMPATIBILITY
 
 protected:
     // this is needed for wxEVT_PAINT processing hack described in

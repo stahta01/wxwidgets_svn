@@ -14,9 +14,8 @@ file or downloaded via HTTP protocol) in a window. The width
 of the window is constant - given in the constructor - and virtual height
 is changed dynamically depending on page size.
 Once the window is created you can set its content by calling 
-\helpref{SetPage(text)}{wxhtmlwindowsetpage},
-\helpref{LoadPage(filename)}{wxhtmlwindowloadpage} or
-\helpref{LoadFile}{wxhtmlwindowloadfile}.
+\helpref{SetPage(text)}{wxhtmlwindowsetpage} or 
+\helpref{LoadPage(filename)}{wxhtmlwindowloadpage}. 
 
 \wxheading{Note}
 
@@ -73,7 +72,7 @@ Appends HTML fragment to currently displayed text and refreshes the window.
 
 \wxheading{Return value}
 
-false if an error occurred, true otherwise.
+FALSE if an error occurred, TRUE otherwise.
 
 \membersection{wxHtmlWindow::GetInternalRepresentation}\label{wxhtmlwindowgetinternalrepresentation}
 
@@ -147,20 +146,6 @@ Clears history.
 
 Moves to next page in history.
 
-\membersection{wxHtmlWindow::LoadFile}\label{wxhtmlwindowloadfile}
-
-\func{virtual bool}{LoadFile}{\param{const wxFileName\& }{filename}}
-
-Loads HTML page from file and displays it.
-
-\wxheading{Return value}
-
-false if an error occurred, true otherwise
-
-\wxheading{See also}
-
-\helpref{LoadPage}{wxhtmlwindowloadpage}
-
 \membersection{wxHtmlWindow::LoadPage}\label{wxhtmlwindowloadpage}
 
 \func{virtual bool}{LoadPage}{\param{const wxString\& }{location}}
@@ -169,7 +154,7 @@ Unlike SetPage this function first loads HTML page from {\it location}
 and then displays it. See example:
 
 \begin{verbatim}
-htmlwin->LoadPage("help/myproject/index.htm");
+htmlwin -> SetPage("help/myproject/index.htm");
 \end{verbatim}
 
 \wxheading{Parameters}
@@ -178,11 +163,7 @@ htmlwin->LoadPage("help/myproject/index.htm");
 
 \wxheading{Return value}
 
-false if an error occurred, true otherwise
-
-\wxheading{See also}
-
-\helpref{LoadFile}{wxhtmlwindowloadfile}
+FALSE if an error occurred, TRUE otherwise
 
 \membersection{wxHtmlWindow::OnCellClicked}\label{wxhtmlwindowoncellclicked}
 
@@ -297,7 +278,7 @@ This function sets the space between border of window and HTML contents. See ima
 
 \membersection{wxHtmlWindow::SetFonts}\label{wxhtmlwindowsetfonts}
 
-\func{void}{SetFonts}{\param{wxString }{normal\_face}, \param{wxString }{fixed\_face}, \param{const int }{*sizes = NULL}}
+\func{void}{SetFonts}{\param{wxString }{normal\_face}, \param{wxString }{fixed\_face}, \param{const int }{*sizes}}
 
 This function sets font sizes and faces.
 
@@ -312,14 +293,24 @@ platform-specific face name. Examples are "helvetica" under Unix or
 
 \docparam{sizes}{This is an array of 7 items of {\it int} type.
 The values represent size of font with HTML size from -2 to +4
-( <FONT SIZE=-2> to <FONT SIZE=+4> ). Default sizes are used if {\it sizes}
-is NULL.}
+( <FONT SIZE=-2> to <FONT SIZE=+4> )}
 
 \wxheading{Defaults}
 
-Default font sizes are defined by constants wxHTML\_FONT\_SIZE\_1,
-wxHTML\_FONT\_SIZE\_2, ..., wxHTML\_FONT\_SIZE\_7. Note that they differ among
-platforms. Default face names are empty strings.
+Under wxGTK:
+
+\begin{verbatim}
+    SetFonts("", "", {10, 12, 14, 16, 19, 24, 32});
+\end{verbatim}
+
+Under Windows:
+
+\begin{verbatim}
+    SetFonts("", "", {7, 8, 10, 12, 16, 22, 30});
+\end{verbatim}
+
+Although it seems different the fact is that the fonts are of approximately
+same size under both platforms (due to wxMSW / wxGTK inconsistency)
 
 \membersection{wxHtmlWindow::SetPage}\label{wxhtmlwindowsetpage}
 
@@ -341,7 +332,7 @@ If you want to load a document from some location use
 
 \wxheading{Return value}
 
-false if an error occurred, true otherwise.
+FALSE if an error occurred, TRUE otherwise.
 
 \membersection{wxHtmlWindow::SetRelatedFrame}\label{wxhtmlwindowsetrelatedframe}
 

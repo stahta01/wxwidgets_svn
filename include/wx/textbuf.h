@@ -6,7 +6,7 @@
 // Created:     14.11.01
 // Author:      Morten Hanssen, Vadim Zeitlin
 // Copyright:   (c) 1998-2001 wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TEXTBUFFER_H
@@ -81,10 +81,10 @@ public:
     bool Create(const wxString& strBufferName);
 
     // Open() also loads buffer in memory on success
-    bool Open(wxMBConv& conv = wxConvUTF8);
+    bool Open(wxMBConv& conv = wxConvISO8859_1);
 
     // same as Open() but with (another) buffer name
-    bool Open(const wxString& strBufferName, wxMBConv& conv = wxConvUTF8);
+    bool Open(const wxString& strBufferName, wxMBConv& conv = wxConvISO8859_1);
 
     // closes the buffer and frees memory, losing all changes
     bool Close();
@@ -148,7 +148,7 @@ public:
     // change the buffer (default argument means "don't change type")
     // possibly in another format
     bool Write(wxTextFileType typeNew = wxTextFileType_None,
-               wxMBConv& conv = wxConvUTF8);
+               wxMBConv& conv = wxConvISO8859_1);
 
     // dtor
     virtual ~wxTextBuffer();

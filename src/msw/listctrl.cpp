@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -52,6 +52,24 @@
 #endif
 
 #include "wx/msw/missing.h"
+
+
+// ----------------------------------------------------------------------------
+// private globals (yuck!)
+// ----------------------------------------------------------------------------
+
+// Some versions of comctl32.dll don't do what MSDN says it should and still
+// sends LVN_DELETEITEM after LVN_DELETEALLITEMS has returned TRUE.  This flag
+// will be used to enable us to ignore the LVN_DELETEITEM message in these cases.
+// Also note that sometimes when there are large numbers of items in the listctrl
+// and items have attribute data then when the data is being deleted a
+// LVN_ITEMCHANGING message can be sent that will have a bogus value, causing a
+// memory fault.  This flag will also be used to ignore those change messages.
+//
+// 2.5 will have a better fix that avoids the use of a global.  It was unavoidable
+// for 2.4.x because of binary compatibility concerns.
+static bool gs_ignoreChangeDeleteItem = FALSE;
+
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -119,7 +137,12 @@ private:
 #if wxUSE_WCHAR_T
         if ( (item.mask & LVIF_TEXT) && item.pszText )
         {
+#ifdef __WXWINE__
+            // FIXME
+            m_buf = new wxWC2WXbuf(wxConvLocal.cWC2WX((const __wchar_t* ) item.pszText));
+#else
             m_buf = new wxWC2WXbuf(wxConvLocal.cWC2WX(item.pszText));
+#endif
             m_item->pszText = (wxChar*)m_buf->data();
         }
         else
@@ -132,8 +155,6 @@ private:
 #endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
     LV_ITEM *m_item;
-
-    DECLARE_NO_COPY_CLASS(wxLV_ITEM)
 };
 
 ///////////////////////////////////////////////////////
@@ -180,8 +201,6 @@ public:
        if (attr)
            delete attr;
    };
-
-    DECLARE_NO_COPY_CLASS(wxListItemInternalData)
 };
 
 // Get the internal data structure
@@ -244,8 +263,6 @@ void wxListCtrl::Init()
     m_ownsImageListNormal = m_ownsImageListSmall = m_ownsImageListState = FALSE;
     m_baseStyle = 0;
     m_colCount = 0;
-    m_count = 0;
-    m_ignoreChangeMessages = FALSE;
     m_textCtrl = NULL;
     m_AnyInternalData = FALSE;
     m_hasAnyAttr = FALSE;
@@ -380,10 +397,8 @@ void wxListCtrl::FreeAllInternalData()
         int n = GetItemCount();
         int i = 0;
 
-        m_ignoreChangeMessages = TRUE;
         for (i = 0; i < n; i++)
             wxDeleteInternalData(this, i);
-        m_ignoreChangeMessages = FALSE;
 
         m_AnyInternalData = FALSE;
     }
@@ -391,7 +406,9 @@ void wxListCtrl::FreeAllInternalData()
 
 wxListCtrl::~wxListCtrl()
 {
+    gs_ignoreChangeDeleteItem = TRUE;
     FreeAllInternalData();
+    gs_ignoreChangeDeleteItem = FALSE;
 
     if ( m_textCtrl )
     {
@@ -1018,7 +1035,7 @@ bool wxListCtrl::SetItemPosition(long item, const wxPoint& pos)
 // Gets the number of items in the list control
 int wxListCtrl::GetItemCount() const
 {
-    return m_count;
+    return ListView_GetItemCount(GetHwnd());
 }
 
 // Retrieves the spacing between icons in pixels.
@@ -1208,10 +1225,6 @@ bool wxListCtrl::DeleteItem(long item)
         return FALSE;
     }
 
-    m_count -= 1;
-    wxASSERT_MSG( m_count == ListView_GetItemCount(GetHwnd()),
-                  wxT("m_count should match ListView_GetItemCount"));
-
     // the virtual list control doesn't refresh itself correctly, help it
     if ( IsVirtual() )
     {
@@ -1240,8 +1253,11 @@ bool wxListCtrl::DeleteItem(long item)
 // Deletes all items
 bool wxListCtrl::DeleteAllItems()
 {
+    gs_ignoreChangeDeleteItem = TRUE;
     FreeAllInternalData();
-    return ListView_DeleteAllItems(GetHwnd()) != 0;
+    bool rval = ListView_DeleteAllItems(GetHwnd()) != 0;
+    gs_ignoreChangeDeleteItem = FALSE;
+    return rval;
 }
 
 // Deletes all items
@@ -1457,12 +1473,8 @@ long wxListCtrl::InsertItem(wxListItem& info)
     }
     };
 
-    long rv = ListView_InsertItem(GetHwnd(), & item);
-    m_count += 1;
-    wxASSERT_MSG( m_count == ListView_GetItemCount(GetHwnd()),
-                  wxT("m_count should match ListView_GetItemCount"));
 
-    return rv;
+    return (long) ListView_InsertItem(GetHwnd(), & item);
 }
 
 long wxListCtrl::InsertItem(long index, const wxString& label)
@@ -1652,9 +1664,9 @@ bool wxListCtrl::MSWCommand(WXUINT cmd, WXWORD id)
         return FALSE;
 }
 
+
 bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 {
-
     // prepare the event
     // -----------------
 
@@ -1663,7 +1675,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
     wxEventType eventType = wxEVT_NULL;
 
-    NMHDR *nmhdr = (NMHDR *)lParam;
+   NMHDR *nmhdr = (NMHDR *)lParam;
 
     // if your compiler is as broken as this, you should really change it: this
     // code is needed for normal operation! #ifdef below is only useful for
@@ -1777,7 +1789,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     }
     else
 #endif // defined(HDN_BEGINTRACKA)
-        if ( nmhdr->hwndFrom == GetHwnd() )
+    if ( nmhdr->hwndFrom == GetHwnd() )
     {
         // almost all messages use NM_LISTVIEW
         NM_LISTVIEW *nmLV = (NM_LISTVIEW *)nmhdr;
@@ -1788,7 +1800,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
         // FreeAllInternalData will cause LVN_ITEMCHANG* messages, which can be
         // ignored for efficiency.  It is done here because the internal data is in the
         // process of being deleted so we don't want to try and access it below.
-        if ( m_ignoreChangeMessages &&
+        if ( gs_ignoreChangeDeleteItem &&
              ( (nmLV->hdr.code == LVN_ITEMCHANGED) || (nmLV->hdr.code == LVN_ITEMCHANGING)))
         {
             return TRUE;
@@ -1875,15 +1887,12 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 break;
 
             case LVN_DELETEALLITEMS:
-                m_count = 0;
                 eventType = wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS;
                 event.m_itemIndex = -1;
                 break;
 
             case LVN_DELETEITEM:
-                if (m_count == 0)
-                    // this should be prevented by the post-processing code below,
-                    // but "just in case"
+                if ( gs_ignoreChangeDeleteItem )
                     return FALSE;
 
                 eventType = wxEVT_COMMAND_LIST_DELETE_ITEM;
@@ -2133,6 +2142,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
     // post processing
     // ---------------
+
     switch ( nmhdr->code )
     {
         case LVN_DELETEALLITEMS:
@@ -2140,6 +2150,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             // notifications - this makes deleting all items from a list ctrl
             // much faster
             *result = TRUE;
+
             return TRUE;
 
         case LVN_ENDLABELEDITA:
@@ -2364,9 +2375,6 @@ void wxListCtrl::SetItemCount(long count)
     {
         wxLogLastError(_T("ListView_SetItemCount"));
     }
-    m_count = count;
-    wxASSERT_MSG( m_count == ListView_GetItemCount(GetHwnd()),
-                  wxT("m_count should match ListView_GetItemCount"));
 }
 
 void wxListCtrl::RefreshItem(long item)

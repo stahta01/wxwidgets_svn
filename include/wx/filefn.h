@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _FILEFN_H_
@@ -18,17 +18,11 @@
 
 #include "wx/list.h"
 
-#ifndef __WXWINCE__
 #include <time.h>
-#endif
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
-
-#ifdef __WXWINCE__
-    typedef long off_t;
-#else
 
 // define off_t
 #if !defined(__WXMAC__) || defined(__UNIX__)
@@ -45,8 +39,6 @@
     typedef long off_t;
 #elif defined(__MWERKS__) && !defined(__INTEL__)
     typedef long off_t;
-#endif
-
 #endif
 
 #if defined(__VISAGECPP__) && __IBMCPP__ >= 400
@@ -75,7 +67,7 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 
 // Microsoft compiler loves underscores, feed them to it
 #if defined( __VISUALC__ ) \
-    || ( defined(__MINGW32__) && !defined(__WINE__) && wxCHECK_W32API_VERSION( 0, 5 ) ) \
+    || ( defined(__MINGW32__) && wxCHECK_W32API_VERSION( 0, 5 ) ) \
     || ( defined(__MWERKS__) && defined(__WXMSW__) )
     // functions
     #define   wxClose      _close

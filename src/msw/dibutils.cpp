@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Microsoft, Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Microsoft, Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -31,6 +31,12 @@
 #include <stdio.h>
 
 #include "wx/msw/dibutils.h"
+
+#ifdef __WXWINE__
+/* Why module.h? No longer finds this header.
+   #include <module.h>
+*/
+#endif
 
 #if defined(__WIN32__)
 #if !defined(__MWERKS__) && !defined(__SALFORDC__)
@@ -72,6 +78,68 @@
                 (GlobalUnlockPtr(lp), (BOOL)GlobalFree(GlobalPtrHandle(lp)))
 #endif
 
+
+/*
+ *  Clear the System Palette so that we can ensure an identity palette
+ *  mapping for fast performance.
+ */
+
+void wxClearSystemPalette(void)
+{
+  //*** A dummy palette setup
+  struct
+  {
+    WORD Version;
+    WORD NumberOfEntries;
+    PALETTEENTRY aEntries[256];
+  } Palette =
+  {
+    0x300,
+    256
+  };
+
+  HPALETTE ScreenPalette = 0;
+  HDC ScreenDC;
+  int Counter;
+  UINT nMapped = 0;
+  BOOL bOK = FALSE;
+  int  nOK = 0;
+
+  // *** Reset everything in the system palette to black
+  for(Counter = 0; Counter < 256; Counter++)
+  {
+    Palette.aEntries[Counter].peRed = 0;
+   Palette.aEntries[Counter].peGreen = 0;
+    Palette.aEntries[Counter].peBlue = 0;
+    Palette.aEntries[Counter].peFlags = PC_NOCOLLAPSE;
+  }
+
+  // *** Create, select, realize, deselect, and delete the palette
+#ifdef __WXWINE__
+  ScreenDC = GetDC((HWND)NULL);
+#else
+  ScreenDC = GetDC(NULL);
+#endif
+  ScreenPalette = CreatePalette((LOGPALETTE *)&Palette);
+
+  if (ScreenPalette)
+  {
+   ScreenPalette = SelectPalette(ScreenDC,ScreenPalette,FALSE);
+   nMapped = RealizePalette(ScreenDC);
+    ScreenPalette = SelectPalette(ScreenDC,ScreenPalette,FALSE);
+    bOK = DeleteObject(ScreenPalette);
+  }
+
+#ifdef __WXWINE__
+  nOK = ReleaseDC((HWND)NULL, ScreenDC);
+#else
+  nOK = ReleaseDC(NULL, ScreenDC);
+#endif
+
+  return;
+}
+
+
 /*
  *   Open a DIB file and return a MEMORY DIB, a memory handle containing..
  *
@@ -88,7 +156,8 @@ int wxDibWriteFile(LPTSTR szFile, LPBITMAPINFOHEADER lpbi)
    fh = OpenFile(wxConvFile.cWX2MB(szFile), &of, OF_WRITE | OF_CREATE);
 
   if (!fh) {
-    return 0;
+//   printf("la regamos0");
+   return 0;
   }
 
   long size = wxDibSize(lpbi);
@@ -128,7 +197,7 @@ PDIB wxDibOpenFile(LPTSTR szFile)
    LPVOID              p;
    OFSTRUCT            of;
 
-#if defined(__WIN32__)
+#if defined(WIN32) || defined(_WIN32)
    #define GetCurrentInstance()    GetModuleHandle(NULL)
 #else
    #define GetCurrentInstance()    (HINSTANCE)SELECTOROF((LPVOID)&of)

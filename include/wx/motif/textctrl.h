@@ -133,8 +133,7 @@ public:
     
 protected:
     wxString  m_fileName;
-
-    virtual wxSize DoGetBestSize() const;
+    
 public:
     // Motif-specific
     void*     m_tempCallbackStruct;

@@ -49,15 +49,12 @@
     #include <shellapi.h>
 #endif
 
-#include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxTaskBarIconList);
-
 LRESULT APIENTRY _EXPORT wxTaskBarIconWindowProc( HWND hWnd, unsigned msg,
                                      UINT wParam, LONG lParam );
 
 wxChar *wxTaskBarWindowClass = (wxChar*) wxT("wxTaskBarWindowClass");
 
-wxTaskBarIconList wxTaskBarIcon::sm_taskBarIcons;
+wxList wxTaskBarIcon::sm_taskBarIcons;
 bool   wxTaskBarIcon::sm_registeredClass = FALSE;
 UINT   wxTaskBarIcon::sm_taskbarMsg = 0;
 
@@ -86,7 +83,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxTaskBarIcon, wxEvtHandler)
 wxTaskBarIcon::wxTaskBarIcon(void)
 {
     m_hWnd = 0;
-    m_iconAdded = false;
+    m_iconAdded = FALSE;
 
     AddObject(this);
 
@@ -114,7 +111,7 @@ wxTaskBarIcon::~wxTaskBarIcon(void)
 bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
 {
     if (!IsOK())
-        return false;
+        return FALSE;
 
     NOTIFYICONDATA notifyData;
 
@@ -149,7 +146,7 @@ bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
 bool wxTaskBarIcon::RemoveIcon(void)
 {
     if (!m_iconAdded)
-        return false;
+        return FALSE;
 
     NOTIFYICONDATA notifyData;
 
@@ -160,7 +157,7 @@ bool wxTaskBarIcon::RemoveIcon(void)
         notifyData.uFlags = NIF_MESSAGE;
         notifyData.hIcon = 0 ; // hIcon;
     notifyData.uID = 99;
-    m_iconAdded = false;
+    m_iconAdded = FALSE;
 
     return (Shell_NotifyIcon(NIM_DELETE, & notifyData) != 0);
 }
@@ -170,14 +167,14 @@ bool wxTaskBarIcon::PopupMenu(wxMenu *menu) //, int x, int y);
     // OK, so I know this isn't thread-friendly, but
     // what to do? We need this check.
 
-    static bool s_inPopup = false;
+    static bool s_inPopup = FALSE;
 
     if (s_inPopup)
-        return false;
+        return FALSE;
 
-    s_inPopup = true;
+    s_inPopup = TRUE;
 
-    bool        rval = false;
+    bool        rval = FALSE;
     wxWindow*   win;
     int         x, y;
     wxGetMousePosition(&x, &y);
@@ -200,11 +197,11 @@ bool wxTaskBarIcon::PopupMenu(wxMenu *menu) //, int x, int y);
     // Work around a WIN32 bug
     ::PostMessage ((HWND) win->GetHWND(),WM_NULL,0,0L);
 
-    win->PopEventHandler(false);
+    win->PopEventHandler(FALSE);
     win->Destroy();
     delete win;
 
-    s_inPopup = false;
+    s_inPopup = FALSE;
 
     return rval;
 }
@@ -250,13 +247,13 @@ void wxTaskBarIcon::_OnRButtonDClick(wxEvent& e)  { OnRButtonDClick(e); }
 
 wxTaskBarIcon* wxTaskBarIcon::FindObjectForHWND(WXHWND hWnd)
 {
-    wxTaskBarIconList::Node *node = sm_taskBarIcons.GetFirst();
+    wxNode*node = sm_taskBarIcons.First();
     while (node)
     {
-        wxTaskBarIcon *obj = node->GetData();
+        wxTaskBarIcon* obj = (wxTaskBarIcon*) node->Data();
         if (obj->GetHWND() == hWnd)
             return obj;
-        node = node->GetNext();
+        node = node->Next();
     }
     return NULL;
 }
@@ -274,7 +271,7 @@ void wxTaskBarIcon::RemoveObject(wxTaskBarIcon* obj)
 bool wxTaskBarIcon::RegisterWindowClass()
 {
     if (sm_registeredClass)
-        return true;
+        return TRUE;
 
     // Also register the taskbar message here
     sm_taskbarMsg = ::RegisterWindowMessage(wxT("wxTaskBarIconMessage"));
@@ -375,7 +372,7 @@ long wxTaskBarIcon::WindowProc( WXHWND hWnd, unsigned int msg, unsigned int wPar
 LRESULT APIENTRY _EXPORT wxTaskBarIconWindowProc( HWND hWnd, unsigned msg,
                                      UINT wParam, LONG lParam )
 {
-    wxTaskBarIcon *obj = wxTaskBarIcon::FindObjectForHWND((WXHWND) hWnd);
+    wxTaskBarIcon* obj = wxTaskBarIcon::FindObjectForHWND((WXHWND) hWnd);
     if (obj)
         return obj->WindowProc((WXHWND) hWnd, msg, wParam, lParam);
     else

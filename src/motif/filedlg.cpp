@@ -262,9 +262,7 @@ int wxFileDialog::ShowModal()
     Widget shell = XtParent(fileSel);
 
     if (!m_message.IsNull())
-        XtVaSetValues(shell,
-                      XmNtitle, wxConstCast(m_message.c_str(), char),
-                      NULL);
+        XtVaSetValues(shell, XmNtitle, (char*) (const char*) m_message, NULL);
 
     wxString entirePath("");
 
@@ -291,7 +289,7 @@ int wxFileDialog::ShowModal()
         else
             filter = wildCard;
 
-        XmTextSetString(filterWidget, wxConstCast(filter.c_str(), char));
+        XmTextSetString(filterWidget, (char*)filter.c_str());
         XmFileSelectionDoSearch(fileSel, NULL);
     }
 
@@ -308,8 +306,7 @@ int wxFileDialog::ShowModal()
 
     if (entirePath != "")
     {
-        XmTextSetString(selectionWidget,
-                        wxConstCast(entirePath.c_str(), char));
+        XmTextSetString(selectionWidget, (char*)entirePath.c_str());
     }
 
     XtAddCallback(fileSel, XmNcancelCallback, (XtCallbackProc)wxFileSelCancel, (XtPointer)NULL);
@@ -384,7 +381,7 @@ int wxFileDialog::ShowModal()
 static wxString
 wxDefaultFileSelector(bool load, const char *what, const char *extension, const char *default_name, wxWindow *parent)
 {
-    char *ext = wxConstCast(extension, char);
+    char *ext = (char *)extension;
 
     wxString prompt;
     wxString str;

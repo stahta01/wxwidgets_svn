@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -89,7 +89,7 @@ wxWindowsPrinter::~wxWindowsPrinter()
 {
     // avoids warning about statement with no effect (FreeProcInstance
 	// doesn't do anything under Win32)
-#if !defined(__WIN32__) && !defined(__NT__)
+#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) && !defined(__NT__) && !defined(__GNUWIN32__)
     FreeProcInstance((FARPROC) m_lpAbortProc);
 #endif
 }

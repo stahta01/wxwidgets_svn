@@ -495,9 +495,7 @@ private:
     // common part of all ctors
     void Init();
 
-    // generate and process the list event of the given type, return true if
-    // it wasn't vetoed, i.e. if we should proceed
-    bool SendListEvent(wxEventType type, wxPoint pos);
+    void SendListEvent(wxEventType type, wxPoint pos);
 
     DECLARE_DYNAMIC_CLASS(wxListHeaderWindow)
     DECLARE_EVENT_TABLE()
@@ -1776,30 +1774,17 @@ void wxListLineData::DrawTextFormatted(wxDC *dc,
 
     // determine if the string can fit inside the current width
     dc->GetTextExtent(text, &w, &h);
+
+    // if it can, draw it
     if (w <= width)
     {
-        // it can, draw it using the items alignment
         m_owner->GetColumn(col, item);
-        switch ( item.GetAlign() )
-        {
-            default:
-                wxFAIL_MSG( _T("unknown list item format") );
-                // fall through
-
-            case wxLIST_FORMAT_LEFT:
-                // nothing to do
-                break;
-
-            case wxLIST_FORMAT_RIGHT:
-                x += width - w;
-                break;
-
-            case wxLIST_FORMAT_CENTER:
-                x += (width - w) / 2;
-                break;
-        }
-
-        dc->DrawText(text, x, y);
+        if (item.m_format == wxLIST_FORMAT_LEFT)
+            dc->DrawText(text, x, y);
+        else if (item.m_format == wxLIST_FORMAT_RIGHT)
+            dc->DrawText(text, x + width - w, y);
+        else if (item.m_format == wxLIST_FORMAT_CENTER)
+            dc->DrawText(text, x + ((width - w) / 2), y);
     }
     else // otherwise, truncate and add an ellipsis if possible
     {
@@ -2020,68 +2005,28 @@ void wxListHeaderWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
         DoDrawRect( &dc, x, HEADER_OFFSET_Y, cw, h-2 );
 
-        // see if we have enough space for the column label
-
-        // for this we need the width of the text
-        wxCoord wLabel;
-        dc.GetTextExtent(item.GetText(), &wLabel, NULL);
-        wLabel += 2*EXTRA_WIDTH;
-
-        // and the width of the icon, if any
-        static const int MARGIN_BETWEEN_TEXT_AND_ICON = 2;
-        int ix = 0,     // init them just to suppress the compiler warnings
-            iy = 0;
-        const int image = item.m_image;
-        wxImageListType *imageList;
+        // if we have an image, draw it on the right of the label
+        int image = item.m_image;
         if ( image != -1 )
         {
-            imageList = m_owner->m_small_image_list;
+            wxImageListType *imageList = m_owner->m_small_image_list;
             if ( imageList )
             {
+                int ix, iy;
                 imageList->GetSize(image, ix, iy);
-                wLabel += ix + MARGIN_BETWEEN_TEXT_AND_ICON;
+
+                imageList->Draw
+                           (
+                            image,
+                            dc,
+                            x + cw - ix - 1,
+                            HEADER_OFFSET_Y + (h - 4 - iy)/2,
+                            wxIMAGELIST_DRAW_TRANSPARENT
+                           );
+
+                cw -= ix + 2;
             }
-        }
-        else
-        {
-            imageList = NULL;
-        }
-
-        // ignore alignment if there is not enough space anyhow
-        int xAligned;
-        switch ( wLabel < cw ? item.GetAlign() : wxLIST_FORMAT_LEFT )
-        {
-            default:
-                wxFAIL_MSG( _T("unknown list item format") );
-                // fall through
-
-            case wxLIST_FORMAT_LEFT:
-                xAligned = x;
-                break;
-
-            case wxLIST_FORMAT_RIGHT:
-                xAligned = x + cw - wLabel;
-                break;
-
-            case wxLIST_FORMAT_CENTER:
-                xAligned = x + (cw - wLabel) / 2;
-                break;
-        }
-
-
-        // if we have an image, draw it on the right of the label
-        if ( imageList )
-        {
-            imageList->Draw
-                       (
-                        image,
-                        dc,
-                        xAligned + wLabel - ix - MARGIN_BETWEEN_TEXT_AND_ICON,
-                        HEADER_OFFSET_Y + (h - 4 - iy)/2,
-                        wxIMAGELIST_DRAW_TRANSPARENT
-                       );
-
-            cw -= ix + MARGIN_BETWEEN_TEXT_AND_ICON;
+            //else: ignore the column image
         }
 
         // draw the text clipping it so that it doesn't overwrite the column
@@ -2089,7 +2034,7 @@ void wxListHeaderWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
         wxDCClipper clipper(dc, x, HEADER_OFFSET_Y, cw, h - 4 );
 
         dc.DrawText( item.GetText(),
-                     xAligned + EXTRA_WIDTH, HEADER_OFFSET_Y + EXTRA_HEIGHT );
+                     x + EXTRA_WIDTH, HEADER_OFFSET_Y + EXTRA_HEIGHT );
 
         x += wCol;
     }
@@ -2132,7 +2077,8 @@ void wxListHeaderWindow::OnMouse( wxMouseEvent &event )
 
     if (m_isDragging)
     {
-        SendListEvent(wxEVT_COMMAND_LIST_COL_DRAGGING, event.GetPosition());
+        SendListEvent(wxEVT_COMMAND_LIST_COL_DRAGGING,
+                      event.GetPosition());
 
         // we don't draw the line beyond our window, but we allow dragging it
         // there
@@ -2151,7 +2097,8 @@ void wxListHeaderWindow::OnMouse( wxMouseEvent &event )
             m_isDragging = FALSE;
             m_dirty = TRUE;
             m_owner->SetColumnWidth( m_column, m_currentX - m_minX );
-            SendListEvent(wxEVT_COMMAND_LIST_COL_END_DRAG, event.GetPosition());
+            SendListEvent(wxEVT_COMMAND_LIST_COL_END_DRAG,
+                          event.GetPosition());
         }
         else
         {
@@ -2204,15 +2151,12 @@ void wxListHeaderWindow::OnMouse( wxMouseEvent &event )
         {
             if (hit_border && event.LeftDown())
             {
-                if ( SendListEvent(wxEVT_COMMAND_LIST_COL_BEGIN_DRAG,
-                                   event.GetPosition()) )
-                {
-                    m_isDragging = TRUE;
-                    m_currentX = x;
-                    DrawCurrent();
-                    CaptureMouse();
-                }
-                //else: column resizing was vetoed by the user code
+                m_isDragging = TRUE;
+                m_currentX = x;
+                DrawCurrent();
+                CaptureMouse();
+                SendListEvent(wxEVT_COMMAND_LIST_COL_BEGIN_DRAG,
+                              event.GetPosition());
             }
             else // click on a column
             {
@@ -2247,7 +2191,7 @@ void wxListHeaderWindow::OnSetFocus( wxFocusEvent &WXUNUSED(event) )
     m_owner->SetFocus();
 }
 
-bool wxListHeaderWindow::SendListEvent(wxEventType type, wxPoint pos)
+void wxListHeaderWindow::SendListEvent(wxEventType type, wxPoint pos)
 {
     wxWindow *parent = GetParent();
     wxListEvent le( type, parent->GetId() );
@@ -2261,7 +2205,7 @@ bool wxListHeaderWindow::SendListEvent(wxEventType type, wxPoint pos)
     le.m_pointDrag.y -= GetSize().y;
 
     le.m_col = m_column;
-    return !parent->GetEventHandler()->ProcessEvent( le ) || le.IsAllowed();
+    parent->GetEventHandler()->ProcessEvent( le );
 }
 
 //-----------------------------------------------------------------------------
@@ -3419,7 +3363,7 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
         wxListEvent le( wxEVT_COMMAND_LIST_KEY_DOWN, GetParent()->GetId() );
         le.m_itemIndex = m_current;
         GetLine(m_current)->GetItem( 0, le.m_item );
-        le.m_code = event.GetKeyCode();
+        le.m_code = (int)event.KeyCode();
         le.SetEventObject( parent );
         parent->GetEventHandler()->ProcessEvent( le );
     }
@@ -3436,7 +3380,7 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
     ke.SetEventObject( parent );
     if (parent->GetEventHandler()->ProcessEvent( ke )) return;
 
-    if (event.GetKeyCode() == WXK_TAB)
+    if (event.KeyCode() == WXK_TAB)
     {
         wxNavigationKeyEvent nevent;
         nevent.SetWindowChange( event.ControlDown() );
@@ -3454,7 +3398,7 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
         return;
     }
 
-    switch (event.GetKeyCode())
+    switch (event.KeyCode())
     {
         case WXK_UP:
             if ( m_current > 0 )
@@ -3871,10 +3815,16 @@ void wxListMainWindow::SetItem( wxListItem &item )
         line->SetItem( item.m_col, item );
     }
 
-    // update the item on screen
-    wxRect rectItem;
-    GetItemRect(id, rectItem);
-    RefreshRect(rectItem);
+    if ( InReportView() )
+    {
+        // just refresh the line to show the new value of the text/image
+        RefreshLine((size_t)id);
+    }
+    else // !report
+    {
+        // refresh everything (resulting in horrible flicker - FIXME!)
+        m_dirty = TRUE;
+    }
 }
 
 void wxListMainWindow::SetItemState( long litem, long state, long stateMask )
