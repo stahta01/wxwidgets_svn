@@ -12,10 +12,6 @@
     #pragma implementation "window.h"
 #endif
 
-#ifdef __VMS
-#define XWarpPointer XWARPPOINTER
-#endif
-
 #include "wx/defs.h"
 #include "wx/window.h"
 #include "wx/dc.h"

@@ -523,10 +523,9 @@ bool wxFrame::ShowFullScreen(bool show, long style)
         // Save the number of fields in the statusbar
         if ((style & wxFULLSCREEN_NOSTATUSBAR) && theStatusBar)
         {
-            //m_fsStatusBarFields = theStatusBar->GetFieldsCount();
-            //SetStatusBar((wxStatusBar*) NULL);
-            //delete theStatusBar;
-            theStatusBar->Show(FALSE);
+            m_fsStatusBarFields = theStatusBar->GetFieldsCount();
+            SetStatusBar((wxStatusBar*) NULL);
+            delete theStatusBar;
         }
         else
             m_fsStatusBarFields = 0;
@@ -588,14 +587,10 @@ bool wxFrame::ShowFullScreen(bool show, long style)
             theToolBar->Show(TRUE);
         }
 
-        if ((m_fsStyle & wxFULLSCREEN_NOSTATUSBAR)) // && (m_fsStatusBarFields > 0))
+        if ((m_fsStyle & wxFULLSCREEN_NOSTATUSBAR) && (m_fsStatusBarFields > 0))
         {
-            //CreateStatusBar(m_fsStatusBarFields);
-            if (GetStatusBar())
-            {
-                GetStatusBar()->Show(TRUE);
-                PositionStatusBar();
-            }
+            CreateStatusBar(m_fsStatusBarFields);
+            PositionStatusBar();
         }
 
         if ((m_fsStyle & wxFULLSCREEN_NOMENUBAR) && (m_hMenu != 0))

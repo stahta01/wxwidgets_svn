@@ -11,10 +11,6 @@
 #pragma implementation "dcclient.h"
 #endif
 
-#ifdef __VMS
-#define XCopyPlane XCOPYPLANE
-#endif
-
 #include "wx/dcclient.h"
 #include "wx/dcmemory.h"
 #include "wx/image.h"
