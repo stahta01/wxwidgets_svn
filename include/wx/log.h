@@ -132,13 +132,6 @@ public:
     bool HasPendingMessages() const { return m_bHasMessages; }
 
     // only one sink is active at each moment
-        // flush the active target if any
-    static void FlushActive()
-    {
-        wxLog *log = GetActiveTarget();
-        if ( log )
-            log->Flush();
-    }
         // get current log target, will call wxApp::CreateLogTarget() to
         // create one if none exists
     static wxLog *GetActiveTarget();

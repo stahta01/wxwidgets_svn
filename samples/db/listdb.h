@@ -112,12 +112,9 @@ class ClookUpDlg : public wxDialog
 					  wxDB			*pDb = READONLY_DB,		// Database connection pointer
 					  bool		 allowOk		= TRUE);		// is the OK button enabled
 
-		void     OnButton( wxCommandEvent &event );
 		void		OnCommand(wxWindow& win, wxCommandEvent& event);
-		void		OnClose(wxCloseEvent& event);
+		bool		OnClose();
 		void		OnActivate(bool) {};  // necessary for hot keys
-
-DECLARE_EVENT_TABLE()
 };
 
 #define LOOKUP_DIALOG                   500

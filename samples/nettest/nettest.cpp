@@ -80,7 +80,6 @@ public:
     void OnAbout(wxCommandEvent& event);
     void OnHangUp(wxCommandEvent& event);
     void OnDial(wxCommandEvent& event);
-    void OnEnumISPs(wxCommandEvent& event);
 
     void OnUpdateUI(wxUpdateUIEvent& event);
 
@@ -102,9 +101,7 @@ enum
     NetTest_Quit = 1,
     NetTest_About,
     NetTest_HangUp,
-    NetTest_Dial,
-    NetTest_EnumISP,
-    NetTest_Max
+    NetTest_Dial
 };
 
 // ----------------------------------------------------------------------------
@@ -124,7 +121,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(NetTest_About, MyFrame::OnAbout)
     EVT_MENU(NetTest_HangUp, MyFrame::OnHangUp)
     EVT_MENU(NetTest_Dial, MyFrame::OnDial)
-    EVT_MENU(NetTest_EnumISP, MyFrame::OnEnumISPs)
 
     EVT_UPDATE_UI(NetTest_Dial, MyFrame::OnUpdateUI)
 
@@ -172,8 +168,6 @@ bool MyApp::OnInit()
         return FALSE;
     }
 
-    frame->SetStatusText(GetDialer()->IsAlwaysOnline() ? "LAN" : "No LAN", 2);
-
     return TRUE;
 }
 
@@ -201,7 +195,9 @@ void MyApp::OnConnected(wxDialUpEvent& event)
                                        : "Disconnected";
     }
 
-    wxLogMessage(msg);
+    wxMessageBox(msg, "Dial Up Manager Notification",
+                 wxOK | wxICON_INFORMATION,
+                 GetTopWindow());
 }
 
 // ----------------------------------------------------------------------------
@@ -218,8 +214,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuFile->Append(NetTest_Dial, "&Dial\tCtrl-D", "Dial default ISP");
     menuFile->Append(NetTest_HangUp, "&HangUp\tCtrl-H", "Hang up modem");
     menuFile->AppendSeparator();
-    menuFile->Append(NetTest_EnumISP, "&Enumerate ISPs...\tCtrl-E");
-    menuFile->AppendSeparator();
     menuFile->Append(NetTest_About, "&About...\tCtrl-A", "Show about dialog");
     menuFile->AppendSeparator();
     menuFile->Append(NetTest_Quit, "E&xit\tAlt-X", "Quit this program");
@@ -231,10 +225,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
 
-    // create status bar and fill the LAN field
-    CreateStatusBar(3);
-    static const int widths[3] = { -1, 100, 60 };
-    SetStatusWidths(3, widths);
+    CreateStatusBar(2);
 }
 
 
@@ -273,7 +264,7 @@ void MyFrame::OnDial(wxCommandEvent& WXUNUSED(event))
     wxYield();
     wxBeginBusyCursor();
 
-    if ( wxGetApp().GetDialer()->Dial() )
+    if ( wxGetApp().GetDialer()->Dial("Free", "zeitlin", "") )
     {
         wxLogStatus(this, "Dialing...");
     }
@@ -283,26 +274,6 @@ void MyFrame::OnDial(wxCommandEvent& WXUNUSED(event))
     }
 
     wxEndBusyCursor();
-}
-
-void MyFrame::OnEnumISPs(wxCommandEvent& WXUNUSED(event))
-{
-    wxArrayString names;
-    size_t nCount = wxGetApp().GetDialer()->GetISPNames(names);
-    if ( nCount == 0 )
-    {
-        wxLogWarning("No ISPs found.");
-    }
-    else
-    {
-        wxString msg = "Known ISPs:\n";
-        for ( size_t n = 0; n < nCount; n++ )
-        {
-            msg << names[n] << '\n';
-        }
-
-        wxLogMessage(msg);
-    }
 }
 
 void MyFrame::OnUpdateUI(wxUpdateUIEvent& event)

@@ -56,8 +56,6 @@
 
 #include <wx/dbtable.h>
 
-extern DbList* WXDLLEXPORT PtrBegDbList;    /* from db.cpp, used in getting back error results from db connections */
-
 #include "listdb.h"
 
 // Global structure for holding ODBC connection information
@@ -80,65 +78,8 @@ char ListDB_Selection2[LOOKUP_COL_LEN+1];
 const int LISTDB_NO_SPACES_BETWEEN_COLS = 3;
 
 
-
-/*
- * This function will return the exact string(s) from the database engine
- * indicating all error conditions which have just occured during the
- * last call to the database engine.
- *
- * This demo uses the returned string by displaying it in a wxMessageBox.  The
- * formatting therefore is not the greatest, but this is just a demo, not a
- * finished product.  :-) gt
- *
- * NOTE: The value returned by this function is for temporary use only and
- *       should be copied for long term use
- */
-char *GetExtendedDBErrorMsg2(char *ErrFile, int ErrLine)
-{
-	static wxString msg;
-
-	wxString tStr;
-
-	if (ErrFile || ErrLine)
-	{
-		msg += "File: ";
-		msg += ErrFile;
-		msg += "   Line: ";
-		tStr.Printf("%d",ErrLine);
-		msg += tStr.GetData();
-		msg += "\n";
-	}
-
-	msg.Append ("\nODBC errors:\n");
-	msg += "\n";
-	
-	/* Scan through each database connection displaying 
-	 * any ODBC errors that have occured. */
-	for (DbList *pDbList = PtrBegDbList; pDbList; pDbList = pDbList->PtrNext)
-	{
-		// Skip over any free connections
-		if (pDbList->Free)
-			continue;
-		// Display errors for this connection
-		for (int i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-		{
-			if (pDbList->PtrDb->errorList[i])
-			{
-				msg.Append(pDbList->PtrDb->errorList[i]);
-				if (strcmp(pDbList->PtrDb->errorList[i],"") != 0)
-					msg.Append("\n");
-			}
-		}
-	}
-	msg += "\n";
-
-	return (char*) (const char*) msg;
-}  // GetExtendedDBErrorMsg
-
-
-
 // Clookup constructor
-Clookup::Clookup(char *tblName, char *colName) : wxTable(READONLY_DB, tblName, 1, NULL, !QUERY_ONLY, DbConnectInf.defaultDir)
+Clookup::Clookup(char *tblName, char *colName) : wxTable(READONLY_DB, tblName, 1)
 {
 
 	SetColDefs (0, colName,	DB_DATA_TYPE_VARCHAR, lookupCol,	SQL_C_CHAR, LOOKUP_COL_LEN+1, FALSE, FALSE);
@@ -148,7 +89,7 @@ Clookup::Clookup(char *tblName, char *colName) : wxTable(READONLY_DB, tblName, 1
 
 // Clookup2 constructor
 Clookup2::Clookup2(char *tblName, char *colName1, char *colName2, wxDB *pDb)
-   : wxTable(pDb, tblName, (1 + (strlen(colName2) > 0)), NULL, !QUERY_ONLY, DbConnectInf.defaultDir)
+   : wxTable(pDb, tblName, (1 + (strlen(colName2) > 0)))
 {
 	int i = 0;
 
@@ -159,13 +100,6 @@ Clookup2::Clookup2(char *tblName, char *colName1, char *colName2, wxDB *pDb)
 
 }  // Clookup2()
 
-
-BEGIN_EVENT_TABLE(ClookUpDlg, wxDialog)
-//	 EVT_LISTBOX(LOOKUP_DIALOG_SELECT, ClookUpDlg::SelectCallback)
-    EVT_BUTTON(LOOKUP_DIALOG_OK,  ClookUpDlg::OnButton)
-    EVT_BUTTON(LOOKUP_DIALOG_CANCEL,  ClookUpDlg::OnButton)
-    EVT_CLOSE(ClookUpDlg::OnClose)
-END_EVENT_TABLE()
 
 // This is a generic lookup constructor that will work with any table and any column
 ClookUpDlg::ClookUpDlg(wxWindow *parent, char *windowTitle, char *tableName, char *colName,
@@ -300,7 +234,6 @@ ClookUpDlg::ClookUpDlg(wxWindow *parent, char *windowTitle, char *tableName,
 	{
 		wxString tStr;
 		tStr.Printf("Unable to open the table '%s'.",tableName);
-		tStr += GetExtendedDBErrorMsg2(__FILE__,__LINE__);
 		wxMessageBox(tStr,"ODBC Error...");
 		Close();
 		return;
@@ -396,7 +329,7 @@ ClookUpDlg::ClookUpDlg(wxWindow *parent, char *windowTitle, char *tableName,
 }  // Generic lookup constructor 2
 
 
-void ClookUpDlg::OnClose(wxCloseEvent& event)
+bool ClookUpDlg::OnClose(void)
 {
 	widgetPtrsSet = FALSE;
 	GetParent()->Enable(TRUE);
@@ -407,18 +340,9 @@ void ClookUpDlg::OnClose(wxCloseEvent& event)
 		delete lookup2;
 
 	wxEndBusyCursor();
-   event.Skip();
-
-//	return TRUE;
+	return TRUE;
 
 }  // ClookUpDlg::OnClose
-
-
-void ClookUpDlg::OnButton( wxCommandEvent &event )
-{
-  wxWindow *win = (wxWindow*) event.GetEventObject();
-  OnCommand( *win, event );
-}
 
 
 void ClookUpDlg::OnCommand(wxWindow& win, wxCommandEvent& event)

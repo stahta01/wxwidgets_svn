@@ -1,176 +1,85 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        font.cpp
 // Purpose:     wxFont class
-// Author:      David Webster
+// Author:      AUTHOR
 // Modified by:
-// Created:     10/06/99
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// ============================================================================
-// declarations
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// headers
-// ----------------------------------------------------------------------------
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#ifndef WX_PRECOMP
-    #include <stdio.h>
-    #include "wx/setup.h"
-    #include "wx/list.h"
-    #include "wx/utils.h"
-    #include "wx/app.h"
-    #include "wx/font.h"
-#endif // WX_PRECOMP
-
-#include "wx/os2/private.h"
-
-#if !USE_SHARED_LIBRARIES
-    IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
-
-    #if wxUSE_PORTABLE_FONTS_IN_MSW
-        IMPLEMENT_DYNAMIC_CLASS(wxFontNameDirectory, wxObject)
-    #endif
+#ifdef __GNUG__
+#pragma implementation "font.h"
 #endif
 
-// ----------------------------------------------------------------------------
-// wxFontRefData - the internal description of the font
-// ----------------------------------------------------------------------------
+#include "wx/defs.h"
+#include "wx/string.h"
+#include "wx/font.h"
+#include "wx/gdicmn.h"
 
-class WXDLLEXPORT wxFontRefData: public wxGDIRefData
+#if !USE_SHARED_LIBRARIES
+IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
+#endif
+
+wxFontRefData::wxFontRefData()
 {
-friend class WXDLLEXPORT wxFont;
+	m_style = 0;
+  	m_pointSize = 0;
+  	m_family = 0;
+  	m_style = 0;
+  	m_weight = 0;
+  	m_underlined = 0;
+  	m_faceName = "";
+/* TODO
+  	m_hFont = 0;
+*/
+}
 
-public:
-    wxFontRefData()
-    {
-        Init(12, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE,
-             "", wxFONTENCODING_DEFAULT);
-    }
-
-    wxFontRefData(const wxFontRefData& data)
-    {
-        Init(data.m_pointSize, data.m_family, data.m_style, data.m_weight,
-             data.m_underlined, data.m_faceName, data.m_encoding);
-
-        m_fontId = data.m_fontId;
-    }
-
-    wxFontRefData(int size,
-                  int family,
-                  int style,
-                  int weight,
-                  bool underlined,
-                  const wxString& faceName,
-                  wxFontEncoding encoding)
-    {
-        Init(size, family, style, weight, underlined, faceName, encoding);
-    }
-
-    virtual ~wxFontRefData();
-
-protected:
-    // common part of all ctors
-    void Init(int size,
-              int family,
-              int style,
-              int weight,
-              bool underlined,
-              const wxString& faceName,
-              wxFontEncoding encoding);
-
-    // If TRUE, the pointer to the actual font is temporary and SHOULD NOT BE
-    // DELETED by destructor
-    bool          m_temporary;
-
-    int           m_fontId;
-
-    // font characterstics
-    int           m_pointSize;
-    int           m_family;
-    int           m_style;
-    int           m_weight;
-    bool          m_underlined;
-    wxString      m_faceName;
-    wxFontEncoding m_encoding;
-
-    // Windows font handle
-    WXHFONT       m_hFont;
-};
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// wxFontRefData
-// ----------------------------------------------------------------------------
-
-void wxFontRefData::Init(int pointSize,
-                         int family,
-                         int style,
-                         int weight,
-                         bool underlined,
-                         const wxString& faceName,
-                         wxFontEncoding encoding)
+wxFontRefData::wxFontRefData(const wxFontRefData& data)
 {
-    m_style = style;
-    m_pointSize = pointSize;
-    m_family = family;
-    m_style = style;
-    m_weight = weight;
-    m_underlined = underlined;
-    m_faceName = faceName;
-    m_encoding = encoding;
-
-    m_fontId = 0;
-    m_temporary = FALSE;
-
-    m_hFont = 0;
+	m_style = data.m_style;
+  	m_pointSize = data.m_pointSize;
+  	m_family = data.m_family;
+  	m_style = data.m_style;
+  	m_weight = data.m_weight;
+  	m_underlined = data.m_underlined;
+  	m_faceName = data.m_faceName;
+/* TODO
+  	m_hFont = 0;
+*/
 }
 
 wxFontRefData::~wxFontRefData()
 {
-// TODO:
-//    if ( m_hFont )
-//    {
-//        if ( !::DeleteObject((HFONT) m_hFont) )
-//        {
-//            wxLogLastError("DeleteObject(font)");
-//        }
-//    }
+    // TODO: delete font data
 }
 
-// ----------------------------------------------------------------------------
-// wxFont
-// ----------------------------------------------------------------------------
-
-void wxFont::Init()
+wxFont::wxFont()
 {
     if ( wxTheFontList )
         wxTheFontList->Append(this);
 }
 
-/* Constructor for a font. Note that the real construction is done
- * in wxDC::SetFont, when information is available about scaling etc.
- */
-bool wxFont::Create(int pointSize,
-                    int family,
-                    int style,
-                    int weight,
-                    bool underlined,
-                    const wxString& faceName,
-                    wxFontEncoding encoding)
+wxFont::wxFont(int pointSize, int family, int style, int weight, bool underlined, const wxString& faceName)
+{
+    Create(pointSize, family, style, weight, underlined, faceName);
+
+    if ( wxTheFontList )
+        wxTheFontList->Append(this);
+}
+
+bool wxFont::Create(int pointSize, int family, int style, int weight, bool underlined, const wxString& faceName)
 {
     UnRef();
-    m_refData = new wxFontRefData(pointSize, family, style, weight,
-                                  underlined, faceName, encoding);
+    m_refData = new wxFontRefData;
+
+    M_FONTDATA->m_family = family;
+    M_FONTDATA->m_style = style;
+    M_FONTDATA->m_weight = weight;
+    M_FONTDATA->m_pointSize = pointSize;
+    M_FONTDATA->m_underlined = underlined;
+    M_FONTDATA->m_faceName = faceName;
 
     RealizeResource();
 
@@ -179,291 +88,30 @@ bool wxFont::Create(int pointSize,
 
 wxFont::~wxFont()
 {
-    if ( wxTheFontList )
+    if (wxTheFontList)
         wxTheFontList->DeleteObject(this);
 }
 
-// ----------------------------------------------------------------------------
-// real implementation
-// ----------------------------------------------------------------------------
-
 bool wxFont::RealizeResource()
 {
-    if ( GetResourceHandle() )
-    {
-        // VZ: the old code returned FALSE in this case, but it doesn't seem
-        //     to make sense because the font _was_ created
-        wxLogDebug(T("Calling wxFont::RealizeResource() twice"));
-
-       return TRUE;
-    }
-
-    int ff_family = 0;
-    wxString ff_face;
-
-// OS/2 combines the family with styles to give a facename
-
-    switch ( M_FONTDATA->m_family )
-    {
-        case wxSCRIPT:
-//            ff_family = FF_SCRIPT ;
-            ff_face = T("Script") ;
-            break ;
-
-        case wxDECORATIVE:
-//            ff_family = FF_DECORATIVE;
-            break;
-
-        case wxROMAN:
-//            ff_family = FF_ROMAN;
-            ff_face = T("Times New Roman") ;
-            break;
-
-        case wxTELETYPE:
-        case wxMODERN:
-//            ff_family = FF_MODERN;
-            ff_face = T("Courier New") ;
-            break;
-
-        case wxSWISS:
-//            ff_family = FF_SWISS;
-            ff_face = T("Arial") ;
-            break;
-
-        case wxDEFAULT:
-        default:
-//            ff_family = FF_SWISS;
-            ff_face = T("Arial") ;
-    }
-
-    BYTE ff_italic;
-    switch ( M_FONTDATA->m_style )
-    {
-        case wxITALIC:
-        case wxSLANT:
-            ff_italic = 1;
-            break;
-
-        default:
-            wxFAIL_MSG(T("unknown font slant"));
-            // fall through
-
-        case wxNORMAL:
-            ff_italic = 0;
-    }
-
-    int ff_weight = 0;
-    switch ( M_FONTDATA->m_weight )
-    {
-        default:
-            wxFAIL_MSG(T("unknown font weight"));
-            // fall through
-
-        case wxNORMAL:
-//            ff_weight = FW_NORMAL;
-            break;
-
-        case wxLIGHT:
-//            ff_weight = FW_LIGHT;
-            break;
-
-        case wxBOLD:
-//            ff_weight = FW_BOLD;
-            break;
-    }
-
-    const wxChar* pzFace;
-    if ( M_FONTDATA->m_faceName.IsEmpty() )
-        pzFace = ff_face;
-    else
-        pzFace = M_FONTDATA->m_faceName ;
-
-#if 0
-    /* Always calculate fonts using the screen DC (is this the best strategy?)
-     * There may be confusion if a font is selected into a printer
-     * DC (say), because the height will be calculated very differently.
-     */
-    // What sort of display is it?
-    int technology = ::GetDeviceCaps(dc, TECHNOLOGY);
-
-    int nHeight;
-
-    if (technology != DT_RASDISPLAY && technology != DT_RASPRINTER)
-    {
-        // Have to get screen DC Caps, because a metafile will return 0.
-        HDC dc2 = ::GetDC(NULL);
-        nHeight = M_FONTDATA->m_pointSize*GetDeviceCaps(dc2, LOGPIXELSY)/72;
-        ::ReleaseDC(NULL, dc2);
-    }
-    else
-    {
-        nHeight = M_FONTDATA->m_pointSize*GetDeviceCaps(dc, LOGPIXELSY)/72;
-    }
-#endif // 0
-
-#if 0
-    // Have to get screen DC Caps, because a metafile will return 0.
-    HDC dc2 = ::GetDC(NULL);
-    ppInch = ::GetDeviceCaps(dc2, LOGPIXELSY);
-    ::ReleaseDC(NULL, dc2);
-#endif // 0
-
-    // New behaviour: apparently ppInch varies according to Large/Small Fonts
-    // setting in Windows. This messes up fonts. So, set ppInch to a constant
-    // 96 dpi.
-    static const int ppInch = 96;
-
-#if wxFONT_SIZE_COMPATIBILITY
-    // Incorrect, but compatible with old wxWindows behaviour
-    int nHeight = (M_FONTDATA->m_pointSize*ppInch/72);
-#else
-    // Correct for Windows compatibility
-    int nHeight = - (M_FONTDATA->m_pointSize*ppInch/72);
-#endif
-
-    BYTE ff_underline = M_FONTDATA->m_underlined;
-
-    wxFontEncoding encoding = M_FONTDATA->m_encoding;
-    if ( encoding == wxFONTENCODING_DEFAULT )
-    {
-        encoding = wxFont::GetDefaultEncoding();
-    }
-
-    DWORD charset;
-    switch ( encoding )
-    {
-        case wxFONTENCODING_ISO8859_1:
-        case wxFONTENCODING_ISO8859_15:
-        case wxFONTENCODING_CP1250:
-//            charset = ANSI_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_2:
-        case wxFONTENCODING_CP1252:
-//            charset = EASTEUROPE_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_4:
-        case wxFONTENCODING_ISO8859_10:
-//            charset = BALTIC_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_5:
-        case wxFONTENCODING_CP1251:
-//            charset = RUSSIAN_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_6:
-//            charset = ARABIC_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_7:
-//            charset = GREEK_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_8:
-//            charset = HEBREW_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_9:
-//            charset = TURKISH_CHARSET;
-            break;
-
-        case wxFONTENCODING_ISO8859_11:
-//            charset = THAI_CHARSET;
-            break;
-
-        case wxFONTENCODING_CP437:
-//            charset = OEM_CHARSET;
-            break;
-
-        default:
-            wxFAIL_MSG(T("unsupported encoding"));
-            // fall through
-
-        case wxFONTENCODING_SYSTEM:
-//            charset = ANSI_CHARSET;
-            break;
-    }
-
-// TODO:
-WXHFONT hFont;
-//    HFONT hFont = ::CreateFont
-//                  (
-//                   nHeight,             // height
-//                   0,                   // width (choose best)
-//                   0,                   // escapement
-//                   0,                   // orientation
-//                   ff_weight,           // weight
-//                   ff_italic,           // italic?
-//                   ff_underline,        // underlined?
-//                   0,                   // strikeout?
-//                   charset,             // charset
-//                   OUT_DEFAULT_PRECIS,  // precision
-//                   CLIP_DEFAULT_PRECIS, // clip precision
-//                   PROOF_QUALITY,       // quality of match
-//                   DEFAULT_PITCH |      // fixed or variable
-//                   ff_family,           // family id
-//                   pzFace               // face name
-//                  );
-
-    M_FONTDATA->m_hFont = (WXHFONT)hFont;
-    if ( !hFont )
-    {
-        wxLogLastError("CreateFont");
-    }
-
-    return hFont != 0;
-}
-
-bool wxFont::FreeResource(bool force)
-{
-    if ( GetResourceHandle() )
-    {
-// TODO:
-//        if ( !::DeleteObject((HFONT) M_FONTDATA->m_hFont) )
-//        {
-//            wxLogLastError("DeleteObject(font)");
-//        }
-
-        M_FONTDATA->m_hFont = 0;
-
-        return TRUE;
-    }
+    // TODO: create the font (if there is a native font object)
     return FALSE;
-}
-
-WXHANDLE wxFont::GetResourceHandle()
-{
-    if ( !M_FONTDATA )
-        return 0;
-    else
-        return (WXHANDLE)M_FONTDATA->m_hFont ;
-}
-
-bool wxFont::IsFree() const
-{
-    return (M_FONTDATA && (M_FONTDATA->m_hFont == 0));
 }
 
 void wxFont::Unshare()
 {
-    // Don't change shared data
-    if ( !m_refData )
+	// Don't change shared data
+	if (!m_refData)
     {
-        m_refData = new wxFontRefData();
-    }
+		m_refData = new wxFontRefData();
+	}
     else
     {
-        wxFontRefData* ref = new wxFontRefData(*M_FONTDATA);
-        UnRef();
-        m_refData = ref;
-    }
+		wxFontRefData* ref = new wxFontRefData(*(wxFontRefData*)m_refData);
+		UnRef();
+		m_refData = ref;
+	}
 }
-
-// ----------------------------------------------------------------------------
-// change font attribute: we recreate font when doing it
-// ----------------------------------------------------------------------------
 
 void wxFont::SetPointSize(int pointSize)
 {
@@ -519,59 +167,78 @@ void wxFont::SetUnderlined(bool underlined)
     RealizeResource();
 }
 
-void wxFont::SetEncoding(wxFontEncoding encoding)
+wxString wxFont::GetFamilyString() const
 {
-    Unshare();
-
-    M_FONTDATA->m_encoding = encoding;
-
-    RealizeResource();
+  wxString fam("");
+  switch (GetFamily())
+  {
+    case wxDECORATIVE:
+      fam = "wxDECORATIVE";
+      break;
+    case wxROMAN:
+      fam = "wxROMAN";
+      break;
+    case wxSCRIPT:
+      fam = "wxSCRIPT";
+      break;
+    case wxSWISS:
+      fam = "wxSWISS";
+      break;
+    case wxMODERN:
+      fam = "wxMODERN";
+      break;
+    case wxTELETYPE:
+      fam = "wxTELETYPE";
+      break;
+    default:
+      fam = "wxDEFAULT";
+      break;
+  }
+  return fam;
 }
 
-// ----------------------------------------------------------------------------
-// accessors
-// ----------------------------------------------------------------------------
-
-int wxFont::GetPointSize() const
-{
-    return M_FONTDATA->m_pointSize;
-}
-
-int wxFont::GetFamily() const
-{
-    return M_FONTDATA->m_family;
-}
-
-int wxFont::GetFontId() const
-{
-    return M_FONTDATA->m_fontId;
-}
-
-int wxFont::GetStyle() const
-{
-    return M_FONTDATA->m_style;
-}
-
-int wxFont::GetWeight() const
-{
-    return M_FONTDATA->m_weight;
-}
-
-bool wxFont::GetUnderlined() const
-{
-    return M_FONTDATA->m_underlined;
-}
-
+/* New font system */
 wxString wxFont::GetFaceName() const
 {
-    wxString str;
-    if ( M_FONTDATA )
-        str = M_FONTDATA->m_faceName ;
+    wxString str("");
+    if (M_FONTDATA)
+	    str = M_FONTDATA->m_faceName ;
     return str;
 }
 
-wxFontEncoding wxFont::GetEncoding() const
+wxString wxFont::GetStyleString() const
 {
-    return M_FONTDATA->m_encoding;
+    wxString styl("");
+    switch (GetStyle())
+    {
+        case wxITALIC:
+            styl = "wxITALIC";
+            break;
+        case wxSLANT:
+            styl = "wxSLANT";
+            break;
+        default:
+            styl = "wxNORMAL";
+            break;
+    }
+    return styl;
+}
+
+wxString wxFont::GetWeightString() const
+{
+    wxString w("");
+    switch (GetWeight())
+    {
+        case wxBOLD:
+            w = "wxBOLD";
+            break;
+        case wxLIGHT:
+            w = "wxLIGHT";
+            break;
+        default:
+            w = "wxNORMAL";
+            break;
+    }
+    return w;
 }
 

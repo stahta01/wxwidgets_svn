@@ -51,32 +51,36 @@
     #! Common
     
     foreach $file (sort keys %wxCommon) {
-        ($fileobj = $file) =~ s/cp?p?$/\o/;
-        ($filedep = $file) =~ s/cp?p?$/\d/;
+        next if $wxCommon{$file} =~ /\bR\b/;
 
-        #! 'B' flag means that the file makes part of wxBase too
-        if ( $wxCommon{$file} =~ /\bB\b/ ) {
-            $project{"BASE_OBJS"} .= $fileobj . " ";
-            $project{"BASE_DEPS"} .= $filedep . " ";
-        }
+        $file2 = $file;
+        $file =~ s/cp?p?$/\o/;
+        $file2 =~ s/cp?p?$/\d/;
+        $project{"WXGTK_COMMONOBJS"} .= $file . " ";
+        $project{"WXGTK_COMMONDEPS"} .= $file2 . " "
+    }
 
-        #! if it's the wxBase-only file, nothing more to do with it
-        next if $wxCommon{$file} =~ /\bBO\b/;
+    foreach $file (sort keys %wxCommon) {
+        next if $wxCommon{$file} =~ /\bX\b/;
 
-        if ( $wxCommon{$file} !~ /\bR\b/ ) {    #! unless not for GTK
-            $project{"WXGTK_COMMONOBJS"} .= $fileobj . " ";
-            $project{"WXGTK_COMMONDEPS"} .= $filedep . " "
-        }
-        if ( $wxCommon{$file} !~ /\bX\b/ ) {    #! unless not for Motif
-            $project{"WXMOTIF_COMMONOBJS"} .= $fileobj . " ";
-            $project{"WXMOTIF_COMMONDEPS"} .= $filedep . " "
-        }
+        $file2 = $file;
+        $file =~ s/cp?p?$/\o/;
+        $file2 =~ s/cp?p?$/\d/;
+        $project{"WXMOTIF_COMMONOBJS"} .= $file . " ";
+        $project{"WXMOTIF_COMMONDEPS"} .= $file2 . " "
+    }
 
-        #! ODBC needs extra files (sql*.h) so not compiled by default.
-        if ( (file !~ /^odbc\./) && ($wxCommon{$file} !~ /\b(16)\b/) ) {
-            $project{"WXMSW_COMMONOBJS"} .= $fileobj . " ";
-            $project{"WXMSW_COMMONDEPS"} .= $filedep . " "
-        }
+    foreach $file (sort keys %wxCommon) {
+        next if $wxCommon{$file} =~ /\b(16)\b/;
+
+        #! needs extra files (sql*.h) so not compiled by default.
+        next if $file =~ /^odbc\./;
+
+        $file2 = $file;
+        $file =~ s/cp?p?$/\o/;
+        $file2 =~ s/cp?p?$/\d/;
+        $project{"WXMSW_COMMONOBJS"} .= $file . " ";
+        $project{"WXMSW_COMMONDEPS"} .= $file2 . " "
     }
 
     #! GUI
@@ -123,24 +127,17 @@
     }
 
     foreach $file (sort keys %wxUNIX) {
-        ($fileobj = $file) =~ s/cp?p?$/\o/;
-        ($filedep = $file) =~ s/cp?p?$/\d/;
-
-        #! 'B' flag means that the file makes part of wxBase too
-        if ( $wxUNIX{$file} =~ /\bB\b/ ) {
-            $project{"BASE_OBJS"} .= $fileobj . " ";
-            $project{"BASE_DEPS"} .= $filedep . " "
-        }
-
-        $project{"WXUNIX_OBJS"} .= $fileobj . " ";
-        $project{"WXUNIX_DEPS"} .= $filedep . " "
+        $file2 = $file;
+        $file =~ s/cp?p?$/\o/;
+        $file2 =~ s/cp?p?$/\d/;
+        $project{"WXUNIXOBJS"} .= $file . " ";
+        $project{"WXUNIXDEPS"} .= $file2 . " "
     }
     
     #! headers
     
     foreach $file (sort keys %wxWXINCLUDE) {
-        $project{"WX_HEADERS"} .= $file . " ";
-        $project{"BASE_HEADERS"} .= $file . " " if $wxWXINCLUDE{$file} =~ /\bB\b/;
+        $project{"WX_HEADERS"} .= $file . " "
     }
     
     foreach $file (sort keys %wxGENERICINCLUDE) {
@@ -298,9 +295,6 @@ DISTDIR = ./_dist_dir/wx$(TOOLKIT)
 
 ############################## Files ##################################
 
-BASE_HEADERS = \
-		#$ ExpandList("BASE_HEADERS");
-
 WX_HEADERS = \
 		#$ ExpandList("WX_HEADERS");
 
@@ -387,23 +381,17 @@ MSW_GUIOBJS = \
 MSW_GUIDEPS = \
 		#$ ExpandList("WXMSW_GUIDEPS");
 
-BASE_OBJS = \
-		#$ ExpandList("BASE_OBJS");
-
-BASE_DEPS = \
-		#$ ExpandList("BASE_DEPS");
-
 HTMLOBJS = \
 		#$ ExpandList("WXHTMLOBJS");
 
 HTMLDEPS = \
 		#$ ExpandList("WXHTMLDEPS");
 
-UNIX_OBJS = \
-		#$ ExpandList("WXUNIX_OBJS");
+UNIXOBJS = \
+		#$ ExpandList("WXUNIXOBJS");
 
-UNIX_DEPS = \
-		#$ ExpandList("WXUNIX_DEPS");
+UNIXDEPS = \
+		#$ ExpandList("WXUNIXDEPS");
 
 ZLIBOBJS    = \
 		adler32.o \
@@ -487,21 +475,14 @@ JPEGOBJS    = \
 		jquant2.o \
 		jdmerge.o
 
-GUIOBJS = @GUIOBJS@
-GUIDEPS = @GUIDEPS@
-GUIHEADERS = @GUIHEADERS@
-COMMONOBJS = @COMMONOBJS@
-COMMONDEPS = @COMMONDEPS@
-GENERICOBJS = @GENERICOBJS@
-GENERICDEPS = @GENERICDEPS@
-UNIXOBJS = @UNIXOBJS@
-UNIXDEPS = @UNIXDEPS@
 
-OBJECTS = @ALL_OBJECTS@
+OBJECTS = $(@GUIOBJS@) $(@COMMONOBJS@) $(@GENERICOBJS@) $(@UNIXOBJS@) $(HTMLOBJS) \
+	  $(JPEGOBJS) $(PNGOBJS) $(ZLIBOBJS)
 
-DEPFILES = @ALL_DEPFILES@
+DEPFILES = $(@GUIDEPS@) $(@COMMONDEPS@) $(@GENERICDEPS@) $(UNIXDEPS) $(HTMLDEPS)
 
-HEADERS = @ALL_HEADERS@
+HEADERS = $(@GUIHEADERS@) $(HTML_HEADERS) $(UNIX_HEADERS) $(PROTOCOL_HEADERS) \
+	  $(GENERIC_HEADERS) $(WX_HEADERS)
 
 all: @WX_CREATE_LINKS@
 
@@ -871,10 +852,6 @@ SAMPLES_DIST:
 	cp $(SAMPDIR)/minimal/Makefile.in $(DISTDIR)/samples/minimal
 	cp $(SAMPDIR)/minimal/*.cpp $(DISTDIR)/samples/minimal
 	cp $(SAMPDIR)/minimal/*.xpm $(DISTDIR)/samples/minimal
-	mkdir $(DISTDIR)/samples/newgrid
-	cp $(SAMPDIR)/newgrid/Makefile.in $(DISTDIR)/samples/newgrid
-	cp $(SAMPDIR)/newgrid/*.cpp $(DISTDIR)/samples/newgrid
-	cp $(SAMPDIR)/newgrid/*.h $(DISTDIR)/samples/newgrid
 	mkdir $(DISTDIR)/samples/notebook
 	cp $(SAMPDIR)/notebook/Makefile.in $(DISTDIR)/samples/notebook
 	cp $(SAMPDIR)/notebook/*.cpp $(DISTDIR)/samples/notebook

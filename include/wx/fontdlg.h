@@ -18,7 +18,9 @@
 #   define wxFontDialog wxGenericFontDialog
 #   define sm_classwxFontDialog sm_classwxGenericFontDialog
 #elif defined(__WXPM__)
-#include "wx/os2/fontdlg.h"
+#include "wx/generic/fontdlgg.h"
+#   define wxFontDialog wxGenericFontDialog
+#   define sm_classwxFontDialog sm_classwxGenericFontDialog
 #elif defined(__WXSTUBS__)
 #include "wx/generic/fontdlgg.h"
 #   define wxFontDialog wxGenericFontDialog

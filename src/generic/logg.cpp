@@ -45,11 +45,6 @@
 #include "wx/file.h"
 #include "wx/textfile.h"
 
-#ifdef  __WXMSW__
-  // for OutputDebugString()
-  #include  "wx/msw/private.h"
-#endif // Windows
-
 // ----------------------------------------------------------------------------
 // global variables
 // ----------------------------------------------------------------------------

@@ -1061,4 +1061,3 @@ long wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 
     return rc;
 }
-
