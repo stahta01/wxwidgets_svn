@@ -378,9 +378,9 @@ bool wxBMPFileHandler::LoadFile(wxBitmap *bitmap,
   WXHBITMAP hBitmap = (WXHBITMAP)wxLoadBMP(name);
   if(hBitmap) {
       bitmap->SetHBITMAP(hBitmap);
-      return true;
+      return TRUE;
   }
-    return false;
+    return FALSE;
 #endif
 }
 
@@ -396,7 +396,7 @@ bool wxBMPFileHandler::SaveFile(wxBitmap *bitmap,
 
     return dib.Save(name);
 #else
-    return false;
+    return FALSE;
 #endif
 }
 

@@ -205,28 +205,28 @@ bool wxIniConfig::GetFirstGroup(wxString& WXUNUSED(str), long& WXUNUSED(lIndex))
 {
   wxFAIL_MSG("not implemented");
 
-  return false;
+  return FALSE;
 }
 
 bool wxIniConfig::GetNextGroup (wxString& WXUNUSED(str), long& WXUNUSED(lIndex)) const
 {
   wxFAIL_MSG("not implemented");
 
-  return false;
+  return FALSE;
 }
 
 bool wxIniConfig::GetFirstEntry(wxString& WXUNUSED(str), long& WXUNUSED(lIndex)) const
 {
   wxFAIL_MSG("not implemented");
 
-  return false;
+  return FALSE;
 }
 
 bool wxIniConfig::GetNextEntry (wxString& WXUNUSED(str), long& WXUNUSED(lIndex)) const
 {
   wxFAIL_MSG("not implemented");
 
-  return false;
+  return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -252,14 +252,14 @@ bool wxIniConfig::HasGroup(const wxString& WXUNUSED(strName)) const
 {
   wxFAIL_MSG("not implemented");
 
-  return false;
+  return FALSE;
 }
 
 bool wxIniConfig::HasEntry(const wxString& WXUNUSED(strName)) const
 {
   wxFAIL_MSG("not implemented");
 
-  return false;
+  return FALSE;
 }
 
 // is current group empty?
@@ -270,13 +270,13 @@ bool wxIniConfig::IsEmpty() const
   GetPrivateProfileString(m_strGroup, NULL, "",
                           szBuf, WXSIZEOF(szBuf), m_strLocalFilename);
   if ( !::IsEmpty(szBuf) )
-    return false;
+    return FALSE;
 
   GetProfileString(m_strGroup, NULL, "", szBuf, WXSIZEOF(szBuf));
   if ( !::IsEmpty(szBuf) )
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -302,10 +302,10 @@ bool wxIniConfig::DoReadString(const wxString& szKey, wxString *pstr) const
   }
 
   if ( ::IsEmpty(szBuf) )
-    return false;
+    return FALSE;
 
   *pstr = szBuf;
-  return true;
+  return TRUE;
 }
 
 bool wxIniConfig::DoReadLong(const wxString& szKey, long *pl) const
@@ -322,7 +322,7 @@ bool wxIniConfig::DoReadLong(const wxString& szKey, long *pl) const
   if ( lVal != nMagic ) {
     // the value was read from the file
     *pl = lVal;
-    return true;
+    return TRUE;
   }
 
   // is it really nMagic?
@@ -330,7 +330,7 @@ bool wxIniConfig::DoReadLong(const wxString& szKey, long *pl) const
   if ( lVal != nMagic2 ) {
     // the nMagic it returned was indeed read from the file
     *pl = lVal;
-    return true;
+    return TRUE;
   }
 
   // CS : I have no idea why they should look up in win.ini
@@ -340,9 +340,9 @@ bool wxIniConfig::DoReadLong(const wxString& szKey, long *pl) const
   // no, it was just returning the default value, so now look in win.ini
  *pl = GetProfileInt(GetVendorName(), GetKeyName(szKey), *pl);
 
-  return true;
+  return TRUE;
 #endif
-  return false ;
+  return FALSE ;
 }
 
 bool wxIniConfig::DoWriteString(const wxString& szKey, const wxString& szValue)
@@ -386,10 +386,10 @@ bool wxIniConfig::DeleteEntry(const wxString& szKey, bool bGroupIfEmptyAlso)
 
   if (WritePrivateProfileString(m_strGroup, strKey,
                                          (const char*) NULL, m_strLocalFilename) == 0)
-    return false;
+    return FALSE;
 
   if ( !bGroupIfEmptyAlso || !IsEmpty() )
-    return true;
+    return TRUE;
 
   // delete the current group too
   bool bOk = WritePrivateProfileString(m_strGroup, NULL,
@@ -442,24 +442,24 @@ bool wxIniConfig::DeleteAll()
 
   if ( wxFile::Exists(strFile) && !wxRemoveFile(strFile) ) {
     wxLogSysError(_("Can't delete the INI file '%s'"), strFile.c_str());
-    return false;
+    return FALSE;
   }
 
-  return true;
+  return TRUE;
 }
 
 bool wxIniConfig::RenameEntry(const wxString& WXUNUSED(oldName),
                               const wxString& WXUNUSED(newName))
 {
     // Not implemented
-    return false;
+    return FALSE;
 }
 
 bool wxIniConfig::RenameGroup(const wxString& WXUNUSED(oldName),
                               const wxString& WXUNUSED(newName))
 {
     // Not implemented
-    return false;
+    return FALSE;
 }
 
 #endif

@@ -175,7 +175,7 @@ wxGLCanvas::wxGLCanvas(wxWindow *parent, wxWindowID id,
   SetupPixelFormat(attribList);
   SetupPalette(palette);
 
-  m_glContext = new wxGLContext(true, this, palette);
+  m_glContext = new wxGLContext(TRUE, this, palette);
 }
 
 wxGLCanvas::wxGLCanvas( wxWindow *parent,
@@ -198,7 +198,7 @@ wxGLCanvas::wxGLCanvas( wxWindow *parent,
   SetupPixelFormat(attribList);
   SetupPalette(palette);
 
-  m_glContext = new wxGLContext(true, this, palette, shared );
+  m_glContext = new wxGLContext(TRUE, this, palette, shared );
 }
 
 // Not very useful for wxMSW, but this is to be wxGTK compliant
@@ -224,7 +224,7 @@ wxGLCanvas::wxGLCanvas( wxWindow *parent, const wxGLCanvas *shared, wxWindowID i
 
   wxGLContext *sharedContext=0;
   if (shared) sharedContext=shared->GetContext();
-  m_glContext = new wxGLContext(true, this, palette, sharedContext );
+  m_glContext = new wxGLContext(TRUE, this, palette, sharedContext );
 }
 
 wxGLCanvas::~wxGLCanvas()
@@ -244,7 +244,7 @@ bool wxGLCanvas::Create(wxWindow *parent,
                         long style,
                         const wxString& name)
 {
-  static bool s_registeredGLCanvasClass = false;
+  static bool s_registeredGLCanvasClass = FALSE;
 
   // We have to register a special window class because we need
   // the CS_OWNDC style for GLCanvas.
@@ -287,7 +287,7 @@ bool wxGLCanvas::Create(wxWindow *parent,
     if ( !::RegisterClass(&wndclass) )
     {
       wxLogLastError(wxT("RegisterClass(wxGLCanvasClass)"));
-      return false;
+      return FALSE;
     }
 
     // Register the GLCanvas class name for windows which don't do full repaint
@@ -301,16 +301,16 @@ bool wxGLCanvas::Create(wxWindow *parent,
 
         ::UnregisterClass(wxGLCanvasClassName, wxhInstance);
 
-        return false;
+        return FALSE;
     }
 
-    s_registeredGLCanvasClass = true;
+    s_registeredGLCanvasClass = TRUE;
   }
 
-  wxCHECK_MSG( parent, false, wxT("can't create wxWindow without parent") );
+  wxCHECK_MSG( parent, FALSE, wxT("can't create wxWindow without parent") );
 
   if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
-    return false;
+    return FALSE;
 
   parent->AddChild(this);
 
@@ -466,8 +466,8 @@ void wxGLCanvas::SetupPalette(const wxPalette& palette)
 
     if (m_palette.Ok())
     {
-        ::SelectPalette((HDC) m_hDC, (HPALETTE) m_palette.GetHPALETTE(), FALSE);
-        ::RealizePalette((HDC) m_hDC);
+        SelectPalette((HDC) m_hDC, (HPALETTE) m_palette.GetHPALETTE(), FALSE);
+        RealizePalette((HDC) m_hDC);
     }
 }
 
@@ -547,10 +547,10 @@ void wxGLCanvas::OnQueryNewPalette(wxQueryNewPaletteEvent& event)
     ::SelectPalette((HDC) GetHDC(), (HPALETTE) GetPalette()->GetHPALETTE(), FALSE);
     ::RealizePalette((HDC) GetHDC());
     Refresh();
-    event.SetPaletteRealized(true);
+    event.SetPaletteRealized(TRUE);
   }
   else
-    event.SetPaletteRealized(false);
+    event.SetPaletteRealized(FALSE);
 }
 
 // I think this doesn't have to be propagated to child windows.
@@ -736,10 +736,10 @@ bool wxGLApp::InitGLVisual(int *attribList)
 
   if (pixelFormat == 0) {
     wxLogError(_("Failed to initialize OpenGL"));
-    return false;
+    return FALSE;
   }
 
-  return true;
+  return TRUE;
 }
 
 wxGLApp::~wxGLApp()

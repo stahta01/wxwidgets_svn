@@ -22,7 +22,6 @@
     <wx-data id="fr" template="catalog"/>
     <wx-data id="ja" template="catalog"/>
     <wx-data id="ka" template="catalog"/>
-    <wx-data id="pl" template="catalog"/>
     <wx-data id="ru" template="catalog"/>
 
 </makefile>

@@ -6,7 +6,7 @@
 // Created:     02/04/2001
 // RCS-ID:      $Id$
 // Copyright:   (c) Mattia Barbon
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
@@ -48,7 +48,7 @@ bool wxBestHelpController::Initialize( const wxString& filename )
     if( chm->Initialize( GetValidFilename( filename ) ) )
     {
         m_helpController = chm;
-        return true;
+        return TRUE;
     }
 
     // failed
@@ -61,13 +61,13 @@ bool wxBestHelpController::Initialize( const wxString& filename )
     if( html->Initialize( GetValidFilename( filename ) ) )
     {
         m_helpController = html;
-        return true;
+        return TRUE;
     }
 
     // failed
     delete html;
 
-    return false;
+    return FALSE;
 }
 
 wxString wxBestHelpController::GetValidFilename( const wxString& filename ) const

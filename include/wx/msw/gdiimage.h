@@ -176,7 +176,7 @@ public:
     void SetSize(const wxSize& size) { SetSize(size.x, size.y); }
 
     // forward some of base class virtuals to wxGDIImageRefData
-    bool FreeResource(bool force = false);
+    bool FreeResource(bool force = FALSE);
     virtual WXHANDLE GetResourceHandle() const;
 
 protected:

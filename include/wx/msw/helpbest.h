@@ -87,7 +87,7 @@ public:
     virtual void SetFrameParameters(const wxString& title,
                                     const wxSize& size,
                                     const wxPoint& pos = wxDefaultPosition,
-                                    bool newFrameEachTime = false)
+                                    bool newFrameEachTime = FALSE)
     {
         m_helpController->SetFrameParameters( title, size, pos,
                                               newFrameEachTime );
