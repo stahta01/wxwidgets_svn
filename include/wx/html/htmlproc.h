@@ -11,7 +11,7 @@
 #ifndef _WX_HTMLPREP_H_
 #define _WX_HTMLPREP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "htmlproc.h"
 // (implementation is in htmlwin.cpp, there's no htmlprep.cpp!)
 #endif
@@ -35,7 +35,7 @@ enum
 // processors before displaying it, thus allowing for on-the-fly
 // modifications of the markup.
 
-class WXDLLIMPEXP_HTML wxHtmlProcessor : public wxObject
+class WXDLLEXPORT wxHtmlProcessor : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlProcessor)
 

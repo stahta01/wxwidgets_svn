@@ -6,10 +6,10 @@
 // Created:     04.04.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "statbr95.h"
 #endif
 
@@ -27,7 +27,7 @@
   #include "wx/dcclient.h"
 #endif
 
-#if wxUSE_STATUSBAR && defined(__WIN95__) && wxUSE_NATIVE_STATUSBAR
+#if defined(__WIN95__) && wxUSE_NATIVE_STATUSBAR
 
 #include "wx/intl.h"
 #include "wx/log.h"
@@ -36,7 +36,7 @@
 #include "wx/msw/private.h"
 #include <windowsx.h>
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -96,11 +96,9 @@ bool wxStatusBar95::Create(wxWindow *parent,
     }
     else
     {
-#ifndef __WXWINCE__
         // may be some versions of comctl32.dll do need it - anyhow, it won't
         // do any harm
         wstyle |= SBARS_SIZEGRIP;
-#endif
     }
 
     m_hWnd = (WXHWND)CreateStatusWindow(wstyle,
@@ -191,7 +189,8 @@ wxString wxStatusBar95::GetStatusText(int nField) const
     int len = StatusBar_GetTextLen(GetHwnd(), nField);
     if ( len > 0 )
     {
-        StatusBar_GetText(GetHwnd(), nField, wxStringBuffer(str, len));
+        StatusBar_GetText(GetHwnd(), nField, str.GetWriteBuf(len));
+        str.UngetWriteBuf();
     }
 
     return str;

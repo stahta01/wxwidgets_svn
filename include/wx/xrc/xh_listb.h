@@ -19,9 +19,8 @@
 
 #if wxUSE_LISTBOX
 
-class WXDLLIMPEXP_XRC wxListBoxXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxListBoxXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxListBoxXmlHandler)
 public:
     wxListBoxXmlHandler();
     virtual wxObject *DoCreateResource();

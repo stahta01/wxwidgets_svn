@@ -6,10 +6,10 @@
 // Created:     07/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "protocol.h"
 #endif
 
@@ -40,9 +40,9 @@
 
 wxProtoInfo::wxProtoInfo(const wxChar *name, const wxChar *serv,
                          const bool need_host1, wxClassInfo *info)
-           : m_protoname(name),
-             m_servname(serv)
 {
+    m_protoname = name;
+    m_servname = serv;
     m_cinfo = info;
     m_needhost = need_host1;
     next = wxURL::ms_protocols;

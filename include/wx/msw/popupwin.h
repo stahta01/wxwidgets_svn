@@ -12,7 +12,7 @@
 #ifndef _WX_MSW_POPUPWIN_H_
 #define _WX_MSW_POPUPWIN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "popup.h"
 #endif
 
@@ -30,8 +30,6 @@ public:
 
     bool Create(wxWindow *parent, int flags = wxBORDER_NONE);
 
-    virtual bool Show(bool show = TRUE);
-
 protected:
     // popups handle the position like wxTopLevelWindow, not wxWindow
     virtual void DoGetPosition(int *x, int *y) const;
@@ -42,7 +40,7 @@ protected:
     // get the HWND to be used as parent of this window with CreateWindow()
     virtual WXHWND MSWGetParent() const;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxPopupWindow)
+    DECLARE_DYNAMIC_CLASS(wxPopupWindow)
 };
 
 #endif // _WX_MSW_POPUPWIN_H_

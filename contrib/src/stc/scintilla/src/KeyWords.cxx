@@ -112,6 +112,18 @@ void LexerModule::Fold(unsigned int startPos, int lengthDoc, int initStyle,
 	}
 }
 
+static void ColouriseNullDoc(unsigned int startPos, int length, int, WordList *[],
+                            Accessor &styler) {
+	// Null language means all style bytes are 0 so just mark the end - no need to fill in.
+	if (length > 0) {
+		styler.StartAt(startPos + length - 1);
+		styler.StartSegment(startPos + length - 1);
+		styler.ColourTo(startPos + length - 1, 0);
+	}
+}
+
+LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
+
 // Alternative historical name for Scintilla_LinkLexers
 int wxForceScintillaLexers(void) {
 	return Scintilla_LinkLexers();
@@ -142,7 +154,6 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmCss);
 	LINK_LEXER(lmEiffel);
 	LINK_LEXER(lmEiffelkw);
-	LINK_LEXER(lmESCRIPT);
 	LINK_LEXER(lmFortran);
 	LINK_LEXER(lmF77);
 	LINK_LEXER(lmHTML);
@@ -150,7 +161,6 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmASP);
 	LINK_LEXER(lmPHP);
 	LINK_LEXER(lmLISP);
-	LINK_LEXER(lmLout);
 	LINK_LEXER(lmLua);
 	LINK_LEXER(lmMatlab);
 	LINK_LEXER(lmBatch);
@@ -159,7 +169,6 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmMake);
 	LINK_LEXER(lmErrorList);
 	LINK_LEXER(lmLatex);
-	LINK_LEXER(lmNull);
 	LINK_LEXER(lmPascal);
 	LINK_LEXER(lmPerl);
 	LINK_LEXER(lmPOV);

@@ -6,20 +6,10 @@
  * Created:     09.08.00
  * RCS-ID:      $Id$
  * Copyright:   (c) 2000 Vadim Zeitlin <vadim@wxwindows.org>
- * Licence:     wxWindows licence
+ * Licence:     wxWindows license
  */
 
 /* THIS IS A C FILE, DON'T USE C++ FEATURES (IN PARTICULAR COMMENTS) IN IT */
-
-/*
-   Compiler-specific checking.
- */
-
-#if defined(__WXMSW__)
-#  include "wx/msw/chkconf.h"
-#elif defined(__WXMAC__)
-#  include "wx/mac/chkconf.h"
-#endif
 
 /*
    this global setting determines what should we do if the setting FOO
@@ -37,6 +27,16 @@
 #if !defined(wxUSE_GUI)
 #   define wxUSE_GUI 1
 #endif /* !defined(wxUSE_GUI) */
+
+/* wxBase doesn't need compatibility settings as it's a new port */
+#if !wxUSE_GUI
+#   undef WXWIN_COMPATIBILITY
+#   undef WXWIN_COMPATIBILITY_2
+#   undef WXWIN_COMPATIBILITY_2_2
+#   define WXWIN_COMPATIBILITY 0
+#   define WXWIN_COMPATIBILITY_2 0
+#   define WXWIN_COMPATIBILITY_2_2 0
+#endif /* !wxUSE_GUI */
 
 /*
    tests for non GUI features
@@ -95,6 +95,14 @@
 #   endif
 #endif /* !defined(wxUSE_MIMETYPE) */
 
+#ifndef wxUSE_PROLOGIO
+#   ifdef wxABORT_ON_CONFIG_ERROR
+#       error "wxUSE_PROLOGIO must be defined."
+#   else
+#       define wxUSE_PROLOGIO 0
+#   endif
+#endif /* !defined(wxUSE_PROLOGIO) */
+
 #ifndef wxUSE_PROTOCOL
 #   ifdef wxABORT_ON_CONFIG_ERROR
 #       error "wxUSE_PROTOCOL must be defined."
@@ -144,14 +152,6 @@
 #       define wxUSE_REGEX 0
 #   endif
 #endif /* !defined(wxUSE_REGEX) */
-
-#ifndef wxUSE_XML
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_XML must be defined."
-#   else
-#       define wxUSE_XML 0
-#   endif
-#endif /* !defined(wxUSE_XML) */
 
 #ifndef wxUSE_SOCKETS
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -419,14 +419,6 @@
 #   endif
 #endif /* !defined(wxUSE_JOYSTICK) */
 
-#ifndef wxUSE_LISTBOOK
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_LISTBOOK must be defined."
-#   else
-#       define wxUSE_LISTBOOK 0
-#   endif
-#endif /* !defined(wxUSE_LISTBOOK) */
-
 #ifndef wxUSE_LISTBOX
 #   ifdef wxABORT_ON_CONFIG_ERROR
 #       error "wxUSE_LISTBOX must be defined."
@@ -490,6 +482,14 @@
 #       define wxUSE_MSGDLG 0
 #   endif
 #endif /* !defined(wxUSE_MSGDLG) */
+
+#ifndef wxUSE_NEW_GRID
+#   ifdef wxABORT_ON_CONFIG_ERROR
+#       error "wxUSE_NEW_GRID must be defined."
+#   else
+#       define wxUSE_NEW_GRID 0
+#   endif
+#endif /* !defined(wxUSE_NEW_GRID) */
 
 #ifndef wxUSE_NOTEBOOK
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -683,13 +683,13 @@
 #   endif
 #endif /* !defined(wxUSE_TREECTRL) */
 
-#ifndef wxUSE_DISPLAY
+#ifndef wxUSE_WX_RESOURCES
 #   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_DISPLAY must be defined."
+#       error "wxUSE_WX_RESOURCES must be defined."
 #   else
-#       define wxUSE_DISPLAY 0
+#       define wxUSE_WX_RESOURCES 0
 #   endif
-#endif /* !defined(wxUSE_TREECTRL) */
+#endif /* !defined(wxUSE_WX_RESOURCES) */
 
 #ifndef wxUSE_WXHTML_HELP
 #   ifdef wxABORT_ON_CONFIG_ERROR
@@ -840,25 +840,6 @@
 #   endif
 #endif /* wxUSE_ODBC */
 
-#if wxUSE_XML && !wxUSE_WCHAR_T
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxUSE_XML requires wxUSE_WCHAR_T"
-#   else
-#       undef wxUSE_XML
-#       define wxUSE_XML 0
-#   endif
-#endif /* wxUSE_UNICODE_MSLU */
-
-#if !wxUSE_DYNLIB_CLASS
-#   if wxUSE_DYNAMIC_LOADER
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxUSE_DYNAMIC_LOADER requires wxUSE_DYNLIB_CLASS."
-#       else
-#           define wxUSE_DYNLIB_CLASS 1
-#       endif
-#   endif
-#endif  /* wxUSE_DYNLIB_CLASS */
-
 /* the rest of the tests is for the GUI settings only */
 #if wxUSE_GUI
 
@@ -872,6 +853,7 @@
     wxUSE_CHOICE || \
     wxUSE_GAUGE || \
     wxUSE_GRID || \
+    wxUSE_NEW_GRID || \
     wxUSE_LISTBOX || \
     wxUSE_LISTCTRL || \
     wxUSE_NOTEBOOK || \
@@ -898,31 +880,6 @@
 #        endif
 #    endif
 #endif /* controls */
-
-#if wxUSE_NOTEBOOK || wxUSE_LISTBOOK
-#   if defined(wxUSE_BOOKCTRL) && !wxUSE_BOOKCTRL
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxUSE_BOOKCTRL must be set."
-#       else
-#           undef wxUSE_BOOKCTRL
-#       endif
-#   endif
-
-#   ifndef wxUSE_BOOKCTRL
-#       define wxUSE_BOOKCTRL 1
-#   endif
-#endif /* wxUSE_NOTEBOOK */
-
-#if wxUSE_LISTBOOK
-#   if !wxUSE_LISTCTRL
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxListbook requires wxListCtrl"
-#       else
-#           undef wxUSE_LISTCTRL
-#           define wxUSE_LISTCTRL 1
-#       endif
-#   endif
-#endif /* wxUSE_LISTBOOK */
 
 /* wxUniv-specific dependencies */
 #if defined(__WXUNIVERSAL__)
@@ -1012,20 +969,6 @@
 #           define wxUSE_UNICODE_MSLU 0
 #       endif
 #   endif  /* wxUSE_UNICODE_MSLU */
-#   ifndef wxUSE_UXTHEME
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxUSE_UXTHEME must be defined."
-#       else
-#           define wxUSE_UXTHEME 0
-#       endif
-#   endif  /* wxUSE_UXTHEME */
-#   ifndef wxUSE_UXTHEME_AUTO
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxUSE_UXTHEME_AUTO must be defined."
-#       else
-#           define wxUSE_UXTHEME_AUTO 0
-#       endif
-#   endif  /* wxUSE_UXTHEME_AUTO */
 #   ifndef wxUSE_MS_HTML_HELP
 #       ifdef wxABORT_ON_CONFIG_ERROR
 #           error "wxUSE_MS_HTML_HELP must be defined."
@@ -1059,22 +1002,14 @@
 #   endif  /* wxUSE_DYNAMIC_LOADER */
 #endif /* wxMSW */
 
-/* wxMAC-specific dependencies */
-#ifdef __WXMAC__
-#   if wxUSE_UNICODE
-#       if !TARGET_CARBON
-#           ifdef wxABORT_ON_CONFIG_ERROR
-#               error "wxUSE_UNICODE is only supported for Carbon Targets."
-#           else
-#               define wxUSE_UNICODE 0
-#           endif
-#       endif
-#   endif
-#endif /* wxMAC */
 /* wxMotif-specific dependencies */
 #if defined(__WXMOTIF__) && wxUSE_NOTEBOOK && !wxUSE_TAB_DIALOG
 #  undef wxUSE_TAB_DIALOG
 #  define wxUSE_TAB_DIALOG 1
+#endif
+#if defined(__WXMOTIF__) && wxUSE_TOGGLEBTN
+#  undef wxUSE_TOGGLEBTN
+#  define wxUSE_TOGGLEBTN 0
 #endif
 
 /* wxMGL-specific dependencies */
@@ -1083,15 +1018,6 @@
 #       error "wxMGL requires wxUSE_PALETTE=1"
 #   endif
 #endif /* wxMGL */
-
-// Hopefully we can emulate these dialogs in due course
-#if wxUSE_SMARTPHONE
-#   ifdef wxUSE_COLOURDLG
-#       undef wxUSE_COLOURDLG
-#       define wxUSE_COLOURDLG 0
-#   endif
-#endif /* wxUSE_SMARTPHONE */
-
 
 /* generic controls dependencies */
 #if !defined(__WXMSW__) || defined(__WXUNIVERSAL__)
@@ -1132,15 +1058,6 @@
 #           define wxUSE_COMBOBOX 1
 #       endif
 #   endif
-
-#   if !wxUSE_DATETIME
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxCalendarCtrl requires wxUSE_DATETIME"
-#       else
-#           undef wxUSE_DATETIME
-#           define wxUSE_DATETIME 1
-#       endif
-#   endif
 #endif /* wxUSE_CALENDARCTRL */
 
 #if wxUSE_CHECKLISTBOX
@@ -1171,26 +1088,6 @@
 #   endif
 #endif /* wxUSE_WXHTML_HELP */
 
-#if wxUSE_DOC_VIEW_ARCHITECTURE
-#   if !wxUSE_MENUS
-#        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "DocView requires wxUSE_MENUS"
-#        else
-#            undef wxUSE_MENUS
-#            define wxUSE_MENUS 1
-#        endif
-#   endif
-
-#   if !wxUSE_STREAMS && !wxUSE_STD_IOSTREAM
-#        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "DocView requires wxUSE_STREAMS or wxUSE_STD_IOSTREAM"
-#        else
-#            undef wxUSE_STREAMS
-#            define wxUSE_STREAMS 1
-#        endif
-#   endif
-#endif /* wxUSE_DOC_VIEW_ARCHITECTURE */
-
 #if wxUSE_PRINTING_ARCHITECTURE
 #   if !wxUSE_COMBOBOX
 #       ifdef wxABORT_ON_CONFIG_ERROR
@@ -1202,16 +1099,16 @@
 #   endif
 #endif /* wxUSE_PRINTING_ARCHITECTURE */
 
-#if wxUSE_MDI_ARCHITECTURE
-#   if !wxUSE_DOC_VIEW_ARCHITECTURE
+#if wxUSE_DOC_VIEW_ARCHITECTURE
+#   if !wxUSE_MENUS
 #        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "MDI requires wxUSE_DOC_VIEW_ARCHITECTURE"
+#            error "DocView requires wxUSE_MENUS"
 #        else
-#            undef wxUSE_DOC_VIEW_ARCHITECTURE
-#            define wxUSE_DOC_VIEW_ARCHITECTURE 1
+#            undef wxUSE_MENUS
+#            define wxUSE_MENUS 1
 #        endif
 #   endif
-#endif /* wxUSE_MDI_ARCHITECTURE */
+#endif /* wxUSE_DOC_VIEW_ARCHITECTURE */
 
 #if !wxUSE_FILEDLG
 #   if wxUSE_DOC_VIEW_ARCHITECTURE || wxUSE_WXHTML_HELP
@@ -1223,26 +1120,6 @@
 #       endif
 #   endif
 #endif /* wxUSE_FILEDLG */
-
-#if !wxUSE_TOOLBAR
-#   if wxUSE_TOOLBAR_NATIVE
-#        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "wxUSE_TOOLBAR is set to 0 but wxUSE_TOOLBAR_NATIVE is set to 1"
-#        else
-#            undef wxUSE_TOOLBAR_NATIVE
-#            define wxUSE_TOOLBAR_NATIVE 0
-#        endif
-#   endif
-
-#   if wxUSE_TOOLBAR_SIMPLE
-#        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "wxUSE_TOOLBAR is set to 0 but wxUSE_TOOLBAR_SIMPLE is set to 1"
-#        else
-#            undef wxUSE_TOOLBAR_SIMPLE
-#            define wxUSE_TOOLBAR_SIMPLE 0
-#        endif
-#   endif
-#endif
 
 #if !wxUSE_IMAGLIST
 #   if wxUSE_TREECTRL || wxUSE_NOTEBOOK || wxUSE_LISTCTRL

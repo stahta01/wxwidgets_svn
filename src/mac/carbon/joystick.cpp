@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        joystick.cpp
 // Purpose:     wxJoystick class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -113,7 +113,7 @@ int wxJoystick::GetProductId() const
 wxString wxJoystick::GetProductName() const
 {
     // TODO
-    return wxString(wxT(""));
+    return wxString("");
 }
 
 int wxJoystick::GetXMin() const
@@ -282,5 +282,5 @@ bool wxJoystick::ReleaseCapture()
 }
 
 #endif
-    // wxUSE_JOYSTICK
+	// wxUSE_JOYSTICK
 

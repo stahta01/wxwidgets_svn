@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "helpdata.h"
 #endif
 
@@ -85,14 +85,9 @@ wxHtmlHelpIndexCompareFunc(const void *a, const void *b)
 class HP_Parser : public wxHtmlParser
 {
 public:
-    HP_Parser() { }
-
     wxObject* GetProduct() { return NULL; }
-
 protected:
     virtual void AddText(const wxChar* WXUNUSED(txt)) {}
-
-    DECLARE_NO_COPY_CLASS(HP_Parser)
 };
 
 
@@ -119,8 +114,6 @@ class HP_TagHandler : public wxHtmlTagHandler
         bool HandleTag(const wxHtmlTag& tag);
         void WriteOut(wxHtmlContentsItem*& array, int& size);
         void ReadIn(wxHtmlContentsItem* array, int size);
-
-    DECLARE_NO_COPY_CLASS(HP_TagHandler)
 };
 
 
@@ -514,17 +507,13 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
     fi = fsys.OpenFile(bookfile.GetLocation() + wxT(".cached"));
 
     if (fi == NULL ||
-#if wxUSE_DATETIME
           fi->GetModificationTime() < bookfile.GetModificationTime() ||
-#endif // wxUSE_DATETIME
           !LoadCachedBook(bookr, fi->GetStream()))
     {
         if (fi != NULL) delete fi;
         fi = fsys.OpenFile(m_TempPath + wxFileNameFromPath(bookfile.GetLocation()) + wxT(".cached"));
         if (m_TempPath == wxEmptyString || fi == NULL ||
-#if wxUSE_DATETIME
             fi->GetModificationTime() < bookfile.GetModificationTime() ||
-#endif // wxUSE_DATETIME
             !LoadCachedBook(bookr, fi->GetStream()))
         {
             LoadMSProject(bookr, fsys, indexfile, contfile);

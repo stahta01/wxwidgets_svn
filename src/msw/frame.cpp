@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "frame.h"
 #endif
 
@@ -41,10 +41,6 @@
 #endif // WX_PRECOMP
 
 #include "wx/msw/private.h"
-
-#ifdef __WXWINCE__
-#include <commctrl.h>
-#endif
 
 #if wxUSE_STATUSBAR
     #include "wx/statusbr.h"
@@ -79,27 +75,7 @@ BEGIN_EVENT_TABLE(wxFrame, wxFrameBase)
     EVT_SYS_COLOUR_CHANGED(wxFrame::OnSysColourChanged)
 END_EVENT_TABLE()
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxFrame, wxTopLevelWindow,"wx/frame.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxFrame)
-	WX_PROPERTY( Title,wxString, SetTitle, GetTitle, wxEmptyString )
-/*
-	TODO PROPERTIES
-
-		style (wxDEFAULT_FRAME_STYLE)
-		centered (bool, false )
-*/
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxFrame)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_6( wxFrame , wxWindow* , Parent , wxWindowID , Id , wxString , Title , wxPoint , Position , wxSize , Size , long , WindowStyle) 
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxTopLevelWindow)
-#endif
 
 // ============================================================================
 // implementation
@@ -156,6 +132,7 @@ bool wxFrame::Create(wxWindow *parent,
 wxFrame::~wxFrame()
 {
     m_isBeingDeleted = TRUE;
+
     DeleteAllBars();
 }
 
@@ -214,7 +191,12 @@ void wxFrame::DoGetClientSize(int *x, int *y) const
 
 void wxFrame::Raise()
 {
+#ifdef __WIN16__
+    // no SetForegroundWindow() in Win16
+    wxFrameBase::Raise();
+#else // Win32
     ::SetForegroundWindow(GetHwnd());
+#endif // Win16/32
 }
 
 // generate an artificial resize event
@@ -284,7 +266,6 @@ void wxFrame::AttachMenuBar(wxMenuBar *menubar)
     }
     else // set new non NULL menu bar
     {
-#ifndef __WXWINCE__
         // Can set a menubar several times.
         if ( menubar->GetHMenu() )
         {
@@ -300,26 +281,14 @@ void wxFrame::AttachMenuBar(wxMenuBar *menubar)
                 return;
             }
         }
-#endif
+
         InternalSetMenuBar();
     }
 }
 
 void wxFrame::InternalSetMenuBar()
 {
-#ifdef __WXMICROWIN__
-    // Nothing
-#elif defined(__WXWINCE__)
-
-    if (!GetToolBar())
-    {
-        wxToolBar* toolBar = new wxToolBar(this, -1,
-                         wxDefaultPosition, wxDefaultSize,
-                         wxBORDER_NONE | wxTB_HORIZONTAL,
-                         wxToolBarNameStr, GetMenuBar());
-        SetToolBar(toolBar);
-    }
-#else
+#ifndef __WXMICROWIN__
     if ( !::SetMenu(GetHwnd(), (HMENU)m_hMenu) )
     {
         wxLogLastError(wxT("SetMenu"));
@@ -357,9 +326,6 @@ bool wxFrame::ShowFullScreen(bool show, long style)
     if (show)
     {
 #if wxUSE_TOOLBAR
-#ifdef __WXWINCE__
-        // TODO: hide commandbar
-#else
         wxToolBar *theToolBar = GetToolBar();
         if (theToolBar)
             theToolBar->GetSize(NULL, &m_fsToolBarHeight);
@@ -371,11 +337,9 @@ bool wxFrame::ShowFullScreen(bool show, long style)
             theToolBar->SetSize(-1,0);
             theToolBar->Show(FALSE);
         }
-#endif // __WXWINCE__
 #endif // wxUSE_TOOLBAR
 
-        // TODO: make it work for WinCE
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#ifndef __WXMICROWIN__
         if (style & wxFULLSCREEN_NOMENUBAR)
             SetMenu((HWND)GetHWND(), (HMENU) NULL);
 #endif
@@ -400,9 +364,6 @@ bool wxFrame::ShowFullScreen(bool show, long style)
     else
     {
 #if wxUSE_TOOLBAR
-#ifdef __WXWINCE__
-        // TODO: show commandbar
-#else
         wxToolBar *theToolBar = GetToolBar();
 
         // restore the toolbar, menubar, and statusbar
@@ -411,7 +372,6 @@ bool wxFrame::ShowFullScreen(bool show, long style)
             theToolBar->SetSize(-1, m_fsToolBarHeight);
             theToolBar->Show(TRUE);
         }
-#endif // __WXWINCE__
 #endif // wxUSE_TOOLBAR
 
 #if wxUSE_STATUSBAR
@@ -426,8 +386,7 @@ bool wxFrame::ShowFullScreen(bool show, long style)
         }
 #endif // wxUSE_STATUSBAR
 
-        // TODO: make it work for WinCE
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#ifndef __WXMICROWIN__
         if ((m_fsStyle & wxFULLSCREEN_NOMENUBAR) && (m_hMenu != 0))
             SetMenu((HWND)GetHWND(), (HMENU)m_hMenu);
 #endif
@@ -444,11 +403,6 @@ bool wxFrame::ShowFullScreen(bool show, long style)
 
 wxToolBar* wxFrame::CreateToolBar(long style, wxWindowID id, const wxString& name)
 {
-#ifdef __WXWINCE__
-    // We may already have a toolbar from calling SetMenuBar.
-    if (GetToolBar())
-        return GetToolBar();
-#endif
     if ( wxFrameBase::CreateToolBar(style, id, name) )
     {
         PositionToolBar();
@@ -462,12 +416,6 @@ void wxFrame::PositionToolBar()
     wxToolBar *toolbar = GetToolBar();
     if ( toolbar && toolbar->IsShown() )
     {
-#ifdef __WXWINCE__
-        // We want to do something different in WinCE, because
-        // the toolbar should be associated with the commandbar,
-        // and not an independent window.
-        // TODO
-#else
         // don't call our (or even wxTopLevelWindow) version because we want
         // the real (full) client area size, not excluding the tool/status bar
         int width, height;
@@ -481,64 +429,23 @@ void wxFrame::PositionToolBar()
         }
 #endif // wxUSE_STATUSBAR
 
-        int tx, ty;
         int tw, th;
-        toolbar->GetPosition(&tx, &ty);
         toolbar->GetSize(&tw, &th);
-        
-        // Adjust
-        if (ty < 0 && (-ty == th))
-            ty = 0;
-        if (tx < 0 && (-tx == tw))
-            tx = 0;        
-        
-        int desiredW = tw;
-        int desiredH = th;
 
         if ( toolbar->GetWindowStyleFlag() & wxTB_VERTICAL )
         {
-            desiredH = height;
+            th = height;
         }
         else
         {
-            desiredW = width;
-//            if ( toolbar->GetWindowStyleFlag() & wxTB_FLAT )
-//                desiredW -= 3;
-        }        
+            tw = width;
+            if ( toolbar->GetWindowStyleFlag() & wxTB_FLAT )
+                th -= 3;
+        }
 
         // use the 'real' MSW position here, don't offset relativly to the
         // client area origin
-
-        // Optimise such that we don't have to always resize the toolbar
-        // when the frame changes, otherwise we'll get a lot of flicker.        
-        bool heightChanging = TRUE;
-        bool widthChanging = TRUE;
-        
-        if ( toolbar->GetWindowStyleFlag() & wxTB_VERTICAL )
-        {
-            // It's OK if the current height is greater than what can be shown.
-            heightChanging = (desiredH > th) ;
-            widthChanging = (desiredW != tw) ;
-            
-            // The next time around, we may not have to set the size            
-            if (heightChanging)
-                desiredH = desiredH + 200;
-        }
-        else
-        {
-            // It's OK if the current width is greater than what can be shown.
-            widthChanging = (desiredW > tw) ;
-            heightChanging = (desiredH != th) ;
-
-            // The next time around, we may not have to set the size            
-            if (widthChanging)
-                desiredW = desiredW + 200;
-        }
-        
-        if (tx != 0 || ty != 0 || widthChanging || heightChanging)
-            toolbar->SetSize(0, 0, desiredW, desiredH, wxSIZE_NO_ADJUSTMENTS);
-        
-#endif // __WXWINCE__
+        toolbar->SetSize(0, 0, tw, th, wxSIZE_NO_ADJUSTMENTS);
     }
 }
 
@@ -553,7 +460,7 @@ void wxFrame::PositionToolBar()
 // on the desktop, but are iconized/restored with it
 void wxFrame::IconizeChildFrames(bool bIconize)
 {
-    for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    for ( wxWindowList::Node *node = GetChildren().GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -599,8 +506,8 @@ void wxFrame::IconizeChildFrames(bool bIconize)
 
 WXHICON wxFrame::GetDefaultIcon() const
 {
-    // we don't have any standard icons (any more)
-    return (WXHICON)0;
+    return (WXHICON)(wxSTD_FRAME_ICON ? wxSTD_FRAME_ICON
+                                      : wxDEFAULT_FRAME_ICON);
 }
 
 // ===========================================================================
@@ -638,7 +545,7 @@ bool wxFrame::HandlePaint()
     RECT rect;
     if ( GetUpdateRect(GetHwnd(), &rect, FALSE) )
     {
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#ifndef __WXMICROWIN__
         if ( m_iconized )
         {
             const wxIcon& icon = GetIcon();
@@ -688,7 +595,7 @@ bool wxFrame::HandlePaint()
 bool wxFrame::HandleSize(int x, int y, WXUINT id)
 {
     bool processed = FALSE;
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#ifndef __WXMICROWIN__
 
     switch ( id )
     {
@@ -846,11 +753,7 @@ long wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
             processed = HandlePaint();
             break;
 
-        case WM_INITMENUPOPUP:
-            processed = HandleInitMenuPopup((WXHMENU) wParam);
-            break;
-
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#ifndef __WXMICROWIN__
         case WM_MENUSELECT:
             {
                 WXWORD item, flags;
@@ -861,9 +764,15 @@ long wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
             }
             break;
 
+#ifndef __WIN16__
+        case WM_ENTERMENULOOP:
+            processed = HandleMenuLoop(wxEVT_MENU_OPEN, wParam);
+            break;
+
         case WM_EXITMENULOOP:
             processed = HandleMenuLoop(wxEVT_MENU_CLOSE, wParam);
             break;
+#endif // __WIN16__
 
         case WM_QUERYDRAGICON:
             {
@@ -883,25 +792,3 @@ long wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
     return rc;
 }
 
-// handle WM_INITMENUPOPUP message
-bool wxFrame::HandleInitMenuPopup(WXHMENU hMenu)
-{
-    wxMenu* menu = NULL;
-    if (GetMenuBar())
-    {
-        int nCount = GetMenuBar()->GetMenuCount();
-        for (int n = 0; n < nCount; n++)
-        {
-            if (GetMenuBar()->GetMenu(n)->GetHMenu() == hMenu)
-            {
-                menu = GetMenuBar()->GetMenu(n);
-                break;
-            }
-        }
-    }
-    
-    wxMenuEvent event(wxEVT_MENU_OPEN, 0, menu);
-    event.SetEventObject(this);
-
-    return GetEventHandler()->ProcessEvent(event);
-}

@@ -13,7 +13,7 @@
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "cshelp.h"
 #endif
 
@@ -56,8 +56,6 @@ public:
 
 //// Data
     wxContextHelp* m_contextHelp;
-
-    DECLARE_NO_COPY_CLASS(wxContextHelpEvtHandler)
 };
 
 // ============================================================================
@@ -326,34 +324,30 @@ wxHelpProvider::~wxHelpProvider()
 
 wxString wxSimpleHelpProvider::GetHelp(const wxWindowBase *window)
 {
-    wxLongToStringHashMap::iterator it = m_hashWindows.find((long)window);
+    bool wasFound;
+    wxString text = m_hashWindows.Get((long)window, &wasFound);
+    if ( !wasFound )
+        text = m_hashIds.Get(window->GetId());
 
-    if ( it == m_hashWindows.end() )
-    {
-        it = m_hashIds.find(window->GetId());
-        if ( it == m_hashIds.end() )
-            return wxEmptyString;
-    }
-
-    return it->second;
+    return text;
 }
 
 void wxSimpleHelpProvider::AddHelp(wxWindowBase *window, const wxString& text)
 {
-    m_hashWindows.erase((long)window);
-    m_hashWindows[(long)window] = text;
+    m_hashWindows.Delete((long)window);
+    m_hashWindows.Put((long)window, text);
 }
 
 void wxSimpleHelpProvider::AddHelp(wxWindowID id, const wxString& text)
 {
-    m_hashIds.erase((long)id);
-    m_hashIds[id] = text;
+    m_hashIds.Delete((long)id);
+    m_hashIds.Put(id, text);
 }
 
 // removes the association
 void wxSimpleHelpProvider::RemoveHelp(wxWindowBase* window)
 {
-    m_hashWindows.erase((long)window);
+    m_hashWindows.Delete((long)window);
 }
 
 bool wxSimpleHelpProvider::ShowHelp(wxWindowBase *window)
@@ -421,7 +415,7 @@ bool wxHelpControllerHelpProvider::ShowHelp(wxWindowBase *window)
 // Convenience function for turning context id into wxString
 wxString wxContextId(int id)
 {
-    return wxString::Format(_T("%d"), id);
+    return wxString(IntToString(id));
 }
 
 // ----------------------------------------------------------------------------

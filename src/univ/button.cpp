@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univbutton.h"
 #endif
 
@@ -82,7 +82,7 @@ bool wxButton::Create(wxWindow *parent,
         style |= wxALIGN_CENTRE_HORIZONTAL | wxALIGN_CENTRE_VERTICAL;
     }
 
-    if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
+    if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
     SetLabel(label);
@@ -113,11 +113,8 @@ wxSize wxButtonBase::GetDefaultSize()
 
         // this corresponds more or less to wxMSW standard in Win32 theme (see
         // wxWin32Renderer::AdjustSize())
-//        s_sizeBtn.x = 8*dc.GetCharWidth();
-//        s_sizeBtn.y = (11*dc.GetCharHeight())/10 + 2;
-        // Otto Wyss, Patch 664399
-        s_sizeBtn.x = dc.GetCharWidth()*10 + 2;
-        s_sizeBtn.y = dc.GetCharHeight()*11/10 + 2;
+        s_sizeBtn.x = 8*dc.GetCharWidth();
+        s_sizeBtn.y = (11*dc.GetCharHeight())/10 + 2;
     }
 
     return s_sizeBtn;
@@ -139,11 +136,6 @@ wxSize wxButton::DoGetBestClientSize() const
         width += m_bitmap.GetWidth() + 2*m_marginBmpX;
     }
 
-    // The default size should not be adjusted, so the code is moved into the 
-    // renderer. This is conceptual wrong but currently the only solution.
-    // (Otto Wyss, Patch 664399)
-
-/*
     // for compatibility with other ports, the buttons default size is never
     // less than the standard one, but not when display not PDAs.
     if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
@@ -155,7 +147,7 @@ wxSize wxButton::DoGetBestClientSize() const
                 width = szDef.x;
         }
     }
-*/
+
     return wxSize(width, height);
 }
 
@@ -395,8 +387,8 @@ bool wxStdButtonInputHandler::HandleMouseMove(wxInputConsumer *consumer,
     return wxStdInputHandler::HandleMouseMove(consumer, event);
 }
 
-bool wxStdButtonInputHandler::HandleFocus(wxInputConsumer * WXUNUSED(consumer),
-                                          const wxFocusEvent& WXUNUSED(event))
+bool wxStdButtonInputHandler::HandleFocus(wxInputConsumer *consumer,
+                                          const wxFocusEvent& event)
 {
     // buttons change appearance when they get/lose focus, so return TRUE to
     // refresh
@@ -404,7 +396,7 @@ bool wxStdButtonInputHandler::HandleFocus(wxInputConsumer * WXUNUSED(consumer),
 }
 
 bool wxStdButtonInputHandler::HandleActivation(wxInputConsumer *consumer,
-                                               bool WXUNUSED(activated))
+                                               bool activated)
 {
     // the default button changes appearance when the app is [de]activated, so
     // return TRUE to refresh

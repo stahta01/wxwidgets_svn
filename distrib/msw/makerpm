@@ -61,7 +61,7 @@ dospinwxgtk()
   ls RPMS/i386
 
   cp $RPM_ROOT/SRPMS/*.rpm $WXDEST
-  cp $RPM_ROOT/RPMS/*.rpm $WXDEST
+  cp $RPM_ROOT/RPMS/i386/*.rpm $WXDEST
   cp $WXDEST/wxgtk/release/*.tar.gz $WXDEST
   cp $WXDEST/wxgtk/release/*.tar.bz2 $WXDEST
 
@@ -121,7 +121,7 @@ dospinwxbase()
   ls RPMS/i386
 
   cp $RPM_ROOT/SRPMS/*.rpm $WXDEST
-  cp $RPM_ROOT/RPMS/*.rpm $WXDEST
+  cp $RPM_ROOT/RPMS/i386/*.rpm $WXDEST
   cp $WXDEST/wxbase/release/*.tar.gz $WXDEST
   cp $WXDEST/wxbase/release/*.tar.bz2 $WXDEST
 
@@ -181,7 +181,7 @@ dospinwxx11()
   ls RPMS/i386
 
   cp $RPM_ROOT/SRPMS/*.rpm $WXDEST
-  cp $RPM_ROOT/RPMS/*.rpm $WXDEST
+  cp $RPM_ROOT/RPMS/i386/*.rpm $WXDEST
   cp $WXDEST/wxx11/release/*.tar.gz $WXDEST
   cp $WXDEST/wxx11/release/*.tar.bz2 $WXDEST
 

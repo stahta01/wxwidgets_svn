@@ -12,7 +12,7 @@
 #ifndef _WX_WXFSTREAM_H__
 #define _WX_WXFSTREAM_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "wfstream.h"
 #endif
 
@@ -30,7 +30,7 @@
 // wxFileStream using wxFile
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFileInputStream: public wxInputStream {
+class WXDLLEXPORT wxFileInputStream: public wxInputStream {
  public:
   wxFileInputStream(const wxString& ifileName);
   wxFileInputStream(wxFile& file);
@@ -51,11 +51,9 @@ class WXDLLIMPEXP_BASE wxFileInputStream: public wxInputStream {
  protected:
   wxFile *m_file;
   bool m_file_destroy;
-
-    DECLARE_NO_COPY_CLASS(wxFileInputStream)
 };
 
-class WXDLLIMPEXP_BASE wxFileOutputStream: public wxOutputStream {
+class WXDLLEXPORT wxFileOutputStream: public wxOutputStream {
  public:
   wxFileOutputStream(const wxString& fileName);
   wxFileOutputStream(wxFile& file);
@@ -81,25 +79,18 @@ class WXDLLIMPEXP_BASE wxFileOutputStream: public wxOutputStream {
  protected:
   wxFile *m_file;
   bool m_file_destroy;
-
-    DECLARE_NO_COPY_CLASS(wxFileOutputStream)
 };
 
-class WXDLLIMPEXP_BASE wxFileStream : public wxFileInputStream,
-                                      public wxFileOutputStream
-{
-public:
-    wxFileStream(const wxString& fileName);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxFileStream)
+class WXDLLEXPORT wxFileStream: public wxFileInputStream, public wxFileOutputStream {
+ public:
+  wxFileStream(const wxString& fileName);
 };
 
 // ----------------------------------------------------------------------------
 // wxFFileStream using wxFFile
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFFileInputStream: public wxInputStream {
+class WXDLLEXPORT wxFFileInputStream: public wxInputStream {
  public:
   wxFFileInputStream(const wxString& ifileName);
   wxFFileInputStream(wxFFile& file);
@@ -120,11 +111,9 @@ class WXDLLIMPEXP_BASE wxFFileInputStream: public wxInputStream {
  protected:
   wxFFile *m_file;
   bool m_file_destroy;
-
-    DECLARE_NO_COPY_CLASS(wxFFileInputStream)
 };
 
-class WXDLLIMPEXP_BASE wxFFileOutputStream: public wxOutputStream {
+class WXDLLEXPORT wxFFileOutputStream: public wxOutputStream {
  public:
   wxFFileOutputStream(const wxString& fileName);
   wxFFileOutputStream(wxFFile& file);
@@ -150,20 +139,12 @@ class WXDLLIMPEXP_BASE wxFFileOutputStream: public wxOutputStream {
  protected:
   wxFFile *m_file;
   bool m_file_destroy;
-
-    DECLARE_NO_COPY_CLASS(wxFFileOutputStream)
 };
 
-class WXDLLIMPEXP_BASE wxFFileStream : public wxFFileInputStream,
-                                       public wxFFileOutputStream
-{
-public:
-    wxFFileStream(const wxString& fileName);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxFFileStream)
+class WXDLLEXPORT wxFFileStream: public wxFFileInputStream, public wxFFileOutputStream {
+ public:
+  wxFFileStream(const wxString& fileName);
 };
-
 #endif
   // wxUSE_STREAMS && wxUSE_FILE
 

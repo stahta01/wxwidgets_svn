@@ -54,7 +54,7 @@ END_EVENT_TABLE()
 // Define my frame constructor
 csFrame::csFrame(wxDocManager* manager, wxFrame *parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size,
 	long style):
-  wxDocMDIParentFrame(manager, parent, id, title, pos, size, style, _T("frame"))
+  wxDocMDIParentFrame(manager, parent, id, title, pos, size, style, "frame")
 {
     CreateToolBar(wxNO_BORDER|wxTB_FLAT|wxTB_HORIZONTAL);
     wxGetApp().InitToolBar(GetToolBar());
@@ -71,26 +71,26 @@ csFrame::csFrame(wxDocManager* manager, wxFrame *parent, wxWindowID id, const wx
     SetAcceleratorTable(accel);
 }
 
-void csFrame::OnHelp(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnHelp(wxCommandEvent& event)
 {
     wxGetApp().GetHelpController().DisplayContents();
 }
 
-void csFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnSettings(wxCommandEvent& event)
 {
     csSettingsDialog* dialog = new csSettingsDialog(this);
-    /* int ret = */ dialog->ShowModal();
+    int ret = dialog->ShowModal();
     dialog->Destroy();
 }
 
-void csFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnQuit(wxCommandEvent& event)
 {
       Close(TRUE);
 }
 
-void csFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnAbout(wxCommandEvent& event)
 {
-      (void)wxMessageBox(_T("OGL Studio\n(c) 1999, Julian Smart"), _T("About OGL Studio"), wxICON_INFORMATION);
+      (void)wxMessageBox("OGL Studio\n(c) 1999, Julian Smart", "About OGL Studio", wxICON_INFORMATION);
 }
 
 void csFrame::OnSashDragPaletteWindow(wxSashEvent& event)
@@ -141,7 +141,7 @@ void csFrame::OnCloseWindow(wxCloseEvent& event)
     wxDocMDIParentFrame::OnCloseWindow(event);
 }
 
-void csFrame::OnSize(wxSizeEvent& WXUNUSED(event))
+void csFrame::OnSize(wxSizeEvent& event)
 {
     wxLayoutAlgorithm layout;
     layout.LayoutMDIFrame(this);
@@ -150,6 +150,8 @@ void csFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 // Make sure the correct toolbars are showing for the active view
 void csFrame::OnIdle(wxIdleEvent& event)
 {
+    wxDocMDIParentFrame::OnIdle(event);
+
     wxSashLayoutWindow* paletteWin = wxGetApp().GetDiagramPaletteSashWindow();
     wxSashLayoutWindow* diagramToolBarWin = wxGetApp().GetDiagramToolBarSashWindow();
     if (!paletteWin || !diagramToolBarWin)
@@ -199,7 +201,6 @@ void csFrame::OnIdle(wxIdleEvent& event)
 #endif
 #endif
     }
-    event.Skip();
 }
 
 // General handler for disabling items

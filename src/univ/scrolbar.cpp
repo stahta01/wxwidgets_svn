@@ -6,7 +6,7 @@
 // Created:     20.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univscrolbar.h"
 #endif
 
@@ -83,6 +83,7 @@ private:
 IMPLEMENT_DYNAMIC_CLASS(wxScrollBar, wxControl)
 
 BEGIN_EVENT_TABLE(wxScrollBar, wxScrollBarBase)
+    EVT_IDLE(wxScrollBar::OnIdle)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -147,7 +148,7 @@ bool wxScrollBar::Create(wxWindow *parent,
     // the scrollbars never have the border
     style &= ~wxBORDER_MASK;
 
-    if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
+    if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
     SetBestSize(size);
@@ -321,10 +322,10 @@ wxScrollArrows::Arrow wxScrollBar::HitTest(const wxPoint& pt) const
 // drawing
 // ----------------------------------------------------------------------------
 
-void wxScrollBar::OnInternalIdle()
+void wxScrollBar::OnIdle(wxIdleEvent& event)
 {
     UpdateThumb();
-    wxControl::OnInternalIdle();
+    event.Skip();
 }
 
 void wxScrollBar::UpdateThumb()

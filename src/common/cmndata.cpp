@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "cmndata.h"
 #endif
 
@@ -48,22 +48,24 @@
 #endif // wxUSE_PRINTING_ARCHITECTURE
 
 #ifdef __WXMSW__
-    #include <windowsx.h>
+    #include <windows.h>
     #include "wx/msw/private.h"
 
-    #if defined(__WXWINCE__) && !wxUSE_SMARTPHONE
+    #if !defined(__WIN32__)
+        #include <print.h>
+        #include <commdlg.h>
+    #endif // Win16
+
+    #ifdef __WXWINE__
+        #include <cderr.h>
         #include <commdlg.h>
     #endif
 
-    #if defined(__WATCOMC__) || defined(__SYMANTEC__) || defined(__SALFORDC__)
+    #if defined(__WATCOMC__) || defined(__SC__) || defined(__SALFORDC__)
         #include <windowsx.h>
         #include <commdlg.h>
     #endif
 #endif // MSW
-
-#ifdef __WXMAC__
-    #include "wx/mac/private/print.h"
-#endif
 
     #if wxUSE_PRINTING_ARCHITECTURE
         IMPLEMENT_DYNAMIC_CLASS(wxPrintData, wxObject)
@@ -73,6 +75,23 @@
 
     IMPLEMENT_DYNAMIC_CLASS(wxFontData, wxObject)
     IMPLEMENT_DYNAMIC_CLASS(wxColourData, wxObject)
+
+#ifdef __WXMAC__
+    #include "wx/mac/uma.h"
+
+#if defined(TARGET_CARBON) && !defined(__DARWIN__)
+#  if PM_USE_SESSION_APIS
+#    include <PMCore.h>
+#  endif
+#  include <PMApplication.h>
+#endif
+
+#ifndef __DARWIN__
+    #include "Printing.h"
+#endif
+    #define mm2pt            2.83464566929
+    #define pt2mm            0.352777777778
+#endif // Mac
 
 #ifndef DMPAPER_USER
      #define DMPAPER_USER                256
@@ -90,10 +109,10 @@ wxColourData::wxColourData()
 {
     int i;
     for (i = 0; i < 16; i++)
-        m_custColours[i].Set(255, 255, 255);
+        custColours[i].Set(255, 255, 255);
 
-    m_chooseFull = FALSE;
-    m_dataColour.Set(0,0,0);
+    chooseFull = FALSE;
+    dataColour.Set(0,0,0);
 }
 
 wxColourData::wxColourData(const wxColourData& data)
@@ -111,7 +130,7 @@ void wxColourData::SetCustomColour(int i, const wxColour& colour)
     if (i > 15 || i < 0)
         return;
 
-    m_custColours[i] = colour;
+    custColours[i] = colour;
 }
 
 wxColour wxColourData::GetCustomColour(int i)
@@ -119,17 +138,17 @@ wxColour wxColourData::GetCustomColour(int i)
     if (i > 15 || i < 0)
         return wxColour(0,0,0);
 
-    return m_custColours[i];
+    return custColours[i];
 }
 
 void wxColourData::operator=(const wxColourData& data)
 {
     int i;
     for (i = 0; i < 16; i++)
-        m_custColours[i] = data.m_custColours[i];
+        custColours[i] = data.custColours[i];
 
-    m_dataColour = (wxColour&)data.m_dataColour;
-    m_chooseFull = data.m_chooseFull;
+    dataColour = (wxColour&)data.dataColour;
+    chooseFull = data.chooseFull;
 }
 
 // ----------------------------------------------------------------------------
@@ -139,13 +158,13 @@ void wxColourData::operator=(const wxColourData& data)
 wxFontData::wxFontData()
 {
     // Intialize colour to black.
-    m_fontColour = wxNullColour;
+    fontColour = wxNullColour;
 
-    m_showHelp = FALSE;
-    m_allowSymbols = TRUE;
-    m_enableEffects = TRUE;
-    m_minSize = 0;
-    m_maxSize = 0;
+    showHelp = FALSE;
+    allowSymbols = TRUE;
+    enableEffects = TRUE;
+    minSize = 0;
+    maxSize = 0;
 
     m_encoding = wxFONTENCODING_SYSTEM;
 }
@@ -173,7 +192,25 @@ wxPrintData::wxPrintData()
     m_devMode = (void*) NULL;
     m_devNames = (void*) NULL;
 #elif defined( __WXMAC__ )
-    m_nativePrintData = wxNativePrintData::Create() ;
+#if TARGET_CARBON
+    m_macPageFormat = kPMNoPageFormat;
+    m_macPrintSettings = kPMNoPrintSettings;
+    m_macPrintSession = kPMNoReference ;
+    ValidateOrCreate() ;
+#else
+    m_macPrintSettings = (THPrint) NewHandleClear( sizeof( TPrint ) );
+    (**(THPrint)m_macPrintSettings).iPrVersion = 0;                    // something invalid
+
+    (**(THPrint)m_macPrintSettings).prInfo.iHRes = 72;
+    (**(THPrint)m_macPrintSettings).prInfo.iVRes = 72;
+    Rect r1 = { 0, 0, 8*72 - 2 * 18, 11*72 - 2 * 36 };
+    (**(THPrint)m_macPrintSettings).prInfo.rPage = r1;// must have its top left & (0,0)
+
+    Rect r2 = { -18, -36, 8*72 - 18, 11*72 - 36  };
+    (**(THPrint)m_macPrintSettings).rPaper = r2;
+    (**(THPrint)m_macPrintSettings).prStl.iPageV = 11 * 120 ;                // 11 inches in 120th of an inch
+    (**(THPrint)m_macPrintSettings).prStl.iPageH = 8 * 120 ;                // 8 inches in 120th of an inch
+#endif
 #endif
     m_printOrientation = wxPORTRAIT;
     m_printNoCopies = 1;
@@ -222,7 +259,13 @@ wxPrintData::wxPrintData(const wxPrintData& printData)
     m_devMode = (void*) NULL;
     m_devNames = (void*) NULL;
 #elif defined( __WXMAC__ )
-    m_nativePrintData = wxNativePrintData::Create() ;
+#if TARGET_CARBON
+    m_macPageFormat    = kPMNoPageFormat;
+    m_macPrintSettings = kPMNoPrintSettings;
+    m_macPrintSession = kPMNoReference ;
+#else
+    m_macPrintSettings = NULL;
+#endif
 #endif
     (*this) = printData;
 }
@@ -237,7 +280,40 @@ wxPrintData::~wxPrintData()
     if ( hDevNames )
         GlobalFree(hDevNames);
 #elif defined(__WXMAC__)
-    delete m_nativePrintData ;
+#if TARGET_CARBON
+    if (m_macPageFormat != kPMNoPageFormat)
+    {
+  #if PM_USE_SESSION_APIS
+        (void)PMRelease(m_macPageFormat);
+  #else
+        (void)PMDisposePageFormat(m_macPageFormat);
+  #endif
+        m_macPageFormat = kPMNoPageFormat;
+    }
+
+    if (m_macPrintSettings != kPMNoPrintSettings)
+    {
+  #if PM_USE_SESSION_APIS
+        (void)PMRelease(m_macPrintSettings);
+  #else
+        (void)PMDisposePrintSettings(m_macPrintSettings);
+  #endif
+        m_macPrintSettings = kPMNoPrintSettings;
+    }
+    
+    if ( m_macPrintSession != kPMNoReference )
+    {
+  #if PM_USE_SESSION_APIS
+        (void)PMRelease(m_macPrintSession);
+  #else
+        (void)PMDisposePrintSession(m_macPrintSession);
+  #endif
+        m_macPrintSession = kPMNoReference;
+    }
+#else
+    wxASSERT( m_macPrintSettings );
+    // we should perhaps delete
+#endif
 #endif
 }
 
@@ -326,11 +402,7 @@ void wxPrintData::ConvertToNative()
         pd.lStructSize    = 66;
 #else
         memset(&pd, 0, sizeof(PRINTDLG));
-#ifdef __WXWINCE__
-        pd.cbStruct    = sizeof(PRINTDLG);
-#else
         pd.lStructSize    = sizeof(PRINTDLG);
-#endif
 #endif
 
         pd.hwndOwner      = (HWND)NULL;
@@ -382,7 +454,10 @@ void wxPrintData::ConvertToNative()
 
         //// Orientation
 
+#ifndef __WXWINE__
         devMode->dmOrientation = m_printOrientation;
+#endif
+        devMode->dmFields = DM_ORIENTATION;
 
         //// Collation
 
@@ -414,6 +489,7 @@ void wxPrintData::ConvertToNative()
 
         devMode->dmFields |= DM_COLOR;
 
+#ifndef __WXWINE__
         //// Paper size
 
         if (m_paperId == wxPAPER_NONE)
@@ -437,6 +513,7 @@ void wxPrintData::ConvertToNative()
                 }
             }
         }
+#endif
 
         //// Duplex
 
@@ -505,10 +582,12 @@ void wxPrintData::ConvertFromNative()
     {
         LPDEVMODE devMode = (LPDEVMODE)GlobalLock(hDevMode);
 
+#ifndef __WXWINE__
         //// Orientation
 
         if (devMode->dmFields & DM_ORIENTATION)
             m_printOrientation = devMode->dmOrientation;
+#endif
 
         //// Collation
 
@@ -548,6 +627,7 @@ void wxPrintData::ConvertFromNative()
         else
             m_colour = TRUE;
 
+#ifndef __WXWINE__
         //// Paper size
 
         // We don't know size of user defined paper and some buggy drivers
@@ -601,6 +681,7 @@ void wxPrintData::ConvertFromNative()
             m_paperSize.y = 0;
             m_paperId = wxPAPER_NONE;
         }
+#endif
 
         //// Duplex
 
@@ -688,12 +769,142 @@ void wxPrintData::ConvertFromNative()
 
 void wxPrintData::ConvertToNative()
 {
-    m_nativePrintData->TransferFrom( this ) ;
+    ValidateOrCreate() ;
+#if TARGET_CARBON
+    PMSetCopies( (PMPrintSettings) m_macPrintSettings , m_printNoCopies , false ) ;
+    PMSetOrientation( (PMPageFormat) m_macPageFormat , ( m_printOrientation == wxLANDSCAPE ) ?
+        kPMLandscape : kPMPortrait , false ) ;
+    // collate cannot be set
+#if 0 // not yet tested
+    if ( m_printerName.Length() > 0 )
+        PMSessionSetCurrentPrinter( (PMPrintSession) m_macPrintSession , wxMacCFStringHolder( m_printerName ) ) ;
+#endif
+    PMColorMode color ;
+    PMGetColorMode(  (PMPrintSettings) m_macPrintSettings, &color ) ;
+    if (m_colour)
+    {
+        if ( color == kPMBlackAndWhite )
+            PMSetColorMode( (PMPrintSettings) m_macPrintSettings, kPMColor ) ;
+    }
+    else
+        PMSetColorMode( (PMPrintSettings) m_macPrintSettings, kPMBlackAndWhite ) ;
+    
+    // PMDuplexMode not yet accessible via API
+    // PMQualityMode not yet accessible via API
+    // todo paperSize
+#else
+    (**(THPrint)m_macPrintSettings).prJob.iCopies = m_printNoCopies;
+#endif
 }
 
 void wxPrintData::ConvertFromNative()
 {
-    m_nativePrintData->TransferTo( this ) ;
+#if TARGET_CARBON
+    OSStatus err = noErr ;
+    
+    UInt32 copies ;
+    err = PMGetCopies( (PMPrintSettings) m_macPrintSettings , &copies ) ;
+    if ( err == noErr )
+        m_printNoCopies = copies ; 
+          
+    PMOrientation orientation ;
+    err = PMGetOrientation(  (PMPageFormat) m_macPageFormat , &orientation ) ;
+    if ( err == noErr )
+    {
+        if ( orientation == kPMPortrait || orientation == kPMReversePortrait )
+            m_printOrientation = wxPORTRAIT ;
+        else
+            m_printOrientation = wxLANDSCAPE ;
+    }
+
+    // collate cannot be set
+#if 0
+    {
+        wxMacCFStringHolder name ;
+        PMPrinter printer ;
+        PMSessionGetCurrentPrinter( (PMPrintSession) m_macPrintSession ,
+            &printer ) ;
+        m_printerName = name.AsString() ;
+    }
+#endif
+    
+    PMColorMode color ;
+    err = PMGetColorMode(  (PMPrintSettings) m_macPrintSettings, &color ) ;
+    if ( err == noErr )
+        m_colour = !(color == kPMBlackAndWhite) ;
+        
+    // PMDuplexMode not yet accessible via API
+    // PMQualityMode not yet accessible via API
+    // todo paperSize
+	PMRect rPaper;
+    err = PMGetUnadjustedPaperRect((PMPageFormat) m_macPageFormat, &rPaper);
+    if ( err == noErr )
+    {
+        m_paperSize.x = (int)(( rPaper.right - rPaper.left ) * pt2mm + 0.5 );
+        m_paperSize.y = (int)(( rPaper.bottom - rPaper.top ) * pt2mm + 0.5 );
+    }
+#else
+    m_printNoCopies = (**(THPrint)m_macPrintSettings).prJob.iCopies;
+    
+    // paper size
+    m_paperSize.x = ((double) (**(THPrint)m_macPrintSettings).rPaper.right - (**(THPrint)m_macPrintSettings).rPaper.left ) * pt2mm;
+    m_paperSize.y = ((double) (**(THPrint)m_macPrintSettings).rPaper.bottom - (**(THPrint)m_macPrintSettings).rPaper.top ) * pt2mm;
+#endif
+}
+
+void wxPrintData::ValidateOrCreate()
+{
+#if TARGET_CARBON
+    OSStatus err = noErr ;
+    if ( m_macPrintSession == kPMNoReference )
+    {
+        err = PMCreateSession( (PMPrintSession *) &m_macPrintSession ) ;
+    }
+    //  Set up a valid PageFormat object.
+    if ( m_macPageFormat == kPMNoPageFormat)
+    {
+        err = PMCreatePageFormat((PMPageFormat *) &m_macPageFormat);
+        
+        //  Note that PMPageFormat is not session-specific, but calling
+        //  PMSessionDefaultPageFormat assigns values specific to the printer
+        //  associated with the current printing session.
+        if ((err == noErr) &&
+            ( m_macPageFormat != kPMNoPageFormat))
+        {
+            err = PMSessionDefaultPageFormat((PMPrintSession) m_macPrintSession,
+                (PMPageFormat) m_macPageFormat);
+        }
+    }
+    else
+    {
+        err = PMSessionValidatePageFormat((PMPrintSession) m_macPrintSession,
+            (PMPageFormat) m_macPageFormat,
+            kPMDontWantBoolean);
+    }
+    
+    //  Set up a valid PrintSettings object.
+    if ( m_macPrintSettings == kPMNoPrintSettings)
+    {
+        err = PMCreatePrintSettings((PMPrintSettings *) &m_macPrintSettings);
+        
+        //  Note that PMPrintSettings is not session-specific, but calling
+        //  PMSessionDefaultPrintSettings assigns values specific to the printer
+        //  associated with the current printing session.
+        if ((err == noErr) &&
+            ( m_macPrintSettings != kPMNoPrintSettings))
+        {
+            err = PMSessionDefaultPrintSettings((PMPrintSession) m_macPrintSession,
+                (PMPrintSettings) m_macPrintSettings);
+        }
+    }
+    else
+    {
+        err = PMSessionValidatePrintSettings((PMPrintSession) m_macPrintSession,
+            (PMPrintSettings) m_macPrintSettings,
+            kPMDontWantBoolean);
+    }
+#else
+#endif
 }
 
 #endif
@@ -701,7 +912,40 @@ void wxPrintData::ConvertFromNative()
 void wxPrintData::operator=(const wxPrintData& data)
 {
 #ifdef __WXMAC__
-    m_nativePrintData->CopyFrom( data.m_nativePrintData ) ;
+#if TARGET_CARBON
+	if ( data.m_macPrintSession != kPMNoPrintSettings )
+		PMRetain( data.m_macPrintSession ) ;
+	if ( m_macPrintSession != kPMNoPrintSettings )
+	{
+		PMRelease( m_macPrintSession ) ;
+		m_macPrintSession = kPMNoPrintSettings ;
+	}
+	if ( data.m_macPrintSession != kPMNoPrintSettings )
+		m_macPrintSession = data.m_macPrintSession ;
+
+	if ( data.m_macPrintSettings != kPMNoPrintSettings )
+		PMRetain( data.m_macPrintSettings ) ;
+	if ( m_macPrintSettings != kPMNoPrintSettings )
+	{
+		PMRelease( m_macPrintSettings ) ;
+		m_macPrintSettings = kPMNoPrintSettings ;
+	}
+	if ( data.m_macPrintSettings != kPMNoPrintSettings )
+		m_macPrintSettings = data.m_macPrintSettings ;
+
+	if ( data.m_macPageFormat != kPMNoPageFormat )
+		PMRetain( data.m_macPageFormat ) ;
+	if ( m_macPageFormat != kPMNoPageFormat )
+	{
+		PMRelease( m_macPageFormat ) ;
+		m_macPageFormat = kPMNoPageFormat ;
+	}
+	if ( data.m_macPageFormat != kPMNoPageFormat )
+		m_macPageFormat = data.m_macPageFormat ;
+#else
+    m_macPrintSettings = data.m_macPrintSettings;
+    HandToHand( (Handle*) &m_macPrintSettings );
+#endif
 #endif
     m_printNoCopies = data.m_printNoCopies;
     m_printCollate = data.m_printCollate;
@@ -776,10 +1020,10 @@ wxPrintDialogData::wxPrintDialogData(const wxPrintData& printData)
 #ifdef __WXMSW__
     m_printDlgData = NULL;
 #endif
-    m_printFromPage = 1;
+    m_printFromPage = 0;
     m_printToPage = 0;
-    m_printMinPage = 1;
-    m_printMaxPage = 9999;
+    m_printMinPage = 0;
+    m_printMaxPage = 0;
     m_printNoCopies = 1;
     m_printAllPages = FALSE;
     m_printCollate = FALSE;
@@ -897,7 +1141,7 @@ void wxPrintDialogData::ConvertToNative()
         pd->Flags |= PD_NOSELECTION;
     if ( !m_printEnablePageNumbers )
         pd->Flags |= PD_NOPAGENUMS;
-    else if ( (!m_printAllPages) && (!m_printSelection) && (m_printFromPage != 0) && (m_printToPage != 0))
+    else if ( (!m_printAllPages) && (!m_printSelection) )
         pd->Flags |= PD_PAGENUMS;
     if ( m_printEnableHelp )
         pd->Flags |= PD_SHOWHELP;
@@ -989,13 +1233,37 @@ void wxPrintDialogData::SetOwnerWindow(wxWindow* win)
 void wxPrintDialogData::ConvertToNative()
 {
     m_printData.ConvertToNative();
-    m_printData.m_nativePrintData->TransferFrom( this ) ;
+#if TARGET_CARBON
+    PMSetPageRange( (PMPrintSettings) m_printData.m_macPrintSettings , m_printMinPage , m_printMaxPage ) ;
+    PMSetCopies( (PMPrintSettings) m_printData.m_macPrintSettings , m_printNoCopies , false ) ;
+    PMSetFirstPage( (PMPrintSettings) m_printData.m_macPrintSettings , m_printFromPage , false ) ;
+    PMSetLastPage( (PMPrintSettings) m_printData.m_macPrintSettings , m_printToPage , false ) ;
+#else
+    (**(THPrint)m_printData.m_macPrintSettings).prJob.iFstPage = m_printFromPage;
+    (**(THPrint)m_printData.m_macPrintSettings).prJob.iLstPage = m_printToPage;
+#endif
 }
 
 void wxPrintDialogData::ConvertFromNative()
 {
     m_printData.ConvertFromNative();
-    m_printData.m_nativePrintData->TransferTo( this ) ;
+#if TARGET_CARBON
+    UInt32 minPage , maxPage ;
+    PMGetPageRange( (PMPrintSettings) m_printData.m_macPrintSettings , &minPage , &maxPage ) ;
+    m_printMinPage = minPage ;
+    m_printMaxPage = maxPage ;
+    UInt32 copies ;
+    PMGetCopies( (PMPrintSettings) m_printData.m_macPrintSettings , &copies ) ;
+    m_printNoCopies = copies ;
+    UInt32 from , to ;
+    PMGetFirstPage((PMPrintSettings) m_printData.m_macPrintSettings , &from ) ;
+    PMGetLastPage((PMPrintSettings) m_printData.m_macPrintSettings , &to ) ;
+    m_printFromPage = from ;
+    m_printToPage = to ;
+#else
+    m_printFromPage = (**(THPrint)m_printData.m_macPrintSettings).prJob.iFstPage;
+    m_printToPage = (**(THPrint)m_printData.m_macPrintSettings).prJob.iLstPage;
+#endif
 }
 
 #endif
@@ -1311,7 +1579,20 @@ void wxPageSetupDialogData::SetOwnerWindow(wxWindow* win)
 void wxPageSetupDialogData::ConvertToNative()
 {
     m_printData.ConvertToNative();
-    m_printData.m_nativePrintData->TransferFrom( this ) ;
+    // on mac the paper rect has a negative top left corner, because the page rect (printable area) is at 0,0
+#if TARGET_CARBON
+#else
+    (**(THPrint)m_printData.m_macPrintSettings).rPaper.left = int( ((double) m_minMarginTopLeft.x)*mm2pt );
+    (**(THPrint)m_printData.m_macPrintSettings).rPaper.top = int( ((double) m_minMarginTopLeft.y)*mm2pt );
+
+    (**(THPrint)m_printData.m_macPrintSettings).rPaper.right = int( ((double) m_paperSize.x - m_minMarginTopLeft.x)*mm2pt );
+    (**(THPrint)m_printData.m_macPrintSettings).rPaper.bottom = int( ((double) m_paperSize.y - m_minMarginTopLeft.y)*mm2pt );
+
+    (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.left = 0;
+    (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.top = 0;
+    (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.right =  int( ((double) m_paperSize.x - m_minMarginTopLeft.x - m_minMarginBottomRight.x)*mm2pt );
+    (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.bottom =  int( ((double) m_paperSize.y - m_minMarginTopLeft.y - m_minMarginBottomRight.y)*mm2pt );
+#endif
 }
 
 void wxPageSetupDialogData::ConvertFromNative()
@@ -1319,8 +1600,29 @@ void wxPageSetupDialogData::ConvertFromNative()
     m_printData.ConvertFromNative ();
     m_paperSize = m_printData.GetPaperSize() ;
     CalculateIdFromPaperSize();
-    m_printData.m_nativePrintData->TransferTo( this ) ;
+#if TARGET_CARBON
+	PMRect rPaper;
+    OSStatus err = PMGetUnadjustedPaperRect((PMPageFormat) m_printData.m_macPageFormat, &rPaper);
+    if ( err == noErr )
+    {
+        PMRect rPage ;
+        err = PMGetUnadjustedPageRect((PMPageFormat) m_printData.m_macPageFormat , &rPage ) ;
+        if ( err == noErr )
+        {
+	        m_minMarginTopLeft.x = (int)(((double) rPage.left - rPaper.left ) * pt2mm);
+	        m_minMarginTopLeft.y = (int)(((double) rPage.top - rPaper.top ) * pt2mm);
+            m_minMarginBottomRight.x = ((double) rPaper.right - rPage.right ) * pt2mm;
+            m_minMarginBottomRight.y = ((double) rPaper.bottom - rPage.bottom ) * pt2mm;
+	    }
+	}
+#else
+    m_minMarginTopLeft.x = ((double) (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.left -(**(THPrint)m_printData.m_macPrintSettings).rPaper.left ) * pt2mm;
+    m_minMarginTopLeft.y = ((double) (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.top -(**(THPrint)m_printData.m_macPrintSettings).rPaper.top ) * pt2mm;
+    m_minMarginBottomRight.x = ((double) (**(THPrint)m_printData.m_macPrintSettings).rPaper.right - (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.right ) * pt2mm;
+    m_minMarginBottomRight.y = ((double)(**(THPrint)m_printData.m_macPrintSettings).rPaper.bottom - (**(THPrint)m_printData.m_macPrintSettings).prInfo.rPage.bottom ) * pt2mm;
+#endif
     // adjust minimal values
+    //TODO add custom fields in dialog for margins
 
     if ( m_marginTopLeft.x < m_minMarginTopLeft.x )
         m_marginTopLeft.x = m_minMarginTopLeft.x;

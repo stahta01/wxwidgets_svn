@@ -7,7 +7,7 @@
 // Created:     20.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // NB: this is a private header, it is not intended to be directly included by
@@ -16,7 +16,7 @@
 #ifndef _WX_MSW_GDIIMAGE_H_
 #define _WX_MSW_GDIIMAGE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "gdiimage.h"
 #endif
 
@@ -27,8 +27,6 @@
 class WXDLLEXPORT wxGDIImageRefData;
 class WXDLLEXPORT wxGDIImageHandler;
 class WXDLLEXPORT wxGDIImage;
-
-WX_DECLARE_EXPORTED_LIST(wxGDIImageHandler, wxGDIImageHandlerList);
 
 // ----------------------------------------------------------------------------
 // wxGDIImageRefData: common data fields for all derived classes
@@ -42,6 +40,10 @@ public:
         m_width = m_height = m_depth = 0;
 
         m_handle = 0;
+
+#if WXWIN_COMPATIBILITY_2
+        m_ok = FALSE;
+#endif // WXWIN_COMPATIBILITY_2
     }
 
     // accessors
@@ -68,6 +70,14 @@ public:
         WXHICON   m_hIcon;
         WXHCURSOR m_hCursor;
     };
+
+    // this filed is redundant and using it is error prone but keep it for
+    // backwards compatibility
+#if WXWIN_COMPATIBILITY_2
+    void SetOk() { m_ok = m_handle != 0; }
+
+    bool          m_ok;
+#endif // WXWIN_COMPATIBILITY_2
 };
 
 // ----------------------------------------------------------------------------
@@ -125,7 +135,7 @@ class WXDLLEXPORT wxGDIImage : public wxGDIObject
 {
 public:
     // handlers list interface
-    static wxGDIImageHandlerList& GetHandlers() { return ms_handlers; }
+    static wxList& GetHandlers() { return ms_handlers; }
 
     static void AddHandler(wxGDIImageHandler *handler);
     static void InsertHandler(wxGDIImageHandler *handler);
@@ -176,7 +186,7 @@ protected:
     // create the data for the derived class here
     virtual wxGDIImageRefData *CreateData() const = 0;
 
-    static wxGDIImageHandlerList ms_handlers;
+    static wxList ms_handlers;
 };
 
 #endif // _WX_MSW_GDIIMAGE_H_

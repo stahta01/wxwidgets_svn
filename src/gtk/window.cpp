@@ -8,17 +8,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "window.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #ifdef __VMS
 #define XWarpPointer XWARPPOINTER
 #endif
 
+#include "wx/defs.h"
 #include "wx/window.h"
 #include "wx/dcclient.h"
 #include "wx/frame.h"
@@ -257,9 +255,9 @@ wxWindowGTK *g_delayedFocus = (wxWindowGTK*) NULL;
 // send any activate events at all
 static int        g_sendActivateEvent = -1;
 
-// hack: we need something to pass to gtk_menu_popup, so we store the time of
-// the last click here
-static guint32 gs_timeLastClick = 0; 
+/* hack: we need something to pass to gtk_menu_popup, so we store the time of
+   the last click here */
+static guint32 gs_timeLastClick = 0;
 
 extern bool g_mainThreadLocked;
 
@@ -347,7 +345,7 @@ wxWindow *wxFindFocusedChild(wxWindowGTK *win)
     if ( winFocus == win )
         return (wxWindow *)win;
 
-    for ( wxWindowList::compatibility_iterator node = win->GetChildren().GetFirst();
+    for ( wxWindowList::Node *node = win->GetChildren().GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -479,18 +477,12 @@ static void gtk_window_own_draw_callback( GtkWidget *widget, GdkRectangle *WXUNU
 // "size_request" of m_widget
 //-----------------------------------------------------------------------------
 
-// make it extern because wxStatitText needs to disconnect this one
-extern "C"
-void wxgtk_window_size_request_callback(GtkWidget *widget,
-                                        GtkRequisition *requisition,
-                                        wxWindow *win)
+static void gtk_window_size_request_callback( GtkWidget *widget, GtkRequisition *requisition, wxWindow *win )
 {
-    int w, h;
+    int w,h;
     win->GetSize( &w, &h );
-    if (w < 2)
-        w = 2;
-    if (h < 2)
-        h = 2;
+    if (w < 2) w = 2;
+    if (h < 2) h = 2;
 
     requisition->height = h;
     requisition->width = w;
@@ -1248,8 +1240,8 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
 
 #ifdef __WXGTK20__
 static void gtk_wxwindow_commit_cb (GtkIMContext *context,
-						   const gchar  *str,
-						   wxWindow     *window)
+                                    const gchar  *str,
+                                    wxWindow     *window)
 {
     bool ret = FALSE;
 
@@ -1413,12 +1405,12 @@ wxWindowGTK *FindWindowForMouseEvent(wxWindowGTK *win, wxCoord& x, wxCoord& y)
         yy += pizza->yoffset;
     }
 
-    wxWindowList::compatibility_iterator node = win->GetChildren().GetFirst();
+    wxNode *node = win->GetChildren().First();
     while (node)
     {
-        wxWindowGTK *child = node->GetData();
+        wxWindowGTK *child = (wxWindowGTK*)node->Data();
 
-        node = node->GetNext();
+        node = node->Next();
         if (!child->IsShown())
             continue;
 
@@ -2187,6 +2179,21 @@ wxWindow *wxWindowBase::FindFocus()
     return (wxWindow *)g_focusWindow;
 }
 
+//-----------------------------------------------------------------------------
+// "destroy" event
+//-----------------------------------------------------------------------------
+
+// VZ: Robert commented the code using out so it generates warnings: should
+//     be either fixed or removed completely
+#if 0
+
+static void gtk_window_destroy_callback( GtkWidget* widget, wxWindow *win )
+{
+    wxWindowDestroyEvent event(win);
+    win->GetEventHandler()->ProcessEvent(event);
+}
+
+#endif // 0
 
 //-----------------------------------------------------------------------------
 // "realize" from m_widget
@@ -2202,11 +2209,11 @@ gtk_window_realized_callback( GtkWidget *m_widget, wxWindow *win )
 
     if (g_isIdle)
         wxapp_install_idle_handler();
-        
-    if (win->m_delayedBackgroundColour && !win->GetThemeEnabled())
+
+    if (win->m_delayedBackgroundColour)
         win->GtkSetBackgroundColour( win->GetBackgroundColour() );
 
-    if (win->m_delayedForegroundColour && !win->GetThemeEnabled())
+    if (win->m_delayedForegroundColour)
         win->GtkSetForegroundColour( win->GetForegroundColour() );
 
 #ifdef __WXGTK20__
@@ -2458,10 +2465,8 @@ void wxWindowGTK::Init()
 
     m_hAdjust = (GtkAdjustment*) NULL;
     m_vAdjust = (GtkAdjustment*) NULL;
-    m_oldHorizontalPos =
+    m_oldHorizontalPos = 0.0;
     m_oldVerticalPos = 0.0;
-    m_oldClientWidth =
-    m_oldClientHeight = 0;
 
     m_resizing = FALSE;
     m_widgetStyle = (GtkStyle*) NULL;
@@ -2634,7 +2639,10 @@ bool wxWindowGTK::Create( wxWindow *parent,
 
 wxWindowGTK::~wxWindowGTK()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent((wxWindow*) this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
     if (g_focusWindow == this)
         g_focusWindow = NULL;
@@ -2805,7 +2813,7 @@ void wxWindowGTK::PostCreation()
                             GTK_SIGNAL_FUNC(gtk_wxwindow_size_callback), (gpointer)this );
     }
 
-    if ( !GTK_IS_COMBO(m_widget))
+    if (!GTK_IS_COMBO(m_widget))
     {
         // This is needed if we want to add our windows into native
         // GTK control, such as the toolbar. With this callback, the
@@ -2813,8 +2821,7 @@ void wxWindowGTK::PostCreation()
         // programmer). Sadly, it misbehaves for wxComboBox. FIXME
         // when moving to GTK 2.0.
         gtk_signal_connect( GTK_OBJECT(m_widget), "size_request",
-                            GTK_SIGNAL_FUNC(wxgtk_window_size_request_callback),
-                            (gpointer) this );
+                            GTK_SIGNAL_FUNC(gtk_window_size_request_callback), (gpointer) this );
     }
 
     m_hasVMT = TRUE;
@@ -2842,6 +2849,11 @@ void wxWindowGTK::ConnectWidget( GtkWidget *widget )
 
     gtk_signal_connect( GTK_OBJECT(widget), "leave_notify_event",
       GTK_SIGNAL_FUNC(gtk_window_leave_callback), (gpointer)this );
+
+    // This keeps crashing on me. RR.
+    //
+    // gtk_signal_connect( GTK_OBJECT(widget), "destroy",
+    //  GTK_SIGNAL_FUNC(gtk_window_destroy_callback), (gpointer)this );
 }
 
 bool wxWindowGTK::Destroy()
@@ -3002,10 +3014,10 @@ void wxWindowGTK::OnInternalIdle()
 
     if (cursor.Ok())
     {
-        /* I now set the cursor anew in every OnInternalIdle call
-           as setting the cursor in a parent window also effects the
-           windows above so that checking for the current cursor is
-           not possible. */
+        // We now set the cursor anew in every OnInternalIdle call
+        // as setting the cursor in a parent window also effects the
+        // windows above so that checking for the current cursor is
+        // not possible.
 
         if (m_wxwindow)
         {
@@ -3031,8 +3043,7 @@ void wxWindowGTK::OnInternalIdle()
         }
     }
 
-    if (wxUpdateUIEvent::CanUpdate(this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 }
 
 void wxWindowGTK::DoGetSize( int *width, int *height ) const
@@ -3283,7 +3294,7 @@ static void wxWindowNotifyEnable(wxWindowGTK* win, bool enable)
     // Recurse, so that children have the opportunity to Do The Right Thing
     // and reset colours that have been messed up by a parent's (really ancestor's)
     // Enable call
-    for ( wxWindowList::compatibility_iterator node = win->GetChildren().GetFirst();
+    for ( wxWindowList::Node *node = win->GetChildren().GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -3862,7 +3873,7 @@ void wxWindowGTK::GtkSendPaintEvents()
     m_updateRegion.Clear();
 }
 
-void wxWindowGTK::ClearBackground()
+void wxWindowGTK::Clear()
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
 
@@ -4150,7 +4161,7 @@ void gtk_pop_hide_callback( GtkWidget *WXUNUSED(widget), bool* is_waiting  )
 static void SetInvokingWindow( wxMenu *menu, wxWindowGTK *win )
 {
     menu->SetInvokingWindow( win );
-    wxMenuItemList::compatibility_iterator node = menu->GetMenuItems().GetFirst();
+    wxMenuItemList::Node *node = menu->GetMenuItems().GetFirst();
     while (node)
     {
         wxMenuItem *menuitem = node->GetData();
@@ -4219,16 +4230,13 @@ bool wxWindowGTK::DoPopupMenu( wxMenu *menu, int x, int y )
                   wxPopupMenuPositionCallback,  // function to position it
                   NULL,                         // client data
                   0,                            // button used to activate it
-#ifdef __WXGTK20__
-                  gtk_get_current_event_time()
-#else
                   gs_timeLastClick              // the time of activation
-#endif
                 );
 
     while (is_waiting)
     {
-        gtk_main_iteration();
+        while (gtk_events_pending())
+            gtk_main_iteration();
     }
 
     return TRUE;

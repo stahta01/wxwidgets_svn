@@ -14,7 +14,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univdialog.h"
 #endif
 
@@ -164,6 +164,11 @@ bool wxDialog::Show(bool show)
 bool wxDialog::IsModal() const
 {
     return m_isShowingModal;
+}
+
+void wxDialog::SetModal(bool WXUNUSED(flag))
+{
+    wxFAIL_MSG( wxT("wxDialog:SetModal obsolete now") );
 }
 
 int wxDialog::ShowModal()

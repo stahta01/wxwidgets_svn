@@ -28,10 +28,6 @@
 #include <wx/gtk/win_gtk.h>
 #endif
 
-#include <wx/clipbrd.h>
-#include <wx/mimetype.h>
-#include <wx/image.h>
-
 //----------------------------------------------------------------------
 
 #if PYTHON_API_VERSION <= 1007 && wxUSE_UNICODE
@@ -39,6 +35,14 @@
 #endif
 
 //----------------------------------------------------------------------
+
+#ifdef __WXGTK__
+int  WXDLLEXPORT wxEntryStart( int& argc, char** argv );
+#else
+int  WXDLLEXPORT wxEntryStart( int argc, char** argv );
+#endif
+int  WXDLLEXPORT wxEntryInitGui();
+void WXDLLEXPORT wxEntryCleanup();
 
 wxPyApp* wxPythonApp = NULL;  // Global instance of application object
 bool wxPyDoCleanup = FALSE;
@@ -330,7 +334,6 @@ void wxPyApp::SetMacHelpMenuTitleName(const wxString& val) {
 //----------------------------------------------------------------------
 
 
-#if 0
 static char* wxPyCopyCString(const wxChar* src)
 {
     wxWX2MBbuf buff = (wxWX2MBbuf)wxConvCurrent->cWX2MB(src);
@@ -363,13 +366,13 @@ static wxChar* wxPyCopyWString(const wxChar *src)
     return copystring(src);
 }
 #endif
-#endif
 
 
 //----------------------------------------------------------------------
 
-// This function is called when the wxc module is imported to do some initial
-// setup.  (Before there is a wxApp object.)
+// This is where we pick up the first part of the wxEntry functionality...
+// The rest is in __wxStart and  __wxCleanup.  This function is called when
+// wxcmodule is imported.  (Before there is a wxApp object.)
 void __wxPreStart(PyObject* moduleDict)
 {
 
@@ -383,32 +386,25 @@ void __wxPreStart(PyObject* moduleDict)
     wxPyTMutex = new wxMutex;
 #endif
 
-    // Ensure that the build options in the DLL (or whatever) match this build
-    wxApp::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, "wxPython");
+     // Restore default signal handlers, (prevents crash upon Ctrl-C in the
+     // console that launched a wxPython app...)
+    PyOS_FiniInterrupts();
 
-    // Create an exception object to use for wxASSERTions
+    wxApp::CheckBuildOptions(wxBuildOptions());
+
     wxPyAssertionError = PyErr_NewException("wxPython.wxc.wxPyAssertionError",
                                             PyExc_AssertionError, NULL);
     PyDict_SetItemString(moduleDict, "wxPyAssertionError", wxPyAssertionError);
-}
 
 
+    // Bail out if there is already a wxApp created.  This means that the
+    // toolkit has already been initialized, as in embedding wxPython in
+    // a C++ wxWindows app, so we don't need to call wxEntryStart.
+    if (wxTheApp != NULL) {
+        return;
+    }
+    wxPyDoCleanup = TRUE;
 
-// Initialize wxWindows and bootstrap the user application by calling the
-// wxApp's OnInit, which is a parameter to this funciton.  See wxApp.__init__
-// in _extras.py to learn how the bootstrap is started.
-PyObject* __wxStart(PyObject* /* self */, PyObject* args)
-{
-    PyObject*   onInitFunc = NULL;
-    PyObject*   arglist= NULL;
-    PyObject*   result = NULL;
-    PyObject*   pyint = NULL;
-    long        bResult;
-
-    if (!PyArg_ParseTuple(args, "O", &onInitFunc))
-        return NULL;
-
-    // Get any command-line args passed to this program from the sys module
     int argc = 0;
     char** argv = NULL;
     PyObject* sysargv = PySys_GetObject("argv");
@@ -417,26 +413,49 @@ PyObject* __wxStart(PyObject* /* self */, PyObject* args)
         argv = new char*[argc+1];
         int x;
         for(x=0; x<argc; x++) {
+	    PyObject *item = PyList_GetItem(sysargv, x);
+            argv[x] = wxPyCopyCString(Py2wxString(item));
+	}
+        argv[argc] = NULL;
+    }
+
+    wxEntryStart(argc, argv);
+    delete [] argv;
+}
+
+
+// Start the user application, user App's OnInit method is a parameter here
+PyObject* __wxStart(PyObject* /* self */, PyObject* args)
+{
+    PyObject*   onInitFunc = NULL;
+    PyObject*   arglist;
+    PyObject*   result;
+    long        bResult;
+
+    if (!PyArg_ParseTuple(args, "O", &onInitFunc))
+        return NULL;
+
+    // This is the next part of the wxEntry functionality...
+    int argc = 0;
+    wxChar** argv = NULL;
+    PyObject* sysargv = PySys_GetObject("argv");
+    if (sysargv != NULL) {
+        argc = PyList_Size(sysargv);
+        argv = new wxChar*[argc+1];
+        int x;
+        for(x=0; x<argc; x++) {
             PyObject *pyArg = PyList_GetItem(sysargv, x);
-            argv[x] = PyString_AsString(pyArg);
+            argv[x] = wxPyCopyWString(Py2wxString(pyArg));
         }
         argv[argc] = NULL;
     }
 
-    if (! wxEntryStart(argc, argv) ) {
-        PyErr_SetString(PyExc_SystemError,      // is this the right one?
-                        "wxEntryStart failed!");
-        goto error;
-    }
-    delete [] argv;
+    wxPythonApp->argc = argc;
+    wxPythonApp->argv = argv;
 
+    wxEntryInitGui();
 
-    // The stock objects were all NULL when they were loaded into
-    // SWIG generated proxies, so re-init those now...
-    wxPy_ReinitStockObjects();
-
-
-    // Call the Python wxApp's OnInit function
+    // Call the Python App's OnInit function
     arglist = PyTuple_New(0);
     result = PyEval_CallObject(onInitFunc, arglist);
     Py_DECREF(arglist);
@@ -444,7 +463,7 @@ PyObject* __wxStart(PyObject* /* self */, PyObject* args)
         return NULL;
     }
 
-    pyint = PyNumber_Int(result);
+    PyObject* pyint = PyNumber_Int(result);
     if (! pyint) {
         PyErr_SetString(PyExc_TypeError, "OnInit should return a boolean value");
         goto error;
@@ -469,7 +488,6 @@ PyObject* __wxStart(PyObject* /* self */, PyObject* args)
     Py_XDECREF(pyint);
     return NULL;
 }
-
 
 
 void __wxCleanup() {
@@ -532,102 +550,6 @@ PyObject* __wxSetDictionary(PyObject* /* self */, PyObject* args)
 
     Py_INCREF(Py_None);
     return Py_None;
-}
-
-
-//---------------------------------------------------------------------------
-
-// The stock objects are no longer created when the wxc module is imported, but
-// only after the app object has been created.  This function will be called before
-// OnInit is called so we can hack the new pointer values into the obj.this attributes.
-
-void wxPy_ReinitStockObjects()
-{
-    char ptrbuf[128];
-    PyObject* obj;
-    PyObject* ptrobj;
-
-
-
-#define REINITOBJ(name, type) \
-    obj = PyDict_GetItemString(wxPython_dict, #name); \
-    wxASSERT_MSG(obj != NULL, wxT("Unable to find stock object for " #name)); \
-    SWIG_MakePtr(ptrbuf, (char *) name, "_" #type "_p"); \
-    ptrobj = PyString_FromString(ptrbuf); \
-    PyObject_SetAttrString(obj, "this", ptrobj); \
-    Py_DECREF(ptrobj)
-
-#define REINITOBJ2(name, type) \
-    obj = PyDict_GetItemString(wxPython_dict, #name); \
-    wxASSERT_MSG(obj != NULL, wxT("Unable to find stock object for " #name)); \
-    SWIG_MakePtr(ptrbuf, (char *) &name, "_" #type "_p"); \
-    ptrobj = PyString_FromString(ptrbuf); \
-    PyObject_SetAttrString(obj, "this", ptrobj); \
-    Py_DECREF(ptrobj)
-
-
-    REINITOBJ(wxNORMAL_FONT, wxFont);
-    REINITOBJ(wxSMALL_FONT, wxFont);
-    REINITOBJ(wxITALIC_FONT, wxFont);
-    REINITOBJ(wxSWISS_FONT, wxFont);
-
-    REINITOBJ(wxRED_PEN, wxPen);
-    REINITOBJ(wxCYAN_PEN, wxPen);
-    REINITOBJ(wxGREEN_PEN, wxPen);
-    REINITOBJ(wxBLACK_PEN, wxPen);
-    REINITOBJ(wxWHITE_PEN, wxPen);
-    REINITOBJ(wxTRANSPARENT_PEN, wxPen);
-    REINITOBJ(wxBLACK_DASHED_PEN, wxPen);
-    REINITOBJ(wxGREY_PEN, wxPen);
-    REINITOBJ(wxMEDIUM_GREY_PEN, wxPen);
-    REINITOBJ(wxLIGHT_GREY_PEN, wxPen);
-
-    REINITOBJ(wxBLUE_BRUSH, wxBrush);
-    REINITOBJ(wxGREEN_BRUSH, wxBrush);
-    REINITOBJ(wxWHITE_BRUSH, wxBrush);
-    REINITOBJ(wxBLACK_BRUSH, wxBrush);
-    REINITOBJ(wxTRANSPARENT_BRUSH, wxBrush);
-    REINITOBJ(wxCYAN_BRUSH, wxBrush);
-    REINITOBJ(wxRED_BRUSH, wxBrush);
-    REINITOBJ(wxGREY_BRUSH, wxBrush);
-    REINITOBJ(wxMEDIUM_GREY_BRUSH, wxBrush);
-    REINITOBJ(wxLIGHT_GREY_BRUSH, wxBrush);
-
-    REINITOBJ(wxBLACK, wxColour);
-    REINITOBJ(wxWHITE, wxColour);
-    REINITOBJ(wxRED, wxColour);
-    REINITOBJ(wxBLUE, wxColour);
-    REINITOBJ(wxGREEN, wxColour);
-    REINITOBJ(wxCYAN, wxColour);
-    REINITOBJ(wxLIGHT_GREY, wxColour);
-
-    REINITOBJ(wxSTANDARD_CURSOR, wxCursor);
-    REINITOBJ(wxHOURGLASS_CURSOR, wxCursor);
-    REINITOBJ(wxCROSS_CURSOR, wxCursor);
-
-    REINITOBJ2(wxNullBitmap, wxBitmap);
-    REINITOBJ2(wxNullIcon, wxIcon);
-    REINITOBJ2(wxNullCursor, wxCursor);
-    REINITOBJ2(wxNullPen, wxPen);
-    REINITOBJ2(wxNullBrush, wxBrush);
-    REINITOBJ2(wxNullPalette, wxPalette);
-    REINITOBJ2(wxNullFont, wxFont);
-    REINITOBJ2(wxNullColour, wxColour);
-
-    REINITOBJ(wxTheFontList, wxFontList);
-    REINITOBJ(wxThePenList, wxPenList);
-    REINITOBJ(wxTheBrushList, wxBrushList);
-    REINITOBJ(wxTheColourDatabase, wxColourDatabase);
-
-
-    REINITOBJ(wxTheClipboard, wxClipboard);
-    REINITOBJ(wxTheMimeTypesManager, wxMimeTypesManager);
-    REINITOBJ2(wxDefaultValidator, wxValidator);
-    REINITOBJ2(wxNullImage, wxImage);
-    REINITOBJ2(wxNullAcceleratorTable, wxAcceleratorTable);
-
-#undef REINITOBJ
-#undef REINITOBJ2
 }
 
 //---------------------------------------------------------------------------
@@ -1306,50 +1228,29 @@ void wxPyCallback::EventThunker(wxEvent& event) {
     PyObject*       result;
     PyObject*       arg;
     PyObject*       tuple;
-    bool            checkSkip = FALSE;
+
 
     wxPyBeginBlockThreads();
     wxString className = event.GetClassInfo()->GetClassName();
 
-    // If the event is one of these types then pass the original
-    // event object instead of the one passed to us.
-    if ( className == wxT("wxPyEvent") ) {
-        arg =       ((wxPyEvent*)&event)->GetSelf();
-        checkSkip = ((wxPyEvent*)&event)->GetCloned();
-    }
-    else if ( className == wxT("wxPyCommandEvent") ) {
-        arg =       ((wxPyCommandEvent*)&event)->GetSelf();
-        checkSkip = ((wxPyCommandEvent*)&event)->GetCloned();
-    }
+    if (className == wxT("wxPyEvent"))
+        arg = ((wxPyEvent*)&event)->GetSelf();
+    else if (className == wxT("wxPyCommandEvent"))
+        arg = ((wxPyCommandEvent*)&event)->GetSelf();
     else {
         arg = wxPyConstructObject((void*)&event, className);
     }
 
-    // Call the event handler, passing the event object
     tuple = PyTuple_New(1);
-    PyTuple_SET_ITEM(tuple, 0, arg);  // steals ref to arg
+    PyTuple_SET_ITEM(tuple, 0, arg);
     result = PyEval_CallObject(func, tuple);
-    if ( result ) {
-        Py_DECREF(result);   // result is ignored, but we still need to decref it
+    Py_DECREF(tuple);
+    if (result) {
+        Py_DECREF(result);
         PyErr_Clear();       // Just in case...
     } else {
         PyErr_Print();
     }
-
-    if ( checkSkip ) {
-        // if the event object was one of our special types and
-        // it had been cloned, then we need to extract the Skipped
-        // value from the original and set it in the clone.
-        result = PyObject_CallMethod(arg, "GetSkipped", "");
-        if ( result ) {
-            event.Skip(PyInt_AsLong(result));
-            Py_DECREF(result);
-        } else {
-            PyErr_Print();
-        }
-    }
-
-    Py_DECREF(tuple);
     wxPyEndBlockThreads();
 }
 
@@ -1585,8 +1486,8 @@ IMPLEMENT_ABSTRACT_CLASS(wxPyEvent, wxEvent);
 IMPLEMENT_ABSTRACT_CLASS(wxPyCommandEvent, wxCommandEvent);
 
 
-wxPyEvent::wxPyEvent(int winid, wxEventType commandType)
-    : wxEvent(winid, commandType) {
+wxPyEvent::wxPyEvent(int id)
+    : wxEvent(id) {
 }
 
 
@@ -1663,20 +1564,19 @@ void wxPyTimer::Notify() {
 //---------------------------------------------------------------------------
 // Convert a wxList to a Python List
 
-PyObject* wxPy_ConvertList(wxListBase* listbase, const char* className) {
-    wxList*     list = (wxList*)listbase;  // this is probably bad...
+PyObject* wxPy_ConvertList(wxListBase* list, const char* className) {
     PyObject*   pyList;
     PyObject*   pyObj;
     wxObject*   wxObj;
-    wxNode*     node = list->GetFirst();
+    wxNode*     node = list->First();
 
     wxPyBeginBlockThreads();
     pyList = PyList_New(0);
     while (node) {
-        wxObj = node->GetData();
+        wxObj = node->Data();
         pyObj = wxPyMake_wxObject(wxObj); //wxPyConstructObject(wxObj, className);
         PyList_Append(pyList, pyObj);
-        node = node->GetNext();
+        node = node->Next();
     }
     wxPyEndBlockThreads();
     return pyList;

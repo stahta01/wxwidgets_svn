@@ -5,8 +5,8 @@
 // Modified by: Vadim Zeitlin to derive from wxChoiceBase
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "choice.h"
 #endif
 
@@ -40,29 +40,7 @@
 
 #include "wx/msw/private.h"
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxChoice, wxControl,"wx/checkbox.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxChoice)
-    // TODO DELEGATES
-	WX_PROPERTY( Font , wxFont , SetFont , GetFont  , )
-    WX_PROPERTY_COLLECTION( Choices , wxArrayString , wxString , AppendString , GetStrings )
-	WX_PROPERTY( Selection ,int, SetSelection, GetSelection, )
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxChoice)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_4( wxChoice , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size ) 
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
-#endif
-/*
-	TODO PROPERTIES
-		selection (long)
-		content (list)
-			item
-*/
 
 // ============================================================================
 // implementation
@@ -132,20 +110,6 @@ int wxChoice::DoAppend(const wxString& item)
     if ( n == CB_ERR )
     {
         wxLogLastError(wxT("SendMessage(CB_ADDSTRING)"));
-    }
-
-    return n;
-}
-
-int wxChoice::DoInsert(const wxString& item, int pos)
-{
-    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
-
-    int n = (int)SendMessage(GetHwnd(), CB_INSERTSTRING, pos, (LONG)item.c_str());
-    if ( n == CB_ERR )
-    {
-        wxLogLastError(wxT("SendMessage(CB_INSERTSTRING)"));
     }
 
     return n;
@@ -273,6 +237,8 @@ wxString wxChoice::GetString(int n) const
         {
             wxLogLastError(wxT("SendMessage(CB_GETLBTEXT)"));
         }
+
+        str.UngetWriteBuf();
     }
 
     return str;
@@ -427,12 +393,31 @@ bool wxChoice::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
 }
 
 WXHBRUSH wxChoice::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
+#if wxUSE_CTL3D
+                               WXUINT message,
+                               WXWPARAM wParam,
+                               WXLPARAM lParam
+#else
                                WXUINT WXUNUSED(message),
                                WXWPARAM WXUNUSED(wParam),
                                WXLPARAM WXUNUSED(lParam)
+#endif
      )
 {
+#if wxUSE_CTL3D
+    if ( m_useCtl3D )
+    {
+        HBRUSH hbrush = Ctl3dCtlColorEx(message, wParam, lParam);
+        return (WXHBRUSH) hbrush;
+    }
+#endif // wxUSE_CTL3D
+
     HDC hdc = (HDC)pDC;
+    if (GetParent()->GetTransparentBackground())
+        SetBkMode(hdc, TRANSPARENT);
+    else
+        SetBkMode(hdc, OPAQUE);
+
     wxColour colBack = GetBackgroundColour();
 
     if (!IsEnabled())

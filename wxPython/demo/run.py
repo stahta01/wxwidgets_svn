@@ -18,7 +18,6 @@ on the command line.
 """
 
 import wx                  # This module uses the new wx namespace
-print "wx.VERSION_STRING = ", wx.VERSION_STRING
 
 import sys, os
 

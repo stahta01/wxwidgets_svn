@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -69,7 +69,6 @@ static wxString LINKAGEMODE HtmlizeWhitespaces(const wxString& str)
 
 
 TAG_HANDLER_BEGIN(PRE, "PRE")
-    TAG_HANDLER_CONSTR(PRE) { }
 
     TAG_HANDLER_PROC(tag)
     {

@@ -25,8 +25,6 @@
 
 #if wxUSE_TOOLBAR
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBarXmlHandler, wxXmlResourceHandler)
-
 wxToolBarXmlHandler::wxToolBarXmlHandler() 
 : wxXmlResourceHandler(), m_isInside(FALSE), m_toolbar(NULL)
 {
@@ -148,7 +146,8 @@ wxObject *wxToolBarXmlHandler::DoCreateResource()
 
         toolbar->Realize();
 
-        if (m_parentAsWindow && !GetBool(wxT("dontattachtoframe")))
+        // FIXME: how can I create a toolbar without immediately setting it to the frame?
+        if (m_parentAsWindow)
         {
             wxFrame *parentFrame = wxDynamicCast(m_parent, wxFrame);
             if (parentFrame)

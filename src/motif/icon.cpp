@@ -9,17 +9,29 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "icon.h"
 #endif
 
 #include "wx/icon.h"
+#include "wx/window.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxBitmap);
+#ifdef __VMS__
+#pragma message disable nosimpint
+#endif
+#include <Xm/Xm.h>
+#include <X11/cursorfont.h>
+#ifdef __VMS__
+#pragma message enable nosimpint
+#endif
 
-// ============================================================================
-// Icons
-// ============================================================================
+#include "wx/motif/private.h"
+
+IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxBitmap)
+
+/*
+* Icons
+*/
 
 wxIcon::wxIcon()
 {
@@ -42,6 +54,13 @@ wxIcon::wxIcon(const char **data)
     (void) Create((void*) data, wxBITMAP_TYPE_XPM_DATA, 0, 0, 0);
 }
 
+wxIcon::wxIcon(const wxString& icon_file, long flags,
+               int desiredWidth, int desiredHeight)
+               
+{
+    LoadFile(icon_file, flags, desiredWidth, desiredHeight);
+}
+
 void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
 {
     wxIcon *icon = (wxIcon*)(&bmp);
@@ -52,16 +71,18 @@ wxIcon::~wxIcon()
 {
 }
 
-bool wxIcon::LoadFile(const wxString& filename, wxBitmapType type,
+bool wxIcon::LoadFile(const wxString& filename, long type,
                       int desiredWidth, int desiredHeight)
 {
     UnRef();
-
+    
+    m_refData = new wxBitmapRefData;
+    
     wxBitmapHandler *handler = FindHandler(type);
     
     if ( handler )
-        return handler->LoadFile(this, filename, type,
-                                 desiredWidth, desiredHeight);
+        return handler->LoadFile(this, filename, type, desiredWidth, desiredHeight);
     else
         return FALSE;
 }
+

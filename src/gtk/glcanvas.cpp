@@ -9,12 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "glcanvas.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/setup.h"
 
@@ -35,10 +32,6 @@ extern "C"
 }
 
 #include "wx/gtk/win_gtk.h"
-
-// DLL options compatibility check:
-#include "wx/build.h"
-WX_CHECK_BUILD_OPTIONS("wxGL")
 
 //---------------------------------------------------------------------------
 // global data

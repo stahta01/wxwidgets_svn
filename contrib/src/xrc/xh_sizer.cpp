@@ -24,10 +24,7 @@
 #include "wx/log.h"
 #include "wx/statbox.h"
 #include "wx/notebook.h"
-#include "wx/panel.h"
 #include "wx/tokenzr.h"
-
-IMPLEMENT_DYNAMIC_CLASS(wxSizerXmlHandler, wxXmlResourceHandler)
 
 bool wxSizerXmlHandler::IsSizerNode(wxXmlNode *node)
 {
@@ -141,11 +138,12 @@ wxObject *wxSizerXmlHandler::DoCreateResource()
         wxXmlNode *parentNode = m_node->GetParent();
 
         wxCHECK_MSG(m_parentSizer != NULL ||
-                (parentNode->GetType() == wxXML_ELEMENT_NODE &&
-                    (m_parentAsWindow->IsKindOf(CLASSINFO(wxPanel)) ||
-                     m_parentAsWindow->IsKindOf(CLASSINFO(wxFrame)) ||
-                     m_parentAsWindow->IsKindOf(CLASSINFO(wxDialog)))
-                ), NULL,
+                ((IsOfClass(parentNode, wxT("wxPanel")) ||
+                  IsOfClass(parentNode, wxT("wxWizardPage")) ||
+                  IsOfClass(parentNode, wxT("wxWizardPageSimple")) ||
+                  IsOfClass(parentNode, wxT("wxFrame")) ||
+                  IsOfClass(parentNode, wxT("wxDialog"))) &&
+                 parentNode->GetType() == wxXML_ELEMENT_NODE), NULL,
                 wxT("Incorrect use of sizer: parent is not 'wxDialog', 'wxFrame' or 'wxPanel'."));
 
         if (m_class == wxT("wxBoxSizer"))

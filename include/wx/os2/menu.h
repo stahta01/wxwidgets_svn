@@ -63,6 +63,17 @@ public:
     virtual void        Break(void);
     virtual void        SetTitle(const wxString& rTitle);
 
+#if wxUSE_MENU_CALLBACK
+    wxMenu( const wxString&  rTitle
+           ,const wxFunction fnFunc
+          )
+          : wxMenuBase(rTitle)
+    {
+        Init();
+        Callback(fnFunc);
+    }
+#endif // wxUSE_MENU_CALLBACK
+
     //
     // Implementation only from now on
     // -------------------------------
@@ -231,6 +242,16 @@ public:
     virtual wxString    GetLabelTop(size_t nPos) const;
 
     //
+    // Compatibility: these functions are deprecated
+    //
+#if WXWIN_COMPATIBILITY
+    void          SetEventHandler(wxEvtHandler* pHandler) { m_pEventHandler = pHandler; }
+    wxEvtHandler* GetEventHandler(void) { return m_pEventHandler; }
+    bool          Enabled(int nId) const { return IsEnabled(nId); }
+    bool          Checked(int nId) const { return IsChecked(nId); }
+#endif // WXWIN_COMPATIBILITY
+
+    //
     // Implementation from now on
     //
     WXHMENU                   Create(void);
@@ -264,6 +285,10 @@ protected:
     // Common part of all ctors
     //
     void                      Init(void);
+
+#if WXWIN_COMPATIBILITY
+    wxEvtHandler*                   m_pEventHandler;
+#endif // WXWIN_COMPATIBILITY
 
     wxArrayString m_titles;
 

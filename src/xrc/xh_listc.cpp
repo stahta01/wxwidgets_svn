@@ -24,8 +24,6 @@
 #include "wx/listctrl.h"
 
 
-IMPLEMENT_DYNAMIC_CLASS(wxListCtrlXmlHandler, wxXmlResourceHandler)
-
 wxListCtrlXmlHandler::wxListCtrlXmlHandler() 
 : wxXmlResourceHandler() 
 {
@@ -42,7 +40,6 @@ wxListCtrlXmlHandler::wxListCtrlXmlHandler()
     XRC_ADD_STYLE(wxLC_SINGLE_SEL);
     XRC_ADD_STYLE(wxLC_SORT_ASCENDING);
     XRC_ADD_STYLE(wxLC_SORT_DESCENDING);
-    XRC_ADD_STYLE(wxLC_VIRTUAL);
     AddWindowStyles();
 }
 

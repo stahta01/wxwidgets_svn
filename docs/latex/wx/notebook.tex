@@ -80,12 +80,10 @@ Destroys the wxNotebook object.
 
 \func{bool}{AddPage}{\param{wxNotebookPage*}{ page},
  \param{const wxString\&}{ text},
- \param{bool}{ select = false},
+ \param{bool}{ select = FALSE},
  \param{int}{ imageId = -1}}
 
 Adds a new page.
-
-The call to this function may generate the page changing events.
 
 \wxheading{Parameters}
 
@@ -99,7 +97,7 @@ The call to this function may generate the page changing events.
 
 \wxheading{Return value}
 
-true if successful, false otherwise.
+TRUE if successful, FALSE otherwise.
 
 \wxheading{Remarks}
 
@@ -111,11 +109,9 @@ Do not delete the page, it will be deleted by the notebook.
 
 \membersection{wxNotebook::AdvanceSelection}\label{wxnotebookadvanceselection}
 
-\func{void}{AdvanceSelection}{\param{bool}{ forward = true}}
+\func{void}{AdvanceSelection}{\param{bool}{ forward = TRUE}}
 
 Cycles through the tabs.
-
-The call to this function generates the page changing events.
 
 \membersection{wxNotebook::AssignImageList}\label{wxnotebookassignimagelist}
 
@@ -145,11 +141,9 @@ Deletes all pages.
 
 \membersection{wxNotebook::DeletePage}\label{wxnotebookdeletepage}
 
-\func{bool}{DeletePage}{\param{size\_t}{ page}}
+\func{bool}{DeletePage}{\param{int}{ page}}
 
 Deletes the specified page, and the associated window.
-
-The call to this function generates the page changing events.
 
 \membersection{wxNotebook::GetImageList}\label{wxnotebookgetimagelist}
 
@@ -163,25 +157,25 @@ Returns the associated image list.
 
 \membersection{wxNotebook::GetPage}\label{wxnotebookgetpage}
 
-\func{wxNotebookPage*}{GetPage}{\param{size\_t}{ page}}
+\func{wxNotebookPage*}{GetPage}{\param{int}{ page}}
 
 Returns the window at the given page position.
 
 \membersection{wxNotebook::GetPageCount}\label{wxnotebookgetpagecount}
 
-\constfunc{size\_t}{GetPageCount}{\void}
+\constfunc{int}{GetPageCount}{\void}
 
 Returns the number of pages in the notebook control.
 
 \membersection{wxNotebook::GetPageImage}\label{wxnotebookgetpageimage}
 
-\constfunc{int}{GetPageImage}{\param{size\_t }{nPage}}
+\constfunc{int}{GetPageImage}{\param{int }{nPage}}
 
 Returns the image index for the given page.
 
 \membersection{wxNotebook::GetPageText}\label{wxnotebookgetpagetext}
 
-\constfunc{wxString}{GetPageText}{\param{size\_t }{nPage}}
+\constfunc{wxString}{GetPageText}{\param{int }{nPage}}
 
 Returns the string for the given page.
 
@@ -203,41 +197,11 @@ the platform and so\rtfsp
 \helpref{wxNotebookEvent::GetSelection}{wxnotebookeventgetselection} should be
 used instead in this case.
 
-\membersection{wxNotebook::HitTest}\label{wxnotebookhittest}
-
-\func{int}{HitTest}{\param{const wxPoint\&}{ pt}, \param{long}{ *flags = {\tt NULL}}}
-
-Returns the index of the tab at the specified position or {\tt wxNOT\_FOUND} 
-if none. If {\it flags} parameter is non {\tt NULL}, the position of the point
-inside the tab is returned as well.
-
-{\bf NB: } This method is currently only implemented under wxMSW and wxUniv.
-
-\wxheading{Parameters}
-
-\docparam{pt}{Specifies the point for the hit test.}
-
-\docparam{flags}{Return value for detailed information. One of the following values:
-\twocolwidtha{7cm}
-\begin{twocollist}\itemsep=0pt
-\twocolitem{{\bf wxNB\_HITTEST\_NOWHERE}}{There was no tab under this point.}
-\twocolitem{{\bf wxNB\_HITTEST\_ONICON}}{The point was over an icon (currently wxMSW only).}
-\twocolitem{{\bf wxNB\_HITTEST\_ONLABEL}}{The point was over a label (currently wxMSW only).}
-\twocolitem{{\bf wxNB\_HITTEST\_ONITEM}}{The point was over an item, but not on the label or icon.}
-\end{twocollist}
-}
-
-\wxheading{Return value}
-
-Returns the zero-based tab index or {\tt wxNOT\_FOUND} if there is no tab is at
-the specified position.
-
-
 \membersection{wxNotebook::InsertPage}\label{wxnotebookinsertpage}
 
-\func{bool}{InsertPage}{\param{size\_t}{ index}, \param{wxNotebookPage*}{ page},
+\func{bool}{InsertPage}{\param{int}{ index}, \param{wxNotebookPage*}{ page},
  \param{const wxString\&}{ text},
- \param{bool}{ select = false},
+ \param{bool}{ select = FALSE},
  \param{int}{ imageId = -1}}
 
 Inserts a new page at the specified position.
@@ -256,7 +220,7 @@ Inserts a new page at the specified position.
 
 \wxheading{Return value}
 
-true if successful, false otherwise.
+TRUE if successful, FALSE otherwise.
 
 \wxheading{Remarks}
 
@@ -278,7 +242,7 @@ An event handler function, called when the page selection is changed.
 
 \membersection{wxNotebook::RemovePage}\label{wxnotebookremovepage}
 
-\func{bool}{RemovePage}{\param{size\_t}{ page}}
+\func{bool}{RemovePage}{\param{int}{ page}}
 
 Deletes the specified page, without deleting the associated window.
 
@@ -312,24 +276,22 @@ Sets the width and height of the pages.
 
 \membersection{wxNotebook::SetPageImage}\label{wxnotebooksetpageimage}
 
-\func{bool}{SetPageImage}{\param{size\_t}{ page}, \param{int }{image}}
+\func{bool}{SetPageImage}{\param{int}{ page}, \param{int }{image}}
 
 Sets the image index for the given page. {\it image} is an index into
 the image list which was set with \helpref{wxNotebook::SetImageList}{wxnotebooksetimagelist}.
 
 \membersection{wxNotebook::SetPageText}\label{wxnotebooksetpagetext}
 
-\func{bool}{SetPageText}{\param{size\_t}{ page}, \param{const wxString\& }{text}}
+\func{bool}{SetPageText}{\param{int}{ page}, \param{const wxString\& }{text}}
 
 Sets the text for the given page.
 
 \membersection{wxNotebook::SetSelection}\label{wxnotebooksetselection}
 
-\func{int}{SetSelection}{\param{size\_t}{ page}}
+\func{int}{SetSelection}{\param{int}{ page}}
 
 Sets the selection for the given page, returning the previous selection.
-
-The call to this function generates the page changing events.
 
 \wxheading{See also}
 

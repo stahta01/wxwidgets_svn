@@ -9,7 +9,7 @@
 
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "fs_zip.h"
 #endif
 
@@ -26,7 +26,7 @@
     #include "wx/log.h"
 #endif
 
-#include "wx/hashmap.h"
+#include "wx/hash.h"
 #include "wx/filesys.h"
 #include "wx/zipstrm.h"
 #include "wx/fs_zip.h"
@@ -38,12 +38,10 @@
 #include "unzip.h"
 #endif
 
-WX_DECLARE_HASH_MAP_WITH_DECL( long, long, wxIntegerHash, wxIntegerEqual,
-                               wxLongToLongHashMap, class WXDLLIMPEXP_BASE );
 
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxZipFSHandler
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
 
 
@@ -89,14 +87,6 @@ wxFSFile* wxZipFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& l
         return NULL;
     }
 
-    if (right.Contains(wxT("./")))
-    {
-        if (right.GetChar(0) != wxT('/')) right = wxT('/') + right;
-        wxFileName rightPart(right, wxPATH_UNIX);
-        rightPart.Normalize(wxPATH_NORM_DOTS, wxT("/"), wxPATH_UNIX);
-        right = rightPart.GetFullPath(wxPATH_UNIX);
-    }
-    
     if (right.GetChar(0) == wxT('/')) right = right.Mid(1);
 
     wxFileName leftFilename = wxFileSystem::URLToFileName(left);
@@ -107,11 +97,8 @@ wxFSFile* wxZipFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& l
         return new wxFSFile(s,
                             left + wxT("#zip:") + right,
                             GetMimeTypeFromExt(location),
-                            GetAnchor(location)
-#if wxUSE_DATETIME
-                            , wxDateTime(wxFileModificationTime(left))
-#endif // wxUSE_DATETIME
-                            );
+                            GetAnchor(location),
+                            wxDateTime(wxFileModificationTime(left)));
     }
 
     delete s;
@@ -167,7 +154,7 @@ wxString wxZipFSHandler::FindFirst(const wxString& spec, int flags)
             if (m_AllowDirs)
             {
                 delete m_DirsFound;
-                m_DirsFound = new wxLongToLongHashMap();
+                m_DirsFound = new wxHashTableLong();
             }
             return DoFind();
         }
@@ -205,10 +192,9 @@ wxString wxZipFSHandler::DoFind()
             {
                 long key = 0;
                 for (size_t i = 0; i < dir.Length(); i++) key += (wxUChar)dir[i];
-                wxLongToLongHashMap::iterator it = m_DirsFound->find(key);
-                if (it == m_DirsFound->end())
+                if (m_DirsFound->Get(key) == wxNOT_FOUND)
                 {
-                    m_DirsFound[key] = 1;
+                    m_DirsFound->Put(key, 1);
                     filename = dir.AfterLast(wxT('/'));
                     dir = dir.BeforeLast(wxT('/'));
                     if (!filename.IsEmpty() && m_BaseDir == dir &&

@@ -6,7 +6,7 @@
 // Created:     30.12.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -37,9 +37,9 @@
     #include "wx/frame.h"
     #include "wx/control.h"
     #include "wx/containr.h"        // wxSetFocusToChild()
+    #include "wx/module.h"        // wxSetFocusToChild()
 #endif //WX_PRECOMP
 
-#include "wx/module.h"        // wxSetFocusToChild()
 #include "wx/os2/private.h"
 
 // ----------------------------------------------------------------------------
@@ -501,7 +501,7 @@ bool wxTopLevelWindowOS2::CreateFrame(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError("Error creating frame. Error: %s\n", sError.c_str());
+        wxLogError("Error creating frame. Error: %s\n", sError);
         return FALSE;
     }
 
@@ -525,7 +525,7 @@ bool wxTopLevelWindowOS2::CreateFrame(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError("Error creating frame. Error: %s\n", sError.c_str());
+        wxLogError("Error creating frame. Error: %s\n", sError);
         return FALSE;
     }
 
@@ -562,7 +562,7 @@ bool wxTopLevelWindowOS2::CreateFrame(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError("Error sizing frame. Error: %s\n", sError.c_str());
+        wxLogError("Error sizing frame. Error: %s\n", sError);
         return FALSE;
     }
     lStyle =  ::WinQueryWindowULong( m_hWnd

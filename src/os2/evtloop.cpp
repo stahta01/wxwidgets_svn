@@ -6,7 +6,7 @@
 // Created:     01.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -138,7 +138,9 @@ bool wxEventLoopImpl::PreProcessMessage(QMSG *msg)
 
 bool wxEventLoopImpl::SendIdleMessage()
 {
-    return wxTheApp->ProcessIdle() ;
+    wxIdleEvent event;
+
+    return wxTheApp->ProcessEvent(event) && event.MoreRequested();
 }
 
 // ============================================================================

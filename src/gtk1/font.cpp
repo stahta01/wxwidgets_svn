@@ -3,7 +3,7 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,12 +15,9 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "font.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/font.h"
 #include "wx/fontutil.h"
@@ -85,11 +82,6 @@ public:
         return !m_nativeFontInfo.IsDefault();
 #endif // GTK 2.0/1.x
     }
-
-#ifndef __WXGTK20__
-    // reinitilize the font with the gived XFLD
-    void ReInit(const wxString& fontname);
-#endif
 
     // setters: all of them also take care to modify m_nativeFontInfo if we
     // have it so as to not lose the information not carried by our fields
@@ -442,15 +434,6 @@ wxFontRefData::wxFontRefData(const wxString& fontname)
     InitFromNative();
 }
 
-#ifndef __WXGTK20__
-void wxFontRefData::ReInit(const wxString& fontname)
-{
-    m_nativeFontInfo.SetXFontName(fontname);
-
-    InitFromNative();
-}
-#endif
-
 void wxFontRefData::ClearGdkFonts()
 {
 #ifndef __WXGTK20__
@@ -794,7 +777,7 @@ wxNativeFontInfo *wxFont::GetNativeFontInfo() const
 {
     wxCHECK_MSG( Ok(), (wxNativeFontInfo *)NULL, wxT("invalid font") );
 
-#ifndef __WXGTK20__
+#ifndef __WXGTK20__  // ???
     if ( M_FONTDATA->m_nativeFontInfo.GetXFontName().empty() )
         GetInternalFont();
 #endif
@@ -873,7 +856,7 @@ void wxFont::SetEncoding(wxFontEncoding encoding)
     M_FONTDATA->SetEncoding(encoding);
 }
 
-void wxFont::DoSetNativeFontInfo( const wxNativeFontInfo& info )
+void wxFont::SetNativeFontInfo( const wxNativeFontInfo& info )
 {
     Unshare();
 
@@ -891,7 +874,6 @@ void wxFont::SetNoAntiAliasing( bool no )
 // get internal representation of font
 // ----------------------------------------------------------------------------
 
-#ifndef __WXGTK20__
 static GdkFont *g_systemDefaultGuiFont = (GdkFont*) NULL;
 
 // this is also used from tbargtk.cpp and tooltip.cpp, hence extern
@@ -903,13 +885,13 @@ extern GdkFont *GtkGetDefaultGuiFont()
         GtkStyle *def = gtk_rc_get_style( widget );
         if (def)
         {
-            g_systemDefaultGuiFont = gdk_font_ref( def->font );
+            g_systemDefaultGuiFont = gdk_font_ref( GET_STYLE_FONT(def) );
         }
         else
         {
             def = gtk_widget_get_default_style();
             if (def)
-                g_systemDefaultGuiFont = gdk_font_ref( def->font );
+                g_systemDefaultGuiFont = gdk_font_ref( GET_STYLE_FONT(def) );
         }
         gtk_widget_destroy( widget );
     }
@@ -928,6 +910,19 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
 
     wxCHECK_MSG( Ok(), font, wxT("invalid font") )
 
+#ifdef __WXGTK20__
+    if (*this == wxSystemSettings::GetFont( wxSYS_DEFAULT_GUI_FONT))
+    {
+        font = GtkGetDefaultGuiFont();
+    }
+    else
+    {
+        PangoFontDescription *
+            font_description = GetNativeFontInfo()->description;
+
+        font = gdk_font_from_description( font_description );
+    }
+#else // GTK 1.x
     long int_scale = long(scale * 100.0 + 0.5); // key for fontlist
     int point_scale = (int)((M_FONTDATA->m_pointSize * 10 * int_scale) / 100);
 
@@ -966,7 +961,7 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
                                                &xfontname);
                 if ( font )
                 {
-                    M_FONTDATA->ReInit(xfontname);
+                    M_FONTDATA->m_nativeFontInfo.SetXFontName(xfontname);
                 }
             }
         }
@@ -976,6 +971,7 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
             list[int_scale] = font;
         }
     }
+#endif  // GTK 2.0/1.x
 
     // it's quite useless to make it a wxCHECK because we're going to crash
     // anyhow...
@@ -983,5 +979,4 @@ GdkFont *wxFont::GetInternalFont( float scale ) const
 
     return font;
 }
-#endif  // not GTK 2.0
 

@@ -12,7 +12,7 @@
 #ifndef _WX_REGEX_H_
 #define _WX_REGEX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "regex.h"
 #endif
 
@@ -20,7 +20,7 @@
 
 #if wxUSE_REGEX
 
-class WXDLLIMPEXP_BASE wxString;
+class WXDLLEXPORT wxString;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -67,9 +67,9 @@ enum
 // wxRegEx: a regular expression
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxRegExImpl;
+class WXDLLEXPORT wxRegExImpl;
 
-class WXDLLIMPEXP_BASE wxRegEx
+class WXDLLEXPORT wxRegEx
 {
 public:
     // default ctor: use Compile() later

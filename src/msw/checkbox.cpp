@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "checkbox.h"
 #endif
 
@@ -47,25 +47,7 @@
 // implementation
 // ============================================================================
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxCheckBox, wxControl,"wx/checkbox.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxCheckBox)
-	WX_DELEGATE( OnClick , wxEVT_COMMAND_CHECKBOX_CLICKED , wxCommandEvent )
-
-	WX_PROPERTY( Font , wxFont , SetFont , GetFont  , )
-	WX_PROPERTY( Label,wxString, SetLabel, GetLabel, wxEmptyString )
-	WX_PROPERTY( Value ,bool, SetValue, GetValue, )
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxCheckBox)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_6( wxCheckBox , wxWindow* , Parent , wxWindowID , Id , wxString , Label , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxCheckBox, wxControl)
-#endif
-
 
 // ----------------------------------------------------------------------------
 // wxCheckBox

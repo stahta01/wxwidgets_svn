@@ -6,13 +6,13 @@
 // Created:     13.01.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MSW_ENHMETA_H_
 #define _WX_MSW_ENHMETA_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "enhmeta.h"
 #endif
 
@@ -91,7 +91,7 @@ public:
     wxEnhMetaFile *Close();
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxEnhMetaFileDC)
+    DECLARE_DYNAMIC_CLASS(wxEnhMetaFileDC)
 };
 
 #if wxUSE_DRAG_AND_DROP
@@ -128,8 +128,6 @@ public:
 
 protected:
     wxEnhMetaFile m_metafile;
-
-    DECLARE_NO_COPY_CLASS(wxEnhMetaFileDataObject)
 };
 
 
@@ -162,8 +160,6 @@ public:
 
 protected:
     wxEnhMetaFile m_metafile;
-
-    DECLARE_NO_COPY_CLASS(wxEnhMetaFileSimpleDataObject)
 };
 
 #endif // wxUSE_DRAG_AND_DROP

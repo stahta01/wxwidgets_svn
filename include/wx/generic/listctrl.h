@@ -4,14 +4,14 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __LISTCTRLH_G__
 #define __LISTCTRLH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "listctrl.h"
 #endif
 
@@ -148,8 +148,8 @@ public:
     long InsertItem( long index, int imageIndex );
     long InsertItem( long index, const wxString& label, int imageIndex );
     long InsertColumn( long col, wxListItem& info );
-    long InsertColumn( long col, const wxString& heading,
-                       int format = wxLIST_FORMAT_LEFT, int width = -1 );
+    long InsertColumn( long col, const wxString& heading, int format = wxLIST_FORMAT_LEFT,
+      int width = -1 );
     bool ScrollList( int dx, int dy );
     bool SortItems( wxListCtrlCompare fn, long data );
     bool Update( long item );
@@ -164,12 +164,10 @@ public:
     // implementation only from now on
     // -------------------------------
 
-    void OnInternalIdle( );
+    void OnIdle( wxIdleEvent &event );
     void OnSize( wxSizeEvent &event );
 
     // We have to hand down a few functions
-    virtual void Refresh(bool eraseBackground = TRUE,
-                         const wxRect *rect = NULL);
 
     virtual void Freeze();
     virtual void Thaw();

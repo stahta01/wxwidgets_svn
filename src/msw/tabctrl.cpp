@@ -6,10 +6,10 @@
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "tabctrl.h"
 #endif
 
@@ -30,16 +30,18 @@
 #include "malloc.h"
 #endif
 
-#include "wx/msw/private.h"
+#include <windows.h>
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #else
     #include "wx/msw/gnuwin32/extra.h"
 #endif
 
+#include "wx/msw/dib.h"
 #include "wx/tabctrl.h"
 #include "wx/app.h"
+#include "wx/msw/private.h"
 #include "wx/msw/imaglist.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTabCtrl, wxControl)
@@ -88,7 +90,7 @@ bool wxTabCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, cons
 
   m_windowId = (id < 0 ? NewControlId() : id);
 
-  long tabStyle = WS_CHILD | WS_VISIBLE;
+  long tabStyle = WS_CHILD;
   if (m_windowStyle & wxTC_MULTILINE)
     tabStyle |= TCS_MULTILINE;
   if (m_windowStyle & wxTC_RIGHTJUSTIFY)
@@ -100,14 +102,12 @@ bool wxTabCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, cons
   if (m_windowStyle & wxBORDER)
     tabStyle |= WS_BORDER;
 
-#ifndef __WXWINCE__
   tabStyle |= TCS_TOOLTIPS;
-#endif
 
   // Create the toolbar control.
   HWND hWndTabCtrl = CreateWindowEx(0L,     // No extended styles.
     WC_TABCONTROL,                          // Class name for the tab control
-    wxEmptyString,                          // No default text.
+    wxT(""),                                 // No default text.
     tabStyle,    // Styles and defaults.
     x, y, width, height,                    // Standard size and position.
     (HWND) parent->GetHWND(),               // Parent window
@@ -145,14 +145,13 @@ bool wxTabCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             eventType = wxEVT_COMMAND_TAB_SEL_CHANGING;
             break;
 
-#ifndef __WXWINCE__
         case TTN_NEEDTEXT:
         {
             // TODO
 //            if (tool->m_shortHelpString != "")
 //                ttText->lpszText = (char *) (const char *)tool->m_shortHelpString;
         }
-#endif
+
         default :
             return wxControl::MSWOnNotify(idCtrl, lParam, result);
     }
@@ -239,7 +238,7 @@ int wxTabCtrl::GetRowCount() const
 wxString wxTabCtrl::GetItemText(int item) const
 {
     wxChar buf[256];
-    wxString str(wxEmptyString);
+    wxString str(wxT(""));
     TC_ITEM tcItem;
     tcItem.mask = TCIF_TEXT;
     tcItem.pszText = buf;
@@ -301,7 +300,7 @@ bool wxTabCtrl::InsertItem(int item, const wxString& text, int imageId, void* da
     TC_ITEM tcItem;
     tcItem.mask = TCIF_PARAM;
     tcItem.lParam = (long) data;
-    if (text != wxEmptyString)
+    if (text != wxT(""))
     {
         tcItem.mask |= TCIF_TEXT;
         wxStrcpy(buf, (const wxChar*) text);

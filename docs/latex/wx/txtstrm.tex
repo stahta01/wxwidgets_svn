@@ -15,12 +15,6 @@ and on a typical 32-bit computer, none of these match to the "long" type (wxInt3
 is defined as int on 32-bit architectures) so that you cannot use long. To avoid
 problems (here and elsewhere), make use of wxInt32, wxUint32 and similar types.
 
-If you're scanning through a file using wxTextInputStream, you should check for EOF {\bf before}
-reading the next item (word / number), because otherwise the last item may get lost. 
-You should however be prepared to receive an empty item (empty string / zero number) at the
-end of file, especially on Windows systems. This is unavoidable because most (but not all) files end
-with whitespace (i.e. usually a newline).
-
 For example:
 
 \begin{verbatim}
@@ -43,20 +37,17 @@ For example:
 
 \membersection{wxTextInputStream::wxTextInputStream}\label{wxtextinputstreamconstr}
 
-\func{}{wxTextInputStream}{\param{wxInputStream\&}{ stream}, \param{const wxString\&}{ sep=" $\backslash$t"}, 
-  \param{wxMBConv\&}{ conv = wxConvUTF8} }
+\func{}{wxTextInputStream}{\param{wxInputStream\&}{ stream}}
+
+\func{}{wxTextInputStream}{\param{wxInputStream\&}{ stream}, \param{wxMBConv\&}{ conv = wxMBConvUTF8}}
 
 Constructs a text stream object from an input stream. Only read methods will
-be available.
+be available. The second form is available only in Unicode mode and lets
+you set the encoding of the text.
 
 \wxheading{Parameters}
 
-\docparam{stream}{The underlying input stream.}
-
-\docparam{sep}{The initial string separator characters.}
-
-\docparam{conv}{{\it In Unicode build only:} The encoding converter used to convert the bytes in the
-  underlying input stream to characters.}
+\docparam{stream}{The input stream.}
 
 \membersection{wxTextInputStream::\destruct{wxTextInputStream}}
 
@@ -64,64 +55,23 @@ be available.
 
 Destroys the wxTextInputStream object.
 
-\membersection{wxTextInputStream::Read8}\label{wxtextinputstreamread8}
+\membersection{wxTextInputStream::Read8}
 
-\func{wxUint8}{Read8}{\param{int}{ base = 10}}
+\func{wxUint8}{Read8}{\void}
 
-Reads a single unsigned byte from the stream, given in base {\it base}.
-
-The value of {\it base} must be comprised between $2$ and $36$, inclusive, or
-be a special value $0$ which means that the usual rules of {\tt C} numbers are
-applied: if the number starts with {\tt 0x} it is considered to be in base
-$16$, if it starts with {\tt 0} - in base $8$ and in base $10$ otherwise. Note
-that you may not want to specify the base $0$ if you are parsing the numbers
-which may have leading zeroes as they can yield unexpected (to the user not
-familiar with C) results.
-
-\membersection{wxTextInputStream::Read8S}
-
-\func{wxInt8}{Read8S}{\param{int}{ base = 10}}
-
-Reads a single signed byte from the stream.
-
-See \helpref{wxTextInputStream::Read8}{wxtextinputstreamread8} for the
-description of the {\it base} parameter.
+Reads a single byte from the stream.
 
 \membersection{wxTextInputStream::Read16}
 
-\func{wxUint16}{Read16}{\param{int}{ base = 10}}
+\func{wxUint16}{Read16}{\void}
 
-Reads a unsigned 16 bit integer from the stream.
-
-See \helpref{wxTextInputStream::Read8}{wxtextinputstreamread8} for the
-description of the {\it base} parameter.
-
-\membersection{wxTextInputStream::Read16S}
-
-\func{wxInt16}{Read16S}{\param{int}{ base = 10}}
-
-Reads a signed 16 bit integer from the stream.
-
-See \helpref{wxTextInputStream::Read8}{wxtextinputstreamread8} for the
-description of the {\it base} parameter.
+Reads a 16 bit integer from the stream.
 
 \membersection{wxTextInputStream::Read32}
 
-\func{wxUint32}{Read32}{\param{int}{ base = 10}}
+\func{wxUint32}{Read32}{\void}
 
-Reads a 32 bit unsigned integer from the stream.
-
-See \helpref{wxTextInputStream::Read8}{wxtextinputstreamread8} for the
-description of the {\it base} parameter.
-
-\membersection{wxTextInputStream::Read32S}
-
-\func{wxInt32}{Read32S}{\param{int}{ base = 10}}
-
-Reads a 32 bit signed integer from the stream.
-
-See \helpref{wxTextInputStream::Read8}{wxtextinputstreamread8} for the
-description of the {\it base} parameter.
+Reads a 32 bit integer from the stream.
 
 \membersection{wxTextInputStream::ReadDouble}
 
@@ -192,11 +142,10 @@ and Unix in their native formats (concerning the line ending).
 
 \membersection{wxTextOutputStream::wxTextOutputStream}\label{wxtextoutputstreamconstr}
 
-\func{}{wxTextOutputStream}{\param{wxOutputStream\&}{ stream}, \param{wxEOL}{ mode = wxEOL\_NATIVE}}
+\func{}{wxTextOutputStream}{\param{wxOutputStream\&}{ stream}, \param{wxEOL}{ mode = wxEOL\_NATIVE}, \param{wxMBConv\&}{ conv = wxMBConvUTF8}}
 
 Constructs a text stream object from an output stream. Only write methods will
-be available.
-
+be available. The second form is only available in Unicode mode.
 \wxheading{Parameters}
 
 \docparam{stream}{The output stream.}
@@ -249,7 +198,6 @@ Writes the double {\it f} to the stream using the IEEE format.
 
 \func{virtual void}{wxTextOutputStream::WriteString}{{\param const wxString\& }{string}}
 
-Writes {\it string} as a line. Depending on the end-of-line mode the end of
-line ('$\backslash$n') characters in the string are converted to the correct
-line ending terminator.
+Writes {\it string} as a line. Depending on the end-of-line mode, it adds 
+$\backslash$n, $\backslash$r or $\backslash$r$\backslash$n.
 

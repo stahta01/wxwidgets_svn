@@ -10,7 +10,7 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "glcanvas.h"
 #endif
 
@@ -21,7 +21,6 @@
 #include "wx/glcanvas.h"
 #include "wx/utils.h"
 #include "wx/app.h"
-#include "wx/log.h"
 
 #ifdef __VMS
 # pragma message disable nosimpint
@@ -31,10 +30,6 @@
 # pragma message enable nosimpint
 #endif
 #include "wx/motif/private.h"
-
-// DLL options compatibility check:
-#include "wx/build.h"
-WX_CHECK_BUILD_OPTIONS("wxGL")
 
 #ifdef OLD_MESA
 // workaround for bug in Mesa's glx.c
@@ -148,7 +143,7 @@ void wxGLContext::SetColour(const char *colour)
 		if(!XAllocColor((Display*) m_window->GetXDisplay(),
                   (Colormap) wxTheApp->GetMainColormap(m_window->GetXDisplay()),
                   &exact_def)) {
-		    wxLogError("wxGLCanvas: cannot allocate color\n");
+		    wxDebugMsg("wxGLCanvas: cannot allocate color\n");
 		    return;
 		}
 		pix = the_colour->m_pixel = exact_def.pixel;
@@ -250,7 +245,7 @@ bool wxGLCanvas::Create( wxWindow *parent,
 
     // Check for the presence of the GLX extension
     if(!glXQueryExtension(display, NULL, NULL)) {
-	wxLogError("wxGLCanvas: GLX extension is missing\n");
+	wxDebugMsg("wxGLCanvas: GLX extension is missing\n");
 	return false;
     }
 

@@ -15,7 +15,7 @@
 #ifndef _WX_DIRDLGG_H_
 #define _WX_DIRDLGG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "dirdlgg.h"
 #endif
 
@@ -82,7 +82,6 @@ protected:
     wxTextCtrl*       m_input;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS(wxGenericDirDialog)
 };
 
 #endif // _WX_DIRDLGG_H_

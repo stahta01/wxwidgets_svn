@@ -12,7 +12,7 @@
 #ifndef __GTKCOMBOBOXH__
 #define __GTKCOMBOBOXH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "combobox.h"
 #endif
 
@@ -68,24 +68,20 @@ public:
     void Append( const wxString &item );
     void Append( const wxString &item, void* clientData );
     void Append( const wxString &item, wxClientData* clientData );
-
-    void Insert( const wxString &item, int pos );
-    void Insert( const wxString &item, int pos, void* clientData );
-    void Insert( const wxString &item, int pos, wxClientData* clientData );
-
+  
     void SetClientData( int n, void* clientData );
-    void* GetClientData( int n ) const;
+    void* GetClientData( int n );
     void SetClientObject( int n, wxClientData* clientData );
-    wxClientData* GetClientObject( int n ) const;
-
+    wxClientData* GetClientObject( int n );
+  
     void SetClientObject( wxClientData *data )  { wxControl::SetClientObject( data ); }
     wxClientData *GetClientObject() const       { return wxControl::GetClientObject(); }
     void SetClientData( void *data )            { wxControl::SetClientData( data ); }
     void *GetClientData() const                 { return wxControl::GetClientData(); }
-
+    
     void Clear();
     void Delete( int n );
-
+  
     int FindString( const wxString &item );
     int GetSelection() const;
     wxString GetString( int n ) const;
@@ -94,7 +90,6 @@ public:
     int Number() const;
     void SetSelection( int n );
     void SetStringSelection( const wxString &string );
-    void SetString(int n, const wxString &text);
 
     wxString GetValue() const;
     void SetValue(const wxString& value);
@@ -110,14 +105,14 @@ public:
     void Remove( long from, long to );
     void SetSelection( long from, long to );
     void SetEditable( bool editable );
-
+  
     // implementation
-
+    
     virtual void SetFocus();
-
+    
     void OnSize( wxSizeEvent &event );
     void OnChar( wxKeyEvent &event );
-
+  
     bool     m_alreadySent;
     wxList   m_clientDataList;
     wxList   m_clientObjectList;
@@ -126,15 +121,14 @@ public:
     void DisableEvents();
     void EnableEvents();
     void AppendCommon( const wxString &item );
-    void InsertCommon( const wxString &item, int pos );
     GtkWidget* GetConnectWidget();
     bool IsOwnGtkWindow( GdkWindow *window );
     void ApplyWidgetStyle();
-
+ 
 protected:
     virtual wxSize DoGetBestSize() const;
 
-private:
+private: 
     DECLARE_DYNAMIC_CLASS(wxComboBox)
     DECLARE_EVENT_TABLE()
 };

@@ -11,7 +11,7 @@
 #ifndef __SCK_STREAM_H__
 #define __SCK_STREAM_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -21,7 +21,7 @@
 
 #include "wx/socket.h"
 
-class WXDLLIMPEXP_NET wxSocketOutputStream : public wxOutputStream
+class WXDLLEXPORT wxSocketOutputStream : public wxOutputStream
 {
  public:
   wxSocketOutputStream(wxSocketBase& s);
@@ -36,11 +36,9 @@ class WXDLLIMPEXP_NET wxSocketOutputStream : public wxOutputStream
   wxSocketBase *m_o_socket;
 
   size_t OnSysWrite(const void *buffer, size_t bufsize);
-
-    DECLARE_NO_COPY_CLASS(wxSocketOutputStream)
 };
 
-class WXDLLIMPEXP_NET wxSocketInputStream : public wxInputStream
+class WXDLLEXPORT wxSocketInputStream : public wxInputStream
 {
  public:
   wxSocketInputStream(wxSocketBase& s);
@@ -55,18 +53,14 @@ class WXDLLIMPEXP_NET wxSocketInputStream : public wxInputStream
   wxSocketBase *m_i_socket;
 
   size_t OnSysRead(void *buffer, size_t bufsize);
-
-    DECLARE_NO_COPY_CLASS(wxSocketInputStream)
 };
 
-class WXDLLIMPEXP_NET wxSocketStream : public wxSocketInputStream,
+class WXDLLEXPORT wxSocketStream : public wxSocketInputStream,
                    public wxSocketOutputStream
 {
  public:
   wxSocketStream(wxSocketBase& s);
   ~wxSocketStream();
-
-  DECLARE_NO_COPY_CLASS(wxSocketStream)
 };
 
 #endif

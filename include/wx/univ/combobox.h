@@ -36,7 +36,7 @@
 #ifndef _WX_UNIV_COMBOBOX_H_
 #define _WX_UNIV_COMBOBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univcombobox.h"
 #endif
 
@@ -82,8 +82,6 @@ public:
 
     // called immediately after the control is shown
     virtual void OnShow() = 0;
-
-    virtual wxCoord GetBestWidth() const {return 0; }
 
 protected:
     wxComboControl *m_combo;
@@ -277,7 +275,7 @@ public:
     virtual int GetSelection() const;
     void SetSelection(int n) { Select(n); }
 
-    void SetStringSelection(const wxString& WXUNUSED(s)) {  }
+    void SetStringSelection(const wxString& s) {  }
 
     // we have to redefine these functions here to avoid ambiguities in classes
     // deriving from us which would arise otherwise because we inherit these
@@ -330,7 +328,6 @@ public:
 
 protected:
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, int pos);
     virtual void DoSetItemClientData(int n, void* clientData);
     virtual void* DoGetItemClientData(int n) const;
     virtual void DoSetItemClientObject(int n, wxClientData* clientData);

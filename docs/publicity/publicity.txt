@@ -4,7 +4,7 @@ Publicity notes and ideas
 Release announcments can be made to the following
 newsgroups.
 
-Microsoft:
+Windows:
 
 comp.os.ms-windows.programmer.misc
 comp.os.ms-windows.programmer.tools
@@ -14,9 +14,11 @@ comp.os.ms-windows.programmer.win32
 comp.windows.ms.programmer
 microsoft.public.win32.programmer.tools
 microsoft.public.win32.programmer.ui
-microsoft.public.win32.programmer.3rdparty
+microsoft.public.vc.3rdparty
 
-Non-Microsoft:
+borland.public.cppbuilder.thirdpartytools (newsgroups.borland.com)
+
+Non-Windows:
 
 comp.programming
 comp.os.linux.development.apps
@@ -25,13 +27,11 @@ comp.sys.mac.programmer.tools
 comp.software-eng
 comp.lang.c++
 
-borland.public.cppbuilder.thirdpartytools (newsgroups.borland.com)
-
 comp.windows.x
 comp.windows.x.announce
 comp.windows.x.motif
 
-Note: submissions to comp.windows.linux.announce must be
+Note: submissions to comp.os.linux.announce must be
 sent to cola@stump.algebra.com, with short descr
 of software and location. See http://stump.algebra.com/~cola/
 NO CROSSPOSTING when sending to this address.
@@ -136,12 +136,30 @@ PC Magazines:
 
 CD-ROM distributions for PC Plus, PCW
 
-Organisations:
---------------
+PUBLICITY RECORD
+================
 
-http://www.egovos.org/ The Center of Open Source & Government 
-(Submitted to their directory, 2003-04-25)
+The 2.4.0 release has been publicised at
+the following places:
 
-http://www.opensector.org/
-(nothing submitted yet)
+wx-users@lists.wxwindows.org
+
+comp.os.ms-windows.programmer.misc
+comp.os.ms-windows.programmer.tools.mfc
+comp.os.ms-windows.programmer.tools.misc
+comp.os.ms-windows.programmer.win32
+comp.windows.ms.programmer
+comp.os.linux.announce (pending acceptance)
+comp.sys.mac.programmer.tools
+comp.lang.c++
+comp.windows.x.announce
+microsoft.public.win32.programmer.tools
+microsoft.public.win32.programmer.ui
+microsoft.public.vc.3rdparty
+borland.public.cppbuilder.thirdpartytools
+
+news@macnn.com
+adcnews@apple.com
+presse@ct.heise.de
+press_releases@mactech.com
 

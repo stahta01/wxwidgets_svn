@@ -6,7 +6,7 @@
 // Created:     23.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "numdlgg.cpp"
 #endif
 
@@ -85,7 +85,6 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxNumberEntryDialog)
 };
 
 // ============================================================================

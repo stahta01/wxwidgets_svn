@@ -22,7 +22,6 @@
 #include "wx/xrc/xh_bttn.h"
 #include "wx/button.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxButtonXmlHandler, wxXmlResourceHandler)
 
 wxButtonXmlHandler::wxButtonXmlHandler() 
 : wxXmlResourceHandler() 
@@ -31,7 +30,6 @@ wxButtonXmlHandler::wxButtonXmlHandler()
     XRC_ADD_STYLE(wxBU_RIGHT);
     XRC_ADD_STYLE(wxBU_TOP);
     XRC_ADD_STYLE(wxBU_BOTTOM);
-    XRC_ADD_STYLE(wxBU_EXACTFIT);
     AddWindowStyles();
 }
 

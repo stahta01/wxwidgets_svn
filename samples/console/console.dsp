@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
-CFG=console - Win32 DLL Release
+CFG=console - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,431 +13,223 @@ CFG=console - Win32 DLL Release
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "console.mak" CFG="console - Win32 DLL Release"
+!MESSAGE NMAKE /f "console.mak" CFG="console - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "console - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "console - Win32 Release Unicode DLL" (based on "Win32 (x86) Console Application")
+!MESSAGE "console - Win32 Debug Unicode DLL" (based on "Win32 (x86) Console Application")
+!MESSAGE "console - Win32 Debug Unicode" (based on "Win32 (x86) Console Application")
+!MESSAGE "console - Win32 Release DLL" (based on "Win32 (x86) Console Application")
+!MESSAGE "console - Win32 Debug DLL" (based on "Win32 (x86) Console Application")
 !MESSAGE "console - Win32 Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 Unicode Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 Unicode Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 Universal Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 Universal Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 Universal Unicode Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 Universal Unicode Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Unicode Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Unicode Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Universal Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Universal Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Universal Unicode Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "console - Win32 DLL Universal Unicode Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "console - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
-# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "console - Win32 Debug"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswd"
-# PROP BASE Intermediate_Dir "vc_mswd\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswd"
-# PROP Intermediate_Dir "vc_mswd\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswd\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswd\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswd" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswd" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswd\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswd\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
-
-!ELSEIF  "$(CFG)" == "console - Win32 Release"
+!IF "$(CFG)" == "console - Win32 Release Unicode DLL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_msw"
-# PROP BASE Intermediate_Dir "vc_msw\console"
+# PROP BASE Output_Dir "BaseReleaseUnicodeDll"
+# PROP BASE Intermediate_Dir "BaseReleaseUnicodeDll"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_msw"
-# PROP Intermediate_Dir "vc_msw\console"
+# PROP Output_Dir "BaseReleaseUnicodeDll"
+# PROP Intermediate_Dir "BaseReleaseUnicodeDll"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_msw\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\msw" /I "." /D "WIN32" /D "__WXMSW__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_msw\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\msw" /I "." /D "WIN32" /D "__WXMSW__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\msw" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\msw" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /O2 /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /O2 /I "../../include" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MD  /D WXUSINGDLL  /D _UNICODE /D UNICODE  /I..\..\lib\basedllu 
+# ADD BASE RSC /l 0x409 /d "NDEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "NDEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_msw\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_msw\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /machine:I386 ..\..\lib\wxbase233u.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 Unicode Debug"
+!IF "$(CFG)" == "console - Win32 Debug Unicode DLL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswud"
-# PROP BASE Intermediate_Dir "vc_mswud\console"
+# PROP BASE Output_Dir "BaseDebugUnicodeDll"
+# PROP BASE Intermediate_Dir "BaseDebugUnicodeDll"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswud"
-# PROP Intermediate_Dir "vc_mswud\console"
+# PROP Output_Dir "BaseDebugUnicodeDll"
+# PROP Intermediate_Dir "BaseDebugUnicodeDll"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswud\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswud\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswud" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswud" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /Zi /Od /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /Zi /Od /I "../../include" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MDd /D "__WXDEBUG__" /D "WXDEBUG=1"  /D WXUSINGDLL  /D _UNICODE /D UNICODE  /I..\..\lib\basedllud 
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "_DEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswud\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswud\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept ..\..\lib\wxbase233ud.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 Unicode Release"
+!IF "$(CFG)" == "console - Win32 Release Unicode"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_mswu"
-# PROP BASE Intermediate_Dir "vc_mswu\console"
+# PROP BASE Output_Dir "BaseReleaseUnicode"
+# PROP BASE Intermediate_Dir "BaseReleaseUnicode"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_mswu"
-# PROP Intermediate_Dir "vc_mswu\console"
+# PROP Output_Dir "BaseReleaseUnicode"
+# PROP Intermediate_Dir "BaseReleaseUnicode"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_mswu\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswu" /I "." /D "WIN32" /D "__WXMSW__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_mswu\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswu" /I "." /D "WIN32" /D "__WXMSW__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswu" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswu" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /O2 /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /O2 /I "../../include" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MD  /D _UNICODE /D UNICODE  /I..\..\lib\baseu 
+# ADD BASE RSC /l 0x409 /d "NDEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "NDEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswu\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswu\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /machine:I386 ..\..\lib\zlib.lib ..\..\lib\regex.lib ..\..\lib\wxbaseu.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 Universal Debug"
+!IF "$(CFG)" == "console - Win32 Debug Unicode"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswunivd"
-# PROP BASE Intermediate_Dir "vc_mswunivd\console"
+# PROP BASE Output_Dir "BaseDebugUnicode"
+# PROP BASE Intermediate_Dir "BaseDebugUnicode"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswunivd"
-# PROP Intermediate_Dir "vc_mswunivd\console"
+# PROP Output_Dir "BaseDebugUnicode"
+# PROP Intermediate_Dir "BaseDebugUnicode"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivd\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswunivd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivd\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswunivd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswunivd" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswunivd" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /Zi /Od /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /Zi /Od /I "../../include" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MDd /D "__WXDEBUG__" /D "WXDEBUG=1"  /D _UNICODE /D UNICODE  /I..\..\lib\baseud 
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "_DEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivd\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivd\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept ..\..\lib\zlibd.lib ..\..\lib\regexd.lib ..\..\lib\wxbaseud.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 Universal Release"
+!IF "$(CFG)" == "console - Win32 Release DLL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_mswuniv"
-# PROP BASE Intermediate_Dir "vc_mswuniv\console"
+# PROP BASE Output_Dir "BaseReleaseDll"
+# PROP BASE Intermediate_Dir "BaseReleaseDll"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_mswuniv"
-# PROP Intermediate_Dir "vc_mswuniv\console"
+# PROP Output_Dir "BaseReleaseDll"
+# PROP Intermediate_Dir "BaseReleaseDll"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_mswuniv\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswuniv" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_mswuniv\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswuniv" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswuniv" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswuniv" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /O2 /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /O2 /I "../../include" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MD  /D WXUSINGDLL  /I..\..\lib\basedll 
+# ADD BASE RSC /l 0x409 /d "NDEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "NDEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswuniv\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswuniv\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /machine:I386 ..\..\lib\wxbase233.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 Universal Unicode Debug"
+!IF "$(CFG)" == "console - Win32 Debug DLL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswunivud"
-# PROP BASE Intermediate_Dir "vc_mswunivud\console"
+# PROP BASE Output_Dir "BaseDebugDll"
+# PROP BASE Intermediate_Dir "BaseDebugDll"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswunivud"
-# PROP Intermediate_Dir "vc_mswunivud\console"
+# PROP Output_Dir "BaseDebugDll"
+# PROP Intermediate_Dir "BaseDebugDll"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivud\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswunivud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivud\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswunivud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswunivud" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswunivud" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /Zi /Od /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /Zi /Od /I "../../include" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MDd /D "__WXDEBUG__" /D "WXDEBUG=1"  /D WXUSINGDLL  /I..\..\lib\basedlld 
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "_DEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivud\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivud\console.exe" /debug /libpath:".\..\..\lib\vc_lib" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept ..\..\lib\wxbase233d.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 Universal Unicode Release"
+!IF "$(CFG)" == "console - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_mswunivu"
-# PROP BASE Intermediate_Dir "vc_mswunivu\console"
+# PROP BASE Output_Dir "BaseRelease"
+# PROP BASE Intermediate_Dir "BaseRelease"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_mswunivu"
-# PROP Intermediate_Dir "vc_mswunivu\console"
+# PROP Output_Dir "BaseRelease"
+# PROP Intermediate_Dir "BaseRelease"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_mswunivu\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswunivu" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_mswunivu\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_lib\mswunivu" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D wxUSE_UNICODE=1 /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswunivu" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_lib\mswunivu" /i "." /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /O2 /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /O2 /I "../../include" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MD  /I..\..\lib\base 
+# ADD BASE RSC /l 0x409 /d "NDEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "NDEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivu\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
-# ADD LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivu\console.exe" /libpath:".\..\..\lib\vc_lib" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /machine:I386 ..\..\lib\zlib.lib ..\..\lib\regex.lib ..\..\lib\wxbase.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Debug"
+!IF "$(CFG)" == "console - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswddll"
-# PROP BASE Intermediate_Dir "vc_mswddll\console"
+# PROP BASE Output_Dir "BaseDebug"
+# PROP BASE Intermediate_Dir "BaseDebug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswddll"
-# PROP Intermediate_Dir "vc_mswddll\console"
+# PROP Output_Dir "BaseDebug"
+# PROP Intermediate_Dir "BaseDebug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswd" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswd" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
+# ADD BASE CPP /nologo /W4 /Zi /Od /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /YX /FD /c
+# ADD CPP /nologo /W4 /Zi /Od /I "../../include" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D WIN32 /D WINVER=0x400 /D _MT /D wxUSE_GUI=0 /YX /FD /c /MDd /D "__WXDEBUG__" /D "WXDEBUG=1"  /I..\..\lib\based 
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /I "../../include"
+# ADD RSC /l 0x409 /d "_DEBUG" /I "../../include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
+# ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib advapi32.lib shell32.lib wsock32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept ..\..\lib\zlibd.lib ..\..\lib\regexd.lib ..\..\lib\wxbased.lib
 
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Release"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_mswdll"
-# PROP BASE Intermediate_Dir "vc_mswdll\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_mswdll"
-# PROP Intermediate_Dir "vc_mswdll\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_mswdll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\msw" /I "." /D "WIN32" /D "__WXMSW__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_mswdll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\msw" /I "." /D "WIN32" /D "__WXMSW__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\msw" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\msw" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswdll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswdll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Unicode Debug"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswuddll"
-# PROP BASE Intermediate_Dir "vc_mswuddll\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswuddll"
-# PROP Intermediate_Dir "vc_mswuddll\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswuddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswuddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswud" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswud" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswuddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswuddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
-
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Unicode Release"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_mswudll"
-# PROP BASE Intermediate_Dir "vc_mswudll\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_mswudll"
-# PROP Intermediate_Dir "vc_mswudll\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_mswudll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswu" /I "." /D "WIN32" /D "__WXMSW__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_mswudll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswu" /I "." /D "WIN32" /D "__WXMSW__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswu" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswu" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswudll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswudll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Universal Debug"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswunivddll"
-# PROP BASE Intermediate_Dir "vc_mswunivddll\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswunivddll"
-# PROP Intermediate_Dir "vc_mswunivddll\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswunivd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswunivd" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswunivd" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswunivd" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
-
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Universal Release"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_mswunivdll"
-# PROP BASE Intermediate_Dir "vc_mswunivdll\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_mswunivdll"
-# PROP Intermediate_Dir "vc_mswunivdll\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_mswunivdll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswuniv" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_mswunivdll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswuniv" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswuniv" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswuniv" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivdll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivdll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Universal Unicode Debug"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vc_mswunivuddll"
-# PROP BASE Intermediate_Dir "vc_mswunivuddll\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vc_mswunivuddll"
-# PROP Intermediate_Dir "vc_mswunivuddll\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivuddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswunivud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MDd /Zi /Gm /GZ /Fdvc_mswunivuddll\console.pdb /Od /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswunivud" /I "." /D "WIN32" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswunivud" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswunivud" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivuddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivuddll\console.exe" /debug /libpath:".\..\..\lib\vc_dll" /subsystem:console
-
-!ELSEIF  "$(CFG)" == "console - Win32 DLL Universal Unicode Release"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc_mswunivudll"
-# PROP BASE Intermediate_Dir "vc_mswunivudll\console"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc_mswunivudll"
-# PROP Intermediate_Dir "vc_mswunivudll\console"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /W4 /MD /Fdvc_mswunivudll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswunivu" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD CPP /nologo /FD /W4 /MD /Fdvc_mswunivudll\console.pdb /O1 /I ".\..\..\include" /I ".\..\..\lib\vc_dll\mswunivu" /I "." /D "WIN32" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D wxUSE_UNICODE=1 /D "WXUSINGDLL" /D "_CONSOLE" /D wxUSE_GUI=0 /c
-# ADD BASE RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswunivu" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-# ADD RSC /l 0x405 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d wxUSE_UNICODE=1 /i ".\..\..\include" /i ".\..\..\lib\vc_dll\mswunivu" /i "." /d "WXUSINGDLL" /d "_CONSOLE" /d wxUSE_GUI=0
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivudll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-# ADD LINK32 wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib odbc32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib /nologo /machine:i386 /out:"vc_mswunivudll\console.exe" /libpath:".\..\..\lib\vc_dll" /subsystem:console
-
-!ENDIF
+!ENDIF 
 
 # Begin Target
 
-# Name "console - Win32 Debug"
+# Name "console - Win32 Release Unicode DLL"
+# Name "console - Win32 Debug Unicode DLL"
+# Name "console - Win32 Debug Unicode"
+# Name "console - Win32 Release DLL"
+# Name "console - Win32 Debug DLL"
 # Name "console - Win32 Release"
-# Name "console - Win32 Unicode Debug"
-# Name "console - Win32 Unicode Release"
-# Name "console - Win32 Universal Debug"
-# Name "console - Win32 Universal Release"
-# Name "console - Win32 Universal Unicode Debug"
-# Name "console - Win32 Universal Unicode Release"
-# Name "console - Win32 DLL Debug"
-# Name "console - Win32 DLL Release"
-# Name "console - Win32 DLL Unicode Debug"
-# Name "console - Win32 DLL Unicode Release"
-# Name "console - Win32 DLL Universal Debug"
-# Name "console - Win32 DLL Universal Release"
-# Name "console - Win32 DLL Universal Unicode Debug"
-# Name "console - Win32 DLL Universal Unicode Release"
-# Begin Group "Source Files"
-
-# PROP Default_Filter ""
+# Name "console - Win32 Debug"
 # Begin Source File
 
 SOURCE=.\console.cpp
 # End Source File
-# End Group
 # End Target
 # End Project
-

@@ -6,32 +6,26 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_LOG_H_
-#define _WX_LOG_H_
+#ifndef   _WX_LOG_H_
+#define   _WX_LOG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "log.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_LOG
-
+#include "wx/setup.h"
 #include "wx/string.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // forward declarations
 // ----------------------------------------------------------------------------
 
-#if wxUSE_GUI
-    class WXDLLIMPEXP_CORE wxTextCtrl;
-    class WXDLLIMPEXP_CORE wxLogFrame;
-    class WXDLLIMPEXP_CORE wxFrame;
-#endif // wxUSE_GUI
+class WXDLLEXPORT wxTextCtrl;
+class WXDLLEXPORT wxLogFrame;
+class WXDLLEXPORT wxFrame;
 
 // ----------------------------------------------------------------------------
 // types
@@ -44,9 +38,9 @@ typedef unsigned long wxLogLevel;
 // headers
 // ----------------------------------------------------------------------------
 
-#ifndef __WXWINCE__
+#if wxUSE_LOG
+
 #include <time.h>   // for time_t
-#endif
 
 #include "wx/dynarray.h"
 
@@ -105,14 +99,14 @@ enum
     #define wxTraceOleCalls 0x0100  // OLE interface calls
 #endif
 
-#include "wx/iosfwrap.h"
+#include "wx/ioswrap.h"
 
 // ----------------------------------------------------------------------------
 // derive from this class to redirect (or suppress, or ...) log messages
 // normally, only a single instance of this class exists but it's not enforced
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxLog
+class WXDLLEXPORT wxLog
 {
 public:
     // ctor
@@ -147,19 +141,22 @@ public:
         // and iostream logs don't need it, but wxGuiLog does to avoid showing
         // 17 modal dialogs one after another)
     virtual void Flush();
+        // call to Flush() may be optimized: call it only if this function
+        // returns true (although Flush() also returns immediately if there is
+        // no messages, this functions is more efficient because inline)
+    bool HasPendingMessages() const { return m_bHasMessages; }
 
+    // only one sink is active at each moment
         // flush the active target if any
     static void FlushActive()
     {
         if ( !ms_suspendCount )
         {
             wxLog *log = GetActiveTarget();
-            if ( log )
+            if ( log && log->HasPendingMessages() )
                 log->Flush();
         }
     }
-
-    // only one sink is active at each moment
         // get current log target, will call wxApp::CreateLogTarget() to
         // create one if none exists
     static wxLog *GetActiveTarget();
@@ -188,8 +185,7 @@ public:
         // trace mask (see wxTraceXXX constants for details)
     static void SetTraceMask(wxTraceMask ulMask) { ms_ulTraceMask = ulMask; }
         // add string trace mask
-    static void AddTraceMask(const wxString& str)
-        { ms_aTraceMasks.push_back(str); }
+    static void AddTraceMask(const wxString& str) { ms_aTraceMasks.Add(str); }
         // add string trace mask
     static void RemoveTraceMask(const wxString& str);
         // remove all string trace masks
@@ -209,7 +205,8 @@ public:
         // get trace mask
     static wxTraceMask GetTraceMask() { return ms_ulTraceMask; }
         // is this trace mask in the list?
-    static bool IsAllowedTraceMask(const wxChar *mask);
+    static bool IsAllowedTraceMask(const wxChar *mask)
+        { return ms_aTraceMasks.Index(mask) != wxNOT_FOUND; }
         // return the current loglevel limit
     static wxLogLevel GetLogLevel() { return ms_logLevel; }
 
@@ -225,11 +222,9 @@ public:
     // make dtor virtual for all derived classes
     virtual ~wxLog() { }
 
-
-    // this method exists for backwards compatibility only, don't use
-    bool HasPendingMessages() const { return TRUE; }
-
 protected:
+    bool m_bHasMessages; // any messages in the queue?
+
     // the logging functions that can be overriden
         // default DoLog() prepends the time stamp and a prefix corresponding
         // to the message to szString and then passes it to DoLogString()
@@ -264,7 +259,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // log everything to a "FILE *", stderr by default
-class WXDLLIMPEXP_BASE wxLogStderr : public wxLog
+class WXDLLEXPORT wxLogStderr : public wxLog
 {
     DECLARE_NO_COPY_CLASS(wxLogStderr)
 
@@ -282,7 +277,7 @@ protected:
 #if wxUSE_STD_IOSTREAM
 
 // log everything to an "ostream", cerr by default
-class WXDLLIMPEXP_BASE wxLogStream : public wxLog
+class WXDLLEXPORT wxLogStream : public wxLog
 {
 public:
     // redirect log output to an ostream
@@ -318,7 +313,7 @@ protected:
         // ~wxLogNull called, old log sink restored
     }
  */
-class WXDLLIMPEXP_BASE wxLogNull
+class WXDLLEXPORT wxLogNull
 {
 public:
     wxLogNull() : m_flagOld(wxLog::EnableLogging(FALSE)) { }
@@ -337,7 +332,7 @@ private:
 // does it itself in its ctor
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxLogChain : public wxLog
+class WXDLLEXPORT wxLogChain : public wxLog
 {
 public:
     wxLogChain(wxLog *logger);
@@ -372,23 +367,119 @@ private:
 
     // do we pass the messages to the old logger?
     bool m_bPassMessages;
-
-    DECLARE_NO_COPY_CLASS(wxLogChain)
 };
 
 // a chain log target which uses itself as the new logger
-class WXDLLIMPEXP_BASE wxLogPassThrough : public wxLogChain
+class WXDLLEXPORT wxLogPassThrough : public wxLogChain
 {
 public:
     wxLogPassThrough();
-
-private:
-    DECLARE_NO_COPY_CLASS(wxLogPassThrough)
 };
 
+// ----------------------------------------------------------------------------
+// the following log targets are only compiled in if the we're compiling the
+// GUI part (andnot just the base one) of the library, they're implemented in
+// src/generic/logg.cpp *and not src/common/log.cpp unlike all the rest)
+// ----------------------------------------------------------------------------
+
 #if wxUSE_GUI
-    // include GUI log targets:
-    #include "wx/generic/logg.h"
+
+#if wxUSE_TEXTCTRL
+
+// log everything to a text window (GUI only of course)
+class WXDLLEXPORT wxLogTextCtrl : public wxLog
+{
+public:
+    wxLogTextCtrl(wxTextCtrl *pTextCtrl);
+
+private:
+    // implement sink function
+    virtual void DoLogString(const wxChar *szString, time_t t);
+
+    // the control we use
+    wxTextCtrl *m_pTextCtrl;
+};
+
+#endif // wxUSE_TEXTCTRL
+
+// ----------------------------------------------------------------------------
+// GUI log target, the default one for wxWindows programs
+// ----------------------------------------------------------------------------
+
+#if wxUSE_LOGGUI
+
+class WXDLLEXPORT wxLogGui : public wxLog
+{
+public:
+    // ctor
+    wxLogGui();
+
+    // show all messages that were logged since the last Flush()
+    virtual void Flush();
+
+protected:
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
+
+    // empty everything
+    void Clear();
+
+    wxArrayString m_aMessages;      // the log message texts
+    wxArrayInt    m_aSeverity;      // one of wxLOG_XXX values
+    wxArrayLong   m_aTimes;         // the time of each message
+    bool          m_bErrors,        // do we have any errors?
+                  m_bWarnings;      // any warnings?
+};
+
+#endif // wxUSE_LOGGUI
+
+// ----------------------------------------------------------------------------
+// (background) log window: this class forwards all log messages to the log
+// target which was active when it was instantiated, but also collects them
+// to the log window. This window has it's own menu which allows the user to
+// close it, clear the log contents or save it to the file.
+// ----------------------------------------------------------------------------
+
+#if wxUSE_LOGWINDOW
+
+class WXDLLEXPORT wxLogWindow : public wxLogPassThrough
+{
+public:
+    wxLogWindow(wxFrame *pParent,         // the parent frame (can be NULL)
+                const wxChar *szTitle,    // the title of the frame
+                bool bShow = TRUE,        // show window immediately?
+                bool bPassToOld = TRUE);  // pass messages to the old target?
+
+    ~wxLogWindow();
+
+    // window operations
+        // show/hide the log window
+    void Show(bool bShow = TRUE);
+        // retrieve the pointer to the frame
+    wxFrame *GetFrame() const;
+
+    // overridables
+        // called immediately after the log frame creation allowing for
+        // any extra initializations
+    virtual void OnFrameCreate(wxFrame *frame);
+        // called if the user closes the window interactively, will not be
+        // called if it is destroyed for another reason (such as when program
+        // exits) - return TRUE from here to allow the frame to close, FALSE
+        // to prevent this from happening
+    virtual bool OnFrameClose(wxFrame *frame);
+        // called right before the log frame is going to be deleted: will
+        // always be called unlike OnFrameClose()
+    virtual void OnFrameDelete(wxFrame *frame);
+
+protected:
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
+    virtual void DoLogString(const wxChar *szString, time_t t);
+
+private:
+    wxLogFrame *m_pLogFrame;      // the log frame
+};
+
+#endif // wxUSE_LOGWINDOW
+
 #endif // wxUSE_GUI
 
 // ============================================================================
@@ -405,53 +496,37 @@ private:
 // ----------------------------------------------------------------------------
 
 // return the last system error code
-WXDLLIMPEXP_BASE unsigned long wxSysErrorCode();
+WXDLLEXPORT unsigned long wxSysErrorCode();
 
 // return the error message for given (or last if 0) error code
-WXDLLIMPEXP_BASE const wxChar* wxSysErrorMsg(unsigned long nErrCode = 0);
+WXDLLEXPORT const wxChar* wxSysErrorMsg(unsigned long nErrCode = 0);
 
 // ----------------------------------------------------------------------------
 // define wxLog<level>
 // ----------------------------------------------------------------------------
 
-#define DECLARE_LOG_FUNCTION(level)                                         \
-extern void WXDLLIMPEXP_BASE wxVLog##level(const wxChar *szFormat,          \
-                                      va_list argptr);                      \
-extern void WXDLLIMPEXP_BASE wxLog##level(const wxChar *szFormat,           \
+#define DECLARE_LOG_FUNCTION(level)                                 \
+extern void WXDLLEXPORT wxVLog##level(const wxChar *szFormat,       \
+                                      va_list argptr);              \
+extern void WXDLLEXPORT wxLog##level(const wxChar *szFormat,        \
                                      ...) ATTRIBUTE_PRINTF_1
-#define DECLARE_LOG_FUNCTION2_EXP(level, arg, expdecl)                      \
-extern void expdecl wxVLog##level(arg, const wxChar *szFormat,              \
-                                      va_list argptr);                      \
-extern void expdecl wxLog##level(arg, const wxChar *szFormat,               \
+#define DECLARE_LOG_FUNCTION2(level, arg1)                          \
+extern void WXDLLEXPORT wxVLog##level(arg1, const wxChar *szFormat, \
+                                      va_list argptr);              \
+extern void WXDLLEXPORT wxLog##level(arg1, const wxChar *szFormat,  \
                                      ...) ATTRIBUTE_PRINTF_2
-#define DECLARE_LOG_FUNCTION2(level, arg)                                   \
-    DECLARE_LOG_FUNCTION2_EXP(level, arg, WXDLLIMPEXP_BASE)
 
 #else // !wxUSE_LOG
 
 // log functions do nothing at all
-#define DECLARE_LOG_FUNCTION(level)                                         \
-inline void wxVLog##level(const wxChar *szFormat,                           \
-                                     va_list argptr) { }                    \
-inline void wxLog##level(const wxChar *szFormat, ...) { }
-#define DECLARE_LOG_FUNCTION2(level, arg)                                   \
-inline void wxVLog##level(arg, const wxChar *szFormat,                      \
-                                     va_list argptr) {}                     \
-inline void wxLog##level(arg, const wxChar *szFormat, ...) { }
-
-// Empty Class to fake wxLogNull
-class WXDLLIMPEXP_BASE wxLogNull
-{
-public:
-    wxLogNull() { }
-};
-
-// Dummy macros to replace some functions.
-#define wxSysErrorCode() (unsigned long)0
-#define wxSysErrorMsg( X ) (const wxChar*)NULL
-
-// Fake symbolic trace masks... for those that are used frequently
-#define wxTRACE_OleCalls wxEmptyString // OLE interface calls
+#define DECLARE_LOG_FUNCTION(level)                                 \
+inline void WXDLLEXPORT wxVLog##level(const wxChar *szFormat,       \
+                                     va_list argptr) {}             \
+inline void WXDLLEXPORT wxLog##level(const wxChar *szFormat, ...) {}
+#define DECLARE_LOG_FUNCTION2(level, arg1)                          \
+inline void WXDLLEXPORT wxVLog##level(arg1, const wxChar *szFormat, \
+                                     va_list argptr) {}             \
+inline void WXDLLEXPORT wxLog##level(arg1, const wxChar *szFormat, ...) {}
 
 #endif // wxUSE_LOG/!wxUSE_LOG
 
@@ -470,11 +545,9 @@ DECLARE_LOG_FUNCTION(Verbose);
 // application frame, if any
 DECLARE_LOG_FUNCTION(Status);
 
-#if wxUSE_GUI
-    // this one is the same as previous except that it allows to explicitly
-    // specify the frame to which the output should go
-    DECLARE_LOG_FUNCTION2_EXP(Status, wxFrame *pFrame, WXDLLIMPEXP_CORE);
-#endif // wxUSE_GUI
+// this one is the same as previous except that it allows to explicitly
+// specify the frame to which the output should go
+DECLARE_LOG_FUNCTION2(Status, wxFrame *pFrame);
 
 // additional one: as wxLogError, but also logs last system call error code
 // and the corresponding error message if available
@@ -513,8 +586,7 @@ DECLARE_LOG_FUNCTION2(SysError, long lErrCode);
 
 // wxLogFatalError helper: show the (fatal) error to the user in a safe way,
 // i.e. without using wxMessageBox() for example because it could crash
-void WXDLLIMPEXP_BASE
-wxSafeShowMessage(const wxString& title, const wxString& text);
+void WXDLLEXPORT wxSafeShowMessage(const wxString& title, const wxString& text);
 
 // ----------------------------------------------------------------------------
 // debug only logging functions: use them with API name and error code
@@ -545,3 +617,4 @@ wxSafeShowMessage(const wxString& title, const wxString& text);
 
 #endif  // _WX_LOG_H_
 
+// vi:sts=4:sw=4:et

@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "statline.h"
 #endif
 
@@ -47,10 +47,6 @@
 // ============================================================================
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticLine, wxControl)
-/*
-	TODO PROPERTIES :
-		style (wxLI_HORIZONTAL)
-*/
 
 // ----------------------------------------------------------------------------
 // wxStaticLine
@@ -68,7 +64,7 @@ bool wxStaticLine::Create(wxWindow *parent,
     if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
-    return MSWCreateControl(_T("STATIC"), wxEmptyString, pos, size);
+    return MSWCreateControl(_T("STATIC"), _T(""), pos, size, style);
 }
 
 WXDWORD wxStaticLine::MSWGetStyle(long style, WXDWORD *exstyle) const
@@ -80,12 +76,7 @@ WXDWORD wxStaticLine::MSWGetStyle(long style, WXDWORD *exstyle) const
     WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);
 
     // add our default styles
-    msStyle |= SS_SUNKEN | SS_NOTIFY | WS_CLIPSIBLINGS;
-#ifndef __WXWINCE__
-    msStyle |= SS_GRAYRECT ;
-#endif
-
-    return msStyle ;
+    return msStyle | SS_GRAYRECT | SS_SUNKEN | SS_NOTIFY | WS_CLIPSIBLINGS;
 }
 
 #endif // wxUSE_STATLINE

@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "docmdi.h"
 #endif
 
@@ -20,7 +20,7 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_MDI_ARCHITECTURE
+#if wxUSE_MDI_ARCHITECTURE && wxUSE_DOC_VIEW_ARCHITECTURE
 
 #include "wx/docmdi.h"
 
@@ -87,36 +87,14 @@ BEGIN_EVENT_TABLE(wxDocMDIChildFrame, wxMDIChildFrame)
     EVT_CLOSE(wxDocMDIChildFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
-void wxDocMDIChildFrame::Init()
-{
-    m_childDocument = (wxDocument*)  NULL;
-    m_childView = (wxView*) NULL;
-}
-
-wxDocMDIChildFrame::wxDocMDIChildFrame()
-{
-    Init();
-}
-
 wxDocMDIChildFrame::wxDocMDIChildFrame(wxDocument *doc, wxView *view, wxMDIParentFrame *frame, wxWindowID  id,
-  const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-{
-    Init();
-    Create(doc, view, frame, id, title, pos, size, style, name);
-}
-
-bool wxDocMDIChildFrame::Create(wxDocument *doc, wxView *view, wxMDIParentFrame *frame, wxWindowID  id,
-  const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+  const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
+    wxMDIChildFrame(frame, id, title, pos, size, style, name)
 {
   m_childDocument = doc;
   m_childView = view;
-    if (wxMDIChildFrame::Create(frame, id, title, pos, size, style, name)) {
   if (view)
     view->SetFrame(this);
-        return TRUE;
-    }
-
-    return FALSE;
 }
 
 wxDocMDIChildFrame::~wxDocMDIChildFrame(void)

@@ -55,7 +55,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxCDAudioLinux, wxCDAudio)
 wxCDAudioLinux::wxCDAudioLinux()
     : wxCDAudio(), m_fd(-1)
 {
-  OpenDevice(wxT("/dev/cdrom"));
+  OpenDevice("/dev/cdrom");
 }
 
 wxCDAudioLinux::wxCDAudioLinux(const wxString& dev_name)

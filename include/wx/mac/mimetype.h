@@ -6,13 +6,13 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _MIMETYPE_IMPL_H
 #define _MIMETYPE_IMPL_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "mimetype.h"
 #endif
 
@@ -71,7 +71,7 @@ public:
     // the first extension found, index 1 for the second and so on
     
     void Init(wxMimeTypesManagerImpl *manager, size_t index)
-    { m_manager = manager; m_index.Add(index); }
+	{ m_manager = manager; m_index.Add(index); }
 
     // initialize us with our file type name
     void SetFileType(const wxString& strFileType)
@@ -83,7 +83,7 @@ public:
     bool GetExtensions(wxArrayString& extensions);
     bool GetMimeType(wxString *mimeType) const;
     bool GetMimeTypes(wxArrayString& mimeTypes) const;
-    bool GetIcon(wxIconLocation *iconLoc) const;
+    bool GetIcon(wxIcon *icon, wxString *sCommand = NULL, int *iIndex = NULL) const;
     bool GetDescription(wxString *desc) const;
     bool GetOpenCommand(wxString *openCmd,
                         const wxFileType::MessageParameters&) const
@@ -98,10 +98,10 @@ public:
     // remove the record for this file type
     // probably a mistake to come here, use wxMimeTypesManager.Unassociate (ft) instead
     bool Unassociate(wxFileType *ft)
-    {
-        return m_manager->Unassociate(ft);
-    }
-
+	{
+	    return m_manager->Unassociate(ft);
+	}
+    
     // set an arbitrary command, ask confirmation if it already exists and
     // overwriteprompt is TRUE
     bool SetCommand(const wxString& cmd, const wxString& verb, bool overwriteprompt = TRUE);

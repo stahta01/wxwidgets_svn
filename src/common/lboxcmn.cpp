@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "listboxbase.h"
 #endif
 
@@ -32,8 +32,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/listbox.h"
-    #include "wx/dynarray.h"
-    #include "wx/arrstr.h"
 #endif
 
 // ============================================================================

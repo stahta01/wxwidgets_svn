@@ -10,7 +10,7 @@
 #ifndef _WX_FS_ZIP_H_
 #define _WX_FS_ZIP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "fs_zip.h"
 #endif
 
@@ -24,13 +24,13 @@
 
 #include "wx/filesys.h"
 
-class WXDLLIMPEXP_BASE wxLongToLongHashMap;
+class WXDLLEXPORT wxHashTableLong;
 
 //--------------------------------------------------------------------------------
 // wxZipFSHandler
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxZipFSHandler : public wxFileSystemHandler
+class WXDLLEXPORT wxZipFSHandler : public wxFileSystemHandler
 {
     public:
         wxZipFSHandler();
@@ -45,11 +45,9 @@ class WXDLLIMPEXP_BASE wxZipFSHandler : public wxFileSystemHandler
         void *m_Archive;
         wxString m_Pattern, m_BaseDir, m_ZipFile;
         bool m_AllowDirs, m_AllowFiles;
-        wxLongToLongHashMap *m_DirsFound;
+        wxHashTableLong *m_DirsFound;
 
         wxString DoFind();
-
-    DECLARE_NO_COPY_CLASS(wxZipFSHandler)
 };
 
 

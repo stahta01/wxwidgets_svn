@@ -6,13 +6,13 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MEMORYH__
 #define _WX_MEMORYH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "memory.h"
 #endif
 
@@ -28,10 +28,24 @@
 
 #include <stddef.h>
 
+// Obsolete
+#if 0
+#if wxUSE_IOSTREAMH
+    // N.B. BC++ doesn't have istream.h, ostream.h
+#   include <iostream.h>
+#else
+#   include <iostream>
+#   if defined(__VISUALC__) || defined(__MWERKS__)
+//        using namespace std;
+#   endif
+#endif
+#endif
+
 #ifdef __WXDEBUG__
 
-WXDLLIMPEXP_BASE void * wxDebugAlloc(size_t size, wxChar * fileName, int lineNum, bool isObject, bool isVect = FALSE);
-WXDLLIMPEXP_BASE void wxDebugFree(void * buf, bool isVect = FALSE);
+// devik 2000-8-27: export these because new/delete operators are now inline
+WXDLLEXPORT void * wxDebugAlloc(size_t size, wxChar * fileName, int lineNum, bool isObject, bool isVect = FALSE);
+WXDLLEXPORT void wxDebugFree(void * buf, bool isVect = FALSE);
 
 //**********************************************************************************
 /*
@@ -71,28 +85,28 @@ WXDLLIMPEXP_BASE void wxDebugFree(void * buf, bool isVect = FALSE);
 
 inline void * operator new (size_t size, wxChar * fileName, int lineNum)
 {
-    return wxDebugAlloc(size, fileName, lineNum, FALSE, FALSE);
+  return wxDebugAlloc(size, fileName, lineNum, FALSE, FALSE);
 }
 
 inline void * operator new (size_t size)
 {
-    return wxDebugAlloc(size, NULL, 0, FALSE);
+  return wxDebugAlloc(size, NULL, 0, FALSE);
 }
 
 inline void operator delete (void * buf)
 {
-    wxDebugFree(buf, FALSE);
+  wxDebugFree(buf, FALSE);
 }
 
 #if wxUSE_ARRAY_MEMORY_OPERATORS
 inline void * operator new[] (size_t size)
 {
-    return wxDebugAlloc(size, NULL, 0, FALSE, TRUE);
+  return wxDebugAlloc(size, NULL, 0, FALSE, TRUE);
 }
 
 inline void * operator new[] (size_t size, wxChar * fileName, int lineNum)
 {
-    return wxDebugAlloc(size, fileName, lineNum, FALSE, TRUE);
+  return wxDebugAlloc(size, fileName, lineNum, FALSE, TRUE);
 }
 
 inline void operator delete[] (void * buf)
@@ -105,11 +119,11 @@ inline void operator delete[] (void * buf)
 #if ( defined(__VISUALC__) && (__VISUALC__ >= 1200) ) || defined(__MWERKS__)
 inline void operator delete(void* pData, wxChar* /* fileName */, int /* lineNum */)
 {
-    wxDebugFree(pData, FALSE);
+  wxDebugFree(pData, FALSE);
 }
 inline void operator delete[](void* pData, wxChar* /* fileName */, int /* lineNum */)
 {
-    wxDebugFree(pData, TRUE);
+  wxDebugFree(pData, TRUE);
 }
 #endif // __VISUALC__>=1200
 #endif // wxUSE_GLOBAL_MEMORY_OPERATORS
@@ -124,9 +138,9 @@ typedef unsigned int wxMarkerType;
   allocated memory.
 */
 
-class WXDLLIMPEXP_BASE wxMemStruct {
+class WXDLLEXPORT wxMemStruct {
 
-friend class WXDLLIMPEXP_BASE wxDebugContext; // access to the m_next pointer for list traversal.
+friend class WXDLLEXPORT wxDebugContext; // access to the m_next pointer for list traversal.
 
 public:
 public:
@@ -193,16 +207,16 @@ typedef void (wxMemStruct::*PmSFV) ();
 
 
 /*
-  Debugging class. This will only have a single instance, but it's
+  Debugging class. This will only have a single instance, but it\'s
   a reasonable way to keep everything together and to make this
   available for change if needed by someone else.
   A lot of this stuff would be better off within the wxMemStruct class, but
-  it's stuff which we need to access at times when there is no wxMemStruct
+  it\'s stuff which we need to access at times when there is no wxMemStruct
   object so we use this class instead. Think of it as a collection of
   globals which have to do with the wxMemStruct class.
 */
 
-class WXDLLIMPEXP_BASE wxDebugContext {
+class WXDLLEXPORT wxDebugContext {
 
 protected:
     // Used to set alignment for markers.
@@ -216,6 +230,12 @@ protected:
     // Traverse the list.
     static void TraverseList (PmSFV, wxMemStruct *from = NULL);
 
+    // Obsolete
+#if 0
+    static wxSTD streambuf *m_streamBuf;
+    static wxSTD ostream *m_debugStream;
+#endif
+
     static int debugLevel;
     static bool debugOn;
 
@@ -228,6 +248,16 @@ public:
 
     wxDebugContext(void);
     ~wxDebugContext(void);
+
+    // Obsolete
+#if 0
+    static bool HasStream(void) { return (m_debugStream != NULL); };
+    static wxSTD ostream& GetStream(void) { return *m_debugStream; }
+    static wxSTD streambuf *GetStreamBuf(void) { return m_streamBuf; }
+    static void SetStream(wxSTD ostream *stream, wxSTD streambuf *buf = NULL);
+    static bool SetFile(const wxString& file);
+    static bool SetStandardError(void);
+#endif
 
     static int GetLevel(void) { return debugLevel; }
     static void SetLevel(int level) { debugLevel = level; }
@@ -300,8 +330,8 @@ private:
 };
 
 // Output a debug message, in a system dependent fashion.
-void WXDLLIMPEXP_BASE wxTrace(const wxChar *fmt ...) ATTRIBUTE_PRINTF_1;
-void WXDLLIMPEXP_BASE wxTraceLevel(int level, const wxChar *fmt ...) ATTRIBUTE_PRINTF_2;
+void WXDLLEXPORT wxTrace(const wxChar *fmt ...) ATTRIBUTE_PRINTF_1;
+void WXDLLEXPORT wxTraceLevel(int level, const wxChar *fmt ...) ATTRIBUTE_PRINTF_2;
 
 #define WXTRACE wxTrace
 #define WXTRACELEVEL wxTraceLevel
@@ -313,6 +343,7 @@ inline void wxTraceLevel(int WXUNUSED(level), const wxChar *WXUNUSED(fmt)) {}
 
 #define WXTRACE TRUE ? (void)0 : wxTrace
 #define WXTRACELEVEL TRUE ? (void)0 : wxTraceLevel
+// #define WXDEBUG_NEW new
 
 #endif // __WXDEBUG__
 

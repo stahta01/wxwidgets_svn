@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "statbmp.h"
 #endif
 
@@ -45,11 +45,6 @@
 // ---------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap, wxControl)
-
-/*
-	TODO PROPERTIES :
-		bitmap
-*/
 
 // ===========================================================================
 // implementation
@@ -95,16 +90,39 @@ static wxGDIImage* ConvertImage( const wxGDIImage& bitmap )
 
 #endif
 
-bool wxStaticBitmap::Create(wxWindow *parent,
-                            wxWindowID id,
+bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
                             const wxGDIImage& bitmap,
                             const wxPoint& pos,
                             const wxSize& size,
                             long style,
                             const wxString& name)
 {
-    if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return FALSE;
+    // default border for this control is none
+    if ( (style & wxBORDER_MASK) == wxBORDER_DEFAULT )
+    {
+        style |= wxBORDER_NONE;
+    }
+    
+    Init();
+
+    SetName(name);
+    if (parent)
+        parent->AddChild(this);
+
+    m_backgroundColour = parent->GetBackgroundColour() ;
+    m_foregroundColour = parent->GetForegroundColour() ;
+
+    if ( id == -1 )
+        m_windowId = (int)NewControlId();
+    else
+        m_windowId = id;
+
+    int x = pos.x;
+    int y = pos.y;
+    int width = size.x;
+    int height = size.y;
+
+    m_windowStyle = style;
 
     // we may have either bitmap or icon: if a bitmap with mask is passed, we
     // will transform it to an icon ourselves because otherwise the mask will
@@ -115,51 +133,53 @@ bool wxStaticBitmap::Create(wxWindow *parent,
 #ifdef __WIN16__
     wxASSERT_MSG( !m_isIcon, "Icons are not supported in wxStaticBitmap under WIN16." );
     image = &bitmap;
-#else // Win32
+#endif
+
+#ifndef __WIN16__
     image = ConvertImage( bitmap );
     m_isIcon = image->IsKindOf( CLASSINFO(wxIcon) );
-#endif // Win16/32
+#endif
 
-    // create the native control
-    if ( !MSWCreateControl(
 #ifdef __WIN32__
-                           _T("STATIC"),
+    // create a static control with either SS_BITMAP or SS_ICON style depending
+    // on what we have here
+    const wxChar *classname = wxT("STATIC");
+    int winstyle = m_isIcon ? SS_ICON : SS_BITMAP;
 #else // Win16
-                           _T("BUTTON"),
-#endif // Win32/16
-                           wxEmptyString, pos, size) )
-    {
-        // control creation failed
-        return FALSE;
-    }
+    const wxChar *classname = wxT("BUTTON");
+    int winstyle = BS_OWNERDRAW;
+#endif // Win32
+
+    if ( m_windowStyle & wxCLIP_SIBLINGS )
+        winstyle |= WS_CLIPSIBLINGS;
+
+
+    m_hWnd = (WXHWND)::CreateWindow
+                       (
+                        classname,
+                        wxT(""),
+                        // NOT DISABLED!!! We want to move it in Dialog Editor.
+                        winstyle | WS_CHILD | WS_VISIBLE /* | WS_CLIPSIBLINGS */ , // | WS_DISABLED,
+                        0, 0, 0, 0,
+                        (HWND)parent->GetHWND(),
+                        (HMENU)m_windowId,
+                        wxGetInstance(),
+                        NULL
+                       );
+
+    wxCHECK_MSG( m_hWnd, FALSE, wxT("Failed to create static bitmap") );
 
     // no need to delete the new image
-    SetImageNoCopy(image);
+    SetImageNoCopy( image );
+
+    // Subclass again for purposes of dialog editing mode
+    SubclassWin(m_hWnd);
+
+    SetFont(GetParent()->GetFont());
+
+    SetSize(x, y, width, height);
 
     return TRUE;
-}
-
-wxBorder wxStaticBitmap::GetDefaultBorder() const
-{
-    return wxBORDER_NONE;
-}
-
-WXDWORD wxStaticBitmap::MSWGetStyle(long style, WXDWORD *exstyle) const
-{
-    WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);
-
-#ifdef __WIN32__
-    // what kind of control are we?
-    msStyle |= m_isIcon ? SS_ICON : SS_BITMAP;
-
-    // we use SS_CENTERIMAGE to prevent the control from resizing the bitmap to
-    // fit to its size -- this is unexpected and doesn't happen in other ports
-    msStyle |= SS_CENTERIMAGE;
-#else // Win16
-    msStyle |= BS_OWNERDRAW;
-#endif // Win32/16
-
-    return msStyle;
 }
 
 bool wxStaticBitmap::ImageIsOk() const
@@ -274,12 +294,10 @@ long wxStaticBitmap::MSWWindowProc(WXUINT nMsg,
                                    WXWPARAM wParam,
                                    WXLPARAM lParam)
 {
-#ifndef __WXWINCE__
     // Ensure that static items get messages. Some controls don't like this
     // message to be intercepted (e.g. RichEdit), hence the tests.
     if ( nMsg == WM_NCHITTEST )
         return (long)HTCLIENT;
-#endif
 
     return wxWindow::MSWWindowProc(nMsg, wParam, lParam);
 }

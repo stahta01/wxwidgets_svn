@@ -266,7 +266,7 @@ void ButtonWidgetsPage::CreateButton()
         size_t count = m_sizerButton->GetChildren().GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
-            m_sizerButton->Remove( 0 );
+            m_sizerButton->Remove(0);
         }
 
         delete m_button;
@@ -355,7 +355,7 @@ void ButtonWidgetsPage::OnButtonReset(wxCommandEvent& WXUNUSED(event))
     CreateButton();
 }
 
-void ButtonWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void ButtonWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& event)
 {
     CreateButton();
 }
@@ -365,7 +365,7 @@ void ButtonWidgetsPage::OnButtonChangeLabel(wxCommandEvent& WXUNUSED(event))
     m_button->SetLabel(m_textLabel->GetValue());
 }
 
-void ButtonWidgetsPage::OnButton(wxCommandEvent& WXUNUSED(event))
+void ButtonWidgetsPage::OnButton(wxCommandEvent& event)
 {
     wxLogMessage(_T("Test button clicked."));
 }

@@ -12,7 +12,7 @@
 #ifndef _WX_LISTCTRL_H_BASE_
 #define _WX_LISTCTRL_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "listctrlbase.h"
 #endif
 
@@ -26,8 +26,6 @@
 
 #if defined(__WIN32__) && !defined(__WXUNIVERSAL__)
     #include "wx/msw/listctrl.h"
-#elif defined(__WXPM__)
-    #include "wx/os2/listctrl.h"
 #else
     #include "wx/generic/listctrl.h"
 #endif
@@ -97,7 +95,7 @@ public:
     void ClearColumnImage(int col) { SetColumnImage(col, -1); }
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxListView)
+    DECLARE_DYNAMIC_CLASS(wxListView)
 };
 
 #endif // wxUSE_LISTCTRL

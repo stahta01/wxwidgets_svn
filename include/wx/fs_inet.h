@@ -21,7 +21,7 @@ limitation)
 #ifndef _WX_FS_INET_H_
 #define _WX_FS_INET_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "fs_inet.h"
 #endif
 
@@ -39,7 +39,7 @@ limitation)
 // wxInternetFSHandler
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_NET wxInternetFSHandler : public wxFileSystemHandler
+class WXDLLEXPORT wxInternetFSHandler : public wxFileSystemHandler
 {
     private:
         wxHashTable m_Cache;

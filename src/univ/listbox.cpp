@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univlistbox.h"
 #endif
 
@@ -49,6 +49,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 
 BEGIN_EVENT_TABLE(wxListBox, wxListBoxBase)
     EVT_SIZE(wxListBox::OnSize)
+
+    EVT_IDLE(wxListBox::OnIdle)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -106,7 +108,7 @@ bool wxListBox::Create(wxWindow *parent,
 #endif
 
     if ( !wxControl::Create(parent, id, pos, size, style, 
-                            validator, name) )
+                            wxDefaultValidator, name) )
         return FALSE;
 
     SetWindow(this);
@@ -125,8 +127,6 @@ bool wxListBox::Create(wxWindow *parent,
 
 wxListBox::~wxListBox()
 {
-    // call this just to free the client data -- and avoid leaking memory
-    DoClear();
 }
 
 // ----------------------------------------------------------------------------
@@ -272,8 +272,7 @@ void wxListBox::Clear()
 
 void wxListBox::Delete(int n)
 {
-    wxCHECK_RET( n >= 0 && n < GetCount(),
-                 _T("invalid index in wxListBox::Delete") );
+    wxCHECK_RET( n < GetCount(), _T("invalid index in wxListBox::Delete") );
 
     // do it before removing the index as otherwise the last item will not be
     // refreshed (as GetCount() will be decremented)
@@ -599,7 +598,7 @@ void wxListBox::UpdateItems()
     }
 }
 
-void wxListBox::OnInternalIdle()
+void wxListBox::OnIdle(wxIdleEvent& event)
 {
     if ( m_updateScrollbarY || m_updateScrollbarX )
     {
@@ -622,7 +621,8 @@ void wxListBox::OnInternalIdle()
 
         m_updateCount = 0;
     }
-    wxListBoxBase::OnInternalIdle();
+
+    event.Skip();
 }
 
 // ----------------------------------------------------------------------------
@@ -770,7 +770,7 @@ void wxListBox::DoSetSize(int x, int y,
         height = ((height - hBorders + hLine - 1) / hLine)*hLine + hBorders;
     }
 
-    wxListBoxBase::DoSetSize(x, y, width, height, sizeFlags);
+    wxListBoxBase::DoSetSize(x, y, width, height);
 }
 
 wxSize wxListBox::DoGetBestClientSize() const

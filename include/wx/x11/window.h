@@ -12,7 +12,7 @@
 #ifndef _WX_WINDOW_H_
 #define _WX_WINDOW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "window.h"
 #endif
 
@@ -63,6 +63,8 @@ public:
     virtual void Refresh( bool eraseBackground = TRUE,
         const wxRect *rect = (const wxRect *) NULL );
     virtual void Update();
+    
+    virtual void Clear();
     
     virtual bool SetBackgroundColour( const wxColour &colour );
     virtual bool SetForegroundColour( const wxColour &colour );
@@ -152,6 +154,9 @@ public:
     // has to be done in idle time in order for wxX11 to work is done in
     // OnInternalIdle
     virtual void OnInternalIdle();
+    
+    // For compatibility across platforms (not in event table)
+    void OnIdle(wxIdleEvent& WXUNUSED(event)) {}
     
 protected:
     // Responds to colour changes: passes event on to children.

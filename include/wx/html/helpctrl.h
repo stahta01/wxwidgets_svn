@@ -14,7 +14,7 @@
 
 #include "wx/defs.h"
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "helpctrl.h"
 #endif
 
@@ -25,7 +25,7 @@
 
 #define wxID_HTML_HELPFRAME   (wxID_HIGHEST + 1)
 
-class WXDLLIMPEXP_HTML wxHtmlHelpController : public wxHelpControllerBase // wxEvtHandler
+class WXDLLEXPORT wxHtmlHelpController : public wxHelpControllerBase // wxEvtHandler
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlHelpController)
 
@@ -99,8 +99,6 @@ protected:
     wxString            m_titleFormat;
     int                 m_FrameStyle;
     // DECLARE_EVENT_TABLE()
-
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpController)
 };
 
 #endif // wxUSE_WXHTML_HELP

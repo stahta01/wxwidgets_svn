@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "caret.h"
 #endif
 
@@ -34,8 +34,6 @@
 #endif // WX_PRECOMP
 
 #include "wx/caret.h"
-
-#if wxUSE_CARET
 
 #include "wx/msw/private.h"
 
@@ -194,5 +192,3 @@ void wxCaret::DoSize()
         OnSetFocus();
     }
 }
-
-#endif

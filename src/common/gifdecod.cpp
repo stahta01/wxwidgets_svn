@@ -8,7 +8,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "gifdecod.h"
 #endif
 
@@ -21,7 +21,6 @@
 
 #ifndef WX_PRECOMP
 #  include "wx/defs.h"
-#  include "wx/palette.h"
 #endif
 
 #if wxUSE_STREAMS && wxUSE_GIF

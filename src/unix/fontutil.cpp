@@ -6,7 +6,7 @@
 // Created:     05.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "fontutil.h"
 #endif
 
@@ -132,12 +132,14 @@ wxFontEncoding wxNativeFontInfo::GetEncoding() const
     return wxFONTENCODING_SYSTEM;
 }
 
-bool wxNativeFontInfo::FromString(const wxString& s)
+bool wxNativeFontInfo::FromString( const wxString& str )
 {
     if (description)
         pango_font_description_free( description );
 
-    description = pango_font_description_from_string( wxGTK_CONV( s ) );
+    description = pango_font_description_from_string( wxGTK_CONV( str ) );
+    
+    // wxPrintf( L"FromString result: %s\n", ToString().c_str() );
 
     return TRUE;
 }
@@ -151,9 +153,9 @@ wxString wxNativeFontInfo::ToString() const
     return tmp;
 }
 
-bool wxNativeFontInfo::FromUserString(const wxString& s)
+bool wxNativeFontInfo::FromUserString( const wxString& str )
 {
-    return FromString( s );
+    return FromString( str );
 }
 
 wxString wxNativeFontInfo::ToUserString() const
@@ -235,13 +237,7 @@ static wxHashTable *g_fontHash = (wxHashTable*) NULL;
 #elif defined(__WXGTK__)
     wxNativeFont wxLoadFont(const wxString& fontSpec)
     {
-        // VZ: we should use gdk_fontset_load() instead of gdk_font_load()
-        //     here to be able to display Japanese fonts correctly (at least
-        //     this is what people report) but unfortunately doing it results
-        //     in tons of warnings when using GTK with "normal" European
-        //     languages and so we can't always do it and I don't know enough
-        //     to determine when should this be done... (FIXME)
-        return gdk_font_load( wxConvertWX2MB(fontSpec) );
+       return gdk_font_load( wxConvertWX2MB(fontSpec) );
     }
 
     inline void wxFreeFont(wxNativeFont font)
@@ -394,19 +390,15 @@ bool wxNativeFontInfo::FromXFontName(const wxString& fontname)
             return FALSE;
         }
 
-        wxString field = tokenizer.GetNextToken();
-        if ( !field.empty() && field != _T('*') )
-        {
-            // we're really initialized now
-            m_isDefault = FALSE;
-        }
-
-        fontElements[n] = field;
+        fontElements[n] = tokenizer.GetNextToken();
     }
 
     // this should be all
     if ( tokenizer.HasMoreTokens() )
         return FALSE;
+
+    // we're initialized now
+    m_isDefault = FALSE;
 
     return TRUE;
 }
@@ -797,49 +789,27 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
           *xFontName = newFontName;
     }
 
+    // try to load exactly the font requested first
+    if( !font )
+    {
+        font = wxLoadQueryFont( pointSize, family, style, weight,
+                                underlined, facename,
+                                info.xregistry, info.xencoding,
+                                xFontName );
+    }
+
     if ( !font )
     {
         // search up and down by stepsize 10
         int max_size = pointSize + 20 * (1 + (pointSize/180));
         int min_size = pointSize - 20 * (1 + (pointSize/180));
 
-        int i, round; // counters
+        int i;
 
-        // first round: search for equal, then for smaller and for larger size with the given weight and style
-        int testweight = weight;
-        int teststyle = style;
-
-        for ( round = 0; round < 3; round++ )
+        // Search for smaller size (approx.)
+        for ( i = pointSize - 10; !font && i >= 10 && i >= min_size; i -= 10 )
         {
-            // second round: use normal weight
-            if ( round == 1 )
-        {
-                if ( testweight != wxNORMAL )
-                {
-                    testweight = wxNORMAL;
-                }
-                else
-                {
-                    ++round; // fall through to third round
-                }
-            }
-
-            // third round: ... and use normal style
-            if ( round == 2 )
-            {
-                if ( teststyle != wxNORMAL )
-                {
-                    teststyle = wxNORMAL;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            // Search for equal or smaller size (approx.)
-            for ( i = pointSize; !font && i >= 10 && i >= min_size; i -= 10 )
-            {
-                font = wxLoadQueryFont(i, family, teststyle, testweight, underlined,
+            font = wxLoadQueryFont(i, family, style, weight, underlined,
                                    facename, info.xregistry, info.xencoding,
                                    xFontName);
         }
@@ -847,10 +817,9 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
         // Search for larger size (approx.)
         for ( i = pointSize + 10; !font && i <= max_size; i += 10 )
         {
-                font = wxLoadQueryFont(i, family, teststyle, testweight, underlined,
+            font = wxLoadQueryFont(i, family, style, weight, underlined,
                                    facename, info.xregistry, info.xencoding,
                                    xFontName);
-            }
         }
 
         // Try default family

@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "controlwithitems.h"
 #endif
 
@@ -32,7 +32,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/ctrlsub.h"
-    #include "wx/arrstr.h"
 #endif
 
 // ============================================================================
@@ -58,15 +57,6 @@ wxString wxItemContainer::GetStringSelection() const
     return s;
 }
 
-wxArrayString wxItemContainer::GetStrings() const
-{
-    wxArrayString result ;
-    size_t count = GetCount() ;
-    for ( size_t n = 0 ; n < count ; n++ )
-        result.Add(GetString(n));
-    return result ;
-}
-
 // ----------------------------------------------------------------------------
 // appending items
 // ----------------------------------------------------------------------------
@@ -78,25 +68,6 @@ void wxItemContainer::Append(const wxArrayString& strings)
     {
         Append(strings[n]);
     }
-}
-
-int wxItemContainer::Insert(const wxString& item, int pos, void *clientData)
-{
-    int n = DoInsert(item, pos);
-    if ( n != wxNOT_FOUND )
-        SetClientData(n, clientData);
-
-    return n;
-}
-
-int
-wxItemContainer::Insert(const wxString& item, int pos, wxClientData *clientData)
-{
-    int n = DoInsert(item, pos);
-    if ( n != wxNOT_FOUND )
-        SetClientObject(n, clientData);
-
-    return n;
 }
 
 // ----------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -18,7 +18,6 @@
 
 #ifdef __BORLANDC__
 #pragma hdrstop
-#include <dir.h>
 #endif
 
 #ifndef WX_PRECOMP
@@ -131,8 +130,6 @@ WXDLLEXPORT int wxMSLU_GetSaveFileNameW(void *ofn)
 // Missing libc file manipulation functions in Win9x
 //------------------------------------------------------------------------
 
-#if wxUSE_BASE
-
 WXDLLEXPORT int wxMSLU__trename(const wxChar *oldname, const wxChar *newname)
 {
     if ( wxUsingUnicowsDll() )
@@ -151,17 +148,12 @@ WXDLLEXPORT int wxMSLU__tremove(const wxChar *name)
 
 #if defined( __VISUALC__ ) \
     || ( defined(__MINGW32__) && wxCHECK_W32API_VERSION( 0, 5 ) ) \
-    || ( defined(__MWERKS__) && defined(__WXMSW__) ) \
-    || ( defined(__BORLANDC__) && (__BORLANDC__ > 0x460) )
+    || ( defined(__MWERKS__) && defined(__WXMSW__) )
 
 WXDLLEXPORT int wxMSLU__wopen(const wxChar *name, int flags, int mode)
 {
     if ( wxUsingUnicowsDll() )
-#ifdef __BORLANDC__
-        return open(wxConvFile.cWX2MB(name), flags, mode);
-#else
         return _open(wxConvFile.cWX2MB(name), flags, mode);
-#endif
     else
         return _wopen(name, flags, mode);
 }
@@ -198,8 +190,6 @@ WXDLLEXPORT int wxMSLU__wstat(const wxChar *name, struct _stat *buffer)
         return _wstat(name, buffer);
 }
 
-#endif // compilers having wopen() &c
-
-#endif // wxUSE_BASE
+#endif
 
 #endif // wxUSE_UNICODE_MSLU

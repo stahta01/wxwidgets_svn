@@ -7,7 +7,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -32,13 +32,20 @@
 #if wxUSE_MIMETYPE
 
 #ifndef WX_PRECOMP
+    #include "wx/module.h"
+#endif
+// this one is needed for MSVC5
+#include "wx/module.h"
+
+#ifndef WX_PRECOMP
   #include "wx/string.h"
+  #if wxUSE_GUI
+    #include "wx/icon.h"
+  #endif
 #endif //WX_PRECOMP
 
-#include "wx/module.h"
 #include "wx/log.h"
 #include "wx/file.h"
-#include "wx/iconloc.h"
 #include "wx/intl.h"
 #include "wx/dynarray.h"
 #include "wx/confbase.h"
@@ -262,41 +269,33 @@ bool wxFileType::GetMimeTypes(wxArrayString& mimeTypes) const
     return m_impl->GetMimeTypes(mimeTypes);
 }
 
-bool wxFileType::GetIcon(wxIconLocation *iconLoc) const
+bool wxFileType::GetIcon(wxIcon *icon,
+                         wxString *iconFile,
+                         int *iconIndex) const
 {
     if ( m_info )
     {
-        if ( iconLoc )
+        if ( iconFile )
+            *iconFile = m_info->GetIconFile();
+        if ( iconIndex )
+            *iconIndex = m_info->GetIconIndex();
+
+#if wxUSE_GUI
+        if ( icon && !m_info->GetIconFile().empty() )
         {
-            iconLoc->SetFileName(m_info->GetIconFile());
-#ifdef __WXMSW__
-            iconLoc->SetIndex(m_info->GetIconIndex());
-#endif // __WXMSW__
+            // FIXME: what about the index?
+            icon->LoadFile(m_info->GetIconFile());
         }
+#endif // wxUSE_GUI
 
         return TRUE;
     }
 
-    return m_impl->GetIcon(iconLoc);
-}
-
-bool
-wxFileType::GetIcon(wxIconLocation *iconloc,
-                    const MessageParameters& params) const
-{
-    if ( !GetIcon(iconloc) )
-    {
-        return false;
-    }
-
-    // we may have "%s" in the icon location string, at least under Windows, so
-    // expand this
-    if ( iconloc )
-    {
-        iconloc->SetFileName(ExpandCommand(iconloc->GetFileName(), params));
-    }
-
-    return true;
+#if defined(__WXMSW__) || defined(__UNIX__)
+    return m_impl->GetIcon(icon, iconFile, iconIndex);
+#else
+    return m_impl->GetIcon(icon);
+#endif
 }
 
 bool wxFileType::GetDescription(wxString *desc) const
@@ -487,7 +486,7 @@ wxMimeTypesManager::~wxMimeTypesManager()
 
 bool wxMimeTypesManager::Unassociate(wxFileType *ft)
 {
-#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WXWINE__)
     return m_impl->Unassociate(ft);
 #else
     return ft->Unassociate();
@@ -538,11 +537,11 @@ wxMimeTypesManager::GetFileTypeFromMimeType(const wxString& mimeType)
     EnsureImpl();
     wxFileType *ft = m_impl->GetFileTypeFromMimeType(mimeType);
 
-    if ( !ft ) {
+    if ( ft ) {
         // check the fallbacks
         //
-        // TODO linear search is potentially slow, perhaps we should use a
-        //      sorted array?
+        // TODO linear search is potentially slow, perhaps we should use a sorted
+        //      array?
         size_t count = m_fallbacks.GetCount();
         for ( size_t n = 0; n < count; n++ ) {
             if ( wxMimeTypesManager::IsOfType(mimeType,
@@ -597,7 +596,7 @@ size_t wxMimeTypesManager::EnumAllFileTypes(wxArrayString& mimetypes)
 void wxMimeTypesManager::Initialize(int mcapStyle,
                                     const wxString& sExtraDir)
 {
-#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WXWINE__)
     EnsureImpl();
 
     m_impl->Initialize(mcapStyle, sExtraDir);
@@ -610,7 +609,7 @@ void wxMimeTypesManager::Initialize(int mcapStyle,
 // and this function clears all the data from the manager
 void wxMimeTypesManager::ClearData()
 {
-#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXPM__) && !defined(__CYGWIN__) && !defined(__WXWINE__)
     EnsureImpl();
 
     m_impl->ClearData();

@@ -6,13 +6,13 @@
 // Created:     11.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _MENUITEM_H
 #define   _MENUITEM_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "menuitem.h"
 #endif
 
@@ -90,7 +90,7 @@ private:
     // does this item start a radio group?
     bool m_isRadioGroupStart;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMenuItem)
+    DECLARE_DYNAMIC_CLASS(wxMenuItem)
 };
 
 #endif  //_MENUITEM_H

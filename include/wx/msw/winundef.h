@@ -27,8 +27,7 @@
 
 // CreateDialog
 
-//#ifdef(CreateDialog)
-#if !defined(__WXWINCE__) && defined(CreateDialog)
+#ifdef CreateDialog
     #undef CreateDialog
 
     inline HWND CreateDialog(HINSTANCE hInstance,
@@ -252,32 +251,6 @@
    }
 #endif
 
-// LoadIcon
-#ifdef LoadIcon
-    #undef LoadIcon
-    inline HICON LoadIcon(HINSTANCE hInstance, LPCTSTR lpIconName)
-    {
-        #ifdef _UNICODE
-            return LoadIconW(hInstance, lpIconName);
-        #else // ANSI
-            return LoadIconA(hInstance, lpIconName);
-        #endif // Unicode/ANSI
-    }
-#endif // LoadIcon
-
-// LoadBitmap
-#ifdef LoadBitmap
-    #undef LoadBitmap
-    inline HBITMAP LoadBitmap(HINSTANCE hInstance, LPCTSTR lpBitmapName)
-    {
-        #ifdef _UNICODE
-            return LoadBitmapW(hInstance, lpBitmapName);
-        #else // ANSI
-            return LoadBitmapA(hInstance, lpBitmapName);
-        #endif // Unicode/ANSI
-    }
-#endif // LoadBitmap
-
 // LoadLibrary
 
 #ifdef LoadLibrary
@@ -317,11 +290,7 @@
     #undef IsMaximized
     inline BOOL IsMaximized(HWND hwnd)
     {
-#ifdef __WXWINCE__
-        return FALSE;
-#else
         return IsZoomed(hwnd);
-#endif
     }
 #endif
 
@@ -331,11 +300,7 @@
     #undef GetFirstChild
     inline HWND GetFirstChild(HWND hwnd)
     {
-#ifdef __WXWINCE__
-        return 0;
-#else
         return GetTopWindow(hwnd);
-#endif
     }
 #endif
 
@@ -361,7 +326,7 @@
 
 // For WINE
 
-#if defined(GetWindowStyle)
+#if defined(GetWindowStyle) || defined(__WXWINE__)
   #undef GetWindowStyle
 #endif
 
@@ -390,16 +355,6 @@
 #ifdef Yield
     #undef Yield
 #endif
-
-
-#if defined(__WXWINCE__) && defined(DrawIcon) //#ifdef DrawIcon
-    #undef DrawIcon
-    inline BOOL DrawIcon(HDC hdc, int x, int y, HICON hicon) 
-    {
-        return DrawIconEx(hdc,x,y,hicon,0,0,0,NULL, DI_NORMAL) ;
-    }
-#endif
-
 
 // GetWindowProc
 //ifdef GetWindowProc

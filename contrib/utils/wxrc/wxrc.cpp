@@ -27,19 +27,30 @@
 #endif
 
 #include "wx/cmdline.h"
-#include "wx/xml/xml.h"
+#include "wx/xrc/xml.h"
 #include "wx/ffile.h"
 #include "wx/filename.h"
 #include "wx/wfstream.h"
 
 
-class XmlResApp : public wxAppConsole
+
+
+
+/*
+#if wxUSE_GUI
+#error "You must compile the resource compiler with wxBase!"
+#endif
+*/
+
+class XmlResApp : public wxApp
 {
 public:
-    // don't use builtin cmd line parsing:
-    virtual bool OnInit() { return true; } 
 
+#if wxUSE_GUI
+    bool OnInit();
+#else
     virtual int OnRun();
+#endif
     
 private:
     
@@ -64,9 +75,13 @@ private:
     int retCode;
 };
 
-IMPLEMENT_APP_NO_THEMES(XmlResApp)
+IMPLEMENT_APP(XmlResApp)
 
+#if wxUSE_GUI
+bool XmlResApp::OnInit()
+#else
 int XmlResApp::OnRun()
+#endif
 {
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
@@ -103,11 +118,19 @@ int XmlResApp::OnRun()
                 OutputGettext();
             else
                 CompileRes();
+#if wxUSE_GUI
+            return FALSE;
+#else
             return retCode;
+#endif
             break;
 
         default:
+#if wxUSE_GUI
+            return FALSE;
+#else
             return 1;
+#endif
             break;
     }
 }
@@ -146,18 +169,7 @@ void XmlResApp::ParseParams(const wxCmdLineParser& cmdline)
         parFuncname = _T("InitXmlResource");
 
     for (size_t i = 0; i < cmdline.GetParamCount(); i++)
-    {
-#ifdef __WINDOWS__
-        wxString fn=wxFindFirstFile(cmdline.GetParam(i), wxFILE);
-        while (!fn.IsEmpty())
-        {
-            parFiles.Add(fn);
-            fn=wxFindNextFile();
-        }
-#else
         parFiles.Add(cmdline.GetParam(i));
-#endif
-    }
 }
 
 
@@ -238,7 +250,6 @@ wxArrayString XmlResApp::PrepareTempFiles()
     return flist;
 }
 
-
 // Does 'node' contain filename information at all?
 static bool NodeContainsFilename(wxXmlNode *node)
 {
@@ -269,6 +280,7 @@ static bool NodeContainsFilename(wxXmlNode *node)
    
    return FALSE;
 }
+
 
 // find all files mentioned in structure, e.g. <bitmap>filename</bitmap>
 void XmlResApp::FindFilesInXML(wxXmlNode *node, wxArrayString& flist, const wxString& inputPath)
@@ -334,7 +346,7 @@ void XmlResApp::MakePackageZIP(const wxArrayString& flist)
     
     if (flagVerbose) 
         wxPrintf(_T("compressing ") + parOutput +  _T("...\n"));
-    
+
     wxString cwd = wxGetCwd();
     wxSetWorkingDirectory(parOutputPath);
     int execres = wxExecute(_T("zip -9 -j ") + 
@@ -358,7 +370,7 @@ static wxString FileToCppArray(wxString filename, int num)
     wxString output;
     wxString tmp;
     wxString snum;
-    wxFFile file(filename, wxT("rb"));
+    wxFFile file(filename, "rb");
     size_t lng = file.Length();
     
     snum.Printf(_T("%i"), num);
@@ -393,7 +405,7 @@ static wxString FileToCppArray(wxString filename, int num)
 
 void XmlResApp::MakePackageCPP(const wxArrayString& flist)
 {
-    wxFFile file(parOutput, wxT("wt"));
+    wxFFile file(parOutput, "wt");
     size_t i;
 
     if (flagVerbose) 
@@ -462,7 +474,7 @@ static wxString FileToPythonArray(wxString filename, int num)
     wxString output;
     wxString tmp;
     wxString snum;
-    wxFFile file(filename, wxT("rb"));
+    wxFFile file(filename, "rb");
     size_t lng = file.Length();
     
     snum.Printf(_T("%i"), num);
@@ -504,7 +516,7 @@ static wxString FileToPythonArray(wxString filename, int num)
 
 void XmlResApp::MakePackagePython(const wxArrayString& flist)
 {
-    wxFFile file(parOutput, wxT("wt"));
+    wxFFile file(parOutput, "wt");
     size_t i;
 
     if (flagVerbose) 
@@ -541,7 +553,7 @@ void XmlResApp::OutputGettext()
     
     wxFFile fout;
     if (!parOutput) fout.Attach(stdout);
-    else fout.Open(parOutput, wxT("wt"));
+    else fout.Open(parOutput, "wt");
     
     for (size_t i = 0; i < str.GetCount(); i++)
         fout.Write(_T("_(\"") + str[i] + _T("\");\n"));

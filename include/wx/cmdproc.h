@@ -12,15 +12,12 @@
 #ifndef _WX_CMDPROC_H_
 #define _WX_CMDPROC_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "cmdproc.h"
 #endif
 
-#include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/list.h"
-
-class WXDLLEXPORT wxMenu;
 
 // ----------------------------------------------------------------------------
 // wxCommand: a single command capable of performing itself
@@ -29,7 +26,7 @@ class WXDLLEXPORT wxMenu;
 class WXDLLEXPORT wxCommand : public wxObject
 {
 public:
-    wxCommand(bool canUndoIt = FALSE, const wxString& name = wxEmptyString);
+    wxCommand(bool canUndoIt = FALSE, const wxString& name = wxT(""));
     ~wxCommand();
 
     // Override this to perform a command
@@ -94,7 +91,7 @@ public:
     wxList& GetCommands() const { return (wxList&) m_commands; }
     wxCommand *GetCurrentCommand() const
     {
-        return (wxCommand *)(m_currentCommand ? m_currentCommand->GetData() : NULL);
+        return (wxCommand *)(m_currentCommand ? m_currentCommand->Data() : NULL);
     }
     int GetMaxCommands() const { return m_maxNoCommands; }
     virtual void ClearCommands();
@@ -115,7 +112,7 @@ protected:
 
     int           m_maxNoCommands;
     wxList        m_commands;
-    wxList::compatibility_iterator m_currentCommand;
+    wxNode*       m_currentCommand;
 
 #if wxUSE_MENUS
     wxMenu*       m_commandEditMenu;
@@ -126,7 +123,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxCommandProcessor)
-    DECLARE_NO_COPY_CLASS(wxCommandProcessor)
 };
 
 #endif // _WX_CMDPROC_H_

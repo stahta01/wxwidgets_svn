@@ -8,13 +8,13 @@
 // Created:     03.04.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TEXTFILE_H
 #define _WX_TEXTFILE_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "textfile.h"
 #endif
 
@@ -30,7 +30,7 @@
 // wxTextFile
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxTextFile : public wxTextBuffer
+class WXDLLEXPORT wxTextFile : public wxTextBuffer
 {
 public:
     // constructors
@@ -47,10 +47,7 @@ protected:
     virtual bool OnWrite(wxTextFileType typeNew, wxMBConv& conv);
 
 private:
-
     wxFile m_file;
-
-    DECLARE_NO_COPY_CLASS(wxTextFile)
 };
 
 #else // !wxUSE_TEXTFILE

@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "gridsel.h"
 #endif
 
@@ -30,7 +30,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GRID
+#if defined(wxUSE_NEW_GRID) && (wxUSE_NEW_GRID)
 
 #include "wx/generic/gridsel.h"
 
@@ -1083,4 +1083,3 @@ int wxGridSelection::BlockContain( int topRow1, int leftCol1,
 }
 
 #endif
-

@@ -24,12 +24,13 @@
 #include <wx/wx.h>
 #endif
 
-#if wxUSE_PROLOGIO
-#include <wx/deprecated/wxexpr.h>
-#endif
+#include <wx/wxexpr.h>
 
-#include "wx/ogl/ogl.h"
-
+#include <wx/ogl/basic.h>
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/canvas.h>
+#include <wx/ogl/bmpshape.h>
+#include <wx/ogl/misc.h>
 
 /*
  * Bitmap object
@@ -60,7 +61,7 @@ void wxBitmapShape::OnDraw(wxDC& dc)
   dc.Blit((long) x, (long) y, m_bitmap.GetWidth(), m_bitmap.GetHeight(), &tempDC, 0, 0);
 }
 
-void wxBitmapShape::SetSize(double w, double h, bool WXUNUSED(recursive))
+void wxBitmapShape::SetSize(double w, double h, bool recursive)
 {
   if (m_bitmap.Ok())
   {
@@ -81,13 +82,13 @@ void wxBitmapShape::WriteAttributes(wxExpr *clause)
   // Can't really save the bitmap; so instantiate the bitmap
   // at a higher level in the application, from a symbol library.
   wxRectangleShape::WriteAttributes(clause);
-  clause->AddAttributeValueString(_T("filename"), m_filename);
+  clause->AddAttributeValueString("filename", m_filename);
 }
 
 void wxBitmapShape::ReadAttributes(wxExpr *clause)
 {
   wxRectangleShape::ReadAttributes(clause);
-  clause->GetAttributeValue(_T("filename"), m_filename);
+  clause->GetAttributeValue("filename", m_filename);
 }
 #endif
 

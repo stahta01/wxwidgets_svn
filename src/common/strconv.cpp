@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Ove Kaaven, Robert Roebling, Vadim Zeitlin, Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma implementation "strconv.h"
 #endif
 
@@ -37,10 +37,7 @@
     #include "wx/msw/private.h"
 #endif
 
-#ifndef __WXWINCE__
 #include <errno.h>
-#endif
-
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
@@ -53,19 +50,19 @@
 // ----------------------------------------------------------------------------
 
 #if wxUSE_WCHAR_T
-    WXDLLIMPEXP_DATA_BASE(wxMBConv) wxConvLibc;
-    WXDLLIMPEXP_DATA_BASE(wxCSConv) wxConvLocal((const wxChar *)NULL);
-    WXDLLIMPEXP_DATA_BASE(wxCSConv) wxConvISO8859_1(_T("iso-8859-1"));
+    WXDLLEXPORT_DATA(wxMBConv) wxConvLibc;
+    WXDLLEXPORT_DATA(wxCSConv) wxConvLocal((const wxChar *)NULL);
+    WXDLLEXPORT_DATA(wxCSConv) wxConvISO8859_1(_T("iso-8859-1"));
 #else
     // stand-ins in absence of wchar_t
-    WXDLLIMPEXP_DATA_BASE(wxMBConv) wxConvLibc,
-                                    wxConvFile,
-                                    wxConvISO8859_1,
-                                    wxConvLocal,
-                                    wxConvUTF8;
+    WXDLLEXPORT_DATA(wxMBConv) wxConvLibc,
+                               wxConvFile,
+                               wxConvISO8859_1,
+                               wxConvLocal,
+                               wxConvUTF8;
 #endif // wxUSE_WCHAR_T
 
-WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent = &wxConvLibc;
+WXDLLEXPORT_DATA(wxMBConv *) wxConvCurrent = &wxConvLibc;
 
 class wxStrConvModule: public wxModule
 {
@@ -279,10 +276,52 @@ const wxCharBuffer wxMBConv::cWC2MB(const wchar_t *pwz) const
 }
 
 // ----------------------------------------------------------------------------
+// standard gdk conversion
+// ----------------------------------------------------------------------------
+
+#ifdef __WXGTK12__
+
+WXDLLEXPORT_DATA(wxMBConvGdk) wxConvGdk;
+
+#include <gdk/gdk.h>
+
+size_t wxMBConvGdk::MB2WC(wchar_t *buf, const char *psz, size_t n) const
+{
+    if (buf)
+    {
+        return gdk_mbstowcs((GdkWChar *)buf, psz, n);
+    }
+    else
+    {
+        GdkWChar *nbuf = new GdkWChar[n=strlen(psz)];
+        size_t len = gdk_mbstowcs(nbuf, psz, n);
+        delete[] nbuf;
+        return len;
+    }
+}
+
+size_t wxMBConvGdk::WC2MB(char *buf, const wchar_t *psz, size_t n) const
+{
+    char *mbstr = gdk_wcstombs((GdkWChar *)psz);
+    size_t len = mbstr ? strlen(mbstr) : 0;
+    if (buf)
+    {
+        if (len > n)
+            len = n;
+        memcpy(buf, psz, len);
+        if (len < n)
+            buf[len] = 0;
+    }
+    return len;
+}
+
+#endif // GTK > 1.0
+
+// ----------------------------------------------------------------------------
 // UTF-7
 // ----------------------------------------------------------------------------
 
-WXDLLIMPEXP_DATA_BASE(wxMBConvUTF7) wxConvUTF7;
+WXDLLEXPORT_DATA(wxMBConvUTF7) wxConvUTF7;
 
 #if 0
 static char utf7_setD[]="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -313,7 +352,7 @@ size_t wxMBConvUTF7::WC2MB(char * WXUNUSED(buf),
 // UTF-8
 // ----------------------------------------------------------------------------
 
-WXDLLIMPEXP_DATA_BASE(wxMBConvUTF8) wxConvUTF8;
+WXDLLEXPORT_DATA(wxMBConvUTF8) wxConvUTF8;
 
 static wxUint32 utf8_max[]=
     { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff, 0xffffffff };
@@ -746,6 +785,12 @@ size_t IC_CharSet::WC2MB(char *buf, const wchar_t *psz, size_t n)
 
 #if defined(__WIN32__) && !defined(__WXMICROWIN__) && !defined(__WXUNIVERSAL__)
 
+#ifdef __WXWINE__
+    #define WINE_CAST (WCHAR *)
+#else
+    #define WINE_CAST
+#endif
+
 extern long wxCharsetToCodepage(const wxChar *charset); // from utils.cpp
 
 class CP_CharSet : public wxCharacterSet
@@ -765,7 +810,7 @@ public:
                                 0,              // flags (none)
                                 psz,            // input string
                                 -1,             // its length (NUL-terminated)
-                                buf,            // output string
+                                WINE_CAST buf,  // output string
                                 buf ? n : 0     // size of output buffer
                              );
 
@@ -780,7 +825,7 @@ public:
                              (
                                 m_CodePage,     // code page
                                 0,              // flags (none)
-                                psz,            // input string
+                                WINE_CAST psz,  // input string
                                 -1,             // it is (wide) NUL-terminated
                                 buf,            // output buffer
                                 buf ? n : 0,    // and its size
@@ -846,8 +891,6 @@ public:
 
     // were we initialized successfully?
     bool m_ok;
-
-    DECLARE_NO_COPY_CLASS(EC_CharSet)
 };
 
 #endif // wxUSE_FONTMAP

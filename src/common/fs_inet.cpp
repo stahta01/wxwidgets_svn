@@ -19,7 +19,7 @@ limitation)
 
 */
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "fs_inet.h"
 #endif
 
@@ -145,22 +145,19 @@ wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxStri
     return new wxFSFile(s,
                         right,
                         info->GetMime(),
-                        GetAnchor(location)
-#if wxUSE_DATETIME
-                        , wxDateTime::Now()
-#endif // wxUSE_DATETIME
-                        );
+                        GetAnchor(location),
+                        wxDateTime::Now());
 }
 
 
 
 wxInternetFSHandler::~wxInternetFSHandler()
 {
-    wxHashTable::compatibility_iterator n;
+    wxNode *n;
     wxInetCacheNode *n2;
 
     m_Cache.BeginFind();
-    while ((n = m_Cache.Next()) != 0)
+    while ((n = m_Cache.Next()) != NULL)
     {
         n2 = (wxInetCacheNode*) n->GetData();
         wxRemoveFile(n2->GetTemp());

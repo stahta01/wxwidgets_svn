@@ -11,7 +11,7 @@
 #ifndef __GTKTOPLEVELH__
 #define __GTKTOPLEVELH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "toplevel.h"
 #endif
 
@@ -60,7 +60,7 @@ public:
     virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
     virtual bool IsFullScreen() const { return m_fsIsShowing; };
 
-    virtual bool SetShape(const wxRegion& region);
+    /*virtual*/ bool SetShape(const wxRegion& region);
 
     virtual bool Show(bool show = TRUE);
 

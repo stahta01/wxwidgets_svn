@@ -12,7 +12,7 @@
 #ifndef _WX_CONTROL_H_
 #define _WX_CONTROL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "control.h"
 #endif
 
@@ -21,13 +21,15 @@
 // General item class
 class WXDLLEXPORT wxControl : public wxControlBase
 {
+    DECLARE_ABSTRACT_CLASS(wxControl)
+
 public:
-    wxControl();
-    wxControl(wxWindow *parent, wxWindowID id,
-              const wxPoint& pos = wxDefaultPosition,
-              const wxSize& size = wxDefaultSize, long style = 0,
-              const wxValidator& validator = wxDefaultValidator,
-              const wxString& name = wxControlNameStr)
+   wxControl();
+   wxControl(wxWindow *parent, wxWindowID id,
+             const wxPoint& pos = wxDefaultPosition,
+             const wxSize& size = wxDefaultSize, long style = 0,
+             const wxValidator& validator = wxDefaultValidator,
+             const wxString& name = wxControlNameStr)
     {
         Create(parent, id, pos, size, style, validator, name);
     }
@@ -65,21 +67,37 @@ public:
     virtual WXHBRUSH OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
             WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
+#if WXWIN_COMPATIBILITY
+    virtual void SetButtonColour(const wxColour& WXUNUSED(col)) { }
+    wxColour* GetButtonColour() const { return NULL; }
+
+    inline virtual void SetLabelFont(const wxFont& font);
+    inline virtual void SetButtonFont(const wxFont& font);
+    inline wxFont& GetLabelFont() const;
+    inline wxFont& GetButtonFont() const;
+
+    // Adds callback
+    inline void Callback(const wxFunction function);
+
+    wxFunction GetCallback() { return m_callback; }
+
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const;
+    wxFunction       m_callback;     // Callback associated with the window
+#endif // WXWIN_COMPATIBILITY
+
+protected:
+    // for controls like radiobuttons which are really composite this array
+    // holds the ids (not HWNDs!) of the sub controls
+    wxArrayLong m_subControls;
 
     virtual wxSize DoGetBestSize() const;
 
-    // create the control of the given Windows class: this is typically called
-    // from Create() method of the derived class passing its label, pos and
-    // size parameter (style parameter is not needed because m_windowStyle is
-    // supposed to had been already set and so is used instead when this
-    // function is called)
+    // create the control of the given Window class
     bool MSWCreateControl(const wxChar *classname,
                           const wxString& label,
                           const wxPoint& pos,
-                          const wxSize& size);
+                          const wxSize& size,
+                          long style);
 
     // NB: the method below is deprecated now, with MSWGetStyle() the method
     //     above should be used instead! Once all the controls are updated to
@@ -104,14 +122,18 @@ protected:
     // default style for the control include WS_TABSTOP if it AcceptsFocus()
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
-    // for controls like radiobuttons which are really composite this array
-    // holds the ids (not HWNDs!) of the sub controls
-    wxArrayLong m_subControls;
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxControl)
     DECLARE_EVENT_TABLE()
 };
+
+
+#if WXWIN_COMPATIBILITY
+    inline void wxControl::Callback(const wxFunction f) { m_callback = f; };
+    inline wxFont& wxControl::GetLabelFont() const { return (wxFont &)GetFont(); }
+    inline wxFont& wxControl::GetButtonFont() const { return (wxFont &)GetFont(); }
+    inline void wxControl::SetLabelFont(const wxFont& font) { SetFont(font); }
+    inline void wxControl::SetButtonFont(const wxFont& font) { SetFont(font); }
+#endif // WXWIN_COMPATIBILITY
 
 #endif
     // _WX_CONTROL_H_

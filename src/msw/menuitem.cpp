@@ -6,7 +6,7 @@
 // Created:     11.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "menuitem.h"
 #endif
 
@@ -49,11 +49,6 @@
 #endif // wxUSE_ACCEL
 
 #include "wx/msw/private.h"
-
-#ifdef __WXWINCE__
-// Implemented in menu.cpp
-UINT GetMenuState(HMENU hMenu, UINT id, UINT flags) ;
-#endif
 
 // ---------------------------------------------------------------------------
 // macro
@@ -109,7 +104,7 @@ wxMenuItem::wxMenuItem(wxMenu *parentMenu,
           : wxMenuItemBase(parentMenu, id, text, help,
                            isCheckable ? wxITEM_CHECK : wxITEM_NORMAL, subMenu)
 #if wxUSE_OWNER_DRAWN
-           , wxOwnerDrawn(text, isCheckable, true)
+           , wxOwnerDrawn(text, isCheckable, TRUE)
 #endif // owner drawn
 {
     Init();
@@ -267,7 +262,7 @@ void wxMenuItem::Check(bool check)
 #endif // __WIN32__
 
         // also uncheck all the other items in this radio group
-        wxMenuItemList::compatibility_iterator node = items.Item(start);
+        wxMenuItemList::Node *node = items.Item(start);
         for ( int n = start; n <= end && node; n++ )
         {
             if ( n != pos )
@@ -347,31 +342,12 @@ void wxMenuItem::SetText(const wxString& text)
             data = (wxChar*) text.c_str();
         }
 
-#ifdef __WXWINCE__
-        // FIXME: complete this, applying the old
-        // flags.
-        // However, the WinCE doc for SetMenuItemInfo
-        // says that you can't use it to set the menu
-        // item state; only data, id and type.
-        MENUITEMINFO info;
-        wxZeroMemory(info);
-        info.cbSize = sizeof(info);
-        info.fMask = MIIM_TYPE;
-        info.fType = MFT_STRING;
-        info.cch = text.Length();
-        info.dwTypeData = (LPTSTR) data ;
-        if ( !SetMenuItemInfo(hMenu, id, FALSE, & info) )
-        {
-            wxLogLastError(wxT("SetMenuItemInfo"));
-        }
-#else
         if ( ::ModifyMenu(hMenu, id,
                           MF_BYCOMMAND | flagsOld,
                           id, data) == (int)0xFFFFFFFF )
         {
             wxLogLastError(wxT("ModifyMenu"));
         }
-#endif
     }
 }
 

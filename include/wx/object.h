@@ -5,7 +5,7 @@
 // Modified by: Ron Lee
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) 1997 Julian Smart
+// Copyright:   (c) 1997 Julian Smart and Markus Holzem
 //              (c) 2001 Ron Lee <ron@debian.org>
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@
 #ifndef _WX_OBJECTH__
 #define _WX_OBJECTH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "object.h"
 #endif
 
@@ -24,17 +24,9 @@
 #include "wx/defs.h"
 #include "wx/memory.h"
 
-class WXDLLIMPEXP_BASE wxObject;
+class WXDLLEXPORT wxObject;
 
 #if wxUSE_DYNAMIC_CLASSES
-
-#ifndef wxUSE_EXTENDED_RTTI
-#define wxUSE_EXTENDED_RTTI 0
-#endif
-
-#if wxUSE_EXTENDED_RTTI
-#include "wx/xti.h"
-#else
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -49,9 +41,14 @@ class WXDLLIMPEXP_BASE wxObject;
 #undef GetClassInfo
 #endif
 
-class WXDLLIMPEXP_BASE wxClassInfo;
-class WXDLLIMPEXP_BASE wxHashTable;
-class WXDLLIMPEXP_BASE wxObjectRefData;
+class WXDLLEXPORT wxClassInfo;
+class WXDLLEXPORT wxHashTable;
+class WXDLLEXPORT wxObjectRefData;
+
+#if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
+    #include "wx/ioswrap.h"
+#endif
+
 
 // ----------------------------------------------------------------------------
 // wxClassInfo
@@ -59,34 +56,31 @@ class WXDLLIMPEXP_BASE wxObjectRefData;
 
 typedef wxObject *(*wxObjectConstructorFn)(void);
 
-class WXDLLIMPEXP_BASE wxClassInfo
+class WXDLLEXPORT wxClassInfo
 {
 public:
     wxClassInfo( const wxChar *className,
-                 const wxClassInfo *baseInfo1,
-                 const wxClassInfo *baseInfo2,
+                 const wxChar *baseName1,
+                 const wxChar *baseName2,
                  int size,
                  wxObjectConstructorFn ctor )
         : m_className(className)
+        , m_baseClassName1(baseName1)
+        , m_baseClassName2(baseName2)
         , m_objectSize(size)
         , m_objectConstructor(ctor)
-        , m_baseInfo1(baseInfo1)
-        , m_baseInfo2(baseInfo2)
+        , m_baseInfo1(0)
+        , m_baseInfo2(0)
         , m_next(sm_first)
-        { 
-            sm_first = this;
-            Register();
-        }
+        { sm_first = this; }
 
     ~wxClassInfo();
 
     wxObject *CreateObject() { return m_objectConstructor ? (*m_objectConstructor)() : 0; }
 
     const wxChar       *GetClassName() const { return m_className; }
-    const wxChar       *GetBaseClassName1() const
-        { return m_baseInfo1 ? m_baseInfo1->GetClassName() : NULL; }
-    const wxChar       *GetBaseClassName2() const
-        { return m_baseInfo2 ? m_baseInfo2->GetClassName() : NULL; }
+    const wxChar       *GetBaseClassName1() const { return m_baseClassName1; }
+    const wxChar       *GetBaseClassName2() const { return m_baseClassName2; }
     const wxClassInfo  *GetBaseClass1() const { return m_baseInfo1; }
     const wxClassInfo  *GetBaseClass2() const { return m_baseInfo2; }
     int                 GetSize() const { return m_objectSize; }
@@ -107,16 +101,18 @@ public:
                  ( m_baseInfo2 && m_baseInfo2->IsKindOf(info) ) );
     }
 
-#ifdef WXWIN_COMPATIBILITY_2_4
-    // Initializes parent pointers and hash table for fast searching.
-    wxDEPRECATED( static void     InitializeClasses() );
-    // Cleans up hash table used for fast searching.
-    wxDEPRECATED( static void     CleanUpClasses() );
-#endif
-    static void     CleanUp();
-    
+        // Initializes parent pointers and hash table for fast searching.
+
+    static void     InitializeClasses();
+
+        // Cleans up hash table used for fast searching.
+
+    static void     CleanUpClasses();
+
 public:
     const wxChar            *m_className;
+    const wxChar            *m_baseClassName1;
+    const wxChar            *m_baseClassName2;
     int                      m_objectSize;
     wxObjectConstructorFn    m_objectConstructor;
 
@@ -140,19 +136,9 @@ private:
     static wxClassInfo *GetBaseByName(const wxChar *name);
 
     DECLARE_NO_COPY_CLASS(wxClassInfo)
-   
-protected: 
-    // registers the class
-    void Register();
-    void Unregister();
 };
 
-WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxChar *name);
-
-#ifdef WXWIN_COMPATIBILITY_2_4
-inline void wxClassInfo::InitializeClasses() {}
-inline void wxClassInfo::CleanUpClasses() {}
-#endif
+WXDLLEXPORT wxObject *wxCreateDynamicObject(const wxChar *name);
 
 // ----------------------------------------------------------------------------
 // Dynamic class macros
@@ -164,14 +150,6 @@ inline void wxClassInfo::CleanUpClasses() {}
   virtual wxClassInfo *GetClassInfo() const   \
    { return &name::sm_class##name; }
 
-#define DECLARE_DYNAMIC_CLASS_NO_ASSIGN(name)   \
-    DECLARE_NO_ASSIGN_CLASS(name)               \
-    DECLARE_DYNAMIC_CLASS(name)
-
-#define DECLARE_DYNAMIC_CLASS_NO_COPY(name)   \
-    DECLARE_NO_COPY_CLASS(name)               \
-    DECLARE_DYNAMIC_CLASS(name)
-
 #define DECLARE_ABSTRACT_CLASS(name) DECLARE_DYNAMIC_CLASS(name)
 #define DECLARE_CLASS(name) DECLARE_DYNAMIC_CLASS(name)
 
@@ -182,21 +160,18 @@ inline void wxClassInfo::CleanUpClasses() {}
     // Single inheritance with one base class
 
 #define IMPLEMENT_DYNAMIC_CLASS(name, basename)                 \
- wxObject* wxConstructorFor##name()                             \
+ wxObject* WXDLLEXPORT_CTORFN wxConstructorFor##name()          \
   { return new name; }                                          \
- wxClassInfo name::sm_class##name(wxT(#name),                   \
-            &basename::sm_class##basename, NULL,                \
-            (int) sizeof(name),                                 \
+ wxClassInfo name::sm_class##name(wxT(#name), wxT(#basename),   \
+            0, (int) sizeof(name),                              \
             (wxObjectConstructorFn) wxConstructorFor##name);
 
     // Multiple inheritance with two base classes
 
 #define IMPLEMENT_DYNAMIC_CLASS2(name, basename1, basename2)    \
- wxObject* wxConstructorFor##name()                             \
+ wxObject* WXDLLEXPORT_CTORFN wxConstructorFor##name()          \
   { return new name; }                                          \
- wxClassInfo name::sm_class##name(wxT(#name),                   \
-            &basename1::sm_class##basename1,                    \
-            &basename2::sm_class##basename2,                    \
+ wxClassInfo name::sm_class##name(wxT(#name), wxT(#basename1),  \
             wxT(#basename2), (int) sizeof(name),                \
             (wxObjectConstructorFn) wxConstructorFor##name);
 
@@ -207,24 +182,18 @@ inline void wxClassInfo::CleanUpClasses() {}
     // Single inheritance with one base class
 
 #define IMPLEMENT_ABSTRACT_CLASS(name, basename)                \
- wxClassInfo name::sm_class##name(wxT(#name),                   \
-            &basename::sm_class##basename, NULL,                \
-            (int) sizeof(name), (wxObjectConstructorFn) 0);
+ wxClassInfo name::sm_class##name(wxT(#name), wxT(#basename),   \
+            0, (int) sizeof(name), (wxObjectConstructorFn) 0);
 
     // Multiple inheritance with two base classes
 
 #define IMPLEMENT_ABSTRACT_CLASS2(name, basename1, basename2)   \
- wxClassInfo name::sm_class##name(wxT(#name),                   \
-            &basename1::sm_class##basename1,                    \
-            &basename2::sm_class##basename2,                    \
-            (int) sizeof(name),                                 \
+ wxClassInfo name::sm_class##name(wxT(#name), wxT(#basename1),  \
+            wxT(#basename2), (int) sizeof(name),                \
             (wxObjectConstructorFn) 0);
 
 #define IMPLEMENT_CLASS IMPLEMENT_ABSTRACT_CLASS
 #define IMPLEMENT_CLASS2 IMPLEMENT_ABSTRACT_CLASS2
-
-#endif // !wxUSE_EXTENDED_RTTI
-
 
 // -----------------------------------
 // for pluggable classes
@@ -293,6 +262,7 @@ name##PluginSentinel  m_pluginsentinel;
 #define IMPLEMENT_USER_EXPORTED_ABSTRACT_PLUGGABLE_CLASS2(name, basename1, basename2)  \
  IMPLEMENT_ABSTRACT_PLUGGABLE_CLASS2(name, basename1, basename2)
 
+
 #define CLASSINFO(name) (&name::sm_class##name)
 
 #else // !wxUSE_DYNAMIC_CLASSES
@@ -325,6 +295,7 @@ name##PluginSentinel  m_pluginsentinel;
 
 #endif // wxUSE_DYNAMIC_CLASSES
 
+
 #define wxIS_KIND_OF(obj, className) obj->IsKindOf(&className::sm_class##className)
 
 // Just seems a bit nicer-looking (pretend it's not a macro)
@@ -339,11 +310,7 @@ name##PluginSentinel  m_pluginsentinel;
 #define wxDynamicCastThis(className) \
  (IsKindOf(&className::sm_class##className) ? (className *)(this) : (className *)0)
 
-#ifdef HAVE_CONST_CAST
-#define wxConstCast(obj, className) const_cast<className *>(obj)
-#else
 #define wxConstCast(obj, className) ((className *)(obj))
-#endif
 
 
 #ifdef __WXDEBUG__
@@ -358,6 +325,18 @@ inline void wxCheckCast(void *ptr)
 #define wxStaticCast(obj, className) ((className *)(obj))
 
 #endif  // __WXDEBUG__
+
+
+// for some reason Borland seems to need this include.
+#if wxUSE_STD_IOSTREAM                                \
+    && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)  \
+    && defined(__BORLANDC__)
+    #if wxUSE_IOSTREAMH
+        #include <iostream.h>
+    #else
+        #include <iostream>
+    #endif
+#endif // wxUSE_IOSTREAMH
 
 // ----------------------------------------------------------------------------
 // set up memory debugging macros
@@ -417,26 +396,27 @@ inline void wxCheckCast(void *ptr)
 
 #endif // WXDEBUG && wxUSE_MEMORY_TRACING
 
+
 // ----------------------------------------------------------------------------
 // wxObject: the root class of wxWindows object hierarchy
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxObject
+class WXDLLEXPORT wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxObject)
 
 private:
     void InitFrom(const wxObject& other);
-
+    
 public:
     wxObject() { m_refData = NULL; }
     virtual ~wxObject() { UnRef(); }
-
+    
     wxObject(const wxObject& other)
         {
             InitFrom(other);
         }
-
+    
     wxObject& operator=(const wxObject& other)
     {
         if ( this != &other )
@@ -480,6 +460,11 @@ public:
     void operator delete[] (void* buf, const wxChar*, int );
 #endif
 
+
+#if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
+    virtual void Dump(wxSTD ostream& str);
+#endif
+
     // ref counted data handling methods
 
     // get/set
@@ -514,9 +499,9 @@ protected:
 // wxObjectRefData: ref counted data meant to be stored in wxObject
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxObjectRefData
+class WXDLLEXPORT wxObjectRefData
 {
-    friend class WXDLLIMPEXP_BASE wxObject;
+    friend class WXDLLEXPORT wxObject;
 
 public:
     wxObjectRefData() : m_count(1) { }
@@ -533,35 +518,6 @@ inline wxObject *wxCheckDynamicCast(wxObject *obj, wxClassInfo *classInfo)
 {
     return obj && obj->GetClassInfo()->IsKindOf(classInfo) ? obj : NULL;
 }
-
-#if wxUSE_EXTENDED_RTTI
-class WXDLLIMPEXP_BASE wxDynamicObject : public wxObject
-{
-public:
-    // instantiates this object with an instance of its superclass
-    wxDynamicObject(wxObject* superClassInstance, const wxDynamicClassInfo *info) ;
-    ~wxDynamicObject();
-
-    void SetProperty (const wxChar *PropertyName, const wxxVariant &Value);
-    wxxVariant GetProperty (const wxChar *PropertyName) const ;
-
-    // get the runtime identity of this object
-    wxClassInfo *GetClassInfo() const
-    {
-		return const_cast<wxClassInfo*>((const wxClassInfo*)m_classInfo);
-    }
-
-    wxObject* GetSuperClassInstance() const
-    {
-        return m_superClassInstance ;
-    }
-private :
-    wxObject *m_superClassInstance ;
-    const wxDynamicClassInfo *m_classInfo;
-    struct wxDynamicObjectInternal;
-    wxDynamicObjectInternal *m_data;
-};
-#endif
 
 // ----------------------------------------------------------------------------
 // more debugging macros

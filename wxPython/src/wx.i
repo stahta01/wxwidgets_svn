@@ -87,6 +87,9 @@ public:
 
 
     wxString GetAppName();
+#ifdef __WXMSW__
+    bool GetAuto3D();
+#endif
     wxString GetClassName();
     bool GetExitOnFrameDelete();
     int GetPrintMode();
@@ -103,6 +106,9 @@ public:
     bool Yield(bool onlyIfNeeded = FALSE);
 
     void SetAppName(const wxString& name);
+#ifdef __WXMSW__
+    void SetAuto3D(bool auto3D);
+#endif
     void SetClassName(const wxString& name);
     void SetExitOnFrameDelete(bool flag);
     void SetPrintMode(int mode);

@@ -43,8 +43,6 @@
 // Implementation
 // ---------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxCDAudioWin, wxCDAudio)
-    
 wxCDAudioWin::wxCDAudioWin(void)
   : wxCDAudio(), m_trksize(NULL), m_trkpos(NULL), m_ok(TRUE), m_toc(NULL)
 {
@@ -53,7 +51,7 @@ wxCDAudioWin::wxCDAudioWin(void)
   DWORD ret;
 
   m_internal = new CDAW_Internal;
-  open_struct.lpstrDeviceType = _T("cdaudio");
+  open_struct.lpstrDeviceType = "cdaudio";
   ret = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_TYPE,
                        (DWORD)&open_struct);
   if (ret) {
@@ -89,13 +87,13 @@ void wxCDAudioWin::PrepareToc(void)
   MCI_STATUS_PARMS status_struct;
   wxUint16 i, nb_m_trksize;
   wxCDtime total_time, *trk;
-  DWORD tmem;
+  DWORD ret, tmem;
 
   if (!m_ok)
     return;
 
   status_struct.dwItem = MCI_STATUS_NUMBER_OF_TRACKS;
-  mciSendCommand(m_internal->dev_id, MCI_STATUS, MCI_STATUS_ITEM,
+  ret = mciSendCommand(m_internal->dev_id, MCI_STATUS, MCI_STATUS_ITEM,
                  (DWORD)&status_struct);
   nb_m_trksize = status_struct.dwReturn;
 
@@ -103,7 +101,7 @@ void wxCDAudioWin::PrepareToc(void)
   m_trkpos = new wxCDtime[nb_m_trksize+1];
 
   status_struct.dwItem = MCI_STATUS_LENGTH;
-  mciSendCommand(m_internal->dev_id, MCI_STATUS, MCI_STATUS_ITEM,
+  ret = mciSendCommand(m_internal->dev_id, MCI_STATUS, MCI_STATUS_ITEM,
                  (DWORD)&status_struct);
   total_time.track = nb_m_trksize;
   tmem = status_struct.dwReturn;
@@ -115,7 +113,7 @@ void wxCDAudioWin::PrepareToc(void)
   for (i=1;i<=nb_m_trksize;i++) {
     status_struct.dwItem = MCI_STATUS_POSITION;
     status_struct.dwTrack = i;
-    mciSendCommand(m_internal->dev_id, MCI_STATUS,
+    ret  = mciSendCommand(m_internal->dev_id, MCI_STATUS,
                    MCI_STATUS_ITEM | MCI_TRACK,
                    (DWORD)(LPVOID)&status_struct);
     tmem = status_struct.dwReturn;
@@ -129,7 +127,7 @@ void wxCDAudioWin::PrepareToc(void)
 
     status_struct.dwItem = MCI_STATUS_LENGTH;
     status_struct.dwTrack = i;
-    mciSendCommand(m_internal->dev_id, MCI_STATUS,
+    ret  = mciSendCommand(m_internal->dev_id, MCI_STATUS,
                    MCI_STATUS_ITEM | MCI_TRACK,
                    (DWORD)(LPVOID)&status_struct);
     tmem = status_struct.dwReturn;

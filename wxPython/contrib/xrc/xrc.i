@@ -16,7 +16,7 @@
 %{
 #include "wxPython.h"
 #include "pyistream.h"
-#include "wx/xml/xml.h"
+#include "wx/xrc/xml.h"
 #include "wx/xrc/xmlres.h"
 #include <wx/filesys.h>
 #include <wx/fs_mem.h>
@@ -676,6 +676,9 @@ public:
 //----------------------------------------------------------------------
 
 %init %{
+
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
 
     wxXmlInitResourceModule();
     wxXmlResource::Get()->InitAllHandlers();

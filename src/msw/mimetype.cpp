@@ -6,7 +6,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef    __GNUG__
@@ -35,7 +35,6 @@
 
 #include "wx/log.h"
 #include "wx/file.h"
-#include "wx/iconloc.h"
 #include "wx/intl.h"
 #include "wx/dynarray.h"
 #include "wx/confbase.h"
@@ -77,33 +76,6 @@ class WXDLLEXPORT wxIcon;
 // location, uses it, so it isn't likely to change
 static const wxChar *MIME_DATABASE_KEY = wxT("MIME\\Database\\Content Type\\");
 
-// this function replaces Microsoft %1 with Unix-like %s
-static bool CanonicalizeParams(wxString& command)
-{
-    // transform it from '%1' to '%s' style format string (now also test for %L
-    // as apparently MS started using it as well for the same purpose)
-
-    // NB: we don't make any attempt to verify that the string is valid, i.e.
-    //     doesn't contain %2, or second %1 or .... But we do make sure that we
-    //     return a string with _exactly_ one '%s'!
-    bool foundFilename = false;
-    size_t len = command.length();
-    for ( size_t n = 0; (n < len) && !foundFilename; n++ )
-    {
-        if ( command[n] == wxT('%') &&
-                (n + 1 < len) &&
-                (command[n + 1] == wxT('1') || command[n + 1] == wxT('L')) )
-        {
-            // replace it with '%s'
-            command[n + 1] = wxT('s');
-
-            foundFilename = true;
-        }
-    }
-
-    return foundFilename;
-}
-
 void wxFileTypeImpl::Init(const wxString& strFileType, const wxString& ext)
 {
     // VZ: does it? (FIXME)
@@ -138,7 +110,7 @@ size_t wxFileTypeImpl::GetAllCommands(wxArrayString *verbs,
         // get it from the registry
         wxFileTypeImpl *self = wxConstCast(this, wxFileTypeImpl);
         wxRegKey rkey(wxRegKey::HKCR, m_ext);
-        if ( !rkey.Exists() || !rkey.QueryValue(wxEmptyString, self->m_strFileType) )
+        if ( !rkey.Exists() || !rkey.QueryValue(_T(""), self->m_strFileType) )
         {
             wxLogDebug(_T("Can't get the filetype for extension '%s'."),
                        m_ext.c_str());
@@ -191,7 +163,7 @@ bool wxFileTypeImpl::EnsureExtKeyExists()
     wxRegKey rkey(wxRegKey::HKCR, m_ext);
     if ( !rkey.Exists() )
     {
-        if ( !rkey.Create() || !rkey.SetValue(wxEmptyString, m_strFileType) )
+        if ( !rkey.Create() || !rkey.SetValue(_T(""), m_strFileType) )
         {
             wxLogError(_("Failed to create registry entry for '%s' files."),
                        m_ext.c_str());
@@ -228,8 +200,27 @@ wxString wxFileTypeImpl::GetCommand(const wxChar *verb) const
     wxString command;
     if ( key.Open() ) {
         // it's the default value of the key
-        if ( key.QueryValue(wxEmptyString, command) ) {
-            bool foundFilename = CanonicalizeParams(command);
+        if ( key.QueryValue(wxT(""), command) ) {
+            // transform it from '%1' to '%s' style format string (now also
+            // test for %L - apparently MS started using it as well for the
+            // same purpose)
+
+            // NB: we don't make any attempt to verify that the string is valid,
+            //     i.e. doesn't contain %2, or second %1 or .... But we do make
+            //     sure that we return a string with _exactly_ one '%s'!
+            bool foundFilename = FALSE;
+            size_t len = command.Len();
+            for ( size_t n = 0; (n < len) && !foundFilename; n++ ) {
+                if ( command[n] == wxT('%') &&
+                     (n + 1 < len) &&
+                     (command[n + 1] == wxT('1') ||
+                      command[n + 1] == wxT('L')) ) {
+                    // replace it with '%s'
+                    command[n + 1] = wxT('s');
+
+                    foundFilename = TRUE;
+                }
+            }
 
 #if wxUSE_IPC
             // look whether we must issue some DDE requests to the application
@@ -238,13 +229,13 @@ wxString wxFileTypeImpl::GetCommand(const wxChar *verb) const
             wxRegKey keyDDE(wxRegKey::HKCR, strKey);
             if ( keyDDE.Open() ) {
                 wxString ddeCommand, ddeServer, ddeTopic;
-                keyDDE.QueryValue(wxEmptyString, ddeCommand);
+                keyDDE.QueryValue(_T(""), ddeCommand);
                 ddeCommand.Replace(_T("%1"), _T("%s"));
 
                 wxRegKey(wxRegKey::HKCR, strKey + _T("\\Application")).
-                    QueryValue(wxEmptyString, ddeServer);
+                    QueryValue(_T(""), ddeServer);
                 wxRegKey(wxRegKey::HKCR, strKey + _T("\\Topic")).
-                    QueryValue(wxEmptyString, ddeTopic);
+                    QueryValue(_T(""), ddeTopic);
 
                 if (ddeTopic.IsEmpty())
                     ddeTopic = wxT("System");
@@ -259,8 +250,7 @@ wxString wxFileTypeImpl::GetCommand(const wxChar *verb) const
             }
             else
 #endif // wxUSE_IPC
-            if ( !foundFilename )
-            {
+                if ( !foundFilename ) {
                 // we didn't find any '%1' - the application doesn't know which
                 // file to open (note that we only do it if there is no DDEExec
                 // subkey)
@@ -344,8 +334,11 @@ bool wxFileTypeImpl::GetMimeTypes(wxArrayString& mimeTypes) const
 }
 
 
-bool wxFileTypeImpl::GetIcon(wxIconLocation *iconLoc) const
+bool wxFileTypeImpl::GetIcon(wxIcon *icon,
+                             wxString *iconFile,
+                             int *iconIndex) const
 {
+#if wxUSE_GUI
     wxString strIconKey;
     strIconKey << m_strFileType << wxT("\\DefaultIcon");
 
@@ -356,7 +349,7 @@ bool wxFileTypeImpl::GetIcon(wxIconLocation *iconLoc) const
     if ( key.Open() ) {
         wxString strIcon;
         // it's the default value of the key
-        if ( key.QueryValue(wxEmptyString, strIcon) ) {
+        if ( key.QueryValue(wxT(""), strIcon) ) {
             // the format is the following: <full path to file>, <icon index>
             // NB: icon index may be negative as well as positive and the full
             //     path may contain the environment variables inside '%'
@@ -370,18 +363,34 @@ bool wxFileTypeImpl::GetIcon(wxIconLocation *iconLoc) const
                 strIndex = wxT("0");
             }
 
-            if ( iconLoc )
-            {
-                iconLoc->SetFileName(wxExpandEnvVars(strFullPath));
+            wxString strExpPath = wxExpandEnvVars(strFullPath);
+            // here we need C based counting!
+            int nIndex = wxAtoi(strIndex);
 
-                iconLoc->SetIndex(wxAtoi(strIndex));
+            HICON hIcon = ExtractIcon(GetModuleHandle(NULL), strExpPath, nIndex);
+            switch ( (int)hIcon ) {
+                case 0: // means no icons were found
+                case 1: // means no such file or it wasn't a DLL/EXE/OCX/ICO/...
+                    wxLogDebug(wxT("incorrect registry entry '%s': no such icon."),
+                               key.GetName().c_str());
+                    break;
+
+                default:
+                    icon->SetHICON((WXHICON)hIcon);
+                    wxSize size = wxGetHiconSize(hIcon);
+                    icon->SetSize(size);
+                    if ( iconIndex )
+                        *iconIndex = nIndex;
+                    if ( iconFile )
+                        *iconFile = strFullPath;
+                    return TRUE;
             }
-
-            return TRUE;
         }
     }
 
     // no such file type or no value or incorrect icon entry
+#endif // wxUSE_GUI
+
     return FALSE;
 }
 
@@ -393,7 +402,7 @@ bool wxFileTypeImpl::GetDescription(wxString *desc) const
 
     if ( key.Open() ) {
         // it's the default value of the key
-        if ( key.QueryValue(wxEmptyString, *desc) ) {
+        if ( key.QueryValue(wxT(""), *desc) ) {
             return TRUE;
         }
     }
@@ -430,7 +439,7 @@ wxMimeTypesManagerImpl::GetFileTypeFromExtension(const wxString& ext)
     wxRegKey key(wxRegKey::HKCR, str);
     if ( key.Open() ) {
         // it's the default value of the key
-        if ( key.QueryValue(wxEmptyString, strFileType) ) {
+        if ( key.QueryValue(wxT(""), strFileType) ) {
             // create the new wxFileType object
             return CreateFileType(strFileType, ext);
         }
@@ -551,7 +560,7 @@ wxFileType *wxMimeTypesManagerImpl::Associate(const wxFileTypeInfo& ftInfo)
                 filetype = filetypeOrig;
             }
 
-            ok = key.SetValue(wxEmptyString, filetype);
+            ok = key.SetValue(_T(""), filetype);
         }
         }
         else
@@ -560,11 +569,11 @@ wxFileType *wxMimeTypesManagerImpl::Associate(const wxFileTypeInfo& ftInfo)
             if (!filetypeOrig.empty())
                 {
                     filetype = filetypeOrig;
-                    ok = key.SetValue(wxEmptyString, filetype);
+                    ok = key.SetValue(_T(""), filetype);
                 }
             else
                 {
-                    ok = key.QueryValue(wxEmptyString, filetype);
+                    ok = key.QueryValue(_T(""), filetype);
                 }
         }
         // now set a mimetypeif we have it, but ignore it if none
@@ -602,7 +611,7 @@ wxFileType *wxMimeTypesManagerImpl::Associate(const wxFileTypeInfo& ftInfo)
 
             wxRegKey key(wxRegKey::HKCR, extWithDot);
             if ( !key.Exists() ) ok = key.Create();
-            ok = key.SetValue(wxEmptyString, filetype);
+            ok = key.SetValue(_T(""), filetype);
 
         // now set any mimetypes we may have, but ignore it if none
         const wxString& mimetype = ftInfo.GetMimeType();
@@ -666,7 +675,7 @@ bool wxFileTypeImpl::SetCommand(const wxString& cmd,
     {
 #if wxUSE_GUI
         wxString old;
-        rkey.QueryValue(wxEmptyString, old);
+        rkey.QueryValue(wxT(""), old);
         if ( wxMessageBox
              (
                 wxString::Format(
@@ -690,7 +699,7 @@ bool wxFileTypeImpl::SetCommand(const wxString& cmd,
     // TODO:
     // 1. translate '%s' to '%1' instead of always adding it
     // 2. create DDEExec value if needed (undo GetCommand)
-    return rkey.Create() && rkey.SetValue(wxEmptyString, cmd + _T(" \"%1\"") );
+    return rkey.Create() && rkey.SetValue(_T(""), cmd + _T(" \"%1\"") );
 }
 
 /* // no longer used
@@ -733,7 +742,7 @@ bool wxFileTypeImpl::SetDefaultIcon(const wxString& cmd, int index)
     wxRegKey rkey(wxRegKey::HKCR, m_strFileType + _T("\\DefaultIcon"));
 
     return rkey.Create() &&
-           rkey.SetValue(wxEmptyString,
+           rkey.SetValue(_T(""),
                          wxString::Format(_T("%s,%d"), cmd.c_str(), index));
 }
 
@@ -748,7 +757,7 @@ bool wxFileTypeImpl::SetDescription (const wxString& desc)
     wxRegKey rkey(wxRegKey::HKCR, m_strFileType );
 
     return rkey.Create() &&
-           rkey.SetValue(wxEmptyString, desc);
+           rkey.SetValue(_T(""), desc);
 }
 
 // ----------------------------------------------------------------------------

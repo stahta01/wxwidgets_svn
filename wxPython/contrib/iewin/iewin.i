@@ -127,6 +127,9 @@ public:
 
 %init %{
 
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
+
 %}
 
 //----------------------------------------------------------------------

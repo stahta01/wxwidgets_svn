@@ -19,10 +19,12 @@
 #include "wx/mac/glcanvas.h"
 #elif defined(__WXPM__)
 #include "wx/os2/glcanvas.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/glcanvas.h"
 #endif
 
 #include "wx/app.h"
-class WXDLLIMPEXP_GL wxGLApp : public wxApp
+class WXDLLEXPORT wxGLApp : public wxApp
 {
 public:
     wxGLApp() : wxApp() { }

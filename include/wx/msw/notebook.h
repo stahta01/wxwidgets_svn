@@ -4,14 +4,14 @@
 // Author:      Robert Roebling
 // Modified by: Vadim Zeitlin for Windows version
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _NOTEBOOK_H
 #define _NOTEBOOK_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma interface "notebook.h"
 #endif
 
@@ -26,32 +26,6 @@
 // ----------------------------------------------------------------------------
 // wxNotebook
 // ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxNotebookPageInfo : public wxObject
-{
-public :
-    wxNotebookPageInfo() { m_page = NULL ; m_imageId = -1 ; m_selected = false ; }
-    virtual ~wxNotebookPageInfo() { }
-
-    void Create( wxNotebookPage *page , const wxString &text , bool selected , int imageId ) 
-    { m_page = page ; m_text = text ; m_selected = selected ; m_imageId = imageId ; }
-    wxNotebookPage* GetPage() const { return m_page ; }
-    wxString GetText() const { return m_text ; }
-    bool GetSelected() const { return m_selected ; }
-    int GetImageId() const { return m_imageId; }
-private :
-    wxNotebookPage *m_page ;
-    wxString m_text ;
-    bool m_selected ;
-    int m_imageId ;
-
-    DECLARE_DYNAMIC_CLASS(wxNotebookPageInfo) ;
-} ;
-
-
-WX_DECLARE_LIST(wxNotebookPageInfo, wxNotebookPageInfoList);
-// WX_DECLARE_EXPORTED_LIST(wxNotebookPageInfo, wxNotebookPageInfoList );
-// WX_DECLARE_LIST_3(wxNotebookPageInfo, wxNotebookPageInfo, wxNotebookPageInfoList, wxNotebookPageInfoListNode, class WXDLLEXPORT);
 
 class WXDLLEXPORT wxNotebook : public wxNotebookBase
 {
@@ -78,18 +52,18 @@ public:
   // accessors
   // ---------
     // get number of pages in the dialog
-  virtual size_t GetPageCount() const;
+  int GetPageCount() const;
 
     // set the currently selected page, return the index of the previously
     // selected one (or -1 on error)
     // NB: this function will _not_ generate wxEVT_NOTEBOOK_PAGE_xxx events
-  int SetSelection(size_t nPage);
+  int SetSelection(int nPage);
     // get the currently selected page
   int GetSelection() const { return m_nSelection; }
 
     // set/get the title of a page
-  bool SetPageText(size_t nPage, const wxString& strText);
-  wxString GetPageText(size_t nPage) const;
+  bool SetPageText(int nPage, const wxString& strText);
+  wxString GetPageText(int nPage) const;
 
   // image list stuff: each page may have an image associated with it. All
   // the images belong to an image list, so you have to
@@ -100,8 +74,8 @@ public:
   void SetImageList(wxImageList* imageList);
 
     // sets/returns item's image index in the current image list
-  int  GetPageImage(size_t nPage) const;
-  bool SetPageImage(size_t nPage, int nImage);
+  int  GetPageImage(int nPage) const;
+  bool SetPageImage(int nPage, int nImage);
 
     // currently it's always 1 because wxGTK doesn't support multi-row
     // tab controls
@@ -113,37 +87,26 @@ public:
     // set the padding between tabs (in pixels)
   void SetPadding(const wxSize& padding);
 
-    // Windows only: attempts to get colour for UX theme page background
-  wxColour GetThemeBackgroundColour();
-
   // operations
   // ----------
     // remove all pages
   bool DeleteAllPages();
-
-    // inserts a new page to the notebook (it will be deleted ny the notebook,
+    // adds a new page to the notebook (it will be deleted ny the notebook,
     // don't delete it yourself). If bSelect, this page becomes active.
-  bool InsertPage(size_t nPage,
+  bool AddPage(wxNotebookPage *pPage,
+               const wxString& strText,
+               bool bSelect = FALSE,
+               int imageId = -1);
+    // the same as AddPage(), but adds it at the specified position
+  bool InsertPage(int nPage,
                   wxNotebookPage *pPage,
                   const wxString& strText,
                   bool bSelect = FALSE,
                   int imageId = -1);
 
-  void AddPageInfo( wxNotebookPageInfo* info ) { AddPage( info->GetPage() , info->GetText() , info->GetSelected() , info->GetImageId() ) ; }
-  const wxNotebookPageInfoList& GetPageInfos() const ;
-
     // Windows-only at present. Also, you must use the wxNB_FIXEDWIDTH
     // style.
   void SetTabSize(const wxSize& sz);
-
-    // Windows only: attempts to apply the UX theme page background to this page
-  void ApplyThemeBackground(wxWindow* window, const wxColour& colour);
-
-    // hit test
-  virtual int HitTest(const wxPoint& pt, long *flags = NULL) const;
-
-    // calculate the size of the notebook from the size of its page
-  virtual wxSize CalcSizeFromPage(const wxSize& sizePage) const;
 
   // callbacks
   // ---------
@@ -154,15 +117,11 @@ public:
 
   // base class virtuals
   // -------------------
-
   virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
   virtual bool MSWOnScroll(int orientation, WXWORD nSBCode,
                            WXWORD pos, WXHWND control);
-
-#if wxUSE_CONSTRAINTS
   virtual void SetConstraintSizes(bool recurse = TRUE);
   virtual bool DoPhase(int nPhase);
-#endif // wxUSE_CONSTRAINTS
 
 protected:
   // common part of all ctors
@@ -172,23 +131,20 @@ protected:
   virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
   // remove one page from the notebook, without deleting
-  virtual wxNotebookPage *DoRemovePage(size_t nPage);
-
-  // set the size of the given page to fit in the notebook
-  void AdjustPageSize(wxNotebookPage *page);
-
-  // override WndProc
-  virtual long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+  virtual wxNotebookPage *DoRemovePage(int nPage);
 
   // the current selection (-1 if none)
   int m_nSelection;
 
-  wxNotebookPageInfoList m_pageInfos ;
-
-
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxNotebook)
+  DECLARE_DYNAMIC_CLASS(wxNotebook)
   DECLARE_EVENT_TABLE()
 };
+
+// Windows only: attempts to get colour for UX theme page background
+WXDLLEXPORT wxColour wxNotebookGetThemeBackgroundColour(wxNotebook* notebook);
+
+// Windows only: attempts to apply the UX theme page background to this page
+WXDLLEXPORT void wxNotebookApplyThemeBackground(wxNotebook* notebook, wxWindow* window, const wxColour& colour);
 
 #endif // wxUSE_NOTEBOOK
 

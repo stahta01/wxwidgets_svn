@@ -10,7 +10,7 @@
 #ifndef __GTKMENUH__
 #define __GTKMENUH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "menu.h"
 #endif
 
@@ -79,6 +79,17 @@ public:
     virtual wxMenuItem *DoRemove(wxMenuItem *item);
 
     // TODO: virtual void SetTitle(const wxString& title);
+
+    // compatibility only
+#if wxUSE_MENU_CALLBACK
+    wxMenu(const wxString& title, const wxFunction func)
+        : wxMenuBase(title)
+    {
+        Init();
+
+        Callback(func);
+    }
+#endif // WXWIN_COMPATIBILITY_2
 
     // implementation
     int FindMenuIdByMenuItem( GtkWidget *menuItem ) const;

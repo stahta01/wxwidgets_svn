@@ -108,7 +108,7 @@ wxVideoXANIM::wxVideoXANIM()
     m_xanim_detector = new wxVideoXANIMProcess(this);
     m_xanim_started  = FALSE;
     m_paused         = FALSE;
-    m_filename       = wxEmptyString;
+    m_filename       = "";
     m_remove_file    = FALSE;
 }
 
@@ -122,7 +122,7 @@ wxVideoXANIM::wxVideoXANIM(wxInputStream& str)
     m_size[0]        = 0;
     m_size[1]        = 0;
     
-    m_filename       = wxGetTempFileName(_T("vidxa"));
+    m_filename       = wxGetTempFileName("vidxa");
     m_remove_file    = TRUE;
     wxFileOutputStream fout(m_filename);
     
@@ -372,7 +372,7 @@ bool wxVideoXANIM::CollectInfo()
     wxInputStream *infoStream = xanimProcess->GetInputStream();
     wxString totalOutput;
         
-    while (infoStream->GetLastError() == wxSTREAM_NO_ERROR) {
+    while (infoStream->LastError() == wxSTREAM_NOERROR) {
         char line[100];
 
         infoStream->Read(line, sizeof(line)-1);
@@ -381,7 +381,7 @@ bool wxVideoXANIM::CollectInfo()
         
         line[infoStream->LastRead()] = 0;
        
-        totalOutput += wxString::FromAscii(line); 
+        totalOutput += line;        
     }
 
     // This is good for everything ... :-)
@@ -393,7 +393,7 @@ bool wxVideoXANIM::CollectInfo()
     m_movieCodec = totalOutput(0, position);
 
     totalOutput.Remove(0, position);
-    tokenizer.SetString(totalOutput, wxT("\n\r"));
+    tokenizer.SetString(totalOutput, "\n\r");
 
     // the rest of the line
     wxString token = tokenizer.GetNextToken();
@@ -468,7 +468,8 @@ bool wxVideoXANIM::RestartXANIM()
     GtkPizza *pizza = GTK_PIZZA( m_video_output->m_wxwindow );
     GdkWindow *window = pizza->bin_window;
     
-    m_internal->xanim_window = GDK_WINDOW_XWINDOW(window);
+    m_internal->xanim_window =
+        ((GdkWindowPrivate *)window)->xwindow;
 #endif
     // Get the XANIM atom
     m_internal->xanim_atom = XInternAtom(m_internal->xanim_dpy,

@@ -26,15 +26,7 @@
 #include "wx/icon.h"
 #include "wx/artprov.h"
 
-#include "wx/xml/xml.h"
-
-#ifdef WXMAKINGDLL_XRC
-    #define WXDLLIMPEXP_XRC WXEXPORT
-#elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_XRC WXIMPORT
-#else // not making nor using DLL
-    #define WXDLLIMPEXP_XRC
-#endif
+#include "wx/xrc/xml.h"
 
 class WXDLLEXPORT wxMenu;
 class WXDLLEXPORT wxMenuBar;
@@ -44,9 +36,9 @@ class WXDLLEXPORT wxWindow;
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxToolBar;
 
-class WXDLLIMPEXP_XRC wxXmlResourceHandler;
-class WXDLLIMPEXP_XRC wxXmlSubclassFactory;
-class WXDLLIMPEXP_XRC wxXmlSubclassFactoriesList;
+class WXXMLDLLEXPORT wxXmlResourceHandler;
+class WXXMLDLLEXPORT wxXmlSubclassFactory;
+class WXXMLDLLEXPORT wxXmlSubclassFactoriesList;
 class wxXmlResourceModule;
 
 
@@ -54,19 +46,19 @@ class wxXmlResourceModule;
 // encoded in root node of XRC file as "version" property).
 //
 // Rules for increasing version number:
-//   - change it only if you made incompatible change to the format. Addition
-//     of new attribute to control handler is _not_ incompatible change, because
-//     older versions of the library may ignore it.
+//   - change it only if you made incompatible change to the format. Addition of new
+//     attribute to control handler is _not_ incompatible change, because older
+//     versions of the library may ignore it.
 //   - if you change version number, follow these steps:
 //       - set major, minor and release numbers to respective version numbers of
 //         the wxWindows library (see wx/version.h)
-//       - reset revision to 0 unless the first three are same as before,
-//         in which case you should increase revision by one
+//       - reset revision to 0 unless the first three are same as before, in which
+//         case you should increase revision by one
 #define WX_XMLRES_CURRENT_VERSION_MAJOR            2
 #define WX_XMLRES_CURRENT_VERSION_MINOR            3
 #define WX_XMLRES_CURRENT_VERSION_RELEASE          0
 #define WX_XMLRES_CURRENT_VERSION_REVISION         1
-#define WX_XMLRES_CURRENT_VERSION_STRING       _T("2.3.0.1")
+#define WX_XMLRES_CURRENT_VERSION_STRING    wxT("2.3.0.1")
 
 #define WX_XMLRES_CURRENT_VERSION \
                 (WX_XMLRES_CURRENT_VERSION_MAJOR * 256*256*256 + \
@@ -74,7 +66,7 @@ class wxXmlResourceModule;
                  WX_XMLRES_CURRENT_VERSION_RELEASE * 256 + \
                  WX_XMLRES_CURRENT_VERSION_REVISION)
 
-class WXDLLIMPEXP_XRC wxXmlResourceDataRecord
+class WXXMLDLLEXPORT wxXmlResourceDataRecord
 {
 public:
     wxXmlResourceDataRecord() : Doc(NULL), Time(wxDateTime::Now()) {}
@@ -86,9 +78,11 @@ public:
 };
 
 
-WX_DECLARE_USER_EXPORTED_OBJARRAY(wxXmlResourceDataRecord,
-                                  wxXmlResourceDataRecords,
-                                  WXDLLIMPEXP_XRC);
+#ifdef WXXMLISDLL
+WX_DECLARE_EXPORTED_OBJARRAY(wxXmlResourceDataRecord, wxXmlResourceDataRecords);
+#else
+WX_DECLARE_OBJARRAY(wxXmlResourceDataRecord, wxXmlResourceDataRecords);
+#endif
 
 enum wxXmlResourceFlags
 {
@@ -99,7 +93,7 @@ enum wxXmlResourceFlags
 // This class holds XML resources from one or more .xml files
 // (or derived forms, either binary or zipped -- see manual for
 // details).
-class WXDLLIMPEXP_XRC wxXmlResource : public wxObject
+class WXXMLDLLEXPORT wxXmlResource : public wxObject
 {
 public:
     // Constructor.
@@ -131,10 +125,10 @@ public:
     void InitAllHandlers();
 
     // Initialize only a specific handler (or custom handler). Convention says
-    // that handler name is equal to the control's name plus 'XmlHandler', for
-    // example wxTextCtrlXmlHandler, wxHtmlWindowXmlHandler. The XML resource
-    // compiler (xmlres) can create include file that contains initialization
-    // code for all controls used within the resource.
+    // that handler name is equal to the control's name plus 'XmlHandler', for example
+    // wxTextCtrlXmlHandler, wxHtmlWindowXmlHandler. The XML resource compiler
+    // (xmlres) can create include file that contains initialization code for
+    // all controls used within the resource.
     void AddHandler(wxXmlResourceHandler *handler);
 
     // Add a new handler at the begining of the handler list
@@ -142,7 +136,7 @@ public:
 
     // Removes all handlers
     void ClearHandlers();
-
+    
     // Registers subclasses factory for use in XRC. This function is not meant
     // for public use, please see the comment above wxXmlSubclassFactory
     // definition.
@@ -245,12 +239,19 @@ protected:
     // Helper function: finds a resource (calls UpdateResources) and returns a node containing it.
     wxXmlNode *DoFindResource(wxXmlNode *parent, const wxString& name, const wxString& classname, bool recursive);
 
+    // Creates a resource from information in the given node.
+    wxObject *CreateResFromNode(wxXmlNode *node, wxObject *parent,
+                                wxObject *instance = NULL);
+
     // Creates a resource from information in the given node
     // (Uses only 'handlerToUse' if != NULL)
-    wxObject *CreateResFromNode(wxXmlNode *node, wxObject *parent,
-                                wxObject *instance = NULL,
-                                wxXmlResourceHandler *handlerToUse = NULL);
-
+    //
+    // ATTENTION: Do *NOT* use this function, it will disappear in
+    //            wxWindows 2.5.0! It exists *only* as a hack to preserve
+    //            binary compatibility in 2.4.x branch.
+    wxObject *CreateResFromNode2(wxXmlNode *node, wxObject *parent,
+                                 wxObject *instance = NULL,
+                                 wxXmlResourceHandler *handlerToUse = NULL);
 private:
     long m_version;
 
@@ -306,9 +307,8 @@ private:
 // wxXmlResourceHandler is an abstract base class for resource handlers
 // capable of creating a control from an XML node.
 
-class WXDLLIMPEXP_XRC wxXmlResourceHandler : public wxObject
+class WXXMLDLLEXPORT wxXmlResourceHandler : public wxObject
 {
-DECLARE_ABSTRACT_CLASS(wxXmlResourceHandler)
 public:
     // Constructor.
     wxXmlResourceHandler();
@@ -458,7 +458,7 @@ protected:
 
 
 // FIXME -- remove this $%^#$%#$@# as soon as Ron checks his changes in!!
-WXDLLIMPEXP_XRC void wxXmlInitResourceModule();
+void wxXmlInitResourceModule();
 
 
 // This class is used to create instances of XRC "object" nodes with "subclass"
@@ -466,11 +466,10 @@ WXDLLIMPEXP_XRC void wxXmlInitResourceModule();
 // register your subclasses via wxWindows' RTTI mechanism. This class is useful
 // only for language bindings developer who need a way to implement subclassing
 // in wxWindows ports that don't support wxRTTI (e.g. wxPython).
-class WXDLLIMPEXP_XRC wxXmlSubclassFactory
+class WXXMLDLLEXPORT wxXmlSubclassFactory
 {
 public:
-    // Try to create instance of given class and return it, return NULL on
-    // failure:
+    // Try to create instance of given class and return it, return NULL on failure:
     virtual wxObject *Create(const wxString& className) = 0;
     virtual ~wxXmlSubclassFactory() {}
 };
@@ -480,13 +479,11 @@ public:
    Backward compatibility macros. Do *NOT* use, they may disappear in future
    versions of the XRC library!
    ------------------------------------------------------------------------- */
-#if WXWIN_COMPATIBILITY_2_4
-    #define ADD_STYLE         XRC_ADD_STYLE
-    #define wxTheXmlResource  wxXmlResource::Get()
-    #define XMLID             XRCID
-    #define XMLCTRL           XRCCTRL
-    #define GetXMLID          GetXRCID
-#endif
+#define ADD_STYLE         XRC_ADD_STYLE
+#define wxTheXmlResource  wxXmlResource::Get()
+#define XMLID             XRCID
+#define XMLCTRL           XRCCTRL
+#define GetXMLID          GetXRCID
 
 
 #endif // _WX_XMLRES_H_

@@ -8,12 +8,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "settings.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/settings.h"
 #include "wx/debug.h"
@@ -333,9 +330,9 @@ wxFont wxSystemSettingsNative::GetFont( wxSystemFont index )
 #ifdef __WXGTK20__
                 GtkWidget *widget = gtk_button_new();
                 GtkStyle *def = gtk_rc_get_style( widget );
-                if ( !def || !def->font_desc )
+                if (!def)  
                     def = gtk_widget_get_default_style();  
-                if ( def && def->font_desc )
+                if (def)  
                 {  
                     wxNativeFontInfo info;  
                     info.description = def->font_desc;  

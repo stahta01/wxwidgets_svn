@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "spinbutt.h"
     #pragma implementation "spinbutbase.h"
 #endif
@@ -39,11 +39,13 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 
-#if defined(__WIN95__)
+// Can't resolve reference to CreateUpDownControl in
+// TWIN32, but could probably use normal CreateWindow instead.
+#if defined(__WIN95__) && !defined(__TWIN32__)
 
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -55,29 +57,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxSpinButton, wxControl,"wx/spinbut.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxSpinButton)
-	WX_PROPERTY( Value , int , SetValue, GetValue, 0 )
-	WX_PROPERTY( Min , int , SetMin, GetMin, 0 )
-	WX_PROPERTY( Max , int , SetMax, GetMax, 0 )
-/*
-	TODO PROPERTIES
-		style wxSP_VERTICAL | wxSP_ARROW_KEYS
-*/
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxSpinButton)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_5( wxSpinButton , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
-#endif
-
-
 
 // ----------------------------------------------------------------------------
 // wxSpinButton

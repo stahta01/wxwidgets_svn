@@ -13,7 +13,7 @@
 #ifndef _WX_SNGLINST_H_
 #define _WX_SNGLINST_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "snglinst.h"
 #endif
 
@@ -23,7 +23,7 @@
 // wxSingleInstanceChecker
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxSingleInstanceChecker
+class WXDLLEXPORT wxSingleInstanceChecker
 {
 public:
     // default ctor, use Create() after it
@@ -59,9 +59,7 @@ private:
     void Init() { m_impl = NULL; }
 
     // the implementation details (platform specific)
-    class WXDLLIMPEXP_BASE wxSingleInstanceCheckerImpl *m_impl;
-
-    DECLARE_NO_COPY_CLASS(wxSingleInstanceChecker)
+    class WXDLLEXPORT wxSingleInstanceCheckerImpl *m_impl;
 };
 
 #endif // wxUSE_SNGLINST_CHECKER

@@ -15,28 +15,6 @@ from controls import *
 
 from events import *
 import wx
-
-def EVT_TASKBAR_MOVE(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_MOVE, func)
-
-def EVT_TASKBAR_LEFT_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DOWN, func)
-
-def EVT_TASKBAR_LEFT_UP(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_UP, func)
-
-def EVT_TASKBAR_RIGHT_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DOWN, func)
-
-def EVT_TASKBAR_RIGHT_UP(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_UP, func)
-
-def EVT_TASKBAR_LEFT_DCLICK(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DCLICK, func)
-
-def EVT_TASKBAR_RIGHT_DCLICK(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DCLICK, func)
-
 class wxNotebookEventPtr(wxNotifyEventPtr):
     def __init__(self,this):
         self.this = this
@@ -73,8 +51,11 @@ class wxNotebookPtr(wxControlPtr):
     def GetPageCount(self, *_args, **_kwargs):
         val = windows2c.wxNotebook_GetPageCount(self, *_args, **_kwargs)
         return val
-    def GetPage(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_GetPage(self, *_args, **_kwargs)
+    def SetSelection(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_SetSelection(self, *_args, **_kwargs)
+        return val
+    def AdvanceSelection(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_AdvanceSelection(self, *_args, **_kwargs)
         return val
     def GetSelection(self, *_args, **_kwargs):
         val = windows2c.wxNotebook_GetSelection(self, *_args, **_kwargs)
@@ -110,13 +91,6 @@ class wxNotebookPtr(wxControlPtr):
     def SetPadding(self, *_args, **_kwargs):
         val = windows2c.wxNotebook_SetPadding(self, *_args, **_kwargs)
         return val
-    def SetTabSize(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_SetTabSize(self, *_args, **_kwargs)
-        return val
-    def CalcSizeFromPage(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_CalcSizeFromPage(self, *_args, **_kwargs)
-        if val: val = wxSizePtr(val) ; val.thisown = 1
-        return val
     def DeletePage(self, *_args, **_kwargs):
         val = windows2c.wxNotebook_DeletePage(self, *_args, **_kwargs)
         return val
@@ -132,14 +106,11 @@ class wxNotebookPtr(wxControlPtr):
     def InsertPage(self, *_args, **_kwargs):
         val = windows2c.wxNotebook_InsertPage(self, *_args, **_kwargs)
         return val
-    def SetSelection(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_SetSelection(self, *_args, **_kwargs)
+    def GetPage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetPage(self, *_args, **_kwargs)
         return val
-    def HitTest(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_HitTest(self, *_args, **_kwargs)
-        return val
-    def AdvanceSelection(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_AdvanceSelection(self, *_args, **_kwargs)
+    def ResizeChildren(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_ResizeChildren(self, *_args, **_kwargs)
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxNotebook instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
@@ -272,20 +243,6 @@ def wxPreSplitterWindow(*_args,**_kwargs):
     val.thisown = 1
     val._setOORInfo(val)
     return val
-
-
-class wxTaskBarIconEventPtr(wxEventPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxTaskBarIconEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxTaskBarIconEvent(wxTaskBarIconEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = windows2c.new_wxTaskBarIconEvent(*_args,**_kwargs)
-        self.thisown = 1
-
-
 
 
 class wxTaskBarIconPtr(wxEvtHandlerPtr):
@@ -568,16 +525,6 @@ class wxPyPanel(wxPyPanelPtr):
 
 wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED = windows2c.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED
 wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING = windows2c.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING
-wxNB_FIXEDWIDTH = windows2c.wxNB_FIXEDWIDTH
-wxNB_TOP = windows2c.wxNB_TOP
-wxNB_LEFT = windows2c.wxNB_LEFT
-wxNB_RIGHT = windows2c.wxNB_RIGHT
-wxNB_BOTTOM = windows2c.wxNB_BOTTOM
-wxNB_MULTILINE = windows2c.wxNB_MULTILINE
-wxNB_HITTEST_NOWHERE = windows2c.wxNB_HITTEST_NOWHERE
-wxNB_HITTEST_ONICON = windows2c.wxNB_HITTEST_ONICON
-wxNB_HITTEST_ONLABEL = windows2c.wxNB_HITTEST_ONLABEL
-wxNB_HITTEST_ONITEM = windows2c.wxNB_HITTEST_ONITEM
 wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING = windows2c.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING
 wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED = windows2c.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED
 wxEVT_COMMAND_SPLITTER_UNSPLIT = windows2c.wxEVT_COMMAND_SPLITTER_UNSPLIT
@@ -587,18 +534,6 @@ wxSPLIT_VERTICAL = windows2c.wxSPLIT_VERTICAL
 wxSPLIT_DRAG_NONE = windows2c.wxSPLIT_DRAG_NONE
 wxSPLIT_DRAG_DRAGGING = windows2c.wxSPLIT_DRAG_DRAGGING
 wxSPLIT_DRAG_LEFT_DOWN = windows2c.wxSPLIT_DRAG_LEFT_DOWN
-wxSP_VERTICAL = windows2c.wxSP_VERTICAL
-wxSP_HORIZONTAL = windows2c.wxSP_HORIZONTAL
-wxSP_ARROW_KEYS = windows2c.wxSP_ARROW_KEYS
-wxSP_WRAP = windows2c.wxSP_WRAP
-wxSP_NOBORDER = windows2c.wxSP_NOBORDER
-wxSP_3D = windows2c.wxSP_3D
-wxSP_3DSASH = windows2c.wxSP_3DSASH
-wxSP_3DBORDER = windows2c.wxSP_3DBORDER
-wxSP_FULLSASH = windows2c.wxSP_FULLSASH
-wxSP_BORDER = windows2c.wxSP_BORDER
-wxSP_LIVE_UPDATE = windows2c.wxSP_LIVE_UPDATE
-wxSP_PERMIT_UNSPLIT = windows2c.wxSP_PERMIT_UNSPLIT
 wxEVT_TASKBAR_MOVE = windows2c.wxEVT_TASKBAR_MOVE
 wxEVT_TASKBAR_LEFT_DOWN = windows2c.wxEVT_TASKBAR_LEFT_DOWN
 wxEVT_TASKBAR_LEFT_UP = windows2c.wxEVT_TASKBAR_LEFT_UP

@@ -30,7 +30,7 @@
 
 #include "wx/version.h"
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
   #pragma interface "dbtable.h"
 #endif
 
@@ -56,7 +56,7 @@ const int   wxDB_NO_MORE_COLUMN_NUMBERS = -1;
 // wxDbTable class which allows it to create a table in the data
 // source, exchange data between the data source and the C++
 // object, and so on.
-class WXDLLIMPEXP_ODBC wxDbColDef
+class WXDLLEXPORT wxDbColDef
 {
 public:
     wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
@@ -77,7 +77,7 @@ public:
 };  // wxDbColDef
 
 
-class WXDLLIMPEXP_ODBC wxDbColDataPtr
+class WXDLLEXPORT wxDbColDataPtr
 {
 public:
     void    *PtrDataObj;
@@ -87,7 +87,7 @@ public:
 
 
 // This structure is used when creating secondary indexes.
-class WXDLLIMPEXP_ODBC wxDbIdxDef
+class WXDLLEXPORT wxDbIdxDef
 {
 public:
     wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];
@@ -95,7 +95,7 @@ public:
 };  // wxDbIdxDef
 
 
-class WXDLLIMPEXP_ODBC wxDbTable
+class WXDLLEXPORT wxDbTable
 {
 private:
     ULONG       tableID;  // Used for debugging.  This can help to match up mismatched constructors/destructors

@@ -12,7 +12,7 @@
 #ifndef _WX_CLIPBRD_H_BASE_
 #define _WX_CLIPBRD_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "clipboardbase.h"
 #endif
 
@@ -94,10 +94,10 @@ public:
     #include "wx/mgl/clipbrd.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/clipbrd.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/clipbrd.h"
 #elif defined(__WXPM__)
     #include "wx/os2/clipbrd.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/clipbrd.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -135,8 +135,6 @@ public:
 
 private:
     wxClipboard *m_clipboard;
-
-    DECLARE_NO_COPY_CLASS(wxClipboardLocker)
 };
 
 #endif // wxUSE_CLIPBOARD

@@ -12,13 +12,15 @@
 #ifndef _WX_SCROLBAR_H_
 #define _WX_SCROLBAR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "scrolbar.h"
 #endif
 
 // Scrollbar item
 class WXDLLEXPORT wxScrollBar: public wxScrollBarBase
 {
+    DECLARE_DYNAMIC_CLASS(wxScrollBar)
+
 public:
     wxScrollBar() { m_pageSize = 0; m_viewSize = 0; m_objectSize = 0; }
     ~wxScrollBar();
@@ -48,10 +50,19 @@ public:
     virtual void SetScrollbar(int position, int thumbSize, int range, int pageSize,
             bool refresh = TRUE);
 
-    // needed for RTTI
-    void SetThumbSize( int s ) { SetScrollbar( GetThumbPosition() , s , GetRange() , GetPageSize() , true ) ; }
-    void SetPageSize( int s ) { SetScrollbar( GetThumbPosition() , GetThumbSize() , GetRange() , s , true ) ; }
-    void SetRange( int s ) { SetScrollbar( GetThumbPosition() , GetThumbSize() , s , GetPageSize() , true ) ; }
+#if WXWIN_COMPATIBILITY
+    // Backward compatibility
+    int GetValue() const { return GetThumbPosition(); }
+    void SetValue(int viewStart) { SetThumbPosition(viewStart); }
+    void GetValues(int *viewStart, int *viewLength, int *objectLength,
+            int *pageLength) const ;
+    int GetViewLength() const { return m_viewSize; }
+    int GetObjectLength() const { return m_objectSize; }
+
+    void SetPageSize(int pageLength);
+    void SetObjectLength(int objectLength);
+    void SetViewLength(int viewLength);
+#endif
 
     void Command(wxCommandEvent& event);
     virtual WXHBRUSH OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
@@ -59,12 +70,17 @@ public:
     virtual bool MSWOnScroll(int orientation, WXWORD wParam,
                              WXWORD pos, WXHWND control);
 
+#if WXWIN_COMPATIBILITY
+    // Backward compatibility: generate an old-style scroll command
+    void OnScroll(wxScrollEvent& event);
+#endif // WXWIN_COMPATIBILITY
+
 protected:
     int m_pageSize;
     int m_viewSize;
     int m_objectSize;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxScrollBar)
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

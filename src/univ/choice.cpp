@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univchoice.h"
 #endif
 
@@ -43,7 +43,7 @@ bool wxChoice::Create(wxWindow *parent, wxWindowID id,
                       const wxPoint& pos,
                       const wxSize& size,
                       int n, const wxString choices[],
-                      long WXUNUSED(style),
+                      long style,
                       const wxValidator& validator,
                       const wxString& name)
 {

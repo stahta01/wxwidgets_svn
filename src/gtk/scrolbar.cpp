@@ -8,12 +8,11 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "scrolbar.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_SCROLLBAR
 
@@ -335,11 +334,6 @@ void wxScrollBar::ApplyWidgetStyle()
 {
     SetWidgetStyle();
     gtk_widget_set_style( m_widget, m_widgetStyle );
-}
-
-wxSize wxScrollBar::DoGetBestSize() const
-{
-    return wxControl::DoGetBestSize();
 }
 
 #endif

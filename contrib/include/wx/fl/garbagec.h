@@ -27,14 +27,14 @@ struct GCItem
 
 inline void* gc_node_to_obj( wxNode* pGCNode )
 {
-    return ( (GCItem*) (pGCNode->GetData()) )->mpObj;
+    return ( (GCItem*) (pGCNode->Data()) )->mpObj;
 }
 
 /*
 This class implements an extremely slow but simple garbage collection algorithm.
 */
 
-class WXDLLIMPEXP_FL GarbageCollector
+class WXFL_DECLSPEC GarbageCollector
 {
 protected:
     wxList mAllNodes;

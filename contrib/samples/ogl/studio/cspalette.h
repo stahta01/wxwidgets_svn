@@ -18,7 +18,7 @@
 
 #include <wx/wx.h>
 #include <wx/string.h>
-#include <wx/deprecated/tbarsmpl.h>
+#include <wx/tbarsmpl.h>
 
 /*
  * Object editor tool palette
@@ -28,10 +28,7 @@
 // TODO for wxWin: wxToolBar95 cannot be moved to a non-0,0 position!
 // Needs to have a parent window...
 // So use a simple toolbar at present.
-// ABX: Simple toolbar is not available in default compilation and is deprecated
-//      so I use wxToolBar anyway
-// #define TOOLPALETTECLASS    wxToolBarSimple
-#define TOOLPALETTECLASS    wxToolBar
+#define TOOLPALETTECLASS    wxToolBarSimple
 
 class csEditorToolPalette: public TOOLPALETTECLASS
 {

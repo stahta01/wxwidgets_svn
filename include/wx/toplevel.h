@@ -14,7 +14,7 @@
 #ifndef _WX_TOPLEVEL_BASE_H_
 #define _WX_TOPLEVEL_BASE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "toplevelbase.h"
 #endif
 
@@ -108,10 +108,10 @@ public:
     virtual wxString GetTitle() const = 0;
      */
 
-    // Set the shape of the window to the given region.
-    // Returns TRUE if the platform supports this feature (and the
-    // operation is successful.)
-    virtual bool SetShape(const wxRegion& WXUNUSED(region)) { return FALSE; }
+    // old functions, use the new ones instead!
+#if WXWIN_COMPATIBILITY_2
+    bool Iconized() const { return IsIconized(); }
+#endif // WXWIN_COMPATIBILITY_2
 
     // implementation only from now on
     // -------------------------------
@@ -128,9 +128,6 @@ public:
     // this should go away, but for now it's called from docview.cpp,
     // so should be there for all platforms
     void OnActivate(wxActivateEvent &WXUNUSED(event)) { }
-
-    // do the window-specific processing after processing the update event
-    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) ;
 
 protected:
     // the frame client to screen translation should take account of the
@@ -153,7 +150,6 @@ protected:
     // the frame icon
     wxIconBundle m_icons;
 
-    DECLARE_NO_COPY_CLASS(wxTopLevelWindowBase)
     DECLARE_EVENT_TABLE()
 };
 
@@ -174,15 +170,9 @@ protected:
 #elif defined(__WXMAC__)
     #include "wx/mac/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowMac
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/toplevel.h"
-    #define wxTopLevelWindowNative wxTopLevelWindowCocoa
 #elif defined(__WXPM__)
     #include "wx/os2/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowOS2
-#elif defined(__WXMOTIF__)
-    #include "wx/motif/toplevel.h"
-    #define wxTopLevelWindowNative wxTopLevelWindowMotif
 #endif
 
 #ifdef __WXUNIVERSAL__
@@ -195,7 +185,7 @@ protected:
             // construction
             wxTopLevelWindow() { Init(); }
             wxTopLevelWindow(wxWindow *parent,
-                       wxWindowID winid,
+                       wxWindowID id,
                        const wxString& title,
                        const wxPoint& pos = wxDefaultPosition,
                        const wxSize& size = wxDefaultSize,
@@ -203,13 +193,15 @@ protected:
                        const wxString& name = wxFrameNameStr)
             {
                 Init();
-                Create(parent, winid, title, pos, size, style, name);
+                Create(parent, id, title, pos, size, style, name);
             }
 
-            DECLARE_DYNAMIC_CLASS_NO_COPY(wxTopLevelWindow)
+            DECLARE_DYNAMIC_CLASS(wxTopLevelWindow)
         };
     #endif // wxTopLevelWindowNative
 #endif // __WXUNIVERSAL__/!__WXUNIVERSAL__
 
 
 #endif // _WX_TOPLEVEL_BASE_H_
+
+// vi:sts=4:sw=4:et

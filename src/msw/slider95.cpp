@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "slider95.h"
 #endif
 
@@ -33,29 +33,11 @@
 #include "wx/msw/slider95.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxSlider95, wxControl,"wx/scrolbar.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxSlider95)
-	WX_PROPERTY( Value , int , SetValue, GetValue , 0)
-	WX_PROPERTY( Minimum , int , SetMin, GetMin, 0 )
-	WX_PROPERTY( Maximum , int , SetMax, GetMax, 0 )
-	WX_PROPERTY( PageSize , int , SetPageSize, GetLineSize, 1 )
-	WX_PROPERTY( LineSize , int , SetLineSize, GetLineSize, 1 )
-	WX_PROPERTY( ThumbLength , int , SetThumbLength, GetThumbLength, 1 )
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxSlider95)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_8( wxSlider95 , wxWindow* , Parent , wxWindowID , Id , int , Value , int , Minimum , int , Maximum , wxPoint , Position , wxSize , Size , long , WindowStyle )
-#else
-IMPLEMENT_DYNAMIC_CLASS(wxSlider95, wxControl)
-#endif
+IMPLEMENT_DYNAMIC_CLASS(wxSlider, wxControl)
 
 // Slider
 wxSlider95::wxSlider95()
@@ -90,9 +72,9 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
     SetBackgroundColour(parent->GetBackgroundColour()) ;
     SetForegroundColour(parent->GetForegroundColour()) ;
 
-    m_staticValue = (WXHWND) NULL;;
-    m_staticMin = (WXHWND) NULL;;
-    m_staticMax = (WXHWND) NULL;;
+    m_staticValue = (WXHWND) NULL;
+    m_staticMin = (WXHWND) NULL;
+    m_staticMax = (WXHWND) NULL;
     m_pageSize = 1;
     m_lineSize = 1;
     m_windowStyle = style;
@@ -147,6 +129,9 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;    
 
+    if ( m_windowStyle & wxCLIP_SIBLINGS )
+        msStyle |= WS_CLIPSIBLINGS;
+
     if (m_windowStyle & wxSL_VERTICAL)
         msStyle = TBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP ;
     else
@@ -173,7 +158,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     HWND scroll_bar = CreateWindowEx
         (
-            exStyle, TRACKBAR_CLASS, wxEmptyString,
+            exStyle, TRACKBAR_CLASS, wxT(""),
             msStyle,
             0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)m_windowId,
             wxGetInstance(), NULL
@@ -192,7 +177,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     SubclassWin(GetHWND());
 
-    ::SetWindowText((HWND) m_hWnd, wxEmptyString);
+    ::SetWindowText((HWND) m_hWnd, wxT(""));
 
     SetFont(parent->GetFont());
 
@@ -612,13 +597,9 @@ void wxSlider95::SetRange(int minValue, int maxValue)
 WXHBRUSH wxSlider95::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
             WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-#ifndef __WXWINCE__
     if ( nCtlColor == CTLCOLOR_SCROLLBAR )
         return 0;
-#else
-    if ( nCtlColor != CTLCOLOR_STATIC )
-        return 0;
-#endif
+
     // Otherwise, it's a static
     return wxControl::OnCtlColor(pDC, pWnd, nCtlColor, message, wParam, lParam);
 }

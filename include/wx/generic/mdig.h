@@ -12,7 +12,7 @@
 #ifndef _WX_MDIG_H_
 #define _WX_MDIG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "mdig.h"
 #endif
 
@@ -175,8 +175,8 @@ public:
 #endif
 
     // no icon
-    void SetIcon( const wxIcon& WXUNUSED(icon) ) { }
-    void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
+    void SetIcon( const wxIcon &icon ) { /*m_icons = wxIconBundle( icon );*/}
+    void SetIcons( const wxIconBundle &icons ) { /*m_icons = icons;*/ }
 
     // no maximize etc
     virtual void Maximize( bool WXUNUSED(maximize) = TRUE) { /* Has no effect */ }
@@ -256,7 +256,7 @@ private:
  */
 
 #ifndef wxUSE_GENERIC_MDI_AS_NATIVE
-#if defined(__WXUNIVERSAL__) || defined(__WXPM__) || defined(__WXCOCOA__)
+#if defined(__WXUNIVERSAL__) || defined(__WXPM__)
 #define wxUSE_GENERIC_MDI_AS_NATIVE   1
 #else
 #define wxUSE_GENERIC_MDI_AS_NATIVE   0

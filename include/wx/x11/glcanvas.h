@@ -10,7 +10,7 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "glcanvas.h"
 #endif
 
@@ -64,7 +64,7 @@ public:
     ~wxGLContext();
     
     void SetCurrent();
-    void SetColour(const wxChar *colour);
+    void SetColour(const char *colour);
     void SwapBuffers();
     
     void SetupPixelFormat();
@@ -100,21 +100,21 @@ public:
     wxGLCanvas( wxWindow *parent, wxWindowID id = -1, 
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, 
-        long style = 0, const wxString& name = wxT("GLCanvas"), 
+        long style = 0, const wxString& name = "GLCanvas", 
         int *attribList = (int*) NULL, 
         const wxPalette& palette = wxNullPalette );
     wxGLCanvas( wxWindow *parent, const wxGLContext *shared = (wxGLContext *)NULL,
         wxWindowID id = -1, 
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, 
-        long style = 0, const wxString& name = wxT("GLCanvas"), 
+        long style = 0, const wxString& name = "GLCanvas", 
         int *attribList = (int*) NULL, 
         const wxPalette& palette = wxNullPalette );
     wxGLCanvas( wxWindow *parent, const wxGLCanvas *shared = (wxGLCanvas *)NULL,
         wxWindowID id = -1, 
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, 
-        long style = 0, const wxString& name = wxT("GLCanvas"), 
+        long style = 0, const wxString& name = "GLCanvas", 
         int *attribList = (int*) NULL, 
         const wxPalette& palette = wxNullPalette );
     
@@ -124,14 +124,14 @@ public:
         wxWindowID id = -1, 
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, 
-        long style = 0, const wxString& name = wxT("GLCanvas"), 
+        long style = 0, const wxString& name = "GLCanvas", 
         int *attribList = (int*) NULL,
         const wxPalette& palette = wxNullPalette );
     
     ~wxGLCanvas();
     
     void SetCurrent();
-    void SetColour(const wxChar *colour);
+    void SetColour(const char *colour);
     void SwapBuffers();
     
     // void OnSize(wxSizeEvent& event);

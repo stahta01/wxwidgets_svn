@@ -6,7 +6,7 @@
 // Created:     25.03.02
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIX_UTILSX11_H_

@@ -12,11 +12,9 @@
 #ifndef _WX_STATBMP_H_BASE_
 #define _WX_STATBMP_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "statbmpbase.h"
 #endif
-
-#include "wx/defs.h"
 
 #if wxUSE_STATBMP
 
@@ -31,8 +29,7 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBitmapNameStr;
 // a control showing an icon or a bitmap
 class WXDLLEXPORT wxStaticBitmapBase : public wxControl
 {
-public:
-    wxStaticBitmapBase() { }
+ public:
     virtual ~wxStaticBitmapBase();
     
     // our interface
@@ -45,8 +42,6 @@ public:
 
 protected:
     virtual wxSize DoGetBestClientSize() const;
-
-    DECLARE_NO_COPY_CLASS(wxStaticBitmapBase)
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -59,10 +54,10 @@ protected:
     #include "wx/gtk/statbmp.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/statbmp.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/statbmp.h"
 #elif defined(__WXPM__)
     #include "wx/os2/statbmp.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/statbmp.h"
 #endif
 
 #endif // wxUSE_STATBMP

@@ -41,19 +41,12 @@
  * the file first and TIFFOpen'ing it later.
  */
 
-#ifdef __MACH__
-   	  #include <ansi_prefix.mach.h>
-   	  #include <msl_c_version.h>
-   	  #include <stdint.h>
-   	  #undef WCHAR_MAX
-   	  #include <machine/ansi.h>
-#endif
 #include "tiffiop.h"
-#include <MacErrors.h>
+#include <Errors.h>
 #include <Files.h>
 #include <Memory.h>
 
-#if defined(__PPCC__) || defined(__SYMANTEC__) || defined(__MRC__) || defined(applec)
+#if defined(__PPCC__) || defined(__SC__) || defined(__MRC__) || defined(applec)
 #define	CtoPstr	c2pstr
 #endif
 

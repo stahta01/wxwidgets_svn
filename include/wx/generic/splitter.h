@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SPLITTERH_G__
 #define __SPLITTERH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "splitter.h"
 #endif
 
@@ -133,16 +133,16 @@ public:
     bool IsSplit() const { return (m_windowTwo != NULL); }
 
     // Sets the sash size
-    void SetSashSize(int WXUNUSED(width)) { }
+    void SetSashSize(int width) { m_sashSize = width; }
 
     // Sets the border size
-    void SetBorderSize(int WXUNUSED(width)) { }
+    void SetBorderSize(int width) { m_borderSize = width; }
 
     // Gets the sash size
-    int GetSashSize() const;
+    int GetSashSize() const { return m_sashSize; }
 
     // Gets the border size
-    int GetBorderSize() const;
+    int GetBorderSize() const { return m_borderSize; }
 
     // Set the sash position
     void SetSashPosition(int position, bool redraw = TRUE);
@@ -190,7 +190,10 @@ public:
     void OnSize(wxSizeEvent& event);
 
     // In live mode, resize child windows in idle time
-    void OnInternalIdle();
+    void OnIdle(wxIdleEvent& event);
+
+    // Draws borders
+    virtual void DrawBorders(wxDC& dc);
 
     // Draws the sash
     virtual void DrawSash(wxDC& dc);
@@ -199,17 +202,20 @@ public:
     virtual void DrawSashTracker(int x, int y);
 
     // Tests for x, y over sash
-    virtual bool SashHitTest(int x, int y, int tolerance = 5);
+    virtual bool SashHitTest(int x, int y, int tolerance = 2);
 
     // Resizes subwindows
     virtual void SizeWindows();
+
+    // Initialize colours
+    void InitColours();
 
     void SetNeedUpdating(bool needUpdating) { m_needUpdating = needUpdating; }
     bool GetNeedUpdating() const { return m_needUpdating ; }
 
 protected:
     // event handlers
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
     void OnSetCursor(wxSetCursorEvent& event);
 #endif // wxMSW
 
@@ -245,23 +251,19 @@ protected:
     // set the sash position and send an event about it having been changed
     void SetSashPositionAndNotify(int sashPos);
 
-    // callbacks executed when we detect that the mouse has entered or left
-    // the sash
-    virtual void OnEnterSash();
-    virtual void OnLeaveSash();
-
     // set the cursor appropriate for the current split mode
     void SetResizeCursor();
 
-    // redraw the splitter if its "hotness" changed if necessary
-    void RedrawIfHotSensitive(bool isHot);
-
     wxSplitMode m_splitMode;
+    bool        m_permitUnsplitAlways;
+    bool        m_needUpdating; // when in live mode, set this to TRUE to resize children in idle
     wxWindow*   m_windowOne;
     wxWindow*   m_windowTwo;
     int         m_dragMode;
     int         m_oldX;
     int         m_oldY;
+    int         m_borderSize;
+    int         m_sashSize;     // Sash width or height
     int         m_sashPosition; // Number of pixels from left or top
     int         m_requestedSashPosition;
     int         m_sashPositionCurrent; // while dragging
@@ -270,19 +272,19 @@ protected:
     int         m_minimumPaneSize;
     wxCursor    m_sashCursorWE;
     wxCursor    m_sashCursorNS;
-    wxPen      *m_sashTrackerPen;
-
-    // when in live mode, set this to TRUE to resize children in idle
-    bool        m_needUpdating:1;
-    bool        m_permitUnsplitAlways:1;
-    bool        m_isHot:1;
+    wxPen*      m_sashTrackerPen;
+    wxPen*      m_lightShadowPen;
+    wxPen*      m_mediumShadowPen;
+    wxPen*      m_darkShadowPen;
+    wxPen*      m_hilightPen;
+    wxBrush*    m_faceBrush;
+    wxPen*      m_facePen;
 
 private:
     WX_DECLARE_CONTROL_CONTAINER();
 
     DECLARE_DYNAMIC_CLASS(wxSplitterWindow)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSplitterWindow)
 };
 
 // ----------------------------------------------------------------------------
@@ -361,7 +363,7 @@ private:
         } pt;               // position of double click for DCLICK event
     } m_data;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxSplitterEvent)
+    DECLARE_DYNAMIC_CLASS(wxSplitterEvent)
 };
 
 typedef void (wxEvtHandler::*wxSplitterEventFunction)(wxSplitterEvent&);

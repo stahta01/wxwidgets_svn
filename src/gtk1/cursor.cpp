@@ -7,12 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+
+#ifdef __GNUG__
 #pragma implementation "cursor.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/cursor.h"
 #include "wx/utils.h"
@@ -356,7 +354,7 @@ void wxEndBusyCursor()
     gs_savedCursor = wxNullCursor;
 
     if (wxTheApp)
-        wxTheApp->ProcessIdle();
+        wxTheApp->SendIdleEvents();
 }
 
 void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )

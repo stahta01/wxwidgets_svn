@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_SCRARROW_H_
 #define _WX_UNIV_SCRARROW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univscrarrow.h"
 #endif
 

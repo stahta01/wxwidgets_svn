@@ -41,12 +41,6 @@ def EVT_SIZE(win, func):
 def EVT_MOVE(win, func):
     win.Connect(-1, -1, wxEVT_MOVE, func)
 
-def EVT_SIZING(win, func):
-    win.Connect(-1, -1, wxEVT_SIZING, func)
-
-def EVT_MOVING(win, func):
-    win.Connect(-1, -1, wxEVT_MOVING, func)
-
 def EVT_CLOSE(win, func):
     win.Connect(-1, -1, wxEVT_CLOSE_WINDOW, func)
 
@@ -67,9 +61,6 @@ def EVT_KEY_DOWN(win, func):
 
 def EVT_KEY_UP(win, func):
     win.Connect(-1, -1, wxEVT_KEY_UP, func)
-
-def EVT_HOTKEY(win, func):
-    win.Connect(-1, -1, wxEVT_HOTKEY, func)
 
 def EVT_MENU_OPEN(win, func):
     win.Connect(-1, -1, wxEVT_MENU_OPEN, func)
@@ -493,6 +484,29 @@ def EVT_SPIN_DOWN(win, id, func):
 
 def EVT_SPIN(win, id, func):
     win.Connect(id, -1, wxEVT_SCROLL_THUMBTRACK,func)
+
+
+# wxTaskBarIcon
+def EVT_TASKBAR_MOVE(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_MOVE, func)
+
+def EVT_TASKBAR_LEFT_DOWN(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DOWN, func)
+
+def EVT_TASKBAR_LEFT_UP(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_UP, func)
+
+def EVT_TASKBAR_RIGHT_DOWN(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DOWN, func)
+
+def EVT_TASKBAR_RIGHT_UP(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_UP, func)
+
+def EVT_TASKBAR_LEFT_DCLICK(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DCLICK, func)
+
+def EVT_TASKBAR_RIGHT_DCLICK(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DCLICK, func)
 
 
 # wxSashWindow
@@ -955,15 +969,6 @@ of your Mac."""
 
         if redirect:
             self.RedirectStdio(filename)
-
-        # Set the default handler for SIGINT.  This fixes a problem
-        # where if Ctrl-C is pressed in the console that started this
-        # app then it will not appear to do anything, (not even send
-        # KeyboardInterrupt???)  but will later segfault on exit.  By
-        # setting the default handler then the app will exit, as
-        # expected (depending on platform.)
-        import signal
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
 
         # this initializes wxWindows and then calls our OnInit
         _wxStart(self.OnInit)

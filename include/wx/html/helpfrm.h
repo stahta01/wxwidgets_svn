@@ -12,7 +12,7 @@
 #ifndef _WX_HELPFRM_H_
 #define _WX_HELPFRM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "helpfrm.h"
 #endif
 
@@ -34,10 +34,8 @@
 #include "wx/html/htmlwin.h"
 #include "wx/html/htmprint.h"
 
-class WXDLLIMPEXP_CORE wxButton;
-class WXDLLIMPEXP_CORE wxTextCtrl;
-class WXDLLIMPEXP_CORE wxTreeEvent;
-class WXDLLIMPEXP_CORE wxTreeCtrl;
+class WXDLLEXPORT wxButton;
+class WXDLLEXPORT wxTextCtrl;
 
 
 // style flags for the Help Frame
@@ -70,9 +68,9 @@ struct wxHtmlHelpFrameCfg
 };
 
 
-class WXDLLIMPEXP_CORE wxHelpControllerBase;
+class WXDLLEXPORT wxHelpControllerBase;
 
-class WXDLLIMPEXP_HTML wxHtmlHelpFrame : public wxFrame
+class WXDLLEXPORT wxHtmlHelpFrame : public wxFrame
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlHelpFrame)
 
@@ -170,11 +168,6 @@ protected:
     void OnCloseWindow(wxCloseEvent& event);
     void OnActivate(wxActivateEvent& event);
 
-#ifdef __WXMAC__
-    void OnClose(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-#endif
-
     // Images:
     enum {
         IMG_Book = 0,
@@ -233,7 +226,6 @@ protected:
     int m_hfStyle;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrame)
 };
 
 #endif // wxUSE_WXHTML_HELP

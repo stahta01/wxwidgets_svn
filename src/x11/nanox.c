@@ -2,7 +2,6 @@
  * nanox.c
  *
  * Replacements for some comomon Xlib functions
- * Licence: The wxWindows licence
  */
 
 #include "wx/setup.h"

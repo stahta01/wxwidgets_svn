@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "button.h"
 #endif
 
@@ -46,25 +46,7 @@
 // macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxButton, wxControl,"wx/button.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxButton)
-	WX_DELEGATE( OnClick , wxEVT_COMMAND_BUTTON_CLICKED , wxCommandEvent )
-
-	WX_PROPERTY( Font , wxFont , SetFont , GetFont  , )
-	WX_PROPERTY( Label,wxString, SetLabel, GetLabel, wxEmptyString )
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxButton)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_6( wxButton , wxWindow* , Parent , wxWindowID , Id , wxString , Label , wxPoint , Position , wxSize , Size , long , WindowStyle  )
-
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
-#endif
 
 // this macro tries to adjust the default button height to a reasonable value
 // using the char height as the base
@@ -442,10 +424,11 @@ static void DrawButtonText(HDC hdc,
 
 static void DrawRect(HDC hdc, const RECT& r)
 {
-    wxDrawLine(hdc, r.left, r.top, r.right, r.top);
-    wxDrawLine(hdc, r.right, r.top, r.right, r.bottom);
-    wxDrawLine(hdc, r.right, r.bottom, r.left, r.bottom);
-    wxDrawLine(hdc, r.left, r.bottom, r.left, r.top);
+    MoveToEx(hdc, r.left, r.top, NULL);
+    LineTo(hdc, r.right, r.top);
+    LineTo(hdc, r.right, r.bottom);
+    LineTo(hdc, r.left, r.bottom);
+    LineTo(hdc, r.left, r.top);
 }
 
 void wxButton::MakeOwnerDrawn()
@@ -559,20 +542,24 @@ static void DrawButtonFrame(HDC hdc, const RECT& rectBtn,
             InflateRect(&r, -1, -1);
         }
 
-        wxDrawLine(hdc, r.left, r.bottom, r.right, r.bottom);
-        wxDrawLine(hdc, r.right, r.bottom, r.right, r.top - 1);
+        MoveToEx(hdc, r.left, r.bottom, NULL);
+        LineTo(hdc, r.right, r.bottom);
+        LineTo(hdc, r.right, r.top - 1);
 
         (void)SelectObject(hdc, hpenWhite);
-        wxDrawLine(hdc, r.left, r.bottom - 1, r.left, r.top);
-        wxDrawLine(hdc, r.left, r.top, r.right, r.top);
+        MoveToEx(hdc, r.left, r.bottom - 1, NULL);
+        LineTo(hdc, r.left, r.top);
+        LineTo(hdc, r.right, r.top);
 
         (void)SelectObject(hdc, hpenLightGr);
-        wxDrawLine(hdc, r.left + 1, r.bottom - 2, r.left + 1, r.top + 1);
-        wxDrawLine(hdc, r.left + 1, r.top + 1, r.right - 1, r.top + 1);
+        MoveToEx(hdc, r.left + 1, r.bottom - 2, NULL);
+        LineTo(hdc, r.left + 1, r.top + 1);
+        LineTo(hdc, r.right - 1, r.top + 1);
 
         (void)SelectObject(hdc, hpenGrey);
-        wxDrawLine(hdc, r.left + 1, r.bottom - 1, r.right - 1, r.bottom - 1);
-        wxDrawLine(hdc, r.right - 1, r.bottom - 1, r.right - 1, r.top);
+        MoveToEx(hdc, r.left + 1, r.bottom - 1, NULL);
+        LineTo(hdc, r.right - 1, r.bottom - 1);
+        LineTo(hdc, r.right - 1, r.top);
     }
 
     (void)SelectObject(hdc, hpenOld);

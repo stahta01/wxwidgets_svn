@@ -8,15 +8,11 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "colour.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #include "wx/gdicmn.h"
-#include "wx/colour.h"
 #include "wx/gtk/private.h"
 
 #include <gdk/gdk.h>
@@ -159,13 +155,12 @@ wxColour::wxColour( unsigned char red, unsigned char green, unsigned char blue )
     M_COLDATA->m_color.pixel = 0;
 }
 
-
-
 void wxColour::InitFromName( const wxString &colourName )
 {
-    wxColour* col = NULL;
-    if ( (wxTheColourDatabase) && (col = wxTheColourDatabase->FindColourNoAdd(colourName)) )
+    wxNode *node = (wxNode *) NULL;
+    if ( (wxTheColourDatabase) && (node = wxTheColourDatabase->Find(colourName)) )
     {
+        wxColour *col = (wxColour*)node->Data();
         UnRef();
         if (col) Ref( *col );
     }

@@ -7,13 +7,13 @@
 // Created:     07/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_FTP_H__
 #define __WX_FTP_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "ftp.h"
 #endif
 
@@ -25,7 +25,7 @@
 #include "wx/protocol/protocol.h"
 #include "wx/url.h"
 
-class WXDLLIMPEXP_NET wxFTP : public wxProtocol
+class WXDLLEXPORT wxFTP : public wxProtocol
 {
 public:
     enum TransferMode
@@ -120,6 +120,11 @@ public:
                  const wxString& wildcard = wxEmptyString,
                  bool details = FALSE);
 
+#if WXWIN_COMPATIBILITY_2
+    // deprecated
+    wxList *GetList(const wxString& wildcard, bool details = FALSE);
+#endif // WXWIN_COMPATIBILITY_2
+
 protected:
     // this executes a simple ftp command with the given argument and returns
     // TRUE if it its return code starts with '2'
@@ -151,7 +156,7 @@ protected:
     friend class wxInputFTPStream;
     friend class wxOutputFTPStream;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxFTP)
+    DECLARE_DYNAMIC_CLASS(wxFTP)
     DECLARE_PROTOCOL(wxFTP)
 };
 

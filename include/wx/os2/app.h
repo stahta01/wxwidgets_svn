@@ -76,11 +76,8 @@ public:
     virtual bool Initialized(void);
     virtual bool Pending(void) ;
     virtual void Dispatch(void);
-
-    virtual void Exit();
-
     virtual bool Yield(bool onlyIfNeeded = FALSE);
-    virtual void WakeUpIdle(void);
+    virtual bool         ProcessIdle(void);
 
     virtual void SetPrintMode(int mode) { m_nPrintMode = mode; }
     virtual int  GetPrintMode(void) const { return m_nPrintMode; }
@@ -90,6 +87,17 @@ public:
     void OnEndSession(wxCloseEvent& rEvent);
     void OnQueryEndSession(wxCloseEvent& rEvent);
 
+    // Send idle event to all top-level windows.
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents(void);
+
+    // Send idle event to window and all subwindows
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents(wxWindow* pWin);
+
+    void SetAuto3D(bool bFlag) { m_bAuto3D = bFlag; }
+    bool GetAuto3D(void) const { return m_bAuto3D; }
+
     int AddSocketHandler(int handle, int mask,
                          void (*callback)(void*), void * gsock);
     void RemoveSocketHandler(int handle);
@@ -98,6 +106,7 @@ public:
 protected:
     bool                            m_bShowOnInit;
     int                             m_nPrintMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
+    bool                            m_bAuto3D ;   // Always use 3D controls, except where overriden
 
     //
     // PM-specific wxApp definitions */
@@ -113,13 +122,14 @@ private:
 public:
 
     // Implementation
-    virtual bool  Initialize(int& argc, wxChar **argv);
-    virtual void  CleanUp(void);
+    static bool  Initialize(HAB vHab);
+    static void  CleanUp(void);
 
     static bool  RegisterWindowClasses(HAB vHab);
     virtual void DoMessage(WXMSG *pMsg);
     virtual bool DoMessage(void);
     virtual bool ProcessMessage(WXMSG* pMsg);
+    void         DeletePendingObjects(void);
 
 public:
     int                             m_nCmdShow;

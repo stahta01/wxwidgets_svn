@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "combobox.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/combobox.h"
 
@@ -48,11 +45,11 @@ gtk_combo_select_child_callback( GtkList *WXUNUSED(list), GtkWidget *WXUNUSED(wi
     if (g_isIdle) wxapp_install_idle_handler();
 
     if (!combo->m_hasVMT) return;
-
+    
     if (g_blockEventsOnDrag) return;
 
     int curSelection = combo->GetSelection();
-
+    
     if (combo->m_prevSelection != curSelection)
     {
         GtkWidget *list = GTK_COMBO(combo->m_widget)->list;
@@ -91,6 +88,7 @@ gtk_dummy_callback(GtkEntry *WXUNUSED(entry), GtkCombo *WXUNUSED(combo))
 {
 }
 
+
 //-----------------------------------------------------------------------------
 // wxComboBox
 //-----------------------------------------------------------------------------
@@ -122,7 +120,7 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
 
     m_widget = gtk_combo_new();
     GtkCombo *combo = GTK_COMBO(m_widget);
-
+    
     // Disable GTK's broken events ...
     gtk_signal_disconnect( GTK_OBJECT(combo->entry), combo->entry_change_id );
     // ... and add surogate handler.
@@ -131,7 +129,7 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
 
     // make it more useable
     gtk_combo_set_use_arrows_always( GTK_COMBO(m_widget), TRUE );
-
+    
     // and case-sensitive
     gtk_combo_set_case_sensitive( GTK_COMBO(m_widget), TRUE );
 
@@ -154,7 +152,7 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
     }
 
     m_parent->DoAddChild( this );
-
+    
     m_focusWidget = combo->entry;
 
     PostCreation();
@@ -185,7 +183,7 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
     if ((new_size.x != size.x) || (new_size.y != size.y))
     {
         SetSize( new_size.x, new_size.y );
-
+        
         // This is required for tool bar support
         gtk_widget_set_usize( m_widget, new_size.x, new_size.y );
     }
@@ -200,12 +198,12 @@ bool wxComboBox::Create( wxWindow *parent, wxWindowID id, const wxString& value,
 
 wxComboBox::~wxComboBox()
 {
-    wxList::compatibility_iterator node = m_clientObjectList.GetFirst();
+    wxNode *node = m_clientObjectList.First();
     while (node)
     {
-        wxClientData *cd = (wxClientData*)node->GetData();
+        wxClientData *cd = (wxClientData*)node->Data();
         if (cd) delete cd;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_clientObjectList.Clear();
 
@@ -228,7 +226,7 @@ void wxComboBox::AppendCommon( const wxString &item )
     wxCHECK_RET( m_widget != NULL, wxT("invalid combobox") );
 
     DisableEvents();
-
+    
     GtkWidget *list = GTK_COMBO(m_widget)->list;
 
     GtkWidget *list_item = gtk_list_item_new_with_label( wxGTK_CONV( item ) );
@@ -244,7 +242,7 @@ void wxComboBox::AppendCommon( const wxString &item )
     }
 
     gtk_widget_show( list_item );
-
+    
     EnableEvents();
 }
 
@@ -272,132 +270,47 @@ void wxComboBox::Append( const wxString &item, wxClientData *clientData )
     AppendCommon( item );
 }
 
-void wxComboBox::InsertCommon( const wxString &item, int pos )
-{
-    wxCHECK_RET(!(GetWindowStyle() & wxCB_SORT), wxT("can't insert into sorted list"));
-    wxCHECK_RET( m_widget != NULL, wxT("invalid combobox") );
-
-    int count = GetCount();
-    wxCHECK_RET((pos>=0) && (pos<=count), wxT("invalid index"));
-    if (pos == count)
-    {
-        AppendCommon(item);
-        return;
-    }
-
-    DisableEvents();
-
-    GtkWidget *list = GTK_COMBO(m_widget)->list;
-
-    GtkWidget *list_item = gtk_list_item_new_with_label( wxGTK_CONV( item ) );
-
-    GList *gitem_list = g_list_alloc ();
-    gitem_list->data = list_item;
-    gtk_list_insert_items( GTK_LIST (list), gitem_list, pos );
-
-    if (GTK_WIDGET_REALIZED(m_widget))
-    {
-        gtk_widget_realize( list_item );
-        gtk_widget_realize( GTK_BIN(list_item)->child );
-
-        if (m_widgetStyle) ApplyWidgetStyle();
-    }
-
-    gtk_widget_show( list_item );
-
-    EnableEvents();
-}
-
-void wxComboBox::Insert( const wxString &item, int pos )
-{
-    wxCHECK_RET(!(GetWindowStyle() & wxCB_SORT), wxT("can't insert into sorted list"));
-    int count = GetCount();
-    wxCHECK_RET((pos>=0) && (pos<=count), wxT("invalid index"));
-    if (pos == count)
-    {
-        Append(item);
-        return;
-    }
-
-    m_clientDataList.Insert( pos, (wxObject*) NULL );
-    m_clientObjectList.Insert( pos, (wxObject*) NULL );
-
-    InsertCommon( item, pos );
-}
-
-void wxComboBox::Insert( const wxString &item, int pos, void *clientData )
-{
-    wxCHECK_RET(!(GetWindowStyle() & wxCB_SORT), wxT("can't insert into sorted list"));
-    int count = GetCount();
-    wxCHECK_RET((pos>=0) && (pos<=count), wxT("invalid index"));
-    if (pos == count)
-    {
-        Append(item, clientData);
-        return;
-    }
-
-    m_clientDataList.Insert( pos, (wxObject*) clientData );
-    m_clientObjectList.Insert( pos, (wxObject*)NULL );
-
-    InsertCommon( item, pos );
-}
-
-void wxComboBox::Insert( const wxString &item, int pos, wxClientData *clientData )
-{
-    wxCHECK_RET(!(GetWindowStyle() & wxCB_SORT), wxT("can't insert into sorted list"));
-    int count = GetCount();
-    wxCHECK_RET((pos>=0) && (pos<=count), wxT("invalid index"));
-    if (pos == count)
-    {
-        Append(item, clientData);
-        return;
-    }
-
-    m_clientDataList.Insert( pos, (wxObject*) NULL );
-    m_clientObjectList.Insert( pos, (wxObject*) clientData );
-
-    InsertCommon( item, pos );
-}
-
 void wxComboBox::SetClientData( int n, void* clientData )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid combobox") );
 
-    wxList::compatibility_iterator node = m_clientDataList.Item( n );
+    wxNode *node = m_clientDataList.Nth( n );
     if (!node) return;
 
     node->SetData( (wxObject*) clientData );
 }
 
-void* wxComboBox::GetClientData( int n ) const
+void* wxComboBox::GetClientData( int n )
 {
     wxCHECK_MSG( m_widget != NULL, NULL, wxT("invalid combobox") );
 
-    wxList::compatibility_iterator node = m_clientDataList.Item( n );
+    wxNode *node = m_clientDataList.Nth( n );
+    if (!node) return NULL;
 
-    return node ? node->GetData() : NULL;
+    return node->Data();
 }
 
 void wxComboBox::SetClientObject( int n, wxClientData* clientData )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid combobox") );
 
-    wxList::compatibility_iterator node = m_clientObjectList.Item( n );
+    wxNode *node = m_clientObjectList.Nth( n );
     if (!node) return;
 
-    wxClientData *cd = (wxClientData*) node->GetData();
+    wxClientData *cd = (wxClientData*) node->Data();
     if (cd) delete cd;
 
     node->SetData( (wxObject*) clientData );
 }
 
-wxClientData* wxComboBox::GetClientObject( int n ) const
+wxClientData* wxComboBox::GetClientObject( int n )
 {
     wxCHECK_MSG( m_widget != NULL, (wxClientData*)NULL, wxT("invalid combobox") );
 
-    wxList::compatibility_iterator node = m_clientObjectList.Item( n );
+    wxNode *node = m_clientObjectList.Nth( n );
+    if (!node) return (wxClientData*) NULL;
 
-    return node ? (wxClientData*) node->GetData() : NULL;
+    return (wxClientData*) node->Data();
 }
 
 void wxComboBox::Clear()
@@ -405,21 +318,21 @@ void wxComboBox::Clear()
     wxCHECK_RET( m_widget != NULL, wxT("invalid combobox") );
 
     DisableEvents();
-
+    
     GtkWidget *list = GTK_COMBO(m_widget)->list;
     gtk_list_clear_items( GTK_LIST(list), 0, Number() );
 
-    wxList::compatibility_iterator node = m_clientObjectList.GetFirst();
+    wxNode *node = m_clientObjectList.First();
     while (node)
     {
-        wxClientData *cd = (wxClientData*)node->GetData();
+        wxClientData *cd = (wxClientData*)node->Data();
         if (cd) delete cd;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_clientObjectList.Clear();
 
     m_clientDataList.Clear();
-
+    
     EnableEvents();
 }
 
@@ -438,43 +351,24 @@ void wxComboBox::Delete( int n )
     }
 
     DisableEvents();
-
+    
     GList *list = g_list_append( (GList*) NULL, child->data );
     gtk_list_remove_items( listbox, list );
     g_list_free( list );
 
-    wxList::compatibility_iterator node = m_clientObjectList.Item( n );
+    wxNode *node = m_clientObjectList.Nth( n );
     if (node)
     {
-        wxClientData *cd = (wxClientData*)node->GetData();
+        wxClientData *cd = (wxClientData*)node->Data();
         if (cd) delete cd;
-        m_clientObjectList.Erase( node );
+        m_clientObjectList.DeleteNode( node );
     }
 
-    node = m_clientDataList.Item( n );
+    node = m_clientDataList.Nth( n );
     if (node)
-        m_clientDataList.Erase( node );
+        m_clientDataList.DeleteNode( node );
     
     EnableEvents();
-}
-
-void wxComboBox::SetString(int n, const wxString &text)
-{
-    wxCHECK_RET( m_widget != NULL, wxT("invalid combobox") );
-
-    GtkWidget *list = GTK_COMBO(m_widget)->list;
-
-    GList *child = g_list_nth( GTK_LIST(list)->children, n );
-    if (child)
-    {
-        GtkBin *bin = GTK_BIN( child->data );
-        GtkLabel *label = GTK_LABEL( bin->child );
-        gtk_label_set_text(label, wxGTK_CONV(text));
-    }
-    else
-    {
-        wxFAIL_MSG( wxT("wxComboBox: wrong index") );
-    }
 }
 
 int wxComboBox::FindString( const wxString &item )
@@ -496,7 +390,7 @@ int wxComboBox::FindString( const wxString &item )
 #endif
         if (item == str)
             return count;
-
+            
         count++;
         child = child->next;
     }
@@ -616,7 +510,7 @@ wxString wxComboBox::GetValue() const
     GtkEntry *entry = GTK_ENTRY( GTK_COMBO(m_widget)->entry );
     wxString tmp( wxGTK_CONV_BACK( gtk_entry_get_text( entry ) ) );
 
-#if 0
+#if 0    
     for (int i = 0; i < wxStrlen(tmp.c_str()) +1; i++)
     {
         wxChar c = tmp[i];
@@ -624,7 +518,7 @@ wxString wxComboBox::GetValue() const
     }
     printf( "\n" );
 #endif
-
+    
     return tmp;
 }
 
@@ -697,7 +591,7 @@ void wxComboBox::Replace( long from, long to, const wxString& value )
     gtk_editable_delete_text( GTK_EDITABLE(entry), (gint)from, (gint)to );
     if (value.IsNull()) return;
     gint pos = (gint)to;
-
+    
 #if wxUSE_UNICODE
     wxCharBuffer buffer = wxConvUTF8.cWX2MB( value );
     gtk_editable_insert_text( GTK_EDITABLE(entry), (const char*) buffer, strlen( (const char*) buffer ), &pos );
@@ -728,14 +622,14 @@ void wxComboBox::SetEditable( bool editable )
 
 void wxComboBox::OnChar( wxKeyEvent &event )
 {
-    if ( event.GetKeyCode() == WXK_RETURN )
+    if ( event.KeyCode() == WXK_RETURN )
     {
         // GTK automatically selects an item if its in the list
         wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, GetId());
         event.SetString( GetValue() );
         event.SetInt( GetSelection() );
         event.SetEventObject( this );
-
+        
         if (!GetEventHandler()->ProcessEvent( event ))
         {
             // This will invoke the dialog default action, such
@@ -753,12 +647,12 @@ void wxComboBox::OnChar( wxKeyEvent &event )
                     gtk_widget_activate (window->default_widget);
             }
         }
-
+            
         // Catch GTK event so that GTK doesn't open the drop
         // down list upon RETURN.
         return;
     }
-
+    
     event.Skip();
 }
 
@@ -849,3 +743,4 @@ wxSize wxComboBox::DoGetBestSize() const
 }
 
 #endif
+

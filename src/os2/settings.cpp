@@ -316,9 +316,11 @@ int wxSystemSettingsNative::GetMetric(
             // TODO
             return 0;
         case wxSYS_SCREEN_X:
-            return ::WinQuerySysValue(HWND_DESKTOP,SV_CXSCREEN);
+            // TODO
+            return 0;
         case wxSYS_SCREEN_Y:
-            return ::WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN);
+            // TODO
+            return 0;
         case wxSYS_FRAMESIZE_X:
             // TODO
             return 0;

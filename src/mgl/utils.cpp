@@ -18,7 +18,6 @@
 #include "wx/string.h"
 
 #include "wx/intl.h"
-#include "wx/apptrait.h"
 #include "wx/log.h"
 #include "wx/process.h"
 
@@ -208,7 +207,7 @@ int wxDisplayDepth()
     return g_displayDC->getBitsPerPixel();
 }
 
-int wxGUIAppTraits::GetOSVersion(int *majorVsn, int *minorVsn)
+int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
     if ( majorVsn )
         *majorVsn = MGL_RELEASE_MAJOR;

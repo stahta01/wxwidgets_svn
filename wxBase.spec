@@ -1,37 +1,19 @@
 %define pref /usr
-%define ver 2.5.0
-%define ver2 2.5
+%define ver 2.4.1
+%define ver2 2.4
 %define rel 1
 
-# Configurable settings (use --with(out) unicode on rpmbuild command line):
-%define unicode 0
-%{?_with_unicode: %{expand: %%define unicode 1}}
-%{?_without_unicode: %{expand: %%define unicode 0}}
-
-%if %{unicode}
-%define wxconfigname wxbaseu-%{ver2}-config
-%else
-%define wxconfigname wxbase-%{ver2}-config
-%endif
-
-%if %{unicode}
-%define name wx-base-unicode
-%else 
-%define name wx-base
-%endif
-
 Summary: wxBase library - non-GUI support classes of wxWindows toolkit
-Name:   %{name}
+Name: wxBase
 Version: %{ver}
 Release: %{rel}
-License: wxWindows Licence
+Copyright: wxWindows Licence
 Group: Development/Libraries
 Source: wxBase-%{ver}.tar.bz2
 URL: http://www.wxwindows.org
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Prefix: %{pref}
 BuildRoot: /var/tmp/%{name}-root
-Provides: wxBase
 
 %description
 wxBase is a collection of C++ classes providing basic data structures (strings,
@@ -45,8 +27,7 @@ the following platforms: Win32, generic Unix (Linux, FreeBSD, Solaris, HP-UX,
 %package devel
 Summary: wxBase headers needed for developping with wxBase
 Group: Development/Libraries
-Requires: %{name} = %{ver}
-Provides: wxBase-devel
+Requires: wxBase = %{ver}
 
 %description devel
 Header files for wxBase. You need them to develop programs using wxBase.
@@ -59,7 +40,7 @@ Group: Development/Libraries
 Static libraries for wxBase. You need them if you want to link statically against wxBase.
 
 %prep
-%setup -q -n wxBase-%{ver}
+%setup -n wxBase-%{ver}
 
 %build
 if [ "$SMP" != "" ]; then
@@ -70,25 +51,13 @@ fi
 
 mkdir obj-shared
 cd obj-shared
-../configure --prefix=%{pref} --disable-gui \
-%if %{unicode}
-             --enable-unicode \
-%else
-             --with-odbc \
-%endif
-             --disable-std_iostreams
+../configure --prefix=%{pref} --enable-soname --disable-gui --disable-std_iostreams
 $MAKE
 cd ..
 
 mkdir obj-static
 cd obj-static
-../configure --prefix=%{pref} --disable-shared --disable-gui \
-%if %{unicode}
-             --enable-unicode \
-%else
-             --with-odbc \
-%endif
-             --disable-std_iostreams
+../configure --prefix=%{pref} --disable-shared --disable-gui --disable-std_iostreams
 $MAKE
 cd ..
 
@@ -136,7 +105,7 @@ fi
 %{_libdir}/libwx_base*.so
 %dir %{_libdir}/wx
 %{_libdir}/wx/*
-%{_bindir}/wxbase*-%{ver2}-config
+%{_bindir}/wxbase-%{ver2}-config
 %{_datadir}/aclocal/*.m4
 
 %files static

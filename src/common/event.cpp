@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "event.h"
 #endif
 
@@ -44,19 +44,14 @@
 
 #if wxUSE_GUI
     #include "wx/validate.h"
-#if wxUSE_STOPWATCH
-    #include "wx/stopwatch.h"
-#endif
 #endif // wxUSE_GUI
 
 // ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_BASE
-    IMPLEMENT_DYNAMIC_CLASS(wxEvtHandler, wxObject)
-    IMPLEMENT_ABSTRACT_CLASS(wxEvent, wxObject)
-#endif // wxUSE_BASE
+IMPLEMENT_DYNAMIC_CLASS(wxEvtHandler, wxObject)
+IMPLEMENT_ABSTRACT_CLASS(wxEvent, wxObject)
 
 #if wxUSE_GUI
     IMPLEMENT_DYNAMIC_CLASS(wxIdleEvent, wxEvent)
@@ -96,18 +91,11 @@
     IMPLEMENT_DYNAMIC_CLASS(wxMouseCaptureChangedEvent, wxEvent)
 #endif // wxUSE_GUI
 
-#if wxUSE_BASE
-
 const wxEventTable *wxEvtHandler::GetEventTable() const
     { return &wxEvtHandler::sm_eventTable; }
 
 const wxEventTable wxEvtHandler::sm_eventTable =
     { (const wxEventTable *)NULL, &wxEvtHandler::sm_eventTableEntries[0] };
-
-wxEventHashTable &wxEvtHandler::GetEventHashTable() const
-    { return wxEvtHandler::sm_eventHashTable; }
-
-wxEventHashTable wxEvtHandler::sm_eventHashTable(wxEvtHandler::sm_eventTable);
 
 const wxEventTableEntry wxEvtHandler::sm_eventTableEntries[] =
     { DECLARE_EVENT_TABLE_ENTRY(wxEVT_NULL, 0, 0, (wxObjectEventFunction)NULL, NULL) };
@@ -129,21 +117,7 @@ wxList *wxPendingEvents = (wxList *)NULL;
 // common event types are defined here, other event types are defined by the
 // components which use them
 
-const wxEventType wxEVT_FIRST = 10000;
-const wxEventType wxEVT_USER_FIRST = wxEVT_FIRST + 2000;
-
 DEFINE_EVENT_TYPE(wxEVT_NULL)
-DEFINE_EVENT_TYPE(wxEVT_IDLE)
-DEFINE_EVENT_TYPE(wxEVT_SOCKET)
-
-#endif // !WXWIN_COMPATIBILITY_EVENT_TYPES
-
-#endif // wxUSE_BASE
-
-#if wxUSE_GUI
-
-#if !WXWIN_COMPATIBILITY_EVENT_TYPES
-
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_BUTTON_CLICKED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_CHECKBOX_CLICKED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_CHOICE_SELECTED)
@@ -162,6 +136,7 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_TOOL_ENTER)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPINCTRL_UPDATED)
 
 // Sockets and timers send events, too
+DEFINE_EVENT_TYPE(wxEVT_SOCKET)
 DEFINE_EVENT_TYPE(wxEVT_TIMER)
 
 // Mouse event types
@@ -202,9 +177,6 @@ DEFINE_EVENT_TYPE(wxEVT_CHAR_HOOK)
 DEFINE_EVENT_TYPE(wxEVT_NAVIGATION_KEY)
 DEFINE_EVENT_TYPE(wxEVT_KEY_DOWN)
 DEFINE_EVENT_TYPE(wxEVT_KEY_UP)
-#if wxUSE_HOTKEY
-DEFINE_EVENT_TYPE(wxEVT_HOTKEY)
-#endif
 
 // Set cursor event
 DEFINE_EVENT_TYPE(wxEVT_SET_CURSOR)
@@ -232,9 +204,7 @@ DEFINE_EVENT_TYPE(wxEVT_SCROLLWIN_THUMBRELEASE)
 
 // System events
 DEFINE_EVENT_TYPE(wxEVT_SIZE)
-DEFINE_EVENT_TYPE(wxEVT_SIZING)
 DEFINE_EVENT_TYPE(wxEVT_MOVE)
-DEFINE_EVENT_TYPE(wxEVT_MOVING)
 DEFINE_EVENT_TYPE(wxEVT_CLOSE_WINDOW)
 DEFINE_EVENT_TYPE(wxEVT_END_SESSION)
 DEFINE_EVENT_TYPE(wxEVT_QUERY_END_SESSION)
@@ -269,6 +239,7 @@ DEFINE_EVENT_TYPE(wxEVT_DRAW_ITEM)
 DEFINE_EVENT_TYPE(wxEVT_MEASURE_ITEM)
 DEFINE_EVENT_TYPE(wxEVT_COMPARE_ITEM)
 DEFINE_EVENT_TYPE(wxEVT_INIT_DIALOG)
+DEFINE_EVENT_TYPE(wxEVT_IDLE)
 DEFINE_EVENT_TYPE(wxEVT_UPDATE_UI)
 
 // Generic command events
@@ -287,10 +258,6 @@ DEFINE_EVENT_TYPE(wxEVT_DETAILED_HELP)
 
 #endif // !WXWIN_COMPATIBILITY_EVENT_TYPES
 
-#endif // wxUSE_GUI
-
-#if wxUSE_BASE
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -303,6 +270,16 @@ int wxNewEventType()
 {
     // MT-FIXME
     static int s_lastUsedEventType = wxEVT_FIRST;
+
+#if WXWIN_COMPATIBILITY_2
+    // check that we don't overlap with the user-defined types: if it does
+    // happen, the best solution is probably to update the existing code to
+    // use wxNewEventType() instead of wxEVT_USER_FIRST
+    //
+    // due to the uncertainty
+    wxASSERT_MSG( s_lastUsedEventType < wxEVT_USER_FIRST - 1,
+                  _T("possible event type conflict") );
+#endif // WXWIN_COMPATIBILITY_2
 
     return s_lastUsedEventType++;
 }
@@ -329,7 +306,6 @@ wxEvent::wxEvent(int theId, wxEventType commandType )
     m_skipped = FALSE;
     m_callbackUserData = (wxObject *) NULL;
     m_isCommandEvent = FALSE;
-    m_propagationLevel = wxEVENT_PROPAGATE_NONE;
 }
 
 wxEvent::wxEvent(const wxEvent &src)
@@ -339,13 +315,10 @@ wxEvent::wxEvent(const wxEvent &src)
     , m_timeStamp(src.m_timeStamp)
     , m_id(src.m_id)
     , m_callbackUserData(src.m_callbackUserData)
-    , m_propagationLevel(src.m_propagationLevel)
     , m_skipped(src.m_skipped)
     , m_isCommandEvent(src.m_isCommandEvent)
 {
 }
-
-#endif // wxUSE_BASE
 
 #if wxUSE_GUI
 
@@ -355,94 +328,14 @@ wxEvent::wxEvent(const wxEvent &src)
  */
 
 wxCommandEvent::wxCommandEvent(wxEventType commandType, int theId)
-              : wxEvent(theId, commandType)
+  : wxEvent(theId, commandType)
 {
     m_clientData = (char *) NULL;
     m_clientObject = (wxClientData *) NULL;
     m_extraLong = 0;
     m_commandInt = 0;
+    m_commandString = wxEmptyString;
     m_isCommandEvent = TRUE;
-
-    // the command events are propagated upwards by default
-    m_propagationLevel = wxEVENT_PROPAGATE_MAX;
-}
-
-/*
- * UI update events
- */
-
-#if wxUSE_LONGLONG
-wxLongLong wxUpdateUIEvent::sm_lastUpdate = 0;
-#endif
-
-long wxUpdateUIEvent::sm_updateInterval = 0;
-
-wxUpdateUIMode wxUpdateUIEvent::sm_updateMode = wxUPDATE_UI_PROCESS_ALL;
-
-// Can we update?
-bool wxUpdateUIEvent::CanUpdate(wxWindowBase *win)
-{
-    // Don't update if we've switched global updating off
-    // and this window doesn't support updates.
-    if (win &&
-       (GetMode() == wxUPDATE_UI_PROCESS_SPECIFIED &&
-       ((win->GetExtraStyle() & wxWS_EX_PROCESS_UI_UPDATES) == 0)))
-        return FALSE;
-
-    if (sm_updateInterval == -1)
-        return FALSE;
-    else if (sm_updateInterval == 0)
-        return TRUE;
-    else
-    {
-#if wxUSE_STOPWATCH && wxUSE_LONGLONG
-        wxLongLong now = wxGetLocalTimeMillis();
-        if (now > (sm_lastUpdate + sm_updateInterval))
-        {
-            return TRUE;
-        }
-#else
-        // If we don't have wxStopWatch or wxLongLong, we
-        // should err on the safe side and update now anyway.
-        return TRUE;
-#endif
-    }
-    return FALSE;
-}
-
-// Reset the update time to provide a delay until the next
-// time we should update
-void wxUpdateUIEvent::ResetUpdateTime()
-{
-#if wxUSE_STOPWATCH && wxUSE_LONGLONG
-    if (sm_updateInterval > 0)
-    {
-        wxLongLong now = wxGetLocalTimeMillis();
-        if (now > (sm_lastUpdate + sm_updateInterval))
-        {
-            sm_lastUpdate = now;
-        }
-    }
-#endif
-}
-
-/*
- * Idle events
- */
-
-wxIdleMode wxIdleEvent::sm_idleMode = wxIDLE_PROCESS_ALL;
-
-// Can we send an idle event?
-bool wxIdleEvent::CanSend(wxWindow* win)
-{
-    // Don't update if we've switched global updating off
-    // and this window doesn't support updates.
-    if (win &&
-       (GetMode() == wxIDLE_PROCESS_SPECIFIED &&
-       ((win->GetExtraStyle() & wxWS_EX_PROCESS_IDLE) == 0)))
-        return FALSE;
-
-    return TRUE;
 }
 
 /*
@@ -678,11 +571,6 @@ wxKeyEvent::wxKeyEvent(const wxKeyEvent& evt)
 #endif
 }
 
-long wxKeyEvent::KeyCode() const
-{
-    return m_keyCode;
-}
-
 wxWindowCreateEvent::wxWindowCreateEvent(wxWindow *win)
 {
     SetEventType(wxEVT_CREATE);
@@ -703,185 +591,6 @@ wxChildFocusEvent::wxChildFocusEvent(wxWindow *win)
 
 #endif // wxUSE_GUI
 
-
-#if wxUSE_BASE
-
-// ----------------------------------------------------------------------------
-// wxEventHashTable
-// ----------------------------------------------------------------------------
-
-static const int EVENT_TYPE_TABLE_INIT_SIZE = 31; // Not to big not to small...
-
-wxEventHashTable::wxEventHashTable(const wxEventTable &table)
-                : m_table(table),
-                  m_rebuildHash(TRUE)
-{
-    AllocEventTypeTable(EVENT_TYPE_TABLE_INIT_SIZE);
-}
-
-wxEventHashTable::~wxEventHashTable()
-{
-    size_t i;
-    for(i = 0; i < m_size; i++)
-    {
-        EventTypeTablePointer  eTTnode = m_eventTypeTable[i];
-        if (eTTnode)
-        {
-            delete eTTnode;
-        }
-    }
-
-    delete[] m_eventTypeTable;
-}
-
-bool wxEventHashTable::HandleEvent(wxEvent &event, wxEvtHandler *self)
-{
-    if (m_rebuildHash)
-    {
-        InitHashTable();
-        m_rebuildHash = FALSE;
-    }
-
-    // Find all entries for the given event type.
-    wxEventType eventType = event.GetEventType();
-    const EventTypeTablePointer eTTnode = m_eventTypeTable[eventType % m_size];
-    if (eTTnode && eTTnode->eventType == eventType)
-    {
-        // Now start the search for an event handler
-        // that can handle an event with the given ID.
-        int eventId = event.GetId();
-        const wxEventTableEntryPointerArray &eventEntryTable = eTTnode->eventEntryTable;
-
-        size_t n;
-        size_t count = eventEntryTable.GetCount();
-        for (n = 0; n < count; n++)
-        {
-            const wxEventTableEntry* entry = eventEntryTable[n];
-            int tableId1 = entry->m_id,
-                tableId2 = entry->m_lastId;
-
-            if ((tableId1 == -1) ||
-                (tableId2 == -1 && tableId1 == eventId) ||
-                (tableId2 != -1 &&
-                 (eventId >= tableId1 && eventId <= tableId2)))
-            {
-                event.Skip(FALSE);
-                event.m_callbackUserData = entry->m_callbackUserData;
-
-                (self->*((wxEventFunction) (entry->m_fn)))(event);
-
-                if (!event.GetSkipped())
-                    return TRUE;
-            }
-        }
-
-        return FALSE;
-    }
-
-    return FALSE;
-}
-
-void wxEventHashTable::InitHashTable()
-{
-    // Loop over the event tables and all its base tables.
-    const wxEventTable *table = &m_table;
-    while (table)
-    {
-        // Retrieve all valid event handler entries
-        const wxEventTableEntry *entry = table->entries;
-        while (entry->m_fn != 0)
-        {
-            // Add the event entry in the Hash.
-            AddEntry(*entry);
-
-            entry++;
-        }
-
-        table = table->baseTable;
-    }
-
-    // Lets free some memory.
-    size_t i;
-    for(i = 0; i < m_size; i++)
-    {
-        EventTypeTablePointer  eTTnode = m_eventTypeTable[i];
-        if (eTTnode)
-        {
-            eTTnode->eventEntryTable.Shrink();
-        }
-    }
-}
-
-void wxEventHashTable::AddEntry(const wxEventTableEntry &entry)
-{
-    EventTypeTablePointer *peTTnode = &m_eventTypeTable[entry.m_eventType % m_size];
-    EventTypeTablePointer  eTTnode = *peTTnode;
-
-    if (eTTnode)
-    {
-        if (eTTnode->eventType != entry.m_eventType)
-        {
-            // Resize the table!
-            GrowEventTypeTable();
-            // Try again to add it.
-            AddEntry(entry);
-            return;
-        }
-    }
-    else
-    {
-        eTTnode = new EventTypeTable;
-        eTTnode->eventType = entry.m_eventType;
-        *peTTnode = eTTnode;
-    }
-
-    // Fill all hash entries between entry.m_id and entry.m_lastId...
-    eTTnode->eventEntryTable.Add(&entry);
-}
-
-void wxEventHashTable::AllocEventTypeTable(size_t size)
-{
-    m_eventTypeTable = new EventTypeTablePointer[size];
-    memset((void *)m_eventTypeTable, 0, sizeof(EventTypeTablePointer)*size);
-    m_size = size;
-}
-
-void wxEventHashTable::GrowEventTypeTable()
-{
-    size_t oldSize = m_size;
-    EventTypeTablePointer *oldEventTypeTable = m_eventTypeTable;
-
-    // TODO: Search the most optimal grow sequence
-    AllocEventTypeTable(/* GetNextPrime(oldSize) */oldSize*2+1);
-
-    for ( size_t i = 0; i < oldSize; /* */ )
-    {
-        EventTypeTablePointer  eTToldNode = oldEventTypeTable[i];
-        if (eTToldNode)
-        {
-            EventTypeTablePointer *peTTnode = &m_eventTypeTable[eTToldNode->eventType % m_size];
-            EventTypeTablePointer  eTTnode = *peTTnode;
-
-            // Check for collision, we don't want any.
-            if (eTTnode)
-            {
-                GrowEventTypeTable();
-                continue; // Don't increment the counter,
-                          // as we still need to add this element.
-            }
-            else
-            {
-                // Get the old value and put it in the new table.
-                *peTTnode = oldEventTypeTable[i];
-            }
-        }
-
-        i++;
-    }
-
-    delete[] oldEventTypeTable;
-}
-
 // ----------------------------------------------------------------------------
 // wxEvtHandler
 // ----------------------------------------------------------------------------
@@ -896,6 +605,7 @@ wxEvtHandler::wxEvtHandler()
     m_previousHandler = (wxEvtHandler *) NULL;
     m_enabled = TRUE;
     m_dynamicEvents = (wxList *) NULL;
+    m_isWindow = FALSE;
     m_pendingEvents = (wxList *) NULL;
 #if wxUSE_THREADS
 #  if !defined(__VISAGECPP__)
@@ -918,19 +628,19 @@ wxEvtHandler::~wxEvtHandler()
 
     if (m_dynamicEvents)
     {
-        wxList::iterator it = m_dynamicEvents->begin(),
-                         en = m_dynamicEvents->end();
-        for (;it != en; ++it)
+        wxNode *node = m_dynamicEvents->First();
+        while (node)
         {
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxEventTableEntry *entry = (wxEventTableEntry*)*it;
+            wxEventTableEntry *entry = (wxEventTableEntry*)node->Data();
 #else // !WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)*it;
+            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->Data();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
             if (entry->m_callbackUserData)
                 delete entry->m_callbackUserData;
             delete entry;
+            node = node->Next();
         }
         delete m_dynamicEvents;
     };
@@ -941,15 +651,6 @@ wxEvtHandler::~wxEvtHandler()
 #  if !defined(__VISAGECPP__)
     delete m_eventsLocker;
 #  endif
-
-    // Remove us from wxPendingEvents if necessary.
-    if(wxPendingEventsLocker)
-        wxENTER_CRIT_SECT(*wxPendingEventsLocker);
-    if ( wxPendingEvents ) {
-        wxPendingEvents->DeleteObject(this);
-    }
-    if(wxPendingEventsLocker)
-        wxLEAVE_CRIT_SECT(*wxPendingEventsLocker);
 #endif
 
     // we only delete object data, not untyped
@@ -1024,11 +725,11 @@ void wxEvtHandler::ProcessPendingEvents()
     wxENTER_CRIT_SECT( *m_eventsLocker);
 #endif
 
-    wxList::compatibility_iterator node = m_pendingEvents->GetFirst();
+    wxNode *node = m_pendingEvents->First();
     while ( node )
     {
-        wxEvent *event = (wxEvent *)node->GetData();
-        m_pendingEvents->Erase(node);
+        wxEvent *event = (wxEvent *)node->Data();
+        delete node;
 
         // In ProcessEvent, new events might get added and
         // we can safely leave the crtical section here.
@@ -1045,7 +746,7 @@ void wxEvtHandler::ProcessPendingEvents()
         wxENTER_CRIT_SECT( *m_eventsLocker);
 #endif
 
-        node = m_pendingEvents->GetFirst();
+        node = m_pendingEvents->First();
     }
 
 #if defined(__VISAGECPP__)
@@ -1059,25 +760,47 @@ void wxEvtHandler::ProcessPendingEvents()
  * Event table stuff
  */
 
-bool wxEvtHandler::TryParent(wxEvent& event)
-{
-    if ( wxTheApp && (this != wxTheApp) )
-    {
-        // Special case: don't pass wxEVT_IDLE to wxApp, since it'll always
-        // swallow it. wxEVT_IDLE is sent explicitly to wxApp so it will be
-        // processed appropriately via SearchEventTable.
-        if ( event.GetEventType() != wxEVT_IDLE )
-        {
-            if ( wxTheApp->ProcessEvent(event) )
-                return TRUE;
-        }
-    }
-
-    return FALSE;
-}
-
 bool wxEvtHandler::ProcessEvent(wxEvent& event)
 {
+#if wxUSE_GUI
+
+    // We have to use the actual window or processing events from
+    // wxWindowNative destructor won't work (we don't see the wxWindow class)
+#ifdef __WXDEBUG__
+    // check that our flag corresponds to reality
+    wxClassInfo* info = NULL;
+#ifdef __WXUNIVERSAL__
+#  if defined(__WXMSW__)
+    info = CLASSINFO(wxWindowMSW);
+#  elif defined(__WXGTK__)
+    info = CLASSINFO(wxWindowGTK);
+#  elif defined(__WXX11__)
+    info = CLASSINFO(wxWindowX11);
+#  elif defined(__WXMGL__)
+    info = CLASSINFO(wxWindowMGL);
+#  elif defined(__WXPM__)
+    info = CLASSINFO(wxWindowOS2);
+#  elif defined(__WXMAC__)
+    info = CLASSINFO(wxWindowMac);
+#  elif defined(__WXMOTIF__)
+    info = CLASSINFO(wxWindowMotif);
+#  endif
+#else
+    info = CLASSINFO(wxWindow);
+#endif
+
+    if ( m_isWindow != IsKindOf(info) )
+    {
+        wxString msg = GetClassInfo()->GetClassName();
+        msg += _T(" should [not] be a window but it is [not]");
+
+        wxFAIL_MSG( msg );
+    }
+
+#endif // __WXDEBUG__
+
+#endif // wxUSE_GUI
+
     // allow the application to hook into event processing
     if ( wxTheApp )
     {
@@ -1095,18 +818,59 @@ bool wxEvtHandler::ProcessEvent(wxEvent& event)
     // An event handler can be enabled or disabled
     if ( GetEvtHandlerEnabled() )
     {
-        // if we have a validator, it has higher priority than our own event
-        // table
-        if ( TryValidator(event) )
-            return TRUE;
+
+#if 0
+/*
+        What is this? When using GUI threads, a non main
+        threads can send an event and process it itself.
+        This breaks GTK's GUI threads, so please explain.
+*/
+
+        // Check whether we are in a child thread.
+        if ( !wxThread::IsMain() )
+          return ProcessThreadEvent(event);
+#endif
 
         // Handle per-instance dynamic event tables first
         if ( m_dynamicEvents && SearchDynamicEventTable(event) )
             return TRUE;
 
         // Then static per-class event tables
-        if ( GetEventHashTable().HandleEvent(event, this) )
-            return TRUE;
+        const wxEventTable *table = GetEventTable();
+
+#if wxUSE_GUI && wxUSE_VALIDATORS
+        // Try the associated validator first, if this is a window.
+        // Problem: if the event handler of the window has been replaced,
+        // this wxEvtHandler may no longer be a window.
+        // Therefore validators won't be processed if the handler
+        // has been replaced with SetEventHandler.
+        // THIS CAN BE CURED if PushEventHandler is used instead of
+        // SetEventHandler, and then processing will be passed down the
+        // chain of event handlers.
+        if (m_isWindow)
+        {
+            wxWindow *win = (wxWindow *)this;
+
+            // Can only use the validator of the window which
+            // is receiving the event
+            if ( win == event.GetEventObject() )
+            {
+                wxValidator *validator = win->GetValidator();
+                if ( validator && validator->ProcessEvent(event) )
+                {
+                    return TRUE;
+                }
+            }
+        }
+#endif
+
+        // Search upwards through the inheritance hierarchy
+        while (table)
+        {
+            if ( SearchEventTable((wxEventTable&)*table, event) )
+                return TRUE;
+            table = table->baseTable;
+        }
     }
 
     // Try going down the event handler chain
@@ -1116,11 +880,42 @@ bool wxEvtHandler::ProcessEvent(wxEvent& event)
             return TRUE;
     }
 
-    // Finally propagate the event upwards the window chain and/or to the
-    // application object as necessary
-    return TryParent(event);
-}
+#if wxUSE_GUI
+    // Carry on up the parent-child hierarchy, but only if event is a command
+    // event: it wouldn't make sense for a parent to receive a child's size
+    // event, for example
+    if ( m_isWindow && event.IsCommandEvent() )
+    {
+        wxWindow *win = (wxWindow *)this;
 
+        // honour the requests to stop propagation at this window: this is
+        // used by the dialogs, for example, to prevent processing the events
+        // from the dialog controls in the parent frame which rarely, if ever,
+        // makes sense
+        if ( !(win->GetExtraStyle() & wxWS_EX_BLOCK_EVENTS) )
+        {
+            wxWindow *parent = win->GetParent();
+            if ( parent && !parent->IsBeingDeleted() )
+                return parent->GetEventHandler()->ProcessEvent(event);
+        }
+    }
+#endif // wxUSE_GUI
+
+    // Last try - application object.
+    if ( wxTheApp && (this != wxTheApp) )
+    {
+        // Special case: don't pass wxEVT_IDLE to wxApp, since it'll always
+        // swallow it. wxEVT_IDLE is sent explicitly to wxApp so it will be
+        // processed appropriately via SearchEventTable.
+        if ( event.GetEventType() != wxEVT_IDLE )
+        {
+            if ( wxTheApp->ProcessEvent(event) )
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+}
 
 bool wxEvtHandler::SearchEventTable(wxEventTable& table, wxEvent& event)
 {
@@ -1169,8 +964,7 @@ bool wxEvtHandler::SearchEventTable(wxEventTable& table, wxEvent& event)
 void wxEvtHandler::Connect( int id, int lastId,
                             int eventType,
                             wxObjectEventFunction func,
-                            wxObject *userData,
-                            wxEvtHandler* eventSink )
+                            wxObject *userData )
 {
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
     wxEventTableEntry *entry = new wxEventTableEntry;
@@ -1181,7 +975,7 @@ void wxEvtHandler::Connect( int id, int lastId,
     entry->m_callbackUserData = userData;
 #else // !WXWIN_COMPATIBILITY_EVENT_TYPES
     wxDynamicEventTableEntry *entry =
-        new wxDynamicEventTableEntry(eventType, id, lastId, func, userData, eventSink);
+        new wxDynamicEventTableEntry(eventType, id, lastId, func, userData);
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
     if (!m_dynamicEvents)
@@ -1193,35 +987,33 @@ void wxEvtHandler::Connect( int id, int lastId,
 
 bool wxEvtHandler::Disconnect( int id, int lastId, wxEventType eventType,
                   wxObjectEventFunction func,
-                  wxObject *userData,
-                  wxEvtHandler* eventSink )
+                  wxObject *userData )
 {
     if (!m_dynamicEvents)
         return FALSE;
 
-    wxList::compatibility_iterator node = m_dynamicEvents->GetFirst();
+    wxNode *node = m_dynamicEvents->First();
     while (node)
     {
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxEventTableEntry *entry = (wxEventTableEntry*)node->GetData();
+            wxEventTableEntry *entry = (wxEventTableEntry*)node->Data();
 #else // !WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->GetData();
+            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->Data();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
         if ((entry->m_id == id) &&
             ((entry->m_lastId == lastId) || (lastId == -1)) &&
             ((entry->m_eventType == eventType) || (eventType == wxEVT_NULL)) &&
             ((entry->m_fn == func) || (func == (wxObjectEventFunction)NULL)) &&
-            ((entry->m_eventSink == eventSink) || (eventSink == (wxEvtHandler*)NULL)) &&
             ((entry->m_callbackUserData == userData) || (userData == (wxObject*)NULL)))
         {
             if (entry->m_callbackUserData)
                 delete entry->m_callbackUserData;
-            m_dynamicEvents->Erase( node );
+            m_dynamicEvents->DeleteNode( node );
             delete entry;
             return TRUE;
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return FALSE;
 }
@@ -1233,13 +1025,13 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
 
     int commandId = event.GetId();
 
-    wxList::compatibility_iterator node = m_dynamicEvents->GetFirst();
+    wxNode *node = m_dynamicEvents->First();
     while (node)
     {
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxEventTableEntry *entry = (wxEventTableEntry*)node->GetData();
+            wxEventTableEntry *entry = (wxEventTableEntry*)node->Data();
 #else // !WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->GetData();
+            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->Data();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
         if (entry->m_fn)
@@ -1254,18 +1046,13 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
                 event.Skip(FALSE);
                 event.m_callbackUserData = entry->m_callbackUserData;
 
-#if !WXWIN_COMPATIBILITY_EVENT_TYPES
-                if (entry->m_eventSink)
-                    ((entry->m_eventSink)->*((wxEventFunction) (entry->m_fn)))(event);
-                else
-#endif
-                    (this->*((wxEventFunction) (entry->m_fn)))(event);
+                (this->*((wxEventFunction) (entry->m_fn)))(event);
 
                 if ( ! event.GetSkipped() )
                     return TRUE;
             }
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return FALSE;
 };
@@ -1311,7 +1098,16 @@ void *wxEvtHandler::DoGetClientData() const
     return m_clientData;
 }
 
-#endif // wxUSE_BASE
+
+#if WXWIN_COMPATIBILITY
+bool wxEvtHandler::OnClose()
+{
+    if (GetNextHandler())
+        return GetNextHandler()->OnClose();
+    else
+        return FALSE;
+}
+#endif // WXWIN_COMPATIBILITY
 
 #if wxUSE_GUI
 

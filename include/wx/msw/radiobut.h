@@ -12,7 +12,7 @@
 #ifndef _WX_RADIOBUT_H_
 #define _WX_RADIOBUT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "radiobut.h"
 #endif
 
@@ -66,7 +66,7 @@ private:
     // see the comments in SetFocus()
     bool m_focusJustSet;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxRadioButton)
+    DECLARE_DYNAMIC_CLASS(wxRadioButton)
 };
 
 #endif

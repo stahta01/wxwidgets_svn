@@ -11,7 +11,7 @@
 #ifndef _WX_HTMLFILT_H_
 #define _WX_HTMLFILT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "htmlfilt.h"
 #endif
 
@@ -30,7 +30,7 @@
 //                  kinds of files (HTPP, FTP, local, tar.gz etc..)
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlFilter : public wxObject
+class WXDLLEXPORT wxHtmlFilter : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlFilter)
 
@@ -56,7 +56,7 @@ public:
 //--------------------------------------------------------------------------------
 
 
-class WXDLLIMPEXP_HTML wxHtmlFilterPlainText : public wxHtmlFilter
+class WXDLLEXPORT wxHtmlFilterPlainText : public wxHtmlFilter
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlFilterPlainText)
 

@@ -29,6 +29,12 @@
     #define USE_METAFILES
 #endif // Windows
 
+#define USE_RESOURCES 0
+#if !wxUSE_RESOURCES
+#undef USE_RESOURCES
+#define USE_RESOURCES 0
+#endif
+
 #include "wx/intl.h"
 #include "wx/log.h"
 
@@ -38,7 +44,11 @@
 #include "wx/image.h"
 #include "wx/clipbrd.h"
 #include "wx/colordlg.h"
-#include "wx/sizer.h"
+#if USE_RESOURCES
+    #include "wx/resource.h"
+#else
+    #include "wx/sizer.h"
+#endif
 
 #ifdef USE_METAFILES
     #include "wx/metafile.h"
@@ -337,7 +347,7 @@ protected:
     //get a point 1 up and 1 left, otherwise the mid-point of a triangle is on the line
     wxPoint GetCentre() const
          { return wxPoint(m_pos.x + m_size.x / 2 - 1, m_pos.y + m_size.y / 2 - 1); }
-
+         
     struct ShapeDump
     {
         int x, y,       // position
@@ -383,7 +393,7 @@ public:
         dc.DrawLine(p3, p1);
 
         //works in multicolor modes; on GTK (at least) will fail in 16-bit color
-        dc.SetBrush(wxBrush(m_col, wxSOLID));
+        dc.SetBrush(wxBrush(m_col, wxSOLID));       
         dc.FloodFill(GetCentre(), m_col, wxFLOOD_BORDER);
     }
 };
@@ -864,6 +874,27 @@ END_EVENT_TABLE()
 // `Main program' equivalent, creating windows and returning main app frame
 bool DnDApp::OnInit()
 {
+#if USE_RESOURCES
+    // load our ressources
+    wxPathList pathList;
+    pathList.Add(_T("."));
+#ifdef __WXMSW__
+    pathList.Add(_T("./Debug"));
+    pathList.Add(_T("./Release"));
+#endif // wxMSW
+
+    wxString path = pathList.FindValidPath(_T("dnd.wxr"));
+    if ( !path )
+    {
+        wxLogError(wxT("Can't find the resource file dnd.wxr in the current ")
+                   wxT("directory, aborting."));
+
+        return FALSE;
+    }
+
+    wxDefaultResourceTable->ParseResourceFile(path);
+#endif
+
     // switch on trace messages
 #if defined(__WXGTK__)
     wxLog::AddTraceMask(_T("clipboard"));
@@ -1451,7 +1482,7 @@ bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
 {
     size_t nFiles = filenames.GetCount();
     wxString str;
-    str.Printf( _T("%d files dropped"), (int)nFiles);
+    str.Printf( _T("%d files dropped"), nFiles);
     m_pOwner->Append(str);
     for ( size_t n = 0; n < nFiles; n++ ) {
         m_pOwner->Append(filenames[n]);
@@ -1465,11 +1496,23 @@ bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
 // ----------------------------------------------------------------------------
 
 DnDShapeDialog::DnDShapeDialog(wxFrame *parent, DnDShape *shape)
+#if !USE_RESOURCES
   :wxDialog( parent, 6001, wxT("Choose Shape"), wxPoint( 10, 10 ),
              wxSize( 40, 40 ),
              wxRAISED_BORDER|wxCAPTION|wxTHICK_FRAME|wxSYSTEM_MENU )
+#endif
 {
     m_shape = shape;
+#if USE_RESOURCES
+    LoadFromResource(parent, _T("dialogShape"));
+
+    m_textX = (wxTextCtrl *)wxFindWindowByName(_T("textX"), this);
+    m_textY = (wxTextCtrl *)wxFindWindowByName(_T("textY"), this);
+    m_textW = (wxTextCtrl *)wxFindWindowByName(_T("textW"), this);
+    m_textH = (wxTextCtrl *)wxFindWindowByName(_T("textH"), this);
+
+    m_radio = (wxRadioBox *)wxFindWindowByName(_T("radio"), this);
+#else
     wxBoxSizer* topSizer = new wxBoxSizer( wxVERTICAL );
 
     // radio box
@@ -1531,6 +1574,7 @@ DnDShapeDialog::DnDShapeDialog(wxFrame *parent, DnDShape *shape)
     SetAutoLayout( TRUE );
     SetSizer( topSizer );
     topSizer->Fit( this );
+#endif
 }
 
 DnDShape *DnDShapeDialog::GetShape() const

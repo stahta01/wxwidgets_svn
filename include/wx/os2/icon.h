@@ -66,11 +66,6 @@ public:
            ,int             nDesiredWidth = -1
            ,int             nDesiredHeight = -1
           );
-    wxIcon(const wxIconLocation& loc)
-    {
-        LoadFile(loc.GetFileName(), wxBITMAP_TYPE_ICO);
-    }
-
     ~wxIcon();
 
     bool LoadFile( const wxString& rName

@@ -16,12 +16,11 @@
 #pragma interface "linesp.h"
 #endif
 
-
-class WXDLLIMPEXP_OGL wxLineShape;
-class WXDLLIMPEXP_OGL wxLineControlPoint: public wxControlPoint
+class wxLineShape;
+class wxLineControlPoint: public wxControlPoint
 {
   DECLARE_DYNAMIC_CLASS(wxLineControlPoint)
-  friend class WXDLLIMPEXP_OGL wxLineShape;
+  friend class wxLineShape;
  public:
 
   wxLineControlPoint(wxShapeCanvas *the_canvas = NULL, wxShape *object = NULL, double size = 0.0,
@@ -52,8 +51,8 @@ public:
 /*
  * Temporary arc label object
  */
-
-class WXDLLIMPEXP_OGL wxLabelShape: public wxRectangleShape
+ 
+class wxLabelShape: public wxRectangleShape
 {
   DECLARE_DYNAMIC_CLASS(wxLabelShape)
 

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "combobox.h"
 #endif
 
@@ -53,24 +53,7 @@
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxComboBox, wxControl,"wx/combobox.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxComboBox)
-    // TODO DELEGATES
-	WX_PROPERTY( Font , wxFont , SetFont , GetFont  , )
-    WX_PROPERTY_COLLECTION( Choices , wxArrayString , wxString , AppendString , GetStrings )
-	WX_PROPERTY( Value ,wxString, SetValue, GetValue, )
-	WX_PROPERTY( Selection ,int, SetSelection, GetSelection, )
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxComboBox)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_5( wxComboBox , wxWindow* , Parent , wxWindowID , Id , wxString , Value , wxPoint , Position , wxSize , Size )
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxControl)
-#endif
 
 // ----------------------------------------------------------------------------
 // function prototypes
@@ -173,12 +156,31 @@ LRESULT APIENTRY _EXPORT wxComboEditWndProc(HWND hWnd,
 }
 
 WXHBRUSH wxComboBox::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
+#if wxUSE_CTL3D
+                               WXUINT message,
+                               WXWPARAM wParam,
+                               WXLPARAM lParam
+#else
                                WXUINT WXUNUSED(message),
                                WXWPARAM WXUNUSED(wParam),
                                WXLPARAM WXUNUSED(lParam)
+#endif
     )
 {
+#if wxUSE_CTL3D
+    if ( m_useCtl3D )
+    {
+        HBRUSH hbrush = Ctl3dCtlColorEx(message, wParam, lParam);
+        return (WXHBRUSH) hbrush;
+    }
+#endif // wxUSE_CTL3D
+
     HDC hdc = (HDC)pDC;
+    if (GetParent()->GetTransparentBackground())
+        SetBkMode(hdc, TRANSPARENT);
+    else
+        SetBkMode(hdc, OPAQUE);
+
     wxColour colBack = GetBackgroundColour();
 
     if (!IsEnabled())
@@ -329,10 +331,8 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
                    CBS_AUTOHSCROLL | CBS_NOINTEGRALHEIGHT /* | WS_CLIPSIBLINGS */;
     if ( style & wxCB_READONLY )
         msStyle |= CBS_DROPDOWNLIST;
-#ifndef __WXWINCE__
     else if ( style & wxCB_SIMPLE )
         msStyle |= CBS_SIMPLE; // A list (shown always) and edit control
-#endif
     else
         msStyle |= CBS_DROPDOWN;
 
@@ -429,7 +429,7 @@ void wxComboBox::SetInsertionPoint(long pos)
         // Scroll insertion point into view
         SendMessage(hEditWnd, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0);
         // Why is this necessary? (Copied from wxTextCtrl::SetInsertionPoint)
-        SendMessage(hEditWnd, EM_REPLACESEL, 0, (LPARAM) wxEmptyString);
+        SendMessage(hEditWnd, EM_REPLACESEL, 0, (LPARAM)_T(""));
     }
 #endif // __WIN32__
 }

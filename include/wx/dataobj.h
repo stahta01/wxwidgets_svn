@@ -6,27 +6,24 @@
 // Created:     26.05.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows Team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DATAOBJ_H_BASE_
 #define _WX_DATAOBJ_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "dataobjbase.h"
 #endif
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "wx/defs.h"
-
-#if wxUSE_DATAOBJ
-
 #include "wx/string.h"
 #include "wx/bitmap.h"
 #include "wx/list.h"
-#include "wx/arrstr.h"
 
 // ============================================================================
 /*
@@ -86,8 +83,6 @@ public:
     #include "wx/x11/dataform.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dataform.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/dataform.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dataform.h"
 #endif
@@ -172,10 +167,10 @@ public:
     #include "wx/gtk/dataobj.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dataobj.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/dataobj.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dataobj.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/dnd.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -245,8 +240,6 @@ public:
 private:
     // the one and only format we support
     wxDataFormat m_format;
-
-    DECLARE_NO_COPY_CLASS(wxDataObjectSimple)
 };
 
 // ----------------------------------------------------------------------------
@@ -266,7 +259,6 @@ class WXDLLEXPORT wxDataObjectComposite : public wxDataObject
 public:
     // ctor
     wxDataObjectComposite();
-    virtual ~wxDataObjectComposite();
 
     // add data object (it will be deleted by wxDataObjectComposite, hence it
     // must be allocated on the heap) whose format will become the preferred
@@ -300,8 +292,6 @@ private:
     // the index of the preferred one (0 initially, so by default the first
     // one is the preferred)
     size_t m_preferred;
-
-    DECLARE_NO_COPY_CLASS(wxDataObjectComposite)
 };
 
 // ============================================================================
@@ -349,8 +339,6 @@ private:
         { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
     bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
         { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
-
-    DECLARE_NO_COPY_CLASS(wxTextDataObject)
 };
 
 // ----------------------------------------------------------------------------
@@ -374,8 +362,6 @@ public:
 
 protected:
     wxBitmap m_bitmap;
-
-    DECLARE_NO_COPY_CLASS(wxBitmapDataObjectBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -407,8 +393,6 @@ private:
         { return(wxDataObjectSimple::GetDataSize(format)); }
     bool GetDataHere(const wxDataFormat& format, void* pBuf) const
         { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
-
-    DECLARE_NO_COPY_CLASS(wxFileDataObjectBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -463,8 +447,6 @@ private:
         { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
     bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
         { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
-
-    DECLARE_NO_COPY_CLASS(wxCustomDataObject)
 };
 
 // ----------------------------------------------------------------------------
@@ -480,12 +462,8 @@ private:
         #include "wx/gtk/dataobj2.h"
     #elif defined(__WXX11__)
         #include "wx/x11/dataobj2.h"
-    #elif defined(__WXMOTIF__)
-        #include "wx/motif/dataobj2.h"
     #elif defined(__WXMAC__)
         #include "wx/mac/dataobj2.h"
-    #elif defined(__WXCOCOA__)
-        #include "wx/cocoa/dataobj2.h"
     #elif defined(__WXPM__)
         #include "wx/os2/dataobj2.h"
     #endif
@@ -498,7 +476,5 @@ private:
         void SetURL(const wxString& url) { SetText(url); }
     };
 #endif // __WXMSW__/!__WXMSW__
-
-#endif // wxUSE_DATAOBJ
 
 #endif // _WX_DATAOBJ_H_BASE_

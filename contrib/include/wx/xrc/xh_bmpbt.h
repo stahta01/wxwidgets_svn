@@ -18,9 +18,8 @@
 #include "wx/xrc/xmlres.h"
 
 
-class WXDLLIMPEXP_XRC wxBitmapButtonXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxBitmapButtonXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxBitmapButtonXmlHandler)
 public:
     wxBitmapButtonXmlHandler();
     virtual wxObject *DoCreateResource();

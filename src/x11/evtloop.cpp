@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "evtloop.h"
 #endif
 
@@ -73,7 +73,7 @@ class wxSocketTable: public wxHashTable
     }
     ~wxSocketTable()
     {
-        WX_CLEAR_HASH_TABLE(*this)
+        DeleteContents(TRUE);
     }
 
     wxSocketTableEntry* FindEntry(int fd);
@@ -171,10 +171,10 @@ bool wxSocketTable::CallCallback(int fd, wxSocketTableType socketType)
 void wxSocketTable::FillSets(fd_set* readset, fd_set* writeset, int* highest)
 {
     BeginFind();
-    wxHashTable::compatibility_iterator node = Next();
+    wxNode* node = Next();
     while (node)
     {
-        wxSocketTableEntry* entry = (wxSocketTableEntry*) node->GetData();
+        wxSocketTableEntry* entry = (wxSocketTableEntry*) node->Data();
         
         if (entry->m_fdInput != -1)
         {
@@ -197,10 +197,10 @@ void wxSocketTable::FillSets(fd_set* readset, fd_set* writeset, int* highest)
 void wxSocketTable::ProcessEvents(fd_set* readset, fd_set* writeset)
 {
     BeginFind();
-    wxHashTable::compatibility_iterator node = Next();
+    wxNode* node = Next();
     while (node)
     {
-        wxSocketTableEntry* entry = (wxSocketTableEntry*) node->GetData();
+        wxSocketTableEntry* entry = (wxSocketTableEntry*) node->Data();
         
         if (entry->m_fdInput != -1 && FD_ISSET(entry->m_fdInput, readset))
         {
@@ -335,7 +335,10 @@ bool wxEventLoopImpl::PreProcessEvent(XEvent *event)
 
 bool wxEventLoopImpl::SendIdleEvent()
 {
-    return wxTheApp->ProcessIdle();
+    wxIdleEvent event;
+    event.SetEventObject(wxTheApp);
+
+    return wxTheApp->ProcessEvent(event) && event.MoreRequested();
 }
 
 // ============================================================================

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "gauge95.h"
 #endif
 
@@ -37,7 +37,7 @@
 #include "wx/msw/gauge95.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -66,27 +66,7 @@
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxGauge, wxControl,"wx/gauge.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxGauge95)
-	WX_PROPERTY( Value , int , SetValue, GetValue, 0 )
-	WX_PROPERTY( Range , int , SetRange, GetRange, 0 )
-	WX_PROPERTY( ShadowWidth , int , SetShadowWidth, GetShadowWidth, 0 )
-	WX_PROPERTY( BezelFace , int , SetBezelFace, GetBezelFace, 0 )
-/*
-	TODO PROPERTIES
-		style wxGA_HORIZONTAL
-*/
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxGauge95)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_6( wxGauge95 , wxWindow* , Parent , wxWindowID , Id , int , Range , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxGauge95, wxControl)
-#endif
 
 // ============================================================================
 // implementation

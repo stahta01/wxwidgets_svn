@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "bmpbuttn.h"
 #endif
 
@@ -31,16 +31,6 @@
 #include "wx/msw/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton, wxButton)
-
-/*
-TODO PROPERTIES :
-
-long "style" , wxBU_AUTODRAW
-bool "default" , 0
-bitmap "selected" ,
-bitmap "focus" ,
-bitmap "disabled" ,
-*/
 
 #define BUTTON_HEIGHT_FACTOR (EDIT_CONTROL_FACTOR * 1.1)
 
@@ -105,7 +95,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
                    (
                     0,
                     wxT("BUTTON"),
-                    wxEmptyString,
+                    wxT(""),
                     msStyle,
                     0, 0, 0, 0,
                     GetWinHwnd(parent),
@@ -129,7 +119,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
 
 bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 {
-#ifndef __WXWINCE__
+#if defined(__WIN95__)
     long style = GetWindowLong((HWND) GetHWND(), GWL_STYLE);
     if (style & BS_BITMAP)
     {
@@ -259,21 +249,20 @@ void wxBitmapButton::DrawFace( WXHDC dc, int left, int top, int right, int botto
 
     // draw the border
     oldp = (HPEN) SelectObject( (HDC) dc, sel? penDkShadow : penHiLight);
-
-    wxDrawLine((HDC) dc, left, top, right-1, top);
-    wxDrawLine((HDC) dc, left, top+1, left, bottom-1);
+    MoveToEx((HDC) dc, left, top, NULL); LineTo((HDC) dc, right-1, top);
+    MoveToEx((HDC) dc, left, top+1, NULL); LineTo((HDC) dc, left, bottom-1);
 
     SelectObject( (HDC) dc, sel? penShadow : penLight);
-    wxDrawLine((HDC) dc, left+1, top+1, right-2, top+1);
-    wxDrawLine((HDC) dc, left+1, top+2, left+1, bottom-2);
+    MoveToEx((HDC) dc, left+1, top+1, NULL); LineTo((HDC) dc, right-2, top+1);
+    MoveToEx((HDC) dc, left+1, top+2, NULL); LineTo((HDC) dc, left+1, bottom-2);
 
     SelectObject( (HDC) dc, sel? penLight : penShadow);
-    wxDrawLine((HDC) dc, left+1, bottom-2, right-1, bottom-2);
-    wxDrawLine((HDC) dc, right-2, bottom-3, right-2, top);
+    MoveToEx((HDC) dc, left+1, bottom-2, NULL); LineTo((HDC) dc, right-1, bottom-2);
+    MoveToEx((HDC) dc, right-2, bottom-3, NULL); LineTo((HDC) dc, right-2, top);
 
     SelectObject( (HDC) dc, sel? penHiLight : penDkShadow);
-    wxDrawLine((HDC) dc, left, bottom-1, right+2, bottom-1);
-    wxDrawLine((HDC) dc, right-1, bottom-2, right-1, top-1);
+    MoveToEx((HDC) dc, left, bottom-1, NULL); LineTo((HDC) dc, right+2, bottom-1);
+    MoveToEx((HDC) dc, right-1, bottom-2, NULL); LineTo((HDC) dc, right-1, top-1);
 
     // delete allocated resources
     SelectObject((HDC) dc,oldp);

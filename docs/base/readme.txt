@@ -1,5 +1,5 @@
-                                wxBase README
-                                =============
+				wxBase README
+				=============
 
 NB: this file applies to wxBase library only. If you are using a GUI version
     of wxWindows, please refer to the documentation in the appropriate
@@ -14,7 +14,7 @@ NB: this file applies to wxBase library only. If you are using a GUI version
  wxBase is the library providing most of the non-GUI classes of the wxWindows
 cross-platform C++ framework. wxBase has some generic classes such as yet
 another C++ string class, typesafe dynamic arrays, hashes and lists and, more
-excitingly, wxDateTime -- a very flexible and powerful class for manipulating
+excitingly, wxDateTime - a very flexible and powerful class for manipulating
 the dates in the range of 580 million years with up to millisecond precision.
 Another useful class not present in the standard C++ library is wxRegEx which
 allows you to use regular expressions for string matching and replacing.
@@ -51,33 +51,21 @@ or Unicode mode for a total of 8 possibilities.
 
 a) Using Visual C++ 6.0
 
-   Simply open the src/wxBase.dsw file in MSDEV and build it. When it is
-done you can also open samples/console/console.dsp project and build it as
-well.
+   Simply open the src/wxBase.dsw file in MSDEV and build it (you may need to
+right click on wxBase in the project tree to make it the active project). When
+it is done you can also open samples/console/console.dsp project and build it
+as well.
 
 b) Cygwin
 
-   Please refer to the Unix section below.
+   Please refer to the Unix section below
 
 c) Borland
 
    Please refer to the docs/msw/install.txt. The console sample compiles and
-   runs but does not pass all tests (04 sept 02)
+   runs but does not pass all tests (as of Sep 4, 2002)
 
-d) Watcom
-
-   The compilation has been tested only with OpenWatcom but should also work
-   with Watcom 11.0 but probably not the earlier versions.
-
-   To build wxBase itself (only static library build is supported), enter the
-   directory src\msw and type "wmake -f makebase.wat". See also Watcom notes in
-   docs/msw/install.txt.
-
-   There is makefile.wat in samples\console which can be used to build the
-   console sample with Watcom and also shows how can you write your own
-   makefiles for wxBase and Watcom compiler.
-
-e) Other compilers
+d) Other compilers
 
    Unfortunately we don't have the makefiles for any other compilers yet.
 Please contact us if you would like to help us with creating one for the
@@ -96,23 +84,22 @@ you get any errors from the native Unix make.
 
 The recommended way to build wxBase is:
 
-        % cd ..../wxWindows
-        % mkdir base-release # or any other directory of your liking
-        % cd base-release
-        % ../configure
-        # ignore the error messages about missing samples
-        % make
-        % make install
+	% cd ..../wxWindows
+	% mkdir base-release # or any other directory of your liking
+	% cd base-release
+	% ../configure
+	# ignore the error messages about missing samples
+	% make
+	% make install
 
 You can also do:
 
-        % mkdir base-debug
-        % cd base-debug
-        % ../configure --enable-debug
-        % make
+	% mkdir base-debug
+	% cd base-debug
+	% ../configure --enable-debug
+	% make
 
 To build the sample then cd to samples/console and make there.
-
 
 4. Documentation and support
 ----------------------------
@@ -136,9 +123,9 @@ namely:
 
  Hope you will find wxBase useful!
 
-                                                                 Vadim Zeitlin
+								 Vadim Zeitlin
 
 
-This file is accurate for the version 2.5.0 of wxBase. It was last modified on
-Jan 22, 2003.
+This file is accurate for the version 2.4.1 of wxBase. It was last modified on
+June 13, 2003.
 

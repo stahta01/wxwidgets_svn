@@ -6,13 +6,13 @@
 // Created:     26/04/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_NETWORK_ADDRESS_H
 #define _WX_NETWORK_ADDRESS_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "sckaddr.h"
 #endif
 
@@ -24,7 +24,7 @@
 #include "wx/gsocket.h"
 
 
-class WXDLLIMPEXP_NET wxSockAddress : public wxObject {
+class WXDLLEXPORT wxSockAddress : public wxObject {
   DECLARE_ABSTRACT_CLASS(wxSockAddress)
 public:
   typedef enum { IPV4=1, IPV6=2, UNIX=3 } Addr;
@@ -52,7 +52,7 @@ private:
   void Init();
 };
 
-class WXDLLIMPEXP_NET wxIPV4address : public wxSockAddress {
+class WXDLLEXPORT wxIPV4address : public wxSockAddress {
   DECLARE_DYNAMIC_CLASS(wxIPV4address)
 public:
   wxIPV4address();
@@ -69,7 +69,6 @@ public:
   wxString Hostname();
   wxString OrigHostname() { return m_origHostname; }
   unsigned short Service();
-  wxString IPAddress() const;
 
   virtual int Type() { return wxSockAddress::IPV4; }
   virtual wxSockAddress *Clone() const;
@@ -79,7 +78,7 @@ private:
 };
 
 #ifdef ENABLE_IPV6
-class WXDLLIMPEXP_NET wxIPV6address : public wxSockAddress {
+class WXDLLEXPORT wxIPV6address : public wxSockAddress {
   DECLARE_DYNAMIC_CLASS(wxIPV6address)
 private:
   struct sockaddr_in6 *m_addr;
@@ -102,13 +101,13 @@ public:
 };
 #endif
 
-#if defined(__UNIX__) && !defined(__WINE__) && (!defined(__WXMAC__) || defined(__DARWIN__))
+#if defined(__UNIX__) && (!defined(__WXMAC__) || defined(__DARWIN__))
 #include <sys/socket.h>
 #ifndef __VMS__
 # include <sys/un.h>
 #endif
 
-class WXDLLIMPEXP_NET wxUNIXaddress : public wxSockAddress {
+class WXDLLEXPORT wxUNIXaddress : public wxSockAddress {
   DECLARE_DYNAMIC_CLASS(wxUNIXaddress)
 private:
   struct sockaddr_un *m_addr;

@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "colour.h"
 #endif
 
@@ -24,23 +24,9 @@
 #include "wx/msw/private.h"
 
 #include <string.h>
+#include <windows.h>
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_WITH_COPY_XTI( wxColour , wxObject , "wx/colour.h" ) 
-
-WX_BEGIN_PROPERTIES_TABLE(wxColour)
-	WX_READONLY_PROPERTY( Red, unsigned char , Red , 0 )
-	WX_READONLY_PROPERTY( Green, unsigned char  , Green , 0 ) 
-	WX_READONLY_PROPERTY( Blue, unsigned char , Blue , 0 )
-WX_END_PROPERTIES_TABLE()
-
-WX_CONSTRUCTOR_3( wxColour , unsigned char , Red , unsigned char , Green , unsigned char , Blue )  
-
-WX_BEGIN_HANDLERS_TABLE(wxColour)
-WX_END_HANDLERS_TABLE()
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
-#endif
 
 // Colour
 
@@ -111,3 +97,14 @@ void wxColour::Set (unsigned char r, unsigned char g, unsigned char b)
   m_isInit = TRUE;
   m_pixel = PALETTERGB (m_red, m_green, m_blue);
 }
+
+// Obsolete
+#if WXWIN_COMPATIBILITY
+void wxColour::Get (unsigned char *r, unsigned char *g, unsigned char *b) const
+{
+  *r = m_red;
+  *g = m_green;
+  *b = m_blue;
+}
+#endif
+

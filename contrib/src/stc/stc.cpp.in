@@ -325,29 +325,23 @@ bool wxStyledTextCtrl::SaveFile(const wxString& filename)
 
 bool wxStyledTextCtrl::LoadFile(const wxString& filename)
 {
-    bool success = false;
     wxFile file(filename, wxFile::read);
 
-    if (file.IsOpened())
+    if (!file.IsOpened())
+        return FALSE;
+
+    wxString contents;
+    off_t len = file.Length();
+
+    wxChar *buf = contents.GetWriteBuf(len);
+    bool success = (file.Read(buf, len) == len);
+    contents.UngetWriteBuf();
+
+    if (success)
     {
-        wxString contents;
-        off_t len = file.Length();
-
-        if (len > 0)
-        {
-            wxChar *buf = contents.GetWriteBuf(len);
-            success = (file.Read(buf, len) == len);
-            contents.UngetWriteBuf();
-        }
-        else
-            success = true;		// empty file is ok
-
-        if (success)
-        {
-            SetText(contents);
-            EmptyUndoBuffer();
-            SetSavePoint();
-        }
+        SetText(contents);
+        EmptyUndoBuffer();
+        SetSavePoint();
     }
 
     return success;

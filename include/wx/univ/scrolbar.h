@@ -6,20 +6,19 @@
 // Created:     20.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_SCROLBAR_H_
 #define _WX_UNIV_SCROLBAR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univscrolbar.h"
 #endif
 
 class WXDLLEXPORT wxScrollTimer;
 
 #include "wx/univ/scrarrow.h"
-#include "wx/renderer.h"
 
 // ----------------------------------------------------------------------------
 // the actions supported by this control
@@ -120,13 +119,13 @@ public:
     // for wxControlRenderer::DrawScrollbar() only
     const wxScrollArrows& GetArrows() const { return m_arrows; }
 
-    // idle processing
-    virtual void OnInternalIdle();
-
 protected:
     virtual wxSize DoGetBestClientSize() const;
     virtual void DoDraw(wxControlRenderer *renderer);
     virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
+
+    // event handlers
+    void OnIdle(wxIdleEvent& event);
 
     // forces update of thumb's visual appearence (does nothing if m_dirty=FALSE)
     void UpdateThumb();

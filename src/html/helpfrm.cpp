@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "helpfrm.h"
 #endif
 
@@ -34,11 +34,6 @@
     #include "wx/statbox.h"
     #include "wx/radiobox.h"
 #endif // WXPRECOMP
-
-#ifdef __WXMAC__
-    #include "wx/menu.h"
-    #include "wx/msgdlg.h"
-#endif
 
 #include "wx/html/helpfrm.h"
 #include "wx/html/helpctrl.h"
@@ -113,15 +108,11 @@ class wxHtmlHelpHtmlWindow : public wxHtmlWindow
         virtual void OnLinkClicked(const wxHtmlLinkInfo& link)
         {
             wxHtmlWindow::OnLinkClicked(link);
-            const wxMouseEvent *e = link.GetEvent();
-            if (e == NULL || e->LeftUp())
-                m_Frame->NotifyPageChanged();
+            m_Frame->NotifyPageChanged();
         }
 
     private:
         wxHtmlHelpFrame *m_Frame;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpHtmlWindow)
 };
 
 
@@ -258,25 +249,6 @@ bool wxHtmlHelpFrame::Create(wxWindow* parent, wxWindowID id,
     GetPosition(&m_Cfg.x, &m_Cfg.y);
 
     SetIcon(wxArtProvider::GetIcon(wxART_HELP, wxART_HELP_BROWSER));
-
-    // On the Mac, each modeless frame must have a menubar.
-    // TODO: add more menu items, and perhaps add a style to show
-    // the menubar: compulsory on the Mac, optional elsewhere.
-#ifdef __WXMAC__
-    wxMenuBar* menuBar = new wxMenuBar;
-
-    wxMenu* fileMenu = new wxMenu;
-    fileMenu->Append(wxID_HTML_OPENFILE, _("&Open..."));
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_CLOSE, _("&Close"));
-
-    wxMenu* helpMenu = new wxMenu;
-    helpMenu->Append(wxID_ABOUT, _("&About..."));
-
-    menuBar->Append(fileMenu,_("File"));
-    menuBar->Append(helpMenu,_("Help"));
-    SetMenuBar(menuBar);
-#endif
 
     int notebook_page = 0;
 
@@ -496,11 +468,7 @@ wxHtmlHelpFrame::~wxHtmlHelpFrame()
         delete m_Data;
     if (m_NormalFonts) delete m_NormalFonts;
     if (m_FixedFonts) delete m_FixedFonts;
-    if (m_PagesHash) 
-    {
-        WX_CLEAR_HASH_TABLE(*m_PagesHash);
-        delete m_PagesHash;
-    }
+    if (m_PagesHash) delete m_PagesHash;
 }
 
 
@@ -721,12 +689,11 @@ void wxHtmlHelpFrame::CreateContents()
     if (! m_ContentsBox)
         return ;
 
-    if (m_PagesHash)
-    {
-        WX_CLEAR_HASH_TABLE(*m_PagesHash);
-        delete m_PagesHash;
-    }
+    m_ContentsBox->Clear();
+
+    if (m_PagesHash) delete m_PagesHash;
     m_PagesHash = new wxHashTable(wxKEY_STRING, 2 * m_Data->GetContentsCnt());
+    m_PagesHash->DeleteContents(TRUE);
 
     int cnt = m_Data->GetContentsCnt();
     int i;
@@ -790,8 +757,7 @@ void wxHtmlHelpFrame::CreateContents()
             else if (m_hfStyle & wxHF_ICONS_BOOK_CHAPTER)
                 image = (it->m_Level == 1) ? IMG_Book : IMG_Folder;
             m_ContentsBox->SetItemImage(roots[it->m_Level], image);
-            m_ContentsBox->SetItemImage(roots[it->m_Level], image,
-                                        wxTreeItemIcon_Selected);
+            m_ContentsBox->SetItemSelectedImage(roots[it->m_Level], image);
             imaged[it->m_Level] = TRUE;
         }
     }
@@ -1060,13 +1026,13 @@ Normal face<br>(and <u>underlined</u>. <i>Italic face.</i> \
     }
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrameOptionsDialog)
 };
 
 BEGIN_EVENT_TABLE(wxHtmlHelpFrameOptionsDialog, wxDialog)
     EVT_COMBOBOX(-1, wxHtmlHelpFrameOptionsDialog::OnUpdate)
     EVT_SPINCTRL(-1, wxHtmlHelpFrameOptionsDialog::OnUpdateSpin)
 END_EVENT_TABLE()
+
 
 void wxHtmlHelpFrame::OptionsDialog()
 {
@@ -1079,7 +1045,7 @@ void wxHtmlHelpFrame::OptionsDialog()
         enu.EnumerateFacenames();
         m_NormalFonts = new wxArrayString;
         *m_NormalFonts = *enu.GetFacenames();
-        m_NormalFonts->Sort(wxStringSortAscending);
+        m_NormalFonts->Sort();
     }
     if (m_FixedFonts == NULL)
     {
@@ -1087,7 +1053,7 @@ void wxHtmlHelpFrame::OptionsDialog()
         enu.EnumerateFacenames(wxFONTENCODING_SYSTEM, TRUE);
         m_FixedFonts = new wxArrayString;
         *m_FixedFonts = *enu.GetFacenames();
-        m_FixedFonts->Sort(wxStringSortAscending);
+        m_FixedFonts->Sort();
     }
     
     // VS: We want to show the font that is actually used by wxHtmlWindow.
@@ -1315,8 +1281,8 @@ void wxHtmlHelpFrame::OnToolbar(wxCommandEvent& event)
                 pos = m_BookmarksNames.Index(item);
                 if (pos != wxNOT_FOUND)
                 {
-                    m_BookmarksNames.RemoveAt(pos);
-                    m_BookmarksPages.RemoveAt(pos);
+                    m_BookmarksNames.Remove(pos);
+                    m_BookmarksPages.Remove(pos);
                     m_Bookmarks->Delete(m_Bookmarks->GetSelection());
                 }
             }
@@ -1528,19 +1494,6 @@ void wxHtmlHelpFrame::OnCloseWindow(wxCloseEvent& evt)
     evt.Skip();
 }
 
-#ifdef __WXMAC__
-void wxHtmlHelpFrame::OnClose(wxCommandEvent& event)
-{
-    Close(TRUE);
-}
-
-void wxHtmlHelpFrame::OnAbout(wxCommandEvent& event)
-{
-    wxMessageBox(wxT("wxWindows HTML Help Viewer (c) 1998-2003, Vaclav Slavik et al"), wxT("HelpView"),
-        wxICON_INFORMATION|wxOK, this);
-}
-#endif
-
 BEGIN_EVENT_TABLE(wxHtmlHelpFrame, wxFrame)
     EVT_ACTIVATE(wxHtmlHelpFrame::OnActivate)
     EVT_TOOL_RANGE(wxID_HTML_PANEL, wxID_HTML_OPTIONS, wxHtmlHelpFrame::OnToolbar)
@@ -1556,11 +1509,6 @@ BEGIN_EVENT_TABLE(wxHtmlHelpFrame, wxFrame)
     EVT_BUTTON(wxID_HTML_INDEXBUTTONALL, wxHtmlHelpFrame::OnIndexAll)
     EVT_COMBOBOX(wxID_HTML_BOOKMARKSLIST, wxHtmlHelpFrame::OnBookmarksSel)
     EVT_CLOSE(wxHtmlHelpFrame::OnCloseWindow)
-#ifdef __WXMAC__
-    EVT_MENU(wxID_CLOSE, wxHtmlHelpFrame::OnClose)
-    EVT_MENU(wxID_ABOUT, wxHtmlHelpFrame::OnAbout)
-#endif
-
 END_EVENT_TABLE()
 
 #endif // wxUSE_WXHTML_HELP

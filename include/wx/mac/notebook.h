@@ -1,17 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        notebook.h
 // Purpose:     MSW/GTK compatible notebook (a.k.a. property sheet)
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_NOTEBOOK_H_
 #define _WX_NOTEBOOK_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "notebook.h"
 #endif
 
@@ -48,14 +48,14 @@ public:
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
              long style = 0,
-             const wxString& name = wxT("notebook"));
+             const wxString& name = "notebook");
     // Create() function
   bool Create(wxWindow *parent,
               wxWindowID id, 
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize,
               long style = 0,
-              const wxString& name = wxT("notebook"));
+              const wxString& name = "notebook");
     // dtor
   ~wxNotebook();
 
@@ -64,17 +64,17 @@ public:
     // set the currently selected page, return the index of the previously
     // selected one (or -1 on error)
     // NB: this function will _not_ generate wxEVT_NOTEBOOK_PAGE_xxx events
-  int SetSelection(size_t nPage);
+  int SetSelection(int nPage);
     // get the currently selected page
   int GetSelection() const { return m_nSelection; }
 
     // set/get the title of a page
-  bool SetPageText(size_t nPage, const wxString& strText);
-  wxString GetPageText(size_t nPage) const;
+  bool SetPageText(int nPage, const wxString& strText);
+  wxString GetPageText(int nPage) const;
 
     // sets/returns item's image index in the current image list
-  int  GetPageImage(size_t nPage) const;
-  bool SetPageImage(size_t nPage, int nImage);
+  int  GetPageImage(int nPage) const;
+  bool SetPageImage(int nPage, int nImage);
 
   // control the appearance of the notebook pages
     // set the size (the same for all pages)
@@ -85,7 +85,7 @@ public:
   virtual void SetTabSize(const wxSize& sz);
    
     // calculate size for wxNotebookSizer
-  wxSize CalcSizeFromPage(const wxSize& sizePage) const;
+  wxSize CalcSizeFromPage(const wxSize& sizePage);
 
 /*
     // get number of pages in the dialog
@@ -104,7 +104,7 @@ public:
     // remove all pages
   bool DeleteAllPages();
     // the same as AddPage(), but adds it at the specified position
-  bool InsertPage(size_t nPage,
+  bool InsertPage(int nPage,
                   wxNotebookPage *pPage,
                   const wxString& strText,
                   bool bSelect = FALSE,
@@ -134,8 +134,8 @@ public:
   // -------------------
   virtual void Command(wxCommandEvent& event);
 protected:
-    virtual wxNotebookPage *DoRemovePage(size_t page) ;
-    virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
+    virtual wxNotebookPage *DoRemovePage(int page) ;
+	virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
   // common part of all ctors
   void Init();
 

@@ -5,7 +5,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -87,10 +87,10 @@ public:
     wxMetalRenderer(wxRenderer *renderer, wxColourScheme* scheme);
 
     virtual void DrawButtonSurface(wxDC& dc,
-                                   const wxColour& WXUNUSED(col),
+                                   const wxColour& col,
                                    const wxRect& rect,
-                                   int WXUNUSED(flags))
-        { DrawMetal(dc, rect); }
+                                   int flags )
+        { DrawMetal( dc, rect ); }
 
     virtual void DrawScrollbarThumb(wxDC& dc,
                                     wxOrientation orient,
@@ -141,7 +141,7 @@ private:
 // wxMetalTheme
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY_NO_PTR(wxInputHandler *, wxArrayHandlers);
+WX_DEFINE_ARRAY(wxInputHandler *, wxArrayHandlers);
 
 class wxMetalTheme : public wxTheme
 {
@@ -406,9 +406,9 @@ wxMetalRenderer::wxMetalRenderer(wxRenderer *renderer, wxColourScheme *scheme)
 }
 
 void wxMetalRenderer::DrawScrollbarThumb(wxDC& dc,
-                                         wxOrientation WXUNUSED(orient),
+                                         wxOrientation orient,
                                          const wxRect& rect,
-                                         int WXUNUSED(flags))
+                                         int flags)
 {
     // we don't use the flags, the thumb never changes appearance
     wxRect rectThumb = rect;
@@ -417,15 +417,15 @@ void wxMetalRenderer::DrawScrollbarThumb(wxDC& dc,
 }
 
 void wxMetalRenderer::DrawScrollbarShaft(wxDC& dc,
-                                         wxOrientation WXUNUSED(orient),
+                                         wxOrientation orient,
                                          const wxRect& rectBar,
-                                         int WXUNUSED(flags))
+                                         int flags)
 {
-    DrawMetal(dc, rectBar);
+    DrawMetal( dc, rectBar );
 }
 
 void wxMetalRenderer::GetComboBitmaps(wxBitmap *bmpNormal,
-                                      wxBitmap * WXUNUSED(bmpFocus),
+                                      wxBitmap *bmpFocus,
                                       wxBitmap *bmpPressed,
                                       wxBitmap *bmpDisabled)
 {

@@ -11,7 +11,7 @@
 #ifndef _WX_REGION_H_
 #define _WX_REGION_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "region.h"
 #endif
 

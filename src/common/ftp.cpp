@@ -10,14 +10,14 @@
 // Created:     07/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma implementation "ftp.h"
 #endif
 
@@ -524,8 +524,6 @@ public:
 
     wxFTP *m_ftp;
     size_t m_ftpsize;
-
-    DECLARE_NO_COPY_CLASS(wxInputFTPStream)
 };
 
 class wxOutputFTPStream : public wxSocketOutputStream
@@ -560,8 +558,6 @@ public:
     }
 
     wxFTP *m_ftp;
-
-    DECLARE_NO_COPY_CLASS(wxOutputFTPStream)
 };
 
 wxSocketClient *wxFTP::GetPort()
@@ -886,6 +882,48 @@ int wxFTP::GetFileSize(const wxString& fileName)
     // filesize might still be -1 when exiting
     return filesize;
 }
+
+
+#if WXWIN_COMPATIBILITY_2
+// deprecated
+wxList *wxFTP::GetList(const wxString& wildcard, bool details)
+{
+ wxSocketBase *sock = GetPort();
+ if (!sock)
+  return FALSE;
+ wxList *file_list = new wxList;
+ wxString line;
+ // NLST : List of Filenames (including Directory's !)
+ // LIST : depending on BS of FTP-Server
+ //        - Unix    : result like "ls" command
+ //        - Windows : like "dir" command
+ //        - others  : ?
+ if (!details)
+  line = _T("NLST");   // Default
+ else
+  line = _T("LIST");
+ if (!wildcard.IsNull())
+  line += wildcard;
+ if (!CheckCommand(line, '1'))
+ {
+  delete sock;
+  delete file_list;
+  return NULL;
+ }
+ while (GetLine(sock, line) == wxPROTO_NOERR)
+ {
+  file_list->Append((wxObject *)(new wxString(line)));
+ }
+ if (!CheckResult('2'))
+ {
+  delete sock;
+  file_list->DeleteContents(TRUE);
+  delete file_list;
+  return NULL;
+ }
+ return file_list;
+}
+#endif // WXWIN_COMPATIBILITY_2
 
 #endif // wxUSE_PROTOCOL_FTP
 

@@ -529,7 +529,7 @@ void wxThread::Sleep(unsigned long milliseconds)
     do
     {
         YieldToAnyThread();
-    } while( clock() - start < milliseconds /  1000.0 * CLOCKS_PER_SEC ) ;
+    } while( clock() - start < (milliseconds * CLOCKS_PER_SEC) / 1000 ) ;
 }
 
 int wxThread::GetCPUCount()
@@ -716,6 +716,13 @@ wxThreadError wxThread::Delete(ExitCode *pRc)
         }
     }
 
+ //   if ( !::GetExitCodeThread(hThread, (LPDWORD)&rc) )
+    {
+        wxLogLastError("GetExitCodeThread");
+
+        rc = (ExitCode)-1;
+    }
+
     if ( IsDetached() )
     {
         // if the thread exits normally, this is done in WinThreadStart, but in
@@ -724,6 +731,9 @@ wxThreadError wxThread::Delete(ExitCode *pRc)
         // closed while we were waiting on it, so we must do it here
         delete this;
     }
+
+ //   wxASSERT_MSG( (DWORD)rc != STILL_ACTIVE,
+ //                 wxT("thread must be already terminated.") );
 
     if ( pRc )
         *pRc = rc;
@@ -844,7 +854,7 @@ bool wxThreadModule::OnInit()
 #endif
     if ( !hasThreadManager )
     {
-        wxMessageBox( wxT("Error") , wxT("Thread Support is not available on this System") , wxOK ) ;
+        wxMessageBox( "Error" , "Thread Support is not available on this System" , wxOK ) ;
         return FALSE ;
     }
 
@@ -894,3 +904,5 @@ bool WXDLLEXPORT wxIsWaitingForThread()
 #include "wx/thrimpl.cpp"
 
 #endif // wxUSE_THREADS
+
+// vi:sts=4:sw=4:et

@@ -12,20 +12,19 @@
 #ifndef _WX_PEN_H_
 #define _WX_PEN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "pen.h"
 #endif
 
-#include "wx/gdicmn.h"
 #include "wx/gdiobj.h"
+#include "wx/colour.h"
+#include "wx/bitmap.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
 class wxPen;
-class wxColour;
-class wxBitmap;
 
 typedef char wxX11Dash;
 
@@ -38,8 +37,7 @@ class wxPen: public wxGDIObject
 public:
     wxPen() { }
     
-    wxPen( const wxColour &colour, int width = 1, int style = wxSOLID );
-    wxPen( const wxBitmap &stipple, int width );
+    wxPen( const wxColour &colour, int width, int style );
     ~wxPen();
     
     wxPen( const wxPen& pen ) { Ref(pen); }
@@ -57,8 +55,7 @@ public:
     void SetStyle( int style );
     void SetWidth( int width );
     void SetDashes( int number_of_dashes, const wxDash *dash );
-    void SetStipple( wxBitmap *stipple );
-
+    
     wxColour &GetColour() const;
     int GetCap() const;
     int GetJoin() const;
@@ -67,7 +64,6 @@ public:
     int GetDashes(wxDash **ptr) const;
     int GetDashCount() const;
     wxDash* GetDash() const;
-    wxBitmap* GetStipple() const;
 
 private:    
     // ref counting code

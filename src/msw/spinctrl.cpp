@@ -13,7 +13,7 @@
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "spinctrlbase.h"
     #pragma implementation "spinctrl.h"
 #endif
@@ -40,7 +40,7 @@
 #include "wx/spinctrl.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -50,27 +50,7 @@
 // macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxSpinCtrl, wxControl,"wx/spinbut.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxSpinCtrl)
-    WX_PROPERTY( ValueString , wxString , SetValue , GetValue , ) ;
-	WX_PROPERTY( Value , int , SetValue, GetValue, 0 )
-	WX_PROPERTY( Min , int , SetMin, GetMin, 0 )
-	WX_PROPERTY( Max , int , SetMax, GetMax, 0 )
-/*
-	TODO PROPERTIES
-		style wxSP_ARROW_KEYS
-*/
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxSpinCtrl)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_6( wxSpinCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , ValueString , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
-#endif
 
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
@@ -191,7 +171,7 @@ bool wxSpinCtrl::ProcessTextCommand(WXWORD cmd, WXWORD WXUNUSED(id))
 
 void wxSpinCtrl::OnChar(wxKeyEvent& event)
 {
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_RETURN:
             {
@@ -258,9 +238,6 @@ bool wxSpinCtrl::Create(wxWindow *parent,
 
     SetWindowStyle(style);
 
-    WXDWORD exStyle = 0;
-    WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;
-
     // calculate the sizes: the size given is the toal size for both controls
     // and we need to fit them both in the given width (height is the same)
     wxSize sizeText(size), sizeBtn(size);
@@ -288,9 +265,12 @@ bool wxSpinCtrl::Create(wxWindow *parent,
 
     // create the text window
 
+    WXDWORD exStyle = 0;
+    WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;
+
     m_hwndBuddy = (WXHWND)::CreateWindowEx
                     (
-                     exStyle,                // sunken border
+                     exStyle,       // sunken border
                      _T("EDIT"),             // window class
                      NULL,                   // no window title
                      msStyle,                // style (will be shown later)

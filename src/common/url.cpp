@@ -6,10 +6,10 @@
 // Created:     20/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "url.h"
 #endif
 
@@ -464,16 +464,12 @@ wxString wxURL::ConvertFromURI(const wxString& uri)
       i++;
       if (uri[i] >= wxT('A') && uri[i] <= wxT('F'))
         code = (uri[i] - wxT('A') + 10) * 16;
-      else if (uri[i] >= wxT('a') && uri[i] <= wxT('f'))
-        code = (uri[i] - wxT('a') + 10) * 16;
       else
         code = (uri[i] - wxT('0')) * 16;
 
       i++;
       if (uri[i] >= wxT('A') && uri[i] <= wxT('F'))
         code += (uri[i] - wxT('A')) + 10;
-      else if (uri[i] >= wxT('a') && uri[i] <= wxT('f'))
-        code += (uri[i] - wxT('a')) + 10;
       else
         code += (uri[i] - wxT('0'));
 

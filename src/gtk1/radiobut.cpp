@@ -8,12 +8,11 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "radiobut.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_RADIOBOX
 
@@ -95,7 +94,7 @@ bool wxRadioButton::Create( wxWindow *parent,
     {
         // search backward for last group start
         wxRadioButton *chief = (wxRadioButton*) NULL;
-        wxWindowList::compatibility_iterator node = parent->GetChildren().GetLast();
+        wxWindowList::Node *node = parent->GetChildren().GetLast();
         while (node)
         {
             wxWindow *child = node->GetData();
@@ -240,8 +239,7 @@ void wxRadioButton::OnInternalIdle()
         }
     }
 
-    if (wxUpdateUIEvent::CanUpdate(this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 }
 
 wxSize wxRadioButton::DoGetBestSize() const

@@ -22,8 +22,6 @@
 #include "wx/xrc/xh_bmpbt.h"
 #include <wx/bmpbuttn.h>
 
-IMPLEMENT_DYNAMIC_CLASS(wxBitmapButtonXmlHandler, wxXmlResourceHandler)
-
 wxBitmapButtonXmlHandler::wxBitmapButtonXmlHandler() 
 : wxXmlResourceHandler() 
 {

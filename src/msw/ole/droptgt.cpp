@@ -6,7 +6,7 @@
 // Created:
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "droptgt.h"
 #endif
 
@@ -32,18 +32,12 @@
 
 #if wxUSE_OLE && wxUSE_DRAG_AND_DROP
 
-#include "wx/msw/private.h"
 #include "wx/log.h"
-
-#ifdef __WXWINCE__
-    #include <winreg.h>
-    #include <ole2.h>
-#endif
 
 #ifdef __WIN32__
     #if !defined(__GNUWIN32__) || wxUSE_NORLANDER_HEADERS
         #if wxCHECK_W32API_VERSION( 1, 0 )
-            #include "wx/msw/wrapwin.h"
+            #include <windows.h>
         #endif
         #include <shlobj.h>            // for DROPFILES structure
     #endif
@@ -52,6 +46,11 @@
 #endif
 
 #include "wx/dnd.h"
+
+#ifndef __WIN32__
+    #include <ole2.h>
+    #include <olestd.h>
+#endif
 
 #include "wx/msw/ole/oleutils.h"
 
@@ -86,8 +85,6 @@ protected:
 
     // get default drop effect for given keyboard flags
     static inline DWORD GetDropEffect(DWORD flags);
-
-    DECLARE_NO_COPY_CLASS(wxIDropTarget)
 };
 
 // ----------------------------------------------------------------------------
@@ -330,23 +327,16 @@ wxDropTarget::~wxDropTarget()
 
 bool wxDropTarget::Register(WXHWND hwnd)
 {
-    HRESULT hr;
-
-    // May exist in later WinCE versions
-#ifndef __WXWINCE__
-    hr = ::CoLockObjectExternal(m_pIDropTarget, TRUE, FALSE);
+    HRESULT hr = ::CoLockObjectExternal(m_pIDropTarget, TRUE, FALSE);
     if ( FAILED(hr) ) {
         wxLogApiError(wxT("CoLockObjectExternal"), hr);
         return FALSE;
     }
-#endif
 
     hr = ::RegisterDragDrop((HWND) hwnd, m_pIDropTarget);
     if ( FAILED(hr) ) {
-    // May exist in later WinCE versions
-#ifndef __WXWINCE__
         ::CoLockObjectExternal(m_pIDropTarget, FALSE, FALSE);
-#endif
+
         wxLogApiError(wxT("RegisterDragDrop"), hr);
         return FALSE;
     }
@@ -365,10 +355,7 @@ void wxDropTarget::Revoke(WXHWND hwnd)
         wxLogApiError(wxT("RevokeDragDrop"), hr);
     }
 
-    // May exist in later WinCE versions
-#ifndef __WXWINCE__
     ::CoLockObjectExternal(m_pIDropTarget, FALSE, TRUE);
-#endif
 
     m_pIDropTarget->SetHwnd(0);
 }

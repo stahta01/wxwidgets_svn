@@ -9,13 +9,6 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if wxUSE_STL
-
-#undef WX_DEFINE_LIST
-#define WX_DEFINE_LIST(name)
-
-#else // if !wxUSE_STL
-
 #define _DEFINE_LIST(T, name)                   \
     void wx##name##Node::DeleteData()    \
     {                                           \
@@ -29,5 +22,3 @@
 
 // don't pollute preprocessor's name space
 //#undef  _DEFINE_LIST
-
-#endif

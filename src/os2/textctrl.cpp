@@ -516,6 +516,7 @@ void wxTextCtrl::SetInsertionPointEnd()
     //
     if (GetInsertionPoint() == GetLastPosition())
         return;
+
     SetInsertionPoint(lPos);
 } // end of wxTextCtrl::SetInsertionPointEnd
 

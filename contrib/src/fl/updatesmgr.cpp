@@ -102,23 +102,23 @@ void cbSimpleUpdatesMgr::OnFinishChanges()
     // nothing here, could be overriden by more sophisticated updates-managers
 }
 
-void cbSimpleUpdatesMgr::OnRowWillChange( cbRowInfo* WXUNUSED(pRow), cbDockPane* WXUNUSED(pInPane) )
+void cbSimpleUpdatesMgr::OnRowWillChange( cbRowInfo* pRow, cbDockPane* pInPane )
 {
     // -/-
 }
 
-void cbSimpleUpdatesMgr::OnBarWillChange( cbBarInfo* WXUNUSED(pBar), 
-                                          cbRowInfo* WXUNUSED(pInRow), cbDockPane* WXUNUSED(pInPane) )
+void cbSimpleUpdatesMgr::OnBarWillChange( cbBarInfo* pBar, 
+                                          cbRowInfo* pInRow, cbDockPane* pInPane )
 {
     // -/-
 }
 
-void cbSimpleUpdatesMgr::OnPaneMarginsWillChange( cbDockPane* WXUNUSED(pPane) )
+void cbSimpleUpdatesMgr::OnPaneMarginsWillChange( cbDockPane* pPane )
 {
     // -/-
 }
 
-void cbSimpleUpdatesMgr::OnPaneWillChange( cbDockPane* WXUNUSED(pPane) )
+void cbSimpleUpdatesMgr::OnPaneWillChange( cbDockPane* pPane )
 {
     // -/-
 }
@@ -249,25 +249,25 @@ void cbSimpleUpdatesMgr::UpdateNow()
 
     // step #2 - do ordered refreshing and resizing of bar window objects now
 
-    wxNode* pNode     = mBarsToRefresh.GetFirst();
-    wxNode* pPaneNode = mPanesList.GetFirst();
+    wxNode* pNode     = mBarsToRefresh.First();
+    wxNode* pPaneNode = mPanesList.First();
 
     while( pNode )
     {
-        cbBarInfo*  pBar  = (cbBarInfo*) pNode->GetData();
-        cbDockPane* pPane = (cbDockPane*)pPaneNode->GetData();
+        cbBarInfo*  pBar  = (cbBarInfo*) pNode->Data();
+        cbDockPane* pPane = (cbDockPane*)pPaneNode->Data();
 
         pPane->SizeBar( pBar );
 
-        pNode     = pNode->GetNext();
-        pPaneNode = pPaneNode->GetNext();
+        pNode     = pNode->Next();
+        pPaneNode = pPaneNode->Next();
     }
 
-    pNode = mBarsToRefresh.GetFirst();
+    pNode = mBarsToRefresh.First();
 
     while( pNode )
     {
-        cbBarInfo* pBar = (cbBarInfo*)pNode->GetData();
+        cbBarInfo* pBar = (cbBarInfo*)pNode->Data();
 
         if ( pBar->mpBarWnd ) 
         {
@@ -278,7 +278,7 @@ void cbSimpleUpdatesMgr::UpdateNow()
             //info.mpBarWnd->Show(TRUE);
         }
 
-        pNode  = pNode->GetNext();
+        pNode  = pNode->Next();
     }
 
     if ( clientWindowChanged )

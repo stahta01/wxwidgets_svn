@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_TEXTCTRL_H_
 #define _WX_UNIV_TEXTCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univtextctrl.h"
 #endif
 
@@ -455,6 +455,7 @@ protected:
 
     // event handlers
     // --------------
+    void OnIdle(wxIdleEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnSize(wxSizeEvent& event);
 
@@ -475,8 +476,6 @@ protected:
     bool DoCut();
     bool DoPaste();
 
-    // idle processing
-    virtual void OnInternalIdle();
 private:
     // all these methods are for multiline text controls only
 

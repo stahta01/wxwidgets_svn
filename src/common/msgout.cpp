@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "msgout.h"
 #endif
 
@@ -39,28 +39,14 @@
 #endif
 
 #include "wx/msgout.h"
-#include "wx/apptrait.h"
 #include "wx/log.h"
 
 #include <stdarg.h>
 #include <stdio.h>
 
-#ifdef __WXMSW__
-    #include "wx/msw/private.h"
-#endif
-#ifdef __WXMAC__
-    #include "wx/mac/private.h"
-#endif
-
 // ===========================================================================
 // implementation
 // ===========================================================================
-
-#if wxUSE_BASE
-
-// ----------------------------------------------------------------------------
-// wxMessageOutput
-// ----------------------------------------------------------------------------
 
 wxMessageOutput* wxMessageOutput::ms_msgOut = 0;
 
@@ -68,7 +54,7 @@ wxMessageOutput* wxMessageOutput::Get()
 {
     if ( !ms_msgOut && wxTheApp )
     {
-        ms_msgOut = wxTheApp->GetTraits()->CreateMessageOutput();
+        ms_msgOut = wxTheApp->CreateMessageOutput();
     }
 
     return ms_msgOut;
@@ -96,65 +82,6 @@ void wxMessageOutputStderr::Printf(const wxChar* format, ...)
 
     fprintf(stderr, "%s", (const char*) out.mb_str());
 }
-
-// ----------------------------------------------------------------------------
-// wxMessageOutputDebug
-// ----------------------------------------------------------------------------
-
-void wxMessageOutputDebug::Printf(const wxChar* format, ...)
-{
-    wxString out;
-
-    va_list args;
-    va_start(args, format);
-
-    out.PrintfV(format, args);
-    va_end(args);
-
-#if defined(__WXMSW__) && !defined(__WXMICROWIN__)
-    out.Replace(wxT("\t"), wxT("        "));
-    out += _T("\r\n");
-    ::OutputDebugString(out);
-#elif defined(__WXMAC__) && !defined(__DARWIN__)
-    if ( wxIsDebuggerRunning() )
-    {
-        Str255 pstr;
-        wxString output = out + wxT(";g") ;
-        wxMacStringToPascal(output.c_str(), pstr);
-
-        #ifdef __powerc
-            DebugStr(pstr);
-        #else
-            SysBreakStr(pstr);
-        #endif
-    }
-#else // !MSW, !Mac
-    // FIXME: why is wxFputs() not defined under Linux?
-    fputs(out.mb_str(), stderr);
-    fflush(stderr);
-#endif // platform
-}
-
-// ----------------------------------------------------------------------------
-// wxMessageOutputLog
-// ----------------------------------------------------------------------------
-
-void wxMessageOutputLog::Printf(const wxChar* format, ...)
-{
-    wxString out;
-
-    va_list args;
-    va_start(args, format);
-
-    out.PrintfV(format, args);
-    va_end(args);
-
-    out.Replace(wxT("\t"), wxT("        "));
-
-    ::wxLogMessage(wxT("%s"), out.c_str());
-}
-
-#endif // wxUSE_BASE
 
 // ----------------------------------------------------------------------------
 // wxMessageOutputMessageBox
@@ -185,3 +112,21 @@ void wxMessageOutputMessageBox::Printf(const wxChar* format, ...)
 
 #endif // wxUSE_GUI
 
+// ----------------------------------------------------------------------------
+// wxMessageOutputLog
+// ----------------------------------------------------------------------------
+
+void wxMessageOutputLog::Printf(const wxChar* format, ...)
+{
+    wxString out;
+
+    va_list args;
+    va_start(args, format);
+
+    out.PrintfV(format, args);
+    va_end(args);
+
+    out.Replace(wxT("\t"), wxT("        "));
+
+    ::wxLogMessage(wxT("%s"), out.c_str());
+}

@@ -2,7 +2,6 @@
 REM ----------------------------------------------------------------------
 REM Note:  This is a 4NT script
 REM ----------------------------------------------------------------------
-call wxset.btm
 setlocal
 
 set FLAGS=USE_SWIG=1 IN_CVS_TREE=1

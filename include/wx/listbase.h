@@ -12,17 +12,11 @@
 #ifndef _WX_LISTBASE_H_BASE_
 #define _WX_LISTBASE_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 //    #pragma interface "listctrlbase.h"
 #endif
 
 #if wxUSE_LISTCTRL
-
-#include "wx/colour.h"
-#include "wx/font.h"
-#include "wx/gdicmn.h"
-
-#include "wx/event.h"
 
 // ----------------------------------------------------------------------------
 // types
@@ -87,11 +81,6 @@ typedef int (wxCALLBACK *wxListCtrlCompare)(long item1, long item2, long sortDat
 #define wxLIST_STATE_FOCUSED        0x0002
 #define wxLIST_STATE_SELECTED       0x0004
 #define wxLIST_STATE_CUT            0x0008      // MSW only
-#define wxLIST_STATE_DISABLED       0x0010      // OS2 only
-#define wxLIST_STATE_FILTERED       0x0020      // OS2 only
-#define wxLIST_STATE_INUSE          0x0040      // OS2 only
-#define wxLIST_STATE_PICKED         0x0080      // OS2 only
-#define wxLIST_STATE_SOURCE         0x0100      // OS2 only
 
 // Hit test flags, used in HitTest
 #define wxLIST_HITTEST_ABOVE            0x0001  // Above the client area.
@@ -225,29 +214,18 @@ public:
     void ClearAttributes() { if ( m_attr ) { delete m_attr; m_attr = NULL; } }
 
     // setters
-    void SetMask(long mask)
-        { m_mask = mask; }
-    void SetId(long id)
-        { m_itemId = id; }
-    void SetColumn(int col)
-        { m_col = col; }
-    void SetState(long state)
-        { m_mask |= wxLIST_MASK_STATE; m_state = state; m_stateMask |= state; }
-    void SetStateMask(long stateMask)
-        { m_stateMask = stateMask; }
-    void SetText(const wxString& text)
-        { m_mask |= wxLIST_MASK_TEXT; m_text = text; }
-    void SetImage(int image)
-        { m_mask |= wxLIST_MASK_IMAGE; m_image = image; }
-    void SetData(long data)
-        { m_mask |= wxLIST_MASK_DATA; m_data = data; }
-    void SetData(void *data)
-        { m_mask |= wxLIST_MASK_DATA; m_data = (long)data; }
+    void SetMask(long mask) { m_mask = mask; }
+    void SetId(long id) { m_itemId = id; }
+    void SetColumn(int col) { m_col = col; }
+    void SetState(long state) { m_state = state; m_stateMask |= state; }
+    void SetStateMask(long stateMask) { m_stateMask = stateMask; }
+    void SetText(const wxString& text) { m_text = text; }
+    void SetImage(int image) { m_image = image; }
+    void SetData(long data) { m_data = data; }
+    void SetData(void *data) { m_data = (long)data; }
 
-    void SetWidth(int width)
-        { m_mask |= wxLIST_MASK_WIDTH; m_width = width; }
-    void SetAlign(wxListColumnFormat align)
-        { m_mask |= wxLIST_MASK_FORMAT; m_format = align; }
+    void SetWidth(int width) { m_width = width; }
+    void SetAlign(wxListColumnFormat align) { m_format = align; }
 
     void SetTextColour(const wxColour& colText)
         { Attributes().SetTextColour(colText); }
@@ -297,10 +275,6 @@ public:
     // For columns only
     int             m_format;   // left, right, centre
     int             m_width;    // width of column
-
-#ifdef __WXPM__
-    int             m_miniImage; // handle to the mini image for OS/2
-#endif
 
 protected:
     // creates m_attr if we don't have it yet
@@ -398,7 +372,7 @@ public:
     wxListItem    m_item;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxListEvent)
+    DECLARE_DYNAMIC_CLASS(wxListEvent)
 };
 
 // ----------------------------------------------------------------------------

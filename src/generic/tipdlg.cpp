@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "tipdlg.h"
 #endif
 
@@ -53,7 +53,7 @@
 // constants
 // ----------------------------------------------------------------------------
 
-static const int wxID_NEXT_TIP = 32000;  // whatever
+static const int wxID_NEXT_TIP = -100;  // whatever
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -61,7 +61,7 @@ static const int wxID_NEXT_TIP = 32000;  // whatever
 
 // an implementation which takes the tips from the text file - each line
 // represents a tip
-class WXDLLIMPEXP_ADV wxFileTipProvider : public wxTipProvider
+class WXDLLEXPORT wxFileTipProvider : public wxTipProvider
 {
 public:
     wxFileTipProvider(const wxString& filename, size_t currentTip);
@@ -70,13 +70,11 @@ public:
 
 private:
     wxTextFile m_textfile;
-
-    DECLARE_NO_COPY_CLASS(wxFileTipProvider)
 };
 
 #ifdef __WIN32__
 // TODO an implementation which takes the tips from the given registry key
-class WXDLLIMPEXP_ADV wxRegTipProvider : public wxTipProvider
+class WXDLLEXPORT wxRegTipProvider : public wxTipProvider
 {
 public:
     wxRegTipProvider(const wxString& keyname);
@@ -93,7 +91,7 @@ wxString wxRegTipProvider::GetTip()
 #endif // __WIN32__
 
 // the dialog we show in wxShowTip()
-class WXDLLIMPEXP_ADV wxTipDialog : public wxDialog
+class WXDLLEXPORT wxTipDialog : public wxDialog
 {
 public:
     wxTipDialog(wxWindow *parent,
@@ -117,7 +115,6 @@ private:
     wxCheckBox *m_checkbox;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTipDialog)
 };
 
 // ============================================================================

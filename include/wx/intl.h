@@ -6,13 +6,13 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_INTL_H_
 #define _WX_INTL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "intl.h"
 #endif
 
@@ -45,9 +45,9 @@
 // forward decls
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxLocale;
-class WXDLLIMPEXP_BASE wxMsgCatalog;
-class WXDLLIMPEXP_BASE wxLanguageInfoArray;
+class WXDLLEXPORT wxLocale;
+class WXDLLEXPORT wxMsgCatalog;
+class WXDLLEXPORT wxLanguageInfoArray;
 
 // ============================================================================
 // locale support
@@ -308,7 +308,7 @@ enum wxLanguage
 //                 translation information
 // ----------------------------------------------------------------------------
 
-struct WXDLLIMPEXP_BASE wxLanguageInfo
+struct WXDLLEXPORT wxLanguageInfo
 {
     int Language;                   // wxLanguage id
     wxString CanonicalName;         // Canonical name, e.g. fr_FR
@@ -362,7 +362,7 @@ enum wxLocaleInitFlags
     wxLOCALE_CONV_ENCODING = 0x0002      // convert encoding on the fly?
 };
 
-class WXDLLIMPEXP_BASE wxLocale
+class WXDLLEXPORT wxLocale
 {
 public:
     // ctor & dtor
@@ -455,17 +455,6 @@ public:
     // Returns NULL if no info found, pointer must *not* be deleted by caller
     static const wxLanguageInfo *GetLanguageInfo(int lang);
 
-    // Returns language name in English or empty string if the language
-    // is not in database
-    static wxString GetLanguageName(int lang);
-
-    // Find the language for the given locale string which may be either a
-    // canonical ISO 2 letter language code ("xx"), a language code followed by
-    // the country code ("xx_XX") or a Windows full language name ("Xxxxx...")
-    //
-    // Returns NULL if no info found, pointer must *not* be deleted by caller
-    static const wxLanguageInfo *FindLanguageInfo(const wxString& locale);
-
     // Add custom language to the list of known languages.
     // Notes: 1) wxLanguageInfo contains platform-specific data
     //        2) must be called before Init to have effect
@@ -513,8 +502,6 @@ private:
     bool           m_bConvertEncoding;
 
     static wxLanguageInfoArray *ms_languagesDB;
-
-    DECLARE_NO_COPY_CLASS(wxLocale)
 };
 
 // ----------------------------------------------------------------------------
@@ -522,7 +509,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // get the current locale object (note that it may be NULL!)
-extern WXDLLIMPEXP_BASE wxLocale* wxGetLocale();
+extern WXDLLEXPORT wxLocale* wxGetLocale();
 
 // get the translation of the string in the current locale
 inline const wxChar *wxGetTranslation(const wxChar *sz)

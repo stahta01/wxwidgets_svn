@@ -12,7 +12,7 @@
 #ifndef _WX_EVTLOOP_H_
 #define _WX_EVTLOOP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "evtloop.h"
 #endif
 
@@ -55,8 +55,6 @@ protected:
     class WXDLLEXPORT wxEventLoopImpl *m_impl;
     // the pointer to currently active loop
     static wxEventLoop *ms_activeLoop;
-
-    DECLARE_NO_COPY_CLASS(wxEventLoop)
 };
 
 #endif // _WX_EVTLOOP_H_

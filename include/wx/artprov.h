@@ -12,7 +12,7 @@
 #ifndef _WX_ARTPROV_H_
 #define _WX_ARTPROV_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "artprov.h"
 #endif
 
@@ -84,7 +84,6 @@ typedef wxString wxArtID;
 #define wxART_QUESTION             wxART_MAKE_ART_ID(wxART_QUESTION)           
 #define wxART_WARNING              wxART_MAKE_ART_ID(wxART_WARNING)            
 #define wxART_INFORMATION          wxART_MAKE_ART_ID(wxART_INFORMATION)        
-#define wxART_MISSING_IMAGE        wxART_MAKE_ART_ID(wxART_MISSING_IMAGE)
 
 // ----------------------------------------------------------------------------
 // wxArtProvider class

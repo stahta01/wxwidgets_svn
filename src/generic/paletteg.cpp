@@ -4,12 +4,12 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "paletteg.h"
 #endif
 

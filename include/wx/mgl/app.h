@@ -10,7 +10,7 @@
 #ifndef __WX_APP_H__
 #define __WX_APP_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "app.h"
 #endif
 
@@ -47,9 +47,17 @@ public:
     virtual bool Initialized();
     virtual bool Pending();
     virtual void Dispatch();
+    virtual bool ProcessIdle();
 
-    virtual bool Initialize(int& argc, wxChar **argv);
-    virtual void CleanUp();
+    // implementation only from now on
+    void OnIdle(wxIdleEvent &event);
+    bool SendIdleEvents();
+    bool SendIdleEvents(wxWindow* win);
+
+    static bool Initialize();
+    static void CleanUp();
+
+    void DeletePendingObjects();
 
     virtual bool Yield(bool onlyIfNeeded = FALSE);
 
@@ -64,5 +72,6 @@ private:
     wxDisplayModeInfo m_displayMode;
 };
 
-#endif // __WX_APP_H__
+int WXDLLEXPORT wxEntry(int argc, char *argv[]);
 
+#endif // __WX_APP_H__

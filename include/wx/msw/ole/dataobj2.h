@@ -7,7 +7,7 @@
 // Created:     21.10.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MSW_OLE_DATAOBJ2_H
@@ -41,8 +41,6 @@ public:
 private:
     // the DIB data
     void /* BITMAPINFO */ *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxBitmapDataObject)
 };
 
 // ----------------------------------------------------------------------------
@@ -64,9 +62,6 @@ public:
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxBitmapDataObject2)
 };
 
 // ----------------------------------------------------------------------------
@@ -76,16 +71,11 @@ private:
 class WXDLLEXPORT wxFileDataObject : public wxFileDataObjectBase
 {
 public:
-    wxFileDataObject() { }
-
     // implement base class pure virtuals
     virtual bool SetData(size_t len, const void *buf);
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *pData) const;
     virtual void AddFile(const wxString& file);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxFileDataObject)
 };
 
 // ----------------------------------------------------------------------------
@@ -111,8 +101,6 @@ public:
 private:
     // last data object we got data in
     wxDataObjectSimple *m_dataObjectLast;
-
-    DECLARE_NO_COPY_CLASS(wxURLDataObject)
 };
 
 #endif // _WX_MSW_OLE_DATAOBJ2_H

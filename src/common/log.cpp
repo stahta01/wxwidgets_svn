@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,51 +17,52 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "log.h"
+#ifdef __GNUG__
+  #pragma implementation "log.h"
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+  #pragma hdrstop
 #endif
-
-#if wxUSE_LOG
 
 // wxWindows
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/arrstr.h"
-    #include "wx/intl.h"
     #include "wx/string.h"
+    #include "wx/intl.h"
+    #include "wx/app.h"
+
+    #if wxUSE_GUI
+        #include "wx/window.h"
+        #include "wx/msgdlg.h"
+        #ifdef __WXMSW__
+            #include "wx/msw/private.h"
+        #endif
+    #endif
 #endif //WX_PRECOMP
 
-#include "wx/apptrait.h"
-#include "wx/file.h"
-#include "wx/log.h"
-#include "wx/msgout.h"
-#include "wx/textfile.h"
-#include "wx/thread.h"
-#include "wx/utils.h"
-#include "wx/wxchar.h"
+#include  "wx/file.h"
+#include  "wx/textfile.h"
+#include  "wx/utils.h"
+#include  "wx/wxchar.h"
+#include  "wx/log.h"
+#include  "wx/thread.h"
+
+#if wxUSE_LOG
 
 // other standard headers
-#ifndef __WXWINCE__
-#include <errno.h>
+#include  <errno.h>
+#include  <stdlib.h>
+#include  <time.h>
+
+#if defined(__WXMSW__)
+  #include  "wx/msw/private.h"      // includes windows.h for OutputDebugString
 #endif
 
-#include <stdlib.h>
-
-#ifndef __WXWINCE__
-#include <time.h>
-#else
-#include "wx/msw/wince/time.h"
-#endif
-
-#if defined(__WINDOWS__)
-    #include "wx/msw/private.h" // includes windows.h
+#if defined(__WXMAC__)
+  #include  "wx/mac/private.h"  // includes mac headers
 #endif
 
 // ----------------------------------------------------------------------------
@@ -187,11 +188,7 @@ void wxVLogFatalError(const wxChar *szFormat, va_list argptr)
 
     wxSafeShowMessage(_T("Fatal Error"), s_szBuf);
 
-#ifdef __WXWINCE__
-    ExitThread(3);
-#else
     abort();
-#endif
 }
 
 void wxLogFatalError(const wxChar *szFormat, ...)
@@ -366,6 +363,7 @@ void WXDLLEXPORT wxLogSysError(long lErrCode, const wxChar *szFormat, ...)
 
 wxLog::wxLog()
 {
+    m_bHasMessages = FALSE;
 }
 
 wxChar *wxLog::SetLogBuffer( wxChar *buf, size_t size)
@@ -397,7 +395,7 @@ wxLog *wxLog::GetActiveTarget()
 
             // ask the application to create a log target for us
             if ( wxTheApp != NULL )
-                ms_pLogger = wxTheApp->GetTraits()->CreateLogTarget();
+                ms_pLogger = wxTheApp->CreateLogTarget();
             else
                 ms_pLogger = new wxLogStderr;
 
@@ -438,7 +436,7 @@ void wxLog::RemoveTraceMask(const wxString& str)
 {
     int index = ms_aTraceMasks.Index(str);
     if ( index != wxNOT_FOUND )
-        ms_aTraceMasks.RemoveAt((size_t)index);
+        ms_aTraceMasks.Remove((size_t)index);
 }
 
 void wxLog::ClearTraceMasks()
@@ -467,11 +465,7 @@ void wxLog::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
             DoLogString(wxString(_("Fatal error: ")) + szString, t);
             DoLogString(_("Program aborted."), t);
             Flush();
-#ifdef __WXWINCE__
-            ExitThread(3);
-#else
             abort();
-#endif
             break;
 
         case wxLOG_Error:
@@ -511,17 +505,8 @@ void wxLog::DoLogString(const wxChar *WXUNUSED(szString), time_t WXUNUSED(t))
 
 void wxLog::Flush()
 {
-    // nothing to do here
-}
-
-/*static*/ bool wxLog::IsAllowedTraceMask(const wxChar *mask)
-{
-    for ( wxArrayString::iterator it = ms_aTraceMasks.begin(),
-                                  en = ms_aTraceMasks.end();
-         it != en; ++it )
-        if ( *it == mask)
-            return true;
-    return false;
+    // remember that we don't have any more messages to show
+    m_bHasMessages = FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -536,6 +521,192 @@ wxLogStderr::wxLogStderr(FILE *fp)
         m_fp = fp;
 }
 
+#if defined(__WXMAC__) && !defined(__DARWIN__) && defined(__MWERKS__) && (__MWERKS__ >= 0x2400)
+
+// MetroNub stuff doesn't seem to work in CodeWarrior 5.3 Carbon builds...
+
+#ifndef __MetroNubUtils__
+#include "MetroNubUtils.h"
+#endif
+
+#ifdef __cplusplus
+    extern "C" {
+#endif
+
+#ifndef __GESTALT__
+#include <Gestalt.h>
+#endif
+
+#ifndef true
+#define true 1
+#endif
+
+#ifndef false
+#define false 0
+#endif
+
+#if TARGET_API_MAC_CARBON
+
+    #include <CodeFragments.h>
+
+    EXTERN_API_C( long )
+    CallUniversalProc(UniversalProcPtr theProcPtr, ProcInfoType procInfo, ...);
+
+    ProcPtr gCallUniversalProc_Proc = NULL;
+
+#endif
+
+static MetroNubUserEntryBlock*    gMetroNubEntry = NULL;
+
+static long fRunOnce = false;
+
+Boolean IsCompatibleVersion(short inVersion);
+
+/* ---------------------------------------------------------------------------
+        IsCompatibleVersion
+   --------------------------------------------------------------------------- */
+
+Boolean IsCompatibleVersion(short inVersion)
+{
+    Boolean result = false;
+
+    if (fRunOnce)
+    {
+        MetroNubUserEntryBlock* block = (MetroNubUserEntryBlock *)result;
+
+        result = (inVersion <= block->apiHiVersion);
+    }
+
+    return result;
+}
+
+/* ---------------------------------------------------------------------------
+        IsMetroNubInstalled
+   --------------------------------------------------------------------------- */
+
+Boolean IsMetroNubInstalled()
+{
+    if (!fRunOnce)
+    {
+        long result, value;
+
+        fRunOnce = true;
+        gMetroNubEntry = NULL;
+
+        if (Gestalt(gestaltSystemVersion, &value) == noErr && value < 0x1000)
+        {
+            /* look for MetroNub's Gestalt selector */
+            if (Gestalt(kMetroNubUserSignature, &result) == noErr)
+            {
+
+            #if TARGET_API_MAC_CARBON
+                if (gCallUniversalProc_Proc == NULL)
+                {
+                    CFragConnectionID   connectionID;
+                    Ptr                 mainAddress;
+                    Str255              errorString;
+                    ProcPtr             symbolAddress;
+                    OSErr               err;
+                    CFragSymbolClass    symbolClass;
+
+                    symbolAddress = NULL;
+                    err = GetSharedLibrary("\pInterfaceLib", kPowerPCCFragArch, kFindCFrag,
+                                           &connectionID, &mainAddress, errorString);
+
+                    if (err != noErr)
+                    {
+                        gCallUniversalProc_Proc = NULL;
+                        goto end;
+                    }
+
+                    err = FindSymbol(connectionID, "\pCallUniversalProc",
+                                    (Ptr *) &gCallUniversalProc_Proc, &symbolClass);
+
+                    if (err != noErr)
+                    {
+                        gCallUniversalProc_Proc = NULL;
+                        goto end;
+                    }
+                }
+            #endif
+
+                {
+                    MetroNubUserEntryBlock* block = (MetroNubUserEntryBlock *)result;
+
+                    /* make sure the version of the API is compatible */
+                    if (block->apiLowVersion <= kMetroNubUserAPIVersion &&
+                        kMetroNubUserAPIVersion <= block->apiHiVersion)
+                        gMetroNubEntry = block;        /* success! */
+                }
+
+            }
+        }
+    }
+
+end:
+
+#if TARGET_API_MAC_CARBON
+    return (gMetroNubEntry != NULL && gCallUniversalProc_Proc != NULL);
+#else
+    return (gMetroNubEntry != NULL);
+#endif
+}
+
+/* ---------------------------------------------------------------------------
+        IsMWDebuggerRunning                                            [v1 API]
+   --------------------------------------------------------------------------- */
+
+Boolean IsMWDebuggerRunning()
+{
+    if (IsMetroNubInstalled())
+        return CallIsDebuggerRunningProc(gMetroNubEntry->isDebuggerRunning);
+    else
+        return false;
+}
+
+/* ---------------------------------------------------------------------------
+        AmIBeingMWDebugged                                            [v1 API]
+   --------------------------------------------------------------------------- */
+
+Boolean AmIBeingMWDebugged()
+{
+    if (IsMetroNubInstalled())
+        return CallAmIBeingDebuggedProc(gMetroNubEntry->amIBeingDebugged);
+    else
+        return false;
+}
+
+/* ---------------------------------------------------------------------------
+        UserSetWatchPoint                                            [v2 API]
+   --------------------------------------------------------------------------- */
+
+OSErr UserSetWatchPoint (Ptr address, long length, WatchPointIDT* watchPointID)
+{
+    if (IsMetroNubInstalled() && IsCompatibleVersion(kMetroNubUserAPIVersion))
+        return CallUserSetWatchPointProc(gMetroNubEntry->userSetWatchPoint,
+                                         address, length, watchPointID);
+    else
+        return errProcessIsNotClient;
+}
+
+/* ---------------------------------------------------------------------------
+        ClearWatchPoint                                                [v2 API]
+   --------------------------------------------------------------------------- */
+
+OSErr ClearWatchPoint (WatchPointIDT watchPointID)
+{
+    if (IsMetroNubInstalled() && IsCompatibleVersion(kMetroNubUserAPIVersion))
+        return CallClearWatchPointProc(gMetroNubEntry->clearWatchPoint, watchPointID);
+    else
+        return errProcessIsNotClient;
+}
+
+#ifdef __cplusplus
+    }
+#endif
+
+#endif // defined(__WXMAC__) && !defined(__DARWIN__) && (__MWERKS__ >= 0x2400)
+
 void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 {
     wxString str;
@@ -546,18 +717,38 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
     fputc(_T('\n'), m_fp);
     fflush(m_fp);
 
-    // under GUI systems such as Windows or Mac, programs usually don't have
-    // stderr at all, so show the messages also somewhere else, typically in
-    // the debugger window so that they go at least somewhere instead of being
-    // simply lost
-    if ( m_fp == stderr )
+    // under Windows, programs usually don't have stderr at all, so show the
+    // messages also under debugger - unless it's a console program
+#if defined(__WXMSW__) && wxUSE_GUI && !defined(__WXMICROWIN__)
+    str += wxT("\r\n") ;
+    OutputDebugString(str.c_str());
+#endif // MSW
+#if defined(__WXMAC__) && !defined(__DARWIN__) && wxUSE_GUI
+    Str255 pstr ;
+    strcpy( (char*) pstr , str.c_str() ) ;
+    strcat( (char*) pstr , ";g" ) ;
+    c2pstr( (char*) pstr ) ;
+
+    Boolean running = false ;
+
+#if defined(__MWERKS__) && (__MWERKS__ >= 0x2400)
+
+    if ( IsMWDebuggerRunning() && AmIBeingMWDebugged() )
     {
-        wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-        if ( traits && !traits->HasStderr() )
-        {
-            wxMessageOutputDebug().Printf(_T("%s"), str.c_str());
-        }
+        running = true ;
     }
+
+#endif
+
+    if (running)
+    {
+#ifdef __powerc
+        DebugStr(pstr);
+#else
+        SysBreakStr(pstr);
+#endif
+    }
+#endif // Mac
 }
 
 // ----------------------------------------------------------------------------
@@ -565,7 +756,6 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 // ----------------------------------------------------------------------------
 
 #if wxUSE_STD_IOSTREAM
-#include "wx/ioswrap.h"
 wxLogStream::wxLogStream(wxSTD ostream *ostr)
 {
     if ( ostr == NULL )
@@ -615,7 +805,7 @@ void wxLogChain::Flush()
     if ( m_logOld )
         m_logOld->Flush();
 
-    // be careful to avoid infinite recursion
+    // be careful to avoid inifinite recursion
     if ( m_logNew && m_logNew != this )
         m_logNew->Flush();
 }
@@ -671,7 +861,11 @@ wxLogLevel      wxLog::ms_logLevel     = wxLOG_Max;  // log everything by defaul
 
 size_t          wxLog::ms_suspendCount = 0;
 
-const wxChar   *wxLog::ms_timestamp    = wxT("%X");  // time only, no date
+#if wxUSE_GUI
+    const wxChar *wxLog::ms_timestamp  = wxT("%X");  // time only, no date
+#else
+    const wxChar *wxLog::ms_timestamp  = NULL;       // save space
+#endif
 
 wxTraceMask     wxLog::ms_ulTraceMask  = (wxTraceMask)0;
 wxArrayString   wxLog::ms_aTraceMasks;
@@ -786,5 +980,6 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
 #endif  // Win/Unix
 }
 
-#endif // wxUSE_LOG
+#endif //wxUSE_LOG
 
+// vi:sts=4:sw=4:et

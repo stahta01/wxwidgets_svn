@@ -9,7 +9,7 @@
 // Licence:
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "splash.h"
 #endif
 
@@ -34,13 +34,13 @@
 #define wxSPLASH_TIMEOUT            0x04
 #define wxSPLASH_NO_TIMEOUT         0x00
 
-class WXDLLIMPEXP_ADV wxSplashScreenWindow;
+class WXDLLEXPORT wxSplashScreenWindow;
 
 /*
  * wxSplashScreen
  */
 
-class WXDLLIMPEXP_ADV wxSplashScreen: public wxFrame
+class WXDLLEXPORT wxSplashScreen: public wxFrame
 {
 public:
     // for RTTI macros only
@@ -65,16 +65,15 @@ protected:
     int                     m_milliseconds;
     wxTimer                 m_timer;
 
-    DECLARE_DYNAMIC_CLASS(wxSplashScreen)
-    DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSplashScreen)
+DECLARE_DYNAMIC_CLASS(wxSplashScreen)
+DECLARE_EVENT_TABLE()
 };
 
 /*
  * wxSplashScreenWindow
  */
 
-class WXDLLIMPEXP_ADV wxSplashScreenWindow: public wxWindow
+class WXDLLEXPORT wxSplashScreenWindow: public wxWindow
 {
 public:
     wxSplashScreenWindow(const wxBitmap& bitmap, wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxNO_BORDER);
@@ -90,8 +89,7 @@ public:
 protected:
     wxBitmap    m_bitmap;
 
-    DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSplashScreenWindow)
+DECLARE_EVENT_TABLE()
 };
 
 

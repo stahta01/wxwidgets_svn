@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:   	wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:   	wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_HELPBASEH__
 #define _WX_HELPBASEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "helpbase.h"
 #endif
 
@@ -45,7 +45,7 @@ public:
     virtual void SetViewer(const wxString& WXUNUSED(viewer), long WXUNUSED(flags) = 0) {}
 
     // If file is "", reloads file given  in Initialize
-    virtual bool LoadFile(const wxString& file = wxEmptyString) = 0;
+    virtual bool LoadFile(const wxString& file = wxT("")) = 0;
 
     // Displays the contents
     virtual bool DisplayContents(void) = 0;

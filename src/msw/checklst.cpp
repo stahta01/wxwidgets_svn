@@ -6,7 +6,7 @@
 // Created:     16.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "checklst.h"
 #endif
 
@@ -47,10 +47,8 @@
 #include "wx/ownerdrw.h"
 #include "wx/checklst.h"
 
-#include "wx/msw/wrapwin.h"
+#include <windows.h>
 #include <windowsx.h>
-
-#include "wx/msw/private.h"
 
 #if defined(__GNUWIN32_OLD__)
     #include "wx/msw/gnuwin32/extra.h"
@@ -69,11 +67,6 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox, wxListBox)
 
-/*
-TODO PROPERTIES
-	list content
-		item , checked (no)
-*/
 // ----------------------------------------------------------------------------
 // declaration and implementation of wxCheckListBoxItem class
 // ----------------------------------------------------------------------------
@@ -89,7 +82,7 @@ public:
   virtual bool OnDrawItem(wxDC& dc, const wxRect& rc, wxODAction act, wxODStatus stat);
 
   // simple accessors and operations
-  bool IsChecked() const { return m_bChecked; }
+  bool IsChecked() const  { return m_bChecked;        }
 
   void Check(bool bCheck);
   void Toggle() { Check(!IsChecked()); }
@@ -97,11 +90,9 @@ public:
   void SendEvent();
 
 private:
-
-    DECLARE_NO_COPY_CLASS(wxCheckListBoxItem)
   bool            m_bChecked;
   wxCheckListBox *m_pParent;
-  size_t          m_nIndex;
+  size_t            m_nIndex;
 };
 
 wxCheckListBoxItem::wxCheckListBoxItem(wxCheckListBox *pParent, size_t nIndex)
@@ -161,17 +152,29 @@ bool wxCheckListBoxItem::OnDrawItem(wxDC& dc, const wxRect& rc,
       HBITMAP hbmpOld = (HBITMAP)SelectObject(hdcMem, hbmpCheck);
 
       // then draw a check mark into it
-
+#if defined(__WIN32__) && !defined(__SC__)
       RECT rect;
       rect.left   = 0;
       rect.top    = 0;
       rect.right  = nCheckWidth;
       rect.bottom = nCheckHeight;
 
-#ifdef __WXWINCE__
-      DrawFrameControl(hdcMem, &rect, DFC_BUTTON, DFCS_BUTTONCHECK);
-#else
       DrawFrameControl(hdcMem, &rect, DFC_MENU, DFCS_MENUCHECK);
+#else
+      // In WIN16, draw a cross
+      HPEN blackPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+      HPEN whiteBrush = (HPEN)GetStockObject(WHITE_BRUSH);
+      HPEN hPenOld = (HPEN)::SelectObject(hdcMem, blackPen);
+      HPEN hBrushOld = (HPEN)::SelectObject(hdcMem, whiteBrush);
+      ::SetROP2(hdcMem, R2_COPYPEN);
+      Rectangle(hdcMem, 0, 0, nCheckWidth, nCheckHeight);
+      MoveTo(hdcMem, 0, 0);
+      LineTo(hdcMem, nCheckWidth, nCheckHeight);
+      MoveTo(hdcMem, nCheckWidth, 0);
+      LineTo(hdcMem, 0, nCheckHeight);
+      ::SelectObject(hdcMem, hPenOld);
+      ::SelectObject(hdcMem, hBrushOld);
+      ::DeleteObject(blackPen);
 #endif
 
       // finally copy it to screen DC and clean up
@@ -303,6 +306,7 @@ bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
                              style | wxLB_OWNERDRAW, validator, name);
 }
 
+
 // misc overloaded methods
 // -----------------------
 
@@ -390,7 +394,7 @@ void wxCheckListBox::OnKeyDown(wxKeyEvent& event)
         Clear
     } oper;
 
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_SPACE:
             oper = Toggle;

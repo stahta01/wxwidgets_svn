@@ -12,7 +12,7 @@
 #ifndef _SLIDER95_H_
 #define _SLIDER95_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "slider95.h"
 #endif
 
@@ -101,7 +101,7 @@ protected:
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxSlider95)
+    DECLARE_DYNAMIC_CLASS(wxSlider95)
 };
 
 #endif

@@ -16,7 +16,6 @@
 
 
 #include "ScintillaWX.h"
-#include "ExternalLexer.h"
 #include "wx/stc/stc.h"
 #include "PlatWX.h"
 
@@ -338,7 +337,12 @@ void ScintillaWX::Copy() {
     if (currentPos != anchor) {
         SelectionText st;
         CopySelectionRange(&st);
-        CopyToClipboard(st);
+        if (wxTheClipboard->Open()) {
+            wxTheClipboard->UsePrimarySelection(FALSE);
+            wxString text = stc2wx(st.s, st.len);
+            wxTheClipboard->SetData(new wxTextDataObject(text));
+            wxTheClipboard->Close();
+        }
     }
 }
 
@@ -365,16 +369,6 @@ void ScintillaWX::Paste() {
     pdoc->EndUndoAction();
     NotifyChange();
     Redraw();
-}
-
-
-void ScintillaWX::CopyToClipboard(const SelectionText& st) {
-    if (wxTheClipboard->Open()) {
-        wxTheClipboard->UsePrimarySelection(FALSE);
-        wxString text = stc2wx(st.s, st.len);
-        wxTheClipboard->SetData(new wxTextDataObject(text));
-        wxTheClipboard->Close();
-    }
 }
 
 
@@ -480,11 +474,6 @@ long ScintillaWX::WndProc(unsigned int iMessage, unsigned long wParam, long lPar
           break;
       }
 
-#ifdef SCI_LEXER
-	case SCI_LOADLEXERLIBRARY:
-            LexerManager::GetInstance()->Load((const char*)lParam);
-            break;
-#endif
       default:
           return ScintillaBase::WndProc(iMessage, wParam, lParam);
       }

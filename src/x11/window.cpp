@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "window.h"
 #endif
 
@@ -42,7 +42,6 @@
 #include "wx/log.h"
 #include "wx/fontutil.h"
 #include "wx/univ/renderer.h"
-#include "wx/hash.h"
 
 #if  wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
@@ -123,7 +122,7 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
                       long style,
                       const wxString& name)
 {
-    wxCHECK_MSG( parent, FALSE, wxT("can't create wxWindow without parent") );
+    wxCHECK_MSG( parent, FALSE, "can't create wxWindow without parent" );
 
     CreateBase(parent, id, pos, size, style, wxDefaultValidator, name);
 
@@ -341,7 +340,10 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
 // Destructor
 wxWindowX11::~wxWindowX11()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent((wxWindow*) this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
     if (g_captureWindow == this)
         g_captureWindow = NULL;
@@ -471,7 +473,7 @@ void wxWindowX11::DoCaptureMouse()
 {
     if ((g_captureWindow != NULL) && (g_captureWindow != this))
     {
-        wxASSERT_MSG(FALSE, wxT("Trying to capture before mouse released."));
+        wxASSERT_MSG(FALSE, "Trying to capture before mouse released.");
 
         // Core dump now
         int *tmp = NULL;
@@ -989,7 +991,7 @@ void wxWindowX11::SetSizeHints(int minW, int minH, int maxW, int maxH, int incW,
 
 int wxWindowX11::GetCharHeight() const
 {
-    wxCHECK_MSG( m_font.Ok(), 0, wxT("valid window font needed") );
+    wxCHECK_MSG( m_font.Ok(), 0, "valid window font needed" );
 
 #if wxUSE_UNICODE
     // There should be an easier way.
@@ -1016,7 +1018,7 @@ int wxWindowX11::GetCharHeight() const
 
 int wxWindowX11::GetCharWidth() const
 {
-    wxCHECK_MSG( m_font.Ok(), 0, wxT("valid window font needed") );
+    wxCHECK_MSG( m_font.Ok(), 0, "valid window font needed" );
 
 #if wxUSE_UNICODE
     // There should be an easier way.
@@ -1163,6 +1165,14 @@ void wxWindowX11::Update()
     }
 }
 
+void wxWindowX11::Clear()
+{
+//    wxClientDC dc((wxWindow*) this);
+//    wxBrush brush(GetBackgroundColour(), wxSOLID);
+//    dc.SetBackground(brush);
+//    dc.Clear();
+}
+
 void wxWindowX11::SendEraseEvents()
 {
     if (m_clearRegion.IsEmpty()) return;
@@ -1253,7 +1263,7 @@ void wxWindowX11::SendNcPaintEvents()
 // Responds to colour changes: passes event on to children.
 void wxWindowX11::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
-    wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    wxWindowList::Node *node = GetChildren().GetFirst();
     while ( node )
     {
         // Only propagate to non-top-level windows
@@ -1279,8 +1289,7 @@ void wxWindowX11::OnInternalIdle()
 
     // This calls the UI-update mechanism (querying windows for
     // menu/toolbar/control state information)
-    if (wxUpdateUIEvent::CanUpdate((wxWindow*) this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 
     // Set the input focus if couldn't do it before
     if (m_needsInputFocus)
@@ -1586,7 +1595,7 @@ bool wxWindowX11::SetForegroundColour(const wxColour& col)
 wxWindow *wxGetActiveWindow()
 {
     // TODO
-    wxFAIL_MSG(wxT("Not implemented"));
+    wxFAIL_MSG("Not implemented");
     return NULL;
 }
 

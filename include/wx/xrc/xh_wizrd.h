@@ -21,9 +21,8 @@
 
 #include "wx/wizard.h"
 
-class WXDLLIMPEXP_XRC wxWizardXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxWizardXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxWizardXmlHandler)
 public:
     wxWizardXmlHandler();
     virtual wxObject *DoCreateResource();

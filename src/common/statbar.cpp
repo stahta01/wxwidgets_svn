@@ -6,7 +6,7 @@
 // Created:     14.10.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "statbar.h"
 #endif
 
@@ -234,8 +234,7 @@ void wxStatusBarBase::FreeStacks()
     {
         if(m_statusTextStacks[i])
         {
-            wxListString& t = *m_statusTextStacks[i];
-            WX_CLEAR_LIST(wxListString, t);
+            m_statusTextStacks[i]->Clear();
             delete m_statusTextStacks[i];
         }
     }
@@ -250,7 +249,11 @@ void wxStatusBarBase::FreeStacks()
 void wxStatusBarBase::PushStatusText(const wxString& text, int number)
 {
     wxListString* st = GetOrCreateStatusStack(number);
-    st->Insert(new wxString(GetStatusText(number)));
+    // Temporary variables used here to avoid an internal compiler error
+    // in VC++ 6 in _AFXDLL mode
+    wxString statusText(GetStatusText(number));
+    wxString* s = new wxString(statusText);
+    st->Insert(s);
     SetStatusText(text, number);
 }
 
@@ -258,11 +261,10 @@ void wxStatusBarBase::PopStatusText(int number)
 {
     wxListString *st = GetStatusStack(number);
     wxCHECK_RET( st, _T("Unbalanced PushStatusText/PopStatusText") );
-    wxListString::compatibility_iterator top = st->GetFirst();
+    wxListString::Node *top = st->GetFirst();
 
     SetStatusText(*top->GetData(), number);
-    delete top->GetData();
-    st->Erase(top);
+    st->DeleteNode(top);
     if(st->GetCount() == 0)
     {
         delete st;
@@ -290,6 +292,7 @@ wxListString *wxStatusBarBase::GetOrCreateStatusStack(int i)
     if(!m_statusTextStacks[i])
     {
         m_statusTextStacks[i] = new wxListString();
+        m_statusTextStacks[i]->DeleteContents(TRUE);
     }
 
     return m_statusTextStacks[i];

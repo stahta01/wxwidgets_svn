@@ -21,9 +21,8 @@
 
 class WXDLLEXPORT wxToolBar;
 
-class WXDLLIMPEXP_XRC wxToolBarXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxToolBarXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxToolBarXmlHandler)
 public:
     wxToolBarXmlHandler();
     virtual wxObject *DoCreateResource();

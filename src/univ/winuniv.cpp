@@ -6,7 +6,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univwindow.h"
 #endif
 
@@ -182,7 +182,7 @@ const wxBitmap& wxWindow::GetBackgroundBitmap(int *alignment,
 // ----------------------------------------------------------------------------
 
 // the event handlers executed when the window must be repainted
-void wxWindow::OnNcPaint(wxPaintEvent& WXUNUSED(event))
+void wxWindow::OnNcPaint(wxPaintEvent& event)
 {
     if ( m_renderer )
     {
@@ -340,7 +340,7 @@ void wxWindow::DoDrawBorder(wxDC& dc, const wxRect& rect)
     }
 }
 
-void wxWindow::DoDraw(wxControlRenderer * WXUNUSED(renderer))
+void wxWindow::DoDraw(wxControlRenderer *renderer)
 {
 }
 
@@ -393,7 +393,7 @@ void wxWindow::Refresh(bool eraseBackground, const wxRect *rectClient)
     wxWindowNative::Refresh(eraseBackground, &rectWin);
 
     // Refresh all sub controls if any.
-    wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    wxWindowList::Node *node = GetChildren().GetFirst();
     while ( node )
     {
         wxWindow *win = node->GetData();
@@ -891,7 +891,7 @@ void wxWindow::SetScrollbar(int orient,
     }
 }
 
-void wxWindow::SetScrollPos(int orient, int pos, bool WXUNUSED(refresh))
+void wxWindow::SetScrollPos(int orient, int pos, bool refresh)
 {
     wxScrollBar *scrollbar = GetScrollbar(orient);
     wxCHECK_RET( scrollbar, _T("no scrollbar to set position for") );
@@ -954,7 +954,7 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
     // scroll children accordingly:
     wxPoint offset(dx, dy);
 
-    for (wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    for (wxWindowList::Node *node = GetChildren().GetFirst();
          node; node = node->GetNext())
     {
         wxWindow *child = node->GetData();

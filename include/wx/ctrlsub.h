@@ -6,13 +6,13 @@
 // Created:     22.10.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CTRLSUB_H_BASE_
 #define _WX_CTRLSUB_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "controlwithitems.h"
 #endif
 
@@ -44,17 +44,8 @@ public:
     int Append(const wxString& item, wxClientData *clientData)
         { int n = DoAppend(item); SetClientObject(n, clientData); return n; }
 
-    // only for rtti needs (separate name)
-    void AppendString( const wxString& item)
-    { Append( item ) ; }
-
     // append several items at once to the control
     void Append(const wxArrayString& strings);
-
-    int Insert(const wxString& item, int pos)
-        { return DoInsert(item, pos); }
-    int Insert(const wxString& item, int pos, void *clientData);
-    int Insert(const wxString& item, int pos, wxClientData *clientData);
 
     // deleting items
     // --------------
@@ -66,10 +57,7 @@ public:
     // -----------------
 
     virtual int GetCount() const = 0;
-    bool IsEmpty() const { return GetCount() == 0; }
-
     virtual wxString GetString(int n) const = 0;
-    wxArrayString GetStrings() const;
     virtual void SetString(int n, const wxString& s) = 0;
     virtual int FindString(const wxString& s) const = 0;
 
@@ -104,7 +92,6 @@ public:
 
 protected:
     virtual int DoAppend(const wxString& item) = 0;
-    virtual int DoInsert(const wxString& item, int pos) = 0;
 
     virtual void DoSetItemClientData(int n, void* clientData) = 0;
     virtual void* DoGetItemClientData(int n) const = 0;
@@ -166,9 +153,6 @@ public:
     {
         return wxItemContainer::GetClientObject(n);
     }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxControlWithItems)
 };
 
 #endif // wxUSE_CONTROLS

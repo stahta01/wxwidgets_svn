@@ -13,7 +13,6 @@
 #endif
 
 #include "wx/defs.h"
-#include "wx/mmedia/defs.h"
 
 // ------------------------------------------------------------------------
 // DEFINITIONS
@@ -77,7 +76,7 @@ typedef enum {
   wxSOUND_NOTSTARTED
 } wxSoundError;
 
-class WXDLLIMPEXP_MMEDIA wxSoundStream;
+class WXDLLEXPORT wxSoundStream;
 
 // ---------------------
 // wxSoundCallback(stream, evt, cdata): C callback for sound event.
@@ -93,7 +92,7 @@ typedef void (*wxSoundCallback)(wxSoundStream *stream, int evt,
 // Base class for sound format specification
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundFormatBase {
+class WXDLLEXPORT wxSoundFormatBase {
  public:
   wxSoundFormatBase();
   virtual ~wxSoundFormatBase();
@@ -113,7 +112,7 @@ class WXDLLIMPEXP_MMEDIA wxSoundFormatBase {
 // Base class for sound streams
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundStream {
+class WXDLLEXPORT wxSoundStream {
  public:
   wxSoundStream();
   virtual ~wxSoundStream();

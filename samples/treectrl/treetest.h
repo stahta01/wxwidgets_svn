@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +73,7 @@ public:
     void OnBeginLabelEdit(wxTreeEvent& event);
     void OnEndLabelEdit(wxTreeEvent& event);
     void OnDeleteItem(wxTreeEvent& event);
-    void OnContextMenu(wxContextMenuEvent& event);
+    void OnRMouseUp(wxMouseEvent& event);
     void OnGetInfo(wxTreeEvent& event);
     void OnTreeRMouseClick(wxTreeEvent& event);
     void OnItemRightClick(wxTreeEvent& event);
@@ -88,8 +88,7 @@ public:
     void OnItemActivated(wxTreeEvent& event);
     void OnRMouseDClick(wxMouseEvent& event);
 
-    void GetItemsRecursively(const wxTreeItemId& idParent,
-                             wxTreeItemIdValue cookie = 0);
+    void GetItemsRecursively(const wxTreeItemId& idParent, long cookie);
 
     void CreateImageList(int size = 16);
     void CreateButtonsImageList(int size = 11);
@@ -98,15 +97,13 @@ public:
 
     void DoSortChildren(const wxTreeItemId& item, bool reverse = FALSE)
         { m_reverseSort = reverse; wxTreeCtrl::SortChildren(item); }
-    void DoEnsureVisible() { if (m_lastItem.IsOk()) EnsureVisible(m_lastItem); }
+    void DoEnsureVisible() { EnsureVisible(m_lastItem); }
 
     void DoToggleIcon(const wxTreeItemId& item);
 
     void ShowMenu(wxTreeItemId id, const wxPoint& pt);
 
     int ImageSize(void) const { return m_imageSize; }
-
-    void SetLastItem(wxTreeItemId id) { m_lastItem = id; }
 
 protected:
     virtual int OnCompareItems(const wxTreeItemId& i1, const wxTreeItemId& i2);

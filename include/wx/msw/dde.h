@@ -12,7 +12,7 @@
 #ifndef _WX_DDE_H_
 #define _WX_DDE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "dde.h"
 #endif
 
@@ -42,10 +42,10 @@
  *
  */
 
-class WXDLLIMPEXP_BASE wxDDEServer;
-class WXDLLIMPEXP_BASE wxDDEClient;
+class WXDLLEXPORT wxDDEServer;
+class WXDLLEXPORT wxDDEClient;
 
-class WXDLLIMPEXP_BASE wxDDEConnection: public wxConnectionBase
+class WXDLLEXPORT wxDDEConnection: public wxConnectionBase
 {
   DECLARE_DYNAMIC_CLASS(wxDDEConnection)
 public:
@@ -78,11 +78,9 @@ public:
   wxChar*       m_sendingData;
   int           m_dataSize;
   wxIPCFormat  m_dataType;
-
-    DECLARE_NO_COPY_CLASS(wxDDEConnection)
 };
 
-class WXDLLIMPEXP_BASE wxDDEServer: public wxServerBase
+class WXDLLEXPORT wxDDEServer: public wxServerBase
 {
   DECLARE_DYNAMIC_CLASS(wxDDEServer)
  public:
@@ -100,18 +98,15 @@ class WXDLLIMPEXP_BASE wxDDEServer: public wxServerBase
   wxDDEConnection *FindConnection(WXHCONV conv);
   bool DeleteConnection(WXHCONV conv);
   inline wxString& GetServiceName(void) const { return (wxString&) m_serviceName; }
-    inline wxDDEConnectionList& GetConnections(void) const
-    {
-        return (wxDDEConnectionList&) m_connections;
-    }
+  inline wxList& GetConnections(void) const { return (wxList&) m_connections; }
 
-protected:
-    int       m_lastError;
-    wxString  m_serviceName;
-    wxDDEConnectionList m_connections;
+ protected:
+  int       m_lastError;
+  wxString  m_serviceName;
+  wxList    m_connections;
 };
 
-class WXDLLIMPEXP_BASE wxDDEClient: public wxClientBase
+class WXDLLEXPORT wxDDEClient: public wxClientBase
 {
   DECLARE_DYNAMIC_CLASS(wxDDEClient)
  public:
@@ -129,19 +124,15 @@ class WXDLLIMPEXP_BASE wxDDEClient: public wxClientBase
   // Find/delete wxDDEConnection corresponding to the HCONV
   wxDDEConnection *FindConnection(WXHCONV conv);
   bool DeleteConnection(WXHCONV conv);
+  inline wxList& GetConnections(void) const { return (wxList&) m_connections; }
 
-    inline wxDDEConnectionList& GetConnections(void) const
-    {
-        return (wxDDEConnectionList&) m_connections;
-    }
-
-protected:
-    int       m_lastError;
-    wxDDEConnectionList m_connections;
+ protected:
+  int       m_lastError;
+  wxList    m_connections;
 };
 
-void WXDLLIMPEXP_BASE wxDDEInitialize();
-void WXDLLIMPEXP_BASE wxDDECleanUp();
+void WXDLLEXPORT wxDDEInitialize();
+void WXDLLEXPORT wxDDECleanUp();
 
 #endif
     // _WX_DDE_H_

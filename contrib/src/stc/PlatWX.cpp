@@ -405,7 +405,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font, int ybase,
     SetFont(font);
     hdc->SetTextForeground(wxColourFromCA(fore));
     hdc->SetTextBackground(wxColourFromCA(back));
-    FillRectangle(rc, back);
+    //FillRectangle(rc, back);
 
     // ybase is where the baseline should be, but wxWin uses the upper left
     // corner, so I need to calculate the real position for the text...
@@ -418,12 +418,11 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font, int ybase,
     SetFont(font);
     hdc->SetTextForeground(wxColourFromCA(fore));
     hdc->SetTextBackground(wxColourFromCA(back));
-    FillRectangle(rc, back);
+    //FillRectangle(rc, back);
     hdc->SetClippingRegion(wxRectFromPRectangle(rc));
 
     // see comments above
     hdc->DrawText(stc2wx(s, len), rc.left, ybase - font.ascent);
-    hdc->DestroyClippingRegion();
 }
 
 
@@ -451,7 +450,7 @@ void SurfaceImpl::MeasureWidths(Font &font, const char *s, int len, int *positio
 #ifndef __WXMAC__
     // Calculate the position of each character based on the widths of
     // the previous characters
-    int* tpos = new int[len+1];
+    int* tpos = new int[len];
     int totalWidth = 0;
     size_t i;
     for (i=0; i<str.Length(); i++) {
@@ -466,7 +465,7 @@ void SurfaceImpl::MeasureWidths(Font &font, const char *s, int len, int *positio
     // on OS X widths can be fractions of pixels wide when more than one
     // are drawn together, so the sum of all character widths is not necessarily
     // (and probably not) the same as the whole string width.
-    int* tpos = new int[len+1];
+    int* tpos = new int[len];
     size_t i;
     for (i=0; i<str.Length(); i++) {
         int w, h;
@@ -482,7 +481,7 @@ void SurfaceImpl::MeasureWidths(Font &font, const char *s, int len, int *positio
     // so figure it out and fix it!
     i = 0;
     size_t ui = 0;
-    while ((int)i < len) {
+    while (i < len) {
         unsigned char uch = (unsigned char)s[i];
         positions[i++] = tpos[ui];
         if (uch >= 0x80) {
@@ -1003,7 +1002,7 @@ void ListBoxImpl::RegisterImage(int type, const char *xpm_data) {
 
     // do we need to extend the mapping array?
     wxArrayInt& itm = *imgTypeMap;
-    if ( itm.GetCount() < (size_t)type+1)
+    if ( itm.GetCount() < type+1)
         itm.Add(-1, type - itm.GetCount() + 1);
 
     // Add an item that maps type to the image index
@@ -1059,13 +1058,6 @@ void Menu::Destroy() {
 void Menu::Show(Point pt, Window &w) {
     GETWIN(w.GetID())->PopupMenu((wxMenu*)id, pt.x - 4, pt.y);
     Destroy();
-}
-
-//----------------------------------------------------------------------
-
-DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
-    wxFAIL_MSG(wxT("Dynamic lexer loading not implemented yet"));
-    return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -1201,11 +1193,11 @@ bool Platform::IsDBCSLeadByte(int codePage, char ch) {
 }
 
 int Platform::DBCSCharLength(int codePage, const char *s) {
-    return 1;
+    return 0;
 }
 
 int Platform::DBCSCharMaxLength() {
-    return 1;
+    return 0;
 }
 
 
@@ -1223,22 +1215,6 @@ double ElapsedTime::Duration(bool reset) {
 
 
 //----------------------------------------------------------------------
-
-#if wxUSE_UNICODE
-wxString stc2wx(const char* str, size_t len)
-{
-    char *buffer=new char[len+1];
-    strncpy(buffer, str, len);
-    buffer[len]=0;
-
-    wxString cstr(buffer, wxConvUTF8);
-
-    delete[] buffer;
-    return cstr;
-}
-#endif
-
-
 
 
 

@@ -12,7 +12,7 @@
 #ifndef _WX_APP_H_
 #define _WX_APP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "app.h"
 #endif
 
@@ -33,7 +33,6 @@ class WXDLLEXPORT wxApp;
 class WXDLLEXPORT wxKeyEvent;
 class WXDLLEXPORT wxLog;
 class WXDLLEXPORT wxEventLoop;
-class WXDLLEXPORT wxXVisualInfo;
 
 // ----------------------------------------------------------------------------
 // the wxApp class for wxX11 - see wxAppBase for more details
@@ -55,16 +54,23 @@ public:
     virtual bool Initialized();
     virtual bool Pending();
     virtual void Dispatch();
-
-    virtual void Exit();
-
     virtual bool Yield(bool onlyIfNeeded = FALSE);
-    virtual void WakeUpIdle();
+    virtual bool ProcessIdle();
     
     virtual bool OnInitGui();
     
     // implementation from now on
     // --------------------------
+    
+    void OnIdle(wxIdleEvent& event);
+    
+    // Send idle event to all top-level windows.
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents();
+    
+    // Send idle event to window and all subwindows
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents(wxWindow* win);
     
     // Processes an X event.
     virtual bool ProcessXEvent(WXEvent* event);
@@ -78,8 +84,10 @@ protected:
     
 public:
     // Implementation
-    virtual bool Initialize(int& argc, wxChar **argv);
-    virtual void CleanUp();
+    static bool Initialize();
+    static void CleanUp();
+    
+    void DeletePendingObjects();
     
     WXWindow       GetTopLevelWidget() const { return m_topLevelWidget; }
     WXColormap     GetMainColormap(WXDisplay* display);
@@ -99,14 +107,7 @@ public:
     // environment variable
     PangoContext* GetPangoContext();
 #endif    
-
-    wxXVisualInfo* GetVisualInfo(WXDisplay* display)
-    {
-        // this should be implemented correctly for wxBitmap to work
-        // with multiple display
-        return m_visualInfo;
-    }
-
+    
     // We need this before creating the app
     static   WXDisplay* GetDisplay() { return ms_display; }
     static   WXDisplay* ms_display;
@@ -116,8 +117,24 @@ public:
     bool                  m_showIconic;    
     wxSize                m_initialSize;
 
-#if !wxUSE_NANOX
-    wxXVisualInfo*        m_visualInfo;
+#if !wxUSE_NANOX    
+    // Someone find a better place for these
+    int                   m_visualType;   // TrueColor, DirectColor etc.
+    int                   m_visualDepth;
+    int                   m_visualColormapSize;
+    void                 *m_visualColormap;
+    int                   m_visualScreen;
+    unsigned long         m_visualRedMask;
+    unsigned long         m_visualGreenMask;
+    unsigned long         m_visualBlueMask;
+    int                   m_visualRedShift;
+    int                   m_visualGreenShift;
+    int                   m_visualBlueShift;
+    int                   m_visualRedPrec;
+    int                   m_visualGreenPrec;
+    int                   m_visualBluePrec;
+    
+    unsigned char        *m_colorCube;
 #endif
     
 protected:
@@ -131,5 +148,8 @@ protected:
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_APP_H_
+int WXDLLEXPORT wxEntry( int argc, char *argv[] );
+
+#endif
+// _WX_APP_H_
 

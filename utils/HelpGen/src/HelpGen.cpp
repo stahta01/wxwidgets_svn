@@ -51,10 +51,15 @@
 // wxWindows
 #include "wx/wxprec.h"
 
+#if wxUSE_GUI
+    #error "This is a console program and can be only compiled using wxBase"
+#endif
+
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/dynarray.h"
+    #include "wx/wx.h"
 #endif // WX_PRECOMP
 
 #include "wx/file.h"
@@ -72,6 +77,23 @@
 #ifdef GetCurrentTime
 #undef GetCurrentTime
 #endif
+
+// -----------------------------------------------------------------------------
+// global vars
+// -----------------------------------------------------------------------------
+
+class HelpGenApp: public wxApp
+{
+public:
+    HelpGenApp() {};
+
+    // don't let wxWin parse our cmd line, we do it ourselves
+    virtual bool OnInit() { return TRUE; }
+
+    virtual int OnRun();
+};
+
+// IMPLEMENT_APP(HelpGenApp);
 
 // -----------------------------------------------------------------------------
 // private functions
@@ -520,12 +542,10 @@ private:
 // implementation
 // =============================================================================
 
-static char **g_argv = NULL;
-
 // this function never returns
 static void usage()
 {
-    wxString prog = g_argv[0];
+    wxString prog = wxTheApp->argv[0];
     wxString basename = prog.AfterLast('/');
 #ifdef __WXMSW__
     if ( !basename )
@@ -561,18 +581,8 @@ static void usage()
     exit(1);
 }
 
-int main(int argc, char **argv)
+int HelpGenApp::OnRun()
 {
-    g_argv = argv;
-
-    wxInitializer initializer;
-    if ( !initializer )
-    {
-        fprintf(stderr, "Failed to initialize the wxWindows library, aborting.");
-
-        return -1;
-    }
-
     enum
     {
         Mode_None,
@@ -776,6 +786,21 @@ int main(int argc, char **argv)
     }
 
     return 0;
+}
+
+int main(int argc, char **argv)
+{
+    wxInitializer initializer;
+    if ( !initializer )
+    {
+        fprintf(stderr, "Failed to initialize the wxWindows library, aborting.");
+
+        return -1;
+    }
+	HelpGenApp app;
+	app.argc = argc;
+	app.argv = argv;
+	return app.OnRun();
 }
 
 // -----------------------------------------------------------------------------
@@ -2128,7 +2153,7 @@ static void TeXUnfilter(wxString* str)
 
     // undo TeXFilter
     static wxRegEx reNonSpecialSpecials("\\\\([#$%&_{}])"),
-                   reAccents("\\\\verb\\|([~^])\\|");
+                   reAccents("\\\\verb|([~^])|");
 
     reNonSpecialSpecials.ReplaceAll(str, "\\1");
     reAccents.ReplaceAll(str, "\\1");
@@ -2178,12 +2203,6 @@ static const wxString GetVersionString()
 
 /*
    $Log$
-   Revision 1.24  2003/08/13 22:59:37  VZ
-   compilation fix
-
-   Revision 1.23  2003/06/13 17:05:43  VZ
-   quote '|' inside regexes (fixes dump mode); fixed crash due to strange HelpGenApp code
-
    Revision 1.22  2002/01/21 21:18:50  JS
    Now adds 'include file' heading
 

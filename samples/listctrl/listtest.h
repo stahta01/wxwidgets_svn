@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -13,12 +13,7 @@
 class MyApp: public wxApp
 {
 public:
-    MyApp() { }
-
     virtual bool OnInit();
-
-private:
-    DECLARE_NO_COPY_CLASS(MyApp)
 };
 
 class MyListCtrl: public wxListCtrl
@@ -71,7 +66,6 @@ private:
 
     wxListItemAttr m_attr;
 
-    DECLARE_NO_COPY_CLASS(MyListCtrl)
     DECLARE_EVENT_TABLE()
 };
 
@@ -133,7 +127,6 @@ private:
 
     wxLog *m_logOld;
 
-    DECLARE_NO_COPY_CLASS(MyFrame)
     DECLARE_EVENT_TABLE()
 };
 

@@ -12,8 +12,6 @@
 #ifndef _WX_CHECKBOX_H_BASE_
 #define _WX_CHECKBOX_H_BASE_
 
-#include "wx/defs.h"
-
 #if wxUSE_CHECKBOX
 
 #include "wx/control.h"
@@ -27,16 +25,11 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxCheckBoxNameStr;
 class WXDLLEXPORT wxCheckBoxBase : public wxControl
 {
 public:
-    wxCheckBoxBase() { }
-
     // set/get the checked status of the listbox
     virtual void SetValue(bool value) = 0;
     virtual bool GetValue() const = 0;
 
     bool IsChecked() const { return GetValue(); }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxCheckBoxBase)
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -49,10 +42,10 @@ private:
     #include "wx/gtk/checkbox.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/checkbox.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/checkbox.h"
 #elif defined(__WXPM__)
     #include "wx/os2/checkbox.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/checkbox.h"
 #endif
 
 #endif // wxUSE_CHECKBOX

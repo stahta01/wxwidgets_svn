@@ -30,7 +30,7 @@
 
 /* modified by Vaclav Slavik for use as jpeglib-independent module */
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "quantize.h"
 #endif
 
@@ -42,16 +42,13 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/palette.h"
 #endif
-
-#if wxUSE_IMAGE
 
 #include "wx/image.h"
 #include "wx/quantize.h"
 
 #ifdef __WXMSW__
-#include "wx/msw/private.h"
+#include <windows.h>
 #endif
 
 #include <stdlib.h>
@@ -1656,7 +1653,4 @@ bool wxQuantize::Quantize(const wxImage& src,
 
     return TRUE;
 }
-
-#endif
-    // wxUSE_IMAGE
 

@@ -15,7 +15,7 @@
 #ifndef _WX_LAYWIN_H_G_
 #define _WX_LAYWIN_H_G_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "laywin.h"
 #endif
 
@@ -24,8 +24,8 @@
 #endif // wxUSE_SASH
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_QUERY_LAYOUT_INFO, 1500)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_CALCULATE_LAYOUT, 1501)
+    DECLARE_EVENT_TYPE(wxEVT_QUERY_LAYOUT_INFO, 1500)
+    DECLARE_EVENT_TYPE(wxEVT_CALCULATE_LAYOUT, 1501)
 END_DECLARE_EVENT_TYPES()
 
 enum wxLayoutOrientation
@@ -59,7 +59,7 @@ enum wxLayoutAlignment
  * orientation and size.
  */
 
-class WXDLLIMPEXP_ADV wxQueryLayoutInfoEvent: public wxEvent
+class WXDLLEXPORT wxQueryLayoutInfoEvent: public wxEvent
 {
 public:
     wxQueryLayoutInfoEvent(wxWindowID id = 0)
@@ -99,7 +99,7 @@ protected:
     wxLayoutAlignment       m_alignment;
     
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxQueryLayoutInfoEvent)
+    DECLARE_DYNAMIC_CLASS(wxQueryLayoutInfoEvent)
 };
 
 typedef void (wxEvtHandler::*wxQueryLayoutInfoEventFunction)(wxQueryLayoutInfoEvent&);
@@ -111,7 +111,7 @@ typedef void (wxEvtHandler::*wxQueryLayoutInfoEventFunction)(wxQueryLayoutInfoEv
  * This event is used to take a bite out of the available client area.
  */
 
-class WXDLLIMPEXP_ADV wxCalculateLayoutEvent: public wxEvent
+class WXDLLEXPORT wxCalculateLayoutEvent: public wxEvent
 {
 public:
     wxCalculateLayoutEvent(wxWindowID id = 0)
@@ -136,7 +136,7 @@ protected:
     wxRect                  m_rect;
     
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxCalculateLayoutEvent)
+    DECLARE_DYNAMIC_CLASS(wxCalculateLayoutEvent)
 };
 
 typedef void (wxEvtHandler::*wxCalculateLayoutEventFunction)(wxCalculateLayoutEvent&);
@@ -149,7 +149,7 @@ typedef void (wxEvtHandler::*wxCalculateLayoutEventFunction)(wxCalculateLayoutEv
 // This is window that can remember alignment/orientation, does its own layout,
 // and can provide sashes too. Useful for implementing docked windows with sashes in
 // an IDE-style interface.
-class WXDLLIMPEXP_ADV wxSashLayoutWindow: public wxSashWindow
+class WXDLLEXPORT wxSashLayoutWindow: public wxSashWindow
 {
 public:
     wxSashLayoutWindow()
@@ -192,7 +192,7 @@ private:
     wxSize                      m_defaultSize;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxSashLayoutWindow)
+    DECLARE_CLASS(wxSashLayoutWindow)
     DECLARE_EVENT_TABLE()
 };
 
@@ -202,7 +202,7 @@ class WXDLLEXPORT wxMDIParentFrame;
 class WXDLLEXPORT wxFrame;
 
 // This class implements the layout algorithm
-class WXDLLIMPEXP_ADV wxLayoutAlgorithm: public wxObject
+class WXDLLEXPORT wxLayoutAlgorithm: public wxObject
 {
 public:
     wxLayoutAlgorithm() {}

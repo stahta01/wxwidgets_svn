@@ -14,13 +14,8 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBoxNameStr;
 class WXDLLEXPORT wxStaticBoxBase : public wxControl
 {
 public:
-    wxStaticBoxBase() { }
-
     // overriden base class virtuals
     virtual bool AcceptsFocus() const { return FALSE; }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxStaticBoxBase)
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -33,10 +28,10 @@ private:
 #include "wx/gtk/statbox.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/statbox.h"
-#elif defined(__WXCOCOA__)
-#include "wx/cocoa/statbox.h"
 #elif defined(__WXPM__)
 #include "wx/os2/statbox.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/statbox.h"
 #endif
 
 #endif // wxUSE_STATBOX

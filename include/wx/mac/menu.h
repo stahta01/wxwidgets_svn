@@ -1,20 +1,27 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        menu.h
 // Purpose:     wxMenu, wxMenuBar classes
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MENU_H_
 #define _WX_MENU_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "menu.h"
 #endif
+
+#if wxUSE_ACCEL
+    #include "wx/accel.h"
+    #include "wx/dynarray.h"
+
+    WX_DEFINE_EXPORTED_ARRAY(wxAcceleratorEntry *, wxAcceleratorArray);
+#endif // wxUSE_ACCEL
 
 class WXDLLEXPORT wxFrame;
 
@@ -37,7 +44,6 @@ public:
     virtual bool DoAppend(wxMenuItem *item);
     virtual bool DoInsert(size_t pos, wxMenuItem *item);
     virtual wxMenuItem *DoRemove(wxMenuItem *item);
-    virtual void Attach(wxMenuBarBase *menubar) ;
 
     virtual void Break();
 
@@ -46,18 +52,20 @@ public:
     // MSW-specific
     bool ProcessCommand(wxCommandEvent& event);
 
+#if WXWIN_COMPATIBILITY
+    wxMenu(const wxString& title, const wxFunction func)
+        : wxMenuBase(title)
+    {
+        Callback(func);
+    }
+#endif // WXWIN_COMPATIBILITY
+
     // implementation only from now on
     // -------------------------------
 
-      int    MacGetIndexFromId( int id ) ; 
-      int    MacGetIndexFromItem( wxMenuItem *pItem ) ;
-      void MacEnableMenu( bool bDoEnable ) ;
-      // MacOS needs to know about submenus somewhere within this menu
-      // before it can be displayed , also hide special menu items like preferences
-      // that are handled by the OS
-      void  MacBeforeDisplay( bool isSubMenu ) ;
-      // undo all changes from the MacBeforeDisplay call
-      void  MacAfterDisplay( bool isSubMenu ) ;
+  	int	MacGetIndexFromId( int id ) ; 
+  	int	MacGetIndexFromItem( wxMenuItem *pItem ) ; 
+  	void MacEnableMenu( bool bDoEnable ) ;
 
     // semi-private accessors
         // get the window which contains this menu
@@ -65,7 +73,19 @@ public:
         // get the menu handle
     WXHMENU GetHMenu() const { return m_hMenu; }
 
-    short MacGetMenuId() { return m_macMenuId ; }
+	short MacGetMenuId() { return m_macMenuId ; }
+#if wxUSE_ACCEL
+    // called by wxMenuBar to build its accel table from the accels of all menus
+    bool HasAccels() const { return !m_accels.IsEmpty(); }
+    size_t GetAccelCount() const { return m_accels.GetCount(); }
+    size_t CopyAccels(wxAcceleratorEntry *accels) const;
+
+    // called by wxMenuItem when its accels changes
+    void UpdateAccel(wxMenuItem *item);
+
+    // helper used by wxMenu itself (returns the index in m_accels)
+    int FindAccel(int id) const;
+#endif // wxUSE_ACCEL
 
 private:
     // common part of all ctors
@@ -74,21 +94,19 @@ private:
     // common part of Append/Insert (behaves as Append is pos == (size_t)-1)
     bool DoInsertOrAppend(wxMenuItem *item, size_t pos = (size_t)-1);
 
-    // terminate the current radio group, if any
-    void EndRadioGroup();
-
     // if TRUE, insert a breal before appending the next item
     bool m_doBreak;
-
-    // the position of the first item in the current radio group or -1
-    int m_startRadioGroup;
 
     // the menu handle of this menu
     WXHMENU m_hMenu;
 
-      short                m_macMenuId;
+  	short				m_macMenuId;
 
-      static short        s_macNextMenuId ;
+  	static short		s_macNextMenuId ;
+#if wxUSE_ACCEL
+    // the accelerators for our menu items
+    wxAcceleratorArray m_accels;
+#endif // wxUSE_ACCEL
 
     DECLARE_DYNAMIC_CLASS(wxMenu)
 };
@@ -123,6 +141,15 @@ public:
     virtual void SetLabelTop( size_t pos, const wxString& label );
     virtual wxString GetLabelTop( size_t pos ) const;
 
+    // compatibility: these functions are deprecated
+#if WXWIN_COMPATIBILITY
+    void SetEventHandler(wxEvtHandler *handler) { m_eventHandler = handler; }
+    wxEvtHandler *GetEventHandler() { return m_eventHandler; }
+
+    bool Enabled(int id) const { return IsEnabled(id); }
+    bool Checked(int id) const { return IsChecked(id); }
+#endif // WXWIN_COMPATIBILITY
+
     // implementation from now on
     WXHMENU Create();
     int  FindMenu(const wxString& title);
@@ -135,11 +162,18 @@ public:
         // attach to a frame
     void Attach(wxFrame *frame);
 
-        // clear the invoking window for all menus and submenus
-    void UnsetInvokingWindow() ;
+		// clear the invoking window for all menus and submenus
+	void UnsetInvokingWindow() ;
 
-        // set the invoking window for all menus and submenus
-    void SetInvokingWindow( wxFrame* frame ) ;
+		// set the invoking window for all menus and submenus
+	void SetInvokingWindow( wxFrame* frame ) ;
+#if wxUSE_ACCEL
+    // get the accel table for all the menus
+    const wxAcceleratorTable& GetAccelTable() const { return m_accelTable; }
+
+    // update the accel table (must be called after adding/deletign a menu)
+    void RebuildAccelTable();
+#endif // wxUSE_ACCEL
 
     // if the menubar is modified, the display is not updated automatically,
     // call this function to update it (m_menuBarFrame should be !NULL)
@@ -147,19 +181,25 @@ public:
 
   void MacInstallMenuBar() ;
   static wxMenuBar* MacGetInstalledMenuBar() { return s_macInstalledMenuBar ; }
-  static void MacSetCommonMenuBar(wxMenuBar* menubar) { s_macCommonMenuBar=menubar; }
-  static wxMenuBar* MacGetCommonMenuBar() { return s_macCommonMenuBar; }
 
 protected:
     // common part of all ctors
     void Init();
     wxWindow        *m_invokingWindow;
 
+#if WXWIN_COMPATIBILITY
+    wxEvtHandler *m_eventHandler;
+#endif // WXWIN_COMPATIBILITY
+
     wxArrayString m_titles;
 
+#if wxUSE_ACCEL
+    // the accelerator table for all accelerators in all our menus
+    wxAcceleratorTable m_accelTable;
+#endif // wxUSE_ACCEL
+
 private:
-  static wxMenuBar*            s_macInstalledMenuBar ;
-  static wxMenuBar*            s_macCommonMenuBar ;
+  static wxMenuBar*			s_macInstalledMenuBar ;
 
     DECLARE_DYNAMIC_CLASS(wxMenuBar)
 };

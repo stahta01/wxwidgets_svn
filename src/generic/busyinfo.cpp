@@ -6,7 +6,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "busyinfo.h"
 #endif
 
@@ -106,7 +106,7 @@ wxBusyInfo::wxBusyInfo(const wxString& message, wxWindow *parent)
     m_InfoFrame = new wxInfoFrame( parent, message);
     m_InfoFrame->Show(TRUE);
 #ifdef __WXMAC__
-	m_InfoFrame->Update() ;
+    m_InfoFrame->Update();
 #else
     wxYield();
     m_InfoFrame->Refresh();

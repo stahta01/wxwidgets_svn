@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "msgdlg.h"
 #endif
 
@@ -38,15 +38,6 @@ wxMessageDialog::wxMessageDialog(wxWindow *parent,
                                  long style,
                                  const wxPoint& WXUNUSED(pos))
 {
-#ifdef __WXDEBUG__
-    // check for common programming errors
-    if ( (style & wxID_OK) == wxID_OK )
-    {
-        // programmer probably confused wxID_OK with wxOK. Correct one is wxOK.
-        wxFAIL_MSG( _T("wxMessageBox: Did you mean wxOK (and not wxID_OK)?") );
-    }
-#endif // __WXDEBUG__
-
     m_caption = caption;
     m_message = message;
     m_dialogStyle = style;
@@ -104,10 +95,8 @@ int wxMessageDialog::ShowModal()
 
     if (hWnd)
         msStyle |= MB_APPLMODAL;
-#ifndef __WXWINCE__
     else
         msStyle |= MB_TASKMODAL;
-#endif
 
     // do show the dialog
     int msAns = MessageBox(hWnd, m_message.c_str(), m_caption.c_str(), msStyle);

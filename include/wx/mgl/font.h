@@ -9,7 +9,7 @@
 #ifndef __WX_FONT_H__
 #define __WX_FONT_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "font.h"
 #endif
 

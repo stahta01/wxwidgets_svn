@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "helpchm.h"
 #endif
 
@@ -25,7 +25,7 @@
 #include "wx/filefn.h"
 #include "wx/msw/helpchm.h"
 
-#include "wx/dynload.h"
+#include "wx/dynlib.h"
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"

@@ -6,7 +6,7 @@
 // Created:     22.01.02
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #define HAVE_USLEEP 1

@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "control.h"
 #endif
 
@@ -33,7 +33,7 @@
 
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -46,6 +46,9 @@ END_EVENT_TABLE()
 // Item members
 wxControl::wxControl()
 {
+#if WXWIN_COMPATIBILITY
+    m_callback = 0;
+#endif // WXWIN_COMPATIBILITY
 }
 
 wxControl::~wxControl()
@@ -75,10 +78,11 @@ bool wxControl::Create(wxWindow *parent,
 bool wxControl::MSWCreateControl(const wxChar *classname,
                                  const wxString& label,
                                  const wxPoint& pos,
-                                 const wxSize& size)
+                                 const wxSize& size,
+                                 long style)
 {
     WXDWORD exstyle;
-    WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), &exstyle);
+    WXDWORD msStyle = MSWGetStyle(style, &exstyle);
 
     return MSWCreateControl(classname, msStyle, pos, size, label, exstyle);
 }
@@ -94,7 +98,7 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
     if ( exstyle == (WXDWORD)-1 )
     {
         exstyle = 0;
-        (void) MSWGetStyle(GetWindowStyle(), &exstyle);
+        (void) MSWGetStyle(GetWindowStyle(), & exstyle) ;
     }
 
     // all controls should have this style
@@ -132,14 +136,6 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
         return FALSE;
     }
 
-#if wxUSE_CTL3D
-    if ( want3D )
-    {
-        Ctl3dSubclassCtl(GetHwnd());
-        m_useCtl3D = TRUE;
-    }
-#endif // wxUSE_CTL3D
-
     // install wxWindows window proc for this window
     SubclassWin(m_hWnd);
 
@@ -155,14 +151,6 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
     return TRUE;
 }
 
-wxBorder wxControl::GetDefaultBorder() const
-{
-    // we want to automatically give controls a sunken style (confusingly,
-    // it may not really mean sunken at all as we map it to WS_EX_CLIENTEDGE
-    // which is not sunken at all under Windows XP -- rather, just the default)
-    return wxBORDER_SUNKEN;
-}
-
 wxSize wxControl::DoGetBestSize() const
 {
     return wxSize(DEFAULT_ITEM_WIDTH, DEFAULT_ITEM_HEIGHT);
@@ -170,6 +158,16 @@ wxSize wxControl::DoGetBestSize() const
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
+#if WXWIN_COMPATIBILITY
+    if ( m_callback )
+    {
+        (void)(*m_callback)(*this, event);
+
+        return TRUE;
+    }
+    else
+#endif // WXWIN_COMPATIBILITY
+
     return GetEventHandler()->ProcessEvent(event);
 }
 
@@ -235,17 +233,11 @@ void wxControl::OnEraseBackground(wxEraseEvent& event)
     HBRUSH hBrush = ::CreateSolidBrush(wxColourToRGB(GetBackgroundColour()));
 
     HDC hdc = GetHdcOf((*event.GetDC()));
-
-#ifndef __WXWINCE__
     int mode = ::SetMapMode(hdc, MM_TEXT);
-#endif
 
     ::FillRect(hdc, &rect, hBrush);
     ::DeleteObject(hBrush);
-
-#ifndef __WXWINCE__
     ::SetMapMode(hdc, mode);
-#endif
 }
 
 WXHBRUSH wxControl::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
@@ -269,6 +261,11 @@ WXHBRUSH wxControl::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED
 #endif // wxUSE_CTL3D
 
     HDC hdc = (HDC)pDC;
+    if (GetParent()->GetTransparentBackground())
+        SetBkMode(hdc, TRANSPARENT);
+    else
+        SetBkMode(hdc, OPAQUE);
+
     wxColour colBack = GetBackgroundColour();
 
     ::SetBkColor(hdc, wxColourToRGB(colBack));

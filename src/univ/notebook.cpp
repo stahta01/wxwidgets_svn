@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univnotebook.h"
 #endif
 
@@ -40,7 +40,7 @@
 // macros
 // ----------------------------------------------------------------------------
 
-#define IS_VALID_PAGE(nPage) (((nPage) >= 0) && ((size_t(nPage)) < GetPageCount()))
+#define IS_VALID_PAGE(nPage) (((nPage) >= 0) && ((nPage) < GetPageCount()))
 
 // ----------------------------------------------------------------------------
 // constants
@@ -133,14 +133,14 @@ bool wxNotebook::Create(wxWindow *parent,
 // wxNotebook page titles and images
 // ----------------------------------------------------------------------------
 
-wxString wxNotebook::GetPageText(size_t nPage) const
+wxString wxNotebook::GetPageText(int nPage) const
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), _T(""), _T("invalid notebook page") );
 
     return m_titles[nPage];
 }
 
-bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
+bool wxNotebook::SetPageText(int nPage, const wxString& strText)
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), FALSE, _T("invalid notebook page") );
 
@@ -163,14 +163,14 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
     return TRUE;
 }
 
-int wxNotebook::GetPageImage(size_t nPage) const
+int wxNotebook::GetPageImage(int nPage) const
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     return m_images[nPage];
 }
 
-bool wxNotebook::SetPageImage(size_t nPage, int nImage)
+bool wxNotebook::SetPageImage(int nPage, int nImage)
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), FALSE, _T("invalid notebook page") );
 
@@ -202,24 +202,13 @@ wxNotebook::~wxNotebook()
 // wxNotebook page switching
 // ----------------------------------------------------------------------------
 
-int wxNotebook::SetSelection(size_t nPage)
+int wxNotebook::SetSelection(int nPage)
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, _T("invalid notebook page") );
 
     if ( (size_t)nPage == m_sel )
     {
         // don't do anything if there is nothing to do
-        return m_sel;
-    }
-
-    // event handling
-    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId);
-    event.SetSelection(nPage);
-    event.SetOldSelection(m_sel);
-    event.SetEventObject(this);
-    if ( GetEventHandler()->ProcessEvent(event) && !event.IsAllowed() )
-    {
-        // program doesn't allow the page change
         return m_sel;
     }
 
@@ -266,24 +255,46 @@ int wxNotebook::SetSelection(size_t nPage)
         m_pages[m_sel]->Show();
     }
 
-    // event handling
+    return selOld;
+}
+
+void wxNotebook::ChangePage(int nPage)
+{
+    wxCHECK_RET( IS_VALID_PAGE(nPage), _T("invalid notebook page") );
+
+    if ( (size_t)nPage == m_sel )
+    {
+        // nothing to do
+        return;
+    }
+
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId);
+    event.SetSelection(nPage);
+    event.SetOldSelection(m_sel);
+    event.SetEventObject(this);
+    if ( GetEventHandler()->ProcessEvent(event) && !event.IsAllowed() )
+    {
+        // program doesn't allow the page change
+        return;
+    }
+
+    SetSelection(nPage);
+
     event.SetEventType(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED);
     GetEventHandler()->ProcessEvent(event);
-
-    return selOld;
 }
 
 // ----------------------------------------------------------------------------
 // wxNotebook pages adding/deleting
 // ----------------------------------------------------------------------------
 
-bool wxNotebook::InsertPage(size_t nPage,
+bool wxNotebook::InsertPage(int nPage,
                             wxNotebookPage *pPage,
                             const wxString& strText,
                             bool bSelect,
                             int imageId)
 {
-    size_t nPages = GetPageCount();
+    int nPages = GetPageCount();
     wxCHECK_MSG( nPage == nPages || IS_VALID_PAGE(nPage), FALSE,
                  _T("invalid notebook page in InsertPage()") );
 
@@ -360,7 +371,7 @@ bool wxNotebook::DeleteAllPages()
     return TRUE;
 }
 
-wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
+wxNotebookPage *wxNotebook::DoRemovePage(int nPage)
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), NULL, _T("invalid notebook page") );
 
@@ -381,7 +392,7 @@ wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
         UpdateSpinBtn();
     }
 
-    size_t count = GetPageCount();
+    int count = GetPageCount();
     if ( count )
     {
         if ( m_sel == (size_t)nPage )
@@ -574,11 +585,8 @@ void wxNotebook::DoDraw(wxControlRenderer *renderer)
 // wxNotebook geometry
 // ----------------------------------------------------------------------------
 
-int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
+int wxNotebook::HitTest(const wxPoint& pt) const
 {
-    if ( flags )
-        *flags = wxNB_HITTEST_NOWHERE;
-
     // first check that it is in this window at all
     if ( !GetClientRect().Inside(pt) )
     {
@@ -619,15 +627,7 @@ int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
         GetTabSize(n, &rectTabs.width, &rectTabs.height);
 
         if ( rectTabs.Inside(pt) )
-        {
-            if ( flags )
-            {
-                // TODO: be more precise
-                *flags = wxNB_HITTEST_ONITEM;
-            }
-
             return n;
-        }
 
         // move the rectTabs to the next tab
         if ( IsVertical() )
@@ -962,7 +962,7 @@ void wxNotebook::SetPageSize(const wxSize& size)
     SetClientSize(GetSizeForPage(size));
 }
 
-wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage) const
+wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage)
 {
     return AdjustSize(GetSizeForPage(sizePage));
 }
@@ -1292,11 +1292,11 @@ bool wxNotebook::PerformAction(const wxControlAction& action,
                                const wxString& strArg)
 {
     if ( action == wxACTION_NOTEBOOK_NEXT )
-        SetSelection(GetNextPage(TRUE));
+        ChangePage(GetNextPage(TRUE));
     else if ( action == wxACTION_NOTEBOOK_PREV )
-        SetSelection(GetNextPage(FALSE));
+        ChangePage(GetNextPage(FALSE));
     else if ( action == wxACTION_NOTEBOOK_GOTO )
-        SetSelection((int)numArg);
+        ChangePage((int)numArg);
     else
         return wxControl::PerformAction(action, numArg, strArg);
 
@@ -1389,9 +1389,8 @@ bool wxStdNotebookInputHandler::HandleMouseMove(wxInputConsumer *consumer,
     return wxStdInputHandler::HandleMouseMove(consumer, event);
 }
 
-bool
-wxStdNotebookInputHandler::HandleFocus(wxInputConsumer *consumer,
-                                       const wxFocusEvent& WXUNUSED(event))
+bool wxStdNotebookInputHandler::HandleFocus(wxInputConsumer *consumer,
+                                            const wxFocusEvent& event)
 {
     HandleFocusChange(consumer);
 

@@ -24,9 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#if wxUSE_PROLOGIO
-#include <wx/deprecated/wxexpr.h>
-#endif
+#include <wx/wxexpr.h>
 
 #include <wx/types.h>
 
@@ -38,8 +36,11 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "wx/ogl/ogl.h"
-
+#include <wx/ogl/basic.h>
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/misc.h>
+#include <wx/ogl/constrnt.h>
+#include <wx/ogl/composit.h>
 
 wxFont*         g_oglNormalFont;
 wxPen*          g_oglBlackPen;
@@ -61,12 +62,12 @@ void wxOGLInitialize()
 
   g_oglNormalFont = new wxFont(10, wxSWISS, wxNORMAL, wxNORMAL);
 
-  g_oglBlackPen = new wxPen(wxT("BLACK"), 1, wxSOLID);
+  g_oglBlackPen = new wxPen("BLACK", 1, wxSOLID);
 
-  g_oglWhiteBackgroundPen = new wxPen(wxT("WHITE"), 1, wxSOLID);
-  g_oglTransparentPen = new wxPen(wxT("WHITE"), 1, wxTRANSPARENT);
-  g_oglWhiteBackgroundBrush = new wxBrush(wxT("WHITE"), wxSOLID);
-  g_oglBlackForegroundPen = new wxPen(wxT("BLACK"), 1, wxSOLID);
+  g_oglWhiteBackgroundPen = new wxPen("WHITE", 1, wxSOLID);
+  g_oglTransparentPen = new wxPen("WHITE", 1, wxTRANSPARENT);
+  g_oglWhiteBackgroundBrush = new wxBrush("WHITE", wxSOLID);
+  g_oglBlackForegroundPen = new wxPen("BLACK", 1, wxSOLID);
 
   OGLInitializeConstraintTypes();
 
@@ -83,7 +84,6 @@ void wxOGLCleanUp()
         oglBuffer = NULL;
     }
     oglBuffer = NULL;
-
     if (g_oglBullseyeCursor)
     {
         delete g_oglBullseyeCursor;
@@ -164,17 +164,16 @@ int FontSizeDialog(wxFrame *parent, int old_size)
 {
   if (old_size <= 0)
     old_size = 10;
-  wxString buf;
-  buf << old_size;
-  wxString ans = wxGetTextFromUser(wxT("Enter point size"), wxT("Font size"), buf, parent);
-  if (ans.Length() == 0)
+  char buf[40];
+  sprintf(buf, "%d", old_size);
+  wxString ans = wxGetTextFromUser("Enter point size", "Font size", buf, parent);
+  if (ans == "")
     return 0;
 
-  long new_size = 0;
-  ans.ToLong(&new_size);
+  int new_size = atoi(ans);
   if ((new_size <= 0) || (new_size > 40))
   {
-    wxMessageBox(wxT("Invalid point size!"), wxT("Error"), wxOK);
+    wxMessageBox("Invalid point size!", "Error", wxOK);
     return 0;
   }
   return new_size;
@@ -206,7 +205,7 @@ void oglCentreText(wxDC& dc, wxList *text_list,
                 double m_xpos, double m_ypos, double width, double height,
                 int formatMode)
 {
-  int n = text_list->GetCount();
+  int n = text_list->Number();
 
   if (!text_list || (n == 0))
     return;
@@ -220,17 +219,17 @@ void oglCentreText(wxDC& dc, wxList *text_list,
   // Store text extents for speed
   double *widths = new double[n];
 
-  wxNode *current = text_list->GetFirst();
+  wxNode *current = text_list->First();
   int i = 0;
   while (current)
   {
-    wxShapeTextLine *line = (wxShapeTextLine *)current->GetData();
+    wxShapeTextLine *line = (wxShapeTextLine *)current->Data();
     dc.GetTextExtent(line->GetText(), &current_width, &char_height);
     widths[i] = current_width;
 
     if (current_width > max_width)
       max_width = current_width;
-    current = current->GetNext();
+    current = current->Next();
     i ++;
   }
 
@@ -263,12 +262,12 @@ void oglCentreText(wxDC& dc, wxList *text_list,
     xOffset = 0.0;
   }
 
-  current = text_list->GetFirst();
+  current = text_list->First();
   i = 0;
 
   while (current)
   {
-    wxShapeTextLine *line = (wxShapeTextLine *)current->GetData();
+    wxShapeTextLine *line = (wxShapeTextLine *)current->Data();
 
     double x;
     if ((formatMode & FORMAT_CENTRE_HORIZ) && (widths[i] < width))
@@ -278,7 +277,7 @@ void oglCentreText(wxDC& dc, wxList *text_list,
     double y = (double)(i*char_height + yoffset);
 
     line->SetX( x - xOffset ); line->SetY( y - yOffset );
-    current = current->GetNext();
+    current = current->Next();
     i ++;
   }
 
@@ -289,7 +288,7 @@ void oglCentreText(wxDC& dc, wxList *text_list,
 void oglCentreTextNoClipping(wxDC& dc, wxList *text_list,
                               double m_xpos, double m_ypos, double width, double height)
 {
-  int n = text_list->GetCount();
+  int n = text_list->Number();
 
   if (!text_list || (n == 0))
     return;
@@ -303,17 +302,17 @@ void oglCentreTextNoClipping(wxDC& dc, wxList *text_list,
   // Store text extents for speed
   double *widths = new double[n];
 
-  wxNode *current = text_list->GetFirst();
+  wxNode *current = text_list->First();
   int i = 0;
   while (current)
   {
-    wxShapeTextLine *line = (wxShapeTextLine *)current->GetData();
+    wxShapeTextLine *line = (wxShapeTextLine *)current->Data();
     dc.GetTextExtent(line->GetText(), &current_width, &char_height);
     widths[i] = current_width;
 
     if (current_width > max_width)
       max_width = current_width;
-    current = current->GetNext();
+    current = current->Next();
     i ++;
   }
 
@@ -323,28 +322,28 @@ void oglCentreTextNoClipping(wxDC& dc, wxList *text_list,
 
   double xoffset = (double)(m_xpos - width/2.0);
 
-  current = text_list->GetFirst();
+  current = text_list->First();
   i = 0;
 
   while (current)
   {
-    wxShapeTextLine *line = (wxShapeTextLine *)current->GetData();
+    wxShapeTextLine *line = (wxShapeTextLine *)current->Data();
 
     double x = (double)((width - widths[i])/2.0 + xoffset);
     double y = (double)(i*char_height + yoffset);
 
     line->SetX( x - m_xpos ); line->SetY( y - m_ypos );
-    current = current->GetNext();
+    current = current->Next();
     i ++;
   }
   delete widths;
 }
 
 void oglGetCentredTextExtent(wxDC& dc, wxList *text_list,
-                              double WXUNUSED(m_xpos), double WXUNUSED(m_ypos), double WXUNUSED(width), double WXUNUSED(height),
+                              double m_xpos, double m_ypos, double width, double height,
                               double *actual_width, double *actual_height)
 {
-  int n = text_list->GetCount();
+  int n = text_list->Number();
 
   if (!text_list || (n == 0))
   {
@@ -359,16 +358,16 @@ void oglGetCentredTextExtent(wxDC& dc, wxList *text_list,
   long max_width = 0;
   long current_width = 0;
 
-  wxNode *current = text_list->GetFirst();
+  wxNode *current = text_list->First();
   int i = 0;
   while (current)
   {
-    wxShapeTextLine *line = (wxShapeTextLine *)current->GetData();
+    wxShapeTextLine *line = (wxShapeTextLine *)current->Data();
     dc.GetTextExtent(line->GetText(), &current_width, &char_height);
 
     if (current_width > max_width)
       max_width = current_width;
-    current = current->GetNext();
+    current = current->Next();
     i ++;
   }
 
@@ -378,30 +377,30 @@ void oglGetCentredTextExtent(wxDC& dc, wxList *text_list,
 
 // Format a string to a list of strings that fit in the given box.
 // Interpret %n and 10 or 13 as a new line.
-wxStringList *oglFormatText(wxDC& dc, const wxString& text, double width, double WXUNUSED(height), int formatMode)
+wxStringList *oglFormatText(wxDC& dc, const wxString& text, double width, double height, int formatMode)
 {
   // First, parse the string into a list of words
   wxStringList word_list;
 
   // Make new lines into NULL strings at this point
-  int i = 0; int j = 0; int len = text.Length();
-  wxChar word[200]; word[0] = 0;
+  int i = 0; int j = 0; int len = strlen(text);
+  char word[200]; word[0] = 0;
   bool end_word = FALSE; bool new_line = FALSE;
   while (i < len)
   {
     switch (text[i])
     {
-      case wxT('%'):
+      case '%':
       {
         i ++;
         if (i == len)
-        { word[j] = wxT('%'); j ++; }
+        { word[j] = '%'; j ++; }
         else
         {
-          if (text[i] == wxT('n'))
+          if (text[i] == 'n')
           { new_line = TRUE; end_word = TRUE; i++; }
           else
-          { word[j] = wxT('%'); j ++; word[j] = text[i]; j ++; i ++; }
+          { word[j] = '%'; j ++; word[j] = text[i]; j ++; i ++; }
         }
         break;
       }
@@ -414,7 +413,7 @@ wxStringList *oglFormatText(wxDC& dc, const wxString& text, double width, double
       {
         new_line = TRUE; end_word = TRUE; i++;
       }
-      case wxT(' '):
+      case ' ':
       {
         end_word = TRUE;
         i ++;
@@ -444,29 +443,30 @@ wxStringList *oglFormatText(wxDC& dc, const wxString& text, double width, double
   // Now, make a list of strings which can fit in the box
   wxStringList *string_list = new wxStringList;
 
-  wxString buffer;
-  wxStringListNode *node = word_list.GetFirst();
+  char buffer[400];
+  buffer[0] = 0;
+  wxNode *node = word_list.First();
   long x, y;
 
   while (node)
   {
     wxString oldBuffer(buffer);
 
-    wxChar *s = (wxChar *)node->GetData();
+    char *s = (char *)node->Data();
     if (!s)
     {
       // FORCE NEW LINE
-      if (buffer.Length() > 0)
+      if (strlen(buffer) > 0)
         string_list->Add(buffer);
 
-      buffer.Empty();
+      buffer[0] = 0;
     }
     else
     {
-      if (buffer.Length() != 0)
-        buffer += wxT(" ");
+      if (buffer[0] != 0)
+        strcat(buffer, " ");
 
-      buffer += s;
+      strcat(buffer, s);
       dc.GetTextExtent(buffer, &x, &y);
 
       // Don't fit within the bounding box if we're fitting shape to contents
@@ -476,14 +476,14 @@ wxStringList *oglFormatText(wxDC& dc, const wxString& text, double width, double
         if (oldBuffer.Length() > 0)
           string_list->Add(oldBuffer);
 
-        buffer.Empty();
-        buffer += s;
+        buffer[0] = 0;
+        strcat(buffer, s);
       }
     }
 
-    node = node->GetNext();
+    node = node->Next();
   }
-  if (buffer.Length() != 0)
+  if (buffer[0] != 0)
     string_list->Add(buffer);
 
   return string_list;
@@ -508,13 +508,13 @@ void oglDrawFormattedText(wxDC& dc, wxList *text_list,
                     (long)(m_xpos - width/2.0), (long)(m_ypos - height/2.0),
                     (long)width, (long)height);
 
-  wxNode *current = text_list->GetFirst();
+  wxNode *current = text_list->First();
   while (current)
   {
-    wxShapeTextLine *line = (wxShapeTextLine *)current->GetData();
+    wxShapeTextLine *line = (wxShapeTextLine *)current->Data();
 
     dc.DrawText(line->GetText(), WXROUND(xoffset + line->GetX()), WXROUND(yoffset + line->GetY()));
-    current = current->GetNext();
+    current = current->Next();
   }
 
   dc.DestroyClippingRegion();
@@ -530,17 +530,17 @@ void oglFindPolylineCentroid(wxList *points, double *x, double *y)
   double xcount = 0;
   double ycount = 0;
 
-  wxNode *node = points->GetFirst();
+  wxNode *node = points->First();
   while (node)
   {
-    wxRealPoint *point = (wxRealPoint *)node->GetData();
+    wxRealPoint *point = (wxRealPoint *)node->Data();
     xcount += point->x;
     ycount += point->y;
-    node = node->GetNext();
+    node = node->Next();
   }
 
-  *x = (xcount/points->GetCount());
-  *y = (ycount/points->GetCount());
+  *x = (xcount/points->Number());
+  *y = (ycount/points->Number());
 }
 
 /*
@@ -808,12 +808,12 @@ void UpdateListBox(wxListBox *item, wxList *list)
   if (!list)
     return;
 
-  wxNode *node = list->GetFirst();
+  wxNode *node = list->First();
   while (node)
   {
-    wxChar *s = (wxChar *)node->GetData();
+    char *s = (char *)node->Data();
     item->Append(s);
-    node = node->GetNext();
+    node = node->Next();
   }
 }
 
@@ -828,32 +828,29 @@ bool oglRoughlyEqual(double val1, double val2, double tol)
  */
 
 // Array used in DecToHex conversion routine.
-static wxChar sg_HexArray[] = { wxT('0'), wxT('1'), wxT('2'), wxT('3'),
-                                wxT('4'), wxT('5'), wxT('6'), wxT('7'),
-                                wxT('8'), wxT('9'), wxT('A'), wxT('B'),
-                                wxT('C'), wxT('D'), wxT('E'), wxT('F')
-};
+static char sg_HexArray[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
+  'C', 'D', 'E', 'F' };
 
 // Convert 2-digit hex number to decimal
-unsigned int oglHexToDec(wxChar* buf)
+unsigned int oglHexToDec(char* buf)
 {
   int firstDigit, secondDigit;
 
-  if (buf[0] >= wxT('A'))
-    firstDigit = buf[0] - wxT('A') + 10;
+  if (buf[0] >= 'A')
+    firstDigit = buf[0] - 'A' + 10;
   else
-    firstDigit = buf[0] - wxT('0');
+    firstDigit = buf[0] - '0';
 
-  if (buf[1] >= wxT('A'))
-    secondDigit = buf[1] - wxT('A') + 10;
+  if (buf[1] >= 'A')
+    secondDigit = buf[1] - 'A' + 10;
   else
-    secondDigit = buf[1] - wxT('0');
+    secondDigit = buf[1] - '0';
 
   return firstDigit * 16 + secondDigit;
 }
 
 // Convert decimal integer to 2-character hex string
-void oglDecToHex(unsigned int dec, wxChar *buf)
+void oglDecToHex(unsigned int dec, char *buf)
 {
     int firstDigit = (int)(dec/16.0);
     int secondDigit = (int)(dec - (firstDigit*16.0));
@@ -866,22 +863,22 @@ void oglDecToHex(unsigned int dec, wxChar *buf)
 wxColour oglHexToColour(const wxString& hex)
 {
     if (hex.Length() == 6)
-    {
-        long r, g, b;
-        r = g = b = 0;
-        hex.Mid(0,2).ToLong(&r, 16);
-        hex.Mid(2,2).ToLong(&g, 16);
-        hex.Mid(4,2).ToLong(&b, 16);
+	{
+        char buf[7];
+        strncpy(buf, hex, 7);
+        unsigned int r = oglHexToDec((char *)buf);
+        unsigned int g = oglHexToDec((char *)(buf+2));
+        unsigned int b = oglHexToDec((char *)(buf+4));
         return wxColour(r, g, b);
-    }
-    else
-        return wxColour(0,0,0);
+	}
+	else
+	    return wxColour(0,0,0);
 }
 
 // RGB to 3-digit hex
 wxString oglColourToHex(const wxColour& colour)
 {
-    wxChar buf[7];
+    char buf[7];
     unsigned int red = colour.Red();
     unsigned int green = colour.Green();
     unsigned int blue = colour.Blue();

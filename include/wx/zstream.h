@@ -11,7 +11,7 @@
 #ifndef _WX_WXZSTREAM_H__
 #define _WX_WXZSTREAM_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "zstream.h"
 #endif
 
@@ -21,7 +21,7 @@
 
 #include "wx/stream.h"
 
-class WXDLLIMPEXP_BASE wxZlibInputStream: public wxFilterInputStream {
+class WXDLLEXPORT wxZlibInputStream: public wxFilterInputStream {
  public:
   wxZlibInputStream(wxInputStream& stream);
   virtual ~wxZlibInputStream();
@@ -33,11 +33,9 @@ class WXDLLIMPEXP_BASE wxZlibInputStream: public wxFilterInputStream {
   size_t m_z_size;
   unsigned char *m_z_buffer;
   struct z_stream_s *m_inflate;
-
-    DECLARE_NO_COPY_CLASS(wxZlibInputStream)
 };
 
-class WXDLLIMPEXP_BASE wxZlibOutputStream: public wxFilterOutputStream {
+class WXDLLEXPORT wxZlibOutputStream: public wxFilterOutputStream {
  public:
   wxZlibOutputStream(wxOutputStream& stream, int level = -1);
   virtual ~wxZlibOutputStream();
@@ -51,8 +49,6 @@ class WXDLLIMPEXP_BASE wxZlibOutputStream: public wxFilterOutputStream {
   size_t m_z_size;
   unsigned char *m_z_buffer;
   struct z_stream_s *m_deflate;
-
-    DECLARE_NO_COPY_CLASS(wxZlibOutputStream)
 };
 
 #endif

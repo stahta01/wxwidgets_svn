@@ -6,7 +6,7 @@
 // Created:     13.02.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univscrthumb.h"
 #endif
 
@@ -29,7 +29,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/window.h"
-    #include "wx/renderer.h"
 #endif // WX_PRECOMP
 
 #include "wx/univ/scrtimer.h"

@@ -11,18 +11,18 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_GRID
+#if defined(wxUSE_NEW_GRID) && (wxUSE_NEW_GRID)
 
 #ifndef __WXGRIDSEL_H__
 #define __WXGRIDSEL_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "gridsel.h"
 #endif
 
 #include "wx/grid.h"
 
-class WXDLLIMPEXP_ADV wxGridSelection{
+class WXDLLEXPORT wxGridSelection{
 public:
     wxGridSelection( wxGrid * grid, wxGrid::wxGridSelectionModes sel =
                      wxGrid::wxGridSelectCells );
@@ -82,11 +82,8 @@ private:
     wxGrid                              *m_grid;
     wxGrid::wxGridSelectionModes        m_selectionMode;
 
-    friend class WXDLLIMPEXP_ADV wxGrid;
-
-    DECLARE_NO_COPY_CLASS(wxGridSelection)
+    friend class WXDLLEXPORT wxGrid;
 };
 
 #endif  // #ifdef __WXGRIDSEL_H__
-#endif  // #ifndef wxUSE_GRID
-
+#endif  // #ifndef wxUSE_NEW_GRID

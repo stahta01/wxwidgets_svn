@@ -34,7 +34,7 @@
 // SYNOPSIS START
 // SYNOPSIS STOP
 */
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "db.h"
 #endif
 
@@ -53,6 +53,9 @@
     #include "wx/object.h"
     #include "wx/list.h"
     #include "wx/utils.h"
+    #if wxUSE_GUI
+        #include "wx/msgdlg.h"
+    #endif
     #include "wx/log.h"
 #endif
 #include "wx/filefn.h"
@@ -68,11 +71,7 @@
 
 #include "wx/db.h"
 
-// DLL options compatibility check:
-#include "wx/app.h"
-WX_CHECK_BUILD_OPTIONS("wxODBC")
-
-WXDLLIMPEXP_DATA_ODBC(wxDbList*) PtrBegDbList = 0;
+WXDLLEXPORT_DATA(wxDbList*) PtrBegDbList = 0;
 
 
 wxChar const *SQL_LOG_FILENAME         = wxT("sqllog.txt");
@@ -3068,7 +3067,7 @@ bool wxDb::Catalog(const wxChar *userID, const wxString &fileName)
       GetData(7,SQL_C_SLONG, (UCHAR *)&precision,   0,                       &cb);
       GetData(8,SQL_C_SLONG, (UCHAR *)&length,      0,                       &cb);
 
-        outStr.Printf(wxT("%-32s %-32s (%04d)%-15s %9ld %9ld\n"),
+        outStr.Printf(wxT("%-32s %-32s (%04d)%-15s %9d %9d\n"),
             tblName, colName, sqlDataType, typeName, precision, length);
         if (fputs(outStr.c_str(), fp) == EOF)
         {
@@ -3593,7 +3592,7 @@ bool wxDb::ModifyColumn(const wxString &tableName, const wxString &columnName,
         (Dbms() != dbmsMY_SQL || dataTypeName != "text"))
     {
         wxString s;
-        s.Printf(wxT("(%lu)"), columnLength);
+        s.Printf(wxT("(%d)"), columnLength);
         sqlStmt += s;
     }
 
@@ -3610,7 +3609,7 @@ bool wxDb::ModifyColumn(const wxString &tableName, const wxString &columnName,
 
 
 /********** wxDbGetConnection() **********/
-wxDb WXDLLIMPEXP_ODBC *wxDbGetConnection(wxDbConnectInf *pDbConfig, bool FwdOnlyCursors)
+wxDb WXDLLEXPORT *wxDbGetConnection(wxDbConnectInf *pDbConfig, bool FwdOnlyCursors)
 {
     wxDbList *pList;
 
@@ -3699,7 +3698,7 @@ wxDb WXDLLIMPEXP_ODBC *wxDbGetConnection(wxDbConnectInf *pDbConfig, bool FwdOnly
 
 
 /********** wxDbFreeConnection() **********/
-bool WXDLLIMPEXP_ODBC wxDbFreeConnection(wxDb *pDb)
+bool WXDLLEXPORT wxDbFreeConnection(wxDb *pDb)
 {
     wxDbList *pList;
 
@@ -3717,7 +3716,7 @@ bool WXDLLIMPEXP_ODBC wxDbFreeConnection(wxDb *pDb)
 
 
 /********** wxDbCloseConnections() **********/
-void WXDLLIMPEXP_ODBC wxDbCloseConnections(void)
+void WXDLLEXPORT wxDbCloseConnections(void)
 {
     wxDbList *pList, *pNext;
 
@@ -3739,7 +3738,7 @@ void WXDLLIMPEXP_ODBC wxDbCloseConnections(void)
 
 
 /********** wxDbConnectionsInUse() **********/
-int WXDLLIMPEXP_ODBC wxDbConnectionsInUse(void)
+int WXDLLEXPORT wxDbConnectionsInUse(void)
 {
     wxDbList *pList;
     int cnt = 0;
@@ -3759,7 +3758,7 @@ int WXDLLIMPEXP_ODBC wxDbConnectionsInUse(void)
 
 /********** wxDbLogExtendedErrorMsg() **********/
 // DEBUG ONLY function
-const wxChar* WXDLLIMPEXP_ODBC wxDbLogExtendedErrorMsg(const wxChar *userText,
+const wxChar* WXDLLEXPORT wxDbLogExtendedErrorMsg(const wxChar *userText,
                                                   wxDb *pDb,
                                                   const wxChar *ErrFile,
                                                   int ErrLine)
@@ -3948,22 +3947,22 @@ bool GetDataSource(HENV henv, char *Dsn, SWORD DsnMax, char *DsDesc, SWORD DsDes
     return wxDbGetDataSource(henv, Dsn, DsnMax, DsDesc, DsDescMax, direction);
 }
 /***** DEPRECATED: use wxDbGetConnection() *****/
-wxDb WXDLLIMPEXP_ODBC *GetDbConnection(DbStuff *pDbStuff, bool FwdOnlyCursors)
+wxDb WXDLLEXPORT *GetDbConnection(DbStuff *pDbStuff, bool FwdOnlyCursors)
 {
     return wxDbGetConnection((wxDbConnectInf *)pDbStuff, FwdOnlyCursors);
 }
 /***** DEPRECATED: use wxDbFreeConnection() *****/
-bool WXDLLIMPEXP_ODBC FreeDbConnection(wxDb *pDb)
+bool WXDLLEXPORT FreeDbConnection(wxDb *pDb)
 {
     return wxDbFreeConnection(pDb);
 }
 /***** DEPRECATED: use wxDbCloseConnections() *****/
-void WXDLLIMPEXP_ODBC CloseDbConnections(void)
+void WXDLLEXPORT CloseDbConnections(void)
 {
     wxDbCloseConnections();
 }
 /***** DEPRECATED: use wxDbConnectionsInUse() *****/
-int WXDLLIMPEXP_ODBC NumberDbConnectionsInUse(void)
+int WXDLLEXPORT NumberDbConnectionsInUse(void)
 {
     return wxDbConnectionsInUse();
 }

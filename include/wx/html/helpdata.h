@@ -12,7 +12,7 @@
 #ifndef _WX_HELPDATA_H_
 #define _WX_HELPDATA_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "helpdata.h"
 #endif
 
@@ -26,13 +26,13 @@
 #include "wx/dynarray.h"
 #include "wx/font.h"
 
-class WXDLLIMPEXP_HTML wxHtmlHelpData;
+class WXDLLEXPORT wxHtmlHelpData;
 
 //--------------------------------------------------------------------------------
 // helper classes & structs
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlBookRecord
+class WXDLLEXPORT wxHtmlBookRecord
 {
 public:
     wxHtmlBookRecord(const wxString& bookfile, const wxString& basepath, 
@@ -77,9 +77,11 @@ protected:
 };
 
 
-WX_DECLARE_USER_EXPORTED_OBJARRAY(wxHtmlBookRecord, wxHtmlBookRecArray,
-                                  WXDLLIMPEXP_HTML);
+WX_DECLARE_EXPORTED_OBJARRAY(wxHtmlBookRecord, wxHtmlBookRecArray);
 
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
 
 struct wxHtmlContentsItem
 {
@@ -93,13 +95,17 @@ struct wxHtmlContentsItem
     wxString GetFullPath() const { return m_Book->GetFullPath(m_Page); }
 };
 
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
+
 //------------------------------------------------------------------------------
 // wxHtmlSearchEngine
 //                  This class takes input streams and scans them for occurence
 //                  of keyword(s)
 //------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlSearchEngine : public wxObject
+class WXDLLEXPORT wxHtmlSearchEngine : public wxObject
 {
 public:
     wxHtmlSearchEngine() : wxObject() {m_Keyword = NULL; }
@@ -116,8 +122,6 @@ private:
     wxChar *m_Keyword;
     bool m_CaseSensitive;
     bool m_WholeWords;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlSearchEngine)
 };
 
 
@@ -125,7 +129,7 @@ private:
 // class inside wxHtmlHelpData, but that's against coding standards :-(
 // Never construct this class yourself, obtain a copy from
 // wxHtmlHelpData::PrepareKeywordSearch(const wxString& key)
-class WXDLLIMPEXP_HTML wxHtmlSearchStatus
+class WXDLLEXPORT wxHtmlSearchStatus
 {
 public:
     // constructor; supply wxHtmlHelpData ptr, the keyword and (optionally) the
@@ -150,11 +154,9 @@ private:
     int m_CurIndex;  // where we are now
     int m_MaxIndex;  // number of files we search
     // For progress bar: 100*curindex/maxindex = % complete
-
-    DECLARE_NO_COPY_CLASS(wxHtmlSearchStatus)
 };
 
-class WXDLLIMPEXP_HTML wxHtmlHelpData : public wxObject
+class WXDLLEXPORT wxHtmlHelpData : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlHelpData)
     friend class wxHtmlSearchStatus;
@@ -210,8 +212,6 @@ protected:
     bool LoadCachedBook(wxHtmlBookRecord *book, wxInputStream *f);
     // Writes binary book
     bool SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f);
-
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpData)
 };
 
 #endif

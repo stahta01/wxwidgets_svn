@@ -1121,7 +1121,7 @@ wxString wxStyledTextCtrl::GetSelectedText() {
          int   len  = end - start;
          if (!len) return wxEmptyString;
 
-         wxMemoryBuffer mbuf(len+2);
+         wxMemoryBuffer mbuf(len+1);
          char* buf = (char*)mbuf.GetWriteBuf(len+1);
          SendMsg(2161, 0, (long)buf);
          mbuf.UngetWriteBuf(len);
@@ -1618,11 +1618,6 @@ void wxStyledTextCtrl::LineEndDisplayExtend() {
     SendMsg(2348, 0, 0);
 }
 
-// Copy the line containing the caret.
-void wxStyledTextCtrl::LineCopy() {
-    SendMsg(2455, 0, 0);
-}
-
 // Move the caret inside current view if it's not there already.
 void wxStyledTextCtrl::MoveCaretInsideView() {
     SendMsg(2401, 0, 0);
@@ -1910,28 +1905,6 @@ void wxStyledTextCtrl::SetHotspotActiveUnderline(bool underline) {
     SendMsg(2412, underline, 0);
 }
 
-// Given a valid document position, return the previous position taking code
-// page into account. Returns 0 if passed 0.
-int wxStyledTextCtrl::PositionBefore(int pos) {
-    return SendMsg(2417, pos, 0);
-}
-
-// Given a valid document position, return the next position taking code
-// page into account. Maximum value returned is the last position in the document.
-int wxStyledTextCtrl::PositionAfter(int pos) {
-    return SendMsg(2418, pos, 0);
-}
-
-// Copy a range of text to the clipboard. Positions are clipped into the document.
-void wxStyledTextCtrl::CopyRange(int start, int end) {
-    SendMsg(2419, start, end);
-}
-
-// Copy argument text to the clipboard.
-void wxStyledTextCtrl::CopyText(int length, const wxString& text) {
-    SendMsg(2420, length, (long)(const char*)wx2stc(text));
-}
-
 // Start notifying the container of all key presses and commands.
 void wxStyledTextCtrl::StartRecord() {
     SendMsg(3001, 0, 0);
@@ -2120,29 +2093,23 @@ bool wxStyledTextCtrl::SaveFile(const wxString& filename)
 
 bool wxStyledTextCtrl::LoadFile(const wxString& filename)
 {
-    bool success = false;
     wxFile file(filename, wxFile::read);
 
-    if (file.IsOpened())
+    if (!file.IsOpened())
+        return FALSE;
+
+    wxString contents;
+    off_t len = file.Length();
+
+    wxChar *buf = contents.GetWriteBuf(len);
+    bool success = (file.Read(buf, len) == len);
+    contents.UngetWriteBuf();
+
+    if (success)
     {
-        wxString contents;
-        off_t len = file.Length();
-
-        if (len > 0)
-        {
-            wxChar *buf = contents.GetWriteBuf(len);
-            success = (file.Read(buf, len) == len);
-            contents.UngetWriteBuf();
-        }
-        else
-            success = true;		// empty file is ok
-
-        if (success)
-        {
-            SetText(contents);
-            EmptyUndoBuffer();
-            SetSavePoint();
-        }
+        SetText(contents);
+        EmptyUndoBuffer();
+        SetSavePoint();
     }
 
     return success;

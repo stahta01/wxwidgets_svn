@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dialog.h"
 #endif
 
@@ -69,13 +69,6 @@ static wxWindowList wxModalDialogs;
 // ----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
-
-/*
-	TODO PROPERTIES
-
-		style (wxDEFAULT_DIALOG_STYLE)
-		centered (bool, false )
-*/
 
 BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
     EVT_BUTTON(wxID_OK, wxDialog::OnOK)
@@ -198,7 +191,7 @@ bool wxDialog::IsModal() const
 
 bool wxDialog::IsModalShowing() const
 {
-    return wxModalDialogs.Find(wxConstCast(this, wxDialog)) != NULL;
+    return wxModalDialogs.Find((wxDialog *)this) != NULL; // const_cast
 }
 
 wxWindow *wxDialog::FindSuitableParent() const
@@ -340,19 +333,10 @@ bool wxDialog::Show(bool show)
             // this will cause IsModalShowing() return FALSE and our local
             // message loop will terminate
             wxModalDialogs.DeleteObject(this);
-
-            // ensure that there is another message for this window so the
-            // ShowModal loop will exit and won't get stuck in GetMessage().
-            ::PostMessage(GetHwnd(), WM_NULL, 0, 0);
         }
     }
 
     return TRUE;
-}
-
-void wxDialog::Raise()
-{
-    ::SetForegroundWindow(GetHwnd());
 }
 
 // a special version for Show(TRUE) for modal dialogs which returns return code

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "radiobut.h"
 #endif
 
@@ -47,26 +47,7 @@
 // wxRadioButton creation
 // ----------------------------------------------------------------------------
 
-
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxRadioButton, wxControl,"wx/radiobut.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxRadioButton)
-	WX_DELEGATE( OnClick , wxEVT_COMMAND_RADIOBUTTON_SELECTED , wxCommandEvent )
-	WX_PROPERTY( Font , wxFont , SetFont , GetFont  , )
-	WX_PROPERTY( Label,wxString, SetLabel, GetLabel, wxEmptyString )
-	WX_PROPERTY( Value ,bool, SetValue, GetValue, )
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxRadioButton)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_6( wxRadioButton , wxWindow* , Parent , wxWindowID , Id , wxString , Label , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxRadioButton, wxControl)
-#endif
-
 
 void wxRadioButton::Init()
 {
@@ -133,39 +114,39 @@ void wxRadioButton::SetValue(bool value)
     if ( value )
     {
         const wxWindowList& siblings = GetParent()->GetChildren();
-        wxWindowList::compatibility_iterator nodeThis = siblings.Find(this);
+        wxWindowList::Node *nodeThis = siblings.Find(this);
         wxCHECK_RET( nodeThis, _T("radio button not a child of its parent?") );
 
         // if it's not the first item of the group ...
         if ( !HasFlag(wxRB_GROUP) )
         {
             // ... turn off all radio buttons before it
-            for ( wxWindowList::compatibility_iterator nodeBefore = nodeThis->GetPrevious();
-                  nodeBefore;
-                  nodeBefore = nodeBefore->GetPrevious() )
+        for ( wxWindowList::Node *nodeBefore = nodeThis->GetPrevious();
+              nodeBefore;
+              nodeBefore = nodeBefore->GetPrevious() )
+        {
+            wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
+                                               wxRadioButton);
+            if ( !btn )
             {
-                wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
-                                                   wxRadioButton);
-                if ( !btn )
-                {
                     // the radio buttons in a group must be consecutive, so
                     // there are no more of them
-                    break;
-                }
-
-                btn->SetValue(FALSE);
-
-                if ( btn->HasFlag(wxRB_GROUP) )
-                {
-                    // even if there are other radio buttons before this one,
-                    // they're not in the same group with us
-                    break;
-                }
+                break;
             }
+
+            btn->SetValue(FALSE);
+
+            if ( btn->HasFlag(wxRB_GROUP) )
+            {
+                // even if there are other radio buttons before this one,
+                // they're not in the same group with us
+                break;
+            }
+        }
         }
 
         // ... and also turn off all buttons after this one
-        for ( wxWindowList::compatibility_iterator nodeAfter = nodeThis->GetNext();
+        for ( wxWindowList::Node *nodeAfter = nodeThis->GetNext();
               nodeAfter;
               nodeAfter = nodeAfter->GetNext() )
         {

@@ -6,7 +6,7 @@
 // Created:     10/12/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -24,6 +24,7 @@
   #include "wx/dcmemory.h"
   #include "wx/menu.h"
   #include "wx/utils.h"
+  #include "wx/settings.h"
 #endif
 
 #if wxUSE_OWNER_DRAWN

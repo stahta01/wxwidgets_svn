@@ -877,5 +877,3 @@ paramDict = {
     'tooltip': ParamText, 'bitmap': ParamBitmap, 'icon': ParamBitmap,
     'encoding': ParamEncoding
     }
-
-

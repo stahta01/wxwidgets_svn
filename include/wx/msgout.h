@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "msgout.h"
 #endif
 
@@ -28,7 +28,7 @@
 // something you can printf() to
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMessageOutput
+class WXDLLEXPORT wxMessageOutput
 {
 public:
     virtual ~wxMessageOutput() { }
@@ -50,7 +50,7 @@ private:
 // implementation which sends output to stderr
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMessageOutputStderr : public wxMessageOutput
+class WXDLLEXPORT wxMessageOutputStderr : public wxMessageOutput
 {
 public:
     wxMessageOutputStderr() { }
@@ -64,7 +64,7 @@ public:
 
 #if wxUSE_GUI
 
-class WXDLLIMPEXP_CORE wxMessageOutputMessageBox : public wxMessageOutput
+class WXDLLEXPORT wxMessageOutputMessageBox : public wxMessageOutput
 {
 public:
     wxMessageOutputMessageBox() { }
@@ -75,22 +75,10 @@ public:
 #endif // wxUSE_GUI
 
 // ----------------------------------------------------------------------------
-// implementation using the native way of outputting debug messages
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_BASE wxMessageOutputDebug : public wxMessageOutput
-{
-public:
-    wxMessageOutputDebug() { }
-
-    virtual void Printf(const wxChar* format, ...) ATTRIBUTE_PRINTF_2;
-};
-
-// ----------------------------------------------------------------------------
 // implementation using wxLog (mainly for backwards compatibility)
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMessageOutputLog : public wxMessageOutput
+class WXDLLEXPORT wxMessageOutputLog : public wxMessageOutput
 {
 public:
     wxMessageOutputLog() { }

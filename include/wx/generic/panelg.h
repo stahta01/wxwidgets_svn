@@ -12,7 +12,7 @@
 #ifndef _WX_GENERIC_PANEL_H_
 #define _WX_GENERIC_PANEL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "panelg.h"
 #endif
 
@@ -50,7 +50,7 @@ public:
 
     // Constructor
     wxPanel(wxWindow *parent,
-            wxWindowID winid = -1,
+            wxWindowID id = -1,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
             long style = wxTAB_TRAVERSAL | wxNO_BORDER,
@@ -58,11 +58,11 @@ public:
     {
         Init();
 
-        Create(parent, winid, pos, size, style, name);
+        Create(parent, id, pos, size, style, name);
     }
 
     // Pseudo ctor
-    bool Create(wxWindow *parent, wxWindowID winid,
+    bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxTAB_TRAVERSAL | wxNO_BORDER,
@@ -93,7 +93,7 @@ protected:
     void Init();
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxPanel)
+    DECLARE_DYNAMIC_CLASS(wxPanel)
     DECLARE_EVENT_TABLE()
 };
 

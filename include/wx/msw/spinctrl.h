@@ -12,7 +12,7 @@
 #ifndef _WX_MSW_SPINCTRL_H_
 #define _WX_MSW_SPINCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "spinctrl.h"
 #endif
 
@@ -21,7 +21,7 @@
 #include "wx/dynarray.h"
 
 class WXDLLEXPORT wxSpinCtrl;
-WX_DEFINE_EXPORTED_ARRAY_NO_PTR(wxSpinCtrl *, wxArraySpins);
+WX_DEFINE_EXPORTED_ARRAY(wxSpinCtrl *, wxArraySpins);
 
 // ----------------------------------------------------------------------------
 // Under Win32, wxSpinCtrl is a wxSpinButton with a buddy (as MSDN docs call
@@ -113,7 +113,6 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS(wxSpinCtrl)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSpinCtrl)
 };
 
 #endif // _WX_MSW_SPINCTRL_H_

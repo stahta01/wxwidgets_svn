@@ -12,19 +12,19 @@
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "brush.h"
 #endif
 
+#include "wx/gdicmn.h"
 #include "wx/gdiobj.h"
+#include "wx/bitmap.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
 class wxBrush;
-class wxColour;
-class wxBitmap;
 
 //-----------------------------------------------------------------------------
 // wxBrush
@@ -35,7 +35,7 @@ class wxBrush: public wxGDIObject
 public:
     wxBrush() { }
     
-    wxBrush( const wxColour &colour, int style = wxSOLID );
+    wxBrush( const wxColour &colour, int style );
     wxBrush( const wxBitmap &stippleBitmap );
     ~wxBrush();
     

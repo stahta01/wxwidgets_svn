@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "pen.h"
 #endif
 
@@ -30,6 +30,7 @@
 #endif
 
 #include "wx/msw/private.h"
+#include "assert.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxPen, wxGDIObject)
 
@@ -148,7 +149,7 @@ bool wxPen::RealizeResource()
        // Join style, Cap style, Pen Stippling only on Win32.
        // Currently no time to find equivalent on Win3.1, sorry
        // [if such equiv exist!!]
-#if defined(__WIN32__) && !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#if defined(__WIN32__) && !defined(__WXMICROWIN__)
        if (M_PENDATA->m_join==wxJOIN_ROUND        &&
            M_PENDATA->m_cap==wxCAP_ROUND          &&
            M_PENDATA->m_style!=wxUSER_DASH        &&
@@ -231,9 +232,8 @@ bool wxPen::RealizeResource()
            if (M_PENDATA->m_style==wxUSER_DASH && M_PENDATA->m_nbDash && M_PENDATA->m_dash)
            {
                real_dash = new wxMSWDash[M_PENDATA->m_nbDash];
-               int rw = M_PENDATA->m_width > 1 ? M_PENDATA->m_width : 1;
                for ( int i = 0; i < M_PENDATA->m_nbDash; i++ )
-                   real_dash[i] = M_PENDATA->m_dash[i] * rw;
+                   real_dash[i] = M_PENDATA->m_dash[i] * M_PENDATA->m_width;
            }
            else
            {
@@ -396,7 +396,7 @@ int wx2msPenStyle(int wx_style)
     int cstyle;
     switch (wx_style)
     {
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#if !defined(__WXMICROWIN__)
        case wxDOT:
            cstyle = PS_DOT;
            break;
@@ -416,7 +416,7 @@ int wx2msPenStyle(int wx_style)
 #endif
 
        case wxUSER_DASH:
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#if !defined(__WXMICROWIN__)
 #ifdef __WIN32__
            // Win32s doesn't have PS_USERSTYLE
            if (wxGetOsVersion()==wxWINDOWS_NT || wxGetOsVersion()==wxWIN95)

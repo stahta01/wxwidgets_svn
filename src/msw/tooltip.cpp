@@ -6,7 +6,7 @@
 // Created:     31.01.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -32,8 +32,14 @@
 #include "wx/tooltip.h"
 #include "wx/msw/private.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
+
+#ifndef _WIN32_IE
+    // minimal set of features by default
+    #define _WIN32_IE 0x0200
+#endif
 
 // VZ: normally, the trick with subclassing the tooltip control and processing
 //     TTM_WINDOWFROMPOINT should work but, somehow, it doesn't. I leave the
@@ -289,10 +295,10 @@ void wxToolTip::Add(WXHWND hWnd)
 
         if ( index != wxNOT_FOUND )
         {
-#ifdef TTM_SETMAXTIPWIDTH
+#if _WIN32_IE >= 0x0300
             if ( wxTheApp->GetComCtl32Version() >= 470 )
             {
-                // use TTM_SETMAXTIPWIDTH to make tooltip multiline using the
+                // use TTM_SETMAXWIDTH to make tooltip multiline using the
                 // extent of its first line as max value
                 HFONT hfont = (HFONT)SendTooltipMessage(GetToolTipCtrl(),
                                                         WM_GETFONT,

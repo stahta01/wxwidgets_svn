@@ -13,8 +13,10 @@
 import sys, os, glob, getopt
 from wxPython.wx import *
 
-# some bitmap related things need to have a wxApp initialized...
-app = wxPySimpleApp()
+if wxPlatform == "__WXGTK__":
+    # some bitmap related things need to have a wxApp initialized...
+    app = wxPySimpleApp()
+
 wxInitAllImageHandlers()
 
 def convert(file, maskClr, outputDir, outputName, outType, outExt):

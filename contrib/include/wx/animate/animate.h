@@ -21,20 +21,12 @@
 #include <wx/gdicmn.h>
 #include <wx/list.h>
 #include <wx/timer.h>
-#include <wx/bitmap.h>
-#include <wx/colour.h>
-#include <wx/control.h>
 
-#ifdef WXMAKINGDLL_ANIMATE
-    #define WXDLLIMPEXP_ANIMATE WXEXPORT
-#elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_ANIMATE WXIMPORT
-#else // not making nor using DLL
-    #define WXDLLIMPEXP_ANIMATE
-#endif
+//#define ANIMDLLEXPORT WXDLLEXPORT
+#define ANIMDLLEXPORT
 
-class WXDLLIMPEXP_ANIMATE wxAnimationBase;
-class WXDLLIMPEXP_ANIMATE wxAnimationPlayer;
+class ANIMDLLEXPORT wxAnimationBase;
+class ANIMDLLEXPORT wxAnimationPlayer;
 class WXDLLEXPORT wxImage;
 
 enum wxAnimationDisposal
@@ -45,7 +37,7 @@ enum wxAnimationDisposal
     wxANIM_TOPREVIOUS = 2
 } ;
 
-class WXDLLIMPEXP_ANIMATE wxAnimationTimer: public wxTimer
+class ANIMDLLEXPORT wxAnimationTimer: public wxTimer
 {
 public:
     wxAnimationTimer() { m_player = (wxAnimationPlayer*) NULL; }
@@ -58,13 +50,13 @@ protected:
 };
 
 /* wxAnimationPlayer
- * Create an object of this class, and either pass an wxXXXAnimation object in
- * the constructor, or call SetAnimation. Then call Play().  The wxAnimation
- * object is only destroyed in the destructor if destroyAnimation is TRUE in
- * the constructor.
+ * Create an object of this class, and either pass an wxXXXAnimation object in the constructor,
+ * or call SetAnimation. Then call Play().
+ * The wxAnimation object is only destroyed in the destructor if destroyAnimation is TRUE
+ * in the constructor.
  */
 
-class WXDLLIMPEXP_ANIMATE wxAnimationPlayer : public wxObject
+class ANIMDLLEXPORT wxAnimationPlayer : public wxObject
 {
     DECLARE_CLASS(wxAnimationPlayer)
 
@@ -181,15 +173,14 @@ protected:
 
 /* wxAnimationBase
  * Base class for animations.
- * A wxXXXAnimation only stores the animation, providing accessors to
- * wxAnimationPlayer.  Currently an animation is read-only, but we could
- * extend the API for adding frames programmatically, and perhaps have a
- * wxMemoryAnimation class that stores its frames in memory, and is able to
- * save all files with suitable filenames. You could then use e.g. Ulead GIF
- * Animator to load the image files into a GIF animation.
+ * A wxXXXAnimation only stores the animation, providing accessors to wxAnimationPlayer.
+ * Currently an animation is read-only, but we could extend the API for adding frames
+ * programmatically, and perhaps have a wxMemoryAnimation class that stores its frames
+ * in memory, and is able to save all files with suitable filenames. You could then use
+ * e.g. Ulead GIF Animator to load the image files into a GIF animation.
  */
 
-class WXDLLIMPEXP_ANIMATE wxAnimationBase : public wxObject
+class ANIMDLLEXPORT wxAnimationBase : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxAnimationBase)
 
@@ -221,9 +212,9 @@ public:
  * This will be moved to a separate file in due course.
  */
 
-class WXDLLIMPEXP_ANIMATE wxGIFDecoder;
+class ANIMDLLEXPORT wxGIFDecoder;
 
-class WXDLLIMPEXP_ANIMATE wxGIFAnimation : public wxAnimationBase
+class ANIMDLLEXPORT wxGIFAnimation : public wxAnimationBase
 {
     DECLARE_CLASS(wxGIFAnimation)
 
@@ -264,7 +255,7 @@ protected:
 // Resize to animation size if this is set
 #define wxAN_FIT_ANIMATION       0x0010
 
-class WXDLLIMPEXP_ANIMATE wxAnimationCtrlBase: public wxControl
+class ANIMDLLEXPORT wxAnimationCtrlBase: public wxControl
 {
 public:
     wxAnimationCtrlBase() { }
@@ -321,7 +312,7 @@ private:
  * Provides a GIF animation class when required.
  */
 
-class WXDLLIMPEXP_ANIMATE wxGIFAnimationCtrl: public wxAnimationCtrlBase
+class ANIMDLLEXPORT wxGIFAnimationCtrl: public wxAnimationCtrlBase
 {
 public:
     wxGIFAnimationCtrl() { }

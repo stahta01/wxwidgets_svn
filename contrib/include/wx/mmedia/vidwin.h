@@ -36,7 +36,6 @@
 // ----------------------------------------------------------------------------
 // wxMMedia2 headers
 
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/vidbase.h"
 
 // ----------------------------------------------------------------------------
@@ -54,7 +53,7 @@ typedef struct VIDW_Internal {
 // ----------------------------------------------------------------------------
 // Class definition
 
-class WXDLLIMPEXP_MMEDIA wxVideoWindows : public wxVideoBaseDriver {
+class WXDLLEXPORT wxVideoWindows : public wxVideoBaseDriver {
     DECLARE_DYNAMIC_CLASS(wxVideoWindows)
 protected:
     struct VIDW_Internal *m_internal;

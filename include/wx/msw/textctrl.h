@@ -12,7 +12,7 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "textctrl.h"
 #endif
 
@@ -92,7 +92,6 @@ public:
     // controls)
     virtual bool SetStyle(long start, long end, const wxTextAttr& style);
     virtual bool SetDefaultStyle(const wxTextAttr& style);
-    virtual bool GetStyle(long position, wxTextAttr& style);
 #endif // wxUSE_RICHEDIT
 
     // translate between the position (which is just an index in the text ctrl
@@ -127,11 +126,6 @@ public:
 
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
-
-    // Caret handling (Windows only)
-
-    bool ShowNativeCaret(bool show = true);
-    bool HideNativeCaret() { return ShowNativeCaret(false); }
 
     // Implementation from now on
     // --------------------------
@@ -188,10 +182,6 @@ public:
     // Show a context menu for Rich Edit controls (the standard
     // EDIT control has one already)
     void OnRightClick(wxMouseEvent& event);
-
-    // be sure the caret remains invisible if the user
-    // called HideNativeCaret() before
-    void OnSetFocus(wxFocusEvent& event);
 
 protected:
     // common part of all ctors
@@ -251,11 +241,9 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxTextCtrl)
+    DECLARE_DYNAMIC_CLASS(wxTextCtrl)
 
     wxMenu* m_privateContextMenu;
-
-    bool m_isNativeCaretShown;
 };
 
 #endif

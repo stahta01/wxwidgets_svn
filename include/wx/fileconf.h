@@ -7,13 +7,13 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997 Karsten Ballüder   &  Vadim Zeitlin
 //                       Ballueder@usa.net     <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _FILECONF_H
 #define   _FILECONF_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "fileconf.h"
 #endif
 
@@ -92,12 +92,12 @@
   (it's on by default, the current status can be retrieved with
    IsExpandingEnvVars function).
 */
-class WXDLLIMPEXP_BASE wxFileConfigGroup;
-class WXDLLIMPEXP_BASE wxFileConfigEntry;
-class WXDLLIMPEXP_BASE wxFileConfigLineList;
-class WXDLLIMPEXP_BASE wxInputStream;
+class WXDLLEXPORT wxFileConfigGroup;
+class WXDLLEXPORT wxFileConfigEntry;
+class WXDLLEXPORT wxFileConfigLineList;
+class WXDLLEXPORT wxInputStream;
 
-class WXDLLIMPEXP_BASE wxFileConfig : public wxConfigBase
+class WXDLLEXPORT wxFileConfig : public wxConfigBase
 {
 public:
   // construct the "standard" full name for global (system-wide) and
@@ -116,17 +116,15 @@ public:
   // ctor & dtor
     // New constructor: one size fits all. Specify wxCONFIG_USE_LOCAL_FILE or
     // wxCONFIG_USE_GLOBAL_FILE to say which files should be used.
-  wxFileConfig(const wxString& appName = wxEmptyString,
-               const wxString& vendorName = wxEmptyString,
-               const wxString& localFilename = wxEmptyString,
-               const wxString& globalFilename = wxEmptyString,
-               long style = wxCONFIG_USE_LOCAL_FILE,
-               wxMBConv& conv = wxConvUTF8);
+  wxFileConfig(const wxString& appName,
+               const wxString& vendorName = wxT(""),
+               const wxString& localFilename = wxT(""),
+               const wxString& globalFilename = wxT(""),
+               long style = wxCONFIG_USE_LOCAL_FILE);
 
 #if wxUSE_STREAMS
     // ctor that takes an input stream.
-  wxFileConfig(wxInputStream &inStream,
-               wxMBConv& conv = wxConvUTF8);
+  wxFileConfig(wxInputStream &inStream);
 #endif // wxUSE_STREAMS
 
     // dtor will save unsaved data
@@ -209,13 +207,9 @@ private:
   wxFileConfigGroup *m_pRootGroup,      // the top (unnamed) group
                     *m_pCurrentGroup;   // the current group
 
-  wxMBConv   &m_conv;
-        
 #ifdef __UNIX__
   int m_umask;                    // the umask to use for file creation
 #endif // __UNIX__
-
-    DECLARE_NO_COPY_CLASS(wxFileConfig)
 };
 
 #endif

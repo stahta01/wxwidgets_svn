@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "glcanvas.h"
 #endif
 
@@ -52,9 +52,9 @@ enum
   WX_GL_MIN_ACCUM_ALPHA  /* use blue buffer with most bits (> MIN_ACCUM_ALPHA bits) */
 };
 
-class WXDLLIMPEXP_GL wxGLCanvas;     /* forward reference */
+class WXDLLEXPORT wxGLCanvas;     /* forward reference */
 
-class WXDLLIMPEXP_GL wxGLContext: public wxObject
+class WXDLLEXPORT wxGLContext: public wxObject
 {
 public:
    wxGLContext(bool isRGB, wxGLCanvas *win, const wxPalette& palette = wxNullPalette);
@@ -80,7 +80,7 @@ public:
    wxWindow*        m_window;
 };
 
-class WXDLLIMPEXP_GL wxGLCanvas: public wxWindow
+class WXDLLEXPORT wxGLCanvas: public wxWindow
 {
    DECLARE_CLASS(wxGLCanvas)
  public:

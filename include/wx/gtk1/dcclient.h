@@ -10,7 +10,7 @@
 #ifndef __GTKDCCLIENTH__
 #define __GTKDCCLIENTH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -122,7 +122,6 @@ public:
     // PangoContext stuff for GTK 2.0
 #ifdef __WXGTK20__
     PangoContext *m_context;
-    PangoLayout *m_layout;
     PangoFontDescription *m_fontdesc;
 #endif
 

@@ -6,7 +6,7 @@
 // Copyright:   (c) 1999 Vaclav Slavik
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -66,20 +66,16 @@ FORCE_LINK_ME(m_layout)
 // array wxHtmlPrintout::m_PageBreaks of pagebreaks already set, and
 // set a new one only if it's not in that array.
 
-class wxHtmlPageBreakCell : public wxHtmlCell
+class WXDLLEXPORT wxHtmlPageBreakCell : public wxHtmlCell
 {
-public:
+  public:
     wxHtmlPageBreakCell() {}
 
-    bool AdjustPagebreak(int* pagebreak,
-                         int* known_pagebreaks = NULL,
-                         int number_of_pages = 0) const;
-    void Draw(wxDC& WXUNUSED(dc),
-              int WXUNUSED(x), int WXUNUSED(y),
-              int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-              wxHtmlRenderingInfo& WXUNUSED(info)) {}
+// wx 2.5 will use this signature:
+//    bool AdjustPagebreak(int* pagebreak, int* known_pagebreaks = NULL, int number_of_pages = 0) const;
+    bool AdjustPagebreak(int* pagebreak) const;
 
-private:
+  private:
     DECLARE_NO_COPY_CLASS(wxHtmlPageBreakCell)
 };
 
@@ -89,8 +85,23 @@ extern "C" int wxCMPFUNC_CONV wxInteger_compare(void const* i0, void const* i1)
     return *(int*)i0 - *(int*)i1;
 }
 
-bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, int* known_pagebreaks, int number_of_pages) const
+// wx 2.5 will use this signature:
+//   bool wxHtmlContainerCell::AdjustPagebreak(int *pagebreak, int* known_pagebreaks, int number_of_pages) const
+//
+// Workaround to backport html pagebreaks to 2.4.0:
+// Actually, we're passing a pointer to struct wxHtmlKludge, casting
+// that pointer to an int* . We don't need to do anything special
+// here because that struct's first element is an int* to 'pagebreak'.
+// Other struct members are addressed by casting that int* back to
+// wxHtmlKludge*; they don't get modified, so we don't have to pass
+// them back to the caller.
+bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak) const
 {
+    // Workaround to backport html pagebreaks to 2.4.0:
+    wxHtmlKludge* kludge = (wxHtmlKludge*)pagebreak;
+    int* known_pagebreaks = kludge->known_pagebreaks;
+    int number_of_pages = kludge->number_of_pages;
+
     // When we are counting pages, 'known_pagebreaks' is non-NULL.
     // That's the only time we change 'pagebreak'. Otherwise, pages
     // were already counted, 'known_pagebreaks' is NULL, and we don't
@@ -133,11 +144,10 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, int* known_pagebreaks,
 }
 
 TAG_HANDLER_BEGIN(P, "P")
-    TAG_HANDLER_CONSTR(P) { }
 
     TAG_HANDLER_PROC(tag)
     {
-        if (m_WParser->GetContainer()->GetFirstChild() != NULL)
+        if (m_WParser->GetContainer()->GetFirstCell() != NULL)
         {
             m_WParser->CloseContainer();
             m_WParser->OpenContainer();
@@ -152,7 +162,6 @@ TAG_HANDLER_END(P)
 
 
 TAG_HANDLER_BEGIN(BR, "BR")
-    TAG_HANDLER_CONSTR(BR) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -172,7 +181,6 @@ TAG_HANDLER_END(BR)
 
 
 TAG_HANDLER_BEGIN(CENTER, "CENTER")
-    TAG_HANDLER_CONSTR(CENTER) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -180,7 +188,7 @@ TAG_HANDLER_BEGIN(CENTER, "CENTER")
         wxHtmlContainerCell *c = m_WParser->GetContainer();
 
         m_WParser->SetAlign(wxHTML_ALIGN_CENTER);
-        if (c->GetFirstChild() != NULL)
+        if (c->GetFirstCell() != NULL)
         {
             m_WParser->CloseContainer();
             m_WParser->OpenContainer();
@@ -193,7 +201,7 @@ TAG_HANDLER_BEGIN(CENTER, "CENTER")
             ParseInner(tag);
 
             m_WParser->SetAlign(old);
-            if (c->GetFirstChild() != NULL)
+            if (c->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -211,13 +219,12 @@ TAG_HANDLER_END(CENTER)
 
 
 TAG_HANDLER_BEGIN(DIV, "DIV")
-    TAG_HANDLER_CONSTR(DIV) { }
 
     TAG_HANDLER_PROC(tag)
     {
-        if(tag.HasParam(wxT("STYLE")))
+        if (tag.HasParam(wxT("STYLE")))
         {
-            if(tag.GetParam(wxT("STYLE")).IsSameAs(wxT("PAGE-BREAK-BEFORE:ALWAYS"), FALSE))
+            if (tag.GetParam(wxT("STYLE")).IsSameAs(wxString(wxT("PAGE-BREAK-BEFORE:ALWAYS")), FALSE))
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer()->InsertCell(new wxHtmlPageBreakCell);
@@ -231,11 +238,11 @@ TAG_HANDLER_BEGIN(DIV, "DIV")
                 return FALSE;
             }
         }
-        else if(tag.HasParam(wxT("ALIGN")))
+        else if (tag.HasParam(wxT("ALIGN")))
         {
             int old = m_WParser->GetAlign();
             wxHtmlContainerCell *c = m_WParser->GetContainer();
-            if (c->GetFirstChild() != NULL)
+            if (c->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -252,7 +259,7 @@ TAG_HANDLER_BEGIN(DIV, "DIV")
             ParseInner(tag);
 
             m_WParser->SetAlign(old);
-            if (c->GetFirstChild() != NULL)
+            if (c->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -274,7 +281,6 @@ TAG_HANDLER_END(DIV)
 
 
 TAG_HANDLER_BEGIN(TITLE, "TITLE")
-    TAG_HANDLER_CONSTR(TITLE) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -284,7 +290,7 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
             if (wfr)
             {
                 const wxString& src = *m_WParser->GetSource();
-                wfr->OnSetTitle(src.Mid(tag.GetBeginPos(), 
+                wfr->OnSetTitle(src.Mid(tag.GetBeginPos(),
                                         tag.GetEndPos1()-tag.GetBeginPos()));
             }
         }
@@ -297,7 +303,6 @@ TAG_HANDLER_END(TITLE)
 
 
 TAG_HANDLER_BEGIN(BODY, "BODY")
-    TAG_HANDLER_CONSTR(BODY) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -327,7 +332,6 @@ TAG_HANDLER_END(BODY)
 
 
 TAG_HANDLER_BEGIN(BLOCKQUOTE, "BLOCKQUOTE")
-    TAG_HANDLER_CONSTR(BLOCKQUOTE) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -358,9 +362,7 @@ TAG_HANDLER_END(BLOCKQUOTE)
 // Tag handler for tags that we have to ignore, otherwise non-text data
 // would show up as text:
 TAG_HANDLER_BEGIN(DoNothing, "SCRIPT")
-    TAG_HANDLER_CONSTR(DoNothing) { }
-
-    TAG_HANDLER_PROC(WXUNUSED(tag))
+    TAG_HANDLER_PROC(tag)
     {
         return true;
     }

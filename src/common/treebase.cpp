@@ -17,7 +17,7 @@
 // headers
 // -----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma implementation "treebase.h"
 #endif
 
@@ -37,6 +37,7 @@
 #include "wx/dynarray.h"
 #include "wx/arrimpl.cpp"
 #include "wx/dcclient.h"
+#include "wx/msgdlg.h"
 
 
 // ----------------------------------------------------------------------------
@@ -61,7 +62,6 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_ACTIVATED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_END_DRAG)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TREE_STATE_IMAGE_CLICK)
 
 // ----------------------------------------------------------------------------
 // Tree event

@@ -11,7 +11,7 @@
 // Branched From : dbgrid.cpp,v 1.18 2000/12/19 13:00:58
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dbgrid.h"
 #endif
 
@@ -23,7 +23,7 @@
 
 
 #if wxUSE_ODBC
-#if wxUSE_GRID
+#if wxUSE_NEW_GRID
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
@@ -32,10 +32,6 @@
 
 #include "wx/generic/gridctrl.h"
 #include "wx/dbgrid.h"
-
-// DLL options compatibility check:
-#include "wx/app.h"
-WX_CHECK_BUILD_OPTIONS("wxDbGrid")
 
 
 wxDbGridCellAttrProvider::wxDbGridCellAttrProvider()
@@ -724,6 +720,6 @@ bool wxDbGridTableBase::Writeback() const
 
 WX_DEFINE_EXPORTED_OBJARRAY(keyarray);
 
-#endif  // #if wxUSE_GRID
+#endif  // #if wxUSE_NEW_GRID
 #endif  // #if wxUSE_ODBC
 

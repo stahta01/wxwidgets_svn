@@ -146,7 +146,7 @@ public:
 
 protected:
     // get pointer to our scroll rect if we use it or NULL
-    const wxRect *GetScrollRect() const
+    const wxRect *GetRect() const
     {
         return m_rectToScroll.width != 0 ? &m_rectToScroll : NULL;
     }
@@ -201,8 +201,6 @@ protected:
 #endif // wxUSE_MOUSEWHEEL
 
     wxScrollHelperEvtHandler *m_handler;
-
-    DECLARE_NO_COPY_CLASS(wxScrollHelper)
 };
 
 // ----------------------------------------------------------------------------
@@ -229,7 +227,7 @@ protected:
         }
 
     private:
-        DECLARE_DYNAMIC_CLASS_NO_COPY(wxScrolledWindow)
+        DECLARE_CLASS(wxScrolledWindow)
     };
 
     #define wxSCROLLED_WINDOW_IS_GENERIC 1
@@ -238,3 +236,4 @@ protected:
 #endif
     // _WX_SCROLWIN_H_BASE_
 
+// vi:sts=4:sw=4:et

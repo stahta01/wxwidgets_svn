@@ -17,9 +17,8 @@
 
 #include "wx/xrc/xmlres.h"
 
-class WXDLLIMPEXP_XRC wxSplitterWindowXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxSplitterWindowXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxSplitterWindowXmlHandler)
 public:
     wxSplitterWindowXmlHandler();
     virtual wxObject *DoCreateResource();

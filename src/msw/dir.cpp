@@ -6,7 +6,7 @@
 // Created:     08.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dir.h"
 #endif
 
@@ -40,10 +40,6 @@
 
 #include "wx/dir.h"
 #include "wx/filefn.h"          // for wxPathExists()
-
-#ifdef __WXMSW__
-    #include "wx/msw/private.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // define the types and functions used for file searching
@@ -134,6 +130,8 @@
         return (attr & (_A_SYSTEM | _A_HIDDEN)) != 0;
     }
 #else // Win32
+    #include <windows.h>
+
     typedef WIN32_FIND_DATA FIND_STRUCT;
     typedef HANDLE FIND_DATA;
     typedef DWORD FIND_ATTR;
@@ -226,8 +224,6 @@ private:
     wxString m_filespec;
 
     int      m_flags;
-
-    DECLARE_NO_COPY_CLASS(wxDirData)
 };
 
 // ============================================================================

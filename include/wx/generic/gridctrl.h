@@ -12,24 +12,21 @@
 #ifndef _WX_GENERIC_GRIDCTRL_H_
 #define _WX_GENERIC_GRIDCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "gridctrl.h"
 #endif
 
-#if wxUSE_GRID
+#if wxUSE_GRID || wxUSE_NEW_GRID
 
 #include "wx/grid.h"
 #include "wx/string.h"
-#include "wx/arrstr.h"
 #include "wx/datetime.h"
 
 #define wxGRID_VALUE_CHOICEINT    _T("choiceint")
 #define wxGRID_VALUE_DATETIME     _T("datetime")
 
-#if wxUSE_DATETIME
-
 // the default renderer for the cells containing Time and dates..
-class WXDLLIMPEXP_ADV wxGridCellDateTimeRenderer : public wxGridCellStringRenderer
+class WXDLLEXPORT wxGridCellDateTimeRenderer : public wxGridCellStringRenderer
 {
 public:
     wxGridCellDateTimeRenderer(wxString outformat =  _T("%c"),
@@ -62,10 +59,9 @@ protected:
     wxDateTime::TimeZone m_tz;
 };
 
-#endif // wxUSE_DATETIME
 
 // the default renderer for the cells containing Time and dates..
-class WXDLLIMPEXP_ADV wxGridCellEnumRenderer : public wxGridCellStringRenderer
+class WXDLLEXPORT wxGridCellEnumRenderer : public wxGridCellStringRenderer
 {
 public:
     wxGridCellEnumRenderer( const wxString& choices = wxEmptyString );
@@ -97,7 +93,7 @@ protected:
 
 #if wxUSE_COMBOBOX
 
-class WXDLLIMPEXP_ADV wxGridCellEnumEditor : public wxGridCellChoiceEditor
+class WXDLLEXPORT wxGridCellEnumEditor : public wxGridCellChoiceEditor
 {
 public:
     wxGridCellEnumEditor( const wxString& choices = wxEmptyString );
@@ -110,13 +106,11 @@ public:
 
 private:
     long int   m_startint;
-
-    DECLARE_NO_COPY_CLASS(wxGridCellEnumEditor)
 };
 
 #endif // wxUSE_COMBOBOX
 
-class WXDLLIMPEXP_ADV wxGridCellAutoWrapStringEditor : public wxGridCellTextEditor
+class WXDLLEXPORT wxGridCellAutoWrapStringEditor : public wxGridCellTextEditor
 {
 public:
     wxGridCellAutoWrapStringEditor() : wxGridCellTextEditor() { }
@@ -126,11 +120,9 @@ public:
 
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellAutoWrapStringEditor; }
-
-    DECLARE_NO_COPY_CLASS(wxGridCellAutoWrapStringEditor)
 };
 
-class WXDLLIMPEXP_ADV wxGridCellAutoWrapStringRenderer : public wxGridCellStringRenderer
+class WXDLLEXPORT wxGridCellAutoWrapStringRenderer : public wxGridCellStringRenderer
 {
 public:
     wxGridCellAutoWrapStringRenderer() : wxGridCellStringRenderer() { }
@@ -159,7 +151,7 @@ private:
 
 };
 
-#endif  // #if wxUSE_GRID
+#endif  // #if wxUSE_GRID || wxUSE_NEW_GRID
 
 #endif //_WX_GENERIC_GRIDCTRL_H_
 

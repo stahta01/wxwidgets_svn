@@ -12,7 +12,7 @@
 #ifndef _WX_WAVE_H_
 #define _WX_WAVE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "wave.h"
 #endif
 
@@ -20,7 +20,7 @@
 
 #include "wx/object.h"
 
-class WXDLLIMPEXP_ADV wxWave : public wxObject
+class WXDLLEXPORT wxWave : public wxObject
 {
 public:
   wxWave();
@@ -44,8 +44,6 @@ private:
   wxByte* m_waveData;
   int   m_waveLength;
   bool  m_isResource;
-
-    DECLARE_NO_COPY_CLASS(wxWave)
 };
 #endif
 #endif

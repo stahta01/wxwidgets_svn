@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "statbox.h"
 #endif
 
@@ -43,24 +43,7 @@
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxStaticBox, wxControl,"wx/statbox.h")
-
-WX_BEGIN_PROPERTIES_TABLE(wxStaticBox)
-	WX_PROPERTY( Label,wxString, SetLabel, GetLabel, wxEmptyString )
-/*
-	TODO PROPERTIES :
-		label
-*/
-WX_END_PROPERTIES_TABLE()
-
-WX_BEGIN_HANDLERS_TABLE(wxStaticBox)
-WX_END_HANDLERS_TABLE()
-
-WX_CONSTRUCTOR_6( wxStaticBox , wxWindow* , Parent , wxWindowID , Id , wxString , Label , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBox, wxControl)
-#endif
 
 // ============================================================================
 // implementation
@@ -93,12 +76,7 @@ bool wxStaticBox::Create(wxWindow *parent,
     //        after removing WS_EX_TRANSPARENT bit) and so let's use it until
     //        we fix the real underlying problem
     if ( !MSWCreateControl(wxT("BUTTON"), BS_GROUPBOX, pos, size, label,
-#ifdef __WXWINCE__
-        0
-#else
-        WS_EX_TRANSPARENT
-#endif
-                           ) )
+                           WS_EX_TRANSPARENT) )
         return FALSE;
 
     // to be transparent we should have the same colour as the parent as well
@@ -125,7 +103,6 @@ long wxStaticBox::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 {
     switch ( nMsg )
     {
-#ifndef __WXWINCE__
         case WM_NCHITTEST:
             // FIXME: this hack is specific to dialog ed, shouldn't it be
             //        somehow disabled during normal operation?
@@ -141,7 +118,7 @@ long wxStaticBox::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
                     return (long)HTCLIENT;
             }
             break;
-#endif
+
         case WM_ERASEBKGND:
             // prevent wxControl from processing this message because it will
             // erase the background incorrectly and there is no way for us to

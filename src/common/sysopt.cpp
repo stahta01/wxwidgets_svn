@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "sysopt.h"
 #endif
 
@@ -37,7 +37,6 @@
 #include "wx/string.h"
 #include "wx/sysopt.h"
 #include "wx/module.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -47,7 +46,7 @@
 // singleton class so it can't be done in the dtor)
 class wxSystemOptionsModule : public wxModule
 {
-    friend class WXDLLIMPEXP_BASE wxSystemOptions;
+    friend class WXDLLEXPORT wxSystemOptions;
 public:
     virtual bool OnInit();
     virtual void OnExit();

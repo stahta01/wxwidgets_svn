@@ -57,7 +57,6 @@ wxART_ERROR                = 'wxART_ERROR'
 wxART_QUESTION             = 'wxART_QUESTION'
 wxART_WARNING              = 'wxART_WARNING'
 wxART_INFORMATION          = 'wxART_INFORMATION'
-wxART_MISSING_IMAGE        = 'wxART_MISSING_IMAGE'
 
 class wxSystemSettingsPtr :
     def __init__(self,this):
@@ -68,20 +67,6 @@ class wxSystemSettingsPtr :
 class wxSystemSettings(wxSystemSettingsPtr):
     def __init__(self,this):
         self.this = this
-
-
-
-
-class wxSystemOptionsPtr(wxObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxSystemOptions instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxSystemOptions(wxSystemOptionsPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = misc2c.new_wxSystemOptions(*_args,**_kwargs)
-        self.thisown = 1
 
 
 
@@ -422,6 +407,9 @@ class wxLogPtr :
         self.thisown = 0
     def Flush(self, *_args, **_kwargs):
         val = misc2c.wxLog_Flush(self, *_args, **_kwargs)
+        return val
+    def HasPendingMessages(self, *_args, **_kwargs):
+        val = misc2c.wxLog_HasPendingMessages(self, *_args, **_kwargs)
         return val
     def GetVerbose(self, *_args, **_kwargs):
         val = misc2c.wxLog_GetVerbose(self, *_args, **_kwargs)
@@ -1074,9 +1062,11 @@ class wxFileHistoryPtr(wxObjectPtr):
     def GetCount(self, *_args, **_kwargs):
         val = misc2c.wxFileHistory_GetCount(self, *_args, **_kwargs)
         return val
+    def GetNoHistoryFiles(self, *_args, **_kwargs):
+        val = misc2c.wxFileHistory_GetNoHistoryFiles(self, *_args, **_kwargs)
+        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxFileHistory instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-    GetNoHistoryFiles = GetCount
 class wxFileHistory(wxFileHistoryPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = misc2c.new_wxFileHistory(*_args,**_kwargs)
@@ -1324,16 +1314,6 @@ wxSystemSettings_HasFeature = misc2c.wxSystemSettings_HasFeature
 wxSystemSettings_GetScreenType = misc2c.wxSystemSettings_GetScreenType
 
 wxSystemSettings_SetScreenType = misc2c.wxSystemSettings_SetScreenType
-
-wxSystemOptions_SetOption = misc2c.wxSystemOptions_SetOption
-
-wxSystemOptions_SetOptionInt = misc2c.wxSystemOptions_SetOptionInt
-
-wxSystemOptions_GetOption = misc2c.wxSystemOptions_GetOption
-
-wxSystemOptions_GetOptionInt = misc2c.wxSystemOptions_GetOptionInt
-
-wxSystemOptions_HasOption = misc2c.wxSystemOptions_HasOption
 
 wxToolTip_Enable = misc2c.wxToolTip_Enable
 

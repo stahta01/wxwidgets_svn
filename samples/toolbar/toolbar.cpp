@@ -92,7 +92,7 @@ public:
             const wxString& title = _T("wxToolBar Sample"),
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            long style = wxDEFAULT_FRAME_STYLE|wxCLIP_CHILDREN|wxNO_FULL_REPAINT_ON_RESIZE);
+            long style = wxDEFAULT_FRAME_STYLE);
 
     void RecreateToolbar();
 
@@ -156,7 +156,7 @@ private:
 
 const int ID_TOOLBAR = 500;
 
-static const long TOOLBAR_STYLE = wxTB_FLAT | wxTB_DOCKABLE | wxTB_TEXT;
+static const long TOOLBAR_STYLE = wxTB_FLAT | wxTB_DOCKABLE | wxTB_TEXT ;
 
 enum
 {
@@ -233,12 +233,7 @@ bool MyApp::OnInit()
     // Create the main frame window
     MyFrame* frame = new MyFrame((wxFrame *) NULL, -1,
                                  _T("wxToolBar Sample"),
-#ifdef __WXWINCE__
-                                 wxPoint(0, 0), wxDefaultSize, wxNO_BORDER
-#else
-                                 wxPoint(100, 100), wxSize(550, 300)
-#endif
-                                 );
+                                 wxPoint(100, 100), wxSize(550, 300));
 
     frame->Show(TRUE);
 
@@ -251,12 +246,6 @@ bool MyApp::OnInit()
 
 void MyFrame::RecreateToolbar()
 {
-#ifdef __WXWINCE__
-    // On Windows CE, we should not delete the
-    // previous toolbar in case it contains the menubar.
-    // We'll try to accomodate this usage in due course.
-    wxToolBar* toolBar = CreateToolBar();
-#else
     // delete and recreate the toolbar
     wxToolBarBase *toolBar = GetToolBar();
     long style = toolBar ? toolBar->GetWindowStyle() : TOOLBAR_STYLE;
@@ -267,10 +256,8 @@ void MyFrame::RecreateToolbar()
 
     style &= ~(wxTB_HORIZONTAL | wxTB_VERTICAL);
     style |= m_horzToolbar ? wxTB_HORIZONTAL : wxTB_VERTICAL;
-    style |= wxNO_FULL_REPAINT_ON_RESIZE ;
 
     toolBar = CreateToolBar(style, ID_TOOLBAR);
-#endif
 
     // Set up toolbar
     wxBitmap toolBarBitmaps[8];
@@ -311,8 +298,8 @@ void MyFrame::RecreateToolbar()
     toolBar->AddTool(wxID_NEW, _T("New"), toolBarBitmaps[0], _T("New file"));
     toolBar->AddTool(wxID_OPEN, _T("Open"), toolBarBitmaps[1], _T("Open file"));
 
-    // the generic toolbar doesn't really support this
-#if (wxUSE_TOOLBAR_NATIVE && !USE_GENERIC_TBAR) && !defined(__WXX11__) || defined(__WXUNIVERSAL__)
+    // neither the generic nor Motif native toolbars really support this
+#if (wxUSE_TOOLBAR_NATIVE && !USE_GENERIC_TBAR) && !defined(__WXMOTIF__) && !defined(__WXX11__) && !defined(__WXMAC__)
     // adding a combo to a vertical toolbar is not very smart
     if ( m_horzToolbar )
     {
@@ -362,10 +349,8 @@ MyFrame::MyFrame(wxFrame* parent,
     m_rows = 1;
     m_nPrint = 1;
 
-#ifndef __WXWINCE__
     // Give it a status line
     CreateStatusBar();
-#endif
 
     // Give it an icon
     SetIcon(wxICON(mondrian));
@@ -547,13 +532,8 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
     Close(TRUE);
 }
 
-void MyFrame::OnAbout(wxCommandEvent& event)
+void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    if ( event.IsChecked() )
-        m_textWindow->WriteText( _T("Help button down now.\n") );
-    else
-        m_textWindow->WriteText( _T("Help button up now.\n") );
-
     (void)wxMessageBox(_T("wxWindows toolbar sample"), _T("About wxToolBar"));
 }
 
@@ -562,6 +542,14 @@ void MyFrame::OnToolLeftClick(wxCommandEvent& event)
     wxString str;
     str.Printf( _T("Clicked on tool %d\n"), event.GetId());
     m_textWindow->WriteText( str );
+
+    if (event.GetId() == wxID_HELP)
+    {
+        if ( event.GetExtraLong() != 0 )
+            m_textWindow->WriteText( _T("Help button down now.\n") );
+        else
+            m_textWindow->WriteText( _T("Help button up now.\n") );
+    }
 
     if (event.GetId() == wxID_COPY)
     {
@@ -612,8 +600,7 @@ void MyFrame::DoToggleHelp()
 
 void MyFrame::OnUpdateCopyAndCut(wxUpdateUIEvent& event)
 {
-    if (m_textWindow)
-        event.Enable( m_textWindow->CanCopy() );
+    event.Enable( m_textWindow->CanCopy() );
 }
 
 void MyFrame::OnChangeToolTip(wxCommandEvent& WXUNUSED(event))

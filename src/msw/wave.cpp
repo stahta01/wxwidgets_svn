@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "wave.h"
 #endif
 
@@ -30,6 +30,7 @@
 #include "wx/msw/wave.h"
 #include "wx/msw/private.h"
 
+#include <windows.h>
 #include <windowsx.h>
 
 #if defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__)
@@ -69,7 +70,7 @@ bool wxWave::Create(const wxString& fileName, bool isResource)
     m_isResource = TRUE;
 
     HRSRC hresInfo;
-#if defined(__WIN32__)
+#if defined(__WIN32__) && !defined(__TWIN32__)
 #ifdef _UNICODE
     hresInfo = ::FindResourceW((HMODULE) wxhInstance, fileName, wxT("WAVE"));
 #else
@@ -101,7 +102,7 @@ bool wxWave::Create(const wxString& fileName, bool isResource)
 
     m_waveLength = (int) fileWave.Length();
 
-    m_waveData = (wxByte*)GlobalLock(GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, m_waveLength));
+    m_waveData = (wxByte*)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, m_waveLength));
     if (!m_waveData)
         return FALSE;
 
@@ -116,7 +117,7 @@ bool wxWave::Create(int size, const wxByte* data)
   Free();
   m_isResource = FALSE;
   m_waveLength=size;
-  m_waveData = (wxByte*)GlobalLock(GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, m_waveLength));
+  m_waveData = (wxByte*)::GlobalLock(::GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, m_waveLength));
   if (!m_waveData)
      return FALSE;
 
@@ -142,24 +143,20 @@ bool wxWave::Free()
 {
   if (m_waveData)
   {
-#ifdef __WXWINCE__
-    HGLOBAL waveData = (HGLOBAL) m_waveData;
-#elif defined(__WIN32__)
-    HGLOBAL waveData = GlobalHandle(m_waveData);
+#ifdef __WIN32__
+    HGLOBAL waveData = ::GlobalHandle(m_waveData);
 #else
     HGLOBAL waveData = GlobalPtrHandle(m_waveData);
 #endif
 
     if (waveData)
     {
-#ifndef __WXWINCE__
-        if (m_isResource)
+      if (m_isResource)
         ::FreeResource(waveData);
       else
-#endif
       {
-        GlobalUnlock(waveData);
-        GlobalFree(waveData);
+        ::GlobalUnlock(waveData);
+        ::GlobalFree(waveData);
       }
 
       m_waveData = NULL;

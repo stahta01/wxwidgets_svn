@@ -4,7 +4,7 @@
 // Created:     14.11.01
 // Author:      Morten Hanssen
 // Copyright:   (c) 2001 wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MEMTEXT_H
@@ -19,7 +19,7 @@
 // wxMemoryText
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMemoryText : public wxTextBuffer
+class wxMemoryText : public wxTextBuffer
 {
 public:
     // Constructors.
@@ -41,11 +41,8 @@ protected:
         { return TRUE; }
 
     virtual bool OnWrite(wxTextFileType WXUNUSED(typeNew),
-                         wxMBConv& WXUNUSED(conv) = wxConvUTF8)
+                         wxMBConv& WXUNUSED(conv) = wxConvLibc)
         { return TRUE; }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxMemoryText)
 };
 
 #endif // wxUSE_TEXTBUFFER

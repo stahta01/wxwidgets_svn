@@ -1,6 +1,9 @@
+#ifndef _WX_WXH__
+#define _WX_WXH__
+
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/wx.h
-// Purpose:     wxWindows central header including the most often used ones
+// Name:        wx.h
+// Purpose:     wxWindows main include file
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
@@ -8,9 +11,6 @@
 // Copyright:   (c)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
-#ifndef _WX_WX_H_
-#define _WX_WX_H_
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -78,8 +78,7 @@
 #include "wx/textdlg.h"
 #include "wx/filedlg.h"
 
-// always include, even if !wxUSE_VALIDATORS because we need wxDefaultValidator
-#include "wx/validate.h"
+#include "wx/validate.h"        // always include, even if !wxUSE_VALIDATORS
 
 #if wxUSE_VALIDATORS
     #include "wx/valtext.h"
@@ -87,5 +86,5 @@
 
 #endif // wxUSE_GUI
 
-#endif // _WX_WX_H_
-
+#endif
+    // _WX_WXH__

@@ -11,15 +11,7 @@
 #ifndef __X11TEXTCTRLH__
 #define __X11TEXTCTRLH__
 
-// Set to 1 to use wxUniv's implementation, 0
-// to use wxX11's.
-#define wxUSE_UNIV_TEXTCTRL 1
-
-#if wxUSE_UNIV_TEXTCTRL
-#include "wx/univ/textctrl.h"
-#else
-
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "textctrl.h"
 #endif
 
@@ -256,10 +248,10 @@ public:
     void OnEraseBackground( wxEraseEvent &event );
     void OnMouse( wxMouseEvent &event );
     void OnChar( wxKeyEvent &event );
+    void OnIdle( wxIdleEvent &event );
     void OnSetFocus( wxFocusEvent& event );
     void OnKillFocus( wxFocusEvent& event );
 
-    void OnInternalIdle();
     void RefreshLine( int n );
     void RefreshDown( int n );
     void MoveCursor( int new_x, int new_y, bool shift = FALSE, bool centre = FALSE );
@@ -393,8 +385,5 @@ protected:
     wxTextCtrl *m_winCapture;
 };
 
-#endif
-// wxUSE_UNIV_TEXTCTRL
-
-#endif // __X11TEXTCTRLH__
+#endif // __GTKTEXTCTRLH__
 

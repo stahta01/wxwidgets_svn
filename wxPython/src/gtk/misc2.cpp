@@ -56,6 +56,7 @@ extern PyObject *SWIG_newvarlink(void);
 
 #include "helpers.h"
 #include "pyistream.h"
+#include <wx/resource.h>
 #include <wx/tooltip.h>
 #include <wx/caret.h>
 #include <wx/tipdlg.h>
@@ -72,7 +73,7 @@ extern PyObject *SWIG_newvarlink(void);
 #include <wx/mimetype.h>
 #include <wx/snglinst.h>
 #include <wx/effects.h>
-#include <wx/sysopt.h>
+//#include <wx/spawnbrowser.h>
 
 
 static PyObject* t_output_helper(PyObject* target, PyObject* o) {
@@ -2401,206 +2402,6 @@ static PyObject *_wrap_wxSystemSettings_SetScreenType(PyObject *self, PyObject *
     return _resultobj;
 }
 
-static void *SwigwxSystemOptionsTowxObject(void *ptr) {
-    wxSystemOptions *src;
-    wxObject *dest;
-    src = (wxSystemOptions *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define new_wxSystemOptions() (new wxSystemOptions())
-static PyObject *_wrap_new_wxSystemOptions(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxSystemOptions * _result;
-    char *_kwnames[] = {  NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,":new_wxSystemOptions",_kwnames)) 
-        return NULL;
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxSystemOptions *)new_wxSystemOptions();
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxSystemOptions_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-    return _resultobj;
-}
-
-static PyObject *_wrap_wxSystemOptions_SetOption(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxString * _arg0;
-    wxString * _arg1;
-    PyObject * _obj0 = 0;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "name","value", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxSystemOptions_SetOption",_kwnames,&_obj0,&_obj1)) 
-        return NULL;
-{
-    _arg0 = wxString_in_helper(_obj0);
-    if (_arg0 == NULL)
-        return NULL;
-}
-{
-    _arg1 = wxString_in_helper(_obj1);
-    if (_arg1 == NULL)
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxSystemOptions::SetOption(*_arg0,*_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-{
-    if (_obj0)
-        delete _arg0;
-}
-{
-    if (_obj1)
-        delete _arg1;
-}
-    return _resultobj;
-}
-
-static PyObject *_wrap_wxSystemOptions_SetOptionInt(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxString * _arg0;
-    int  _arg1;
-    PyObject * _obj0 = 0;
-    char *_kwnames[] = { "name","value", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxSystemOptions_SetOptionInt",_kwnames,&_obj0,&_arg1)) 
-        return NULL;
-{
-    _arg0 = wxString_in_helper(_obj0);
-    if (_arg0 == NULL)
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxSystemOptions::SetOption(*_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-{
-    if (_obj0)
-        delete _arg0;
-}
-    return _resultobj;
-}
-
-static PyObject *_wrap_wxSystemOptions_GetOption(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxString * _result;
-    wxString * _arg0;
-    PyObject * _obj0 = 0;
-    char *_kwnames[] = { "name", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxSystemOptions_GetOption",_kwnames,&_obj0)) 
-        return NULL;
-{
-    _arg0 = wxString_in_helper(_obj0);
-    if (_arg0 == NULL)
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = new wxString (wxSystemOptions::GetOption(*_arg0));
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}{
-#if wxUSE_UNICODE
-    _resultobj = PyUnicode_FromWideChar(_result->c_str(), _result->Len());
-#else
-    _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
-#endif
-}
-{
-    if (_obj0)
-        delete _arg0;
-}
-{
-    delete _result;
-}
-    return _resultobj;
-}
-
-static PyObject *_wrap_wxSystemOptions_GetOptionInt(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxString * _arg0;
-    PyObject * _obj0 = 0;
-    char *_kwnames[] = { "name", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxSystemOptions_GetOptionInt",_kwnames,&_obj0)) 
-        return NULL;
-{
-    _arg0 = wxString_in_helper(_obj0);
-    if (_arg0 == NULL)
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxSystemOptions::GetOptionInt(*_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-{
-    if (_obj0)
-        delete _arg0;
-}
-    return _resultobj;
-}
-
-static PyObject *_wrap_wxSystemOptions_HasOption(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxString * _arg0;
-    PyObject * _obj0 = 0;
-    char *_kwnames[] = { "name", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxSystemOptions_HasOption",_kwnames,&_obj0)) 
-        return NULL;
-{
-    _arg0 = wxString_in_helper(_obj0);
-    if (_arg0 == NULL)
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxSystemOptions::HasOption(*_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-{
-    if (_obj0)
-        delete _arg0;
-}
-    return _resultobj;
-}
-
 static void *SwigwxToolTipTowxObject(void *ptr) {
     wxToolTip *src;
     wxObject *dest;
@@ -4817,6 +4618,34 @@ static PyObject *_wrap_wxLog_Flush(PyObject *self, PyObject *args, PyObject *kwa
     if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
+    return _resultobj;
+}
+
+#define wxLog_HasPendingMessages(_swigobj)  (_swigobj->HasPendingMessages())
+static PyObject *_wrap_wxLog_HasPendingMessages(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxLog * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxLog_HasPendingMessages",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxLog_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxLog_HasPendingMessages. Expected _wxLog_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (bool )wxLog_HasPendingMessages(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
@@ -8792,9 +8621,9 @@ static PyObject *_wrap_wxFileType_GetExtensions(PyObject *self, PyObject *args, 
 }
 
 static wxIcon * wxFileType_GetIcon(wxFileType *self) {
-            wxIconLocation loc;
-            if (self->GetIcon(&loc))
-                return new wxIcon(loc);
+            wxIcon icon;
+            if (self->GetIcon(&icon))
+                return new wxIcon(icon);
             else
                 return NULL;
         }
@@ -8833,18 +8662,14 @@ static PyObject *_wrap_wxFileType_GetIcon(PyObject *self, PyObject *args, PyObje
 }
 
 static PyObject * wxFileType_GetIconInfo(wxFileType *self) {
-            wxIconLocation loc;
-            if (self->GetIcon(&loc)) {
-                wxString iconFile = loc.GetFileName();
-                int iconIndex     = -1;
-#ifdef __WXMSW__
-                iconIndex = loc.GetIndex();
-#endif
-                // Make a tuple and put the values in it
+            wxIcon icon;
+            wxString iconFile;
+            int iconIndex;
+            if (self->GetIcon(&icon, &iconFile, &iconIndex)) {
                 wxPyBeginBlockThreads();
                 PyObject* tuple = PyTuple_New(3);
-                PyTuple_SetItem(tuple, 0,
-                                wxPyConstructObject(new wxIcon(loc), wxT("wxIcon"), TRUE));
+                PyTuple_SetItem(tuple, 0, wxPyConstructObject(new wxIcon(icon),
+                                                              wxT("wxIcon"), TRUE));
 #if wxUSE_UNICODE
                 PyTuple_SetItem(tuple, 1, PyUnicode_FromWideChar(iconFile.c_str(), iconFile.Len()));
 #else
@@ -9385,7 +9210,7 @@ static PyObject *_wrap_new_wxMimeTypesManager(PyObject *self, PyObject *args, Py
 static PyObject *_wrap_wxMimeTypesManager_Initialize(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxMimeTypesManager * _arg0;
-    int  _arg1 = (int ) (wxMAILCAP_ALL);
+    int  _arg1 = (int ) (wxMAILCAP_STANDARD);
     wxString * _arg2 = (wxString *) &wxPyEmptyString;
     PyObject * _argo0 = 0;
     PyObject * _obj2 = 0;
@@ -10485,6 +10310,34 @@ static PyObject *_wrap_wxFileHistory_GetCount(PyObject *self, PyObject *args, Py
     return _resultobj;
 }
 
+#define wxFileHistory_GetNoHistoryFiles(_swigobj)  (_swigobj->GetNoHistoryFiles())
+static PyObject *_wrap_wxFileHistory_GetNoHistoryFiles(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    int  _result;
+    wxFileHistory * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxFileHistory_GetNoHistoryFiles",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxFileHistory_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxFileHistory_GetNoHistoryFiles. Expected _wxFileHistory_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (int )wxFileHistory_GetNoHistoryFiles(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
 static void *SwigwxEffectsTowxObject(void *ptr) {
     wxEffects *src;
     wxObject *dest;
@@ -11216,6 +11069,7 @@ static PyMethodDef misc2cMethods[] = {
 	 { "wxEffects_GetLightShadow", (PyCFunction) _wrap_wxEffects_GetLightShadow, METH_VARARGS | METH_KEYWORDS },
 	 { "wxEffects_GetHighlightColour", (PyCFunction) _wrap_wxEffects_GetHighlightColour, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxEffects", (PyCFunction) _wrap_new_wxEffects, METH_VARARGS | METH_KEYWORDS },
+	 { "wxFileHistory_GetNoHistoryFiles", (PyCFunction) _wrap_wxFileHistory_GetNoHistoryFiles, METH_VARARGS | METH_KEYWORDS },
 	 { "wxFileHistory_GetCount", (PyCFunction) _wrap_wxFileHistory_GetCount, METH_VARARGS | METH_KEYWORDS },
 	 { "wxFileHistory_GetHistoryFile", (PyCFunction) _wrap_wxFileHistory_GetHistoryFile, METH_VARARGS | METH_KEYWORDS },
 	 { "wxFileHistory_AddFilesToThisMenu", (PyCFunction) _wrap_wxFileHistory_AddFilesToThisMenu, METH_VARARGS | METH_KEYWORDS },
@@ -11390,6 +11244,7 @@ static PyMethodDef misc2cMethods[] = {
 	 { "wxLog_SetActiveTarget", (PyCFunction) _wrap_wxLog_SetActiveTarget, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_GetActiveTarget", (PyCFunction) _wrap_wxLog_GetActiveTarget, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_FlushActive", (PyCFunction) _wrap_wxLog_FlushActive, METH_VARARGS | METH_KEYWORDS },
+	 { "wxLog_HasPendingMessages", (PyCFunction) _wrap_wxLog_HasPendingMessages, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_Flush", (PyCFunction) _wrap_wxLog_Flush, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_OnLog", (PyCFunction) _wrap_wxLog_OnLog, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_EnableLogging", (PyCFunction) _wrap_wxLog_EnableLogging, METH_VARARGS | METH_KEYWORDS },
@@ -11457,12 +11312,6 @@ static PyMethodDef misc2cMethods[] = {
 	 { "wxToolTip_GetTip", (PyCFunction) _wrap_wxToolTip_GetTip, METH_VARARGS | METH_KEYWORDS },
 	 { "wxToolTip_SetTip", (PyCFunction) _wrap_wxToolTip_SetTip, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxToolTip", (PyCFunction) _wrap_new_wxToolTip, METH_VARARGS | METH_KEYWORDS },
-	 { "wxSystemOptions_HasOption", (PyCFunction) _wrap_wxSystemOptions_HasOption, METH_VARARGS | METH_KEYWORDS },
-	 { "wxSystemOptions_GetOptionInt", (PyCFunction) _wrap_wxSystemOptions_GetOptionInt, METH_VARARGS | METH_KEYWORDS },
-	 { "wxSystemOptions_GetOption", (PyCFunction) _wrap_wxSystemOptions_GetOption, METH_VARARGS | METH_KEYWORDS },
-	 { "wxSystemOptions_SetOptionInt", (PyCFunction) _wrap_wxSystemOptions_SetOptionInt, METH_VARARGS | METH_KEYWORDS },
-	 { "wxSystemOptions_SetOption", (PyCFunction) _wrap_wxSystemOptions_SetOption, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxSystemOptions", (PyCFunction) _wrap_new_wxSystemOptions, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSystemSettings_SetScreenType", (PyCFunction) _wrap_wxSystemSettings_SetScreenType, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSystemSettings_GetScreenType", (PyCFunction) _wrap_wxSystemSettings_GetScreenType, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSystemSettings_HasFeature", (PyCFunction) _wrap_wxSystemSettings_HasFeature, METH_VARARGS | METH_KEYWORDS },
@@ -11598,7 +11447,6 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxObject","_wxPyTimer",SwigwxPyTimerTowxObject},
     { "_wxObject","_wxGenericDragImage",SwigwxGenericDragImageTowxObject},
     { "_wxObject","_wxToolTip",SwigwxToolTipTowxObject},
-    { "_wxObject","_wxSystemOptions",SwigwxSystemOptionsTowxObject},
     { "_signed_short","_WXTYPE",0},
     { "_signed_short","_short",0},
     { "_unsigned_char","_byte",0},

@@ -553,15 +553,9 @@ public:
     void SetImageList(wxImageList *imageList);
     void SetStateImageList(wxImageList *imageList);
     void SetButtonsImageList(wxImageList *imageList);
-
     void AssignImageList(wxImageList *imageList);
-    %pragma(python) addtomethod = "AssignImageList:_args[0].thisown = 0"
-
     void AssignStateImageList(wxImageList *imageList);
-    %pragma(python) addtomethod = "AssignStateImageList:_args[0].thisown = 0"
-
     void AssignButtonsImageList(wxImageList *imageList);
-    %pragma(python) addtomethod = "AssignButtonsImageList:_args[0].thisown = 0"
 
 
 
@@ -725,24 +719,7 @@ public:
     wxTreeItemId GetSelection() const;
 
     // get the items currently selected, return the number of such item
-    //size_t GetSelections(wxArrayTreeItemIds&) const;
-    %addmethods {
-        PyObject* GetSelections() {
-            wxPyBeginBlockThreads();
-            PyObject*           rval = PyList_New(0);
-            wxArrayTreeItemIds  array;
-            size_t              num, x;
-            num = self->GetSelections(array);
-            for (x=0; x < num; x++) {
-                wxTreeItemId *tii = new wxTreeItemId(array.Item(x));
-                PyObject* item = wxPyConstructObject((void*)tii, wxT("wxTreeItemId"), TRUE);
-                PyList_Append(rval, item);
-            }
-            wxPyEndBlockThreads();
-            return rval;
-        }
-    }
-
+    size_t GetSelections(wxArrayTreeItemIds&) const;
 
     // get the parent of this item (may return NULL if root)
     %name(GetItemParent)wxTreeItemId GetParent(const wxTreeItemId& item) const;
@@ -900,17 +877,17 @@ public:
 %pragma(python) addtoclass = "
     # Redefine some methods that SWIG gets a bit confused on...
     def GetFirstChild(self, *_args, **_kwargs):
-        val1,val2 = gizmosc.wxTreeListCtrl_GetFirstChild(self, *_args, **_kwargs)
+        val1,val2 = controls2c.wxTreeCtrl_GetFirstChild(self, *_args, **_kwargs)
         val1 = wxTreeItemIdPtr(val1)
         val1.thisown = 1
         return (val1,val2)
     def GetNextChild(self, *_args, **_kwargs):
-        val1,val2 = gizmosc.wxTreeListCtrl_GetNextChild(self, *_args, **_kwargs)
+        val1,val2 = controls2c.wxTreeCtrl_GetNextChild(self, *_args, **_kwargs)
         val1 = wxTreeItemIdPtr(val1)
         val1.thisown = 1
         return (val1,val2)
     def HitTest(self, *_args, **_kwargs):
-        val1, val2, val3 = gizmosc.wxTreeListCtrl_HitTest(self, *_args, **_kwargs)
+        val1, val2, val3 = controls2c.wxTreeCtrl_HitTest(self, *_args, **_kwargs)
         val1 = wxTreeItemIdPtr(val1)
         val1.thisown = 1
         return (val1, val2, val3)
@@ -924,6 +901,9 @@ public:
 //----------------------------------------------------------------------
 
 %init %{
+
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
 
     wxPyPtrTypeMap_Add("wxTreeCompanionWindow", "wxPyTreeCompanionWindow");
     wxPyPtrTypeMap_Add("wxTreeListCtrl", "wxPyTreeListCtrl");
