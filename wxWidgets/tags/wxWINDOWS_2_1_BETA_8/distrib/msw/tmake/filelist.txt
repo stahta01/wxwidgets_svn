@@ -1,0 +1,572 @@
+###############################################################################
+# File:    src/msw/filelist.cpp
+# Purpose: The list of source files for MSW version of wxWindows.
+# Author:  Vadim Zeitlin
+# Created: 14.07.99
+# Version: $Id$
+#
+# Format of this file: TAB separated columns. The first column contains the
+# filename, the second a letter corresonding a directory:
+#  G	/src/generic 
+#  C	/src/common
+#  M	/src/msw
+#  U	/src/unix
+#  R	/src/gtk
+#  H	/src/html
+#  I	/include/wx, /include/wx/gtk, /include/wx/msw, etc.
+#
+# The third column may be empty or contain some additional info about this 
+# file (only compile it in 16bit mode, don't compile it with this or that 
+# compiler, &c)
+#
+# Known flags:
+#  16	a generic file implementing Win32 control for Win16
+#  32	only can be compiled under Win32
+#  PS	PostScript related file, normally not compiled under Windows
+#  G	generic code which might be used instead of native one
+#  U	Unix-ish file, normally not compiled under Windows
+#  O	OLE file (needs Win32 and a decent compiler)
+#  S	Socket file (currently doesn't compile under Win16 nor with GNU)
+#  R	Not required for the GTK port
+#  WX	Base header
+#  GTK  GTK header
+#  MSW	MSW header
+#  MAC  Mac header
+#  MOT	Motif header
+#  PM	OS/2 header
+#  GEN	Generic header
+#  PRO	Protocol header
+#  HTM	wxHtml header
+#  UNX	Unix header
+###############################################################################
+
+# File name 	Type	Flags
+
+busyinfo.cpp	G
+caret.cpp	G	U
+choicdgg.cpp	G	R
+colrdlgg.cpp	G	G
+dirdlgg.cpp	G	16
+extdlgg.cpp	G
+fontdlgg.cpp	G	G
+gridg.cpp	G
+helpxlp.cpp	G	G,R
+imaglist.cpp	G	16
+laywin.cpp	G
+listctrl.cpp	G	16
+msgdlgg.cpp	G	G,R
+notebook.cpp	G	16,R
+panelg.cpp	G
+printps.cpp	G	PS
+prntdlgg.cpp	G	PS,U
+progdlgg.cpp	G
+prop.cpp	G
+propform.cpp	G
+proplist.cpp	G
+sashwin.cpp	G
+scrolwin.cpp	G
+splitter.cpp	G
+statusbr.cpp	G
+tabg.cpp	G	R
+numdlgg.cpp	G
+textdlgg.cpp	G	R
+tipdlg.cpp	G
+treectrl.cpp	G	16
+
+choiccmn.cpp	C	R
+cmndata.cpp	C
+config.cpp	C
+ctrlcmn.cpp	C	R
+date.cpp	C
+datstrm.cpp	C
+db.cpp	C
+dbtable.cpp	C
+dcbase.cpp	C
+dlgcmn.cpp	C
+docmdi.cpp	C
+docview.cpp	C
+dynarray.cpp	C
+dynlib.cpp	C
+event.cpp	C
+extended.c	C
+ffile.cpp	C
+file.cpp	C
+fileconf.cpp	C
+filefn.cpp	C
+filesys.cpp	C
+framecmn.cpp	C
+fs_inet.cpp	C
+fs_zip.cpp	C
+ftp.cpp	C	S
+gdicmn.cpp	C
+hash.cpp	C
+helpbase.cpp	C
+http.cpp	C	S
+imagbmp.cpp	C
+image.cpp	C
+imaggif.cpp	C
+imagjpeg.cpp	C
+imagpng.cpp	C
+intl.cpp	C
+ipcbase.cpp	C
+layout.cpp	C
+list.cpp	C
+log.cpp	C
+memory.cpp	C
+mimetype.cpp	C	32
+module.cpp	C
+mstream.cpp	C
+object.cpp	C
+objstrm.cpp	C
+odbc.cpp	C	R
+paper.cpp	C
+prntbase.cpp	C
+process.cpp	C	32
+protocol.cpp	C	S
+resource.cpp	C
+sckaddr.cpp	C	S
+sckfile.cpp	C	S
+sckipc.cpp	C	S
+sckstrm.cpp	C	S
+socket.cpp	C	S
+stream.cpp	C
+string.cpp	C
+tbarbase.cpp	C
+tbarsmpl.cpp	C	16
+textcmn.cpp	C
+textfile.cpp	C
+time.cpp	C
+timercmn.cpp	C
+tokenzr.cpp	C
+txtstrm.cpp	C
+unzip.c	C
+url.cpp	C	S
+utilscmn.cpp	C
+valgen.cpp	C
+validate.cpp	C
+valtext.cpp	C
+variant.cpp	C
+wfstream.cpp	C
+wincmn.cpp	C
+wxchar.cpp	C
+wxexpr.cpp	C
+zipstream.cpp	C
+zstream.cpp	C
+
+accel.cpp	M
+app.cpp	M
+automtn.cpp	M	O
+bitmap.cpp	M
+bmpbuttn.cpp	M
+brush.cpp	M
+button.cpp	M
+caret.cpp	M
+checkbox.cpp	M
+checklst.cpp	M
+choice.cpp	M
+clipbrd.cpp	M
+colordlg.cpp	M
+colour.cpp	M
+combobox.cpp	M
+control.cpp	M
+curico.cpp	M
+cursor.cpp	M
+data.cpp	M
+dataobj.cpp	M	O
+dc.cpp	M
+dcclient.cpp	M
+dcmemory.cpp	M
+dcprint.cpp	M
+dcscreen.cpp	M
+dde.cpp	M
+dialog.cpp	M
+dib.cpp	M
+dibutils.cpp	M
+dirdlg.cpp	M	32
+dragimag.cpp	M
+dropsrc.cpp	M	O
+droptgt.cpp	M	O
+filedlg.cpp	M
+font.cpp	M
+fontdlg.cpp	M
+frame.cpp	M
+gauge95.cpp	M	32
+gaugemsw.cpp	M	16
+gdiobj.cpp	M
+helpwin.cpp	M
+icon.cpp	M
+imaglist.cpp	M	32
+iniconf.cpp	M	16
+joystick.cpp	M
+listbox.cpp	M
+listctrl.cpp	M	32
+main.cpp	M
+mdi.cpp	M
+menu.cpp	M
+menuitem.cpp	M
+metafile.cpp	M
+minifram.cpp	M
+msgdlg.cpp	M
+nativdlg.cpp	M
+notebook.cpp	M	32
+oleutils.cpp	M	O
+ownerdrw.cpp	M
+palette.cpp	M
+pen.cpp	M
+penwin.cpp	M
+pnghand.cpp	M
+printdlg.cpp	M
+printwin.cpp	M
+radiobox.cpp	M
+radiobut.cpp	M
+regconf.cpp	M	32
+region.cpp	M
+registry.cpp	M	32
+scrolbar.cpp	M
+settings.cpp	M
+slider95.cpp	M	32
+slidrmsw.cpp	M	16
+spinbutt.cpp	M
+statbmp.cpp	M
+statbox.cpp	M
+statbr95.cpp	M	32
+statline.cpp	M
+stattext.cpp	M
+tabctrl.cpp	M
+taskbar.cpp	M	32
+tbar95.cpp	M	32
+tbarmsw.cpp	M	16
+textctrl.cpp	M
+thread.cpp	M	32
+timer.cpp	M
+tooltip.cpp	M	32
+treectrl.cpp	M	32
+utils.cpp	M
+utilsexc.cpp	M
+uuid.cpp	M	O
+wave.cpp	M
+window.cpp	M
+xpmhand.cpp	M
+
+threadpsx.cpp	U
+utilsunx.cpp	U
+gsocket.c	U
+
+gsockgtk.c	R
+win_gtk.c	R
+accel.cpp	R
+app.cpp	R
+bitmap.cpp	R
+bmpbuttn.cpp	R
+brush.cpp	R
+button.cpp	R
+checkbox.cpp	R
+checklst.cpp	R
+choice.cpp	R
+choicdlg.cpp	R
+clipbrd.cpp	R
+colour.cpp	R
+combobox.cpp	R
+control.cpp	R
+cursor.cpp	R
+data.cpp	R
+dataobj.cpp	R
+dc.cpp	R
+dcclient.cpp	R
+dcmemory.cpp 	R
+dcscreen.cpp	R
+dialog.cpp	R
+dnd.cpp	R
+filedlg.cpp	R
+font.cpp	R
+frame.cpp	R
+gauge.cpp	R
+gdiobj.cpp	R
+icon.cpp	R
+listbox.cpp	R
+main.cpp	R
+mdi.cpp	R
+menu.cpp	R
+minifram.cpp	R
+msgdlg.cpp	R
+notebook.cpp	R
+palette.cpp	R
+pen.cpp	R
+radiobox.cpp	R
+radiobut.cpp	R
+region.cpp	R
+scrolbar.cpp	R
+settings.cpp	R
+slider.cpp	R
+spinbutt.cpp	R
+statbmp.cpp	R
+statbox.cpp	R
+statline.cpp	R
+stattext.cpp	R
+tbargtk.cpp	R
+textctrl.cpp	R
+textdlg.cpp	R
+timer.cpp	R
+tooltip.cpp	R
+utilsgtk.cpp	R
+utilsres.cpp	R
+wave.cpp	R
+window.cpp	R
+
+htmlcell.cpp	H
+htmlfilter.cpp	H
+htmlhelp.cpp	H
+htmlhelp_io.cpp	H
+htmlparser.cpp	H
+htmltag.cpp	H
+htmlwin.cpp	H
+htmlwinparser.cpp	H
+mod_fonts.cpp	H
+mod_hline.cpp	H
+mod_image.cpp	H
+mod_layout.cpp	H
+mod_links.cpp	H
+mod_list.cpp	H
+mod_pre.cpp	H
+mod_tables.cpp	H
+search.cpp	H
+
+arrimpl.cpp	I	WX
+listimpl.cpp	I	WX
+accel.h	I	WX
+app.h	I	WX
+bitmap.h	I	WX
+bmpbuttn.h	I	WX
+brush.h	I	WX
+buffer.h	I	WX
+busyinfo.h	I	WX
+button.h	I	WX
+caret.h	I	WX
+checkbox.h	I	WX
+checklst.h	I	WX
+choicdlg.h	I	WX
+choice.h	I	WX
+clipbrd.h	I	WX
+cmndata.h	I	WX
+colordlg.h	I	WX
+colour.h	I	WX
+combobox.h	I	WX
+confbase.h	I	WX
+config.h	I	WX
+control.h	I	WX
+cursor.h	I	WX
+dataobj.h	I	WX
+date.h	I	WX
+datstrm.h	I	WX
+db.h	I	WX
+dbtable.h	I	WX
+dc.h	I	WX
+dcclient.h	I	WX
+dcmemory.h	I	WX
+dcprint.h	I	WX
+dcps.h	I	WX
+dcscreen.h	I	WX
+dde.h	I	WX
+debug.h	I	WX
+defs.h	I	WX
+dialog.h	I	WX
+dirdlg.h	I	WX
+dnd.h	I	WX
+docmdi.h	I	WX
+docview.h	I	WX
+dragimag.h	I	WX
+dynarray.h	I	WX
+dynlib.h	I	WX
+event.h	I	WX
+expr.h	I	WX
+extdlg.h	I	WX
+ffile.h	I	WX
+file.h	I	WX
+fileconf.h	I	WX
+filedlg.h	I	WX
+filefn.h	I	WX
+filesys.h	I	WX
+font.h	I	WX
+fontdlg.h	I	WX
+frame.h	I	WX
+fs_inet.h	I	WX
+fs_zip.h	I	WX
+gauge.h	I	WX
+gdicmn.h	I	WX
+gdiobj.h	I	WX
+grid.h	I	WX
+hash.h	I	WX
+help.h	I	WX
+helpbase.h	I	WX
+helphtml.h	I	WX
+helpwin.h	I	WX
+helpxlp.h	I	WX
+icon.h	I	WX
+image.h	I	WX
+imaglist.h	I	WX
+intl.h	I	WX
+ioswrap.h	I	WX
+ipcbase.h	I	WX
+joystick.h	I	WX
+layout.h	I	WX
+laywin.h	I	WX
+list.h	I	WX
+listbox.h	I	WX
+listctrl.h	I	WX
+log.h	I	WX
+longlong.h	I	WX
+matrix.h	I	WX
+mdi.h	I	WX
+memory.h	I	WX
+menu.h	I	WX
+menuitem.h	I	WX
+metafile.h	I	WX
+mimetype.h	I	WX
+minifram.h	I	WX
+module.h	I	WX
+msgdlg.h	I	WX
+mstream.h	I	WX
+notebook.h	I	WX
+object.h	I	WX
+objstrm.h	I	WX
+odbc.h	I	WX
+ownerdrw.h	I	WX
+palette.h	I	WX
+panel.h	I	WX
+paper.h	I	WX
+pen.h	I	WX
+pnghand.h	I	WX
+print.h	I	WX
+printdlg.h	I	WX
+prntbase.h	I	WX
+process.h	I	WX
+progdlg.h	I	WX
+prop.h	I	WX
+propform.h	I	WX
+proplist.h	I	WX
+radiobox.h	I	WX
+radiobut.h	I	WX
+region.h	I	WX
+resource.h	I	WX
+sashwin.h	I	WX
+sckaddr.h	I	WX
+sckipc.h	I	WX
+sckstrm.h	I	WX
+scrolbar.h	I	WX
+scrolwin.h	I	WX
+serbase.h	I	WX
+settings.h	I	WX
+setup.h	I	WX
+slider.h	I	WX
+socket.h	I	WX
+spinbutt.h	I	WX
+splitter.h	I	WX
+statbmp.h	I	WX
+statbox.h	I	WX
+statline.h	I	WX
+stattext.h	I	WX
+statusbr.h	I	WX
+stream.h	I	WX
+string.h	I	WX
+tab.h	I	WX
+tabctrl.h	I	WX
+taskbar.h	I	WX
+tbar95.h	I	WX
+tbarbase.h	I	WX
+tbarmsw.h	I	WX
+tbarsmpl.h	I	WX
+textctrl.h	I	WX
+textdlg.h	I	WX
+textfile.h	I	WX
+txtstrm.h	I	WX
+thread.h	I	WX
+time.h	I	WX
+timer.h	I	WX
+tipdlg.h	I	WX
+tokenzr.h	I	WX
+toolbar.h	I	WX
+tooltip.h	I	WX
+treectrl.h	I	WX
+types.h	I	WX
+url.h	I	WX
+utils.h	I	WX
+valgen.h	I	WX
+validate.h	I	WX
+valtext.h	I	WX
+variant.h	I	WX
+version.h	I	WX
+wave.h	I	WX
+wfstream.h	I	WX
+window.h	I	WX
+wx.h	I	WX
+wx_cw.h	I	WX
+wx_cw_cm.h	I	WX
+wx_cw_d.h	I	WX
+wxchar.h	I	WX
+wxexpr.h	I	WX
+wxhtml.h	I	WX
+wxprec.h	I	WX
+xpmhand.h	I	WX
+zipstream.h	I	WX
+zstream.h	I	WX
+
+accel.h	I	GTK
+app.h	I	GTK
+bitmap.h	I	GTK
+bmpbuttn.h	I	GTK
+brush.h	I	GTK
+button.h	I	GTK
+checkbox.h	I	GTK
+checklst.h	I	GTK
+choice.h	I	GTK
+choicdlg.h	I	GTK
+clipbrd.h	I	GTK
+colour.h	I	GTK
+combobox.h	I	GTK
+control.h	I	GTK
+cursor.h	I	GTK
+dataobj.h	I	GTK
+dc.h	I	GTK
+dcclient.h	I	GTK
+dcmemory.h	I	GTK
+dcscreen.h	I	GTK
+dialog.h	I	GTK
+dnd.h	I	GTK
+filedlg.h	I	GTK
+font.h	I	GTK
+frame.h	I	GTK
+gauge.h	I	GTK
+gdiobj.h	I	GTK
+icon.h	I	GTK
+joystick.h	I	GTK
+listbox.h	I	GTK
+mdi.h	I	GTK
+menu.h	I	GTK
+menuitem.h	I	GTK
+msgdlg.h	I	GTK
+minifram.h	I	GTK
+notebook.h	I	GTK
+palette.h	I	GTK
+pen.h	I	GTK
+radiobox.h	I	GTK
+radiobut.h	I	GTK
+region.h	I	GTK
+scrolbar.h	I	GTK
+settings.h	I	GTK
+slider.h	I	GTK
+spinbutt.h	I	GTK
+statbmp.h	I	GTK
+statbox.h	I	GTK
+statline.h	I	GTK
+stattext.h	I	GTK
+tbargtk.h	I	GTK
+textctrl.h	I	GTK
+textdlg.h	I	GTK
+timer.h	I	GTK
+tooltip.h	I	GTK
+treectrl.h	I	GTK
+wave.h	I	GTK
+win_gtk.h	I	GTK
+window.h	I	GTK
+
+# vi: set noet ts=16 nolist:

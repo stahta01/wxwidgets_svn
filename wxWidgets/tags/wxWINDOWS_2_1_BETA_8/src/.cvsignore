@@ -1,0 +1,7 @@
+FreeBSD
+Linux
+linux
+linux-gnu
+Makefile.in
+*.lo
+*.la
