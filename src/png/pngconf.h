@@ -1,7 +1,7 @@
 
 /* pngconf.h - machine configurable file for libpng
  *
- * libpng version 1.2.6 - August 15, 2004
+ * libpng version 1.2.7 - September 12, 2004
  * For conditions of distribution and use, see copyright notice in png.h
  * Copyright (c) 1998-2004 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
@@ -85,9 +85,9 @@
  * 'Cygwin' defines/defaults:
  *   PNG_BUILD_DLL -- (ignored) building the dll
  *   (no define)   -- (ignored) building an application, linking to the dll
- *   PNG_STATIC    -- (ignored) building the static lib, or building an
+ *   PNG_STATIC    -- (ignored) building the static lib, or building an 
  *                    application that links to the static lib.
- *   ALL_STATIC    -- (ignored) building various static libs, or building an
+ *   ALL_STATIC    -- (ignored) building various static libs, or building an 
  *                    application that links to the static libs.
  * Thus,
  * a cygwin user should define either PNG_BUILD_DLL or PNG_STATIC, and
@@ -100,12 +100,12 @@
  *   PNG_BUILD_DLL
  *   PNG_STATIC
  *   (nothing) == PNG_USE_DLL
- *
+ * 
  * CYGWIN (2002-01-20): The preceding is now obsolete. With the advent
- *   of auto-import in binutils, we no longer need to worry about
+ *   of auto-import in binutils, we no longer need to worry about 
  *   __declspec(dllexport) / __declspec(dllimport) and friends.  Therefore,
  *   we don't need to worry about PNG_STATIC or ALL_STATIC when it comes
- *   to __declspec() stuff.  However, we DO need to worry about
+ *   to __declspec() stuff.  However, we DO need to worry about 
  *   PNG_BUILD_DLL and PNG_STATIC because those change some defaults
  *   such as CONSOLE_IO and whether GLOBAL_ARRAYS are allowed.
  */
@@ -149,8 +149,8 @@
 #        if !defined(PNG_DLL)
 #          define PNG_DLL
 #        endif
-#      endif
-#    endif
+#      endif  
+#    endif  
 #  endif
 #endif
 
@@ -232,7 +232,7 @@
  */
 #ifndef MACOS
 #  if (defined(__MWERKS__) && defined(macintosh)) || defined(applec) || \
-      defined(THINK_C) || (defined(__SC__) && !defined(__DMC__))|| defined(TARGET_OS_MAC)
+      defined(THINK_C) || defined(__SC__) || defined(TARGET_OS_MAC)
 #    define MACOS
 #  endif
 #endif
@@ -589,13 +589,6 @@
 #  endif
 #endif /* PNG_WRITE_TRANSFORMS_SUPPORTED */
 
-#if defined(PNG_READ_USER_TRANSFORM_SUPPORTED) || \
-    defined(PNG_WRITE_USER_TRANSFORM_SUPPORTED)
-#  ifndef PNG_NO_USER_TRANSFORM_PTR
-#    define PNG_USER_TRANSFORM_PTR_SUPPORTED
-#  endif
-#endif
-
 #define PNG_WRITE_INTERLACING_SUPPORTED  /* not required for PNG-compliant
                                             encoders, but can cause trouble
                                             if left undefined */
@@ -604,12 +597,6 @@
      defined(PNG_FLOATING_POINT_SUPPORTED)
 #  define PNG_WRITE_WEIGHTED_FILTER_SUPPORTED
 #endif
-
-#ifndef PNG_1_0_X
-#ifndef PNG_NO_ERROR_NUMBERS
-#define PNG_ERROR_NUMBERS_SUPPORTED
-#endif
-#endif /* PNG_1_0_X */
 
 #ifndef PNG_NO_WRITE_FLUSH
 #  define PNG_WRITE_FLUSH_SUPPORTED
@@ -621,6 +608,19 @@
 #endif
 
 #endif /* PNG_WRITE_SUPPORTED */
+
+#ifndef PNG_1_0_X
+#  ifndef PNG_NO_ERROR_NUMBERS
+#    define PNG_ERROR_NUMBERS_SUPPORTED
+#  endif
+#endif /* PNG_1_0_X */
+
+#if defined(PNG_READ_USER_TRANSFORM_SUPPORTED) || \
+    defined(PNG_WRITE_USER_TRANSFORM_SUPPORTED)
+#  ifndef PNG_NO_USER_TRANSFORM_PTR
+#    define PNG_USER_TRANSFORM_PTR_SUPPORTED
+#  endif
+#endif
 
 #ifndef PNG_NO_STDIO
 #  define PNG_TIME_RFC1123_SUPPORTED
@@ -646,7 +646,7 @@
 #  define PNG_EASY_ACCESS_SUPPORTED
 #endif
 
-/* PNG_ASSEMBLER_CODE was enabled by default in version 1.2.0
+/* PNG_ASSEMBLER_CODE was enabled by default in version 1.2.0 
    even when PNG_USE_PNGVCRD or PNG_USE_PNGGCCRD is not defined */
 #if defined(PNG_READ_SUPPORTED) && !defined(PNG_NO_ASSEMBLER_CODE)
 #  ifndef PNG_ASSEMBLER_CODE_SUPPORTED
@@ -1186,16 +1186,12 @@ typedef z_stream FAR *  png_zstreamp;
 #  endif
 #endif
 
-#if defined(__CYGWIN__) || defined(__WINE__)
+#if defined(__CYGWIN__)
 #  undef PNGAPI
-#  if defined(__WINE__)
-#    define PNGAPI
-#  else
-#    define PNGAPI __cdecl
-#  endif
+#  define PNGAPI __cdecl
 #  undef PNG_IMPEXP
 #  define PNG_IMPEXP
-#endif
+#endif  
 
 /* If you define PNGAPI, e.g., with compiler option "-DPNGAPI=__stdcall",
  * you may get warnings regarding the linkage of png_zalloc and png_zfree.
@@ -1268,21 +1264,7 @@ typedef z_stream FAR *  png_zstreamp;
 #   else
 #      if 0 /* ... other platforms, with other meanings */
 #      endif
-#    endif
-#endif
-
-#if defined(__VISAGECPP__)
-/* I don't compile with this _System linkage for wxWidgets */
-#  ifdef PNGAPI
-#    undef PNGAPI
-#  endif
-#  define PNGAPI _Optlink
-#  define PNG_IMPEXP
-#  define PNG_USE_LOCAL_ARRAYS
-#  ifdef PNG_USE_GLOBAL_ARRAYS
-#    undef PNG_USE_GLOBAL_ARRAYS
-#  endif
-extern const char png_libpng_ver[18];
+#   endif
 #endif
 
 #ifndef PNGAPI
@@ -1363,7 +1345,7 @@ extern const char png_libpng_ver[18];
 #  define PNG_MMX_ROWBYTES_THRESHOLD_DEFAULT  128  /*  >=  */
 #endif
 #ifndef PNG_MMX_BITDEPTH_THRESHOLD_DEFAULT
-#  define PNG_MMX_BITDEPTH_THRESHOLD_DEFAULT  9    /*  >=  */
+#  define PNG_MMX_BITDEPTH_THRESHOLD_DEFAULT  9    /*  >=  */   
 #endif
 
 /* Set this in the makefile for VC++ on Pentium, not here. */
