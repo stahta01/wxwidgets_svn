@@ -19,7 +19,8 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GRID || wxUSE_NEW_GRID
+
+#if wxUSE_GRID || wxUSE_NEW_GRID 
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
@@ -207,16 +208,13 @@ void wxGridCellEnumRenderer::SetParameters(const wxString& params)
     }
 }
 
-#if wxUSE_COMBOBOX
-
 // ----------------------------------------------------------------------------
 // wxGridCellEnumEditor
 // ----------------------------------------------------------------------------
-
-// A cell editor which displays an enum number as a textual equivalent. eg
-// data in cell is 0,1,2 ... n the cell could be displayed as
-// "John","Fred"..."Bob" in the combo choice box
-
+// A cell editor which displays an enum number as a textual equivalent.
+// eg data in cell is 0,1,2 ... n the cell could be displayed as "John","Fred"..."Bob"
+// in the combo choice box
+//
 wxGridCellEnumEditor::wxGridCellEnumEditor(const wxString& choices)
                     : wxGridCellChoiceEditor()
 {
@@ -278,11 +276,6 @@ bool wxGridCellEnumEditor::EndEdit(int row, int col, wxGrid* grid)
     return changed;
 }
 
-#endif // wxUSE_COMBOBOX
-
-// ----------------------------------------------------------------------------
-// wxGridCellAutoWrapStringEditor
-// ----------------------------------------------------------------------------
 
 void
 wxGridCellAutoWrapStringEditor::Create(wxWindow* parent,
@@ -396,5 +389,4 @@ wxGridCellAutoWrapStringRenderer::GetBestSize(wxGrid& grid,
     return wxSize(width,height);
 }
 
-#endif // wxUSE_GRID
-
+#endif

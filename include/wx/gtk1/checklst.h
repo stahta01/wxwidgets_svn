@@ -15,6 +15,15 @@
 #pragma interface
 #endif
 
+#include "wx/defs.h"
+
+#if wxUSE_CHECKLISTBOX
+
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/control.h"
+#include "wx/listbox.h"
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -28,7 +37,7 @@
     #define wxCHECKLBOX_STRING    _T("[ ] ")
 #endif
 
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // wxCheckListBox
 // ----------------------------------------------------------------------------
 
@@ -53,5 +62,7 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 };
+
+#endif
 
 #endif   //__GTKCHECKLISTH__

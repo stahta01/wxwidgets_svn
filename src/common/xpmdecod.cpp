@@ -523,14 +523,12 @@ static bool GetRGBFromName(const char *inname, bool *isNone,
     char *name;
     char *grey, *p;
 
-    // Neither #rrggbb nor #rrrrggggbbbb are in database, we parse them directly
-    size_t inname_len = strlen(inname);
-    if ( *inname == '#' && (inname_len == 7 || inname_len == 13))
+    // #rrggbb are not in database, we parse them directly
+    if ( *inname == '#' && strlen(inname) == 7 )
     {
-        size_t ofs = (inname_len == 7) ? 2 : 4;
         *r = ParseHexadecimal(inname[1], inname[2]);
-        *g = ParseHexadecimal(inname[1*ofs+1], inname[1*ofs+2]);
-        *b = ParseHexadecimal(inname[2*ofs+1], inname[2*ofs+2]);
+        *g = ParseHexadecimal(inname[3], inname[4]);
+        *b = ParseHexadecimal(inname[5], inname[6]);
         *isNone = FALSE;
         return TRUE;
     }
@@ -753,5 +751,6 @@ wxImage wxXPMDecoder::ReadData(const char **xpm_data)
 
     return img;
 }
+
 
 #endif // wxUSE_IMAGE && wxUSE_XPM

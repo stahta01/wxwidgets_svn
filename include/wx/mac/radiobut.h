@@ -16,6 +16,10 @@
 #pragma interface "radiobut.h"
 #endif
 
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxRadioButtonNameStr;
+
 class WXDLLEXPORT wxRadioButton: public wxControl
 {
   DECLARE_DYNAMIC_CLASS(wxRadioButton)

@@ -3,7 +3,9 @@
 #include "wx/mac/uma.h"
 #include "wx/mac/aga.h"
 
-#ifndef __UNIX__
+#ifdef __UNIX__
+  #include <Carbon/Carbon.h>
+#else
   #include <Navigation.h>
 #endif
 
@@ -289,11 +291,7 @@ void UMAInsertMenu( MenuRef insertMenu , SInt16 afterId )
 
 int gPrOpenCounter = 0 ;
 
-#if TARGET_CARBON && PM_USE_SESSION_APIS
-OSStatus UMAPrOpen(PMPrintSession *macPrintSession)
-#else
-OSStatus UMAPrOpen()
-#endif
+OSStatus UMAPrOpen() 
 {
 #if !TARGET_CARBON
 	OSErr err = noErr ;
@@ -310,22 +308,14 @@ OSStatus UMAPrOpen()
 	++gPrOpenCounter ;
 	if ( gPrOpenCounter == 1 )
 	{
-  #if PM_USE_SESSION_APIS
-	    err = PMCreateSession(macPrintSession) ;
-  #else
-	    err = PMBegin() ;
-  #endif
+		err = PMBegin() ;
 		wxASSERT( err == noErr ) ;
 	}
 	return err ;
 #endif
 }
 
-#if TARGET_CARBON && PM_USE_SESSION_APIS
-OSStatus UMAPrClose(PMPrintSession *macPrintSession)
-#else
-OSStatus UMAPrClose()
-#endif
+OSStatus UMAPrClose() 
 {
 #if !TARGET_CARBON
 	OSErr err = noErr ;
@@ -343,12 +333,7 @@ OSStatus UMAPrClose()
 	wxASSERT( gPrOpenCounter >= 1 ) ;
 	if ( gPrOpenCounter == 1 )
 	{
-  #if PM_USE_SESSION_APIS
-	    err = PMRelease(*macPrintSession) ;
-	    *macPrintSession = kPMNoReference;
-  #else
-	    err = PMEnd() ;
-  #endif
+		err = PMEnd() ;
 	}
 	--gPrOpenCounter ;
 	return err ;

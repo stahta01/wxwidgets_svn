@@ -900,13 +900,11 @@ bool wxYield()
 #endif
     EventRecord event ;
 
-	long sleepTime = 1 ; //::GetCaretTime();
+	long sleepTime = 0 ; //::GetCaretTime();
 
 	while ( !wxTheApp->IsExiting() && WaitNextEvent(everyEvent, &event,sleepTime, wxApp::s_macCursorRgn))
 	{
     	wxTheApp->MacHandleOneEvent( &event );
-	    if ( event.what != kHighLevelEvent )
-		    SetRectRgn( wxApp::s_macCursorRgn , event.where.h , event.where.v ,  event.where.h + 1 , event.where.v + 1 ) ;
 	}
 
 	wxMacProcessNotifierAndPendingEvents() ;

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/msw/frame.h
-// Purpose:     wxFrameMSW class
+// Purpose:     wxFrame class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
@@ -16,18 +16,18 @@
     #pragma interface "frame.h"
 #endif
 
-class WXDLLEXPORT wxFrameMSW : public wxFrameBase
+class WXDLLEXPORT wxFrame : public wxFrameBase
 {
 public:
     // construction
-    wxFrameMSW() { Init(); }
-    wxFrameMSW(wxWindow *parent,
-               wxWindowID id,
-               const wxString& title,
-               const wxPoint& pos = wxDefaultPosition,
-               const wxSize& size = wxDefaultSize,
-               long style = wxDEFAULT_FRAME_STYLE,
-               const wxString& name = wxFrameNameStr)
+    wxFrame() { Init(); }
+    wxFrame(wxWindow *parent,
+            wxWindowID id,
+            const wxString& title,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxDEFAULT_FRAME_STYLE,
+            const wxString& name = wxFrameNameStr)
     {
         Init();
 
@@ -42,7 +42,7 @@ public:
                 long style = wxDEFAULT_FRAME_STYLE,
                 const wxString& name = wxFrameNameStr);
 
-    virtual ~wxFrameMSW();
+    virtual ~wxFrame();
 
     // implement base class pure virtuals
     virtual void Maximize(bool maximize = TRUE);
@@ -137,11 +137,9 @@ protected:
     // helper
     void DetachMenuBar();
 
-#if wxUSE_MENUS_NATIVE
     // a plug in for MDI frame classes which need to do something special when
     // the menubar is set
     virtual void InternalSetMenuBar();
-#endif // wxUSE_MENUS_NATIVE
 
     // propagate our state change to all child frames
     void IconizeChildFrames(bool bIconize);
@@ -186,8 +184,8 @@ private:
     WXHWND                m_hwndToolTip;
 #endif // tooltips
 
-    DECLARE_DYNAMIC_CLASS(wxFrameMSW)
     DECLARE_EVENT_TABLE()
+    DECLARE_DYNAMIC_CLASS(wxFrame)
 };
 
 #endif

@@ -80,6 +80,7 @@ void wxNotebook::Init()
     m_macHorizontalBorder = 7;
     m_macVerticalBorder = 8;
 #endif
+    m_pImageList = NULL;
     m_nSelection = -1;
 }
 
@@ -131,17 +132,14 @@ wxNotebook::~wxNotebook()
 // ----------------------------------------------------------------------------
 // wxNotebook accessors
 // ----------------------------------------------------------------------------
-
-void wxNotebook::SetPadding(const wxSize& padding)
+int wxNotebook::GetPageCount() const
 {
+    return m_aPages.Count();
 }
 
-void wxNotebook::SetTabSize(const wxSize& sz)
+int wxNotebook::GetRowCount() const
 {
-}
-
-void wxNotebook::SetPageSize(const wxSize& size)
-{
+    return 1;
 }
 
 int wxNotebook::SetSelection(int nPage)
@@ -154,11 +152,24 @@ int wxNotebook::SetSelection(int nPage)
     return m_nSelection;
 }
 
+void wxNotebook::AdvanceSelection(bool bForward)
+{
+    if (GetPageCount() == 0) {
+        return;
+    }
+    int nSel = GetSelection();
+    int nMax = GetPageCount() - 1;
+    if ( bForward )
+        SetSelection(nSel == nMax ? 0 : nSel + 1);
+    else
+        SetSelection(nSel == 0 ? nMax : nSel - 1);
+}
+
 bool wxNotebook::SetPageText(int nPage, const wxString& strText)
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 
-    wxNotebookPage *page = m_pages[nPage];
+    wxNotebookPage *page = m_aPages[nPage];
     page->SetLabel(strText);
     MacSetupTabs();
 
@@ -169,7 +180,7 @@ wxString wxNotebook::GetPageText(int nPage) const
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 
-    wxNotebookPage *page = m_pages[nPage];
+    wxNotebookPage *page = m_aPages[nPage];
     return page->GetLabel();
 }
 
@@ -189,16 +200,23 @@ bool wxNotebook::SetPageImage(int nPage, int nImage)
     return FALSE;
 }
 
+void wxNotebook::SetImageList(wxImageList* imageList)
+{ 
+    m_pImageList = imageList;
+    // TODO
+}
+
 // ----------------------------------------------------------------------------
 // wxNotebook operations
 // ----------------------------------------------------------------------------
 
-// remove one page from the notebook, without deleting the window
-wxNotebookPage* wxNotebook::DoRemovePage(int nPage)
+// remove one page from the notebook
+bool wxNotebook::DeletePage(int nPage)
 {
-    wxCHECK( IS_VALID_PAGE(nPage), NULL );
-    wxNotebookPage* page = m_pages[nPage] ;
-    m_pages.Remove(nPage);
+    wxCHECK( IS_VALID_PAGE(nPage), FALSE );
+
+    delete m_aPages[nPage];
+    m_aPages.Remove(nPage);
 
     MacSetupTabs();
 
@@ -206,9 +224,20 @@ wxNotebookPage* wxNotebook::DoRemovePage(int nPage)
         m_nSelection = GetPageCount() - 1;
     }
     if(m_nSelection >= 0) {
-        m_pages[m_nSelection]->Show(true);
+        m_aPages[m_nSelection]->Show(true);
     }
-    return page;
+
+    return true;
+}
+
+// remove one page from the notebook, without deleting the window
+bool wxNotebook::RemovePage(int nPage)
+{
+    wxCHECK( IS_VALID_PAGE(nPage), FALSE );
+
+    m_aPages.Remove(nPage);
+
+    return TRUE;
 }
 
 // remove all pages
@@ -216,12 +245,26 @@ bool wxNotebook::DeleteAllPages()
 {
     // TODO: delete native widget pages
 
-    WX_CLEAR_ARRAY(m_pages) ;
+    int nPageCount = GetPageCount();
+    int nPage;
+    for ( nPage = 0; nPage < nPageCount; nPage++ )
+        delete m_aPages[nPage];
+
+    m_aPages.Clear();
+
     MacSetupTabs();
 
     return TRUE;
 }
 
+// add a page to the notebook
+bool wxNotebook::AddPage(wxNotebookPage *pPage,
+                         const wxString& strText,
+                         bool bSelect,
+                         int imageId)
+{
+    return InsertPage(GetPageCount(), pPage, strText, bSelect, imageId);
+}
 
 // same as AddPage() but does it at given position
 bool wxNotebook::InsertPage(int nPage,
@@ -236,7 +279,7 @@ bool wxNotebook::InsertPage(int nPage,
     pPage->SetLabel(strText);
 
     // save the pointer to the page
-    m_pages.Insert(pPage, nPage);
+    m_aPages.Insert(pPage, nPage);
 
     MacSetupTabs();
 
@@ -278,7 +321,7 @@ void wxNotebook::MacSetupTabs()
     Boolean enabled = true;
     for(int ii = 0; ii < GetPageCount(); ii++)
     {
-        page = m_pages[ii];
+        page = m_aPages[ii];
         info.version = 0;
         info.iconSuiteID = 0;
 #if TARGET_CARBON
@@ -323,9 +366,9 @@ void wxNotebook::OnSize(wxSizeEvent& event)
     int w, h;
     GetSize(&w, &h);
 
-    unsigned int nCount = m_pages.Count();
+    unsigned int nCount = m_aPages.Count();
     for ( unsigned int nPage = 0; nPage < nCount; nPage++ ) {
-        wxNotebookPage *pPage = m_pages[nPage];
+        wxNotebookPage *pPage = m_aPages[nPage];
         pPage->SetSize(kwxMacTabLeftMargin, kwxMacTabTopMargin,
                        w - kwxMacTabLeftMargin - kwxMacTabRightMargin,
                        h - kwxMacTabTopMargin - kwxMacTabBottomMargin );
@@ -352,7 +395,7 @@ void wxNotebook::OnSetFocus(wxFocusEvent& event)
 {
     // set focus to the currently selected page if any
     if ( m_nSelection != -1 )
-        m_pages[m_nSelection]->SetFocus();
+        m_aPages[m_nSelection]->SetFocus();
 
     event.Skip();
 }
@@ -405,7 +448,7 @@ void wxNotebook::ChangePage(int nOldSel, int nSel)
     // and it may happen - just do nothing
     if ( nSel == nOldSel )
     {
-        wxNotebookPage *pPage = m_pages[nSel];
+        wxNotebookPage *pPage = m_aPages[nSel];
         pPage->Show(FALSE);
         pPage->Show(TRUE);
         pPage->SetFocus();
@@ -414,10 +457,10 @@ void wxNotebook::ChangePage(int nOldSel, int nSel)
 
     // Hide previous page
     if ( nOldSel != -1 ) {
-        m_pages[nOldSel]->Show(FALSE);
+        m_aPages[nOldSel]->Show(FALSE);
     }
 
-    wxNotebookPage *pPage = m_pages[nSel];
+    wxNotebookPage *pPage = m_aPages[nSel];
     pPage->Show(TRUE);
     pPage->SetFocus();
 

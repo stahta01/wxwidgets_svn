@@ -41,7 +41,7 @@
 // #include "wx/msw/private.h" which itself includes <windows.h>, as this
 // one in turn includes <winsock.h> unless we define WIN32_LEAN_AND_MEAN.
 //
-#if defined(__WIN32__) && !defined(__TWIN32__) && !defined(__WXMICROWIN__) && ! (defined(__GNUWIN32__) && !defined(__MINGW32__))
+#if defined(__WIN32__) && !defined(__TWIN32__) && ! (defined(__GNUWIN32__) && !defined(__MINGW32__))
 extern "C" {
     #include <winsock.h>    // we use socket functions in wxGetFullHostName()
 }
@@ -51,7 +51,9 @@ extern "C" {
 
 #include "wx/timer.h"
 
-#if !defined(__GNUWIN32__) && !defined(__WXWINE__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__)
+#include <ctype.h>
+
+#if !defined(__GNUWIN32__) && !defined(__WXWINE__) && !defined(__SALFORDC__)
     #include <direct.h>
 
     #ifndef __MWERKS__
@@ -80,7 +82,7 @@ extern "C" {
     #include <lm.h>
 #endif // USE_NET_API
 
-#if defined(__WIN32__) && !defined(__WXWINE__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__) && !defined(__WXWINE__)
     #include <io.h>
 
     #ifndef __GNUWIN32__
@@ -88,11 +90,15 @@ extern "C" {
     #endif
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #ifndef __WATCOMC__
     #if !(defined(_MSC_VER) && (_MSC_VER > 800))
         #include <errno.h>
     #endif
 #endif
+#include <stdarg.h>
 
 //// BEGIN for console support: VC++ only
 #ifdef __VISUALC__
@@ -103,7 +109,13 @@ extern "C" {
 
 #include "wx/ioswrap.h"
 
-#include "wx/ioswrap.h"
+#if wxUSE_IOSTREAMH
+// N.B. BC++ doesn't have istream.h, ostream.h
+#  include <io.h>
+#  include <fstream.h>
+#else
+#  include <fstream>
+#endif
 
 /* Need to undef new if including crtdbg.h */
 #  ifdef new
@@ -131,12 +143,10 @@ static const wxChar WX_SECTION[] = wxT("wxWindows");
 static const wxChar eUSERNAME[]  = wxT("UserName");
 
 // these are only used under Win16
-#if !defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifndef __WIN32__
 static const wxChar eHOSTNAME[]  = wxT("HostName");
 static const wxChar eUSERID[]    = wxT("UserId");
 #endif // !Win32
-
-#ifndef __WXMICROWIN__
 
 // ============================================================================
 // implementation
@@ -149,7 +159,7 @@ static const wxChar eUSERID[]    = wxT("UserId");
 // Get hostname only (without domain name)
 bool wxGetHostName(wxChar *buf, int maxSize)
 {
-#if defined(__WIN32__) && !defined(__TWIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__) && !defined(__TWIN32__)
     DWORD nSize = maxSize;
     if ( !::GetComputerName(buf, &nSize) )
     {
@@ -175,7 +185,7 @@ bool wxGetHostName(wxChar *buf, int maxSize)
 // get full hostname (with domain name if possible)
 bool wxGetFullHostName(wxChar *buf, int maxSize)
 {
-#if defined(__WIN32__) && !defined(__TWIN32__) && !defined(__WXMICROWIN__) && ! (defined(__GNUWIN32__) && !defined(__MINGW32__))
+#if defined(__WIN32__) && !defined(__TWIN32__) && ! (defined(__GNUWIN32__) && !defined(__MINGW32__))
     // TODO should use GetComputerNameEx() when available
     WSADATA wsa;
     if ( WSAStartup(MAKEWORD(1, 1), &wsa) == 0 )
@@ -220,7 +230,7 @@ bool wxGetFullHostName(wxChar *buf, int maxSize)
 // Get user ID e.g. jacs
 bool wxGetUserId(wxChar *buf, int maxSize)
 {
-#if defined(__WIN32__) && !defined(__win32s__) && !defined(__TWIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__) && !defined(__win32s__) && !defined(__TWIN32__)
     DWORD nSize = maxSize;
     if ( ::GetUserName(buf, &nSize) == 0 )
     {
@@ -425,9 +435,7 @@ wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
 
 bool wxDirExists(const wxString& dir)
 {
-#ifdef __WXMICROWIN__
-    return wxPathExist(dir);
-#elif defined(__WIN32__)
+#if defined(__WIN32__)
     DWORD attribs = GetFileAttributes(dir);
     return ((attribs != (DWORD)-1) && (attribs & FILE_ATTRIBUTE_DIRECTORY));
 #else // Win16
@@ -854,12 +862,10 @@ int wxGetOsVersion(int *majorVsn, int *minorVsn)
 
 #if wxUSE_GUI
 
-#if wxUSE_TIMER
-
 // Sleep for nSecs seconds. Attempt a Windows implementation using timers.
 static bool gs_inTimer = FALSE;
 
-class wxSleepTimer : public wxTimer
+class wxSleepTimer: public wxTimer
 {
 public:
     virtual void Notify()
@@ -875,7 +881,7 @@ void wxUsleep(unsigned long milliseconds)
 {
 #ifdef __WIN32__
     ::Sleep(milliseconds);
-#else // !Win32
+#else
     if (gs_inTimer)
         return;
 
@@ -889,7 +895,7 @@ void wxUsleep(unsigned long milliseconds)
     }
     delete wxTheSleepTimer;
     wxTheSleepTimer = NULL;
-#endif // Win32/!Win32
+#endif
 }
 
 void wxSleep(int nSecs)
@@ -915,8 +921,6 @@ void wxFlushEvents()
 //  wxYield();
 }
 
-#endif // wxUSE_TIMER
-
 #elif defined(__WIN32__) // wxUSE_GUI
 
 void wxUsleep(unsigned long milliseconds)
@@ -930,8 +934,6 @@ void wxSleep(int nSecs)
 }
 
 #endif // wxUSE_GUI/!wxUSE_GUI
-#endif
-  // __WXMICROWIN__
 
 // ----------------------------------------------------------------------------
 // deprecated (in favour of wxLog) log functions
@@ -940,7 +942,6 @@ void wxSleep(int nSecs)
 #if wxUSE_GUI
 
 // Output a debug mess., in a system dependent fashion.
-#ifndef __WXMICROWIN__
 void wxDebugMsg(const wxChar *fmt ...)
 {
   va_list ap;
@@ -972,7 +973,6 @@ void wxFatalError(const wxString& msg, const wxString& title)
   wxSprintf(wxBuffer, wxT("%s: %s"), WXSTRINGCAST title, WXSTRINGCAST msg);
   FatalAppExit(0, (LPCTSTR)wxBuffer);
 }
-#endif // __WXMICROWIN__
 
 // ----------------------------------------------------------------------------
 // functions to work with .INI files
@@ -1099,9 +1099,7 @@ void wxBeginBusyCursor(wxCursor *cursor)
     if ( gs_wxBusyCursorCount++ == 0 )
     {
         gs_wxBusyCursor = (HCURSOR)cursor->GetHCURSOR();
-#ifndef __WXMICROWIN__
         gs_wxBusyCursorOld = ::SetCursor(gs_wxBusyCursor);
-#endif
     }
     //else: nothing to do, already set
 }
@@ -1114,9 +1112,8 @@ void wxEndBusyCursor()
 
     if ( --gs_wxBusyCursorCount == 0 )
     {
-#ifndef __WXMICROWIN__
         ::SetCursor(gs_wxBusyCursorOld);
-#endif
+
         gs_wxBusyCursorOld = 0;
     }
 }
@@ -1146,7 +1143,6 @@ bool wxCheckForInterrupt(wxWindow *wnd)
 // MSW only: get user-defined resource from the .res file.
 // Returns NULL or newly-allocated memory, so use delete[] to clean up.
 
-#ifndef __WXMICROWIN__
 wxChar *wxLoadUserResource(const wxString& resourceName, const wxString& resourceType)
 {
     HRSRC hResource = ::FindResource(wxGetInstance(), resourceName, resourceType);
@@ -1180,7 +1176,6 @@ wxChar *wxLoadUserResource(const wxString& resourceName, const wxString& resourc
 
     return s;
 }
-#endif
 
 // ----------------------------------------------------------------------------
 // get display info
@@ -1199,10 +1194,6 @@ void wxGetMousePosition( int* x, int* y )
 // Return TRUE if we have a colour display
 bool wxColourDisplay()
 {
-#ifdef __WXMICROWIN__
-    // MICROWIN_TODO
-    return TRUE;
-#else
     // this function is called from wxDC ctor so it is called a *lot* of times
     // hence we optimize it a bit but doign the check only once
     //
@@ -1219,7 +1210,6 @@ bool wxColourDisplay()
     }
 
     return s_isColour != 0;
-#endif
 }
 
 // Returns depth of screen
@@ -1232,37 +1222,23 @@ int wxDisplayDepth()
 // Get size of display
 void wxDisplaySize(int *width, int *height)
 {
-#ifdef __WXMICROWIN__
-    RECT rect;
-    HWND hWnd = GetDesktopWindow();
-    ::GetWindowRect(hWnd, & rect);
-
-    *width = rect.right - rect.left;
-    *height = rect.bottom - rect.top;
-#else
     ScreenHDC dc;
 
     if ( width ) *width = GetDeviceCaps(dc, HORZRES);
     if ( height ) *height = GetDeviceCaps(dc, VERTRES);
-#endif
 }
 
 void wxDisplaySizeMM(int *width, int *height)
 {
-#ifdef __WXMICROWIN__
-    // MICROWIN_TODO
-    *width = 0; * height = 0;
-#else
     ScreenHDC dc;
 
     if ( width ) *width = GetDeviceCaps(dc, HORZSIZE);
     if ( height ) *height = GetDeviceCaps(dc, VERTSIZE);
-#endif
 }
 
 void wxClientDisplayRect(int *x, int *y, int *width, int *height)
 {
-#if defined(__WIN16__) || defined(__WXMICROWIN__)
+#ifdef __WIN16__
     *x = 0; *y = 0;
     wxDisplaySize(width, height);
 #else
@@ -1295,10 +1271,6 @@ wxString WXDLLEXPORT wxGetWindowText(WXHWND hWnd)
 
 wxString WXDLLEXPORT wxGetWindowClass(WXHWND hWnd)
 {
-#ifdef __WXMICROWIN__
-    // MICROWIN_TODO
-    return wxEmptyString;
-#else
     wxString str;
 
     int len = 256; // some starting value
@@ -1338,7 +1310,6 @@ wxString WXDLLEXPORT wxGetWindowClass(WXHWND hWnd)
     }
 
     return str;
-#endif
 }
 
 WXWORD WXDLLEXPORT wxGetWindowId(WXHWND hWnd)
@@ -1613,13 +1584,4 @@ void wxRedirectIOToConsole()
 }
 #endif
 
-#ifdef __WXMICROWIN__
-int wxGetOsVersion(int *majorVsn, int *minorVsn)
-{
-    // MICROWIN_TODO
-    if (majorVsn) *majorVsn = 0;
-    if (minorVsn) *minorVsn = 0;
-    return wxUNIX;
-}
-#endif
 

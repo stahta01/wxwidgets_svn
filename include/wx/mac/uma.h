@@ -82,13 +82,8 @@ void			UMADrawMenuBar() ;
 void			UMAShowWatchCursor() ;
 void			UMAShowArrowCursor() ;
 
-#if TARGET_CARBON && PM_USE_SESSION_APIS
-OSStatus		UMAPrOpen(PMPrintSession *macPrintSession) ;
-OSStatus		UMAPrClose(PMPrintSession *macPrintSession) ;
-#else
 OSStatus		UMAPrOpen() ;
 OSStatus		UMAPrClose() ;
-#endif
 
 // window manager
 

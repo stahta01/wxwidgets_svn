@@ -63,14 +63,12 @@
     #pragma hdrstop
 #endif
 
-#if !defined(wxUSE_DATETIME) || wxUSE_DATETIME
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
+    #include "wx/intl.h"
     #include "wx/log.h"
 #endif // WX_PRECOMP
 
-#include "wx/intl.h"
 #include "wx/thread.h"
 #include "wx/tokenzr.h"
 #include "wx/module.h"
@@ -3713,4 +3711,4 @@ size_t wxDateTimeWorkDays::DoGetHolidaysInRange(const wxDateTime& dtStart,
     return holidays.GetCount();
 }
 
-#endif // wxUSE_DATETIME
+

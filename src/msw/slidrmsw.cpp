@@ -41,6 +41,7 @@ wxSliderMSW::wxSliderMSW()
   m_lineSize = 1;
   m_rangeMax = 0;
   m_rangeMin = 0;
+  m_tickFreq = 0;
 }
 
 bool wxSliderMSW::Create(wxWindow *parent, wxWindowID id,
@@ -65,6 +66,7 @@ bool wxSliderMSW::Create(wxWindow *parent, wxWindowID id,
   m_pageSize = 1;
   m_lineSize = 1;
   m_windowStyle = style;
+  m_tickFreq = 0;
 
   if ( id == -1 )
       m_windowId = (int)NewControlId();
@@ -489,6 +491,11 @@ WXHBRUSH wxSliderMSW::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
   return wxControl::OnCtlColor(pDC, pWnd, nCtlColor, message, wParam, lParam);
 }
 
+// For trackbars only
+void wxSliderMSW::SetTickFreq(int n, int pos)
+{
+}
+
 void wxSliderMSW::SetPageSize(int pageSize)
 {
   m_pageSize = pageSize;
@@ -497,6 +504,14 @@ void wxSliderMSW::SetPageSize(int pageSize)
 int wxSliderMSW::GetPageSize() const
 {
   return m_pageSize;
+}
+
+void wxSliderMSW::ClearSel()
+{
+}
+
+void wxSliderMSW::ClearTicks()
+{
 }
 
 void wxSliderMSW::SetLineSize(int lineSize)
@@ -509,15 +524,31 @@ int wxSliderMSW::GetLineSize() const
   return m_lineSize;
 }
 
-// Not yet implemented
-void wxSliderMSW::SetThumbLength(int WXUNUSED(lenPixels))
+int wxSliderMSW::GetSelEnd() const
+{
+  return 0;
+}
+
+int wxSliderMSW::GetSelStart() const
+{
+  return 0;
+}
+
+void wxSliderMSW::SetSelection(int minPos, int maxPos)
 {
 }
 
-// Not yet implemented
+void wxSliderMSW::SetThumbLength(int len)
+{
+}
+
 int wxSliderMSW::GetThumbLength() const
 {
-    return 0;
+  return 0;
+}
+
+void wxSliderMSW::SetTick(int tickPos)
+{
 }
 
 bool wxSliderMSW::ContainsHWND(WXHWND hWnd) const

@@ -23,12 +23,11 @@
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
+#include "wx/msw/private.h"
 
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
-
-#if wxUSE_DRAGIMAGE
 
 #if defined(__WIN95__)
 
@@ -42,7 +41,6 @@
 #include "wx/settings.h"
 #endif
 
-#include "wx/msw/private.h"
 #include "wx/log.h"
 #include "wx/intl.h"
 #include "wx/frame.h"
@@ -435,4 +433,3 @@ bool wxDragImage::Hide()
 #endif
     // __WIN95__
 
-#endif // wxUSE_DRAGIMAGE

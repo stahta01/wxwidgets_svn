@@ -21,11 +21,10 @@
 #include "wx/colour.h"
 #include "wx/gdicmn.h"
 
-#if defined(__WXMAC__) && defined(TARGET_CARBON) && !defined(__UNIX__)
-  #if PM_USE_SESSION_APIS
-    #include <PMCore.h>
-  #endif
+#if defined(__WXMAC__) && defined(TARGET_CARBON)
+  #if !defined(__UNIX__)
     #include <PMApplication.h>
+  #endif
 #endif
 
 #if (defined(__WXMOTIF__) || defined(__WXGTK__) || defined(__WXPM__) || defined(__WXMAC__)) && wxUSE_POSTSCRIPT
@@ -194,12 +193,12 @@ public:
     void*           m_devMode;
     void*           m_devNames;
 #elif defined( __WXMAC__  )
-  #if TARGET_CARBON
+#if TARGET_CARBON
     PMPageFormat    m_macPageFormat ;
     PMPrintSettings m_macPrintSettings ;
-  #else
+#else
 	THPrint 		m_macPrintInfo ;
-  #endif
+#endif
 #endif
 
 private:

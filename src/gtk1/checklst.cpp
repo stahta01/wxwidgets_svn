@@ -11,11 +11,9 @@
 #pragma implementation "checklst.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/checklst.h"
 
 #if wxUSE_CHECKLISTBOX
-
-#include "wx/checklst.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>

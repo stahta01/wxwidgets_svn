@@ -20,8 +20,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TIMER
-
 #ifndef WX_PRECOMP
     #include "wx/setup.h"
     #include "wx/window.h"
@@ -82,18 +80,11 @@ bool wxTimer::Start(int milliseconds, bool oneShot)
     wxCHECK_MSG( m_milli > 0, FALSE, wxT("invalid value for timer timeour") );
 
     wxTimerList.DeleteObject(this);
-
-#ifdef __WXMICROWIN__
-    m_id = SetTimer(NULL, (UINT)(m_id ? m_id : 1),
-                    (UINT)milliseconds, (TIMERPROC) wxTimerProc);
-#else
     TIMERPROC wxTimerProcInst = (TIMERPROC)
         MakeProcInstance((FARPROC)wxTimerProc, wxGetInstance());
 
     m_id = SetTimer(NULL, (UINT)(m_id ? m_id : 1),
                     (UINT)milliseconds, wxTimerProcInst);
-#endif
-
     if ( m_id > 0 )
     {
         wxTimerList.Append(m_id, this);
@@ -145,5 +136,3 @@ UINT WINAPI _EXPORT wxTimerProc(HWND WXUNUSED(hwnd), WORD, int idTimer, DWORD)
 
     return 0;
 }
-
-#endif // wxUSE_TIMER

@@ -52,7 +52,7 @@ protected:
 
   GWorldPtr lpbi;
   int bgindex;
-  wxPalette* m_palette;
+  wxPalette* Palette;
   bool imageOK;
 friend class wxPNGReaderIter;
 public:
@@ -80,7 +80,7 @@ public:
   bool SetPalette(wxPalette* colourmap);
   bool SetPalette(int n, rgb_color_struct *rgb_struct);
   bool SetPalette(int n, byte *r, byte *g=0, byte *b=0);
-  wxPalette* GetPalette() const { return m_palette; }
+  wxPalette* GetPalette() const { return Palette; }
 
   void NullData();
   inline int GetBGIndex(void) { return bgindex; }

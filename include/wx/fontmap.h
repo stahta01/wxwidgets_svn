@@ -20,13 +20,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if wxUSE_FONTMAP
-
 #include "wx/fontenc.h"         // for wxFontEncoding
-
-#if wxUSE_GUI
-    #include "wx/fontutil.h"    // for wxNativeEncodingInfo
-#endif // wxUSE_GUI
 
 #if wxUSE_CONFIG
     class WXDLLEXPORT wxConfigBase;
@@ -166,7 +160,6 @@ protected:
 #if wxUSE_CONFIG
     // config object and path (in it) to use
     wxConfigBase *m_config;
-    bool m_configIsDummy;
 #endif
 
     wxString  m_configRootPath;
@@ -188,7 +181,5 @@ protected:
 
 // the default font mapper for wxWindows programs
 WXDLLEXPORT_DATA(extern wxFontMapper *) wxTheFontMapper;
-
-#endif // wxUSE_FONTMAP
 
 #endif // _WX_FONTMAPPER_H_

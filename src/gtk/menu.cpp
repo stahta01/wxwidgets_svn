@@ -578,14 +578,12 @@ void wxMenuBar::SetLabelTop( size_t pos, const wxString& label )
 
 static void gtk_menu_clicked_callback( GtkWidget *widget, wxMenu *menu )
 {
-    if (g_isIdle)
-        wxapp_install_idle_handler();
+    if (g_isIdle) wxapp_install_idle_handler();
 
     int id = menu->FindMenuIdByMenuItem(widget);
 
     /* should find it for normal (not popup) menu */
-    wxASSERT_MSG( (id != -1) || (menu->GetInvokingWindow() != NULL),
-                  _T("menu item not found in gtk_menu_clicked_callback") );
+    wxASSERT( (id != -1) || (menu->GetInvokingWindow() != NULL) );
 
     if (!menu->IsEnabled(id))
         return;
@@ -609,7 +607,25 @@ static void gtk_menu_clicked_callback( GtkWidget *widget, wxMenu *menu )
         }
     }
 
-    menu->SendEvent(item->GetId(), item->IsCheckable() ? item->IsChecked() : -1);
+    wxCommandEvent event( wxEVT_COMMAND_MENU_SELECTED, id );
+    event.SetEventObject( menu );
+    if (item->IsCheckable())
+        event.SetInt( item->IsChecked() );
+
+#if wxUSE_MENU_CALLBACK
+    if (menu->GetCallback())
+    {
+        (void) (*(menu->GetCallback())) (*menu, event);
+        return;
+    }
+#endif // wxUSE_MENU_CALLBACK
+
+    if (menu->GetEventHandler()->ProcessEvent(event))
+        return;
+
+    wxWindow *win = menu->GetInvokingWindow();
+    if (win)
+        win->GetEventHandler()->ProcessEvent( event );
 }
 
 //-----------------------------------------------------------------------------

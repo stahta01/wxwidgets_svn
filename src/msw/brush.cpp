@@ -127,7 +127,6 @@ bool wxBrush::RealizeResource(void)
                       // - could choose white always for a quick solution
       break;
 ***/
-#ifndef __WXMICROWIN__
       case wxBDIAGONAL_HATCH:
         M_BRUSHDATA->m_hBrush = (WXHBRUSH) CreateHatchBrush(HS_BDIAGONAL,ms_colour) ;
         break ;
@@ -158,7 +157,6 @@ bool wxBrush::RealizeResource(void)
         else
           M_BRUSHDATA->m_hBrush = (WXHBRUSH) CreateSolidBrush(ms_colour) ;
         break ;
-#endif
       case wxSOLID:
       default:
         M_BRUSHDATA->m_hBrush = (WXHBRUSH) CreateSolidBrush(ms_colour) ;

@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_FONTMAP
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/log.h"
@@ -57,7 +55,6 @@
 // ----------------------------------------------------------------------------
 
 // the config paths we use
-#if wxUSE_CONFIG
 static const wxChar* FONTMAPPER_ROOT_PATH = wxT("/wxWindows/FontMapper");
 static const wxChar* FONTMAPPER_CHARSET_PATH = wxT("Charsets");
 static const wxChar* FONTMAPPER_CHARSET_ALIAS_PATH = wxT("Aliases");
@@ -67,7 +64,6 @@ static const wxChar* FONTMAPPER_CHARSET_ALIAS_PATH = wxT("Aliases");
     static const wxChar* FONTMAPPER_FONT_FROM_ENCODING_PATH = wxT("Encodings");
     static const wxChar* FONTMAPPER_FONT_DONT_ASK = wxT("none");
 #endif // wxUSE_GUI
-#endif // wxUSE_CONFIG
 
 // encodings supported by GetEncodingDescription
 static wxFontEncoding gs_encodings[] =
@@ -215,7 +211,6 @@ wxFontMapper::wxFontMapper()
 {
 #if wxUSE_CONFIG
     m_config = NULL;
-    m_configIsDummy = FALSE;
 #endif // wxUSE_CONFIG
 
 #if wxUSE_GUI
@@ -265,25 +260,8 @@ wxConfigBase *wxFontMapper::GetConfig()
             // but will allow us to remember the results of the questions at
             // least during this run
             m_config = new wxMemoryConfig;
-            m_configIsDummy = TRUE;
-            // VS: we can't call wxConfig::Set(m_config) here because that would
-            //     disable automatic wxConfig instance creation if this code was
-            //     called before wxApp::OnInit (this happens in wxGTK -- it sets
-            //     default wxFont encoding in wxApp::Initialize())
+            wxConfig::Set(m_config);
         }
-    }
-
-    if ( m_configIsDummy && wxConfig::Get(FALSE) != NULL )
-    {
-        // VS: in case we created dummy m_config (see above), we want to switch back
-        //     to the real one as soon as one becomes available.
-        m_config = wxConfig::Get(FALSE);
-        m_configIsDummy = FALSE;
-        // FIXME: ideally, we should add keys from dummy config to the real one now,
-        //        but it is a low-priority task because typical wxWin application
-        //        either doesn't use wxConfig at all or creates wxConfig object in 
-        //        wxApp::OnInit(), before any real interaction with the user takes 
-        //        place...
     }
 
     return m_config;
@@ -756,7 +734,6 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
 #endif // wxUSE_CONFIG
 
     // ask the user
-#if wxUSE_FONTDLG
     if ( interactive )
     {
         wxString title(m_titleDialog);
@@ -816,7 +793,6 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
         }
     }
     //else: we're in non-interactive mode
-#endif // wxUSE_FONTDLG
 
     // now try the default mappings:
     wxFontEncodingArray equiv = wxEncodingConverter::GetAllEquivalents(encoding);
@@ -859,5 +835,3 @@ bool wxFontMapper::IsEncodingAvailable(wxFontEncoding encoding,
 }
 
 #endif // wxUSE_GUI
-
-#endif // wxUSE_FONTMAP

@@ -60,7 +60,6 @@ AC_OUTPUT([
             sashtest/Makefile
             scroll/Makefile
             scrollsub/Makefile
-            sockets/Makefile
             splitter/Makefile
             statbar/Makefile
             text/Makefile
@@ -70,7 +69,7 @@ AC_OUTPUT([
             treelay/Makefile
             typetest/Makefile
             validate/Makefile
-            widgets/Makefile
+            sockets/Makefile
             wizard/Makefile
             html/Makefile
             html/about/Makefile

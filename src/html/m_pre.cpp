@@ -20,7 +20,9 @@
 #endif
 
 #ifndef WXPRECOMP
+#include "wx/wx.h"
 #endif
+
 
 #include "wx/html/forcelnk.h"
 #include "wx/html/m_templ.h"
@@ -63,7 +65,7 @@ TAG_HANDLER_BEGIN(PRE, "PRE")
         wxString src, srcMid;
 
         src = *m_WParser->GetSource();
-        srcMid = src.Mid(tag.GetBeginPos(),
+        srcMid = src.Mid(tag.GetBeginPos(), 
                          tag.GetEndPos1() - tag.GetBeginPos());
         srcMid.Replace(wxT("\t"), wxT("        "));
         srcMid.Replace(wxT(" "), wxT("&nbsp;"));
@@ -74,7 +76,7 @@ TAG_HANDLER_BEGIN(PRE, "PRE")
         m_Parser->SetSource(srcMid);
         m_Parser->DoParsing();
         m_Parser->SetSource(src);
-
+        
         m_WParser->CloseContainer();
         c = m_WParser->OpenContainer();
 

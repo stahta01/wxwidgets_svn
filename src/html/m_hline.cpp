@@ -21,10 +21,10 @@
 #endif
 
 #ifndef WXPRECOMP
-    #include "wx/brush.h"
-    #include "wx/pen.h"
-    #include "wx/dc.h"
+#include "wx/wx.h"
 #endif
+
+
 
 #include "wx/html/forcelnk.h"
 #include "wx/html/m_templ.h"
@@ -80,7 +80,7 @@ TAG_HANDLER_BEGIN(HR, "HR")
         c->SetAlign(tag);
         c->SetWidthFloat(tag);
         sz = 1;
-        tag.GetParamAsInt(wxT("SIZE"), &sz);
+        if (tag.HasParam(wxT("SIZE")) && tag.ScanParam(wxT("SIZE"), wxT("%i"), &sz) == 1) {}
         c->InsertCell(new wxHtmlLineCell((int)((double)sz * m_WParser->GetPixelScale())));
 
         m_WParser->CloseContainer();

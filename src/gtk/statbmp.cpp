@@ -11,11 +11,9 @@
 #pragma implementation "statbmp.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/statbmp.h"
 
 #if wxUSE_STATBMP
-
-#include "wx/statbmp.h"
 
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
@@ -76,7 +74,7 @@ bool wxStaticBitmap::Create( wxWindow *parent, wxWindowID id, const wxBitmap &bi
             mask = m_bitmap.GetMask()->GetBitmap();
         m_widget = gtk_pixmap_new( m_bitmap.GetPixmap(), mask );
 
-        SetBestSize( size );
+        SetSizeOrDefault( size );
     }
     else
     {
@@ -114,9 +112,16 @@ void wxStaticBitmap::SetBitmap( const wxBitmap &bitmap )
             gtk_pixmap_set( GTK_PIXMAP(m_widget), m_bitmap.GetPixmap(), mask );
         }
 
-        SetBestSize(wxSize(bitmap.GetWidth(), bitmap.GetHeight()));
+        SetSizeOrDefault();
     }
 }
 
-#endif // wxUSE_STATBMP
+wxSize wxStaticBitmap::DoGetBestSize() const
+{
+    if ( m_bitmap.Ok() )
+        return wxSize(m_bitmap.GetWidth(), m_bitmap.GetHeight());
+    else
+        return wxSize(16, 16);  // completely arbitrary
+}
 
+#endif

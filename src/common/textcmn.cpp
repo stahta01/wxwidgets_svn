@@ -12,19 +12,16 @@
 // ============================================================================
 // declarations
 // ============================================================================
-
 #ifdef __GNUG__
     #pragma implementation "textctrlbase.h"
 #endif
-
+        
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#if wxUSE_TEXTCTRL
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
@@ -53,13 +50,13 @@
 wxTextCtrlBase::wxTextCtrlBase()
 {
 #ifndef NO_TEXT_WINDOW_STREAM
-    #if wxUSE_IOSTREAMH
-        if (allocate())
-            setp(base(),ebuf());
-    #else
-        m_streambuf = new char[64];
-        setp(m_streambuf, m_streambuf + 64);
-    #endif //wxUSE_IOSTREAMH
+  #if wxUSE_IOSTREAMH
+  if (allocate())
+    setp(base(),ebuf());
+  #else
+  m_streambuf=new char[64];
+  setp(m_streambuf,m_streambuf+64);
+  #endif //wxUSE_IOSTREAMH
 #endif // NO_TEXT_WINDOW_STREAM
 }
 
@@ -103,7 +100,6 @@ const wxTextAttr& wxTextCtrlBase::GetDefaultStyle() const
 
 bool wxTextCtrlBase::LoadFile(const wxString& filename)
 {
-#if wxUSE_FFILE
     wxFFile file(filename);
     if ( file.IsOpened() )
     {
@@ -121,7 +117,6 @@ bool wxTextCtrlBase::LoadFile(const wxString& filename)
     }
 
     wxLogError(_("File couldn't be loaded."));
-#endif // wxUSE_FFILE
 
     return FALSE;
 }
@@ -137,7 +132,6 @@ bool wxTextCtrlBase::SaveFile(const wxString& filename)
         return FALSE;
     }
 
-#if wxUSE_FFILE
     wxFFile file(filename, "w");
     if ( file.IsOpened() && file.Write(GetValue()) )
     {
@@ -150,7 +144,6 @@ bool wxTextCtrlBase::SaveFile(const wxString& filename)
     }
 
     wxLogError(_("The text couldn't be saved."));
-#endif // wxUSE_FFILE
 
     return FALSE;
 }
@@ -238,39 +231,4 @@ int wxTextCtrlBase::underflow()
 }
 
 #endif // NO_TEXT_WINDOW_STREAM
-
-// ----------------------------------------------------------------------------
-// clipboard stuff
-// ----------------------------------------------------------------------------
-
-bool wxTextCtrlBase::CanCopy() const
-{
-    // can copy if there's a selection
-    long from, to;
-    GetSelection(&from, &to);
-    return from != to;
-}
-
-bool wxTextCtrlBase::CanCut() const
-{
-    // can cut if there's a selection and if we're not read only
-    return CanCopy() && IsEditable();
-}
-
-bool wxTextCtrlBase::CanPaste() const
-{
-    // can paste if we are not read only
-    return IsEditable();
-}
-
-// ----------------------------------------------------------------------------
-// misc
-// ----------------------------------------------------------------------------
-
-void wxTextCtrlBase::SelectAll()
-{
-    SetSelection(0, GetLastPosition());
-}
-
-#endif // wxUSE_TEXTCTRL
 

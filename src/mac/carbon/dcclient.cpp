@@ -48,7 +48,7 @@ wxWindowDC::wxWindowDC()
 wxWindowDC::wxWindowDC(wxWindow *the_canvas) 
 {
 	WindowRef windowref ;
-	wxWindowMac* rootwindow ;
+	wxWindow* rootwindow ;
 	
 	// this time it is really the full window
 	
@@ -78,7 +78,7 @@ wxClientDC::wxClientDC()
 wxClientDC::wxClientDC(wxWindow *window)
 {
 	WindowRef windowref ;
-	wxWindowMac* rootwindow ;
+	wxWindow* rootwindow ;
 	
 	window->MacGetPortClientParams(&m_macLocalOrigin, &m_macClipRect , &windowref , &rootwindow );
 	m_macPort = UMAGetWindowPort( windowref ) ;
@@ -106,7 +106,7 @@ wxPaintDC::wxPaintDC()
 wxPaintDC::wxPaintDC(wxWindow *window)
 {
 	WindowRef windowref ;
-	wxWindowMac* rootwindow ;
+	wxWindow* rootwindow ;
 	
 	window->MacGetPortClientParams(&m_macLocalOrigin, &m_macClipRect , &windowref , &rootwindow );
 

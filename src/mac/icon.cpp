@@ -61,7 +61,7 @@ bool wxIcon::LoadFile(const wxString& filename, long type,
 
   m_refData = new wxBitmapRefData;
 
-  wxBitmapHandler *handler = FindHandler((wxBitmapType)type);
+  wxBitmapHandler *handler = FindHandler(type);
 
   if ( handler )
 	return handler->LoadFile(this, filename, type, desiredWidth, desiredHeight);

@@ -333,8 +333,6 @@ void wxHandleProcessTermination(wxEndProcessData *proc_data)
 // wxStream classes to support IO redirection in wxExecute
 // ----------------------------------------------------------------------------
 
-#if wxUSE_STREAMS
-
 class wxProcessFileInputStream : public wxInputStream
 {
 public:
@@ -430,8 +428,6 @@ size_t wxProcessFileOutputStream::OnSysWrite(const void *buffer, size_t bufsize)
 
     return ret;
 }
-
-#endif // wxUSE_STREAMS
 
 long wxExecute(wxChar **argv,
                bool sync,
@@ -594,21 +590,19 @@ long wxExecute(wxChar **argv,
         // pipe initialization: construction of the wxStreams
         if ( process && process->IsRedirected() )
         {
-#if wxUSE_STREAMS
             // These two streams are relative to this process.
             wxOutputStream *outStream = new wxProcessFileOutputStream(pipeIn[1]);
             wxInputStream *inStream = new wxProcessFileInputStream(pipeOut[0]);
             wxInputStream *errStream = new wxProcessFileInputStream(pipeErr[0]);
 
-            process->SetPipeStreams(inStream, outStream, errStream);
-#endif // wxUSE_STREAMS
-
             close(pipeIn[0]); // close reading side
             close(pipeOut[1]); // close writing side
             close(pipeErr[1]); // close writing side
+
+            process->SetPipeStreams(inStream, outStream, errStream);
         }
 
-#if wxUSE_GUI && !defined(__WXMICROWIN__)
+#if wxUSE_GUI
         wxEndProcessData *data = new wxEndProcessData;
 
         if ( sync )

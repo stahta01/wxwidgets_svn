@@ -84,6 +84,11 @@ int wxSpinButton::GetValue() const
 void wxSpinButton::SetValue(int val)
 {
 	m_value = val ;
+  wxScrollEvent event(wxEVT_SCROLL_THUMBTRACK, m_windowId);
+
+  event.SetPosition(m_value);
+  event.SetEventObject( this );
+  GetEventHandler()->ProcessEvent(event);
 }
 
 void wxSpinButton::SetRange(int minVal, int maxVal)

@@ -138,9 +138,6 @@ public:
     const wxBitmap& GetSelectedBitmap() const { return m_selectedBitmap; }
     wxBitmap& GetSelectedBitmap() { return m_selectedBitmap; }
 
-    // update the internal clip box variables
-    void UpdateClipBox();
-
 protected:
     virtual void DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
                              int style = wxFLOOD_SURFACE);

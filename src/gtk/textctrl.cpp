@@ -80,6 +80,7 @@ gtk_scrollbar_changed_callback( GtkWidget *WXUNUSED(widget), wxTextCtrl *win )
 // "focus_in_event"
 //-----------------------------------------------------------------------------
 
+wxWindow *FindFocusedChild(wxWindow *win);
 extern wxWindow  *g_focusWindow;
 extern bool       g_blockEventsOnDrag;
 // extern bool g_isIdle;
@@ -151,7 +152,7 @@ static gint gtk_text_focus_out_callback( GtkWidget *widget, GdkEvent *WXUNUSED(e
     g_sendActivateEvent = 0;
 #endif
 
-    wxWindow *winFocus = wxFindFocusedChild(win);
+    wxWindow *winFocus = FindFocusedChild(win);
     if ( winFocus )
         win = winFocus;
 
@@ -923,6 +924,27 @@ void wxTextCtrl::Paste()
 #else
     gtk_editable_paste_clipboard( GTK_EDITABLE(m_text), 0 );
 #endif
+}
+
+bool wxTextCtrl::CanCopy() const
+{
+    // Can copy if there's a selection
+    long from, to;
+    GetSelection(& from, & to);
+    return (from != to) ;
+}
+
+bool wxTextCtrl::CanCut() const
+{
+    // Can cut if there's a selection
+    long from, to;
+    GetSelection(& from, & to);
+    return (from != to) && (IsEditable());
+}
+
+bool wxTextCtrl::CanPaste() const
+{
+    return IsEditable() ;
 }
 
 // Undo/redo

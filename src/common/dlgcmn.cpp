@@ -43,8 +43,6 @@
 // wxDialogBase
 //--------------------------------------------------------------------------
 
-#if wxUSE_STATTEXT && wxUSE_TEXTCTRL
-
 wxSizer *wxDialogBase::CreateTextSizer( const wxString &message )
 {
     wxBoxSizer *box = new wxBoxSizer( wxVERTICAL );
@@ -87,10 +85,6 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString &message )
 
     return box;
 }
-
-#endif // wxUSE_STATTEXT && wxUSE_TEXTCTRL
-
-#if wxUSE_BUTTON
 
 wxSizer *wxDialogBase::CreateButtonSizer( long flags )
 {
@@ -180,4 +174,3 @@ wxSizer *wxDialogBase::CreateButtonSizer( long flags )
     return box;
 }
 
-#endif // wxUSE_BUTTON

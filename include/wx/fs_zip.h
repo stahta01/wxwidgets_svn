@@ -20,6 +20,11 @@
 
 #if wxUSE_FILESYSTEM && wxUSE_FS_ZIP && wxUSE_STREAMS
 
+
+#ifndef WXPRECOMP
+#include "wx/wx.h"
+#endif
+
 #include "wx/filesys.h"
 
 class WXDLLEXPORT wxHashTableLong;
@@ -37,14 +42,14 @@ class WXDLLEXPORT wxZipFSHandler : public wxFileSystemHandler
         virtual wxString FindFirst(const wxString& spec, int flags = 0);
         virtual wxString FindNext();
         ~wxZipFSHandler();
-
+        
     private:
         // these vars are used by FindFirst/Next:
         void *m_Archive;
         wxString m_Pattern, m_BaseDir, m_ZipFile;
         bool m_AllowDirs, m_AllowFiles;
         wxHashTableLong *m_DirsFound;
-
+        
         wxString DoFind();
 };
 

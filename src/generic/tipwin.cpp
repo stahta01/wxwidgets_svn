@@ -34,7 +34,6 @@
 
 #include "wx/tipwin.h"
 #include "wx/timer.h"
-#include "wx/settings.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -100,14 +99,12 @@ wxTipWindow::wxTipWindow(wxWindow *parent,
 {
     // set colours
     SetForegroundColour(*wxBLACK);
-
-#ifdef __WXMSW__
-    wxColour bkCol(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_INFOBK));
+#if !defined(__WXPM__)
+    SetBackgroundColour(wxColour(0xc3ffff));
 #else
-    wxColour bkCol(wxColour(255, 255, 225));
+    // What is 0xc3ffff, try some legable documentation for those of us who don't memorize hex codes??
+    SetBackgroundColour(wxColour(*wxWHITE));
 #endif
-    SetBackgroundColour(bkCol);
-
     // set position and size
     int x, y;
     wxGetMousePosition(&x, &y);
@@ -162,12 +159,12 @@ wxTipWindowView::wxTipWindowView(wxWindow *parent)
 {
     // set colours
     SetForegroundColour(*wxBLACK);
-#ifdef __WXMSW__
-    wxColour bkCol(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_INFOBK));
+#if !defined(__WXPM__)
+    SetBackgroundColour(wxColour(0xc3ffff));
 #else
-    wxColour bkCol(wxColour(255, 255, 225));
+    // What is 0xc3ffff, try some legable documentation for those of us who don't memorize hex codes??
+    SetBackgroundColour(wxColour(*wxWHITE));
 #endif
-    SetBackgroundColour(bkCol);
     m_creationTime = wxGetLocalTime();
 }
 

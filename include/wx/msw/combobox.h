@@ -20,6 +20,7 @@
 
 #if wxUSE_COMBOBOX
 
+WXDLLEXPORT_DATA(extern const wxChar*) wxComboBoxNameStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 
 // ----------------------------------------------------------------------------

@@ -17,7 +17,6 @@
 #define __DOCSAMPLEH__
 
 #include "wx/docview.h"
-#include "wx/cmdproc.h"
 
 // Plots a line from one point to the other
 class DoodleLine: public wxObject

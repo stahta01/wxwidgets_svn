@@ -20,6 +20,11 @@
 
 #include "wx/defs.h"
 
+#if !wxUSE_FILE
+    #undef wxUSE_TEXTFILE
+    #define wxUSE_TEXTFILE 0
+#endif // wxUSE_FILE
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -185,12 +190,6 @@ private:
     // copy ctor/assignment operator not implemented
     wxTextFile(const wxTextFile&);
     wxTextFile& operator=(const wxTextFile&);
-
-    // suppress the gcc warning: 'class defines only private constructors and
-    // has no friends'
-#ifdef __GNUG__
-    friend class wxTextFileDummyFriend;
-#endif // gcc
 };
 
 #endif // wxUSE_TEXTFILE

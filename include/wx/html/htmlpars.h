@@ -21,21 +21,24 @@
 #include "wx/html/htmltag.h"
 #include "wx/filesys.h"
 
-class WXDLLEXPORT wxMBConv;
-class WXDLLEXPORT wxHtmlParser;
-class WXDLLEXPORT wxHtmlTagHandler;
-class WXDLLEXPORT wxHtmlEntitiesParser;
+class wxHtmlParser;
+class wxHtmlTagHandler;
 
-// This class handles generic parsing of HTML document : it scans
-// the document and divide it into blocks of tags (where one block
-// consists of starting and ending tag and of text between these
-// 2 tags.
+//--------------------------------------------------------------------------------
+// wxHtmlParser
+//                  This class handles generic parsing of HTML document : it scans
+//                  the document and divide it into blocks of tags (where one block
+//                  consists of starting and ending tag and of text between these
+//                  2 tags.
+//--------------------------------------------------------------------------------
+
 class WXDLLEXPORT wxHtmlParser : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlParser)
 
 public:
-    wxHtmlParser();
+    wxHtmlParser() : wxObject(), m_HandlersHash(wxKEY_STRING) 
+        { m_FS = NULL; m_Cache = NULL; m_HandlersStack = NULL; }
     virtual ~wxHtmlParser();
 
     // Sets the class which will be used for opening files
@@ -103,9 +106,6 @@ protected:
     // ignored if no hander is found.
     // Derived class is *responsible* for filling in m_Handlers table.
     virtual void AddTag(const wxHtmlTag& tag);
-    
-    // Returns entity parser object, used to substitute HTML &entities;
-    wxHtmlEntitiesParser *GetEntitiesParser() const { return m_entitiesParser; }
 
 protected:
     // source being parsed
@@ -130,20 +130,24 @@ protected:
     wxFileSystem *m_FS;
     // handlers stack used by PushTagHandler and PopTagHandler
     wxList *m_HandlersStack;
-    
-    // entity parse
-    wxHtmlEntitiesParser *m_entitiesParser;
 };
 
 
 
-// This class (and derived classes) cooperates with wxHtmlParser.
-// Each recognized tag is passed to handler which is capable
-// of handling it. Each tag is handled in 3 steps:
-// 1. Handler will modifies state of parser
-//    (using it's public methods)
-// 2. Parser parses source between starting and ending tag
-// 3. Handler restores original state of the parser
+
+
+
+//--------------------------------------------------------------------------------
+// wxHtmlTagHandler
+//                  This class (and derived classes) cooperates with wxHtmlParser.
+//                  Each recognized tag is passed to handler which is capable
+//                  of handling it. Each tag is handled in 3 steps:
+//                  1. Handler will modifies state of parser
+//                    (using it's public methods)
+//                  2. Parser parses source between starting and ending tag
+//                  3. Handler restores original state of the parser
+//--------------------------------------------------------------------------------
+
 class WXDLLEXPORT wxHtmlTagHandler : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlTagHandler)
@@ -180,33 +184,6 @@ protected:
 };
 
 
-// This class is used to parse HTML entities in strings. It can handle
-// both named entities and &#xxxx entries where xxxx is Unicode code.
-class WXDLLEXPORT wxHtmlEntitiesParser : public wxObject
-{
-    DECLARE_DYNAMIC_CLASS(wxHtmlEntitiesParser)
-
-public:
-    wxHtmlEntitiesParser();
-    virtual ~wxHtmlEntitiesParser();
-    
-    // Sets encoding of output string.
-    // Has no effect if wxUSE_WCHAR_T==0 or wxUSE_UNICODE==1
-    void SetEncoding(wxFontEncoding encoding);
-    
-    // Parses entities in input and replaces them with respective characters
-    // (with respect to output encoding)
-    wxString Parse(const wxString& input);
-    
-protected:
-    wxChar GetEntityChar(const wxString& entity);
-    wxChar GetCharForCode(unsigned code);
-
-#if wxUSE_WCHAR_T && !wxUSE_UNICODE
-    wxMBConv *m_conv;
-    wxFontEncoding m_encoding;
-#endif
-};
 
 
 #endif

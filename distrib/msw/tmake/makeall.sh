@@ -50,10 +50,6 @@ do
 	    echo "Generating $topdir/src/files.lst for Configure..."
 	    tmake -t base wxwin.pro -o $topdir/src/files.lst ;;
 
-	baserpm.t)
-	    echo "Generating $topdir/src/rpmfiles.lst for wxBase RPM..."
-	    tmake -t baserpm wxwin.pro -o $topdir/src/rpmfiles.lst ;;
-
 	gtk.t)
 	    echo "Generating $topdir/src/gtk/files.lst for GTK and Configure..."
 	    tmake -t gtk wxwin.pro -o $topdir/src/gtk/files.lst;;
@@ -65,10 +61,6 @@ do
 	motif.t)
 	    echo "Generating $topdir/src/motif/files.lst for Motif and Configure..."
 	    tmake -t motif wxwin.pro -o $topdir/src/motif/files.lst;;
-
-	univ.t)
-	    echo "Generating $topdir/src/univ/files.lst for wxUniversal..."
-	    tmake -t univ wxwin.pro -o $topdir/src/univ/files.lst;;
 
 	unx.t)
 	    echo "Generating $topdir/src/os2/files.lst for OS/2 PM and Configure..."

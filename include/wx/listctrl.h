@@ -16,8 +16,6 @@
     #pragma interface "listctrlbase.h"
 #endif
 
-#if wxUSE_LISTCTRL
-
 // ----------------------------------------------------------------------------
 // types
 // ----------------------------------------------------------------------------
@@ -28,41 +26,6 @@ typedef int (wxCALLBACK *wxListCtrlCompare)(long item1, long item2, long sortDat
 // ----------------------------------------------------------------------------
 // wxListCtrl constants
 // ----------------------------------------------------------------------------
-
-// style flags
-#define wxLC_VRULES          0x0001
-#define wxLC_HRULES          0x0002
-#define wxLC_ICON            0x0004
-#define wxLC_SMALL_ICON      0x0008
-#define wxLC_LIST            0x0010
-#define wxLC_REPORT          0x0020
-#define wxLC_ALIGN_TOP       0x0040
-#define wxLC_ALIGN_LEFT      0x0080
-#define wxLC_AUTOARRANGE     0x0100
-#define wxLC_VIRTUAL         0x0200
-#define wxLC_EDIT_LABELS     0x0400
-#define wxLC_NO_HEADER       0x0800
-#define wxLC_NO_SORT_HEADER  0x1000
-#define wxLC_SINGLE_SEL      0x2000
-#define wxLC_SORT_ASCENDING  0x4000
-#define wxLC_SORT_DESCENDING 0x8000
-
-#define wxLC_MASK_TYPE       (wxLC_ICON | wxLC_SMALL_ICON | wxLC_LIST | wxLC_REPORT)
-#define wxLC_MASK_ALIGN      (wxLC_ALIGN_TOP | wxLC_ALIGN_LEFT)
-#define wxLC_MASK_SORT       (wxLC_SORT_ASCENDING | wxLC_SORT_DESCENDING)
-
-// for compatibility only
-#define wxLC_USER_TEXT       wxLC_VIRTUAL
-
-// Omitted because
-//  (a) too much detail
-//  (b) not enough style flags
-//  (c) not implemented anyhow in the generic version
-//
-// #define wxLC_NO_SCROLL
-// #define wxLC_NO_LABEL_WRAP
-// #define wxLC_OWNERDRAW_FIXED
-// #define wxLC_SHOW_SEL_ALWAYS
 
 // Mask flags to tell app/GUI what fields of wxListItem are valid
 #define wxLIST_MASK_STATE           0x0001
@@ -276,9 +239,7 @@ private:
 // include the wxListCtrl class declaration
 // ----------------------------------------------------------------------------
 
-#if defined(__WXUNIVERSAL__)
-    #include "wx/generic/listctrl.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
     #ifdef __WIN16__
         #include "wx/generic/listctrl.h"
     #else
@@ -377,8 +338,6 @@ typedef void (wxEvtHandler::*wxListEventFunction)(wxListEvent&);
 #define EVT_LIST_ITEM_RIGHT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
 #define EVT_LIST_ITEM_MIDDLE_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
 #define EVT_LIST_ITEM_ACTIVATED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
-
-#endif // wxUSE_LISTCTRL
 
 #endif
     // _WX_LISTCTRL_H_BASE_

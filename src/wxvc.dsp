@@ -101,10 +101,6 @@ SOURCE=.\common\cmdline.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\cmdproc.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\cmndata.cpp
 # End Source File
 # Begin Source File
@@ -372,10 +368,6 @@ SOURCE=.\common\mstream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\nbkbase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\object.cpp
 # End Source File
 # Begin Source File
@@ -405,10 +397,6 @@ SOURCE=.\common\protocol.cpp
 # Begin Source File
 
 SOURCE=.\common\quantize.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\radiocmn.cpp
 # End Source File
 # Begin Source File
 
@@ -636,7 +624,7 @@ SOURCE=.\generic\sashwin.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\scrlwing.cpp
+SOURCE=.\generic\scrolwin.cpp
 # End Source File
 # Begin Source File
 

@@ -27,8 +27,8 @@
 WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
+WXDLLEXPORT_DATA(extern wxWindow*) wxWndHook;
 
-class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxMenuBar;
 class WXDLLEXPORT wxStatusBar;
 class WXDLLEXPORT wxToolBar;
@@ -104,10 +104,8 @@ public:
     // menu bar functions
     // ------------------
 
-#if wxUSE_MENUS
     virtual void SetMenuBar(wxMenuBar *menubar) = 0;
     virtual wxMenuBar *GetMenuBar() const { return m_frameMenuBar; }
-#endif // wxUSE_MENUS
 
     // call this to simulate a menu command
     bool Command(int id) { return ProcessCommand(id); }
@@ -174,16 +172,13 @@ public:
     void OnCloseWindow(wxCloseEvent& event);
     void OnMenuHighlight(wxMenuEvent& event);
     void OnSize(wxSizeEvent& event);
-
     // this should go away, but for now it's called from docview.cpp,
     // so should be there for all platforms
     void OnActivate(wxActivateEvent &WXUNUSED(event)) { }
 
-#if wxUSE_MENUS
     // send wxUpdateUIEvents for all menu items (called from OnIdle())
     void DoMenuUpdates();
     void DoMenuUpdates(wxMenu* menu, wxWindow* focusWin);
-#endif // wxUSE_MENUS
 
 protected:
     // the frame main menu/status/tool bars
@@ -193,15 +188,7 @@ protected:
     // main menubar, statusbar and toolbar (if any)
     void DeleteAllBars();
 
-    // test whether this window makes part of the frame
-    virtual bool IsOneOfBars(const wxWindow *win) const;
-
-#if wxUSE_MENUS
-    // override to update menu bar position when the frame size changes
-    virtual void PositionMenuBar() { }
-
     wxMenuBar *m_frameMenuBar;
-#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
     // override to update status bar position (or anything else) when
@@ -240,90 +227,18 @@ protected:
 // include the real class declaration
 #if defined(__WXMSW__)
     #include "wx/msw/frame.h"
-    #ifndef __WXUNIVERSAL__
-
-    class WXDLLEXPORT wxFrame : public wxFrameMSW
-    {
-    public:
-        // construction
-        wxFrame() { Init(); }
-        wxFrame(wxWindow *parent,
-                   wxWindowID id,
-                   const wxString& title,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = wxDEFAULT_FRAME_STYLE,
-                   const wxString& name = wxFrameNameStr)
-        {
-            Init();
-            Create(parent, id, title, pos, size, style, name);
-        }
-        DECLARE_DYNAMIC_CLASS(wxFrame)
-    };
-
-    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/frame.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/frame.h"
-    #ifndef __WXUNIVERSAL__
-
-    class WXDLLEXPORT wxFrame : public wxFrameGTK
-    {
-    public:
-        // construction
-        wxFrame() { Init(); }
-        wxFrame(wxWindow *parent,
-                   wxWindowID id,
-                   const wxString& title,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = wxDEFAULT_FRAME_STYLE,
-                   const wxString& name = wxFrameNameStr)
-        {
-            Init();
-            Create(parent, id, title, pos, size, style, name);
-        }
-        DECLARE_DYNAMIC_CLASS(wxFrame)
-    };
-
-    #endif
-#elif defined(__WXMGL__)
-    #include "wx/mgl/frame.h"
 #elif defined(__WXQT__)
     #include "wx/qt/frame.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/frame.h"
-    #ifndef __WXUNIVERSAL__
-
-    class WXDLLEXPORT wxFrame : public wxFrameMac
-    {
-    public:
-        // construction
-        wxFrame() { Init(); }
-        wxFrame(wxWindow *parent,
-                   wxWindowID id,
-                   const wxString& title,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = wxDEFAULT_FRAME_STYLE,
-                   const wxString& name = wxFrameNameStr)
-        {
-            Init();
-            Create(parent, id, title, pos, size, style, name);
-        }
-        DECLARE_DYNAMIC_CLASS(wxFrame)
-    };
-
-    #endif
 #elif defined(__WXPM__)
     #include "wx/os2/frame.h"
 #elif defined(__WXSTUBS__)
     #include "wx/stubs/frame.h"
-#endif
-
-#ifdef __WXUNIVERSAL__
-    #include "wx/univ/frame.h"
 #endif
 
 #endif

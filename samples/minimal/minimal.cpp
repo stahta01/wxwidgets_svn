@@ -18,8 +18,8 @@
 // ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
-//    #pragma implementation "minimal.cpp"
-//    #pragma interface "minimal.cpp"
+    #pragma implementation "minimal.cpp"
+    #pragma interface "minimal.cpp"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -39,7 +39,7 @@
 // resources
 // ----------------------------------------------------------------------------
 // the application icon
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
     #include "mondrian.xpm"
 #endif
 
@@ -107,13 +107,6 @@ END_EVENT_TABLE()
 // not wxApp)
 IMPLEMENT_APP(MyApp)
 
-#ifdef __WXUNIVERSAL__
-    #include "wx/univ/theme.h"
-
-    WX_USE_THEME(win32);
-    WX_USE_THEME(gtk);
-#endif // __WXUNIVERSAL__
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -156,7 +149,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     // set the frame icon
     SetIcon(wxICON(mondrian));
 
-#if wxUSE_MENUS
     // create a menu bar
     wxMenu *menuFile = new wxMenu("", wxMENU_TEAROFF);
 
@@ -173,7 +165,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
-#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)

@@ -22,9 +22,7 @@
 #endif
 
 #ifndef WXPRECOMP
-    #include "wx/brush.h"
-    #include "wx/colour.h"
-    #include "wx/dc.h"
+#include "wx/wx.h"
 #endif
 
 #include "wx/html/htmlcell.h"
@@ -36,23 +34,23 @@
 // wxHtmlCell
 //-----------------------------------------------------------------------------
 
-wxHtmlCell::wxHtmlCell() : wxObject()
+wxHtmlCell::wxHtmlCell() : wxObject() 
 {
-    m_Next = NULL;
-    m_Parent = NULL;
-    m_Width = m_Height = m_Descent = 0;
+    m_Next = NULL; 
+    m_Parent = NULL; 
+    m_Width = m_Height = m_Descent = 0; 
     m_CanLiveOnPagebreak = TRUE;
     m_Link = NULL;
 }
 
-wxHtmlCell::~wxHtmlCell()
+wxHtmlCell::~wxHtmlCell() 
 {
-    if (m_Link) delete m_Link;
+    if (m_Link) delete m_Link; 
     if (m_Next) delete m_Next;
 }
 
 
-void wxHtmlCell::OnMouseClick(wxWindow *parent, int x, int y,
+void wxHtmlCell::OnMouseClick(wxWindow *parent, int x, int y, 
                               const wxMouseEvent& event)
 {
     wxHtmlLinkInfo *lnk = GetLink(x, y);
@@ -70,15 +68,15 @@ void wxHtmlCell::OnMouseClick(wxWindow *parent, int x, int y,
 
 bool wxHtmlCell::AdjustPagebreak(int *pagebreak) const
 {
-    if ((!m_CanLiveOnPagebreak) &&
-                m_PosY < *pagebreak && m_PosY + m_Height > *pagebreak)
+    if ((!m_CanLiveOnPagebreak) && 
+                m_PosY < *pagebreak && m_PosY + m_Height > *pagebreak) 
 	{
         *pagebreak = m_PosY;
         if (m_Next != NULL) m_Next->AdjustPagebreak(pagebreak);
         return TRUE;
     }
-
-    else
+    
+    else 
     {
         if (m_Next != NULL) return m_Next->AdjustPagebreak(pagebreak);
         else return FALSE;
@@ -87,7 +85,7 @@ bool wxHtmlCell::AdjustPagebreak(int *pagebreak) const
 
 
 
-void wxHtmlCell::SetLink(const wxHtmlLinkInfo& link)
+void wxHtmlCell::SetLink(const wxHtmlLinkInfo& link) 
 {
     if (m_Link) delete m_Link;
     m_Link = NULL;
@@ -97,30 +95,30 @@ void wxHtmlCell::SetLink(const wxHtmlLinkInfo& link)
 
 
 
-void wxHtmlCell::Layout(int w)
+void wxHtmlCell::Layout(int w) 
 {
-    SetPos(0, 0);
+    SetPos(0, 0); 
     if (m_Next) m_Next->Layout(w);
 }
 
 
-void wxHtmlCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
+void wxHtmlCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2) 
 {
     if (m_Next) m_Next->Draw(dc, x, y, view_y1, view_y2);
 }
 
 
 
-void wxHtmlCell::DrawInvisible(wxDC& dc, int x, int y)
+void wxHtmlCell::DrawInvisible(wxDC& dc, int x, int y) 
 {
     if (m_Next) m_Next->DrawInvisible(dc, x, y);
 }
 
 
 
-const wxHtmlCell* wxHtmlCell::Find(int condition, const void* param) const
+const wxHtmlCell* wxHtmlCell::Find(int condition, const void* param) const 
 {
-    if (m_Next) return m_Next->Find(condition, param);
+    if (m_Next) return m_Next->Find(condition, param); 
     else return NULL;
 }
 
@@ -133,6 +131,156 @@ const wxHtmlCell* wxHtmlCell::Find(int condition, const void* param) const
 wxHtmlWordCell::wxHtmlWordCell(const wxString& word, wxDC& dc) : wxHtmlCell()
 {
     m_Word = word;
+    
+    if (m_Word.Find(wxT('&')) != -1) 
+    {
+#define ESCSEQ(escape, subst)  \
+                  { _T("&") _T(escape) _T(";"), _T("&") _T(escape) _T(" "), _T("&") _T(escape), _T(subst) }
+        static wxChar* substitutions[][4] =
+                {
+                ESCSEQ("quot", "\""),
+                ESCSEQ("#34", "\""),
+                ESCSEQ("#8220", "\""),
+                ESCSEQ("#8221", "\""),
+                ESCSEQ("lt", "<"),
+                ESCSEQ("#60", "<"),
+                ESCSEQ("gt", ">"),
+                ESCSEQ("#62", ">"),
+
+                ESCSEQ("#94", "^"), /* ^ */
+    
+                ESCSEQ("nbsp", " "),
+                ESCSEQ("#32", " "),
+                ESCSEQ("iexcl", "!"),
+                ESCSEQ("#33", "!"),
+                ESCSEQ("cent", "¢"/* ¢ */),
+                ESCSEQ("#162", "¢"/* ¢ */),
+    
+                ESCSEQ("trade", "(TM)"),
+                ESCSEQ("#153", "(TM)"),
+                ESCSEQ("#8482", "(TM)"),
+
+                ESCSEQ("yen", "¥"),
+                ESCSEQ("#165", "¥"),
+                ESCSEQ("brkbar", "¦"),
+                ESCSEQ("#166", "¦"),
+                ESCSEQ("sect", "§"),
+                ESCSEQ("#167", "§"),
+                ESCSEQ("uml", "¨"),
+                ESCSEQ("#168", "¨"),
+    
+                ESCSEQ("copy", "©"), /* © */
+                ESCSEQ("#169", "©"),
+                ESCSEQ("ordf", "ª"),
+                ESCSEQ("#170", "ª"),
+                ESCSEQ("laquo", "«"), /* « */
+                ESCSEQ("#171", "«"),
+                ESCSEQ("not", "¬"),
+                ESCSEQ("#172", "¬"),
+    
+                ESCSEQ("reg", "®"), /* ® */
+                ESCSEQ("#174", "®"),
+    
+                ESCSEQ("deg", "°"), /* ° */
+                ESCSEQ("#176", "°"),
+                ESCSEQ("plusm", "±"), /* ± */
+                ESCSEQ("#177", "±"),
+    
+                ESCSEQ("acute", "´"),
+                ESCSEQ("#180", "´"),
+                ESCSEQ("macron", "¯"),
+                ESCSEQ("#175", "¯"),
+                ESCSEQ("micro", "µ"), /* µ */
+                ESCSEQ("#181", "µ"),
+                ESCSEQ("para", "¶"), /* ¶ */
+                ESCSEQ("#182", "¶"),
+    
+                ESCSEQ("ordm", "º"), /* º */
+                ESCSEQ("#186", "º"),
+                ESCSEQ("raquo", "»"), /* » */
+                ESCSEQ("#187", "»"),
+    
+                ESCSEQ("iquest", "¿"), /* ¿ */
+                ESCSEQ("#191", "¿"),
+                ESCSEQ("Agrave", "\300"/* À */),
+                ESCSEQ("#193", "\300"/* À */),
+    
+                ESCSEQ("Acirc", "\302"/* Â */),
+                ESCSEQ("Atilde", "\303"/* Ã */),
+                ESCSEQ("Auml", "\304"/* Ä */),
+                ESCSEQ("Aring", " "),
+                ESCSEQ("AElig", " "),
+                ESCSEQ("Ccedil", "\347"/* ç */),
+                ESCSEQ("Egrave", "\310"/* È */),
+                ESCSEQ("Eacute", "\311"/* É */),
+                ESCSEQ("Ecirc", "\312"/* Ê */),
+                ESCSEQ("Euml", "\313"/* Ë */),
+                ESCSEQ("Igrave", "\314"/* Ì */),
+
+                ESCSEQ("Icirc", "\316"/* Î */),
+                ESCSEQ("Iuml", "\317"/* Ï */),
+    
+                ESCSEQ("Ntilde", "\321"/* Ñ */),
+                ESCSEQ("Ograve", "\322"/* Ò */),
+    
+                ESCSEQ("Ocirc", "\324"/* Ô */),
+                ESCSEQ("Otilde", "\325"/* Õ */),
+                ESCSEQ("Ouml", "\326"/* Ö */),
+    
+                ESCSEQ("Oslash", " "),
+                ESCSEQ("Ugrave", "\331"/* Ù */),
+    
+                ESCSEQ("Ucirc", " "),
+                ESCSEQ("Uuml", "\334"/* Ü */),
+    
+                ESCSEQ("szlig", "\247"/* § */),
+                ESCSEQ("agrave","\340"/* à */),
+                ESCSEQ("aacute", "\341"/* á */),
+                ESCSEQ("acirc", "\342"/* â */),
+                ESCSEQ("atilde", "\343"/* ã */),
+                ESCSEQ("auml", "\344"/* ä */),
+                ESCSEQ("aring", "a"),
+                ESCSEQ("aelig", "ae"),
+                ESCSEQ("ccedil", "\347"/* ç */),
+                ESCSEQ("egrave", "\350"/* è */),
+                ESCSEQ("eacute", "\351"/* é */),
+                ESCSEQ("ecirc", "\352"/* ê */),
+                ESCSEQ("euml", "\353"/* ë */),
+                ESCSEQ("igrave", "\354"/* ì */),
+                ESCSEQ("iacute", "\355"/* í */),
+                ESCSEQ("icirc", " "),
+                ESCSEQ("iuml", "\357"/* ï */),
+                ESCSEQ("eth", " "),
+                ESCSEQ("ntilde", "\361"/* ñ */),
+                ESCSEQ("ograve", "\362"/* ò */),
+                ESCSEQ("oacute", "\363"/* ó */),
+                ESCSEQ("ocirc", "\364"/* ô */),
+                ESCSEQ("otilde", "\365"/* õ */),
+                ESCSEQ("ouml", "\366"/* ö */),
+                ESCSEQ("divide", " "),
+                ESCSEQ("oslash", " "),
+                ESCSEQ("ugrave", "\371"/* ù */),
+                ESCSEQ("uacute", "\372"/* ú */),
+                ESCSEQ("ucirc", "\373"/* û */),
+                ESCSEQ("uuml", "\374"/* ü */),
+    
+                ESCSEQ("yuml", ""),
+
+                /* this one should ALWAYS stay the last one!!! */
+                ESCSEQ("amp", "&"),
+                ESCSEQ("#38", "&"),
+
+                { NULL, NULL, NULL }
+                };
+
+        for (int i = 0; substitutions[i][0] != NULL; i++) 
+        {
+            m_Word.Replace(substitutions[i][0], substitutions[i][3], TRUE);
+            m_Word.Replace(substitutions[i][1], substitutions[i][3], TRUE);
+            m_Word.Replace(substitutions[i][2], substitutions[i][3], TRUE);
+        }
+    }
+
     dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
     SetCanLiveOnPagebreak(FALSE);
 }
@@ -168,7 +316,7 @@ wxHtmlContainerCell::wxHtmlContainerCell(wxHtmlContainerCell *parent) : wxHtmlCe
     m_LastLayout = -1;
 }
 
-wxHtmlContainerCell::~wxHtmlContainerCell()
+wxHtmlContainerCell::~wxHtmlContainerCell() 
 {
     if (m_Cells) delete m_Cells;
 }
@@ -214,16 +362,16 @@ int wxHtmlContainerCell::GetIndentUnits(int ind) const
 
 bool wxHtmlContainerCell::AdjustPagebreak(int *pagebreak) const
 {
-    if (!m_CanLiveOnPagebreak)
+    if (!m_CanLiveOnPagebreak) 
         return wxHtmlCell::AdjustPagebreak(pagebreak);
 
-    else
+    else 
     {
         wxHtmlCell *c = GetFirstCell();
         bool rt = FALSE;
         int pbrk = *pagebreak - m_PosY;
 
-        while (c)
+        while (c) 
 	    {
             if (c->AdjustPagebreak(&pbrk)) rt = TRUE;
             c = c->GetNext();
@@ -237,11 +385,11 @@ bool wxHtmlContainerCell::AdjustPagebreak(int *pagebreak) const
 
 void wxHtmlContainerCell::Layout(int w)
 {
-    if (m_LastLayout == w)
+    if (m_LastLayout == w) 
     {
         wxHtmlCell::Layout(w);
         return;
-    }
+    } 
 
     wxHtmlCell *cell = m_Cells, *line = m_Cells;
     long xpos = 0, ypos = m_IndentTop;
@@ -258,18 +406,18 @@ void wxHtmlContainerCell::Layout(int w)
 
     */
 
-    if (m_WidthFloatUnits == wxHTML_UNITS_PERCENT)
+    if (m_WidthFloatUnits == wxHTML_UNITS_PERCENT) 
     {
         if (m_WidthFloat < 0) m_Width = (100 + m_WidthFloat) * w / 100;
         else m_Width = m_WidthFloat * w / 100;
     }
-    else
+    else 
     {
         if (m_WidthFloat < 0) m_Width = w + m_WidthFloat;
         else m_Width = m_WidthFloat;
     }
 
-    if (m_Cells)
+    if (m_Cells) 
     {
         int l = (m_IndentLeft < 0) ? (-m_IndentLeft * m_Width / 100) : m_IndentLeft;
         int r = (m_IndentRight < 0) ? (-m_IndentRight * m_Width / 100) : m_IndentRight;
@@ -287,9 +435,9 @@ void wxHtmlContainerCell::Layout(int w)
     s_width = m_Width - s_indent - ((m_IndentRight < 0) ? (-m_IndentRight * m_Width / 100) : m_IndentRight);
 
     // my own layouting:
-    while (cell != NULL)
+    while (cell != NULL) 
     {
-        switch (m_AlignVer)
+        switch (m_AlignVer) 
 	    {
             case wxHTML_ALIGN_TOP :      ybasicpos = 0; break;
             case wxHTML_ALIGN_BOTTOM :   ybasicpos = - cell->GetHeight(); break;
@@ -306,42 +454,42 @@ void wxHtmlContainerCell::Layout(int w)
         xcnt++;
 
         // force new line if occured:
-        if ((cell == NULL) || (xpos + cell->GetWidth() > s_width))
+        if ((cell == NULL) || (xpos + cell->GetWidth() > s_width)) 
 	    {
             if (xpos > MaxLineWidth) MaxLineWidth = xpos;
             if (ysizeup < 0) ysizeup = 0;
             if (ysizedown < 0) ysizedown = 0;
             switch (m_AlignHor) {
-                case wxHTML_ALIGN_LEFT :
-                case wxHTML_ALIGN_JUSTIFY :
-                         xdelta = 0;
+                case wxHTML_ALIGN_LEFT : 
+                case wxHTML_ALIGN_JUSTIFY : 
+                         xdelta = 0; 
                          break;
-                case wxHTML_ALIGN_RIGHT :
-                         xdelta = 0 + (s_width - xpos);
+                case wxHTML_ALIGN_RIGHT : 
+                         xdelta = 0 + (s_width - xpos); 
                          break;
-                case wxHTML_ALIGN_CENTER :
-                         xdelta = 0 + (s_width - xpos) / 2;
+                case wxHTML_ALIGN_CENTER : 
+                         xdelta = 0 + (s_width - xpos) / 2; 
                          break;
             }
             if (xdelta < 0) xdelta = 0;
             xdelta += s_indent;
 
             ypos += ysizeup;
-
+            
             if (m_AlignHor != wxHTML_ALIGN_JUSTIFY || cell == NULL)
-                while (line != cell)
+                while (line != cell) 
 		        {
-                    line->SetPos(line->GetPosX() + xdelta,
+                    line->SetPos(line->GetPosX() + xdelta, 
                                    ypos + line->GetPosY());
                     line = line->GetNext();
                 }
             else
-            {
+            { 
                 int counter = 0;
                 int step = (s_width - xpos);
                 if (step < 0) step = 0;
                 xcnt--;
-                if (xcnt > 0) while (line != cell)
+                if (xcnt > 0) while (line != cell) 
 		        {
                     line->SetPos(line->GetPosX() + s_indent +
                                    (counter++ * step / xcnt),
@@ -361,14 +509,14 @@ void wxHtmlContainerCell::Layout(int w)
     // setup height & width, depending on container layout:
     m_Height = ypos + (ysizedown + ysizeup) + m_IndentBottom;
 
-    if (m_Height < m_MinHeight)
+    if (m_Height < m_MinHeight) 
     {
-        if (m_MinHeightAlign != wxHTML_ALIGN_TOP)
+        if (m_MinHeightAlign != wxHTML_ALIGN_TOP) 
 	    {
             int diff = m_MinHeight - m_Height;
             if (m_MinHeightAlign == wxHTML_ALIGN_CENTER) diff /= 2;
             cell = m_Cells;
-            while (cell)
+            while (cell) 
 	        {
                 cell->SetPos(cell->GetPosX(), cell->GetPosY() + diff);
                 cell = cell->GetNext();
@@ -392,10 +540,10 @@ void wxHtmlContainerCell::Layout(int w)
 void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
 {
     // container visible, draw it:
-    if ((y + m_PosY < view_y2) && (y + m_PosY + m_Height > view_y1))
+    if ((y + m_PosY < view_y2) && (y + m_PosY + m_Height > view_y1)) 
     {
 
-        if (m_UseBkColour)
+        if (m_UseBkColour) 
 	    {
             wxBrush myb = wxBrush(m_BkColour, wxSOLID);
 
@@ -407,7 +555,7 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
             dc.DrawRectangle(x + m_PosX, real_y1, m_Width, real_y2 - real_y1 + 1);
         }
 
-        if (m_UseBorder)
+        if (m_UseBorder) 
 	    {
             wxPen mypen1(m_BorderColour1, 1, wxSOLID);
             wxPen mypen2(m_BorderColour2, 1, wxSOLID);
@@ -423,7 +571,7 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
         if (m_Cells) m_Cells->Draw(dc, x + m_PosX, y + m_PosY, view_y1, view_y2);
     }
     // container invisible, just proceed font+color changing:
-    else
+    else 
     {
         if (m_Cells) m_Cells->DrawInvisible(dc, x + m_PosX, y + m_PosY);
     }
@@ -446,7 +594,7 @@ wxHtmlLinkInfo *wxHtmlContainerCell::GetLink(int x, int y) const
     wxHtmlCell *c = m_Cells;
     int cx, cy, cw, ch;
 
-    while (c)
+    while (c) 
     {
         cx = c->GetPosX(), cy = c->GetPosY();
         cw = c->GetWidth(), ch = c->GetHeight();
@@ -462,7 +610,7 @@ wxHtmlLinkInfo *wxHtmlContainerCell::GetLink(int x, int y) const
 void wxHtmlContainerCell::InsertCell(wxHtmlCell *f)
 {
     if (!m_Cells) m_Cells = m_LastCell = f;
-    else
+    else 
     {
         m_LastCell->SetNext(f);
         m_LastCell = f;
@@ -476,7 +624,7 @@ void wxHtmlContainerCell::InsertCell(wxHtmlCell *f)
 
 void wxHtmlContainerCell::SetAlign(const wxHtmlTag& tag)
 {
-    if (tag.HasParam(wxT("ALIGN")))
+    if (tag.HasParam(wxT("ALIGN"))) 
     {
         wxString alg = tag.GetParam(wxT("ALIGN"));
         alg.MakeUpper();
@@ -496,17 +644,17 @@ void wxHtmlContainerCell::SetAlign(const wxHtmlTag& tag)
 
 void wxHtmlContainerCell::SetWidthFloat(const wxHtmlTag& tag, double pixel_scale)
 {
-    if (tag.HasParam(wxT("WIDTH")))
+    if (tag.HasParam(wxT("WIDTH"))) 
     {
         int wdi;
         wxString wd = tag.GetParam(wxT("WIDTH"));
 
-        if (wd[wd.Length()-1] == wxT('%'))
+        if (wd[wd.Length()-1] == wxT('%')) 
 	    {
             wxSscanf(wd.c_str(), wxT("%i%%"), &wdi);
             SetWidthFloat(wdi, wxHTML_UNITS_PERCENT);
         }
-        else
+        else 
 	    {
             wxSscanf(wd.c_str(), wxT("%i"), &wdi);
             SetWidthFloat((int)(pixel_scale * (double)wdi), wxHTML_UNITS_PIXELS);
@@ -521,7 +669,7 @@ const wxHtmlCell* wxHtmlContainerCell::Find(int condition, const void* param) co
 {
     const wxHtmlCell *r = NULL;
 
-    if (m_Cells)
+    if (m_Cells) 
     {
         r = m_Cells->Find(condition, param);
         if (r) return r;
@@ -534,15 +682,15 @@ const wxHtmlCell* wxHtmlContainerCell::Find(int condition, const void* param) co
 
 void wxHtmlContainerCell::OnMouseClick(wxWindow *parent, int x, int y, const wxMouseEvent& event)
 {
-    if (m_Cells)
+    if (m_Cells) 
     {
         wxHtmlCell *c = m_Cells;
-        while (c)
+        while (c) 
 	    {
             if (    (c->GetPosX() <= x) &&
                     (c->GetPosY() <= y) &&
                     (c->GetPosX() + c->GetWidth() > x) &&
-                    (c->GetPosY() + c->GetHeight() > y))
+                    (c->GetPosY() + c->GetHeight() > y)) 
 		    {
                 c->OnMouseClick(parent, x - c->GetPosX(), y - c->GetPosY(), event);
                 break;
@@ -564,7 +712,7 @@ void wxHtmlColourCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
 {
     if (m_Flags & wxHTML_CLR_FOREGROUND)
         dc.SetTextForeground(m_Colour);
-    if (m_Flags & wxHTML_CLR_BACKGROUND)
+    if (m_Flags & wxHTML_CLR_BACKGROUND) 
     {
         dc.SetBackground(wxBrush(m_Colour, wxSOLID));
         dc.SetTextBackground(m_Colour);
@@ -576,7 +724,7 @@ void wxHtmlColourCell::DrawInvisible(wxDC& dc, int x, int y)
 {
     if (m_Flags & wxHTML_CLR_FOREGROUND)
         dc.SetTextForeground(m_Colour);
-    if (m_Flags & wxHTML_CLR_BACKGROUND)
+    if (m_Flags & wxHTML_CLR_BACKGROUND) 
     {
         dc.SetBackground(wxBrush(m_Colour, wxSOLID));
         dc.SetTextBackground(m_Colour);
@@ -629,14 +777,14 @@ void wxHtmlWidgetCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
     int absx = 0, absy = 0, stx, sty;
     wxHtmlCell *c = this;
 
-    while (c)
+    while (c) 
     {
         absx += c->GetPosX();
         absy += c->GetPosY();
         c = c->GetParent();
     }
 
-    ((wxScrolledWindow*)(m_Wnd->GetParent()))->GetViewStart(&stx, &sty);
+    ((wxScrolledWindow*)(m_Wnd->GetParent()))->ViewStart(&stx, &sty);
     m_Wnd->SetSize(absx - wxHTML_SCROLL_STEP * stx, absy  - wxHTML_SCROLL_STEP * sty, m_Width, m_Height);
 
     wxHtmlCell::Draw(dc, x, y, view_y1, view_y2);
@@ -649,14 +797,14 @@ void wxHtmlWidgetCell::DrawInvisible(wxDC& dc, int x, int y)
     int absx = 0, absy = 0, stx, sty;
     wxHtmlCell *c = this;
 
-    while (c)
+    while (c) 
     {
         absx += c->GetPosX();
         absy += c->GetPosY();
         c = c->GetParent();
     }
 
-    ((wxScrolledWindow*)(m_Wnd->GetParent()))->GetViewStart(&stx, &sty);
+    ((wxScrolledWindow*)(m_Wnd->GetParent()))->ViewStart(&stx, &sty);
     m_Wnd->SetSize(absx - wxHTML_SCROLL_STEP * stx, absy  - wxHTML_SCROLL_STEP * sty, m_Width, m_Height);
 
     wxHtmlCell::DrawInvisible(dc, x, y);
@@ -666,7 +814,7 @@ void wxHtmlWidgetCell::DrawInvisible(wxDC& dc, int x, int y)
 
 void wxHtmlWidgetCell::Layout(int w)
 {
-    if (m_WidthFloat != 0)
+    if (m_WidthFloat != 0) 
     {
         m_Width = (w * m_WidthFloat) / 100;
         m_Wnd->SetSize(m_Width, m_Height);

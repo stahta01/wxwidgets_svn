@@ -1,10 +1,8 @@
 #ifndef _WX_IMAGLIST_H_BASE_
 #define _WX_IMAGLIST_H_BASE_
 
-#if defined(__WXUNIVERSAL__)
-#include "wx/generic/imaglist.h"
-#elif defined(__WXMSW__)
-#if defined(__WIN16__)
+#if defined(__WXMSW__)
+#ifdef __WIN16__
 #include "wx/generic/imaglist.h"
 #else
 #include "wx/msw/imaglist.h"

@@ -22,8 +22,7 @@
 #endif
 
 #ifndef WXPRECOMP
-    #include "wx/intl.h"
-    #include "wx/dc.h"
+#include "wx/wx.h"
 #endif
 
 #include "wx/html/htmldefs.h"
@@ -198,12 +197,10 @@ void wxHtmlWinParser::AddText(const char* txt)
     char temp[wxHTML_BUFLEN];
     register char d;
     int templen = 0;
-    
+
     if (m_tmpLastWasSpace) 
     {
-        while ((i < lng) && 
-               ((txt[i] == '\n') || (txt[i] == '\r') || (txt[i] == ' ') || 
-                (txt[i] == '\t'))) i++;
+        while ((i < lng) && ((txt[i] == '\n') || (txt[i] == '\r') || (txt[i] == ' ') || (txt[i] == '\t'))) i++;
     }
 
     while (i < lng) 
@@ -213,8 +210,7 @@ void wxHtmlWinParser::AddText(const char* txt)
         if ((d == '\n') || (d == '\r') || (d == ' ') || (d == '\t')) 
 	    {
             i++, x++;
-            while ((i < lng) && ((txt[i] == '\n') || (txt[i] == '\r') || 
-                                 (txt[i] == ' ') || (txt[i] == '\t'))) i++, x++;
+            while ((i < lng) && ((txt[i] == '\n') || (txt[i] == '\r') || (txt[i] == ' ') || (txt[i] == '\t'))) i++, x++;
         }
         else i++;
 
@@ -223,11 +219,9 @@ void wxHtmlWinParser::AddText(const char* txt)
             temp[templen-1] = ' ';
             temp[templen] = 0;
             templen = 0;
-            if (m_EncConv) 
-                m_EncConv->Convert(temp);
-            c = new wxHtmlWordCell(GetEntitiesParser()->Parse(temp), *(GetDC()));
-            if (m_UseLink) 
-                c->SetLink(m_Link);
+            if (m_EncConv) m_EncConv->Convert(temp);
+            c = new wxHtmlWordCell(temp, *(GetDC()));
+            if (m_UseLink) c->SetLink(m_Link);
             m_Container->InsertCell(c);
             m_tmpLastWasSpace = TRUE;
         }
@@ -235,11 +229,9 @@ void wxHtmlWinParser::AddText(const char* txt)
     if (templen) 
     {
         temp[templen] = 0;
-        if (m_EncConv) 
-            m_EncConv->Convert(temp);
-        c = new wxHtmlWordCell(GetEntitiesParser()->Parse(temp), *(GetDC()));
-        if (m_UseLink) 
-            c->SetLink(m_Link);
+        if (m_EncConv) m_EncConv->Convert(temp);
+        c = new wxHtmlWordCell(temp, *(GetDC()));
+        if (m_UseLink) c->SetLink(m_Link);
         m_Container->InsertCell(c);
         m_tmpLastWasSpace = FALSE;
     }
@@ -341,11 +333,7 @@ void wxHtmlWinParser::SetFontFace(const wxString& face)
 void wxHtmlWinParser::SetInputEncoding(wxFontEncoding enc)
 {
     m_InputEnc = m_OutputEnc = wxFONTENCODING_DEFAULT;
-    if (m_EncConv) 
-    {
-        delete m_EncConv; 
-        m_EncConv = NULL;
-    }
+    if (m_EncConv) {delete m_EncConv; m_EncConv = NULL;}
 
     if (enc == wxFONTENCODING_DEFAULT) return;
 
@@ -375,10 +363,6 @@ void wxHtmlWinParser::SetInputEncoding(wxFontEncoding enc)
         m_OutputEnc = wxFONTENCODING_DEFAULT;
         
     m_InputEnc = enc;
-    if (m_OutputEnc == wxFONTENCODING_DEFAULT)
-        GetEntitiesParser()->SetEncoding(wxFONTENCODING_SYSTEM);
-    else
-        GetEntitiesParser()->SetEncoding(m_OutputEnc);
     
     if (m_InputEnc == m_OutputEnc) return;
 

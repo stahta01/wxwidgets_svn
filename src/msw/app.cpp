@@ -86,13 +86,11 @@
 #include <string.h>
 #include <ctype.h>
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__) || defined(__WXMICROWIN__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
-#ifndef __WXMICROWIN__
 #include "wx/msw/msvcrt.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -126,9 +124,7 @@
 extern wxChar *wxBuffer;
 extern wxList *wxWinHandleList;
 extern wxList WXDLLEXPORT wxPendingDelete;
-#ifndef __WXMICROWIN__
 extern void wxSetKeyboardHook(bool doIt);
-#endif
 
 MSG s_currentMsg;
 wxApp *wxTheApp = NULL;
@@ -238,11 +234,12 @@ bool wxApp::Initialize()
 
     wxBitmap::InitStandardHandlers();
 
-#if defined(__WIN95__) && !defined(__WXMICROWIN__)
+#if defined(__WIN95__)
     InitCommonControls();
+
 #endif // __WIN95__
 
-#if wxUSE_OLE || wxUSE_DRAG_AND_DROP
+#if wxUSE_OLE
 
 #ifdef __WIN16__
     // for OLE, enlarge message queue to be as large as possible
@@ -250,11 +247,9 @@ bool wxApp::Initialize()
     while (!SetMessageQueue(iMsg) && (iMsg -= 8))
         ;
 #endif // Win16
-
     // we need to initialize OLE library
     if ( FAILED(::OleInitialize(NULL)) )
         wxLogError(_("Cannot initialize OLE"));
-
 #endif // wxUSE_OLE
 
 #if wxUSE_CTL3D
@@ -262,7 +257,7 @@ bool wxApp::Initialize()
         wxLogError(wxT("Cannot register CTL3D"));
 
     Ctl3dAutoSubclass(wxhInstance);
-#endif // wxUSE_CTL3D
+#endif
 
     // VZ: these icons are not in wx.rc anyhow (but should they?)!
 #if 0
@@ -277,7 +272,6 @@ bool wxApp::Initialize()
 
     RegisterWindowClasses();
 
-#ifndef __WXMICROWIN__
     // Create the brush for disabling bitmap buttons
 
     LOGBRUSH lb;
@@ -289,7 +283,6 @@ bool wxApp::Initialize()
         ::DeleteObject( (HGDIOBJ)lb.lbHatch );
     }
     //else: wxWindows resources are probably not linked in
-#endif
 
 #if wxUSE_PENWINDOWS
     wxRegisterPenWin();
@@ -304,9 +297,7 @@ bool wxApp::Initialize()
     if (wxDummyChar) wxDummyChar++;
 #endif
 
-#ifndef __WXMICROWIN__
     wxSetKeyboardHook(TRUE);
-#endif
 
     wxModule::RegisterModules();
     if (!wxModule::InitializeModules())
@@ -570,9 +561,7 @@ void wxApp::CleanUp()
 
     //// WINDOWS-SPECIFIC CLEANUP
 
-#ifndef __WXMICROWIN__
     wxSetKeyboardHook(FALSE);
-#endif
 
 #if wxUSE_PENWINDOWS
     wxCleanUpPenWin();
@@ -609,14 +598,13 @@ void wxApp::CleanUp()
     // GL: I'm annoyed ... I don't know where to put this and I don't want to
     // create a module for that as it's part of the core.
     delete wxPendingEvents;
-
 #if wxUSE_THREADS
     delete wxPendingEventsLocker;
-    // If we don't do the following, we get an apparent memory leak
+    // If we don't do the following, we get an apparent memory leak.
 #if wxUSE_VALIDATORS
     ((wxEvtHandler&) wxDefaultValidator).ClearEventLocker();
-#endif // wxUSE_VALIDATORS
-#endif // wxUSE_THREADS
+#endif
+#endif
 
     wxClassInfo::CleanUpClasses();
 
@@ -654,7 +642,8 @@ int WXDLLEXPORT wxEntryStart( int WXUNUSED(argc), char** WXUNUSED(argv) )
 
 int WXDLLEXPORT wxEntryInitGui()
 {
-    return wxTheApp->OnInitGui();
+    wxTheApp->OnInitGui();
+    return 0;
 }
 
 void WXDLLEXPORT wxEntryCleanup()
@@ -683,10 +672,7 @@ int wxEntry(WXHINSTANCE hInstance,
     // do check for memory leaks on program exit
     // (another useful flag is _CRTDBG_DELAY_FREE_MEM_DF which doesn't free
     //  deallocated memory which may be used to simulate low-memory condition)
-#ifndef __WXMICROWIN__
     wxCrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF);
-#endif
-
 #ifdef __MWERKS__
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
     // This seems to be necessary since there are 'rogue'
@@ -718,7 +704,7 @@ int wxEntry(WXHINSTANCE hInstance,
             wxCHECK_MSG( wxApp::GetInitializerFunction(), 0,
                          wxT("No initializer - use IMPLEMENT_APP macro.") );
 
-            wxTheApp = (wxApp*) (*wxApp::GetInitializerFunction()) ();
+            wxTheApp = (*wxApp::GetInitializerFunction()) ();
         }
 
         wxCHECK_MSG( wxTheApp, 0, wxT("You have to define an instance of wxApp!") );
@@ -726,6 +712,10 @@ int wxEntry(WXHINSTANCE hInstance,
         // save the WinMain() parameters
         wxTheApp->ConvertToStandardCommandArgs(lpCmdLine);
         wxTheApp->m_nCmdShow = nCmdShow;
+
+        // GUI-specific initialisation. In fact on Windows we don't have any,
+        // but this call is provided for compatibility across platforms.
+        wxEntryInitGui();
 
         // We really don't want timestamps by default, because it means
         // we can't simply double-click on the error message and get to that
@@ -746,7 +736,7 @@ int wxEntry(WXHINSTANCE hInstance,
         wxTheApp->SetExitOnFrameDelete(FALSE);
 
         // init the app
-        retValue = wxEntryInitGui() && wxTheApp->OnInit() ? 0 : -1;
+        retValue = wxTheApp->OnInit() ? 0 : -1;
 
         // restore the old flag value
         wxTheApp->SetExitOnFrameDelete(exitOnLastFrameDelete);
@@ -858,9 +848,14 @@ wxAppInitializerFunction wxAppBase::m_appInitFn = (wxAppInitializerFunction) NUL
 
 wxApp::wxApp()
 {
+    m_topWindow = NULL;
+    wxTheApp = this;
+    m_wantDebugOutput = TRUE;
+
     argc = 0;
     argv = NULL;
     m_printMode = wxPRINT_WINDOWS;
+    m_exitOnFrameDelete = TRUE;
     m_auto3D = TRUE;
 }
 
@@ -1201,9 +1196,6 @@ void wxApp::OnQueryEndSession(wxCloseEvent& event)
 /* static */
 int wxApp::GetComCtl32Version()
 {
-#ifdef __WXMICROWIN__
-    return 0;
-#else
     // cache the result
     static int s_verComCtl32 = -1;
 
@@ -1286,7 +1278,6 @@ int wxApp::GetComCtl32Version()
     }
 
     return s_verComCtl32;
-#endif
 }
 
 void wxExit()

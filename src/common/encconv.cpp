@@ -18,8 +18,6 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_FONTMAP
-
 #include "wx/encconv.h"
 
 #include <stdlib.h>
@@ -444,5 +442,3 @@ wxFontEncodingArray wxEncodingConverter::GetAllEquivalents(wxFontEncoding enc)
 
     return arr;
 }
-
-#endif // wxUSE_FONTMAP

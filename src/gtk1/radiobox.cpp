@@ -11,11 +11,9 @@
 #pragma implementation "radiobox.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/radiobox.h"
 
 #if wxUSE_RADIOBOX
-
-#include "wx/radiobox.h"
 
 #include "wx/dialog.h"
 #include "wx/frame.h"

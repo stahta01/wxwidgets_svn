@@ -27,8 +27,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_DATAOBJ
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/debug.h"
@@ -366,6 +364,5 @@ wxDragResult wxFileDropTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
     return OnDropFiles(x, y, dobj->GetFilenames()) ? def : wxDragNone;
 }
 
-#endif // wxUSE_DRAG_AND_DROP
+#endif
 
-#endif // wxUSE_DATAOBJ

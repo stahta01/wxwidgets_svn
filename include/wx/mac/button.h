@@ -22,7 +22,7 @@
 WXDLLEXPORT_DATA(extern const char*) wxButtonNameStr;
 
 // Pushbutton
-class WXDLLEXPORT wxButton: public wxButtonBase
+class WXDLLEXPORT wxButton: public wxControl
 {
   DECLARE_DYNAMIC_CLASS(wxButton)
  public:

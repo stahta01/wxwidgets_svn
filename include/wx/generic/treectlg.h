@@ -16,8 +16,6 @@
     #pragma interface "treectlg.h"
 #endif
 
-#if wxUSE_TREECTRL
-
 #include "wx/defs.h"
 #include "wx/string.h"
 #include "wx/object.h"
@@ -425,7 +423,7 @@ private:
     DECLARE_DYNAMIC_CLASS(wxGenericTreeCtrl)
 };
 
-#if !defined(__WXMSW__) || defined(__WIN16__) || defined(__WXUNIVERSAL__)
+#if !defined(__WXMSW__) || defined(__WIN16__)
 /*
  * wxTreeCtrl has to be a real class or we have problems with
  * the run-time information.
@@ -451,8 +449,6 @@ public:
 };
 
 #endif
-
-#endif // wxUSE_TREECTRL
 
 #endif // _GENERIC_TREECTRL_H_
 

@@ -17,10 +17,6 @@
 #pragma implementation "checklst.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_CHECKLISTBOX
-
 #include "wx/checklst.h"
 
 // ============================================================================
@@ -75,5 +71,4 @@ void wxCheckListBox::Check(size_t uiIndex, bool bCheck)
     // TODO
 }
 
-#endif // wxUSE_CHECKLISTBOX
 

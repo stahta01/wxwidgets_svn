@@ -10,15 +10,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-#  pragma implementation "pngread.h"
-#  pragma implementation "pnghand.h"
+#pragma implementation "pngread.h"
+#pragma implementation "pnghand.h"
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#  pragma hdrstop
+#pragma hdrstop
 #endif
 
 #include <stdlib.h>
@@ -79,7 +79,7 @@ wxPNGReader::wxPNGReader(void)
 
   lpbi = NULL;
   bgindex = -1;
-  m_palette = 0;
+  Palette = 0;
   imageOK = FALSE;
 }
 
@@ -91,7 +91,7 @@ wxPNGReader::wxPNGReader ( char* ImageFileName )
 
   Width = 0; Height = 0;       //  Dimensions
   Depth = 0;           // (bits x pixel)
-  ColorType = 0;        // Bit 1 = m_palette used
+  ColorType = 0;        // Bit 1 = Palette used
                   // Bit 2 = Color used
                   // Bit 3 = Alpha used
 
@@ -99,7 +99,7 @@ wxPNGReader::wxPNGReader ( char* ImageFileName )
 
   lpbi = NULL;
   bgindex = -1;
-  m_palette = 0;
+  Palette = 0;
 
   imageOK = ReadFile (ImageFileName);
 }
@@ -109,10 +109,10 @@ wxPNGReader::Create(int width, int height, int depth, int colortype)
 {
   Width = width; Height = height; Depth = depth;
   ColorType = (colortype>=0) ? colortype: ((Depth>8) ? COLORTYPE_COLOR: 0);
-  delete m_palette;
+  delete Palette;
   delete[] RawImage ;
   RawImage = 0;
-  m_palette = 0;
+  Palette = 0;
 
   if (lpbi)  
   {
@@ -137,7 +137,7 @@ wxPNGReader::~wxPNGReader ( )
   if (lpbi)  {
   	wxMacDestroyGWorld( lpbi ) ;
   }
-  delete m_palette;
+  delete Palette;
 }
 
 
@@ -154,10 +154,10 @@ bool wxPNGReader::GetRGB(int x, int y, byte* r, byte* g, byte* b)
 {
   if (!Inside(x, y)) return FALSE;
 
-  if (m_palette) {
-   return m_palette->GetRGB(GetIndex(x, y), r, g, b);
+  if (Palette) {
+   return Palette->GetRGB(GetIndex(x, y), r, g, b);
 /*   PALETTEENTRY entry;
-   ::GetPaletteEntries((HPALETTE) m_palette->GetHPALETTE(), GetIndex(x, y), 1, &entry);
+   ::GetPaletteEntries((HPALETTE) Palette->GetHPALETTE(), GetIndex(x, y), 1, &entry);
    *r = entry.peRed;
    *g = entry.peGreen;
    *b = entry.peBlue;  */
@@ -187,8 +187,8 @@ bool wxPNGReader::SetRGB(int x, int y, byte r, byte g, byte b)
 
   if (ColorType & COLORTYPE_PALETTE)
   {
-   if (!m_palette) return FALSE;
-   SetIndex(x, y, m_palette->GetPixel(r, g, b));
+   if (!Palette) return FALSE;
+   SetIndex(x, y, Palette->GetPixel(r, g, b));
 
   } else {
    ImagePointerType ImagePointer = RawImage + EfeWidth*y + (x*Depth >> 3);
@@ -202,37 +202,37 @@ bool wxPNGReader::SetRGB(int x, int y, byte r, byte g, byte b)
 
 bool wxPNGReader::SetPalette(wxPalette* colourmap)
 {
-  delete m_palette ;
+  delete Palette ;
   if (!colourmap)
    return FALSE;
   ColorType |= (COLORTYPE_PALETTE | COLORTYPE_COLOR);
-  m_palette = new wxPalette( *colourmap );
+  Palette = new wxPalette( *colourmap );
 	return true ;
-//  return (DibSetUsage(lpbi, (HPALETTE) m_palette->GetHPALETTE(), WXIMA_COLORS ) != 0);
+//  return (DibSetUsage(lpbi, (HPALETTE) Palette->GetHPALETTE(), WXIMA_COLORS ) != 0);
 }
 
 bool
 wxPNGReader::SetPalette(int n, byte *r, byte *g, byte *b)
 {
-  delete m_palette ;
-  m_palette = new wxPalette();
-  if (!m_palette)
+  delete Palette ;
+  Palette = new wxPalette();
+  if (!Palette)
    return FALSE;
 
   if (!g) g = r;
   if (!b) b = g;
-  m_palette->Create(n, r, g, b);
+  Palette->Create(n, r, g, b);
   ColorType |= (COLORTYPE_PALETTE | COLORTYPE_COLOR);
 	return true ;
-//    return (DibSetUsage(lpbi, (HPALETTE) m_palette->GetHPALETTE(), WXIMA_COLORS ) != 0);
+//    return (DibSetUsage(lpbi, (HPALETTE) Palette->GetHPALETTE(), WXIMA_COLORS ) != 0);
 }
 
 bool
 wxPNGReader::SetPalette(int n, rgb_color_struct *rgb_struct)
 {
-  delete m_palette ;
-  m_palette = new wxPalette();
-  if (!m_palette)
+  delete Palette ;
+  Palette = new wxPalette();
+  if (!Palette)
    return FALSE;
 
   byte r[256], g[256], b[256];
@@ -249,10 +249,10 @@ wxPNGReader::SetPalette(int n, rgb_color_struct *rgb_struct)
   if (bgindex != -1)
     r[bgindex] = g[bgindex] = b[bgindex] = 0;
 
-  m_palette->Create(n, r, g, b);
+  Palette->Create(n, r, g, b);
   ColorType |= (COLORTYPE_PALETTE | COLORTYPE_COLOR);
 	return true ;
-//    return (DibSetUsage(lpbi, (HPALETTE) m_palette->GetHPALETTE(), WXIMA_COLORS ) != 0);
+//    return (DibSetUsage(lpbi, (HPALETTE) Palette->GetHPALETTE(), WXIMA_COLORS ) != 0);
 }
 
 void wxPNGReader::NullData()
@@ -260,9 +260,9 @@ void wxPNGReader::NullData()
   if (lpbi)  {
   	wxMacDestroyGWorld( lpbi ) ;
   }
-  delete m_palette;
+  delete Palette;
   lpbi = NULL;
-  m_palette = NULL;
+  Palette = NULL;
 }
 
 wxBitmap* wxPNGReader::GetBitmap(void)
@@ -285,8 +285,8 @@ bool wxPNGReader::InstantiateBitmap(wxBitmap *bitmap)
       bitmap->SetWidth(GetWidth());
       bitmap->SetHeight(GetHeight());
       bitmap->SetDepth(GetDepth());
-      if ( GetDepth() > 1 && m_palette )
-        bitmap->SetPalette(*m_palette);
+      if ( GetDepth() > 1 && Palette )
+        bitmap->SetPalette(*Palette);
       bitmap->SetOk(TRUE);
 
 
@@ -317,9 +317,9 @@ bool wxPNGReader::InstantiateBitmap(wxBitmap *bitmap)
         ReleaseDC(NULL, dc2);
         HBITMAP oldBitmap = (HBITMAP) ::SelectObject(dc, tmpBitmap);
 
-        if ( m_palette )
+        if ( Palette )
         {
-            HPALETTE oldPal = ::SelectPalette(dc, (HPALETTE) m_palette->GetHPALETTE(), FALSE);
+            HPALETTE oldPal = ::SelectPalette(dc, (HPALETTE) Palette->GetHPALETTE(), FALSE);
         ::RealizePalette(dc);
         }
 
@@ -337,8 +337,8 @@ bool wxPNGReader::InstantiateBitmap(wxBitmap *bitmap)
           bitmap->SetWidth(GetWidth());
           bitmap->SetHeight(GetHeight());
           bitmap->SetDepth(GetDepth());
-          if ( GetDepth() > 1 && m_palette )
-            bitmap->SetPalette(*m_palette);
+          if ( GetDepth() > 1 && Palette )
+            bitmap->SetPalette(*Palette);
           bitmap->SetOk(TRUE);
 
 
@@ -887,7 +887,7 @@ bool wxPNGFileHandler::LoadFile(wxBitmap *bitmap, const wxString& name, long fla
         return FALSE;
 }
 
-bool wxPNGFileHandler::SaveFile(const wxBitmap *bitmap, const wxString& name, int type, const wxPalette *pal)
+bool wxPNGFileHandler::SaveFile(wxBitmap *bitmap, const wxString& name, int type, const wxPalette *pal)
 {
     return FALSE;
 }

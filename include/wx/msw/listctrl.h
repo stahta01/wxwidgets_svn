@@ -13,10 +13,8 @@
 #define _WX_LISTCTRL_H_
 
 #ifdef __GNUG__
-    #pragma interface "listctrl.h"
+#pragma interface "listctrl.h"
 #endif
-
-#if wxUSE_LISTCTRL
 
 #include "wx/control.h"
 #include "wx/event.h"
@@ -215,6 +213,12 @@ public:
     // Returns the item or -1 if unsuccessful.
     long GetNextItem(long item, int geometry = wxLIST_NEXT_ALL, int state = wxLIST_STATE_DONTCARE) const ;
 
+    // Implementation: converts wxWindows style to MSW style.
+    // Can be a single style flag or a bit list.
+    // oldStyle is 'normalised' so that it doesn't contain
+    // conflicting styles.
+    long ConvertToMSWStyle(long& oldStyle, long style) const;
+
     // Gets one of the three image lists
     wxImageList *GetImageList(int which) const ;
 
@@ -227,9 +231,6 @@ public:
     // the wxLC_LIST mode works without icons. Of course, you may want icons...
     void SetImageList(wxImageList *imageList, int which) ;
     void AssignImageList(wxImageList *imageList, int which) ;
-
-    // returns true if it is a virtual list control
-    bool IsVirtual() const { return (GetWindowStyle() & wxLC_VIRTUAL) != 0; }
 
     // Operations
     ////////////////////////////////////////////////////////////////////////////
@@ -298,9 +299,6 @@ public:
                       int format = wxLIST_FORMAT_LEFT,
                       int width = -1);
 
-    // set the number of items in a virtual list control
-    void SetItemCount(long count);
-
     // Scrolls the list control. If in icon, small icon or report view mode,
     // x specifies the number of pixels to scroll. If in list view mode, x
     // specifies the number of columns to scroll.
@@ -328,11 +326,9 @@ public:
     // bring the control in sync with current m_windowStyle value
     void UpdateStyle();
 
-    // Implementation: converts wxWindows style to MSW style.
-    // Can be a single style flag or a bit list.
-    // oldStyle is 'normalised' so that it doesn't contain
-    // conflicting styles.
-    long ConvertToMSWStyle(long& oldStyle, long style) const;
+    // Add to pool: necessary because Windows needs to have a string
+    // still exist across 3 callbacks.
+    wxChar *AddPool(const wxString& str);
 
     // Event handlers
     ////////////////////////////////////////////////////////////////////////////
@@ -355,6 +351,7 @@ protected:
                       m_ownsImageListState;
 
     long              m_baseStyle;  // Basic Windows style flags, for recreation purposes
+    wxStringList      m_stringPool; // Pool of 3 strings to satisfy Windows callback requirements
     int               m_colCount;   // Windows doesn't have GetColumnCount so must
                                     // keep track of inserted/deleted columns
 
@@ -364,23 +361,12 @@ protected:
     // TRUE if we have any items with custom attributes
     bool m_hasAnyAttr;
 
-    // these functions are only used for virtual list view controls, i.e. the
-    // ones with wxLC_VIRTUAL style
-
-    // return the text for the given column of the given item
-    virtual wxString OnGetItemText(long item, long column) const;
-
-    // return the icon for the given item
-    virtual int OnGetItemImage(long item) const;
-
 private:
     bool DoCreateControl(int x, int y, int w, int h);
 
     DECLARE_DYNAMIC_CLASS(wxListCtrl)
     DECLARE_EVENT_TABLE()
 };
-
-#endif // wxUSE_LISTCTRL
 
 #endif
     // _WX_LISTCTRL_H_

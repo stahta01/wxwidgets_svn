@@ -25,8 +25,7 @@
 #if wxUSE_HTML && wxUSE_STREAMS
 
 #ifndef WXPRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
+#include "wx/wx.h"
 #endif
 
 #include "wx/html/helpdata.h"
@@ -94,9 +93,9 @@ class HP_TagHandler : public wxHtmlTagHandler
         wxHtmlBookRecord *m_Book;
 
     public:
-        HP_TagHandler(wxHtmlBookRecord *b) : wxHtmlTagHandler()
-            { m_Book = b; m_Items = NULL; m_ItemsCnt = 0; m_Name = m_Page = wxEmptyString;
-              m_Level = 0; m_ID = -1; }
+        HP_TagHandler(wxHtmlBookRecord *b) : wxHtmlTagHandler() 
+	        { m_Book = b; m_Items = NULL; m_ItemsCnt = 0; m_Name = m_Page = wxEmptyString; 
+		      m_Level = 0; m_ID = -1; }
         wxString GetSupportedTags() { return wxT("UL,OBJECT,PARAM"); }
         bool HandleTag(const wxHtmlTag& tag);
         void WriteOut(wxHtmlContentsItem*& array, int& size);
@@ -106,14 +105,14 @@ class HP_TagHandler : public wxHtmlTagHandler
 
 bool HP_TagHandler::HandleTag(const wxHtmlTag& tag)
 {
-    if (tag.GetName() == wxT("UL"))
+    if (tag.GetName() == wxT("UL")) 
     {
         m_Level++;
         ParseInner(tag);
         m_Level--;
         return TRUE;
     }
-    else if (tag.GetName() == wxT("OBJECT"))
+    else if (tag.GetName() == wxT("OBJECT")) 
     {
         m_Name = m_Page = wxEmptyString;
         ParseInner(tag);
@@ -121,18 +120,18 @@ bool HP_TagHandler::HandleTag(const wxHtmlTag& tag)
 #if 0
          if (!m_Page.IsEmpty())
         /* Valid HHW's file may contain only two object tags:
-
+           
            <OBJECT type="text/site properties">
                <param name="ImageType" value="Folder">
            </OBJECT>
-
+           
            or
-
-           <OBJECT type="text/sitemap">
-               <param name="Name" value="main page">
-               <param name="Local" value="another.htm">
-           </OBJECT>
-
+           
+	       <OBJECT type="text/sitemap">
+		       <param name="Name" value="main page">
+		       <param name="Local" value="another.htm">
+		   </OBJECT>
+           
            We're interested in the latter. !m_Page.IsEmpty() is valid
            condition because text/site properties does not contain Local param
         */
@@ -140,8 +139,8 @@ bool HP_TagHandler::HandleTag(const wxHtmlTag& tag)
         if (tag.GetParam(wxT("TYPE")) == wxT("text/sitemap"))
         {
             if (m_ItemsCnt % wxHTML_REALLOC_STEP == 0)
-                m_Items = (wxHtmlContentsItem*) realloc(m_Items,
-                                       (m_ItemsCnt + wxHTML_REALLOC_STEP) *
+                m_Items = (wxHtmlContentsItem*) realloc(m_Items, 
+                                       (m_ItemsCnt + wxHTML_REALLOC_STEP) * 
                                        sizeof(wxHtmlContentsItem));
 
             m_Items[m_ItemsCnt].m_Level = m_Level;
@@ -156,14 +155,162 @@ bool HP_TagHandler::HandleTag(const wxHtmlTag& tag)
 
         return TRUE;
     }
-    else
+    else 
     { // "PARAM"
-        if (m_Name == wxEmptyString && tag.GetParam(wxT("NAME")) == wxT("Name"))
+        if (m_Name == wxEmptyString && tag.GetParam(wxT("NAME")) == wxT("Name")) 
+        {
             m_Name = tag.GetParam(wxT("VALUE"));
-        if (tag.GetParam(wxT("NAME")) == wxT("Local"))
-            m_Page = tag.GetParam(wxT("VALUE"));
-        if (tag.GetParam(wxT("NAME")) == wxT("ID"))
-            tag.GetParamAsInt(wxT("VALUE"), &m_ID);
+            if (m_Name.Find(wxT('&')) != -1) 
+            {
+#define ESCSEQ(escape, subst)  \
+                  { _T("&") _T(escape) _T(";"), _T("&") _T(escape) _T(" "), _T("&") _T(escape), _T(subst) }
+        static wxChar* substitutions[][4] =
+                        {
+                ESCSEQ("quot", "\""),
+                ESCSEQ("#34", "\""),
+                ESCSEQ("#8220", "\""),
+                ESCSEQ("#8221", "\""),
+                ESCSEQ("lt", "<"),
+                ESCSEQ("#60", "<"),
+                ESCSEQ("gt", ">"),
+                ESCSEQ("#62", ">"),
+
+                ESCSEQ("#94", "^"), /* ^ */
+    
+                ESCSEQ("nbsp", " "),
+                ESCSEQ("#32", " "),
+                ESCSEQ("iexcl", "!"),
+                ESCSEQ("#33", "!"),
+                ESCSEQ("cent", "¢"/* ¢ */),
+                ESCSEQ("#162", "¢"/* ¢ */),
+    
+                ESCSEQ("trade", "(TM)"),
+                ESCSEQ("#153", "(TM)"),
+                ESCSEQ("#8482", "(TM)"),
+
+                ESCSEQ("yen", "¥"),
+                ESCSEQ("#165", "¥"),
+                ESCSEQ("brkbar", "¦"),
+                ESCSEQ("#166", "¦"),
+                ESCSEQ("sect", "§"),
+                ESCSEQ("#167", "§"),
+                ESCSEQ("uml", "¨"),
+                ESCSEQ("#168", "¨"),
+    
+                ESCSEQ("copy", "©"), /* © */
+                ESCSEQ("#169", "©"),
+                ESCSEQ("ordf", "ª"),
+                ESCSEQ("#170", "ª"),
+                ESCSEQ("laquo", "«"), /* « */
+                ESCSEQ("#171", "«"),
+                ESCSEQ("not", "¬"),
+                ESCSEQ("#172", "¬"),
+    
+                ESCSEQ("reg", "®"), /* ® */
+                ESCSEQ("#174", "®"),
+    
+                ESCSEQ("deg", "°"), /* ° */
+                ESCSEQ("#176", "°"),
+                ESCSEQ("plusm", "±"), /* ± */
+                ESCSEQ("#177", "±"),
+    
+                ESCSEQ("acute", "´"),
+                ESCSEQ("#180", "´"),
+                ESCSEQ("macron", "¯"),
+                ESCSEQ("#175", "¯"),
+                ESCSEQ("micro", "µ"), /* µ */
+                ESCSEQ("#181", "µ"),
+                ESCSEQ("para", "¶"), /* ¶ */
+                ESCSEQ("#182", "¶"),
+    
+                ESCSEQ("ordm", "º"), /* º */
+                ESCSEQ("#186", "º"),
+                ESCSEQ("raquo", "»"), /* » */
+                ESCSEQ("#187", "»"),
+    
+                ESCSEQ("iquest", "¿"), /* ¿ */
+                ESCSEQ("#191", "¿"),
+                ESCSEQ("Agrave", "\300"/* À */),
+                ESCSEQ("#193", "\300"/* À */),
+    
+                ESCSEQ("Acirc", "\302"/* Â */),
+                ESCSEQ("Atilde", "\303"/* Ã */),
+                ESCSEQ("Auml", "\304"/* Ä */),
+                ESCSEQ("Aring", " "),
+                ESCSEQ("AElig", " "),
+                ESCSEQ("Ccedil", "\347"/* ç */),
+                ESCSEQ("Egrave", "\310"/* È */),
+                ESCSEQ("Eacute", "\311"/* É */),
+                ESCSEQ("Ecirc", "\312"/* Ê */),
+                ESCSEQ("Euml", "\313"/* Ë */),
+                ESCSEQ("Igrave", "\314"/* Ì */),
+
+                ESCSEQ("Icirc", "\316"/* Î */),
+                ESCSEQ("Iuml", "\317"/* Ï */),
+    
+                ESCSEQ("Ntilde", "\321"/* Ñ */),
+                ESCSEQ("Ograve", "\322"/* Ò */),
+    
+                ESCSEQ("Ocirc", "\324"/* Ô */),
+                ESCSEQ("Otilde", "\325"/* Õ */),
+                ESCSEQ("Ouml", "\326"/* Ö */),
+    
+                ESCSEQ("Oslash", " "),
+                ESCSEQ("Ugrave", "\331"/* Ù */),
+    
+                ESCSEQ("Ucirc", " "),
+                ESCSEQ("Uuml", "\334"/* Ü */),
+    
+                ESCSEQ("szlig", "\247"/* § */),
+                ESCSEQ("agrave","\340"/* à */),
+                ESCSEQ("aacute", "\341"/* á */),
+                ESCSEQ("acirc", "\342"/* â */),
+                ESCSEQ("atilde", "\343"/* ã */),
+                ESCSEQ("auml", "\344"/* ä */),
+                ESCSEQ("aring", "a"),
+                ESCSEQ("aelig", "ae"),
+                ESCSEQ("ccedil", "\347"/* ç */),
+                ESCSEQ("egrave", "\350"/* è */),
+                ESCSEQ("eacute", "\351"/* é */),
+                ESCSEQ("ecirc", "\352"/* ê */),
+                ESCSEQ("euml", "\353"/* ë */),
+                ESCSEQ("igrave", "\354"/* ì */),
+                ESCSEQ("iacute", "\355"/* í */),
+                ESCSEQ("icirc", " "),
+                ESCSEQ("iuml", "\357"/* ï */),
+                ESCSEQ("eth", " "),
+                ESCSEQ("ntilde", "\361"/* ñ */),
+                ESCSEQ("ograve", "\362"/* ò */),
+                ESCSEQ("oacute", "\363"/* ó */),
+                ESCSEQ("ocirc", "\364"/* ô */),
+                ESCSEQ("otilde", "\365"/* õ */),
+                ESCSEQ("ouml", "\366"/* ö */),
+                ESCSEQ("divide", " "),
+                ESCSEQ("oslash", " "),
+                ESCSEQ("ugrave", "\371"/* ù */),
+                ESCSEQ("uacute", "\372"/* ú */),
+                ESCSEQ("ucirc", "\373"/* û */),
+                ESCSEQ("uuml", "\374"/* ü */),
+    
+                ESCSEQ("yuml", ""),
+
+                /* this one should ALWAYS stay the last one!!! */
+                ESCSEQ("amp", "&"),
+                ESCSEQ("#38", "&"),
+
+                { NULL, NULL, NULL }
+                };
+
+                for (int i = 0; substitutions[i][0] != NULL; i++)
+                {
+                    m_Name.Replace(substitutions[i][0], substitutions[i][3], TRUE);
+                    m_Name.Replace(substitutions[i][1], substitutions[i][3], TRUE);
+                    m_Name.Replace(substitutions[i][2], substitutions[i][3], TRUE);
+                }
+            }
+        }
+        if (tag.GetParam(wxT("NAME")) == wxT("Local")) m_Page = tag.GetParam(wxT("VALUE"));
+        if (tag.GetParam(wxT("NAME")) == wxT("ID")) tag.ScanParam(wxT("VALUE"), wxT("%i"), &m_ID);
         return FALSE;
     }
 }
@@ -218,19 +365,19 @@ wxHtmlHelpData::~wxHtmlHelpData()
     int i;
 
     m_BookRecords.Empty();
-    if (m_Contents)
+    if (m_Contents) 
     {
-        for (i = 0; i < m_ContentsCnt; i++)
-        {
+        for (i = 0; i < m_ContentsCnt; i++) 
+	    {
             delete[] m_Contents[i].m_Page;
             delete[] m_Contents[i].m_Name;
         }
         free(m_Contents);
     }
-    if (m_Index)
+    if (m_Index) 
     {
-        for (i = 0; i < m_IndexCnt; i++)
-        {
+        for (i = 0; i < m_IndexCnt; i++) 
+	    {
             delete[] m_Index[i].m_Page;
             delete[] m_Index[i].m_Name;
         }
@@ -250,7 +397,7 @@ bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys, c
     parser.AddTagHandler(handler);
 
     f = ( contentsfile.IsEmpty() ? (wxFSFile*) NULL : fsys.OpenFile(contentsfile) );
-    if (f)
+    if (f) 
     {
         sz = f->GetStream()->GetSize();
         buf = new char[sz + 1];
@@ -266,7 +413,7 @@ bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys, c
         wxLogError(_("Cannot open contents file: %s"), contentsfile.c_str());
 
     f = ( indexfile.IsEmpty() ? (wxFSFile*) NULL : fsys.OpenFile(indexfile) );
-    if (f)
+    if (f) 
     {
         sz = f->GetStream()->GetSize();
         buf = new char[sz + 1];
@@ -311,23 +458,23 @@ bool wxHtmlHelpData::LoadCachedBook(wxHtmlBookRecord *book, wxInputStream *f)
 
     f->Read(&x, sizeof(x));
     version = wxINT32_SWAP_ON_BE(x);
-
-    if (version != CURRENT_CACHED_BOOK_VERSION)
+    
+    if (version != CURRENT_CACHED_BOOK_VERSION) 
     {
         wxLogError(_("Incorrect version of HTML help book"));
         return FALSE;
         // NOTE: when adding new version, please ensure backward compatibility!
     }
-
+    
     /* load contents : */
 
     f->Read(&x, sizeof(x));
     st = m_ContentsCnt;
     m_ContentsCnt += wxINT32_SWAP_ON_BE(x);
-    m_Contents = (wxHtmlContentsItem*) realloc(m_Contents,
-                                               (m_ContentsCnt / wxHTML_REALLOC_STEP + 1) *
+    m_Contents = (wxHtmlContentsItem*) realloc(m_Contents, 
+                                               (m_ContentsCnt / wxHTML_REALLOC_STEP + 1) * 
                                                wxHTML_REALLOC_STEP * sizeof(wxHtmlContentsItem));
-    for (i = st; i < m_ContentsCnt; i++)
+    for (i = st; i < m_ContentsCnt; i++) 
     {
         f->Read(&x, sizeof(x));
         m_Contents[i].m_Level = wxINT32_SWAP_ON_BE(x);
@@ -347,9 +494,9 @@ bool wxHtmlHelpData::LoadCachedBook(wxHtmlBookRecord *book, wxInputStream *f)
     f->Read(&x, sizeof(x));
     st = m_IndexCnt;
     m_IndexCnt += wxINT32_SWAP_ON_BE(x);
-    m_Index = (wxHtmlContentsItem*) realloc(m_Index, (m_IndexCnt / wxHTML_REALLOC_STEP + 1) *
+    m_Index = (wxHtmlContentsItem*) realloc(m_Index, (m_IndexCnt / wxHTML_REALLOC_STEP + 1) * 
                                                      wxHTML_REALLOC_STEP * sizeof(wxHtmlContentsItem));
-    for (i = st; i < m_IndexCnt; i++)
+    for (i = st; i < m_IndexCnt; i++) 
     {
         f->Read(&x, sizeof(x)); x = wxINT32_SWAP_ON_BE(x);
         m_Index[i].m_Name = new wxChar[x];
@@ -379,7 +526,7 @@ bool wxHtmlHelpData::SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f)
     for (i = 0; i < m_ContentsCnt; i++) if (m_Contents[i].m_Book == book && m_Contents[i].m_Level > 0) x++;
     x = wxINT32_SWAP_ON_BE(x);
     f->Write(&x, sizeof(x));
-    for (i = 0; i < m_ContentsCnt; i++)
+    for (i = 0; i < m_ContentsCnt; i++) 
     {
         if (m_Contents[i].m_Book != book || m_Contents[i].m_Level == 0) continue;
         x = wxINT32_SWAP_ON_BE(m_Contents[i].m_Level);
@@ -400,7 +547,7 @@ bool wxHtmlHelpData::SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f)
     for (i = 0; i < m_IndexCnt; i++) if (m_Index[i].m_Book == book && m_Index[i].m_Level > 0) x++;
     x = wxINT32_SWAP_ON_BE(x);
     f->Write(&x, sizeof(x));
-    for (i = 0; i < m_IndexCnt; i++)
+    for (i = 0; i < m_IndexCnt; i++) 
     {
         if (m_Index[i].m_Book != book || m_Index[i].m_Level == 0) continue;
         x = wxINT32_SWAP_ON_BE(wxStrlen(m_Index[i].m_Name) + 1);
@@ -417,7 +564,7 @@ bool wxHtmlHelpData::SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f)
 void wxHtmlHelpData::SetTempDir(const wxString& path)
 {
     if (path == wxEmptyString) m_TempPath = path;
-    else
+    else 
     {
         if (wxIsAbsolutePath(path)) m_TempPath = path;
         else m_TempPath = wxGetCwd() + _T("/") + path;
@@ -448,7 +595,7 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
     wxFileSystem fsys;
     wxFSFile *fi;
     wxHtmlBookRecord *bookr;
-
+    
     int IndexOld = m_IndexCnt,
         ContentsOld = m_ContentsCnt;
 
@@ -474,35 +621,35 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
     // 1. save file as book, but with .hhp.cached extension
     // 2. same as 1. but in temp path
     // 3. otherwise or if cache load failed, load it from MS.
-
+    
     fi = fsys.OpenFile(bookfile.GetLocation() + wxT(".cached"));
-
-    if (fi == NULL ||
-          fi->GetModificationTime() < bookfile.GetModificationTime() ||
+    
+    if (fi == NULL || 
+          fi->GetModificationTime() < bookfile.GetModificationTime() || 
           !LoadCachedBook(bookr, fi->GetStream()))
     {
         if (fi != NULL) delete fi;
         fi = fsys.OpenFile(m_TempPath + wxFileNameFromPath(bookfile.GetLocation()) + wxT(".cached"));
-        if (m_TempPath == wxEmptyString || fi == NULL ||
-            fi->GetModificationTime() < bookfile.GetModificationTime() ||
+        if (m_TempPath == wxEmptyString || fi == NULL || 
+            fi->GetModificationTime() < bookfile.GetModificationTime() || 
             !LoadCachedBook(bookr, fi->GetStream()))
         {
             LoadMSProject(bookr, fsys, indexfile, contfile);
-            if (m_TempPath != wxEmptyString)
+            if (m_TempPath != wxEmptyString) 
             {
-                wxFileOutputStream *outs = new wxFileOutputStream(m_TempPath +
+                wxFileOutputStream *outs = new wxFileOutputStream(m_TempPath + 
                                                   SafeFileName(wxFileNameFromPath(bookfile.GetLocation())) + wxT(".cached"));
                 SaveCachedBook(bookr, outs);
                 delete outs;
             }
         }
     }
-
+    
     if (fi != NULL) delete fi;
 
     // Now store the contents range
     bookr->SetContentsRange(cont_start, m_ContentsCnt);
-
+    
     // Convert encoding, if neccessary:
     if (encoding != wxFONTENCODING_SYSTEM)
     {
@@ -512,7 +659,7 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
             int i;
             wxEncodingConverter conv;
             conv.Init(encoding, a[0]);
-
+            
             for (i = IndexOld; i < m_IndexCnt; i++)
                 conv.Convert(m_Index[i].m_Name);
             for (i = ContentsOld; i < m_ContentsCnt; i++)
@@ -531,7 +678,7 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
 bool wxHtmlHelpData::AddBook(const wxString& book)
 {
     if (book.Right(4).Lower() == wxT(".zip") ||
-        book.Right(4).Lower() == wxT(".htb") /*html book*/)
+        book.Right(4).Lower() == wxT(".htb") /*html book*/) 
 
     {
         wxFileSystem fsys;
@@ -539,18 +686,18 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
         bool rt = FALSE;
 
         s = fsys.FindFirst(book + wxT("#zip:") + wxT("*.hhp"), wxFILE);
-        while (!s.IsEmpty())
+        while (!s.IsEmpty()) 
         {
             if (AddBook(s)) rt = TRUE;
             s = fsys.FindNext();
         }
-
+        
         return rt;
     }
 
 
-    else
-    {
+    else 
+    {       
         wxFSFile *fi;
         wxFileSystem fsys;
         wxInputStream *s;
@@ -563,7 +710,7 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
         wxString title = _("noname"),
                  safetitle,
                  start = wxEmptyString,
-                 contents = wxEmptyString,
+                 contents = wxEmptyString, 
                  index = wxEmptyString,
                  charset = wxEmptyString;
 
@@ -571,7 +718,7 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
         else bookFull = wxGetCwd() + "/" + book;
 
         fi = fsys.OpenFile(bookFull);
-        if (fi == NULL)
+        if (fi == NULL) 
         {
             wxLogError(_("Cannot open HTML help book: %s"), bookFull.c_str());
             return FALSE;
@@ -599,11 +746,11 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
                 charset = linebuf + strlen("Charset=");
         } while (lineptr != NULL);
         delete[] buff;
-
+    
         wxFontEncoding enc;
         if (charset == wxEmptyString) enc = wxFONTENCODING_SYSTEM;
         else enc = wxTheFontMapper->CharsetToEncoding(charset);
-        bool rtval = AddBookParam(*fi, enc,
+        bool rtval = AddBookParam(*fi, enc, 
                                   title, contents, index, start, fsys.GetPath());
         delete fi;
         return rtval;
@@ -621,11 +768,11 @@ wxString wxHtmlHelpData::FindPageByName(const wxString& x)
     /* 1. try to open given file: */
 
     cnt = m_BookRecords.GetCount();
-    for (i = 0; i < cnt; i++)
+    for (i = 0; i < cnt; i++) 
     {
         f = fsys.OpenFile(m_BookRecords[i].GetFullPath(x));
-        if (f)
-        {
+        if (f) 
+	    {
             url = m_BookRecords[i].GetFullPath(x);
             delete f;
             return url;
@@ -635,10 +782,10 @@ wxString wxHtmlHelpData::FindPageByName(const wxString& x)
 
     /* 2. try to find a book: */
 
-    for (i = 0; i < cnt; i++)
+    for (i = 0; i < cnt; i++) 
     {
-        if (m_BookRecords[i].GetTitle() == x)
-        {
+        if (m_BookRecords[i].GetTitle() == x) 
+	    {
             url = m_BookRecords[i].GetFullPath(m_BookRecords[i].GetStart());
             return url;
         }
@@ -647,10 +794,10 @@ wxString wxHtmlHelpData::FindPageByName(const wxString& x)
     /* 3. try to find in contents: */
 
     cnt = m_ContentsCnt;
-    for (i = 0; i < cnt; i++)
+    for (i = 0; i < cnt; i++) 
     {
-        if (wxStrcmp(m_Contents[i].m_Name, x) == 0)
-        {
+        if (wxStrcmp(m_Contents[i].m_Name, x) == 0) 
+	    {
             url = m_Contents[i].GetFullPath();
             return url;
         }
@@ -660,10 +807,10 @@ wxString wxHtmlHelpData::FindPageByName(const wxString& x)
     /* 4. try to find in index: */
 
     cnt = m_IndexCnt;
-    for (i = 0; i < cnt; i++)
+    for (i = 0; i < cnt; i++) 
     {
-        if (wxStrcmp(m_Index[i].m_Name, x) == 0)
-        {
+        if (wxStrcmp(m_Index[i].m_Name, x) == 0) 
+	    {
             url = m_Index[i].GetFullPath();
             return url;
         }
@@ -677,10 +824,10 @@ wxString wxHtmlHelpData::FindPageById(int id)
     int i;
     wxString url(wxEmptyString);
 
-    for (i = 0; i < m_ContentsCnt; i++)
+    for (i = 0; i < m_ContentsCnt; i++) 
     {
-        if (m_Contents[i].m_ID == id)
-        {
+        if (m_Contents[i].m_ID == id) 
+	    {
             url = m_Contents[i].GetFullPath();
             return url;
         }
@@ -700,13 +847,13 @@ wxHtmlSearchStatus::wxHtmlSearchStatus(wxHtmlHelpData* data, const wxString& key
     m_Data = data;
     m_Keyword = keyword;
     wxHtmlBookRecord* bookr = NULL;
-    if (book != wxEmptyString)
+    if (book != wxEmptyString) 
     {
         // we have to search in a specific book. Find it first
         int i, cnt = data->m_BookRecords.GetCount();
         for (i = 0; i < cnt; i++)
-            if (data->m_BookRecords[i].GetTitle() == book)
-            {
+            if (data->m_BookRecords[i].GetTitle() == book) 
+	        {
                 bookr = &(data->m_BookRecords[i]);
                 m_CurIndex = bookr->GetContentsStart();
                 m_MaxIndex = bookr->GetContentsEnd();
@@ -715,7 +862,7 @@ wxHtmlSearchStatus::wxHtmlSearchStatus(wxHtmlHelpData* data, const wxString& key
         // check; we won't crash if the book doesn't exist, but it's Bad Anyway.
         wxASSERT(bookr);
     }
-    if (! bookr)
+    if (! bookr) 
     {
         // no book specified; search all books
         m_CurIndex = 0;
@@ -733,7 +880,7 @@ bool wxHtmlSearchStatus::Search()
     bool found = FALSE;
     wxChar *thepage;
 
-    if (!m_Active)
+    if (!m_Active) 
     {
         // sanity check. Illegal use, but we'll try to prevent a crash anyway
         wxASSERT(m_Active);
@@ -749,7 +896,7 @@ bool wxHtmlSearchStatus::Search()
     if (m_LastPage != NULL)
     {
         wxChar *p1, *p2;
-        for (p1 = thepage, p2 = m_LastPage;
+        for (p1 = thepage, p2 = m_LastPage; 
              *p1 != 0 && *p1 != _T('#') && *p1 == *p2; p1++, p2++) {}
 
         m_LastPage = thepage;
@@ -758,12 +905,12 @@ bool wxHtmlSearchStatus::Search()
             return FALSE;
     }
     else m_LastPage = thepage;
-
+    
     wxFileSystem fsys;
     file = fsys.OpenFile(m_Data->m_Contents[i].m_Book->GetFullPath(thepage));
-    if (file)
+    if (file) 
     {
-        if (m_Engine.Scan(file->GetStream()))
+        if (m_Engine.Scan(file->GetStream())) 
         {
             m_Name = m_Data->m_Contents[i].m_Name;
             m_ContentsItem = m_Data->m_Contents + i;
@@ -792,15 +939,15 @@ void wxSearchEngine::LookFor(const wxString& keyword, bool case_sensitive, bool 
     if (m_Keyword) delete[] m_Keyword;
     m_Keyword = new wxChar[keyword.Length() + 1];
     wxStrcpy(m_Keyword, keyword.c_str());
-
+    
     if (!m_CaseSensitive)
     {
         for (int i = wxStrlen(m_Keyword) - 1; i >= 0; i--)
-        {
+	    {
             if ((m_Keyword[i] >= wxT('A')) && (m_Keyword[i] <= wxT('Z')))
                 m_Keyword[i] += wxT('a') - wxT('A');
-        }
-    }
+		}
+	}
 }
 
 
@@ -825,19 +972,19 @@ bool wxSearchEngine::Scan(wxInputStream *stream)
 
     if (m_WholeWords)
     {
-        for (i = 0; i < lng - wrd; i++)
-        {
+        for (i = 0; i < lng - wrd; i++) 
+	    {
             if (WHITESPACE(buf[i])) continue;
             j = 0;
             while ((j < wrd) && (buf[i + j] == m_Keyword[j])) j++;
             if (j == wrd && WHITESPACE(buf[i + j])) { found = TRUE; break; }
         }
     }
-
+    
     else
     {
-        for (i = 0; i < lng - wrd; i++)
-        {
+        for (i = 0; i < lng - wrd; i++) 
+	    {
             j = 0;
             while ((j < wrd) && (buf[i + j] == m_Keyword[j])) j++;
             if (j == wrd) { found = TRUE; break; }

@@ -13,8 +13,6 @@
   #include "wx/motif/icon.h"
 #elif defined(__WXGTK__)
   #include "wx/gtk/icon.h"
-#elif defined(__WXMGL__)
-  #include "wx/mgl/icon.h"
 #elif defined(__WXQT__)
   #include "wx/qt/icon.h"
 #elif defined(__WXMAC__)

@@ -32,9 +32,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxSizer, wxObject);
 IMPLEMENT_ABSTRACT_CLASS(wxGridSizer, wxSizer);
 IMPLEMENT_ABSTRACT_CLASS(wxFlexGridSizer, wxGridSizer);
 IMPLEMENT_ABSTRACT_CLASS(wxBoxSizer, wxSizer);
-#if wxUSE_STATBOX
 IMPLEMENT_ABSTRACT_CLASS(wxStaticBoxSizer, wxBoxSizer);
-#endif
 #if wxUSE_NOTEBOOK
 IMPLEMENT_ABSTRACT_CLASS(wxNotebookSizer, wxSizer);
 #endif
@@ -383,9 +381,6 @@ wxSize wxSizer::GetMaxWindowSize( wxWindow *WXUNUSED(window) )
     wxRect rect = wxGetClientDisplayRect();
     wxSize sizeMax (rect.width,rect.height);
 
-    // Sorry, but this bit is wrong -- it makes a window that should just be
-    // able to fit onto the screen, not fit on the screen. -- JACS
-#if 0
     // Make the max size a bit smaller than the visible portion of
     // the screen.  A window which takes the entire screen doesn't
     // look very nice either
@@ -394,7 +389,6 @@ wxSize wxSizer::GetMaxWindowSize( wxWindow *WXUNUSED(window) )
 
     sizeMax.y *= 9;
     sizeMax.y /= 10;
-#endif
 
     return sizeMax;
 }
@@ -1023,8 +1017,6 @@ wxSize wxBoxSizer::CalcMin()
 // wxStaticBoxSizer
 //---------------------------------------------------------------------------
 
-#if wxUSE_STATBOX
-
 wxStaticBoxSizer::wxStaticBoxSizer( wxStaticBox *box, int orient )
                 : wxBoxSizer( orient )
 {
@@ -1080,8 +1072,6 @@ wxSize wxStaticBoxSizer::CalcMin()
     return ret;
 }
 
-#endif // wxUSE_STATBOX
-
 //---------------------------------------------------------------------------
 // wxNotebookSizer
 //---------------------------------------------------------------------------
@@ -1102,15 +1092,24 @@ void wxNotebookSizer::RecalcSizes()
 
 wxSize wxNotebookSizer::CalcMin()
 {
-    wxSize sizeBorder = m_notebook->CalcSizeFromPage(wxSize(0, 0));
+    // This will have to be done platform by platform
+    // as there is no way to guess the thickness of
+    // the wxNotebook tabs and border.
 
-    sizeBorder.x += 5;
-    sizeBorder.y += 5;
+    int borderX = 5;
+    int borderY = 5;
+    if ((m_notebook->HasFlag(wxNB_RIGHT)) ||
+        (m_notebook->HasFlag(wxNB_LEFT)))
+    {
+        borderX += 90; // improvements later..
+    }
+    else
+    {
+        borderY += 40; // improvements later..
+    }
 
     if (m_notebook->GetChildren().GetCount() == 0)
-    {
-        return wxSize(sizeBorder.x + 10, sizeBorder.y + 10);
-    }
+        return wxSize(borderX + 10, borderY + 10);
 
     int maxX = 0;
     int maxY = 0;
@@ -1125,16 +1124,14 @@ wxSize wxNotebookSizer::CalcMin()
         {
             wxSize subsize( itemsizer->CalcMin() );
 
-            if (subsize.x > maxX)
-                maxX = subsize.x;
-            if (subsize.y > maxY)
-                maxY = subsize.y;
+            if (subsize.x > maxX) maxX = subsize.x;
+            if (subsize.y > maxY) maxY = subsize.y;
         }
 
         node = node->GetNext();
     }
 
-    return wxSize( maxX, maxY ) + sizeBorder;
+    return wxSize( borderX + maxX, borderY + maxY );
 }
 
 #endif // wxUSE_NOTEBOOK

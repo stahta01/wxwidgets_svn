@@ -13,8 +13,6 @@
 #pragma implementation "control.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/control.h"
 #include "wx/panel.h"
 #include "wx/app.h"
@@ -516,8 +514,7 @@ void  wxControl::DoSetSize(int x, int y,
 
 		MacRepositionScrollBars() ;
 		// To consider -> should the parameters be the effective or the virtual coordinates (AdjustForParent..)
-	wxPoint point(m_x, m_y);
-        wxMoveEvent event(point, m_windowId);
+        wxMoveEvent event(wxPoint(m_x, m_y), m_windowId);
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
 	}		
@@ -537,8 +534,7 @@ void  wxControl::DoSetSize(int x, int y,
 		}
 
 		MacRepositionScrollBars() ;
-	wxSize size(m_width, m_height);
-        wxSizeEvent event(size, m_windowId);
+        wxSizeEvent event(wxSize(m_width, m_height), m_windowId);
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
 	}

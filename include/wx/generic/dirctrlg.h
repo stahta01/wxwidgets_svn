@@ -9,7 +9,7 @@
 // Created:     21/3/2000
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DIRCTRL_H_
@@ -18,8 +18,6 @@
 #ifdef __GNUG__
 #pragma interface "dirctrlg.h"
 #endif
-
-#if wxUSE_DIRDLG
 
 #include "wx/treectrl.h"
 #include "wx/dirdlg.h"
@@ -248,8 +246,6 @@ protected:
     wxTextCtrl* m_input;
 
 };
-
-#endif // wxUSE_DIRDLG
 
 #endif
     // _WX_DIRCTRLG_H_

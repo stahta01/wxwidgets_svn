@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        generic/colrdlgg.cpp
+// Name:        colrdlgg.cpp
 // Purpose:     Choice dialogs
 // Author:      Julian Smart
 // Modified by:
@@ -17,22 +17,22 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_COLOURDLG
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/intl.h"
-    #include "wx/dialog.h"
-    #include "wx/listbox.h"
-    #include "wx/button.h"
-    #include "wx/stattext.h"
-    #include "wx/layout.h"
-    #include "wx/dcclient.h"
-    #include "wx/slider.h"
-    #include "wx/sizer.h"
+#include <stdio.h>
+#include <stdio.h>
+#include "wx/utils.h"
+#include "wx/intl.h"
+#include "wx/dialog.h"
+#include "wx/listbox.h"
+#include "wx/button.h"
+#include "wx/stattext.h"
+#include "wx/layout.h"
+#include "wx/dcclient.h"
+#include "wx/slider.h"
+#include "wx/sizer.h"
 #endif
 
 #if wxUSE_STATLINE
@@ -499,5 +499,4 @@ void wxGenericColourDialog::OnBlueSlider(wxCommandEvent& WXUNUSED(event))
   PaintCustomColour(dc);
 }
 
-#endif // wxUSE_COLOURDLG
 

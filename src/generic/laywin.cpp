@@ -24,8 +24,8 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/frame.h"
-    #include "wx/mdi.h"
+#include "wx/wx.h"
+#include "wx/mdi.h"
 #endif
 
 #include "wx/laywin.h"
@@ -179,8 +179,6 @@ void wxSashLayoutWindow::OnCalculateLayout(wxCalculateLayoutEvent& event)
  * wxLayoutAlgorithm
  */
 
-#if wxUSE_MDI_ARCHITECTURE
-
 // Lays out windows for an MDI frame. The MDI client area gets what's left
 // over.
 bool wxLayoutAlgorithm::LayoutMDIFrame(wxMDIParentFrame* frame, wxRect* r)
@@ -216,13 +214,6 @@ bool wxLayoutAlgorithm::LayoutMDIFrame(wxMDIParentFrame* frame, wxRect* r)
     clientWindow->SetSize(rect.x, rect.y, rect.width, rect.height);
 
     return TRUE;
-}
-
-#endif // wxUSE_MDI_ARCHITECTURE
-
-bool wxLayoutAlgorithm::LayoutFrame(wxFrame* frame, wxWindow* mainWindow)
-{
-    return LayoutWindow(frame, mainWindow);
 }
 
 // Layout algorithm for any window. mainWindow gets what's left over.

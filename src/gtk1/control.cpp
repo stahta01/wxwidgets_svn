@@ -11,10 +11,6 @@
 #pragma implementation "control.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_CONTROLS
-
 #include "wx/control.h"
 
 #include <gtk/gtk.h>
@@ -82,6 +78,4 @@ wxSize wxControl::DoGetBestSize() const
 
     return wxSize(req.width, req.height);
 }
-
-#endif // wxUSE_CONTROLS
 

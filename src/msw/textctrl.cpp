@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TEXTCTRL
-
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
     #include "wx/settings.h"
@@ -1399,4 +1397,3 @@ bool wxRichEditModule::Load(int version)
 
 #endif // wxUSE_RICHEDIT
 
-#endif // wxUSE_TEXTCTRL

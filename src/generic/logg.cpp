@@ -46,22 +46,26 @@
     #include "wx/button.h"
 #endif // WX_PRECOMP
 
-#if wxUSE_LOGGUI || wxUSE_LOGWINDOW
-
 #include "wx/file.h"
 #include "wx/textfile.h"
 #include "wx/statline.h"
+
+#if wxUSE_LOG
 
 #ifdef  __WXMSW__
   // for OutputDebugString()
   #include  "wx/msw/private.h"
 #endif // Windows
 
+// may be defined to 0 for old behavior (using wxMessageBox) - shouldn't be
+// changed normally (that's why it's here and not in setup.h)
+#define wxUSE_LOG_DIALOG 1
+
 #if wxUSE_LOG_DIALOG
     #include "wx/listctrl.h"
     #include "wx/imaglist.h"
     #include "wx/image.h"
-#else // !wxUSE_LOG_DIALOG
+#else // !wxUSE_TEXTFILE
     #include "wx/msgdlg.h"
 #endif // wxUSE_LOG_DIALOG/!wxUSE_LOG_DIALOG
 
@@ -148,7 +152,7 @@ END_EVENT_TABLE()
 // private functions
 // ----------------------------------------------------------------------------
 
-#if wxUSE_FILE && wxUSE_FILEDLG
+#if wxUSE_FILE
 
 // pass an uninitialized file object, the function will ask the user for the
 // filename and try to open it, returns TRUE on success (file was opened),
@@ -163,7 +167,7 @@ static int OpenLogFile(wxFile& file, wxString *filename = NULL);
 // ----------------------------------------------------------------------------
 
 // we use a global variable to store the frame pointer for wxLogStatus - bad,
-// but it's the easiest way
+// but it's he easiest way
 static wxFrame *gs_pFrame; // FIXME MT-unsafe
 
 // ============================================================================
@@ -192,6 +196,28 @@ void wxLogStatus(wxFrame *pFrame, const wxChar *szFormat, ...)
     wxLog::OnLog(wxLOG_Status, msg, time(NULL));
     gs_pFrame = (wxFrame *) NULL;
   }
+}
+
+// ----------------------------------------------------------------------------
+// wxLogTextCtrl implementation
+// ----------------------------------------------------------------------------
+
+wxLogTextCtrl::wxLogTextCtrl(wxTextCtrl *pTextCtrl)
+{
+    m_pTextCtrl = pTextCtrl;
+}
+
+void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
+{
+    wxString msg;
+    TimeStamp(&msg);
+#ifdef __WXMAC__
+    msg << szString << wxT('\r');
+#else
+    msg << szString << wxT('\n');
+#endif
+
+    m_pTextCtrl->AppendText(msg);
 }
 
 // ----------------------------------------------------------------------------
@@ -240,7 +266,7 @@ void wxLogGui::Flush()
         titleFormat = _("%s Information");
         style = wxICON_INFORMATION;
     }
-
+    
     wxString title;
     title.Printf(titleFormat, appName.c_str());
 
@@ -257,7 +283,6 @@ void wxLogGui::Flush()
     else // more than one message
     {
 #if wxUSE_LOG_DIALOG
-
         wxLogDialog dlg(parent,
                         m_aMessages, m_aSeverity, m_aTimes,
                         title, style);
@@ -336,7 +361,7 @@ void wxLogGui::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
         case wxLOG_Debug:
             #ifdef __WXDEBUG__
             {
-                #if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+                #ifdef __WXMSW__
                     // don't prepend debug/trace here: it goes to the
                     // debug window anyhow, but do put a timestamp
                     wxString str;
@@ -456,7 +481,6 @@ wxLogFrame::wxLogFrame(wxFrame *pParent, wxLogWindow *log, const wxChar *szTitle
             wxHSCROLL       |
             wxTE_READONLY);
 
-#if wxUSE_MENUS
     // create menu
     wxMenuBar *pMenuBar = new wxMenuBar;
     wxMenu *pMenu = new wxMenu;
@@ -468,7 +492,6 @@ wxLogFrame::wxLogFrame(wxFrame *pParent, wxLogWindow *log, const wxChar *szTitle
     pMenu->Append(Menu_Close, _("&Close"), _("Close this window"));
     pMenuBar->Append(pMenu, _("&Log"));
     SetMenuBar(pMenuBar);
-#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
     // status bar for menu prompts
@@ -501,7 +524,6 @@ void wxLogFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 #if wxUSE_FILE
 void wxLogFrame::OnSave(wxCommandEvent& WXUNUSED(event))
 {
-#if wxUSE_FILEDLG
     wxString filename;
     wxFile file;
     int rc = OpenLogFile(file, &filename);
@@ -530,7 +552,6 @@ void wxLogFrame::OnSave(wxCommandEvent& WXUNUSED(event))
     else {
         wxLogStatus(this, _("Log saved to the file '%s'."), filename.c_str());
     }
-#endif
 }
 #endif // wxUSE_FILE
 
@@ -890,7 +911,6 @@ void wxLogDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
 void wxLogDialog::OnSave(wxCommandEvent& WXUNUSED(event))
 {
-#if wxUSE_FILEDLG
     wxFile file;
     int rc = OpenLogFile(file);
     if ( rc == -1 )
@@ -925,7 +945,6 @@ void wxLogDialog::OnSave(wxCommandEvent& WXUNUSED(event))
 
     if ( !ok )
         wxLogError(_("Can't save log contents to file."));
-#endif
 }
 
 #endif // wxUSE_FILE
@@ -992,7 +1011,7 @@ wxLogDialog::~wxLogDialog()
 
 #endif // wxUSE_LOG_DIALOG
 
-#if wxUSE_FILE && wxUSE_FILEDLG
+#if wxUSE_FILE
 
 // pass an uninitialized file object, the function will ask the user for the
 // filename and try to open it, returns TRUE on success (file was opened),
@@ -1052,34 +1071,4 @@ static int OpenLogFile(wxFile& file, wxString *pFilename)
 
 #endif // wxUSE_FILE
 
-#endif // !(wxUSE_LOGGUI || wxUSE_LOGWINDOW)
-
-#if wxUSE_TEXTCTRL
-
-// ----------------------------------------------------------------------------
-// wxLogTextCtrl implementation
-// ----------------------------------------------------------------------------
-
-wxLogTextCtrl::wxLogTextCtrl(wxTextCtrl *pTextCtrl)
-{
-    m_pTextCtrl = pTextCtrl;
-}
-
-void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
-{
-    wxString msg;
-    TimeStamp(&msg);
-
-#ifdef __WXMAC__
-    // VZ: this is a bug in wxMac, it *must* accept '\n' as new line, the
-    //     translation must be done in wxTextCtrl, not here! (FIXME)
-    msg << szString << wxT('\r');
-#else
-    msg << szString << wxT('\n');
-#endif
-
-    m_pTextCtrl->AppendText(msg);
-}
-
-#endif // wxUSE_TEXTCTRL
-
+#endif // wxUSE_LOG

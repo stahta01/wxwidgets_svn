@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATBOX
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/dcclient.h"
@@ -117,4 +115,3 @@ long wxStaticBox::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
     return wxControl::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-#endif // wxUSE_STATBOX

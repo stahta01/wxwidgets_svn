@@ -13,7 +13,6 @@
 #pragma implementation "bmpbuttn.h"
 #endif
 
-#include "wx/window.h"
 #include "wx/bmpbuttn.h"
 
 #if !USE_SHARED_LIBRARY

@@ -402,7 +402,7 @@ WXDLLEXPORT_DATA(wxCSConv) wxConvLocal((const wxChar *)NULL);
 // - perhaps common encodings to objects ("UTF8" -> wxConvUTF8)
 // - move wxEncodingConverter meat in here
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifdef __WIN32__
 #include "wx/msw/registry.h"
 // this should work if M$ Internet Exploiter is installed
 static long CharsetToCodepage(const wxChar *name)
@@ -616,7 +616,7 @@ public:
 };
 #endif
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifdef __WIN32__
 class CP_CharSet : public wxCharacterSet
 {
 public:
@@ -627,7 +627,7 @@ public:
     {
         size_t len =
             MultiByteToWideChar(CodePage, 0, psz, -1, buf, buf ? n : 0);
-        //VS: returns # of written chars for buf!=NULL and *size*
+        //VS: returns # of written chars for buf!=NULL and *size* 
         //    needed buffer for buf==NULL
         return len ? (buf ? len : len-1) : (size_t)-1;
     }
@@ -636,7 +636,7 @@ public:
     {
         size_t len = WideCharToMultiByte(CodePage, 0, psz, -1, buf,
                                          buf ? n : 0, NULL, NULL);
-        //VS: returns # of written chars for buf!=NULL and *size*
+        //VS: returns # of written chars for buf!=NULL and *size* 
         //    needed buffer for buf==NULL
         return len ? (buf ? len : len-1) : (size_t)-1;
     }
@@ -647,9 +647,7 @@ public:
 public:
     long CodePage;
 };
-#endif // __WIN32__
-
-#if wxUSE_FONTMAP
+#endif
 
 class EC_CharSet : public wxCharacterSet
 {
@@ -694,8 +692,6 @@ public:
     wxEncodingConverter m2w, w2m;
 };
 
-#endif // wxUSE_FONTMAP
-
 static wxCharacterSet *wxGetCharacterSet(const wxChar *name)
 {
     wxCharacterSet *cset = NULL;
@@ -713,16 +709,14 @@ static wxCharacterSet *wxGetCharacterSet(const wxChar *name)
         }
     }
 
-    if (cset && cset->usable())
-        return cset;
-
+    if (cset && cset->usable()) return cset;
     if (cset)
     {
         delete cset;
         cset = NULL;
     }
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifdef __WIN32__
     cset = new CP_CharSet(name); // may take NULL
     if (cset->usable())
         return cset;
@@ -730,11 +724,9 @@ static wxCharacterSet *wxGetCharacterSet(const wxChar *name)
     delete cset;
 #endif // __WIN32__
 
-#if wxUSE_FONTMAP
     cset = new EC_CharSet(name);
     if (cset->usable())
         return cset;
-#endif // wxUSE_FONTMAP
 
     delete cset;
     wxLogError(_("Unknown encoding '%s'!"), name);
@@ -776,8 +768,7 @@ void wxCSConv::LoadNow()
                 SetName(name);
         }
 
-        // wxGetCharacterSet() complains about NULL name
-        m_cset = m_name ? wxGetCharacterSet(m_name) : NULL;
+        m_cset = wxGetCharacterSet(m_name);
         m_deferred = FALSE;
     }
 }
@@ -863,10 +854,10 @@ public:
 class EC_CharSetConverter
 {
 public:
-    EC_CharSetConverter(EC_CharSet* from,EC_CharSet* to)
+    EC_CharSetConverter(EC_CharSet*from,EC_CharSet*to)
         { cnv.Init(from->enc,to->enc); }
 
-    size_t Convert(char* buf, const char* psz, size_t n)
+    size_t Convert(char*buf, const char*psz, size_t n)
     {
         size_t inbuf = strlen(psz);
         if (buf) cnv.Convert(psz,buf);

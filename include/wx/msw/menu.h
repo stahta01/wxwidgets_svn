@@ -60,6 +60,9 @@ public:
     }
 #endif // wxUSE_MENU_CALLBACK
 
+    // MSW-specific
+    bool ProcessCommand(wxCommandEvent& event);
+
     // implementation only from now on
     // -------------------------------
 
@@ -70,6 +73,10 @@ public:
     wxWindow *GetWindow() const;
         // get the menu handle
     WXHMENU GetHMenu() const { return m_hMenu; }
+
+    // attach/detach menu to/from wxMenuBar
+    void Attach(wxMenuBar *menubar);
+    void Detach();
 
 #if wxUSE_ACCEL
     // called by wxMenuBar to build its accel table from the accels of all menus
@@ -127,6 +134,10 @@ public:
     virtual wxMenu *Replace(size_t pos, wxMenu *menu, const wxString& title);
     virtual wxMenu *Remove(size_t pos);
 
+    virtual int FindMenuItem(const wxString& menuString,
+                             const wxString& itemString) const;
+    virtual wxMenuItem* FindItem( int id, wxMenu **menu = NULL ) const;
+
     virtual void EnableTop( size_t pos, bool flag );
     virtual void SetLabelTop( size_t pos, const wxString& label );
     virtual wxString GetLabelTop( size_t pos ) const;
@@ -142,8 +153,14 @@ public:
 
     // implementation from now on
     WXHMENU Create();
-    virtual void Detach();
-    virtual void Attach(wxFrame *frame);
+    void Detach();
+
+        // returns TRUE if we're attached to a frame
+    bool IsAttached() const { return m_menuBarFrame != NULL; }
+        // get the frame we live in
+    wxFrame *GetFrame() const { return m_menuBarFrame; }
+        // attach to a frame
+    void Attach(wxFrame *frame);
 
 #if wxUSE_ACCEL
     // get the accel table for all the menus
@@ -170,6 +187,7 @@ protected:
 
     wxArrayString m_titles;
 
+    wxFrame      *m_menuBarFrame;
     WXHMENU       m_hMenu;
 
 #if wxUSE_ACCEL

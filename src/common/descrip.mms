@@ -102,7 +102,6 @@ OBJECTS1=framecmn.obj,\
 		mimecmn.obj,\
 		module.obj,\
 		mstream.obj,\
-		nbkbase.obj,\
 		object.obj,\
 		objstrm.obj,\
 		paper.obj,\
@@ -206,7 +205,6 @@ SOURCES = \
 		mimecmn.cpp,\
 		module.cpp,\
 		mstream.cpp,\
-		nbkbase.cpp,\
 		object.cpp,\
 		objstrm.cpp,\
 		paper.cpp,\
@@ -340,7 +338,6 @@ menucmn.obj : menucmn.cpp
 mimecmn.obj : mimecmn.cpp
 module.obj : module.cpp
 mstream.obj : mstream.cpp
-nbkbase.obj : nbkbase.cpp
 object.obj : object.cpp
 objstrm.obj : objstrm.cpp
 paper.obj : paper.cpp

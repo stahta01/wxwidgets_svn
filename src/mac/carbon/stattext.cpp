@@ -28,7 +28,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxStaticText, wxControl)
 
 #include <wx/mac/uma.h>
 
-BEGIN_EVENT_TABLE(wxStaticText, wxStaticTextBase)
+BEGIN_EVENT_TABLE(wxStaticText, wxControl)
     EVT_PAINT(wxStaticText::OnPaint)
 END_EVENT_TABLE()
 
@@ -52,84 +52,15 @@ bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
     m_label = label ;
 
 	bool ret = wxControl::Create( parent, id, pos, size, style , wxDefaultValidator , name );
-	SetBestSize( size ) ;
+	SetSizeOrDefault( size ) ;
     
     return ret;
-}
-
-const wxString punct = " ,.-;:!?";
-
-void wxStaticText::DrawParagraph(wxDC &dc, wxString paragraph)
-{
-  int x = 0 ;
-  int y = 0 ;
-  int i = 0 ;
-  long width, height ;
-  bool linedrawn = true;
-  while( paragraph.Length() > 0 )
-  {
-		dc.GetTextExtent( paragraph , &width , &height ) ;
-		 	   		
-		if ( width > m_width )
-		{
-			for ( int p = paragraph.Length() -1 ; p > 0 ; --p )
-			{     				  
-			  if ((punct.Find(paragraph[p]) != wxNOT_FOUND) || !linedrawn)
-				{
-				  int blank = (paragraph[p] == ' ') ? 0 : 1;
-				  
-					dc.GetTextExtent( paragraph.Left(p + blank) , &width , &height ) ;
-					
-					if ( width <= m_width )
-					{	
-						int pos = x ;
-						if ( HasFlag( wxALIGN_CENTER ) )
-						{
-							pos += ( m_width - width ) / 2 ;
-					  }
-						else if ( HasFlag( wxALIGN_RIGHT ) )
-						{
-							pos += ( m_width - width ) ;
-					  }
-					  		
-  					dc.DrawText( paragraph.Left(p + blank), pos , y) ;
-  					y += height ;
-						paragraph = paragraph.Mid(p+1) ;
-						linedrawn = true;
-						break ;
-					}
-				}
-			}
-			
-			linedrawn = false;
-		}
-		else
-		{
-			int pos = x ;
-			if ( HasFlag( wxALIGN_CENTER ) )
-			{
-				pos += ( m_width - width ) / 2 ;
-		  }
-			else if ( HasFlag( wxALIGN_RIGHT ) )
-			{
-				pos += ( m_width - width ) ;
-		  }
-		  		
-  		dc.DrawText( paragraph, pos , y) ;
-  		paragraph="";
-  		y += height ;
-		}
-	}
 }
 
 void wxStaticText::OnDraw( wxDC &dc )
 {
     if (m_width <= 0 || m_height <= 0)
         return;
-
-  wxString paragraph;
-  int i = 0 ;
-  wxString text = m_label;
 
     PrepareDC(dc);
     
@@ -168,17 +99,145 @@ void wxStaticText::OnDraw( wxDC &dc )
 	if ( doClear )
 		dc.Clear() ;
 		
-	while (i < text.Length())
+    int x = 0 ;
+    int y = 0 ;
+    wxString text = m_label ;
+    wxString paragraph ;
+   	int i = 0 ;
+   	int laststop = 0 ;
+   	long width, height ;
+
+   	while( i < text.Length() )
+   	{
+		if( text[i] == 13 || text[i] == 10)
+		{
+   			paragraph = text.Mid( laststop , i - laststop ) ;
+   			while( paragraph.Length() > 0 )
+   			{
+   				dc.GetTextExtent( paragraph , &width , &height ) ;
+   				if ( width > m_width )
+   				{
+	   				for ( int p = paragraph.Length() -1 ; p > 0 ; --p )
+	   				{
+	   					if ( paragraph[p]=='.' )
+	   					{
+	   						dc.GetTextExtent( paragraph.Left(p+1) , &width , &height ) ;
+	   						if ( width <= m_width )
+	   						{	
+	   							int pos = x ;
+	   							if ( HasFlag( wxALIGN_CENTER ) )
+	   							{
+	   								pos += ( m_width - width ) / 2 ;
+								}
+	   							else if ( HasFlag( wxALIGN_RIGHT ) )
+	   							{
+	   								pos += ( m_width - width ) ;
+								}		
+	     						dc.DrawText( paragraph.Left(p+1), pos , y) ;
+	     						y += height ;
+	   							paragraph = paragraph.Mid(p+1) ;
+	   							break ;
+	   						}
+	   					}
+	   					if ( paragraph[p]==' ' )
+	   					{
+	   						dc.GetTextExtent( paragraph.Left(p) , &width , &height ) ;
+	   						if ( width <= m_width )
+	   						{
+	   							int pos = x ;
+	   							if ( HasFlag( wxALIGN_CENTER ) )
+	   							{
+	   								pos += ( m_width - width ) / 2 ;
+								}
+	   							else if ( HasFlag( wxALIGN_RIGHT ) )
+	   							{
+	   								pos += ( m_width - width ) ;
+								}		
+	     						dc.DrawText( paragraph.Left(p), pos , y) ;
+	     						y += height ;
+	   							paragraph = paragraph.Mid(p+1) ;
+	   							break ;
+	   						}
+	   					}
+	   				}
+	   			}
+	   			else
+	   			{
+	     			dc.DrawText( paragraph, x , y) ;
+	     			paragraph="";
+	     			y += height ;
+	   			}
+	   		}
+   			laststop = i+1 ;
+		}
+   		++i ;
+   	}
+   	paragraph = text.Mid( laststop , text.Length() - laststop ) ;
+	while( paragraph.Length() > 0 )
 	{
-	  paragraph += text[i];
-	  
-  	if (text[i] == 13 || text[i] == 10)
-	    DrawParagraph(dc, paragraph);
-	    
-    ++i;
-  }
-  if (paragraph.Length() > 0)
-	  DrawParagraph(dc, paragraph);
+		dc.GetTextExtent( paragraph , &width , &height ) ;
+		if ( width > m_width )
+		{
+			for ( int p = paragraph.Length() -1 ; p > 0 ; --p )
+			{
+				if ( paragraph[p]=='.' )
+				{
+					dc.GetTextExtent( paragraph.Left(p+1) , &width , &height ) ;
+					if ( width <= m_width )
+					{
+						int pos = x ;
+						if ( HasFlag( wxALIGN_CENTER ) )
+						{
+							pos += ( m_width - width ) / 2 ;
+						}
+						else if ( HasFlag( wxALIGN_RIGHT ) )
+						{
+							pos += ( m_width - width ) ;
+						}		
+ 						dc.DrawText( paragraph.Left(p+1), pos , y) ;
+ 						y += height ;
+						paragraph = paragraph.Mid(p+1) ;
+						break ;
+					}
+				}
+				if ( paragraph[p]==' ' )
+				{
+					dc.GetTextExtent( paragraph.Left(p) , &width , &height ) ;
+					if ( width <= m_width )
+					{
+						int pos = x ;
+						if ( HasFlag( wxALIGN_CENTER ) )
+						{
+							pos += ( m_width - width ) / 2 ;
+						}
+						else if ( HasFlag( wxALIGN_RIGHT ) )
+						{
+							pos += ( m_width - width ) ;
+						}		
+ 						dc.DrawText( paragraph.Left(p), pos , y) ;
+ 						y += height ;
+						paragraph = paragraph.Mid(p+1) ;
+						break ;
+					}
+				}
+			}
+		}
+		else
+		{
+			int pos = x ;
+			if ( HasFlag( wxALIGN_CENTER ) )
+			{
+				pos += ( m_width - width ) / 2 ;
+			}
+			else if ( HasFlag( wxALIGN_RIGHT ) )
+			{
+				pos += ( m_width - width ) ;
+			}		
+ 			dc.DrawText( paragraph, pos , y) ;
+ 			paragraph="";
+ 			y += height ;
+		}
+ 	}
 }
 
 void wxStaticText::OnPaint( wxPaintEvent &event ) 
@@ -235,7 +294,7 @@ void wxStaticText::SetLabel(const wxString& st )
 	SetTitle( st ) ;
 	m_label = st ;
 	if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
-		SetSize( GetBestSize() ) ;
+		SetSizeOrDefault() ;
 
 	Refresh() ;	
 	MacUpdateImmediately() ;

@@ -13,8 +13,6 @@
 #pragma implementation "scrolbar.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/scrolbar.h"
 #include "wx/mac/uma.h"
 
@@ -43,7 +41,7 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
 	
 	MacPreControlCreate( parent , id ,  "" , pos , size ,style, validator , name , &bounds , title ) ;
 
-	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true , 0 , 0 , 100, 
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , false , 0 , 0 , 100, 
 		kControlScrollBarLiveProc , (long) this ) ;
 	
 	wxASSERT_MSG( m_macControl != NULL , "No valid mac control" ) ;
@@ -114,19 +112,19 @@ void wxScrollBar::MacHandleControlClick( ControlHandle control , SInt16 controlp
 	switch( controlpart )
 	{
 		case kControlUpButtonPart :
-        nScrollInc = -m_pageSize;
+        nScrollInc = -1;
         scrollEvent = wxEVT_SCROLL_LINEUP;
 			break ;
 		case kControlDownButtonPart :
-        nScrollInc = m_pageSize;
+        nScrollInc = 1;
         scrollEvent = wxEVT_SCROLL_LINEDOWN;
 			break ;
 		case kControlPageUpPart :
-        nScrollInc = -m_viewSize;
+        nScrollInc = -m_pageSize;
         scrollEvent = wxEVT_SCROLL_PAGEUP;
 			break ;
 		case kControlPageDownPart :
-        nScrollInc = m_viewSize;
+        nScrollInc = m_pageSize;
         scrollEvent = wxEVT_SCROLL_PAGEDOWN;
 			break ;
 		case kControlIndicatorPart :

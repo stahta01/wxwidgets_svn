@@ -13,8 +13,6 @@
 #pragma implementation "button.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/button.h"
 #include "wx/panel.h"
 

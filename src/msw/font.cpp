@@ -41,7 +41,6 @@
 #include "wx/tokenzr.h"
 
 #include "wx/msw/private.h"
-#include "wx/tokenzr.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
 
@@ -86,9 +85,9 @@ public:
         Init(size, family, style, weight, underlined, faceName, encoding);
     }
 
-    wxFontRefData(const wxNativeFontInfo& info, WXHFONT hFont = 0)
+    wxFontRefData(const wxNativeFontInfo& info)
     {
-        Init(info, hFont);
+        Init(info);
     }
 
     virtual ~wxFontRefData();
@@ -103,7 +102,7 @@ protected:
               const wxString& faceName,
               wxFontEncoding encoding);
 
-    void Init(const wxNativeFontInfo& info, WXHFONT hFont = 0);
+    void Init(const wxNativeFontInfo& info);
 
     // If TRUE, the pointer to the actual font is temporary and SHOULD NOT BE
     // DELETED by destructor
@@ -161,7 +160,7 @@ void wxFontRefData::Init(int pointSize,
     m_nativeFontInfoOk = FALSE;
 }
 
-void wxFontRefData::Init(const wxNativeFontInfo& info, WXHFONT hFont)
+void wxFontRefData::Init(const wxNativeFontInfo& info)
 {
     // extract family from pitch-and-family
     int lfFamily = info.lf.lfPitchAndFamily;
@@ -230,11 +229,7 @@ void wxFontRefData::Init(const wxNativeFontInfo& info, WXHFONT hFont)
     m_fontId = 0;
     m_temporary = FALSE;
 
-    // hFont may be zero, or it be passed in case we really want to
-    // use the exact font created in the underlying system
-    // (for example where we can't guarantee conversion from HFONT
-    // to LOGFONT back to HFONT)
-    m_hFont = hFont;
+    m_hFont = 0;
 
     m_nativeFontInfoOk = TRUE;
     m_nativeFontInfo = info;
@@ -374,11 +369,11 @@ void wxFont::Init()
         wxTheFontList->Append(this);
 }
 
-bool wxFont::Create(const wxNativeFontInfo& info, WXHFONT hFont)
+bool wxFont::Create(const wxNativeFontInfo& info)
 {
     UnRef();
 
-    m_refData = new wxFontRefData(info, hFont);
+    m_refData = new wxFontRefData(info);
 
     RealizeResource();
 

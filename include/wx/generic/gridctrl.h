@@ -91,8 +91,6 @@ protected:
 };
 
 
-#if wxUSE_COMBOBOX
-
 class WXDLLEXPORT wxGridCellEnumEditor : public wxGridCellChoiceEditor
 {
 public:
@@ -108,7 +106,6 @@ private:
     long int   m_startint;
 };
 
-#endif // wxUSE_COMBOBOX
 
 class wxGridCellAutoWrapStringEditor : public wxGridCellTextEditor
 {

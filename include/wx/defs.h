@@ -126,6 +126,7 @@
             #define __WXMAC_X__
         #endif
 
+        #define PM_USE_SESSION_APIS 0
         #include <Carbon/Carbon.h>
     #endif // __APPLE__
 #elif defined(applec) || \
@@ -148,6 +149,7 @@
         #define __WXMAC_X__
     #endif
 
+    #define PM_USE_SESSION_APIS 0
     #include <Carbon/Carbon.h>
 #elif defined(__OS2__)
     #if defined(__IBMCPP__)
@@ -165,7 +167,6 @@
         // VisualAge is the only thing that understands _Optlink
         #define LINKAGEMODE _Optlink
     #endif
-    #define wxSIZE_T_IS_UINT
 #else   // Windows
     #ifndef __WINDOWS__
         #define __WINDOWS__
@@ -187,11 +188,8 @@
         #define __SYMANTECC__
     #endif  // compiler
 
-    // size_t is the same as unsigned int for all Windows compilers we know,
-    // so define it if it hadn't been done by configure yet
-    #if !defined(wxSIZE_T_IS_UINT) && !defined(wxSIZE_T_IS_ULONG)
-        #define wxSIZE_T_IS_UINT
-    #endif
+    // size_t is the same as unsigned int for all Windows compilers we know
+    #define wxSIZE_T_IS_UINT
 #endif  // OS
 
 // if we're on a Unix system but didn't use configure (so that setup.h didn't
@@ -282,11 +280,11 @@
     #error "Target can't be both X and Windows"
 #elif !defined(__WXMOTIF__) && !defined(__WXMSW__) && !defined(__WXGTK__) && \
       !defined(__WXPM__) && !defined(__WXMAC__) && !defined(__X__) && \
-      !defined(__WXQT__) && !defined(__WXMGL__) && wxUSE_GUI
+      !defined(__WXQT__) && !defined(__WXSTUBS__) && wxUSE_GUI
     #ifdef __UNIX__
-        #error "No Target! You should use wx-config program for compilation flags!"
+        #error "No Target! You should wx-config program for compilation flags!"
     #else // !Unix
-        #error "No Target! You should use supplied makefiles for compilation!"
+        #error "No Target! You should supplied makefiles for compilation!"
     #endif // Unix/!Unix
 #endif
 
@@ -300,10 +298,7 @@
 // compatibility code
 #if !wxUSE_GUI
     #undef WXWIN_COMPATIBILITY_2
-    #undef WXWIN_COMPATIBILITY_2_2
-
     #define WXWIN_COMPATIBILITY_2 0
-    #define WXWIN_COMPATIBILITY_2_2 0
 #endif // !GUI
 
 // ============================================================================
@@ -412,7 +407,7 @@ typedef int wxWindowID;
 
 // wxCALLBACK should be used for the functions which are called back by
 // Windows (such as compare function for wxListCtrl)
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__)
     #define wxCALLBACK wxSTDCALL
 #else
     // no stdcall under Unix nor Win16
@@ -868,10 +863,7 @@ enum wxAlignment
     wxALIGN_CENTRE_VERTICAL   = wxALIGN_CENTER_VERTICAL,
 
     wxALIGN_CENTER            = (wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL),
-    wxALIGN_CENTRE            = wxALIGN_CENTER,
-
-    // a mask to extract alignment from the combination of flags
-    wxALIGN_MASK              = 0x0f00
+    wxALIGN_CENTRE            = wxALIGN_CENTER
 };
 
 enum wxStretch
@@ -881,26 +873,7 @@ enum wxStretch
     wxGROW                    = 0x2000,
     wxEXPAND                  = wxGROW,
     wxSHAPED                  = 0x4000,
-    wxADJUST_MINSIZE          = 0x8000,
-    wxTILE                    = 0xc000
-};
-
-// border flags: the values are chosen for backwards compatibility
-enum wxBorder
-{
-    // this is different from wxBORDER_NONE as by default the controls do have
-    // border
-    wxBORDER_DEFAULT = 0,
-
-    wxBORDER_NONE   = 0x00200000,
-    wxBORDER_STATIC = 0x01000000,
-    wxBORDER_SIMPLE = 0x02000000,
-    wxBORDER_RAISED = 0x04000000,
-    wxBORDER_SUNKEN = 0x08000000,
-    wxBORDER_DOUBLE = 0x10000000,
-
-    // a mask to extract border style from the combination of flags
-    wxBORDER_MASK   = 0x1f200000
+    wxADJUST_MINSIZE          = 0x8000
 };
 
 // ----------------------------------------------------------------------------
@@ -927,40 +900,30 @@ enum wxBorder
 #define wxHSCROLL               0x40000000
 #define wxCAPTION               0x20000000
 
-// New styles (border styles are now in their own enum)
-#define wxDOUBLE_BORDER         wxBORDER_DOUBLE
-#define wxSUNKEN_BORDER         wxBORDER_SUNKEN
-#define wxRAISED_BORDER         wxBORDER_RAISED
-#define wxBORDER                wxBORDER_SIMPLE
-#define wxSIMPLE_BORDER         wxBORDER_SIMPLE
-#define wxSTATIC_BORDER         wxBORDER_STATIC
-#define wxNO_BORDER             wxBORDER_NONE
+// New styles
+#define wxDOUBLE_BORDER         0x10000000
+#define wxSUNKEN_BORDER         0x08000000
+#define wxRAISED_BORDER         0x04000000
+#define wxBORDER                0x02000000
+#define wxSIMPLE_BORDER         wxBORDER
+#define wxSTATIC_BORDER         0x01000000
+#define wxTRANSPARENT_WINDOW    0x00100000
+#define wxNO_BORDER             0x00200000
 
 // Override CTL3D etc. control colour processing to allow own background
 // colour.
+// OBSOLETE - use wxNO_3D instead
+#define wxUSER_COLOURS          0x00800000
 // Override CTL3D or native 3D styles for children
 #define wxNO_3D                 0x00800000
-
-// OBSOLETE - use wxNO_3D instead
-#define wxUSER_COLOURS          wxNO_3D
-
-// wxALWAYS_SHOW_SB: instead of hiding the scrollbar when it is not needed,
-// disable it - but still show (see also wxLB_ALWAYS_SB style)
-//
-// NB: as this style is only supported by wxUniversal so far as it doesn't use
-//     wxUSER_COLOURS/wxNO_3D, we reuse the same style value
-#define wxALWAYS_SHOW_SB        0x00800000
 
 // Clip children when painting, which reduces flicker in e.g. frames and
 // splitter windows, but can't be used in a panel where a static box must be
 // 'transparent' (panel paints the background for it)
 #define wxCLIP_CHILDREN         0x00400000
-
 // Note we're reusing the wxCAPTION style because we won't need captions
 // for subwindows/controls
 #define wxCLIP_SIBLINGS         0x20000000
-
-#define wxTRANSPARENT_WINDOW    0x00100000
 
 // Add this style to a panel to get tab traversal working outside of dialogs
 // (on by default for wxPanel, wxDialog, wxScrolledWindow)
@@ -970,14 +933,9 @@ enum wxBorder
 // Windows, it won't normally get the dialog navigation key events)
 #define wxWANTS_CHARS           0x00040000
 
-// Make window retained (mostly Motif, I think) -- obsolete (VZ)?
+// Make window retained (mostly Motif, I think)
 #define wxRETAINED              0x00020000
 #define wxBACKINGSTORE          wxRETAINED
-
-// set this flag to create a special popup window: it will be always shown on
-// top of other windows, will capture the mouse and will be dismissed when the
-// mouse is clicked outside of it or if it loses focus in any other way
-#define wxPOPUP_WINDOW          0x00020000
 
 // don't invalidate the whole window (resulting in a PAINT event) when the
 // window is resized (currently, makes sense for wxMSW only)
@@ -1105,8 +1063,7 @@ enum wxBorder
 #define wxLB_NEEDED_SB      0x0200
 #define wxLB_ALWAYS_SB      0x0400
 #define wxLB_HSCROLL        wxHSCROLL
-// always show an entire number of rows
-#define wxLB_INT_HEIGHT     0x0800
+
 /*
  * wxTextCtrl style flags
  */
@@ -1121,18 +1078,10 @@ enum wxBorder
 #define wxTE_RICH           0x0080
 #define wxTE_NO_VSCROLL     0x0100
 #define wxTE_AUTO_SCROLL    0x0200
-#define wxTE_PROCESS_ENTER  0x0400
-#define wxTE_PASSWORD       0x0800
-
-// use wxHSCROLL to not wrap text at all, wxTE_LINEWRAP to wrap it at any
-// position and wxTE_WORDWRAP to wrap at words boundary
-#define wxTE_DONTWRAP       wxHSCROLL
-#define wxTE_LINEWRAP       0x0800
-#define wxTE_WORDWRAP       0x0000  // it's just == !wxHSCROLL
-
-// deprecated synonyms
-#define wxPROCESS_ENTER     wxTE_PROCESS_ENTER
-#define wxPASSWORD          wxTE_PASSWORD
+#define wxPROCESS_ENTER     0x0400
+#define wxPASSWORD          0x0800
+#define wxTE_PROCESS_ENTER  wxPROCESS_ENTER
+#define wxTE_PASSWORD       wxPASSWORD
 
 /*
  * wxComboBox style flags
@@ -1145,15 +1094,9 @@ enum wxBorder
 /*
  * wxRadioBox style flags
  */
-// should we number the items from left to right or from top to bottom in a 2d
-// radiobox?
-#define wxRA_LEFTTORIGHT    0x0001
-#define wxRA_TOPTOBOTTOM    0x0002
-
 // New, more intuitive names to specify majorDim argument
 #define wxRA_SPECIFY_COLS   wxHORIZONTAL
 #define wxRA_SPECIFY_ROWS   wxVERTICAL
-
 // Old names for compatibility
 #define wxRA_HORIZONTAL     wxHORIZONTAL
 #define wxRA_VERTICAL       wxVERTICAL
@@ -1179,8 +1122,8 @@ enum wxBorder
 #define wxSL_VERTICAL        wxVERTICAL   // 8
 // The next one is obsolete - use scroll events instead
 #define wxSL_NOTIFY_DRAG     0x0000
-#define wxSL_TICKS           0x0010
-#define wxSL_AUTOTICKS       wxSL_TICKS // we don't support manual ticks
+#define wxSL_AUTOTICKS       0x0010
+// #define wxSL_MANUALTICKS     0x0010
 #define wxSL_LABELS          0x0020
 #define wxSL_LEFT            0x0040
 #define wxSL_TOP             0x0080
@@ -1221,6 +1164,36 @@ enum wxBorder
 #define wxTR_ROW_LINES       0x0400
 
 /*
+ * wxListCtrl flags
+ */
+#define wxLC_VRULES          0x0001
+#define wxLC_HRULES          0x0002
+#define wxLC_ICON            0x0004
+#define wxLC_SMALL_ICON      0x0008
+#define wxLC_LIST            0x0010
+#define wxLC_REPORT          0x0020
+#define wxLC_ALIGN_TOP       0x0040
+#define wxLC_ALIGN_LEFT      0x0080
+#define wxLC_AUTOARRANGE     0x0100
+#define wxLC_USER_TEXT       0x0200
+#define wxLC_EDIT_LABELS     0x0400
+#define wxLC_NO_HEADER       0x0800
+#define wxLC_NO_SORT_HEADER  0x1000
+#define wxLC_SINGLE_SEL      0x2000
+#define wxLC_SORT_ASCENDING  0x4000
+#define wxLC_SORT_DESCENDING 0x8000
+
+#define wxLC_MASK_TYPE       (wxLC_ICON | wxLC_SMALL_ICON | wxLC_LIST | wxLC_REPORT)
+#define wxLC_MASK_ALIGN      (wxLC_ALIGN_TOP | wxLC_ALIGN_LEFT)
+#define wxLC_MASK_SORT       (wxLC_SORT_ASCENDING | wxLC_SORT_DESCENDING)
+
+// Omitted because (a) too much detail (b) not enough style flags
+// #define wxLC_NO_SCROLL
+// #define wxLC_NO_LABEL_WRAP
+// #define wxLC_OWNERDRAW_FIXED
+// #define wxLC_SHOW_SEL_ALWAYS
+
+/*
  * wxSpinButton flags.
  * Note that a wxSpinCtrl is sometimes defined as
  * a wxTextCtrl, and so the flags must be different
@@ -1256,11 +1229,9 @@ enum wxBorder
  * wxNotebook flags
  */
 #define wxNB_FIXEDWIDTH       0x0010
-#define wxNB_TOP              0x0000    // default
 #define wxNB_LEFT             0x0020
 #define wxNB_RIGHT            0x0040
 #define wxNB_BOTTOM           0x0080
-#define wxNB_MULTILINE        0x0100
 
 /*
  * wxStatusBar95 flags
@@ -1271,11 +1242,6 @@ enum wxBorder
  * wxStaticText flags
  */
 #define wxST_NO_AUTORESIZE    0x0001
-
-/*
- * wxStaticBitmap flags
- */
-#define wxBI_EXPAND           wxEXPAND
 
 /*
  * wxStaticLine flags
@@ -1414,36 +1380,6 @@ enum wxBorder
 // IDs used by generic file dialog (11 consecutive starting from this value)
 #define wxID_FILEDLGG           5900
 #define wxID_HIGHEST            5999
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// hit test results
-enum wxHitTest
-{
-    wxHT_NOWHERE,
-
-    // scrollbar
-    wxHT_SCROLLBAR_FIRST = wxHT_NOWHERE,
-    wxHT_SCROLLBAR_ARROW_LINE_1,    // left or upper arrow to scroll by line
-    wxHT_SCROLLBAR_ARROW_LINE_2,    // right or down
-    wxHT_SCROLLBAR_ARROW_PAGE_1,    // left or upper arrow to scroll by page
-    wxHT_SCROLLBAR_ARROW_PAGE_2,    // right or down
-    wxHT_SCROLLBAR_THUMB,           // on the thumb
-    wxHT_SCROLLBAR_BAR_1,           // bar to the left/above the thumb
-    wxHT_SCROLLBAR_BAR_2,           // bar to the right/below the thumb
-    wxHT_SCROLLBAR_LAST,
-
-    // window
-    wxHT_WINDOW_OUTSIDE,            // not in this window at all
-    wxHT_WINDOW_INSIDE,             // in the client area
-    wxHT_WINDOW_VERT_SCROLLBAR,     // on the vertical scrollbar
-    wxHT_WINDOW_HORZ_SCROLLBAR,     // on the horizontal scrollbar
-    wxHT_WINDOW_CORNER,             // on the corner between 2 scrollbars
-
-    wxHT_MAX
-};
 
 // ----------------------------------------------------------------------------
 // Possible SetSize flags
@@ -1983,7 +1919,7 @@ typedef struct tagLOGPALETTE
 } LOGPALETTE;
 #endif //__WXPM__
 
-#if defined(__GNUWIN32__) || defined(__WXWINE__) || defined(__WXMICROWIN__)
+#if defined(__GNUWIN32__) || defined(__WXWINE__)
     typedef int (*WXFARPROC)();
 #elif defined(__WIN32__)
     typedef int (__stdcall *WXFARPROC)();
@@ -2094,10 +2030,6 @@ typedef struct _PangoFontDescription PangoFontDescription;
 #endif
 #endif // GTK
 
-#ifdef __WXMGL__
-typedef void *WXWidget; // FIXME_MGL - type-safe
-#endif // MGL
-
 // This is required because of clashing macros in windows.h, which may be
 // included before or after wxWindows classes, and therefore must be
 // disabled here before any significant wxWindows headers are included.
@@ -2139,7 +2071,7 @@ typedef void *WXWidget; // FIXME_MGL - type-safe
 #define DECLARE_NO_COPY_CLASS(classname)        \
     private:                                    \
         classname(const classname&);            \
-        classname& operator=(const classname&);
+        classname& operator=(const classname&)
 
 #endif
     // _WX_DEFS_H_

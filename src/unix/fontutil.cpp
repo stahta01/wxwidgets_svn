@@ -278,9 +278,7 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
         if ( !wxGetNativeFontEncoding(encoding, &info) ||
              !wxTestFontEncoding(info) )
         {
-#if wxUSE_FONTMAP
             if ( !wxTheFontMapper->GetAltForEncoding(encoding, &info) )
-#endif // wxUSE_FONTMAP
             {
                 // unspported encoding - replace it with the default
                 //

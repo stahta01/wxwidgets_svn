@@ -20,8 +20,6 @@
     #pragma interface "treectrl.h"
 #endif
 
-#if wxUSE_TREECTRL
-
 #include "wx/textctrl.h"
 #include "wx/dynarray.h"
 #include "wx/treebase.h"
@@ -453,8 +451,6 @@ private:
 
     DECLARE_DYNAMIC_CLASS(wxTreeCtrl)
 };
-
-#endif // wxUSE_TREECTRL
 
 #endif
     // _WX_TREECTRL_H_

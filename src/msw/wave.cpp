@@ -20,8 +20,6 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_WAVE
-
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif
@@ -167,4 +165,4 @@ bool wxWave::Free()
   return FALSE;
 }
 
-#endif // wxUSE_WAVE
+

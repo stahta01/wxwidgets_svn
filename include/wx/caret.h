@@ -12,10 +12,6 @@
 #ifndef _WX_CARET_H_BASE_
 #define _WX_CARET_H_BASE_
 
-#include "wx/defs.h"
-
-#if wxUSE_CARET
-
 #ifdef __GNUG__
 #pragma interface "caret.h"
 #endif
@@ -187,7 +183,7 @@ protected:
     int m_countVisible;
 
 private:
-    DECLARE_NO_COPY_CLASS(wxCaretBase)
+    DECLARE_NO_COPY_CLASS(wxCaretBase);
 };
 
 // ---------------------------------------------------------------------------
@@ -225,8 +221,6 @@ public:
 private:
     wxCaret *m_caret;
 };
-
-#endif // wxUSE_CARET
 
 #endif // _WX_CARET_H_BASE_
 

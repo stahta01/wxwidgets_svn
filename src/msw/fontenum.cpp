@@ -28,8 +28,6 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_FONTMAP
-
 #ifndef WX_PRECOMP
   #include "wx/font.h"
 #endif
@@ -93,10 +91,8 @@ private:
 // private functions
 // ----------------------------------------------------------------------------
 
-#ifndef __WXMICROWIN__
 int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
                                   DWORD dwStyle, LONG lParam);
-#endif
 
 // ============================================================================
 // implementation
@@ -149,7 +145,6 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
 
 void wxFontEnumeratorHelper::DoEnumerate()
 {
-#ifndef __WXMICROWIN__
     HDC hDC = ::GetDC(NULL);
 
 #ifdef __WIN32__
@@ -170,7 +165,6 @@ void wxFontEnumeratorHelper::DoEnumerate()
 #endif // Win32/16
 
     ::ReleaseDC(NULL, hDC);
-#endif
 }
 
 bool wxFontEnumeratorHelper::OnFont(const LPLOGFONT lf,
@@ -250,7 +244,6 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 // Windows callbacks
 // ----------------------------------------------------------------------------
 
-#ifndef __WXMICROWIN__
 int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
                                   DWORD dwStyle, LONG lParam)
 {
@@ -265,6 +258,4 @@ int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
 
     return fontEnum->OnFont(lplf, lptm);
 }
-#endif
 
-#endif // wxUSE_FONTMAP

@@ -123,7 +123,7 @@ bool wxGetNativeFontEncoding(wxFontEncoding encoding,
             info->charset = ANSI_CHARSET;
             break;
 
-#if !defined(__WIN16__) && !defined(__WXMICROWIN__)
+#if !defined(__WIN16__)
         case wxFONTENCODING_CP1250:
             info->charset = EASTEUROPE_CHARSET;
             break;
@@ -213,7 +213,7 @@ wxFontEncoding wxGetFontEncFromCharSet(int cs)
             fontEncoding = wxFONTENCODING_CP1252;
             break;
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifdef __WIN32__
         case EASTEUROPE_CHARSET:
             fontEncoding = wxFONTENCODING_CP1250;
             break;
@@ -369,9 +369,7 @@ void wxFillLogFont(LOGFONT *logFont, const wxFont *font)
     wxFontEncoding encoding = font->GetEncoding();
     if ( !wxGetNativeFontEncoding(encoding, &info) )
     {
-#if wxUSE_FONTMAP
         if ( !wxTheFontMapper->GetAltForEncoding(encoding, &info) )
-#endif // wxUSE_FONTMAP
         {
             // unsupported encoding, replace with the default
             info.charset = ANSI_CHARSET;

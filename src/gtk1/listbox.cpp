@@ -374,7 +374,7 @@ bool wxListBox::Create( wxWindow *parent, wxWindowID id,
 
     gtk_widget_show( GTK_WIDGET(m_list) );
 
-    SetBestSize( size );
+    SetSizeOrDefault( size );
 
     if ( style & wxLB_SORT )
     {
@@ -647,7 +647,7 @@ void wxListBox::Clear()
 {
     wxCHECK_RET( m_list != NULL, wxT("invalid listbox") );
 
-    gtk_list_clear_items( m_list, 0, GetCount() );
+    gtk_list_clear_items( m_list, 0, Number() );
 
     if ( HasClientObjectData() )
     {
@@ -682,7 +682,7 @@ void wxListBox::Delete( int n )
     wxNode *node = m_clientList.Nth( n );
     if ( node )
     {
-        if ( m_clientDataItemsType == wxClientData_Object )
+        if ( m_clientDataItemsType == ClientData_Object )
         {
             wxClientData *cd = (wxClientData*)node->Data();
             delete cd;

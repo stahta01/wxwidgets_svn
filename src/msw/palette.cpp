@@ -75,7 +75,7 @@ bool wxPalette::Create(int n, const unsigned char *red, const unsigned char *gre
 {
   UnRef();
 
-#if defined(__WXWINE__) || defined(__WXMICROWIN__)
+#ifdef __WXWINE__
 
   return (FALSE);
 
@@ -108,21 +108,14 @@ bool wxPalette::Create(int n, const unsigned char *red, const unsigned char *gre
 
 int wxPalette::GetPixel(const unsigned char red, const unsigned char green, const unsigned char blue) const
 {
-#ifdef __WXMICROWIN__
-  return FALSE;
-#else
   if ( !m_refData )
 	return FALSE;
 
   return ::GetNearestPaletteIndex((HPALETTE) M_PALETTEDATA->m_hPalette, PALETTERGB(red, green, blue));
-#endif
 }
 
 bool wxPalette::GetRGB(int index, unsigned char *red, unsigned char *green, unsigned char *blue) const
 {
-#ifdef __WXMICROWIN__
-  return FALSE;
-#else
   if ( !m_refData )
 	return FALSE;
 
@@ -138,7 +131,6 @@ bool wxPalette::GetRGB(int index, unsigned char *red, unsigned char *green, unsi
          return TRUE;
   } else
          return FALSE;
-#endif
 }
 
 void wxPalette::SetHPALETTE(WXHPALETTE pal)

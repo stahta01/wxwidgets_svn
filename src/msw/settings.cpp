@@ -40,7 +40,6 @@
 #include "wx/window.h"
 #include "wx/msw/private.h"
 #include "wx/module.h"
-#include "wx/fontutil.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -118,39 +117,6 @@ wxColour wxSystemSettings::GetSystemColour(int index)
     }
 }
 
-wxFont wxCreateFontFromStockObject(int index)
-{
-    wxFont font;
-
-    HFONT hFont = (HFONT) ::GetStockObject(index);
-    if ( hFont )
-    {
-        LOGFONT lf;
-        if ( ::GetObject(hFont, sizeof(LOGFONT), &lf) != 0 )
-        {
-            wxNativeFontInfo info;
-            info.lf = lf;
-            // Under MicroWindows we pass the HFONT as well
-            // because it's hard to convert HFONT -> LOGFONT -> HFONT
-            // It's OK to delete stock objects, the delete will be ignored.
-#ifdef __WXMICROWIN__
-            font.Create(info, (WXHFONT) hFont);
-#else
-            font.Create(info);
-#endif
-        }
-        else
-        {
-            wxFAIL_MSG( _T("failed to get LOGFONT") );
-        }
-    }
-    else // GetStockObject() failed
-    {
-        wxFAIL_MSG( _T("stock font not found") );
-    }
-    return font;
-}
-
 wxFont wxSystemSettings::GetSystemFont(int index)
 {
     // wxWindow ctor calls GetSystemFont(wxSYS_DEFAULT_GUI_FONT) so we're
@@ -161,7 +127,25 @@ wxFont wxSystemSettings::GetSystemFont(int index)
         return *gs_fontDefault;
     }
 
-    wxFont font = wxCreateFontFromStockObject(index);
+    wxFont font;
+
+    HFONT hFont = (HFONT) ::GetStockObject(index);
+    if ( hFont )
+    {
+        LOGFONT lf;
+        if ( ::GetObject(hFont, sizeof(LOGFONT), &lf) != 0 )
+        {
+            font = wxCreateFontFromLogFont(&lf);
+        }
+        else
+        {
+            wxFAIL_MSG( _T("failed to get LOGFONT") );
+        }
+    }
+    else // GetStockObject() failed
+    {
+        wxFAIL_MSG( _T("stock font not found") );
+    }
 
     if ( isDefaultRequested )
     {
@@ -175,10 +159,6 @@ wxFont wxSystemSettings::GetSystemFont(int index)
 // Get a system metric, e.g. scrollbar size
 int wxSystemSettings::GetSystemMetric(int index)
 {
-#ifdef __WXMICROWIN__
-    // TODO: probably use wxUniv themes functionality
-    return 0;
-#else
     switch ( index)
     {
 #ifdef __WIN32__
@@ -270,8 +250,6 @@ int wxSystemSettings::GetSystemMetric(int index)
         default:
             return 0;
     }
-#endif
-    // __WXMICROWIN__
 }
 
 // Option functions (arbitrary name/value mapping)

@@ -177,7 +177,6 @@ typedef  _TUCHAR     wxUChar;
 #  define  wxStrcspn   _tcscspn
 #  define  wxStrftime  _tcsftime
 #  define  wxStricmp   _tcsicmp
-#  define  wxStrnicmp  _tcsnicmp
 #  define  wxStrlen_   _tcslen // used in wxStrlen inline function
 #  define  wxStrncat   _tcsncat
 #  define  wxStrncmp   _tcsncmp
@@ -266,7 +265,7 @@ typedef  _TUCHAR     wxUChar;
 #    if defined(__VISUALC__) && (__VISUALC__ < 900)
 #      define wxUSE_WCHAR_T 0 // wchar_t is not available for MSVC++ 1.5
 #    elif defined(__UNIX__)
-#      if defined(HAVE_WCSTR_H) || defined(HAVE_WCHAR_H) || defined(__FreeBSD__) || (defined(__APPLE__) && defined(__UNIX__))
+#      if defined(HAVE_WCSTR_H) || defined(HAVE_WCHAR_H) || defined(__FreeBSD__)
 #        define wxUSE_WCHAR_T 1
 #      else
 #        define wxUSE_WCHAR_T 0
@@ -566,10 +565,6 @@ WXDLLEXPORT wxChar * wxStrdup(const wxChar *psz);
 
 #ifndef wxStricmp
 WXDLLEXPORT int      wxStricmp(const wxChar *psz1, const wxChar *psz2);
-#endif
-
-#ifndef wxStrnicmp
-WXDLLEXPORT int      wxStrnicmp(const wxChar *psz1, const wxChar *psz2, size_t len);
 #endif
 
 #ifndef wxStrtok

@@ -1,8 +1,6 @@
 #ifndef _WX_DRAGIMAG_H_BASE_
 #define _WX_DRAGIMAG_H_BASE_
 
-#if wxUSE_DRAGIMAGE
-
 #if defined(__WXMSW__)
 #ifdef __WIN16__
 #include "wx/generic/dragimgg.h"
@@ -43,8 +41,6 @@
 #define sm_classwxDragImage sm_classwxGenericDragImage
 
 #endif
-
-#endif // wxUSE_DRAGIMAGE
 
 #endif
     // _WX_DRAGIMAG_H_BASE_

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        gtk/fontdlg.cpp
+// Name:        fontdlg.cpp
 // Purpose:     wxFontDialog
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -10,10 +10,6 @@
 #ifdef __GNUG__
 #pragma implementation "fontdlg.h"
 #endif
-
-#include "wx/defs.h"
-
-#if wxUSE_FONTDLG
 
 #include "wx/fontutil.h"
 #include "wx/fontdlg.h"
@@ -204,6 +200,4 @@ wxFontDialog::wxFontDialog( wxWindow *parent, wxFontData *fontdata )
 wxFontDialog::~wxFontDialog()
 {
 }
-
-#endif // wxUSE_FONTDLG
 

@@ -29,7 +29,7 @@
 #include "wx/file.h"
 #include "wx/log.h"
 
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
 #include "mondrian.xpm"
 #endif
 
@@ -84,19 +84,14 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-  const wxChar * const langs[] =
-  {
-      _T("(System default)"),
-      _T("French"),
-      _T("German"),
-      _T("Russian"),
-      _T("English"),
-      _T("English (U.S.)")
-  };
-
+  wxString langs[] = {_T("(System default)"),
+                      _T("French"),
+                      _T("German"),
+                      _T("English"),
+                      _T("English (U.S.)")};
   SetExitOnFrameDelete(FALSE);
   int lng = wxGetSingleChoiceIndex(_T("Please choose language:"), _T("Language"), 
-                                   WXSIZEOF(langs), (char **)langs);
+                                   5, langs);
   SetExitOnFrameDelete(TRUE);
 
   switch (lng)
@@ -104,11 +99,12 @@ bool MyApp::OnInit()
       case 0 : m_locale.Init(wxLANGUAGE_DEFAULT); break;
       case 1 : m_locale.Init(wxLANGUAGE_FRENCH); break;
       case 2 : m_locale.Init(wxLANGUAGE_GERMAN); break;
-      case 3 : m_locale.Init(wxLANGUAGE_RUSSIAN); break;
-      case 4 : m_locale.Init(wxLANGUAGE_ENGLISH); break;
-      case -1:
-      case 5 : m_locale.Init(wxLANGUAGE_ENGLISH_US); break;
+      case 3 : m_locale.Init(wxLANGUAGE_ENGLISH); break;
+      case 4 : m_locale.Init(wxLANGUAGE_ENGLISH_US); break;
+      default:
+          return FALSE;
   }
+
 
   // Initialize the catalogs we'll be using
   /* not needed any more, done in wxLocale ctor
@@ -119,10 +115,7 @@ bool MyApp::OnInit()
      it might not be installed on yours - just ignore the errrors
      or comment out this line then */
 #ifdef __LINUX__
-  {
-    wxLogNull noLog;
-    m_locale.AddCatalog("fileutils");  // 3) and another just for testing
-  }
+  //m_locale.AddCatalog("fileutils");  // 3) and another just for testing
 #endif
   
   // Create the main frame window

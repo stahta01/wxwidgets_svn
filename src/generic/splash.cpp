@@ -6,7 +6,7 @@
 // Created:     28/6/2000
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -20,9 +20,8 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_SPLASH
-
 #ifndef WX_PRECOMP
+#include "wx/wx.h"
 #endif
 
 #include "wx/splash.h"
@@ -170,4 +169,3 @@ void wxSplashScreenWindow::OnChar(wxKeyEvent& WXUNUSED(event))
     GetParent()->Close(TRUE);
 }
 
-#endif // wxUSE_SPLASH

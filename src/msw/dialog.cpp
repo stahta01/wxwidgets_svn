@@ -170,30 +170,12 @@ bool wxDialog::Create(wxWindow *parent,
         dlg = wxT("wxCaptionDialog");
     else
         dlg = wxT("wxNoCaptionDialog");
-
-#ifdef __WXMICROWIN__
-    extern const wxChar *wxFrameClassName;
-    
-    int msflags = WS_OVERLAPPED|WS_POPUP;
-    if (style & wxCAPTION)
-        msflags |= WS_CAPTION;
-    if (style & wxCLIP_CHILDREN)
-        msflags |= WS_CLIPCHILDREN;
-    if ((style & wxTHICK_FRAME) == 0)
-      msflags |= WS_BORDER;
-    MSWCreate(m_windowId, parent, wxFrameClassName, this, NULL,
-              x, y, width, height,
-              msflags,
-              NULL,
-              extendedStyle);
-
-#else
     MSWCreate(m_windowId, parent, NULL, this, NULL,
               x, y, width, height,
               0, // style is not used if we have dlg template
               dlg,
               extendedStyle);
-#endif
+
     HWND hwnd = (HWND)GetHWND();
 
     if ( !hwnd )
@@ -203,10 +185,8 @@ bool wxDialog::Create(wxWindow *parent,
         return FALSE;
     }
 
-#ifndef __WXMICROWIN__
     SubclassWin(GetHWND());
-#endif
-    
+
     SetWindowText(hwnd, title);
 
     return TRUE;
@@ -214,7 +194,6 @@ bool wxDialog::Create(wxWindow *parent,
 
 bool wxDialog::EnableCloseButton(bool enable)
 {
-#ifndef __WXMICROWIN__
     // get system (a.k.a. window) menu
     HMENU hmenu = ::GetSystemMenu(GetHwnd(), FALSE /* get it */);
     if ( !hmenu )
@@ -229,7 +208,7 @@ bool wxDialog::EnableCloseButton(bool enable)
     if ( !::EnableMenuItem(hmenu, SC_CLOSE,
                            MF_BYCOMMAND | (enable ? MF_ENABLED : MF_GRAYED)) )
     {
-        wxLogLastError(_T("EnableMenuItem(SC_CLOSE)"));
+        wxLogLastError(_T("DeleteMenu(SC_CLOSE)"));
 
         return FALSE;
     }
@@ -239,8 +218,7 @@ bool wxDialog::EnableCloseButton(bool enable)
     {
         wxLogLastError(_T("DrawMenuBar"));
     }
-#endif
-    
+
     return TRUE;
 }
 
@@ -646,7 +624,6 @@ long wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
             processed = !Close();
             break;
 
-#ifndef __WXMICROWIN__
         case WM_SETCURSOR:
             // we want to override the busy cursor for modal dialogs:
             // typically, wxBeginBusyCursor() is called and then a modal dialog
@@ -672,7 +649,6 @@ long wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
                 rc = FALSE;
             }
             break;
-#endif
     }
 
     if ( !processed )

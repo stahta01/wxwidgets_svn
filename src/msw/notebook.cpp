@@ -17,10 +17,8 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
-
-#if wxUSE_NOTEBOOK
 
 // wxWindows
 #ifndef WX_PRECOMP
@@ -110,7 +108,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
 // common part of all ctors
 void wxNotebook::Init()
 {
-  m_imageList = NULL;
+  m_pImageList = NULL;
+  m_bOwnsImageList = FALSE;
   m_nSelection = -1;
 }
 
@@ -192,16 +191,21 @@ bool wxNotebook::Create(wxWindow *parent,
   return TRUE;
 }
 
+// dtor
+wxNotebook::~wxNotebook()
+{
+  if (m_bOwnsImageList) delete m_pImageList;
+}
+
 // ----------------------------------------------------------------------------
 // wxNotebook accessors
 // ----------------------------------------------------------------------------
-
 int wxNotebook::GetPageCount() const
 {
   // consistency check
-  wxASSERT( (int)m_pages.Count() == TabCtrl_GetItemCount(m_hwnd) );
+  wxASSERT( (int)m_aPages.Count() == TabCtrl_GetItemCount(m_hwnd) );
 
-  return m_pages.Count();
+  return m_aPages.Count();
 }
 
 int wxNotebook::GetRowCount() const
@@ -216,6 +220,16 @@ int wxNotebook::SetSelection(int nPage)
   ChangePage(m_nSelection, nPage);
 
   return TabCtrl_SetCurSel(m_hwnd, nPage);
+}
+
+void wxNotebook::AdvanceSelection(bool bForward)
+{
+  int nSel = GetSelection();
+  int nMax = GetPageCount() - 1;
+  if ( bForward )
+    SetSelection(nSel == nMax ? 0 : nSel + 1);
+  else
+    SetSelection(nSel == 0 ? nMax : nSel - 1);
 }
 
 bool wxNotebook::SetPageText(int nPage, const wxString& strText)
@@ -269,12 +283,16 @@ bool wxNotebook::SetPageImage(int nPage, int nImage)
 
 void wxNotebook::SetImageList(wxImageList* imageList)
 {
-  wxNotebookBase::SetImageList(imageList);
+  if (m_bOwnsImageList) delete m_pImageList;
+  m_pImageList = imageList;
+  m_bOwnsImageList = FALSE;
+  TabCtrl_SetImageList(m_hwnd, (HIMAGELIST)imageList->GetHIMAGELIST());
+}
 
-  if ( imageList )
-  {
-    TabCtrl_SetImageList(m_hwnd, (HIMAGELIST)imageList->GetHIMAGELIST());
-  }
+void wxNotebook::AssignImageList(wxImageList* imageList)
+{
+  SetImageList(imageList);
+  m_bOwnsImageList = TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -325,10 +343,10 @@ bool wxNotebook::DeletePage(int nPage)
 
   TabCtrl_DeleteItem(m_hwnd, nPage);
 
-  delete m_pages[nPage];
-  m_pages.Remove(nPage);
+  delete m_aPages[nPage];
+  m_aPages.Remove(nPage);
 
-  if ( m_pages.IsEmpty() ) {
+  if ( m_aPages.IsEmpty() ) {
       // no selection if the notebook became empty
       m_nSelection = -1;
   }
@@ -340,20 +358,20 @@ bool wxNotebook::DeletePage(int nPage)
 }
 
 // remove one page from the notebook, without deleting
-wxNotebookPage *wxNotebook::DoRemovePage(int nPage)
+bool wxNotebook::RemovePage(int nPage)
 {
-  wxNotebookPage *pageRemoved = wxNotebookBase::DoRemovePage(nPage);
-  if ( !pageRemoved )
-      return NULL;
+  wxCHECK_MSG( IS_VALID_PAGE(nPage), FALSE, wxT("notebook page out of range") );
 
   TabCtrl_DeleteItem(m_hwnd, nPage);
 
-  if ( m_pages.IsEmpty() )
-    m_nSelection = -1;
-  else
-    m_nSelection = TabCtrl_GetCurSel(m_hwnd);
+  m_aPages.Remove(nPage);
 
-  return pageRemoved;
+  if ( m_aPages.IsEmpty() )
+      m_nSelection = -1;
+    else
+      m_nSelection = TabCtrl_GetCurSel(m_hwnd);
+
+  return TRUE;
 }
 
 // remove all pages
@@ -362,9 +380,9 @@ bool wxNotebook::DeleteAllPages()
   int nPageCount = GetPageCount();
   int nPage;
   for ( nPage = 0; nPage < nPageCount; nPage++ )
-    delete m_pages[nPage];
+    delete m_aPages[nPage];
 
-  m_pages.Clear();
+  m_aPages.Clear();
 
   TabCtrl_DeleteAllItems(m_hwnd);
 
@@ -425,7 +443,7 @@ bool wxNotebook::InsertPage(int nPage,
   }
 
   // save the pointer to the page
-  m_pages.Insert(pPage, nPage);
+  m_aPages.Insert(pPage, nPage);
 
   // don't show pages by default (we'll need to adjust their size first)
   HWND hwnd = GetWinHwnd(pPage);
@@ -470,9 +488,9 @@ void wxNotebook::OnSize(wxSizeEvent& event)
 
   int width = rc.right - rc.left,
       height = rc.bottom - rc.top;
-  size_t nCount = m_pages.Count();
+  size_t nCount = m_aPages.Count();
   for ( size_t nPage = 0; nPage < nCount; nPage++ ) {
-    wxNotebookPage *pPage = m_pages[nPage];
+    wxNotebookPage *pPage = m_aPages[nPage];
     pPage->SetSize(rc.left, rc.top, width, height);
   }
 
@@ -486,12 +504,12 @@ void wxNotebook::OnSelChange(wxNotebookEvent& event)
   {
       int sel = event.GetOldSelection();
       if ( sel != -1 )
-        m_pages[sel]->Show(FALSE);
+        m_aPages[sel]->Show(FALSE);
 
       sel = event.GetSelection();
       if ( sel != -1 )
       {
-        wxNotebookPage *pPage = m_pages[sel];
+        wxNotebookPage *pPage = m_aPages[sel];
         pPage->Show(TRUE);
         pPage->SetFocus();
       }
@@ -512,7 +530,7 @@ void wxNotebook::OnSetFocus(wxFocusEvent& event)
 
     // set focus to the currently selected page if any
     if ( m_nSelection != -1 )
-        m_pages[m_nSelection]->SetFocus();
+        m_aPages[m_nSelection]->SetFocus();
 
     event.Skip();
 }
@@ -548,7 +566,7 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
                 // and is being propagated downwards
                 event.SetEventObject(this);
 
-                wxWindow *page = m_pages[m_nSelection];
+                wxWindow *page = m_aPages[m_nSelection];
                 if ( !page->GetEventHandler()->ProcessEvent(event) )
                 {
                     page->SetFocus();
@@ -644,7 +662,7 @@ void wxNotebook::ChangePage(int nOldSel, int nSel)
   event.SetSelection(nSel);
   event.SetOldSelection(nOldSel);
   event.SetEventObject(this);
-  if ( GetEventHandler()->ProcessEvent(event) && !event.IsAllowed() )
+  if ( ProcessEvent(event) && !event.IsAllowed() )
   {
     // program doesn't allow the page change
     s_bInsideChangePage = FALSE;
@@ -652,9 +670,7 @@ void wxNotebook::ChangePage(int nOldSel, int nSel)
   }
 
   event.SetEventType(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED);
-  GetEventHandler()->ProcessEvent(event);
+  ProcessEvent(event);
 
   s_bInsideChangePage = FALSE;
 }
-
-#endif // wxUSE_NOTEBOOK

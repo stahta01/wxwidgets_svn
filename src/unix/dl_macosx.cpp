@@ -29,9 +29,7 @@ int dlclose(void *handle) /* stub only */
     return 0;
 }
 
-extern "C" {
-  #import <mach-o/dyld.h>
-};
+#import <mach-o/dyld.h>
 
 enum dyldErrorSource
 {

@@ -347,6 +347,22 @@ bool wxMenu::ProcessCommand(wxCommandEvent & event)
 // other
 // ---------------------------------------------------------------------------
 
+void wxMenu::Attach(wxMenuBar *menubar)
+{
+    // menu can be in at most one menubar because otherwise they would both
+    // delete the menu pointer
+    wxASSERT_MSG( !m_menuBar, wxT("menu belongs to 2 menubars, expect a crash") );
+
+    m_menuBar = menubar;
+}
+
+void wxMenu::Detach()
+{
+    wxASSERT_MSG( m_menuBar, wxT("can't detach menu if it's not attached") );
+
+    m_menuBar = NULL;
+}
+
 wxWindow *wxMenu::GetWindow() const
 {
     if ( m_invokingWindow != NULL )
@@ -963,6 +979,8 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
     if ( !wxMenuBarBase::Append(menu, title) )
         return FALSE;
 
+    menu->Attach(this);
+
     m_titles.Add(title);
 
     if ( IsAttached() )
@@ -986,14 +1004,11 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
     return TRUE;
 }
 
-void wxMenuBar::Detach()
-{
-    wxMenuBarBase::Detach() ;
-}
-
 void wxMenuBar::Attach(wxFrame *frame)
 {
-    wxMenuBarBase::Attach( frame ) ;
+//    wxASSERT_MSG( !IsAttached(), wxT("menubar already attached!") );
+
+    m_menuBarFrame = frame;
 
 #if wxUSE_ACCEL
     RebuildAccelTable();

@@ -865,7 +865,7 @@ void wxThread::Sleep(unsigned long milliseconds)
 
 int wxThread::GetCPUCount()
 {
-#if defined(__LINUX__) && wxUSE_FFILE
+#if defined(__LINUX__)
     // read from proc (can't use wxTextFile here because it's a special file:
     // it has 0 size but still can be read from)
     wxLogNull nolog;

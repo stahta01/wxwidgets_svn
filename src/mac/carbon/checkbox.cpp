@@ -13,8 +13,6 @@
 #pragma implementation "checkbox.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/checkbox.h"
 
 #if !USE_SHARED_LIBRARY

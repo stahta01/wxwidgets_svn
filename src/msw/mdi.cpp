@@ -270,19 +270,18 @@ wxMDIParentFrame::~wxMDIParentFrame()
     }
 }
 
-#if wxUSE_MENUS_NATIVE
-
 void wxMDIParentFrame::InternalSetMenuBar()
 {
+//    HMENU subMenu = GetSubMenu((HMENU) m_windowMenu, 0);
+
     m_parentFrameActive = TRUE;
 
-    wxMenu *menu = GetWindowMenu();
-    HMENU subMenu = menu ? GetHmenuOf(menu) : 0;
+    HMENU subMenu = (HMENU) 0;
+    if (GetWindowMenu())
+        subMenu = (HMENU) GetWindowMenu()->GetHMenu();
 
     InsertWindowMenu(GetClientWindow(), m_hMenu, subMenu);
 }
-
-#endif // wxUSE_MENUS_NATIVE
 
 void wxMDIParentFrame::SetWindowMenu(wxMenu* menu)
 {

@@ -19,7 +19,6 @@
 
 #ifdef __GNUG__
     #pragma implementation "controlbase.h"
-    #pragma implementation "statbmpbase.h"
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
@@ -29,39 +28,14 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CONTROLS
-
 #ifndef WX_PRECOMP
     #include "wx/control.h"
     #include "wx/log.h"
 #endif
 
-#if wxUSE_STATBMP
-    #include "wx/bitmap.h"
-    #include "wx/statbmp.h"
-#endif // wxUSE_STATBMP
-
 // ============================================================================
 // implementation
 // ============================================================================
-
-bool wxControlBase::Create(wxWindow *parent,
-                           wxWindowID id,
-                           const wxPoint &pos,
-                           const wxSize &size,
-                           long style,
-                           const wxValidator& validator,
-                           const wxString &name)
-{
-    bool ret = wxWindow::Create(parent, id, pos, size, style, name);
-
-#if wxUSE_VALIDATORS
-    if ( ret )
-        SetValidator(validator);
-#endif // wxUSE_VALIDATORS
-
-    return ret;
-}
 
 bool wxControlBase::CreateControl(wxWindowBase *parent,
                                   wxWindowID id,
@@ -105,37 +79,17 @@ void wxControlBase::InitCommandEvent(wxCommandEvent& event) const
 
     switch ( m_clientDataType )
     {
-        case wxClientData_Void:
+        case ClientData_Void:
             event.SetClientData(GetClientData());
             break;
 
-        case wxClientData_Object:
+        case ClientData_Object:
             event.SetClientObject(GetClientObject());
             break;
 
-        case wxClientData_None:
+        case ClientData_None:
             // nothing to do
             ;
     }
 }
-
-// ----------------------------------------------------------------------------
-// wxStaticBitmap
-// ----------------------------------------------------------------------------
-
-#if wxUSE_STATBMP
-
-wxSize wxStaticBitmapBase::DoGetBestClientSize() const
-{
-    wxBitmap bmp = GetBitmap();
-    if ( bmp.Ok() )
-        return wxSize(bmp.GetWidth(), bmp.GetHeight());
-
-    // this is completely arbitrary
-    return wxSize(16, 16);
-}
-
-#endif // wxUSE_STATBMP
-
-#endif // wxUSE_CONTROLS
 

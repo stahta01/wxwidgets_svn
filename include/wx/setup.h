@@ -15,16 +15,7 @@
 #error No __WXxxx__ define set! Please define one of __WXBASE__,__WXGTK__,__WXMSW__,__WXMOTIF__,__WXMAC__,__WXQT__,__WXPM__,__WXSTUBS__
 #endif
 
-// wxUniversal is defined together with one of other ports, so test for it
-// first
-#ifdef __WXUNIVERSAL__
-#if defined(__USE_WXCONFIG__) && defined(__WXDEBUG__)
-#include "wx/univd/setup.h"
-#else
-#include "wx/univ/setup.h"
-#endif
-
-#elif defined(__WXBASE__)
+#ifdef __WXBASE__
 #if defined(__USE_WXCONFIG__) && defined(__WXDEBUG__)
 #include "wx/based/setup.h"
 #else
@@ -65,7 +56,5 @@
 #endif
 
 #endif
-
-#include "wx/chkconf.h"
-
-#endif /* _WX_SETUP_H_BASE_ */
+#endif
+	/* _WX_SETUP_H_BASE_ */

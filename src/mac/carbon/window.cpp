@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        windows.cpp
-// Purpose:     wxWindowMac
+// Purpose:     wxWindow
 // Author:      AUTHOR
 // Modified by:
 // Created:     ??/??/98
@@ -54,16 +54,16 @@
 #include <string.h>
 
 extern wxList wxPendingDelete;
-wxWindowMac* gFocusWindow = NULL ;
+wxWindow* gFocusWindow = NULL ;
 
 #if !USE_SHARED_LIBRARY
-IMPLEMENT_DYNAMIC_CLASS(wxWindowMac, wxEvtHandler)
-BEGIN_EVENT_TABLE(wxWindowMac, wxEvtHandler)
-  EVT_ERASE_BACKGROUND(wxWindowMac::OnEraseBackground)
-  EVT_SYS_COLOUR_CHANGED(wxWindowMac::OnSysColourChanged)
-  EVT_INIT_DIALOG(wxWindowMac::OnInitDialog)
-  EVT_IDLE(wxWindowMac::OnIdle)
-  EVT_SET_FOCUS(wxWindowMac::OnSetFocus)
+IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxEvtHandler)
+BEGIN_EVENT_TABLE(wxWindow, wxEvtHandler)
+  EVT_ERASE_BACKGROUND(wxWindow::OnEraseBackground)
+  EVT_SYS_COLOUR_CHANGED(wxWindow::OnSysColourChanged)
+  EVT_INIT_DIALOG(wxWindow::OnInitDialog)
+  EVT_IDLE(wxWindow::OnIdle)
+  EVT_SET_FOCUS(wxWindow::OnSetFocus)
 END_EVENT_TABLE()
 
 #endif
@@ -75,21 +75,21 @@ END_EVENT_TABLE()
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// wxWindowMac utility functions
+// wxWindow utility functions
 // ---------------------------------------------------------------------------
 
 // Find an item given the Macintosh Window Reference
 
 wxList *wxWinMacWindowList = NULL;
-wxWindowMac *wxFindWinFromMacWindow(WindowRef inWindowRef)
+wxWindow *wxFindWinFromMacWindow(WindowRef inWindowRef)
 {
     wxNode *node = wxWinMacWindowList->Find((long)inWindowRef);
     if (!node)
         return NULL;
-    return (wxWindowMac *)node->Data();
+    return (wxWindow *)node->Data();
 }
 
-void wxAssociateWinWithMacWindow(WindowRef inWindowRef, wxWindowMac *win)
+void wxAssociateWinWithMacWindow(WindowRef inWindowRef, wxWindow *win)
 {
     // adding NULL WindowRef is (first) surely a result of an error and
     // (secondly) breaks menu command processing
@@ -99,7 +99,7 @@ void wxAssociateWinWithMacWindow(WindowRef inWindowRef, wxWindowMac *win)
         wxWinMacWindowList->Append((long)inWindowRef, win);
 }
 
-void wxRemoveMacWindowAssociation(wxWindowMac *win)
+void wxRemoveMacWindowAssociation(wxWindow *win)
 {
     wxWinMacWindowList->DeleteObject(win);
 }
@@ -108,9 +108,9 @@ void wxRemoveMacWindowAssociation(wxWindowMac *win)
 // constructors and such
 // ----------------------------------------------------------------------------
 
-WindowRef wxWindowMac::s_macWindowInUpdate = NULL;
+WindowRef wxWindow::s_macWindowInUpdate = NULL;
 
-void wxWindowMac::Init()
+void wxWindow::Init()
 {
     // generic
     InitBase();
@@ -150,11 +150,11 @@ void wxWindowMac::Init()
 }
 
 // Destructor
-wxWindowMac::~wxWindowMac()
+wxWindow::~wxWindow()
 {
     // deleting a window while it is shown invalidates the region
     if ( IsShown() ) {
-        wxWindowMac* iter = this ;
+        wxWindow* iter = this ;
         while( iter ) {
             if ( iter->m_macWindowData )
             {
@@ -193,13 +193,13 @@ wxWindowMac::~wxWindowMac()
 }
 
 // Constructor
-bool wxWindowMac::Create(wxWindowMac *parent, wxWindowID id,
+bool wxWindow::Create(wxWindow *parent, wxWindowID id,
            const wxPoint& pos,
            const wxSize& size,
            long style,
            const wxString& name)
 {
-    wxCHECK_MSG( parent, FALSE, wxT("can't create wxWindowMac without parent") );
+    wxCHECK_MSG( parent, FALSE, wxT("can't create wxWindow without parent") );
 
     if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
@@ -211,16 +211,16 @@ bool wxWindowMac::Create(wxWindowMac *parent, wxWindowID id,
 	AdjustForParentClientOrigin(m_x, m_y, wxSIZE_USE_EXISTING);
   	m_width = WidthDefault( size.x );
   	m_height = HeightDefault( size.y ) ;
-#ifndef __WXUNIVERSAL__
+
 	if ( ! IsKindOf( CLASSINFO ( wxControl ) ) && ! IsKindOf( CLASSINFO( wxStatusBar ) ) )
 	{
     	MacCreateScrollBars( style ) ;
 	}
-#endif
+
     return TRUE;
 }
 
-void wxWindowMac::SetFocus()
+void wxWindow::SetFocus()
 {
 	if ( gFocusWindow == this )
 		return ;
@@ -236,14 +236,12 @@ void wxWindowMac::SetFocus()
 			          gFocusWindow->m_caret->OnKillFocus();
 			    }
 			#endif // wxUSE_CARET
-      #ifndef __WXUNIVERSAL__
 			wxControl* control = wxDynamicCast( gFocusWindow , wxControl ) ;
 			if ( control && control->GetMacControl() )
 			{
 				UMASetKeyboardFocus( gFocusWindow->GetMacRootWindow() , control->GetMacControl()  , kControlFocusNoPart ) ;
 				control->MacRedrawControl() ;
 			}
-			#endif
 	    	wxFocusEvent event(wxEVT_KILL_FOCUS, gFocusWindow->m_windowId);
 	    	event.SetEventObject(gFocusWindow);
 			gFocusWindow->GetEventHandler()->ProcessEvent(event) ;
@@ -261,15 +259,14 @@ void wxWindowMac::SetFocus()
     		wxPanel *panel = wxDynamicCast(GetParent(), wxPanel);
     		if ( panel )
     		{
-        		panel->SetLastFocus((wxWindow*)this);
+        		panel->SetLastFocus(this);
     		}
-      #ifndef __WXUNIVERSAL__
 			wxControl* control = wxDynamicCast( gFocusWindow , wxControl ) ;
 			if ( control && control->GetMacControl() )
 			{
 				UMASetKeyboardFocus( gFocusWindow->GetMacRootWindow() , control->GetMacControl()  , kControlEditTextPart ) ;
 			}
-      #endif
+
 	    	wxFocusEvent event(wxEVT_SET_FOCUS, m_windowId);
 	    	event.SetEventObject(this);
 			GetEventHandler()->ProcessEvent(event) ;
@@ -277,7 +274,7 @@ void wxWindowMac::SetFocus()
 	}
 }
 
-bool wxWindowMac::Enable(bool enable)
+bool wxWindow::Enable(bool enable)
 {
     if ( !wxWindowBase::Enable(enable) )
         return FALSE;
@@ -285,7 +282,7 @@ bool wxWindowMac::Enable(bool enable)
     wxWindowList::Node *node = GetChildren().GetFirst();
     while ( node )
     {
-        wxWindowMac *child = node->GetData();
+        wxWindow *child = node->GetData();
         child->Enable(enable);
 
         node = node->GetNext();
@@ -294,24 +291,19 @@ bool wxWindowMac::Enable(bool enable)
     return TRUE;
 }
 
-void wxWindowMac::CaptureMouse()
+void wxWindow::CaptureMouse()
 {
     wxTheApp->s_captureWindow = this ;
 }
 
-wxWindow* wxWindowBase::GetCapture()
-{
-    return wxTheApp->s_captureWindow ;
-}
-
-void wxWindowMac::ReleaseMouse()
+void wxWindow::ReleaseMouse()
 {
     wxTheApp->s_captureWindow = NULL ;
 }
 
 #if    wxUSE_DRAG_AND_DROP
 
-void wxWindowMac::SetDropTarget(wxDropTarget *pDropTarget)
+void wxWindow::SetDropTarget(wxDropTarget *pDropTarget)
 {
   if ( m_pDropTarget != 0 ) {
     delete m_pDropTarget;
@@ -327,19 +319,19 @@ void wxWindowMac::SetDropTarget(wxDropTarget *pDropTarget)
 #endif
 
 // Old style file-manager drag&drop
-void wxWindowMac::DragAcceptFiles(bool accept)
+void wxWindow::DragAcceptFiles(bool accept)
 {
     // TODO
 }
 
 // Get total size
-void wxWindowMac::DoGetSize(int *x, int *y) const
+void wxWindow::DoGetSize(int *x, int *y) const
 {
     *x = m_width ;
     *y = m_height ;
 }
 
-void wxWindowMac::DoGetPosition(int *x, int *y) const
+void wxWindow::DoGetPosition(int *x, int *y) const
 {
     *x = m_x ;
     *y = m_y ;
@@ -351,8 +343,8 @@ void wxWindowMac::DoGetPosition(int *x, int *y) const
     }
 }
 
-#if wxUSE_MENUS
-bool wxWindowMac::DoPopupMenu(wxMenu *menu, int x, int y)
+
+bool wxWindow::DoPopupMenu(wxMenu *menu, int x, int y)
 {
 	menu->SetInvokingWindow(this);
     menu->UpdateUI();
@@ -366,9 +358,8 @@ bool wxWindowMac::DoPopupMenu(wxMenu *menu, int x, int y)
 
   return TRUE;
 }
-#endif
 
-void wxWindowMac::DoScreenToClient(int *x, int *y) const
+void wxWindow::DoScreenToClient(int *x, int *y) const
 {
 	WindowRef window = GetMacRootWindow() ;
 
@@ -388,7 +379,7 @@ void wxWindowMac::DoScreenToClient(int *x, int *y) const
 	MacRootWindowToClient( x , y ) ;
 }
 
-void wxWindowMac::DoClientToScreen(int *x, int *y) const
+void wxWindow::DoClientToScreen(int *x, int *y) const
 {
 	WindowRef window = GetMacRootWindow() ;
 	
@@ -408,7 +399,7 @@ void wxWindowMac::DoClientToScreen(int *x, int *y) const
 	*y = localwhere.v ;
 }
 
-void wxWindowMac::MacClientToRootWindow( int *x , int *y ) const
+void wxWindow::MacClientToRootWindow( int *x , int *y ) const
 {
 	if ( m_macWindowData )
 	{
@@ -421,7 +412,7 @@ void wxWindowMac::MacClientToRootWindow( int *x , int *y ) const
 	}
 }
 
-void wxWindowMac::MacRootWindowToClient( int *x , int *y ) const
+void wxWindow::MacRootWindowToClient( int *x , int *y ) const
 {
 	if ( m_macWindowData )
 	{
@@ -434,7 +425,7 @@ void wxWindowMac::MacRootWindowToClient( int *x , int *y ) const
 	}
 }
 
-bool wxWindowMac::SetCursor(const wxCursor& cursor)
+bool wxWindow::SetCursor(const wxCursor& cursor)
 {
     if (m_cursor == cursor)
        return FALSE;
@@ -454,7 +445,7 @@ bool wxWindowMac::SetCursor(const wxCursor& cursor)
                   wxT("cursor must be valid after call to the base version"));
 
   Point pt ;
-  wxWindowMac *mouseWin ;
+  wxWindow *mouseWin ;
   GetMouse( &pt ) ;
   
   // Change the cursor NOW if we're within the correct window
@@ -472,7 +463,7 @@ bool wxWindowMac::SetCursor(const wxCursor& cursor)
 
 
 // Get size *available for subwindows* i.e. excluding menu bar etc.
-void wxWindowMac::DoGetClientSize(int *x, int *y) const
+void wxWindow::DoGetClientSize(int *x, int *y) const
 {
     *x = m_width ;
     *y = m_height ;
@@ -491,7 +482,7 @@ void wxWindowMac::DoGetClientSize(int *x, int *y) const
 	MacClientToRootWindow( &w , &h ) ;
 	
 	WindowRef window = NULL ;
-	wxWindowMac *iter = (wxWindowMac*)this ;
+	wxWindow *iter = (wxWindow*)this ;
 	
 	int totW = 10000 , totH = 10000;
 	while( iter )
@@ -532,7 +523,7 @@ void wxWindowMac::DoGetClientSize(int *x, int *y) const
 
 #if wxUSE_TOOLTIPS
 
-void wxWindowMac::DoSetToolTip(wxToolTip *tooltip)
+void wxWindow::DoSetToolTip(wxToolTip *tooltip)
 {
     wxWindowBase::DoSetToolTip(tooltip);
 
@@ -542,7 +533,7 @@ void wxWindowMac::DoSetToolTip(wxToolTip *tooltip)
 
 #endif // wxUSE_TOOLTIPS
 
-void wxWindowMac::DoMoveWindow(int x, int y, int width, int height)
+void wxWindow::DoMoveWindow(int x, int y, int width, int height)
 {
 	DoSetSize( x,y, width, height ) ;
 }
@@ -555,7 +546,7 @@ void wxWindowMac::DoMoveWindow(int x, int y, int width, int height)
 // If sizeFlags contains wxSIZE_AUTO_WIDTH/HEIGHT flags (default), we calculate
 // the width/height to best suit our contents, otherwise we reuse the current
 // width/height
-void wxWindowMac::DoSetSize(int x, int y, int width, int height, int sizeFlags)
+void wxWindow::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 {
 
 	int former_x = m_x ;
@@ -693,37 +684,35 @@ void wxWindowMac::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 			}
 			
 			if ( doMove )
-				wxWindowMac::MacSuperChangedPosition() ; // like this only children will be notified
+				wxWindow::MacSuperChangedPosition() ; // like this only children will be notified
 		}
 		MacRepositionScrollBars() ;
 		if ( doMove )
 		{
-	        wxPoint point(m_x, m_y);
-    		wxMoveEvent event(point, m_windowId);
+    		wxMoveEvent event(wxPoint(m_x, m_y), m_windowId);
     		event.SetEventObject(this);
     		GetEventHandler()->ProcessEvent(event) ;
     	}
     	if ( doResize )
     	{
-	    MacRepositionScrollBars() ;
-	    wxSize size(m_width, m_height);
-	    wxSizeEvent event(size, m_windowId);
-	    event.SetEventObject(this);
-	    GetEventHandler()->ProcessEvent(event);
+			MacRepositionScrollBars() ;
+	    	wxSizeEvent event(wxSize(m_width, m_height), m_windowId);
+	    	event.SetEventObject(this);
+	    	GetEventHandler()->ProcessEvent(event);
     	}
 	}
 }
 // For implementation purposes - sometimes decorations make the client area
 // smaller
 
-wxPoint wxWindowMac::GetClientAreaOrigin() const
+wxPoint wxWindow::GetClientAreaOrigin() const
 {
     return wxPoint(MacGetLeftBorderSize(  ) , MacGetTopBorderSize(  ) );
 }
 
 // Makes an adjustment to the window position (for example, a frame that has
 // a toolbar that it manages itself).
-void wxWindowMac::AdjustForParentClientOrigin(int& x, int& y, int sizeFlags)
+void wxWindow::AdjustForParentClientOrigin(int& x, int& y, int sizeFlags)
 {
 	if( !m_macWindowData )
 	{
@@ -735,7 +724,7 @@ void wxWindowMac::AdjustForParentClientOrigin(int& x, int& y, int sizeFlags)
    }
 }
 
-void wxWindowMac::SetTitle(const wxString& title)
+void wxWindow::SetTitle(const wxString& title)
 {
 	m_label = title ;
 	
@@ -750,12 +739,12 @@ void wxWindowMac::SetTitle(const wxString& title)
     	UMASetWTitleC( m_macWindowData->m_macWindow , label ) ;
 }
 
-wxString wxWindowMac::GetTitle() const
+wxString wxWindow::GetTitle() const
 {
 	return m_label ;
 }
 
-bool wxWindowMac::Show(bool show)
+bool wxWindow::Show(bool show)
 {
     if ( !wxWindowBase::Show(show) )
         return FALSE;
@@ -768,8 +757,7 @@ bool wxWindowMac::Show(bool show)
 	  	UMASelectWindow( m_macWindowData->m_macWindow ) ;
 		// no need to generate events here, they will get them triggered by macos
 		// actually they should be , but apparently they are not
-	    wxSize size(m_width, m_height);
-	    wxSizeEvent event(size, m_windowId);
+	    wxSizeEvent event(wxSize(m_width, m_height), m_windowId);
 	    event.SetEventObject(this);
 	    GetEventHandler()->ProcessEvent(event);
 	  }
@@ -779,34 +767,24 @@ bool wxWindowMac::Show(bool show)
 	  }
 	}
 	MacSuperShown( show ) ;
-	if ( !show )
-	{
-	    WindowRef window = GetMacRootWindow() ;
-	    wxWindowMac* win = wxFindWinFromMacWindow( window ) ;
-	    if ( !win->m_isBeingDeleted )
-   	        Refresh() ;	
-	}
-	else
-	{
-    	Refresh() ;	
-	}
+	Refresh() ;
 
     return TRUE;
 }
 
-void wxWindowMac::MacSuperShown( bool show ) 
+void wxWindow::MacSuperShown( bool show ) 
 {
 	wxNode *node = GetChildren().First();
 	while ( node )
 	{
-		wxWindowMac *child = (wxWindowMac *)node->Data();
+		wxWindow *child = (wxWindow *)node->Data();
 		if ( child->m_isShown )
 			child->MacSuperShown( show ) ;
 		node = node->Next();
 	}
 }
 
-bool wxWindowMac::MacIsReallyShown() const 
+bool wxWindow::MacIsReallyShown() const 
 {
 	if ( m_isShown && (m_parent != NULL) ) {
 		return m_parent->MacIsReallyShown();
@@ -814,7 +792,7 @@ bool wxWindowMac::MacIsReallyShown() const
 	return m_isShown;
 /*	
 	bool status = m_isShown ;
-	wxWindowMac * win = this ;
+	wxWindow * win = this ;
 	while ( status && win->m_parent != NULL )
 	{
 		win = win->m_parent ;
@@ -824,26 +802,26 @@ bool wxWindowMac::MacIsReallyShown() const
 */
 }
 
-int wxWindowMac::GetCharHeight() const
+int wxWindow::GetCharHeight() const
 {
-	wxClientDC dc ( (wxWindowMac*)this ) ;
+	wxClientDC dc ( (wxWindow*)this ) ;
 	return dc.GetCharHeight() ;
 }
 
-int wxWindowMac::GetCharWidth() const
+int wxWindow::GetCharWidth() const
 {
-	wxClientDC dc ( (wxWindowMac*)this ) ;
+	wxClientDC dc ( (wxWindow*)this ) ;
 	return dc.GetCharWidth() ;
 }
 
-void wxWindowMac::GetTextExtent(const wxString& string, int *x, int *y,
+void wxWindow::GetTextExtent(const wxString& string, int *x, int *y,
                            int *descent, int *externalLeading, const wxFont *theFont ) const
 {
     const wxFont *fontToUse = theFont;
     if ( !fontToUse )
         fontToUse = &m_font;
         
-    wxClientDC dc( (wxWindowMac*) this ) ;
+    wxClientDC dc( (wxWindow*) this ) ;
     long lx,ly,ld,le ;
     dc.GetTextExtent( string , &lx , &ly , &ld, &le, (wxFont *)fontToUse ) ;
     if ( externalLeading )
@@ -856,7 +834,7 @@ void wxWindowMac::GetTextExtent(const wxString& string, int *x, int *y,
     	*y = ly ;
 }
 
-void wxWindowMac::MacEraseBackground( Rect *rect )
+void wxWindow::MacEraseBackground( Rect *rect )
 {
 /*
 	WindowRef window = GetMacRootWindow() ;
@@ -870,7 +848,7 @@ void wxWindowMac::MacEraseBackground( Rect *rect )
 		// it is on a notebook panel or not, in order to take care of that we walk up the hierarchy until we have
 		// either a non gray background color or a non control window
 		
-			wxWindowMac* parent = GetParent() ;
+			wxWindow* parent = GetParent() ;
 			while( parent )
 			{
 				if ( parent->m_backgroundColour != wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DFACE ) )
@@ -911,7 +889,7 @@ void wxWindowMac::MacEraseBackground( Rect *rect )
 	
 	for (wxNode *node = GetChildren().First(); node; node = node->Next())
 	{
-		wxWindowMac *child = (wxWindowMac*)node->Data();
+		wxWindow *child = (wxWindow*)node->Data();
 		
 		Rect clientrect = { child->m_x , child->m_y , child->m_x +child->m_width , child->m_y + child->m_height } ;
 		SectRect( &clientrect , rect , &clientrect ) ;    	
@@ -929,17 +907,15 @@ void wxWindowMac::MacEraseBackground( Rect *rect )
 */
 }
 
-void wxWindowMac::Refresh(bool eraseBack, const wxRect *rect)
+void wxWindow::Refresh(bool eraseBack, const wxRect *rect)
 {
 //    if ( !IsShown() )
 //        return ;
         
-	wxMacDrawingClientHelper focus( this ) ;
+	wxMacDrawingHelper focus( this ) ;
 	if ( focus.Ok() )
 	{
-  	    wxPoint client ;
-	    client = GetClientAreaOrigin( ) ;
-	  	Rect clientrect = { -client.y , -client.x , m_height - client.y , m_width - client.x} ;
+	  	Rect clientrect = { 0 , 0 , m_height , m_width } ;
   		// ClipRect( &clientrect ) ;
 
     	if ( rect )
@@ -956,13 +932,13 @@ void wxWindowMac::Refresh(bool eraseBack, const wxRect *rect)
 }
 
 // Responds to colour changes: passes event on to children.
-void wxWindowMac::OnSysColourChanged(wxSysColourChangedEvent& event)
+void wxWindow::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
     wxNode *node = GetChildren().First();
     while ( node )
     {
         // Only propagate to non-top-level windows
-        wxWindowMac *win = (wxWindowMac *)node->Data();
+        wxWindow *win = (wxWindow *)node->Data();
         if ( win->GetParent() )
         {
             wxSysColourChangedEvent event2;
@@ -979,36 +955,36 @@ void wxWindowMac::OnSysColourChanged(wxSysColourChangedEvent& event)
 // Caret manipulation
 // ---------------------------------------------------------------------------
 
-void wxWindowMac::CreateCaret(int w, int h)
+void wxWindow::CreateCaret(int w, int h)
 {
     SetCaret(new wxCaret(this, w, h));
 }
 
-void wxWindowMac::CreateCaret(const wxBitmap *WXUNUSED(bitmap))
+void wxWindow::CreateCaret(const wxBitmap *WXUNUSED(bitmap))
 {
     wxFAIL_MSG("not implemented");
 }
 
-void wxWindowMac::ShowCaret(bool show)
+void wxWindow::ShowCaret(bool show)
 {
     wxCHECK_RET( m_caret, "no caret to show" );
 
     m_caret->Show(show);
 }
 
-void wxWindowMac::DestroyCaret()
+void wxWindow::DestroyCaret()
 {
     SetCaret(NULL);
 }
 
-void wxWindowMac::SetCaretPos(int x, int y)
+void wxWindow::SetCaretPos(int x, int y)
 {
     wxCHECK_RET( m_caret, "no caret to move" );
 
     m_caret->Move(x, y);
 }
 
-void wxWindowMac::GetCaretPos(int *x, int *y) const
+void wxWindow::GetCaretPos(int *x, int *y) const
 {
     wxCHECK_RET( m_caret, "no caret to get position of" );
 
@@ -1016,24 +992,24 @@ void wxWindowMac::GetCaretPos(int *x, int *y) const
 }
 #endif // wxUSE_CARET
 
-wxWindowMac *wxGetActiveWindow()
+wxWindow *wxGetActiveWindow()
 {
     // actually this is a windows-only concept
     return NULL;
 }
 
 // Coordinates relative to the window
-void wxWindowMac::WarpPointer (int x_pos, int y_pos)
+void wxWindow::WarpPointer (int x_pos, int y_pos)
 {
     // We really dont move the mouse programmatically under mac
 }
 
-void wxWindowMac::OnEraseBackground(wxEraseEvent& event)
+void wxWindow::OnEraseBackground(wxEraseEvent& event)
 {
     // TODO : probably we would adopt the EraseEvent structure
 }
 
-int wxWindowMac::GetScrollPos(int orient) const
+int wxWindow::GetScrollPos(int orient) const
 {
 		if ( orient == wxHORIZONTAL )
 		{
@@ -1050,7 +1026,7 @@ int wxWindowMac::GetScrollPos(int orient) const
 
 // This now returns the whole range, not just the number
 // of positions that we can scroll.
-int wxWindowMac::GetScrollRange(int orient) const
+int wxWindow::GetScrollRange(int orient) const
 {
 		if ( orient == wxHORIZONTAL )
 		{
@@ -1065,7 +1041,7 @@ int wxWindowMac::GetScrollRange(int orient) const
     return 0;
 }
 
-int wxWindowMac::GetScrollThumb(int orient) const
+int wxWindow::GetScrollThumb(int orient) const
 {
 		if ( orient == wxHORIZONTAL )
 		{
@@ -1080,7 +1056,7 @@ int wxWindowMac::GetScrollThumb(int orient) const
     return 0;
 }
 
-void wxWindowMac::SetScrollPos(int orient, int pos, bool refresh)
+void wxWindow::SetScrollPos(int orient, int pos, bool refresh)
 {
 		if ( orient == wxHORIZONTAL )
 		{
@@ -1094,7 +1070,7 @@ void wxWindowMac::SetScrollPos(int orient, int pos, bool refresh)
 		}
 }
 
-void  wxWindowMac::MacCreateRealWindow( const wxString& title,
+void  wxWindow::MacCreateRealWindow( const wxString& title,
            const wxPoint& pos,
            const wxSize& size,
            long style,
@@ -1183,11 +1159,11 @@ void  wxWindowMac::MacCreateRealWindow( const wxString& title,
 	m_macWindowData->m_macHasReceivedFirstActivate = true ;
 }
 
-void wxWindowMac::MacPaint( wxPaintEvent &event ) 
+void wxWindow::MacPaint( wxPaintEvent &event ) 
 {
 }
 
-void wxWindowMac::MacPaintBorders( ) 
+void wxWindow::MacPaintBorders( ) 
 {
 	if( m_macWindowData )
 		return ;
@@ -1301,7 +1277,7 @@ void wxWindowMac::MacPaintBorders( )
 }
 
 // New function that will replace some of the above.
-void wxWindowMac::SetScrollbar(int orient, int pos, int thumbVisible,
+void wxWindow::SetScrollbar(int orient, int pos, int thumbVisible,
     int range, bool refresh)
 {
 		if ( orient == wxHORIZONTAL )
@@ -1342,7 +1318,7 @@ void wxWindowMac::SetScrollbar(int orient, int pos, int thumbVisible,
 }
 
 // Does a physical scroll
-void wxWindowMac::ScrollWindow(int dx, int dy, const wxRect *rect)
+void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
 {
 	wxMacDrawingClientHelper focus( this ) ;
 	if ( focus.Ok() )
@@ -1366,7 +1342,7 @@ void wxWindowMac::ScrollWindow(int dx, int dy, const wxRect *rect)
 	
 	for (wxNode *node = GetChildren().First(); node; node = node->Next())
 	{
-		wxWindowMac *child = (wxWindowMac*)node->Data();
+		wxWindow *child = (wxWindow*)node->Data();
 		if (child == m_vScrollBar) continue;
 		if (child == m_hScrollBar) continue;
 		if (child->IsTopLevel()) continue;
@@ -1379,7 +1355,7 @@ void wxWindowMac::ScrollWindow(int dx, int dy, const wxRect *rect)
 	
 }
 
-void wxWindowMac::MacOnScroll(wxScrollEvent &event )
+void wxWindow::MacOnScroll(wxScrollEvent &event )
 {
 	if ( event.m_eventObject == m_vScrollBar || event.m_eventObject == m_hScrollBar )
 	{
@@ -1414,7 +1390,7 @@ void wxWindowMac::MacOnScroll(wxScrollEvent &event )
     }
 }
 
-bool wxWindowMac::SetFont(const wxFont& font)
+bool wxWindow::SetFont(const wxFont& font)
 {
     if ( !wxWindowBase::SetFont(font) )
     {
@@ -1426,7 +1402,7 @@ bool wxWindowMac::SetFont(const wxFont& font)
 }
 
 // Get the window with the focus
-wxWindowMac *wxWindowBase::FindFocus()
+wxWindow *wxWindowBase::FindFocus()
 {
 	return gFocusWindow ;
 }
@@ -1435,7 +1411,7 @@ wxWindowMac *wxWindowBase::FindFocus()
 // If nothing defined for this, try the parent.
 // E.g. we may be a button loaded from a resource, with no callback function
 // defined.
-void wxWindowMac::OnCommand(wxWindowMac& win, wxCommandEvent& event)
+void wxWindow::OnCommand(wxWindow& win, wxCommandEvent& event)
 {
     if ( GetEventHandler()->ProcessEvent(event)  )
         return;
@@ -1445,7 +1421,7 @@ void wxWindowMac::OnCommand(wxWindowMac& win, wxCommandEvent& event)
 #endif // WXWIN_COMPATIBILITY_2
 
 #if WXWIN_COMPATIBILITY
-wxObject* wxWindowMac::GetChild(int number) const
+wxObject* wxWindow::GetChild(int number) const
 {
     // Return a pointer to the Nth object in the Panel
     wxNode *node = GetChildren().First();
@@ -1462,7 +1438,7 @@ wxObject* wxWindowMac::GetChild(int number) const
 }
 #endif // WXWIN_COMPATIBILITY
 
-void wxWindowMac::OnSetFocus(wxFocusEvent& event)
+void wxWindow::OnSetFocus(wxFocusEvent& event)
 {
     // panel wants to track the window which was the last to have focus in it,
     // so we want to set ourselves as the window which last had focus
@@ -1470,10 +1446,10 @@ void wxWindowMac::OnSetFocus(wxFocusEvent& event)
     // notice that it's also important to do it upwards the tree becaus
     // otherwise when the top level panel gets focus, it won't set it back to
     // us, but to some other sibling
-    wxWindowMac *win = this;
+    wxWindow *win = this;
     while ( win )
     {
-        wxWindowMac *parent = win->GetParent();
+        wxWindow *parent = win->GetParent();
         wxPanel *panel = wxDynamicCast(parent, wxPanel);
         if ( panel )
         {
@@ -1486,7 +1462,7 @@ void wxWindowMac::OnSetFocus(wxFocusEvent& event)
     event.Skip();
 }
 
-void wxWindowMac::Clear()
+void wxWindow::Clear()
 {
 	if ( m_macWindowData )
 	{
@@ -1508,13 +1484,13 @@ void wxWindowMac::Clear()
 }
 
 // Setup background and foreground colours correctly
-void wxWindowMac::SetupColours()
+void wxWindow::SetupColours()
 {
     if ( GetParent() )
         SetBackgroundColour(GetParent()->GetBackgroundColour());
 }
 
-void wxWindowMac::OnIdle(wxIdleEvent& event)
+void wxWindow::OnIdle(wxIdleEvent& event)
 {
 /*
    // Check if we need to send a LEAVE event
@@ -1537,24 +1513,18 @@ void wxWindowMac::OnIdle(wxIdleEvent& event)
 }
 
 // Raise the window to the top of the Z order
-void wxWindowMac::Raise()
+void wxWindow::Raise()
 {
-    if ( m_macWindowData )
-    {
-        UMABringToFront( m_macWindowData->m_macWindow ) ;
-    }
+    // TODO
 }
 
 // Lower the window to the bottom of the Z order
-void wxWindowMac::Lower()
+void wxWindow::Lower()
 {
-    if ( m_macWindowData )
-    {
-        UMASendBehind( m_macWindowData->m_macWindow , NULL ) ;
-    }
+    // TODO
 }
 
-void wxWindowMac::DoSetClientSize(int width, int height)
+void wxWindow::DoSetClientSize(int width, int height)
 {
 	if ( width != -1 || height != -1 )
 	{
@@ -1572,9 +1542,9 @@ void wxWindowMac::DoSetClientSize(int width, int height)
 }
 
 
-wxWindowMac* wxWindowMac::s_lastMouseWindow = NULL ;
+wxWindow* wxWindow::s_lastMouseWindow = NULL ;
 
-bool wxWindowMac::MacGetWindowFromPointSub( const wxPoint &point , wxWindowMac** outWin ) 
+bool wxWindow::MacGetWindowFromPointSub( const wxPoint &point , wxWindow** outWin ) 
 {
 	if ((point.x < m_x) || (point.y < m_y) ||
 		(point.x > (m_x + m_width)) || (point.y > (m_y + m_height)))
@@ -1589,7 +1559,7 @@ bool wxWindowMac::MacGetWindowFromPointSub( const wxPoint &point , wxWindowMac**
 	
 	for (wxNode *node = GetChildren().First(); node; node = node->Next())
 	{
-		wxWindowMac *child = (wxWindowMac*)node->Data();
+		wxWindow *child = (wxWindow*)node->Data();
 		// added the m_isShown test --dmazzoni
 		if ( child->GetMacRootWindow() == window && child->m_isShown )
 		{
@@ -1602,14 +1572,14 @@ bool wxWindowMac::MacGetWindowFromPointSub( const wxPoint &point , wxWindowMac**
 	return TRUE;
 }
 
-bool wxWindowMac::MacGetWindowFromPoint( const wxPoint &screenpoint , wxWindowMac** outWin ) 
+bool wxWindow::MacGetWindowFromPoint( const wxPoint &screenpoint , wxWindow** outWin ) 
 {
 	WindowRef window ;
 	Point pt = { screenpoint.y , screenpoint.x } ;
 	if ( ::FindWindow( pt , &window ) == 3 )
 	{
 			wxPoint point( screenpoint ) ;
-			wxWindowMac* win = wxFindWinFromMacWindow( window ) ;
+			wxWindow* win = wxFindWinFromMacWindow( window ) ;
 			if ( win )
 			{
 			win->ScreenToClient( point ) ;
@@ -1621,7 +1591,7 @@ bool wxWindowMac::MacGetWindowFromPoint( const wxPoint &screenpoint , wxWindowMa
 
 extern int wxBusyCursorCount ;
 
-bool wxWindowMac::MacDispatchMouseEvent(wxMouseEvent& event)
+bool wxWindow::MacDispatchMouseEvent(wxMouseEvent& event)
 {
 	if ((event.m_x < m_x) || (event.m_y < m_y) ||
 		(event.m_x > (m_x + m_width)) || (event.m_y > (m_y + m_height)))
@@ -1641,7 +1611,7 @@ bool wxWindowMac::MacDispatchMouseEvent(wxMouseEvent& event)
 
 	for (wxNode *node = GetChildren().First(); node; node = node->Next())
 	{
-		wxWindowMac *child = (wxWindowMac*)node->Data();
+		wxWindow *child = (wxWindow*)node->Data();
 		if ( child->GetMacRootWindow() == window && child->IsShown() && child->IsEnabled() )
 		{
 			if (child->MacDispatchMouseEvent(event))
@@ -1677,7 +1647,7 @@ bool wxWindowMac::MacDispatchMouseEvent(wxMouseEvent& event)
 Point lastWhere ;
 long lastWhen = 0 ;
 
-wxString wxWindowMac::MacGetToolTipString( wxPoint &pt )
+wxString wxWindow::MacGetToolTipString( wxPoint &pt )
 {
 	if ( m_tooltip )
 	{
@@ -1685,7 +1655,7 @@ wxString wxWindowMac::MacGetToolTipString( wxPoint &pt )
 	}
 	return "" ;
 }
-void wxWindowMac::MacFireMouseEvent( EventRecord *ev )
+void wxWindow::MacFireMouseEvent( EventRecord *ev )
 {
 	wxMouseEvent event(wxEVT_LEFT_DOWN);
 	bool isDown = !(ev->modifiers & btnState) ; // 1 is for up
@@ -1784,12 +1754,12 @@ void wxWindowMac::MacFireMouseEvent( EventRecord *ev )
 	}
 }
 
-void wxWindowMac::MacMouseDown( EventRecord *ev , short part)
+void wxWindow::MacMouseDown( EventRecord *ev , short part)
 {
 	MacFireMouseEvent( ev ) ;
 }
 
-void wxWindowMac::MacMouseUp( EventRecord *ev , short part)
+void wxWindow::MacMouseUp( EventRecord *ev , short part)
 {
 	WindowPtr frontWindow ;
 	switch (part)
@@ -1802,7 +1772,7 @@ void wxWindowMac::MacMouseUp( EventRecord *ev , short part)
 	}
 }
 
-void wxWindowMac::MacMouseMoved( EventRecord *ev , short part)
+void wxWindow::MacMouseMoved( EventRecord *ev , short part)
 {
 	WindowPtr frontWindow ;
 	switch (part)
@@ -1814,7 +1784,7 @@ void wxWindowMac::MacMouseMoved( EventRecord *ev , short part)
 			break ;
 	}
 }
-void wxWindowMac::MacActivate( EventRecord *ev , bool inIsActivating )
+void wxWindow::MacActivate( EventRecord *ev , bool inIsActivating )
 {
     if ( !m_macWindowData->m_macHasReceivedFirstActivate )
         m_macWindowData->m_macHasReceivedFirstActivate = true ;
@@ -1830,14 +1800,14 @@ void wxWindowMac::MacActivate( EventRecord *ev , bool inIsActivating )
 //	MacUpdateImmediately() ;
 }
 
-void wxWindowMac::MacRedraw( RgnHandle updatergn , long time)
+void wxWindow::MacRedraw( RgnHandle updatergn , long time)
 {
 	// updatergn is always already clipped to our boundaries
 	WindowRef window = GetMacRootWindow() ;
 	// ownUpdateRgn is the area that this window has to invalidate i.e. its own area without its children
 	RgnHandle ownUpdateRgn = NewRgn() ;
 	CopyRgn( updatergn , ownUpdateRgn ) ;
-	wxWindowMac* win = wxFindWinFromMacWindow( window ) ;
+	wxWindow* win = wxFindWinFromMacWindow( window ) ;
 	{
 		wxMacDrawingHelper focus( this ) ; // was client
 		if ( focus.Ok() )
@@ -1857,7 +1827,7 @@ void wxWindowMac::MacRedraw( RgnHandle updatergn , long time)
 					// either a non gray background color or a non control window
 		
 
-					wxWindowMac* parent = GetParent() ;
+					wxWindow* parent = GetParent() ;
 					while( parent )
 					{
 						if ( parent->GetMacRootWindow() != window )
@@ -1906,7 +1876,7 @@ void wxWindowMac::MacRedraw( RgnHandle updatergn , long time)
     	    RgnHandle childarea = NewRgn() ;
         	for (wxNode *node = GetChildren().First(); node; node = node->Next())
         	{
-        		wxWindowMac *child = (wxWindowMac*)node->Data();
+        		wxWindow *child = (wxWindow*)node->Data();
         		// eventually test for transparent windows
 		        if ( child->GetMacRootWindow() == window && child->IsShown() )
 		        {
@@ -1957,7 +1927,7 @@ void wxWindowMac::MacRedraw( RgnHandle updatergn , long time)
 			
 	for (wxNode *node = GetChildren().First(); node; node = node->Next())
 	{
-		wxWindowMac *child = (wxWindowMac*)node->Data();
+		wxWindow *child = (wxWindow*)node->Data();
 		SetRectRgn( childupdate , child->m_x , child->m_y , child->m_x + child->m_width ,  child->m_y + child->m_height ) ;
 		SectRgn( childupdate , updatergn , childupdate ) ;
 		OffsetRgn( childupdate , -child->m_x , -child->m_y ) ;
@@ -1971,12 +1941,12 @@ void wxWindowMac::MacRedraw( RgnHandle updatergn , long time)
 	// eventually a draw grow box here
 }
 
-void wxWindowMac::MacUpdateImmediately()
+void wxWindow::MacUpdateImmediately()
 {
 	WindowRef window = GetMacRootWindow() ;
 	if ( window )
 	{
-		wxWindowMac* win = wxFindWinFromMacWindow( window ) ;
+		wxWindow* win = wxFindWinFromMacWindow( window ) ;
 		#if TARGET_CARBON
 		AGAPortHelper help( GetWindowPort(window) ) ;
 		#else
@@ -2004,10 +1974,10 @@ void wxWindowMac::MacUpdateImmediately()
 	}
 }
 
-void wxWindowMac::MacUpdate( EventRecord *ev )
+void wxWindow::MacUpdate( EventRecord *ev )
 {
 	WindowRef window = (WindowRef) ev->message ;
-	wxWindowMac * win = wxFindWinFromMacWindow( window ) ;
+	wxWindow * win = wxFindWinFromMacWindow( window ) ;
 	#if TARGET_CARBON
 	AGAPortHelper help( GetWindowPort(window) ) ;
 	#else
@@ -2034,10 +2004,10 @@ void wxWindowMac::MacUpdate( EventRecord *ev )
 	EndUpdate( window ) ;
 }
 
-WindowRef wxWindowMac::GetMacRootWindow() const
+WindowRef wxWindow::GetMacRootWindow() const
 {
 	WindowRef window = NULL ;
-	wxWindowMac *iter = (wxWindowMac*)this ;
+	wxWindow *iter = (wxWindow*)this ;
 	
 	while( iter )
 	{
@@ -2050,7 +2020,7 @@ WindowRef wxWindowMac::GetMacRootWindow() const
 	return NULL ;
 }
 
-void wxWindowMac::MacCreateScrollBars( long style ) 
+void wxWindow::MacCreateScrollBars( long style ) 
 {
 	wxASSERT_MSG( m_vScrollBar == NULL && m_hScrollBar == NULL , "attempt to create window twice" ) ;
 	
@@ -2089,7 +2059,7 @@ void wxWindowMac::MacCreateScrollBars( long style )
 	MacRepositionScrollBars() ; // we might have a real position shift
 }
 
-void wxWindowMac::MacRepositionScrollBars()
+void wxWindow::MacRepositionScrollBars()
 {
 	bool hasBoth = ( m_hScrollBar && m_hScrollBar->IsShown()) && ( m_vScrollBar && m_vScrollBar->IsShown()) ;
 	int adjust = hasBoth ? MAC_SCROLLBAR_SIZE - 1 : 0 ;
@@ -2116,7 +2086,7 @@ void wxWindowMac::MacRepositionScrollBars()
 	MacClientToRootWindow( &w , &h ) ;
 	
 	WindowRef window = NULL ;
-	wxWindowMac *iter = (wxWindowMac*)this ;
+	wxWindow *iter = (wxWindow*)this ;
 	
 	int totW = 10000 , totH = 10000;
 	while( iter )
@@ -2164,18 +2134,18 @@ void wxWindowMac::MacRepositionScrollBars()
 	}
 }
 
-void wxWindowMac::MacKeyDown( EventRecord *ev ) 
+void wxWindow::MacKeyDown( EventRecord *ev ) 
 {
 
 }
 
 
-bool wxWindowMac::AcceptsFocus() const
+bool wxWindow::AcceptsFocus() const
 {
     return MacCanFocus() && wxWindowBase::AcceptsFocus();
 }
 
-ControlHandle wxWindowMac::MacGetContainerForEmbedding() 
+ControlHandle wxWindow::MacGetContainerForEmbedding() 
 {
 	if ( m_macWindowData )
 		return m_macWindowData->m_macRootControl ;
@@ -2183,20 +2153,20 @@ ControlHandle wxWindowMac::MacGetContainerForEmbedding()
 		return GetParent()->MacGetContainerForEmbedding() ;
 }
 
-void wxWindowMac::MacSuperChangedPosition() 
+void wxWindow::MacSuperChangedPosition() 
 {
 	// only window-absolute structures have to be moved i.e. controls
 
 	wxNode *node = GetChildren().First();
 	while ( node )
 	{
-		wxWindowMac *child = (wxWindowMac *)node->Data();
+		wxWindow *child = (wxWindow *)node->Data();
 		child->MacSuperChangedPosition() ;
 		node = node->Next();
 	}
 }
 
-bool wxWindowMac::MacSetPortFocusParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindowMac* win ) 
+bool wxWindow::MacSetPortFocusParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindow* win ) 
 {
 	if ( window == NULL )
 		return false ;
@@ -2214,7 +2184,7 @@ bool wxWindowMac::MacSetPortFocusParams( const Point & localOrigin, const Rect &
 	return true;			
 }
 
-bool wxWindowMac::MacSetPortDrawingParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindowMac* win ) 
+bool wxWindow::MacSetPortDrawingParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindow* win ) 
 {
 	if ( window == NULL )
 		return false ;
@@ -2239,7 +2209,7 @@ bool wxWindowMac::MacSetPortDrawingParams( const Point & localOrigin, const Rect
 	return true;			
 }
 
-void wxWindowMac::MacGetPortParams(Point* localOrigin, Rect* clipRect, WindowRef *window  , wxWindowMac** rootwin) 
+void wxWindow::MacGetPortParams(Point* localOrigin, Rect* clipRect, WindowRef *window  , wxWindow** rootwin) 
 {
 	if ( m_macWindowData )
 	{
@@ -2269,7 +2239,7 @@ void wxWindowMac::MacGetPortParams(Point* localOrigin, Rect* clipRect, WindowRef
 	}
 }
 
-void wxWindowMac::MacDoGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window , wxWindowMac** rootwin ) 
+void wxWindow::MacDoGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window , wxWindow** rootwin ) 
 {
 //	int width , height ;
 //	GetClientSize( &width , &height ) ;
@@ -2304,7 +2274,7 @@ void wxWindowMac::MacDoGetPortClientParams(Point* localOrigin, Rect* clipRect, W
 	}
 }
 
-void wxWindowMac::MacGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window , wxWindowMac** rootwin ) 
+void wxWindow::MacGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window , wxWindow** rootwin ) 
 {
 	MacDoGetPortClientParams( localOrigin , clipRect , window , rootwin ) ;
 
@@ -2325,7 +2295,7 @@ void wxWindowMac::MacGetPortClientParams(Point* localOrigin, Rect* clipRect, Win
 	SectRect(clipRect, &myClip, clipRect);
 }
 
-long wxWindowMac::MacGetLeftBorderSize( ) const
+long wxWindow::MacGetLeftBorderSize( ) const
 {
 	if( m_macWindowData )
 		return 0 ;
@@ -2345,7 +2315,7 @@ long wxWindowMac::MacGetLeftBorderSize( ) const
 	return 0 ;
 }
 
-long wxWindowMac::MacGetRightBorderSize( ) const
+long wxWindow::MacGetRightBorderSize( ) const
 {
 	if( m_macWindowData )
 		return 0 ;
@@ -2365,7 +2335,7 @@ long wxWindowMac::MacGetRightBorderSize( ) const
 	return 0 ;
 }
 
-long wxWindowMac::MacGetTopBorderSize( ) const
+long wxWindow::MacGetTopBorderSize( ) const
 {
 	if( m_macWindowData )
 		return 0 ;
@@ -2385,7 +2355,7 @@ long wxWindowMac::MacGetTopBorderSize( ) const
 	return 0 ;
 }
 
-long wxWindowMac::MacGetBottomBorderSize( ) const
+long wxWindow::MacGetBottomBorderSize( ) const
 {
 	if( m_macWindowData )
 		return 0 ;
@@ -2405,19 +2375,19 @@ long wxWindowMac::MacGetBottomBorderSize( ) const
 	return 0 ;
 }
 
-long wxWindowMac::MacRemoveBordersFromStyle( long style ) 
+long wxWindow::MacRemoveBordersFromStyle( long style ) 
 {
 	return style & ~( wxDOUBLE_BORDER | wxSUNKEN_BORDER | wxRAISED_BORDER | wxBORDER | wxSTATIC_BORDER ) ;
 }
 
 
-wxMacDrawingHelper::wxMacDrawingHelper( wxWindowMac * theWindow ) 
+wxMacDrawingHelper::wxMacDrawingHelper( wxWindow * theWindow ) 
 {
 	m_ok = false ;
 	Point localOrigin ;
 	Rect clipRect ;
 	WindowRef window ;
-	wxWindowMac *rootwin ;
+	wxWindow *rootwin ;
 	m_currentPort = NULL ;
 	
 	GetPort( &m_formerPort ) ;
@@ -2449,13 +2419,13 @@ wxMacDrawingHelper::~wxMacDrawingHelper()
 		SetPort( m_formerPort ) ;
 }
 
-wxMacDrawingClientHelper::wxMacDrawingClientHelper( wxWindowMac * theWindow ) 
+wxMacDrawingClientHelper::wxMacDrawingClientHelper( wxWindow * theWindow ) 
 {
 	m_ok = false ;
 	Point localOrigin ;
 	Rect clipRect ;
 	WindowRef window ;
-	wxWindowMac *rootwin ;
+	wxWindow *rootwin ;
 	m_currentPort = NULL ;
 	
 	GetPort( &m_formerPort ) ;
@@ -2488,12 +2458,12 @@ wxMacDrawingClientHelper::~wxMacDrawingClientHelper()
 		SetPort( m_formerPort ) ;
 }
 
-// Find the wxWindowMac at the current mouse position, returning the mouse
+// Find the wxWindow at the current mouse position, returning the mouse
 // position.
-wxWindowMac* wxFindWindowAtPointer(wxPoint& pt)
+wxWindow* wxFindWindowAtPointer(wxPoint& pt)
 {
     pt = wxGetMousePosition();
-    wxWindowMac* found = wxFindWindowAtPoint(pt);
+    wxWindow* found = wxFindWindowAtPoint(pt);
     return found;
 }
 

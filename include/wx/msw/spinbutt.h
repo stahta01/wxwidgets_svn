@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/univ/spinbutt.h
+// Name:        spinbutt.h
 // Purpose:     wxSpinButton class
 // Author:      Julian Smart
 // Modified by:
@@ -32,7 +32,7 @@ public:
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
                  long style = wxSP_VERTICAL | wxSP_ARROW_KEYS,
-                 const wxString& name = wxSPIN_BUTTON_NAME)
+                 const wxString& name = "wxSpinButton")
     {
         Create(parent, id, pos, size, style, name);
     }
@@ -44,7 +44,7 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxSP_VERTICAL | wxSP_ARROW_KEYS,
-                const wxString& name = wxSPIN_BUTTON_NAME);
+                const wxString& name = "wxSpinButton");
 
 
     // accessors

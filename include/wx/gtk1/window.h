@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/window.h
+// Name:        window.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -19,32 +19,33 @@
 // callback definition for inserting a window (internal)
 //-----------------------------------------------------------------------------
 
-class wxWindowGTK;
-typedef void (*wxInsertChildFunction)( wxWindowGTK*, wxWindowGTK* );
+typedef void (*wxInsertChildFunction)( wxWindow*, wxWindow* );
 
 //-----------------------------------------------------------------------------
-// wxWindowGTK
+// wxWindow
 //-----------------------------------------------------------------------------
 
-class wxWindowGTK : public wxWindowBase
+class wxWindow : public wxWindowBase
 {
+    DECLARE_DYNAMIC_CLASS(wxWindow)
+
 public:
     // creating the window
     // -------------------
-    wxWindowGTK();
-    wxWindowGTK(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                const wxString& name = wxPanelNameStr);
+    wxWindow();
+    wxWindow(wxWindow *parent,
+             wxWindowID id,
+             const wxPoint& pos = wxDefaultPosition,
+             const wxSize& size = wxDefaultSize,
+             long style = 0,
+             const wxString& name = wxPanelNameStr);
     bool Create(wxWindow *parent,
                 wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
                 const wxString& name = wxPanelNameStr);
-    virtual ~wxWindowGTK();
+    virtual ~wxWindow();
 
     // implement base class (pure) virtual methods
     // -------------------------------------------
@@ -85,9 +86,7 @@ public:
                                const wxFont *theFont = (const wxFont *) NULL)
                                const;
 
-#if wxUSE_MENUS
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
-#endif // wxUSE_MENUS
 
     virtual void SetScrollbar( int orient, int pos, int thumbVisible,
                                int range, bool refresh = TRUE );
@@ -121,13 +120,13 @@ public:
     virtual void OnParentEnable( bool WXUNUSED(enable) ) {};
 
     /* used by all window classes in the widget creation process */
-    bool PreCreation( wxWindowGTK *parent, const wxPoint &pos, const wxSize &size );
+    bool PreCreation( wxWindow *parent, const wxPoint &pos, const wxSize &size );
     void PostCreation();
 
     /* internal addition of child windows. differs from class
        to class not by using virtual functions but by using
        the m_insertCallback */
-    void DoAddChild(wxWindowGTK *child);
+    void DoAddChild(wxWindow *child);
 
     /* the methods below are required because many native widgets
        are composed of several subwidgets and setting a style for
@@ -173,7 +172,7 @@ public:
     GdkIC               *m_ic;
     GdkICAttr           *m_icattr;
 #endif
-
+    
     /* scrolling stuff */
     GtkAdjustment       *m_hAdjust,*m_vAdjust;
     float                m_oldHorizontalPos;
@@ -200,7 +199,7 @@ public:
     // before the widget has been "realized"
     bool                 m_delayedForegroundColour:1;
     bool                 m_delayedBackgroundColour:1;
-
+    
     // contains GTK's widgets internal information about non-default widget
     // font and colours. we create one for each widget that gets any
     // non-default attribute set via SetFont() or SetForegroundColour() /
@@ -232,10 +231,7 @@ public:
     void Init();
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxWindowGTK)
-    DECLARE_NO_COPY_CLASS(wxWindowGTK)
+    DECLARE_NO_COPY_CLASS(wxWindow);
 };
-
-extern wxWindow *wxFindFocusedChild(wxWindowGTK *win);
 
 #endif // __GTKWINDOWH__

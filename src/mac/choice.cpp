@@ -13,8 +13,7 @@
 #pragma implementation "choice.h"
 #endif
 
-#include "wx/defs.h"
-
+// For compilers that support precompilation, includes "wx.h".
 #include "wx/choice.h"
 #include "wx/menu.h"
 #include "wx/mac/uma.h"
@@ -77,7 +76,7 @@ int wxChoice::DoAppend(const wxString& item)
 	m_datas.Add( NULL ) ;
 	int index = m_strings.GetCount()  - 1  ;
 	DoSetItemClientData( index , NULL ) ;
-	SetControlMaximum( m_macControl , GetCount()) ;
+	SetControlMaximum( m_macControl , Number()) ;
 	return index ;
 }
 
@@ -93,7 +92,7 @@ void wxChoice::Delete(int n)
     ::DeleteMenuItem( m_macPopUpMenuHandle , n + 1) ;
     m_strings.Remove( n ) ;
     m_datas.Remove( n ) ;
-	SetControlMaximum( m_macControl , GetCount()) ;
+	SetControlMaximum( m_macControl , Number()) ;
 }
 
 void wxChoice::Clear()

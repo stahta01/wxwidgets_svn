@@ -14,8 +14,6 @@
 
 #include "wx/window.h"
 
-#if wxUSE_STATUSBAR
-
 // ----------------------------------------------------------------------------
 // wxStatusBar: a window near the bottom of the frame used for status info
 // ----------------------------------------------------------------------------
@@ -46,9 +44,6 @@ public:
     // get the dimensions of the horizontal and vertical borders
     virtual int GetBorderX() const = 0;
     virtual int GetBorderY() const = 0;
-
-    // don't want status bars to accept the focus at all
-    virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:
     int     m_nFields;      // the current number of fields
@@ -97,8 +92,6 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxStatusBar)
 };
-
-#endif
 
 #endif
     // _WX_STATUSBR_H_BASE_

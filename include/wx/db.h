@@ -54,9 +54,6 @@
 
 #include "wx/setup.h"
 
-#include "wx/defs.h"
-#include "wx/string.h"
-
 extern "C" {
 #ifdef __VISUALC__
 // If you use the wxDbCreateDataSource() function with MSW/VC6,

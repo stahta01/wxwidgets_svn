@@ -21,6 +21,7 @@
 #endif
 
 #ifndef WXPRECOMP
+#include "wx/wx.h"
 #endif
 
 #include "wx/html/forcelnk.h"
@@ -43,66 +44,69 @@ TAG_HANDLER_BEGIN(FONT, "FONT")
         wxString oldface = m_WParser->GetFontFace();
 
         if (tag.HasParam(wxT("COLOR")))
-        {
+	    {
+            unsigned long tmp = 0;
             wxColour clr;
-            if (tag.GetParamAsColour(wxT("COLOR"), &clr))
-            {
+            if (tag.ScanParam(wxT("COLOR"), wxT("#%lX"), &tmp) == 1)
+	        {
+                clr = wxColour((unsigned char)((tmp & 0xFF0000) >> 16),
+							   (unsigned char)((tmp & 0x00FF00) >> 8),
+							   (unsigned char)(tmp & 0x0000FF));
                 m_WParser->SetActualColor(clr);
                 m_WParser->GetContainer()->InsertCell(new wxHtmlColourCell(clr));
             }
         }
 
         if (tag.HasParam(wxT("SIZE")))
-        {
-            int tmp = 0;
-            wxChar c = tag.GetParam(wxT("SIZE")).GetChar(0);
-            if (tag.GetParamAsInt(wxT("SIZE"), &tmp))
-            {
-                if (c == wxT('+') || c == wxT('-'))
+	    {
+            long tmp = 0;
+            wxChar c = tag.GetParam(wxT("SIZE"))[(unsigned int) 0];
+            if (tag.ScanParam(wxT("SIZE"), wxT("%li"), &tmp) == 1)
+	        {
+                if (c == '+' || c == '-')
                     m_WParser->SetFontSize(oldsize+tmp);
                 else
                     m_WParser->SetFontSize(tmp);
-                m_WParser->GetContainer()->InsertCell(
-                    new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+                m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
             }
         }
 
         if (tag.HasParam(wxT("FACE")))
-        {
+	    {
             if (m_Faces.GetCount() == 0)
-            {
+	        {
                 wxFontEnumerator enu;
                 enu.EnumerateFacenames();
                 m_Faces = *enu.GetFacenames();
             }
-            wxStringTokenizer tk(tag.GetParam(wxT("FACE")), wxT(","));
+            wxStringTokenizer tk(tag.GetParam(wxT("FACE")), ",");
             int index;
 
             while (tk.HasMoreTokens())
-            {
+	        {
                 if ((index = m_Faces.Index(tk.GetNextToken())) != wxNOT_FOUND)
-                {
+		        {
                     m_WParser->SetFontFace(m_Faces[index]);
                     m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
                     break;
                 }
-            }
+        	}
         }
 
         ParseInner(tag);
 
         if (oldface != m_WParser->GetFontFace())
-        {
+	    {
             m_WParser->SetFontFace(oldface);
             m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         }
         if (oldsize != m_WParser->GetFontSize())
-        {
+	    {
             m_WParser->SetFontSize(oldsize);
             m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         }
         if (oldclr != m_WParser->GetActualColor())
-        {
+	    {
             m_WParser->SetActualColor(oldclr);
             m_WParser->GetContainer()->InsertCell(new wxHtmlColourCell(oldclr));
         }
@@ -119,14 +123,12 @@ TAG_HANDLER_BEGIN(FACES_U, "U,STRIKE")
         int underlined = m_WParser->GetFontUnderlined();
 
         m_WParser->SetFontUnderlined(TRUE);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
         ParseInner(tag);
 
         m_WParser->SetFontUnderlined(underlined);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         return TRUE;
     }
 
@@ -142,14 +144,12 @@ TAG_HANDLER_BEGIN(FACES_B, "B,STRONG")
         int bold = m_WParser->GetFontBold();
 
         m_WParser->SetFontBold(TRUE);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
         ParseInner(tag);
 
         m_WParser->SetFontBold(bold);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         return TRUE;
     }
 
@@ -165,14 +165,12 @@ TAG_HANDLER_BEGIN(FACES_I, "I,EM,CITE,ADDRESS")
         int italic = m_WParser->GetFontItalic();
 
         m_WParser->SetFontItalic(TRUE);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
         ParseInner(tag);
 
         m_WParser->SetFontItalic(italic);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         return TRUE;
     }
 
@@ -188,14 +186,12 @@ TAG_HANDLER_BEGIN(FACES_TT, "TT,CODE,KBD,SAMP")
         int fixed = m_WParser->GetFontFixed();
 
         m_WParser->SetFontFixed(TRUE);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
         ParseInner(tag);
 
         m_WParser->SetFontFixed(fixed);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         return TRUE;
     }
 
@@ -231,7 +227,7 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
         else if (tag.GetName() == wxT("H3"))
                 m_WParser->SetFontSize(5);
         else if (tag.GetName() == wxT("H4"))
-        {
+	    {
                 m_WParser->SetFontSize(5);
                 m_WParser->SetFontItalic(TRUE);
                 m_WParser->SetFontBold(FALSE);
@@ -239,7 +235,7 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
         else if (tag.GetName() == wxT("H5"))
                 m_WParser->SetFontSize(4);
         else if (tag.GetName() == wxT("H6"))
-        {
+	    {
                 m_WParser->SetFontSize(4);
                 m_WParser->SetFontItalic(TRUE);
                 m_WParser->SetFontBold(FALSE);
@@ -247,7 +243,7 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
 
         c = m_WParser->GetContainer();
         if (c->GetFirstCell())
-        {
+	    {
             m_WParser->CloseContainer();
             m_WParser->OpenContainer();
             c = m_WParser->GetContainer();
@@ -268,8 +264,7 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
         m_WParser->SetFontFixed(old_f);
         m_WParser->SetAlign(old_al);
 
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         m_WParser->CloseContainer();
         m_WParser->OpenContainer();
         c = m_WParser->GetContainer();
@@ -289,14 +284,12 @@ TAG_HANDLER_BEGIN(BIGSMALL, "BIG,SMALL")
         int sz = (tag.GetName() == wxT("BIG")) ? +1 : -1;
 
         m_WParser->SetFontSize(sz);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
         ParseInner(tag);
 
         m_WParser->SetFontSize(oldsize);
-        m_WParser->GetContainer()->InsertCell(
-            new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+        m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
         return TRUE;
     }
 

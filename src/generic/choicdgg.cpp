@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CHOICEDLG
-
 #ifndef WX_PRECOMP
     #include <stdio.h>
     #include "wx/utils.h"
@@ -525,5 +523,3 @@ bool wxMultiChoiceDialog::TransferDataFromWindow()
 
     return TRUE;
 }
-
-#endif // wxUSE_CHOICEDLG

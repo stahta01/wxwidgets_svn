@@ -387,12 +387,6 @@ to the list of windows pending real deletion.
 
 Destroys all children of a window.  Called automatically by the destructor.
 
-\membersection{wxWindow::Disable}\label{wxwindowdisable}
-
-\func{void}{Disable}{\void}
-
-Disables the window, same as \helpref{Enable(FALSE)}{wxwindowenable}.
-
 \membersection{wxWindow::DragAcceptFiles}\label{wxwindowdragacceptfiles}
 
 \func{virtual void}{DragAcceptFiles}{\param{bool}{ accept}}
@@ -414,7 +408,7 @@ Windows only.
 
 \membersection{wxWindow::Enable}\label{wxwindowenable}
 
-\func{virtual void}{Enable}{\param{bool}{ enable = TRUE}}
+\func{virtual void}{Enable}{\param{bool}{ enable}}
 
 Enable or disable the window for user input.
 
@@ -424,8 +418,7 @@ Enable or disable the window for user input.
 
 \wxheading{See also}
 
-\helpref{wxWindow::IsEnabled}{wxwindowisenabled},\rtfsp
-\helpref{wxWindow::Disable}{wxwindowdisable}
+\helpref{wxWindow::IsEnabled}{wxwindowisenabled}
 
 \membersection{wxWindow::FindFocus}\label{wxwindowfindfocus}
 
@@ -2429,13 +2422,12 @@ See \helpref{Window styles}{windowstyles} for more information about flags.
 
 \func{virtual bool}{Show}{\param{bool}{ show}}
 
-Shows or hides the window. You may need to call \helpref{Raise}{wxwindowraise} 
-for a top level window if you want to bring it to top, although this is not
-needed if Show() is called immediately after the frame creation.
+Shows or hides the window.
 
 \wxheading{Parameters}
 
-\docparam{show}{If TRUE displays the window. Otherwise, hides it.}
+\docparam{show}{If TRUE, displays the window and brings it to the front. Otherwise,
+hides the window.}
 
 \wxheading{See also}
 

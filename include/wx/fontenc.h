@@ -105,8 +105,6 @@ struct WXDLLEXPORT wxNativeEncodingInfo
 #elif defined(_WX_X_FONTLIKE)
     wxString xregistry,
              xencoding;
-#elif defined(__WXMGL__)
-    int      mglEncoding;
 #else
     #error "Unsupported toolkit"
 #endif

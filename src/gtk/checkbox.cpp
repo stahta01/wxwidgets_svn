@@ -12,11 +12,9 @@
 #pragma implementation "checkbox.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/checkbox.h"
 
 #if wxUSE_CHECKBOX
-
-#include "wx/checkbox.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>

@@ -20,7 +20,7 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_DIRDLG
+#include "wx/defs.h"
 
 #include "wx/utils.h"
 #include "wx/dialog.h"
@@ -1400,5 +1400,3 @@ void wxGenericDirDialog::OnNew( wxCommandEvent& WXUNUSED(event) )
     m_dirCtrl->GetTreeCtrl()->EnsureVisible( new_id );
     m_dirCtrl->GetTreeCtrl()->EditLabel( new_id );
 }
-
-#endif // wxUSE_DIRDLG

@@ -57,11 +57,9 @@
 #include  <stdlib.h>
 #include  <time.h>
 
-#if defined(__WXMSW__)
+#ifdef  __WXMSW__
   #include  "wx/msw/private.h"      // includes windows.h for OutputDebugString
-#endif
-
-#if !defined(__WXMSW__) || defined(__WXMICROWIN__)
+#else   //Unix
   #include  <signal.h>
 #endif  //Win/Unix
 
@@ -515,7 +513,7 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 
     // under Windows, programs usually don't have stderr at all, so show the
     // messages also under debugger - unless it's a console program
-#if defined(__WXMSW__) && wxUSE_GUI && !defined(__WXMICROWIN__)
+#if defined(__WXMSW__) && wxUSE_GUI
     str += wxT("\r\n") ;
     OutputDebugString(str.c_str());
 #endif // MSW
@@ -641,7 +639,7 @@ static void wxLogWrap(FILE *f, const char *pszPrefix, const char *psz)
 // get error code from syste
 unsigned long wxSysErrorCode()
 {
-#if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef  __WXMSW__
 #ifdef  __WIN32__
     return ::GetLastError();
 #else   //WIN16
@@ -659,7 +657,7 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
     if ( nErrCode == 0 )
         nErrCode = wxSysErrorCode();
 
-#if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef  __WXMSW__
 #ifdef  __WIN32__
     static wxChar s_szBuf[LOG_BUFFER_SIZE / 2];
 
@@ -716,7 +714,7 @@ bool wxAssertIsEqual(int x, int y)
 // break into the debugger
 void wxTrap()
 {
-#if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef __WXMSW__
     DebugBreak();
 #elif defined(__WXMAC__)
 #if __powerc
@@ -774,14 +772,14 @@ void wxOnAssert(const wxChar *szFile, int nLine, const wxChar *szMsg)
         // send it to the normal log destination
         wxLogDebug(szBuf);
 
-#if (wxUSE_GUI && wxUSE_MSGDLG) || defined(__WXMSW__)
+#if wxUSE_GUI || defined(__WXMSW__)
         // this message is intentionally not translated - it is for
         // developpers only
         wxStrcat(szBuf, wxT("\nDo you want to stop the program?\nYou can also choose [Cancel] to suppress further warnings."));
 
         // use the native message box if available: this is more robust than
         // using our own
-#if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef __WXMSW__
         switch ( ::MessageBox(NULL, szBuf, _T("Debug"),
                               MB_YESNOCANCEL | MB_ICONSTOP ) ) {
             case IDYES:

@@ -1002,7 +1002,7 @@ wxConcatFiles (const wxString& file1, const wxString& file2, const wxString& fil
 bool
 wxCopyFile (const wxString& file1, const wxString& file2, bool overwrite)
 {
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__)
     // CopyFile() copies file attributes and modification time too, so use it
     // instead of our code if available
     //
@@ -1129,7 +1129,7 @@ bool wxMkdir(const wxString& dir, int perm)
 
     // assume mkdir() has 2 args on non Windows-OS/2 platforms and on Windows too
     // for the GNU compiler
-#if (!(defined(__WXMSW__) || defined(__WXPM__))) || (defined(__GNUWIN32__) && !defined(__MINGW32__)) || defined(__WXWINE__) || defined(__WXMICROWIN__)
+#if (!(defined(__WXMSW__) || defined(__WXPM__))) || (defined(__GNUWIN32__) && !defined(__MINGW32__)) || defined(__WXWINE__)
     if ( mkdir(wxFNCONV(dirname), perm) != 0 )
 #elif defined(__WXPM__)
     if (::DosCreateDir((PSZ)dirname, NULL) != 0) // enhance for EAB's??
@@ -1197,7 +1197,7 @@ bool wxPathExists(const wxChar *pszPathName)
 // Get a temporary filename, opening and closing the file.
 wxChar *wxGetTempFileName(const wxString& prefix, wxChar *buf)
 {
-#if defined(__WINDOWS__) && !defined(__WXMICROWIN__)
+#ifdef __WINDOWS__
 
 #ifndef        __WIN32__
   wxChar tmp[144];
@@ -1816,7 +1816,7 @@ bool wxSetWorkingDirectory(const wxString& d)
 // On non-Windows platform, probably just return the empty string.
 wxString wxGetOSDirectory()
 {
-#if defined(__WINDOWS__) && !defined(__WXMICROWIN__)
+#ifdef __WINDOWS__
     wxChar buf[256];
     GetWindowsDirectory(buf, 256);
     return wxString(buf);

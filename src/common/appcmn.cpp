@@ -36,59 +36,9 @@
 #include "wx/thread.h"
 #include "wx/confbase.h"
 
-#ifdef __WXUNIVERSAL__
-    #include "wx/univ/theme.h"
-#endif // __WXUNIVERSAL__
-
 // ===========================================================================
 // implementation
 // ===========================================================================
-
-wxAppBase::wxAppBase()
-{
-    wxTheApp = (wxApp *)this;
-
-    // VZ: what's this? is it obsolete?
-    m_wantDebugOutput = FALSE;
-
-#if wxUSE_GUI
-    m_topWindow = (wxWindow *)NULL;
-    m_useBestVisual = FALSE;
-    m_exitOnFrameDelete = TRUE;
-    m_isActive = TRUE;
-#endif // wxUSE_GUI
-}
-
-// ----------------------------------------------------------------------------
-// initialization and termination
-// ----------------------------------------------------------------------------
-
-#if wxUSE_GUI
-bool wxAppBase::OnInitGui()
-{
-#ifdef __WXUNIVERSAL__
-    if ( !wxTheme::CreateDefault() )
-        return FALSE;
-#endif // __WXUNIVERSAL__
-
-    return TRUE;
-}
-#endif // wxUSE_GUI
-
-int wxAppBase::OnExit()
-{
-#if wxUSE_CONFIG
-    // delete the config object if any (don't use Get() here, but Set()
-    // because Get() could create a new config object)
-    delete wxConfigBase::Set((wxConfigBase *) NULL);
-#endif // wxUSE_CONFIG
-
-#ifdef __WXUNIVERSAL__
-    delete wxTheme::Set(NULL);
-#endif // __WXUNIVERSAL__
-
-    return 0;
-}
 
 // ---------------------------------------------------------------------------
 // wxAppBase
@@ -124,15 +74,13 @@ void wxAppBase::ProcessPendingEvents()
     wxLEAVE_CRIT_SECT( *wxPendingEventsLocker );
 }
 
-// ----------------------------------------------------------------------------
-// misc
-// ----------------------------------------------------------------------------
-
-#if wxUSE_GUI
-
-void wxAppBase::SetActive(bool active, wxWindow * WXUNUSED(lastFocus))
+int wxAppBase::OnExit()
 {
-    m_isActive = active;
-}
+#if wxUSE_CONFIG
+    // delete the config object if any (don't use Get() here, but Set()
+    // because Get() could create a new config object)
+    delete wxConfigBase::Set((wxConfigBase *) NULL);
+#endif // wxUSE_CONFIG
 
-#endif // wxUSE_GUI
+    return 0;
+}
