@@ -104,15 +104,15 @@ at once by setting the environment variable WXTHEME to the theme name.
 5. Documentation and support
 ----------------------------
 
-Please note that wxUniversal is not as mature as the other wxWindows ports
+ Please note that wxUniversal is not as mature as the other wxWindows ports
 and is currently officially in alpha stage. In particular, it is not really
 intended for the end users but rather for developers at the current stage and
 this is why we don't provide any binaries for it.
 
-There is no separate documentation for wxUniversal, please refer to wxWindows
+ There is no separate documentation for wxUniversal, please refer to wxWindows
 documentation instead.
 
-Support for wxUniversal is available from the same places as for wxWindows
+ Support for wxUniversal is available from the same places as for wxWindows
 itself, namely:
 
 * Usenet newsgroup comp.soft-sys.wxwindows
@@ -127,6 +127,6 @@ itself, namely:
                                                                  Vadim Zeitlin
 
 
-This file is accurate for the version 2.3.4 of wxUniversal. It was last
+This file is accurate for the version 2.4.0 of wxUniversal. It was last
 modified on Apr 15, 2002.
 

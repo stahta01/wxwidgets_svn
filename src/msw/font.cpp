@@ -839,7 +839,7 @@ void wxFont::SetEncoding(wxFontEncoding encoding)
     RealizeResource();
 }
 
-void wxFont::DoSetNativeFontInfo(const wxNativeFontInfo& info)
+void wxFont::SetNativeFontInfo(const wxNativeFontInfo& info)
 {
     Unshare();
 

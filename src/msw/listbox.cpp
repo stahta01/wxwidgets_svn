@@ -36,6 +36,12 @@
 
 #include <windowsx.h>
 
+#ifdef __WXWINE__
+  #if defined(GetWindowStyle)
+    #undef GetWindowStyle
+  #endif
+#endif
+
 #include "wx/dynarray.h"
 #include "wx/log.h"
 
@@ -49,7 +55,34 @@
     #endif
 #endif
 
-IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
+#ifdef __WXWINE__
+  #ifndef ListBox_SetItemData
+    #define ListBox_SetItemData(hwndCtl, index, data) \
+      ((int)(DWORD)SendMessage((hwndCtl), LB_SETITEMDATA, (WPARAM)(int)(index), (LPARAM)(data)))
+  #endif
+  #ifndef ListBox_GetHorizontalExtent
+    #define ListBox_GetHorizontalExtent(hwndCtl) \
+      ((int)(DWORD)SendMessage((hwndCtl), LB_GETHORIZONTALEXTENT, 0L, 0L))
+  #endif
+  #ifndef ListBox_GetSelCount
+    #define ListBox_GetSelCount(hwndCtl) \
+      ((int)(DWORD)SendMessage((hwndCtl), LB_GETSELCOUNT, 0L, 0L))
+  #endif
+  #ifndef ListBox_GetSelItems
+    #define ListBox_GetSelItems(hwndCtl, cItems, lpItems) \
+      ((int)(DWORD)SendMessage((hwndCtl), LB_GETSELITEMS, (WPARAM)(int)(cItems), (LPARAM)(int *)(lpItems)))
+  #endif
+  #ifndef ListBox_GetTextLen
+    #define ListBox_GetTextLen(hwndCtl, index) \
+      ((int)(DWORD)SendMessage((hwndCtl), LB_GETTEXTLEN, (WPARAM)(int)(index), 0L))
+  #endif
+  #ifndef ListBox_GetText
+    #define ListBox_GetText(hwndCtl, index, lpszBuffer) \
+      ((int)(DWORD)SendMessage((hwndCtl), LB_GETTEXT, (WPARAM)(int)(index), (LPARAM)(LPCTSTR)(lpszBuffer)))
+  #endif
+#endif
+
+    IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 
 // ============================================================================
 // list box item declaration and implementation
@@ -675,17 +708,20 @@ bool wxListBox::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
     wxCommandEvent event(evtType, m_windowId);
     event.SetEventObject( this );
 
-    // retrieve the affected item
-    int n = SendMessage(GetHwnd(), LB_GETCARETINDEX, 0, 0);
-    if ( n != LB_ERR )
+    wxArrayInt aSelections;
+    int n, count = GetSelections(aSelections);
+    if ( count > 0 )
     {
+        n = aSelections[0];
         if ( HasClientObjectData() )
             event.SetClientObject( GetClientObject(n) );
         else if ( HasClientUntypedData() )
             event.SetClientData( GetClientData(n) );
-
         event.SetString( GetString(n) );
-        event.SetExtraLong( HasMultipleSelection() ? IsSelected(n) : TRUE );
+    }
+    else
+    {
+        n = -1;
     }
 
     event.m_commandInt = n;

@@ -39,17 +39,25 @@
 
 #include "wx/msw/private.h"         // includes <windows.h>
 
-// for some compilers, the entire ole2.h must be included, not only oleauto.h
-#if wxUSE_NORLANDER_HEADERS || defined(__WATCOMC__)
+#if wxUSE_NORLANDER_HEADERS
   #include <ole2.h>
 #endif
-
 #include <oleauto.h>
+
+#ifndef __WIN32__
+  #include <ole2.h>
+  #include <olestd.h>
+#endif
+
 #include <shlobj.h>
 
 #include "wx/msw/ole/oleutils.h"
 
 #include "wx/msw/dib.h"
+
+#ifdef __WXWINE__
+#define LPDROPFILES DROPFILES*
+#endif
 
 #ifndef CFSTR_SHELLURL
 #define CFSTR_SHELLURL _T("UniformResourceLocator")
@@ -87,8 +95,6 @@ private:
     CLIPFORMAT *m_formats;  // formats we can provide data in
     ULONG       m_nCount,   // number of formats we support
                 m_nCurrent; // current enum position
-
-    DECLARE_NO_COPY_CLASS(wxIEnumFORMATETC)
 };
 
 // ----------------------------------------------------------------------------
@@ -123,8 +129,6 @@ private:
     wxDataObject *m_pDataObject;      // pointer to C++ class we belong to
 
     bool m_mustDelete;
-
-    DECLARE_NO_COPY_CLASS(wxIDataObject)
 };
 
 // ============================================================================
@@ -470,7 +474,7 @@ STDMETHODIMP wxIDataObject::SetData(FORMATETC *pformatetc,
     || ( defined(__MWERKS__) && defined(__WXMSW__) )
                         size = std::wcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
 #else
-                        size = wxWcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
+                        size = ::wxWcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
 #endif
                         break;
 #endif

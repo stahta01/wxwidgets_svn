@@ -100,35 +100,32 @@ public:
 
 #define M_BITMAPDATA ((wxBitmapRefData *)m_refData)
 
-class WXDLLEXPORT wxBitmapHandler: public wxBitmapHandlerBase
+class WXDLLEXPORT wxBitmapHandler: public wxObject
 {
-public:
-    wxBitmapHandler() : wxBitmapHandlerBase() { }
-
-    virtual bool Create(wxBitmap *bitmap, void *data, long flags,
-                          int width, int height, int depth = 1)
-    {
-        return false;
-    }
-
-    virtual bool LoadFile(wxBitmap *bitmap, const wxString& name, long flags,
-                          int desiredWidth, int desiredHeight)
-    {
-        return false;
-    }
-
-    virtual bool SaveFile(const wxBitmap *bitmap, const wxString& name,
-                          int type, const wxPalette *palette = NULL)
-    {
-        return false;
-    }
-private:
     DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
+public:
+    wxBitmapHandler() { m_name = ""; m_extension = ""; m_type = 0; };
+    
+    virtual bool Create(wxBitmap *bitmap, void *data, long flags, int width, int height, int depth = 1);
+    virtual bool LoadFile(wxBitmap *bitmap, const wxString& name, long flags,
+        int desiredWidth, int desiredHeight);
+    virtual bool SaveFile(wxBitmap *bitmap, const wxString& name, int type, const wxPalette *palette = NULL);
+    
+    void SetName(const wxString& name) { m_name = name; }
+    void SetExtension(const wxString& ext) { m_extension = ext; }
+    void SetType(long type) { m_type = type; }
+    wxString GetName() const { return m_name; }
+    wxString GetExtension() const { return m_extension; }
+    long GetType() const { return m_type; }
+protected:
+    wxString  m_name;
+    wxString  m_extension;
+    long      m_type;
 };
 
 #define M_BITMAPHANDLERDATA ((wxBitmapRefData *)bitmap->GetRefData())
 
-class WXDLLEXPORT wxBitmap: public wxBitmapBase
+class WXDLLEXPORT wxBitmap: public wxGDIObject
 {
     DECLARE_DYNAMIC_CLASS(wxBitmap)
         
@@ -152,11 +149,10 @@ public:
     wxBitmap(char **data, wxControl* control);
     
     // Load a file or resource
-    wxBitmap(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_XPM);
+    wxBitmap(const wxString& name, int type = wxBITMAP_TYPE_XPM);
     
     // Constructor for generalised creation from data
-    wxBitmap(void *data, wxBitmapType type,
-             int width, int height, int depth = 1);
+    wxBitmap(void *data, long type, int width, int height, int depth = 1);
     
     // If depth is omitted, will create a bitmap compatible with the display
     wxBitmap(int width, int height, int depth = -1);
@@ -167,15 +163,12 @@ public:
     ~wxBitmap();
     
     virtual bool Create(int width, int height, int depth = -1);
-    virtual bool Create(void *data, wxBitmapType type,
-                        int width, int height, int depth = 1);
+    virtual bool Create(void *data, long type, int width, int height, int depth = 1);
     
     wxBitmap GetSubBitmap( const wxRect& rect ) const;
     
-    virtual bool LoadFile(const wxString& name,
-                          wxBitmapType type = wxBITMAP_TYPE_XPM);
-    virtual bool SaveFile(const wxString& name, wxBitmapType type,
-                          const wxPalette *cmap = NULL) const;
+    virtual bool LoadFile(const wxString& name, long type = wxBITMAP_TYPE_XPM);
+    virtual bool SaveFile(const wxString& name, int type, const wxPalette *cmap = NULL);
     
     wxImage ConvertToImage() const;
 
@@ -204,7 +197,16 @@ public:
     bool operator != (const wxBitmap& bitmap) const { return m_refData != bitmap.m_refData; }
     
     // Format handling
+    static wxList& GetHandlers() { return sm_handlers; }
+    static void AddHandler(wxBitmapHandler *handler);
+    static void InsertHandler(wxBitmapHandler *handler);
+    static bool RemoveHandler(const wxString& name);
+    static wxBitmapHandler *FindHandler(const wxString& name);
+    static wxBitmapHandler *FindHandler(const wxString& extension, long bitmapType);
+    static wxBitmapHandler *FindHandler(long bitmapType);
+    
     static void InitStandardHandlers();
+    static void CleanUpHandlers();
     
     // Motif implementation
 public:
@@ -214,6 +216,9 @@ public:
     virtual WXPixmap GetArmPixmap(WXWidget w) ;
     virtual WXPixmap GetInsensPixmap(WXWidget w = (WXWidget) 0) ;
     void SetPixmapNull() { M_BITMAPDATA->m_pixmap = 0; }
+    
+protected:
+    static wxList sm_handlers;
     
 protected:
     bool CreateFromXpm(const char **bits);

@@ -16,40 +16,66 @@
     #pragma interface "cursor.h"
 #endif
 
-#include "wx/msw/gdiimage.h"
+// compatible (even if incorrect) behaviour by default: derive wxCursor from
+// wxBitmap
+#ifndef wxICON_IS_BITMAP
+    #define wxICON_IS_BITMAP 1
+#endif
+
+#if wxICON_IS_BITMAP
+    #include "wx/bitmap.h"
+
+    #define wxCursorRefDataBase   wxBitmapRefData
+    #define wxCursorBase          wxBitmap
+#else
+    #include "wx/msw/gdiimage.h"
+
+    #define wxCursorRefDataBase   wxGDIImageRefData
+    #define wxCursorBase          wxGDIImage
+#endif
 
 class WXDLLEXPORT wxImage;
 
-// Cursor
-class WXDLLEXPORT wxCursor : public wxGDIImage
+class WXDLLEXPORT wxCursorRefData : public wxCursorRefDataBase
 {
 public:
-    // constructors
+    wxCursorRefData();
+    virtual ~wxCursorRefData() { Free(); }
+
+    virtual void Free();
+
+    // for compatibility
+public:
+    bool m_destroyCursor;
+};
+
+// Cursor
+class WXDLLEXPORT wxCursor : public wxCursorBase
+{
+public:
     wxCursor();
+
+    // Copy constructors
     wxCursor(const wxCursor& cursor) { Ref(cursor); }
-    wxCursor(const wxImage& image);
+    wxCursor(const wxImage & image) ;
     wxCursor(const char bits[], int width, int height,
              int hotSpotX = -1, int hotSpotY = -1,
              const char maskBits[] = NULL);
     wxCursor(const wxString& name,
              long flags = wxBITMAP_TYPE_CUR_RESOURCE,
              int hotSpotX = 0, int hotSpotY = 0);
-    wxCursor(int idCursor);
+    wxCursor(int cursor_type);
     virtual ~wxCursor();
 
-    wxCursor& operator=(const wxCursor& cursor)
-        { if (*this == cursor) return (*this); Ref(cursor); return *this; }
+    wxCursor& operator = (const wxCursor& cursor) { if (*this == cursor) return (*this); Ref(cursor); return *this; }
+    bool operator == (const wxCursor& cursor) const { return m_refData == cursor.m_refData; }
+    bool operator != (const wxCursor& cursor) const { return m_refData != cursor.m_refData; }
 
-    bool operator==(const wxCursor& cursor) const;
-    bool operator!=(const wxCursor& cursor) const
-        { return !(*this == cursor); }
-
-    // implementation only
     void SetHCURSOR(WXHCURSOR cursor) { SetHandle((WXHANDLE)cursor); }
     WXHCURSOR GetHCURSOR() const { return (WXHCURSOR)GetHandle(); }
 
 protected:
-    virtual wxGDIImageRefData *CreateData() const;
+    virtual wxGDIImageRefData *CreateData() const { return new wxCursorRefData; }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxCursor)

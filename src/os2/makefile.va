@@ -114,6 +114,7 @@ GENERICOBJS= \
   ..\generic\$D\helphtml.obj \
   ..\generic\$D\imaglist.obj \
   ..\generic\$D\laywin.obj \
+  ..\generic\$D\listctrl.obj \
   ..\generic\$D\logg.obj \
   ..\generic\$D\mdig.obj \
   ..\generic\$D\numdlgg.obj \
@@ -134,6 +135,7 @@ GENERICOBJS= \
   ..\generic\$D\textdlgg.obj \
   ..\generic\$D\tipdlg.obj \
   ..\generic\$D\tipwin.obj \
+  ..\generic\$D\treectlg.obj \
   ..\generic\$D\treelay.obj \
   ..\generic\$D\wizard.obj
 
@@ -159,6 +161,7 @@ GENLIBOBJS= \
   helphtml.obj \
   imaglist.obj \
   laywin.obj \
+  listctrl.obj \
   logg.obj \
   mdig.obj \
   numdlgg.obj \
@@ -179,6 +182,7 @@ GENLIBOBJS= \
   textdlgg.obj \
   tipdlg.obj \
   tipwin.obj \
+  treectlg.obj \
   treelay.obj \
   wizard.obj
 
@@ -506,7 +510,6 @@ OS2OBJS = \
   ..\os2\$D\iniconf.obj \
   ..\os2\$D\joystick.obj \
   ..\os2\$D\listbox.obj \
-  ..\os2\$D\listctrl.obj \
   ..\os2\$D\main.obj \
   ..\os2\$D\menu.obj \
   ..\os2\$D\menuitem.obj \
@@ -540,7 +543,6 @@ OS2OBJS = \
   ..\os2\$D\toolbar.obj \
   ..\os2\$D\tooltip.obj \
   ..\os2\$D\toplevel.obj \
-  ..\os2\$D\treectrl.obj \
   ..\os2\$D\utils.obj \
   ..\os2\$D\utilsexc.obj \
   ..\os2\$D\wave.obj \
@@ -587,14 +589,13 @@ OS2LIBOBJS1 = \
   iniconf.obj \
   joystick.obj \
   listbox.obj \
-  listctrl.obj \
   main.obj \
   menu.obj \
   menuitem.obj \
-  metafile.obj
+  metafile.obj \
+  mimetype.obj
 
 OS2LIBOBJS2 = \
-  mimetype.obj \
   msgdlg.obj \
   nativdlg.obj \
   notebook.obj \
@@ -623,7 +624,6 @@ OS2LIBOBJS2 = \
   toolbar.obj \
   tooltip.obj \
   toplevel.obj \
-  treectrl.obj \
   utils.obj \
   utilsexc.obj \
   wave.obj \
@@ -856,6 +856,7 @@ $(GENLIBOBJS):
   copy ..\generic\$D\helphtml.obj
   copy ..\generic\$D\imaglist.obj
   copy ..\generic\$D\laywin.obj
+  copy ..\generic\$D\listctrl.obj
   copy ..\generic\$D\logg.obj
   copy ..\generic\$D\mdig.obj
   copy ..\generic\$D\numdlgg.obj
@@ -876,6 +877,7 @@ $(GENLIBOBJS):
   copy ..\generic\$D\textdlgg.obj
   copy ..\generic\$D\tipdlg.obj
   copy ..\generic\$D\tipwin.obj
+  copy ..\generic\$D\treectlg.obj
   copy ..\generic\$D\treelay.obj
   copy ..\generic\$D\wizard.obj
 
@@ -942,14 +944,13 @@ $(OS2LIBOBJS1):
   copy ..\os2\$D\iniconf.obj
   copy ..\os2\$D\joystick.obj
   copy ..\os2\$D\listbox.obj
-  copy ..\os2\$D\listctrl.obj
   copy ..\os2\$D\main.obj
   copy ..\os2\$D\menu.obj
   copy ..\os2\$D\menuitem.obj
   copy ..\os2\$D\metafile.obj
+  copy ..\os2\$D\mimetype.obj
 
 $(OS2LIBOBJS2):
-  copy ..\os2\$D\mimetype.obj
   copy ..\os2\$D\msgdlg.obj
   copy ..\os2\$D\nativdlg.obj
   copy ..\os2\$D\notebook.obj
@@ -978,7 +979,6 @@ $(OS2LIBOBJS2):
   copy ..\os2\$D\toolbar.obj
   copy ..\os2\$D\tooltip.obj
   copy ..\os2\$D\toplevel.obj
-  copy ..\os2\$D\treectrl.obj
   copy ..\os2\$D\utils.obj
   copy ..\os2\$D\utilsexc.obj
   copy ..\os2\$D\wave.obj
@@ -1113,15 +1113,15 @@ $(WXDIR)\lib\wx.lib: \
 !else
 
 # Update the dynamic link library
-$(WXDIR)\lib\wx25.dll: $(OBJECTS)
+$(WXDIR)\lib\wx24.dll: $(OBJECTS)
     icc @<<
     /B" $(LINKFLAGS)" /Fe$@
     $(LIBS)
     $(DUMMYOBJ)
     $(OBJECTS)
-    $(WXDIR)\src\os2\wx25.def
+    $(WXDIR)\src\os2\wx24.def
 <<
-    implib $(WXDIR)\lib\wx25.lib $(WXDIR)\src\os2\wx25.def
+    implib $(WXDIR)\lib\wx24.lib $(WXDIR)\src\os2\wx24.def
 
 !endif
 
@@ -1200,7 +1200,7 @@ clean:  $(PERIPH_CLEAN_TARGET) clean_png clean_zlib clean_jpeg clean_tiff
         rd      ..\os2\$D
         del      $(LIBTARGET)
 !if "$(WXMAKINGDLL)" == "1"
-        erase /N ..\..\lib\wx25.lib
+        erase /N ..\..\lib\wx24.lib
 !endif
         erase /N $(COMMDIR)\y_tab.c
         erase /N $(COMMDIR)\lex_yy.c

@@ -44,23 +44,26 @@
 // Recommended setting: 0 (please update your code instead!)
 #define WXWIN_COMPATIBILITY_2 0
 
-// This setting determines the compatibility with 2.2 API: set it to 1 to
-// enable it but please consider to update your code instead of doing it.
+// This setting determines the compatibility with 2.2 API: set it to 0 to
+// flag all cases of using deprecated functions.
 //
-// Default is 0
+// Default is 1 but please try building your code with 0.
 //
 // Recommended setting: 0 (please update your code)
 #define WXWIN_COMPATIBILITY_2_2 1
 
-// This setting determines the compatibility with 2.2 API: set it to 0 to
-// flag all cases of using deprecated functions.
+// in wxMSW version 2.1.11 and earlier, wxIcon always derives from wxBitmap,
+// but this is very dangerous because you can mistakenly pass an icon instead
+// of a bitmap to a function taking "const wxBitmap&" - which will *not* work
+// because an icon is not a valid bitmap
 //
-// Default is 1 but please try building your code with 0 as the default will
-// change to 0 in the next version and the deprecated functions will disappear
-// in the version after it completely.
+// Starting from 2.1.12, you have the choice under this backwards compatible
+// behaviour (your code will still compile, but probably won't behave as
+// expected!) and not deriving wxIcon class from wxBitmap, but providing a
+// conversion ctor wxBitmap(const wxIcon&) instead.
 //
-// Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 1
+// Recommended setting: 0
+#define wxICON_IS_BITMAP    0
 
 // Define as 1 for font size to be backward compatible to 1.63 and earlier.
 // 1.64 and later define point sizes to be compatible with Windows.
@@ -587,14 +590,6 @@
 // Recommended setting: 1 (can be safely set to 0, not used by the library)
 #define wxUSE_CARET         1
 
-// Use wxDisplay class: it allows enumerating all displays on a system and
-// working with them.
-//
-// Default is 0 because it isn't yet implemented on all platforms
-//
-// Recommended setting: 1 if you need it, can be safely set to 0 otherwise
-#define wxUSE_DISPLAY       0
-
 // Miscellaneous geometry code: needed for Canvas library
 #define wxUSE_GEOMETRY            1
 
@@ -640,10 +635,6 @@
 
 // wxDC cacheing implementation
 #define wxUSE_DC_CACHEING 1
-
-// Set this to 1 to enable the use of DIB's for wxBitmap to support
-// bitmaps > 16MB on Win95/98/Me.  Set to 0 to use DDB's only.
-#define wxUSE_DIB_FOR_BITMAP 0
 
 // ----------------------------------------------------------------------------
 // common dialogs
@@ -820,14 +811,6 @@
 //
 // Recommended setting: 1
 #define wxUSE_DRAG_AND_DROP 1
-
-// Use wxAccessible for enhanced and customisable accessibility.
-// Depends on wxUSE_OLE.
-//
-// Default is 0.
-//
-// Recommended setting (at present): 0
-#define wxUSE_ACCESSIBILITY 0
 
 // ----------------------------------------------------------------------------
 // miscellaneous settings
@@ -1195,7 +1178,7 @@
 #define wxUSE_DEBUG_NEW_ALWAYS 0
 #endif
 
-#if defined(__WXMSW__) && (defined(__WATCOMC__) && __WATCOMC__ < 1200)
+#if defined(__WXMSW__) && defined(__WATCOMC__)
 /*
 #undef  wxUSE_GLCANVAS
 #define wxUSE_GLCANVAS 0

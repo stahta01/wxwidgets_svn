@@ -552,8 +552,14 @@ void wxTextCtrl::WriteText( const wxString &text )
         wxCharBuffer buffer( wxConvUTF8.cWC2MB( wxConvLocal.cWX2WC( text ) ) );
 #endif
         GtkTextBuffer *text_buffer = gtk_text_view_get_buffer( GTK_TEXT_VIEW(m_text) );
+        
         // TODO: call wahtever is needed to delete the selection
         gtk_text_buffer_insert_at_cursor( text_buffer, buffer, strlen(buffer) );
+        
+        GtkTextIter iter;
+        gtk_text_buffer_get_iter_at_mark( text_buffer, &iter,
+                                         gtk_text_buffer_get_mark (text_buffer, "insert") );
+        gtk_text_view_scroll_to_iter( GTK_TEXT_VIEW(m_text), &iter, 0.0, FALSE, 0.0, 0.0 );
 
 #else // GTK 1.x
         // After cursor movements, gtk_text_get_point() is wrong by one.
@@ -1175,7 +1181,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ((key_event.GetKeyCode() == WXK_RETURN) && (m_windowStyle & wxPROCESS_ENTER))
+    if ((key_event.KeyCode() == WXK_RETURN) && (m_windowStyle & wxPROCESS_ENTER))
     {
         wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
         event.SetEventObject(this);
@@ -1183,7 +1189,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
         if (GetEventHandler()->ProcessEvent(event)) return;
     }
 
-    if ((key_event.GetKeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
+    if ((key_event.KeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
     {
         // This will invoke the dialog default action, such
         // as the clicking the default button.

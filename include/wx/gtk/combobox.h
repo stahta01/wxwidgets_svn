@@ -90,7 +90,6 @@ public:
     int Number() const;
     void SetSelection( int n );
     void SetStringSelection( const wxString &string );
-    void SetString(int n, const wxString &text);
 
     wxString GetValue() const;
     void SetValue(const wxString& value);

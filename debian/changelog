@@ -1,8 +1,11 @@
-wxwindows2.5 (2.5.0) unstable; urgency=low
+wxwindows2.4 (2.4.0.3) unstable; urgency=low
 
-  * New beginnings.  Back to development flavored chaos again.
+  * Changed Conflict to Replaces so people can use 2.4 -dev before all
+    their 2.3 deps are gone.  Closes: #178305
+  * Added wxPy supplied 2.3 distutils to the source package, apparently the
+    standard 2.2 one is now insufficient.  This hopefully Closes: #178457
 
- -- Ron Lee <ron@debian.org>  Thu, 19 Dec 2002 01:08:50 -0800
+ -- Ron Lee <ron@debian.org>  Mon, 27 Jan 2003 17:36:59 -0800
 
 wxwindows2.4 (2.4.0.2) unstable; urgency=low
 

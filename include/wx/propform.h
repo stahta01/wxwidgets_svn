@@ -19,9 +19,6 @@
 #if wxUSE_PROPSHEET
 
 #include "wx/prop.h"
-#include "wx/panel.h"
-
-class WXDLLEXPORT wxPropertyFormView;
 
 ////
 //// Property form classes: for using an existing dialog or panel

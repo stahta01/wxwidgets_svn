@@ -125,7 +125,6 @@ public:
     virtual bool SetSelection(const wxString& value);
     virtual wxControl *GetControl() { return this; }
     virtual void OnShow();
-    virtual wxCoord GetBestWidth() const;
 
 protected:
     // we shouldn't return height too big from here
@@ -301,15 +300,8 @@ wxSize wxComboControl::DoGetBestClientSize() const
 {
     wxSize sizeBtn = m_btn->GetBestSize(),
            sizeText = m_text->GetBestSize();
-    wxCoord widthPopup = 0;
 
-    if (m_popup)
-    {
-        widthPopup = m_popup->GetBestWidth();
-    }
-
-    return wxSize(wxMax(sizeText.x + g_comboMargin + sizeBtn.x, widthPopup), 
-                  wxMax(sizeBtn.y, sizeText.y));
+    return wxSize(sizeText.x + g_comboMargin + sizeBtn.x, wxMax(sizeBtn.y, sizeText.y));
 }
 
 void wxComboControl::DoMoveWindow(int x, int y, int width, int height)
@@ -621,12 +613,6 @@ void wxComboListBox::OnMouseMove(wxMouseEvent& event)
         //      captures the mouse to be able to detect when it must be
         //      dismissed, so don't call Skip()
     }
-}
-
-wxCoord wxComboListBox::GetBestWidth() const
-{
-    wxSize size = wxListBox::GetBestSize();
-    return size.x;
 }
 
 wxSize wxComboListBox::DoGetBestClientSize() const

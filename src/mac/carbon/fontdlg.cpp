@@ -2,12 +2,12 @@
 // Name:        fontdlg.cpp
 // Purpose:     wxFontDialog class. NOTE: you can use the generic class
 //              if you wish, instead of implementing this.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__

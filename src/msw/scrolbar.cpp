@@ -239,7 +239,6 @@ bool wxScrollBar::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
     }
 
     wxScrollEvent event(scrollEvent, m_windowId);
-    event.SetOrientation(IsVertical() ? wxVERTICAL : wxHORIZONTAL);
     event.SetPosition(position);
     event.SetEventObject( this );
 

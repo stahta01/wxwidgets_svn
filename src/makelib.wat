@@ -1,3 +1,7 @@
+#
+# Changelist:	2003-02-25 - Juergen Ulbts - update from wxWindows 2.5.x/HEAD branch
+#
+
 !include $(WXDIR)\src\makewat.env
 
 all: $(OUTPUTDIR) $(LIBTARGET)

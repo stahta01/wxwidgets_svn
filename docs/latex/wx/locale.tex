@@ -45,8 +45,8 @@ No base class
 
 \wxheading{See also}
 
-\helpref{Internationalization overview}{internationalization},\\
-\helpref{Internat sample}{sampleinternat}
+\helpref{I18n overview}{internationalization},\\
+\helpref{i18n sample}{sampleinternat}
 
 \wxheading{Include files}
 
@@ -321,7 +321,7 @@ This is the default constructor and it does nothing to initialize the object:
 
 See \helpref{Init()}{wxlocaleinit} for parameters description.
 
-\func{}{wxLocale}{\param{const char }{*szName}, \param{const char }{*szShort = NULL}, \param{const char }{*szLocale = NULL}, \param{bool }{bLoadDefault = true}, \param{bool }{bConvertEncoding = false}}
+\func{}{wxLocale}{\param{const char }{*szName}, \param{const char }{*szShort = NULL}, \param{const char }{*szLocale = NULL}, \param{bool }{bLoadDefault = TRUE}, \param{bool }{bConvertEncoding = FALSE}}
 
 See \helpref{Init()}{wxlocaleinit} for parameters description.
 
@@ -353,7 +353,7 @@ additional directories to the search path with
 All loaded catalogs will be used for message lookup by GetString() for the
 current locale.
 
-Returns true if catalog was successfully loaded, false otherwise (which might
+Returns TRUE if catalog was successfully loaded, FALSE otherwise (which might
 mean that the catalog is not found or that it isn't in the correct format).
 
 \membersection{wxLocale::AddCatalogLookupPathPrefix}\label{wxlocaleaddcataloglookuppathprefix}
@@ -395,22 +395,6 @@ struct WXDLLEXPORT wxLanguageInfo
 \perlnote{In wxPerl Wx::LanguageInfo has only one method:\par
 Wx::LanguageInfo->new( language, canonicalName, WinLang, WinSubLang, Description )}
 
-\membersection{wxLocale::FindLanguageInfo}{wxlocalefindlanguageinfo}
-
-\constfunc{static wxLanguageInfo *}{FindLanguageInfo}{\param{const wxString\& }{locale}}
-
-This function may be used to find the language description structure for the
-given locale, specified either as a two letter ISO language code (for example,
-"pt"), a language code followed by the country code ("pt\_BR") or a full, human
-readable, language description ("Portuguese-Brazil").
-
-Returns the information for the given language or {\tt NULL} if this language
-is unknown. Note that even if the returned pointer is valid, the caller should
-{\it not} delete it.
-
-\wxheading{See also}
-
-\helpref{GetLanguageInfo}{wxlocalegetlanguageinfo}
 
 \membersection{wxLocale::GetCanonicalName}\label{wxlocalegetcanonicalname}
 
@@ -523,7 +507,7 @@ Returns \helpref{wxLanguage}{wxlanguage} value or
 \func{bool}{Init}{\param{int }{language = wxLANGUAGE\_DEFAULT}, \param{int }{flags =
                           wxLOCALE\_LOAD\_DEFAULT | wxLOCALE\_CONV\_ENCODING}}
 
-\func{bool}{Init}{\param{const char }{*szName}, \param{const char }{*szShort = NULL}, \param{const char }{*szLocale = NULL}, \param{bool }{bLoadDefault = true}, \param{bool }{bConvertEncoding = false}}
+\func{bool}{Init}{\param{const char }{*szName}, \param{const char }{*szShort = NULL}, \param{const char }{*szLocale = NULL}, \param{bool }{bLoadDefault = TRUE}, \param{bool }{bConvertEncoding = FALSE}}
 
 The second form is deprecated, use the first one unless you know what you are
 doing. 
@@ -556,11 +540,11 @@ directory prefix when looking for the message catalog files.}
 \docparam{szLocale}{The parameter for the call to setlocale(). Note that it is
 platform-specific.}
 
-\docparam{bLoadDefault}{May be set to false to prevent loading of the message catalog
+\docparam{bLoadDefault}{May be set to FALSE to prevent loading of the message catalog
 for the given locale containing the translations of standard wxWindows messages.
 This parameter would be rarely used in normal circumstances.}
 
-\docparam{bConvertEncoding}{May be set to true to do automatic conversion of message
+\docparam{bConvertEncoding}{May be set to TRUE to do automatic conversion of message
 catalogs to platform's native encoding. Note that it will do only basic 
 conversion between well-known pair like iso8859-1 and windows-1252 or
 iso8859-2 and windows-1250. 
@@ -575,13 +559,13 @@ Second, this wxLocale object becomes the new current global locale for the
 application and so all subsequent calls to wxGetTranslation() will try to
 translate the messages using the message catalogs for this locale.
 
-Returns true on success or false if the given locale couldn't be set.
+Returns TRUE on success or FALSE if the given locale couldn't be set.
 
 \membersection{wxLocale::IsLoaded}\label{wxlocaleisloaded}
 
 \constfunc{bool}{IsLoaded}{\param{const char* }{domain}}
 
-Check if the given catalog is loaded, and returns true if it is.
+Check if the given catalog is loaded, and returns TRUE if it is.
 
 According to GNU gettext tradition, each catalog
 normally corresponds to 'domain' which is more or less the application name.
@@ -592,5 +576,5 @@ See also: \helpref{AddCatalog}{wxlocaleaddcatalog}
 
 \constfunc{bool}{IsOk}{\void}
 
-Returns true if the locale could be set successfully.
+Returns TRUE if the locale could be set successfully.
 

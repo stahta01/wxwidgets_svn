@@ -17,7 +17,6 @@
 #endif
 
 #include "wx/ctrlsub.h"
-#include "wx/clntdata.h"
 
 WXDLLEXPORT_DATA(extern const char*) wxListBoxNameStr;
 
@@ -39,7 +38,8 @@ public:
         int n = 0, const wxString choices[] = NULL,
         long style = 0,
         const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr)
+        const wxString& name = wxListBoxNameStr):
+        m_clientDataList(wxKEY_INTEGER)
     {
         Create(parent, id, pos, size, n, choices, style, validator, name);
     }
@@ -57,10 +57,10 @@ public:
     // implementation of wxControlWithItems
     virtual int GetCount() const;
     virtual int DoAppend(const wxString& item);
-    virtual void DoSetItemClientData(int n, void* clientData);
-    virtual void* DoGetItemClientData(int n) const;
-    virtual void DoSetItemClientObject(int n, wxClientData* clientData);
-    virtual wxClientData* DoGetItemClientObject(int n) const;
+    virtual void DoSetItemClientData(int n, void* clientData); //
+    virtual void* DoGetItemClientData(int n) const; //
+    virtual void DoSetItemClientObject(int n, wxClientData* clientData); //
+    virtual wxClientData* DoGetItemClientObject(int n) const; //
     virtual int GetSelection() const;
     virtual void Delete(int n);
     virtual int FindString(const wxString& s) const;
@@ -80,6 +80,7 @@ public:
     void Command(wxCommandEvent& event);
     
     // Implementation
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
     virtual void ChangeBackgroundColour();
     virtual void ChangeForegroundColour();
     WXWidget GetTopWidget() const;
@@ -88,14 +89,14 @@ public:
     virtual void DoToggleItem(int item, int x) {};
 #endif
 protected:
-    virtual wxSize DoGetBestSize() const;
-
     int       m_noItems;
     
     // List mapping positions->client data
-    wxClientDataDictionary m_clientDataDict;
-private:
-    void SetSelectionPolicy();
+    wxList    m_clientDataList;
+    
+    virtual void DoSetSize(int x, int y,
+        int width, int height,
+        int sizeFlags = wxSIZE_AUTO);
 };
 
 #endif

@@ -44,8 +44,6 @@ private:
   wxByte* m_waveData;
   int   m_waveLength;
   bool  m_isResource;
-
-    DECLARE_NO_COPY_CLASS(wxWave)
 };
 #endif
 #endif

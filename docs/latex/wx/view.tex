@@ -70,9 +70,9 @@ This function calls wxView::OnActivateView.
 
 \membersection{wxView::Close}
 
-\func{virtual bool}{Close}{\param{bool}{ deleteWindow = true}}
+\func{virtual bool}{Close}{\param{bool}{ deleteWindow = TRUE}}
 
-Closes the view by calling OnClose. If {\it deleteWindow} is true, this function should
+Closes the view by calling OnClose. If {\it deleteWindow} is TRUE, this function should
 delete the window associated with the view.
 
 \membersection{wxView::GetDocument}
@@ -87,14 +87,11 @@ Gets a pointer to the document associated with the view.
 
 Returns a pointer to the document manager instance associated with this view.
 
-\membersection{wxView::GetFrame}\label{wxviewgetframe}
+\membersection{wxView::GetFrame}
 
-\func{wxWindow *}{GetFrame}{\void}
+\func{wxFrame *}{GetFrame}{\void}
 
-Gets the frame associated with the view (if any). Note that this ``frame'' is
-not a wxFrame at all in the generic MDI implementation which uses the notebook
-pages instead of the frames and this is why this method returns a wxWindow and
-not a wxFrame.
+Gets the frame associated with the view (if any).
 
 \membersection{wxView::GetViewName}
 
@@ -126,7 +123,7 @@ to close the associated document. Does not delete the view. The application
 may wish to do some cleaning up operations in this function, {\it if} a
 call to wxDocument::Close succeeded. For example, if your application's
 all share the same window, you need to disassociate the window from the view
-and perhaps clear the window. If {\it deleteWindow} is true, delete the
+and perhaps clear the window. If {\it deleteWindow} is TRUE, delete the
 frame associated with the view.
 
 \membersection{wxView::OnClosingDocument}\label{wxviewonclosingdocument}
@@ -146,7 +143,7 @@ wxView::OnCreate. In its OnCreate member function, the wxView can create a wxDoc
 or a derived class. This wxDocChildFrame provides user interface
 elements to view and/or edit the contents of the wxDocument.
 
-By default, simply returns true. If the function returns false, the
+By default, simply returns TRUE. If the function returns FALSE, the
 view will be deleted.
 
 \membersection{wxView::OnCreatePrintout}
@@ -180,13 +177,10 @@ framework.
 
 \membersection{wxView::SetFrame}
 
-\func{void}{SetFrame}{\param{wxWindow* }{frame}}
+\func{void}{SetFrame}{\param{wxFrame* }{frame}}
 
 Sets the frame associated with this view. The application should call this
 if possible, to tell the view about the frame.
-
-See \helpref{GetFrame}{wxviewgetframe} for the explanation about the mismatch
-between the ``Frame'' in the method name and the type of its parameter.
 
 \membersection{wxView::SetViewName}
 

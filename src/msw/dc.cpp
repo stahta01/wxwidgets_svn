@@ -43,7 +43,6 @@
 #include "wx/sysopt.h"
 #include "wx/dcprint.h"
 #include "wx/module.h"
-#include "wx/dynload.h"
 
 #include <string.h>
 #include <math.h>
@@ -131,30 +130,6 @@ private:
     COLORREF m_colFgOld, m_colBgOld;
 
     bool m_changed;
-};
-
-// this class saves the old stretch blit mode during its life time
-class StretchBltModeChanger
-{
-public:
-    StretchBltModeChanger(HDC hdc, int mode)
-        : m_hdc(hdc)
-    {
-        m_modeOld = ::SetStretchBltMode(m_hdc, mode);
-        if ( !m_modeOld )
-            wxLogLastError(_T("SetStretchBltMode"));
-    }
-
-    ~StretchBltModeChanger()
-    {
-        if ( !::SetStretchBltMode(m_hdc, m_modeOld) )
-            wxLogLastError(_T("SetStretchBltMode"));
-    }
-
-private:
-    const HDC m_hdc;
-
-    int m_modeOld;
 };
 
 // ===========================================================================
@@ -273,12 +248,10 @@ void wxDC::SelectOldObjects(WXHDC dc)
         if (m_oldBitmap)
         {
             ::SelectObject((HDC) dc, (HBITMAP) m_oldBitmap);
-#ifdef __WXDEBUG__
             if (m_selectedBitmap.Ok())
             {
                 m_selectedBitmap.SetSelectedInto(NULL);
             }
-#endif
         }
         m_oldBitmap = 0;
         if (m_oldPen)
@@ -941,65 +914,6 @@ void wxDC::DoDrawBitmap( const wxBitmap &bmp, wxCoord x, wxCoord y, bool useMask
 #if wxUSE_PALETTE
     HPALETTE oldPal = 0;
 #endif // wxUSE_PALETTE
-
-    // do we have AlphaBlend() and company in the headers?
-#ifdef AC_SRC_OVER
-    if ( bmp.HasAlpha() )
-    {
-        // yes, now try to see if we have it during run-time
-
-        typedef BOOL (WINAPI *AlphaBlend_t)(HDC,int,int,int,int,
-                                            HDC,int,int,int,int,
-                                            BLENDFUNCTION);
-
-        // bitmaps can be drawn only from GUI thread so there is no need to
-        // protect this static variable from multiple threads
-        static bool s_triedToLoad = FALSE;
-        static AlphaBlend_t pfnAlphaBlend = NULL;
-        if ( !s_triedToLoad )
-        {
-            s_triedToLoad = TRUE;
-
-            wxDynamicLibrary dll(_T("msimg32.dll"));
-            if ( dll.IsLoaded() )
-            {
-                pfnAlphaBlend = (AlphaBlend_t)dll.GetSymbol(_T("AlphaBlend"));
-                if ( pfnAlphaBlend )
-                {
-                    // we must keep the DLL loaded if we want to be able to
-                    // call AlphaBlend() so just never unload it at all
-                    dll.Detach();
-                }
-            }
-        }
-
-        if ( pfnAlphaBlend )
-        {
-            MemoryHDC hdcMem;
-            SelectInHDC select(hdcMem, GetHbitmapOf(bmp));
-
-#ifndef AC_SRC_ALPHA
-    #define AC_SRC_ALPHA 1
-#endif
-
-            BLENDFUNCTION bf;
-            bf.BlendOp = AC_SRC_OVER;
-            bf.BlendFlags = 0;
-            bf.SourceConstantAlpha = 0xff;
-            bf.AlphaFormat = AC_SRC_ALPHA;
-
-            if ( !pfnAlphaBlend(GetHdc(), x, y, width, height,
-                                hdcMem, 0, 0, width, height,
-                                bf) )
-            {
-                wxLogLastError(_T("AlphaBlend"));
-            }
-
-            return;
-        }
-        //else: AlphaBlend() not available
-    }
-#endif // defined(AC_SRC_OVER)
 
     if ( useMask )
     {
@@ -1894,16 +1808,10 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
         if (wxSystemOptions::GetOptionInt(wxT("no-maskblt")) == 0)
 #endif
         {
-           success = ::MaskBlt
-                       (
-                            GetHdc(),
-                            xdest, ydest, width, height,
-                            GetHdcOf(*source),
-                            xsrc, ysrc,
-                            (HBITMAP)mask->GetMaskBitmap(),
-                            xsrcMask, ysrcMask,
-                            MAKEROP4(dwRop, DSTCOPY)
-                        ) != 0;
+           success = ::MaskBlt(GetHdc(), xdest, ydest, width, height,
+                            GetHdcOf(*source), xsrc, ysrc,
+                            (HBITMAP)mask->GetMaskBitmap(), xsrcMask, ysrcMask,
+                            MAKEROP4(dwRop, DSTCOPY)) != 0;
         }
 
         if ( !success )
@@ -1993,39 +1901,14 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
     }
     else // no mask, just BitBlt() it
     {
-        // use StretchBlt() if available
-        if ( ::GetDeviceCaps(GetHdc(), RASTERCAPS) & RC_STRETCHBLT )
-        {
-            StretchBltModeChanger changeMode(GetHdc(), COLORONCOLOR);
-
-            success = ::StretchBlt
-                        (
-                            GetHdc(),
-                            xdest, ydest, width, height,
-                            GetHdcOf(*source),
-                            xsrc, ysrc, width, height,
-                            dwRop
-                        ) != 0;
-        }
-        else
-        {
-            success = ::BitBlt
-                        (
-                            GetHdc(),
-                            xdest, ydest,
-                            (int)width, (int)height,
-                            GetHdcOf(*source),
-                            xsrc, ysrc,
-                            dwRop
-                        ) != 0;
-        }
-
+        success = ::BitBlt(GetHdc(), xdest, ydest,
+                           (int)width, (int)height,
+                           GetHdcOf(*source), xsrc, ysrc, dwRop) != 0;
         if ( !success )
         {
-            wxLogLastError(wxT("BitBlt/StretchBlt"));
+            wxLogLastError(wxT("BitBlt"));
         }
     }
-
     ::SetTextColor(GetHdc(), old_textground);
     ::SetBkColor(GetHdc(), old_background);
 
@@ -2096,6 +1979,25 @@ void wxDC::SetLogicalScale(double x, double y)
     m_logicalScaleX = x;
     m_logicalScaleY = y;
 }
+
+#if WXWIN_COMPATIBILITY
+void wxDC::DoGetTextExtent(const wxString& string, float *x, float *y,
+                         float *descent, float *externalLeading,
+                         wxFont *theFont, bool use16bit) const
+{
+#ifdef __WXMICROWIN__
+    if (!GetHDC()) return;
+#endif
+
+    wxCoord x1, y1, descent1, externalLeading1;
+    GetTextExtent(string, & x1, & y1, & descent1, & externalLeading1, theFont, use16bit);
+    *x = x1; *y = y1;
+    if (descent)
+        *descent = descent1;
+    if (externalLeading)
+        *externalLeading = externalLeading1;
+}
+#endif
 
 #if wxUSE_DC_CACHEING
 

@@ -35,7 +35,6 @@
 #include "wx/gifdecod.h"
 #include "wx/dynarray.h"
 #include "wx/log.h"
-#include "wx/artprov.h"
 
 #include <math.h>
 #include <float.h>
@@ -304,8 +303,6 @@ private:
     double              m_scale;
     wxHtmlImageMapCell *m_imageMap;
     wxString            m_mapName;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlImageCell)
 };
 
 #if wxUSE_GIF && wxUSE_TIMER
@@ -320,16 +317,55 @@ class wxGIFTimer : public wxTimer
 
     private:
         wxHtmlImageCell *m_cell;
-
-    DECLARE_NO_COPY_CLASS(wxGIFTimer)
 };
 #endif
 
 
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlImageCell
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
+/* XPM */
+static const char * broken_image_xpm[] = {
+"29 31 7 1",
+"   c None",
+".  c #808080",
+"+  c #FFFFFF",
+"@  c #C0C0C0",
+"#  c #000000",
+"$  c #333366",
+"%  c #B2B2B2",
+".....................        ",
+".+++++++++++++++++++..       ",
+".+++++++++++++++++++.@.      ",
+".++@@@@@@@@@@@@@@@@@.+@.     ",
+".++@@@@@@@@@@@@@@@@@.++@.    ",
+".++@@@@@.@@@@.@@@@@@.+++@.   ",
+".++@@@@@@@@@@@@@@@@@.++++@.  ",
+".++@@@@@@@@@@@@@@@@@.+++++@. ",
+".++@@.@@@@@@@@@@.@@@######## ",
+".++@@@@@@@@@@@@@@@@@@$$$$$$#.",
+".######@@@@@@@@@@@@@@@.....#.",
+"       ###@@@@@@@@@@@@@@@++#.",
+"          #####@@@@@@@@@@++#.",
+"              #@.@@@@@@@@++#.",
+"..             ###@@@@@@@++#.",
+".+....            #@@@@@@++#.",
+".++@@@...          ####@@++#.",
+".++@@@@@@..            #####.",
+".++@@@@@@@@...               ",
+".++@@@@@@%%%%@.              ",
+".++@@@@@@%%%%@@....          ",
+".++@@@@@@%%%%@@@@@@....      ",
+".++@@@@@@%%%%@@@@@@@@@@....  ",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++++++++++++++++++++++++++#.",
+".++++++++++++++++++++++++++#.",
+"############################."};
 
 wxHtmlImageCell::wxHtmlImageCell(wxWindow *window, wxFSFile *input,
                                  int w, int h, double scale, int align,
@@ -411,8 +447,7 @@ wxHtmlImageCell::wxHtmlImageCell(wxWindow *window, wxFSFile *input,
                 if ( m_bmpW == -1 ) m_bmpW = 31;
                 if ( m_bmpH == -1 ) m_bmpH = 33;
             }
-            m_bitmap = 
-                new wxBitmap(wxArtProvider::GetBitmap(wxART_MISSING_IMAGE));
+            m_bitmap = new wxBitmap(broken_image_xpm);
         }
     }
     //else: ignore the 0-sized images used sometimes on the Web pages

@@ -392,7 +392,6 @@ ALL_HEADERS = \
 		imagtiff.h \
 		imagxpm.h \
 		intl.h \
-		iosfwrap.h \
 		ioswrap.h \
 		ipc.h \
 		ipcbase.h \
@@ -843,7 +842,15 @@ GENERICOBJS = \
 		wizard.o
 
 GUIOBJS = \
-		MoreFilesX.o \
+		DirectoryCopy.o \
+		FSpCompat.o \
+		FileCopy.o \
+		FullPath.o \
+		IterateDirectory.o \
+		MoreDesktopMgr.o \
+		MoreFiles.o \
+		MoreFilesExtras.o \
+		Search.o \
 		accel.o \
 		aga.o \
 		app.o \

@@ -33,7 +33,7 @@ public:
     ~wxMimeTypesManagerImpl();
 
     // load all data into memory - done when it is needed for the first time
-    void Initialize(int mailcapStyles = wxMAILCAP_ALL,
+    void Initialize(int mailcapStyles = wxMAILCAP_STANDARD,
                     const wxString& extraDir = wxEmptyString);
 
     // and delete the data here
@@ -98,11 +98,9 @@ private:
     wxString GetCommand(const wxString &verb, size_t nIndex) const;
 
     // read Gnome files
-    void LoadGnomeDataFromKeyFile(const wxString& filename,
-                                  const wxArrayString& dirs);
+    void LoadGnomeDataFromKeyFile(const wxString& filename);
     void LoadGnomeMimeTypesFromMimeFile(const wxString& filename);
-    void LoadGnomeMimeFilesFromDir(const wxString& dirbase,
-                                   const wxArrayString& dirs);
+    void LoadGnomeMimeFilesFromDir(const wxString& dirbase);
     void GetGnomeMimeInfo(const wxString& sExtraDir);
 
     // write gnome files

@@ -996,6 +996,10 @@
 #  undef wxUSE_TAB_DIALOG
 #  define wxUSE_TAB_DIALOG 1
 #endif
+#if defined(__WXMOTIF__) && wxUSE_TOGGLEBTN
+#  undef wxUSE_TOGGLEBTN
+#  define wxUSE_TOGGLEBTN 0
+#endif
 
 /* wxMGL-specific dependencies */
 #ifdef __WXMGL__
@@ -1043,15 +1047,6 @@
 #           define wxUSE_COMBOBOX 1
 #       endif
 #   endif
-
-#   if !wxUSE_DATETIME
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "wxCalendarCtrl requires wxUSE_DATETIME"
-#       else
-#           undef wxUSE_DATETIME
-#           define wxUSE_DATETIME 1
-#       endif
-#   endif
 #endif /* wxUSE_CALENDARCTRL */
 
 #if wxUSE_CHECKLISTBOX
@@ -1082,26 +1077,6 @@
 #   endif
 #endif /* wxUSE_WXHTML_HELP */
 
-#if wxUSE_DOC_VIEW_ARCHITECTURE
-#   if !wxUSE_MENUS
-#        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "DocView requires wxUSE_MENUS"
-#        else
-#            undef wxUSE_MENUS
-#            define wxUSE_MENUS 1
-#        endif
-#   endif
-
-#   if !wxUSE_STREAMS && !wxUSE_STD_IOSTREAM
-#        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "DocView requires wxUSE_STREAMS or wxUSE_STD_IOSTREAM"
-#        else
-#            undef wxUSE_STREAMS
-#            define wxUSE_STREAMS 1
-#        endif
-#   endif
-#endif /* wxUSE_DOC_VIEW_ARCHITECTURE */
-
 #if wxUSE_PRINTING_ARCHITECTURE
 #   if !wxUSE_COMBOBOX
 #       ifdef wxABORT_ON_CONFIG_ERROR
@@ -1111,27 +1086,18 @@
 #           define wxUSE_COMBOBOX 1
 #       endif
 #   endif
-
-#   if !wxUSE_DOC_VIEW_ARCHITECTURE
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "Print architecture requires wxUSE_DOC_VIEW_ARCHITECTURE"
-#       else
-#           undef wxUSE_DOC_VIEW_ARCHITECTURE
-#           define wxUSE_DOC_VIEW_ARCHITECTURE 1
-#       endif
-#   endif
 #endif /* wxUSE_PRINTING_ARCHITECTURE */
 
-#if wxUSE_MDI_ARCHITECTURE
-#   if !wxUSE_DOC_VIEW_ARCHITECTURE
+#if wxUSE_DOC_VIEW_ARCHITECTURE
+#   if !wxUSE_MENUS
 #        ifdef wxABORT_ON_CONFIG_ERROR
-#            error "MDI requires wxUSE_DOC_VIEW_ARCHITECTURE"
+#            error "DocView requires wxUSE_MENUS"
 #        else
-#            undef wxUSE_DOC_VIEW_ARCHITECTURE
-#            define wxUSE_DOC_VIEW_ARCHITECTURE 1
+#            undef wxUSE_MENUS
+#            define wxUSE_MENUS 1
 #        endif
 #   endif
-#endif /* wxUSE_MDI_ARCHITECTURE */
+#endif /* wxUSE_DOC_VIEW_ARCHITECTURE */
 
 #if !wxUSE_FILEDLG
 #   if wxUSE_DOC_VIEW_ARCHITECTURE || wxUSE_WXHTML_HELP

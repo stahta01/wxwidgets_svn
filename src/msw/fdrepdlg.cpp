@@ -37,7 +37,7 @@
 
 #include "wx/msw/private.h"
 
-#if !defined(__WIN32__) || defined(__SALFORDC__)
+#if !defined(__WIN32__) || defined(__SALFORDC__) || defined(__WXWINE__)
     #include <commdlg.h>
 #endif
 
@@ -102,8 +102,6 @@ private:
 
     // registered Message for Dialog
     static UINT ms_msgFindDialog;
-
-    DECLARE_NO_COPY_CLASS(wxFindReplaceDialogImpl)
 };
 
 UINT wxFindReplaceDialogImpl::ms_msgFindDialog = 0;

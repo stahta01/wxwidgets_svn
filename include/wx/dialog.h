@@ -20,7 +20,13 @@
 #include "wx/containr.h"
 #include "wx/toplevel.h"
 
+// FIXME - temporary hack in absence of wxTLW !!
+#ifndef wxTopLevelWindowNative
+#include "wx/panel.h"
+class WXDLLEXPORT wxDialogBase : public wxPanel
+#else
 class WXDLLEXPORT wxDialogBase : public wxTopLevelWindow
+#endif
 {
 public:
     wxDialogBase() { Init(); }
@@ -48,8 +54,11 @@ protected:
     // the return code from modal dialog
     int m_returnCode;
 
+    // FIXME - temporary hack in absence of wxTLW !!
+#ifdef wxTopLevelWindowNative
     DECLARE_EVENT_TABLE()
     WX_DECLARE_CONTROL_CONTAINER();
+#endif
 };
 
 
@@ -66,6 +75,8 @@ protected:
         #include "wx/mac/dialog.h"
     #elif defined(__WXPM__)
         #include "wx/os2/dialog.h"
+    #elif defined(__WXSTUBS__)
+        #include "wx/stubs/dialog.h"
     #endif
 #endif
 

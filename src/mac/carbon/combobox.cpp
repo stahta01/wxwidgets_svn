@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        combobox.cpp
 // Purpose:     wxComboBox class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +60,7 @@ public:
 protected:
     void OnChar( wxKeyEvent& event )
     {
-        if ( event.GetKeyCode() == WXK_RETURN )
+        if ( event.KeyCode() == WXK_RETURN )
         {
             wxString value = GetValue();
 
@@ -96,7 +96,7 @@ protected:
 
                 wxWindow *parent = GetParent();
                 while( parent && !parent->IsTopLevel() && parent->GetDefaultItem() == NULL ) {
-                    parent = parent->GetParent() ;
+                  parent = parent->GetParent() ;
                 }
                 if ( parent && parent->GetDefaultItem() )
                 {
@@ -205,7 +205,7 @@ void wxComboBox::DoMoveWindow(int x, int y, int width, int height) {
     }
     else
     {
-        wxCoord wText = width - POPUPWIDTH - MARGIN;
+        wxCoord wText = width - POPUPWIDTH - MARGIN ;
         m_text->SetSize(0, 0, wText, height);
         m_choice->SetSize(0 + wText + MARGIN, 0, POPUPWIDTH, -1);
     }    
@@ -314,9 +314,9 @@ void wxComboBox::SetValue(const wxString& value)
     int s = FindString (value);
     if (s == wxNOT_FOUND && !HasFlag(wxCB_READONLY) )
     {
-        m_choice->Append(value) ;
+    	m_choice->Append(value) ;
     }
-    SetStringSelection( value ) ;
+	SetStringSelection( value ) ;
 }
 
 // Clipboard operations
@@ -471,7 +471,7 @@ bool wxComboBox::SetStringSelection(const wxString& sel)
         return FALSE;
 }
 
-void wxComboBox::MacHandleControlClick( WXWidget WXUNUSED(control) , wxInt16 WXUNUSED(controlpart) ) 
+void wxComboBox::MacHandleControlClick( WXWidget control , wxInt16 controlpart ) 
 {
     wxCommandEvent event(wxEVT_COMMAND_COMBOBOX_SELECTED, m_windowId );
     event.SetInt(GetSelection());

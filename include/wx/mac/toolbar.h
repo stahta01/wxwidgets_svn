@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        toolbar.h
 // Purpose:     wxToolBar class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TOOLBAR_H_
@@ -61,11 +61,11 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
 
   // Add all the buttons
 
-    virtual void MacHandleControlClick( WXWidget control , short controlpart ) ;
-    virtual wxString MacGetToolTipString( wxPoint &where ) ;
-    void OnPaint(wxPaintEvent& event) ;
-    void OnMouse(wxMouseEvent& event) ;
-    virtual void MacSuperChangedPosition() ;
+	virtual void MacHandleControlClick( WXWidget control , short controlpart ) ;
+	virtual wxString MacGetToolTipString( wxPoint &where ) ;
+	void OnPaint(wxPaintEvent& event) ;
+	void OnMouse(wxMouseEvent& event) ;
+	virtual void MacSuperChangedPosition() ;
 protected:
     // common part of all ctors
     void Init();
@@ -88,9 +88,9 @@ protected:
                                           const wxString& longHelp);
     virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
-    wxArrayPtrVoid    m_macToolHandles ;
+	wxArrayPtrVoid	m_macToolHandles ;
 
-    DECLARE_EVENT_TABLE()
+	DECLARE_EVENT_TABLE()
 };
 
 #endif // wxUSE_TOOLBAR
