@@ -515,6 +515,7 @@ OS2OBJS = \
   ..\os2\$D\menuitem.obj \
   ..\os2\$D\metafile.obj \
   ..\os2\$D\mimetype.obj \
+  ..\os2\$D\minifram.obj \
   ..\os2\$D\msgdlg.obj \
   ..\os2\$D\nativdlg.obj \
   ..\os2\$D\notebook.obj \
@@ -596,6 +597,7 @@ OS2LIBOBJS1 = \
   mimetype.obj
 
 OS2LIBOBJS2 = \
+  minifram.obj \
   msgdlg.obj \
   nativdlg.obj \
   notebook.obj \
@@ -860,7 +862,6 @@ $(GENLIBOBJS):
   copy ..\generic\$D\laywin.obj
   copy ..\generic\$D\listctrl.obj
   copy ..\generic\$D\logg.obj
-  copy ..\generic\$D\mdig.obj
   copy ..\generic\$D\numdlgg.obj
   copy ..\generic\$D\panelg.obj
   copy ..\generic\$D\printps.obj
@@ -954,6 +955,7 @@ $(OS2LIBOBJS1):
   copy ..\os2\$D\mimetype.obj
 
 $(OS2LIBOBJS2):
+  copy ..\os2\$D\minifram.obj
   copy ..\os2\$D\msgdlg.obj
   copy ..\os2\$D\nativdlg.obj
   copy ..\os2\$D\notebook.obj
