@@ -143,11 +143,7 @@ wxMenu *MyTaskBarIcon::CreatePopupMenu()
     return menu;
 }
 
-#if WXWIN_COMPATIBILITY_2_4
-void MyTaskBarIcon::OnLButtonDClick(wxEvent&)
-#else
 void MyTaskBarIcon::OnLButtonDClick(wxTaskBarIconEvent&)
-#endif
 {
     dialog->Show(true);
 }

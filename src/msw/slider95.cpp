@@ -88,11 +88,11 @@ wxBEGIN_PROPERTIES_TABLE(wxSlider95)
     wxEVENT_PROPERTY( Updated , wxEVT_COMMAND_SLIDER_UPDATED , wxCommandEvent )
 
     wxPROPERTY( Value , int , SetValue, GetValue , 0, 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( Minimum , int , SetMin, GetMin, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( Maximum , int , SetMax, GetMax, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( PageSize , int , SetPageSize, GetLineSize, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( LineSize , int , SetLineSize, GetLineSize, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( ThumbLength , int , SetThumbLength, GetThumbLength, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
+	wxPROPERTY( Minimum , int , SetMin, GetMin, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
+	wxPROPERTY( Maximum , int , SetMax, GetMax, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
+	wxPROPERTY( PageSize , int , SetPageSize, GetLineSize, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
+	wxPROPERTY( LineSize , int , SetLineSize, GetLineSize, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
+	wxPROPERTY( ThumbLength , int , SetThumbLength, GetThumbLength, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
     wxPROPERTY_FLAGS( WindowStyle , wxSliderStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , EMPTY_MACROVALUE , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
 wxEND_PROPERTIES_TABLE()
 
@@ -129,7 +129,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
         style |= wxBORDER_NONE;
 
     if ( !CreateBase(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     if (parent) parent->AddChild(this);
 
@@ -144,6 +144,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
     m_tickFreq = 0;
 
     long msStyle = 0;
+    long wstyle = 0;
 
     if ( m_windowStyle & wxSL_LABELS )
     {
@@ -165,7 +166,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
         // Now create min static control
         wxString minLabel;
         minLabel.Printf(wxT("%d"), minValue);
-        long wstyle = STATIC_FLAGS;
+        wstyle = STATIC_FLAGS;
         if ( m_windowStyle & wxCLIP_SIBLINGS )
             wstyle |= WS_CLIPSIBLINGS;
         m_staticMin = (WXHWND) CreateWindowEx
@@ -179,9 +180,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     WXDWORD exStyle = 0;
 
-    msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;
-
-    wxUnusedVar(msStyle);
+    msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;    
 
     if (m_windowStyle & wxSL_VERTICAL)
         msStyle = TBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP ;
@@ -235,7 +234,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
         // Finally, create max value static item
         wxString maxLabel;
         maxLabel.Printf(wxT("%d"), maxValue);
-        long wstyle = STATIC_FLAGS;
+        wstyle = STATIC_FLAGS;
 
         if ( m_windowStyle & wxCLIP_SIBLINGS )
             wstyle |= WS_CLIPSIBLINGS;
@@ -275,7 +274,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
     // for this control, so call SetBestSize here instead.
     SetBestSize(size);
 
-    return true;
+    return TRUE;
 }
 
 bool wxSlider95::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
@@ -322,14 +321,14 @@ bool wxSlider95::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
 
         default:
             // unknown scroll event?
-            return false;
+            return FALSE;
     }
 
     int newPos = (int) ::SendMessage((HWND) control, TBM_GETPOS, 0, 0);
     if ( (newPos < GetMin()) || (newPos > GetMax()) )
     {
         // out of range - but we did process it
-        return true;
+        return TRUE;
     }
 
     SetValue(newPos);
@@ -454,9 +453,9 @@ void wxSlider95::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 
     int currentX, currentY;
     GetPosition(&currentX, &currentY);
-    if (x == wxDefaultCoord && !(sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+    if (x == -1 && !(sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
        x1 = currentX;
-    if (y == wxDefaultCoord && !(sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+    if (y == -1 && !(sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
         y1 = currentY;
 
     AdjustForParentClientOrigin(x1, y1, sizeFlags);
@@ -502,7 +501,7 @@ void wxSlider95::DoSetSize(int x, int y, int width, int height, int sizeFlags)
                 x_offset += new_width + cx;
             }
 
-            ::MoveWindow((HWND) m_staticMin, x_offset, y_offset,
+            MoveWindow((HWND) m_staticMin, x_offset, y_offset,
                 (int) min_len, cy, TRUE);
             x_offset += (int)(min_len + cx);
 
@@ -522,7 +521,7 @@ void wxSlider95::DoSetSize(int x, int y, int width, int height, int sizeFlags)
                 slider_length, slider_height, TRUE);
             x_offset += slider_length + cx;
 
-            ::MoveWindow((HWND) m_staticMax, x_offset, y_offset,
+            MoveWindow((HWND) m_staticMax, x_offset, y_offset,
                 (int) max_len, cy, TRUE);
         }
         else
@@ -531,8 +530,8 @@ void wxSlider95::DoSetSize(int x, int y, int width, int height, int sizeFlags)
             // If we're prepared to use the existing size, then...
             if
             (
-                width == wxDefaultCoord
-                && height == wxDefaultCoord
+                width == -1
+                && height == -1
                 && ((sizeFlags & wxSIZE_AUTO) != wxSIZE_AUTO)
             )
             {
@@ -603,7 +602,7 @@ void wxSlider95::DoSetSize(int x, int y, int width, int height, int sizeFlags)
             // If we're prepared to use the existing size, then...
             if
             (
-                width == wxDefaultCoord && height == wxDefaultCoord
+                width == -1 && height == -1
                 && ((sizeFlags & wxSIZE_AUTO) != wxSIZE_AUTO)
             )
             {
@@ -845,7 +844,7 @@ bool wxSlider95::Show(bool show)
     if(m_staticMax)
         ShowWindow((HWND) m_staticMax, (BOOL)cshow);
 
-    return true;
+    return TRUE;
 }
 
 #endif

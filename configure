@@ -39557,140 +39557,13 @@ fi
     BAKEFILE_BAKEFILE_M4_VERSION="0.1.4"
 
 
+
+
+
 BAKEFILE_AUTOCONF_INC_M4_VERSION="0.1.4"
 
 
 
-    # Check whether --enable-precomp-headers or --disable-precomp-headers was given.
-if test "${enable_precomp_headers+set}" = set; then
-  enableval="$enable_precomp_headers"
-  bk_use_pch="$enableval"
-fi;
-
-    GCC_PCH=0
-
-    if test "x$bk_use_pch" = "x" -o "x$bk_use_pch" = "xyes" ; then
-        if test "x$GCC" = "xyes"; then
-                        echo "$as_me:$LINENO: checking if the compiler supports precompiled headers" >&5
-echo $ECHO_N "checking if the compiler supports precompiled headers... $ECHO_C" >&6
-            cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-                    #if !defined(__GNUC__) || !defined(__GNUC_MINOR__)
-                        #error "no pch support"
-                    #endif
-                    #if (__GNUC__ < 3)
-                        #error "no pch support"
-                    #endif
-                    #if (__GNUC__ == 3) && \
-                       ((!defined(__APPLE_CC__) && (__GNUC_MINOR__ < 4)) || \
-                       ( defined(__APPLE_CC__) && (__GNUC_MINOR__ < 3)))
-                        #error "no pch support"
-                    #endif
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-
-                    echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-                    GCC_PCH=1
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-                    echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-            if test $GCC_PCH = 1 ; then
-                cat <<EOF >bk-make-pch
-#!/bin/sh
-
-# This script is part of Bakefile (http://bakefile.sourceforge.net) autoconf
-# script. It is used to generated precompiled headers.
-#
-# Permission is given to use this file in any way.
-
-outfile="\${1}"
-header="\${2}"
-shift
-shift
-
-compiler=
-headerfile=
-while test \${#} -gt 0; do
-    case "\${1}" in
-        -I* )
-            incdir=\`echo \${1} | sed -e 's/-I\(.*\)/\1/g'\`
-            if test "x\${headerfile}" = "x" -a -f "\${incdir}/\${header}" ; then
-                headerfile="\${incdir}/\${header}"
-            fi
-        ;;
-    esac
-    compiler="\${compiler} \${1}"
-    shift
-done
-
-if test "x\${headerfile}" = "x" ; then
-    echo "error: can't find header \${header} in include paths" >2
-else
-    if test -f \${outfile} ; then
-        rm -f \${outfile}
-    else
-        mkdir -p \`dirname \${outfile}\`
-    fi
-    depsfile=".deps/\`basename \${outfile}\`.d"
-    mkdir -p .deps
-    # can do this because gcc is >= 3.4:
-    \${compiler} -o \${outfile} -MMD -MF "\${depsfile}" "\${headerfile}"
-    exit \${?}
-fi
-EOF
-                chmod +x bk-make-pch
-            fi
-        fi
-    fi
-
-
-
-
-
-
 
     # Check whether --enable-precomp-headers or --disable-precomp-headers was given.
 if test "${enable_precomp_headers+set}" = set; then
@@ -39816,6 +39689,138 @@ EOF
             fi
         fi
     fi
+
+
+
+
+
+
+
+    # Check whether --enable-precomp-headers or --disable-precomp-headers was given.
+if test "${enable_precomp_headers+set}" = set; then
+  enableval="$enable_precomp_headers"
+  bk_use_pch="$enableval"
+fi;
+
+    GCC_PCH=0
+
+    if test "x$bk_use_pch" = "x" -o "x$bk_use_pch" = "xyes" ; then
+        if test "x$GCC" = "xyes"; then
+                        echo "$as_me:$LINENO: checking if the compiler supports precompiled headers" >&5
+echo $ECHO_N "checking if the compiler supports precompiled headers... $ECHO_C" >&6
+            cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+                    #if !defined(__GNUC__) || !defined(__GNUC_MINOR__)
+                        #error "no pch support"
+                    #endif
+                    #if (__GNUC__ < 3)
+                        #error "no pch support"
+                    #endif
+                    #if (__GNUC__ == 3) && \
+                       ((!defined(__APPLE_CC__) && (__GNUC_MINOR__ < 4)) || \
+                       ( defined(__APPLE_CC__) && (__GNUC_MINOR__ < 3)))
+                        #error "no pch support"
+                    #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+                    echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+                    GCC_PCH=1
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+                    echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+            if test $GCC_PCH = 1 ; then
+                cat <<EOF >bk-make-pch
+#!/bin/sh
+
+# This script is part of Bakefile (http://bakefile.sourceforge.net) autoconf
+# script. It is used to generated precompiled headers.
+#
+# Permission is given to use this file in any way.
+
+outfile="\${1}"
+header="\${2}"
+shift
+shift
+
+compiler=
+headerfile=
+while test \${#} -gt 0; do
+    case "\${1}" in
+        -I* )
+            incdir=\`echo \${1} | sed -e 's/-I\(.*\)/\1/g'\`
+            if test "x\${headerfile}" = "x" -a -f "\${incdir}/\${header}" ; then
+                headerfile="\${incdir}/\${header}"
+            fi
+        ;;
+    esac
+    compiler="\${compiler} \${1}"
+    shift
+done
+
+if test "x\${headerfile}" = "x" ; then
+    echo "error: can't find header \${header} in include paths" >2
+else
+    if test -f \${outfile} ; then
+        rm -f \${outfile}
+    else
+        mkdir -p \`dirname \${outfile}\`
+    fi
+    depsfile=".deps/\`basename \${outfile}\`.d"
+    mkdir -p .deps
+    # can do this because gcc is >= 3.4:
+    \${compiler} -o \${outfile} -MMD -MF "\${depsfile}" "\${headerfile}"
+    exit \${?}
+fi
+EOF
+                chmod +x bk-make-pch
+            fi
+        fi
+    fi
+
 
 
 
@@ -40567,16 +40572,6 @@ EOF
     COND_PLATFORM_MACOSX_1_TOOLKIT_MAC="#"
     if test "x$PLATFORM_MACOSX" = "x1" -a "x$TOOLKIT" = "xMAC" ; then
         COND_PLATFORM_MACOSX_1_TOOLKIT_MAC=""
-    fi
-
-    COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF="#"
-    if test "x$PLATFORM_MACOSX" = "x1" -a "x$TOOLKIT" = "xMOTIF" ; then
-        COND_PLATFORM_MACOSX_1_TOOLKIT_MOTIF=""
-    fi
-
-    COND_PLATFORM_MACOSX_1_TOOLKIT_X11="#"
-    if test "x$PLATFORM_MACOSX" = "x1" -a "x$TOOLKIT" = "xX11" ; then
-        COND_PLATFORM_MACOSX_1_TOOLKIT_X11=""
     fi
 
     COND_PLATFORM_MACOSX_1_USE_GUI_1="#"
@@ -41849,7 +41844,6 @@ cat >>$CONFIG_STATUS <<_ACEOF
 
             TOOLCHAIN_NAME="${TOOLCHAIN_NAME}"
             WXCONFIG_DATA_FILE="${WXCONFIG_DATA_FILE}"
-            WX_RELEASE="${WX_RELEASE}"
             LN_S="${LN_S}"
 
 
@@ -42871,20 +42865,18 @@ echo "$as_me: executing $ac_dest commands" >&6;}
               mv -f setup.h lib/wx/include/${TOOLCHAIN_NAME}/wx/setup.h
             fi
 
-                                                                                                if test ! -h wx-config; then
+            if test -f wx-config; then
                 chmod +x wx-config
                 mv -f wx-config lib/wx/config/${WXCONFIG_DATA_FILE}
-                ${LN_S} wx-config-${WX_RELEASE} wx-config
+                ( cd lib/wx/config ;
+                  rm -f ${TOOLCHAIN_NAME}
+                  ${LN_S} ${WXCONFIG_DATA_FILE} ${TOOLCHAIN_NAME} )
             fi
-            ( cd lib/wx/config ;
-              rm -f ${TOOLCHAIN_NAME}
-              ${LN_S} ${WXCONFIG_DATA_FILE} ${TOOLCHAIN_NAME} )
-
             if test -f wx-config-wrapper; then
                 chmod +x wx-config-wrapper
-                mv -f wx-config-wrapper wx-config-${WX_RELEASE}
+                mv -f wx-config-wrapper wx-config
                 rm -f wx${TOOLCHAIN_NAME}-config
-                ${LN_S} wx-config-${WX_RELEASE} wx${TOOLCHAIN_NAME}-config
+                ${LN_S} wx-config wx${TOOLCHAIN_NAME}-config
             fi
            ;;
   esac

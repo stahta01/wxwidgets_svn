@@ -157,7 +157,7 @@ WX_DECLARE_OBJARRAY(wxFoldWindowItem, wxFoldWindowItemArray);
     for receiving of events, and a the rest of the area can be populated by a wxPanel derived class. 
 */
 
-class WXDLLIMPEXP_FOLDBAR wxFoldPanelItem: public wxPanel
+class wxFoldPanelItem: public wxPanel
 {
 private:
     wxCaptionBar *_captionBar;

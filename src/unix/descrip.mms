@@ -58,7 +58,7 @@ SOURCES =       baseunix.cpp,\
 		dir.cpp,\
 		fontenum.cpp,\
 		fontutil.cpp,\
-		gsocket.cpp,\
+		gsocket.c,\
 		mimetype.cpp,\
 		threadpsx.cpp,\
 		utilsunx.cpp,\
@@ -88,8 +88,7 @@ dialup.obj : dialup.cpp
 dir.obj : dir.cpp
 fontenum.obj : fontenum.cpp
 fontutil.obj : fontutil.cpp
-gsocket.obj : gsocket.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/nowarn gsocket.cpp
+gsocket.obj : gsocket.c
 mimetype.obj : mimetype.cpp
 threadpsx.obj : threadpsx.cpp
 utilsunx.obj : utilsunx.cpp
