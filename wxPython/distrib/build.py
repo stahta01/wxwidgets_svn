@@ -121,7 +121,7 @@ import sys, os, string, getopt
 # Makefiles for use with the distribution related targets.
 
 major_version = '2.2'
-build_version = '0'
+build_version = '2'
 
 __version__ = major_version + '.' + build_version
 
@@ -259,7 +259,8 @@ class BuildConfig:
 
         if sys.platform == 'win32':
             self.MAKE = 'nmake'
-            self.PYTHONLIB = '$(PYPREFIX)\\libs\\python15.lib'
+            compactver = string.join(string.split(self.PYVERSION, '.'), '')
+            self.PYTHONLIB = '$(PYPREFIX)\\libs\\python%s.lib' % compactver
             self.TARGETDIR = '$(PYPREFIX)\\wxPython'
             self.LIBS = '$(PYTHONLIB) $(WXPSRCDIR)\wxc.lib'
             self.GENCODEDIR = 'msw'
@@ -809,6 +810,10 @@ endif
 
 $(TARGETDIR)/%% : %%
 	cp -f $< $@
+
+$(TARGETDIR)/$(TARGET) : $(TARGET)
+	cp -f $< $@
+	strip $@
 
 $(TARGETDIR)/%% : $(GENCODEDIR)/%%
 	cp -f $< $@

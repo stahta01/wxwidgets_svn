@@ -98,7 +98,7 @@ wxStyledTextCtrl::wxStyledTextCtrl(wxWindow *parent,
                                    long style,
                                    const wxString& name) :
     wxControl(parent, id, pos, size,
-              style | wxVSCROLL | wxHSCROLL | wxWANTS_CHARS,
+              style | wxVSCROLL | wxHSCROLL | wxWANTS_CHARS | wxCLIP_CHILDREN,
               wxDefaultValidator, name)
 {
     m_swx = new ScintillaWX(this);
@@ -118,6 +118,10 @@ long wxStyledTextCtrl::SendMsg(int msg, long wp, long lp) {
     return m_swx->WndProc(msg, wp, lp);
 }
 
+
+#ifdef MAKELONG
+#undef MAKELONG
+#endif
 
 #define MAKELONG(a, b) ((a) | ((b) << 16))
 
@@ -1475,6 +1479,17 @@ wxPoint wxStyledTextCtrl::PointFromPosition(int pos) {
     int x = SendMsg(SCI_POINTXFROMPOSITION, 0, pos);
     int y = SendMsg(SCI_POINTYFROMPOSITION, 0, pos);
     return wxPoint(x, y);
+}
+
+// Scroll enough to make the given line visible
+void wxStyledTextCtrl::ScrollToLine(int line) {
+    m_swx->DoScrollToLine(line);
+}
+
+
+// Scroll enough to make the given column visible
+void wxStyledTextCtrl::ScrollToColumn(int column) {
+    m_swx->DoScrollToColumn(column);
 }
 
 
