@@ -49,11 +49,11 @@ extern const wxChar *wxToolBarNameStr;
 class wxToolBar: public wxControl
 {
 public:
-    wxToolBar();
+    wxToolBar(void);
     wxToolBar( wxWindow *parent, wxWindowID id, 
       const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
       long style = 0, const wxString& name = wxToolBarNameStr );
-   ~wxToolBar();
+   ~wxToolBar(void);
 
    bool Create( wxWindow *parent, wxWindowID id, 
      const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
@@ -74,18 +74,12 @@ public:
     // If toggle is TRUE, the button toggles between the two states.
     virtual wxToolBarTool *AddTool( int toolIndex, const wxBitmap& bitmap, 
       const wxBitmap& pushedBitmap = wxNullBitmap, bool toggle = FALSE,
-      wxCoord xPos = -1, wxCoord yPos = -1, wxObject *clientData = (wxObject *)NULL,
+      float xPos = -1, float yPos = -1, wxObject *clientData = (wxObject *)NULL,
       const wxString& helpString1 = "", const wxString& helpString2 = "");
+    virtual void AddSeparator(void);
+    virtual void ClearTools(void);
     
-    // Add arbitrary control
-    virtual bool AddControl(wxControl *control);
-      
-    // Add space
-    virtual void AddSeparator();
-    
-    virtual void ClearTools();
-    
-    virtual bool Realize();
+    virtual bool Realize(void);
 
     virtual void EnableTool(int toolIndex, bool enable);
     virtual void ToggleTool(int toolIndex, bool toggle); // toggle is TRUE if toggled on

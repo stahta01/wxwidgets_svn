@@ -329,9 +329,6 @@ bool wxNotebook::RemovePage(int nPage)
 
   m_aPages.Remove(nPage);
 
-  if ( m_aPages.IsEmpty() )
-      m_nSelection = -1;
-
   return TRUE;
 }
 
@@ -346,8 +343,6 @@ bool wxNotebook::DeleteAllPages()
   m_aPages.Clear();
 
   TabCtrl_DeleteAllItems(m_hwnd);
-
-  m_nSelection = -1;
 
   return TRUE;
 }

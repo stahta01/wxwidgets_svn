@@ -40,9 +40,9 @@
 // Yuck this is really BOTH site and platform dependent
 // so we should use some other strategy!
 #ifdef __SUN__
-#   define DEFAULT_XRESOURCE_DIR wxT("/usr/openwin/lib/app-defaults")
+    #define DEFAULT_XRESOURCE_DIR wxT("/usr/openwin/lib/app-defaults")
 #else
-#   define DEFAULT_XRESOURCE_DIR wxT("/usr/lib/X11/app-defaults")
+    #define DEFAULT_XRESOURCE_DIR wxT("/usr/lib/X11/app-defaults")
 #endif
 
 //-----------------------------------------------------------------------------
@@ -150,15 +150,29 @@ static void wxXMergeDatabases()
 
     if ((environment = wxGetenv(wxT("XENVIRONMENT"))) == NULL) 
     {
+        size_t len;
+#if wxUSE_UNICODE
+	char hostbuf[1024];
+#endif
         environment = GetIniFile(filename, (const wxChar *) NULL);
-        size_t len = wxStrlen(environment);
-
-        wxChar hostbuf[1024];
-        (void)wxGetHostName(hostbuf, WXSIZEOF(hostbuf) - len);
-
-        wxStrcat(environment, hostbuf);
+        len = wxStrlen(environment);
+#if !defined(SVR4) || defined(__sgi)
+#if wxUSE_UNICODE
+        (void)gethostname(hostbuf, 1024 - len);
+#else
+        (void)gethostname(environment + len, 1024 - len);
+#endif
+#else
+#if wxUSE_UNICODE
+        (void)sysinfo(SI_HOSTNAME, hostbuf, 1024 - len);
+#else
+        (void)sysinfo(SI_HOSTNAME, environment + len, 1024 - len);
+#endif
+#endif
+#if wxUSE_UNICODE
+	wxStrcat(environment, wxConvCurrent->cMB2WX(hostbuf));
+#endif
     }
-
     if ((homeDB = XrmGetFileDatabase(wxConvCurrent->cWX2MB(environment))))
         XrmMergeDatabases(homeDB, &wxResourceDatabase);
 }

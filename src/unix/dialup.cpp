@@ -127,7 +127,7 @@ public:
 
    size_t GetISPNames(class wxArrayString &) const
       { return 0; }
-
+   
    // sometimes the built-in logic for determining the online status may fail,
    // so, in general, the user should be allowed to override it. This function
    // allows to forcefully set the online status - whatever our internal
@@ -175,7 +175,7 @@ private:
    int m_CanUsePing;
    /// The path to ping program
    wxString m_PingPath;
-
+   
    /// beacon host:
    wxString m_BeaconHost;
    /// beacon host portnumber for connect:
@@ -209,7 +209,7 @@ private:
    int CheckPing(void);
    /// Check by connecting to host on given port.
    int CheckConnect(void);
-
+   
 };
 
 
@@ -265,19 +265,12 @@ wxDialUpManagerImpl::wxDialUpManagerImpl()
    m_CanUsePing = -1; // unknown
    m_BeaconHost = WXDIALUP_MANAGER_DEFAULT_BEACONHOST;
    m_BeaconPort = 80;
-
-#ifdef __SGI__
-   m_ConnectCommand = _T("/usr/etc/ppp");
-#elif defined(__LINUX__)
-   // default values for Debian/GNU linux
-   m_ConnectCommand = _T("pon");
-   m_HangUpCommand = _T("poff");
-#endif
-
+   SetConnectCommand("pon", "poff"); // default values for Debian/GNU linux
    wxChar * dial = wxGetenv(_T("WXDIALUP_DIALCMD"));
    wxChar * hup = wxGetenv(_T("WXDIALUP_HUPCMD"));
-   SetConnectCommand(dial ? wxString(dial) : m_ConnectCommand,
-                     hup ? wxString(hup) : m_HangUpCommand);
+   if(dial || hup)
+      SetConnectCommand(dial ? wxString(dial) : m_ConnectCommand,
+                        hup ? wxString(hup) : m_HangUpCommand); 
 }
 
 wxDialUpManagerImpl::~wxDialUpManagerImpl()
@@ -450,17 +443,17 @@ wxDialUpManagerImpl::CheckConnect(void)
 
    if((hp = gethostbyname(m_BeaconHost.mb_str())) == NULL)
       return 0; // no DNS no net
-
-   serv_addr.sin_family = hp->h_addrtype;
+   
+   serv_addr.sin_family		= hp->h_addrtype;
    memcpy(&serv_addr.sin_addr,hp->h_addr, hp->h_length);
-   serv_addr.sin_port = htons(m_BeaconPort);
+   serv_addr.sin_port		= htons(m_BeaconPort);
 
-   int sockfd;
-   if( ( sockfd = socket(hp->h_addrtype, SOCK_STREAM, 0)) < 0)
-   {
+   int	sockfd;
+   if( ( sockfd = socket(hp->h_addrtype, SOCK_STREAM, 0)) < 0) 
+   {	
       return -1;  // no info
    }
-
+   
    if( connect(sockfd, (struct sockaddr *) &serv_addr,
                sizeof(serv_addr)) >= 0)
    {
@@ -479,29 +472,14 @@ int
 wxDialUpManagerImpl::CheckIfconfig(void)
 {
    int rc = -1;
-
-   // First time check for ifconfig location. We only use the variant which
-   // does not take arguments, a la GNU.
-   if ( m_CanUseIfconfig == -1 ) // unknown
+   // First time check for ifconfig location. We only use the variant
+   // which does not take arguments, a la GNU.
+   if(m_CanUseIfconfig == -1) // unknown
    {
-       static const wxChar *ifconfigLocations[] =
-       {
-           _T("/sbin"),         // Linux, FreeBSD
-           _T("/usr/sbin"),     // SunOS, Solaris, AIX, HP-UX
-           _T("/usr/etc"),      // IRIX
-       };
-
-       for ( size_t n = 0; n < WXSIZEOF(ifconfigLocations); n++ )
-       {
-           wxString path(ifconfigLocations[n]);
-           path << _T("/ifconfig");
-
-           if ( wxFileExists(path) )
-           {
-               m_IfconfigPath = path;
-               break;
-           }
-       }
+      if(wxFileExists("/sbin/ifconfig"))
+         m_IfconfigPath = "/sbin/ifconfig";
+      else if(wxFileExists("/usr/sbin/ifconfig"))
+         m_IfconfigPath = "/usr/sbin/ifconfig";
    }
 
    wxLogNull ln; // suppress all error messages
@@ -516,10 +494,10 @@ wxDialUpManagerImpl::CheckIfconfig(void)
 #if defined(__SOLARIS__) || defined (__SUNOS__)
       // need to add -a flag
       cmd << " -a";
-#elif defined(__LINUX__) || defined (__FREEBSD__) || defined(__SGI__)
+#elif defined(__LINUX__) || defined (__FREEBSD__)
       // nothing to be added to ifconfig
 #else
-#     pragma warning "No ifconfig information for this OS."
+#   pragma warning "No ifconfig information for this OS."
       m_CanUseIfconfig = 0;
       return -1;
 #endif
@@ -538,18 +516,20 @@ wxDialUpManagerImpl::CheckIfconfig(void)
             output[file.Length()] = '\0';
             if(file.Read(output,file.Length()) == file.Length())
             {
-               // FIXME shouldn't we grep for "^ppp"? (VZ)
-
+               if(
 #if defined(__SOLARIS__) || defined (__SUNOS__)
-               // dialup device under SunOS/Solaris
-               rc = strstr(output,"ipdptp") != (char *)NULL;
+                  strstr(output,"ipdptp")   // dialup device
 #elif defined(__LINUX__) || defined (__FREEBSD__)
-               rc = strstr(output,"ppp")    // ppp
-                    || strstr(output,"sl")  // slip
-                    || strstr(output,"pl"); // plip
-#elif defined(__SGI__)  // IRIX
-               rc = strstr(output, "ppp"); // PPP
+                  strstr(output,"ppp")   // ppp
+                  || strstr(output,"sl") // slip
+                  || strstr(output,"pl") // plip
+#else
+                  wxASSERT(0); // unreachable code
 #endif
+                  )
+                  rc = 1;
+               else
+                  rc = 0;
             }
             file.Close();
             delete [] output;
@@ -568,7 +548,7 @@ wxDialUpManagerImpl::CheckPing(void)
 {
    if(! m_CanUsePing)
       return -1;
-
+   
    // First time check for ping location. We only use the variant
    // which does not take arguments, a la GNU.
    if(m_CanUsePing == -1) // unknown

@@ -148,8 +148,6 @@ if the buffer is NULL.
 
 \func{char*}{wxGetTempFileName}{\param{const wxString\& }{prefix}, \param{char* }{buf=NULL}}
 
-\func{bool}{wxGetTempFileName}{\param{const wxString\& }{prefix}, \param{wxString\& }{buf}}
-
 Makes a temporary filename based on {\it prefix}, opens and closes the file,
 and places the name in {\it buf}. If {\it buf} is NULL, new store
 is allocated for the temporary filename using {\it new}.
@@ -411,33 +409,6 @@ original string is returned. In debug build, an error message is logged - this
 should help to find the strings which were not yet translated. As this function
 is used very often, an alternative syntax is provided: the \_() macro is
 defined as wxGetTranslation().
-
-\membersection{::wxSnprintf}\label{wxsnprintf}
-
-\func{int}{wxSnprintf}{\param{wxChar *}{buf}, \param{size\_t }{len}, \param{const wxChar *}{format}, \param{}{...}}
-
-This function replaces the dangerous standard function {\tt sprintf()} and is
-like {\tt snprintf()} available on some platforms. The only difference with
-sprintf() is that an additional argument - buffer size - is taken and the
-buffer is never overflowed.
-
-Returns the number of characters copied to the buffer or -1 if there is not
-enough space.
-
-\wxheading{See also:}
-\helpref{wxVsnprintf}{wxvsnprintf},
-\helpref{wxString::Printf}{wxstringprintf}
-
-\membersection{::wxVsnprintf}\label{wxsnprintf}
-
-\func{int}{wxVsnprintf}{\param{wxChar *}{buf}, \param{size\_t }{len}, \param{const wxChar *}{format}, \param{va\_list }{argptr}}
-
-The same as \helpref{wxSnprintf}{wxsnprintf} but takes a {\tt va\_list}
-argument instead of arbitrary number of parameters.
-
-\wxheading{See also:}
-\helpref{wxSnprintf}{wxsnprintf},
-\helpref{wxString::PrintfV}{wxstringprintfv}
 
 \section{Dialog functions}\label{dialogfunctions}
 
@@ -1051,14 +1022,16 @@ See also \helpref{wxDDEServer}{wxddeserver}, \helpref{wxDDEClient}{wxddeclient},
 
 \func{void}{wxDebugMsg}{\param{const wxString\& }{fmt}, \param{...}{}}
 
-{\bf This function is deprecated, use \helpref{wxLogDebug}{wxlogoverview} instead!}
-
 Display a debugging message; under Windows, this will appear on the
 debugger command window, and under Unix, it will be written to standard
 error.
 
 The syntax is identical to {\bf printf}: pass a format string and a
 variable list of arguments.
+
+Note that under Windows, you can see the debugging messages without a
+debugger if you have the DBWIN debug log application that comes with
+Microsoft C++.
 
 {\bf Tip:} under Windows, if your application crashes before the
 message appears in the debugging window, put a wxYield call after

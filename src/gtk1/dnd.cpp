@@ -359,7 +359,7 @@ wxDragResult wxDropTarget::OnDragOver( wxCoord WXUNUSED(x),
 
     // disable the debug message from GetMatchingPair() - there are too many
     // of them otherwise
-#ifdef __WXDEBUG__
+#if 0 //def __WXDEBUG__
     wxLogNull noLog;
 #endif // Debug
 
@@ -763,11 +763,6 @@ wxDragResult wxDropSource::DoDragDrop( bool allowMove )
         PrepareIcon( 0, 0, context );
 
         while (m_waiting) gtk_main_iteration();;
-	
-	if (context->action == GDK_ACTION_COPY)
-            return m_retValue = wxDragCopy;
-	if (context->action == GDK_ACTION_MOVE)
-            return m_retValue = wxDragMove;
     }
 
 #if wxUSE_THREADS

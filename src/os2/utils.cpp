@@ -265,7 +265,6 @@ void wxError(
 , const wxString&                   rTitle
 )
 {
-    wxBuffer = new wxChar[256];
     wxSprintf(wxBuffer, "%s\nContinue?", WXSTRINGCAST rMsg);
     if (::WinMessageBox( HWND_DESKTOP
                         ,NULL
@@ -274,7 +273,6 @@ void wxError(
                         ,0
                         ,MB_ICONEXCLAMATION | MB_YESNO
                        ) == MBID_YES)
-    delete[] wxBuffer;
     wxExit();
 }
 
@@ -420,8 +418,7 @@ bool wxGetResource(
 {
     HAB                             hab;
     HINI                            hIni;
-    wxChar                          zDefunkt[] = _T("$$default");
-    char                            zBuf[1000];
+    static const wxChar             zDefunkt[] = _T("$$default");
 
     if (rFile != "")
     {
@@ -432,14 +429,11 @@ bool wxGetResource(
                                               ,(PSZ)WXSTRINGCAST rSection
                                               ,(PSZ)WXSTRINGCAST rEntry
                                               ,(PSZ)zDefunkt
-                                              ,(PVOID)zBuf
+                                              ,(void*)*ppValue
                                               ,1000
                                              );
-            if (zBuf == NULL)
+            if (n != 0L || wxStrcmp(*ppValue, zDefunkt) == 0)
                 return FALSE;
-            if (n == 0L || wxStrcmp(zBuf, zDefunkt) == 0)
-                return FALSE;
-            zBuf[n-1] = '\0';
         }
         else
             return FALSE;
@@ -450,16 +444,12 @@ bool wxGetResource(
                                           ,(PSZ)WXSTRINGCAST rSection
                                           ,(PSZ)WXSTRINGCAST rEntry
                                           ,(PSZ)zDefunkt
-                                          ,(PVOID)zBuf
+                                          ,(void*)*ppValue
                                           ,1000
                                          );
-        if (zBuf == NULL)
+        if (n != 0L || wxStrcmp(*ppValue, zDefunkt) == 0)
             return FALSE;
-        if (n == 0L || wxStrcmp(zBuf, zDefunkt) == 0)
-            return FALSE;
-        zBuf[n-1] = '\0';
     }
-    strcpy((char*)*ppValue, zBuf);
     return TRUE;
 }
 
@@ -471,8 +461,6 @@ bool wxGetResource(
 )
 {
     wxChar*                         zStr = NULL;
-
-    zStr = new wxChar[1000];
     bool                            bSucc = wxGetResource( rSection
                                                           ,rEntry
                                                           ,(wxChar **)&zStr
@@ -485,11 +473,7 @@ bool wxGetResource(
         delete[] zStr;
         return TRUE;
     }
-    else
-    {
-        delete[] zStr;
-        return FALSE;
-    }
+    else return FALSE;
 }
 
 bool wxGetResource(
@@ -500,8 +484,6 @@ bool wxGetResource(
 )
 {
     wxChar*                           zStr = NULL;
-
-    zStr = new wxChar[1000];
     bool                              bSucc = wxGetResource( rSection
                                                             ,rEntry
                                                             ,(wxChar **)&zStr
@@ -514,11 +496,7 @@ bool wxGetResource(
         delete[] zStr;
         return TRUE;
     }
-    else
-    {
-        delete[] zStr;
-        return FALSE;
-    }
+    else return FALSE;
 }
 
 bool wxGetResource(
@@ -529,8 +507,6 @@ bool wxGetResource(
 )
 {
     wxChar*                         zStr = NULL;
-
-    zStr = new wxChar[1000];
     bool                            bSucc = wxGetResource( rSection
                                                           ,rEntry
                                                           ,(wxChar **)&zStr
@@ -543,11 +519,7 @@ bool wxGetResource(
         delete[] zStr;
         return TRUE;
     }
-    else
-    {
-        delete[] zStr;
-        return FALSE;
-    }
+    else return FALSE;
 }
 #endif // wxUSE_RESOURCES
 
@@ -623,7 +595,6 @@ wxChar* wxGetUserHome (
     wxChar*                         zHome;
     wxString                        sUser1(rUser);
 
-    wxBuffer = new wxChar[256];
     if (sUser1 != _T(""))
     {
         wxChar                      zTmp[64];
@@ -638,7 +609,6 @@ wxChar* wxGetUserHome (
                 if ((zHome = wxGetenv(_T("TMP"))) != NULL    ||
                     (zHome = wxGetenv(_T("TMPDIR"))) != NULL ||
                     (zHome = wxGetenv(_T("TEMP"))) != NULL)
-                    delete[] wxBuffer;
                     return *zHome ? zHome : (wxChar*)_T("\\");
             }
             if (wxStricmp(zTmp, WXSTRINGCAST sUser1) == 0)
@@ -646,18 +616,13 @@ wxChar* wxGetUserHome (
         }
     }
     if (sUser1 == _T(""))
-    {
         if ((zHome = wxGetenv(_T("HOME"))) != NULL)
         {
             wxStrcpy(wxBuffer, zHome);
             Unix2DosFilename(wxBuffer);
-            wxStrcpy(zHome, wxBuffer);
-            delete[] wxBuffer;
-            return zHome;
+            return wxBuffer;
         }
-    }
-    delete[] wxBuffer;
-    return NULL; // No home known!
+        return NULL; // No home known!
 }
 
 // Check whether this window wants to process messages, e.g. Stop button

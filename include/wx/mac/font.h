@@ -16,66 +16,15 @@
     #pragma interface "font.h"
 #endif
 
-class WXDLLEXPORT wxFontRefData: public wxGDIRefData
-{
-    friend class WXDLLEXPORT wxFont;
-public:
-    wxFontRefData()
-    {
-        Init(10, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE,
-             "Geneva", wxFONTENCODING_DEFAULT);
-    }
+// ----------------------------------------------------------------------------
+// public functions
+// ----------------------------------------------------------------------------
 
-    wxFontRefData(const wxFontRefData& data)
-    {
-        Init(data.m_pointSize, data.m_family, data.m_style, data.m_weight,
-             data.m_underlined, data.m_faceName, data.m_encoding);
+// convert wxFontEncoding into one of Windows XXX_CHARSET constants (fill exact
+// parameter if it's not NULL with TRUE if encoding is realyl supported under
+// Windows and FALSE if not and we just chose something close to it)
+extern int wxCharsetFromEncoding(wxFontEncoding encoding, bool *exact = NULL);
 
-		m_macFontNum = data.m_macFontNum ;
-		m_macFontSize = data.m_macFontSize;
-		m_macFontStyle = data.m_macFontStyle;
-		m_fontId = data.m_fontId;
-    }
-
-    wxFontRefData(int size,
-                  int family,
-                  int style,
-                  int weight,
-                  bool underlined,
-                  const wxString& faceName,
-                  wxFontEncoding encoding)
-    {
-        Init(size, family, style, weight, underlined, faceName, encoding);
-    }
-
-    virtual ~wxFontRefData();
-protected:
-    // common part of all ctors
-    void Init(int size,
-              int family,
-              int style,
-              int weight,
-              bool underlined,
-              const wxString& faceName,
-              wxFontEncoding encoding);
-
-    // font characterstics
-    int           m_fontId;
-    int           m_pointSize;
-    int           m_family;
-    int           m_style;
-    int           m_weight;
-    bool          m_underlined;
-    wxString      m_faceName;
-    wxFontEncoding m_encoding;
-
-public :
-	short		m_macFontNum ;
-	short		m_macFontSize ;
-	Style		m_macFontStyle ;
-public :
-	void		MacFindFont() ;
-};
 // ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
@@ -133,7 +82,15 @@ public:
     // implementation only from now on
     // -------------------------------
 
+    int GetFontId() const;
+    virtual bool IsFree() const;
     virtual bool RealizeResource();
+    virtual WXHANDLE GetResourceHandle();
+    virtual bool FreeResource(bool force = FALSE);
+    /*
+       virtual bool UseResource();
+       virtual bool ReleaseResource();
+     */
 
 protected:
     // common part of all ctors

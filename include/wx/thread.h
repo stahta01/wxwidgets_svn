@@ -137,9 +137,6 @@ private:
 #if defined(__WXMSW__) || defined(__WXPM__)
     class WXDLLEXPORT wxCriticalSectionInternal;
     #define WXCRITICAL_INLINE
-#elif defined(__WXMAC__)
-    class WXDLLEXPORT wxCriticalSectionInternal;
-    #define WXCRITICAL_INLINE
 #else // !MSW && !PM
     #define WXCRITICAL_INLINE   inline
 #endif // MSW/!MSW
@@ -163,7 +160,7 @@ private:
     wxCriticalSection(const wxCriticalSection&);
     wxCriticalSection& operator=(const wxCriticalSection&);
 
-#if defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMAC__)
+#if defined(__WXMSW__) || defined(__WXPM__)
     wxCriticalSectionInternal *m_critsect;
 #else // !MSW
     wxMutex m_mutex;
@@ -402,18 +399,6 @@ public:
     // return TRUE if the main thread is waiting for some other to terminate:
     // wxApp then should block all "dangerous" messages
     extern bool WXDLLEXPORT wxIsWaitingForThread();
-#elif defined(__WXMAC__)
-    extern void WXDLLEXPORT wxMutexGuiLeaveOrEnter();
-
-    // returns TRUE if the main thread has GUI lock
-    extern bool WXDLLEXPORT wxGuiOwnedByMainThread();
-
-    // wakes up the main thread if it's sleeping inside ::GetMessage()
-    extern void WXDLLEXPORT wxWakeUpMainThread();
-
-    // return TRUE if the main thread is waiting for some other to terminate:
-    // wxApp then should block all "dangerous" messages
-    extern bool WXDLLEXPORT wxIsWaitingForThread();
 #elif defined(__WXPM__)
     // unlock GUI if there are threads waiting for and lock it back when
     // there are no more of them - should be called periodically by the main
@@ -422,9 +407,6 @@ public:
 
     // returns TRUE if the main thread has GUI lock
     extern bool WXDLLEXPORT wxGuiOwnedByMainThread();
-    // return TRUE if the main thread is waiting for some other to terminate:
-    // wxApp then should block all "dangerous" messages
-    extern bool WXDLLEXPORT wxIsWaitingForThread();
 #else // !MSW && !PM
     // implement wxCriticalSection using mutexes
     inline wxCriticalSection::wxCriticalSection() { }

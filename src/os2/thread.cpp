@@ -777,10 +777,5 @@ bool WXDLLEXPORT wxGuiOwnedByMainThread()
     return s_bGuiOwnedByMainThread;
 }
 
-bool WXDLLEXPORT wxIsWaitingForThread()
-{
-    return s_bWaitingForThread;
-}
-
 #endif
   // wxUSE_THREADS

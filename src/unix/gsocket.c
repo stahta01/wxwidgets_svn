@@ -14,19 +14,12 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <sys/ioctl.h>
-#ifdef __VMS__
-#define SOCK_LEN_TYP (unsigned int*)
+#ifdef vms
 #include <socket.h>
-struct	sockaddr_un {
-	u_char	sun_len;		/* sockaddr len including null */
-	u_char	sun_family;		/* AF_UNIX */
-	char	sun_path[108];		/* path name (gag) */
-};
 #else
 #include <sys/socket.h>
-#include <sys/un.h>
-#define SOCK_LEN_TYP (int*)
 #endif
+#include <sys/un.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -225,7 +218,7 @@ GAddress *GSocket_GetLocal(GSocket *socket)
 
   size = sizeof(addr);
 
-  if (getsockname(socket->m_fd, &addr, SOCK_LEN_TYP &size) < 0) {
+  if (getsockname(socket->m_fd, &addr, &size) < 0) {
     socket->m_error = GSOCK_IOERR;
     return NULL;
   }
@@ -806,8 +799,7 @@ int _GSocket_Recv_Dgram(GSocket *socket, char *buffer, int size)
   fromlen = sizeof(from);
 
   MASK_SIGNAL();
-  ret = recvfrom(socket->m_fd, buffer, size, 0, &from,
-		 SOCK_LEN_TYP &fromlen);
+  ret = recvfrom(socket->m_fd, buffer, size, 0, &from, &fromlen);
   UNMASK_SIGNAL();
 
   if (ret == -1)
@@ -909,8 +901,7 @@ void _GSocket_Detected_Write(GSocket *socket)
     socket->m_establishing = FALSE;
 
     len = sizeof(error);
-    getsockopt(socket->m_fd, SOL_SOCKET, SO_ERROR, (void*) &error,
-	       SOCK_LEN_TYP &len);
+    getsockopt(socket->m_fd, SOL_SOCKET, SO_ERROR, (void*) &error, &len);
 
     if (error)
     {

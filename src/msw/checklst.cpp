@@ -314,10 +314,7 @@ void wxCheckListBox::InsertItems(int nItems, const wxString items[], int pos)
     for ( i = 0; i < nItems; i++ ) {
         wxOwnerDrawn *pNewItem = CreateItem((size_t)(pos + i));
         pNewItem->SetName(items[i]);
-        pNewItem->SetFont(GetFont());
-
         m_aItems.Insert(pNewItem, (size_t)(pos + i));
-
         ListBox_SetItemData((HWND)GetHWND(), i + pos, pNewItem);
     }
 }
@@ -326,11 +323,9 @@ void wxCheckListBox::InsertItems(int nItems, const wxString items[], int pos)
 bool wxCheckListBox::SetFont( const wxFont &font )
 {
     size_t i;
-    for ( i = 0; i < m_aItems.GetCount(); i++ )
+    for (i=0; i < m_aItems.GetCount(); i++)
         m_aItems[i]->SetFont(font);
-
     wxListBox::SetFont(font);
-
     return TRUE;
 }
 

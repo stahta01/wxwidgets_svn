@@ -303,7 +303,6 @@ DOCDIR = $(WXDIR)/docs
 ########################## Archive name ###############################
 
 WXARCHIVE = wx$(TOOLKIT)-$(WX_MAJOR_VERSION_NUMBER).$(WX_MINOR_VERSION_NUMBER).$(WX_RELEASE_NUMBER).tgz
-WXSAMPLES = wx$(TOOLKIT)-samples-$(WX_MAJOR_VERSION_NUMBER).$(WX_MINOR_VERSION_NUMBER).$(WX_RELEASE_NUMBER).tgz
 DISTDIR = ./_dist_dir/wx$(TOOLKIT)
 
 ############################## Files ##################################
@@ -780,55 +779,45 @@ SAMPLES_DIST:
 	cp $(SAMPDIR)/Makefile.in $(DISTDIR)/samples
 	mkdir $(DISTDIR)/samples/bombs
 	cp $(SAMPDIR)/bombs/Makefile.in $(DISTDIR)/samples/bombs
-	cp $(SAMPDIR)/bombs/makefile.unx $(DISTDIR)/samples/bombs
 	cp $(SAMPDIR)/bombs/*.cpp $(DISTDIR)/samples/bombs
 	cp $(SAMPDIR)/bombs/*.h $(DISTDIR)/samples/bombs
 	cp $(SAMPDIR)/bombs/*.xpm $(DISTDIR)/samples/bombs
 	cp $(SAMPDIR)/bombs/readme.txt $(DISTDIR)/samples/bombs
 	mkdir $(DISTDIR)/samples/caret
 	cp $(SAMPDIR)/caret/Makefile.in $(DISTDIR)/samples/caret
-	cp $(SAMPDIR)/caret/makefile.unx $(DISTDIR)/samples/caret
 	cp $(SAMPDIR)/caret/*.cpp $(DISTDIR)/samples/caret
 	cp $(SAMPDIR)/caret/*.xpm $(DISTDIR)/samples/caret
 	mkdir $(DISTDIR)/samples/config
 	cp $(SAMPDIR)/config/Makefile.in $(DISTDIR)/samples/config
-	cp $(SAMPDIR)/config/makefile.unx $(DISTDIR)/samples/config
 	cp $(SAMPDIR)/config/*.cpp $(DISTDIR)/samples/config
 	mkdir $(DISTDIR)/samples/controls
 	mkdir $(DISTDIR)/samples/controls/icons
 	cp $(SAMPDIR)/controls/Makefile.in $(DISTDIR)/samples/controls
-	cp $(SAMPDIR)/controls/makefile.unx $(DISTDIR)/samples/controls
 	cp $(SAMPDIR)/controls/*.cpp $(DISTDIR)/samples/controls
 	cp $(SAMPDIR)/controls/*.xpm $(DISTDIR)/samples/controls
 	cp $(SAMPDIR)/controls/icons/*.??? $(DISTDIR)/samples/controls/icons
 	mkdir $(DISTDIR)/samples/checklst
 	cp $(SAMPDIR)/checklst/Makefile.in $(DISTDIR)/samples/checklst
-	cp $(SAMPDIR)/checklst/makefile.unx $(DISTDIR)/samples/checklst
 	cp $(SAMPDIR)/checklst/*.cpp $(DISTDIR)/samples/checklst
 	cp $(SAMPDIR)/checklst/*.xpm $(DISTDIR)/samples/checklst
 	mkdir $(DISTDIR)/samples/printing
 	cp $(SAMPDIR)/printing/Makefile.in $(DISTDIR)/samples/printing
-	cp $(SAMPDIR)/printing/makefile.unx $(DISTDIR)/samples/printing
 	cp $(SAMPDIR)/printing/*.cpp $(DISTDIR)/samples/printing
 	cp $(SAMPDIR)/printing/*.h $(DISTDIR)/samples/printing
 	cp $(SAMPDIR)/printing/*.xpm $(DISTDIR)/samples/printing
 	cp $(SAMPDIR)/printing/*.xbm $(DISTDIR)/samples/printing
 	mkdir $(DISTDIR)/samples/db
 	cp $(SAMPDIR)/db/Makefile.in $(DISTDIR)/samples/db
-	cp $(SAMPDIR)/db/makefile.unx $(DISTDIR)/samples/db
 	cp $(SAMPDIR)/db/*.cpp $(DISTDIR)/samples/db
 	cp $(SAMPDIR)/db/*.h $(DISTDIR)/samples/db
 	cp $(SAMPDIR)/db/*.xpm $(DISTDIR)/samples/db
 	mkdir $(DISTDIR)/samples/dialogs
 	cp $(SAMPDIR)/dialogs/Makefile.in $(DISTDIR)/samples/dialogs
-	cp $(SAMPDIR)/dialogs/makefile.unx $(DISTDIR)/samples/dialogs
 	cp $(SAMPDIR)/dialogs/*.cpp $(DISTDIR)/samples/dialogs
 	cp $(SAMPDIR)/dialogs/*.h $(DISTDIR)/samples/dialogs
 	cp $(SAMPDIR)/dialogs/*.txt $(DISTDIR)/samples/dialogs
 	mkdir $(DISTDIR)/samples/dnd
 	cp $(SAMPDIR)/dnd/Makefile.in $(DISTDIR)/samples/dnd
-	cp $(SAMPDIR)/dnd/makefile.unx $(DISTDIR)/samples/dnd
-	cp $(SAMPDIR)/dnd/*.wxr $(DISTDIR)/samples/dnd
 	cp $(SAMPDIR)/dnd/*.cpp $(DISTDIR)/samples/dnd
 	cp $(SAMPDIR)/dnd/*.xpm $(DISTDIR)/samples/dnd
 	cp $(SAMPDIR)/dnd/*.txt $(DISTDIR)/samples/dnd
@@ -976,10 +965,6 @@ SAMPLES_DIST:
 	cp $(SAMPDIR)/proplist/Makefile.in $(DISTDIR)/samples/proplist
 	cp $(SAMPDIR)/proplist/*.cpp $(DISTDIR)/samples/proplist
 	cp $(SAMPDIR)/proplist/*.h $(DISTDIR)/samples/proplist
-	mkdir $(DISTDIR)/samples/propsize
-	cp $(SAMPDIR)/propsize/Makefile.in $(DISTDIR)/samples/propsize
-	cp $(SAMPDIR)/propsize/*.cpp $(DISTDIR)/samples/propsize
-	cp $(SAMPDIR)/propsize/*.xpm $(DISTDIR)/samples/propsize
 	mkdir $(DISTDIR)/samples/sashtest
 	cp $(SAMPDIR)/sashtest/Makefile.in $(DISTDIR)/samples/sashtest
 	cp $(SAMPDIR)/sashtest/*.cpp $(DISTDIR)/samples/sashtest
@@ -1075,8 +1060,6 @@ MISC_DIST:
 	
 dist: ALL_DIST @GUIDIST@ SAMPLES_DIST UTILS_DIST MISC_DIST
 	cd _dist_dir; tar ch wx$(TOOLKIT) | gzip -f9 > $(WXARCHIVE); mv $(WXARCHIVE) ..
-	mv _dist_dir/wx$(TOOLKIT)/samples _dist_dir/wx$(TOOLKIT)/wxSamples
-	cd _dist_dir/wx$(TOOLKIT); tar ch wxSamples | gzip -f9 > $(WXSAMPLES); mv $(WXSAMPLES) ../..
 	$(RM) -r _dist_dir
 
 clean:

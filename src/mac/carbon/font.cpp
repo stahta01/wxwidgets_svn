@@ -22,42 +22,39 @@
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
 #endif
 
-
-
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// wxFontRefData
-// ----------------------------------------------------------------------------
-
-void wxFontRefData::Init(int pointSize,
-                         int family,
-                         int style,
-                         int weight,
-                         bool underlined,
-                         const wxString& faceName,
-                         wxFontEncoding encoding)
+wxFontRefData::wxFontRefData()
 {
-    m_style = style;
-    m_pointSize = pointSize;
-    m_family = family;
-    m_style = style;
-    m_weight = weight;
-    m_underlined = underlined;
-    m_faceName = faceName;
-    m_encoding = encoding;
+	m_style = 0;
+  	m_pointSize = 0;
+  	m_family = 0;
+  	m_style = 0;
+  	m_weight = 0;
+  	m_underlined = 0;
+  	m_faceName = "";
 
-	m_macFontNum = 0 ;
-	m_macFontSize = 0;
-	m_macFontStyle = 0;
-    m_fontId = 0;
+  	m_macFontSize = m_pointSize ; 
+  	m_macFontNum = systemFont ;
+  	m_macFontStyle = normal ;
+}
+
+wxFontRefData::wxFontRefData(const wxFontRefData& data)
+{
+	m_style = data.m_style;
+  	m_pointSize = data.m_pointSize;
+  	m_family = data.m_family;
+  	m_style = data.m_style;
+  	m_weight = data.m_weight;
+  	m_underlined = data.m_underlined;
+  	m_faceName = data.m_faceName;
+
+  	m_macFontSize = m_pointSize ; 
+  	m_macFontNum = systemFont ;
+  	m_macFontStyle = normal ;
 }
 
 wxFontRefData::~wxFontRefData()
 {
+    // TODO: delete font data
 }
 
 void wxFontRefData::MacFindFont()
@@ -110,27 +107,31 @@ void wxFontRefData::MacFindFont()
 	m_macFontSize = m_pointSize ;
 }
 
-// ----------------------------------------------------------------------------
-// wxFont
-// ----------------------------------------------------------------------------
-
-void wxFont::Init()
+wxFont::wxFont()
 {
     if ( wxTheFontList )
         wxTheFontList->Append(this);
 }
 
-bool wxFont::Create(int pointSize,
-                    int family,
-                    int style,
-                    int weight,
-                    bool underlined,
-                    const wxString& faceName,
-                    wxFontEncoding encoding)
+wxFont::wxFont(int pointSize, int family, int style, int weight, bool underlined, const wxString& faceName)
+{
+    Create(pointSize, family, style, weight, underlined, faceName);
+
+    if ( wxTheFontList )
+        wxTheFontList->Append(this);
+}
+
+bool wxFont::Create(int pointSize, int family, int style, int weight, bool underlined, const wxString& faceName)
 {
     UnRef();
-    m_refData = new wxFontRefData(pointSize, family, style, weight,
-                                  underlined, faceName, encoding);
+    m_refData = new wxFontRefData;
+
+    M_FONTDATA->m_family = family;
+    M_FONTDATA->m_style = style;
+    M_FONTDATA->m_weight = weight;
+    M_FONTDATA->m_pointSize = pointSize;
+    M_FONTDATA->m_underlined = underlined;
+    M_FONTDATA->m_faceName = faceName;
 
     RealizeResource();
 
@@ -147,15 +148,6 @@ bool wxFont::RealizeResource()
 {
 	M_FONTDATA->MacFindFont() ;
     return TRUE;
-}
-
-void wxFont::SetEncoding(wxFontEncoding encoding)
-{
-    Unshare();
-
-    M_FONTDATA->m_encoding = encoding;
-
-    RealizeResource();
 }
 
 void wxFont::Unshare()
@@ -227,45 +219,78 @@ void wxFont::SetUnderlined(bool underlined)
     RealizeResource();
 }
 
-// ----------------------------------------------------------------------------
-// accessors
-// ----------------------------------------------------------------------------
-
-int wxFont::GetPointSize() const
+wxString wxFont::GetFamilyString() const
 {
-    return M_FONTDATA->m_pointSize;
+  wxString fam("");
+  switch (GetFamily())
+  {
+    case wxDECORATIVE:
+      fam = "wxDECORATIVE";
+      break;
+    case wxROMAN:
+      fam = "wxROMAN";
+      break;
+    case wxSCRIPT:
+      fam = "wxSCRIPT";
+      break;
+    case wxSWISS:
+      fam = "wxSWISS";
+      break;
+    case wxMODERN:
+      fam = "wxMODERN";
+      break;
+    case wxTELETYPE:
+      fam = "wxTELETYPE";
+      break;
+    default:
+      fam = "wxDEFAULT";
+      break;
+  }
+  return fam;
 }
 
-int wxFont::GetFamily() const
-{
-    return M_FONTDATA->m_family;
-}
-
-int wxFont::GetStyle() const
-{
-    return M_FONTDATA->m_style;
-}
-
-int wxFont::GetWeight() const
-{
-    return M_FONTDATA->m_weight;
-}
-
-bool wxFont::GetUnderlined() const
-{
-    return M_FONTDATA->m_underlined;
-}
-
+/* New font system */
 wxString wxFont::GetFaceName() const
 {
-    wxString str;
-    if ( M_FONTDATA )
-        str = M_FONTDATA->m_faceName ;
+    wxString str("");
+    if (M_FONTDATA)
+	    str = M_FONTDATA->m_faceName ;
     return str;
 }
 
-wxFontEncoding wxFont::GetEncoding() const
+wxString wxFont::GetStyleString() const
 {
-    return M_FONTDATA->m_encoding;
+    wxString styl("");
+    switch (GetStyle())
+    {
+        case wxITALIC:
+            styl = "wxITALIC";
+            break;
+        case wxSLANT:
+            styl = "wxSLANT";
+            break;
+        default:
+            styl = "wxNORMAL";
+            break;
+    }
+    return styl;
+}
+
+wxString wxFont::GetWeightString() const
+{
+    wxString w("");
+    switch (GetWeight())
+    {
+        case wxBOLD:
+            w = "wxBOLD";
+            break;
+        case wxLIGHT:
+            w = "wxLIGHT";
+            break;
+        default:
+            w = "wxNORMAL";
+            break;
+    }
+    return w;
 }
 

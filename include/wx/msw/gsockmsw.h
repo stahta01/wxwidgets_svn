@@ -21,9 +21,6 @@
 #include "gsocket.h"
 #endif
 
-#if defined(__BORLANDC__)
-#include <windows.h>
-#endif
 #include <winsock.h>
 
 #ifdef __cplusplus
@@ -31,6 +28,7 @@ extern "C" {
 #endif
 
 /* Definition of GSocket */
+typedef
 struct _GSocket
 {
   SOCKET m_fd;

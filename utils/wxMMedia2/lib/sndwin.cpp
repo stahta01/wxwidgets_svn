@@ -65,9 +65,6 @@ wxSoundStreamWin::wxSoundStreamWin()
   CreateSndWindow();
   SetSoundFormat(pcm);
 
-  m_internal->m_input_enabled = FALSE;
-  m_internal->m_output_enabled = FALSE;
-
   if (!OpenDevice(wxSOUND_OUTPUT))
     return;
 
@@ -86,18 +83,12 @@ wxSoundStreamWin::~wxSoundStreamWin()
 LRESULT APIENTRY _EXPORT _wxSoundHandlerWndProc(HWND hWnd, UINT message,
                  WPARAM wParam, LPARAM lParam)
 {
-  wxSoundStreamWin *sndwin;
-
-  sndwin = wxFindSoundFromHandle((WXHWND)hWnd);
-  if (!sndwin)
-    return (LRESULT)0;
-
   switch (message) {
   case MM_WOM_DONE:
-    sndwin->NotifyDoneBuffer(wParam, wxSOUND_OUTPUT);
+    wxFindSoundFromHandle((WXHWND)hWnd)->NotifyDoneBuffer(wParam, wxSOUND_OUTPUT);
     break;
   case MM_WIM_DATA:
-    sndwin->NotifyDoneBuffer(wParam, wxSOUND_INPUT);
+    wxFindSoundFromHandle((WXHWND)hWnd)->NotifyDoneBuffer(wParam, wxSOUND_INPUT);
     break;
   default:
     break;
@@ -237,15 +228,16 @@ bool wxSoundStreamWin::OpenDevice(int mode)
 // -------------------------------------------------------------------------
 void wxSoundStreamWin::CloseDevice()
 {
+  m_internal->m_output_enabled = FALSE;
+  m_internal->m_input_enabled  = FALSE;
+
   if (m_internal->m_output_enabled) {
-    m_internal->m_output_enabled = FALSE;
     waveOutReset(m_internal->m_devout);
     FreeHeaders(wxSOUND_OUTPUT);
     waveOutClose(m_internal->m_devout);
   }
 
   if (m_internal->m_input_enabled) {
-    m_internal->m_input_enabled  = FALSE;
     waveInReset(m_internal->m_devin);
     FreeHeaders(wxSOUND_INPUT);
     waveInClose(m_internal->m_devin);
@@ -557,11 +549,11 @@ wxSoundInfoHeader *wxSoundStreamWin::NextFragmentInput()
 {
   wxSoundInfoHeader *header;
 
-  m_current_frag_in = (m_current_frag_in + 1) % WXSOUND_MAX_QUEUE;
-
   header = m_headers_rec[m_current_frag_in];
   if (header->m_recording)
     WaitFor(header);
+
+  m_current_frag_in = (m_current_frag_in + 1) % WXSOUND_MAX_QUEUE;
 
   if (m_current_frag_in == m_input_frag_in)
     m_queue_filled = TRUE;

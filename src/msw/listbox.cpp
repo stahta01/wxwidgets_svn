@@ -256,15 +256,15 @@ void wxListBox::Delete(int N)
     wxCHECK_RET( N >= 0 && N < m_noItems,
                  wxT("invalid index in wxListBox::Delete") );
 
-    // for owner drawn objects, the data is used for storing wxOwnerDrawn
-    // pointers and we shouldn't touch it
-#if !wxUSE_OWNER_DRAWN
-    if ( !(m_windowStyle & wxLB_OWNERDRAW) )
-#endif // !wxUSE_OWNER_DRAWN
-        if ( HasClientObjectData() )
-        {
-            delete GetClientObject(N);
-        }
+#if wxUSE_OWNER_DRAWN
+    delete m_aItems[N];
+    m_aItems.Remove(N);
+#else // !wxUSE_OWNER_DRAWN
+    if ( HasClientObjectData() )
+    {
+        delete GetClientObject(N);
+    }
+#endif // wxUSE_OWNER_DRAWN/!wxUSE_OWNER_DRAWN
 
     SendMessage(GetHwnd(), LB_DELETESTRING, N, 0);
     m_noItems--;
@@ -747,18 +747,12 @@ bool wxListBox::MSWOnMeasure(WXMEASUREITEMSTRUCT *item)
 
     MEASUREITEMSTRUCT *pStruct = (MEASUREITEMSTRUCT *)item;
 
-    HDC hdc = CreateIC(wxT("DISPLAY"), NULL, NULL, 0);
-
     wxDC dc;
-    dc.SetHDC((WXHDC)hdc);
+    dc.SetHDC((WXHDC)CreateIC(wxT("DISPLAY"), NULL, NULL, 0));
     dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_ANSI_VAR_FONT));
 
     pStruct->itemHeight = dc.GetCharHeight() + 2*OWNER_DRAWN_LISTBOX_EXTRA_SPACE;
     pStruct->itemWidth  = dc.GetCharWidth();
-
-    dc.SetHDC(0);
-
-    DeleteDC(hdc);
 
     return TRUE;
 }

@@ -12,9 +12,6 @@
 #ifndef _WX_DIB_H_
 #define _WX_DIB_H_
 
-class WXDLLEXPORT wxBitmap;
-class WXDLLEXPORT wxColourMap;
-
 // Save (device dependent) wxBitmap as a DIB
 bool             wxSaveBitmap(wxChar *filename, wxBitmap *bitmap, wxColourMap *colourmap = NULL);
 

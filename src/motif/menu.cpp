@@ -162,14 +162,14 @@ bool wxMenu::ProcessCommand(wxCommandEvent & event)
 {
     bool processed = FALSE;
 
-#if wxUSE_MENU_CALLBACK
+#if WXWIN_COMPATIBILITY
     // Try a callback
     if (m_callback)
     {
         (void) (*(m_callback)) (*this, event);
         processed = TRUE;
     }
-#endif // wxUSE_MENU_CALLBACK
+#endif // WXWIN_COMPATIBILITY
 
     // Try the menu's event handler
     if ( !processed && GetEventHandler())
@@ -217,7 +217,7 @@ wxMenuBar::~wxMenuBar()
 void wxMenuBar::EnableTop(size_t WXUNUSED(pos), bool WXUNUSED(flag))
 {
   //    wxFAIL_MSG("TODO");
-//  wxLogWarning("wxMenuBar::EnableTop not yet implemented.");
+  wxLogWarning("wxMenuBar::EnableTop not yet implemented.");
 }
 
 void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)

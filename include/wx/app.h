@@ -310,11 +310,6 @@ extern void WXDLLEXPORT wxExit();
 // Yield to other apps/messages
 extern bool WXDLLEXPORT wxYield();
 
-#ifdef __WXGTK__
-// Yield to other apps/messages
-extern void WXDLLEXPORT wxWakeUpIdle();
-#endif
-
 // Post a message to the given eventhandler which will be processed during the
 // next event loop iteration
 inline void WXDLLEXPORT wxPostEvent(wxEvtHandler *dest, wxEvent& event)
@@ -361,7 +356,7 @@ public:
 // be in your main program (e.g. hello.cpp). Now IMPLEMENT_APP should add this
 // code if required.
 
-#if defined(__AIX__) || defined(__HPUX__) || defined( __VMS__ )
+#if defined(__AIX__) || defined(__HPUX__)
     #define IMPLEMENT_WXWIN_MAIN \
         extern int wxEntry( int argc, char *argv[] ); \
         int main(int argc, char *argv[]) { return wxEntry(argc, argv); }

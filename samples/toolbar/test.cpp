@@ -85,8 +85,6 @@ public:
     void OnToolLeftClick(wxCommandEvent& event);
     void OnToolEnter(wxCommandEvent& event);
 
-    void OnCombo(wxCommandEvent& event);
-
 private:
     void DoEnablePrint();
     void DoToggleHelp();
@@ -107,9 +105,7 @@ enum
 {
     IDM_TOOLBAR_TOGGLETOOLBAR = 200,
     IDM_TOOLBAR_ENABLEPRINT,
-    IDM_TOOLBAR_TOGGLEHELP,
-
-    ID_COMBO = 1000
+    IDM_TOOLBAR_TOGGLEHELP
 };
 
 // ----------------------------------------------------------------------------
@@ -128,8 +124,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(IDM_TOOLBAR_TOGGLEHELP, MyFrame::OnToggleHelp)
 
     EVT_MENU(-1, MyFrame::OnToolLeftClick)
-
-    EVT_COMBOBOX(ID_COMBO, MyFrame::OnCombo)
 
     EVT_TOOL_ENTER(ID_TOOLBAR, MyFrame::OnToolEnter)
 END_EVENT_TABLE()
@@ -211,24 +205,13 @@ bool MyApp::InitToolbar(wxToolBar* toolBar, bool smallicons)
   toolBar->AddTool(wxID_NEW, *(toolBarBitmaps[0]), wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, "New file");
   currentX += width + 5;
   toolBar->AddTool(wxID_OPEN, *(toolBarBitmaps[1]), wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, "Open file");
-  currentX += width + 5;
-  toolBar->AddTool(wxID_SAVE, *(toolBarBitmaps[2]), wxNullBitmap, TRUE, currentX, -1, (wxObject *) NULL, "Toggle button 1");
 
-  toolBar->AddSeparator();
-
-  wxComboBox *combo = new wxComboBox(toolBar, ID_COMBO);
-  combo->Append("This");
-  combo->Append("is a");
-  combo->Append("combobox");
-  combo->Append("in a");
-  combo->Append("toolbar");
-  toolBar->AddControl(combo);
-
-  toolBar->AddSeparator();
-  
   if ( !smallicons )
   {
       currentX += width + 5;
+      toolBar->AddTool(wxID_SAVE, *(toolBarBitmaps[2]), wxNullBitmap, TRUE, currentX, -1, (wxObject *) NULL, "Toggle button 1");
+      currentX += width + 5;
+      toolBar->AddSeparator();
       toolBar->AddTool(wxID_COPY, *(toolBarBitmaps[3]), wxNullBitmap, TRUE, currentX, -1, (wxObject *) NULL, "Toggle button 2");
       currentX += width + 5;
       toolBar->AddTool(wxID_CUT, *(toolBarBitmaps[4]), wxNullBitmap, FALSE, currentX, -1, (wxObject *) NULL, "Toggle/Untoggle help button");
@@ -240,12 +223,17 @@ bool MyApp::InitToolbar(wxToolBar* toolBar, bool smallicons)
       currentX += width + 5;
       toolBar->AddSeparator();
       toolBar->AddTool(wxID_HELP, *(toolBarBitmaps[7]), wxNullBitmap, TRUE, currentX, -1, (wxObject *) NULL, "Help button");
+
+      toolBar->ToggleTool( wxID_SAVE, TRUE );
+      toolBar->ToggleTool( wxID_COPY, TRUE );
+      toolBar->ToggleTool( wxID_COPY, FALSE );
+      toolBar->EnableTool( wxID_PRINT, FALSE );
   }
 
   toolBar->Realize();
 
   // Can delete the bitmaps since they're reference counted
-  int i, max = smallicons ? 3 : WXSIZEOF(toolBarBitmaps);
+  int i, max = smallicons ? 2 : WXSIZEOF(toolBarBitmaps);
   for (i = 0; i < max; i++)
     delete toolBarBitmaps[i];
 
@@ -300,7 +288,7 @@ MyFrame::MyFrame(wxFrame* parent,
                                     wxTB_FLAT | wxTB_DOCKABLE,
                                     ID_TOOLBAR);
 
-    tbar->SetMargins( 4, 4 );
+    tbar->SetMargins( 2, 2 );
 
     wxGetApp().InitToolbar(tbar);
 }
@@ -353,11 +341,6 @@ void MyFrame::OnToolLeftClick(wxCommandEvent& event)
     {
         DoToggleHelp();
     }
-}
-
-void MyFrame::OnCombo(wxCommandEvent& event)
-{
-    wxLogStatus(_T("Combobox string '%s' selected"), event.GetString().c_str());
 }
 
 void MyFrame::DoEnablePrint()

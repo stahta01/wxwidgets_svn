@@ -37,7 +37,7 @@
 // ----------------------------------------------------------------------------
 
 wxList wxTimerList(wxKEY_INTEGER);
-ULONG wxTimerProc(HWND hwnd, ULONG, int nIdTimer, ULONG);
+UINT wxTimerProc(HWND hwnd, WORD, int idTimer, DWORD);
 
 // ----------------------------------------------------------------------------
 // macros
@@ -49,7 +49,9 @@ IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxObject)
 
 wxTimer::wxTimer()
 {
-    m_ulId = 0;
+    milli = 0 ;
+    id = 0;
+    oneShot = FALSE;
 }
 
 wxTimer::~wxTimer()
@@ -59,84 +61,74 @@ wxTimer::~wxTimer()
     wxTimerList.DeleteObject(this);
 }
 
-bool wxTimer::Start(
-  int                               nMilliseconds
-, bool                              bOneShot
-)
+bool wxTimer::Start(int milliseconds,bool mode)
 {
-    (void)wxTimerBase::Start( nMilliseconds
-                             ,bOneShot
-                            );
+    oneShot = mode;
+    if (milliseconds < 0)
+        milliseconds = lastMilli;
 
-    wxCHECK_MSG( m_milli > 0L, FALSE, wxT("invalid value for timer") );
+    wxCHECK_MSG( milliseconds > 0, FALSE, wxT("invalid value for timer timeour") );
+
+    lastMilli = milli = milliseconds;
 
     wxTimerList.DeleteObject(this);
+// TODO:
+/*
+    TIMERPROC wxTimerProcInst = (TIMERPROC)
+        MakeProcInstance((FARPROC)wxTimerProc, wxGetInstance());
 
-    //
-    // Create a windowless timer
-    //
-    m_ulId = ::WinStartTimer( m_Hab
-                             ,NULL
-                             ,(m_ulId ? m_ulId : 1L)
-                             ,(ULONG)nMilliseconds
-                            );
-    if (m_ulId > 0L)
+    id = SetTimer(NULL, (UINT)(id ? id : 1),
+                  (UINT)milliseconds, wxTimerProcInst);
+*/
+    if (id > 0)
     {
-        wxTimerList.Append( m_ulId
-                           ,this
-                          );
-        return(TRUE);
+        wxTimerList.Append(id, this);
+
+        return TRUE;
     }
     else
     {
         wxLogSysError(_("Couldn't create a timer"));
 
-        return(FALSE);
+        return FALSE;
     }
 }
 
 void wxTimer::Stop()
 {
-    if ( m_ulId )
+    if ( id )
     {
-        ::WinStopTimer(m_Hab, NULL, m_ulId);
+//        KillTimer(NULL, (UINT)id);
         wxTimerList.DeleteObject(this);
     }
-    m_ulId = 0L;
+    id = 0;
+    milli = 0;
 }
 
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
-void wxProcessTimer(
-  wxTimer&                          rTimer
-)
+void wxProcessTimer(wxTimer& timer)
 {
-    //
     // Avoid to process spurious timer events
-    //
-    if (rTimer.m_ulId == 0L)
+    if ( timer.id == 0)
         return;
 
-    if (rTimer.IsOneShot())
-        rTimer.Stop();
+    if ( timer.oneShot )
+        timer.Stop();
 
-    rTimer.Notify();
+    timer.Notify();
 }
 
-ULONG wxTimerProc(
-  HWND                              WXUNUSED(hwnd)
-, ULONG
-, int                               nIdTimer
-, ULONG
-)
+UINT wxTimerProc(HWND WXUNUSED(hwnd), WORD, int idTimer, DWORD)
 {
-    wxNode*                         pNode = wxTimerList.Find((ULONG)nIdTimer);
+    wxNode *node = wxTimerList.Find((long)idTimer);
 
-    wxCHECK_MSG(pNode, 0, wxT("bogus timer id in wxTimerProc") );
+    wxCHECK_MSG( node, 0, wxT("bogus timer id in wxTimerProc") );
 
-    wxProcessTimer(*(wxTimer *)pNode->Data());
+    wxProcessTimer(*(wxTimer *)node->Data());
+
     return 0;
 }
 

@@ -296,12 +296,9 @@ void wxTextCtrl::SetValue(const wxString& value)
 {
     wxString valueDos = wxTextFile::Translate(value, wxTextFileType_Dos);
 
-    if ( valueDos != GetValue() )
-    {
-        SetWindowText(GetHwnd(), valueDos);
+    SetWindowText(GetHwnd(), valueDos);
 
-        AdjustSpaceLimit();
-    }
+    AdjustSpaceLimit();
 }
 
 void wxTextCtrl::WriteText(const wxString& value)

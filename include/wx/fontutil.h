@@ -53,7 +53,7 @@ struct WXDLLEXPORT wxNativeEncodingInfo
 {
     wxString facename;          // may be empty meaning "any"
 
-#if defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMAC__)
+#if defined(__WXMSW__) || defined(__WXPM__)
     wxNativeEncodingInfo() { charset = 0; /* ANSI_CHARSET */ }
 
     int      charset;

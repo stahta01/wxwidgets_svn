@@ -33,21 +33,18 @@ class WXDLLEXPORT wxPrintDialog: public wxDialog
 
  public:
   wxPrintDialog();
-    wxPrintDialog(wxWindow *parent, wxPrintDialogData* data = NULL);
-  wxPrintDialog(wxWindow *parent, wxPrintData* data );
+  wxPrintDialog(wxWindow *parent, wxPrintData* data = NULL);
   ~wxPrintDialog();
 
-    bool Create(wxWindow *parent, wxPrintDialogData* data = NULL);
+  bool Create(wxWindow *parent, wxPrintData* data = NULL);
   virtual int ShowModal();
 
-  wxPrintDialogData& GetPrintDialogData() { return m_printDialogData; }
-  wxPrintData& GetPrintData() { return m_printDialogData.GetPrintData(); }
+  inline wxPrintData& GetPrintData() { return m_printData; }
   virtual wxDC *GetPrintDC();
 
  private:
-  wxPrintDialogData   m_printDialogData;
+  wxPrintData       m_printData;
   wxDC*             m_printerDC;
-  bool              m_destroyDC;
   wxWindow*         m_dialogParent;
 };
 
@@ -55,6 +52,9 @@ class WXDLLEXPORT wxPageSetupDialog: public wxDialog
 {
   DECLARE_DYNAMIC_CLASS(wxPageSetupDialog)
 
+ private:
+  wxPageSetupData   m_pageSetupData;
+  wxWindow*         m_dialogParent;
  public:
   wxPageSetupDialog();
   wxPageSetupDialog(wxWindow *parent, wxPageSetupData *data = NULL);
@@ -64,9 +64,6 @@ class WXDLLEXPORT wxPageSetupDialog: public wxDialog
   virtual int ShowModal();
 
   inline wxPageSetupData& GetPageSetupData() { return m_pageSetupData; }
- private:
-  wxPageSetupData   m_pageSetupData;
-  wxWindow*         m_dialogParent;
 };
 
 #endif

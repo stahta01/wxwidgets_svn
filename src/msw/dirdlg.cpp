@@ -6,186 +6,154 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart and Markus Holzem
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// ============================================================================
-// declarations
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// headers
-// ----------------------------------------------------------------------------
 #ifdef __GNUG__
-    #pragma implementation "dirdlg.h"
+#pragma implementation "dirdlg.h"
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-    #include "wx/dirdlg.h"
-    #include "wx/log.h"
+#include <stdio.h>
+#include "wx/defs.h"
+#include "wx/utils.h"
+#include "wx/dialog.h"
+#include "wx/dirdlg.h"
+#endif
+
+#if (defined(__WIN95__) && !defined(__GNUWIN32__))||defined(wxUSE_NORLANDER_HEADERS)
+#include "shlobj.h" // Win95 shell
 #endif
 
 #include "wx/msw/private.h"
+#include "wx/cmndata.h"
 
-#if defined(__WIN95__) && \
-    (!defined(__GNUWIN32__) || defined(wxUSE_NORLANDER_HEADERS))
-    #define CAN_COMPILE_DIRDLG
-//#else: we provide a stub version which doesn't do anything
-#endif
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
-#ifdef CAN_COMPILE_DIRDLG
-    #include "shlobj.h" // Win95 shell
-#endif
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-#ifndef MAX_PATH
-    #define MAX_PATH 4096      // be generuous
-#endif
-
-// ----------------------------------------------------------------------------
-// wxWindows macros
-// ----------------------------------------------------------------------------
+#define wxDIALOG_DEFAULT_X 300
+#define wxDIALOG_DEFAULT_Y 300
 
 #if !USE_SHARED_LIBRARY
-    IMPLEMENT_CLASS(wxDirDialog, wxDialog)
+IMPLEMENT_CLASS(wxDirDialog, wxDialog)
 #endif
 
-// ----------------------------------------------------------------------------
-// private functions prototypes
-// ----------------------------------------------------------------------------
+static int CALLBACK
+BrowseCallbackProc(HWND hwnd,UINT uMsg,LPARAM lp, LPARAM pData)
+   {
+   TCHAR szDir[MAX_PATH];
 
-// free the parameter
-static void ItemListFree(LPITEMIDLIST pidl);
+   switch(uMsg)
+      {
+      case BFFM_INITIALIZED:
+         // We have put m_path into pData.
+         // TRUE -> passing char *, not dir id.
+         SendMessage(hwnd,BFFM_SETSELECTION,TRUE,pData);
+         break;
 
-// the callback proc for the dir dlg
-static int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lp,
-                                       LPARAM pData);
+      case BFFM_SELCHANGED:
+         // Set the status window to the currently selected path.
+         if (SHGetPathFromIDList((LPITEMIDLIST) lp ,szDir))
+            {
+            SendMessage(hwnd,BFFM_SETSTATUSTEXT,0,(LPARAM)szDir);
+            }
+         break;
 
-// ============================================================================
-// implementation
-// ============================================================================
+      default:
+         break;
+      }
+   return 0;
+   }
 
-// ----------------------------------------------------------------------------
-// wxDirDialog
-// ----------------------------------------------------------------------------
 
-wxDirDialog::wxDirDialog(wxWindow *parent,
-                         const wxString& message,
-                         const wxString& defaultPath,
-                         long WXUNUSED(style),
-                         const wxPoint& WXUNUSED(pos))
+wxDirDialog::wxDirDialog(wxWindow *parent, const wxString& message,
+//		const wxString& caption,
+        const wxString& defaultPath,
+        long style, const wxPoint& pos)
 {
     m_message = message;
+//    m_caption = caption;
+    m_dialogStyle = style;
     m_parent = parent;
-    m_path = defaultPath;
+	m_path = defaultPath;
 }
 
-int wxDirDialog::ShowModal()
+int wxDirDialog::ShowModal(void)
 {
-#ifdef CAN_COMPILE_DIRDLG
+    // Unfortunately Gnu-Win32 doesn't yet have COM support
+#if (defined(__WIN95__) && !defined(__GNUWIN32__))||defined(wxUSE_NORLANDER_HEADERS)
+  HWND hWnd = 0;
+  if (m_parent) hWnd = (HWND) m_parent->GetHWND();
+
     BROWSEINFO bi;
-    bi.hwndOwner      = m_parent ? GetHwndOf(m_parent) : NULL;
-    bi.pidlRoot       = NULL;
-    bi.pszDisplayName = NULL;
-    bi.lpszTitle      = m_message.c_str();
-    bi.ulFlags        = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
-    bi.lpfn           = BrowseCallbackProc;
-    bi.lParam         = (LPARAM)m_path.c_str();    // param for the callback
+    LPTSTR lpBuffer;
+//    LPITEMIDLIST pidlPrograms;  // PIDL for Programs folder 
+    LPITEMIDLIST pidlBrowse;    // PIDL selected by user 
+    LPMALLOC pMalloc = NULL;
 
-    LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+    HRESULT result = ::SHGetMalloc(&pMalloc);
 
-    if ( bi.pidlRoot )
+    if (result != NOERROR)
+      return wxID_CANCEL;
+    
+    // Allocate a buffer to receive browse information. 
+    if ((lpBuffer = (LPTSTR) pMalloc->Alloc(MAX_PATH)) == NULL) 
     {
-        ItemListFree((LPITEMIDLIST)bi.pidlRoot);
-    }
-
-    if ( !pidl )
-    {
-        // Cancel button pressed
+        pMalloc->Release();
         return wxID_CANCEL;
     }
 
-    BOOL ok = SHGetPathFromIDList(pidl, m_path.GetWriteBuf(MAX_PATH));
-    m_path.UngetWriteBuf();
-
-    ItemListFree(pidl);
-
-    if ( !ok )
-    {
-        wxLogLastError("SHGetPathFromIDList");
-
+/*
+    // Get the PIDL for the Programs folder. 
+    if (!SUCCEEDED(SHGetSpecialFolderLocation( 
+            parent->GetSafeHwnd(), CSIDL_PROGRAMS, &pidlPrograms))) { 
+        pMalloc->Free(lpBuffer);
+        pMalloc->Release();
         return wxID_CANCEL;
+    } 
+*/
+ 
+    // Fill in the BROWSEINFO structure. 
+    bi.hwndOwner = hWnd;
+    bi.pidlRoot = NULL; // pidlPrograms; 
+    bi.pszDisplayName = lpBuffer; 
+    bi.lpszTitle = m_message; // BC++ 4.52 says LPSTR, not LPTSTR?
+    bi.ulFlags = 0; 
+    bi.lpfn = BrowseCallbackProc; 
+    bi.lParam = (LPARAM)m_path.c_str(); 
+ 
+    // Browse for a folder and return its PIDL. 
+    pidlBrowse = SHBrowseForFolder(&bi); 
+
+    int id = wxID_OK;
+    if (pidlBrowse != NULL) {
+ 
+        // Show the display name, title, and file system path. 
+        if (SHGetPathFromIDList(pidlBrowse, lpBuffer))
+          m_path = lpBuffer;
+          
+        // Free the PIDL returned by SHBrowseForFolder. 
+        pMalloc->Free(pidlBrowse);
     }
-
-    return wxID_OK;
-#else // !CAN_COMPILE_DIRDLG
-    return wxID_CANCEL;
-#endif // CAN_COMPILE_DIRDLG/!CAN_COMPILE_DIRDLG
-}
-
-// ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-static int CALLBACK
-BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
-{
-    switch(uMsg)
-    {
-        case BFFM_INITIALIZED:
-            // sent immediately after initialisation and so we may set the
-            // initial selection here
-            //
-            // wParam = TRUE => lParam is a string and not a PIDL
-            SendMessage(hwnd, BFFM_SETSELECTION, TRUE, pData);
-            break;
-
-        case BFFM_SELCHANGED:
-            {
-                // Set the status window to the currently selected path.
-                TCHAR szDir[MAX_PATH];
-                if ( SHGetPathFromIDList((LPITEMIDLIST)lp, szDir) )
-                {
-                    SendMessage(hwnd, BFFM_SETSTATUSTEXT, 0, (LPARAM)szDir);
-                }
-            }
-            break;
-
-        //case BFFM_VALIDATEFAILED: -- might be used to provide custom message
-        //                             if the user types in invalid dir name
-    }
-
-    return 0;
-}
-
-
-static void ItemListFree(LPITEMIDLIST pidl)
-{
-    if ( pidl )
-    {
-        LPMALLOC pMalloc;
-        SHGetMalloc(&pMalloc);
-        if ( pMalloc )
-        {
-            pMalloc->Free(pidl);
-            pMalloc->Release();
-        }
-        else
-        {
-            wxLogLastError("SHGetMalloc");
-        }
-    }
+	else
+		id = wxID_CANCEL;
+ 
+    // Clean up. 
+//    pMalloc->Free(pidlPrograms); 
+    pMalloc->Free(lpBuffer); 
+    pMalloc->Release();
+    
+    return id;
+#else
+	return wxID_CANCEL;
+#endif
 }
 

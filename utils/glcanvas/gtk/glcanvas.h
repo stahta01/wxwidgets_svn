@@ -132,7 +132,6 @@ public:
   
     wxGLContext      *m_glContext,
                      *m_sharedContext;
-    void             *m_vi;
     GtkWidget        *m_glWidget;
     bool              m_exposed;
 

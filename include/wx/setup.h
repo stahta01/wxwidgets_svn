@@ -15,9 +15,7 @@
 #error No __WXxxx__ define set! Please define one of __WXGTK__,__WXMSW__,__WXMOTIF__,__WXMAC__,__WXQT__,__WXPM__,__WXSTUBS__
 #endif
 
-#ifdef __VMS
-#include "[--]setup.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
 #include "wx/msw/setup.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/setup.h"

@@ -523,13 +523,6 @@ void wxTreeCtrl::Init()
   m_dragCount = 0;
 
   m_renameTimer = new wxTreeRenameTimer( this );
-  
-  m_normalFont = wxSystemSettings::GetSystemFont( wxSYS_DEFAULT_GUI_FONT );
-  m_boldFont = wxFont( m_normalFont.GetPointSize(),
-                            m_normalFont.GetFamily(),
-                            m_normalFont.GetStyle(),
-                            wxBOLD,
-                            m_normalFont.GetUnderlined());
 }
 
 bool wxTreeCtrl::Create(wxWindow *parent, wxWindowID id,
@@ -1413,8 +1406,28 @@ int wxTreeCtrl::GetLineHeight(wxGenericTreeItem *item) const
 
 void wxTreeCtrl::PaintItem(wxGenericTreeItem *item, wxDC& dc)
 {
+    // render bold items in bold
+    wxFont fontOld;
+    wxFont fontNew;
+
     if (item->IsBold())
-        dc.SetFont(m_boldFont);
+    {
+        fontOld = dc.GetFont();
+        if (fontOld.Ok())
+        {
+          // VZ: is there any better way to make a bold variant of old font?
+          fontNew = wxFont( fontOld.GetPointSize(),
+                            fontOld.GetFamily(),
+                            fontOld.GetStyle(),
+                            wxBOLD,
+                            fontOld.GetUnderlined());
+          dc.SetFont(fontNew);
+        }
+        else
+        {
+            wxFAIL_MSG(wxT("wxDC::GetFont() failed!"));
+        }
+    }
 
     long text_w = 0;
     long text_h = 0;
@@ -1447,8 +1460,11 @@ void wxTreeCtrl::PaintItem(wxGenericTreeItem *item, wxDC& dc)
     dc.DrawText( item->GetText(), image_w + item->GetX(), item->GetY()
                  + ((total_h > text_h) ? (total_h - text_h)/2 : 0));
 
-    // restore normal font
-    dc.SetFont( m_normalFont );
+    // restore normal font for bold items
+    if (fontOld.Ok())
+    {
+        dc.SetFont( fontOld);
+    }
 }
 
 // Now y stands for the top of the item, whereas it used to stand for middle !
@@ -1596,10 +1612,9 @@ void wxTreeCtrl::OnPaint( wxPaintEvent &WXUNUSED(event) )
     wxPaintDC dc(this);
     PrepareDC( dc );
 
-    dc.SetFont( m_normalFont );
+    dc.SetFont( wxSystemSettings::GetSystemFont( wxSYS_DEFAULT_GUI_FONT ) );
+
     dc.SetPen( m_dottedPen );
-    
-    // this is now done dynamically
     //if(GetImageList() == NULL)
     // m_lineHeight = (int)(dc.GetCharHeight() + 4);
 
@@ -1996,14 +2011,33 @@ void wxTreeCtrl::CalculateSize( wxGenericTreeItem *item, wxDC &dc )
     long text_w = 0;
     long text_h = 0;
 
+    wxFont fontOld;
+    wxFont fontNew;
     if (item->IsBold())
-        dc.SetFont(m_boldFont);
+    {
+        fontOld = dc.GetFont();
+        if (fontOld.Ok())
+        {
+          // VZ: is there any better way to make a bold variant of old font?
+          fontNew = wxFont( fontOld.GetPointSize(),
+                            fontOld.GetFamily(),
+                            fontOld.GetStyle(),
+                            wxBOLD,
+                            fontOld.GetUnderlined());
+          dc.SetFont(fontNew);
+        }
+        else
+        {
+            wxFAIL_MSG(wxT("wxDC::GetFont() failed!"));
+        }
+    }
 
     dc.GetTextExtent( item->GetText(), &text_w, &text_h );
     text_h+=2;
 
-    // restore normal font
-    dc.SetFont( m_normalFont );
+    // restore normal font for bold items
+    if (fontOld.Ok())
+        dc.SetFont( fontOld);
 
     int image_h = 0;
     int image_w = 0;
@@ -2058,7 +2092,7 @@ void wxTreeCtrl::CalculatePositions()
     wxClientDC dc(this);
     PrepareDC( dc );
 
-    dc.SetFont( m_normalFont );
+    dc.SetFont( wxSystemSettings::GetSystemFont( wxSYS_DEFAULT_GUI_FONT ) );
 
     dc.SetPen( m_dottedPen );
     //if(GetImageList() == NULL)

@@ -13,10 +13,12 @@
 #define _WX_TIMER_H_
 
 #ifdef __GNUG__
-    #pragma interface "timer.h"
+#pragma interface "timer.h"
 #endif
 
-class WXDLLEXPORT wxTimer : public wxTimerBase
+#include "wx/object.h"
+
+class WXDLLEXPORT wxTimer : public wxObject
 {
 friend void wxProcessTimer(wxTimer& timer);
 
@@ -24,13 +26,22 @@ public:
     wxTimer();
     ~wxTimer();
 
-    virtual bool Start(int milliseconds = -1, bool oneShot = FALSE);
-    virtual void Stop();
+    virtual bool Start(int milliseconds = -1,
+                       bool one_shot = FALSE); // Start timer
+    virtual void Stop();                       // Stop timer
 
-    virtual bool IsRunning() const { return m_id != 0; }
+    virtual void Notify() = 0;                 // Override this member
+
+    // Returns the current interval time (0 if stop)
+    int Interval() const { return milli; };
+    bool OneShot() const { return oneShot; }
 
 protected:
-    long m_id;
+    bool oneShot;
+    int  milli;
+    int  lastMilli;
+
+    long id;
 
 private:
     DECLARE_ABSTRACT_CLASS(wxTimer)

@@ -52,12 +52,13 @@ wxFrame::wxFrame()
 #if wxUSE_TOOLBAR
   m_frameToolBar = NULL ;
 #endif
-
+	m_macShown = false ;
 	// in order to be able to give size events on show
   m_frameMenuBar = NULL;
   m_frameStatusBar = NULL;
+
+  m_windowParent = NULL;
   m_iconized = FALSE;
-  m_isShown = FALSE;
 }
 
 bool wxFrame::Create(wxWindow *parent,
@@ -74,7 +75,6 @@ bool wxFrame::Create(wxWindow *parent,
   SetName(name);
   m_windowStyle = style;
   m_frameMenuBar = NULL;
-  m_isShown = FALSE;
 
 #if wxUSE_TOOLBAR
   m_frameToolBar = NULL ;
@@ -147,6 +147,7 @@ bool wxFrame::Create(wxWindow *parent,
 	UMACreateRootControl( m_macWindowData->m_macWindow , &m_macWindowData->m_macRootControl ) ;
 	m_macWindowData->m_macWindowBackgroundTheme = kThemeBrushDocumentWindowBackground ;
 	m_macWindowData->m_macFocus = NULL ;
+	m_macShown = false ;
   return TRUE;
 }
 
@@ -490,9 +491,9 @@ wxPoint wxFrame::GetClientAreaOrigin() const
     return pt;
 }
 
-void wxFrame::DoGetClientSize(int *x, int *y) const
+void wxFrame::GetClientSize(int *x, int *y) const
 {
-	wxWindow::DoGetClientSize( x , y ) ;
+	wxWindow::GetClientSize( x , y ) ;
 
   if ( GetStatusBar() )
   {
