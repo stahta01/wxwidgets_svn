@@ -1,5 +1,5 @@
 
-import sys, os, string
+import sys, os
 
 from distutils.msvccompiler import MSVCCompiler
 from distutils.bcppcompiler import BCPPCompiler
@@ -185,7 +185,7 @@ class MyBCPPCompiler(BCPPCompiler):
                     # This needs to be compiled to a .res file -- do it now.
                     try:
                         self.spawn (["brcc32"] + pp_opts + ["-fo"] +
-				[obj] + [src]) ### RPD changed this lines only
+                                    [obj] + [src]) ### RPD changed this lines only
                     except DistutilsExecError, msg:
                         raise CompileError, msg
                     continue # the 'for' loop
@@ -222,7 +222,7 @@ class MyBCPPCompiler(BCPPCompiler):
     # with cw32mti library as in wxWindows DLL make file
     # Othervise we obtain Windows "Core dump" ;-).
     #
-    #		Evgeny A Cherkashin <eugeneai@icc.ru>
+    #           Evgeny A Cherkashin <eugeneai@icc.ru>
     #
     ####################################################################
 
@@ -335,7 +335,7 @@ class MyBCPPCompiler(BCPPCompiler):
 
             # some default libraries
             ld_args.append ('import32')
-            ld_args.append ('cw32mti')	### mt->mti (as in wx2)
+            ld_args.append ('cw32mti')  ### mt->mti (as in wx2)
 
             # def file for export symbols
             ld_args.extend([',',def_file])
@@ -444,6 +444,9 @@ def run_swig(files, dir, gendir, package, USE_SWIG, force, swig_args, swig_deps=
     from distutils.dep_util import newer
     from distutils.spawn import spawn
 
+    if not os.path.exists(os.path.join(dir, gendir)):
+        os.mkdir(os.path.join(dir, gendir))
+
     sources = []
 
     for file in files:
@@ -462,8 +465,8 @@ def run_swig(files, dir, gendir, package, USE_SWIG, force, swig_args, swig_deps=
 
             if force or newer(i_file, py_file) or newer(i_file, cpp_file):
                 # we need forward slashes here even on win32
-                cpp_file = string.join(string.split(cpp_file, '\\'), '/')
-                i_file = string.join(string.split(i_file, '\\'), '/')
+                cpp_file = '/'.join(cpp_file.split('\\'))
+                i_file = '/'.join(i_file.split('\\'))
 
                 cmd = ['./wxSWIG/wxswig'] + swig_args + ['-I'+dir, '-c', '-o', cpp_file, i_file]
                 spawn(cmd, verbose=1)
