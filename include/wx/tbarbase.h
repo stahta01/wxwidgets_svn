@@ -22,8 +22,6 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_TOOLBAR
-
 #include "wx/bitmap.h"
 #include "wx/list.h"
 #include "wx/control.h"
@@ -120,9 +118,9 @@ public:
     wxToolBarBase *GetToolBar() const { return m_tbar; }
 
     // style
-    bool IsButton() const { return m_toolStyle == wxTOOL_STYLE_BUTTON; }
-    bool IsControl() const { return m_toolStyle == wxTOOL_STYLE_CONTROL; }
-    bool IsSeparator() const { return m_toolStyle == wxTOOL_STYLE_SEPARATOR; }
+    int IsButton() const { return m_toolStyle == wxTOOL_STYLE_BUTTON; }
+    int IsControl() const { return m_toolStyle == wxTOOL_STYLE_CONTROL; }
+    int IsSeparator() const { return m_toolStyle == wxTOOL_STYLE_SEPARATOR; }
     int GetStyle() const { return m_toolStyle; }
 
     // state
@@ -238,7 +236,7 @@ public:
     // between the two states.
     wxToolBarToolBase *AddTool(int id,
                                const wxBitmap& bitmap,
-                               const wxBitmap& pushedBitmap,
+                               const wxBitmap& pushedBitmap = wxNullBitmap,
                                bool toggle = FALSE,
                                wxObject *clientData = NULL,
                                const wxString& shortHelpString = wxEmptyString,
@@ -412,7 +410,7 @@ public:
     // Do the toolbar button updates (check for EVT_UPDATE_UI handlers)
     virtual void DoToolbarUpdates();
 
-    // don't want toolbars to accept the focus
+    // Don't want toolbars to accept the focus
     virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:
@@ -472,10 +470,7 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_CLASS(wxToolBarBase)
 };
-
-#endif // wxUSE_TOOLBAR
 
 #endif
     // _WX_TBARBASE_H_

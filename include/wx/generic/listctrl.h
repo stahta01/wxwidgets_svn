@@ -17,9 +17,10 @@
 
 #include "wx/defs.h"
 #include "wx/object.h"
-#include "wx/imaglist.h"
+#include "wx/generic/imaglist.h"
 #include "wx/control.h"
 #include "wx/timer.h"
+#include "wx/textctrl.h"
 #include "wx/dcclient.h"
 #include "wx/scrolwin.h"
 #include "wx/settings.h"
@@ -69,7 +70,7 @@ public:
         Create(parent, id, pos, size, style, validator, name);
     }
     ~wxListCtrl();
-
+    
     bool Create( wxWindow *parent,
                  wxWindowID id = -1,
                  const wxPoint &pos = wxDefaultPosition,
@@ -112,7 +113,6 @@ public:
     long GetNextItem( long item, int geometry = wxLIST_NEXT_ALL, int state = wxLIST_STATE_DONTCARE ) const;
     wxImageList *GetImageList( int which ) const;
     void SetImageList( wxImageList *imageList, int which );
-    void AssignImageList( wxImageList *imageList, int which );
     bool Arrange( int flag = wxLIST_ALIGN_DEFAULT ); // always wxLIST_ALIGN_LEFT in wxGLC
 
     void ClearAll();
@@ -120,8 +120,6 @@ public:
     bool DeleteAllItems();
     bool DeleteAllColumns();
     bool DeleteColumn( int col );
-
-    void SetItemCount(long count);
 
     void EditLabel( long item ) { Edit(item); }
     void Edit( long item );
@@ -141,40 +139,26 @@ public:
     bool ScrollList( int dx, int dy );
     bool SortItems( wxListCtrlCompare fn, long data );
     bool Update( long item );
-
-    // returns true if it is a virtual list control
-    bool IsVirtual() const { return (GetWindowStyle() & wxLC_VIRTUAL) != 0; }
-
-    // refresh items selectively (only useful for virtual list controls)
-    void RefreshItem(long item);
-    void RefreshItems(long itemFrom, long itemTo);
-
-    // implementation only from now on
-    // -------------------------------
-
+    
     void OnIdle( wxIdleEvent &event );
     void OnSize( wxSizeEvent &event );
 
     // We have to hand down a few functions
 
-    virtual void Freeze();
-    virtual void Thaw();
-
-    virtual bool SetBackgroundColour( const wxColour &colour );
-    virtual bool SetForegroundColour( const wxColour &colour );
-    virtual wxColour GetBackgroundColour() const;
-    virtual wxColour GetForegroundColour() const;
-    virtual bool SetFont( const wxFont &font );
-    virtual bool SetCursor( const wxCursor &cursor );
+    bool SetBackgroundColour( const wxColour &colour );
+    bool SetForegroundColour( const wxColour &colour );
+    bool SetFont( const wxFont &font );
 
 #if wxUSE_DRAG_AND_DROP
-    virtual void SetDropTarget( wxDropTarget *dropTarget );
-    virtual wxDropTarget *GetDropTarget() const;
+    void SetDropTarget( wxDropTarget *dropTarget );
+    wxDropTarget *GetDropTarget() const;
 #endif
 
-    virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
-
-    virtual void SetFocus();
+    bool SetCursor( const wxCursor &cursor );
+    wxColour GetBackgroundColour() const;
+    wxColour GetForegroundColour() const;
+    bool DoPopupMenu( wxMenu *menu, int x, int y );
+    void SetFocus();
 
     // implementation
     // --------------
@@ -182,36 +166,10 @@ public:
     wxImageList         *m_imageListNormal;
     wxImageList         *m_imageListSmall;
     wxImageList         *m_imageListState;  // what's that ?
-    bool                 m_ownsImageListNormal,
-                         m_ownsImageListSmall,
-                         m_ownsImageListState;
     wxListHeaderWindow  *m_headerWin;
     wxListMainWindow    *m_mainWin;
 
-protected:
-    // return the text for the given column of the given item
-    virtual wxString OnGetItemText(long item, long column) const;
-
-    // return the icon for the given item
-    virtual int OnGetItemImage(long item) const;
-
-    // return the attribute for the item (may return NULL if none)
-    virtual wxListItemAttr *OnGetItemAttr(long item) const;
-
-    // it calls our OnGetXXX() functions
-    friend class WXDLLEXPORT wxListMainWindow;
-
 private:
-    // Virtual function hiding supression
-    virtual void Update() { wxWindowBase::Update(); }
-
-    // create the header window
-    void CreateHeaderWindow();
-
-    // reposition the header and the main window in the report view depending
-    // on whether it should be shown or not
-    void ResizeReportView(bool showHeader);
-
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxListCtrl);
 };

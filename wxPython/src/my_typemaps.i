@@ -12,13 +12,12 @@
 
 
 //---------------------------------------------------------------------------
-// Tell SWIG to wrap all the wrappers with our thread protection
+// Tell SWIG to wrap all the wrappers with Python's thread macros
 
 %except(python) {
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    wxPy_BEGIN_ALLOW_THREADS;
     $function
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
+    wxPy_END_ALLOW_THREADS;
 }
 
 //----------------------------------------------------------------------
@@ -132,15 +131,24 @@
     delete [] $source;
 }
 
+
+
+
+
 %typemap(python,build) int PCOUNT {
-	$target = NPOINTS;
+    if (_in_points) {
+        $target = PyList_Size(_in_points);
+    }
+    else {
+        $target = 0;
+    }
 }
 
-%typemap(python,in) wxPoint* points (int NPOINTS) {
-    $target = wxPoint_LIST_helper($source, &NPOINTS);
-	if ($target == NULL) {
-		return NULL;
-	}
+%typemap(python,in) wxPoint* points  {
+    $target = wxPoint_LIST_helper($source);
+    if ($target == NULL) {
+        return NULL;
+    }
 }
 %typemap(python,freearg) wxPoint* points {
     delete [] $source;
@@ -148,15 +156,10 @@
 
 
 
-
 //---------------------------------------------------------------------------
 
 %{
-#if PYTHON_API_VERSION >= 1009
-    static char* wxStringErrorMsg = "String or Unicode type required";
-#else
-    static char* wxStringErrorMsg = "String type required";
-#endif
+static char* wxStringErrorMsg = "string type is required for parameter";
 %}
 
 // TODO:  Which works best???
@@ -190,7 +193,7 @@
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check($source) && !PyUnicode_Check($source)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize($source, &tmpPtr, &tmpSize) == -1)
@@ -232,7 +235,7 @@
 
 
 //---------------------------------------------------------------------------
-// Typemaps to convert Python sequence objects (tuples, etc.) to
+// Typemaps to convert Python sequence objects (2-tuples, etc.) to
 // wxSize, wxPoint, wxRealPoint, and wxRect.
 
 %typemap(python,in) wxSize& (wxSize temp) {
@@ -269,29 +272,6 @@
         return NULL;
 }
 
-//---------------------------------------------------------------------------
-// Typemap for wxArrayString from Python sequence objects
-
-%typemap(python,in) wxArrayString& {
-    if (! PySequence_Check($source)) {
-        PyErr_SetString(PyExc_TypeError, "Sequence of strings expected.");
-        return NULL;
-    }
-    $target = new wxArrayString;
-    int i, len=PySequence_Length($source);
-    for (i=0; i<len; i++) {
-        PyObject* item = PySequence_GetItem($source, i);
-        PyObject* str  = PyObject_Str(item);
-        $target->Add(PyString_AsString(item));
-        Py_DECREF(item);
-        Py_DECREF(str);
-    }
-}
-
-%typemap(python, freearg) wxArrayString& {
-    if ($target)
-        delete $source;
-}
 
 //---------------------------------------------------------------------------
 // Map T_OUTPUTs for floats to return ints.
@@ -313,56 +293,5 @@
 }
 
 //---------------------------------------------------------------------------
-// Typemaps to convert return values that are base class pointers
-// to the real derived type, if possible.  See wxPyMake_wxObject in
-// helpers.cpp
-
-%typemap(python, out) wxEvtHandler*             { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxMenu*                   { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxValidator*              { $target = wxPyMake_wxObject($source); }
-
-%typemap(python, out) wxDC*                     { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxFSFile*                 { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxFileSystem*             { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxGridTableBase*          { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxImageList*              { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxListItem*               { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxMenuItem*               { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxMouseEvent*             { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxObject*                 { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxPyPrintout*             { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxToolBarToolBase*        { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxToolTip*                { $target = wxPyMake_wxObject($source); }
-
-
-%typemap(python, out) wxButton*                 { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxControl*                { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxFrame*                  { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxGrid*                   { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxMDIChildFrame*          { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxMDIClientWindow*        { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxMenuBar*                { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxNotebook*               { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxStaticBox*              { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxStatusBar*              { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxTextCtrl*               { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxToolBar*                { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxToolBarBase*            { $target = wxPyMake_wxObject($source); }
-%typemap(python, out) wxWindow*                 { $target = wxPyMake_wxObject($source); }
-
-%typemap(python, out) wxSizer*                  { $target = wxPyMake_wxSizer($source); }
-
-
-//%typemap(python, out) wxHtmlCell*               { $target = wxPyMake_wxObject($source); }
-//%typemap(python, out) wxHtmlContainerCell*      { $target = wxPyMake_wxObject($source); }
-//%typemap(python, out) wxHtmlParser*             { $target = wxPyMake_wxObject($source); }
-//%typemap(python, out) wxHtmlWinParser*          { $target = wxPyMake_wxObject($source); }
-
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-
-
-
-
-
 

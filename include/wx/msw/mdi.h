@@ -30,6 +30,8 @@ class WXDLLEXPORT wxMDIChildFrame;
 
 class WXDLLEXPORT wxMDIParentFrame : public wxFrame
 {
+    DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
+
 public:
     wxMDIParentFrame();
     wxMDIParentFrame(wxWindow *parent,
@@ -96,14 +98,11 @@ public:
     virtual bool MSWTranslateMessage(WXMSG* msg);
 
 protected:
-#if wxUSE_MENUS_NATIVE
     virtual void InternalSetMenuBar();
-#endif // wxUSE_MENUS_NATIVE
-
-    virtual WXHICON GetDefaultIcon() const;
 
     wxMDIClientWindow *             m_clientWindow;
     wxMDIChildFrame *               m_currentChild;
+//    WXHMENU                         m_windowMenu;
     wxMenu*                         m_windowMenu;
 
     // TRUE if MDI Frame is intercepting commands, not child
@@ -113,7 +112,6 @@ private:
     friend class WXDLLEXPORT wxMDIChildFrame;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
 };
 
 // ---------------------------------------------------------------------------
@@ -161,7 +159,6 @@ public:
     bool HandleMDIActivate(long bActivate, WXHWND, WXHWND);
     bool HandleWindowPosChanging(void *lpPos);
     bool HandleCommand(WXWORD id, WXWORD cmd, WXHWND control);
-    bool HandleGetMinMaxInfo(void *mmInfo);
 
     virtual long MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
     virtual long MSWDefWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
@@ -177,9 +174,6 @@ protected:
     virtual void DoGetPosition(int *x, int *y) const;
     virtual void DoSetClientSize(int width, int height);
     virtual void InternalSetMenuBar();
-    virtual bool IsMDIChild() const { return TRUE; }
-
-    virtual WXHICON GetDefaultIcon() const;
 
     // common part of all ctors
     void Init();

@@ -13,16 +13,11 @@
 #pragma implementation "button.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/button.h"
-#include "wx/panel.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
-#endif
 
-#include "wx/mac/uma.h"
+#include <wx/mac/uma.h>
 // Button
 
 
@@ -34,10 +29,12 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 {
 	Rect bounds ;
 	Str255 title ;
+	m_macHorizontalBorder = 2 ; // additional pixels around the real control
+	m_macVerticalBorder = 2 ;
 	
 	MacPreControlCreate( parent , id ,  label , pos , size ,style, validator , name , &bounds , title ) ;
 
-	m_macControl = ::NewControl( parent->MacGetRootWindow() , &bounds , title , false , 0 , 0 , 1, 
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true , 0 , 0 , 1, 
 	  	kControlPushButtonProc , (long) this ) ;
 	wxASSERT_MSG( m_macControl != NULL , "No valid mac control" ) ;
 	
@@ -50,68 +47,48 @@ void wxButton::SetDefault()
 {
     wxWindow *parent = GetParent();
     wxButton *btnOldDefault = NULL;
-    if ( parent )
+    wxPanel *panel = wxDynamicCast(parent, wxPanel);
+    if ( panel )
     {
-        btnOldDefault = wxDynamicCast(parent->GetDefaultItem(),
-           wxButton);
-        parent->SetDefaultItem(this);
+        btnOldDefault = panel->GetDefaultItem();
+        panel->SetDefaultItem(this);
     }
-
-	Boolean inData;
-	if ( btnOldDefault && btnOldDefault->m_macControl )
-	{
-  		inData = 0;
-		::SetControlData( btnOldDefault->m_macControl , kControlButtonPart ,
-						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
-	}
-	if ( m_macControl )
-	{
-  		inData = 1;
-		::SetControlData( m_macControl , kControlButtonPart ,
-						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
-	}
+  
+  if ( btnOldDefault && btnOldDefault->m_macControl )
+  {
+		UMASetControlData( btnOldDefault->m_macControl , kControlButtonPart , kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)0) ) ;
+  }
+  if ( m_macControl )
+  {
+		UMASetControlData( m_macControl , kControlButtonPart , kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)1) ) ;
+  }
 }
 
 wxSize wxButton::DoGetBestSize() const
 {
-  wxSize sz = GetDefaultSize() ;
-  
-    int wBtn = m_label.Length() * 8 + 12 ;
-	int hBtn = 20 ;
-	
-  if (wBtn > sz.x) sz.x = wBtn;
-  if (hBtn > sz.y) sz.y = hBtn;
-  
-  return sz ;
+    int wBtn = m_label.Length() * 8 + 12 + 2 * m_macHorizontalBorder;
+	int hBtn = 13 + 2 * m_macVerticalBorder;
+
+    return wxSize(wBtn, hBtn);
 }
 
 wxSize wxButton::GetDefaultSize()
 {
-    int wBtn = 70 /* + 2 * m_macHorizontalBorder */ ; 
-	int hBtn = 20 /* +  2 * m_macVerticalBorder */ ;
+    int wBtn = 15 * 8 + 12 + 2 * 2;
+	int hBtn = 13 + 2 * 2;
 
     return wxSize(wBtn, hBtn);
 }
 
 void wxButton::Command (wxCommandEvent & event)
 {
-	if ( m_macControl )
-	{
-		HiliteControl( m_macControl , kControlButtonPart ) ;
-		unsigned long finalTicks ;
-		Delay( 8 , &finalTicks ) ;
-		HiliteControl( m_macControl , 0 ) ;
-	}
     ProcessCommand (event);
 }
 
 void wxButton::MacHandleControlClick( ControlHandle control , SInt16 controlpart ) 
 {
-  if ( controlpart != kControlNoPart )
-  {
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, m_windowId );
     event.SetEventObject(this);
     ProcessCommand(event);
-  }
 }
 

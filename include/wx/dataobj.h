@@ -161,6 +161,8 @@ public:
     #include "wx/motif/dataobj.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/dataobj.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/dnd.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dataobj.h"
 #elif defined(__WXPM__)
@@ -254,7 +256,7 @@ class WXDLLEXPORT wxDataObjectComposite : public wxDataObject
 {
 public:
     // ctor
-    wxDataObjectComposite();
+    wxDataObjectComposite() { m_preferred = 0; }
 
     // add data object (it will be deleted by wxDataObjectComposite, hence it
     // must be allocated on the heap) whose format will become the preferred
@@ -273,13 +275,6 @@ public:
 protected:
     // returns the pointer to the object which supports this format or NULL
     wxDataObjectSimple *GetObject(const wxDataFormat& format) const;
-#if defined(__WXMSW__)
-    virtual const void* GetSizeFromBuffer( const void* buffer, size_t* size,
-                                           const wxDataFormat& format );
-    virtual void* SetSizeInBuffer( void* buffer, size_t size,
-                                   const wxDataFormat& format );
-    virtual size_t GetBufferOffset( const wxDataFormat& format );
-#endif
 
 private:
     // the list of all (simple) data objects whose formats we support
@@ -308,8 +303,7 @@ public:
     // ctor: you can specify the text here or in SetText(), or override
     // GetText()
     wxTextDataObject(const wxString& text = wxEmptyString)
-        : wxDataObjectSimple(wxUSE_UNICODE?wxDF_UNICODETEXT:wxDF_TEXT),
-          m_text(text)
+        : wxDataObjectSimple(wxDF_TEXT), m_text(text)
         {
         }
 
@@ -451,24 +445,14 @@ private:
 
 #if defined(__WXMSW__)
     #include "wx/msw/ole/dataobj2.h"
-
-    // wxURLDataObject defined in msw/ole/dataobj2.h
-#else // !__WXMSW__
-    #if defined(__WXGTK__)
-        #include "wx/gtk/dataobj2.h"
-    #elif defined(__WXMAC__)
-        #include "wx/mac/dataobj2.h"
-    #elif defined(__WXPM__)
-        #include "wx/os2/dataobj2.h"
-    #endif
-
-    // wxURLDataObject is simply wxTextDataObject with a different name
-    class WXDLLEXPORT wxURLDataObject : public wxTextDataObject
-    {
-    public:
-        wxString GetURL() const { return GetText(); }
-        void SetURL(const wxString& url) { SetText(url); }
-    };
-#endif // __WXMSW__/!__WXMSW__
+#elif defined(__WXMOTIF__)
+    // #include "wx/motif/dataobj2.h" -- not yet
+#elif defined(__WXGTK__)
+    #include "wx/gtk/dataobj2.h"
+#elif defined(__WXMAC__)
+    #include "wx/mac/dataobj2.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/dataobj2.h"
+#endif
 
 #endif // _WX_DATAOBJ_H_BASE_

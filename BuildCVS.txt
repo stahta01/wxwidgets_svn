@@ -118,41 +118,22 @@ ftp server at ftp://sourceware.cygnus.com/pub/cygwin/.
 Of course, you can also build the library using plain makefiles (see
 section I).
 
-IV) Classic MacOS using CodeWarrior (eg MacOS 8.x/9.x)
+IV) wxBase
 ----------------------------------------
 
-Refer to the readme.txt and install.txt files in docs/mac to build
-wxWindows under Classic Mac OS using CodeWarrior.
+wxBase is the non GUI part of wxWindows. Currently it can be only built using
+configure (i.e. under Unix and probably under Win32 with cygwin) and with
+Visual C++.
 
-If you are checking out the CVS sources using cvs under Mac OS X and
-compiling under Classic Mac OS:
+To build it using configure, just add "--disable-gui" argument to it.
 
-- make sure that all text files have a Mac OS type of 'TEXT' otherwise
-  CodeWarrior may ignore them. Checking out the CVS sources using cvs
-  under Mac OS X creates untyped files which can lead to compilation
-  errors under CodeWarrior which are hard to track down.
+To build wxBase with VC++, use the project files wxBase.dsp and wxBaseDll.dsp
+included in the CVS. See http://www.wxwindows.org/vadim/wxDocs/buildmsw.html
+for the instructions on how to generate the project files for the programs
+using wxBase.
 
-- convert the xml files to CodeWarrior binary projects using the supplied
-  AppleScript in docs/mac (M5xml2mcp.applescript for CodeWarrior 5.3)
-
-V) MacOS X using configure and the Developer Tools
+V) MacOS
 ----------------------------------------
-
-You need to have the Developer Tools installed. If this is not the case,
-you will need to register at the Apple Developer web site (this is a free
-registration) in order to download the Developer Tools installer.
-
-In order to create configure, you need to have the
-GNU autoconf package (version 2.13 or 2.14) installed
-on your system and type run "autoconf" in the base
-directory (or run the autogen.sh script in the same
-directory, which just calls autoconf).
-
--> type: mkdir macbuild
--> type: cd macbuild
--> type: ../configure --with-mac
-or type: ../configure
--> type: make
 
 VI) OS/2
 ----------------------------------------
@@ -162,10 +143,8 @@ VII) Unix->Windows cross-compiling using configure
 
 First you'll need a cross-compiler; linux glibc binaries of mingw32 and
 cygwin32 (both based on egcs) can be found at
-ftp://ftp.objsw.com/pub/crossgcc/linux-x-win32. Alternative binaries,
-based on the latest MinGW release can be found at
-http://members.telering.at/jessich/mingw/mingwcross/mingw_cross.html 
-Otherwise you can compile one yourself.
+ftp://ftp.objsw.com/pub/crossgcc/linux-x-win32. Otherwise you can
+compile one yourself. Check the relevant FAQs.
 
 [ A Note about cygwin32 and mingw32: the main difference is that cygwin32
 binaries are always linked against cygwin.dll. This dll encapsulates most
@@ -185,7 +164,8 @@ To cross compile the windows library, do
 -> cd win32
 (or whatever you called it)
 Now run configure. There are two ways to do this
--> ../configure --host=i586-mingw32 --build=i586-linux --with-mingw
+-> ../configure --host=i586-mingw32 --build=i586-linux --with-mingw \
+   --enable-dnd=no --without-odbc
 where --build= should read whatever platform you're building on. Configure
 will notice that build and host platforms differ, and automatically prepend
 i586-mingw32- to gcc, ar, ld, etc (make sure they're in the PATH!).
@@ -193,22 +173,29 @@ The other way to run configure is by specifying the names of the binaries
 yourself:
 -> CC=i586-mingw32-gcc CXX=i586-mingw32-g++ RANLIB=i586-mingw32-ranlib \
    DLLTOOL=i586-mingw32-dlltool LD=i586-mingw32-ld NM=i586-mingw32-nm \
-   ../configure --host=i586-mingw32 --with-mingw
+   ../configure --host=i586-mingw32 --with-mingw --enable-dnd=no
 
 (all assuming you're using mingw32)
-By default this will compile a DLL, if you want a static library,
-specify --disable-shared.
+Drag'n'drop is disabled because mingw32 lacks (AFAIK) OLE headers.
+
+[ Update: some new mingw32 versions now have a new set of windows header
+files, which apparently can handle ole. Untested at the moment ]
+
+ODBC files don't compile as of 13.10.99 - may be this will be fixed by the
+moment you're reading these lines.
+
+Configure will conclude that shared libraries are out of the question and
+opt for a static one. I haven't looked into DLL creation yet.
 
 Type
 -> make
 and wait, wait, wait. Don't leave the room, because the minute you do there
 will be a compile error :-)
 
-NB: if you are using a very old compiler you risk to get quite a few warnings
-    about "ANSI C++ forbids implicit conversion from 'void *'" in all places
-    where va_arg macro is used. This is due to a bug in (some versions of)
-    mingw32 headers which may be corrected by upgrading your compier,
-    otherwise you might edit the file
+NB: you risk to get quite a few warnings about "ANSI C++ forbids implicit
+    conversion from 'void *'" in all places where va_arg macro is used. This
+    is due to a bug in (some versions of) mingw32 headers which may be
+    corrected by editing the file
 
     ${install_prefix}/lib/gcc-lib/i586-mingw32/egcs-2.91.57/include/stdarg.h
 
@@ -229,9 +216,8 @@ typedef void *__gnuc_va_list;
     and adding "|| defined(_WIN32)" to the list of platforms on which
     __gnuc_va_list is char *.
 
-If this is successful, you end up with a wx23_2.dll/libwx23_2.a in win32/lib
-( or just libwx_msw.a if you opted for a static build ).
-Now try building the minimal sample:
+If this is successful, you end up with a libwx_msw.a in win32/lib.  Now try
+building the minimal sample:
 
 -> cd samples/minimal
 -> make
@@ -251,5 +237,6 @@ Cross-compiling TODO:
 - resource compiling must be done manually for now (should/can we link the
 default wx resources into libwx_msw.a?) [ No we can't; the linker won't
 link it in... you have to supply an object file ]
+- dynamic libraries
 - static executables are HUGE -- there must be room for improvement.
 

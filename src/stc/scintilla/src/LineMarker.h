@@ -1,15 +1,11 @@
 // Scintilla source code edit control
-/** @file LineMarker.h
- ** Defines the look of a line marker in the margin .
- **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// LineMarker.h - defines the look of a line marker in the margin 
+// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef LINEMARKER_H
 #define LINEMARKER_H
 
-/**
- */
 class LineMarker {
 public:
 	int markType;
@@ -20,7 +16,7 @@ public:
 		fore = Colour(0,0,0);
 		back = Colour(0xff,0xff,0xff);
 	}
-	void Draw(Surface *surface, PRectangle &rc, Font &fontForCharacter);
+	void Draw(Surface *surface, PRectangle &rc);
 };
 
 #endif

@@ -16,14 +16,13 @@
 #pragma interface
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_URL
-
+// wxWindows header
 #include "wx/object.h"
+
+// wxSocket headers
 #include "wx/protocol/protocol.h"
 
-#if wxUSE_PROTOCOL_HTTP
+#if wxUSE_SOCKETS
   #include "wx/protocol/http.h"
 #endif
 
@@ -36,7 +35,7 @@ typedef enum {
   wxURL_CONNERR,
   wxURL_PROTOERR
 } wxURLError;
-
+  
 class WXDLLEXPORT wxURL : public wxObject
 {
 public:
@@ -93,12 +92,9 @@ protected:
 private:
     // VZ: can't use default copy ctor for this class, should write a correct
     //     one! (TODO)
-    DECLARE_NO_COPY_CLASS(wxURL)
+    DECLARE_NO_COPY_CLASS(wxURL);
 
     DECLARE_DYNAMIC_CLASS(wxURL)
 };
 
-#endif // wxUSE_URL
-
-#endif // _WX_URL_H
-
+#endif

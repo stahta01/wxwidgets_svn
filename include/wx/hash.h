@@ -69,7 +69,7 @@ protected:
 
 private:
     // no copy ctor/assignment operator (yet)
-    DECLARE_NO_COPY_CLASS(wxHashTableBase)
+    DECLARE_NO_COPY_CLASS(wxHashTableBase);
 };
 
 // ----------------------------------------------------------------------------
@@ -106,37 +106,7 @@ private:
     size_t m_count;
 
     // not implemented yet
-    DECLARE_NO_COPY_CLASS(wxHashTableLong)
-};
-
-// ----------------------------------------------------------------------------
-// wxStringHashTable: a hash table which indexes strings with longs
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxStringHashTable : public wxObject
-{
-public:
-    wxStringHashTable(size_t sizeTable = wxHASH_SIZE_DEFAULT);
-    virtual ~wxStringHashTable();
-
-    // add a string associated with this key to the table
-    void Put(long key, const wxString& value);
-
-    // get the string from the key: if not found, an empty string is returned
-    // and the wasFound is set to FALSE if not NULL
-    wxString Get(long key, bool *wasFound = NULL) const;
-
-    // clean up
-    void Destroy();
-
-private:
-    wxArrayLong **m_keys;
-    wxArrayString **m_values;
-
-    // the size of array above
-    size_t m_hashSize;
-
-    DECLARE_NO_COPY_CLASS(wxStringHashTable)
+    DECLARE_NO_COPY_CLASS(wxHashTableLong);
 };
 
 // ----------------------------------------------------------------------------
@@ -296,9 +266,6 @@ private:
 // library
 #define WX_DECLARE_EXPORTED_HASH(el, list, hash)  \
     _WX_DECLARE_HASH(el, list, hash, class WXDLLEXPORT)
-
-#define WX_DECLARE_USER_EXPORTED_HASH(el, list, hash, usergoo)  \
-    _WX_DECLARE_HASH(el, list, hash, class usergoo)
 
 #endif
     // _WX_HASH_H__

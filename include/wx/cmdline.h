@@ -17,10 +17,6 @@
     #pragma interface "cmdline.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_CMDLINE_PARSER
-
 #include "wx/string.h"
 
 class WXDLLEXPORT wxDateTime;
@@ -162,10 +158,7 @@ public:
     // parse the command line, return 0 if ok, -1 if "-h" or "--help" option
     // was encountered and the help message was given or a positive value if a
     // syntax error occured
-    //
-    // if showUsage is true, Usage() is called in case of syntax error or if
-    // help was requested
-    int Parse(bool showUsage = TRUE);
+    int Parse();
 
     // give the usage message describing all program options
     void Usage();
@@ -194,12 +187,6 @@ public:
     // gets the value of Nth parameter (as string only for now)
     wxString GetParam(size_t n = 0u) const;
 
-    // Resets switches and options
-    void Reset();
-
-    // break down the command line in arguments
-    static wxArrayString ConvertStringToArgs(const wxChar *cmdline);
-
 private:
     // common part of all ctors
     void Init();
@@ -207,17 +194,4 @@ private:
     struct wxCmdLineParserData *m_data;
 };
 
-#else // !wxUSE_CMDLINE_PARSER
-
-// this function is always available (even if !wxUSE_CMDLINE_PARSER) because it
-// is used by wxWin itself under Windows
-class WXDLLEXPORT wxCmdLineParser
-{
-public:
-    static wxArrayString ConvertStringToArgs(const wxChar *cmdline);
-};
-
-#endif // wxUSE_CMDLINE_PARSER/!wxUSE_CMDLINE_PARSER
-
 #endif // _WX_CMDLINE_H_
-

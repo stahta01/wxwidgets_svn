@@ -225,9 +225,9 @@ void wxMDIParentFrame::OnInternalIdle()
     }
 }
 
-void wxMDIParentFrame::DoGetClientSize(int *width, int *height ) const
+void wxMDIParentFrame::GetClientSize(int *width, int *height ) const
 {
-    wxFrame::DoGetClientSize( width, height );
+    wxFrame::GetClientSize( width, height );
 }
 
 wxMDIChildFrame *wxMDIParentFrame::GetActiveChild() const
@@ -327,9 +327,9 @@ bool wxMDIChildFrame::Create( wxMDIParentFrame *parent,
     return wxWindow::Create( parent->GetClientWindow(), id, wxDefaultPosition, size, style, name );
 }
 
-void wxMDIChildFrame::DoGetClientSize( int *width, int *height ) const
+void wxMDIChildFrame::GetClientSize( int *width, int *height ) const
 {
-    wxWindow::DoGetClientSize( width, height );
+    wxWindow::GetClientSize( width, height );
 }
 
 void wxMDIChildFrame::AddChild( wxWindowBase *child )

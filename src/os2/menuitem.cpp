@@ -62,7 +62,7 @@ static wxString TextToLabel(const wxString& rTitle)
 {
     wxString Title;
     const wxChar *pc;
-    for (pc = rTitle.c_str(); *pc != wxT('\0'); pc++ )
+    for (pc = rTitle; *pc != wxT('\0'); pc++ )
     {
         if (*pc == wxT('&') )
         {
@@ -71,9 +71,13 @@ static wxString TextToLabel(const wxString& rTitle)
                 pc++;
                 Title << wxT('&');
             }
-            else
+            else 
                 Title << wxT('~');
         }
+//         else if (*pc == wxT('/'))
+//         {
+//             Title << wxT('\\');
+//         }
         else
         {
             if ( *pc == wxT('~') )
@@ -203,6 +207,18 @@ wxString wxMenuItemBase::GetLabelFromText(
     }
     return label;
 }
+
+// accelerators
+// ------------
+
+#if wxUSE_ACCEL
+
+wxAcceleratorEntry *wxMenuItem::GetAccel() const
+{
+    return wxGetAccelFromString(GetText());
+}
+
+#endif // wxUSE_ACCEL
 
 // change item state
 // -----------------

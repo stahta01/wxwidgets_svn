@@ -126,24 +126,6 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
     else
         image->SetMask(FALSE);
 
-#if wxUSE_PALETTE
-    if (pal)
-    {
-        unsigned char r[256];
-        unsigned char g[256];
-        unsigned char b[256];
-
-        for (i = 0; i < 256; i++)
-        {
-            r[i] = pal[3*i + 0];
-            g[i] = pal[3*i + 1];
-            b[i] = pal[3*i + 2];
-        }
-
-        image->SetPalette(wxPalette(256, r, g, b));
-    }
-#endif // wxUSE_PALETTE
-
     /* copy image data */
     for (i = 0; i < (GetWidth() * GetHeight()); i++, src++)
     {
@@ -335,17 +317,18 @@ int wxGIFDecoder::getcode(int bits, int ab_fin)
 //
 int wxGIFDecoder::dgif(GIFImage *img, int interl, int bits)
 {
-    int *ab_prefix = new int[4096]; /* alphabet (prefixes) */
-    int *ab_tail = new int[4096];   /* alphabet (tails) */
-    int *stack = new int[4096];     /* decompression stack */
-    int ab_clr;                     /* clear code */
-    int ab_fin;                     /* end of info code */
-    int ab_bits;                    /* actual symbol width, in bits */
-    int ab_free;                    /* first free position in alphabet */
-    int ab_max;                     /* last possible character in alphabet */
-    int pass;                       /* pass number in interlaced images */
-    int pos;                        /* index into decompresion stack */
-    unsigned int x, y;              /* position in image buffer */
+    int ab_prefix[4096];        /* alphabet (prefixes) */
+    int ab_tail[4096];          /* alphabet (tails) */
+    int stack[4096];            /* decompression stack */
+
+    int ab_clr;                 /* clear code */
+    int ab_fin;                 /* end of info code */
+    int ab_bits;                /* actual symbol width, in bits */
+    int ab_free;                /* first free position in alphabet */
+    int ab_max;                 /* last possible character in alphabet */
+    int pass;                   /* pass number in interlaced images */
+    int pos;                    /* index into decompresion stack */
+    unsigned int x, y;          /* position in image buffer */
 
     int code, readcode, lastcode, abcabca;
 
@@ -461,10 +444,6 @@ int wxGIFDecoder::dgif(GIFImage *img, int interl, int bits)
     }
     while (code != ab_fin);
 
-    delete [] ab_prefix ;
-    delete [] ab_tail ;
-    delete [] stack ;
-
     return 0;
 }
 
@@ -500,8 +479,7 @@ int wxGIFDecoder::ReadGIF()
     unsigned char type = 0;
     unsigned char pal[768];
     unsigned char buf[16];
-    GIFImage      **ppimg;
-        GIFImage      *pimg, *pprev;
+    GIFImage      **ppimg, *pimg, *pprev;
 
     /* check GIF signature */
     if (!CanRead())
@@ -591,12 +569,8 @@ int wxGIFDecoder::ReadGIF()
 
             /* fill in the data */
             m_f->Read(buf, 9);
-            pimg->left = buf[0] + 256 * buf[1];
-            pimg->top = buf[2] + 256 * buf[3];
-/*
             pimg->left = buf[4] + 256 * buf[5];
             pimg->top = buf[4] + 256 * buf[5];
-*/
             pimg->w = buf[4] + 256 * buf[5];
             pimg->h = buf[6] + 256 * buf[7];
             interl = ((buf[8] & 0x40)? 1 : 0);
@@ -653,9 +627,6 @@ int wxGIFDecoder::ReadGIF()
     /* try to read to the end of the stream */
     while (type != 0x3B)
     {
-        if (!m_f->IsOk())
-            return wxGIF_TRUNCATED;
-            
         type = (unsigned char)m_f->GetC();
 
         if (type == 0x21)

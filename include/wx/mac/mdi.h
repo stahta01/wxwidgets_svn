@@ -28,8 +28,9 @@ class WXDLLEXPORT wxMDIChildFrame;
 
 class WXDLLEXPORT wxMDIParentFrame: public wxFrame
 {
-  DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
+DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
 
+  friend class WXDLLEXPORT wxMDIChildFrame;
 public:
 
   wxMDIParentFrame();
@@ -86,14 +87,7 @@ protected:
 
   // TODO maybe have this member
   wxMDIClientWindow     *m_clientWindow;
-  wxMDIChildFrame *               m_currentChild;
-    wxMenu*                         m_windowMenu;
 
-    // TRUE if MDI Frame is intercepting commands, not child
-    bool m_parentFrameActive;
-
-private:
-    friend class WXDLLEXPORT wxMDIChildFrame;
 DECLARE_EVENT_TABLE()
 };
 
@@ -111,7 +105,6 @@ public:
            long style = wxDEFAULT_FRAME_STYLE,
            const wxString& name = wxFrameNameStr)
   {
-      Init() ;
       Create(parent, id, title, pos, size, style, name);
   }
 
@@ -127,16 +120,14 @@ public:
 
   // Set menu bar
   void SetMenuBar(wxMenuBar *menu_bar);
+  void SetClientSize(int width, int height);
+  void GetPosition(int *x, int *y) const ;
 
   // MDI operations
   virtual void Maximize();
   virtual void Maximize( bool ){ Maximize() ; } // this one is inherited from wxFrame
   virtual void Restore();
   virtual void Activate();
-protected:
-
-    // common part of all ctors
-    void Init();
 };
 
 /* The client window is a child of the parent MDI frame, and itself

@@ -19,8 +19,8 @@
 #include "wx/dc.h"
 #include "wx/gdiobj.h"
 
-#if wxUSE_DATAOBJ
-#include "wx/dataobj.h"
+#if wxUSE_DRAG_AND_DROP
+#include "wx/dataobj.h" wx/defs.h
 #endif
 
 /*
@@ -120,30 +120,42 @@ bool WXDLLEXPORT wxMakeMetaFilePlaceable(const wxString& filename, int x1, int y
 // wxMetafileDataObject is a specialization of wxDataObject for metafile data
 // ----------------------------------------------------------------------------
 
-#if wxUSE_DATAOBJ
-class WXDLLEXPORT wxMetafileDataObject : public wxDataObjectSimple
+// TODO: implement OLE side of things. At present, it's just for clipboard
+// use.
+
+#if wxUSE_DRAG_AND_DROP
+class WXDLLEXPORT wxMetafileDataObject : public wxDataObject
 {
 public:
   // ctors
-  wxMetafileDataObject() 
-    : wxDataObjectSimple(wxDF_METAFILE) {  };
-  wxMetafileDataObject(const wxMetafile& metafile)
-    : wxDataObjectSimple(wxDF_METAFILE), m_metafile(metafile) { }
+  wxMetafileDataObject() { m_width = 0; m_height = 0; };
+  wxMetafileDataObject(const wxMetafile& metafile, int width = 0, int height = 0):
+    m_metafile(metafile), m_width(width), m_height(height) { }
 
-    // virtual functions which you may override if you want to provide data on
-    // demand only - otherwise, the trivial default versions will be used
-    virtual void SetMetafile(const wxMetafile& metafile)
-        { m_metafile = metafile; }
-    virtual wxMetafile GetMetafile() const
-        { return m_metafile; }
+  void SetMetafile(const wxMetafile& metafile, int w = 0, int h = 0)
+    { m_metafile = metafile; m_width = w; m_height = h; }
+  wxMetafile GetMetafile() const { return m_metafile; }
+  int GetWidth() const { return m_width; }
+  int GetHeight() const { return m_height; }
 
-    // implement base class pure virtuals
-    virtual size_t GetDataSize() const;
-    virtual bool GetDataHere(void *buf) const;
-    virtual bool SetData(size_t len, const void *buf);
+  virtual wxDataFormat GetFormat() const { return wxDF_METAFILE; }
 
-protected:
+/* ??
+  // implement base class pure virtuals
+  virtual wxDataFormat GetPreferredFormat() const
+    { return (wxDataFormat) wxDataObject::Text; }
+  virtual bool IsSupportedFormat(wxDataFormat format) const
+    { return format == wxDataObject::Text || format == wxDataObject::Locale; }
+  virtual size_t GetDataSize() const
+    { return m_strText.Len() + 1; } // +1 for trailing '\0'of course
+  virtual void GetDataHere(void *pBuf) const
+    { memcpy(pBuf, m_strText.c_str(), GetDataSize()); }
+*/
+
+private:
   wxMetafile   m_metafile;
+  int          m_width;
+  int          m_height;
 };
 #endif
 

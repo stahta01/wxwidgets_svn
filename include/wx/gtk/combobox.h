@@ -86,7 +86,6 @@ public:
     int GetSelection() const;
     wxString GetString( int n ) const;
     wxString GetStringSelection() const;
-    int GetCount() const { return Number(); }
     int Number() const;
     void SetSelection( int n );
     void SetStringSelection( const wxString &string );
@@ -114,7 +113,6 @@ public:
     bool     m_alreadySent;
     wxList   m_clientDataList;
     wxList   m_clientObjectList;
-    int      m_prevSelection;
 
     void DisableEvents();
     void EnableEvents();

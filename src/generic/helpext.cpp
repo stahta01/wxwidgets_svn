@@ -98,9 +98,7 @@ wxExtHelpController::DisplayHelp(const wxString &relativeURL)
    }
    else
       return true;
-
 #elif  defined(__WXPM__)
-
    wxString url;
    url << m_MapFile << '\\' << relativeURL.BeforeFirst('#');
 //   will have to fix for OS/2, later.....DW
@@ -113,16 +111,8 @@ wxExtHelpController::DisplayHelp(const wxString &relativeURL)
 //   }
 //   else
       return TRUE;
-
-#elif defined(__DOS__)
-
-   wxString command;
-   command = m_BrowserName;
-   command << wxT(" file://")
-           << m_MapFile << WXEXTHELP_SEPARATOR << relativeURL;
-   return wxExecute(command) != 0;
-
-#else // UNIX
+#else
+   // assume UNIX
    wxString command;
 
    if(m_BrowserIsNetscape) // try re-loading first

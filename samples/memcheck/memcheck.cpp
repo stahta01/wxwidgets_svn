@@ -25,9 +25,9 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/datetime.h"
+#include "wx/date.h"
 
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
 #include "mondrian.xpm"
 #endif
 
@@ -86,26 +86,16 @@ bool MyApp::OnInit(void)
   wxDebugContext::SetCheckpoint();
 
   wxString *thing = new wxString;
-
-#if wxUSE_DATETIME
-  wxDateTime* date = new wxDateTime;
-#endif // wxUSE_DATETIME
+  wxDate* date = new wxDate;
 
   // non-object allocation
   char *ordinaryNonObject = new char[1000];
 
   const char *data = (const char*) thing ;
 
-  // On MSW, Dump() crashes if using wxLogGui,
-  // so use wxLogStderr instead.
-  wxLog* oldLog = wxLog::SetActiveTarget(new wxLogStderr);
-
   wxDebugContext::PrintClasses();
   wxDebugContext::Dump();
   wxDebugContext::PrintStatistics();
-
-  // Set back to wxLogGui
-  delete wxLog::SetActiveTarget(oldLog);
 
   // Don't delete these objects, to force wxApp to flag a memory leak.
 //  delete thing;

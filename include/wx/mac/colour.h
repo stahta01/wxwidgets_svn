@@ -28,8 +28,6 @@ public:
   wxColour();
     // from RGB
   wxColour( unsigned char red, unsigned char green, unsigned char blue );
-  wxColour( unsigned long colRGB ) { Set(colRGB); }
-  
     // implicit conversion from the colour name
   wxColour( const wxString &colourName ) { InitFromName(colourName); }
   wxColour( const char *colourName ) { InitFromName(colourName); }
@@ -76,7 +74,7 @@ public:
 
   void InitFromName(const wxString& col);
 
-  const WXCOLORREF& GetPixel() const { return m_pixel; };
+  const WXCOLORREF GetPixel() const { return m_pixel; };
 
 private:
   bool          m_isInit;

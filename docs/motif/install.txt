@@ -1,4 +1,4 @@
-wxWindows 2.3 for Motif installation
+wxWindows 2.2 for Motif installation
 ------------------------------------
 
 IMPORTANT NOTE:
@@ -11,7 +11,7 @@ IMPORTANT NOTE:
   
   When sending bug reports tell us what version of wxWindows you are 
   using (including the beta) and what compiler on what system. One 
-  example: wxMotif 2.3.0, egcs 1.1.1, Redhat 5.0
+  example: wxMotif 2.2.0, egcs 1.1.1, Redhat 5.0
 
 First steps
 -----------
@@ -243,10 +243,10 @@ Usage:
 	./configure options
 
 If you want to use system's C and C++ compiler,
-set environment variables CXX and CC as
+set environment variables CC and CCC as
 
 	% setenv CC cc
-	% setenv CXX CC
+	% setenv CCC CC
 	% ./configure options
 
 to see all the options please use:
@@ -432,13 +432,13 @@ g++ myfoo.cpp `wx-config --libs` `wx-config --cflags` -o myfoo
 Using this way, a make file for the minimal sample would look
 like this
 
-CXX = g++
+CC = g++
 
 minimal: minimal.o
-    $(CXX) -o minimal minimal.o `wx-config --libs` 
+    $(CC) -o minimal minimal.o `wx-config --libs` 
 
 minimal.o: minimal.cpp mondrian.xpm
-    $(CXX) `wx-config --cflags` -c minimal.cpp -o minimal.o
+    $(CC) `wx-config --cflags` -c minimal.cpp -o minimal.o
 
 clean: 
 	rm -f *.o minimal

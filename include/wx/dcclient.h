@@ -7,8 +7,8 @@
 #include "wx/motif/dcclient.h"
 #elif defined(__WXGTK__)
 #include "wx/gtk/dcclient.h"
-#elif defined(__WXMGL__)
-#include "wx/mgl/dcclient.h"
+#elif defined(__WXQT__)
+#include "wx/qt/dcclient.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/dcclient.h"
 #elif defined(__WXPM__)

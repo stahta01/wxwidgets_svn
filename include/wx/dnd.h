@@ -34,13 +34,12 @@ enum wxDragResult
     wxDragNone,     // drag target didn't accept the data
     wxDragCopy,     // the data was successfully copied
     wxDragMove,     // the data was successfully moved (MSW only)
-    wxDragLink,     // operation is a drag-link
     wxDragCancel    // the operation was cancelled by user (not an error)
 };
 
 inline WXDLLEXPORT bool wxIsDragResultOk(wxDragResult res)
 {
-    return res == wxDragCopy || res == wxDragMove || res == wxDragLink;
+    return res == wxDragCopy || res == wxDragMove;
 }
 
 // ----------------------------------------------------------------------------
@@ -189,6 +188,8 @@ protected:
     #include "wx/motif/dnd.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/dnd.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/dnd.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dnd.h"
 #elif defined(__WXPM__)

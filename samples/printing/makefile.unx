@@ -13,16 +13,16 @@
 # under Linux.
 #
 
-CXX = $(shell wx-config --cxx)
+CC = gcc
 
 PROGRAM = printing
 
 $(PROGRAM): $(PROGRAM).o
-	$(CXX) -o $(PROGRAM) \
+	$(CC) -o $(PROGRAM) \
 	$(PROGRAM).o `wx-config --libs`
 
 $(PROGRAM).o: $(PROGRAM).cpp
-	$(CXX) `wx-config --cxxflags` -c $(PROGRAM).cpp
+	$(CC) `wx-config --cflags` -c $(PROGRAM).cpp
 
 clean: 
 	rm -f *.o $(PROGRAM)

@@ -14,7 +14,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -25,10 +25,6 @@
 #endif
 
 #include <wx/wxexpr.h>
-
-#ifdef new
-#undef new
-#endif
 
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
@@ -61,6 +57,8 @@
 #define CONTROL_POINT_ENDPOINT_FROM 5
 #define CONTROL_POINT_LINE       6
 
+extern wxCursor *g_oglBullseyeCursor;
+
 IMPLEMENT_DYNAMIC_CLASS(wxShapeCanvas, wxScrolledWindow)
 
 BEGIN_EVENT_TABLE(wxShapeCanvas, wxScrolledWindow)
@@ -92,11 +90,10 @@ void wxShapeCanvas::OnPaint(wxPaintEvent& event)
 
     PrepareDC(dc);
 
-    dc.SetBackground(wxBrush(GetBackgroundColour(), wxSOLID));
     dc.Clear();
 
-    if (GetDiagram())
-        GetDiagram()->Redraw(dc);
+	if (GetDiagram())
+		GetDiagram()->Redraw(dc);
 }
 
 void wxShapeCanvas::OnMouseEvent(wxMouseEvent& event)

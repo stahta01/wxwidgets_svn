@@ -20,6 +20,7 @@
 #endif
 
 #ifndef WXPRECOMP
+#include "wx/wx.h"
 #endif
 
 
@@ -35,13 +36,12 @@ TAG_HANDLER_BEGIN(P, "P")
 
     TAG_HANDLER_PROC(tag)
     {
-        if (m_WParser->GetContainer()->GetFirstCell() != NULL)
-        {
-            m_WParser->CloseContainer();
-            m_WParser->OpenContainer();
+        if (m_WParser -> GetContainer() -> GetFirstCell() != NULL) {
+            m_WParser -> CloseContainer();
+            m_WParser -> OpenContainer();
         }
-        m_WParser->GetContainer()->SetIndent(m_WParser->GetCharHeight(), wxHTML_INDENT_TOP);
-        m_WParser->GetContainer()->SetAlign(tag);
+        m_WParser -> GetContainer() -> SetIndent(m_WParser -> GetCharHeight(), wxHTML_INDENT_TOP);
+        m_WParser -> GetContainer() -> SetAlign(tag);
         return FALSE;
     }
 
@@ -53,14 +53,14 @@ TAG_HANDLER_BEGIN(BR, "BR")
 
     TAG_HANDLER_PROC(tag)
     {
-        int al = m_WParser->GetContainer()->GetAlignHor();
+        int al = m_WParser -> GetContainer() -> GetAlignHor();
         wxHtmlContainerCell *c;
-
-        m_WParser->CloseContainer();
-        c = m_WParser->OpenContainer();
-        c->SetAlignHor(al);
-        c->SetAlign(tag);
-        c->SetMinHeight(m_WParser->GetCharHeight());
+    
+        m_WParser -> CloseContainer();
+        c = m_WParser -> OpenContainer();
+        c -> SetAlignHor(al);
+        c -> SetAlign(tag);
+        c -> SetMinHeight(m_WParser -> GetCharHeight());
         return FALSE;
     }
 
@@ -72,30 +72,27 @@ TAG_HANDLER_BEGIN(CENTER, "CENTER")
 
     TAG_HANDLER_PROC(tag)
     {
-        int old = m_WParser->GetAlign();
-        wxHtmlContainerCell *c = m_WParser->GetContainer();
+        int old = m_WParser -> GetAlign();
+        wxHtmlContainerCell *c = m_WParser -> GetContainer();
 
-        m_WParser->SetAlign(wxHTML_ALIGN_CENTER);
-        if (c->GetFirstCell() != NULL)
-        {
-            m_WParser->CloseContainer();
-            m_WParser->OpenContainer();
+        m_WParser -> SetAlign(wxHTML_ALIGN_CENTER);
+        if (c -> GetFirstCell() != NULL) {
+            m_WParser -> CloseContainer();
+            m_WParser -> OpenContainer();
         }
         else
-            c->SetAlignHor(wxHTML_ALIGN_CENTER);
+            c -> SetAlignHor(wxHTML_ALIGN_CENTER);
 
-        if (tag.HasEnding())
-        {
+        if (tag.HasEnding()) {
             ParseInner(tag);
 
-            m_WParser->SetAlign(old);
-            if (c->GetFirstCell() != NULL)
-            {
-                m_WParser->CloseContainer();
-                m_WParser->OpenContainer();
+            m_WParser -> SetAlign(old);
+            if (c -> GetFirstCell() != NULL) {
+                m_WParser -> CloseContainer();
+                m_WParser -> OpenContainer();
             }
             else
-                c->SetAlignHor(old);
+                c -> SetAlignHor(old);
 
             return TRUE;
         }
@@ -110,32 +107,29 @@ TAG_HANDLER_BEGIN(DIV, "DIV")
 
     TAG_HANDLER_PROC(tag)
     {
-        int old = m_WParser->GetAlign();
-        wxHtmlContainerCell *c = m_WParser->GetContainer();
-        if (c->GetFirstCell() != NULL)
-        {
-            m_WParser->CloseContainer();
-            m_WParser->OpenContainer();
-            c = m_WParser->GetContainer();
-            c->SetAlign(tag);
-            m_WParser->SetAlign(c->GetAlignHor());
+        int old = m_WParser -> GetAlign();
+        wxHtmlContainerCell *c = m_WParser -> GetContainer();
+        if (c -> GetFirstCell() != NULL) {
+            m_WParser -> CloseContainer();
+            m_WParser -> OpenContainer();
+            c = m_WParser -> GetContainer();
+            c -> SetAlign(tag);
+            m_WParser -> SetAlign(c -> GetAlignHor());
         }
-        else
-        {
-            c->SetAlign(tag);
-            m_WParser->SetAlign(c->GetAlignHor());
+        else {
+            c -> SetAlign(tag);
+        m_WParser -> SetAlign(c -> GetAlignHor());
         }
 
         ParseInner(tag);
 
-        m_WParser->SetAlign(old);
-        if (c->GetFirstCell() != NULL)
-        {
-            m_WParser->CloseContainer();
-            m_WParser->OpenContainer();
+        m_WParser -> SetAlign(old);
+        if (c -> GetFirstCell() != NULL) {
+            m_WParser -> CloseContainer();
+            m_WParser -> OpenContainer();
         }
         else
-            c->SetAlignHor(old);
+            c -> SetAlignHor(old);
 
         return TRUE;
     }
@@ -149,14 +143,14 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
 
     TAG_HANDLER_PROC(tag)
     {
-        if (m_WParser->GetWindow())
-        {
-            wxHtmlWindow *wfr = (wxHtmlWindow*)(m_WParser->GetWindow());
-            if (wfr)
-            {
-                const wxString& src = *m_WParser->GetSource();
-                wfr->OnSetTitle(src.Mid(tag.GetBeginPos(), 
-                                        tag.GetEndPos1()-tag.GetBeginPos()));
+        if (m_WParser -> GetWindow()) {
+            wxHtmlWindow *wfr = (wxHtmlWindow*)(m_WParser -> GetWindow());
+            if (wfr) {
+                wxString title = "";
+                wxString *src = m_WParser -> GetSource();
+
+                for (int i = tag.GetBeginPos(); i < tag.GetEndPos1(); i++) title += (*src)[(unsigned int) i];
+                wfr -> OnSetTitle(title);
             }
         }
         return TRUE;
@@ -171,23 +165,31 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
 
     TAG_HANDLER_PROC(tag)
     {
+        unsigned long tmp;
         wxColour clr;
 
-        if (tag.GetParamAsColour(wxT("TEXT"), &clr))
-        {
-            m_WParser->SetActualColor(clr);
-            m_WParser->GetContainer()->InsertCell(new wxHtmlColourCell(clr));
+        if (tag.HasParam(wxT("TEXT"))) {
+            if (tag.ScanParam(wxT("TEXT"), wxT("#%lX"), &tmp) == 1) {
+                clr = wxColour((tmp & 0xFF0000) >> 16 , (tmp & 0x00FF00) >> 8, (tmp & 0x0000FF));
+                m_WParser -> SetActualColor(clr);
+                m_WParser -> GetContainer() -> InsertCell(new wxHtmlColourCell(clr));
+            }
+	}
+
+        if (tag.HasParam(wxT("LINK"))) {
+            if (tag.ScanParam(wxT("LINK"), wxT("#%lX"), &tmp) == 1) {
+                clr = wxColour((tmp & 0xFF0000) >> 16 , (tmp & 0x00FF00) >> 8, (tmp & 0x0000FF));
+                m_WParser -> SetLinkColor(clr);
+	    }
         }
 
-        if (tag.GetParamAsColour(wxT("LINK"), &clr))
-            m_WParser->SetLinkColor(clr);
-
-        if (tag.GetParamAsColour(wxT("BGCOLOR"), &clr))
-        {
-            m_WParser->GetContainer()->InsertCell(
-                new wxHtmlColourCell(clr, wxHTML_CLR_BACKGROUND));
-            if (m_WParser->GetWindow() != NULL)
-                m_WParser->GetWindow()->SetBackgroundColour(clr);
+        if (tag.HasParam(wxT("BGCOLOR"))) {
+            if (tag.ScanParam(wxT("BGCOLOR"), wxT("#%lX"), &tmp) == 1) {
+                clr = wxColour((tmp & 0xFF0000) >> 16 , (tmp & 0x00FF00) >> 8, (tmp & 0x0000FF));
+                m_WParser -> GetContainer() -> InsertCell(new wxHtmlColourCell(clr, wxHTML_CLR_BACKGROUND));
+                if (m_WParser -> GetWindow() != NULL)
+                    m_WParser -> GetWindow() -> SetBackgroundColour(clr);
+	    }
         }
         return FALSE;
     }
@@ -201,22 +203,20 @@ TAG_HANDLER_BEGIN(BLOCKQUOTE, "BLOCKQUOTE")
     TAG_HANDLER_PROC(tag)
     {
         wxHtmlContainerCell *c;
-
-        m_WParser->CloseContainer();
-        c = m_WParser->OpenContainer();
-
-        if (c->GetAlignHor() == wxHTML_ALIGN_RIGHT)
-            c->SetIndent(5 * m_WParser->GetCharWidth(), wxHTML_INDENT_RIGHT);
+    
+        m_WParser -> CloseContainer();
+        c = m_WParser -> OpenContainer();
+        if (c -> GetAlignHor() == wxHTML_ALIGN_RIGHT)
+            c -> SetIndent(5 * m_WParser -> GetCharWidth(), wxHTML_INDENT_RIGHT);
         else
-            c->SetIndent(5 * m_WParser->GetCharWidth(), wxHTML_INDENT_LEFT);
-
-        c->SetIndent(m_WParser->GetCharHeight(), wxHTML_INDENT_TOP);
-        m_WParser->OpenContainer();
+            c -> SetIndent(5 * m_WParser -> GetCharWidth(), wxHTML_INDENT_LEFT);
+        c -> SetIndent(m_WParser -> GetCharHeight(), wxHTML_INDENT_TOP);
+        m_WParser -> OpenContainer();
         ParseInner(tag);
-        c = m_WParser->CloseContainer();
-        c->SetIndent(m_WParser->GetCharHeight(), wxHTML_INDENT_BOTTOM);
-        m_WParser->CloseContainer();
-        m_WParser->OpenContainer();
+        c = m_WParser -> CloseContainer();
+        c -> SetIndent(m_WParser -> GetCharHeight(), wxHTML_INDENT_BOTTOM);
+        m_WParser -> CloseContainer();
+        m_WParser -> OpenContainer();
         return TRUE;
     }
 

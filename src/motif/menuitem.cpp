@@ -21,8 +21,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/defs.h"
-
 #include "wx/menu.h"
 #include "wx/menuitem.h"
 #include "wx/utils.h"

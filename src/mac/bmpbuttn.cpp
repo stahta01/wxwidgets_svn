@@ -13,15 +13,13 @@
 #pragma implementation "bmpbuttn.h"
 #endif
 
-#include "wx/window.h"
 #include "wx/bmpbuttn.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton, wxButton)
-#endif
 
-#include "wx/mac/uma.h"
-#include "wx/bitmap.h"
+#include <wx/mac/uma.h>
+
+PicHandle MakePict(GWorldPtr wp) ;
 
 bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bitmap,
            const wxPoint& pos,
@@ -50,51 +48,35 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
     if ( height == -1 && bitmap.Ok())
 	height = bitmap.GetHeight() + 2*m_marginY;
 
+	m_macHorizontalBorder = 0 ; // additional pixels around the real control
+	m_macVerticalBorder = 0 ;
 	Rect bounds ;
 	Str255 title ;
-    m_buttonBitmap = bitmap;
-	wxBitmapRefData * bmap = (wxBitmapRefData*) ( m_buttonBitmap.GetRefData()) ;
-	
 	MacPreControlCreate( parent , id ,  "" , pos , wxSize( width , height ) ,style, validator , name , &bounds , title ) ;
 
-	m_macControl = ::NewControl( parent->MacGetRootWindow() , &bounds , title , false , 0 , 
-		kControlBehaviorOffsetContents + 
-		    ( bmap->m_bitmapType == kMacBitmapTypeIcon ? kControlContentCIconHandle : kControlContentPictHandle ) , 0, 
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true , 0 , 
+		kControlBehaviorOffsetContents + kControlContentPictHandle , 0, 
 	  	(( style & wxBU_AUTODRAW ) ? kControlBevelButtonSmallBevelProc : kControlBevelButtonNormalBevelProc ), (long) this ) ;
 	wxASSERT_MSG( m_macControl != NULL , "No valid mac control" ) ;
 	
-	ControlButtonContentInfo info ;
-	
-
+    m_buttonBitmap = bitmap;
+			PicHandle	icon = NULL ;
 	if ( m_buttonBitmap.Ok() )
 	{
-		if ( bmap->m_bitmapType == kMacBitmapTypePict ) {
-	    info.contentType = kControlContentPictHandle ;
-			info.u.picture = bmap->m_hPict ;
-		}
+		wxBitmapRefData * bmap = (wxBitmapRefData*) ( m_buttonBitmap.GetRefData()) ;
+		if ( bmap->m_bitmapType == kMacBitmapTypePict )
+			icon = bmap->m_hPict ;
 		else if ( bmap->m_bitmapType == kMacBitmapTypeGrafWorld )
 		{
-			if ( m_buttonBitmap.GetMask() )
-			{
-		    info.contentType = kControlContentCIconHandle ;
-				info.u.cIconHandle = wxMacCreateCIcon( bmap->m_hBitmap , m_buttonBitmap.GetMask()->GetMaskBitmap() ,
-				    8 , 16 ) ;
-			}
-			else
-			{
-		    info.contentType = kControlContentCIconHandle ;
-				info.u.cIconHandle = wxMacCreateCIcon( bmap->m_hBitmap , NULL ,
-				    8 , 16 ) ;
-			}
-		}
-		else if ( bmap->m_bitmapType == kMacBitmapTypeIcon )
-		{
-	        info.contentType = kControlContentCIconHandle ;
-	        info.u.cIconHandle = bmap->m_hIcon ;
+			icon = MakePict( bmap->m_hBitmap ) ;
 		}
 	}
+	ControlButtonContentInfo info ;
 	
-	::SetControlData( m_macControl , kControlButtonPart , kControlBevelButtonContentTag , sizeof(info) , (char*) &info ) ;
+	info.contentType = kControlContentPictHandle ;
+	info.u.picture = icon ;
+	
+	UMASetControlData( m_macControl , kControlButtonPart , kControlBevelButtonContentTag , sizeof(info) , (char*) &info ) ;
 
 	MacPostControlCreate() ;
 
@@ -103,39 +85,23 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
 
 void wxBitmapButton::SetBitmapLabel(const wxBitmap& bitmap)
 {
-	ControlButtonContentInfo info ;
     m_buttonBitmap = bitmap;
-
+			PicHandle	icon = NULL ;
 	if ( m_buttonBitmap.Ok() )
 	{
 		wxBitmapRefData * bmap = (wxBitmapRefData*) ( m_buttonBitmap.GetRefData()) ;
-		if ( bmap->m_bitmapType == kMacBitmapTypePict ) {
-	    info.contentType = kControlContentPictHandle ;
-			info.u.picture = bmap->m_hPict ;
-		}
+		if ( bmap->m_bitmapType == kMacBitmapTypePict )
+			icon = bmap->m_hPict ;
 		else if ( bmap->m_bitmapType == kMacBitmapTypeGrafWorld )
 		{
-			if ( m_buttonBitmap.GetMask() )
-			{
-		    info.contentType = kControlContentCIconHandle ;
-				info.u.cIconHandle = wxMacCreateCIcon( bmap->m_hBitmap , m_buttonBitmap.GetMask()->GetMaskBitmap() ,
-				    8 , 16 ) ;
-			}
-			else
-			{
-		    info.contentType = kControlContentCIconHandle ;
-				info.u.cIconHandle = wxMacCreateCIcon( bmap->m_hBitmap , NULL ,
-				    8 , 16 ) ;
-			}
+			icon = MakePict( bmap->m_hBitmap ) ;
 		}
-		else if ( bmap->m_bitmapType == kMacBitmapTypeIcon )
-		{
-	        info.contentType = kControlContentCIconHandle ;
-	        info.u.cIconHandle = bmap->m_hIcon ;
-		}
-
-		
-	    ::SetControlData( m_macControl , kControlButtonPart , kControlBevelButtonContentTag , sizeof(info) , (char*) &info ) ;
-    }
+	}
+	ControlButtonContentInfo info ;
+	
+	info.contentType = kControlContentPictHandle ;
+	info.u.picture = icon ;
+	
+	UMASetControlData( m_macControl , kControlButtonPart , kControlBevelButtonContentTag , sizeof(info) , (char*) &info ) ;
 }
 

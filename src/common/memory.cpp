@@ -40,13 +40,10 @@
 
 #include "wx/ioswrap.h"
 
-// Obsolete
-#if 0
 #if wxUSE_IOSTREAMH
     #include <fstream.h>
 #else
     #include <fstream>
-#endif
 #endif
 
 #if !defined(__WATCOMC__) && !(defined(__VMS__) && ( __VMS_VER < 70000000 ) )\
@@ -464,15 +461,12 @@ int wxMemStruct::ValidateNode ()
 
 wxMemStruct *wxDebugContext::m_head = NULL;
 wxMemStruct *wxDebugContext::m_tail = NULL;
-// wxSTD ostream *wxDebugContext::m_debugStream = NULL;
-// wxSTD streambuf *wxDebugContext::m_streamBuf = NULL;
+// ostream *wxDebugContext::m_debugStream = NULL;
+// streambuf *wxDebugContext::m_streamBuf = NULL;
 
 // Must initialise these in wxEntry, and then delete them just before wxEntry exits
-// Obsolete
-#if 0
-wxSTD streambuf *wxDebugContext::m_streamBuf = NULL;
-wxSTD ostream *wxDebugContext::m_debugStream = NULL;
-#endif
+streambuf *wxDebugContext::m_streamBuf = NULL;
+ostream *wxDebugContext::m_debugStream = NULL;
 
 bool wxDebugContext::m_checkPrevious = FALSE;
 int wxDebugContext::debugLevel = 1;
@@ -487,12 +481,12 @@ int wxDebugContext::m_balignmask = (int)((char *)&markerCalc[1] - (char*)&marker
 wxDebugContext::wxDebugContext(void)
 {
 //  m_streamBuf = new wxDebugStreamBuf;
-//  m_debugStream = new wxSTD ostream(m_streamBuf);
+//  m_debugStream = new ostream(m_streamBuf);
 }
 
 wxDebugContext::~wxDebugContext(void)
 {
-//  SetStream(NULL, NULL);
+  SetStream(NULL, NULL);
 }
 
 /*
@@ -500,9 +494,7 @@ wxDebugContext::~wxDebugContext(void)
  * between SetFile and SetStream.
  */
 
-// Obsolete
-#if 0
-void wxDebugContext::SetStream(wxSTD ostream *str, wxSTD streambuf *buf)
+void wxDebugContext::SetStream(ostream *str, streambuf *buf)
 {
   if (m_debugStream)
   {
@@ -516,7 +508,7 @@ void wxDebugContext::SetStream(wxSTD ostream *str, wxSTD streambuf *buf)
 #ifndef __WATCOMC__
   if (m_streamBuf)
   {
-    wxSTD streambuf* oldBuf = m_streamBuf;
+    streambuf* oldBuf = m_streamBuf;
     m_streamBuf = NULL;
     delete oldBuf;
   }
@@ -527,7 +519,7 @@ void wxDebugContext::SetStream(wxSTD ostream *str, wxSTD streambuf *buf)
 
 bool wxDebugContext::SetFile(const wxString& file)
 {
-  wxSTD ofstream *str = new wxSTD ofstream(file.mb_str());
+  ofstream *str = new ofstream(file.mb_str());
 
   if (str->bad())
   {
@@ -547,7 +539,7 @@ bool wxDebugContext::SetStandardError(void)
 #if 0
 #if !defined(_WINDLL)
   wxDebugStreamBuf *buf = new wxDebugStreamBuf;
-  wxSTD ostream *stream = new wxSTD ostream(m_streamBuf);
+  ostream *stream = new ostream(m_streamBuf);
   SetStream(stream, buf);
   return TRUE;
 #else
@@ -556,8 +548,7 @@ bool wxDebugContext::SetStandardError(void)
 #endif
   return FALSE;
 }
-#endif
-    // 0
+
 
 /*
   Work out the positions of the markers by creating an array of 2 markers
@@ -624,13 +615,13 @@ size_t wxDebugContext::PaddedSize (const size_t size)
 {
     // Added by Terry Farnham <TJRT@pacbell.net> to replace
     // slow GetPadding call.
-    int padb;
+	int padb;
 
-    padb = size & m_balignmask;
-    if(padb)
-        return(size + m_balign - padb);
-    else
-        return(size);
+	padb = size & m_balignmask;
+	if(padb)
+		return(size + m_balign - padb);
+	else
+		return(size);
 
 // Old (slow) code
 #if 0
@@ -658,8 +649,7 @@ void wxDebugContext::TraverseList (PmSFV func, wxMemStruct *from)
   if (!from)
     from = wxDebugContext::GetHead ();
 
-  wxMemStruct * st = NULL;
-  for (st = from; st != 0; st = st->m_next)
+  for (wxMemStruct * st = from; st != 0; st = st->m_next)
   {
       void* data = st->GetActualData();
 //      if ((data != (void*)m_debugStream) && (data != (void*) m_streamBuf))
@@ -720,7 +710,6 @@ bool wxDebugContext::Dump(void)
 #endif
 }
 
-#ifdef __WXDEBUG__
 struct wxDebugStatsStruct
 {
   long instanceCount;
@@ -745,7 +734,6 @@ static wxDebugStatsStruct *InsertStatsStruct(wxDebugStatsStruct *head, wxDebugSt
   st->next = head;
   return st;
 }
-#endif
 
 bool wxDebugContext::PrintStatistics(bool detailed)
 {
@@ -794,7 +782,7 @@ bool wxDebugContext::PrintStatistics(bool detailed)
       {
         wxObject *obj = (wxObject *)st->GetActualData();
         if (obj->GetClassInfo()->GetClassName())
-          className = (wxChar*)obj->GetClassInfo()->GetClassName();
+          className = obj->GetClassInfo()->GetClassName();
       }
       wxDebugStatsStruct *stats = FindStatsStruct(list, className);
       if (!stats)
@@ -843,7 +831,6 @@ bool wxDebugContext::PrintStatistics(bool detailed)
 
   return TRUE;
 #else
-  (void)detailed;
   return FALSE;
 #endif
 }
@@ -957,16 +944,114 @@ int wxDebugContext::CountObjectsLeft(bool sinceCheckpoint)
   return n ;
 }
 
+/*
+  The global operator new used for everything apart from getting
+  dynamic storage within this function itself.
+*/
+
+// We'll only do malloc and free for the moment: leave the interesting
+// stuff for the wxObject versions.
+
+#if defined(__WXDEBUG__) && wxUSE_GLOBAL_MEMORY_OPERATORS
+
+#ifdef new
+#undef new
+#endif
+
+// Seems OK all of a sudden. Maybe to do with linking with multithreaded library?
+#if 0 // def __VISUALC__
+#define NO_DEBUG_ALLOCATION
+#endif
+
+// Unfortunately ~wxDebugStreamBuf doesn't work (VC++ 5) when we enable the debugging
+// code. I have no idea why. In BC++ 4.5, we have a similar problem the debug
+// stream myseriously changing pointer address between being passed from SetFile to SetStream.
+// See docs/msw/issues.txt.
+void * operator new (size_t size, wxChar * fileName, int lineNum)
+{
+#ifdef NO_DEBUG_ALLOCATION
+  return malloc(size);
+#else
+  return wxDebugAlloc(size, fileName, lineNum, FALSE, FALSE);
+#endif
+}
+
+// Added JACS 25/11/98
+void * operator new (size_t size)
+{
+#ifdef NO_DEBUG_ALLOCATION
+  return malloc(size);
+#else
+  return wxDebugAlloc(size, NULL, 0, FALSE);
+#endif
+}
+
+#if wxUSE_ARRAY_MEMORY_OPERATORS
+void * operator new[] (size_t size)
+{
+#ifdef NO_DEBUG_ALLOCATION
+  return malloc(size);
+#else
+  return wxDebugAlloc(size, NULL, 0, FALSE, TRUE);
+#endif
+}
+#endif
+
+#if wxUSE_ARRAY_MEMORY_OPERATORS
+void * operator new[] (size_t size, wxChar * fileName, int lineNum)
+{
+#ifdef NO_DEBUG_ALLOCATION
+  return malloc(size);
+#else
+  return wxDebugAlloc(size, fileName, lineNum, FALSE, TRUE);
+#endif
+}
+#endif
+
+#if !defined(__VISAGECPP__) // already defines this by default
+void operator delete (void * buf)
+{
+#ifdef NO_DEBUG_ALLOCATION
+  free((char*) buf);
+#else
+  wxDebugFree(buf);
+#endif
+}
+#endif
+
+// VC++ 6.0
+#if defined(__VISUALC__) && (__VISUALC__ >= 1200)
+void operator delete(void* pData, wxChar* /* fileName */, int /* lineNum */)
+{
+  wxDebugFree(pData, FALSE);
+}
+// New operator 21/11/1998
+void operator delete[](void* pData, wxChar* /* fileName */, int /* lineNum */)
+{
+  wxDebugFree(pData, TRUE);
+}
+#endif
+
+#if wxUSE_ARRAY_MEMORY_OPERATORS
+
+void operator delete[] (void * buf)
+{
+#ifdef NO_DEBUG_ALLOCATION
+  free((char*) buf);
+#else
+  wxDebugFree(buf, TRUE);
+#endif
+}
+#endif
+
+#endif
+
 // TODO: store whether this is a vector or not.
 void * wxDebugAlloc(size_t size, wxChar * fileName, int lineNum, bool isObject, bool WXUNUSED(isVect) )
 {
   // If not in debugging allocation mode, do the normal thing
   // so we don't leave any trace of ourselves in the node list.
 
-#if defined(__VISAGECPP__) && (__IBMCPP__ < 400 || __IBMC__ < 400 )
-// VA 3.0 still has trouble in here
-  return (void *)malloc(size);
-#endif
   if (!wxDebugContext::GetDebugMode())
   {
     return (void *)malloc(size);
@@ -1019,10 +1104,6 @@ void wxDebugFree(void * buf, bool WXUNUSED(isVect) )
   if (!buf)
     return;
 
-#if defined(__VISAGECPP__) && (__IBMCPP__ < 400 || __IBMC__ < 400 )
-// VA 3.0 still has trouble in here
-  free((char *)buf);
-#endif
   // If not in debugging allocation mode, do the normal thing
   // so we don't leave any trace of ourselves in the node list.
   if (!wxDebugContext::GetDebugMode())
@@ -1063,7 +1144,7 @@ void wxDebugFree(void * buf, bool WXUNUSED(isVect) )
 }
 
 // Trace: send output to the current debugging stream
-void wxTrace(const wxChar * ...)
+void wxTrace(const wxChar *fmt ...)
 {
 #if 1
     wxFAIL_MSG(wxT("wxTrace is now obsolete. Please use wxDebugXXX instead."));
@@ -1100,7 +1181,7 @@ void wxTrace(const wxChar * ...)
 }
 
 // Trace with level
-void wxTraceLevel(int, const wxChar * ...)
+void wxTraceLevel(int level, const wxChar *fmt ...)
 {
 #if 1
     wxFAIL_MSG(wxT("wxTrace is now obsolete. Please use wxDebugXXX instead."));

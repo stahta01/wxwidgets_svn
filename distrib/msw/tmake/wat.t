@@ -37,8 +37,6 @@
     }
 
     foreach $file (sort keys %wxCommon) {
-        next if $wxCommon{$file} =~ /\b(16|U)\b/;
-
         $isCFile = $file =~ /\.c$/;
         $file =~ s/cp?p?$/obj/;
         $project{"WXCOMMONOBJS"} .= $file . " ";
@@ -91,10 +89,11 @@ LIBTARGET   = $(WXLIB)\wx.lib
 DUMMY=dummydll
 # ODBCLIB     = ..\..\contrib\odbc\odbc32.lib
 
-EXTRATARGETS = png zlib jpeg tiff regex
-EXTRATARGETSCLEAN = clean_png clean_zlib clean_jpeg clean_tiff clean_regex
+EXTRATARGETS = xpm png zlib jpeg tiff
+EXTRATARGETSCLEAN = clean_xpm clean_png clean_zlib clean_jpeg clean_tiff
 GENDIR=$(WXDIR)\src\generic
 COMMDIR=$(WXDIR)\src\common
+XPMDIR=$(WXDIR)\src\xpm
 JPEGDIR=$(WXDIR)\src\jpeg
 TIFFDIR=$(WXDIR)\src\tiff
 MSWDIR=$(WXDIR)\src\msw
@@ -120,17 +119,7 @@ HTMLOBJS = #$ ExpandGlue("WXHTMLOBJS", "", " &\n\t")
 # Add $(NONESSENTIALOBJS) if wanting generic dialogs, PostScript etc.
 OBJECTS = $(COMMONOBJS) $(GENERICOBJS) $(MSWOBJS) $(HTMLOBJS)
 
-ARCHINCDIR=$(WXDIR)\lib\msw
-SETUP_H=$(ARCHINCDIR)\wx\setup.h
-
-all:        $(SETUP_H) $(OBJECTS) $(LIBTARGET) $(EXTRATARGETS) .SYMBOLIC
-
-$(ARCHINCDIR)\wx:
-    mkdir $(ARCHINCDIR)
-    mkdir $(ARCHINCDIR)\wx
-
-$(SETUP_H): $(WXDIR)\include\wx\msw\setup.h $(ARCHINCDIR)\wx
-    copy $(WXDIR)\include\wx\msw\setup.h $@
+all:        $(OBJECTS) $(LIBTARGET) $(EXTRATARGETS) .SYMBOLIC
 
 $(LIBTARGET) : $(OBJECTS)
     %create tmp.lbc
@@ -244,6 +233,133 @@ $(COMMDIR)\lex_yy.c:    $(COMMDIR)\doslex.c
     }
 #$}
 
+
+crbuffri.obj: $(XPMDIR)\crbuffri.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crbuffrp.obj: $(XPMDIR)\crbuffrp.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crdatfri.obj: $(XPMDIR)\crdatfri.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crdatfrp.obj: $(XPMDIR)\crdatfrp.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+create.obj: $(XPMDIR)\create.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crifrbuf.obj: $(XPMDIR)\crifrbuf.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crifrdat.obj: $(XPMDIR)\crifrdat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crpfrbuf.obj: $(XPMDIR)\crpfrbuf.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crpfrdat.obj: $(XPMDIR)\crpfrdat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+# TODO: what to do about this clash of filename????
+#data.obj: $(XPMDIR)\data.c
+#  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+hashtab.obj: $(XPMDIR)\hashtab.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+misc.obj: $(XPMDIR)\misc.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+parse.obj: $(XPMDIR)\parse.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rdftodat.obj: $(XPMDIR)\rdftodat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rdftoi.obj: $(XPMDIR)\rdftoi.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rdftop.obj: $(XPMDIR)\rdftop.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rgb.obj: $(XPMDIR)\rgb.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+scan.obj: $(XPMDIR)\scan.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+simx.obj: $(XPMDIR)\simx.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+wrffrdat.obj: $(XPMDIR)\wrffrdat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+wrffri.obj: $(XPMDIR)\wrffri.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+wrffrp.obj: $(XPMDIR)\wrffrp.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+OBJ1 = adler32$(O) compress$(O) crc32$(O) gzio$(O) uncompr$(O) deflate$(O) \
+  trees$(O)
+OBJ2 = zutil$(O) inflate$(O) infblock$(O) inftrees$(O) infcodes$(O) \
+  infutil$(O) inffast$(O)
+
+adler32.obj: adler32.c zutil.h zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+compress.obj: compress.c zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+crc32.obj: crc32.c zutil.h zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+deflate.obj: deflate.c deflate.h zutil.h zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+gzio.obj: gzio.c zutil.h zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+infblock.obj: infblock.c zutil.h zlib.h zconf.h infblock.h inftrees.h\
+   infcodes.h infutil.h
+	$(CC) -c $(CFLAGS) $*.c
+
+infcodes.obj: infcodes.c zutil.h zlib.h zconf.h inftrees.h infutil.h\
+   infcodes.h inffast.h
+	$(CC) -c $(CFLAGS) $*.c
+
+inflate.obj: inflate.c zutil.h zlib.h zconf.h infblock.h
+	$(CC) -c $(CFLAGS) $*.c
+
+inftrees.obj: inftrees.c zutil.h zlib.h zconf.h inftrees.h
+	$(CC) -c $(CFLAGS) $*.c
+
+infutil.obj: infutil.c zutil.h zlib.h zconf.h inftrees.h infutil.h
+	$(CC) -c $(CFLAGS) $*.c
+
+inffast.obj: inffast.c zutil.h zlib.h zconf.h inftrees.h infutil.h inffast.h
+	$(CC) -c $(CFLAGS) $*.c
+
+trees.obj: trees.c deflate.h zutil.h zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+uncompr.obj: uncompr.c zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+zutil.obj: zutil.c zutil.h zlib.h zconf.h
+	$(CC) -c $(CFLAGS) $*.c
+
+xpm:   .SYMBOLIC
+    cd $(WXDIR)\src\xpm
+    wmake -f makefile.wat all
+    cd $(WXDIR)\src\msw
+
+clean_xpm:   .SYMBOLIC
+    cd $(WXDIR)\src\xpm
+    wmake -f makefile.wat clean
+    cd $(WXDIR)\src\msw
+
 png:   .SYMBOLIC
     cd $(WXDIR)\src\png
     wmake -f makefile.wat all
@@ -281,16 +397,6 @@ tiff:    .SYMBOLIC
 
 clean_tiff:   .SYMBOLIC
     cd $(WXDIR)\src\tiff
-    wmake -f makefile.wat clean
-    cd $(WXDIR)\src\msw
-
-regex:    .SYMBOLIC
-    cd $(WXDIR)\src\regex
-    wmake -f makefile.wat all
-    cd $(WXDIR)\src\msw
-
-clean_regex:   .SYMBOLIC
-    cd $(WXDIR)\src\regex
     wmake -f makefile.wat clean
     cd $(WXDIR)\src\msw
 

@@ -10,7 +10,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-#  pragma implementation "srcparser.h"
+#pragma implementation "srcparser.h"
+#pragma interface
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -24,9 +25,7 @@
 #include "wx/wx.h"
 #endif
 
-#ifndef __DARWIN__
-#  include <malloc.h>
-#endif
+#include <malloc.h>
 #include <stdio.h>
 
 #include "srcparser.h"
@@ -346,7 +345,7 @@ void spContext::RemoveThisContext()
         mpParent->RemoveChild( this );
     else
         // context should have a parent
-        wxFAIL_MSG("Context should have a parent");
+        wxASSERT(0);
 }
 
 spContext* spContext::GetOutterContext()

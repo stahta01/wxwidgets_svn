@@ -35,8 +35,6 @@ public:
              ,unsigned char cBlue
             );
 
-    wxColour( unsigned long colRGB ) { Set(colRGB); }
-
     //
     // Implicit conversion from the colour name
     //
@@ -72,10 +70,6 @@ public:
             ,(unsigned char)(lColRGB >> 8)
             ,(unsigned char)(lColRGB >> 16)
            );
-    }
-    void Set(const wxString& rsColour)
-    {
-        InitFromName(rsColour);
     }
 
     //

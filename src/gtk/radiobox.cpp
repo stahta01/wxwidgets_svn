@@ -11,15 +11,12 @@
 #pragma implementation "radiobox.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/radiobox.h"
 
 #if wxUSE_RADIOBOX
 
-#include "wx/radiobox.h"
-
 #include "wx/dialog.h"
 #include "wx/frame.h"
-#include "wx/log.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -44,14 +41,20 @@ extern bool       g_blockEventsOnDrag;
 // "clicked"
 //-----------------------------------------------------------------------------
 
-static void gtk_radiobutton_clicked_callback( GtkToggleButton *button, wxRadioBox *rb )
+static void gtk_radiobutton_clicked_callback( GtkWidget *WXUNUSED(widget), wxRadioBox *rb )
 {
     if (g_isIdle) wxapp_install_idle_handler();
 
     if (!rb->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
-    if (!button->active) return;
+    if (rb->m_alreadySent)
+    {
+        rb->m_alreadySent = FALSE;
+        return;
+    }
+
+    rb->m_alreadySent = TRUE;
 
     wxCommandEvent event( wxEVT_COMMAND_RADIOBOX_SELECTED, rb->GetId() );
     event.SetInt( rb->GetSelection() );
@@ -139,10 +142,7 @@ static gint gtk_radiobutton_focus_out( GtkWidget *widget,
                                        GdkEvent *WXUNUSED(event),
                                        wxRadioBox *win )
 {
-  //    wxASSERT_MSG( win->m_hasFocus, _T("got focus out without any focus in?") );
-  // Replace with a warning, else we dump core a lot!
-  //  if (!win->m_hasFocus)
-  //      wxLogWarning(_T("Radiobox got focus out without any focus in.") );
+    wxASSERT_MSG( win->m_hasFocus, _T("got focus out without any focus in?") );
 
     // we might have lost the focus, but may be not - it may have just gone to
     // another button in the same radiobox, so we'll check for it in the next
@@ -160,6 +160,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxRadioBox,wxControl)
 
 void wxRadioBox::Init()
 {
+    m_alreadySent = FALSE;
     m_needParent = TRUE;
     m_acceptsFocus = TRUE;
 
@@ -177,7 +178,7 @@ bool wxRadioBox::Create( wxWindow *parent, wxWindowID id, const wxString& title,
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxRadioBox creation failed") );
-        return FALSE;
+	return FALSE;
     }
 
     m_widget = gtk_frame_new( title.mbc_str() );
@@ -242,7 +243,7 @@ bool wxRadioBox::Create( wxWindow *parent, wxWindowID id, const wxString& title,
     GtkRequisition req;
     req.width = 2;
     req.height = 2;
-    (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(m_widget) )->size_request ) (m_widget, &req );
+    (* GTK_WIDGET_CLASS( GTK_OBJECT(m_widget)->klass )->size_request ) (m_widget, &req );
     if (req.width > ls.x) ls.x = req.width;
     
     wxSize newSize = size;
@@ -322,7 +323,7 @@ wxSize wxRadioBox::LayoutItems()
                 GtkRequisition req;
                 req.width = 2;
                 req.height = 2;
-                (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(button) )->size_request )
+                (* GTK_WIDGET_CLASS( GTK_OBJECT(button)->klass )->size_request )
                       (button, &req );
 		
                 if (req.width > max_len) max_len = req.width;
@@ -367,7 +368,7 @@ wxSize wxRadioBox::LayoutItems()
             GtkRequisition req;
             req.width = 2;
             req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(button) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(button)->klass )->size_request )
                   (button, &req );
 
             if (req.width > max) max = req.width;
@@ -471,7 +472,7 @@ void wxRadioBox::SetSelection( int n )
 
     GtkDisableEvents();
     
-    gtk_toggle_button_set_active( button, 1 );
+    gtk_toggle_button_set_state( button, 1 );
     
     GtkEnableEvents();
 }

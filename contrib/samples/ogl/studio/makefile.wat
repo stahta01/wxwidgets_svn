@@ -8,7 +8,7 @@
 WXDIR = $(%WXWIN)
 
 PROGRAM = studio
-EXTRALIBS = $(WXDIR)\lib\ogl.lib
+EXTRALIBS = $(WXDIR)\contrib\lib\ogl.lib
 OBJECTS = $(PROGRAM).obj doc.obj shapes.obj symbols.obj view.obj cspalette.obj &
   mainfrm.obj project.obj dialogs.obj csprint.obj
 

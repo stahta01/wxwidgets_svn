@@ -13,11 +13,7 @@
 #pragma implementation "joystick.h"
 #endif
 
-#include "wx/setup.h"
-
-#include "wx/joystick.h"
-
-#if wxUSE_JOYSTICK
+#include <wx/joystick.h>
 
 IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
@@ -280,7 +276,4 @@ bool wxJoystick::ReleaseCapture()
     // TODO
     return FALSE;
 }
-
-#endif
-	// wxUSE_JOYSTICK
 

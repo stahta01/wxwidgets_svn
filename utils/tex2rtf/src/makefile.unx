@@ -11,12 +11,12 @@ OBJECTS = tex2rtf.o tex2any.o texutils.o rtfutils.o xlputils.o htmlutil.o readsh
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
-	$(CXX) -c `wx-config --cxxflags` -o $@ $<
+	$(CC) -c `wx-config --cflags` -o $@ $<
 
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) `wx-config --libs`
+	$(CC) -o $(PROGRAM) $(OBJECTS) `wx-config --libs`
 
 clean:
 	rm -f *.o $(PROGRAM)

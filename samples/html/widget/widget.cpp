@@ -10,7 +10,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -47,8 +47,8 @@ TAG_HANDLER_BEGIN(MYBIND, "MYBIND")
         int ax, ay;
         int fl = 0;
 
-        tag.ScanParam(wxT("X"), wxT("%i"), &ax);
-        tag.ScanParam(wxT("Y"), wxT("%i"), &ay);
+        tag.ScanParam("X", "%i", &ax);
+        tag.ScanParam("Y", "%i", &ay);
         if (tag.HasParam("FLOAT")) fl = ax;
 
         wnd = new wxTextCtrl( m_WParser -> GetWindow(), -1, tag.GetParam("NAME"),

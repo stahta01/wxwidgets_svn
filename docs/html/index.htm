@@ -5,13 +5,24 @@
 
 </HEAD>
 
-<BODY BGCOLOR=#FFFFFF TEXT=#000000 VLINK="#63659C" LINK="#313063" ALINK="#313063">
+<BODY BGCOLOR="#FFFFFF" TEXT=#000000 LINK=#FF0000 VLINK=#000000>
 
 <font face="Arial, Lucida Sans, Helvetica">
 
 <a name="top"></a>
 
-<IMG src="logo.gif" align=left hspace=10 vspace=0>
+<table width=100% border=0 cellpadding=5 cellspacing=0>
+<tr>
+<td bgcolor="#C4ECF9">
+<font size=+1 face="Arial, Lucida Sans, Helvetica" color="#000000">
+<IMG src="logo.gif" align=left>
+<!-- wxWindows Documentation -->
+</font>
+</td>
+</tr>
+</table>
+
+<P>
 
 Welcome to wxWindows 2, the premi&egrave;re cross-platform GUI C++ framework. This is an index of
 the plain text, HTML, Windows Help and Acrobat documentation: availability depends on what you've
@@ -65,16 +76,16 @@ downloaded from the <a href="http://www.wxwindows.org">wxWindows Web site</a>.<P
 <table border=1 align=center>
 
 <tr>
-<td align=center bgcolor="#C4ECF9">
+<td align=center bgcolor="#FFFF00">
 <B>HTML</B>
 </td>
-<td align=center bgcolor="#C4ECF9">
+<td align=center bgcolor="#FFFF00">
 <B>WinHelp</B>
 </td>
-<td align=center bgcolor="#C4ECF9">
+<td align=center bgcolor="#FFFF00">
 <B>MS HTML Help</B>
 </td>
-<td align=center bgcolor="#C4ECF9">
+<td align=center bgcolor="#FFFF00">
 <B>PDF</B>
 </td>
 </tr>
@@ -205,7 +216,6 @@ using wxMDIParentFrame, wxMDIChildFrame.
 <li><a href="../../samples/drawing">drawing</a>: tests device context drawing.
 <li><a href="../../samples/dynamic">dynamic</a>: shows how to connect events to member functions
 dynamically.
-<li><a href="../../samples/event">event</a>: demonstrates event handling.
 <li><a href="../../samples/exec">exec</a>: demonstrates wxExecute.
 <li><a href="../../samples/font">font</a>: tests fonts, font enumerator, font encodings.
 <li><a href="../../samples/grid">grid</a>: demonstrates the wxGrid class. This demo should work
@@ -248,6 +258,7 @@ dialog resource, translating the controls into wxWindows controls (Windows only)
 <li><a href="../../samples/oleauto">oleauto</a>: a little OLE automation controller (Windows only; requires
 Excel to be present).
 <li><a href="../../samples/ownerdrw">ownerdrw</a>: demonstrates owner-draw menus and controls (Windows only).
+<li><a href="../../samples/plot">plot</a>: demonstrates wxPlot classes (under development).
 <li><a href="../../samples/png">png</a>: demonstrates PNG loading.
 <li><a href="../../samples/printing">printing</a>: shows printing and previewing.
 <li><a href="../../samples/proplist">proplist</a>: demonstrates the property list classes (a VB-style property editor).
@@ -266,6 +277,9 @@ an embedded window.
 <li><a href="../../samples/sockets">sockets</a>: demonstrates the TCP/IP family of classes.
 <li><a href="../../samples/splitter">splitter</a>: demonstrates the wxSplitterWindow class.
 <li><a href="../../samples/statbar">statbar</a>: demonstrates the wxStatusBar class.
+<li><a href="../../samples/tab">tab</a>: demonstrates the generic tab window class. You should
+normally use wxNotebook instead, but the generic code is sometimes useful, for example for
+implementing wxNotebook on platforms with no native support.
 <li><a href="../../samples/taskbar">taskbar</a>: demonstrates the wxTaskBarIcon class, for
 adding icons to the system tray. Windows only, but may eventually be implemented for other desktop
 environments that use this metaphor.

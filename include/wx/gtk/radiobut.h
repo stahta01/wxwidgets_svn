@@ -15,6 +15,26 @@
 #pragma interface
 #endif
 
+#include "wx/defs.h"
+
+#if wxUSE_RADIOBOX
+
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/control.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class wxRadioButton;
+
+//-----------------------------------------------------------------------------
+// data
+//-----------------------------------------------------------------------------
+
+extern const char* wxRadioButtonNameStr;
+
 //-----------------------------------------------------------------------------
 // wxRadioButton
 //-----------------------------------------------------------------------------
@@ -50,13 +70,13 @@ public:
     bool IsOwnGtkWindow( GdkWindow *window );
     void OnInternalIdle();
     
-    bool m_blockEvent;
-    
 protected:
     virtual wxSize DoGetBestSize() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxRadioButton)
 };
+
+#endif
 
 #endif // __GTKRADIOBUTTONH__

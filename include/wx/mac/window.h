@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        window.h
-// Purpose:     wxWindowMac class
+// Purpose:     wxWindow class
 // Author:      AUTHOR
 // Modified by:
 // Created:     ??/??/98
@@ -16,14 +16,12 @@
 #pragma interface "window.h"
 #endif
 
-#include <wx/brush.h>
 // ---------------------------------------------------------------------------
 // forward declarations
 // ---------------------------------------------------------------------------
 
 class WXDLLEXPORT wxButton;
 class WXDLLEXPORT wxScrollBar;
-class WXDLLEXPORT wxTopLevelWindowMac;
 
 // ---------------------------------------------------------------------------
 // constants
@@ -36,18 +34,26 @@ enum
     wxKEY_CTRL  = 2
 };
 
-class WXDLLEXPORT wxWindowMac: public wxWindowBase
+class WXDLLEXPORT wxWindow: public wxWindowBase
 {
-  DECLARE_DYNAMIC_CLASS(wxWindowMac);
+  DECLARE_DYNAMIC_CLASS(wxWindow);
 
   friend class wxDC;
   friend class wxPaintDC;
 
 public:
+	typedef struct MacWindowData
+	{
+			SInt16								m_macWindowBackgroundTheme ;
+			WindowRef							m_macWindow ;
+			ControlHandle					m_macRootControl ;
+			wxWindow*							m_macFocus ;
+	} MacWindowData ;
 	
-    wxWindowMac() { Init(); }
+	
+    wxWindow() { Init(); }
 
-    wxWindowMac(wxWindowMac *parent,
+    wxWindow(wxWindow *parent,
              wxWindowID id,
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
@@ -58,9 +64,9 @@ public:
         Create(parent, id, pos, size, style, name);
     }
 
-    virtual ~wxWindowMac();
+    virtual ~wxWindow();
 
-    bool Create(wxWindowMac *parent,
+    bool Create(wxWindow *parent,
                 wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
@@ -80,6 +86,7 @@ public:
 
     virtual void SetFocus();
 
+
     virtual void WarpPointer(int x, int y);
     virtual void CaptureMouse();
     virtual void ReleaseMouse();
@@ -89,8 +96,8 @@ public:
     virtual void Clear();
 
     virtual bool SetCursor( const wxCursor &cursor );
-    virtual bool SetFont(const wxFont& font)
-           { return wxWindowBase::SetFont(font); }
+    virtual bool SetFont( const wxFont &font );
+
     virtual int GetCharHeight() const;
     virtual int GetCharWidth() const;
     virtual void GetTextExtent(const wxString& string,
@@ -127,7 +134,7 @@ public:
 
     // event handlers
         // Handle a control command
-    virtual void OnCommand(wxWindowMac& win, wxCommandEvent& event);
+    virtual void OnCommand(wxWindow& win, wxCommandEvent& event);
 
         // Override to define new behaviour for default action (e.g. double
         // clicking on a listbox)
@@ -147,18 +154,15 @@ public:
 
     // Native resource loading (implemented in src/msw/nativdlg.cpp)
     // FIXME: should they really be all virtual?
-    wxWindowMac* GetWindowChild1(wxWindowID id);
-    wxWindowMac* GetWindowChild(wxWindowID id);
+    wxWindow* GetWindowChild1(wxWindowID id);
+    wxWindow* GetWindowChild(wxWindowID id);
 
     // implementation from now on
     // --------------------------
 
 	void MacClientToRootWindow( int *x , int *y ) const ;
 	void MacRootWindowToClient( int *x , int *y ) const ;
-	void MacWindowToRootWindow( int *x , int *y ) const ;
-	void MacRootWindowToWindow( int *x , int *y ) const ;
-	
-	virtual wxString MacGetToolTipString( wxPoint &where ) ;
+
 
     // simple accessors
     // ----------------
@@ -173,8 +177,6 @@ public:
 
     // event handlers
     // --------------
-	void OnSetFocus(wxFocusEvent& event) ;
-    void OnNcPaint(wxNcPaintEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnIdle(wxIdleEvent& event);
     void MacOnScroll(wxScrollEvent&event ) ;
@@ -186,8 +188,12 @@ public:
     // smaller
     virtual wxPoint GetClientAreaOrigin() const;
 
-    wxWindowMac *FindItem(long id) const;
-    wxWindowMac *FindItemByHWND(WXHWND hWnd, bool controlOnly = FALSE) const;
+    // Makes an adjustment to the window position (for example, a frame that has
+    // a toolbar that it manages itself).
+    virtual void AdjustForParentClientOrigin(int& x, int& y, int sizeFlags);
+
+    wxWindow *FindItem(long id) const;
+    wxWindow *FindItemByHWND(WXHWND hWnd, bool controlOnly = FALSE) const;
 
     // Make a Windows extended style from the given wxWindows window style
     static WXDWORD MakeExtendedStyle(long style,
@@ -212,48 +218,52 @@ public:
     bool IsUserEnabled() const { return IsEnabled(); }
 #endif // WXWIN_COMPATIBILITY
 
+    // Responds to colour changes: passes event on to children.
+    void OnSysColourChanged(wxSysColourChangedEvent& event);
+
 public :
-	static bool							MacGetWindowFromPoint( const wxPoint &point , wxWindowMac** outWin ) ;
-	virtual bool						MacGetWindowFromPointSub( const wxPoint &point , wxWindowMac** outWin ) ;
-	virtual	void						MacRedraw( RgnHandle updatergn , long time , bool erase) ;
+	static bool							MacGetWindowFromPoint( const wxPoint &point , wxWindow** outWin ) ;
+	virtual void						MacActivate( EventRecord *ev , bool inIsActivating ) ;
+	virtual void						MacUpdate( EventRecord *ev ) ;
+	virtual void						MacUpdateImmediately() ;
+	virtual	void						MacRedraw( RgnHandle updatergn , long time) ;
+	virtual void						MacMouseDown( EventRecord *ev , short windowPart ) ;
+	virtual void						MacMouseUp( EventRecord *ev , short windowPart ) ;
+	virtual void						MacMouseMoved( EventRecord *ev , short windowPart ) ;
+	virtual void						MacKeyDown( EventRecord *ev ) ;
 	virtual bool						MacCanFocus() const { return true ; }
 
+	virtual void						MacFireMouseEvent( EventRecord *ev ) ;
 	virtual bool						MacDispatchMouseEvent(wxMouseEvent& event ) ;
+	virtual void						MacEraseBackground( Rect *rect ) ;
+	virtual void 						MacPaint( wxPaintEvent &event ) ;
+	WindowRef								GetMacRootWindow() const  ;
 
-	virtual void 						MacPaintBorders( int left , int top ) ;
-	WindowRef						    MacGetRootWindow() const  ;
-	wxTopLevelWindowMac*                MacGetTopLevelWindow() const ;
-
-	virtual ControlHandle 				MacGetContainerForEmbedding() ;
-	
-	virtual long						MacGetLeftBorderSize() const ;
-	virtual long						MacGetRightBorderSize() const ;
-	virtual long						MacGetTopBorderSize() const ;
-	virtual long						MacGetBottomBorderSize() const ;
-
-	static long							MacRemoveBordersFromStyle( long style ) ;
+	virtual ControlHandle 	MacGetContainerForEmbedding() ;
 	virtual void 						MacSuperChangedPosition() ;
-	virtual void                        MacTopLevelWindowChangedPosition() ;
 	virtual void						MacSuperShown( bool show ) ;
-	virtual void                        MacSuperEnabled( bool enable ) ;
-	bool								MacIsReallyShown() const ;
-	virtual void                        Update() ;
-	// for compatibility
-	void                                MacUpdateImmediately() { Update() ; }
+
+	bool										MacSetupFocusPort() ;
+	bool										MacSetupDrawingPort() ;
+	bool										MacSetupFocusClientPort() ;
+	bool										MacSetupDrawingClientPort() ;
 	
-//	virtual bool						MacSetPortDrawingParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindowMac* rootwin )  ;
-//	virtual void						MacGetPortParams(Point* localOrigin, Rect* clipRect, WindowRef *window , wxWindowMac** rootwin ) ;
-//	virtual void						MacGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window  , wxWindowMac** rootwin) ;
-	const wxBrush&                      MacGetBackgroundBrush() ;
-    const wxRegion&                     MacGetVisibleRegion() ;
+	virtual bool						MacSetPortFocusParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindow* rootwin )  ;
+	virtual bool						MacSetPortDrawingParams( const Point & localOrigin, const Rect & clipRect, WindowRef window , wxWindow* rootwin )  ;
+
+	virtual void						MacGetPortParams(Point* localOrigin, Rect* clipRect, WindowRef *window , wxWindow** rootwin ) ;
+	virtual void						MacGetPortClientParams(Point* localOrigin, Rect* clipRect, WindowRef *window  , wxWindow** rootwin) ;
+	MacWindowData*						MacGetWindowData() { return m_macWindowData ; }
+	static WindowRef					MacGetWindowInUpdate() { return s_macWindowInUpdate ; }
 	bool								MacIsWindowScrollbar( const wxScrollBar* sb ) { return (m_hScrollBar == sb || m_vScrollBar == sb) ; }
-	static wxWindowMac*					s_lastMouseWindow ;
+	static wxWindow*					s_lastMouseWindow ;
 private:
+	virtual bool						MacGetWindowFromPointSub( const wxPoint &point , wxWindow** outWin ) ;
 protected:
-//	RgnHandle					m_macUpdateRgn ;
-//	bool						m_macEraseOnRedraw ;
-    wxBrush                                 m_macBackgroundBrush ;
-    wxRegion                                m_macVisibleRegion ;
+
+	MacWindowData*				m_macWindowData ;
+	static WindowRef			s_macWindowInUpdate ;
+
 	int 									m_x ;
 	int 									m_y ;	
 	int 									m_width ;
@@ -304,22 +314,64 @@ private:
     // common part of all ctors
     void Init();
 
-    DECLARE_NO_COPY_CLASS(wxWindowMac)
+    DECLARE_NO_COPY_CLASS(wxWindow);
     DECLARE_EVENT_TABLE()
 };
+
+// associate mac windows with wx counterparts
+
+wxWindow* wxFindWinFromMacWindow( WindowRef inWindow ) ;
+void wxAssociateWinWithMacWindow(WindowRef inWindow, wxWindow *win) ;
+void wxRemoveMacWindowAssociation(wxWindow *win) ;
+
+class wxMacFocusHelper
+{
+public :
+	wxMacFocusHelper( wxWindow * theWindow ) ;
+	~wxMacFocusHelper() ;
+	bool Ok() { return m_ok ; }
+
+private :
+	GrafPtr 	m_formerPort ;
+	GrafPtr		m_currentPort ;
+	bool			m_ok ;
+} ;
 
 class wxMacDrawingHelper
 {
 public :
-	wxMacDrawingHelper( wxWindowMac * theWindow , bool clientArea = false ) ;
+	wxMacDrawingHelper( wxWindow * theWindow ) ;
 	~wxMacDrawingHelper() ;
 	bool Ok() { return m_ok ; }
-	void LocalToWindow( Rect *rect) { OffsetRect( rect , m_origin.h , m_origin.v ) ; }
-	void LocalToWindow( Point *pt ) { AddPt( m_origin , pt ) ; }
-	void LocalToWindow( RgnHandle rgn ) { OffsetRgn( rgn , m_origin.h , m_origin.v ) ; }
-  const Point& GetOrigin() { return m_origin ; }
+
 private :
-  Point     m_origin ;
+	GrafPtr 	m_formerPort ;
+	GrafPtr		m_currentPort ;
+	PenState 	m_savedPenState ;
+	bool			m_ok ;
+} ;
+
+class wxMacFocusClientHelper
+{
+public :
+	wxMacFocusClientHelper( wxWindow * theWindow ) ;
+	~wxMacFocusClientHelper() ;
+	bool Ok() { return m_ok ; }
+
+private :
+	GrafPtr 	m_formerPort ;
+	GrafPtr		m_currentPort ;
+	bool			m_ok ;
+} ;
+
+class wxMacDrawingClientHelper
+{
+public :
+	wxMacDrawingClientHelper( wxWindow * theWindow ) ;
+	~wxMacDrawingClientHelper() ;
+	bool Ok() { return m_ok ; }
+
+private :
 	GrafPtr 	m_formerPort ;
 	GrafPtr		m_currentPort ;
 	PenState 	m_savedPenState ;

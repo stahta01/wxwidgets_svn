@@ -25,14 +25,13 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_COMBOBOX
 
 #ifndef WX_PRECOMP
-    #include "wx/settings.h"
-    #include "wx/log.h"
+#include "wx/settings.h"
 #endif
 
 #include "wx/combobox.h"
@@ -41,7 +40,7 @@
 #include "wx/msw/private.h"
 
 #if wxUSE_TOOLTIPS
-    #if !defined(__GNUWIN32_OLD__) || defined(__CYGWIN10__)
+    #ifndef __GNUWIN32_OLD__
         #include <commctrl.h>
     #endif
     #include "wx/tooltip.h"
@@ -100,7 +99,7 @@ LRESULT APIENTRY _EXPORT wxComboEditWndProc(HWND hWnd,
             }
             break;
 
-#if 0
+#if 1
         case WM_GETDLGCODE:
             {
                 wxCHECK_MSG( win, 0, _T("should have a parent") );
@@ -115,7 +114,7 @@ LRESULT APIENTRY _EXPORT wxComboEditWndProc(HWND hWnd,
 #endif // 0
 
         // deal with tooltips here
-#if wxUSE_TOOLTIPS && defined(TTN_NEEDTEXT)
+#if wxUSE_TOOLTIPS
         case WM_NOTIFY:
             {
                 wxCHECK_MSG( win, 0, _T("should have a parent") );
@@ -141,17 +140,10 @@ LRESULT APIENTRY _EXPORT wxComboEditWndProc(HWND hWnd,
     return ::CallWindowProc(CASTWNDPROC gs_wndprocEdit, hWnd, message, wParam, lParam);
 }
 
-WXHBRUSH wxComboBox::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
-#if wxUSE_CTL3D
+WXHBRUSH wxComboBox::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
                                WXUINT message,
                                WXWPARAM wParam,
-                               WXLPARAM lParam
-#else
-                               WXUINT WXUNUSED(message),
-                               WXWPARAM WXUNUSED(wParam),
-                               WXLPARAM WXUNUSED(lParam)
-#endif
-    )
+                               WXLPARAM lParam)
 {
 #if wxUSE_CTL3D
     if ( m_useCtl3D )
@@ -231,22 +223,11 @@ bool wxComboBox::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
         case CBN_EDITCHANGE:
             {
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, GetId());
-
                 // if sel != -1, value was initialized above (and we can't use
                 // GetValue() here as it would return the old selection and we
                 // want the new one)
                 if ( sel == -1 )
-                {
                     value = GetValue();
-                }
-                else // we're synthesizing text updated event from sel change
-                {
-                    // we need to do this because the user code expects
-                    // wxComboBox::GetValue() to return the new value from
-                    // "text updated" handler but it hadn't been updated yet
-                    SetValue(value);
-                }
-
                 event.SetString(value);
                 event.SetEventObject(this);
                 ProcessCommand(event);
@@ -303,13 +284,11 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
     if ( style & wxCB_SORT )
         msStyle |= CBS_SORT;
 
-    if ( style & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
-
-
     // and now create the MSW control
     if ( !MSWCreateControl(_T("COMBOBOX"), msStyle) )
         return FALSE;
+
+    SetSize(pos.x, pos.y, size.x, size.y);
 
     // A choice/combobox normally has a white background (or other, depending
     // on global settings) rather than inheriting the parent's background colour.
@@ -324,10 +303,6 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
     {
         SetValue(value);
     }
-
-    // do this after appending the values to the combobox so that autosizing
-    // works correctly
-    SetSize(pos.x, pos.y, size.x, size.y);
 
     // a (not read only) combobox is, in fact, 2 controls: the combobox itself
     // and an edit control inside it and if we want to catch events from this
@@ -399,7 +374,7 @@ void wxComboBox::Paste()
   SendMessage(hWnd, WM_PASTE, 0, 0L);
 }
 
-void wxComboBox::SetEditable(bool WXUNUSED(editable))
+void wxComboBox::SetEditable(bool editable)
 {
   // Can't implement in MSW?
 //  HWND hWnd = GetHwnd();
@@ -459,21 +434,39 @@ long wxComboBox::GetLastPosition() const
 void wxComboBox::Replace(long from, long to, const wxString& value)
 {
 #if wxUSE_CLIPBOARD
-    Remove(from, to);
+    HWND hWnd = GetHwnd();
+    long fromChar = from;
+    long toChar = to;
+
+    // Set selection and remove it
+#ifdef __WIN32__
+    SendMessage(hWnd, CB_SETEDITSEL, fromChar, toChar);
+#else
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar));
+#endif
+    SendMessage(hWnd, WM_CUT, (WPARAM)0, (LPARAM)0);
 
     // Now replace with 'value', by pasting.
     wxSetClipboardData(wxDF_TEXT, (wxObject *)(const wxChar *)value, 0, 0);
 
     // Paste into edit control
-    SendMessage(GetHwnd(), WM_PASTE, (WPARAM)0, (LPARAM)0L);
+    SendMessage(hWnd, WM_PASTE, (WPARAM)0, (LPARAM)0L);
 #endif
 }
 
 void wxComboBox::Remove(long from, long to)
 {
-    // Set selection and remove it
-    SetSelection(from, to);
-    SendMessage(GetHwnd(), WM_CUT, (WPARAM)0, (LPARAM)0);
+    HWND hWnd = GetHwnd();
+    long fromChar = from;
+    long toChar = to;
+
+    // Cut all selected text
+#ifdef __WIN32__
+    SendMessage(hWnd, CB_SETEDITSEL, fromChar, toChar);
+#else
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar));
+#endif
+    SendMessage(hWnd, WM_CUT, (WPARAM)0, (LPARAM)0);
 }
 
 void wxComboBox::SetSelection(long from, long to)
@@ -490,16 +483,56 @@ void wxComboBox::SetSelection(long from, long to)
       toChar = -1;
     }
 
-    if (
 #ifdef __WIN32__
-    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar))
-#else // Win16
-    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)fromChar, (LPARAM)toChar)
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)fromChar, (LPARAM)toChar);
+//    SendMessage(hWnd, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0);
+#else
+    // WPARAM is 0: selection is scrolled into view
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar));
 #endif
-        == CB_ERR )
-    {
-        wxLogDebug(_T("CB_SETEDITSEL failed"));
-    }
+}
+
+void wxComboBox::DoMoveWindow(int x, int y, int width, int height)
+{
+    // here is why this is necessary: if the width is negative, the combobox
+    // window proc makes the window of the size width*height instead of
+    // interpreting height in the usual manner (meaning the height of the drop
+    // down list - usually the height specified in the call to MoveWindow()
+    // will not change the height of combo box per se)
+    //
+    // this behaviour is not documented anywhere, but this is just how it is
+    // here (NT 4.4) and, anyhow, the check shouldn't hurt - however without
+    // the check, constraints/sizers using combos may break the height
+    // constraint will have not at all the same value as expected
+    if ( width < 0 )
+        return;
+
+    int cx, cy;
+    wxGetCharSize(GetHWND(), &cx, &cy, &GetFont());
+
+    // what should the height of the drop down list be? we choose 10 items by
+    // default and also 10 items max (if we always use n, the list will never
+    // have vertical scrollbar)
+    int n = GetCount();
+    if ( !n || (n > 10) )
+        n = 10;
+
+    height = (n + 1)* EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy);
+
+    wxControl::DoMoveWindow(x, y, width, height);
+}
+
+wxSize wxComboBox::DoGetBestSize() const
+{
+    // the choice calculates the horz size correctly, but not the vertical
+    // component: correct it
+    wxSize size = wxChoice::DoGetBestSize();
+
+    int cx, cy;
+    wxGetCharSize(GetHWND(), &cx, &cy, &GetFont());
+    size.y = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy);
+
+    return size;
 }
 
 #endif

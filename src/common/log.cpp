@@ -39,6 +39,7 @@
         #ifdef __WXMSW__
             #include "wx/msw/private.h"
         #endif
+        #include "wx/msgdlg.h"
     #endif
 #endif //WX_PRECOMP
 
@@ -49,16 +50,16 @@
 #include  "wx/log.h"
 #include  "wx/thread.h"
 
-#if wxUSE_LOG
-
 // other standard headers
 #include  <errno.h>
 #include  <stdlib.h>
 #include  <time.h>
 
-#if defined(__WXMSW__)
+#ifdef  __WXMSW__
   #include  "wx/msw/private.h"      // includes windows.h for OutputDebugString
-#endif
+#else   //Unix
+  #include  <signal.h>
+#endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
 // non member functions
@@ -279,6 +280,13 @@ void WXDLLEXPORT wxLogSysError(long lErrCode, const wxChar *szFormat, ...)
 wxLog::wxLog()
 {
     m_bHasMessages = FALSE;
+
+    // enable verbose messages by default in the debug builds
+#ifdef __WXDEBUG__
+    m_bVerbose = TRUE;
+#else // release
+    m_bVerbose = FALSE;
+#endif // debug/release
 }
 
 wxLog *wxLog::GetActiveTarget()
@@ -319,26 +327,11 @@ wxLog *wxLog::SetActiveTarget(wxLog *pLogger)
     return pOldLogger;
 }
 
-void wxLog::DontCreateOnDemand()
-{
-    ms_bAutoCreate = FALSE;
-
-    // this is usually called at the end of the program and we assume that it
-    // is *always* called at the end - so we free memory here to avoid false
-    // memory leak reports from wxWin  memory tracking code
-    ClearTraceMasks();
-}
-
 void wxLog::RemoveTraceMask(const wxString& str)
 {
     int index = ms_aTraceMasks.Index(str);
     if ( index != wxNOT_FOUND )
         ms_aTraceMasks.Remove((size_t)index);
-}
-
-void wxLog::ClearTraceMasks()
-{
-    ms_aTraceMasks.Clear();
 }
 
 void wxLog::TimeStamp(wxString *str)
@@ -402,8 +395,7 @@ void wxLog::DoLogString(const wxChar *WXUNUSED(szString), time_t WXUNUSED(t))
 
 void wxLog::Flush()
 {
-    // remember that we don't have any more messages to show
-    m_bHasMessages = FALSE;
+    // do nothing
 }
 
 // ----------------------------------------------------------------------------
@@ -418,191 +410,6 @@ wxLogStderr::wxLogStderr(FILE *fp)
         m_fp = fp;
 }
 
-#if defined(__WXMAC__) && !defined(__DARWIN__)
-
-#ifndef __MetroNubUtils__
-#include "MetroNubUtils.h"
-#endif
-
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
-#ifndef __GESTALT__
-#include <Gestalt.h>
-#endif
-
-#ifndef true
-#define true 1
-#endif
-
-#ifndef false
-#define false 0
-#endif
-
-#if TARGET_API_MAC_CARBON
-
-	#include <CodeFragments.h>
-
-	EXTERN_API_C( long )
-	CallUniversalProc(UniversalProcPtr theProcPtr, ProcInfoType procInfo, ...);
-
-	ProcPtr gCallUniversalProc_Proc = NULL;
-	
-#endif
-
-static MetroNubUserEntryBlock*	gMetroNubEntry = NULL;
-
-static long fRunOnce = false;
-
-Boolean IsCompatibleVersion(short inVersion);
-
-/* ---------------------------------------------------------------------------
-		IsCompatibleVersion
-   --------------------------------------------------------------------------- */
-
-Boolean IsCompatibleVersion(short inVersion)
-{
-	Boolean result = false;
-	
-	if (fRunOnce)
-	{
-		MetroNubUserEntryBlock* block = (MetroNubUserEntryBlock *)result;
-		
-		result = (inVersion <= block->apiHiVersion);
-	}
-	
-	return result;	
-}
-
-/* ---------------------------------------------------------------------------
-		IsMetroNubInstalled
-   --------------------------------------------------------------------------- */
-
-Boolean IsMetroNubInstalled()
-{
-	if (!fRunOnce)
-	{
-		long result, value;
-		
-		fRunOnce = true;
-		gMetroNubEntry = NULL;
-		
-		if (Gestalt(gestaltSystemVersion, &value) == noErr && value < 0x1000)
-		{
-			/* look for MetroNub's Gestalt selector */
-			if (Gestalt(kMetroNubUserSignature, &result) == noErr)
-			{
-			
-			#if TARGET_API_MAC_CARBON
-				if (gCallUniversalProc_Proc == NULL)
-				{
-					CFragConnectionID	connectionID;
-					Ptr					mainAddress;
-					Str255				errorString;
-					ProcPtr				symbolAddress;
-					OSErr				err;
-					CFragSymbolClass	symbolClass;
-					
-					symbolAddress = NULL;
-					err = GetSharedLibrary("\pInterfaceLib", kPowerPCCFragArch, kFindCFrag,
-											&connectionID, &mainAddress, errorString);
-					
-					if (err != noErr)
-					{
-						gCallUniversalProc_Proc = NULL;
-						goto end;
-					}
-
-					err = FindSymbol(connectionID, "\pCallUniversalProc",
-									(Ptr *) &gCallUniversalProc_Proc, &symbolClass);
-					
-					if (err != noErr)
-					{
-						gCallUniversalProc_Proc = NULL;
-						goto end;
-					}
-				}
-			#endif
-			
-				{
-					MetroNubUserEntryBlock* block = (MetroNubUserEntryBlock *)result;
-					
-					/* make sure the version of the API is compatible */
-					if (block->apiLowVersion <= kMetroNubUserAPIVersion &&
-						kMetroNubUserAPIVersion <= block->apiHiVersion)
-						gMetroNubEntry = block;		/* success! */
-				}
-
-			}
-		}
-	}
-
-end:
-
-#if TARGET_API_MAC_CARBON
-	return (gMetroNubEntry != NULL && gCallUniversalProc_Proc != NULL);
-#else
-	return (gMetroNubEntry != NULL);
-#endif
-}
-
-/* ---------------------------------------------------------------------------
-		IsMWDebuggerRunning											[v1 API]
-   --------------------------------------------------------------------------- */
-
-Boolean IsMWDebuggerRunning()
-{
-	if (IsMetroNubInstalled())
-		return CallIsDebuggerRunningProc(gMetroNubEntry->isDebuggerRunning);
-	else
-		return false;
-}
-
-/* ---------------------------------------------------------------------------
-		AmIBeingMWDebugged											[v1 API]
-   --------------------------------------------------------------------------- */
-
-Boolean AmIBeingMWDebugged()
-{
-	if (IsMetroNubInstalled())
-		return CallAmIBeingDebuggedProc(gMetroNubEntry->amIBeingDebugged);
-	else
-		return false;
-}
-
-/* ---------------------------------------------------------------------------
-		UserSetWatchPoint											[v2 API]
-   --------------------------------------------------------------------------- */
-
-OSErr UserSetWatchPoint (Ptr address, long length, WatchPointIDT* watchPointID)
-{
-	if (IsMetroNubInstalled() && IsCompatibleVersion(kMetroNubUserAPIVersion))
-		return CallUserSetWatchPointProc(gMetroNubEntry->userSetWatchPoint,
-											address, length, watchPointID);
-	else
-		return errProcessIsNotClient;
-}
-
-/* ---------------------------------------------------------------------------
-		ClearWatchPoint												[v2 API]
-   --------------------------------------------------------------------------- */
-
-OSErr ClearWatchPoint (WatchPointIDT watchPointID)
-{
-	if (IsMetroNubInstalled() && IsCompatibleVersion(kMetroNubUserAPIVersion))
-		return CallClearWatchPointProc(gMetroNubEntry->clearWatchPoint,
-											watchPointID);
-	else
-		return errProcessIsNotClient;
-}
-
-#ifdef __cplusplus
-	}
-#endif
-
-#endif
-
 void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 {
     wxString str;
@@ -615,32 +422,13 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 
     // under Windows, programs usually don't have stderr at all, so show the
     // messages also under debugger - unless it's a console program
-#if defined(__WXMSW__) && wxUSE_GUI && !defined(__WXMICROWIN__)
+#if defined(__WXMSW__) && wxUSE_GUI
     str += wxT("\r\n") ;
     OutputDebugString(str.c_str());
 #endif // MSW
-#if defined(__WXMAC__) && !defined(__DARWIN__) && wxUSE_GUI
-    Str255 pstr ;
-    strcpy( (char*) pstr , str.c_str() ) ;
-    strcat( (char*) pstr , ";g" ) ;
-    c2pstr( (char*) pstr ) ;
-
-    Boolean running = false ;
-
-    if ( IsMWDebuggerRunning() && AmIBeingMWDebugged() )
-    {
-        running = true ;
-    }
-
-    if (running)
-    {
-#ifdef __powerc
-        DebugStr(pstr);
-#else
-        SysBreakStr(pstr);
-#endif
-    }
-#endif // Mac
+#if defined(__WXMAC__) && wxUSE_GUI
+    debugstr(str + wxT("\r\n"));
+#endif // MSW
 }
 
 // ----------------------------------------------------------------------------
@@ -648,85 +436,19 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 // ----------------------------------------------------------------------------
 
 #if wxUSE_STD_IOSTREAM
-wxLogStream::wxLogStream(wxSTD ostream *ostr)
+wxLogStream::wxLogStream(ostream *ostr)
 {
     if ( ostr == NULL )
-        m_ostr = &wxSTD cerr;
+        m_ostr = &cerr;
     else
         m_ostr = ostr;
 }
 
 void wxLogStream::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 {
-    wxString str;
-    TimeStamp(&str);
-    (*m_ostr) << str << wxConvertWX2MB(szString) << wxSTD endl;
+    (*m_ostr) << wxConvertWX2MB(szString) << endl;
 }
 #endif // wxUSE_STD_IOSTREAM
-
-// ----------------------------------------------------------------------------
-// wxLogChain
-// ----------------------------------------------------------------------------
-
-wxLogChain::wxLogChain(wxLog *logger)
-{
-    m_logNew = logger;
-    m_logOld = wxLog::SetActiveTarget(this);
-}
-
-void wxLogChain::SetLog(wxLog *logger)
-{
-    if ( m_logNew != this )
-        delete m_logNew;
-
-    wxLog::SetActiveTarget(logger);
-
-    m_logNew = logger;
-}
-
-void wxLogChain::Flush()
-{
-    if ( m_logOld )
-        m_logOld->Flush();
-
-    // be careful to avoid inifinite recursion
-    if ( m_logNew && m_logNew != this )
-        m_logNew->Flush();
-}
-
-void wxLogChain::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
-{
-    // let the previous logger show it
-    if ( m_logOld && IsPassingMessages() )
-    {
-        // bogus cast just to access protected DoLog
-        ((wxLogChain *)m_logOld)->DoLog(level, szString, t);
-    }
-
-    if ( m_logNew && m_logNew != this )
-    {
-        // as above...
-        ((wxLogChain *)m_logNew)->DoLog(level, szString, t);
-    }
-}
-
-// ----------------------------------------------------------------------------
-// wxLogPassThrough
-// ----------------------------------------------------------------------------
-
-#ifdef __VISUALC__
-    // "'this' : used in base member initializer list" - so what?
-    #pragma warning(disable:4355)
-#endif // VC++
-
-wxLogPassThrough::wxLogPassThrough()
-                : wxLogChain(this)
-{
-}
-
-#ifdef __VISUALC__
-    #pragma warning(default:4355)
-#endif // VC++
 
 // ============================================================================
 // Global functions/variables
@@ -739,7 +461,6 @@ wxLogPassThrough::wxLogPassThrough()
 wxLog          *wxLog::ms_pLogger      = (wxLog *)NULL;
 bool            wxLog::ms_doLog        = TRUE;
 bool            wxLog::ms_bAutoCreate  = TRUE;
-bool            wxLog::ms_bVerbose     = FALSE;
 
 size_t          wxLog::ms_suspendCount = 0;
 
@@ -796,7 +517,7 @@ static void wxLogWrap(FILE *f, const char *pszPrefix, const char *psz)
 // get error code from syste
 unsigned long wxSysErrorCode()
 {
-#if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef  __WXMSW__
 #ifdef  __WIN32__
     return ::GetLastError();
 #else   //WIN16
@@ -814,7 +535,7 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
     if ( nErrCode == 0 )
         nErrCode = wxSysErrorCode();
 
-#if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef  __WXMSW__
 #ifdef  __WIN32__
     static wxChar s_szBuf[LOG_BUFFER_SIZE / 2];
 
@@ -827,23 +548,17 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
             0, NULL);
 
     // copy it to our buffer and free memory
-    if( lpMsgBuf != 0 ) {
-        wxStrncpy(s_szBuf, (const wxChar *)lpMsgBuf, WXSIZEOF(s_szBuf) - 1);
-        s_szBuf[WXSIZEOF(s_szBuf) - 1] = wxT('\0');
+    wxStrncpy(s_szBuf, (const wxChar *)lpMsgBuf, WXSIZEOF(s_szBuf) - 1);
+    s_szBuf[WXSIZEOF(s_szBuf) - 1] = wxT('\0');
+    LocalFree(lpMsgBuf);
 
-        LocalFree(lpMsgBuf);
-
-        // returned string is capitalized and ended with '\r\n' - bad
-        s_szBuf[0] = (wxChar)wxTolower(s_szBuf[0]);
-        size_t len = wxStrlen(s_szBuf);
-        if ( len > 0 ) {
-            // truncate string
-            if ( s_szBuf[len - 2] == wxT('\r') )
-                s_szBuf[len - 2] = wxT('\0');
-        }
-    }
-    else {
-        s_szBuf[0] = wxT('\0');
+    // returned string is capitalized and ended with '\r\n' - bad
+    s_szBuf[0] = (wxChar)wxTolower(s_szBuf[0]);
+    size_t len = wxStrlen(s_szBuf);
+    if ( len > 0 ) {
+        // truncate string
+        if ( s_szBuf[len - 2] == wxT('\r') )
+            s_szBuf[len - 2] = wxT('\0');
     }
 
     return s_szBuf;
@@ -862,4 +577,113 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
 #endif  // Win/Unix
 }
 
-#endif //wxUSE_LOG
+// ----------------------------------------------------------------------------
+// debug helper
+// ----------------------------------------------------------------------------
+
+#ifdef  __WXDEBUG__
+
+// break into the debugger
+void Trap()
+{
+#ifdef __WXMSW__
+    DebugBreak();
+#elif defined(__WXMAC__)
+#if __powerc
+    Debugger();
+#else
+    SysBreak();
+#endif
+#elif defined(__UNIX__)
+    raise(SIGTRAP);
+#else
+    // TODO
+#endif // Win/Unix
+}
+
+// this function is called when an assert fails
+void wxOnAssert(const wxChar *szFile, int nLine, const wxChar *szMsg)
+{
+    // this variable can be set to true to suppress "assert failure" messages
+    static bool s_bNoAsserts = FALSE;
+    static bool s_bInAssert = FALSE;        // FIXME MT-unsafe
+
+    if ( s_bInAssert ) {
+        // He-e-e-e-elp!! we're trapped in endless loop
+        Trap();
+
+        s_bInAssert = FALSE;
+
+        return;
+    }
+
+    s_bInAssert = TRUE;
+
+    wxChar szBuf[LOG_BUFFER_SIZE];
+
+    // make life easier for people using VC++ IDE: clicking on the message
+    // will take us immediately to the place of the failed assert
+    wxSnprintf(szBuf, WXSIZEOF(szBuf),
+#ifdef __VISUALC__
+               wxT("%s(%d): assert failed"),
+#else  // !VC++
+    // make the error message more clear for all the others
+               wxT("Assert failed in file %s at line %d"),
+#endif // VC/!VC
+               szFile, nLine);
+
+    if ( szMsg != NULL ) {
+        wxStrcat(szBuf, wxT(": "));
+        wxStrcat(szBuf, szMsg);
+    }
+    else {
+        wxStrcat(szBuf, wxT("."));
+    }
+
+    if ( !s_bNoAsserts ) {
+        // send it to the normal log destination
+        wxLogDebug(szBuf);
+
+#if wxUSE_GUI || defined(__WXMSW__)
+        // this message is intentionally not translated - it is for
+        // developpers only
+        wxStrcat(szBuf, wxT("\nDo you want to stop the program?\nYou can also choose [Cancel] to suppress further warnings."));
+
+#if wxUSE_GUI
+        switch ( wxMessageBox(szBuf, wxT("Debug"),
+                              wxYES_NO | wxCANCEL | wxICON_STOP ) ) {
+            case wxYES:
+                Trap();
+                break;
+
+            case wxCANCEL:
+                s_bNoAsserts = TRUE;
+                break;
+
+            //case wxNO: nothing to do
+        }
+#else // !GUI, but MSW
+        switch ( ::MessageBox(NULL, szBuf, _T("Debug"),
+                              MB_YESNOCANCEL | MB_ICONSTOP ) ) {
+            case IDYES:
+                Trap();
+                break;
+
+            case IDCANCEL:
+                s_bNoAsserts = TRUE;
+                break;
+
+            //case IDNO: nothing to do
+        }
+#endif // GUI or MSW
+
+#else // !GUI
+        Trap();
+#endif // GUI/!GUI
+    }
+
+    s_bInAssert = FALSE;
+}
+
+#endif  //WXDEBUG
+

@@ -45,7 +45,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#if defined(__GNUWIN32_OLD__)
+#ifdef __GNUWIN32_OLD__
     #include "wx/msw/gnuwin32/extra.h"
 #endif
 
@@ -296,7 +296,7 @@ void wxCheckListBox::Delete(int N)
     // free memory
     delete m_aItems[N];
 
-    m_aItems.RemoveAt(N);
+    m_aItems.Remove(N);
 }
 
 void wxCheckListBox::InsertItems(int nItems, const wxString items[], int pos)

@@ -10,7 +10,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-#  pragma implementation "acell.h"
+#pragma implementation "acell.h"
+#pragma interface
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".

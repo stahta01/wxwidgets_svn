@@ -33,12 +33,6 @@
 #include "wx/dcscreen.h"
 #include "wx/settings.h"
 #include "wx/log.h"
-#include "wx/utils.h"
-
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_DOUBLECLICKED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_UNSPLIT)
 
 IMPLEMENT_DYNAMIC_CLASS(wxSplitterWindow, wxWindow)
 IMPLEMENT_DYNAMIC_CLASS(wxSplitterEvent, wxCommandEvent)
@@ -57,11 +51,7 @@ BEGIN_EVENT_TABLE(wxSplitterWindow, wxWindow)
     EVT_SPLITTER_SASH_POS_CHANGING(-1, wxSplitterWindow::OnSashPosChanged)
     EVT_SPLITTER_DCLICK(-1,           wxSplitterWindow::OnDoubleClick)
     EVT_SPLITTER_UNSPLIT(-1,          wxSplitterWindow::OnUnsplitEvent)
-
-    WX_EVENT_TABLE_CONTROL_CONTAINER(wxSplitterWindow)
 END_EVENT_TABLE()
-
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxSplitterWindow);
 
 bool wxSplitterWindow::Create(wxWindow *parent, wxWindowID id,
                                    const wxPoint& pos,
@@ -69,9 +59,6 @@ bool wxSplitterWindow::Create(wxWindow *parent, wxWindowID id,
                                    long style,
                                    const wxString& name)
 {
-    // allow TABbing from one window to the other
-    style |= wxTAB_TRAVERSAL;
-
     if (!wxWindow::Create(parent, id, pos, size, style, name))
         return FALSE;
 
@@ -88,21 +75,12 @@ bool wxSplitterWindow::Create(wxWindow *parent, wxWindowID id,
         m_borderSize = 1;
     else
         m_borderSize = 0;
-        
-#ifdef __WXMAC__
-    int major,minor;
-    wxGetOsVersion( &major, &minor );
-    if (major >= 10)
-        m_windowStyle |= wxSP_SASH_AQUA;
-#endif
 
     return TRUE;
 }
 
 void wxSplitterWindow::Init()
 {
-    m_container.SetContainerWindow(this);
-
     m_splitMode = wxSPLIT_VERTICAL;
     m_permitUnsplitAlways = TRUE;
     m_windowOne = (wxWindow *) NULL;
@@ -161,7 +139,7 @@ void wxSplitterWindow::OnIdle(wxIdleEvent& event)
     if (m_needUpdating)
         SizeWindows();
 
-    event.Skip();
+    event.Skip( TRUE );
 }
 
 void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
@@ -516,11 +494,7 @@ void wxSplitterWindow::DrawSash(wxDC& dc)
         if ( m_splitMode == wxSPLIT_VERTICAL )
         {
             dc.SetPen(*m_facePen);
-
-            if (HasFlag( wxSP_SASH_AQUA ))
-                dc.SetBrush(*wxWHITE_BRUSH);
-            else
-                dc.SetBrush(*m_faceBrush);
+            dc.SetBrush(*m_faceBrush);
             dc.DrawRectangle(m_sashPosition + 2, 0 , m_sashSize - 4, h );
 
             dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -532,18 +506,13 @@ void wxSplitterWindow::DrawSash(wxDC& dc)
             dc.SetPen(*m_hilightPen);
             dc.DrawLine(m_sashPosition+1, m_borderSize - 2, m_sashPosition+1, h - m_borderSize+2);
 
-            if (!HasFlag( wxSP_SASH_AQUA ))
-                dc.SetPen(*m_mediumShadowPen);
-
-            int yMedium = m_borderSize ? h-m_borderSize+1 : h ;
+            dc.SetPen(*m_mediumShadowPen);
+                        int yMedium = m_borderSize ? h-m_borderSize+1 : h ;
             dc.DrawLine(m_sashPosition+m_sashSize-2, xShadow, m_sashPosition+m_sashSize-2, yMedium);
 
-            if (HasFlag( wxSP_SASH_AQUA ))
-                dc.SetPen(*m_lightShadowPen);
-            else
-                dc.SetPen(*m_darkShadowPen);
+            dc.SetPen(*m_darkShadowPen);
             dc.DrawLine(m_sashPosition+m_sashSize-1, m_borderSize, m_sashPosition+m_sashSize-1, h-m_borderSize );
-            
+
             // Draw the top and bottom edges of the sash, if requested
             if (GetWindowStyle() & wxSP_FULLSASH)
             {
@@ -559,10 +528,7 @@ void wxSplitterWindow::DrawSash(wxDC& dc)
         else
         {
             dc.SetPen(*m_facePen);
-            if (HasFlag( wxSP_SASH_AQUA ))
-                dc.SetBrush(*wxWHITE_BRUSH);
-            else
-                dc.SetBrush(*m_faceBrush);
+            dc.SetBrush(*m_faceBrush);
             dc.DrawRectangle( m_borderSize-2, m_sashPosition + 2, w-m_borderSize+2, m_sashSize - 4);
 
             dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -573,14 +539,10 @@ void wxSplitterWindow::DrawSash(wxDC& dc)
             dc.SetPen(*m_hilightPen);
             dc.DrawLine(m_borderSize-2, m_sashPosition+1, w-m_borderSize+1, m_sashPosition+1);
 
-            if (!HasFlag( wxSP_SASH_AQUA ))
-                dc.SetPen(*m_mediumShadowPen);
+            dc.SetPen(*m_mediumShadowPen);
             dc.DrawLine(m_borderSize-1, m_sashPosition+m_sashSize-2, w-m_borderSize+1, m_sashPosition+m_sashSize-2);
 
-            if (HasFlag( wxSP_SASH_AQUA ))
-                dc.SetPen(*m_lightShadowPen);
-            else
-                dc.SetPen(*m_darkShadowPen);
+            dc.SetPen(*m_darkShadowPen);
             dc.DrawLine(m_borderSize, m_sashPosition+m_sashSize-1, w-m_borderSize, m_sashPosition+m_sashSize-1);
 
             // Draw the left and right edges of the sash, if requested
@@ -873,7 +835,7 @@ void wxSplitterWindow::InitColours()
     wxDELETE( m_hilightPen );
 
     // Shadow colours
-#ifndef __WIN16__
+#if defined(__WIN95__)
     wxColour faceColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DFACE));
     m_facePen = new wxPen(faceColour, 1, wxSOLID);
     m_faceBrush = new wxBrush(faceColour, wxSOLID);
@@ -889,14 +851,14 @@ void wxSplitterWindow::InitColours()
 
     wxColour hilightColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DHILIGHT));
     m_hilightPen = new wxPen(hilightColour, 1, wxSOLID);
-#else
+#else // !Win32
     m_facePen = new wxPen("LIGHT GREY", 1, wxSOLID);
     m_faceBrush = new wxBrush("LIGHT GREY", wxSOLID);
     m_mediumShadowPen = new wxPen("GREY", 1, wxSOLID);
     m_darkShadowPen = new wxPen("BLACK", 1, wxSOLID);
     m_lightShadowPen = new wxPen("LIGHT GREY", 1, wxSOLID);
     m_hilightPen = new wxPen("WHITE", 1, wxSOLID);
-#endif // __WIN16__
+#endif // Win32/!Win32
 }
 
 void wxSplitterWindow::SendUnsplitEvent(wxWindow *winRemoved)

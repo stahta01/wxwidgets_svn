@@ -28,209 +28,125 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticText, wxControl)
 
-bool wxStaticText::Create(
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxString&                   rsLabel
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, long                              lStyle
-, const wxString&                   rsName
-)
+bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
+           const wxString& label,
+           const wxPoint& pos,
+           const wxSize& size,
+           long style,
+           const wxString& name)
 {
-    SetName(rsName);
-    if (pParent)
-        pParent->AddChild(this);
+    SetName(name);
+    if (parent) parent->AddChild(this);
 
-    SetBackgroundColour(pParent->GetBackgroundColour()) ;
-    SetForegroundColour(pParent->GetForegroundColour()) ;
+    SetBackgroundColour(parent->GetBackgroundColour()) ;
+    SetForegroundColour(parent->GetForegroundColour()) ;
 
-    if ( vId == -1 )
+    if ( id == -1 )
         m_windowId = (int)NewControlId();
     else
-        m_windowId = vId;
+        m_windowId = id;
 
-    int                             nX      = rPos.x;
-    int                             nY      = rPos.y;
-    int                             nWidth  = rSize.x;
-    int                             nHeight = rSize.y;
+    int x = pos.x;
+    int y = pos.y;
+    int width = size.x;
+    int height = size.y;
 
-    m_windowStyle = lStyle;
+    m_windowStyle = style;
 
-    long                            lSstyle = 0L;
-
-    lSstyle = WS_VISIBLE | SS_TEXT | DT_VCENTER;
-    if (m_windowStyle & wxALIGN_CENTRE)
-        lSstyle |= DT_CENTER;
-    else if (m_windowStyle & wxALIGN_RIGHT)
-        lSstyle |= DT_RIGHT;
-    else
-        lSstyle |= DT_LEFT;
-    m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
-                                       ,WC_STATIC                // Window class
-                                       ,(PSZ)rsLabel.c_str()     // Initial Text
-                                       ,(ULONG)lSstyle           // Style flags
-                                       ,0L, 0L, 0L, 0L           // Origin -- 0 size
-                                       ,(HWND)GetHwndOf(pParent) // owner window handle (same as parent
-                                       ,HWND_TOP                 // initial z position
-                                       ,(ULONG)m_windowId        // Window identifier
-                                       ,NULL                     // no control data
-                                       ,NULL                     // no Presentation parameters
-                                      );
-
-    wxCHECK_MSG(m_hWnd, FALSE, wxT("Failed to create static ctrl"));
-
-    wxColour                        vColour;
-
-    vColour.Set(wxString("BLACK"));
-
-    LONG                            lColor = (LONG)vColour.GetPixel();
-
-    ::WinSetPresParam( m_hWnd
-                      ,PP_FOREGROUNDCOLOR
-                      ,sizeof(LONG)
-                      ,(PVOID)&lColor
-                     );
-    lColor = (LONG)m_backgroundColour.GetPixel();
-
-    ::WinSetPresParam( m_hWnd
-                      ,PP_BACKGROUNDCOLOR
-                      ,sizeof(LONG)
-                      ,(PVOID)&lColor
-                     );
-
+    // TODO
     SubclassWin(m_hWnd);
-    wxControl::SetFont(pParent->GetFont());
-    SetSize( nX
-            ,nY
-            ,nWidth
-            ,nHeight
-           );
-    return TRUE;
-} // end of wxStaticText::Create
+
+    SetFont(parent->GetFont());
+    SetSize(x, y, width, height);
+
+    return FALSE;
+}
 
 wxSize wxStaticText::DoGetBestSize() const
 {
-    wxString                        sText(wxGetWindowText(GetHWND()));
-    int                             nWidthTextMax = 0;
-    int                             nWidthLine = 0;
-    int                             nHeightTextTotal = 0;
-    int                             nHeightLineDefault = 0;
-    int                             nHeightLine = 0;
-    wxString                        sCurLine;
+    wxString text(wxGetWindowText(GetHWND()));
 
-    for (const wxChar *pc = sText; ; pc++)
-    {
-        if ( *pc == wxT('\n') || *pc == wxT('\0') )
-        {
-            if (!sCurLine )
-            {
-                //
-                // We can't use GetTextExtent - it will return 0 for both width
+    int widthTextMax = 0, widthLine,
+        heightTextTotal = 0, heightLineDefault = 0, heightLine = 0;
+
+    wxString curLine;
+    for ( const wxChar *pc = text; ; pc++ ) {
+        if ( *pc == wxT('\n') || *pc == wxT('\0') ) {
+            if ( !curLine ) {
+                // we can't use GetTextExtent - it will return 0 for both width
                 // and height and an empty line should count in height
                 // calculation
-                //
-                if (!nHeightLineDefault)
-                    nHeightLineDefault = nHeightLine;
-                if (!nHeightLineDefault)
-                    GetTextExtent(_T("W"), NULL, &nHeightLineDefault);
-                nHeightTextTotal += nHeightLineDefault;
+                if ( !heightLineDefault )
+                    heightLineDefault = heightLine;
+                if ( !heightLineDefault )
+                    GetTextExtent(_T("W"), NULL, &heightLineDefault);
+
+                heightTextTotal += heightLineDefault;
             }
-            else
-            {
-                GetTextExtent( sCurLine
-                              ,&nWidthLine
-                              ,&nHeightLine
-                             );
-                if (nWidthLine > nWidthTextMax)
-                    nWidthTextMax = nWidthLine;
-                nHeightTextTotal += nHeightLine;
+            else {
+                GetTextExtent(curLine, &widthLine, &heightLine);
+                if ( widthLine > widthTextMax )
+                    widthTextMax = widthLine;
+                heightTextTotal += heightLine;
             }
 
-            if ( *pc == wxT('\n') )
-            {
-                sCurLine.Empty();
+            if ( *pc == wxT('\n') ) {
+               curLine.Empty();
             }
-            else
-            {
+            else {
+               // the end of string
                break;
             }
         }
-        else
-        {
-            sCurLine += *pc;
+        else {
+            curLine += *pc;
         }
     }
-    return wxSize( nWidthTextMax
-                  ,nHeightTextTotal
-                 );
-} // end of wxStaticText::DoGetBestSize
 
-void wxStaticText::DoSetSize(
-  int                               nX
-, int                               nY
-, int                               nWidth
-, int                               nHeight
-, int                               nSizeFlags
-)
+    return wxSize(widthTextMax, heightTextTotal);
+}
+
+void wxStaticText::SetLabel(const wxString& label)
 {
-    //
-    // We need to refresh the window after changing its size as the standard
-    // control doesn't always update itself properly.
-    //
-    wxStaticTextBase::DoSetSize( nX
-                                ,nY
-                                ,nWidth
-                                ,nHeight
-                                ,nSizeFlags
-                               );
-    Refresh();
-} // end of wxStaticText::DoSetSize
+    // TODO
 
-bool wxStaticText::SetFont(
-  const wxFont&                     rFont
-)
-{
-    bool                            bRet = wxControl::SetFont(rFont);
-
-    //
-    // Adjust the size of the window to fit to the label unless autoresizing is
-    // disabled
-    //
-    if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
-    {
-        DoSetSize(-1, -1, -1, -1, wxSIZE_AUTO_WIDTH | wxSIZE_AUTO_HEIGHT);
-    }
-    return bRet;
-} // end of wxStaticText::SetFont
-
-void wxStaticText::SetLabel(
-  const wxString&                   rsLabel
-)
-{
-    ::WinSetWindowText(GetHwnd(), rsLabel.c_str());
-
-    //
-    // Adjust the size of the window to fit to the label unless autoresizing is
-    // disabled
-    //
-    if (!(GetWindowStyle() & wxST_NO_AUTORESIZE))
-    {
-        DoSetSize(-1, -1, -1, -1, wxSIZE_AUTO_WIDTH | wxSIZE_AUTO_HEIGHT);
-    }
+    // adjust the size of the window to fit to the label (this behaviour is
+    // backward compatible and generally makes sense but we might want to still
+    // provide the user a way to disable it) (VZ)
     DoSetSize(-1, -1, -1, -1, wxSIZE_AUTO_WIDTH | wxSIZE_AUTO_HEIGHT);
-} // end of wxStaticText::SetLabel
+}
 
-MRESULT wxStaticText::OS2WindowProc(
-  WXUINT                            uMsg
-, WXWPARAM                          wParam
-, WXLPARAM                          lParam
-)
+WXHBRUSH wxStaticText::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
+      WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-    return wxWindow::OS2WindowProc( uMsg
-                                   ,wParam
-                                   ,lParam
-                                  );
-} // end of wxStaticText::OS2WindowProc
+    // TODO:
+/*
+    if (GetParent()->GetTransparentBackground())
+        SetBkMode((HDC) pDC, TRANSPARENT);
+    else
+        SetBkMode((HDC) pDC, OPAQUE);
 
+    ::SetBkColor((HDC) pDC, RGB(GetBackgroundColour().Red(), GetBackgroundColour().Green(), GetBackgroundColour().Blue()));
+    ::SetTextColor((HDC) pDC, RGB(GetForegroundColour().Red(), GetForegroundColour().Green(), GetForegroundColour().Blue()));
+
+    wxBrush *backgroundBrush = wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID);
+    // Note that this will be cleaned up in wxApp::OnIdle, if backgroundBrush
+    // has a zero usage count.
+//  backgroundBrush->RealizeResource();
+    return (WXHBRUSH) backgroundBrush->GetResourceHandle();
+*/
+    return (WXHBRUSH)0;
+}
+
+MRESULT wxStaticText::OS2WindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
+{
+  // Ensure that static items get messages. Some controls don't like this
+  // message to be intercepted (e.g. RichEdit), hence the tests.
+// TODO:
+/*
+  if (nMsg == WM_NCHITTEST)
+    return (long)HTCLIENT;
+*/
+  return wxWindow::OS2WindowProc(nMsg, wParam, lParam);
+}
 

@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATBOX
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/dcclient.h"
@@ -64,19 +62,7 @@ bool wxStaticBox::Create(wxWindow *parent,
     if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
-    // as wxStaticBox doesn't draw its own background, we make it transparent
-    // to force redrawing its background which could have been overwritten by
-    // the other controls inside it
-    //
-    // FIXME: I still think that it isn't the right solution because the static
-    //        boxes shouldn't have to be transparent if the redrawing was done
-    //        right elsewhere - who ever had to make them transparent in non
-    //        wxWindows programs, after all? But for now it does fix a serious
-    //        problem (try resizing the sizers test screen in the layout sample
-    //        after removing WS_EX_TRANSPARENT bit) and so let's use it until
-    //        we fix the real underlying problem
-    if ( !MSWCreateControl(wxT("BUTTON"), BS_GROUPBOX, pos, size, label,
-                           WS_EX_TRANSPARENT) )
+    if ( !MSWCreateControl(wxT("BUTTON"), BS_GROUPBOX, pos, size, label, 0) )
         return FALSE;
 
     return TRUE;
@@ -129,4 +115,3 @@ long wxStaticBox::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
     return wxControl::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-#endif // wxUSE_STATBOX

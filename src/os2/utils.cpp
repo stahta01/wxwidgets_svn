@@ -105,7 +105,7 @@ bool wxGetUserId(
 , int                               nType
 )
 {
-#if defined(__VISAGECPP__)
+#ifndef __EMX__
     long                            lrc;
     // UPM procs return 0 on success
     lrc = U32ELOCU((unsigned char*)zBuf, (unsigned long *)&nType);
@@ -131,8 +131,7 @@ bool wxGetUserName(
 
 int wxKill(
   long                              lPid
-, wxSignal                          eSig
-, wxKillError*                      peError
+, int                               nSig
 )
 {
     return((int)::DosKillProcess(0, (PID)lPid));
@@ -212,49 +211,6 @@ long wxGetFreeMemory()
         return -1L;
     return (long)lSize;
 }
-
-// ----------------------------------------------------------------------------
-// env vars
-// ----------------------------------------------------------------------------
-
-bool wxGetEnv(const wxString& var, wxString *value)
-{
-    // wxGetenv is defined as getenv()
-    wxChar *p = wxGetenv(var);
-    if ( !p )
-        return FALSE;
-
-    if ( value )
-    {
-        *value = p;
-    }
-
-    return TRUE;
-}
-
-bool wxSetEnv(const wxString& variable, const wxChar *value)
-{
-#if defined(HAVE_SETENV)
-    return setenv(variable.mb_str(), value ? wxString(value).mb_str().data()
-                                           : NULL, 1 /* overwrite */) == 0;
-#elif defined(HAVE_PUTENV)
-    wxString s = variable;
-    if ( value )
-        s << _T('=') << value;
-
-    // transform to ANSI
-    const char *p = s.mb_str();
-
-    // the string will be free()d by libc
-    char *buf = (char *)malloc(strlen(p) + 1);
-    strcpy(buf, p);
-
-    return putenv(buf) == 0;
-#else // no way to set an env var
-    return FALSE;
-#endif
-}
-
 
 // Sleep for nSecs seconds. Attempt a Windows implementation using timers.
 static bool inTimer = FALSE;
@@ -750,7 +706,6 @@ void wxGetMousePosition(
 // Return TRUE if we have a colour display
 bool wxColourDisplay()
 {
-#if 0
     HPS                             hpsScreen;
     HDC                             hdcScreen;
     LONG                            lColors;
@@ -759,11 +714,6 @@ bool wxColourDisplay()
     hdcScreen = ::GpiQueryDevice(hpsScreen);
     ::DevQueryCaps(hdcScreen, CAPS_COLORS, 1L, &lColors);
     return(lColors > 1L);
-#else
-    // I don't see how the PM display could not be color. Besides, this
-    // was leaking DCs and PSs!!!  MN
-    return TRUE;
-#endif
 }
 
 // Returns depth of screen
@@ -773,20 +723,15 @@ int wxDisplayDepth()
     HDC                             hdcScreen;
     LONG                            lPlanes;
     LONG                            lBitsPerPixel;
-    static LONG                     nDepth = 0;
+    LONG                            nDepth;
 
-    // The screen colordepth ain't gonna change. No reason to query
-    // it over and over!
-    if (!nDepth) {
-        hpsScreen = ::WinGetScreenPS(HWND_DESKTOP);
-        hdcScreen = ::GpiQueryDevice(hpsScreen);
-        ::DevQueryCaps(hdcScreen, CAPS_COLOR_PLANES, 1L, &lPlanes);
-        ::DevQueryCaps(hdcScreen, CAPS_COLOR_BITCOUNT, 1L, &lBitsPerPixel);
+    hpsScreen = ::WinGetScreenPS(HWND_DESKTOP);
+    hdcScreen = ::GpiQueryDevice(hpsScreen);
+    ::DevQueryCaps(hdcScreen, CAPS_COLOR_PLANES, 1L, &lPlanes);
+    ::DevQueryCaps(hdcScreen, CAPS_COLOR_BITCOUNT, 1L, &lBitsPerPixel);
 
-        nDepth = (int)(lPlanes * lBitsPerPixel);
-        ::DevCloseDC(hdcScreen);
-        ::WinReleasePS(hpsScreen);
-    }
+    nDepth = (int)(lPlanes * lBitsPerPixel);
+    DevCloseDC(hdcScreen);
     return (nDepth);
 }
 
@@ -798,60 +743,17 @@ void wxDisplaySize(
 {
     HPS                             hpsScreen;
     HDC                             hdcScreen;
-    static LONG                     lWidth  = 0;
-    static LONG                     lHeight = 0;
-
-    // The screen size ain't gonna change either so just cache the values
-    if (!lWidth) {
-        hpsScreen = ::WinGetScreenPS(HWND_DESKTOP);
-        hdcScreen = ::GpiQueryDevice(hpsScreen);
-        ::DevQueryCaps(hdcScreen, CAPS_WIDTH, 1L, &lWidth);
-        ::DevQueryCaps(hdcScreen, CAPS_HEIGHT, 1L, &lHeight);
-        ::DevCloseDC(hdcScreen);
-        ::WinReleasePS(hpsScreen);
-    }
-    *pWidth = (int)lWidth;
-    *pHeight = (int)lHeight;
-}
-
-void wxDisplaySizeMM(
-  int*                              pWidth
-, int*                              pHeight
-)
-{
-    HPS                             hpsScreen;
-    HDC                             hdcScreen;
+    LONG                            lWidth;
+    LONG                            lHeight;
 
     hpsScreen = ::WinGetScreenPS(HWND_DESKTOP);
     hdcScreen = ::GpiQueryDevice(hpsScreen);
-
-    if (pWidth)
-        ::DevQueryCaps( hdcScreen
-                       ,CAPS_HORIZONTAL_RESOLUTION
-                       ,1L
-                       ,(PLONG)pWidth
-                      );
-    if (pHeight)
-        ::DevQueryCaps( hdcScreen
-                       ,CAPS_VERTICAL_RESOLUTION
-                       ,1L
-                       ,(PLONG)pHeight
-                      );
-    ::DevCloseDC(hdcScreen);
-    ::WinReleasePS(hpsScreen);
+    ::DevQueryCaps(hdcScreen, CAPS_WIDTH, 1L, &lWidth);
+    ::DevQueryCaps(hdcScreen, CAPS_HEIGHT, 1L, &lHeight);
+    DevCloseDC(hdcScreen);
+    *pWidth = (int)lWidth;
+    *pHeight = (int)lHeight;
 }
-
-void wxClientDisplayRect(int *x, int *y, int *width, int *height)
-{
-    // This is supposed to return desktop dimensions minus any window
-    // manager panels, menus, taskbars, etc.  If there is a way to do that
-    // for this platform please fix this function, otherwise it defaults
-    // to the entire desktop.
-    if (x) *x = 0;
-    if (y) *y = 0;
-    wxDisplaySize(width, height);
-}
-
 
 bool wxDirExists(
   const wxString&                   rDir
@@ -968,317 +870,4 @@ wxString WXDLLEXPORT wxPMErrorToStr(
     return(sError);
 } // end of wxPMErrorToStr
 
-void wxDrawBorder(
-  HPS                               hPS
-, RECTL&                            rRect
-, WXDWORD                           dwStyle
-)
-{
-    POINTL                          vPoint[2];
 
-    vPoint[0].x = rRect.xLeft;
-    vPoint[0].y = rRect.yBottom;
-    ::GpiMove(hPS, &vPoint[0]);
-    if (dwStyle & wxSIMPLE_BORDER ||
-        dwStyle & wxSTATIC_BORDER)
-    {
-        vPoint[1].x = rRect.xRight - 1;
-        vPoint[1].y = rRect.yTop - 1;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-    }
-    if (dwStyle & wxSUNKEN_BORDER)
-    {
-        LINEBUNDLE                      vLineBundle;
-
-        vLineBundle.lColor     = 0x00FFFFFF; // WHITE
-        vLineBundle.usMixMode  = FM_OVERPAINT;
-        vLineBundle.fxWidth    = 2;
-        vLineBundle.lGeomWidth = 2;
-        vLineBundle.usType     = LINETYPE_SOLID;
-        vLineBundle.usEnd      = 0;
-        vLineBundle.usJoin     = 0;
-        ::GpiSetAttrs( hPS
-                      ,PRIM_LINE
-                      ,LBB_COLOR | LBB_MIX_MODE | LBB_WIDTH | LBB_GEOM_WIDTH | LBB_TYPE
-                      ,0L
-                      ,&vLineBundle
-                     );
-        vPoint[1].x = rRect.xRight - 1;
-        vPoint[1].y = rRect.yTop - 1;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-       vPoint[0].x = rRect.xLeft + 1;
-       vPoint[0].y = rRect.yBottom + 1;
-       ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xRight - 2;
-        vPoint[1].y = rRect.yTop - 2;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-
-        vLineBundle.lColor     = 0x00000000; // BLACK
-        vLineBundle.usMixMode  = FM_OVERPAINT;
-        vLineBundle.fxWidth    = 2;
-        vLineBundle.lGeomWidth = 2;
-        vLineBundle.usType     = LINETYPE_SOLID;
-        vLineBundle.usEnd      = 0;
-        vLineBundle.usJoin     = 0;
-        ::GpiSetAttrs( hPS
-                      ,PRIM_LINE
-                      ,LBB_COLOR | LBB_MIX_MODE | LBB_WIDTH | LBB_GEOM_WIDTH | LBB_TYPE
-                      ,0L
-                      ,&vLineBundle
-                     );
-        vPoint[0].x = rRect.xLeft + 2;
-        vPoint[0].y = rRect.yBottom + 2;
-        ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xLeft + 2;
-        vPoint[1].y = rRect.yTop - 3;
-        ::GpiLine(hPS, &vPoint[1]);
-        vPoint[1].x = rRect.xRight - 3;
-        vPoint[1].y = rRect.yTop - 3;
-        ::GpiLine(hPS, &vPoint[1]);
-
-        vPoint[0].x = rRect.xLeft + 3;
-        vPoint[0].y = rRect.yBottom + 3;
-        ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xLeft + 3;
-        vPoint[1].y = rRect.yTop - 4;
-        ::GpiLine(hPS, &vPoint[1]);
-        vPoint[1].x = rRect.xRight - 4;
-        vPoint[1].y = rRect.yTop - 4;
-        ::GpiLine(hPS, &vPoint[1]);
-    }
-    if (dwStyle & wxDOUBLE_BORDER)
-    {
-        LINEBUNDLE                      vLineBundle;
-
-        vLineBundle.lColor     = 0x00FFFFFF; // WHITE
-        vLineBundle.usMixMode  = FM_OVERPAINT;
-        vLineBundle.fxWidth    = 2;
-        vLineBundle.lGeomWidth = 2;
-        vLineBundle.usType     = LINETYPE_SOLID;
-        vLineBundle.usEnd      = 0;
-        vLineBundle.usJoin     = 0;
-        ::GpiSetAttrs( hPS
-                      ,PRIM_LINE
-                      ,LBB_COLOR | LBB_MIX_MODE | LBB_WIDTH | LBB_GEOM_WIDTH | LBB_TYPE
-                      ,0L
-                      ,&vLineBundle
-                     );
-        vPoint[1].x = rRect.xRight - 1;
-        vPoint[1].y = rRect.yTop - 1;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-        vLineBundle.lColor     = 0x00000000; // WHITE
-        vLineBundle.usMixMode  = FM_OVERPAINT;
-        vLineBundle.fxWidth    = 2;
-        vLineBundle.lGeomWidth = 2;
-        vLineBundle.usType     = LINETYPE_SOLID;
-        vLineBundle.usEnd      = 0;
-        vLineBundle.usJoin     = 0;
-        ::GpiSetAttrs( hPS
-                      ,PRIM_LINE
-                      ,LBB_COLOR | LBB_MIX_MODE | LBB_WIDTH | LBB_GEOM_WIDTH | LBB_TYPE
-                      ,0L
-                      ,&vLineBundle
-                     );
-        vPoint[0].x = rRect.xLeft + 2;
-        vPoint[0].y = rRect.yBottom + 2;
-        ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xRight - 2;
-        vPoint[1].y = rRect.yTop - 2;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-        vLineBundle.lColor     = 0x00FFFFFF; // BLACK
-        vLineBundle.usMixMode  = FM_OVERPAINT;
-        vLineBundle.fxWidth    = 2;
-        vLineBundle.lGeomWidth = 2;
-        vLineBundle.usType     = LINETYPE_SOLID;
-        vLineBundle.usEnd      = 0;
-        vLineBundle.usJoin     = 0;
-        ::GpiSetAttrs( hPS
-                      ,PRIM_LINE
-                      ,LBB_COLOR | LBB_MIX_MODE | LBB_WIDTH | LBB_GEOM_WIDTH | LBB_TYPE
-                      ,0L
-                      ,&vLineBundle
-                     );
-        vPoint[0].x = rRect.xLeft + 3;
-        vPoint[0].y = rRect.yBottom + 3;
-        ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xRight - 3;
-        vPoint[1].y = rRect.yTop - 3;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-    }
-    if (dwStyle & wxRAISED_BORDER)
-    {
-        LINEBUNDLE                      vLineBundle;
-
-        vLineBundle.lColor     = 0x00000000; // BLACK
-        vLineBundle.usMixMode  = FM_OVERPAINT;
-        vLineBundle.fxWidth    = 2;
-        vLineBundle.lGeomWidth = 2;
-        vLineBundle.usType     = LINETYPE_SOLID;
-        vLineBundle.usEnd      = 0;
-        vLineBundle.usJoin     = 0;
-        ::GpiSetAttrs( hPS
-                      ,PRIM_LINE
-                      ,LBB_COLOR | LBB_MIX_MODE | LBB_WIDTH | LBB_GEOM_WIDTH | LBB_TYPE
-                      ,0L
-                      ,&vLineBundle
-                     );
-        vPoint[1].x = rRect.xRight - 1;
-        vPoint[1].y = rRect.yTop - 1;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-       vPoint[0].x = rRect.xLeft + 1;
-       vPoint[0].y = rRect.yBottom + 1;
-       ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xRight - 2;
-        vPoint[1].y = rRect.yTop - 2;
-        ::GpiBox( hPS
-                 ,DRO_OUTLINE
-                 ,&vPoint[1]
-                 ,0L
-                 ,0L
-                );
-
-        vLineBundle.lColor     = 0x00FFFFFF; // WHITE
-        vLineBundle.usMixMode  = FM_OVERPAINT;
-        vLineBundle.fxWidth    = 2;
-        vLineBundle.lGeomWidth = 2;
-        vLineBundle.usType     = LINETYPE_SOLID;
-        vLineBundle.usEnd      = 0;
-        vLineBundle.usJoin     = 0;
-        ::GpiSetAttrs( hPS
-                      ,PRIM_LINE
-                      ,LBB_COLOR | LBB_MIX_MODE | LBB_WIDTH | LBB_GEOM_WIDTH | LBB_TYPE
-                      ,0L
-                      ,&vLineBundle
-                     );
-        vPoint[0].x = rRect.xLeft + 2;
-        vPoint[0].y = rRect.yBottom + 2;
-        ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xLeft + 2;
-        vPoint[1].y = rRect.yTop - 3;
-        ::GpiLine(hPS, &vPoint[1]);
-        vPoint[1].x = rRect.xRight - 3;
-        vPoint[1].y = rRect.yTop - 3;
-        ::GpiLine(hPS, &vPoint[1]);
-
-        vPoint[0].x = rRect.xLeft + 3;
-        vPoint[0].y = rRect.yBottom + 3;
-        ::GpiMove(hPS, &vPoint[0]);
-        vPoint[1].x = rRect.xLeft + 3;
-        vPoint[1].y = rRect.yTop - 4;
-        ::GpiLine(hPS, &vPoint[1]);
-        vPoint[1].x = rRect.xRight - 4;
-        vPoint[1].y = rRect.yTop - 4;
-        ::GpiLine(hPS, &vPoint[1]);
-    }
-} // end of wxDrawBorder
-
-void wxOS2SetFont(
-  HWND                              hWnd
-, const wxFont&                     rFont
-)
-{
-    char                            zFont[128];
-    char                            zFacename[30];
-    char                            zWeight[30];
-    char                            zStyle[30];
-
-    if (hWnd == NULLHANDLE)
-
-    //
-    // The fonts available for Presentation Params are just three
-    // outline fonts, the rest are available to the GPI, so we must
-    // map the families to one of these three
-    //
-    switch(rFont.GetFamily())
-    {
-        case wxSCRIPT:
-        case wxDECORATIVE:
-        case wxROMAN:
-            strcpy(zFacename,"Times New Roman");
-            break;
-
-        case wxTELETYPE:
-        case wxMODERN:
-            strcpy(zFacename, "Courier");
-            break;
-
-        case wxSWISS:
-        case wxDEFAULT:
-        default:
-            strcpy(zFacename, "Helvetica");
-            break;
-    }
-
-    switch(rFont.GetWeight())
-    {
-        default:
-        case wxNORMAL:
-        case wxLIGHT:
-            zWeight[0] = '\0';
-            break;
-
-        case wxBOLD:
-        case wxFONTWEIGHT_MAX:
-            strcpy(zWeight, "Bold");
-            break;
-    }
-
-    switch(rFont.GetStyle())
-    {
-        case wxITALIC:
-        case wxSLANT:
-            strcpy(zStyle, "Italic");
-            break;
-
-        default:
-            zStyle[0] = '\0';
-            break;
-    }
-    sprintf(zFont, "%d.%s", rFont.GetPointSize(), zFacename);
-    if (zWeight[0] != '\0')
-    {
-        strcat(zFont, " ");
-        strcat(zFont, zWeight);
-    }
-    if (zStyle[0] != '\0')
-    {
-        strcat(zFont, " ");
-        strcat(zFont, zStyle);
-    }
-    ::WinSetPresParam(hWnd, PP_FONTNAMESIZE, strlen(zFont) + 1, (PVOID)zFont);
-} // end of wxOS2SetFont

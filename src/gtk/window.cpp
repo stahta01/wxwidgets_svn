@@ -12,10 +12,6 @@
     #pragma implementation "window.h"
 #endif
 
-#ifdef __VMS
-#define XWarpPointer XWARPPOINTER
-#endif
-
 #include "wx/defs.h"
 #include "wx/window.h"
 #include "wx/dcclient.h"
@@ -37,10 +33,6 @@
 #if wxUSE_CARET
     #include "wx/caret.h"
 #endif // wxUSE_CARET
-
-#if wxUSE_TEXTCTRL
-#include "wx/textctrl.h"
-#endif
 
 #include "wx/menu.h"
 #include "wx/statusbr.h"
@@ -203,29 +195,15 @@ extern wxList     wxPendingDelete;
 extern bool       g_blockEventsOnDrag;
 extern bool       g_blockEventsOnScroll;
 extern wxCursor   g_globalCursor;
+static wxWindow  *g_captureWindow = (wxWindow*) NULL;
 
-// mouse capture state: the window which has it and if the mouse is currently
-// inside it
-static wxWindowGTK  *g_captureWindow = (wxWindowGTK*) NULL;
-static bool g_captureWindowHasMouse = FALSE;
-
-/* extern */ wxWindowGTK  *g_focusWindow = (wxWindowGTK*) NULL;
-
-// the last window which had the focus - this is normally never NULL (except
-// if we never had focus at all) as even when g_focusWindow is NULL it still
-// keeps its previous value
-static wxWindowGTK *g_focusWindowLast = (wxWindowGTK *)NULL;
-
-// the frame that is currently active (i.e. its child has focus). It is
-// used to generate wxActivateEvents
-static wxWindowGTK *g_activeFrame = (wxWindowGTK *)NULL;
-static bool g_activeFrameLostFocus = FALSE;
+wxWindow  *g_focusWindow = (wxWindow*) NULL;
 
 // if we detect that the app has got/lost the focus, we set this variable to
 // either TRUE or FALSE and an activate event will be sent during the next
 // OnIdle() call and it is reset to -1: this value means that we shouldn't
 // send any activate events at all
-static int        g_sendActivateEvent = -1;
+int        g_sendActivateEvent = -1;
 
 /* hack: we need something to pass to gtk_menu_popup, so we store the time of
    the last click here */
@@ -237,9 +215,7 @@ extern bool g_mainThreadLocked;
 // debug
 //-----------------------------------------------------------------------------
 
-#ifndef __WXGTK20__
 #define DISABLE_STYLE_IF_BROKEN_THEME 1
-#endif
 
 #ifdef __WXDEBUG__
 
@@ -298,23 +274,11 @@ gdk_window_warp_pointer (GdkWindow      *window,
                          gint            x,
                          gint            y)
 {
-#ifndef __WXGTK20__
   GdkWindowPrivate *priv;
-#endif
 
   if (!window)
     window = GDK_ROOT_PARENT();
 
-#ifdef __WXGTK20__
-  if (!GDK_WINDOW_DESTROYED(window))
-  {
-      XWarpPointer (GDK_WINDOW_XDISPLAY(window),
-                    None,              /* not source window -> move from anywhere */
-                    GDK_WINDOW_XID(window),  /* dest window */
-                    0, 0, 0, 0,        /* not source window -> move from anywhere */
-                    x, y );
-  }
-#else
   priv = (GdkWindowPrivate*) window;
 
   if (!priv->destroyed)
@@ -325,7 +289,6 @@ gdk_window_warp_pointer (GdkWindow      *window,
                     0, 0, 0, 0,        /* not source window -> move from anywhere */
                     x, y );
   }
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -340,22 +303,20 @@ extern bool g_isIdle;
 //-----------------------------------------------------------------------------
 
 // returns the child of win which currently has focus or NULL if not found
-//
-// Note: can't be static, needed by textctrl.cpp.
-wxWindow *wxFindFocusedChild(wxWindowGTK *win)
+static wxWindow *FindFocusedChild(wxWindow *win)
 {
-    wxWindow *winFocus = wxWindowGTK::FindFocus();
+    wxWindow *winFocus = wxWindow::FindFocus();
     if ( !winFocus )
         return (wxWindow *)NULL;
 
     if ( winFocus == win )
-        return (wxWindow *)win;
+        return win;
 
     for ( wxWindowList::Node *node = win->GetChildren().GetFirst();
           node;
           node = node->GetNext() )
     {
-        wxWindow *child = wxFindFocusedChild(node->GetData());
+        wxWindow *child = FindFocusedChild(node->GetData());
         if ( child )
             return child;
     }
@@ -363,20 +324,8 @@ wxWindow *wxFindFocusedChild(wxWindowGTK *win)
     return (wxWindow *)NULL;
 }
 
-// Returns toplevel grandparent of given window:
-static wxWindowGTK* wxGetTopLevelParent(wxWindowGTK *win)
+static void draw_frame( GtkWidget *widget, wxWindow *win )
 {
-    wxWindowGTK *p = win;
-    while (p && !p->IsTopLevel())
-         p = p->GetParent();
-    return p;
-}
-
-
-static void draw_frame( GtkWidget *widget, wxWindowGTK *win )
-{
-    // wxUniversal widgets draw the borders and scrollbars themselves
-#ifndef __WXUNIVERSAL__
     if (!win->m_hasVMT)
         return;
 
@@ -390,16 +339,16 @@ static void draw_frame( GtkWidget *widget, wxWindowGTK *win )
             GtkRequisition vscroll_req;
             vscroll_req.width = 2;
             vscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->vscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->vscrollbar)->klass )->size_request )
                 (scroll_window->vscrollbar, &vscroll_req );
 
             GtkRequisition hscroll_req;
             hscroll_req.width = 2;
             hscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->hscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->hscrollbar)->klass )->size_request )
                 (scroll_window->hscrollbar, &hscroll_req );
 
-            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(widget) );
+            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(widget)->klass );
 
             if (scroll_window->vscrollbar_visible)
             {
@@ -455,14 +404,13 @@ static void draw_frame( GtkWidget *widget, wxWindowGTK *win )
         gdk_gc_unref( gc );
         return;
     }
-#endif // __WXUNIVERSAL__
 }
 
 //-----------------------------------------------------------------------------
 // "expose_event" of m_widget
 //-----------------------------------------------------------------------------
 
-gint gtk_window_own_expose_callback( GtkWidget *widget, GdkEventExpose *gdk_event, wxWindowGTK *win )
+gint gtk_window_own_expose_callback( GtkWidget *widget, GdkEventExpose *gdk_event, wxWindow *win )
 {
     if (gdk_event->count > 0) return FALSE;
 
@@ -475,7 +423,7 @@ gint gtk_window_own_expose_callback( GtkWidget *widget, GdkEventExpose *gdk_even
 // "draw" of m_widget
 //-----------------------------------------------------------------------------
 
-static void gtk_window_own_draw_callback( GtkWidget *widget, GdkRectangle *WXUNUSED(rect), wxWindowGTK *win )
+static void gtk_window_own_draw_callback( GtkWidget *widget, GdkRectangle *WXUNUSED(rect), wxWindow *win )
 {
     draw_frame( widget, win );
 }
@@ -486,21 +434,10 @@ static void gtk_window_own_draw_callback( GtkWidget *widget, GdkRectangle *WXUNU
 
 static long map_to_unmodified_wx_keysym( GdkEventKey *event )
 {
-    // VZ: it seems that GDK_KEY_RELEASE event doesn't set event->string
-    //     but only event->keyval which is quite useless to us, so remember
-    //     the last character from GDK_KEY_PRESS and resue it as last resort
-    //
-    // NB: should be MT-neutral as always called from main thread only
-    static struct
-    {
-        KeySym keysym;
-        long   keycode;
-    } s_lastKeyPress = { 0, 0 };
-
     KeySym keysym = event->keyval;
-    long key_code;
+    guint key_code = 0;
 
-    switch ( keysym )
+    switch (keysym)
     {
         case GDK_Shift_L:
         case GDK_Shift_R:       key_code = WXK_SHIFT;       break;
@@ -593,45 +530,20 @@ static long map_to_unmodified_wx_keysym( GdkEventKey *event )
         case GDK_F12:           key_code = WXK_F12;         break;
         default:
         {
-            // do we have the translation?
-            if ( event->length == 1 )
+	    if (event->length == 1)
+	    {
+	        key_code = toupper( (unsigned char)*event->string );
+	    }
+	    else if ((keysym & 0xFF) == keysym)
             {
-                keysym = (KeySym)event->string[0];
-            }
-            else if ( (keysym & 0xFF) != keysym )
-            {
-                // non ASCII key, what to do?
-
-                if ( event->type == GDK_KEY_RELEASE )
-                {
-                    // reuse the one from the last keypress if any
-                    if ( keysym == s_lastKeyPress.keysym )
-                    {
-                        key_code = s_lastKeyPress.keycode;
-
-                        // skip "return 0"
-                        break;
-                    }
-                }
-
-                // ignore this one, we don't know it
-                return 0;
-            }
-            //else: ASCII key, ok
-
-            guint upper = gdk_keyval_to_upper( (guint)keysym );
-            key_code = upper ? upper : keysym;
-
-            if ( event->type == GDK_KEY_PRESS )
-            {
-                // remember it to be reused below later
-                s_lastKeyPress.keysym = keysym;
-                s_lastKeyPress.keycode = key_code;
+                guint upper = gdk_keyval_to_upper( (guint)keysym );
+                keysym = (upper != 0 ? upper : keysym ); /* to be MSW compatible */
+                key_code = (guint)keysym;
             }
         }
     }
 
-    return key_code;
+    return (key_code);
 }
 
 static long map_to_wx_keysym( GdkEventKey *event )
@@ -721,41 +633,26 @@ static long map_to_wx_keysym( GdkEventKey *event )
         case GDK_F11:           key_code = WXK_F11;         break;
         case GDK_F12:           key_code = WXK_F12;         break;
         default:
-            if (event->length == 1)
-            {
-                key_code = (unsigned char)*event->string;
-            }
-            else if ((keysym & 0xFF) == keysym)
+        {
+	    if (event->length == 1)
+	    {
+	        key_code = (unsigned char)*event->string;
+	    }
+	    else if ((keysym & 0xFF) == keysym)
             {
                 key_code = (guint)keysym;
             }
+        }
     }
 
-    return key_code;
-}
-
-//-----------------------------------------------------------------------------
-// "size_request" of m_widget
-//-----------------------------------------------------------------------------
-
-static void gtk_window_size_request_callback( GtkWidget *widget, GtkRequisition *requisition, wxWindow *win )
-{
-    int w,h;
-    win->GetSize( &w, &h );
-    if (w < 2) w = 2;
-    if (h < 2) h = 2;
-
-    requisition->height = h;
-    requisition->width = w;
+    return (key_code);
 }
 
 //-----------------------------------------------------------------------------
 // "expose_event" of m_wxwindow
 //-----------------------------------------------------------------------------
 
-static int gtk_window_expose_callback( GtkWidget *widget,
-                                       GdkEventExpose *gdk_event,
-                                       wxWindow *win )
+static int gtk_window_expose_callback( GtkWidget *widget, GdkEventExpose *gdk_event, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -777,18 +674,40 @@ static int gtk_window_expose_callback( GtkWidget *widget,
 
     GtkPizza *pizza = GTK_PIZZA (widget);
 
-    if (win->GetThemeEnabled())
+    wxWindow *parent = win;
+    if (win->IsTopLevel())
     {
-        wxWindow *parent = win->GetParent();
-        while (parent && !parent->IsTopLevel())
-            parent = parent->GetParent();
-        if (!parent)
-            parent = win;
-
         gtk_paint_flat_box (parent->m_widget->style, pizza->bin_window, GTK_STATE_NORMAL,
             GTK_SHADOW_NONE, &gdk_event->area, parent->m_widget, "base", 0, 0, -1, -1);
+    } 
+    else
+    {
+        parent = win->GetParent();
+        if (parent)
+        {
+            if (parent->m_isFrame)
+            {
+                wxFrame *frame = (wxFrame*) parent;
+                if (frame->GetStatusBar() == win)
+                {
+                    gtk_paint_flat_box (parent->m_widget->style, pizza->bin_window, GTK_STATE_NORMAL,
+                        GTK_SHADOW_NONE, &gdk_event->area, parent->m_widget, "base", 0, 0, -1, -1);
+                }
+            }
+            else
+            if (GTK_IS_NOTEBOOK(parent->m_widget))
+            {
+                while (parent && !parent->IsTopLevel())
+                    parent = parent->GetParent();
+                    
+                if (!parent) parent = win;
+                    
+                gtk_paint_flat_box (parent->m_widget->style, pizza->bin_window, GTK_STATE_NORMAL,
+                    GTK_SHADOW_NONE, &gdk_event->area, parent->m_widget, "base", 0, 0, -1, -1);
+            }
+        }
     }
-
+        
     win->GetUpdateRegion().Union( gdk_event->area.x,
                                   gdk_event->area.y,
                                   gdk_event->area.width,
@@ -797,65 +716,43 @@ static int gtk_window_expose_callback( GtkWidget *widget,
     if (gdk_event->count == 0)
     {
         win->m_clipPaintRegion = TRUE;
-
-        wxWindowDC dc(win);
-        dc.SetClippingRegion(win->GetUpdateRegion());
-        wxEraseEvent eevent( win->GetId(), &dc );
+    
+        wxEraseEvent eevent( win->GetId() );
         eevent.SetEventObject( win );
-#if 1
-        (void)win->GetEventHandler()->ProcessEvent(eevent);
-#else // 0
-        if (!win->GetEventHandler()->ProcessEvent(eevent))
-        {
-            wxClientDC dc( win );
-            dc.SetBrush( wxBrush( win->GetBackgroundColour(), wxSOLID ) );
-            dc.SetPen( *wxTRANSPARENT_PEN );
-
-            wxRegionIterator upd( win->GetUpdateRegion() );
-            while (upd)
-            {
-                dc.DrawRectangle( upd.GetX(), upd.GetY(), upd.GetWidth(), upd.GetHeight() );
-                upd ++;
-            }
-        }
-#endif // 1/0
-
-        wxNcPaintEvent eventNc( win->GetId() );
-        eventNc.SetEventObject( win );
-        win->GetEventHandler()->ProcessEvent( eventNc );
+        win->GetEventHandler()->ProcessEvent(eevent);
 
         wxPaintEvent event( win->GetId() );
         event.SetEventObject( win );
         win->GetEventHandler()->ProcessEvent( event );
 
         win->GetUpdateRegion().Clear();
-
         win->m_clipPaintRegion = FALSE;
     }
 
-    /* The following code will result in all window-less widgets
-       being redrawn if the wxWindows class is given a chance to
-       paint *anything* because it will then be allowed to paint
-       over the window-less widgets */
-    GList *children = pizza->children;
-    while (children)
-    {
-        GtkPizzaChild *child = (GtkPizzaChild*) children->data;
-        children = children->next;
+        /* The following code will result in all window-less widgets
+           being redrawn if the wxWindows class is given a chance to
+           paint *anything* because it will then be allowed to paint
+           over the window-less widgets */
 
-        GdkEventExpose child_event = *gdk_event;
-
-        if (GTK_WIDGET_NO_WINDOW (child->widget) &&
-            GTK_WIDGET_DRAWABLE (child->widget) /* &&
-            gtk_widget_intersect (child->widget, &gdk_event->area, &child_event.area)*/ )
+        GList *children = pizza->children;
+        while (children)
         {
-            child_event.area.x = child->widget->allocation.x;
-            child_event.area.y = child->widget->allocation.y;
-            child_event.area.width = child->widget->allocation.width;
-            child_event.area.height = child->widget->allocation.height;
-            gtk_widget_event (child->widget, (GdkEvent*) &child_event);
+            GtkPizzaChild *child = (GtkPizzaChild*) children->data;
+            children = children->next;
+
+            GdkEventExpose child_event = *gdk_event;
+
+            if (GTK_WIDGET_NO_WINDOW (child->widget) &&
+                GTK_WIDGET_DRAWABLE (child->widget) /* &&
+                gtk_widget_intersect (child->widget, &gdk_event->area, &child_event.area)*/ )
+            {
+                child_event.area.x = child->widget->allocation.x;
+                child_event.area.y = child->widget->allocation.y;
+                child_event.area.width = child->widget->allocation.width;
+                child_event.area.height = child->widget->allocation.height;
+                gtk_widget_event (child->widget, (GdkEvent*) &child_event);
+            }
         }
-    }
 
     return TRUE;
 }
@@ -870,9 +767,7 @@ static int gtk_window_expose_callback( GtkWidget *widget,
    There, we look for expose events ourselves whereas all other events are
    handled normally. */
 
-gint gtk_window_event_event_callback( GtkWidget *widget,
-                                      GdkEventExpose *event,
-                                      wxWindow *win )
+gint gtk_window_event_event_callback( GtkWidget *widget, GdkEventExpose *event, wxWindow *win )
 {
     if (event->type == GDK_EXPOSE)
     {
@@ -890,20 +785,12 @@ gint gtk_window_event_event_callback( GtkWidget *widget,
 /* This callback is a complete replacement of the gtk_pizza_draw() function,
    which disabled. */
 
-static void gtk_window_draw_callback( GtkWidget *widget,
-                                      GdkRectangle *rect,
-                                      wxWindow *win )
+static void gtk_window_draw_callback( GtkWidget *widget, GdkRectangle *rect, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
     if (g_isIdle)
         wxapp_install_idle_handler();
-
-    if ((win->HasFlag(wxNO_FULL_REPAINT_ON_RESIZE)) &&
-        (win->GetChildren().GetCount() == 0))
-    {
-        return;
-    }
 
 /*
     if (win->GetName() == wxT("panel"))
@@ -918,20 +805,14 @@ static void gtk_window_draw_callback( GtkWidget *widget,
     }
 */
 
-    GtkPizza *pizza = GTK_PIZZA (widget);
-
-    if (win->GetThemeEnabled())
+    if ((win->HasFlag(wxNO_FULL_REPAINT_ON_RESIZE)) &&
+        (win->GetChildren().GetCount() == 0))
     {
-        wxWindow *parent = win->GetParent();
-        while (parent && !parent->IsTopLevel())
-            parent = parent->GetParent();
-        if (!parent)
-            parent = win;
-
-        gtk_paint_flat_box (parent->m_widget->style, pizza->bin_window, GTK_STATE_NORMAL,
-            GTK_SHADOW_NONE, rect, parent->m_widget, "base", 0, 0, -1, -1);
+        return;
     }
 
+
+    GtkPizza *pizza = GTK_PIZZA (widget);
 
     if (!(GTK_WIDGET_APP_PAINTABLE (widget)) &&
          (pizza->clear_on_draw))
@@ -944,35 +825,9 @@ static void gtk_window_draw_callback( GtkWidget *widget,
 
     win->m_clipPaintRegion = TRUE;
 
-    wxWindowDC dc(win);
-    dc.SetClippingRegion(win->GetUpdateRegion());
-    wxEraseEvent eevent( win->GetId(), &dc );
+    wxEraseEvent eevent( win->GetId() );
     eevent.SetEventObject( win );
-
-#if 1
-    (void)win->GetEventHandler()->ProcessEvent(eevent);
-#else
-    if (!win->GetEventHandler()->ProcessEvent(eevent))
-    {
-        if (!win->GetEventHandler()->ProcessEvent(eevent))
-        {
-            wxClientDC dc( win );
-            dc.SetBrush( wxBrush( win->GetBackgroundColour(), wxSOLID ) );
-            dc.SetPen( *wxTRANSPARENT_PEN );
-
-            wxRegionIterator upd( win->GetUpdateRegion() );
-            while (upd)
-            {
-                dc.DrawRectangle( upd.GetX(), upd.GetY(), upd.GetWidth(), upd.GetHeight() );
-                upd ++;
-            }
-        }
-    }
-#endif
-
-    wxNcPaintEvent eventNc( win->GetId() );
-    eventNc.SetEventObject( win );
-    win->GetEventHandler()->ProcessEvent( eventNc );
+    win->GetEventHandler()->ProcessEvent(eevent);
 
     wxPaintEvent event( win->GetId() );
     event.SetEventObject( win );
@@ -982,18 +837,17 @@ static void gtk_window_draw_callback( GtkWidget *widget,
 
     win->m_clipPaintRegion = FALSE;
 
-
     GList *children = pizza->children;
     while (children)
     {
-            GtkPizzaChild *child = (GtkPizzaChild*) children->data;
-            children = children->next;
+        GtkPizzaChild *child = (GtkPizzaChild*) children->data;
+        children = children->next;
 
-            GdkRectangle child_area;
-            if (gtk_widget_intersect (child->widget, rect, &child_area))
-            {
-                gtk_widget_draw (child->widget, &child_area /* (GdkRectangle*) NULL*/ );
-            }
+        GdkRectangle child_area;
+        if (gtk_widget_intersect (child->widget, rect, &child_area))
+        {
+            gtk_widget_draw (child->widget, &child_area /* (GdkRectangle*) NULL*/ );
+        }
     }
 }
 
@@ -1001,12 +855,7 @@ static void gtk_window_draw_callback( GtkWidget *widget,
 // "key_press_event" from any window
 //-----------------------------------------------------------------------------
 
-// turn on to see the key event codes on the console
-#undef DEBUG_KEY_EVENTS
-
-static gint gtk_window_key_press_callback( GtkWidget *widget,
-                                           GdkEventKey *gdk_event,
-                                           wxWindow *win )
+static gint gtk_window_key_press_callback( GtkWidget *widget, GdkEventKey *gdk_event, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1017,23 +866,23 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
     if (g_blockEventsOnDrag) return FALSE;
 
 
+/*
+    wxString tmp;
+    tmp += (char)gdk_event->keyval;
+    printf( "KeyDown-Code is: %s.\n", tmp.c_str() );
+    printf( "KeyDown-ScanCode is: %d.\n", gdk_event->keyval );
+*/
+
     int x = 0;
     int y = 0;
     GdkModifierType state;
-    if (gdk_event->window)
-        gdk_window_get_pointer(gdk_event->window, &x, &y, &state);
+    if (gdk_event->window) gdk_window_get_pointer(gdk_event->window, &x, &y, &state);
 
     bool ret = FALSE;
 
     long key_code = map_to_unmodified_wx_keysym( gdk_event );
-
-#ifdef DEBUG_KEY_EVENTS
-    wxPrintf(_T("Key press event: %d => %ld\n"), gdk_event->keyval, key_code);
-#endif // DEBUG_KEY_EVENTS
-
     /* sending unknown key events doesn't really make sense */
-    if (key_code == 0)
-        return FALSE;
+    if (key_code == 0) return FALSE;
 
     wxKeyEvent event( wxEVT_KEY_DOWN );
     event.SetTimestamp( gdk_event->time );
@@ -1051,7 +900,7 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
 #if wxUSE_ACCEL
     if (!ret)
     {
-        wxWindowGTK *ancestor = win;
+        wxWindow *ancestor = win;
         while (ancestor)
         {
             int command = ancestor->GetAcceleratorTable()->GetCommand( event );
@@ -1068,37 +917,39 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
     }
 #endif // wxUSE_ACCEL
 
+    /* wxMSW doesn't send char events with Alt pressed */
     /* Only send wxEVT_CHAR event if not processed yet. Thus, ALT-x
        will only be sent if it is not in an accelerator table. */
-    if ( !ret )
+    key_code = map_to_wx_keysym( gdk_event );
+
+    if ( (!ret) &&
+         (key_code != 0))
     {
-        key_code = map_to_wx_keysym( gdk_event );
-
-        if ( key_code )
-        {
-#ifdef DEBUG_KEY_EVENTS
-            wxPrintf(_T("Char event: %ld\n"), key_code);
-#endif // DEBUG_KEY_EVENTS
-
-            // reuse the ame event object, just change its type and use the
-            // translated keycode instead of the raw one
-            event.SetEventType(wxEVT_CHAR);
-            event.m_keyCode = key_code;
-
-            ret = win->GetEventHandler()->ProcessEvent( event );
-        }
+        wxKeyEvent event2( wxEVT_CHAR );
+        event2.SetTimestamp( gdk_event->time );
+        event2.m_shiftDown = (gdk_event->state & GDK_SHIFT_MASK);
+        event2.m_controlDown = (gdk_event->state & GDK_CONTROL_MASK);
+        event2.m_altDown = (gdk_event->state & GDK_MOD1_MASK);
+        event2.m_metaDown = (gdk_event->state & GDK_MOD2_MASK);
+        event2.m_keyCode = key_code;
+        event2.m_scanCode = gdk_event->keyval;
+        event2.m_x = x;
+        event2.m_y = y;
+        event2.SetEventObject( win );
+        ret = win->GetEventHandler()->ProcessEvent( event2 );
     }
 
     /* win is a control: tab can be propagated up */
-    if ( !ret &&
+    if ( (!ret) &&
          ((gdk_event->keyval == GDK_Tab) || (gdk_event->keyval == GDK_ISO_Left_Tab)) &&
 // VZ: testing for wxTE_PROCESS_TAB shouldn't be done here the control may
 //     have this style, yet choose not to process this particular TAB in which
 //     case TAB must still work as a navigational character
 #if 0
-         !win->HasFlag(wxTE_PROCESS_TAB) &&
+         (!win->HasFlag(wxTE_PROCESS_TAB)) &&
 #endif // 0
-         win->GetParent() && (win->GetParent()->HasFlag( wxTAB_TRAVERSAL)) )
+         (win->GetParent()) &&
+         (win->GetParent()->HasFlag( wxTAB_TRAVERSAL)) )
     {
         wxNavigationKeyEvent new_event;
         new_event.SetEventObject( win->GetParent() );
@@ -1111,7 +962,7 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
     }
 
     /* generate wxID_CANCEL if <esc> has been pressed (typically in dialogs) */
-    if ( !ret &&
+    if ( (!ret) &&
          (gdk_event->keyval == GDK_Escape) )
     {
         wxCommandEvent new_event(wxEVT_COMMAND_BUTTON_CLICKED,wxID_CANCEL);
@@ -1119,13 +970,14 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
         ret = win->GetEventHandler()->ProcessEvent( new_event );
     }
 
-    /* Doesn't work. */
-#if 0 // (GTK_MINOR_VERSION > 0)
+#if (GTK_MINOR_VERSION > 0)
     /* Pressing F10 will activate the menu bar of the top frame. */
+    /* Doesn't work. */
+/*
     if ( (!ret) &&
          (gdk_event->keyval == GDK_F10) )
     {
-        wxWindowGTK *ancestor = win;
+        wxWindow *ancestor = win;
         while (ancestor)
         {
             if (wxIsKindOf(ancestor,wxFrame))
@@ -1147,7 +999,8 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
             ancestor = ancestor->GetParent();
         }
     }
-#endif // 0
+*/
+#endif
 
     if (ret)
     {
@@ -1162,7 +1015,7 @@ static gint gtk_window_key_press_callback( GtkWidget *widget,
 // "key_release_event" from any window
 //-----------------------------------------------------------------------------
 
-static gint gtk_window_key_release_callback( GtkWidget *widget, GdkEventKey *gdk_event, wxWindowGTK *win )
+static gint gtk_window_key_release_callback( GtkWidget *widget, GdkEventKey *gdk_event, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1172,11 +1025,20 @@ static gint gtk_window_key_release_callback( GtkWidget *widget, GdkEventKey *gdk
     if (!win->m_hasVMT) return FALSE;
     if (g_blockEventsOnDrag) return FALSE;
 
-    long key_code = map_to_unmodified_wx_keysym( gdk_event );
+/*
+    printf( "KeyUp-ScanCode is: %d.\n", gdk_event->keyval );
+    if (gdk_event->state & GDK_SHIFT_MASK)
+      printf( "ShiftDown.\n" );
+    else
+      printf( "ShiftUp.\n" );
+    if (gdk_event->state & GDK_CONTROL_MASK)
+      printf( "ControlDown.\n" );
+    else
+      printf( "ControlUp.\n" );
+    printf( "\n" );
+*/
 
-#ifdef DEBUG_KEY_EVENTS
-    wxPrintf(_T("Key release event: %d => %ld\n"), gdk_event->keyval, key_code);
-#endif // DEBUG_KEY_EVENTS
+    long key_code = map_to_unmodified_wx_keysym( gdk_event );
 
     /* sending unknown key events doesn't really make sense */
     if (key_code == 0) return FALSE;
@@ -1184,8 +1046,7 @@ static gint gtk_window_key_release_callback( GtkWidget *widget, GdkEventKey *gdk
     int x = 0;
     int y = 0;
     GdkModifierType state;
-    if (gdk_event->window)
-        gdk_window_get_pointer(gdk_event->window, &x, &y, &state);
+    if (gdk_event->window) gdk_window_get_pointer(gdk_event->window, &x, &y, &state);
 
     wxKeyEvent event( wxEVT_KEY_UP );
     event.SetTimestamp( gdk_event->time );
@@ -1208,27 +1069,6 @@ static gint gtk_window_key_release_callback( GtkWidget *widget, GdkEventKey *gdk
     return FALSE;
 }
 
-// ============================================================================
-// the mouse events
-// ============================================================================
-
-// init wxMouseEvent with the info from gdk_event
-#define InitMouseEvent(win, event, gdk_event) \
-    { \
-    event.SetTimestamp( gdk_event->time ); \
-    event.m_shiftDown = (gdk_event->state & GDK_SHIFT_MASK); \
-    event.m_controlDown = (gdk_event->state & GDK_CONTROL_MASK); \
-    event.m_altDown = (gdk_event->state & GDK_MOD1_MASK); \
-    event.m_metaDown = (gdk_event->state & GDK_MOD2_MASK); \
-    event.m_leftDown = (gdk_event->state & GDK_BUTTON1_MASK); \
-    event.m_middleDown = (gdk_event->state & GDK_BUTTON2_MASK); \
-    event.m_rightDown = (gdk_event->state & GDK_BUTTON3_MASK); \
-\
-    wxPoint pt = win->GetClientAreaOrigin(); \
-    event.m_x = (wxCoord)gdk_event->x - pt.x; \
-    event.m_y = (wxCoord)gdk_event->y - pt.y; \
-    }
-
 // ----------------------------------------------------------------------------
 // mouse event processing helper
 // ----------------------------------------------------------------------------
@@ -1239,29 +1079,25 @@ static void AdjustEventButtonState(wxMouseEvent& event)
     // for compatibility with MSW and common sense we want m_leftDown be TRUE
     // for a LEFT_DOWN event, not FALSE, so we will invert
     // left/right/middleDown for the corresponding click events
-
-    if ((event.GetEventType() == wxEVT_LEFT_DOWN) ||
-        (event.GetEventType() == wxEVT_LEFT_DCLICK) ||
-        (event.GetEventType() == wxEVT_LEFT_UP))
+    switch ( event.GetEventType() )
     {
-        event.m_leftDown = !event.m_leftDown;
-        return;
-    }
+        case wxEVT_LEFT_DOWN:
+        case wxEVT_LEFT_DCLICK:
+        case wxEVT_LEFT_UP:
+            event.m_leftDown = !event.m_leftDown;
+            break;
 
-    if ((event.GetEventType() == wxEVT_MIDDLE_DOWN) ||
-        (event.GetEventType() == wxEVT_MIDDLE_DCLICK) ||
-        (event.GetEventType() == wxEVT_MIDDLE_UP))
-    {
-        event.m_middleDown = !event.m_middleDown;
-        return;
-    }
+        case wxEVT_MIDDLE_DOWN:
+        case wxEVT_MIDDLE_DCLICK:
+        case wxEVT_MIDDLE_UP:
+            event.m_middleDown = !event.m_middleDown;
+            break;
 
-    if ((event.GetEventType() == wxEVT_RIGHT_DOWN) ||
-        (event.GetEventType() == wxEVT_RIGHT_DCLICK) ||
-        (event.GetEventType() == wxEVT_RIGHT_UP))
-    {
-        event.m_rightDown = !event.m_rightDown;
-        return;
+        case wxEVT_RIGHT_DOWN:
+        case wxEVT_RIGHT_DCLICK:
+        case wxEVT_RIGHT_UP:
+            event.m_rightDown = !event.m_rightDown;
+            break;
     }
 }
 
@@ -1269,7 +1105,7 @@ static void AdjustEventButtonState(wxMouseEvent& event)
 // "button_press_event"
 //-----------------------------------------------------------------------------
 
-static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxWindowGTK *win )
+static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1341,17 +1177,19 @@ static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton 
     }
 
     wxMouseEvent event( event_type );
-    InitMouseEvent( win, event, gdk_event );
+    event.SetTimestamp( gdk_event->time );
+    event.m_shiftDown = (gdk_event->state & GDK_SHIFT_MASK);
+    event.m_controlDown = (gdk_event->state & GDK_CONTROL_MASK);
+    event.m_altDown = (gdk_event->state & GDK_MOD1_MASK);
+    event.m_metaDown = (gdk_event->state & GDK_MOD2_MASK);
+    event.m_leftDown = (gdk_event->state & GDK_BUTTON1_MASK);
+    event.m_middleDown = (gdk_event->state & GDK_BUTTON2_MASK);
+    event.m_rightDown = (gdk_event->state & GDK_BUTTON3_MASK);
+
+    event.m_x = (wxCoord)gdk_event->x;
+    event.m_y = (wxCoord)gdk_event->y;
 
     AdjustEventButtonState(event);
-    
-    // wxListBox actually get mouse events from the item
-    
-    if (win->m_isListBox)
-    {
-        event.m_x += widget->allocation.x;
-        event.m_y += widget->allocation.y;
-    }
 
     // Some control don't have their own X window and thus cannot get
     // any events.
@@ -1370,7 +1208,7 @@ static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton 
         wxNode *node = win->GetChildren().First();
         while (node)
         {
-            wxWindowGTK *child = (wxWindowGTK*)node->Data();
+            wxWindow *child = (wxWindow*)node->Data();
 
             node = node->Next();
             if (!child->IsShown())
@@ -1441,7 +1279,7 @@ static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton 
 // "button_release_event"
 //-----------------------------------------------------------------------------
 
-static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxWindowGTK *win )
+static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1472,17 +1310,18 @@ static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButto
     }
 
     wxMouseEvent event( event_type );
-    InitMouseEvent( win, event, gdk_event );
+    event.SetTimestamp( gdk_event->time );
+    event.m_shiftDown = (gdk_event->state & GDK_SHIFT_MASK);
+    event.m_controlDown = (gdk_event->state & GDK_CONTROL_MASK);
+    event.m_altDown = (gdk_event->state & GDK_MOD1_MASK);
+    event.m_metaDown = (gdk_event->state & GDK_MOD2_MASK);
+    event.m_leftDown = (gdk_event->state & GDK_BUTTON1_MASK);
+    event.m_middleDown = (gdk_event->state & GDK_BUTTON2_MASK);
+    event.m_rightDown = (gdk_event->state & GDK_BUTTON3_MASK);
+    event.m_x = (wxCoord)gdk_event->x;
+    event.m_y = (wxCoord)gdk_event->y;
 
     AdjustEventButtonState(event);
-
-    // wxListBox actually get mouse events from the item
-    
-    if (win->m_isListBox)
-    {
-        event.m_x += widget->allocation.x;
-        event.m_y += widget->allocation.y;
-    }
 
     // Some control don't have their own X window and thus cannot get
     // any events.
@@ -1501,7 +1340,7 @@ static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButto
         wxNode *node = win->GetChildren().First();
         while (node)
         {
-            wxWindowGTK *child = (wxWindowGTK*)node->Data();
+            wxWindow *child = (wxWindow*)node->Data();
 
             node = node->Next();
             if (!child->IsShown())
@@ -1563,9 +1402,7 @@ static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButto
 // "motion_notify_event"
 //-----------------------------------------------------------------------------
 
-static gint gtk_window_motion_notify_callback( GtkWidget *widget,
-                                               GdkEventMotion *gdk_event,
-                                               wxWindowGTK *win )
+static gint gtk_window_motion_notify_callback( GtkWidget *widget, GdkEventMotion *gdk_event, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1596,30 +1433,23 @@ static gint gtk_window_motion_notify_callback( GtkWidget *widget,
 */
 
     wxMouseEvent event( wxEVT_MOTION );
-    InitMouseEvent(win, event, gdk_event);
+    event.SetTimestamp( gdk_event->time );
+    event.m_shiftDown = (gdk_event->state & GDK_SHIFT_MASK);
+    event.m_controlDown = (gdk_event->state & GDK_CONTROL_MASK);
+    event.m_altDown = (gdk_event->state & GDK_MOD1_MASK);
+    event.m_metaDown = (gdk_event->state & GDK_MOD2_MASK);
+    event.m_leftDown = (gdk_event->state & GDK_BUTTON1_MASK);
+    event.m_middleDown = (gdk_event->state & GDK_BUTTON2_MASK);
+    event.m_rightDown = (gdk_event->state & GDK_BUTTON3_MASK);
 
-    if ( g_captureWindow )
+    event.m_x = (wxCoord)gdk_event->x;
+    event.m_y = (wxCoord)gdk_event->y;
+
+    // Some control don't have their own X window and thus cannot get
+    // any events.
+
+    if (!g_captureWindow)
     {
-        // synthetize a mouse enter or leave event if needed
-        GdkWindow *winUnderMouse = gdk_window_at_pointer(NULL, NULL);
-        bool hasMouse = winUnderMouse == gdk_event->window;
-        if ( hasMouse != g_captureWindowHasMouse )
-        {
-            // the mouse changed window
-            g_captureWindowHasMouse = hasMouse;
-
-            wxMouseEvent event(g_captureWindowHasMouse ? wxEVT_ENTER_WINDOW
-                                                       : wxEVT_LEAVE_WINDOW);
-            InitMouseEvent(win, event, gdk_event);
-            event.SetEventObject(win);
-            win->GetEventHandler()->ProcessEvent(event);
-        }
-    }
-    else // no capture
-    {
-        // Some control don't have their own X window and thus cannot get
-        // any events.
-
         wxCoord x = event.m_x;
         wxCoord y = event.m_y;
         if (win->m_wxwindow)
@@ -1632,7 +1462,7 @@ static gint gtk_window_motion_notify_callback( GtkWidget *widget,
         wxNode *node = win->GetChildren().First();
         while (node)
         {
-            wxWindowGTK *child = (wxWindowGTK*)node->Data();
+            wxWindow *child = (wxWindow*)node->Data();
 
             node = node->Next();
             if (!child->IsShown())
@@ -1694,9 +1524,7 @@ static gint gtk_window_motion_notify_callback( GtkWidget *widget,
 // "focus_in_event"
 //-----------------------------------------------------------------------------
 
-static gint gtk_window_focus_in_callback( GtkWidget *widget,
-                                          GdkEvent *WXUNUSED(event),
-                                          wxWindow *win )
+static gint gtk_window_focus_in_callback( GtkWidget *widget, GdkEvent *WXUNUSED(event), wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1709,38 +1537,40 @@ static gint gtk_window_focus_in_callback( GtkWidget *widget,
     switch ( g_sendActivateEvent )
     {
         case -1:
-            // we've got focus from outside, synthetize wxActivateEvent
+            // we've got focus from outside, synthtize wxActivateEvent
             g_sendActivateEvent = 1;
             break;
 
         case 0:
             // another our window just lost focus, it was already ours before
-            // - don't send any wxActivateEvent
+            // - don't send any wxActivateAppEvent
             g_sendActivateEvent = -1;
             break;
     }
 
-    g_focusWindowLast =
     g_focusWindow = win;
 
-#if 0
-    wxPrintf( "OnSetFocus from " );
+/*
+    printf( "OnSetFocus from " );
     if (win->GetClassInfo() && win->GetClassInfo()->GetClassName())
-        wxPrintf( win->GetClassInfo()->GetClassName() );
-    wxPrintf( ".\n" );
-#endif
+        printf( win->GetClassInfo()->GetClassName() );
+    printf( "   " );
+    printf( WXSTRINGCAST win->GetLabel() );
+    printf( ".\n" );
+*/
 
-    // notify the parent keeping track of focus for the kbd navigation
-    // purposes that we got it
-    wxChildFocusEvent eventFocus(win);
-    (void)win->GetEventHandler()->ProcessEvent(eventFocus);
+    wxPanel *panel = wxDynamicCast(win->GetParent(), wxPanel);
+    if (panel)
+    {
+        panel->SetLastFocus(win);
+    }
 
 #ifdef HAVE_XIM
     if (win->m_ic)
         gdk_im_begin(win->m_ic, win->m_wxwindow->window);
 #endif
 
-#if wxUSE_CARET
+#ifdef wxUSE_CARET
     // caret needs to be informed about focus change
     wxCaret *caret = win->GetCaret();
     if ( caret )
@@ -1749,25 +1579,15 @@ static gint gtk_window_focus_in_callback( GtkWidget *widget,
     }
 #endif // wxUSE_CARET
 
-    wxWindowGTK *active = wxGetTopLevelParent(win);
-    if ( active != g_activeFrame )
+
+    if (win->IsTopLevel())
     {
-        if ( g_activeFrame )
-        {
-            wxLogTrace(wxT("activate"), wxT("Deactivating frame %p (from focus_in)"), g_activeFrame);
-            wxActivateEvent event(wxEVT_ACTIVATE, FALSE, g_activeFrame->GetId());
-            event.SetEventObject(g_activeFrame);
-            g_activeFrame->GetEventHandler()->ProcessEvent(event);
-        }
+        wxActivateEvent event( wxEVT_ACTIVATE, TRUE, win->GetId() );
+        event.SetEventObject( win );
 
-        wxLogTrace(wxT("activate"), wxT("Activating frame %p (from focus_in)"), active);
-        g_activeFrame = active;
-        wxActivateEvent event(wxEVT_ACTIVATE, TRUE, g_activeFrame->GetId());
-        event.SetEventObject(g_activeFrame);
-        g_activeFrame->GetEventHandler()->ProcessEvent(event);
+        // ignore return value
+        win->GetEventHandler()->ProcessEvent( event );
     }
-    g_activeFrameLostFocus = FALSE;
-
 
     wxFocusEvent event( wxEVT_SET_FOCUS, win->GetId() );
     event.SetEventObject( win );
@@ -1778,7 +1598,6 @@ static gint gtk_window_focus_in_callback( GtkWidget *widget,
        return TRUE;
     }
 
-
     return FALSE;
 }
 
@@ -1786,9 +1605,7 @@ static gint gtk_window_focus_in_callback( GtkWidget *widget,
 // "focus_out_event"
 //-----------------------------------------------------------------------------
 
-static GtkWidget *gs_widgetLastFocus = NULL;
-
-static gint gtk_window_focus_out_callback( GtkWidget *widget, GdkEvent *WXUNUSED(event), wxWindowGTK *win )
+static gint gtk_window_focus_out_callback( GtkWidget *widget, GdkEvent *WXUNUSED(event), wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1798,55 +1615,30 @@ static gint gtk_window_focus_out_callback( GtkWidget *widget, GdkEvent *WXUNUSED
     if (!win->m_hasVMT) return FALSE;
     if (g_blockEventsOnDrag) return FALSE;
 
-    // VZ: this is really weird but GTK+ seems to call us from inside
-    //     gtk_widget_grab_focus(), i.e. it first sends "focus_out" signal to
-    //     this widget and then "focus_in". This is totally unexpected and
-    //     completely breaks wxUniv code so ignore this dummy event (we can't
-    //     be losing focus if we're about to acquire it!)
-    if ( widget == gs_widgetLastFocus )
-    {
-        gs_widgetLastFocus = NULL;
-
-        return FALSE;
-    }
-
-    if ( !g_activeFrameLostFocus && g_activeFrame )
-    {
-        // VZ: commenting this out because it does happen (although not easy
-        //     to reproduce, I only see it when using wxMiniFrame and not
-        //     always) and makes using Mahogany quite annoying
-#if 0
-        wxASSERT_MSG( wxGetTopLevelParent(win) == g_activeFrame,
-                        wxT("unfocusing window that hasn't gained focus properly") )
-#endif // 0
-
-        g_activeFrameLostFocus = TRUE;
-    }
-
     // if the focus goes out of our app alltogether, OnIdle() will send
     // wxActivateEvent, otherwise gtk_window_focus_in_callback() will reset
     // g_sendActivateEvent to -1
     g_sendActivateEvent = 0;
 
-    wxWindowGTK *winFocus = wxFindFocusedChild(win);
+    wxWindow *winFocus = FindFocusedChild(win);
     if ( winFocus )
         win = winFocus;
 
-    g_focusWindow = (wxWindowGTK *)NULL;
+    g_focusWindow = (wxWindow *)NULL;
 
-#if 0
-    wxPrintf( "OnKillFocus from " );
+/*
+    printf( "OnKillFocus from " );
     if (win->GetClassInfo() && win->GetClassInfo()->GetClassName())
-        wxPrintf( win->GetClassInfo()->GetClassName() );
-    wxPrintf( ".\n" );
-#endif
+        printf( win->GetClassInfo()->GetClassName() );
+    printf( ".\n" );
+*/
 
 #ifdef HAVE_XIM
     if (win->m_ic)
         gdk_im_end();
 #endif
 
-#if wxUSE_CARET
+#ifdef wxUSE_CARET
     // caret needs to be informed about focus change
     wxCaret *caret = win->GetCaret();
     if ( caret )
@@ -1854,6 +1646,15 @@ static gint gtk_window_focus_out_callback( GtkWidget *widget, GdkEvent *WXUNUSED
         caret->OnKillFocus();
     }
 #endif // wxUSE_CARET
+
+    if (win->IsTopLevel())
+    {
+        wxActivateEvent event( wxEVT_ACTIVATE, FALSE, win->GetId() );
+        event.SetEventObject( win );
+
+        // ignore return value
+        win->GetEventHandler()->ProcessEvent( event );
+    }
 
     wxFocusEvent event( wxEVT_KILL_FOCUS, win->GetId() );
     event.SetEventObject( win );
@@ -1871,7 +1672,7 @@ static gint gtk_window_focus_out_callback( GtkWidget *widget, GdkEvent *WXUNUSED
 // "enter_notify_event"
 //-----------------------------------------------------------------------------
 
-static gint gtk_window_enter_callback( GtkWidget *widget, GdkEventCrossing *gdk_event, wxWindowGTK *win )
+static gint gtk_window_enter_callback( GtkWidget *widget, GdkEventCrossing *gdk_event, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1884,47 +1685,9 @@ static gint gtk_window_enter_callback( GtkWidget *widget, GdkEventCrossing *gdk_
     if (!win->IsOwnGtkWindow( gdk_event->window )) return FALSE;
 
     wxMouseEvent event( wxEVT_ENTER_WINDOW );
+#if (GTK_MINOR_VERSION > 0)
     event.SetTimestamp( gdk_event->time );
-    event.SetEventObject( win );
-
-    int x = 0;
-    int y = 0;
-    GdkModifierType state = (GdkModifierType)0;
-
-    gdk_window_get_pointer( widget->window, &x, &y, &state );
-
-    InitMouseEvent(win, event, gdk_event);
-    wxPoint pt = win->GetClientAreaOrigin();
-    event.m_x = x + pt.x;
-    event.m_y = y + pt.y;
-
-    if (win->GetEventHandler()->ProcessEvent( event ))
-    {
-       gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "enter_notify_event" );
-       return TRUE;
-    }
-
-    return FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// "leave_notify_event"
-//-----------------------------------------------------------------------------
-
-static gint gtk_window_leave_callback( GtkWidget *widget, GdkEventCrossing *gdk_event, wxWindowGTK *win )
-{
-    DEBUG_MAIN_THREAD
-
-    if (g_isIdle)
-        wxapp_install_idle_handler();
-
-    if (!win->m_hasVMT) return FALSE;
-    if (g_blockEventsOnDrag) return FALSE;
-
-    if (!win->IsOwnGtkWindow( gdk_event->window )) return FALSE;
-
-    wxMouseEvent event( wxEVT_LEAVE_WINDOW );
-    event.SetTimestamp( gdk_event->time );
+#endif
     event.SetEventObject( win );
 
     int x = 0;
@@ -1941,9 +1704,56 @@ static gint gtk_window_leave_callback( GtkWidget *widget, GdkEventCrossing *gdk_
     event.m_middleDown = (state & GDK_BUTTON2_MASK);
     event.m_rightDown = (state & GDK_BUTTON3_MASK);
 
-    wxPoint pt = win->GetClientAreaOrigin();
-    event.m_x = x + pt.x;
-    event.m_y = y + pt.y;
+    event.m_x = x;
+    event.m_y = y;
+
+    if (win->GetEventHandler()->ProcessEvent( event ))
+    {
+       gtk_signal_emit_stop_by_name( GTK_OBJECT(widget), "enter_notify_event" );
+       return TRUE;
+    }
+
+    return FALSE;
+}
+
+//-----------------------------------------------------------------------------
+// "leave_notify_event"
+//-----------------------------------------------------------------------------
+
+static gint gtk_window_leave_callback( GtkWidget *widget, GdkEventCrossing *gdk_event, wxWindow *win )
+{
+    DEBUG_MAIN_THREAD
+
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
+    if (!win->m_hasVMT) return FALSE;
+    if (g_blockEventsOnDrag) return FALSE;
+
+    if (!win->IsOwnGtkWindow( gdk_event->window )) return FALSE;
+
+    wxMouseEvent event( wxEVT_LEAVE_WINDOW );
+#if (GTK_MINOR_VERSION > 0)
+    event.SetTimestamp( gdk_event->time );
+#endif
+    event.SetEventObject( win );
+
+    int x = 0;
+    int y = 0;
+    GdkModifierType state = (GdkModifierType)0;
+
+    gdk_window_get_pointer( widget->window, &x, &y, &state );
+
+    event.m_shiftDown = (state & GDK_SHIFT_MASK);
+    event.m_controlDown = (state & GDK_CONTROL_MASK);
+    event.m_altDown = (state & GDK_MOD1_MASK);
+    event.m_metaDown = (state & GDK_MOD2_MASK);
+    event.m_leftDown = (state & GDK_BUTTON1_MASK);
+    event.m_middleDown = (state & GDK_BUTTON2_MASK);
+    event.m_rightDown = (state & GDK_BUTTON3_MASK);
+
+    event.m_x = x;
+    event.m_y = y;
 
     if (win->GetEventHandler()->ProcessEvent( event ))
     {
@@ -1958,7 +1768,7 @@ static gint gtk_window_leave_callback( GtkWidget *widget, GdkEventCrossing *gdk_
 // "value_changed" from m_vAdjust
 //-----------------------------------------------------------------------------
 
-static void gtk_window_vscroll_callback( GtkAdjustment *adjust, wxWindowGTK *win )
+static void gtk_window_vscroll_callback( GtkAdjustment *adjust, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -1994,7 +1804,7 @@ static void gtk_window_vscroll_callback( GtkAdjustment *adjust, wxWindowGTK *win
 // "value_changed" from m_hAdjust
 //-----------------------------------------------------------------------------
 
-static void gtk_window_hscroll_callback( GtkAdjustment *adjust, wxWindowGTK *win )
+static void gtk_window_hscroll_callback( GtkAdjustment *adjust, wxWindow *win )
 {
     DEBUG_MAIN_THREAD
 
@@ -2031,7 +1841,7 @@ static void gtk_window_hscroll_callback( GtkAdjustment *adjust, wxWindowGTK *win
 
 static gint gtk_scrollbar_button_press_callback( GtkRange *widget,
                                                  GdkEventButton *gdk_event,
-                                                 wxWindowGTK *win)
+                                                 wxWindow *win)
 {
     DEBUG_MAIN_THREAD
 
@@ -2051,7 +1861,7 @@ static gint gtk_scrollbar_button_press_callback( GtkRange *widget,
 
 static gint gtk_scrollbar_button_release_callback( GtkRange *widget,
                                                    GdkEventButton *WXUNUSED(gdk_event),
-                                                   wxWindowGTK *win)
+                                                   wxWindow *win)
 {
     DEBUG_MAIN_THREAD
 
@@ -2097,8 +1907,7 @@ static gint gtk_scrollbar_button_release_callback( GtkRange *widget,
 
 wxWindow *wxWindowBase::FindFocus()
 {
-    // the cast is necessary when we compile in wxUniversal mode
-    return (wxWindow *)g_focusWindow;
+    return g_focusWindow;
 }
 
 //-----------------------------------------------------------------------------
@@ -2172,7 +1981,7 @@ void gtk_window_size_callback( GtkWidget *WXUNUSED(widget),
 static
 void gtk_wxwindow_size_callback( GtkWidget* WXUNUSED_UNLESS_XIM(widget),
                                  GtkAllocation* WXUNUSED_UNLESS_XIM(alloc),
-                                 wxWindowGTK* WXUNUSED_UNLESS_XIM(win) )
+                                 wxWindow* WXUNUSED_UNLESS_XIM(win) )
 {
     if (g_isIdle)
         wxapp_install_idle_handler();
@@ -2201,7 +2010,7 @@ void gtk_wxwindow_size_callback( GtkWidget* WXUNUSED_UNLESS_XIM(widget),
 
 static gint
 gtk_wxwindow_realized_callback( GtkWidget * WXUNUSED_UNLESS_XIM(widget),
-                                wxWindowGTK * WXUNUSED_UNLESS_XIM(win) )
+                                wxWindow * WXUNUSED_UNLESS_XIM(win) )
 {
     if (g_isIdle)
         wxapp_install_idle_handler();
@@ -2281,23 +2090,23 @@ gtk_wxwindow_realized_callback( GtkWidget * WXUNUSED_UNLESS_XIM(widget),
           if (GTK_WIDGET_HAS_FOCUS(widget))
               gdk_im_begin (win->m_ic, widget->window);
       }
-#endif // HAVE_XIM
+#endif
 
     return FALSE;
 }
 
 //-----------------------------------------------------------------------------
-// InsertChild for wxWindowGTK.
+// InsertChild for wxWindow.
 //-----------------------------------------------------------------------------
 
-/* Callback for wxWindowGTK. This very strange beast has to be used because
+/* Callback for wxWindow. This very strange beast has to be used because
  * C++ has no virtual methods in a constructor. We have to emulate a
  * virtual function here as wxNotebook requires a different way to insert
  * a child in it. I had opted for creating a wxNotebookPage window class
  * which would have made this superfluous (such in the MDI window system),
  * but no-one was listening to me... */
 
-static void wxInsertChildInWindow( wxWindowGTK* parent, wxWindowGTK* child )
+static void wxInsertChildInWindow( wxWindow* parent, wxWindow* child )
 {
     /* the window might have been scrolled already, do we
        have to adapt the position */
@@ -2317,25 +2126,18 @@ static void wxInsertChildInWindow( wxWindowGTK* parent, wxWindowGTK* child )
 // global functions
 //-----------------------------------------------------------------------------
 
-wxWindow *wxGetActiveWindow()
+wxWindow* wxGetActiveWindow()
 {
-    // the cast is necessary when we compile in wxUniversal mode
-    return (wxWindow *)g_focusWindow;
+    return g_focusWindow;
 }
 
 //-----------------------------------------------------------------------------
-// wxWindowGTK
+// wxWindow
 //-----------------------------------------------------------------------------
 
-// in wxUniv/MSW this class is abstract because it doesn't have DoPopupMenu()
-// method
-#ifdef __WXUNIVERSAL__
-    IMPLEMENT_ABSTRACT_CLASS(wxWindowGTK, wxWindowBase)
-#else // __WXGTK__
-    IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowBase)
-#endif // __WXUNIVERSAL__/__WXGTK__
+IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowBase)
 
-void wxWindowGTK::Init()
+void wxWindow::Init()
 {
     // common init
     InitBase();
@@ -2343,7 +2145,6 @@ void wxWindowGTK::Init()
     // GTK specific
     m_widget = (GtkWidget *) NULL;
     m_wxwindow = (GtkWidget *) NULL;
-    m_focusWidget = (GtkWidget *) NULL;
 
     // position/size
     m_x = 0;
@@ -2358,7 +2159,7 @@ void wxWindowGTK::Init()
 
     m_noExpose = FALSE;
     m_nativeSizeEvent = FALSE;
-    
+
     m_hasScrolling = FALSE;
     m_isScrolling = FALSE;
 
@@ -2374,7 +2175,6 @@ void wxWindowGTK::Init()
 
     m_isStaticBox = FALSE;
     m_isRadioButton = FALSE;
-    m_isListBox = FALSE;
     m_isFrame = FALSE;
     m_acceptsFocus = FALSE;
 
@@ -2391,34 +2191,28 @@ void wxWindowGTK::Init()
 #endif
 }
 
-wxWindowGTK::wxWindowGTK()
+wxWindow::wxWindow()
 {
     Init();
 }
 
-wxWindowGTK::wxWindowGTK( wxWindow *parent,
-                          wxWindowID id,
-                          const wxPoint &pos,
-                          const wxSize &size,
-                          long style,
-                          const wxString &name  )
+wxWindow::wxWindow( wxWindow *parent, wxWindowID id,
+                    const wxPoint &pos, const wxSize &size,
+                    long style, const wxString &name  )
 {
     Init();
 
     Create( parent, id, pos, size, style, name );
 }
 
-bool wxWindowGTK::Create( wxWindow *parent,
-                          wxWindowID id,
-                          const wxPoint &pos,
-                          const wxSize &size,
-                          long style,
-                          const wxString &name  )
+bool wxWindow::Create( wxWindow *parent, wxWindowID id,
+                       const wxPoint &pos, const wxSize &size,
+                       long style, const wxString &name  )
 {
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, wxDefaultValidator, name ))
     {
-        wxFAIL_MSG( wxT("wxWindowGTK creation failed") );
+        wxFAIL_MSG( wxT("wxWindow creation failed") );
         return FALSE;
     }
 
@@ -2429,7 +2223,7 @@ bool wxWindowGTK::Create( wxWindow *parent,
 
     GtkScrolledWindow *scrolledWindow = GTK_SCROLLED_WINDOW(m_widget);
 
-    GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(m_widget) );
+    GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(m_widget)->klass );
     scroll_class->scrollbar_spacing = 0;
 
     gtk_scrolled_window_set_policy( scrolledWindow, GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
@@ -2441,7 +2235,6 @@ bool wxWindowGTK::Create( wxWindow *parent,
 
     gtk_container_add( GTK_CONTAINER(m_widget), m_wxwindow );
 
-#ifndef __WXUNIVERSAL__
 #if (GTK_MINOR_VERSION > 0)
     GtkPizza *pizza = GTK_PIZZA(m_wxwindow);
 
@@ -2477,7 +2270,6 @@ bool wxWindowGTK::Create( wxWindow *parent,
         gtk_viewport_set_shadow_type( viewport, GTK_SHADOW_NONE );
     }
 #endif // GTK_MINOR_VERSION
-#endif // __WXUNIVERSAL__
 
     GTK_WIDGET_SET_FLAGS( m_wxwindow, GTK_CAN_FOCUS );
     m_acceptsFocus = TRUE;
@@ -2533,8 +2325,6 @@ bool wxWindowGTK::Create( wxWindow *parent,
 
     if (m_parent)
         m_parent->DoAddChild( this );
-        
-    m_focusWidget = m_wxwindow;
 
     PostCreation();
 
@@ -2543,13 +2333,10 @@ bool wxWindowGTK::Create( wxWindow *parent,
     return TRUE;
 }
 
-wxWindowGTK::~wxWindowGTK()
+wxWindow::~wxWindow()
 {
     if (g_focusWindow == this)
         g_focusWindow = NULL;
-
-    if (g_activeFrame == this)
-        g_activeFrame = NULL;
 
     m_isBeingDeleted = TRUE;
     m_hasVMT = FALSE;
@@ -2592,7 +2379,7 @@ wxWindowGTK::~wxWindowGTK()
     }
 }
 
-bool wxWindowGTK::PreCreation( wxWindowGTK *parent, const wxPoint &pos,  const wxSize &size )
+bool wxWindow::PreCreation( wxWindow *parent, const wxPoint &pos,  const wxSize &size )
 {
     wxCHECK_MSG( !m_needParent || parent, FALSE, wxT("Need complete parent.") );
 
@@ -2624,15 +2411,15 @@ bool wxWindowGTK::PreCreation( wxWindowGTK *parent, const wxPoint &pos,  const w
     return TRUE;
 }
 
-void wxWindowGTK::PostCreation()
+void wxWindow::PostCreation()
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid window") );
-    
+
     if (m_wxwindow)
     {
         if (!m_noExpose)
         {
-            // these get reported to wxWindows -> wxPaintEvent
+            /* these get reported to wxWindows -> wxPaintEvent */
 
             gtk_pizza_set_external( GTK_PIZZA(m_wxwindow), TRUE );
 
@@ -2641,7 +2428,7 @@ void wxWindowGTK::PostCreation()
 
             gtk_signal_connect( GTK_OBJECT(m_wxwindow), "draw",
                 GTK_SIGNAL_FUNC(gtk_window_draw_callback), (gpointer)this );
-
+            
             if (HasFlag(wxNO_FULL_REPAINT_ON_RESIZE))
             {
                 gtk_signal_connect( GTK_OBJECT(m_wxwindow), "event",
@@ -2649,32 +2436,35 @@ void wxWindowGTK::PostCreation()
             }
         }
 
-        // these are called when the "sunken" or "raised" borders are drawn */
+#if (GTK_MINOR_VERSION > 0)
+        /* these are called when the "sunken" or "raised" borders are drawn */
         gtk_signal_connect( GTK_OBJECT(m_widget), "expose_event",
           GTK_SIGNAL_FUNC(gtk_window_own_expose_callback), (gpointer)this );
 
         gtk_signal_connect( GTK_OBJECT(m_widget), "draw",
           GTK_SIGNAL_FUNC(gtk_window_own_draw_callback), (gpointer)this );
+#endif
     }
 
-    // focus handling
+    if (m_wxwindow && m_needParent)
+    {
+        gtk_signal_connect( GTK_OBJECT(m_wxwindow), "focus_in_event",
+            GTK_SIGNAL_FUNC(gtk_window_focus_in_callback), (gpointer)this );
 
-    if (m_focusWidget == NULL)
-        m_focusWidget = m_widget;
+        gtk_signal_connect( GTK_OBJECT(m_wxwindow), "focus_out_event",
+            GTK_SIGNAL_FUNC(gtk_window_focus_out_callback), (gpointer)this );
+    }
+    else
+    {
+        // For dialogs and frames, we are interested mainly in
+        // m_widget's focus.
 
-#if 0
-    if (GetClassInfo() && GetClassInfo()->GetClassName())
-        wxPrintf( GetClassInfo()->GetClassName() );
-    wxPrintf( ".\n" );
-#endif
+        gtk_signal_connect( GTK_OBJECT(m_widget), "focus_in_event",
+            GTK_SIGNAL_FUNC(gtk_window_focus_in_callback), (gpointer)this );
 
-    gtk_signal_connect( GTK_OBJECT(m_focusWidget), "focus_in_event",
-        GTK_SIGNAL_FUNC(gtk_window_focus_in_callback), (gpointer)this );
-
-    gtk_signal_connect( GTK_OBJECT(m_focusWidget), "focus_out_event",
-         GTK_SIGNAL_FUNC(gtk_window_focus_out_callback), (gpointer)this );
-
-    // connect to the various key and mouse handlers
+        gtk_signal_connect( GTK_OBJECT(m_widget), "focus_out_event",
+            GTK_SIGNAL_FUNC(gtk_window_focus_out_callback), (gpointer)this );
+    }
 
     GtkWidget *connect_widget = GetConnectWidget();
 
@@ -2687,34 +2477,23 @@ void wxWindowGTK::PostCreation()
 
     if (m_wxwindow)
     {
-        // Catch native resize events
+        /* Catch native resize events. */
         gtk_signal_connect( GTK_OBJECT(m_wxwindow), "size_allocate",
                             GTK_SIGNAL_FUNC(gtk_window_size_callback), (gpointer)this );
 
-        // Initialize XIM support
+        /* Initialize XIM support. */
         gtk_signal_connect( GTK_OBJECT(m_wxwindow), "realize",
                             GTK_SIGNAL_FUNC(gtk_wxwindow_realized_callback), (gpointer) this );
 
-        // And resize XIM window
+        /* And resize XIM window. */
         gtk_signal_connect( GTK_OBJECT(m_wxwindow), "size_allocate",
                             GTK_SIGNAL_FUNC(gtk_wxwindow_size_callback), (gpointer)this );
-    }
-
-    if (!GTK_IS_COMBO(m_widget))
-    {
-        // This is needed if we want to add our windows into native
-        // GTK control, such as the toolbar. With this callback, the
-        // toolbar gets to know the correct size (the one set by the
-        // programmer). Sadly, it misbehaves for wxComboBox. FIXME
-        // when moving to GTK 2.0.
-        gtk_signal_connect( GTK_OBJECT(m_widget), "size_request",
-                            GTK_SIGNAL_FUNC(gtk_window_size_request_callback), (gpointer) this );
     }
 
     m_hasVMT = TRUE;
 }
 
-void wxWindowGTK::ConnectWidget( GtkWidget *widget )
+void wxWindow::ConnectWidget( GtkWidget *widget )
 {
     gtk_signal_connect( GTK_OBJECT(widget), "key_press_event",
       GTK_SIGNAL_FUNC(gtk_window_key_press_callback), (gpointer)this );
@@ -2738,7 +2517,7 @@ void wxWindowGTK::ConnectWidget( GtkWidget *widget )
       GTK_SIGNAL_FUNC(gtk_window_leave_callback), (gpointer)this );
 }
 
-bool wxWindowGTK::Destroy()
+bool wxWindow::Destroy()
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid window") );
 
@@ -2747,30 +2526,18 @@ bool wxWindowGTK::Destroy()
     return wxWindowBase::Destroy();
 }
 
-void wxWindowGTK::DoMoveWindow(int x, int y, int width, int height)
+void wxWindow::DoMoveWindow(int x, int y, int width, int height)
 {
     gtk_pizza_set_size( GTK_PIZZA(m_parent->m_wxwindow), m_widget, x, y, width, height );
 }
 
-void wxWindowGTK::DoSetSize( int x, int y, int width, int height, int sizeFlags )
+void wxWindow::DoSetSize( int x, int y, int width, int height, int sizeFlags )
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid window") );
-    wxASSERT_MSG( (m_parent != NULL), wxT("wxWindowGTK::SetSize requires parent.\n") );
-
-/*
-    printf( "DoSetSize: name %s, x,y,w,h: %d,%d,%d,%d \n", GetName().c_str(), x,y,width,height );
-*/
+    wxASSERT_MSG( (m_parent != NULL), wxT("wxWindow::SetSize requires parent.\n") );
 
     if (m_resizing) return; /* I don't like recursions */
     m_resizing = TRUE;
-
-    int currentX, currentY;
-    GetPosition(&currentX, &currentY);
-    if (x == -1)
-        x = currentX;
-    if (y == -1)
-        y = currentY;
-    AdjustForParentClientOrigin(x, y, sizeFlags);
 
     if (m_parent->m_wxwindow == NULL) /* i.e. wxNotebook */
     {
@@ -2858,7 +2625,7 @@ void wxWindowGTK::DoSetSize( int x, int y, int width, int height, int sizeFlags 
     m_resizing = FALSE;
 }
 
-void wxWindowGTK::OnInternalIdle()
+void wxWindow::OnInternalIdle()
 {
     if ( g_sendActivateEvent != -1 )
     {
@@ -2867,20 +2634,10 @@ void wxWindowGTK::OnInternalIdle()
         // do it only once
         g_sendActivateEvent = -1;
 
-        wxTheApp->SetActive(activate, (wxWindow *)g_focusWindowLast);
-    }
+        wxActivateEvent event(wxEVT_ACTIVATE_APP, activate, GetId());
+        event.SetEventObject(this);
 
-    if ( g_activeFrameLostFocus )
-    {
-        if ( g_activeFrame )
-        {
-            wxLogTrace(wxT("activate"), wxT("Deactivating frame %p (from idle)"), g_activeFrame);
-            wxActivateEvent event(wxEVT_ACTIVATE, FALSE, g_activeFrame->GetId());
-            event.SetEventObject(g_activeFrame);
-            g_activeFrame->GetEventHandler()->ProcessEvent(event);
-            g_activeFrame = NULL;
-        }
-        g_activeFrameLostFocus = FALSE;
+        (void)GetEventHandler()->ProcessEvent(event);
     }
 
     wxCursor cursor = m_cursor;
@@ -2920,7 +2677,7 @@ void wxWindowGTK::OnInternalIdle()
     UpdateWindowUI();
 }
 
-void wxWindowGTK::DoGetSize( int *width, int *height ) const
+void wxWindow::DoGetSize( int *width, int *height ) const
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -2928,7 +2685,7 @@ void wxWindowGTK::DoGetSize( int *width, int *height ) const
     if (height) (*height) = m_height;
 }
 
-void wxWindowGTK::DoSetClientSize( int width, int height )
+void wxWindow::DoSetClientSize( int width, int height )
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -2941,7 +2698,6 @@ void wxWindowGTK::DoSetClientSize( int width, int height )
         int dw = 0;
         int dh = 0;
 
-#ifndef __WXUNIVERSAL__
         if (HasFlag(wxRAISED_BORDER) || HasFlag(wxSUNKEN_BORDER))
         {
             /* when using GTK 1.2 we set the shadow border size to 2 */
@@ -2954,7 +2710,6 @@ void wxWindowGTK::DoSetClientSize( int width, int height )
             dw += 1 * 2;
             dh += 1 * 2;
         }
-#endif // __WXUNIVERSAL__
 
         if (m_hasScrolling)
         {
@@ -2963,16 +2718,16 @@ void wxWindowGTK::DoSetClientSize( int width, int height )
             GtkRequisition vscroll_req;
             vscroll_req.width = 2;
             vscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->vscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->vscrollbar)->klass )->size_request )
                 (scroll_window->vscrollbar, &vscroll_req );
 
             GtkRequisition hscroll_req;
             hscroll_req.width = 2;
             hscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->hscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->hscrollbar)->klass )->size_request )
                 (scroll_window->hscrollbar, &hscroll_req );
 
-            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(m_widget) );
+            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(m_widget)->klass );
 
             if (scroll_window->vscrollbar_visible)
             {
@@ -2991,7 +2746,7 @@ void wxWindowGTK::DoSetClientSize( int width, int height )
     }
 }
 
-void wxWindowGTK::DoGetClientSize( int *width, int *height ) const
+void wxWindow::DoGetClientSize( int *width, int *height ) const
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -3005,7 +2760,6 @@ void wxWindowGTK::DoGetClientSize( int *width, int *height ) const
         int dw = 0;
         int dh = 0;
 
-#ifndef __WXUNIVERSAL__
         if (HasFlag(wxRAISED_BORDER) || HasFlag(wxSUNKEN_BORDER))
         {
             /* when using GTK 1.2 we set the shadow border size to 2 */
@@ -3018,7 +2772,6 @@ void wxWindowGTK::DoGetClientSize( int *width, int *height ) const
             dw += 1 * 2;
             dh += 1 * 2;
         }
-#endif // __WXUNIVERSAL__
 
         if (m_hasScrolling)
         {
@@ -3027,16 +2780,16 @@ void wxWindowGTK::DoGetClientSize( int *width, int *height ) const
             GtkRequisition vscroll_req;
             vscroll_req.width = 2;
             vscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->vscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->vscrollbar)->klass )->size_request )
                 (scroll_window->vscrollbar, &vscroll_req );
 
             GtkRequisition hscroll_req;
             hscroll_req.width = 2;
             hscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->hscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->hscrollbar)->klass )->size_request )
                 (scroll_window->hscrollbar, &hscroll_req );
 
-            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(m_widget) );
+            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(m_widget)->klass );
 
             if (scroll_window->vscrollbar_visible)
             {
@@ -3054,16 +2807,9 @@ void wxWindowGTK::DoGetClientSize( int *width, int *height ) const
         if (width) (*width) = m_width - dw;
         if (height) (*height) = m_height - dh;
     }
-
-/*
-    printf( "GetClientSize, name %s ", GetName().c_str() );
-    if (width) printf( " width = %d", (*width) );
-    if (height) printf( " height = %d", (*height) );
-    printf( "\n" );
-*/
 }
 
-void wxWindowGTK::DoGetPosition( int *x, int *y ) const
+void wxWindow::DoGetPosition( int *x, int *y ) const
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -3075,12 +2821,12 @@ void wxWindowGTK::DoGetPosition( int *x, int *y ) const
         dx = pizza->xoffset;
         dy = pizza->yoffset;
     }
-    
+
     if (x) (*x) = m_x - dx;
     if (y) (*y) = m_y - dy;
 }
 
-void wxWindowGTK::DoClientToScreen( int *x, int *y ) const
+void wxWindow::DoClientToScreen( int *x, int *y ) const
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -3109,7 +2855,7 @@ void wxWindowGTK::DoClientToScreen( int *x, int *y ) const
     if (y) *y += org_y;
 }
 
-void wxWindowGTK::DoScreenToClient( int *x, int *y ) const
+void wxWindow::DoScreenToClient( int *x, int *y ) const
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -3138,7 +2884,7 @@ void wxWindowGTK::DoScreenToClient( int *x, int *y ) const
     if (y) *y -= org_y;
 }
 
-bool wxWindowGTK::Show( bool show )
+bool wxWindow::Show( bool show )
 {
     wxCHECK_MSG( (m_widget != NULL), FALSE, wxT("invalid window") );
 
@@ -3156,24 +2902,7 @@ bool wxWindowGTK::Show( bool show )
     return TRUE;
 }
 
-static void wxWindowNotifyEnable(wxWindowGTK* win, bool enable)
-{
-    win->OnParentEnable(enable);
-
-    // Recurse, so that children have the opportunity to Do The Right Thing
-    // and reset colours that have been messed up by a parent's (really ancestor's)
-    // Enable call
-    for ( wxWindowList::Node *node = win->GetChildren().GetFirst();
-          node;
-          node = node->GetNext() )
-    {
-        wxWindow *child = node->GetData();
-        if (!child->IsKindOf(CLASSINFO(wxDialog)) && !child->IsKindOf(CLASSINFO(wxFrame)))
-            wxWindowNotifyEnable(child, enable);
-    }
-}
-
-bool wxWindowGTK::Enable( bool enable )
+bool wxWindow::Enable( bool enable )
 {
     wxCHECK_MSG( (m_widget != NULL), FALSE, wxT("invalid window") );
 
@@ -3187,12 +2916,10 @@ bool wxWindowGTK::Enable( bool enable )
     if ( m_wxwindow )
         gtk_widget_set_sensitive( m_wxwindow, enable );
 
-    wxWindowNotifyEnable(this, enable);
-
     return TRUE;
 }
 
-int wxWindowGTK::GetCharHeight() const
+int wxWindow::GetCharHeight() const
 {
     wxCHECK_MSG( (m_widget != NULL), 12, wxT("invalid window") );
 
@@ -3203,7 +2930,7 @@ int wxWindowGTK::GetCharHeight() const
     return font->ascent + font->descent;
 }
 
-int wxWindowGTK::GetCharWidth() const
+int wxWindow::GetCharWidth() const
 {
     wxCHECK_MSG( (m_widget != NULL), 8, wxT("invalid window") );
 
@@ -3214,7 +2941,7 @@ int wxWindowGTK::GetCharWidth() const
     return gdk_string_width( font, "H" );
 }
 
-void wxWindowGTK::GetTextExtent( const wxString& string,
+void wxWindow::GetTextExtent( const wxString& string,
                               int *x,
                               int *y,
                               int *descent,
@@ -3233,27 +2960,18 @@ void wxWindowGTK::GetTextExtent( const wxString& string,
     if (externalLeading) (*externalLeading) = 0;  // ??
 }
 
-void wxWindowGTK::SetFocus()
+void wxWindow::SetFocus()
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
-
-#if 0
-    wxPrintf( "SetFocus from " );
-    if (GetClassInfo() && GetClassInfo()->GetClassName())
-        wxPrintf( GetClassInfo()->GetClassName() );
-    wxPrintf( ".\n" );
-#endif
 
     if (m_wxwindow)
     {
         if (!GTK_WIDGET_HAS_FOCUS (m_wxwindow))
-        {
-            // see comment in gtk_window_focus_out_callback()
-            gs_widgetLastFocus = m_wxwindow;
             gtk_widget_grab_focus (m_wxwindow);
-        }
+        return;
     }
-    else if (m_widget)
+
+    if (m_widget)
     {
         if (GTK_WIDGET_CAN_FOCUS(m_widget) && !GTK_WIDGET_HAS_FOCUS (m_widget) )
         {
@@ -3268,27 +2986,19 @@ void wxWindowGTK::SetFocus()
            // ?
         }
     }
-    
-#if 0
-    wxPrintf( "SetFocus finished in " );
-    if (GetClassInfo() && GetClassInfo()->GetClassName())
-        wxPrintf( GetClassInfo()->GetClassName() );
-    wxPrintf( ".\n" );
-#endif
-
 }
 
-bool wxWindowGTK::AcceptsFocus() const
+bool wxWindow::AcceptsFocus() const
 {
     return m_acceptsFocus && wxWindowBase::AcceptsFocus();
 }
 
-bool wxWindowGTK::Reparent( wxWindowBase *newParentBase )
+bool wxWindow::Reparent( wxWindowBase *newParentBase )
 {
     wxCHECK_MSG( (m_widget != NULL), FALSE, wxT("invalid window") );
 
-    wxWindowGTK *oldParent = m_parent,
-             *newParent = (wxWindowGTK *)newParentBase;
+    wxWindow *oldParent = m_parent,
+             *newParent = (wxWindow *)newParentBase;
 
     wxASSERT( GTK_IS_WIDGET(m_widget) );
 
@@ -3319,7 +3029,7 @@ bool wxWindowGTK::Reparent( wxWindowBase *newParentBase )
     return TRUE;
 }
 
-void wxWindowGTK::DoAddChild(wxWindowGTK *child)
+void wxWindow::DoAddChild(wxWindow *child)
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid window") );
 
@@ -3334,7 +3044,7 @@ void wxWindowGTK::DoAddChild(wxWindowGTK *child)
     (*m_insertCallback)(this, child);
 }
 
-void wxWindowGTK::Raise()
+void wxWindow::Raise()
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -3343,7 +3053,7 @@ void wxWindowGTK::Raise()
     gdk_window_raise( m_widget->window );
 }
 
-void wxWindowGTK::Lower()
+void wxWindow::Lower()
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -3352,7 +3062,7 @@ void wxWindowGTK::Lower()
     gdk_window_lower( m_widget->window );
 }
 
-bool wxWindowGTK::SetCursor( const wxCursor &cursor )
+bool wxWindow::SetCursor( const wxCursor &cursor )
 {
     wxCHECK_MSG( (m_widget != NULL), FALSE, wxT("invalid window") );
 
@@ -3368,7 +3078,7 @@ bool wxWindowGTK::SetCursor( const wxCursor &cursor )
        return wxWindowBase::SetCursor( cursor );
 }
 
-void wxWindowGTK::WarpPointer( int x, int y )
+void wxWindow::WarpPointer( int x, int y )
 {
     wxCHECK_RET( (m_widget != NULL), wxT("invalid window") );
 
@@ -3385,16 +3095,10 @@ void wxWindowGTK::WarpPointer( int x, int y )
         gdk_window_warp_pointer( window, x, y );
 }
 
-void wxWindowGTK::Refresh( bool eraseBackground, const wxRect *rect )
+void wxWindow::Refresh( bool eraseBackground, const wxRect *rect )
 {
     if (!m_widget) return;
     if (!m_widget->window) return;
-
-    // temporarily hide the caret to avoid nasty interactions between caret
-    // drawing and the window contents redraw
-#if 0 // def wxUSE_CARET -- doesn't seem to help :-(
-    wxCaretSuspend cs((wxWindow *)this);
-#endif // wxUSE_CARET
 
     if (eraseBackground && m_wxwindow && m_wxwindow->window)
     {
@@ -3433,7 +3137,8 @@ void wxWindowGTK::Refresh( bool eraseBackground, const wxRect *rect )
             gdk_event.area.y = 0;
             gdk_event.area.width = m_wxwindow->allocation.width;
             gdk_event.area.height = m_wxwindow->allocation.height;
-            gtk_window_expose_callback( m_wxwindow, &gdk_event, (wxWindow *)this );
+            gtk_window_expose_callback( m_wxwindow, &gdk_event, this );
+
         }
         else
         {
@@ -3468,7 +3173,7 @@ void wxWindowGTK::Refresh( bool eraseBackground, const wxRect *rect )
             gdk_event.area.y = rect->y;
             gdk_event.area.width = rect->width;
             gdk_event.area.height = rect->height;
-            gtk_window_expose_callback( m_wxwindow, &gdk_event, (wxWindow *)this );
+            gtk_window_expose_callback( m_wxwindow, &gdk_event, this );
         }
         else
         {
@@ -3482,7 +3187,7 @@ void wxWindowGTK::Refresh( bool eraseBackground, const wxRect *rect )
     }
 }
 
-void wxWindowGTK::Clear()
+void wxWindow::Clear()
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
 
@@ -3495,21 +3200,21 @@ void wxWindowGTK::Clear()
 }
 
 #if wxUSE_TOOLTIPS
-void wxWindowGTK::DoSetToolTip( wxToolTip *tip )
+void wxWindow::DoSetToolTip( wxToolTip *tip )
 {
     wxWindowBase::DoSetToolTip(tip);
 
     if (m_tooltip)
-        m_tooltip->Apply( (wxWindow *)this );
+        m_tooltip->Apply( this );
 }
 
-void wxWindowGTK::ApplyToolTip( GtkTooltips *tips, const wxChar *tip )
+void wxWindow::ApplyToolTip( GtkTooltips *tips, const wxChar *tip )
 {
     gtk_tooltips_set_tip( tips, GetConnectWidget(), wxConvCurrent->cWX2MB(tip), (gchar*) NULL );
 }
 #endif // wxUSE_TOOLTIPS
 
-bool wxWindowGTK::SetBackgroundColour( const wxColour &colour )
+bool wxWindow::SetBackgroundColour( const wxColour &colour )
 {
     wxCHECK_MSG( m_widget != NULL, FALSE, wxT("invalid window") );
 
@@ -3550,7 +3255,7 @@ bool wxWindowGTK::SetBackgroundColour( const wxColour &colour )
     return TRUE;
 }
 
-bool wxWindowGTK::SetForegroundColour( const wxColour &colour )
+bool wxWindow::SetForegroundColour( const wxColour &colour )
 {
     wxCHECK_MSG( m_widget != NULL, FALSE, wxT("invalid window") );
 
@@ -3580,17 +3285,12 @@ bool wxWindowGTK::SetForegroundColour( const wxColour &colour )
     return TRUE;
 }
 
-GtkStyle *wxWindowGTK::GetWidgetStyle()
+GtkStyle *wxWindow::GetWidgetStyle()
 {
     if (m_widgetStyle)
     {
         GtkStyle *remake = gtk_style_copy( m_widgetStyle );
-#ifdef __WXGTK20__
-        /* FIXME: is this necessary? */
-        _G_TYPE_IGC(remake, GtkObjectClass) = _G_TYPE_IGC(m_widgetStyle, GtkObjectClass);
-#else
         remake->klass = m_widgetStyle->klass;
-#endif
 
         gtk_style_unref( m_widgetStyle );
         m_widgetStyle = remake;
@@ -3603,18 +3303,13 @@ GtkStyle *wxWindowGTK::GetWidgetStyle()
             def = gtk_widget_get_default_style();
 
         m_widgetStyle = gtk_style_copy( def );
-#ifdef __WXGTK20__
-        /* FIXME: is this necessary? */
-        _G_TYPE_IGC(m_widgetStyle, GtkObjectClass) = _G_TYPE_IGC(def, GtkObjectClass);
-#else
         m_widgetStyle->klass = def->klass;
-#endif
     }
 
     return m_widgetStyle;
 }
 
-void wxWindowGTK::SetWidgetStyle()
+void wxWindow::SetWidgetStyle()
 {
 #if DISABLE_STYLE_IF_BROKEN_THEM
     if (m_widget->style->engine_data)
@@ -3703,7 +3398,7 @@ void wxWindowGTK::SetWidgetStyle()
     }
 }
 
-void wxWindowGTK::ApplyWidgetStyle()
+void wxWindow::ApplyWidgetStyle()
 {
 }
 
@@ -3711,14 +3406,12 @@ void wxWindowGTK::ApplyWidgetStyle()
 // Pop-up menu stuff
 //-----------------------------------------------------------------------------
 
-#if wxUSE_MENUS_NATIVE
-
 static void gtk_pop_hide_callback( GtkWidget *WXUNUSED(widget), bool* is_waiting  )
 {
     *is_waiting = FALSE;
 }
 
-static void SetInvokingWindow( wxMenu *menu, wxWindowGTK *win )
+static void SetInvokingWindow( wxMenu *menu, wxWindow *win )
 {
     menu->SetInvokingWindow( win );
     wxMenuItemList::Node *node = menu->GetMenuItems().GetFirst();
@@ -3734,32 +3427,19 @@ static void SetInvokingWindow( wxMenu *menu, wxWindowGTK *win )
     }
 }
 
-// used to pass the coordinates from wxWindowGTK::DoPopupMenu() to
-// wxPopupMenuPositionCallback()
-//
-// should be safe even in the MT case as the user can hardly popup 2 menus
-// simultaneously, can he?
 static gint gs_pop_x = 0;
 static gint gs_pop_y = 0;
 
-static void wxPopupMenuPositionCallback( GtkMenu *menu,
-                                         gint *x, gint *y,
-                                         gpointer WXUNUSED(user_data) )
+static void pop_pos_callback( GtkMenu * WXUNUSED(menu),
+                              gint *x, gint *y,
+                              wxWindow *win )
 {
-    // ensure that the menu appears entirely on screen
-    GtkRequisition req;
-    gtk_widget_get_child_requisition(GTK_WIDGET(menu), &req);
-
-    wxSize sizeScreen = wxGetDisplaySize();
-
-    gint xmax = sizeScreen.x - req.width,
-         ymax = sizeScreen.y - req.height;
-
-    *x = gs_pop_x < xmax ? gs_pop_x : xmax;
-    *y = gs_pop_y < ymax ? gs_pop_y : ymax;
+    win->ClientToScreen( &gs_pop_x, &gs_pop_y );
+    *x = gs_pop_x;
+    *y = gs_pop_y;
 }
 
-bool wxWindowGTK::DoPopupMenu( wxMenu *menu, int x, int y )
+bool wxWindow::DoPopupMenu( wxMenu *menu, int x, int y )
 {
     wxCHECK_MSG( m_widget != NULL, FALSE, wxT("invalid window") );
 
@@ -3771,7 +3451,6 @@ bool wxWindowGTK::DoPopupMenu( wxMenu *menu, int x, int y )
 
     gs_pop_x = x;
     gs_pop_y = y;
-    ClientToScreen( &gs_pop_x, &gs_pop_y );
 
     bool is_waiting = TRUE;
 
@@ -3780,12 +3459,12 @@ bool wxWindowGTK::DoPopupMenu( wxMenu *menu, int x, int y )
 
     gtk_menu_popup(
                   GTK_MENU(menu->m_menu),
-                  (GtkWidget *) NULL,           // parent menu shell
-                  (GtkWidget *) NULL,           // parent menu item
-                  wxPopupMenuPositionCallback,  // function to position it
-                  NULL,                         // client data
-                  0,                            // button used to activate it
-                  gs_timeLastClick              // the time of activation
+                  (GtkWidget *) NULL,          // parent menu shell
+                  (GtkWidget *) NULL,          // parent menu item
+                  (GtkMenuPositionFunc) pop_pos_callback,
+                  (gpointer) this,             // client data
+                  0,                           // button used to activate it
+                  gs_timeLastClick             // the time of activation
                 );
 
     while (is_waiting)
@@ -3797,11 +3476,9 @@ bool wxWindowGTK::DoPopupMenu( wxMenu *menu, int x, int y )
     return TRUE;
 }
 
-#endif // wxUSE_MENUS_NATIVE
-
 #if wxUSE_DRAG_AND_DROP
 
-void wxWindowGTK::SetDropTarget( wxDropTarget *dropTarget )
+void wxWindow::SetDropTarget( wxDropTarget *dropTarget )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
 
@@ -3817,7 +3494,7 @@ void wxWindowGTK::SetDropTarget( wxDropTarget *dropTarget )
 
 #endif // wxUSE_DRAG_AND_DROP
 
-GtkWidget* wxWindowGTK::GetConnectWidget()
+GtkWidget* wxWindow::GetConnectWidget()
 {
     GtkWidget *connect_widget = m_widget;
     if (m_wxwindow) connect_widget = m_wxwindow;
@@ -3825,7 +3502,7 @@ GtkWidget* wxWindowGTK::GetConnectWidget()
     return connect_widget;
 }
 
-bool wxWindowGTK::IsOwnGtkWindow( GdkWindow *window )
+bool wxWindow::IsOwnGtkWindow( GdkWindow *window )
 {
     if (m_wxwindow)
         return (window == GTK_PIZZA(m_wxwindow)->bin_window);
@@ -3833,7 +3510,7 @@ bool wxWindowGTK::IsOwnGtkWindow( GdkWindow *window )
     return (window == m_widget->window);
 }
 
-bool wxWindowGTK::SetFont( const wxFont &font )
+bool wxWindow::SetFont( const wxFont &font )
 {
     wxCHECK_MSG( m_widget != NULL, FALSE, wxT("invalid window") );
 
@@ -3857,9 +3534,11 @@ bool wxWindowGTK::SetFont( const wxFont &font )
     return TRUE;
 }
 
-void wxWindowGTK::CaptureMouse()
+void wxWindow::CaptureMouse()
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
+
+    wxCHECK_RET( g_captureWindow == NULL, wxT("CaptureMouse called twice") );
 
     GdkWindow *window = (GdkWindow*) NULL;
     if (m_wxwindow)
@@ -3867,7 +3546,7 @@ void wxWindowGTK::CaptureMouse()
     else
         window = GetConnectWidget()->window;
 
-    wxCHECK_RET( window, _T("CaptureMouse() failed") );
+    if (!window) return;
 
     wxCursor* cursor = & m_cursor;
     if (!cursor->Ok())
@@ -3883,14 +3562,13 @@ void wxWindowGTK::CaptureMouse()
                       cursor->GetCursor(),
                       (guint32)GDK_CURRENT_TIME );
     g_captureWindow = this;
-    g_captureWindowHasMouse = TRUE;
 }
 
-void wxWindowGTK::ReleaseMouse()
+void wxWindow::ReleaseMouse()
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
 
-    wxCHECK_RET( g_captureWindow, wxT("can't release mouse - not captured") );
+    wxCHECK_RET( g_captureWindow, wxT("ReleaseMouse called twice") );
 
     GdkWindow *window = (GdkWindow*) NULL;
     if (m_wxwindow)
@@ -3902,21 +3580,15 @@ void wxWindowGTK::ReleaseMouse()
         return;
 
     gdk_pointer_ungrab ( (guint32)GDK_CURRENT_TIME );
-    g_captureWindow = (wxWindowGTK*) NULL;
+    g_captureWindow = (wxWindow*) NULL;
 }
 
-/* static */
-wxWindow *wxWindowBase::GetCapture()
-{
-    return (wxWindow *)g_captureWindow;
-}
-
-bool wxWindowGTK::IsRetained() const
+bool wxWindow::IsRetained() const
 {
     return FALSE;
 }
 
-void wxWindowGTK::SetScrollbar( int orient, int pos, int thumbVisible,
+void wxWindow::SetScrollbar( int orient, int pos, int thumbVisible,
       int range, bool refresh )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
@@ -3980,7 +3652,7 @@ void wxWindowGTK::SetScrollbar( int orient, int pos, int thumbVisible,
         gtk_signal_emit_by_name( GTK_OBJECT(m_vAdjust), "changed" );
 }
 
-void wxWindowGTK::SetScrollPos( int orient, int pos, bool WXUNUSED(refresh) )
+void wxWindow::SetScrollPos( int orient, int pos, bool WXUNUSED(refresh) )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
 
@@ -4032,7 +3704,7 @@ void wxWindowGTK::SetScrollPos( int orient, int pos, bool WXUNUSED(refresh) )
     }
 }
 
-int wxWindowGTK::GetScrollThumb( int orient ) const
+int wxWindow::GetScrollThumb( int orient ) const
 {
     wxCHECK_MSG( m_widget != NULL, 0, wxT("invalid window") );
 
@@ -4044,7 +3716,7 @@ int wxWindowGTK::GetScrollThumb( int orient ) const
         return (int)(m_vAdjust->page_size+0.5);
 }
 
-int wxWindowGTK::GetScrollPos( int orient ) const
+int wxWindow::GetScrollPos( int orient ) const
 {
     wxCHECK_MSG( m_widget != NULL, 0, wxT("invalid window") );
 
@@ -4056,7 +3728,7 @@ int wxWindowGTK::GetScrollPos( int orient ) const
         return (int)(m_vAdjust->value+0.5);
 }
 
-int wxWindowGTK::GetScrollRange( int orient ) const
+int wxWindow::GetScrollRange( int orient ) const
 {
     wxCHECK_MSG( m_widget != NULL, 0, wxT("invalid window") );
 
@@ -4068,7 +3740,7 @@ int wxWindowGTK::GetScrollRange( int orient ) const
         return (int)(m_vAdjust->upper+0.5);
 }
 
-void wxWindowGTK::ScrollWindow( int dx, int dy, const wxRect* WXUNUSED(rect) )
+void wxWindow::ScrollWindow( int dx, int dy, const wxRect* WXUNUSED(rect) )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid window") );
 
@@ -4132,45 +3804,3 @@ void wxWindowGTK::ScrollWindow( int dx, int dy, const wxRect* WXUNUSED(rect) )
     }
 */
 }
-
-// Find the wxWindow at the current mouse position, also returning the mouse
-// position.
-wxWindow* wxFindWindowAtPointer(wxPoint& pt)
-{
-    pt = wxGetMousePosition();
-    wxWindow* found = wxFindWindowAtPoint(pt);
-    return found;
-}
-
-// Get the current mouse position.
-wxPoint wxGetMousePosition()
-{
-  /* This crashes when used within wxHelpContext,
-     so we have to use the X-specific implementation below.
-    gint x, y;
-    GdkModifierType *mask;
-    (void) gdk_window_get_pointer(NULL, &x, &y, mask);
-
-    return wxPoint(x, y);
-  */
-
-    int x, y;
-    GdkWindow* windowAtPtr = gdk_window_at_pointer(& x, & y);
-    if (!windowAtPtr)
-      return wxPoint(-999, -999);
-
-    Display *display = GDK_WINDOW_XDISPLAY(windowAtPtr);
-    Window rootWindow = RootWindowOfScreen (DefaultScreenOfDisplay(display));
-    Window rootReturn, childReturn;
-    int rootX, rootY, winX, winY;
-    unsigned int maskReturn;
-
-    XQueryPointer (display,
-           rootWindow,
-           &rootReturn,
-                   &childReturn,
-                   &rootX, &rootY, &winX, &winY, &maskReturn);
-    return wxPoint(rootX, rootY);
-
-}
-

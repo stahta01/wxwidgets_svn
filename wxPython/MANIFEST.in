@@ -4,10 +4,6 @@ include my_distutils.py
 include licence/*.txt
 include b
 include b.bat
-include MANIFEST.in
-
-include SWIG/*
-exclude SWIG/CVS/*
 
 include demo/*.py
 include demo/bitmaps/*.bmp
@@ -15,12 +11,7 @@ include demo/bitmaps/*.ico
 include demo/bitmaps/*.gif
 include demo/bitmaps/*.png
 include demo/bitmaps/*.jpg
-include demo/bmp_source/*.bmp
-include demo/bmp_source/*.ico
-include demo/bmp_source/*.gif
-include demo/bmp_source/*.png
-include demo/bmp_source/*.jpg
-include demo/*.txt
+include demo/README.txt
 include demo/*.xml
 include demo/data/*.png
 include demo/data/*.htm
@@ -30,44 +21,15 @@ include demo/data/*.txt
 include demo/data/*.i
 include demo/data/*.h
 include demo/data/*.py
-include demo/data/*.wav
-include demo/data/*.wdr
-include demo/data/*.xrc
-include demo/dllwidget/Makefile
-include demo/dllwidget/makefile.*
-include demo/dllwidget/*.cpp
-include demo/dllwidget/*.py
-
-include samples/doodle/*.txt
-include samples/doodle/*.py
-include samples/doodle/*.iss
-include samples/doodle/sample.ddl
-include samples/stxview/*.txt
-include samples/stxview/*.py
-include samples/stxview/*.stx
-include samples/stxview/StructuredText/*.py
-include samples/stxview/StructuredText/*.txt
-include samples/wxProject/*.txt
-include samples/wxProject/*.py
-include samples/StyleEditor/*.py
-include samples/StyleEditor/*.txt
-include samples/StyleEditor/*.cfg
-include samples/pySketch/*.py
-include samples/pySketch/images/*.bmp
-include samples/frogedit/*.py
-
 
 include wxPython/lib/*.py
 include wxPython/lib/*.txt
 include wxPython/lib/editor/*.py
 include wxPython/lib/editor/*.txt
-include wxPython/lib/mixins/*.py
-include wxPython/lib/PyCrust/*.py
-include wxPython/lib/PyCrust/*.txt
-include wxPython/lib/PyCrust/*.ico
 
 exclude wxPython/*
 exclude tests
+exclude SWIG
 
 include src/*.i
 include src/*.py
@@ -76,7 +38,6 @@ include src/*.c
 include src/*.h
 include src/*.ico
 include src/*.rc
-include src/wxc.pyd.manifest
 
 include src/msw/*.cpp
 include src/msw/*.h
@@ -86,16 +47,10 @@ include src/gtk/*.cpp
 include src/gtk/*.h
 include src/gtk/*.py
 
-include src/mac/*.cpp
-include src/mac/*.h
-include src/mac/*.py
+# src/motif/*.cpp
+# src/motif/*.h
+# src/motif/*.py
 
-include tools/*.py
-include tools/XRCed/CHANGES
-include tools/XRCed/TODO
-include tools/XRCed/README
-include tools/XRCed/*.py
-include tools/XRCed/*.xrc
 
 include contrib/glcanvas/*.i
 include contrib/glcanvas/*.py
@@ -108,9 +63,6 @@ include contrib/glcanvas/msw/*.py
 include contrib/glcanvas/gtk/*.cpp
 include contrib/glcanvas/gtk/*.h
 include contrib/glcanvas/gtk/*.py
-include contrib/glcanvas/mac/*.cpp
-include contrib/glcanvas/mac/*.h
-include contrib/glcanvas/mac/*.py
 
 include contrib/ogl/*.txt
 include contrib/ogl/*.i
@@ -126,64 +78,17 @@ include contrib/stc/*.i
 include contrib/stc/*.py
 include contrib/stc/*.cpp
 include contrib/stc/*.c
-include contrib/stc/msw/*.h
-include contrib/stc/msw/*.cpp
-include contrib/stc/msw/*.py
-include contrib/stc/gtk/*.h
-include contrib/stc/gtk/*.cpp
-include contrib/stc/gtk/*.py
-include contrib/stc/mac/*.h
-include contrib/stc/mac/*.cpp
-include contrib/stc/mac/*.py
+include contrib/stc/*.h
+include contrib/stc/*.cpp
+include contrib/stc/*.py
 include contrib/stc/contrib/include/wx/stc/*.h
 include contrib/stc/contrib/src/stc/*.h
 include contrib/stc/contrib/src/stc/*.cpp
 include contrib/stc/contrib/src/stc/*.txt
 include contrib/stc/contrib/src/stc/*.py
-include contrib/stc/contrib/src/stc/stc.*.in
+include contrib/stc/contrib/src/stc/*.in
 include contrib/stc/contrib/src/stc/scintilla/include/*.h
 include contrib/stc/contrib/src/stc/scintilla/include/*.iface
 include contrib/stc/contrib/src/stc/scintilla/src/*.h
 include contrib/stc/contrib/src/stc/scintilla/src/*.cxx
-include contrib/stc/contrib/src/stc/scintilla/*.txt
-
-include contrib/xrc/*.txt
-include contrib/xrc/*.i
-include contrib/xrc/*.py
-include contrib/xrc/*.cpp
-include contrib/xrc/*.c
-include contrib/xrc/*.h
-include contrib/xrc/contrib/include/wx/xrc/*.h
-include contrib/xrc/contrib/src/xrc/*.cpp
-include contrib/xrc/contrib/src/xrc/*.txt
-include contrib/xrc/contrib/src/xrc/README.EXPAT
-include contrib/xrc/contrib/src/xrc/expat/*.txt
-include contrib/xrc/contrib/src/xrc/expat/xmlparse/*.c
-include contrib/xrc/contrib/src/xrc/expat/xmlparse/*.h
-include contrib/xrc/contrib/src/xrc/expat/xmltok/*.c
-include contrib/xrc/contrib/src/xrc/expat/xmltok/*.h
-
-include contrib/gizmos/*.txt
-include contrib/gizmos/*.i
-include contrib/gizmos/*.py
-include contrib/gizmos/*.cpp
-include contrib/gizmos/*.c
-include contrib/gizmos/*.h
-include contrib/gizmos/contrib/include/wx/gizmos/*.h
-include contrib/gizmos/contrib/src/gizmos/*.cpp
-include contrib/gizmos/contrib/src/gizmos/*.xpm
-include contrib/gizmos/contrib/src/gizmos/*.txt
-
-include contrib/dllwidget/*.txt
-include contrib/dllwidget/*.i
-include contrib/dllwidget/*.py
-include contrib/dllwidget/*.cpp
-include contrib/dllwidget/*.c
-include contrib/dllwidget/*.h
-
-include demo/dllwidget/*.h
-include demo/dllwidget/*.cpp
-include demo/dllwidget/*.py
-include demo/dllwidget/Makefile
-include demo/dllwidget/makefile.*
 

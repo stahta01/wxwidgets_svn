@@ -56,7 +56,6 @@ class ScintillaWX;
 //----------------------------------------------------------------------
 // Helper classes
 
-#if wxUSE_DRAG_AND_DROP
 class wxSTCDropTarget : public wxTextDropTarget {
 public:
     void SetScintilla(ScintillaWX* swx) {
@@ -71,7 +70,7 @@ public:
 private:
     ScintillaWX* swx;
 };
-#endif
+
 
 //----------------------------------------------------------------------
 
@@ -120,17 +119,14 @@ public:
     void DoButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
     void DoButtonUp(Point pt, unsigned int curTime, bool ctrl);
     void DoButtonMove(Point pt);
-    void DoMouseWheel(int rotation, int delta, int linesPerAction, int ctrlDown);
     void DoAddChar(char ch);
-    int  DoKeyDown(int key, bool shift, bool ctrl, bool alt, bool* consumed);
+    int  DoKeyDown(int key, bool shift, bool ctrl, bool alt);
     void DoTick() { Tick(); }
 
-#if wxUSE_DRAG_AND_DROP
     bool DoDropText(long x, long y, const wxString& data);
     wxDragResult DoDragEnter(wxCoord x, wxCoord y, wxDragResult def);
     wxDragResult DoDragOver(wxCoord x, wxCoord y, wxDragResult def);
     void DoDragLeave();
-#endif
 
     void DoCommand(int ID);
     void DoContextMenu(Point pt);
@@ -148,11 +144,8 @@ private:
     bool                capturedMouse;
     wxStyledTextCtrl*   stc;
 
-#if wxUSE_DRAG_AND_DROP
     wxSTCDropTarget*    dropTarget;
     wxDragResult        dragResult;
-#endif
-    int                 wheelRotation;
 };
 
 //----------------------------------------------------------------------

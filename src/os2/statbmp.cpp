@@ -172,11 +172,3 @@ void wxStaticBitmap::SetImage(
     ::WinInvalidateRect(GetHwndOf(GetParent()), &vRect, TRUE);
 }
 
-MRESULT wxStaticBitmap::OS2WindowProc(
-  WXUINT                            uMsg
-, WXWPARAM                          wParam
-, WXLPARAM                          lParam
-)
-{
-    return wxWindow::OS2WindowProc(uMsg, wParam, lParam);
-} // end of wxStaticBitmap::OS2WindowProc

@@ -1,15 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        tabpgwin.h
+// Name:        No names yet.
 // Purpose:     Contrib. demo
 // Author:      Aleksandras Gluchovas
-// Modified by: 19990908 : mj
+// Modified by: 19990908 : mj10777@gmx.net
 //              19990909 :
 //              - rename to tabpgwin
 //              - restruction of Variable declaration
 //              - to prevent Warnings under MingGW32
-// Modified by: 19990909 : mj
+// Modified by: 19990909 : mj10777@gmx.net
 //              - mNoVertScroll TRUE = no / FALSE = Original Code
-//                the Original Code Paints a Vertical Scroll in wxPagedWindow
+//                the Original Code Paints a Vertical Scroll in wxPaggedWindow
 //                which is not needed in this Version. Use TRUE for this.
 // Created:     07/09/98
 // RCS-ID:      $Id$
@@ -17,12 +17,12 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __TABPGWIN_G__
-#define __TABPGWIN_G__
+#ifndef __CONTROLAREA_G__
+#define __CONTROLAREA_G__
 
-//#ifdef __GNUG__
-//#pragma interface
-//#endif
+#ifdef __GNUG__
+#pragma interface "controlarea.h"
+#endif
 
 #include "wx/defs.h"
 #include "wx/window.h"
@@ -60,7 +60,7 @@ public:
 
  virtual wxFont GetLabelingFont();
 
- // FOR NOW:: scrollbars are actually related to wxPagedWindow
+ // FOR NOW:: scrollbars are actually related to wxPaggedWindow
 
  wxScrollBar* mpTabScroll;
  wxScrollBar* mpHorizScroll;
@@ -100,10 +100,10 @@ public:
  // tabs can be also added when the window is
  // already displayed - "on the fly"
 
- virtual void AddTab( wxWindow*    pContent,           // contained window
-                      wxString     tabText,            // tab label
-                      wxString     imageFileName = "", // if "", only text label is displayed
-                      wxBitmapType imageType     = wxBITMAP_TYPE_BMP );
+ virtual void AddTab( wxWindow* pContent,           // contained window
+                      wxString  tabText,            // tab label
+                      wxString  imageFileName = "", // if "", only text label is displayed
+                      long      imageType     = wxBITMAP_TYPE_BMP );
 
  // NOTE:: if this AddTab(..) overload is called, the
  //        image bitmap will not be serialized (if performed),
@@ -154,9 +154,9 @@ public:
  * of Microsoft Developer Studio 4.xx
  */
 
-class wxPagedWindow : public wxTabbedWindow
+class wxPaggedWindow : public wxTabbedWindow
 {
- DECLARE_DYNAMIC_CLASS( wxPagedWindow )
+ DECLARE_DYNAMIC_CLASS( wxPaggedWindow )
  // the protected: public: changes prevents Warnings in gcc
 protected:
  bool         mScrollEventInProgress;
@@ -199,8 +199,8 @@ public:
 
 
 public:
- wxPagedWindow();
- ~wxPagedWindow();
+ wxPaggedWindow();
+ ~wxPaggedWindow();
 
  // NOTE:: use public methods of the base class
  //        to add "pages" to this window

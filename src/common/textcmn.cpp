@@ -12,19 +12,16 @@
 // ============================================================================
 // declarations
 // ============================================================================
-
 #ifdef __GNUG__
     #pragma implementation "textctrlbase.h"
 #endif
-
+        
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#if wxUSE_TEXTCTRL
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
@@ -46,90 +43,30 @@
 // implementation
 // ============================================================================
 
-IMPLEMENT_DYNAMIC_CLASS(wxTextUrlEvent, wxCommandEvent)
-
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_UPDATED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_ENTER)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_URL)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_MAXLEN)
-
 // ----------------------------------------------------------------------------
 // ctor
 // ----------------------------------------------------------------------------
 
 wxTextCtrlBase::wxTextCtrlBase()
 {
+#ifndef NO_TEXT_WINDOW_STREAM
+  #if wxUSE_IOSTREAMH
+  if (allocate())
+    setp(base(),ebuf());
+  #else
+  m_streambuf=new char[64];
+  setp(m_streambuf,m_streambuf+64);
+  #endif //wxUSE_IOSTREAMH
+#endif // NO_TEXT_WINDOW_STREAM
 }
 
 wxTextCtrlBase::~wxTextCtrlBase()
 {
-}
-
-// ----------------------------------------------------------------------------
-// style functions - not implemented here
-// ----------------------------------------------------------------------------
-
-/* static */
-wxTextAttr wxTextAttr::Combine(const wxTextAttr& attr,
-                               const wxTextAttr& attrDef,
-                               const wxTextCtrlBase *text)
-{
-    wxFont font = attr.GetFont();
-    if ( !font.Ok() )
-    {
-        font = attrDef.GetFont();
-
-        if ( text && !font.Ok() )
-            font = text->GetFont();
-    }
-
-    wxColour colFg = attr.GetTextColour();
-    if ( !colFg.Ok() )
-    {
-        colFg = attrDef.GetTextColour();
-
-        if ( text && !colFg.Ok() )
-            colFg = text->GetForegroundColour();
-    }
-
-    wxColour colBg = attr.GetBackgroundColour();
-    if ( !colBg.Ok() )
-    {
-        colBg = attrDef.GetBackgroundColour();
-
-        if ( text && !colBg.Ok() )
-            colBg = text->GetBackgroundColour();
-    }
-
-    return wxTextAttr(colFg, colBg, font);
-}
-
-// apply styling to text range
-bool wxTextCtrlBase::SetStyle(long WXUNUSED(start), long WXUNUSED(end),
-                              const wxTextAttr& WXUNUSED(style))
-{
-    // to be implemented in derived TextCtrl classes
-    return FALSE;
-}
-
-// change default text attributes
-bool wxTextCtrlBase::SetDefaultStyle(const wxTextAttr& style)
-{
-    // keep the old attributes if the new style doesn't specify them unless the
-    // new style is empty - then reset m_defaultStyle (as there is no other way
-    // to do it)
-    if ( style.IsDefault() )
-        m_defaultStyle = style;
-    else
-        m_defaultStyle = wxTextAttr::Combine(style, m_defaultStyle, this);
-
-    return TRUE;
-}
-
-// get default text attributes
-const wxTextAttr& wxTextCtrlBase::GetDefaultStyle() const
-{
-    return m_defaultStyle;
+#ifndef NO_TEXT_WINDOW_STREAM
+#if !wxUSE_IOSTREAMH
+  delete[] m_streambuf;
+#endif
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -138,7 +75,6 @@ const wxTextAttr& wxTextCtrlBase::GetDefaultStyle() const
 
 bool wxTextCtrlBase::LoadFile(const wxString& filename)
 {
-#if wxUSE_FFILE
     wxFFile file(filename);
     if ( file.IsOpened() )
     {
@@ -156,7 +92,6 @@ bool wxTextCtrlBase::LoadFile(const wxString& filename)
     }
 
     wxLogError(_("File couldn't be loaded."));
-#endif // wxUSE_FFILE
 
     return FALSE;
 }
@@ -172,7 +107,6 @@ bool wxTextCtrlBase::SaveFile(const wxString& filename)
         return FALSE;
     }
 
-#if wxUSE_FFILE
     wxFFile file(filename, "w");
     if ( file.IsOpened() && file.Write(GetValue()) )
     {
@@ -185,7 +119,6 @@ bool wxTextCtrlBase::SaveFile(const wxString& filename)
     }
 
     wxLogError(_("The text couldn't be saved."));
-#endif // wxUSE_FFILE
 
     return FALSE;
 }
@@ -243,70 +176,34 @@ wxTextCtrl& wxTextCtrlBase::operator<<(const wxChar c)
 
 #ifndef NO_TEXT_WINDOW_STREAM
 
-int wxTextCtrlBase::overflow(int c)
+int wxTextCtrlBase::overflow( int WXUNUSED(c) )
 {
-    AppendText((wxChar)c);
+    int len = pptr() - pbase();
+    char *txt = new char[len+1];
+    strncpy(txt, pbase(), len);
+    txt[len] = '\0';
+    (*this) << txt;
+    setp(pbase(), epptr());
+    delete[] txt;
+    return EOF;
+}
 
-    // return something different from EOF
+int wxTextCtrlBase::sync()
+{
+    int len = pptr() - pbase();
+    char *txt = new char[len+1];
+    strncpy(txt, pbase(), len);
+    txt[len] = '\0';
+    (*this) << txt;
+    setp(pbase(), epptr());
+    delete[] txt;
     return 0;
 }
 
+int wxTextCtrlBase::underflow()
+{
+    return EOF;
+}
+
 #endif // NO_TEXT_WINDOW_STREAM
-
-// ----------------------------------------------------------------------------
-// clipboard stuff
-// ----------------------------------------------------------------------------
-
-bool wxTextCtrlBase::CanCopy() const
-{
-    // can copy if there's a selection
-    long from, to;
-    GetSelection(&from, &to);
-    return from != to;
-}
-
-bool wxTextCtrlBase::CanCut() const
-{
-    // can cut if there's a selection and if we're not read only
-    return CanCopy() && IsEditable();
-}
-
-bool wxTextCtrlBase::CanPaste() const
-{
-    // can paste if we are not read only
-    return IsEditable();
-}
-
-// ----------------------------------------------------------------------------
-// misc
-// ----------------------------------------------------------------------------
-
-void wxTextCtrlBase::SelectAll()
-{
-    SetSelection(0, GetLastPosition());
-}
-
-wxString wxTextCtrlBase::GetStringSelection() const
-{
-    long from, to;
-    GetSelection(&from, &to);
-
-    wxString sel;
-    if ( from < to )
-    {
-        sel = GetValue().Mid(from, to - from);
-    }
-
-    return sel;
-}
-
-#else // !wxUSE_TEXTCTRL
-
-// define this one even if !wxUSE_TEXTCTRL because it is also used by other
-// controls (wxComboBox and wxSpinCtrl)
-#include "wx/event.h"
-
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TEXT_UPDATED)
-
-#endif // wxUSE_TEXTCTRL/!wxUSE_TEXTCTRL
 

@@ -14,7 +14,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -25,10 +25,6 @@
 #endif
 
 #include <wx/wxexpr.h>
-
-#ifdef new
-#undef new
-#endif
 
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
@@ -288,6 +284,7 @@ wxShape::wxShape(wxShapeCanvas *can)
   m_textColour = wxBLACK;
   m_textColourName = "BLACK";
   m_visible = FALSE;
+  m_clientData = NULL;
   m_selected = FALSE;
   m_attachmentMode = ATTACHMENT_MODE_NONE;
   m_spaceAttachments = TRUE;
@@ -991,9 +988,8 @@ void wxShape::OnEraseContents(wxDC& dc)
     if (m_pen)
       penWidth = m_pen->GetWidth();
 
-    dc.SetPen(GetBackgroundPen());
-    dc.SetBrush(GetBackgroundBrush());
-
+    dc.SetPen(* g_oglWhiteBackgroundPen);
+    dc.SetBrush(* g_oglWhiteBackgroundBrush);
     dc.DrawRectangle(WXROUND(topLeftX - penWidth), WXROUND(topLeftY - penWidth),
                       WXROUND(maxX + penWidth*2.0 + 4.0), WXROUND(maxY + penWidth*2.0 + 4.0));
 }
@@ -3274,27 +3270,5 @@ void wxShape::Rotate(double WXUNUSED(x), double WXUNUSED(y), double theta)
     {
         m_rotation -= 2*pi;
     }
-}
-
-
-wxPen wxShape::GetBackgroundPen()
-{
-    if (GetCanvas())
-    {
-        wxColour c = GetCanvas()->GetBackgroundColour();
-        return wxPen(c, 1, wxSOLID);
-    }
-    return * g_oglWhiteBackgroundPen;
-}
-
-
-wxBrush wxShape::GetBackgroundBrush()
-{
-    if (GetCanvas())
-    {
-        wxColour c = GetCanvas()->GetBackgroundColour();
-        return wxBrush(c, wxSOLID);
-    }
-    return * g_oglWhiteBackgroundBrush;
 }
 

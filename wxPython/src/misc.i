@@ -35,22 +35,6 @@
 //---------------------------------------------------------------------------
 
 
-class wxObject {
-public:
-
-    %addmethods {
-        const char* GetClassName() {
-            return self->GetClassInfo()->GetClassName();
-        }
-
-        void Destroy() {
-            delete self;
-        }
-    }
-};
-
-//---------------------------------------------------------------------------
-
 class wxSize {
 public:
     long x;
@@ -75,24 +59,9 @@ public:
             PyTuple_SET_ITEM(tup, 1, PyInt_FromLong(self->y));
             return tup;
         }
-
-        int __cmp__(const wxSize* sz) {
-            if (! sz) return 1;
-            if (*self == *sz) return 0;
-            return -1;
-        }
     }
-
-    %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.width = val
-        elif index == 1: self.height = val
-        else: raise IndexError
-"
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
 
 };
 
@@ -128,21 +97,12 @@ public:
         }
 
         int __cmp__(const wxRealPoint* p) {
-            if (! p) return 1;
-            if (*self == *p) return 0;
-            return -1;
+            if (! p) return 0;
+            return *self == *p;
         }
     }
-    %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.width = val
-        elif index == 1: self.height = val
-        else: raise IndexError
-"
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
 };
 
 
@@ -176,21 +136,12 @@ public:
         }
 
         int __cmp__(const wxPoint* p) {
-            if (! p) return 1;
-            if (*self == *p) return 0;
-            return -1;
+            if (! p) return 0;
+            return *self == *p;
         }
     }
-    %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.x = val
-        elif index == 1: self.y = val
-        else: raise IndexError
-"
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
 };
 
 //---------------------------------------------------------------------------
@@ -245,24 +196,14 @@ public:
         }
 
         int __cmp__(const wxRect* rect) {
-            if (! rect) return 1;
-            if (*self == *rect) return 0;
-            return -1;
+            if (! rect) return 0;
+            return *self == *rect;
         }
     }
 
+    %pragma(python) addtoclass = "def __str__(self): return str(self.asTuple())"
+    %pragma(python) addtoclass = "def __repr__(self): return str(self.asTuple())"
     %pragma(python) addtoclass = "
-    def __str__(self):                   return str(self.asTuple())
-    def __repr__(self):                  return str(self.asTuple())
-    def __len__(self):                   return len(self.asTuple())
-    def __getitem__(self, index):        return self.asTuple()[index]
-    def __setitem__(self, index, val):
-        if index == 0: self.x = val
-        elif index == 1: self.y = val
-        elif index == 2: self.width = val
-        elif index == 3: self.height = val
-        else: raise IndexError
-
     # override the __getattr__ made by SWIG
     def __getattr__(self, name):
         d = {
@@ -315,13 +256,13 @@ public:
         dest = reg1.GetBox();
 
         if (dest != wxRect(0,0,0,0)) {
-            wxPyBeginBlockThreads();
+            bool doSave = wxPyRestoreThread();
             wxRect* newRect = new wxRect(dest);
             obj = wxPyConstructObject((void*)newRect, "wxRect");
             PyObject* one = PyInt_FromLong(1);
             PyObject_SetAttrString(obj, "thisown", one);
             Py_DECREF(one);
-            wxPyEndBlockThreads();
+            wxPySaveThread(doSave);
             return obj;
         }
         Py_INCREF(Py_None);
@@ -337,9 +278,9 @@ long wxNewId();
 void wxRegisterId(long id);
 %name(NewId) long wxNewId();
 %name(RegisterId) void wxRegisterId(long id);
-long wxGetCurrentId();
 
 void wxBell();
+void wxDisplaySize(int *OUTPUT, int *OUTPUT);
 void wxEndBusyCursor();
 
 long wxGetElapsedTime(bool resetTimer = TRUE);
@@ -357,7 +298,6 @@ wxString wxGetOsDescription();
 void wxSleep(int secs);
 void wxUsleep(unsigned long milliseconds);
 bool wxYield();
-bool wxYieldIfNeeded();
 void wxEnableTopLevelWindows(bool enable);
 
 %inline %{
@@ -394,7 +334,7 @@ enum wxRelationship { wxUnconstrained = 0,
                       wxAbsolute };
 
 
-class wxIndividualLayoutConstraint : public wxObject {
+class wxIndividualLayoutConstraint {
 public:
 //    wxIndividualLayoutConstraint();
 //    ~wxIndividualLayoutConstraint();
@@ -412,7 +352,7 @@ public:
 };
 
 
-class wxLayoutConstraints : public wxObject {
+class wxLayoutConstraints {
 public:
     wxLayoutConstraints();
 
@@ -427,6 +367,71 @@ public:
     wxIndividualLayoutConstraint width;
 %readwrite
 }
+
+
+//---------------------------------------------------------------------------
+// Regions, etc.
+
+enum wxRegionContain {
+	wxOutRegion, wxPartRegion, wxInRegion
+};
+
+
+class wxRegion {
+public:
+    wxRegion(long x=0, long y=0, long width=0, long height=0);
+    ~wxRegion();
+
+    void Clear();
+    wxRegionContain Contains(long x, long y);
+    %name(ContainsPoint)wxRegionContain Contains(const wxPoint& pt);
+    %name(ContainsRect)wxRegionContain Contains(const wxRect& rect);
+    %name(ContainsRectDim)wxRegionContain Contains(long x, long y, long w, long h);
+
+    wxRect GetBox();
+
+    bool Intersect(long x, long y, long width, long height);
+    %name(IntersectRect)bool Intersect(const wxRect& rect);
+    %name(IntersectRegion)bool Intersect(const wxRegion& region);
+
+    bool IsEmpty();
+
+    bool Union(long x, long y, long width, long height);
+    %name(UnionRect)bool Union(const wxRect& rect);
+    %name(UnionRegion)bool Union(const wxRegion& region);
+
+    bool Subtract(long x, long y, long width, long height);
+    %name(SubtractRect)bool Subtract(const wxRect& rect);
+    %name(SubtractRegion)bool Subtract(const wxRegion& region);
+
+    bool Xor(long x, long y, long width, long height);
+    %name(XorRect)bool Xor(const wxRect& rect);
+    %name(XorRegion)bool Xor(const wxRegion& region);
+};
+
+
+
+class wxRegionIterator {
+public:
+    wxRegionIterator(const wxRegion& region);
+    ~wxRegionIterator();
+
+    long GetX();
+    long GetY();
+    long GetW();
+    long GetWidth();
+    long GetH();
+    long GetHeight();
+    wxRect GetRect();
+    bool HaveRects();
+    void Reset();
+
+    %addmethods {
+        void Next() {
+            (*self) ++;
+        }
+    };
+};
 
 
 
@@ -445,7 +450,7 @@ public:
 };
 
 
-class wxAcceleratorTable : public wxObject {
+class wxAcceleratorTable {
 public:
     // Can also accept a list of 3-tuples
     wxAcceleratorTable(int LCOUNT, wxAcceleratorEntry* choices);
@@ -468,7 +473,7 @@ extern wxAcceleratorTable wxNullAcceleratorTable;
 
 //---------------------------------------------------------------------------
 
-class wxBusyInfo : public wxObject {
+class wxBusyInfo {
 public:
     wxBusyInfo(const wxString& message);
     ~wxBusyInfo();

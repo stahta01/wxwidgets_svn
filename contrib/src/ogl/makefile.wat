@@ -6,7 +6,7 @@ WXDIR = ..\..\..
 
 EXTRACPPFLAGS=/DPROLOGIO
 
-OGLLIB = $(WXDIR)\lib\ogl.lib
+OGLLIB = $(WXDIR)\contrib\lib\ogl.lib
 THISDIR = $(WXDIR)\src\ogl
 
 NAME = ogl

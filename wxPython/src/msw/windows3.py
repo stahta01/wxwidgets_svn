@@ -47,9 +47,8 @@ class wxSashEventPtr(wxCommandEventPtr):
     def __repr__(self):
         return "<C wxSashEvent instance at %s>" % (self.this,)
 class wxSashEvent(wxSashEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(windows3c.new_wxSashEvent,_args,_kwargs)
-        self.thisown = 1
+    def __init__(self,this):
+        self.this = this
 
 
 
@@ -58,9 +57,6 @@ class wxSashWindowPtr(wxWindowPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = apply(windows3c.wxSashWindow_Create,(self,) + _args, _kwargs)
-        return val
     def GetSashVisible(self, *_args, **_kwargs):
         val = apply(windows3c.wxSashWindow_GetSashVisible,(self,) + _args, _kwargs)
         return val
@@ -118,15 +114,9 @@ class wxSashWindow(wxSashWindowPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(windows3c.new_wxSashWindow,_args,_kwargs)
         self.thisown = 1
-        self._setOORInfo(self)
+        #wx._StdWindowCallbacks(self)
 
 
-
-def wxPreSashWindow(*_args,**_kwargs):
-    val = wxSashWindowPtr(apply(windows3c.new_wxPreSashWindow,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
 
 
 class wxQueryLayoutInfoEventPtr(wxEventPtr):
@@ -167,9 +157,8 @@ class wxQueryLayoutInfoEventPtr(wxEventPtr):
     def __repr__(self):
         return "<C wxQueryLayoutInfoEvent instance at %s>" % (self.this,)
 class wxQueryLayoutInfoEvent(wxQueryLayoutInfoEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(windows3c.new_wxQueryLayoutInfoEvent,_args,_kwargs)
-        self.thisown = 1
+    def __init__(self,this):
+        self.this = this
 
 
 
@@ -194,9 +183,8 @@ class wxCalculateLayoutEventPtr(wxEventPtr):
     def __repr__(self):
         return "<C wxCalculateLayoutEvent instance at %s>" % (self.this,)
 class wxCalculateLayoutEvent(wxCalculateLayoutEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(windows3c.new_wxCalculateLayoutEvent,_args,_kwargs)
-        self.thisown = 1
+    def __init__(self,this):
+        self.this = this
 
 
 
@@ -205,9 +193,6 @@ class wxSashLayoutWindowPtr(wxSashWindowPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = apply(windows3c.wxSashLayoutWindow_Create,(self,) + _args, _kwargs)
-        return val
     def GetAlignment(self, *_args, **_kwargs):
         val = apply(windows3c.wxSashLayoutWindow_GetAlignment,(self,) + _args, _kwargs)
         return val
@@ -229,18 +214,14 @@ class wxSashLayoutWindow(wxSashLayoutWindowPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(windows3c.new_wxSashLayoutWindow,_args,_kwargs)
         self.thisown = 1
-        self._setOORInfo(self)
+        #wx._StdWindowCallbacks(self)
+        #wx._checkForCallback(self, 'OnCalculateLayout',    wxEVT_CALCULATE_LAYOUT)
+        #wx._checkForCallback(self, 'OnQueryLayoutInfo',    wxEVT_QUERY_LAYOUT_INFO)
 
 
 
-def wxPreSashLayoutWindow(*_args,**_kwargs):
-    val = wxSashLayoutWindowPtr(apply(windows3c.new_wxPreSashLayoutWindow,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
 
-
-class wxLayoutAlgorithmPtr(wxObjectPtr):
+class wxLayoutAlgorithmPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -262,79 +243,6 @@ class wxLayoutAlgorithm(wxLayoutAlgorithmPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(windows3c.new_wxLayoutAlgorithm,_args,_kwargs)
         self.thisown = 1
-
-
-
-
-class wxPopupWindowPtr(wxWindowPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = apply(windows3c.wxPopupWindow_Create,(self,) + _args, _kwargs)
-        return val
-    def Position(self, *_args, **_kwargs):
-        val = apply(windows3c.wxPopupWindow_Position,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxPopupWindow instance at %s>" % (self.this,)
-class wxPopupWindow(wxPopupWindowPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(windows3c.new_wxPopupWindow,_args,_kwargs)
-        self.thisown = 1
-        self._setOORInfo(self)
-
-
-
-def wxPrePopupWindow(*_args,**_kwargs):
-    val = wxPopupWindowPtr(apply(windows3c.new_wxPrePopupWindow,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
-
-
-class wxPopupTransientWindowPtr(wxPopupWindowPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def _setCallbackInfo(self, *_args, **_kwargs):
-        val = apply(windows3c.wxPopupTransientWindow__setCallbackInfo,(self,) + _args, _kwargs)
-        return val
-    def Popup(self, *_args, **_kwargs):
-        val = apply(windows3c.wxPopupTransientWindow_Popup,(self,) + _args, _kwargs)
-        return val
-    def Dismiss(self, *_args, **_kwargs):
-        val = apply(windows3c.wxPopupTransientWindow_Dismiss,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxPopupTransientWindow instance at %s>" % (self.this,)
-class wxPopupTransientWindow(wxPopupTransientWindowPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(windows3c.new_wxPopupTransientWindow,_args,_kwargs)
-        self.thisown = 1
-        self._setCallbackInfo(self, wxPopupTransientWindow)
-        self._setOORInfo(self)
-
-
-
-def wxPrePopupTransientWindow(*_args,**_kwargs):
-    val = wxPopupTransientWindowPtr(apply(windows3c.new_wxPrePopupTransientWindow,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
-
-
-class wxTipWindowPtr(wxPopupTransientWindowPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __repr__(self):
-        return "<C wxTipWindow instance at %s>" % (self.this,)
-class wxTipWindow(wxTipWindowPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(windows3c.new_wxTipWindow,_args,_kwargs)
-        self.thisown = 1
-        self._setOORInfo(self)
 
 
 

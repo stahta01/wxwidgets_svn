@@ -40,55 +40,48 @@ IMPLEMENT_DYNAMIC_CLASS(wxStaticLine, wxControl)
 // wxStaticLine
 // ----------------------------------------------------------------------------
 
-bool wxStaticLine::Create(
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, long                              lStyle
-, const wxString&                   rsName
-)
+bool wxStaticLine::Create( wxWindow *parent,
+                           wxWindowID id,
+                           const wxPoint &pos,
+                           const wxSize &size,
+                           long style,
+                           const wxString &name)
 {
-    if (!CreateBase( pParent
-                    ,vId
-                    ,rPos
-                    ,rSize
-                    ,lStyle
-                    ,wxDefaultValidator
-                    ,rsName
-                   ))
+    if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
-    pParent->AddChild(this);
+    parent->AddChild(this);
 
-    wxSize                          vSizeReal = AdjustSize(rSize);
+    wxSize sizeReal = AdjustSize(size);
 
-    m_hWnd = (WXHWND)::WinCreateWindow( GetWinHwnd(pParent)
-                                       ,WC_STATIC
-                                       ,""
-                                       ,WS_VISIBLE | SS_TEXT | DT_VCENTER | DT_CENTER
-                                       ,0
-                                       ,0
-                                       ,0
-                                       ,0
-                                       ,GetWinHwnd(pParent)
-                                       ,HWND_TOP
-                                       ,(ULONG)m_windowId
-                                       ,NULL
-                                       ,NULL
-                                      );
+// TODO:
+/*
+    m_hWnd = (WXHWND)::CreateWindow
+                       (
+                        wxT("STATIC"),
+                        wxT(""),
+                        WS_VISIBLE | WS_CHILD |
+                        SS_GRAYRECT | SS_SUNKEN, // | SS_ETCHEDFRAME,
+                        pos.x, pos.y, sizeReal.x, sizeReal.y,
+                        GetWinHwnd(parent),
+                        (HMENU)m_windowId,
+                        wxGetInstance(),
+                        NULL
+                       );
+
     if ( !m_hWnd )
     {
+#ifdef __WXDEBUG__
         wxLogDebug(wxT("Failed to create static control"));
+#endif
         return FALSE;
     }
-    SubclassWin(m_hWnd);
-    SetSize( rPos.x
-            ,rPos.y
-            ,rSize.x
-            ,rSize.y
-           );
-    return TRUE;
-} // end of wxStaticLine::Create
 
-#endif // wxUSE_STATLINE
+    SubclassWin(m_hWnd);
+
+    return TRUE;
+*/
+    return FALSE;
+}
+#endif
+

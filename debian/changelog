@@ -1,35 +1,13 @@
-wxwindows2.3 (2.3.3) unstable; urgency=low
+wxwindows2.2 (2.2.9) unstable; urgency=high
 
-  * New dynamic library/object loading code.
-  * Fixes several showstoppers from 2.3.2
+  * fix for arches with unsigned char as default.
+  * high urgency because this fix really should get
+    into woody.
+    Closes: #127014
 
- -- Ron Lee <ron@debian.org>  Wed, 19 Dec 2001 15:41:31 -0800
+ -- Ron Lee <ron@debian.org>  Mon, 31 Dec 2001 06:53:27 -0800
 
-wxwindows2.3 (2.3.2) unstable; urgency=low
-
-  * Major Overhaul.  First serious release contender.
-
-      Added .dll's to msw-cross packages.
-      Added -dbg versions of the cross packages.
-      Added experimental -univ(gtk) package.
-      Switched to python 2.1
-
- -- Ron Lee <ron@debian.org>  Thu, 27 Sep 2001 05:55:07 -0700
-
-wxwindows2.3 (2.3.1) unstable; urgency=low
-
-  * 2.3.1 test debs -- still not QA'd for general release yet.
-
- -- Ron Lee <ron@debian.org>  Sun, 10 Jun 2001 20:10:36 -0700
-
-wxwindows2.3 (2.3.0) unstable; urgency=low
-
-  * Updated 2.2 build scripts for 2.3
-  * initial test builds, please do not release..
-
- -- Ron Lee <ron@debian.org>  Sat, 27 Jan 2001 01:51:24 -0800
-
- wxwindows2.2 (2.2.8.5) unstable; urgency=low
+wxwindows2.2 (2.2.8.5) unstable; urgency=low
 
   * Add wxSIZE_T_IS defines to setup.h
     Add automate that to my TODO list.

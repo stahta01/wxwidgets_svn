@@ -46,7 +46,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) || defined(__TWIN32__))
     #include <commctrl.h>
 #endif
 
@@ -110,8 +110,6 @@ bool wxSpinButton::Create(wxWindow *parent,
                    UDS_NOTHOUSANDS | // never useful, sometimes harmful
                    UDS_SETBUDDYINT;  // it doesn't harm if we don't have buddy
 
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        wstyle |= WS_CLIPSIBLINGS;
     if ( m_windowStyle & wxSP_HORIZONTAL )
         wstyle |= UDS_HORZ;
     if ( m_windowStyle & wxSP_ARROW_KEYS )
@@ -194,7 +192,7 @@ void wxSpinButton::SetRange(int minVal, int maxVal)
                    (LPARAM) MAKELONG((short)maxVal, (short)minVal));
 }
 
-bool wxSpinButton::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
+bool wxSpinButton::MSWOnScroll(int orientation, WXWORD wParam,
                                WXWORD pos, WXHWND control)
 {
     wxCHECK_MSG( control, FALSE, wxT("scrolling what?") )
@@ -212,7 +210,7 @@ bool wxSpinButton::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
     return GetEventHandler()->ProcessEvent(event);
 }
 
-bool wxSpinButton::MSWOnNotify(int WXUNUSED(idCtrl), WXLPARAM lParam, WXLPARAM *result)
+bool wxSpinButton::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 {
 #ifndef __GNUWIN32__
 #if defined(__BORLANDC__) || defined(__WATCOMC__)
@@ -242,7 +240,7 @@ bool wxSpinButton::MSWOnNotify(int WXUNUSED(idCtrl), WXLPARAM lParam, WXLPARAM *
 #endif
 }
 
-bool wxSpinButton::MSWCommand(WXUINT WXUNUSED(cmd), WXWORD WXUNUSED(id))
+bool wxSpinButton::MSWCommand(WXUINT cmd, WXWORD id)
 {
     // No command messages
     return FALSE;

@@ -10,7 +10,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-#  pragma implementation "ifcontext.h"
+#pragma implementation "ifcontext.h"
+#pragma interface
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -24,9 +25,7 @@
 #include "wx/wx.h"
 #endif
 
-#ifndef __DARWIN__
-#  include <malloc.h>
-#endif
+#include <malloc.h>
 #include <stdio.h>
 
 #include "ifcontext.h"
@@ -35,12 +34,11 @@
 
 size_t spInterFileContext::GetFileNo( const string& fname )
 {
-    size_t i;
-	for ( i = 0; i != mFiles.size(); ++i )
-		if ( fname == mFiles[i] )
-            return i;
+	for( size_t i = 0; i != mFiles.size(); ++i )
 
-    wxFAIL_MSG("File not found in array in function spInterFileContext::GetFileNo()");
+		if ( fname == mFiles[i] ) return i;
+
+	wxASSERT(0); // DBG::
 	return 0;
 }
 
@@ -120,8 +118,8 @@ void spInterFileContext::DoAppendSourceFragment( string& source,
 
 		if ( cur >= pos + len ) // check if we've overstepped the current source-fragment
 		{
-//			wxASSERT(0); // DBG:: with current imp. this should not happen
-            wxFAIL_MSG("Overstepped the current source fragment in function\nspInterFileContext::DoAppendSourceFragment()");			
+			wxASSERT(0); // DBG:: with current imp. this should not happen
+			
 			cur = pos + len; break;
 		}
 	}

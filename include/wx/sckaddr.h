@@ -30,20 +30,16 @@ public:
   typedef enum { IPV4=1, IPV6=2, UNIX=3 } Addr;
 
   wxSockAddress();
-  wxSockAddress(const wxSockAddress& other);
   virtual ~wxSockAddress();
-
-  wxSockAddress& operator=(const wxSockAddress& other);
 
   virtual void Clear();
   virtual int Type() = 0;
 
   GAddress *GetAddress() const { return m_address; }
   void SetAddress(GAddress *address);
+  const wxSockAddress& operator =(const wxSockAddress& addr);
 
-  // we need to be able to create copies of the addresses polymorphically (i.e.
-  // wihtout knowing the exact address class)
-  virtual wxSockAddress *Clone() const = 0;
+  void CopyObject(wxObject& dest) const;
 
 protected:
   GAddress *m_address;
@@ -53,7 +49,6 @@ class WXDLLEXPORT wxIPV4address : public wxSockAddress {
   DECLARE_DYNAMIC_CLASS(wxIPV4address)
 public:
   wxIPV4address();
-  wxIPV4address(const wxIPV4address& other);
   virtual ~wxIPV4address();
 
   bool Hostname(const wxString& name);
@@ -66,8 +61,7 @@ public:
   wxString Hostname();
   unsigned short Service();
 
-  virtual int Type() { return wxSockAddress::IPV4; }
-  virtual wxSockAddress *Clone() const { return new wxIPV4address(*this); }
+  inline int Type() { return wxSockAddress::IPV4; }
 };
 
 #ifdef ENABLE_IPV6
@@ -77,8 +71,7 @@ private:
   struct sockaddr_in6 *m_addr;
 public:
   wxIPV6address();
-  wxIPV6address(const wxIPV6address& other);
-  virtual ~wxIPV6address();
+  ~wxIPV6address();
 
   bool Hostname(const wxString& name);
   bool Hostname(unsigned char addr[16]);
@@ -89,12 +82,11 @@ public:
   wxString Hostname() const;
   unsigned short Service() const;
 
-  virtual int Type() { return wxSockAddress::IPV6; }
-  virtual wxSockAddress *Clone() const { return new wxIPV6address(*this); }
+  inline int Type() { return wxSockAddress::IPV6; }
 };
 #endif
 
-#if defined(__UNIX__) && !defined(__WXMAC__)
+#ifdef __UNIX__
 #include <sys/socket.h>
 #ifndef __VMS__
 # include <sys/un.h>
@@ -106,14 +98,12 @@ private:
   struct sockaddr_un *m_addr;
 public:
   wxUNIXaddress();
-  wxUNIXaddress(const wxUNIXaddress& other);
-  virtual ~wxUNIXaddress();
+  ~wxUNIXaddress();
 
   void Filename(const wxString& name);
   wxString Filename();
 
-  virtual int Type() { return wxSockAddress::UNIX; }
-  virtual wxSockAddress *Clone() const { return new wxUNIXaddress(*this); }
+  inline int Type() { return wxSockAddress::UNIX; }
 };
 #endif
   // __UNIX__

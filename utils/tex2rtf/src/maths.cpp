@@ -7,7 +7,7 @@
 
 // For compilers that support precompilation, includes "wx.h".
 #ifdef WX_PRECOMP
-#include "wx/wxprec.h"
+#include "wx_prec.h"
 #endif
 
 #ifdef __BORLANDC__
@@ -15,7 +15,7 @@
 #endif
 
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif
 
 #include <ctype.h>

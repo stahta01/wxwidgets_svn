@@ -91,9 +91,6 @@
  * Cambridge, MA 02139, USA.
  *
  */
-#ifdef __VMS
-#include <wx/vms_x_fix.h>
-#endif
 
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
@@ -792,7 +789,6 @@ static int WidgetToScreen(Widget w)
 	if ( ScreenOfDisplay(display, i) == screen )
 	    return i;
     XtError("WidgetToScreen: data structures are destroyed.");
-    return 0; /* to avoid a compiler warning */
 } /* WidgetToScreen */
 
 /* --------------------------------------------------------------------
@@ -805,6 +801,7 @@ static void DoDropDownLayout(XmComboBoxWidget w)
     Position       abs_x, abs_y;
     Dimension      ArrowWidth, ListWidth, ListHeight;
     Dimension      ScreenHeight, LabelWidth;
+    Window         Decoration;
     XWindowChanges WindowChanges;
 
     /* 
@@ -1263,7 +1260,7 @@ static struct { String Resource; int Flag; }
 	   { XmNbackground,        BACKGROUND        }
        };
 
-static int UpdateColors(XmComboBoxWidget w, int flags)
+static UpdateColors(XmComboBoxWidget w, int flags)
 {
     Pixel  Color;
     int    i, size = XtNumber(ColorResources);
@@ -1419,7 +1416,7 @@ static Boolean SetValues(XmComboBoxWidget current, XmComboBoxWidget req,
  * dauerhaft dargestellt wird.
  */
     if ( newW->combobox.ScrollBarDisplayPolicy != 
-	 current->combobox.ScrollBarDisplayPolicy ) {
+           current->combobox.ScrollBarDisplayPolicy )
         if ( newW->combobox.StaticList )
             XtVaSetValues(newW->combobox.ListCtrl,
                           XmNscrollBarDisplayPolicy, newW->combobox.ScrollBarDisplayPolicy,
@@ -1427,8 +1424,7 @@ static Boolean SetValues(XmComboBoxWidget current, XmComboBoxWidget req,
         else
             XtWarning(
 "XmComboBox: ScrollBarDisplayPolicy can not be changed when StaticList == False."
-);
-    }
+            );
 /* Anzahl der in der Liste gleichzeitig darstellbaren Eintraege */
     if ( current->combobox.VisibleItemCount != 
            newW->combobox.VisibleItemCount ) {
@@ -1438,11 +1434,11 @@ static Boolean SetValues(XmComboBoxWidget current, XmComboBoxWidget req,
 	Update = True;
     }
     if ( current->combobox.AutomaticSelection != 
-	 newW->combobox.AutomaticSelection ) {
+           newW->combobox.AutomaticSelection )
 	XtVaSetValues(newW->combobox.ListCtrl, 
 	              XmNautomaticSelection, newW->combobox.AutomaticSelection, 
 		      NULL);
-    }
+					      
 /* 
  * benutzter Font: hier erhalten Liste und Eingabefeld jeweils die
  * gleiche Fontliste, wohingegen das Label getrennt behandelt wird.
@@ -2090,7 +2086,7 @@ static void EditVerifyCallback(Widget w, XtPointer pClientData,
 	XmStringTable  Items;
 	int            *SelectionList;
 	int            SelectionCount;
-	int            i, ItemCount, Start;
+	int            i, ItemCount, Start, End;
 	char           *pItem;
 	Boolean        Ignore;
 	
@@ -2322,8 +2318,9 @@ static Boolean FetchLabelTypeResource(Widget w,
                                 char *RscName, char *RscClass, 
 			        unsigned char *pUChar)
 {
-    XrmValue RscValue;
+    XrmValue RscValue, RscDest;
     String   RepresentationType;
+    int      AInt;
     
     if ( FetchResource(w, FullName, FullClass, 
                        RscName, RscClass, 
@@ -2570,6 +2567,7 @@ static void InitMirrorResources(XmComboBoxWidget w)
     XmStringTable AStringTable;
     Pixmap        APixmap;
     XmFontList    AFontList;
+    XrmValue      RscValue;
     String        AString;
     KeySym        AKeySym;
     int           i, size = XtNumber(ResourceMirror);
@@ -2717,6 +2715,8 @@ static void Initialize(Widget request, XmComboBoxWidget newW,
     Widget       w;
     Arg          args[10];
     int          n = 0;
+    XmString     xmstr;
+    Pixel        BackgroundColor;
     
 /* 
  * Da zu allem Ueberfluss die einzelnen Instanzen einer XmComboBox
@@ -3063,7 +3063,7 @@ Widget XmComboBoxGetLabelWidget(Widget w)
  *   Deleted	    Zeigt an, ob der Eintrag geloescht wurde (True)
  *		    oder sich nur veraenderte (False)
  */
-static int UpdateComboBox(XmComboBoxWidget w, int Index, Boolean Deleted)
+static UpdateComboBox(XmComboBoxWidget w, int Index, Boolean Deleted)
 {
     int OldIndex, ItemCount;
     

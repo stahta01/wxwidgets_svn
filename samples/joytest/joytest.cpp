@@ -20,12 +20,8 @@
 #include "wx/wx.h"
 #endif
 
-#if !wxUSE_JOYSTICK
-#error You must set wxUSE_JOYSTICK to 1 in setup.h!
-#endif
-
-#include "wx/wave.h"
-#include "wx/joystick.h"
+#include <wx/wave.h>
+#include <wx/joystick.h>
 
 #include "joytest.h"
 

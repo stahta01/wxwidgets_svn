@@ -22,7 +22,6 @@
 
 class WXDLLEXPORT wxAcceleratorTable;
 
-#if 0
 // Hold Ctrl key down
 #define wxACCEL_ALT     0x01
 
@@ -67,7 +66,6 @@ public:
     int          m_keyCode; // ASCII or virtual keycode
     int          m_command; // Command id to generate
 };
-#endif
 
 class WXDLLEXPORT wxAcceleratorTable: public wxObject
 {
@@ -78,8 +76,8 @@ public:
     wxAcceleratorTable(int n, wxAcceleratorEntry entries[]); // Load from array
 
     // Copy constructors
-    wxAcceleratorTable(const wxAcceleratorTable& accel) { Ref(accel); }
-    wxAcceleratorTable(const wxAcceleratorTable* accel) { if (accel) Ref(*accel); }
+    wxAcceleratorTable(const wxAcceleratorTable& accel) : wxObject() { Ref(accel); }
+    wxAcceleratorTable(const wxAcceleratorTable* accel) : wxObject() { if (accel) Ref(*accel); }
 
     ~wxAcceleratorTable();
 

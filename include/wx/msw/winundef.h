@@ -25,24 +25,6 @@
 // elsewhere because the functions, unlike the macros, respect the scope.
 // ----------------------------------------------------------------------------
 
-// CreateDialog
-
-#ifdef CreateDialog
-    #undef CreateDialog
-
-    inline HWND CreateDialog(HINSTANCE hInstance,
-                             LPCTSTR pTemplate,
-                             HWND hwndParent,
-                             DLGPROC pDlgProc)
-    {
-        #ifdef _UNICODE
-            return CreateDialogW(hInstance, pTemplate, hwndParent, pDlgProc);
-        #else
-            return CreateDialogA(hInstance, pTemplate, hwndParent, pDlgProc);
-        #endif
-    }
-#endif
-
 // GetCharWidth
 
 #ifdef GetCharWidth
@@ -70,23 +52,6 @@
    inline HWND FindWindow(LPCSTR classname, LPCSTR windowname)
    {
       return FindWindowA(classname, windowname);
-   }
-   #endif
-#endif
-
-// PlaySound
-
-#ifdef PlaySound
-   #undef PlaySound
-   #ifdef _UNICODE
-   inline BOOL PlaySound(LPCWSTR pszSound, HMODULE hMod, DWORD fdwSound)
-   {
-      return PlaySoundW(pszSound, hMod, fdwSound);
-   }
-   #else
-   inline BOOL PlaySound(LPCSTR pszSound, HMODULE hMod, DWORD fdwSound)
-   {
-      return PlaySoundA(pszSound, hMod, fdwSound);
    }
    #endif
 #endif
@@ -163,19 +128,19 @@
 
 #ifdef StartDoc
    #undef StartDoc
-   #if defined( __GNUG__ ) && !wxCHECK_W32API_VERSION( 0, 5 )
+   #ifdef __GNUG__
       #define DOCINFOW DOCINFO
       #define DOCINFOA DOCINFO
    #endif
    #ifdef _UNICODE
    inline int StartDoc(HDC h, CONST DOCINFOW* info)
    {
-      return StartDocW(h, (DOCINFOW*) info);
+      return StartDocW(h, info);
    }
    #else
    inline int StartDoc(HDC h, CONST DOCINFOA* info)
    {
-      return StartDocA(h, (DOCINFOA*) info);
+      return StartDocA(h, info);
    }
    #endif
 #endif
@@ -306,11 +271,6 @@
    {
      return GetWindow(h, GW_HWNDNEXT);
    }
-#endif
-
-
-#ifdef Yield
-    #undef Yield
 #endif
 
 // GetWindowProc

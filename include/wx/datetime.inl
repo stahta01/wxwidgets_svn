@@ -54,19 +54,19 @@ inline wxDateTime wxDateTime::Now()
 /* static */
 inline wxDateTime wxDateTime::Today()
 {
-    struct tm *time = GetTmNow();
-    time->tm_hour = 0;
-    time->tm_min = 0;
-    time->tm_sec = 0;
+    struct tm *tm = GetTmNow();
+    tm->tm_hour =
+    tm->tm_min =
+    tm->tm_sec = 0;
 
-    return wxDateTime(*time);
+    return wxDateTime(*tm);
 }
 
 #if (!(defined(__VISAGECPP__) && __IBMCPP__ >= 400))
 inline wxDateTime& wxDateTime::Set(time_t timet)
 {
     // assign first to avoid long multiplication overflow!
-    m_time = timet - WX_TIME_BASE_OFFSET ;
+    m_time = timet;
     m_time *= TIME_T_FACTOR;
 
     return *this;
@@ -146,7 +146,7 @@ inline time_t wxDateTime::GetTicks() const
         return (time_t)-1;
     }
 
-    return (time_t)((m_time / (long)TIME_T_FACTOR).GetLo())+WX_TIME_BASE_OFFSET ;
+    return (time_t)((m_time / (long)TIME_T_FACTOR).GetLo());
 }
 
 inline bool wxDateTime::SetToLastWeekDay(WeekDay weekday,
@@ -249,12 +249,7 @@ inline bool wxDateTime::IsBetween(const wxDateTime& t1,
 
 inline bool wxDateTime::IsSameDate(const wxDateTime& dt) const
 {
-    Tm tm1 = GetTm(),
-       tm2 = dt.GetTm();
-
-    return tm1.year == tm2.year &&
-           tm1.mon == tm2.mon &&
-           tm1.mday == tm2.mday;
+    return (m_time - dt.m_time).Abs() < MILLISECONDS_PER_DAY;
 }
 
 inline bool wxDateTime::IsSameTime(const wxDateTime& dt) const

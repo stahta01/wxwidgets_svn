@@ -54,8 +54,6 @@ or test if it can be opened for writing with Access()}
 contents of the file is not erased and the file pointer is initially placed at the end of the file;
 can not be used with Access(). This is the same as {\bf wxFile::write} if the
 file doesn't exist.}
-\twocolitem{{\bf wxFile::write\_excl}}{Open the file securely for writing (Uses O\_EXCL | O\_CREAT).
-Will fail if the file already exists, else create and open it atomically.  Useful for opening temporary files without being vulnerable to race exploits.}
 \end{twocollist}
 
 Other constants defined elsewhere but used by wxFile functions are wxInvalidOffset which represents an
@@ -280,12 +278,9 @@ the number of bytes actually written
 
 \membersection{wxFile::Write}\label{wxfilewrites}
 
-\func{bool}{Write}{\param{const wxString\& }{s}, \param{wxMBConv&}{ conv = wxConvLibc}}
+\func{bool}{Write}{\param{const wxString\& }{s}}
 
 Writes the contents of the string to the file, returns TRUE on success.
-
-The second argument is only meaningful in Unicode build of wxWindows when
-{\it conv} is used to convert {\it s} to multibyte representation.
 
 \section{\class{wxFFile}}\label{wxffile}
 
@@ -333,10 +328,7 @@ Opens a file with the given file pointer, which has already been opened.
 
 \docparam{filename}{The filename.}
 
-\docparam{mode}{The mode in which to open the file using standard C strings.
-Note that you should use {\tt "b"} flag if you use binary files under Windows
-or the results might be unexpected due to automatic newline conversion done
-for the text files.}
+\docparam{mode}{The mode in which to open the file using standard C strings.}
 
 \docparam{fp}{An existing file descriptor, such as stderr.}
 
@@ -481,10 +473,7 @@ Number of bytes written.
 
 \membersection{wxFFile::Write}\label{wxffilewrites}
 
-\func{bool}{Write}{\param{const wxString\& }{s}, \param{wxMBConv&}{ conv = wxConvLibc}}
+\func{bool}{Write}{\param{const wxString\& }{s}}
 
 Writes the contents of the string to the file, returns TRUE on success.
-
-The second argument is only meaningful in Unicode build of wxWindows when
-{\it conv} is used to convert {\it s} to multibyte representation.
 

@@ -5,7 +5,7 @@
 
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -156,6 +156,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 {
     // create a menu bar
     wxMenu *menuFile = new wxMenu;
+    wxMenu *menuNav = new wxMenu;
+
     menuFile->Append(Minimal_Open, "Open...\tCtrl-O");
     menuFile->AppendSeparator();
     menuFile->Append(Minimal_PageSetup, "Page Setup");

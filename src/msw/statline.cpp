@@ -66,17 +66,12 @@ bool wxStaticLine::Create( wxWindow *parent,
 
     wxSize sizeReal = AdjustSize(size);
 
-    DWORD wstyle = WS_CHILD | WS_VISIBLE | SS_GRAYRECT | SS_SUNKEN | SS_NOTIFY;
-
-    if ( style & wxCLIP_SIBLINGS )
-        wstyle |= WS_CLIPSIBLINGS;
-
-
     m_hWnd = (WXHWND)::CreateWindow
                        (
                         wxT("STATIC"),
                         wxT(""),
-                        wstyle,
+                        WS_VISIBLE | WS_CHILD /* | WS_CLIPSIBLINGS */ |
+                        SS_GRAYRECT | SS_SUNKEN | SS_NOTIFY,
                         pos.x, pos.y, sizeReal.x, sizeReal.y,
                         GetWinHwnd(parent),
                         (HMENU)m_windowId,

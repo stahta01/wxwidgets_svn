@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #----------------------------------------------------------------------
 
-import sys, os, string, glob
+import sys, os, string
 from distutils.core      import setup, Extension
 from distutils.file_util import copy_file
 from distutils.dir_util  import mkpath
@@ -13,10 +13,10 @@ from my_distutils import run_swig, contrib_copy_tree
 # flags and values that affect this script
 #----------------------------------------------------------------------
 
-VERSION          = "2.3.2.1"
+VERSION          = "2.2.8"
 DESCRIPTION      = "Cross platform GUI toolkit for Python"
 AUTHOR           = "Robin Dunn"
-AUTHOR_EMAIL     = "Robin Dunn <robin@alldunn.com>"
+AUTHOR_EMAIL     = "robin@alldunn.com"
 URL              = "http://wxPython.org/"
 LICENCE          = "wxWindows (LGPL derivative)"
 LONG_DESCRIPTION = """\
@@ -31,15 +31,7 @@ on.
 BUILD_GLCANVAS = 1 # If true, build the contrib/glcanvas extension module
 BUILD_OGL = 1      # If true, build the contrib/ogl extension module
 BUILD_STC = 1      # If true, build the contrib/stc extension module
-BUILD_XRC = 1      # XML based resource system
-BUILD_GIZMOS = 1   # Build a module for the gizmos contrib library
-BUILD_DLLWIDGET = 1# Build a module for the gizmos contrib library
-
-BUILD_IEWIN = 0    # Internet Explorer wrapper (experimental)
-
 CORE_ONLY = 0      # if true, don't build any of the above
-
-
 GL_ONLY = 0        # Only used when making the -gl RPM.  See the "b" script
                    # for the ugly details
 
@@ -68,26 +60,7 @@ HYBRID = 0         # If set and not debug or FINAL, then build a
                    # wxWindows must have been built with /MD, not /MDd
                    # (using FINAL=hybrid will do it.)
 
-WXDLLVER = '232'   # Version part of DLL name
-
-
-#----------------------------------------------------------------------
-
-def msg(text):
-    if __name__ == "__main__":
-        print text
-
-def opj(*args):
-    path = apply(os.path.join, args)
-    return os.path.normpath(path)
-
-def libFlag():
-    if FINAL:
-        return ''
-    elif HYBRID:
-        return 'h'
-    else:
-        return 'd'
+WXDLLVER = '22_8'  # Version part of DLL name
 
 
 #----------------------------------------------------------------------
@@ -100,24 +73,13 @@ wxpExtensions = []
 force = '--force' in sys.argv or '-f' in sys.argv
 debug = '--debug' in sys.argv or '-g' in sys.argv
 
-bcpp_compiling = '-c' in sys.argv and 'my_bcpp' in sys.argv # Bad heuristic
-
-if bcpp_compiling:
-    msg("Compiling wxPython by Borland C/C++ Compiler")
-    HYBRID=0
-    WXBCPPLIBVER = string.replace(WXDLLVER,"_","")
-    # Version part of BCPP build LIBRARY name
-    WXDLLVER="" # no dll ver path avaible
-
 
 #----------------------------------------------------------------------
 # Check for build flags on the command line
 #----------------------------------------------------------------------
 
-for flag in ['BUILD_GLCANVAS', 'BUILD_OGL', 'BUILD_STC', 'BUILD_XRC',
-             'BUILD_GIZMOS', 'BUILD_DLLWIDGET',
-             'CORE_ONLY', 'USE_SWIG', 'IN_CVS_TREE',
-             'FINAL', 'HYBRID', ]:
+for flag in ['BUILD_GLCANVAS', 'BUILD_OGL', 'BUILD_STC', 'CORE_ONLY',
+             'USE_SWIG', 'IN_CVS_TREE', 'FINAL', 'HYBRID', ]:
     for x in range(len(sys.argv)):
         if string.find(sys.argv[x], flag) == 0:
             pos = string.find(sys.argv[x], '=') + 1
@@ -140,10 +102,6 @@ if CORE_ONLY:
     BUILD_GLCANVAS = 0
     BUILD_OGL = 0
     BUILD_STC = 0
-    BUILD_XRC = 0
-    BUILD_GIZMOS = 0
-    BUILD_DLLWIDGET = 0
-
 
 #----------------------------------------------------------------------
 # Setup some platform specific stuff
@@ -165,8 +123,7 @@ if os.name == 'nt':
         FINAL = 0
 
     includes = ['src',
-                opj(WXDIR, 'lib', 'mswdll' + libFlag()),
-                opj(WXDIR, 'include'),
+                os.path.join(WXDIR, 'include'),
                 ]
 
     defines = [ ('WIN32', None),        # Some of these are no longer
@@ -185,82 +142,30 @@ if os.name == 'nt':
                 ('WXP_USE_THREAD', '1'),
                 ]
 
-    if bcpp_compiling:  # overwrite it
-        defines = [
-            ('_WINDOWS', None),
-            ('WINVER', '0x0400'),
-            ('STRICT', None),
-
-            ('WXUSINGDLL', '1'),
-
-            ('SWIG_GLOBAL', None),
-            ('HAVE_CONFIG_H', None),
-            ('WXP_USE_THREAD', '1'),
-
-            ('WXUSE_DEFINE','1'),
-            ('_RTLDLL',None),
-            ]
-
-
     if not FINAL or HYBRID:
         defines.append( ('__WXDEBUG__', None) )
 
-    libdirs = [opj(WXDIR, 'lib'), 'build\\ilib']
-    wxdll = 'wxmsw' + WXDLLVER + libFlag()
-    libs = [wxdll]
+    libdirs = [os.path.join(WXDIR, 'lib'), 'build\\ilib']
 
-    if bcpp_compiling:
-        libs = ['wx'+WXBCPPLIBVER]
+    if FINAL:
+        wxdll = 'wx' + WXDLLVER
+    elif HYBRID:
+        wxdll = 'wx' + WXDLLVER + 'h'
+    else:
+        wxdll = 'wx' + WXDLLVER + 'd'
 
-    libs = libs + ['kernel32', 'user32', 'gdi32', 'comdlg32',
+
+    libs = [wxdll, 'kernel32', 'user32', 'gdi32', 'comdlg32',
             'winspool', 'winmm', 'shell32', 'oldnames', 'comctl32',
             'ctl3d32', 'odbc32', 'ole32', 'oleaut32', 'uuid', 'rpcrt4',
             'advapi32', 'wsock32']
 
-
-    cflags = [] #['/GX-']  # workaround for internal compiler error in MSVC on some machines
+    cflags = ['/GX-']  # workaround for internal compiler error in MSVC 5
     lflags = None
 
-
-    if bcpp_compiling:  # overwrite it
-        cflags = ['-5', '-VF',  ### To support MSVC spurious semicolons in the class scope
-                  ### else, all semicolons at the end of all DECLARE_...CALLBACK... macros must be eliminated
-                  '-Hc', '-H=' + opj(WXDIR, '\src\msw\wx32.csm'),
-                  '@' + opj(WXDIR, '\src\msw\wxwin32.cfg')
-                  ]
-
-
-    if not FINAL and HYBRID and not bcpp_compiling:
+    if not FINAL and HYBRID:
         cflags = cflags + ['/Od', '/Z7']
         lflags = ['/DEBUG', ]
-
-    elif bcpp_compiling and not FINAL:
-        cflags = cflags + ['/Od', '/v', '/y']
-        lflags = lflags + ['/v', ]   ## '/PDB:NONE']
-
-
-
-elif os.name == 'posix' and sys.platform[:6] == "darwin":
-    # Flags and such for a Darwin (Max OS X) build of Python
-
-    WXDIR = '..'              # assumes IN_CVS_TREE
-    WXPLAT = '__WXMAC__'
-    GENDIR = 'mac'
-
-    includes = ['src']
-    defines = [('SWIG_GLOBAL', None),
-               ('HAVE_CONFIG_H', None),
-               ('WXP_USE_THREAD', '1'),
-               ]
-    libdirs = []
-    libs = []
-
-    cflags = os.popen(WX_CONFIG + ' --cxxflags', 'r').read()[:-1]
-    cflags = string.split(cflags)
-
-    lflags = os.popen(WX_CONFIG + ' --libs', 'r').read()[:-1]
-    lflags = string.split(lflags)
-
 
 
 elif os.name == 'posix':
@@ -278,7 +183,7 @@ elif os.name == 'posix':
     libdirs = []
     libs = []
 
-    cflags = os.popen(WX_CONFIG + ' --cxxflags', 'r').read()[:-1] + ' ' + \
+    cflags = os.popen(WX_CONFIG + ' --cflags', 'r').read()[:-1] + ' ' + \
              os.popen('gtk-config --cflags', 'r').read()[:-1]
     cflags = string.split(cflags)
 
@@ -304,12 +209,8 @@ if IN_CVS_TREE and newer('setup.py', 'src/__version__.py'):
 #----------------------------------------------------------------------
 
 swig_force = force
-swig_args = ['-c++', '-shadow', '-python', '-keyword',
-             '-dnone',
-             #'-dascii',
-             #'-docstring', '-Sbefore',
-             '-I./src', '-D'+WXPLAT,
-             ]
+swig_args = ['-c++', '-shadow', '-python', '-keyword', '-dnone', #'-dascii',
+             '-I./src', '-D'+WXPLAT]
 swig_deps = ['src/my_typemaps.i']
 
 
@@ -318,7 +219,7 @@ swig_deps = ['src/my_typemaps.i']
 #----------------------------------------------------------------------
 
 if not GL_ONLY:
-    msg('Preparing CORE...')
+    print 'Preparing CORE...'
     swig_files = [ 'wx.i', 'windows.i', 'windows2.i', 'windows3.i', 'events.i',
                    'misc.i', 'misc2.i', 'gdi.i', 'mdi.i', 'controls.i',
                    'controls2.i', 'cmndlgs.i', 'stattool.i', 'frames.i', 'image.i',
@@ -337,7 +238,7 @@ if not GL_ONLY:
     if IN_CVS_TREE:   # update the licence files
         mkpath('licence')
         for file in ['preamble.txt', 'licence.txt', 'licendoc.txt', 'lgpl.txt']:
-            copy_file(opj(WXDIR, 'docs', file), opj('licence',file), update=1, verbose=0)
+            copy_file(WXDIR+'/docs/'+file, 'licence/'+file, update=1, verbose=0)
 
 
     if os.name == 'nt':
@@ -418,57 +319,36 @@ if not GL_ONLY:
     wxpExtensions.append(ext)
 
 
-    # Extension for the help module
-    swig_sources = run_swig(['help.i'], 'src', GENDIR, PKGDIR,
-                            USE_SWIG, swig_force, swig_args, swig_deps)
-    ext = Extension('helpc', swig_sources,
-                    include_dirs =  includes,
-                    define_macros = defines,
-                    library_dirs = libdirs,
-                    libraries = libs,
-                    extra_compile_args = cflags,
-                    extra_link_args = lflags,
-                    )
-    wxpExtensions.append(ext)
-
-
 #----------------------------------------------------------------------
 # Define the GLCanvas extension module
 #----------------------------------------------------------------------
 
-CTRB_SRC =  opj(WXDIR, 'contrib/src')
-CTRB_INC =  opj(WXDIR, 'contrib/include/wx')
-
 if BUILD_GLCANVAS or GL_ONLY:
-    msg('Preparing GLCANVAS...')
+    print 'Preparing GLCANVAS...'
     location = 'contrib/glcanvas'
     swig_files = ['glcanvas.i']
-    other_sources = []
 
     swig_sources = run_swig(swig_files, location, GENDIR, PKGDIR,
                             USE_SWIG, swig_force, swig_args)
 
     gl_libs = []
+    # libwx_gtk_gl is linked in now by wx-config so we don't need
+    # to add it here.  (If it's not you built without --with-opengl
+    # and are screwed here anyway.
     if os.name == 'posix':
-        gl_config = os.popen(WX_CONFIG + ' --gl-libs', 'r').read()[:-1]
-        gl_lflags = string.split(gl_config) + lflags
-        gl_libs = libs
-    else:
-        other_sources = [opj(location, 'msw/myglcanvas.cpp')]
-        gl_libs = libs + ['opengl32', 'glu32']
-        gl_lflags = lflags
+            gl_libs = ['GL', 'GLU']
 
     ext = Extension('glcanvasc',
-                    swig_sources + other_sources,
+                    swig_sources,
 
                     include_dirs = includes,
                     define_macros = defines,
 
                     library_dirs = libdirs,
-                    libraries = gl_libs,
+                    libraries = libs + gl_libs,
 
                     extra_compile_args = cflags,
-                    extra_link_args = gl_lflags,
+                    extra_link_args = lflags,
                     )
 
     wxpExtensions.append(ext)
@@ -479,10 +359,10 @@ if BUILD_GLCANVAS or GL_ONLY:
 #----------------------------------------------------------------------
 
 if not GL_ONLY and BUILD_OGL:
-    msg('Preparing OGL...')
+    print 'Preparing OGL...'
     location = 'contrib/ogl'
-    OGLLOC = opj(location, 'contrib/src/ogl')
-    OGLINC = opj(location, 'contrib/include')
+    OGLLOC = location + '/contrib/src/ogl'
+    OGLINC = location + '/contrib/include'
 
     swig_files = ['ogl.i', 'oglbasic.i', 'oglshapes.i', 'oglshapes2.i',
                   'oglcanvas.i']
@@ -490,10 +370,10 @@ if not GL_ONLY and BUILD_OGL:
     swig_sources = run_swig(swig_files, location, '', PKGDIR,
                             USE_SWIG, swig_force, swig_args)
 
+    # make sure local copy of contrib files are up to date
     if IN_CVS_TREE:
-        # make sure local copy of contrib files are up to date
-        contrib_copy_tree(opj(CTRB_INC, 'ogl'), opj(OGLINC, 'wx/ogl'))
-        contrib_copy_tree(opj(CTRB_SRC, 'ogl'), OGLLOC)
+        contrib_copy_tree(WXDIR + '/contrib/include/wx/ogl', OGLINC+'/wx/ogl')
+        contrib_copy_tree(WXDIR + '/contrib/src/ogl', OGLLOC)
 
     ext = Extension('oglc', ['%s/basic.cpp' % OGLLOC,
                              '%s/bmpshape.cpp' % OGLLOC,
@@ -528,40 +408,26 @@ if not GL_ONLY and BUILD_OGL:
 #----------------------------------------------------------------------
 
 if not GL_ONLY and BUILD_STC:
-    msg('Preparing STC...')
+    print 'Preparing STC...'
     location = 'contrib/stc'
-    STCLOC = opj(location, 'contrib/src/stc')
-    STCINC = opj(location, 'contrib/include')
-    STC_H =  opj(location, 'contrib/include/wx/stc')
+    STCLOC = location + '/contrib/src/stc'
+    STCINC = location + '/contrib/include'
+    STC_H =  location + '/contrib/include/wx/stc'
 
+    # make sure local copy of contrib files are up to date
     if IN_CVS_TREE:
-        # Check if gen_iface needs to be run for the wxSTC sources
-        if (newer(opj(CTRB_SRC, 'stc/stc.h.in'),     opj(CTRB_INC, 'stc/stc.h'  )) or
-            newer(opj(CTRB_SRC, 'stc/stc.cpp.in'),   opj(CTRB_SRC, 'stc/stc.cpp')) or
-            newer(opj(CTRB_SRC, 'stc/gen_iface.py'), opj(CTRB_SRC, 'stc/stc.cpp'))):
-
-            msg('Running gen_iface.py, regenerating stc.h and stc.cpp...')
-            cwd = os.getcwd()
-            os.chdir(opj(CTRB_SRC, 'stc'))
-            import gen_iface
-            gen_iface.main([])
-            os.chdir(cwd)
-
-
-        # make sure local copy of contrib files are up to date
-        contrib_copy_tree(opj(CTRB_INC, 'stc'), opj(STCINC, 'wx/stc'))
-        contrib_copy_tree(opj(CTRB_SRC, 'stc'), STCLOC)
-
+        contrib_copy_tree(WXDIR + '/contrib/include/wx/stc', STCINC+'/wx/stc')
+        contrib_copy_tree(WXDIR + '/contrib/src/stc', STCLOC)
 
 
     swig_files = ['stc_.i']
-    swig_sources = run_swig(swig_files, location, GENDIR, PKGDIR,
+    swig_sources = run_swig(swig_files, location, '', PKGDIR,
                             USE_SWIG, swig_force,
                             swig_args + ['-I'+STC_H, '-I'+location],
-                            [opj(STC_H, 'stc.h')])
+                            [STC_H+'/stc.h'])
 
-    # copy a contrib project specific py module to the main package dir
-    copy_file(opj(location, 'stc.py'), PKGDIR, update=1, verbose=0)
+    # copy a project specific py module to the main package dir
+    copy_file(location+'/stc.py', PKGDIR, update=1, verbose=1)
 
     # add some include dirs to the standard set
     stc_includes = includes[:]
@@ -581,37 +447,27 @@ if not GL_ONLY and BUILD_STC:
                      '%s/scintilla/src/CellBuffer.cxx' % STCLOC,
                      '%s/scintilla/src/ContractionState.cxx' % STCLOC,
                      '%s/scintilla/src/Document.cxx' % STCLOC,
-                     '%s/scintilla/src/DocumentAccessor.cxx' % STCLOC,
                      '%s/scintilla/src/Editor.cxx' % STCLOC,
                      '%s/scintilla/src/Indicator.cxx' % STCLOC,
                      '%s/scintilla/src/KeyMap.cxx' % STCLOC,
                      '%s/scintilla/src/KeyWords.cxx' % STCLOC,
                      '%s/scintilla/src/LineMarker.cxx' % STCLOC,
                      '%s/scintilla/src/PropSet.cxx' % STCLOC,
-                     '%s/scintilla/src/RESearch.cxx' % STCLOC,
                      '%s/scintilla/src/ScintillaBase.cxx' % STCLOC,
                      '%s/scintilla/src/Style.cxx' % STCLOC,
-                     '%s/scintilla/src/StyleContext.cxx' % STCLOC,
-                     '%s/scintilla/src/UniConversion.cxx' % STCLOC,
                      '%s/scintilla/src/ViewStyle.cxx' % STCLOC,
-                     '%s/scintilla/src/WindowAccessor.cxx' % STCLOC,
-
-                     '%s/scintilla/src/LexAda.cxx' % STCLOC,
-                     '%s/scintilla/src/LexAVE.cxx' % STCLOC,
                      '%s/scintilla/src/LexCPP.cxx' % STCLOC,
-                     '%s/scintilla/src/LexConf.cxx' % STCLOC,
-                     '%s/scintilla/src/LexCrontab.cxx' % STCLOC,
-                     '%s/scintilla/src/LexEiffel.cxx' % STCLOC,
                      '%s/scintilla/src/LexHTML.cxx' % STCLOC,
-                     '%s/scintilla/src/LexLisp.cxx' % STCLOC,
                      '%s/scintilla/src/LexLua.cxx' % STCLOC,
                      '%s/scintilla/src/LexOthers.cxx' % STCLOC,
-                     '%s/scintilla/src/LexPascal.cxx' % STCLOC,
                      '%s/scintilla/src/LexPerl.cxx' % STCLOC,
                      '%s/scintilla/src/LexPython.cxx' % STCLOC,
-                     '%s/scintilla/src/LexRuby.cxx' % STCLOC,
                      '%s/scintilla/src/LexSQL.cxx' % STCLOC,
                      '%s/scintilla/src/LexVB.cxx' % STCLOC,
+                     '%s/scintilla/src/DocumentAccessor.cxx' % STCLOC,
+                     '%s/scintilla/src/UniConversion.cxx' % STCLOC,
+                     '%s/scintilla/src/WindowAccessor.cxx' % STCLOC,
+                     '%s/scintilla/src/PosRegExp.cxx' % STCLOC,
 
                      '%s/PlatWX.cpp' % STCLOC,
                      '%s/ScintillaWX.cpp' % STCLOC,
@@ -633,221 +489,6 @@ if not GL_ONLY and BUILD_STC:
 
 
 #----------------------------------------------------------------------
-# Define the IEWIN extension module (experimental)
-#----------------------------------------------------------------------
-
-if not GL_ONLY and BUILD_IEWIN:
-    msg('Preparing IEWIN...')
-    location = 'contrib/iewin'
-
-    swig_files = ['iewin.i', ]
-
-    swig_sources = run_swig(swig_files, location, '', PKGDIR,
-                            USE_SWIG, swig_force, swig_args)
-
-
-    ext = Extension('iewinc', ['%s/IEHtmlWin.cpp' % location,
-                             ] + swig_sources,
-
-                    include_dirs =  includes,
-                    define_macros = defines,
-
-                    library_dirs = libdirs,
-                    libraries = libs,
-
-                    extra_compile_args = cflags,
-                    extra_link_args = lflags,
-                    )
-
-    wxpExtensions.append(ext)
-
-
-#----------------------------------------------------------------------
-# Define the XRC extension module
-#----------------------------------------------------------------------
-
-if not GL_ONLY and BUILD_XRC:
-    msg('Preparing XRC...')
-    location = 'contrib/xrc'
-    XMLLOC = opj(location, 'contrib/src/xrc')
-    XMLINC = opj(location, 'contrib/include')
-
-    swig_files = ['xrc.i']
-
-    swig_sources = run_swig(swig_files, location, '', PKGDIR,
-                            USE_SWIG, swig_force, swig_args)
-
-    xmlres_includes = includes[:]
-    xmlres_includes.append('%s/expat/xmlparse' % XMLLOC)
-    xmlres_includes.append('%s/expat/xmltok' % XMLLOC)
-    xmlres_includes.append(XMLINC)
-
-
-    # make sure local copy of contrib files are up to date
-    if IN_CVS_TREE:
-        contrib_copy_tree(opj(CTRB_INC, 'xrc'), opj(XMLINC, 'wx/xrc'))
-        contrib_copy_tree(opj(CTRB_SRC, 'xrc'), XMLLOC)
-
-    ext = Extension('xrcc', ['%s/expat/xmlparse/xmlparse.c' % XMLLOC,
-                                '%s/expat/xmltok/xmlrole.c' % XMLLOC,
-                                '%s/expat/xmltok/xmltok.c' % XMLLOC,
-
-                                '%s/xh_bmp.cpp' % XMLLOC,
-                                '%s/xh_bmpbt.cpp' % XMLLOC,
-                                '%s/xh_bttn.cpp' % XMLLOC,
-                                '%s/xh_cald.cpp' % XMLLOC,
-                                '%s/xh_chckb.cpp' % XMLLOC,
-
-                                '%s/xh_chckl.cpp' % XMLLOC,
-                                '%s/xh_choic.cpp' % XMLLOC,
-                                '%s/xh_combo.cpp' % XMLLOC,
-                                '%s/xh_dlg.cpp' % XMLLOC,
-                                '%s/xh_frame.cpp' % XMLLOC,
-
-                                '%s/xh_gauge.cpp' % XMLLOC,
-                                '%s/xh_html.cpp' % XMLLOC,
-                                '%s/xh_listb.cpp' % XMLLOC,
-                                '%s/xh_listc.cpp' % XMLLOC,
-                                '%s/xh_menu.cpp' % XMLLOC,
-
-                                '%s/xh_notbk.cpp' % XMLLOC,
-                                '%s/xh_panel.cpp' % XMLLOC,
-                                '%s/xh_radbt.cpp' % XMLLOC,
-                                '%s/xh_radbx.cpp' % XMLLOC,
-                                '%s/xh_scrol.cpp' % XMLLOC,
-
-                                '%s/xh_sizer.cpp' % XMLLOC,
-                                '%s/xh_slidr.cpp' % XMLLOC,
-                                '%s/xh_spin.cpp' % XMLLOC,
-                                '%s/xh_stbmp.cpp' % XMLLOC,
-                                '%s/xh_stbox.cpp' % XMLLOC,
-
-                                '%s/xh_stlin.cpp' % XMLLOC,
-                                '%s/xh_sttxt.cpp' % XMLLOC,
-                                '%s/xh_text.cpp' % XMLLOC,
-                                '%s/xh_toolb.cpp' % XMLLOC,
-                                '%s/xh_tree.cpp' % XMLLOC,
-
-                                '%s/xh_unkwn.cpp' % XMLLOC,
-                                '%s/xml.cpp' % XMLLOC,
-                                '%s/xmlbin.cpp' % XMLLOC,
-                                '%s/xmlbinz.cpp' % XMLLOC,
-                                '%s/xmlexpat.cpp' % XMLLOC,
-
-                                '%s/xmlres.cpp' % XMLLOC,
-                                '%s/xmlrsall.cpp' % XMLLOC,
-                                '%s/xmlwrite.cpp' % XMLLOC,
-
-                             ] + swig_sources,
-
-                    include_dirs =  xmlres_includes,
-                    define_macros = defines,
-
-                    library_dirs = libdirs,
-                    libraries = libs,
-
-                    extra_compile_args = cflags,
-                    extra_link_args = lflags,
-                    )
-
-    wxpExtensions.append(ext)
-
-
-
-#----------------------------------------------------------------------
-# Define the GIZMOS  extension module
-#----------------------------------------------------------------------
-
-if not GL_ONLY and BUILD_GIZMOS:
-    msg('Preparing GIZMOS...')
-    location = 'contrib/gizmos'
-    GIZMOLOC = opj(location, 'contrib/src/gizmos')
-    GIZMOINC = opj(location, 'contrib/include')
-
-    swig_files = ['gizmos.i']
-
-    swig_sources = run_swig(swig_files, location, '', PKGDIR,
-                            USE_SWIG, swig_force, swig_args)
-
-    gizmos_includes = includes[:]
-    gizmos_includes.append(GIZMOINC)
-
-
-    # make sure local copy of contrib files are up to date
-    if IN_CVS_TREE:
-        contrib_copy_tree(opj(CTRB_INC, 'gizmos'), opj(GIZMOINC, 'wx/gizmos'))
-        contrib_copy_tree(opj(CTRB_SRC, 'gizmos'), GIZMOLOC)
-
-    ext = Extension('gizmosc', [
-                                '%s/dynamicsash.cpp' % GIZMOLOC,
-                                '%s/editlbox.cpp' % GIZMOLOC,
-                                #'%s/multicell.cpp' % GIZMOLOC,
-                                '%s/splittree.cpp' % GIZMOLOC,
-                                '%s/ledctrl.cpp'   % GIZMOLOC,
-                             ] + swig_sources,
-
-                    include_dirs =  gizmos_includes,
-                    define_macros = defines,
-
-                    library_dirs = libdirs,
-                    libraries = libs,
-
-                    extra_compile_args = cflags,
-                    extra_link_args = lflags,
-                    )
-
-    wxpExtensions.append(ext)
-
-
-
-#----------------------------------------------------------------------
-# Define the DLLWIDGET  extension module
-#----------------------------------------------------------------------
-
-if not GL_ONLY and BUILD_DLLWIDGET:
-    msg('Preparing DLLWIDGET...')
-    location = 'contrib/dllwidget'
-    swig_files = ['dllwidget_.i']
-
-    swig_sources = run_swig(swig_files, location, '', PKGDIR,
-                            USE_SWIG, swig_force, swig_args)
-
-    # copy a contrib project specific py module to the main package dir
-    copy_file(opj(location, 'dllwidget.py'), PKGDIR, update=1, verbose=0)
-
-    ext = Extension('dllwidget_c', [
-                                '%s/dllwidget.cpp' % location,
-                             ] + swig_sources,
-
-                    include_dirs =  includes,
-                    define_macros = defines,
-
-                    library_dirs = libdirs,
-                    libraries = libs,
-
-                    extra_compile_args = cflags,
-                    extra_link_args = lflags,
-                    )
-
-    wxpExtensions.append(ext)
-
-
-#----------------------------------------------------------------------
-# Tools and scripts
-#----------------------------------------------------------------------
-
-TOOLS = [("wxPython/tools",        glob.glob("tools/*.py")),
-         ("wxPython/tools/XRCed",  glob.glob("tools/XRCed/*.py") +
-                                   glob.glob("tools/XRCed/*.xrc") +
-                                   ["tools/XRCed/CHANGES",
-                                    "tools/XRCed/TODO",
-                                    "tools/XRCed/README"]),
-         ]
-
-
-
-
-#----------------------------------------------------------------------
 # Do the Setup/Build/Install/Whatever
 #----------------------------------------------------------------------
 
@@ -865,14 +506,10 @@ if __name__ == "__main__":
               packages = [PKGDIR,
                           PKGDIR+'.lib',
                           PKGDIR+'.lib.editor',
-                          PKGDIR+'.lib.mixins',
-                          PKGDIR+'.lib.PyCrust',
                           ],
 
               ext_package = PKGDIR,
               ext_modules = wxpExtensions,
-
-              ##data_files = TOOLS,
               )
 
     else:
@@ -889,7 +526,6 @@ if __name__ == "__main__":
 
               ext_package = PKGDIR,
               ext_modules = wxpExtensions,
-
               )
 
 

@@ -40,25 +40,25 @@ class wxPNGReader
 protected:
   int filetype;
   char filename[255];
-  ImagePointerType RawImage;  	//  Image data
+  ImagePointerType RawImage;  		//  Image data
 
-  int Width, Height;   	        //  Dimensions
-  int Depth;	 		// (bits x pixel)
-  int ColorType;		// Bit 1 = Palette used
-				// Bit 2 = Color used
-				// Bit 3 = Alpha used
+  int Width, Height;   		//  Dimensions
+  int Depth;	 				// (bits x pixel)
+  int ColorType;				// Bit 1 = Palette used
+									// Bit 2 = Color used
+									// Bit 3 = Alpha used
 
-  long EfeWidth;	 	// Efective Width
+  long EfeWidth;	 			// Efective Width
 
   GWorldPtr lpbi;
   int bgindex;
-  wxPalette* m_palette;
+  wxPalette* Palette;
   bool imageOK;
 friend class wxPNGReaderIter;
 public:
   wxPNGReader(void);
   wxPNGReader (char* ImageFileName);     // Read an image file
-  virtual ~wxPNGReader ();
+  ~wxPNGReader ();
 
   void Create(int width, int height, int deep, int colortype=-1);
 
@@ -80,7 +80,7 @@ public:
   bool SetPalette(wxPalette* colourmap);
   bool SetPalette(int n, rgb_color_struct *rgb_struct);
   bool SetPalette(int n, byte *r, byte *g=0, byte *b=0);
-  wxPalette* GetPalette() const { return m_palette; }
+  wxPalette* GetPalette() const { return Palette; }
 
   void NullData();
   inline int GetBGIndex(void) { return bgindex; }

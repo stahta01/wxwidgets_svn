@@ -33,141 +33,103 @@ END_EVENT_TABLE()
 // Item members
 wxControl::wxControl()
 {
+  m_backgroundColour = *wxWHITE;
+  m_foregroundColour = *wxBLACK;
 
 #if WXWIN_COMPATIBILITY
   m_callback = 0;
 #endif // WXWIN_COMPATIBILITY
-} // end of wxControl::wxControl
+}
 
-bool wxControl::Create(
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, long                              lStyle
+bool wxControl::Create(wxWindow *parent, wxWindowID id,
+                       const wxPoint& pos,
+                       const wxSize& size, long style,
 #if wxUSE_VALIDATORS
-, const wxValidator&                rValidator
+                       const wxValidator& validator,
 #endif
-, const wxString&                   rsName
-)
+                       const wxString& name)
 {
-    bool                            bRval = wxWindow::Create( pParent
-                                                             ,vId
-                                                             ,rPos
-                                                             ,rSize
-                                                             ,lStyle
-                                                             ,rsName
-                                                            );
-    if (bRval)
-    {
+    bool rval = wxWindow::Create(parent, id, pos, size, style, name);
+    if (rval) {
 #if wxUSE_VALIDATORS
-        SetValidator(rValidator);
+        SetValidator(validator);
 #endif
     }
-    return bRval;
-} // end of wxControl::Create
+    return rval;
+}
 
 wxControl::~wxControl()
 {
     m_isBeingDeleted = TRUE;
 }
 
-bool wxControl::OS2CreateControl(
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, long                              lStyle
-#if wxUSE_VALIDATORS
-, const wxValidator&                rValidator
-#endif
-, const wxString&                   rsName
-)
+bool wxControl::OS2CreateControl(const wxChar *classname,
+                                 WXDWORD style,
+                                 const wxPoint& pos,
+                                 const wxSize& size,
+                                 const wxString& label,
+                                 WXDWORD exstyle)
 {
-    //
-    // Even if it's possible to create controls without parents in some port,
-    // it should surely be discouraged because it doesn't work at all under
-    // Windows
-    //
-    if (!CreateBase( pParent
-                    ,vId
-                    ,rPos
-                    ,rSize
-                    ,lStyle
-#if wxUSE_VALIDATORS
-                    ,rValidator
-#endif
-                    ,rsName
-                   ))
-        return FALSE;
-    pParent->AddChild(this);
-    return TRUE;
-} // end of wxControl::OS2CreateControl
+    // VZ: if someone could put a comment here explaining what exactly this is
+    //     needed for, it would be nice...
+    bool want3D;
 
-bool wxControl::OS2CreateControl(
-  const wxChar*                     zClassname
-, WXDWORD                           dwStyle
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, const wxString&                   rsLabel
-, WXDWORD                           dwExstyle
-)
-{
-    //
-    // Doesn't do anything at all under OS/2
-    //
-    if (dwExstyle == (WXDWORD)-1)
+    // if no extended style given, determine it ourselves
+    if ( exstyle == (WXDWORD)-1 )
     {
-        dwExstyle = GetExStyle(dwStyle);
+        exstyle = GetExStyle(style);
     }
+
+// TODO:
+/*
+    // all controls have these childs (wxWindows creates all controls visible
+    // by default)
+    style |= WS_CHILD | WS_VISIBLE;
+
+    m_hWnd = (WXHWND)::CreateWindowEx
+                       (
+                        exstyle,            // extended style
+                        classname,          // the kind of control to create
+                        label,              // the window name
+                        style,              // the window style
+                        pos.x, pos.y,       // the window position
+                        size.x, size.y,     //            and size
+                        GetHwndOf(GetParent()),  // parent
+                        (HMENU)GetId(),     // child id
+                        wxGetInstance(),    // app instance
+                        NULL                // creation parameters
+                       );
 
     if ( !m_hWnd )
     {
 #ifdef __WXDEBUG__
-        wxLogError(wxT("Failed to create a control of class '%s'"), zClassname);
+        wxLogError(wxT("Failed to create a control of class '%s'"), classname);
 #endif // DEBUG
 
         return FALSE;
     }
 
-    PSZ                             zClass;
+#if wxUSE_CTL3D
+    if ( want3D )
+    {
+        Ctl3dSubclassCtl(GetHwnd());
+        m_useCtl3D = TRUE;
+    }
+#endif // wxUSE_CTL3D
 
-    if ((strcmp(zClassname, "COMBOBOX")) == 0)
-        zClass = WC_COMBOBOX;
-    else if ((strcmp(zClassname, "STATIC")) == 0)
-        zClass = WC_STATIC;
-    dwStyle |= WS_VISIBLE;
-    m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(GetParent()) // Parent window handle
-                                       ,(PSZ)zClassname              // Window class
-                                       ,(PSZ)rsLabel.c_str()         // Initial Text
-                                       ,(ULONG)dwStyle               // Style flags
-                                       ,(LONG)0                      // X pos of origin
-                                       ,(LONG)0                      // Y pos of origin
-                                       ,(LONG)0                      // control width
-                                       ,(LONG)0                      // control height
-                                       ,(HWND)GetHwndOf(GetParent()) // owner window handle (same as parent
-                                       ,HWND_TOP                     // initial z position
-                                       ,(ULONG)GetId()               // Window identifier
-                                       ,NULL                         // no control data
-                                       ,NULL                         // no Presentation parameters
-                                      );
-
-    //
-    // Subclass again for purposes of dialog editing mode
-    //
+    // subclass again for purposes of dialog editing mode
     SubclassWin(m_hWnd);
 
-    //
-    // Controls use the same font and colours as their parent dialog by default
-    //
+    // controls use the same font and colours as their parent dialog by default
     InheritAttributes();
+*/
     return TRUE;
-} // end of wxControl::OS2CreateControl
+}
 
 wxSize wxControl::DoGetBestSize() const
 {
     return wxSize(DEFAULT_ITEM_WIDTH, DEFAULT_ITEM_HEIGHT);
-} // end of wxControl::DoGetBestSize
+}
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
@@ -184,57 +146,92 @@ bool wxControl::ProcessCommand(wxCommandEvent& event)
     return GetEventHandler()->ProcessEvent(event);
 }
 
-WXHBRUSH wxControl::OnCtlColor(
-  WXHDC                             hWxDC
-, WXHWND                            hWnd
-, WXUINT                            uCtlColor
-, WXUINT                            uMessage
-, WXWPARAM                          wParam
-, WXLPARAM                          lParam
-)
+bool wxControl::OS2OnNotify(int idCtrl,
+                            WXLPARAM lParam,
+                            WXLPARAM* result)
 {
-    HPS                             hPS = (HPS)hWxDC; // pass in a PS handle in OS/2
-    wxColour                        vColFore = GetForegroundColour();
-    wxColour                        vColBack = GetBackgroundColour();
+    wxCommandEvent event(wxEVT_NULL, m_windowId);
+    wxEventType eventType = wxEVT_NULL;
+/* TODO:
+    NMHDR *hdr1 = (NMHDR*) lParam;
+    switch ( hdr1->code )
+    {
+        case NM_CLICK:
+            eventType = wxEVT_COMMAND_LEFT_CLICK;
+            break;
 
-    if (GetParent()->GetTransparentBackground())
-        ::GpiSetBackMix(hPS, BM_LEAVEALONE);
-    else
-        ::GpiSetBackMix(hPS, BM_OVERPAINT);
+        case NM_DBLCLK:
+            eventType = wxEVT_COMMAND_LEFT_DCLICK;
+            break;
 
-    ::GpiSetBackColor(hPS, vColBack.GetPixel());
-    ::GpiSetColor(hPS, vColFore.GetPixel());
+        case NM_RCLICK:
+            eventType = wxEVT_COMMAND_RIGHT_CLICK;
+            break;
 
-    wxBrush*                        pBrush = wxTheBrushList->FindOrCreateBrush( vColBack
-                                                                               ,wxSOLID
-                                                                              );
-    return (WXHBRUSH)pBrush->GetResourceHandle();
-} // end of wxControl::OnCtlColor
+        case NM_RDBLCLK:
+            eventType = wxEVT_COMMAND_RIGHT_DCLICK;
+            break;
 
-void wxControl::OnEraseBackground(
-  wxEraseEvent&                     rEvent
-)
+        case NM_SETFOCUS:
+            eventType = wxEVT_COMMAND_SET_FOCUS;
+            break;
+
+        case NM_KILLFOCUS:
+            eventType = wxEVT_COMMAND_KILL_FOCUS;
+            break;
+
+        case NM_RETURN:
+            eventType = wxEVT_COMMAND_ENTER;
+            break;
+
+        default:
+            return wxWindow::OS2OnNotify(idCtrl, lParam, result);
+    }
+*/
+    event.SetEventType(eventType);
+    event.SetEventObject(this);
+
+    return GetEventHandler()->ProcessEvent(event);
+}
+
+void wxControl::OnEraseBackground(wxEraseEvent& event)
 {
-    RECTL                           vRect;
-    HPS                             hPS = rEvent.GetDC()->GetHPS();
-    SIZEL                           vSize = {0,0};
+    // In general, you don't want to erase the background of a control,
+    // or you'll get a flicker.
+    // TODO: move this 'null' function into each control that
+    // might flicker.
 
-    ::GpiSetPS(hPS, &vSize, PU_PELS | GPIF_DEFAULT);
-    ::WinQueryWindowRect((HWND)GetHwnd(), &vRect);
-    ::WinFillRect(hPS, &vRect, GetBackgroundColour().GetPixel());
-} // end of wxControl::OnEraseBackground
+    RECT rect;
+/*
+* below is msw code.
+* TODO: convert to PM Code
+*   ::GetClientRect((HWND) GetHWND(), &rect);
+*
+*   HBRUSH hBrush = ::CreateSolidBrush(PALETTERGB(GetBackgroundColour().Red(),
+*                                                 GetBackgroundColour().Green(),
+*                                                 GetBackgroundColour().Blue()));
+*   int mode = ::SetMapMode((HDC) event.GetDC()->GetHDC(), MM_TEXT);
+*
+*   ::FillRect ((HDC) event.GetDC()->GetHDC(), &rect, hBrush);
+*   ::DeleteObject(hBrush);
+*   ::SetMapMode((HDC) event.GetDC()->GetHDC(), mode);
+*/
+}
 
-WXDWORD wxControl::GetExStyle(
-  WXDWORD&                          rStyle
-) const
+WXDWORD wxControl::GetExStyle(WXDWORD& style) const
 {
-    //
-    // Meaningless under OS/2, just return what was sent
-    //
-    WXDWORD                         exStyle = rStyle;
+    bool want3D;
+    WXDWORD exStyle = Determine3DEffects(WS_EX_CLIENTEDGE, &want3D) ;
+
+    // Even with extended styles, need to combine with FS_BORDER
+    // for them to look right.  Check it out later, base window style does
+    // not designate BORDERS.  Down in Frame and And controls.
+
+    if ( want3D || wxStyleHasBorder(m_windowStyle) )
+        style |= FS_BORDER;
 
     return exStyle;
-} // end of wxControl::GetExStyle
+}
 
 // ---------------------------------------------------------------------------
 // global functions
@@ -245,32 +242,28 @@ WXDWORD wxControl::GetExStyle(
 // Call it initially with -1 for all values in rect.
 // Keep calling for other widgets, and rect will be modified
 // to calculate largest bounding rectangle.
-void wxFindMaxSize(
-  WXHWND                            hWnd
-, RECT*                             pRect
-)
+void wxFindMaxSize(WXHWND wnd, RECT *rect)
 {
-    int                             nLeft = pRect->xLeft;
-    int                             nRight = pRect->xRight;
-    int                             nTop = pRect->yTop;
-    int                             nBottom = pRect->yBottom;
+    int left = rect->xLeft;
+    int right = rect->xRight;
+    int top = rect->yTop;
+    int bottom = rect->yBottom;
 
-    ::WinQueryWindowRect((HWND)hWnd, pRect);
+    ::WinQueryWindowRect((HWND) wnd, rect);
 
-    if (nLeft < 0)
+    if (left < 0)
         return;
 
-    if (nLeft < pRect->xLeft)
-        pRect->xLeft = nLeft;
+    if (left < rect->xLeft)
+        rect->xLeft = left;
 
-    if (nRight > pRect->xRight)
-        pRect->xRight = nRight;
+    if (right > rect->xRight)
+        rect->xRight = right;
 
-    if (nTop < pRect->yTop)
-        pRect->yTop = nTop;
+    if (top < rect->yTop)
+        rect->yTop = top;
 
-    if (nBottom > pRect->yBottom)
-        pRect->yBottom = nBottom;
-} // end of wxFindMaxSize
-
+    if (bottom > rect->yBottom)
+        rect->yBottom = bottom;
+}
 

@@ -15,7 +15,26 @@
 #pragma interface
 #endif
 
+#include "wx/defs.h"
+
+#if wxUSE_RADIOBOX
+
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/control.h"
 #include "wx/bitmap.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class wxRadioBox;
+
+//-----------------------------------------------------------------------------
+// global data
+//-----------------------------------------------------------------------------
+
+extern const char *wxRadioBoxNameStr;
 
 //-----------------------------------------------------------------------------
 // wxRadioBox
@@ -78,8 +97,7 @@ public:
     virtual wxString GetStringSelection() const;
     virtual bool SetStringSelection( const wxString& s );
     
-    int Number() const;
-    int GetCount() const { return Number(); }
+    virtual int Number() const;
     int GetNumberOfRowsOrCols() const;
     void SetNumberOfRowsOrCols( int n );
     
@@ -99,6 +117,7 @@ public:
     virtual void DoSetSize( int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO );
     virtual void OnInternalIdle();
     
+    bool             m_alreadySent;
     bool             m_hasFocus,
                      m_lostFocus;
     int              m_majorDim;
@@ -111,5 +130,7 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS(wxRadioBox)
 };
+
+#endif
 
 #endif // __GTKRADIOBOXH__

@@ -19,9 +19,7 @@
 #include <memory.h>
 #include <string.h>  // imports memmove()
 #include <stddef.h>
-#if !defined(__WXMAC__) || defined(__DARWIN__)
-#  include <sys/types.h>
-#endif
+#include <sys/types.h>
 #include <limits.h>
 #include <new>
 

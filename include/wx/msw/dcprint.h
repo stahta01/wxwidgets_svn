@@ -21,9 +21,11 @@
 #include "wx/dc.h"
 #include "wx/cmndata.h"
 
-class WXDLLEXPORT wxPrinterDC : public wxDC
+class WXDLLEXPORT wxPrinterDC: public wxDC
 {
 public:
+DECLARE_CLASS(wxPrinterDC)
+
     // Create a printer DC (obsolete function: use wxPrintData version now)
     wxPrinterDC(const wxString& driver, const wxString& device, const wxString& output, bool interactive = TRUE, int orientation = wxPORTRAIT);
 
@@ -31,6 +33,8 @@ public:
     wxPrinterDC(const wxPrintData& data);
 
     wxPrinterDC(WXHDC theDC);
+
+    ~wxPrinterDC(void);
 
     // override some base class virtuals
     virtual bool StartDoc(const wxString& message);
@@ -44,15 +48,9 @@ protected:
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest,
                         wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
-                        int rop = wxCOPY, bool useMask = FALSE, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
-
-    // init the dc
-    void Init();
+                        int rop = wxCOPY, bool useMask = FALSE);
 
     wxPrintData m_printData;
-
-private:
-    DECLARE_CLASS(wxPrinterDC)
 };
 
 // Gets an HDC for the default printer configuration

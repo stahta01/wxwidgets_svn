@@ -72,26 +72,6 @@ int             hugeFont1 = 20;
 int             HugeFont2 = 24;
 int             HUGEFont3 = 28;
 
-// All of these tokens MUST be found on a line by themselves (no other
-// text) and must start at the first character of the line, or tex2rtf
-// will fail to process them correctly (a limitation of tex2rtf, not TeX)
-static const wxString syntaxTokens[] =
-{ "\\begin{verbatim}",
-  "\\begin{toocomplex}",
-  "\\end{verbatim}",
-  "\\end{toocomplex}",
-  "\\verb",
-  "\\begin{comment}",
-  "\\end{comment}",
-  "\\verbatiminput",
-//  "\\par",
-  "\\input",
-  "\\helpinput",
-  "\\include",
-  wxEmptyString
-};
-
-
 /*
  * USER-ADJUSTABLE SETTINGS
  *
@@ -108,8 +88,6 @@ bool            winHelp = FALSE;  // Output in Windows Help format if TRUE, line
 bool            isInteractive = FALSE;
 bool            runTwice = FALSE;
 int             convertMode = TEX_RTF;
-bool            checkCurleyBraces = FALSE;
-bool            checkSyntax = FALSE;
 bool            headerRule = FALSE;
 bool            footerRule = FALSE;
 bool            compatibilityMode = FALSE; // If TRUE, maximum Latex compatibility
@@ -144,11 +122,6 @@ char            *linkColourString = NULL;
 char            *followedLinkColourString = NULL;
 bool            combineSubSections = FALSE;
 bool            htmlWorkshopFiles = FALSE;
-bool            ignoreBadRefs = FALSE;
-
-extern int passNumber;
-
-extern wxHashTable TexReferences;
 
 /*
  * International support
@@ -218,34 +191,7 @@ TexMacroDef *VerbatimMacroDef = NULL;
 
 #define IncrementLineNumber() LineNumbers[CurrentInputIndex] ++
 
-
-TexRef::TexRef(const char *label, const char *file,
-	       const char *section, const char *sectionN)
-{
-    refLabel = copystring(label);
-    refFile = file ? copystring(file) : (char*) NULL;
-    sectionNumber = section ? copystring(section) : copystring("??");
-    sectionName = sectionN ? copystring(sectionN) : copystring("??");
-}
-
-TexRef::~TexRef(void)
-{
-    delete [] refLabel;      refLabel = NULL;
-    delete [] refFile;       refFile = NULL;
-    delete [] sectionNumber; sectionNumber = NULL;
-    delete [] sectionName;   sectionName = NULL;
-}
-
-
-CustomMacro::~CustomMacro()
-{
-    if (macroName)
-        delete [] macroName;
-    if (macroBody)
-        delete [] macroBody;
-}
-
-void TexOutput(const char *s, bool ordinaryText)
+void TexOutput(char *s, bool ordinaryText)
 {
   int len = strlen(s);
 
@@ -276,19 +222,19 @@ void TexOutput(const char *s, bool ordinaryText)
 
 void ForbidWarning(TexMacroDef *def)
 {
-  wxString informBuf;
+  char buf[100];
   switch (def->forbidden)
   {
     case FORBID_WARN:
     {
-      informBuf.Printf("Warning: it is recommended that command %s is not used.", def->name);
-      OnInform((char *)informBuf.c_str());
+      sprintf(buf, "Warning: it is recommended that command %s is not used.", def->name);
+      OnInform(buf);
       break;
     }
     case FORBID_ABSOLUTELY:
     {
-      informBuf.Printf("Error: command %s cannot be used and will lead to errors.", def->name);
-      OnInform((char *)informBuf.c_str());
+      sprintf(buf, "Error: command %s cannot be used and will lead to errors.", def->name);
+      OnInform(buf);
       break;
     }
     default:
@@ -419,10 +365,10 @@ bool readInVerbatim = FALSE;  // Within a verbatim, but not nec. verbatiminput
 
 // Switched this off because e.g. \verb${$ causes it to fail. There is no
 // detection of \verb yet.
-// #define CHECK_BRACES 1
+#define CHECK_BRACES 0
 
-unsigned long leftCurley = 0;
-unsigned long rightCurley = 0;
+unsigned long leftCurly = 0;
+unsigned long rightCurly = 0;
 static wxString currentFileName = "";
 
 bool read_a_line(char *buf)
@@ -432,47 +378,37 @@ bool read_a_line(char *buf)
     buf[0] = 0;
     return FALSE;
   }
-
+  
   int ch = -2;
-  int bufIndex = 0;
+  int i = 0;
   buf[0] = 0;
 
   while (ch != EOF && ch != 10)
   {
-    if (bufIndex >= MAX_LINE_BUFFER_SIZE)
-    {
-       wxString errBuf;
-       errBuf.Printf("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated.",
-           LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-       OnError((char *)errBuf.c_str());
-       return FALSE;
-    }
-
-    if (((bufIndex == 14) && (strncmp(buf, "\\end{verbatim}", 14) == 0)) ||
-         ((bufIndex == 16) && (strncmp(buf, "\\end{toocomplex}", 16) == 0)))
+    if (((i == 14) && (strncmp(buf, "\\end{verbatim}", 14) == 0)) ||
+         ((i == 16) && (strncmp(buf, "\\end{toocomplex}", 16) == 0)))
       readInVerbatim = FALSE;
 
     ch = getc(Inputs[CurrentInputIndex]);
 
-    if (checkCurleyBraces)
+#if CHECK_BRACES
+    if (ch == '{' && !readInVerbatim)
+       leftCurly++;
+    if (ch == '}' && !readInVerbatim)
     {
-        if (ch == '{' && !readInVerbatim)
-           leftCurley++;
-        if (ch == '}' && !readInVerbatim)
-        {
-           rightCurley++;
-           if (rightCurley > leftCurley)
-           {
-               wxString errBuf;
-               errBuf.Printf("An extra right Curley brace ('}') was detected at line %lu inside file %s",LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str());
-               OnError((char *)errBuf.c_str());
+       rightCurly++;
+       if (rightCurly > leftCurly)
+       {
+           wxString errBuf;
+           errBuf.Printf("An extra right Curly brace ('}') was detected at line %l inside file %s",LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str());
+           OnError((char *)errBuf.c_str());
 
-               // Reduce the count of right Curley braces, so the mismatched count
-               // isn't reported on every line that has a '}' after the first mismatch
-               rightCurley--;
-           }
-        }
+           // Reduce the count of right curly braces, so the mismatched count
+           // isn't reported on every line that has a '}' after the first mismatch
+           rightCurly--;
+       }
     }
+#endif
 
     if (ch != EOF)
     {
@@ -483,162 +419,79 @@ bool read_a_line(char *buf)
         if ((ch1 == 10) || (ch1 == 13))
         {
           // Eliminate newline (10) following DOS linefeed
-          if (ch1 == 13) 
-            ch1 = getc(Inputs[CurrentInputIndex]);
-          buf[bufIndex] = 0;
+          if (ch1 == 13) ch1 = getc(Inputs[CurrentInputIndex]);
+          buf[i] = 0;
           IncrementLineNumber();
 //          strcat(buf, "\\par\n");
 //          i += 6;
-          if (bufIndex+5 >= MAX_LINE_BUFFER_SIZE)
-          {
-             wxString errBuf;
-             errBuf.Printf("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated.",
-                 LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-             OnError((char *)errBuf.c_str());
-             return FALSE;
-          }
           strcat(buf, "\\par");
-          bufIndex += 5;
-
+          i += 5;
         }
         else
         {
           ungetc(ch1, Inputs[CurrentInputIndex]);
-          if (bufIndex >= MAX_LINE_BUFFER_SIZE)
-          {
-             wxString errBuf;
-             errBuf.Printf("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated.",
-                 LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-             OnError((char *)errBuf.c_str());
-             return FALSE;
-          }
-
-          buf[bufIndex] = ch;
-          bufIndex ++;
+          buf[i] = ch;
+          i ++;
         }
       }
       else
       {
 
         // Convert embedded characters to RTF equivalents
-        switch(ch)
-        {
-        case 0xf6: // ö
-        case 0xe4: // ü
-        case 0xfc: // ü
-        case 0xd6: // Ö
-        case 0xc4: // Ä
-        case 0xdc: // Ü     
-                if (bufIndex+5 >= MAX_LINE_BUFFER_SIZE)
-                {
-                   wxString errBuf;
-                   errBuf.Printf("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated.",
-                       LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-                   OnError((char *)errBuf.c_str());
-                   return FALSE;
-                }
-                buf[bufIndex++]='\\';
-                buf[bufIndex++]='"';
-                buf[bufIndex++]='{';
-                switch(ch)
-                {
-                    case 0xf6:buf[bufIndex++]='o';break; // ö
-                    case 0xe4:buf[bufIndex++]='a';break; // ä
-                    case 0xfc:buf[bufIndex++]='u';break; // ü
-                    case 0xd6:buf[bufIndex++]='O';break; // Ö
-                    case 0xc4:buf[bufIndex++]='A';break; // Ä
-                    case 0xdc:buf[bufIndex++]='U';break; // Ü                   
-                }               
-                buf[bufIndex++]='}';
-                break;
-        case 0xdf: // ß 
-            if (bufIndex+5 >= MAX_LINE_BUFFER_SIZE)
-            {
-              wxString errBuf;
-              errBuf.Printf("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated.",
-                  LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-              OnError((char *)errBuf.c_str());
-              return FALSE;
-            }
-            buf[bufIndex++]='\\';
-            buf[bufIndex++]='s';
-            buf[bufIndex++]='s';
-            buf[bufIndex++]='\\';
-            buf[bufIndex++]='/';
-            break;  
-        default:
-            if (bufIndex >= MAX_LINE_BUFFER_SIZE)
-            {
-              wxString errBuf;
-              errBuf.Printf("Line %lu of file %s is too long.  Lines can be no longer than %lu characters.  Truncated.",
-                  LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str(),MAX_LINE_BUFFER_SIZE);
-              OnError((char *)errBuf.c_str());
-              return FALSE;
-            }
-            // If the current character read in is a '_', we need to check 
-            // whether there should be a '\' before it or not
-            if (ch != '_')
-            {
-                buf[bufIndex++] = ch;
-                break;
-            }
-
-            if (checkSyntax)
-            {
-                if (readInVerbatim)
-                {
-                    // There should NOT be a '\' before the '_'
-                    if ((bufIndex > 0 && (buf[bufIndex-1] == '\\')) && (buf[0] != '%'))
-                    {
-                        wxString errBuf;
-                        errBuf.Printf("An underscore ('_') was detected at line %lu inside file %s that should NOT have a '\\' before it.",LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str());
-                        OnError((char *)errBuf.c_str());
-                    }
-                }
-                else
-                {
-                    // There should be a '\' before the '_'
-                    if (bufIndex == 0)
-                    {
-                        wxString errBuf;
-                        errBuf.Printf("An underscore ('_') was detected at line %lu inside file %s that may need a '\\' before it.",LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str());
-                        OnError((char *)errBuf.c_str());
-                    }
-                    else if ((buf[bufIndex-1] != '\\') && (buf[0] != '%') &&  // If it is a comment line, then no warnings
-                        (strncmp(buf, "\\input", 6))) // do not report filenames that have underscores in them
-                    {
-                        wxString errBuf;
-                        errBuf.Printf("An underscore ('_') was detected at line %lu inside file %s that may need a '\\' before it.",LineNumbers[CurrentInputIndex], (const char*) currentFileName.c_str());
-                        OnError((char *)errBuf.c_str());
-                    }
-                }
-            }
-            buf[bufIndex++] = ch;
-            break;
-        }  // switch
-      }  // else
+		switch(ch)
+		{
+		case 0xf6: // ö
+		case 0xe4: // ü
+		case 0xfc: // ü
+		case 0xd6: // Ö
+		case 0xc4: // Ä
+		case 0xdc: // Ü		
+				buf[i++]='\\';
+				buf[i++]='"';
+				buf[i++]='{';
+				switch(ch)
+				{
+					case 0xf6:buf[i++]='o';break; // ö
+					case 0xe4:buf[i++]='a';break; // ä
+					case 0xfc:buf[i++]='u';break; // ü
+					case 0xd6:buf[i++]='O';break; // Ö
+					case 0xc4:buf[i++]='A';break; // Ä
+					case 0xdc:buf[i++]='U';break; // Ü					
+				}				
+				buf[i++]='}';
+				break;
+		case 0xdf: // ß 
+			buf[i++]='\\';
+			buf[i++]='s';
+			buf[i++]='s';
+            buf[i++]='\\';
+            buf[i++]='/';
+			break;	
+		default:
+			buf[i++] = ch;
+			break;
+		}
+        
+      }
     }
     else
     {
-      buf[bufIndex] = 0;
+      buf[i] = 0;
       fclose(Inputs[CurrentInputIndex]);
       Inputs[CurrentInputIndex] = NULL;
       if (CurrentInputIndex > 0) 
          ch = ' '; // No real end of file
       CurrentInputIndex --;
-
-      if (checkCurleyBraces)
+#if CHECK_BRACES
+      if (leftCurly != rightCurly)
       {
-          if (leftCurley != rightCurley)
-          {
-            wxString errBuf;
-            errBuf.Printf("Curley braces do not match inside file %s\n%lu opens, %lu closes", (const char*) currentFileName.c_str(),leftCurley,rightCurley);
-            OnError((char *)errBuf.c_str());
-          }
-          leftCurley = 0;
-          rightCurley = 0;
+        wxString errBuf;
+        errBuf.Printf("Curly braces do not match inside file %s\n%lu opens, %lu closes", (const char*) currentFileName.c_str(),leftCurly,rightCurly);
+        OnError((char *)errBuf.c_str());
       }
-
+      leftCurly = 0;
+      rightCurly = 0;
+#endif
       if (readingVerbatim)
       {
         readingVerbatim = FALSE;
@@ -650,7 +503,7 @@ bool read_a_line(char *buf)
     if (ch == 10)
       IncrementLineNumber();
   }
-  buf[bufIndex] = 0;
+  buf[i] = 0;
 
   // Strip out comment environment
   if (strncmp(buf, "\\begin{comment}", 15) == 0)
@@ -665,7 +518,7 @@ bool read_a_line(char *buf)
     int wordLen = 14;
     char *fileName = buf + wordLen + 1;
 
-    int j = bufIndex - 1;
+    int j = i - 1;
     buf[j] = 0;
 
     // thing}\par -- eliminate the \par!
@@ -675,16 +528,16 @@ bool read_a_line(char *buf)
       buf[j] = 0;
     }
     
-    if (buf[j-1] == '}')
-        buf[j-1] = 0; // Ignore final brace
+    if (buf[j-1] == '}') buf[j-1] = 0; // Ignore final brace
 
     wxString actualFile = TexPathList.FindValidPath(fileName);
     currentFileName = actualFile;
     if (actualFile == "")
     {
-      wxString errBuf;
-      errBuf.Printf("Could not find file: %s",fileName);
-      OnError((char *)errBuf.c_str());
+      char errBuf[300];
+      strcpy(errBuf, "Could not find file: ");
+      strncat(errBuf, fileName, 100);
+      OnError(errBuf);
     }
     else
     {
@@ -692,7 +545,6 @@ bool read_a_line(char *buf)
       informStr.Printf("Processing: %s",actualFile.c_str());
       OnInform((char *)informStr.c_str());
       CurrentInputIndex ++;
-
       Inputs[CurrentInputIndex] = fopen(actualFile, "r");
       LineNumbers[CurrentInputIndex] = 1;
       if (FileNames[CurrentInputIndex])
@@ -728,7 +580,7 @@ bool read_a_line(char *buf)
 
     char *fileName = buf + wordLen + 1;
 
-    int j = bufIndex - 1;
+    int j = i - 1;
     buf[j] = 0;
 
     // \input{thing}\par -- eliminate the \par!
@@ -740,8 +592,7 @@ bool read_a_line(char *buf)
       buf[j] = 0;
     }
 
-    if (buf[j-1] == '}') 
-        buf[j-1] = 0; // Ignore final brace
+    if (buf[j-1] == '}') buf[j-1] = 0; // Ignore final brace
 
     // Remove backslashes from name
     wxString fileNameStr(fileName);
@@ -764,9 +615,10 @@ bool read_a_line(char *buf)
 
     if (actualFile == "")
     {
-      wxString errBuf;
-      errBuf.Printf("Could not find file: %s",fileName);
-      OnError((char *)errBuf.c_str());
+      char errBuf[300];
+      strcpy(errBuf, "Could not find file: ");
+      strncat(errBuf, fileName, 100);
+      OnError(errBuf);
     }
     else
     {
@@ -778,7 +630,6 @@ bool read_a_line(char *buf)
       informStr.Printf("Processing: %s",actualFile.c_str());
       OnInform((char *)informStr.c_str());
       CurrentInputIndex ++;
-
       Inputs[CurrentInputIndex] = fopen(actualFile, "r");
       LineNumbers[CurrentInputIndex] = 1;
       if (FileNames[CurrentInputIndex])
@@ -787,50 +638,15 @@ bool read_a_line(char *buf)
 
       if (!Inputs[CurrentInputIndex])
       {
-        wxString errBuf;
-        errBuf.Printf("Could not open include file %s", (const char*) actualFile);
+        char errBuf[300];
+        sprintf(errBuf, "Could not open include file %s", (const char*) actualFile);
         CurrentInputIndex --;
-        OnError((char *)errBuf.c_str());
+        OnError(errBuf);
       }
     }
     bool succ = read_a_line(buf);
     return succ;
   }
-
-  if (checkSyntax)
-  {
-      wxString bufStr = buf;
-      int index = 0;
-      size_t pos = 0;
-      for (index=0; syntaxTokens[index] != wxEmptyString; index++)
-      {
-          pos = bufStr.find(syntaxTokens[index]);
-          if (pos != wxString::npos && pos != 0)
-          {
-              size_t commentStart = bufStr.find("%");
-              if (commentStart == wxString::npos || commentStart > pos)
-              {
-                  wxString errBuf;
-                  if (syntaxTokens[index] == "\\verb")
-                  {
-                      errBuf.Printf("'%s$....$' was detected at line %lu inside file %s.  Please replace this form with \\tt{....}",
-                                    syntaxTokens[index].c_str(),
-                                    LineNumbers[CurrentInputIndex],
-                                    currentFileName.c_str());
-                  }
-                  else
-                  {
-                      errBuf.Printf("'%s' was detected at line %lu inside file %s that is not the only text on the line, starting at column one.",
-                                    syntaxTokens[index].c_str(),
-                                    LineNumbers[CurrentInputIndex],
-                                    currentFileName.c_str());
-                  }
-                  OnError((char *)errBuf.c_str());
-              }
-          }
-      }
-  }  // checkSyntax
-
   if (strncmp(buf, "\\begin{verbatim}", 16) == 0 ||
       strncmp(buf, "\\begin{toocomplex}", 18) == 0)
     readInVerbatim = TRUE;
@@ -838,18 +654,17 @@ bool read_a_line(char *buf)
            strncmp(buf, "\\end{toocomplex}", 16) == 0)
     readInVerbatim = FALSE;
 
-  if (checkCurleyBraces)
+#if CHECK_BRACES
+  if (ch == EOF && leftCurly != rightCurly)
   {
-      if (ch == EOF && leftCurley != rightCurley)
-      {
-        wxString errBuf;
-        errBuf.Printf("Curley braces do not match inside file %s\n%lu opens, %lu closes", (const char*) currentFileName.c_str(),leftCurley,rightCurley);
-        OnError((char *)errBuf.c_str());
-      }
+    wxString errBuf;
+    errBuf.Printf("Curly braces do not match inside file %s\n%lu opens, %lu closes", (const char*) currentFileName.c_str(),leftCurly,rightCurly);
+    OnError((char *)errBuf.c_str());
   }
+#endif
 
   return (ch == EOF);
-}  // read_a_line
+}
 
 /*
  * Parse newcommand
@@ -926,7 +741,7 @@ bool ParseNewCommand(char *buffer, int *pos)
 
 void MacroError(char *buffer)
 {
-  wxString errBuf;
+  char errBuf[300];
   char macroBuf[200];
   macroBuf[0] = '\\';
   int i = 1;
@@ -940,17 +755,9 @@ void MacroError(char *buffer)
   if (i > 20)
     macroBuf[20] = 0;
 
-  errBuf.Printf("Could not find macro: %s at line %d, file %s",
+  sprintf(errBuf, "Could not find macro: %s at line %d, file %s",
              macroBuf, (int)(LineNumbers[CurrentInputIndex]-1), FileNames[CurrentInputIndex]);
-  OnError((char *)errBuf.c_str());
-
-  if (wxStrcmp(macroBuf,"\\end{document}") == 0)
-  {
-      wxString buf;
-      buf = "Halted build due to unrecoverable error.";
-      OnInform((char *)buf.c_str());
-      stopRunning = TRUE;
-  }
+  OnError(errBuf);
 }
 
 /*
@@ -1031,9 +838,6 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
       pos = 0;
       len = strlen(buffer);
       // Check for verbatim (or toocomplex, which comes to the same thing)
-      wxString bufStr = buffer;
-//      if (bufStr.find("\\begin{verbatim}") != wxString::npos ||
-//          bufStr.find("\\begin{toocomplex}") != wxString::npos)
       if (strncmp(buffer, "\\begin{verbatim}", 16) == 0 ||
           strncmp(buffer, "\\begin{toocomplex}", 18) == 0)
       {
@@ -1052,11 +856,11 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
         while (!eof && (strncmp(buffer, "\\end{verbatim}", 14) != 0) &&
                        (strncmp(buffer, "\\end{toocomplex}", 16) != 0)
                )
-        {
+	{
           strcat(BigBuffer, buffer);
           buf_ptr += strlen(buffer);
           eof = read_a_line(buffer);
-        }
+	}
         eof = read_a_line(buffer);
         buf_ptr = 0;
 
@@ -1120,6 +924,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
         }
         pos ++;
         
+
         // Try matching \end{environment}
         if (environment && FindEndEnvironment(buffer, &pos, environment))
         {
@@ -1251,8 +1056,8 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
 
           children.Append((wxObject *)chunk);
         }
-    else
-    {
+	else
+	{
           char *env = NULL;
           bool tmpParseToBrace = TRUE;
           TexMacroDef *def = MatchMacro(buffer, &pos, &env, &tmpParseToBrace);
@@ -1261,7 +1066,6 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
           CustomMacro *customMacro = FindCustomMacro(def->name);
 
           TexChunk *chunk = new TexChunk(CHUNK_TYPE_MACRO, def);
-
           chunk->no_args = def->no_args;
 //          chunk->name = copystring(def->name);
           chunk->macroId = def->macroId;
@@ -1350,7 +1154,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
               }
             
 //            delete chunk; // Might delete children
-        }
+	    }
           }
           else
           {
@@ -1358,7 +1162,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
           }
         }
         else
-    {
+	{
          /*
           * If all else fails, we assume that we have
           * a pair of braces on their own, so return a `dummy' macro
@@ -1391,7 +1195,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
           arg->macroId = chunk->macroId;
 
           pos = ParseArg(arg, arg->children, buffer, pos, NULL, TRUE, customMacroArgs);
-    }
+	}
         break;
       }
       case '$':
@@ -1553,7 +1357,7 @@ int ParseArg(TexChunk *thisArg, wxList& children, char *buffer, int pos, char *e
  *
  */
  
-int ParseMacroBody(const char *macro_name, TexChunk *parent,
+int ParseMacroBody(char *macro_name, TexChunk *parent,
                    int no_args, char *buffer, int pos,
                    char *environment, bool parseToBrace,
                    TexChunk *customMacroArgs)
@@ -1618,19 +1422,6 @@ int ParseMacroBody(const char *macro_name, TexChunk *parent,
         isOptional = TRUE;
         pos += 2;
       }
-      else if (i > 0)
-      {
-        wxString errBuf;
-        wxString tmpBuffer(buffer);
-        if (tmpBuffer.length() > 4)
-        {
-            if (tmpBuffer.Right(4) == "\\par")
-                tmpBuffer = tmpBuffer.Mid(0,tmpBuffer.length()-4);
-        }
-        errBuf.Printf("Missing macro argument in the line:\n\t%s\n",tmpBuffer.c_str());
-        OnError((char *)errBuf.c_str());
-      }
-
     }
     arg->optional = isOptional;
 
@@ -1660,7 +1451,6 @@ int ParseMacroBody(const char *macro_name, TexChunk *parent,
 
 bool TexLoadFile(char *filename)
 {
-  static char *line_buffer;
   stopRunning = FALSE;
   strcpy(TexFileRoot, filename);
   StripExtension(TexFileRoot);
@@ -1669,10 +1459,11 @@ bool TexLoadFile(char *filename)
 
   TexPathList.EnsureFileAccessible(filename);
 
-  if (line_buffer) 
-      delete line_buffer;
-
-  line_buffer = new char[MAX_LINE_BUFFER_SIZE];
+#ifdef __WXMSW__
+  static char *line_buffer = new char[600];
+#else
+  static char *line_buffer = new char[11000];
+#endif
   
   Inputs[0] = fopen(filename, "r");
   LineNumbers[0] = 1;
@@ -1684,11 +1475,10 @@ bool TexLoadFile(char *filename)
     if (Inputs[0]) fclose(Inputs[0]);
     return TRUE;
   }
-
-  return FALSE;
+  else return FALSE;
 }
 
-TexMacroDef::TexMacroDef(int the_id, const char *the_name, int n, bool ig, bool forbidLevel)
+TexMacroDef::TexMacroDef(int the_id, char *the_name, int n, bool ig, bool forbidLevel)
 {
   name = copystring(the_name);
   no_args = n;
@@ -1880,16 +1670,14 @@ void TraverseFromChunk(TexChunk *chunk, wxNode *thisNode, bool childrenOnly)
         OnMacro(chunk->macroId, chunk->no_args, TRUE);
 
       wxNode *node = chunk->children.First();
-      TexChunk *child_chunk = NULL;
       while (node)
       {
-        child_chunk = (TexChunk *)node->Data();
+        TexChunk *child_chunk = (TexChunk *)node->Data();
         TraverseFromChunk(child_chunk, node);
         node = node->Next();
       }
 
-      if (thisNode && thisNode->Next())
-          nextChunk = (TexChunk *)thisNode->Next()->Data();
+      if (thisNode && thisNode->Next()) nextChunk = (TexChunk *)thisNode->Next()->Data();
 
       if (!childrenOnly)
         OnMacro(chunk->macroId, chunk->no_args, FALSE);
@@ -1917,8 +1705,7 @@ void TraverseFromChunk(TexChunk *chunk, wxNode *thisNode, bool childrenOnly)
 
       currentArgument = chunk;
 
-      if (thisNode && thisNode->Next())
-          nextChunk = (TexChunk *)thisNode->Next()->Data();
+      if (thisNode && thisNode->Next()) nextChunk = (TexChunk *)thisNode->Next()->Data();
 
       isArgOptional = chunk->optional;
       noArgs = chunk->no_args;
@@ -1936,9 +1723,7 @@ void TraverseFromChunk(TexChunk *chunk, wxNode *thisNode, bool childrenOnly)
         // If non-whitespace text, we no longer have a new paragraph.
         if (issuedNewParagraph && !((chunk->value[0] == 10 || chunk->value[0] == 13 || chunk->value[0] == 32)
                                     && chunk->value[1] == 0))
-        {
           issuedNewParagraph = FALSE;
-        }
         TexOutput(chunk->value, TRUE);
       }
       break;
@@ -1963,7 +1748,7 @@ void SetCurrentOutputs(FILE *fd1, FILE *fd2)
   CurrentOutput2 = fd2;
 }
 
-void AddMacroDef(int the_id, const char *name, int n, bool ignore, bool forbid)
+void AddMacroDef(int the_id, char *name, int n, bool ignore, bool forbid)
 {
   MacroDefs.Put(name, new TexMacroDef(the_id, name, n, ignore, forbid));
 }
@@ -2032,27 +1817,17 @@ void TexCleanUp(void)
   BibliographyStyleString = copystring("plain");
   DocumentStyleString = copystring("report");
   MinorDocumentStyleString = NULL;
-
-  // gt - Changed this so if this is the final pass
-  // then we DO want to remove these macros, so that
-  // memory is not MASSIVELY leaked if the user
-  // does not exit the program, but instead runs
-  // the program again
-  if ((passNumber == 1 && !runTwice) ||
-      (passNumber == 2 && runTwice))
+/* Don't want to remove custom macros after each pass.
+  SetFontSizes(10);
+  wxNode *node = CustomMacroList.First();
+  while (node)
   {
-/* Don't want to remove custom macros after each pass.*/
-      SetFontSizes(10);
-      wxNode *node = CustomMacroList.First();
-      while (node)
-      {
-        CustomMacro *macro = (CustomMacro *)node->Data();
-        delete macro;
-        delete node;
-        node = CustomMacroList.First();
-      }
+    CustomMacro *macro = (CustomMacro *)node->Data();
+    delete macro;
+    delete node;
+    node = CustomMacroList.First();
   }
-/**/
+*/
   TexReferences.BeginFind();
   wxNode *node = TexReferences.Next();
   while (node)
@@ -3168,9 +2943,10 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
         }
         else
         {
-           wxString informBuf;
-           informBuf.Printf("Warning: unresolved reference '%s'", refName); 
-           OnInform((char *)informBuf.c_str());
+          char buf[300];
+          TexOutput("??", TRUE);
+          sprintf(buf, "Warning: unresolved reference %s.", refName); 
+          OnInform(buf);
         }
       }
       else TexOutput("??", TRUE);
@@ -3329,9 +3105,9 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
           TexOutput(ref->sectionNumber, TRUE);
           if (strcmp(ref->sectionNumber, "??") == 0)
           {
-            wxString informBuf;
-            informBuf.Printf("Warning: unresolved citation %s.", citeKey);
-            OnInform((char *)informBuf.c_str());
+            char buf[300];
+            sprintf(buf, "Warning: unresolved citation %s.", citeKey);
+            OnInform(buf);
           }
         }
         citeKey = ParseMultifieldString(citeKeys, &pos);
@@ -3473,16 +3249,16 @@ bool DefaultOnArgument(int macroId, int arg_no, bool start)
         {
           if (!ReadBib((char*) (const char*) actualFile))
           {
-            wxString errBuf;
-            errBuf.Printf(".bib file %s not found or malformed", (const char*) actualFile);
-            OnError((char *)errBuf.c_str());
+            char buf[300];
+            sprintf(buf, ".bib file %s not found or malformed", (const char*) actualFile);
+            OnError(buf);
           }
         }
         else
         {
-          wxString errBuf;
-          errBuf.Printf(".bib file %s not found", fileBuf);
-          OnError((char *)errBuf.c_str());
+          char buf[300];
+          sprintf(buf, ".bib file %s not found", fileBuf);
+          OnError(buf);
         }
         bibFile = ParseMultifieldString(allFiles, &pos);
       }

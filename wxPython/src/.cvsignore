@@ -1,4 +1,3 @@
-*.dsp
 .emacs.desktop
 Makefile
 Makefile.pre
@@ -33,7 +32,6 @@ wxPython.dsp
 wxPython.dsw
 wxPython.ncb
 wxPython.opt
-wxSamples
 wxc.exp
 wxc.ilk
 wxc.lib

@@ -24,9 +24,9 @@
 #include "wx/defs.h"
 #endif
 
-#if wxUSE_HELP
-
 #include "wx/helpbase.h"
+
+#if wxUSE_HELP
 
 IMPLEMENT_CLASS(wxHelpControllerBase, wxObject)
 

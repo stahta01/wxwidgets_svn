@@ -1,21 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/mstream.cpp
+// Name:        mstream.cpp
 // Purpose:     "Memory stream" classes
 // Author:      Guilhem Lavaux
-// Modified by: VZ (23.11.00): general code review
+// Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
-
-// ============================================================================
-// declarations
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// headers
-// ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
 #pragma implementation "mstream.h"
@@ -34,118 +26,100 @@
 #include "wx/stream.h"
 #include "wx/mstream.h"
 
-// ============================================================================
-// implementation
-// ============================================================================
-
 // ----------------------------------------------------------------------------
 // wxMemoryInputStream
 // ----------------------------------------------------------------------------
 
-wxMemoryInputStream::wxMemoryInputStream(const void *data, size_t len)
+wxMemoryInputStream::wxMemoryInputStream(const char *data, size_t len)
+  : wxInputStream()
 {
-    m_i_streambuf = new wxStreamBuffer(wxStreamBuffer::read);
-    m_i_streambuf->SetBufferIO((void *)data, len); // const_cast
-    m_i_streambuf->SetIntPosition(0); // seek to start pos
-    m_i_streambuf->Fixed(TRUE);
+  m_i_streambuf = new wxStreamBuffer(wxStreamBuffer::read);
+  m_i_streambuf->SetBufferIO((char*) data, (char*) (data+len));
+  m_i_streambuf->SetIntPosition(0); // seek to start pos
+  m_i_streambuf->Fixed(TRUE);
 
-    m_length = len;
+  m_length = len;
 }
 
 wxMemoryInputStream::~wxMemoryInputStream()
 {
-    delete m_i_streambuf;
+  delete m_i_streambuf;
 }
 
 char wxMemoryInputStream::Peek()
 {
-    char *buf = (char *)m_i_streambuf->GetBufferStart();
-
-    return buf[m_i_streambuf->GetIntPosition()];
-}
-
-bool wxMemoryInputStream::Eof() const
-{
-    return !m_i_streambuf->GetBytesLeft();
+  return m_i_streambuf->GetBufferStart()[m_i_streambuf->GetIntPosition()];
 }
 
 size_t wxMemoryInputStream::OnSysRead(void *buffer, size_t nbytes)
-{
-    size_t pos = m_i_streambuf->GetIntPosition();
-    if ( pos == m_length )
-    {
-        m_lasterror = wxSTREAM_EOF;
-
-        return 0;
-    }
-
-    m_i_streambuf->Read(buffer, nbytes);
-    m_lasterror = wxSTREAM_NOERROR;
-
-    return m_i_streambuf->GetIntPosition() - pos;
+{ 
+  size_t bufsize = m_i_streambuf->GetBufferEnd() - m_i_streambuf->GetBufferStart();
+  size_t oldpos = m_i_streambuf->GetIntPosition();
+  m_i_streambuf->Read(buffer, nbytes);
+  size_t newpos = m_i_streambuf->GetIntPosition();
+  if (newpos == 0) return bufsize - oldpos;
+  else return newpos - oldpos;
 }
 
 off_t wxMemoryInputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
-    return m_i_streambuf->Seek(pos, mode);
+  return m_i_streambuf->Seek(pos, mode);
 }
 
 off_t wxMemoryInputStream::OnSysTell() const
 {
-    return m_i_streambuf->Tell();
+  return m_i_streambuf->Tell();
 }
 
 // ----------------------------------------------------------------------------
 // wxMemoryOutputStream
 // ----------------------------------------------------------------------------
 
-wxMemoryOutputStream::wxMemoryOutputStream(void *data, size_t len)
+wxMemoryOutputStream::wxMemoryOutputStream(char *data, size_t len)
+  : wxOutputStream()
 {
-    m_o_streambuf = new wxStreamBuffer(wxStreamBuffer::write);
-    if ( data )
-        m_o_streambuf->SetBufferIO(data, len);
-    m_o_streambuf->Fixed(FALSE);
-    m_o_streambuf->Flushable(FALSE);
+  m_o_streambuf = new wxStreamBuffer(wxStreamBuffer::write);
+  if (data)
+    m_o_streambuf->SetBufferIO(data, data+len);
+  m_o_streambuf->Fixed(FALSE);
+  m_o_streambuf->Flushable(FALSE);
 }
 
 wxMemoryOutputStream::~wxMemoryOutputStream()
 {
-    delete m_o_streambuf;
+  delete m_o_streambuf;
 }
 
 size_t wxMemoryOutputStream::OnSysWrite(const void *buffer, size_t nbytes)
 {
-    size_t oldpos = m_o_streambuf->GetIntPosition();
-    m_o_streambuf->Write(buffer, nbytes);
-    size_t newpos = m_o_streambuf->GetIntPosition();
-
-    // FIXME can someone please explain what this does? (VZ)
-    if ( !newpos )
-        newpos = m_o_streambuf->GetBufferSize();
-
-    return newpos - oldpos;
+  size_t bufsize = m_o_streambuf->GetBufferEnd() - m_o_streambuf->GetBufferStart();
+  size_t oldpos = m_o_streambuf->GetIntPosition();
+  m_o_streambuf->Write(buffer, nbytes);
+  size_t newpos = m_o_streambuf->GetIntPosition();
+  if (newpos == 0) return bufsize - oldpos;
+  else return newpos - oldpos;
 }
 
 off_t wxMemoryOutputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
-    return m_o_streambuf->Seek(pos, mode);
+  return m_o_streambuf->Seek(pos, mode);
 }
 
 off_t wxMemoryOutputStream::OnSysTell() const
 {
-    return m_o_streambuf->Tell();
+  return m_o_streambuf->Tell();
 }
 
-size_t wxMemoryOutputStream::CopyTo(void *buffer, size_t len) const
+size_t wxMemoryOutputStream::CopyTo(char *buffer, size_t len) const
 {
-    wxCHECK_MSG( buffer, 0, _T("must have buffer to CopyTo") );
+  if (!buffer)
+    return 0;
 
-    if ( len > GetSize() )
-        len = GetSize();
+  if (len > GetSize())
+    len = GetSize();
 
-    memcpy(buffer, m_o_streambuf->GetBufferStart(), len);
-
-    return len;
+  memcpy(buffer, m_o_streambuf->GetBufferStart(), len);
+  return len;
 }
 
-#endif // wxUSE_STREAMS
+#endif

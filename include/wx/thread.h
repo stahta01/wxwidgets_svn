@@ -150,11 +150,11 @@ class WXDLLEXPORT wxCriticalSectionInternal;
 
 // in order to avoid any overhead under platforms where critical sections are
 // just mutexes make all wxCriticalSection class functions inline
-#if !defined(__WXMSW__) && !defined(__WXPM__)
+#if !defined(__WXMSW__) && !defined(__WXPM__) && !defined(__WXMAC__)
     #define WXCRITICAL_INLINE   inline
 
     #define wxCRITSECT_IS_MUTEX 1
-#else // MSW || OS2
+#else // MSW || Mac || OS2
     #define WXCRITICAL_INLINE
 
     #define wxCRITSECT_IS_MUTEX 0
@@ -303,11 +303,8 @@ public:
     // from _another_ thread (typically the thread that created this one, e.g.
     // the main thread), not from the thread itself
 
-        // create a new thread and optionally set the stack size on
-        // platforms that support that - call Run() to start it
-        // (special cased for watcom which won't accept 0 default)
-
-    wxThreadError Create(unsigned int stackSize = 0);
+        // create a new thread - call Run() to start it
+    wxThreadError Create();
 
         // starts execution of the thread - from the moment Run() is called
         // the execution of wxThread::Entry() may start at any moment, caller
@@ -371,12 +368,8 @@ public:
 
     // Get the thread ID - a platform dependent number which uniquely
     // identifies a thread inside a process
-#ifdef __VMS
-   unsigned long long GetId() const;
-#else
-   unsigned long GetId() const;
-#endif
-   
+    unsigned long GetId() const;
+
     // called when the thread exits - in the context of this thread
     //
     // NB: this function will not be called if the thread is Kill()ed
@@ -478,7 +471,7 @@ public:
     // wxApp then should block all "dangerous" messages
     extern bool WXDLLEXPORT wxIsWaitingForThread();
 #elif defined(__WXMAC__)
-   extern void WXDLLEXPORT wxMutexGuiLeaveOrEnter();
+    extern void WXDLLEXPORT wxMutexGuiLeaveOrEnter();
 
     // returns TRUE if the main thread has GUI lock
     extern bool WXDLLEXPORT wxGuiOwnedByMainThread();
@@ -489,13 +482,6 @@ public:
     // return TRUE if the main thread is waiting for some other to terminate:
     // wxApp then should block all "dangerous" messages
     extern bool WXDLLEXPORT wxIsWaitingForThread();
-
-    // implement wxCriticalSection using mutexes
-    inline wxCriticalSection::wxCriticalSection() { }
-    inline wxCriticalSection::~wxCriticalSection() { }
-
-    inline void wxCriticalSection::Enter() { (void)m_mutex.Lock(); }
-    inline void wxCriticalSection::Leave() { (void)m_mutex.Unlock(); }
 #elif defined(__WXPM__)
     // unlock GUI if there are threads waiting for and lock it back when
     // there are no more of them - should be called periodically by the main
@@ -528,5 +514,3 @@ public:
 #endif // wxUSE_THREADS
 
 #endif // __THREADH__
-
-// vi:sts=4:sw=4:et

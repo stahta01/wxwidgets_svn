@@ -1,15 +1,11 @@
 // Scintilla source code edit control
-/** @file ViewStyle.h
- ** Store information on how the document is to be viewed.
- **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// ViewStyle.h - store information on how the document is to be viewed
+// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef VIEWSTYLE_H
 #define VIEWSTYLE_H
 
-/**
- */
 class MarginStyle {
 public:
 	bool symbol;
@@ -19,13 +15,10 @@ public:
 	MarginStyle();
 };
 
-/**
- */
 class FontNames {
 private:
 	char *names[STYLE_MAX + 1];
 	int max;
-
 public:
 	FontNames();
 	~FontNames();
@@ -34,9 +27,6 @@ public:
 };
 
 enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterIndent=2};
-
-/**
- */
 class ViewStyle {
 public:
 	FontNames fontNames;
@@ -55,12 +45,12 @@ public:
 	ColourPair selbackground2;
 	ColourPair selbar;
 	ColourPair selbarlight;
-	/// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
+	// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
+	int leftMarginWidth;		// Spacing margin on left of text
+	int rightMarginWidth;	// Spacing margin on left of text
 	enum { margins=3 };
-	int leftMarginWidth;	///< Spacing margin on left of text
-	int rightMarginWidth;	///< Spacing margin on left of text
 	bool symbolMargin;
-	int maskInLine;	///< Mask for markers to be put into text because there is nowhere for them to go in margin
+	int maskInLine;	// Mask for markers to be put into text because there is nowhere for them to go in margin
 	MarginStyle ms[margins];
 	int fixedColumnWidth;
 	int zoomLevel;
@@ -69,11 +59,8 @@ public:
 	bool viewEOL;
 	bool showMarkedLines;
 	ColourPair caretcolour;
-	bool showCaretLineBackground;
-	ColourPair caretLineBackground;
 	ColourPair edgecolour;
 	int edgeState;
-	int caretWidth;
 	
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);

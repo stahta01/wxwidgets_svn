@@ -15,7 +15,7 @@
 
 PROGRAM = dnd
 
-CXX = $(shell wx-config --cxx)
+CC = gcc
 
 OBJECTS = $(PROGRAM).o
 
@@ -24,12 +24,12 @@ OBJECTS = $(PROGRAM).o
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
-	$(CXX) -c `wx-config --cxxflags` -o $@ $<
+	$(CC) -c `wx-config --cflags` -o $@ $<
 
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) `wx-config --libs`
+	$(CC) -o $(PROGRAM) $(OBJECTS) `wx-config --libs`
 
 clean: 
 	rm -f *.o $(PROGRAM)

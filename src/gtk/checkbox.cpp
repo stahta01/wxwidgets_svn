@@ -12,11 +12,9 @@
 #pragma implementation "checkbox.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/checkbox.h"
 
 #if wxUSE_CHECKBOX
-
-#include "wx/checkbox.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -46,8 +44,6 @@ static void gtk_checkbox_clicked_callback( GtkWidget *WXUNUSED(widget), wxCheckB
     if (!cb->m_hasVMT) return;
 
     if (g_blockEventsOnDrag) return;
-    
-    if (cb->m_blockEvent) return;
 
     wxCommandEvent event(wxEVT_COMMAND_CHECKBOX_CLICKED, cb->GetId());
     event.SetInt( cb->GetValue() );
@@ -76,13 +72,12 @@ bool wxCheckBox::Create(wxWindow *parent,
 {
     m_needParent = TRUE;
     m_acceptsFocus = TRUE;
-    m_blockEvent = FALSE;
 
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxCheckBox creation failed") );
-        return FALSE;
+	    return FALSE;
     }
 
     wxControl::SetLabel( label );
@@ -146,11 +141,16 @@ void wxCheckBox::SetValue( bool state )
     if (state == GetValue())
         return;
 
-    m_blockEvent = TRUE;
+    gtk_signal_disconnect_by_func( GTK_OBJECT(m_widgetCheckbox),
+                        GTK_SIGNAL_FUNC(gtk_checkbox_clicked_callback),
+                        (gpointer *)this );
 
     gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(m_widgetCheckbox), state );
-
-    m_blockEvent = FALSE;
+    
+    gtk_signal_connect( GTK_OBJECT(m_widgetCheckbox),
+                        "clicked",
+                        GTK_SIGNAL_FUNC(gtk_checkbox_clicked_callback),
+                        (gpointer *)this );
 }
 
 bool wxCheckBox::GetValue() const
@@ -199,11 +199,11 @@ void wxCheckBox::OnInternalIdle()
     if (GTK_TOGGLE_BUTTON(m_widgetCheckbox)->event_window && cursor.Ok())
     {
         /* I now set the cursor the anew in every OnInternalIdle call
-           as setting the cursor in a parent window also effects the
-           windows above so that checking for the current cursor is
-           not possible. */
-
-       gdk_window_set_cursor( GTK_TOGGLE_BUTTON(m_widgetCheckbox)->event_window, cursor.GetCursor() );
+	       as setting the cursor in a parent window also effects the
+	       windows above so that checking for the current cursor is
+	       not possible. */
+	   
+	   gdk_window_set_cursor( GTK_TOGGLE_BUTTON(m_widgetCheckbox)->event_window, cursor.GetCursor() );
     }
 
     UpdateWindowUI();

@@ -342,6 +342,7 @@ MRESULT wxTaskBarIcon::WindowProc( WXHWND hWnd, UINT msg, MPARAM wParam, MPARAM 
         default:
             break;
     }
+*/
     if (eventType)
     {
         wxEvent event;
@@ -350,7 +351,6 @@ MRESULT wxTaskBarIcon::WindowProc( WXHWND hWnd, UINT msg, MPARAM wParam, MPARAM 
 
         ProcessEvent(event);
     }
-*/
     return 0;
 }
 

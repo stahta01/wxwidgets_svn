@@ -32,9 +32,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxSizer, wxObject);
 IMPLEMENT_ABSTRACT_CLASS(wxGridSizer, wxSizer);
 IMPLEMENT_ABSTRACT_CLASS(wxFlexGridSizer, wxGridSizer);
 IMPLEMENT_ABSTRACT_CLASS(wxBoxSizer, wxSizer);
-#if wxUSE_STATBOX
 IMPLEMENT_ABSTRACT_CLASS(wxStaticBoxSizer, wxBoxSizer);
-#endif
 #if wxUSE_NOTEBOOK
 IMPLEMENT_ABSTRACT_CLASS(wxNotebookSizer, wxSizer);
 #endif
@@ -135,28 +133,21 @@ wxSize wxSizerItem::CalcMin()
     if (IsSizer())
     {
         ret = m_sizer->GetMinSize();
-
         // if we have to preserve aspect ratio _AND_ this is
         // the first-time calculation, consider ret to be initial size
-        if ((m_flag & wxSHAPED) && !m_ratio)
-            SetRatio(ret);
+        if ((m_flag & wxSHAPED) && !m_ratio) SetRatio(ret);
     }
-    else
-    {
-        if ( IsWindow() && (m_flag & wxADJUST_MINSIZE) )
-        {
-            // check if the best (minimal, in fact) window size hadn't changed
-            // by chance: this may happen for, e.g. static text if its label
-            // changed
-            wxSize size = m_window->GetBestSize();
-            if ( size.x > m_minSize.x )
-                m_minSize.x = size.x;
-            if ( size.y > m_minSize.y )
-                m_minSize.y = size.y;
-        }
 
-        ret = m_minSize;
-    }
+/*
+    The minimum size of a window should be the
+    initial size, as saved in m_minSize, not the
+    current size.
+
+    else
+    if (IsWindow())
+        ret = m_window->GetSize();
+*/
+    else ret = m_minSize;
 
     if (m_flag & wxWEST)
         ret.x += m_border;
@@ -198,7 +189,7 @@ void wxSizerItem::SetDimension( wxPoint pos, wxSize size )
             size.x = rwidth;
         }
     }
-
+    
     // This is what GetPosition() returns. Since we calculate
     // borders afterwards, GetPosition() will be the left/top
     // corner of the surrounding border.
@@ -230,15 +221,6 @@ void wxSizerItem::SetDimension( wxPoint pos, wxSize size )
         m_window->SetSize( pos.x, pos.y, size.x, size.y, wxSIZE_ALLOW_MINUS_ONE );
 
     m_size = size;
-}
-
-void wxSizerItem::DeleteWindows()
-{
-    if (m_window)
-         m_window->Destroy();
-         
-    if (m_sizer)
-        m_sizer->DeleteWindows();
 }
 
 bool wxSizerItem::IsWindow()
@@ -364,34 +346,9 @@ bool wxSizer::Remove( int pos )
     return TRUE;
 }
 
-void wxSizer::Clear( bool delete_windows )
-{
-    if (delete_windows)
-        DeleteWindows();
-        
-    m_children.Clear();
-}
-
-void wxSizer::DeleteWindows()
-{
-    wxNode *node = m_children.First();
-    while (node)
-    {
-        wxSizerItem *item = (wxSizerItem*)node->Data();
-        item->DeleteWindows();
-        node = node->Next();
-    }
-}
-
 void wxSizer::Fit( wxWindow *window )
 {
-    wxSize size;
-    if (window->IsTopLevel())
-        size = FitSize( window );
-    else
-        size = GetMinWindowSize( window );
-
-    window->SetSize( size );
+    window->SetSize( GetMinWindowSize( window ) );
 }
 
 void wxSizer::Layout()
@@ -402,29 +359,8 @@ void wxSizer::Layout()
 
 void wxSizer::SetSizeHints( wxWindow *window )
 {
-    wxSize size = FitSize( window );
+    wxSize size( GetMinWindowSize( window ) );
     window->SetSizeHints( size.x, size.y );
-}
-
-wxSize wxSizer::GetMaxWindowSize( wxWindow *WXUNUSED(window) )
-{
-    wxRect rect = wxGetClientDisplayRect();
-    wxSize sizeMax (rect.width,rect.height);
-
-    // Sorry, but this bit is wrong -- it makes a window that should just be
-    // able to fit onto the screen, not fit on the screen. -- JACS
-#if 0
-    // Make the max size a bit smaller than the visible portion of
-    // the screen.  A window which takes the entire screen doesn't
-    // look very nice either
-    sizeMax.x *= 9;
-    sizeMax.x /= 10;
-
-    sizeMax.y *= 9;
-    sizeMax.y /= 10;
-#endif
-
-    return sizeMax;
 }
 
 wxSize wxSizer::GetMinWindowSize( wxWindow *window )
@@ -434,20 +370,6 @@ wxSize wxSizer::GetMinWindowSize( wxWindow *window )
     wxSize client_size( window->GetClientSize() );
     return wxSize( minSize.x+size.x-client_size.x,
                    minSize.y+size.y-client_size.y );
-}
-
-// Return a window size that will fit within the screens dimensions
-wxSize wxSizer::FitSize( wxWindow *window )
-{
-    wxSize size     = GetMinWindowSize( window );
-    wxSize sizeMax  = GetMaxWindowSize( window );
-
-    if ( size.x > sizeMax.x )
-        size.x = sizeMax.x;
-    if ( size.y > sizeMax.y )
-        size.y = sizeMax.y;
-
-    return size;
 }
 
 void wxSizer::SetDimension( int x, int y, int width, int height )
@@ -793,7 +715,7 @@ void wxFlexGridSizer::RecalcSizes()
             {
                 wxNode *node = m_children.Nth( i );
                 wxASSERT( node );
-
+                
                 int w = wxMax( 0, wxMin( m_colWidths[c], sz.x - x ) );
                 int h = wxMax( 0, wxMin( m_rowHeights[r], sz.y - y ) );
 
@@ -833,6 +755,7 @@ wxSize wxFlexGridSizer::CalcMin()
         row = i / ncols;
         col = i % ncols;
         m_rowHeights[ row ] = wxMax( sz.y, m_rowHeights[ row ] );
+
         m_colWidths[ col ] = wxMax( sz.x, m_colWidths[ col ] );
 
         node = node->Next();
@@ -978,43 +901,14 @@ wxSize wxBoxSizer::CalcMin()
     m_fixedWidth = 0;
     m_fixedHeight = 0;
 
-    // Find how long each stretch unit needs to be
-    int stretchSize = 1;
     wxNode *node = m_children.GetFirst();
-    while (node)
-    {
-        wxSizerItem *item = (wxSizerItem*) node->Data();
-        if (item->GetOption() != 0)
-        {
-            int stretch = item->GetOption();
-            wxSize size( item->CalcMin() );
-            int sizePerStretch;
-            // Integer division rounded up is (a + b - 1) / b
-            if (m_orient == wxHORIZONTAL)
-                sizePerStretch = ( size.x + stretch - 1 ) / stretch;
-            else
-                sizePerStretch = ( size.y + stretch - 1 ) / stretch;
-            if (sizePerStretch > stretchSize)
-                stretchSize = sizePerStretch;
-        }
-        node = node->Next();
-    }
-	// Calculate overall minimum size
-	node = m_children.GetFirst();
     while (node)
     {
         wxSizerItem *item = (wxSizerItem*) node->Data();
 
         m_stretchable += item->GetOption();
-
+        
         wxSize size( item->CalcMin() );
-        if (item->GetOption() != 0)
-        {
-            if (m_orient == wxHORIZONTAL)
-                size.x = stretchSize * item->GetOption();
-            else
-                size.y = stretchSize * item->GetOption();
-        }
 
         if (m_orient == wxHORIZONTAL)
         {
@@ -1035,7 +929,7 @@ wxSize wxBoxSizer::CalcMin()
                 m_fixedWidth = wxMax( m_fixedWidth, size.x );
             }
             else
-            {
+            { 
                 m_fixedWidth += size.x;
                 m_fixedHeight = wxMax( m_fixedHeight, size.y );
             }
@@ -1051,35 +945,22 @@ wxSize wxBoxSizer::CalcMin()
 // wxStaticBoxSizer
 //---------------------------------------------------------------------------
 
-#if wxUSE_STATBOX
-
 wxStaticBoxSizer::wxStaticBoxSizer( wxStaticBox *box, int orient )
-                : wxBoxSizer( orient )
+  : wxBoxSizer( orient )
 {
     wxASSERT_MSG( box, wxT("wxStaticBoxSizer needs a static box") );
 
     m_staticBox = box;
 }
 
-static void GetStaticBoxBorders(wxStaticBox *box,
-                                int *borderTop, int *borderOther)
-{
-    // this has to be done platform by platform as there is no way to
-    // guess the thickness of a wxStaticBox border
-#ifdef __WXGTK__
-    if ( box->GetLabel().IsEmpty() )
-        *borderTop = 5;
-    else
-#endif // __WXGTK__
-        *borderTop = 15;
-	(void)box;
-    *borderOther = 5;
-}
-
 void wxStaticBoxSizer::RecalcSizes()
 {
-    int top_border, other_border;
-    GetStaticBoxBorders(m_staticBox, &top_border, &other_border);
+    // this will have to be done platform by platform
+    // as there is no way to guess the thickness of
+    // a wxStaticBox border
+    int top_border = 15;
+    if (m_staticBox->GetLabel().IsEmpty()) top_border = 5;
+    int other_border = 5;
 
     m_staticBox->SetSize( m_position.x, m_position.y, m_size.x, m_size.y );
 
@@ -1098,8 +979,13 @@ void wxStaticBoxSizer::RecalcSizes()
 
 wxSize wxStaticBoxSizer::CalcMin()
 {
-    int top_border, other_border;
-    GetStaticBoxBorders(m_staticBox, &top_border, &other_border);
+    // This will have to be done platform by platform
+    // as there is no way to guess the thickness of
+    // a wxStaticBox border.
+
+    int top_border = 15;
+    if (m_staticBox->GetLabel().IsEmpty()) top_border = 5;
+    int other_border = 5;
 
     wxSize ret( wxBoxSizer::CalcMin() );
     ret.x += 2*other_border;
@@ -1107,8 +993,6 @@ wxSize wxStaticBoxSizer::CalcMin()
 
     return ret;
 }
-
-#endif // wxUSE_STATBOX
 
 //---------------------------------------------------------------------------
 // wxNotebookSizer
@@ -1130,15 +1014,24 @@ void wxNotebookSizer::RecalcSizes()
 
 wxSize wxNotebookSizer::CalcMin()
 {
-    wxSize sizeBorder = m_notebook->CalcSizeFromPage(wxSize(0, 0));
+    // This will have to be done platform by platform
+    // as there is no way to guess the thickness of
+    // the wxNotebook tabs and border.
 
-    sizeBorder.x += 5;
-    sizeBorder.y += 5;
+    int borderX = 5;
+    int borderY = 5;
+    if ((m_notebook->HasFlag(wxNB_RIGHT)) ||
+        (m_notebook->HasFlag(wxNB_LEFT)))
+    {
+        borderX += 90; // improvements later..
+    }
+    else
+    {
+        borderY += 40; // improvements later..
+    }
 
     if (m_notebook->GetChildren().GetCount() == 0)
-    {
-        return wxSize(sizeBorder.x + 10, sizeBorder.y + 10);
-    }
+        return wxSize(borderX + 10, borderY + 10);
 
     int maxX = 0;
     int maxY = 0;
@@ -1153,16 +1046,14 @@ wxSize wxNotebookSizer::CalcMin()
         {
             wxSize subsize( itemsizer->CalcMin() );
 
-            if (subsize.x > maxX)
-                maxX = subsize.x;
-            if (subsize.y > maxY)
-                maxY = subsize.y;
+            if (subsize.x > maxX) maxX = subsize.x;
+            if (subsize.y > maxY) maxY = subsize.y;
         }
 
         node = node->GetNext();
     }
 
-    return wxSize( maxX, maxY ) + sizeBorder;
+    return wxSize( borderX + maxX, borderY + maxY );
 }
 
 #endif // wxUSE_NOTEBOOK

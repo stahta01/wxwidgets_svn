@@ -21,10 +21,12 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/window.h"
+#include <stdio.h>
+#include "wx/setup.h"
+#include "wx/window.h"
 #endif
 
-#include "wx/accel.h"
+#include "wx/msw/accel.h"
 
 #include "wx/msw/private.h"
 
@@ -101,27 +103,36 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
     m_refData = new wxAcceleratorRefData;
 
     ACCEL* arr = new ACCEL[n];
-    for ( int i = 0; i < n; i++ )
+    int i;
+    for (i = 0; i < n; i++)
     {
-        int flags = entries[i].GetFlags();
-
         BYTE fVirt = 0;
-        if ( flags & wxACCEL_ALT )
-            fVirt |= FALT | FVIRTKEY;
-        if ( flags & wxACCEL_SHIFT )
-            fVirt |= FSHIFT | FVIRTKEY;
-        if ( flags & wxACCEL_CTRL )
-            fVirt |= FCONTROL | FVIRTKEY;
+        if (entries[i].m_flags & wxACCEL_ALT)
+        {
+            fVirt |= FALT;
+            fVirt |= FVIRTKEY;
+        }
+        if (entries[i].m_flags & wxACCEL_SHIFT)
+        {
+            fVirt |= FSHIFT;
+            fVirt |= FVIRTKEY;
+        }
+        if (entries[i].m_flags & wxACCEL_CTRL)
+        {
+            fVirt |= FCONTROL;
+            fVirt |= FVIRTKEY;
+        }
 
         bool isVirtual;
-
-        WORD key = wxCharCodeWXToMSW(entries[i].GetKeyCode(), &isVirtual);
+        WORD key = wxCharCodeWXToMSW(entries[i].m_keyCode, & isVirtual);
         if (isVirtual)
             fVirt |= FVIRTKEY;
 
+        WORD cmd = entries[i].m_command;
+
         arr[i].fVirt = fVirt;
         arr[i].key = key;
-        arr[i].cmd = entries[i].GetCommand();
+        arr[i].cmd = cmd;
     }
 
     M_ACCELDATA->m_hAccel = ::CreateAcceleratorTable(arr, n);

@@ -18,59 +18,11 @@
 #include "wx/pen.h"
 #include "wx/brush.h"
 #include "wx/gdicmn.h"
-#include "wx/module.h"
 #endif
 
 #include "wx/settings.h"
 #include "wx/window.h"
 #include "wx/os2/private.h"
-
-// the module which is used to clean up wxSystemSettings data (this is a
-// singleton class so it can't be done in the dtor)
-class wxSystemSettingsModule : public wxModule
-{
-    friend class wxSystemSettings;
-public:
-    virtual bool OnInit();
-    virtual void OnExit();
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxSystemSettingsModule)
-
-    static wxArrayString   sm_optionNames;
-    static wxArrayString   sm_optionValues;
-};
-
-// ----------------------------------------------------------------------------
-// global data
-// ----------------------------------------------------------------------------
-
-static wxFont *gs_fontDefault = NULL;
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// wxSystemSettingsModule
-// ----------------------------------------------------------------------------
-
-IMPLEMENT_DYNAMIC_CLASS(wxSystemSettingsModule, wxModule)
-
-wxArrayString wxSystemSettingsModule::sm_optionNames;
-wxArrayString wxSystemSettingsModule::sm_optionValues;
-
-bool wxSystemSettingsModule::OnInit()
-{
-    return TRUE;
-}
-
-void wxSystemSettingsModule::OnExit()
-{
-    sm_optionNames.Clear();
-    sm_optionValues.Clear();
-    delete gs_fontDefault;
-}
 
 wxColour wxSystemSettings::GetSystemColour(
   int                               nIndex
@@ -92,6 +44,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_WINDOWFRAME:
@@ -103,6 +56,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_MENUTEXT:
@@ -125,6 +79,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_BTNSHADOW:
@@ -136,6 +91,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_BTNHIGHLIGHT:
@@ -147,6 +103,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         //
@@ -161,7 +118,7 @@ wxColour wxSystemSettings::GetSystemColour(
         case wxSYS_COLOUR_INACTIVECAPTIONTEXT:
         case wxSYS_COLOUR_BTNTEXT:
         case wxSYS_COLOUR_INFOTEXT:
-            vCol = (*wxBLACK);
+            return(*wxBLACK);
             break;
 
         //
@@ -171,7 +128,7 @@ wxColour wxSystemSettings::GetSystemColour(
         case wxSYS_COLOUR_ACTIVECAPTION:
         case wxSYS_COLOUR_ACTIVEBORDER:
         case wxSYS_COLOUR_HIGHLIGHT:
-            vCol = (*wxBLUE);
+            return(*wxBLUE);
             break;
 
         case wxSYS_COLOUR_SCROLLBAR:
@@ -185,7 +142,7 @@ wxColour wxSystemSettings::GetSystemColour(
         case wxSYS_COLOUR_3DDKSHADOW:
         case wxSYS_COLOUR_3DLIGHT:
         case wxSYS_COLOUR_INFOBK:
-            vCol = (*wxLIGHT_GREY);
+            return(*wxLIGHT_GREY);
             break;
 
         default:
@@ -197,6 +154,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
     }
     return(vCol);
@@ -229,10 +187,8 @@ wxFont wxSystemSettings::GetSystemFont(int index)
             break;
         }
     }
-    if(wxSWISS_FONT)
-         return *wxSWISS_FONT;
 
-    return wxNullFont;
+    return *wxSWISS_FONT;
 }
 
 // Get a system metric, e.g. scrollbar size
@@ -357,15 +313,3 @@ int wxSystemSettings::GetSystemMetric(int index)
     return 0;
 }
 
-bool wxSystemSettings::GetCapability(int index)
-{
-    switch (index)
-    {
-        case wxSYS_CAN_ICONIZE_FRAME:
-        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-            return TRUE; break;
-        default:
-            return FALSE;
-    }
-    return FALSE;
-}

@@ -14,7 +14,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -168,7 +168,7 @@ void csEvtHandler::OnRightClick(double x, double y, int keys, int attachment)
 
     int viewStartX, viewStartY;
     int unitX, unitY;
-    GetShape()->GetCanvas()->GetViewStart(& viewStartX, & viewStartY);
+    GetShape()->GetCanvas()->ViewStart(& viewStartX, & viewStartY);
     GetShape()->GetCanvas()->GetScrollPixelsPerUnit(& unitX, & unitY);
 
     int x1 = (int)(x * GetShape()->GetCanvas()->GetScaleX());

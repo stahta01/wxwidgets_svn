@@ -16,8 +16,6 @@ program_dir = demos/bombs
 PROGRAM=bombs
 
 OBJECTS = bombs.o bombs1.o game.o
-DEPFILES= bombs.d bombs1.d game.d
 
 include ../../src/makeprog.env
 
--include $(DEPFILES)

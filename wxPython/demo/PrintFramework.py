@@ -31,18 +31,18 @@ class MyPrintout(wxPrintout):
         self.base_OnPreparePrinting()
 
     def HasPage(self, page):
-        self.log.WriteText("wxPrintout.HasPage: %d\n" % page)
-        if page <= 2:
+        self.log.WriteText("wxPrintout.HasPage\n")
+        if page == 1:
             return true
         else:
             return false
 
     def GetPageInfo(self):
         self.log.WriteText("wxPrintout.GetPageInfo\n")
-        return (1, 2, 1, 2)
+        return (1, 1, 1, 1)
 
     def OnPrintPage(self, page):
-        self.log.WriteText("wxPrintout.OnPrintPage: %d\n" % page)
+        self.log.WriteText("wxPrintout.OnPrintPage\n")
         dc = self.GetDC()
 
         #-------------------------------------------
@@ -80,8 +80,6 @@ class MyPrintout(wxPrintout):
         #-------------------------------------------
 
         self.canvas.DoDrawing(dc)
-        dc.DrawText("Page: %d" % page, marginX/2, maxY-marginY)
-
         return true
 
 

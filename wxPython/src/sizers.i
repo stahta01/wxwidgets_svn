@@ -14,8 +14,6 @@
 
 %{
 #include "helpers.h"
-
-#include <wx/notebook.h>
 %}
 
 //----------------------------------------------------------------------
@@ -35,7 +33,7 @@
 //---------------------------------------------------------------------------
 
 
-class wxSizerItem : public wxObject {
+class wxSizerItem {
 public:
     // No need to ever create one directly in Python...
 
@@ -43,9 +41,6 @@ public:
     //wxSizerItem( wxWindow *window, int option, int flag, int border, wxObject* userData );
     //wxSizerItem( wxSizer *sizer, int option, int flag, int border, wxObject* userData );
 
-    void DeleteWindows();
-
-    wxPoint GetPosition();
     wxSize GetSize();
     wxSize CalcMin();
     void SetDimension( wxPoint pos, wxSize size );
@@ -90,16 +85,10 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxSizer : public wxObject {
+class wxSizer {
 public:
     // wxSizer();      ****  abstract, can't instantiate
     // ~wxSizer();
-
-    %addmethods {
-        void _setOORInfo(PyObject* _self) {
-            self->SetClientObject(new wxPyClientData(_self));
-        }
-    }
 
     %addmethods {
         void Destroy() { delete self; }
@@ -170,37 +159,37 @@ public:
 
 
     %pragma(python) addtoclass = "
-    def Add(self, *args, **kw):
+    def Add(self, *args):
         if type(args[0]) == type(1):
-            apply(self.AddSpacer, args, kw)
+            apply(self.AddSpacer, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.AddSizer, args, kw)
+            apply(self.AddSizer, args)
         else:
-            apply(self.AddWindow, args, kw)
+            apply(self.AddWindow, args)
 
-    def Insert(self, *args, **kw):
+    def Insert(self, *args):
         if type(args[1]) == type(1):
-            apply(self.InsertSpacer, args, kw)
+            apply(self.InsertSpacer, args)
         elif string.find(args[1].this, 'Sizer') != -1:
-            apply(self.InsertSizer, args, kw)
+            apply(self.InsertSizer, args)
         else:
-            apply(self.InsertWindow, args, kw)
+            apply(self.InsertWindow, args)
 
-    def Prepend(self, *args, **kw):
+    def Prepend(self, *args):
         if type(args[0]) == type(1):
-            apply(self.PrependSpacer, args, kw)
+            apply(self.PrependSpacer, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.PrependSizer, args, kw)
+            apply(self.PrependSizer, args)
         else:
-            apply(self.PrependWindow, args, kw)
+            apply(self.PrependWindow, args)
 
-    def Remove(self, *args, **kw):
+    def Remove(self, *args):
         if type(args[0]) == type(1):
-            apply(self.RemovePos, args, kw)
+            apply(self.RemovePos, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.RemoveSizer, args, kw)
+            apply(self.RemoveSizer, args)
         else:
-            apply(self.RemoveWindow, args, kw)
+            apply(self.RemoveWindow, args)
 
     def AddMany(self, widgets):
         for childinfo in widgets:
@@ -239,10 +228,6 @@ public:
     void Fit( wxWindow *window );
     void SetSizeHints( wxWindow *window );
 
-    void Clear( bool delete_windows=FALSE );
-    void DeleteWindows();
-
-
     // wxList& GetChildren();
     %addmethods {
         PyObject* GetChildren() {
@@ -278,9 +263,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxPySizer, wxSizer);
 class wxPySizer : public wxSizer {
 public:
     wxPySizer();
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPySizer)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPySizer)"
 };
 
 
@@ -289,7 +273,6 @@ public:
 class  wxBoxSizer : public wxSizer {
 public:
     wxBoxSizer(int orient = wxHORIZONTAL);
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
     int GetOrientation();
     void RecalcSizes();
     wxSize CalcMin();
@@ -300,7 +283,6 @@ public:
 class  wxStaticBoxSizer : public wxBoxSizer {
 public:
     wxStaticBoxSizer(wxStaticBox *box, int orient = wxHORIZONTAL);
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
     wxStaticBox *GetStaticBox();
     void RecalcSizes();
     wxSize CalcMin();
@@ -311,9 +293,10 @@ public:
 class wxNotebookSizer: public wxSizer {
 public:
     wxNotebookSizer( wxNotebook *nb );
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+
     void RecalcSizes();
     wxSize CalcMin();
+
     wxNotebook *GetNotebook();
 };
 
@@ -323,7 +306,6 @@ class wxGridSizer: public wxSizer
 {
 public:
     wxGridSizer( int rows=1, int cols=0, int vgap=0, int hgap=0 );
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
 
     void RecalcSizes();
     wxSize CalcMin();
@@ -344,7 +326,6 @@ class wxFlexGridSizer: public wxGridSizer
 {
 public:
     wxFlexGridSizer( int rows=1, int cols=0, int vgap=0, int hgap=0 );
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
 
     void RecalcSizes();
     wxSize CalcMin();

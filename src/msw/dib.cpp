@@ -159,9 +159,9 @@ WORD wxPaletteSize(VOID FAR * pv)
         NumColors = DibNumColors(lpbi);
 
         if (lpbi->biSize == sizeof(BITMAPCOREHEADER))
-                return (WORD)(NumColors * sizeof(RGBTRIPLE));
+                return NumColors * sizeof(RGBTRIPLE);
         else
-                return (WORD)(NumColors * sizeof(RGBQUAD));
+                return NumColors * sizeof(RGBQUAD);
 }
 
 /****************************************************************************
@@ -364,7 +364,7 @@ static DWORD PASCAL lread(int fh, void far *pv, DWORD ul)
                 ul -= MAXREAD;
                 hp += MAXREAD;
                 }
-        if (_lread(fh, (LPSTR) hp, (WXUINT) ul) != (WXUINT) ul)
+        if (_lread(fh, (LPSTR) hp, (WORD) ul) != (WORD) ul)
                 return 0;
         return ulT;
 }
@@ -394,7 +394,7 @@ static DWORD PASCAL lwrite(int fh, VOID FAR *pv, DWORD ul)
                 ul -= MAXREAD;
                 hp += MAXREAD;
                 }
-        if (_lwrite(fh, (LPSTR) hp, (WXUINT) ul) != (WXUINT) ul)
+        if (_lwrite(fh, (LPSTR) hp, (WORD) ul) != (WORD) ul)
                 return 0;
         return ulT;
 }
@@ -528,7 +528,7 @@ BOOL wxReadDIB(LPTSTR lpFileName, HBITMAP *bitmap, HPALETTE *palette)
     }
 
     /* offset to the bits from start of DIB header */
-    offBits = (WORD)(lpbi->biSize + nNumColors * sizeof(RGBQUAD));
+    offBits = (WORD)lpbi->biSize + nNumColors * sizeof(RGBQUAD);
 
     if (bf.bfOffBits != 0L)
     {
@@ -619,9 +619,6 @@ static BOOL PASCAL MakeBitmapAndPalette(HDC hDC, HANDLE hDIB,
             result = TRUE;
         }
     }
-
-	GlobalUnlock (hDIB);  // glt
-
     return(result);
 }
 
@@ -668,7 +665,7 @@ HPALETTE wxMakeDIBPalette(LPBITMAPINFOHEADER lpInfo)
         lpRGB = (RGBQUAD FAR *)((LPSTR)lpInfo + lpInfo->biSize);
 
         /* copy colors from the color table to the LogPalette structure */
-        for (i = 0; (DWORD)i < lpInfo->biClrUsed; i++, lpRGB++)
+        for (i = 0; i < lpInfo->biClrUsed; i++, lpRGB++)
         {
             npPal->palPalEntry[i].peRed = lpRGB->rgbRed;
             npPal->palPalEntry[i].peGreen = lpRGB->rgbGreen;
@@ -695,28 +692,25 @@ HPALETTE wxMakeDIBPalette(LPBITMAPINFOHEADER lpInfo)
 
 bool wxLoadIntoBitmap(wxChar *filename, wxBitmap *bitmap, wxPalette **pal)
 {
-  HBITMAP hBitmap = NULL;
-  HPALETTE hPalette = NULL;
+  HBITMAP hBitmap;
+  HPALETTE hPalette;
 
   bool success = (wxReadDIB(filename, &hBitmap, &hPalette) != 0);
 
   if (!success)
   {
-    if (hPalette)
-        DeleteObject(hPalette);
+    DeleteObject(hPalette);
     return FALSE;
   }
 
   if (hPalette)
   {
-#if wxUSE_PALETTE
     if (pal)
     {
       *pal = new wxPalette;
       (*pal)->SetHPALETTE((WXHPALETTE) hPalette);
     }
     else
-#endif // wxUSE_PALETTE
       DeleteObject(hPalette);
   }
   else if (pal)
@@ -931,10 +925,8 @@ HANDLE wxBitmapToDIB (HBITMAP hBitmap, HPALETTE hPal)
 bool wxSaveBitmap(wxChar *filename, wxBitmap *bitmap, wxPalette *colourmap)
 {
   HPALETTE hPalette = 0;
-#if wxUSE_PALETTE
   if (colourmap)
     hPalette = (HPALETTE) colourmap->GetHPALETTE();
-#endif // wxUSE_PALETTE
 
   HANDLE dibHandle = wxBitmapToDIB((HBITMAP) bitmap->GetHBITMAP(), hPalette);
   if (dibHandle)
@@ -945,4 +937,5 @@ bool wxSaveBitmap(wxChar *filename, wxBitmap *bitmap, wxPalette *colourmap)
   }
   else return FALSE;
 }
+
 

@@ -39,9 +39,7 @@
 
 #include "wx/module.h"
 #include "wx/msw/private.h"
-#ifndef __WXMICROWIN__
 #include "wx/msw/dib.h"
-#endif
 
 #if wxUSE_RESOURCE_LOADING_IN_MSW
     #include "wx/msw/curico.h"
@@ -96,17 +94,15 @@ wxCursorRefData::wxCursorRefData()
   m_width = 32;
   m_height = 32;
 
-  m_destroyCursor = TRUE;
+  m_destroyCursor = FALSE;
 }
 
 void wxCursorRefData::Free()
 {
     if ( m_hCursor )
     {
-#ifndef __WXMICROWIN__
         if ( m_destroyCursor )
             ::DestroyCursor((HCURSOR)m_hCursor);
-#endif
 
         m_hCursor = 0;
     }
@@ -132,11 +128,10 @@ wxCursor::wxCursor(const wxString& cursor_file,
                    long flags,
                    int hotSpotX, int hotSpotY)
 {
-#ifdef __WXMICROWIN__
-    m_refData = NULL;
-#else
     wxCursorRefData *refData = new wxCursorRefData;
     m_refData = refData;
+
+    refData->m_destroyCursor = FALSE;
 
     if (flags == wxBITMAP_TYPE_CUR_RESOURCE)
     {
@@ -153,6 +148,7 @@ wxCursor::wxCursor(const wxString& cursor_file,
 #else
 #if wxUSE_RESOURCE_LOADING_IN_MSW
         refData->m_hCursor = (WXHCURSOR) ReadCursorFile(WXSTRINGCAST cursor_file, wxGetInstance(), &refData->m_width, &refData->m_height);
+        refData->m_destroyCursor = TRUE;
 #endif
 #endif
     }
@@ -160,6 +156,7 @@ wxCursor::wxCursor(const wxString& cursor_file,
     {
 #if wxUSE_RESOURCE_LOADING_IN_MSW
         refData->m_hCursor = (WXHCURSOR) IconToCursor(WXSTRINGCAST cursor_file, wxGetInstance(), hotSpotX, hotSpotY, &refData->m_width, &refData->m_height);
+        refData->m_destroyCursor = TRUE;
 #endif
     }
     else if (flags == wxBITMAP_TYPE_BMP)
@@ -176,6 +173,7 @@ wxCursor::wxCursor(const wxString& cursor_file,
         pnt.x = hotSpotX;
         pnt.y = hotSpotY;
         refData->m_hCursor = (WXHCURSOR) MakeCursorFromBitmap(wxGetInstance(), hBitmap, &pnt);
+        refData->m_destroyCursor = TRUE;
         DeleteObject(hBitmap);
 #endif
     }
@@ -183,26 +181,16 @@ wxCursor::wxCursor(const wxString& cursor_file,
 #if WXWIN_COMPATIBILITY_2
     refData->SetOk();
 #endif // WXWIN_COMPATIBILITY_2
-
-#endif
 }
 
 // Cursors by stock number
 wxCursor::wxCursor(int cursor_type)
 {
-#ifdef __WXMICROWIN__
-    m_refData = NULL;
-#else
   wxCursorRefData *refData = new wxCursorRefData;
   m_refData = refData;
 
   switch (cursor_type)
   {
-    case wxCURSOR_ARROWWAIT:
-#ifndef __WIN16__
-      refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_APPSTARTING);
-      break;
-#endif
     case wxCURSOR_WAIT:
       refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_WAIT);
       break;
@@ -301,7 +289,6 @@ wxCursor::wxCursor(int cursor_type)
     }
     case wxCURSOR_QUESTION_ARROW:
     {
-//      refData->m_hCursor = (WXHCURSOR) LoadImage(wxGetInstance(), wxT("wxCURSOR_QARROW"), IMAGE_CURSOR, 16, 16, LR_MONOCHROME);
       refData->m_hCursor = (WXHCURSOR) LoadCursor(wxGetInstance(), wxT("wxCURSOR_QARROW"));
       break;
     }
@@ -315,11 +302,6 @@ wxCursor::wxCursor(int cursor_type)
       refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_ARROW);
       break;
   }
-
-  // no need to destroy the stock cursors
-  // TODO: check this
-  //m_refData->m_destroyCursor = FALSE;
-#endif
 }
 
 wxCursor::~wxCursor()
@@ -339,9 +321,7 @@ void wxSetCursor(const wxCursor& cursor)
 {
     if ( cursor.Ok() )
     {
-#ifndef __WXMICROWIN__
         ::SetCursor(GetHcursorOf(cursor));
-#endif
 
         if ( gs_globalCursor )
             *gs_globalCursor = cursor;

@@ -25,12 +25,37 @@
 #include "wx/module.h"
 #include "wx/dataobj.h"     // for wxDataFormat
 
+// These functions superceded by wxClipboard, but retained in order to
+// implement wxClipboard, and for compatibility.
+
+// open/close the clipboard
+WXDLLEXPORT bool wxOpenClipboard();
+WXDLLEXPORT bool wxIsClipboardOpened();
+#define wxClipboardOpen wxIsClipboardOpened
+WXDLLEXPORT bool wxCloseClipboard();
+
+// get/set data
+WXDLLEXPORT bool wxEmptyClipboard();
+WXDLLEXPORT bool wxSetClipboardData(wxDataFormat dataFormat,
+                                    const void *data,
+                                    int width = 0, int height = 0);
+WXDLLEXPORT void* wxGetClipboardData(wxDataFormat dataFormat,
+                                     long *len = NULL);
+
+// clipboard formats
+WXDLLEXPORT bool wxIsClipboardFormatAvailable(wxDataFormat dataFormat);
+WXDLLEXPORT wxDataFormat wxEnumClipboardFormats(wxDataFormat dataFormat);
+WXDLLEXPORT int  wxRegisterClipboardFormat(wxChar *formatName);
+WXDLLEXPORT bool wxGetClipboardFormatName(wxDataFormat dataFormat,
+                                          wxChar *formatName,
+                                          int maxCount);
+
 //-----------------------------------------------------------------------------
 // wxClipboard
 //-----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxDataObject;
-class WXDLLEXPORT wxClipboard : public wxClipboardBase
+class WXDLLEXPORT wxClipboard : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 
@@ -54,7 +79,7 @@ public:
     virtual bool AddData( wxDataObject *data );
 
     // ask if data in correct format is available
-    virtual bool IsSupported( const wxDataFormat& format );
+    virtual bool IsSupported( wxDataFormat format );
 
     // fill data with data on the clipboard (if available)
     virtual bool GetData( wxDataObject& data );
@@ -71,8 +96,7 @@ public:
     void UsePrimarySelection( bool WXUNUSED(primary) = FALSE ) { }
 
 private:
-    wxDataObject     *m_data;
-    bool              m_open;
+    bool m_clearOnExit;
 };
 
 #endif // wxUSE_CLIPBOARD

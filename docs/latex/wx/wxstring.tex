@@ -314,7 +314,7 @@ their documentation.
     // find first n characters of sz
   size_t find(const char* sz, size_t nStart = 0, size_t n = npos) const;
 
-    // find the first occurrence of character ch after nStart
+    // find the first occurence of character ch after nStart
   size_t find(char ch, size_t nStart = 0) const;
 
     // rfind() family is exactly like find() but works right to left
@@ -328,7 +328,7 @@ their documentation.
     // as find, but from the end
   size_t rfind(char ch, size_t nStart = npos) const;
 
-    // find first/last occurrence of any character in the set
+    // find first/last occurence of any character in the set
 
     //
   size_t find_first_of(const wxString& str, size_t nStart = 0) const;
@@ -343,7 +343,7 @@ their documentation.
     // same as rfind(char, size_t)
   size_t find_last_of (char c, size_t nStart = npos) const;
 
-    // find first/last occurrence of any character not in the set
+    // find first/last occurence of any character not in the set
 
     //
   size_t find_first_not_of(const wxString& str, size_t nStart = 0) const;
@@ -478,28 +478,28 @@ to it.
 
 \constfunc{wxString}{AfterFirst}{\param{char}{ ch}}
 
-Gets all the characters after the first occurrence of {\it ch}.
+Gets all the characters after the first occurence of {\it ch}.
 Returns the empty string if {\it ch} is not found.
 
 \membersection{wxString::AfterLast}\label{wxstringafterlast}
 
 \constfunc{wxString}{AfterLast}{\param{char}{ ch}}
 
-Gets all the characters after the last occurrence of {\it ch}.
+Gets all the characters after the last occurence of {\it ch}.
 Returns the whole string if {\it ch} is not found.
 
 \membersection{wxString::BeforeFirst}\label{wxstringbeforefirst}
 
 \constfunc{wxString}{BeforeFirst}{\param{char}{ ch}}
 
-Gets all characters before the first occurrence of {\it ch}.
+Gets all characters before the first occurence of {\it ch}.
 Returns the whole string if {\it ch} is not found.
 
 \membersection{wxString::BeforeLast}\label{wxstringbeforelast}
 
 \constfunc{wxString}{BeforeLast}{\param{char}{ ch}}
 
-Gets all characters before the last occurrence of {\it ch}.
+Gets all characters before the last occurence of {\it ch}.
 Returns the empty string if {\it ch} is not found.
 
 \membersection{wxString::c\_str}\label{wxstringcstr}
@@ -673,25 +673,25 @@ Returns the index of the first item matched, or NOT\_FOUND.
 
 \constfunc{bool}{IsAscii}{\void}
 
-Returns TRUE if the string contains only ASCII characters.
+Returns TRUE if the string is ASCII.
 
 \membersection{wxString::IsEmpty}\label{wxstringisempty}
 
 \constfunc{bool}{IsEmpty}{\void}
 
-Returns TRUE if the string is empty.
+Returns TRUE if the string is NULL.
 
 \membersection{wxString::IsNull}\label{wxstringisnull}
 
 \constfunc{bool}{IsNull}{\void}
 
-Returns TRUE if the string is empty (same as \helpref{IsEmpty}{wxstringisempty}).
+Returns TRUE if the string is NULL (same as IsEmpty).
 
 \membersection{wxString::IsNumber}\label{wxstringisnumber}
 
 \constfunc{bool}{IsNumber}{\void}
 
-Returns TRUE if the string is an integer (with possible sign).
+Returns TRUE if the string is a positive or negative integer. Will return FALSE for decimals.
 
 \membersection{wxString::IsSameAs}\label{wxstringissameas}
 
@@ -740,7 +740,7 @@ Returns the first {\it count} characters.
 
 \constfunc{wxString}{Left}{\param{char}{ ch}}
 
-Returns all characters before the first occurrence of {\it ch}.
+Returns all characters before the first occurence of {\it ch}.
 Returns the whole string if {\it ch} is not found.
 
 \membersection{wxString::Len}\label{wxstringlen}
@@ -845,9 +845,9 @@ Removes the last character.
 
 \func{size\_t}{Replace}{\param{const char*}{ szOld}, \param{const char*}{ szNew}, \param{bool}{ replaceAll = TRUE}}
 
-Replace first (or all) occurrences of substring with another one.
+Replace first (or all) occurences of substring with another one.
 
-{\it replaceAll}: global replace (default), or only the first occurrence.
+{\it replaceAll}: global replace (default), or only the first occurence.
 
 Returns the number of replacements made.
 
@@ -922,17 +922,11 @@ if the string does not represent such number.
 
 \membersection{wxString::ToLong}\label{wxstringtolong}
 
-\constfunc{bool}{ToLong}{\param{long}{ *val}, \param{int }{base = 0}}
+\constfunc{bool}{ToLong}{\param{long}{ *val}}
 
-Attempts to convert the string to a signed integer in base {\it base}. Returns
-{\tt TRUE} on success in which case the number is stored in the location
-pointed to by {\it val} or {\tt FALSE} if the string does not represent a
-valid number in the given base.
-
-The default value of {\it base} $0$ is special and means that the usual rules
-of {\tt C} numbers are applied: if the number starts with {\tt 0x} it is
-considered to be in base $16$, if it starts with {\tt 0} - in base $8$ and in
-base $10$ otherwise.
+Attempts to convert the string to a signed integer. Returns TRUE on success
+(the number is stored in the location pointed to by {\it val}) or FALSE if the
+string does not represent such number.
 
 \wxheading{See also}
 
@@ -941,17 +935,11 @@ base $10$ otherwise.
 
 \membersection{wxString::ToULong}\label{wxstringtoulong}
 
-\constfunc{bool}{ToULong}{\param{unsigned long}{ *val}, \param{int }{base = 0}}
+\constfunc{bool}{ToULong}{\param{unsigned long}{ *val}}
 
-Attempts to convert the string to a ansigned integer in base {\it base}.
-Returns {\tt TRUE} on success in which case the number is stored in the
-location pointed to by {\it val} or {\tt FALSE} if the string does not
-represent a valid number in the given base.
-
-The default value of {\it base} $0$ is special and means that the usual rules
-of {\tt C} numbers are applied: if the number starts with {\tt 0x} it is
-considered to be in base $16$, if it starts with {\tt 0} - in base $8$ and in
-base $10$ otherwise.
+Attempts to convert the string to an unsigned integer. Returns TRUE on success
+(the number is stored in the location pointed to by {\it val}) or FALSE if the
+string does not represent such number.
 
 \wxheading{See also}
 
@@ -1115,58 +1103,4 @@ Implicit conversion to a C string.
 \wxheading{Remarks}
 
 These comparisons are case-sensitive.
-
-
-\section{\class{wxStringBuffer}}\label{wxstringbuffer}
-
-This tiny class allows to conveniently access the \helpref{wxString}{wxstring} 
-internal buffer as a writable pointer without any risk to forget to restore
-the string to the usable state later.
-
-For example, assuming you have a low-level OS function called 
-{\tt GetMeaningOfLifeAsString(char *)} returning the value in the provided
-buffer (which must be writable, of course) you might call it like this:
-
-\begin{verbatim}
-    wxString theAnswer;
-    GetMeaningOfLifeAsString(wxStringBuffer(theAnswer, 1024));
-    if ( theAnswer != "42" )
-    {
-        wxLogError("Something is very wrong!");
-    }
-\end{verbatim}
-
-\wxheading{Derived from}
-
-None
-
-\wxheading{Include files}
-
-<wx/string.h>
-
-\latexignore{\rtfignore{\wxheading{Members}}}
-
-\membersection{wxStringBuffer::wxStringBuffer}
-
-\func{}{wxStringBuffer}{\param{const wxString\& }{str}, \param{size\_t }{len}}
-
-Constructs a writable string buffer object associated with the given string
-and containing enough space for at least {\it len} characters. Basicly, this
-is equivalent to calling \helpref{GetWriteBuf}{wxstringgetwritebuf} and
-saving the result.
-
-\membersection{wxStringBuffer::\destruct{wxStringBuffer}}
-
-\func{}{\destruct{wxStringBuffer}}{\void}
-
-Restores the string passed to the constructor to the usable state by calling 
-\helpref{UngetWriteBuf}{wxstringungetwritebuf} on it.
-
-\membersection{wxStringBuffer::operator wxChar *}
-
-\constfunc{wxChar *}{operator wxChar *}{\void}
-
-Returns the writable pointer to a buffer of the size at least equal to the
-length specified in the constructor.
-
 

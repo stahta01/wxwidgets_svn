@@ -20,8 +20,6 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_PROTOCOL
-
 #include "wx/protocol/protocol.h"
 #include "wx/url.h"
 #include "wx/module.h"
@@ -66,6 +64,7 @@ wxProtocol::wxProtocol()
 {
 }
 
+#if wxUSE_SOCKETS
 bool wxProtocol::Reconnect()
 {
   wxIPV4address addr;
@@ -167,6 +166,4 @@ wxProtocolError GetLine(wxSocketBase *sock, wxString& result) {
   return wxPROTO_NOERR;
 #undef PROTO_BSIZE
 }
-
-#endif // wxUSE_PROTOCOL
-
+#endif

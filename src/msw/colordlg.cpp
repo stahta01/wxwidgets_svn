@@ -72,7 +72,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxColourDialog, wxDialog)
 
 UINT CALLBACK wxColourDialogHookProc(HWND hwnd,
                                      UINT uiMsg,
-                                     WPARAM WXUNUSED(wParam),
+                                     WPARAM wParam,
                                      LPARAM lParam)
 {
     if ( uiMsg == WM_INITDIALOG )

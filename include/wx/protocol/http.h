@@ -11,10 +11,6 @@
 #ifndef _WX_HTTP_H
 #define _WX_HTTP_H
 
-#include "wx/defs.h"
-
-#if wxUSE_PROTOCOL_HTTP
-
 #include "wx/list.h"
 #include "wx/protocol/protocol.h"
 
@@ -50,12 +46,6 @@ protected:
   bool BuildRequest(const wxString& path, wxHTTP_Req req);
   void SendHeaders();
   bool ParseHeaders();
-
-  // deletes the header value strings
-  void ClearHeaders();
 };
 
-#endif // wxUSE_PROTOCOL_HTTP
-
-#endif // _WX_HTTP_H
-
+#endif

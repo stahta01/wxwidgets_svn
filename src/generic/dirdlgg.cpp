@@ -29,7 +29,6 @@
 #include "wx/button.h"
 #include "wx/layout.h"
 #include "wx/msgdlg.h"
-#include "wx/textctrl.h"
 #include "wx/textdlg.h"
 #include "wx/filefn.h"
 #include "wx/cmndata.h"
@@ -40,7 +39,6 @@
 #include "wx/log.h"
 #include "wx/sizer.h"
 #include "wx/tokenzr.h"
-#include "wx/dir.h"
 
 #if wxUSE_STATLINE
     #include "wx/statline.h"
@@ -149,7 +147,10 @@ void wxDirItemData::SetNewDirName( wxString path )
 
 bool wxDirItemData::HasSubDirs()
 {
-    return wxDir(m_path).HasSubDirs();
+    wxString search = m_path + wxT("/*");
+    wxLogNull log;
+    wxString path = wxFindFirstFile( search, wxDIR );
+    return (bool)(!path.IsNull());
 }
 
 //-----------------------------------------------------------------------------
@@ -312,24 +313,30 @@ void wxDirCtrl::OnExpandItem(wxTreeEvent &event)
     wxBeginBusyCursor();
 
     wxDirItemData *data = (wxDirItemData *)GetItemData(event.GetItem());
+    wxASSERT(data);
+
+    wxString search,path,filename;
 
     m_paths.Clear();
     m_names.Clear();
-
-    wxString path = data->m_path;
-
-    wxDir dir(path);
-
-    path += _T('/');
-
-    wxString filename;
-    bool cont = dir.GetFirst(&filename, "", wxDIR_DIRS | wxDIR_HIDDEN);
-    while ( cont )
+#ifdef __WXMSW__
+    search = data->m_path + _T("\\*.*");
+#else
+    search = data->m_path + _T("/*");
+#endif
+    for (path = wxFindFirstFile( search, wxDIR ); !path.IsNull();
+       path=wxFindNextFile() )
     {
-        m_paths.Add(path + filename);
-        m_names.Add(filename);
-
-        cont = dir.GetNext(&filename);
+        filename = wxFileNameFromPath( path );
+        /* Don't add "." and ".." to the tree. I think wxFindNextFile
+         * also checks this, but I don't quite understand what happens
+         * there. Also wxFindNextFile seems to swallow hidden dirs */
+        if ( (filename != _T(".")) && (filename != _T(".."))
+                && (filename[0u] != _T('.')))
+        {
+            m_paths.Add(path);
+            m_names.Add(filename);
+        }
     }
 
     CreateItems( event.GetItem() );
@@ -446,7 +453,7 @@ wxDirDialog::wxDirDialog(wxWindow *parent,
     long cookie = 0;
     // default to root dir
     wxTreeItemId item = m_dir->GetFirstChild(m_dir->GetRootItem(), cookie);
-
+    
     if (!m_path.IsEmpty() && (m_path != wxT("/")) && (m_dir->m_paths.Count() > 1))
     {
         size_t count = m_dir->m_paths.GetCount();
@@ -455,14 +462,14 @@ wxDirDialog::wxDirDialog(wxWindow *parent,
             if (m_path.Find( m_dir->m_paths[i] ) == 0)
             {
                 path = m_dir->m_paths[i];
-
+                
                 for (size_t j = 0; j < i; j++)
                    item = m_dir->GetNextChild(m_dir->GetRootItem(), cookie);
-
+                
                 wxStringTokenizer tk2(path, wxFILE_SEP_PATH, wxTOKEN_STRTOK);
                 for (size_t h = 0; h < tk2.CountTokens(); h++)
                    tk.GetNextToken();
-
+                
                 break;
             }
         }

@@ -42,7 +42,7 @@
 //---------------------------------------------------------------------------
 
 
-class wxShapeRegion : public wxObject {
+class wxShapeRegion {
 public:
     wxShapeRegion();
     //~wxShapeRegion();
@@ -87,22 +87,17 @@ public:
 %}
 
 
-class wxPyShapeEvtHandler : public wxObject {
+class wxPyShapeEvtHandler {
 public:
     wxPyShapeEvtHandler(wxPyShapeEvtHandler *prev = NULL,
                         wxPyShape *shape = NULL);
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyShapeEvtHandler)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyShapeEvtHandler)"
 
-    %addmethods { void Destroy() { delete self; } }
     %addmethods {
-        void _setOORInfo(PyObject* _self) {
-            self->SetClientObject(new wxPyClientData(_self));
-        }
+        void Destroy() { delete self; }
     }
-
 
     void SetShape(wxPyShape *sh);
     wxPyShape *GetShape();
@@ -152,9 +147,12 @@ class wxPyShape : public wxPyShapeEvtHandler {
 public:
     // wxPyShape(wxPyShapeCanvas *can = NULL);     abstract base class...
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyShape)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyShape)"
+
+    %addmethods {
+        void Destroy() { delete self; }
+    }
 
     void GetBoundingBoxMax(double *OUTPUT, double *OUTPUT);
     void GetBoundingBoxMin(double *OUTPUT, double *OUTPUT);
@@ -233,24 +231,30 @@ public:
     int GetAttachmentMode();
     void SetId(long i);
     long GetId();
-
     void SetPen(wxPen *pen);
     void SetBrush(wxBrush *brush);
 
-
     // void SetClientData(wxObject *client_data);
     // wxObject *GetClientData();
+    %addmethods {
+        void SetClientData(PyObject* userData) {
+            wxPyUserData* data = NULL;
+            if (userData)
+                data = new wxPyUserData(userData);
+            self->SetClientData(data);
+        }
 
-    // The real client data methods are being used for OOR, so just fake it.
-    %pragma(python) addtoclass = "
-    def SetClientData(self, data):
-        self.clientData = data
-    def GetClientData(self):
-        if hasattr(self, 'clientData'):
-            return self.clientData
-        else:
-            return None
-"
+        PyObject* GetClientData() {
+            wxPyUserData* data = (wxPyUserData*)self->GetClientData();
+            if (data) {
+                Py_INCREF(data->m_obj);
+                return data->m_obj;
+            } else {
+                Py_INCREF(Py_None);
+                return Py_None;
+            }
+        }
+    }
 
     void Show(bool show);
     bool IsShown();
@@ -360,8 +364,6 @@ public:
     void ClearAttachments();
     void Recentre(wxDC& dc);
     void ClearPointList(wxList& list);
-    wxPen GetBackgroundPen();
-    wxBrush GetBackgroundBrush();
 
     void base_OnDelete();
     void base_OnDraw(wxDC& dc);

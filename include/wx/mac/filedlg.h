@@ -35,8 +35,6 @@ protected:
     wxString    m_dir;
     wxString    m_path; // Full path
     wxString    m_fileName;
-    wxArrayString m_fileNames;
-    wxArrayString m_paths;
     wxString    m_wildCard;
     int         m_filterIndex;
 public:
@@ -56,19 +54,11 @@ public:
     inline wxString GetPath() const { return m_path; }
     inline wxString GetDirectory() const { return m_dir; }
     inline wxString GetFilename() const { return m_fileName; }
-    void GetPaths(wxArrayString& paths) const { paths = m_paths; }
-    void GetFilenames(wxArrayString& files) const { files = m_fileNames; }
     inline wxString GetWildcard() const { return m_wildCard; }
     inline long GetStyle() const { return m_dialogStyle; }
     inline int GetFilterIndex() const { return m_filterIndex ; }
 
     int ShowModal();
-    
-    // not supported for file dialog, RR
-    virtual void DoSetSize(int x, int y,
-                           int width, int height,
-                           int sizeFlags = wxSIZE_AUTO) {}
-
 };
 
 #define wxOPEN              0x0001

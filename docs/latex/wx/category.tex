@@ -14,14 +14,12 @@ Frames may contain windows, and dialog boxes may directly contain controls.
 \begin{twocollist}\itemsep=0pt
 \twocolitem{\helpref{wxDialog}{wxdialog}}{Dialog box}
 \twocolitem{\helpref{wxFrame}{wxframe}}{Normal frame}
-\twocolitem{\helpref{wxMDIChildFrame}{wxmdichildframe}}{MDI child frame}
 \twocolitem{\helpref{wxMDIParentFrame}{wxmdiparentframe}}{MDI parent frame}
+\twocolitem{\helpref{wxMDIChildFrame}{wxmdichildframe}}{MDI child frame}
 \twocolitem{\helpref{wxMiniFrame}{wxminiframe}}{A frame with a small title bar}
-\twocolitem{\helpref{wxSplashScreen}{wxsplashscreen}}{Splash screen class}
+\twocolitem{\helpref{wxWizard}{wxwizard}}{A wizard dialog.}
 \twocolitem{\helpref{wxTabbedDialog}{wxtabbeddialog}}{Tabbed dialog
 (deprecated, use wxNotebook instead)}
-\twocolitem{\helpref{wxTipWindow}{wxtipwindow}}{Shows text in a small window}
-\twocolitem{\helpref{wxWizard}{wxwizard}}{A wizard dialog}
 \end{twocollist}
 
 See also {\bf Common dialogs}.
@@ -58,7 +56,6 @@ in an application.
 \twocolitem{\helpref{wxColourDialog}{wxcolourdialog}}{Colour chooser dialog}
 \twocolitem{\helpref{wxDirDialog}{wxdirdialog}}{Directory selector dialog}
 \twocolitem{\helpref{wxFileDialog}{wxfiledialog}}{File selector dialog}
-\twocolitem{\helpref{wxFindReplaceDialog}{wxfindreplacedialog}}{Text search/replace dialog}
 \twocolitem{\helpref{wxMultipleChoiceDialog}{wxmultiplechoicedialog}}{Dialog to get one or more selections from a list}
 \twocolitem{\helpref{wxSingleChoiceDialog}{wxsinglechoicedialog}}{Dialog to get a single selection from a list and return the string}
 \twocolitem{\helpref{wxTextEntryDialog}{wxtextentrydialog}}{Dialog to get a single line of text from the user}
@@ -79,14 +76,12 @@ that are not static can have \helpref{validators}{wxvalidator} associated with t
 \twocolitem{\helpref{wxControl}{wxcontrol}}{The base class for controls}
 \twocolitem{\helpref{wxButton}{wxbutton}}{Push button control, displaying text}
 \twocolitem{\helpref{wxBitmapButton}{wxbitmapbutton}}{Push button control, displaying a bitmap}
-\twocolitem{\helpref{wxToggleButton}{wxtogglebutton}}{A button which stays pressed when clicked by user.}
 \twocolitem{\helpref{wxCalendarCtrl}{wxcalendarctrl}}{Date picker control}
 \twocolitem{\helpref{wxCheckBox}{wxcheckbox}}{Checkbox control}
 \twocolitem{\helpref{wxCheckListBox}{wxchecklistbox}}{A listbox with a checkbox to the left of each item}
 \twocolitem{\helpref{wxChoice}{wxchoice}}{Choice control (a combobox without the editable area)}
 \twocolitem{\helpref{wxComboBox}{wxcombobox}}{A choice with an editable area}
 \twocolitem{\helpref{wxGauge}{wxgauge}}{A control to represent a varying quantity, such as time remaining}
-\twocolitem{\helpref{wxGenericDirCtrl}{wxgenericdirctrl}}{A control for displaying a directory tree}
 \twocolitem{\helpref{wxStaticBox}{wxstaticbox}}{A static, or group box for visually grouping related controls}
 \twocolitem{\helpref{wxListBox}{wxlistbox}}{A list of strings for single or multiple selection}
 \twocolitem{\helpref{wxListCtrl}{wxlistctrl}}{A control for displaying lists of strings and/or icons, plus a multicolumn report view}
@@ -166,7 +161,6 @@ These classes are related to drawing on device contexts and windows.
 
 \begin{twocollist}\itemsep=0pt
 \twocolitem{\helpref{wxColour}{wxcolour}}{Represents the red, blue and green elements of a colour}
-\twocolitem{\helpref{wxDCClipper}{wxdcclipper}}{Wraps the operations of setting and destroying the clipping region}
 \twocolitem{\helpref{wxBitmap}{wxbitmap}}{Represents a bitmap}
 \twocolitem{\helpref{wxBrush}{wxbrush}}{Used for filling areas on a device context}
 \twocolitem{\helpref{wxBrushList}{wxbrushlist}}{The list of previously-created brushes}
@@ -200,16 +194,12 @@ An event object contains information about a specific event. Event handlers
 \twocolitem{\helpref{wxDropFilesEvent}{wxdropfilesevent}}{A drop files event}
 \twocolitem{\helpref{wxEraseEvent}{wxeraseevent}}{An erase background event}
 \twocolitem{\helpref{wxEvent}{wxevent}}{The event base class}
-\twocolitem{\helpref{wxFindDialogEvent}{wxfinddialogevent}}{Event sent by 
-\helpref{wxFindReplaceDialog}{wxfindreplacedialog}}
 \twocolitem{\helpref{wxFocusEvent}{wxfocusevent}}{A window focus event}
 \twocolitem{\helpref{wxKeyEvent}{wxkeyevent}}{A keypress event}
-\twocolitem{\helpref{wxIconizeEvent}{wxiconizeevent}}{An iconize/restore event}
 \twocolitem{\helpref{wxIdleEvent}{wxidleevent}}{An idle event}
 \twocolitem{\helpref{wxInitDialogEvent}{wxinitdialogevent}}{A dialog initialisation event}
 \twocolitem{\helpref{wxJoystickEvent}{wxjoystickevent}}{A joystick event}
 \twocolitem{\helpref{wxListEvent}{wxlistevent}}{A list control event}
-\twocolitem{\helpref{wxMaximizeEvent}{wxmaximizeevent}}{A maximize event}
 \twocolitem{\helpref{wxMenuEvent}{wxmenuevent}}{A menu event}
 \twocolitem{\helpref{wxMouseEvent}{wxmouseevent}}{A mouse event}
 \twocolitem{\helpref{wxMoveEvent}{wxmoveevent}}{A move event}
@@ -263,7 +253,6 @@ These are the data structure classes supported by wxWindows.
 \twocolitem{\helpref{wxPathList}{wxpathlist}}{A class to help search multiple paths}
 \twocolitem{\helpref{wxPoint}{wxpoint}}{Representation of a point}
 \twocolitem{\helpref{wxRect}{wxrect}}{A class representing a rectangle}
-\twocolitem{\helpref{wxRegEx}{wxregex}}{Regular expression support}
 \twocolitem{\helpref{wxRegion}{wxregion}}{A class representing a region}
 \twocolitem{\helpref{wxString}{wxstring}}{A string class}
 \twocolitem{\helpref{wxStringList}{wxstringlist}}{A class representing a list of strings}
@@ -290,28 +279,6 @@ creation of objects given class names.
 
 {\large {\bf Debugging features}}
 
-\overview{Overview}{wxlogoverview}
-
-wxWindows provides several classes and functions for the message logging.
-Please see the \helpref{wxLog overview}{wxlogoverview} for more details.
-
-\begin{twocollist}\itemsep=0pt
-\twocolitem{\helpref{wxLog}{wxlog}}{The base log class}
-\twocolitem{\helpref{wxLogStderr}{wxlogstderr}}{Log messages to a C STDIO stream}
-\twocolitem{\helpref{wxLogStream}{wxlogstream}}{Log messages to a C++ iostream}
-\twocolitem{\helpref{wxLogTextCtrl}{wxlogtextctrl}}{Log messages to a \helpref{wxTextCtrl}{wxtextctrl}}
-\twocolitem{\helpref{wxLogWindow}{wxlogwindow}}{Log messages to a log frame}
-\twocolitem{\helpref{wxLogGui}{wxloggui}}{Default log target for GUI programs}
-\twocolitem{\helpref{wxLogNull}{wxlognull}}{Temporarily suppress message logging}
-\twocolitem{\helpref{wxLogChain}{wxlogchain}}{Allows to chain two log targets}
-\twocolitem{\helpref{wxLogPassThrough}{wxlogpassthrough}}{Allows to filter the log messages}
-\twocolitem{\helpref{wxStreamToTextRedirector}{wxstreamtotextredirector}}{Allows
-to redirect output sent to {\tt cout} to a \helpref{wxTextCtrl}{wxtextctrl}}
-\twocolitem{\helpref{Log functions}{logfunctions}}{Error and warning logging functions}
-\end{twocollist}
-
-{\large {\bf Debugging features}}
-
 \overview{Overview}{debuggingoverview}
 
 wxWindows supports some aspects of debugging an application through
@@ -320,7 +287,11 @@ classes, functions and macros.
 \begin{twocollist}\itemsep=0pt
 \twocolitem{\helpref{wxDebugContext}{wxdebugcontext}}{Provides memory-checking facilities}
 %\twocolitem{\helpref{wxDebugStreamBuf}{wxdebugstreambuf}}{A stream buffer writing to the debug stream}
+\twocolitem{\helpref{wxLog}{wxlog}}{Logging facility}
+\twocolitem{\helpref{Log functions}{logfunctions}}{Error and warning logging functions}
 \twocolitem{\helpref{Debugging macros}{debugmacros}}{Debug macros for assertion and checking}
+%\twocolitem{\helpref{wxTrace}{wxtrace}}{Tracing facility}
+%\twocolitem{\helpref{wxTraceLevel}{wxtracelevel}}{Tracing facility with levels}
 \twocolitem{\helpref{WXDEBUG\_NEW}{debugnew}}{Use this macro to give further debugging information}
 %\twocolitem{\helpref{WXTRACE}{trace}}{Trace macro}
 %\twocolitem{\helpref{WXTRACELEVEL}{tracelevel}}{Trace macro with levels}
@@ -425,9 +396,7 @@ wxWindows has several small classes to work with disk files, see \helpref{file c
 overview}{wxfileoverview} for more details.
 
 \begin{twocollist}\itemsep=0pt
-\twocolitem{\helpref{wxFileName}{wxfilename}}{Operations with the file name and attributes}
 \twocolitem{\helpref{wxDir}{wxdir}}{Class for enumerating files/subdirectories.}
-\twocolitem{\helpref{wxDirTraverser}{wxdirtraverser}}{Class used together with wxDir for recursively enumerating the files/subdirectories}
 \twocolitem{\helpref{wxFile}{wxfile}}{Low-level file input/output class.}
 \twocolitem{\helpref{wxFFile}{wxffile}}{Another low-level file input/output class.}
 \twocolitem{\helpref{wxTempFile}{wxtempfile}}{Class to safely replace an existing file}
@@ -509,51 +478,6 @@ used internally by the HTML classes.
 \twocolitem{\helpref{wxFileSystemHandler}{wxfilesystemhandler}}{Class used to announce file system type}
 \end{twocollist}
 
-{\large {\bf Online help}}
-
-\begin{twocollist}\itemsep=0pt
-\twocolitem{\helpref{wxHelpController}{wxhelpcontroller}}{Family of classes for controlling help windows}
-\twocolitem{\helpref{wxHtmlHelpController}{wxhtmlhelpcontroller}}{HTML help controller class}
-\twocolitem{\helpref{wxContextHelp}{wxcontexthelp}}{Class to put application into context-sensitive help mode}
-\twocolitem{\helpref{wxContextHelpButton}{wxcontexthelpbutton}}{Button class for putting application into context-sensitive help mode}
-\twocolitem{\helpref{wxHelpProvider}{wxhelpprovider}}{Abstract class for context-sensitive help provision}
-\twocolitem{\helpref{wxSimpleHelpProvider}{wxsimplehelpprovider}}{Class for simple context-sensitive help provision}
-\twocolitem{\helpref{wxHelpControllerHelpProvider}{wxhelpcontrollerhelpprovider}}{Class for context-sensitive help provision via a help controller}
-\twocolitem{\helpref{wxToolTip}{wxtooltip}}{Class implementing tooltips}
-\end{twocollist}
-
-{\large {\bf Database classes}}
-
-\overview{Database classes overview}{odbcoverview}
-
-wxWindows provides two alternative sets of classes for accessing Microsoft's ODBC (Open Database Connectivity)
-product. The new version by Remstar, known as wxODBC, is more powerful,
-portable, flexible and better supported, so please use the classes below for
-working with databases:
-
-\begin{twocollist}\itemsep=0pt
-\twocolitem{\helpref{wxDb}{wxdb}}{ODBC database connection}
-\twocolitem{\helpref{wxDbTable}{wxdbtable}}{Provides access to a database table}
-\twocolitem{\helpref{wxDbInf}{wxdbinf}}{}
-\twocolitem{\helpref{wxDbTableInf}{wxdbtableinf}}{}
-\twocolitem{\helpref{wxDbColDef}{wxdbcoldef}}{}
-\twocolitem{\helpref{wxDbColInf}{wxdbcolinf}}{}
-\twocolitem{\helpref{wxDbColDataPtr}{wxdbcoldataptr}}{}
-\twocolitem{\helpref{wxDbColFor}{wxdbcolfor}}{}
-\twocolitem{\helpref{wxDbConnectInf}{wxdbconnectinf}}{}
-\twocolitem{\helpref{wxDbIdxDef}{wxdbidxdef}}{}
-\end{twocollist}
-
-The documentation for the older classes is still included, but you should avoid
-using any of them in the new programs:
-
-\begin{twocollist}\itemsep=0pt
-\twocolitem{\helpref{wxDatabase}{wxdatabase}}{Database class}
-\twocolitem{\helpref{wxQueryCol}{wxquerycol}}{Class representing a column}
-\twocolitem{\helpref{wxQueryField}{wxqueryfield}}{Class representing a field}
-\twocolitem{\helpref{wxRecordSet}{wxrecordset}}{Class representing one or more record}
-\end{twocollist}
-
 {\large {\bf Miscellaneous}}
 
 \begin{twocollist}\itemsep=0pt
@@ -562,19 +486,33 @@ using any of them in the new programs:
 \twocolitem{\helpref{wxCmdLineParser}{wxcmdlineparser}}{Command line parser class}
 \twocolitem{\helpref{wxConfig}{wxconfigbase}}{Classes for configuration reading/writing (using either INI files or registry)}
 \twocolitem{\helpref{wxDllLoader}{wxdllloader}}{Class to work with shared libraries.}
+\twocolitem{\helpref{wxHelpController}{wxhelpcontroller}}{Family of classes for controlling help windows}
 \twocolitem{\helpref{wxLayoutAlgorithm}{wxlayoutalgorithm}}{An alternative window layout facility}
 \twocolitem{\helpref{wxProcess}{wxprocess}}{Process class}
 \twocolitem{\helpref{wxTimer}{wxtimer}}{Timer class}
 \twocolitem{\helpref{wxStopWatch}{wxstopwatch}}{Stop watch class}
 \twocolitem{\helpref{wxMimeTypesManager}{wxmimetypesmanager}}{MIME-types manager class}
-\twocolitem{\helpref{wxSystemSettings}{wxsystemsettings}}{System settings class for obtaining various global parameters}
-\twocolitem{\helpref{wxSystemOptions}{wxsystemoptions}}{System options class for run-time configuration}
+\twocolitem{\helpref{wxSystemSettings}{wxsystemsettings}}{System settings class}
 \twocolitem{\helpref{wxAcceleratorTable}{wxacceleratortable}}{Accelerator table}
 \twocolitem{\helpref{wxAutomationObject}{wxautomationobject}}{OLE automation class}
 \twocolitem{\helpref{wxFontMapper}{wxfontmapper}}{Font mapping, finding suitable font for given encoding}
 \twocolitem{\helpref{wxEncodingConverter}{wxencodingconverter}}{Encoding conversions}
 \twocolitem{\helpref{wxCalendarDateAttr}{wxcalendardateattr}}{Used with \helpref{wxCalendarCtrl}{wxcalendarctrl}}
-\twocolitem{\helpref{wxQuantize}{wxquantize}}{Class to perform quantization, or colour reduction}
-\twocolitem{\helpref{wxSingleInstanceChecker}{wxsingleinstancechecker}}{Check that only single program instance is running}
 \end{twocollist}
+
+{\large {\bf Database classes}}
+
+wxWindows provides a set of classes for accessing Microsoft's ODBC (Open 
+Database Connectivity) product, also available for Unix and Linux. The
+new version by Remstar is documented here:
+
+\begin{twocollist}\itemsep=0pt
+\twocolitem{\helpref{wxDb}{wxdb}}{Database class}
+\twocolitem{\helpref{wxDbColFor}{wxdbcolfor}}{International formatting}
+\twocolitem{\helpref{wxDbColInf}{wxdbcolinf}}{Information about a columns definition}
+\twocolitem{\helpref{wxDbTable}{wxdbtable}}{Access to rows of data in a table}
+\twocolitem{\helpref{wxDbTableInf}{wxdbtableinf}}{Information describing the table}
+\twocolitem{\helpref{wxDbInf}{wxdbinf}}{Database connection}
+\end{twocollist}
+
 

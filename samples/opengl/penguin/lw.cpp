@@ -20,21 +20,13 @@
 #include <windows.h>
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif
-
-#ifndef WX_PRECOMP
-#include "wx/wx.h"
-#endif
-
 #include "lw.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+#define wxInt32 int
+#define wxUint32 unsigned int
 
 #ifndef FALSE
 #define FALSE 0
@@ -65,23 +57,12 @@ static wxInt32 read_char(FILE *f)
 
 static wxInt32 read_short(FILE *f)
 {
-    // the execution path was not always correct
-    // when using the direct evaluation in the return statement
-    wxInt32 first = read_char(f) ;
-    wxInt32 second = read_char(f) ;
-    
-  return (first<<8) | second ;
+  return (read_char(f)<<8) | read_char(f);
 }
 
 static wxInt32 read_long(FILE *f)
 {
-    // the execution path was not always correct
-    // when using the direct evaluation in the return statement
-    wxInt32 first = read_char(f) ;
-    wxInt32 second = read_char(f) ;
-    wxInt32 third = read_char(f) ;
-    wxInt32 fourth = read_char(f) ;
-  return (first<<24) | (second<<16) | (third<<8) | fourth ;
+  return (read_char(f)<<24) | (read_char(f)<<16) | (read_char(f)<<8) | read_char(f);
 }
 
 static GLfloat read_float(FILE *f)
@@ -128,9 +109,9 @@ static void read_srfs(FILE *f, int nbytes, lwObject *lwo)
     nbytes -= read_string(f,material->name);
 
     /* defaults */
-    material->r = 0.7f;
-    material->g = 0.7f;
-    material->b = 0.7f;
+    material->r = 0.7;
+    material->g = 0.7;
+    material->b = 0.7;
   }
   lwo->material = (lwMaterial*) realloc(lwo->material, sizeof(lwMaterial)*lwo->material_cnt);
 }

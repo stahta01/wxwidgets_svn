@@ -37,18 +37,6 @@ wxDataInputStream::~wxDataInputStream()
 {
 }
 
-wxUint64 wxDataInputStream::Read64()
-{
-  wxUint64 i64;
-
-  m_input->Read(&i64, 8);
-
-  if (m_be_order)
-    return wxUINT64_SWAP_ON_LE(i64);
-  else
-    return wxUINT64_SWAP_ON_BE(i64);
-}
-
 wxUint32 wxDataInputStream::Read32()
 {
   wxUint32 i32;
@@ -117,7 +105,7 @@ wxString wxDataInputStream::ReadString()
 #endif
     return s;
   }
-  else
+  else 
     return wxEmptyString;
 }
 
@@ -163,12 +151,6 @@ wxDataInputStream& wxDataInputStream::operator>>(wxUint32& i)
   return *this;
 }
 
-wxDataInputStream& wxDataInputStream::operator>>(wxUint64& i)
-{
-  i = Read64();
-  return *this;
-}
-
 wxDataInputStream& wxDataInputStream::operator>>(double& i)
 {
   i = ReadDouble();
@@ -192,17 +174,6 @@ wxDataOutputStream::wxDataOutputStream(wxOutputStream& s)
 
 wxDataOutputStream::~wxDataOutputStream()
 {
-}
-
-void wxDataOutputStream::Write64(wxUint64 i)
-{
-  wxUint64 i64;
-
-  if (m_be_order)
-    i64 = wxUINT64_SWAP_ON_LE(i);
-  else
-    i64 = wxUINT64_SWAP_ON_BE(i);
-  m_output->Write(&i64, 8);
 }
 
 void wxDataOutputStream::Write32(wxUint32 i)
@@ -266,7 +237,7 @@ wxDataOutputStream& wxDataOutputStream::operator<<(const wxChar *string)
   return *this;
 }
 
-wxDataOutputStream& wxDataOutputStream::operator<<(const wxString& string)
+wxDataOutputStream& wxDataOutputStream::operator<<(wxString& string)
 {
   WriteString(string);
   return *this;
@@ -305,12 +276,6 @@ wxDataOutputStream& wxDataOutputStream::operator<<(wxUint16 i)
 wxDataOutputStream& wxDataOutputStream::operator<<(wxUint32 i)
 {
   Write32(i);
-  return *this;
-}
-
-wxDataOutputStream& wxDataOutputStream::operator<<(wxUint64 i)
-{
-  Write64(i);
   return *this;
 }
 

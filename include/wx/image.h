@@ -24,8 +24,6 @@
 #  include "wx/stream.h"
 #endif
 
-#if wxUSE_IMAGE
-
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
@@ -43,7 +41,7 @@ public:
     wxImageHandler() { m_name = ""; m_extension = ""; m_type = 0; }
 
 #if wxUSE_STREAMS
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=0 );
     virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
 
     virtual int GetImageCount( wxInputStream& stream );
@@ -70,7 +68,7 @@ protected:
     wxString  m_extension;
     wxString  m_mime;
     long      m_type;
-
+    
 private:
     DECLARE_CLASS(wxImageHandler)
 };
@@ -92,24 +90,19 @@ public:
     wxImage();
     wxImage( int width, int height );
     wxImage( int width, int height, unsigned char* data, bool static_data = FALSE );
-    wxImage( const wxString& name, long type = wxBITMAP_TYPE_ANY, int index = -1 );
-    wxImage( const wxString& name, const wxString& mimetype, int index = -1 );
-
-#if wxUSE_STREAMS
-    wxImage( wxInputStream& stream, long type = wxBITMAP_TYPE_ANY, int index = -1 );
-    wxImage( wxInputStream& stream, const wxString& mimetype, int index = -1 );
-#endif // wxUSE_STREAMS
+    wxImage( const wxString& name, long type = wxBITMAP_TYPE_ANY );
+    wxImage( wxInputStream& stream, long type = wxBITMAP_TYPE_ANY );
+    wxImage( const wxString& name, const wxString& mimetype );
+    wxImage( wxInputStream& stream, const wxString& mimetype );
 
     wxImage( const wxImage& image );
     wxImage( const wxImage* image );
 
-#if wxUSE_GUI
-    // convertion to/from wxBitmap (deprecated, use wxBitmap's methods instead):
     wxImage( const wxBitmap &bitmap );
+    operator wxBitmap() const { return ConvertToBitmap(); }
     wxBitmap ConvertToBitmap() const;
 #ifdef __WXGTK__
-    wxBitmap ConvertToMonoBitmap( unsigned char red, unsigned char green, unsigned char blue ) const;
-#endif
+    wxBitmap ConvertToMonoBitmap( unsigned char red, unsigned char green, unsigned char blue );
 #endif
 
     void Create( int width, int height );
@@ -119,13 +112,13 @@ public:
     // creates an identical copy of the image (the = operator
     // just raises the ref count)
     wxImage Copy() const;
-
+    
     // return the new image with size width*height
     wxImage GetSubImage( const wxRect& ) const;
-
+    
     // pastes image into this instance and takes care of
     // the mask colour and out of bounds problems
-    void Paste( const wxImage &image, int x, int y );
+    void Paste( const wxImage &image, int x, int y );    
 
     // return the new image with size width*height
     wxImage Scale( int width, int height ) const;
@@ -145,34 +138,20 @@ public:
     void Replace( unsigned char r1, unsigned char g1, unsigned char b1,
                   unsigned char r2, unsigned char g2, unsigned char b2 );
 
-    // convert to monochrome image (<r,g,b> will be replaced by white, everything else by black)
-    wxImage ConvertToMono( unsigned char r, unsigned char g, unsigned char b ) const;
-
     // these routines are slow but safe
     void SetRGB( int x, int y, unsigned char r, unsigned char g, unsigned char b );
     unsigned char GetRed( int x, int y ) const;
     unsigned char GetGreen( int x, int y ) const;
     unsigned char GetBlue( int x, int y ) const;
 
-    // find first colour that is not used in the image and has higher
-    // RGB values than <startR,startG,startB>
-    bool FindFirstUnusedColour( unsigned char *r, unsigned char *g, unsigned char *b,
-                                unsigned char startR = 1, unsigned char startG = 0,
-                                unsigned char startB = 0 );
-    // Set image's mask to the area of 'mask' that has <r,g,b> colour
-    bool SetMaskFromImage(const wxImage & mask,
-                          unsigned char mr, unsigned char mg, unsigned char mb);
-
     static bool CanRead( const wxString& name );
-    static int GetImageCount( const wxString& name, long type = wxBITMAP_TYPE_ANY );
-    virtual bool LoadFile( const wxString& name, long type = wxBITMAP_TYPE_ANY, int index = -1 );
-    virtual bool LoadFile( const wxString& name, const wxString& mimetype, int index = -1 );
+    virtual bool LoadFile( const wxString& name, long type = wxBITMAP_TYPE_ANY );
+    virtual bool LoadFile( const wxString& name, const wxString& mimetype );
 
 #if wxUSE_STREAMS
     static bool CanRead( wxInputStream& stream );
-    static int GetImageCount( wxInputStream& stream, long type = wxBITMAP_TYPE_ANY );
-    virtual bool LoadFile( wxInputStream& stream, long type = wxBITMAP_TYPE_ANY, int index = -1 );
-    virtual bool LoadFile( wxInputStream& stream, const wxString& mimetype, int index = -1 );
+    virtual bool LoadFile( wxInputStream& stream, long type = wxBITMAP_TYPE_ANY );
+    virtual bool LoadFile( wxInputStream& stream, const wxString& mimetype );
 #endif
 
     virtual bool SaveFile( const wxString& name, int type );
@@ -190,28 +169,13 @@ public:
     char unsigned *GetData() const;
     void SetData( char unsigned *data );
     void SetData( char unsigned *data, int new_width, int new_height );
-
-    // Mask functions
+    
     void SetMaskColour( unsigned char r, unsigned char g, unsigned char b );
     unsigned char GetMaskRed() const;
     unsigned char GetMaskGreen() const;
     unsigned char GetMaskBlue() const;
     void SetMask( bool mask = TRUE );
     bool HasMask() const;
-
-#if wxUSE_PALETTE
-    // Palette functions
-    bool HasPalette() const;
-    const wxPalette& GetPalette() const;
-    void SetPalette(const wxPalette& palette);
-#endif // wxUSE_PALETTE
-
-    // Option functions (arbitrary name/value mapping)
-    void SetOption(const wxString& name, const wxString& value);
-    void SetOption(const wxString& name, int value);
-    wxString GetOption(const wxString& name) const;
-    int GetOptionInt(const wxString& name) const;
-    bool HasOption(const wxString& name) const;
 
     unsigned long CountColours( unsigned long stopafter = (unsigned long) -1 );
     unsigned long ComputeHistogram( wxHashTable &h );
@@ -241,7 +205,7 @@ public:
     static void InitStandardHandlers();
 
 protected:
-    static wxList   sm_handlers;
+    static wxList sm_handlers;
 
 private:
     friend class WXDLLEXPORT wxImageHandler;
@@ -252,7 +216,6 @@ private:
 
 extern void WXDLLEXPORT wxInitAllImageHandlers();
 
-WXDLLEXPORT_DATA(extern wxImage)    wxNullImage;
 
 //-----------------------------------------------------------------------------
 // wxImage handlers
@@ -265,9 +228,6 @@ WXDLLEXPORT_DATA(extern wxImage)    wxNullImage;
 #include "wx/imagjpeg.h"
 #include "wx/imagtiff.h"
 #include "wx/imagpnm.h"
-#include "wx/imagxpm.h"
-
-#endif // wxUSE_IMAGE
 
 #endif
   // _WX_IMAGE_H_

@@ -25,8 +25,6 @@
 
 #include "wx/image.h"
 
-#if wxUSE_IMAGE
-
 //-----------------------------------------------------------------------------
 // This function allows dynamic access to all image handlers compile within
 // the library. This function should be in a separate file as some compilers
@@ -52,11 +50,4 @@ void wxInitAllImageHandlers()
 #if wxUSE_PCX
   wxImage::AddHandler( new wxPCXHandler );
 #endif
-#if wxUSE_XPM
-  wxImage::AddHandler( new wxXPMHandler );
-#endif
-  wxImage::AddHandler( new wxICOHandler );
-  wxImage::AddHandler( new wxCURHandler );
 }
-
-#endif // wxUSE_IMAGE

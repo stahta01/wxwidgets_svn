@@ -20,17 +20,26 @@
     #pragma interface "framebase.h"
 #endif
 
-#include "wx/toplevel.h"      // the base class
+#include "wx/window.h"      // the base class
+#include "wx/icon.h"        // for m_icon
 
 // the default names for various classs
 WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
+WXDLLEXPORT_DATA(extern wxWindow*) wxWndHook;
 
-class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxMenuBar;
 class WXDLLEXPORT wxStatusBar;
 class WXDLLEXPORT wxToolBar;
+
+// Styles for ShowFullScreen
+#define wxFULLSCREEN_NOMENUBAR      0x01
+#define wxFULLSCREEN_NOTOOLBAR      0x02
+#define wxFULLSCREEN_NOSTATUSBAR    0x04
+#define wxFULLSCREEN_NOBORDER       0x08
+#define wxFULLSCREEN_NOCAPTION      0x10
+#define wxFULLSCREEN_ALL            (wxFULLSCREEN_NOMENUBAR | wxFULLSCREEN_NOTOOLBAR | wxFULLSCREEN_NOSTATUSBAR | wxFULLSCREEN_NOBORDER | wxFULLSCREEN_NOCAPTION)
 
 // ----------------------------------------------------------------------------
 // wxFrame is a top-level window with optional menubar, statusbar and toolbar
@@ -44,19 +53,11 @@ class WXDLLEXPORT wxToolBar;
 // CreateXXXBar() is called.
 // ----------------------------------------------------------------------------
 
-// FIXME - temporary hack in absence of wxTLW !!
-#ifndef wxTopLevelWindowNative
-class WXDLLEXPORT wxFrameBase : public wxTopLevelWindowBase
-#else
-class WXDLLEXPORT wxFrameBase : public wxTopLevelWindow
-#endif
+class WXDLLEXPORT wxFrameBase : public wxWindow
 {
 public:
     // construction
     wxFrameBase();
-#ifdef __DARWIN__
-    virtual ~wxFrameBase() { }
-#endif
 
     wxFrame *New(wxWindow *parent,
                  wxWindowID id,
@@ -69,6 +70,30 @@ public:
     // frame state
     // -----------
 
+    // maximize = TRUE => maximize, otherwise - restore
+    virtual void Maximize(bool maximize = TRUE) = 0;
+
+    // undo Maximize() or Iconize()
+    virtual void Restore() = 0;
+
+    // iconize = TRUE => iconize, otherwise - restore
+    virtual void Iconize(bool iconize = TRUE) = 0;
+
+    // return TRUE if the frame is maximized
+    virtual bool IsMaximized() const = 0;
+
+    // return TRUE if the frame is iconized
+    virtual bool IsIconized() const = 0;
+
+    // get the frame icon
+    const wxIcon& GetIcon() const { return m_icon; }
+
+    // set the frame icon
+    virtual void SetIcon(const wxIcon& icon) { m_icon = icon; }
+
+    // make the window modal (all other windows unresponsive)
+    virtual void MakeModal(bool modal = TRUE);
+
     // get the origin of the client area (which may be different from (0, 0)
     // if the frame has a toolbar) in client coordinates
     virtual wxPoint GetClientAreaOrigin() const;
@@ -76,10 +101,8 @@ public:
     // menu bar functions
     // ------------------
 
-#if wxUSE_MENUS
-    virtual void SetMenuBar(wxMenuBar *menubar);
+    virtual void SetMenuBar(wxMenuBar *menubar) = 0;
     virtual wxMenuBar *GetMenuBar() const { return m_frameMenuBar; }
-#endif // wxUSE_MENUS
 
     // call this to simulate a menu command
     bool Command(int id) { return ProcessCommand(id); }
@@ -129,29 +152,30 @@ public:
     virtual void SetToolBar(wxToolBar *toolbar) { m_frameToolBar = toolbar; }
 #endif // wxUSE_TOOLBAR
 
+    // old functions, use the new ones instead!
+#if WXWIN_COMPATIBILITY_2
+    bool Iconized() const { return IsIconized(); }
+#endif // WXWIN_COMPATIBILITY_2
+
     // implementation only from now on
     // -------------------------------
 
+    // override some base class virtuals
+    virtual bool Destroy();
+    virtual bool IsTopLevel() const { return TRUE; }
+
     // event handlers
     void OnIdle(wxIdleEvent& event);
+    void OnCloseWindow(wxCloseEvent& event);
     void OnMenuHighlight(wxMenuEvent& event);
+    void OnSize(wxSizeEvent& event);
+    // this should go away, but for now it's called from docview.cpp,
+    // so should be there for all platforms
+    void OnActivate(wxActivateEvent &WXUNUSED(event)) { }
 
-#if wxUSE_MENUS
     // send wxUpdateUIEvents for all menu items (called from OnIdle())
     void DoMenuUpdates();
     void DoMenuUpdates(wxMenu* menu, wxWindow* focusWin);
-#endif // wxUSE_MENUS
-
-    // if there is no real wxTopLevelWindow on this platform we have to define
-    // some wxTopLevelWindowBase pure virtual functions here to avoid breaking
-    // old ports (wxMotif) which don't define them in wxFrame
-#ifndef wxTopLevelWindowNative
-    virtual bool ShowFullScreen(bool WXUNUSED(show),
-                                long WXUNUSED(style) = wxFULLSCREEN_ALL)
-        { return FALSE; }
-    virtual bool IsFullScreen() const
-        { return FALSE; }
-#endif // no wxTopLevelWindowNative
 
 protected:
     // the frame main menu/status/tool bars
@@ -161,23 +185,7 @@ protected:
     // main menubar, statusbar and toolbar (if any)
     void DeleteAllBars();
 
-    // test whether this window makes part of the frame
-    virtual bool IsOneOfBars(const wxWindow *win) const;
-
-#if wxUSE_MENUS
-    // override to update menu bar position when the frame size changes
-    virtual void PositionMenuBar() { }
-
-    // override to do something special when the menu bar is being removed
-    // from the frame
-    virtual void DetachMenuBar();
-
-    // override to do something special when the menu bar is attached to the
-    // frame
-    virtual void AttachMenuBar(wxMenuBar *menubar);
-
     wxMenuBar *m_frameMenuBar;
-#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
     // override to update status bar position (or anything else) when
@@ -199,24 +207,32 @@ protected:
     wxToolBar *m_frameToolBar;
 #endif // wxUSE_TOOLBAR
 
+    // the frame client to screen translation should take account of the
+    // toolbar which may shift the origin of the client area
+    virtual void DoClientToScreen(int *x, int *y) const;
+    virtual void DoScreenToClient(int *x, int *y) const;
+
+    // the frame icon
+    wxIcon m_icon;
+
     DECLARE_EVENT_TABLE()
 };
 
 // include the real class declaration
-#if defined(__WXUNIVERSAL__) // && !defined(__WXMICROWIN__)
-    #include "wx/univ/frame.h"
-#else // !__WXUNIVERSAL__
-    #if defined(__WXMSW__)
-        #include "wx/msw/frame.h"
-    #elif defined(__WXGTK__)
-        #include "wx/gtk/frame.h"
-    #elif defined(__WXMOTIF__)
-        #include "wx/motif/frame.h"
-    #elif defined(__WXMAC__)
-        #include "wx/mac/frame.h"
-    #elif defined(__WXPM__)
-        #include "wx/os2/frame.h"
-    #endif
+#if defined(__WXMSW__)
+    #include "wx/msw/frame.h"
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/frame.h"
+#elif defined(__WXGTK__)
+    #include "wx/gtk/frame.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/frame.h"
+#elif defined(__WXMAC__)
+    #include "wx/mac/frame.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/frame.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/frame.h"
 #endif
 
 #endif

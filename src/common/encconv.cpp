@@ -18,8 +18,6 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_FONTMAP
-
 #include "wx/encconv.h"
 
 #include <stdlib.h>
@@ -140,8 +138,7 @@ bool wxEncodingConverter::Init(wxFontEncoding input_enc, wxFontEncoding output_e
         else
         {
             CharsetItem *rev = BuildReverseTable(out_tbl);
-            CharsetItem *item;
-            CharsetItem key;
+            CharsetItem *item, key;
 
             for (i = 0; i < 128; i++)
             {
@@ -153,11 +150,7 @@ bool wxEncodingConverter::Init(wxFontEncoding input_enc, wxFontEncoding output_e
                 if (item)
                     m_Table[128 + i] = (tchar)item -> c;
                 else
-#if wxUSE_WCHAR_T
-                    m_Table[128 + i] = (wchar_t)(128 + i);
-#else
-                    m_Table[128 + i] = (char)(128 + i);
-#endif					
+                    m_Table[128 + i] = 128 + i; // don't know => don't touch
             }
 
             delete[] rev;
@@ -444,5 +437,3 @@ wxFontEncodingArray wxEncodingConverter::GetAllEquivalents(wxFontEncoding enc)
 
     return arr;
 }
-
-#endif // wxUSE_FONTMAP

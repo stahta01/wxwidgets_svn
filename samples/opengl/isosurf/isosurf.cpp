@@ -32,24 +32,8 @@
 #include "wx/timer.h"
 #include "wx/glcanvas.h"
 
-#ifdef __WXMAC__
-#  ifdef __DARWIN__
-#    include <OpenGL/gl.h>
-#    include <OpenGL/glu.h>
-#  else
-#    include <gl.h>
-#    include <glu.h>
-#  endif
-#else
-#  include <GL/gl.h>
-#  include <GL/glu.h>
-#endif
-
-// disabled because this has apparently changed in OpenGL 1.2, so doesn't link
-// correctly if this is on...
-#ifdef GL_EXT_vertex_array
-#undef GL_EXT_vertex_array
-#endif
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #include "isosurf.h"
 
@@ -203,6 +187,13 @@ static void Init(void)
 #endif
 }
 
+
+static void Reshape(int width, int height)
+{
+  glViewport(0, 0, (GLint)width, (GLint)height);
+}
+
+
 static GLenum Args(int argc, char **argv)
 {
    GLint i;
@@ -262,14 +253,9 @@ bool MyApp::OnInit(void)
 #ifdef __WXMSW__
   int *gl_attrib = NULL;
 #else
-  int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
-			WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
-			WX_GL_DOUBLEBUFFER,
-#  ifdef __WXMAC__
-			GL_NONE };
-#  else
-			None };
-#  endif
+  int gl_attrib[20] = { GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,
+			GLX_BLUE_SIZE, 1, GLX_DEPTH_SIZE, 1,
+			GLX_DOUBLEBUFFER, None };
 #endif
 
   if(!doubleBuffer)
@@ -280,9 +266,8 @@ bool MyApp::OnInit(void)
 #endif
       doubleBuffer = GL_FALSE;
   }
- 
-  frame->m_canvas = new TestGLCanvas(frame, -1, wxDefaultPosition, wxDefaultSize,
-                                     0, "TestGLCanvas", gl_attrib );
+  frame->m_canvas = new TestGLCanvas(frame, -1, wxPoint(0, 0), wxSize(200, 200), 0, "TestGLCanvas",
+				   gl_attrib);
 
   // Show the frame
   frame->Show(TRUE);
@@ -331,7 +316,6 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, wxWindowID id,
 {
    parent->Show(TRUE);
    SetCurrent();
-
    /* Make sure server supports the vertex array extension */
    char* extensions = (char *) glGetString( GL_EXTENSIONS );
    if (!extensions || !strstr( extensions, "GL_EXT_vertex_array" )) {
@@ -354,27 +338,20 @@ void TestGLCanvas::OnPaint( wxPaintEvent& event )
     if (!GetContext()) return;
 #endif
 
-    SetCurrent();
-
     draw1();
     SwapBuffers();
 }
 
 void TestGLCanvas::OnSize(wxSizeEvent& event)
 {
-    // this is also necessary to update the context on some platforms
-    wxGLCanvas::OnSize(event);
-    
-    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
-		int w, h;
-		GetClientSize(&w, &h);
 #ifndef __WXMOTIF__
-    if (GetContext())
+    if (!GetContext()) return;
 #endif
-    {
+
     SetCurrent();
-        glViewport(0, 0, (GLint) w, (GLint) h);
-    }
+    int width, height;
+    GetClientSize(& width, & height);
+    Reshape(width, height);
 }
 
 void TestGLCanvas::OnChar(wxKeyEvent& event)

@@ -12,20 +12,28 @@
 top_srcdir = @top_srcdir@/..
 top_builddir = ../..
 program_dir = samples/ipc
+# the comment at the end of the next line is needed because otherwise autoconf
+# would remove this line completely - it contains a built-in hack to remove
+# any VPATH assignment not containing ':'
+VPATH = @PATH_IFS@$(top_srcdir)/samples/ipc # ':' for autoconf
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+# Clears all default suffixes
+.SUFFIXES:	.o .cpp .c .cxx
 
-# this target can't be called all
-all-both:
-	$(MAKE) PROGRAM=client all
-	$(MAKE) PROGRAM=server all
+.cpp.o :
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-# this target can't be called clean
-clean-both:
-	$(MAKE) PROGRAM=client clean
-	$(MAKE) PROGRAM=server clean
+# Set defaults from configure
+include ../../src/make.env
 
-include ../../src/makeprog.env
+all:	client server
 
--include $(DEPFILES)
+client:	client.o ../../lib/@WX_TARGET_LIBRARY@
+	$(CXX) $(LDFLAGS) -o client client.o $(LDLIBS)
+
+server:	server.o ../../lib/@WX_TARGET_LIBRARY@
+	$(CXX) $(LDFLAGS) -o server server.o $(LDLIBS)
+
+clean:
+	rm -f $(OBJECTS) $(PROGRAM) core
+

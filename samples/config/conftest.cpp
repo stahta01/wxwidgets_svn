@@ -28,7 +28,6 @@
 // ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
-
 class MyApp: public wxApp
 {
 public:
@@ -47,6 +46,7 @@ public:
   void OnQuit(wxCommandEvent& event);
   void OnAbout(wxCommandEvent& event);
   void OnDelete(wxCommandEvent& event);
+  void OnCloseWindow(wxCloseEvent& event);
 
 private:
   wxTextCtrl *m_text;
@@ -57,19 +57,19 @@ private:
 
 enum
 {
-  ConfTest_Quit,
-  ConfTest_About,
-  ConfTest_Delete
+  Minimal_Quit,
+  Minimal_About,
+  Minimal_Delete
 };
 
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-  EVT_MENU(ConfTest_Quit, MyFrame::OnQuit)
-  EVT_MENU(ConfTest_About, MyFrame::OnAbout)
-  EVT_MENU(ConfTest_Delete, MyFrame::OnDelete)
+  EVT_MENU(Minimal_Quit, MyFrame::OnQuit)
+  EVT_MENU(Minimal_About, MyFrame::OnAbout)
+  EVT_MENU(Minimal_Delete, MyFrame::OnDelete)
+  EVT_CLOSE(MyFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -79,7 +79,6 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 // application
 // ----------------------------------------------------------------------------
-
 IMPLEMENT_APP(MyApp)
 
 // `Main program' equivalent, creating windows and returning main app frame
@@ -99,11 +98,6 @@ bool MyApp::OnInit()
   SetAppName("conftest"); // not needed, it's the default value
 
   wxConfigBase *pConfig = wxConfigBase::Get();
-
-  // uncomment this to force writing back of the defaults for all values
-  // if they're not present in the config - this can give the user an idea
-  // of all possible settings for this program
-  pConfig->SetRecordDefaults();
 
   // or you could also write something like this:
   //  wxFileConfig *pConfig = new wxFileConfig("conftest");
@@ -147,14 +141,20 @@ int MyApp::OnExit()
 MyFrame::MyFrame()
        : wxFrame((wxFrame *) NULL, -1, "wxConfig Demo")
 {
+  // submenu
+  wxMenu *sub_menu = new wxMenu( wxEmptyString, wxMENU_TEAROFF );
+  sub_menu->Append(Minimal_About, "&About", "About this sample");
+  sub_menu->Append(Minimal_About, "&About", "About this sample");
+  sub_menu->Append(Minimal_About, "&About", "About this sample");
+
   // menu
   wxMenu *file_menu = new wxMenu;
 
-  file_menu->Append(ConfTest_Delete, "&Delete", "Delete config file");
+  file_menu->Append(Minimal_Delete, "&Delete", "Delete config file");
   file_menu->AppendSeparator();
-  file_menu->Append(ConfTest_About, "&About\tF1", "About this sample");
+  file_menu->Append(Minimal_About, "&About", "About this sample");
   file_menu->AppendSeparator();
-  file_menu->Append(ConfTest_Quit, "E&xit\tAlt-X", "Exit the program");
+  file_menu->Append(Minimal_Quit, "E&xit", "Exit the program");
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu, "&File");
   SetMenuBar(menu_bar);
@@ -194,17 +194,11 @@ MyFrame::MyFrame()
       h = pConfig->Read("h", 200);
   Move(x, y);
   SetClientSize(w, h);
+}
 
-  pConfig->SetPath("/");
-  wxString s;
-  if ( pConfig->Read("TestValue", &s) )
-  {
-      wxLogStatus(this, wxT("TestValue from config is '%s'"), s.c_str());
-  }
-  else
-  {
-      wxLogStatus(this, wxT("TestValue not found in the config"));
-  }
+void MyFrame::OnCloseWindow(wxCloseEvent& event)
+{
+    this->Destroy();
 }
 
 void MyFrame::OnQuit(wxCommandEvent&)
@@ -214,14 +208,13 @@ void MyFrame::OnQuit(wxCommandEvent&)
 
 void MyFrame::OnAbout(wxCommandEvent&)
 {
-  wxMessageBox(_T("wxConfig demo\n© 1998-2001 Vadim Zeitlin"), _T("About"),
+  wxMessageBox(_T("wxConfig demo\n© Vadim Zeitlin 1998"), _T("About"),
                wxICON_INFORMATION | wxOK);
 }
 
 void MyFrame::OnDelete(wxCommandEvent&)
 {
-    if ( wxConfigBase::Get()->DeleteAll() ) 
-    {
+    if ( wxConfigBase::Get()->DeleteAll() ) {
         wxLogMessage(_T("Config file/registry key successfully deleted."));
 
         delete wxConfigBase::Set((wxConfigBase *) NULL);
@@ -250,6 +243,4 @@ MyFrame::~MyFrame()
   pConfig->Write("/MainFrame/y", (long) y);
   pConfig->Write("/MainFrame/w", (long) w);
   pConfig->Write("/MainFrame/h", (long) h);
-
-  pConfig->Write("/TestValue", "");
 }

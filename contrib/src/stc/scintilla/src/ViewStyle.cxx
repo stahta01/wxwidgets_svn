@@ -1,8 +1,6 @@
 // Scintilla source code edit control
-/** @file ViewStyle.cxx
- ** Store information on how the document is to be viewed.
- **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// ViewStyle.cxx - store information on how the document is to be viewed
+// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
@@ -15,7 +13,7 @@
 #include "Style.h"
 #include "ViewStyle.h"
 
-MarginStyle::MarginStyle() :
+MarginStyle::MarginStyle() : 
 	symbol(false), width(16), mask(0xffffffff), sensitive(false) {
 }
 
@@ -66,7 +64,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	for (int ind=0;ind<=INDIC_MAX;ind++) {
 		indicators[ind] = source.indicators[ind];
 	}
-
+	
 	selforeset = source.selforeset;
 	selforeground.desired = source.selforeground.desired;
 	selbackset = source.selbackset;
@@ -75,11 +73,8 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	selbar.desired = source.selbar.desired;
 	selbarlight.desired = source.selbarlight.desired;
 	caretcolour.desired = source.caretcolour.desired;
-	showCaretLineBackground = source.showCaretLineBackground;
-	caretLineBackground.desired = source.caretLineBackground.desired;
 	edgecolour.desired = source.edgecolour.desired;
 	edgeState = source.edgeState;
-	caretWidth = source.caretWidth;
 	leftMarginWidth = source.leftMarginWidth;
 	rightMarginWidth = source.rightMarginWidth;
 	for (int i=0;i < margins; i++) {
@@ -92,7 +87,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	viewWhitespace = source.viewWhitespace;
 	viewIndentationGuides = source.viewIndentationGuides;
 	viewEOL = source.viewEOL;
-	showMarkedLines = source.showMarkedLines;
+	showMarkedLines = source.showMarkedLines;		
 }
 
 ViewStyle::~ViewStyle() {
@@ -101,7 +96,7 @@ ViewStyle::~ViewStyle() {
 void ViewStyle::Init() {
 	fontNames.Clear();
 	ResetDefaultStyle();
-
+	
 	indicators[0].style = INDIC_SQUIGGLE;
 	indicators[0].fore = Colour(0, 0x7f, 0);
 	indicators[1].style = INDIC_TT;
@@ -124,13 +119,11 @@ void ViewStyle::Init() {
 	selbarlight.desired = Platform::ChromeHighlight();
 	styles[STYLE_LINENUMBER].fore.desired = Colour(0, 0, 0);
 	styles[STYLE_LINENUMBER].back.desired = Platform::Chrome();
+	//caretcolour.desired = Colour(0xff, 0, 0);
 	caretcolour.desired = Colour(0, 0, 0);
-	showCaretLineBackground = false;
-	caretLineBackground.desired = Colour(0xff, 0xff, 0);
 	edgecolour.desired = Colour(0xc0, 0xc0, 0xc0);
 	edgeState = EDGE_NONE;
-	caretWidth = 1;
-
+	
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
 	ms[0].symbol = false;
@@ -179,7 +172,6 @@ void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
 	pal.WantFind(selbar, want);
 	pal.WantFind(selbarlight, want);
 	pal.WantFind(caretcolour, want);
-	pal.WantFind(caretLineBackground, want);
 	pal.WantFind(edgecolour, want);
 }
 
@@ -198,7 +190,7 @@ void ViewStyle::Refresh(Surface &surface) {
 				maxDescent = styles[i].descent;
 		}
 	}
-
+	
 	lineHeight = maxAscent + maxDescent;
 	aveCharWidth = styles[STYLE_DEFAULT].aveCharWidth;
 	spaceWidth = styles[STYLE_DEFAULT].spaceWidth;
@@ -216,16 +208,26 @@ void ViewStyle::Refresh(Surface &surface) {
 
 void ViewStyle::ResetDefaultStyle() {
 	styles[STYLE_DEFAULT].Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
-	        Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()),
+	        Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()), 
 		SC_CHARSET_DEFAULT,
-		false, false, false, false, Style::caseMixed, true);
+		false, false, false, false, true);
 }
 
 void ViewStyle::ClearStyles() {
 	// Reset all styles to be like the default style
 	for (unsigned int i=0;i<(sizeof(styles)/sizeof(styles[0]));i++) {
 		if (i != STYLE_DEFAULT) {
-			styles[i].ClearTo(styles[STYLE_DEFAULT]);
+			styles[i].Clear(
+				styles[STYLE_DEFAULT].fore.desired, 
+				styles[STYLE_DEFAULT].back.desired, 
+				styles[STYLE_DEFAULT].size, 
+				styles[STYLE_DEFAULT].fontName, 
+				styles[STYLE_DEFAULT].characterSet, 
+				styles[STYLE_DEFAULT].bold, 
+				styles[STYLE_DEFAULT].italic,
+				styles[STYLE_DEFAULT].eolFilled,
+				styles[STYLE_DEFAULT].underline,
+				styles[STYLE_DEFAULT].visible);
 		}
 	}
 	styles[STYLE_LINENUMBER].back.desired = Platform::Chrome();

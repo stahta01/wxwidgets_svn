@@ -19,7 +19,7 @@
 #   pragma hdrstop
 #endif
 
-#if wxUSE_WXHTML_HELP
+#if wxUSE_HTML && wxUSE_STREAMS
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
@@ -131,7 +131,7 @@ wxHelpFrame::OnButton(wxCommandEvent &ev)
    else if(id == m_IdSearch)
    {
       wxString str = m_combo->GetValue();
-      if(m_combo->FindString(str) == -1 && m_combo->GetCount() < MAX_COMBO_ENTRIES)
+      if(m_combo->FindString(str) == -1 && m_combo->Number() < MAX_COMBO_ENTRIES)
          m_combo->Append(str);
       m_controller->KeywordSearch(str);
    }
@@ -315,5 +315,4 @@ wxHelpControllerHtml::GetFrameParameters(wxSize *size,
    return m_Frame;
 }
 
-#endif // wxUSE_WXHTML_HELP
-
+#endif // wxUSE_HTML

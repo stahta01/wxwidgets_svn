@@ -15,11 +15,9 @@ program_dir = samples/html/virtual
 
 PROGRAM=virtual
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 DATAFILES=start.htm
 
 include ../../../src/makeprog.env
 
--include $(DEPFILES)

@@ -1,6 +1,6 @@
 # $Id$
 
-CONTRIB_SUBDIRS=canvas fl gizmos mmedia net ogl plot stc xrc #applet
+CONTRIB_SUBDIRS=ogl mmedia stc
 
 all:
 	@for d in $(CONTRIB_SUBDIRS); do (cd $$d && $(MAKE)); done

@@ -20,6 +20,7 @@
   working with right types. This achieves the 2nd goal. As for the first one,
   we provide a special derivation of wxListBase called wxList which looks just
   like the old class.
+	Last change:  AC   27 Jan 101    4:38 pm
 */
 
 #ifndef _WX_LISTH__
@@ -187,9 +188,6 @@ class WXDLLEXPORT wxListBase : public wxObject
 {
 friend class wxNodeBase;        // should be able to call DetachNode()
 friend class wxHashTableBase;   // should be able to call untyped Find()
-private:
-        // common part of all ctors
-    void Init(wxKeyType keyType = wxKEY_NONE); // Must be declared before it's used (for VC++ 1.5)
 public:
     // default ctor & dtor
     wxListBase(wxKeyType keyType = wxKEY_NONE) { Init(keyType); }
@@ -248,9 +246,7 @@ public:
     wxListBase(void *object, ... /* terminate with NULL */);
 
 protected:
-        // copy ctor and assignment operator
-    wxListBase(const wxListBase& list) : wxObject()
-        { Init(); DoCopy(list); }
+        // assignment operator
     wxListBase& operator=(const wxListBase& list)
         { Clear(); DoCopy(list); return *this; }
 
@@ -311,6 +307,8 @@ protected:
 
 private:
     // helpers
+        // common part of all ctors
+    void Init(wxKeyType keyType = wxKEY_NONE);
         // common part of copy ctor and assignment operator
     void DoCopy(const wxListBase& list);
         // common part of all Append()s
@@ -324,6 +322,11 @@ private:
                *m_nodeLast;
 
     wxKeyType m_keyType;        // type of our keys (may be wxKEY_NONE)
+
+protected:
+        // copy ctor. This has to go below Init, or VC++ 1.5 will complain.
+    wxListBase(const wxListBase& list) : wxObject()
+        { Init(); DoCopy(list); }
 };
 
 // -----------------------------------------------------------------------------
@@ -461,17 +464,9 @@ private:
     typedef elementtype _WX_LIST_ITEM_TYPE_##listname;                      \
     WX_DECLARE_LIST_2(elementtype, listname, wx##listname##Node, class WXDLLEXPORT)
 
-#define WX_DECLARE_USER_EXPORTED_LIST(elementtype, listname, usergoo)       \
-    typedef elementtype _WX_LIST_ITEM_TYPE_##listname;                      \
-    WX_DECLARE_LIST_2(elementtype, listname, wx##listname##Node, class usergoo)
-
 // this macro must be inserted in your program after
 //      #include <wx/listimpl.cpp>
 #define WX_DEFINE_LIST(name)    "don't forget to include listimpl.cpp!"
-
-#define WX_DEFINE_EXPORTED_LIST(name)      WX_DEFINE_LIST(name)
-#define WX_DEFINE_USER_EXPORTED_LIST(name) WX_DEFINE_LIST(name)
-
 
 // =============================================================================
 // now we can define classes 100% compatible with the old ones
@@ -493,9 +488,6 @@ class WXDLLEXPORT wxList : public wxObjectList
 {
 public:
     wxList(int key_type = wxKEY_NONE) : wxObjectList((wxKeyType)key_type) { }
-#ifdef __DARWIN__
-   ~wxList() { }
-#endif
 
     wxList& operator=(const wxList& list)
         { return (wxList&)wxListBase::operator=(list); }
@@ -522,7 +514,8 @@ public:
 
         // copying the string list: the strings are copied, too (extremely
         // inefficient!)
-    wxStringList(const wxStringList& other) : wxStringListBase() { DeleteContents(TRUE); DoCopy(other); }
+    wxStringList(const wxStringList& other) : wxStringListBase()
+    	{ DeleteContents(TRUE); DoCopy(other); }
     wxStringList& operator=(const wxStringList& other)
         { Clear(); DoCopy(other); return *this; }
 

@@ -24,8 +24,7 @@ also has operators for implicit construction from and conversion to the native
 {\it long long} type if it exists and {\it long}.
 
 You would usually use this type in exactly the same manner as any other
-(built-in) arithmetic type. Note that wxLongLong is a signed type, if you
-want unsigned values use wxULongLong.
+(built-in) arithmetic type. Note that wxLongLong is a signed type.
 
 If a native (i.e. supported directly by the compiler) 64 bit integer type was
 found a typedef {\it wxLongLong\_t} will be defined to correspond it.
@@ -72,7 +71,7 @@ Assignment operator from native long long (only for compilers supporting it).
 \func{wxLongLong\&}{Abs}{\void}
 
 Returns an absolute value of wxLongLong - either making a copy (const version)
-or modifying it in place (the second one).  Not in wxULongLong.
+or modifying it in place (the second one).
 
 \membersection{wxLongLong::Assign}\label{wxlonglongassign}
 
@@ -80,7 +79,7 @@ or modifying it in place (the second one).  Not in wxULongLong.
 
 This allows to convert a double value to wxLongLong type. Such conversion is
 not always possible in which case the result will be silently truncated in a
-platform-dependent way.  Not in wxULongLong.
+platform-dependent way.
 
 \membersection{wxLongLong::GetHi}\label{wxlonglonggethi}
 
@@ -108,12 +107,6 @@ Truncate wxLongLong to long. If the conversion loses data (i.e. the wxLongLong
 value is outside the range of built-in long type), an assert will be triggered
 in debug mode.
 
-\membersection{wxLongLong::ToString}\label{wxlonglongtostring}
-
-\constfunc{wxString}{ToString}{\void}
-
-Returns the string representation of a wxLongLong.
-
 \membersection{wxLongLong::operator$+$}\label{wxlonglongoperatorplus}
 
 \constfunc{wxLongLong}{operator$+$}{\param{const wxLongLong\& }{ll}}
@@ -138,7 +131,7 @@ Pre/post increment operator.
 
 \constfunc{wxLongLong}{operator$-$}{\void}
 
-Returns the value of this wxLongLong with opposite sign.  Not in wxULongLong.
+Returns the value of this wxLongLong with opposite sign.
 
 \membersection{wxLongLong::operator$-$}\label{wxlonglongoperatorminus}
 

@@ -41,7 +41,7 @@ wxPenRefData::wxPenRefData()
   m_join = wxJOIN_ROUND ;
   m_cap = wxCAP_ROUND ;
   m_nbDash = 0 ;
-  m_dash = (wxDash*)NULL;
+  m_dash = (wxMSWDash*)NULL;
   m_hPen = 0;
 }
 
@@ -67,10 +67,14 @@ wxPenRefData::~wxPenRefData()
 
 wxPen::wxPen()
 {
+  if (wxThePenList)
+    wxThePenList->AddPen(this);
 }
 
 wxPen::~wxPen()
 {
+    if (wxThePenList)
+        wxThePenList->RemovePen(this);
 }
 
 // Should implement Create
@@ -85,7 +89,7 @@ wxPen::wxPen(const wxColour& col, int Width, int Style)
   M_PENDATA->m_join = wxJOIN_ROUND ;
   M_PENDATA->m_cap = wxCAP_ROUND ;
   M_PENDATA->m_nbDash = 0 ;
-  M_PENDATA->m_dash = (wxDash*)NULL;
+  M_PENDATA->m_dash = (wxMSWDash*)NULL;
   M_PENDATA->m_hPen = 0 ;
 
 #ifndef __WIN32__
@@ -113,6 +117,8 @@ wxPen::wxPen(const wxColour& col, int Width, int Style)
 #endif
   RealizeResource();
 
+  if ( wxThePenList )
+    wxThePenList->AddPen(this);
 }
 
 wxPen::wxPen(const wxBitmap& stipple, int Width)
@@ -126,11 +132,13 @@ wxPen::wxPen(const wxBitmap& stipple, int Width)
     M_PENDATA->m_join = wxJOIN_ROUND ;
     M_PENDATA->m_cap = wxCAP_ROUND ;
     M_PENDATA->m_nbDash = 0 ;
-    M_PENDATA->m_dash = (wxDash*)NULL;
+    M_PENDATA->m_dash = (wxMSWDash*)NULL;
     M_PENDATA->m_hPen = 0 ;
 
     RealizeResource();
 
+    if (wxThePenList)
+       wxThePenList->AddPen(this);
 }
 
 bool wxPen::RealizeResource()
@@ -149,7 +157,7 @@ bool wxPen::RealizeResource()
        // Join style, Cap style, Pen Stippling only on Win32.
        // Currently no time to find equivalent on Win3.1, sorry
        // [if such equiv exist!!]
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifdef __WIN32__
        if (M_PENDATA->m_join==wxJOIN_ROUND        &&
            M_PENDATA->m_cap==wxCAP_ROUND          &&
            M_PENDATA->m_style!=wxUSER_DASH        &&
@@ -232,7 +240,8 @@ bool wxPen::RealizeResource()
            if (M_PENDATA->m_style==wxUSER_DASH && M_PENDATA->m_nbDash && M_PENDATA->m_dash)
            {
                real_dash = new wxMSWDash[M_PENDATA->m_nbDash];
-               for ( int i = 0; i < M_PENDATA->m_nbDash; i++ )
+               int i;
+               for (i=0; i<M_PENDATA->m_nbDash; i++)
                    real_dash[i] = M_PENDATA->m_dash[i] * M_PENDATA->m_width;
            }
            else
@@ -286,7 +295,7 @@ WXHANDLE wxPen::GetResourceHandle()
                 return (WXHANDLE)M_PENDATA->m_hPen;
 }
 
-bool wxPen::FreeResource(bool WXUNUSED(force))
+bool wxPen::FreeResource(bool force)
 {
   if (M_PENDATA && (M_PENDATA->m_hPen != 0))
   {
@@ -368,7 +377,7 @@ void wxPen::SetDashes(int nb_dashes, const wxDash *Dash)
     Unshare();
 
     M_PENDATA->m_nbDash = nb_dashes;
-    M_PENDATA->m_dash = (wxDash *)Dash;
+    M_PENDATA->m_dash = (wxMSWDash *)Dash;
 
     RealizeResource();
 }
@@ -396,7 +405,6 @@ int wx2msPenStyle(int wx_style)
     int cstyle;
     switch (wx_style)
     {
-#if !defined(__WXMICROWIN__)
        case wxDOT:
            cstyle = PS_DOT;
            break;
@@ -413,10 +421,8 @@ int wx2msPenStyle(int wx_style)
        case wxTRANSPARENT:
            cstyle = PS_NULL;
            break;
-#endif
 
        case wxUSER_DASH:
-#if !defined(__WXMICROWIN__)
 #ifdef __WIN32__
            // Win32s doesn't have PS_USERSTYLE
            if (wxGetOsVersion()==wxWINDOWS_NT || wxGetOsVersion()==wxWIN95)
@@ -425,7 +431,6 @@ int wx2msPenStyle(int wx_style)
                cstyle = PS_DOT; // We must make a choice... This is mine!
 #else
            cstyle = PS_DASH;
-#endif
 #endif
            break;
        case wxSOLID:

@@ -1,10 +1,7 @@
-#ifdef __UNIX__
-  #include <Carbon.r>
-#else
-  #include <Types.r>
-  #if UNIVERSAL_INTERFACES_VERSION > 0x320
-    #include <ControlDefinitions.r>
-  #endif
+#include <Types.r>
+
+#if UNIVERSAL_INTERFACES_VERSION > 0x320
+	#include <ControlDefinitions.r>
 #endif
 
 #define kMacOKAlertResourceID 128
@@ -391,17 +388,17 @@ resource 'ldes' ( 128 )
 		0 , 
 		hasVertScroll , 
 		noHorizScroll , 
-		0 , 
+		128 , 
 		noGrowSpace , 
 	}
 } ;
 
 resource 'CURS' (9, "Hand") {
-	$"0380 04C0 04C0 04C0 04C0 04C0 74F8 9CAE"
-	$"4CAB 240B 2403 1003 0803 0806 0406 0406",
-	$"0380 07C0 07C0 07C0 07C0 07C0 77F8 FFFE"
-	$"7FFF 3FFF 3FFF 1FFF 0FFF 0FFE 07FE 07FE",
-	{0, 7}
+	$"01 80 1A 70 26 48 26 4A 12 4D 12 49 68 09 98 01"
+	$"88 02 40 02 20 02 20 04 10 04 08 08 04 08 04 08",
+	$"01 80 1B F0 3F F8 3F FA 1F FF 1F FF 7F FF FF FF"
+	$"FF FE 7F FE 3F FE 3F FC 1F FC 0F F8 07 F8 07 F8",
+	{9, 8}
 };
 
 resource 'CURS' (10, "SizeWE") {
@@ -603,11 +600,3 @@ resource 'STR#' (251) {
 };
 
 // end of get file
-
-data 'PAT#' (128) {
-	$"0007 FFFF FFFF FFFF FFFF 0102 0408 1020"            /* ..ˇˇˇˇˇˇˇˇ.....  */
-	$"4080 8040 2010 0804 0201 1010 10FF 1010"            /* @ÄÄ@ ........ˇ.. */
-	$"1010 0000 00FF 0000 0000 1010 1010 1010"            /* .....ˇ.......... */
-	$"1010 8142 2418 1824 4281"                           /* ..ÅB$..$BÅ */
-};
-

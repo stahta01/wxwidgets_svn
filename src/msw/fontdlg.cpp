@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/fontdlg.cpp
+// Name:        fontdlg.cpp
 // Purpose:     wxFontDialog class
 // Author:      Julian Smart
 // Modified by:
@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_FONTDLG
-
 #ifndef WX_PRECOMP
     #include "wx/defs.h"
     #include "wx/utils.h"
@@ -54,7 +52,7 @@
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxFontDialog, wxDialog)
+    IMPLEMENT_DYNAMIC_CLASS(wxFontDialog, wxDialog)
 
 // ============================================================================
 // implementation
@@ -158,5 +156,3 @@ int wxFontDialog::ShowModal()
         return wxID_CANCEL;
     }
 }
-
-#endif // wxUSE_FONTDLG

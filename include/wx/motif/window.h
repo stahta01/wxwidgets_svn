@@ -24,6 +24,8 @@
 
 class wxWindow : public wxWindowBase
 {
+DECLARE_DYNAMIC_CLASS(wxWindow)
+
 friend class WXDLLEXPORT wxDC;
 friend class WXDLLEXPORT wxWindowDC;
 
@@ -31,11 +33,11 @@ public:
     wxWindow() { Init(); }
 
     wxWindow(wxWindow *parent,
-	     wxWindowID id,
-	     const wxPoint& pos = wxDefaultPosition,
-	     const wxSize& size = wxDefaultSize,
-	     long style = 0,
-	     const wxString& name = wxPanelNameStr)
+             wxWindowID id,
+             const wxPoint& pos = wxDefaultPosition,
+             const wxSize& size = wxDefaultSize,
+             long style = 0,
+             const wxString& name = wxPanelNameStr)
     {
         Init();
         Create(parent, id, pos, size, style, name);
@@ -169,13 +171,13 @@ public:
     static void DoChangeForegroundColour(WXWidget widget, wxColour& foregroundColour);
     static void DoChangeBackgroundColour(WXWidget widget, wxColour& backgroundColour, bool changeArmColour = FALSE);
 
-    // For implementation purposes - sometimes decorations make the client area
-    // smaller
-    virtual wxPoint GetClientAreaOrigin() const;
-
 protected:
     // event handlers (not virtual by design)
     void OnIdle(wxIdleEvent& event);
+
+    // For implementation purposes - sometimes decorations make the client area
+    // smaller
+    virtual wxPoint GetClientAreaOrigin() const;
 
     // Makes an adjustment to the window position (for example, a frame that has
     // a toolbar that it manages itself).
@@ -201,14 +203,11 @@ protected:
     bool CanAddEventHandler() const { return m_canAddEventHandler; }
     void SetCanAddEventHandler(bool flag) { m_canAddEventHandler = flag; }
 
-public:
     WXPixmap GetBackingPixmap() const { return m_backingPixmap; }
-    void SetBackingPixmap(WXPixmap pixmap) { m_backingPixmap = pixmap; }
     int GetPixmapWidth() const { return m_pixmapWidth; }
     int GetPixmapHeight() const { return m_pixmapHeight; }
-    void SetPixmapWidth(int w) { m_pixmapWidth = w; }
-    void SetPixmapHeight(int h) { m_pixmapHeight = h; }
 
+public:
     // Change properties
     virtual void ChangeFont(bool keepOriginalSize = TRUE);             // Change to the current font (often overridden)
 
@@ -325,8 +324,7 @@ private:
     // common part of all ctors
     void Init();
 
-    DECLARE_DYNAMIC_CLASS(wxWindow)
-    DECLARE_NO_COPY_CLASS(wxWindow)
+    DECLARE_NO_COPY_CLASS(wxWindow);
     DECLARE_EVENT_TABLE()
 };
 

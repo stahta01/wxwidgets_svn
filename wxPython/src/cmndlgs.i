@@ -18,7 +18,6 @@
 #include <wx/dirdlg.h>
 #include <wx/fontdlg.h>
 #include <wx/progdlg.h>
-#include <wx/fdrepdlg.h>
 %}
 
 //----------------------------------------------------------------------
@@ -31,20 +30,19 @@
 %import misc.i
 %import gdi.i
 %import windows.i
-%import events.i
 %import frames.i
 
 %pragma(python) code = "import wx"
 
 //----------------------------------------------------------------------
 
-class wxColourData : public wxObject {
+class wxColourData {
 public:
     wxColourData();
     ~wxColourData();
 
     bool GetChooseFull();
-    wxColour GetColour();
+    wxColour& GetColour();
     wxColour GetCustomColour(int i);
     void SetChooseFull(int flag);
     void SetColour(const wxColour& colour);
@@ -56,7 +54,7 @@ class wxColourDialog : public wxDialog {
 public:
     wxColourDialog(wxWindow* parent, wxColourData* data = NULL);
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
     wxColourData& GetColourData();
     int ShowModal();
@@ -73,7 +71,7 @@ public:
                 long style = 0,
                 const wxPoint& pos = wxDefaultPosition);
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
     wxString GetPath();
     wxString GetMessage();
@@ -95,7 +93,7 @@ public:
                  long style = 0,
                  const wxPoint& pos = wxDefaultPosition);
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
     wxString GetDirectory();
     wxString GetFilename();
@@ -117,13 +115,25 @@ public:
         PyObject* GetFilenames() {
             wxArrayString arr;
             self->GetFilenames(arr);
-            return wxArrayString2PyList_helper(arr);
+            size_t count = arr.GetCount();
+            PyObject* listObj = PyList_New(0);
+            for(size_t x=0; x<count; x++) {
+                PyObject* name = PyString_FromString(arr[x]);
+                PyList_Append(listObj, name);
+            }
+            return listObj;
         }
 
         PyObject* GetPaths() {
             wxArrayString arr;
             self->GetPaths(arr);
-            return wxArrayString2PyList_helper(arr);
+            size_t count = arr.GetCount();
+            PyObject* listObj = PyList_New(0);
+            for(size_t x=0; x<count; x++) {
+                PyObject* name = PyString_FromString(arr[x]);
+                PyList_Append(listObj, name);
+            }
+            return listObj;
         }
     }
 };
@@ -150,9 +160,9 @@ public:
             return new wxSingleChoiceDialog(parent, *message, *caption,
                                             LCOUNT, choices, NULL, style, *pos);
         }
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-
     }
+
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
     int GetSelection();
     wxString GetStringSelection();
@@ -172,7 +182,7 @@ public:
                       long style = wxOK | wxCANCEL | wxCENTRE,
                       const wxPoint& pos = wxDefaultPosition);
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
     wxString GetValue();
     void SetValue(const wxString& value);
@@ -181,14 +191,14 @@ public:
 
 //----------------------------------------------------------------------
 
-class wxFontData : public wxObject {
+class wxFontData {
 public:
     wxFontData();
     ~wxFontData();
 
     void EnableEffects(bool enable);
     bool GetAllowSymbols();
-    wxColour GetColour();
+    wxColour& GetColour();
     wxFont GetChosenFont();
     bool GetEnableEffects();
     wxFont GetInitialFont();
@@ -205,7 +215,8 @@ public:
 class wxFontDialog : public wxDialog {
 public:
     wxFontDialog(wxWindow* parent, wxFontData* data);
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
     wxFontData& GetFontData();
     int ShowModal();
@@ -221,7 +232,8 @@ public:
                     char* caption = "Message box",
                     long style = wxOK | wxCANCEL | wxCENTRE,
                     const wxPoint& pos = wxDefaultPosition);
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
     int ShowModal();
 };
@@ -235,117 +247,10 @@ public:
                      int maximum = 100,
                      wxWindow* parent = NULL,
                      int style = wxPD_AUTO_HIDE | wxPD_APP_MODAL );
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+
 
     bool Update(int value = -1, const char* newmsg = NULL);
     void Resume();
 }
-
-//----------------------------------------------------------------------
-
-enum wxFindReplaceFlags
-{
-    // downward search/replace selected (otherwise - upwards)
-    wxFR_DOWN       = 1,
-
-    // whole word search/replace selected
-    wxFR_WHOLEWORD  = 2,
-
-    // case sensitive search/replace selected (otherwise - case insensitive)
-    wxFR_MATCHCASE  = 4
-};
-
-
-enum wxFindReplaceDialogStyles
-{
-    // replace dialog (otherwise find dialog)
-    wxFR_REPLACEDIALOG = 1,
-
-    // don't allow changing the search direction
-    wxFR_NOUPDOWN      = 2,
-
-    // don't allow case sensitive searching
-    wxFR_NOMATCHCASE   = 4,
-
-    // don't allow whole word searching
-    wxFR_NOWHOLEWORD   = 8
-};
-
-enum {
-    wxEVT_COMMAND_FIND,
-    wxEVT_COMMAND_FIND_NEXT,
-    wxEVT_COMMAND_FIND_REPLACE,
-    wxEVT_COMMAND_FIND_REPLACE_ALL,
-    wxEVT_COMMAND_FIND_CLOSE,
-};
-
-%pragma(python) code = "
-
-def EVT_COMMAND_FIND(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_FIND, func)
-
-def EVT_COMMAND_FIND_NEXT(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_FIND_NEXT, func)
-
-def EVT_COMMAND_FIND_REPLACE(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_FIND_REPLACE, func)
-
-def EVT_COMMAND_FIND_REPLACE_ALL(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_FIND_REPLACE_ALL, func)
-
-def EVT_COMMAND_FIND_CLOSE(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_FIND_CLOSE, func)
-
-"
-
-class wxFindDialogEvent : public wxCommandEvent
-{
-public:
-    wxFindDialogEvent(wxEventType commandType = wxEVT_NULL, int id = 0);
-    int GetFlags();
-    wxString GetFindString();
-    const wxString& GetReplaceString();
-    wxFindReplaceDialog *GetDialog();
-    void SetFlags(int flags);
-    void SetFindString(const wxString& str);
-    void SetReplaceString(const wxString& str);
-};
-
-
-
-class wxFindReplaceData : public wxObject
-{
-public:
-    wxFindReplaceData(int flags=0);
-    ~wxFindReplaceData();
-
-    const wxString& GetFindString();
-    const wxString& GetReplaceString();
-    int GetFlags();
-    void SetFlags(int flags);
-    void SetFindString(const wxString& str);
-    void SetReplaceString(const wxString& str);
-};
-
-
-class wxFindReplaceDialog : public wxDialog {
-public:
-    wxFindReplaceDialog(wxWindow *parent,
-                        wxFindReplaceData *data,
-                        const wxString &title,
-                        int style = 0);
-    %name(wxPreFindReplaceDialog)wxFindReplaceDialog();
-
-     bool Create(wxWindow *parent,
-                 wxFindReplaceData *data,
-                 const wxString &title,
-                 int style = 0);
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    %pragma(python) addtomethod = "wxPreFindReplaceDialog:val._setOORInfo(val)"
-
-    const wxFindReplaceData *GetData();
-    void SetData(wxFindReplaceData *data);
-};
 
 //----------------------------------------------------------------------

@@ -66,8 +66,6 @@ public:
     void OnMouseEvent(wxMouseEvent& event);
     void OnSysColourChanged(wxSysColourChangedEvent& event);
 
-    static WXHBITMAP MapBitmap(WXHBITMAP bitmap, int width, int height);
-
 protected:
     // common part of all ctors
     void Init();
@@ -100,9 +98,6 @@ protected:
 
     // the total number of toolbar elements
     size_t m_nButtons;
-
-    // the tool the cursor is in
-    wxToolBarToolBase *m_pInTool;
 
 private:
     DECLARE_EVENT_TABLE()

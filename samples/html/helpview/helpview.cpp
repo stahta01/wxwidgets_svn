@@ -10,7 +10,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -70,8 +70,8 @@ bool MyApp::OnInit()
     help = new wxHtmlHelpController;
     
     if (argc < 2) {
-        wxLogError(wxT("Usage : helpview <helpfile> [<more helpfiles>]"));
-        wxLogError(wxT("  helpfile may be .hhp, .zip or .htb"));
+        wxLogError("Usage : helpview <helpfile> [<more helpfiles>]");
+        wxLogError("  helpfile may be .hhp, .zip or .htb");
         return FALSE;
     }
 

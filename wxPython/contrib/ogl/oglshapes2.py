@@ -15,8 +15,6 @@ from events import *
 
 from streams import *
 
-from utils import *
-
 from mdi import *
 
 from frames import *
@@ -41,6 +39,8 @@ from sizers import *
 
 from filesys import *
 
+from utils import *
+
 from oglbasic import *
 
 from oglshapes import *
@@ -49,8 +49,8 @@ class wxPyEllipseShapePtr(wxPyShapePtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def _setCallbackInfo(self, *_args, **_kwargs):
-        val = apply(oglshapes2c.wxPyEllipseShape__setCallbackInfo,(self,) + _args, _kwargs)
+    def _setSelf(self, *_args, **_kwargs):
+        val = apply(oglshapes2c.wxPyEllipseShape__setSelf,(self,) + _args, _kwargs)
         return val
     def base_OnDraw(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyEllipseShape_base_OnDraw,(self,) + _args, _kwargs)
@@ -142,8 +142,7 @@ class wxPyEllipseShape(wxPyEllipseShapePtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(oglshapes2c.new_wxPyEllipseShape,_args,_kwargs)
         self.thisown = 1
-        self._setCallbackInfo(self, wxPyEllipseShape)
-        self._setOORInfo(self)
+        self._setSelf(self, wxPyEllipseShape)
 
 
 
@@ -152,8 +151,8 @@ class wxPyCircleShapePtr(wxPyEllipseShapePtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def _setCallbackInfo(self, *_args, **_kwargs):
-        val = apply(oglshapes2c.wxPyCircleShape__setCallbackInfo,(self,) + _args, _kwargs)
+    def _setSelf(self, *_args, **_kwargs):
+        val = apply(oglshapes2c.wxPyCircleShape__setSelf,(self,) + _args, _kwargs)
         return val
     def base_OnDraw(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyCircleShape_base_OnDraw,(self,) + _args, _kwargs)
@@ -245,13 +244,12 @@ class wxPyCircleShape(wxPyCircleShapePtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(oglshapes2c.new_wxPyCircleShape,_args,_kwargs)
         self.thisown = 1
-        self._setCallbackInfo(self, wxPyCircleShape)
-        self._setOORInfo(self)
+        self._setSelf(self, wxPyCircleShape)
 
 
 
 
-class wxArrowHeadPtr(wxObjectPtr):
+class wxArrowHeadPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -290,6 +288,7 @@ class wxArrowHeadPtr(wxObjectPtr):
         return val
     def GetMetaFile(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxArrowHead_GetMetaFile,(self,) + _args, _kwargs)
+        if val: val = wxPseudoMetaFilePtr(val) 
         return val
     def GetId(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxArrowHead_GetId,(self,) + _args, _kwargs)
@@ -320,8 +319,8 @@ class wxPyLineShapePtr(wxPyShapePtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def _setCallbackInfo(self, *_args, **_kwargs):
-        val = apply(oglshapes2c.wxPyLineShape__setCallbackInfo,(self,) + _args, _kwargs)
+    def _setSelf(self, *_args, **_kwargs):
+        val = apply(oglshapes2c.wxPyLineShape__setSelf,(self,) + _args, _kwargs)
         return val
     def AddArrow(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_AddArrow,(self,) + _args, _kwargs)
@@ -358,9 +357,11 @@ class wxPyLineShapePtr(wxPyShapePtr):
         return val
     def FindArrowHeadId(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_FindArrowHeadId,(self,) + _args, _kwargs)
+        if val: val = wxArrowHeadPtr(val) 
         return val
     def FindArrowHead(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_FindArrowHead,(self,) + _args, _kwargs)
+        if val: val = wxArrowHeadPtr(val) 
         return val
     def FindLineEndPoints(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_FindLineEndPoints,(self,) + _args, _kwargs)
@@ -385,6 +386,7 @@ class wxPyLineShapePtr(wxPyShapePtr):
         return val
     def GetFrom(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_GetFrom,(self,) + _args, _kwargs)
+        if val: val = wxPyShapePtr(val) 
         return val
     def GetLabelPosition(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_GetLabelPosition,(self,) + _args, _kwargs)
@@ -395,6 +397,7 @@ class wxPyLineShapePtr(wxPyShapePtr):
         return val
     def GetTo(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_GetTo,(self,) + _args, _kwargs)
+        if val: val = wxPyShapePtr(val) 
         return val
     def Initialise(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_Initialise,(self,) + _args, _kwargs)
@@ -410,9 +413,6 @@ class wxPyLineShapePtr(wxPyShapePtr):
         return val
     def MakeLineControlPoints(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_MakeLineControlPoints,(self,) + _args, _kwargs)
-        return val
-    def GetLineControlPoints(self, *_args, **_kwargs):
-        val = apply(oglshapes2c.wxPyLineShape_GetLineControlPoints,(self,) + _args, _kwargs)
         return val
     def SetAttachmentFrom(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyLineShape_SetAttachmentFrom,(self,) + _args, _kwargs)
@@ -534,8 +534,7 @@ class wxPyLineShape(wxPyLineShapePtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(oglshapes2c.new_wxPyLineShape,_args,_kwargs)
         self.thisown = 1
-        self._setCallbackInfo(self, wxPyLineShape)
-        self._setOORInfo(self)
+        self._setSelf(self, wxPyLineShape)
 
 
 
@@ -544,8 +543,8 @@ class wxPyPolygonShapePtr(wxPyShapePtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def _setCallbackInfo(self, *_args, **_kwargs):
-        val = apply(oglshapes2c.wxPyPolygonShape__setCallbackInfo,(self,) + _args, _kwargs)
+    def _setSelf(self, *_args, **_kwargs):
+        val = apply(oglshapes2c.wxPyPolygonShape__setSelf,(self,) + _args, _kwargs)
         return val
     def Create(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyPolygonShape_Create,(self,) + _args, _kwargs)
@@ -655,8 +654,7 @@ class wxPyPolygonShape(wxPyPolygonShapePtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(oglshapes2c.new_wxPyPolygonShape,_args,_kwargs)
         self.thisown = 1
-        self._setCallbackInfo(self, wxPyPolygonShape)
-        self._setOORInfo(self)
+        self._setSelf(self, wxPyPolygonShape)
 
 
 
@@ -665,8 +663,8 @@ class wxPyTextShapePtr(wxPyRectangleShapePtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def _setCallbackInfo(self, *_args, **_kwargs):
-        val = apply(oglshapes2c.wxPyTextShape__setCallbackInfo,(self,) + _args, _kwargs)
+    def _setSelf(self, *_args, **_kwargs):
+        val = apply(oglshapes2c.wxPyTextShape__setSelf,(self,) + _args, _kwargs)
         return val
     def base_OnDelete(self, *_args, **_kwargs):
         val = apply(oglshapes2c.wxPyTextShape_base_OnDelete,(self,) + _args, _kwargs)
@@ -761,8 +759,7 @@ class wxPyTextShape(wxPyTextShapePtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(oglshapes2c.new_wxPyTextShape,_args,_kwargs)
         self.thisown = 1
-        self._setCallbackInfo(self, wxPyTextShape)
-        self._setOORInfo(self)
+        self._setSelf(self, wxPyTextShape)
 
 
 

@@ -140,19 +140,6 @@ Description: wxWindows Cross-platform C++ GUI toolkit (runtime contrib libs)
  This package provides the contrib libs of the wxWindows source tree
  (mmedia, ogl, stc)
 
-Package: libwxgtk=V-univ
-Architecture: any
-Section: libs
-Depends: wxwin=V-headers (= ${Source-Version}), libwxgtk=V (= ${Source-Version}), libgtk1.2-dev, zlib1g-dev, libjpeg62-dev, libpng2-dev, libtiff3g-dev, libc6-dev, ${shlibs:Depends}
-Suggests: wxwin=V-doc, libstdc++-dev, gettext, libgl-dev
-Description: wxWindows Cross-platform C++ GUI toolkit (wxUNIVERSAL widgets)
- wxWindows is a class library for C++ providing GUI (Graphical User
- Interface) and other facilities on more than one platform.  Version =V
- currently supports subsets of GTK+, Motif, and MS Windows.
- .
- This package is built to use the wxUNIVERSAL widget set instead of
- native gtk widgets.
-
 Package: libwxgtk=V-contrib-dev
 Architecture: any
 Section: devel
@@ -227,17 +214,6 @@ Provides: libwxbase-msw-dev
 Description: wxBase mingw32msvc-cross
  mingw32msvc-cross wxBase libs.
 
-Package: libwxbase-msw=V-dbg
-Architecture: i386
-Section: otherosfs
-Depends: wxwin=V-headers-msw (= ${Source-Version})
-Conflicts: libwxbase-msw-dbg
-Replaces: libwxbase-msw-dbg
-Provides: libwxbase-msw-dbg
-Description: wxBase mingw32msvc-cross (debug)
- mingw32msvc-cross wxBase libs.
- __WXDEBUG__ version.
-
 Package: libwxmsw=V-dev
 Architecture: i386
 Section: otherosfs
@@ -247,17 +223,6 @@ Replaces: libwxmsw-dev
 Provides: libwxmsw-dev
 Description: wxMSW mingw32msvc-cross
  mingw32msvc-cross wxMSW libs.
-
-Package: libwxmsw=V-dbg
-Architecture: i386
-Section: otherosfs
-Depends: wxwin=V-headers-msw (= ${Source-Version})
-Conflicts: libwxmsw-dbg
-Replaces: libwxmsw-dbg
-Provides: libwxmsw-dbg
-Description: wxMSW mingw32msvc-cross (debug)
- mingw32msvc-cross wxMSW libs.
- __WXDEBUG__ version.
 
 Package: wxwin=V-headers-msw
 Architecture: i386

@@ -20,8 +20,6 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_WAVE
-
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif
@@ -33,7 +31,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#if defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__)
+#ifdef __GNUWIN32_OLD__
     #include "wx/msw/gnuwin32/extra.h"
 #else
     #include <mmsystem.h>
@@ -167,4 +165,4 @@ bool wxWave::Free()
   return FALSE;
 }
 
-#endif // wxUSE_WAVE
+

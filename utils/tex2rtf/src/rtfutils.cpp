@@ -58,9 +58,6 @@ extern FILE *WinHelpContentsFile;
 extern char *RTFCharset;
 // This is defined in the Tex2Any library and isn't in use after parsing
 extern char *BigBuffer;
-
-extern wxHashTable TexReferences;
-
 // Are we in verbatim mode? If so, format differently.
 static bool inVerbatim = FALSE;
 
@@ -93,8 +90,6 @@ static int TwoColWidthB = 3000;
 
 const int PageWidth = 12242; // 8.25 inches wide for A4
 
-// Remember the anchor in a helpref
-static TexChunk *helpRefText = NULL;
 
 /*
  * Flag to say we've just issued a \par\pard command, so don't
@@ -215,7 +210,7 @@ void OutputSectionKeyword(FILE *fd)
 {
   OutputCurrentSectionToString(wxBuffer);
   
-  unsigned int i;
+  int i;
   for (i = 0; i < strlen(wxBuffer); i++)
     if (wxBuffer[i] == ':')
       wxBuffer[i] = ' ';
@@ -354,7 +349,7 @@ void GenerateKeywordsForTopic(char *topic)
       SplitIndexEntry(s, buf1, buf2);
       
       // Check for ':' which messes up index
-      unsigned int i;
+      int i;
       for (i = 0; i < strlen(buf1) ; i++)
         if (buf1[i] == ':')
           buf1[i] = ' ';
@@ -667,7 +662,7 @@ void ProcessText2RTF(TexChunk *chunk)
       i += 1;
       changed = TRUE;
     }
-    else if (inVerbatim && (ch == '{' || ch == '}')) // Escape the curley bracket
+    else if (inVerbatim && (ch == '{' || ch == '}')) // Escape the curly bracket
     {
       BigBuffer[ptr] = '\\'; ptr ++;
       BigBuffer[ptr] = ch; ptr ++;
@@ -3343,61 +3338,46 @@ bool RTFOnArgument(int macroId, int arg_no, bool start)
           TexOutput("{\\i ");
         else
           TexOutput("}");
-
-        if (start)
-          helpRefText = GetArgChunk();
-
         return TRUE;
       }
       else if ((GetNoArgs() - arg_no) == 0) // Arg = 2, or 3 if first is optional
       {
         if (macroId != ltHELPREFN)
         {
-          char *refName = GetArgData();
-          TexRef *texRef = NULL;
-          if (refName)
-            texRef = FindReference(refName);
           if (start)
           {
-            if (texRef || !ignoreBadRefs)
-              TexOutput(" (");
+            TexOutput(" (");
+            char *refName = GetArgData();
             if (refName)
             {
-                if (texRef || !ignoreBadRefs)
+                if (useWord)
                 {
-                  if (useWord)
+                    char *s = GetArgData();
+                    TexOutput("p. ");
+                    TexOutput("{\\field{\\*\\fldinst  PAGEREF ");
+                    TexOutput(refName);
+                    TexOutput(" \\\\* MERGEFORMAT }{\\fldrslt ??}}");
+                }
+                else
+                {
+                  // Only print section name if we're not in Word mode,
+                  // so can't do page references
+                  TexRef *texRef = FindReference(refName);
+                  if (texRef)
                   {
-                      char *s = GetArgData();
-                      TexOutput("p. ");
-                      TexOutput("{\\field{\\*\\fldinst  PAGEREF ");
-                      TexOutput(refName);
-                      TexOutput(" \\\\* MERGEFORMAT }{\\fldrslt ??}}");
+                    TexOutput(texRef->sectionName) ; TexOutput(" "); TexOutput(texRef->sectionNumber);
                   }
                   else
                   {
-                    // Only print section name if we're not in Word mode,
-                    // so can't do page references
-                    if (texRef)
-                    {
-                      TexOutput(texRef->sectionName) ; TexOutput(" "); TexOutput(texRef->sectionNumber);
-                    }
-                    else
-                    {
-                      if (!ignoreBadRefs)
-                        TexOutput("??");
-                      sprintf(buf, "Warning: unresolved reference '%s'", refName);
-                      OnInform(buf);
-                    }
+                    TexOutput("??");
+                    sprintf(buf, "Warning: unresolved reference %s.", refName);
+                    OnInform(buf);
                   }
                 }
             }
             else TexOutput("??");
           }
-          else
-          {
-            if (texRef || !ignoreBadRefs)
-              TexOutput(")");
-          }
+          else TexOutput(")");
         }
         return FALSE;
       }
@@ -3502,8 +3482,6 @@ bool RTFOnArgument(int macroId, int arg_no, bool start)
       // Convert points to TWIPS (1 twip = 1/20th of point)
       imageWidth = (int)(20*(tok1 ? ParseUnitArgument(tok1) : 0));
       imageHeight = (int)(20*(tok2 ? ParseUnitArgument(tok2) : 0));
-      if (imageDimensions)  // glt
-          delete [] imageDimensions;
       return FALSE;
     }  
     else if (start && (arg_no == 2 ))
@@ -3578,8 +3556,6 @@ bool RTFOnArgument(int macroId, int arg_no, bool start)
           sprintf(buf, "Warning: could not find a BMP or WMF equivalent for %s.", filename);
           OnInform(buf);
         }
-        if (filename)  // glt
-            delete [] filename;
       }
       else // linear RTF
       {
@@ -5105,9 +5081,6 @@ bool RTFOnArgument(int macroId, int arg_no, bool start)
 
 bool RTFGo(void)
 {
-  if (stopRunning)
-      return FALSE;
-
   // Reset variables
   indentLevel = 0;
   forbidParindent = 0;
@@ -5182,9 +5155,6 @@ bool RTFGo(void)
 
     SetCurrentOutput(Chapters);
 
-    if (stopRunning)
-        return FALSE;
-
     OnInform("Converting...");
 
     TraverseDocument();
@@ -5248,28 +5218,8 @@ bool RTFGo(void)
     {
       wxConcatFiles("header.rtf", "chapters.rtf", "tmp1.rtf");
       Tex2RTFYield(TRUE);
-      if (FileExists(OutputFile))
-          wxRemoveFile(OutputFile);
-
-      char *cwdStr;
-      cwdStr = wxGetWorkingDirectory();
-
-      wxString outputDirStr;
-      outputDirStr = wxPathOnly(OutputFile);
-
-      // Determine if the temp file and the output file are in the same directory,
-      // and if they are, then just rename the temp file rather than copying
-      // it, as this is much faster when working with large (multi-megabyte files)
-      if ((wxStrcmp(outputDirStr.c_str(),"") == 0) ||  // no path specified on output file
-          (wxStrcmp(cwdStr,outputDirStr.c_str()) == 0)) // paths do not match
-      {
-        wxRenameFile("tmp1.rtf", OutputFile);
-      }
-      else
-      {
-        wxCopyFile("tmp1.rtf", OutputFile);
-      }
-      delete [] cwdStr;
+      if (FileExists(OutputFile)) wxRemoveFile(OutputFile);
+      wxCopyFile("tmp1.rtf", OutputFile);
       Tex2RTFYield(TRUE);
       wxRemoveFile("tmp1.rtf");
     }

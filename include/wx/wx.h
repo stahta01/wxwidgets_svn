@@ -1,6 +1,3 @@
-#ifndef _WX_WXH__
-#define _WX_WXH__
-
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx.h
 // Purpose:     wxWindows main include file
@@ -11,6 +8,9 @@
 // Copyright:   (c)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
+
+#ifndef _WX_WXH__
+#define _WX_WXH__
 
 #include "wx/defs.h"
 #include "wx/object.h"
@@ -23,7 +23,6 @@
 #include "wx/event.h"
 #include "wx/app.h"
 #include "wx/utils.h"
-#include "wx/stream.h"
 
 #if wxUSE_GUI
 
@@ -48,11 +47,8 @@
 #include "wx/msgdlg.h"
 #include "wx/cmndata.h"
 
-#include "wx/control.h"
-#include "wx/ctrlsub.h"
 #include "wx/bmpbuttn.h"
 #include "wx/checkbox.h"
-#include "wx/checklst.h"
 #include "wx/choice.h"
 #include "wx/scrolbar.h"
 #include "wx/stattext.h"
@@ -64,25 +60,30 @@
 #include "wx/textctrl.h"
 #include "wx/slider.h"
 #include "wx/gauge.h"
-#include "wx/scrolwin.h"
-#include "wx/dirdlg.h"
-#include "wx/toolbar.h"
 #include "wx/combobox.h"
 #include "wx/layout.h"
 #include "wx/sizer.h"
 #include "wx/memory.h"
 #include "wx/mdi.h"
+#include "wx/scrolwin.h"
 #include "wx/statusbr.h"
 #include "wx/scrolbar.h"
 #include "wx/choicdlg.h"
 #include "wx/textdlg.h"
 #include "wx/filedlg.h"
+#include "wx/dirdlg.h"
+#include "wx/toolbar.h"
 
 #include "wx/validate.h"        // always include, even if !wxUSE_VALIDATORS
 
 #if wxUSE_VALIDATORS
     #include "wx/valtext.h"
 #endif // wxUSE_VALIDATORS
+
+#if wxUSE_SERIAL
+    #include "wx/objstrm.h"
+    #include "wx/serbase.h"
+#endif // wxUSE_SERIAL
 
 #endif // wxUSE_GUI
 

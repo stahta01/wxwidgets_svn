@@ -56,9 +56,6 @@ public:
     virtual void Check(bool bDoCheck = TRUE);
     virtual bool IsChecked() const;
 
-    virtual void SetBitmap(const wxBitmap& bitmap) { m_bitmap = bitmap; }
-    virtual const wxBitmap& GetBitmap() const { return m_bitmap; }
-
 #if wxUSE_ACCEL
     virtual wxAcceleratorEntry *GetAccel() const;
 #endif // wxUSE_ACCEL
@@ -72,11 +69,7 @@ public:
     // menu handle depending on what we're
     int GetRealId() const;
 
-    static int MacBuildMenuString(StringPtr outMacItemText, SInt16 *outMacShortcutChar , UInt8 *outMacModifiers , const char *inItemName , bool useShortcuts ) ;
-
 private:
-    wxBitmap  m_bitmap; // Bitmap for menuitem, if any
-
     DECLARE_DYNAMIC_CLASS(wxMenuItem)
 };
 

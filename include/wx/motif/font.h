@@ -16,15 +16,13 @@
     #pragma interface "font.h"
 #endif
 
-class wxXFont;
-
 // Font
 class wxFont : public wxFontBase
 {
 public:
     // ctors and such
     wxFont() { Init(); }
-    wxFont(const wxFont& font) { Init(); Ref(font); }
+    wxFont(const wxFont& font) : wxFontBase() { Init(); Ref(font); }
 
     wxFont(int size,
            int family,
@@ -39,8 +37,6 @@ public:
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
-    wxFont(const wxNativeFontInfo& info);
-
     bool Create(int size,
                 int family,
                 int style,
@@ -49,11 +45,6 @@ public:
                 const wxString& face = wxEmptyString,
                 wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
-    // wxMOTIF-specific
-    bool Create(const wxString& fontname,
-                wxFontEncoding fontenc = wxFONTENCODING_DEFAULT);
-    bool Create(const wxNativeFontInfo& fontinfo);
-    
     virtual ~wxFont();
 
     // assignment
@@ -67,8 +58,7 @@ public:
     virtual bool GetUnderlined() const;
     virtual wxString GetFaceName() const;
     virtual wxFontEncoding GetEncoding() const;
-    virtual wxNativeFontInfo *GetNativeFontInfo() const;
-    
+
     virtual void SetPointSize(int pointSize);
     virtual void SetFamily(int family);
     virtual void SetStyle(int style);
@@ -76,8 +66,7 @@ public:
     virtual void SetFaceName(const wxString& faceName);
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
-    virtual void SetNativeFontInfo( const wxNativeFontInfo& info );
-    
+
     // Implementation
 
     // Find an existing, or create a new, XFontStruct
@@ -92,8 +81,8 @@ public:
     // of the fonts and a mapping file.
 
     // Return font struct, and optionally the Motif font list
-    wxXFont *GetInternalFont(double scale = 1.0,
-                             WXDisplay* display = NULL) const;
+    class wxXFont* GetInternalFont(double scale = 1.0,
+                                   WXDisplay* display = NULL) const;
 
     // These two are helper functions for convenient access of the above.
     WXFontStructPtr GetFontStruct(double scale = 1.0,

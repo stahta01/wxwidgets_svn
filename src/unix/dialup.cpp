@@ -46,9 +46,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-DEFINE_EVENT_TYPE(wxEVT_DIALUP_CONNECTED)
-DEFINE_EVENT_TYPE(wxEVT_DIALUP_DISCONNECTED)
-
 // ----------------------------------------------------------------------------
 // A class which groups functions dealing with connecting to the network from a
 // workstation using dial-up access to the net. There is at most one instance
@@ -639,11 +636,7 @@ wxDialUpManagerImpl::CheckProcNet()
 int
 wxDialUpManagerImpl::CheckIfconfig()
 {
-#ifdef __VMS
-       m_CanUseIfconfig = 0;
-        return -1;
-#else
-   // assume that the test doesn't work
+    // assume that the test doesn't work
     int netDevice = NetDevice_Unknown;
 
     // first time check for ifconfig location
@@ -684,18 +677,18 @@ wxDialUpManagerImpl::CheckIfconfig()
         cmd << " -a";
 #elif defined(__LINUX__) || defined(__SGI__)
         // nothing to be added to ifconfig
-#elif defined(__FREEBSD__) || defined(__WXMAC__)
+#elif defined(__FREEBSD__)
         // add -l flag
         cmd << " -l";
 #elif defined(__HPUX__)
         // VZ: a wild guess (but without it, ifconfig fails completely)
         cmd << _T(" ppp0");
 #else
-# pragma warning "No ifconfig information for this OS."
-       m_CanUseIfconfig = 0;
+#     pragma warning "No ifconfig information for this OS."
+        m_CanUseIfconfig = 0;
         return -1;
 #endif
-       cmd << " >" << tmpfile <<  '\'';
+        cmd << " >" << tmpfile <<  '\'';
         /* I tried to add an option to wxExecute() to not close stdout,
            so we could let ifconfig write directly to the tmpfile, but
            this does not work. That should be faster, as it doesn´t call
@@ -716,15 +709,15 @@ wxDialUpManagerImpl::CheckIfconfig()
 
 #if defined(__SOLARIS__) || defined (__SUNOS__)
                     // dialup device under SunOS/Solaris
-                    hasModem = strstr(output,"ipdptp") != (char *)NULL;
-                    hasLAN = strstr(output, "hme") != (char *)NULL;
+                    hasModem = wxStrstr(output, _T("ipdptp")) != NULL;
+                    hasLAN = wxStrstr(output, _T("hme")) != NULL;
 #elif defined(__LINUX__) || defined (__FREEBSD__)
-                    hasModem = strstr(output,"ppp")    // ppp
-                        || strstr(output,"sl")  // slip
-                        || strstr(output,"pl"); // plip
-                    hasLAN = strstr(output, "eth") != NULL;
+                    hasModem = wxStrstr(output, _T("ppp"))    // ppp
+                        || wxStrstr(output, _T("sl"))  // slip
+                        || wxStrstr(output, _T("pl")); // plip
+                    hasLAN = wxStrstr(output, _T("eth")) != NULL;
 #elif defined(__SGI__)  // IRIX
-                    hasModem = strstr(output, "ppp") != NULL; // PPP
+                    hasModem = wxStrstr(output, _T("ppp")) != NULL; // PPP
 #elif defined(__HPUX__)
                     // if could run ifconfig on interface, then it exists
                     hasModem = TRUE;
@@ -749,7 +742,6 @@ wxDialUpManagerImpl::CheckIfconfig()
     }
 
     return netDevice;
-#endif
 }
 
 wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
@@ -758,15 +750,10 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
    // which does not take arguments, a la GNU.
    if(m_CanUsePing == -1) // unknown
    {
-#ifdef __VMS
-      if(wxFileExists("SYS$SYSTEM:TCPIP$PING.EXE"))
-         m_PingPath = "$SYS$SYSTEM:TCPIP$PING";
-#else
       if(wxFileExists("/bin/ping"))
          m_PingPath = "/bin/ping";
       else if(wxFileExists("/usr/sbin/ping"))
          m_PingPath = "/usr/sbin/ping";
-#endif
       if(! m_PingPath)
       {
          m_CanUsePing = 0;
@@ -785,7 +772,7 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
    cmd << m_PingPath << ' ';
 #if defined(__SOLARIS__) || defined (__SUNOS__)
    // nothing to add to ping command
-#elif defined(__LINUX__) || defined ( __FREEBSD__) || defined(__WXMAC__) || defined( __VMS )
+#elif defined(__LINUX__) || defined ( __FREEBSD__)
    cmd << "-c 1 "; // only ping once
 #elif defined(__HPUX__)
    cmd << "64 1 "; // only ping once (need also specify the packet size)

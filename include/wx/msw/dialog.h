@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/dialog.h
+// Name:        dialog.h
 // Purpose:     wxDialog class
 // Author:      Julian Smart
 // Modified by:
@@ -23,8 +23,10 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 // Dialog boxes
 class WXDLLEXPORT wxDialog : public wxDialogBase
 {
+    DECLARE_DYNAMIC_CLASS(wxDialog)
+
 public:
-    wxDialog() { Init(); }
+    wxDialog();
 
     // Constructor with a modal flag, but no window id - the old convention
     wxDialog(wxWindow *parent,
@@ -56,7 +58,15 @@ public:
                 long style = wxDEFAULT_DIALOG_STYLE,
                 const wxString& name = wxDialogNameStr);
 
-    virtual ~wxDialog();
+    ~wxDialog();
+
+    // override some base class virtuals
+    virtual bool Destroy();
+    virtual bool Show(bool show);
+    virtual void Iconize(bool iconize);
+    virtual bool IsIconized() const;
+
+    virtual bool IsTopLevel() const { return TRUE; }
 
     void SetModal(bool flag);
     virtual bool IsModal() const;
@@ -70,11 +80,12 @@ public:
     // returns TRUE if we're in a modal loop
     bool IsModalShowing() const;
 
+#if WXWIN_COMPATIBILITY
+    bool Iconized() const { return IsIconized(); };
+#endif
+
     // implementation only from now on
     // -------------------------------
-
-    // override some base class virtuals
-    virtual bool Show(bool show);
 
     // event handlers
     bool OnClose();
@@ -98,20 +109,16 @@ public:
 #endif // wxUSE_CTL3D
 
 protected:
+    // override more base class virtuals
+    virtual void DoSetClientSize(int width, int height);
+    virtual void DoGetPosition(int *x, int *y) const;
+
     // show modal dialog and enter modal loop
     void DoShowModal();
-
-    // common part of all ctors
-    void Init();
 
 private:
     wxWindow *m_oldFocus;
 
-    // while we are showing a modal dialog we disable the other windows using
-    // this object
-    class wxWindowDisabler *m_windowDisabler;
-
-    DECLARE_DYNAMIC_CLASS(wxDialog)
     DECLARE_EVENT_TABLE()
 };
 

@@ -272,30 +272,28 @@ bool wxGenericValidator::TransferToWindow(void)
             return TRUE;
         }
     } else
-    // array controls
 #if wxUSE_CHECKLISTBOX && !defined(__WIN16__)
-    // NOTE: wxCheckListBox is a wxListBox, so wxCheckListBox MUST come first:
-    if (m_validatorWindow->IsKindOf(CLASSINFO(wxCheckListBox)) )
-    {
-        wxCheckListBox* pControl = (wxCheckListBox*) m_validatorWindow;
+  // array controls
+  // NOTE: wxCheckListBox isa wxListBox, so wxCheckListBox
+  // MUST come first:
+  if (m_validatorWindow->IsKindOf(CLASSINFO(wxCheckListBox)) )
+  {
+    wxCheckListBox* pControl = (wxCheckListBox*) m_validatorWindow;
         if (m_pArrayInt)
-        {
-            // clear all selections
-            size_t i,
-                   count = pControl->GetCount();
-            for ( i = 0 ; i < count; i++ )
-                pControl->Check(i, FALSE);
-
-            // select each item in our array
-            count = m_pArrayInt->GetCount();
-            for ( i = 0 ; i < count; i++ )
-                pControl->Check(m_pArrayInt->Item(i));
-
-            return TRUE;
-        }
+    {
+      // clear all selections
+      int i;
+      for (i = 0 ; i < pControl->Number(); ++i)
+        pControl->Check(i, FALSE);
+      // select each item in our array
+      unsigned u;
+      for (u = 0; u < m_pArrayInt->Count(); ++u)
+        pControl->Check(m_pArrayInt->Item(u));
+      return TRUE;
+    }
         else
-            return FALSE;
-    } else
+                return FALSE;
+  } else
 #endif
 #if wxUSE_LISTBOX
     if (m_validatorWindow->IsKindOf(CLASSINFO(wxListBox)) )
@@ -304,16 +302,13 @@ bool wxGenericValidator::TransferToWindow(void)
         if (m_pArrayInt)
         {
             // clear all selections
-            size_t i,
-                   count = pControl->GetCount();
-            for ( i = 0 ; i < count; i++ )
+            int i;
+            for (i = 0 ; i < pControl->Number(); ++i)
                 pControl->Deselect(i);
-
             // select each item in our array
-            count = m_pArrayInt->GetCount();
-            for ( i = 0 ; i < count; i++ )
-                pControl->SetSelection(m_pArrayInt->Item(i));
-
+            unsigned u;
+            for (u = 0; u < m_pArrayInt->Count(); ++u)
+                pControl->SetSelection(m_pArrayInt->Item(u));
             return TRUE;
         }
     } else
@@ -486,31 +481,27 @@ bool wxGenericValidator::TransferFromWindow(void)
         return TRUE;
     }
   } else
-  // array controls
 #if wxUSE_CHECKLISTBOX
 #ifndef __WIN16__
-  // NOTE: wxCheckListBox isa wxListBox, so wxCheckListBox MUST come first:
+  // array controls
+  // NOTE: wxCheckListBox isa wxListBox, so wxCheckListBox
+  // MUST come first:
   if (m_validatorWindow->IsKindOf(CLASSINFO(wxCheckListBox)) )
   {
     wxCheckListBox* pControl = (wxCheckListBox*) m_validatorWindow;
-    if (m_pArrayInt)
+        if (m_pArrayInt)
     {
       // clear our array
       m_pArrayInt->Clear();
-
       // add each selected item to our array
-      size_t i,
-             count = pControl->GetCount();
-      for ( i = 0; i < count; i++ )
-      {
+      int i;
+      for (i = 0 ; i < pControl->Number(); ++i)
         if (pControl->IsChecked(i))
           m_pArrayInt->Add(i);
-      }
-
       return TRUE;
     }
-    else
-      return FALSE;
+        else
+          return FALSE;
   } else
 #endif
 #endif
@@ -522,16 +513,11 @@ bool wxGenericValidator::TransferFromWindow(void)
     {
       // clear our array
       m_pArrayInt->Clear();
-
       // add each selected item to our array
-      size_t i,
-             count = pControl->GetCount();
-      for ( i = 0; i < count; i++ )
-      {
+      int i;
+      for (i = 0 ; i < pControl->Number(); ++i)
         if (pControl->Selected(i))
           m_pArrayInt->Add(i);
-      }
-
       return TRUE;
     }
   } else
@@ -544,6 +530,7 @@ bool wxGenericValidator::TransferFromWindow(void)
 
 /*
   Called by constructors to initialize ALL data members
+	Last change:  JAC  21 Jul 100    4:58 pm
 */
 void wxGenericValidator::Initialize()
 {

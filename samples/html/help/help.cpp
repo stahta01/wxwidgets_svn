@@ -10,7 +10,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -22,11 +22,10 @@
     #include <wx/wx.h>
 #endif
 
-#include "wx/image.h"
-#include "wx/html/helpfrm.h"
-#include "wx/html/helpctrl.h"
-#include "wx/filesys.h"
-#include "wx/fs_zip.h"
+#include <wx/image.h>
+#include <wx/wxhtml.h>
+#include <wx/filesys.h>
+#include <wx/fs_zip.h>
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -138,8 +137,7 @@
 
 // frame constructor
    MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-   : wxFrame((wxFrame *)NULL, -1, title, pos, size), 
-     help(wxHF_DEFAULT_STYLE | wxHF_OPEN_FILES)
+   : wxFrame((wxFrame *)NULL, -1, title, pos, size), help(wxHF_DEFAULTSTYLE | wxHF_OPENFILES)
    {
     // create a menu bar
       wxMenu *menuFile = new wxMenu;
@@ -156,19 +154,11 @@
 
       help.UseConfig(wxConfig::Get());
       bool ret;
-#ifdef __WXMAC__
-      ret = help.AddBook(":helpfiles:testing.hhp");
-#else
       help.SetTempDir(".");
       ret = help.AddBook("helpfiles/testing.hhp");
-#endif
       if (! ret)
 	  wxMessageBox("Failed adding book helpfiles/testing.hhp");
-#ifdef __WXMAC__
-      ret = help.AddBook(":helpfiles:another.hhp");
-#else
       ret = help.AddBook("helpfiles/another.hhp");
-#endif
       if (! ret)
 	  wxMessageBox("Failed adding book helpfiles/another.hhp");
    }

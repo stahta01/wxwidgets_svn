@@ -55,7 +55,7 @@ public:
        @param newmsg if used, new message to display
        @returns true if ABORT button has not been pressed
    */
-   bool Update(int value, const wxString& newmsg = wxT(""));
+   bool Update(int value = -1, const wxString& newmsg = wxT(""));
 
    /* Can be called to continue after the cancel button has been pressed, but
        the program decided to continue the operation (e.g., user didn't
@@ -63,19 +63,11 @@ public:
    */
    void Resume() { m_state = Continue; }
 
-protected:
-   // callback for optional abort button
+   // implementation from now on
+       // callback for optional abort button
    void OnCancel(wxCommandEvent& event);
-
-   // callback to disable "hard" window closing
+       // callback to disable "hard" window closing
    void OnClose(wxCloseEvent& event);
-
-   // callback to detect when the dialog is closed
-   void OnShow(wxShowEvent& event);
-
-   // must be called to reenable the other windows temporarily disabled while
-   // the dialog was shown
-   void ReenableOtherWindows();
 
 private:
    // create the label with given text and another one to show the time nearby
@@ -112,19 +104,10 @@ private:
    // the maximum value
    int m_maximum;
 
-#ifdef __WXMSW__
-   // the factor we use to always keep the value in 16 bit range as the native
-   // control only supports ranges from 0 to 65,535
-   size_t m_factor;
-#endif // __WXMSW__
-
    // for wxPD_APP_MODAL case
    class WXDLLEXPORT wxWindowDisabler *m_winDisabler;
 
    DECLARE_EVENT_TABLE()
-private:
-    // Virtual function hiding supression
-    virtual void Update() { wxDialog::Update(); }
 };
 #endif
 

@@ -75,21 +75,18 @@ enum {
 
 //---------------------------------------------------------------------------
 
-class wxHtmlLinkInfo : public wxObject {
+class wxHtmlLinkInfo {
 public:
     wxHtmlLinkInfo(const wxString& href, const wxString& target = wxEmptyString);
     wxString GetHref();
     wxString GetTarget();
     wxMouseEvent* GetEvent();
     wxHtmlCell* GetHtmlCell();
-
-    void SetEvent(const wxMouseEvent *e);
-    void SetHtmlCell(const wxHtmlCell * e);
 };
 
 //---------------------------------------------------------------------------
 
-class wxHtmlTag : public wxObject {
+class wxHtmlTag {
 public:
     // Never need to create a new tag from Python...
     //wxHtmlTag(const wxString& source, int pos, int end_pos, wxHtmlTagsCache* cache);
@@ -102,6 +99,7 @@ public:
     //int ScanParam(const wxString& par, const char *format, void* param);
 
     wxString GetAllParams();
+    bool IsEnding();
     bool HasEnding();
     int GetBeginPos();
     int GetEndPos1();
@@ -111,7 +109,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxHtmlParser : public wxObject {
+class wxHtmlParser {
 public:
     // wxHtmlParser();  This is an abstract base class...
 
@@ -172,9 +170,9 @@ public:
     void SetFontFixed(int x);
     int GetAlign();
     void SetAlign(int a);
-    wxColour GetLinkColor();
+    const wxColour& GetLinkColor();
     void SetLinkColor(const wxColour& clr);
-    wxColour GetActualColor();
+    const wxColour& GetActualColor();
     void SetActualColor(const wxColour& clr);
     void SetLink(const wxString& link);
     wxFont* CreateCurrentFont();
@@ -188,7 +186,6 @@ public:
 
 %{
 class wxPyHtmlTagHandler : public wxHtmlTagHandler {
-    DECLARE_DYNAMIC_CLASS(wxPyHtmlTagHandler);
 public:
     wxPyHtmlTagHandler() : wxHtmlTagHandler() {};
 
@@ -201,19 +198,17 @@ public:
     PYPRIVATE;
 };
 
-IMPLEMENT_DYNAMIC_CLASS(wxPyHtmlTagHandler, wxHtmlTagHandler);
-
 IMP_PYCALLBACK_STRING__pure(wxPyHtmlTagHandler, wxHtmlTagHandler, GetSupportedTags);
 IMP_PYCALLBACK_BOOL_TAG_pure(wxPyHtmlTagHandler, wxHtmlTagHandler, HandleTag);
 %}
 
 
-%name(wxHtmlTagHandler) class wxPyHtmlTagHandler : public wxObject {
+%name(wxHtmlTagHandler) class wxPyHtmlTagHandler {
 public:
     wxPyHtmlTagHandler();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxHtmlTagHandler)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxHtmlTagHandler)"
 
     void SetParser(wxHtmlParser *parser);
     wxHtmlParser* GetParser();
@@ -225,7 +220,6 @@ public:
 
 %{
 class wxPyHtmlWinTagHandler : public wxHtmlWinTagHandler {
-    DECLARE_DYNAMIC_CLASS(wxPyHtmlWinTagHandler);
 public:
     wxPyHtmlWinTagHandler() : wxHtmlWinTagHandler() {};
 
@@ -239,8 +233,6 @@ public:
     PYPRIVATE;
 };
 
-IMPLEMENT_DYNAMIC_CLASS( wxPyHtmlWinTagHandler, wxHtmlWinTagHandler);
-
 IMP_PYCALLBACK_STRING__pure(wxPyHtmlWinTagHandler, wxHtmlWinTagHandler, GetSupportedTags);
 IMP_PYCALLBACK_BOOL_TAG_pure(wxPyHtmlWinTagHandler, wxHtmlWinTagHandler, HandleTag);
 %}
@@ -250,8 +242,8 @@ IMP_PYCALLBACK_BOOL_TAG_pure(wxPyHtmlWinTagHandler, wxHtmlWinTagHandler, HandleT
 public:
     wxPyHtmlWinTagHandler();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxHtmlWinTagHandler)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxHtmlWinTagHandler)"
 
     void SetParser(wxHtmlParser *parser);
     wxHtmlWinParser* GetParser();
@@ -273,25 +265,25 @@ public:
     }
 
     void OnExit() {
-        wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         Py_DECREF(m_tagHandlerClass);
         m_tagHandlerClass = NULL;
         for (size_t x=0; x < m_objArray.GetCount(); x++) {
             PyObject* obj = (PyObject*)m_objArray.Item(x);
             Py_DECREF(obj);
         }
-        wxPyEndBlockThreads();
+        wxPySaveThread(doSave);
     };
 
     void FillHandlersTable(wxHtmlWinParser *parser) {
         // Wave our magic wand...  (if it works it's a miracle!  ;-)
 
         // First, make a new instance of the tag handler
-        wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         PyObject* arg = Py_BuildValue("()");
         PyObject* obj = PyInstance_New(m_tagHandlerClass, arg, NULL);
         Py_DECREF(arg);
-        wxPyEndBlockThreads();
+        wxPySaveThread(doSave);
 
         // now figure out where it's C++ object is...
         wxPyHtmlWinTagHandler* thPtr;
@@ -326,7 +318,7 @@ private:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-class wxHtmlCell : public wxObject {
+class wxHtmlCell {
 public:
     wxHtmlCell();
 
@@ -350,13 +342,6 @@ public:
     bool AdjustPagebreak(int * pagebreak);
     void SetCanLiveOnPagebreak(bool can);
 
-};
-
-
-class  wxHtmlWordCell : public wxHtmlCell
-{
-public:
-    wxHtmlWordCell(const wxString& word, wxDC& dc);
 };
 
 
@@ -390,12 +375,6 @@ public:
 };
 
 
-class  wxHtmlFontCell : public wxHtmlCell
-{
-public:
-    wxHtmlFontCell(wxFont *font);
-};
-
 
 class wxHtmlWidgetCell : public wxHtmlCell {
 public:
@@ -409,9 +388,21 @@ public:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
+// item of history list
+class HtmlHistoryItem {
+public:
+    HtmlHistoryItem(const char* p, const char* a);
+
+    int GetPos();
+    void SetPos(int p);
+    const wxString& GetPage();
+    const wxString& GetAnchor();
+};
+
+
+//---------------------------------------------------------------------------
 %{
 class wxPyHtmlWindow : public wxHtmlWindow {
-    DECLARE_ABSTRACT_CLASS(wxPyHtmlWindow);
 public:
     wxPyHtmlWindow(wxWindow *parent, wxWindowID id = -1,
                    const wxPoint& pos = wxDefaultPosition,
@@ -419,39 +410,31 @@ public:
                    long style = wxHW_SCROLLBAR_AUTO,
                    const wxString& name = "htmlWindow")
         : wxHtmlWindow(parent, id, pos, size, style, name)  {};
-    wxPyHtmlWindow() : wxHtmlWindow() {};
 
     void OnLinkClicked(const wxHtmlLinkInfo& link);
     void base_OnLinkClicked(const wxHtmlLinkInfo& link);
 
     DEC_PYCALLBACK__STRING(OnSetTitle);
-    DEC_PYCALLBACK__CELLINTINT(OnCellMouseHover);
-    DEC_PYCALLBACK__CELLINTINTME(OnCellClicked);
     PYPRIVATE;
 };
 
-IMPLEMENT_ABSTRACT_CLASS( wxPyHtmlWindow, wxHtmlWindow );
+
 IMP_PYCALLBACK__STRING(wxPyHtmlWindow, wxHtmlWindow, OnSetTitle);
-IMP_PYCALLBACK__CELLINTINT(wxPyHtmlWindow, wxHtmlWindow, OnCellMouseHover);
-IMP_PYCALLBACK__CELLINTINTME(wxPyHtmlWindow, wxHtmlWindow, OnCellClicked);
 
-
-void wxPyHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link) {
-    bool found;
-    wxPyBeginBlockThreads();
-    if ((found = wxPyCBH_findCallback(m_myInst, "OnLinkClicked"))) {
+ void wxPyHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link) {
+    bool doSave = wxPyRestoreThread();
+    if (wxPyCBH_findCallback(m_myInst, "OnLinkClicked")) {
         PyObject* obj = wxPyConstructObject((void*)&link, "wxHtmlLinkInfo", 0);
         wxPyCBH_callCallback(m_myInst, Py_BuildValue("(O)", obj));
         Py_DECREF(obj);
     }
-    wxPyEndBlockThreads();
-    if (! found)
+    else
         wxHtmlWindow::OnLinkClicked(link);
+    wxPySaveThread(doSave);
 }
 void wxPyHtmlWindow::base_OnLinkClicked(const wxHtmlLinkInfo& link) {
     wxHtmlWindow::OnLinkClicked(link);
 }
-
 %}
 
 
@@ -463,27 +446,16 @@ public:
                  wxSize& size = wxDefaultSize,
                  int flags=wxHW_SCROLLBAR_AUTO,
                  char* name = "htmlWindow");
-    %name(wxPreHtmlWindow)wxPyHtmlWindow();
 
-    bool Create(wxWindow *parent, int id = -1,
-                wxPoint& pos = wxDefaultPosition,
-                wxSize& size = wxDefaultSize,
-                int flags=wxHW_SCROLLBAR_AUTO,
-                char* name = "htmlWindow");
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxHtmlWindow)"
+    %pragma(python) addtomethod = "__init__:#wx._StdWindowCallbacks(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdOnScrollCallbacks(self)"
 
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxHtmlWindow)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    %pragma(python) addtomethod = "wxPreHtmlWindow:val._setOORInfo(val)"
-
-    bool SetPage(const wxString& source);
-    bool LoadPage(const wxString& location);
-    bool AppendToPage(const wxString& source);
+    bool SetPage(const char* source);
+    bool LoadPage(const char* location);
     wxString GetOpenedPage();
-    wxString GetOpenedAnchor();
-    wxString GetOpenedPageTitle();
-
     void SetRelatedFrame(wxFrame* frame, const char* format);
     wxFrame* GetRelatedFrame();
     void SetRelatedStatusBar(int bar);
@@ -499,24 +471,18 @@ public:
         }
     }
 
-    void SetTitle(const wxString& title);
+    void SetTitle(const char* title);
     void SetBorders(int b);
-    void ReadCustomization(wxConfigBase *cfg, wxString path = wxEmptyString);
-    void WriteCustomization(wxConfigBase *cfg, wxString path = wxEmptyString);
+    void ReadCustomization(wxConfigBase *cfg, char* path = "");
+    void WriteCustomization(wxConfigBase *cfg, char* path = "");
     bool HistoryBack();
     bool HistoryForward();
-    bool HistoryCanBack();
-    bool HistoryCanForward();
     void HistoryClear();
     wxHtmlContainerCell* GetInternalRepresentation();
     wxHtmlWinParser* GetParser();
 
     void base_OnLinkClicked(const wxHtmlLinkInfo& link);
     void base_OnSetTitle(const char* title);
-    void base_OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y);
-    void base_OnCellClicked(wxHtmlCell *cell,
-                            wxCoord x, wxCoord y,
-                            const wxMouseEvent& event);
 };
 
 // Static methods are mapped to stand-alone functions
@@ -531,7 +497,7 @@ public:
 //---------------------------------------------------------------------------
 
 
-class wxHtmlDCRenderer : public wxObject {
+class wxHtmlDCRenderer {
 public:
     wxHtmlDCRenderer();
     ~wxHtmlDCRenderer();
@@ -557,7 +523,7 @@ enum {
 class wxHtmlPrintout : public wxPyPrintout {
 public:
     wxHtmlPrintout(const char* title = "Printout");
-    //~wxHtmlPrintout();   wxPrintPreview object takes ownership...
+    ~wxHtmlPrintout();
 
     void SetHtmlText(const wxString& html,
                      const wxString &basepath = wxEmptyString,
@@ -572,7 +538,7 @@ public:
 
 
 
-class wxHtmlEasyPrinting : public wxObject {
+class wxHtmlEasyPrinting {
 public:
     wxHtmlEasyPrinting(const char* name = "Printing",
                        wxFrame *parent_frame = NULL);
@@ -608,10 +574,6 @@ public:
 
     wxClassInfo::CleanUpClasses();
     wxClassInfo::InitializeClasses();
-
-    wxPyPtrTypeMap_Add("wxHtmlTagHandler", "wxPyHtmlTagHandler");
-    wxPyPtrTypeMap_Add("wxHtmlWinTagHandler", "wxPyHtmlWinTagHandler");
-    wxPyPtrTypeMap_Add("wxHtmlWindow", "wxPyHtmlWindow");
 %}
 
 //----------------------------------------------------------------------
@@ -621,3 +583,4 @@ public:
 %pragma(python) include="_htmlextras.py";
 
 //---------------------------------------------------------------------------
+

@@ -13,16 +13,12 @@
 #pragma implementation "checkbox.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/checkbox.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxCheckBox, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapCheckBox, wxCheckBox)
-#endif
 
-#include "wx/mac/uma.h"
+#include <wx/mac/uma.h>
 
 // Single check box item
 bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
@@ -36,7 +32,7 @@ bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 	
 	MacPreControlCreate( parent , id ,  label , pos , size ,style, validator , name , &bounds , title ) ;
 
-	m_macControl = ::NewControl( parent->MacGetRootWindow() , &bounds , title , false , 0 , 0 , 1, 
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true , 0 , 0 , 1, 
 	  	kControlCheckBoxProc , (long) this ) ;
 	
 	MacPostControlCreate() ;
@@ -47,7 +43,6 @@ bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 void wxCheckBox::SetValue(bool val)
 {
    ::SetControlValue( m_macControl , val ) ;
-   MacRedrawControl() ;
 }
 
 bool wxCheckBox::GetValue() const

@@ -6,30 +6,35 @@
 // Created:     03/02/99
 // RCS-ID:      $Id: 
 // Copyright:   (c) Stefan Csomor
-// Licence:   	wxWindows licence
+// Licence:   	LGPL licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef H_UMA
 #define H_UMA
 
-#if defined(__POWERPC__)
-    #if defined(__DARWIN__)
-        #include <Carbon/Carbon.h>
-    #endif
+// define this to be 1 if you have the 8.6 libs (weak linked)
+
+#define UMA_USE_8_6 0 
+
+// define this to be 1 if you have the carbon libs (weak linked or PreCarbon.lib)
+
+#define UMA_USE_CARBON 0
+
+#define UMA_USE_APPEARANCE 1
+#define UMA_USE_WINDOWMGR 1
+
+#if !UMA_USE_8_6 && UMA_USE_WINDOWMGR
+#undef UMA_USE_WINDOWMGR
+#define UMA_USE_WINDOWMGR 0
 #endif
 
 #if !TARGET_CARBON
-//  this is now defined in the latest headers
-//	typedef short MenuItemIndex  ;
+	typedef short MenuItemIndex  ;
 #endif
 
 void UMAInitToolbox( UInt16 inMoreMastersCalls) ;
-void UMACleanupToolbox() ;
 bool UMAHasAppearance() ;
 long UMAGetAppearanceVersion() ;
-bool UMAHasWindowManager() ;
-long UMAGetWindowManagerAttr() ;
-bool UMAHasAquaLayout() ;
 
 // process manager
 
@@ -38,37 +43,14 @@ bool UMAGetProcessModeDoesActivateOnFGSwitch() ;
 
 // menu manager
 
-void 			UMASetMenuTitle( MenuRef menu , StringPtr title ) ;
-UInt32 			UMAMenuEvent( EventRecord *inEvent ) ;
+void 			UMASetMenuTitle( MenuRef menu , ConstStr255Param title ) ;
+UInt32 		UMAMenuEvent( EventRecord *inEvent ) ;
 void 			UMAEnableMenuItem( MenuRef inMenu , MenuItemIndex item ) ;	
 void 			UMADisableMenuItem( MenuRef inMenu , MenuItemIndex item ) ;	
-void			UMAAppendSubMenuItem( MenuRef menu , StringPtr label , SInt16 submenuid ) ;
-void			UMAInsertSubMenuItem( MenuRef menu , StringPtr label , MenuItemIndex item , SInt16 submenuid  ) ;
-void			UMAAppendMenuItem( MenuRef menu , StringPtr label , SInt16 key= 0, UInt8 modifiers = 0 ) ;
-void			UMAInsertMenuItem( MenuRef menu , StringPtr label , MenuItemIndex item , SInt16 key = 0 , UInt8 modifiers = 0 ) ;
-// void			UMASetMenuItemText( MenuRef menu , MenuItemIndex item , StringPtr label ) ;
-
-// MenuRef			::NewMenu( SInt16 menuid , StringPtr label ) ;
-// void 			UMADisposeMenu( MenuRef menu ) ;
-
-// handling the menubar
-
-// void			UMADeleteMenu( SInt16 menuId ) ;
-// void			UMAInsertMenu( MenuRef insertMenu , SInt16 afterId ) ;
-// void			UMADrawMenuBar() ;
-
 // quickdraw
 
 void			UMAShowWatchCursor() ;
 void			UMAShowArrowCursor() ;
-
-#if TARGET_CARBON && PM_USE_SESSION_APIS
-OSStatus		UMAPrOpen(PMPrintSession *macPrintSession) ;
-OSStatus		UMAPrClose(PMPrintSession *macPrintSession) ;
-#else
-OSStatus		UMAPrOpen() ;
-OSStatus		UMAPrClose() ;
-#endif
 
 // window manager
 
@@ -78,32 +60,24 @@ void 			UMASetWTitleC( WindowRef inWindowRef , const char *title ) ;
 void 			UMAGetWTitleC( WindowRef inWindowRef , char *title ) ;
 
 void 			UMADrawGrowIcon( WindowRef inWindowRef ) ;
-//void			UMAShowWindow( WindowRef inWindowRef ) ;
-//void			UMAHideWindow( WindowRef inWindowRef ) ;
+void			UMAShowWindow( WindowRef inWindowRef ) ;
+void			UMAHideWindow( WindowRef inWindowRef ) ;
 void			UMAShowHide( WindowRef inWindowRef , Boolean show) ;
-//void 			UMASelectWindow( WindowRef inWindowRef ) ;
-//void			UMABringToFront( WindowRef inWindowRef ) ;
-//void			UMASendBehind( WindowRef inWindowRef , WindowRef behindWindow ) ;
-// void			UMACloseWindow(WindowRef inWindowRef) ;
+void 			UMASelectWindow( WindowRef inWindowRef ) ;
+void			UMABringToFront( WindowRef inWindowRef ) ;
+void			UMASendBehind( WindowRef inWindowRef , WindowRef behindWindow ) ;
+void			UMACloseWindow(WindowRef inWindowRef) ;
 
 // appearance manager
 
 void 			UMADrawControl( ControlHandle inControl ) ;
 
-void 			UMAEnableControl( ControlHandle inControl ) ;
-void			UMADisableControl( ControlHandle inControl ) ;
 void 			UMAActivateControl( ControlHandle inControl ) ;
 void			UMADeactivateControl( ControlHandle inControl ) ;
-//void			UMAApplyThemeBackground			(ThemeBackgroundKind 	inKind,
-//								 const Rect *			bounds,
-//								 ThemeDrawState 		inState,
-//								 SInt16 				inDepth,
-//								 Boolean 				inColorDev);
-//void			UMASetThemeWindowBackground		(WindowRef 				inWindow,
-//								 ThemeBrush 			inBrush,
-//								 Boolean 				inUpdate)	;
-/*
-ControlHandle ::NewControl(WindowPtr 				owningWindow,
+void			UMASetThemeWindowBackground		(WindowRef 				inWindow,
+								 ThemeBrush 			inBrush,
+								 Boolean 				inUpdate)	;
+ControlHandle UMANewControl(WindowPtr 				owningWindow,
 								 const Rect *			boundsRect,
 								 ConstStr255Param 		controlTitle,
 								 Boolean 				initiallyVisible,
@@ -112,37 +86,36 @@ ControlHandle ::NewControl(WindowPtr 				owningWindow,
 								 SInt16 				maximumValue,
 								 SInt16 				procID,
 								 SInt32 				controlReference)	;
-*/
-//void UMADisposeControl (ControlHandle 			theControl)	;
-//void UMAHiliteControl	(ControlHandle 			theControl,
-//								 ControlPartCode 		hiliteState)	;
+void UMADisposeControl (ControlHandle 			theControl)	;
+void UMAHiliteControl	(ControlHandle 			theControl,
+								 ControlPartCode 		hiliteState)	;
 void UMAShowControl						(ControlHandle 			theControl)	;
 void UMAHideControl						(ControlHandle 			theControl);
-//void UMASetControlVisibility			(ControlHandle 			inControl,
-//								 Boolean 				inIsVisible,
-//								 Boolean 				inDoDraw);
+void UMASetControlVisibility			(ControlHandle 			inControl,
+								 Boolean 				inIsVisible,
+								 Boolean 				inDoDraw);
 
-//bool UMAIsControlActive					(ControlHandle 			inControl);
-//bool UMAIsControlVisible				(ControlHandle 			inControl);
+bool UMAIsControlActive					(ControlHandle 			inControl);
+bool UMAIsControlVisible				(ControlHandle 			inControl);
 void UMAActivateControl					(ControlHandle 			inControl);
 void UMADeactivateControl				(ControlHandle 			inControl);
 
-//OSErr UMAGetBestControlRect				(ControlHandle 			inControl,
-//								 Rect *					outRect,
-//								 SInt16 *				outBaseLineOffset);
-//OSErr UMASetControlFontStyle				(ControlHandle 			inControl,
-//								 const ControlFontStyleRec * inStyle)	;
+OSErr UMAGetBestControlRect				(ControlHandle 			inControl,
+								 Rect *					outRect,
+								 SInt16 *				outBaseLineOffset);
+OSErr UMASetControlFontStyle				(ControlHandle 			inControl,
+								 const ControlFontStyleRec * inStyle)	;
 
 
 void UMAMoveControl( ControlHandle inControl , short x , short y ) ;
 void UMASizeControl( ControlHandle inControl , short x , short y ) ;
 // control hierarchy
 
-//OSErr UMACreateRootControl				(WindowPtr 				inWindow,
-//								 ControlHandle *		outControl) ;
+OSErr UMACreateRootControl				(WindowPtr 				inWindow,
+								 ControlHandle *		outControl) ;
 
-//OSErr UMAEmbedControl					(ControlHandle 			inControl,
-//								 ControlHandle 			inContainer);
+OSErr UMAEmbedControl					(ControlHandle 			inControl,
+								 ControlHandle 			inContainer);
 
 // keyboard focus
 OSErr UMASetKeyboardFocus				(WindowPtr 				inWindow,
@@ -152,35 +125,35 @@ OSErr UMASetKeyboardFocus				(WindowPtr 				inWindow,
 
 // events
 
-//ControlPartCode UMAHandleControlClick				(ControlHandle 			inControl,
-//								 Point 					inWhere,
-//								 SInt16 				inModifiers,
-//								 ControlActionUPP 		inAction) ;
-//SInt16 UMAHandleControlKey				(ControlHandle 			inControl,
-//								 SInt16 				inKeyCode,
-//								 SInt16 				inCharCode,
-//								 SInt16 				inModifiers);
+ControlPartCode UMAHandleControlClick				(ControlHandle 			inControl,
+								 Point 					inWhere,
+								 SInt16 				inModifiers,
+								 ControlActionUPP 		inAction) ;
+SInt16 UMAHandleControlKey				(ControlHandle 			inControl,
+								 SInt16 				inKeyCode,
+								 SInt16 				inCharCode,
+								 SInt16 				inModifiers);
 								 
-//void UMAIdleControls					(WindowPtr 				inWindow)	;
+void UMAIdleControls					(WindowPtr 				inWindow)	;
 
 void UMAUpdateControls( WindowPtr inWindow , RgnHandle inRgn ) ;
 OSErr UMAGetRootControl( WindowPtr inWindow , ControlHandle *outControl ) ;
 
 // handling control data
-/*
-OSErr ::SetControlData					(ControlHandle 			inControl,
+
+OSErr UMASetControlData					(ControlHandle 			inControl,
 								 ControlPartCode 		inPart,
 								 ResType 				inTagName,
 								 Size 					inSize,
 								 Ptr 					inData)		;
 
-OSErr ::GetControlData					(ControlHandle 			inControl,
+OSErr UMAGetControlData					(ControlHandle 			inControl,
 								 ControlPartCode 		inPart,
 								 ResType 				inTagName,
 								 Size 					inBufferSize,
 								 Ptr 					outBuffer,
 								 Size *					outActualSize) ;
-OSErr ::GetControlDataSize				(ControlHandle 			inControl,
+OSErr UMAGetControlDataSize				(ControlHandle 			inControl,
 								 ControlPartCode 		inPart,
 								 ResType 				inTagName,
 								 Size *					outMaxSize);
@@ -209,54 +182,13 @@ WindowRef UMAFrontWindow() ;
 WindowRef UMAFrontNonFloatingWindow() ;
 
 // floaters support
-*/
+
 bool			UMAIsWindowFloating( WindowRef inWindow ) ;
 bool			UMAIsWindowModal( WindowRef inWindow ) ;
-/*
 WindowRef UMAGetActiveWindow() ;
 WindowRef UMAGetActiveNonFloatingWindow() ;
-*/
+
 void UMAHighlightAndActivateWindow( WindowRef inWindowRef , bool inActivate ) ;
 
-OSStatus UMAGetHelpMenu(
-  MenuRef *        outHelpMenu,
-  MenuItemIndex *  outFirstCustomItemIndex);      /* can be NULL */
-
-#if !TARGET_CARBON
-#define GetPortTextFont( p) ((p)->txFont )
-#define GetPortTextSize( p) ((p)->txSize )
-#define GetPortTextFace( p) ((p)->txFace )
-#define GetPortTextMode( p) ((p)->txMode )
-#define GetRegionBounds( r , b) ((*b) = (**r).rgnBBox)
-#define GetPortBounds( p , b) ((*b) = p->portRect )
-#define GetWindowPortBounds( p , b) ((*b) = p->portRect )
-#define	GetPortVisibleRegion( p, r ) CopyRgn( p->visRgn , r )
-#define GetQDGlobalsWhite( a ) (&((*a) = qd.white))
-#define GetQDGlobalsBlack( a ) (&((*a) = qd.black))
-#define GetQDGlobalsScreenBits( a ) ((*a) = qd.screenBits)
-#define GetQDGlobalsArrow( a ) (&((*a) = qd.arrow))
-#define GetControlBounds( c , b ) &((*b) = (**c).contrlRect )
-#define GetPortBitMapForCopyBits( p ) ((BitMap*) &(((CGrafPtr)p)->portPixMap ))
-#define	GetControlOwner( control ) ((**control).contrlOwner)
-#define InvalWindowRgn( window , rgn ) InvalRgn( rgn )
-#define GetPortPenMode( p ) (p->pnMode)
-#define SetPortPenMode( p , mode ) (p->pnMode = mode )
-#define ClearCurrentScrap() ZeroScrap() ;
-// control manager
-
-#define GetControlReference( control ) ((**control).contrlRfCon)
-
-// list manager
-
-#define SetListSelectionFlags( list , options ) (**list).selFlags = options
-#define GetListRefCon( list ) (**list).refCon
-
-#endif
-#if TARGET_CARBON
-#define GetWindowUpdateRgn( inWindow , updateRgn ) GetWindowRegion( inWindow , kWindowUpdateRgn, updateRgn ) 
-#endif
-// Appearance Drawing
-
-OSStatus UMADrawThemePlacard( const Rect *inRect , ThemeDrawState inState ) ;
 
 #endif

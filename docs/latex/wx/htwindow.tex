@@ -53,20 +53,6 @@ filters. These filters are present by default:
 \item Plain Text filter (this filter is used if no other filter matches)
 \end{itemize}
 
-\membersection{wxHtmlWindow::AppendToPage}\label{wxhtmlwindowappendtopage}
-
-\func{bool}{AppendToPage}{\param{const wxString\& }{source}}
-
-Appends HTML fragment to currently displayed text and refreshes the window. 
-
-\wxheading{Parameters}
-
-\docparam{source}{HTML code fragment}
-
-\wxheading{Return value}
-
-FALSE if an error occurred, TRUE otherwise.
-
 \membersection{wxHtmlWindow::GetInternalRepresentation}\label{wxhtmlwindowgetinternalrepresentation}
 
 \constfunc{wxHtmlContainerCell*}{GetInternalRepresentation}{\void}
@@ -112,21 +98,6 @@ Returns the related frame.
 Moves back to the previous page. (each page displayed using 
 \helpref{LoadPage}{wxhtmlwindowloadpage} is stored in history list.)
 
-\membersection{wxHtmlWindow::HistoryCanBack}\label{wxhtmlwindowhistorycanback}
-
-\func{bool}{HistoryCanBack}{\void}
-
-Returns true if it is possible to go back in the history (i.e. HistoryBack()
-won't fail).
-
-\membersection{wxHtmlWindow::HistoryCanForward}\label{wxhtmlwindowhistorycanforward}
-
-\func{bool}{HistoryCanForward}{\void}
-
-Returns true if it is possible to go forward in the history (i.e. HistoryBack()
-won't fail).
-
-
 \membersection{wxHtmlWindow::HistoryClear}\label{wxhtmlwindowhistoryclear}
 
 \func{void}{HistoryClear}{\void}
@@ -141,7 +112,7 @@ Moves to next page in history.
 
 \membersection{wxHtmlWindow::LoadPage}\label{wxhtmlwindowloadpage}
 
-\func{virtual bool}{LoadPage}{\param{const wxString\& }{location}}
+\func{bool}{LoadPage}{\param{const wxString\& }{location}}
 
 Unlike SetPage this function first loads HTML page from {\it location} 
 and then displays it. See example:
@@ -157,37 +128,6 @@ htmlwin -> SetPage("help/myproject/index.htm");
 \wxheading{Return value}
 
 FALSE if an error occurred, TRUE otherwise
-
-\membersection{wxHtmlWindow::OnCellClicked}\label{wxhtmlwindowoncellclicked}
-
-\func{virtual void}{OnCellClicked}{\param{wxHtmlCell }{*cell}, \param{wxCoord }{x}, \param{wxCoord }{y}, \param{const wxMouseEvent\& }{event}}
-
-This method is called when a mouse button is clicked inside wxHtmlWindow.
-The default behaviour is to call 
-\helpref{OnLinkClicked}{wxhtmlwindowonlinkclicked} if the cell contains a
-hypertext link.
-
-\wxheading{Parameters}
-
-\docparam{cell}{The cell inside which the mouse was clicked, always a simple
-(i.e. non container) cell}
-
-\docparam{x, y}{The logical coordinates of the click point}
-
-\docparam{event}{The mouse event containing other information about the click}
-
-\membersection{wxHtmlWindow::OnCellMouseHover}\label{wxhtmlwindowoncellmousehover}
-
-\func{virtual void}{OnCellMouseHover}{\param{wxHtmlCell }{*cell}, \param{wxCoord }{x}, \param{wxCoord }{y}}
-
-This method is called when a mouse moves over an HTML cell.
-
-\wxheading{Parameters}
-
-\docparam{cell}{The cell inside which the mouse is currently, always a simple
-(i.e. non container) cell}
-
-\docparam{x, y}{The logical coordinates of the click point}
 
 \membersection{wxHtmlWindow::OnLinkClicked}\label{wxhtmlwindowonlinkclicked}
 

@@ -13,8 +13,7 @@
 # Assume we are in distrib/msw/tmake
 #
 topdir="../../.."
-srcdir="$topdir/src"
-mswdir="$srcdir/msw"
+mswdir="$topdir/src/msw"
 
 for tname in `ls *.t` 
 do
@@ -43,18 +42,6 @@ do
 	    echo "Generating $mswdir/makefile.vc for Visual C++ 4.0..."
 	    tmake -t vc wxwin.pro -o $mswdir/makefile.vc;;
 
-	vc6msw.t) 
-	    echo "Generating $srcdir/wxWindows.dsp for Visual C++ 6.0..."
-	    tmake -t vc6msw wxwin.pro -o $srcdir/wxWindows.dsp;;
-
-	vc6base.t) 
-	    echo "Generating $srcdir/wxBase.dsp for Visual C++ 6.0..."
-	    tmake -t vc6base wxwin.pro -o $srcdir/wxBase.dsp;;
-
-	vc6univ.t) 
-	    echo "Generating $srcdir/wxUniv.dsp for Visual C++ 6.0..."
-	    tmake -t vc6univ wxwin.pro -o $srcdir/wxUniv.dsp;;
-
 	wat.t)
 	    echo "Generating $mswdir/makefile.wat for Watcom C++..."
 	    tmake -t wat wxwin.pro -o $mswdir/makefile.wat;;
@@ -67,41 +54,13 @@ do
 	    echo "Generating $topdir/src/gtk/files.lst for GTK and Configure..."
 	    tmake -t gtk wxwin.pro -o $topdir/src/gtk/files.lst;;
 
-	mgl.t)
-	    echo "Generating $topdir/src/mgl/files.lst for MGL and Configure..."
-	    tmake -t mgl wxwin.pro -o $topdir/src/mgl/files.lst;;
-
-	micro.t)
-	    echo "Generating $topdir/src/micro/files.lst for MicroWindows and Configure..."
-	    tmake -t micro wxwin.pro -o $topdir/src/microwin/files.lst;;
-
-	msw.t)
-	    echo "Generating $topdir/src/msw/files.lst for MSW and Configure..."
-	    tmake -t msw wxwin.pro -o $topdir/src/msw/files.lst;;
-
-	mac.t)
-	    echo "Generating $topdir/src/mac/files.lst for Mac and Configure..."
-	    tmake -t mac wxwin.pro -o $topdir/src/mac/files.lst;;
-
 	motif.t)
 	    echo "Generating $topdir/src/motif/files.lst for Motif and Configure..."
 	    tmake -t motif wxwin.pro -o $topdir/src/motif/files.lst;;
 
-	univ.t)
-	    echo "Generating $topdir/src/univ/files.lst for wxUniversal..."
-	    tmake -t univ wxwin.pro -o $topdir/src/univ/files.lst;;
-
 	unx.t)
 	    echo "Generating $topdir/src/os2/files.lst for OS/2 PM and Configure..."
 	    tmake -t os2 wxwin.pro -o $topdir/src/os2/files.lst;;
-
-	mgl.t)
-	    echo "Generating $topdir/src/mgl/files.lst for MGL and Configure..."
-	    tmake -t mgl wxwin.pro -o $topdir/src/mgl/files.lst;;
-
-	watmgl.t)
-	    echo "Generating $topdir/src/mgl/makefile.wat for Watcom C++ and MGL+DOS..."
-	    tmake -t watmgl wxwin.pro -o $topdir/src/mgl/makefile.wat;;
     esac
 done
 

@@ -323,11 +323,10 @@ public:
 
 class WXDLLEXPORT wxSocketEvent : public wxEvent
 {
+  DECLARE_DYNAMIC_CLASS(wxSocketEvent)
+
 public:
-  wxSocketEvent(int id = 0)
-      : wxEvent(id, wxEVT_SOCKET)
-      {
-      }
+  wxSocketEvent(int id = 0);
 
   wxSocketNotify  GetSocketEvent() const { return m_event; }
   wxSocketBase   *GetSocket() const      { return (wxSocketBase *) GetEventObject(); }
@@ -339,24 +338,19 @@ public:
   wxSocketBase   *Socket() const         { return (wxSocketBase *) GetEventObject(); }
 #endif // WXWIN_COMPATIBILITY_2
 
-  virtual wxEvent *Clone() const { return new wxSocketEvent(*this); }
+  void CopyObject(wxObject& object_dest) const;
 
 public:
   wxSocketNotify  m_event;
   void           *m_clientData;
-
-  DECLARE_DYNAMIC_CLASS(wxSocketEvent)
 };
 
 
 typedef void (wxEvtHandler::*wxSocketEventFunction)(wxSocketEvent&);
 
-#define EVT_SOCKET(id, func) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_SOCKET, id, -1, \
-                              (wxObjectEventFunction) \
-                              (wxEventFunction) \
-                              (wxSocketEventFunction) & func, \
-                              (wxObject *) NULL ),
+#define EVT_SOCKET(id, func) { wxEVT_SOCKET, id, -1, \
+  (wxObjectEventFunction) (wxEventFunction) (wxSocketEventFunction) & func, \
+  (wxObject *) NULL },
 
 
 #endif

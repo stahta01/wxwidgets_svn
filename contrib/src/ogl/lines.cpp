@@ -15,7 +15,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -26,10 +26,6 @@
 #endif
 
 #include <wx/wxexpr.h>
-
-#ifdef new
-#undef new
-#endif
 
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
@@ -288,8 +284,8 @@ void wxLineShape::DrawRegion(wxDC& dc, wxShapeRegion *region, double x, double y
   // First, clear a rectangle for the text IF there is any
   if (region->GetFormattedText().Number() > 0)
   {
-      dc.SetPen(GetBackgroundPen());
-      dc.SetBrush(GetBackgroundBrush());
+      dc.SetPen(* g_oglWhiteBackgroundPen);
+      dc.SetBrush(* g_oglWhiteBackgroundBrush);
 
       // Now draw the text
       if (region->GetFont()) dc.SetFont(* region->GetFont());
@@ -300,7 +296,7 @@ void wxLineShape::DrawRegion(wxDC& dc, wxShapeRegion *region, double x, double y
       dc.SetTextForeground(* region->GetActualColourObject());
 
 #ifdef __WXMSW__
-      dc.SetTextBackground(GetBackgroundBrush().GetColour());
+      dc.SetTextBackground(g_oglWhiteBackgroundBrush->GetColour());
 #endif
 
       oglDrawFormattedText(dc, &(region->GetFormattedText()), xp, yp, w, h, region->GetFormatMode());
@@ -324,8 +320,8 @@ void wxLineShape::EraseRegion(wxDC& dc, wxShapeRegion *region, double x, double 
 
   if (region->GetFormattedText().Number() > 0)
   {
-      dc.SetPen(GetBackgroundPen());
-      dc.SetBrush(GetBackgroundBrush());
+      dc.SetPen(* g_oglWhiteBackgroundPen);
+      dc.SetBrush(* g_oglWhiteBackgroundBrush);
 
       dc.DrawRectangle((long)(xp - w/2.0), (long)(yp - h/2.0), (long)w, (long)h);
   }
@@ -853,10 +849,8 @@ void wxLineShape::OnErase(wxDC& dc)
 {
     wxPen *old_pen = m_pen;
     wxBrush *old_brush = m_brush;
-    wxPen bg_pen = GetBackgroundPen();
-    wxBrush bg_brush = GetBackgroundBrush();
-    SetPen(&bg_pen);
-    SetBrush(&bg_brush);
+    SetPen(g_oglWhiteBackgroundPen);
+    SetBrush(g_oglWhiteBackgroundBrush);
 
     double bound_x, bound_y;
     GetBoundingBoxMax(&bound_x, &bound_y);
@@ -876,8 +870,8 @@ void wxLineShape::OnErase(wxDC& dc)
     }
 
     // Undraw line
-    dc.SetPen(GetBackgroundPen());
-    dc.SetBrush(GetBackgroundBrush());
+    dc.SetPen(* g_oglWhiteBackgroundPen);
+    dc.SetBrush(* g_oglWhiteBackgroundBrush);
 
     // Drawing over the line only seems to work if the line has a thickness
     // of 1.
@@ -1819,7 +1813,7 @@ void wxLineShape::OnSizingBeginDragLeft(wxControlPoint* pt, double x, double y, 
 
   if (lpt->m_type == CONTROL_POINT_ENDPOINT_FROM || lpt->m_type == CONTROL_POINT_ENDPOINT_TO)
   {
-    m_canvas->SetCursor(wxCursor(wxCURSOR_BULLSEYE));
+    m_canvas->SetCursor(* g_oglBullseyeCursor);
     lpt->m_oldCursor = wxSTANDARD_CURSOR;
   }
 }
@@ -1935,7 +1929,7 @@ void wxLineControlPoint::OnBeginDragRight(double x, double y, int keys, int atta
       lineShape->GetTo()->GetEventHandler()->OnDraw(dc);
       lineShape->GetTo()->GetEventHandler()->OnDrawContents(dc);
     }
-    m_canvas->SetCursor(wxCursor(wxCURSOR_BULLSEYE));
+    m_canvas->SetCursor(g_oglBullseyeCursor);
     m_oldCursor = wxSTANDARD_CURSOR;
   }
 }

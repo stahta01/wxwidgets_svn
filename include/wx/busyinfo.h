@@ -26,8 +26,8 @@
 
 class WXDLLEXPORT wxInfoFrame : public wxFrame
 {
-public:
-    wxInfoFrame(wxWindow *parent, const wxString& message);
+    public:
+        wxInfoFrame(wxWindow *parent, const wxString& message);
 };
 
 
@@ -39,13 +39,12 @@ public:
 
 class WXDLLEXPORT wxBusyInfo : public wxObject
 {
-public:
-    wxBusyInfo(const wxString& message, wxWindow *parent = NULL);
+    public:
+        wxBusyInfo(const wxString& message);
+        ~wxBusyInfo();
 
-    virtual ~wxBusyInfo();
-
-private:
-    wxInfoFrame *m_InfoFrame;
+    private:
+        wxInfoFrame *m_InfoFrame;
 };
 
 

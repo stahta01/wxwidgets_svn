@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver 2.3.2
-%define ver2 2.3
-%define rel 1
+%define ver 2.2.9
+%define ver2 2.2
+%define rel 0
 
 Summary: wxBase library - non-GUI support classes of wxWindows toolkit
 Name: wxBase
@@ -10,10 +10,12 @@ Release: %{rel}
 Copyright: wxWindows Licence
 Group: Development/Libraries
 Source: wxBase-%{ver}.tar.bz2
-URL: http://www.wxwindows.org
+URL: http://www.wxwindows.org/
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Prefix: %{pref}
 BuildRoot: /var/tmp/%{name}-root
+
+Provides: wxbase
 
 %description
 wxBase is a collection of C++ classes providing basic data structures (strings,
@@ -27,20 +29,14 @@ the following platforms: Win32, generic Unix (Linux, FreeBSD, Solaris, HP-UX,
 %package devel
 Summary: wxBase headers needed for developping with wxBase
 Group: Development/Libraries
-Requires: wxBase = %{ver}
+Requires: wxBase
 
 %description devel
 Header files for wxBase. You need them to develop programs using wxBase.
 
-%package static
-Summary: wxBase static libraries
-Group: Development/Libraries
-
-%description static
-Static libraries for wxBase. You need them if you want to link statically against wxBase.
-
 %prep
 %setup -n wxBase-%{ver}
+./configure --prefix=%{pref} --no-recursion --disable-gui --disable-std_iostreams
 
 %build
 if [ "$SMP" != "" ]; then
@@ -48,25 +44,10 @@ if [ "$SMP" != "" ]; then
 else
   export MAKE="make"
 fi
-
-(cd locale; make allmo)
-
-mkdir obj-shared
-cd obj-shared
-../configure --prefix=%{pref} --enable-soname --disable-gui --disable-std_iostreams
 $MAKE
-cd ..
-
-mkdir obj-static
-cd obj-static
-../configure --prefix=%{pref} --disable-shared --disable-gui --disable-std_iostreams
-$MAKE
-cd ..
 
 %install
-rm -rf $RPM_BUILD_ROOT
-(cd obj-static ; make prefix=$RPM_BUILD_ROOT%{pref} install)
-(cd obj-shared ; make prefix=$RPM_BUILD_ROOT%{pref} install)
+make prefix=$RPM_BUILD_ROOT%{pref} install
 
 %find_lang wxstd
 
@@ -79,37 +60,16 @@ rm -rf $RPM_BUILD_ROOT
 %postun
 /sbin/ldconfig
 
-%post devel
-# Install wx-config if there isn't any
-if test ! -f %{_bindir}/wx-config ; then
-    ln -sf wxbase-%{ver2}-config %{_bindir}/wx-config
-fi
-
-%preun devel
-# Remove wx-config if it points to this package
-if test -f %{_bindir}/wx-config -a -f /usr/bin/md5sum ; then
-  SUM1=`md5sum %{_bindir}/wxbase-%{ver2}-config | cut -c 0-32`
-  SUM2=`md5sum %{_bindir}/wx-config | cut -c 0-32`
-  if test "x$SUM1" = "x$SUM2" ; then
-    rm -f %{_bindir}/wx-config
-  fi
-fi
-
 %files -f wxstd.lang
-%defattr (-,root,root)
-%doc COPYING.LIB *.txt
-%{_libdir}/libwx_base*so.*
+%defattr (-, root, root)
+%doc COPYING.LIB LICENCE.txt README.txt SYMBOLS.txt
+%{pref}/lib/libwx_base*
 
 %files devel
-%defattr (-,root,root)
-%dir %{_includedir}/wx
-%{_includedir}/wx/*
-%{_libdir}/libwx_base*.so
-%dir %{_libdir}/wx
-%{_libdir}/wx/*
-%{_bindir}/wxbase-%{ver2}-config
-%{_datadir}/aclocal/*.m4
+%defattr (-, root, root)
+%dir %{pref}/include/wx
+%dir %{pref}/lib/wx
+%{pref}/lib/wx/*
+%{pref}/include/wx/*
+%{pref}/bin/wx*-config
 
-%files static
-%defattr (-,root,root)
-%{_libdir}/lib*.a

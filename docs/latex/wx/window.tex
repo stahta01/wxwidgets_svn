@@ -224,9 +224,6 @@ cause an erase background event to be generated.
 
 \constfunc{virtual void}{ClientToScreen}{\param{int* }{x}, \param{int* }{y}}
 
-\perlnote{In wxPerl this method returns a 2-element list intead of
-modifying its parameters.}
-
 \constfunc{virtual wxPoint}{ClientToScreen}{\param{const wxPoint\&}{ pt}}
 
 Converts to screen coordinates from coordinates relative to this window.
@@ -246,6 +243,7 @@ implements the following methods:\par
 \twocolitem{{\bf ClientToScreenXY(x, y)}}{Returns a 2-tuple, (x, y)}
 \end{twocollist}}
 }
+
 
 \membersection{wxWindow::Close}\label{wxwindowclose}
 
@@ -387,12 +385,6 @@ to the list of windows pending real deletion.
 
 Destroys all children of a window.  Called automatically by the destructor.
 
-\membersection{wxWindow::Disable}\label{wxwindowdisable}
-
-\func{void}{Disable}{\void}
-
-Disables the window, same as \helpref{Enable(FALSE)}{wxwindowenable}.
-
 \membersection{wxWindow::DragAcceptFiles}\label{wxwindowdragacceptfiles}
 
 \func{virtual void}{DragAcceptFiles}{\param{bool}{ accept}}
@@ -414,7 +406,7 @@ Windows only.
 
 \membersection{wxWindow::Enable}\label{wxwindowenable}
 
-\func{virtual void}{Enable}{\param{bool}{ enable = TRUE}}
+\func{virtual void}{Enable}{\param{bool}{ enable}}
 
 Enable or disable the window for user input.
 
@@ -424,8 +416,7 @@ Enable or disable the window for user input.
 
 \wxheading{See also}
 
-\helpref{wxWindow::IsEnabled}{wxwindowisenabled},\rtfsp
-\helpref{wxWindow::Disable}{wxwindowdisable}
+\helpref{wxWindow::IsEnabled}{wxwindowisenabled}
 
 \membersection{wxWindow::FindFocus}\label{wxwindowfindfocus}
 
@@ -465,20 +456,6 @@ implements the following methods:\par
 
 Sizes the window so that it fits around its subwindows. This function won't do
 anything if there are no subwindows.
-
-\membersection{wxWindow::Freeze}\label{wxwindowfreeze}
-
-\func{virtual void}{Freeze}{\void}
-
-Freezes the window or, in other words, prevents any updates from taking place
-on screen, the window is not redrawn at all. \helpref{Thaw}{wxwindowthaw} must
-be called to reenable window redrawing.
-
-This method is useful for visual appearance optimization (for example, it
-is a good idea to use it before inserting large amount of text into a
-wxTextCtrl under wxGTK) but is not implemented on all platforms nor for all
-controls so it is mostly just a hint to wxWindows and not a mandatory
-directive.
 
 \membersection{wxWindow::GetBackgroundColour}\label{wxwindowgetbackgroundcolour}
 
@@ -531,9 +508,6 @@ Returns a reference to the list of the window's children.
 \membersection{wxWindow::GetClientSize}\label{wxwindowgetclientsize}
 
 \constfunc{virtual void}{GetClientSize}{\param{int* }{width}, \param{int* }{height}}
-
-\perlnote{In wxPerl this method takes no parameter and returns
-a 2-element list {\tt ( width, height )}.}
 
 \constfunc{virtual wxSize}{GetClientSize}{\void}
 
@@ -626,7 +600,7 @@ be used at all.
 
 Returns the grandparent of a window, or NULL if there isn't one.
 
-\membersection{wxWindow::GetHandle}\label{wxwindowgethandle}
+\membersection{wxWindow::GetHandle}
 
 \constfunc{void*}{GetHandle}{\void}
 
@@ -634,19 +608,6 @@ Returns the platform-specific handle of the physical window. Cast it to an appro
 handle, such as {\bf HWND} for Windows, {\bf Widget} for Motif or {\bf GtkWidget} for GTK.
 
 \pythonnote{This method will return an integer in wxPython.}
-
-\membersection{wxWindow::GetHelpText}\label{wxwindowgethelptext}
-
-\constfunc{virtual wxString}{GetHelpText}{\void}
-
-Gets the help text to be used as context-sensitive help for this window.
-
-Note that the text is actually stored by the current \helpref{wxHelpProvider}{wxhelpprovider} implementation,
-and not in the window object itself.
-
-\wxheading{See also}
-
-\helpref{SetHelpText}{wxwindowsethelptext}, \helpref{wxHelpProvider}{wxhelpprovider}
 
 \membersection{wxWindow::GetId}\label{wxwindowgetid}
 
@@ -723,15 +684,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl there are two methods instead of a single overloaded
-method:\par
-\indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf GetPosition()}}{Returns a Wx::Point}
-\twocolitem{{\bf GetPositionXY()}}{Returns a 2-element list
- {\tt ( x, y )}}
-\end{twocollist}
-}}
-
 \membersection{wxWindow::GetRect}\label{wxwindowgetrect}
 
 \constfunc{virtual wxRect}{GetRect}{\void}
@@ -790,21 +742,7 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl there are two methods instead of a single overloaded
-method:\par
-\indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf GetSize()}}{Returns a Wx::Size}
-\twocolitem{{\bf GetSizeWH()}}{Returns a 2-element list
- {\tt ( width, height )}}
-\end{twocollist}
-}}
-
-\membersection{wxWindow::GetSizer}\label{wxwindowgetsizer}
-
-\constfunc{const wxSizer *}{GetSizer}{\void}
-
-Return the sizer associated with the window by a previous call to 
-\helpref{SetSizer()}{wxwindowsetsizer} or {\tt NULL}.
+\membersection{wxWindow::GetTextExtent}
 
 \constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{x}, \param{int* }{y},
  \param{int* }{descent = NULL}, \param{int* }{externalLeading = NULL},
@@ -839,9 +777,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl this method takes only the {\tt string} and optionally
- {\tt font} parameters, and returns a 4-element list
- {\tt ( x, y, descent, externalLeading )}.}
 
 \membersection{wxWindow::GetTitle}\label{wxwindowgettitle}
 
@@ -1078,9 +1013,6 @@ keypresses, then you will need to use \helpref{wxWindow::OnKeyDown}{wxwindowonke
 
 Most, but not all, windows allow keypresses to be intercepted.
 
-{\bf Tip:} be sure to call {\tt event.Skip()} for events that you don't process in this function,
-otherwise menu shortcuts may cease to work under Windows.
-
 \wxheading{See also}
 
 \helpref{wxWindow::OnKeyDown}{wxwindowonkeydown}, \helpref{wxWindow::OnKeyUp}{wxwindowonkeyup},\rtfsp
@@ -1118,10 +1050,8 @@ the window won't get the event.
 
 \wxheading{See also}
 
-\helpref{wxKeyEvent}{wxkeyevent},\rtfsp
-\helpref{wxWindow::OnCharHook}{wxwindowoncharhook},\rtfsp
-%% GD: OnXXX functions are not documented
-%%\helpref{wxApp::OnCharHook}{wxapponcharhook},\rtfsp
+\helpref{wxKeyEvent}{wxkeyevent}, \helpref{wxWindow::OnCharHook}{wxwindowoncharhook},\rtfsp
+\helpref{wxApp::OnCharHook}{wxapponcharhook},\rtfsp
 \helpref{Event handling overview}{eventhandlingoverview}
 
 \membersection{wxWindow::OnCommand}\label{wxwindowoncommand}
@@ -1209,9 +1139,8 @@ destroying the window if it returns TRUE or if the close is being forced.
 \helpref{wxWindow::OnClose}{wxwindowonclose},\rtfsp
 \helpref{wxWindow::Destroy}{wxwindowdestroy},\rtfsp
 \helpref{wxCloseEvent}{wxcloseevent},\rtfsp
-\helpref{wxApp::OnQueryEndSession}{wxapponqueryendsession}
-%% GD: OnXXX functions are not documented
-%%\helpref{wxApp::OnEndSession}{wxapponendsession}
+\helpref{wxApp::OnQueryEndSession}{wxapponqueryendsession},\rtfsp
+\helpref{wxApp::OnEndSession}{wxapponendsession}
 
 \membersection{wxWindow::OnDropFiles}\label{wxwindowondropfiles}
 
@@ -1284,9 +1213,6 @@ keys, such as shift, control, and function keys, then you will need to use \help
 
 Most, but not all, windows allow keypresses to be intercepted.
 
-{\bf Tip:} be sure to call {\tt event.Skip()} for events that you don't process in this function,
-otherwise menu shortcuts may cease to work under Windows.
-
 \wxheading{See also}
 
 \helpref{wxWindow::OnChar}{wxwindowonchar}, \helpref{wxWindow::OnKeyUp}{wxwindowonkeyup},\rtfsp
@@ -1352,9 +1278,7 @@ when the application is idle.
 
 \wxheading{See also}
 
-%% GD: OnXXX functions are not documented
-%%\helpref{wxApp::OnIdle}{wxapponidle}
-\helpref{wxIdleEvent}{wxidleevent}
+\helpref{wxApp::OnIdle}{wxapponidle}, \helpref{wxIdleEvent}{wxidleevent}
 
 \membersection{wxWindow::OnInitDialog}\label{wxwindowoninitdialog}
 
@@ -1487,6 +1411,8 @@ Sent to the event handler when the window must be refreshed.
 \docparam{event}{Paint event. For more information, see \helpref{wxPaintEvent}{wxpaintevent}.}
 
 \wxheading{Remarks}
+
+
 
 Use the EVT\_PAINT macro in an event table definition to intercept paint events.
 
@@ -1810,49 +1736,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\membersection{wxWindow::ScrollLines}\label{wxwindowscrolllines}
-
-\func{virtual bool}{ScrollLines}{\param{int }{lines}}
-
-Scrolls the window by the given number of lines down (if {\it lines} is
-positive) or up.
-
-\wxheading{Return value}
-
-Returns {\tt TRUE} if the window was scrolled, {\tt FALSE} if it was already
-on top/bottom and nothing was done.
-
-\wxheading{Remarks}
-
-This function is currently only implemented under MSW and wxTextCtrl under
-wxGTK (it also works for wxScrolledWindow derived classes under all
-platforms).
-
-\wxheading{See also}
-
-\helpref{ScrollPages}{wxwindowscrollpages}
-
-\membersection{wxWindow::ScrollPages}\label{wxwindowscrollpages}
-
-\func{virtual bool}{ScrollPages}{\param{int }{pages}}
-
-Scrolls the window by the given number of pages down (if {\it pages} is
-positive) or up.
-
-\wxheading{Return value}
-
-Returns {\tt TRUE} if the window was scrolled, {\tt FALSE} if it was already
-on top/bottom and nothing was done.
-
-\wxheading{Remarks}
-
-This function is currently only implemented under MSW and wxTextCtrl under
-wxGTK (it also works for wxScrolledWindow derived classes under all
-platforms).
-
-\wxheading{See also}
-
-\helpref{ScrollLines}{wxwindowscrolllines}
 
 \membersection{wxWindow::ScrollWindow}\label{wxwindowscrollwindow}
 
@@ -1886,10 +1769,9 @@ Sets the accelerator table for this window. See \helpref{wxAcceleratorTable}{wxa
 \func{void}{SetAutoLayout}{\param{bool}{ autoLayout}}
 
 Determines whether the \helpref{wxWindow::Layout}{wxwindowlayout} function will
-be called automatically when the window is resized. Use in connection with 
-\helpref{wxWindow::SetSizer}{wxwindowsetsizer} and 
-\helpref{wxWindow::SetConstraints}{wxwindowsetconstraints} for laying out
-subwindows.
+be called automatically when the window is resized. Use in connection with
+\helpref{wxWindow::SetSizer}{wxwindowsetsizer} and
+\helpref{wxWindow::SetConstraints}{wxwindowsetconstraints} for laying out subwindows.
 
 \wxheading{Parameters}
 
@@ -2062,16 +1944,6 @@ bits are:
 \twocolitem{\windowstyle{wxWS\_EX\_VALIDATE\_RECURSIVELY}}{TransferDataTo/FromWindow()
 and Validate() methods will recursively descend into all children of the
 window if it has this style flag set.}
-\twocolitem{\windowstyle{wxWS\_EX\_BLOCK\_EVENTS}}{Normally, the command
-events are propagared upwards to the window parent recursively until a handler
-for them is found. Using this style allows to prevent them from being
-propagated beyond this window. Notice that wxDialog has this style on by
-default for the reasons explained in the 
-\helpref{event processing overview}{eventprocessing}.}
-\twocolitem{\windowstyle{wxWS\_EX\_TRANSIENT}}{This can be used to prevent a
-window from being used as an implicit parent for the dialogs which were
-created without a parent. It is useful for the windows which can disappear at
-any moment as creating childs of such windows results in fatal problems.}
 \end{twocollist}
 
 \membersection{wxWindow::SetFocus}\label{wxwindowsetfocus}
@@ -2119,19 +1991,6 @@ their parent windows.
 \helpref{wxWindow::GetForegroundColour}{wxwindowgetforegroundcolour},\rtfsp
 \helpref{wxWindow::SetBackgroundColour}{wxwindowsetbackgroundcolour},\rtfsp
 \helpref{wxWindow::GetBackgroundColour}{wxwindowgetbackgroundcolour}
-
-\membersection{wxWindow::SetHelpText}\label{wxwindowsethelptext}
-
-\func{virtual void}{SetHelpText}{\param{const wxString\& }{helpText}}
-
-Sets the help text to be used as context-sensitive help for this window.
-
-Note that the text is actually stored by the current \helpref{wxHelpProvider}{wxhelpprovider} implementation,
-and not in the window object itself.
-
-\wxheading{See also}
-
-\helpref{GetHelpText}{wxwindowgethelptext}, \helpref{wxHelpProvider}{wxhelpprovider}
 
 \membersection{wxWindow::SetId}\label{wxwindowsetid}
 
@@ -2501,24 +2360,16 @@ See \helpref{Window styles}{windowstyles} for more information about flags.
 
 \func{virtual bool}{Show}{\param{bool}{ show}}
 
-Shows or hides the window. You may need to call \helpref{Raise}{wxwindowraise} 
-for a top level window if you want to bring it to top, although this is not
-needed if Show() is called immediately after the frame creation.
+Shows or hides the window.
 
 \wxheading{Parameters}
 
-\docparam{show}{If TRUE displays the window. Otherwise, hides it.}
+\docparam{show}{If TRUE, displays the window and brings it to the front. Otherwise,
+hides the window.}
 
 \wxheading{See also}
 
 \helpref{wxWindow::IsShown}{wxwindowisshown}
-
-\membersection{wxWindow::Thaw}\label{wxwindowthaw}
-
-\func{virtual void}{Thaw}{\void}
-
-Reenables window updating after a previous call to 
-\helpref{Freeze}{wxwindowfreeze}.
 
 \membersection{wxWindow::TransferDataFromWindow}\label{wxwindowtransferdatafromwindow}
 

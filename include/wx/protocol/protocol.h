@@ -18,8 +18,6 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_PROTOCOL
-
 #include "wx/object.h"
 #include "wx/string.h"
 #include "wx/stream.h"
@@ -128,7 +126,5 @@ protected:
 
     DECLARE_DYNAMIC_CLASS(wxProtoInfo)
 };
-
-#endif // wxUSE_PROTOCOL
 
 #endif // _WX_PROTOCOL_PROTOCOL_H

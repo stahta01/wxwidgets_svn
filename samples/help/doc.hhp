@@ -1,18 +1,15 @@
 [OPTIONS]
-Compatibility=1.1 or later
-Compiled file=doc.chm
+Compatibility=1.1
+Full-text search=Yes
 Contents file=doc.hhc
+Compiled file=doc.chm
 Default Window=docHelp
 Default topic=doc.htm
-Display compile progress=No
-Full-text search=Yes
 Index file=doc.hhk
-Language=0x809 English (United Kingdom)
 Title=Help Demo
 
 [WINDOWS]
-docHelp=,"doc.hhc","doc.hhk","doc.htm",,,,,,0x2420,,0x380e,,,,,0,,,0
-
+docHelp=,"doc.hhc","doc.hhk","doc.htm",,,,,,0x2420,,0x380e,,,,,0,,,
 
 [FILES]
 doc.htm
@@ -23,11 +20,8 @@ doc4.htm
 doc5.htm
 
 [MAP]
-#include doc.h
-
-[TEXT POPUPS]
-doc.h
-cshelp.txt
-
-[INFOTYPES]
+#define doc1       100
+#define doc3       1
+#define doc2       2
+#define doc4       3
 

@@ -21,16 +21,16 @@ if wxPlatform == '__WXMSW__':
               'mono' : 'Courier New',
               'helv' : 'Arial',
               'other': 'Comic Sans MS',
-              'size' : 10,
-              'size2': 8,
+              'size' : 8,
+              'size2': 6,
              }
 else:
     faces = { 'times': 'Times',
               'mono' : 'Courier',
               'helv' : 'Helvetica',
               'other': 'new century schoolbook',
-              'size' : 13,
-              'size2': 11,
+              'size' : 11,
+              'size2': 9,
              }
 
 
@@ -39,9 +39,6 @@ else:
 class PythonSTC(wxStyledTextCtrl):
     def __init__(self, parent, ID):
         wxStyledTextCtrl.__init__(self, parent, ID)
-
-        self.CmdKeyAssign(ord('B'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMIN)
-        self.CmdKeyAssign(ord('N'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMOUT)
 
         self.SetLexer(wxSTC_LEX_PYTHON)
         self.SetKeyWords(0, string.join(keyword.kwlist))
@@ -85,38 +82,38 @@ class PythonSTC(wxStyledTextCtrl):
 
         # Python styles
         # White space
-        self.StyleSetSpec(wxSTC_P_DEFAULT, "fore:#808080,face:%(helv)s,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_DEFAULT, "fore:#808080")
         # Comment
-        self.StyleSetSpec(wxSTC_P_COMMENTLINE, "fore:#007F00,face:%(other)s,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_COMMENTLINE, "fore:#007F00,face:%(other)s" % faces)
         # Number
-        self.StyleSetSpec(wxSTC_P_NUMBER, "fore:#007F7F,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_NUMBER, "fore:#007F7F")
         # String
-        self.StyleSetSpec(wxSTC_P_STRING, "fore:#7F007F,italic,face:%(times)s,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_STRING, "fore:#7F007F,italic,face:%(times)s" % faces)
         # Single quoted string
-        self.StyleSetSpec(wxSTC_P_CHARACTER, "fore:#7F007F,italic,face:%(times)s,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_CHARACTER, "fore:#7F007F,italic,face:%(times)s" % faces)
         # Keyword
-        self.StyleSetSpec(wxSTC_P_WORD, "fore:#00007F,bold,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_WORD, "fore:#00007F,bold")
         # Triple quotes
-        self.StyleSetSpec(wxSTC_P_TRIPLE, "fore:#7F0000,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_TRIPLE, "fore:#7F0000")
         # Triple double quotes
-        self.StyleSetSpec(wxSTC_P_TRIPLEDOUBLE, "fore:#7F0000,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_TRIPLEDOUBLE, "fore:#7F0000")
         # Class name definition
-        self.StyleSetSpec(wxSTC_P_CLASSNAME, "fore:#0000FF,bold,underline,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_CLASSNAME, "fore:#0000FF,bold,underline")
         # Function or method name definition
-        self.StyleSetSpec(wxSTC_P_DEFNAME, "fore:#007F7F,bold,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_DEFNAME, "fore:#007F7F,bold")
         # Operators
-        self.StyleSetSpec(wxSTC_P_OPERATOR, "bold,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_OPERATOR, "bold")
         # Identifiers
-        self.StyleSetSpec(wxSTC_P_IDENTIFIER, "fore:#808080,face:%(helv)s,size:%(size)d" % faces)
+        #self.StyleSetSpec(wxSTC_P_IDENTIFIER, "bold")#,fore:#FF00FF")
         # Comment-blocks
-        self.StyleSetSpec(wxSTC_P_COMMENTBLOCK, "fore:#7F7F7F,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_COMMENTBLOCK, "fore:#7F7F7F")
         # End of line where string is not closed
-        self.StyleSetSpec(wxSTC_P_STRINGEOL, "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d" % faces)
+        self.StyleSetSpec(wxSTC_P_STRINGEOL, "fore:#000000,face:%(mono)s,back:#E0C0E0,eolfilled" % faces)
 
 
         self.SetCaretForeground("BLUE")
 
-        EVT_KEY_DOWN(self, self.OnKeyPressed)
+        EVT_KEY_UP(self, self.OnKeyPressed)
 
 
     def OnKeyPressed(self, event):
@@ -135,20 +132,9 @@ class PythonSTC(wxStyledTextCtrl):
                 #st = string.join(lst)
                 #print len(st)
                 #self.AutoCompShow(0, st)
-
-                kw = keyword.kwlist[:]
-                kw.append("zzzzzz")
-                kw.append("aaaaa")
-                kw.append("__init__")
-                kw.append("zzaaaaa")
-                kw.append("zzbaaaa")
-                kw.append("this_is_a_longer_value")
-                kw.append("this_is_a_much_much_much_much_much_much_much_longer_value")
-
-                kw.sort()  # Python sorts are case sensitive
-                self.AutoCompSetIgnoreCase(false)  # so this needs to match
-
-                self.AutoCompShow(0, string.join(kw))
+                self.AutoCompSetIgnoreCase(true)
+                self.AutoCompShow(0, string.join(keyword.kwlist))
+                self.AutoCompSelect('br')
         else:
             event.Skip()
 
@@ -276,29 +262,18 @@ class PythonSTC(wxStyledTextCtrl):
 
 #----------------------------------------------------------------------
 
-_USE_PANEL = 1
-
 def runTest(frame, nb, log):
-    if not _USE_PANEL:
-        ed = p = PythonSTC(nb, -1)
-    else:
-        p = wxPanel(nb, -1)
-        ed = PythonSTC(p, -1)
-        s = wxBoxSizer(wxHORIZONTAL)
-        s.Add(ed, 1, wxEXPAND)
-        p.SetSizer(s)
-        p.SetAutoLayout(true)
-
+    ed = PythonSTC(nb, -1)
 
     ed.SetText(demoText + open('Main.py').read())
     ed.EmptyUndoBuffer()
-    ed.Colourise(0, -1)
+
 
     # line numbers in the margin
     ed.SetMarginType(1, wxSTC_MARGIN_NUMBER)
     ed.SetMarginWidth(1, 25)
 
-    return p
+    return ed
 
 
 
@@ -307,7 +282,7 @@ def runTest(frame, nb, log):
 
 overview = """\
 <html><body>
-Once again, no docs yet.  <b>Sorry.</b>  But <a href="data/stc.h.html">this</a>
+Once again, no docs yet.  <b>Sorry.</b>  But <a href="data/stc.h">this</a>
 and <a href="http://www.scintilla.org/ScintillaDoc.html">this</a> should
 be helpful.
 </body><html>

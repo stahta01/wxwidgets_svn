@@ -119,6 +119,9 @@ class wxpTagHandler(wxHtmlWinTagHandler):
 
 
     def HandleWxpTag(self, tag):
+        if tag.IsEnding():
+            return false
+
         # create a new context object
         self.ctx = _Context()
 
@@ -140,6 +143,8 @@ class wxpTagHandler(wxHtmlWinTagHandler):
         if type(self.ctx.classObj) != types.ClassType:
             raise TypeError, "WXP tag attribute CLASS must name a class"
 
+
+
         # now look for width and height
         width = -1
         height = -1
@@ -154,7 +159,7 @@ class wxpTagHandler(wxHtmlWinTagHandler):
             height = string.atoi(tag.GetParam('HEIGHT'))
         self.ctx.kwargs['size'] = wxSize(width, height)
 
-        # parse up to the closing tag, and gather any nested Param tags.
+
         self.ParseInner(tag)
 
         # create the object
@@ -172,7 +177,12 @@ class wxpTagHandler(wxHtmlWinTagHandler):
         return true
 
 
+
+
     def HandleParamTag(self, tag):
+        if tag.IsEnding():
+            return false
+
         if not tag.HasParam('NAME'):
             return false
 

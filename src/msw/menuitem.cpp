@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_MENUS
-
 #ifndef WX_PRECOMP
     #include "wx/font.h"
     #include "wx/bitmap.h"
@@ -72,11 +70,11 @@
 // dynamic classes implementation
 // ----------------------------------------------------------------------------
 
-#if wxUSE_OWNER_DRAWN
-    IMPLEMENT_DYNAMIC_CLASS2(wxMenuItem, wxMenuItemBase, wxOwnerDrawn)
-#else   //!USE_OWNER_DRAWN
-    IMPLEMENT_DYNAMIC_CLASS(wxMenuItem, wxMenuItemBase)
-#endif  //USE_OWNER_DRAWN
+    #if wxUSE_OWNER_DRAWN
+        IMPLEMENT_DYNAMIC_CLASS2(wxMenuItem, wxMenuItemBase, wxOwnerDrawn)
+    #else   //!USE_OWNER_DRAWN
+        IMPLEMENT_DYNAMIC_CLASS(wxMenuItem, wxMenuItemBase)
+    #endif  //USE_OWNER_DRAWN
 
 // ----------------------------------------------------------------------------
 // wxMenuItem
@@ -92,7 +90,7 @@ wxMenuItem::wxMenuItem(wxMenu *pParentMenu,
                        bool bCheckable,
                        wxMenu *pSubMenu)
 #if wxUSE_OWNER_DRAWN
-                       : wxOwnerDrawn(GetLabelFromText(text), bCheckable)
+                       : wxOwnerDrawn(text, bCheckable)
 #endif // owner drawn
 {
     wxASSERT_MSG( pParentMenu != NULL, wxT("a menu item should have a parent") );
@@ -104,13 +102,10 @@ wxMenuItem::wxMenuItem(wxMenu *pParentMenu,
     SetTextColour(SYS_COLOR(MENUTEXT));
     SetBackgroundColour(SYS_COLOR(MENU));
 
-    #undef  SYS_COLOR
-
     // we don't want normal items be owner-drawn
     ResetOwnerDrawn();
 
-    // tell the owner drawing code to to show the accel string as well
-    SetAccelString(text.AfterFirst(_T('\t')));
+    #undef  SYS_COLOR
 #endif // wxUSE_OWNER_DRAWN
 
     m_parentMenu  = pParentMenu;
@@ -151,6 +146,18 @@ wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }
+
+// accelerators
+// ------------
+
+#if wxUSE_ACCEL
+
+wxAcceleratorEntry *wxMenuItem::GetAccel() const
+{
+    return wxGetAccelFromString(GetText());
+}
+
+#endif // wxUSE_ACCEL
 
 // change item state
 // -----------------
@@ -265,5 +272,3 @@ wxMenuItem *wxMenuItemBase::New(wxMenu *parentMenu,
 {
     return new wxMenuItem(parentMenu, id, name, help, isCheckable, subMenu);
 }
-
-#endif // wxUSE_MENUS

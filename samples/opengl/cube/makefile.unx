@@ -9,13 +9,9 @@
 #
 # Makefile for cube example (UNIX).
 
-OPENGL_LIBS=-lGL -lGLU
-#if you have old Mesa, try this:
-#OPENGL_LIBS=-lMesaGL -lMesaGLU
-
 PROGRAM=cube
 
-CXX = $(shell wx-config --cxx)
+CC = gcc
 
 OBJECTS = $(PROGRAM).o
 
@@ -24,12 +20,12 @@ OBJECTS = $(PROGRAM).o
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
-	$(CXX) -c `wx-config --cxxflags` -o $@ $<
+	$(CC) -c `wx-config --cflags` -o $@ $<
 
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) `wx-config --libs` -lwx_gtk_gl $(OPENGL_LIBS)
+	$(CC) -o $(PROGRAM) $(OBJECTS) `wx-config --libs` -lwx_gtk_gl -lMesaGL -lMesaGLU
 
 clean: 
 	rm -f *.o $(PROGRAM)

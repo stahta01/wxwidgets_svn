@@ -100,9 +100,8 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
 {
-  wxString f = wxFileSelector( wxT("Save Image"), (const wxChar *)NULL,
-                               (const wxChar *)NULL,
-                               wxT("png"), wxT("PNG files (*.png)|*.png") );
+  wxString f = wxFileSelector( "Save Image", (const char *)NULL, (const char *)NULL,
+                            "png", "PNG files (*.png)|*.png" );
 
   if (f == "")  return;
   
@@ -129,9 +128,8 @@ void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnLoadFile(wxCommandEvent& WXUNUSED(event))
 {
 	// Show file selector.
-	wxString f = wxFileSelector(wxT("Open Image"), (const wxChar *) NULL,
-                                    (const wxChar *) NULL, wxT("png"),
-                                    wxT("PNG files (*.png)|*.png"));
+	wxString f = wxFileSelector("Open Image", (const char *) NULL, (const char *) NULL,"png",
+		  "PNG files (*.png)|*.png");
 
 	if (f == "")
 	  return;

@@ -26,88 +26,49 @@
 
 #include "wx/font.h"        // for wxFont and wxFontEncoding
 
-#if defined(__WXMSW__)
-    #include <windows.h>
-    #include "wx/msw/winundef.h"
+// for our purposes here, GDK and X are identical
+#if defined(__WXGTK__) || defined(__X__)
+    #define _WX_X_FONTLIKE
 #endif
 
 // ----------------------------------------------------------------------------
 // types
 // ----------------------------------------------------------------------------
 
-// wxNativeFontInfo is platform-specific font representation: this struct
-// should be considered as opaque font description only used by the native
-// functions, the user code can only get the objects of this type from
-// somewhere and pass it somewhere else (possibly save them somewhere using
-// ToString() and restore them using FromString())
+// This private structure specifies all the parameters needed to create a font
+// with the given encoding on this platform.
 //
-// NB: it is a POD currently for max efficiency but if it continues to grow
-//     further it might make sense to make it a real class with virtual methods
-struct WXDLLEXPORT wxNativeFontInfo
+// Under X, it contains the last 2 elements of the font specifications
+// (registry and encoding).
+//
+// Under Windows, it contains a number which is one of predefined CHARSET_XXX
+// values.
+//
+// Under all platforms it also contains a facename string which should be
+// used, if not empty, to create fonts in this encoding (this is the only way
+// to create a font of non-standard encoding (like KOI8) under Windows - the
+// facename specifies the encoding then)
+
+struct WXDLLEXPORT wxNativeEncodingInfo
 {
-#if defined(__WXGTK__) || defined(__WXMOTIF__)
-    // the components of the XLFD
-    wxString     fontElements[14];
+    wxString facename;          // may be empty meaning "any"
+    wxFontEncoding encoding;    // so that we know what this struct represents
 
-    // the full XLFD
-    wxString     xFontName;
+#if defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMAC__)
+    wxNativeEncodingInfo() { charset = 0; /* ANSI_CHARSET */ }
 
-    // init the elements from an XLFD, return TRUE if ok
-    bool FromXFontName(const wxString& xFontName);
+    int      charset;
+#elif defined(_WX_X_FONTLIKE)
+    wxString xregistry,
+             xencoding;
+#else
+    #error "Unsupported toolkit"
+#endif
 
-    // generate an XLFD using the fontElements
-    wxString GetXFontName() const;
-#elif defined(__WXMSW__)
-    LOGFONT      lf;
-#else // other platforms
-    //
-    //  This is a generic implementation that should work on all ports
-    //  without specific support by the port.
-    //
-    #define wxNO_NATIVE_FONTINFO
-
-    int           pointSize;
-    wxFontFamily  family;
-    wxFontStyle   style;
-    wxFontWeight  weight;
-    bool          underlined;
-    wxString      faceName;
-    wxFontEncoding encoding;
-#endif // platforms
-
-    // default ctor (default copy ctor is ok)
-    wxNativeFontInfo() { Init(); }
-
-    // reset to the default state
-    void Init();
-
-    // accessors and modifiers for the font elements
-    int GetPointSize() const;
-    wxFontStyle GetStyle() const;
-    wxFontWeight GetWeight() const;
-    bool GetUnderlined() const;
-    wxString GetFaceName() const;
-    wxFontFamily GetFamily() const;
-    wxFontEncoding GetEncoding() const;
-
-    void SetPointSize(int pointsize);
-    void SetStyle(wxFontStyle style);
-    void SetWeight(wxFontWeight weight);
-    void SetUnderlined(bool underlined);
-    void SetFaceName(wxString facename);
-    void SetFamily(wxFontFamily family);
-    void SetEncoding(wxFontEncoding encoding);
-
-    // it is important to be able to serialize wxNativeFontInfo objects to be
-    // able to store them (in config file, for example)
+    // this struct is saved in config by wxFontMapper, so it should know to
+    // serialise itself (implemented in platform-specific code)
     bool FromString(const wxString& s);
     wxString ToString() const;
-
-    // we also want to present the native font descriptions to the user in some
-    // human-readable form (it is not platform independent neither, but can
-    // hopefully be understood by the user)
-    bool FromUserString(const wxString& s);
-    wxString ToUserString() const;
 };
 
 // ----------------------------------------------------------------------------
@@ -131,13 +92,5 @@ extern bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
 #ifdef _WX_X_FONTLIKE
     #include "wx/unix/fontutil.h"
 #endif // X || GDK
-
-// ----------------------------------------------------------------------------
-// font-related functions (MGL)
-// ----------------------------------------------------------------------------
-
-#ifdef __WXMGL__
-    #include "wx/mgl/fontutil.h"
-#endif // __WXMGL__
 
 #endif // _WX_FONTUTIL_H_

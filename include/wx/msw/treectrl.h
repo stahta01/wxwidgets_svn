@@ -20,11 +20,8 @@
     #pragma interface "treectrl.h"
 #endif
 
-#if wxUSE_TREECTRL
-
 #include "wx/textctrl.h"
 #include "wx/dynarray.h"
-#include "wx/treebase.h"
 
 #ifdef __GNUWIN32__
     // Cygwin windows.h defines these identifiers
@@ -60,6 +57,68 @@ enum
 // flags for deprecated InsertItem() variant
 #define wxTREE_INSERT_FIRST 0xFFFF0001
 #define wxTREE_INSERT_LAST  0xFFFF0002
+
+// ----------------------------------------------------------------------------
+// wxTreeItemId identifies an element of the tree. In this implementation, it's
+// just a trivial wrapper around Win32 HTREEITEM. It's opaque for the
+// application.
+// ----------------------------------------------------------------------------
+class WXDLLEXPORT wxTreeItemId
+{
+public:
+    // ctors
+        // 0 is invalid value for HTREEITEM
+    wxTreeItemId() { m_itemId = 0; }
+
+        // default copy ctor/assignment operator are ok for us
+
+    // accessors
+        // is this a valid tree item?
+    bool IsOk() const { return m_itemId != 0; }
+
+    // conversion to/from either real (system-dependent) tree item id or
+    // to "long" which used to be the type for tree item ids in previous
+    // versions of wxWindows
+
+    // for wxTreeCtrl usage only
+    wxTreeItemId(WXHTREEITEM itemId) { m_itemId = (long)itemId; }
+    operator WXHTREEITEM() const { return (WXHTREEITEM)m_itemId; }
+
+    void operator=(WXHTREEITEM item) { m_itemId = (long) item; }
+
+protected:
+    long m_itemId;
+};
+
+WX_DEFINE_EXPORTED_ARRAY(WXHTREEITEM, wxArrayTreeItemIds);
+
+// ----------------------------------------------------------------------------
+// wxTreeItemData is some (arbitrary) user class associated with some item. The
+// main advantage of having this class (compared to old untyped interface) is
+// that wxTreeItemData's are destroyed automatically by the tree and, as this
+// class has virtual dtor, it means that the memory will be automatically
+// freed. OTOH, we don't just use wxObject instead of wxTreeItemData because
+// the size of this class is critical: in any real application, each tree leaf
+// will have wxTreeItemData associated with it and number of leaves may be
+// quite big.
+//
+// Because the objects of this class are deleted by the tree, they should
+// always be allocated on the heap!
+// ----------------------------------------------------------------------------
+class WXDLLEXPORT wxTreeItemData : private wxTreeItemId
+{
+public:
+    // default ctor/copy ctor/assignment operator are ok
+
+    // dtor is virtual and all the items are deleted by the tree control when
+    // it's deleted, so you normally don't have to care about freeing memory
+    // allocated in your wxTreeItemData-derived class
+    virtual ~wxTreeItemData() { }
+
+    // accessors: set/get the item associated with this node
+    void SetId(const wxTreeItemId& id) { m_itemId = id; }
+    const wxTreeItemId GetId() const { return *this; }
+};
 
 // ----------------------------------------------------------------------------
 // wxTreeCtrl
@@ -122,8 +181,6 @@ public:
 
     void SetImageList(wxImageList *imageList);
     void SetStateImageList(wxImageList *imageList);
-    void AssignImageList(wxImageList *imageList);
-    void AssignStateImageList(wxImageList *imageList);
 
     // Functions to work with tree ctrl items. Unfortunately, they can _not_ be
     // member functions of wxTreeItem because they must know the tree the item
@@ -400,13 +457,9 @@ protected:
     // SetImageList helper
     void SetAnyImageList(wxImageList *imageList, int which);
 
-    // refresh a single item
-    void RefreshItem(const wxTreeItemId& item);
-
     wxTextCtrl  *m_textCtrl;        // used while editing the item label
     wxImageList *m_imageListNormal, // images for tree elements
                 *m_imageListState;  // special images for app defined states
-    bool         m_ownsImageListNormal, m_ownsImageListState;
 
 private:
     // the common part of all ctors
@@ -433,13 +486,14 @@ private:
 
     void DeleteTextCtrl();
 
-    // support for additional item images which we implement using
-    // wxTreeItemIndirectData technique - see the comments in msw/treectrl.cpp
+    // support for additional item images
+    friend class wxTreeItemIndirectData;
     void SetIndirectItemData(const wxTreeItemId& item,
-                             class wxTreeItemIndirectData *data);
+                             wxTreeItemIndirectData *data);
     bool HasIndirectData(const wxTreeItemId& item) const;
-    bool IsDataIndirect(wxTreeItemData *data) const
-        { return data && data->GetId().m_pItem == 0; }
+
+    // the array storing all item ids which have indirect data
+    wxArrayTreeItemIds m_itemsWithIndirectData;
 
     // the hash storing the items attributes (indexed by items ids)
     wxHashTable m_attrs;
@@ -453,13 +507,8 @@ private:
     // the starting item for selection with Shift
     WXHTREEITEM m_htSelStart;
 
-    friend class wxTreeItemIndirectData;
-    friend class wxTreeSortHelper;
-
     DECLARE_DYNAMIC_CLASS(wxTreeCtrl)
 };
-
-#endif // wxUSE_TREECTRL
 
 #endif
     // _WX_TREECTRL_H_

@@ -20,7 +20,7 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_IMAGE && wxUSE_LIBTIFF
+#if wxUSE_LIBTIFF
 
 #include "wx/imagtiff.h"
 #include "wx/bitmap.h"
@@ -37,25 +37,21 @@ extern "C"
 #include "wx/intl.h"
 #include "wx/module.h"
 
-#ifndef TIFFLINKAGEMODE
-  #define TIFFLINKAGEMODE LINKAGEMODE
-#endif
-
 //-----------------------------------------------------------------------------
 // wxTIFFHandler
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxTIFFHandler,wxImageHandler)
 
-static tsize_t TIFFLINKAGEMODE
+static tsize_t
 _tiffNullProc(thandle_t WXUNUSED(handle),
-          tdata_t WXUNUSED(buf),
-          tsize_t WXUNUSED(size))
+	      tdata_t WXUNUSED(buf),
+	      tsize_t WXUNUSED(size))
 {
     return (tsize_t) -1;
 }
 
-static tsize_t TIFFLINKAGEMODE
+static tsize_t
 _tiffReadProc(thandle_t handle, tdata_t buf, tsize_t size)
 {
     wxInputStream *stream = (wxInputStream*) handle;
@@ -63,7 +59,7 @@ _tiffReadProc(thandle_t handle, tdata_t buf, tsize_t size)
     return stream->LastRead();
 }
 
-static tsize_t TIFFLINKAGEMODE
+static tsize_t
 _tiffWriteProc(thandle_t handle, tdata_t buf, tsize_t size)
 {
     wxOutputStream *stream = (wxOutputStream*) handle;
@@ -71,7 +67,7 @@ _tiffWriteProc(thandle_t handle, tdata_t buf, tsize_t size)
     return stream->LastWrite();
 }
 
-static toff_t TIFFLINKAGEMODE
+static toff_t
 _tiffSeekIProc(thandle_t handle, toff_t off, int whence)
 {
     wxInputStream *stream = (wxInputStream*) handle;
@@ -87,7 +83,7 @@ _tiffSeekIProc(thandle_t handle, toff_t off, int whence)
     return (toff_t)stream->SeekI( (off_t)off, mode );
 }
 
-static toff_t TIFFLINKAGEMODE
+static toff_t
 _tiffSeekOProc(thandle_t handle, toff_t off, int whence)
 {
     wxOutputStream *stream = (wxOutputStream*) handle;
@@ -103,20 +99,20 @@ _tiffSeekOProc(thandle_t handle, toff_t off, int whence)
     return (toff_t)stream->SeekO( (off_t)off, mode );
 }
 
-static int TIFFLINKAGEMODE
+static int
 _tiffCloseProc(thandle_t WXUNUSED(handle))
 {
     return 0;  // ?
 }
 
-static toff_t TIFFLINKAGEMODE
+static toff_t
 _tiffSizeProc(thandle_t handle)
 {
     wxStreamBase *stream = (wxStreamBase*) handle;
     return (toff_t) stream->GetSize();
 }
 
-static int TIFFLINKAGEMODE
+static int
 _tiffMapProc(thandle_t WXUNUSED(handle),
              tdata_t* WXUNUSED(pbase),
              toff_t* WXUNUSED(psize))
@@ -124,7 +120,7 @@ _tiffMapProc(thandle_t WXUNUSED(handle),
     return 0;
 }
 
-static void TIFFLINKAGEMODE
+static void
 _tiffUnmapProc(thandle_t WXUNUSED(handle),
                tdata_t WXUNUSED(base),
                toff_t WXUNUSED(size))
@@ -157,9 +153,6 @@ TIFFwxOpen(wxOutputStream &stream, const char* name, const char* mode)
 
 bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose, int index )
 {
-    if (index == -1)
-        index = 0;
-
     image->Destroy();
 
     TIFF *tif = TIFFwxOpen( stream, "image", "r" );
@@ -197,7 +190,7 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     {
         if (verbose)
             wxLogError( _("TIFF: Couldn't allocate memory.") );
-
+            
         TIFFClose( tif );
 
         return FALSE;
@@ -308,11 +301,11 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
     TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-
+    
     tsize_t linebytes = (tsize_t)image->GetWidth() * 3;
     unsigned char *buf;
-
-    if (TIFFScanlineSize(tif) > linebytes)
+    
+    if (TIFFScanlineSize(tif) > linebytes) 
     {
         buf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(tif));
         if (!buf)
@@ -324,30 +317,30 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
 
             return FALSE;
         }
-    }
-    else
+    } 
+    else 
     {
         buf = NULL;
     }
 
     TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP,
         TIFFDefaultStripSize(tif, (uint32) -1));
-
+        
     unsigned char *ptr = image->GetData();
-    for (int row = 0; row < image->GetHeight(); row++)
+    for (int row = 0; row < image->GetHeight(); row++) 
     {
-        if (buf)
-            memcpy(buf, ptr, image->GetWidth());
-
-        if (TIFFWriteScanline(tif, buf ? buf : ptr, (uint32)row, 0) < 0)
+	    if (buf)
+	        memcpy(buf, ptr, image->GetWidth());
+        
+	    if (TIFFWriteScanline(tif, buf ? buf : ptr, (uint32)row, 0) < 0)
         {
-            if (verbose)
-                wxLogError( _("TIFF: Error writing image.") );
-
+	        if (verbose)
+	            wxLogError( _("TIFF: Error writing image.") );
+        
             TIFFClose( tif );
             if (buf)
                 _TIFFfree(buf);
-
+                
             return FALSE;
         }
         ptr += image->GetWidth()*3;

@@ -74,6 +74,12 @@ public:
 #endif // wxUSE_MENU_CALLBACK
 
     //
+    // OS2-specific
+    //
+    bool ProcessCommand(wxCommandEvent& rEvent);
+
+
+    //
     // Implementation only from now on
     // -------------------------------
     //
@@ -95,6 +101,12 @@ public:
     //
     WXHMENU GetHMenu() const { return m_hMenu; }
 
+    //
+    // Attach/detach menu to/from wxMenuBar
+    //
+    void Attach(wxMenuBar* pMenubar);
+    void Detach(void);
+
 #if wxUSE_ACCEL
     //
     // Called by wxMenuBar to build its accel table from the accels of all menus
@@ -113,15 +125,6 @@ public:
     //
     int FindAccel(int nId) const;
 #endif // wxUSE_ACCEL
-    //
-    // OS/2 specific Find
-    //
-    wxMenuItem* FindItem(int id, ULONG hItem, wxMenu **menu = NULL) const;
-    //virtual function hiding suppression
-    int FindItem(const wxString& rsString) const
-    { return wxMenuBase::FindItem(rsString); }
-    wxMenuItem* FindItem(int id, wxMenu **menu = NULL) const
-    { return wxMenuBase::FindItem(id, menu); }
 
     //
     // All OS/2PM Menu's have one of these
@@ -154,7 +157,7 @@ private:
     //
     // The helper variable for creating unique IDs.
     //
-    static USHORT		            m_nextMenuId;
+    static USHORT		    m_nextMenuId;
 
 #if wxUSE_ACCEL
     //
@@ -216,10 +219,7 @@ public:
     virtual wxMenuItem* FindItem( int      nId
                                  ,wxMenu** ppMenu = NULL
                                 ) const;
-    virtual wxMenuItem* FindItem( int      nId
-                                 ,ULONG    hItem
-                                 ,wxMenu** ppMenu = NULL
-                                ) const;
+
     virtual void        EnableTop( size_t nPos
                                   ,bool   bFlag
                                  );
@@ -242,8 +242,22 @@ public:
     // Implementation from now on
     //
     WXHMENU                   Create(void);
-    virtual void              Detach(void);
-    virtual void              Attach(wxFrame* pFrame);
+    void                      Detach(void);
+
+    //
+    // Returns TRUE if we're attached to a frame
+    //
+    bool                      IsAttached(void) const { return m_pMenuBarFrame != NULL; }
+
+    //
+    // Get the frame we live in
+    //
+    wxFrame *                 GetFrame(void) const { return m_pMenuBarFrame; }
+
+    //
+    // Attach to a frame
+    //
+    void                      Attach(wxFrame* pFrame);
 
 #if wxUSE_ACCEL
     //
@@ -279,6 +293,7 @@ protected:
 
     wxArrayString m_titles;
 
+    wxFrame*                        m_pMenuBarFrame;
     WXHMENU                         m_hMenu;
 
 #if wxUSE_ACCEL
@@ -287,8 +302,6 @@ protected:
     //
     wxAcceleratorTable              m_vAccelTable;
 #endif // wxUSE_ACCEL
-
-    wxFrame*                        m_pMenuBarFrame;
 
 private:
     //

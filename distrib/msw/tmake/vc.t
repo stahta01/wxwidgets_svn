@@ -13,8 +13,6 @@
 
     #! now transform these hashes into $project tags
     foreach $file (sort keys %wxGeneric) {
-        next if $wxGeneric{$file} =~ /\bU\b/;
-
         my $tag = "";
         if ( $wxGeneric{$file} =~ /\b(PS|G|16|U)\b/ ) {
             $tag = "WXNONESSENTIALOBJS";
@@ -24,34 +22,31 @@
         }
 
         $file =~ s/cp?p?$/obj/;
-        $project{$tag} .= "\$(GENDIR)\\\$D\\" . $file . " "
+        $project{$tag} .= "..\\generic\\\$D\\" . $file . " "
     }
 
     foreach $file (sort keys %wxCommon) {
-        next if $wxCommon{$file} =~ /\b(16|U)\b/;
+        next if $wxCommon{$file} =~ /\b16\b/;
 
         $file =~ s/cp?p?$/obj/;
-        $project{"WXCOMMONOBJS"} .= "\$(COMMDIR)\\\$D\\" . $file . " "
+        $project{"WXCOMMONOBJS"} .= "..\\common\\\$D\\" . $file . " "
     }
 
     foreach $file (sort keys %wxMSW) {
         next if $wxMSW{$file} =~ /\b16\b/;
 
         #! OLE files live in a subdir
-        if( $wxMSW{$file} =~ /\bO\b/ ) {
-            $project{"WXMSWOBJS"} .= '$(OLEDIR)';
-        } else {
-            $project{"WXMSWOBJS"} .= '$(MSWDIR)';
-        }
+        $project{"WXMSWOBJS"} .= '..\msw\\';
+        $project{"WXMSWOBJS"} .= 'ole\\' if $wxMSW{$file} =~ /\bO\b/;
         $file =~ s/cp?p?$/obj/;
-        $project{"WXMSWOBJS"} .= '\\$D\\' . $file . " ";
+        $project{"WXMSWOBJS"} .= '$D\\' . $file . " ";
     }
 
     foreach $file (sort keys %wxHTML) {
         next if $wxHTML{$file} =~ /\b16\b/;
 
         $file =~ s/cp?p?$/obj/;
-        $project{"WXHTMLOBJS"} .= "\$(HTMLDIR)\\\$D\\" . $file . " "
+        $project{"WXHTMLOBJS"} .= "..\\html\\\$D\\" . $file . " "
     }
 
 #$}
@@ -94,9 +89,6 @@ PERIPH_CLEAN_TARGET=
 # Set to 0 if not using GLCanvas (only affects DLL build)
 USE_GLCANVAS=1
 
-# Set to 0 if you are using MSVC 5
-USE_MSVC_5=0
-
 # These are absolute paths, so that the compiler
 # generates correct __FILE__ symbols for debugging.
 # Otherwise you don't be able to double-click on a memory
@@ -107,42 +99,38 @@ OLEDIR=ole
 MSWDIR=$(WXDIR)\src\msw
 DOCDIR = $(WXDIR)\docs
 HTMLDIR = $(WXDIR)\src\html
-JPEGDIR = $(WXDIR)\src\jpeg
-TIFFDIR = $(WXDIR)\src\tiff
-REGEXDIR = $(WXDIR)\src\regex
 
-
-{$(GENDIR)}.cpp{$(GENDIR)\$D}.obj:
+{..\generic}.cpp{..\generic\$D}.obj:
 	cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $<
 <<
 
-{$(COMMDIR)}.cpp{$(COMMDIR)\$D}.obj:
+{..\common}.cpp{..\common\$D}.obj:
 	cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $<
 <<
 
-{$(COMMDIR)}.c{$(COMMDIR)\$D}.obj:
+{..\common}.c{..\common\$D}.obj:
 	cl @<<
 $(CPPFLAGS2) /Fo$@ /c /Tc $<
 <<
 
-{$(MSWDIR)}.cpp{$(MSWDIR)\$D}.obj:
+{..\msw}.cpp{..\msw\$D}.obj:
 	cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $<
 <<
 
-{$(MSWDIR)}.c{$(MSWDIR)\$D}.obj:
+{..\msw}.c{..\msw\$D}.obj:
 	cl @<<
 $(CPPFLAGS2) /Fo$@ /c /Tc $<
 <<
 
-{$(OLEDIR)}.cpp{$(OLEDIR)\$D}.obj:
+{..\msw\ole}.cpp{..\msw\ole\$D}.obj:
 	cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $<
 <<
 
-{$(HTMLDIR)}.cpp{$(HTMLDIR)\$D}.obj:
+{..\html}.cpp{..\html\$D}.obj:
 	cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $<
 <<
@@ -154,7 +142,7 @@ GENERICOBJS= #$ ExpandList("WXGENERICOBJS");
 NONESSENTIALOBJS= #$ ExpandList("WXNONESSENTIALOBJS");
 
 COMMONOBJS = \
-		$(COMMDIR)\$D\y_tab.obj \
+		..\common\$D\y_tab.obj \
 		#$ ExpandList("WXCOMMONOBJS");
 
 MSWOBJS = #$ ExpandList("WXMSWOBJS");
@@ -166,20 +154,11 @@ HTMLOBJS = #$ ExpandList("WXHTMLOBJS");
 # Add $(HTMLOBJS) if wanting wxHTML classes
 OBJECTS = $(COMMONOBJS) $(GENERICOBJS) $(MSWOBJS) $(HTMLOBJS)
 
-ARCHINCDIR=$(WXDIR)\lib\msw$(INCEXT)
-SETUP_H=$(ARCHINCDIR)\wx\setup.h
-
 # Normal, static library
-all:    dirs $(SETUP_H) $(DUMMYOBJ) $(OBJECTS) $(PERIPH_TARGET) png zlib jpeg tiff regex $(LIBTARGET)
+all:    dirs $(DUMMYOBJ) $(OBJECTS) $(PERIPH_TARGET) png zlib xpm jpeg tiff $(LIBTARGET)
 
-$(ARCHINCDIR)\wx:
-    mkdir $(ARCHINCDIR)
-    mkdir $(ARCHINCDIR)\wx
+dirs: $(MSWDIR)\$D $(COMMDIR)\$D $(GENDIR)\$D $(OLEDIR)\$D $(HTMLDIR)\$D
 
-$(SETUP_H): $(WXDIR)\include\wx\msw\setup.h
-    copy $(WXDIR)\include\wx\msw\setup.h $@
-
-dirs: $(MSWDIR)\$D $(COMMDIR)\$D $(GENDIR)\$D $(OLEDIR)\$D $(HTMLDIR)\$D $(JPEGDIR)\$D $(TIFFDIR)\$D $(REGEXDIR)\$D $(ARCHINCDIR)\wx $(WXDIR)\$D
 
 $D:
     mkdir $D
@@ -199,33 +178,20 @@ $(OLEDIR)\$D:
 $(HTMLDIR)\$D:
     mkdir $(HTMLDIR)\$D
 
-$(JPEGDIR)\$D:
-    mkdir $(JPEGDIR)\$D
-
-$(TIFFDIR)\$D:
-    mkdir $(TIFFDIR)\$D
-
-$(REGEXDIR)\$D:
-    mkdir $(REGEXDIR)\$D
-
-$(WXDIR)\$D:
-    mkdir $(WXDIR)\$D
-
-
 # wxWindows library as DLL
 dll:
-        nmake -f makefile.vc all FINAL=$(FINAL) DLL=1 WXMAKINGDLL=1 NEW_WXLIBNAME=$(NEW_WXLIBNAME) UNICODE=$(UNICODE)
+        nmake -f makefile.vc all FINAL=$(FINAL) DLL=1 WXMAKINGDLL=1 NEW_WXLIBNAME=$(NEW_WXLIBNAME)
 
 cleandll:
-        nmake -f makefile.vc clean FINAL=$(FINAL) DLL=1 WXMAKINGDLL=1 NEW_WXLIBNAME=$(NEW_WXLIBNAME) UNICODE=$(UNICODE)
+        nmake -f makefile.vc clean FINAL=$(FINAL) DLL=1 WXMAKINGDLL=1 NEW_WXLIBNAME=$(NEW_WXLIBNAME)
 
 # wxWindows + app as DLL. Only affects main.cpp.
 dllapp:
-        nmake -f makefile.vc all FINAL=$(FINAL) DLL=1 UNICODE=$(UNICODE)
+        nmake -f makefile.vc all FINAL=$(FINAL) DLL=1
 
 # wxWindows + app as DLL, for Netscape plugin - remove DllMain.
 dllnp:
-        nmake -f makefile.vc all NOMAIN=1 FINAL=$(FINAL) DLL=1 UNICODE=$(UNICODE)
+        nmake -f makefile.vc all NOMAIN=1 FINAL=$(FINAL) DLL=1
 
 # Use this to make dummy.obj and generate a PCH.
 # You might use the dll target, then the pch target, in order to
@@ -272,26 +238,16 @@ GL_LIBS=opengl32.lib glu32.lib
 # GL_LIBS_DELAY=/delayload:opengl32.dll
 !endif
 
-!if "$(USE_MSVC_5)" == "1"
-# we are too big
-INCREMENTAL=/INCREMENTAL:NO
-DELAY_LOAD=
-!else
-INCREMENTAL=
-DELAY_LOAD=delayimp.lib \
-	/delayload:ws2_32.dll /delayload:advapi32.dll /delayload:user32.dll \
-        /delayload:gdi32.dll \
-	/delayload:comdlg32.dll /delayload:shell32.dll /delayload:comctl32.dll \
-        /delayload:ole32.dll \
-	/delayload:oleaut32.dll /delayload:rpcrt4.dll $(GL_LIBS_DELAY)
-!endif
-
 # Update the dynamic link library
 $(WXDIR)\lib\$(WXLIBNAME).dll: $(DUMMYOBJ) $(OBJECTS)
     $(link) @<<
-    $(LINKFLAGS) $(INCREMENTAL)
+    $(LINKFLAGS)
     -out:$(WXDIR)\lib\$(WXLIBNAME).dll
-    $(DUMMYOBJ) $(OBJECTS) $(guilibsdll) shell32.lib comctl32.lib ctl3d32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib odbc32.lib advapi32.lib winmm.lib $(GL_LIBS) $(WXDIR)\lib\png$(LIBEXT).lib $(WXDIR)\lib\zlib$(LIBEXT).lib $(WXDIR)\lib\jpeg$(LIBEXT).lib $(WXDIR)\lib\tiff$(LIBEXT).lib $(WXDIR)\lib\regex$(LIBEXT).lib $(DELAY_LOAD)
+    $(DUMMYOBJ) $(OBJECTS) $(guilibsdll) shell32.lib comctl32.lib ctl3d32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib odbc32.lib advapi32.lib winmm.lib $(GL_LIBS) $(WXDIR)\lib\png$(LIBEXT).lib $(WXDIR)\lib\zlib$(LIBEXT).lib $(WXDIR)\lib\xpm$(LIBEXT).lib $(WXDIR)\lib\jpeg$(LIBEXT).lib $(WXDIR)\lib\tiff$(LIBEXT).lib
+	delayimp.lib
+	/delayload:ws2_32.dll /delayload:advapi32.dll /delayload:user32.dll /delayload:gdi32.dll
+	/delayload:comdlg32.dll /delayload:shell32.dll /delayload:comctl32.dll /delayload:ole32.dll
+	/delayload:oleaut32.dll /delayload:rpcrt4.dll $(GL_LIBS_DELAY)
 <<
 
 !endif
@@ -301,10 +257,10 @@ $(WXDIR)\lib\$(WXLIBNAME).dll: $(DUMMYOBJ) $(OBJECTS)
 ########################################################
 # Windows-specific objects
 
-$D\dummy.obj: dummy.$(SRCSUFF) $(WXDIR)\include\wx\wx.h $(SETUP_H)
+$D\dummy.obj: dummy.$(SRCSUFF) $(WXDIR)\include\wx\wx.h $(WXDIR)\include\wx\msw\setup.h
         cl $(CPPFLAGS) $(MAKEPRECOMP) /Fo$D\dummy.obj /c /Tp dummy.cpp
 
-$D\dummydll.obj: dummydll.$(SRCSUFF) $(WXDIR)\include\wx\wx.h $(SETUP_H)
+$D\dummydll.obj: dummydll.$(SRCSUFF) $(WXDIR)\include\wx\wx.h $(WXDIR)\include\wx\msw\setup.h
         cl @<<
 $(CPPFLAGS) $(MAKEPRECOMP) /Fo$D\dummydll.obj /c /Tp dummydll.cpp
 <<
@@ -374,20 +330,30 @@ $(CPPFLAGS2) /Od /Fo$(MSWDIR)\$D\treectrl.obj /c /Tp $(MSWDIR)\treectrl.cpp
 $(CPPFLAGS2) /Od /Fo$(HTMLDIR)\$D\helpfrm.obj /c /Tp $(HTMLDIR)\helpfrm.cpp
 <<
 
-$(COMMDIR)\$D\y_tab.obj:     $(COMMDIR)\y_tab.c $(COMMDIR)\lex_yy.c
+# If taking wxWindows from CVS, setup.h doesn't exist yet.
+# Actually the 'if not exist setup.h' test doesn't work
+# (copies the file anyway)
+# we'll have to comment this rule out.
+
+# $(WXDIR)\include\wx\msw\setup.h: $(WXDIR)\include\wx\msw\setup0.h
+#    cd "$(WXDIR)"\include\wx\msw
+#    if not exist setup.h copy setup0.h setup.h
+#    cd "$(WXDIR)"\src\msw
+
+..\common\$D\y_tab.obj:     ..\common\y_tab.c ..\common\lex_yy.c
         cl @<<
-$(CPPFLAGS2) /c $(COMMDIR)\y_tab.c -DUSE_DEFINE -DYY_USE_PROTOS /Fo$@
+$(CPPFLAGS2) /c ..\common\y_tab.c -DUSE_DEFINE -DYY_USE_PROTOS /Fo$@
 <<
 
-$(COMMDIR)\y_tab.c:     $(COMMDIR)\dosyacc.c
-        copy "$(COMMDIR)"\dosyacc.c "$(COMMDIR)"\y_tab.c
+..\common\y_tab.c:     ..\common\dosyacc.c
+        copy "..\common"\dosyacc.c "..\common"\y_tab.c
 
-$(COMMDIR)\lex_yy.c:    $(COMMDIR)\doslex.c
-    copy "$(COMMDIR)"\doslex.c "$(COMMDIR)"\lex_yy.c
+..\common\lex_yy.c:    ..\common\doslex.c
+    copy "..\common"\doslex.c "..\common"\lex_yy.c
 
-$(OBJECTS):	$(SETUP_H)
+$(OBJECTS):	$(WXDIR)/include/wx/setup.h
 
-$(COMMDIR)\$D\unzip.obj:     $(COMMDIR)\unzip.c
+..\common\$D\unzip.obj:     ..\common\unzip.c
         cl @<<
 $(CPPFLAGS2) /c $(COMMDIR)\unzip.c /Fo$@
 <<
@@ -434,13 +400,13 @@ clean_tiff:
     nmake -f makefile.vc clean
     cd $(WXDIR)\src\msw
 
-regex:
-    cd $(WXDIR)\src\regex
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) all
+xpm:
+    cd $(WXDIR)\src\xpm
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG)
     cd $(WXDIR)\src\msw
 
-clean_regex:
-    cd $(WXDIR)\src\regex
+clean_xpm:
+    cd $(WXDIR)\src\xpm
     nmake -f makefile.vc clean
     cd $(WXDIR)\src\msw
 
@@ -449,7 +415,7 @@ rcparser:
     nmake -f makefile.vc FINAL=$(FINAL)
     cd $(WXDIR)\src\msw
 
-cleanall: clean clean_png clean_zlib clean_jpeg clean_tiff clean_regex
+cleanall: clean clean_png clean_zlib clean_xpm clean_jpeg clean_tiff
         -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).dll
         -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).lib
         -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).exp
@@ -474,29 +440,18 @@ clean: $(PERIPH_CLEAN_TARGET)
         -erase $(MSWDIR)\$D\*.obj
         -erase $(MSWDIR)\$D\*.sbr
         -erase $(MSWDIR)\$D\*.pdb
-        -erase $(MSWDIR)\$D\*.pch
         -erase $(OLEDIR)\$D\*.obj
         -erase $(OLEDIR)\$D\*.sbr
         -erase $(OLEDIR)\$D\*.pdb
         -erase $(HTMLDIR)\$D\*.obj
         -erase $(HTMLDIR)\$D\*.sbr
         -erase $(HTMLDIR)\$D\*.pdb
-        -erase $(JPEGDIR)\$D\*.obj
-        -erase $(JPEGDIR)\$D\*.sbr
-        -erase $(JPEGDIR)\$D\*.idb
-        -erase $(JPEGDIR)\$D\*.pdb
-        -erase $(TIFFDIR)\$D\*.obj
-        -erase $(TIFFDIR)\$D\*.sbr
-        -erase $(TIFFDIR)\$D\*.pdb
-        -erase $(TIFFDIR)\$D\*.idb
         -rmdir $(D)
-        -rmdir $(GENDIR)\$(D)
-        -rmdir $(COMMDIR)\$(D)
-        -rmdir $(MSWDIR)\$(D)
-        -rmdir $(OLEDIR)\$(D)
-        -rmdir $(HTMLDIR)\$(D)
-        -rmdir $(JPEGDIR)\$(D)
-        -rmdir $(TIFFDIR)\$(D)
+        -rmdir ole\$(D)
+        -rmdir ..\generic\$(D)
+        -rmdir ..\common\$(D)
+        -rmdir ..\html\$(D)
+
 
 # Making documents
 docs:   allhlp allhtml allpdfrtf allhtb allhtmlhelp
@@ -522,6 +477,19 @@ allhlp: wxhlp
         nmake -f makefile.vc hlp
         cd $(THISDIR)
 
+#        cd $(WXDIR)\utils\wxhelp\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxgraph\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxchart\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxtree\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxbuild\src
+#        nmake -f makefile.vc hlp
+#        cd $(WXDIR)\utils\wxgrid\src
+#        nmake -f makefile.vc hlp
+
 allhtml: wxhtml
         cd $(WXDIR)\utils\dialoged\src
         nmake -f makefile.vc html
@@ -543,6 +511,20 @@ allhtb: htb
         nmake -f makefile.vc htb
         cd $(THISDIR)
 
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\dialoged\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\hytext\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxhelp\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxgraph\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxchart\src
+#        nmake -f makefile.vc html
+#        cd $(WXDIR)\utils\wxtree\src
+#        nmake -f makefile.vc html
+
 allps: wxps referencps
         cd $(WXDIR)\utils\dialoged\src
         nmake -f makefile.vc ps
@@ -557,12 +539,22 @@ allpdfrtf: pdfrtf
         nmake -f makefile.vc pdfrtf
         cd $(THISDIR)
 
+#        cd $(WXDIR)\utils\wxhelp\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\tex2rtf\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\wxgraph\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\wxchart\src
+#        nmake -f makefile.vc ps
+#        cd $(WXDIR)\utils\wxtree\src
+#        nmake -f makefile.vc ps
+#        cd $(THISDIR)
+
 $(DOCDIR)/winhelp/wx.hlp:         $(DOCDIR)/latex/wx/wx.rtf $(DOCDIR)/latex/wx/wx.hpj
         cd $(DOCDIR)/latex/wx
         -erase wx.ph
         hc wx
-        -erase $(DOCDIR)\winhelp\wx.hlp
-        -erase $(DOCDIR)\winhelp\wx.cnt
         move wx.hlp $(DOCDIR)\winhelp\wx.hlp
         move wx.cnt $(DOCDIR)\winhelp\wx.cnt
         cd $(THISDIR)
@@ -614,7 +606,6 @@ $(DOCDIR)\htmlhelp\wx.chm : $(DOCDIR)\html\wx\wx.htm $(DOCDIR)\html\wx\wx.hhp
 	cd $(DOCDIR)\html\wx
 	-hhc wx.hhp
     -mkdir ..\..\htmlhelp
-    -erase $(DOCDIR)\htmlhelp\wx.chm
     move wx.chm ..\..\htmlhelp
 	cd $(THISDIR)
 
@@ -656,8 +647,8 @@ $(WXDIR)\docs\ps\referenc.ps:	$(WXDIR)\docs\latex\wx\referenc.dvi
 # Optionally, a cached version of the .hhp file can be generated with hhp2cached.
 $(DOCDIR)\htb\wx.htb: $(DOCDIR)\html\wx\wx.htm
 	cd $(WXDIR)\docs\html\wx
-    -erase wx.zip wx.htb
-    zip wx.zip *.htm *.gif *.hhp *.hhc *.hhk
+    -erase /Y wx.zip wx.htb
+    zip32 wx.zip *.htm *.gif *.hhp *.hhc *.hhk
     -mkdir $(DOCDIR)\htb
     move wx.zip $(DOCDIR)\htb\wx.htb
     cd $(THISDIR)
@@ -669,14 +660,11 @@ touchmanual:
 updatedocs: touchmanual alldocs
 
 cleandocs:
-    -erase $(DOCDIR)\winhelp\wx.hlp
-    -erase $(DOCDIR)\winhelp\wx.cnt
-    -erase $(DOCDIR)\html\wx\*.htm
-    -erase $(DOCDIR)\pdf\wx.rtf
-    -erase $(DOCDIR)\latex\wx\wx.rtf
-    -erase $(DOCDIR)\latex\wx\WX.PH
-    -erase $(DOCDIR)\htmlhelp\wx.chm
-    -erase $(DOCDIR)\htb\wx.htb
+    -erase /Y $(DOCDIR)\html\wx\wx.htm
+    -erase /Y $(DOCDIR)\pdf\wx.rtf
+    -erase /Y $(DOCDIR)\latex\wx\wx.rtf
+    -erase /Y $(DOCDIR)\htmlhelp\wx.chm
+    -erase /Y $(DOCDIR)\htb\wx.htb
 
 # Start Word, running the GeneratePDF macro. MakeManual.dot should be in the
 # Office StartUp folder, and PDFMaker should be installed.

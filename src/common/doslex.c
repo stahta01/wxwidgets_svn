@@ -85,6 +85,7 @@ char *malloc();
 int free();
 */
 
+int read();
 #endif
 
 

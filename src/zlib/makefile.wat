@@ -13,7 +13,7 @@
 
 # ------------- Watcom 10a -------------
 MODEL=-mf 
-CFLAGS= $(MODEL) -fpi87 -fp5 -zp4 -5r -w5 -oneatx -DWIN32
+CFLAGS= $(MODEL) -fpi87 -fp5 -zp4 -5r -w5 -oneatx -DMSDOS
 CC=wcc386
 LD=wcl386
 LIB=wlib -b -c 
@@ -22,9 +22,12 @@ O=.obj
 LIBTARGET=..\..\lib\zlib.lib
 
 # variables
-OBJECTS=adler32$(O) compress$(O) crc32$(O) gzio$(O) uncompr$(O) deflate$(O) &
-        trees$(O) zutil$(O) inflate$(O) infblock$(O) inftrees$(O) infcodes$(O) &
-        infutil$(O) inffast$(O)
+OBJ1=adler32$(O) compress$(O) crc32$(O) gzio$(O) uncompr$(O) deflate$(O) 
+OBJ2=trees$(O) zutil$(O) inflate$(O) infblock$(O) inftrees$(O) infcodes$(O) 
+OBJ3=infutil$(O) inffast$(O)
+OBJP1=adler32$(O) +compress$(O) +crc32$(O) +gzio$(O) +uncompr$(O) +deflate$(O)
+OBJP2=trees$(O) +zutil$(O) +inflate$(O) +infblock$(O) +inftrees$(O) +infcodes$(O)
+OBJP3=infutil$(O) +inffast$(O)
 
 # all: test
 
@@ -80,11 +83,12 @@ example.obj: example.c zlib.h zconf.h
 minigzip.obj: minigzip.c zlib.h zconf.h
 	$(CC) $(CFLAGS) $*.c
 
-$(LIBTARGET) : $(OBJECTS)
-	%create tmp.lbc
-	@for %i in ( $(OBJECTS) ) do @%append tmp.lbc +%i
-	wlib /b /c /n /p=512 $^@ @tmp.lbc
-
+# we must cut the command line to fit in the MS/DOS 128 byte limit:
+$(LIBTARGET): $(OBJ1) $(OBJ2) $(OBJ3) 
+	if exist $(LIBTARGET) del $(LIBTARGET)
+	$(LIB) $(LIBTARGET) +$(OBJP1)
+	$(LIB) $(LIBTARGET) +$(OBJP2)
+	$(LIB) $(LIBTARGET) +$(OBJP3)
 
 example.exe: example.obj $(LIBTARGET)
 	$(LD) $(LDFLAGS) example.obj $(LIBTARGET)

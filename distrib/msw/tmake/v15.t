@@ -29,7 +29,7 @@
 
     foreach $file (sort keys %wxCommon) {
         #! socket files don't compile under Win16 currently
-        next if $wxCommon{$file} =~ /\b(32|S|U)\b/;
+        next if $wxCommon{$file} =~ /\b(32|S)\b/;
 
         $isCFile = $file =~ /\.c$/;
         $file =~ s/cp?p?$/obj/;

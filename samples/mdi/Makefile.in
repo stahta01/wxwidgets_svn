@@ -15,9 +15,7 @@ program_dir = samples/mdi
 
 PROGRAM=mdi
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 include ../../src/makeprog.env
 
--include $(DEPFILES)

@@ -28,21 +28,6 @@
 
 #include "wx/stream.h"
 
-#ifdef HAVE_STATFS
-#  ifdef __BSD__
-#    include <sys/param.h>
-#    include <sys/mount.h>
-#  else
-#    include <sys/vfs.h>
-#  endif
-#endif // HAVE_STATFS
-
-#ifdef HAVE_STATVFS
-    #include <sys/statvfs.h>
-
-    #define statfs statvfs
-#endif // HAVE_STATVFS
-
 #if wxUSE_GUI
     #include "wx/unix/execute.h"
 #endif
@@ -150,39 +135,9 @@ void wxUsleep(unsigned long milliseconds)
 // process management
 // ----------------------------------------------------------------------------
 
-int wxKill(long pid, wxSignal sig, wxKillError *rc)
+int wxKill(long pid, wxSignal sig)
 {
-    int err = kill((pid_t)pid, (int)sig);
-    if ( rc )
-    {
-        switch ( err )
-        {
-            case 0:
-                *rc = wxKILL_OK;
-                break;
-
-            case EINVAL:
-                *rc = wxKILL_BAD_SIGNAL;
-                break;
-
-            case EPERM:
-                *rc = wxKILL_ACCESS_DENIED;
-                break;
-
-            case ESRCH:
-                *rc = wxKILL_NO_PROCESS;
-                break;
-
-            default:
-                // this goes against Unix98 docs so log it
-                wxLogDebug(_T("unexpected kill(2) return value %d"), err);
-
-                // something else...
-                *rc = wxKILL_ERROR;
-        }
-    }
-
-    return err;
+    return kill((pid_t)pid, (int)sig);
 }
 
 #define WXEXECUTE_NARGS   127
@@ -294,21 +249,51 @@ bool wxShell(const wxString& command, wxArrayString& output)
 
 void wxHandleProcessTermination(wxEndProcessData *proc_data)
 {
-    // notify user about termination if required
-    if ( proc_data->process )
-    {
-        proc_data->process->OnTerminate(proc_data->pid, proc_data->exitcode);
-    }
+    int pid = (proc_data->pid > 0) ? proc_data->pid : -(proc_data->pid);
 
-    // clean up
-    if ( proc_data->pid > 0 )
+    // waitpid is POSIX so should be available everywhere, however on older
+    // systems wait() might be used instead in a loop (until the right pid
+    // terminates)
+    int status = 0;
+    int rc;
+
+    // wait for child termination and if waitpid() was interrupted, try again
+    do
     {
-       delete proc_data;
+       rc = waitpid(pid, &status, 0);
+    }
+    while ( rc == -1 && errno == EINTR );
+
+
+    if( rc == -1 || ! (WIFEXITED(status) || WIFSIGNALED(status)) )
+    {
+       wxLogSysError(_("Waiting for subprocess termination failed"));
+       /* AFAIK, this can only happen if something went wrong within
+          wxGTK, i.e. due to a race condition or some serious bug.
+          After having fixed the order of statements in
+          GTK_EndProcessDetector(). (KB)
+       */
     }
     else
     {
-       // let wxExecute() know that the process has terminated
-       proc_data->pid = 0;
+        // notify user about termination if required
+        if (proc_data->process)
+        {
+            proc_data->process->OnTerminate(proc_data->pid,
+                                            WEXITSTATUS(status));
+        }
+        // clean up
+        if ( proc_data->pid > 0 )
+        {
+           delete proc_data;
+        }
+        else
+        {
+           // wxExecute() will know about it
+           proc_data->exitcode = status;
+
+           proc_data->pid = 0;
+        }
     }
 }
 
@@ -317,8 +302,6 @@ void wxHandleProcessTermination(wxEndProcessData *proc_data)
 // ----------------------------------------------------------------------------
 // wxStream classes to support IO redirection in wxExecute
 // ----------------------------------------------------------------------------
-
-#if wxUSE_STREAMS
 
 class wxProcessFileInputStream : public wxInputStream
 {
@@ -415,108 +398,6 @@ size_t wxProcessFileOutputStream::OnSysWrite(const void *buffer, size_t bufsize)
 
     return ret;
 }
-
-// ----------------------------------------------------------------------------
-// wxStreamTempBuffer
-// ----------------------------------------------------------------------------
-
-/*
-   Extract of a mail to wx-users to give the context of the problem we are
-   trying to solve here:
-
-    MC> If I run the command:
-    MC>    find . -name "*.h" -exec grep linux {} \;
-    MC> in the exec sample synchronously from the 'Capture command output'
-    MC> menu, wxExecute never returns.  I have to xkill it.  Has anyone
-    MC> else encountered this?
-
-     Yes, I can reproduce it too.
-
-     I even think I understand why it happens: before launching the external
-    command we set up a pipe with a valid file descriptor on the reading side
-    when the output is redirected. So the subprocess happily writes to it ...
-    until the pipe buffer (which is usually quite big on Unix, I think the
-    default is 4Mb) is full. Then the writing process stops and waits until we
-    read some data from the pipe to be able to continue writing to it but we
-    never do it because we wait until it terminates to start reading and so we
-    have a classical deadlock.
-
-   Here is the fix: we now read the output as soon as it appears into a temp
-   buffer (wxStreamTempBuffer object) and later just stuff it back into the
-   stream when the process terminates. See supporting code in wxExecute()
-   itself as well.   
-*/
-
-class wxStreamTempBuffer
-{
-public:
-    wxStreamTempBuffer();
-
-    // call to associate a stream with this buffer, otherwise nothing happens
-    // at all
-    void Init(wxInputStream *stream);
-
-    // check for input on our stream and cache it in our buffer if any
-    void Update();
-
-    ~wxStreamTempBuffer();
-
-private:
-    // the stream we're buffering, if NULL we don't do anything at all
-    wxInputStream *m_stream;
-
-    // the buffer of size m_size (NULL if m_size == 0)
-    void *m_buffer;
-
-    // the size of the buffer
-    size_t m_size;
-};
-
-wxStreamTempBuffer::wxStreamTempBuffer()
-{
-    m_stream = NULL; 
-    m_buffer = NULL;
-    m_size = 0;
-}
-
-void wxStreamTempBuffer::Init(wxInputStream *stream)
-{
-    m_stream = stream;
-}
-
-void wxStreamTempBuffer::Update()
-{
-    if ( m_stream && !m_stream->Eof() )
-    {
-        // realloc in blocks of 1Kb - surely not the best strategy but which
-        // one is?
-        static const size_t incSize = 1024;
-
-        void *buf = realloc(m_buffer, m_size + incSize);
-        if ( !buf )
-        {
-            // don't read any more, we don't have enough memory to do it
-            m_stream = NULL;
-        }
-        else // got memory for the buffer
-        {
-            m_buffer = buf;
-            m_stream->Read((char *)m_buffer + m_size, incSize);
-            m_size += incSize;
-        }
-    }
-}
-
-wxStreamTempBuffer::~wxStreamTempBuffer()
-{
-    if ( m_buffer )
-    {
-        m_stream->Ungetch(m_buffer, m_size);
-        free(m_buffer);
-    }
-}
-
-#endif // wxUSE_STREAMS
 
 long wxExecute(wxChar **argv,
                bool sync,
@@ -671,43 +552,27 @@ long wxExecute(wxChar **argv,
 
         // there is no return after successful exec()
         _exit(-1);
-
-        // some compilers complain about missing return - of course, they
-        // should know that exit() doesn't return but what else can we do if
-        // they don't?
-#if defined(__VMS) || defined(__INTEL_COMPILER)
-        return 0;
-#endif
     }
     else // we're in parent
     {
         ARGS_CLEANUP;
 
         // pipe initialization: construction of the wxStreams
-#if wxUSE_STREAMS
-        wxStreamTempBuffer bufIn, bufErr;
-#endif // wxUSE_STREAMS
-
         if ( process && process->IsRedirected() )
         {
-#if wxUSE_STREAMS
-            // in/out for subprocess correspond to our out/in
+            // These two streams are relative to this process.
             wxOutputStream *outStream = new wxProcessFileOutputStream(pipeIn[1]);
             wxInputStream *inStream = new wxProcessFileInputStream(pipeOut[0]);
             wxInputStream *errStream = new wxProcessFileInputStream(pipeErr[0]);
 
-            process->SetPipeStreams(inStream, outStream, errStream);
-
-            bufIn.Init(inStream);
-            bufErr.Init(inStream);
-#endif // wxUSE_STREAMS
-
             close(pipeIn[0]); // close reading side
             close(pipeOut[1]); // close writing side
             close(pipeErr[1]); // close writing side
+
+            process->SetPipeStreams(inStream, outStream, errStream);
         }
 
-#if wxUSE_GUI && !defined(__WXMICROWIN__)
+#if wxUSE_GUI
         wxEndProcessData *data = new wxEndProcessData;
 
         if ( sync )
@@ -725,19 +590,9 @@ long wxExecute(wxChar **argv,
             wxBusyCursor bc;
             wxWindowDisabler wd;
 
-            // data->pid will be set to 0 from GTK_EndProcessDetector when the
-            // process terminates
-            while ( data->pid != 0 )
-            {
-#if wxUSE_STREAMS
-                bufIn.Update();
-                bufErr.Update();
-#endif // wxUSE_STREAMS
-
-                // give GTK+ a chance to call GTK_EndProcessDetector here and
-                // also repaint the GUI
+            // it will be set to 0 from GTK_EndProcessDetector
+            while (data->pid != 0)
                 wxYield();
-            }
 
             int exitcode = data->exitcode;
 
@@ -782,14 +637,9 @@ long wxExecute(wxChar **argv,
 const wxChar* wxGetHomeDir( wxString *home  )
 {
     *home = wxGetUserHome( wxString() );
-   wxString tmp;
     if ( home->IsEmpty() )
         *home = wxT("/");
-#ifdef __VMS
-   tmp = *home;
-   if ( tmp.Last() != wxT(']'))
-     if ( tmp.Last() != wxT('/')) *home << wxT('/');
-#endif
+
     return home->c_str();
 }
 
@@ -1009,80 +859,6 @@ long wxGetFreeMemory()
 
     // can't find it out
     return -1;
-}
-
-bool wxGetDiskSpace(const wxString& path, wxLongLong *pTotal, wxLongLong *pFree)
-{
-#if defined(HAVE_STATFS) || defined(HAVE_STATVFS)
-    struct statfs fs;
-    if ( statfs(path, &fs) != 0 )
-    {
-        wxLogSysError("Failed to get file system statistics");
-
-        return FALSE;
-    }
-
-    // under Solaris we might have to use fs.f_frsize instead as I think it
-    // may be a multiple of the block size in general (TODO)
-
-    if ( pTotal )
-    {
-        *pTotal = wxLongLong(fs.f_blocks) * fs.f_bsize;
-    }
-
-    if ( pFree )
-    {
-        *pFree = wxLongLong(fs.f_bavail) * fs.f_bsize;
-    }
-
-    return TRUE;
-#endif // HAVE_STATFS
-
-    return FALSE;
-}
-
-// ----------------------------------------------------------------------------
-// env vars
-// ----------------------------------------------------------------------------
-
-bool wxGetEnv(const wxString& var, wxString *value)
-{
-    // wxGetenv is defined as getenv()
-    wxChar *p = wxGetenv(var);
-    if ( !p )
-        return FALSE;
-
-    if ( value )
-    {
-        *value = p;
-    }
-
-    return TRUE;
-}
-
-bool wxSetEnv(const wxString& variable, const wxChar *value)
-{
-#if defined(HAVE_SETENV)
-    return setenv(variable.mb_str(),
-                  value ? (const char *)wxString(value).mb_str()
-                        : NULL,
-                  1 /* overwrite */) == 0;
-#elif defined(HAVE_PUTENV)
-    wxString s = variable;
-    if ( value )
-        s << _T('=') << value;
-
-    // transform to ANSI
-    const char *p = s.mb_str();
-
-    // the string will be free()d by libc
-    char *buf = (char *)malloc(strlen(p) + 1);
-    strcpy(buf, p);
-
-    return putenv(buf) == 0;
-#else // no way to set an env var
-    return FALSE;
-#endif
 }
 
 // ----------------------------------------------------------------------------

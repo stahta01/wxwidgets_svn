@@ -12,11 +12,9 @@
 #pragma implementation "choice.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/choice.h"
 
 #if wxUSE_CHOICE
-
-#include "wx/choice.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -114,7 +112,14 @@ bool wxChoice::Create( wxWindow *parent, wxWindowID id,
 
     SetFont( parent->GetFont() );
 
-    SetBestSize(size);
+    wxSize size_best( DoGetBestSize() );
+    wxSize new_size( size );
+    if (new_size.x == -1)
+        new_size.x = size_best.x;
+    if (new_size.y == -1)
+        new_size.y = size_best.y;
+    if ((new_size.x != size.x) || (new_size.y != size.y))
+        SetSize( new_size.x, new_size.y );
 
     SetBackgroundColour( parent->GetBackgroundColour() );
     SetForegroundColour( parent->GetForegroundColour() );
@@ -400,43 +405,9 @@ size_t wxChoice::GtkAppendHelper(GtkWidget *menu, const wxString& item)
 wxSize wxChoice::DoGetBestSize() const
 {
     wxSize ret( wxControl::DoGetBestSize() );
-
-    // we know better our horizontal extent: it depends on the longest string
-    // we have
-    ret.x = 0;
-    if ( m_widget )
-    {
-        GdkFont *font = m_font.GetInternalFont();
-
-        wxCoord width;
-        size_t count = GetCount();
-        for ( size_t n = 0; n < count; n++ )
-        {
-            width = (wxCoord)gdk_string_width(font, GetString(n).mbc_str());
-            if ( width > ret.x )
-                ret.x = width;
-        }
-
-        // add extra for the choice "=" button
-
-        // VZ: I don't know how to get the right value, it seems to be in
-        //     GtkOptionMenuProps struct from gtkoptionmenu.c but we can't get
-        //     to it - maybe we can use gtk_option_menu_size_request() for this
-        //     somehow?
-        //
-        //     This default value works only for the default GTK+ theme (i.e.
-        //     no theme at all) (FIXME)
-        static const int widthChoiceIndicator = 35;
-        ret.x += widthChoiceIndicator;
-    }
-
-    // but not less than the minimal width
-    if ( ret.x < 80 )
-        ret.x = 80;
-
+    if (ret.x < 80) ret.x = 80;
     ret.y = 16 + gdk_char_height( m_widget->style->font, 'H' );
     return ret;
 }
 
-#endif // wxUSE_CHOICE
-
+#endif

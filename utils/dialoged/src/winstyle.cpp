@@ -24,9 +24,6 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/listctrl.h"
-#include "wx/treectrl.h"
-
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>

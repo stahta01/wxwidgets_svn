@@ -17,11 +17,6 @@
 #include "helpers.h"
 %}
 
-//  %pragma(python) code="
-//  # This gives this module's dictionary to the C++ extension code...
-//  wxc._wxSetDictionary(vars())
-//  "
-
 //----------------------------------------------------------------------
 // This is where we include the other wrapper definition files for SWIG
 //----------------------------------------------------------------------
@@ -107,6 +102,8 @@ public:
     void SetVendorName(const wxString& name);
     void SetUseBestVisual(bool flag);
     wxIcon GetStdIcon(int which);
+
+
 };
 
 %inline %{
@@ -114,8 +111,6 @@ public:
         return wxPythonApp;
     }
 %}
-
-
 
 //----------------------------------------------------------------------
 // this is used to cleanup after wxWindows when Python shuts down.
@@ -166,11 +161,8 @@ static wxPyCoreAPI API = {
     SWIG_addvarlink,
     SWIG_newvarlink,
 
-    wxPyBeginAllowThreads,
-    wxPyEndAllowThreads,
-    wxPyBeginBlockThreads,
-    wxPyEndBlockThreads,
-
+    wxPySaveThread,
+    wxPyRestoreThread,
     wxPyConstructObject,
     wxPy_ConvertList,
 
@@ -189,19 +181,12 @@ static wxPyCoreAPI API = {
     wxRect_helper,
     wxColour_helper,
 
-    wxPyCBH_setCallbackInfo,
+    wxPyCBH_setSelf,
     wxPyCBH_findCallback,
     wxPyCBH_callCallback,
     wxPyCBH_callCallbackObj,
     wxPyCBH_delete,
-
-    wxPyClassExists,
-    wxPyMake_wxObject,
-    wxPyMake_wxSizer,
-    wxPyPtrTypeMap_Add,
-    wxArrayString2PyList_helper
 };
-
 
 %}
 
@@ -240,14 +225,6 @@ static wxPyCoreAPI API = {
     initclip_dndc();
     initstreamsc();
     initfilesysc();
-
-
-    PyDict_SetItemString(d,"wxMAJOR_VERSION", PyInt_FromLong((long)wxMAJOR_VERSION ));
-    PyDict_SetItemString(d,"wxMINOR_VERSION", PyInt_FromLong((long)wxMINOR_VERSION ));
-    PyDict_SetItemString(d,"wxRELEASE_NUMBER", PyInt_FromLong((long)wxRELEASE_NUMBER ));
-    PyDict_SetItemString(d,"wxVERSION_NUMBER", PyInt_FromLong((long)wxVERSION_NUMBER ));
-    PyDict_SetItemString(d,"wxVERSION_STRING", PyString_FromString(wxVERSION_STRING));
-
 
 %}
 

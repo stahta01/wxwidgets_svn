@@ -40,7 +40,7 @@
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-class wxPseudoMetaFile : public wxObject {
+class wxPseudoMetaFile {
 public:
   wxPseudoMetaFile();
   ~wxPseudoMetaFile();
@@ -108,9 +108,8 @@ class wxPyRectangleShape : public wxPyShape {
 public:
     wxPyRectangleShape(double width = 0.0, double height = 0.0);
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyRectangleShape)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyRectangleShape)"
 
     void SetCornerRadius(double radius);
 
@@ -159,9 +158,8 @@ public:
                      double size = 0.0, double the_xoffset = 0.0,
                      double the_yoffset = 0.0, int the_type = 0);
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyControlPoint)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyControlPoint)"
 
     void SetCornerRadius(double radius);
 
@@ -207,9 +205,8 @@ class wxPyBitmapShape : public wxPyRectangleShape {
 public:
     wxPyBitmapShape();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyBitmapShape)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyBitmapShape)"
 
     wxBitmap& GetBitmap();
     wxString GetFilename();
@@ -257,9 +254,8 @@ class wxPyDrawnShape : public wxPyRectangleShape {
 public:
     wxPyDrawnShape();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyDrawnShape)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyDrawnShape)"
 
     void CalculateSize();
     void DestroyClippingRect();
@@ -330,7 +326,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxOGLConstraint : public wxObject {
+class wxOGLConstraint  {
 public:
     //wxOGLConstraint(int type, wxPyShape *constraining, wxList& constrained);
     %addmethods {
@@ -341,8 +337,7 @@ public:
             return rv;
         }
     }
-
-    //~wxOGLConstraint();  The wxCompositShape takes ownership of the constraint
+    ~wxOGLConstraint();
 
     bool Evaluate();
     void SetSpacing(double x, double y);
@@ -362,9 +357,8 @@ class wxPyCompositeShape : public wxPyRectangleShape {
 public:
     wxPyCompositeShape();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyCompositeShape)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyCompositeShape)"
 
     void AddChild(wxPyShape *child, wxPyShape *addAfter = NULL);
 
@@ -461,9 +455,8 @@ class wxPyDividedShape : public wxPyRectangleShape {
 public:
     wxPyDividedShape(double width = 0.0, double height = 0.0);
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyDividedShape)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyDividedShape)"
 
     void EditRegions();
     void SetRegionSizes();
@@ -511,9 +504,8 @@ class wxPyDivisionShape : public wxPyCompositeShape {
 public:
     wxPyDivisionShape();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyDivisionShape)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyDivisionShape)"
 
     void AdjustBottom(double bottom, bool test);
     void AdjustLeft(double left, bool test);

@@ -20,22 +20,11 @@ class WXDLLEXPORT wxWizard : public wxWizardBase
 {
 public:
     // ctor
-    wxWizard() { Init(); }
-    wxWizard(wxWindow *parent,
-             int id = -1,
-             const wxString& title = wxEmptyString,
-             const wxBitmap& bitmap = wxNullBitmap,
-             const wxPoint& pos = wxDefaultPosition)
-    {
-        Init();
-        Create(parent, id, title, bitmap, pos);
-    }
-    bool Create(wxWindow *parent,
+    wxWizard(wxWindow *parent = NULL,
              int id = -1,
              const wxString& title = wxEmptyString,
              const wxBitmap& bitmap = wxNullBitmap,
              const wxPoint& pos = wxDefaultPosition);
-    void Init();
 
     // implement base class pure virtuals
     virtual bool RunWizard(wxWizardPage *firstPage);
@@ -54,18 +43,16 @@ public:
     // TransferDataFromWindow() returns FALSE - otherwise, returns TRUE
     bool ShowPage(wxWizardPage *page, bool goingForward = TRUE);
 
-    // do fill the dialog with controls
-    // this is app-overridable to, for example, set help and tooltip text
-    void DoCreateControls();
-
 private:
     // was the dialog really created?
     bool WasCreated() const { return m_btnPrev != NULL; }
 
+    // do fill the dialog with controls
+    void DoCreateControls();
+
     // event handlers
     void OnCancel(wxCommandEvent& event);
     void OnBackOrNext(wxCommandEvent& event);
-    void OnHelp(wxCommandEvent& event);
 
     // the page size requested by user
     wxSize m_sizePage;

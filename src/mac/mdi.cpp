@@ -17,9 +17,8 @@
 #include "wx/menu.h"
 #include "wx/settings.h"
 
-extern wxWindowList wxModelessWindows;
+extern wxList wxModelessWindows;
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxMDIParentFrame, wxFrame)
 IMPLEMENT_DYNAMIC_CLASS(wxMDIChildFrame, wxFrame)
 IMPLEMENT_DYNAMIC_CLASS(wxMDIClientWindow, wxWindow)
@@ -34,30 +33,11 @@ BEGIN_EVENT_TABLE(wxMDIClientWindow, wxWindow)
   EVT_SCROLL(wxMDIClientWindow::OnScroll)
 END_EVENT_TABLE()
 
-#endif
-
-static const int IDM_WINDOWTILE  = 4001;
-static const int IDM_WINDOWTILEHOR  = 4001;
-static const int IDM_WINDOWCASCADE = 4002;
-static const int IDM_WINDOWICONS = 4003;
-static const int IDM_WINDOWNEXT = 4004;
-static const int IDM_WINDOWTILEVERT = 4005;
-
-// This range gives a maximum of 500 MDI children. Should be enough :-)
-static const int wxFIRST_MDI_CHILD = 4100;
-static const int wxLAST_MDI_CHILD = 4600;
-
-// Status border dimensions
-static const int wxTHICK_LINE_BORDER = 3;
 
 // Parent frame
 
 wxMDIParentFrame::wxMDIParentFrame()
 {
-    m_clientWindow = NULL;
-    m_currentChild = NULL;
-    m_windowMenu = (wxMenu*) NULL;
-    m_parentFrameActive = TRUE;
 }
 
 bool wxMDIParentFrame::Create(wxWindow *parent,
@@ -68,62 +48,34 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
            long style,
            const wxString& name)
 {
-  m_clientWindow = NULL;
-  m_currentChild = NULL;
+    if (!parent)
+        wxTopLevelWindows.Append(this);
 
-  // this style can be used to prevent a window from having the standard MDI
-  // "Window" menu
-  if ( style & wxFRAME_NO_WINDOW_MENU )
-  {
-      m_windowMenu = (wxMenu *)NULL;
-      style -= wxFRAME_NO_WINDOW_MENU ;
-  }
-  else // normal case: we have the window menu, so construct it
-  {
-      m_windowMenu = new wxMenu;
+    SetName(name);
+    m_windowStyle = style;
 
-      m_windowMenu->Append(IDM_WINDOWCASCADE, wxT("&Cascade"));
-      m_windowMenu->Append(IDM_WINDOWTILEHOR, wxT("Tile &Horizontally"));
-      m_windowMenu->Append(IDM_WINDOWTILEVERT, wxT("Tile &Vertically"));
-      m_windowMenu->AppendSeparator();
-      m_windowMenu->Append(IDM_WINDOWICONS, wxT("&Arrange Icons"));
-      m_windowMenu->Append(IDM_WINDOWNEXT, wxT("&Next"));
-  }
+    if (parent) parent->AddChild(this);
 
-  wxFrame::Create( parent , id , title , wxPoint( 2000 , 2000 ) , size , style , name ) ;
-  m_parentFrameActive = TRUE;
-        
-  OnCreateClient();
+    if ( id > -1 )
+        m_windowId = id;
+    else
+        m_windowId = (int)NewControlId();
+
+    // TODO: create MDI parent frame
+
+    wxModelessWindows.Append(this);
 
     return TRUE;
 }
 
 wxMDIParentFrame::~wxMDIParentFrame()
 {
-    DestroyChildren();
-    // already delete by DestroyChildren()
-    m_frameToolBar = NULL;
-    m_frameStatusBar = NULL;
-    m_clientWindow = NULL ;
-
-    if (m_windowMenu)
-    {
-        delete m_windowMenu;
-        m_windowMenu = (wxMenu*) NULL;
-    }
-
-    if ( m_clientWindow )
-    {
-        delete m_clientWindow;
-        m_clientWindow = NULL ;
-    }
 }
-
 
 // Get size *available for subwindows* i.e. excluding menu bar.
 void wxMDIParentFrame::DoGetClientSize(int *x, int *y) const
 {
-	wxDisplaySize( x , y ) ;
+   wxFrame::DoGetClientSize( x , y ) ;
 }
 
 void wxMDIParentFrame::SetMenuBar(wxMenuBar *menu_bar)
@@ -148,34 +100,21 @@ void wxMDIParentFrame::OnSize(wxSizeEvent& event)
 
 void wxMDIParentFrame::OnActivate(wxActivateEvent& event)
 {
-  if ( m_currentChild && event.GetActive() )
-  {
-    wxActivateEvent event(wxEVT_ACTIVATE, TRUE, m_currentChild->GetId());
-    event.SetEventObject( m_currentChild );
-    m_currentChild->GetEventHandler()->ProcessEvent(event) ;
-  }
-  else if ( event.GetActive() )
-  {
-  	  if ( m_frameMenuBar != NULL )
-	    {
-	    	  m_frameMenuBar->MacInstallMenuBar() ;
-	    }
-
-  }
+	// Do nothing
 }
 
 // Returns the active MDI child window
 wxMDIChildFrame *wxMDIParentFrame::GetActiveChild() const
 {
-  return m_currentChild ;
+    // TODO
+    return NULL;
 }
 
 // Create the client window class (don't Create the window,
 // just return a new class)
 wxMDIClientWindow *wxMDIParentFrame::OnCreateClient()
 {
-    m_clientWindow = new wxMDIClientWindow( this );
-    return m_clientWindow;
+	return new wxMDIClientWindow ;
 }
 
 // Responds to colour changes, and passes event on to children.
@@ -217,10 +156,6 @@ void wxMDIParentFrame::ActivatePrevious()
 
 wxMDIChildFrame::wxMDIChildFrame()
 {
-    Init() ;
-}
-void wxMDIChildFrame::Init()
-{
 }
 
 bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
@@ -240,9 +175,7 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
 
     if (parent) parent->AddChild(this);
 
-  	MacCreateRealWindow( title, pos , size , MacRemoveBordersFromStyle(style) , name ) ;
-  
-	  m_macWindowBackgroundTheme = kThemeBrushDocumentWindowBackground ;
+    // TODO: create child frame
 
     wxModelessWindows.Append(this);
     return FALSE;
@@ -250,10 +183,18 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
 
 wxMDIChildFrame::~wxMDIChildFrame()
 {
-    DestroyChildren();
-    // already delete by DestroyChildren()
-    m_frameToolBar = NULL;
-    m_frameStatusBar = NULL;
+}
+
+// Set the client size (i.e. leave the calculation of borders etc.
+// to wxWindows)
+void wxMDIChildFrame::SetClientSize(int width, int height)
+{
+    // TODO
+}
+
+void wxMDIChildFrame::GetPosition(int *x, int *y) const
+{
+    // TODO
 }
 
 void wxMDIChildFrame::SetMenuBar(wxMenuBar *menu_bar)
@@ -264,21 +205,20 @@ void wxMDIChildFrame::SetMenuBar(wxMenuBar *menu_bar)
 // MDI operations
 void wxMDIChildFrame::Maximize()
 {
-    wxFrame::Maximize() ;
+    // TODO
 }
 
 void wxMDIChildFrame::Restore()
 {
-    wxFrame::Restore() ;
+    // TODO
 }
 
 void wxMDIChildFrame::Activate()
 {
+    // TODO
 }
 
-//-----------------------------------------------------------------------------
-// wxMDIClientWindow
-//-----------------------------------------------------------------------------
+// Client window
 
 wxMDIClientWindow::wxMDIClientWindow()
 {
@@ -286,22 +226,14 @@ wxMDIClientWindow::wxMDIClientWindow()
 
 wxMDIClientWindow::~wxMDIClientWindow()
 {
-    DestroyChildren();
 }
 
 bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
 {
-
-    m_windowId = (int)NewControlId();
-
-    if ( parent )
-    {
-       parent->AddChild(this);
-    }
+    // TODO create client window
     m_backgroundColour = wxSystemSettings::GetSystemColour(wxSYS_COLOUR_APPWORKSPACE);
 
-    wxModelessWindows.Append(this);
-    return TRUE;
+    return FALSE;
 }
 
 // Explicitly call default scroll behaviour

@@ -8,11 +8,15 @@ config.sub
 configure.in
 setup.h.in
 install-sh
+ltconfig
+ltmain.sh
 missing
 mkinstalldirs
 modules
 template.mak
 wx-config.in
+makefile.unx.in
+wxinstall
 setup.h_vms
 
 distrib/msw/*.rsp
@@ -28,7 +32,9 @@ distrib/msw/tmake/makeall.bat
 distrib/msw/tmake/makeall.sh
 distrib/msw/tmake/wxwin.pro
 distrib/msw/tmake/tmake.conf
-distrib/gtk/*
+distrib/gtk/*.txt
+distrib/gtk/Setup
+distrib/gtk/copy_src
 
 locale/*.po
 locale/*.mo
@@ -36,7 +42,9 @@ locale/*.mo
 docs/readme.txt
 docs/readme_vms.txt
 docs/install.txt
+docs/release.txt
 docs/changes.txt
+docs/upgrade.txt
 docs/todo.txt
 docs/licence.txt
 docs/licendoc.txt
@@ -56,6 +64,9 @@ docs/tech/*.txt
 docs/tech/*.htm
 
 src/makeenvs/*.env
+src/make.env
+src/makeprog.env
+src/makelib.env
 
 src/*.inc
 src/mkdir
@@ -112,18 +123,6 @@ src/zlib/*.txt
 src/zlib/makefile*
 src/zlib/*.com
 src/zlib/*.3
-
-src/regex/COPYRIGHT
-src/regex/makefile*
-src/regex/README
-src/regex/WHATSNEW
-src/regex/mkh
-src/regex/*.h
-src/regex/*.ih
-src/regex/*.c
-src/regex/tests
-src/regex/regex.3
-src/regex/regex.7
 
 include/wx/*.h
 include/wx/*.inl
@@ -231,18 +230,6 @@ samples/dynamic/*.bmp
 samples/dynamic/*.rc
 samples/dynamic/*.wav
 
-samples/erase/*.cpp
-samples/erase/*.h
-samples/erase/*.def
-samples/erase/makefile*
-samples/erase/*.xbm
-samples/erase/*.xpm
-samples/erase/*.txt
-samples/erase/*.ico
-samples/erase/*.bmp
-samples/erase/*.rc
-samples/erase/*.wav
-
 samples/sockets/*.cpp
 samples/sockets/*.h
 samples/sockets/*.def
@@ -285,7 +272,6 @@ samples/help/*.hhc
 samples/help/*.hpj
 samples/help/*.tex
 samples/help/*.ini
-samples/help/cshelp.txt
 samples/help/doc/*.html
 samples/help/doc/*.htm
 samples/help/doc/*.class
@@ -507,17 +493,17 @@ samples/validate/*.xpm
 samples/validate/*.ico
 samples/validate/*.bmp
 
-samples/event/*.cpp
-samples/event/*.h
-samples/event/*.def
-samples/event/*.rc
-samples/event/*.inf
-samples/event/*.txt
-samples/event/makefile*
-samples/event/*.xbm
-samples/event/*.xpm
-samples/event/*.ico
-samples/event/*.bmp
+samples/events/*.cpp
+samples/events/*.h
+samples/events/*.def
+samples/events/*.rc
+samples/events/*.inf
+samples/events/*.txt
+samples/events/makefile*
+samples/events/*.xbm
+samples/events/*.xpm
+samples/events/*.ico
+samples/events/*.bmp
 
 samples/treectrl/*.cpp
 samples/treectrl/*.h
@@ -623,6 +609,17 @@ samples/dnd/*.png
 samples/dnd/*.ico
 samples/dnd/*.txt
 samples/dnd/*.cur
+
+samples/tab/*.cpp
+samples/tab/*.h
+samples/tab/makefile*
+samples/tab/*.rc
+samples/tab/*.def
+samples/tab/*.bmp
+samples/tab/*.xbm
+samples/tab/*.xpm
+samples/tab/*.ico
+samples/tab/*.txt
 
 samples/notebook/*.cpp
 samples/notebook/*.h
@@ -966,6 +963,15 @@ samples/statbar/*.xpm
 samples/statbar/*.bmp
 samples/statbar/*.txt
 
+samples/plot/*.cpp
+samples/plot/*.h
+samples/plot/makefile*
+samples/plot/*.rc
+samples/plot/*.def
+samples/plot/*.ico
+samples/plot/*.xpm
+samples/plot/*.txt
+
 samples/exec/*.cpp
 samples/exec/*.h
 samples/exec/makefile*
@@ -1029,16 +1035,6 @@ samples/opengl/penguin/*.xbm
 samples/opengl/penguin/*.xpm
 samples/opengl/penguin/make*.*
 samples/opengl/penguin/penguin.lwo
-
-samples/widgets/*.cpp
-samples/widgets/*.h
-samples/widgets/makefile*
-samples/widgets/*.rc
-samples/widgets/*.def
-samples/widgets/*.ico
-samples/widgets/*.xpm
-samples/widgets/*.txt
-samples/widgets/*.bmp
 
 demos/makefile*
 demos/configure

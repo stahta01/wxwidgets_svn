@@ -20,8 +20,6 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_FONTDLG && (!defined(__WXGTK__) || defined(__WXUNIVERSAL__))
-
 #ifndef WX_PRECOMP
 #include <stdio.h>
 #include "wx/utils.h"
@@ -449,6 +447,4 @@ int wxFontWeightStringToInt(wxChar *weight)
     return wxNORMAL;
 }
 
-#endif
-    // wxUSE_FONTDLG
 

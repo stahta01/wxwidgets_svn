@@ -67,6 +67,7 @@ class wxGenButton(wxControl):
         self.bezelWidth = 2
         self.hasFocus = false
         self.useFocusInd = true
+        self.evtToSend = []
 
         self.SetLabel(label)
         self.SetPosition(pos)
@@ -86,6 +87,7 @@ class wxGenButton(wxControl):
         EVT_KEY_UP(self,           self.OnKeyUp)
         EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
         EVT_PAINT(self,            self.OnPaint)
+        EVT_IDLE(self,             self.OnIdle)
 
 
     def SetBestSize(self, size=None):
@@ -151,7 +153,7 @@ class wxGenButton(wxControl):
 
 
     def SetBackgroundColour(self, colour):
-        wxControl.SetBackgroundColour(self, colour)
+        wxWindow.SetBackgroundColour(self, colour)
 
         # Calculate a new set of highlight and shadow colours based on
         # the new background colour.  Works okay if the colour is dark...
@@ -174,7 +176,14 @@ class wxGenButton(wxControl):
         evt = wxGenButtonEvent(wxEVT_COMMAND_BUTTON_CLICKED, self.GetId())
         evt.SetIsDown(not self.up)
         evt.SetButtonObj(self)
-        self.GetEventHandler().ProcessEvent(evt)
+        self.evtToSend.append(evt)
+
+
+    def OnIdle(self, evt):
+        while self.evtToSend:
+            evt = self.evtToSend[0]
+            del self.evtToSend[0]
+            self.GetEventHandler().ProcessEvent(evt)
 
 
     def DrawBezel(self, dc, x1, y1, x2, y2):
@@ -254,10 +263,10 @@ class wxGenButton(wxControl):
     def OnLeftUp(self, event):
         if not self.IsEnabled():
             return
-        self.ReleaseMouse()
         if not self.up:    # if the button was down when the mouse was released...
             self.Notify()
         self.up = true
+        self.ReleaseMouse()
         self.Refresh()
         event.Skip()
 
@@ -357,6 +366,7 @@ class wxGenBitmapButton(wxGenButton):
             return -1, -1, false
         return self.bmpLabel.GetWidth()+2, self.bmpLabel.GetHeight()+2, false
 
+
     def DrawLabel(self, dc, width, height, dw=0, dy=0):
         bmp = self.bmpLabel
         if self.bmpDisabled and not self.IsEnabled():
@@ -371,68 +381,6 @@ class wxGenBitmapButton(wxGenButton):
         hasMask = bmp.GetMask() != None
         dc.DrawBitmap(bmp, (width-bw)/2+dw, (height-bh)/2+dy, hasMask)
 
-
-#----------------------------------------------------------------------
-
-
-class wxGenBitmapTextButton(wxGenBitmapButton):     # generic bitmapped button with Text Label
-    def __init__(self, parent, ID, bitmap, label,
-                 pos = wxDefaultPosition, size = wxDefaultSize,
-                 style = 0, validator = wxDefaultValidator,
-                 name = "genbutton"):
-        wxGenBitmapButton.__init__(self, parent, ID, bitmap, pos, size, style, validator, name)
-        self.SetLabel(label)
-
-
-    def _GetLabelSize(self):
-        """ used internally """
-        w, h = self.GetTextExtent(self.GetLabel())
-        if not self.bmpLabel:
-            return w, h, true       # if there isn't a bitmap use the size of the text
-
-        w_bmp = self.bmpLabel.GetWidth()+2
-        h_bmp = self.bmpLabel.GetHeight()+2
-        width = w + w_bmp
-        if h_bmp > h:
-            height = h_bmp
-        else:
-            height = h
-        return width, height, true
-
-
-    def DrawLabel(self, dc, width, height, dw=0, dy=0):
-        bmp = self.bmpLabel
-        if bmp != None:     # if the bitmap is used
-            if self.bmpDisabled and not self.IsEnabled():
-                bmp = self.bmpDisabled
-            if self.bmpFocus and self.hasFocus:
-                bmp = self.bmpFocus
-            if self.bmpSelected and not self.up:
-                bmp = self.bmpSelected
-            bw,bh = bmp.GetWidth(), bmp.GetHeight()
-            if not self.up:
-                dw = dy = self.labelDelta
-            hasMask = bmp.GetMask() != None
-        else:
-            bw = bh = 0     # no bitmap -> size is zero
-
-        dc.SetFont(self.GetFont())
-        if self.IsEnabled():
-            dc.SetTextForeground(self.GetForegroundColour())
-        else:
-            dc.SetTextForeground(wxSystemSettings_GetSystemColour(wxSYS_COLOUR_GRAYTEXT))
-
-        label = self.GetLabel()
-        tw, th = dc.GetTextExtent(label)        # size of text
-        if not self.up:
-            dw = dy = self.labelDelta
-
-        pos_x = (width-bw-tw)/2+dw      # adjust for bitmap and text to centre
-        if bmp !=None:
-            dc.DrawBitmap(bmp, pos_x, (height-bh)/2+dy, hasMask)        # draw bitmap if available
-            pos_x = pos_x + 2   # extra spacing from bitmap
-
-        dc.DrawText(label, pos_x + dw+bw, (height-th)/2+dy)             # draw the text
 
 
 #----------------------------------------------------------------------
@@ -479,9 +427,6 @@ class wxGenToggleButton(__ToggleMixin, wxGenButton):
     pass
 
 class wxGenBitmapToggleButton(__ToggleMixin, wxGenBitmapButton):
-    pass
-
-class wxGenBitmapTextToggleButton(__ToggleMixin, wxGenBitmapTextButton):
     pass
 
 #----------------------------------------------------------------------

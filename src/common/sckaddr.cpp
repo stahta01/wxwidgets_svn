@@ -42,7 +42,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxIPV4address, wxSockAddress)
 #ifdef ENABLE_IPV6
 IMPLEMENT_DYNAMIC_CLASS(wxIPV6address, wxSockAddress)
 #endif
-#if defined(__UNIX__) && !defined(__WXMAC__)
+#ifdef __UNIX__
 IMPLEMENT_DYNAMIC_CLASS(wxUNIXaddress, wxSockAddress)
 #endif
 
@@ -53,11 +53,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxUNIXaddress, wxSockAddress)
 wxSockAddress::wxSockAddress()
 {
   m_address = GAddress_new();
-}
-
-wxSockAddress::wxSockAddress(const wxSockAddress& other)
-{
-    m_address = GAddress_copy(other.m_address);
 }
 
 wxSockAddress::~wxSockAddress()
@@ -71,14 +66,22 @@ void wxSockAddress::SetAddress(GAddress *address)
   m_address = GAddress_copy(address);
 }
 
-wxSockAddress& wxSockAddress::operator=(const wxSockAddress& addr)
+const wxSockAddress& wxSockAddress::operator=(const wxSockAddress& addr)
 {
   SetAddress(addr.GetAddress());
   return *this;
 }
 
-void wxSockAddress::Clear()
+void wxSockAddress::CopyObject(wxObject& dest) const
 {
+  wxSockAddress *addr = (wxSockAddress *)&dest;
+
+  wxObject::CopyObject(dest);
+  addr->SetAddress(GetAddress());
+}
+
+void wxSockAddress::Clear()
+{ 
   GAddress_destroy(m_address);
   m_address = GAddress_new();
 }
@@ -88,11 +91,7 @@ void wxSockAddress::Clear()
 // ---------------------------------------------------------------------------
 
 wxIPV4address::wxIPV4address()
-{
-}
-
-wxIPV4address::wxIPV4address(const wxIPV4address& other)
-             : wxSockAddress(other)
+  : wxSockAddress()
 {
 }
 
@@ -103,7 +102,7 @@ wxIPV4address::~wxIPV4address()
 bool wxIPV4address::Hostname(const wxString& name)
 {
   // Some people are sometimes fool.
-  if (name == wxT(""))
+  if (name == wxT("")) 
   {
     wxLogWarning( _("Trying to solve a NULL hostname: giving up") );
     return FALSE;
@@ -148,7 +147,7 @@ wxString wxIPV4address::Hostname()
 
 unsigned short wxIPV4address::Service()
 {
-  return GAddress_INET_GetPort(m_address);
+  return GAddress_INET_GetPort(m_address); 
 }
 
 #if 0
@@ -158,11 +157,6 @@ unsigned short wxIPV4address::Service()
 
 wxIPV6address::wxIPV6address()
   : wxSockAddress()
-{
-}
-
-wxIPV6address::wxIPV6address(const wxIPV6address& other)
-             : wxSockAddress(other)
 {
 }
 
@@ -202,24 +196,18 @@ const wxString& wxIPV6address::Hostname()
 
 unsigned short wxIPV6address::Service()
 {
-  return GAddress_INET_GetPort(m_address);
+  return GAddress_INET_GetPort(m_address); 
 }
 
-#endif // 0
+#endif
 
-#if defined(__UNIX__) && !defined(__WXMAC__)
-
+#ifdef __UNIX__
 // ---------------------------------------------------------------------------
 // wxUNIXaddress
 // ---------------------------------------------------------------------------
 
 wxUNIXaddress::wxUNIXaddress()
-             : wxSockAddress()
-{
-}
-
-wxUNIXaddress::wxUNIXaddress(const wxUNIXaddress& other)
-             : wxSockAddress(other)
+  : wxSockAddress()
 {
 }
 
@@ -241,7 +229,7 @@ wxString wxUNIXaddress::Filename()
   return wxString(path);
 }
 
-#endif // __UNIX__
-
 #endif
+
+#endif 
   // wxUSE_SOCKETS

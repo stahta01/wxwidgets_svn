@@ -22,9 +22,7 @@ DATAFILES = helpfiles/Index.hhk helpfiles/book1.htm helpfiles/book2.htm \
 
 PROGRAM=help
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 include ../../../src/makeprog.env
 
--include $(DEPFILES)

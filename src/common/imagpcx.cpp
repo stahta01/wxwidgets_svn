@@ -23,7 +23,7 @@
 #  include "wx/defs.h"
 #endif
 
-#if wxUSE_IMAGE && wxUSE_STREAMS && wxUSE_PCX
+#if wxUSE_STREAMS && wxUSE_PCX
 
 #include "wx/imagpcx.h"
 #include "wx/wfstream.h"
@@ -102,7 +102,7 @@ void RLEdecode(unsigned char *p, unsigned int size, wxInputStream& s)
 		  //
         if ((data & 0xC0) != 0xC0)
         {
-            *(p++) = (unsigned char)data;
+            *(p++) = data;
             size--;
         }
         else
@@ -110,7 +110,7 @@ void RLEdecode(unsigned char *p, unsigned int size, wxInputStream& s)
             cont = data & 0x3F;
             data = (unsigned char)s.GetC();
             for (i = 1; i <= cont; i++)
-                *(p++) = (unsigned char)data;
+                *(p++) = data;
             size -= cont;
         }
     }
@@ -276,19 +276,6 @@ int ReadPCX(wxImage *image, wxInputStream& stream)
             *(p++) = pal[3 * index + 1];
             *(p++) = pal[3 * index + 2];
         }
-
-#if wxUSE_PALETTE
-        unsigned char r[256];
-        unsigned char g[256];
-        unsigned char b[256];
-        for (i = 0; i < 256; i++)
-        {
-            r[i] = pal[3*i + 0];
-            g[i] = pal[3*i + 1];
-            b[i] = pal[3*i + 2];
-        }
-        image->SetPalette(wxPalette(256, r, g, b));
-#endif // wxUSE_PALETTE
     }
 
     return wxPCX_OK;
@@ -350,12 +337,12 @@ int SavePCX(wxImage *image, wxOutputStream& stream)
     hdr[HDR_ENCODING]         = 1;
     hdr[HDR_NPLANES]          = nplanes;
     hdr[HDR_BITSPERPIXEL]     = 8;
-    hdr[HDR_BYTESPERLINE]     = (unsigned char)(bytesperline % 256);
-    hdr[HDR_BYTESPERLINE + 1] = (unsigned char)(bytesperline / 256);
-    hdr[HDR_XMAX]             = (unsigned char)((width - 1)  % 256);
-    hdr[HDR_XMAX + 1]         = (unsigned char)((width - 1)  / 256);
-    hdr[HDR_YMAX]             = (unsigned char)((height - 1) % 256);
-    hdr[HDR_YMAX + 1]         = (unsigned char)((height - 1) / 256);
+    hdr[HDR_BYTESPERLINE]     = bytesperline % 256;
+    hdr[HDR_BYTESPERLINE + 1] = bytesperline / 256;
+    hdr[HDR_XMAX]             = (width - 1)  % 256;
+    hdr[HDR_XMAX + 1]         = (width - 1)  / 256;
+    hdr[HDR_YMAX]             = (height - 1) % 256;
+    hdr[HDR_YMAX + 1]         = (height - 1) / 256;
     hdr[HDR_PALETTEINFO]      = 1;
 
     stream.Write(hdr, 128);

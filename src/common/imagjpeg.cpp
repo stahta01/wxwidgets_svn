@@ -20,28 +20,20 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_IMAGE && wxUSE_LIBJPEG
+#if wxUSE_LIBJPEG
 
 #include "wx/imagjpeg.h"
 #include "wx/bitmap.h"
 #include "wx/debug.h"
 #include "wx/log.h"
 #include "wx/app.h"
-
-// NB: Some compilers define boolean type in Windows headers (e.g. Watcom C++).
-//     This causes a conflict with jmorecfg.h header from libjpeg, so we have
-//     to make sure libjpeg won't try to define boolean itself. This is done by
-//     defining HAVE_BOOLEAN.
-#if defined(__WXMSW__) && (defined(__MWERKS__) || defined(__WATCOMC__))
-    #define HAVE_BOOLEAN
-    #include <windows.h>
-#endif
-
 extern "C"
 {
+#ifdef __WATCOMC__
+    #define HAVE_BOOLEAN
+#endif
     #include "jpeglib.h"
 }
-
 #include "wx/filefn.h"
 #include "wx/wfstream.h"
 #include "wx/intl.h"
@@ -56,6 +48,10 @@ extern "C"
 #ifdef FAR
 #undef FAR
 #endif
+#endif
+
+#ifdef __WXMSW__
+#include <windows.h>
 #endif
 
 //-----------------------------------------------------------------------------
@@ -106,7 +102,7 @@ METHODDEF(void) my_skip_input_data ( j_decompress_ptr cinfo, long num_bytes )
     {
         my_src_ptr src = (my_src_ptr) cinfo->src;
 
-        while (num_bytes > (long)src->pub.bytes_in_buffer)
+        while (num_bytes > (long)src->pub.bytes_in_buffer) 
         {
             num_bytes -= (long) src->pub.bytes_in_buffer;
             src->pub.fill_input_buffer(cinfo);
@@ -202,7 +198,7 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
       /* If we get here, the JPEG code has signaled an error.
        * We need to clean up the JPEG object, close the input file, and return.
        */
-      if (verbose)
+      if (verbose) 
         wxLogError(_("JPEG: Couldn't load - file is probably corrupted."));
       (cinfo.src->term_source)(&cinfo);
       jpeg_destroy_decompress(&cinfo);
@@ -311,12 +307,12 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     if (!verbose) cinfo.err->output_message=NULL;
 
     /* Establish the setjmp return context for my_error_exit to use. */
-    if (setjmp(jerr.setjmp_buffer))
+    if (setjmp(jerr.setjmp_buffer)) 
     {
         /* If we get here, the JPEG code has signaled an error.
          * We need to clean up the JPEG object, close the input file, and return.
          */
-         if (verbose)
+         if (verbose) 
             wxLogError(_("JPEG: Couldn't save image."));
          jpeg_destroy_compress(&cinfo);
          return FALSE;
@@ -330,16 +326,6 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
     jpeg_set_defaults(&cinfo);
-
-    // TODO: 3rd parameter is force_baseline, what value should this be?
-    // Code says: "If force_baseline is TRUE, the computed quantization table entries
-    // are limited to 1..255 for JPEG baseline compatibility."
-    // 'Quality' is a number between 0 (terrible) and 100 (very good).
-    // The default (in jcparam.c, jpeg_set_defaults) is 75,
-    // and force_baseline is TRUE.
-    if (image->HasOption(wxT("quality")))
-        jpeg_set_quality(&cinfo, image->GetOptionInt(wxT("quality")), TRUE);
-
     jpeg_start_compress(&cinfo, TRUE);
 
     stride = cinfo.image_width * 3;    /* JSAMPLEs per row in image_buffer */
@@ -362,7 +348,7 @@ bool wxJPEGHandler::DoCanRead( wxInputStream& stream )
 {
     unsigned char hdr[2];
 
-    stream.Read(hdr, 2);
+    stream.Read(&hdr, 2);
     stream.SeekI(-2, wxFromCurrent);
     return (hdr[0] == 0xFF && hdr[1] == 0xD8);
 }

@@ -21,9 +21,6 @@ class wxMDIParentFramePtr(wxFramePtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = apply(mdic.wxMDIParentFrame_Create,(self,) + _args, _kwargs)
-        return val
     def ActivateNext(self, *_args, **_kwargs):
         val = apply(mdic.wxMDIParentFrame_ActivateNext,(self,) + _args, _kwargs)
         return val
@@ -38,12 +35,15 @@ class wxMDIParentFramePtr(wxFramePtr):
         return val
     def GetActiveChild(self, *_args, **_kwargs):
         val = apply(mdic.wxMDIParentFrame_GetActiveChild,(self,) + _args, _kwargs)
+        if val: val = wxMDIChildFramePtr(val) 
         return val
     def GetClientWindow(self, *_args, **_kwargs):
         val = apply(mdic.wxMDIParentFrame_GetClientWindow,(self,) + _args, _kwargs)
+        if val: val = wxMDIClientWindowPtr(val) 
         return val
     def GetToolBar(self, *_args, **_kwargs):
         val = apply(mdic.wxMDIParentFrame_GetToolBar,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def Tile(self, *_args, **_kwargs):
         val = apply(mdic.wxMDIParentFrame_Tile,(self,) + _args, _kwargs)
@@ -54,24 +54,15 @@ class wxMDIParentFrame(wxMDIParentFramePtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(mdic.new_wxMDIParentFrame,_args,_kwargs)
         self.thisown = 1
-        self._setOORInfo(self)
+        #wx._StdFrameCallbacks(self)
 
 
-
-def wxPreMDIParentFrame(*_args,**_kwargs):
-    val = wxMDIParentFramePtr(apply(mdic.new_wxPreMDIParentFrame,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
 
 
 class wxMDIChildFramePtr(wxFramePtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = apply(mdic.wxMDIChildFrame_Create,(self,) + _args, _kwargs)
-        return val
     def Activate(self, *_args, **_kwargs):
         val = apply(mdic.wxMDIChildFrame_Activate,(self,) + _args, _kwargs)
         return val
@@ -87,39 +78,25 @@ class wxMDIChildFrame(wxMDIChildFramePtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(mdic.new_wxMDIChildFrame,_args,_kwargs)
         self.thisown = 1
-        self._setOORInfo(self)
+        #wx._StdFrameCallbacks(self)
 
 
-
-def wxPreMDIChildFrame(*_args,**_kwargs):
-    val = wxMDIChildFramePtr(apply(mdic.new_wxPreMDIChildFrame,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
 
 
 class wxMDIClientWindowPtr(wxWindowPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = apply(mdic.wxMDIClientWindow_Create,(self,) + _args, _kwargs)
-        return val
     def __repr__(self):
         return "<C wxMDIClientWindow instance at %s>" % (self.this,)
 class wxMDIClientWindow(wxMDIClientWindowPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(mdic.new_wxMDIClientWindow,_args,_kwargs)
         self.thisown = 1
-        self._setOORInfo(self)
+        #wx._StdWindowCallbacks(self)
+        #wx._StdOnScrollCallbacks(self)
 
 
-
-def wxPreMDIClientWindow(*_args,**_kwargs):
-    val = wxMDIClientWindowPtr(apply(mdic.new_wxPreMDIClientWindow,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
 
 
 

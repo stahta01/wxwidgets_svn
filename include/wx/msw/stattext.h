@@ -16,40 +16,45 @@
     #pragma interface "stattext.h"
 #endif
 
-class WXDLLEXPORT wxStaticText : public wxStaticTextBase
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticTextNameStr;
+
+class WXDLLEXPORT wxStaticText : public wxControl
 {
+DECLARE_DYNAMIC_CLASS(wxStaticText)
+
 public:
     wxStaticText() { }
 
-    wxStaticText(wxWindow *parent,
-                 wxWindowID id,
-                 const wxString& label,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
-                 long style = 0,
-                 const wxString& name = wxStaticTextNameStr)
+    wxStaticText(wxWindow *parent, wxWindowID id,
+        const wxString& label,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = 0,
+        const wxString& name = wxStaticTextNameStr)
     {
         Create(parent, id, label, pos, size, style, name);
     }
 
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxString& label,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                const wxString& name = wxStaticTextNameStr);
+    bool Create(wxWindow *parent, wxWindowID id,
+        const wxString& label,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = 0,
+        const wxString& name = wxStaticTextNameStr);
 
-    // override some methods to resize the window properly
-    virtual void SetLabel(const wxString& label);
-    virtual bool SetFont( const wxFont &font );
+    // accessors
+    void SetLabel(const wxString& label);
+
+    // overriden base class virtuals
+    virtual bool AcceptsFocus() const { return FALSE; }
+
+    // callbacks
+    virtual long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 
 protected:
-    virtual void DoSetSize(int x, int y, int w, int h,
-                           int sizeFlags = wxSIZE_AUTO);
     virtual wxSize DoGetBestSize() const;
-
-    DECLARE_DYNAMIC_CLASS(wxStaticText)
 };
 
 #endif
