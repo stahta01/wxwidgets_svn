@@ -22,9 +22,6 @@ src/zlib/zlib.dsw
 src/png/png.dsp
 src/png/png.dsw
 
-src/regex/regex.dsp
-src/regex/regex.dsw
-
 samples/samples.dsw
 
 samples/calendar/Calendar.dsp
@@ -203,6 +200,9 @@ samples/splitter/Splitter.dsw
 
 samples/statbar/Statbar.dsp
 samples/statbar/Statbar.dsw
+
+samples/tab/Tab.dsp
+samples/tab/Tab.dsw
 
 samples/taskbar/Taskbar.dsp
 samples/taskbar/Taskbar.dsw

@@ -113,19 +113,6 @@ src/zlib/makefile*
 src/zlib/*.com
 src/zlib/*.3
 
-src/regex/COPYRIGHT
-src/regex/makefile*
-src/regex/README
-src/regex/WHATSNEW
-src/regex/mkh
-src/regex/makefile*
-src/regex/*.h
-src/regex/*.ih
-src/regex/*.c
-src/regex/tests
-src/regex/regex.3
-src/regex/regex.7
-
 include/wx/*.h
 include/wx/*.inl
 include/wx/*.cpp
@@ -624,6 +611,17 @@ samples/dnd/*.png
 samples/dnd/*.ico
 samples/dnd/*.txt
 samples/dnd/*.cur
+
+samples/tab/*.cpp
+samples/tab/*.h
+samples/tab/makefile*
+samples/tab/*.rc
+samples/tab/*.def
+samples/tab/*.bmp
+samples/tab/*.xbm
+samples/tab/*.xpm
+samples/tab/*.ico
+samples/tab/*.txt
 
 samples/notebook/*.cpp
 samples/notebook/*.h
