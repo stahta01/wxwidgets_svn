@@ -27,19 +27,20 @@
 #	define SWIGEXPORT(a) __declspec(dllexport) a
 #   else
 #	if defined(__BORLANDC__)
-#	    define SWIGEXPORT(a) a _export 
+#	    define SWIGEXPORT(a) a _export
 #	else
-#	    define SWIGEXPORT(a) a 
+#	    define SWIGEXPORT(a) a
 #	endif
 #   endif
 #else
-#   define SWIGEXPORT(a) a 
+#   define SWIGEXPORT(a) a
 #endif
+
+#include "Python.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "Python.h"
 extern void SWIG_MakePtr(char *, void *, char *);
 extern void SWIG_RegisterMapping(char *, char *, void *(*)(void *));
 extern char *SWIG_GetPtr(char *, void **, char *);
@@ -60,13 +61,12 @@ extern PyObject *SWIG_newvarlink(void);
 
 static PyObject* l_output_helper(PyObject* target, PyObject* o) {
     PyObject*   o2;
-    PyObject*   o3;
-    if (!target) {                   
+    if (!target) {
         target = o;
-    } else if (target == Py_None) {  
+    } else if (target == Py_None) {
         Py_DECREF(Py_None);
         target = o;
-    } else {                         
+    } else {
         if (!PyList_Check(target)) {
             o2 = target;
             target = PyList_New(0);
@@ -83,23 +83,23 @@ static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     PyObject*   o2;
     PyObject*   o3;
 
-    if (!target) {                   
+    if (!target) {
         target = o;
-    } else if (target == Py_None) {  
+    } else if (target == Py_None) {
         Py_DECREF(Py_None);
         target = o;
-    } else {                         
+    } else {
         if (!PyTuple_Check(target)) {
             o2 = target;
             target = PyTuple_New(1);
             PyTuple_SetItem(target, 0, o2);
         }
-        o3 = PyTuple_New(1);            
-        PyTuple_SetItem(o3, 0, o);      
+        o3 = PyTuple_New(1);
+        PyTuple_SetItem(o3, 0, o);
 
         o2 = target;
-        target = PySequence_Concat(o2, o3); 
-        Py_DECREF(o2);                      
+        target = PySequence_Concat(o2, o3);
+        Py_DECREF(o2);
         Py_DECREF(o3);
     }
     return target;
@@ -3053,19 +3053,23 @@ static PyObject *_wrap_wxLayoutConstraints_width_get(PyObject *self, PyObject *a
     return _resultobj;
 }
 
-#define new_wxRegion() (new wxRegion())
+#define new_wxRegion(_swigarg0,_swigarg1,_swigarg2,_swigarg3) (new wxRegion(_swigarg0,_swigarg1,_swigarg2,_swigarg3))
 static PyObject *_wrap_new_wxRegion(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxRegion * _result;
-    char *_kwnames[] = {  NULL };
+    long  _arg0 = (long ) 0;
+    long  _arg1 = (long ) 0;
+    long  _arg2 = (long ) 0;
+    long  _arg3 = (long ) 0;
+    char *_kwnames[] = { "x","y","width","height", NULL };
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,":new_wxRegion",_kwnames)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"|llll:new_wxRegion",_kwnames,&_arg0,&_arg1,&_arg2,&_arg3)) 
         return NULL;
 {
     wxPy_BEGIN_ALLOW_THREADS;
-        _result = (wxRegion *)new_wxRegion();
+        _result = (wxRegion *)new_wxRegion(_arg0,_arg1,_arg2,_arg3);
 
     wxPy_END_ALLOW_THREADS;
 }    if (_result) {
@@ -4536,6 +4540,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxPrintQuality","_uint",0},
     { "_wxPrintQuality","_EBool",0},
     { "_wxPrintQuality","_size_t",0},
+    { "_wxPrintQuality","_time_t",0},
     { "_class_wxRegionIterator","_wxRegionIterator",0},
     { "_wxIndividualLayoutConstraint","_class_wxIndividualLayoutConstraint",0},
     { "_byte","_unsigned_char",0},
@@ -4544,6 +4549,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_class_wxAcceleratorTable","_wxAcceleratorTable",0},
     { "_size_t","_wxCoord",0},
     { "_size_t","_wxPrintQuality",0},
+    { "_size_t","_time_t",0},
     { "_size_t","_unsigned_int",0},
     { "_size_t","_int",0},
     { "_size_t","_wxWindowID",0},
@@ -4551,6 +4557,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_class_wxRealPoint","_wxRealPoint",0},
     { "_uint","_wxCoord",0},
     { "_uint","_wxPrintQuality",0},
+    { "_uint","_time_t",0},
     { "_uint","_size_t",0},
     { "_uint","_unsigned_int",0},
     { "_uint","_int",0},
@@ -4589,6 +4596,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_unsigned_char","_byte",0},
     { "_unsigned_int","_wxCoord",0},
     { "_unsigned_int","_wxPrintQuality",0},
+    { "_unsigned_int","_time_t",0},
     { "_unsigned_int","_size_t",0},
     { "_unsigned_int","_uint",0},
     { "_unsigned_int","_wxWindowID",0},
@@ -4598,6 +4606,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_short","_signed_short",0},
     { "_wxWindowID","_wxCoord",0},
     { "_wxWindowID","_wxPrintQuality",0},
+    { "_wxWindowID","_time_t",0},
     { "_wxWindowID","_size_t",0},
     { "_wxWindowID","_EBool",0},
     { "_wxWindowID","_uint",0},
@@ -4606,12 +4615,20 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxWindowID","_unsigned_int",0},
     { "_int","_wxCoord",0},
     { "_int","_wxPrintQuality",0},
+    { "_int","_time_t",0},
     { "_int","_size_t",0},
     { "_int","_EBool",0},
     { "_int","_uint",0},
     { "_int","_wxWindowID",0},
     { "_int","_unsigned_int",0},
     { "_int","_signed_int",0},
+    { "_time_t","_wxCoord",0},
+    { "_time_t","_wxPrintQuality",0},
+    { "_time_t","_unsigned_int",0},
+    { "_time_t","_int",0},
+    { "_time_t","_wxWindowID",0},
+    { "_time_t","_uint",0},
+    { "_time_t","_size_t",0},
     { "_wxSize","_class_wxSize",0},
     { "_wxRegionIterator","_class_wxRegionIterator",0},
     { "_class_wxLayoutConstraints","_wxLayoutConstraints",0},
@@ -4622,6 +4639,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxCoord","_uint",0},
     { "_wxCoord","_EBool",0},
     { "_wxCoord","_size_t",0},
+    { "_wxCoord","_time_t",0},
     { "_wxCoord","_wxPrintQuality",0},
     { "_wxRegion","_class_wxRegion",0},
     { "_class_wxBusyInfo","_wxBusyInfo",0},

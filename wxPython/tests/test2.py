@@ -154,11 +154,7 @@ if __name__ == '__main__':
 #----------------------------------------------------------------------------
 #
 # $Log$
-# Revision 1.2  2000/07/15 19:51:32  cvsuser
-# merged 2.2 branch
-#
 # Revision 1.1.2.1  2000/05/16 02:07:01  RD
-#
 # Moved and reorganized wxPython directories
 #
 # Now builds into an intermediate wxPython package directory before

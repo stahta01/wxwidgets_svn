@@ -138,6 +138,11 @@ _wxStart = wxc._wxStart
 
 _wxSetDictionary = wxc._wxSetDictionary
 
+def wxGetApp(*_args, **_kwargs):
+    val = apply(wxc.wxGetApp,_args,_kwargs)
+    if val: val = wxPyAppPtr(val)
+    return val
+
 wxApp_CleanUp = wxc.wxApp_CleanUp
 
 
@@ -1456,9 +1461,6 @@ def EVT_LIST_SET_INFO(win, id, func):
 def EVT_LIST_ITEM_SELECTED(win, id, func):
     win.Connect(id, -1,  wxEVT_COMMAND_LIST_ITEM_SELECTED, func)
 
-def EVT_LIST_ITEM_ACTIVATED(win, id, func):
-    win.Connect(id, -1,  wxEVT_COMMAND_LIST_ITEM_ACTIVATED, func)
-
 def EVT_LIST_ITEM_DESELECTED(win, id, func):
     win.Connect(id, -1, wxEVT_COMMAND_LIST_ITEM_DESELECTED, func)
 
@@ -1476,6 +1478,10 @@ def EVT_LIST_ITEM_RIGHT_CLICK(win, id, func):
 
 def EVT_LIST_ITEM_MIDDLE_CLICK(win, id, func):
     win.Connect(id, -1, wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK, func)
+
+def EVT_LIST_ITEM_ACTIVATED(win, id, func):
+    win.Connect(id, -1,  wxEVT_COMMAND_LIST_ITEM_ACTIVATED, func)
+
 
 
 
