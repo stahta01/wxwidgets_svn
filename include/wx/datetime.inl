@@ -40,19 +40,19 @@
     const long wxDateTime::TIME_T_FACTOR = 1000l;
 #endif // wxDEFINE_TIME_CONSTANTS
 
-WXDLLEXPORT bool wxDateTime::IsInStdRange() const
+bool wxDateTime::IsInStdRange() const
 {
     return m_time >= 0l && (m_time / TIME_T_FACTOR) < LONG_MAX;
 }
 
 /* static */
-WXDLLEXPORT wxDateTime wxDateTime::Now()
+wxDateTime wxDateTime::Now()
 {
     return wxDateTime(*GetTmNow());
 }
 
 /* static */
-WXDLLEXPORT wxDateTime wxDateTime::Today()
+wxDateTime wxDateTime::Today()
 {
     struct tm *tm = GetTmNow();
     tm->tm_hour =
@@ -63,7 +63,7 @@ WXDLLEXPORT wxDateTime wxDateTime::Today()
 }
 
 #if (!(defined(__VISAGECPP__) && __IBMCPP__ >= 400))
-WXDLLEXPORT wxDateTime& wxDateTime::Set(time_t timet)
+wxDateTime& wxDateTime::Set(time_t timet)
 {
     // assign first to avoid long multiplication overflow!
     m_time = timet;
@@ -73,42 +73,42 @@ WXDLLEXPORT wxDateTime& wxDateTime::Set(time_t timet)
 }
 #endif
 
-WXDLLEXPORT wxDateTime& wxDateTime::SetToCurrent()
+wxDateTime& wxDateTime::SetToCurrent()
 {
     *this = Now();
     return *this;
 }
 
 #if (!(defined(__VISAGECPP__) && __IBMCPP__ >= 400))
-WXDLLEXPORT wxDateTime::wxDateTime(time_t timet)
+wxDateTime::wxDateTime(time_t timet)
 {
     Set(timet);
 }
 #endif
 
-WXDLLEXPORT wxDateTime::wxDateTime(const struct tm& tm)
+wxDateTime::wxDateTime(const struct tm& tm)
 {
     Set(tm);
 }
 
-WXDLLEXPORT wxDateTime::wxDateTime(const Tm& tm)
+wxDateTime::wxDateTime(const Tm& tm)
 {
     Set(tm);
 }
 
-WXDLLEXPORT wxDateTime::wxDateTime(double jdn)
+wxDateTime::wxDateTime(double jdn)
 {
     Set(jdn);
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::Set(const Tm& tm)
+wxDateTime& wxDateTime::Set(const Tm& tm)
 {
     wxASSERT_MSG( tm.IsValid(), _T("invalid broken down date/time") );
 
     return Set(tm.mday, (Month)tm.mon, tm.year, tm.hour, tm.min, tm.sec);
 }
 
-WXDLLEXPORT wxDateTime::wxDateTime(wxDateTime_t hour,
+wxDateTime::wxDateTime(wxDateTime_t hour,
                        wxDateTime_t minute,
                        wxDateTime_t second,
                        wxDateTime_t millisec)
@@ -116,7 +116,7 @@ WXDLLEXPORT wxDateTime::wxDateTime(wxDateTime_t hour,
     Set(hour, minute, second, millisec);
 }
 
-WXDLLEXPORT wxDateTime::wxDateTime(wxDateTime_t day,
+wxDateTime::wxDateTime(wxDateTime_t day,
                        Month        month,
                        int          year,
                        wxDateTime_t hour,
@@ -131,14 +131,14 @@ WXDLLEXPORT wxDateTime::wxDateTime(wxDateTime_t day,
 // wxDateTime accessors
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT wxLongLong wxDateTime::GetValue() const
+wxLongLong wxDateTime::GetValue() const
 {
     wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     return m_time;
 }
 
-WXDLLEXPORT time_t wxDateTime::GetTicks() const
+time_t wxDateTime::GetTicks() const
 {
     wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
     if ( !IsInStdRange() )
@@ -149,29 +149,29 @@ WXDLLEXPORT time_t wxDateTime::GetTicks() const
     return (time_t)((m_time / (long)TIME_T_FACTOR).GetLo());
 }
 
-WXDLLEXPORT bool wxDateTime::SetToLastWeekDay(WeekDay weekday,
+bool wxDateTime::SetToLastWeekDay(WeekDay weekday,
                                   Month month,
                                   int year)
 {
     return SetToWeekDay(weekday, -1, month, year);
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetWeekDayInSameWeek(WeekDay weekday) const
+wxDateTime wxDateTime::GetWeekDayInSameWeek(WeekDay weekday) const
 {
     MODIFY_AND_RETURN( SetToWeekDayInSameWeek(weekday) );
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetNextWeekDay(WeekDay weekday) const
+wxDateTime wxDateTime::GetNextWeekDay(WeekDay weekday) const
 {
     MODIFY_AND_RETURN( SetToNextWeekDay(weekday) );
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetPrevWeekDay(WeekDay weekday) const
+wxDateTime wxDateTime::GetPrevWeekDay(WeekDay weekday) const
 {
     MODIFY_AND_RETURN( SetToPrevWeekDay(weekday) );
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetWeekDay(WeekDay weekday,
+wxDateTime wxDateTime::GetWeekDay(WeekDay weekday,
                                   int n,
                                   Month month,
                                   int year) const
@@ -181,7 +181,7 @@ WXDLLEXPORT wxDateTime wxDateTime::GetWeekDay(WeekDay weekday,
     return dt.SetToWeekDay(weekday, n, month, year) ? dt : wxInvalidDateTime;
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetLastWeekDay(WeekDay weekday,
+wxDateTime wxDateTime::GetLastWeekDay(WeekDay weekday,
                                       Month month,
                                       int year)
 {
@@ -190,19 +190,19 @@ WXDLLEXPORT wxDateTime wxDateTime::GetLastWeekDay(WeekDay weekday,
     return dt.SetToLastWeekDay(weekday, month, year) ? dt : wxInvalidDateTime;
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetWeek(wxDateTime_t numWeek, WeekDay weekday) const
+wxDateTime wxDateTime::GetWeek(wxDateTime_t numWeek, WeekDay weekday) const
 {
     wxDateTime dt(*this);
 
     return dt.SetToTheWeek(numWeek, weekday) ? dt : wxInvalidDateTime;
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetLastMonthDay(Month month, int year) const
+wxDateTime wxDateTime::GetLastMonthDay(Month month, int year) const
 {
     MODIFY_AND_RETURN( SetToLastMonthDay(month, year) );
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::GetYearDay(wxDateTime_t yday) const
+wxDateTime wxDateTime::GetYearDay(wxDateTime_t yday) const
 {
     MODIFY_AND_RETURN( SetToYearDay(yday) );
 }
@@ -211,46 +211,46 @@ WXDLLEXPORT wxDateTime wxDateTime::GetYearDay(wxDateTime_t yday) const
 // wxDateTime comparison
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT bool wxDateTime::IsEqualTo(const wxDateTime& datetime) const
+bool wxDateTime::IsEqualTo(const wxDateTime& datetime) const
 {
     wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return m_time == datetime.m_time;
 }
 
-WXDLLEXPORT bool wxDateTime::IsEarlierThan(const wxDateTime& datetime) const
+bool wxDateTime::IsEarlierThan(const wxDateTime& datetime) const
 {
     wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return m_time < datetime.m_time;
 }
 
-WXDLLEXPORT bool wxDateTime::IsLaterThan(const wxDateTime& datetime) const
+bool wxDateTime::IsLaterThan(const wxDateTime& datetime) const
 {
     wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return m_time > datetime.m_time;
 }
 
-WXDLLEXPORT bool wxDateTime::IsStrictlyBetween(const wxDateTime& t1,
+bool wxDateTime::IsStrictlyBetween(const wxDateTime& t1,
                                    const wxDateTime& t2) const
 {
     // no need for assert, will be checked by the functions we call
     return IsLaterThan(t1) && IsEarlierThan(t2);
 }
 
-WXDLLEXPORT bool wxDateTime::IsBetween(const wxDateTime& t1, const wxDateTime& t2) const
+bool wxDateTime::IsBetween(const wxDateTime& t1, const wxDateTime& t2) const
 {
     // no need for assert, will be checked by the functions we call
     return IsEqualTo(t1) || IsEqualTo(t2) || IsStrictlyBetween(t1, t2);
 }
 
-WXDLLEXPORT bool wxDateTime::IsSameDate(const wxDateTime& dt) const
+bool wxDateTime::IsSameDate(const wxDateTime& dt) const
 {
     return (m_time - dt.m_time).Abs() < MILLISECONDS_PER_DAY;
 }
 
-WXDLLEXPORT bool wxDateTime::IsSameTime(const wxDateTime& dt) const
+bool wxDateTime::IsSameTime(const wxDateTime& dt) const
 {
     // notice that we can't do something like this:
     //
@@ -266,7 +266,7 @@ WXDLLEXPORT bool wxDateTime::IsSameTime(const wxDateTime& dt) const
            tm1.msec == tm2.msec;
 }
 
-WXDLLEXPORT bool wxDateTime::IsEqualUpTo(const wxDateTime& dt, const wxTimeSpan& ts) const
+bool wxDateTime::IsEqualUpTo(const wxDateTime& dt, const wxTimeSpan& ts) const
 {
     return IsBetween(dt.Substract(ts), dt.Add(ts));
 }
@@ -275,14 +275,14 @@ WXDLLEXPORT bool wxDateTime::IsEqualUpTo(const wxDateTime& dt, const wxTimeSpan&
 // wxDateTime arithmetics
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT wxDateTime wxDateTime::Add(const wxTimeSpan& diff) const
+wxDateTime wxDateTime::Add(const wxTimeSpan& diff) const
 {
     wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     return wxDateTime(m_time + diff.GetValue());
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::Add(const wxTimeSpan& diff)
+wxDateTime& wxDateTime::Add(const wxTimeSpan& diff)
 {
     wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
@@ -291,19 +291,19 @@ WXDLLEXPORT wxDateTime& wxDateTime::Add(const wxTimeSpan& diff)
     return *this;
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::operator+=(const wxTimeSpan& diff)
+wxDateTime& wxDateTime::operator+=(const wxTimeSpan& diff)
 {
     return Add(diff);
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::Substract(const wxTimeSpan& diff) const
+wxDateTime wxDateTime::Substract(const wxTimeSpan& diff) const
 {
     wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     return wxDateTime(m_time - diff.GetValue());
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::Substract(const wxTimeSpan& diff)
+wxDateTime& wxDateTime::Substract(const wxTimeSpan& diff)
 {
     wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
@@ -312,39 +312,39 @@ WXDLLEXPORT wxDateTime& wxDateTime::Substract(const wxTimeSpan& diff)
     return *this;
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::operator-=(const wxTimeSpan& diff)
+wxDateTime& wxDateTime::operator-=(const wxTimeSpan& diff)
 {
     return Substract(diff);
 }
 
-WXDLLEXPORT wxTimeSpan wxDateTime::Substract(const wxDateTime& datetime) const
+wxTimeSpan wxDateTime::Substract(const wxDateTime& datetime) const
 {
     wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return wxTimeSpan(datetime.GetValue() - GetValue());
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::Add(const wxDateSpan& diff) const
+wxDateTime wxDateTime::Add(const wxDateSpan& diff) const
 {
     return wxDateTime(*this).Add(diff);
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::Substract(const wxDateSpan& diff)
+wxDateTime& wxDateTime::Substract(const wxDateSpan& diff)
 {
     return Add(diff.Negate());
 }
 
-WXDLLEXPORT wxDateTime wxDateTime::Substract(const wxDateSpan& diff) const
+wxDateTime wxDateTime::Substract(const wxDateSpan& diff) const
 {
     return wxDateTime(*this).Substract(diff);
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::operator-=(const wxDateSpan& diff)
+wxDateTime& wxDateTime::operator-=(const wxDateSpan& diff)
 {
     return Substract(diff);
 }
 
-WXDLLEXPORT wxDateTime& wxDateTime::operator+=(const wxDateSpan& diff)
+wxDateTime& wxDateTime::operator+=(const wxDateSpan& diff)
 {
     return Add(diff);
 }
@@ -353,7 +353,7 @@ WXDLLEXPORT wxDateTime& wxDateTime::operator+=(const wxDateSpan& diff)
 // wxDateTime and timezones
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT wxDateTime wxDateTime::ToTimezone(const wxDateTime::TimeZone& tz,
+wxDateTime wxDateTime::ToTimezone(const wxDateTime::TimeZone& tz,
                                   bool noDST) const
 {
     MODIFY_AND_RETURN( MakeTimezone(tz, noDST) );
@@ -363,7 +363,7 @@ WXDLLEXPORT wxDateTime wxDateTime::ToTimezone(const wxDateTime::TimeZone& tz,
 // wxTimeSpan construction
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT wxTimeSpan::wxTimeSpan(long hours, long minutes, long seconds, long milliseconds)
+wxTimeSpan::wxTimeSpan(long hours, long minutes, long seconds, long milliseconds)
 {
     // assign first to avoid precision loss
     m_diff = hours;
@@ -379,27 +379,27 @@ WXDLLEXPORT wxTimeSpan::wxTimeSpan(long hours, long minutes, long seconds, long 
 // wxTimeSpan accessors
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT wxLongLong wxTimeSpan::GetSeconds() const
+wxLongLong wxTimeSpan::GetSeconds() const
 {
     return m_diff / 1000l;
 }
 
-WXDLLEXPORT int wxTimeSpan::GetMinutes() const
+int wxTimeSpan::GetMinutes() const
 {
     return (GetSeconds() / 60l).GetLo();
 }
 
-WXDLLEXPORT int wxTimeSpan::GetHours() const
+int wxTimeSpan::GetHours() const
 {
     return GetMinutes() / 60;
 }
 
-WXDLLEXPORT int wxTimeSpan::GetDays() const
+int wxTimeSpan::GetDays() const
 {
     return GetHours() / 24;
 }
 
-WXDLLEXPORT int wxTimeSpan::GetWeeks() const
+int wxTimeSpan::GetWeeks() const
 {
     return GetDays() / 7;
 }
@@ -408,53 +408,53 @@ WXDLLEXPORT int wxTimeSpan::GetWeeks() const
 // wxTimeSpan arithmetics
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT wxTimeSpan wxTimeSpan::Add(const wxTimeSpan& diff) const
+wxTimeSpan wxTimeSpan::Add(const wxTimeSpan& diff) const
 {
     return wxTimeSpan(m_diff + diff.GetValue());
 }
 
-WXDLLEXPORT wxTimeSpan& wxTimeSpan::Add(const wxTimeSpan& diff)
+wxTimeSpan& wxTimeSpan::Add(const wxTimeSpan& diff)
 {
     m_diff += diff.GetValue();
 
     return *this;
 }
 
-WXDLLEXPORT wxTimeSpan wxTimeSpan::Substract(const wxTimeSpan& diff) const
+wxTimeSpan wxTimeSpan::Substract(const wxTimeSpan& diff) const
 {
     return wxTimeSpan(m_diff - diff.GetValue());
 }
 
-WXDLLEXPORT wxTimeSpan& wxTimeSpan::Substract(const wxTimeSpan& diff)
+wxTimeSpan& wxTimeSpan::Substract(const wxTimeSpan& diff)
 {
     m_diff -= diff.GetValue();
 
     return *this;
 }
 
-WXDLLEXPORT wxTimeSpan& wxTimeSpan::Multiply(int n)
+wxTimeSpan& wxTimeSpan::Multiply(int n)
 {
     m_diff *= (long)n;
 
     return *this;
 }
 
-WXDLLEXPORT wxTimeSpan wxTimeSpan::Multiply(int n) const
+wxTimeSpan wxTimeSpan::Multiply(int n) const
 {
     return wxTimeSpan(m_diff * (long)n);
 }
 
-WXDLLEXPORT wxTimeSpan wxTimeSpan::Abs() const
+wxTimeSpan wxTimeSpan::Abs() const
 {
     return wxTimeSpan(GetValue().Abs());
 }
 
-WXDLLEXPORT bool wxTimeSpan::IsEqualTo(const wxTimeSpan& ts) const
+bool wxTimeSpan::IsEqualTo(const wxTimeSpan& ts) const
 {
     return GetValue() == ts.GetValue();
 }
 
-WXDLLEXPORT bool wxTimeSpan::IsLongerThan(const wxTimeSpan& ts) const
+bool wxTimeSpan::IsLongerThan(const wxTimeSpan& ts) const
 {
     return GetValue().Abs() > ts.GetValue().Abs();
 }
@@ -463,7 +463,7 @@ WXDLLEXPORT bool wxTimeSpan::IsLongerThan(const wxTimeSpan& ts) const
 // wxDateSpan
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT wxDateSpan& 
+wxDateSpan&
 wxDateSpan::operator+=(const wxDateSpan& other)
 {
     m_years += other.m_years;
@@ -474,7 +474,7 @@ wxDateSpan::operator+=(const wxDateSpan& other)
     return *this;
 }
 
-WXDLLEXPORT wxDateSpan& wxDateSpan::Multiply(int factor)
+wxDateSpan& wxDateSpan::Multiply(int factor)
 {
     m_years *= factor;
     m_months *= factor;
@@ -484,17 +484,17 @@ WXDLLEXPORT wxDateSpan& wxDateSpan::Multiply(int factor)
     return *this;
 }
 
-WXDLLEXPORT wxDateSpan wxDateSpan::Multiply(int factor) const
+wxDateSpan wxDateSpan::Multiply(int factor) const
 {
     return wxDateSpan(*this).Multiply(factor);
 }
 
-WXDLLEXPORT wxDateSpan wxDateSpan::Negate() const
+wxDateSpan wxDateSpan::Negate() const
 {
     return wxDateSpan(-m_years, -m_months, -m_weeks, -m_days);
 }
 
-WXDLLEXPORT wxDateSpan& wxDateSpan::Neg()
+wxDateSpan& wxDateSpan::Neg()
 {
     m_years = -m_years;
     m_months = -m_months;
