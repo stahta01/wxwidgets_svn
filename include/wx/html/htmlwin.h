@@ -129,9 +129,6 @@ class WXDLLEXPORT wxHtmlWindow : public wxScrolledWindow
         bool HistoryForward();
                 // Goes to previous/next page (in browsing history)
                 // Returns TRUE if successful, FALSE otherwise
-        bool HistoryCanBack();
-        bool HistoryCanForward();
-        
         void HistoryClear();
                 // Resets history
 

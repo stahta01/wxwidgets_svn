@@ -21,7 +21,6 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-#if wxUSE_SPINBTN
 
 // Can't resolve reference to CreateUpDownControl in
 // TWIN32, but could probably use normal CreateWindow instead.
@@ -160,4 +159,3 @@ bool wxSpinButton::OS2Command(WXUINT cmd, WXWORD id)
     return FALSE;
 }
 
-#endif //wxUSE_SPINBTN

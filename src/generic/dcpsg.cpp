@@ -649,7 +649,7 @@ void wxPostScriptDC::DoDrawPolygon (int n, wxPoint points[], wxCoord xoffset, wx
 
         wxCoord xx = XLOG2DEV(points[0].x + xoffset);
         wxCoord yy = YLOG2DEV(points[0].y + yoffset);
-
+        
         fprintf( m_pstream, "%d %d moveto\n", xx, yy );
 
         CalcBoundingBox( points[0].x + xoffset, points[0].y + yoffset );
@@ -1176,9 +1176,7 @@ void wxPostScriptDC::DoDrawText( const wxString& text, wxCoord x, wxCoord y )
 
     GetTextExtent(text, &text_w, &text_h, &text_descent);
 
-    // VZ: this seems to be unnecessary, so taking it out for now, if it
-    //     doesn't create any problems, remove this comment entirely
-    //SetFont( m_font );
+    SetFont( m_font );
 
     if (m_textForegroundColour.Ok())
     {
@@ -1668,26 +1666,10 @@ void wxPostScriptDC::EndDoc ()
 
     // Compute the bounding box.  Note that it is in the default user
     // coordinate system, thus we have to convert the values.
-    wxCoord minX = (wxCoord) XLOG2DEV(m_minX);
-    wxCoord minY = (wxCoord) YLOG2DEV(m_minY);
-    wxCoord maxX = (wxCoord) XLOG2DEV(m_maxX);
-    wxCoord maxY = (wxCoord) YLOG2DEV(m_maxY);
- 
-    // LOG2DEV may have changed the minimum to maximum vice versa
-    if ( minX > maxX ) { wxCoord tmp = minX; minX = maxX; maxX = tmp; }
-    if ( minY > maxY ) { wxCoord tmp = minY; minY = maxY; maxY = tmp; }
- 
-    // account for used scaling (boundingbox is before scaling in ps-file)
-    double scale_x = m_printData.GetPrinterScaleX() / ms_PSScaleFactor;
-    double scale_y = m_printData.GetPrinterScaleY() / ms_PSScaleFactor;
- 
-    wxCoord llx, lly, urx, ury;   
-    llx = (wxCoord) ((minX+wx_printer_translate_x)*scale_x);
-    lly = (wxCoord) ((minY+wx_printer_translate_y)*scale_y);
-    urx = (wxCoord) ((maxX+wx_printer_translate_x)*scale_x);
-    ury = (wxCoord) ((maxY+wx_printer_translate_y)*scale_y);
-    // (end of bounding box computation)
-
+    wxCoord llx = (wxCoord) ((XLOG2DEV(m_minX)+wx_printer_translate_x)*wx_printer_scale_x);
+    wxCoord lly = (wxCoord) ((YLOG2DEV(m_minY)+wx_printer_translate_y)*wx_printer_scale_y);
+    wxCoord urx = (wxCoord) ((XLOG2DEV(m_maxX)+wx_printer_translate_x)*wx_printer_scale_x);
+    wxCoord ury = (wxCoord) ((YLOG2DEV(m_maxY)+wx_printer_translate_y)*wx_printer_scale_y);
 
     // If we're landscape, our sense of "x" and "y" is reversed.
     if (m_printData.GetOrientation() == wxLANDSCAPE)

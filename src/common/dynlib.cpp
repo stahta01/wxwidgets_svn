@@ -53,16 +53,9 @@
     // note about dlopen() flags: we use RTLD_NOW to have more Windows-like
     // behaviour (Win won't let you load a library with missing symbols) and
     // RTLD_GLOBAL because it is needed sometimes and probably doesn't hurt
-    // otherwise. On True64-Unix RTLD_GLOBAL is not allowed and on VMS the
-    // second argument on dlopen is ignored.
-#ifdef __VMS
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), 0 )
-#elif defined( __osf__ )
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY )
-#else
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY | RTLD_GLOBAL)
-#endif
-#define wxDllGetSymbol(handle, name)  dlsym(handle, name)
+    // otherwise
+#   define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY | RTLD_GLOBAL)
+#   define wxDllGetSymbol(handle, name)  dlsym(handle, name)
 #   define wxDllClose                    dlclose
 #elif defined(HAVE_SHL_LOAD)
 #   define wxDllOpen(lib)                shl_load(lib.fn_str(), BIND_DEFERRED, 0)

@@ -185,7 +185,6 @@ public:
     void OnSetFocus(wxFocusEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnIdle(wxIdleEvent& event);
-    void OnPaint(wxPaintEvent& event);
 
 public:
     // For implementation purposes - sometimes decorations make the client area
@@ -208,7 +207,7 @@ public:
 
     // Make a Windows extended style from the given wxWindows window style
     static WXDWORD MakeExtendedStyle(long style,
-                                     bool eliminateBorders = FALSE);
+                                     bool eliminateBorders = TRUE);
     // Determine whether 3D effects are wanted
     WXDWORD Determine3DEffects(WXDWORD defaultBorderStyle, bool *want3D) const;
 

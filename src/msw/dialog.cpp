@@ -96,35 +96,31 @@ END_EVENT_TABLE()
 // wxDialog construction
 // ----------------------------------------------------------------------------
 
-void wxDialog::Init()
+wxDialog::wxDialog()
 {
     m_oldFocus = (wxWindow *)NULL;
-
     m_isShown = FALSE;
-
-    m_windowDisabler = (wxWindowDisabler *)NULL;
 
     SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DFACE));
 }
 
-bool wxDialog::Create(wxWindow *parent,
-                      wxWindowID id,
+bool wxDialog::Create(wxWindow *parent, wxWindowID id,
                       const wxString& title,
                       const wxPoint& pos,
                       const wxSize& size,
                       long style,
                       const wxString& name)
 {
-    Init();
-
     m_oldFocus = FindFocus();
 
+    SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DFACE));
     SetName(name);
 
     wxTopLevelWindows.Append(this);
 
-    if ( parent )
-        parent->AddChild(this);
+    //  windowFont = wxTheFontList->FindOrCreateFont(11, wxSWISS, wxNORMAL, wxNORMAL);
+
+    if (parent) parent->AddChild(this);
 
     if ( id == -1 )
         m_windowId = (int)NewControlId();
@@ -143,6 +139,8 @@ bool wxDialog::Create(wxWindow *parent,
 
     m_windowStyle = style;
 
+    m_isShown = FALSE;
+
     if (width < 0)
         width = wxDIALOG_DEFAULT_WIDTH;
     if (height < 0)
@@ -154,11 +152,6 @@ bool wxDialog::Create(wxWindow *parent,
     WXDWORD extendedStyle = MakeExtendedStyle(m_windowStyle);
     if (m_windowStyle & wxSTAY_ON_TOP)
         extendedStyle |= WS_EX_TOPMOST;
-
-#ifndef __WIN16__
-    if (m_exStyle & wxDIALOG_EX_CONTEXTHELP)
-        extendedStyle |= WS_EX_CONTEXTHELP;
-#endif
 
     // Allows creation of dialogs with & without captions under MSWindows,
     // resizeable or not (but a resizeable dialog always has caption -
@@ -215,7 +208,8 @@ wxDialog::~wxDialog()
 
     wxTopLevelWindows.DeleteObject(this);
 
-    // this will also reenable all the other windows for a modal dialog
+    // this will call BringWindowToTop() if necessary to bring back our parent
+    // window to top
     Show(FALSE);
 
     if ( !IsModal() )
@@ -344,32 +338,37 @@ void wxDialog::DoShowModal()
     if (oldFocus)
         hwndOldFocus = (HWND) oldFocus->GetHWND();
 
-    // remember where the focus was
-    if ( !oldFocus )
+    // inside this block, all app windows are disabled
     {
-        oldFocus = parent;
-        if ( parent )
-            hwndOldFocus = GetHwndOf(parent);
-    }
+        wxWindowDisabler wd(this);
 
-    // disable all other app windows
-    wxASSERT_MSG( !m_windowDisabler, _T("disabling windows twice?") );
+        // remember where the focus was
+        if ( !oldFocus )
+        {
+            oldFocus = parent;
+            if (parent)
+                hwndOldFocus = (HWND) parent->GetHWND();
+        }
 
-    m_windowDisabler = new wxWindowDisabler(this);
-
-    // enter the modal loop
-    while ( IsModalShowing() )
-    {
+        // enter the modal loop
+        while ( IsModalShowing() )
+        {
 #if wxUSE_THREADS
-        wxMutexGuiLeaveOrEnter();
+            wxMutexGuiLeaveOrEnter();
 #endif // wxUSE_THREADS
 
-        while ( !wxTheApp->Pending() && wxTheApp->ProcessIdle() )
-            ;
+            while ( !wxTheApp->Pending() && wxTheApp->ProcessIdle() )
+                ;
 
-        // a message came or no more idle processing to do
-        wxTheApp->DoMessage();
+            // a message came or no more idle processing to do
+            wxTheApp->DoMessage();
+        }
     }
+
+#ifdef __WIN32__
+    if ( parent )
+        ::SetActiveWindow(GetHwndOf(parent));
+#endif // __WIN32__
 
     // and restore focus
     // Note that this code MUST NOT access the dialog object's data
@@ -385,15 +384,16 @@ void wxDialog::DoShowModal()
 
 bool wxDialog::Show(bool show)
 {
+    // The following is required when the parent has been disabled, (modal
+    // dialogs, or modeless dialogs with disabling such as wxProgressDialog).
+    // Otherwise the parent disappears behind other windows when the dialog is
+    // hidden.
     if ( !show )
     {
-        // if we had disabled other app windows, reenable them back now because
-        // if they stay disabled Windows will activate another window (one
-        // which is enabled, anyhow) and we will lose activation
-        if ( m_windowDisabler )
+        wxWindow *parent = GetParent();
+        if ( parent )
         {
-            delete m_windowDisabler;
-            m_windowDisabler = NULL;
+            ::BringWindowToTop(GetHwndOf(parent));
         }
     }
 
@@ -422,18 +422,6 @@ bool wxDialog::Show(bool show)
                 {
                     // use it
                     m_parent = parent;
-
-                    // VZ: to make dialog behave properly we should reparent
-                    //     the dialog for Windows as well - unfortunately,
-                    //     following the docs for SetParent() results in this
-                    //     code which plainly doesn't work
-#if 0
-                    long dwStyle = ::GetWindowLong(GetHwnd(), GWL_STYLE);
-                    dwStyle &= ~WS_POPUP;
-                    dwStyle |= WS_CHILD;
-                    ::SetWindowLong(GetHwnd(), GWL_STYLE, dwStyle);
-                    ::SetParent(GetHwnd(), GetHwndOf(parent));
-#endif // 0
                 }
             }
 
@@ -560,7 +548,6 @@ long wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 
     switch ( message )
     {
-#if 0 // now that we got owner window right it doesn't seem to be needed
         case WM_ACTIVATE:
             switch ( LOWORD(wParam) )
             {
@@ -587,7 +574,6 @@ long wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
                     // fall through to process it normally as well
             }
             break;
-#endif // 0
 
         case WM_CLOSE:
             // if we can't close, tell the system that we processed the

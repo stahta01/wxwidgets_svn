@@ -18,7 +18,6 @@
 #endif
 
 #include "wx/utils.h"
-
 /* This is a small class which can be used by all ports
    to temporarily suspend the busy cursor. Useful in modal
    dialogs.

@@ -1481,7 +1481,6 @@ wxPoint wxStyledTextCtrl::PointFromPosition(int pos) {
     return wxPoint(x, y);
 }
 
-
 // Scroll enough to make the given line visible
 void wxStyledTextCtrl::ScrollToLine(int line) {
     m_swx->DoScrollToLine(line);
@@ -1492,6 +1491,7 @@ void wxStyledTextCtrl::ScrollToLine(int line) {
 void wxStyledTextCtrl::ScrollToColumn(int column) {
     m_swx->DoScrollToColumn(column);
 }
+
 
 
 //----------------------------------------------------------------------

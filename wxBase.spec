@@ -1,5 +1,6 @@
+# Note that this is NOT a relocatable package
 %define pref /usr
-%define ver 2.3.0
+%define ver 2.2.5
 %define rel 0
 
 Summary: wxBase library - non-GUI support classes of wxWindows toolkit
@@ -11,8 +12,7 @@ Group: Development/Libraries
 Source: wxBase-%{ver}.tar.gz
 URL: none
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
-Prefix: %{pref}
-BuildRoot: /var/tmp/%{name}-root
+BuildRoot: /tmp/wxBase_rpm
 
 %description
 wxBase is a collection of C++ classes providing basic data structures (strings,
@@ -32,7 +32,7 @@ Requires: wxBase
 Header files for wxBase. You need them to develop programs using wxBase.
 
 %prep
-%setup -n wxBase-%{ver}
+%setup -n wxBase
 ./configure --prefix=%{pref} --disable-gui --disable-std_iostreams
 
 %build
@@ -58,12 +58,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr (644, root, root, 755)
-%doc COPYING.LIB LICENCE.txt README.txt SYMBOLS.txt
-%attr(755, -, -) %{pref}/lib/libwx_base*
+%doc COPYING.LIB INSTALL.txt LICENCE.txt README.txt SYMBOLS.txt TODO.txt
+%attr(755, -, -) %{pref}/lib/libwxbase*
 %dir %{pref}/lib/wx
 %dir %{pref}/lib/wx/include
 %dir %{pref}/lib/wx/include/wx
-%{pref}/lib/wx/include/wx/base/setup.h
+%{pref}/lib/wx/include/wx/setup.h
 
 %files devel -f src/rpmfiles.lst
 %defattr (644, root, root, 755)

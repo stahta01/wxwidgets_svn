@@ -21,10 +21,6 @@
     #pragma implementation "scrolwin.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -287,49 +283,63 @@ int wxScrolledWindow::CalcScrollInc(wxScrollWinEvent& event)
     int orient = event.GetOrientation();
 
     int nScrollInc = 0;
-    if (event.GetEventType() == wxEVT_SCROLLWIN_TOP)
+    switch (event.GetEventType())
     {
+        case wxEVT_SCROLLWIN_TOP:
+        {
             if (orient == wxHORIZONTAL)
                 nScrollInc = - m_xScrollPosition;
             else
                 nScrollInc = - m_yScrollPosition;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLLWIN_BOTTOM)
-    {
+            break;
+        }
+        case wxEVT_SCROLLWIN_BOTTOM:
+        {
             if (orient == wxHORIZONTAL)
                 nScrollInc = m_xScrollLines - m_xScrollPosition;
             else
                 nScrollInc = m_yScrollLines - m_yScrollPosition;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLLWIN_LINEUP)
-    {
+            break;
+        }
+        case wxEVT_SCROLLWIN_LINEUP:
+        {
             nScrollInc = -1;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLLWIN_LINEDOWN)
-    {
+            break;
+        }
+        case wxEVT_SCROLLWIN_LINEDOWN:
+        {
             nScrollInc = 1;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLLWIN_PAGEUP)
-    {
+            break;
+        }
+        case wxEVT_SCROLLWIN_PAGEUP:
+        {
             if (orient == wxHORIZONTAL)
                 nScrollInc = -GetScrollPageSize(wxHORIZONTAL);
             else
                 nScrollInc = -GetScrollPageSize(wxVERTICAL);
-    } else
-    if (event.GetEventType() == wxEVT_SCROLLWIN_PAGEDOWN)
-    {
+            break;
+        }
+        case wxEVT_SCROLLWIN_PAGEDOWN:
+        {
             if (orient == wxHORIZONTAL)
                 nScrollInc = GetScrollPageSize(wxHORIZONTAL);
             else
                 nScrollInc = GetScrollPageSize(wxVERTICAL);
-    } else
-    if ((event.GetEventType() == wxEVT_SCROLLWIN_THUMBTRACK) ||
-        (event.GetEventType() == wxEVT_SCROLLWIN_THUMBRELEASE))
-    {
+            break;
+        }
+        case wxEVT_SCROLLWIN_THUMBTRACK:
+        case wxEVT_SCROLLWIN_THUMBRELEASE:
+        {
             if (orient == wxHORIZONTAL)
                 nScrollInc = pos - m_xScrollPosition;
             else
                 nScrollInc = pos - m_yScrollPosition;
+            break;
+        }
+        default:
+        {
+            break;
+        }
     }
 
     if (orient == wxHORIZONTAL)

@@ -81,9 +81,6 @@
 // event table
 // ----------------------------------------------------------------------------
 
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
-
 BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
 
@@ -109,7 +106,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
 void wxNotebook::Init()
 {
   m_pImageList = NULL;
-  m_bOwnsImageList = FALSE;
   m_nSelection = -1;
 }
 
@@ -192,7 +188,6 @@ bool wxNotebook::Create(wxWindow *parent,
 // dtor
 wxNotebook::~wxNotebook()
 {
-  if (m_bOwnsImageList) delete m_pImageList;
 }
 
 // ----------------------------------------------------------------------------
@@ -281,16 +276,8 @@ bool wxNotebook::SetPageImage(int nPage, int nImage)
 
 void wxNotebook::SetImageList(wxImageList* imageList)
 {
-  if (m_bOwnsImageList) delete m_pImageList;
   m_pImageList = imageList;
-  m_bOwnsImageList = FALSE;
   TabCtrl_SetImageList(m_hwnd, (HIMAGELIST)imageList->GetHIMAGELIST());
-}
-
-void wxNotebook::AssignImageList(wxImageList* imageList)
-{
-  SetImageList(imageList);
-  m_bOwnsImageList = TRUE;
 }
 
 // ----------------------------------------------------------------------------

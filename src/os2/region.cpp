@@ -29,51 +29,24 @@ class WXDLLEXPORT wxRegionRefData : public wxGDIRefData {
 public:
     wxRegionRefData()
     {
-        m_hRegion = 0;
+        m_region = 0;
     }
 
-    wxRegionRefData(const wxRegionRefData& rData)
+    wxRegionRefData(const wxRegionRefData& data)
     {
-        RGNRECT                     vRgnData;
-        PRECTL                      pRect = NULL;
-
-        if (::GpiQueryRegionRects( rData.m_hPS      // Pres space
-                                  ,rData.m_hRegion  // Handle of region to query
-                                  ,NULL             // Return all RECTs
-                                  ,&vRgnData        // Will contain number or RECTs in region
-                                  ,NULL             // NULL to return number of RECTs
-                                 ))
-        {
-            pRect = new RECTL[vRgnData.crcReturned];
-            vRgnData.crc = vRgnData.crcReturned;
-            vRgnData.ircStart = 1;
-            if (::GpiQueryRegionRects( rData.m_hPS     // Pres space of source
-                                      ,rData.m_hRegion // Handle of source region
-                                      ,NULL            // Return all RECTs
-                                      ,&vRgnData       // Operations set to return rects
-                                      ,pRect           // Will contain the actual RECTS
-                                     ))
-            {
-                m_hRegion = ::GpiCreateRegion( rData.m_hPS
-                                              ,vRgnData.crcReturned
-                                              ,pRect
-                                             );
-                m_hPS = rData.m_hPS;
-            }
-            delete [] pRect;
-        }
+        // TODO
     }
 
     ~wxRegionRefData()
     {
-        ::GpiDestroyRegion(m_hPS, m_hRegion);
+        // TODO
+
     }
 
-    HRGN                            m_hRegion;
-    HPS                             m_hPS;
+    HRGN m_region;
 };
 
-#define M_REGION (((wxRegionRefData*)m_refData)->m_hRegion)
+#define M_REGION (((wxRegionRefData*)m_refData)->m_region)
 
 //-----------------------------------------------------------------------------
 // wxRegion
@@ -85,331 +58,151 @@ public:
 wxRegion::wxRegion()
 {
     m_refData = new wxRegionRefData;
-} // end of wxRegion::wxRegion
+    // TODO create empty region
+}
 
-wxRegion::wxRegion(
-  WXHRGN                            hRegion
-)
+wxRegion::wxRegion(WXHRGN hRegion)
 {
     m_refData = new wxRegionRefData;
     M_REGION = (HRGN) hRegion;
-} // end of wxRegion::wxRegion
+}
 
-wxRegion::wxRegion(
-  wxCoord                           x
-, wxCoord                           y
-, wxCoord                           vWidth
-, wxCoord                           vHeight
-)
+wxRegion::wxRegion(wxCoord x, wxCoord y, wxCoord w, wxCoord h)
 {
-    RECTL                           vRect;
-    SIZEL                           vSize = {0, 0};
-    DEVOPENSTRUC                    vDop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
-    HDC                             hDC = ::DevOpenDC( vHabmain
-                                                      ,OD_MEMORY
-                                                      ,"*"
-                                                      ,5L
-                                                      ,(PDEVOPENDATA)&vDop
-                                                      ,NULLHANDLE
-                                                     );
+    m_refData = new wxRegionRefData;
+    // TODO create rect region
+}
 
-
-    vRect.xLeft   = x;
-    vRect.xRight  = x + vWidth;
-    vRect.yBottom = y;
-    vRect.yTop    = y + vHeight;
-
-    m_refData     = new wxRegionRefData;
-
-    //
-    // Need a PS to create a Region
-    //
-    ((wxRegionRefData*)m_refData)->m_hPS = ::GpiCreatePS( vHabmain
-                                                         ,hDC
-                                                         ,&vSize
-                                                         ,PU_PELS | GPIT_MICRO | GPIA_ASSOC
-                                                        );
-    M_REGION      = ::GpiCreateRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                      ,1
-                                      ,&vRect
-                                     );
-} // end of wxRegion::wxRegion
-
-wxRegion::wxRegion(
-  const wxPoint&                    rTopLeft
-, const wxPoint&                    rBottomRight
-)
+wxRegion::wxRegion(const wxPoint& topLeft, const wxPoint& bottomRight)
 {
-    RECTL                           vRect;
-    SIZEL                           vSize = {0, 0};
-    DEVOPENSTRUC                    vDop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
-    HDC                             hDC = ::DevOpenDC( vHabmain
-                                                      ,OD_MEMORY
-                                                      ,"*"
-                                                      ,5L
-                                                      ,(PDEVOPENDATA)&vDop
-                                                      ,NULLHANDLE
-                                                     );
+    m_refData = new wxRegionRefData;
+    // TODO create rect region
+}
 
-    vRect.xLeft   = rTopLeft.x;
-    vRect.xRight  = rBottomRight.x;
-    vRect.yBottom = rBottomRight.y;
-    vRect.yTop    = rTopLeft.y;
-
-    m_refData     = new wxRegionRefData;
-
-    //
-    // Need a PS to create a Region
-    //
-    ((wxRegionRefData*)m_refData)->m_hPS = ::GpiCreatePS( vHabmain
-                                                         ,hDC
-                                                         ,&vSize
-                                                         ,PU_PELS | GPIT_MICRO | GPIA_ASSOC
-                                                        );
-    M_REGION      = ::GpiCreateRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                      ,1
-                                      ,&vRect
-                                     );
-} // end of wxRegion::wxRegion
-
-wxRegion::wxRegion(
-  const wxRect&                     rRect
-)
+wxRegion::wxRegion(const wxRect& rect)
 {
-    RECTL                           vRect;
-    SIZEL                           vSize = {0, 0};
-    DEVOPENSTRUC                    vDop = {0L, "DISPLAY", NULL, 0L, 0L, 0L, 0L, 0L, 0L};
-    HDC                             hDC = ::DevOpenDC( vHabmain
-                                                      ,OD_MEMORY
-                                                      ,"*"
-                                                      ,5L
-                                                      ,(PDEVOPENDATA)&vDop
-                                                      ,NULLHANDLE
-                                                     );
+    m_refData = new wxRegionRefData;
+    // TODO create rect region
+}
 
-
-    vRect.xLeft   = rRect.x;
-    vRect.xRight  = rRect.x + rRect.width;
-    vRect.yBottom = rRect.y;
-    vRect.yTop    = rRect.y + rRect.height;
-
-    m_refData     = new wxRegionRefData;
-
-    //
-    // Need a PS to create a Region
-    //
-    ((wxRegionRefData*)m_refData)->m_hPS = ::GpiCreatePS( vHabmain
-                                                         ,hDC
-                                                         ,&vSize
-                                                         ,PU_PELS | GPIT_MICRO | GPIA_ASSOC
-                                                        );
-    M_REGION      = ::GpiCreateRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                      ,1
-                                      ,&vRect
-                                     );
-} // end of wxRegion::wxRegion
-
-//
-// Destroy the region.
-//
+/*!
+ * Destroy the region.
+ */
 wxRegion::~wxRegion()
 {
-} // end of wxRegion::~wxRegion
+    // m_refData unrefed in ~wxObject
+}
 
 //-----------------------------------------------------------------------------
 //# Modify region
 //-----------------------------------------------------------------------------
 
-//
-// Clear current region
-//
+//! Clear current region
 void wxRegion::Clear()
 {
     UnRef();
-} // end of wxRegion::Clear
+}
 
-//
-// Combine rectangle (x, y, w, h) with this.
-//
-bool wxRegion::Combine(
-  wxCoord                           x
-, wxCoord                           y
-, wxCoord                           vWidth
-, wxCoord                           vHeight
-, wxRegionOp                        eOp
-)
+//! Combine rectangle (x, y, w, h) with this.
+bool wxRegion::Combine(wxCoord x, wxCoord y, wxCoord width, wxCoord height, wxRegionOp op)
 {
-    //
     // Don't change shared data
-    //
-    if (!m_refData)
-    {
+    if (!m_refData) {
         m_refData = new wxRegionRefData();
-    }
-    else if (m_refData->GetRefCount() > 1)
-    {
-        wxRegionRefData*            pRef = (wxRegionRefData*)m_refData;
-
+    } else if (m_refData->GetRefCount() > 1) {
+        wxRegionRefData* ref = (wxRegionRefData*)m_refData;
         UnRef();
-        m_refData = new wxRegionRefData(*pRef);
+        m_refData = new wxRegionRefData(*ref);
     }
-
-    //
     // If ref count is 1, that means it's 'ours' anyway so no action.
-    //
-    RECTL                           vRect;
 
-    vRect.xLeft   = x;
-    vRect.xRight  = x + vWidth;
-    vRect.yBottom = y;
-    vRect.yTop    = y + vHeight;
+    // TODO create rect region
 
-    HRGN                            hRgn = ::GpiCreateRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                                             ,1
-                                                             ,&vRect
-                                                            );
-    LONG                            lMode = 0L;
-
-    switch (eOp)
+    int mode = 0; // TODO platform-specific code
+    switch (op)
     {
         case wxRGN_AND:
-            lMode = CRGN_AND;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_OR:
-            lMode = CRGN_OR;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_XOR:
-            lMode = CRGN_XOR;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_DIFF:
-            lMode = CRGN_DIFF;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_COPY:
         default:
-            lMode = CRGN_COPY;
-            break;
+            // TODO
+            break ;
     }
-    bool                            bSuccess = ::GpiCombineRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                                                  ,M_REGION
-                                                                  ,M_REGION
-                                                                  ,hRgn
-                                                                  ,lMode
-                                                                 );
-    ::GpiDestroyRegion ( ((wxRegionRefData*)m_refData)->m_hPS
-                        ,hRgn
-                       );
 
-    return bSuccess;
-} // end of wxRegion::Combine
+    // TODO do combine region
 
-//
-// Union region with this.
-//
-bool wxRegion::Combine(
-  const wxRegion&                   rRegion
-, wxRegionOp                        eOp
-)
+    return FALSE;
+}
+
+//! Union /e region with this.
+bool wxRegion::Combine(const wxRegion& region, wxRegionOp op)
 {
-    if (rRegion.Empty())
+    if (region.Empty())
         return FALSE;
 
-    //
     // Don't change shared data
-    //
-    if (!m_refData)
-    {
+    if (!m_refData) {
         m_refData = new wxRegionRefData();
-    }
-    else  if (m_refData->GetRefCount() > 1)
-    {
-        wxRegionRefData*            pRef = (wxRegionRefData*)m_refData;
-
+    } else  if (m_refData->GetRefCount() > 1) {
+        wxRegionRefData* ref = (wxRegionRefData*)m_refData;
         UnRef();
-        m_refData = new wxRegionRefData(*pRef);
+        m_refData = new wxRegionRefData(*ref);
     }
 
-    LONG                            lMode = 0;
-
-    switch (eOp)
+    int mode = 0; // TODO platform-specific code
+    switch (op)
     {
         case wxRGN_AND:
-            lMode = CRGN_AND;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_OR:
-            lMode = CRGN_OR;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_XOR:
-            lMode = CRGN_XOR;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_DIFF:
-            lMode = CRGN_DIFF;
-            break;
-
+            // TODO
+            break ;
         case wxRGN_COPY:
         default:
-            lMode = CRGN_COPY;
-            break;
+            // TODO
+            break ;
     }
-    return (::GpiCombineRegion( ((wxRegionRefData*)rRegion.m_refData)->m_hPS
-                               ,M_REGION
-                               ,M_REGION
-                               ,((wxRegionRefData*)rRegion.m_refData)->m_hRegion
-                               ,lMode
-                              ) != RGN_ERROR);
-} // end of wxRegion::Combine
 
-bool wxRegion::Combine(
-  const wxRect&                     rRect
-, wxRegionOp                        eOp
-)
+    // TODO combine region
+
+    return FALSE;
+}
+
+bool wxRegion::Combine(const wxRect& rect, wxRegionOp op)
 {
-    return Combine( rRect.GetLeft()
-                   ,rRect.GetTop()
-                   ,rRect.GetWidth()
-                   ,rRect.GetHeight()
-                   ,eOp
-                  );
-} // end of wxRegion::Combine
+    return Combine(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight(), op);
+}
 
 //-----------------------------------------------------------------------------
 //# Information on region
 //-----------------------------------------------------------------------------
 
-//
 // Outer bounds of region
-//
-void wxRegion::GetBox(
-  wxCoord&                          x
-, wxCoord&                          y
-, wxCoord&                          vWidth
-, wxCoord&                          vHeight
-) const
+void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord&w, wxCoord &h) const
 {
-    if (m_refData)
-    {
-        RECTL                       vRect;
-
-        ::GpiQueryRegionBox( ((wxRegionRefData*)m_refData)->m_hPS
-                            ,M_REGION
-                            ,&vRect
-                           );
-        x       = vRect.xLeft;
-        y       = vRect.yTop;
-        vWidth  = vRect.xRight - vRect.xLeft;
-        vHeight = vRect.yTop - vRect.yBottom;
+    if (m_refData) {
+        // TODO get box
+    } else {
+        x = y = w = h = 0;
     }
-    else
-    {
-        x = y = vWidth = vHeight = 0L;
-    }
-} // end of wxRegion::GetBox
+}
 
 wxRect wxRegion::GetBox() const
 {
@@ -418,136 +211,73 @@ wxRect wxRegion::GetBox() const
     return wxRect(x, y, w, h);
 }
 
-//
 // Is region empty?
-//
 bool wxRegion::Empty() const
 {
-    wxCoord                         x;
-    wxCoord                         y;
-    wxCoord                         vWidth;
-    wxCoord                         vHeight;
-
-    if (M_REGION == 0)
-        return TRUE;
-
-    GetBox( x
-           ,y
-           ,vWidth
-           ,vHeight
-          );
-    return ((vWidth == 0) && (vHeight == 0));
-} // end of wxRegion::Empty
+    // TODO
+    return FALSE;
+}
 
 //-----------------------------------------------------------------------------
-// Tests
+//# Tests
 //-----------------------------------------------------------------------------
 
-//
 // Does the region contain the point (x,y)?
-wxRegionContain wxRegion::Contains(
-  wxCoord                           x
-, wxCoord                           y
-) const
+wxRegionContain wxRegion::Contains(wxCoord x, wxCoord y) const
 {
-    bool                            bOK = FALSE;
-    POINTL                          vPoint;
-
-    vPoint.x = x;
-    vPoint.y = y;
-
+    bool    bOK = FALSE; // temporary
     if (!m_refData)
         return wxOutRegion;
 
-    LONG                            lInside = ::GpiPtInRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                                              ,M_REGION
-                                                              ,&vPoint
-                                                             );
-    if (lInside == PRGN_INSIDE)
+    // TODO. Return wxInRegion if within region.
+    if (bOK)
         return wxInRegion;
     return wxOutRegion;
-} // end of wxRegion::Contains
+}
 
-//
 // Does the region contain the point pt?
-//
-wxRegionContain wxRegion::Contains(
-  const wxPoint&                    rPoint
-) const
+wxRegionContain wxRegion::Contains(const wxPoint& pt) const
 {
-    POINTL                          vPoint = { rPoint.x, rPoint.y };
-
+    bool    bOK = FALSE; // temporary
     if (!m_refData)
         return wxOutRegion;
 
-    LONG                            lInside = ::GpiPtInRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                                              ,M_REGION
-                                                              ,&vPoint
-                                                             );
-    if (lInside == PRGN_INSIDE)
+    // TODO. Return wxInRegion if within region.
+    if (bOK)
         return wxInRegion;
     else
         return wxOutRegion;
-} // end of wxRegion::Contains
+}
 
-//
 // Does the region contain the rectangle (x, y, w, h)?
-//
-wxRegionContain wxRegion::Contains(
-  wxCoord                           x
-, wxCoord                           y
-, wxCoord                           vWidth
-, wxCoord                           vHeight
-) const
+wxRegionContain wxRegion::Contains(wxCoord x, wxCoord y, wxCoord w, wxCoord h) const
 {
-    RECTL                           vRect;
-
+    bool    bOK = FALSE; // temporary
     if (!m_refData)
         return wxOutRegion;
 
-    vRect.xLeft   = x;
-    vRect.yTop    = y;
-    vRect.xRight  = x + vWidth;
-    vRect.yBottom = y + vHeight;
-
-    if (PRGN_INSIDE == ::GpiRectInRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                                         ,M_REGION
-                                         ,&vRect
-                                        ))
+    // TODO. Return wxInRegion if within region.
+    if (bOK)
         return wxInRegion;
     else
         return wxOutRegion;
-} // end of wxRegion::Contains
+}
 
-//
 // Does the region contain the rectangle rect
-//
-wxRegionContain wxRegion::Contains(
-  const wxRect&                     rRect
-) const
+wxRegionContain wxRegion::Contains(const wxRect& rect) const
 {
     if (!m_refData)
         return wxOutRegion;
 
-    wxCoord                         x;
-    wxCoord                         y;
-    wxCoord                         vWidth;
-    wxCoord                         vHeight;
+    wxCoord x, y, w, h;
+    x = rect.x;
+    y = rect.y;
+    w = rect.GetWidth();
+    h = rect.GetHeight();
+    return Contains(x, y, w, h);
+}
 
-    x       = rRect.x;
-    y       = rRect.y;
-    vWidth  = rRect.GetWidth();
-    vHeight = rRect.GetHeight();
-    return Contains( x
-                    ,y
-                    ,vWidth
-                    ,vHeight
-                   );
-} // end of wxRegion::Contains
-
-//
 // Get internal region handle
-//
 WXHRGN wxRegion::GetHRGN() const
 {
     if (!m_refData)
@@ -555,187 +285,102 @@ WXHRGN wxRegion::GetHRGN() const
     return (WXHRGN) M_REGION;
 }
 
-//
-// Set a new PS, this means we have to recreate the old region in the new
-// PS
-//
-void wxRegion::SetPS(
-  HPS                               hPS
-)
-{
-    RGNRECT                     vRgnData;
-    PRECTL                      pRect = NULL;
-
-    if (::GpiQueryRegionRects( ((wxRegionRefData*)m_refData)->m_hPS
-                              ,((wxRegionRefData*)m_refData)->m_hRegion
-                              ,NULL
-                              ,&vRgnData
-                              ,NULL
-                             ))
-    {
-        pRect = new RECTL[vRgnData.crcReturned];
-        vRgnData.crc = vRgnData.crcReturned;
-        vRgnData.ircStart = 1;
-        if (::GpiQueryRegionRects( ((wxRegionRefData*)m_refData)->m_hPS
-                                  ,((wxRegionRefData*)m_refData)->m_hRegion
-                                  ,NULL
-                                  ,&vRgnData
-                                  ,pRect
-                                 ))
-        {
-            //
-            // First destroy the region out of the old PS
-            // and then create it in the new and set the new to current
-            //
-            ::GpiDestroyRegion( ((wxRegionRefData*)m_refData)->m_hPS
-                               ,M_REGION
-                              );
-            ((wxRegionRefData*)m_refData)->m_hRegion = ::GpiCreateRegion( hPS
-                                                                         ,vRgnData.crcReturned
-                                                                         ,pRect
-                                                                        );
-            ((wxRegionRefData*)m_refData)->m_hPS = hPS;
-        }
-        delete [] pRect;
-    }
-} // end of wxRegion::SetPS
-
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 //                             wxRegionIterator                              //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-//
-// Initialize empty iterator
-//
-wxRegionIterator::wxRegionIterator()
-: m_lCurrent(0)
-, m_lNumRects(0)
-, m_pRects(NULL)
+/*!
+ * Initialize empty iterator
+ */
+wxRegionIterator::wxRegionIterator() : m_current(0), m_numRects(0), m_rects(NULL)
 {
-} // end of wxRegionIterator::wxRegionIterator
+}
 
 wxRegionIterator::~wxRegionIterator()
 {
-    if (m_pRects)
-        delete[] m_pRects;
-} // end of wxRegionIterator::~wxRegionIterator
+    if (m_rects)
+        delete[] m_rects;
+}
 
-//
-// Initialize iterator for region
-//
-wxRegionIterator::wxRegionIterator(
-  const wxRegion&                   rRegion
-)
+/*!
+ * Initialize iterator for region
+ */
+wxRegionIterator::wxRegionIterator(const wxRegion& region)
 {
-    m_pRects = NULL;
-    Reset(rRegion);
-} // end of wxRegionIterator::wxRegionIterator
+    m_rects = NULL;
 
-//
-// Reset iterator for a new /e region.
-//
-void wxRegionIterator::Reset(
-  const wxRegion&                   rRegion
-)
+    Reset(region);
+}
+
+/*!
+ * Reset iterator for a new /e region.
+ */
+void wxRegionIterator::Reset(const wxRegion& region)
 {
-    m_lCurrent = 0;
-    m_vRegion  = rRegion;
+    m_current = 0;
+    m_region = region;
 
-    if (m_pRects)
-        delete[] m_pRects;
+    if (m_rects)
+        delete[] m_rects;
 
-    m_pRects = NULL;
+    m_rects = NULL;
 
-    if (m_vRegion.Empty())
-        m_lNumRects = 0;
+    if (m_region.Empty())
+        m_numRects = 0;
     else
     {
-        RGNRECT                     vRgnData;
-        PRECTL                      pRect;
-
-        if (::GpiQueryRegionRects( ((wxRegionRefData*)rRegion.m_refData)->m_hPS     // Pres space
-                                  ,((wxRegionRefData*)rRegion.m_refData)->m_hRegion // Handle of region to query
-                                  ,NULL                                             // Return all RECTs
-                                  ,&vRgnData                                        // Will contain number or RECTs in region
-                                  ,NULL                                             // NULL to return number of RECTs
-                                 ))
-        {
-            pRect = new RECTL[vRgnData.crcReturned];
-            m_pRects = new wxRect[vRgnData.crcReturned];
-            vRgnData.crc = vRgnData.crcReturned;
-            m_lNumRects = vRgnData.crcReturned;
-            vRgnData.ircStart = 1;
-            if (::GpiQueryRegionRects( ((wxRegionRefData*)rRegion.m_refData)->m_hPS     // Pres space of source
-                                      ,((wxRegionRefData*)rRegion.m_refData)->m_hRegion // Handle of source region
-                                      ,NULL                                             // Return all RECTs
-                                      ,&vRgnData                                        // Operations set to return rects
-                                      ,pRect                                            // Will contain the actual RECTS
-                                     ))
-            {
-                M_REGION = ::GpiCreateRegion( ((wxRegionRefData*)rRegion.m_refData)->m_hPS
-                                             ,vRgnData.crcReturned
-                                             ,pRect
-                                            );
-                for( LONG i = 0; i < m_lNumRects; i++)
-                {
-                    m_pRects[i].x      = pRect[i].xLeft;
-                    m_pRects[i].width  = pRect[i].xRight - pRect[i].xLeft;
-                    m_pRects[i].y      = pRect[i].yBottom;
-                    m_pRects[i].height = pRect[i].yTop - pRect[i].yBottom;
-                }
-                ((wxRegionRefData*)m_refData)->m_hPS = ((wxRegionRefData*)rRegion.m_refData)->m_hPS;
-            }
-        }
+        // TODO create m_rects and fill with rectangles for this region
+        m_numRects = 0;
     }
-} // end of wxRegionIterator::Reset
+}
 
-//
-// Increment iterator. The rectangle returned is the one after the
-// incrementation.
-//
-void wxRegionIterator::operator++ ()
+/*!
+ * Increment iterator. The rectangle returned is the one after the
+ * incrementation.
+ */
+void wxRegionIterator::operator ++ ()
 {
-    if (m_lCurrent < m_lNumRects)
-        ++m_lCurrent;
-} // end of wxRegionIterator::operator ++
+    if (m_current < m_numRects)
+        ++m_current;
+}
 
-//
-// Increment iterator. The rectangle returned is the one before the
-// incrementation.
-//
-void wxRegionIterator::operator++ (int)
+/*!
+ * Increment iterator. The rectangle returned is the one before the
+ * incrementation.
+ */
+void wxRegionIterator::operator ++ (int)
 {
-    if (m_lCurrent < m_lNumRects)
-        ++m_lCurrent;
-} // end of wxRegionIterator::operator++
+    if (m_current < m_numRects)
+        ++m_current;
+}
 
 wxCoord wxRegionIterator::GetX() const
 {
-    if (m_lCurrent < m_lNumRects)
-        return m_pRects[m_lCurrent].x;
-    return 0L;
-} // end of wxRegionIterator::GetX
+    if (m_current < m_numRects)
+        return m_rects[m_current].x;
+    return 0;
+}
 
 wxCoord wxRegionIterator::GetY() const
 {
-    if (m_lCurrent < m_lNumRects)
-        return m_pRects[m_lCurrent].y;
-    return 0L;
-} // end of wxRegionIterator::GetY
+    if (m_current < m_numRects)
+        return m_rects[m_current].y;
+    return 0;
+}
 
 wxCoord wxRegionIterator::GetW() const
 {
-    if (m_lCurrent < m_lNumRects)
-        return m_pRects[m_lCurrent].width ;
-    return 0L;
-} // end of wxRegionIterator::GetW
+    if (m_current < m_numRects)
+        return m_rects[m_current].width ;
+    return 0;
+}
 
 wxCoord wxRegionIterator::GetH() const
 {
-    if (m_lCurrent < m_lNumRects)
-        return m_pRects[m_lCurrent].height;
-    return 0L;
-} // end of wxRegionIterator::GetH
+    if (m_current < m_numRects)
+        return m_rects[m_current].height;
+    return 0;
+}
 

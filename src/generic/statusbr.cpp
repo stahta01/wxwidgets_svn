@@ -175,25 +175,25 @@ void wxStatusBarGeneric::OnPaint(wxPaintEvent& WXUNUSED(event) )
 {
   wxPaintDC dc(this);
 
+#ifdef __WXPM__
+    RECTL wrectl;
+
+    ::WinQueryWindowRect(GetHWND(), &wrectl);
+    ::WinFillRect(dc.GetHDC(), &wrectl, CLR_BLACK);
+#else
 
   int i;
   if ( GetFont().Ok() )
     dc.SetFont(GetFont());
   dc.SetBackgroundMode(wxTRANSPARENT);
 
-#ifdef __WXPM__
-  wxColour                          vColor;
-
-  vColor.InitFromName("GREY");
-  ::WinFillRect(dc.m_hPS, &dc.m_vRclPaint, vColor.GetPixel());
-#endif
-
   for ( i = 0; i < m_nFields; i ++ )
     DrawField(dc, i);
 
-#ifdef __WXMSW__
-  dc.SetFont(wxNullFont);
-#endif // MSW
+#   ifdef __WXMSW__
+        dc.SetFont(wxNullFont);
+#   endif // MSW
+#endif
 }
 
 void wxStatusBarGeneric::DrawFieldText(wxDC& dc, int i)
@@ -207,20 +207,10 @@ void wxStatusBarGeneric::DrawFieldText(wxDC& dc, int i)
 
   long x, y;
 
-#if defined(__WXPM__)
-  long decsent;
-
-  dc.GetTextExtent(text, &x, &y,&decsent);
-  int xpos = rect.x + leftMargin;
-  int ypos = (int) (((rect.height - y + 1) / 2 ) + rect.y + decsent ) ;
-
-#else
   dc.GetTextExtent(text, &x, &y);
 
   int xpos = rect.x + leftMargin;
   int ypos = (int) (((rect.height - y) / 2 ) + rect.y + 0.5) ;
-
-#endif // __WXPM__
 
 #if defined( __WXGTK__ ) || defined(__WXMAC__)
   xpos++;
@@ -247,8 +237,6 @@ void wxStatusBarGeneric::DrawField(wxDC& dc, int i)
 
     dc.SetPen(m_hilightPen);
 
-#ifndef __WXPM__
-
     // Right and bottom white lines
     dc.DrawLine(rect.x + rect.width, rect.y,
                 rect.x + rect.width, rect.y + rect.height);
@@ -262,25 +250,6 @@ void wxStatusBarGeneric::DrawField(wxDC& dc, int i)
            rect.x, rect.y);
     dc.DrawLine(rect.x, rect.y,
         rect.x + rect.width, rect.y);
-#else
-    // Right
-    dc.DrawLine(rect.x + rect.width, rect.y,
-                rect.x + rect.width, rect.y + rect.height + 2);
-    dc.SetPen(m_mediumShadowPen);
-    dc.DrawLine(rect.x + rect.width + 1, rect.y,
-                rect.x + rect.width + 1, rect.y + rect.height + 2);
-    dc.DrawLine(rect.x + rect.width + 2, rect.y,
-                rect.x + rect.width + 2, rect.y + rect.height + 2);
-    // Top
-    dc.DrawLine(rect.x + rect.width + 2, rect.y,
-                rect.x - 2, rect.y);
-    dc.DrawLine(rect.x + rect.width + 1, rect.y - 1,
-                rect.x - 2, rect.y - 1);
-    dc.SetPen(m_hilightPen);
-    dc.DrawLine(rect.x + rect.width, rect.y - 2,
-                rect.x - 2, rect.y - 2);
-
-#endif
 
     DrawFieldText(dc, i);
 }
@@ -292,11 +261,7 @@ bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
                _T("invalid status bar field index") );
 
   int width, height;
-#ifdef __WXPM__
-  GetSize(&width, &height);
-#else
   GetClientSize(&width, &height);
-#endif
 
   int i;
   int sum_of_nonvar = 0;
@@ -369,9 +334,6 @@ void wxStatusBarGeneric::InitColours()
 
     wxColour hilightColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DHILIGHT));
     m_hilightPen = wxPen(hilightColour, 1, wxSOLID);
-#elif defined(__WXPM__)
-    m_mediumShadowPen = wxPen("LIGHT GREY", 1, wxSOLID);
-    m_hilightPen = wxPen("WHITE", 1, wxSOLID);
 #else
     m_mediumShadowPen = wxPen("GREY", 1, wxSOLID);
     m_hilightPen = wxPen("WHITE", 1, wxSOLID);

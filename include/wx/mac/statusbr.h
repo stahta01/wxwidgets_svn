@@ -19,34 +19,35 @@
 
 #include "wx/generic/statusbr.h"
 
-class WXDLLEXPORT wxStatusBarMac : public wxStatusBarGeneric
+class WXDLLEXPORT wxStatusBarMac : public wxStatusBar
 {
-  DECLARE_DYNAMIC_CLASS(wxStatusBarMac);
+  DECLARE_DYNAMIC_CLASS(wxStatusBarXX);
 
-  wxStatusBarMac(void);
-  inline wxStatusBarMac(wxWindow *parent, wxWindowID id,
-           long style = 0,
-           const wxString& name = wxPanelNameStr)
-  {
-      Create(parent, id, style, name);
-  }
+public:
+  // ctors
+  wxStatusBarXX();
+  wxStatusBarXX(wxWindow *parent, wxWindowID id = -1, long style = wxST_SIZEGRIP);
 
-  ~wxStatusBarMac();
+  // create status line
+  bool Create(wxWindow *parent, wxWindowID id = -1, long style = wxST_SIZEGRIP);
 
-  bool Create(wxWindow *parent, wxWindowID id,
-              long style,
-              const wxString& name = wxPanelNameStr) ;
+  // a status line can have several (<256) fields numbered from 0
+  virtual void SetFieldsCount(int number = 1, const int widths[] = NULL);
 
-  virtual void DrawFieldText(wxDC& dc, int i);
-  virtual void DrawField(wxDC& dc, int i);
+  // each field of status line has its own text
+  virtual void     SetStatusText(const wxString& text, int number = 0);
+  virtual wxString GetStatusText(int number = 0) const;
 
-  ////////////////////////////////////////////////////////////////////////
-  // Implementation
+  // set status line fields' widths
+  virtual void SetStatusWidths(int n, const int widths_field[]);
 
-  void OnPaint(wxPaintEvent& event);
-protected:
+  void OnSize(wxSizeEvent& event);
 
   DECLARE_EVENT_TABLE()
+
+protected:
+  void CopyFieldsWidth(const int widths[]);
+  void SetFieldsWidth();
 };
 
 #endif

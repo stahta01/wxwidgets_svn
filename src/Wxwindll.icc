@@ -39,7 +39,6 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
    {
       source type(cpp) "COMMON\\APPCMN.CPP"
       source type(cpp) "COMMON\\CHOICCMN.CPP"
-      source type(cpp) "COMMON\\CSHELP.CPP"
       source type(cpp) "COMMON\\CLIPCMN.CPP"
       source type(cpp) "COMMON\\CMDLINE.CPP"
       source type(cpp) "COMMON\\CMNDATA.CPP"
@@ -56,7 +55,6 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "COMMON\\DOCVIEW.CPP"
       source type(cpp) "COMMON\\DYNARRAY.CPP"
       source type(cpp) "COMMON\\DYNLIB.CPP"
-      source type(cpp) "COMMON\\EFFECTS.CPP"
       source type(cpp) "COMMON\\ENCCONV.CPP"
       source type(cpp) "COMMON\\EVENT.CPP"
       option report(level, "W")
@@ -67,7 +65,6 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "COMMON\\FILE.CPP"
       source type(cpp) "COMMON\\FILECONF.CPP"
       source type(cpp) "COMMON\\FILEFN.CPP"
-      source type(cpp) "COMMON\\FILENAME.CPP"
       source type(cpp) "COMMON\\FILESYS.CPP"
       source type(cpp) "COMMON\\FONTCMN.CPP"
       source type(cpp) "COMMON\\FONTMAP.CPP"
@@ -125,7 +122,6 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "COMMON\\TEXTFILE.CPP"
       source type(cpp) "COMMON\\TIMERCMN.CPP"
       source type(cpp) "COMMON\\TOKENZR.CPP"
-      source type(cpp) "COMMON\\TREEBASE.CPP"
       source type(cpp) "COMMON\\TXTSTRM.CPP"
       option report(level, "E")
       {
@@ -153,7 +149,6 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "GENERIC\\CHOICDGG.CPP"
       source type(cpp) "GENERIC\\COLRDLGG.CPP"
       source type(cpp) "GENERIC\\DCPSG.CPP"
-      source type(cpp) "GENERIC\\DIRCTRLG.CPP"
       source type(cpp) "GENERIC\\DRAGIMGG.CPP"
       source type(cpp) "GENERIC\\FONTDLGG.CPP"
       source type(cpp) "GENERIC\\GRID.CPP"
@@ -168,6 +163,7 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "GENERIC\\LOGG.CPP"
       source type(cpp) "GENERIC\\NUMDLGG.CPP"
       source type(cpp) "GENERIC\\PANELG.CPP"
+      source type(cpp) "GENERIC\\PLOT.CPP"
       source type(cpp) "GENERIC\\PRINTPS.CPP"
       source type(cpp) "GENERIC\\PRNTDLGG.CPP"
       source type(cpp) "GENERIC\\PROGDLGG.CPP"
@@ -182,8 +178,7 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "GENERIC\\TBARSMPL.CPP"
       source type(cpp) "GENERIC\\TEXTDLGG.CPP"
       source type(cpp) "GENERIC\\TIPDLG.CPP"
-      source type(cpp) "GENERIC\\TIPWIN.CPP"
-      source type(cpp) "GENERIC\\TREECTLG.CPP"
+      source type(cpp) "GENERIC\\TREECTRL.CPP"
       source type(cpp) "GENERIC\\TREELAY.CPP"
       source type(cpp) "GENERIC\\WIZARD.CPP"
       source type(cpp) "HTML\\HELPCTRL.CPP"
@@ -228,7 +223,6 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "OS2\\DCPRINT.CPP"
       source type(cpp) "OS2\\DCSCREEN.CPP"
       source type(cpp) "OS2\\DIALOG.CPP"
-      source type(cpp) "OS2\\DIR.CPP"
       source type(cpp) "OS2\\DIRDLG.CPP"
       source type(cpp) "OS2\\DND.CPP"
       source type(cpp) "OS2\\DUMMYDLL.CPP"
@@ -288,21 +282,10 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "OS2\\UTILSEXC.CPP"
       source type(cpp) "OS2\\WAVE.CPP"
       source type(cpp) "OS2\\WINDOW.CPP"
-      source type(cpp) "OS2\\XPMHAND.CPP"
    }
-//   target "..\\samples\\minimal\\dbgos240dll\\Minimal.exe"
-//   {
-//      source type(cpp) "..\\SAMPLES\\MINIMAL\\MINIMAL.CPP"
-//      source type(rc) "..\\SAMPLES\\MINIMAL\\MINIMAL.RC4"
-//   }
-   target "..\\samples\\menu\\dbgos240dll\\Menu.exe"
+   target "..\\samples\\minimal\\dbgos240dll\\Minimal.exe"
    {
-      source type(cpp) "..\\SAMPLES\\MENU\\MENU.CPP"
-      source type(rc) "..\\SAMPLES\\MENU\\MENU.RC4"
+      source type(cpp) "..\\SAMPLES\\MINIMAL\\MINIMAL.CPP"
+      source type(rc) "..\\SAMPLES\\MINIMAL\\MINIMAL.RC4"
    }
-//   target "..\\samples\\statbar\\dbgos240dll\\Statbar.exe"
-//   {
-//      source type(cpp) "..\\SAMPLES\\STATBAR\\STATBAR.CPP"
-//      source type(rc) "..\\SAMPLES\\STATBAR\\STATBAR.RC4"
-//   }
 }

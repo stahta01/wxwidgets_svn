@@ -89,12 +89,8 @@ typedef struct {
     unsigned int depth;
 }      XImage;
 
-#elif defined(macintosh) || defined(__APPLE__)
-#if defined(__APPLE__)
-#include <Carbon/Carbon.h>
-#elif !defined(__MWERKS__)
-#include <wx/wxprec.h>
-#endif
+#elif macintosh
+
 /* define Mac types for X window types */
 
 typedef GDevice* Display;			/* this should be similar */
@@ -140,7 +136,7 @@ extern "C" {
     FUNC(XQueryColors, void, (Display *display, Colormap *colormap,
 			      XColor *xcolors, int ncolors));
     FUNC(XFreeColors, int, (Display *d, Colormap cmap,
-			    Pixel *pixels,
+			    unsigned long pixels[],
 			    int npixels, unsigned long planes));
 /* XImage */
     FUNC(XCreateImage, XImage *, (Display *, Visual *, int depth, int format,
@@ -165,7 +161,7 @@ extern "C" {
 #ifndef Bool
 #ifdef FOR_MSW
 typedef BOOL Bool;		/* take MSW bool */
-#elif defined(macintosh) || defined(__APPLE__)
+#elif macintosh
 typedef Boolean Bool;		/* take MSW bool */
 #endif
 #endif

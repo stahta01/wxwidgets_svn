@@ -61,6 +61,11 @@ wxString wxGetTextFromUser(const wxString& message,
                            int x = -1, int y = -1,
                            bool centre = TRUE);
 
+wxString wxGetPasswordFromUser(const wxString& message,
+                               const wxString& caption = wxPyEmptyStr,
+                               const wxString& default_value = wxPyEmptyStr,
+                               wxWindow *parent = NULL);
+
 
 // TODO: Need to custom wrap this one...
 // int wxGetMultipleChoice(char* message, char* caption,
@@ -109,8 +114,11 @@ int wxGetDisplayDepth();
 
 void wxDisplaySize(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySize();
+
+#ifdef FOR_2_3
 void wxDisplaySizeMM(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySizeMM();
+#endif
 
 void wxSetCursor(wxCursor& cursor);
 

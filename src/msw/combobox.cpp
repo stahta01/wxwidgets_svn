@@ -25,14 +25,13 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_COMBOBOX
 
 #ifndef WX_PRECOMP
-    #include "wx/settings.h"
-    #include "wx/log.h"
+#include "wx/settings.h"
 #endif
 
 #include "wx/combobox.h"
@@ -433,21 +432,39 @@ long wxComboBox::GetLastPosition() const
 void wxComboBox::Replace(long from, long to, const wxString& value)
 {
 #if wxUSE_CLIPBOARD
-    Remove(from, to);
+    HWND hWnd = GetHwnd();
+    long fromChar = from;
+    long toChar = to;
+
+    // Set selection and remove it
+#ifdef __WIN32__
+    SendMessage(hWnd, CB_SETEDITSEL, fromChar, toChar);
+#else
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar));
+#endif
+    SendMessage(hWnd, WM_CUT, (WPARAM)0, (LPARAM)0);
 
     // Now replace with 'value', by pasting.
     wxSetClipboardData(wxDF_TEXT, (wxObject *)(const wxChar *)value, 0, 0);
 
     // Paste into edit control
-    SendMessage(GetHwnd(), WM_PASTE, (WPARAM)0, (LPARAM)0L);
+    SendMessage(hWnd, WM_PASTE, (WPARAM)0, (LPARAM)0L);
 #endif
 }
 
 void wxComboBox::Remove(long from, long to)
 {
-    // Set selection and remove it
-    SetSelection(from, to);
-    SendMessage(GetHwnd(), WM_CUT, (WPARAM)0, (LPARAM)0);
+    HWND hWnd = GetHwnd();
+    long fromChar = from;
+    long toChar = to;
+
+    // Cut all selected text
+#ifdef __WIN32__
+    SendMessage(hWnd, CB_SETEDITSEL, fromChar, toChar);
+#else
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar));
+#endif
+    SendMessage(hWnd, WM_CUT, (WPARAM)0, (LPARAM)0);
 }
 
 void wxComboBox::SetSelection(long from, long to)
@@ -464,16 +481,13 @@ void wxComboBox::SetSelection(long from, long to)
       toChar = -1;
     }
 
-    if ( 
 #ifdef __WIN32__
-    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar))
-#else // Win16
-    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)fromChar, (LPARAM)toChar)
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)fromChar, (LPARAM)toChar);
+//    SendMessage(hWnd, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0);
+#else
+    // WPARAM is 0: selection is scrolled into view
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar));
 #endif
-        == CB_ERR )
-    {
-        wxLogDebug(_T("CB_SETEDITSEL failed"));
-    }
 }
 
 void wxComboBox::DoMoveWindow(int x, int y, int width, int height)

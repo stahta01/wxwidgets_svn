@@ -27,8 +27,6 @@
 #include "wx/dcprint.h"
 #include "math.h"
 
-#if wxUSE_PRINTING_ARCHITECTURE
-
 IMPLEMENT_CLASS(wxPrinterDC, wxDC)
 
 
@@ -330,4 +328,3 @@ WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
     return (WXHDC) hDC;
 }
 
-#endif //wxUSE_PRINTING_ARCHITECTURE

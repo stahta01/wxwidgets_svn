@@ -43,7 +43,7 @@
  * Lorens Younes (d93-hyo@nada.kth.se) 4/96
  */
 
-#include "XpmI.h"
+#include "xpmi.h"
 #include <ctype.h>
 
 LFUNC(xpmVisualType, int, (Visual *visual));
@@ -412,7 +412,7 @@ CreateColors(display, attributes, colors, ncolors, image_pixels, mask_pixels,
 	    } 
 	    else
 	    {
-	    	#if defined(macintosh) || defined(__APPLE__)
+	    	#ifdef macintosh
 			SET_WHITE_PIXEL( *mask_pixels ) ; // is this correct CS ????
 			#else
 			*mask_pixels = 1; // is this correct CS ????
@@ -677,7 +677,7 @@ PlatformPutImagePixels(dc, image, width, height, pixelindex, pixels)
 	}
     }
     SelectObject(*dc, obm);
-#elif defined(macintosh) || defined(__APPLE__)
+#elif macintosh
 	GrafPtr 	origPort ;
 	GDHandle	origDevice ;
 	
@@ -1036,7 +1036,7 @@ ParseAndPutPixels(
 	    }
 	    obm = SelectObject(*dc, image->bitmap);
 
-		#elif defined(macintosh) || defined(__APPLE__)
+		#elif macintosh
 		GrafPtr 	origPort ;
 		GDHandle	origDevice ;
 		
@@ -1065,14 +1065,14 @@ ParseAndPutPixels(
 					{
 					    SetPixel(shapedc, x, y, shape_pixels[colidx[c] - 1]);
 					}
-					#elif defined(macintosh) || defined(__APPLE__)
+					#elif macintosh
 					SetCPixel( x, y, &image_pixels[colidx[c] - 1]);
-					if (shapeimage) 
+					/*
+					if (shapedc) 
 					{
-						SetGWorld( shapeimage->gworldptr , NULL ) ;
-					    SetCPixel( x, y, &shape_pixels[colidx[c] - 1]);
-						SetGWorld( image->gworldptr , NULL ) ;
+					    SetPixel(shapedc, x, y, shape_pixels[colidx[c] - 1]);
 					}
+					*/
 					#endif
 				} 
 				else
@@ -1086,7 +1086,7 @@ ParseAndPutPixels(
 			DeleteDC(shapedc);
 	    }
 	    SelectObject(*dc, obm);
-	   	#elif defined(macintosh) || defined(__APPLE__)
+	   	#elif macintosh
     	SetGWorld( origPort , origDevice ) ;
 	   	#endif
 	}
@@ -1103,7 +1103,7 @@ if (cidx[f]) XpmFree(cidx[f]);}
 	    /* array of pointers malloced by need */
 	    unsigned short *cidx[256];
 	    int char1;
-		#if defined(macintosh) || defined(__APPLE__)
+		#ifdef macintosh
 		GrafPtr 	origPort ;
 		GDHandle	origDevice ;
 		GetGWorld( &origPort , &origDevice ) ;
@@ -1116,7 +1116,7 @@ if (cidx[f]) XpmFree(cidx[f]);}
 		    cidx[char1] = (unsigned short *)
 			XpmCalloc(256, sizeof(unsigned short));
 		    if (cidx[char1] == NULL) { /* new block failed */
-			#if defined(macintosh) || defined(__APPLE__)
+			#ifdef macintosh
     		SetGWorld( origPort , origDevice ) ;
 			#endif
 			FREE_CIDX;
@@ -1145,19 +1145,19 @@ if (cidx[f]) XpmFree(cidx[f]);}
 			    SetPixel(*dc, x, y,
 				     shape_pixels[cidx[cc1][cc2] - 1]);
 			}
-			#elif defined(macintosh) || defined(__APPLE__)
+			#elif macintosh
 	    		SetCPixel( x, y, &image_pixels[cidx[cc1][cc2] - 1]);  
 			#endif
 			} else 
 			{
-				#if defined(macintosh) || defined(__APPLE__)
+				#ifdef macintosh
     			SetGWorld( origPort , origDevice ) ;
 				#endif
 			    FREE_CIDX;
 			    return (XpmFileInvalid);
 			}
 		    } else {
-				#if defined(macintosh) || defined(__APPLE__)
+				#ifdef macintosh
     			SetGWorld( origPort , origDevice ) ;
 				#endif
 			FREE_CIDX;
@@ -1165,7 +1165,7 @@ if (cidx[f]) XpmFree(cidx[f]);}
 		    }
 		}
 	    }
-		#if defined(macintosh) || defined(__APPLE__)
+		#ifdef macintosh
 		SetGWorld( origPort , origDevice ) ;
 		#endif
 	    FREE_CIDX;
@@ -1177,7 +1177,7 @@ if (cidx[f]) XpmFree(cidx[f]);}
 	{
 	    char *s;
 	    char buf[BUFSIZ];
-		#if defined(macintosh) || defined(__APPLE__)
+		#ifdef macintosh
 		GrafPtr 	origPort ;
 		GDHandle	origDevice ;
 		GetGWorld( &origPort , &origDevice ) ;
@@ -1196,7 +1196,7 @@ if (cidx[f]) XpmFree(cidx[f]);}
 			slot = xpmHashSlot(hashtable, buf);
 			if (!*slot)	/* no color matches */
 			{
-				#if defined(macintosh) || defined(__APPLE__)
+				#ifdef macintosh
     			SetGWorld( origPort , origDevice ) ;
 				#endif
 			    return (XpmFileInvalid);
@@ -1212,7 +1212,7 @@ if (cidx[f]) XpmFree(cidx[f]);}
 			    SetPixel(*dc, x, y,
 				     shape_pixels[HashColorIndex(slot)]);
 			}
-			#elif defined(macintosh) || defined(__APPLE__)
+			#elif macintosh
 	    		SetCPixel( x, y, &image_pixels[HashColorIndex(slot)]); 
 			#endif
 		    }
@@ -1228,7 +1228,7 @@ if (cidx[f]) XpmFree(cidx[f]);}
 				break;
 			if (a == ncolors)	/* no color matches */
 			{
-				#if defined(macintosh) || defined(__APPLE__)
+				#ifdef macintosh
     			SetGWorld( origPort , origDevice ) ;
 				#endif
 			    return (XpmFileInvalid);
@@ -1241,13 +1241,13 @@ if (cidx[f]) XpmFree(cidx[f]);}
 			    SelectObject(*dc, shapeimage->bitmap);
 			    SetPixel(*dc, x, y, shape_pixels[a]);
 			}
-			#elif defined(macintosh) || defined(__APPLE__)
+			#elif macintosh
 	    	SetCPixel( x, y, &image_pixels[a]); // data is [x+y*width] 
 			#endif
 		    }
 		}
 	    }
-		#if defined(macintosh) || defined(__APPLE__)
+		#ifdef macintosh
     	SetGWorld( origPort , origDevice ) ;
 		#endif
 

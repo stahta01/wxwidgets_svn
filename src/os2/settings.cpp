@@ -44,6 +44,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_WINDOWFRAME:
@@ -55,6 +56,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_MENUTEXT:
@@ -77,6 +79,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_BTNSHADOW:
@@ -88,6 +91,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         case wxSYS_COLOUR_BTNHIGHLIGHT:
@@ -99,6 +103,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
 
         //
@@ -113,7 +118,7 @@ wxColour wxSystemSettings::GetSystemColour(
         case wxSYS_COLOUR_INACTIVECAPTIONTEXT:
         case wxSYS_COLOUR_BTNTEXT:
         case wxSYS_COLOUR_INFOTEXT:
-            vCol = (*wxBLACK);
+            return(*wxBLACK);
             break;
 
         //
@@ -123,7 +128,7 @@ wxColour wxSystemSettings::GetSystemColour(
         case wxSYS_COLOUR_ACTIVECAPTION:
         case wxSYS_COLOUR_ACTIVEBORDER:
         case wxSYS_COLOUR_HIGHLIGHT:
-            vCol = (*wxBLUE);
+            return(*wxBLUE);
             break;
 
         case wxSYS_COLOUR_SCROLLBAR:
@@ -137,7 +142,7 @@ wxColour wxSystemSettings::GetSystemColour(
         case wxSYS_COLOUR_3DDKSHADOW:
         case wxSYS_COLOUR_3DLIGHT:
         case wxSYS_COLOUR_INFOBK:
-            vCol = (*wxLIGHT_GREY);
+            return(*wxLIGHT_GREY);
             break;
 
         default:
@@ -149,6 +154,7 @@ wxColour wxSystemSettings::GetSystemColour(
                      ,GetGValue(vRef)
                      ,GetBValue(vRef)
                     );
+            return vCol;
             break;
     }
     return(vCol);
@@ -181,10 +187,8 @@ wxFont wxSystemSettings::GetSystemFont(int index)
             break;
         }
     }
-    if(wxSWISS_FONT)
-         return *wxSWISS_FONT;
 
-    return wxNullFont;
+    return *wxSWISS_FONT;
 }
 
 // Get a system metric, e.g. scrollbar size

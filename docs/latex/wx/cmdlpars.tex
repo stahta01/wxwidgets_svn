@@ -14,8 +14,7 @@
 wxCmdLineParser is a class for parsing command line.
 
 It has the following features:
-
-\begin{enumerate}\itemsep=0pt
+\begin{enumerate}
 \item distinguishes options, switches and parameters; allows option grouping
 \item allows both short and long options
 \item automatically generates the usage message from the command line description
@@ -23,8 +22,7 @@ It has the following features:
 \end{enumerate}
 
 To use it you should follow these steps:
-
-\begin{enumerate}\itemsep=0pt
+\begin{enumerate}
 \item \helpref{construct}{wxcmdlineparserconstruction} an object of this class
 giving it the command line to parse and optionally its description or use 
 {\tt AddXXX()} functions later
@@ -75,9 +73,7 @@ struct wxCmdLineEntryDesc
 
 The type of a command line entity is in the {\tt kind} field and may be one of
 the following constants:
-
-{\small%
-\begin{verbatim}
+{\small \begin{verbatim}
 enum wxCmdLineEntryType
 {
     wxCMD\_LINE\_SWITCH,
@@ -85,8 +81,7 @@ enum wxCmdLineEntryType
     wxCMD\_LINE\_PARAM,
     wxCMD\_LINE\_NONE         // use this to terminate the list
 }
-\end{verbatim}
-}
+\end{verbatim}}
 
 The field {\tt shortName} is the usual, short, name of the switch or the option.
 {\tt longName} is the corresponding long name or NULL if the option has no long
@@ -98,9 +93,7 @@ to construct a help message explaining the syntax of the program.
 
 The possible values of {\tt type} which specifies the type of the value accepted
 by an option or parameter are:
-
-{\small%
-\begin{verbatim}
+{\small \begin{verbatim}
 enum wxCmdLineParamType
 {
     wxCMD\_LINE\_VAL\_STRING,  // default
@@ -108,13 +101,10 @@ enum wxCmdLineParamType
     wxCMD\_LINE\_VAL\_DATE,
     wxCMD\_LINE\_VAL\_NONE
 }
-\end{verbatim}
-}
+\end{verbatim}}
 
 Finally, the {\tt flags} field is a combination of the following bit masks:
-
-{\small%
-\begin{verbatim}
+{\small \begin{verbatim}
 enum
 {
     wxCMD\_LINE\_OPTION\_MANDATORY = 0x01, // this option must be given
@@ -123,8 +113,7 @@ enum
     wxCMD\_LINE\_OPTION\_HELP      = 0x08, // this option is a help request
     wxCMD\_LINE\_NEEDS\_SEPARATOR  = 0x10, // must have sep before the value
 }
-\end{verbatim}
-}
+\end{verbatim}}
 
 Notice that by default (i.e. if flags are just $0$), options are optional (sic)
 and each call to \helpref{AddParam()}{wxcmdlineparseraddparam} allows one more
@@ -207,7 +196,7 @@ application-specific text before the explanation given by
 
 \membersection{Parsing command line}\label{wxcmdlineparserparsing}
 
-After the command line description was constructed and the desired options were
+After the command line description was constructed and the desiredoptions were
 set, you can finally call \helpref{Parse}{wxcmdlineparserparse} method.
 It returns $0$ if the command line was correct and was parsed, $-1$ if the help
 option was specified (this is a separate case as, normally, the program will
@@ -242,7 +231,8 @@ command line or FALSE if they were not specified.
 \func{}{wxCmdLineParser}{\void}
 
 Default constructor. You must use 
-\helpref{SetCmdLine}{wxcmdlineparsersetcmdlineargc} later.
+\helpref{SetCmdLine}{wxcmdlineparsersetcmdlineargc} or 
+\helpref{SetCmdLinelater.}{wxcmdlineparsersetcmdlinestr} later.
 
 \membersection{wxCmdLineParser::wxCmdLineParser}\label{wxcmdlineparserwxcmdlineparserargc}
 

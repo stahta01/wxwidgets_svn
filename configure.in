@@ -456,11 +456,11 @@ dnl
 dnl WX_INTERFACE_AGE = 0
 
 WX_MAJOR_VERSION_NUMBER=2
-WX_MINOR_VERSION_NUMBER=3
-WX_RELEASE_NUMBER=0
+WX_MINOR_VERSION_NUMBER=2
+WX_RELEASE_NUMBER=5
 
-WX_INTERFACE_AGE=0
-WX_BINARY_AGE=0
+WX_INTERFACE_AGE=5
+WX_BINARY_AGE=5
 
 WX_VERSION=$WX_MAJOR_VERSION_NUMBER.$WX_MINOR_VERSION_NUMBER.$WX_RELEASE_NUMBER
 
@@ -709,7 +709,6 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_LIBJPEG=no
   DEFAULT_wxUSE_LIBTIFF=no
   DEFAULT_wxUSE_ODBC=no
-  DEFAULT_wxUSE_FREETYPE=no
   DEFAULT_wxUSE_OPENGL=no
 
   DEFAULT_wxUSE_ON_FATAL_EXCEPTION=no
@@ -727,7 +726,6 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_JOYSTICK=no
   DEFAULT_wxUSE_DYNLIB_CLASS=no
   DEFAULT_wxUSE_LONGLONG=no
-  DEFAULT_wxUSE_GEOMETRY=no
 
   DEFAULT_wxUSE_AFM_FOR_POSTSCRIPT=no
   DEFAULT_wxUSE_NORMALIZED_PS_FONTS=no
@@ -779,6 +777,7 @@ if test $DEBUG_CONFIGURE = 1; then
   DEFAULT_wxUSE_LISTBOX=no
   DEFAULT_wxUSE_LISTCTRL=no
   DEFAULT_wxUSE_NOTEBOOK=no
+  DEFAULT_wxUSE_PLOT=no
   DEFAULT_wxUSE_RADIOBOX=no
   DEFAULT_wxUSE_RADIOBTN=no
   DEFAULT_wxUSE_SASH=no
@@ -831,7 +830,6 @@ else
   DEFAULT_wxUSE_LIBJPEG=yes
   DEFAULT_wxUSE_LIBTIFF=yes
   DEFAULT_wxUSE_ODBC=no
-  DEFAULT_wxUSE_FREETYPE=no
   DEFAULT_wxUSE_OPENGL=no
 
   DEFAULT_wxUSE_ON_FATAL_EXCEPTION=yes
@@ -849,7 +847,6 @@ else
   DEFAULT_wxUSE_JOYSTICK=yes
   DEFAULT_wxUSE_DYNLIB_CLASS=yes
   DEFAULT_wxUSE_LONGLONG=yes
-  DEFAULT_wxUSE_GEOMETRY=yes
 
   DEFAULT_wxUSE_AFM_FOR_POSTSCRIPT=yes
   DEFAULT_wxUSE_NORMALIZED_PS_FONTS=yes
@@ -901,6 +898,7 @@ else
   DEFAULT_wxUSE_LISTBOX=yes
   DEFAULT_wxUSE_LISTCTRL=yes
   DEFAULT_wxUSE_NOTEBOOK=yes
+  DEFAULT_wxUSE_PLOT=yes
   DEFAULT_wxUSE_RADIOBOX=yes
   DEFAULT_wxUSE_RADIOBTN=yes
   DEFAULT_wxUSE_SASH=yes
@@ -973,7 +971,6 @@ AC_ARG_WITH(gtk-exec-prefix, [  --with-gtk-exec-prefix=PFX  Exec prefix where GT
 WX_ARG_SYS_WITH(libpng,    [  --with-libpng           use libpng (PNG image format)], wxUSE_LIBPNG)
 WX_ARG_SYS_WITH(libjpeg,   [  --with-libjpeg          use libjpeg (JPEG file format)], wxUSE_LIBJPEG)
 WX_ARG_SYS_WITH(libtiff,   [  --with-libtiff          use libtiff (TIFF file format)], wxUSE_LIBTIFF)
-WX_ARG_SYS_WITH(freetype,  [  --with-freetype         use freetype (font rasterizer)], wxUSE_FREETYPE)
 WX_ARG_WITH(opengl,        [  --with-opengl           use OpenGL (or Mesa)], wxUSE_OPENGL)
 
 fi
@@ -1033,7 +1030,6 @@ WX_ARG_ENABLE(wave,          [  --enable-wave           use wxWave class], wxUSE
 WX_ARG_ENABLE(fraction,      [  --enable-fraction       use wxFraction class], wxUSE_FRACTION)
 WX_ARG_ENABLE(dynlib,        [  --enable-dynlib         use wxLibrary class for DLL loading], wxUSE_DYNLIB_CLASS)
 WX_ARG_ENABLE(longlong,      [  --enable-longlong       use wxLongLong class], wxUSE_LONGLONG)
-WX_ARG_ENABLE(geometry,      [  --enable-geometry       use geometry class], wxUSE_GEOMETRY)
 WX_ARG_ENABLE(log,           [  --enable-log            use logging system], wxUSE_LOG)
 WX_ARG_ENABLE(streams,       [  --enable-streams        use wxStream etc classes], wxUSE_STREAMS)
 WX_ARG_ENABLE(file,          [  --enable-file           use wxFile classes], wxUSE_FILE)
@@ -1219,6 +1215,7 @@ WX_ARG_ENABLE(tooltips,    [  --enable-tooltips       use wxToolTip class], wxUS
 WX_ARG_ENABLE(splines,     [  --enable-splines        use spline drawing code], wxUSE_SPLINES)
 WX_ARG_ENABLE(validators,  [  --enable-validators     use wxValidator and derived classes], wxUSE_VALIDATORS)
 WX_ARG_ENABLE(busyinfo,    [  --enable-busyinfo       use wxBusyInfo], wxUSE_BUSYINFO)
+WX_ARG_ENABLE(plot,        [  --enable-plot           use wxPlot], wxUSE_PLOT)
 WX_ARG_ENABLE(joystick,    [  --enable-joystick       compile in joystick support (Linux only)], wxUSE_JOYSTICK)
 
 dnl ---------------------------------------------------------------------------
@@ -1544,7 +1541,7 @@ GUI_TK_LINK=
 
 WXGTK12=
 WXGTK127=
-WXGTK20=
+WXGTK13=
 
 WXWINE=
 
@@ -1604,12 +1601,10 @@ fi
 if test "$wxUSE_GTK" = 1; then
     dnl avoid calling AM_PATH_GTK twice, so check first for the newer version
     dnl and only then, if it wasn't found, for an older one
-    AM_PATH_GTK_2_0(1.3.1, WXGTK20=1,[
-      AM_PATH_GTK(1.2.7, WXGTK127=1)
-      AM_PATH_GTK(1.2.3, WXGTK12=1)
-    ], gthread)
+    AM_PATH_GTK(1.2.7, WXGTK127=1)
+    AM_PATH_GTK(1.2.3, WXGTK12=1)
 
-    if test "$WXGTK12" != 1 -a "$WXGTK20" != 1; then
+    if test "$WXGTK12" != 1; then
         AC_MSG_ERROR([
             Please check that gtk-config is in path, the directory
             where GTK+ libraries are installed (returned by
@@ -1617,6 +1612,15 @@ if test "$wxUSE_GTK" = 1; then
             equivalent variable and GTK+ is version 1.2.3 or above.
         ])
     fi
+
+dnl it doesn't really work with 1.3.0 now...
+dnl    AM_PATH_GTK(1.3.0,
+dnl        WXGTK13=1,
+dnl        AM_PATH_GTK(1.2.1,
+dnl            WXGTK12=1,
+dnl            AC_MSG_ERROR(Is gtk-config in path and GTK+ is version 1.2.1 or above?)
+dnl        )
+dnl    )
 
     TOOLKIT_INCLUDE="$GTK_CFLAGS"
 
@@ -1704,18 +1708,13 @@ if test "$wxUSE_WINE" = 1; then
     GUIDIST=MSW_DIST
 fi
 
-dnl use standard macros to check for X headers/libs, this brings support
-dnl for the standard configure options --x-includes and --x-libraries;
-dnl the path to the X headers/libs is not only needed for motif, but also
-dnl by the OpenGL and XKBlib.h checks further down
-
-AC_PATH_XTRA
-CPPFLAGS="$CPPFLAGS $X_CFLAGS"
-LDFLAGS="$LDFLAGS $X_LIBS"
-
 if test "$wxUSE_MOTIF" = 1; then
+    dnl use standard macros to check for X headers/libs, this brings support
+    dnl for the standard configure options --x-includes and --x-libraries
+    AC_PATH_XTRA
+
     if test "$no_x" = "yes"; then
-      AC_MSG_ERROR(X11 not found, please use --x-includes and/or --x-libraries options)
+        AC_MSG_ERROR(X11 not found, please use --x-includes and/or --x-libraries options)
     fi
 
     GUI_TK_LIBRARY="$X_LIBS"
@@ -1947,9 +1946,6 @@ fi
     if test "$wxUSE_ZLIB" = "yes" ; then
         ALL_OBJECTS="${ALL_OBJECTS} \$(ZLIBOBJS)"
     fi
-    if test "$wxUSE_FREETYPE" = "yes" ; then
-        ALL_OBJECTS="${ALL_OBJECTS} \$(FREETYPEOBJS)"
-    fi
     ALL_DEPFILES="\$(GUIDEPS) \$(COMMONDEPS) \$(GENERICDEPS) \$(UNIXDEPS) \$(HTMLDEPS) \$(OGLDEPS)"
 
     PORT_FILES="src/\$(TOOLKITDIR)/files.lst"
@@ -2109,13 +2105,8 @@ if test "$wxUSE_SHARED" = "yes"; then
       *-*-freebsd* | *-*-netbsd*)
         SHARED_LD="${CC} -shared -o"
         PIC_FLAG="-fPIC"
-        if test "$wxUSE_OPENGL" = "yes"; then
-            WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS CREATE_INSTALLED_LINKS_GL"
-            WX_ALL="CREATE_LINKS CREATE_LINKS_GL"
-        else
-            WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS"
-            WX_ALL="CREATE_LINKS"
-        fi
+        WX_ALL_INSTALLED="CREATE_INSTALLED_LINKS"
+        WX_ALL="CREATE_LINKS"
       ;;
       *-*-osf* )
         SHARED_LD="${CXX} -shared -o"
@@ -2214,18 +2205,12 @@ dnl defines HAVE_STRINGS_H (where some string functions live on AIX for example)
 AC_CHECK_HEADERS(strings.h)
 dnl defines HAVE_UNISTD_H
 AC_CHECK_HEADERS(unistd.h)
-dnl defines HAVE_FCNTL_H
-AC_CHECK_HEADERS(fcntl.h)
 dnl defines HAVE_WCHAR_H
 AC_CHECK_HEADERS(wchar.h)
 dnl defines HAVE_WCSTR_H
 AC_CHECK_HEADERS(wcstr.h)
 dnl defines HAVE_FNMATCH_H
 AC_CHECK_HEADERS(fnmatch.h)
-dnl defines HAVE_ICONV_H (Unix98 encoding conversion routines)
-AC_CHECK_HEADERS(iconv.h)
-dnl defines HAVE_LANGINFO_H (GNU libc locale parameters)
-AC_CHECK_HEADERS(langinfo.h)
 
 if test "$wxUSE_GUI" = "yes"; then
     if test "$wxUSE_UNIX" = "yes"; then
@@ -2289,7 +2274,6 @@ dnl check the sizes of integral types (give some reasonable default values for
 dnl cross-compiling)
 dnl   defines the size of certain types of variables in SIZEOF_<TYPE>
 AC_CHECK_SIZEOF(char, 1)
-AC_CHECK_SIZEOF(wchar_t, 4)
 AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(int *, 4)
 AC_CHECK_SIZEOF(int, 4)
@@ -2443,9 +2427,6 @@ AC_CHECK_FUNCS(vfork)
 dnl check for timegm() used by datetime.cpp
 AC_CHECK_FUNCS(timegm)
 
-dnl look for a functiopn to modify the environment
-AC_CHECK_FUNCS(putenv setenv, break)
-
 HAVE_SOME_SLEEP_FUNC=0
 if test "$USE_BEOS" = 1; then
     dnl BeOS has its own (wonder where did they get it from) sleep() function
@@ -2552,7 +2533,7 @@ if test "$wxUSE_THREADS" = "yes" ; then
     dnl find if POSIX threads are available
 
     dnl AIX calls the library libpthreads - thanks IBM!
-    if test "$USE_AIX" = 1; then
+    if test "$wxUSE_AIX" = 1; then
         THREADS_LIB=pthreads
     else
         THREADS_LIB=pthread
@@ -2658,14 +2639,6 @@ if test "$wxUSE_THREADS" = "yes" ; then
   ])
 
   THREADS_LINK="-l$THREADS_LINK"
-
-  dnl building MT programs under Solaris with the native compiler requires -mt
-  dnl switch
-  if test "$USE_SOLARIS" = "yes" -a "$GCC" != "yes"; then
-      CFLAGS="${CFLAGS} -mt"
-      CXXFLAGS="${CXXFLAGS} -mt"
-      LDFLAGS="${LDFLAGS} -mt"
-  fi
 fi
 
 dnl from if !MSW
@@ -2694,8 +2667,8 @@ else
   fi
 fi
 
-if test "$WXGTK20" = 1 ; then
-  AC_DEFINE_UNQUOTED(__WXGTK20__,$WXGTK20)
+if test "$WXGTK13" = 1 ; then
+  AC_DEFINE_UNQUOTED(__WXGTK13__,$WXGTK13)
   WXGTK12=1
 fi
 
@@ -2754,12 +2727,13 @@ fi
 
 DEP_INFO_FLAGS=
 CODE_GEN_FLAGS=
+CODE_GEN_FLAGS_CXX=
 if test "$GCC" = yes ; then
     if test "$wxUSE_NO_RTTI" = "yes" ; then
-        CODE_GEN_FLAGS="$CODE_GEN_FLAGS -fno-rtti"
+        CODE_GEN_FLAGS_CXX="$CODE_GEN_FLAGS_CXX -fno-rtti"
     fi
     if test "$wxUSE_NO_EXCEPTIONS" = "yes" ; then
-        CODE_GEN_FLAGS="$CODE_GEN_FLAGS -fno-exceptions"
+        CODE_GEN_FLAGS_CXX="$CODE_GEN_FLAGS_CXX -fno-exceptions"
     fi
     if test "$wxUSE_PERMISSIVE" = "yes" ; then
        CODE_GEN_FLAGS="$CODE_GEN_FLAGS -fpermissive"
@@ -2860,25 +2834,6 @@ if test "$wxUSE_LIBTIFF" = "yes" -o "$wxUSE_LIBTIFF" = "sys" ; then
                                            -lm))
     if test "x$TIFF_LINK" = "x" ; then
         AC_MSG_ERROR(system tiff library not found! Use --with-libtiff=yes to use the built-in one)
-    fi
-  fi
-fi
-
-FREETYPE_INCLUDE=
-if test "$wxUSE_FREETYPE" = "yes" -o "$wxUSE_FREETYPE" = "sys" ; then
-  AC_DEFINE(wxUSE_FREETYPE)
-  if test "$wxUSE_FREETYPE" = "yes" ; then
-    FREETYPE_INCLUDE="-I\${top_srcdir}/src/freetype"
-  else
-    FREETYPE_LINK=
-    AC_CHECK_HEADER(freetype.h,
-                    AC_CHECK_LIB(freetype, FT_Render_Glyph,
-                                 FREETYPE_LINK="-lfreetype",
-                                 ,
-                                 [-lm])
-                   )
-    if test "x$FREETYPE_LINK" = "x" ; then
-        AC_MSG_ERROR(system freetype library not found! Use --with-freetype=yes to use the built-in freetype)
     fi
   fi
 fi
@@ -3006,8 +2961,8 @@ if test "$wxUSE_LONGLONG" = "yes"; then
   AC_DEFINE(wxUSE_LONGLONG)
 fi
 
-if test "$wxUSE_GEOMETRY" = "yes"; then
-  AC_DEFINE(wxUSE_GEOMETRY)
+if test "$wxUSE_PLOT" = "yes"; then
+  AC_DEFINE(wxUSE_PLOT)
 fi
 
 if test "$wxUSE_DIALUP_MANAGER" = "yes" ; then
@@ -3760,7 +3715,7 @@ dnl note that we always link with -lm - extended.c uses floor() and is always
 dnl linked in
 EXTRA_LIBS="$LIBS $POSIX4_LINK $INET_LINK $WCHAR_LINK $THREADS_LINK $DMALLOC_LINK $DL_LINK $ZLIB_LINK -lm"
 if test "$wxUSE_GUI" = "yes"; then
-    EXTRA_LIBS="$GUILIBS $PNG_LINK $JPEG_LINK $TIFF_LINK $FREETYPE_LINK $EXTRA_LIBS"
+    EXTRA_LIBS="$GUILIBS $PNG_LINK $JPEG_LINK $TIFF_LINK $EXTRA_LIBS"
 fi
 
 dnl all the libraries needed to link wxWindows programs when using the
@@ -3768,7 +3723,7 @@ dnl makefile system without libtool
 LD_LIBS="\${top_builddir}/lib/${WX_LIBRARY_NAME_STATIC} $EXTRA_LIBS"
 
 dnl all -I options we must pass to the compiler
-INCLUDES="-I. -I\${top_builddir}/include -I\${top_srcdir}/include $ZLIB_INCLUDE $PNG_INCLUDE $JPEG_INCLUDE $TIFF_INCLUDE $FREETYPE_INCLUDE $TOOLKIT_INCLUDE"
+INCLUDES="-I. -I\${top_builddir}/include -I\${top_srcdir}/include $ZLIB_INCLUDE $PNG_INCLUDE $JPEG_INCLUDE $TIFF_INCLUDE $TOOLKIT_INCLUDE"
 
 dnl wxGTK does not need TOOLKIT includes in wx-config
 if test "$wxUSE_GTK" = 1; then
@@ -3797,9 +3752,8 @@ if test "$wxUSE_GUI" = "yes"; then
 
     dnl TODO some samples are never built so far:
     dnl      ipc, mfc, nativdlg, oleauto, ownerdrw, proplist
-    SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS controls dialogs dragimag \
-                     drawing dynamic event font fractal image menu \
-                     minimal richedit"
+    SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS controls dialogs dragimag drawing dynamic \
+                     font image menu minimal richedit"
 
     dnl this is needed to be able to find AFM files
     CPPFLAGS="$CPPFLAGS \$(EXTRADEFS) \$(APPEXTRADEFS)"
@@ -3853,6 +3807,7 @@ AC_SUBST(SHARED_LD)
 AC_SUBST(PIC_FLAG)
 AC_SUBST(DEP_INFO_FLAGS)
 AC_SUBST(CODE_GEN_FLAGS)
+AC_SUBST(CODE_GEN_FLAGS_CXX)
 AC_SUBST(BURNT_LIBRARY_NAME)
 AC_SUBST(BURNT_LIBRARY_NAME_GL)
 AC_SUBST(WX_TARGET_LIBRARY_SONAME)

@@ -13,10 +13,6 @@
 #pragma implementation "radiobox.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 #include "wx/radiobox.h"
 #include "wx/utils.h"
 

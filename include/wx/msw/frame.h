@@ -141,8 +141,6 @@ protected:
 
     // window proc for the frames
     long MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
-    
-    virtual bool IsMDIChild() const { return FALSE; }
 
     bool                  m_iconized;
     WXHICON               m_defaultIcon;

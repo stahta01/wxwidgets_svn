@@ -9,11 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////// */
 
-#ifdef VMS
-#define XCheckIfEvent XCHECKIFEVENT
+#ifdef __VMS
+#define gtk_widget_get_child_requisition gtk_widget_get_child_requisitio
+#define gtk_marshal_NONE__POINTER_POINTER gtk_marshal_NONE__POINTER_POINT
 #endif
 
-#include "wx/setup.h"
 #include "wx/gtk/win_gtk.h"
 #include "gtk/gtksignal.h"
 #include "gtk/gtkprivate.h"
@@ -160,12 +160,7 @@ gtk_pizza_class_init (GtkPizzaClass *klass)
     widget_class->set_scroll_adjustments_signal =
     gtk_signal_new ("set_scroll_adjustments",
                     GTK_RUN_LAST,
-
-#ifdef __WXGTK20__
-                    GTK_CLASS_TYPE(object_class),
-#else
                     object_class->type,
-#endif
                     GTK_SIGNAL_OFFSET (GtkPizzaClass, set_scroll_adjustments),
                     gtk_marshal_NONE__POINTER_POINTER,
                     GTK_TYPE_NONE, 2, GTK_TYPE_ADJUSTMENT, GTK_TYPE_ADJUSTMENT);
@@ -300,10 +295,8 @@ gtk_pizza_put (GtkPizza   *pizza,
     if (GTK_WIDGET_REALIZED (pizza))
       gtk_widget_set_parent_window (widget, pizza->bin_window);
 
-#ifndef __WXGTK20__ /* FIXME? */
     if (!IS_ONSCREEN (x, y))
        GTK_PRIVATE_SET_FLAG (widget, GTK_IS_OFFSCREEN);
-#endif
 
 /*
     if (GTK_WIDGET_REALIZED (pizza))
@@ -484,11 +477,7 @@ gtk_pizza_map (GtkWidget *widget)
 
         if ( GTK_WIDGET_VISIBLE (child->widget) &&
             !GTK_WIDGET_MAPPED (child->widget) &&
-#ifdef __WXGTK20__
-            TRUE)
-#else
             !GTK_WIDGET_IS_OFFSCREEN (child->widget))
-#endif
         {
             gtk_widget_map (child->widget);
         }
@@ -823,9 +812,7 @@ gtk_pizza_remove (GtkContainer *container,
             /* security checks */
             g_return_if_fail (GTK_IS_WIDGET (widget));
 
-#ifndef __WXGTK20__
             GTK_PRIVATE_UNSET_FLAG (widget, GTK_IS_OFFSCREEN);
-#endif
 
             break;
         }
@@ -883,17 +870,13 @@ gtk_pizza_position_child (GtkPizza      *pizza,
                 gtk_widget_map (child->widget);
         }
 
-#ifndef __WXGTK20__
         if (GTK_WIDGET_IS_OFFSCREEN (child->widget))
             GTK_PRIVATE_UNSET_FLAG (child->widget, GTK_IS_OFFSCREEN);
-#endif
     }
     else
     {
-#ifndef __WXGTK20__
         if (!GTK_WIDGET_IS_OFFSCREEN (child->widget))
             GTK_PRIVATE_SET_FLAG (child->widget, GTK_IS_OFFSCREEN);
-#endif
 
         if (GTK_WIDGET_MAPPED (child->widget))
             gtk_widget_unmap (child->widget);

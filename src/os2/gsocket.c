@@ -57,12 +57,7 @@ int _System soclose(int);
 
 #include <string.h>
 #include <stdio.h>
-#if defined(__VISAGECPP__) && __IBMCPP__ < 400
-#  ifdef min
-#  undef min
-#  endif
-#  include <stdlib.h>
-#endif
+#include <stdlib.h>
 #include <stddef.h>
 #include <ctype.h>
 

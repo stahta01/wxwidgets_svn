@@ -42,7 +42,6 @@
 #endif
 
 #if wxUSE_GUI
-    #include "wx/fontutil.h"
     #include "wx/msgdlg.h"
     #include "wx/fontdlg.h"
     #include "wx/choicdlg.h"
@@ -95,11 +94,11 @@ static wxFontEncoding gs_encodings[] =
 // the descriptions for them
 static const wxChar* gs_encodingDescs[] =
 {
-    wxTRANSLATE( "Western European (ISO-8859-1)" ),
-    wxTRANSLATE( "Central European (ISO-8859-2)" ),
+    wxTRANSLATE( "Western European (ISO-8859-1/Latin 1)" ),
+    wxTRANSLATE( "Central European (ISO-8859-2/Latin 2)" ),
     wxTRANSLATE( "Esperanto (ISO-8859-3)" ),
     wxTRANSLATE( "Baltic (old) (ISO-8859-4)" ),
-    wxTRANSLATE( "Cyrillic (ISO-8859-5)" ),
+    wxTRANSLATE( "Cyrillic (Latin 5)" ),
     wxTRANSLATE( "Arabic (ISO-8859-6)" ),
     wxTRANSLATE( "Greek (ISO-8859-7)" ),
     wxTRANSLATE( "Hebrew (ISO-8859-8)" ),
@@ -109,7 +108,7 @@ static const wxChar* gs_encodingDescs[] =
     wxTRANSLATE( "Indian (ISO-8859-12)" ),
     wxTRANSLATE( "Baltic (ISO-8859-13)" ),
     wxTRANSLATE( "Celtic (ISO-8859-14)" ),
-    wxTRANSLATE( "Western European with Euro (ISO-8859-15)" ),
+    wxTRANSLATE( "Western European with Euro (ISO-8859-15/Latin 0)" ),
     wxTRANSLATE( "KOI8-R" ),
     wxTRANSLATE( "Windows Central European (CP 1250)" ),
     wxTRANSLATE( "Windows Cyrillic (CP 1251)" ),
@@ -141,15 +140,15 @@ static const wxChar* gs_encodingNames[] =
     wxT( "iso8859-14" ),
     wxT( "iso8859-15" ),
     wxT( "koi8-r" ),
-    wxT( "windows1250" ),
-    wxT( "windows1251" ),
-    wxT( "windows1252" ),
-    wxT( "windows1253" ),
-    wxT( "windows1254" ),
-    wxT( "windows1255" ),
-    wxT( "windows1256" ),
-    wxT( "windows1257" ),
-    wxT( "windows437" ),
+    wxT( "windows-1250" ),
+    wxT( "windows-1251" ),
+    wxT( "windows-1252" ),
+    wxT( "windows-1253" ),
+    wxT( "windows-1254" ),
+    wxT( "windows-1255" ),
+    wxT( "windows-1256" ),
+    wxT( "windows-1257" ),
+    wxT( "windows-437" ),
 };
 
 // ----------------------------------------------------------------------------
@@ -439,10 +438,14 @@ wxFontEncoding wxFontMapper::CharsetToEncoding(const wxString& charset,
                 }
             }
         }
-        else if ( cs.Left(8) == wxT("WINDOWS-") )
+        else if ( cs.Left(7) == wxT("WINDOWS") )
         {
+            const wxChar *p = cs.c_str() + 7;
+            if ( *p == wxT('-') )
+                p++;
+
             int value;
-            if ( wxSscanf(cs.c_str() + 8, wxT("%u"), &value) == 1 )
+            if ( wxSscanf(p, wxT("%u"), &value) == 1 )
             {
                 if ( value >= 1250 )
                 {
@@ -686,10 +689,10 @@ bool wxFontMapper::GetAltForEncoding(wxFontEncoding encoding,
                 wxFont font = retData.GetChosenFont();
 
                 *info = retData.EncodingInfo();
-                info->encoding = retData.GetEncoding();
+                info -> encoding = retData.GetEncoding();
 
 #if wxUSE_CONFIG
-                // remember this in the config
+            // remember this in the config
                 if ( ChangePath(FONTMAPPER_FONT_FROM_ENCODING_PATH, &pathOld) )
                 {
                     GetConfig()->Write(configEntry, info->ToString());

@@ -18,11 +18,10 @@
 #include "wx/font.h"
 #include "wx/gdicmn.h"
 
-#include "wx/fontutil.h"
-
-#if !USE_SHARED_LIBRARIES
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
-#endif
+
+
+
 
 // ============================================================================
 // implementation
@@ -78,7 +77,7 @@ void wxFontRefData::MacFindFont()
 				::GetFNum( "\pTimes" , &m_macFontNum) ;
 				break ;
 			case wxSWISS :
-				::GetFNum( "\pGeneva" , &m_macFontNum) ;
+				::GetFNum( "\pHelvetica" , &m_macFontNum) ;
 				break ;
 			case wxMODERN :
 				::GetFNum( "\pMonaco" , &m_macFontNum) ;
@@ -119,13 +118,6 @@ void wxFont::Init()
         wxTheFontList->Append(this);
 }
 
-wxFont::wxFont(const wxString& fontdesc)
-{
-    wxNativeFontInfo info;
-    if ( info.FromString(fontdesc) )
-        (void)Create(info);
-}
-
 bool wxFont::Create(int pointSize,
                     int family,
                     int style,
@@ -141,12 +133,6 @@ bool wxFont::Create(int pointSize,
     RealizeResource();
 
     return TRUE;
-}
-
-bool wxFont::Create(const wxNativeFontInfo& info)
-{
-    return Create(info.pointSize, info.family, info.style, info.weight,
-                  info.underlined, info.faceName, info.encoding);
 }
 
 wxFont::~wxFont()

@@ -30,9 +30,6 @@ public:
     wxCursor();
     wxCursor( int cursorId );
     wxCursor( const wxCursor &cursor );
-    wxCursor( const char bits[], int width, int  height,
-              int hotSpotX=-1, int hotSpotY=-1,
-              const char maskBits[]=0, wxColour *fg=0, wxColour *bg=0 );
     ~wxCursor();
     wxCursor& operator = ( const wxCursor& cursor );
     bool operator == ( const wxCursor& cursor ) const;

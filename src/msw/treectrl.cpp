@@ -46,8 +46,9 @@
 #include "wx/log.h"
 #include "wx/dynarray.h"
 #include "wx/imaglist.h"
+#include "wx/treectrl.h"
 #include "wx/settings.h"
-#include "wx/msw/treectrl.h"
+
 #include "wx/msw/dragimag.h"
 
 #ifdef __GNUWIN32_OLD__
@@ -87,7 +88,6 @@
 // approach is much easier but doesn't work with comctl32.dll < 4.71 and also
 // looks quite ugly.
 #define wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE 0
-
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -498,7 +498,6 @@ void wxTreeCtrl::Init()
 {
     m_imageListNormal = NULL;
     m_imageListState = NULL;
-    m_ownsImageListNormal = m_ownsImageListState = FALSE;
     m_textCtrl = NULL;
     m_hasAnyAttr = FALSE;
     m_dragImage = NULL;
@@ -520,10 +519,8 @@ bool wxTreeCtrl::Create(wxWindow *parent,
         return FALSE;
 
     DWORD wstyle = WS_VISIBLE | WS_CHILD | WS_TABSTOP |
-                   TVS_SHOWSELALWAYS /* | WS_CLIPSIBLINGS */;
+                   TVS_HASLINES | TVS_SHOWSELALWAYS /* | WS_CLIPSIBLINGS */;
 
-    if ((m_windowStyle & wxTR_NO_LINES) == 0)
-        wstyle |= TVS_HASLINES;
     if ( m_windowStyle & wxTR_HAS_BUTTONS )
         wstyle |= TVS_HASBUTTONS;
 
@@ -643,9 +640,6 @@ wxTreeCtrl::~wxTreeCtrl()
 
     // delete user data to prevent memory leaks
     DeleteAllItems();
-    
-    if (m_ownsImageListNormal) delete m_imageListNormal;
-    if (m_ownsImageListState) delete m_imageListState;
 }
 
 // ----------------------------------------------------------------------------
@@ -709,28 +703,12 @@ void wxTreeCtrl::SetAnyImageList(wxImageList *imageList, int which)
 
 void wxTreeCtrl::SetImageList(wxImageList *imageList)
 {
-    if (m_ownsImageListNormal) delete m_imageListNormal;
     SetAnyImageList(m_imageListNormal = imageList, TVSIL_NORMAL);
-    m_ownsImageListNormal = FALSE;
 }
 
 void wxTreeCtrl::SetStateImageList(wxImageList *imageList)
 {
-    if (m_ownsImageListState) delete m_imageListState;
     SetAnyImageList(m_imageListState = imageList, TVSIL_STATE);
-    m_ownsImageListState = FALSE;
-}
-
-void wxTreeCtrl::AssignImageList(wxImageList *imageList)
-{
-    SetImageList(imageList);
-    m_ownsImageListNormal = TRUE;
-}
-
-void wxTreeCtrl::AssignStateImageList(wxImageList *imageList)
-{
-    SetStateImageList(imageList);
-    m_ownsImageListState = TRUE;
 }
 
 size_t wxTreeCtrl::GetChildrenCount(const wxTreeItemId& item,
@@ -1032,6 +1010,7 @@ void wxTreeCtrl::SetItemTextColour(const wxTreeItemId& item,
     }
 
     attr->SetTextColour(col);
+    Refresh();
 }
 
 void wxTreeCtrl::SetItemBackgroundColour(const wxTreeItemId& item,
@@ -1048,6 +1027,7 @@ void wxTreeCtrl::SetItemBackgroundColour(const wxTreeItemId& item,
     }
 
     attr->SetBackgroundColour(col);
+    Refresh();
 }
 
 void wxTreeCtrl::SetItemFont(const wxTreeItemId& item, const wxFont& font)
@@ -1063,6 +1043,7 @@ void wxTreeCtrl::SetItemFont(const wxTreeItemId& item, const wxFont& font)
     }
 
     attr->SetFont(font);
+    Refresh();
 }
 
 // ----------------------------------------------------------------------------
@@ -1129,7 +1110,7 @@ wxTreeItemId wxTreeCtrl::GetRootItem() const
 
 wxTreeItemId wxTreeCtrl::GetSelection() const
 {
-    wxCHECK_MSG( !(m_windowStyle & wxTR_MULTIPLE), (long)(WXHTREEITEM)0,
+    wxCHECK_MSG( !(m_windowStyle & wxTR_MULTIPLE), (WXHTREEITEM)0,
                  wxT("this only works with single selection controls") );
 
     return wxTreeItemId((WXHTREEITEM) TreeView_GetSelection(GetHwnd()));
@@ -1328,7 +1309,7 @@ wxTreeItemId wxTreeCtrl::AddRoot(const wxString& text,
                                  int image, int selectedImage,
                                  wxTreeItemData *data)
 {
-    return DoInsertItem(wxTreeItemId((long) (WXHTREEITEM) 0), (long)(WXHTREEITEM) 0,
+    return DoInsertItem(wxTreeItemId((WXHTREEITEM) 0), (WXHTREEITEM) 0,
                         text, image, selectedImage, data);
 }
 
@@ -1493,7 +1474,7 @@ void wxTreeCtrl::Unselect()
                   wxT("doesn't make sense, may be you want UnselectAll()?") );
 
     // just remove the selection
-    SelectItem(wxTreeItemId((long) (WXHTREEITEM) 0));
+    SelectItem(wxTreeItemId((WXHTREEITEM) 0));
 }
 
 void wxTreeCtrl::UnselectAll()
@@ -2294,11 +2275,6 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                     delete data; // can't be NULL here
 
                     m_itemsWithIndirectData.Remove(item);
-#if 0
-                    int iIndex = m_itemsWithIndirectData.Index(item);
-                    wxASSERT( iIndex != wxNOT_FOUND) ;
-                    m_itemsWithIndirectData.wxBaseArray::RemoveAt((size_t)iIndex);
-#endif
                 }
                 else
                 {
@@ -2370,6 +2346,19 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     }
 
     return processed;
+}
+
+// ----------------------------------------------------------------------------
+// Tree event
+// ----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxTreeEvent, wxNotifyEvent)
+
+wxTreeEvent::wxTreeEvent(wxEventType commandType, int id)
+           : wxNotifyEvent(commandType, id)
+{
+    m_code = 0;
+    m_itemOld = 0;
 }
 
 #endif // __WIN95__

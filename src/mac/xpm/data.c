@@ -39,7 +39,7 @@ static char *RCS_Version = "$XpmVersion: 3.4k $";
 /* Internal version number */
 static char *RCS_Id = "$Id$";
 
-#include "XpmI.h"
+#include "xpmi.h"
 #endif
 #include <ctype.h>
 
@@ -423,7 +423,7 @@ xpmParseHeader(data)
 	    if (!l)
 		return (XpmFileInvalid);
 	    buf[l] = '\0';
-	    #if defined(macintosh) ||Êdefined(__APPLE__)
+	    #ifdef macintosh
 	    ptr = strrchr(buf, '_');
 	    #else
 	    ptr = rindex(buf, '_');
