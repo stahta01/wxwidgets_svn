@@ -107,7 +107,7 @@ public:
             : wxNotifyEvent(clone.GetEventType(), clone.GetId()) 
     {               }
 
-    virtual wxEvent *Clone() const { return new wxMediaEvent(*this); } 
+    wxEvent *Clone() { return new wxMediaEvent(*this); } 
    
     DECLARE_DYNAMIC_CLASS(wxMediaEvent) 
 }; 
