@@ -152,13 +152,6 @@ void wxScrollBar::MacHandleControlClick( ControlHandle control , SInt16 controlp
 	}
   event.SetPosition(new_pos);
   event.SetEventObject( this );
-  wxWindow* window = GetParent() ;
-  if (window && window->MacIsWindowScrollbar(this) )
-  {
-  	// this is hardcoded
-  	window->MacOnScroll(event);
-  }
-  else
-  	GetEventHandler()->ProcessEvent(event);
+  GetEventHandler()->ProcessEvent(event);
 }
 

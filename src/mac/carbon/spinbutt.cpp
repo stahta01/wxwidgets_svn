@@ -16,18 +16,15 @@
 #include "wx/spinbutt.h"
 #include "wx/mac/uma.h"
 
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// wxWin macros
-// ----------------------------------------------------------------------------
-
 #if !USE_SHARED_LIBRARY
-    IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
-    IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxScrollEvent);
+IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
 #endif
+
+wxSpinButton::wxSpinButton()
+{
+	m_min = 0;
+	m_max = 100;
+}
 
 bool wxSpinButton::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
             long style, const wxString& name)
@@ -81,6 +78,14 @@ void wxSpinButton::SetRange(int minVal, int maxVal)
 	m_max = maxVal;
 }
 
+// Spin event
+IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxScrollEvent)
+
+wxSpinEvent::wxSpinEvent(wxEventType commandType, int id):
+  wxScrollEvent(commandType, id)
+{
+}
+
 void wxSpinButton::MacHandleControlClick( ControlHandle control , SInt16 controlpart ) 
 {
 	if ( m_macControl == NULL )
@@ -126,23 +131,4 @@ void wxSpinButton::MacHandleControlClick( ControlHandle control , SInt16 control
   GetEventHandler()->ProcessEvent(event);
 }
 
-// ----------------------------------------------------------------------------
-// size calculation
-// ----------------------------------------------------------------------------
-
-wxSize wxSpinButton::DoGetBestSize()
-{
-    if ( (GetWindowStyle() & wxSP_VERTICAL) != 0 )
-    {
-        // vertical control
-        return wxSize(16,
-                      2*16);
-    }
-    else
-    {
-        // horizontal control
-        return wxSize(2*16,
-                      16);
-    }
-}
 

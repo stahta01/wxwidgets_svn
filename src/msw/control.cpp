@@ -45,11 +45,11 @@ END_EVENT_TABLE()
 // Item members
 wxControl::wxControl()
 {
-    m_backgroundColour = *wxWHITE;
-    m_foregroundColour = *wxBLACK;
+  m_backgroundColour = *wxWHITE;
+  m_foregroundColour = *wxBLACK;
 
 #if WXWIN_COMPATIBILITY
-    m_callback = 0;
+  m_callback = 0;
 #endif // WXWIN_COMPATIBILITY
 }
 
@@ -58,35 +58,15 @@ wxControl::~wxControl()
     m_isBeingDeleted = TRUE;
 }
 
-bool wxControl::MSWCreateControl(const wxChar *classname,
-                                 WXDWORD style,
-                                 const wxPoint& pos,
-                                 const wxSize& size,
-                                 const wxString& label,
-                                 WXDWORD exstyle)
+bool wxControl::MSWCreateControl(const wxChar *classname, WXDWORD style)
 {
-    // VZ: if someone could put a comment here explaining what exactly this is
-    //     needed for, it would be nice...
-    bool want3D;
-
-    // if no extended style given, determine it ourselves
-    if ( exstyle == (WXDWORD)-1 )
-    {
-        exstyle = GetExStyle(style, &want3D);
-    }
-
-    // all controls have these childs (wxWindows creates all controls visible
-    // by default)
-    style |= WS_CHILD | WS_VISIBLE;
-
     m_hWnd = (WXHWND)::CreateWindowEx
                        (
-                        exstyle,            // extended style
+                        GetExStyle(style),  // extended style
                         classname,          // the kind of control to create
-                        label,              // the window name
+                        NULL,               // the window name
                         style,              // the window style
-                        pos.x, pos.y,       // the window position
-                        size.x, size.y,     //            and size
+                        0, 0, 0, 0,         // the window position and size
                         GetHwndOf(GetParent()),  // parent
                         (HMENU)GetId(),     // child id
                         wxGetInstance(),    // app instance
@@ -101,14 +81,6 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
 
         return FALSE;
     }
-
-#if wxUSE_CTL3D
-    if ( want3D )
-    {
-        Ctl3dSubclassCtl(GetHwnd());
-        m_useCtl3D = TRUE;
-    }
-#endif // wxUSE_CTL3D
 
     // subclass again for purposes of dialog editing mode
     SubclassWin(m_hWnd);
@@ -196,25 +168,26 @@ void wxControl::OnEraseBackground(wxEraseEvent& event)
     // might flicker.
 
     RECT rect;
-    ::GetClientRect(GetHwnd(), &rect);
+    ::GetClientRect((HWND) GetHWND(), &rect);
 
-    HBRUSH hBrush = ::CreateSolidBrush(wxColourToRGB(GetBackgroundColour()));
+    HBRUSH hBrush = ::CreateSolidBrush(PALETTERGB(GetBackgroundColour().Red(),
+                                                  GetBackgroundColour().Green(),
+                                                  GetBackgroundColour().Blue()));
+    int mode = ::SetMapMode((HDC) event.GetDC()->GetHDC(), MM_TEXT);
 
-    HDC hdc = GetHdcOf((*event.GetDC()));
-    int mode = ::SetMapMode(hdc, MM_TEXT);
-
-    ::FillRect(hdc, &rect, hBrush);
+    ::FillRect ((HDC) event.GetDC()->GetHDC(), &rect, hBrush);
     ::DeleteObject(hBrush);
-    ::SetMapMode(hdc, mode);
+    ::SetMapMode((HDC) event.GetDC()->GetHDC(), mode);
 }
 
-WXDWORD wxControl::GetExStyle(WXDWORD& style, bool *want3D) const
+WXDWORD wxControl::GetExStyle(WXDWORD& style) const
 {
-    WXDWORD exStyle = Determine3DEffects(WS_EX_CLIENTEDGE, want3D);
+    bool want3D;
+    WXDWORD exStyle = Determine3DEffects(WS_EX_CLIENTEDGE, &want3D) ;
 
-    // Even with extended styles, need to combine with WS_BORDER for them to
-    // look right.
-    if ( *want3D || wxStyleHasBorder(m_windowStyle) )
+    // Even with extended styles, need to combine with WS_BORDER
+    // for them to look right.
+    if ( want3D || wxStyleHasBorder(m_windowStyle) )
         style |= WS_BORDER;
 
     return exStyle;

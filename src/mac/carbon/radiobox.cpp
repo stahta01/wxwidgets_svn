@@ -67,6 +67,17 @@ wxRadioBox::~wxRadioBox()
     // TODO
 }
 
+wxString wxRadioBox::GetLabel(int item) const
+{
+    // TODO
+    return wxString("");
+}
+
+void wxRadioBox::SetLabel(int item, const wxString& label)
+{
+    // TODO
+}
+
 int wxRadioBox::FindString(const wxString& s) const
 {
     // TODO
@@ -95,28 +106,28 @@ wxString wxRadioBox::GetString(int n) const
     return wxString("");
 }
 
-void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
+void wxRadioBox::SetSize(int x, int y, int width, int height, int sizeFlags)
 {
-    wxControl::DoSetSize( x , y , width , height , sizeFlags ) ;
+    wxControl::SetSize( x , y , width , height , sizeFlags ) ;
 }
 
 void wxRadioBox::GetSize(int *width, int *height) const
 {
-    wxControl::GetSize( width , height ) ;
+    // TODO
 }
 
 void wxRadioBox::GetPosition(int *x, int *y) const
 {
-    wxControl::GetPosition( x , y ) ;
+    // TODO
 }
 
-wxString wxRadioBox::GetLabel( int item ) const
+wxString wxRadioBox::GetLabel() const
 {
     // TODO
     return wxString("");
 }
 
-void wxRadioBox::SetLabel(int item , const wxString& label)
+void wxRadioBox::SetLabel(const wxString& label)
 {
     // TODO
 }
@@ -128,18 +139,23 @@ void wxRadioBox::SetFocus()
 
 bool wxRadioBox::Show(bool show)
 {
- 	return wxControl::Show( show ) ;
+    // TODO
+	return wxWindow::Show( show ) ;
 }
 
 // Enable a specific button
 void wxRadioBox::Enable(int item, bool enable)
 {
+    wxControl::Enable(enable);
+    // TODO
 }
 
 // Enable all controls
-bool wxRadioBox::Enable(bool enable)
+void wxRadioBox::Enable(bool enable)
 {
-    return wxControl::Enable(enable);
+    wxControl::Enable(enable);
+
+    // TODO
 }
 
 // Show a specific button

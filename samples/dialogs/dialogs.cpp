@@ -286,11 +286,7 @@ void MyFrame::FileSave(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::DirChoose(wxCommandEvent& WXUNUSED(event) )
 {
-    // pass some initial dir to wxDirDialog
-    wxString dirHome;
-    wxGetHomeDir(&dirHome);
-
-    wxDirDialog dialog(this, "Testing directory picker", dirHome);
+    wxDirDialog dialog(this, "Testing directory picker", "");
 
     if (dialog.ShowModal() == wxID_OK)
     {

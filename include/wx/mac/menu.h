@@ -16,193 +16,168 @@
 #pragma interface "menu.h"
 #endif
 
-#if wxUSE_ACCEL
-    #include "wx/accel.h"
-    #include "wx/dynarray.h"
+#include "wx/defs.h"
+#include "wx/event.h"
 
-    WX_DEFINE_EXPORTED_ARRAY(wxAcceleratorEntry *, wxAcceleratorArray);
-#endif // wxUSE_ACCEL
+class WXDLLEXPORT wxMenuItem;
+class WXDLLEXPORT wxMenuBar;
+class WXDLLEXPORT wxMenu;
 
-class WXDLLEXPORT wxFrame;
+WXDLLEXPORT_DATA(extern const char*) wxEmptyString;
 
 // ----------------------------------------------------------------------------
 // Menu
 // ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxMenu : public wxMenuBase
+class WXDLLEXPORT wxMenu: public wxEvtHandler
 {
+  DECLARE_DYNAMIC_CLASS(wxMenu)
+
 public:
-    // ctors & dtor
-    wxMenu(const wxString& title, long style = 0)
-        : wxMenuBase(title, style) { Init(); }
+  // ctor & dtor
+  wxMenu(const wxString& title = wxEmptyString, const wxFunction func = NULL);
+  ~wxMenu();
 
-    wxMenu(long style = 0) : wxMenuBase(style) { Init(); }
+  // construct menu
+    // append items to the menu
+      // separator line
+  void AppendSeparator();
+      // normal item
+  void Append(int id, const wxString& Label, const wxString& helpString = wxEmptyString,
+              bool checkable = FALSE);
+      // a submenu
+  void Append(int id, const wxString& Label, wxMenu *SubMenu, 
+              const wxString& helpString = wxEmptyString);
+      // the most generic form (create wxMenuItem first and use it's functions)
+  void Append(wxMenuItem *pItem);
+    // insert a break in the menu
+  void Break();
+    // delete an item
+  void Delete(int id);
 
-    virtual ~wxMenu();
+  // menu item control
+  void Enable(int id, bool Flag);
+  bool Enabled(int id) const;
+  inline bool IsEnabled(int id) const { return Enabled(id); };
+  void Check(int id, bool Flag);
+  bool Checked(int id) const;
+  inline bool IsChecked(int id) const { return IsChecked(id); };
 
-    // implement base class virtuals
-    virtual bool DoAppend(wxMenuItem *item);
-    virtual bool DoInsert(size_t pos, wxMenuItem *item);
-    virtual wxMenuItem *DoRemove(wxMenuItem *item);
+  // Client data
+  inline void SetClientData(void* clientData) { m_clientData = clientData; }
+  inline void* GetClientData() const { return m_clientData; }
 
-    virtual void Break();
+  // item properties
+    // title
+  void SetTitle(const wxString& label);
+  const wxString GetTitle() const;
+    // label
+  void SetLabel(int id, const wxString& label);
+  wxString GetLabel(int id) const;
+    // help string
+  virtual void SetHelpString(int id, const wxString& helpString);
+  virtual wxString GetHelpString(int id) const ;
 
-    virtual void SetTitle(const wxString& title);
+  // find item
+    // Finds the item id matching the given string, -1 if not found.
+  virtual int FindItem(const wxString& itemString) const ;
+    // Find wxMenuItem by ID, and item's menu too if itemMenu is !NULL.
+  wxMenuItem *FindItemForId(int itemId, wxMenu **itemMenu = NULL) const;
 
-    // MSW-specific
-    bool ProcessCommand(wxCommandEvent& event);
+  void ProcessCommand(wxCommandEvent& event);
+  inline void Callback(const wxFunction func) { m_callback = func; }
 
-#if WXWIN_COMPATIBILITY
-    wxMenu(const wxString& title, const wxFunction func)
-        : wxMenuBase(title)
-    {
-        Callback(func);
-    }
-#endif // WXWIN_COMPATIBILITY
+  virtual void SetParent(wxEvtHandler *parent) { m_parent = parent; }
+  inline void SetEventHandler(wxEvtHandler *handler) { m_eventHandler = handler; }
+  inline wxEvtHandler *GetEventHandler() { return m_eventHandler; }
 
-    // implementation only from now on
-    // -------------------------------
+  inline wxList& GetItems() const { return (wxList&) m_menuItems; }
 
-  	bool MacMenuSelect(wxEvtHandler* handler, long when , int macMenuId, int macMenuItemNum) ;
-  	int	MacGetIndexFromId( int id ) ; 
-  	int	MacGetIndexFromItem( wxMenuItem *pItem ) ; 
-  	void MacEnableMenu( bool bDoEnable ) ;
+  void      				SetInvokingWindow(wxWindow *pWin) { m_pInvokingWindow = pWin; }
+  wxWindow *				GetInvokingWindow()         const { return m_pInvokingWindow; }
 
-    // semi-private accessors
-        // get the window which contains this menu
-    wxWindow *GetWindow() const;
-        // get the menu handle
-    WXHMENU GetHMenu() const { return m_hMenu; }
+  bool MacMenuSelect(wxEvtHandler* handler, long when , int macMenuId, int macMenuItemNum) ;
+public:
+  wxFunction        m_callback;
 
-    // attach/detach menu to/from wxMenuBar
-    void Attach(wxMenuBar *menubar);
-    void Detach();
-	short MacGetMenuId() { return m_macMenuId ; }
-#if wxUSE_ACCEL
-    // called by wxMenuBar to build its accel table from the accels of all menus
-    bool HasAccels() const { return !m_accels.IsEmpty(); }
-    size_t GetAccelCount() const { return m_accels.GetCount(); }
-    size_t CopyAccels(wxAcceleratorEntry *accels) const;
+  int               m_noItems;
+  wxString          m_title;
+  wxMenuBar *       m_menuBar;
+  wxList            m_menuItems;
+  wxEvtHandler *    m_parent;
+  wxEvtHandler *    m_eventHandler;
+  wxWindow*			m_pInvokingWindow;
+  void*             m_clientData;
+  
+  MenuHandle		m_macMenuHandle;
+  short				m_macMenuId;
+  bool				m_macMenuEnabled ;
 
-    // called by wxMenuItem when its accels changes
-    void UpdateAccel(wxMenuItem *item);
+  //	void 					MacSetTitle(const wxString& title);
+  int				MacGetIndexFromId( int id ) ; 
+  int				MacGetIndexFromItem( wxMenuItem *pItem ) ; 
+  void				MacEnableMenu( bool bDoEnable ) ;
 
-    // helper used by wxMenu itself (returns the index in m_accels)
-    int FindAccel(int id) const;
-#endif // wxUSE_ACCEL
+  static short		s_macNextMenuId ;
 
-private:
-    // common part of all ctors
-    void Init();
-
-    // common part of Append/Insert (behaves as Append is pos == (size_t)-1)
-    bool DoInsertOrAppend(wxMenuItem *item, size_t pos = (size_t)-1);
-
-    // if TRUE, insert a breal before appending the next item
-    bool m_doBreak;
-
-    // the menu handle of this menu
-    WXHMENU m_hMenu;
-
-  	short				m_macMenuId;
-
-  	static short		s_macNextMenuId ;
-#if wxUSE_ACCEL
-    // the accelerators for our menu items
-    wxAcceleratorArray m_accels;
-#endif // wxUSE_ACCEL
-
-    DECLARE_DYNAMIC_CLASS(wxMenu)
+protected:
 };
 
 // ----------------------------------------------------------------------------
 // Menu Bar (a la Windows)
 // ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxMenuBar : public wxMenuBarBase
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxMenuBar: public wxEvtHandler
 {
-public:
-    // ctors & dtor
-        // default constructor
-    wxMenuBar();
-        // unused under MSW
-    wxMenuBar(long style);
-        // menubar takes ownership of the menus arrays but copies the titles
-    wxMenuBar(int n, wxMenu *menus[], const wxString titles[]);
-    virtual ~wxMenuBar();
+  DECLARE_DYNAMIC_CLASS(wxMenuBar)
 
-    // menubar construction
-    virtual bool Append( wxMenu *menu, const wxString &title );
-    virtual bool Insert(size_t pos, wxMenu *menu, const wxString& title);
-    virtual wxMenu *Replace(size_t pos, wxMenu *menu, const wxString& title);
-    virtual wxMenu *Remove(size_t pos);
+  wxMenuBar();
+  wxMenuBar(int n, wxMenu *menus[], const wxString titles[]);
+  ~wxMenuBar();
 
-    virtual int FindMenuItem(const wxString& menuString,
-                             const wxString& itemString) const;
-    virtual wxMenuItem* FindItem( int id, wxMenu **menu = NULL ) const;
+  void Append(wxMenu *menu, const wxString& title);
+  // Must only be used AFTER menu has been attached to frame,
+  // otherwise use individual menus to enable/disable items
+  void Enable(int Id, bool Flag);
+  bool Enabled(int Id) const ;
+  inline bool IsEnabled(int Id) const { return Enabled(Id); };
+  void EnableTop(int pos, bool Flag);
+  void Check(int id, bool Flag);
+  bool Checked(int id) const ;
+  inline bool IsChecked(int Id) const { return Checked(Id); };
+  void SetLabel(int id, const wxString& label) ;
+  wxString GetLabel(int id) const ;
+  void SetLabelTop(int pos, const wxString& label) ;
+  wxString GetLabelTop(int pos) const ;
+  virtual void Delete(wxMenu *menu, int index = 0); /* Menu not destroyed */
+  virtual bool OnAppend(wxMenu *menu, const char *title);
+  virtual bool OnDelete(wxMenu *menu, int index);
 
-    virtual void EnableTop( size_t pos, bool flag );
-    virtual void SetLabelTop( size_t pos, const wxString& label );
-    virtual wxString GetLabelTop( size_t pos ) const;
+  virtual void SetHelpString(int Id, const wxString& helpString);
+  virtual wxString GetHelpString(int Id) const ;
 
-    // compatibility: these functions are deprecated
-#if WXWIN_COMPATIBILITY
-    void SetEventHandler(wxEvtHandler *handler) { m_eventHandler = handler; }
-    wxEvtHandler *GetEventHandler() { return m_eventHandler; }
+  virtual int FindMenuItem(const wxString& menuString, const wxString& itemString) const ;
 
-    bool Enabled(int id) const { return IsEnabled(id); }
-    bool Checked(int id) const { return IsChecked(id); }
-#endif // WXWIN_COMPATIBILITY
+  // Find wxMenuItem for item ID, and return item's
+  // menu too if itemMenu is non-NULL.
+  wxMenuItem *FindItemForId(int itemId, wxMenu **menuForItem = NULL) const ;
 
-    // implementation from now on
-    WXHMENU Create();
-    int  FindMenu(const wxString& title);
-    void Detach();
+  inline void SetEventHandler(wxEvtHandler *handler) { m_eventHandler = handler; }
+  inline wxEvtHandler *GetEventHandler() { return m_eventHandler; }
 
-        // returns TRUE if we're attached to a frame
-    bool IsAttached() const { return m_menuBarFrame != NULL; }
-        // get the frame we live in
-    wxFrame *GetFrame() const { return m_menuBarFrame; }
-        // attach to a frame
-    void Attach(wxFrame *frame);
-
-#if wxUSE_ACCEL
-    // get the accel table for all the menus
-    const wxAcceleratorTable& GetAccelTable() const { return m_accelTable; }
-
-    // update the accel table (must be called after adding/deletign a menu)
-    void RebuildAccelTable();
-#endif // wxUSE_ACCEL
-
-    // if the menubar is modified, the display is not updated automatically,
-    // call this function to update it (m_menuBarFrame should be !NULL)
-    void Refresh();
+  inline int GetMenuCount() const { return m_menuCount; }
+  inline wxMenu* GetMenu(int i) const { return m_menus[i]; }
 
   void MacInstallMenuBar() ;
   void MacMenuSelect(wxEvtHandler* handler, long when , int macMenuId, int macMenuItemNum) ;
-  static wxMenuBar* MacGetInstalledMenuBar() { return s_macInstalledMenuBar ; }
 
-protected:
-    // common part of all ctors
-    void Init();
+ public:
+  wxEvtHandler *            m_eventHandler;
+  int                       m_menuCount;
+  wxMenu **                 m_menus;
+  wxString *                m_titles;
+  wxFrame *                 m_menuBarFrame;
 
-#if WXWIN_COMPATIBILITY
-    wxEvtHandler *m_eventHandler;
-#endif // WXWIN_COMPATIBILITY
-
-    wxArrayString m_titles;
-
-    wxFrame      *m_menuBarFrame;
-
-#if wxUSE_ACCEL
-    // the accelerator table for all accelerators in all our menus
-    wxAcceleratorTable m_accelTable;
-#endif // wxUSE_ACCEL
-
-private:
   static wxMenuBar*			s_macInstalledMenuBar ;
-
-    DECLARE_DYNAMIC_CLASS(wxMenuBar)
 };
 
 #endif // _WX_MENU_H_

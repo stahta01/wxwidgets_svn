@@ -6,7 +6,7 @@
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart and Markus Holzem
-// Licence:     wxWindows license
+// Licence:       wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -90,13 +90,6 @@ wxToolBarTool::wxToolBarTool(int theIndex,
   }
   m_shortHelpString = helpS1;
   m_longHelpString = helpS2;
-}
-
-wxToolBarTool::wxToolBarTool(wxControl *control)
-{
-    m_toolStyle = wxTOOL_STYLE_CONTROL;
-    m_control = control;
-    m_index = control->GetId();
 }
 
 wxToolBarTool::~wxToolBarTool()
@@ -193,7 +186,7 @@ void wxToolBarBase::OnMouseEnter ( int toolIndex )
 // created and used as the pushed/toggled image.
 // If toggle is TRUE, the button toggles between the two states.
 wxToolBarTool *wxToolBarBase::AddTool(int index, const wxBitmap& bitmap, const wxBitmap& pushedBitmap,
-             bool toggle, wxCoord xPos, wxCoord yPos, wxObject *clientData,
+             bool toggle, long xPos, long yPos, wxObject *clientData,
              const wxString& helpString1, const wxString& helpString2)
 {
 #ifdef __WXGTK__

@@ -37,7 +37,6 @@
     #include "wx/window.h"
     #include "wx/checkbox.h"
     #include "wx/radiobut.h"
-    #include "wx/textctrl.h"
     #include "wx/settings.h"
     #include "wx/dialog.h"
 #endif //WX_PRECOMP
@@ -119,11 +118,8 @@ void wxWindowBase::InitBase()
 
     m_backgroundColour = settings.GetSystemColour(wxSYS_COLOUR_BTNFACE);
     m_foregroundColour = *wxBLACK;  // TODO take this from sys settings too?
-#ifndef __WXMAC__
     m_font = *wxSWISS_FONT;         //      and this?
-#else
-	m_font = settings.GetSystemFont(wxSYS_DEFAULT_GUI_FONT);
-#endif
+
     // no style bits
     m_windowStyle = 0;
 
@@ -354,7 +350,6 @@ void wxWindowBase::Centre(int direction)
         yNew += posParent.y;
     }
 
-    // move the centre of this window to this position
     Move(xNew, yNew);
 }
 
@@ -1184,44 +1179,42 @@ void wxWindowBase::GetPositionConstraint(int *x, int *y) const
 // of control classes.
 void wxWindowBase::UpdateWindowUI()
 {
-    wxUpdateUIEvent event(GetId());
-    event.m_eventObject = this;
-
-    if ( GetEventHandler()->ProcessEvent(event) )
+    wxWindowID id = GetId();
+    if ( id > 0 )
     {
-        if ( event.GetSetEnabled() )
-            Enable(event.GetEnabled());
+        wxUpdateUIEvent event(id);
+        event.m_eventObject = this;
 
-        if ( event.GetSetText() )
+        if ( GetEventHandler()->ProcessEvent(event) )
         {
-            wxControl *control = wxDynamicCast(this, wxControl);
-            if ( control )
+            if ( event.GetSetEnabled() )
+                Enable(event.GetEnabled());
+
+            if ( event.GetSetText() )
             {
-                wxTextCtrl *text = wxDynamicCast(control, wxTextCtrl);
-                if ( text )
-                    text->SetValue(event.GetText());
-                else
+                wxControl *control = wxDynamicCast(this, wxControl);
+                if ( control )
                     control->SetLabel(event.GetText());
             }
-        }
 
 #if wxUSE_CHECKBOX
-        wxCheckBox *checkbox = wxDynamicCast(this, wxCheckBox);
-        if ( checkbox )
-        {
-            if ( event.GetSetChecked() )
-                checkbox->SetValue(event.GetChecked());
-        }
+            wxCheckBox *checkbox = wxDynamicCast(this, wxCheckBox);
+            if ( checkbox )
+            {
+                if ( event.GetSetChecked() )
+                    checkbox->SetValue(event.GetChecked());
+            }
 #endif // wxUSE_CHECKBOX
 
 #if wxUSE_RADIOBUTTON
-        wxRadioButton *radiobtn = wxDynamicCast(this, wxRadioButton);
-        if ( radiobtn )
-        {
-            if ( event.GetSetChecked() )
-                radiobtn->SetValue(event.GetChecked());
-        }
+            wxRadioButton *radiobtn = wxDynamicCast(this, wxRadioButton);
+            if ( radiobtn )
+            {
+                if ( event.GetSetChecked() )
+                    radiobtn->SetValue(event.GetChecked());
+            }
 #endif // wxUSE_RADIOBUTTON
+        }
     }
 }
 

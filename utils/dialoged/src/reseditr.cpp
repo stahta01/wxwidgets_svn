@@ -54,6 +54,7 @@
 #include "edtree.h"
 #include "edlist.h"
 
+static void ObjectMenuProc(wxMenu& menu, wxCommandEvent& event);
 wxResourceManager *wxResourceManager::sm_currentResourceManager = NULL;
 
 #if defined(__WXGTK__) || defined(__WXMOTIF__)
@@ -158,7 +159,7 @@ bool wxResourceManager::Initialize()
   m_helpController->Initialize("dialoged");
 #endif
 
-  m_popupMenu = new wxMenu;
+  m_popupMenu = new wxMenu("", (wxFunction)ObjectMenuProc);
   m_popupMenu->Append(OBJECT_MENU_EDIT, "Edit properties");
   m_popupMenu->Append(OBJECT_MENU_DELETE, "Delete object");
 
@@ -325,6 +326,7 @@ bool wxResourceManager::ShowResourceEditor(bool show, wxWindow *WXUNUSED(parent)
   }
   else
   {
+    wxFrame *fr = m_editorFrame;
     if (m_editorFrame->Close())
     {
       m_editorFrame = NULL;
@@ -2226,9 +2228,9 @@ void wxResourceEditorScrolledWindow::DrawTitle(wxDC& dc)
 }
 
 // Popup menu callback
-void ObjectMenuProc(wxMenu *menu, wxCommandEvent& event)
+void ObjectMenuProc(wxMenu& menu, wxCommandEvent& event)
 {
-  wxWindow *data = (wxWindow *)menu->GetClientData();
+  wxWindow *data = (wxWindow *)menu.GetClientData();
   if (!data)
     return;
 

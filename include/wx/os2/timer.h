@@ -14,7 +14,7 @@
 
 #include "wx/object.h"
 
-class WXDLLEXPORT wxTimer: public wxTimerBase
+class WXDLLEXPORT wxTimer: public wxObject
 {
 friend void wxProcessTimer(wxTimer& timer);
 
@@ -22,16 +22,22 @@ public:
     wxTimer();
     ~wxTimer();
 
-    virtual bool Start( int  nMilliseconds = -1
-                       ,bool bOneShot = FALSE
-                      );
-    virtual void Stop(void);
+    virtual bool Start(int milliseconds = -1,
+                       bool one_shot = FALSE); // Start timer
+    virtual void Stop();                       // Stop timer
 
-    inline virtual bool IsRunning(void) const { return m_ulId != 0L; }
+    virtual void Notify() = 0;                 // Override this member
+
+    // Returns the current interval time (0 if stop)
+    int Interval() const { return milli; };
+    bool OneShot() const { return oneShot; }
 
 protected:
-    ULONG                            m_ulId;
-    HAB                              m_Hab;
+    bool oneShot ;
+    int  milli ;
+    int  lastMilli ;
+
+    long id;
 
 private:
     DECLARE_ABSTRACT_CLASS(wxTimer)

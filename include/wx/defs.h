@@ -30,7 +30,7 @@
 #if defined(__unix) || defined(__unix__) || defined(____SVR4____) || \
     defined(__LINUX__) || defined(__sgi ) || \
     defined(__hpux) || defined(sun) || defined(__SUN__) || defined(_AIX) || \
-    defined(__EMX__) || defined( __VMS )
+    defined(__EMX__)
 
     #define __UNIX_LIKE__
 
@@ -126,9 +126,7 @@
 // Digital Unix C++ compiler only defines this symbol for .cxx and .hxx files,
 // so define it ourselves
 #ifdef __DECCXX
-#ifndef __VMS
-# define __cplusplus
-#endif
+    #define __cplusplus
 #endif // __DECCXX
 
 // Resolves linking problems under HP-UX
@@ -145,12 +143,6 @@
 #endif
 #endif
 
-// "old" GNUWIN32 is the one without Norlander's headers: it lacks the standard
-// Win32 headers and we define the used stuff ourselves for it in
-// wx/msw/gnuwin32/extra.h
-#if defined(__MINGW32__) && !wxUSE_NORLANDER_HEADERS
-    #define __GNUWIN32_OLD__
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////
 // Currently Only MS-Windows/NT, XView and Motif are supported
@@ -301,9 +293,7 @@
     // NB: of course, this doesn't replace the standard type, because, for
     //     example, overloading based on bool/int parameter doesn't work and
     //     so should be avoided in portable programs
-#ifndef VMS
-typedef unsigned int bool;
-#endif
+    typedef unsigned int bool;
 #endif // bool
 
 typedef short int WXTYPE;
@@ -596,25 +586,6 @@ enum
 #define  wxByte   wxUint8
 #define  wxWord   wxUint16
 
-// base floating point types 
-// wxFloat32 : 32 bit IEEE float ( 1 sign , 8 exponent bits , 23 fraction bits
-// wxFloat64 : 64 bit IEEE float ( 1 sign , 11 exponent bits , 52 fraction bits
-// wxDouble : native fastest representation that has at least wxFloat64
-//            precision, so use the IEEE types for storage , and this for calculations
-
-typedef float wxFloat32 ; 
-#if defined( __WXMAC__ )  && defined (__MWERKS__) 
-	typedef short double	wxFloat64;
-#else
-	typedef double			wxFloat64;
-#endif
-
-#if defined( __WXMAC__ )  && !defined( __POWERPC__ ) 
-	typedef long double wxDouble;
-#else
-	typedef double wxDouble ;
-#endif
-
 // ----------------------------------------------------------------------------
 // byte ordering related definition and macros
 // ----------------------------------------------------------------------------
@@ -633,36 +604,6 @@ typedef float wxFloat32 ;
 
 // byte swapping
 
-#if defined (__MWERKS__) && ( (__MWERKS__ < 0x0900) || macintosh )
-// assembler versions for these
-#ifdef __POWERPC__
-	inline wxUint16 wxUINT16_SWAP_ALWAYS( wxUint16 i ) 
-		{return (__lhbrx( &i , 0 ) ) ;}
-	inline wxInt16 wxINT16_SWAP_ALWAYS( wxInt16 i ) 
-		{return (__lhbrx( &i , 0 ) ) ;}
-	inline wxUint32 wxUINT32_SWAP_ALWAYS( wxUint32 i ) 
-		{return (__lwbrx( &i , 0 ) ) ;}
-	inline wxInt32 wxINT32_SWAP_ALWAYS( wxInt32 i ) 
-		{return (__lwbrx( &i , 0 ) ) ;}
-#else
-	#pragma parameter __D0 wxUINT16_SWAP_ALWAYS(__D0)
-	pascal wxUint16 wxUINT16_SWAP_ALWAYS(wxUint16 value)
-		= { 0xE158 };
-	
-	#pragma parameter __D0 wxINT16_SWAP_ALWAYS(__D0)
-	pascal wxInt16 wxUINT16_SWAP_ALWAYS(wxInt16 value)
-		= { 0xE158 };
-
-	#pragma parameter __D0 wxUINT32_SWAP_ALWAYS (__D0)
-	pascal wxUint32 wxUINT32_SWAP_ALWAYS(wxUint32 value)
-		= { 0xE158, 0x4840, 0xE158 };
-
-	#pragma parameter __D0 wxINT32_SWAP_ALWAYS (__D0)
-	pascal wxInt32 wxUINT32_SWAP_ALWAYS(wxInt32 value)
-		= { 0xE158, 0x4840, 0xE158 };
-
-#endif
-#else // !MWERKS
 #define wxUINT16_SWAP_ALWAYS(val) \
    ((wxUint16) ( \
     (((wxUint16) (val) & (wxUint16) 0x00ffU) << 8) | \
@@ -686,7 +627,7 @@ typedef float wxFloat32 ;
     (((wxUint32) (val) & (wxUint32) 0x0000ff00U) <<  8) | \
     (((wxUint32) (val) & (wxUint32) 0x00ff0000U) >>  8) | \
     (((wxUint32) (val) & (wxUint32) 0xff000000U) >> 24)))
-#endif
+
 // machine specific byte swapping
 
 #ifdef WORDS_BIGENDIAN
@@ -754,17 +695,12 @@ enum wxDirection
 enum wxAlignment
 {
     wxALIGN_NOT               = 0x0000,
-    wxALIGN_CENTER_HORIZONTAL = 0x0100,
-    wxALIGN_CENTRE_HORIZONTAL = wxALIGN_CENTER_HORIZONTAL,
+    wxALIGN_CENTER            = 0x0100,
+    wxALIGN_CENTRE            = wxALIGN_CENTER,
     wxALIGN_LEFT              = wxALIGN_NOT,
     wxALIGN_TOP               = wxALIGN_NOT,
     wxALIGN_RIGHT             = 0x0200,
-    wxALIGN_BOTTOM            = 0x0400,
-    wxALIGN_CENTER_VERTICAL   = 0x0800,
-    wxALIGN_CENTRE_VERTICAL   = wxALIGN_CENTER_VERTICAL,
-
-    wxALIGN_CENTER            = (wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL),
-    wxALIGN_CENTRE            = wxALIGN_CENTER
+    wxALIGN_BOTTOM            = 0x0400
 };
 
 enum wxStretch
@@ -772,8 +708,7 @@ enum wxStretch
     wxSTRETCH_NOT             = 0x0000,
     wxSHRINK                  = 0x1000,
     wxGROW                    = 0x2000,
-    wxEXPAND                  = wxGROW,
-    wxSHAPED                  = 0x4000
+    wxEXPAND                  = wxGROW
 };
 
 // ----------------------------------------------------------------------------

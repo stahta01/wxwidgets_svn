@@ -22,7 +22,6 @@ WXDLLEXPORT_DATA(extern const char*) wxRadioBoxNameStr;
 
 // List box item
 class WXDLLEXPORT wxBitmap ;
-class WXDLLEXPORT wxRadioButton ;
 
 class WXDLLEXPORT wxRadioBox: public wxControl
 {
@@ -78,7 +77,8 @@ public:
     // implementation only from now on
     // -------------------------------
 
-    wxRadioButton *GetRadioButtons() const { return m_radioButtons; }
+    WXHWND *GetRadioButtons() const { return m_radioButtons; }
+    bool ContainsHWND(WXHWND hWnd) const;
     void SendNotificationEvent();
 
     // get the number of buttons per column/row
@@ -95,7 +95,7 @@ public:
 protected:
     void SubclassRadioButton(WXHWND hWndBtn);
 
-    wxRadioButton *   m_radioButtons;
+    WXHWND *          m_radioButtons;
     int               m_majorDim;
     int *             m_radioWidth;  // for bitmaps
     int *             m_radioHeight;

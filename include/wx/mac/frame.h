@@ -125,20 +125,18 @@ public:
   void OnSysColourChanged(wxSysColourChangedEvent& event);
 
   // Query app for menu item updates (called from OnIdle)
-    // Query app for menu item updates (called from OnIdle)
-    void DoMenuUpdates();
-    void DoMenuUpdates(wxMenu* menu, wxWindow* focusWin);
+  void DoMenuUpdates();
+  void DoMenuUpdates(wxMenu* menu);
 
   // Checks if there is a toolbar, and returns the first free client position
   virtual wxPoint GetClientAreaOrigin() const;
-	virtual	void DoGetClientSize(int *x, int *y) const ;
+	virtual	void GetClientSize(int *x, int *y) const ;
 	virtual void DoSetClientSize(int clientwidth, int clientheight) ;
 
   // tooltip management
 #if wxUSE_TOOLTIPS
     wxMacToolTip* GetToolTipCtrl() const { return m_hwndToolTip; }
-    void SetToolTipCtrl(wxMacToolTip *tt) { m_hwndToolTip = tt; }
-    wxMacToolTip* m_hwndToolTip ;
+    void SetToolTipCtrl(wxMacToolTip *tt) { m_hwndToolTip = wxMacToolTip; }
 #endif // tooltips
 
 protected:

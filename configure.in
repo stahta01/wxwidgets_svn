@@ -401,7 +401,7 @@ dnl WX_INTERFACE_AGE = 0
 
 WX_MAJOR_VERSION_NUMBER=2
 WX_MINOR_VERSION_NUMBER=1
-WX_RELEASE_NUMBER=12
+WX_RELEASE_NUMBER=11
 
 WX_INTERFACE_AGE=0
 WX_BINARY_AGE=0
@@ -1718,7 +1718,7 @@ if test "$wxUSE_SHARED" = "yes"; then
     case "${host}" in
       *-hp-hpux* )
         if test "$GCC" = yes ; then
-            SHARED_LD="${CC} -shared -fPIC -o"
+            SHARED_LD="${CC} -shared -o"
             PIC_FLAG="-fPIC"
         else
             SHARED_LD="${CXX} -b -o"
@@ -2386,30 +2386,9 @@ dnl time/date functions
 dnl ------------------------------------------------------------------------
 
 if test "$wxUSE_TIMEDATE" = "yes"; then
-    dnl check for localtime (POSIX), gettimeofday (SVr4, BSD 4.3) and ftime
-    dnl (V7, BSD 4.3)
-    AC_CHECK_FUNCS(localtime gettimeofday ftime, break)
+    AC_CHECK_FUNCS(gettimeofday localtime ftime)
 
-    if test "$ac_cv_func_localtime" = "yes"; then
-        AC_CACHE_CHECK(for tm_gmtoff in struct tm,
-                       wx_cv_struct_tm_has_gmtoff,
-        [
-            AC_TRY_COMPILE(
-                [
-                    #include <time.h>
-                ],
-                [
-                    struct tm tm;
-                    tm.tm_gmtoff++;
-                ],
-                [
-                    wx_cv_struct_tm_has_gmtoff=yes
-                    AC_DEFINE(WX_GMTOFF_IN_TM)
-                ],
-                wx_cv_struct_tm_has_gmtoff=no
-            )
-        ])
-    elif test "$ac_cv_func_gettimeofday" = "yes"; then
+    if test "$ac_cv_func_gettimeofday" = "yes"; then
         AC_CACHE_CHECK([whether gettimeofday takes two arguments],
                        wx_cv_func_gettimeofday_has_2_args,
         [
@@ -2964,7 +2943,7 @@ if test "$wxUSE_GUI" = "yes"; then
     dnl TODO some samples are never built so far:
     dnl      mfc, nativdlg, oleauto, ownerdrw, proplist
     SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS bombs controls dialogs drawing dynamic \
-                     font forty fractal image minimal richedit wxpoem"
+                     forty fractal image wxpoem"
 else
     SAMPLES_SUBDIRS=""
 fi

@@ -138,7 +138,7 @@ void wxObject::operator delete(void* pData, char* /* fileName */, int /* lineNum
 #endif
 
 // Cause problems for VC++ - crashes
-#if (!defined(__VISUALC__) && wxUSE_ARRAY_MEMORY_OPERATORS ) || defined(__MWERKS__)
+#if !defined(__VISUALC__) && wxUSE_ARRAY_MEMORY_OPERATORS
 void * wxObject::operator new[] (size_t size, wxChar * fileName, int lineNum)
 {
     return wxDebugAlloc(size, fileName, lineNum, TRUE, TRUE);
@@ -355,15 +355,13 @@ void wxObject::Ref(const wxObject& clone)
 
 void wxObject::UnRef()
 {
-    if ( m_refData )
-    {
-        wxASSERT_MSG( m_refData->m_count > 0, _T("invalid ref data count") );
-
-        if ( !--m_refData->m_count )
+    if (m_refData) {
+        assert(m_refData->m_count > 0);
+        --(m_refData->m_count);
+        if (m_refData->m_count == 0)
             delete m_refData;
-
-        m_refData = (wxObjectRefData *) NULL;
     }
+    m_refData = (wxObjectRefData *) NULL;
 }
 
 /*

@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        mac/dataform.h
+// Name:        os2/dataform.h
 // Purpose:     declaration of the wxDataFormat class
-// Author:      Stefan Csomor
+// Author:      David Webster (lifted from dnd.h)
 // Modified by:
 // Created:     10/21/99
 // RCS-ID:      $Id$
-// Copyright:   (c) 1999 Stefan Csomor
+// Copyright:   (c) 1999 David Webster
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 

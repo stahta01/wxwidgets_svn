@@ -231,7 +231,7 @@ extern char *malloc();
 #endif
 #define Return(x) return x;
 
-#if defined(VMS) && ( __VMS_VER < 70000000 )
+#if defined(VMS) && !defined(strdup)
 #define strdup(s) (strcpy((char *)malloc(strlen(s)+1), s));
 #endif
 

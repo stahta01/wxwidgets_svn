@@ -96,7 +96,6 @@ DbList WXDLLEXPORT *PtrBegDbList = 0;
 	extern wxList TablesInUse;
 #endif
 
-
 // SQL Log defaults to be used by GetDbConnection
 enum sqlLog SQLLOGstate				= sqlLogOFF;
 

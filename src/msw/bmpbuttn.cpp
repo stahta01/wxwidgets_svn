@@ -155,20 +155,7 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
         y1 ++;
     }
 
-    wxMask *mask = bitmap->GetMask();
-    if ( mask )
-    {
-        ::MaskBlt(hDC, x1, y1, bitmap->GetWidth(), bitmap->GetHeight(), // dst
-                  memDC, 0, 0,                                          // src
-                  (HBITMAP)mask->GetMaskBitmap(), 0, 0,                 // mask
-                  MAKEROP4(SRCPAINT, SRCCOPY));
-    }
-    else
-    {
-        ::BitBlt(hDC, x1, y1, bitmap->GetWidth(), bitmap->GetHeight(), // dst
-                 memDC, 0, 0,                                          // src
-                 SRCCOPY);
-    }
+    ::BitBlt(hDC, x1, y1, bitmap->GetWidth(), bitmap->GetHeight(), memDC, 0, 0, SRCCOPY);
 
     if ( (state & ODS_DISABLED) && (GetWindowStyleFlag() & wxBU_AUTODRAW) )
         DrawButtonDisable( (WXHDC) hDC, lpDIS->rcItem.left, lpDIS->rcItem.top, lpDIS->rcItem.right, lpDIS->rcItem.bottom, TRUE ) ;
@@ -245,8 +232,7 @@ void wxBitmapButton::DrawFace( WXHDC dc, int left, int top, int right, int botto
   DeleteObject(brushFace);
 }
 
-// VZ: should be at the very least less than wxDEFAULT_BUTTON_MARGIN
-#define FOCUS_MARGIN 3
+#define FOCUS_MARGIN 6
 
 void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right, int bottom, bool sel )
 {

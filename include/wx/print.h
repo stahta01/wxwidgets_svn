@@ -11,17 +11,6 @@
 #define wxPrintPreview wxWindowsPrintPreview
 #endif
 
-#elif defined(__WXMAC__)
-
-#include "wx/mac/printmac.h"
-
-#ifndef wxPrinter
-#define wxPrinter wxMacPrinter
-#endif
-#ifndef wxPrintPreview
-#define wxPrintPreview wxMacPrintPreview
-#endif
-
 #else
 #include "wx/generic/printps.h"
 

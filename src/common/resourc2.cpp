@@ -1545,10 +1545,6 @@ bool wxWindow::LoadFromResource(wxWindow *parent, const wxString& resourceName, 
     SetClientSize(sz.x, sz.y);
 
     wxPoint pt = ConvertDialogToPixels(wxPoint(x, y));
-    #ifdef __WXMAC__
-    int mbarheight = 2 * LMGetMBarHeight() ;
- 		pt.y += mbarheight ;
-    #endif
     Move(pt.x, pt.y);
   }
 

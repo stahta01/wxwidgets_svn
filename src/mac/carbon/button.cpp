@@ -47,39 +47,14 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 
 void wxButton::SetDefault()
 {
-    wxWindow *parent = GetParent();
-    wxButton *btnOldDefault = NULL;
-    wxPanel *panel = wxDynamicCast(parent, wxPanel);
-    if ( panel )
-    {
-        btnOldDefault = panel->GetDefaultItem();
-        panel->SetDefaultItem(this);
-    }
-  
-  if ( btnOldDefault && btnOldDefault->m_macControl )
-  {
-		UMASetControlData( btnOldDefault->m_macControl , kControlButtonPart , kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)0) ) ;
-  }
+  wxWindow *parent = (wxWindow *)GetParent();
+  if (parent)
+      parent->SetDefaultItem(this);
+
   if ( m_macControl )
   {
 		UMASetControlData( m_macControl , kControlButtonPart , kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)((Boolean)1) ) ;
-  }
-}
-
-wxSize wxButton::DoGetBestSize()
-{
-    int wBtn = m_label.Length() * 8 + 12 + 2 * m_macHorizontalBorder;
-	int hBtn = 13 + 2 * m_macVerticalBorder;
-
-    return wxSize(wBtn, hBtn);
-}
-
-wxSize wxButton::GetDefaultSize()
-{
-    int wBtn = 15 * 8 + 12 + 2 * 2;
-	int hBtn = 13 + 2 * 2;
-
-    return wxSize(wBtn, hBtn);
+	}
 }
 
 void wxButton::Command (wxCommandEvent & event)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/tbar95.h
+// Name:        tbar95.h
 // Purpose:     wxToolBar95 (Windows 95 toolbar) class
 // Author:      Julian Smart
 // Modified by:
@@ -17,78 +17,76 @@
 #endif
 
 #if wxUSE_TOOLBAR
-
 #include "wx/tbarbase.h"
 
-class WXDLLEXPORT wxToolBar95 : public wxToolBarBase
+WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
+
+class WXDLLEXPORT wxToolBar95: public wxToolBarBase
 {
-public:
-    wxToolBar95() { Init(); }
+  DECLARE_DYNAMIC_CLASS(wxToolBar95)
+ public:
+  /*
+   * Public interface
+   */
 
-    wxToolBar95(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxNO_BORDER | wxTB_HORIZONTAL,
-                const wxString& name = wxToolBarNameStr)
-    {
-        Init();
+  wxToolBar95();
 
-        Create(parent, id, pos, size, style, name);
-    }
+  wxToolBar95(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+            long style = wxNO_BORDER|wxTB_HORIZONTAL,
+            const wxString& name = wxToolBarNameStr)
+  {
+    Create(parent, id, pos, size, style, name);
+  }
+  ~wxToolBar95();
 
-    ~wxToolBar95();
+  bool Create(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+            long style = wxNO_BORDER|wxTB_HORIZONTAL,
+            const wxString& name = wxToolBarNameStr);
 
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxNO_BORDER | wxTB_HORIZONTAL,
-                const wxString& name = wxToolBarNameStr);
+  // Call default behaviour
+  void OnMouseEvent(wxMouseEvent& event);
 
-    // override base class virtuals
+  // Handle wxToolBar95 events
 
-    virtual wxToolBarTool *AddTool(int toolIndex,
-                                   const wxBitmap& bitmap,
-                                   const wxBitmap& pushedBitmap = wxNullBitmap,
-                                   bool toggle = FALSE,
-                                   long xPos = -1, long yPos = -1,
-                                   wxObject *clientData = NULL,
-                                   const wxString& helpString1 = wxEmptyString,
-                                   const wxString& helpString2 = wxEmptyString);
-    virtual bool AddControl(wxControl *control);
+  // If pushedBitmap is NULL, a reversed version of bitmap is
+  // created and used as the pushed/toggled image.
+  // If toggle is TRUE, the button toggles between the two states.
+  wxToolBarTool *AddTool(int toolIndex, const wxBitmap& bitmap, const wxBitmap& pushedBitmap = wxNullBitmap,
+               bool toggle = FALSE, long xPos = -1, long yPos = -1, wxObject *clientData = NULL,
+               const wxString& helpString1 = "", const wxString& helpString2 = "");
 
-    virtual void ClearTools();
+  // Set default bitmap size
+  void SetToolBitmapSize(const wxSize& size);
+  void EnableTool(int toolIndex, bool enable); // additional drawing on enabling
+  void ToggleTool(int toolIndex, bool toggle); // toggle is TRUE if toggled on
+  void ClearTools();
 
-    virtual bool Realize() { return CreateTools(); };
+  // The button size is bigger than the bitmap size
+  wxSize GetToolSize() const;
 
-    virtual void EnableTool(int toolIndex, bool enable);
-    virtual void ToggleTool(int toolIndex, bool toggle);
+  wxSize GetMaxSize() const;
 
-    virtual void SetToolBitmapSize(const wxSize& size);
-    virtual wxSize GetToolSize() const;
-    virtual wxSize GetMaxSize() const;
+  virtual bool GetToolState(int toolIndex) const;
 
-    virtual bool GetToolState(int toolIndex) const;
+  // Add all the buttons: required for Win95.
+  virtual bool CreateTools();
+  virtual void SetRows(int nRows);
+  virtual void LayoutButtons() {}
 
-    virtual bool CreateTools();
-    virtual void SetRows(int nRows);
+  // The post-tool-addition call
+  bool Realize() { return CreateTools(); };
 
-    // IMPLEMENTATION
-    virtual bool MSWCommand(WXUINT param, WXWORD id);
-    virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
+  // IMPLEMENTATION
+  virtual bool MSWCommand(WXUINT param, WXWORD id);
+  virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
 
-    void OnMouseEvent(wxMouseEvent& event);
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
+  // Responds to colour changes
+  void OnSysColourChanged(wxSysColourChangedEvent& event);
 
 protected:
-    // common part of all ctors
-    void Init();
+  WXHBITMAP         m_hBitmap;
 
-    WXHBITMAP m_hBitmap;
-
-    DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS(wxToolBar95)
+DECLARE_EVENT_TABLE()
 };
 
 #endif // wxUSE_TOOLBAR

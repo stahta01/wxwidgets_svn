@@ -75,14 +75,24 @@ wxMDIParentFrame::~wxMDIParentFrame()
 }
 
 // Get size *available for subwindows* i.e. excluding menu bar.
-void wxMDIParentFrame::DoGetClientSize(int *x, int *y) const
+void wxMDIParentFrame::GetClientSize(int *x, int *y) const
 {
-   wxFrame::DoGetClientSize( x , y ) ;
+    // TODO
 }
 
 void wxMDIParentFrame::SetMenuBar(wxMenuBar *menu_bar)
 {
-	wxFrame::SetMenuBar( menu_bar ) ;
+    // TODO
+    if (!menu_bar)
+    {
+        m_frameMenuBar = NULL;
+        return;
+    }
+  
+    if (menu_bar->m_menuBarFrame)
+	    return;
+
+    m_frameMenuBar = menu_bar;
 }
 
 void wxMDIParentFrame::OnSize(wxSizeEvent& event)
@@ -201,7 +211,16 @@ void wxMDIChildFrame::GetPosition(int *x, int *y) const
 
 void wxMDIChildFrame::SetMenuBar(wxMenuBar *menu_bar)
 {
-	return wxFrame::SetMenuBar( menu_bar ) ;
+    // TODO
+    if (!menu_bar)
+    {
+        m_frameMenuBar = NULL;
+        return;
+    }
+  
+    if (menu_bar->m_menuBarFrame)
+	    return;
+    m_frameMenuBar = menu_bar;
 }
 
 // MDI operations

@@ -62,8 +62,6 @@ bool wxStaticText::Create(wxWindow *parent,
     wxControl::SetLabel(label);
     m_widget = gtk_label_new( m_label.mbc_str() );
 
-    SetFont( parent->GetFont() );
-
     GtkJustification justify;
     if ( style & wxALIGN_CENTER )
       justify = GTK_JUSTIFY_CENTER;
@@ -91,6 +89,8 @@ bool wxStaticText::Create(wxWindow *parent,
 
     SetBackgroundColour( parent->GetBackgroundColour() );
     SetForegroundColour( parent->GetForegroundColour() );
+    SetFont( parent->GetFont() );
+
     Show( TRUE );
 
     return TRUE;

@@ -61,7 +61,7 @@
 #elif defined(__WXGTK__)
     static inline wxNativeFont wxLoadFont(const wxString& fontSpec)
     {
-       return gdk_font_load( wxConvertWX2MB(fontSpec) );
+        return gdk_font_load( wxConvertWX2MB(fontSpec) );
     }
 
     static inline void wxFreeFont(wxNativeFont font)
@@ -218,16 +218,11 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
                                     const wxString &facename,
                                     wxFontEncoding encoding)
 {
-    if ( encoding == wxFONTENCODING_DEFAULT )
-    {
-        encoding = wxFont::GetDefaultEncoding();
-    }
-
     // first determine the encoding - if the font doesn't exist at all in this
     // encoding, it's useless to do all other approximations (i.e. size,
     // family &c don't matter much)
     wxNativeEncodingInfo info;
-    if ( encoding == wxFONTENCODING_SYSTEM )
+    if (encoding == wxFONTENCODING_SYSTEM)
     {
         // This will always work so we don't test to save time
         wxGetNativeFontEncoding(wxFONTENCODING_SYSTEM, &info);
@@ -246,10 +241,11 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
                 //     so it would provoke a crash
                 wxGetNativeFontEncoding(wxFONTENCODING_SYSTEM, &info);
             }
-        }
+	}
     }
     
     // OK, we have the correct xregistry/xencoding in info structure
+
     wxNativeFont font = wxLoadQueryFont( pointSize, family, style, weight,
                                          underlined, facename,
                                          info.xregistry, info.xencoding );
@@ -311,13 +307,6 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
 // returns TRUE if there are any fonts matching this font spec
 static bool wxTestFontSpec(const wxString& fontspec)
 {
-    // some X servers will fail to load this font because there are too many
-    // matches so we must test explicitly for this
-    if ( fontspec == _T("-*-*-*-*-*-*-*-*-*-*-*-*-*-*") )
-    {
-        return TRUE;
-    }
-
     wxNativeFont test = wxLoadFont(fontspec);
     if ( test )
     {

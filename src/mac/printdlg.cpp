@@ -14,7 +14,7 @@
 #endif
 
 #include "wx/object.h"
-#include "wx/printdlg.h"
+#include "wx/mac/printdlg.h"
 #include "wx/dcprint.h"
 
 // Use generic page setup dialog: use your own native one if one exists.
@@ -24,43 +24,30 @@ IMPLEMENT_DYNAMIC_CLASS(wxPrintDialog, wxDialog)
 IMPLEMENT_CLASS(wxPageSetupDialog, wxDialog)
 #endif
 
-wxPrintDialog::wxPrintDialog()
+wxPrintDialog::wxPrintDialog():
+ wxDialog()
 {
     m_dialogParent = NULL;
-    m_printerDC = NULL;
-    m_destroyDC = TRUE;
 }
 
-wxPrintDialog::wxPrintDialog(wxWindow *p, wxPrintDialogData* data)
+wxPrintDialog::wxPrintDialog(wxWindow *p, wxPrintData* data):
+ wxDialog()
 {
     Create(p, data);
 }
 
-wxPrintDialog::wxPrintDialog(wxWindow *p, wxPrintData* data)
-{
-    wxPrintDialogData data2;
-    if ( data )
-        data2 = *data;
-
-    Create(p, &data2);
-}
-
-bool wxPrintDialog::Create(wxWindow *p, wxPrintDialogData* data)
+bool wxPrintDialog::Create(wxWindow *p, wxPrintData* data)
 {
     m_dialogParent = p;
-    m_printerDC = NULL;
-    m_destroyDC = TRUE;
 
     if ( data )
-        m_printDialogData = *data;
+        m_printData = *data;
 
     return TRUE;
 }
 
 wxPrintDialog::~wxPrintDialog()
 {
-    if (m_destroyDC && m_printerDC)
-        delete m_printerDC;
 }
 
 int wxPrintDialog::ShowModal()
@@ -73,10 +60,10 @@ int wxPrintDialog::ShowModal()
 	
 	if ( !err )
 	{
-		m_printDialogData.ConvertToNative() ;
-		if  ( m_printDialogData.m_macPrintInfo && ::PrJobDialog( m_printDialogData.m_macPrintInfo ) )
+		m_printData.ConvertToNative() ;
+		if  ( m_printData.macPrintInfo && ::PrJobDialog( m_printData.macPrintInfo ) )
 		{
-			m_printDialogData.ConvertFromNative() ;
+			m_printData.ConvertFromNative() ;
 			result = wxID_OK ;
 		}
 
@@ -93,7 +80,7 @@ int wxPrintDialog::ShowModal()
 
 wxDC *wxPrintDialog::GetPrintDC()
 {
-    return new wxPrinterDC( m_printDialogData.GetPrintData() ) ;
+    return new wxPrinterDC( m_printData ) ;
 }
 
 /*

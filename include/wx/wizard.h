@@ -121,10 +121,6 @@ public:
 
     // get the current page (NULL if RunWizard() isn't running)
     virtual wxWizardPage *GetCurrentPage() const = 0;
-
-    // get the size available for the page: the wizards are not resizeable, so
-    // this size doesn't change
-    virtual wxSize GetPageSize() const = 0;
 };
 
 // include the real class declaration

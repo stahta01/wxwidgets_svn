@@ -24,10 +24,10 @@ class WXDLLEXPORT wxLog;
 WXDLLEXPORT_DATA(extern wxApp*) wxTheApp;
 
 // Force an exit from main loop
-void WXDLLEXPORT wxExit(void);
+void WXDLLEXPORT wxExit();
 
 // Yield to other apps/messages
-bool WXDLLEXPORT wxYield(void);
+bool WXDLLEXPORT wxYield();
 
 // Represents the application. Derive OnInit and declare
 // a new App object to start application
@@ -39,73 +39,68 @@ public:
     wxApp();
     virtual ~wxApp();
 
-    virtual bool OnInitGui(void);
-
     // override base class (pure) virtuals
-    virtual int  MainLoop(void);
-    virtual void ExitMainLoop(void);
-    virtual bool Initialized(void);
-    virtual bool Pending(void) ;
-    virtual void Dispatch(void);
+    virtual int MainLoop();
+    virtual void ExitMainLoop();
+    virtual bool Initialized();
+    virtual bool Pending() ;
+    virtual void Dispatch() ;
 
     virtual wxIcon GetStdIcon(int which) const;
 
-    virtual void SetPrintMode(int mode) { m_nPrintMode = mode; }
-    virtual int  GetPrintMode(void) const { return m_nPrintMode; }
+    virtual void SetPrintMode(int mode) { m_printMode = mode; }
+    virtual int GetPrintMode() const { return m_printMode; }
 
     // implementation only
-    void OnIdle(wxIdleEvent& rEvent);
-    void OnEndSession(wxCloseEvent& rEvent);
-    void OnQueryEndSession(wxCloseEvent& rEvent);
+    void OnIdle(wxIdleEvent& event);
+    void OnEndSession(wxCloseEvent& event);
+    void OnQueryEndSession(wxCloseEvent& event);
 
     // Send idle event to all top-level windows.
     // Returns TRUE if more idle time is requested.
-    bool SendIdleEvents(void);
+    bool SendIdleEvents();
 
     // Send idle event to window and all subwindows
     // Returns TRUE if more idle time is requested.
-    bool SendIdleEvents(wxWindow* pWin);
+    bool SendIdleEvents(wxWindow* win);
 
-    void SetAuto3D(bool bFlag) { m_bAuto3D = bFlag; }
-    bool GetAuto3D(void) const { return m_bAuto3D; }
+    void SetAuto3D(bool flag) { m_auto3D = flag; }
+    bool GetAuto3D() const { return m_auto3D; }
 
 protected:
-    bool                            m_bShowOnInit;
-    int                             m_nPrintMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
-    bool                            m_bAuto3D ;   // Always use 3D controls, except where overriden
+    bool              m_showOnInit;
+    int               m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
+    bool              m_auto3D ;   // Always use 3D controls, except where overriden
 
-    //
-    // PM-specific wxApp definitions */
-    //
+    /* Windows-specific wxApp definitions */
+
 public:
 
     // Implementation
-    static bool  Initialize(HAB vHab);
-    static void  CleanUp(void);
+    static bool Initialize();
+    static void CleanUp();
 
-    static bool  RegisterWindowClasses(HAB vHab);
-    virtual bool DoMessage(void);
+    static bool RegisterWindowClasses();
+    // Convert Windows to argc, argv style
+    void ConvertToStandardCommandArgs(char* p);
+    virtual bool DoMessage();
     virtual bool ProcessMessage(WXMSG* pMsg);
-    void         DeletePendingObjects(void);
-    bool         ProcessIdle(void);
+    void DeletePendingObjects();
+    bool ProcessIdle();
 #if wxUSE_THREADS
-    void         ProcessPendingEvents(void);
+    void ProcessPendingEvents();
 #endif
+    int GetComCtl32Version() const;
 
 public:
-    int                             m_nCmdShow;
+    int               m_nCmdShow;
 
 protected:
-    bool                            m_bKeepGoing ;
+    bool              m_keepGoing ;
 
     DECLARE_EVENT_TABLE()
-private:
-    HAB                             m_vHab;
-    HMQ                             m_hMq;
-    QMSG                            m_vMsg;
 };
 
-int WXDLLEXPORT wxEntry( int argc, char *argv[] );
 #endif
     // _WX_APP_H_
 

@@ -1,5 +1,0 @@
-include/wx/wxchar.h
-include/wx/msw/setup.h
-samples/dnd/*.wxr
-src/unix/fontutil.cpp
-src/common/fontmap.cpp

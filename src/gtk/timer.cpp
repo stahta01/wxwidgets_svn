@@ -85,7 +85,7 @@ static gint timeout_callback( gpointer data )
     GDK_THREADS_LEAVE ();
 #endif
 
-    if ( timer->IsOneShot() )
+    if (timer->OneShot())
         return FALSE;
 
     return TRUE;
@@ -94,20 +94,25 @@ static gint timeout_callback( gpointer data )
 wxTimer::wxTimer()
 {
     m_tag = -1;
-    m_milli = 1000;
+    m_time = 1000;
     m_oneShot = FALSE;
 }
 
 wxTimer::~wxTimer()
 {
-    wxTimer::Stop();
+    Stop();
 }
 
 bool wxTimer::Start( int millisecs, bool oneShot )
 {
-    (void)wxTimerBase::Start(millisecs, oneShot);
+    if (millisecs != -1)
+    {
+        m_time = millisecs;
+    }
 
-    m_tag = gtk_timeout_add( m_milli, timeout_callback, this );
+    m_oneShot = oneShot;
+
+    m_tag = gtk_timeout_add( millisecs, timeout_callback, this );
 
     return TRUE;
 }
