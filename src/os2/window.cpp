@@ -1699,7 +1699,7 @@ bool wxWindow::OS2TranslateMessage(
   WXMSG*                            pMsg
 )
 {
-    return m_acceleratorTable.Translate(this, pMsg);
+    return m_acceleratorTable.Translate(m_hWnd, pMsg);
 } // end of wxWindow::OS2TranslateMessage
 
 // ---------------------------------------------------------------------------
@@ -1813,7 +1813,7 @@ MRESULT EXPENTRY wxWndProc(
     {
         if (pWnd)
             rc = pWnd->OS2WindowProc(ulMsg, wParam, lParam);
-        else
+        if (!rc)
             rc = ::WinDefWindowProc(hWnd, ulMsg, wParam, lParam);
     }
     return rc;
@@ -1954,7 +1954,6 @@ MRESULT wxWindow::OS2WindowProc(
                 bProcessed = HandleMouseEvent(uMsg, x, y, (WXUINT)wParam);
             }
             break;
-
         case WM_SYSCOMMAND:
             bProcessed = HandleSysCommand(wParam, lParam);
             break;
@@ -2154,7 +2153,7 @@ MRESULT wxWindow::OS2WindowProc(
 
         // wxFrame specific message
         case WM_MINMAXFRAME:
-            bProcessed = HandleGetMinMaxInfo((PSWP)lParam);
+            bProcessed = HandleGetMinMaxInfo((PSWP)wParam);
             break;
 
         case WM_SYSVALUECHANGED:
@@ -2395,6 +2394,7 @@ bool wxWindow::OS2Create(
         wxLogError("Can't create window of class %s!. Error: %s\n", zClass, sError);
         return FALSE;
     }
+    ::WinSetWindowULong(m_hWnd, QWL_USER, (ULONG) this);
     wxWndHook = NULL;
 
 #ifdef __WXDEBUG__
@@ -2797,8 +2797,6 @@ bool wxWindow::HandlePaint()
 {
     HRGN                            hRgn = NULLHANDLE;
     wxPaintEvent                    vEvent;
-    HPS                             hPS;
-    RECTL                           vRect;
 
     if (::WinQueryUpdateRegion(GetHwnd(), hRgn) == RGN_NULL)
     {
@@ -2806,10 +2804,6 @@ bool wxWindow::HandlePaint()
          return FALSE;
     }
     m_updateRegion = wxRegion(hRgn);
-
-    hPS = WinBeginPaint(GetHwnd(), 0L, &vRect);
-    WinFillRect(hPS, &vRect, SYSCLR_WINDOW);
-    WinEndPaint(hPS);
 
     vEvent.SetEventObject(this);
     return (GetEventHandler()->ProcessEvent(vEvent));
