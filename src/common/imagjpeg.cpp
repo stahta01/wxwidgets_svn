@@ -117,7 +117,7 @@ METHODDEF(void) my_term_source ( j_decompress_ptr cinfo )
     my_src_ptr src = (my_src_ptr) cinfo->src;
 
     if (src->pub.bytes_in_buffer > 0)
-        src->stream->SeekI(-src->pub.bytes_in_buffer, wxFromCurrent);
+        src->stream->SeekI(-(long)src->pub.bytes_in_buffer, wxFromCurrent);
     delete[] src->buffer;
 }
 
@@ -173,7 +173,11 @@ my_error_exit (j_common_ptr cinfo)
   longjmp(myerr->setjmp_buffer, 1);
 }
 
-
+// temporarily disable the warning C4611 (interaction between '_setjmp' and
+// C++ object destruction is non-portable) - I don't see any dtors here
+#ifdef __VISUALC__
+    #pragma warning(disable:4611)
+#endif /* VC++ */
 
 bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose, int WXUNUSED(index) )
 {
@@ -228,10 +232,6 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     jpeg_destroy_decompress( &cinfo );
     return TRUE;
 }
-
-
-
-
 
 typedef struct {
     struct jpeg_destination_mgr pub;
@@ -325,16 +325,6 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
     jpeg_set_defaults(&cinfo);
-
-    // TODO: 3rd parameter is force_baseline, what value should this be?
-    // Code says: "If force_baseline is TRUE, the computed quantization table entries
-    // are limited to 1..255 for JPEG baseline compatibility."
-    // 'Quality' is a number between 0 (terrible) and 100 (very good).
-    // The default (in jcparam.c, jpeg_set_defaults) is 75,
-    // and force_baseline is TRUE.
-    if (image->HasOption(wxT("quality")))
-        jpeg_set_quality(&cinfo, image->GetOptionInt(wxT("quality")), TRUE);
-
     jpeg_start_compress(&cinfo, TRUE);
 
     stride = cinfo.image_width * 3;    /* JSAMPLEs per row in image_buffer */
@@ -349,6 +339,9 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     return TRUE;
 }
 
+#ifdef __VISUALC__
+    #pragma warning(default:4611)
+#endif /* VC++ */
 
 bool wxJPEGHandler::DoCanRead( wxInputStream& stream )
 {

@@ -100,8 +100,9 @@
 #   pragma warning(disable:4100)    // unreferenced formal parameter
 #   pragma warning(disable:4511)    // copy ctor couldn't be generated
 #   pragma warning(disable:4512)    // operator=() couldn't be generated
-#   pragma warning(disable:4699)    // Using precompiled header
+#   pragma warning(disable:4699)    // using precompiled header
 #   pragma warning(disable:4134)    // conversion between pointers to members of same class
+#   pragma warning(disable:4710)    // function not inlined
 #ifndef WIN32
 #   pragma warning(disable:4135)    // conversion between different integral types
 #   pragma warning(disable:4769)    // assignment of near pointer to long integer
@@ -139,8 +140,9 @@
     #define va_list __gnuc_va_list
 #endif // HP-UX
 
-// Cygwin / Mingw32 with gcc >= 2.95 use new windows headers which
-// are more ms-like (header author is Anders Norlander, hence the name)
+// Mingw32 gcc-2.95 uses new windows headers which are more ms-like
+// we are setting this define because of the complex check
+// using NORLANDER as Cygwin may follow. (header author is Anders Norlander)
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95)))
     #ifndef wxUSE_NORLANDER_HEADERS
         #define wxUSE_NORLANDER_HEADERS 1
@@ -151,9 +153,9 @@
     #endif
 #endif
 
-// "old" GNUWIN32 is the one without Norlander's headers: it lacks the
-// standard Win32 headers and we define the used stuff ourselves for it
-// in wx/msw/gnuwin32/extra.h
+// "old" GNUWIN32 is the one without Norlander's headers: it lacks the standard
+// Win32 headers and we define the used stuff ourselves for it in
+// wx/msw/gnuwin32/extra.h
 #if defined(__GNUC__) && !wxUSE_NORLANDER_HEADERS
     #define __GNUWIN32_OLD__
 #endif
@@ -1087,7 +1089,6 @@ enum wxStretch
 #define wxTR_MULTIPLE        0x0020
 #define wxTR_EXTENDED        0x0040
 #define wxTR_HAS_VARIABLE_ROW_HEIGHT 0x0080
-#define wxTR_NO_LINES        0x0100
 
 /*
  * wxListCtrl flags
@@ -1894,7 +1895,7 @@ typedef struct _GdkColor        GdkColor;
 typedef struct _GdkColormap     GdkColormap;
 typedef struct _GdkFont         GdkFont;
 typedef struct _GdkGC           GdkGC;
-#ifdef __WXGTK20__
+#ifdef __WXGTK13__
     typedef struct _GdkDrawable     GdkWindow;
     typedef struct _GdkDrawable     GdkBitmap;
     typedef struct _GdkDrawable     GdkPixmap;
@@ -1925,18 +1926,6 @@ typedef struct _GtkItemFactory    GtkItemFactory;
 typedef struct _GtkSelectionData  GtkSelectionData;
 
 typedef GtkWidget *WXWidget;
-
-#ifndef __WXGTK20__
-#define GTK_OBJECT_GET_CLASS(object) (GTK_OBJECT(object)->klass)
-#define GTK_CLASS_TYPE(klass) ((klass)->type)
-#endif
-
-#ifdef __WXGTK20__
-/* Stand-ins for Pango types */
-typedef struct _PangoContext         PangoContext;
-typedef struct _PangoLayout          PangoLayout;
-typedef struct _PangoFontDescription PangoFontDescription;
-#endif
 #endif // GTK
 
 // This is required because of clashing macros in windows.h, which may be

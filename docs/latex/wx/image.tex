@@ -187,6 +187,10 @@ on program start-up to look up colors. This ensures a very fast conversion, but
 the image quality won't be perfect (and could be better for photo images using more
 sophisticated dithering algorithms).
 
+On Windows, if there is a palette present (set with SetPalette), it will be used when
+creating the wxBitmap (most useful in 8-bit display mode). On other platforms,
+the palette is currently ignored.
+
 \membersection{wxImage::Copy}\label{wximagecopy}
 
 \constfunc{wxImage}{Copy}{\void}
@@ -309,6 +313,15 @@ Gets the green value of the mask colour.
 
 Gets the red value of the mask colour.
 
+\membersection{wxImage::GetPalette}\label{wximagegetpalette}
+
+\constfunc{const wxPalette\&}{GetPalette}{\void}
+
+Returns the palette associated with the image. Currently the palette is only
+used in ConvertToBitmap under Windows.
+
+Eventually wxImage handlers will set the palette if one exists in the image file.
+
 \membersection{wxImage::GetSubImage}\label{wximagegetsubimage}
 
 \constfunc{wxImage}{GetSubImage}{\param{const wxRect\&}{ rect}}
@@ -331,45 +344,6 @@ Gets the width of the image in pixels.
 \constfunc{bool}{HasMask}{\void}
 
 Returns TRUE if there is a mask active, FALSE otherwise.
-
-\membersection{wxImage::GetOption}\label{wximagegetoption}
-
-\constfunc{wxString}{GetOption}{\param{const wxString\&}{ name}}
-
-Gets a user-defined option. The function is case-insensitive to {\it name}.
-
-For example, when saving as a JPEG file, the option {\bf quality} is
-used, which is a number between 0 and 100 (0 is terrible, 100 is very good).
-
-\wxheading{See also}
-
-\helpref{wxImage::SetOption}{wximagesetoption},\rtfsp
-\helpref{wxImage::GetOptionInt}{wximagegetoptionint},\rtfsp
-\helpref{wxImage::HasOption}{wximagehasoption}
-
-\membersection{wxImage::GetOptionInt}\label{wximagegetoptionint}
-
-\constfunc{int}{GetOptionInt}{\param{const wxString\&}{ name}}
-
-Gets a user-defined option as an integer. The function is case-insensitive to {\it name}.
-
-\wxheading{See also}
-
-\helpref{wxImage::SetOption}{wximagesetoption},\rtfsp
-\helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
-\helpref{wxImage::HasOption}{wximagehasoption}
-
-\membersection{wxImage::HasOption}\label{wximagehasoption}
-
-\constfunc{bool}{HasOption}{\param{const wxString\&}{ name}}
-
-Returns TRUE if the given option is present. The function is case-insensitive to {\it name}.
-
-\wxheading{See also}
-
-\helpref{wxImage::SetOption}{wximagesetoption},\rtfsp
-\helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
-\helpref{wxImage::GetOptionInt}{wximagegetoptionint}
 
 \membersection{wxImage::InitStandardHandlers}
 
@@ -636,22 +610,11 @@ Specifies whether there is a mask or not. The area of the mask is determined by 
 
 Sets the mask colour for this image (and tells the image to use the mask).
 
-\membersection{wxImage::SetOption}\label{wximagesetoption}
+\membersection{wxImage::SetPalette}\label{wximagesetpalette}
 
-\func{void}{SetOption}{\param{const wxString\&}{ name}, \param{const wxString\&}{ value}}
+\func{void}{SetPalette}{\param{const wxPalette\&}{ palette}}
 
-\func{void}{SetOption}{\param{const wxString\&}{ name}, \param{int}{ value}}
-
-Sets a user-defined option. The function is case-insensitive to {\it name}.
-
-For example, when saving as a JPEG file, the option {\bf quality} is
-used, which is a number between 0 and 100 (0 is terrible, 100 is very good).
-
-\wxheading{See also}
-
-\helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
-\helpref{wxImage::GetOptionInt}{wximagegetoptionint},\rtfsp
-\helpref{wxImage::HasOption}{wximagehasoption}
+Associates a palette with the image. Currently, the palette is not used.
 
 \membersection{wxImage::SetRGB}\label{wximagesetrgb}
 

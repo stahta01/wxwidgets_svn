@@ -990,13 +990,7 @@ void wxWindow::OnIdle(wxIdleEvent& event)
                 state |= MK_SHIFT;
             if ( wxIsCtrlDown() )
                 state |= MK_CONTROL;
-            if ( GetKeyState( VK_LBUTTON ) )
-                state |= MK_LBUTTON;
-            if ( GetKeyState( VK_MBUTTON ) )
-                state |= MK_MBUTTON;
-            if ( GetKeyState( VK_RBUTTON ) )
-                state |= MK_RBUTTON;
-  
+
             wxMouseEvent event(wxEVT_LEAVE_WINDOW);
             InitMouseEvent(event, pt.x, pt.y, state);
 
@@ -2766,11 +2760,9 @@ bool wxWindow::HandleSetCursor(WXHWND hWnd,
         // cursor set, stop here
         return TRUE;
     }
-    else
-    {
-        // pass up the window chain
-        return FALSE;
-    }
+
+    // pass up the window chain
+    return FALSE;
 }
 
 // ---------------------------------------------------------------------------
@@ -2950,16 +2942,6 @@ bool wxWindow::HandlePaint()
     event.SetEventObject(this);
 
     return GetEventHandler()->ProcessEvent(event);
-}
-
-// Can be called from an application's OnPaint handler
-void wxWindow::OnPaint(wxPaintEvent& event)
-{
-    HDC hDC = (HDC) wxPaintDC::FindDCInCache((wxWindow*) event.GetEventObject());
-    if (hDC != 0)
-    {
-        MSWDefWindowProc(WM_PAINT, (WPARAM) hDC, 0);
-    }
 }
 
 bool wxWindow::HandleEraseBkgnd(WXHDC hdc)

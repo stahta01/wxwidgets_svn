@@ -564,8 +564,7 @@ public:
     wxGridCellAttr()
     {
         Init();
-        // MB: args used to be 0,0 here but wxALIGN_LEFT is 0
-        SetAlignment(-1, -1);
+        SetAlignment(0, 0);
     }
 
     // VZ: considering the number of members wxGridCellAttr has now, this ctor
@@ -611,7 +610,7 @@ public:
     bool HasTextColour() const { return m_colText.Ok(); }
     bool HasBackgroundColour() const { return m_colBack.Ok(); }
     bool HasFont() const { return m_font.Ok(); }
-    bool HasAlignment() const { return (m_hAlign != -1 || m_vAlign != -1); }
+    bool HasAlignment() const { return m_hAlign || m_vAlign; }
     bool HasRenderer() const { return m_renderer != NULL; }
     bool HasEditor() const { return m_editor != NULL; }
 
@@ -1047,8 +1046,8 @@ public:
     // ------ Cell text drawing functions
     //
     void DrawTextRectangle( wxDC& dc, const wxString&, const wxRect&,
-                            int horizontalAlignment = wxALIGN_LEFT,
-                            int verticalAlignment = wxALIGN_TOP );
+                            int horizontalAlignment = wxLEFT,
+                            int verticalAlignment = wxTOP );
 
     // Split a string containing newline chararcters into an array of
     // strings and return the number of lines
@@ -1070,15 +1069,6 @@ public:
 
     int      GetBatchCount() { return m_batchCount; }
 
-    // Use this, rather than wxWindow::Refresh(), to force an
-    // immediate repainting of the grid. Has no effect if you are
-    // already inside a BeginBatch / EndBatch block.
-    //
-    // This function is necessary because wxGrid has a minimal OnPaint()
-    // handler to reduce screen flicker.
-    //
-    void     ForceRefresh();
-    
 
     // ------ edit control functions
     //
@@ -1300,15 +1290,27 @@ public:
     void SelectRow( int row, bool addToSelected = FALSE );
     void SelectCol( int col, bool addToSelected = FALSE );
 
+    // MB: This ugly confusion of SelectBlock functions will be absent
+    // in post wx-2.2 releases
+    //
     void SelectBlock( int topRow, int leftCol, int bottomRow, int rightCol,
-                      bool addToSelected = FALSE );
+                      bool addToSelected );
+
+    void SelectBlock( int topRow, int leftCol, int bottomRow, int rightCol )
+        { SelectBlock( topRow, leftCol, bottomRow, rightCol, FALSE ); }
 
     void SelectBlock( const wxGridCellCoords& topLeft,
                       const wxGridCellCoords& bottomRight,
-                      bool addToSelected = FALSE )
+                      bool addToSelected )
         { SelectBlock( topLeft.GetRow(), topLeft.GetCol(),
                        bottomRight.GetRow(), bottomRight.GetCol(),
                        addToSelected ); }
+
+    void SelectBlock( const wxGridCellCoords& topLeft,
+                      const wxGridCellCoords& bottomRight )
+        { SelectBlock( topLeft.GetRow(), topLeft.GetCol(),
+                       bottomRight.GetRow(), bottomRight.GetCol(),
+                       FALSE ); }
 
     void SelectAll();
 
@@ -1497,7 +1499,7 @@ public:
     void SetEditInPlace(bool WXUNUSED(edit) = TRUE) { }
 
     void SetCellAlignment( int align, int row, int col)
-    { SetCellAlignment(row, col, align, wxALIGN_CENTER); }
+    { SetCellAlignment(row, col, align, wxCENTER); }
     void SetCellAlignment( int WXUNUSED(align) ) {}
     void SetCellBitmap(wxBitmap *WXUNUSED(bitmap), int WXUNUSED(row), int WXUNUSED(col))
     { }

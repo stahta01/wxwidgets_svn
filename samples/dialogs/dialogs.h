@@ -68,7 +68,6 @@ public:
     void FilesOpen(wxCommandEvent& event);
     void FileSave(wxCommandEvent& event);
     void DirChoose(wxCommandEvent& event);
-    void GenericDirChoose(wxCommandEvent& event);
     void ShowTip(wxCommandEvent& event);
     void ModalDlg(wxCommandEvent& event);
     void ModelessDlg(wxCommandEvent& event);
@@ -115,7 +114,6 @@ enum
     DIALOGS_FILES_OPEN,
     DIALOGS_FILE_SAVE,
     DIALOGS_DIR_CHOOSE,
-    DIALOGS_GENERIC_DIR_CHOOSE,
     DIALOGS_TIP,
     DIALOGS_NUM_ENTRY,
     DIALOGS_LOG_DIALOG,

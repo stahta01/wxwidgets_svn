@@ -15,7 +15,6 @@
 #include "wx/gdicmn.h"
 
 #include <gdk/gdk.h>
-#include <gdk/gdkx.h>
 #include <gdk/gdkprivate.h>
 
 //-----------------------------------------------------------------------------
@@ -181,14 +180,9 @@ void wxColour::CalcPixel( GdkColormap *cmap )
     
     M_COLDATA->FreeColour();
 
-#ifdef __WXGTK20__
-    if ((cmap->visual->type == GDK_VISUAL_GRAYSCALE) ||
-        (cmap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#else
     GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) cmap;
     if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
         (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#endif
     {
         GdkColor *colors = cmap->colors;
         int max = 3 * (65536);

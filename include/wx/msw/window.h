@@ -185,7 +185,6 @@ public:
     void OnSetFocus(wxFocusEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnIdle(wxIdleEvent& event);
-    void OnPaint(wxPaintEvent& event);
 
 public:
     // For implementation purposes - sometimes decorations make the client area

@@ -296,28 +296,7 @@ bool wxMenu::DoInsertOrAppend(
 
     if (pItem->IsSeparator())
     {
-        vItem.afStyle |= MIS_SEPARATOR;
-    }
-
-    //
-    // Id is the numeric id for normal menu items and HMENU for submenus as
-    // required by ::MM_INSERTITEM message API
-    //
-
-    wxMenu*                         pSubmenu = pItem->GetSubMenu();
-
-    if (pSubmenu != NULL)
-    {
-        wxASSERT_MSG(pSubmenu->GetHMenu(), wxT("invalid submenu"));
-        pSubmenu->SetParent(this);
-
-        vItem.iPosition = 0; // submenus have a 0 position
-        vItem.id = (USHORT)pSubmenu->GetHMenu();
-        vItem.afStyle |= MIS_SUBMENU | MIS_TEXT;
-    }
-    else
-    {
-        vItem.id = pItem->GetId();
+        rItem.afStyle |= MIS_SEPARATOR;
     }
 
     BYTE*                           pData;
@@ -340,7 +319,7 @@ bool wxMenu::DoInsertOrAppend(
         //
         // Menu is just a normal string (passed in data parameter)
         //
-        vItem.afStyle |= MIS_TEXT;
+        rItem.afStyle |= MIS_TEXT;
         pData = (char*)pItem->GetText().c_str();
     }
 

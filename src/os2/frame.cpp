@@ -350,23 +350,7 @@ void wxFrame::DoShowWindow(
   int                               bShowCmd
 )
 {
-    HWND                            hClient = NULLHANDLE;
-    SWP                             vSwp;
-
-    //
-    // Reset the window position
-    //
-    WinQueryWindowPos(m_hFrame, &vSwp);
-    WinSetWindowPos( GetHwnd()
-                    ,HWND_TOP
-                    ,vSwp.x
-                    ,vSwp.y
-                    ,vSwp.cx
-                    ,vSwp.cy
-                    ,SWP_SIZE | SWP_MOVE | SWP_ACTIVATE
-                   );
     ::WinShowWindow(m_hFrame, (BOOL)bShowCmd);
-    ::WinShowWindow(GetHwnd(), (BOOL)bShowCmd);
 } // end of wxFrame::DoShowWindow
 
 bool wxFrame::Show(
@@ -669,27 +653,6 @@ void wxFrame::SetMenuBar(
 
     m_frameMenuBar = pMenuBar;
     pMenuBar->Attach(this);
-
-    //
-    // Now resize the client to fit the new frame
-    //
-    WinQueryWindowPos(m_hFrame, &vSwp);
-    hTitlebar = WinWindowFromID(m_hFrame, FID_TITLEBAR);
-    WinQueryWindowPos(hTitlebar, &vSwpTitlebar);
-    hHScroll = WinWindowFromID(m_hFrame, FID_HORZSCROLL);
-    WinQueryWindowPos(hHScroll, &vSwpHScroll);
-    hVScroll = WinWindowFromID(m_hFrame, FID_VERTSCROLL);
-    WinQueryWindowPos(hVScroll, &vSwpVScroll);
-    hMenuBar = WinWindowFromID(m_hFrame, FID_MENU);
-    WinQueryWindowPos(hMenuBar, &vSwpMenu);
-    WinSetWindowPos( GetHwnd()
-                    ,HWND_TOP
-                    ,SV_CXSIZEBORDER/2
-                    ,(SV_CYSIZEBORDER/2) + vSwpHScroll.cy/2
-                    ,vSwp.cx - ((SV_CXSIZEBORDER + 1) + vSwpVScroll.cx)
-                    ,vSwp.cy - ((SV_CYSIZEBORDER + 1) + vSwpTitlebar.cy + vSwpMenu.cy + vSwpHScroll.cy/2)
-                    ,SWP_SIZE | SWP_MOVE
-                   );
 } // end of wxFrame::SetMenuBar
 
 void wxFrame::InternalSetMenuBar()
@@ -969,7 +932,7 @@ bool wxFrame::OS2Create(
                              ,0L
                              ,0L
                              ,0L
-                             ,NULLHANDLE
+                             ,m_hFrame
                              ,HWND_TOP
                              ,(unsigned long)FID_CLIENT
                              ,NULL
@@ -1004,22 +967,6 @@ bool wxFrame::OS2Create(
         else if (vSwp[i].hwnd == m_hTitleBar)
             memcpy(&m_vSwpTitleBar, &vSwp[i], sizeof(SWP));
     }
-
-    //
-    // Now set the size of the client
-    //
-    WinSetWindowPos( hClient
-                    ,HWND_TOP
-                    ,SV_CXSIZEBORDER/2
-                    ,(SV_CYSIZEBORDER/2) + m_vSwpHScroll.cy/2
-                    ,m_vSwp.cx - ((SV_CXSIZEBORDER + 1) + m_vSwpVScroll.cx)
-                    ,m_vSwp.cy - ((SV_CYSIZEBORDER + 1) + m_vSwpTitleBar.cy + m_vSwpHScroll.cy/2)
-                    ,SWP_SIZE | SWP_MOVE
-                   );
-
-    //
-    // Set the client window's background, otherwise it is transparent!
-    //
     return TRUE;
 } // end of wxFrame::OS2Create
 
@@ -1219,7 +1166,7 @@ bool wxFrame::HandlePaint()
 {
     RECTL                           vRect;
 
-    if (::WinQueryUpdateRect(m_hFrame, &vRect))
+    if (::WinQueryUpdateRect(GetHwnd(), &vRect))
     {
         if (m_bIconized)
         {
@@ -1238,7 +1185,7 @@ bool wxFrame::HandlePaint()
             // is being processed
             //
             RECTL                   vRect2;
-            HPS                     hPs = ::WinBeginPaint(m_hFrame, NULLHANDLE, &vRect2);
+            HPS                     hPs = ::WinBeginPaint(GetHwnd(), NULLHANDLE, &vRect2);
 
             //
             // Erase background before painting or we get white background

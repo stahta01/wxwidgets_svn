@@ -1567,7 +1567,7 @@ void wxGridCellNumberRenderer::Draw(wxGrid& grid,
     // draw the text right aligned by default
     int hAlign, vAlign;
     attr.GetAlignment(&hAlign, &vAlign);
-    hAlign = wxALIGN_RIGHT;
+    hAlign = wxRIGHT;
 
     wxRect rect = rectCell;
     rect.Inflate(-1);
@@ -1662,7 +1662,7 @@ void wxGridCellFloatRenderer::Draw(wxGrid& grid,
     // draw the text right aligned by default
     int hAlign, vAlign;
     attr.GetAlignment(&hAlign, &vAlign);
-    hAlign = wxALIGN_RIGHT;
+    hAlign = wxRIGHT;
 
     wxRect rect = rectCell;
     rect.Inflate(-1);
@@ -3382,7 +3382,7 @@ void wxGrid::Create()
 
     // Set default cell attributes
     m_defaultCellAttr->SetFont(GetFont());
-    m_defaultCellAttr->SetAlignment(wxALIGN_LEFT, wxALIGN_TOP);
+    m_defaultCellAttr->SetAlignment(wxLEFT, wxTOP);
     m_defaultCellAttr->SetTextColour(
         wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOWTEXT));
     m_defaultCellAttr->SetBackgroundColour(
@@ -3514,11 +3514,11 @@ void wxGrid::Init()
     m_labelFont = this->GetFont();
     m_labelFont.SetWeight( m_labelFont.GetWeight() + 2 );
 
-    m_rowLabelHorizAlign = wxALIGN_LEFT;
-    m_rowLabelVertAlign  = wxALIGN_CENTRE;
+    m_rowLabelHorizAlign = wxLEFT;
+    m_rowLabelVertAlign  = wxCENTRE;
 
-    m_colLabelHorizAlign = wxALIGN_CENTRE;
-    m_colLabelVertAlign  = wxALIGN_TOP;
+    m_colLabelHorizAlign = wxCENTRE;
+    m_colLabelVertAlign  = wxTOP;
 
     m_defaultColWidth  = WXGRID_DEFAULT_COL_WIDTH;
     m_defaultRowHeight = m_gridWin->GetCharHeight();
@@ -3825,8 +3825,9 @@ bool wxGrid::Redimension( wxGridTableMessage& msg )
             wxGridCellAttrProvider * attrProvider = m_table->GetAttrProvider();
             if (attrProvider) {
                 attrProvider->UpdateAttrRows( pos, -((int)numRows) );
-// ifdef'd out following patch from Paul Gammans
-#if 0
+// ifdef'd out following patch from Paul Gammans                
+#if 0                
+                // No need to touch column attributes, unless we
                 // removed _all_ rows, in this case, we remove
                 // all column attributes.
                 // I hate to do this here, but the
@@ -3961,7 +3962,7 @@ bool wxGrid::Redimension( wxGridTableMessage& msg )
             if (attrProvider) {
                 attrProvider->UpdateAttrCols( pos, -((int)numCols) );
 // ifdef'd out following patch from Paul Gammans                
-#if 0
+#if 0                
                 // No need to touch row attributes, unless we
                 // removed _all_ columns, in this case, we remove
                 // all row attributes.
@@ -5253,8 +5254,7 @@ bool wxGrid::SendEvent( const wxEventType type,
                                  type,
                                  this,
                                  rowOrCol,
-                                 mouseEv.GetX() + GetColLabelSize(),
-                                 mouseEv.GetY() + GetRowLabelSize(),
+                                 mouseEv.GetX(), mouseEv.GetY(),
                                  mouseEv.ControlDown(),
                                  mouseEv.ShiftDown(),
                                  mouseEv.AltDown(),
@@ -5284,8 +5284,7 @@ bool wxGrid::SendEvent( const wxEventType type,
                              type,
                              this,
                              row, col,
-                             mouseEv.GetX() + GetColLabelSize(),
-                             mouseEv.GetY() + GetRowLabelSize(),
+                             mouseEv.GetX(), mouseEv.GetY(),
                              FALSE,
                              mouseEv.ControlDown(),
                              mouseEv.ShiftDown(),
@@ -5595,7 +5594,7 @@ void wxGrid::SetCurrentCell( const wxGridCellCoords& coords )
         HideCellEditControl();
         DisableCellEditControl();
 
-        if ( IsVisible( m_currentCellCoords, FALSE ) )  // zzz
+        if ( IsVisible( m_currentCellCoords, FALSE ) )
         {
             wxRect r;
             r = BlockToDeviceRect(m_currentCellCoords, m_currentCellCoords);
@@ -5758,7 +5757,6 @@ void wxGrid::HighlightBlock( int topRow, int leftCol, int bottomRow, int rightCo
     // wxGridSelection::SelectBlock!
     // (old comment from when this was the body of SelectBlock)
 }
-
 
 //
 // ------ functions to get/send data (see also public functions)
@@ -6186,15 +6184,15 @@ void wxGrid::DrawTextRectangle( wxDC& dc,
         float x, y;
         switch ( horizAlign )
         {
-            case wxALIGN_RIGHT:
+            case wxRIGHT:
                 x = rect.x + (rect.width - textWidth - 1);
                 break;
 
-            case wxALIGN_CENTRE:
+            case wxCENTRE:
                 x = rect.x + ((rect.width - textWidth)/2);
                 break;
 
-            case wxALIGN_LEFT:
+            case wxLEFT:
             default:
                 x = rect.x + 1;
                 break;
@@ -6202,15 +6200,15 @@ void wxGrid::DrawTextRectangle( wxDC& dc,
 
         switch ( vertAlign )
         {
-            case wxALIGN_BOTTOM:
+            case wxBOTTOM:
                 y = rect.y + (rect.height - textHeight - 1);
                 break;
 
-            case wxALIGN_CENTRE:
+            case wxCENTRE:
                 y = rect.y + ((rect.height - textHeight)/2);
                 break;
 
-            case wxALIGN_TOP:
+            case wxTOP:
             default:
                 y = rect.y + 1;
                 break;
@@ -6299,17 +6297,6 @@ void wxGrid::EndBatch()
         }
     }
 }
-
-// Use this, rather than wxWindow::Refresh(), to force an immediate
-// repainting of the grid. Has no effect if you are already inside a
-// BeginBatch / EndBatch block.
-//
-void wxGrid::ForceRefresh()
-{
-    BeginBatch();
-    EndBatch();
-}
-
 
 //
 // ------ Edit control functions
@@ -6417,7 +6404,7 @@ void wxGrid::ShowCellEditControl()
     {
         if ( !IsVisible( m_currentCellCoords ) )
         {
-            m_cellEditCtrlEnabled = false;        
+            m_cellEditCtrlEnabled = FALSE;
             return;
         }
         else
@@ -7330,27 +7317,12 @@ void wxGrid::SetLabelFont( const wxFont& font )
 
 void wxGrid::SetRowLabelAlignment( int horiz, int vert )
 {
-    // allow old (incorrect) defs to be used
-    switch ( horiz )
-    {
-        case wxLEFT:   horiz = wxALIGN_LEFT; break;
-        case wxRIGHT:  horiz = wxALIGN_RIGHT; break;
-        case wxCENTRE: horiz = wxALIGN_CENTRE; break;
-    }
-    
-    switch ( vert )
-    {
-        case wxTOP:    vert = wxALIGN_TOP;    break;
-        case wxBOTTOM: vert = wxALIGN_BOTTOM; break;
-        case wxCENTRE: vert = wxALIGN_CENTRE; break;
-    }
-    
-    if ( horiz == wxALIGN_LEFT || horiz == wxALIGN_CENTRE || horiz == wxALIGN_RIGHT )
+    if ( horiz == wxLEFT || horiz == wxCENTRE || horiz == wxRIGHT )
     {
         m_rowLabelHorizAlign = horiz;
     }
 
-    if ( vert == wxALIGN_TOP || vert == wxALIGN_CENTRE || vert == wxALIGN_BOTTOM )
+    if ( vert == wxTOP || vert == wxCENTRE || vert == wxBOTTOM )
     {
         m_rowLabelVertAlign = vert;
     }
@@ -7363,27 +7335,12 @@ void wxGrid::SetRowLabelAlignment( int horiz, int vert )
 
 void wxGrid::SetColLabelAlignment( int horiz, int vert )
 {
-    // allow old (incorrect) defs to be used
-    switch ( horiz )
-    {
-        case wxLEFT:   horiz = wxALIGN_LEFT; break;
-        case wxRIGHT:  horiz = wxALIGN_RIGHT; break;
-        case wxCENTRE: horiz = wxALIGN_CENTRE; break;
-    }
-    
-    switch ( vert )
-    {
-        case wxTOP:    vert = wxALIGN_TOP;    break;
-        case wxBOTTOM: vert = wxALIGN_BOTTOM; break;
-        case wxCENTRE: vert = wxALIGN_CENTRE; break;
-    }
-    
-    if ( horiz == wxALIGN_LEFT || horiz == wxALIGN_CENTRE || horiz == wxALIGN_RIGHT )
+    if ( horiz == wxLEFT || horiz == wxCENTRE || horiz == wxRIGHT )
     {
         m_colLabelHorizAlign = horiz;
     }
 
-    if ( vert == wxALIGN_TOP || vert == wxALIGN_CENTRE || vert == wxALIGN_BOTTOM )
+    if ( vert == wxTOP || vert == wxCENTRE || vert == wxBOTTOM )
     {
         m_colLabelVertAlign = vert;
     }

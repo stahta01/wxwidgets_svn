@@ -167,10 +167,6 @@ SOURCE=.\common\dynlib.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\effects.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\encconv.cpp
 # End Source File
 # Begin Source File
@@ -372,10 +368,6 @@ SOURCE=.\common\protocol.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\quantize.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\resource.cpp
 # End Source File
 # Begin Source File
@@ -437,10 +429,6 @@ SOURCE=.\common\timercmn.cpp
 # Begin Source File
 
 SOURCE=.\common\tokenzr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\treebase.cpp
 # End Source File
 # Begin Source File
 
@@ -528,10 +516,6 @@ SOURCE=.\generic\choicdgg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\dirctrlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\dragimgg.cpp
 # End Source File
 # Begin Source File
@@ -600,10 +584,6 @@ SOURCE=.\generic\scrolwin.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\splash.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\splitter.cpp
 # End Source File
 # Begin Source File
@@ -625,10 +605,6 @@ SOURCE=.\generic\textdlgg.cpp
 # Begin Source File
 
 SOURCE=.\generic\tipdlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\treectlg.cpp
 # End Source File
 # Begin Source File
 
