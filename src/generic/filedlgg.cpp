@@ -759,9 +759,6 @@ void wxFileCtrl::GoToParentDir()
 {
     if (m_dirName != wxT("/"))
     {
-        size_t len = m_dirName.Len();
-        if (m_dirName[len-1] == wxT('/'))
-            m_dirName.Remove( len-1, 1 );
         wxString fname( wxFileNameFromPath(m_dirName) );
         m_dirName = wxPathOnly( m_dirName );
         if (m_dirName.IsEmpty()) m_dirName = wxT("/");
@@ -922,17 +919,12 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
         m_dialogStyle |= wxOPEN;
 
     m_dir = defaultDir;
-    if ((m_dir.empty()) || (m_dir == wxT(".")))
+    if ((m_dir.IsEmpty()) || (m_dir == wxT(".")))
     {
         char buf[200];
         m_dir = getcwd( buf, sizeof(buf) );
     }
-    
-    size_t len = m_dir.Len();
-    if ((len > 1) && (m_dir[len-1] == wxT('/')))
-        m_dir.Remove( len-1, 1 );
-
-    m_path = m_dir;
+    m_path = defaultDir;
     m_path += wxT("/");
     m_path += defaultFile;
     m_fileName = defaultFile;
@@ -1015,10 +1007,10 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
 
     if (m_dialogStyle & wxMULTIPLE)
         m_list = new wxFileCtrl( this, ID_LIST_CTRL, m_dir, firstWild, wxDefaultPosition,
-                                 wxSize(540,200), s_lastViewStyle | wxSUNKEN_BORDER );
+                                 wxSize(440,180), s_lastViewStyle | wxSUNKEN_BORDER );
     else
         m_list = new wxFileCtrl( this, ID_LIST_CTRL, m_dir, firstWild, wxDefaultPosition,
-                                 wxSize(540,200), s_lastViewStyle | wxSUNKEN_BORDER | wxLC_SINGLE_SEL );
+                                 wxSize(440,180), s_lastViewStyle | wxSUNKEN_BORDER | wxLC_SINGLE_SEL );
     m_list -> ShowHidden(s_lastShowHidden);
     mainsizer->Add( m_list, 1, wxEXPAND | wxLEFT|wxRIGHT, 10 );
 

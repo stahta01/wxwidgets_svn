@@ -45,7 +45,7 @@ wxGLContext::wxGLContext(
 {
     m_window = win;
 
-    m_drawable = (AGLDrawable) UMAGetWindowPort(win->MacGetRootWindow());
+    m_drawable = (AGLDrawable) UMAGetWindowPort(win->GetMacRootWindow());
 
     m_glContext = aglCreateContext(fmt, other ? other->m_glContext : NULL);
     wxCHECK_RET( m_glContext, wxT("Couldn't create OpenGl context") );
@@ -216,6 +216,7 @@ bool wxGLCanvas::Create(wxWindow *parent, const wxGLContext *shared, wxWindowID 
 			const wxPoint& pos, const wxSize& size, long style, const wxString& name,
 			int *attribList, const wxPalette& palette)
 {
+  	m_macEraseOnRedraw = false ;
     wxWindow::Create( parent, id, pos, size, style, name );
 
     AGLPixelFormat fmt = ChoosePixelFormat(attribList);
@@ -251,7 +252,7 @@ void wxGLCanvas::SetViewport()
     int width, height;
     GetClientSize(& width, & height);
     Rect bounds ;
-    GetWindowPortBounds( MacGetRootWindow() , &bounds ) ;
+    GetWindowPortBounds( GetMacRootWindow() , &bounds ) ;
     GLint parms[4] ;
     parms[0] = x ;
     parms[1] = bounds.bottom - bounds.top - ( y + height ) ;

@@ -33,6 +33,8 @@ END_EVENT_TABLE()
 // Item members
 wxControl::wxControl()
 {
+  m_backgroundColour = *wxWHITE;
+  m_foregroundColour = *wxBLACK;
 
 #if WXWIN_COMPATIBILITY
   m_callback = 0;
@@ -134,8 +136,6 @@ bool wxControl::OS2CreateControl(
 
     if ((strcmp(zClassname, "COMBOBOX")) == 0)
         zClass = WC_COMBOBOX;
-    else if ((strcmp(zClassname, "STATIC")) == 0)
-        zClass = WC_STATIC;
     dwStyle |= WS_VISIBLE;
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(GetParent()) // Parent window handle
                                        ,(PSZ)zClassname              // Window class

@@ -6,7 +6,7 @@
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) AUTHOR
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -19,7 +19,6 @@
 #include "wx/tabctrl.h"
 #include "wx/dc.h"
 #include "wx/dcclient.h"
-#include "wx/utils.h"
 
 #include <stdio.h>
 
@@ -45,15 +44,15 @@ bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
     m_foregroundColour = parent->GetForegroundColour() ;
 
     if ( id == -1 )
-        m_windowId = (int)NewControlId();
+  	    m_windowId = (int)NewControlId();
     else
-        m_windowId = id;
+	    m_windowId = id;
 
     m_windowStyle = style;
     m_label = label ;
 
-    bool ret = wxControl::Create( parent, id, pos, size, style , wxDefaultValidator , name );
-    SetBestSize( size ) ;
+	bool ret = wxControl::Create( parent, id, pos, size, style , wxDefaultValidator , name );
+	SetBestSize( size ) ;
     
     return ret;
 }
@@ -69,58 +68,58 @@ void wxStaticText::DrawParagraph(wxDC &dc, wxString paragraph)
   bool linedrawn = true;
   while( paragraph.Length() > 0 )
   {
-        dc.GetTextExtent( paragraph , &width , &height ) ;
-                    
-        if ( width > m_width )
-        {
-            for ( int p = paragraph.Length() -1 ; p > 0 ; --p )
-            {                     
-              if ((punct.Find(paragraph[p]) != wxNOT_FOUND) || !linedrawn)
-                {
-                  int blank = (paragraph[p] == ' ') ? 0 : 1;
-                  
-                    dc.GetTextExtent( paragraph.Left(p + blank) , &width , &height ) ;
-                    
-                    if ( width <= m_width )
-                    {   
-                        int pos = x ;
-                        if ( HasFlag( wxALIGN_CENTER ) )
-                        {
-                            pos += ( m_width - width ) / 2 ;
-                      }
-                        else if ( HasFlag( wxALIGN_RIGHT ) )
-                        {
-                            pos += ( m_width - width ) ;
-                      }
-                            
-                    dc.DrawText( paragraph.Left(p + blank), pos , y) ;
-                    y += height ;
-                        paragraph = paragraph.Mid(p+1) ;
-                        linedrawn = true;
-                        break ;
-                    }
-                }
-            }
-            
-            linedrawn = false;
-        }
-        else
-        {
-            int pos = x ;
-            if ( HasFlag( wxALIGN_CENTER ) )
-            {
-                pos += ( m_width - width ) / 2 ;
-          }
-            else if ( HasFlag( wxALIGN_RIGHT ) )
-            {
-                pos += ( m_width - width ) ;
-          }
-                
-        dc.DrawText( paragraph, pos , y) ;
-        paragraph="";
-        y += height ;
-        }
-    }
+		dc.GetTextExtent( paragraph , &width , &height ) ;
+		 	   		
+		if ( width > m_width )
+		{
+			for ( int p = paragraph.Length() -1 ; p > 0 ; --p )
+			{     				  
+			  if ((punct.Find(paragraph[p]) != wxNOT_FOUND) || !linedrawn)
+				{
+				  int blank = (paragraph[p] == ' ') ? 0 : 1;
+				  
+					dc.GetTextExtent( paragraph.Left(p + blank) , &width , &height ) ;
+					
+					if ( width <= m_width )
+					{	
+						int pos = x ;
+						if ( HasFlag( wxALIGN_CENTER ) )
+						{
+							pos += ( m_width - width ) / 2 ;
+					  }
+						else if ( HasFlag( wxALIGN_RIGHT ) )
+						{
+							pos += ( m_width - width ) ;
+					  }
+					  		
+  					dc.DrawText( paragraph.Left(p + blank), pos , y) ;
+  					y += height ;
+						paragraph = paragraph.Mid(p+1) ;
+						linedrawn = true;
+						break ;
+					}
+				}
+			}
+			
+			linedrawn = false;
+		}
+		else
+		{
+			int pos = x ;
+			if ( HasFlag( wxALIGN_CENTER ) )
+			{
+				pos += ( m_width - width ) / 2 ;
+		  }
+			else if ( HasFlag( wxALIGN_RIGHT ) )
+			{
+				pos += ( m_width - width ) ;
+		  }
+		  		
+  		dc.DrawText( paragraph, pos , y) ;
+  		paragraph="";
+  		y += height ;
+		}
+	}
 }
 
 void wxStaticText::OnDraw( wxDC &dc )
@@ -128,13 +127,47 @@ void wxStaticText::OnDraw( wxDC &dc )
     if (m_width <= 0 || m_height <= 0)
         return;
 
-  if ( !IsWindowHilited( MacGetRootWindow() ) )
-  {
-    dc.SetTextForeground( wxColour( 0x80 , 0x80 , 0x80 ) ) ;
-  }
   wxString paragraph;
   int i = 0 ;
   wxString text = m_label;
+
+    PrepareDC(dc);
+    
+    bool doClear = true ;
+	WindowRef window = GetMacRootWindow() ;
+	if ( window )
+	{
+		wxWindow* win = wxFindWinFromMacWindow( window ) ;
+		if ( win )
+		{
+			wxWindow* parent = GetParent() ;
+			while ( parent )
+			{
+				if( parent->MacGetWindowData() )
+				{
+					break ;
+				}
+				
+				if( parent->IsKindOf( CLASSINFO( wxNotebook ) ) ||  parent->IsKindOf( CLASSINFO( wxTabCtrl ) ))
+				{
+					if ( ((wxControl*)parent)->GetMacControl() ) {
+						Rect rect = { -10000 , -10000 , 10000 , 10000 } ; // MacOS X was having a coord rollover
+						if ( DrawThemeTabPane != (void*)kUnresolvedCFragSymbolAddress )
+						{
+						  DrawThemeTabPane ( &rect, kThemeStateActive);
+						  doClear = false ;
+						}
+					}
+					break ;
+				}
+				
+				parent = parent->GetParent() ;
+			} 
+		}
+	}
+	if ( doClear )
+		dc.Clear() ;
+		
 	while (i < text.Length())
 	{
 	  paragraph += text[i];
@@ -156,7 +189,7 @@ void wxStaticText::OnPaint( wxPaintEvent &event )
 
 wxSize wxStaticText::DoGetBestSize() const
 {
-    int x,y ;
+	int x,y ;
     int widthTextMax = 0, widthLine,
         heightTextTotal = 0, heightLineDefault = 0, heightLine = 0;
         
@@ -213,5 +246,7 @@ void wxStaticText::SetLabel(const wxString& st )
 		SetSize( GetBestSize() ) ;
 
 	Refresh() ;	
-	Update() ;
+	MacUpdateImmediately() ;
+//    wxClientDC dc(this);
+//    OnDraw( dc ) ;
 }

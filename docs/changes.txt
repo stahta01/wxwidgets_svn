@@ -60,20 +60,6 @@ Unix ports:
   and the compiler flags for C++ files only, CFLAGS should still be used
   to compile pure C files.
 
-2.3.3
------
-
-All:
-
-- fixes to the command line parsing error and usage messages
-- modified wxFileName::CreateTempFileName() to open the file atomically
-  (if possible) and, especially, not to leak the file descriptors under Unix
-
-wxMSW:
-
-- fixed flicker in wxTreeCtrl::SetItemXXX()
-- fixed redraw problems in dynamically resized wxStaticText
-
 2.3.2
 -----
 
@@ -107,8 +93,6 @@ All (GUI):
 wxMSW:
 
 - support for the DBCS fonts (CP 932, 936, 949, 950) (Nathan Cook)
-- new library naming convention under VC++ -- please change your application
-  project files
 
 wxGTK:
 

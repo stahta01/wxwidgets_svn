@@ -333,6 +333,10 @@
  */
 #define wxUSE_STREAMS 1
 /*
+ * Use class serialization
+ */
+#define wxUSE_SERIAL 1
+/*
  * Use sockets
  */
 #define wxUSE_SOCKETS 1
@@ -341,6 +345,10 @@
  * streams implementation.
  */
 #define wxUSE_STD_IOSTREAM  0
+/*
+ * wxLibrary class
+ */
+#define wxUSE_DYNLIB_CLASS 1
 
 /*
  * Use font metric files in GetTextExtent for wxPostScriptDC
@@ -410,9 +418,9 @@
  */
 #define wxUSE_SPLINES 1
 /*
- * Use wxObjectLoader class
+ * Use wxLibrary class
  */
-#define wxUSE_DYNAMIC_LOADER 1
+#define wxUSE_DYNLIB_CLASS 1
 
 /*
  * Use the mdi architecture

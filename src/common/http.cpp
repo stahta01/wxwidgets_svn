@@ -177,8 +177,6 @@ bool wxHTTP::Connect(const wxString& host)
 
   if (!addr->Service(wxT("http")))
     addr->Service(80);
-    
-  SetHeader(wxT("Host"), host);
 
   return TRUE;
 }
@@ -191,10 +189,6 @@ bool wxHTTP::Connect(wxSockAddress& addr, bool WXUNUSED(wait))
   }
 
   m_addr = addr.Clone();
-
-  wxIPV4address *ipv4addr = wxDynamicCast(&addr, wxIPV4address);
-  if (ipv4addr)
-      SetHeader(wxT("Host"), ipv4addr->Hostname());
 
   return TRUE;
 }

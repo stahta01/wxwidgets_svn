@@ -443,7 +443,7 @@ void wxTextCtrl::SetValue(const wxString& value)
     }
 }
 
-#if wxUSE_RICHEDIT && !wxUSE_UNICODE
+#if wxUSE_RICHEDIT
 
 DWORD CALLBACK wxRichEditStreamIn(DWORD dwCookie, BYTE *buf, LONG cb, LONG *pcb)
 {
@@ -529,7 +529,6 @@ void wxTextCtrl::WriteText(const wxString& value)
             SetStyle(start, end, m_defaultStyle );
         }
 
-#if !wxUSE_UNICODE
         // next check if the text we're inserting must be shown in a non
         // default charset -- this only works for RichEdit > 1.0
         if ( GetRichVersion() > 1 )
@@ -547,7 +546,6 @@ void wxTextCtrl::WriteText(const wxString& value)
                }
             }
         }
-#endif // !wxUSE_UNICODE
     }
 
     if ( !done )

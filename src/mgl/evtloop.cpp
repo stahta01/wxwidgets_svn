@@ -31,6 +31,7 @@
 #include "wx/evtloop.h"
 #include "wx/timer.h"
 #include "wx/mgl/private.h"
+#include "pmapi.h"
 
 // ----------------------------------------------------------------------------
 // wxEventLoopImpl

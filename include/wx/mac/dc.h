@@ -177,7 +177,6 @@ class WXDLLEXPORT wxDC: public wxDCBase
 	    return (wxCoord)((double)(y) * m_scaleY - 0.5);
 	}
   
-    RgnHandle MacGetCurrentClipRgn() { return m_macCurrentClipRgn ; }
 //
 
 protected:
@@ -266,8 +265,7 @@ protected:
 	mutable bool	m_macPenInstalled ;
 	mutable bool	m_macBrushInstalled ;
 	
-	RgnHandle				m_macBoundaryClipRgn ;
-	RgnHandle               m_macCurrentClipRgn ;
+	Rect					m_macClipRect ;
 	Point					m_macLocalOrigin ;
 	void					MacSetupPort( AGAPortHelper* ph ) const ;
 };

@@ -193,10 +193,6 @@ SOURCE=.\common\dynlib.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\dynload.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\effects.cpp
 # End Source File
 # Begin Source File
@@ -393,6 +389,10 @@ SOURCE=.\common\object.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\common\objstrm.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\common\odbc.cpp
 # End Source File
 # Begin Source File
@@ -446,6 +446,10 @@ SOURCE=.\common\sckipc.cpp
 # Begin Source File
 
 SOURCE=.\common\sckstrm.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\common\serbase.cpp
 # End Source File
 # Begin Source File
 
@@ -1430,10 +1434,6 @@ SOURCE=..\include\wx\dynlib.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\dynload.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\encconv.h
 # End Source File
 # Begin Source File
@@ -1726,6 +1726,10 @@ SOURCE=..\include\wx\object.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\objstrm.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\odbc.h
 # End Source File
 # Begin Source File
@@ -1831,6 +1835,10 @@ SOURCE=..\include\wx\scrolbar.h
 # Begin Source File
 
 SOURCE=..\include\wx\scrolwin.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\serbase.h
 # End Source File
 # Begin Source File
 

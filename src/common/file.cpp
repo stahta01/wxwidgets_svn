@@ -59,16 +59,9 @@
     #ifdef __GNUWIN32__
         #include <windows.h>
     #endif
-#elif defined(__DOS__)
-    #if defined(__WATCOMC__)
-       #include <io.h>
-    #elif defined(__DJGPP__)
-       #include <io.h>
-       #include <unistd.h>
-       #include <stdio.h>
-    #else
-        #error  "Please specify the header with file functions declarations."
-    #endif
+#elif defined(__DOS__) && defined(__WATCOMC__)
+    #include <io.h>
+    char* mktemp(char *path) { return _mktemp(path); }
 #elif (defined(__WXPM__))
     #include <io.h>
     #define   W_OK        2
@@ -432,7 +425,7 @@ bool wxFile::Eof() const
 
     int iRc;
 
-#if defined(__DOS__) || defined(__UNIX__) || defined(__GNUWIN32__) || defined( __MWERKS__ ) || defined(__SALFORDC__)
+#if defined(__UNIX__) || defined(__GNUWIN32__) || defined( __MWERKS__ ) || defined(__SALFORDC__)
     // @@ this doesn't work, of course, on unseekable file descriptors
     off_t ofsCur = Tell(),
     ofsMax = Length();
@@ -478,11 +471,18 @@ bool wxTempFile::Open(const wxString& strName)
 {
     m_strName = strName;
 
-    m_strTemp = wxFileName::CreateTempFileName(strName, &m_file);
+    m_strTemp = wxFileName::CreateTempFileName(strName);
 
     if ( m_strTemp.empty() )
     {
         // CreateTempFileName() failed
+        return FALSE;
+    }
+
+    // actually open the file now (it must already exist)
+    if ( !m_file.Open(m_strTemp, wxFile::write) )
+    {
+        // opening existing file failed?
         return FALSE;
     }
 

@@ -96,7 +96,7 @@ wxCursorRefData::wxCursorRefData()
   m_width = 32;
   m_height = 32;
 
-  m_destroyCursor = TRUE;
+  m_destroyCursor = FALSE;
 }
 
 void wxCursorRefData::Free()
@@ -145,6 +145,7 @@ wxCursor::wxCursor(const wxString& cursor_file,
 #else
         refData->m_hCursor = (WXHCURSOR) LoadCursor(wxGetInstance(), cursor_file);
 #endif
+        refData->m_destroyCursor = FALSE;
     }
     else if (flags == wxBITMAP_TYPE_CUR)
     {
@@ -316,9 +317,6 @@ wxCursor::wxCursor(int cursor_type)
       break;
   }
 #endif
-
-  // no need to destroy the stock cursors
-  refData->m_destroyCursor = FALSE;
 }
 
 wxCursor::~wxCursor()

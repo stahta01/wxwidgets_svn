@@ -38,8 +38,6 @@
 #include "wx/filefn.h"
 #include "wx/datetime.h"
 
-class WXDLLEXPORT wxFile;
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -210,12 +208,9 @@ public:
     void AssignHomeDir();
     static wxString GetHomeDir();
 
-        // get a temp file name starting with the specified prefix and open the
-        // file passed to us using this name for writing (atomically if
-        // possible)
-    void AssignTempFileName(const wxString& prefix, wxFile *fileTemp = NULL);
-    static wxString CreateTempFileName(const wxString& prefix,
-                                       wxFile *fileTemp = NULL);
+        // get a temp file name starting with the specified prefix
+    void AssignTempFileName(const wxString& prefix);
+    static wxString CreateTempFileName(const wxString& prefix);
 
     // directory creation and removal.
     // if full is TRUE, will try to make each directory in the path.
@@ -265,12 +260,11 @@ public:
     static bool IsCaseSensitive( wxPathFormat format = wxPATH_NATIVE );
 
         // is this filename absolute?
-    bool IsAbsolute() const
-        { return !m_relative; }
+    bool IsAbsolute( wxPathFormat format = wxPATH_NATIVE );
 
         // is this filename relative?
-    bool IsRelative() const
-        { return m_relative; }
+    bool IsRelative( wxPathFormat format = wxPATH_NATIVE )
+        { return !IsAbsolute(format); }
 
     // Information about path format
 
@@ -360,9 +354,6 @@ private:
     // the file name and extension (empty for directories)
     wxString        m_name,
                     m_ext;
-                    
-    // is the path relative
-    bool            m_relative;
 };
 
 #endif // _WX_FILENAME_H_

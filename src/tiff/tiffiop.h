@@ -34,7 +34,7 @@
  * a port.h file that reflects the system capabilities.
  * Doing this obviates all the dreck done in tiffcomp.h.
  */
-#if (defined(unix) || defined(__unix)) && !defined(__DJGPP__)
+#if defined(unix) || defined(__unix)
 #include "port.h"
 #include "tiffconf.h"
 #else

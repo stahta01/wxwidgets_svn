@@ -51,10 +51,8 @@ wxWindowDC::wxWindowDC(wxWindow *the_canvas)
 	wxWindowMac* rootwindow ;
 	
 	// this time it is really the full window
-	Rect clipRect ;
-	the_canvas->MacGetPortParams(&m_macLocalOrigin, &clipRect , &windowref , &rootwindow );
-	SetRectRgn( m_macBoundaryClipRgn , clipRect.left , clipRect.top , clipRect.right , clipRect.bottom ) ;
-	CopyRgn( m_macBoundaryClipRgn , m_macCurrentClipRgn ) ;
+	
+	the_canvas->MacGetPortParams(&m_macLocalOrigin, &m_macClipRect , &windowref , &rootwindow );
 	m_macPort = UMAGetWindowPort( windowref ) ;
 	m_minY = m_minX =  0;
 	wxSize size = the_canvas->GetSize() ;
@@ -82,10 +80,7 @@ wxClientDC::wxClientDC(wxWindow *window)
 	WindowRef windowref ;
 	wxWindowMac* rootwindow ;
 	
-	Rect clipRect ;
-	window->MacGetPortClientParams(&m_macLocalOrigin, &clipRect , &windowref , &rootwindow );
-	SetRectRgn( m_macBoundaryClipRgn , clipRect.left , clipRect.top , clipRect.right , clipRect.bottom ) ;
-	CopyRgn( m_macBoundaryClipRgn , m_macCurrentClipRgn ) ;
+	window->MacGetPortClientParams(&m_macLocalOrigin, &m_macClipRect , &windowref , &rootwindow );
 	m_macPort = UMAGetWindowPort( windowref ) ;
 	m_minY = m_minX =  0;
 	wxSize size = window->GetSize() ;
@@ -113,10 +108,8 @@ wxPaintDC::wxPaintDC(wxWindow *window)
 	WindowRef windowref ;
 	wxWindowMac* rootwindow ;
 	
-	Rect clipRect ;
-	window->MacGetPortClientParams(&m_macLocalOrigin, &clipRect , &windowref , &rootwindow );
-  CopyRgn( window->GetUpdateRegion().GetWXHRGN() , m_macBoundaryClipRgn ) ;
-	CopyRgn( m_macBoundaryClipRgn , m_macCurrentClipRgn ) ;
+	window->MacGetPortClientParams(&m_macLocalOrigin, &m_macClipRect , &windowref , &rootwindow );
+
 	m_macPort = UMAGetWindowPort( windowref ) ;
  	m_ok = TRUE ;
 	/*

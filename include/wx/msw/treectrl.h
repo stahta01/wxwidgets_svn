@@ -400,9 +400,6 @@ protected:
     // SetImageList helper
     void SetAnyImageList(wxImageList *imageList, int which);
 
-    // refresh a single item
-    void RefreshItem(const wxTreeItemId& item);
-
     wxTextCtrl  *m_textCtrl;        // used while editing the item label
     wxImageList *m_imageListNormal, // images for tree elements
                 *m_imageListState;  // special images for app defined states

@@ -14,7 +14,6 @@
 #define _WX_PRIVATE_H_
 
 #include <mgraph.hpp>
-#include "pmapi.h"
 
 class WXDLLEXPORT wxBitmap;
 

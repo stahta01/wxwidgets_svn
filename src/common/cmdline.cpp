@@ -109,9 +109,7 @@ struct wxCmdLineOption
 
 public:
     wxCmdLineEntryType kind;
-    wxString shortName,
-             longName,
-             description;
+    wxString shortName, longName, description;
     wxCmdLineParamType type;
     int flags;
 
@@ -478,7 +476,7 @@ void wxCmdLineParser::Reset()
 // the real work is done here
 // ----------------------------------------------------------------------------
 
-int wxCmdLineParser::Parse(bool showUsage)
+int wxCmdLineParser::Parse()
 {
     bool maybeOption = TRUE;    // can the following arg be an option?
     bool ok = TRUE;             // TRUE until an error is detected
@@ -805,7 +803,7 @@ int wxCmdLineParser::Parse(bool showUsage)
         }
     }
 
-    if ( !ok && showUsage )
+    if ( !ok )
     {
         Usage();
     }
@@ -851,30 +849,13 @@ void wxCmdLineParser::Usage()
             brief << _T('[');
         }
 
-        if ( !opt.shortName.empty() )
-        {
-            brief << chSwitch << opt.shortName;
-        }
-        else if ( !opt.longName.empty() )
-        {
-            brief << _T("--") << opt.longName;
-        }
-        else
-        {
-            wxFAIL_MSG( _T("option without neither short nor long name?") );
-        }
+        brief << chSwitch << opt.shortName;
 
         wxString option;
-
-        if ( !opt.shortName.empty() )
+        option << _T("  ") << chSwitch << opt.shortName;
+        if ( !!opt.longName )
         {
-            option << _T("  ") << chSwitch << opt.shortName;
-        }
-
-        if ( !opt.longName.empty() )
-        {
-            option << (option.empty() ? _T("  ") : _T(", "))
-                   << _T("--") << opt.longName;
+            option << _T("  --") << opt.longName;
         }
 
         if ( opt.kind != wxCMD_LINE_SWITCH )
@@ -923,13 +904,7 @@ void wxCmdLineParser::Usage()
         wxLogMessage(m_data->m_logo);
     }
 
-    // in console mode we want to show the brief usage message first, then the
-    // detailed one but in GUI build we give the details first and then the
-    // summary - like this, the brief message appears in the wxLogGui dialog,
-    // as expected
-#if !wxUSE_GUI
     wxLogMessage(brief);
-#endif // !wxUSE_GUI
 
     // now construct the detailed help message
     size_t len, lenMax = 0;
@@ -952,11 +927,6 @@ void wxCmdLineParser::Usage()
     }
 
     wxLogMessage(detailed);
-
-    // do it now if not done above
-#if wxUSE_GUI
-    wxLogMessage(brief);
-#endif // wxUSE_GUI
 }
 
 // ----------------------------------------------------------------------------

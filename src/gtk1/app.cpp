@@ -679,8 +679,8 @@ GtkWidget* wxGetRootWindow()
 // wxEntry
 //-----------------------------------------------------------------------------
 
-// NB: argc and argv may be changed here, pass by reference!
-int wxEntryStart( int& argc, char *argv[] )
+
+int wxEntryStart( int argc, char *argv[] )
 {
 #if wxUSE_THREADS
     /* GTK 1.2 up to version 1.2.3 has broken threads */

@@ -139,7 +139,6 @@ docview.cpp	Common
 dseldlg.cpp	Common
 dynarray.cpp	Common	Base
 dynlib.cpp	Common	Base
-dynload.cpp	Common	Base
 effects.cpp	Common
 encconv.cpp	Common	Base
 event.cpp	Common	Base
@@ -192,6 +191,7 @@ module.cpp	Common	Base
 mstream.cpp	Common	Base
 nbkbase.cpp	Common
 object.cpp	Common	Base
+objstrm.cpp	Common	Base
 odbc.cpp	Common	NotGTK,NotX,NotOS2
 paper.cpp	Common
 popupcmn.cpp	Common
@@ -206,6 +206,7 @@ sckaddr.cpp	Common	Socket,Base
 sckfile.cpp	Common	Socket,Base
 sckipc.cpp	Common	Socket,Base
 sckstrm.cpp	Common	Socket,Base
+serbase.cpp	Common	Base
 sizer.cpp	Common
 socket.cpp	Common	Socket,Base
 statbar.cpp	Common
@@ -349,9 +350,9 @@ wave.cpp	MSW
 window.cpp	MSW	LowLevel
 
 dialup.cpp	Unix	NotMac
-dir.cpp	Unix	Base,NotMac,NotMGL
-fontenum.cpp	Unix	NotMac,NotMGL
-fontutil.cpp	Unix	NotMac,NotMGL
+dir.cpp	Unix	Base,NotMac
+fontenum.cpp	Unix	NotMac
+fontutil.cpp	Unix	NotMac
 gsocket.c	Unix	Base,NotMac
 mimetype.cpp	Unix	Base,NotMac
 snglinst.cpp	Unix	Base
@@ -722,7 +723,6 @@ confbase.h	WXH	Base
 config.h	WXH	Base
 containr.h	WXH
 control.h	WXH
-cshelp.h	WXH
 ctrlsub.h	WXH
 cursor.h	WXH
 dataobj.h	WXH
@@ -752,7 +752,6 @@ docview.h	WXH
 dragimag.h	WXH
 dynarray.h	WXH	Base
 dynlib.h	WXH	Base
-dynload.h	WXH	Base
 encconv.h	WXH	Base
 event.h	WXH	Base
 expr.h	WXH
@@ -788,6 +787,7 @@ gsocket.h	WXH	Base
 hash.h	WXH	Base
 help.h	WXH
 helpbase.h	WXH
+cshelp.h	WXH
 helphtml.h	WXH
 helpwin.h	WXH
 icon.h	WXH
@@ -830,6 +830,7 @@ msgdlg.h	WXH
 mstream.h	WXH	Base
 notebook.h	WXH
 object.h	WXH	Base
+objstrm.h	WXH	Base
 odbc.h	WXH
 ownerdrw.h	WXH
 palette.h	WXH
@@ -857,6 +858,7 @@ sckipc.h	WXH	Base
 sckstrm.h	WXH	Base
 scrolbar.h	WXH
 scrolwin.h	WXH
+serbase.h	WXH	Base
 settings.h	WXH
 sizer.h	WXH
 slider.h	WXH
@@ -1442,12 +1444,11 @@ brush.cpp	MGL	LowLevel
 pen.cpp	MGL	LowLevel
 font.cpp	MGL	LowLevel
 data.cpp	MGL	LowLevel
-fontenum.cpp	MGL	LowLevel
-fontutil.cpp	MGL	LowLevel
+#fontenum.cpp	MGL	LowLevel
+#fontutil.cpp	MGL	LowLevel
 evtloop.cpp	MGL	LowLevel
 app.cpp	MGL	LowLevel
 bitmap.cpp	MGL	LowLevel
-dir.cpp	MGL	LowLevel
 clipbrd.cpp	MGL	LowLevel
 cursor.cpp	MGL	LowLevel
 dcclient.cpp	MGL	LowLevel

@@ -16,11 +16,13 @@
 #include "wx/app.h"
 #include "wx/listbox.h"
 #include "wx/settings.h"
-#include "wx/toplevel.h"
 #include "wx/dynarray.h"
 #include "wx/log.h"
 
 #include "wx/utils.h"
+#ifndef __DARWIN__
+//  #include "extldef.h"
+#endif
 
 #if !USE_SHARED_LIBRARY
   IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
@@ -166,7 +168,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
     Size asize;
 
 
-    CreateListBoxControl( parent->MacGetRootWindow(), &bounds, false, 0, 1, false, true,
+    CreateListBoxControl( parent->GetMacRootWindow(), &bounds, false, 0, 1, false, true,
                           14, 14, false, &listDef, &m_macControl );
 
     GetControlData(m_macControl, kControlNoPart, kControlListBoxListHandleTag,
@@ -178,7 +180,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
 #else
     long    result ;
 
-    m_macControl = ::NewControl( parent->MacGetRootWindow() , &bounds , title , false ,
+    m_macControl = ::NewControl( parent->GetMacRootWindow() , &bounds , title , false ,
                   kwxMacListWithVerticalScrollbar , 0 , 0, 
                   kControlListBoxProc , (long) this ) ;
     ::GetControlData( m_macControl , kControlNoPart , kControlListBoxListHandleTag ,
@@ -586,7 +588,7 @@ void wxListBox::SetupColours()
 void wxListBox::Refresh(bool eraseBack, const wxRect *rect)
 {
     // Set up port
-    WindowRef rootwindow = MacGetRootWindow() ;
+    WindowRef rootwindow = GetMacRootWindow() ;
     wxWindow* wxrootwindow = wxFindWinFromMacWindow( rootwindow ) ;
     wxMacDrawingHelper focus( wxrootwindow );
 

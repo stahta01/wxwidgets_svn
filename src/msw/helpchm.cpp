@@ -28,9 +28,8 @@
 
 #if wxUSE_HELP && wxUSE_MS_HTML_HELP && defined(__WIN95__)
 #include "wx/msw/helpchm.h"
-
 #include "wx/dynlib.h"
-
+ 
 #ifndef WX_PRECOMP
 #include <windows.h>
 #endif

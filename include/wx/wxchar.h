@@ -439,7 +439,7 @@ typedef unsigned __WCHAR_TYPE__ wxUChar;
 
 // define wxStricmp for various compilers without Unicode possibilities
 #if !defined(wxStricmp) && !wxUSE_UNICODE
-#  if defined(__BORLANDC__) || defined(__WATCOMC__) || defined(__SALFORDC__) || defined(__VISAGECPP__) || defined(__EMX__) || defined(__DJGPP__)
+#  if defined(__BORLANDC__) || defined(__WATCOMC__) || defined(__SALFORDC__) || defined(__VISAGECPP__) || defined(__EMX__)
 #    define wxStricmp stricmp
 #    define wxStrnicmp strnicmp
 #  elif defined(__SC__) || defined(__VISUALC__) || (defined(__MWERKS__) && defined(__INTEL__))
@@ -674,20 +674,10 @@ WXDLLEXPORT size_t   wxStrftime(wxChar *s, size_t max, const wxChar *fmt, const 
 // and _() in wxWindows sources
 #define wxT(x)       _T(x)
 
-// Unicode-friendly __FILE__, __DATE__ and __TIME__ analogs
+// a Unicode-friendly __FILE__ analog
 #ifndef __TFILE__
     #define __XFILE__(x) wxT(x)
     #define __TFILE__ __XFILE__(__FILE__)
-#endif
-
-#ifndef __TDATE__
-    #define __XDATE__(x) wxT(x)
-    #define __TDATE__ __XDATE__(__DATE__)
-#endif
-
-#ifndef __TTIME__
-    #define __XTIME__(x) wxT(x)
-    #define __TTIME__ __XTIME__(__TIME__)
 #endif
 
 #endif

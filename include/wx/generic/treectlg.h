@@ -382,8 +382,6 @@ protected:
 
     wxTimer             *m_renameTimer;
     wxString             m_renameRes;
-    
-    wxBitmap            *m_arrowRight,*m_arrowDown;
 
     // the common part of all ctors
     void Init();

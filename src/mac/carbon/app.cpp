@@ -976,24 +976,19 @@ bool wxApp::Yield(bool onlyIfNeeded)
 
 void wxApp::MacSuspend( bool convertClipboard )
 {
-    // we have to deactive the top level windows manually
+    // we have to deactive the window manually
 
-    wxNode* node = wxTopLevelWindows.First();
-    while (node)
-    {
-        wxTopLevelWindow* win = (wxTopLevelWindow*) node->Data();
-        win->MacActivate( MacGetCurrentEvent() , false ) ;
+    wxWindow* window = GetTopWindow() ;
+    if ( window )
+        window->MacActivate( MacGetCurrentEvent() , false ) ;
 
-        node = node->Next();
-    }
+        s_lastMouseDown = 0 ;
+        if( convertClipboard )
+        {
+            MacConvertPrivateToPublicScrap() ;
+        }
 
-     s_lastMouseDown = 0 ;
-     if( convertClipboard )
-     {
-         MacConvertPrivateToPublicScrap() ;
-     }
-
-     ::HideFloatingWindows() ;
+        ::HideFloatingWindows() ;
 }
 
 void wxApp::MacResume( bool convertClipboard )
@@ -1116,7 +1111,7 @@ void wxApp::MacHandleMouseDownEvent( EventRecord *ev )
         ::GetWindowAttributes( frontWindow , &frontWindowAttributes ) ;
 
     short windowPart = ::FindWindow(ev->where, &window);
-    wxTopLevelWindowMac* win = wxFindWinFromMacWindow( window ) ;
+    wxWindow* win = wxFindWinFromMacWindow( window ) ;
     if ( wxPendingDelete.Member(win) )
         return ;
 
@@ -1279,7 +1274,7 @@ void wxApp::MacHandleMouseUpEvent( EventRecord *ev )
             break ;
         default:
             {
-                wxTopLevelWindowMac* win = wxFindWinFromMacWindow( window ) ;
+                wxWindow* win = wxFindWinFromMacWindow( window ) ;
                 if ( win )
                     win->MacMouseUp( ev , windowPart ) ;
             }
@@ -1561,7 +1556,7 @@ void wxApp::MacHandleActivateEvent( EventRecord *ev )
             // if it is a floater we activate/deactivate the front non-floating window instead
             window = ::FrontNonFloatingWindow() ;
         }
-        wxTopLevelWindowMac* win = wxFindWinFromMacWindow( window ) ;
+        wxWindow* win = wxFindWinFromMacWindow( window ) ;
         if ( win )
             win->MacActivate( ev , activate ) ;
     }
@@ -1570,11 +1565,11 @@ void wxApp::MacHandleActivateEvent( EventRecord *ev )
 void wxApp::MacHandleUpdateEvent( EventRecord *ev )
 {
     WindowRef window = (WindowRef) ev->message ;
-    wxTopLevelWindowMac * win = wxFindWinFromMacWindow( window ) ;
+    wxWindow * win = wxFindWinFromMacWindow( window ) ;
     if ( win )
     {
         if ( !wxPendingDelete.Member(win) )
-            win->MacUpdate( ev->when ) ;
+            win->MacUpdate( ev ) ;
     }
     else
     {
@@ -1631,13 +1626,13 @@ void wxApp::MacHandleOSEvent( EventRecord *ev )
 
                     if ( oldFrontWindow )
                     {
-                        wxTopLevelWindowMac* win = wxFindWinFromMacWindow( oldFrontWindow ) ;
+                        wxWindow* win = wxFindWinFromMacWindow( oldFrontWindow ) ;
                         if ( win )
                             win->MacActivate( ev , false ) ;
                     }
                     if ( newFrontWindow )
                     {
-                        wxTopLevelWindowMac* win = wxFindWinFromMacWindow( newFrontWindow ) ;
+                        wxWindow* win = wxFindWinFromMacWindow( newFrontWindow ) ;
                         if ( win )
                             win->MacActivate( ev , true ) ;
                     }
@@ -1731,7 +1726,7 @@ void wxApp::MacHandleOSEvent( EventRecord *ev )
                             ::GetNextEvent(0, &tmp);
                             ev->modifiers = tmp.modifiers;
                             
-                            wxTopLevelWindowMac* win = wxFindWinFromMacWindow( window ) ;
+                            wxWindow* win = wxFindWinFromMacWindow( window ) ;
                             if ( win )
                                 win->MacMouseMoved( ev , windowPart ) ;
                             else

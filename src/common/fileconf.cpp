@@ -819,7 +819,8 @@ bool wxFileConfig::HasEntry(const wxString& strName) const
 // read/write values
 // ----------------------------------------------------------------------------
 
-bool wxFileConfig::DoReadString(const wxString& key, wxString* pStr) const
+bool wxFileConfig::Read(const wxString& key,
+                        wxString* pStr) const
 {
   wxConfigPathChanger path(this, key);
 
@@ -828,12 +829,32 @@ bool wxFileConfig::DoReadString(const wxString& key, wxString* pStr) const
     return FALSE;
   }
 
-  *pStr = pEntry->Value();
-
+  *pStr = ExpandEnvVars(pEntry->Value());
   return TRUE;
 }
 
-bool wxFileConfig::DoReadLong(const wxString& key, long *pl) const
+bool wxFileConfig::Read(const wxString& key,
+                        wxString* pStr, const wxString& defVal) const
+{
+  wxConfigPathChanger path(this, key);
+
+  wxFileConfigEntry *pEntry = m_pCurrentGroup->FindEntry(path.Name());
+  bool ok;
+  if (pEntry == NULL) {
+    if( IsRecordingDefaults() )
+      ((wxFileConfig *)this)->Write(key,defVal);
+    *pStr = ExpandEnvVars(defVal);
+    ok = FALSE;
+  }
+  else {
+    *pStr = ExpandEnvVars(pEntry->Value());
+    ok = TRUE;
+  }
+
+  return ok;
+}
+
+bool wxFileConfig::Read(const wxString& key, long *pl) const
 {
   wxString str;
   if ( !Read(key, & str) )
@@ -841,10 +862,11 @@ bool wxFileConfig::DoReadLong(const wxString& key, long *pl) const
     return FALSE;
   }
 
-  return str.ToLong(pl);
+  *pl = wxAtol(str);
+  return TRUE;
 }
 
-bool wxFileConfig::DoWriteString(const wxString& key, const wxString& szValue)
+bool wxFileConfig::Write(const wxString& key, const wxString& szValue)
 {
   wxConfigPathChanger path(this, key);
 
@@ -879,9 +901,12 @@ bool wxFileConfig::DoWriteString(const wxString& key, const wxString& szValue)
   return TRUE;
 }
 
-bool wxFileConfig::DoWriteLong(const wxString& key, long lValue)
+bool wxFileConfig::Write(const wxString& key, long lValue)
 {
-  return Write(key, wxString::Format(_T("%ld"), lValue));
+  // ltoa() is not ANSI :-(
+  wxString buf;
+  buf.Printf(wxT("%ld"), lValue);
+  return Write(key, buf);
 }
 
 bool wxFileConfig::Flush(bool /* bCurrentOnly */)

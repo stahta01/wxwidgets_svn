@@ -44,7 +44,12 @@
 
 #include "wx/msw/private.h"  // must be before #include "dynlib.h"
 
+#if !wxUSE_DYNLIB_CLASS
+    #error You need wxUSE_DYNLIB_CLASS to be 1 to compile dialup.cpp.
+#endif
+
 #include "wx/dynlib.h"
+
 #include "wx/dialup.h"
 
 DEFINE_EVENT_TYPE(wxEVT_DIALUP_CONNECTED)
@@ -350,7 +355,7 @@ wxDialUpManagerMSW::wxDialUpManagerMSW()
     if ( !ms_nDllCount++ )
     {
         // load the RAS library
-        ms_dllRas = wxDllLoader::LoadLibrary(_T("RASAPI32"));
+        ms_dllRas = wxDllLoader::LoadLibrary("RASAPI32");
         if ( !ms_dllRas )
         {
             wxLogError(_("Dial up functions are unavailable because the remote access service (RAS) is not installed on this machine. Please install it."));
@@ -959,8 +964,9 @@ bool wxDialUpManagerMSW::IsAlwaysOnline() const
     }
 
     // try to use WinInet function first
-    wxDllType hDll = wxDllLoader::LoadLibrary(_T("WININET"));
-    if ( hDll )
+    bool ok;
+    wxDllType hDll = wxDllLoader::LoadLibrary(_T("WININET"), &ok);
+    if ( ok )
     {
         typedef BOOL (WINAPI *INTERNETGETCONNECTEDSTATE)(LPDWORD, DWORD);
         INTERNETGETCONNECTEDSTATE pfnInternetGetConnectedState;

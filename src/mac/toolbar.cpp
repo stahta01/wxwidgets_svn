@@ -25,8 +25,8 @@
 IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarBase)
 
 BEGIN_EVENT_TABLE(wxToolBar, wxToolBarBase)
-    EVT_MOUSE_EVENTS( wxToolBar::OnMouse ) 
-    EVT_PAINT( wxToolBar::OnPaint ) 
+	EVT_MOUSE_EVENTS( wxToolBar::OnMouse ) 
+	EVT_PAINT( wxToolBar::OnPaint ) 
 END_EVENT_TABLE()
 #endif
 
@@ -66,7 +66,7 @@ public:
     void SetSeparatorsCount(size_t count) { m_nSepCount = count; }
     size_t GetSeparatorsCount() const { return m_nSepCount; }
 
-    int     m_index ;
+    int		m_index ;
 private:
     size_t m_nSepCount;
 };
@@ -143,13 +143,13 @@ bool wxToolBar::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, cons
       m_windowId = id;
 
   {
-    m_width = size.x ;
-    m_height = size.y ;
-    int x = pos.x ;
-    int y = pos.y ;
-    AdjustForParentClientOrigin(x, y, wxSIZE_USE_EXISTING);
-    m_x = x ;
-    m_y = y ;
+	m_width = size.x ;
+	m_height = size.y ;
+	int x = pos.x ;
+	int y = pos.y ;
+	AdjustForParentClientOrigin(x, y, wxSIZE_USE_EXISTING);
+	m_x = x ;
+	m_y = y ;
   }
   
   return TRUE;
@@ -342,20 +342,20 @@ wxSize wxToolBar::GetToolSize() const
 
 void wxToolBar::MacHandleControlClick( ControlHandle control , SInt16 controlpart ) 
 {
-    int index = 0 ;
-    for ( index = 0 ; index < m_macToolHandles.Count() ; ++index )
-    {
-        if ( m_macToolHandles[index] == (void*) control )
-        {
-            wxToolBarTool *tool = (wxToolBarTool *)m_tools.Nth( index )->Data();
-            if ( tool->CanBeToggled() )
-            {
-                tool->Toggle( GetControlValue( control ) ) ;
-            }
-            OnLeftClick( tool->GetId() , tool -> IsToggled() ) ;
-            break ;
-        }
-    }
+	int index = 0 ;
+	for ( index = 0 ; index < m_macToolHandles.Count() ; ++index )
+	{
+		if ( m_macToolHandles[index] == (void*) control )
+		{
+   			wxToolBarTool *tool = (wxToolBarTool *)m_tools.Nth( index )->Data();
+			if ( tool->CanBeToggled() )
+    		{
+        		tool->Toggle( GetControlValue( control ) ) ;
+    		}
+			OnLeftClick( tool->GetId() , tool -> IsToggled() ) ;
+			break ;
+		}
+	}
 }
 
 void wxToolBar::SetRows(int nRows)
@@ -374,24 +374,24 @@ void wxToolBar::MacSuperChangedPosition()
   if (m_tools.Number() > 0)
   {
 
-    Point localOrigin ;
-    Rect clipRect ;
-    WindowRef window ;
-    wxWindow *win ;
-    
-    GetParent()->MacGetPortParams( &localOrigin , &clipRect , &window , &win ) ;
+	Point localOrigin ;
+	Rect clipRect ;
+	WindowRef window ;
+	wxWindow *win ;
+	
+	GetParent()->MacGetPortParams( &localOrigin , &clipRect , &window , &win ) ;
 
-    Rect toolbarrect = { m_y + localOrigin.v , m_x  + localOrigin.h , 
-        m_y + m_height + localOrigin.v  , m_x + m_width + localOrigin.h} ;
-    ControlFontStyleRec     controlstyle ;
+	Rect toolbarrect = { m_y + localOrigin.v , m_x  + localOrigin.h , 
+		m_y + m_height + localOrigin.v  , m_x + m_width + localOrigin.h} ;
+	ControlFontStyleRec		controlstyle ;
 
-    controlstyle.flags = kControlUseFontMask ;
-    controlstyle.font = kControlFontSmallSystemFont ;
-    
-    wxNode *node = m_tools.First();
-    int noButtons = 0;
-    int x = 0 ;
-    wxSize toolSize = GetToolSize() ;
+	controlstyle.flags = kControlUseFontMask ;
+	controlstyle.font = kControlFontSmallSystemFont ;
+	
+	wxNode *node = m_tools.First();
+	int noButtons = 0;
+	int x = 0 ;
+	wxSize toolSize = GetToolSize() ;
     int tw, th;
     GetSize(& tw, & th);
     
@@ -399,7 +399,7 @@ void wxToolBar::MacSuperChangedPosition()
     int maxHeight = 0 ;
     int toolcount = 0 ;
     {
-   		WindowRef rootwindow = MacGetRootWindow() ;
+   		WindowRef rootwindow = GetMacRootWindow() ;
    		wxWindow* wxrootwindow = wxFindWinFromMacWindow( rootwindow ) ;
    		::SetThemeWindowBackground( rootwindow , kThemeBrushDialogBackgroundActive , false ) ;
    		wxMacDrawingHelper focus( wxrootwindow ) ;
@@ -444,22 +444,22 @@ void wxToolBar::MacSuperChangedPosition()
     		else
     		{
                 toolcount++ ;
-                x += (int)toolSize.x / 4;
-            }
-            if ( toolbarrect.left + x + m_xMargin  + kwxMacToolBarLeftMargin- m_x - localOrigin.h > maxWidth)
-                maxWidth = toolbarrect.left + x  + kwxMacToolBarLeftMargin+ m_xMargin - m_x - localOrigin.h;
-            if (toolbarrect.top + m_yMargin  + kwxMacToolBarTopMargin - m_y - localOrigin.v > maxHeight)
-                maxHeight = toolbarrect.top  + kwxMacToolBarTopMargin + m_yMargin - m_y - localOrigin.v ;
+    			x += (int)toolSize.x / 4;
+    		}
+    	    if ( toolbarrect.left + x + m_xMargin  + kwxMacToolBarLeftMargin- m_x - localOrigin.h > maxWidth)
+        	  	maxWidth = toolbarrect.left + x  + kwxMacToolBarLeftMargin+ m_xMargin - m_x - localOrigin.h;
+        	if (toolbarrect.top + m_yMargin  + kwxMacToolBarTopMargin - m_y - localOrigin.v > maxHeight)
+          		maxHeight = toolbarrect.top  + kwxMacToolBarTopMargin + m_yMargin - m_y - localOrigin.v ;
 
-            node = node->Next();
-        }
-        if ( wxrootwindow->IsKindOf( CLASSINFO( wxDialog ) ) )
-        {
-        }
-        else
-        {
-            ::SetThemeWindowBackground( rootwindow , kThemeBrushDocumentWindowBackground , false ) ;
-        }
+    		node = node->Next();
+    	}
+  		if ( wxrootwindow->IsKindOf( CLASSINFO( wxDialog ) ) )
+  		{
+  		}
+  		else
+  		{
+  			::SetThemeWindowBackground( rootwindow , kThemeBrushDocumentWindowBackground , false ) ;
+  		}
     }
 
      if ( GetWindowStyleFlag() & wxTB_HORIZONTAL )
@@ -469,10 +469,10 @@ void wxToolBar::MacSuperChangedPosition()
            // if not set yet, only one row
            SetRows(1);
        }
-        maxWidth = tw ; 
+      	maxWidth = tw ; 
        maxHeight += toolSize.y;
-        maxHeight += m_yMargin + kwxMacToolBarTopMargin;
-        m_maxHeight = maxHeight ;
+     	maxHeight += m_yMargin + kwxMacToolBarTopMargin;
+     	m_maxHeight = maxHeight ;
      }
      else
      {
@@ -483,8 +483,8 @@ void wxToolBar::MacSuperChangedPosition()
        }
        maxHeight = th ;
        maxWidth += toolSize.x;
-        maxWidth += m_xMargin + kwxMacToolBarLeftMargin;
-        m_maxWidth = maxWidth ;
+     	maxWidth += m_xMargin + kwxMacToolBarLeftMargin;
+     	m_maxWidth = maxWidth ;
      }
 
      SetSize(maxWidth, maxHeight);
@@ -498,61 +498,55 @@ wxToolBarToolBase *wxToolBar::FindToolForPosition(wxCoord x, wxCoord y) const
     MacClientToRootWindow( &x , &y ) ;
     Point pt = { y ,x } ;
 
-    int index = 0 ;
-    for ( index = 0 ; index < m_macToolHandles.Count() ; ++index )
-    {
-        if ( m_macToolHandles[index] )
-        {
-            Rect bounds ;
-            GetControlBounds((ControlHandle) m_macToolHandles[index], &bounds ) ;
-            if ( PtInRect( pt , &bounds ) )
-            {
-                return  (wxToolBarTool*) (m_tools.Nth( index )->Data() ) ;
-            }
-        }
-    }
+	int index = 0 ;
+	for ( index = 0 ; index < m_macToolHandles.Count() ; ++index )
+	{
+		if ( m_macToolHandles[index] )
+		{
+			Rect bounds ;
+			GetControlBounds((ControlHandle) m_macToolHandles[index], &bounds ) ;
+			if ( PtInRect( pt , &bounds ) )
+			{
+				return  (wxToolBarTool*) (m_tools.Nth( index )->Data() ) ;
+			}
+		}
+	}
 
     return (wxToolBarToolBase *)NULL;
 }
 
 wxString wxToolBar::MacGetToolTipString( wxPoint &pt )
 {
-    wxToolBarToolBase* tool = FindToolForPosition( pt.x , pt.y ) ;
-    if ( tool )
-    {
-        return tool->GetShortHelp() ;
-    }
-    return "" ;
+	wxToolBarToolBase* tool = FindToolForPosition( pt.x , pt.y ) ;
+	if ( tool )
+	{
+		return tool->GetShortHelp() ;
+	}
+	return "" ;
 }
 
 void wxToolBar::DoEnableTool(wxToolBarToolBase *t, bool enable)
 {
-    if (!IsShown())
-        return ;
+        wxToolBarTool *tool = (wxToolBarTool *)t;
+        if ( tool->m_index < 0 )
+        	return ;
+        	
+        ControlHandle control = (ControlHandle) m_macToolHandles[ tool->m_index ] ;
 
-    wxToolBarTool *tool = (wxToolBarTool *)t;
-    if ( tool->m_index < 0 )
-        return ;
-           
-    ControlHandle control = (ControlHandle) m_macToolHandles[ tool->m_index ] ;
-
-    if ( enable )
-        UMAActivateControl( control ) ;
-    else
-        UMADeactivateControl( control ) ;
+		if ( enable )
+			UMAActivateControl( control ) ;
+		else
+			UMADeactivateControl( control ) ;
 }
 
 void wxToolBar::DoToggleTool(wxToolBarToolBase *t, bool toggle)
 {
-    if (!IsShown())
-        return ;
-
-    wxToolBarTool *tool = (wxToolBarTool *)t;
-    if ( tool->m_index < 0 )
-        return ;
+       wxToolBarTool *tool = (wxToolBarTool *)t;
+        if ( tool->m_index < 0 )
+        	return ;
         
-    ControlHandle control = (ControlHandle) m_macToolHandles[ tool->m_index ] ;
-        ::SetControlValue( control , toggle ) ;
+       ControlHandle control = (ControlHandle) m_macToolHandles[ tool->m_index ] ;
+   		::SetControlValue( control , toggle ) ;
 }
 
 bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos),
@@ -573,7 +567,7 @@ void wxToolBar::DoSetToggle(wxToolBarToolBase *t, bool toggle)
 
 bool wxToolBar::DoDeleteTool(size_t pos, wxToolBarToolBase *tool)
 {
-        return TRUE ;
+		return TRUE ;
 }
 
 void wxToolBar::OnPaint(wxPaintEvent& event)
@@ -594,9 +588,9 @@ void wxToolBar::OnPaint(wxPaintEvent& event)
 		wxWindow* parent = GetParent() ;
 		while ( parent )
 		{
-			if( parent->IsTopLevel() )
+			if( parent->MacGetWindowData() )
 			{
-//				::SetThemeWindowBackground( win->MacGetWindowData()->m_macWindow , kThemeBrushDialogBackgroundActive , false ) ;
+				::SetThemeWindowBackground( win->MacGetWindowData()->m_macWindow , kThemeBrushDialogBackgroundActive , false ) ;
 				break ;
 			}
 			
@@ -624,12 +618,13 @@ void wxToolBar::OnPaint(wxPaintEvent& event)
 				}
 			}
 		}
-//		::SetThemeWindowBackground( win->MacGetWindowData()->m_macWindow , win->MacGetWindowData()->m_macWindowBackgroundTheme , false ) ;
+		::SetThemeWindowBackground( win->MacGetWindowData()->m_macWindow , win->MacGetWindowData()->m_macWindowBackgroundTheme , false ) ;
 	}
 }
 
 void  wxToolBar::OnMouse( wxMouseEvent &event ) 
 {
+		
 	if (event.GetEventType() == wxEVT_LEFT_DOWN || event.GetEventType() == wxEVT_LEFT_DCLICK )
 	{
 			
@@ -642,7 +637,7 @@ void  wxToolBar::OnMouse( wxMouseEvent &event )
 		Point		localwhere ;
 		GrafPtr		port ;
 		SInt16		controlpart ;
-		WindowRef	window = MacGetRootWindow() ;
+		WindowRef	window = GetMacRootWindow() ;
 		
 		localwhere.h = x ;
 		localwhere.v = y ;

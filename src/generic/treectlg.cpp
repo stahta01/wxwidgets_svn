@@ -55,54 +55,6 @@ static const int NO_IMAGE = -1;
 
 #define PIXELS_PER_UNIT 10
 
-// ----------------------------------------------------------------------------
-// Aqua arrows
-// ----------------------------------------------------------------------------
-
-        /* XPM */
-        static char *aqua_arrow_right[] = {
-        /* columns rows colors chars-per-pixel */
-        "13 11 4 1",
-        "  c None",
-        "b c #C0C0C0",
-        "c c #707070",
-        "d c #A0A0A0",
-        /* pixels */
-        "    b        ",
-        "    ddb      ",
-        "    cccdb    ",
-        "    cccccd   ",
-        "    ccccccdb ",
-        "    ccccccccd",
-        "    ccccccdb ",
-        "    cccccb   ",
-        "    cccdb    ",
-        "    ddb      ",
-        "    b        "
-        };
-
-        /* XPM */
-        static char *aqua_arrow_down[] = {
-        /* columns rows colors chars-per-pixel */
-        "13 11 4 1",
-        "  c None",
-        "b c #C0C0C0",
-        "c c #707070",
-        "d c #A0A0A0",
-        /* pixels */
-        "             ",
-        "             ",
-        " bdcccccccdb ",
-        "  dcccccccd  ",
-        "  bcccccccb  ",
-        "   dcccccd   ",
-        "   bcccccb   ",
-        "    bcccd    ",
-        "     dcd     ",
-        "     bcb     ",
-        "      d      "
-        };
-
 // -----------------------------------------------------------------------------
 // private classes
 // -----------------------------------------------------------------------------
@@ -723,20 +675,7 @@ bool wxGenericTreeCtrl::Create(wxWindow *parent,
     style |= wxTR_NO_LINES;
     if (major < 10)
         style |= wxTR_ROW_LINES;
-    if (major >= 10)
-        style |= wxTR_AQUA_BUTTONS;
 #endif
-
-    if (style & wxTR_AQUA_BUTTONS)
-    {
-        m_arrowRight = new wxBitmap( aqua_arrow_right );
-        m_arrowDown = new wxBitmap( aqua_arrow_down );
-    }
-    else
-    {
-        m_arrowRight = NULL;
-        m_arrowDown = NULL;
-    }
 
     wxScrolledWindow::Create( parent, id, pos, size,
                               style|wxHSCROLL|wxVSCROLL, name );
@@ -766,9 +705,6 @@ wxGenericTreeCtrl::~wxGenericTreeCtrl()
 {
     delete m_hilightBrush;
     delete m_hilightUnfocusedBrush;
-    
-    if (m_arrowRight) delete m_arrowRight;
-    if (m_arrowDown) delete m_arrowDown;
 
     DeleteAllItems();
 
@@ -1944,29 +1880,18 @@ void wxGenericTreeCtrl::PaintItem(wxGenericTreeItem *item, wxDC& dc)
 
     int offset = HasFlag(wxTR_ROW_LINES) ? 1 : 0;
 
-    if ( HasFlag(wxTR_FULL_ROW_HIGHLIGHT) )
+    if ( item->IsSelected() && image != NO_IMAGE )
     {
-        int x, y, w, h;
-
-        DoGetPosition(&x, &y);
-        DoGetSize(&w, &h);
-        dc.DrawRectangle(x, item->GetY()+offset, w, total_h-offset);
+        // If it's selected, and there's an image, then we should
+        // take care to leave the area under the image painted in the
+        // background colour.
+        dc.DrawRectangle( item->GetX() + image_w - 2, item->GetY()+offset,
+                          item->GetWidth() - image_w + 2, total_h-offset );
     }
     else
     {
-        if ( item->IsSelected() && image != NO_IMAGE )
-        {
-            // If it's selected, and there's an image, then we should
-            // take care to leave the area under the image painted in the
-            // background colour.
-            dc.DrawRectangle( item->GetX() + image_w - 2, item->GetY()+offset,
-                              item->GetWidth() - image_w + 2, total_h-offset );
-        }
-        else
-        {
-            dc.DrawRectangle( item->GetX()-2, item->GetY()+offset,
-                              item->GetWidth()+2, total_h-offset );
-        }
+        dc.DrawRectangle( item->GetX()-2, item->GetY()+offset,
+                          item->GetWidth()+2, total_h-offset );
     }
 
     if ( image != NO_IMAGE )
@@ -2035,6 +1960,86 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
 
     if (IsExposed(exposed_x, exposed_y, 10000, h))  // 10000 = very much
     {
+        if (item->HasPlus() && HasButtons())  // should the item show a button?
+        {
+            if (!HasFlag(wxTR_NO_LINES))
+            {
+                if (x > (signed)m_indent)
+                    dc.DrawLine(x - m_indent, y_mid, x - 5, y_mid);
+                else if (HasFlag(wxTR_LINES_AT_ROOT))
+                    dc.DrawLine(3, y_mid, x - 5, y_mid);
+                dc.DrawLine(x + 5, y_mid, x + m_spacing, y_mid);
+            }
+
+            if (m_imageListButtons != NULL)
+            {
+                // draw the image button here
+                int image_h = 0, image_w = 0, image = wxTreeItemIcon_Normal;
+                if (item->IsExpanded()) image = wxTreeItemIcon_Expanded;
+                if (item->IsSelected())
+                    image += wxTreeItemIcon_Selected - wxTreeItemIcon_Normal;
+                m_imageListButtons->GetSize(image, image_w, image_h);
+                int xx = x - (image_w>>1);
+                int yy = y_mid - (image_h>>1);
+                dc.SetClippingRegion(xx, yy, image_w, image_h);
+                m_imageListButtons->Draw(image, dc, xx, yy,
+                                         wxIMAGELIST_DRAW_TRANSPARENT);
+                dc.DestroyClippingRegion();
+            }
+            else if (HasFlag(wxTR_TWIST_BUTTONS))
+            {
+                // draw the twisty button here
+                dc.SetPen(*wxBLACK_PEN);
+                dc.SetBrush(*m_hilightBrush);
+
+                wxPoint button[3];
+
+                if (item->IsExpanded())
+                {
+                    button[0].x = x-5;
+                    button[0].y = y_mid-2;
+                    button[1].x = x+5;
+                    button[1].y = y_mid-2;
+                    button[2].x = x;
+                    button[2].y = y_mid+3;
+                }
+                else
+                {
+                    button[0].y = y_mid-5;
+                    button[0].x = x-2;
+                    button[1].y = y_mid+5;
+                    button[1].x = x-2;
+                    button[2].y = y_mid;
+                    button[2].x = x+3;
+                }
+                dc.DrawPolygon(3, button);
+
+                dc.SetPen(m_dottedPen);
+            }
+            else // if (HasFlag(wxTR_HAS_BUTTONS))
+            {
+                // draw the plus sign here
+                dc.SetPen(*wxGREY_PEN);
+                dc.SetBrush(*wxWHITE_BRUSH);
+                dc.DrawRectangle(x-5, y_mid-4, 11, 9);
+                dc.SetPen(*wxBLACK_PEN);
+                dc.DrawLine(x-2, y_mid, x+3, y_mid);
+                if (!item->IsExpanded())
+                    dc.DrawLine(x, y_mid-2, x, y_mid+3);
+                dc.SetPen(m_dottedPen);
+            }
+        }
+        else if (!HasFlag(wxTR_NO_LINES))  // no button; maybe a line?
+        {
+            // draw the horizontal line here
+            int x_start = x;
+            if (x > (signed)m_indent)
+                x_start -= m_indent;
+            else if (HasFlag(wxTR_LINES_AT_ROOT))
+                x_start = 3;
+            dc.DrawLine(x_start, y_mid, x + m_spacing, y_mid);
+        }
+
         wxPen *pen =
 #ifndef __WXMAC__
             // don't draw rect outline if we already have the
@@ -2078,95 +2083,6 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
         dc.SetBrush(*wxWHITE_BRUSH);
         dc.SetPen(m_dottedPen);
         dc.SetTextForeground(*wxBLACK);
-
-        if (item->HasPlus() && HasButtons())  // should the item show a button?
-        {
-            if (!HasFlag(wxTR_NO_LINES))
-            {
-                if (x > (signed)m_indent)
-                    dc.DrawLine(x - m_indent, y_mid, x - 5, y_mid);
-                else if (HasFlag(wxTR_LINES_AT_ROOT))
-                    dc.DrawLine(3, y_mid, x - 5, y_mid);
-                dc.DrawLine(x + 5, y_mid, x + m_spacing, y_mid);
-            }
-
-            if (m_imageListButtons != NULL)
-            {
-                // draw the image button here
-                int image_h = 0, image_w = 0, image = wxTreeItemIcon_Normal;
-                if (item->IsExpanded()) image = wxTreeItemIcon_Expanded;
-                if (item->IsSelected())
-                    image += wxTreeItemIcon_Selected - wxTreeItemIcon_Normal;
-                m_imageListButtons->GetSize(image, image_w, image_h);
-                int xx = x - (image_w>>1);
-                int yy = y_mid - (image_h>>1);
-                dc.SetClippingRegion(xx, yy, image_w, image_h);
-                m_imageListButtons->Draw(image, dc, xx, yy,
-                                         wxIMAGELIST_DRAW_TRANSPARENT);
-                dc.DestroyClippingRegion();
-            }
-            else if (HasFlag(wxTR_TWIST_BUTTONS))
-            {
-                // draw the twisty button here
-                
-                if (HasFlag(wxTR_AQUA_BUTTONS))
-                {
-                    if (item->IsExpanded())
-                        dc.DrawBitmap( *m_arrowDown, x-5, y_mid-6, TRUE );
-                    else
-                        dc.DrawBitmap( *m_arrowRight, x-5, y_mid-6, TRUE );
-                }
-                else
-                {
-                    dc.SetBrush(*m_hilightBrush);
-                    dc.SetPen(*wxBLACK_PEN);
-                    wxPoint button[3];
-
-                    if (item->IsExpanded())
-                    {
-                        button[0].x = x-5;
-                        button[0].y = y_mid-2;
-                        button[1].x = x+5;
-                        button[1].y = y_mid-2;
-                        button[2].x = x;
-                        button[2].y = y_mid+3;
-                    }
-                    else
-                    {
-                        button[0].y = y_mid-5;
-                        button[0].x = x-2;
-                        button[1].y = y_mid+5;
-                        button[1].x = x-2;
-                        button[2].y = y_mid;
-                        button[2].x = x+3;
-                    }
-                    dc.DrawPolygon(3, button);
-                    dc.SetPen(m_dottedPen);
-                }
-            }
-            else // if (HasFlag(wxTR_HAS_BUTTONS))
-            {
-                // draw the plus sign here
-                dc.SetPen(*wxGREY_PEN);
-                dc.SetBrush(*wxWHITE_BRUSH);
-                dc.DrawRectangle(x-5, y_mid-4, 11, 9);
-                dc.SetPen(*wxBLACK_PEN);
-                dc.DrawLine(x-2, y_mid, x+3, y_mid);
-                if (!item->IsExpanded())
-                    dc.DrawLine(x, y_mid-2, x, y_mid+3);
-                dc.SetPen(m_dottedPen);
-            }
-        }
-        else if (!HasFlag(wxTR_NO_LINES))  // no button; maybe a line?
-        {
-            // draw the horizontal line here
-            int x_start = x;
-            if (x > (signed)m_indent)
-                x_start -= m_indent;
-            else if (HasFlag(wxTR_LINES_AT_ROOT))
-                x_start = 3;
-            dc.DrawLine(x_start, y_mid, x + m_spacing, y_mid);
-        }
     }
 
     if (item->IsExpanded())

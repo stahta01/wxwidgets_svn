@@ -47,7 +47,6 @@
 
 #if defined(__WIN95__)
 
-#include "wx/app.h"
 #include "wx/log.h"
 #include "wx/dynarray.h"
 #include "wx/imaglist.h"
@@ -74,10 +73,6 @@
 
 #ifndef TVS_CHECKBOXES
     #define TVS_CHECKBOXES          0x0100
-#endif
-
-#ifndef TVS_FULLROWSELECT
-    #define TVS_FULLROWSELECT       0x1000
 #endif
 
 // old headers might miss these messages (comctl32.dll 4.71+ only)
@@ -551,13 +546,6 @@ bool wxTreeCtrl::Create(wxWindow *parent,
 
     if ( m_windowStyle & wxTR_LINES_AT_ROOT )
         wstyle |= TVS_LINESATROOT;
-    
-    if ( m_windowStyle & wxTR_FULL_ROW_HIGHLIGHT )
-    {    
-        if ( wxTheApp->GetComCtl32Version() >= 471 )
-            wstyle |= TVS_FULLROWSELECT;
-    }
-
 
     // using TVS_CHECKBOXES for emulation of a multiselection tree control
     // doesn't work without the new enough headers
@@ -1044,15 +1032,6 @@ void wxTreeCtrl::SetItemDropHighlight(const wxTreeItemId& item, bool highlight)
     DoSetItem(&tvItem);
 }
 
-void wxTreeCtrl::RefreshItem(const wxTreeItemId& item)
-{
-    wxRect rect;
-    if ( GetBoundingRect(item, rect) )
-    {
-        RefreshRect(rect);
-    }
-}
-
 void wxTreeCtrl::SetItemTextColour(const wxTreeItemId& item,
                                    const wxColour& col)
 {
@@ -1067,8 +1046,7 @@ void wxTreeCtrl::SetItemTextColour(const wxTreeItemId& item,
     }
 
     attr->SetTextColour(col);
-
-    RefreshItem(item);
+    Refresh();
 }
 
 void wxTreeCtrl::SetItemBackgroundColour(const wxTreeItemId& item,
@@ -1085,8 +1063,7 @@ void wxTreeCtrl::SetItemBackgroundColour(const wxTreeItemId& item,
     }
 
     attr->SetBackgroundColour(col);
-
-    RefreshItem(item);
+    Refresh();
 }
 
 void wxTreeCtrl::SetItemFont(const wxTreeItemId& item, const wxFont& font)
@@ -1102,8 +1079,7 @@ void wxTreeCtrl::SetItemFont(const wxTreeItemId& item, const wxFont& font)
     }
 
     attr->SetFont(font);
-
-    RefreshItem(item);
+    Refresh();
 }
 
 // ----------------------------------------------------------------------------
@@ -1121,6 +1097,7 @@ bool wxTreeCtrl::IsVisible(const wxTreeItemId& item) const
 
     // FALSE means get item rect for the whole item, not only text
     return SendMessage(GetHwnd(), TVM_GETITEMRECT, FALSE, (LPARAM)&rect) != 0;
+
 }
 
 bool wxTreeCtrl::ItemHasChildren(const wxTreeItemId& item) const

@@ -32,10 +32,14 @@
 //     This causes a conflict with jmorecfg.h header from libjpeg, so we have
 //     to make sure libjpeg won't try to define boolean itself. This is done by
 //     defining HAVE_BOOLEAN.
-#if defined(__WXMSW__) && (defined(__MWERKS__) || defined(__WATCOMC__))
-    #define HAVE_BOOLEAN
+//
+//     TODO: include windows.h for MetroWerks and Watcom only after 2.3.2 release!
+#if defined(__WXMSW__)
+    #if defined(__MWERKS__) || defined(__WATCOMC__)
+        #define HAVE_BOOLEAN
+    #endif
     #include <windows.h>
-#endif
+#endif // __WXMSW__
 
 extern "C"
 {
