@@ -316,8 +316,6 @@ bool wxWindow::Create(wxWindow *parent, wxWindowID id,
     msflags |= WS_CHILD | WS_VISIBLE;
     if ( style & wxCLIP_CHILDREN )
         msflags |= WS_CLIPCHILDREN;
-    if ( style & wxCLIP_SIBLINGS )
-        msflags |= WS_CLIPSIBLINGS;
 
     bool want3D;
     WXDWORD exStyle = Determine3DEffects(WS_EX_CLIENTEDGE, &want3D);
@@ -992,13 +990,7 @@ void wxWindow::OnIdle(wxIdleEvent& event)
                 state |= MK_SHIFT;
             if ( wxIsCtrlDown() )
                 state |= MK_CONTROL;
-            if ( GetKeyState( VK_LBUTTON ) )
-                state |= MK_LBUTTON;
-            if ( GetKeyState( VK_MBUTTON ) )
-                state |= MK_MBUTTON;
-            if ( GetKeyState( VK_RBUTTON ) )
-                state |= MK_RBUTTON;
-  
+
             wxMouseEvent event(wxEVT_LEAVE_WINDOW);
             InitMouseEvent(event, pt.x, pt.y, state);
 
@@ -1337,7 +1329,8 @@ void wxWindow::AdjustForParentClientOrigin(int& x, int& y, int sizeFlags)
         if ( !(sizeFlags & wxSIZE_NO_ADJUSTMENTS) && parent )
         {
             wxPoint pt(parent->GetClientAreaOrigin());
-            x += pt.x; y += pt.y;
+            x += pt.x;
+            y += pt.y;
         }
     }
 }
@@ -2170,36 +2163,6 @@ long wxWindow::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
                 rc.result = TRUE;
             }
             break;
-#ifdef __WIN32__
-        case WM_HELP:
-        {
-            HELPINFO* info = (HELPINFO*) lParam;
-            // Don't yet process menu help events, just windows
-            if (info->iContextType == HELPINFO_WINDOW)
-            {
-                wxWindow* subjectOfHelp = this;
-                bool eventProcessed = FALSE;
-                while (subjectOfHelp && !eventProcessed)
-                {
-                    wxHelpEvent helpEvent(wxEVT_HELP, subjectOfHelp->GetId(), wxPoint(info->MousePos.x, info->MousePos.y) ) ; // info->iCtrlId);
-                    helpEvent.SetEventObject(this);
-                    eventProcessed = GetEventHandler()->ProcessEvent(helpEvent);
-
-                    // Go up the window hierarchy until the event is handled (or not)
-                    subjectOfHelp = subjectOfHelp->GetParent();
-                }
-                processed = eventProcessed;
-            }
-            else if (info->iContextType == HELPINFO_MENUITEM)
-            {
-                wxHelpEvent helpEvent(wxEVT_HELP, info->iCtrlId) ;
-                helpEvent.SetEventObject(this);
-                processed = GetEventHandler()->ProcessEvent(helpEvent);
-            }
-            else processed = FALSE;
-            break;
-        }
-#endif
     }
 
     if ( !processed )
@@ -2384,29 +2347,6 @@ bool wxWindow::MSWCreate(int id,
 
             return FALSE;
         }
-        if (extendedStyle != 0)
-        {
-            ::SetWindowLong(GetHwnd(), GWL_EXSTYLE, extendedStyle);
-            ::SetWindowPos(GetHwnd(), NULL, 0, 0, 0, 0,
-                SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-#if defined(__WIN95__)
-        // For some reason, the system menu is activated when we use the
-        // WS_EX_CONTEXTHELP style, so let's set a reasonable icon
-        if (extendedStyle & WS_EX_CONTEXTHELP)
-        {
-            if (wxTheApp->GetTopWindow() && (wxTheApp->GetTopWindow()->IsKindOf(CLASSINFO(wxFrame))))
-            {
-                wxIcon icon = ((wxFrame*)wxTheApp->GetTopWindow())->GetIcon();
-                if (icon.Ok())
-                    SendMessage(GetHwnd(), WM_SETICON,
-                        (WPARAM)TRUE, (LPARAM)(HICON) icon.GetHICON());
-            }
-        }
-#endif // __WIN95__
-
-
-        // JACS: is the following still necessary? The above seems to work.
 
         // ::SetWindowLong(GWL_EXSTYLE) doesn't work for the dialogs, so try
         // to take care of (at least some) extended style flags ourselves
@@ -3005,16 +2945,6 @@ bool wxWindow::HandlePaint()
     return GetEventHandler()->ProcessEvent(event);
 }
 
-// Can be called from an application's OnPaint handler
-void wxWindow::OnPaint(wxPaintEvent& event)
-{
-    HDC hDC = (HDC) wxPaintDC::FindDCInCache((wxWindow*) event.GetEventObject());
-    if (hDC != 0)
-    {
-        MSWDefWindowProc(WM_PAINT, (WPARAM) hDC, 0);
-    }
-}
-
 bool wxWindow::HandleEraseBkgnd(WXHDC hdc)
 {
     // Prevents flicker when dragging
@@ -3226,7 +3156,7 @@ void wxWindow::InitMouseEvent(wxMouseEvent& event, int x, int y, WXUINT flags)
     event.m_leftDown = ((flags & MK_LBUTTON) != 0);
     event.m_middleDown = ((flags & MK_MBUTTON) != 0);
     event.m_rightDown = ((flags & MK_RBUTTON) != 0);
-    event.m_altDown = (::GetKeyState(VK_MENU) & 0x80000000) != 0;
+    event.m_altDown = ::GetKeyState(VK_MENU) & 0x80000000;
     event.SetTimestamp(s_currentMsg.time);
     event.m_eventObject = this;
 
@@ -4384,38 +4314,3 @@ static TEXTMETRIC wxGetTextMetrics(const wxWindow *win)
 
     return tm;
 }
-
-// Find the wxWindow at the current mouse position, returning the mouse
-// position.
-wxWindow* wxFindWindowAtPointer(wxPoint& pt)
-{
-    return wxFindWindowAtPoint(wxGetMousePosition());
-}
-
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
-{
-    POINT pt2;
-    pt2.x = pt.x;
-    pt2.y = pt.y;
-    HWND hWndHit = ::WindowFromPoint(pt2);
-
-    wxWindow* win = wxFindWinFromHandle((WXHWND) hWndHit) ;
-    HWND hWnd = hWndHit;
-
-    // Try to find a window with a wxWindow associated with it
-    while (!win && (hWnd != 0))
-    {
-        hWnd = ::GetParent(hWnd);
-        win = wxFindWinFromHandle((WXHWND) hWnd) ;
-    }
-    return win;
-}
-
-// Get the current mouse position.
-wxPoint wxGetMousePosition()
-{
-    POINT pt;
-    GetCursorPos( & pt );
-    return wxPoint(pt.x, pt.y);
-}
-

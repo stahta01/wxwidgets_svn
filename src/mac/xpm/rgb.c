@@ -42,7 +42,7 @@
  * W. Snitily but has been modified for my special need
  */
 
-#include "XpmI.h"
+#include "xpmi.h"
 #include <ctype.h>
 
 #include "rgbtab.h"			/* hard coded rgb.txt table */
@@ -75,7 +75,7 @@ xpmGetRgbName(rgbn, rgbn_max, red, green, blue)
 
 {
     int i;
-    RGBColor rgbVal;
+    unsigned long rgbVal;
 
     i = 0;
     while (i < numTheRGBRecords) {
@@ -97,7 +97,7 @@ xpmGetRGBfromName(inname, r, g, b)
 {
     int left, right, middle;
     int cmp;
-    RGBColor rgbVal;
+    unsigned long rgbVal;
     char *name;
     char *grey, *p;
 

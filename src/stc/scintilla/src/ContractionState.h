@@ -42,11 +42,9 @@ public:
 	
 	bool GetVisible(int lineDoc) const;
 	bool SetVisible(int lineDocStart, int lineDocEnd, bool visible);
-        
+	
 	bool GetExpanded(int lineDoc) const;
 	bool SetExpanded(int lineDoc, bool expanded);
-
-    void ShowAll();
 };
 
 #endif

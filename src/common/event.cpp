@@ -82,7 +82,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxIdleEvent, wxEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxQueryNewPaletteEvent, wxEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxWindowCreateEvent, wxEvent)
     IMPLEMENT_DYNAMIC_CLASS(wxWindowDestroyEvent, wxEvent)
-    IMPLEMENT_DYNAMIC_CLASS(wxHelpEvent, wxCommandEvent)
 #endif // wxUSE_GUI
 
 const wxEventTable *wxEvtHandler::GetEventTable() const
@@ -398,7 +397,7 @@ void wxKeyEvent::CopyObject(wxObject& obj_d) const
     obj->m_x = m_x;
     obj->m_y = m_y;
     obj->m_keyCode = m_keyCode;
-    
+
     obj->m_shiftDown   = m_shiftDown;
     obj->m_controlDown = m_controlDown;
     obj->m_metaDown    = m_metaDown;
@@ -644,7 +643,7 @@ void wxEvtHandler::AddPendingEvent(wxEvent& event)
     wxPendingEvents->Append(this);
 
     wxLEAVE_CRIT_SECT(*wxPendingEventsLocker);
-    
+
     // 3) Inform the system that new pending events are somwehere,
     //    and that these should be processed in idle time.
     wxWakeUpIdle();
@@ -703,7 +702,7 @@ bool wxEvtHandler::ProcessEvent(wxEvent& event)
     // An event handler can be enabled or disabled
     if ( GetEvtHandlerEnabled() )
     {
-    
+
 #if 0
 /*
         What is this? When using GUI threads, a non main

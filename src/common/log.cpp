@@ -402,86 +402,6 @@ wxLogStderr::wxLogStderr(FILE *fp)
         m_fp = fp;
 }
 
-#if defined(__WXMAC__) 
-#define kDebuggerSignature		'MWDB'
-
-static Boolean FindProcessBySignature(OSType signature, ProcessInfoRec* info)
-{	
-	OSErr err;
-	ProcessSerialNumber psn;
-	Boolean found = false;
-	psn.highLongOfPSN = 0;
-	psn.lowLongOfPSN = kNoProcess;
-	
-	if (!info) return false;
-	
-	info->processInfoLength = sizeof(ProcessInfoRec);
-	info->processName = NULL;
-	info->processAppSpec = NULL;
-	
-	err = noErr;
-	while (!found && err == noErr)
-	{
-		err = GetNextProcess(&psn);
-		if (err == noErr)
-		{
-			err = GetProcessInformation(&psn, info);
-			found = err == noErr && info->processSignature == signature;
-		}
-	}				
-	return found;
-}
-
-pascal Boolean MWDebuggerIsRunning(void)
-{
-	ProcessInfoRec info;
-	return FindProcessBySignature(kDebuggerSignature, &info);
-}
-
-pascal OSErr AmIBeingMWDebugged(Boolean* result)
-{
-	OSErr err;
-	ProcessSerialNumber psn;
-	OSType sig = kDebuggerSignature;
-	AppleEvent	theAE = {typeNull, NULL};
-	AppleEvent	theReply = {typeNull, NULL};
-	AEAddressDesc addr  = {typeNull, NULL};
-	DescType actualType;
-	Size actualSize;
-	
-	if (!result) return paramErr;
-	
-	err = AECreateDesc(typeApplSignature, &sig, sizeof(sig), &addr);
-	if (err != noErr) goto exit;
-	
-	err = AECreateAppleEvent('MWDB', 'Dbg?', &addr,
-				kAutoGenerateReturnID, kAnyTransactionID, &theAE);
-	if (err != noErr) goto exit;
-		
-	GetCurrentProcess(&psn);
-	err = AEPutParamPtr(&theAE, keyDirectObject, typeProcessSerialNumber,
-			&psn, sizeof(psn));
-	if (err != noErr) goto exit;
-	
-	err = AESend(&theAE, &theReply, kAEWaitReply, kAENormalPriority,
-					kAEDefaultTimeout, NULL, NULL);
-	if (err != noErr) goto exit;
-	
-	err = AEGetParamPtr(&theReply, keyAEResult, typeBoolean, &actualType, result, 
-				sizeof(Boolean), &actualSize);
-
-exit:
-	if (addr.dataHandle)
-		AEDisposeDesc(&addr);
-	if (theAE.dataHandle)
-		AEDisposeDesc(&theAE);
-	if (theReply.dataHandle)
-		AEDisposeDesc(&theReply);
-
-	return err;
-}
-#endif
-
 void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 {
     wxString str;
@@ -499,36 +419,7 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
     OutputDebugString(str.c_str());
 #endif // MSW
 #if defined(__WXMAC__) && wxUSE_GUI
-	Str255 pstr ;
-	strcpy( (char*) pstr , str.c_str() ) ;
-	strcat( (char*) pstr , ";g" ) ;
-	c2pstr( (char*) pstr ) ;
-#if __WXDEBUG__
-	Boolean running = false ;
-	
-/*
-	if ( MWDebuggerIsRunning() )
-	{
-		AmIBeingMWDebugged( &running ) ;
-	}
-*/
-	if (running)
-	{
-	#ifdef __powerc
-		DebugStr(pstr);
-	#else
-		SysBreakStr(pstr);
-	#endif
-	}
-	else		
-#endif
-	{
-	#ifdef __powerc
-		DebugStr(pstr);
-	#else
-		DebugStr(pstr);
-	#endif
-	}
+    debugstr(str + wxT("\r\n"));
 #endif // MSW
 }
 
@@ -750,22 +641,7 @@ void wxOnAssert(const wxChar *szFile, int nLine, const wxChar *szMsg)
         // developpers only
         wxStrcat(szBuf, wxT("\nDo you want to stop the program?\nYou can also choose [Cancel] to suppress further warnings."));
 
-        // use the native message box if available: this is more robust than
-        // using our own
-#ifdef __WXMSW__
-        switch ( ::MessageBox(NULL, szBuf, _T("Debug"),
-                              MB_YESNOCANCEL | MB_ICONSTOP ) ) {
-            case IDYES:
-                Trap();
-                break;
-
-            case IDCANCEL:
-                s_bNoAsserts = TRUE;
-                break;
-
-            //case IDNO: nothing to do
-        }
-#else // !MSW
+#if wxUSE_GUI
         switch ( wxMessageBox(szBuf, wxT("Debug"),
                               wxYES_NO | wxCANCEL | wxICON_STOP ) ) {
             case wxYES:
@@ -777,6 +653,19 @@ void wxOnAssert(const wxChar *szFile, int nLine, const wxChar *szMsg)
                 break;
 
             //case wxNO: nothing to do
+        }
+#else // !GUI, but MSW
+        switch ( ::MessageBox(NULL, szBuf, _T("Debug"),
+                              MB_YESNOCANCEL | MB_ICONSTOP ) ) {
+            case IDYES:
+                Trap();
+                break;
+
+            case IDCANCEL:
+                s_bNoAsserts = TRUE;
+                break;
+
+            //case IDNO: nothing to do
         }
 #endif // GUI or MSW
 

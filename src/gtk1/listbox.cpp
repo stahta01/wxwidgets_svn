@@ -12,6 +12,12 @@
 #pragma implementation "listbox.h"
 #endif
 
+#ifdef __VMS
+#define gtk_scrolled_window_add_with_viewport gtk_scrolled_window_add_with_vi
+#define gtk_container_set_focus_vadjustment gtk_container_set_focus_vadjust
+#define gtk_scrolled_window_get_vadjustment gtk_scrolled_window_get_vadjust
+#endif
+
 #include "wx/listbox.h"
 
 #if wxUSE_LISTBOX
@@ -361,8 +367,6 @@ bool wxListBox::Create( wxWindow *parent, wxWindowID id,
 wxListBox::~wxListBox()
 {
     Clear();
-    if (m_strings)
-      delete m_strings;
 }
 
 void wxListBox::DoInsertItems(const wxArrayString& items, int pos)

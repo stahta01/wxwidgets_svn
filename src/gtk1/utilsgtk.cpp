@@ -26,9 +26,7 @@
 #include "glib.h"
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
-#ifndef __WXGTK20__
 #include "gtk/gtkfeatures.h"
-#endif
 #include "gdk/gdkx.h"
 
 #ifdef HAVE_X11_XKBLIB_H
@@ -88,12 +86,6 @@ void wxDisplaySize( int *width, int *height )
     if (height) *height = gdk_screen_height();
 }
 
-void wxDisplaySizeMM( int *width, int *height )
-{
-    if (width) *width = gdk_screen_width_mm();
-    if (height) *height = gdk_screen_height_mm();
-}
-
 void wxGetMousePosition( int* x, int* y )
 {
     gdk_window_get_pointer( (GdkWindow*) NULL, x, y, (GdkModifierType*) NULL );
@@ -116,12 +108,6 @@ int wxGetOsVersion(int *majorVsn, int *minorVsn)
 
   return wxGTK;
 }
-
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
-{
-    return wxGenericFindWindowAtPoint(pt);
-}
-
 
 // ----------------------------------------------------------------------------
 // subprocess routines

@@ -40,11 +40,6 @@ z-order and not shown in the taskbar. Without this style, frames are created as 
 the parent window, and frame titles are shown in the taskbar. Windows and GTK.}
 \twocolitem{\windowstyle{wxFRAME\_TOOL\_WINDOW}}{Causes a frame with a small titlebar to be created;
 the frame title does not appear in the taskbar. Windows only.}
-\twocolitem{\windowstyle{wxFRAME\_EX\_CONTEXTHELP}}{Under Windows, puts a query button on the
-caption. When pressed, Windows will go into a context-sensitive help mode and wxWindows will send
-a wxEVT\_HELP event if the user clicked on an application window. {\it Note} that this is an extended
-style and must be set by calling \helpref{SetExtraStyle}{wxwindowsetextrastyle} before Create is called (two-step construction).
-You cannot use this style together with wxMAXIMIZE\_BOX or wxMINIMIZE\_BOX.}
 \end{twocollist}
 
 The default frame style is for normal, resizeable frames. To create a frame
@@ -422,32 +417,36 @@ The frame takes a `copy' of {\it icon}, but since it uses reference
 counting, the copy is very quick. It is safe to delete {\it icon} after
 calling this function.
 
-% VZ: we don't have all this any more (18.08.00) 
-%
-%Under Windows, instead of using {\bf SetIcon}, you can add the
-%following lines to your MS Windows resource file:
-%
-%\begin{verbatim}
-%wxSTD_MDIPARENTFRAME ICON icon1.ico
-%wxSTD_MDICHILDFRAME  ICON icon2.ico
-%wxSTD_FRAME          ICON icon3.ico
-%\end{verbatim}
-%
-%where icon1.ico will be used for the MDI parent frame, icon2.ico
-%will be used for MDI child frames, and icon3.ico will be used for
-%non-MDI frames.
-%
-%If these icons are not supplied, and {\bf SetIcon} is not called either,
-%then the following defaults apply if you have included wx.rc.
-%
-%\begin{verbatim}
-%wxDEFAULT_FRAME               ICON std.ico
-%wxDEFAULT_MDIPARENTFRAME      ICON mdi.ico
-%wxDEFAULT_MDICHILDFRAME       ICON child.ico
-%\end{verbatim}
-%
-%You can replace std.ico, mdi.ico and child.ico with your own defaults
-%for all your wxWindows application. Currently they show the same icon.
+Under Windows, instead of using {\bf SetIcon}, you can add the
+following lines to your MS Windows resource file:
+
+\begin{verbatim}
+wxSTD_MDIPARENTFRAME ICON icon1.ico
+wxSTD_MDICHILDFRAME  ICON icon2.ico
+wxSTD_FRAME          ICON icon3.ico
+\end{verbatim}
+
+where icon1.ico will be used for the MDI parent frame, icon2.ico
+will be used for MDI child frames, and icon3.ico will be used for
+non-MDI frames.
+
+If these icons are not supplied, and {\bf SetIcon} is not called either,
+then the following defaults apply if you have included wx.rc.
+
+\begin{verbatim}
+wxDEFAULT_FRAME               ICON std.ico
+wxDEFAULT_MDIPARENTFRAME      ICON mdi.ico
+wxDEFAULT_MDICHILDFRAME       ICON child.ico
+\end{verbatim}
+
+You can replace std.ico, mdi.ico and child.ico with your own defaults
+for all your wxWindows application. Currently they show the same icon.
+
+{\it Note:} a wxWindows application linked with subsystem equal to 4.0
+(i.e. marked as a Windows 95 application) doesn't respond properly
+to wxFrame::SetIcon. To work around this until a solution is found,
+mark your program as a 3.5 application. This will also ensure
+that Windows provides small icons for the application automatically.
 
 See also \helpref{wxIcon}{wxicon}.
 

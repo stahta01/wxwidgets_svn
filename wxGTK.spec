@@ -1,6 +1,6 @@
 # Note that this is NOT a relocatable package
 %define pref /usr
-%define ver 2.2.1
+%define ver 2.2.2
 %define rel 0
 
 Summary: The GTK+ 1.2 port of the wxWindows library
@@ -9,7 +9,7 @@ Version: %{ver}
 Release: %{rel}
 Copyright: wxWindows Licence
 Group: X11/Libraries
-Source: wxGTK-%{ver}.tgz
+Source: wxGTK-%{ver}.tar.gz
 URL: http://wxwindows.org
 Packager: Robert Roebling <robert@roebling.de>
 

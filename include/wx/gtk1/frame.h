@@ -69,9 +69,6 @@ public:
     virtual void MakeModal(bool modal = TRUE);
     virtual void Restore();
 
-    virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
-    virtual bool IsFullScreen() const { return m_fsIsShowing; };
-
     virtual void SetMenuBar( wxMenuBar *menuBar );
 
 #if wxUSE_STATUSBAR
@@ -113,13 +110,6 @@ public:
     bool          m_menuBarDetached;
     bool          m_toolBarDetached;
     bool          m_insertInClientArea;  /* not from within OnCreateXXX */
-
-    bool          m_isIconized;
-
-    bool          m_fsIsShowing;         /* full screen */
-    long          m_fsSaveStyle;
-    long          m_fsSaveFlag;
-    wxRect        m_fsSaveFrame;
 
 protected:
     // common part of all ctors

@@ -224,13 +224,8 @@
 #include "wx/setup.h"
 
 // just in case they were defined in setup.h
-#ifdef PACKAGE
 #undef PACKAGE
-#endif
-
-#ifdef VERSION
 #undef VERSION
-#endif
 
 // this has to be done after including setup.h which might
 // define __HPUX__ 1 itself
@@ -867,9 +862,6 @@ enum wxStretch
 // splitter windows, but can't be used in a panel where a static box must be
 // 'transparent' (panel paints the background for it)
 #define wxCLIP_CHILDREN         0x00400000
-// Note we're reusing the wxCAPTION style because we won't need captions
-// for subwindows/controls
-#define wxCLIP_SIBLINGS         0x20000000
 
 // Add this style to a panel to get tab traversal working outside of dialogs
 // (on by default for wxPanel, wxDialog, wxScrolledWindow)
@@ -921,10 +913,6 @@ enum wxStretch
 
 // Add for normal Windows frame behaviour
 #define wxFRAME_FLOAT_ON_PARENT 0x0020
-
-// Context-sensitive help
-#define wxFRAME_EX_CONTEXTHELP  0x00000004
-#define wxDIALOG_EX_CONTEXTHELP 0x00000004
 
 /*
  * MDI parent frame style flags
@@ -1105,8 +1093,6 @@ enum wxStretch
 /*
  * wxListCtrl flags
  */
-#define wxLC_VRULES          0x0001
-#define wxLC_HRULES          0x0002
 #define wxLC_ICON            0x0004
 #define wxLC_SMALL_ICON      0x0008
 #define wxLC_LIST            0x0010
@@ -1315,12 +1301,6 @@ enum wxStretch
 #define wxID_MORE               5109
 #define wxID_SETUP              5110
 #define wxID_RESET              5111
-#define wxID_CONTEXT_HELP       5112
-#define wxID_YESTOALL           5113
-#define wxID_NOTOALL            5114
-#define wxID_ABORT              5115
-#define wxID_RETRY              5116
-#define wxID_IGNORE             5117
 
 // IDs used by generic file dialog (11 consecutive starting from this value)
 #define wxID_FILEDLGG           5900
@@ -1813,7 +1793,7 @@ typedef void *          WXLPCREATESTRUCT;
 typedef unsigned long   WXMPARAM;
 typedef unsigned long   WXMSGID;
 typedef void*           WXRESULT;
-//typedef int             (*WXFARPROC)();
+// typedef WXRESULT        (*WXFARPROC)(WXHWND, WXMSGID, WXMPARAM, WXMPARAM);
 // some windows handles not defined by PM
 typedef unsigned long   HANDLE;
 typedef unsigned long   HICON;

@@ -226,6 +226,11 @@ static gboolean target_drag_drop( GtkWidget *widget,
     if (context->suggested_action == GDK_ACTION_COPY) result = wxDragCopy;
 */
 
+    /* reset the block here as someone might very well
+       show a dialog as a reaction to a drop and this
+       wouldn't work without events */
+    g_blockEventsOnDrag = FALSE;
+    
     bool ret = drop_target->OnDrop( x, y );
 
     if (!ret)
@@ -702,18 +707,14 @@ void wxDropSource::PrepareIcon( int action, GdkDragContext *context )
     gdk_window_get_size (pixmap, &width, &height);
 
     GdkColormap *colormap = gtk_widget_get_colormap( m_widget );
-#ifndef __WXGTK20__
     gtk_widget_push_visual (gdk_colormap_get_visual (colormap));
-#endif
     gtk_widget_push_colormap (colormap);
 
     m_iconWindow = gtk_window_new (GTK_WINDOW_POPUP);
     gtk_widget_set_events (m_iconWindow, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
     gtk_widget_set_app_paintable (GTK_WIDGET (m_iconWindow), TRUE);
 
-#ifndef __WXGTK20__
     gtk_widget_pop_visual ();
-#endif
     gtk_widget_pop_colormap ();
 
     gtk_widget_set_usize (m_iconWindow, width, height);
@@ -740,8 +741,12 @@ wxDragResult wxDropSource::DoDragDrop( bool allowMove )
     if (m_data->GetFormatCount() == 0)
         return (wxDragResult) wxDragNone;
 
+    // still in drag
+    if (g_blockEventsOnDrag)
+        return (wxDragResult) wxDragNone;
+    
     // disabled for now
-    g_blockEventsOnDrag = FALSE;
+    g_blockEventsOnDrag = TRUE;
 
     RegisterWindow();
 
@@ -810,7 +815,7 @@ wxDragResult wxDropSource::DoDragDrop( bool allowMove )
 #endif
 
     g_blockEventsOnDrag = FALSE;
-
+    
     UnregisterWindow();
 
     return m_retValue;

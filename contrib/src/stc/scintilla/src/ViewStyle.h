@@ -26,7 +26,6 @@ public:
 	const char *Save(const char *name);
 };
 
-enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterIndent=2};
 class ViewStyle {
 public:
 	FontNames fontNames;
@@ -42,7 +41,6 @@ public:
 	ColourPair selforeground;
 	bool selbackset;
 	ColourPair selbackground;
-	ColourPair selbackground2;
 	ColourPair selbar;
 	ColourPair selbarlight;
 	// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
@@ -54,13 +52,11 @@ public:
 	MarginStyle ms[margins];
 	int fixedColumnWidth;
 	int zoomLevel;
-	WhiteSpaceVisibility viewWhitespace;
-	bool viewIndentationGuides;
+	bool viewWhitespace;
 	bool viewEOL;
 	bool showMarkedLines;
 	ColourPair caretcolour;
 	ColourPair edgecolour;
-	int edgeState;
 	
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);

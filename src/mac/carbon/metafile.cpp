@@ -39,10 +39,8 @@
 
 extern bool wxClipboardIsOpen;
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxMetafile, wxObject)
 IMPLEMENT_ABSTRACT_CLASS(wxMetafileDC, wxDC)
-#endif
 
 /*
  * Metafiles
@@ -59,7 +57,7 @@ wxMetafileRefData::~wxMetafileRefData(void)
 {
     if (m_metafile)
     {
-		KillPicture( m_metafile ) ;
+				KillPicture( m_metafile ) ;
         m_metafile = 0;
     }
 }
@@ -85,7 +83,7 @@ bool wxMetaFile::SetClipboard(int width, int height)
 {
     if (!m_refData)
         return FALSE;
-
+/*
     bool alreadyOpen=wxClipboardOpen();
     if (!alreadyOpen)
     {
@@ -94,17 +92,9 @@ bool wxMetaFile::SetClipboard(int width, int height)
     }
     bool success = wxSetClipboardData(wxDF_METAFILE, this, width,height);
     if (!alreadyOpen) wxCloseClipboard();
-	    return (bool) success;
-
+    return (bool) success;
+    */
     return TRUE ;
-}
-
-void wxMetafile::SetHMETAFILE(PicHandle mf)
-{
-    if (!m_refData)
-        m_refData = new wxMetafileRefData;
-
-    M_METAFILEDATA->m_metafile = mf;
 }
 
 bool wxMetaFile::Play(wxDC *dc)
@@ -152,11 +142,11 @@ wxMetaFileDC::wxMetaFileDC(const wxString& file)
 
   wxASSERT_MSG( file.IsEmpty() , "no file based metafile support yet") ;
 
-  m_metaFile = new wxMetaFile("") ;
-  Rect r={0,0,1000,1000} ;
+	m_metaFile = new wxMetaFile("") ;
+	Rect r={0,0,100,100} ;
 	
-  m_metaFile->SetHMETAFILE( OpenPicture( &r ) ) ;
-  ::GetPort( &m_macPort ) ;	
+	m_metaFile->SetHMETAFILE( OpenPicture( &r ) ) ;
+	::GetPort( &m_macPort ) ;	
   m_ok = TRUE ;
 
   SetMapMode(wxMM_TEXT); 
@@ -193,5 +183,6 @@ wxMetaFile *wxMetaFileDC::Close()
 	ClosePicture() ;
 	return m_metaFile;
 }
+
 
 #endif

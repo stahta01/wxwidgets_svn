@@ -25,7 +25,7 @@
 #include <Types.h>
 #include <Files.h>
 
-#include "optim.h"
+#include "Optim.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -482,7 +482,7 @@ pascal	void	FSpCreateResFileCompat(const FSSpec *spec,
 }
 #endif
 
-#include "optimend.h"
+#include "OptimEnd.h"
 
 #endif	/* __FSPCOMPAT__ */
 

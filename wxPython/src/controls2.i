@@ -184,7 +184,7 @@ public:
 };
 
 
-class wxListEvent: public wxCommandEvent {
+class wxListEvent: public wxNotifyEvent {
 public:
     int           m_code;
     long          m_itemIndex;
@@ -380,7 +380,7 @@ public:
 
     %addmethods {
         int __cmp__(wxTreeItemId* other) {
-            if (! other) return 0;
+            if (! other) return -1;
             return *self != *other;
         }
     }
@@ -392,15 +392,15 @@ public:
 class wxPyTreeItemData : public wxTreeItemData {
 public:
     wxPyTreeItemData(PyObject* obj = NULL) {
-	if (obj == NULL)
+        if (obj == NULL)
             obj = Py_None;
-	Py_INCREF(obj);
-	m_obj = obj;
+        Py_INCREF(obj);
+        m_obj = obj;
     }
 
     ~wxPyTreeItemData() {
         bool doSave = wxPyRestoreThread();
-	Py_DECREF(m_obj);
+        Py_DECREF(m_obj);
         wxPySaveThread(doSave);
     }
 
@@ -517,8 +517,8 @@ public:
     void SetItemHasChildren(const wxTreeItemId& item, bool hasChildren = TRUE);
 
     %addmethods {
-	// [Get|Set]ItemData substitutes.  Automatically create wxPyTreeItemData
-	// if needed.
+        // [Get|Set]ItemData substitutes.  Automatically create wxPyTreeItemData
+        // if needed.
         wxPyTreeItemData* GetItemData(const wxTreeItemId& item) {
             wxPyTreeItemData* data = (wxPyTreeItemData*)self->GetItemData(item);
             if (data == NULL) {
@@ -532,11 +532,11 @@ public:
         void SetItemData(const wxTreeItemId& item, wxPyTreeItemData* data) {
             data->SetId(item); // set the id
             self->SetItemData(item, data);
-	}
+        }
 
-	// [Get|Set]PyData are short-cuts.  Also made somewhat crash-proof by
-	// automatically creating data classes.
-	PyObject* GetPyData(const wxTreeItemId& item) {
+        // [Get|Set]PyData are short-cuts.  Also made somewhat crash-proof by
+        // automatically creating data classes.
+        PyObject* GetPyData(const wxTreeItemId& item) {
             wxPyTreeItemData* data = (wxPyTreeItemData*)self->GetItemData(item);
             if (data == NULL) {
                 data = new wxPyTreeItemData();
@@ -544,7 +544,7 @@ public:
                 self->SetItemData(item, data);
             }
             return data->GetData();
-	}
+        }
 
         void SetPyData(const wxTreeItemId& item, PyObject* obj) {
             wxPyTreeItemData* data = (wxPyTreeItemData*)self->GetItemData(item);
@@ -554,7 +554,7 @@ public:
                 self->SetItemData(item, data);
             } else
                 data->SetData(obj);
-   	}
+        }
     }
 
 
@@ -575,8 +575,8 @@ public:
             size_t              num, x;
             num = self->GetSelections(array);
             for (x=0; x < num; x++) {
-                PyObject* item = wxPyConstructObject((void*)&array.Item(x),
-                                                     "wxTreeItemId");
+                wxTreeItemId *tii = new wxTreeItemId(array.Item(x));
+                PyObject* item = wxPyConstructObject((void*)tii, "wxTreeItemId", TRUE);
                 PyList_Append(rval, item);
             }
             wxPySaveThread(doSave);

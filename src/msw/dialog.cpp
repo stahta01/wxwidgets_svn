@@ -153,10 +153,6 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     if (m_windowStyle & wxSTAY_ON_TOP)
         extendedStyle |= WS_EX_TOPMOST;
 
-#ifndef __WIN16__
-    if (m_exStyle & wxDIALOG_EX_CONTEXTHELP)
-        extendedStyle |= WS_EX_CONTEXTHELP;
-#endif
     // Allows creation of dialogs with & without captions under MSWindows,
     // resizeable or not (but a resizeable dialog always has caption -
     // otherwise it would look too strange)

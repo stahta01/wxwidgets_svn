@@ -31,15 +31,10 @@ public:
 	// Drawing is only performed for maxLineLength characters on each line.
 	enum {maxLineLength = 4000};
 	int numCharsInLine;
-	int xHighlightGuide;
-	bool highlightColumn;
-	int selStart;
-	int selEnd;
-	int edgeColumn;
-	char chars[maxLineLength+1];
-	char styles[maxLineLength+1];
-	char indicators[maxLineLength+1];
-	int positions[maxLineLength+1];
+	char chars[maxLineLength];
+	char styles[maxLineLength];
+	char indicators[maxLineLength];
+	int positions[maxLineLength];
 };
 
 class Editor : public DocWatcher {
@@ -59,8 +54,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool stylesValid;	
 	ViewStyle vs;
 	Palette palette;
-	int printMagnification;
-	int printColourMode;
 	
 	bool hideSelection;
 	bool inOverstrike;
@@ -76,8 +69,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Surface pixmapLine;
 	Surface pixmapSelMargin;
 	Surface pixmapSelPattern;
-	Surface pixmapIndentGuide;
-	Surface pixmapIndentGuideHighlight;
 	// Intellimouse support - currently only implemented for Windows
 	unsigned int ucWheelScrollLines;
 	int cWheelDelta; //wheel delta from roll
@@ -107,8 +98,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool needUpdateUI;
 	Position braces[2];
 	int bracesMatchStyle;
-	int highlightGuideColumn;
 	
+	int edgeState;
 	int theEdge;
 
 	enum { notPainting, painting, paintAbandoned } paintState;
@@ -123,7 +114,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	enum { selStream, selRectangle, selRectangleFixed } selType;
 	int xStartSelect;
 	int xEndSelect;
-	bool primarySelection;
 	
 	int caretPolicy;
 	int caretSlop;
@@ -178,7 +168,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetSelection(int currentPos_, int anchor_);
 	void SetSelection(int currentPos_);
 	void SetEmptySelection(int currentPos_);
-	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 	int MovePositionTo(int newPos, bool extend = false);
 	int MovePositionSoVisible(int pos, int moveDir);
 	void SetLastXChosen();
@@ -194,10 +183,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
         void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout &ll);
-	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart, 
+	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int xStart, 
 		PRectangle rcLine, LineLayout &ll);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
-	long FormatRange(bool draw, RangeToFormat *pfr);
+	long FormatRange(bool draw, FORMATRANGE *pfr);
 
 	virtual void SetVerticalScrollPos() = 0;
 	virtual void SetHorizontalScrollPos() = 0;
@@ -210,7 +199,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void AddCharUTF(char *s, unsigned int len);
 	void ClearSelection();
 	void ClearAll();
-    	void ClearDocumentStyle();
 	void Cut();
 	void PasteRectangular(int pos, const char *ptr, int len);
 	virtual void Copy() = 0;
@@ -228,7 +216,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void NotifyParent(SCNotification scn) = 0;
 	virtual void NotifyStyleToNeeded(int endStyleNeeded);
 	void NotifyChar(char ch);
-	void NotifyMove(int position);
 	void NotifySavePoint(bool isSavePoint);
 	void NotifyModifyAttempt();
 	virtual void NotifyDoubleClick(Point pt, bool shift);
@@ -244,25 +231,24 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	
 #ifdef MACRO_SUPPORT
-	void NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long lParam);
+	void NotifyMacroRecord(UINT iMessage, WPARAM wParam, LPARAM lParam);
 #endif
 
 	void PageMove(int direction, bool extend=false);
 	void ChangeCaseOfSelection(bool makeUpperCase);
 	void LineTranspose();
-    	virtual void CancelModes();
-	virtual int KeyCommand(unsigned int iMessage);
+	virtual int KeyCommand(UINT iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
 	int KeyDown(int key, bool shift, bool ctrl, bool alt);
 
-	int GetWhitespaceVisible();
-	void SetWhitespaceVisible(int view);
+	bool GetWhitespaceVisible();
+	void SetWhitespaceVisible(bool view);
 
 	void Indent(bool forwards);
 
-	long FindText(unsigned int iMessage, unsigned long wParam, long lParam);
+	long FindText(UINT iMessage,WPARAM wParam,LPARAM lParam);
 	void SearchAnchor();
-	long SearchText(unsigned int iMessage, unsigned long wParam, long lParam);
+	long SearchText(UINT iMessage,WPARAM wParam,LPARAM lParam);
 	void GoToLine(int lineNo);
 
 	char *CopyRange(int start, int end);
@@ -296,11 +282,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ToggleContraction(int line);
 	void EnsureLineVisible(int line);
 
-	virtual long DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam) = 0;
+	virtual LRESULT DefWndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) = 0;
 	
 public:
 	// Public so scintilla_send_message can use it
-	virtual long WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
+	virtual LRESULT WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);
 	// Public so scintilla_set_id can use it
 	int ctrlID;	
 };

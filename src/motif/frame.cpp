@@ -21,14 +21,7 @@
     #pragma implementation "frame.h"
 #endif
 
-
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#define XtWindow XTWINDOW
-#define XtScreen XTSCREEN
-#endif
-
-# include "wx/frame.h"
+#include "wx/frame.h"
 #include "wx/statusbr.h"
 #include "wx/toolbar.h"
 #include "wx/menuitem.h"

@@ -55,7 +55,7 @@ WXDLLEXPORT bool wxGetClipboardFormatName(wxDataFormat dataFormat,
 //-----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxDataObject;
-class WXDLLEXPORT wxClipboard : public wxClipboardBase
+class WXDLLEXPORT wxClipboard : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 
@@ -79,7 +79,7 @@ public:
     virtual bool AddData( wxDataObject *data );
 
     // ask if data in correct format is available
-    virtual bool IsSupported( const wxDataFormat& format );
+    virtual bool IsSupported( wxDataFormat format );
 
     // fill data with data on the clipboard (if available)
     virtual bool GetData( wxDataObject& data );

@@ -229,7 +229,7 @@ GridFrame::GridFrame()
     grid->SetCellBackgroundColour(3, 3, *wxLIGHT_GREY);
 
     grid->SetCellValue(4, 4, "a weird looking cell");
-    grid->SetCellAlignment(4, 4, wxALIGN_CENTRE, wxALIGN_CENTRE);
+    grid->SetCellAlignment(4, 4, wxCENTRE, wxCENTRE);
     grid->SetCellRenderer(4, 4, new MyGridCellRenderer);
 
     grid->SetCellValue(3, 0, "1");
@@ -398,16 +398,16 @@ void GridFrame::SetRowLabelHorizAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( horiz )
     {
-        case wxALIGN_LEFT:
-            horiz = wxALIGN_CENTRE;
+        case wxLEFT:
+            horiz = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            horiz = wxALIGN_RIGHT;
+        case wxCENTRE:
+            horiz = wxRIGHT;
             break;
 
-        case wxALIGN_RIGHT:
-            horiz = wxALIGN_LEFT;
+        case wxRIGHT:
+            horiz = wxLEFT;
             break;
     }
 
@@ -421,16 +421,16 @@ void GridFrame::SetRowLabelVertAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( vert )
     {
-        case wxALIGN_TOP:
-            vert = wxALIGN_CENTRE;
+        case wxTOP:
+            vert = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            vert = wxALIGN_BOTTOM;
+        case wxCENTRE:
+            vert = wxBOTTOM;
             break;
 
-        case wxALIGN_BOTTOM:
-            vert = wxALIGN_TOP;
+        case wxBOTTOM:
+            vert = wxTOP;
             break;
     }
 
@@ -445,16 +445,16 @@ void GridFrame::SetColLabelHorizAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( horiz )
     {
-        case wxALIGN_LEFT:
-            horiz = wxALIGN_CENTRE;
+        case wxLEFT:
+            horiz = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            horiz = wxALIGN_RIGHT;
+        case wxCENTRE:
+            horiz = wxRIGHT;
             break;
 
-        case wxALIGN_RIGHT:
-            horiz = wxALIGN_LEFT;
+        case wxRIGHT:
+            horiz = wxLEFT;
             break;
     }
 
@@ -469,16 +469,16 @@ void GridFrame::SetColLabelVertAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( vert )
     {
-        case wxALIGN_TOP:
-            vert = wxALIGN_CENTRE;
+        case wxTOP:
+            vert = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            vert = wxALIGN_BOTTOM;
+        case wxCENTRE:
+            vert = wxBOTTOM;
             break;
 
-        case wxALIGN_BOTTOM:
-            vert = wxALIGN_TOP;
+        case wxBOTTOM:
+            vert = wxTOP;
             break;
     }
 

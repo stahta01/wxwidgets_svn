@@ -45,8 +45,3 @@ wxIcon& wxIcon::operator = ( const wxIcon& icon )
     return *this;
 }
 
-void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
-{
-    wxIcon *icon = (wxIcon*)(&bmp);
-    *this = *icon;
-}

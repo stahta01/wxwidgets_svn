@@ -5,7 +5,7 @@ set dest=%src\deliver
 set wise=0
 
 Rem Set this to the required version
-set version=2.2.0
+set version=2.2.1
 
 if "%src" == "" goto usage
 if "%dest" == "" goto usage
@@ -14,6 +14,7 @@ if "%1" == "--help" goto usage
 if "%1" == "/?" goto usage
 if "%1" == "wiseonly" goto dounzip
 if "%1" == "wise" set wise=1
+if "%1" == "tidyup" goto tidyup
 echo About to archive an external wxWindows distribution:
 echo   From   %src
 echo   To     %dest
@@ -179,6 +180,7 @@ copy %src\bin\dialoged.exe bin
 copy %src\bin\tex2rtf.exe bin
 copy %src\bin\dbgview.* bin
 copy %src\bin\life.exe bin
+copy %src\demos\life\breeder.lif bin
 copy %src\docs\winhelp\dialoged.hlp %src\docs\winhelp\dialoged.cnt bin
 copy %src\docs\winhelp\tex2rtf.hlp %src\docs\winhelp\tex2rtf.cnt bin
 
@@ -200,6 +202,7 @@ start %wisecmd
 pause Press any key to continue with the wxWindows distribution...
 Rem ren %WXWIN\deliver\setup.EXE %WXWIN\deliver\wxMSW-%version%-setup.exe
 
+:tidyup
 cd %dest
 
 Rem tidy up capitalisation of filenames

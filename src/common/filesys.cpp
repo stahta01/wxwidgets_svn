@@ -327,13 +327,11 @@ wxFSFile* wxFileSystem::OpenFile(const wxString& location)
     meta = 0;
     for (i = 0; i < ln; i++)
     {
-        switch (loc[i])
-        {
-            case wxT('/') : case wxT(':') : case wxT('#') : 
-                meta = loc[i];
-                break;
-        }
-        if (meta != 0) break;
+        if (!meta) 
+            switch (loc[i])
+        	{
+                case wxT('/') : case wxT(':') : case wxT('#') : meta = loc[i];
+            }
     }
     m_LastName = wxEmptyString;
 

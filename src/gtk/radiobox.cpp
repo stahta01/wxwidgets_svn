@@ -17,7 +17,6 @@
 
 #include "wx/dialog.h"
 #include "wx/frame.h"
-#include "wx/log.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -143,10 +142,7 @@ static gint gtk_radiobutton_focus_out( GtkWidget *widget,
                                        GdkEvent *WXUNUSED(event),
                                        wxRadioBox *win )
 {
-  //    wxASSERT_MSG( win->m_hasFocus, _T("got focus out without any focus in?") );
-  // Replace with a warning, else we dump core a lot!
-  //  if (!win->m_hasFocus)
-  //      wxLogWarning(_T("Radiobox got focus out without any focus in.") );
+    wxASSERT_MSG( win->m_hasFocus, _T("got focus out without any focus in?") );
 
     // we might have lost the focus, but may be not - it may have just gone to
     // another button in the same radiobox, so we'll check for it in the next
@@ -245,7 +241,7 @@ bool wxRadioBox::Create( wxWindow *parent, wxWindowID id, const wxString& title,
     GtkRequisition req;
     req.width = 2;
     req.height = 2;
-    (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(m_widget) )->size_request ) (m_widget, &req );
+    (* GTK_WIDGET_CLASS( GTK_OBJECT(m_widget)->klass )->size_request ) (m_widget, &req );
     if (req.width > ls.x) ls.x = req.width;
     
     wxSize newSize = size;
@@ -325,7 +321,7 @@ wxSize wxRadioBox::LayoutItems()
                 GtkRequisition req;
                 req.width = 2;
                 req.height = 2;
-                (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(button) )->size_request )
+                (* GTK_WIDGET_CLASS( GTK_OBJECT(button)->klass )->size_request )
                       (button, &req );
 		
                 if (req.width > max_len) max_len = req.width;
@@ -370,7 +366,7 @@ wxSize wxRadioBox::LayoutItems()
             GtkRequisition req;
             req.width = 2;
             req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(button) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(button)->klass )->size_request )
                   (button, &req );
 
             if (req.width > max) max = req.width;

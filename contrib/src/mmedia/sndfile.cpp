@@ -18,7 +18,6 @@
 #include "wx/mmedia/sndcpcm.h"
 #include "wx/mmedia/sndulaw.h"
 #include "wx/mmedia/sndg72x.h"
-#include "wx/mmedia/sndmsad.h"
 
 // --------------------------------------------------------------------------
 // Sound codec router
@@ -105,10 +104,6 @@ bool wxSoundRouterStream::SetSoundFormat(const wxSoundFormatBase& format)
             break;
         case wxSOUND_G72X:
             m_router = new wxSoundStreamG72X(*m_sndio);
-            m_router->SetSoundFormat(format);
-            break;
-        case wxSOUND_MSADPCM:
-            m_router = new  wxSoundStreamMSAdpcm(*m_sndio);
             m_router->SetSoundFormat(format);
             break;
         default:

@@ -65,7 +65,6 @@ caret.cpp	G	U
 choicdgg.cpp	G
 colrdlgg.cpp	G	G
 dcpsg.cpp	G	U
-dirctrlg.cpp	G
 dirdlgg.cpp	G	16,P
 dragimgg.cpp	G	P
 fontdlgg.cpp	G	G,R,P
@@ -92,7 +91,6 @@ propform.cpp	G
 proplist.cpp	G
 sashwin.cpp	G
 scrolwin.cpp	G
-splash.cpp	G
 splitter.cpp	G
 statline.cpp	G	U,R,P
 statusbr.cpp	G
@@ -101,8 +99,7 @@ numdlgg.cpp	G
 tbarsmpl.cpp	G
 textdlgg.cpp	G
 tipdlg.cpp	G
-tipwin.cpp	G
-treectlg.cpp	G
+treectrl.cpp	G	16
 treelay.cpp	G
 wizard.cpp	G
 
@@ -112,7 +109,6 @@ cmdline.cpp	C	B
 cmndata.cpp	C
 clipcmn.cpp	C
 config.cpp	C	B
-cshelp.cpp	C
 ctrlcmn.cpp	C
 ctrlsub.cpp	C
 datetime.cpp	C	B
@@ -127,7 +123,6 @@ docmdi.cpp	C
 docview.cpp	C
 dynarray.cpp	C	B
 dynlib.cpp	C	B
-effects.cpp	C
 encconv.cpp	C	B
 event.cpp	C	B
 extended.c	C	B
@@ -178,7 +173,6 @@ paper.cpp	C
 prntbase.cpp	C
 process.cpp	C	32,B
 protocol.cpp	C	S,B
-quantize.cpp	C
 resource.cpp	C
 sckaddr.cpp	C	S,B
 sckfile.cpp	C	S,B
@@ -195,7 +189,6 @@ textcmn.cpp	C
 textfile.cpp	C	B
 timercmn.cpp	C	B
 tokenzr.cpp	C	B
-treebase.cpp	C
 txtstrm.cpp	C	B
 unzip.c	C	B
 url.cpp	C	S,B
@@ -625,7 +618,6 @@ gsocket.h	W	B
 hash.h	W	B
 help.h	W
 helpbase.h	W
-cshelp.h	W
 helphtml.h	W
 helpchm.h	W
 helpwin.h	W
@@ -723,11 +715,9 @@ thread.h	W	B
 time.h	W	B
 timer.h	W	B
 tipdlg.h	W
-tipwin.h	W
 tokenzr.h	W	B
 toolbar.h	W
 tooltip.h	W
-treebase.h	W
 treectrl.h	W
 types.h	W
 url.h	W	B
@@ -1094,7 +1084,6 @@ caret.h	N
 choicdgg.h	N
 colrdlgg.h	N
 dcpsg.h	N
-dirctrlg.h	N
 dirdlgg.h	N	16
 dragimgg.h	N	16
 fontdlgg.h	N
@@ -1121,7 +1110,7 @@ splitter.h	N
 statusbr.h	N
 tabg.h	N	16
 textdlgg.h	N
-treectlg.h	N	16
+treectrl.h	N	16
 wizard.h	N
 
 # vi: set noet ts=16 nolist:

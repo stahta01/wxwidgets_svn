@@ -1189,10 +1189,7 @@ void wxGridCellBoolEditor::BeginEdit(int row, int col, wxGrid* grid)
     if (grid->GetTable()->CanGetValueAs(row, col, wxGRID_VALUE_BOOL))
         m_startValue = grid->GetTable()->GetValueAsBool(row, col);
     else
-    {
-        wxString cellval( grid->GetTable()->GetValue(row, col) );
-        m_startValue = !( !cellval || (cellval == "0") );
-    }
+        m_startValue = !!grid->GetTable()->GetValue(row, col);
     CBox()->SetValue(m_startValue);
     CBox()->SetFocus();
 }
@@ -1570,7 +1567,7 @@ void wxGridCellNumberRenderer::Draw(wxGrid& grid,
     // draw the text right aligned by default
     int hAlign, vAlign;
     attr.GetAlignment(&hAlign, &vAlign);
-    hAlign = wxALIGN_RIGHT;
+    hAlign = wxRIGHT;
 
     wxRect rect = rectCell;
     rect.Inflate(-1);
@@ -1665,7 +1662,7 @@ void wxGridCellFloatRenderer::Draw(wxGrid& grid,
     // draw the text right aligned by default
     int hAlign, vAlign;
     attr.GetAlignment(&hAlign, &vAlign);
-    hAlign = wxALIGN_RIGHT;
+    hAlign = wxRIGHT;
 
     wxRect rect = rectCell;
     rect.Inflate(-1);
@@ -1798,10 +1795,7 @@ void wxGridCellBoolRenderer::Draw(wxGrid& grid,
     if ( grid.GetTable()->CanGetValueAs(row, col, wxGRID_VALUE_BOOL) )
         value = grid.GetTable()->GetValueAsBool(row, col);
     else
-    {
-        wxString cellval( grid.GetTable()->GetValue(row, col) );
-        value = !( !cellval || (cellval == "0") );
-    }
+        value = !!grid.GetTable()->GetValue(row, col);
 
     if ( value )
     {
@@ -3388,7 +3382,7 @@ void wxGrid::Create()
 
     // Set default cell attributes
     m_defaultCellAttr->SetFont(GetFont());
-    m_defaultCellAttr->SetAlignment(wxALIGN_LEFT, wxALIGN_TOP);
+    m_defaultCellAttr->SetAlignment(wxLEFT, wxTOP);
     m_defaultCellAttr->SetTextColour(
         wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOWTEXT));
     m_defaultCellAttr->SetBackgroundColour(
@@ -3520,11 +3514,11 @@ void wxGrid::Init()
     m_labelFont = this->GetFont();
     m_labelFont.SetWeight( m_labelFont.GetWeight() + 2 );
 
-    m_rowLabelHorizAlign = wxALIGN_LEFT;
-    m_rowLabelVertAlign  = wxALIGN_CENTRE;
+    m_rowLabelHorizAlign = wxLEFT;
+    m_rowLabelVertAlign  = wxCENTRE;
 
-    m_colLabelHorizAlign = wxALIGN_CENTRE;
-    m_colLabelVertAlign  = wxALIGN_TOP;
+    m_colLabelHorizAlign = wxCENTRE;
+    m_colLabelVertAlign  = wxTOP;
 
     m_defaultColWidth  = WXGRID_DEFAULT_COL_WIDTH;
     m_defaultRowHeight = m_gridWin->GetCharHeight();
@@ -5260,8 +5254,7 @@ bool wxGrid::SendEvent( const wxEventType type,
                                  type,
                                  this,
                                  rowOrCol,
-                                 mouseEv.GetX() + GetColLabelSize(),
-                                 mouseEv.GetY() + GetRowLabelSize(),
+                                 mouseEv.GetX(), mouseEv.GetY(),
                                  mouseEv.ControlDown(),
                                  mouseEv.ShiftDown(),
                                  mouseEv.AltDown(),
@@ -5291,8 +5284,7 @@ bool wxGrid::SendEvent( const wxEventType type,
                              type,
                              this,
                              row, col,
-                             mouseEv.GetX() + GetColLabelSize(),
-                             mouseEv.GetY() + GetRowLabelSize(),
+                             mouseEv.GetX(), mouseEv.GetY(),
                              FALSE,
                              mouseEv.ControlDown(),
                              mouseEv.ShiftDown(),
@@ -5766,7 +5758,6 @@ void wxGrid::HighlightBlock( int topRow, int leftCol, int bottomRow, int rightCo
     // (old comment from when this was the body of SelectBlock)
 }
 
-
 //
 // ------ functions to get/send data (see also public functions)
 //
@@ -6193,15 +6184,15 @@ void wxGrid::DrawTextRectangle( wxDC& dc,
         float x, y;
         switch ( horizAlign )
         {
-            case wxALIGN_RIGHT:
+            case wxRIGHT:
                 x = rect.x + (rect.width - textWidth - 1);
                 break;
 
-            case wxALIGN_CENTRE:
+            case wxCENTRE:
                 x = rect.x + ((rect.width - textWidth)/2);
                 break;
 
-            case wxALIGN_LEFT:
+            case wxLEFT:
             default:
                 x = rect.x + 1;
                 break;
@@ -6209,15 +6200,15 @@ void wxGrid::DrawTextRectangle( wxDC& dc,
 
         switch ( vertAlign )
         {
-            case wxALIGN_BOTTOM:
+            case wxBOTTOM:
                 y = rect.y + (rect.height - textHeight - 1);
                 break;
 
-            case wxALIGN_CENTRE:
+            case wxCENTRE:
                 y = rect.y + ((rect.height - textHeight)/2);
                 break;
 
-            case wxALIGN_TOP:
+            case wxTOP:
             default:
                 y = rect.y + 1;
                 break;
@@ -6306,17 +6297,6 @@ void wxGrid::EndBatch()
         }
     }
 }
-
-// Use this, rather than wxWindow::Refresh(), to force an immediate
-// repainting of the grid. Has no effect if you are already inside a
-// BeginBatch / EndBatch block.
-//
-void wxGrid::ForceRefresh()
-{
-    BeginBatch();
-    EndBatch();
-}
-
 
 //
 // ------ Edit control functions
@@ -7337,27 +7317,12 @@ void wxGrid::SetLabelFont( const wxFont& font )
 
 void wxGrid::SetRowLabelAlignment( int horiz, int vert )
 {
-    // allow old (incorrect) defs to be used
-    switch ( horiz )
-    {
-        case wxLEFT:   horiz = wxALIGN_LEFT; break;
-        case wxRIGHT:  horiz = wxALIGN_RIGHT; break;
-        case wxCENTRE: horiz = wxALIGN_CENTRE; break;
-    }
-    
-    switch ( vert )
-    {
-        case wxTOP:    vert = wxALIGN_TOP;    break;
-        case wxBOTTOM: vert = wxALIGN_BOTTOM; break;
-        case wxCENTRE: vert = wxALIGN_CENTRE; break;
-    }
-    
-    if ( horiz == wxALIGN_LEFT || horiz == wxALIGN_CENTRE || horiz == wxALIGN_RIGHT )
+    if ( horiz == wxLEFT || horiz == wxCENTRE || horiz == wxRIGHT )
     {
         m_rowLabelHorizAlign = horiz;
     }
 
-    if ( vert == wxALIGN_TOP || vert == wxALIGN_CENTRE || vert == wxALIGN_BOTTOM )
+    if ( vert == wxTOP || vert == wxCENTRE || vert == wxBOTTOM )
     {
         m_rowLabelVertAlign = vert;
     }
@@ -7370,27 +7335,12 @@ void wxGrid::SetRowLabelAlignment( int horiz, int vert )
 
 void wxGrid::SetColLabelAlignment( int horiz, int vert )
 {
-    // allow old (incorrect) defs to be used
-    switch ( horiz )
-    {
-        case wxLEFT:   horiz = wxALIGN_LEFT; break;
-        case wxRIGHT:  horiz = wxALIGN_RIGHT; break;
-        case wxCENTRE: horiz = wxALIGN_CENTRE; break;
-    }
-    
-    switch ( vert )
-    {
-        case wxTOP:    vert = wxALIGN_TOP;    break;
-        case wxBOTTOM: vert = wxALIGN_BOTTOM; break;
-        case wxCENTRE: vert = wxALIGN_CENTRE; break;
-    }
-    
-    if ( horiz == wxALIGN_LEFT || horiz == wxALIGN_CENTRE || horiz == wxALIGN_RIGHT )
+    if ( horiz == wxLEFT || horiz == wxCENTRE || horiz == wxRIGHT )
     {
         m_colLabelHorizAlign = horiz;
     }
 
-    if ( vert == wxALIGN_TOP || vert == wxALIGN_CENTRE || vert == wxALIGN_BOTTOM )
+    if ( vert == wxTOP || vert == wxCENTRE || vert == wxBOTTOM )
     {
         m_colLabelVertAlign = vert;
     }

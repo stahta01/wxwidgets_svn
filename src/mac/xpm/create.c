@@ -43,7 +43,7 @@
  * Lorens Younes (d93-hyo@nada.kth.se) 4/96
  */
 
-#include "XpmI.h"
+#include "xpmi.h"
 #include <ctype.h>
 
 LFUNC(xpmVisualType, int, (Visual *visual));
@@ -1067,12 +1067,12 @@ ParseAndPutPixels(
 					}
 					#elif macintosh
 					SetCPixel( x, y, &image_pixels[colidx[c] - 1]);
-					if (shapeimage) 
+					/*
+					if (shapedc) 
 					{
-						SetGWorld( shapeimage->gworldptr , NULL ) ;
-					    SetCPixel( x, y, &shape_pixels[colidx[c] - 1]);
-						SetGWorld( image->gworldptr , NULL ) ;
+					    SetPixel(shapedc, x, y, shape_pixels[colidx[c] - 1]);
 					}
+					*/
 					#endif
 				} 
 				else

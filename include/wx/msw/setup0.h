@@ -266,8 +266,6 @@
 // Compile in wxLibrary class for run-time DLL loading and function calling.
 // Required by wxUSE_DIALUP_MANAGER.
 //
-// This setting is for Win32 only
-//
 // Default is 1.
 //
 // Recommended setting: 1

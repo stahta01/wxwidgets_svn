@@ -186,8 +186,14 @@ void wxapp_install_idle_handler()
 
 #if wxUSE_THREADS
 
+static int g_threadUninstallLevel = 0;
+
 void wxapp_install_thread_wakeup()
 {
+    g_threadUninstallLevel++;
+    
+    if (g_threadUninstallLevel != 1) return;
+
     if (wxTheApp->m_wakeUpTimerTag) return;
 
     wxTheApp->m_wakeUpTimerTag = gtk_timeout_add( 50, wxapp_wakeup_timerout_callback, (gpointer) NULL );
@@ -195,6 +201,10 @@ void wxapp_install_thread_wakeup()
 
 void wxapp_uninstall_thread_wakeup()
 {
+    g_threadUninstallLevel--;
+    
+    if (g_threadUninstallLevel != 0) return;
+
     if (!wxTheApp->m_wakeUpTimerTag) return;
 
     gtk_timeout_remove( wxTheApp->m_wakeUpTimerTag );
@@ -284,13 +294,8 @@ bool wxApp::OnInitGui()
     if ((gdk_visual_get_best() != gdk_visual_get_system()) &&
         (m_useBestVisual))
     {
-#ifdef __WXGTK20__
-        /* seems gtk_widget_set_default_visual no longer exists? */
-        GdkVisual* vis = gtk_widget_get_default_visual();
-#else
         GdkVisual* vis = gdk_visual_get_best();
         gtk_widget_set_default_visual( vis );
-#endif
 
         GdkColormap *colormap = gdk_colormap_new( vis, FALSE );
         gtk_widget_set_default_colormap( colormap );
@@ -548,7 +553,7 @@ void wxApp::CleanUp()
 
     // check for memory leaks
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
-    if (wxDebugContext::CountObjectsLeft(TRUE) > 0)
+    if (wxDebugContext::CountObjectsLeft() > 0)
     {
         wxLogDebug(wxT("There were memory leaks.\n"));
         wxDebugContext::Dump();
@@ -575,9 +580,15 @@ int wxEntryStart( int argc, char *argv[] )
 {
 #if wxUSE_THREADS
     /* GTK 1.2 up to version 1.2.3 has broken threads */
+#ifdef __VMS__
+   if ((vms_gtk_major_version() == 1) &&
+        (vms_gtk_minor_version() == 2) &&
+        (vms_gtk_micro_version() < 4))
+#else
    if ((gtk_major_version == 1) &&
         (gtk_minor_version == 2) &&
         (gtk_micro_version < 4))
+#endif
      {
         printf( "wxWindows warning: GUI threading disabled due to outdated GTK version\n" );
     }
@@ -589,10 +600,7 @@ int wxEntryStart( int argc, char *argv[] )
 
     gtk_set_locale();
 
-#if defined(__WXGTK20__)
-    // gtk+ 2.0 supports Unicode through UTF-8 strings
-    wxConvCurrent = &wxConvUTF8;
-#elif wxUSE_WCHAR_T
+#if wxUSE_WCHAR_T
     if (!wxOKlibc()) wxConvCurrent = &wxConvLocal;
 #else
     if (!wxOKlibc()) wxConvCurrent = (wxMBConv*) NULL;
@@ -653,15 +661,6 @@ void wxEntryCleanup()
 
 int wxEntry( int argc, char *argv[] )
 {
-#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
-    // This seems to be necessary since there are 'rogue'
-    // objects present at this point (perhaps global objects?)
-    // Setting a checkpoint will ignore them as far as the
-    // memory checking facility is concerned.
-    // Of course you may argue that memory allocated in globals should be
-    // checked, but this is a reasonable compromise.
-    wxDebugContext::SetCheckpoint();
-#endif
     int err = wxEntryStart(argc, argv);
     if (err)
         return err;

@@ -49,46 +49,6 @@ static void ColouriseBatchDoc(unsigned int startPos, int length, int, WordList *
 		ColouriseBatchLine(lineBuffer, startPos + length, styler);
 }
 
-static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
-	// It is needed to remember the current state to recognize starting
-	// comment lines before the first "diff " or "--- ". If a real
-	// difference starts then each line starting with ' ' is a whitespace
-	// otherwise it is considered a comment (Only in..., Binary file...)
-	if (0 == strncmp(lineBuffer, "diff ", 3)) {
-		styler.ColourTo(endLine, 2);
-	} else if (0 == strncmp(lineBuffer, "--- ", 3)) {
-		styler.ColourTo(endLine, 3);
-	} else if (0 == strncmp(lineBuffer, "+++ ", 3)) {
-		styler.ColourTo(endLine, 3);
-	} else if (lineBuffer[0] == '@') {
-		styler.ColourTo(endLine, 4);
-	} else if (lineBuffer[0] == '-') {
-		styler.ColourTo(endLine, 5);
-	} else if (lineBuffer[0] == '+') {
-		styler.ColourTo(endLine, 6);
-	} else if (lineBuffer[0] != ' ') {
-		styler.ColourTo(endLine, 1);
-	} else {
-		styler.ColourTo(endLine, 0);
-	}
-}
-
-static void ColouriseDiffDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
-	char lineBuffer[1024];
-	styler.StartAt(startPos);
-	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
-	for (unsigned int i = startPos; i < startPos + length; i++) {
-		lineBuffer[linePos++] = styler[i];
-		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >= sizeof(lineBuffer) - 1)) {
-			ColouriseDiffLine(lineBuffer, i, styler);
-			linePos = 0;
-		}
-	}
-	if (linePos > 0)
-		ColouriseDiffLine(lineBuffer, startPos + length, styler);
-}
-
 static void ColourisePropsLine(char *lineBuffer, int lengthLine, int startLine, int endPos, Accessor &styler) {
 	int i = 0;
 	while (isspace(lineBuffer[i]) && (i < lengthLine))	// Skip initial spaces
@@ -166,21 +126,15 @@ static void ColouriseMakeDoc(unsigned int startPos, int length, int, WordList *[
 static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos, Accessor &styler) {
 	if (lineBuffer[0] == '>') {
 		// Command or return status
-		styler.ColourTo(endPos, SCE_ERR_CMD);
+		styler.ColourTo(endPos, 4);
 	} else if (strstr(lineBuffer, "File \"") && strstr(lineBuffer, ", line ")) {
-		styler.ColourTo(endPos, SCE_ERR_PYTHON);
+		styler.ColourTo(endPos, 1);
 	} else if (0 == strncmp(lineBuffer, "Error ", strlen("Error "))) {
 		// Borland error message
-		styler.ColourTo(endPos, SCE_ERR_BORLAND);
+		styler.ColourTo(endPos, 5);
 	} else if (0 == strncmp(lineBuffer, "Warning ", strlen("Warning "))) {
 		// Borland warning message
-		styler.ColourTo(endPos, SCE_ERR_BORLAND);
-	} else if (strstr(lineBuffer, " at "  ) && 
-		strstr(lineBuffer, " at "  ) < lineBuffer+lengthLine && 
-		strstr(lineBuffer, " line ") && 
-		strstr(lineBuffer, " line ") < lineBuffer+lengthLine) {
-		// perl error message
-		styler.ColourTo(endPos, SCE_ERR_PERL);
+		styler.ColourTo(endPos, 5);
 	} else {
 		// Look for <filename>:<line>:message
 		// Look for <filename>(line)message
@@ -214,11 +168,11 @@ static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos,
 			}
 		}
 		if (state == 3) {
-			styler.ColourTo(endPos, SCE_ERR_GCC);
+			styler.ColourTo(endPos, 2);
 		} else if ((state == 13) || (state == 14) || (state == 15)) {
-			styler.ColourTo(endPos, SCE_ERR_MS);
+			styler.ColourTo(endPos, 3);
 		} else {
-			styler.ColourTo(endPos, SCE_ERR_DEFAULT);
+			styler.ColourTo(endPos, 0);
 		}
 	}
 }
@@ -343,9 +297,8 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 	styler.ColourTo(lengthDoc, state);
 }
 
-LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc);
-LexerModule lmDiff(SCLEX_DIFF, ColouriseDiffDoc);
 LexerModule lmProps(SCLEX_PROPERTIES, ColourisePropsDoc);
-LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc);
 LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc);
+LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc);
+LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc);
 LexerModule lmLatex(SCLEX_LATEX, ColouriseLatexDoc);

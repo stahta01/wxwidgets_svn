@@ -313,7 +313,6 @@ public:
     bool operator!=(const wxRect& rect) const { return !(*this == rect); }
 
     bool Inside(int cx, int cy) const;
-    bool Inside(const wxPoint& pt) const { return Inside(pt.x, pt.y); }
     wxRect operator+(const wxRect& rect) const;
     wxRect& operator+=(const wxRect& rect);
 
@@ -496,11 +495,9 @@ extern bool WXDLLEXPORT wxColourDisplay();
 extern int WXDLLEXPORT wxDisplayDepth();
 #define wxGetDisplayDepth wxDisplayDepth
 
-// get the display size
+// get the diaplay size
 extern void WXDLLEXPORT wxDisplaySize(int *width, int *height);
 extern wxSize WXDLLEXPORT wxGetDisplaySize();
-extern void WXDLLEXPORT wxDisplaySizeMM(int *width, int *height);
-extern wxSize WXDLLEXPORT wxGetDisplaySizeMM();
 
 // set global cursor
 extern void WXDLLEXPORT wxSetCursor(const wxCursor& cursor);

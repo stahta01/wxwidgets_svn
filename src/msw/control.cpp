@@ -144,7 +144,7 @@ bool wxControl::ProcessCommand(wxCommandEvent& event)
 #if WXWIN_COMPATIBILITY
     if ( m_callback )
     {
-        (void)(*m_callback)(*this, event);
+        (void)(*m_callback)(this, event);
 
         return TRUE;
     }

@@ -40,7 +40,6 @@ class WXDLLEXPORT wxProcess;
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxWindow;
 class WXDLLEXPORT wxWindowList;
-class WXDLLEXPORT wxPoint;
 
 // FIXME should use wxStricmp() instead
 #if defined(__GNUWIN32__)
@@ -269,11 +268,6 @@ WXDLLEXPORT wxWindow* wxFindWindowByName(const wxString& name, wxWindow *parent 
 
 // Returns menu item id or -1 if none.
 WXDLLEXPORT int wxFindMenuItemId(wxFrame *frame, const wxString& menuString, const wxString& itemString);
-
-// Find the wxWindow at the given point. wxGenericFindWindowAtPoint
-// is always present but may be less reliable than a native version.
-WXDLLEXPORT wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt);
-WXDLLEXPORT wxWindow* wxFindWindowAtPoint(const wxPoint& pt);
 
 // ----------------------------------------------------------------------------
 // Message/event queue helpers

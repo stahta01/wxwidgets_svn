@@ -118,10 +118,6 @@ wxString wxTextFile::Translate(const wxString& text, wxTextFileType type)
                 if ( chLast == _T('\r') ) {
                     // Mac line termination
                     result += eol;
-
-                    // reset chLast to avoid inserting another eol before the
-                    // next character
-                    chLast = 0;
                 }
 
                 // add to the current line

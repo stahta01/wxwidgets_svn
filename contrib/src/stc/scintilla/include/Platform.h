@@ -80,6 +80,12 @@ typedef wxWindow* WindowID;
 typedef wxMenu* MenuID;
 #endif
 
+#if PLAT_GTK || PLAT_WX
+#define SHIFT_PRESSED 1
+#define LEFT_CTRL_PRESSED 2
+#define LEFT_ALT_PRESSED 4
+#endif
+
 // Point is exactly the same as the Win32 POINT and GTK+ GdkPoint so can be used interchangeably
 
 class Point {
@@ -193,7 +199,6 @@ public:
 };
 
 class Font {
-protected:
 	FontID id;
 #if PLAT_WX
 	int ascent;
@@ -203,10 +208,10 @@ protected:
 	Font &operator=(const Font &) { id=0; return *this; }
 public:
 	Font();
-	virtual ~Font();
+	~Font();
 
-	virtual void Create(const char *faceName, int characterSet, int size, bool bold, bool italic);
-	virtual void Release();
+	void Create(const char *faceName, int characterSet, int size, bool bold, bool italic);
+	void Release();
 
 	FontID GetID() { return id; }
 	// Alias another font - caller guarantees not to Release
@@ -322,7 +327,7 @@ public:
 	void Show(bool show=true);
 	void InvalidateAll();
 	void InvalidateRectangle(PRectangle rc);
-	virtual void SetFont(Font &font);
+	void SetFont(Font &font);
 	enum Cursor { cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow };
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
@@ -339,17 +344,14 @@ class ListBox : public Window {
 	WindowID scroller;
 	int current;
 #endif
-	int desiredVisibleRows;
-	unsigned int maxItemCharacters;
-	unsigned int aveCharWidth;
 public:
 	ListBox();
 	virtual ~ListBox();
+	ListBox &operator=(WindowID id_) {
+		id = id_;
+		return *this;
+	}
 	void Create(Window &parent, int ctrlID);
-	virtual void SetFont(Font &font);
-	void SetAverageCharWidth(int width);
-	void SetVisibleRows(int rows);
-	PRectangle GetDesiredRect();
 	void Clear();
 	void Append(char *s);
 	int Length();
@@ -394,16 +396,6 @@ public:
 	// These are utility functions not really tied to a platform
 	static int Minimum(int a, int b);
 	static int Maximum(int a, int b);
-	// Next three assume 16 bit shorts and 32 bit longs
-	static long LongFromTwoShorts(short a,short b) {
-		return (a) | ((b) << 16);
-	}
-	static short HighShortFromLong(long x) {
-		return static_cast<short>(x >> 16);
-	}
-	static short LowShortFromLong(long x) {
-		return static_cast<short>(x & 0xffff);
-	}
 	static void DebugPrintf(const char *format, ...);
 	static int Clamp(int val, int minVal, int maxVal);
 };

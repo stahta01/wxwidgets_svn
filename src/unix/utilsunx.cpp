@@ -622,13 +622,6 @@ long wxExecute(wxChar **argv,
         return exitcode;
 #endif // wxUSE_GUI
     }
-#ifdef __VMS
-   // VMS does not recognise exit as a return and complains about
-   // a missing return
-   // I think VMS is wrong in this
-   //     JJ
-   return 0;
-#endif
 }
 
 #undef ARGS_CLEANUP
@@ -640,14 +633,9 @@ long wxExecute(wxChar **argv,
 const wxChar* wxGetHomeDir( wxString *home  )
 {
     *home = wxGetUserHome( wxString() );
-   wxString tmp;
     if ( home->IsEmpty() )
         *home = wxT("/");
-#ifdef __VMS
-   tmp = *home;
-   if ( tmp.Last() != wxT(']'))
-     if ( tmp.Last() != wxT('/')) *home << wxT('/');
-#endif
+
     return home->c_str();
 }
 

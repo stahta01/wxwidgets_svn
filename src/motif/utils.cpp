@@ -17,10 +17,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 #include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/app.h"
@@ -648,16 +644,6 @@ void wxDisplaySize(int *width, int *height)
         *height = DisplayHeight (dpy, DefaultScreen (dpy));
 }
 
-void wxDisplaySizeMM(int *width, int *height)
-{
-    Display *dpy = (Display*) wxGetDisplay();
-
-    if ( width )
-        *width = DisplayWidthMM(dpy, DefaultScreen (dpy));
-    if ( height )
-        *height = DisplayHeightMM(dpy, DefaultScreen (dpy));
-}
-
 // Configurable display in Motif
 static WXDisplay *gs_currentDisplay = NULL;
 static wxString gs_displayName;
@@ -714,11 +700,6 @@ bool wxSetDisplay(const wxString& display_name)
 wxString wxGetDisplayName()
 {
     return gs_displayName;
-}
-
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
-{
-    return wxGenericFindWindowAtPoint(pt);
 }
 
 // ----------------------------------------------------------------------------

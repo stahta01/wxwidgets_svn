@@ -58,7 +58,6 @@ public:
 
 	void Expand(int sizeNew);
 	void ExpandLevels(int sizeNew=-1);
-    void ClearLevels();
 	void InsertValue(int pos, int value);
 	void SetValue(int pos, int value);
 	void Remove(int pos);
@@ -88,6 +87,8 @@ public:
 	void Destroy();
 	void Grab(Action *source);
 };
+
+enum undoCollectionType { undoCollectNone, undoCollectAutoStart, undoCollectManualStart };
 
 class UndoHistory {
 	Action *actions;
@@ -140,12 +141,12 @@ private:
 	char *part2body;
 	bool readOnly;
 
-	bool collectingUndo;
+	undoCollectionType collectingUndo;
 	UndoHistory uh;
 
 	LineVector lv;
 
-	SVector lineStates;
+	SVector<int, 4000> lineStates;
 
 	void GapTo(int position);
 	void RoomFor(int insertionLength);
@@ -198,7 +199,7 @@ public:
 	void BasicInsertString(int position, char *s, int insertLength);
 	void BasicDeleteChars(int position, int deleteLength);
 
-	bool SetUndoCollection(bool collectUndo);
+	undoCollectionType SetUndoCollection(undoCollectionType collectUndo);
 	bool IsCollectingUndo();
 	void BeginUndoAction();
 	void EndUndoAction();
@@ -221,7 +222,6 @@ public:
 		
 	int SetLevel(int line, int level);
 	int GetLevel(int line);
-    void ClearLevels();
 };
 
 #define CELL_SIZE	2

@@ -9,17 +9,12 @@
 	define wx [--.include.wx]
 
 .ifdef __WXMOTIF__
-CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)
+CXX_DEFINE = /define=(__WXMOTIF__=1)
 .else
 .ifdef __WXGTK__
-CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
+CXX_DEFINE = /define=(__WXGTK__=1)
 .else
 CXX_DEFINE =
-CC_DEFINE =
 .endif
 .endif
 
@@ -27,8 +22,6 @@ CC_DEFINE =
 
 .cpp.obj :
 	cxx $(CXXFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).cpp
-.c.obj :
-	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
 		busyinfo.obj,\
@@ -37,7 +30,6 @@ OBJECTS = \
 		choicdgg.obj,\
 		colrdlgg.obj,\
 		dcpsg.obj,\
-		dirctrlg.obj,\
 		dirdlgg.obj,\
 		fontdlgg.obj,\
 		grid.obj,\
@@ -67,8 +59,7 @@ OBJECTS = \
 		tabg.obj,\
 		textdlgg.obj,\
 		tipdlg.obj,\
-		tipwin.obj,\
-		treectlg.obj,\
+		treectrl.obj,\
 		wizard.obj
 
 SOURCES = \
@@ -78,7 +69,6 @@ SOURCES = \
 		choicdgg.cpp,\
 		colrdlgg.cpp,\
 		dcpsg.cpp,\
-		dirctrlg.cpp,\
 		dirdlgg.cpp,\
 		filedlgg.cpp,\
 		fontdlgg.cpp,\
@@ -111,8 +101,7 @@ SOURCES = \
 		tabg.cpp,\
 		textdlgg.cpp,\
 		tipdlg.cpp,\
-		tipwin.cpp,\
-		treectlg.cpp,\
+		treectrl.cpp,\
 		wizard.cpp
 
 .ifdef __WXMOTIF__
@@ -139,7 +128,6 @@ caret.obj : caret.cpp
 choicdgg.obj : choicdgg.cpp
 colrdlgg.obj : colrdlgg.cpp
 dcpsg.obj : dcpsg.cpp
-dirctrlg.obj : dirctrlg.cpp
 dirdlgg.obj : dirdlgg.cpp
 filedlgg.obj : filedlgg.cpp
 fontdlgg.obj : fontdlgg.cpp
@@ -172,6 +160,5 @@ tbarsmpl.obj : tbarsmpl.cpp
 tabg.obj : tabg.cpp
 textdlgg.obj : textdlgg.cpp
 tipdlg.obj : tipdlg.cpp
-tipwin.obj : tipwin.cpp
-treectlg.obj : treectlg.cpp
+treectrl.obj : treectrl.cpp
 wizard.obj : wizard.cpp

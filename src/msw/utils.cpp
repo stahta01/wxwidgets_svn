@@ -951,8 +951,6 @@ wxChar *wxLoadUserResource(const wxString& resourceName, const wxString& resourc
 // get display info
 // ----------------------------------------------------------------------------
 
-// See also the wxGetMousePosition in window.cpp
-// Deprecated: use wxPoint wxGetMousePosition() instead
 void wxGetMousePosition( int* x, int* y )
 {
     POINT pt;
@@ -985,15 +983,6 @@ void wxDisplaySize(int *width, int *height)
     if ( width ) *width = GetDeviceCaps(dc, HORZRES);
     if ( height ) *height = GetDeviceCaps(dc, VERTRES);
 }
-
-void wxDisplaySizeMM(int *width, int *height)
-{
-    ScreenHDC dc;
-
-    if ( width ) *width = GetDeviceCaps(dc, HORZSIZE);
-    if ( height ) *height = GetDeviceCaps(dc, VERTSIZE);
-}
-
 
 // ---------------------------------------------------------------------------
 // window information functions
