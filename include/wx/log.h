@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/log.h
+// Name:        log.h
 // Purpose:     Assorted wxLogXXX functions, and wxLog (sink for logs)
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -158,10 +158,10 @@ public:
     // functions controlling the default wxLog behaviour
         // verbose mode is activated by standard command-line '-verbose'
         // option
-    static void SetVerbose(bool bVerbose = TRUE) { ms_bVerbose = bVerbose; }
+    void SetVerbose(bool bVerbose = TRUE) { m_bVerbose = bVerbose; }
         // should GetActiveTarget() try to create a new log object if the
         // current is NULL?
-    static void DontCreateOnDemand();
+    static void DontCreateOnDemand() { ms_bAutoCreate = FALSE; }
 
         // trace mask (see wxTraceXXX constants for details)
     static void SetTraceMask(wxTraceMask ulMask) { ms_ulTraceMask = ulMask; }
@@ -169,8 +169,6 @@ public:
     static void AddTraceMask(const wxString& str) { ms_aTraceMasks.Add(str); }
         // add string trace mask
     static void RemoveTraceMask(const wxString& str);
-        // remove all string trace masks
-    static void ClearTraceMasks();
 
         // sets the timestamp string: this is used as strftime() format string
         // for the log targets which add time stamps to the messages - set it
@@ -179,7 +177,7 @@ public:
 
     // accessors
         // gets the verbose status
-    static bool GetVerbose() { return ms_bVerbose; }
+    bool GetVerbose() const { return m_bVerbose; }
         // get trace mask
     static wxTraceMask GetTraceMask() { return ms_ulTraceMask; }
         // is this trace mask in the list?
@@ -199,6 +197,7 @@ public:
 
 protected:
     bool m_bHasMessages; // any messages in the queue?
+    bool m_bVerbose;     // FALSE => ignore LogInfo messages
 
     // the logging functions that can be overriden
         // default DoLog() prepends the time stamp and a prefix corresponding
@@ -215,7 +214,6 @@ private:
     static wxLog      *ms_pLogger;      // currently active log sink
     static bool        ms_doLog;        // FALSE => all logging disabled
     static bool        ms_bAutoCreate;  // create new log targets on demand?
-    static bool        ms_bVerbose;     // FALSE => ignore LogInfo messages
 
     static size_t      ms_suspendCount; // if positive, logs are not flushed
 
@@ -238,7 +236,7 @@ public:
     // redirect log output to a FILE
     wxLogStderr(FILE *fp = (FILE *) NULL);
 
-protected:
+private:
     // implement sink function
     virtual void DoLogString(const wxChar *szString, time_t t);
 
@@ -246,116 +244,27 @@ protected:
 };
 
 #if wxUSE_STD_IOSTREAM
-
 // log everything to an "ostream", cerr by default
 class WXDLLEXPORT wxLogStream : public wxLog
 {
 public:
     // redirect log output to an ostream
-    wxLogStream(wxSTD ostream *ostr = (wxSTD ostream *) NULL);
+    wxLogStream(ostream *ostr = (ostream *) NULL);
 
 protected:
     // implement sink function
     virtual void DoLogString(const wxChar *szString, time_t t);
 
     // using ptr here to avoid including <iostream.h> from this file
-    wxSTD ostream *m_ostr;
+    ostream *m_ostr;
 };
+#endif
 
-#endif // wxUSE_STD_IOSTREAM
-
-// ----------------------------------------------------------------------------
-// /dev/null log target: suppress logging until this object goes out of scope
-// ----------------------------------------------------------------------------
-
-// example of usage:
-/*
-    void Foo()
-    {
-        wxFile file;
-
-        // wxFile.Open() normally complains if file can't be opened, we don't
-        // want it
-        wxLogNull logNo;
-
-        if ( !file.Open("bar") )
-            ... process error ourselves ...
-
-        // ~wxLogNull called, old log sink restored
-    }
- */
-class WXDLLEXPORT wxLogNull
-{
-public:
-    wxLogNull() { m_flagOld = wxLog::EnableLogging(FALSE); }
-    ~wxLogNull() { (void)wxLog::EnableLogging(m_flagOld);   }
-
-private:
-    bool m_flagOld; // the previous value of the wxLog::ms_doLog
-};
-
-// ----------------------------------------------------------------------------
-// chaining log target: installs itself as a log target and passes all
-// messages to the real log target given to it in the ctor but also forwards
-// them to the previously active one
-//
-// note that you don't have to call SetActiveTarget() with this class, it
-// does it itself in its ctor
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxLogChain : public wxLog
-{
-public:
-    wxLogChain(wxLog *logger);
-    virtual ~wxLogChain() { delete m_logOld; }
-
-    // change the new log target
-    void SetLog(wxLog *logger);
-
-    // this can be used to temporarily disable (and then reenable) passing
-    // messages to the old logger (by default we do pass them)
-    void PassMessages(bool bDoPass) { m_bPassMessages = bDoPass; }
-
-    // are we passing the messages to the previous log target?
-    bool IsPassingMessages() const { return m_bPassMessages; }
-
-    // return the previous log target (may be NULL)
-    wxLog *GetOldLog() const { return m_logOld; }
-
-    // override base class version to flush the old logger as well
-    virtual void Flush();
-
-protected:
-    // pass the chain to the old logger if needed
-    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
-
-private:
-    // the current log target
-    wxLog *m_logNew;
-
-    // the previous log target
-    wxLog *m_logOld;
-
-    // do we pass the messages to the old logger?
-    bool m_bPassMessages;
-};
-
-// a chain log target which uses itself as the new logger
-class WXDLLEXPORT wxLogPassThrough : public wxLogChain
-{
-public:
-    wxLogPassThrough();
-};
-
-// ----------------------------------------------------------------------------
 // the following log targets are only compiled in if the we're compiling the
 // GUI part (andnot just the base one) of the library, they're implemented in
 // src/generic/logg.cpp *and not src/common/log.cpp unlike all the rest)
-// ----------------------------------------------------------------------------
 
 #if wxUSE_GUI
-
-#if wxUSE_TEXTCTRL
 
 // log everything to a text window (GUI only of course)
 class WXDLLEXPORT wxLogTextCtrl : public wxLog
@@ -371,14 +280,9 @@ private:
     wxTextCtrl *m_pTextCtrl;
 };
 
-#endif // wxUSE_TEXTCTRL
-
 // ----------------------------------------------------------------------------
 // GUI log target, the default one for wxWindows programs
 // ----------------------------------------------------------------------------
-
-#if wxUSE_LOGGUI
-
 class WXDLLEXPORT wxLogGui : public wxLog
 {
 public:
@@ -401,25 +305,19 @@ protected:
                   m_bWarnings;      // any warnings?
 };
 
-#endif // wxUSE_LOGGUI
-
 // ----------------------------------------------------------------------------
 // (background) log window: this class forwards all log messages to the log
 // target which was active when it was instantiated, but also collects them
 // to the log window. This window has it's own menu which allows the user to
 // close it, clear the log contents or save it to the file.
 // ----------------------------------------------------------------------------
-
-#if wxUSE_LOGWINDOW
-
-class WXDLLEXPORT wxLogWindow : public wxLogPassThrough
+class WXDLLEXPORT wxLogWindow : public wxLog
 {
 public:
     wxLogWindow(wxFrame *pParent,         // the parent frame (can be NULL)
-                const wxChar *szTitle,    // the title of the frame
-                bool bShow = TRUE,        // show window immediately?
-                bool bPassToOld = TRUE);  // pass messages to the old target?
-
+            const wxChar *szTitle,      // the title of the frame
+            bool bShow = TRUE,        // show window immediately?
+            bool bPassToOld = TRUE);  // pass log messages to the old target?
     ~wxLogWindow();
 
     // window operations
@@ -427,6 +325,21 @@ public:
     void Show(bool bShow = TRUE);
         // retrieve the pointer to the frame
     wxFrame *GetFrame() const;
+
+    // accessors
+        // the previous log target (may be NULL)
+    wxLog *GetOldLog() const { return m_pOldLog; }
+        // are we passing the messages to the previous log target?
+    bool IsPassingMessages() const { return m_bPassMessages; }
+
+    // we can pass the messages to the previous log target (we're in this mode by
+    // default: we collect all messages in the window, but also let the default
+    // processing take place)
+    void PassMessages(bool bDoPass) { m_bPassMessages = bDoPass; }
+
+    // base class virtuals
+        // we don't need it ourselves, but we pass it to the previous logger
+    virtual void Flush();
 
     // overridables
         // called immediately after the log frame creation allowing for
@@ -446,12 +359,39 @@ protected:
     virtual void DoLogString(const wxChar *szString, time_t t);
 
 private:
+    bool        m_bPassMessages;  // pass messages to m_pOldLog?
+    wxLog      *m_pOldLog;        // previous log target
     wxLogFrame *m_pLogFrame;      // the log frame
 };
 
-#endif // wxUSE_LOGWINDOW
-
 #endif // wxUSE_GUI
+
+// ----------------------------------------------------------------------------
+// /dev/null log target: suppress logging until this object goes out of scope
+// ----------------------------------------------------------------------------
+
+// example of usage:
+/*
+   void Foo() {
+   wxFile file;
+
+// wxFile.Open() normally complains if file can't be opened, we don't want it
+wxLogNull logNo;
+if ( !file.Open("bar") )
+... process error ourselves ...
+
+// ~wxLogNull called, old log sink restored
+}
+ */
+class WXDLLEXPORT wxLogNull
+{
+public:
+    wxLogNull() { m_flagOld = wxLog::EnableLogging(FALSE); }
+    ~wxLogNull() { (void)wxLog::EnableLogging(m_flagOld);   }
+
+private:
+    bool m_flagOld; // the previous value of the wxLog::ms_doLog
+};
 
 // ============================================================================
 // global functions
@@ -461,6 +401,12 @@ private:
 // Log functions should be used by application instead of stdio, iostream &c
 // for log messages for easy redirection
 // ----------------------------------------------------------------------------
+
+// are we in 'verbose' mode?
+// (note that it's often handy to change this var manually from the
+//  debugger, thus enabling/disabling verbose reporting for some
+//  parts of the program only)
+WXDLLEXPORT_DATA(extern bool) g_bVerbose;
 
 // ----------------------------------------------------------------------------
 // get error code/error message from system in a portable way

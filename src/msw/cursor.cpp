@@ -39,9 +39,7 @@
 
 #include "wx/module.h"
 #include "wx/msw/private.h"
-#ifndef __WXMICROWIN__
 #include "wx/msw/dib.h"
-#endif
 
 #if wxUSE_RESOURCE_LOADING_IN_MSW
     #include "wx/msw/curico.h"
@@ -103,10 +101,8 @@ void wxCursorRefData::Free()
 {
     if ( m_hCursor )
     {
-#ifndef __WXMICROWIN__
         if ( m_destroyCursor )
             ::DestroyCursor((HCURSOR)m_hCursor);
-#endif
 
         m_hCursor = 0;
     }
@@ -132,9 +128,6 @@ wxCursor::wxCursor(const wxString& cursor_file,
                    long flags,
                    int hotSpotX, int hotSpotY)
 {
-#ifdef __WXMICROWIN__
-    m_refData = NULL;
-#else
     wxCursorRefData *refData = new wxCursorRefData;
     m_refData = refData;
 
@@ -188,26 +181,16 @@ wxCursor::wxCursor(const wxString& cursor_file,
 #if WXWIN_COMPATIBILITY_2
     refData->SetOk();
 #endif // WXWIN_COMPATIBILITY_2
-
-#endif
 }
 
 // Cursors by stock number
 wxCursor::wxCursor(int cursor_type)
 {
-#ifdef __WXMICROWIN__
-    m_refData = NULL;
-#else
   wxCursorRefData *refData = new wxCursorRefData;
   m_refData = refData;
 
   switch (cursor_type)
   {
-    case wxCURSOR_ARROWWAIT:
-#ifndef __WIN16__
-      refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_APPSTARTING);
-      break;
-#endif
     case wxCURSOR_WAIT:
       refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_WAIT);
       break;
@@ -306,7 +289,6 @@ wxCursor::wxCursor(int cursor_type)
     }
     case wxCURSOR_QUESTION_ARROW:
     {
-//      refData->m_hCursor = (WXHCURSOR) LoadImage(wxGetInstance(), wxT("wxCURSOR_QARROW"), IMAGE_CURSOR, 16, 16, LR_MONOCHROME);
       refData->m_hCursor = (WXHCURSOR) LoadCursor(wxGetInstance(), wxT("wxCURSOR_QARROW"));
       break;
     }
@@ -320,7 +302,6 @@ wxCursor::wxCursor(int cursor_type)
       refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_ARROW);
       break;
   }
-#endif
 }
 
 wxCursor::~wxCursor()
@@ -340,9 +321,7 @@ void wxSetCursor(const wxCursor& cursor)
 {
     if ( cursor.Ok() )
     {
-#ifndef __WXMICROWIN__
         ::SetCursor(GetHcursorOf(cursor));
-#endif
 
         if ( gs_globalCursor )
             *gs_globalCursor = cursor;

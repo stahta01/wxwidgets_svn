@@ -15,11 +15,9 @@ program_dir = samples/html/widget
 
 PROGRAM=widget
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 DATAFILES=start.htm
 
 include ../../../src/makeprog.env
 
--include $(DEPFILES)

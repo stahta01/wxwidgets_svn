@@ -35,7 +35,6 @@
     #include "wx/app.h"
     #include "wx/icon.h"
     #include "wx/bitmap.h"
-    #include "wx/log.h"
 #endif
 
 #include "wx/msw/private.h"
@@ -63,9 +62,7 @@ void wxIconRefData::Free()
 {
     if ( m_hIcon )
     {
-#ifndef __WXMICROWIN__
         ::DestroyIcon((HICON) m_hIcon);
-#endif
 
         m_hIcon = 0;
     }
@@ -96,7 +93,6 @@ wxIcon::~wxIcon()
 
 void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
 {
-#ifndef __WXMICROWIN__
 #ifdef __WIN32__
     wxMask *mask = bmp.GetMask();
     if ( !mask )
@@ -117,17 +113,23 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
      */
     HDC dcSrc = ::CreateCompatibleDC(NULL);
     HDC dcDst = ::CreateCompatibleDC(NULL);
-    SelectObject(dcSrc, (HBITMAP)mask->GetMaskBitmap());
-    SelectObject(dcDst, iconInfo.hbmColor);
+    HGDIOBJ hSrcOld = SelectObject(dcSrc, (HBITMAP)mask->GetMaskBitmap()),
+            hDstOld = SelectObject(dcDst, iconInfo.hbmColor);
 
     BitBlt(dcDst, 0, 0, bmp.GetWidth(), bmp.GetHeight(), dcSrc, 0, 0, SRCAND);
 
-    SelectObject(dcDst, NULL);
-    SelectObject(dcSrc, NULL);
+    SelectObject(dcDst, hSrcOld);
+    SelectObject(dcSrc, hDstOld);
     DeleteDC(dcDst);
     DeleteDC(dcSrc);
 
     HICON hicon = ::CreateIconIndirect(&iconInfo);
+
+    if ( !::DeleteObject(iconInfo.hbmMask) )
+    {
+        wxLogLastError(_T("DeleteObject"));
+    }
+
     if ( !hicon )
     {
         wxLogLastError(wxT("CreateIconIndirect"));
@@ -157,7 +159,6 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
 
 //    wxFAIL_MSG("Bitmap to icon conversion (including use of XPMs for icons) not implemented");
 #endif // Win32/16
-#endif
 }
 
 void wxIcon::CreateIconFromXpm(const char **data)

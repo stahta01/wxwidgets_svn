@@ -21,9 +21,6 @@
 #include <stdio.h>
 
 #include "wx/module.h"
-#include "wx/intl.h"
-#include "wx/utils.h"
-#include "wx/log.h"
 #include "wx/thread.h"
 
 #define INCL_DOSSEMAPHORES

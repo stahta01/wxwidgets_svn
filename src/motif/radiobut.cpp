@@ -13,12 +13,6 @@
 #pragma implementation "radiobut.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
-#include "wx/defs.h"
-
 #include "wx/radiobut.h"
 #include "wx/utils.h"
 

@@ -18,8 +18,10 @@ WXDLLEXPORT_DATA(extern const char*) wxCheckBoxNameStr;
 
 // Checkbox item (single checkbox)
 class WXDLLEXPORT wxBitmap;
-class WXDLLEXPORT wxCheckBox : public wxCheckBoxBase
+class WXDLLEXPORT wxCheckBox: public wxControl
 {
+  DECLARE_DYNAMIC_CLASS(wxCheckBox)
+
  public:
   inline wxCheckBox() { }
   inline wxCheckBox(wxWindow *parent, wxWindowID id, const wxString& label,
@@ -52,8 +54,6 @@ class WXDLLEXPORT wxCheckBox : public wxCheckBoxBase
 
 protected:
   virtual wxSize DoGetBestSize() const;
-private:
-  DECLARE_DYNAMIC_CLASS(wxCheckBox)
 };
 
 class WXDLLEXPORT wxBitmapCheckBox: public wxCheckBox

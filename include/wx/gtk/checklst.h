@@ -15,22 +15,24 @@
 #pragma interface
 #endif
 
-// ----------------------------------------------------------------------------
-// macros
-// ----------------------------------------------------------------------------
+#include "wx/defs.h"
 
-// there is no "right" choice of the checkbox indicators, so allow the user to
-// define them himself if he wants
-#ifndef wxCHECKLBOX_CHECKED
-    #define wxCHECKLBOX_CHECKED   _T('x')
-    #define wxCHECKLBOX_UNCHECKED _T(' ')
+#if wxUSE_CHECKLISTBOX
 
-    #define wxCHECKLBOX_STRING    _T("[ ] ")
-#endif
+#include "wx/object.h"
+#include "wx/list.h"
+#include "wx/control.h"
+#include "wx/listbox.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class wxCheckListBox;
 
 //-----------------------------------------------------------------------------
 // wxCheckListBox
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class wxCheckListBox : public wxListBox
 {
@@ -53,5 +55,7 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 };
+
+#endif
 
 #endif   //__GTKCHECKLISTH__

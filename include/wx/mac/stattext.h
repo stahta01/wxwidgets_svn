@@ -16,7 +16,11 @@
 #pragma interface "stattext.h"
 #endif
 
-class WXDLLEXPORT wxStaticText: public wxStaticTextBase
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxStaticTextNameStr;
+
+class WXDLLEXPORT wxStaticText: public wxControl
 {
   DECLARE_DYNAMIC_CLASS(wxStaticText)
  public:
@@ -40,16 +44,14 @@ class WXDLLEXPORT wxStaticText: public wxStaticTextBase
            const wxString& name = wxStaticTextNameStr);
 
   // accessors
-  void SetLabel( const wxString &str ) ;
+  void SetLabel(const wxString& , bool resize );
+  void SetLabel( const wxString &str ) { SetLabel( str , true ) ; }
   // operations
   virtual void Command(wxCommandEvent& WXUNUSED(event)) {};
   virtual void ProcessCommand(wxCommandEvent& WXUNUSED(event)) {};
   // events
-  void DrawParagraph(wxDC &dc, wxString paragraph);
   void OnPaint( wxPaintEvent &event ) ;
-  void OnDraw( wxDC &dc ) ;
-  virtual wxSize DoGetBestSize() const ;
-  virtual bool AcceptsFocus() const { return FALSE; }
+  wxSize DoGetBestSize() const ;
  private :
  	wxString	m_label ;
 

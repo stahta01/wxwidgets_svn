@@ -1,27 +1,25 @@
-wxWindows 2.3.2
+wxWindows 2.2.8
 ---------------
 
-*** Please note that this is an UNSTABLE DEVELOPMENT SNAPSHOT.
-*** Unless you need the new features and bug fixes, you may wish to
-*** use the official 2.2.x stable series.
+README
+------
 
 Welcome to wxWindows 2, a sophisticated cross-platform C++
 framework for writing advanced GUI applications using (where
 possible) the native controls.
 
-In addition to common and advanced GUI facilities such as
-frames, scrolling windows, toolbars, tree controls, icons,
-device contexts, printing, splitter windows and so on, there are
-wrappers for common file operations, and facilities for writing
-TCP/IP applications, thread handling, and more. Where certain
-features are not available on a platform, such as MDI and tree
-controls on Unix, they are emulated.
+In addition to common and advanced GUI facilities such as frames, scrolling
+windows, toolbars, tree controls, icons, device contexts, printing,
+splitter windows and so on, there are wrappers for common file operations,
+and facilities for writing TCP/IP applications, thread handling, and more.
+Where certain features are not available on a platform, such as MDI and
+tree controls on Unix, they are emulated.
 
-A detailed 1400-page reference manual is supplied in HTML, PDF
-and Windows Help form: see the docs hierarchy.
+A detailed 1400-page reference manual is supplied in HTML, PDF and
+Windows Help form: see the docs hierarchy.
 
-For a quick start, point your Web browser at docs/html/index.htm
-for a list of important documents and samples.
+For a quick start, point your Web browser at docs/html/index.htm for a
+list of important documents and samples.
 
 Changes in this release
 -----------------------
@@ -33,14 +31,18 @@ Platforms supported
 
 wxWindows 2 currently supports the following platforms:
 
-- Windows 3.1, Windows 95/98, Windows NT, Windows 2000
+- Windows 3.1, Windows 95/98, Windows NT
 - Most Unix variants with Motif/Lesstif
 - Most Unix variants with GTK+
-- MacOS
+- Mac (not covered here: please see the wxWindows web site
+  for details)
+
+Additionally, the wxBase library containing only the non GUI classes can be
+built under Unix/Win32 and (with some limitation) BeOS.
 
 Most popular C++ compilers are supported; see the install.txt
 file for each platform (available via docs/html/index.htm) for details.
-See also http://www.wxwindows.org/platform.htm.
+See also http://www.lpthe.jussieu.fr/~zeitlin/wxWindows/platform.html.
 
 Files
 -----
@@ -49,7 +51,7 @@ The distribution is available in archive formats appropriate to the
 target system. Documentation is available mainly in zip format.
 Some add-on libraries (such as the Object Graphics Library) are
 available in zip form only. In the following, x.y.z represents
-the current version number.
+the current version number (for example, 2.2.3).
 
 wxWindows for GTK distribution
 ------------------------------
@@ -81,12 +83,6 @@ wxMSW-x.y.z.zip                    Zip archive containing all the
                                    files that are in the setup
                                    distribution
 
-wxWindows for MacOS distribution
---------------------------------
-
-wxMac-x.y.z.zip                    Zip archive containing all
-                                   source files (excludes documentation)
-
 As well as the core source, the wxMSW distribution contains:
 
 - Windows HTML Help versions of the documentation (docs/htmlhelp);
@@ -97,6 +93,24 @@ As well as the core source, the wxMSW distribution contains:
 - the JPEG library source;
 - the TIFF library source.
 
+wxBase (wxWindows without GUI) distribution
+-------------------------------------------
+
+wxBase-x.y.z.tgz                    wxBase source distribution (the same files
+wxBase-x.y.z.zip                    but compressed using different formats)
+
+wxBase-x.y.z-0.i386.rpm             wxBase Linux binaries as an RPM
+wxBase-x.y.z-0.src.rpm              source for the i386 RPM above
+wxBase-devel-x.y.z-0.i386.rpm       wxBase headers (requires wxBase.rpm)
+
+wxBase doesn't include the documentation as you are likely to already have it
+from either wxGTK or wxMSW distributions. If you don't, please download the
+manual separately.
+
+NB: you can also build wxBase from the files included in either wxMSW or wxGTK
+    distribution (follow the same instructions as for wxBase distribution in
+    doc/base/install.txt)
+    
 Documentation files
 -------------------
 
@@ -136,10 +150,10 @@ the samples or write your own applications.
 For installation information, please see the install.txt file
 in the individual directories:
 
+  docs/base
   docs/msw
   docs/gtk
   docs/motif
-  docs/mac
 
 Licence information
 -------------------
@@ -179,12 +193,11 @@ If you use JPEG image handler, documentation for your program should
 contain following sentence: "This software is based in part on the work of
 the Independent JPEG Group". See src/jpeg/README for details.
 
-If you use wxRegEx class on a system without native regular expressions
-support (i.e. MS Windows), see src/regex/COPYRIGHT file for Henry Spencer's
-regular expression library copyright.
-
 Documentation
 -------------
+
+See docs/bugs.txt for a bug list: this file is new and will initially
+  be edited by hand, later generated from a web-based bug database.
 
 See docs/html/index.htm for an HTML index of the major documents.
 
@@ -213,10 +226,10 @@ The main wxWindows ftp site is at:
 
 A wxWindows CD-ROM with the latest distribution plus an HTML
 front-end and hundreds of MB of compilers, utilities and other
-material may be ordered from the CD-ROM page: see the wxWindows
-web site.
+material may be ordered from the CD-ROM page (see the wxWindows
+web site) or contact Julian Smart <julian.smart@btopenworld.com>.
 
-Have fun!
+Good luck!
 
-The wxWindows Team, 10th June, 2001
+The wxWindows Team, September, 2001
 

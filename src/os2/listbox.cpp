@@ -30,8 +30,6 @@
 #include "wx/dynarray.h"
 #include "wx/log.h"
 
-#if wxUSE_LISTBOX
-
 #if wxUSE_OWNER_DRAWN
     #include  "wx/ownerdrw.h"
 #endif
@@ -209,7 +207,7 @@ void wxListBox::Delete(int N)
 
 #if wxUSE_OWNER_DRAWN
     delete m_aItems[N];
-    m_aItems.RemoveAt(N);
+    m_aItems.Remove(N);
 #else // !wxUSE_OWNER_DRAWN
     if ( HasClientObjectData() )
     {
@@ -502,9 +500,9 @@ void wxListBox::SetString(int N, const wxString& s)
 
     void *oldData = NULL;
     wxClientData *oldObjData = NULL;
-    if ( m_clientDataItemsType == wxClientData_Void )
+    if ( m_clientDataItemsType == ClientData_Void )
         oldData = GetClientData(N);
-    else if ( m_clientDataItemsType == wxClientData_Object )
+    else if ( m_clientDataItemsType == ClientData_Object )
         oldObjData = GetClientObject(N);
 // TODO:
 /*
@@ -776,5 +774,3 @@ bool wxListBox::OS2OnDraw(WXDRAWITEMSTRUCT *item)
 }
 #endif
     // wxUSE_OWNER_DRAWN
-
-#endif //wxUSE_LISTBOX

@@ -11,17 +11,14 @@
 #ifndef __GTK_PIZZA_H__
 #define __GTK_PIZZA_H__
 
+#include <gdk/gdk.h>
+#include <gtk/gtkcontainer.h>
+#include <gtk/gtkadjustment.h>
+#include <gtk/gtkfeatures.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include <gdk/gdk.h>
-#include <gdk/gdkx.h>
-#include <gtk/gtkcontainer.h>
-#include <gtk/gtkadjustment.h>
-#ifndef __WXGTK20__
-#include <gtk/gtkfeatures.h>
-#endif
 
 #define GTK_PIZZA(obj)          GTK_CHECK_CAST (obj, gtk_pizza_get_type (), GtkPizza)
 #define GTK_PIZZA_CLASS(klass)  GTK_CHECK_CLASS_CAST (klass, gtk_pizza_get_type (), GtkPizzaClass)

@@ -46,8 +46,7 @@ wxMessageDialog::wxMessageDialog(wxWindow *parent,
 
 int wxMessageDialog::ShowModal()
 {
-    wxWindow *winTop = wxTheApp->GetTopWindow();
-    if ( !winTop )
+    if ( !wxTheApp->GetTopWindow() )
     {
         // when the message box is shown from wxApp::OnInit() (i.e. before the
         // message loop is entered), this must be done or the next message box
@@ -57,14 +56,8 @@ int wxMessageDialog::ShowModal()
             wxTheApp->Dispatch();
     }
 
-    // use the top level window as parent if none specified
     HWND hWnd = 0;
-    if ( m_parent )
-        hWnd = GetHwndOf(m_parent);
-    else if ( winTop )
-        hWnd = GetHwndOf(winTop);
-
-    // translate wx style in MSW
+    if (m_parent) hWnd = (HWND) m_parent->GetHWND();
     unsigned int msStyle = MB_OK;
     if (m_dialogStyle & wxYES_NO)
     {
@@ -98,15 +91,11 @@ int wxMessageDialog::ShowModal()
     else
         msStyle |= MB_TASKMODAL;
 
-    // do show the dialog
-    int msAns = MessageBox(hWnd, m_message.c_str(), m_caption.c_str(), msStyle);
-    int ans;
+    int msAns = MessageBox(hWnd, (LPCTSTR)m_message.c_str(),
+                           (LPCTSTR)m_caption.c_str(), msStyle);
+    int ans = wxOK;
     switch (msAns)
     {
-        default:
-            wxFAIL_MSG(_T("unexpected ::MessageBox() return code"));
-            // fall through
-
         case IDCANCEL:
             ans = wxID_CANCEL;
             break;

@@ -83,13 +83,7 @@ public:
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBarSimple, wxToolBarBase)
-
-#if !wxUSE_TOOLBAR_NATIVE || defined(__WXUNIVERSAL__)
-    #include "wx/toolbar.h"
-
-    IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarSimple)
-#endif
+IMPLEMENT_DYNAMIC_CLASS(wxToolBarSimple, wxControl)
 
 BEGIN_EVENT_TABLE(wxToolBarSimple, wxToolBarBase)
     EVT_SIZE(wxToolBarSimple::OnSize)
@@ -509,19 +503,17 @@ void wxToolBarSimple::DrawTool(wxDC& dc, wxToolBarToolBase *toolBase)
     PrepareDC(dc);
 
     wxPen dark_grey_pen(wxColour( 85,85,85 ), 1, wxSOLID);
-    wxPen white_pen(wxT("WHITE"), 1, wxSOLID);
-    wxPen black_pen(wxT("BLACK"), 1, wxSOLID);
+    wxPen white_pen("WHITE", 1, wxSOLID);
+    wxPen black_pen("BLACK", 1, wxSOLID);
 
     wxBitmap bitmap = tool->GetBitmap();
 
     if ( bitmap.Ok() )
     {
-#if wxUSE_PALETTE
 #ifndef __WXGTK__
         if (bitmap.GetPalette())
             memDC.SetPalette(*bitmap.GetPalette());
 #endif
-#endif // wxUSE_PALETTE
 
         int ax = (int)tool->m_x,
         ay = (int)tool->m_y,
@@ -554,12 +546,9 @@ void wxToolBarSimple::DrawTool(wxDC& dc, wxToolBarToolBase *toolBase)
                     &memDC, 0, 0);
         }
         memDC.SelectObject(wxNullBitmap);
-
-#if wxUSE_PALETTE
 #ifndef __WXGTK__
         memDC.SetPalette(wxNullPalette);
 #endif
-#endif // wxUSE_PALETTE
     }
     // No second bitmap, so draw a thick line around bitmap, or invert if mono
     else if ( tool->IsToggled() )
@@ -612,7 +601,7 @@ void wxToolBarSimple::DrawTool(wxDC& dc, wxToolBarToolBase *toolBase)
                 wxCoord y = tool->m_y;
                 wxCoord w = bitmap.GetWidth();
                 wxCoord h = bitmap.GetHeight();
-                wxPen thick_black_pen(wxT("BLACK"), 3, wxSOLID);
+                wxPen thick_black_pen("BLACK", 3, wxSOLID);
 
                 memDC.SelectObject(bitmap);
                 dc.SetClippingRegion(tool->m_x, tool->m_y, w, h);
@@ -693,8 +682,7 @@ void wxToolBarSimple::SpringUpButton(int id)
 
     if ( tool && tool->CanBeToggled() )
     {
-        if (tool->IsToggled())
-            tool->Toggle();
+        tool->Toggle();
 
         DrawTool(tool);
     }
@@ -801,51 +789,63 @@ int wxToolBarSimple::CalcScrollInc(wxScrollEvent& event)
     int orient = event.GetOrientation();
 
     int nScrollInc = 0;
-    if (event.GetEventType() == wxEVT_SCROLL_TOP)
+    switch (event.GetEventType())
     {
-            if (orient == wxHORIZONTAL)
-                nScrollInc = - m_xScrollPosition;
-            else
-                nScrollInc = - m_yScrollPosition;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLL_BOTTOM)
-    {
-            if (orient == wxHORIZONTAL)
-                nScrollInc = m_xScrollLines - m_xScrollPosition;
-            else
-                nScrollInc = m_yScrollLines - m_yScrollPosition;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLL_LINEUP)
-    {
-            nScrollInc = -1;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLL_LINEDOWN)
-    {
-            nScrollInc = 1;
-    } else
-    if (event.GetEventType() == wxEVT_SCROLL_PAGEUP)
-    {
-            if (orient == wxHORIZONTAL)
-                nScrollInc = -GetScrollPageSize(wxHORIZONTAL);
-            else
-                nScrollInc = -GetScrollPageSize(wxVERTICAL);
-    } else
-    if (event.GetEventType() == wxEVT_SCROLL_PAGEDOWN)
-    {
-            if (orient == wxHORIZONTAL)
-                nScrollInc = GetScrollPageSize(wxHORIZONTAL);
-            else
-                nScrollInc = GetScrollPageSize(wxVERTICAL);
-    } else
-    if ((event.GetEventType() == wxEVT_SCROLL_THUMBTRACK) ||
-        (event.GetEventType() == wxEVT_SCROLL_THUMBRELEASE))
-    {
-            if (orient == wxHORIZONTAL)
-                nScrollInc = pos - m_xScrollPosition;
-            else
-                nScrollInc = pos - m_yScrollPosition;
+        case wxEVT_SCROLL_TOP:
+            {
+                if (orient == wxHORIZONTAL)
+                    nScrollInc = - m_xScrollPosition;
+                else
+                    nScrollInc = - m_yScrollPosition;
+                break;
+            }
+        case wxEVT_SCROLL_BOTTOM:
+            {
+                if (orient == wxHORIZONTAL)
+                    nScrollInc = m_xScrollLines - m_xScrollPosition;
+                else
+                    nScrollInc = m_yScrollLines - m_yScrollPosition;
+                break;
+            }
+        case wxEVT_SCROLL_LINEUP:
+            {
+                nScrollInc = -1;
+                break;
+            }
+        case wxEVT_SCROLL_LINEDOWN:
+            {
+                nScrollInc = 1;
+                break;
+            }
+        case wxEVT_SCROLL_PAGEUP:
+            {
+                if (orient == wxHORIZONTAL)
+                    nScrollInc = -GetScrollPageSize(wxHORIZONTAL);
+                else
+                    nScrollInc = -GetScrollPageSize(wxVERTICAL);
+                break;
+            }
+        case wxEVT_SCROLL_PAGEDOWN:
+            {
+                if (orient == wxHORIZONTAL)
+                    nScrollInc = GetScrollPageSize(wxHORIZONTAL);
+                else
+                    nScrollInc = GetScrollPageSize(wxVERTICAL);
+                break;
+            }
+        case wxEVT_SCROLL_THUMBTRACK:
+            {
+                if (orient == wxHORIZONTAL)
+                    nScrollInc = pos - m_xScrollPosition;
+                else
+                    nScrollInc = pos - m_yScrollPosition;
+                break;
+            }
+        default:
+            {
+                break;
+            }
     }
-    
     if (orient == wxHORIZONTAL)
     {
         int w, h;

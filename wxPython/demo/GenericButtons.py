@@ -1,8 +1,8 @@
 
 from wxPython.wx import *
-from wxPython.lib.buttons import *
+from wxPython.lib.buttons import wxGenButton, wxGenBitmapButton, \
+                                 wxGenToggleButton, wxGenBitmapToggleButton
 
-import images
 #----------------------------------------------------------------------
 
 
@@ -34,18 +34,18 @@ class TestPanel(wxPanel):
         #b.SetUseFocusIndicator(false)
         b.SetToolTipString("This is a BIG button...")
 
-        bmp = images.getTest2Bitmap()
+        bmp = wxBitmap('bitmaps/test2.bmp', wxBITMAP_TYPE_BMP)
         b = wxGenBitmapButton(self, -1, bmp, (10, 130))
         EVT_BUTTON(self, b.GetId(), self.OnButton)
 
 
         b = wxGenBitmapButton(self, -1, None, (140, 130))
         EVT_BUTTON(self, b.GetId(), self.OnButton)
-        bmp = images.getBulb1Bitmap()
+        bmp = wxBitmap('bitmaps/lb1.bmp', wxBITMAP_TYPE_BMP)
         mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapLabel(bmp)
-        bmp = images.getBulb2Bitmap()
+        bmp = wxBitmap('bitmaps/lb2.bmp', wxBITMAP_TYPE_BMP)
         mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapSelected(bmp)
@@ -57,28 +57,15 @@ class TestPanel(wxPanel):
 
         b = wxGenBitmapToggleButton(self, -1, None, (140, 230))
         EVT_BUTTON(self, b.GetId(), self.OnToggleButton)
-        bmp = images.getBulb1Bitmap()
+        bmp = wxBitmap('bitmaps/lb1.bmp', wxBITMAP_TYPE_BMP)
         mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapLabel(bmp)
-        bmp = images.getBulb2Bitmap()
+        bmp = wxBitmap('bitmaps/lb2.bmp', wxBITMAP_TYPE_BMP)
         mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         b.SetBitmapSelected(bmp)
         b.SetToggle(true)
-        b.SetBestSize()
-
-        b = wxGenBitmapTextButton(self, -1, None, "Bitmapped Text", (220, 230), size = (200, 45))
-        EVT_BUTTON(self, b.GetId(), self.OnButton)
-        bmp = images.getBulb1Bitmap()
-        mask = wxMaskColour(bmp, wxBLUE)
-        bmp.SetMask(mask)
-        b.SetBitmapLabel(bmp)
-        bmp = images.getBulb2Bitmap()
-        mask = wxMaskColour(bmp, wxBLUE)
-        bmp.SetMask(mask)
-        b.SetBitmapSelected(bmp)
-        b.SetUseFocusIndicator(false)
         b.SetBestSize()
 
 

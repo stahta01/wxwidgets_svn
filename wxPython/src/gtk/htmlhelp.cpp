@@ -90,14 +90,367 @@ static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     return target;
 }
 
-#if PYTHON_API_VERSION >= 1009
-    static char* wxStringErrorMsg = "String or Unicode type required";
-#else
-    static char* wxStringErrorMsg = "String type required";
-#endif
+static char* wxStringErrorMsg = "string type is required for parameter";
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define new_wxHtmlHelpFrameCfg() (new wxHtmlHelpFrameCfg())
+static PyObject *_wrap_new_wxHtmlHelpFrameCfg(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxHtmlHelpFrameCfg * _result;
+    char *_kwnames[] = {  NULL };
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,":new_wxHtmlHelpFrameCfg",_kwnames)) 
+        return NULL;
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (wxHtmlHelpFrameCfg *)new_wxHtmlHelpFrameCfg();
+
+    wxPy_END_ALLOW_THREADS;
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxHtmlHelpFrameCfg_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_x_set(_swigobj,_swigval) (_swigobj->x = _swigval,_swigval)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_x_set(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    long  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","x", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Ol:wxHtmlHelpFrameCfg_x_set",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_x_set. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_x_set(_arg0,_arg1);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_x_get(_swigobj) ((long ) _swigobj->x)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_x_get(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxHtmlHelpFrameCfg_x_get",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_x_get. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_x_get(_arg0);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_y_set(_swigobj,_swigval) (_swigobj->y = _swigval,_swigval)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_y_set(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    long  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","y", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Ol:wxHtmlHelpFrameCfg_y_set",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_y_set. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_y_set(_arg0,_arg1);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_y_get(_swigobj) ((long ) _swigobj->y)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_y_get(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxHtmlHelpFrameCfg_y_get",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_y_get. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_y_get(_arg0);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_w_set(_swigobj,_swigval) (_swigobj->w = _swigval,_swigval)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_w_set(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    long  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","w", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Ol:wxHtmlHelpFrameCfg_w_set",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_w_set. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_w_set(_arg0,_arg1);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_w_get(_swigobj) ((long ) _swigobj->w)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_w_get(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxHtmlHelpFrameCfg_w_get",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_w_get. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_w_get(_arg0);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_h_set(_swigobj,_swigval) (_swigobj->h = _swigval,_swigval)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_h_set(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    long  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","h", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Ol:wxHtmlHelpFrameCfg_h_set",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_h_set. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_h_set(_arg0,_arg1);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_h_get(_swigobj) ((long ) _swigobj->h)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_h_get(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxHtmlHelpFrameCfg_h_get",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_h_get. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_h_get(_arg0);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_sashpos_set(_swigobj,_swigval) (_swigobj->sashpos = _swigval,_swigval)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_sashpos_set(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    long  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","sashpos", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Ol:wxHtmlHelpFrameCfg_sashpos_set",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_sashpos_set. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_sashpos_set(_arg0,_arg1);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_sashpos_get(_swigobj) ((long ) _swigobj->sashpos)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_sashpos_get(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    long  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxHtmlHelpFrameCfg_sashpos_get",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_sashpos_get. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (long )wxHtmlHelpFrameCfg_sashpos_get(_arg0);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("l",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_navig_on_set(_swigobj,_swigval) (_swigobj->navig_on = _swigval,_swigval)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_navig_on_set(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    bool  _arg1;
+    PyObject * _argo0 = 0;
+    int tempbool1;
+    char *_kwnames[] = { "self","navig_on", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxHtmlHelpFrameCfg_navig_on_set",_kwnames,&_argo0,&tempbool1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_navig_on_set. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+    _arg1 = (bool ) tempbool1;
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (bool )wxHtmlHelpFrameCfg_navig_on_set(_arg0,_arg1);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxHtmlHelpFrameCfg_navig_on_get(_swigobj) ((bool ) _swigobj->navig_on)
+static PyObject *_wrap_wxHtmlHelpFrameCfg_navig_on_get(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxHtmlHelpFrameCfg * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxHtmlHelpFrameCfg_navig_on_get",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlHelpFrameCfg_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlHelpFrameCfg_navig_on_get. Expected _wxHtmlHelpFrameCfg_p.");
+        return NULL;
+        }
+    }
+{
+    wxPy_BEGIN_ALLOW_THREADS;
+        _result = (bool )wxHtmlHelpFrameCfg_navig_on_get(_arg0);
+
+    wxPy_END_ALLOW_THREADS;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
 #define new_wxHtmlBookRecord(_swigarg0,_swigarg1,_swigarg2) (new wxHtmlBookRecord(_swigarg0,_swigarg1,_swigarg2))
 static PyObject *_wrap_new_wxHtmlBookRecord(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -118,7 +471,7 @@ static PyObject *_wrap_new_wxHtmlBookRecord(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj0) && !PyUnicode_Check(_obj0)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj0, &tmpPtr, &tmpSize) == -1)
@@ -136,7 +489,7 @@ static PyObject *_wrap_new_wxHtmlBookRecord(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -154,7 +507,7 @@ static PyObject *_wrap_new_wxHtmlBookRecord(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -928,7 +1281,7 @@ static PyObject *_wrap_wxHtmlHelpData_SetTempDir(PyObject *self, PyObject *args,
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -980,7 +1333,7 @@ static PyObject *_wrap_wxHtmlHelpData_AddBook(PyObject *self, PyObject *args, Py
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1031,7 +1384,7 @@ static PyObject *_wrap_wxHtmlHelpData_FindPageByName(PyObject *self, PyObject *a
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1261,14 +1614,6 @@ static void *SwigwxHtmlHelpFrameTowxFrame(void *ptr) {
     return (void *) dest;
 }
 
-static void *SwigwxHtmlHelpFrameTowxTopLevelWindow(void *ptr) {
-    wxHtmlHelpFrame *src;
-    wxTopLevelWindow *dest;
-    src = (wxHtmlHelpFrame *) ptr;
-    dest = (wxTopLevelWindow *) src;
-    return (void *) dest;
-}
-
 static void *SwigwxHtmlHelpFrameTowxWindow(void *ptr) {
     wxHtmlHelpFrame *src;
     wxWindow *dest;
@@ -1282,14 +1627,6 @@ static void *SwigwxHtmlHelpFrameTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxHtmlHelpFrame *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxHtmlHelpFrameTowxObject(void *ptr) {
-    wxHtmlHelpFrame *src;
-    wxObject *dest;
-    src = (wxHtmlHelpFrame *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -1323,7 +1660,7 @@ static PyObject *_wrap_new_wxHtmlHelpFrame(PyObject *self, PyObject *args, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -1420,7 +1757,7 @@ static PyObject *_wrap_wxHtmlHelpFrame_SetTitleFormat(PyObject *self, PyObject *
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1471,7 +1808,7 @@ static PyObject *_wrap_wxHtmlHelpFrame_Display(PyObject *self, PyObject *args, P
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1605,7 +1942,7 @@ static PyObject *_wrap_wxHtmlHelpFrame_KeywordSearch(PyObject *self, PyObject *a
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1665,7 +2002,7 @@ static PyObject *_wrap_wxHtmlHelpFrame_UseConfig(PyObject *self, PyObject *args,
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -1726,7 +2063,7 @@ static PyObject *_wrap_wxHtmlHelpFrame_ReadCustomization(PyObject *self, PyObjec
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -1787,7 +2124,7 @@ static PyObject *_wrap_wxHtmlHelpFrame_WriteCustomization(PyObject *self, PyObje
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -1823,28 +2160,19 @@ static void *SwigwxHtmlHelpControllerTowxEvtHandler(void *ptr) {
     return (void *) dest;
 }
 
-static void *SwigwxHtmlHelpControllerTowxObject(void *ptr) {
-    wxHtmlHelpController *src;
-    wxObject *dest;
-    src = (wxHtmlHelpController *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define new_wxHtmlHelpController(_swigarg0) (new wxHtmlHelpController(_swigarg0))
+#define new_wxHtmlHelpController() (new wxHtmlHelpController())
 static PyObject *_wrap_new_wxHtmlHelpController(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxHtmlHelpController * _result;
-    int  _arg0 = (int ) (wxHF_DEFAULTSTYLE);
-    char *_kwnames[] = { "style", NULL };
+    char *_kwnames[] = {  NULL };
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"|i:new_wxHtmlHelpController",_kwnames,&_arg0)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,":new_wxHtmlHelpController",_kwnames)) 
         return NULL;
 {
     wxPy_BEGIN_ALLOW_THREADS;
-        _result = (wxHtmlHelpController *)new_wxHtmlHelpController(_arg0);
+        _result = (wxHtmlHelpController *)new_wxHtmlHelpController();
 
     wxPy_END_ALLOW_THREADS;
 }    if (_result) {
@@ -1907,7 +2235,7 @@ static PyObject *_wrap_wxHtmlHelpController_SetTitleFormat(PyObject *self, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1958,7 +2286,7 @@ static PyObject *_wrap_wxHtmlHelpController_SetTempDir(PyObject *self, PyObject 
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -2011,7 +2339,7 @@ static PyObject *_wrap_wxHtmlHelpController_AddBook(PyObject *self, PyObject *ar
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -2061,7 +2389,7 @@ static PyObject *_wrap_wxHtmlHelpController_Display(PyObject *self, PyObject *ar
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -2195,7 +2523,7 @@ static PyObject *_wrap_wxHtmlHelpController_KeywordSearch(PyObject *self, PyObje
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -2255,7 +2583,7 @@ static PyObject *_wrap_wxHtmlHelpController_UseConfig(PyObject *self, PyObject *
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -2316,7 +2644,7 @@ static PyObject *_wrap_wxHtmlHelpController_ReadCustomization(PyObject *self, Py
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -2377,7 +2705,7 @@ static PyObject *_wrap_wxHtmlHelpController_WriteCustomization(PyObject *self, P
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -2499,6 +2827,19 @@ static PyMethodDef htmlhelpcMethods[] = {
 	 { "wxHtmlBookRecord_GetStart", (PyCFunction) _wrap_wxHtmlBookRecord_GetStart, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlBookRecord_GetTitle", (PyCFunction) _wrap_wxHtmlBookRecord_GetTitle, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxHtmlBookRecord", (PyCFunction) _wrap_new_wxHtmlBookRecord, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_navig_on_get", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_navig_on_get, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_navig_on_set", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_navig_on_set, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_sashpos_get", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_sashpos_get, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_sashpos_set", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_sashpos_set, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_h_get", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_h_get, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_h_set", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_h_set, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_w_get", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_w_get, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_w_set", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_w_set, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_y_get", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_y_get, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_y_set", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_y_set, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_x_get", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_x_get, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlHelpFrameCfg_x_set", (PyCFunction) _wrap_wxHtmlHelpFrameCfg_x_set, METH_VARARGS | METH_KEYWORDS },
+	 { "new_wxHtmlHelpFrameCfg", (PyCFunction) _wrap_new_wxHtmlHelpFrameCfg, METH_VARARGS | METH_KEYWORDS },
 	 { NULL, NULL }
 };
 #ifdef __cplusplus
@@ -2518,6 +2859,10 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxPrintQuality","_EBool",0},
     { "_wxPrintQuality","_size_t",0},
     { "_wxPrintQuality","_time_t",0},
+    { "_class_wxEvtHandler","_class_wxHtmlHelpController",SwigwxHtmlHelpControllerTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxHtmlHelpController",SwigwxHtmlHelpControllerTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxEvtHandler},
     { "_byte","_unsigned_char",0},
     { "_long","_unsigned_long",0},
     { "_long","_signed_long",0},
@@ -2528,7 +2873,6 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_size_t","_int",0},
     { "_size_t","_wxWindowID",0},
     { "_size_t","_uint",0},
-    { "_wxTopLevelWindow","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxTopLevelWindow},
     { "_uint","_wxCoord",0},
     { "_uint","_wxPrintQuality",0},
     { "_uint","_time_t",0},
@@ -2538,14 +2882,12 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_uint","_wxWindowID",0},
     { "_wxChar","_char",0},
     { "_char","_wxChar",0},
-    { "_struct_wxNativeFontInfo","_wxNativeFontInfo",0},
     { "_EBool","_wxCoord",0},
     { "_EBool","_wxPrintQuality",0},
     { "_EBool","_signed_int",0},
     { "_EBool","_int",0},
     { "_EBool","_wxWindowID",0},
     { "_unsigned_long","_long",0},
-    { "_wxNativeFontInfo","_struct_wxNativeFontInfo",0},
     { "_signed_int","_wxCoord",0},
     { "_signed_int","_wxPrintQuality",0},
     { "_signed_int","_EBool",0},
@@ -2558,8 +2900,8 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_unsigned_short","_wxDateTime_t",0},
     { "_unsigned_short","_WXTYPE",0},
     { "_unsigned_short","_short",0},
-    { "_wxObject","_wxHtmlHelpController",SwigwxHtmlHelpControllerTowxObject},
-    { "_wxObject","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxObject},
+    { "_class_wxWindow","_class_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxWindow},
+    { "_class_wxWindow","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxWindow},
     { "_signed_short","_WXTYPE",0},
     { "_signed_short","_short",0},
     { "_unsigned_char","_byte",0},
@@ -2574,6 +2916,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_short","_WXTYPE",0},
     { "_short","_unsigned_short",0},
     { "_short","_signed_short",0},
+    { "_wxFrame","_class_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxFrame},
     { "_wxFrame","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxFrame},
     { "_wxWindowID","_wxCoord",0},
     { "_wxWindowID","_wxPrintQuality",0},
@@ -2612,9 +2955,14 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxCoord","_size_t",0},
     { "_wxCoord","_time_t",0},
     { "_wxCoord","_wxPrintQuality",0},
+    { "_wxEvtHandler","_class_wxHtmlHelpController",SwigwxHtmlHelpControllerTowxEvtHandler},
     { "_wxEvtHandler","_wxHtmlHelpController",SwigwxHtmlHelpControllerTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxEvtHandler},
     { "_wxEvtHandler","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxEvtHandler},
+    { "_wxWindow","_class_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxWindow},
     { "_wxWindow","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxWindow},
+    { "_class_wxFrame","_class_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxFrame},
+    { "_class_wxFrame","_wxHtmlHelpFrame",SwigwxHtmlHelpFrameTowxFrame},
 {0,0,0}};
 
 static PyObject *SWIG_globals;
@@ -2626,15 +2974,19 @@ SWIGEXPORT(void) inithtmlhelpc() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("htmlhelpc", htmlhelpcMethods);
 	 d = PyModule_GetDict(m);
-	 PyDict_SetItemString(d,"wxHF_TOOLBAR", PyInt_FromLong((long) wxHF_TOOLBAR));
-	 PyDict_SetItemString(d,"wxHF_FLATTOOLBAR", PyInt_FromLong((long) wxHF_FLATTOOLBAR));
-	 PyDict_SetItemString(d,"wxHF_CONTENTS", PyInt_FromLong((long) wxHF_CONTENTS));
-	 PyDict_SetItemString(d,"wxHF_INDEX", PyInt_FromLong((long) wxHF_INDEX));
-	 PyDict_SetItemString(d,"wxHF_SEARCH", PyInt_FromLong((long) wxHF_SEARCH));
-	 PyDict_SetItemString(d,"wxHF_BOOKMARKS", PyInt_FromLong((long) wxHF_BOOKMARKS));
-	 PyDict_SetItemString(d,"wxHF_OPENFILES", PyInt_FromLong((long) wxHF_OPENFILES));
-	 PyDict_SetItemString(d,"wxHF_PRINT", PyInt_FromLong((long) wxHF_PRINT));
-	 PyDict_SetItemString(d,"wxHF_DEFAULTSTYLE", PyInt_FromLong((long) wxHF_DEFAULTSTYLE));
+	 PyDict_SetItemString(d,"wxID_HTML_PANEL", PyInt_FromLong((long) wxID_HTML_PANEL));
+	 PyDict_SetItemString(d,"wxID_HTML_BACK", PyInt_FromLong((long) wxID_HTML_BACK));
+	 PyDict_SetItemString(d,"wxID_HTML_FORWARD", PyInt_FromLong((long) wxID_HTML_FORWARD));
+	 PyDict_SetItemString(d,"wxID_HTML_TREECTRL", PyInt_FromLong((long) wxID_HTML_TREECTRL));
+	 PyDict_SetItemString(d,"wxID_HTML_INDEXPAGE", PyInt_FromLong((long) wxID_HTML_INDEXPAGE));
+	 PyDict_SetItemString(d,"wxID_HTML_INDEXLIST", PyInt_FromLong((long) wxID_HTML_INDEXLIST));
+	 PyDict_SetItemString(d,"wxID_HTML_NOTEBOOK", PyInt_FromLong((long) wxID_HTML_NOTEBOOK));
+	 PyDict_SetItemString(d,"wxID_HTML_SEARCHPAGE", PyInt_FromLong((long) wxID_HTML_SEARCHPAGE));
+	 PyDict_SetItemString(d,"wxID_HTML_SEARCHTEXT", PyInt_FromLong((long) wxID_HTML_SEARCHTEXT));
+	 PyDict_SetItemString(d,"wxID_HTML_SEARCHLIST", PyInt_FromLong((long) wxID_HTML_SEARCHLIST));
+	 PyDict_SetItemString(d,"wxID_HTML_SEARCHBUTTON", PyInt_FromLong((long) wxID_HTML_SEARCHBUTTON));
+	 PyDict_SetItemString(d,"wxID_HTML_SEARCHCHOICE", PyInt_FromLong((long) wxID_HTML_SEARCHCHOICE));
+	 PyDict_SetItemString(d,"wxID_HTML_HELPFRAME", PyInt_FromLong((long) wxID_HTML_HELPFRAME));
 {
    int i;
    for (i = 0; _swig_mapping[i].n1; i++)

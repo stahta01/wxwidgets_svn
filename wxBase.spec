@@ -1,7 +1,6 @@
 %define pref /usr
-%define ver 2.3.1
-%define ver2 2.3
-%define rel 1
+%define ver 2.2.8
+%define rel 0
 
 Summary: wxBase library - non-GUI support classes of wxWindows toolkit
 Name: wxBase
@@ -9,8 +8,8 @@ Version: %{ver}
 Release: %{rel}
 Copyright: wxWindows Licence
 Group: Development/Libraries
-Source: wxBase-%{ver}.tar.bz2
-URL: http://www.wxwindows.org
+Source: wxBase-%{ver}.tar.gz
+URL: http://www.wxwindows.org/
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Prefix: %{pref}
 BuildRoot: /var/tmp/%{name}-root
@@ -34,7 +33,7 @@ Header files for wxBase. You need them to develop programs using wxBase.
 
 %prep
 %setup -n wxBase-%{ver}
-./configure --prefix=%{pref} --enable-soname --disable-gui --disable-std_iostreams
+./configure --prefix=%{pref} --disable-gui --disable-std_iostreams
 
 %build
 if [ "$SMP" != "" ]; then
@@ -45,7 +44,6 @@ fi
 $MAKE
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make prefix=$RPM_BUILD_ROOT%{pref} install
 
 %clean
@@ -60,15 +58,13 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr (644, root, root, 755)
 %doc COPYING.LIB LICENCE.txt README.txt SYMBOLS.txt
-%attr(755, -, -) %{pref}/lib/libwx_base*
-
-%files devel -f src/rpmfiles.lst
+%attr(755, root, root) %{pref}/lib/libwx_base*
 %dir %{pref}/lib/wx
 %dir %{pref}/lib/wx/include
 %dir %{pref}/lib/wx/include/wx
-%dir %{pref}/lib/wx/include/wx/base
 %{pref}/lib/wx/include/wx/base/setup.h
+
+%files devel -f src/rpmfiles.lst
 %defattr (644, root, root, 755)
-%attr(755, -, -) %{pref}/bin/wxbase-%{ver2}-config
-%attr(755, -, -) %{pref}/bin/wx-config
+%attr(755, root, root) %{pref}/bin/wx-config
 

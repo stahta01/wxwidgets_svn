@@ -164,26 +164,8 @@ wxMutex::wxMutex()
 {
     m_internal = new wxMutexInternal;
 
-    // support recursive locks like Win32, i.e. a thread can lock a mutex which
-    // it had itself already locked
-    //
-    // but initialization of recursive mutexes is non portable <sigh>, so try
-    // several methods
-#ifdef HAVE_PTHREAD_MUTEXATTR_T
-    pthread_mutexattr_t attr;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-
-    pthread_mutex_init(&(m_internal->m_mutex), &attr);
-#elif defined(HAVE_PTHREAD_RECURSIVE_MUTEX_INITIALIZER)
-    // we can use this only as initializer so we have to assign it first to a
-    // temp var - assigning directly to m_mutex wouldn't even compile
-    pthread_mutex_t mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-    m_internal->m_mutex = mutex;
-#else // no recursive mutexes
-    pthread_mutex_init(&(m_internal->m_mutex), NULL);
-#endif // HAVE_PTHREAD_MUTEXATTR_T/...
-
+    pthread_mutex_init(&(m_internal->m_mutex),
+                       (pthread_mutexattr_t*) NULL );
     m_locked = 0;
 }
 
@@ -743,12 +725,8 @@ void wxThreadInternal::Wait()
         wxMutexGuiLeave();
 
     bool isDetached = m_isDetached;
-#ifdef __VMS
-   long long id = (long long)GetId();
-#else
-   long id = (long)GetId();
-#endif
-   wxLogTrace(TRACE_THREADS, _T("Starting to wait for thread %ld to exit."),
+    long id = (long)GetId();
+    wxLogTrace(TRACE_THREADS, _T("Starting to wait for thread %ld to exit."),
                id);
 
     // wait until the thread terminates (we're blocking in _another_ thread,
@@ -869,7 +847,7 @@ void wxThread::Sleep(unsigned long milliseconds)
 
 int wxThread::GetCPUCount()
 {
-#if defined(__LINUX__) && wxUSE_FFILE
+#if defined(__LINUX__)
     // read from proc (can't use wxTextFile here because it's a special file:
     // it has 0 size but still can be read from)
     wxLogNull nolog;
@@ -1109,15 +1087,9 @@ unsigned int wxThread::GetPriority() const
     return m_internal->GetPriority();
 }
 
-#ifdef __VMS
-unsigned long long wxThread::GetId() const
-{
-    return (unsigned long long)m_internal->GetId();
-#else
 unsigned long wxThread::GetId() const
 {
     return (unsigned long)m_internal->GetId();
-#endif
 }
 
 // -----------------------------------------------------------------------------

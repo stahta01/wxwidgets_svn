@@ -4,7 +4,7 @@
 //
 // Author:      Robin Dunn
 //
-// Created:     25-Nov-1998
+// Created:     25-nov-1998
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 by Total Control Software
 // Licence:     wxWindows license
@@ -37,7 +37,39 @@
 %extern controls2.i
 
 %extern utils.i
+
 %extern html.i
+
+//---------------------------------------------------------------------------
+
+enum {
+    wxID_HTML_PANEL,
+    wxID_HTML_BACK,
+    wxID_HTML_FORWARD,
+    wxID_HTML_TREECTRL,
+    wxID_HTML_INDEXPAGE,
+    wxID_HTML_INDEXLIST,
+    wxID_HTML_NOTEBOOK,
+    wxID_HTML_SEARCHPAGE,
+    wxID_HTML_SEARCHTEXT,
+    wxID_HTML_SEARCHLIST,
+    wxID_HTML_SEARCHBUTTON,
+    wxID_HTML_SEARCHCHOICE,
+    wxID_HTML_HELPFRAME
+
+};
+
+//---------------------------------------------------------------------------
+
+class  wxHtmlHelpFrameCfg
+{
+public:
+    wxHtmlHelpFrameCfg();
+
+    long x, y, w, h;
+    long sashpos;
+    bool navig_on;
+};
 
 
 //---------------------------------------------------------------------------
@@ -99,7 +131,7 @@ public:
     wxString FindPageByName(const wxString& page);
     wxString FindPageById(int id);
 
-    // TODO: this one needs fixed...
+    // **** this one needs fixed...
     const wxHtmlBookRecArray& GetBookRecArray();
 
     wxHtmlContentsItem* GetContents();
@@ -116,8 +148,6 @@ public:
 		    const wxString& title = wxEmptyString,
 		    int style = wxHF_DEFAULTSTYLE, wxHtmlHelpData* data = NULL);
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-
     wxHtmlHelpData* GetData();
     void SetTitleFormat(const wxString& format);
     void Display(const wxString& x);
@@ -133,26 +163,10 @@ public:
 
 //---------------------------------------------------------------------------
 
-
-enum {
-    wxHF_TOOLBAR,
-    wxHF_FLATTOOLBAR,
-    wxHF_CONTENTS,
-    wxHF_INDEX,
-    wxHF_SEARCH,
-    wxHF_BOOKMARKS,
-    wxHF_OPENFILES,
-    wxHF_PRINT,
-    wxHF_DEFAULTSTYLE,
-};
-
-
 class wxHtmlHelpController : public wxEvtHandler {
 public:
-    wxHtmlHelpController(int style = wxHF_DEFAULTSTYLE);
+    wxHtmlHelpController();
     ~wxHtmlHelpController();
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
 
     void SetTitleFormat(const wxString& format);
     void SetTempDir(const wxString& path);

@@ -101,7 +101,3 @@ bool wxScreenDC::EndDrawingOnTop()
     return TRUE;
 }
 
-void wxScreenDC::DoGetSize(int *width, int *height) const
-{
-    wxDisplaySize(width, height);
-}

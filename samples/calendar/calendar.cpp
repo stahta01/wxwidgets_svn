@@ -178,7 +178,10 @@ bool MyApp::OnInit()
     MyFrame *frame = new MyFrame("Calendar wxWindows sample",
                                  wxPoint(50, 50), wxSize(450, 340));
 
+    // Show it and tell the application that it's our main window
+    // @@@ what does it do exactly, in fact? is it necessary here?
     frame->Show(TRUE);
+    SetTopWindow(frame);
 
     // success: wxApp::OnRun() will be called which will enter the main message
     // loop and the application will run. If we returned FALSE here, the
@@ -299,7 +302,7 @@ MyPanel::MyPanel(wxFrame *frame)
     SetAutoLayout(TRUE);
 
     wxString date;
-    date.Printf(wxT("Selected date: %s"),
+    date.Printf("Selected date: %s",
                 wxDateTime::Today().FormatISODate().c_str());
     m_date = new wxStaticText(this, -1, date);
     m_calendar = new wxCalendarCtrl(this, Calendar_CalCtrl,
@@ -329,31 +332,31 @@ MyPanel::MyPanel(wxFrame *frame)
 
 void MyPanel::OnCalendar(wxCalendarEvent& event)
 {
-    wxLogMessage(wxT("Selected %s from calendar"),
+    wxLogMessage("Selected %s from calendar",
                  event.GetDate().FormatISODate().c_str());
 }
 
 void MyPanel::OnCalendarChange(wxCalendarEvent& event)
 {
     wxString s;
-    s.Printf(wxT("Selected date: %s"), event.GetDate().FormatISODate().c_str());
+    s.Printf("Selected date: %s", event.GetDate().FormatISODate().c_str());
 
     m_date->SetLabel(s);
 }
 
 void MyPanel::OnCalMonthChange(wxCalendarEvent& WXUNUSED(event))
 {
-    wxLogStatus(wxT("Calendar month changed"));
+    wxLogStatus("Calendar month changed");
 }
 
 void MyPanel::OnCalYearChange(wxCalendarEvent& WXUNUSED(event))
 {
-    wxLogStatus(wxT("Calendar year changed"));
+    wxLogStatus("Calendar year changed");
 }
 
 void MyPanel::OnCalendarWeekDayClick(wxCalendarEvent& event)
 {
-    wxLogMessage(wxT("Clicked on %s"),
+    wxLogMessage("Clicked on %s",
                  wxDateTime::GetWeekDayName(event.GetWeekDay()).c_str());
 }
 
@@ -392,3 +395,4 @@ void MyPanel::HighlightSpecial(bool on)
 
     m_calendar->Refresh();
 }
+

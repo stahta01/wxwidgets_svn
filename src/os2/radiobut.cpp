@@ -26,6 +26,7 @@
 #include "wx/os2/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxRadioButton, wxControl)
+IMPLEMENT_DYNAMIC_CLASS(wxBitmapRadioButton, wxRadioButton)
 
 bool wxRadioButton::OS2Command(WXUINT param, WXWORD id)
 {
@@ -147,9 +148,6 @@ void wxRadioButton::Command (wxCommandEvent & event)
   ProcessCommand (event);
 }
 
-// Not implemented
-#if 0
-
 bool wxBitmapRadioButton::Create(wxWindow *parent, wxWindowID id,
        const wxBitmap *bitmap,
            const wxPoint& pos,
@@ -220,4 +218,3 @@ bool wxBitmapRadioButton::GetValue(void) const
     return FALSE;
 }
 
-#endif

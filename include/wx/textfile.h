@@ -20,6 +20,11 @@
 
 #include "wx/defs.h"
 
+#if !wxUSE_FILE
+    #undef wxUSE_TEXTFILE
+    #define wxUSE_TEXTFILE 0
+#endif // wxUSE_FILE
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -79,9 +84,9 @@ public:
     // same as Create() but with (another) file name
   bool Create(const wxString& strFile);
     // Open() also loads file in memory on success
-  bool Open(wxMBConv& conv = wxConvLibc);
+  bool Open();
     // same as Open() but with (another) file name
-  bool Open(const wxString& strFile, wxMBConv& conv = wxConvLibc);
+  bool Open(const wxString& strFile);
     // closes the file and frees memory, losing all changes
   bool Close();
     // is file currently opened?
@@ -131,12 +136,11 @@ public:
                   wxTextFileType type = typeDefault)
     { m_aLines.Insert(str, n); m_aTypes.Insert(type, n); }
     // delete one line
-  void RemoveLine(size_t n) { m_aLines.RemoveAt(n); m_aTypes.RemoveAt(n); }
+  void RemoveLine(size_t n) { m_aLines.Remove(n); m_aTypes.Remove(n); }
 
   // change the file on disk (default argument means "don't change type")
   // possibly in another format
-  bool Write(wxTextFileType typeNew = wxTextFileType_None,
-             wxMBConv& conv = wxConvLibc);
+  bool Write(wxTextFileType typeNew = wxTextFileType_None);
 
   // dtor
   ~wxTextFile();
@@ -147,7 +151,7 @@ private:
   wxTextFile& operator=(const wxTextFile&);
 
   // read the file in memory (m_file is supposed to be just opened)
-  bool Read(wxMBConv& conv);
+  bool Read();
 
   wxFile        m_file;     // current file
 
@@ -186,12 +190,6 @@ private:
     // copy ctor/assignment operator not implemented
     wxTextFile(const wxTextFile&);
     wxTextFile& operator=(const wxTextFile&);
-
-    // suppress the gcc warning: 'class defines only private constructors and
-    // has no friends'
-#ifdef __GNUG__
-    friend class wxTextFileDummyFriend;
-#endif // gcc
 };
 
 #endif // wxUSE_TEXTFILE

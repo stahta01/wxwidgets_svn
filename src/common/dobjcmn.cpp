@@ -27,8 +27,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_DATAOBJ
-
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/debug.h"
@@ -133,43 +131,6 @@ wxDataObjectComposite::GetPreferredFormat(Direction WXUNUSED(dir)) const
     return dataObj->GetFormat();
 }
 
-#if defined(__WXMSW__)
-
-size_t wxDataObjectComposite::GetBufferOffset( const wxDataFormat& format )
-{
-    wxDataObjectSimple *dataObj = GetObject(format);
-
-    wxCHECK_MSG( dataObj, FALSE,
-                 wxT("unsupported format in wxDataObjectComposite"));
-
-    return dataObj->GetBufferOffset( format );
-}
-
-const void* wxDataObjectComposite::GetSizeFromBuffer( const void* buffer,
-                                                      size_t* size,
-                                                      const wxDataFormat& format )
-{
-    wxDataObjectSimple *dataObj = GetObject(format);
-
-    wxCHECK_MSG( dataObj, FALSE,
-                 wxT("unsupported format in wxDataObjectComposite"));
-
-    return dataObj->GetSizeFromBuffer( buffer, size, format );
-}
-
-void* wxDataObjectComposite::SetSizeInBuffer( void* buffer, size_t size,
-                                              const wxDataFormat& format )
-{
-    wxDataObjectSimple *dataObj = GetObject(format);
-
-    wxCHECK_MSG( dataObj, FALSE,
-                 wxT("unsupported format in wxDataObjectComposite"));
-
-    return dataObj->SetSizeInBuffer( buffer, size, format );
-}
-
-#endif
-
 size_t wxDataObjectComposite::GetFormatCount(Direction WXUNUSED(dir)) const
 {
     // TODO what about the Get/Set only formats?
@@ -227,19 +188,19 @@ bool wxDataObjectComposite::SetData(const wxDataFormat& format,
 
 size_t wxTextDataObject::GetDataSize() const
 {
-    return GetTextLength() * sizeof(wxChar);
+    return GetTextLength();
 }
 
 bool wxTextDataObject::GetDataHere(void *buf) const
 {
-    wxStrcpy((wxChar *)buf, GetText().c_str());
+    strcpy((char *)buf, GetText().mb_str());
 
     return TRUE;
 }
 
 bool wxTextDataObject::SetData(size_t WXUNUSED(len), const void *buf)
 {
-    SetText(wxString((const wxChar *)buf));
+    SetText(wxString((const char *)buf));
 
     return TRUE;
 }
@@ -403,6 +364,5 @@ wxDragResult wxFileDropTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
     return OnDropFiles(x, y, dobj->GetFilenames()) ? def : wxDragNone;
 }
 
-#endif // wxUSE_DRAG_AND_DROP
+#endif
 
-#endif // wxUSE_DATAOBJ

@@ -30,15 +30,7 @@
 #endif
 
 #include "penguin.h"
-#ifdef __WXMAC__
-#  ifdef __DARWIN__
-#    include <OpenGL/glu.h>
-#  else
-#    include <glu.h>
-#  endif
-#else
-#  include <GL/glu.h>
-#endif
+#include <GL/glu.h>
 
 #define VIEW_ASPECT 1.3
 
@@ -155,9 +147,16 @@ void TestGLCanvas::OnPaint( wxPaintEvent& event )
 
 void TestGLCanvas::OnSize(wxSizeEvent& event)
 {
-    // the viewport must be initialized this way, not glViewport
-    // this is also necessary to update the context on some platforms
-    wxGLCanvas::OnSize(event);
+    int width, height;
+    GetClientSize(& width, & height);
+    
+#ifndef __WXMOTIF__
+    if (GetContext())
+#endif
+    {
+        SetCurrent();
+        glViewport(0, 0, width, height);
+    }
 }
 
 void TestGLCanvas::OnEraseBackground(wxEraseEvent& event)

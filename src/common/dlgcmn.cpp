@@ -37,40 +37,13 @@
     #include "wx/stattext.h"
     #include "wx/sizer.h"
     #include "wx/button.h"
-    #include "wx/containr.h"
 #endif
-
 
 //--------------------------------------------------------------------------
 // wxDialogBase
 //--------------------------------------------------------------------------
 
-// FIXME - temporary hack in absence of wxtopLevelWindow, should be always used
-#ifdef wxTopLevelWindowNative
-BEGIN_EVENT_TABLE(wxDialogBase, wxTopLevelWindow)
-    WX_EVENT_TABLE_CONTROL_CONTAINER(wxDialogBase)
-END_EVENT_TABLE()
-
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxDialogBase)
-#endif
-
-void wxDialogBase::Init()
-{
-    m_returnCode = 0;
-
-    // the dialogs have this flag on by default to prevent the events from the
-    // dialog controls from reaching the parent frame which is usually
-    // undesirable and can lead to unexpected and hard to find bugs
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS);
-
-#ifdef wxTopLevelWindowNative // FIXME - temporary hack, should be always used!
-    m_container.SetContainerWindow(this);
-#endif
-}
-
-#if wxUSE_STATTEXT && wxUSE_TEXTCTRL
-
-wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
+wxSizer *wxDialogBase::CreateTextSizer( const wxString &message )
 {
     wxBoxSizer *box = new wxBoxSizer( wxVERTICAL );
 
@@ -82,34 +55,24 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
     GetTextExtent(_T("H"), (int*)NULL, &y, (int*)NULL, (int*)NULL, &font);
 
     wxString line;
-    for ( size_t pos = 0; pos < message.length(); pos++ )
+    for (size_t pos = 0; pos < message.Len(); pos++)
     {
-        switch ( message[pos] )
+        if (message[pos] == wxT('\n'))
         {
-            case _T('\n'):
-                if (!line.IsEmpty())
-                {
-                    wxStaticText *s1 = new wxStaticText( this, -1, line );
-                    box->Add( s1 );
-                    line = wxT("");
-                }
-                else
-                {
-                    box->Add( 5, y );
-                }
-                break;
-
-            case _T('&'):
-                // this is used as accel mnemonic prefix in the wxWindows
-                // controls but in the static messages created by
-                // CreateTextSizer() (used by wxMessageBox, for example), we
-                // don't want this special meaning, so we need to quote it
-                line += _T('&');
-
-                // fall through to add it normally too
-
-            default:
-                line += message[pos];
+            if (!line.IsEmpty())
+            {
+                wxStaticText *s1 = new wxStaticText( this, -1, line );
+                box->Add( s1 );
+                line = wxT("");
+            }
+            else
+            {
+                box->Add( 5, y );
+            }
+        }
+        else
+        {
+            line += message[pos];
         }
     }
 
@@ -122,10 +85,6 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
 
     return box;
 }
-
-#endif // wxUSE_STATTEXT && wxUSE_TEXTCTRL
-
-#if wxUSE_BUTTON
 
 wxSizer *wxDialogBase::CreateButtonSizer( long flags )
 {
@@ -147,46 +106,46 @@ wxSizer *wxDialogBase::CreateButtonSizer( long flags )
 
     if (flags & wxYES_NO)
     {
-        yes = new wxButton( this, wxID_YES, _("Yes"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        yes = new wxButton( this, wxID_YES, _("Yes") );
         box->Add( yes, 0, wxLEFT|wxRIGHT, margin );
-        no = new wxButton( this, wxID_NO, _("No") ,wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS);
+        no = new wxButton( this, wxID_NO, _("No") );
         box->Add( no, 0, wxLEFT|wxRIGHT, margin );
     } else
     if (flags & wxYES)
     {
-        yes = new wxButton( this, wxID_YES, _("Yes"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        yes = new wxButton( this, wxID_YES, _("Yes") );
         box->Add( yes, 0, wxLEFT|wxRIGHT, margin );
     } else
     if (flags & wxNO)
     {
-        no = new wxButton( this, wxID_NO, _("No"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        no = new wxButton( this, wxID_NO, _("No") );
         box->Add( no, 0, wxLEFT|wxRIGHT, margin );
     }
 
     if (flags & wxOK)
     {
-        ok = new wxButton( this, wxID_OK, _("OK"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        ok = new wxButton( this, wxID_OK, _("OK") );
         box->Add( ok, 0, wxLEFT|wxRIGHT, margin );
     }
 
     if (flags & wxFORWARD)
-        box->Add( new wxButton( this, wxID_FORWARD, _("Forward"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+        box->Add( new wxButton( this, wxID_FORWARD, _("Forward")  ), 0, wxLEFT|wxRIGHT, margin );
 
     if (flags & wxBACKWARD)
-        box->Add( new wxButton( this, wxID_BACKWARD, _("Backward"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+        box->Add( new wxButton( this, wxID_BACKWARD, _("Backward")  ), 0, wxLEFT|wxRIGHT, margin );
 
     if (flags & wxSETUP)
-        box->Add( new wxButton( this, wxID_SETUP, _("Setup"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+        box->Add( new wxButton( this, wxID_SETUP, _("Setup")  ), 0, wxLEFT|wxRIGHT, margin );
 
     if (flags & wxMORE)
-        box->Add( new wxButton( this, wxID_MORE, _("More..."),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+        box->Add( new wxButton( this, wxID_MORE, _("More...")  ), 0, wxLEFT|wxRIGHT, margin );
 
     if (flags & wxHELP)
-        box->Add( new wxButton( this, wxID_HELP, _("Help"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+        box->Add( new wxButton( this, wxID_HELP, _("Help")  ), 0, wxLEFT|wxRIGHT, margin );
 
     if (flags & wxCANCEL)
     {
-        cancel = new wxButton( this, wxID_CANCEL, _("Cancel"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        cancel = new wxButton( this, wxID_CANCEL, _("Cancel") );
         box->Add( cancel, 0, wxLEFT|wxRIGHT, margin );
     }
 
@@ -215,4 +174,3 @@ wxSizer *wxDialogBase::CreateButtonSizer( long flags )
     return box;
 }
 
-#endif // wxUSE_BUTTON

@@ -13,7 +13,7 @@
 #define _WX_DC_H_
 
 #include "wx/defs.h"
-//#include "wx/dc.h"
+#include "wx/dc.h"
 
 // ---------------------------------------------------------------------------
 // macros
@@ -67,40 +67,12 @@
 
 #define     wx_round(a)    (int)((a)+.5)
 
-#if wxUSE_DC_CACHEING
-/*
- * Cached blitting, maintaining a cache
- * of bitmaps required for transparent blitting
- * instead of constant creation/deletion
- */
-
-class wxDCCacheEntry : public wxObject
-{
-public:
-    wxDCCacheEntry( WXHBITMAP hBitmap
-                   ,int       nWidth
-                   ,int       nHeight
-                   ,int       nDepth
-                  );
-    wxDCCacheEntry( HPS   hPS
-                   ,int   nDepth
-                  );
-    ~wxDCCacheEntry();
-
-    WXHBITMAP                       m_hBitmap;
-    HPS                             m_hPS;
-    int                             m_nWidth;
-    int                             m_nHeight;
-    int                             m_nDepth;
-}; // end of CLASS wxDCCacheEntry
-#endif
-
 class WXDLLEXPORT wxDC : public wxDCBase
 {
     DECLARE_DYNAMIC_CLASS(wxDC)
 
 public:
-    wxDC(void);
+    wxDC();
     ~wxDC();
 
     // implement base class pure virtuals
@@ -176,30 +148,8 @@ public:
         m_bOwnsDC = bOwnsDC;
     }
 
-    HPS             GetHPS(void) const { return m_hPS; }
-    void            SetHPS(HPS hPS)
-    {
-        HDC                         hDC = ::GpiQueryDevice(hPS);
-        m_hPS = hPS;
-    }
     const wxBitmap& GetSelectedBitmap(void) const { return m_vSelectedBitmap; }
     wxBitmap&       GetSelectedBitmap(void) { return m_vSelectedBitmap; }
-
-    void            UpdateClipBox();
-
-#if wxUSE_DC_CACHEING
-    static wxDCCacheEntry* FindBitmapInCache( HPS hPS
-                                             ,int nWidth
-                                             ,int nHeight
-                                            );
-    static wxDCCacheEntry* FindDCInCache( wxDCCacheEntry* pNotThis
-                                         ,HPS             hPS
-                                        );
-
-    static void AddToBitmapCache(wxDCCacheEntry* pEntry);
-    static void AddToDCCache(wxDCCacheEntry* pEntry);
-    static void ClearCache(void);
-#endif
 
 protected:
     virtual void DoFloodFill( wxCoord         vX
@@ -292,8 +242,6 @@ protected:
                         ,wxCoord vYsrc
                         ,int     nRop = wxCOPY
                         ,bool    bUseMask = FALSE
-                        ,wxCoord vXsrcMask = -1
-                        ,wxCoord vYsrcMask = -1
                        );
 
     virtual void DoSetClippingRegionAsRegion(const wxRegion& rRegion);
@@ -333,6 +281,9 @@ protected:
                                ,int     nFillStyle = wxODDEVEN_RULE
                               );
 
+#if wxUSE_SPLINES
+    virtual void DoDrawSpline(wxList* pPoints);
+#endif // wxUSE_SPLINES
 
     //
     // common part of DoDrawText() and DoDrawRotatedText()
@@ -352,22 +303,17 @@ protected:
     wxWindow*                       m_pCanvas;
     wxBitmap                        m_vSelectedBitmap;
 
-public:
-    // PM specific stuff
-    HPS                             m_hPS;
-    HPS                             m_hOldPS;   // old hPS, if any
-    bool                            m_bIsPaintTime;// True at Paint Time
-
-    RECTL                           m_vRclPaint; // Bounding rectangle at Paint time etc.
     //
     // TRUE => DeleteDC() in dtor, FALSE => only ReleaseDC() it
     //
     bool                            m_bOwnsDC:1;
 
     //
-    // our HDC
+    // our HDC and its usage count: we only free it when the usage count drops
+    // to 0
     //
     WXHDC                           m_hDC;
+    int                             m_nDCCount;
 
     //
     // Store all old GDI objects when do a SelectObject, so we can select them
@@ -379,11 +325,6 @@ public:
     WXHBRUSH                        m_hOldBrush;
     WXHFONT                         m_hOldFont;
     WXHPALETTE                      m_hOldPalette;
-
-#if wxUSE_DC_CACHEING
-    static wxList                   m_svBitmapCache;
-    static wxList                   m_svDCCache;
-#endif
-}; // end of CLASS wxDC
+};
 #endif
     // _WX_DC_H_

@@ -40,22 +40,15 @@ public:
     bool IsSupportedFormat(const wxDataFormat& format) const
         { return wxDataObjectBase::IsSupported(format, Get); }
 
-    // function to return symbolic name of clipboard format (for debug messages)
 #ifdef __WXDEBUG__
+    // function to return symbolic name of clipboard format (for debug messages)
     static const wxChar *GetFormatName(wxDataFormat format);
 
     #define wxGetFormatName(format) wxDataObject::GetFormatName(format)
 #else // !Debug
-    #define wxGetFormatName(format) _T("")
+    #define wxGetFormatName(format) ""
 #endif // Debug/!Debug
-    // they need to be accessed from wxIDataObject, so made them public,
-    // or wxIDataObject friend
-public:
-    virtual const void* GetSizeFromBuffer( const void* buffer, size_t* size,
-                                           const wxDataFormat& format );
-    virtual void* SetSizeInBuffer( void* buffer, size_t size,
-                                   const wxDataFormat& format );
-    virtual size_t GetBufferOffset( const wxDataFormat& format );
+
 private:
     IDataObject *m_pIDataObject; // pointer to the COM interface
 };

@@ -41,7 +41,7 @@
 
 
 
-class wxPrintData : public wxObject {
+class wxPrintData {
 public:
     wxPrintData();
     ~wxPrintData();
@@ -69,30 +69,30 @@ public:
     void SetPaperSize(const wxSize& sz);
     void SetQuality(wxPrintQuality quality);
 
-    // PostScript-specific data
-    const wxString& GetPrinterCommand();
-    const wxString& GetPrinterOptions();
-    const wxString& GetPreviewCommand();
-    const wxString& GetFilename();
-    const wxString& GetFontMetricPath();
-    double GetPrinterScaleX();
-    double GetPrinterScaleY();
-    long GetPrinterTranslateX();
-    long GetPrinterTranslateY();
-    wxPrintMode GetPrintMode();
+//    // PostScript-specific data
+//      const wxString& GetPrinterCommand();
+//      const wxString& GetPrinterOptions();
+//      const wxString& GetPreviewCommand();
+//      const wxString& GetFilename();
+//      const wxString& GetFontMetricPath();
+//      double GetPrinterScaleX();
+//      double GetPrinterScaleY();
+//      long GetPrinterTranslateX();
+//      long GetPrinterTranslateY();
+//      wxPrintMode GetPrintMode();
 
-    void SetPrinterCommand(const wxString& command);
-    void SetPrinterOptions(const wxString& options);
-    void SetPreviewCommand(const wxString& command);
-    void SetFilename(const wxString& filename);
-    void SetFontMetricPath(const wxString& path);
-    void SetPrinterScaleX(double x);
-    void SetPrinterScaleY(double y);
-    void SetPrinterScaling(double x, double y);
-    void SetPrinterTranslateX(long x);
-    void SetPrinterTranslateY(long y);
-    void SetPrinterTranslation(long x, long y);
-    void SetPrintMode(wxPrintMode printMode);
+//      void SetPrinterCommand(const wxString& command);
+//      void SetPrinterOptions(const wxString& options);
+//      void SetPreviewCommand(const wxString& command);
+//      void SetFilename(const wxString& filename);
+//      void SetFontMetricPath(const wxString& path);
+//      void SetPrinterScaleX(double x);
+//      void SetPrinterScaleY(double y);
+//      void SetPrinterScaling(double x, double y);
+//      void SetPrinterTranslateX(long x);
+//      void SetPrinterTranslateY(long y);
+//      void SetPrinterTranslation(long x, long y);
+//      void SetPrintMode(wxPrintMode printMode);
 
 };
 
@@ -112,7 +112,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxPageSetupDialogData : public wxObject {
+class wxPageSetupDialogData {
 public:
     wxPageSetupDialogData();
     ~wxPageSetupDialogData();
@@ -165,7 +165,7 @@ public:
 //----------------------------------------------------------------------
 
 
-class wxPrintDialogData : public wxObject {
+class wxPrintDialogData {
 public:
     wxPrintDialogData();
     ~wxPrintDialogData();
@@ -219,10 +219,9 @@ public:
 // Since this one would be tough and ugly to do with the Macros...
 void wxPyPrintout::GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo) {
     bool hadErr = FALSE;
-    bool found;
 
-    wxPyTState* state = wxPyBeginBlockThreads();
-    if ((found = m_myInst.findCallback("GetPageInfo"))) {
+    bool doSave = wxPyRestoreThread();
+    if (m_myInst.findCallback("GetPageInfo")) {
         PyObject* result = m_myInst.callCallbackObj(Py_BuildValue("()"));
         if (result && PyTuple_Check(result) && PyTuple_Size(result) == 4) {
             PyObject* val;
@@ -252,9 +251,10 @@ void wxPyPrintout::GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *p
         }
         Py_DECREF(result);
     }
-    wxPyEndBlockThreads(state);
-    if (! found)
+    else
         wxPrintout::GetPageInfo(minPage, maxPage, pageFrom, pageTo);
+
+    wxPySaveThread(doSave);
 }
 
 void wxPyPrintout::base_GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo) {
@@ -275,12 +275,12 @@ IMP_PYCALLBACK_BOOL_INT(wxPyPrintout, wxPrintout, HasPage);
 
 
 // Now define the custom class for SWIGging
-%name(wxPrintout) class wxPyPrintout  : public wxObject {
+%name(wxPrintout) class wxPyPrintout {
 public:
     wxPyPrintout(const char* title = "Printout");
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPrintout)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPrintout)"
 
     %addmethods {
         void Destroy() { delete self; }
@@ -304,7 +304,7 @@ public:
 
 //----------------------------------------------------------------------
 
-class wxPrinter : public wxObject {
+class wxPrinter {
 public:
     wxPrinter(wxPrintDialogData* data = NULL);
     ~wxPrinter();
@@ -320,7 +320,7 @@ public:
 
 //----------------------------------------------------------------------
 
-class wxPrintPreview : public wxObject {
+class wxPrintPreview {
 public:
     wxPrintPreview(wxPyPrintout* printout, wxPyPrintout* printoutForPrinting, wxPrintData* data=NULL);
 //    ~wxPrintPreview();   **** ????
@@ -353,7 +353,7 @@ public:
                    long style = wxDEFAULT_FRAME_STYLE,
                    char* name = "frame");
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdFrameCallbacks(self)"
 
     void Initialize();
 
@@ -364,11 +364,6 @@ public:
 };
 
 //----------------------------------------------------------------------
-
-%init %{
-    wxPyPtrTypeMap_Add("wxPrintout", "wxPyPrintout");
-%}
-
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 

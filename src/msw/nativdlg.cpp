@@ -43,6 +43,7 @@
 // global functions
 // ---------------------------------------------------------------------------
 
+extern wxWindow *wxWndHook;
 extern LONG APIENTRY _EXPORT wxDlgProc(HWND hWnd, UINT message,
                                        WPARAM wParam, LPARAM lParam);
 
@@ -53,12 +54,12 @@ extern LONG APIENTRY _EXPORT wxDlgProc(HWND hWnd, UINT message,
 bool wxWindow::LoadNativeDialog(wxWindow* parent, wxWindowID& id)
 {
     m_windowId = id;
-
-    wxWindowCreationHook hook(this);
+    wxWndHook = this;
     m_hWnd = (WXHWND)::CreateDialog((HINSTANCE)wxGetInstance(),
                                     MAKEINTRESOURCE(id),
                                     parent ? (HWND)parent->GetHWND() : 0,
                                     (DLGPROC) wxDlgProc);
+    wxWndHook = NULL;
 
     if ( !m_hWnd )
         return FALSE;
@@ -92,11 +93,12 @@ bool wxWindow::LoadNativeDialog(wxWindow* parent, const wxString& name)
 {
     SetName(name);
 
-    wxWindowCreationHook hook(this);
+    wxWndHook = this;
     m_hWnd = (WXHWND)::CreateDialog((HINSTANCE) wxGetInstance(),
                                     name.c_str(),
                                     parent ? (HWND)parent->GetHWND() : 0,
                                     (DLGPROC)wxDlgProc);
+    wxWndHook = NULL;
 
     if ( !m_hWnd )
         return FALSE;
@@ -243,13 +245,11 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
         win = new wxSpinButton;
     }
 #endif
-#if wxUSE_SLIDER
     else if (str == wxT("MSCTLS_TRACKBAR32"))
     {
         // Need to ascertain if it's horiz or vert
         win = new wxSlider;
     }
-#endif // wxUSE_SLIDER
     else if (str == wxT("STATIC"))
     {
         int style1 = (style & 0xFF);

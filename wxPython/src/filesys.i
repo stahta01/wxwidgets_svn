@@ -87,7 +87,7 @@
 
 
 
-class wxFSFile : public wxObject {
+class wxFSFile {
 public:
     wxFSFile(wxInputStream *stream, const wxString& loc,
              const wxString& mimetype, const wxString& anchor,
@@ -151,16 +151,16 @@ IMP_PYCALLBACK_STRING__pure(wxPyFileSystemHandler, wxFileSystemHandler, FindNext
 %}
 
 
-%name(wxCPPFileSystemHandler)class wxFileSystemHandler : public wxObject {
-    wxFileSystemHandler();
+%name(wxCPPFileSystemHandler)class wxFileSystemHandler {
+      wxFileSystemHandler();
 }
 
 %name(wxFileSystemHandler)class wxPyFileSystemHandler : public wxFileSystemHandler {
 public:
     wxPyFileSystemHandler();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxFileSystemHandler)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxFileSystemHandler)"
 
     bool CanOpen(const wxString& location);
     wxFSFile* OpenFile(wxFileSystem& fs, const wxString& location);
@@ -176,7 +176,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxFileSystem : public wxObject {
+class wxFileSystem {
 public:
     wxFileSystem();
 
@@ -272,11 +272,5 @@ def wxMemoryFSHandler_AddFile(filename, a, b=''):
     else: raise TypeError, 'wxImage, wxBitmap or string expected'
 "
 
-
-//---------------------------------------------------------------------------
-
-%init %{
-    wxPyPtrTypeMap_Add("wxFileSystemHandler", "wxPyFileSystemHandler");
-%}
 
 //---------------------------------------------------------------------------

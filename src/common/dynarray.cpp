@@ -73,7 +73,14 @@ wxBaseArray::wxBaseArray(const wxBaseArray& src)
 // assignment operator
 wxBaseArray& wxBaseArray::operator=(const wxBaseArray& src)
 {
+#if 0
   wxDELETEA(m_pItems);
+#else
+	if ( (m_pItems)) { 
+		delete (m_pItems); 
+		(m_pItems) = 0; 
+	}
+#endif
 
   m_nSize  = // not src.m_nSize to save memory
   m_nCount = src.m_nCount;
@@ -182,8 +189,37 @@ int wxBaseArray::Index(long lItem, bool bFromEnd) const
   return wxNOT_FOUND;
 }
 
-// search for a place to insert an item into a sorted array (binary search)
-size_t wxBaseArray::IndexForInsert(long lItem, CMPFUNC fnCompare) const
+// search for an item in a sorted array (binary search)
+int wxBaseArray::Index(long lItem, CMPFUNC fnCompare) const
+{
+  size_t i,
+       lo = 0,
+       hi = m_nCount;
+  int res;
+
+  while ( lo < hi ) {
+    i = (lo + hi)/2;
+
+    res = (*fnCompare)((const void *)lItem, (const void *)m_pItems[i]);
+    if ( res < 0 )
+      hi = i;
+    else if ( res > 0 )
+      lo = i + 1;
+    else
+      return i;
+  }
+
+  return wxNOT_FOUND;
+}
+// add item at the end
+void wxBaseArray::Add(long lItem)
+{
+  Grow();
+  m_pItems[m_nCount++] = lItem;
+}
+
+// add item assuming the array is sorted with fnCompare function
+void wxBaseArray::Add(long lItem, CMPFUNC fnCompare)
 {
   size_t i,
        lo = 0,
@@ -199,33 +235,14 @@ size_t wxBaseArray::IndexForInsert(long lItem, CMPFUNC fnCompare) const
     else if ( res > 0 )
       lo = i + 1;
     else {
-      lo = i;
+      lo = hi = i;
       break;
     }
   }
 
-  return lo;
-}
+  wxASSERT( lo == hi ); // I hope I got binary search right :-)
 
-// search for an item in a sorted array (binary search)
-int wxBaseArray::Index(long lItem, CMPFUNC fnCompare) const
-{
-    size_t n = IndexForInsert(lItem, fnCompare);
-
-    return n < m_nCount && m_pItems[n] == lItem ? (int)n : wxNOT_FOUND;
-}
-
-// add item at the end
-void wxBaseArray::Add(long lItem)
-{
-  Grow();
-  m_pItems[m_nCount++] = lItem;
-}
-
-// add item assuming the array is sorted with fnCompare function
-void wxBaseArray::Add(long lItem, CMPFUNC fnCompare)
-{
-  Insert(lItem, IndexForInsert(lItem, fnCompare));
+  Insert(lItem, lo);
 }
 
 // add item at the given position

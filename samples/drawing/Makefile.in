@@ -15,11 +15,8 @@ program_dir = samples/drawing
 
 PROGRAM=drawing
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
-
+OBJECTS=$(PROGRAM).o
 DATAFILES=pat4.bmp pat35.bmp pat36.bmp image.bmp mask.bmp
 
 include ../../src/makeprog.env
 
--include $(DEPFILES)

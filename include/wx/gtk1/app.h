@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/app.h
+// Name:        app.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -32,7 +32,7 @@ class wxApp: public wxAppBase
 {
 public:
     wxApp();
-    virtual ~wxApp();
+    ~wxApp();
 
     /* override for altering the way wxGTK intializes the GUI
      * (palette/visual/colorcube). under wxMSW, OnInitGui() does nothing by
@@ -46,7 +46,6 @@ public:
     virtual bool Initialized();
     virtual bool Pending();
     virtual void Dispatch();
-    virtual bool Yield(bool onlyIfNeeded = FALSE);
 
     virtual wxIcon GetStdIcon(int which) const;
 
@@ -62,11 +61,9 @@ public:
     bool ProcessIdle();
     void DeletePendingObjects();
 
-#ifdef __WXDEBUG__
-    virtual void OnAssert(const wxChar *file, int line, const wxChar *msg);
-
-    bool IsInAssert() const { return m_isInAssert; }
-#endif // __WXDEBUG__
+    // This can be used to suppress the generation of Idle events.
+    void SuppressIdleEvents(bool arg = TRUE) { m_suppressIdleEvents = arg; }
+    bool GetSuppressIdleEvents() const { return m_suppressIdleEvents; }
 
     bool            m_initialized;
 
@@ -76,19 +73,24 @@ public:
 #endif
     unsigned char  *m_colorCube;
 
-    // used by the the wxGLApp and wxGLCanvas class for GL-based X visual 
-    // selection; this is actually an XVisualInfo*
-    void           *m_glVisualInfo;
-    
 private:
-    // true if we're inside an assert modal dialog
-#ifdef __WXDEBUG__
-    bool m_isInAssert;
-#endif // __WXDEBUG__
+    /// Set to TRUE while we are in wxYield().
+    bool m_suppressIdleEvents;
 
+private:
     DECLARE_DYNAMIC_CLASS(wxApp)
     DECLARE_EVENT_TABLE()
 };
+
+#ifdef __VMS
+
+extern "C"
+  {
+     extern guint vms_gtk_major_version(void);
+     extern guint vms_gtk_minor_version(void);
+     extern guint vms_gtk_micro_version(void);
+  }
+#endif
 
 int WXDLLEXPORT wxEntry( int argc, char *argv[] );
 

@@ -24,7 +24,7 @@
 
 // Watcom C++ gives a linker error if this is compiled in.
 // With Borland C++, all samples crash if this is compiled in.
-#if wxUSE_OLE &&!defined(__WATCOMC__) && !(defined(__BORLANDC__) && (__BORLANDC__ < 0x520)) && !defined(__CYGWIN10__)
+#if !defined(__WATCOMC__) && !(defined(__BORLANDC__) && (__BORLANDC__ < 0x520))
 
 #include "wx/log.h"
 #include "wx/msw/ole/automtn.h"
@@ -85,11 +85,9 @@ static wxString ConvertStringFromOle(BSTR bStr);
 static int rgMonthDays[13] =
 	{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
 
-#if wxUSE_TIMEDATE
 static BOOL OleDateFromTm(WORD wYear, WORD wMonth, WORD wDay,
 	WORD wHour, WORD wMinute, WORD wSecond, DATE& dtDest);
 static BOOL TmFromOleDate(DATE dtSrc, struct tm& tmDest);
-#endif // wxUSE_TIMEDATE
 
 static void ClearVariant(VARIANTARG *pvarg) ;
 static void ReleaseVariant(VARIANTARG *pvarg) ;

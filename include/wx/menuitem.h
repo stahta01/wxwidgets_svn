@@ -12,8 +12,6 @@
 #ifndef _WX_MENUITEM_H_BASE_
 #define _WX_MENUITEM_H_BASE_
 
-#if wxUSE_MENUS
-
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -89,12 +87,8 @@ public:
     const wxString& GetHelp() const { return m_help; }
 
 #if wxUSE_ACCEL
-    // extract the accelerator from the given menu string, return NULL if none
-    // found
-    static wxAcceleratorEntry *GetAccelFromString(const wxString& label);
-
     // get our accelerator or NULL (caller must delete the pointer)
-    virtual wxAcceleratorEntry *GetAccel() const;
+    virtual wxAcceleratorEntry *GetAccel() const { return NULL; }
 
     // set the accel for this item - this may also be done indirectly with
     // SetText()
@@ -132,14 +126,14 @@ private:
 #ifdef wxUSE_BASE_CLASSES_ONLY
     #define wxMenuItem wxMenuItemBase
 #else // !wxUSE_BASE_CLASSES_ONLY
-#if defined(__WXUNIVERSAL__)
-    #include "wx/univ/menuitem.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
     #include "wx/msw/menuitem.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/menuitem.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/menuitem.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/menuitem.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/menuitem.h"
 #elif defined(__WXPM__)
@@ -148,8 +142,6 @@ private:
     #include "wx/stubs/menuitem.h"
 #endif
 #endif // wxUSE_BASE_CLASSES_ONLY/!wxUSE_BASE_CLASSES_ONLY
-
-#endif // wxUSE_MENUS
 
 #endif
     // _WX_MENUITEM_H_BASE_

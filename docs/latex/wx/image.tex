@@ -1,15 +1,14 @@
 \section{\class{wxImage}}\label{wximage}
 
 This class encapsulates a platform-independent image. An image can be created
-from data, or using \helpref{wxBitmap::ConvertToImage}{wxbitmapconverttoimage}. An image
+from data, or using the constructor taking a wxBitmap object. An image
 can be loaded from a file in a variety of formats, and is extensible to new formats
 via image format handlers. Functions are available to set and get image bits, so
 it can be used for basic image manipulation.
 
 A wxImage cannot (currently) be drawn directly to a \helpref{wxDC}{wxdc}. Instead, 
 a platform-specific \helpref{wxBitmap}{wxbitmap} object must be created from it using
-the \helpref{wxBitmap::wxBitmap(wxImage,int depth)}{wxbitmapconstr} constructor. 
-This bitmap can then
+the \helpref{ConvertToBitmap}{wximageconverttobitmap} function. This bitmap can then
 be drawn in a device context, using \helpref{wxDC::DrawBitmap}{wxdcdrawbitmap}.
 
 One colour value of the image may be used as a mask colour which will lead to the automatic
@@ -24,14 +23,13 @@ handler with \helpref{wxImage::AddHandler}{wximageaddhandler} or
 
 \twocolwidtha{5cm}%
 \begin{twocollist}
-\twocolitem{\indexit{wxBMPHandler}}{Only for loading, always installed.}
-\twocolitem{\indexit{wxPNGHandler}}{For loading and saving.}
-\twocolitem{\indexit{wxJPEGHandler}}{For loading and saving.}
-\twocolitem{\indexit{wxGIFHandler}}{Only for loading, due to legal issues.}
-\twocolitem{\indexit{wxPCXHandler}}{For loading and saving (see below).}
-\twocolitem{\indexit{wxPNMHandler}}{For loading and saving (see below).}
-\twocolitem{\indexit{wxTIFFHandler}}{For loading and saving.}
-\twocolitem{\indexit{wxXPMHandler}}{For loading and saving.}
+\twocolitem{{\bf \indexit{wxBMPHandler}}}{Only for loading, always installed.}
+\twocolitem{{\bf \indexit{wxPNGHandler}}}{For loading and saving.}
+\twocolitem{{\bf \indexit{wxJPEGHandler}}}{For loading and saving.}
+\twocolitem{{\bf \indexit{wxGIFHandler}}}{Only for loading, due to legal issues.}
+\twocolitem{{\bf \indexit{wxPCXHandler}}}{For loading and saving (see below).}
+\twocolitem{{\bf \indexit{wxPNMHandler}}}{For loading and saving (see below).}
+\twocolitem{{\bf \indexit{wxTIFFHandler}}}{For loading.}
 \end{twocollist}
 
 When saving in PCX format, {\bf wxPCXHandler} will count the number of
@@ -68,8 +66,7 @@ Copy constructor.
 
 \func{}{wxImage}{\param{const wxBitmap\&}{ bitmap}}
 
-(Deprecated form, use \helpref{wxBitmap::ConvertToImage}{wxbitmapconverttoimage}
-instead.) Constructs an image from a platform-dependent bitmap. This preserves
+Constructs an image from a platform-dependent bitmap. This preserves
 mask information so that bitmaps and images can be converted back
 and forth without loss in that respect.
 
@@ -77,10 +74,10 @@ and forth without loss in that respect.
 
 Creates an image with the given width and height.
 
-\func{}{wxImage}{\param{int}{ width}, \param{int}{ height}, \param{unsigned char*}{ data}, \param{bool}{ static\_data=FALSE}}
+\func{}{wxImage}{\param{int}{ width}, \param{int}{ height}, \param{unsigned char*}{ data}, \param{bool}{ static_data=FALSE}}
 
 Creates an image from given data with the given width and height. If 
-{\it static\_data} is TRUE, then wxImage will not delete the actual
+{\it static_data} is TRUE, then wxImage will not delete the actual
 image data in its destructor, otherwise it will free it by calling
 {\it free()}.
 
@@ -110,15 +107,14 @@ Loads an image from an input stream.
 
 \twocolwidtha{5cm}%
 \begin{twocollist}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_BMP}}{Load a Windows bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_GIF}}{Load a GIF bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_JPEG}}{Load a JPEG bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_PNG}}{Load a PNG bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_PCX}}{Load a PCX bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_PNM}}{Load a PNM bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_TIF}}{Load a TIFF bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_XPM}}{Load a XPM bitmap file.}
-\twocolitem{\indexit{wxBITMAP\_TYPE\_ANY}}{Will try to autodetect the format.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_BMP}}}{Load a Windows bitmap file.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_GIF}}}{Load a GIF bitmap file.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_JPEG}}}{Load a JPEG bitmap file.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_PNG}}}{Load a PNG bitmap file.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_PCX}}}{Load a PCX bitmap file.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_PNM}}}{Load a PNM bitmap file.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_TIF}}}{Load a TIFF bitmap file.}
+\twocolitem{{\bf \indexit{wxBITMAP\_TYPE\_ANY}}}{Will try to autodetect the format.}
 \end{twocollist}}
 
 \docparam{mimetype}{MIME type string (for example 'image/jpeg')}
@@ -149,15 +145,6 @@ platform-dependent bitmap}
 \end{twocollist}}
 }
 
-\perlnote{Constructors supported by wxPerl are:\par
-\begin{itemize}
-\item{Wx::Image->new( bitmap )}
-\item{Wx::Image->new( width, height )}
-\item{Wx::Image->new( name, type )}
-\item{Wx::Image->new( name, mimetype )}
-\end{itemize}
-}
-
 \membersection{wxImage::\destruct{wxImage}}
 
 \func{}{\destruct{wxImage}}{\void}
@@ -177,7 +164,7 @@ of a given handler class in an application session.}
 
 \helpref{wxImageHandler}{wximagehandler}
 
-\pythonnote{In wxPython this static method is named {\tt wxImage\_AddHandler}.}
+\pythonnote{In wxPython this static method is named {\tt wxImage_AddHandler}.}
 \membersection{wxImage::CleanUpHandlers}
 
 \func{static void}{CleanUpHandlers}{\void}
@@ -190,16 +177,19 @@ This function is called by wxWindows on exit.
 
 \constfunc{wxBitmap}{ConvertToBitmap}{\void}
 
-Deprecated, use equivalent \helpref{wxBitmap constructor}{wxbitmapconstr}
-(which takes wxImage and depth as its arguments) instead.
+Converts the image to a platform-specific bitmap object. This has to be done
+to actually display an image as you cannot draw an image directly on a window.
+The resulting bitmap will use the colour depth of the current system which entails
+that a colour reduction has to take place. 
 
-\membersection{wxImage::ConvertToMono}\label{wxbitmapconverttomono}
+When in 8-bit mode (PseudoColour mode), the GTK port will use a color cube created 
+on program start-up to look up colors. This ensures a very fast conversion, but
+the image quality won't be perfect (and could be better for photo images using more
+sophisticated dithering algorithms).
 
-\constfunc{wxImage}{ConvertToMono}{\param{unsigned char}{ r}, \param{unsigned char}{ g}, \param{unsigned char}{ b}}
-
-Returns monochromatic version of the image. The returned image has white
-colour where the original has {\it (r,g,b)} colour and black colour 
-everywhere else.
+On Windows, if there is a palette present (set with SetPalette), it will be used when
+creating the wxBitmap (most useful in 8-bit display mode). On other platforms,
+the palette is currently ignored.
 
 \membersection{wxImage::Copy}\label{wximagecopy}
 
@@ -328,7 +318,7 @@ Gets the red value of the mask colour.
 \constfunc{const wxPalette\&}{GetPalette}{\void}
 
 Returns the palette associated with the image. Currently the palette is only
-used when converting to wxBitmap under Windows.
+used in ConvertToBitmap under Windows.
 
 Eventually wxImage handlers will set the palette if one exists in the image file.
 
@@ -354,45 +344,6 @@ Gets the width of the image in pixels.
 \constfunc{bool}{HasMask}{\void}
 
 Returns TRUE if there is a mask active, FALSE otherwise.
-
-\membersection{wxImage::GetOption}\label{wximagegetoption}
-
-\constfunc{wxString}{GetOption}{\param{const wxString\&}{ name}}
-
-Gets a user-defined option. The function is case-insensitive to {\it name}.
-
-For example, when saving as a JPEG file, the option {\bf quality} is
-used, which is a number between 0 and 100 (0 is terrible, 100 is very good).
-
-\wxheading{See also}
-
-\helpref{wxImage::SetOption}{wximagesetoption},\rtfsp
-\helpref{wxImage::GetOptionInt}{wximagegetoptionint},\rtfsp
-\helpref{wxImage::HasOption}{wximagehasoption}
-
-\membersection{wxImage::GetOptionInt}\label{wximagegetoptionint}
-
-\constfunc{int}{GetOptionInt}{\param{const wxString\&}{ name}}
-
-Gets a user-defined option as an integer. The function is case-insensitive to {\it name}.
-
-\wxheading{See also}
-
-\helpref{wxImage::SetOption}{wximagesetoption},\rtfsp
-\helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
-\helpref{wxImage::HasOption}{wximagehasoption}
-
-\membersection{wxImage::HasOption}\label{wximagehasoption}
-
-\constfunc{bool}{HasOption}{\param{const wxString\&}{ name}}
-
-Returns TRUE if the given option is present. The function is case-insensitive to {\it name}.
-
-\wxheading{See also}
-
-\helpref{wxImage::SetOption}{wximagesetoption},\rtfsp
-\helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
-\helpref{wxImage::GetOptionInt}{wximagegetoptionint}
 
 \membersection{wxImage::InitStandardHandlers}
 
@@ -454,7 +405,6 @@ Loads an image from an input stream.
 \twocolitem{{\bf wxBITMAP\_TYPE\_PNG}}{Load a PNG image file.}
 \twocolitem{{\bf wxBITMAP\_TYPE\_PNM}}{Load a PNM image file.}
 \twocolitem{{\bf wxBITMAP\_TYPE\_TIF}}{Load a TIFF image file.}
-\twocolitem{{\bf wxBITMAP\_TYPE\_XPM}}{Load a XPM image file.}
 \twocolitem{{\bf wxBITMAP\_TYPE\_ANY}}{Will try to autodetect the format.}
 \end{twocollist}}
 
@@ -480,13 +430,6 @@ type from a file}
 \twocolitem{{\bf LoadMimeFile(filename, mimetype)}}{Loads an image of the given
 mimetype from a file}
 \end{twocollist}}
-}
-
-\perlnote{Methods supported by wxPerl are:\par
-\begin{itemize}
-\item{bitmap->LoadFile( name, type )}
-\item{bitmap->LoadFile( name, mimetype )}
-\end{itemize}
 }
 
 
@@ -541,8 +484,6 @@ Saves a image in the given stream.
 \twocolitem{{\bf wxBITMAP\_TYPE\_PNG}}{Save a PNG image file.}
 \twocolitem{{\bf wxBITMAP\_TYPE\_PCX}}{Save a PCX image file (tries to save as 8-bit if possible, falls back to 24-bit otherwise).}
 \twocolitem{{\bf wxBITMAP\_TYPE\_PNM}}{Save a PNM image file (as raw RGB always).}
-\twocolitem{{\bf wxBITMAP\_TYPE\_TIFF}}{Save a TIFF image file.}
-\twocolitem{{\bf wxBITMAP\_TYPE\_XPM}}{Save a XPM image file.}
 \end{twocollist}}
 
 \docparam{mimetype}{MIME type.}
@@ -567,13 +508,6 @@ type to the named file}
 \twocolitem{{\bf SaveMimeFile(filename, mimetype)}}{Saves the image using the given
 mimetype to the named file}
 \end{twocollist}}
-}
-
-\perlnote{Methods supported by wxPerl are:\par
-\begin{itemize}
-\item{bitmap->SaveFile( name, type )}
-\item{bitmap->SaveFile( name, mimetype )}
-\end{itemize}
 }
 
 \membersection{wxImage::Mirror}\label{wximagemirror}
@@ -643,7 +577,7 @@ Example:
     if ( bmp.GetWidth() != 32 || bmp.GetHeight() != 32 )
     {
         wxImage image(bmp);
-        bmp = wxBitmap(image.Scale(32, 32));
+        bmp = image.Scale(32, 32).ConvertToBitmap();
 
         // another possibility:
         image.Rescale(32, 32);
@@ -676,29 +610,11 @@ Specifies whether there is a mask or not. The area of the mask is determined by 
 
 Sets the mask colour for this image (and tells the image to use the mask).
 
-\membersection{wxImage::SetOption}\label{wximagesetoption}
-
-\func{void}{SetOption}{\param{const wxString\&}{ name}, \param{const wxString\&}{ value}}
-
-\func{void}{SetOption}{\param{const wxString\&}{ name}, \param{int}{ value}}
-
-Sets a user-defined option. The function is case-insensitive to {\it name}.
-
-For example, when saving as a JPEG file, the option {\bf quality} is
-used, which is a number between 0 and 100 (0 is terrible, 100 is very good).
-
-\wxheading{See also}
-
-\helpref{wxImage::GetOption}{wximagegetoption},\rtfsp
-\helpref{wxImage::GetOptionInt}{wximagegetoptionint},\rtfsp
-\helpref{wxImage::HasOption}{wximagehasoption}
-
 \membersection{wxImage::SetPalette}\label{wximagesetpalette}
 
 \func{void}{SetPalette}{\param{const wxPalette\&}{ palette}}
 
-Associates a palette with the image. The palette may be used when converting
-wxImage to wxBitmap (MSW only at present) or in file save operations (none as yet).
+Associates a palette with the image. Currently, the palette is not used.
 
 \membersection{wxImage::SetRGB}\label{wximagesetrgb}
 

@@ -80,7 +80,7 @@ public:
 
 	//# Information on region
 	// Outer bounds of region
-	void GetBox(wxCoord& x, wxCoord& y, wxCoord&w, wxCoord &h) const;
+	void GetBox(long& x, long& y, long&w, long &h) const;
 	wxRect GetBox() const ;
 
 	// Is region empty?

@@ -21,6 +21,8 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
+    #include "wx/defs.h"
 #endif // WX_PRECOMP
 
 #if wxUSE_PRINTING_ARCHITECTURE
@@ -1174,9 +1176,7 @@ void wxPostScriptDC::DoDrawText( const wxString& text, wxCoord x, wxCoord y )
 
     GetTextExtent(text, &text_w, &text_h, &text_descent);
 
-    // VZ: this seems to be unnecessary, so taking it out for now, if it
-    //     doesn't create any problems, remove this comment entirely
-    //SetFont( m_font );
+    SetFont( m_font );
 
     if (m_textForegroundColour.Ok())
     {
@@ -1835,7 +1835,7 @@ bool wxPostScriptDC::DoBlit( wxCoord xdest, wxCoord ydest,
                            wxCoord fwidth, wxCoord fheight,
                            wxDC *source,
                            wxCoord xsrc, wxCoord ysrc,
-                           int rop, bool WXUNUSED(useMask), wxCoord WXUNUSED(xsrcMask), wxCoord WXUNUSED(ysrcMask) )
+                           int rop, bool WXUNUSED(useMask) )
 {
     wxCHECK_MSG( m_ok && m_pstream, FALSE, wxT("invalid postscript dc") );
 
@@ -2034,7 +2034,7 @@ void wxPostScriptDC::DoGetTextExtent(const wxString& string,
            - afmFile = fopen() may fail and in that case the next if branch
            MUST be executed - and it would not if there was "else" */
         {
-           afmName = wxGetInstallPrefix();
+           afmName = wxINSTALL_PREFIX;
            afmName <<  wxFILE_SEP_PATH
                    << wxT("share") << wxFILE_SEP_PATH
                    << wxT("wx") << wxFILE_SEP_PATH

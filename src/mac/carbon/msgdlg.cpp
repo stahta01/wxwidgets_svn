@@ -13,14 +13,10 @@
 #pragma implementation "msgdlg.h"
 #endif
 
-#include "wx/app.h"
 #include "wx/msgdlg.h"
-#include "wx/intl.h"
 #include "wx/mac/uma.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_CLASS(wxMessageDialog, wxDialog)
-#endif
 
 #define kMacOKAlertResourceID 128
 #define kMacYesNoAlertResourceID 129
@@ -30,7 +26,6 @@ IMPLEMENT_CLASS(wxMessageDialog, wxDialog)
 
 short language = 0 ;
 
-void wxMacConvertNewlines( const char *source , char * destination ) ;
 void wxMacConvertNewlines( const char *source , char * destination )
 {
 	const char *s = source ;
@@ -74,26 +69,22 @@ int wxMessageDialog::ShowModal()
 	short result ;
 	Str255 pascalTitle ;
 	Str255 pascalText ;
-	char   cText[256] ;
-
-	Str255 yesPString ;
-	Str255 noPString ;
 	
-	wxMacStringToPascal( m_caption , pascalTitle ) ;
-	wxMacStringToPascal( _("Yes") , yesPString ) ;
-	wxMacStringToPascal(  _("No") , noPString ) ;
 	
 	if (wxApp::s_macDefaultEncodingIsPC)
 	{
-		strcpy(cText , wxMacMakeMacStringFromPC( m_message) ) ;
+		strcpy( (char*) pascalTitle , wxMacMakeMacStringFromPC( m_caption ) ) ;
+		strcpy( (char*) pascalText , wxMacMakeMacStringFromPC( m_message) ) ;
 	}
 	else
 	{
-		strcpy( cText , m_message ) ;
+		strcpy( (char*) pascalTitle , m_caption ) ;
+		strcpy( (char*) pascalText , m_message ) ;
 	}
 
-	wxMacConvertNewlines( cText , cText ) ;
-	CopyCStringToPascal( cText , pascalText ) ;
+	c2pstr( (char*) pascalTitle ) ;
+	wxMacConvertNewlines( (char*)pascalText ,(char*) pascalText) ;
+	c2pstr( (char*) pascalText ) ;
 
 	wxASSERT_MSG( ( m_dialogStyle & 0x3F ) != wxYES , "this style is not supported on mac" ) ;
 
@@ -185,18 +176,18 @@ int wxMessageDialog::ShowModal()
 	  {
 	    if (m_dialogStyle & wxCANCEL)
 	    {
-				param.defaultText 	= yesPString ;
+				param.defaultText 	= "\pYes" ;
 				param.cancelText 	= (StringPtr) kAlertDefaultCancelText;
-				param.otherText 	= noPString ;
+				param.otherText 	= "\pNo";
 				param.helpButton 	= false ;
 				param.defaultButton = kAlertStdAlertOKButton;
 				param.cancelButton 	= kAlertStdAlertCancelButton;
 	    }
 	    else
 	    {
-				param.defaultText 	= yesPString ;
+				param.defaultText 	= "\pYes" ;
 				param.cancelText 	= NULL;
-				param.otherText 	= noPString ;
+				param.otherText 	= "\pNo";
 				param.helpButton 	= false ;
 				param.defaultButton = kAlertStdAlertOKButton;
 				param.cancelButton 	= 0;

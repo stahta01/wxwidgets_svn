@@ -17,7 +17,7 @@
 
 #include "wx/defs.h"
 #include "wx/object.h"
-#include "wx/imaglist.h"
+#include "wx/generic/imaglist.h"
 #include "wx/control.h"
 #include "wx/timer.h"
 #include "wx/textctrl.h"
@@ -70,7 +70,7 @@ public:
         Create(parent, id, pos, size, style, validator, name);
     }
     ~wxListCtrl();
-
+    
     bool Create( wxWindow *parent,
                  wxWindowID id = -1,
                  const wxPoint &pos = wxDefaultPosition,
@@ -113,7 +113,6 @@ public:
     long GetNextItem( long item, int geometry = wxLIST_NEXT_ALL, int state = wxLIST_STATE_DONTCARE ) const;
     wxImageList *GetImageList( int which ) const;
     void SetImageList( wxImageList *imageList, int which );
-    void AssignImageList( wxImageList *imageList, int which );
     bool Arrange( int flag = wxLIST_ALIGN_DEFAULT ); // always wxLIST_ALIGN_LEFT in wxGLC
 
     void ClearAll();
@@ -121,8 +120,6 @@ public:
     bool DeleteAllItems();
     bool DeleteAllColumns();
     bool DeleteColumn( int col );
-
-    void SetItemCount(long count);
 
     void EditLabel( long item ) { Edit(item); }
     void Edit( long item );
@@ -142,17 +139,7 @@ public:
     bool ScrollList( int dx, int dy );
     bool SortItems( wxListCtrlCompare fn, long data );
     bool Update( long item );
-
-    // returns true if it is a virtual list control
-    bool IsVirtual() const { return (GetWindowStyle() & wxLC_VIRTUAL) != 0; }
-
-    // refresh items selectively (only useful for virtual list controls)
-    void RefreshItem(long item);
-    void RefreshItems(long itemFrom, long itemTo);
-
-    // implementation only from now on
-    // -------------------------------
-
+    
     void OnIdle( wxIdleEvent &event );
     void OnSize( wxSizeEvent &event );
 
@@ -179,36 +166,10 @@ public:
     wxImageList         *m_imageListNormal;
     wxImageList         *m_imageListSmall;
     wxImageList         *m_imageListState;  // what's that ?
-    bool                 m_ownsImageListNormal,
-                         m_ownsImageListSmall,
-                         m_ownsImageListState;
     wxListHeaderWindow  *m_headerWin;
     wxListMainWindow    *m_mainWin;
 
-protected:
-    // return the text for the given column of the given item
-    virtual wxString OnGetItemText(long item, long column) const;
-
-    // return the icon for the given item
-    virtual int OnGetItemImage(long item) const;
-
-    // return the attribute for the item (may return NULL if none)
-    virtual wxListItemAttr *OnGetItemAttr(long item) const;
-
-    // it calls our OnGetXXX() functions
-    friend class WXDLLEXPORT wxListMainWindow;
-
 private:
-    // Virtual function hiding supression
-    virtual void Update() { wxWindowBase::Update(); }
-
-    // create the header window
-    void CreateHeaderWindow();
-
-    // reposition the header and the main window in the report view depending
-    // on whether it should be shown or not
-    void ResizeReportView(bool showHeader);
-
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxListCtrl);
 };

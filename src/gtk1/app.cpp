@@ -28,20 +28,17 @@
 #include "wx/module.h"
 #include "wx/image.h"
 
-#ifdef __WXUNIVERSAL__
-    #include "wx/univ/theme.h"
-    #include "wx/univ/renderer.h"
-#endif
-
 #if wxUSE_THREADS
     #include "wx/thread.h"
 #endif
 
 #include <unistd.h>
-#include "wx/gtk/win_gtk.h"
 
+#include <glib.h>
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
+#include "wx/gtk/win_gtk.h"
 
 //-----------------------------------------------------------------------------
 // global data
@@ -55,7 +52,7 @@ extern bool g_isIdle;
 bool   g_mainThreadLocked = FALSE;
 gint   g_pendingTag = 0;
 
-static GtkWidget *gs_RootWindow = (GtkWidget*) NULL;
+GtkWidget *wxRootWindow = (GtkWidget*) NULL;
 
 //-----------------------------------------------------------------------------
 // local functions
@@ -83,60 +80,57 @@ void wxExit()
 // wxYield
 //-----------------------------------------------------------------------------
 
-bool wxApp::Yield(bool onlyIfNeeded)
+static bool gs_inYield = FALSE;
+
+bool wxYield()
 {
-    // MT-FIXME
-    static bool s_inYield = FALSE;
-
-    if ( s_inYield )
-    {
-        if ( !onlyIfNeeded )
-        {
-            wxFAIL_MSG( wxT("wxYield called recursively" ) );
-        }
-
-        return FALSE;
-    }
-
-#if wxUSE_THREADS
-    if ( !wxThread::IsMain() )
-    {
-        // can't call gtk_main_iteration() from other threads like this
-        return TRUE;
-    }
-#endif // wxUSE_THREADS
-
-    s_inYield = TRUE;
+#ifdef __WXDEBUG__
+    if (gs_inYield)
+        wxFAIL_MSG( wxT("wxYield called recursively" ) );
+#endif
+    
+    gs_inYield = TRUE;
 
     if (!g_isIdle)
     {
         // We need to remove idle callbacks or the loop will
         // never finish.
-        gtk_idle_remove( m_idleTag );
-        m_idleTag = 0;
+        gtk_idle_remove( wxTheApp->m_idleTag );
+        wxTheApp->m_idleTag = 0;
         g_isIdle = TRUE;
     }
+
+    while (gtk_events_pending())
+        gtk_main_iteration();
 
     // disable log flushing from here because a call to wxYield() shouldn't
     // normally result in message boxes popping up &c
     wxLog::Suspend();
 
-    while (gtk_events_pending())
-        gtk_main_iteration();
-
     /* it's necessary to call ProcessIdle() to update the frames sizes which
        might have been changed (it also will update other things set from
        OnUpdateUI() which is a nice (and desired) side effect) */
-    while ( ProcessIdle() )
-    {
-    }
+    while (wxTheApp->ProcessIdle()) { }
 
     // let the logs be flashed again
     wxLog::Resume();
 
-    s_inYield = FALSE;
+    gs_inYield = FALSE;
 
     return TRUE;
+}
+
+//-----------------------------------------------------------------------------
+// wxYieldIfNeeded
+// Like wxYield, but fails silently if the yield is recursive.
+//-----------------------------------------------------------------------------
+
+bool wxYieldIfNeeded()
+{
+    if (gs_inYield)
+        return FALSE;
+        
+    return wxYield();    
 }
 
 //-----------------------------------------------------------------------------
@@ -166,7 +160,7 @@ void wxWakeUpIdle()
 gint wxapp_pending_callback( gpointer WXUNUSED(data) )
 {
     if (!wxTheApp) return TRUE;
-
+    
     // when getting called from GDK's time-out handler
     // we are no longer within GDK's grab on the GUI
     // thread so we must lock it here ourselves
@@ -177,7 +171,7 @@ gint wxapp_pending_callback( gpointer WXUNUSED(data) )
 
     g_pendingTag = 0;
 
-    /* flush the logged messages if any */
+    // flush the logged messages if any
 #if wxUSE_LOG
     wxLog::FlushActive();
 #endif // wxUSE_LOG
@@ -192,19 +186,8 @@ gint wxapp_pending_callback( gpointer WXUNUSED(data) )
 
 gint wxapp_idle_callback( gpointer WXUNUSED(data) )
 {
-    if (!wxTheApp)
-        return TRUE;
-
-#ifdef __WXDEBUG__
-    // don't generate the idle events while the assert modal dialog is shown,
-    // this completely confuses the apps which don't expect to be reentered
-    // from some safely-looking functions
-    if ( wxTheApp->IsInAssert() )
-    {
-        return TRUE;
-    }
-#endif // __WXDEBUG__
-
+    if (!wxTheApp) return TRUE;
+    
     // when getting called from GDK's time-out handler
     // we are no longer within GDK's grab on the GUI
     // thread so we must lock it here ourselves
@@ -218,9 +201,8 @@ gint wxapp_idle_callback( gpointer WXUNUSED(data) )
     g_isIdle = TRUE;
     wxTheApp->m_idleTag = 0;
 
-    // Sent idle event to all who request them as long as they do
-    while (wxTheApp->ProcessIdle())
-        ;
+    // Sent idle event to all who request them
+    while (wxTheApp->ProcessIdle()) { }
 
     // Release lock again
     gdk_threads_leave();
@@ -238,7 +220,7 @@ void wxapp_install_idle_handler()
 
     if (g_pendingTag == 0)
         g_pendingTag = gtk_idle_add_priority( 900, wxapp_pending_callback, (gpointer) NULL );
-
+        
     /* This routine gets called by all event handlers
        indicating that the idle is over. It may also
        get called from other thread for sending events
@@ -255,7 +237,7 @@ static int g_threadUninstallLevel = 0;
 void wxapp_install_thread_wakeup()
 {
     g_threadUninstallLevel++;
-
+    
     if (g_threadUninstallLevel != 1) return;
 
     if (wxTheApp->m_wakeUpTimerTag) return;
@@ -266,7 +248,7 @@ void wxapp_install_thread_wakeup()
 void wxapp_uninstall_thread_wakeup()
 {
     g_threadUninstallLevel--;
-
+    
     if (g_threadUninstallLevel != 0) return;
 
     if (!wxTheApp->m_wakeUpTimerTag) return;
@@ -319,10 +301,10 @@ END_EVENT_TABLE()
 
 wxApp::wxApp()
 {
-    m_initialized = FALSE;
-#ifdef __WXDEBUG__
-    m_isInAssert = FALSE;
-#endif // __WXDEBUG__
+    wxTheApp = this;
+
+    m_topWindow = (wxWindow *) NULL;
+    m_exitOnFrameDelete = TRUE;
 
     m_idleTag = 0;
     wxapp_install_idle_handler();
@@ -333,9 +315,8 @@ wxApp::wxApp()
 #endif
 
     m_colorCube = (unsigned char*) NULL;
-    
-    // this is NULL for a "regular" wxApp, but is set (and freed) by a wxGLApp
-    m_glVisualInfo = (void *) NULL;
+
+    m_useBestVisual = FALSE;
 }
 
 wxApp::~wxApp()
@@ -351,43 +332,17 @@ wxApp::~wxApp()
 
 bool wxApp::OnInitGui()
 {
-    if ( !wxAppBase::OnInitGui() )
-        return FALSE;
-
     GdkVisual *visual = gdk_visual_get_system();
 
-    // if this is a wxGLApp (derived from wxApp), and we've already
-    // chosen a specific visual, then derive the GdkVisual from that
-    if (m_glVisualInfo != NULL) {
-#ifdef __WXGTK20__
-        /* seems gtk_widget_set_default_visual no longer exists? */
-        GdkVisual* vis = gtk_widget_get_default_visual();
-#else
-        GdkVisual* vis = gdkx_visual_get( 
-            ((XVisualInfo *) m_glVisualInfo) ->visualid );
-        gtk_widget_set_default_visual( vis );
-#endif
-
-        GdkColormap *colormap = gdk_colormap_new( vis, FALSE );
-        gtk_widget_set_default_colormap( colormap );
-
-        visual = vis;
-    }
-    
     /* on some machines, the default visual is just 256 colours, so
        we make sure we get the best. this can sometimes be wasteful,
        of course, but what do these guys pay $30.000 for? */
 
-    else if ((gdk_visual_get_best() != gdk_visual_get_system()) &&
+    if ((gdk_visual_get_best() != gdk_visual_get_system()) &&
         (m_useBestVisual))
     {
-#ifdef __WXGTK20__
-        /* seems gtk_widget_set_default_visual no longer exists? */
-        GdkVisual* vis = gtk_widget_get_default_visual();
-#else
         GdkVisual* vis = gdk_visual_get_best();
         gtk_widget_set_default_visual( vis );
-#endif
 
         GdkColormap *colormap = gdk_colormap_new( vis, FALSE );
         gtk_widget_set_default_colormap( colormap );
@@ -467,20 +422,20 @@ void wxApp::OnIdle( wxIdleEvent &event )
 {
     static bool s_inOnIdle = FALSE;
 
-    /* Avoid recursion (via ProcessEvent default case) */
+    // Avoid recursion (via ProcessEvent default case)
     if (s_inOnIdle)
         return;
 
     s_inOnIdle = TRUE;
 
-    /* Resend in the main thread events which have been prepared in other
-       threads */
+    // Resend in the main thread events which have been prepared in other
+    // threads
     ProcessPendingEvents();
 
-    /* 'Garbage' collection of windows deleted with Close(). */
+    // 'Garbage' collection of windows deleted with Close().
     DeletePendingObjects();
 
-    /* Send OnIdle events to all windows */
+    // Send OnIdle events to all windows
     bool needMore = SendIdleEvents();
 
     if (needMore)
@@ -581,10 +536,6 @@ bool wxApp::Initialize()
     wxClassInfo::InitializeClasses();
 
     wxSystemSettings::Init();
-    
-#if wxUSE_INTL
-    wxFont::SetDefaultEncoding(wxLocale::GetSystemEncoding());
-#endif
 
     // GL: I'm annoyed ... I don't know where to put this and I don't want to
     // create a module for that as it's part of the core.
@@ -644,7 +595,7 @@ void wxApp::CleanUp()
 
     // check for memory leaks
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
-    if (wxDebugContext::CountObjectsLeft(TRUE) > 0)
+    if (wxDebugContext::CountObjectsLeft() > 0)
     {
         wxLogDebug(wxT("There were memory leaks.\n"));
         wxDebugContext::Dump();
@@ -663,19 +614,6 @@ void wxApp::CleanUp()
 }
 
 //-----------------------------------------------------------------------------
-// Access to the root window global
-//-----------------------------------------------------------------------------
-
-GtkWidget* wxGetRootWindow()
-{
-    if (gs_RootWindow == NULL) {
-        gs_RootWindow = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-        gtk_widget_realize( gs_RootWindow );
-    }
-    return gs_RootWindow;
-}
-
-//-----------------------------------------------------------------------------
 // wxEntry
 //-----------------------------------------------------------------------------
 
@@ -684,10 +622,16 @@ int wxEntryStart( int argc, char *argv[] )
 {
 #if wxUSE_THREADS
     /* GTK 1.2 up to version 1.2.3 has broken threads */
+#ifdef __VMS__
+   if ((vms_gtk_major_version() == 1) &&
+        (vms_gtk_minor_version() == 2) &&
+        (vms_gtk_micro_version() < 4))
+#else
    if ((gtk_major_version == 1) &&
         (gtk_minor_version == 2) &&
         (gtk_micro_version < 4))
-    {
+#endif
+     {
         printf( "wxWindows warning: GUI threading disabled due to outdated GTK version\n" );
     }
     else
@@ -698,14 +642,8 @@ int wxEntryStart( int argc, char *argv[] )
 
     gtk_set_locale();
 
-    // We should have the wxUSE_WCHAR_T test on the _outside_
 #if wxUSE_WCHAR_T
-#if defined(__WXGTK20__)
-    // gtk+ 2.0 supports Unicode through UTF-8 strings
-    wxConvCurrent = &wxConvUTF8;
-#else
     if (!wxOKlibc()) wxConvCurrent = &wxConvLocal;
-#endif
 #else
     if (!wxOKlibc()) wxConvCurrent = (wxMBConv*) NULL;
 #endif
@@ -733,7 +671,8 @@ int wxEntryInitGui()
     if ( !wxTheApp->OnInitGui() )
         retValue = -1;
 
-    wxGetRootWindow();
+    wxRootWindow = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    gtk_widget_realize( wxRootWindow );
 
     return retValue;
 }
@@ -764,15 +703,6 @@ void wxEntryCleanup()
 
 int wxEntry( int argc, char *argv[] )
 {
-#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
-    // This seems to be necessary since there are 'rogue'
-    // objects present at this point (perhaps global objects?)
-    // Setting a checkpoint will ignore them as far as the
-    // memory checking facility is concerned.
-    // Of course you may argue that memory allocated in globals should be
-    // checked, but this is a reasonable compromise.
-    wxDebugContext::SetCheckpoint();
-#endif
     int err = wxEntryStart(argc, argv);
     if (err)
         return err;
@@ -859,14 +789,13 @@ int wxEntry( int argc, char *argv[] )
     return retValue;
 }
 
-#ifndef __WXUNIVERSAL__
-
 #include "wx/gtk/info.xpm"
 #include "wx/gtk/error.xpm"
 #include "wx/gtk/question.xpm"
 #include "wx/gtk/warning.xpm"
 
-wxIcon wxApp::GetStdIcon(int which) const
+wxIcon
+wxApp::GetStdIcon(int which) const
 {
     switch(which)
     {
@@ -887,24 +816,3 @@ wxIcon wxApp::GetStdIcon(int which) const
             return wxIcon(error_xpm);
     }
 }
-#else
-wxIcon wxApp::GetStdIcon(int which) const
-{
-    return wxTheme::Get()->GetRenderer()->GetStdIcon(which);
-}
-#endif // !__WXUNIVERSAL__
-
-
-#ifdef __WXDEBUG__
-
-void wxApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
-{
-    m_isInAssert = TRUE;
-
-    wxAppBase::OnAssert(file, line, msg);
-
-    m_isInAssert = FALSE;
-}
-
-#endif // __WXDEBUG__
-

@@ -13,7 +13,7 @@ $Id$
 */
 
 
-#include "wx/defs.h"
+
 #include "wx/setup.h"
 
 #if wxUSE_ZLIB && wxUSE_ZIPSTREAM
@@ -21,19 +21,7 @@ $Id$
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/*
 #include "zlib.h"
- normally, the compiler options should contain -I../zlib, but it is
- apparently not the case for all MSW makefiles and so, unless we use
- configure (which defines __WX_SETUP_H__) or it is explicitly overridden by
- the user (who can define wxUSE_ZLIB_H_IN_PATH), we hardcode the path here
-*/
-#if defined(__WXMSW__) && !defined(__WX_SETUP_H__) && !defined(wxUSE_ZLIB_H_IN_PATH)
-   #include "../zlib/zlib.h"
-#else
-   #include "zlib.h"
-#endif
-
 
 /* Not the right solution (paths in makefiles) but... */
 #ifdef __BORLANDC__
@@ -370,7 +358,7 @@ local uLong unzlocal_SearchCentralDir(fin)
 	return uPosFound;
 }
 
-#if defined(__WXMAC__) && !defined(__UNIX__)
+#ifdef __WXMAC__
 void wxUnix2MacFilename (char *s) ;
 void
 wxUnix2MacFilename (char *s)
@@ -442,10 +430,10 @@ extern unzFile ZEXPORT unzOpen (path)
     if (unz_copyright[0]!=' ')
         return NULL;
 
-#if defined(__WXMAC__) && !defined(__UNIX__)
+#ifdef __WXMAC__
 	strcpy( wxBuffer , path ) ;
 	wxUnix2MacFilename( wxBuffer ) ;
-	fin=fopen(wxBuffer,"rb");
+  fin=fopen(wxBuffer,"rb");
 #else
     fin=fopen(path,"rb");
 #endif
@@ -854,11 +842,11 @@ extern int ZEXPORT unzLocateFile (file, szFileName, iCaseSensitivity)
     const char *c;
     char *c2;
     char szFileName2[UNZ_MAXFILENAMEINZIP+1];
-
+    
 	uLong num_fileSaved;
 	uLong pos_in_central_dirSaved;
 
-    for (c = szFileName, c2 = szFileName2; *c != '\0'; c++, c2++)
+    for (c = szFileName, c2 = szFileName2; *c != '\0'; c++, c2++) 
         if (*c == '\\') *c2 = '/';
         else *c2 = *c;
     *c2 = '\0';

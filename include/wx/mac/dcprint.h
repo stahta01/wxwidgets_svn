@@ -24,7 +24,6 @@ class WXDLLEXPORT wxPrinterDC: public wxDC
  public:
   DECLARE_CLASS(wxPrinterDC)
 
-#if wxUSE_PRINTING_ARCHITECTURE
   // Create a printer DC
   wxPrinterDC(const wxPrintData& printdata );
   ~wxPrinterDC();
@@ -34,17 +33,8 @@ class WXDLLEXPORT wxPrinterDC: public wxDC
     virtual void StartPage(void) ;
     virtual void EndPage(void) ;
  protected :
- #if TARGET_CARBON
-    #if PM_USE_SESSION_APIS
-      PMPrintSession  m_macPrintSession;
-    #else
-      PMPrintContext  m_macPrintPort ;
-    #endif
- #else
-      TPPrPort 	m_macPrintPort ;
- #endif
-      wxPrintData m_printData ;
-#endif // wxUSE_PRINTING_ARCHITECTURE
+ 	TPPrPort 	m_macPrintPort ;
+ 	wxPrintData m_printData ;
 };
 
 #endif

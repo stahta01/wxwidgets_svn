@@ -11,10 +11,6 @@
 #pragma implementation "control.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_CONTROLS
-
 #include "wx/control.h"
 
 #include <gtk/gtk.h>
@@ -77,11 +73,9 @@ wxSize wxControl::DoGetBestSize() const
     GtkRequisition req;
     req.width = 2;
     req.height = 2;
-    (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(m_widget) )->size_request )
+    (* GTK_WIDGET_CLASS( GTK_OBJECT(m_widget)->klass )->size_request )
         (m_widget, &req );
 
     return wxSize(req.width, req.height);
 }
-
-#endif // wxUSE_CONTROLS
 

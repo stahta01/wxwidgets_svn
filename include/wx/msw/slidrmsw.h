@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/slidrmsw.h
+// Name:        slidrmsw.h
 // Purpose:     wxSliderMSW class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _SLIDRMSW_H_
@@ -16,9 +16,15 @@
 #pragma interface "slidrmsw.h"
 #endif
 
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const wxChar*) wxSliderNameStr;
+
 // Slider
-class WXDLLEXPORT wxSliderMSW : public wxSliderBase
+class WXDLLEXPORT wxSliderMSW : public wxControl
 {
+    DECLARE_DYNAMIC_CLASS(wxSliderMSW)
+
 public:
     wxSliderMSW();
 
@@ -43,11 +49,11 @@ public:
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxSliderNameStr);
 
-    virtual int GetValue() const;
+    virtual int GetValue() const ;
     virtual void SetValue(int);
 
-    void GetSize(int *x, int *y) const;
-    void GetPosition(int *x, int *y) const;
+    void GetSize(int *x, int *y) const ;
+    void GetPosition(int *x, int *y) const ;
 
     bool Show(bool show);
 
@@ -57,14 +63,20 @@ public:
     int GetMax() const { return m_rangeMax; }
 
     // For trackbars only
+    void SetTickFreq(int n, int pos);
+    int GetTickFreq() const { return m_tickFreq; }
     void SetPageSize(int pageSize);
-    int GetPageSize() const;
+    int GetPageSize() const ;
+    void ClearSel() ;
+    void ClearTicks() ;
     void SetLineSize(int lineSize);
-    int GetLineSize() const;
-
-    // these methods get/set the length of the slider pointer in pixels
-    virtual void SetThumbLength(int lenPixels);
-    virtual int GetThumbLength() const ;
+    int GetLineSize() const ;
+    int GetSelEnd() const ;
+    int GetSelStart() const ;
+    void SetSelection(int minPos, int maxPos);
+    void SetThumbLength(int len) ;
+    int GetThumbLength() const ;
+    void SetTick(int tickPos) ;
 
     // IMPLEMENTATION
     WXHWND GetStaticMin() const { return m_staticMin; }
@@ -86,12 +98,11 @@ protected:
     int           m_rangeMax;
     int           m_pageSize;
     int           m_lineSize;
+    int           m_tickFreq;
 
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
-
-    DECLARE_DYNAMIC_CLASS(wxSliderMSW)
 };
 
 #endif

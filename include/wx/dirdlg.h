@@ -1,8 +1,6 @@
 #ifndef _WX_DIRDLG_H_BASE_
 #define _WX_DIRDLG_H_BASE_
 
-#if wxUSE_DIRDLG
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -21,6 +19,8 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 #include "wx/generic/dirdlgg.h"
 #elif defined(__WXGTK__)
 #include "wx/generic/dirdlgg.h"
+#elif defined(__WXQT__)
+#include "wx/qt/dirdlg.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/dirdlg.h"
 #elif defined(__WXPM__)
@@ -28,8 +28,6 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 #elif defined(__WXSTUBS__)
 #include "wx/stubs/dirdlg.h"
 #endif
-
-#endif // wxUSE_DIRDLG
 
 #endif
     // _WX_DIRDLG_H_BASE_

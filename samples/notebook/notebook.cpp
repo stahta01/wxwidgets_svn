@@ -20,11 +20,10 @@
     #include "wx/wx.h"
 #endif
 
-// If 1, use a dialog. Otherwise use a frame.
-#define USE_TABBED_DIALOG 1
-
 #include "notebook.h"
 
+// If 1, use a dialog. Otherwise use a frame.
+#define USE_TABBED_DIALOG 0
 #if USE_TABBED_DIALOG
 MyDialog* dialog = (MyDialog *) NULL;
 #else // !USE_TABBED_DIALOG
@@ -37,10 +36,9 @@ bool MyApp::OnInit()
 {
   // Create the main window
 #if USE_TABBED_DIALOG
-  dialog = new MyDialog((wxFrame *) NULL, -1, "Notebook", wxPoint(-1, -1), wxSize(365, 390),
-                        wxRESIZE_BORDER);
+  dialog = new MyDialog((wxFrame *) NULL, -1, (char *) "Notebook", wxPoint(-1, -1), wxSize(365, 390), wxDIALOG_MODAL|wxDEFAULT_DIALOG_STYLE);
+
   dialog->ShowModal();
-  delete dialog;
 
   // Quit immediately the dialog has been dismissed
   return FALSE;
@@ -49,7 +47,7 @@ bool MyApp::OnInit()
 
   // Problem with generic wxNotebook implementation whereby it doesn't size properly unless
   // you set the size again
-#if defined(__WIN16__) || defined(__WXMOTIF__)
+#if defined(__WIN16__)
   int width, height;
   frame->GetSize(& width, & height);
   frame->SetSize(-1, -1, width, height);
@@ -59,7 +57,7 @@ bool MyApp::OnInit()
 #endif
 }
 
-void MyApp::InitTabView(wxNotebook* notebook, wxTopLevelWindow* window)
+void MyApp::InitTabView(wxNotebook* notebook, wxPanel* window)
 {
   m_okButton = new wxButton(window, wxID_OK, "Close", wxPoint(-1, -1), wxSize(80, 25));
   m_cancelButton = new wxButton(window, ID_DELETE_PAGE, "&Delete page", wxPoint(-1, -1), wxSize(80, 25));

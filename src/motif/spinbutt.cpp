@@ -10,14 +10,11 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-    #pragma implementation "spinbutt.h"
+#pragma implementation "spinbutt.h"
 #endif
 
 #include "wx/spinbutt.h"
-#include "wx/spinctrl.h"
 
-// put wxSpinCtrl here too because it doesn't have a separate file for it in
-// wxMotif (yet)
 IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 

@@ -87,7 +87,6 @@ public:
 
     bool                            m_bOk;
 #endif // WXWIN_COMPATIBILITY_2
-    UINT                            m_uId;
 };
 
 // ----------------------------------------------------------------------------
@@ -213,24 +212,6 @@ public:
     }
     void SetSize(const wxSize& rSize) { SetSize(rSize.x, rSize.y); }
 
-    UINT GetId(void) const
-    {
-        wxGDIImageRefData*          pData;
-
-        pData = GetGDIImageData();
-        if (!pData)
-            return 0;
-        else
-            return pData->m_uId;
-    } // end of WxWinGdi_CGDIImage::GetId
-    void SetId(UINT uId)
-    {
-        wxGDIImageRefData*          pData;
-
-        EnsureHasData();
-        pData = GetGDIImageData();
-        pData->m_uId = uId;
-    }
     // forward some of base class virtuals to wxGDIImageRefData
     bool             FreeResource(bool bForce = FALSE);
     virtual WXHANDLE GetResourceHandle();

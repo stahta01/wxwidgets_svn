@@ -53,7 +53,28 @@
     if ($source) {
         _ptr = new wxPyInputStream($source);
     }
-    $target = wxPyConstructObject(_ptr, "wxInputStream", TRUE);
+    if (_ptr) {
+        char    swigptr[64];
+        SWIG_MakePtr(swigptr, _ptr, "_wxPyInputStream_p");
+
+        PyObject* classobj = PyDict_GetItemString(wxPython_dict, "wxInputStreamPtr");
+        if (! classobj) {
+            Py_INCREF(Py_None);
+            $target = Py_None;
+        } else {
+            PyObject* arg = Py_BuildValue("(s)", swigptr);
+            $target = PyInstance_New(classobj, arg, NULL);
+            Py_DECREF(arg);
+
+            // set ThisOwn
+            PyObject* one = PyInt_FromLong(1);
+            PyObject_SetAttrString($target, "thisown", one);
+            Py_DECREF(one);
+        }
+    } else {
+        Py_INCREF(Py_None);
+        $target = Py_None;
+    }
 }
 
 //----------------------------------------------------------------------
@@ -246,7 +267,7 @@ protected:
         if (bufsize == 0)
             return 0;
 
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         PyObject* arglist = Py_BuildValue("(i)", bufsize);
         PyObject* result = PyEval_CallObject(read, arglist);
         Py_DECREF(arglist);
@@ -264,7 +285,7 @@ protected:
         }
         else
             m_lasterror = wxSTREAM_READ_ERROR;
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
         m_lastcount = o;
         return o;
     }
@@ -275,17 +296,17 @@ protected:
     }
 
     virtual off_t OnSysSeek(off_t off, wxSeekMode mode){
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         PyObject*arglist = Py_BuildValue("(ii)", off, mode);
         PyObject*result = PyEval_CallObject(seek, arglist);
         Py_DECREF(arglist);
         Py_XDECREF(result);
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
         return OnSysTell();
     }
 
     virtual off_t OnSysTell() const{
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         PyObject* arglist = Py_BuildValue("()");
         PyObject* result = PyEval_CallObject(tell, arglist);
         Py_DECREF(arglist);
@@ -294,7 +315,7 @@ protected:
             o = PyInt_AsLong(result);
             Py_DECREF(result);
         };
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
         return o;
     }
 
@@ -304,12 +325,12 @@ protected:
 
 public:
     ~wxPyCBInputStream() {
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         Py_XDECREF(py);
         Py_XDECREF(read);
         Py_XDECREF(seek);
         Py_XDECREF(tell);
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
     }
 
     virtual size_t GetSize() {
@@ -484,10 +505,3 @@ public:
 }
 
 
-//----------------------------------------------------------------------
-
-%init %{
-    wxPyPtrTypeMap_Add("wxInputStream", "wxPyInputStream");
-%}
-
-//----------------------------------------------------------------------

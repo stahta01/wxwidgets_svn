@@ -1,4 +1,3 @@
-/* Version: $Id$ */
  %{
 #include "wx/setup.h"
 #include <string.h>
@@ -79,12 +78,14 @@ command	:       WORD PERIOD
 
 expr	:	WORD OPEN arglist CLOSE 
 			{$$ = proio_cons(wxmake_word($1), $3); free($1);}
+	|	OPEN_SQUARE CLOSE_SQUARE
+                        {$$ = proio_cons(NULL, NULL);}
 	|	OPEN_SQUARE arglist CLOSE_SQUARE
 			{$$ = $2; }
 	;
 
 arglist	:
-			{$$ = proio_cons(NULL, NULL);}
+			{$$ = NULL;}
 	|	arg
 			{$$ = proio_cons($1, NULL);}
 	|

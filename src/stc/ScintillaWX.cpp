@@ -93,8 +93,8 @@ END_EVENT_TABLE()
 ScintillaWX::ScintillaWX(wxStyledTextCtrl* win) {
     capturedMouse = false;
     wMain = win;
+    wDraw = win;
     stc   = win;
-    wheelRotation = 0;
     Initialise();
 }
 
@@ -122,10 +122,9 @@ void ScintillaWX::Finalise() {
 
 void ScintillaWX::StartDrag() {
     wxDropSource        source(wMain.GetID());
-    wxTextDataObject    data(wxString(drag.s, drag.len));
+    wxTextDataObject    data(dragChars);
     wxDragResult        result;
 
-    dropWentOutside = true;
     source.SetData(data);
     result = source.DoDragDrop(TRUE);
     if (result == wxDragMove && dropWentOutside)
@@ -170,8 +169,8 @@ bool ScintillaWX::HaveMouseCapture() {
 
 void ScintillaWX::ScrollText(int linesToMove) {
     int dy = vs.lineHeight * (linesToMove);
+    // TODO: calculate the rectangle to refreshed...
     wMain.GetID()->ScrollWindow(0, dy);
-    wMain.GetID()->Update();
 }
 
 void ScintillaWX::SetVerticalScrollPos() {
@@ -218,10 +217,9 @@ void ScintillaWX::NotifyParent(SCNotification scn) {
 
 void ScintillaWX::Copy() {
     if (currentPos != anchor) {
-        SelectionText st;
-        CopySelectionRange(&st);
+        char* text = CopySelectionRange();
         wxTheClipboard->Open();
-        wxTheClipboard->SetData(new wxTextDataObject(wxString(st.s, st.len)));
+        wxTheClipboard->SetData(new wxTextDataObject(text));
         wxTheClipboard->Close();
     }
 }
@@ -262,7 +260,7 @@ bool ScintillaWX::CanPaste() {
 }
 
 void ScintillaWX::CreateCallTipWindow(PRectangle) {
-    ct.wCallTip = new wxSTCCallTip(wMain.GetID(), -1, &ct);
+    ct.wCallTip = new wxSTCCallTip(wDraw.GetID(), -1, &ct);
     ct.wDraw = ct.wCallTip;
 }
 
@@ -327,69 +325,59 @@ void ScintillaWX::DoPaint(wxDC* dc, wxRect rect) {
 
 void ScintillaWX::DoHScroll(int type, int pos) {
     int xPos = xOffset;
-    if (type == wxEVT_SCROLLWIN_LINEUP)
+    switch (type) {
+    case wxEVT_SCROLLWIN_LINEUP:
         xPos -= H_SCROLL_STEP;
-    else if (type == wxEVT_SCROLLWIN_LINEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_LINEDOWN:
         xPos += H_SCROLL_STEP;
-    else if (type == wxEVT_SCROLLWIN_PAGEUP)
+        break;
+    case wxEVT_SCROLLWIN_PAGEUP:
         xPos -= H_SCROLL_PAGE;
-    else if (type == wxEVT_SCROLLWIN_PAGEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_PAGEDOWN:
         xPos += H_SCROLL_PAGE;
-    else if (type == wxEVT_SCROLLWIN_TOP)
+        break;
+    case wxEVT_SCROLLWIN_TOP:
         xPos = 0;
-    else if (type == wxEVT_SCROLLWIN_BOTTOM)
+        break;
+    case wxEVT_SCROLLWIN_BOTTOM:
         xPos = H_SCROLL_MAX;
-    else if (type == wxEVT_SCROLLWIN_THUMBTRACK)
+        break;
+    case wxEVT_SCROLLWIN_THUMBTRACK:
         xPos = pos;
-
+        break;
+    }
     HorizontalScrollTo(xPos);
 }
 
 void ScintillaWX::DoVScroll(int type, int pos) {
     int topLineNew = topLine;
-    if (type == wxEVT_SCROLLWIN_LINEUP)
+    switch (type) {
+    case wxEVT_SCROLLWIN_LINEUP:
         topLineNew -= 1;
-    else if (type == wxEVT_SCROLLWIN_LINEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_LINEDOWN:
         topLineNew += 1;
-    else if (type ==  wxEVT_SCROLLWIN_PAGEUP)
+        break;
+    case wxEVT_SCROLLWIN_PAGEUP:
         topLineNew -= LinesToScroll();
-    else if (type ==  wxEVT_SCROLLWIN_PAGEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_PAGEDOWN:
         topLineNew += LinesToScroll();
-    else if (type ==  wxEVT_SCROLLWIN_TOP)
+        break;
+    case wxEVT_SCROLLWIN_TOP:
         topLineNew = 0;
-    else if (type ==  wxEVT_SCROLLWIN_BOTTOM)
+        break;
+    case wxEVT_SCROLLWIN_BOTTOM:
         topLineNew = MaxScrollPos();
-    else if (type ==   wxEVT_SCROLLWIN_THUMBTRACK)
+        break;
+    case wxEVT_SCROLLWIN_THUMBTRACK:
         topLineNew = pos;
-
+        break;
+    }
     ScrollTo(topLineNew);
 }
-
-
-void ScintillaWX::DoMouseWheel(int rotation, int delta, int linesPerAction, int ctrlDown) {
-    int topLineNew = topLine;
-    int lines;
-
-    if (ctrlDown) {  // Zoom the fonts if Ctrl key down
-        if (rotation < 0) {
-            KeyCommand(SCI_ZOOMIN);
-        }
-        else {
-            KeyCommand(SCI_ZOOMOUT);
-        }
-    }
-    else { // otherwise just scroll the window
-        wheelRotation += rotation;
-        lines = wheelRotation / delta;
-        wheelRotation -= lines * delta;
-        if (lines != 0) {
-            lines *= linesPerAction;
-            topLineNew -= lines;
-            ScrollTo(topLineNew);
-        }
-    }
-}
-
 
 void ScintillaWX::DoSize(int width, int height) {
     PRectangle rcClient(0,0,width,height);
@@ -398,11 +386,11 @@ void ScintillaWX::DoSize(int width, int height) {
 }
 
 void ScintillaWX::DoLoseFocus(){
-    SetFocusState(false);
+    DropCaret();
 }
 
 void ScintillaWX::DoGainFocus(){
-    SetFocusState(true);
+    ShowCaretAtCurrentPosition();
 }
 
 void ScintillaWX::DoSysColourChange() {
@@ -423,52 +411,37 @@ void ScintillaWX::DoButtonMove(Point pt) {
 
 
 void ScintillaWX::DoAddChar(char ch) {
+    //bool acActiveBeforeCharAdded = ac.Active();
     AddChar(ch);
+    //if (acActiveBeforeCharAdded)
+    //    AutoCompleteChanged(ch);
 }
 
-int  ScintillaWX::DoKeyDown(int key, bool shift, bool ctrl, bool alt, bool* consumed) {
-#ifdef __WXGTK__
-    // Ctrl chars (A-Z) end up with the wrong keycode on wxGTK...
-    if (ctrl && key >= 1 && key <= 26)
-        key += 'A' - 1;
-#endif
-
+int  ScintillaWX::DoKeyDown(int key, bool shift, bool ctrl, bool alt) {
     switch (key) {
-    case WXK_DOWN: key = SCK_DOWN; break;
-    case WXK_UP: key = SCK_UP; break;
-    case WXK_LEFT: key = SCK_LEFT; break;
-    case WXK_RIGHT: key = SCK_RIGHT; break;
-    case WXK_HOME: key = SCK_HOME; break;
-    case WXK_END: key = SCK_END; break;
-    case WXK_PRIOR: key = SCK_PRIOR; break;
-    case WXK_NEXT: key = SCK_NEXT; break;
-    case WXK_DELETE: key = SCK_DELETE; break;
-    case WXK_INSERT: key = SCK_INSERT; break;
-    case WXK_ESCAPE: key = SCK_ESCAPE; break;
-    case WXK_BACK: key = SCK_BACK; break;
-    case WXK_TAB: key = SCK_TAB; break;
-    case WXK_RETURN: key = SCK_RETURN; break;
-    case WXK_ADD:
-    case WXK_NUMPAD_ADD:
-        key = SCK_ADD; break;
-    case WXK_SUBTRACT:
-    case WXK_NUMPAD_SUBTRACT:
-        key = SCK_SUBTRACT; break;
-    case WXK_DIVIDE:
-    case WXK_NUMPAD_DIVIDE:
-        key = SCK_DIVIDE; break;
-    case WXK_CONTROL: key = 0; break;
-    case WXK_ALT: key = 0; break;
-    case WXK_SHIFT: key = 0; break;
-    case WXK_MENU: key = 0; break;
+        case WXK_DOWN: key = SCK_DOWN; break;
+        case WXK_UP: key = SCK_UP; break;
+        case WXK_LEFT: key = SCK_LEFT; break;
+        case WXK_RIGHT: key = SCK_RIGHT; break;
+        case WXK_HOME: key = SCK_HOME; break;
+        case WXK_END: key = SCK_END; break;
+        case WXK_PRIOR: key = SCK_PRIOR; break;
+        case WXK_NEXT: key = SCK_NEXT; break;
+        case WXK_DELETE: key = SCK_DELETE; break;
+        case WXK_INSERT: key = SCK_INSERT; break;
+        case WXK_ESCAPE: key = SCK_ESCAPE; break;
+        case WXK_BACK: key = SCK_BACK; break;
+        case WXK_TAB: key = SCK_TAB; break;
+        case WXK_RETURN: key = SCK_RETURN; break;
+        case WXK_ADD: key = SCK_ADD; break;
+        case WXK_SUBTRACT: key = SCK_SUBTRACT; break;
+        case WXK_DIVIDE: key = SCK_DIVIDE; break;
+        case WXK_CONTROL: key = 0; break;
+        case WXK_ALT: key = 0; break;
+        case WXK_SHIFT: key = 0; break;
     }
 
-    int rv = KeyDown(key, shift, ctrl, alt, consumed);
-
-    if (key)
-        return rv;
-    else
-        return 1;
+    return KeyDown(key, shift, ctrl, alt);
 }
 
 
@@ -496,15 +469,14 @@ bool ScintillaWX::DoDropText(long x, long y, const wxString& data) {
 
 
 wxDragResult ScintillaWX::DoDragEnter(wxCoord x, wxCoord y, wxDragResult def) {
-    dragResult = def;
-    return dragResult;
+    return def;
 }
 
 
 wxDragResult ScintillaWX::DoDragOver(wxCoord x, wxCoord y, wxDragResult def) {
     SetDragPosition(PositionFromLocation(Point(x, y)));
     dragResult = def;
-    return dragResult;
+    return def;
 }
 
 

@@ -13,8 +13,6 @@
 #pragma implementation "control.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/control.h"
 #include "wx/panel.h"
 #include "wx/utils.h"
@@ -60,6 +58,18 @@ bool wxControl::Create( wxWindow *parent,
 #endif
 
     return ret;
+}
+
+wxControl::~wxControl()
+{
+    // If we delete an item, we should initialize the parent panel,
+    // because it could now be invalid.
+    wxPanel *panel = wxDynamicCast(GetParent(), wxPanel);
+    if (panel)
+    {
+        if ( (wxControl *)panel->GetDefaultItem() == this)
+            panel->SetDefaultItem((wxButton*) NULL);
+    }
 }
 
 void wxControl::SetLabel(const wxString& label)

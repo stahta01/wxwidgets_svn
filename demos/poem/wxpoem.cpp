@@ -33,7 +33,7 @@
 
 #include "wxpoem.h"
 
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
 #include "corner1.xpm"
 #include "corner2.xpm"
 #include "corner3.xpm"
@@ -236,7 +236,7 @@ void MainWindow::ScanBuffer(wxDC *dc, bool DrawIt, int *max_x, int *max_y)
     while (ch != 0 && !page_break)
     {
         j = 0;
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
         while (((ch = poem_buffer[i]) != 13) && (ch != 0))
 #else
         while (((ch = poem_buffer[i]) != 10) && (ch != 0))
@@ -247,7 +247,7 @@ void MainWindow::ScanBuffer(wxDC *dc, bool DrawIt, int *max_x, int *max_y)
             i ++;
         }
 
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
         if (ch == 13)
 #else
         if (ch == 10)
@@ -510,7 +510,9 @@ void MainWindow::Search(bool ask)
     if (s != "")
     {
       if (search_string) delete[] search_string;
+
       search_string = copystring(s);
+
       search_ok = TRUE;
     } else search_ok = FALSE;
   }
@@ -650,7 +652,7 @@ bool MyApp::OnInit()
   Corner3 = new wxIcon("icon_3");
   Corner4 = new wxIcon("icon_4");
 #endif
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
   Corner1 = new wxIcon( corner1_xpm );
   Corner2 = new wxIcon( corner2_xpm );
   Corner3 = new wxIcon( corner3_xpm );
@@ -685,7 +687,7 @@ int MyApp::OnExit()
   delete ItalicFont;
   delete[] poem_buffer;
   if (search_string)
-    delete[] search_string;
+      delete[] search_string;
 
   return 0;
 }
@@ -924,7 +926,7 @@ long MainWindow::DoSearch(void)
     FILE *file;
     long i = 0;
     int ch = 0;
-    char buf[100];
+    char buf[512];
     long find_start;
     long previous_poem_start;
 
@@ -1023,7 +1025,7 @@ bool Compile(void)
     long i = 0;
     int j;
     int ch = 0;
-    char buf[100];
+    char buf[512];
 
     if (data_filename)
       sprintf(buf, "%s.dat", data_filename);

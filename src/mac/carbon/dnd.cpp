@@ -18,8 +18,6 @@
 #include "wx/app.h"
 #include "wx/gdicmn.h"
 
-#if wxUSE_DRAG_AND_DROP
-
 // ----------------------------------------------------------------------------
 // global
 // ----------------------------------------------------------------------------
@@ -39,22 +37,20 @@ wxDropTarget::~wxDropTarget()
 // ----------------------------------------------------------------------------
 // wxTextDropTarget
 // ----------------------------------------------------------------------------
-#ifndef __DARWIN__
-bool wxTextDropTarget::OnDrop( wxCoord x, wxCoord y, const void *pData )
+
+bool wxTextDropTarget::OnDrop( long x, long y, const void *pData )
 {
   OnDropText( x, y, (const char*)pData );
   return TRUE;
 };
-#endif
 
-bool wxTextDropTarget::OnDropText( wxCoord x, wxCoord y, const wxString &psz )
+bool wxTextDropTarget::OnDropText( long x, long y, const char *psz )
 {
-  printf( "Got dropped text: %s.\n", (char *)psz );
+  printf( "Got dropped text: %s.\n", psz );
   printf( "At x: %d, y: %d.\n", (int)x, (int)y );
   return TRUE;
 };
 
-#ifndef __DARWIN__
 size_t wxTextDropTarget::GetFormatCount() const
 {
   return 1;
@@ -64,27 +60,25 @@ wxDataFormat wxTextDropTarget::GetFormat(size_t WXUNUSED(n)) const
 {
   return wxDF_TEXT;
 }
-#endif
 
 // ----------------------------------------------------------------------------
 // wxFileDropTarget
 // ----------------------------------------------------------------------------
 
-#ifndef __DARWIN__
-bool wxFileDropTarget::OnDropFiles( wxCoord x, wxCoord y, size_t nFiles, const char * const WXUNUSED(aszFiles)[] )
+bool wxFileDropTarget::OnDropFiles( long x, long y, size_t nFiles, const char * const WXUNUSED(aszFiles)[] )
 {
   printf( "Got %d dropped files.\n", (int)nFiles );
   printf( "At x: %d, y: %d.\n", (int)x, (int)y );
   return TRUE;
 }
-#endif
 
-bool wxFileDropTarget::OnDrop(wxCoord x, wxCoord y, const wxArrayString& filenames)
+bool wxFileDropTarget::OnDrop(long x, long y, const void *WXUNUSED(pData) )
 {
-  return OnDropFiles(x, y, 1, &filenames); 
+  char *str = "/this/is/a/path.txt";
+
+  return OnDropFiles(x, y, 1, &str ); 
 }
 
-#ifndef __DARWIN__
 size_t wxFileDropTarget::GetFormatCount() const
 {
   return 1;
@@ -94,7 +88,6 @@ wxDataFormat wxFileDropTarget::GetFormat(size_t WXUNUSED(n)) const
 {
   return wxDF_FILENAME;
 }
-#endif
 
 //-------------------------------------------------------------------------
 // wxDropSource
@@ -138,4 +131,3 @@ wxDragResult wxDropSource::DoDragDrop( bool WXUNUSED(bAllowMove) )
     return wxDragError;
 };
 
-#endif

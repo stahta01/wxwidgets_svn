@@ -22,8 +22,7 @@
 #endif
 
 #ifndef WXPRECOMP
-    #include "wx/log.h"
-    #include "wx/intl.h"
+#include "wx/wx.h"
 #endif
 
 #include "wx/html/htmlfilt.h"
@@ -59,9 +58,9 @@ wxString wxHtmlFilterPlainText::ReadFile(const wxFSFile& file) const
     wxString doc, doc2;
 
     if (s == NULL) return wxEmptyString;
-    src = new char[s->GetSize()+1];
-    src[s->GetSize()] = 0;
-    s->Read(src, s->GetSize());
+    src = new char[s -> GetSize()+1];
+    src[s -> GetSize()] = 0;
+    s -> Read(src, s -> GetSize());
     doc = src;
     delete [] src;
 
@@ -142,18 +141,18 @@ wxString wxHtmlFilterHTML::ReadFile(const wxFSFile& file) const
     char *src;
     wxString doc;
 
-    if (s == NULL)
+    if (s == NULL) 
     {
         wxLogError(_("Cannot open HTML document: %s"), file.GetLocation().c_str());
         return wxEmptyString;
     }
-    src = new char[s->GetSize() + 1];
-    src[s->GetSize()] = 0;
-    s->Read(src, s->GetSize());
+    src = new char[s -> GetSize() + 1];
+    src[s -> GetSize()] = 0;
+    s -> Read(src, s -> GetSize());
     doc = src;
     delete[] src;
 
-    // add meta tag if we obtained this through http:
+    // add meta tag if we obtained this through http:    
     if (file.GetMimeType().Find(_T("; charset=")) == 0)
     {
         wxString s(_T("<meta http-equiv=\"Content-Type\" content=\""));

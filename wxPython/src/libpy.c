@@ -317,11 +317,11 @@ SWIG_GetPtr(char *c, void **ptr, char *t)
   if (*c != '_') {
     *ptr = (void *) 0;
     if (strcmp(c,"NULL") == 0) return (char *) 0;
-    else return c;
+    else c;
   }
   c++;
   /* Extract hex value from pointer */
-  while ((d = *c) != 0) {
+  while (d = *c) {
     if ((d >= '0') && (d <= '9'))
       p = (p << 4) + (d - '0');
     else if ((d >= 'a') && (d <= 'f'))
@@ -362,7 +362,7 @@ SWIG_GetPtr(char *c, void **ptr, char *t)
   sp = &SwigPtrTable[start];
 
   /* Try to find a match */
-  while (start < end) {               /* was "<="     --robin */
+  while (start <= end) {
     if (strncmp(t,sp->name,sp->len) == 0) {
       name = sp->name;
       len = sp->len;
@@ -409,8 +409,6 @@ SWIG_GetPtrObj(PyObject *obj, void **ptr, char *type) {
       Py_DECREF(sobj);
   }
   str = PyString_AsString(sobj);
-  if (str == NULL)
-      return "";
   return SWIG_GetPtr(str,ptr,type);
 }
 

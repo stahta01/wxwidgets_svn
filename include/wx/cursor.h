@@ -7,8 +7,8 @@
 #include "wx/motif/cursor.h"
 #elif defined(__WXGTK__)
 #include "wx/gtk/cursor.h"
-#elif defined(__WXMGL__)
-#include "wx/mgl/cursor.h"
+#elif defined(__WXQT__)
+#include "wx/qt/cursor.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/cursor.h"
 #elif defined(__WXPM__)
@@ -18,7 +18,6 @@
 #endif
 
 #include "wx/utils.h"
-
 /* This is a small class which can be used by all ports
    to temporarily suspend the busy cursor. Useful in modal
    dialogs.

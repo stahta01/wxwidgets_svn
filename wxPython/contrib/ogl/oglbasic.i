@@ -42,7 +42,7 @@
 //---------------------------------------------------------------------------
 
 
-class wxShapeRegion : public wxObject {
+class wxShapeRegion {
 public:
     wxShapeRegion();
     //~wxShapeRegion();
@@ -87,15 +87,17 @@ public:
 %}
 
 
-class wxPyShapeEvtHandler : public wxObject {
+class wxPyShapeEvtHandler {
 public:
     wxPyShapeEvtHandler(wxPyShapeEvtHandler *prev = NULL,
                         wxPyShape *shape = NULL);
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyShapeEvtHandler)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyShapeEvtHandler)"
 
-    %addmethods { void Destroy() { delete self; } }
+    %addmethods {
+        void Destroy() { delete self; }
+    }
 
     void SetShape(wxPyShape *sh);
     wxPyShape *GetShape();
@@ -145,8 +147,8 @@ class wxPyShape : public wxPyShapeEvtHandler {
 public:
     // wxPyShape(wxPyShapeCanvas *can = NULL);     abstract base class...
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyShape)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyShape)"
 
     %addmethods {
         void Destroy() { delete self; }
@@ -229,10 +231,8 @@ public:
     int GetAttachmentMode();
     void SetId(long i);
     long GetId();
-
     void SetPen(wxPen *pen);
     void SetBrush(wxBrush *brush);
-
 
     // void SetClientData(wxObject *client_data);
     // wxObject *GetClientData();

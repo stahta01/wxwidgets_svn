@@ -277,7 +277,7 @@ void wxCheckListBox::Delete(int N)
     // free memory
     delete m_aItems[N];
 
-    m_aItems.RemoveAt(N);
+    m_aItems.Remove(N);
 }
 
 void wxCheckListBox::InsertItems(int nItems, const wxString items[], int pos)

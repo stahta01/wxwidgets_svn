@@ -70,61 +70,68 @@ IMPLEMENT_CLASS(wxPrinterDC, wxDC)
 // ----------------------------------------------------------------------------
 
 // This form is deprecated
-wxPrinterDC::wxPrinterDC(const wxString& driver_name,
-                         const wxString& device_name,
-                         const wxString& file,
-                         bool interactive,
-                         int orientation)
+wxPrinterDC::wxPrinterDC(const wxString& driver_name, const wxString& device_name, const wxString& file, bool interactive, int orientation)
 {
     m_isInteractive = interactive;
 
-    if ( !file.empty() )
+    if ( !!file )
         m_printData.SetFilename(file);
 
 #if wxUSE_COMMON_DIALOGS
-    if ( interactive )
+    if (interactive)
     {
         PRINTDLG pd;
 
         pd.lStructSize = sizeof( PRINTDLG );
-        pd.hwndOwner = (HWND) NULL;
-        pd.hDevMode = (HANDLE)NULL;
-        pd.hDevNames = (HANDLE)NULL;
-        pd.Flags = PD_RETURNDC | PD_NOSELECTION | PD_NOPAGENUMS;
-        pd.nFromPage = 0;
-        pd.nToPage = 0;
-        pd.nMinPage = 0;
-        pd.nMaxPage = 0;
-        pd.nCopies = 1;
-        pd.hInstance = (HINSTANCE)NULL;
+        pd.hwndOwner=(HWND) NULL;
+        pd.hDevMode=(HANDLE)NULL;
+        pd.hDevNames=(HANDLE)NULL;
+        pd.Flags=PD_RETURNDC | PD_NOSELECTION | PD_NOPAGENUMS;
+        pd.nFromPage=0;
+        pd.nToPage=0;
+        pd.nMinPage=0;
+        pd.nMaxPage=0;
+        pd.nCopies=1;
+        pd.hInstance=(HINSTANCE)NULL;
 
-        m_ok = PrintDlg( &pd ) != 0;
-        if ( m_ok )
+        if ( PrintDlg( &pd ) != 0 )
         {
             m_hDC = (WXHDC) pd.hDC;
+            m_ok = TRUE;
         }
+        else
+        {
+            m_ok = FALSE;
+            return;
+        }
+
+        //     m_dontDelete = TRUE;
     }
     else
 #endif // wxUSE_COMMON_DIALOGS
-    {
-        if ( !driver_name.empty() && !device_name.empty() && !file.empty() )
+        if ((!driver_name.IsNull() && driver_name != wxT("")) &&
+            (!device_name.IsNull() && device_name != wxT("")) &&
+            (!file.IsNull() && file != wxT("")))
         {
-            m_hDC = (WXHDC) CreateDC(driver_name, device_name, file, NULL);
+            m_hDC = (WXHDC) CreateDC(WXSTRINGCAST driver_name, WXSTRINGCAST device_name, WXSTRINGCAST file, NULL);
+            m_ok = m_hDC ? TRUE: FALSE;
         }
-        else // we don't have all parameters, ask the user
+        else
         {
             wxPrintData printData;
             printData.SetOrientation(orientation);
             m_hDC = wxGetPrinterDC(printData);
+            m_ok = m_hDC ? TRUE: FALSE;
         }
 
-        m_ok = m_hDC ? TRUE: FALSE;
-
-        // as we created it, we must delete it as well
-        m_bOwnsDC = TRUE;
-    }
-
-    Init();
+        if (m_hDC)
+        {
+            //     int width = GetDeviceCaps(m_hDC, VERTRES);
+            //     int height = GetDeviceCaps(m_hDC, HORZRES);
+            SetMapMode(wxMM_TEXT);
+        }
+        SetBrush(*wxBLACK_BRUSH);
+        SetPen(*wxBLACK_PEN);
 }
 
 wxPrinterDC::wxPrinterDC(const wxPrintData& printData)
@@ -134,32 +141,39 @@ wxPrinterDC::wxPrinterDC(const wxPrintData& printData)
     m_isInteractive = FALSE;
 
     m_hDC = wxGetPrinterDC(printData);
-    m_ok = m_hDC != 0;
-    m_bOwnsDC = TRUE;
+    m_ok = (m_hDC != 0);
 
-    Init();
+    if (m_hDC)
+        SetMapMode(wxMM_TEXT);
+
+    SetBrush(*wxBLACK_BRUSH);
+    SetPen(*wxBLACK_PEN);
 }
 
 
-wxPrinterDC::wxPrinterDC(WXHDC dc)
+wxPrinterDC::wxPrinterDC(WXHDC theDC)
 {
     m_isInteractive = FALSE;
 
-    m_hDC = dc;
-    m_bOwnsDC = TRUE;
+    m_hDC = theDC;
     m_ok = TRUE;
-}
-
-void wxPrinterDC::Init()
-{
-    if ( m_hDC )
+    if (m_hDC)
     {
         //     int width = GetDeviceCaps(m_hDC, VERTRES);
         //     int height = GetDeviceCaps(m_hDC, HORZRES);
         SetMapMode(wxMM_TEXT);
+    }
+    SetBrush(*wxBLACK_BRUSH);
+    SetPen(*wxBLACK_PEN);
+}
 
-        SetBrush(*wxBLACK_BRUSH);
-        SetPen(*wxBLACK_PEN);
+wxPrinterDC::~wxPrinterDC()
+{
+    if ( m_hDC )
+    {
+        ::DeleteDC(GetHdc());
+
+        m_hDC = 0;
     }
 }
 
@@ -221,21 +235,19 @@ void wxPrinterDC::EndPage()
 // Returns default device and port names
 static bool wxGetDefaultDeviceName(wxString& deviceName, wxString& portName)
 {
-    deviceName.clear();
+    deviceName = "";
 
     LPDEVNAMES  lpDevNames;
-    LPTSTR      lpszDriverName;
-    LPTSTR      lpszDeviceName;
-    LPTSTR      lpszPortName;
+    LPSTR       lpszDriverName;
+    LPSTR       lpszDeviceName;
+    LPSTR       lpszPortName;
 
     PRINTDLG    pd;
 
     // Cygwin has trouble believing PRINTDLG is 66 bytes - thinks it is 68
 #ifdef __GNUWIN32__
-    memset(&pd, 0, 66);
     pd.lStructSize    = 66; // sizeof(PRINTDLG);
 #else
-    memset(&pd, 0, sizeof(PRINTDLG));
     pd.lStructSize    = sizeof(PRINTDLG);
 #endif
 
@@ -258,9 +270,9 @@ static bool wxGetDefaultDeviceName(wxString& deviceName, wxString& portName)
     if (pd.hDevNames)
     {
         lpDevNames = (LPDEVNAMES)GlobalLock(pd.hDevNames);
-        lpszDriverName = (LPTSTR)lpDevNames + lpDevNames->wDriverOffset;
-        lpszDeviceName = (LPTSTR)lpDevNames + lpDevNames->wDeviceOffset;
-        lpszPortName   = (LPTSTR)lpDevNames + lpDevNames->wOutputOffset;
+        lpszDriverName = (LPSTR)lpDevNames + lpDevNames->wDriverOffset;
+        lpszDeviceName = (LPSTR)lpDevNames + lpDevNames->wDeviceOffset;
+        lpszPortName   = (LPSTR)lpDevNames + lpDevNames->wOutputOffset;
 
         deviceName = lpszDeviceName;
         portName = lpszPortName;
@@ -353,7 +365,7 @@ WXHDC wxGetPrinterDC(int orientation)
     }
     return (WXHDC) hDC;
 }
-#endif // 0
+#endif
 
 // Gets an HDC for the specified printer configuration
 WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
@@ -474,8 +486,7 @@ bool wxPrinterDC::DoBlit(wxCoord xdest, wxCoord ydest,
                          wxCoord width, wxCoord height,
                          wxDC *source,
                          wxCoord xsrc, wxCoord ysrc,
-                         int WXUNUSED(rop), bool useMask,
-                         wxCoord WXUNUSED(xsrcMask), wxCoord WXUNUSED(ysrcMask))
+                         int rop, bool useMask)
 {
     bool success = TRUE;
 
@@ -499,7 +510,7 @@ bool wxPrinterDC::DoBlit(wxCoord xdest, wxCoord ydest,
                     HBRUSH brush = ::CreateSolidBrush(::GetPixel(dc_src, x, y));
                     rect.left = xdest + x;
                     rect.right = rect.left + 1;
-                    rect.top = ydest + y;
+                    rect.top = ydest + y; 
                     rect.bottom = rect.top + 1;
                     ::FillRect(GetHdc(), &rect, brush);
                     ::DeleteObject(brush);

@@ -112,8 +112,6 @@ Font::~Font() {
 }
 
 void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
-    // TODO:  what to do about the characterSet?
-
     Release();
     id = new wxFont(size,
                     wxDEFAULT,
@@ -163,21 +161,22 @@ void Surface::Init() {
     Release();
     hdc = new wxMemoryDC();
     hdcOwned = true;
+    // **** ::SetTextAlign(hdc, TA_BASELINE);
 }
 
 void Surface::Init(SurfaceID hdc_) {
     Release();
     hdc = hdc_;
+    // **** ::SetTextAlign(hdc, TA_BASELINE);
 }
 
 void Surface::InitPixMap(int width, int height, Surface *surface_) {
     Release();
     hdc = new wxMemoryDC(surface_->hdc);
     hdcOwned = true;
-    if (width < 1) width = 1;
-    if (height < 1) height = 1;
     bitmap = new wxBitmap(width, height);
     ((wxMemoryDC*)hdc)->SelectObject(*bitmap);
+    // **** ::SetTextAlign(hdc, TA_BASELINE);
 }
 
 void Surface::PenColour(Colour fore) {
@@ -200,7 +199,7 @@ int Surface::LogPixelsY() {
 
 
 int Surface::DeviceHeightFont(int points) {
-    return points;
+    return points * LogPixelsY() / 72;
 }
 
 
@@ -354,7 +353,7 @@ int Surface::AverageCharWidth(Font &font) {
 }
 
 int Surface::SetPalette(Palette *pal, bool inBackGround) {
-    return 0;
+    return 0;  // **** figure out what to do with palettes...
 }
 
 void Surface::SetClip(PRectangle rc) {
@@ -456,13 +455,17 @@ class wxSTCListBox : public wxListBox {
 public:
     wxSTCListBox(wxWindow* parent, wxWindowID id)
         : wxListBox(parent, id, wxDefaultPosition, wxDefaultSize,
-                    0, NULL, wxLB_SINGLE | wxSIMPLE_BORDER) // | wxLB_SORT )
+                    0, NULL, wxLB_SINGLE | wxLB_SORT | wxSIMPLE_BORDER)
         {}
 
     void OnFocus(wxFocusEvent& event) {
         GetParent()->SetFocus();
         event.Skip();
     }
+
+#ifdef __WXGTK__
+    void DoSetFirstItem(int n);
+#endif
 
 private:
     DECLARE_EVENT_TABLE()
@@ -473,6 +476,52 @@ BEGIN_EVENT_TABLE(wxSTCListBox, wxListBox)
 END_EVENT_TABLE()
 
 
+
+
+#ifdef __WXGTK__
+    // This can be removed after 2.2.2 I think
+void wxSTCListBox::DoSetFirstItem( int n )
+{
+    wxCHECK_RET( m_list, wxT("invalid listbox") );
+
+    if (gdk_pointer_is_grabbed () && GTK_WIDGET_HAS_GRAB (m_list))
+        return;
+
+    // terribly efficient
+    const gchar *vadjustment_key = "gtk-vadjustment";
+    guint vadjustment_key_id = g_quark_from_static_string (vadjustment_key);
+
+    GtkAdjustment *adjustment =
+       (GtkAdjustment*) gtk_object_get_data_by_id (GTK_OBJECT (m_list), vadjustment_key_id);
+    wxCHECK_RET( adjustment, wxT("invalid listbox code") );
+
+    GList *target = g_list_nth( m_list->children, n );
+    wxCHECK_RET( target, wxT("invalid listbox index") );
+
+    GtkWidget *item = GTK_WIDGET(target->data);
+    wxCHECK_RET( item, wxT("invalid listbox code") );
+
+    // find the last item before this one which is already realized
+    size_t nItemsBefore;
+    for ( nItemsBefore = 0; item && (item->allocation.y == -1); nItemsBefore++ )
+    {
+        target = target->prev;
+        if ( !target )
+        {
+            // nothing we can do if there are no allocated items yet
+            return;
+        }
+
+        item = GTK_WIDGET(target->data);
+    }
+
+    gtk_adjustment_set_value(adjustment,
+                             item->allocation.y +
+                                nItemsBefore*item->allocation.height);
+}
+#endif
+
+
 ListBox::ListBox() {
 }
 
@@ -481,10 +530,8 @@ ListBox::~ListBox() {
 
 void ListBox::Create(Window &parent, int ctrlID) {
     id = new wxSTCListBox(parent.id, ctrlID);
-}
-
-void ListBox::SetVisibleRows(int rows) {
-	desiredVisibleRows = rows;
+//    id = new wxListBox(parent.id, ctrlID,  wxDefaultPosition, wxDefaultSize,
+//                       0, NULL, wxLB_SINGLE | wxLB_SORT | wxSIMPLE_BORDER);
 }
 
 PRectangle ListBox::GetDesiredRect() {
@@ -492,12 +539,13 @@ PRectangle ListBox::GetDesiredRect() {
     PRectangle rc;
     rc.top = 0;
     rc.left = 0;
-    if (sz.x > 400)
-        sz.x = 400;
-    if (sz.y > 160)  // TODO:  Use desiredVisibleRows??
-        sz.y = 160;
+    if (sz.x > 150)   // TODO: A better way to determine these max sizes
+        sz.x = 150;
+    if (sz.y > 100)
+        sz.y = 100;
     rc.right = sz.x;
     rc.bottom = sz.y;
+
     return rc;
 }
 
@@ -518,7 +566,7 @@ void ListBox::Append(char *s) {
 }
 
 int ListBox::Length() {
-    return ((wxListBox*)id)->GetCount();
+    return ((wxListBox*)id)->Number();
 }
 
 void ListBox::Select(int n) {
@@ -537,7 +585,13 @@ int ListBox::GetSelection() {
 }
 
 int ListBox::Find(const char *prefix) {
-    // No longer used
+    if (prefix) {
+        for (int x=0; x < ((wxListBox*)id)->Number(); x++) {
+            wxString text = ((wxListBox*)id)->GetString(x);
+            if (text.StartsWith(prefix))
+                return x;
+        }
+    }
     return -1;
 }
 
@@ -642,36 +696,6 @@ void Platform::DebugPrintf(const char *format, ...) {
     Platform::DebugDisplay(buffer);
 #endif
 }
-
-
-static bool assertionPopUps = true;
-
-bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
-	bool ret = assertionPopUps;
-	assertionPopUps = assertionPopUps_;
-	return ret;
-}
-
-void Platform::Assert(const char *c, const char *file, int line) {
-	char buffer[2000];
-	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
-	if (assertionPopUps) {
-		int idButton = wxMessageBox(buffer, "Assertion failure",
-                                            wxICON_HAND | wxOK);
-//  		if (idButton == IDRETRY) {
-//  			::DebugBreak();
-//  		} else if (idButton == IDIGNORE) {
-//  			// all OK
-//  		} else {
-//  			abort();
-//  		}
-	} else {
-		strcat(buffer, "\r\n");
-		Platform::DebugDisplay(buffer);
-		abort();
-	}
-}
-
 
 int Platform::Clamp(int val, int minVal, int maxVal) {
     if (val > maxVal)

@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CMDLINE_PARSER
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
@@ -64,9 +62,6 @@ struct wxCmdLineOption
                     wxCmdLineParamType typ,
                     int fl)
     {
-        wxASSERT_MSG( !shrt.empty() || !lng.empty(),
-                      _T("option should have at least one name") );
-
         kind = k;
 
         shortName = shrt;
@@ -103,7 +98,7 @@ struct wxCmdLineOption
     void SetDateVal(const wxDateTime val)
         { Check(wxCMD_LINE_VAL_DATE); m_dateVal = val; m_hasVal = TRUE; }
 
-    void SetHasValue(bool hasValue = TRUE) { m_hasVal = hasValue; }
+    void SetHasValue() { m_hasVal = TRUE; }
     bool HasValue() const { return m_hasVal; }
 
 public:
@@ -195,64 +190,23 @@ void wxCmdLineParserData::SetArguments(int argc, wxChar **argv)
     }
 }
 
-void wxCmdLineParserData::SetArguments(const wxString& cmdLine)
+void wxCmdLineParserData::SetArguments(const wxString& WXUNUSED(cmdline))
 {
-    m_arguments.Empty();
+    // either use wxMSW wxApp::ConvertToStandardCommandArgs() or move its logic
+    // here and use this method from it - but don't duplicate the code
 
-    m_arguments.Add(wxTheApp->GetAppName());
-
-    // Break up string
-    // Treat strings enclosed in double-quotes as single arguments
-    int i = 0;
-    int len = cmdLine.Length();
-    while (i < len)
-    {
-        // Skip whitespace
-        while ((i < len) && wxIsspace(cmdLine.GetChar(i)))
-            i ++;
-
-        if (i < len)
-        {
-            if (cmdLine.GetChar(i) == wxT('"')) // We found the start of a string
-            {
-                i ++;
-                int first = i;
-                while ((i < len) && (cmdLine.GetChar(i) != wxT('"')))
-                    i ++;
-
-                wxString arg(cmdLine.Mid(first, (i - first)));
-
-                m_arguments.Add(arg);
-
-                if (i < len)
-                    i ++; // Skip past 2nd quote
-            }
-            else // Unquoted argument
-            {
-                int first = i;
-                while ((i < len) && !wxIsspace(cmdLine.GetChar(i)))
-                    i ++;
-
-                wxString arg(cmdLine.Mid(first, (i - first)));
-
-                m_arguments.Add(arg);
-            }
-        }
-    }
+    wxFAIL_MSG(_T("TODO"));
 }
 
 int wxCmdLineParserData::FindOption(const wxString& name)
 {
-    if ( !name.empty() )
+    size_t count = m_options.GetCount();
+    for ( size_t n = 0; n < count; n++ )
     {
-        size_t count = m_options.GetCount();
-        for ( size_t n = 0; n < count; n++ )
+        if ( m_options[n].shortName == name )
         {
-            if ( m_options[n].shortName == name )
-            {
-                // found
-                return n;
-            }
+            // found
+            return n;
         }
     }
 
@@ -416,9 +370,6 @@ void wxCmdLineParser::AddParam(const wxString& desc,
 bool wxCmdLineParser::Found(const wxString& name) const
 {
     int i = m_data->FindOption(name);
-    if ( i == wxNOT_FOUND )
-        i = m_data->FindOptionByLongName(name);
-
     wxCHECK_MSG( i != wxNOT_FOUND, FALSE, _T("unknown switch") );
 
     wxCmdLineOption& opt = m_data->m_options[(size_t)i];
@@ -431,9 +382,6 @@ bool wxCmdLineParser::Found(const wxString& name) const
 bool wxCmdLineParser::Found(const wxString& name, wxString *value) const
 {
     int i = m_data->FindOption(name);
-    if ( i == wxNOT_FOUND )
-        i = m_data->FindOptionByLongName(name);
-
     wxCHECK_MSG( i != wxNOT_FOUND, FALSE, _T("unknown option") );
 
     wxCmdLineOption& opt = m_data->m_options[(size_t)i];
@@ -450,9 +398,6 @@ bool wxCmdLineParser::Found(const wxString& name, wxString *value) const
 bool wxCmdLineParser::Found(const wxString& name, long *value) const
 {
     int i = m_data->FindOption(name);
-    if ( i == wxNOT_FOUND )
-        i = m_data->FindOptionByLongName(name);
-
     wxCHECK_MSG( i != wxNOT_FOUND, FALSE, _T("unknown option") );
 
     wxCmdLineOption& opt = m_data->m_options[(size_t)i];
@@ -469,9 +414,6 @@ bool wxCmdLineParser::Found(const wxString& name, long *value) const
 bool wxCmdLineParser::Found(const wxString& name, wxDateTime *value) const
 {
     int i = m_data->FindOption(name);
-    if ( i == wxNOT_FOUND )
-        i = m_data->FindOptionByLongName(name);
-
     wxCHECK_MSG( i != wxNOT_FOUND, FALSE, _T("unknown option") );
 
     wxCmdLineOption& opt = m_data->m_options[(size_t)i];
@@ -495,17 +437,6 @@ wxString wxCmdLineParser::GetParam(size_t n) const
     return m_data->m_parameters[n];
 }
 
-// Resets switches and options
-void wxCmdLineParser::Reset()
-{
-    for ( size_t i = 0; i < m_data->m_options.Count(); i++ )
-    {
-        wxCmdLineOption& opt = m_data->m_options[i];
-        opt.SetHasValue(FALSE);
-    }
-}
-
-
 // ----------------------------------------------------------------------------
 // the real work is done here
 // ----------------------------------------------------------------------------
@@ -520,8 +451,6 @@ int wxCmdLineParser::Parse()
     size_t currentParam = 0;    // the index in m_paramDesc
 
     size_t countParam = m_data->m_paramDesc.GetCount();
-
-    Reset();
 
     // parse everything
     wxString arg;
@@ -933,12 +862,13 @@ void wxCmdLineParser::Usage()
         }
     }
 
+    wxString fullmsg;
     if ( !!m_data->m_logo )
     {
-        wxLogMessage(m_data->m_logo);
+        fullmsg << m_data->m_logo << _T('\n');
     }
 
-    wxLogMessage(brief);
+    fullmsg << brief << _T('\n');
 
     // now construct the detailed help message
     size_t len, lenMax = 0;
@@ -960,7 +890,8 @@ void wxCmdLineParser::Usage()
                  << _T('\n');
     }
 
-    wxLogMessage(detailed);
+    fullmsg << detailed;
+    wxLogMessage(fullmsg);
 }
 
 // ----------------------------------------------------------------------------
@@ -983,5 +914,3 @@ static wxString GetTypeName(wxCmdLineParamType type)
 
     return s;
 }
-
-#endif // wxUSE_CMDLINE_PARSER

@@ -189,14 +189,14 @@ bool wxTextFile::Create()
   }
 }
 
-bool wxTextFile::Open(const wxString& strFile, wxMBConv& conv)
+bool wxTextFile::Open(const wxString& strFile)
 {
   m_strFile = strFile;
 
-  return Open(conv);
+  return Open();
 }
 
-bool wxTextFile::Open(wxMBConv& conv)
+bool wxTextFile::Open()
 {
   // file name must be either given in ctor or in Open(const wxString&)
   wxASSERT( !m_strFile.IsEmpty() );
@@ -206,7 +206,7 @@ bool wxTextFile::Open(wxMBConv& conv)
     return FALSE;
 
   // read file into memory
-  m_isOpened = Read(conv);
+  m_isOpened = Read();
 
   m_file.Close();
 
@@ -221,8 +221,8 @@ wxTextFileType wxTextFile::GuessType() const
 
   // scan the file lines
   size_t nUnix = 0,     // number of '\n's alone
-         nDos  = 0,     // number of '\r\n'
-         nMac  = 0;     // number of '\r's
+       nDos  = 0,     // number of '\r\n'
+       nMac  = 0;     // number of '\r's
 
   // we take MAX_LINES_SCAN in the beginning, middle and the end of file
   #define MAX_LINES_SCAN    (10)
@@ -248,7 +248,7 @@ wxTextFileType wxTextFile::GuessType() const
   #undef   AnalyseLine
 
   // interpret the results (FIXME far from being even 50% fool proof)
-  if ( nScan > 0 && nDos + nUnix + nMac == 0 ) {
+  if ( nDos + nUnix + nMac == 0 ) {
     // no newlines at all
     wxLogWarning(_("'%s' is probably a binary file."), m_strFile.c_str());
   }
@@ -276,20 +276,14 @@ wxTextFileType wxTextFile::GuessType() const
   return typeDefault;
 }
 
-bool wxTextFile::Read(wxMBConv& conv)
+bool wxTextFile::Read()
 {
   // file should be opened and we must be in it's beginning
   wxASSERT( m_file.IsOpened() && m_file.Tell() == 0 );
 
-#if wxUSE_UNICODE
-  char conv_mbBuf[2];
-  wchar_t conv_wcBuf[2];
-  conv_mbBuf[1] = 0;
-#else
-  (void)conv;
-#endif
-
   wxString str;
+  str.reserve(1024);
+
   char ch, chLast = '\0';
   char buf[1024];
   int n, nRead;
@@ -328,23 +322,11 @@ bool wxTextFile::Read(wxMBConv& conv)
             m_aLines.Add(str);
             m_aTypes.Add(wxTextFileType_Mac);
             chLast = ch;
-#if wxUSE_UNICODE
-            if (conv.MB2WC(conv_wcBuf, conv_mbBuf, 2) == (size_t)-1)
-                conv_wcBuf[0] = ch;
-            str = conv_wcBuf[0];
-#else
             str = ch;
-#endif
           }
           else {
             // add to the current line
-#if wxUSE_UNICODE
-            if (conv.MB2WC(conv_wcBuf, conv_mbBuf, 2) == (size_t)-1)
-                conv_wcBuf[0] = ch;
-            str += conv_wcBuf[0];
-#else
             str += ch;
-#endif
           }
       }
     }
@@ -369,7 +351,7 @@ bool wxTextFile::Close()
     return TRUE;
 }
 
-bool wxTextFile::Write(wxTextFileType typeNew, wxMBConv& conv)
+bool wxTextFile::Write(wxTextFileType typeNew)
 {
   wxTempFile fileTmp(m_strFile);
 
@@ -382,7 +364,7 @@ bool wxTextFile::Write(wxTextFileType typeNew, wxMBConv& conv)
   for ( size_t n = 0; n < nCount; n++ ) {
     fileTmp.Write(m_aLines[n] +
                   GetEOL(typeNew == wxTextFileType_None ? m_aTypes[n]
-                                                        : typeNew), conv);
+                                                        : typeNew));
   }
 
   // replace the old file with this one

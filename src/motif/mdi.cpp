@@ -13,11 +13,6 @@
 #pragma implementation "mdi.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#define XtWindow XTWINDOW
-#endif
-
 #include "wx/mdi.h"
 #include "wx/menu.h"
 #include "wx/settings.h"
@@ -663,10 +658,10 @@ void wxMDIClientWindow::DoGetPosition(int *x, int *y) const
     wxWindow::DoGetPosition(x, y);
 }
 
-void wxMDIClientWindow::OnScroll(wxScrollEvent& event)
+// Explicitly call default scroll behaviour
+void wxMDIClientWindow::OnScroll(wxScrollEvent& WXUNUSED(event))
 {
-    //    Default(); // Default processing: OBSOLETE FUNCTION
-    event.Skip();
+    Default(); // Default processing
 }
 
 void wxMDIClientWindow::OnPageChanged(wxNotebookEvent& event)

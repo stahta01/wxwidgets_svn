@@ -44,7 +44,7 @@ ULONG wxTimerProc(HWND hwnd, ULONG, int nIdTimer, ULONG);
 
 IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxObject)
 
-void wxTimer::Init()
+wxTimer::wxTimer()
 {
     m_ulId = 0;
 }
@@ -52,7 +52,7 @@ void wxTimer::Init()
 wxTimer::~wxTimer()
 {
     Stop();
-    wxTimer::Stop();
+
     wxTimerList.DeleteObject(this);
 }
 

@@ -19,7 +19,6 @@
 #define wxDRAG_MODE_CONTINUE_RIGHT  4
 #define wxDRAG_TYPE_NONE            0
 #define wxDRAG_TYPE_ITEM            100
-#define wxDRAG_TYPE_BOUNDING_BOX    200
 
 #define wxKEY_SHIFT     1
 #define wxKEY_CTRL      2
@@ -67,12 +66,7 @@ public:
     void AddChildHandlers(void);
     void PaintSelectionHandles(wxDC& dc);
     void ProcessItemEvent(wxControl *item, wxMouseEvent& event, int selectionHandle);
-
-    virtual void DrawBoundingBox(wxDC& dc, int x, int y, int w, int h);
-    virtual void OnDragBegin(int x, int y, int keys, wxDC& dc, int selectionHandle);
-    virtual void OnDragContinue(bool paintIt, int x, int y, int keys, wxDC& dc, int selectionHandle);
-    virtual void OnDragEnd(int x, int y, int keys, wxDC& dc, int selectionHandle);
-
+    
     // Accessors
     /*
     inline long GetTreeItem() const { return m_treeItem; }

@@ -91,14 +91,14 @@ include $(WXDIR)/src/makeg95.env
 
 # DLL Name, if building wxWindows as a DLL.
 ifdef WXMAKINGDLL
-WXDLL = $(WXDIR)/lib/wxmsw$(WXVERSION)$(UNIEXT).dll
-WXDEF = wxmsw$(WXVERSION)$(UNIEXT).def
+WXDLL = $(WXDIR)/lib/wx$(WXVERSION).dll
+WXDEF = wx$(WXVERSION).def
 DLL_EXTRA_LIBS = $(WXDIR)/lib/libzlib.a \
                  $(WXDIR)/lib/libpng.a $(WXDIR)/lib/libjpeg.a \
-	             $(WXDIR)/lib/libtiff.a $(WXDIR)/lib/libregex.a
+	              $(WXDIR)/lib/libxpm.a $(WXDIR)/lib/libtiff.a
 DLL_LDFLAGS = -L$(WXDIR)/lib
 DLL_LDLIBS = -mwindows -lcomctl32 -lctl3d32 -lole32 -loleaut32 \
-             -luuid -lrpcrt4 -lodbc32 -lwinmm -lopengl32 \
+             -luuid -lrpcrt4 -lodbc32 -lwinmm \
              -lwsock32 $(DLL_EXTRA_LIBS) \
 	          -lstdc++
 endif
@@ -113,16 +113,16 @@ HTMLDIR = $(WXDIR)/src/html
 ZLIBDIR = $(WXDIR)/src/zlib
 PNGDIR  = $(WXDIR)/src/png
 JPEGDIR = $(WXDIR)/src/jpeg
+XPMDIR  = $(WXDIR)/src/xpm
 TIFFDIR = $(WXDIR)/src/tiff
 OLEDIR  = $(WXDIR)/src/msw/ole
 MSWDIR  = $(WXDIR)/src/msw
-REGEXDIR= $(WXDIR)/src/regex
 
 ZLIBLIB = $(WXDIR)/lib/libzlib.a
 PNGLIB  = $(WXDIR)/lib/libpng.a
 JPEGLIB = $(WXDIR)/lib/libjpeg.a
+XPMLIB  = $(WXDIR)/lib/libxpm.a
 TIFFLIB = $(WXDIR)/lib/libtiff.a
-REGEXLIB= $(WXDIR)/lib/libregex.a
 
 DOCDIR = $(WXDIR)/docs
 
@@ -236,6 +236,27 @@ JPEGOBJS    = \
 		$(JPEGDIR)/jquant2.$(OBJSUFF) \
 		$(JPEGDIR)/jdmerge.$(OBJSUFF)
 
+# NOTE: these filenames are case sensitive!
+XPMOBJS =    $(XPMDIR)/Attrib.o\
+		$(XPMDIR)/CrBufFrI.o\
+		$(XPMDIR)/CrDatFrI.o\
+		$(XPMDIR)/create.o\
+		$(XPMDIR)/CrIFrBuf.o\
+		$(XPMDIR)/CrIFrDat.o\
+		$(XPMDIR)/data.o\
+		$(XPMDIR)/Image.o\
+		$(XPMDIR)/Info.o\
+		$(XPMDIR)/hashtab.o\
+		$(XPMDIR)/misc.o\
+		$(XPMDIR)/parse.o\
+		$(XPMDIR)/RdFToDat.o\
+		$(XPMDIR)/RdFToI.o\
+		$(XPMDIR)/rgb.o\
+		$(XPMDIR)/scan.o\
+		$(XPMDIR)/simx.o\
+		$(XPMDIR)/WrFFrDat.o\
+		$(XPMDIR)/WrFFrI.o
+
 TIFFOBJS = $(TIFFDIR)/tif_aux.o \
 		$(TIFFDIR)/tif_close.o \
 		$(TIFFDIR)/tif_codec.o \
@@ -280,22 +301,11 @@ else
   OBJECTS = $(MSWOBJS) $(COMMONOBJS) $(GENERICOBJS) $(HTMLOBJS) $(DIRDLGOBJ)
 endif
 
-ARCHINCDIR=$(subst /,\,$(WXDIR))\lib\msw$(INCEXT)
-
-SETUP_H=$(ARCHINCDIR)\wx\setup.h
-
 ifndef WXMAKINGDLL
-all:    $(SETUP_H) $(OBJECTS) $(WXLIB) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(TIFFLIB) $(REGEXLIB)
+all:    $(OBJECTS) $(WXLIB) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(XPMLIB) $(TIFFLIB)
 else
-all:    $(SETUP_H) $(OBJECTS) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(TIFFLIB) $(REGEXLIB) $(WXDLL)
+all:    $(OBJECTS) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(XPMLIB) $(TIFFLIB) $(WXDLL)
 endif
-
-$(ARCHINCDIR)\wx:
-	mkdir $(ARCHINCDIR)
-	mkdir $(ARCHINCDIR)\wx
-
-$(SETUP_H): $(ARCHINCDIR)\wx
-	$(COPY) $(WXDIR)\include\wx\msw\setup.h $@
 
 ifndef WXMAKINGDLL
 
@@ -360,14 +370,16 @@ $(JPEGLIB): $(JPEGOBJS)
 	$(AR) $(AROPTIONS) $@ $(JPEGOBJS)
 	$(RANLIB) $@
 
+$(XPMLIB): $(XPMOBJS)
+	$(AR) $(AROPTIONS) $@ $(XPMOBJS)
+	$(RANLIB) $@
+
 $(TIFFLIB): $(TIFFOBJS)
 	$(AR) $(AROPTIONS) $@ $(TIFFOBJS)
 	$(RANLIB) $@
 
-$(REGEXLIB):
-	$(MAKE) -C $(REGEXDIR) -f makefile.g95 WXDIR=$(WXDIR)
 
-$(OBJECTS):	$(WXINC)/wx/defs.h $(WXINC)/wx/object.h $(ARCHINCDIR)/wx/setup.h
+$(OBJECTS):	$(WXINC)/wx/defs.h $(WXINC)/wx/object.h $(WXINC)/wx/setup.h
 
 $(COMMDIR)/y_tab.$(OBJSUFF):    $(COMMDIR)/y_tab.c $(COMMDIR)/lex_yy.c
 	$(CCLEX) -c $(CPPFLAGS) -DUSE_DEFINE -DYY_USE_PROTOS -o $@ $(COMMDIR)/y_tab.c
@@ -426,18 +438,18 @@ clean:
 	-$(RM) ../png/*.bak
 	-$(RM) ../jpeg/*.o
 	-$(RM) ../jpeg/*.bak
+	-$(RM) ../xpm/*.o
+	-$(RM) ../xpm/*.bak
 	-$(RM) ../tiff/*.o
 	-$(RM) ../tiff/*.bak
-	-$(RM) ../regex/*.o
-	-$(RM) ../regex/*.bak
 
 cleanall: clean
 	-$(RM) $(WXLIB)
 	-$(RM) $(ZLIBLIB)
 	-$(RM) $(PNGLIB)
 	-$(RM) $(JPEGLIB)
+	-$(RM) $(XPMLIB)
 	-$(RM) $(TIFFLIB)
-	-$(RM) $(REGEXLIB)
 
 ifdef WXMAKINGDLL
 	-$(RM) $(WXDLL)

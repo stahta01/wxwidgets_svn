@@ -18,7 +18,7 @@
 #endif
 
 #include "wx/defs.h"
-#include "wx/string.h"
+#include "wx/wxchar.h"
 
 #include <limits.h>     // for LONG_MAX
 
@@ -45,9 +45,6 @@
 // NB: we #define and not typedef wxLongLong_t because we want to be able to
 //     use 'unsigned wxLongLong_t' as well and because we use "#ifdef
 //     wxLongLong_t" below
-
-// first check for generic cases which are long on 64bit machine and "long
-// long", then check for specific compilers
 #if defined(SIZEOF_LONG) && (SIZEOF_LONG == 8)
     #define wxLongLong_t long
     #define wxLongLongIsLong
@@ -55,9 +52,7 @@
     #define wxLongLong_t __int64
 #elif defined(__BORLANDC__) && defined(__WIN32__) && (__BORLANDC__ >= 0x520)
     #define wxLongLong_t __int64
-#elif defined(SIZEOF_LONG_LONG) && SIZEOF_LONG_LONG >= 8
-    #define wxLongLong_t long long
-#elif defined(__MINGW32__) || defined(__CYGWIN__)
+#elif defined(__GNUG__) || defined(__sgi)
     #define wxLongLong_t long long
 #elif defined(__MWERKS__)
     #if __option(longlong)
@@ -70,16 +65,14 @@
         #define wxLongLong_t long long
 #else // no native long long type
     // both warning and pragma warning are not portable, but at least an
-    // unknown pragma should never be an error - except that, actually, some
-    // broken compilers don't like it, so we have to disable it in this case
-    // <sigh>
-#if !(defined(__WATCOMC__) || defined(__VISAGECPP__))
+    // unknown pragma should never be an error - except that, actually, Watcom
+    // C++ doesn't like it, so we have to disable it in this case <sigh>
+#ifndef __WATCOMC__
     #pragma warning "Your compiler does not appear to support 64 bit "\
                     "integers, using emulation class instead.\n" \
                     "Please report your compiler version to " \
                     "wx-dev@lists.wxwindows.org!"
 #endif
-
     #define wxUSE_LONGLONG_WX 1
 #endif // compiler
 
@@ -88,7 +81,7 @@
 // both classes) but by default we only use one class
 #if (defined(wxUSE_LONGLONG_WX) && wxUSE_LONGLONG_WX) || !defined(wxLongLong_t)
     // don't use both classes unless wxUSE_LONGLONG_NATIVE was explicitly set:
-    // this is useful in test programs and only there
+    // this is useful in test programs nad only there
     #ifndef wxUSE_LONGLONG_NATIVE
         #define wxUSE_LONGLONG_NATIVE 0
     #endif
@@ -209,7 +202,6 @@ public:
         // negation operator
     wxLongLongNative operator-() const
         { return wxLongLongNative(-m_ll); }
-    wxLongLongNative& Negate() { m_ll = -m_ll; return *this; }
 
         // subtraction
     wxLongLongNative operator-(const wxLongLongNative& ll) const
@@ -310,16 +302,12 @@ public:
         { return m_ll >= l; }
 
     // miscellaneous
-
-        // return the string representation of this number
-    wxString ToString() const;
-
         // conversion to byte array: returns a pointer to static buffer!
     void *asArray() const;
 
 #if wxUSE_STD_IOSTREAM
         // input/output
-    friend wxSTD ostream& operator<<(wxSTD ostream&, const wxLongLongNative&);
+    friend ostream& operator<<(ostream&, const wxLongLongNative&);
 #endif
 
 private:
@@ -329,7 +317,6 @@ private:
 #endif // wxUSE_LONGLONG_NATIVE
 
 #if wxUSE_LONGLONG_WX
-
 class WXDLLEXPORT wxLongLongWx
 {
 public:
@@ -500,15 +487,11 @@ public:
                 wxLongLongWx& remainder) const;
 
     // input/output
-
-    // return the string representation of this number
-    wxString ToString() const;
+#if wxUSE_STD_IOSTREAM
+    friend ostream& operator<<(ostream&, const wxLongLongWx&);
+#endif // wxUSE_STD_IOSTREAM
 
     void *asArray() const;
-
-#if wxUSE_STD_IOSTREAM
-    friend wxSTD ostream& operator<<(wxSTD ostream&, const wxLongLongWx&);
-#endif // wxUSE_STD_IOSTREAM
 
 private:
     // long is at least 32 bits, so represent our 64bit number as 2 longs
@@ -532,14 +515,14 @@ private:
 // binary operators
 // ----------------------------------------------------------------------------
 
-inline bool operator<(long l, const wxLongLong& ll) { return ll > l; }
-inline bool operator>(long l, const wxLongLong& ll) { return ll > l; }
-inline bool operator<=(long l, const wxLongLong& ll) { return ll > l; }
-inline bool operator>=(long l, const wxLongLong& ll) { return ll > l; }
-inline bool operator==(long l, const wxLongLong& ll) { return ll > l; }
-inline bool operator!=(long l, const wxLongLong& ll) { return ll > l; }
+inline bool WXDLLEXPORT operator<(long l, const wxLongLong& ll) { return ll > l; }
+inline bool WXDLLEXPORT operator>(long l, const wxLongLong& ll) { return ll > l; }
+inline bool WXDLLEXPORT operator<=(long l, const wxLongLong& ll) { return ll > l; }
+inline bool WXDLLEXPORT operator>=(long l, const wxLongLong& ll) { return ll > l; }
+inline bool WXDLLEXPORT operator==(long l, const wxLongLong& ll) { return ll > l; }
+inline bool WXDLLEXPORT operator!=(long l, const wxLongLong& ll) { return ll > l; }
 
-inline wxLongLong operator+(long l, const wxLongLong& ll) { return ll + l; }
-inline wxLongLong operator-(long l, const wxLongLong& ll) { return ll - l; }
+inline wxLongLong WXDLLEXPORT operator+(long l, const wxLongLong& ll) { return ll + l; }
+inline wxLongLong WXDLLEXPORT operator-(long l, const wxLongLong& ll) { return ll - l; }
 
 #endif // _WX_LONGLONG_H

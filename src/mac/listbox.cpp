@@ -13,26 +13,21 @@
 #pragma implementation "listbox.h"
 #endif
 
-#include "wx/app.h"
 #include "wx/listbox.h"
 #include "wx/settings.h"
 #include "wx/dynarray.h"
 #include "wx/log.h"
 
 #include "wx/utils.h"
-#ifndef __DARWIN__
-  #include "extldef.h"
-#endif
+#include "extldef.h"
 
-#if !USE_SHARED_LIBRARY
   IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 
 BEGIN_EVENT_TABLE(wxListBox, wxControl)
 	EVT_SIZE( wxListBox::OnSize ) 
 END_EVENT_TABLE()
-#endif
 
-#include "wx/mac/uma.h"
+#include <wx/mac/uma.h>
 
 extern "C" void MacDrawStringCell(Rect *cellRect, Cell lCell, ListHandle theList, long refCon) ;
 const short kwxMacListWithVerticalScrollbar = 128 ;
@@ -46,7 +41,6 @@ wxListBox::wxListBox()
 {
   m_noItems = 0;
   m_selected = 0;
-  m_macList = NULL ;
 }
 
 bool wxListBox::Create(wxWindow *parent, wxWindowID id,
@@ -57,107 +51,65 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
                        const wxValidator& validator,
                        const wxString& name)
 {
-    m_noItems = 0 ; // this will be increased by our append command
-    m_selected = 0;
-    
-    Rect bounds ;
-    Str255 title ;
-    
-    MacPreControlCreate( parent , id ,  "" , pos , size ,style, validator , name , &bounds , title ) ;
+  m_noItems = 0 ; // this will be increased by our append command
+  m_selected = 0;
 
-#if TARGET_CARBON
-    ListDefSpec listDef;
-    OptionBits  options;
-    Size asize;
+	Rect bounds ;
+	Str255 title ;
+	m_macHorizontalBorder = 5 ; // additional pixels around the real control
+	m_macVerticalBorder = 5 ;
+	
+	MacPreControlCreate( parent , id ,  "" , pos , size ,style, validator , name , &bounds , title ) ;
 
-    listDef.defType = kListDefStandardTextType;
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true , kwxMacListWithVerticalScrollbar , 0 , 0, 
+	  	kControlListBoxProc , (long) this ) ;
+	
+	long	result ;
+	UMAGetControlData( m_macControl , kControlNoPart , kControlListBoxListHandleTag , sizeof( ListHandle ) , (char*) &m_macList  , &result ) ;
 
-    CreateListBoxControl( parent->GetMacRootWindow(), &bounds, false, 0, 1, false, true,
-                          14, 14, false, &listDef, &m_macControl );
+	NewExtLDEFInfo( m_macList , MacDrawStringCell , (long) this ) ;
+	(**m_macList).selFlags = 0 ;
+	if ( style & wxLB_MULTIPLE )
+	{
+		(**m_macList).selFlags += lNoExtend ;
+	}
+	else if ( style & wxLB_EXTENDED )
+	{
+		(**m_macList).selFlags += lExtendDrag ;
+	}
+	else
+	{
+		(**m_macList).selFlags = lOnlyOne ;
+	}
+	Point pt = (**m_macList).cellSize ;
+	pt.v = 14 ;
+	LCellSize( pt , m_macList ) ;
 
-    GetControlData(m_macControl, kControlNoPart, kControlListBoxListHandleTag,
-                   sizeof(ListHandle), (Ptr) &m_macList, &asize);
+	LAddColumn( 1 , 0 , m_macList ) ;
 
-    SetControlReference(m_macControl, (long) this);
-    SetControlVisibility(m_macControl, false, false);
+	MacPostControlCreate() ;
 
-    options = 0;
-    if ( style & wxLB_MULTIPLE )
-    {
-        options += lNoExtend ;
-    }
-    else if ( style & wxLB_EXTENDED )
-    {
-        options += lExtendDrag ;
-    }
-    else
-    {
-        options = lOnlyOne ;
-    }
-    SetListSelectionFlags(m_macList, options);
+	ControlFontStyleRec		controlstyle ;
+	controlstyle.flags = kControlUseFontMask + kControlUseSizeMask ;
+	//controlstyle.font = kControlFontSmallSystemFont ;
+	controlstyle.font = kFontIDMonaco ;
+	controlstyle.size = 9 ;
+	::UMASetControlFontStyle( m_macControl , &controlstyle ) ;
 
-#else
-    long	result ;
+	for ( int i = 0 ; i < n ; i++ )
+	{
+		Append( choices[i] ) ;
+	}
 
-    m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , false ,
-				  kwxMacListWithVerticalScrollbar , 0 , 0, 
-				  kControlListBoxProc , (long) this ) ;
-    UMAGetControlData( m_macControl , kControlNoPart , kControlListBoxListHandleTag ,
-		       sizeof( ListHandle ) , (char*) &m_macList  , &result ) ;
+	LSetDrawingMode( true , m_macList ) ;
 
-    HLock( (Handle) m_macList ) ;
-    NewExtLDEFInfo( m_macList , MacDrawStringCell , (long) this ) ;
-    
-    (**m_macList).selFlags = 0 ;
-    if ( style & wxLB_MULTIPLE )
-    {
-	(**m_macList).selFlags += lNoExtend ;
-    }
-    else if ( style & wxLB_EXTENDED )
-    {
-	(**m_macList).selFlags += lExtendDrag ;
-    }
-    else
-    {
-	(**m_macList).selFlags = lOnlyOne ;
-    }
-    
-    Point pt = (**m_macList).cellSize ;
-    pt.v = 14 ;
-    LCellSize( pt , m_macList ) ;
-    
-    LAddColumn( 1 , 0 , m_macList ) ;
-    
-    ControlFontStyleRec		controlstyle ;
-    controlstyle.flags = kControlUseFontMask + kControlUseSizeMask ;
-    //controlstyle.font = kControlFontSmallSystemFont ;
-    controlstyle.font = kFontIDMonaco ;
-    controlstyle.size = 9 ;
-    //::UMASetControlFontStyle( m_macControl , &controlstyle ) ;
-#endif
-    
-    MacPostControlCreate() ;
-    
-    for ( int i = 0 ; i < n ; i++ )
-    {
-	Append( choices[i] ) ;
-    }
-    
-    LSetDrawingMode( true , m_macList ) ;
-
-    return TRUE;
+  return TRUE;
 }
 
 wxListBox::~wxListBox()
 {
 	Free() ;
-	if ( m_macList )
-	{
-#if !TARGET_CARBON
-	    DisposeExtLDEFInfo( m_macList ) ;
-#endif
-	    m_macList = NULL ;
-	}
+	DisposeExtLDEFInfo( m_macList ) ;
 }
 
 void wxListBox::Free()
@@ -195,7 +147,7 @@ void wxListBox::Delete(int N)
 
 #if wxUSE_OWNER_DRAWN
     delete m_aItems[N];
-    m_aItems.RemoveAt(N);
+    m_aItems.Remove(N);
 #else // !wxUSE_OWNER_DRAWN
     if ( HasClientObjectData() )
     {
@@ -203,8 +155,8 @@ void wxListBox::Delete(int N)
     }
 #endif // wxUSE_OWNER_DRAWN/!wxUSE_OWNER_DRAWN
 	m_stringArray.Remove( N ) ;
-	m_dataArray.RemoveAt( N ) ;
-	m_noItems --;
+	m_dataArray.Remove( N ) ;
+  	m_noItems --;
 	
 	MacDelete( N ) ;
 }
@@ -215,14 +167,10 @@ int wxListBox::DoAppend(const wxString& item)
 	if( wxApp::s_macDefaultEncodingIsPC )
 	{
 		m_stringArray.Add( wxMacMakeMacStringFromPC( item ) ) ;
-		m_dataArray.Add( NULL );
 	}
-	else {
+	else
 		m_stringArray.Add( item ) ;
-		m_dataArray.Add( NULL );
-	}
  	m_noItems ++;
-	DoSetItemClientData( index , NULL ) ;
 	MacAppend( item ) ;
 
 	return index ;
@@ -288,59 +236,19 @@ int wxListBox::FindString(const wxString& st) const
 	{
 		wxString search = s.Left( s.Length() - 1 ) ;
 		int len = search.Length() ;
-		Str255 s1 , s2 ;
-
-#if TARGET_CARBON
-		c2pstrcpy( (StringPtr) s2 , search.c_str() ) ;
-#else
-		strcpy( (char *) s2 , search.c_str() ) ;
-		c2pstr( (char *) s2 ) ;
-#endif
-
-    	for ( int i = 0 ; i < m_noItems ; ++ i )
-	    {
-#if TARGET_CARBON
-	    	c2pstrcpy( (StringPtr) s1 , m_stringArray[i].Left( len ).c_str() ) ;
-#else
-	    	strcpy( (char *) s1 , m_stringArray[i].Left( len ).c_str() ) ;
-			c2pstr( (char *) s1 ) ;
-#endif
-	    	if ( EqualString( s1 , s2 , false , false ) )
-	    		return i ;
-	    }
-	    if ( s.Left(1) == "*" && s.Length() > 1 )
-	    {
-	    	s.MakeLower() ;
-		    for ( int i = 0 ; i < m_noItems ; ++i )
-			{
-				if ( GetString(i).Lower().Matches(s) )
-					return i ;
-			}
-		}	
-
+    for ( int i = 0 ; i < m_noItems ; ++ i )
+    {
+    	if ( equalstring( m_stringArray[i].Left( len ) , search , false , false ) )
+    		return i ;
+    }
 	}
 	else
 	{
-    	Str255 s1 , s2 ;
-
-#if TARGET_CARBON
-		c2pstrcpy( (StringPtr) s2 , s.c_str() ) ;
-#else
-		strcpy( (char *) s2 , s.c_str() ) ;
-		c2pstr( (char *) s2 ) ;
-#endif
-
-	    for ( int i = 0 ; i < m_noItems ; ++ i )
-	    {
-#if TARGET_CARBON
-	    	c2pstrcpy( (StringPtr) s1 , m_stringArray[i].c_str() ) ;
-#else
-	    	strcpy( (char *) s1 , m_stringArray[i].c_str() ) ;
-			c2pstr( (char *) s1 ) ;
-#endif
-	    	if ( EqualString( s1 , s2 , false , false ) )
-	    		return i ;
-	    }
+    for ( int i = 0 ; i < m_noItems ; ++ i )
+    {
+    	if ( equalstring( m_stringArray[i] , s , false , false ) )
+    		return i ;
+    }
    }
    return -1;
 }
@@ -372,7 +280,7 @@ bool wxListBox::IsSelected(int N) const
 void *wxListBox::DoGetItemClientData(int N) const
 {
     wxCHECK_MSG( N >= 0 && N < m_noItems, NULL,
-                 wxT("invalid index in wxListBox::GetClientData"));
+                 "invalid index in wxListBox::GetClientData" );
 
     return (void *)m_dataArray[N];
 }
@@ -400,7 +308,7 @@ void wxListBox::DoSetItemClientData(int N, void *Client_data)
 	if ( m_dataArray.GetCount() > N )
 	{
     	m_dataArray[N] = (char*) Client_data ;
-    }
+	}
     else
     {
     	m_dataArray.Add( (char*) Client_data ) ;
@@ -471,14 +379,7 @@ void wxListBox::DoInsertItems(const wxArrayString& items, int pos)
 
 void wxListBox::SetString(int N, const wxString& s)
 {
-	wxString str ;
-	if( wxApp::s_macDefaultEncodingIsPC )
-	{
-		str = wxMacMakeMacStringFromPC( s )  ;
-	}
-	else
-		str = s ;
-	m_stringArray[N] = str ;
+	m_stringArray[N] = s ;
 	MacSet( N , s ) ;
 }
 
@@ -496,16 +397,6 @@ void wxListBox::SetupColours()
 {
     SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOW));
     SetForegroundColour(GetParent()->GetForegroundColour());
-}
-
-void wxListBox::Refresh(bool eraseBack, const wxRect *rect)
-{
-    // Set up port
-    WindowRef rootwindow = GetMacRootWindow() ;
-    wxWindow* wxrootwindow = wxFindWinFromMacWindow( rootwindow ) ;
-    wxMacDrawingHelper focus( wxrootwindow );
-
-    UMADrawControl(m_macControl);
 }
 
 #if wxUSE_OWNER_DRAWN
@@ -550,38 +441,39 @@ void MacDrawStringCell(Rect *cellRect, Cell lCell, ListHandle theList, long refC
 
 void wxListBox::MacDelete( int N )
 {
-    LDelRow( 1 , N , m_macList) ;
-    Refresh();
+	ListHandle list ;
+	long	result ;
+	Cell cell = { 0 , 0 } ;
+	UMAGetControlData( m_macControl , kControlNoPart , kControlListBoxListHandleTag , sizeof( ListHandle ) , (char*) &list  , &result ) ;
+	LDelRow( 1 , N , list ) ;
 }
 
 void wxListBox::MacInsert( int n , const char * text) 
 {
-    Cell cell = { 0 , 0 } ;
-    cell.v = n ;
-    LAddRow( 1 , cell.v , m_macList ) ;
-    LSetCell(text, strlen(text), cell, m_macList);
-    Refresh();
+	Cell	cell ;
+
+	cell.h = 0 ;
+	cell.v = n ;
+
+	LAddRow( 1 , cell.v , m_macList ) ;
 }
 
 void wxListBox::MacAppend( const char * text) 
 {
-    Cell cell = { 0 , 0 } ;
-    cell.v = (**m_macList).dataBounds.bottom ;
-    LAddRow( 1 , cell.v , m_macList ) ;
-    LSetCell(text, strlen(text), cell, m_macList);
-    Refresh();
+	Cell cell = { 0 , 0 } ;
+	cell.v = (**m_macList).dataBounds.bottom ;
+	LAddRow( 1 , cell.v , m_macList ) ;
 }
 
 void wxListBox::MacClear() 
 {
-    LDelRow( (**m_macList).dataBounds.bottom , 0 , m_macList ) ;
-    Refresh();
+	LDelRow( (**m_macList).dataBounds.bottom , 0 , m_macList ) ;
 }
 
 void wxListBox::MacSetSelection( int n , bool select )
 {
 	Cell cell = { 0 , 0 } ;
-	if ( LGetSelect( true , &cell , m_macList ) )
+	if ( LGetSelect( TRUE , &cell , m_macList ) )
 	{
 		LSetSelect( false , cell , m_macList ) ;
 	}
@@ -589,7 +481,6 @@ void wxListBox::MacSetSelection( int n , bool select )
 	cell.v = n ;
 	LSetSelect( select , cell , m_macList ) ;
 	LAutoScroll( m_macList ) ;
-	Refresh();
 }
 
 bool wxListBox::MacIsSelected( int n ) const
@@ -601,7 +492,7 @@ bool wxListBox::MacIsSelected( int n ) const
 
 void wxListBox::MacDestroy()
 {
-//    DisposeExtLDEFInfo( m_macList ) ;
+//	DisposeExtLDEFInfo( m_macList ) ;
 }
 
 int wxListBox::MacGetSelection() const
@@ -637,8 +528,7 @@ void wxListBox::MacSet( int n , const char * text )
 	// so we just have to redraw
 	Cell cell = { 0 , 0 } ;
 	cell.v = n ;
-	LSetCell(text, strlen(text), cell, m_macList);
-	Refresh();
+	LDraw( cell , m_macList ) ;
 }
 
 void wxListBox::MacScrollTo( int n )
@@ -648,15 +538,9 @@ void wxListBox::MacScrollTo( int n )
 
 void wxListBox::OnSize( const wxSizeEvent &event)
 {
-    Point pt;
-
-#if TARGET_CARBON
-    GetListCellSize(m_macList, &pt);
-#else
-    pt = (**m_macList).cellSize ;
-#endif
-    pt.h =  m_width - 15  ;
-    LCellSize( pt , m_macList ) ;
+	Point pt = (**m_macList).cellSize ;
+	pt.h =  m_width - 15 /* scrollbar */ - m_macHorizontalBorder * 2 ;
+	LCellSize( pt , m_macList ) ;
 }
 
 void wxListBox::MacHandleControlClick( ControlHandle control , SInt16 controlpart ) 

@@ -46,10 +46,9 @@ method.
 
 \wxheading{Remarks}
 
-Note that this requires that the event implements 
-\helpref{CopyObject}{wxobjectcopyobject} 
+Note that this requires that the event has a fully implemented Clone()
 method so that the event can be duplicated and stored until it gets processed later.
-Not all events in wxWindows currently fully implement this method,
+Not all events in wxWindows currently have a fully implemented Clone() method,
 so you may have to look at the source to verify this.
 
 This methods automatically wakes up idle handling even if the underlying window 
@@ -62,7 +61,6 @@ about the status of other working threads and this has to be done using this
 method - which also means that this method is thread safe by means of using
 crtical sections where needed.
 
-% VZ: bad idea IMHO - we're going to have a lot of problems with this
 Furthermore, it may be noted that some ports of wxWindows will probably move
 to using this method more and more in preference over calling ProcessEvent()
 directly so as to avoid problems with reentrant code.

@@ -16,7 +16,6 @@
 #pragma interface "palette.h"
 #endif
 
-#include "wx/colour.h"
 #include "wx/gdiobj.h"
 
 class WXDLLEXPORT wxPalette;

@@ -22,8 +22,6 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_TOOLBAR
-
 #include "wx/bitmap.h"
 #include "wx/list.h"
 #include "wx/control.h"
@@ -238,7 +236,7 @@ public:
     // between the two states.
     wxToolBarToolBase *AddTool(int id,
                                const wxBitmap& bitmap,
-                               const wxBitmap& pushedBitmap,
+                               const wxBitmap& pushedBitmap = wxNullBitmap,
                                bool toggle = FALSE,
                                wxObject *clientData = NULL,
                                const wxString& shortHelpString = wxEmptyString,
@@ -412,8 +410,8 @@ public:
     // Do the toolbar button updates (check for EVT_UPDATE_UI handlers)
     virtual void DoToolbarUpdates();
 
-    // don't want toolbars to accept the focus by tabbing to them
-    virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
+    // Don't want toolbars to accept the focus
+    virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:
     // to implement in derived classes
@@ -472,10 +470,7 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_CLASS(wxToolBarBase)
 };
-
-#endif // wxUSE_TOOLBAR
 
 #endif
     // _WX_TBARBASE_H_

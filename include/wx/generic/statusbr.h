@@ -55,7 +55,7 @@ public:
   }
 
   bool Create(wxWindow *parent, wxWindowID id,
-              long style,
+              long style = 0,
               const wxString& name = wxPanelNameStr);
 
   // Create status line

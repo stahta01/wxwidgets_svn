@@ -17,13 +17,12 @@
 #endif
 
 #include "wx/defs.h"
-
-#if wxUSE_HELP
-
 #include "wx/object.h"
 #include "wx/string.h"
 #include "wx/gdicmn.h"
 #include "wx/frame.h"
+
+#if wxUSE_HELP
 
 // Flags for SetViewer
 #define wxHELP_NETSCAPE     1
@@ -32,34 +31,24 @@
 class WXDLLEXPORT wxHelpControllerBase: public wxObject
 {
     DECLARE_CLASS(wxHelpControllerBase)
-
+        
 public:
     inline wxHelpControllerBase() {}
     inline ~wxHelpControllerBase() {};
-
+    
     // Must call this to set the filename and server name.
     // server is only required when implementing TCP/IP-based
     // help controllers.
     virtual bool Initialize(const wxString& WXUNUSED(file), int WXUNUSED(server) ) { return FALSE; }
     virtual bool Initialize(const wxString& WXUNUSED(file)) { return FALSE; }
-
+    
     // Set viewer: only relevant to some kinds of controller
     virtual void SetViewer(const wxString& WXUNUSED(viewer), long WXUNUSED(flags) = 0) {}
-
+    
     // If file is "", reloads file given  in Initialize
     virtual bool LoadFile(const wxString& file = "") = 0;
-
-    // Displays the contents
     virtual bool DisplayContents(void) = 0;
-
-    // Display the given section
     virtual bool DisplaySection(int sectionNo) = 0;
-
-    // Display the section using a context id
-    virtual bool DisplayContextPopup(int WXUNUSED(contextId)) { return FALSE; };
-
-    // Display the text in a popup, if possible
-    virtual bool DisplayTextPopup(const wxString& WXUNUSED(text), const wxPoint& WXUNUSED(pos)) { return FALSE; };
 
     // By default, uses KeywordSection to display a topic. Implementations
     // may override this for more specific behaviour.
@@ -74,7 +63,7 @@ public:
     {
         // does nothing by default
     }
-    /// Obtains the latest settings used by the help frame and the help
+    /// Obtains the latest settings used by the help frame and the help 
     /// frame.
     virtual wxFrame *GetFrameParameters(wxSize *WXUNUSED(size) = NULL,
         wxPoint *WXUNUSED(pos) = NULL,
@@ -82,12 +71,11 @@ public:
     {
         return (wxFrame*) NULL;// does nothing by default
     }
-
+    
     virtual bool Quit(void) = 0;
     virtual void OnQuit(void) {};
 };
 
 #endif // wxUSE_HELP
-
 #endif
 // _WX_HELPBASEH__

@@ -134,9 +134,6 @@ class wxCalendarCtrlPtr(wxControlPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = apply(calendarc.wxCalendarCtrl_Create,(self,) + _args, _kwargs)
-        return val
     def SetDate(self, *_args, **_kwargs):
         val = apply(calendarc.wxCalendarCtrl_SetDate,(self,) + _args, _kwargs)
         return val
@@ -208,15 +205,8 @@ class wxCalendarCtrl(wxCalendarCtrlPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(calendarc.new_wxCalendarCtrl,_args,_kwargs)
         self.thisown = 1
-        self._setOORInfo(self)
 
 
-
-def wxPreCalendarCtrl(*_args,**_kwargs):
-    val = wxCalendarCtrlPtr(apply(calendarc.new_wxPreCalendarCtrl,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(self)
-    return val
 
 
 

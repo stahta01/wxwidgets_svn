@@ -18,6 +18,8 @@
 
 #include "wx/dynarray.h"
 
+WXDLLEXPORT_DATA(extern const wxChar*) wxControlNameStr;
+
 // General item class
 class WXDLLEXPORT wxControl : public wxControlBase
 {
@@ -92,21 +94,20 @@ protected:
 
     virtual wxSize DoGetBestSize() const;
 
-    // create the control of the given class with the given style (combination
-    // of WS_XXX flags, i.e. Windows style, not wxWindows one), returns
-    // FALSE if creation failed
+    // create the control of the given class with the given style, returns FALSE
+    // if creation failed
     //
     // All parameters except classname and style are optional, if the
-    // size/position are not given, they should be set later with SetSize()
-    // and, label (the title of the window), of course, is left empty. The
-    // extended style is determined from the style and the app 3D settings
-    // automatically if it's not specified explicitly.
+    // size/position are not given, they should be set later with SetSize() and,
+    // label (the title of the window), of course, is left empty. The extended
+    // style is determined from the style and the app 3D settings automatically
+    // if it's not specified explicitly.
     bool MSWCreateControl(const wxChar *classname,
-                          WXDWORD style,
-                          const wxPoint& pos = wxDefaultPosition,
-                          const wxSize& size = wxDefaultSize,
-                          const wxString& label = wxEmptyString,
-                          WXDWORD exstyle = (WXDWORD)-1);
+            WXDWORD style,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            const wxString& label = wxEmptyString,
+            WXDWORD exstyle = (WXDWORD)-1);
 
     // determine the extended styles combination for this window (may slightly
     // modify style parameter, this is why it's non const)
@@ -119,8 +120,8 @@ private:
 
 #if WXWIN_COMPATIBILITY
     inline void wxControl::Callback(const wxFunction f) { m_callback = f; };
-    inline wxFont& wxControl::GetLabelFont() const { return (wxFont &)GetFont(); }
-    inline wxFont& wxControl::GetButtonFont() const { return (wxFont &)GetFont(); }
+    inline wxFont& wxControl::GetLabelFont() const { return GetFont(); }
+    inline wxFont& wxControl::GetButtonFont() const { return GetFont(); }
     inline void wxControl::SetLabelFont(const wxFont& font) { SetFont(font); }
     inline void wxControl::SetButtonFont(const wxFont& font) { SetFont(font); }
 #endif // WXWIN_COMPATIBILITY

@@ -14,21 +14,15 @@
 #ifndef _WX_WIZARD_H_
 #define _WX_WIZARD_H_
 
-#if wxUSE_WIZARDDLG
-
 // ----------------------------------------------------------------------------
 // headers and other simple declarations
 // ----------------------------------------------------------------------------
 
 #ifndef WX_PRECOMP
     #include "wx/dialog.h"      // the base class
-    #include "wx/panel.h"       // ditto
 
     #include "wx/event.h"       // wxEVT_XXX constants
 #endif // WX_PRECOMP
-
-// Extended style to specify a help button
-#define wxWIZARD_EX_HELPBUTTON   0x00000010
 
 // forward declarations
 class WXDLLEXPORT wxWizard;
@@ -181,25 +175,17 @@ private:
 // macros for handling wxWizardEvents
 // ----------------------------------------------------------------------------
 
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGED, 900)
-    DECLARE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGING, 901)
-    DECLARE_EVENT_TYPE(wxEVT_WIZARD_CANCEL, 902)
-END_DECLARE_EVENT_TYPES()
-
 typedef void (wxEvtHandler::*wxWizardEventFunction)(wxWizardEvent&);
 
 // notifies that the page has just been changed (can't be vetoed)
-#define EVT_WIZARD_PAGE_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_WIZARD_PAGE_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL),
+#define EVT_WIZARD_PAGE_CHANGED(id, fn) { wxEVT_WIZARD_PAGE_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL },
 
 // the user pressed "<Back" or "Next>" button and the page is going to be
 // changed - unless the event handler vetoes the event
-#define EVT_WIZARD_PAGE_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_WIZARD_PAGE_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL),
+#define EVT_WIZARD_PAGE_CHANGING(id, fn) { wxEVT_WIZARD_PAGE_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL },
 
 // the user pressed "Cancel" button and the wizard is going to be dismissed -
 // unless the event handler vetoes the event
-#define EVT_WIZARD_CANCEL(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_WIZARD_CANCEL, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL),
-
-#endif // wxUSE_WIZARDDLG
+#define EVT_WIZARD_CANCEL(id, fn) { wxEVT_WIZARD_CANCEL, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL },
 
 #endif // _WX_WIZARD_H_

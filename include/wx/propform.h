@@ -16,8 +16,6 @@
 #pragma interface "propform.h"
 #endif
 
-#if wxUSE_PROPSHEET
-
 #include "wx/prop.h"
 
 ////
@@ -325,9 +323,6 @@ private:
     DECLARE_EVENT_TABLE()
     DECLARE_CLASS(wxPropertyFormFrame)
 };
-
-#endif
-  // wxUSE_PROPSHEET
 
 #endif
   // _WX_PROPFORM_H_

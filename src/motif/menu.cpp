@@ -22,8 +22,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/defs.h"
-
 #include "wx/menu.h"
 #include "wx/menuitem.h"
 #include "wx/log.h"
@@ -34,8 +32,6 @@
 
 #ifdef __VMS__
 #pragma message disable nosimpint
-#define XtDisplay XTDISPLAY
-#define XtWindow XTWINDOW
 #endif
 #include <Xm/Label.h>
 #include <Xm/LabelG.h>
@@ -286,7 +282,7 @@ bool wxMenuBar::Append(wxMenu * menu, const wxString& title)
         menu->SetButtonWidget(w);
     }
 
-    //menu->SetMenuBar(this);
+    menu->SetMenuBar(this);
 
     m_titles.Add(title);
 

@@ -17,7 +17,6 @@
 #define __DOCSAMPLEH__
 
 #include "wx/docview.h"
-#include "wx/cmdproc.h"
 
 // Plots a line from one point to the other
 class DoodleLine: public wxObject
@@ -41,8 +40,8 @@ public:
     
     void Draw(wxDC *dc);
 #if wxUSE_STD_IOSTREAM
-    wxSTD ostream& SaveObject(wxSTD ostream& text_stream);
-    wxSTD istream& LoadObject(wxSTD istream& text_stream);
+    ostream& SaveObject(ostream& text_stream);
+    istream& LoadObject(istream& text_stream);
 #else
     wxOutputStream& SaveObject(wxOutputStream& stream);
     wxInputStream& LoadObject(wxInputStream& stream);
@@ -61,8 +60,8 @@ public:
     ~DrawingDocument(void);
     
 #if wxUSE_STD_IOSTREAM
-    wxSTD ostream& SaveObject(wxSTD ostream& text_stream);
-    wxSTD istream& LoadObject(wxSTD istream& text_stream);
+    ostream& SaveObject(ostream& text_stream);
+    istream& LoadObject(istream& text_stream);
 #else
     wxOutputStream& SaveObject(wxOutputStream& stream);
     wxInputStream& LoadObject(wxInputStream& stream);
@@ -94,8 +93,8 @@ class TextEditDocument: public wxDocument
 private:
 public:
 /*
-wxSTD ostream& SaveObject(wxSTD ostream& stream);
-wxSTD istream& LoadObject(wxSTD istream& stream);
+ostream& SaveObject(ostream& stream);
+istream& LoadObject(istream& stream);
     */
     virtual bool OnSaveDocument(const wxString& filename);
     virtual bool OnOpenDocument(const wxString& filename);

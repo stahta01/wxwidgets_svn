@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        msw/scrolbar.cpp
+// Name:        scrolbar.cpp
 // Purpose:     wxScrollBar
 // Author:      Julian Smart
 // Modified by:
@@ -10,20 +10,19 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-    #pragma implementation "scrolbar.h"
+#pragma implementation "scrolbar.h"
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_SCROLLBAR
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
+#include "wx/defs.h"
+#include "wx/utils.h"
 #endif
 
 #include "wx/scrolbar.h"
@@ -52,7 +51,7 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
 #if wxUSE_VALIDATORS
     SetValidator(validator);
 #endif // wxUSE_VALIDATORS
-
+    
     SetBackgroundColour(parent->GetBackgroundColour()) ;
     SetForegroundColour(parent->GetForegroundColour()) ;
     m_windowStyle = style;
@@ -82,16 +81,11 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
         height = 14;
     }
 
-    DWORD wstyle = WS_VISIBLE | WS_CHILD;
-
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-      wstyle |= WS_CLIPSIBLINGS;
-
     // Now create scrollbar
     DWORD _direction = (style & wxHORIZONTAL) ?
                         SBS_HORZ: SBS_VERT;
     HWND scroll_bar = CreateWindowEx(MakeExtendedStyle(style), wxT("SCROLLBAR"), wxT("scrollbar"),
-                         _direction | wstyle,
+                         _direction | WS_CHILD | WS_VISIBLE,
                          0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)m_windowId,
                          wxGetInstance(), NULL);
 
@@ -268,8 +262,8 @@ In version 4.0 or later, the maximum value that a scroll bar can report
 If the scroll bar has a page size greater than one, the maximum scrolling position
 is less than the maximum range value. You can use the following formula to calculate
 the maximum scrolling position:
-
-MaxScrollPos = MaxRangeValue - (PageSize - 1)
+  
+MaxScrollPos = MaxRangeValue - (PageSize - 1) 
 */
 
 #if WXWIN_COMPATIBILITY
@@ -332,8 +326,8 @@ void wxScrollBar::GetValues(int *viewStart, int *viewLength, int *objectLength,
 }
 #endif
 
-WXHBRUSH wxScrollBar::OnCtlColor(WXHDC WXUNUSED(pDC), WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
-            WXUINT WXUNUSED(message), WXWPARAM WXUNUSED(wParam), WXLPARAM WXUNUSED(lParam))
+WXHBRUSH wxScrollBar::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
+            WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
   return 0;
 }
@@ -358,5 +352,3 @@ void wxScrollBar::OnScroll(wxScrollEvent& event)
     }
 }
 #endif
-
-#endif // wxUSE_SCROLLBAR

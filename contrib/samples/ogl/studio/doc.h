@@ -17,7 +17,6 @@
 #endif
 
 #include <wx/docview.h>
-#include <wx/cmdproc.h>
 #include <wx/string.h>
 #include <wx/wxexpr.h>
 

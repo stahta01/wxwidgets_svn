@@ -41,7 +41,7 @@ from filesys import *
 
 from utils import *
 import wx
-class wxGLContextPtr(wxObjectPtr):
+class wxGLContextPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -73,6 +73,7 @@ class wxGLContextPtr(wxObjectPtr):
         return val
     def GetWindow(self, *_args, **_kwargs):
         val = apply(glcanvasc.wxGLContext_GetWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def __repr__(self):
         return "<C wxGLContext instance at %s>" % (self.this,)
@@ -107,15 +108,9 @@ class wxGLCanvas(wxGLCanvasPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = apply(glcanvasc.new_wxGLCanvas,_args,_kwargs)
         self.thisown = 1
-        self._setOORInfo(self)
+        #wx._StdWindowCallbacks(self)
 
 
-
-def wxGLCanvasWithContext(*_args,**_kwargs):
-    val = wxGLCanvasPtr(apply(glcanvasc.new_wxGLCanvasWithContext,_args,_kwargs))
-    val.thisown = 1
-    val._setOORInfo(self)
-    return val
 
 
 

@@ -17,7 +17,7 @@
 
 #include "wx/dynarray.h"
 #include "wx/string.h"
-#include "wx/notebook.h"
+#include "wx/control.h"
 
 // ----------------------------------------------------------------------------
 // types
@@ -28,6 +28,7 @@ class WXDLLEXPORT wxImageList;
 class WXDLLEXPORT wxWindow;
 
 // array of notebook pages
+typedef wxWindow WXDLLEXPORT wxNotebookPage;  // so far, any window can be a page
 WX_DEFINE_ARRAY(wxNotebookPage *, wxArrayNBPages);
 
 // ----------------------------------------------------------------------------
@@ -37,7 +38,7 @@ WX_DEFINE_ARRAY(wxNotebookPage *, wxArrayNBPages);
 // FIXME this class should really derive from wxTabCtrl, but the interface is not
 //       exactly the same, so I can't do it right now and instead we reimplement
 //       part of wxTabCtrl here
-class WXDLLEXPORT wxNotebook : public wxNotebookBase
+class WXDLLEXPORT wxNotebook : public wxControl
 {
 public:
   // ctors

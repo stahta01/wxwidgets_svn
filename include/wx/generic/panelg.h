@@ -21,9 +21,8 @@
 // ----------------------------------------------------------------------------
 
 #include "wx/window.h"
-#include "wx/containr.h"
 
-class WXDLLEXPORT wxControlContainer;
+class WXDLLEXPORT wxButton;
 
 WXDLLEXPORT_DATA(extern const wxChar*) wxPanelNameStr;
 
@@ -68,7 +67,13 @@ public:
                 long style = wxTAB_TRAVERSAL | wxNO_BORDER,
                 const wxString& name = wxPanelNameStr);
 
-    virtual ~wxPanel();
+    // Sends an OnInitDialog event, which in turns transfers data to
+    // to the dialog via validators.
+    virtual void InitDialog();
+
+    // a default button is activated when Enter is pressed
+    wxButton *GetDefaultItem() const { return m_btnDefault; }
+    void SetDefaultItem(wxButton *btn) { m_btnDefault = btn; }
 
     // implementation from now on
     // --------------------------
@@ -76,21 +81,42 @@ public:
         // responds to colour changes
     void OnSysColourChanged(wxSysColourChangedEvent& event);
 
+        // process a keyboard navigation message (Tab traversal)
+    void OnNavigationKey(wxNavigationKeyEvent& event);
+
+        // set the focus to the first child if we get it
+    void OnFocus(wxFocusEvent& event);
+
         // calls layout for layout constraints and sizers
     void OnSize(wxSizeEvent& event);
 
-    virtual void InitDialog();
+        // overridden to tab move focus into first focusable child
+    virtual void SetFocus();
 
-    WX_DECLARE_CONTROL_CONTAINER();
+        // called by wxWindow whenever it gets focus
+    void SetLastFocus(wxWindow *win) { m_winLastFocused = win; }
+    wxWindow *GetLastFocus() const { return m_winLastFocused; }
 
 protected:
     // common part of all ctors
     void Init();
 
+    // set the focus to the child which had it the last time
+    bool SetFocusToChild();
+
+    // the child which had the focus last time this panel was activated
+    wxWindow *m_winLastFocused;
+
+    // a default button or NULL
+    wxButton *m_btnDefault;
+
 private:
     DECLARE_DYNAMIC_CLASS(wxPanel)
     DECLARE_EVENT_TABLE()
 };
+
+// this function is for wxWindows use only
+extern bool wxSetFocusToChild(wxWindow *win, wxWindow **child);
 
 #endif
     // _WX_GENERIC_PANEL_H_

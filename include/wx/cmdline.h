@@ -17,10 +17,6 @@
     #pragma interface "cmdline.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_CMDLINE_PARSER
-
 #include "wx/string.h"
 
 class WXDLLEXPORT wxDateTime;
@@ -191,16 +187,11 @@ public:
     // gets the value of Nth parameter (as string only for now)
     wxString GetParam(size_t n = 0u) const;
 
-	// Resets switches and options
-	void Reset();
-
 private:
     // common part of all ctors
     void Init();
 
     struct wxCmdLineParserData *m_data;
 };
-
-#endif // wxUSE_CMDLINE_PARSER
 
 #endif // _WX_CMDLINE_H_

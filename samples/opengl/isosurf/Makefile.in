@@ -17,11 +17,9 @@ DATAFILES = isosurf.dat.gz
 
 PROGRAM=isosurf
 
-LIBRARIES=$(top_builddir)/lib/@WX_TARGET_LIBRARY_GL@ $(OPENGLLIBS)
+LIBRARIES=$(OPENGLLIBS) ../../../lib/libwx_gtk_gl.so
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 include ../../../src/makeprog.env
 
--include $(DEPFILES)

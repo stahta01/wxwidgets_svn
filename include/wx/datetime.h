@@ -17,8 +17,6 @@
     #pragma interface "datetime.h"
 #endif
 
-#if wxUSE_DATETIME
-
 #include <time.h>
 #include <limits.h>             // for INT_MIN
 
@@ -38,19 +36,6 @@ class WXDLLEXPORT wxDateSpan;
     #define inline
 #endif // Debug
 
-// not all c-runtimes are based on 1/1/1970 being (time_t) 0
-// set this to the corresponding value in seconds 1/1/1970 has on your
-// systems c-runtime
-
-#ifdef __WXMAC__
-#if __MSL__ < 0x6000
-    #define WX_TIME_BASE_OFFSET ( 2082844800L + 126144000L )
-#else
-    #define WX_TIME_BASE_OFFSET 0
-#endif
-#else
-    #define WX_TIME_BASE_OFFSET 0
-#endif
 /*
  * TODO
  *
@@ -115,7 +100,7 @@ class WXDLLEXPORT wxDateSpan;
 // wxInvalidDateTime)
 class WXDLLEXPORT wxDateTime;
 
-WXDLLEXPORT_DATA(extern const wxDateTime&) wxDefaultDateTime;
+WXDLLEXPORT_DATA(extern wxDateTime&) wxDefaultDateTime;
 #define wxInvalidDateTime wxDefaultDateTime
 
 // ----------------------------------------------------------------------------
@@ -563,7 +548,7 @@ public:
                       wxDateTime_t millisec = 0);
         // from separate values for each component with explicit date
     inline wxDateTime(wxDateTime_t day,             // day of the month
-                      Month        month,
+                      Month        month = Inv_Month,
                       int          year = Inv_Year, // 1999, not 99 please!
                       wxDateTime_t hour = 0,
                       wxDateTime_t minute = 0,
@@ -606,7 +591,7 @@ public:
         // from separate values for each component with explicit date
         // (defaults for month and year are the current values)
     wxDateTime& Set(wxDateTime_t day,
-                    Month        month,
+                    Month        month = Inv_Month,
                     int          year = Inv_Year, // 1999, not 99 please!
                     wxDateTime_t hour = 0,
                     wxDateTime_t minute = 0,
@@ -1571,7 +1556,5 @@ inline WXDLLEXPORT void wxPrevWDay(wxDateTime::WeekDay& wd)
     wd = wd == wxDateTime::Sun ? wxDateTime::Inv_WeekDay
                                : (wxDateTime::WeekDay)(wd - 1);
 }
-
-#endif // wxUSE_DATETIME
 
 #endif // _WX_DATETIME_H

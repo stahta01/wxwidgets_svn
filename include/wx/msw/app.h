@@ -39,9 +39,8 @@ public:
     virtual int MainLoop();
     virtual void ExitMainLoop();
     virtual bool Initialized();
-    virtual bool Pending();
-    virtual void Dispatch();
-    virtual bool Yield(bool onlyIfNeeded = FALSE);
+    virtual bool Pending() ;
+    virtual void Dispatch() ;
 
     virtual wxIcon GetStdIcon(int which) const;
 
@@ -65,9 +64,9 @@ public:
     bool GetAuto3D() const { return m_auto3D; }
 
 protected:
-    bool   m_showOnInit;
-    int    m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
-    bool   m_auto3D ;   // Always use 3D controls, except where overriden
+    bool              m_showOnInit;
+    int               m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
+    bool              m_auto3D ;   // Always use 3D controls, except where overriden
 
     /* Windows-specific wxApp definitions */
 
@@ -78,26 +77,13 @@ public:
     static void CleanUp();
 
     static bool RegisterWindowClasses();
-    static bool UnregisterWindowClasses();
-
     // Convert Windows to argc, argv style
     void ConvertToStandardCommandArgs(char* p);
-
-    // message processing
-    // ------------------
-
-    // process the given message
-    virtual void DoMessage(WXMSG *pMsg);
-
-    // retrieve the next message from the queue and process it
+    
+    /*virtual*/ void DoMessage(WXMSG *pMsg);
     virtual bool DoMessage();
-
-    // preprocess the message
+    
     virtual bool ProcessMessage(WXMSG* pMsg);
-
-    // idle processing
-    // ---------------
-
     void DeletePendingObjects();
     bool ProcessIdle();
 
@@ -115,7 +101,7 @@ public:
     int               m_nCmdShow;
 
 protected:
-    bool              m_keepGoing;
+    bool              m_keepGoing ;
 
     DECLARE_EVENT_TABLE()
 };

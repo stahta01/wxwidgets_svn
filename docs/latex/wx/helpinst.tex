@@ -32,12 +32,7 @@ There are currently the following help controller classes defined:
 \begin{itemize}\itemsep=0pt
 \item wxWinHelpController, for controlling Windows Help.
 \item wxCHMHelpController, for controlling MS HTML Help. To use this, you need to set wxUSE\_MS\_HTML\_HELP
-to 1 in setup.h and have htmlhelp.h header from Microsoft's HTML Help kit (you don't need
-VC++ specific htmlhelp.lib because wxWindows loads neccessary DLL at runtime and so it
-works with all compilers).
-\item wxBestHelpController, for controlling MS HTML Help or, if Microsoft's runtime is
-not available, \helpref{wxHtmlHelpController}{wxhtmlhelpcontroller}. You need to provide
-{\bf both} CHM and HTB versions of the help file. For 32bit Windows only.
+to 0 in setup.h, and link your application with Microsoft's htmlhelp.lib. Currently VC++ only.
 \item wxExtHelpController, for controlling external browsers under Unix.
 The default browser is Netscape Navigator. The 'help' sample shows its use.
 \item wxHelpControllerHtml, using \helpref{wxHTML}{wxhtml} to display help. See {\tt wx/helpwxht.h} for
@@ -121,14 +116,6 @@ This function is for backward compatibility only, and applications should use \h
 If the help viewer is not running, runs it and displays the
 contents.
 
-\membersection{wxHelpController::DisplayContextPopup}\label{wxhelpcontrollerdisplaycontextpopup}
-
-\func{virtual bool}{DisplayContextPopup}{\param{int }{contextId}}
-
-Displays the section as a popup window using a context id.
-
-Returns FALSE if unsuccessful or not implemented.
-
 \membersection{wxHelpController::DisplaySection}\label{wxhelpcontrollerdisplaysection}
 
 \func{virtual bool}{DisplaySection}{\param{const wxString\&}{ section}}
@@ -158,14 +145,6 @@ If the help viewer is not running, runs it and displays the given section.
 {\it wxHtmlHelpController:} {\it sectionNo} is an identifier as specified in the {\tt .hhc} file. See \helpref{Help files format}{helpformat}.
 
 See also the help sample for notes on how to specify section numbers for various help file formats.
-
-\membersection{wxHelpController::DisplayTextPopup}\label{wxhelpcontrollerdisplaytextpopup}
-
-\func{virtual bool}{DisplayTextPopup}{\param{const wxString\&}{ text}, \param{const wxPoint\& }{pos}}
-
-Displays the text in a popup window, if possible.
-
-Returns FALSE if unsuccessful or not implemented.
 
 \membersection{wxHelpController::GetFrameParameters}\label{wxhelpcontrollergetframeparameters}
 

@@ -1,9 +1,7 @@
 // Scintilla source code edit control
-/** @file ScintillaWidget.h
- ** Definition of Scintilla widget for GTK+.
- ** Only needed by GTK+ code but is harmless on other platforms.
- **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// ScintillaWidget.h - definition of Scintilla widget for GTK+
+// Only needed by GTK+ code but is harmless on other platforms.
+// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef SCINTILLAWIDGET_H
@@ -23,7 +21,7 @@ typedef struct _ScintillaObject ScintillaObject;
 typedef struct _ScintillaClass  ScintillaClass;
 
 struct _ScintillaObject {
-	GtkContainer cont;
+	GtkFixed vbox;
 	void *pscin;
 };
 
@@ -37,7 +35,7 @@ struct _ScintillaClass {
 guint		scintilla_get_type	(void);
 GtkWidget*	scintilla_new		(void);
 void		scintilla_set_id	(ScintillaObject *sci,int id);
-sptr_t	scintilla_send_message	(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+long 		scintilla_send_message	(ScintillaObject *sci,int iMessage,int wParam,int lParam);
 
 #ifdef __cplusplus
 }

@@ -4,9 +4,8 @@ from wxPython.wx import *
 #---------------------------------------------------------------------------
 
 class MyFrame(wxFrame):
-    def __init__(self, parent, ID, title, pos=wxDefaultPosition,
-                 size=wxDefaultSize, style=wxDEFAULT_FRAME_STYLE):
-        wxFrame.__init__(self, parent, ID, title, pos, size, style)
+    def __init__(self, parent, ID, title, pos, size):
+        wxFrame.__init__(self, parent, ID, title, pos, size)
         panel = wxPanel(self, -1)
 
         button = wxButton(panel, 1003, "Close Me")
@@ -24,8 +23,7 @@ class MyFrame(wxFrame):
 #---------------------------------------------------------------------------
 
 def runTest(frame, nb, log):
-    win = MyFrame(frame, -1, "This is a wxFrame", size=(350, 200),
-                  style = wxDEFAULT_FRAME_STYLE)# |  wxFRAME_TOOL_WINDOW )
+    win = MyFrame(frame, -1, "This is a wxFrame", wxDefaultPosition, wxSize(350, 200))
     frame.otherWin = win
     win.Show(true)
 

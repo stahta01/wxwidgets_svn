@@ -12,6 +12,12 @@
 #ifndef _WX_SPINBUTT_H_BASE_
 #define _WX_SPINBUTT_H_BASE_
 
+#ifdef __GNUG__
+    #ifndef __WXMOTIF__ // because there is no matching .cpp for Motif
+        #pragma interface "spinbutbase.h"
+    #endif // Motif
+#endif
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -22,8 +28,6 @@
 
 #include "wx/control.h"
 #include "wx/event.h"
-
-#define wxSPIN_BUTTON_NAME _T("wxSpinButton")
 
 // ----------------------------------------------------------------------------
 //  The wxSpinButton is like a small scrollbar than is often placed next
@@ -54,9 +58,6 @@ public:
         m_max = maxVal;
     }
 
-    // is this spin button vertically oriented?
-    bool IsVertical() const { return (m_windowStyle & wxSP_VERTICAL) != 0; }
-
 protected:
     // init the base part of the control
     void InitBase()
@@ -74,14 +75,14 @@ protected:
 // include the declaration of the real class
 // ----------------------------------------------------------------------------
 
-#if defined(__WXUNIVERSAL__)
-    #include "wx/univ/spinbutt.h"
-#elif defined(__WXMSW__) && defined(__WIN95__)
+#if defined(__WXMSW__)
     #include "wx/msw/spinbutt.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/spinbutt.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/spinbutt.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/spinbutt.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/spinbutt.h"
 #elif defined(__WXPM__)
@@ -96,6 +97,8 @@ protected:
 
 class WXDLLEXPORT wxSpinEvent : public wxNotifyEvent
 {
+    DECLARE_DYNAMIC_CLASS(wxSpinEvent)
+
 public:
     wxSpinEvent(wxEventType commandType = wxEVT_NULL, int id = 0)
            : wxNotifyEvent(commandType, id)
@@ -105,20 +108,20 @@ public:
     // get the current value of the control
     int GetPosition() const { return m_commandInt; }
     void SetPosition(int pos) { m_commandInt = pos; }
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxSpinEvent)
 };
 
 typedef void (wxEvtHandler::*wxSpinEventFunction)(wxSpinEvent&);
 
 // macros for handling spin events
-#define EVT_SPIN_UP(id, func) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_SCROLL_LINEUP, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & func, NULL ),
-#define EVT_SPIN_DOWN(id, func) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_SCROLL_LINEDOWN, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & func, NULL ),
-#define EVT_SPIN(id, func) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_SCROLL_THUMBTRACK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & func, NULL ),
+#ifndef EVT_SPIN_UP
+#define EVT_SPIN_UP(id, func) { wxEVT_SCROLL_LINEUP, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & func },
+#endif
+#ifndef EVT_SPIN_DOWN
+#define EVT_SPIN_DOWN(id, func) { wxEVT_SCROLL_LINEDOWN, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & func },
+#endif
+#ifndef EVT_SPIN
+#define EVT_SPIN(id, func) { wxEVT_SCROLL_THUMBTRACK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & func },
+#endif
 
 #endif // wxUSE_SPINBTN
 

@@ -17,7 +17,6 @@
 #endif
 
 #include "wx/window.h"                      // base class declaration
-#include "wx/containr.h"                    // wxControlContainer
 
 class WXDLLEXPORT wxSplitterEvent;
 
@@ -70,19 +69,19 @@ public:
     wxSplitterWindow(wxWindow *parent, wxWindowID id = -1,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
-                     long style = wxSP_3D,
+                     long style = wxSP_3D|wxCLIP_CHILDREN,
                      const wxString& name = "splitter")
     {
         Init();
         Create(parent, id, pos, size, style, name);
     }
 
-    virtual ~wxSplitterWindow();
+    ~wxSplitterWindow();
 
     bool Create(wxWindow *parent, wxWindowID id = -1,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
-                     long style = wxSP_3D,
+                     long style = wxSP_3D|wxCLIP_CHILDREN,
                      const wxString& name = "splitter");
 
     // Gets the only or left/top pane
@@ -209,9 +208,9 @@ protected:
 
     void SendUnsplitEvent(wxWindow *winRemoved);
 
-protected:
-    // common part of all ctors
+private:
     void Init();
+
 
     int         m_splitMode;
     bool        m_permitUnsplitAlways;
@@ -238,8 +237,6 @@ protected:
     wxPen*      m_facePen;
 
 private:
-    WX_DECLARE_CONTROL_CONTAINER();
-
     DECLARE_DYNAMIC_CLASS(wxSplitterWindow)
     DECLARE_EVENT_TABLE()
 };
@@ -326,39 +323,39 @@ private:
 typedef void (wxEvtHandler::*wxSplitterEventFunction)(wxSplitterEvent&);
 
 #define EVT_SPLITTER_SASH_POS_CHANGED(id, fn)                               \
-  DECLARE_EVENT_TABLE_ENTRY(                                                \
+  {                                                                         \
     wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED,                                \
     id,                                                                     \
     -1,                                                                     \
     (wxObjectEventFunction)(wxEventFunction)(wxSplitterEventFunction) &fn,  \
     NULL                                                                    \
-  ),
+  },
 
 #define EVT_SPLITTER_SASH_POS_CHANGING(id, fn)                              \
-  DECLARE_EVENT_TABLE_ENTRY(                                                \
+  {                                                                         \
     wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING,                               \
     id,                                                                     \
     -1,                                                                     \
     (wxObjectEventFunction)(wxEventFunction)(wxSplitterEventFunction) &fn,  \
     NULL                                                                    \
-  ),
+  },
 
 #define EVT_SPLITTER_DCLICK(id, fn)                                         \
-  DECLARE_EVENT_TABLE_ENTRY(                                                \
+  {                                                                         \
     wxEVT_COMMAND_SPLITTER_DOUBLECLICKED,                                   \
     id,                                                                     \
     -1,                                                                     \
     (wxObjectEventFunction)(wxEventFunction)(wxSplitterEventFunction) &fn,  \
     NULL                                                                    \
-  ),
+  },
 
 #define EVT_SPLITTER_UNSPLIT(id, fn)                                        \
-  DECLARE_EVENT_TABLE_ENTRY(                                                \
+  {                                                                         \
     wxEVT_COMMAND_SPLITTER_UNSPLIT,                                         \
     id,                                                                     \
     -1,                                                                     \
     (wxObjectEventFunction)(wxEventFunction)(wxSplitterEventFunction) &fn,  \
     NULL                                                                    \
-  ),
+  },
 
 #endif // __SPLITTERH_G__

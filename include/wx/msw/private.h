@@ -14,21 +14,10 @@
 #ifndef _WX_PRIVATE_H_
 #define _WX_PRIVATE_H_
 
-#ifndef STRICT
-    #define STRICT 1
-#endif
-
 #include <windows.h>
-
-#ifdef __WXMICROWIN__
-    // Extra prototypes and symbols not defined by MicroWindows
-    #include "wx/msw/microwin.h"
-#endif
 
 // undefine conflicting symbols which were defined in windows.h
 #include "wx/msw/winundef.h"
-
-#include "wx/log.h"
 
 class WXDLLEXPORT wxFont;
 class WXDLLEXPORT wxWindow;
@@ -78,13 +67,17 @@ WXDLLEXPORT_DATA(extern HFONT) wxSTATUS_LINE_FONT;
 
 // this defines a CASTWNDPROC macro which casts a pointer to the type of a
 // window proc
-#if defined(STRICT) || defined(__GNUC__)
-    typedef WNDPROC WndProcCast;
-#else
-    typedef FARPROC WndProcCast;
-#endif
 
-#define CASTWNDPROC (WndProcCast)
+#ifdef __GNUWIN32_OLD__
+    #define CASTWNDPROC (long unsigned)
+#else
+    #if defined(STRICT) || defined(__GNUC__)
+        typedef WNDPROC WndProcCast;
+    #else
+        typedef FARPROC WndProcCast;
+    #endif
+    #define CASTWNDPROC (WndProcCast)
+#endif // __GNUWIN32_OLD__
 
 // ---------------------------------------------------------------------------
 // some stuff for old Windows versions (FIXME: what does it do here??)
@@ -165,10 +158,14 @@ WXDLLEXPORT_DATA(extern HFONT) wxSTATUS_LINE_FONT;
 //#define EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)    (3*(cy)/2)
 #define EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)    (cy+8)
 
+#if wxUSE_GUI
+
 // Generic subclass proc, for panel item moving/sizing and intercept
 // EDIT control VK_RETURN messages
 extern LONG APIENTRY _EXPORT
   wxSubclassedGenericControlProc(WXHWND hWnd, WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+
+#endif // wxUSE_GUI
 
 // ---------------------------------------------------------------------------
 // constants which might miss from some compilers' headers
@@ -191,7 +188,7 @@ extern LONG APIENTRY _EXPORT
 // ---------------------------------------------------------------------------
 
 // a wrapper macro for ZeroMemory()
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifdef __WIN32__
 #define wxZeroMemory(obj)   ::ZeroMemory(&obj, sizeof(obj))
 #else
 #define wxZeroMemory(obj)   memset((void*) & obj, 0, sizeof(obj))
@@ -204,7 +201,7 @@ extern LONG APIENTRY _EXPORT
 // make conversion from wxColour and COLORREF a bit less painful
 inline COLORREF wxColourToRGB(const wxColour& c)
 {
-    return PALETTERGB(c.Red(), c.Green(), c.Blue());
+    return RGB(c.Red(), c.Green(), c.Blue());
 }
 
 inline void wxRGBToColour(wxColour& c, COLORREF rgb)
@@ -248,38 +245,6 @@ inline bool wxIsShiftDown()
 inline bool wxIsCtrlDown()
 {
     return (::GetKeyState(VK_CONTROL) & 0x100) != 0;
-}
-
-// wrapper around GetWindowRect() and GetClientRect() APIs doing error checking
-// for Win32
-inline RECT wxGetWindowRect(HWND hwnd)
-{
-    RECT rect;
-#ifdef __WIN16__
-    ::GetWindowRect(hwnd, &rect);
-#else // Win32
-    if ( !::GetWindowRect(hwnd, &rect) )
-    {
-        wxLogLastError(_T("GetWindowRect"));
-    }
-#endif // Win16/32
-
-    return rect;
-}
-
-inline RECT wxGetClientRect(HWND hwnd)
-{
-    RECT rect;
-#ifdef __WIN16__
-    ::GetClientRect(hwnd, &rect);
-#else // Win32
-    if ( !::GetClientRect(hwnd, &rect) )
-    {
-        wxLogLastError(_T("GetClientRect"));
-    }
-#endif // Win16/32
-
-    return rect;
 }
 
 // ---------------------------------------------------------------------------
@@ -331,9 +296,6 @@ private:
 
 #define GetHfont()              ((HFONT)GetHFONT())
 #define GetHfontOf(font)        ((HFONT)(font).GetHFONT())
-
-#define GetHrgn()               ((HRGN)GetHRGN())
-#define GetHrgnOf(rgn)          ((HRGN)(rgn).GetHRGN())
 
 #endif // wxUSE_GUI
 
@@ -391,8 +353,8 @@ WXDLLEXPORT extern WXWORD wxGetWindowId(WXHWND hWnd);
 // Does this window style specify any border?
 inline bool wxStyleHasBorder(long style)
 {
-    return (style & (wxSIMPLE_BORDER | wxRAISED_BORDER |
-                     wxSUNKEN_BORDER | wxDOUBLE_BORDER)) != 0;
+  return (style & (wxSIMPLE_BORDER | wxRAISED_BORDER |
+                   wxSUNKEN_BORDER | wxDOUBLE_BORDER)) != 0;
 }
 
 // find the window for HWND which is part of some wxWindow, returns just the

@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_BUTTON
-
 #ifndef WX_PRECOMP
     #include "wx/button.h"
     #include "wx/brush.h"
@@ -78,9 +76,6 @@ bool wxButton::Create(wxWindow *parent,
 
     long msStyle = WS_VISIBLE | WS_TABSTOP | WS_CHILD /* | WS_CLIPSIBLINGS */ ;
 
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
-
 #ifdef __WIN32__
     if(m_windowStyle & wxBU_LEFT)
         msStyle |= BS_LEFT;
@@ -128,6 +123,15 @@ bool wxButton::Create(wxWindow *parent,
 
 wxButton::~wxButton()
 {
+    wxPanel *panel = wxDynamicCast(GetParent(), wxPanel);
+    if ( panel )
+    {
+        if ( panel->GetDefaultItem() == this )
+        {
+            // don't leave the panel with invalid default item
+            panel->SetDefaultItem(NULL);
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -157,7 +161,7 @@ wxSize wxButton::DoGetBestSize() const
 }
 
 /* static */
-wxSize wxButtonBase::GetDefaultSize()
+wxSize wxButton::GetDefaultSize()
 {
     static wxSize s_sizeBtn;
 
@@ -188,20 +192,20 @@ wxSize wxButtonBase::GetDefaultSize()
 void wxButton::SetDefault()
 {
     wxWindow *parent = GetParent();
-    wxButton *btnOldDefault;
+    wxButton *btnOldDefault = NULL;
+    wxPanel *panel = wxDynamicCast(parent, wxPanel);
+    if ( panel )
+    {
+        btnOldDefault = panel->GetDefaultItem();
+        panel->SetDefaultItem(this);
+    }
+
     if ( parent )
     {
-        wxWindow *winOldDefault = parent->SetDefaultItem(this);
-        btnOldDefault = wxDynamicCast(winOldDefault, wxButton);
-
-        ::SendMessage(GetWinHwnd(parent), DM_SETDEFID, m_windowId, 0L);
-    }
-    else // is a button without parent really normal?
-    {
-        btnOldDefault = NULL;
+        SendMessage(GetWinHwnd(parent), DM_SETDEFID, m_windowId, 0L);
     }
 
-    if ( btnOldDefault && btnOldDefault != this )
+    if ( btnOldDefault )
     {
         // remove the BS_DEFPUSHBUTTON style from the other button
         long style = GetWindowLong(GetHwndOf(btnOldDefault), GWL_STYLE);
@@ -251,7 +255,7 @@ void wxButton::Command(wxCommandEvent & event)
 // event/message handlers
 // ----------------------------------------------------------------------------
 
-bool wxButton::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
+bool wxButton::MSWCommand(WXUINT param, WXWORD id)
 {
     bool processed = FALSE;
     switch ( param )
@@ -520,6 +524,3 @@ bool wxButton::MSWOnDraw(WXDRAWITEMSTRUCT *wxdis)
 }
 
 #endif // __WIN32__
-
-#endif // wxUSE_BUTTON
-

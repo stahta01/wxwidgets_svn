@@ -529,8 +529,6 @@ SAMPLES_SUBDIRS=$wx_cv_path_samplesubdirs
 PATH_IFS=$wx_cv_path_ifs
 PROGRAM_EXT=$wx_cv_program_ext
 WX_TARGET_LIBRARY=$wx_cv_target_library
-WX_TARGET_LIBRARY_GL=$wx_cv_target_library_gl
-
 
 
 
@@ -665,8 +663,6 @@ trap 'rm -fr `echo "
             dragimag/Makefile
             drawing/Makefile
             dynamic/Makefile
-            erase/Makefile
-            event/Makefile
             exec/Makefile
             font/Makefile
             grid/Makefile
@@ -679,7 +675,6 @@ trap 'rm -fr `echo "
             listctrl/Makefile
             mdi/Makefile
             menu/Makefile
-            memcheck/Makefile
             minifram/Makefile
             minimal/Makefile
             newgrid/Makefile
@@ -694,7 +689,6 @@ trap 'rm -fr `echo "
             sashtest/Makefile
             scroll/Makefile
             scrollsub/Makefile
-            sockets/Makefile
             splitter/Makefile
             statbar/Makefile
             text/Makefile
@@ -704,7 +698,7 @@ trap 'rm -fr `echo "
             treelay/Makefile
             typetest/Makefile
             validate/Makefile
-            widgets/Makefile
+            sockets/Makefile
             wizard/Makefile
             html/Makefile
             html/about/Makefile
@@ -755,7 +749,6 @@ s%@SAMPLES_SUBDIRS@%$SAMPLES_SUBDIRS%g
 s%@PATH_IFS@%$PATH_IFS%g
 s%@PROGRAM_EXT@%$PROGRAM_EXT%g
 s%@WX_TARGET_LIBRARY@%$WX_TARGET_LIBRARY%g
-s%@WX_TARGET_LIBRARY_GL@%$WX_TARGET_LIBRARY_GL%g
 
 CEOF
 EOF
@@ -813,8 +806,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             dragimag/Makefile
             drawing/Makefile
             dynamic/Makefile
-            erase/Makefile
-            event/Makefile
             exec/Makefile
             font/Makefile
             grid/Makefile
@@ -827,7 +818,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             listctrl/Makefile
             mdi/Makefile
             menu/Makefile
-            memcheck/Makefile
             minifram/Makefile
             minimal/Makefile
             newgrid/Makefile
@@ -842,7 +832,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             sashtest/Makefile
             scroll/Makefile
             scrollsub/Makefile
-            sockets/Makefile
             splitter/Makefile
             statbar/Makefile
             text/Makefile
@@ -852,7 +841,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             treelay/Makefile
             typetest/Makefile
             validate/Makefile
-            widgets/Makefile
+            sockets/Makefile
             wizard/Makefile
             html/Makefile
             html/about/Makefile

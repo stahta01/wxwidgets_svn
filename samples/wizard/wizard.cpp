@@ -313,10 +313,10 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnRunWizard(wxCommandEvent& WXUNUSED(event))
 {
-    wxWizard *wizard = new wxWizard(this, -1,
-					"Absolutely Useless Wizard",
-					BMP_WIZARD_1);
-    
+    wxWizard *wizard = wxWizard::Create(this, -1,
+                                        "Absolutely Useless Wizard",
+                                        BMP_WIZARD_1);
+
     // a wizard page may be either an object of predefined class
     wxWizardPageSimple *page1 = new wxWizardPageSimple(wizard);
     wxStaticText *text = new wxStaticText(page1, -1,
@@ -352,5 +352,5 @@ void MyFrame::OnRunWizard(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnWizardCancel(wxWizardEvent& WXUNUSED(event))
 {
-    wxLogStatus(this, wxT("The wizard was cancelled."));
+    wxLogStatus(this, "The wizard was cancelled.");
 }

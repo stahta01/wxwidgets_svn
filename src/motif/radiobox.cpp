@@ -13,12 +13,6 @@
 #pragma implementation "radiobox.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
-#include "wx/defs.h"
-
 #include "wx/radiobox.h"
 #include "wx/utils.h"
 
@@ -179,6 +173,7 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
                                                  NULL);
         XtAddCallback ((Widget) m_radioButtons[i], XmNvalueChangedCallback, (XtCallbackProc) wxRadioBoxCallback,
                      (XtPointer) this);
+
     }
     SetSelection (0);
 
@@ -486,7 +481,7 @@ void wxRadioBoxCallback (Widget w, XtPointer clientData,
   wxRadioBox *item = (wxRadioBox *) clientData;
   int sel = -1;
   int i;
-  for (i = 0; i < item->GetCount(); i++)
+  for (i = 0; i < item->Number(); i++)
     if (item->GetRadioButtons() && ((Widget) (item->GetRadioButtons()[i]) == w))
       sel = i;
   item->SetSel(sel);

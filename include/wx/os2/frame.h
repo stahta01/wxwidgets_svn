@@ -23,13 +23,13 @@ public:
     // construction
     wxFrame() { Init(); }
     wxFrame( wxWindow*       pParent
-               ,wxWindowID      vId
-               ,const wxString& rsTitle
-               ,const wxPoint&  rPos = wxDefaultPosition
-               ,const wxSize&   rSize = wxDefaultSize
-               ,long            lStyle = wxDEFAULT_FRAME_STYLE
-               ,const wxString& rsName = wxFrameNameStr
-              )
+            ,wxWindowID      vId
+            ,const wxString& rsTitle
+            ,const wxPoint&  rPos = wxDefaultPosition
+            ,const wxSize&   rSize = wxDefaultSize
+            ,long            lStyle = wxDEFAULT_FRAME_STYLE
+            ,const wxString& rsName = wxFrameNameStr
+           )
     {
         Init();
 
@@ -53,9 +53,7 @@ public:
     virtual void Iconize(bool bIconize = TRUE);
     virtual bool IsIconized(void) const;
     virtual void Restore(void);
-#if wxUSE_MENUS_NATIVE
     virtual void SetMenuBar(wxMenuBar* pMenubar);
-#endif
     virtual void SetIcon(const wxIcon& rIcon);
     virtual bool ShowFullScreen( bool bShow
                                 ,long lStyle = wxFULLSCREEN_ALL
@@ -142,19 +140,9 @@ public:
     void   SetToolTipCtrl(WXHWND hHwndTT) { m_hWndToolTip = hHwndTT; }
 #endif // tooltips
 
-    //
-    // Called by wxWindow whenever it gets focus
-    //
-    void SetLastFocus(wxWindow* pWin) { m_pWinLastFocused = pWin; }
-    wxWindow *GetLastFocus(void) const { return m_pWinLastFocused; }
-
     void      SetClient(WXHWND    c_Hwnd);
     void      SetClient(wxWindow* c_Window);
     wxWindow *GetClient();
-    HWND      GetFrame(void) const { return m_hFrame; }
-
- friend MRESULT EXPENTRY wxFrameWndProc(HWND  hWnd,ULONG ulMsg, MPARAM wParam, MPARAM lParam);
- friend MRESULT EXPENTRY wxFrameMainWndProc(HWND  hWnd,ULONG ulMsg, MPARAM wParam, MPARAM lParam);
 
 protected:
     // common part of all ctors
@@ -177,15 +165,13 @@ protected:
                                  ,int nWeight
                                 );
 
-#if wxUSE_MENUS_NATIVE
     // helper
     void         DetachMenuBar(void);
-    // perform MSW-specific action when menubar is changed
-    virtual void AttachMenuBar(wxMenuBar* pMenubar);
+
     // a plug in for MDI frame classes which need to do something special when
     // the menubar is set
     virtual void InternalSetMenuBar(void);
-#endif
+
     // propagate our state change to all child frames
     void IconizeChildFrames(bool bIconize);
 
@@ -223,11 +209,8 @@ private:
 #endif // tooltips
 
     //
-    // Handles to child windows of the Frame, and the frame itself,
-    // that we don't have child objects for (m_hWnd in wxWindow is the
-    // handle of the Frame's client window!
+    // Handles to child windows of the Frame that we don't have child objects for
     //
-    WXHWND                          m_hFrame;
     WXHWND                          m_hTitleBar;
     WXHWND                          m_hHScroll;
     WXHWND                          m_hVScroll;

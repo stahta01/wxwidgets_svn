@@ -22,6 +22,7 @@
 #endif
 
 #ifndef WXPRECOMP
+#include "wx/wx.h"
 #endif
 
 #include "wx/fontmap.h"
@@ -38,21 +39,21 @@ TAG_HANDLER_BEGIN(META, "META")
 
     TAG_HANDLER_PROC(tag)
     {
-        if (tag.HasParam(_T("HTTP-EQUIV")) &&
+        if (tag.HasParam(_T("HTTP-EQUIV")) && 
             tag.GetParam(_T("HTTP-EQUIV")) == _T("Content-Type") &&
             tag.HasParam(_T("CONTENT")))
         {
             wxString content = tag.GetParam(_T("CONTENT"));
             if (content.Left(19) == _T("text/html; charset="))
             {
-                wxFontEncoding enc =
-                    wxTheFontMapper->CharsetToEncoding(content.Mid(19));
+                wxFontEncoding enc = 
+                    wxTheFontMapper -> CharsetToEncoding(content.Mid(19));
                 if (enc == wxFONTENCODING_SYSTEM) return FALSE;
-                if (enc == m_WParser->GetInputEncoding()) return FALSE;
+                if (enc == m_WParser -> GetInputEncoding()) return FALSE;
 
-                m_WParser->SetInputEncoding(enc);
-                m_WParser->GetContainer()->InsertCell(
-                    new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+                m_WParser -> SetInputEncoding(enc);
+                m_WParser -> GetContainer() -> InsertCell(
+                    new wxHtmlFontCell(m_WParser -> CreateCurrentFont()));
             }
         }
         return FALSE;

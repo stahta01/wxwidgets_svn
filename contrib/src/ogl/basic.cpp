@@ -26,10 +26,6 @@
 
 #include <wx/wxexpr.h>
 
-#ifdef new
-#undef new
-#endif
-
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
 #else
@@ -337,11 +333,6 @@ wxShape::~wxShape()
 
   if (m_canvas)
     m_canvas->RemoveShape(this);
-
-  if (m_clientData) {
-      delete m_clientData;
-      m_clientData = NULL;
-  }
 
   GetEventHandler()->OnDelete();
 }

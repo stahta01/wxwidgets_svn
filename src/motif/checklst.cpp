@@ -17,8 +17,6 @@
 #pragma implementation "checklst.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/checklst.h"
 
 // ============================================================================

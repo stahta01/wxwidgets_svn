@@ -17,14 +17,14 @@
 #endif
 
 #include <wx/docview.h>
-#include <wx/cmdproc.h>
 #include <wx/string.h>
 #include <wx/wxexpr.h>
 
 #include <wx/ogl/ogl.h>
 
 #if wxUSE_STD_IOSTREAM
- #include <iosfwd>
+class ostream;
+class istream;
 #endif
 
 /*
@@ -98,8 +98,8 @@ class DiagramDocument: public wxDocument
   ~DiagramDocument(void);
 
 #if wxUSE_STD_IOSTREAM
-    virtual wxSTD ostream& SaveObject(wxSTD ostream& stream);
-    virtual wxSTD istream& LoadObject(wxSTD istream& stream);
+    virtual ostream& SaveObject(ostream& stream);
+    virtual istream& LoadObject(istream& stream);
 #else
     virtual wxOutputStream& SaveObject(wxOutputStream& stream);
     virtual wxInputStream& LoadObject(wxInputStream& stream);

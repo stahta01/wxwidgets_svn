@@ -273,16 +273,15 @@ void OwnerDrawnFrame::OnListboxSelect(wxCommandEvent& event)
 {
   wxString strSelection;
   unsigned int nSel = event.GetSelection();
-  strSelection.sprintf(wxT("item %d selected (%schecked)"), nSel,
-                       m_pListBox->IsChecked(nSel) ? wxT("") : wxT("not "));
+  strSelection.sprintf("item %d selected (%schecked)", nSel,
+                       m_pListBox->IsChecked(nSel) ? "" : "not ");
   SetStatusText(strSelection);
 }
 
 void OwnerDrawnFrame::OnListboxDblClick(wxCommandEvent& event)
 {
   wxString strSelection;
-  strSelection.sprintf(wxT("item %d double clicked"),
-                       m_pListBox->GetSelection());
+  strSelection.sprintf("item %d double clicked", m_pListBox->GetSelection());
   wxMessageDialog dialog(this, strSelection);
   dialog.ShowModal();
 }
@@ -291,7 +290,7 @@ void OwnerDrawnFrame::OnCheckboxToggle(wxCommandEvent& event)
 {
   wxString strSelection;
   unsigned int nItem = event.GetInt();
-  strSelection.sprintf(wxT("item %d was %schecked"), nItem,
-                       m_pListBox->IsChecked(nItem) ? wxT("") : wxT("un"));
+  strSelection.sprintf("item %d was %schecked", nItem,
+                       m_pListBox->IsChecked(nItem) ? "" : "un");
   SetStatusText(strSelection);
 }

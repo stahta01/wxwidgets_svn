@@ -16,8 +16,6 @@
     #pragma interface "menubase.h"
 #endif
 
-#if wxUSE_MENUS
-
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -30,7 +28,6 @@
 #include "wx/menuitem.h"
 
 class WXDLLEXPORT wxMenu;
-class WXDLLEXPORT wxMenuBarBase;
 class WXDLLEXPORT wxMenuBar;
 class WXDLLEXPORT wxMenuItem;
 
@@ -184,7 +181,7 @@ public:
     wxMenuItemList& GetMenuItems() { return m_items; }
 
     // search
-    virtual int FindItem(const wxString& item) const;
+    virtual int FindItem(const wxString& itemString) const;
     wxMenuItem* FindItem(int id, wxMenu **menu = NULL) const;
 
     // get/set items attributes
@@ -207,6 +204,10 @@ public:
     virtual void SetTitle(const wxString& title) { m_title = title; }
     const wxString GetTitle() const { return m_title; }
 
+    // client data
+    void SetClientData(void* clientData) { m_clientData = clientData; }
+    void* GetClientData() const { return m_clientData; }
+
     // event handler
     void SetEventHandler(wxEvtHandler *handler) { m_eventHandler = handler; }
     wxEvtHandler *GetEventHandler() const { return m_eventHandler; }
@@ -226,14 +227,6 @@ public:
     // menu or associated window will be used.
     void UpdateUI(wxEvtHandler* source = (wxEvtHandler*)NULL);
 
-    // get the menu bar this menu is attached to (may be NULL, always NULL for
-    // popup menus)
-    wxMenuBar *GetMenuBar() const { return m_menuBar; }
-
-    // called when the menu is attached/detached to/from a menu bar
-    virtual void Attach(wxMenuBarBase *menubar);
-    virtual void Detach();
-
     // is the menu attached to a menu bar (or is it a popup one)?
     bool IsAttached() const { return m_menuBar != NULL; }
 
@@ -252,7 +245,7 @@ public:
     wxList& GetItems() const { return (wxList &)m_items; }
 #endif // WXWIN_COMPATIBILITY
 
-#if wxUSE_MENU_CALLBACK || defined(__WXMOTIF__)
+#if wxUSE_MENU_CALLBACK
     // wxWin 1.6x compatible menu event handling
     wxFunction GetCallback() const { return m_callback; }
     void Callback(const wxFunction func) { m_callback = func; }
@@ -264,12 +257,6 @@ public:
     // our direct children and also may return the index of the found child if
     // pos != NULL
     wxMenuItem *FindChildItem(int id, size_t *pos = NULL) const;
-
-    // called to generate a wxCommandEvent, return TRUE if it was processed,
-    // FALSE otherwise
-    //
-    // the checked parameter may have boolean value or -1 for uncheckable items
-    bool SendEvent(int id, int checked = -1);
 
 protected:
     // virtuals to override in derived classes
@@ -288,9 +275,7 @@ protected:
     // common part of all ctors
     void Init(long style);
 
-    // associate the submenu with this menu
-    void AddSubMenu(wxMenu *submenu);
-
+protected:
     wxMenuBar     *m_menuBar;           // menubar we belong to or NULL
     wxMenu        *m_menuParent;        // parent menu or NULL
 
@@ -298,6 +283,7 @@ protected:
     wxMenuItemList m_items;             // the list of menu items
 
     wxWindow      *m_invokingWindow;    // for popup menus
+    void          *m_clientData;        // associated with the menu
 
     long           m_style;             // combination of wxMENU_XXX flags
 
@@ -347,9 +333,6 @@ public:
     // enable or disable a submenu
     virtual void EnableTop(size_t pos, bool enable) = 0;
 
-    // is the menu enabled?
-    virtual bool IsEnabledTop(size_t WXUNUSED(pos)) const { return TRUE; }
-
     // get or change the label of the menu at given position
     virtual void SetLabelTop(size_t pos, const wxString& label) = 0;
     virtual wxString GetLabelTop(size_t pos) const = 0;
@@ -359,12 +342,13 @@ public:
 
     // by menu and item names, returns wxNOT_FOUND if not found or id of the
     // found item
-    virtual int FindMenuItem(const wxString& menu, const wxString& item) const;
+    virtual int FindMenuItem(const wxString& menuString,
+                             const wxString& itemString) const = 0;
 
     // find item by id (in any menu), returns NULL if not found
     //
     // if menu is !NULL, it will be filled with wxMenu this item belongs to
-    virtual wxMenuItem* FindItem(int id, wxMenu **menu = NULL) const;
+    virtual wxMenuItem* FindItem(int id, wxMenu **menu = NULL) const = 0;
 
     // find menu by its caption, return wxNOT_FOUND on failure
     int FindMenu(const wxString& title) const;
@@ -389,27 +373,10 @@ public:
     void SetHelpString(int id, const wxString& helpString);
     wxString GetHelpString(int id) const;
 
-    // implementation helpers
-
-    // get the frame we are attached to (may return NULL)
-    wxFrame *GetFrame() const { return m_menuBarFrame; }
-
-    // returns TRUE if we're attached to a frame
-    bool IsAttached() const { return GetFrame() != NULL; }
-
-    // associate the menubar with the frame
-    virtual void Attach(wxFrame *frame);
-
-    // called before deleting the menubar normally
-    virtual void Detach();
-
     // need to override these ones to avoid virtual function hiding
     virtual bool Enable(bool enable = TRUE) { return wxWindow::Enable(enable); }
     virtual void SetLabel(const wxString& s) { wxWindow::SetLabel(s); }
     virtual wxString GetLabel() const { return wxWindow::GetLabel(); }
-
-    // don't want menu bars to accept the focus by tabbing to them
-    virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
 
     // compatibility only: these functions are deprecated, use the new ones
     // instead
@@ -426,9 +393,6 @@ public:
 protected:
     // the list of all our menus
     wxMenuList m_menus;
-
-    // the frame we are attached to (may be NULL)
-    wxFrame *m_menuBarFrame;
 };
 
 // ----------------------------------------------------------------------------
@@ -438,14 +402,14 @@ protected:
 #ifdef wxUSE_BASE_CLASSES_ONLY
     #define wxMenuItem wxMenuItemBase
 #else // !wxUSE_BASE_CLASSES_ONLY
-#if defined(__WXUNIVERSAL__)
-    #include "wx/univ/menu.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
     #include "wx/msw/menu.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/menu.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/menu.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/menu.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/menu.h"
 #elif defined(__WXPM__)
@@ -454,8 +418,6 @@ protected:
     #include "wx/stubs/menu.h"
 #endif
 #endif // wxUSE_BASE_CLASSES_ONLY/!wxUSE_BASE_CLASSES_ONLY
-
-#endif // wxUSE_MENUS
 
 #endif
     // _WX_MENU_H_BASE_

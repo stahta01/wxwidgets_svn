@@ -25,11 +25,9 @@
 
 class WXDLLEXPORT wxWindow;
 
-#ifndef __DARWIN__
 class WXDLLEXPORT wxDataObject;
 class WXDLLEXPORT wxTextDataObject;
 class WXDLLEXPORT wxFileDataObject;
-#endif
 
 class WXDLLEXPORT wxDropTarget;
 class WXDLLEXPORT wxTextDropTarget;
@@ -37,12 +35,11 @@ class WXDLLEXPORT wxFileDropTarget;
 
 class WXDLLEXPORT wxDropSource;
 
-#ifndef __DARWIN__
 //-------------------------------------------------------------------------
 // wxDataObject
 //-------------------------------------------------------------------------
 
-class WXDLLEXPORT wxDataObject : public wxObject
+class WXDLLEXPORT wxDataObject: public wxObject
 {
 public:
   // all data formats (values are the same as in windows.h, do not change!)
@@ -141,8 +138,6 @@ private:
   wxString  m_files;
   
 };
-#endif
-
 //-------------------------------------------------------------------------
 // wxDropTarget
 //-------------------------------------------------------------------------
@@ -156,7 +151,7 @@ class WXDLLEXPORT wxDropTarget: public wxObject
     
     virtual void OnEnter() { }
     virtual void OnLeave() { }
-    virtual bool OnDrop( wxCoord x, wxCoord y, const void *pData ) = 0;
+    virtual bool OnDrop( long x, long y, const void *pData ) = 0;
 
 //  protected:
       
@@ -168,7 +163,6 @@ class WXDLLEXPORT wxDropTarget: public wxObject
     virtual wxDataFormat GetFormat(size_t n) const = 0;
 };
 
-#ifndef __DARWIN__
 //-------------------------------------------------------------------------
 // wxTextDropTarget
 //-------------------------------------------------------------------------
@@ -178,8 +172,8 @@ class WXDLLEXPORT wxTextDropTarget: public wxDropTarget
   public:
 
     wxTextDropTarget() {};
-    virtual bool OnDrop( wxCoord x, wxCoord y, const void *pData );
-    virtual bool OnDropText( wxCoord x, wxCoord y, const char *psz );
+    virtual bool OnDrop( long x, long y, const void *pData );
+    virtual bool OnDropText( long x, long y, const char *psz );
     
   protected:
   
@@ -197,8 +191,8 @@ class WXDLLEXPORT wxFileDropTarget: public wxDropTarget
     
     wxFileDropTarget() {};
     
-    virtual bool OnDrop(wxCoord x, wxCoord y, const void *pData);
-    virtual bool OnDropFiles( wxCoord x, wxCoord y, 
+    virtual bool OnDrop(long x, long y, const void *pData);
+    virtual bool OnDropFiles( long x, long y, 
                               size_t nFiles, const char * const aszFiles[]);
 
   protected:
@@ -206,11 +200,19 @@ class WXDLLEXPORT wxFileDropTarget: public wxDropTarget
     virtual size_t GetFormatCount() const;
     virtual wxDataFormat GetFormat(size_t n) const;
 };
-#endif
 
 //-------------------------------------------------------------------------
 // wxDropSource
 //-------------------------------------------------------------------------
+
+enum wxDragResult
+  {
+    wxDragError,    // error prevented the d&d operation from completing
+    wxDragNone,     // drag target didn't accept the data
+    wxDragCopy,     // the data was successfully copied
+    wxDragMove,     // the data was successfully moved
+    wxDragCancel    // the operation was cancelled by user (not an error)
+  };
 
 class WXDLLEXPORT wxDropSource: public wxObject
 {

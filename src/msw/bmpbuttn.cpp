@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/bmpbuttn.cpp
+// Name:        bmpbuttn.cpp
 // Purpose:     wxBitmapButton
 // Author:      Julian Smart
 // Modified by:
@@ -17,10 +17,8 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
-
-#if wxUSE_BMPBUTTON
 
 #ifndef WX_PRECOMP
     #include "wx/bmpbuttn.h"
@@ -40,7 +38,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
            const wxValidator& validator,
            const wxString& name)
 {
-  m_bmpNormal = bitmap;
+  m_buttonBitmap = bitmap;
   SetName(name);
 
 #if wxUSE_VALIDATORS
@@ -52,6 +50,8 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
   m_backgroundColour = parent->GetBackgroundColour();
   m_foregroundColour = parent->GetForegroundColour();
   m_windowStyle = style;
+  m_marginX = 0;
+  m_marginY = 0;
 
   if ( style & wxBU_AUTODRAW )
   {
@@ -77,9 +77,6 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
 
 	long msStyle = WS_VISIBLE | WS_TABSTOP | WS_CHILD | BS_OWNERDRAW ;
 
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
-
 #ifdef __WIN32__
     if(m_windowStyle & wxBU_LEFT)
         msStyle |= BS_LEFT;
@@ -97,7 +94,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
                     wxT("BUTTON"),
                     wxT(""),
                     msStyle,
-                    0, 0, 0, 0,
+                    0, 0, 0, 0, 
                     GetWinHwnd(parent),
                     (HMENU)m_windowId,
                     wxGetInstance(),
@@ -112,6 +109,11 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
   SetSize(x, y, width, height);
 
   return TRUE;
+}
+
+void wxBitmapButton::SetBitmapLabel(const wxBitmap& bitmap)
+{
+  m_buttonBitmap = bitmap;
 }
 
 // VZ: should be at the very least less than wxDEFAULT_BUTTON_MARGIN
@@ -139,14 +141,14 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     // choose the bitmap to use depending on the button state
     wxBitmap* bitmap;
 
-    if ( isSelected && m_bmpSelected.Ok() )
-        bitmap = &m_bmpSelected;
-    else if ((state & ODS_FOCUS) && m_bmpFocus.Ok())
-        bitmap = &m_bmpFocus;
-    else if ((state & ODS_DISABLED) && m_bmpDisabled.Ok())
-        bitmap = &m_bmpDisabled;
+    if ( isSelected && m_buttonBitmapSelected.Ok() )
+        bitmap = &m_buttonBitmapSelected;
+    else if ((state & ODS_FOCUS) && m_buttonBitmapFocus.Ok())
+        bitmap = &m_buttonBitmapFocus;
+    else if ((state & ODS_DISABLED) && m_buttonBitmapDisabled.Ok())
+        bitmap = &m_buttonBitmapDisabled;
     else
-        bitmap = &m_bmpNormal;
+        bitmap = &m_buttonBitmap;
 
     if ( !bitmap->Ok() )
         return FALSE;
@@ -194,7 +196,7 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     wxDC dst;
     dst.SetHDC((WXHDC) hDC, FALSE);
     dst.DrawBitmap(*bitmap, x1, y1, TRUE);
-
+    
     // draw focus / disabled state, if auto-drawing
     if ( (state & ODS_DISABLED) && autoDraw )
     {
@@ -350,7 +352,6 @@ void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right, in
     if ( sel )
         OffsetRect( &rect, 1, 1 );
 */
-	(void)sel;
     DrawFocusRect( (HDC) dc, &rect );
 }
 
@@ -383,5 +384,3 @@ void wxBitmapButton::SetDefault()
 {
     wxButton::SetDefault();
 }
-
-#endif // wxUSE_BMPBUTTON

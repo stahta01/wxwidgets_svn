@@ -16,7 +16,7 @@
     #pragma interface "ffile.h"
 #endif
 
-#if wxUSE_FFILE
+#if wxUSE_FILE
 
 #ifndef WX_PRECOMP
   #include  "wx/string.h"
@@ -109,7 +109,7 @@ private:
   wxString m_name;  // the name of the file (for diagnostic messages)
 };
 
-#endif // wxUSE_FFILE
+#endif // wxUSE_FILE
 
 #endif // _WX_FFILE_H_
 

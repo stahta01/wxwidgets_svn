@@ -25,7 +25,7 @@
   class WXDLLEXPORT wxOwnerDrawn;
 
   // define the array of list box items
-  #include  "wx/dynarray.h"
+  #include  <wx/dynarray.h>
 
   WX_DEFINE_EXPORTED_ARRAY(wxOwnerDrawn *, wxListBoxItemsArray);
 #endif // wxUSE_OWNER_DRAWN
@@ -66,8 +66,7 @@ public:
                 const wxString& name = wxListBoxNameStr);
 
     virtual ~wxListBox();
-    virtual void Refresh(bool eraseBack = TRUE, const wxRect *rect = NULL);
-    
+
     // implement base class pure virtuals
     virtual void Clear();
     virtual void Delete(int n);
@@ -139,7 +138,7 @@ protected:
     int m_noItems;
     int m_selected;
 
-    virtual wxSize DoGetBestSize() const;
+    virtual wxSize DoGetBestSize() const ;
 
 #if wxUSE_OWNER_DRAWN
     // control items

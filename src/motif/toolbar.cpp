@@ -21,10 +21,6 @@
     #pragma implementation "toolbar.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 #include "wx/wx.h"
 #include "wx/app.h"
 #include "wx/timer.h"
@@ -51,7 +47,7 @@
 // ----------------------------------------------------------------------------
 
 #if !USE_SHARED_LIBRARY
-IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarBase)
+IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl)
 #endif
 
 // ----------------------------------------------------------------------------

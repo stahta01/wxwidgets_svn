@@ -1,8 +1,6 @@
 
 from wxPython.wx import *
 
-import images
-
 #----------------------------------------------------------------------
 
 class TestPanel(wxPanel):
@@ -21,11 +19,12 @@ class TestPanel(wxPanel):
 
         b.SetToolTipString("This is a Hello button...")
 
-        bmp = images.getTest2Bitmap()
+        bmp = wxBitmap('bitmaps/test2.bmp', wxBITMAP_TYPE_BMP)
+
         mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
 
-        ##print bmp.GetWidth(), bmp.GetHeight()
+        print bmp.GetWidth(), bmp.GetHeight()
 
         wxBitmapButton(self, 30, bmp, wxPoint(140, 20),
                        wxSize(bmp.GetWidth()+10, bmp.GetHeight()+10))

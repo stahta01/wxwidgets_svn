@@ -16,29 +16,16 @@
 
 class WXDLLEXPORT wxMemoryDC: public wxDC
 {
-public:
+  DECLARE_DYNAMIC_CLASS(wxMemoryDC)
+
+  public:
     wxMemoryDC(void);
-    wxMemoryDC(wxDC* pDC); // Create compatible DC
+    wxMemoryDC( wxDC *dc ); // Create compatible DC
 
-    virtual void SelectObject(const wxBitmap& rBitmap);
-protected:
-    // override some base class virtuals
-    virtual void DoDrawRectangle( wxCoord vX
-                                 ,wxCoord vY
-                                 ,wxCoord vWidth
-                                 ,wxCoord vHeight
-                                );
-    virtual void DoGetSize( int* pWidth
-                           ,int* pHeight
-                          ) const;
-    // create DC compatible with the given one or screen if dc == NULL
-    bool CreateCompatible(wxDC* pDC);
-
-    // initialize the newly created DC
-    void Init(void);
-private:
-    DECLARE_DYNAMIC_CLASS(wxMemoryDC)
-}; // end of CLASS wxMemoryDC
+    ~wxMemoryDC(void);
+    virtual void SelectObject( const wxBitmap& bitmap );
+    virtual void DoGetSize( int *width, int *height ) const;
+};
 
 #endif
     // _WX_DCMEMORY_H_

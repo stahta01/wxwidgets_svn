@@ -71,30 +71,10 @@
 
 #define     wx_round(a)    (int)((a)+.5)
 
-#if wxUSE_DC_CACHEING
-/*
- * Cached blitting, maintaining a cache
- * of bitmaps required for transparent blitting
- * instead of constant creation/deletion
- */
-
-class wxDCCacheEntry: public wxObject
-{
-public:
-    wxDCCacheEntry(WXHBITMAP hBitmap, int w, int h, int depth);
-    wxDCCacheEntry(WXHDC hDC, int depth);
-    ~wxDCCacheEntry();
-
-    WXHBITMAP   m_bitmap;
-    WXHDC       m_dc;
-    int         m_width;
-    int         m_height;
-    int         m_depth;
-};
-#endif
-
 class WXDLLEXPORT wxDC : public wxDCBase
 {
+    DECLARE_DYNAMIC_CLASS(wxDC)
+
 public:
     wxDC();
     ~wxDC();
@@ -115,9 +95,7 @@ public:
     virtual void SetBrush(const wxBrush& brush);
     virtual void SetBackground(const wxBrush& brush);
     virtual void SetBackgroundMode(int mode);
-#if wxUSE_PALETTE
     virtual void SetPalette(const wxPalette& palette);
-#endif // wxUSE_PALETTE
 
     virtual void DestroyClippingRegion();
 
@@ -162,18 +140,6 @@ public:
     const wxBitmap& GetSelectedBitmap() const { return m_selectedBitmap; }
     wxBitmap& GetSelectedBitmap() { return m_selectedBitmap; }
 
-    // update the internal clip box variables
-    void UpdateClipBox();
-
-#if wxUSE_DC_CACHEING
-    static wxDCCacheEntry* FindBitmapInCache(WXHDC hDC, int w, int h);
-    static wxDCCacheEntry* FindDCInCache(wxDCCacheEntry* notThis, WXHDC hDC);
-
-    static void AddToBitmapCache(wxDCCacheEntry* entry);
-    static void AddToDCCache(wxDCCacheEntry* entry);
-    static void ClearCache();
-#endif
-
 protected:
     virtual void DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
                              int style = wxFLOOD_SURFACE);
@@ -209,7 +175,7 @@ protected:
 
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
-                        int rop = wxCOPY, bool useMask = FALSE, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
+                        int rop = wxCOPY, bool useMask = FALSE);
 
     // this is gnarly - we can't even call this function DoSetClippingRegion()
     // because of virtual function hiding
@@ -231,6 +197,9 @@ protected:
                                wxCoord xoffset, wxCoord yoffset,
                                int fillStyle = wxODDEVEN_RULE);
 
+#if wxUSE_SPLINES
+    virtual void DoDrawSpline(wxList *points);
+#endif // wxUSE_SPLINES
 
     // common part of DoDrawText() and DoDrawRotatedText()
     void DrawAnyText(const wxString& text, wxCoord x, wxCoord y);
@@ -247,8 +216,10 @@ protected:
     // TRUE => DeleteDC() in dtor, FALSE => only ReleaseDC() it
     bool              m_bOwnsDC:1;
 
-    // our HDC
+    // our HDC and its usage count: we only free it when the usage count drops
+    // to 0
     WXHDC             m_hDC;
+    int               m_hDCCount;
 
     // Store all old GDI objects when do a SelectObject, so we can select them
     // back in (this unselecting user's objects) so we can safely delete the
@@ -257,29 +228,7 @@ protected:
     WXHPEN            m_oldPen;
     WXHBRUSH          m_oldBrush;
     WXHFONT           m_oldFont;
-
-#if wxUSE_PALETTE
     WXHPALETTE        m_oldPalette;
-#endif // wxUSE_PALETTE
-
-#if wxUSE_DC_CACHEING
-    static wxList     sm_bitmapCache;
-    static wxList     sm_dcCache;
-#endif
-
-    DECLARE_DYNAMIC_CLASS(wxDC)
-};
-
-// ----------------------------------------------------------------------------
-// wxDCTemp: a wxDC which doesn't free the given HDC (used by wxWindows
-// only/mainly)
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxDCTemp : public wxDC
-{
-public:
-    wxDCTemp(WXHDC hdc) { SetHDC(hdc); }
-    virtual ~wxDCTemp() { SetHDC((WXHDC)NULL); }
 };
 
 #endif

@@ -1,8 +1,6 @@
-// Scintilla source code edit control
-/** @file WindowAccessor.cxx
- ** Rapid easy access to contents of a Scintilla.
- **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// SciTE - Scintilla based Text Editor
+// Accessor.cxx - rapid easy access to contents of a Scintilla
+// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>

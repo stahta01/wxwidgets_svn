@@ -15,7 +15,7 @@
 #include "wx/defs.h"
 #include "wx/mmedia/sndbase.h"
 
-class WXDLLEXPORT wxSoundStreamCodec: public wxSoundStream {
+class wxSoundStreamCodec: public wxSoundStream {
  public:
   wxSoundStreamCodec(wxSoundStream& snd_io);
   ~wxSoundStreamCodec();

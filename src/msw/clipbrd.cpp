@@ -55,20 +55,15 @@
 #include <windows.h>
 
 #include "wx/msw/private.h"
-
-#ifndef __WXMICROWIN__
 #include "wx/msw/dib.h"
-#endif
 
 // wxDataObject is tied to OLE/drag and drop implementation, therefore so are
 // the functions using wxDataObject in wxClipboard
-//#define wxUSE_DATAOBJ wxUSE_DRAG_AND_DROP
+#define wxUSE_DATAOBJ wxUSE_DRAG_AND_DROP
 
 #if wxUSE_DATAOBJ
     #include "wx/dataobj.h"
-#endif
 
-#if wxUSE_OLE
     // use OLE clipboard
     #define wxUSE_OLE_CLIPBOARD 1
 #else // !wxUSE_DATAOBJ
@@ -224,7 +219,7 @@ bool wxSetClipboardData(wxDataFormat dataFormat,
                 wxBitmap *bitmap = (wxBitmap *)data;
                 HBITMAP hBitmap = (HBITMAP)bitmap->GetHBITMAP();
                 // NULL palette means to use the system one
-                HANDLE hDIB = wxBitmapToDIB(hBitmap, (HPALETTE)NULL);
+                HANDLE hDIB = wxBitmapToDIB(hBitmap, (HPALETTE)NULL); 
                 handle = SetClipboardData(CF_DIB, hDIB);
 #endif // wxUSE_IMAGE_LOADING_IN_MSW
                 break;
@@ -438,7 +433,7 @@ void *wxGetClipboardData(wxDataFormat dataFormat, long *len)
 
 wxDataFormat wxEnumClipboardFormats(wxDataFormat dataFormat)
 {
-  return (wxDataFormat::NativeFormat)::EnumClipboardFormats(dataFormat);
+  return ::EnumClipboardFormats(dataFormat);
 }
 
 int wxRegisterClipboardFormat(wxChar *formatName)
@@ -588,7 +583,7 @@ bool wxClipboard::AddData( wxDataObject *data )
 #if wxUSE_METAFILE
         case wxDF_METAFILE:
         {
-            wxMetafileDataObject* metaFileDataObject =
+            wxMetafileDataObject* metaFileDataObject = 
                 (wxMetafileDataObject*) data;
             wxMetafile metaFile = metaFileDataObject->GetMetafile();
             return wxSetClipboardData(wxDF_METAFILE, &metaFile,
@@ -632,8 +627,7 @@ bool wxClipboard::GetData( wxDataObject& data )
 
     // build the list of supported formats
     size_t nFormats = data.GetFormatCount(wxDataObject::Set);
-    wxDataFormat format;
-    wxDataFormat *formats;
+    wxDataFormat format, *formats;
     if ( nFormats == 1 )
     {
         // the most common case
@@ -821,9 +815,11 @@ bool wxClipboard::GetData( wxDataObject& data )
         }
 #endif // wxUSE_METAFILE
     }
+
     return FALSE;
 #else // !wxUSE_DATAOBJ
     wxFAIL_MSG( wxT("no clipboard implementation") );
+
     return FALSE;
 #endif // wxUSE_OLE_CLIPBOARD/wxUSE_DATAOBJ
 }

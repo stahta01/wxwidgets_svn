@@ -19,10 +19,8 @@ few bits of background information on tools.
 I use a tool called SWIG (http://www.swig.org) to help generate the
 C++ sources used in the wxPython extension module.  However you don't
 need to have SWIG unless you want to modify the *.i files.  If you do
-you'll want to have version 1.1-883 of SWIG and you'll need to apply
-the patches and updates in wxPython/SWIG and rebuild it.  Then you'll
-need to change a flag in the setup.py script as described below so the
-wxPython build process will use SWIG if needed.
+you'll want to have version 1.1-883 of SWIG and you'll need to change
+a flag in the setup.py script as described below.
 
 I use the new Python Distutils tool to build wxPython.  It is included
 with Python 2.0, but if you want to use Python 1.5.2 or 1.6 then
@@ -78,6 +76,7 @@ D. Change to the wx2\include\wx\msw directory and copy setup0.h to
 	 wxUSE_NEW_GRID			    1
 	 wxUSE_GLOBAL_MEMORY_OPERATORS	    0
 	 wxUSE_LIBTIFF			    1
+	 wxUSE_GLCANVAS			    1
 	 wxDIALOG_UNIT_COMPATIBILITY	    0
 
     I also turn off the following as they are not currently used in
@@ -93,13 +92,6 @@ D. Change to the wx2\include\wx\msw directory and copy setup0.h to
 	 wxUSE_PLOT			    0
 	 wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW 0
 
-
-    ** NEW **
-    Be sure that wxUSE_GLCANVAS is defined to be 0 as wxPython now
-    keeps its own copy of the glcanvas sources and expects that it is
-    not in the main library.  This is done to reduce the number of
-    dependant DLLs on the core library and therefore help reduce
-    startup time.
 
 
 
@@ -158,7 +150,7 @@ B. There are three different types of wxWindows DLLs that can be
 C. Change to the wx2\src\msw directory and type the following command,
    using the value for FINAL that you want:
 
-	 nmake -f makefile.vc dll pch FINAL=hybrid
+	 nmake -f makefile.vc dll pch USE_GLCANVAS=1 FINAL=hybrid
 
    Your machine will then crunch away for possibly a long time,
    depending on your hardware, and when it's done you should have a

@@ -29,9 +29,6 @@
 
 /*
  * $Log$
- * Revision 1.2  2000/07/15 19:50:50  cvsuser
- * merged 2.2 branch
- *
  * Revision 1.1.2.1  2000/04/11 12:38:06  BS
  * Added wxInstall a self extracting installation program using wxWindows.
  *

@@ -13,12 +13,6 @@
 #pragma implementation "filedlg.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#define XtParent XTPARENT
-#define XtWindow XTWINDOW
-#endif
-
 #include "wx/defs.h"
 #include "wx/utils.h"
 #include "wx/dialog.h"

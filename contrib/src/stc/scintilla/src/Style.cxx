@@ -1,8 +1,6 @@
 // Scintilla source code edit control
-/** @file Style.cxx
- ** Defines the font and colour style for a class of text.
- **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Style.cxx - defines the font and colour style for a class of text
+// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
@@ -14,15 +12,15 @@
 
 Style::Style() {
 	aliasOfDefaultFont = true;
-	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
-	      Platform::DefaultFontSize(), 0, SC_CHARSET_DEFAULT,
-	      false, false, false, false, caseMixed, true);
+	Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
+	        Platform::DefaultFontSize(), 0, SC_CHARSET_DEFAULT,
+		false, false, false, false, true);
 }
-
+	
 Style::Style(const Style &source) {
-	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
-	      0, 0, 0,
-	      false, false, false, false, caseMixed, true);
+	Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
+	        0, 0, 0,
+		false, false, false, false, true);
 	fore.desired = source.fore.desired;
 	back.desired = source.back.desired;
 	characterSet = source.characterSet;
@@ -31,8 +29,7 @@ Style::Style(const Style &source) {
 	size = source.size;
 	eolFilled = source.eolFilled;
 	underline = source.underline;
-	caseForce = source.caseForce;
-	visible = source.visible;
+    visible = source.visible;
 }
 
 Style::~Style() {
@@ -45,10 +42,10 @@ Style::~Style() {
 
 Style &Style::operator=(const Style &source) {
 	if (this == &source)
-		return * this;
-	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
-	      0, 0, SC_CHARSET_DEFAULT,
-	      false, false, false, false, caseMixed, true);
+		return *this;
+	Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
+	        0, 0, SC_CHARSET_DEFAULT,
+		false, false, false, false, true);
 	fore.desired = source.fore.desired;
 	back.desired = source.back.desired;
 	characterSet = source.characterSet;
@@ -57,15 +54,13 @@ Style &Style::operator=(const Style &source) {
 	size = source.size;
 	eolFilled = source.eolFilled;
 	underline = source.underline;
-	caseForce = source.caseForce;
-	visible = source.visible;
+    visible = source.visible;
 	return *this;
 }
 
-void Style::Clear(Colour fore_, Colour back_, int size_,
-                  const char *fontName_, int characterSet_,
-                  bool bold_, bool italic_, bool eolFilled_, 
-                  bool underline_, ecaseForced caseForce_, bool visible_) {
+void Style::Clear(Colour fore_, Colour back_, int size_, 
+	const char *fontName_, int characterSet_,
+	bool bold_, bool italic_, bool eolFilled_, bool underline_, bool visible_) {
 	fore.desired = fore_;
 	back.desired = back_;
 	characterSet = characterSet_;
@@ -75,35 +70,19 @@ void Style::Clear(Colour fore_, Colour back_, int size_,
 	fontName = fontName_;
 	eolFilled = eolFilled_;
 	underline = underline_;
-	caseForce = caseForce_;
-	visible = visible_;
+    visible = visible_;
 	if (aliasOfDefaultFont)
 		font.SetID(0);
-	else
+	else 
 		font.Release();
 	aliasOfDefaultFont = false;
 }
 
-void Style::ClearTo(const Style &source) {
-	Clear(
-		source.fore.desired,
-		source.back.desired,
-		source.size,
-		source.fontName,
-		source.characterSet,
-		source.bold,
-		source.italic,
-		source.eolFilled,
-		source.underline,
-		source.caseForce,
-		source.visible);
-}
-
 bool Style::EquivalentFontTo(const Style *other) const {
 	if (bold != other->bold ||
-	        italic != other->italic ||
-	        size != other->size ||
-	        characterSet != other->characterSet)
+		italic != other->italic ||
+		size != other->size ||
+		characterSet != other->characterSet)
 		return false;
 	if (fontName == other->fontName)
 		return true;
@@ -115,17 +94,17 @@ bool Style::EquivalentFontTo(const Style *other) const {
 }
 
 void Style::Realise(Surface &surface, int zoomLevel, Style *defaultStyle) {
-	sizeZoomed = size + zoomLevel;
+	int sizeZoomed = size + zoomLevel;
 	if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 		sizeZoomed = 2;
 
 	if (aliasOfDefaultFont)
 		font.SetID(0);
-	else
+	else 
 		font.Release();
 	int deviceHeight = surface.DeviceHeightFont(sizeZoomed);
-	aliasOfDefaultFont = defaultStyle &&
-	                     (EquivalentFontTo(defaultStyle) || !fontName);
+	aliasOfDefaultFont = defaultStyle && 
+		(EquivalentFontTo(defaultStyle) || !fontName);
 	if (aliasOfDefaultFont) {
 		font.SetID(defaultStyle->font.GetID());
 	} else if (fontName) {

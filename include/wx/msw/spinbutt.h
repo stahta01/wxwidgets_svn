@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/univ/spinbutt.h
+// Name:        spinbutt.h
 // Purpose:     wxSpinButton class
 // Author:      Julian Smart
 // Modified by:
@@ -19,6 +19,8 @@
 #include "wx/control.h"
 #include "wx/event.h"
 
+#if defined(__WIN95__)
+
 class WXDLLEXPORT wxSpinButton : public wxSpinButtonBase
 {
 public:
@@ -30,7 +32,7 @@ public:
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
                  long style = wxSP_VERTICAL | wxSP_ARROW_KEYS,
-                 const wxString& name = wxSPIN_BUTTON_NAME)
+                 const wxString& name = "wxSpinButton")
     {
         Create(parent, id, pos, size, style, name);
     }
@@ -42,7 +44,7 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxSP_VERTICAL | wxSP_ARROW_KEYS,
-                const wxString& name = wxSPIN_BUTTON_NAME);
+                const wxString& name = "wxSpinButton");
 
 
     // accessors
@@ -66,5 +68,7 @@ private:
     DECLARE_DYNAMIC_CLASS(wxSpinButton)
 };
 
+#endif
+    // __WIN95__
 #endif
     // _WX_SPINBUTT_H_

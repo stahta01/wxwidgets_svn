@@ -63,11 +63,6 @@
         #define wxHAVE_TCHAR_FUNCTIONS
     #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x520)
         #define wxHAVE_TCHAR_FUNCTIONS
-    #elif defined(__GNUWIN32__) && wxCHECK_W32API_VERSION( 1, 0 )
-        #define wxHAVE_TCHAR_FUNCTIONS
-        #include <stddef.h>
-        #include <string.h>
-        #include <ctype.h>
     #endif
 #elif defined(__VISAGECPP__) && (__IBMCPP__ >= 400)
     // VisualAge 4.0+ supports TCHAR
@@ -113,11 +108,6 @@
     // time.h functions  -- none defined in tchar.h
     #define  wxAsctime   asctime
     #define  wxCtime     ctime
-#elif defined(__MWERKS__)
-    // for wcslen
-    #if wxUSE_WCHAR_T
-    #include <wchar.h>
-    #endif
 #endif // compilers with (good) TCHAR support
 
 #ifdef wxHAVE_TCHAR_FUNCTIONS
@@ -126,12 +116,6 @@
 #  include <tchar.h>
 
 #  if wxUSE_UNICODE // temporary - preserve binary compatibility
-#if defined(__GNUWIN32__)
-    #define _TCHAR   TCHAR
-    #define _TSCHAR  TCHAR
-    #define _TUCHAR  TCHAR
-#endif
-
 typedef  _TCHAR      wxChar;
 typedef  _TSCHAR     wxSChar;
 typedef  _TUCHAR     wxUChar;
@@ -181,7 +165,6 @@ typedef  _TUCHAR     wxUChar;
 #  define  wxStrcspn   _tcscspn
 #  define  wxStrftime  _tcsftime
 #  define  wxStricmp   _tcsicmp
-#  define  wxStrnicmp  _tcsnicmp
 #  define  wxStrlen_   _tcslen // used in wxStrlen inline function
 #  define  wxStrncat   _tcsncat
 #  define  wxStrncmp   _tcsncmp
@@ -270,7 +253,7 @@ typedef  _TUCHAR     wxUChar;
 #    if defined(__VISUALC__) && (__VISUALC__ < 900)
 #      define wxUSE_WCHAR_T 0 // wchar_t is not available for MSVC++ 1.5
 #    elif defined(__UNIX__)
-#      if defined(HAVE_WCSTR_H) || defined(HAVE_WCHAR_H) || defined(__FreeBSD__) || (defined(__DARWIN__))
+#      if defined(HAVE_WCSTR_H) || defined(HAVE_WCHAR_H) || defined(__FreeBSD__)
 #        define wxUSE_WCHAR_T 1
 #      else
 #        define wxUSE_WCHAR_T 0
@@ -293,12 +276,11 @@ typedef  _TUCHAR     wxUChar;
 #    ifdef HAVE_WCSTR_H
 #      include <wcstr.h>
 #    else
-       // VZ: do we really have to include this?
-#      include <stdlib.h>
-
-       // include wchar.h to get wcslen() declaration used by wx/buffer.h
-#      if defined(HAVE_WCHAR_H)
+#      ifndef __FreeBSD__
 #        include <wchar.h>
+#      else
+#        include <stdlib.h>
+#        define wxNEED_WCSLEN
 #      endif
 #    endif
 #  endif
@@ -384,7 +366,7 @@ typedef unsigned __WCHAR_TYPE__ wxUChar;
 #     define wxUChar unsigned char
 #   endif
 
-#   if defined(__FreeBSD__) || defined(__DARWIN__)
+#   ifdef __FreeBSD__
 #     undef _T
 #   endif
 
@@ -523,12 +505,17 @@ typedef unsigned __WCHAR_TYPE__ wxUChar;
 #  endif
 #endif //!Unicode
 
+#if defined(wxNEED_WCSLEN) && wxUSE_UNICODE
+#  define wcslen wxStrlen
+#  undef wxNEED_WCSLEN
+#endif
+
 // checks whether the passed in pointer is NULL and if the string is empty
-inline bool wxIsEmpty(const wxChar *p) { return !p || !*p; }
+WXDLLEXPORT inline bool wxIsEmpty(const wxChar *p) { return !p || !*p; }
 
 #ifndef wxNEED_WX_STRING_H
 // safe version of strlen() (returns 0 if passed NULL pointer)
-inline size_t wxStrlen(const wxChar *psz)
+WXDLLEXPORT inline size_t wxStrlen(const wxChar *psz)
    { return psz ? wxStrlen_(psz) : 0; }
 #endif
 
@@ -568,10 +555,6 @@ WXDLLEXPORT wxChar * wxStrdup(const wxChar *psz);
 WXDLLEXPORT int      wxStricmp(const wxChar *psz1, const wxChar *psz2);
 #endif
 
-#ifndef wxStrnicmp
-WXDLLEXPORT int      wxStrnicmp(const wxChar *psz1, const wxChar *psz2, size_t len);
-#endif
-
 #ifndef wxStrtok
 WXDLLEXPORT wxChar * wxStrtok(wxChar *psz, const wxChar *delim, wxChar **save_ptr);
 #endif
@@ -579,6 +562,10 @@ WXDLLEXPORT wxChar * wxStrtok(wxChar *psz, const wxChar *delim, wxChar **save_pt
 #ifndef wxSetlocale
 class wxWCharBuffer;
 WXDLLEXPORT wxWCharBuffer wxSetlocale(int category, const wxChar *locale);
+#endif
+
+#ifdef wxNEED_WCSLEN // for use in buffer.h
+WXDLLEXPORT size_t   wcslen(const wchar_t *s);
 #endif
 
 #ifdef wxNEED_WX_CTYPE_H

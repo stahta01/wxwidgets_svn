@@ -14,8 +14,6 @@
 
 %{
 #include "helpers.h"
-
-#include <wx/notebook.h>
 %}
 
 //----------------------------------------------------------------------
@@ -35,7 +33,7 @@
 //---------------------------------------------------------------------------
 
 
-class wxSizerItem : public wxObject {
+class wxSizerItem {
 public:
     // No need to ever create one directly in Python...
 
@@ -43,7 +41,6 @@ public:
     //wxSizerItem( wxWindow *window, int option, int flag, int border, wxObject* userData );
     //wxSizerItem( wxSizer *sizer, int option, int flag, int border, wxObject* userData );
 
-    wxPoint GetPosition();
     wxSize GetSize();
     wxSize CalcMin();
     void SetDimension( wxPoint pos, wxSize size );
@@ -88,7 +85,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxSizer : public wxObject {
+class wxSizer {
 public:
     // wxSizer();      ****  abstract, can't instantiate
     // ~wxSizer();
@@ -162,37 +159,37 @@ public:
 
 
     %pragma(python) addtoclass = "
-    def Add(self, *args, **kw):
+    def Add(self, *args):
         if type(args[0]) == type(1):
-            apply(self.AddSpacer, args, kw)
+            apply(self.AddSpacer, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.AddSizer, args, kw)
+            apply(self.AddSizer, args)
         else:
-            apply(self.AddWindow, args, kw)
+            apply(self.AddWindow, args)
 
-    def Insert(self, *args, **kw):
+    def Insert(self, *args):
         if type(args[1]) == type(1):
-            apply(self.InsertSpacer, args, kw)
+            apply(self.InsertSpacer, args)
         elif string.find(args[1].this, 'Sizer') != -1:
-            apply(self.InsertSizer, args, kw)
+            apply(self.InsertSizer, args)
         else:
-            apply(self.InsertWindow, args, kw)
+            apply(self.InsertWindow, args)
 
-    def Prepend(self, *args, **kw):
+    def Prepend(self, *args):
         if type(args[0]) == type(1):
-            apply(self.PrependSpacer, args, kw)
+            apply(self.PrependSpacer, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.PrependSizer, args, kw)
+            apply(self.PrependSizer, args)
         else:
-            apply(self.PrependWindow, args, kw)
+            apply(self.PrependWindow, args)
 
-    def Remove(self, *args, **kw):
+    def Remove(self, *args):
         if type(args[0]) == type(1):
-            apply(self.RemovePos, args, kw)
+            apply(self.RemovePos, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.RemoveSizer, args, kw)
+            apply(self.RemoveSizer, args)
         else:
-            apply(self.RemoveWindow, args, kw)
+            apply(self.RemoveWindow, args)
 
     def AddMany(self, widgets):
         for childinfo in widgets:
@@ -266,8 +263,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxPySizer, wxSizer);
 class wxPySizer : public wxSizer {
 public:
     wxPySizer();
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPySizer)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPySizer)"
 };
 
 

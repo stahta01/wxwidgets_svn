@@ -1,8 +1,6 @@
 // Scintilla source code edit control
-/** @file KeyMap.h
- ** Defines a mapping between keystrokes and commands.
- **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// KeyMap.h - defines a mapping between keystrokes and commands
+// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef KEYTOCOMMAND_H
@@ -15,8 +13,6 @@
 #define SCI_CSHIFT (SCI_CTRL | SCI_SHIFT)
 #define SCI_ASHIFT (SCI_ALT | SCI_SHIFT)
 
-/**
- */
 class KeyToCommand {
 public:
 	int key;
@@ -24,14 +20,11 @@ public:
 	unsigned int msg;
 };
 
-/**
- */
 class KeyMap {
 	KeyToCommand *kmap;
 	int len;
 	int alloc;
 	static KeyToCommand MapDefault[];
-
 public:
 	KeyMap();
 	~KeyMap();

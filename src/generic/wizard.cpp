@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_WIZARDDLG
-
 #ifndef WX_PRECOMP
     #include "wx/dynarray.h"
     #include "wx/intl.h"
@@ -50,10 +48,6 @@ WX_DEFINE_ARRAY(wxPanel *, wxArrayPages);
 // ----------------------------------------------------------------------------
 // event tables and such
 // ----------------------------------------------------------------------------
-
-DEFINE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGING)
-DEFINE_EVENT_TYPE(wxEVT_WIZARD_CANCEL)
 
 BEGIN_EVENT_TABLE(wxWizard, wxDialog)
     EVT_BUTTON(wxID_CANCEL, wxWizard::OnCancel)
@@ -97,29 +91,20 @@ wxWizardPage *wxWizardPageSimple::GetNext() const
 // generic wxWizard implementation
 // ----------------------------------------------------------------------------
 
-void wxWizard::Init()
-{
-    m_posWizard = wxDefaultPosition;
-    m_page = (wxWizardPage *)NULL;
-    m_btnPrev = m_btnNext = NULL;
-    m_statbmp = NULL;
-}
-
-bool wxWizard::Create(wxWindow *parent,
+wxWizard::wxWizard(wxWindow *parent,
                    int id,
                    const wxString& title,
                    const wxBitmap& bitmap,
                    const wxPoint& pos)
+        : m_posWizard(pos), m_bitmap(bitmap)
 {
-    m_posWizard = pos;
-    m_bitmap = bitmap ;
     // just create the dialog itself here, the controls will be created in
     // DoCreateControls() called later when we know our final size
     m_page = (wxWizardPage *)NULL;
     m_btnPrev = m_btnNext = NULL;
     m_statbmp = NULL;
 
-    return wxDialog::Create(parent, id, title, pos);
+    (void)wxDialog::Create(parent, id, title, pos);
 }
 
 void wxWizard::DoCreateControls()
@@ -198,24 +183,13 @@ void wxWizard::DoCreateControls()
 
     x = m_x + m_width - 3*sizeBtn.x - BUTTON_MARGIN;
     y += SEPARATOR_LINE_MARGIN;
-
-    if (GetExtraStyle() & wxWIZARD_EX_HELPBUTTON)
-    {
-        x -= sizeBtn.x;
-        x -= BUTTON_MARGIN ;
-
-        (void)new wxButton(this, wxID_HELP, _("&Help"), wxPoint(x, y), sizeBtn);
-        x += sizeBtn.x;
-        x += BUTTON_MARGIN ;
-    }
-
     m_btnPrev = new wxButton(this, wxID_BACKWARD, _("< &Back"), wxPoint(x, y), sizeBtn);
 
     x += sizeBtn.x;
     m_btnNext = new wxButton(this, wxID_FORWARD, _("&Next >"), wxPoint(x, y), sizeBtn);
 
     x += sizeBtn.x + BUTTON_MARGIN;
-    (void)new wxButton(this, wxID_CANCEL, _("&Cancel"), wxPoint(x, y), sizeBtn);
+    (void)new wxButton(this, wxID_CANCEL, _("Cancel"), wxPoint(x, y), sizeBtn);
 
     // position and size the dialog
     // ----------------------------
@@ -247,7 +221,7 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
     bool btnLabelWasNext = TRUE;
 
     // and this tells us whether we already had the default bitmap before
-    int bmpWasDefault;
+    bool bmpWasDefault = TRUE;
 
     if ( m_page )
     {
@@ -264,11 +238,6 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
 
         btnLabelWasNext = m_page->GetNext() != (wxWizardPage *)NULL;
         bmpWasDefault = !m_page->GetBitmap().Ok();
-    }
-    else // no previous page
-    {
-        // always set the bitmap
-        bmpWasDefault = -1;
     }
 
     // set the new one
@@ -293,7 +262,7 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
     m_page->Show();
 
     // change the bitmap if necessary (and if we have it at all)
-    int bmpIsDefault = !m_page->GetBitmap().Ok();
+    bool bmpIsDefault = !m_page->GetBitmap().Ok();
     if ( m_statbmp && (bmpIsDefault != bmpWasDefault) )
     {
         wxBitmap bmp;
@@ -420,4 +389,3 @@ wxWizardEvent::wxWizardEvent(wxEventType type, int id, bool direction)
     m_direction = direction;
 }
 
-#endif // wxUSE_WIZARDDLG

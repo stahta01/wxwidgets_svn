@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        generic/colrdlgg.cpp
+// Name:        colrdlgg.cpp
 // Purpose:     Choice dialogs
 // Author:      Julian Smart
 // Modified by:
@@ -17,22 +17,22 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
-#if wxUSE_COLOURDLG
-
 #ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/intl.h"
-    #include "wx/dialog.h"
-    #include "wx/listbox.h"
-    #include "wx/button.h"
-    #include "wx/stattext.h"
-    #include "wx/layout.h"
-    #include "wx/dcclient.h"
-    #include "wx/slider.h"
-    #include "wx/sizer.h"
+#include <stdio.h>
+#include <stdio.h>
+#include "wx/utils.h"
+#include "wx/intl.h"
+#include "wx/dialog.h"
+#include "wx/listbox.h"
+#include "wx/button.h"
+#include "wx/stattext.h"
+#include "wx/layout.h"
+#include "wx/dcclient.h"
+#include "wx/slider.h"
+#include "wx/sizer.h"
 #endif
 
 #if wxUSE_STATLINE
@@ -192,7 +192,7 @@ void wxGenericColourDialog::OnMouseEvent(wxMouseEvent& event)
 
 void wxGenericColourDialog::OnPaint(wxPaintEvent& event)
 {
-#if !defined(__WXMOTIF__) && !defined(__WXMAC__) && !defined(__WXPM__)
+#ifndef __WXMOTIF__
   wxDialog::OnPaint(event);
 #endif
 
@@ -258,7 +258,7 @@ void wxGenericColourDialog::CreateWidgets()
 
     // 1) space for explicitly layouted controls
     topsizer->Add( sliderX + 3*sliderSpacing, sliderHeight+25 );
-
+    
 #if wxUSE_STATLINE
     // 2) static line
     topsizer->Add( new wxStaticLine( this, -1 ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
@@ -271,7 +271,7 @@ void wxGenericColourDialog::CreateWidgets()
 
     SetAutoLayout( TRUE );
     SetSizer( topsizer );
-
+    
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
@@ -294,6 +294,11 @@ void wxGenericColourDialog::InitializeColours(void)
 
   for (i = 0; i < 16; i++)
     customColours[i] =
+/*
+#ifndef __VMS__
+     (wxColour&)
+#endif
+*/
        colourData.GetCustomColour(i);
 
   singleCustomColour.Set(0, 0, 0);
@@ -499,5 +504,4 @@ void wxGenericColourDialog::OnBlueSlider(wxCommandEvent& WXUNUSED(event))
   PaintCustomColour(dc);
 }
 
-#endif // wxUSE_COLOURDLG
 

@@ -17,7 +17,6 @@
 #include "wx/app.h"
 
 #include <gdk/gdk.h>
-#include <gtk/gtk.h>
 
 //-----------------------------------------------------------------------------
 // idle system
@@ -72,7 +71,6 @@ wxCursor::wxCursor( int cursorId )
         case wxCURSOR_CROSS:            gdk_cur = GDK_CROSSHAIR; break;
         case wxCURSOR_SIZEWE:           gdk_cur = GDK_SB_H_DOUBLE_ARROW; break;
         case wxCURSOR_SIZENS:           gdk_cur = GDK_SB_V_DOUBLE_ARROW; break;
-        case wxCURSOR_ARROWWAIT:
         case wxCURSOR_WAIT:
         case wxCURSOR_WATCH:            gdk_cur = GDK_WATCH; break;
         case wxCURSOR_SIZING:           gdk_cur = GDK_SIZING; break;
@@ -109,36 +107,6 @@ wxCursor::wxCursor( int cursorId )
 
     M_CURSORDATA->m_cursor = gdk_cursor_new( gdk_cur );
 }
-
-extern GtkWidget *wxGetRootWindow();
-
-wxCursor::wxCursor(const char bits[], int width, int  height,
-                   int hotSpotX, int hotSpotY,
-                   const char maskBits[], wxColour *fg, wxColour *bg)
-{
-    if (!maskBits)
-        maskBits = bits;
-    if (!fg)
-        fg = wxBLACK;
-    if (!bg)
-        bg = wxWHITE;
-    if (hotSpotX < 0 || hotSpotX >= width)
-        hotSpotX = 0;
-    if (hotSpotY < 0 || hotSpotY >= height)
-        hotSpotY = 0;
-
-    GdkBitmap *data = gdk_bitmap_create_from_data( wxGetRootWindow()->window, (gchar *) bits, width, height );
-    GdkBitmap *mask = gdk_bitmap_create_from_data( wxGetRootWindow()->window, (gchar *) maskBits, width, height);
-
-    m_refData = new wxCursorRefData;
-    M_CURSORDATA->m_cursor = gdk_cursor_new_from_pixmap(
-                 data, mask, fg->GetColor(), bg->GetColor(),
-                 hotSpotX, hotSpotY );
-
-    gdk_bitmap_unref( data );
-    gdk_bitmap_unref( mask );
-}
-
 
 wxCursor::wxCursor( const wxCursor &cursor )
 {
@@ -224,8 +192,6 @@ void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )
 
     if (wxTheApp)
         wxTheApp->SendIdleEvents();
-        
-    gdk_flush();
 }
 
 bool wxIsBusy()

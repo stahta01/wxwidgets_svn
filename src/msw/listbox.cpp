@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/listbox.cpp
+// Name:        listbox.cpp
 // Purpose:     wxListBox
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin (owner drawn stuff)
@@ -20,7 +20,8 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_LISTBOX
+#include "wx/window.h"
+#include "wx/msw/private.h"
 
 #ifndef WX_PRECOMP
 #include "wx/listbox.h"
@@ -30,9 +31,6 @@
 #include "wx/dc.h"
 #include "wx/utils.h"
 #endif
-
-#include "wx/window.h"
-#include "wx/msw/private.h"
 
 #include <windowsx.h>
 
@@ -102,7 +100,7 @@ wxListBoxItem::wxListBoxItem(const wxString& str) : wxOwnerDrawn(str, FALSE)
     SetMarginWidth(0);
 }
 
-wxOwnerDrawn *wxListBox::CreateItem(size_t WXUNUSED(n))
+wxOwnerDrawn *wxListBox::CreateItem(size_t n)
 {
     return new wxListBoxItem();
 }
@@ -159,12 +157,6 @@ bool wxListBox::Create(wxWindow *parent,
 
     DWORD wstyle = WS_VISIBLE | WS_VSCROLL | WS_TABSTOP |
                    LBS_NOTIFY | LBS_HASSTRINGS /* | WS_CLIPSIBLINGS */;
-
-    wxASSERT_MSG( !(style & wxLB_MULTIPLE) || !(style & wxLB_EXTENDED),
-                  _T("only one of listbox selection modes can be specified") );
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        wstyle |= WS_CLIPSIBLINGS;
-
     if (m_windowStyle & wxLB_MULTIPLE)
         wstyle |= LBS_MULTIPLESEL;
     else if (m_windowStyle & wxLB_EXTENDED)
@@ -241,6 +233,11 @@ void wxListBox::SetupColours()
 {
     SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOW));
     SetForegroundColour(GetParent()->GetForegroundColour());
+}
+
+bool wxListBox::HasMultipleSelection() const
+{
+    return (m_windowStyle & wxLB_MULTIPLE) || (m_windowStyle & wxLB_EXTENDED);
 }
 
 // ----------------------------------------------------------------------------
@@ -538,9 +535,9 @@ void wxListBox::SetString(int N, const wxString& s)
 
     void *oldData = NULL;
     wxClientData *oldObjData = NULL;
-    if ( m_clientDataItemsType == wxClientData_Void )
+    if ( m_clientDataItemsType == ClientData_Void )
         oldData = GetClientData(N);
-    else if ( m_clientDataItemsType == wxClientData_Object )
+    else if ( m_clientDataItemsType == ClientData_Object )
         oldObjData = GetClientObject(N);
 
     // delete and recreate it
@@ -674,43 +671,41 @@ wxSize wxListBox::DoGetBestSize() const
 
 bool wxListBox::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
 {
-    wxEventType evtType;
     if ( param == LBN_SELCHANGE )
     {
-        evtType = wxEVT_COMMAND_LISTBOX_SELECTED;
+        wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, m_windowId);
+        event.SetEventObject( this );
+
+        wxArrayInt aSelections;
+        int n, count = GetSelections(aSelections);
+        if ( count > 0 )
+        {
+            n = aSelections[0];
+            if ( HasClientObjectData() )
+                event.SetClientObject( GetClientObject(n) );
+            else if ( HasClientUntypedData() )
+                event.SetClientData( GetClientData(n) );
+            event.SetString( GetString(n) );
+        }
+        else
+        {
+            n = -1;
+        }
+
+        event.m_commandInt = n;
+
+        return GetEventHandler()->ProcessEvent(event);
     }
     else if ( param == LBN_DBLCLK )
     {
-        evtType = wxEVT_COMMAND_LISTBOX_DOUBLECLICKED;
-    }
-    else
-    {
-        // some event we're not interested in
-        return FALSE;
-    }
+        wxCommandEvent event(wxEVT_COMMAND_LISTBOX_DOUBLECLICKED, m_windowId);
+        event.SetEventObject( this );
 
-    wxCommandEvent event(evtType, m_windowId);
-    event.SetEventObject( this );
-
-    wxArrayInt aSelections;
-    int n, count = GetSelections(aSelections);
-    if ( count > 0 )
-    {
-        n = aSelections[0];
-        if ( HasClientObjectData() )
-            event.SetClientObject( GetClientObject(n) );
-        else if ( HasClientUntypedData() )
-            event.SetClientData( GetClientData(n) );
-        event.SetString( GetString(n) );
+        return GetEventHandler()->ProcessEvent(event);
     }
-    else
-    {
-        n = -1;
-    }
+    //else:
 
-    event.m_commandInt = n;
-
-    return GetEventHandler()->ProcessEvent(event);
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -773,15 +768,15 @@ bool wxListBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 
     wxListBoxItem *pItem = (wxListBoxItem *)data;
 
-    wxDCTemp dc((WXHDC)pStruct->hDC);
+    wxDC dc;
+    dc.SetHDC((WXHDC)pStruct->hDC, FALSE);
     wxRect rect(wxPoint(pStruct->rcItem.left, pStruct->rcItem.top),
                 wxPoint(pStruct->rcItem.right, pStruct->rcItem.bottom));
 
     return pItem->OnDrawItem(dc, rect,
-                             (wxOwnerDrawn::wxODAction)pStruct->itemAction,
-                             (wxOwnerDrawn::wxODStatus)pStruct->itemState);
+            (wxOwnerDrawn::wxODAction)pStruct->itemAction,
+            (wxOwnerDrawn::wxODStatus)pStruct->itemState);
 }
 
-#endif // wxUSE_OWNER_DRAWN
-
-#endif // wxUSE_LISTBOX
+#endif
+    // wxUSE_OWNER_DRAWN

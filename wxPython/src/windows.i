@@ -16,7 +16,6 @@
 %{
 #include "helpers.h"
 #include <wx/menuitem.h>
-#include <wx/tooltip.h>
 %}
 
 //----------------------------------------------------------------------
@@ -39,7 +38,7 @@
 
 //---------------------------------------------------------------------------
 
-class wxEvtHandler : public wxObject {
+class wxEvtHandler {
 public:
     wxEvtHandler();
 
@@ -71,13 +70,34 @@ public:
                                    (wxObjectEventFunction)
                                     &wxPyCallback::EventThunker);
         }
+
     }
 
-    %addmethods {
-        void _setOORInfo(PyObject* _self) {
-            self->SetClientObject(new wxPyClientData(_self));
-        }
-    }
+    %pragma(python) addtoclass = "
+    _prop_list_ = {}
+    "
+
+//      %pragma(python) addtoclass = "
+//      def __getattr__(self, name):
+//          pl = self._prop_list_
+//          if pl.has_key(name):
+//              getFunc, setFunc = pl[name]
+//              if getFunc:
+//                  return getattr(self, getFunc)()
+//              else:
+//                  raise TypeError, '%s property is write-only' % name
+//          raise AttributeError, name
+
+//      def __setattr__(self, name, value):
+//          pl = self._prop_list_
+//          if pl.has_key(name):
+//              getFunc, setFunc = pl[name]
+//              if setFunc:
+//                  return getattr(self, setFunc)(value)
+//              else:
+//                  raise TypeError, '%s property is read-only' % name
+//          self.__dict__[name] = value
+//      "
 };
 
 
@@ -88,17 +108,28 @@ public:
     wxValidator();
     //~wxValidator();
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-
     wxValidator* Clone();
     wxWindow* GetWindow();
     void SetWindow(wxWindow* window);
 
-    static bool IsSilent();
-    static void SetBellOnError(int doIt = TRUE);
-
+//      // Properties list
+//      %pragma(python) addtoclass = "
+//      _prop_list_ = {
+//          'window' : ('GetWindow', 'SetWindow'),
+//      }
+//      _prop_list_.update(wxEvtHandler._prop_list_)
+//      "
 };
 
+%inline %{
+    bool wxValidator_IsSilent() {
+        return wxValidator::IsSilent();
+    }
+
+    void wxValidator_SetBellOnError(int doIt = TRUE) {
+        wxValidator::SetBellOnError(doIt);
+    }
+%}
 
 //----------------------------------------------------------------------
 %{
@@ -107,15 +138,16 @@ class wxPyValidator : public wxValidator {
 public:
     wxPyValidator() {
     }
+//    wxPyValidator(const wxPyValidator& other);
 
     ~wxPyValidator() {
     }
 
-    wxObject* Clone() const {
+    wxObject* wxPyValidator::Clone() const {
         wxPyValidator* ptr = NULL;
         wxPyValidator* self = (wxPyValidator*)this;
 
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         if (self->m_myInst.findCallback("Clone")) {
             PyObject* ro;
             ro = self->m_myInst.callCallbackObj(Py_BuildValue("()"));
@@ -124,22 +156,22 @@ public:
                 Py_DECREF(ro);
             }
         }
-        wxPyEndBlockThreads(state);
-
         // This is very dangerous!!! But is the only way I could find
         // to squash a memory leak.  Currently it is okay, but if the
         // validator architecture in wxWindows ever changes, problems
         // could arise.
         delete self;
+
+        wxPySaveThread(doSave);
         return ptr;
     }
-
 
     DEC_PYCALLBACK_BOOL_WXWIN(Validate);
     DEC_PYCALLBACK_BOOL_(TransferToWindow);
     DEC_PYCALLBACK_BOOL_(TransferFromWindow);
 
     PYPRIVATE;
+//    PyObject*   m_data;
 };
 
 IMP_PYCALLBACK_BOOL_WXWIN(wxPyValidator, wxValidator, Validate);
@@ -153,11 +185,13 @@ IMPLEMENT_DYNAMIC_CLASS(wxPyValidator, wxValidator);
 class wxPyValidator : public wxValidator {
 public:
     wxPyValidator();
+//    ~wxPyValidator();
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class, int incref=TRUE);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyValidator, 1)"
+    %addmethods { void Destroy() { delete self; } }
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class, int incref=TRUE);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyValidator, 0)"
+
 };
 
 //----------------------------------------------------------------------
@@ -166,22 +200,14 @@ public:
 
 class wxWindow : public wxEvtHandler {
 public:
+
     wxWindow(wxWindow* parent, const wxWindowID id,
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
              long style = 0,
              char* name = "panel");
-    %name(wxPreWindow)wxWindow();
 
-    bool Create(wxWindow* parent, const wxWindowID id,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                char* name = "panel");
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    %pragma(python) addtomethod = "wxPreWindow:val._setOORInfo(self)"
-
+    %pragma(python) addtomethod = "__init__:#wx._StdWindowCallbacks(self)"
 
     void CaptureMouse();
     void Center(int direction = wxBOTH);
@@ -191,8 +217,6 @@ public:
     void CentreOnScreen(int direction = wxBOTH );
     void CenterOnScreen(int direction = wxBOTH );
 
-    void Clear();
-
     // (uses apply'ed INOUT typemap, see above)
     %name(ClientToScreenXY)void ClientToScreen(int* x, int* y);
     wxPoint ClientToScreen(const wxPoint& pt);
@@ -200,7 +224,6 @@ public:
     bool Close(int force = FALSE);
     bool Destroy();
     void DestroyChildren();
-    bool IsBeingDeleted();
 #ifdef __WXMSW__
     void DragAcceptFiles(bool accept);
 #endif
@@ -268,7 +291,7 @@ public:
     void Layout();
     bool LoadFromResource(wxWindow* parent, const wxString& resourceName, const wxResourceTable* resourceTable = NULL);
     void Lower();
-    void MakeModal(bool flag=TRUE);
+    void MakeModal(bool flag);
     %name(MoveXY)void Move(int x, int y);
     void Move(const wxPoint& point);
 
@@ -280,8 +303,6 @@ public:
 
     void Raise();
     void Refresh(bool eraseBackground = TRUE, const wxRect* rect = NULL);
-    void RefreshRect(const wxRect& rect);
-
     void ReleaseMouse();
     void RemoveChild(wxWindow* child);
     bool Reparent( wxWindow* newParent );
@@ -291,6 +312,7 @@ public:
     wxPoint ScreenToClient(const wxPoint& pt);
 
     void ScrollWindow(int dx, int dy, const wxRect* rect = NULL);
+    void SetAcceleratorTable(const wxAcceleratorTable& accel);
     void SetAutoLayout(bool autoLayout);
     bool GetAutoLayout();
     void SetBackgroundColour(const wxColour& colour);
@@ -326,7 +348,6 @@ public:
     //void SetPalette(wxPalette* palette);
     void SetCursor(const wxCursor&cursor);
     void SetEventHandler(wxEvtHandler* handler);
-    void SetExtraStyle(long exStyle);
     void SetTitle(const wxString& title);
     bool Show(bool show);
     bool TransferDataFromWindow();
@@ -361,35 +382,59 @@ public:
 
     void SetCaret(wxCaret *caret);
     wxCaret *GetCaret();
-    %pragma(python) addtoclass = "# replaces broken shadow method
+    %pragma(python) addtoclass = "# replaces broken shadow methods
     def GetCaret(self, *_args, **_kwargs):
         from misc2 import wxCaretPtr
         val = apply(windowsc.wxWindow_GetCaret,(self,) + _args, _kwargs)
         if val: val = wxCaretPtr(val)
         return val
+
+    def GetSizer(self, *_args, **_kwargs):
+        from sizers import wxSizerPtr
+        val = apply(windowsc.wxWindow_GetSizer,(self,) + _args, _kwargs)
+        if val: val = wxSizerPtr(val)
+        return val
+
+    def GetToolTip(self, *_args, **_kwargs):
+        from misc2 import wxToolTipPtr
+        val = apply(windowsc.wxWindow_GetToolTip,(self,) + _args, _kwargs)
+        if val: val = wxToolTipPtr(val)
+        return val
     "
 
-    void Freeze();
-    void Thaw();
-    void Update();
 
-    wxString GetHelpText();
-    void SetHelpText(const wxString& helpText);
+//      // Properties list
+//      %pragma(python) addtoclass = "
+//      _prop_list_ = {
+//          'size'          : ('GetSize',                  'SetSize'),
+//          'enabled'       : ('IsEnabled',                'Enable'),
+//          'background'    : ('GetBackgroundColour',      'SetBackgroundColour'),
+//          'foreground'    : ('GetForegroundColour',      'SetForegroundColour'),
+//          'children'      : ('GetChildren',              None),
+//          'charHeight'    : ('GetCharHeight',            None),
+//          'charWidth'     : ('GetCharWidth',             None),
+//          'clientSize'    : ('GetClientSize',            'SetClientSize'),
+//          'font'          : ('GetFont',                  'SetFont'),
+//          'grandParent'   : ('GetGrandParent',           None),
+//          'handle'        : ('GetHandle',                None),
+//          'label'         : ('GetLabel',                 'SetLabel'),
+//          'name'          : ('GetName',                  'SetName'),
+//          'parent'        : ('GetParent',                None),
+//          'position'      : ('GetPosition',              'SetPosition'),
+//          'title'         : ('GetTitle',                 'SetTitle'),
+//          'style'         : ('GetWindowStyleFlag',       'SetWindowStyleFlag'),
+//          'visible'       : ('IsShown',                  'Show'),
+//          'toolTip'       : ('GetToolTip',               'SetToolTip'),
+//          'sizer'         : ('GetSizer',                 'SetSizer'),
+//          'validator'     : ('GetValidator',             'SetValidator'),
+//          'dropTarget'    : ('GetDropTarget',            'SetDropTarget'),
+//          'caret'         : ('GetCaret',                 'SetCaret'),
+//          'autoLayout'    : ('GetAutoLayout',            'SetAutoLayout'),
+//          'constraints'   : ('GetConstraints',           'SetConstraints'),
 
-    bool ScrollLines(int lines);
-    bool ScrollPages(int pages);
-    bool LineUp();
-    bool LineDown();
-    bool PageUp();
-    bool PageDown();
-
-    static wxWindow* FindFocus();
-    static int NewControlId();
-    static int NextControlId(int id);
-    static int PrevControlId(int id);
-
-    void SetAcceleratorTable(const wxAcceleratorTable& accel);
-    wxAcceleratorTable *GetAcceleratorTable();
+//      }
+//      _prop_list_.update(wxEvtHandler._prop_list_)
+//      "
 };
 
 
@@ -409,6 +454,12 @@ def wxDLG_SZE(win, size_width, height=None):
         return win.ConvertDialogSizeToPixels(wxSize(size_width, height))
 "
 
+%inline %{
+    wxWindow* wxWindow_FindFocus() {
+        return wxWindow::FindFocus();
+    }
+%}
+
 
 #ifdef __WXMSW__
 %inline %{
@@ -421,6 +472,18 @@ wxWindow* wxWindow_FromHWND(unsigned long hWnd) {
 %}
 #endif
 
+%inline %{
+    int wxWindow_NewControlId() {
+        return wxWindow::NewControlId();
+    }
+    int wxWindow_NextControlId(int id) {
+        return wxWindow::NextControlId(id);
+    }
+    int wxWindow_PrevControlId(int id) {
+        return wxWindow::PrevControlId(id);
+    }
+%}
+
 
 //---------------------------------------------------------------------------
 
@@ -432,30 +495,53 @@ public:
             const wxSize& size = wxDefaultSize,
             long style = wxTAB_TRAVERSAL,
             const char* name = "panel");
-    %name(wxPrePanel)wxPanel();
 
-    bool Create(wxWindow* parent,
-                const wxWindowID id,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxTAB_TRAVERSAL,
-                const char* name = "panel");
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    %pragma(python) addtomethod = "XXX:val._setOORInfo(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdWindowCallbacks(self)"
 
     void InitDialog();
     wxButton* GetDefaultItem();
     void SetDefaultItem(wxButton *btn);
 
+    // fix some SWIG trouble...
+    %pragma(python) addtoclass = "
+    def GetDefaultItem(self):
+        import controls
+        val = windowsc.wxPanel_GetDefaultItem(self.this)
+        val = controls.wxButtonPtr(val)
+        return val
+"
 };
 
 //---------------------------------------------------------------------------
 
+class wxDialog : public wxPanel {
+public:
+    wxDialog(wxWindow* parent,
+             const wxWindowID id,
+             const wxString& title,
+             const wxPoint& pos = wxDefaultPosition,
+             const wxSize& size = wxDefaultSize,
+             long style = wxDEFAULT_DIALOG_STYLE,
+             const char* name = "dialogBox");
 
-// TODO: Add wrappers for the wxScrollHelper class, make wxScrolledWindow
-//       derive from it and wxPanel.
+    %pragma(python) addtomethod = "__init__:#wx._StdDialogCallbacks(self)"
 
+    void Centre(int direction = wxBOTH);
+    void EndModal(int retCode);
+    wxString GetTitle();
+    void Iconize(bool iconize);
+    bool IsIconized();
+    void SetModal(bool flag);
+    bool IsModal();
+    void SetTitle(const wxString& title);
+    bool Show(bool show);
+    int ShowModal();
+
+    int  GetReturnCode();
+    void SetReturnCode(int retCode);
+};
+
+//---------------------------------------------------------------------------
 
 class wxScrolledWindow : public wxPanel {
 public:
@@ -465,17 +551,9 @@ public:
                      const wxSize& size = wxDefaultSize,
                      long style = wxHSCROLL | wxVSCROLL,
                      char* name = "scrolledWindow");
-    %name(wxPreScrolledWindow)wxScrolledWindow();
 
-    bool Create(wxWindow* parent,
-                const wxWindowID id = -1,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxHSCROLL | wxVSCROLL,
-                char* name = "scrolledWindow");
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    %pragma(python) addtomethod = "wxPreScrolledWindow:val._setOORInfo(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdWindowCallbacks(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdOnScrollCallbacks(self)"
 
     void EnableScrolling(bool xScrolling, bool yScrolling);
     int GetScrollPageSize(int orient);
@@ -491,16 +569,11 @@ public:
     void SetScrollPageSize(int orient, int pageSize);
     void SetTargetWindow(wxWindow* window);
     void GetViewStart(int* OUTPUT, int* OUTPUT);
-    %pragma(python) addtoclass = "ViewStart = GetViewStart"
+    void ViewStart(int* OUTPUT, int* OUTPUT);
 
     void CalcScrolledPosition( int x, int y, int *OUTPUT, int *OUTPUT);
     void CalcUnscrolledPosition( int x, int y, int *OUTPUT, int *OUTPUT);
 
-    void SetScale(double xs, double ys);
-    double GetScaleX();
-    double GetScaleY();
-
-    void AdjustScrollbars();
 };
 
 //----------------------------------------------------------------------
@@ -509,8 +582,6 @@ public:
 class wxMenu : public wxEvtHandler {
 public:
     wxMenu(const wxString& title = wxPyEmptyStr, long style = 0);
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
 
     void Append(int id, const wxString& item,
                 const wxString& helpString = wxPyEmptyStr,
@@ -581,8 +652,6 @@ class wxMenuBar : public wxWindow {
 public:
     wxMenuBar(long style = 0);
 
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-
     bool Append(wxMenu *menu, const wxString& title);
     bool Insert(size_t pos, wxMenu *menu, const wxString& title);
     size_t GetMenuCount();
@@ -592,7 +661,6 @@ public:
     void EnableTop(size_t pos, bool enable);
     void SetLabelTop(size_t pos, const wxString& label);
     wxString GetLabelTop(size_t pos);
-    int FindMenu(const wxString& title);
     int FindMenuItem(const wxString& menuString, const wxString& itemString);
     %name(FindItemById)wxMenuItem* FindItem(int id/*, wxMenu **menu = NULL*/);
     void Enable(int id, bool enable);
@@ -611,7 +679,7 @@ public:
 
 //----------------------------------------------------------------------
 
-class wxMenuItem : public wxObject {
+class wxMenuItem {
 public:
     wxMenuItem(wxMenu* parentMenu=NULL, int id=wxID_SEPARATOR,
                const wxString& text = wxPyEmptyStr,
@@ -641,30 +709,6 @@ public:
     wxAcceleratorEntry *GetAccel();
     void SetAccel(wxAcceleratorEntry *accel);
 
-    static wxString GetLabelFromText(const wxString& text);
-
-    // wxOwnerDrawn methods
-#ifdef __WXMSW__
-    void SetFont(const wxFont& font);
-    wxFont& GetFont();
-    void SetTextColour(const wxColour& colText);
-    wxColour GetTextColour();
-    void SetBackgroundColour(const wxColour& colBack);
-    wxColour GetBackgroundColour();
-    void SetBitmaps(const wxBitmap& bmpChecked,
-                    const wxBitmap& bmpUnchecked = wxNullBitmap);
-    void SetBitmap(const wxBitmap& bmpChecked);
-    const wxBitmap& GetBitmap(bool bChecked = TRUE);
-    void SetMarginWidth(int nWidth);
-    int GetMarginWidth();
-    static int GetDefaultMarginWidth();
-    //void SetName(const wxString& strName);
-    //const wxString& GetName();
-    //void SetCheckable(bool checkable);
-    //bool IsCheckable();
-    bool IsOwnerDrawn();
-    void ResetOwnerDrawn();
-#endif
 };
 
 //---------------------------------------------------------------------------

@@ -147,7 +147,7 @@ bool wxPyDataObjectSimple::GetDataHere(void *buf) {
     // C++ version.
 
     bool rval = FALSE;
-    wxPyTState* state = wxPyBeginBlockThreads();
+    bool doSave = wxPyRestoreThread();
     if (m_myInst.findCallback("GetDataHere")) {
         PyObject* ro;
         ro = m_myInst.callCallbackObj(Py_BuildValue("()"));
@@ -158,7 +158,7 @@ bool wxPyDataObjectSimple::GetDataHere(void *buf) {
             Py_DECREF(ro);
         }
     }
-    wxPyEndBlockThreads(state);
+    wxPySaveThread(doSave);
     return rval;
 }
 
@@ -166,13 +166,13 @@ bool wxPyDataObjectSimple::SetData(size_t len, const void *buf) {
     // For this one we simply need to make a string from buf and len
     // and send it to the Python method.
     bool rval = FALSE;
-    wxPyTState* state = wxPyBeginBlockThreads();
+    bool doSave = wxPyRestoreThread();
     if (m_myInst.findCallback("SetData")) {
         PyObject* data = PyString_FromStringAndSize((char*)buf, len);
         rval = m_myInst.callCallback(Py_BuildValue("(O)", data));
         Py_DECREF(data);
     }
-    wxPyEndBlockThreads(state);
+    wxPySaveThread(doSave);
     return rval;
 }
 %}
@@ -183,8 +183,8 @@ bool wxPyDataObjectSimple::SetData(size_t len, const void *buf) {
 class wxPyDataObjectSimple : public wxDataObjectSimple {
 public:
     wxPyDataObjectSimple(const wxDataFormat& format = wxPyFormatInvalid);
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyDataObjectSimple)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyDataObjectSimple)"
 };
 
 //----------------------------------------------------------------------
@@ -235,8 +235,8 @@ IMP_PYCALLBACK__STRING(wxPyTextDataObject, wxTextDataObject, SetText);
 class wxPyTextDataObject : public wxTextDataObject {
 public:
     wxPyTextDataObject(const wxString& text = wxEmptyString);
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyTextDataObject)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyTextDataObject)"
 };
 
 //----------------------------------------------------------------------
@@ -264,7 +264,7 @@ public:
 
 wxBitmap wxPyBitmapDataObject::GetBitmap() {
     wxBitmap* rval = &wxNullBitmap;
-    wxPyTState* state = wxPyBeginBlockThreads();
+    bool doSave = wxPyRestoreThread();
     if (m_myInst.findCallback("GetBitmap")) {
         PyObject* ro;
         wxBitmap* ptr;
@@ -275,17 +275,17 @@ wxBitmap wxPyBitmapDataObject::GetBitmap() {
             Py_DECREF(ro);
         }
     }
-    wxPyEndBlockThreads(state);
+    wxPySaveThread(doSave);
     return *rval;
 }
 
 void wxPyBitmapDataObject::SetBitmap(const wxBitmap& bitmap) {
-    wxPyTState* state = wxPyBeginBlockThreads();
+    bool doSave = wxPyRestoreThread();
     if (m_myInst.findCallback("SetBitmap")) {
         m_myInst.callCallback(Py_BuildValue("(O)",
                               wxPyConstructObject((void*)&bitmap, "wxBitmap")));
     }
-    wxPyEndBlockThreads(state);
+    wxPySaveThread(doSave);
 }
 %}
 
@@ -295,8 +295,8 @@ void wxPyBitmapDataObject::SetBitmap(const wxBitmap& bitmap) {
 class wxPyBitmapDataObject : public wxBitmapDataObject {
 public:
     wxPyBitmapDataObject(const wxBitmap& bitmap = wxNullBitmap);
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyBitmapDataObject)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyBitmapDataObject)"
 };
 
 
@@ -363,7 +363,7 @@ public:
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 
-class wxClipboard : public wxObject {
+class wxClipboard {
 public:
     wxClipboard();
 
@@ -443,8 +443,8 @@ public:
                    const wxIcon &go = wxNullIcon);
 #endif
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class, int incref);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxDropSource, 0)"
+    void _setSelf(PyObject* self, PyObject* _class, int incref);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxDropSource, 0)"
     ~wxPyDropSource();
 
     void SetData(wxDataObject& data);
@@ -498,8 +498,8 @@ class wxPyDropTarget : public wxDropTarget {
 public:
     wxPyDropTarget(wxDataObject *dataObject = NULL);
     %pragma(python) addtomethod = "__init__:if _args:_args[0].thisown = 0"
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyDropTarget)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyDropTarget)"
 
     ~wxPyDropTarget();
 
@@ -552,8 +552,8 @@ IMP_PYCALLBACK_BOOL_INTINT(wxPyTextDropTarget, wxTextDropTarget, OnDrop);
 %name(wxTextDropTarget) class wxPyTextDropTarget : public wxPyDropTarget {
 public:
     wxPyTextDropTarget();
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxTextDropTarget)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxTextDropTarget)"
 
     //bool OnDropText(wxCoord x, wxCoord y, const wxString& text) = 0;
     wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
@@ -583,7 +583,7 @@ public:
 bool wxPyFileDropTarget::OnDropFiles(wxCoord x, wxCoord y,
                                      const wxArrayString& filenames) {
     bool rval = FALSE;
-    wxPyTState* state = wxPyBeginBlockThreads();
+    bool doSave = wxPyRestoreThread();
     PyObject* list = PyList_New(0);
     for (size_t i=0; i<filenames.GetCount(); i++) {
         PyObject* str = PyString_FromString(filenames[i].c_str());
@@ -592,7 +592,7 @@ bool wxPyFileDropTarget::OnDropFiles(wxCoord x, wxCoord y,
     if (m_myInst.findCallback("OnDropFiles"))
         rval = m_myInst.callCallback(Py_BuildValue("(iiO)",x,y,list));
     Py_DECREF(list);
-    wxPyEndBlockThreads(state);
+    wxPySaveThread(doSave);
     return rval;
 }
 
@@ -611,8 +611,8 @@ IMP_PYCALLBACK_BOOL_INTINT(wxPyFileDropTarget, wxFileDropTarget, OnDrop);
 {
 public:
     wxPyFileDropTarget();
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxFileDropTarget)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxFileDropTarget)"
 
 //    bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) = 0;
     wxDragResult base_OnEnter(wxCoord x, wxCoord y, wxDragResult def);
@@ -629,9 +629,7 @@ public:
 %init %{
 
     wxPyTheClipboard = wxTheClipboard;
-    wxPyPtrTypeMap_Add("wxDropSource", "wxPyDropSource");
-    wxPyPtrTypeMap_Add("wxTextDropTarget", "wxPyTextDropTarget");
-    wxPyPtrTypeMap_Add("wxFileDropTarget", "wxPyFileDropTarget");
+
 %}
 
 //----------------------------------------------------------------------

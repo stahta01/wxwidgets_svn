@@ -91,9 +91,8 @@ class TestPanel(wxPanel):
 
     def OnCloseStream(self, evt):
         self.log.write('OnCloseStream\n')
-        print "b4 CloseOutput"
         self.process.CloseOutput()
-        print "after CloseOutput"
+
 
     def OnIdle(self, evt):
         if self.process is not None:

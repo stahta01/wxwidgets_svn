@@ -20,12 +20,10 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_SLIDER
-
 #ifndef WX_PRECOMP
+#include <stdio.h>
 #include "wx/utils.h"
 #include "wx/brush.h"
-#include "wx/slider.h"
 #endif
 
 #ifdef __WIN95__
@@ -33,7 +31,7 @@
 #include "wx/msw/slider95.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) || defined(__TWIN32__))
     #include <commctrl.h>
 #endif
 
@@ -86,15 +84,11 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
   int width = size.x;
   int height = size.y;
 
-  long msStyle=0 ;
-  long wstyle=0 ;
-
-  if ( m_windowStyle & wxCLIP_SIBLINGS )
-    msStyle |= WS_CLIPSIBLINGS;
+  long msStyle ;
 
   if ( m_windowStyle & wxSL_LABELS )
   {
-      msStyle |= WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER;
+      msStyle = WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER;
 
       bool want3D;
       WXDWORD exStyle = Determine3DEffects(WS_EX_CLIENTEDGE, &want3D) ;
@@ -106,20 +100,13 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
       // Now create min static control
       wxSprintf(wxBuffer, wxT("%d"), minValue);
-      wstyle = STATIC_FLAGS;
-      if ( m_windowStyle & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
       m_staticMin = (WXHWND) CreateWindowEx(0, wxT("STATIC"), wxBuffer,
-                             wstyle,
+                             STATIC_FLAGS,
                              0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)NewControlId(),
                              wxGetInstance(), NULL);
   }
 
   msStyle = 0;
-
-  if ( m_windowStyle & wxCLIP_SIBLINGS )
-    msStyle |= WS_CLIPSIBLINGS;
-
   if (m_windowStyle & wxSL_VERTICAL)
     msStyle = TBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP ;
   else
@@ -170,11 +157,8 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
   {
       // Finally, create max value static item
       wxSprintf(wxBuffer, wxT("%d"), maxValue);
-      wstyle = STATIC_FLAGS;
-      if ( m_windowStyle & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
       m_staticMax = (WXHWND) CreateWindowEx(0, wxT("STATIC"), wxBuffer,
-                             wstyle,
+                             STATIC_FLAGS,
                              0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)NewControlId(),
                              wxGetInstance(), NULL);
 
@@ -203,43 +187,62 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 }
 
 bool wxSlider95::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
-                             WXWORD WXUNUSED(pos), WXHWND control)
+                             WXWORD pos, WXHWND control)
 {
-    wxEventType scrollEvent;
+    int position = 0; // Dummy - not used in this mode
+
+    int nScrollInc;
+    wxEventType scrollEvent = wxEVT_NULL;
     switch ( wParam )
     {
         case SB_TOP:
+            nScrollInc = m_rangeMax - position;
             scrollEvent = wxEVT_SCROLL_TOP;
             break;
 
         case SB_BOTTOM:
+            nScrollInc = - position;
             scrollEvent = wxEVT_SCROLL_BOTTOM;
             break;
 
         case SB_LINEUP:
+            nScrollInc = - GetLineSize();
             scrollEvent = wxEVT_SCROLL_LINEUP;
             break;
 
         case SB_LINEDOWN:
+            nScrollInc = GetLineSize();
             scrollEvent = wxEVT_SCROLL_LINEDOWN;
             break;
 
         case SB_PAGEUP:
+            nScrollInc = -GetPageSize();
             scrollEvent = wxEVT_SCROLL_PAGEUP;
             break;
 
         case SB_PAGEDOWN:
+            nScrollInc = GetPageSize();
             scrollEvent = wxEVT_SCROLL_PAGEDOWN;
             break;
 
         case SB_THUMBTRACK:
         case SB_THUMBPOSITION:
+#ifdef __WIN32__
+            nScrollInc = (signed short)pos - position;
+#else // Win16
+            nScrollInc = pos - position;
+#endif // Win32/16
             scrollEvent = wxEVT_SCROLL_THUMBTRACK;
             break;
 
         default:
-            // unknown scroll event?
-            return FALSE;
+            nScrollInc = 0;
+    }
+
+    if (scrollEvent == wxEVT_NULL)
+    {
+        // no event...
+        return FALSE;
     }
 
     int newPos = (int)::SendMessage((HWND) control, TBM_GETPOS, 0, 0);
@@ -634,4 +637,3 @@ bool wxSlider95::Show(bool show)
 #endif
   // __WIN95__
 
-#endif // wxUSE_SLIDER

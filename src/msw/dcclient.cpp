@@ -62,9 +62,9 @@ WX_DEFINE_OBJARRAY(wxArrayDCInfo);
 // macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
-IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
-IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxClientDC)
+    IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
+    IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
+    IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
 
 // ----------------------------------------------------------------------------
 // global variables
@@ -90,29 +90,33 @@ static PAINTSTRUCT g_paintStruct;
 
 wxWindowDC::wxWindowDC()
 {
-    m_canvas = NULL;
+  m_canvas = NULL;
 }
 
-wxWindowDC::wxWindowDC(wxWindow *canvas)
+wxWindowDC::wxWindowDC(wxWindow *the_canvas)
 {
-    wxCHECK_RET( canvas, _T("invalid window in wxWindowDC") );
+  m_canvas = the_canvas;
+  m_hDC = (WXHDC) ::GetWindowDC(GetWinHwnd(the_canvas) );
+  m_hDCCount++;
 
-    m_canvas = canvas;
-    m_hDC = (WXHDC) ::GetWindowDC(GetHwndOf(m_canvas));
-
-    // m_bOwnsDC was already set to false in the base class ctor, so the DC
-    // will be released (and not deleted) in ~wxDC
-    InitDC();
+  SetBackground(wxBrush(m_canvas->GetBackgroundColour(), wxSOLID));
 }
 
-void wxWindowDC::InitDC()
+wxWindowDC::~wxWindowDC()
 {
-    // the background mode is only used for text background and is set in
-    // DrawText() to OPAQUE as required, otherwise always TRANSPARENT,
-    ::SetBkMode(GetHdc(), TRANSPARENT);
+  if (m_canvas && m_hDC)
+  {
+    SelectOldObjects(m_hDC);
 
-    // default bg colour is pne of the window
-    SetBackground(wxBrush(m_canvas->GetBackgroundColour(), wxSOLID));
+    if ( !::ReleaseDC(GetWinHwnd(m_canvas), GetHdc()) )
+    {
+        wxLogLastError(wxT("ReleaseDC"));
+    }
+
+    m_hDC = 0;
+  }
+
+  m_hDCCount--;
 }
 
 // ----------------------------------------------------------------------------
@@ -121,43 +125,31 @@ void wxWindowDC::InitDC()
 
 wxClientDC::wxClientDC()
 {
-    m_canvas = NULL;
+  m_canvas = NULL;
 }
 
-wxClientDC::wxClientDC(wxWindow *canvas)
+wxClientDC::wxClientDC(wxWindow *the_canvas)
 {
-    wxCHECK_RET( canvas, _T("invalid window in wxClientDC") );
+  m_canvas = the_canvas;
+  m_hDC = (WXHDC) ::GetDC(GetWinHwnd(the_canvas));
 
-    m_canvas = canvas;
-    m_hDC = (WXHDC)::GetDC(GetHwndOf(m_canvas));
+  // the background mode is only used for text background
+  // and is set in DrawText() to OPAQUE as required, other-
+  // wise always TRANSPARENT, RR
+  ::SetBkMode( GetHdc(), TRANSPARENT );
 
-    // m_bOwnsDC was already set to false in the base class ctor, so the DC
-    // will be released (and not deleted) in ~wxDC
-
-    InitDC();
-}
-
-void wxClientDC::InitDC()
-{
-    wxWindowDC::InitDC();
-
-    // in wxUniv build we must manually do some DC adjustments usually
-    // performed by Windows for us
-#ifdef __WXUNIVERSAL__
-    wxPoint ptOrigin = m_canvas->GetClientAreaOrigin();
-    if ( ptOrigin.x || ptOrigin.y )
-    {
-        // no need to shift DC origin if shift is null
-        SetDeviceOrigin(ptOrigin.x, ptOrigin.y);
-    }
-
-    // clip the DC to avoid overwriting the non client area
-    SetClippingRegion(wxPoint(0, 0), m_canvas->GetClientSize());
-#endif // __WXUNIVERSAL__
+  SetBackground(wxBrush(m_canvas->GetBackgroundColour(), wxSOLID));
 }
 
 wxClientDC::~wxClientDC()
 {
+  if ( m_canvas && GetHdc() )
+  {
+    SelectOldObjects(m_hDC);
+
+    ::ReleaseDC(GetWinHwnd(m_canvas), GetHdc());
+    m_hDC = 0;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -165,7 +157,7 @@ wxClientDC::~wxClientDC()
 // ----------------------------------------------------------------------------
 
 // VZ: initial implementation (by JACS) only remembered the last wxPaintDC
-//     created and tried to reuse it - this was supposed to take care of a
+//     created and tried to reuse - this was supposed to take care of a
 //     situation when a derived class OnPaint() calls base class OnPaint()
 //     because in this case ::BeginPaint() shouldn't be called second time.
 //
@@ -185,6 +177,7 @@ wxArrayDCInfo wxPaintDC::ms_cache;
 wxPaintDC::wxPaintDC()
 {
     m_canvas = NULL;
+    m_hDC = 0;
 }
 
 wxPaintDC::wxPaintDC(wxWindow *canvas)
@@ -211,15 +204,16 @@ wxPaintDC::wxPaintDC(wxWindow *canvas)
     }
     else // not in cache, create a new one
     {
-        m_hDC = (WXHDC)::BeginPaint(GetHwndOf(m_canvas), &g_paintStruct);
-	if (m_hDC)
-            ms_cache.Add(new wxPaintDCInfo(m_canvas, this));
+        m_hDC = (WXHDC)::BeginPaint(GetWinHwnd(m_canvas), &g_paintStruct);
+        ms_cache.Add(new wxPaintDCInfo(m_canvas, this));
     }
 
-    // (re)set the DC parameters.
-    // Note: at this point m_hDC can be NULL under MicroWindows, when dragging.
-    if (GetHDC())
-        InitDC();
+    // the background mode is only used for text background
+    // and is set in DrawText() to OPAQUE as required, other-
+    // wise always TRANSPARENT, RR
+    ::SetBkMode( GetHdc(), TRANSPARENT );
+
+    SetBackground(wxBrush(m_canvas->GetBackgroundColour(), wxSOLID));
 }
 
 wxPaintDC::~wxPaintDC()
@@ -235,9 +229,9 @@ wxPaintDC::~wxPaintDC()
 
         if ( !--info->count )
         {
-            ::EndPaint(GetHwndOf(m_canvas), &g_paintStruct);
+            ::EndPaint(GetWinHwnd(m_canvas), &g_paintStruct);
 
-            ms_cache.RemoveAt(index);
+            ms_cache.Remove(index);
 
             // Reduce the number of bogus reports of non-freed memory
             // at app exit
@@ -268,20 +262,3 @@ wxPaintDCInfo *wxPaintDC::FindInCache(size_t *index) const
 
     return info;
 }
-
-// find the entry for this DC in the cache (keyed by the window)
-WXHDC wxPaintDC::FindDCInCache(wxWindow* win)
-{
-    wxPaintDCInfo *info = NULL;
-    size_t nCache = ms_cache.GetCount();
-    for ( size_t n = 0; n < nCache; n++ )
-    {
-        info = &ms_cache[n];
-        if ( info->hwnd == win->GetHWND() )
-        {
-            return info->hdc;
-        }
-    }
-    return 0;
-}
-

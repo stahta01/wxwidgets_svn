@@ -12,11 +12,9 @@
 #pragma implementation "radiobut.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/radiobut.h"
 
 #if wxUSE_RADIOBOX
-
-#include "wx/radiobut.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>

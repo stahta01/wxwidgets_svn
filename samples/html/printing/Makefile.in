@@ -17,9 +17,7 @@ DATAFILES = test.htm
 
 PROGRAM=printing
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 include ../../../src/makeprog.env
 
--include $(DEPFILES)

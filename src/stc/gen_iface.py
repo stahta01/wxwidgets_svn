@@ -12,21 +12,21 @@
 #----------------------------------------------------------------------------
 
 
-import sys, string, re, os
+import sys, string, re
 from fileinput import FileInput
 
 
-IFACE         = os.path.abspath('./scintilla/include/Scintilla.iface')
-H_TEMPLATE    = os.path.abspath('./stc.h.in')
-CPP_TEMPLATE  = os.path.abspath('./stc.cpp.in')
-H_DEST        = os.path.abspath('../../include/wx/stc/stc.h')
-CPP_DEST      = os.path.abspath('./stc.cpp')
+IFACE         = './scintilla/include/Scintilla.iface'
+H_TEMPLATE    = './stc.h.in'
+CPP_TEMPLATE  = './stc.cpp.in'
+H_DEST        = '../../include/wx/stc/stc.h' # './stc_test.h' #
+CPP_DEST      = './stc.cpp' #'./stc_test.cpp'
 
 
 # Value prefixes to convert
 valPrefixes = [('SCI_', ''),
                ('SC_',  ''),
-               ('SCN_', None),  # just toss these out...
+               ('SCN_', None),  # just toss these...
                ('SCEN_', None),
                ('SCE_', ''),
                ('SCLEX_', 'LEX_'),
@@ -35,7 +35,7 @@ valPrefixes = [('SCI_', ''),
                ('SCWS_', 'WS_'),
 ]
 
-# Message function values that should have a CMD_ constant as well
+# Message funcion values that should have a CMD_ constant as well
 cmdValues = [ (2300, 2350), 2011, 2013, (2176, 2180) ]
 
 
@@ -87,9 +87,8 @@ methodOverrideMap = {
                        '''wxString %s(int startPos, int endPos) {
                           wxString text;
                           int len = endPos - startPos;
-                          if (!len) return "";
                           TextRange tr;
-                          tr.lpstrText = text.GetWriteBuf(len*2);
+                          tr.lpstrText = text.GetWriteBuf(len*2+1);
                           tr.chrg.cpMin = startPos;
                           tr.chrg.cpMax = endPos;
                           SendMsg(%s, 0, (long)&tr);
@@ -108,20 +107,15 @@ methodOverrideMap = {
                            0),
 
     'GetCurLine' : (0,
-                    '#ifdef SWIG\n    wxString %s(int* OUTPUT);\n#else\n    wxString GetCurLine(int* linePos=NULL);\n#endif',
+                    'wxString %s(int* OUTPUT=NULL);',
 
                     '''wxString %s(int* linePos) {
                        wxString text;
                        int len = LineLength(GetCurrentLine());
-                       if (!len) {
-                           if (linePos)  *linePos = 0;
-                           return "";
-                       }
-                       // Need an extra byte because SCI_GETCURLINE writes a null to the string
                        char* buf = text.GetWriteBuf(len+1);
 
-                       int pos = SendMsg(%s, len+1, (long)buf);
-                       text.UngetWriteBuf(len);
+                       int pos = SendMsg(%s, len, (long)buf);
+                       text.UngetWriteBuf();
                        if (linePos)  *linePos = pos;
 
                        return text;''',
@@ -219,9 +213,6 @@ methodOverrideMap = {
     'AutoCGetChooseSingle' : ('AutoCompGetChooseSingle', 0, 0, 0),
     'AutoCSetIgnoreCase' : ('AutoCompSetIgnoreCase', 0, 0, 0),
     'AutoCGetIgnoreCase' : ('AutoCompGetIgnoreCase', 0, 0, 0),
-    'AutoCSetAutoHide' : ('AutoCompSetAutoHide', 0, 0, 0),
-    'AutoCGetAutoHide' : ('AutoCompGetAutoHide', 0, 0, 0),
-
 
     'SetHScrollBar' : ('SetUseHorizontalScrollBar', 0, 0, 0),
     'GetHScrollBar' : ('GetUseHorizontalScrollBar', 0, 0, 0),
@@ -289,11 +280,10 @@ methodOverrideMap = {
                     '''wxString %s(int line) {
                        wxString text;
                        int len = LineLength(line);
-                       if (!len) return "";
-                       char* buf = text.GetWriteBuf(len);
+                       char* buf = text.GetWriteBuf(len+1);
 
                        int pos = SendMsg(%s, line, (long)buf);
-                       text.UngetWriteBuf(len);
+                       text.UngetWriteBuf();
 
                        return text;''',
 
@@ -310,11 +300,10 @@ methodOverrideMap = {
 
                             GetSelection(&start, &end);
                             int   len  = end - start;
-                            if (!len) return "";
-                            char* buff = text.GetWriteBuf(len);
+                            char* buff = text.GetWriteBuf(len+1);
 
                             SendMsg(%s, 0, (long)buff);
-                            text.UngetWriteBuf(len);
+                            text.UngetWriteBuf();
                             return text;''',
 
                     ('Retrieve the selected text.',)),
@@ -325,15 +314,14 @@ methodOverrideMap = {
                       '''wxString %s(int startPos, int endPos) {
                             wxString text;
                             int   len  = endPos - startPos;
-                            if (!len) return "";
-                            char* buff = text.GetWriteBuf(len);
+                            char* buff = text.GetWriteBuf(len+1);
                             TextRange tr;
                             tr.lpstrText = buff;
                             tr.chrg.cpMin = startPos;
                             tr.chrg.cpMax = endPos;
 
                             SendMsg(%s, 0, (long)&tr);
-                            text.UngetWriteBuf(len);
+                            text.UngetWriteBuf();
                             return text;''',
 
                        ('Retrieve a range of text.',)),
@@ -350,11 +338,12 @@ methodOverrideMap = {
 
                  '''wxString %s() {
                         wxString text;
-                        int   len  = GetTextLength();
-                        char* buff = text.GetWriteBuf(len+1);  // leave room for the null...
+                        int   len  = GetTextLength()+1;
+                        char* buff = text.GetWriteBuf(len+1);
 
-                        SendMsg(%s, len+1, (long)buff);
-                        text.UngetWriteBuf(len);
+                        SendMsg(%s, len, (long)buff);
+                        buff[len] = 0;
+                        text.UngetWriteBuf();
                         return text;''',
 
                  ('Retrieve all the text in the document.', )),
@@ -365,38 +354,6 @@ methodOverrideMap = {
     'CallTipPosStart' : ('CallTipPosAtStart', 0, 0, 0),
     'CallTipSetHlt' : ('CallTipSetHighlight', 0, 0, 0),
     'CallTipSetBack' : ('CallTipSetBackground', 0, 0, 0),
-
-
-    'ReplaceTarget' : (0,
-                       'int %s(const wxString& text);',
-
-                       '''
-                       int %s(const wxString& text) {
-                           return SendMsg(%s, text.Len(), (long)text.c_str());
-                       ''',
-
-                       0),
-
-    'ReplaceTargetRE' : (0,
-                       'int %s(const wxString& text);',
-
-                       '''
-                       int %s(const wxString& text) {
-                           return SendMsg(%s, text.Len(), (long)text.c_str());
-                       ''',
-
-                       0),
-
-    'SearchInTarget' : (0,
-                       'int %s(const wxString& text);',
-
-                       '''
-                       int %s(const wxString& text) {
-                           return SendMsg(%s, text.Len(), (long)text.c_str());
-                       ''',
-
-                       0),
-
 
 
     # Remove all methods that are key commands since they can be
@@ -456,7 +413,7 @@ methodOverrideMap = {
     'SetDocPointer' : (0,
                        'void %s(void* docPointer);',
                        '''void %s(void* docPointer) {
-                           SendMsg(%s, 0, (long)docPointer);''',
+                           SendMsg(%s, (long)docPointer);''',
                        0),
 
     'CreateDocument' : (0,
@@ -478,9 +435,6 @@ methodOverrideMap = {
                          0),
 
     'GrabFocus' : (None, 0, 0, 0),
-    'SetFocus'  : ('SetSTCFocus', 0, 0, 0),
-    'GetFocus'  : ('GetSTCFocus', 0, 0, 0),
-
 
     '' : ('', 0, 0, 0),
 
@@ -726,4 +680,5 @@ if __name__ == '__main__':
     main(sys.argv)
 
 #----------------------------------------------------------------------------
+
 

@@ -155,20 +155,8 @@ public:
                    const wxDateTime& date = wxDefaultDateTime,
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
-                   long style = wxCAL_SHOW_HOLIDAYS | wxWANTS_CHARS,
+                   long style = wxCAL_SHOW_HOLIDAYS,
                    const char* name = "calendar");
-    %name(wxPreCalendarCtrl)wxCalendarCtrl();
-
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxDateTime& date = wxDefaultDateTime,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxCAL_SHOW_HOLIDAYS | wxWANTS_CHARS,
-                const char* name = "calendar");
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    %pragma(python) addtomethod = "wxPreCalendarCtrl:val._setOORInfo(self)"
 
     // set/get the current date
     // ------------------------

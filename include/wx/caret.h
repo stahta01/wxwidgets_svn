@@ -12,10 +12,6 @@
 #ifndef _WX_CARET_H_BASE_
 #define _WX_CARET_H_BASE_
 
-#include "wx/defs.h"
-
-#if wxUSE_CARET
-
 #ifdef __GNUG__
 #pragma interface "caret.h"
 #endif
@@ -187,7 +183,7 @@ protected:
     int m_countVisible;
 
 private:
-    DECLARE_NO_COPY_CLASS(wxCaretBase)
+    DECLARE_NO_COPY_CLASS(wxCaretBase);
 };
 
 // ---------------------------------------------------------------------------
@@ -199,34 +195,6 @@ private:
 #else
     #include "wx/generic/caret.h"
 #endif // platform
-
-// ----------------------------------------------------------------------------
-// wxCaretSuspend: a simple class which hides the caret in its ctor and
-// restores it in the dtor, this should be used when drawing on the screen to
-// avoid overdrawing the caret
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxCaretSuspend
-{
-public:
-    wxCaretSuspend(wxWindow *win)
-    {
-        m_caret = win->GetCaret();
-        if ( m_caret )
-            m_caret->Hide();
-    }
-
-    ~wxCaretSuspend()
-    {
-        if ( m_caret )
-            m_caret->Show();
-    }
-
-private:
-    wxCaret *m_caret;
-};
-
-#endif // wxUSE_CARET
 
 #endif // _WX_CARET_H_BASE_
 

@@ -21,11 +21,9 @@
 #include <wx/textctrl.h>
 #include <wx/toolbar.h>
 #include <wx/treectrl.h>
-/*
 #ifdef __WXMSW__
-    #include <wx/xpmhand.h>
+ #include <wx/xpmhand.h>
 #endif
-*/
 //---------------------------
 #include "tabpgwin.h"         // Original name : "controlarea.h"
 //---------------------------

@@ -10,40 +10,35 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-  #pragma implementation "statbmp.h"
+#pragma implementation "statbmp.h"
 #endif
-
-#include "wx/defs.h"
 
 #include "wx/statbmp.h"
-#include "wx/dcclient.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap, wxControl)
-#endif
 
 /*
  * wxStaticBitmap
  */
 
-BEGIN_EVENT_TABLE(wxStaticBitmap, wxStaticBitmapBase)
+BEGIN_EVENT_TABLE(wxStaticBitmap, wxControl)
     EVT_PAINT(wxStaticBitmap::OnPaint)
 END_EVENT_TABLE()
 
 bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
            const wxBitmap& bitmap,
            const wxPoint& pos,
-           const wxSize& s,
+           const wxSize& size,
            long style,
            const wxString& name)
 {
     SetName(name);
-	wxSize size = s ;
 
     m_backgroundColour = parent->GetBackgroundColour() ;
     m_foregroundColour = parent->GetForegroundColour() ;
 
-    m_bitmap = bitmap;
+    m_messageBitmap = bitmap;
+
     if ( id == -1 )
   	    m_windowId = (int)NewControlId();
     else
@@ -52,8 +47,9 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
     m_windowStyle = style;
 
     bool ret = wxControl::Create( parent, id, pos, size, style , wxDefaultValidator , name );
-	SetBestSize( size ) ;
     
+	SetSizeOrDefault() ;
+	
     return ret;
 }
 
@@ -64,24 +60,22 @@ void wxStaticBitmap::SetSize(int x, int y, int width, int height, int sizeFlags)
 
 void wxStaticBitmap::SetBitmap(const wxBitmap& bitmap)
 {
-    m_bitmap = bitmap;
-    Refresh() ;
-    SetBestSize(wxSize(bitmap.GetWidth(), bitmap.GetHeight()));
+    m_messageBitmap = bitmap;
+    SetSizeOrDefault();
 }
-
 void wxStaticBitmap::OnPaint( wxPaintEvent &event ) 
 {
     wxPaintDC dc(this);
     PrepareDC(dc);
-
-    dc.DrawBitmap( m_bitmap , 0 , 0 , TRUE ) ;
+	dc.SetPalette( *m_messageBitmap.GetPalette() ) ;
+	dc.DrawBitmap( m_messageBitmap , 0 , 0 ) ;
 }
 
 wxSize wxStaticBitmap::DoGetBestSize() const
 {
-   if ( m_bitmap.Ok() )
-       return wxSize(m_bitmap.GetWidth(), m_bitmap.GetHeight());
-   else
-       return wxSize(16, 16);  // completely arbitrary
+    if ( m_messageBitmap.Ok() )
+        return wxSize(m_messageBitmap.GetWidth(), m_messageBitmap.GetHeight());
+    else
+        return wxSize(16, 16);  // completely arbitrary
 }
 

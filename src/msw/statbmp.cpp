@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATBMP
-
 #include "wx/window.h"
 #include "wx/msw/private.h"
 
@@ -116,10 +114,6 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
     const wxChar *classname = wxT("BUTTON");
     int winstyle = BS_OWNERDRAW;
 #endif // Win32
-
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        winstyle |= WS_CLIPSIBLINGS;
-
 
     m_hWnd = (WXHWND)::CreateWindow
                        (
@@ -272,4 +266,3 @@ long wxStaticBitmap::MSWWindowProc(WXUINT nMsg,
     return wxWindow::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-#endif // wxUSE_STATBMP

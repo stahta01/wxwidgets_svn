@@ -61,38 +61,53 @@ extern PyObject *SWIG_newvarlink(void);
 #include <wx/fs_mem.h>
 #include <wx/fs_zip.h>
 
+static PyObject* l_output_helper(PyObject* target, PyObject* o) {
+    PyObject*   o2;
+    if (!target) {                   
+        target = o;
+    } else if (target == Py_None) {  
+        Py_DECREF(Py_None);
+        target = o;
+    } else {                         
+        if (!PyList_Check(target)) {
+            o2 = target;
+            target = PyList_New(0);
+            PyList_Append(target, o2);
+	    Py_XDECREF(o2);
+        }
+        PyList_Append(target,o);
+	Py_XDECREF(o);
+    }
+    return target;
+}
 
 static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     PyObject*   o2;
     PyObject*   o3;
 
-    if (!target) {
+    if (!target) {                   
         target = o;
-    } else if (target == Py_None) {
+    } else if (target == Py_None) {  
         Py_DECREF(Py_None);
         target = o;
-    } else {
+    } else {                         
         if (!PyTuple_Check(target)) {
             o2 = target;
             target = PyTuple_New(1);
             PyTuple_SetItem(target, 0, o2);
         }
-        o3 = PyTuple_New(1);
-        PyTuple_SetItem(o3, 0, o);
+        o3 = PyTuple_New(1);            
+        PyTuple_SetItem(o3, 0, o);      
 
         o2 = target;
-        target = PySequence_Concat(o2, o3);
-        Py_DECREF(o2);
+        target = PySequence_Concat(o2, o3); 
+        Py_DECREF(o2);                      
         Py_DECREF(o3);
     }
     return target;
 }
 
-#if PYTHON_API_VERSION >= 1009
-    static char* wxStringErrorMsg = "String or Unicode type required";
-#else
-    static char* wxStringErrorMsg = "String type required";
-#endif
+static char* wxStringErrorMsg = "string type is required for parameter";
 
 // wxPyFileSystemHandler will be the Python class wxFileSystemHandler and handling
 // the callback functions
@@ -177,7 +192,7 @@ static PyObject *_wrap___wxMemoryFSHandler_AddFile_wxImage(PyObject *self, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj0) && !PyUnicode_Check(_obj0)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj0, &tmpPtr, &tmpSize) == -1)
@@ -228,7 +243,7 @@ static PyObject *_wrap___wxMemoryFSHandler_AddFile_wxBitmap(PyObject *self, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj0) && !PyUnicode_Check(_obj0)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj0, &tmpPtr, &tmpSize) == -1)
@@ -278,7 +293,7 @@ static PyObject *_wrap___wxMemoryFSHandler_AddFile_Data(PyObject *self, PyObject
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj0) && !PyUnicode_Check(_obj0)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj0, &tmpPtr, &tmpSize) == -1)
@@ -307,14 +322,6 @@ static PyObject *_wrap___wxMemoryFSHandler_AddFile_Data(PyObject *self, PyObject
         delete _arg0;
 }
     return _resultobj;
-}
-
-static void *SwigwxFSFileTowxObject(void *ptr) {
-    wxFSFile *src;
-    wxObject *dest;
-    src = (wxFSFile *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
 }
 
 #define new_wxFSFile(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4) (new wxFSFile(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4))
@@ -354,7 +361,7 @@ static PyObject *_wrap_new_wxFSFile(PyObject *self, PyObject *args, PyObject *kw
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -372,7 +379,7 @@ static PyObject *_wrap_new_wxFSFile(PyObject *self, PyObject *args, PyObject *kw
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -390,7 +397,7 @@ static PyObject *_wrap_new_wxFSFile(PyObject *self, PyObject *args, PyObject *kw
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj3) && !PyUnicode_Check(_obj3)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj3, &tmpPtr, &tmpSize) == -1)
@@ -467,7 +474,28 @@ static PyObject *_wrap_wxFSFile_GetStream(PyObject *self, PyObject *args, PyObje
     if (_result) {
         _ptr = new wxPyInputStream(_result);
     }
-    _resultobj = wxPyConstructObject(_ptr, "wxInputStream", TRUE);
+    if (_ptr) {
+        char    swigptr[64];
+        SWIG_MakePtr(swigptr, _ptr, "_wxPyInputStream_p");
+
+        PyObject* classobj = PyDict_GetItemString(wxPython_dict, "wxInputStreamPtr");
+        if (! classobj) {
+            Py_INCREF(Py_None);
+            _resultobj = Py_None;
+        } else {
+            PyObject* arg = Py_BuildValue("(s)", swigptr);
+            _resultobj = PyInstance_New(classobj, arg, NULL);
+            Py_DECREF(arg);
+
+            // set ThisOwn
+            PyObject* one = PyInt_FromLong(1);
+            PyObject_SetAttrString(_resultobj, "thisown", one);
+            Py_DECREF(one);
+        }
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
 }
     return _resultobj;
 }
@@ -591,27 +619,11 @@ static PyObject *_wrap_wxFSFile_GetModificationTime(PyObject *self, PyObject *ar
     return _resultobj;
 }
 
-static void *SwigwxFileSystemHandlerTowxObject(void *ptr) {
-    wxFileSystemHandler *src;
-    wxObject *dest;
-    src = (wxFileSystemHandler *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
 static void *SwigwxPyFileSystemHandlerTowxFileSystemHandler(void *ptr) {
     wxPyFileSystemHandler *src;
     wxFileSystemHandler *dest;
     src = (wxPyFileSystemHandler *) ptr;
     dest = (wxFileSystemHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxPyFileSystemHandlerTowxObject(void *ptr) {
-    wxPyFileSystemHandler *src;
-    wxObject *dest;
-    src = (wxPyFileSystemHandler *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -640,8 +652,8 @@ static PyObject *_wrap_new_wxFileSystemHandler(PyObject *self, PyObject *args, P
     return _resultobj;
 }
 
-#define wxFileSystemHandler__setCallbackInfo(_swigobj,_swigarg0,_swigarg1)  (_swigobj->_setCallbackInfo(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxFileSystemHandler__setCallbackInfo(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxFileSystemHandler__setSelf(_swigobj,_swigarg0,_swigarg1)  (_swigobj->_setSelf(_swigarg0,_swigarg1))
+static PyObject *_wrap_wxFileSystemHandler__setSelf(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxPyFileSystemHandler * _arg0;
     PyObject * _arg1;
@@ -652,12 +664,12 @@ static PyObject *_wrap_wxFileSystemHandler__setCallbackInfo(PyObject *self, PyOb
     char *_kwnames[] = { "self","self","_class", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxFileSystemHandler__setCallbackInfo",_kwnames,&_argo0,&_obj1,&_obj2)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxFileSystemHandler__setSelf",_kwnames,&_argo0,&_obj1,&_obj2)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
         else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxPyFileSystemHandler_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxFileSystemHandler__setCallbackInfo. Expected _wxPyFileSystemHandler_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxFileSystemHandler__setSelf. Expected _wxPyFileSystemHandler_p.");
         return NULL;
         }
     }
@@ -669,7 +681,7 @@ static PyObject *_wrap_wxFileSystemHandler__setCallbackInfo(PyObject *self, PyOb
 }
 {
     wxPy_BEGIN_ALLOW_THREADS;
-        wxFileSystemHandler__setCallbackInfo(_arg0,_arg1,_arg2);
+        wxFileSystemHandler__setSelf(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
 }    Py_INCREF(Py_None);
@@ -701,7 +713,7 @@ static PyObject *_wrap_wxFileSystemHandler_CanOpen(PyObject *self, PyObject *arg
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -739,6 +751,7 @@ static PyObject *_wrap_wxFileSystemHandler_OpenFile(PyObject *self, PyObject *ar
     PyObject * _argo1 = 0;
     PyObject * _obj2 = 0;
     char *_kwnames[] = { "self","fs","location", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxFileSystemHandler_OpenFile",_kwnames,&_argo0,&_argo1,&_obj2)) 
@@ -761,7 +774,7 @@ static PyObject *_wrap_wxFileSystemHandler_OpenFile(PyObject *self, PyObject *ar
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -780,7 +793,13 @@ static PyObject *_wrap_wxFileSystemHandler_OpenFile(PyObject *self, PyObject *ar
         _result = (wxFSFile *)wxFileSystemHandler_OpenFile(_arg0,*_arg1,*_arg2);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxFSFile_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
 {
     if (_obj2)
         delete _arg2;
@@ -813,7 +832,7 @@ static PyObject *_wrap_wxFileSystemHandler_FindFirst(PyObject *self, PyObject *a
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -901,7 +920,7 @@ static PyObject *_wrap_wxFileSystemHandler_GetProtocol(PyObject *self, PyObject 
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -957,7 +976,7 @@ static PyObject *_wrap_wxFileSystemHandler_GetLeftLocation(PyObject *self, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1013,7 +1032,7 @@ static PyObject *_wrap_wxFileSystemHandler_GetAnchor(PyObject *self, PyObject *a
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1069,7 +1088,7 @@ static PyObject *_wrap_wxFileSystemHandler_GetRightLocation(PyObject *self, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1125,7 +1144,7 @@ static PyObject *_wrap_wxFileSystemHandler_GetMimeTypeFromExt(PyObject *self, Py
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1155,14 +1174,6 @@ static PyObject *_wrap_wxFileSystemHandler_GetMimeTypeFromExt(PyObject *self, Py
     delete _result;
 }
     return _resultobj;
-}
-
-static void *SwigwxFileSystemTowxObject(void *ptr) {
-    wxFileSystem *src;
-    wxObject *dest;
-    src = (wxFileSystem *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
 }
 
 #define new_wxFileSystem() (new wxFileSystem())
@@ -1215,7 +1226,7 @@ static PyObject *_wrap_wxFileSystem_ChangePathTo(PyObject *self, PyObject *args,
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1285,6 +1296,7 @@ static PyObject *_wrap_wxFileSystem_OpenFile(PyObject *self, PyObject *args, PyO
     PyObject * _argo0 = 0;
     PyObject * _obj1 = 0;
     char *_kwnames[] = { "self","location", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxFileSystem_OpenFile",_kwnames,&_argo0,&_obj1)) 
@@ -1300,7 +1312,7 @@ static PyObject *_wrap_wxFileSystem_OpenFile(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1319,7 +1331,13 @@ static PyObject *_wrap_wxFileSystem_OpenFile(PyObject *self, PyObject *args, PyO
         _result = (wxFSFile *)wxFileSystem_OpenFile(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxFSFile_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
 {
     if (_obj1)
         delete _arg1;
@@ -1352,7 +1370,7 @@ static PyObject *_wrap_wxFileSystem_FindFirst(PyObject *self, PyObject *args, Py
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1467,14 +1485,6 @@ static void *SwigwxInternetFSHandlerTowxFileSystemHandler(void *ptr) {
     return (void *) dest;
 }
 
-static void *SwigwxInternetFSHandlerTowxObject(void *ptr) {
-    wxInternetFSHandler *src;
-    wxObject *dest;
-    src = (wxInternetFSHandler *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
 #define new_wxInternetFSHandler() (new wxInternetFSHandler())
 static PyObject *_wrap_new_wxInternetFSHandler(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -1524,7 +1534,7 @@ static PyObject *_wrap_wxInternetFSHandler_CanOpen(PyObject *self, PyObject *arg
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1562,6 +1572,7 @@ static PyObject *_wrap_wxInternetFSHandler_OpenFile(PyObject *self, PyObject *ar
     PyObject * _argo1 = 0;
     PyObject * _obj2 = 0;
     char *_kwnames[] = { "self","fs","location", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxInternetFSHandler_OpenFile",_kwnames,&_argo0,&_argo1,&_obj2)) 
@@ -1584,7 +1595,7 @@ static PyObject *_wrap_wxInternetFSHandler_OpenFile(PyObject *self, PyObject *ar
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -1603,7 +1614,13 @@ static PyObject *_wrap_wxInternetFSHandler_OpenFile(PyObject *self, PyObject *ar
         _result = (wxFSFile *)wxInternetFSHandler_OpenFile(_arg0,*_arg1,*_arg2);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxFSFile_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
 {
     if (_obj2)
         delete _arg2;
@@ -1616,14 +1633,6 @@ static void *SwigwxZipFSHandlerTowxFileSystemHandler(void *ptr) {
     wxFileSystemHandler *dest;
     src = (wxZipFSHandler *) ptr;
     dest = (wxFileSystemHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxZipFSHandlerTowxObject(void *ptr) {
-    wxZipFSHandler *src;
-    wxObject *dest;
-    src = (wxZipFSHandler *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -1676,7 +1685,7 @@ static PyObject *_wrap_wxZipFSHandler_CanOpen(PyObject *self, PyObject *args, Py
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1714,6 +1723,7 @@ static PyObject *_wrap_wxZipFSHandler_OpenFile(PyObject *self, PyObject *args, P
     PyObject * _argo1 = 0;
     PyObject * _obj2 = 0;
     char *_kwnames[] = { "self","fs","location", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxZipFSHandler_OpenFile",_kwnames,&_argo0,&_argo1,&_obj2)) 
@@ -1736,7 +1746,7 @@ static PyObject *_wrap_wxZipFSHandler_OpenFile(PyObject *self, PyObject *args, P
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -1755,7 +1765,13 @@ static PyObject *_wrap_wxZipFSHandler_OpenFile(PyObject *self, PyObject *args, P
         _result = (wxFSFile *)wxZipFSHandler_OpenFile(_arg0,*_arg1,*_arg2);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxFSFile_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
 {
     if (_obj2)
         delete _arg2;
@@ -1788,7 +1804,7 @@ static PyObject *_wrap_wxZipFSHandler_FindFirst(PyObject *self, PyObject *args, 
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1860,14 +1876,6 @@ static void *SwigwxMemoryFSHandlerTowxFileSystemHandler(void *ptr) {
     return (void *) dest;
 }
 
-static void *SwigwxMemoryFSHandlerTowxObject(void *ptr) {
-    wxMemoryFSHandler *src;
-    wxObject *dest;
-    src = (wxMemoryFSHandler *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
 #define new_wxMemoryFSHandler() (new wxMemoryFSHandler())
 static PyObject *_wrap_new_wxMemoryFSHandler(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -1906,7 +1914,7 @@ static PyObject *_wrap_wxMemoryFSHandler_RemoveFile(PyObject *self, PyObject *ar
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj0) && !PyUnicode_Check(_obj0)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj0, &tmpPtr, &tmpSize) == -1)
@@ -1958,7 +1966,7 @@ static PyObject *_wrap_wxMemoryFSHandler_CanOpen(PyObject *self, PyObject *args,
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1996,6 +2004,7 @@ static PyObject *_wrap_wxMemoryFSHandler_OpenFile(PyObject *self, PyObject *args
     PyObject * _argo1 = 0;
     PyObject * _obj2 = 0;
     char *_kwnames[] = { "self","fs","location", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxMemoryFSHandler_OpenFile",_kwnames,&_argo0,&_argo1,&_obj2)) 
@@ -2018,7 +2027,7 @@ static PyObject *_wrap_wxMemoryFSHandler_OpenFile(PyObject *self, PyObject *args
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -2037,7 +2046,13 @@ static PyObject *_wrap_wxMemoryFSHandler_OpenFile(PyObject *self, PyObject *args
         _result = (wxFSFile *)wxMemoryFSHandler_OpenFile(_arg0,*_arg1,*_arg2);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxFSFile_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
 {
     if (_obj2)
         delete _arg2;
@@ -2070,7 +2085,7 @@ static PyObject *_wrap_wxMemoryFSHandler_FindFirst(PyObject *self, PyObject *arg
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -2166,7 +2181,7 @@ static PyMethodDef filesyscMethods[] = {
 	 { "wxFileSystemHandler_FindFirst", (PyCFunction) _wrap_wxFileSystemHandler_FindFirst, METH_VARARGS | METH_KEYWORDS },
 	 { "wxFileSystemHandler_OpenFile", (PyCFunction) _wrap_wxFileSystemHandler_OpenFile, METH_VARARGS | METH_KEYWORDS },
 	 { "wxFileSystemHandler_CanOpen", (PyCFunction) _wrap_wxFileSystemHandler_CanOpen, METH_VARARGS | METH_KEYWORDS },
-	 { "wxFileSystemHandler__setCallbackInfo", (PyCFunction) _wrap_wxFileSystemHandler__setCallbackInfo, METH_VARARGS | METH_KEYWORDS },
+	 { "wxFileSystemHandler__setSelf", (PyCFunction) _wrap_wxFileSystemHandler__setSelf, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxFileSystemHandler", (PyCFunction) _wrap_new_wxFileSystemHandler, METH_VARARGS | METH_KEYWORDS },
 	 { "wxFSFile_GetModificationTime", (PyCFunction) _wrap_wxFSFile_GetModificationTime, METH_VARARGS | METH_KEYWORDS },
 	 { "wxFSFile_GetAnchor", (PyCFunction) _wrap_wxFSFile_GetAnchor, METH_VARARGS | METH_KEYWORDS },
@@ -2186,7 +2201,13 @@ static PyMethodDef filesyscMethods[] = {
  * This table is used by the pointer type-checker
  */
 static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
+    { "_wxAcceleratorTable","_class_wxAcceleratorTable",0},
     { "_signed_long","_long",0},
+    { "_class_wxJPEGHandler","_wxJPEGHandler",0},
+    { "_class_wxFSFile","_wxFSFile",0},
+    { "_wxBMPHandler","_class_wxBMPHandler",0},
+    { "_wxImage","_class_wxImage",0},
+    { "_class_wxDateTime","_wxDateTime",0},
     { "_wxPrintQuality","_wxCoord",0},
     { "_wxPrintQuality","_int",0},
     { "_wxPrintQuality","_signed_int",0},
@@ -2196,9 +2217,23 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxPrintQuality","_EBool",0},
     { "_wxPrintQuality","_size_t",0},
     { "_wxPrintQuality","_time_t",0},
+    { "_class_wxRegionIterator","_wxRegionIterator",0},
+    { "_wxGIFHandler","_class_wxGIFHandler",0},
+    { "_wxInternetFSHandler","_class_wxInternetFSHandler",0},
+    { "_wxIndividualLayoutConstraint","_class_wxIndividualLayoutConstraint",0},
+    { "_wxCursor","_class_wxCursor",0},
+    { "_wxImageHandler","_class_wxImageHandler",0},
+    { "_wxMask","_class_wxMask",0},
+    { "_wxPNGHandler","_class_wxPNGHandler",0},
+    { "_wxPen","_class_wxPen",0},
     { "_byte","_unsigned_char",0},
     { "_long","_unsigned_long",0},
     { "_long","_signed_long",0},
+    { "_wxImageList","_class_wxImageList",0},
+    { "_class_wxTIFFHandler","_wxTIFFHandler",0},
+    { "_class_wxAcceleratorTable","_wxAcceleratorTable",0},
+    { "_wxDC","_class_wxDC",0},
+    { "_class_wxBMPHandler","_wxBMPHandler",0},
     { "_size_t","_wxCoord",0},
     { "_size_t","_wxPrintQuality",0},
     { "_size_t","_time_t",0},
@@ -2206,6 +2241,14 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_size_t","_int",0},
     { "_size_t","_wxWindowID",0},
     { "_size_t","_uint",0},
+    { "_class_wxRealPoint","_wxRealPoint",0},
+    { "_wxPNMHandler","_class_wxPNMHandler",0},
+    { "_class_wxGIFHandler","_wxGIFHandler",0},
+    { "_wxFileConfig","_class_wxFileConfig",0},
+    { "_class_wxMask","_wxMask",0},
+    { "_class_wxPNGHandler","_wxPNGHandler",0},
+    { "_wxColour","_class_wxColour",0},
+    { "_wxBrush","_class_wxBrush",0},
     { "_uint","_wxCoord",0},
     { "_uint","_wxPrintQuality",0},
     { "_uint","_time_t",0},
@@ -2214,37 +2257,68 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_uint","_int",0},
     { "_uint","_wxWindowID",0},
     { "_wxChar","_char",0},
+    { "_wxRect","_class_wxRect",0},
+    { "_class_wxImage","_wxImage",0},
+    { "_wxPoint","_class_wxPoint",0},
+    { "_class_wxPNMHandler","_wxPNMHandler",0},
+    { "_class_wxZipFSHandler","_wxZipFSHandler",0},
     { "_char","_wxChar",0},
-    { "_struct_wxNativeFontInfo","_wxNativeFontInfo",0},
+    { "_wxBitmap","_class_wxBitmap",0},
+    { "_wxWindowDC","_class_wxWindowDC",0},
+    { "_class_wxInternetFSHandler","_wxInternetFSHandler",0},
+    { "_class_wxIndividualLayoutConstraint","_wxIndividualLayoutConstraint",0},
+    { "_wxConfig","_class_wxConfig",0},
+    { "_class_wxFileConfig","_wxFileConfig",0},
+    { "_class_wxMemoryFSHandler","_wxMemoryFSHandler",0},
     { "_EBool","_wxCoord",0},
     { "_EBool","_wxPrintQuality",0},
     { "_EBool","_signed_int",0},
     { "_EBool","_int",0},
     { "_EBool","_wxWindowID",0},
+    { "_class_wxRegion","_wxRegion",0},
+    { "_wxFont","_class_wxFont",0},
+    { "_wxFSFile","_class_wxFSFile",0},
     { "_unsigned_long","_long",0},
-    { "_wxNativeFontInfo","_struct_wxNativeFontInfo",0},
+    { "_class_wxRect","_wxRect",0},
+    { "_class_wxDC","_wxDC",0},
+    { "_wxPyInputStream","_class_wxPyInputStream",0},
+    { "_wxTimeSpan","_class_wxTimeSpan",0},
+    { "_class_wxOutputStream","_wxOutputStream",0},
+    { "_wxAcceleratorEntry","_class_wxAcceleratorEntry",0},
     { "_signed_int","_wxCoord",0},
     { "_signed_int","_wxPrintQuality",0},
     { "_signed_int","_EBool",0},
     { "_signed_int","_wxWindowID",0},
     { "_signed_int","_int",0},
+    { "_wxLayoutConstraints","_class_wxLayoutConstraints",0},
+    { "_wxMetaFileDC","_class_wxMetaFileDC",0},
+    { "_wxScreenDC","_class_wxScreenDC",0},
     { "_WXTYPE","_wxDateTime_t",0},
     { "_WXTYPE","_short",0},
     { "_WXTYPE","_signed_short",0},
     { "_WXTYPE","_unsigned_short",0},
+    { "_class_wxBrush","_wxBrush",0},
     { "_unsigned_short","_wxDateTime_t",0},
     { "_unsigned_short","_WXTYPE",0},
     { "_unsigned_short","_short",0},
-    { "_wxObject","_wxMemoryFSHandler",SwigwxMemoryFSHandlerTowxObject},
-    { "_wxObject","_wxZipFSHandler",SwigwxZipFSHandlerTowxObject},
-    { "_wxObject","_wxInternetFSHandler",SwigwxInternetFSHandlerTowxObject},
-    { "_wxObject","_wxFileSystem",SwigwxFileSystemTowxObject},
-    { "_wxObject","_wxPyFileSystemHandler",SwigwxPyFileSystemHandlerTowxObject},
-    { "_wxObject","_wxFileSystemHandler",SwigwxFileSystemHandlerTowxObject},
-    { "_wxObject","_wxFSFile",SwigwxFSFileTowxObject},
+    { "_wxDateSpan","_class_wxDateSpan",0},
+    { "_class_wxFont","_wxFont",0},
+    { "_wxBusyInfo","_class_wxBusyInfo",0},
+    { "_wxClientDC","_class_wxClientDC",0},
+    { "_class_wxPoint","_wxPoint",0},
+    { "_class_wxPyInputStream","_wxPyInputStream",0},
+    { "_wxRealPoint","_class_wxRealPoint",0},
     { "_signed_short","_WXTYPE",0},
     { "_signed_short","_short",0},
+    { "_wxMemoryDC","_class_wxMemoryDC",0},
+    { "_wxPyFileSystemHandler","_class_wxPyFileSystemHandler",0},
+    { "_wxPaintDC","_class_wxPaintDC",0},
+    { "_class_wxWindowDC","_wxWindowDC",0},
+    { "_class_wxAcceleratorEntry","_wxAcceleratorEntry",0},
+    { "_class_wxCursor","_wxCursor",0},
+    { "_class_wxImageHandler","_wxImageHandler",0},
     { "_unsigned_char","_byte",0},
+    { "_class_wxMetaFileDC","_wxMetaFileDC",0},
     { "_unsigned_int","_wxCoord",0},
     { "_unsigned_int","_wxPrintQuality",0},
     { "_unsigned_int","_time_t",0},
@@ -2252,14 +2326,25 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_unsigned_int","_uint",0},
     { "_unsigned_int","_wxWindowID",0},
     { "_unsigned_int","_int",0},
+    { "_wxIcon","_class_wxIcon",0},
+    { "_wxConfigBase","_class_wxConfigBase",0},
+    { "_class_wxPen","_wxPen",0},
     { "_short","_wxDateTime_t",0},
     { "_short","_WXTYPE",0},
     { "_short","_unsigned_short",0},
     { "_short","_signed_short",0},
+    { "_class_wxImageList","_wxImageList",0},
+    { "_wxFileSystemHandler","_class_wxMemoryFSHandler",SwigwxMemoryFSHandlerTowxFileSystemHandler},
     { "_wxFileSystemHandler","_wxMemoryFSHandler",SwigwxMemoryFSHandlerTowxFileSystemHandler},
+    { "_wxFileSystemHandler","_class_wxZipFSHandler",SwigwxZipFSHandlerTowxFileSystemHandler},
     { "_wxFileSystemHandler","_wxZipFSHandler",SwigwxZipFSHandlerTowxFileSystemHandler},
+    { "_wxFileSystemHandler","_class_wxInternetFSHandler",SwigwxInternetFSHandlerTowxFileSystemHandler},
     { "_wxFileSystemHandler","_wxInternetFSHandler",SwigwxInternetFSHandlerTowxFileSystemHandler},
+    { "_wxFileSystemHandler","_class_wxPyFileSystemHandler",SwigwxPyFileSystemHandlerTowxFileSystemHandler},
     { "_wxFileSystemHandler","_wxPyFileSystemHandler",SwigwxPyFileSystemHandlerTowxFileSystemHandler},
+    { "_wxFileSystemHandler","_class_wxFileSystemHandler",0},
+    { "_wxPCXHandler","_class_wxPCXHandler",0},
+    { "_wxJPEGHandler","_class_wxJPEGHandler",0},
     { "_wxWindowID","_wxCoord",0},
     { "_wxWindowID","_wxPrintQuality",0},
     { "_wxWindowID","_time_t",0},
@@ -2281,6 +2366,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxDateTime_t","_unsigned_short",0},
     { "_wxDateTime_t","_short",0},
     { "_wxDateTime_t","_WXTYPE",0},
+    { "_wxDateTime","_class_wxDateTime",0},
     { "_time_t","_wxCoord",0},
     { "_time_t","_wxPrintQuality",0},
     { "_time_t","_unsigned_int",0},
@@ -2288,6 +2374,18 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_time_t","_wxWindowID",0},
     { "_time_t","_uint",0},
     { "_time_t","_size_t",0},
+    { "_wxZipFSHandler","_class_wxZipFSHandler",0},
+    { "_class_wxTimeSpan","_wxTimeSpan",0},
+    { "_wxSize","_class_wxSize",0},
+    { "_wxRegionIterator","_class_wxRegionIterator",0},
+    { "_class_wxPyFileSystemHandler","_wxPyFileSystemHandler",0},
+    { "_class_wxPaintDC","_wxPaintDC",0},
+    { "_class_wxLayoutConstraints","_wxLayoutConstraints",0},
+    { "_class_wxIcon","_wxIcon",0},
+    { "_class_wxColour","_wxColour",0},
+    { "_class_wxScreenDC","_wxScreenDC",0},
+    { "_class_wxConfigBase","_wxConfigBase",0},
+    { "_wxPalette","_class_wxPalette",0},
     { "_wxCoord","_int",0},
     { "_wxCoord","_signed_int",0},
     { "_wxCoord","_unsigned_int",0},
@@ -2297,6 +2395,30 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxCoord","_size_t",0},
     { "_wxCoord","_time_t",0},
     { "_wxCoord","_wxPrintQuality",0},
+    { "_wxMemoryFSHandler","_class_wxMemoryFSHandler",0},
+    { "_class_wxDateSpan","_wxDateSpan",0},
+    { "_wxRegion","_class_wxRegion",0},
+    { "_wxFileSystem","_class_wxFileSystem",0},
+    { "_class_wxPCXHandler","_wxPCXHandler",0},
+    { "_wxTIFFHandler","_class_wxTIFFHandler",0},
+    { "_class_wxBusyInfo","_wxBusyInfo",0},
+    { "_class_wxClientDC","_wxClientDC",0},
+    { "_class_wxSize","_wxSize",0},
+    { "_class_wxBitmap","_wxBitmap",0},
+    { "_class_wxMemoryDC","_wxMemoryDC",0},
+    { "_wxOutputStream","_class_wxOutputStream",0},
+    { "_class_wxConfig","_wxConfig",0},
+    { "_class_wxPalette","_wxPalette",0},
+    { "_class_wxFileSystemHandler","_class_wxMemoryFSHandler",SwigwxMemoryFSHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_wxMemoryFSHandler",SwigwxMemoryFSHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_class_wxZipFSHandler",SwigwxZipFSHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_wxZipFSHandler",SwigwxZipFSHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_class_wxInternetFSHandler",SwigwxInternetFSHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_wxInternetFSHandler",SwigwxInternetFSHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_class_wxPyFileSystemHandler",SwigwxPyFileSystemHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_wxPyFileSystemHandler",SwigwxPyFileSystemHandlerTowxFileSystemHandler},
+    { "_class_wxFileSystemHandler","_wxFileSystemHandler",0},
+    { "_class_wxFileSystem","_wxFileSystem",0},
 {0,0,0}};
 
 static PyObject *SWIG_globals;
@@ -2308,8 +2430,6 @@ SWIGEXPORT(void) initfilesysc() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("filesysc", filesyscMethods);
 	 d = PyModule_GetDict(m);
-
-    wxPyPtrTypeMap_Add("wxFileSystemHandler", "wxPyFileSystemHandler");
 {
    int i;
    for (i = 0; _swig_mapping[i].n1; i++)

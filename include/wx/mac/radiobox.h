@@ -16,12 +16,16 @@
 #pragma interface "radiobox.h"
 #endif
 
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxRadioBoxNameStr;
+
 // List box item
-class WXDLLEXPORT wxBitmap ;
+class  wxBitmap ;
 
-class WXDLLEXPORT wxRadioButton ;
+class  wxRadioButton ;
 
-class WXDLLEXPORT wxRadioBox: public wxControl, public wxRadioBoxBase
+class  wxRadioBox: public wxControl
 {
 	DECLARE_DYNAMIC_CLASS(wxRadioBox)
 public:
@@ -43,25 +47,21 @@ public:
              const wxValidator& val = wxDefaultValidator, const wxString& name = wxRadioBoxNameStr);
 
 // Specific functions (in wxWindows2 reference)
-	virtual void SetSelection(int item);
-	virtual int GetSelection() const;
-	
-	inline virtual int GetCount() const { return m_noItems; } ;
-
-	virtual wxString GetString(int item) const;
-	virtual void SetString(int item, const wxString& label) ;
-	
-	virtual void Enable(int item, bool enable);
-	virtual void Show(int item, bool show) ;
-
-    virtual int GetColumnCount() const ;
-    virtual int GetRowCount() const ;
-
-
 	bool Enable(bool enable);
+	void Enable(int item, bool enable);
+	int FindString(const wxString& s) const;
 	wxString GetLabel() const;
+	wxString GetLabel(int item) const;
+	int GetSelection() const;
+	wxString GetString(int item) const;
+	virtual wxString GetStringSelection() const;
+	inline virtual int Number() const { return m_noItems; } ;
 	void SetLabel(const wxString& label) ;
+	void SetLabel(int item, const wxString& label) ;
+	void SetSelection(int item);
+	virtual bool SetStringSelection(const wxString& s);
 	bool Show(bool show);
+	void Show(int item, bool show) ;
 
 // Other external functions 
 	void Command(wxCommandEvent& event);
@@ -71,7 +71,6 @@ public:
 	inline int GetNumberOfRowsOrCols() const { return m_noRowsOrCols; }
 	inline void SetNumberOfRowsOrCols(int n) { m_noRowsOrCols = n; }
 
-	void OnRadioButton( wxCommandEvent& event ) ;
 protected:
 	wxRadioButton		*m_radioButtonCycle;
   	
@@ -80,12 +79,12 @@ protected:
 	int               m_noRowsOrCols;
 
 // Internal functions 
-    virtual wxSize DoGetBestSize() const ;
 	virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
+	int GetNumHor() const;
+	int GetNumVer() const;
 
-    DECLARE_EVENT_TABLE()
 };
 
 #endif
