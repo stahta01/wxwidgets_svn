@@ -18,18 +18,16 @@
 #include "wx/xrc/xmlres.h"
 
 
-class WXDLLIMPEXP_XRC wxBitmapXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxBitmapXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxBitmapXmlHandler)
 public:
     wxBitmapXmlHandler();
     virtual wxObject *DoCreateResource();
     virtual bool CanHandle(wxXmlNode *node);
 };
 
-class WXDLLIMPEXP_XRC wxIconXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxIconXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxIconXmlHandler)
 public:
     wxIconXmlHandler();
     virtual wxObject *DoCreateResource();

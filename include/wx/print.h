@@ -1,7 +1,7 @@
 #ifndef _WX_PRINT_H_BASE_
 #define _WX_PRINT_H_BASE_
 
-#if defined(__WXMSW__) && (!defined(__WXUNIVERSAL__) || !wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW)
+#if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
 #include "wx/msw/printwin.h"
 
 #ifndef wxPrinter
@@ -27,9 +27,11 @@
 
 #ifndef wxPrinter
 #define wxPrinter wxPostScriptPrinter
+#define sm_classwxPrinter sm_classwxPostScriptPrinter
 #endif
 #ifndef wxPrintPreview
 #define wxPrintPreview wxPostScriptPrintPreview
+#define sm_classwxPrintPreview sm_classwxPostScriptPrintPreview
 #endif
 
 #endif

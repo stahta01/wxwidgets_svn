@@ -42,8 +42,8 @@
     #include "wx/image.h"
 #endif
 
-#include "wx/dcclient.h"
 #include "wx/image.h"
+#include "wx/dcclient.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -150,22 +150,20 @@ bool MyApp::OnInit()
 // frame constructor
 ShapedFrame::ShapedFrame()
        : wxFrame((wxFrame *)NULL, -1, wxEmptyString,
-                  wxDefaultPosition, wxSize(100, 100), //wxDefaultSize,
-                  0
-                  | wxFRAME_SHAPED
-                  | wxSIMPLE_BORDER
-                  | wxFRAME_NO_TASKBAR
-                  | wxSTAY_ON_TOP
-            )
+                 wxDefaultPosition, wxSize(100, 100), //wxDefaultSize,
+                 0
+                 | wxFRAME_SHAPED
+                 | wxSIMPLE_BORDER
+                 | wxFRAME_NO_TASKBAR
+                 | wxSTAY_ON_TOP
+           )
 {
     m_hasShape = FALSE;
-    m_bmp = wxBitmap(_T("star.png"), wxBITMAP_TYPE_PNG);
+    m_bmp = wxBitmap(wxT("star.png"), wxBITMAP_TYPE_PNG);
     SetSize(wxSize(m_bmp.GetWidth(), m_bmp.GetHeight()));
 #ifndef __WXMAC__
     // On wxMac the tooltip gets clipped by the window shape, YUCK!!
-#if wxUSE_TOOLTOP
     SetToolTip(wxT("Right-click to exit"));
-#endif
 #endif
 #ifndef __WXGTK__
     // On wxGTK we can't do this yet because the window hasn't been created
@@ -182,7 +180,7 @@ void ShapedFrame::SetWindowShape()
     m_hasShape = SetShape(region);
 }
 
-void ShapedFrame::OnDoubleClick(wxMouseEvent& WXUNUSED(evt))
+void ShapedFrame::OnDoubleClick(wxMouseEvent& evt)
 {
     if (m_hasShape)
     {
@@ -205,7 +203,7 @@ void ShapedFrame::OnLeftDown(wxMouseEvent& evt)
     m_delta = wxPoint(dx, dy);
 }
 
-void ShapedFrame::OnLeftUp(wxMouseEvent& WXUNUSED(evt))
+void ShapedFrame::OnLeftUp(wxMouseEvent& evt)
 {
     if (HasCapture())
     {
@@ -225,18 +223,18 @@ void ShapedFrame::OnMouseMove(wxMouseEvent& evt)
     }
 }
 
-void ShapedFrame::OnExit(wxMouseEvent& WXUNUSED(evt))
+void ShapedFrame::OnExit(wxMouseEvent& evt)
 {
     Close();
 }
 
-void ShapedFrame::OnPaint(wxPaintEvent& WXUNUSED(evt))
+void ShapedFrame::OnPaint(wxPaintEvent& evt)
 {
     wxPaintDC dc(this);
     dc.DrawBitmap(m_bmp, 0, 0, TRUE);
 }
 
-void ShapedFrame::OnWindowCreate(wxWindowCreateEvent& WXUNUSED(evt))
+void ShapedFrame::OnWindowCreate(wxWindowCreateEvent& evt)
 {
     SetWindowShape();
 }

@@ -7,7 +7,7 @@
 // Created:     11/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -18,7 +18,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "stream.h"
 #endif
 
@@ -454,7 +454,7 @@ size_t wxStreamBuffer::Write(const void *buffer, size_t size)
         m_stream->Reset();
     }
 
-    size_t ret;
+    size_t ret = 0;
 
     if ( !HasBuffer() && m_fixed )
     {

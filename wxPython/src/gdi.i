@@ -21,7 +21,6 @@
 #include <wx/fontmap.h>
 #include <wx/fontutil.h>
 #include <wx/dcbuffer.h>
-#include <wx/dcmirror.h>
 #include <wx/iconbndl.h>
 %}
 
@@ -57,10 +56,6 @@ public:
 };
 
 //---------------------------------------------------------------------------
-
-
-// TODO:  When the API stabalizes and is available on other platforms, add
-// wrappers for the new wxBitmap, wxRawBitmap, wxDIB stuff...
 
 class wxBitmap : public wxGDIObject
 {
@@ -243,7 +238,6 @@ public:
 %new wxIcon* wxEmptyIcon();
 %new wxIcon* wxIconFromXPMData(PyObject* listOfStrings);
 %new wxIcon* wxIconFromBitmap(const wxBitmap& bmp);
-%new wxIcon* wxIconFromLocation(const wxIconLocation& loc);
 
 %{ // Implementations of some alternate "constructors"
     wxIcon* wxEmptyIcon() {
@@ -267,60 +261,7 @@ public:
         icon->CopyFromBitmap(bmp);
         return icon;
     }
-
-    wxIcon* wxIconFromLocation(const wxIconLocation& loc) {
-        wxIcon* icon = new wxIcon(loc);
-        return icon;
-    }
 %}
-
-
-//---------------------------------------------------------------------------
-
-class wxIconLocation
-{
-public:
-    // ctor takes the name of the file where the icon is
-    %addmethods {
-        wxIconLocation(const wxString* filename = &wxPyEmptyString, int num = 0) {
-#ifdef __WXMSW__
-            return new wxIconLocation(*filename, num);
-#else
-            return new wxIconLocation(*filename);
-#endif
-        }
-    }
-
-    ~wxIconLocation();
-
-
-    // returns true if this object is valid/initialized
-    bool IsOk() const;
-
-    // set/get the icon file name
-    void SetFileName(const wxString& filename);
-    const wxString& GetFileName() const;
-
-    %addmethods {
-        void SetIndex(int num) {
-#ifdef __WXMSW__
-            self->SetIndex(num);
-#else
-            // do nothing
-#endif
-        }
-
-        int GetIndex() {
-#ifdef __WXMSW__
-            return self->GetIndex();
-#else
-            return -1;
-#endif
-        }
-    }
-};
-
-
 
 //---------------------------------------------------------------------------
 
@@ -487,19 +428,31 @@ public:
 class wxColourDatabase : public wxObject {
 public:
 
-    wxColourDatabase();
-    ~wxColourDatabase();
-
-    // find colour by name or name for the given colour
-    wxColour Find(const wxString& name) const;
+    wxColour *FindColour(const wxString& colour);
     wxString FindName(const wxColour& colour) const;
-
-    // add a new colour to the database
-    void AddColour(const wxString& name, const wxColour& colour);
 
     %addmethods {
         void Append(const wxString& name, int red, int green, int blue) {
-            self->AddColour(name, wxColour(red, green, blue));
+            // first see if the name is already there
+            wxString cName = name;
+            cName.MakeUpper();
+            wxString cName2 = cName;
+            if ( !cName2.Replace(wxT("GRAY"), wxT("GREY")) )
+                cName2.clear();
+
+            wxNode *node = self->First();
+            while ( node ) {
+                const wxChar *key = node->GetKeyString();
+                if ( cName == key || cName2 == key ) {
+                    wxColour* c = (wxColour *)node->Data();
+                    c->Set(red, green, blue);
+                    return;
+                }
+                node = node->Next();
+            }
+
+            // otherwise append the new colour
+            self->Append(name.c_str(), new wxColour(red, green, blue));
         }
     }
 };
@@ -1021,20 +974,6 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxMirrorDC : public wxDC
-{
-public:
-    // constructs a mirror DC associated with the given real DC
-    //
-    // if mirror parameter is true, all vertical and horizontal coordinates are
-    // exchanged, otherwise this class behaves in exactly the same way as a
-    // plain DC
-    //
-    wxMirrorDC(wxDC& dc, bool mirror);
-};
-
-//---------------------------------------------------------------------------
-
 
 #ifdef __WXMSW__
 
@@ -1224,8 +1163,6 @@ public:
 %{
 #if 0
 %}
-
-// See also wxPy_ReinitStockObjects in helpers.cpp
 
 extern wxFont *wxNORMAL_FONT;
 extern wxFont *wxSMALL_FONT;

@@ -214,7 +214,7 @@ wxLayoutWindow::Clear(int family,
 {
    GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
    SetBackgroundColour(GetLayoutList()->GetDefaultStyleInfo().GetBGColour());
-   //wxScrolledWindow::Clear();
+   wxScrolledWindow::Clear();
    ResizeScrollbars(true);
    SetDirty();
    SetModified(FALSE);
@@ -334,7 +334,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
          if( m_StatusBar && m_StatusFieldLabel != -1 &&
              s_hasPutMessageInStatusBar )
          {
-            m_StatusBar->SetStatusText(wxEmptyString, m_StatusFieldLabel);
+            m_StatusBar->SetStatusText("", m_StatusFieldLabel);
          }
       }
    }
@@ -576,7 +576,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             Copy(TRUE, TRUE);
             break;
          case 's': // search
-            Find(wxEmptyString);
+            Find("");
             break;
          case 't': // search again
             FindAgain();
@@ -624,7 +624,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                }
                break;
             case 's': // search
-               Find(wxEmptyString);
+               Find("");
                break;
             case 't': // search again
                FindAgain();
@@ -846,13 +846,7 @@ wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
 }
 
 void
-wxLayoutWindow::RequestUpdate(const wxRect *
-                                            #ifdef __WXGTK__
-                                            updateRect
-                                            #else
-                                            WXUNUSED(updateRect)
-                                            #endif
-                                            )
+wxLayoutWindow::RequestUpdate(const wxRect *updateRect)
 {
 #ifdef __WXGTK__
    // Calling Refresh() causes bad flicker under wxGTK!!!
@@ -1269,27 +1263,9 @@ wxLayoutWindow::Cut(bool privateFormat, bool usePrimary)
 // ----------------------------------------------------------------------------
 
 bool
-wxLayoutWindow::Find(const wxString &
-                                     #ifdef M_BASEDIR
-                                     needle
-                                     #else
-                                     WXUNUSED(needle)
-                                     #endif
-                                     ,
-                     wxPoint * 
-                                     #ifdef M_BASEDIR
-                                     fromWhere
-                                     #else
-                                     WXUNUSED(fromWhere)
-                                     #endif
-                                     ,
-                     const wxString &
-                                     #ifdef M_BASEDIR
-                                     configPath
-                                     #else
-                                     WXUNUSED(configPath)
-                                     #endif
-                                     )
+wxLayoutWindow::Find(const wxString &needle,
+                     wxPoint * fromWhere,
+                     const wxString &configPath)
 {
 #ifdef M_BASEDIR
    wxPoint found;

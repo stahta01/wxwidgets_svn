@@ -267,7 +267,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "griddemo"=.\grid\griddemo.dsp - Package Owner=<4>
+Project: "grid"=.\grid\grid.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -555,6 +555,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "newgrid"=.\newgrid\newgrid.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "notebook"=.\notebook\notebook.dsp - Package Owner=<4>
 
 Package=<5>
@@ -615,6 +627,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "proplist"=.\proplist\proplist.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "propsize"=.\propsize\propsize.dsp - Package Owner=<4>
 
 Package=<5>
@@ -628,6 +652,18 @@ Package=<4>
 ###############################################################################
 
 Project: "regtest"=.\regtest\regtest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "resource"=.\resource\resource.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -784,6 +820,18 @@ Package=<4>
 ###############################################################################
 
 Project: "treetest"=.\treectrl\treetest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "treelay"=.\treelay\treelay.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

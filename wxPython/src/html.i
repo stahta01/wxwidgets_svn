@@ -95,8 +95,6 @@ enum {
 enum {
     wxHW_SCROLLBAR_NEVER,
     wxHW_SCROLLBAR_AUTO,
-    wxHW_NO_SELECTION,
-    wxHW_DEFAULT_STYLE,
 };
 
 
@@ -371,112 +369,6 @@ private:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-
-// wxHtmlSelection is data holder with information about text selection.
-// Selection is defined by two positions (beginning and end of the selection)
-// and two leaf(!) cells at these positions.
-class wxHtmlSelection
-{
-public:
-    wxHtmlSelection();
-    ~wxHtmlSelection();
-
-    void Set(const wxPoint& fromPos, const wxHtmlCell *fromCell,
-             const wxPoint& toPos, const wxHtmlCell *toCell);
-    %name(SetCells)void Set(const wxHtmlCell *fromCell, const wxHtmlCell *toCell);
-
-    const wxHtmlCell *GetFromCell() const;
-    const wxHtmlCell *GetToCell() const;
-
-    // these values are in absolute coordinates:
-    const wxPoint& GetFromPos() const;
-    const wxPoint& GetToPos() const;
-
-    // these are From/ToCell's private data
-    const wxPoint& GetFromPrivPos() const;
-    const wxPoint& GetToPrivPos() const;
-    void SetFromPrivPos(const wxPoint& pos);
-    void SetToPrivPos(const wxPoint& pos);
-    void ClearPrivPos();
-
-    const bool IsEmpty() const;
-
-};
-
-
-enum wxHtmlSelectionState
-{
-    wxHTML_SEL_OUT,     // currently rendered cell is outside the selection
-    wxHTML_SEL_IN,      // ... is inside selection
-    wxHTML_SEL_CHANGING // ... is the cell on which selection state changes
-};
-
-// Selection state is passed to wxHtmlCell::Draw so that it can render itself
-// differently e.g. when inside text selection or outside it.
-class wxHtmlRenderingState
-{
-public:
-    wxHtmlRenderingState();
-    ~wxHtmlRenderingState();
-
-    void SetSelectionState(wxHtmlSelectionState s);
-    wxHtmlSelectionState GetSelectionState() const;
-
-    void SetFgColour(const wxColour& c);
-    const wxColour& GetFgColour() const;
-    void SetBgColour(const wxColour& c);
-    const wxColour& GetBgColour() const;
-};
-
-
-// HTML rendering customization. This class is used when rendering wxHtmlCells
-// as a callback:
-class wxHtmlRenderingStyle
-{
-public:
-    virtual wxColour GetSelectedTextColour(const wxColour& clr) = 0;
-    virtual wxColour GetSelectedTextBgColour(const wxColour& clr) = 0;
-};
-
-// Standard style:
-class wxDefaultHtmlRenderingStyle : public wxHtmlRenderingStyle
-{
-public:
-    virtual wxColour GetSelectedTextColour(const wxColour& clr);
-    virtual wxColour GetSelectedTextBgColour(const wxColour& clr);
-};
-
-
-
-// Information given to cells when drawing them. Contains rendering state,
-// selection information and rendering style object that can be used to
-// customize the output.
-class wxHtmlRenderingInfo
-{
-public:
-    wxHtmlRenderingInfo();
-    ~wxHtmlRenderingInfo();
-
-    void SetSelection(wxHtmlSelection *s);
-    wxHtmlSelection *GetSelection() const;
-
-    void SetStyle(wxHtmlRenderingStyle *style);
-    wxHtmlRenderingStyle& GetStyle();
-
-    wxHtmlRenderingState& GetState();
-};
-
-//---------------------------------------------------------------------------
-
-
-enum
-{
-    wxHTML_FIND_EXACT             = 1,
-    wxHTML_FIND_NEAREST_BEFORE    = 2,
-    wxHTML_FIND_NEAREST_AFTER     = 4
-};
-
-
 class wxHtmlCell : public wxObject {
 public:
     wxHtmlCell();
@@ -489,65 +381,18 @@ public:
     wxHtmlLinkInfo* GetLink(int x = 0, int y = 0);
     wxHtmlCell* GetNext();
     wxHtmlContainerCell* GetParent();
-    wxHtmlCell* GetFirstChild() const;
-
-    // Returns cursor to be used when mouse is over the cell:
-    wxCursor GetCursor() const;
-
-    // Formatting cells are not visible on the screen, they only alter
-    // renderer's state.
-    bool IsFormattingCell() const;
-
-
     void SetLink(const wxHtmlLinkInfo& link);
     void SetNext(wxHtmlCell *cell);
     void SetParent(wxHtmlContainerCell *p);
     void SetPos(int x, int y);
     void Layout(int w);
-    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-              wxHtmlRenderingInfo& info);
-    void DrawInvisible(wxDC& dc, int x, int y,
-              wxHtmlRenderingInfo& info);
+    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
+    void DrawInvisible(wxDC& dc, int x, int y);
     const wxHtmlCell* Find(int condition, const void* param);
 
     bool AdjustPagebreak(int* INOUT);
     void SetCanLiveOnPagebreak(bool can);
 
-    // Can the line be broken before this cell?
-    bool IsLinebreakAllowed() const;
-
-    // Returns true for simple == terminal cells, i.e. not composite ones.
-    // This if for internal usage only and may disappear in future versions!
-    bool IsTerminalCell() const;
-
-    // Find a cell inside this cell positioned at the given coordinates
-    // (relative to this's positions). Returns NULL if no such cell exists.
-    // The flag can be used to specify whether to look for terminal or
-    // nonterminal cells or both. In either case, returned cell is deepest
-    // cell in cells tree that contains [x,y].
-    wxHtmlCell *FindCellByPos(wxCoord x, wxCoord y,
-                                  unsigned flags = wxHTML_FIND_EXACT) const;
-
-    // Returns absolute position of the cell on HTML canvas
-    wxPoint GetAbsPos() const;
-
-    // Returns first (last) terminal cell inside this cell. It may return NULL,
-    // but it is rare -- only if there are no terminals in the tree.
-    wxHtmlCell *GetFirstTerminal() const ;
-    wxHtmlCell *GetLastTerminal() const ;
-
-    // Returns cell's depth, i.e. how far under the root cell it is
-    // (if it is the root, depth is 0)
-    unsigned GetDepth() const;
-
-    // Returns true if the cell appears before 'cell' in natural order of
-    // cells (= as they are read). If cell A is (grand)parent of cell B,
-    // then both A.IsBefore(B) and B.IsBefore(A) always return true.
-    bool IsBefore(wxHtmlCell *cell) const;
-
-    // Converts the cell into text representation. If sel != NULL then
-    // only part of the cell inside the selection is converted.
-    wxString ConvertToText(wxHtmlSelection *sel) const;
 };
 
 
@@ -577,8 +422,7 @@ public:
     void SetBackgroundColour(const wxColour& clr);
     wxColour GetBackgroundColour();
     void SetBorder(const wxColour& clr1, const wxColour& clr2);
-    wxHtmlCell* GetFirstChild();
-    %pragma(python) addtoclass = "GetFirstCell = GetFirstChild"
+    wxHtmlCell* GetFirstCell();
 };
 
 
@@ -682,7 +526,7 @@ public:
     wxPyHtmlWindow(wxWindow *parent, wxWindowID id = -1,
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
-                   long style = wxHW_DEFAULT_STYLE,
+                   long style = wxHW_SCROLLBAR_AUTO,
                    const wxString& name = wxPyHtmlWindowNameStr)
         : wxHtmlWindow(parent, id, pos, size, style, name)  {};
     wxPyHtmlWindow() : wxHtmlWindow() {};
@@ -774,7 +618,7 @@ public:
     wxPyHtmlWindow(wxWindow *parent, int id = -1,
                  wxPoint& pos = wxDefaultPosition,
                  wxSize& size = wxDefaultSize,
-                 int style=wxHW_DEFAULT_STYLE,
+                 int style=wxHW_SCROLLBAR_AUTO,
                  const wxString& name = wxPyHtmlWindowNameStr);
     %name(wxPreHtmlWindow)wxPyHtmlWindow();
 
@@ -910,10 +754,7 @@ public:
                 delete [] temp;
         }
     }
-    int Render(int x, int y, int from = 0, int dont_render = FALSE, int to = INT_MAX,
-               //int *known_pagebreaks = NULL, int number_of_pages = 0
-               int* choices=NULL, int LCOUNT = 0
-               );
+    int Render(int x, int y, int from = 0, int dont_render = FALSE);
     int GetTotalHeight();
                 // returns total height of the html document
                 // (compare Render's return value with this)
@@ -950,12 +791,6 @@ public:
     void SetMargins(float top = 25.2, float bottom = 25.2,
                     float left = 25.2, float right = 25.2,
                     float spaces = 5);
-
-    // Adds input filter
-    static void AddFilter(wxHtmlFilter *filter);
-
-    // Cleanup
-    static void CleanUpStatics();
 };
 
 
@@ -963,7 +798,7 @@ public:
 class wxHtmlEasyPrinting : public wxObject {
 public:
     wxHtmlEasyPrinting(const wxString& name = wxPyHtmlPrintingTitleStr,
-                       wxWindow *parentWindow = NULL);
+                       wxFrame *parent_frame = NULL);
     ~wxHtmlEasyPrinting();
 
     void PreviewFile(const wxString &htmlfile);
@@ -975,20 +810,11 @@ public:
     void SetHeader(const wxString& header, int pg = wxPAGE_ALL);
     void SetFooter(const wxString& footer, int pg = wxPAGE_ALL);
 
-    %addmethods {
-        void SetFonts(wxString normal_face, wxString fixed_face, PyObject* sizes=NULL) {
-            int* temp = NULL;
-            if (sizes) temp = int_LIST_helper(sizes);
-            self->SetFonts(normal_face, fixed_face, temp);
-            if (temp)
-                delete [] temp;
-        }
-    }
-
     wxPrintData *GetPrintData() {return m_PrintData;}
     wxPageSetupDialogData *GetPageSetupData() {return m_PageSetupData;}
 
 };
+
 
 
 //---------------------------------------------------------------------------
@@ -1002,6 +828,9 @@ public:
 %init %{
 
     inithtmlhelpc();
+
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
 
     wxPyPtrTypeMap_Add("wxHtmlTagHandler", "wxPyHtmlTagHandler");
     wxPyPtrTypeMap_Add("wxHtmlWinTagHandler", "wxPyHtmlWinTagHandler");

@@ -3,11 +3,11 @@
 // Purpose:     wxTimer implementation
 // Author:      Vaclav Slavik
 // Id:          $Id$
-// Copyright:   (c) Vaclav Slavik
+// Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "timer.h"
 #endif
 
@@ -41,25 +41,13 @@
     // if we are unlucky and the latter combines information from two sources.
     #include "wx/mgl/private.h"
     extern "C" ulong _EVT_getTicks();
-    #define GetMillisecondsTime _EVT_getTicks
-
-    typedef ulong wxTimerTick_t;
-
-    #define wxTimerTickFmtSpec _T("lu")
-    #define wxTimerTickPrintfArg(tt) (tt)
-#else // !__WXMGL__
-    #define GetMillisecondsTime wxGetLocalTimeMillis
-
-    typedef wxLongLong wxTimerTick_t;
-
-    #if wxUSE_LONGLONG_WX
-        #define wxTimerTickFmtSpec wxLongLongFmtSpec _T("d")
-        #define wxTimerTickPrintfArg(tt) (tt.GetValue())
-    #else // using native wxLongLong
-        #define wxTimerTickFmtSpec _T("s")
-        #define wxTimerTickPrintfArg(tt) (tt.ToString().c_str())
-    #endif // wx/native long long
-#endif // __WXMGL__/!__WXMGL__
+    #define GetMillisecondsTime() _EVT_getTicks()
+#else
+//    #define GetMillisecondsTime() wxGetLocalTimeMillis().ToLong()
+    // Suppresses the debug warning in ToLong. FIXME: check
+    // that we don't drastically lose precision
+    #define GetMillisecondsTime() (unsigned long) wxGetLocalTimeMillis().GetValue()
+#endif
 
 // ----------------------------------------------------------------------------
 // helper structures and wxTimerScheduler
@@ -75,7 +63,7 @@ public:
     wxTimer         *timer;
     bool             running;
     wxTimerDesc     *next, *prev;
-    wxTimerTick_t    shotTime;  
+    unsigned long    shotTime;  
     volatile bool   *deleteFlag; // see comment in ~wxTimer
 };
 
@@ -84,7 +72,7 @@ class wxTimerScheduler
 public:
     wxTimerScheduler() : m_timers(NULL) {}
 
-    void QueueTimer(wxTimerDesc *desc, wxTimerTick_t when = 0);
+    void QueueTimer(wxTimerDesc *desc, unsigned long when = 0);
     void RemoveTimer(wxTimerDesc *desc);
     void NotifyTimers();
    
@@ -92,7 +80,7 @@ private:
     wxTimerDesc *m_timers;
 };
 
-void wxTimerScheduler::QueueTimer(wxTimerDesc *desc, wxTimerTick_t when)
+void wxTimerScheduler::QueueTimer(wxTimerDesc *desc, unsigned long when)
 {
     if ( desc->running )
         return; // already scheduled
@@ -102,9 +90,8 @@ void wxTimerScheduler::QueueTimer(wxTimerDesc *desc, wxTimerTick_t when)
     desc->shotTime = when;
     desc->running = TRUE;
 
-    wxLogTrace( wxT("timer"),
-                wxT("queued timer %p at tick %") wxTimerTickFmtSpec, 
-               desc->timer,  wxTimerTickPrintfArg(when));
+    wxLogTrace( wxT("timer"), wxT("queued timer %p at tick %ld"), 
+               desc->timer, (long) when);
 
     if ( m_timers )
     {
@@ -141,7 +128,7 @@ void wxTimerScheduler::NotifyTimers()
     {
         bool oneShot;
         volatile bool timerDeleted;
-        wxTimerTick_t now = GetMillisecondsTime();
+        unsigned long now = GetMillisecondsTime();
         wxTimerDesc *desc;
 
         while ( m_timers && m_timers->shotTime <= now )
@@ -156,11 +143,8 @@ void wxTimerScheduler::NotifyTimers()
             
             if ( !timerDeleted )
             {
-                wxLogTrace( wxT("timer"),
-                            wxT("notified timer %p sheduled for %")
-                            wxTimerTickFmtSpec, 
-                            desc->timer,
-                            wxTimerTickPrintfArg(desc->shotTime) );
+                wxLogTrace( wxT("timer"), wxT("notified timer %p sheduled for %ld"), 
+                           desc->timer, (long) desc->shotTime);
 
                 desc->deleteFlag = NULL;
                 if ( !oneShot )

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "tbar95.h"
 #endif
 
@@ -47,12 +47,42 @@
     #include "malloc.h"
 #endif
 
+// ----------------------------------------------------------------------------
+// Toolbar define value missing 
+// ----------------------------------------------------------------------------
+#if defined(__DIGITALMARS__) 
+#define CCS_VERT                0x00000080L
+#endif
+
 #include "wx/msw/private.h"
 
-// include <commctrl.h> "properly"
-#include "wx/msw/wrapcctl.h"
+#ifndef __TWIN32__
 
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#else
+    #include "wx/msw/gnuwin32/extra.h"
+#endif
+
+#if !defined(CCS_VERT)
+#define CCS_VERT                0x00000080L
+#endif
+
+#endif // __TWIN32__
+
+#include "wx/msw/dib.h"
 #include "wx/app.h"         // for GetComCtl32Version
+
+#if defined(__MWERKS__) && defined(__WXMSW__)
+// including <windef.h> for max definition doesn't seem
+// to work using CodeWarrior 6 Windows. So we define it
+// here. (Otherwise we get a undefined identifier 'max'
+// later on in this file.) (Added by dimitri@shortcut.nl)
+#   ifndef max
+#       define max(a,b)            (((a) > (b)) ? (a) : (b))
+#   endif
+
+#endif
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -107,26 +137,7 @@
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl)
-
-/*
-	TOOLBAR PROPERTIES
-		tool
-			bitmap
-			bitmap2
-			tooltip
-			longhelp
-			radio (bool)
-			toggle (bool)
-		separator
-		style ( wxNO_BORDER | wxTB_HORIZONTAL)
-		bitmapsize
-		margins
-		packing
-		separation
-
-		dontattachtoframe
-*/
+IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarBase)
 
 BEGIN_EVENT_TABLE(wxToolBar, wxToolBarBase)
     EVT_MOUSE_EVENTS(wxToolBar::OnMouseEvent)
@@ -181,8 +192,6 @@ public:
 
 private:
     size_t m_nSepCount;
-
-    DECLARE_NO_COPY_CLASS(wxToolBarTool)
 };
 
 
@@ -240,7 +249,7 @@ bool wxToolBar::Create(wxWindow *parent,
         return FALSE;
 
     // MSW-specific initialisation
-    if ( !MSWCreateToolbar(pos, size) )
+    if ( !MSWCreateToolbar(pos, size, style) )
         return FALSE;
 
     // set up the colors and fonts
@@ -250,9 +259,11 @@ bool wxToolBar::Create(wxWindow *parent,
     return TRUE;
 }
 
-bool wxToolBar::MSWCreateToolbar(const wxPoint& pos, const wxSize& size)
+bool wxToolBar::MSWCreateToolbar(const wxPoint& pos,
+                                 const wxSize& size,
+                                 long style)
 {
-    if ( !MSWCreateControl(TOOLBARCLASSNAME, wxEmptyString, pos, size) )
+    if ( !MSWCreateControl(TOOLBARCLASSNAME, _T(""), pos, size, style) )
         return FALSE;
 
     // toolbar-specific post initialisation
@@ -276,7 +287,7 @@ void wxToolBar::Recreate()
 
     UnsubclassWin();
 
-    if ( !MSWCreateToolbar(pos, size) )
+    if ( !MSWCreateToolbar(pos, size, GetWindowStyle()) )
     {
         // what can we do?
         wxFAIL_MSG( _T("recreating the toolbar failed") );
@@ -285,7 +296,7 @@ void wxToolBar::Recreate()
     }
 
     // reparent all our children under the new toolbar
-    for ( wxWindowList::compatibility_iterator node = m_children.GetFirst();
+    for ( wxWindowList::Node *node = m_children.GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -347,7 +358,7 @@ WXDWORD wxToolBar::MSWGetStyle(long style, WXDWORD *exstyle) const
     // do have tooltips wouldn't work
     msStyle |= TBSTYLE_TOOLTIPS;
 
-    if ( style & (wxTB_FLAT | wxTB_HORZ_LAYOUT) )
+    if ( style & wxTB_FLAT )
     {
         // static as it doesn't change during the program lifetime
         static int s_verComCtl = wxTheApp->GetComCtl32Version();
@@ -359,11 +370,6 @@ WXDWORD wxToolBar::MSWGetStyle(long style, WXDWORD *exstyle) const
         if ( s_verComCtl > 400 && s_verComCtl < 600 )
         {
             msStyle |= TBSTYLE_FLAT | TBSTYLE_TRANSPARENT;
-        }
-
-        if ( s_verComCtl >= 470 && style & wxTB_HORZ_LAYOUT )
-        {
-            msStyle |= TBSTYLE_LIST;
         }
     }
 
@@ -401,7 +407,7 @@ bool wxToolBar::DoDeleteTool(size_t pos, wxToolBarToolBase *tool)
     // first determine the position of the first button to delete: it may be
     // different from pos if we use several separators to cover the space used
     // by a control
-    wxToolBarToolsList::compatibility_iterator node;
+    wxToolBarToolsList::Node *node;
     for ( node = m_tools.GetFirst(); node; node = node->GetNext() )
     {
         wxToolBarToolBase *tool2 = node->GetData();
@@ -492,7 +498,7 @@ bool wxToolBar::Realize()
     // First, add the bitmap: we use one bitmap for all toolbar buttons
     // ----------------------------------------------------------------
 
-    wxToolBarToolsList::compatibility_iterator node;
+    wxToolBarToolsList::Node *node;
     int bitmapId = 0;
 
     wxSize sizeBmp;
@@ -666,14 +672,9 @@ bool wxToolBar::Realize()
     {
         wxToolBarToolBase *tool = node->GetData();
 
-        // don't add separators to the vertical toolbar with old comctl32.dll
-        // versions as they didn't handle this properly
-        if ( isVertical && tool->IsSeparator() &&
-                wxTheApp->GetComCtl32Version() <= 472 )
-        {
-            continue;
-        }
-
+        // don't add separators to the vertical toolbar - looks ugly
+        //if ( isVertical && tool->IsSeparator() )
+        //    continue;
 
         TBBUTTON& button = buttons[i];
 
@@ -799,7 +800,7 @@ bool wxToolBar::Realize()
         int left = -1;
 
         // TB_SETBUTTONINFO message is only supported by comctl32.dll 4.71+
-#ifdef TB_SETBUTTONINFO
+#if defined(_WIN32_IE) && (_WIN32_IE >= 0x400 )
         // available in headers, now check whether it is available now
         // (during run-time)
         if ( wxTheApp->GetComCtl32Version() >= 471 )
@@ -915,30 +916,28 @@ bool wxToolBar::MSWCommand(WXUINT WXUNUSED(cmd), WXWORD id)
     if ( !tool )
         return FALSE;
 
-    bool toggled = false; // just to suppress warnings
-
     if ( tool->CanBeToggled() )
     {
         LRESULT state = ::SendMessage(GetHwnd(), TB_GETSTATE, id, 0);
-        toggled = (state & TBSTATE_CHECKED) != 0;
-
-        // ignore the event when a radio button is released, as this doesn't seem to
-        // happen at all, and is handled otherwise
-        if ( tool->GetKind() == wxITEM_RADIO && !toggled )
-            return TRUE;
-
-        tool->Toggle(toggled);
-        UnToggleRadioGroup(tool);
+        tool->Toggle((state & TBSTATE_CHECKED) != 0);
     }
 
-    // OnLeftClick() can veto the button state change - for buttons which
-    // may be toggled only, of couse
-    if ( !OnLeftClick((int)id, toggled) && tool->CanBeToggled() )
-    {
-        // revert back
-        tool->Toggle(!toggled);
+    bool toggled = tool->IsToggled();
 
-        ::SendMessage(GetHwnd(), TB_CHECKBUTTON, id, MAKELONG(toggled, 0));
+    // avoid sending the event when a radio button is released, this is not
+    // interesting
+    if ( !tool->CanBeToggled() || tool->GetKind() != wxITEM_RADIO || toggled )
+    {
+        // OnLeftClick() can veto the button state change - for buttons which
+        // may be toggled only, of couse
+        if ( !OnLeftClick((int)id, toggled) && tool->CanBeToggled() )
+        {
+            // revert back
+            toggled = !toggled;
+            tool->SetToggle(toggled);
+
+            ::SendMessage(GetHwnd(), TB_CHECKBUTTON, id, MAKELONG(toggled, 0));
+        }
     }
 
     return TRUE;
@@ -1011,8 +1010,7 @@ wxSize wxToolBar::GetToolSize() const
 {
     // TB_GETBUTTONSIZE is supported from version 4.70
 #if defined(_WIN32_IE) && (_WIN32_IE >= 0x300 ) \
-    && !( defined(__GNUWIN32__) && !wxCHECK_W32API_VERSION( 1, 0 ) ) \
-    && !defined (__DIGITALMARS__)
+    && !( defined(__GNUWIN32__) && !wxCHECK_W32API_VERSION( 1, 0 ) )
     if ( wxTheApp->GetComCtl32Version() >= 470 )
     {
         DWORD dw = ::SendMessage(GetHwnd(), TB_GETBUTTONSIZE, 0, 0);
@@ -1031,7 +1029,7 @@ static
 wxToolBarToolBase *GetItemSkippingDummySpacers(const wxToolBarToolsList& tools,
                                                size_t index )
 {
-    wxToolBarToolsList::compatibility_iterator current = tools.GetFirst();
+    wxToolBarToolsList::Node* current = tools.GetFirst();
 
     for ( ; current != 0; current = current->GetNext() )
     {
@@ -1183,9 +1181,9 @@ void wxToolBar::OnMouseEvent(wxMouseEvent& event)
     }
 }
 
-bool wxToolBar::HandleSize(WXWPARAM WXUNUSED(wParam), WXLPARAM lParam)
+bool wxToolBar::HandleSize(WXWPARAM wParam, WXLPARAM lParam)
 {
-    // calculate our minor dimension ourselves - we're confusing the standard
+    // calculate our minor dimenstion ourselves - we're confusing the standard
     // logic (TB_AUTOSIZE) with our horizontal toolbars and other hacks
     RECT r;
     if ( ::SendMessage(GetHwnd(), TB_GETITEMRECT, 0, (LPARAM)&r) )
@@ -1210,8 +1208,12 @@ bool wxToolBar::HandleSize(WXWPARAM WXUNUSED(wParam), WXLPARAM lParam)
                 h = r.bottom - r.top;
             if ( m_maxRows )
             {
-                // FIXME: hardcoded separator line height...
-                h += HasFlag(wxTB_NODIVIDER) ? 4 : 6;
+                // FIXME: 6 is hardcoded separator line height...
+                //h += 6;
+                if (HasFlag(wxTB_NODIVIDER))
+                    h += 4;
+                else
+                    h += 6;
                 h *= m_maxRows;
             }
         }
@@ -1235,7 +1237,7 @@ bool wxToolBar::HandlePaint(WXWPARAM wParam, WXLPARAM lParam)
     // any here
 
     // first of all, do we have any controls at all?
-    wxToolBarToolsList::compatibility_iterator node;
+    wxToolBarToolsList::Node *node;
     for ( node = m_tools.GetFirst(); node; node = node->GetNext() )
     {
         if ( node->GetData()->IsControl() )
@@ -1317,10 +1319,6 @@ bool wxToolBar::HandlePaint(WXWPARAM wParam, WXLPARAM lParam)
                 {
                     // yes, do erase it!
                     dc.DrawRectangle(rectItem);
-                    
-                    // Necessary in case we use a no-paint-on-size
-                    // style in the parent: the controls can disappear
-                    control->Refresh(FALSE);
                 }
             }
         }
@@ -1329,7 +1327,7 @@ bool wxToolBar::HandlePaint(WXWPARAM wParam, WXLPARAM lParam)
     return TRUE;
 }
 
-void wxToolBar::HandleMouseMove(WXWPARAM WXUNUSED(wParam), WXLPARAM lParam)
+void wxToolBar::HandleMouseMove(WXWPARAM wParam, WXLPARAM lParam)
 {
     wxCoord x = GET_X_LPARAM(lParam),
             y = GET_Y_LPARAM(lParam);

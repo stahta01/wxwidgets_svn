@@ -6,7 +6,7 @@
 // Created:     28.06.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dialogbase.h"
 #endif
 
@@ -67,7 +67,7 @@ void wxDialogBase::Init()
 #endif
 }
 
-#if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#if wxUSE_STATTEXT && wxUSE_TEXTCTRL
 
 wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
 {
@@ -164,7 +164,7 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
     return box;
 }
 
-#endif // wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#endif // wxUSE_STATTEXT && wxUSE_TEXTCTRL
 
 #if wxUSE_BUTTON
 
@@ -172,9 +172,14 @@ wxSizer *wxDialogBase::CreateButtonSizer( long flags )
 {
     bool is_pda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
     
+    wxBoxSizer *box = NULL;
+    
     // If we have a PDA screen, put yes/no button over 
     // all other buttons, otherwise on the left side.
-    wxBoxSizer *box = is_pda ? new wxBoxSizer( wxVERTICAL ) : new wxBoxSizer( wxHORIZONTAL );
+    if (is_pda)
+        box = new wxBoxSizer( wxVERTICAL );
+    else
+        box = new wxBoxSizer( wxHORIZONTAL );
         
     wxBoxSizer *inner_yes_no = NULL;
     

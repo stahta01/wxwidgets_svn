@@ -12,7 +12,7 @@
 #ifndef _WX_LISTCTRL_H_BASE_
 #define _WX_LISTCTRL_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "listctrlbase.h"
 #endif
 
@@ -95,7 +95,7 @@ public:
     void ClearColumnImage(int col) { SetColumnImage(col, -1); }
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxListView)
+    DECLARE_DYNAMIC_CLASS(wxListView)
 };
 
 #endif // wxUSE_LISTCTRL

@@ -1,4 +1,4 @@
-// wxr2xml.h:
+// wxr2xml.h: 
 // 8/30/00 Brian Gavin
 //////////////////////////////////////////////////////////////////////
 
@@ -6,14 +6,13 @@
 #define WXR2XML_H
 
 #include <wx/ffile.h>
-#include "wx/deprecated/setup.h"
-#include "wx/deprecated/resource.h"
+#include "wx/resource.h"
 
 #if !wxUSE_WX_RESOURCES
 #error  "convertc requires wxUSE_WX_RESOURCES"
 #endif  // wxUSE_WX_RESOURCES
 
-class wxr2xml : public wxObject
+class wxr2xml : public wxObject  
 {
 public:
     bool Convert(wxString wxrfile,wxString xmlfile);
@@ -75,4 +74,4 @@ protected:
     wxFFile m_xmlfile;
 };
 
-#endif
+#endif 

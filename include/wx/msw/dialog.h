@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "dialog.h"
 #endif
 
@@ -20,7 +20,7 @@
 
 WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 
-class WXDLLEXPORT wxDialogModalData;
+class WXDLLEXPORT wxWindowDisabler;
 
 // Dialog boxes
 class WXDLLEXPORT wxDialog : public wxDialogBase
@@ -78,9 +78,8 @@ public:
     // override some base class virtuals
     virtual bool Show(bool show = TRUE);
 
-    virtual void Raise();
-
     // event handlers
+    bool OnClose();
     void OnCharHook(wxKeyEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
 
@@ -116,13 +115,12 @@ protected:
 private:
     wxWindow *m_oldFocus;
 
-    // this pointer is non-NULL only while the modal event loop is running
-    wxDialogModalData *m_modalData;
-
+    // while we are showing a modal dialog we disable the other windows using
+    // this object
+    wxWindowDisabler *m_windowDisabler;
 
     DECLARE_DYNAMIC_CLASS(wxDialog)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDialog)
 };
 
 #endif

@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        mac/dataobj.cpp
-// Purpose:     implementation of wxDataObject class
-// Author:      Stefan Csomor
+// Name:        os2/dataobj.cpp
+// Purpose:     implementation of wx[I]DataObject class
+// Author:      David Webster
 // Modified by:
 // Created:     10/21/99
 // RCS-ID:      $Id$
-// Copyright:   (c) 1999 Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) 1999 David Webster
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -34,7 +34,6 @@
 #include "wx/mstream.h"
 #include "wx/image.h"
 #include "wx/mac/private.h"
-#include "Scrap.h"
 
 // ----------------------------------------------------------------------------
 // functions
@@ -74,46 +73,40 @@ void wxDataFormat::SetType(  wxDataFormatId  Type )
 {
     m_type = Type;
 
-    if (m_type == wxDF_TEXT )
-        m_format = kScrapFlavorTypeText;
-    else if (m_type == wxDF_UNICODETEXT )
-        m_format = kScrapFlavorTypeUnicode ;
+    if (m_type == wxDF_TEXT)
+        m_format = 'TEXT';
     else if (m_type == wxDF_BITMAP || m_type == wxDF_METAFILE )
-        m_format = kScrapFlavorTypePicture;
+        m_format = 'PICT';
     else if (m_type == wxDF_FILENAME)
         m_format = kDragFlavorTypeHFS ;
     else
     {
        wxFAIL_MSG( wxT("invalid dataformat") );
-
-       // this is '????' but it can't be used in the code because ??' is
-       // parsed as a trigraph!
-       m_format = 0x3f3f3f3f;
     }
+}
+
+wxDataFormatId wxDataFormat::GetType() const
+{
+    return m_type;
 }
 
 wxString wxDataFormat::GetId() const
 {
-    // note that m_format is not a pointer to string, it *is* itself a 4
-    // character string
-    char text[5] ;
-    strncpy( text , (char*) &m_format , 4 ) ;
-    text[4] = 0 ;
-
-    return wxString::FromAscii( text ) ;
+    wxString sRet("");  // TODO: to name of ( m_format ) );
+    return sRet;
 }
 
 void wxDataFormat::SetId(  NativeFormat  format )
 {
     m_format = format;
 
-    if (m_format == kScrapFlavorTypeText)
+    if (m_format == 'TEXT')
         m_type = wxDF_TEXT;
-    else if (m_format == kScrapFlavorTypeUnicode )
-        m_type = wxDF_UNICODETEXT;
-    else if (m_format == kScrapFlavorTypePicture)
+    else
+    if (m_format == 'PICT')
         m_type = wxDF_BITMAP;
-    else if (m_format == kDragFlavorTypeHFS )
+    else
+    if (m_format == kDragFlavorTypeHFS )
         m_type = wxDF_FILENAME;
     else
         m_type = wxDF_PRIVATE;
@@ -121,6 +114,8 @@ void wxDataFormat::SetId(  NativeFormat  format )
 
 void wxDataFormat::SetId( const wxChar* zId )
 {
+    wxString                        tmp(zId);
+
     m_type = wxDF_PRIVATE;
     m_format = 0;// TODO: get the format gdk_atom_intern( wxMBSTRINGCAST tmp.mbc_str(), FALSE );
 }
@@ -146,7 +141,7 @@ bool wxDataObject::IsSupportedFormat(
     }
     else
     {
-        wxDataFormat* pFormats = new wxDataFormat[nFormatCount];
+        wxDataFormat*               pFormats = new wxDataFormat[nFormatCount];
         GetAllFormats( pFormats
                       ,vDir
                      );
@@ -188,7 +183,7 @@ bool wxFileDataObject::GetDataHere(
 
 size_t wxFileDataObject::GetDataSize() const
 {
-    size_t nRes = 0;
+    size_t                          nRes = 0;
 
     for (size_t i = 0; i < m_filenames.GetCount(); i++)
     {
@@ -206,7 +201,9 @@ bool wxFileDataObject::SetData(
 {
     m_filenames.Empty();
 
-    AddFile(wxString::FromAscii((char*)pBuf));
+    wxString                        sFile( (const char *)pBuf);  /* char, not wxChar */
+
+    AddFile(sFile);
 
     return TRUE;
 }
@@ -228,65 +225,57 @@ wxBitmapDataObject::wxBitmapDataObject()
 }
 
 wxBitmapDataObject::wxBitmapDataObject(
-  const wxBitmap& rBitmap
+  const wxBitmap&                   rBitmap
 )
 : wxBitmapDataObjectBase(rBitmap)
 {
     Init();
     if ( m_bitmap.Ok() )
     {
-        m_pictHandle = m_bitmap.GetPict( &m_pictCreated ) ;
-    }
+		m_pngData = m_bitmap.GetPict() ;
+		m_pngSize = GetHandleSize( (Handle) m_pngData ) ;
+	}
 }
 
 wxBitmapDataObject::~wxBitmapDataObject()
 {
-    Clear();
+	if ( m_pngData && m_bitmap.GetBitmapType() != kMacBitmapTypePict )
+	{
+		KillPicture( (PicHandle) m_pngData ) ;
+	}
+	m_pngData = NULL ;
+	m_pngSize = 0 ;
 }
 
 void wxBitmapDataObject::SetBitmap(
   const wxBitmap&                   rBitmap
 )
 {
-    Clear();
+	if ( m_pngData && m_bitmap.GetBitmapType() != kMacBitmapTypePict )
+	{
+		KillPicture( (PicHandle) m_pngData ) ;
+	}
+	m_pngData = NULL ;
+	m_pngSize = 0 ;
     wxBitmapDataObjectBase::SetBitmap(rBitmap);
     if ( m_bitmap.Ok() )
     {
-        m_pictHandle = m_bitmap.GetPict( &m_pictCreated ) ;
-    }
-}
-
-void wxBitmapDataObject::Init() 
-{ 
-    m_pictHandle = NULL ;
-    m_pictCreated = false ;
-} 
-
-void wxBitmapDataObject::Clear() 
-{
-    if ( m_pictCreated && m_pictHandle )
-    {
-        KillPicture( (PicHandle) m_pictHandle ) ;
-    }
-    m_pictHandle = NULL ;
+		m_pngData = m_bitmap.GetPict() ;
+		m_pngSize = GetHandleSize( (Handle) m_pngData ) ;
+	}
 }
 
 bool wxBitmapDataObject::GetDataHere(
   void*                             pBuf
 ) const
 {
-    if (!m_pictHandle)
+    if (!m_pngData)
     {
         wxFAIL_MSG(wxT("attempt to copy empty bitmap failed"));
         return FALSE;
     }
-    memcpy(pBuf, *(Handle)m_pictHandle, GetHandleSize((Handle)m_pictHandle));
+    memcpy(pBuf, *(Handle)m_pngData, GetHandleSize((Handle)m_pngData));
     return TRUE;
-}
-
-size_t wxBitmapDataObject::GetDataSize() const
-{
-    return GetHandleSize((Handle)m_pictHandle) ;
 }
 
 bool wxBitmapDataObject::SetData(
@@ -297,12 +286,12 @@ bool wxBitmapDataObject::SetData(
     Clear();
     PicHandle picHandle = (PicHandle) NewHandle( nSize ) ;
     memcpy( *picHandle , pBuf , nSize ) ;
-    m_pictHandle = picHandle ;
-    m_pictCreated = false ;
+    m_pngData = picHandle ;
+	m_pngSize = GetHandleSize( (Handle) picHandle ) ;
     Rect frame = (**picHandle).picFrame ;
     
-    m_bitmap.SetPict( picHandle ) ;
-    m_bitmap.SetWidth( frame.right - frame.left ) ;
-    m_bitmap.SetHeight( frame.bottom - frame.top ) ;
+    m_bitmap.SetPict( m_pngData ) ;
+	m_bitmap.SetWidth( frame.right - frame.left ) ;
+	m_bitmap.SetHeight( frame.bottom - frame.top ) ;
     return m_bitmap.Ok();
 }

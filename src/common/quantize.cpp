@@ -30,7 +30,7 @@
 
 /* modified by Vaclav Slavik for use as jpeglib-independent module */
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "quantize.h"
 #endif
 
@@ -42,16 +42,13 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/palette.h"
 #endif
-
-#if wxUSE_IMAGE
 
 #include "wx/image.h"
 #include "wx/quantize.h"
 
 #ifdef __WXMSW__
-#include "wx/msw/private.h"
+#include <windows.h>
 #endif
 
 #include <stdlib.h>
@@ -1302,6 +1299,7 @@ start_pass_2_quant (j_decompress_ptr cinfo, bool is_pre_scan)
 {
   my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
   hist3d histogram = cquantize->histogram;
+  int i;
 
   if (is_pre_scan) {
     /* Set up method pointers */
@@ -1312,6 +1310,9 @@ start_pass_2_quant (j_decompress_ptr cinfo, bool is_pre_scan)
     /* Set up method pointers */
     cquantize->pub.color_quantize = pass2_fs_dither;
     cquantize->pub.finish_pass = finish_pass2;
+
+    /* Make sure color count is acceptable */
+    i = cinfo->actual_number_of_colors;
 
     {
       size_t arraysize = (size_t) ((cinfo->output_width + 2) *
@@ -1330,7 +1331,7 @@ start_pass_2_quant (j_decompress_ptr cinfo, bool is_pre_scan)
   }
   /* Zero the histogram or inverse color map, if necessary */
   if (cquantize->needs_zeroed) {
-    for (int i = 0; i < HIST_C0_ELEMS; i++) {
+    for (i = 0; i < HIST_C0_ELEMS; i++) {
       memset((void  *) histogram[i], 0,
         HIST_C1_ELEMS*HIST_C2_ELEMS * sizeof(histcell));
     }
@@ -1506,6 +1507,8 @@ bool wxQuantize::Quantize(const wxImage& src, wxImage& dest,
 
 {
     int i;
+    int w = src.GetWidth();
+    int h = src.GetHeight();
 
     int windowsSystemColourCount = 20;
 
@@ -1523,9 +1526,8 @@ bool wxQuantize::Quantize(const wxImage& src, wxImage& dest,
 #endif
 
     // create rows info:
-    int h = src.GetHeight();
-    int w = src.GetWidth();
     unsigned char **rows = new unsigned char *[h];
+    h = src.GetHeight(), w = src.GetWidth();
     unsigned char *imgdt = src.GetData();
     for (i = 0; i < h; i++)
         rows[i] = imgdt + 3/*RGB*/ * w * i;
@@ -1651,7 +1653,4 @@ bool wxQuantize::Quantize(const wxImage& src,
 
     return TRUE;
 }
-
-#endif
-    // wxUSE_IMAGE
 

@@ -12,7 +12,7 @@
 #ifndef   _REGISTRY_H
 #define   _REGISTRY_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "registry.h"
 #endif
 
@@ -32,7 +32,7 @@ typedef unsigned long ulong;
 // ----------------------------------------------------------------------------
 // class wxRegKey encapsulates window HKEY handle
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_BASE wxRegKey 
+class WXDLLEXPORT wxRegKey 
 {
 public:
   // NB: do _not_ change the values of elements in these enumerations!

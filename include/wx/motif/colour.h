@@ -12,7 +12,7 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "colour.h"
 #endif
 
@@ -28,8 +28,7 @@ public:
     // default
     wxColour();
     // from RGB
-    wxColour( unsigned char red, unsigned char green, unsigned char blue )
-        { Set(red, green, blue); }
+    wxColour( unsigned char red, unsigned char green, unsigned char blue );
     wxColour( unsigned long colRGB ) { Set(colRGB); }
     
     // implicit conversion from the colour name
@@ -66,10 +65,7 @@ public:
     inline bool operator == (const wxColour& colour) const { return (m_red == colour.m_red && m_green == colour.m_green && m_blue == colour.m_blue); }
     
     inline bool operator != (const wxColour& colour) const { return (!(m_red == colour.m_red && m_green == colour.m_green && m_blue == colour.m_blue)); }
-
-    // Get colour from name or wxNullColour
-    static wxColour CreateByName(const wxString& name);
-
+    
     // Allocate a colour, or nearest colour, using the given display.
     // If realloc is TRUE, ignore the existing pixel, otherwise just return
     // the existing one.

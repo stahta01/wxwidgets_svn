@@ -8,7 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "htmlpars.h"
 #endif
 
@@ -34,11 +34,6 @@
 #include "wx/html/htmlpars.h"
 #include "wx/dynarray.h"
 #include "wx/arrimpl.cpp"
-
-
-// DLL options compatibility check:
-#include "wx/app.h"
-WX_CHECK_BUILD_OPTIONS("wxHTML")
 
 //-----------------------------------------------------------------------------
 // wxHtmlParser helpers
@@ -87,18 +82,11 @@ wxHtmlParser::~wxHtmlParser()
 {
     while (RestoreState()) {}
     DestroyDOMTree();
-
-    if (m_HandlersStack)
-    {
-        wxList& tmp = *m_HandlersStack;
-        wxList::iterator it, en;
-        for( it = tmp.begin(), en = tmp.end(); it != en; ++it )
-            delete (wxHashTable*)*it;
-        tmp.clear();
-    }
+    
     delete m_HandlersStack;
     m_HandlersHash.Clear();
-    WX_CLEAR_LIST(wxList, m_HandlersList);
+    m_HandlersList.DeleteContents(TRUE);
+    m_HandlersList.Clear();
     delete m_entitiesParser;
 }
 
@@ -363,9 +351,10 @@ void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, wxString tags)
     if (m_HandlersStack == NULL)
     {
         m_HandlersStack = new wxList;
+        m_HandlersStack->DeleteContents(TRUE);
     }
 
-    m_HandlersStack->Insert((wxObject*)new wxHashTable(m_HandlersHash));
+    m_HandlersStack->Insert(new wxHashTable(m_HandlersHash));
 
     while (tokenizer.HasMoreTokens())
     {
@@ -377,22 +366,16 @@ void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, wxString tags)
 
 void wxHtmlParser::PopTagHandler()
 {
-    wxList::compatibility_iterator first;
+    wxNode *first;
 
-    if ( !m_HandlersStack ||
-#if wxUSE_STL
-         !(first = m_HandlersStack->GetFirst())
-#else // !wxUSE_STL
-         ((first = m_HandlersStack->GetFirst()) == NULL)
-#endif // wxUSE_STL/!wxUSE_STL
-        )
+    if (m_HandlersStack == NULL ||
+        (first = m_HandlersStack->GetFirst()) == NULL)
     {
         wxLogWarning(_("Warning: attempt to remove HTML tag handler from empty stack."));
         return;
     }
     m_HandlersHash = *((wxHashTable*) first->GetData());
-    delete (wxHashTable*) first->GetData();
-    m_HandlersStack->Erase(first);
+    m_HandlersStack->DeleteNode(first);
 }
 
 void wxHtmlParser::SetSourceAndSaveState(const wxString& src)
@@ -864,14 +847,9 @@ wxFSFile *wxHtmlParser::OpenURL(wxHtmlURLType WXUNUSED(type),
 class wxMetaTagParser : public wxHtmlParser
 {
 public:
-    wxMetaTagParser() { }
-
     wxObject* GetProduct() { return NULL; }
-
 protected:
     virtual void AddText(const wxChar* WXUNUSED(txt)) {}
-
-    DECLARE_NO_COPY_CLASS(wxMetaTagParser)
 };
 
 class wxMetaTagHandler : public wxHtmlTagHandler
@@ -883,8 +861,6 @@ public:
 
 private:
     wxString *m_retval;
-
-    DECLARE_NO_COPY_CLASS(wxMetaTagHandler)
 };
 
 bool wxMetaTagHandler::HandleTag(const wxHtmlTag& tag)
@@ -896,7 +872,7 @@ bool wxMetaTagHandler::HandleTag(const wxHtmlTag& tag)
     }
 
     if (tag.HasParam(_T("HTTP-EQUIV")) &&
-        tag.GetParam(_T("HTTP-EQUIV")).IsSameAs(_T("Content-Type"), false) &&
+        tag.GetParam(_T("HTTP-EQUIV")).IsSameAs(_T("Content-Type"), FALSE) &&
         tag.HasParam(_T("CONTENT")))
     {
         wxString content = tag.GetParam(_T("CONTENT")).Lower();
@@ -919,5 +895,6 @@ wxString wxHtmlParser::ExtractCharsetInformation(const wxString& markup)
     parser.Parse(markup);
     return charset;
 }
+
 
 #endif

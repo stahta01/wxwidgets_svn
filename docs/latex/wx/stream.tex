@@ -250,14 +250,14 @@ Returns the current position (counted in bytes) in the stream buffer.
 
 \membersection{wxStreamBuffer::SetIntPosition}
 
-\func{void}{SetIntPosition}{\param{size\_t}{ pos}}
+\func{void}{SetIntPosition}{\void}
 
 Sets the current position (in bytes) in the stream buffer.
 
 \wxheading{Warning}
 
 Since it is a very low-level function, there is no check on the position:
-specifing an invalid position can induce unexpected results.
+specify an invalid position can induce unexpected results.
 
 \membersection{wxStreamBuffer::GetLastAccess}
 
@@ -270,8 +270,8 @@ Returns the amount of bytes read during the last IO call to the parent stream.
 \func{void}{Fixed}{\param{bool}{ fixed}}
 
 Toggles the fixed flag. Usually this flag is toggled at the same time as 
-{\it flushable}. This flag allows (when it has the false value) or forbids
-(when it has the true value) the stream buffer to resize dynamically the IO buffer.
+{\it flushable}. This flag allows (when it has the FALSE value) or forbids
+(when it has the TRUE value) the stream buffer to resize dynamically the IO buffer.
 
 \wxheading{See also}
 

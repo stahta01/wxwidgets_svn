@@ -72,8 +72,6 @@ protected:
     {
         return AdjustSize(wxDefaultSize);
     }
-
-    DECLARE_NO_COPY_CLASS(wxStaticLineBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -90,8 +88,6 @@ protected:
     #include "wx/os2/statline.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/statline.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/statline.h"
 #else // use generic implementation for all other platforms
     #include "wx/generic/statline.h"
 #endif

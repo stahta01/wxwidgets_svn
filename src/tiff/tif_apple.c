@@ -41,15 +41,8 @@
  * the file first and TIFFOpen'ing it later.
  */
 
-#ifdef __MACH__
-   	  #include <ansi_prefix.mach.h>
-   	  #include <msl_c_version.h>
-   	  #include <stdint.h>
-   	  #undef WCHAR_MAX
-   	  #include <machine/ansi.h>
-#endif
 #include "tiffiop.h"
-#include <MacErrors.h>
+#include <Errors.h>
 #include <Files.h>
 #include <Memory.h>
 

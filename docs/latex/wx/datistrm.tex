@@ -67,7 +67,7 @@ Destroys the wxDataInputStream object.
 
 \func{void}{BigEndianOrdered}{\param{bool}{ be\_order}}
 
-If {\it be\_order} is true, all data will be read in big-endian
+If {\it be\_order} is TRUE, all data will be read in big-endian
 order, such as written by programs on a big endian architecture 
 (e.g. Sparc) or written by Java-Streams (which always use 
 big-endian order).
@@ -78,21 +78,11 @@ big-endian order).
 
 Reads a single byte from the stream.
 
-\func{void}{Read8}{\param{wxUint8 *}{buffer}, \param{size\_t }{size}}
-
-Reads bytes from the stream in a specified buffer. The amount of
-bytes to read is specified by the {\it size} variable.
-
 \membersection{wxDataInputStream::Read16}
 
 \func{wxUint16}{Read16}{\void}
 
 Reads a 16 bit unsigned integer from the stream.
-
-\func{void}{Read16}{\param{wxUint16 *}{buffer}, \param{size\_t }{size}}
-
-Reads 16 bit unsigned integers from the stream in a specified buffer. the
-amount of 16 bit unsigned integer to read is specified by the {\it size} variable.
 
 \membersection{wxDataInputStream::Read32}
 
@@ -100,32 +90,17 @@ amount of 16 bit unsigned integer to read is specified by the {\it size} variabl
 
 Reads a 32 bit unsigned integer from the stream.
 
-\func{void}{Read32}{\param{wxUint32 *}{buffer}, \param{size\_t }{size}}
-
-Reads 32 bit unsigned integers from the stream in a specified buffer. the amount of
-32 bit unsigned integer to read is specified by the {\it size} variable.
-
 \membersection{wxDataInputStream::Read64}
 
 \func{wxUint64}{Read64}{\void}
 
 Reads a 64 bit unsigned integer from the stream.
 
-\func{void}{Read64}{\param{wxUint64 *}{buffer}, \param{size\_t }{size}}
-
-Reads 64 bit unsigned integers from the stream in a specified buffer. the amount of
-64 bit unsigned integer to read is specified by the {\it size} variable.
-
 \membersection{wxDataInputStream::ReadDouble}
 
 \func{double}{ReadDouble}{\void}
 
 Reads a double (IEEE encoded) from the stream.
-
-\func{void}{ReadDouble}{\param{double *}{buffer}, \param{size\_t }{size}}
-
-Reads double data (IEEE encoded) from the stream in a specified buffer. the amount of
-double to read is specified by the {\it size} variable.
 
 \membersection{wxDataInputStream::ReadString}\label{wxdatainputstreamreadstring}
 

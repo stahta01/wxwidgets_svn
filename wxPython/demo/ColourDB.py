@@ -5,6 +5,11 @@ from wxPython.lib import colourdb
 import images
 
 
+# This loads a whole bunch of new color names and values
+# into wxTheColourDatabase
+
+colourdb.updateColourDB()
+
 #----------------------------------------------------------------------
 
 class TestWindow(wxScrolledWindow):
@@ -115,10 +120,6 @@ class TestPanel(wxPanel):
 
 
 def runTest(frame, nb, log):
-    # This loads a whole bunch of new color names and values
-    # into wxTheColourDatabase
-    colourdb.updateColourDB()
-
     win = TestPanel(nb)
     return win
 

@@ -3,12 +3,12 @@
 // Purpose:     wxMetaFile, wxMetaFileDC classes.
 //              This probably should be restricted to Windows platforms,
 //              but if there is an equivalent on your platform, great.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -55,7 +55,7 @@ class WXDLLEXPORT wxMetafile: public wxGDIObject
       : wxGDIObject()
   { Ref(metafile); }
 
-  wxMetafile(const wxString& file = wxEmptyString);
+  wxMetafile(const wxString& file = "");
   ~wxMetafile(void);
 
   // After this is called, the metafile cannot be used for anything
@@ -84,7 +84,7 @@ class WXDLLEXPORT wxMetafileDC: public wxDC
  public:
   // Don't supply origin and extent
   // Supply them to wxMakeMetaFilePlaceable instead.
-  wxMetafileDC(const wxString& file = wxEmptyString);
+  wxMetafileDC(const wxString& file = "");
 
   // Supply origin and extent (recommended).
   // Then don't need to supply them to wxMakeMetaFilePlaceable.

@@ -22,8 +22,6 @@
 #include "wx/xrc/xh_stbox.h"
 #include "wx/statbox.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxStaticBoxXmlHandler, wxXmlResourceHandler)
-
 wxStaticBoxXmlHandler::wxStaticBoxXmlHandler() 
 : wxXmlResourceHandler() 
 {

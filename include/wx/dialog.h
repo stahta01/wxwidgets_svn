@@ -12,7 +12,7 @@
 #ifndef _WX_DIALOG_H_BASE_
 #define _WX_DIALOG_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "dialogbase.h"
 #endif
 
@@ -20,9 +20,13 @@
 #include "wx/containr.h"
 #include "wx/toplevel.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
-
+// FIXME - temporary hack in absence of wxTLW !!
+#ifndef wxTopLevelWindowNative
+#include "wx/panel.h"
+class WXDLLEXPORT wxDialogBase : public wxPanel
+#else
 class WXDLLEXPORT wxDialogBase : public wxTopLevelWindow
+#endif
 {
 public:
     wxDialogBase() { Init(); }
@@ -35,11 +39,11 @@ public:
     void SetReturnCode(int returnCode) { m_returnCode = returnCode; }
     int GetReturnCode() const { return m_returnCode; }
 
-#if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#if wxUSE_STATTEXT && wxUSE_TEXTCTRL
     // splits text up at newlines and places the
     // lines into a vertical wxBoxSizer
     wxSizer *CreateTextSizer( const wxString &message );
-#endif // wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#endif // wxUSE_STATTEXT && wxUSE_TEXTCTRL
 
 #if wxUSE_BUTTON
     // places buttons into a horizontal wxBoxSizer
@@ -50,9 +54,11 @@ protected:
     // the return code from modal dialog
     int m_returnCode;
 
-    DECLARE_NO_COPY_CLASS(wxDialogBase)
+    // FIXME - temporary hack in absence of wxTLW !!
+#ifdef wxTopLevelWindowNative
     DECLARE_EVENT_TABLE()
     WX_DECLARE_CONTROL_CONTAINER();
+#endif
 };
 
 
@@ -67,10 +73,10 @@ protected:
         #include "wx/gtk/dialog.h"
     #elif defined(__WXMAC__)
         #include "wx/mac/dialog.h"
-    #elif defined(__WXCOCOA__)
-        #include "wx/cocoa/dialog.h"
     #elif defined(__WXPM__)
         #include "wx/os2/dialog.h"
+    #elif defined(__WXSTUBS__)
+        #include "wx/stubs/dialog.h"
     #endif
 #endif
 

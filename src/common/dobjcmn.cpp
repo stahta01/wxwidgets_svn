@@ -6,7 +6,7 @@
 // Created:     19.10.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows Team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dataobjbase.h"
 #endif
 
@@ -97,17 +97,14 @@ bool wxDataObjectBase::IsSupported(const wxDataFormat& format,
 wxDataObjectComposite::wxDataObjectComposite()
 {
     m_preferred = 0;
-}
 
-wxDataObjectComposite::~wxDataObjectComposite()
-{
-    WX_CLEAR_LIST(wxSimpleDataObjectList, m_dataObjects);
+    m_dataObjects.DeleteContents(TRUE);
 }
 
 wxDataObjectSimple *
 wxDataObjectComposite::GetObject(const wxDataFormat& format) const
 {
-    wxSimpleDataObjectList::compatibility_iterator node = m_dataObjects.GetFirst();
+    wxSimpleDataObjectList::Node *node = m_dataObjects.GetFirst();
     while ( node )
     {
         wxDataObjectSimple *dataObj = node->GetData();
@@ -134,7 +131,7 @@ void wxDataObjectComposite::Add(wxDataObjectSimple *dataObject, bool preferred)
 wxDataFormat
 wxDataObjectComposite::GetPreferredFormat(Direction WXUNUSED(dir)) const
 {
-    wxSimpleDataObjectList::compatibility_iterator node = m_dataObjects.Item( m_preferred );
+    wxSimpleDataObjectList::Node *node = m_dataObjects.Item( m_preferred );
 
     wxCHECK_MSG( node, wxFormatInvalid, wxT("no preferred format") );
 
@@ -155,7 +152,6 @@ size_t wxDataObjectComposite::GetBufferOffset( const wxDataFormat& format )
     return dataObj->GetBufferOffset( format );
 }
 
-
 const void* wxDataObjectComposite::GetSizeFromBuffer( const void* buffer,
                                                       size_t* size,
                                                       const wxDataFormat& format )
@@ -167,7 +163,6 @@ const void* wxDataObjectComposite::GetSizeFromBuffer( const void* buffer,
 
     return dataObj->GetSizeFromBuffer( buffer, size, format );
 }
-
 
 void* wxDataObjectComposite::SetSizeInBuffer( void* buffer, size_t size,
                                               const wxDataFormat& format )
@@ -192,7 +187,7 @@ void wxDataObjectComposite::GetAllFormats(wxDataFormat *formats,
                                           Direction WXUNUSED(dir)) const
 {
     size_t n = 0;
-    wxSimpleDataObjectList::compatibility_iterator node;
+    wxSimpleDataObjectList::Node *node;
     for ( node = m_dataObjects.GetFirst(); node; node = node->GetNext() )
     {
         // TODO if ( !outputOnlyToo ) && this one counts ...

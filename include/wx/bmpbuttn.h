@@ -12,8 +12,6 @@
 #ifndef _WX_BMPBUTTON_H_BASE_
 #define _WX_BMPBUTTON_H_BASE_
 
-#include "wx/defs.h"
-
 #if wxUSE_BMPBUTTON
 
 #include "wx/bitmap.h"
@@ -74,13 +72,10 @@ protected:
     // the margins around the bitmap
     int m_marginX,
         m_marginY;
-
 private:
     // Prevent Virtual function hiding warnings
     void SetLabel(const wxString& rsLabel)
-        { wxWindowBase::SetLabel(rsLabel); }
-
-    DECLARE_NO_COPY_CLASS(wxBitmapButtonBase)
+    { wxWindowBase::SetLabel(rsLabel); }
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -93,10 +88,10 @@ private:
     #include "wx/gtk/bmpbuttn.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/bmpbuttn.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/bmpbuttn.h"
 #elif defined(__WXPM__)
     #include "wx/os2/bmpbuttn.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/bmpbuttn.h"
 #endif
 
 #endif // wxUSE_BMPBUTTON

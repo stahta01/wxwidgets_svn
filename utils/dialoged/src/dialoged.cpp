@@ -23,7 +23,9 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/deprecated/setup.h"
+#if !wxUSE_WX_RESOURCES 
+#error "Dialog editor requires wxUSE_WX_RESOURCES" 
+#endif // wxUSE_WX_RESOURCES 
 
 #include "dialoged.h"
 

@@ -6,15 +6,13 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_DEBUG_H_
 #define   _WX_DEBUG_H_
 
-#ifndef __WXWINCE__
 #include  <assert.h>
-#endif
 #include  <limits.h>            // for CHAR_BIT used below
 
 #include  "wx/wxchar.h"         // for __TFILE__ and wxChar
@@ -55,11 +53,11 @@
 // (popping up a message box in your favourite GUI, sending you e-mail or
 // whatever) it will affect all ASSERTs, FAILs and CHECKs in your code.
 //
-// Warning: if you don't like advice on programming style, don't read
+// Warning: if you don't like advices on programming style, don't read
 // further! ;-)
 //
 // Extensive use of these macros is recommended! Remember that ASSERTs are
-// disabled in final build (without __WXDEBUG__ defined), so they add strictly
+// disabled in final (without __WXDEBUG__ defined) build, so they add strictly
 // nothing to your program's code. On the other hand, CHECK macros do stay
 // even in release builds, but in general are not much of a burden, while
 // a judicious use of them might increase your program's stability.
@@ -78,25 +76,25 @@
        szFile and nLine - file name and line number of the ASSERT
        szMsg            - optional message explaining the reason
   */
-  extern void WXDLLIMPEXP_BASE wxOnAssert(const wxChar *szFile,
-                                          int nLine,
-                                          const wxChar *szCond,
-                                          const wxChar *szMsg = NULL);
+  extern void WXDLLEXPORT wxOnAssert(const wxChar *szFile,
+                                     int nLine,
+                                     const wxChar *szCond,
+                                     const wxChar *szMsg = NULL);
 
-  // call this function to break into the debugger unconditionally (assuming
+  // call this function to break into the debugger uncodnitionally (assuming
   // the program is running under debugger, of course)
-  extern void WXDLLIMPEXP_BASE wxTrap();
+  extern void WXDLLEXPORT wxTrap();
 
   // helper function used to implement wxASSERT and wxASSERT_MSG
   //
   // note using "int" and not "bool" for cond to avoid VC++ warnings about
   // implicit conversions when doing "wxAssert( pointer )" and also use of
   // "!!cond" below to ensure that everything is converted to int
-  extern void WXDLLIMPEXP_BASE wxAssert(int cond,
-                                        const wxChar *szFile,
-                                        int nLine,
-                                        const wxChar *szCond,
-                                        const wxChar *szMsg = NULL) ;
+  extern void WXDLLEXPORT wxAssert(int cond,
+                                   const wxChar *szFile,
+                                   int nLine,
+                                   const wxChar *szCond,
+                                   const wxChar *szMsg = NULL) ;
 
   // generic assert macro
   #define wxASSERT(cond) wxAssert(!!(cond), __TFILE__, __LINE__, _T(#cond))
@@ -112,7 +110,7 @@
   //
   // NB: this is made obsolete by wxCOMPILE_TIME_ASSERT() and shouldn't be
   //     used any longer
-  extern bool WXDLLIMPEXP_BASE wxAssertIsEqual(int x, int y);
+  extern bool WXDLLEXPORT wxAssertIsEqual(int x, int y);
 #else
   #define wxTrap()
 
@@ -124,7 +122,7 @@
 
 // Use of wxFalse instead of FALSE suppresses compiler warnings about testing
 // constant expression
-WXDLLIMPEXP_DATA_BASE(extern const bool) wxFalse;
+WXDLLEXPORT_DATA(extern const bool) wxFalse;
 #define wxAssertFailure wxFalse
 
 // special form of assert: always triggers it (in debug mode)
@@ -181,9 +179,19 @@ WXDLLIMPEXP_DATA_BASE(extern const bool) wxFalse;
   particular, this is why we define a struct and not an object (which would
   result in a warning about unused variable) and a named struct (otherwise we'd
   get a warning about an unnamed struct not used to define an object!).
+  The _n__ part is to stop VC++ 7 being confused since it encloses __LINE++ in
+  parentheses. Unfortunately this does not work with other compilers, so
+  we will only enable it when we know the _precise_ symbols to test for.
  */
 
-#define wxMAKE_UNIQUE_ASSERT_NAME           wxMAKE_UNIQUE_NAME(wxAssert_)
+#define wxMAKE_ASSERT_NAME_HELPER(line)     wxAssert_ ## line
+#define wxMAKE_ASSERT_NAME(line)            wxMAKE_ASSERT_NAME_HELPER(line)
+#if 0
+#define wxMAKE_UNIQUE_ASSERT_NAME           wxMAKE_ASSERT_NAME(_n___ ## __LINE__)
+#else
+#define wxMAKE_UNIQUE_ASSERT_NAME           wxMAKE_ASSERT_NAME(__LINE__)
+#endif
+#define wxMAKE_UNIQUE_ASSERT_NAME2(text)    wxMAKE_ASSERT_NAME(text)
 
 /*
   The second argument of this macro must be a valid C++ identifier and not a
@@ -196,13 +204,6 @@ WXDLLIMPEXP_DATA_BASE(extern const bool) wxFalse;
 #define wxCOMPILE_TIME_ASSERT(expr, msg) \
     struct wxMAKE_UNIQUE_ASSERT_NAME { unsigned int msg: expr; }
 
-/*
-   When using VC++ 6 with "Edit and Continue" on, the compiler completely
-   mishandles __LINE__ and so wxCOMPILE_TIME_ASSERT() doesn't work, provide a
-   way to make "unique" assert names by specifying a unique prefix explicitly
- */
-#define wxMAKE_UNIQUE_ASSERT_NAME2(text) wxCONCAT(wxAssert_, text)
-
 #define wxCOMPILE_TIME_ASSERT2(expr, msg, text) \
     struct wxMAKE_UNIQUE_ASSERT_NAME2(text) { unsigned int msg: expr; }
 
@@ -214,20 +215,6 @@ WXDLLIMPEXP_DATA_BASE(extern const bool) wxFalse;
 #define wxASSERT_MIN_BITSIZE(type, size) \
     wxCOMPILE_TIME_ASSERT(sizeof(type) * CHAR_BIT >= size, \
                           wxMAKE_BITSIZE_MSG(type, size))
-
-// ----------------------------------------------------------------------------
-// other miscellaneous debugger-related functions
-// ----------------------------------------------------------------------------
-
-// return true if we're running under debugger
-//
-// currently this only really works under Mac in CodeWarrior builds, it always
-// returns false otherwise
-#ifdef __WXMAC__
-    extern bool WXDLLIMPEXP_BASE wxIsDebuggerRunning();
-#else // !Mac
-    inline bool wxIsDebuggerRunning() { return false; }
-#endif // Mac/!Mac
 
 #endif  // _WX_DEBUG_H_
 

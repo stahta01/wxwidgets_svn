@@ -9,7 +9,7 @@
 #ifndef __ZIPSTREAM_H__
 #define __ZIPSTREAM_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "zipstrm.h"
 #endif
 
@@ -26,7 +26,7 @@
 //--------------------------------------------------------------------------------
 
 
-class WXDLLIMPEXP_BASE wxZipInputStream : public wxInputStream
+class WXDLLEXPORT wxZipInputStream : public wxInputStream
 {
 public:
     wxZipInputStream(const wxString& archive, const wxString& file);
@@ -49,8 +49,6 @@ private:
     // this void* is handle of archive . I'm sorry it is void and not proper
     // type but I don't want to make unzip.h header public.
     void *m_Archive;
-
-    DECLARE_NO_COPY_CLASS(wxZipInputStream)
 };
 
 

@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -35,8 +35,6 @@ TAG_HANDLER_BEGIN(FONT, "FONT" )
 
     TAG_HANDLER_VARS
         wxArrayString m_Faces;
-
-    TAG_HANDLER_CONSTR(FONT) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -116,8 +114,6 @@ TAG_HANDLER_END(FONT)
 
 TAG_HANDLER_BEGIN(FACES_U, "U,STRIKE")
 
-    TAG_HANDLER_CONSTR(FACES_U) { }
-
     TAG_HANDLER_PROC(tag)
     {
         int underlined = m_WParser->GetFontUnderlined();
@@ -140,7 +136,6 @@ TAG_HANDLER_END(FACES_U)
 
 
 TAG_HANDLER_BEGIN(FACES_B, "B,STRONG")
-    TAG_HANDLER_CONSTR(FACES_B) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -164,7 +159,6 @@ TAG_HANDLER_END(FACES_B)
 
 
 TAG_HANDLER_BEGIN(FACES_I, "I,EM,CITE,ADDRESS")
-    TAG_HANDLER_CONSTR(FACES_I) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -188,7 +182,6 @@ TAG_HANDLER_END(FACES_I)
 
 
 TAG_HANDLER_BEGIN(FACES_TT, "TT,CODE,KBD,SAMP")
-    TAG_HANDLER_CONSTR(FACES_TT) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -213,7 +206,6 @@ TAG_HANDLER_END(FACES_TT)
 
 
 TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
-    TAG_HANDLER_CONSTR(Hx) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -254,7 +246,7 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
         }
 
         c = m_WParser->GetContainer();
-        if (c->GetFirstChild())
+        if (c->GetFirstCell())
         {
             m_WParser->CloseContainer();
             m_WParser->OpenContainer();
@@ -290,7 +282,6 @@ TAG_HANDLER_END(Hx)
 
 
 TAG_HANDLER_BEGIN(BIGSMALL, "BIG,SMALL")
-    TAG_HANDLER_CONSTR(BIGSMALL) { }
 
     TAG_HANDLER_PROC(tag)
     {

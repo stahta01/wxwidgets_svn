@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -36,8 +36,6 @@ FORCE_LINK_ME(m_dflist)
 
 TAG_HANDLER_BEGIN(DEFLIST, "DL,DT,DD" )
 
-    TAG_HANDLER_CONSTR(DEFLIST) { }
-
     TAG_HANDLER_PROC(tag)
     {
         wxHtmlContainerCell *c;
@@ -45,7 +43,7 @@ TAG_HANDLER_BEGIN(DEFLIST, "DL,DT,DD" )
 
         if (tag.GetName() == wxT("DL"))
         {
-            if (m_WParser->GetContainer()->GetFirstChild() != NULL)
+            if (m_WParser->GetContainer()->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -54,7 +52,7 @@ TAG_HANDLER_BEGIN(DEFLIST, "DL,DT,DD" )
 
             ParseInner(tag);
 
-            if (m_WParser->GetContainer()->GetFirstChild() != NULL)
+            if (m_WParser->GetContainer()->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();

@@ -6,10 +6,10 @@
 // Created:     09/04/99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows copyright
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma implementation "wxchar.h"
 #endif
 
@@ -30,13 +30,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef __WXWINCE__
-#include <time.h>
 #include <locale.h>
-#else
-#include "wx/msw/wince/time.h"
-#endif
+#include <time.h>
 
 #ifndef WX_PRECOMP
   #include "wx/defs.h"
@@ -50,14 +45,6 @@
   #include <winbase.h>
   #include <winnls.h>
   #include <winnt.h>
-#endif
-
-#if defined(__MWERKS__) && __MSL__ >= 0x6000
-using namespace std ;
-#endif
-
-#ifdef __WXMAC__
-    #include "wx/mac/private.h"
 #endif
 
 #if wxUSE_WCHAR_T
@@ -118,7 +105,7 @@ size_t WXDLLEXPORT wxWC2MB(char *buf, const wchar_t *pwz, size_t n)
 
 bool WXDLLEXPORT wxOKlibc()
 {
-#if wxUSE_WCHAR_T && defined(__UNIX__) && defined(__GLIBC__) && !defined(__WINE__)
+#if wxUSE_WCHAR_T && defined(__UNIX__) && defined(__GLIBC__)
   // glibc 2.0 uses UTF-8 even when it shouldn't
   wchar_t res = 0;
   if ((MB_CUR_MAX == 2) &&
@@ -599,7 +586,7 @@ int vfwprintf(FILE *stream, const wxChar *format, va_list argptr)
     if ( rc != -1 )
     {
         // we can't do much better without Unicode support in libc...
-        if ( fprintf(stream, "%s", s.mb_str()) == -1 )
+        if ( fprintf(stream, "%s", (const char*)s.mb_str()) == -1 )
             return -1;
     }
 
@@ -861,6 +848,7 @@ int wxFscanf( FILE *stream, const wxChar *format, ... )
 {
     va_list argptr;
     va_start(argptr, format);
+
     int ret = vfwscanf(stream, wxFormatConverter(format), argptr);
 
     va_end(argptr);
@@ -949,8 +937,6 @@ int wxVsprintf( wxChar *str, const wxChar *format, va_list argptr )
 
 #endif // wxNEED_PRINTF_CONVERSION
 
-#if wxUSE_WCHAR_T
-
 // ----------------------------------------------------------------------------
 // ctype.h stuff (currently unused)
 // ----------------------------------------------------------------------------
@@ -978,26 +964,15 @@ WXDLLEXPORT int wxTolower(wxChar ch) { return (wxChar)CharLower((LPTSTR)(ch)); }
 WXDLLEXPORT int wxToupper(wxChar ch) { return (wxChar)CharUpper((LPTSTR)(ch)); }
 #endif
 
-#ifndef wxStrdupA
-
-WXDLLEXPORT char *wxStrdupA(const char *s)
+#ifndef wxStrdup
+WXDLLEXPORT wxChar * wxStrdup(const wxChar *psz)
 {
-    return strcpy((char *)malloc(strlen(s) + 1), s);
-}
-
-#endif // wxStrdupA
-
-#ifndef wxStrdupW
-
-WXDLLEXPORT wchar_t * wxStrdupW(const wchar_t *pwz)
-{
-  size_t size = (wxWcslen(pwz) + 1) * sizeof(wchar_t);
-  wchar_t *ret = (wchar_t *) malloc(size);
-  memcpy(ret, pwz, size);
+  size_t size = (wxStrlen(psz) + 1) * sizeof(wxChar);
+  wxChar *ret = (wxChar *) malloc(size);
+  memcpy(ret, psz, size);
   return ret;
 }
-
-#endif // wxStrdupW
+#endif
 
 #ifndef wxStricmp
 int WXDLLEXPORT wxStricmp(const wxChar *psz1, const wxChar *psz2)
@@ -1014,8 +989,7 @@ int WXDLLEXPORT wxStricmp(const wxChar *psz1, const wxChar *psz2)
 #ifndef wxStricmp
 int WXDLLEXPORT wxStrnicmp(const wxChar *s1, const wxChar *s2, size_t n)
 {
-  // initialize the variables just to suppress stupid gcc warning
-  register wxChar c1 = 0, c2 = 0;
+  register wxChar c1, c2;
   while (n && ((c1 = wxTolower(*s1)) == (c2 = wxTolower(*s2)) ) && c1) n--, s1++, s2++;
   if (n) {
     if (c1 < c2) return -1;
@@ -1024,6 +998,39 @@ int WXDLLEXPORT wxStrnicmp(const wxChar *s1, const wxChar *s2, size_t n)
   return 0;
 }
 #endif
+
+#ifndef wxStrtok
+WXDLLEXPORT wxChar * wxStrtok(wxChar *psz, const wxChar *delim, wxChar **save_ptr)
+{
+    if (!psz)
+    {
+        psz = *save_ptr;
+        if ( !psz )
+            return NULL;
+    }
+
+    psz += wxStrspn(psz, delim);
+    if (!*psz)
+    {
+        *save_ptr = (wxChar *)NULL;
+        return (wxChar *)NULL;
+    }
+
+    wxChar *ret = psz;
+    psz = wxStrpbrk(psz, delim);
+    if (!psz)
+    {
+        *save_ptr = (wxChar*)NULL;
+    }
+    else
+    {
+        *psz = wxT('\0');
+        *save_ptr = psz + 1;
+    }
+
+    return ret;
+}
+#endif // wxStrtok
 
 #ifndef wxSetlocale
 WXDLLEXPORT wxWCharBuffer wxSetlocale(int category, const wxChar *locale)
@@ -1238,16 +1245,7 @@ WXDLLEXPORT int wxRename(const wxChar *oldpath, const wxChar *newpath)
 #ifndef wxAtof
 double   WXDLLEXPORT wxAtof(const wxChar *psz)
 {
-#ifdef __WXWINCE__
-    double d;
-    wxString str(psz);
-    if (str.ToDouble(& d))
-        return d;
-    else
-        return 0.0;
-#else
-    return atof(wxConvLocal.cWX2MB(psz));
-#endif
+  return atof(wxConvLocal.cWX2MB(psz));
 }
 #endif
 
@@ -1283,7 +1281,7 @@ wxChar * WXDLLEXPORT wxGetenv(const wxChar *name)
     // printf( "home %s\n", val );
 
     // convert it,
-#if wxUSE_UNICODE
+#ifdef wxUSE_UNICODE
     data = (wxObject *)new wxString(val, wxConvLocal);
 #else
     data = (wxObject *)new wxString(val);
@@ -1301,7 +1299,7 @@ int WXDLLEXPORT wxSystem(const wxChar *psz)
     return system(wxConvLocal.cWX2MB(psz));
 }
 
-#endif // wxNEED_WX_STDLIB_H
+#endif
 
 #ifdef wxNEED_WX_TIME_H
 WXDLLEXPORT size_t   wxStrftime(wxChar *s, size_t max, const wxChar *fmt, const struct tm *tm)
@@ -1323,85 +1321,4 @@ WXDLLEXPORT size_t   wxStrftime(wxChar *s, size_t max, const wxChar *fmt, const 
         return 0;
   }
 }
-#endif // wxNEED_WX_TIME_H
-
-#endif // wxUSE_WCHAR_T
-
-// ----------------------------------------------------------------------------
-// functions which we may need even if !wxUSE_WCHAR_T
-// ----------------------------------------------------------------------------
-
-#ifndef wxStrtok
-
-WXDLLEXPORT wxChar * wxStrtok(wxChar *psz, const wxChar *delim, wxChar **save_ptr)
-{
-    if (!psz)
-    {
-        psz = *save_ptr;
-        if ( !psz )
-            return NULL;
-    }
-
-    psz += wxStrspn(psz, delim);
-    if (!*psz)
-    {
-        *save_ptr = (wxChar *)NULL;
-        return (wxChar *)NULL;
-    }
-
-    wxChar *ret = psz;
-    psz = wxStrpbrk(psz, delim);
-    if (!psz)
-    {
-        *save_ptr = (wxChar*)NULL;
-    }
-    else
-    {
-        *psz = wxT('\0');
-        *save_ptr = psz + 1;
-    }
-
-    return ret;
-}
-
-#endif // wxStrtok
-
-// ----------------------------------------------------------------------------
-// missing C RTL functions
-// ----------------------------------------------------------------------------
-
-#if (defined(__MWERKS__) && !defined(__MACH__) && (__MSL__ < 0x00008000)) || \
-     defined(__WXWINCE__)
-char *strdup(const char *s)
-{
-    char *dest = (char*) malloc( strlen( s ) + 1 ) ;
-    if ( dest )
-        strcpy( dest , s ) ;
-    return dest ;
-}
-#endif
-
-#if (defined(__MWERKS__) && !defined(__MACH__)) || (defined(__WXWINCE__) && _WIN32_WCE <= 211)
-
-int isascii( int c )
-{
-    return ( c >= 0 && c < 128 );
-}
-#endif
-
-#if defined(__WXWINCE__)
-void *calloc( size_t num, size_t size )
-{
-    void** ptr = (void **)malloc(num * size);
-    memset( ptr, 0, num * size);
-    return ptr;
-}
-
-#if (_WIN32_WCE <= 211)
-int isspace(int c)
-{
-    return (c == ' ');
-}
-#endif
-
 #endif

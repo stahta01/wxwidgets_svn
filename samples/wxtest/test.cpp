@@ -77,7 +77,7 @@ MyFrame::MyFrame( wxWindow *parent, wxWindowID id, const wxString &title,
     CreateMyMenuBar();
     
     CreateStatusBar(1);
-    SetStatusText( _T("Welcome!") );
+    SetStatusText( "Welcome!" );
     
      // insert main window here
 }
@@ -93,25 +93,25 @@ void MyFrame::CreateMyMenuBar()
 
 // WDR: handler implementations for MyFrame
 
-void MyFrame::OnTest( wxCommandEvent &WXUNUSED(event) )
+void MyFrame::OnTest( wxCommandEvent &event )
 {
-    MyDialog dialog( this, -1, _T("Test") );
+    MyDialog dialog( this, -1, "Test" );
     dialog.ShowModal();
 }
 
-void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
+void MyFrame::OnAbout( wxCommandEvent &event )
 {
-    wxMessageDialog dialog( this, _T("Welcome to SuperApp 1.0\n(C)opyright Joe Hacker"),
-        _T("About SuperApp"), wxOK|wxICON_INFORMATION );
+    wxMessageDialog dialog( this, "Welcome to SuperApp 1.0\n(C)opyright Joe Hacker",
+        "About SuperApp", wxOK|wxICON_INFORMATION );
     dialog.ShowModal();
 }
 
-void MyFrame::OnQuit( wxCommandEvent &WXUNUSED(event) )
+void MyFrame::OnQuit( wxCommandEvent &event )
 {
      Close( TRUE );
 }
 
-void MyFrame::OnCloseWindow( wxCloseEvent &WXUNUSED(event) )
+void MyFrame::OnCloseWindow( wxCloseEvent &event )
 {
     // if ! saved changes -> return
     
@@ -130,7 +130,7 @@ MyApp::MyApp()
 
 bool MyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame( NULL, -1, _T("SuperApp"), wxPoint(20,20), wxSize(500,340) );
+    MyFrame *frame = new MyFrame( NULL, -1, "SuperApp", wxPoint(20,20), wxSize(500,340) );
     frame->Show( TRUE );
     
     return TRUE;

@@ -11,7 +11,7 @@
 #ifndef _WX_GENERIC_STATLINE_H_
 #define _WX_GENERIC_STATLINE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "statline.h"
 #endif
 
@@ -27,7 +27,7 @@ class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 
 public:
     // constructors and pseudo-constructors
-    wxStaticLine() { m_statbox = NULL; }
+    wxStaticLine() { }
 
     wxStaticLine( wxWindow *parent,
                   wxWindowID id,
@@ -38,8 +38,6 @@ public:
     {
         Create(parent, id, pos, size, style, name);
     }
-
-    virtual ~wxStaticLine();
 
     bool Create( wxWindow *parent,
                  wxWindowID id,

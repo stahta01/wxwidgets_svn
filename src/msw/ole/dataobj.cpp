@@ -6,7 +6,7 @@
 // Created:     10.05.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dataobj.h"
 #endif
 
@@ -39,21 +39,25 @@
 
 #include "wx/msw/private.h"         // includes <windows.h>
 
-#ifdef __WXWINCE__
-#include <winreg.h>
-#endif
-
-// for some compilers, the entire ole2.h must be included, not only oleauto.h
-#if wxUSE_NORLANDER_HEADERS || defined(__WATCOMC__) || defined(__WXWINCE__)
+#if wxUSE_NORLANDER_HEADERS
   #include <ole2.h>
 #endif
-
 #include <oleauto.h>
+
+#ifndef __WIN32__
+  #include <ole2.h>
+  #include <olestd.h>
+#endif
+
 #include <shlobj.h>
 
 #include "wx/msw/ole/oleutils.h"
 
 #include "wx/msw/dib.h"
+
+#ifdef __WXWINE__
+#define LPDROPFILES DROPFILES*
+#endif
 
 #ifndef CFSTR_SHELLURL
 #define CFSTR_SHELLURL _T("UniformResourceLocator")
@@ -66,7 +70,7 @@
 #ifdef __WXDEBUG__
     static const wxChar *GetTymedName(DWORD tymed);
 #else // !Debug
-    #define GetTymedName(tymed) wxEmptyString
+    #define GetTymedName(tymed) _T("")
 #endif // Debug/!Debug
 
 // ----------------------------------------------------------------------------
@@ -91,8 +95,6 @@ private:
     CLIPFORMAT *m_formats;  // formats we can provide data in
     ULONG       m_nCount,   // number of formats we support
                 m_nCurrent; // current enum position
-
-    DECLARE_NO_COPY_CLASS(wxIEnumFORMATETC)
 };
 
 // ----------------------------------------------------------------------------
@@ -127,8 +129,6 @@ private:
     wxDataObject *m_pDataObject;      // pointer to C++ class we belong to
 
     bool m_mustDelete;
-
-    DECLARE_NO_COPY_CLASS(wxIDataObject)
 };
 
 // ============================================================================
@@ -157,7 +157,8 @@ wxString wxDataFormat::GetId() const
     wxCHECK_MSG( !IsStandard(), s,
                  wxT("name of predefined format cannot be retrieved") );
 
-    int len = ::GetClipboardFormatName(m_format, wxStringBuffer(s, max), max);
+    int len = ::GetClipboardFormatName(m_format, s.GetWriteBuf(max), max);
+    s.UngetWriteBuf();
 
     if ( !len )
     {
@@ -190,27 +191,31 @@ wxIEnumFORMATETC::wxIEnumFORMATETC(const wxDataFormat *formats, ULONG nCount)
 
 STDMETHODIMP wxIEnumFORMATETC::Next(ULONG      celt,
                                     FORMATETC *rgelt,
-                                    ULONG     *pceltFetched)
+                                    ULONG     *WXUNUSED(pceltFetched))
 {
     wxLogTrace(wxTRACE_OleCalls, wxT("wxIEnumFORMATETC::Next"));
 
-    ULONG numFetched = 0;
-    while (m_nCurrent < m_nCount && numFetched < celt) {
+    if ( celt > 1 ) {
+        // we only return 1 element at a time - mainly because I'm too lazy to
+        // implement something which you're never asked for anyhow
+        return S_FALSE;
+    }
+
+    if ( m_nCurrent < m_nCount ) {
         FORMATETC format;
         format.cfFormat = m_formats[m_nCurrent++];
         format.ptd      = NULL;
         format.dwAspect = DVASPECT_CONTENT;
         format.lindex   = -1;
         format.tymed    = TYMED_HGLOBAL;
+        *rgelt = format;
 
-        *rgelt++ = format;
-        numFetched++;
+        return S_OK;
     }
-
-    if (pceltFetched)
-        *pceltFetched = numFetched;
-
-    return numFetched == celt ? S_OK : S_FALSE;
+    else {
+        // bad index
+        return S_FALSE;
+    }
 }
 
 STDMETHODIMP wxIEnumFORMATETC::Skip(ULONG celt)
@@ -302,7 +307,6 @@ STDMETHODIMP wxIDataObject::GetData(FORMATETC *pformatetcIn, STGMEDIUM *pmedium)
             pmedium->tymed = TYMED_ENHMF;
             break;
 
-#ifndef __WXWINCE__
         case wxDF_METAFILE:
             pmedium->hGlobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE,
                                            sizeof(METAFILEPICT));
@@ -312,7 +316,7 @@ STDMETHODIMP wxIDataObject::GetData(FORMATETC *pformatetcIn, STGMEDIUM *pmedium)
             }
             pmedium->tymed = TYMED_MFPICT;
             break;
-#endif
+
         default:
             // alloc memory
             size_t size = m_pDataObject->GetDataSize(format);
@@ -410,7 +414,6 @@ STDMETHODIMP wxIDataObject::GetDataHere(FORMATETC *pformatetc,
     return S_OK;
 }
 
-
 // set data functions
 STDMETHODIMP wxIDataObject::SetData(FORMATETC *pformatetc,
                                     STGMEDIUM *pmedium,
@@ -471,18 +474,16 @@ STDMETHODIMP wxIDataObject::SetData(FORMATETC *pformatetc,
     || ( defined(__MWERKS__) && defined(__WXMSW__) )
                         size = std::wcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
 #else
-                        size = wxWcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
+                        size = ::wxWcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
 #endif
                         break;
 #endif
                     case CF_BITMAP:
-#ifndef __WXWINCE__
                     case CF_HDROP:
                         // these formats don't use size at all, anyhow (but
                         // pass data by handle, which is always a single DWORD)
                         size = 0;
                         break;
-#endif
 
                     case CF_DIB:
                         // the handler will calculate size itself (it's too
@@ -490,11 +491,10 @@ STDMETHODIMP wxIDataObject::SetData(FORMATETC *pformatetc,
                         size = 0;
                         break;
 
-#ifndef __WXWINCE__
                     case CF_METAFILEPICT:
                         size = sizeof(METAFILEPICT);
                         break;
-#endif
+
                     default:
                         {
                             // we suppose that the size precedes the data
@@ -761,45 +761,27 @@ const wxChar *wxDataObject::GetFormatName(wxDataFormat format)
 
 size_t wxBitmapDataObject::GetDataSize() const
 {
-#if wxUSE_WXDIB
-    return wxDIB::ConvertFromBitmap(NULL, GetHbitmapOf(GetBitmap()));
-#else
-    return 0;
-#endif
+    return wxConvertBitmapToDIB(NULL, GetBitmap());
 }
 
 bool wxBitmapDataObject::GetDataHere(void *buf) const
 {
-#if wxUSE_WXDIB
-    BITMAPINFO * const pbi = (BITMAPINFO *)buf;
-
-    return wxDIB::ConvertFromBitmap(pbi, GetHbitmapOf(GetBitmap())) != 0;
-#else
-    return FALSE;
-#endif
+    return wxConvertBitmapToDIB((LPBITMAPINFO)buf, GetBitmap()) != 0;
 }
 
 bool wxBitmapDataObject::SetData(size_t WXUNUSED(len), const void *buf)
 {
-#if wxUSE_WXDIB
-    const BITMAPINFO * const pbmi = (const BITMAPINFO *)buf;
+    wxBitmap bitmap(wxConvertDIBToBitmap((const LPBITMAPINFO)buf));
 
-    HBITMAP hbmp = wxDIB::ConvertToBitmap(pbmi);
+    if ( !bitmap.Ok() ) {
+        wxFAIL_MSG(wxT("pasting/dropping invalid bitmap"));
 
-    wxCHECK_MSG( hbmp, FALSE, wxT("pasting/dropping invalid bitmap") );
-
-    const BITMAPINFOHEADER * const pbmih = &pbmi->bmiHeader;
-    wxBitmap bitmap(pbmih->biWidth, pbmih->biHeight, pbmih->biBitCount);
-    bitmap.SetHBITMAP((WXHBITMAP)hbmp);
-
-    // TODO: create wxPalette if the bitmap has any
+        return FALSE;
+    }
 
     SetBitmap(bitmap);
 
     return TRUE;
-#else
-    return FALSE;
-#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -975,7 +957,6 @@ bool wxBitmapDataObject::SetData(const wxDataFormat& format,
 
 bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *pData)
 {
-#ifndef __WXWINCE__
     m_filenames.Empty();
 
     // the documentation states that the first member of DROPFILES structure is
@@ -998,7 +979,8 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *pData)
         // +1 for terminating NUL
         len = ::DragQueryFile(hdrop, n, NULL, 0) + 1;
 
-        UINT len2 = ::DragQueryFile(hdrop, n, wxStringBuffer(str, len), len);
+        UINT len2 = ::DragQueryFile(hdrop, n, str.GetWriteBuf(len), len);
+        str.UngetWriteBuf();
         m_filenames.Add(str);
 
         if ( len2 != len - 1 ) {
@@ -1008,9 +990,6 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *pData)
     }
 
     return TRUE;
-#else
-    return FALSE;
-#endif
 }
 
 void wxFileDataObject::AddFile(const wxString& file)
@@ -1023,7 +1002,6 @@ void wxFileDataObject::AddFile(const wxString& file)
 
 size_t wxFileDataObject::GetDataSize() const
 {
-#ifndef __WXWINCE__
     // size returned will be the size of the DROPFILES structure,
     // plus the list of filesnames (null byte separated), plus
     // a double null at the end
@@ -1043,14 +1021,10 @@ size_t wxFileDataObject::GetDataSize() const
     }
 
     return sz;
-#else
-    return 0;
-#endif
 }
 
 bool wxFileDataObject::GetDataHere(void *pData) const
 {
-#ifndef __WXWINCE__
     // pData points to an externally allocated memory block
     // created using the size returned by GetDataSize()
 
@@ -1087,9 +1061,6 @@ bool wxFileDataObject::GetDataHere(void *pData) const
     *pbuf = wxT('\0');
 
     return TRUE;
-#else
-    return FALSE;
-#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -1133,12 +1104,7 @@ protected:
 
         return TRUE;
     }
-    virtual bool GetDataHere(const wxDataFormat& WXUNUSED(format),
-                             void *buf) const
-        { return GetDataHere(buf); }
 #endif
-
-    DECLARE_NO_COPY_CLASS(CFSTR_SHELLURLDataObject)
 };
 
 
@@ -1174,7 +1140,8 @@ wxString wxURLDataObject::GetURL() const
 
     size_t len = m_dataObjectLast->GetDataSize();
 
-    m_dataObjectLast->GetDataHere(wxStringBuffer(url, len));
+    m_dataObjectLast->GetDataHere(url.GetWriteBuf(len));
+    url.UngetWriteBuf();
 
     return url;
 }
@@ -1193,6 +1160,140 @@ void wxURLDataObject::SetURL(const wxString& url)
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
+
+static size_t wxGetNumOfBitmapColors(size_t bitsPerPixel)
+{
+    switch ( bitsPerPixel )
+    {
+        case 1:
+            // monochrome bitmap, 2 entries
+            return 2;
+
+        case 4:
+            return 16;
+
+        case 8:
+            return 256;
+
+        case 24:
+            // may be used with 24bit bitmaps, but we don't use it here - fall
+            // through
+
+        case 16:
+        case 32:
+            // bmiColors not used at all with these bitmaps
+            return 0;
+
+        default:
+            wxFAIL_MSG( wxT("unknown bitmap format") );
+            return 0;
+    }
+}
+
+size_t wxConvertBitmapToDIB(LPBITMAPINFO pbi, const wxBitmap& bitmap)
+{
+    wxASSERT_MSG( bitmap.Ok(), wxT("invalid bmp can't be converted to DIB") );
+
+    // shouldn't be selected into a DC or GetDIBits() would fail
+    wxASSERT_MSG( !bitmap.GetSelectedInto(),
+                  wxT("can't copy bitmap selected into wxMemoryDC") );
+
+    // prepare all the info we need
+    BITMAP bm;
+    HBITMAP hbmp = (HBITMAP)bitmap.GetHBITMAP();
+    if ( !GetObject(hbmp, sizeof(bm), &bm) )
+    {
+        wxLogLastError(wxT("GetObject(bitmap)"));
+
+        return 0;
+    }
+
+    // calculate the number of bits per pixel and the number of items in
+    // bmiColors array (whose meaning depends on the bitmap format)
+    WORD biBits = bm.bmPlanes * bm.bmBitsPixel;
+    WORD biColors = (WORD)wxGetNumOfBitmapColors(biBits);
+
+    BITMAPINFO bi2;
+
+    bool wantSizeOnly = pbi == NULL;
+    if ( wantSizeOnly )
+        pbi = &bi2;
+
+    // just for convenience
+    BITMAPINFOHEADER& bi = pbi->bmiHeader;
+
+    bi.biSize = sizeof(BITMAPINFOHEADER);
+    bi.biWidth = bm.bmWidth;
+    bi.biHeight = bm.bmHeight;
+    bi.biPlanes = 1;
+    bi.biBitCount = biBits;
+    bi.biCompression = BI_RGB;
+    bi.biSizeImage = 0;
+    bi.biXPelsPerMeter = 0;
+    bi.biYPelsPerMeter = 0;
+    bi.biClrUsed = 0;
+    bi.biClrImportant = 0;
+
+    // memory we need for BITMAPINFO only
+    DWORD dwLen = bi.biSize + biColors * sizeof(RGBQUAD);
+
+    // first get the image size
+    ScreenHDC hdc;
+    if ( !GetDIBits(hdc, hbmp, 0, bi.biHeight, NULL, pbi, DIB_RGB_COLORS) )
+    {
+        wxLogLastError(wxT("GetDIBits(NULL)"));
+
+        return 0;
+    }
+
+    if ( wantSizeOnly )
+    {
+        // size of the header + size of the image
+        return dwLen + bi.biSizeImage;
+    }
+
+    // and now copy the bits
+    void *image = (char *)pbi + dwLen;
+    if ( !GetDIBits(hdc, hbmp, 0, bi.biHeight, image, pbi, DIB_RGB_COLORS) )
+    {
+        wxLogLastError(wxT("GetDIBits"));
+
+        return 0;
+    }
+
+    return dwLen + bi.biSizeImage;
+}
+
+wxBitmap wxConvertDIBToBitmap(const LPBITMAPINFO pbmi)
+{
+    // here we get BITMAPINFO struct followed by the actual bitmap bits and
+    // BITMAPINFO starts with BITMAPINFOHEADER followed by colour info
+    const BITMAPINFOHEADER *pbmih = &pbmi->bmiHeader;
+
+    // biClrUsed has the number of colors, unless it's 0
+    int numColors = pbmih->biClrUsed;
+    if (numColors==0)
+    {
+        numColors = wxGetNumOfBitmapColors(pbmih->biBitCount);
+    }
+
+    // offset of image from the beginning of the header
+    DWORD ofs = numColors * sizeof(RGBQUAD);
+    void *image = (char *)pbmih + sizeof(BITMAPINFOHEADER) + ofs;
+
+    ScreenHDC hdc;
+    HBITMAP hbmp = CreateDIBitmap(hdc, pbmih, CBM_INIT,
+                                  image, pbmi, DIB_RGB_COLORS);
+    if ( !hbmp )
+    {
+        wxLogLastError(wxT("CreateDIBitmap"));
+    }
+
+    wxBitmap bitmap(pbmih->biWidth, pbmih->biHeight, pbmih->biBitCount);
+    bitmap.SetHBITMAP((WXHBITMAP)hbmp);
+
+    return bitmap;
+}
 
 #ifdef __WXDEBUG__
 

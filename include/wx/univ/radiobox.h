@@ -6,13 +6,13 @@
 // Created:     11.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_RADIOBOX_H_
 #define _WX_UNIV_RADIOBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univradiobox.h"
 #endif
 
@@ -21,7 +21,7 @@ class WXDLLEXPORT wxRadioButton;
 #include "wx/statbox.h"
 #include "wx/dynarray.h"
 
-WX_DEFINE_EXPORTED_ARRAY_PTR(wxRadioButton *, wxArrayRadioButtons);
+WX_DEFINE_ARRAY(wxRadioButton *, wxArrayRadioButtons);
 
 // ----------------------------------------------------------------------------
 // wxRadioBox: a box full of radio buttons

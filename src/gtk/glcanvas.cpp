@@ -9,12 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "glcanvas.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/setup.h"
 
@@ -35,10 +32,6 @@ extern "C"
 }
 
 #include "wx/gtk/win_gtk.h"
-
-// DLL options compatibility check:
-#include "wx/build.h"
-WX_CHECK_BUILD_OPTIONS("wxGL")
 
 //---------------------------------------------------------------------------
 // global data
@@ -130,12 +123,15 @@ void wxGLContext::SetCurrent()
 
 void wxGLContext::SetColour(const wxChar *colour)
 {
-    wxColour col = wxTheColourDatabase->Find(colour);
-    if (col.Ok())
+    float r = 0.0;
+    float g = 0.0;
+    float b = 0.0;
+    wxColour *col = wxTheColourDatabase->FindColour(colour);
+    if (col)
     {
-        float r = (float)(col.Red()/256.0);
-        float g = (float)(col.Green()/256.0);
-        float b = (float)(col.Blue()/256.0);
+        r = (float)(col->Red()/256.0);
+        g = (float)(col->Green()/256.0);
+        b = (float)(col->Blue()/256.0);
         glColor3f( r, g, b);
     }
 }

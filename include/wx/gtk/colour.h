@@ -11,7 +11,7 @@
 #ifndef __GTKCOLOURH__
 #define __GTKCOLOURH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -79,9 +79,6 @@ public:
     unsigned char Green() const;
     unsigned char Blue() const;
 
-
-    // Get colour from name or wxNullColour
-    static wxColour CreateByName(const wxString& name);
 
     // Implementation part
     void CalcPixel( GdkColormap *cmap );

@@ -22,6 +22,7 @@
     #include "wx/generic/colrdlgg.h"
 
     #define wxColourDialog wxGenericColourDialog
+    #define sm_classwxColourDialog sm_classwxGenericColourDialog
 #endif
 
 // get the colour from user and return it

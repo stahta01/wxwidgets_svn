@@ -170,41 +170,6 @@ class wxIcon(wxIconPtr):
 
 
 
-class wxIconLocationPtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self, delfunc=gdic.delete_wxIconLocation):
-        if self.thisown == 1:
-            try:
-                delfunc(self)
-            except:
-                pass
-    def IsOk(self, *_args, **_kwargs):
-        val = gdic.wxIconLocation_IsOk(self, *_args, **_kwargs)
-        return val
-    def SetFileName(self, *_args, **_kwargs):
-        val = gdic.wxIconLocation_SetFileName(self, *_args, **_kwargs)
-        return val
-    def GetFileName(self, *_args, **_kwargs):
-        val = gdic.wxIconLocation_GetFileName(self, *_args, **_kwargs)
-        return val
-    def SetIndex(self, *_args, **_kwargs):
-        val = gdic.wxIconLocation_SetIndex(self, *_args, **_kwargs)
-        return val
-    def GetIndex(self, *_args, **_kwargs):
-        val = gdic.wxIconLocation_GetIndex(self, *_args, **_kwargs)
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxIconLocation instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxIconLocation(wxIconLocationPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = gdic.new_wxIconLocation(*_args,**_kwargs)
-        self.thisown = 1
-
-
-
-
 class wxIconBundlePtr :
     def __init__(self,this):
         self.this = this
@@ -325,21 +290,12 @@ class wxColourDatabasePtr(wxObjectPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def __del__(self, delfunc=gdic.delete_wxColourDatabase):
-        if self.thisown == 1:
-            try:
-                delfunc(self)
-            except:
-                pass
-    def Find(self, *_args, **_kwargs):
-        val = gdic.wxColourDatabase_Find(self, *_args, **_kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
+    def FindColour(self, *_args, **_kwargs):
+        val = gdic.wxColourDatabase_FindColour(self, *_args, **_kwargs)
+        if val: val = wxColourPtr(val) 
         return val
     def FindName(self, *_args, **_kwargs):
         val = gdic.wxColourDatabase_FindName(self, *_args, **_kwargs)
-        return val
-    def AddColour(self, *_args, **_kwargs):
-        val = gdic.wxColourDatabase_AddColour(self, *_args, **_kwargs)
         return val
     def Append(self, *_args, **_kwargs):
         val = gdic.wxColourDatabase_Append(self, *_args, **_kwargs)
@@ -347,9 +303,8 @@ class wxColourDatabasePtr(wxObjectPtr):
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxColourDatabase instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxColourDatabase(wxColourDatabasePtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = gdic.new_wxColourDatabase(*_args,**_kwargs)
-        self.thisown = 1
+    def __init__(self,this):
+        self.this = this
 
 
 
@@ -1072,20 +1027,6 @@ class wxWindowDC(wxWindowDCPtr):
 
 
 
-class wxMirrorDCPtr(wxDCPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxMirrorDC instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxMirrorDC(wxMirrorDCPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = gdic.new_wxMirrorDC(*_args,**_kwargs)
-        self.thisown = 1
-
-
-
-
 class wxPalettePtr(wxGDIObjectPtr):
     def __init__(self,this):
         self.this = this
@@ -1356,11 +1297,6 @@ def wxIconFromXPMData(*_args, **_kwargs):
 
 def wxIconFromBitmap(*_args, **_kwargs):
     val = gdic.wxIconFromBitmap(*_args,**_kwargs)
-    if val: val = wxIconPtr(val); val.thisown = 1
-    return val
-
-def wxIconFromLocation(*_args, **_kwargs):
-    val = gdic.wxIconFromLocation(*_args,**_kwargs)
     if val: val = wxIconPtr(val); val.thisown = 1
     return val
 

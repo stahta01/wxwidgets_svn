@@ -12,7 +12,7 @@
 #ifndef _WX_LISTBOX_H_
 #define _WX_LISTBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "listbox.h"
 #endif
 
@@ -28,7 +28,7 @@
   // define the array of list box items
   #include  "wx/dynarray.h"
 
-  WX_DEFINE_EXPORTED_ARRAY_PTR(wxOwnerDrawn *, wxListBoxItemsArray);
+  WX_DEFINE_EXPORTED_ARRAY(wxOwnerDrawn *, wxListBoxItemsArray);
 #endif // wxUSE_OWNER_DRAWN
 
 // forward decl for GetSelections()
@@ -129,7 +129,7 @@ protected:
 #endif
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxListBox)
+    DECLARE_DYNAMIC_CLASS(wxListBox)
 };
 
 #endif // wxUSE_LISTBOX

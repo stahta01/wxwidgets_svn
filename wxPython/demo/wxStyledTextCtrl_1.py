@@ -6,7 +6,7 @@ import images
 
 #----------------------------------------------------------------------
 
-debug = 1
+debug = 0
 
 
 demoText = """\
@@ -167,7 +167,7 @@ def runTest(frame, nb, log):
     #ed.SetBufferedDraw(False)
     #ed.StyleClearAll()
     #ed.SetScrollWidth(800)
-    #ed.SetWrapMode(True)
+    #ed.SetWrapMode(wxSTC_WRAP_WORD)
 
     ed.SetText(demoText)
     if wxUSE_UNICODE:

@@ -12,7 +12,7 @@
 #ifndef   _STATBR95_H
 #define   _STATBR95_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "statbr95.h"
 #endif
 
@@ -66,7 +66,7 @@ protected:
     void DoMoveWindow(int x, int y, int width, int height);
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxStatusBar95)
+    DECLARE_DYNAMIC_CLASS(wxStatusBar95);
 };
 
 #endif  // wxUSE_NATIVE_STATUSBAR

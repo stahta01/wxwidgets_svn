@@ -7,12 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "popupwin.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_POPUPWIN
 
@@ -152,6 +151,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxPopupWindow, wxWindow)
 
 wxPopupWindow::~wxPopupWindow()
 {
+    if (GTK_WIDGET_HAS_GRAB(m_widget))
+        gtk_grab_remove( m_widget );
 }
 
 bool wxPopupWindow::Create( wxWindow *parent, int style )
@@ -348,7 +349,13 @@ bool wxPopupWindow::Show( bool show )
         GtkOnSize( m_x, m_y, m_width, m_height );
     }
     
+    if (!show)
+        gtk_grab_remove( m_widget );
+    
     bool ret = wxWindow::Show( show );
+    
+    if (show)
+        gtk_grab_add( m_widget );
     
     return ret;
 }

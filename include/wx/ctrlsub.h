@@ -6,13 +6,13 @@
 // Created:     22.10.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CTRLSUB_H_BASE_
 #define _WX_CTRLSUB_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "controlwithitems.h"
 #endif
 
@@ -44,17 +44,8 @@ public:
     int Append(const wxString& item, wxClientData *clientData)
         { int n = DoAppend(item); SetClientObject(n, clientData); return n; }
 
-    // only for rtti needs (separate name)
-    void AppendString( const wxString& item)
-    { Append( item ) ; }
-
     // append several items at once to the control
     void Append(const wxArrayString& strings);
-
-    int Insert(const wxString& item, int pos)
-        { return DoInsert(item, pos); }
-    int Insert(const wxString& item, int pos, void *clientData);
-    int Insert(const wxString& item, int pos, wxClientData *clientData);
 
     // deleting items
     // --------------
@@ -66,10 +57,7 @@ public:
     // -----------------
 
     virtual int GetCount() const = 0;
-    bool IsEmpty() const { return GetCount() == 0; }
-
     virtual wxString GetString(int n) const = 0;
-    wxArrayString GetStrings() const;
     virtual void SetString(int n, const wxString& s) = 0;
     virtual int FindString(const wxString& s) const = 0;
 
@@ -104,7 +92,6 @@ public:
 
 protected:
     virtual int DoAppend(const wxString& item) = 0;
-    virtual int DoInsert(const wxString& item, int pos) = 0;
 
     virtual void DoSetItemClientData(int n, void* clientData) = 0;
     virtual void* DoGetItemClientData(int n) const = 0;
@@ -115,47 +102,57 @@ protected:
     wxClientDataType m_clientDataItemsType;
 };
 
-// this macro must (unfortunately) be used in any class deriving from both
-// wxItemContainer and wxControl because otherwise there is ambiguity when
-// calling GetClientXXX() functions -- the compiler can't choose between the
-// two versions
-#define wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST                    \
-    void SetClientData(void *data)                                         \
-        { wxControl::SetClientData(data); }                                \
-    void *GetClientData() const                                            \
-        { return wxControl::GetClientData(); }                             \
-    void SetClientObject(wxClientData *data)                               \
-        { wxControl::SetClientObject(data); }                              \
-    wxClientData *GetClientObject() const                                  \
-        { return wxControl::GetClientObject(); }                           \
-    void SetClientData(int n, void* clientData)                            \
-        { wxItemContainer::SetClientData(n, clientData); }                 \
-    void* GetClientData(int n) const                                       \
-        { return wxItemContainer::GetClientData(n); }                      \
-    void SetClientObject(int n, wxClientData* clientData)                  \
-        { wxItemContainer::SetClientObject(n, clientData); }               \
-    wxClientData* GetClientObject(int n) const                             \
-        { return wxItemContainer::GetClientObject(n); }
-
 class WXDLLEXPORT wxControlWithItems : public wxControl, public wxItemContainer
 {
 public:
     wxControlWithItems() { }
     virtual ~wxControlWithItems();
-
+    
     // we have to redefine these functions here to avoid ambiguities in classes
     // deriving from us which would arise otherwise because both base classses
     // have the methods with the same names - hopefully, a smart compiler can
     // optimize away these simple inline wrappers so we don't suffer much from
     // this
-    wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
 
-    // usually the controls like list/combo boxes have their own background
-    // colour
-    virtual bool ShouldInheritColours() const { return false; }
+    void SetClientData(void *data)
+    {
+        wxControl::SetClientData(data);
+    }
 
-private:
-    DECLARE_NO_COPY_CLASS(wxControlWithItems)
+    void *GetClientData() const
+    {
+        return wxControl::GetClientData();
+    }
+
+    void SetClientObject(wxClientData *data)
+    {
+        wxControl::SetClientObject(data);
+    }
+
+    wxClientData *GetClientObject() const
+    {
+        return wxControl::GetClientObject();
+    }
+
+    void SetClientData(int n, void* clientData)
+    {
+        wxItemContainer::SetClientData(n, clientData);
+    }
+
+    void* GetClientData(int n) const
+    {
+        return wxItemContainer::GetClientData(n);
+    }
+
+    void SetClientObject(int n, wxClientData* clientData)
+    {
+        wxItemContainer::SetClientObject(n, clientData);
+    }
+
+    wxClientData* GetClientObject(int n) const
+    {
+        return wxItemContainer::GetClientObject(n);
+    }
 };
 
 #endif // wxUSE_CONTROLS

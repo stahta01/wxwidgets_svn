@@ -6,7 +6,7 @@
 // Created:     30.12.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -37,9 +37,9 @@
     #include "wx/frame.h"
     #include "wx/control.h"
     #include "wx/containr.h"        // wxSetFocusToChild()
+    #include "wx/module.h"        // wxSetFocusToChild()
 #endif //WX_PRECOMP
 
-#include "wx/module.h"        // wxSetFocusToChild()
 #include "wx/os2/private.h"
 
 // ----------------------------------------------------------------------------
@@ -581,7 +581,7 @@ bool wxTopLevelWindowOS2::Create(
 , wxWindowID                        vId
 , const wxString&                   rsTitle
 , const wxPoint&                    rPos
-, const wxSize&                     rSizeOrig
+, const wxSize&                     rSize
 , long                              lStyle
 , const wxString&                   rsName
 )
@@ -593,19 +593,6 @@ bool wxTopLevelWindowOS2::Create(
     m_windowStyle = lStyle;
     SetName(rsName);
     m_windowId = vId == -1 ? NewControlId() : vId;
-
-    // always create a frame of some reasonable, even if arbitrary, size (at
-    // least for MSW compatibility)
-    wxSize rSize = rSizeOrig;
-    if ( rSize.x == -1 || rSize.y == -1 )
-    {
-        wxSize sizeDpy = wxGetDisplaySize();
-        if ( rSize.x == -1 )
-            rSize.x = sizeDpy.x / 3;
-        if ( rSize.y == -1 )
-            rSize.y = sizeDpy.y / 5;
-    }
-
     wxTopLevelWindows.Append(this);
     if (pParent)
         pParent->AddChild(this);

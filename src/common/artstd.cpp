@@ -50,6 +50,23 @@ protected:
 #define ART(artId, xpmRc) \
     if ( id == artId ) return wxBitmap(xpmRc##_xpm);
 
+// Compatibility hack to use wxApp::GetStdIcon of overriden by the user
+#if WXWIN_COMPATIBILITY_2_2
+    #define GET_STD_ICON_FROM_APP(iconId) \
+        if ( client == wxART_MESSAGE_BOX ) \
+        { \
+            wxIcon icon = wxTheApp->GetStdIcon(iconId); \
+            if ( icon.Ok() ) \
+            { \
+                wxBitmap bmp; \
+                bmp.CopyFromIcon(icon); \
+                return bmp; \
+            } \
+        }
+#else
+    #define GET_STD_ICON_FROM_APP(iconId)
+#endif
+
 // There are two ways of getting the standard icon: either via XPMs or via
 // wxIcon ctor. This depends on the platform:
 #if defined(__WXUNIVERSAL__)
@@ -70,6 +87,7 @@ protected:
 #define ART_MSGBOX(artId, iconId, xpmRc) \
     if ( id == artId ) \
     { \
+        GET_STD_ICON_FROM_APP(iconId) \
         CREATE_STD_ICON(#iconId, xpmRc) \
     }
 
@@ -115,7 +133,6 @@ protected:
     #include "../../art/htmbook.xpm"
     #include "../../art/htmfoldr.xpm"
     #include "../../art/htmpage.xpm"
-    #include "../../art/missimg.xpm"
 #endif // wxUSE_HTML
 
 #include "../../art/addbookm.xpm"
@@ -147,7 +164,7 @@ protected:
 // ----------------------------------------------------------------------------
 
 wxBitmap wxDefaultArtProvider::CreateBitmap(const wxArtID& id,
-                                            const wxArtClient& WXUNUSED(client),
+                                            const wxArtClient& client,
                                             const wxSize& WXUNUSED(size))
 {
     // wxMessageBox icons:
@@ -163,7 +180,6 @@ wxBitmap wxDefaultArtProvider::CreateBitmap(const wxArtID& id,
     ART(wxART_HELP_BOOK,                           htmbook)
     ART(wxART_HELP_FOLDER,                         htmfoldr)
     ART(wxART_HELP_PAGE,                           htmpage)
-    ART(wxART_MISSING_IMAGE,                       missimg)
 #endif // wxUSE_HTML
     ART(wxART_ADD_BOOKMARK,                        addbookm)
     ART(wxART_DEL_BOOKMARK,                        delbookm)

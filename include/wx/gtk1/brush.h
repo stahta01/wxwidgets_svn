@@ -11,7 +11,7 @@
 #ifndef __GTKBRUSHH__
 #define __GTKBRUSHH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -36,7 +36,7 @@ class wxBrush: public wxGDIObject
 public:
     wxBrush() { }
     
-    wxBrush( const wxColour &colour, int style = wxSOLID );
+    wxBrush( const wxColour &colour, int style );
     wxBrush( const wxBitmap &stippleBitmap );
     ~wxBrush();
     

@@ -12,55 +12,69 @@
 #ifndef _GAUGE95_H_
 #define _GAUGE95_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "gauge95.h"
 #endif
 
-#if wxUSE_GAUGE
+#if wxUSE_SLIDER
+
+#include "wx/control.h"
 
 WXDLLEXPORT_DATA(extern const wxChar*) wxGaugeNameStr;
 
 // Group box
-class WXDLLEXPORT wxGauge95 : public wxGaugeBase
+class WXDLLEXPORT wxGauge95 : public wxControl
 {
-public:
-    wxGauge95() { }
+    DECLARE_DYNAMIC_CLASS(wxGauge95)
 
-    wxGauge95(wxWindow *parent,
-              wxWindowID id,
-              int range,
-              const wxPoint& pos = wxDefaultPosition,
-              const wxSize& size = wxDefaultSize,
-              long style = wxGA_HORIZONTAL,
-              const wxValidator& validator = wxDefaultValidator,
-              const wxString& name = wxGaugeNameStr)
+public:
+    wxGauge95(void) { m_rangeMax = 0; m_gaugePos = 0; }
+
+    wxGauge95(wxWindow *parent, wxWindowID id,
+            int range,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxGA_HORIZONTAL,
+            const wxValidator& validator = wxDefaultValidator,
+            const wxString& name = wxGaugeNameStr)
     {
-        (void)Create(parent, id, range, pos, size, style, validator, name);
+        Create(parent, id, range, pos, size, style, validator, name);
     }
 
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                int range,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxGA_HORIZONTAL,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxGaugeNameStr);
+    bool Create(wxWindow *parent, wxWindowID id,
+            int range,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxGA_HORIZONTAL,
+            const wxValidator& validator = wxDefaultValidator,
+            const wxString& name = wxGaugeNameStr);
 
-    // set gauge range/value
-    virtual void SetRange(int range);
-    virtual void SetValue(int pos);
+    void SetShadowWidth(int w);
+    void SetBezelFace(int w);
+    void SetRange(int r);
+    void SetValue(int pos);
+
+    int GetShadowWidth(void) const ;
+    int GetBezelFace(void) const ;
+    int GetRange(void) const ;
+    int GetValue(void) const ;
+
+    bool SetForegroundColour(const wxColour& col);
+    bool SetBackgroundColour(const wxColour& col);
 
     // overriden base class virtuals
-    virtual bool SetForegroundColour(const wxColour& col);
-    virtual bool SetBackgroundColour(const wxColour& col);
+    virtual bool AcceptsFocus() const { return FALSE; }
+
+    // Backward compatibility
+#if WXWIN_COMPATIBILITY
+    void SetButtonColour(const wxColour& col) { SetForegroundColour(col); }
+#endif
+
+    virtual void Command(wxCommandEvent& WXUNUSED(event)) {} ;
 
 protected:
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-    virtual wxSize DoGetBestSize() const;
-
-
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxGauge95)
+    int      m_rangeMax;
+    int      m_gaugePos;
 };
 
 #endif // wxUSE_GAUGE

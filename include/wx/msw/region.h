@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/msw/region.h
 // Purpose:     wxRegion class
-// Author:      Julian Smart
+// Author:      Markus Holzem, Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
@@ -12,7 +12,7 @@
 #ifndef _WX_REGION_H_
 #define _WX_REGION_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "region.h"
 #endif
 
@@ -184,7 +184,7 @@ private:
     wxRegion m_region;
     wxRect*  m_rects;
 
-    DECLARE_DYNAMIC_CLASS(wxRegionIterator)
+    DECLARE_DYNAMIC_CLASS(wxRegionIterator);
 };
 
 #endif

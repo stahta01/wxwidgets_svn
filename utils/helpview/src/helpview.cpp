@@ -27,7 +27,6 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/filename.h"
 #include "wx/image.h"
 #include "wx/wxhtml.h"
 #include "wx/fs_zip.h"
@@ -61,11 +60,6 @@ bool hvApp::OnInit()
 	
     wxArtProvider::PushProvider(new AlternateArtProvider);
 	
-#ifdef __WXMAC__
-    wxApp::s_macAboutMenuItemId = wxID_ABOUT;
-    wxFileName::MacRegisterDefaultTypeAndCreator( "htb" , 'HTBD' , 'HTBA' ) ;
-#endif
-
     int istyle = wxHF_DEFAULT_STYLE;
 	
     wxString service, windowName, book[10], titleFormat, argStr;
@@ -144,9 +138,7 @@ bool hvApp::OnInit()
 		}
     }
 	
-    // No book - query user; but not on Mac, since there
-    // may be an AppleEvent to open a document on the way
-#ifndef __WXMAC__
+    //no book - query user
     if ( bookCount < 1 )
     {
 		wxString s = wxFileSelector( wxT("Open help file"),
@@ -165,8 +157,7 @@ bool hvApp::OnInit()
 			bookCount = 1;
 		}
     } 
-#endif
-    
+	
 #if hvUSE_IPC
 	
     if ( createServer ) {
@@ -275,18 +266,6 @@ bool hvApp::OpenBook(wxHtmlHelpController* controller)
     }
     return FALSE;
 }
-
-#ifdef __WXMAC__
-/// Respond to Apple Event for opening a document
-void hvApp::MacOpenFile(const wxString& filename)
-{
-    wxBusyCursor bcur;
-    wxFileName fileName(filename);
-    m_helpController->AddBook(fileName);
-    m_helpController->DisplayContents();
-}
-#endif
-
 
 /*
 * Art provider class

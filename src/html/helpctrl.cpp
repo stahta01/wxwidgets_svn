@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "helpctrl.h"
 #endif
 
@@ -37,12 +37,6 @@
 
 #if wxUSE_HELP
     #include "wx/tipwin.h"
-#endif
-    
-
-#if wxUSE_LIBMSPACK
-#include "wx/html/forcelnk.h"
-FORCE_LINK(wxhtml_chm_support)
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxHtmlHelpController, wxHelpControllerBase)
@@ -193,15 +187,10 @@ bool wxHtmlHelpController::Initialize(const wxString& file)
         {
             actualFilename = dir + filename + wxString(wxT(".hhp"));
             if (!wxFileExists(actualFilename))
-            {
-#if wxUSE_LIBMSPACK
-                actualFilename = dir + filename + wxString(wxT(".chm"));
-                if (!wxFileExists(actualFilename))
-#endif
-                    return false;
-            }
+                return FALSE;
         }
     }
+
     return AddBook(wxFileName(actualFilename));
 }
 
@@ -282,7 +271,7 @@ void wxHtmlHelpController::AddGrabIfNeeded()
     
     // Check if there are any modal windows present,
     // in which case we need to add a grab.
-    for ( wxWindowList::compatibility_iterator node = wxTopLevelWindows.GetFirst();
+    for ( wxWindowList::Node * node = wxTopLevelWindows.GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -330,11 +319,10 @@ bool wxHtmlHelpController::DisplayIndex()
     return success;
 }
 
-bool wxHtmlHelpController::KeywordSearch(const wxString& keyword,
-                                         wxHelpSearchMode mode)
+bool wxHtmlHelpController::KeywordSearch(const wxString& keyword)
 {
     CreateHelpWindow();
-    bool success = m_helpFrame->KeywordSearch(keyword, mode);
+    bool success = m_helpFrame->KeywordSearch(keyword);
     AddGrabIfNeeded();
     return success;
 }

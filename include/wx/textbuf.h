@@ -6,18 +6,17 @@
 // Created:     14.11.01
 // Author:      Morten Hanssen, Vadim Zeitlin
 // Copyright:   (c) 1998-2001 wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TEXTBUFFER_H
 #define _WX_TEXTBUFFER_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "textbuf.h"
 #endif
 
 #include "wx/defs.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -43,13 +42,11 @@ enum wxTextFileType
 // wxTextBuffer
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_USER_EXPORTED_ARRAY_INT(wxTextFileType,
-                                  wxArrayLinesType,
-                                  class WXDLLIMPEXP_BASE);
+WX_DEFINE_EXPORTED_ARRAY_INT(wxTextFileType, ArrayFileType);
 
 #endif // wxUSE_TEXTBUFFER
 
-class WXDLLIMPEXP_BASE wxTextBuffer
+class WXDLLEXPORT wxTextBuffer
 {
 public:
     // constants and static functions
@@ -84,10 +81,10 @@ public:
     bool Create(const wxString& strBufferName);
 
     // Open() also loads buffer in memory on success
-    bool Open(wxMBConv& conv = wxConvUTF8);
+    bool Open(wxMBConv& conv = wxConvISO8859_1);
 
     // same as Open() but with (another) buffer name
-    bool Open(const wxString& strBufferName, wxMBConv& conv = wxConvUTF8);
+    bool Open(const wxString& strBufferName, wxMBConv& conv = wxConvISO8859_1);
 
     // closes the buffer and frees memory, losing all changes
     bool Close();
@@ -99,18 +96,18 @@ public:
     // ---------
 
     // get the number of lines in the buffer
-    size_t GetLineCount() const { return m_aLines.size(); }
+    size_t GetLineCount() const { return m_aLines.Count(); }
 
     // the returned line may be modified (but don't add CR/LF at the end!)
-    wxString& GetLine(size_t n)    const { return (wxString&)m_aLines[n]; }
-    wxString& operator[](size_t n) const { return (wxString&)m_aLines[n]; }
+    wxString& GetLine(size_t n)    const { return m_aLines[n]; }
+    wxString& operator[](size_t n) const { return m_aLines[n]; }
 
     // the current line has meaning only when you're using
     // GetFirstLine()/GetNextLine() functions, it doesn't get updated when
     // you're using "direct access" i.e. GetLine()
     size_t GetCurrentLine() const { return m_nCurLine; }
     void GoToLine(size_t n) { m_nCurLine = n; }
-    bool Eof() const { return (m_aLines.size() == 0 || m_nCurLine == m_aLines.size() - 1); }
+    bool Eof() const { return (m_aLines.Count() == 0 || m_nCurLine == m_aLines.Count() - 1); }
 
     // these methods allow more "iterator-like" traversal of the list of
     // lines, i.e. you may write something like:
@@ -123,7 +120,7 @@ public:
     wxString& GetPrevLine()  /* const */
         { wxASSERT(m_nCurLine > 0); return m_aLines[--m_nCurLine];   }
     wxString& GetLastLine() /* const */
-        { return m_aLines[m_nCurLine = m_aLines.size() - 1]; }
+        { return m_aLines[m_nCurLine = m_aLines.Count() - 1]; }
 
     // get the type of the line (see also GetEOL)
     wxTextFileType GetLineType(size_t n) const { return m_aTypes[n]; }
@@ -139,30 +136,19 @@ public:
 
     // add a line to the end
     void AddLine(const wxString& str, wxTextFileType type = typeDefault)
-        { m_aLines.push_back(str); m_aTypes.push_back(type); }
+        { m_aLines.Add(str); m_aTypes.Add(type); }
     // insert a line before the line number n
     void InsertLine(const wxString& str,
                   size_t n,
                   wxTextFileType type = typeDefault)
-    {
-        m_aLines.insert(m_aLines.begin() + n, str); 
-        m_aTypes.insert(m_aTypes.begin()+n, type); 
-    }
-
+        { m_aLines.Insert(str, n); m_aTypes.Insert(type, n); }
     // delete one line
-    void RemoveLine(size_t n)
-    {
-        m_aLines.erase(m_aLines.begin() + n);
-        m_aTypes.erase(m_aTypes.begin() + n); 
-    }
-
-    // remove all lines
-    void Clear() { m_aLines.clear(); m_nCurLine = 0; }
+    void RemoveLine(size_t n) { m_aLines.RemoveAt(n); m_aTypes.RemoveAt(n); }
 
     // change the buffer (default argument means "don't change type")
     // possibly in another format
     bool Write(wxTextFileType typeNew = wxTextFileType_None,
-               wxMBConv& conv = wxConvUTF8);
+               wxMBConv& conv = wxConvISO8859_1);
 
     // dtor
     virtual ~wxTextBuffer();
@@ -172,7 +158,7 @@ protected:
     // -----
 
     // default ctor, use Open(string)
-    wxTextBuffer() { m_isOpened = false; }
+    wxTextBuffer() { }
 
     // ctor from filename
     wxTextBuffer(const wxString& strBufferName);
@@ -190,8 +176,8 @@ protected:
     wxString m_strBufferName;  // name of the buffer
 
 private:
-    wxArrayLinesType m_aTypes;   // type of each line
-    wxArrayString    m_aLines;   // lines of file
+    ArrayFileType m_aTypes;   // type of each line
+    wxArrayString m_aLines;   // lines of file
 
     size_t        m_nCurLine; // number of current line in the buffer
 

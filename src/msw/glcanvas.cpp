@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "glcanvas.h"
 #endif
 
@@ -26,39 +26,11 @@
     #include "wx/settings.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/app.h"
 #endif
 
 #include "wx/msw/private.h"
 
-// DLL options compatibility check:
-#include "wx/build.h"
-WX_CHECK_BUILD_OPTIONS("wxGL")
-
 #include "wx/glcanvas.h"
-
-/*
-  The following two compiler directives are specific to the Microsoft Visual
-  C++ family of compilers
-
-  Fundementally what they do is instruct the linker to use these two libraries
-  for the resolution of symbols. In essence, this is the equivalent of adding
-  these two libraries to either the Makefile or project file.
-
-  This is NOT a recommended technique, and certainly is unlikely to be used
-  anywhere else in wxWindows given it is so specific to not only wxMSW, but
-  also the VC compiler. However, in the case of opengl support, it's an
-  applicable technique as opengl is optional in setup.h This code (wrapped by
-  wxUSE_GLCANVAS), now allows opengl support to be added purely by modifying
-  setup.h rather than by having to modify either the project or DSP fle.
-
-  See MSDN for further information on the exact usage of these commands.
-*/
-#ifdef _MSC_VER
-#  pragma comment( lib, "opengl32" )
-#  pragma comment( lib, "glu32" )
-#endif
-
 
 static const wxChar *wxGLCanvasClassName = wxT("wxGLCanvasClass");
 static const wxChar *wxGLCanvasClassNameNoRedraw = wxT("wxGLCanvasClassNR");
@@ -70,7 +42,7 @@ LRESULT WXDLLEXPORT APIENTRY _EXPORT wxWndProc(HWND hWnd, UINT message,
  * GLContext implementation
  */
 
-wxGLContext::wxGLContext(bool WXUNUSED(isRGB), wxGLCanvas *win, const wxPalette& WXUNUSED(palette))
+wxGLContext::wxGLContext(bool isRGB, wxGLCanvas *win, const wxPalette& palette)
 {
   m_window = win;
 
@@ -83,8 +55,8 @@ wxGLContext::wxGLContext(bool WXUNUSED(isRGB), wxGLCanvas *win, const wxPalette&
 }
 
 wxGLContext::wxGLContext(
-               bool WXUNUSED(isRGB), wxGLCanvas *win,
-               const wxPalette& WXUNUSED(palette),
+               bool isRGB, wxGLCanvas *win,
+               const wxPalette& palette,
                const wxGLContext *other  /* for sharing display lists */
              )
 {
@@ -134,14 +106,17 @@ void wxGLContext::SetCurrent()
 
 void wxGLContext::SetColour(const wxChar *colour)
 {
-    wxColour col = wxTheColourDatabase->Find(colour);
-    if (col.Ok())
-    {
-        float r = (float)(col.Red()/256.0);
-        float g = (float)(col.Green()/256.0);
-        float b = (float)(col.Blue()/256.0);
-        glColor3f( r, g, b);
-    }
+  float r = 0.0;
+  float g = 0.0;
+  float b = 0.0;
+  wxColour *col = wxTheColourDatabase->FindColour(colour);
+  if (col)
+  {
+    r = (float)(col->Red()/256.0);
+    g = (float)(col->Green()/256.0);
+    b = (float)(col->Blue()/256.0);
+    glColor3f( r, g, b);
+  }
 }
 
 
@@ -522,7 +497,7 @@ void wxGLCanvas::SwapBuffers()
     m_glContext->SwapBuffers();
 }
 
-void wxGLCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
+void wxGLCanvas::OnSize(wxSizeEvent& event)
 {
 }
 
@@ -573,11 +548,11 @@ void wxGLCanvas::OnPaletteChanged(wxPaletteChangedEvent& event)
 /* Give extensions proper function names. */
 
 /* EXT_vertex_array */
-void glArrayElementEXT(GLint WXUNUSED(i))
+void glArrayElementEXT(GLint i)
 {
 }
 
-void glColorPointerEXT(GLint WXUNUSED(size), GLenum WXUNUSED(type), GLsizei WXUNUSED(stride), GLsizei WXUNUSED(count), const GLvoid *WXUNUSED(pointer))
+void glColorPointerEXT(GLint size, GLenum type, GLsizei stride, GLsizei count, const GLvoid *pointer)
 {
 }
 
@@ -596,15 +571,15 @@ void glDrawArraysEXT(GLenum mode, GLint first, GLsizei count)
 #endif
 }
 
-void glEdgeFlagPointerEXT(GLsizei WXUNUSED(stride), GLsizei WXUNUSED(count), const GLboolean *WXUNUSED(pointer))
+void glEdgeFlagPointerEXT(GLsizei stride, GLsizei count, const GLboolean *pointer)
 {
 }
 
-void glGetPointervEXT(GLenum WXUNUSED(pname), GLvoid* *WXUNUSED(params))
+void glGetPointervEXT(GLenum pname, GLvoid* *params)
 {
 }
 
-void glIndexPointerEXT(GLenum WXUNUSED(type), GLsizei WXUNUSED(stride), GLsizei WXUNUSED(count), const GLvoid *WXUNUSED(pointer))
+void glIndexPointerEXT(GLenum type, GLsizei stride, GLsizei count, const GLvoid *pointer)
 {
 }
 
@@ -623,7 +598,7 @@ void glNormalPointerEXT(GLenum type, GLsizei stride, GLsizei count, const GLvoid
 #endif
 }
 
-void glTexCoordPointerEXT(GLint WXUNUSED(size), GLenum WXUNUSED(type), GLsizei WXUNUSED(stride), GLsizei WXUNUSED(count), const GLvoid *WXUNUSED(pointer))
+void glTexCoordPointerEXT(GLint size, GLenum type, GLsizei stride, GLsizei count, const GLvoid *pointer)
 {
 }
 
@@ -642,33 +617,33 @@ void glVertexPointerEXT(GLint size, GLenum type, GLsizei stride, GLsizei count, 
 }
 
 /* EXT_color_subtable */
-void glColorSubtableEXT(GLenum WXUNUSED(target), GLsizei WXUNUSED(start), GLsizei WXUNUSED(count), GLenum WXUNUSED(format), GLenum WXUNUSED(type), const GLvoid *WXUNUSED(table))
+void glColorSubtableEXT(GLenum target, GLsizei start, GLsizei count, GLenum format, GLenum type, const GLvoid *table)
 {
 }
 
 /* EXT_color_table */
-void glColorTableEXT(GLenum WXUNUSED(target), GLenum WXUNUSED(internalformat), GLsizei WXUNUSED(width), GLenum WXUNUSED(format), GLenum WXUNUSED(type), const GLvoid *WXUNUSED(table))
+void glColorTableEXT(GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum type, const GLvoid *table)
 {
 }
 
-void glCopyColorTableEXT(GLenum WXUNUSED(target), GLenum WXUNUSED(internalformat), GLint WXUNUSED(x), GLint WXUNUSED(y), GLsizei WXUNUSED(width))
+void glCopyColorTableEXT(GLenum target, GLenum internalformat, GLint x, GLint y, GLsizei width)
 {
 }
 
-void glGetColorTableEXT(GLenum WXUNUSED(target), GLenum WXUNUSED(format), GLenum WXUNUSED(type), GLvoid *WXUNUSED(table))
+void glGetColorTableEXT(GLenum target, GLenum format, GLenum type, GLvoid *table)
 {
 }
 
-void glGetColorTableParamaterfvEXT(GLenum WXUNUSED(target), GLenum WXUNUSED(pname), GLfloat *WXUNUSED(params))
+void glGetColorTableParamaterfvEXT(GLenum target, GLenum pname, GLfloat *params)
 {
 }
 
-void glGetColorTavleParameterivEXT(GLenum WXUNUSED(target), GLenum WXUNUSED(pname), GLint *WXUNUSED(params))
+void glGetColorTavleParameterivEXT(GLenum target, GLenum pname, GLint *params)
 {
 }
 
 /* SGI_compiled_vertex_array */
-void glLockArraysSGI(GLint WXUNUSED(first), GLsizei WXUNUSED(count))
+void glLockArraysSGI(GLint first, GLsizei count)
 {
 }
 
@@ -678,26 +653,26 @@ void glUnlockArraysSGI()
 
 
 /* SGI_cull_vertex */
-void glCullParameterdvSGI(GLenum WXUNUSED(pname), GLdouble* WXUNUSED(params))
+void glCullParameterdvSGI(GLenum pname, GLdouble* params)
 {
 }
 
-void glCullParameterfvSGI(GLenum WXUNUSED(pname), GLfloat* WXUNUSED(params))
+void glCullParameterfvSGI(GLenum pname, GLfloat* params)
 {
 }
 
 /* SGI_index_func */
-void glIndexFuncSGI(GLenum WXUNUSED(func), GLclampf WXUNUSED(ref))
+void glIndexFuncSGI(GLenum func, GLclampf ref)
 {
 }
 
 /* SGI_index_material */
-void glIndexMaterialSGI(GLenum WXUNUSED(face), GLenum WXUNUSED(mode))
+void glIndexMaterialSGI(GLenum face, GLenum mode)
 {
 }
 
 /* WIN_swap_hint */
-void glAddSwapHintRectWin(GLint WXUNUSED(x), GLint WXUNUSED(y), GLsizei WXUNUSED(width), GLsizei WXUNUSED(height))
+void glAddSwapHintRectWin(GLint x, GLint y, GLsizei width, GLsizei height)
 {
 }
 

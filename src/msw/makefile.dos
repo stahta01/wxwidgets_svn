@@ -70,9 +70,11 @@ GENERICOBJS= $(GENDIR)\busyinfo.obj \
 		$(GENDIR)\panelg.obj \
 		$(GENDIR)\prntdlgg.obj \
 		$(GENDIR)\progdlgg.obj \
+		$(GENDIR)\prop.obj \
+		$(GENDIR)\propform.obj \
+		$(GENDIR)\proplist.obj \
 		$(GENDIR)\sashwin.obj \
 		$(GENDIR)\scrlwing.obj \
-		$(GENDIR)\selstore.obj \
 		$(GENDIR)\spinctlg.obj \
 		$(GENDIR)\splash.obj \
 		$(GENDIR)\splitter.obj \
@@ -83,12 +85,12 @@ GENERICOBJS= $(GENDIR)\busyinfo.obj \
 		$(GENDIR)\tipdlg.obj \
 		$(GENDIR)\tipwin.obj \
 		$(GENDIR)\treectlg.obj \
+		$(GENDIR)\treelay.obj \
 		$(GENDIR)\wizard.obj
 
 # we can't have all objects in one list because the library becomes too big
 COMMONOBJS1 = \
-		$(COMMDIR)\accesscmn.obj \
-		$(COMMDIR)\appbase.obj \
+		$(COMMDIR)\y_tab.obj \
 		$(COMMDIR)\appcmn.obj \
 		$(COMMDIR)\artprov.obj \
 		$(COMMDIR)\artstd.obj \
@@ -104,7 +106,6 @@ COMMONOBJS1 = \
 		$(COMMDIR)\cshelp.obj \
 		$(COMMDIR)\ctrlcmn.obj \
 		$(COMMDIR)\ctrlsub.obj \
-		$(COMMDIR)\datacmn.obj \
 		$(COMMDIR)\datetime.obj \
 		$(COMMDIR)\datstrm.obj \
 		$(COMMDIR)\dcbase.obj \
@@ -114,7 +115,6 @@ COMMONOBJS1 = \
 		$(COMMDIR)\dobjcmn.obj \
 		$(COMMDIR)\docmdi.obj \
 		$(COMMDIR)\docview.obj \
-		$(COMMDIR)\dpycmn.obj \
 		$(COMMDIR)\dseldlg.obj \
 		$(COMMDIR)\dynarray.obj \
 		$(COMMDIR)\dynlib.obj \
@@ -130,8 +130,6 @@ COMMONOBJS1 = \
 		$(COMMDIR)\filefn.obj \
 		$(COMMDIR)\filename.obj \
 		$(COMMDIR)\filesys.obj \
-		$(COMMDIR)\fldlgcmn.obj \
-		$(COMMDIR)\fmapbase.obj \
 		$(COMMDIR)\fontcmn.obj \
 		$(COMMDIR)\fontmap.obj \
 		$(COMMDIR)\framecmn.obj \
@@ -167,7 +165,8 @@ COMMONOBJS1 = \
 		$(COMMDIR)\msgout.obj \
 		$(COMMDIR)\mstream.obj \
 		$(COMMDIR)\nbkbase.obj \
-		$(COMMDIR)\object.obj
+		$(COMMDIR)\object.obj \
+		$(COMMDIR)\odbc.obj
 
 COMMONOBJS2 = \
 		$(COMMDIR)\paper.obj \
@@ -176,16 +175,15 @@ COMMONOBJS2 = \
 		$(COMMDIR)\quantize.obj \
 		$(COMMDIR)\radiocmn.obj \
 		$(COMMDIR)\regex.obj \
+		$(COMMDIR)\resource.obj \
 		$(COMMDIR)\rgncmn.obj \
 		$(COMMDIR)\settcmn.obj \
 		$(COMMDIR)\sizer.obj \
 		$(COMMDIR)\statbar.obj \
-		$(COMMDIR)\stopwatch.obj \
 		$(COMMDIR)\strconv.obj \
 		$(COMMDIR)\stream.obj \
 		$(COMMDIR)\string.obj \
 		$(COMMDIR)\sysopt.obj \
-		$(COMMDIR)\taskbarcmn.obj \
 		$(COMMDIR)\tbarbase.obj \
 		$(COMMDIR)\textbuf.obj \
 		$(COMMDIR)\textcmn.obj \
@@ -204,6 +202,7 @@ COMMONOBJS2 = \
 		$(COMMDIR)\wfstream.obj \
 		$(COMMDIR)\wincmn.obj \
 		$(COMMDIR)\wxchar.obj \
+		$(COMMDIR)\wxexpr.obj \
 		$(COMMDIR)\xpmdecod.obj \
 		$(COMMDIR)\zipstrm.obj \
 		$(COMMDIR)\zstream.obj
@@ -211,7 +210,6 @@ COMMONOBJS2 = \
 # we can't have all objects in one list because the library becomes too big
 MSWOBJS1 = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\app.obj \
-		$(MSWDIR)\basemsw.obj \
 		$(MSWDIR)\bitmap.obj \
 		$(MSWDIR)\bmpbuttn.obj \
 		$(MSWDIR)\brush.obj \
@@ -225,6 +223,7 @@ MSWOBJS1 = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\colour.obj \
 		$(MSWDIR)\combobox.obj \
 		$(MSWDIR)\control.obj \
+		$(MSWDIR)\curico.obj \
 		$(MSWDIR)\cursor.obj \
 		$(MSWDIR)\data.obj \
 		$(MSWDIR)\dc.obj \
@@ -236,6 +235,7 @@ MSWOBJS1 = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\dialog.obj \
 		$(MSWDIR)\dialup.obj \
 		$(MSWDIR)\dib.obj \
+		$(MSWDIR)\dibutils.obj \
 		$(MSWDIR)\dir.obj \
 		$(MSWDIR)\dragimag.obj \
 		$(MSWDIR)\evtloop.obj \
@@ -245,6 +245,7 @@ MSWOBJS1 = $(MSWDIR)\accel.obj \
 		$(MSWDIR)\fontenum.obj \
 		$(MSWDIR)\fontutil.obj \
 		$(MSWDIR)\frame.obj \
+		$(MSWDIR)\gaugemsw.obj \
 		$(MSWDIR)\gdiimage.obj \
 		$(MSWDIR)\gdiobj.obj \
 		$(MSWDIR)\glcanvas.obj \
@@ -293,8 +294,6 @@ MSWOBJS2 = $(MSWDIR)\palette.obj \
 		$(MSWDIR)\toplevel.obj \
 		$(MSWDIR)\utils.obj \
 		$(MSWDIR)\utilsexc.obj \
-		$(MSWDIR)\utilsgui.obj \
-		$(MSWDIR)\uxtheme.obj \
 		$(MSWDIR)\volume.obj \
 		$(MSWDIR)\wave.obj \
 		$(MSWDIR)\window.obj
@@ -380,11 +379,6 @@ $(MSWDIR)/app.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
-$(MSWDIR)/basemsw.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
 $(MSWDIR)/bitmap.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -450,6 +444,11 @@ $(MSWDIR)/control.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
+$(MSWDIR)/curico.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
 $(MSWDIR)/cursor.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -505,6 +504,11 @@ $(MSWDIR)/dib.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
+$(MSWDIR)/dibutils.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
 $(MSWDIR)/dir.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -546,6 +550,11 @@ $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 $(MSWDIR)/frame.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
+$(MSWDIR)/gaugemsw.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
@@ -785,16 +794,6 @@ $(MSWDIR)/utilsexc.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
-$(MSWDIR)/utilsgui.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(MSWDIR)/uxtheme.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
 $(MSWDIR)/volume.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -806,16 +805,6 @@ $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 $(MSWDIR)/window.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(COMMDIR)/accesscmn.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(COMMDIR)/appbase.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
@@ -895,11 +884,6 @@ $(COMMDIR)/ctrlsub.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
-$(COMMDIR)/datacmn.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
 $(COMMDIR)/datetime.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -941,11 +925,6 @@ $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 $(COMMDIR)/docview.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(COMMDIR)/dpycmn.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
@@ -1021,16 +1000,6 @@ $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 $(COMMDIR)/filesys.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(COMMDIR)/fldlgcmn.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(COMMDIR)/fmapbase.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
@@ -1215,6 +1184,11 @@ $(COMMDIR)/object.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
+$(COMMDIR)/odbc.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
 $(COMMDIR)/paper.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -1245,6 +1219,11 @@ $(COMMDIR)/regex.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
+$(COMMDIR)/resource.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
 $(COMMDIR)/rgncmn.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -1265,11 +1244,6 @@ $(COMMDIR)/statbar.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
-$(COMMDIR)/stopwatch.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
 $(COMMDIR)/strconv.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
@@ -1286,11 +1260,6 @@ $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 $(COMMDIR)/sysopt.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(COMMDIR)/taskbarcmn.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
@@ -1381,6 +1350,11 @@ $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 $(COMMDIR)/wxchar.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
+$(COMMDIR)/wxexpr.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
@@ -1505,17 +1479,27 @@ $(GENDIR)/progdlgg.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
+$(GENDIR)/prop.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
+$(GENDIR)/propform.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
+$(GENDIR)/proplist.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
 $(GENDIR)/sashwin.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 $(GENDIR)/scrlwing.obj:     $*.$(SRCSUFF)
-        cl @<<
-$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
-<<
-
-$(GENDIR)/selstore.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
@@ -1570,12 +1554,28 @@ $(GENDIR)/treectlg.obj:     $*.$(SRCSUFF)
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
+$(GENDIR)/treelay.obj:     $*.$(SRCSUFF)
+        cl @<<
+$(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
+<<
+
 $(GENDIR)/wizard.obj:     $*.$(SRCSUFF)
         cl @<<
 $(CPPFLAGS) /Fo$@ /c /Tp $*.$(SRCSUFF)
 <<
 
 
+
+$(COMMDIR)/y_tab.obj:     $*.c $(COMMDIR)/lex_yy.c
+        cl @<<
+$(CPPFLAGS2) -DUSE_DEFINE -DYY_USE_PROTOS /Fo$@ /I ..\common /c $*.c
+<<
+
+$(COMMDIR)/y_tab.c:     $(COMMDIR)/dosyacc.c
+        copy $(COMMDIR)\dosyacc.c $(COMMDIR)\y_tab.c
+
+$(COMMDIR)/lex_yy.c:    $(COMMDIR)/doslex.c
+    copy $(COMMDIR)\doslex.c $(COMMDIR)\lex_yy.c
 
 $(OBJECTS):	$(WXDIR)/include/wx/setup.h
 

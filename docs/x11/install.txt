@@ -1,4 +1,4 @@
-wxWindows 2.5 for X11 installation
+wxWindows 2.4 for X11 installation
 ----------------------------------
 
 IMPORTANT NOTE:
@@ -11,7 +11,7 @@ IMPORTANT NOTE:
 
   When sending bug reports tell us what version of wxWindows you are 
   using (including the beta) and what compiler on what system. One 
-  example: wxX11 2.5.1, gcc 2.95.4, Redhat 6.2
+  example: wxX11 2.4.2, gcc 2.95.4, Redhat 6.2
 
 First steps
 -----------
@@ -137,7 +137,8 @@ YOU USE AND WHAT ERROR WAS REPORTED. I know this has no effect, but I tried...
 * GUI libraries
 ---------------
 
-wxWindows/X11 requires the X11 library to be installed on your system.
+wxWindows/X11 only requires the X11 system to be installed. TinyX
+will also suffice.
   
 * Additional libraries
 ----------------------
@@ -145,9 +146,15 @@ wxWindows/X11 requires the X11 library to be installed on your system.
 wxWindows/X11 requires a thread library and X libraries known to work with
 threads.  This is the case on all commercial Unix-Variants and all
 Linux-Versions that are based on glibc 2 except RedHat 5.0 which is broken in
-many aspects.  As of writing this, virtually all Linux distributions have
-+correct glibc 2 support.
+many aspects. As of writing this, these Linux distributions have correct glibc
+2 support:
 
+ - RedHat 5.1
+ - Debian 2.0 and 3.0
+ - Stampede
+ - DLD 6.0
+ - SuSE 6.0
+ 
 You can disable thread support by running 
 
 ./configure --disable-threads
@@ -179,6 +186,12 @@ LIBRARY_PATH set up accordingly, however, wxGTK will even work without it.
 Presence of Posix/2 will be auto-detected.
 
 Open an OS/2 prompt and switch to the directory above.
+If you didn't do it yet, unzip distrib/os2/os2-specific.zip into the current
+directory. This will overwrite the configure scripts in the main directory
+and in the samples, demos and utils subdirectory with the OS/2 aware
+versions. Alternatively, if you didn't get os2-specific.zip (e.g. because
+you downloaded wxX11 only), run autoconf yourself in the said directories.
+
 Set MAKESHELL (and depending on your installation also INSTALL, for me
 it tends to try to use the system's tcpip\pcomos\install.exe which causes
 problems...) to a Unix like shell, e.g.
@@ -189,8 +202,7 @@ variable that needs to be set might be MAKE_SHELL instead of MAKESHELL.
 If you have a really deficient version of GNU make, it might even be
 necessary to set SHELL or even COMSPEC to a unix like shell as well. 
 
-Notice that the delivered configure scripts are fully OS/2 aware, so you
-can simply run
+Now run
     ash -c "configure --with-x11"
 and make and possibly make install as described above.
 
@@ -268,10 +280,6 @@ The following options handle the kind of library you want to build.
 
 	--disable-shared        Do not create shared libraries.
 
-    --enable-monolithic     Build wxWindows as single library instead
-                            of as several smaller libraries (which is
-                            the default since wxWindows 2.5.0).
-
 	--disable-optimise	Do not optimise the code. Can
 	                        sometimes be useful for debugging
 				and is required on some architectures
@@ -334,8 +342,6 @@ are
 	--without-libjpeg	Disables JPEG image format code.
 	
 {	--without-odbc          Disables ODBC code. Not yet. }
-
-    --without-expat         Disable XML classes based on Expat parser.
 	
         --disable-resources     Disables the use of *.wxr type
 	                        resources.
@@ -366,10 +372,6 @@ are
 Apart from disabling certain features you can very often "strip"
 the program of its debugging information resulting in a significant
 reduction in size.
-
-Please see the output of "./configure --help" for comprehensive list
-of all configurable options.
-
 
 * Compiling
 -----------
@@ -431,12 +433,6 @@ clean:
 
 This is certain to become the standard way unless we decide
 to stick to tmake.
-
-If your application uses only some of wxWindows libraries, you can
-specify required libraries when running wx-config. For example,
-`wx-config --libs=html,core` will only output link command to link
-with libraries required by core GUI classes and wxHTML classes. See
-the manual for more information on the libraries.
 
 2) The other way creates a project within the source code 
 directories of wxWindows. For this endeavour, you'll need
@@ -508,5 +504,5 @@ compiler and the error message(s) to the wxwin-developers mailing list at:
 
     wx-dev@lists.wxwindows.org
 
-Julian Smart, Robert Roebling and Vadim Zeitlin, February 2002.
+Julian Smart, Robert Roebling and Vadim Zeitlin, Decemver 2002.
 

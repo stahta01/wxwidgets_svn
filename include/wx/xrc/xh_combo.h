@@ -19,9 +19,8 @@
 
 #if wxUSE_COMBOBOX
 
-class WXDLLIMPEXP_XRC wxComboBoxXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxComboBoxXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxComboBoxXmlHandler)
 public:
     wxComboBoxXmlHandler();
     virtual wxObject *DoCreateResource();

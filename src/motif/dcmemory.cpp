@@ -9,7 +9,7 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dcmemory.h"
 #endif
 
@@ -105,7 +105,7 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
     
     if (m_bitmap.Ok() && (bitmap.GetDisplay() == m_display))
     {
-        m_pixmap = m_bitmap.GetDrawable();
+        m_pixmap = m_bitmap.GetPixmap();
         Display* display = (Display*) m_display;
         
         XGCValues gcvalues;

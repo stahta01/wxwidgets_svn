@@ -8,7 +8,7 @@
 // Created:     22.01.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -47,8 +47,6 @@ public:
                                     0)              // don't use any files
     {
     }
-
-    DECLARE_NO_COPY_CLASS(wxMemoryConfig)
 };
 
 #endif // wxUSE_CONFIG

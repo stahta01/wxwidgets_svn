@@ -16,14 +16,6 @@
 #pragma interface "basic.h"
 #endif
 
-#ifndef wxUSE_DEPRECATED
-#define wxUSE_DEPRECATED 1
-#endif
-
-#if wxUSE_DEPRECATED
-#include <wx/deprecated/setup.h>
-#endif
-
 #define OGL_VERSION     2.0
 
 #ifndef DEFAULT_MOUSE_TOLERANCE
@@ -127,7 +119,7 @@ class WXDLLEXPORT wxExprDatabase;
 
 
 
-class WXDLLIMPEXP_OGL wxShapeEvtHandler: public wxObject, public wxClientDataContainer
+class wxShapeEvtHandler: public wxObject, public wxClientDataContainer
 {
  DECLARE_DYNAMIC_CLASS(wxShapeEvtHandler)
 
@@ -185,14 +177,14 @@ class WXDLLIMPEXP_OGL wxShapeEvtHandler: public wxObject, public wxClientDataCon
 
   // Does the copy - override for new event handlers which might store
   // app-specific data.
-  virtual void CopyData(wxShapeEvtHandler& WXUNUSED(copy)) {};
+  virtual void CopyData(wxShapeEvtHandler& copy) {};
 
  private:
   wxShapeEvtHandler*    m_previousHandler;
   wxShape*              m_handlerShape;
 };
 
-class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
+class wxShape: public wxShapeEvtHandler
 {
  DECLARE_ABSTRACT_CLASS(wxShape)
 
@@ -231,7 +223,7 @@ class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
   virtual void OnEraseContents(wxDC& dc);
   virtual void OnHighlight(wxDC& dc);
   virtual void OnLeftClick(double x, double y, int keys = 0, int attachment = 0);
-  virtual void OnLeftDoubleClick(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys) = 0, int WXUNUSED(attachment) = 0) {}
+  virtual void OnLeftDoubleClick(double x, double y, int keys = 0, int attachment = 0) {}
   virtual void OnRightClick(double x, double y, int keys = 0, int attachment = 0);
   virtual void OnSize(double x, double y);
   virtual bool OnMovePre(wxDC& dc, double x, double y, double old_x, double old_y, bool display = TRUE);
@@ -347,7 +339,7 @@ class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
   virtual wxFont *GetFont(int regionId = 0) const;
   virtual void SetTextColour(const wxString& colour, int regionId = 0);
   virtual wxString GetTextColour(int regionId = 0) const;
-  virtual inline int GetNumberOfTextRegions() const { return m_regions.GetCount(); }
+  virtual inline int GetNumberOfTextRegions() const { return m_regions.Number(); }
   virtual void SetRegionName(const wxString& name, int regionId = 0);
 
   // Get the name representing the region for this image alone.
@@ -569,7 +561,7 @@ class WXDLLIMPEXP_OGL wxShape: public wxShapeEvtHandler
   long                  m_branchStyle;
 };
 
-class WXDLLIMPEXP_OGL wxPolygonShape: public wxShape
+class wxPolygonShape: public wxShape
 {
  DECLARE_DYNAMIC_CLASS(wxPolygonShape)
  public:
@@ -624,7 +616,7 @@ class WXDLLIMPEXP_OGL wxPolygonShape: public wxShape
   int GetNumberOfAttachments() const;
   bool GetAttachmentPosition(int attachment, double *x, double *y,
                                      int nth = 0, int no_arcs = 1, wxLineShape *line = NULL);
-  bool AttachmentIsValid(int attachment) const;
+  bool AttachmentIsValid(int attachment);
   // Does the copying for this object
   void Copy(wxShape& copy);
 
@@ -642,7 +634,7 @@ class WXDLLIMPEXP_OGL wxPolygonShape: public wxShape
   double        m_originalHeight;
 };
 
-class WXDLLIMPEXP_OGL wxRectangleShape: public wxShape
+class wxRectangleShape: public wxShape
 {
  DECLARE_DYNAMIC_CLASS(wxRectangleShape)
  public:
@@ -677,7 +669,7 @@ protected:
   double m_cornerRadius;
 };
 
-class WXDLLIMPEXP_OGL wxTextShape: public wxRectangleShape
+class wxTextShape: public wxRectangleShape
 {
  DECLARE_DYNAMIC_CLASS(wxTextShape)
  public:
@@ -693,7 +685,7 @@ class WXDLLIMPEXP_OGL wxTextShape: public wxRectangleShape
   void Copy(wxShape& copy);
 };
 
-class WXDLLIMPEXP_OGL wxEllipseShape: public wxShape
+class wxEllipseShape: public wxShape
 {
  DECLARE_DYNAMIC_CLASS(wxEllipseShape)
  public:
@@ -730,7 +722,7 @@ protected:
   double m_height;
 };
 
-class WXDLLIMPEXP_OGL wxCircleShape: public wxEllipseShape
+class wxCircleShape: public wxEllipseShape
 {
  DECLARE_DYNAMIC_CLASS(wxCircleShape)
  public:

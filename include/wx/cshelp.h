@@ -12,7 +12,7 @@
 #ifndef _WX_CSHELPH__
 #define _WX_CSHELPH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "cshelp.h"
 #endif
 
@@ -21,11 +21,7 @@
 #if wxUSE_HELP
 
 #include "wx/help.h"
-
-#include "wx/hashmap.h"
-#if wxUSE_BMPBUTTON
 #include "wx/bmpbuttn.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // classes used to implement context help UI
@@ -60,7 +56,6 @@ private:
     DECLARE_DYNAMIC_CLASS(wxContextHelp)
 };
 
-#if wxUSE_BMPBUTTON
 /*
  * wxContextHelpButton
  * You can add this to your dialogs (especially on non-Windows platforms)
@@ -79,11 +74,9 @@ public:
     void OnContextHelp(wxCommandEvent& event);
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxContextHelpButton)
+    DECLARE_CLASS(wxContextHelpButton)
     DECLARE_EVENT_TABLE()
 };
-
-#endif
 
 // ----------------------------------------------------------------------------
 // classes used to implement context help support
@@ -141,9 +134,6 @@ private:
     static wxHelpProvider *ms_helpProvider;
 };
 
-WX_DECLARE_EXPORTED_HASH_MAP( long, wxString, wxIntegerHash, wxIntegerEqual,
-                              wxLongToStringHashMap );
-
 // wxSimpleHelpProvider is an implementation of wxHelpProvider which supports
 // only plain text help strings and shows the string associated with the
 // control (if any) in a tooltip
@@ -160,8 +150,8 @@ public:
 protected:
     // we use 2 hashes for storing the help strings associated with windows
     // and the ids
-    wxLongToStringHashMap m_hashWindows,
-                          m_hashIds;
+    wxStringHashTable m_hashWindows,
+                     m_hashIds;
 };
 
 // wxHelpControllerHelpProvider is an implementation of wxHelpProvider which supports
@@ -184,8 +174,6 @@ public:
 
 protected:
     wxHelpControllerBase*   m_helpController;
-
-    DECLARE_NO_COPY_CLASS(wxHelpControllerHelpProvider)
 };
 
 // Convenience function for turning context id into wxString

@@ -32,7 +32,7 @@ class wxFrameManager;
 It is not clear what this class does. It is not used elsewhere in FL.
 */
 
-class WXDLLIMPEXP_FL wxFrameView : public wxEvtHandler
+class WXFL_DECLSPEC wxFrameView : public wxEvtHandler
 {
 protected:
     wxStringList    mTopMenus;
@@ -87,7 +87,7 @@ class wxFrame;
 It is not clear what this class does. It is not used elsewhere in FL.
 */
 
-class WXDLLIMPEXP_FL wxFrameManager : public wxObject
+class WXFL_DECLSPEC wxFrameManager : wxObject
 {
 protected:
     wxList       mViews;
@@ -114,8 +114,7 @@ public:
 
     // if file name is empty, views are are not saved/loaded
 
-    virtual void Init( wxWindow* pMainFrame,
-                       const wxString& settingsFile = wxEmptyString );
+    virtual void Init( wxWindow* pMainFrame, const wxString& settingsFile = "" );
 
     // synonyms
     wxFrame* GetParentFrame();

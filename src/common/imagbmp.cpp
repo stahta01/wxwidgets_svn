@@ -7,7 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "imagbmp.h"
 #endif
 
@@ -20,7 +20,7 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_IMAGE
+#if wxUSE_IMAGE && wxUSE_STREAMS
 
 #include "wx/imagbmp.h"
 #include "wx/bitmap.h"
@@ -43,7 +43,7 @@
 #endif
 
 #ifdef __WXMSW__
-#include "wx/msw/wrapwin.h"
+#include <windows.h>
 #endif
 
 //-----------------------------------------------------------------------------
@@ -51,8 +51,6 @@
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxBMPHandler,wxImageHandler)
-
-#if wxUSE_STREAMS
 
 #ifndef BI_RGB
 #define BI_RGB       0
@@ -459,7 +457,7 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
     wxUint16        aWord;
 
     // allocate space for palette if needed:
-    _cmap *cmap;
+    _cmap *cmap = NULL;
 
     if ( bpp < 16 )
     {
@@ -602,23 +600,27 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
         ptr = data;
     }
 
+    int line = 0;
+    int column = 0;
     int linesize = ((width * bpp + 31) / 32) * 4;
 
     /* BMPs are stored upside down */
-    for ( int line = (height - 1); line >= 0; line-- )
+    for ( line = (height - 1); line >= 0; line-- )
     {
         int linepos = 0;
-        for ( int column = 0; column < width ; )
+        for ( column = 0; column < width ; )
         {
             if ( bpp < 16 )
             {
+                int index = 0;
                 linepos++;
                 aByte = stream.GetC();
                 if ( bpp == 1 )
                 {
-                    for (int bit = 0; bit < 8 && column < width; bit++)
+                    int bit = 0;
+                    for (bit = 0; bit < 8 && column < width; bit++)
                     {
-                        int index = ((aByte & (0x80 >> bit)) ? 1 : 0);
+                        index = ((aByte & (0x80 >> bit)) ? 1 : 0);
                         ptr[poffset] = cmap[index].r;
                         ptr[poffset + 1] = cmap[index].g;
                         ptr[poffset + 2] = cmap[index].b;
@@ -696,9 +698,10 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
                     }
                     else
                     {
-                        for (int nibble = 0; nibble < 2 && column < width; nibble++)
+                        int nibble = 0;
+                        for (nibble = 0; nibble < 2 && column < width; nibble++)
                         {
-                            int index = ((aByte & (0xF0 >> nibble * 4)) >> (!nibble * 4));
+                            index = ((aByte & (0xF0 >> nibble * 4)) >> (!nibble * 4));
                             if ( index >= 16 )
                                 index = 15;
                             ptr[poffset] = cmap[index].r;
@@ -961,8 +964,6 @@ bool wxBMPHandler::DoCanRead(wxInputStream& stream)
     return hdr[0] == 'B' && hdr[1] == 'M';
 }
 
-#endif // wxUSE_STREAMS
-
 
 #if wxUSE_ICO_CUR
 //-----------------------------------------------------------------------------
@@ -970,8 +971,6 @@ bool wxBMPHandler::DoCanRead(wxInputStream& stream)
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxICOHandler, wxBMPHandler)
-
-#if wxUSE_STREAMS
 
 struct ICONDIRENTRY
 {
@@ -1289,7 +1288,6 @@ bool wxICOHandler::DoCanRead(wxInputStream& stream)
     return hdr[0] == '\0' && hdr[1] == '\0' && hdr[2] == '\1' && hdr[3] == '\0';
 }
 
-#endif // wxUSE_STREAMS
 
 
 //-----------------------------------------------------------------------------
@@ -1297,8 +1295,6 @@ bool wxICOHandler::DoCanRead(wxInputStream& stream)
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxCURHandler, wxICOHandler)
-
-#if wxUSE_STREAMS
 
 bool wxCURHandler::DoCanRead(wxInputStream& stream)
 {
@@ -1311,15 +1307,11 @@ bool wxCURHandler::DoCanRead(wxInputStream& stream)
     return hdr[0] == '\0' && hdr[1] == '\0' && hdr[2] == '\2' && hdr[3] == '\0';
 }
 
-#endif // wxUSE_STREAMS
-
 //-----------------------------------------------------------------------------
 // wxANIHandler
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxANIHandler, wxCURHandler)
-
-#if wxUSE_STREAMS
 
 bool wxANIHandler::LoadFile(wxImage *image, wxInputStream& stream,
                             bool verbose, int index)
@@ -1478,8 +1470,6 @@ int wxANIHandler::GetImageCount(wxInputStream& stream)
     return wxNOT_FOUND;
 }
 
-#endif // wxUSE_STREAMS
-
 #endif // wxUSE_ICO_CUR
 
-#endif // wxUSE_IMAGE
+#endif // wxUSE_IMAGE && wxUSE_STREAMS

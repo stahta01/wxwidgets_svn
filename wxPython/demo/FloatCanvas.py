@@ -109,7 +109,7 @@ else:
             # Add the Canvas
             self.Canvas = floatcanvas.FloatCanvas(self,-1,(500,500),
                                       ProjectionFun = 'FlatEarth',
-                                      Debug = 0,
+                                      Debug = 1,
                                       EnclosingFrame = self,
                                       BackgroundColor = "DARK SLATE BLUE",
                                       UseBackground = 0,

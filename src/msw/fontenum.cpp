@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "fontenum.h"
 #endif
 
@@ -31,15 +31,14 @@
 #if wxUSE_FONTMAP
 
 #ifndef WX_PRECOMP
-    #include "wx/font.h"
-    #include "wx/encinfo.h"
+  #include "wx/font.h"
 #endif
-
-#include "wx/msw/private.h"
 
 #include "wx/fontutil.h"
 #include "wx/fontenum.h"
 #include "wx/fontmap.h"
+
+#include "wx/msw/private.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -91,8 +90,6 @@ private:
 
     // the list of facenames we already found while enumerating facenames
     wxArrayString m_facenames;
-
-    DECLARE_NO_COPY_CLASS(wxFontEnumeratorHelper)
 };
 
 // ----------------------------------------------------------------------------
@@ -149,8 +146,14 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
     return TRUE;
 }
 
-#if defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ) && !wxUSE_NORLANDER_HEADERS
-    #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+#if defined(__WXWINE__)
+    #define wxFONTENUMPROC FONTENUMPROCEX
+#elif (defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ))
+    #if wxUSE_NORLANDER_HEADERS
+        #define wxFONTENUMPROC int(*)(const LOGFONT *, const TEXTMETRIC *, long unsigned int, LPARAM)
+    #else
+        #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+    #endif
 #else
     #define wxFONTENUMPROC FONTENUMPROC
 #endif
@@ -160,10 +163,7 @@ void wxFontEnumeratorHelper::DoEnumerate()
 #ifndef __WXMICROWIN__
     HDC hDC = ::GetDC(NULL);
 
-#ifdef __WXWINCE__
-    ::EnumFontFamilies(hDC, m_facename, (wxFONTENUMPROC)wxFontEnumeratorProc,
-                         (LPARAM)this) ;
-#elif defined(__WIN32__)
+#ifdef __WIN32__
     LOGFONT lf;
     lf.lfCharSet = m_charset;
     wxStrncpy(lf.lfFaceName, m_facename, WXSIZEOF(lf.lfFaceName));

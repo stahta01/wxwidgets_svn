@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "radiobox.h"
 #endif
 
@@ -30,6 +30,7 @@
 #include <Xm/ToggleB.h>
 #include <Xm/ToggleBG.h>
 #include <Xm/RowColumn.h>
+#include <Xm/Form.h>
 #include <Xm/Frame.h>
 #ifdef __VMS__
 #pragma message enable nosimpint
@@ -43,12 +44,15 @@ void wxRadioBoxCallback (Widget w, XtPointer clientData,
 IMPLEMENT_DYNAMIC_CLASS(wxRadioBox, wxControl)
 
 // Radio box item
-void wxRadioBox::Init()
+wxRadioBox::wxRadioBox()
 {
     m_selectedButton = -1;
     m_noItems = 0;
     m_noRowsOrCols = 0;
     m_majorDim = 0 ;
+
+    m_radioButtons = (WXWidget*) NULL;
+    m_radioButtonLabels = (wxString*) NULL;
 }
 
 bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
@@ -57,10 +61,26 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
              int majorDim, long style,
              const wxValidator& val, const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, val, name ) )
-        return false;
-
+    m_selectedButton = -1;
     m_noItems = n;
+    m_radioButtons = (WXWidget*) NULL;
+    m_radioButtonLabels = (wxString*) NULL;
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+    m_font = parent->GetFont();
+
+    SetName(name);
+    SetValidator(val);
+
+    parent->AddChild(this);
+
+    m_windowStyle = (long&)style;
+
+    if (id == -1)
+        m_windowId = NewControlId();
+    else
+        m_windowId = id;
+
     m_noRowsOrCols = majorDim;
 
     if (majorDim==0)
@@ -72,40 +92,38 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
 
     m_mainWidget = XtVaCreateWidget ("radioboxframe",
                                         xmFrameWidgetClass, parentWidget,
+                                        XmNshadowType, XmSHADOW_IN,
                                         XmNresizeHeight, True,
                                         XmNresizeWidth, True,
                                         NULL);
 
     wxString label1(wxStripMenuCodes(title));
 
-    WXFontType fontType = m_font.GetFontType(XtDisplay(parentWidget));
+    XmFontList fontList = (XmFontList) m_font.GetFontList(1.0, XtDisplay(parentWidget));
 
     if (label1 != "")
     {
         wxXmString text(label1);
-        m_labelWidget = (WXWidget)
-            XtVaCreateManagedWidget( label1.c_str(),
+        (void)XtVaCreateManagedWidget(label1.c_str(),
 #if wxUSE_GADGETS
-                                       style & wxCOLOURED ? xmLabelWidgetClass
-                                                          : xmLabelGadgetClass,
-                                       (Widget)m_mainWidget,
+                                             style & wxCOLOURED ? xmLabelWidgetClass
+                                                                : xmLabelGadgetClass,
+                                             (Widget)m_mainWidget,
 #else
-                                       xmLabelWidgetClass, 
-                                       (Widget)m_mainWidget,
+                                             xmLabelWidgetClass, (Widget)m_mainWidget,
 #endif
-                                       wxFont::GetFontTag(), fontType,
-                                       XmNlabelString, text(),
+                                             XmNfontList, fontList,
+                                             XmNlabelString, text(),
 // XmNframeChildType is not in Motif 1.2, nor in Lesstif,
 // if it was compiled with 1.2 compatibility
 // TODO: check this still looks OK for Motif 1.2.
 #if (XmVersion > 1200)
-                                       XmNframeChildType, XmFRAME_TITLE_CHILD,
+                                             XmNframeChildType, XmFRAME_TITLE_CHILD,
 #else
-                                       XmNchildType, XmFRAME_TITLE_CHILD,
+                                             XmNchildType, XmFRAME_TITLE_CHILD,
 #endif
-                                       XmNchildVerticalAlignment, 
-                                           XmALIGNMENT_CENTER,
-                                       NULL);
+                                             XmNchildVerticalAlignment, XmALIGNMENT_CENTER,
+                                             NULL);
     }
 
     Arg args[3];
@@ -118,28 +136,29 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
 
     Widget radioBoxWidget = XmCreateRadioBox ((Widget)m_mainWidget, "radioBoxWidget", args, 2);
 
-    m_radioButtons.reserve(n);
-    m_radioButtonLabels.reserve(n);
+    //    if (style & wxFLAT)
+    //        XtVaSetValues (radioBoxWidget, XmNborderWidth, 1, NULL);
 
+    m_radioButtons = new WXWidget[n];
+    m_radioButtonLabels = new wxString[n];
     int i;
     for (i = 0; i < n; i++)
     {
         wxString str(wxStripMenuCodes(choices[i]));
-        m_radioButtonLabels.push_back(str);
-        Widget radioItem =  XtVaCreateManagedWidget (wxConstCast(str.c_str(), char),
+        m_radioButtonLabels[i] = str;
+        m_radioButtons[i] = (WXWidget) XtVaCreateManagedWidget ((char*) (const char*) str,
 #if wxUSE_GADGETS
                             xmToggleButtonGadgetClass, radioBoxWidget,
 #else
-                            xmToggleButtonWidgetClass, radioBoxWidget,
+                                    xmToggleButtonWidgetClass, radioBoxWidget,
 #endif
-                            wxFont::GetFontTag(), fontType,
+                                    XmNfontList, fontList,
                                                  NULL);
-        m_radioButtons.push_back((WXWidget)radioItem);
-        XtAddCallback (radioItem, XmNvalueChangedCallback,
-                       (XtCallbackProc) wxRadioBoxCallback,
-                       (XtPointer) this);
+        XtAddCallback ((Widget) m_radioButtons[i], XmNvalueChangedCallback, (XtCallbackProc) wxRadioBoxCallback,
+                     (XtPointer) this);
     }
 
+    m_font = parent->GetFont();
     ChangeFont(FALSE);
 
     SetSelection (0);
@@ -148,6 +167,7 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
     XtManageChild (radioBoxWidget);
     XtManageChild ((Widget)m_mainWidget);
 
+    SetCanAddEventHandler(TRUE);
     AttachWidget (parent, m_mainWidget, NULL, pos.x, pos.y, size.x, size.y);
 
     ChangeBackgroundColour();
@@ -158,6 +178,9 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
 
 wxRadioBox::~wxRadioBox()
 {
+    delete[] m_radioButtonLabels;
+    delete[] m_radioButtons;
+
     DetachWidget(m_mainWidget);
     XtDestroyWidget((Widget) m_mainWidget);
 
@@ -173,12 +196,12 @@ void wxRadioBox::SetString(int item, const wxString& label)
     if (label != "")
     {
         wxString label1(wxStripMenuCodes(label));
-        wxXmString text( label1 );
-        m_radioButtonLabels[item] = label1;
+        XmString text = XmStringCreateSimple ((char*) (const char*) label1);
         XtVaSetValues (widget,
-                        XmNlabelString, text(),
+                        XmNlabelString, text,
                         XmNlabelType, XmSTRING,
                         NULL);
+        XmStringFree (text);
     }
 }
 
@@ -337,8 +360,7 @@ void wxRadioBox::ChangeFont(bool keepOriginalSize)
 {
     wxWindow::ChangeFont(keepOriginalSize);
 
-    WXFontType fontType =
-        m_font.GetFontType(XtDisplay((Widget) GetTopWidget()));
+    XmFontList fontList = (XmFontList) m_font.GetFontList(1.0, XtDisplay((Widget) GetTopWidget()));
 
     int i;
     for (i = 0; i < m_noItems; i++)
@@ -346,7 +368,7 @@ void wxRadioBox::ChangeFont(bool keepOriginalSize)
         WXWidget radioButton = m_radioButtons[i];
 
         XtVaSetValues ((Widget) radioButton,
-                       wxFont::GetFontTag(), fontType,
+                       XmNfontList, fontList,
                        NULL);
     }
 }
@@ -355,14 +377,14 @@ void wxRadioBox::ChangeBackgroundColour()
 {
     wxWindow::ChangeBackgroundColour();
 
-    int selectPixel = wxBLACK->AllocColour(XtDisplay((Widget)m_mainWidget));
+    int selectPixel = wxBLACK->AllocColour(wxGetDisplay());
 
     int i;
     for (i = 0; i < m_noItems; i++)
     {
         WXWidget radioButton = m_radioButtons[i];
 
-        wxDoChangeBackgroundColour(radioButton, m_backgroundColour, TRUE);
+        DoChangeBackgroundColour(radioButton, m_backgroundColour, TRUE);
 
         XtVaSetValues ((Widget) radioButton,
           XmNselectColor, selectPixel,
@@ -379,7 +401,7 @@ void wxRadioBox::ChangeForegroundColour()
     {
         WXWidget radioButton = m_radioButtons[i];
 
-        wxDoChangeForegroundColour(radioButton, m_foregroundColour);
+        DoChangeForegroundColour(radioButton, m_foregroundColour);
     }
 }
 
@@ -409,9 +431,8 @@ void wxRadioBoxCallback (Widget w, XtPointer clientData,
   wxRadioBox *item = (wxRadioBox *) clientData;
   int sel = -1;
   int i;
-  const wxWidgetArray& buttons = item->GetRadioButtons();
   for (i = 0; i < item->GetCount(); i++)
-    if (((Widget)buttons[i]) == w)
+    if (item->GetRadioButtons() && ((Widget) (item->GetRadioButtons()[i]) == w))
       sel = i;
   item->SetSel(sel);
 

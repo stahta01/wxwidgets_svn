@@ -18,7 +18,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "regex.h"
 #endif
 
@@ -43,9 +43,7 @@
     #include <sys/types.h>
 #endif
 
-#ifndef __WXWINCE__
 #include <regex.h>
-#endif
 
 #include "wx/regex.h"
 
@@ -148,7 +146,9 @@ wxString wxRegExImpl::GetErrorMsg(int errorcode) const
 
         msg = wxString(buf.data(), wxConvLibc);
 #else // !Unicode
-        (void)regerror(errorcode, &m_RegEx, wxStringBuffer(msg, len), len);
+        (void)regerror(errorcode, &m_RegEx, msg.GetWriteBuf(len), len);
+
+        msg.UngetWriteBuf();
 #endif // Unicode/!Unicode
     }
     else // regerror() returned 0

@@ -21,12 +21,7 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #ifndef NO_GUI
-        #include "wx/menu.h"
-        #include "wx/textctrl.h"
-        #include "wx/filedlg.h"
-        #include "wx/msgdlg.h"
-    #endif
+#include "wx/wx.h"
 #endif
 
 #ifndef NO_GUI
@@ -51,13 +46,8 @@
 #include "rtfutils.h"
 #include "symbols.h"
 
-#if (defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXX11__)) && !defined(NO_GUI)
+#if (defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)) && !defined(NO_GUI)
 #include "tex2rtf.xpm"
-#endif
-
-#if !WXWIN_COMPATIBILITY_2_4
-static inline wxChar* copystring(const wxChar* s)
-    { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
 #endif
 
 const float versionNo = TEX2RTF_VERSION_NUMBER;
@@ -68,7 +58,7 @@ char *contentsString = NULL;
 bool suppressNameDecoration = FALSE;
 bool OkToClose = TRUE;
 int passNumber = 1;
-unsigned long errorCount = 0;
+unsigned long errorCount = 0UL;
 
 #ifndef NO_GUI
 

@@ -12,7 +12,7 @@
 #ifndef _WX_LISTCTRL_H_
 #define _WX_LISTCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "listctrl.h"
 #endif
 
@@ -138,9 +138,6 @@ public:
     // or small icon view)
     int GetCountPerPage() const;
 
-    // return the total area occupied by all the items (icon/small icon only)
-    wxRect GetViewRect() const;
-
     // Gets the edit control for editing labels.
     wxTextCtrl* GetEditControl() const;
 
@@ -189,8 +186,10 @@ public:
     // Gets the number of columns in the list control
     int GetColumnCount() const { return m_colCount; }
 
-    // get the horizontal and vertical components of the item spacing
-    wxSize GetItemSpacing() const;
+    // Retrieves the spacing between icons in pixels.
+    // If small is TRUE, gets the spacing for the small icon
+    // view, otherwise the large icon view.
+    int GetItemSpacing(bool isSmall) const;
 
     // Foreground colour of an item.
     void SetItemTextColour( long item, const wxColour& col);
@@ -353,11 +352,6 @@ public:
     // Necessary for drawing hrules and vrules, if specified
     void OnPaint(wxPaintEvent& event);
 
-    virtual bool ShouldInheritColours() const { return false; }
-
-    // obsolete stuff, for compatibility only -- don't use
-    wxDEPRECATED( int GetItemSpacing(bool isSmall) const);
-
 protected:
     // common part of all ctors
     void Init();
@@ -376,9 +370,6 @@ protected:
     long              m_baseStyle;  // Basic Windows style flags, for recreation purposes
     int               m_colCount;   // Windows doesn't have GetColumnCount so must
                                     // keep track of inserted/deleted columns
-    long              m_count;      // Keep track of item count to save calls to
-                                    // ListView_GetItemCount
-    bool              m_ignoreChangeMessages;
 
     // TRUE if we have any internal data (user data & attributes)
     bool m_AnyInternalData;
@@ -406,7 +397,6 @@ private:
 
     DECLARE_DYNAMIC_CLASS(wxListCtrl)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxListCtrl)
 };
 
 #endif // wxUSE_LISTCTRL

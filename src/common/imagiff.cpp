@@ -12,7 +12,7 @@
 // by the author of xv, John Bradley for using the iff loading part
 // in wxWindows has been gratefully given.
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "imagiff.h"
 #endif
 
@@ -33,10 +33,6 @@
 #include "wx/wfstream.h"
 #include "wx/log.h"
 #include "wx/intl.h"
-
-#if wxUSE_PALETTE
-    #include "wx/palette.h"
-#endif // wxUSE_PALETTE
 
 #include <stdlib.h>
 #include <string.h>

@@ -12,7 +12,7 @@
 #ifndef _WX_DCSCREEN_H_
 #define _WX_DCSCREEN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "dcscreen.h"
 #endif
 
@@ -33,7 +33,7 @@ protected:
     virtual void DoGetSize(int *width, int *height) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxScreenDC)
+    DECLARE_DYNAMIC_CLASS(wxScreenDC)
 };
 
 #endif

@@ -120,8 +120,6 @@ WXDLLEXPORT_DATA(extern const wxChar*)  wxCanvasClassNameNR;
 // standard icons from the resources
 // ---------------------------------------------------------------------------
 
-#if wxUSE_GUI
-
 WXDLLEXPORT_DATA(extern HICON) wxSTD_FRAME_ICON;
 WXDLLEXPORT_DATA(extern HICON) wxSTD_MDIPARENTFRAME_ICON;
 WXDLLEXPORT_DATA(extern HICON) wxSTD_MDICHILDFRAME_ICON;
@@ -129,8 +127,6 @@ WXDLLEXPORT_DATA(extern HICON) wxDEFAULT_FRAME_ICON;
 WXDLLEXPORT_DATA(extern HICON) wxDEFAULT_MDIPARENTFRAME_ICON;
 WXDLLEXPORT_DATA(extern HICON) wxDEFAULT_MDICHILDFRAME_ICON;
 WXDLLEXPORT_DATA(extern HFONT) wxSTATUS_LINE_FONT;
-
-#endif // wxUSE_GUI
 
 // ---------------------------------------------------------------------------
 // this defines a CASTWNDPROC macro which casts a pointer to the type of a
@@ -187,13 +183,9 @@ typedef MRESULT (APIENTRY * WndProcCast) (HWND, ULONG, MPARAM, MPARAM);
 // Scale font to get edit control height
 #define EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)    (3*(cy)/2)
 
-#if wxUSE_GUI
-
 // Generic subclass proc, for panel item moving/sizing and intercept
 // EDIT control VK_RETURN messages
 extern LONG APIENTRY wxSubclassedGenericControlProc(WXHWND hWnd, WXDWORD message, WXWPARAM wParam, WXLPARAM lParam);
-
-#endif
 
 // ---------------------------------------------------------------------------
 // constants which might miss from some compilers' headers
@@ -266,7 +258,10 @@ extern "C"
 WXDLLEXPORT HINSTANCE wxGetInstance();
 }
 
-WXDLLEXPORT void wxSetInstance(HINSTANCE hInst);
+WXDLLEXPORT void wxDrawBorder( HPS     hPS
+                              ,RECTL&  rRect
+                              ,WXDWORD dwStyle
+                             );
 
 #include "wx/thread.h"
 static inline MRESULT MySendMsg(HWND hwnd, ULONG ulMsgid,
@@ -282,12 +277,7 @@ static inline MRESULT MySendMsg(HWND hwnd, ULONG ulMsgid,
 }
 #define WinSendMsg MySendMsg
 
-#if wxUSE_GUI
-
-WXDLLEXPORT void wxDrawBorder( HPS     hPS
-                              ,RECTL&  rRect
-                              ,WXDWORD dwStyle
-                             );
+WXDLLEXPORT void wxSetInstance(HINSTANCE hInst);
 
 WXDLLEXPORT wxWindow* wxFindWinFromHandle(WXHWND hWnd);
 
@@ -366,10 +356,5 @@ WXDLLEXPORT extern wxBitmap wxDisableBitmap( const wxBitmap& rBmp
                                             ,long            lColor
                                            );
 
-#include "wx/colour.h"
-
-WXDLLEXPORT extern COLORREF wxColourToRGB(const wxColour& rColor);
-
-#endif // wxUSE_GUI
-
 #endif // _WX_PRIVATE_H_
+

@@ -13,7 +13,7 @@
 #ifndef __PRINTDLGH_G_
 #define __PRINTDLGH_G_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "prntdlgg.h"
 #endif
 
@@ -160,8 +160,7 @@ private:
 class WXDLLEXPORT wxGenericPageSetupDialog : public wxDialog
 {
 public:
-    wxGenericPageSetupDialog(wxWindow *parent = NULL,
-                             wxPageSetupData* data = NULL);
+    wxGenericPageSetupDialog(wxWindow *parent, wxPageSetupData* data = (wxPageSetupData*) NULL);
     virtual ~wxGenericPageSetupDialog();
 
     virtual bool TransferDataFromWindow();
@@ -187,7 +186,7 @@ public:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxGenericPageSetupDialog)
+    DECLARE_CLASS(wxGenericPageSetupDialog)
 };
 
 #endif

@@ -21,9 +21,8 @@
 
 #if wxUSE_HTML
 
-class WXDLLIMPEXP_XRC wxHtmlWindowXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxHtmlWindowXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxHtmlWindowXmlHandler)
 public:
     wxHtmlWindowXmlHandler();
     virtual wxObject *DoCreateResource();

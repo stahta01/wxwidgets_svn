@@ -12,7 +12,7 @@
 #ifndef   _WX_OLEDROPSRC_H
 #define   _WX_OLEDROPSRC_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface
 #endif
 
@@ -76,8 +76,6 @@ protected:
 
 private:
     wxIDropSource *m_pIDropSource;  // the pointer to COM interface
-
-    DECLARE_NO_COPY_CLASS(wxDropSource)
 };
 
 #endif  //_WX_OLEDROPSRC_H

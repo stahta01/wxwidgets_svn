@@ -12,7 +12,7 @@
 #ifndef _WX_COMBOBOX_H_
 #define _WX_COMBOBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "combobox.h"
 #endif
 
@@ -20,12 +20,16 @@
 
 #if wxUSE_COMBOBOX
 
+WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
+
 // ----------------------------------------------------------------------------
 // Combobox control
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxComboBox: public wxChoice
 {
+    DECLARE_DYNAMIC_CLASS(wxComboBox)
+
 public:
     wxComboBox() { }
 
@@ -79,9 +83,6 @@ public:
             WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
     WXHWND GetEditHWND() const;
-
-private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxComboBox)
 };
 
 #endif // wxUSE_COMBOBOX

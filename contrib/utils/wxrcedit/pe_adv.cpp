@@ -18,7 +18,7 @@
 #endif
 
 #include "wx/wx.h"
-#include "wx/xml/xml.h"
+#include "wx/xrc/xml.h"
 #include "wx/tokenzr.h"
 #include "wx/wx.h"
 #include "wx/dialog.h"
@@ -94,7 +94,7 @@ void PropEditCtrlChoice::WriteValue()
 
 
 
-void PropEditCtrlChoice::OnChoice(wxCommandEvent& WXUNUSED(event))
+void PropEditCtrlChoice::OnChoice(wxCommandEvent& event)
 {
     if (CanSave()) 
     {
@@ -118,7 +118,6 @@ void PropEditCtrlColor::OnDetails()
         clr = wxColour((tmp & 0xFF0000) >> 16, 
                        (tmp & 0x00FF00) >> 8, 
                        (tmp & 0x0000FF));
-
     clr = wxGetColourFromUser(NULL, clr);
     if (clr.Ok())
     {

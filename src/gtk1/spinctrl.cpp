@@ -8,12 +8,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "spinctrl.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/spinctrl.h"
 
@@ -258,7 +255,7 @@ void wxSpinCtrl::OnChar( wxKeyEvent &event )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid spin ctrl") );
 
-    if (event.GetKeyCode() == WXK_RETURN)
+    if (event.KeyCode() == WXK_RETURN)
     {
         wxWindow *top_frame = m_parent;
         while (top_frame->GetParent() && !(top_frame->GetParent()->IsTopLevel()))

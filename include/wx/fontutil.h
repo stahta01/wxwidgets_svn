@@ -6,7 +6,7 @@
 // Created:     05.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // General note: this header is private to wxWindows and is not supposed to be
@@ -16,7 +16,7 @@
 #ifndef _WX_FONTUTIL_H_
 #define _WX_FONTUTIL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "fontutil.h"
 #endif
 
@@ -30,8 +30,6 @@
     #include <windows.h>
     #include "wx/msw/winundef.h"
 #endif
-
-struct WXDLLEXPORT wxNativeEncodingInfo;
 
 #if defined(_WX_X_FONTLIKE)
 
@@ -138,28 +136,6 @@ public:
 
     // reset to the default state
     void Init();
-
-    // init with the parameters of the given font
-    void InitFromFont(const wxFont& font)
-    {
-        // translate all font parameters
-        SetStyle((wxFontStyle)font.GetStyle());
-        SetWeight((wxFontWeight)font.GetWeight());
-        SetUnderlined(font.GetUnderlined());
-        SetPointSize(font.GetPointSize());
-
-        // set the family/facename
-        SetFamily((wxFontFamily)font.GetFamily());
-        const wxString& facename = font.GetFaceName();
-        if ( !facename.empty() )
-        {
-            SetFaceName(facename);
-        }
-
-        // deal with encoding now (it may override the font family and facename
-        // so do it after setting them)
-        SetEncoding(font.GetEncoding());
-    }
 
     // accessors and modifiers for the font elements
     int GetPointSize() const;

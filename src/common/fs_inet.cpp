@@ -6,7 +6,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "fs_inet.h"
 #endif
 
@@ -95,8 +95,7 @@ bool wxInternetFSHandler::CanOpen(const wxString& location)
 }
 
 
-wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
-                                        const wxString& location)
+wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& location)
 {
     wxString right =
         GetProtocol(location) + wxT(":") + StripProtocolAnchor(location);
@@ -132,6 +131,11 @@ wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
     return (wxFSFile*) NULL; // incorrect URL
 }
 
+
+
+wxInternetFSHandler::~wxInternetFSHandler()
+{
+}
 
 class wxFileSystemInternetModule : public wxModule
 {

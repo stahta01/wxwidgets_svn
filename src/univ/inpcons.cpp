@@ -6,14 +6,14 @@
 // Created:     14.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "inpcons.h"
 #endif
 
@@ -99,9 +99,9 @@ void wxInputConsumer::OnMouse(wxMouseEvent& event)
 // the actions
 // ----------------------------------------------------------------------------
 
-bool wxInputConsumer::PerformAction(const wxControlAction& WXUNUSED(action),
-                                    long WXUNUSED(numArg),
-                                    const wxString& WXUNUSED(strArg))
+bool wxInputConsumer::PerformAction(const wxControlAction& action,
+                                    long numArg,
+                                    const wxString& strArg)
 {
     return FALSE;
 }

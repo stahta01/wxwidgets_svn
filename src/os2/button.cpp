@@ -61,7 +61,7 @@ bool wxButton::Create(
         m_windowId = NewControlId();
     else
         m_windowId = vId;
-    lStyle = WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON;
+    lStyle = WS_TABSTOP | BS_PUSHBUTTON;
 
     //
     // OS/2 PM does not have Right/Left/Top/Bottom styles.
@@ -311,7 +311,7 @@ void wxButton::SetDefaultStyle(
         if ((lStyle & BS_USERBUTTON) != BS_USERBUTTON)
         {
             if (bOn)
-                lStyle |= BS_DEFAULT;
+                lStyle | BS_DEFAULT;
             else
                 lStyle &= ~BS_DEFAULT;
             ::WinSetWindowULong(GetHwndOf(pBtn), QWL_STYLE, lStyle);

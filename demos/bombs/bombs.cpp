@@ -40,7 +40,7 @@ bool AppClass::OnInit()
   level=IDM_EASY;
 
   BombsFrame = 
-    new BombsFrameClass(NULL, _T("wxBombs"), wxPoint(155, 165), wxSize(300, 300), wxMINIMIZE_BOX | wxSYSTEM_MENU | wxCAPTION | wxCLOSE_BOX );
+    new BombsFrameClass(NULL, _T("wxBombs"), wxPoint(155, 165), wxSize(300, 300), wxMINIMIZE_BOX | wxSYSTEM_MENU | wxCAPTION);
 
   int xmax=BombsFrame->BombsCanvas->field_width*BombsFrame->BombsCanvas->x_cell*X_UNIT;
   int ymax=BombsFrame->BombsCanvas->field_height*BombsFrame->BombsCanvas->y_cell*Y_UNIT;
@@ -104,17 +104,17 @@ BombsFrameClass::~BombsFrameClass(void)
 {
 }
 
-void BombsFrameClass::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
+void BombsFrameClass::OnCloseWindow(wxCloseEvent& event)
 {
   this->Destroy();
 }
 
-void BombsFrameClass::OnExit(wxCommandEvent& WXUNUSED(event))
+void BombsFrameClass::OnExit(wxCommandEvent& event)
 {
     this->Destroy();
 }
 
-void BombsFrameClass::OnRestart(wxCommandEvent& WXUNUSED(event))
+void BombsFrameClass::OnRestart(wxCommandEvent& event)
 {
     BombsCanvas->UpdateFieldSize();
     int xmax=BombsCanvas->field_width*BombsCanvas->x_cell*X_UNIT;
@@ -122,26 +122,26 @@ void BombsFrameClass::OnRestart(wxCommandEvent& WXUNUSED(event))
     wxGetApp().BombsFrame->SetClientSize(xmax, ymax);
 }
 
-void BombsFrameClass::OnAbout(wxCommandEvent& WXUNUSED(event))
+void BombsFrameClass::OnAbout(wxCommandEvent& event)
 {
     wxMessageBox(_T("wxBombs (c) 1996 by P. Foggia\n<foggia@amalfi.dis.unina.it>"), _T("About wxBombs"));
 }
 
-void BombsFrameClass::OnEasy(wxCommandEvent& WXUNUSED(event))
+void BombsFrameClass::OnEasy(wxCommandEvent& event)
 {
     menuBar->Check(wxGetApp().level, FALSE);
     wxGetApp().level=IDM_EASY;
     menuBar->Check(wxGetApp().level, TRUE);
 }
 
-void BombsFrameClass::OnMedium(wxCommandEvent& WXUNUSED(event))
+void BombsFrameClass::OnMedium(wxCommandEvent& event)
 {
     menuBar->Check(wxGetApp().level, FALSE);
     wxGetApp().level=IDM_MEDIUM;
     menuBar->Check(wxGetApp().level, TRUE);
 }
 
-void BombsFrameClass::OnDifficult(wxCommandEvent& WXUNUSED(event))
+void BombsFrameClass::OnDifficult(wxCommandEvent& event)
 {
     menuBar->Check(wxGetApp().level, FALSE);
     wxGetApp().level=IDM_DIFFICULT;
@@ -169,8 +169,8 @@ BombsCanvasClass::BombsCanvasClass(wxFrame *parent, const wxPoint& pos, const wx
 
   dc.SetMapMode(wxMM_METRIC);
 
-  int xcm = dc.LogicalToDeviceX(10);
-  int ycm = dc.LogicalToDeviceY(10);
+  int xcm = dc.LogicalToDeviceX(10.0);
+  int ycm = dc.LogicalToDeviceY(10.0);
     // To have a square cell, there must be :
     //    sx*ycm == sy*xcm
   if (chw*ycm < chh*xcm)
@@ -195,7 +195,7 @@ BombsCanvasClass::~BombsCanvasClass(void)
 }
 
 // Called when canvas needs to be repainted.
-void BombsCanvasClass::OnPaint(wxPaintEvent& WXUNUSED(event))
+void BombsCanvasClass::OnPaint(wxPaintEvent& event)
 {
   wxPaintDC dc(this);
 

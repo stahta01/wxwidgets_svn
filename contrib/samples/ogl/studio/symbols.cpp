@@ -24,8 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#include <wx/deprecated/setup.h>
-#include <wx/deprecated/wxexpr.h>
+#include <wx/wxexpr.h>
 
 #include "studio.h"
 #include "doc.h"
@@ -120,51 +119,51 @@ void csApp::InitSymbols()
 
     wxShape* shape = new csCircleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Circle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Circle", shape));
 
     shape = new csCircleShadowShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Circle shadow"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Circle shadow", shape));
 
     shape = new csThinRectangleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Thin Rectangle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Thin Rectangle", shape));
 
     shape = new csWideRectangleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Wide Rectangle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Wide Rectangle", shape));
 
     shape = new csSemiCircleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("SemiCircle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("SemiCircle", shape));
 
     shape = new csTriangleShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Triangle"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Triangle", shape));
 
     shape = new csOctagonShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Octagon"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Octagon", shape));
 
     shape = new csGroupShape();
     shape->AssignNewIds();
-    shape->SetEventHandler(new csEvtHandler(shape, shape, wxEmptyString));
+    shape->SetEventHandler(new csEvtHandler(shape, shape, wxString("")));
 
-    m_symbolDatabase->AddSymbol(new csSymbol(_T("Group"), shape));
+    m_symbolDatabase->AddSymbol(new csSymbol("Group", shape));
 }
 
 wxBitmap* csSymbolDatabase::CreateToolBitmap(csSymbol* symbol, const wxSize& toolSize)

@@ -107,7 +107,6 @@ class TestPanel(wxPanel):
         EVT_WIZARD_PAGE_CHANGED(self, self.ID_wiz, self.OnWizPageChanged)
         EVT_WIZARD_PAGE_CHANGING(self, self.ID_wiz, self.OnWizPageChanging)
         EVT_WIZARD_CANCEL(self, self.ID_wiz, self.OnWizCancel)
-        EVT_WIZARD_FINISHED(self, self.ID_wiz, self.OnWizFinished)
 
 
     def OnWizPageChanged(self, evt):
@@ -138,9 +137,6 @@ class TestPanel(wxPanel):
             wxMessageBox("Cancelling on the first page has been prevented.", "Sorry")
             evt.Veto()
 
-    def OnWizFinished(self, evt):
-        self.log.write("OnWizFinished\n")
-        
 
     def OnRunSimpleWizard(self, evt):
         # Create the wizard and the pages
@@ -174,10 +170,6 @@ wxWizardPageSimple class can easily be used for the pages."""))
 
     def OnRunDynamicWizard(self, evt):
         # Create the wizard and the pages
-        #wizard = wxPreWizard()
-        #wizard.SetExtraStyle(wxWIZARD_EX_HELPBUTTON)
-        #wizard.Create(self, self.ID_wiz, "Simple Wizard",
-        #              images.getWizTest1Bitmap())
         wizard = wxWizard(self, self.ID_wiz, "Simple Wizard",
                           images.getWizTest1Bitmap())
 

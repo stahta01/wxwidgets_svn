@@ -2,7 +2,7 @@
  * to make it work with configure?
  */
 
-#if defined(_MSC_VER) || defined(__BORLANDC__) || defined (__DMC__)
+#if defined(_MSC_VER) || defined(__BORLANDC__)
 #include "jconfig.vc"
 #else
 
@@ -12,16 +12,9 @@
 
 /* use wxWindows' configure */
 #ifdef __MWERKS__
-#if (__MWERKS__ < 0x0900) || macintosh || defined ( __MACH__ )
+#if (__MWERKS__ < 0x0900) || macintosh
     #define __WXMAC__
 		#define USE_MAC_MEMMGR
-	#ifdef __MACH__
-   	  #include <ansi_prefix.mach.h>
-   	  #include <msl_c_version.h>
-   	  #include <stdint.h>
-   	  #undef WCHAR_MAX
-   	  #include <machine/ansi.h>
-	#endif
 // automatically includes MacHeaders
 #elif (__MWERKS__ >= 0x0900) && __INTEL__
     #define __WXMSW__

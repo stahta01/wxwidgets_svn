@@ -10,11 +10,9 @@
 #ifndef __GTKCHOICEH__
 #define __GTKCHOICEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "choice.h"
 #endif
-
-class WXDLLIMPEXP_BASE wxSortedArrayString;
 
 //-----------------------------------------------------------------------------
 // wxChoice
@@ -62,7 +60,6 @@ protected:
 
     void ApplyWidgetStyle();
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, int pos);
 
     virtual void DoSetItemClientData( int n, void* clientData );
     virtual void* DoGetItemClientData( int n ) const;
@@ -74,7 +71,7 @@ protected:
     virtual bool IsOwnGtkWindow( GdkWindow *window );
 private:
     // common part of Create() and DoAppend()
-    int GtkAddHelper(GtkWidget *menu, int pos, const wxString& item);
+    size_t GtkAppendHelper(GtkWidget *menu, const wxString& item);
 
     // this array is only used for controls with wxCB_SORT style, so only
     // allocate it if it's needed (hence using pointer)

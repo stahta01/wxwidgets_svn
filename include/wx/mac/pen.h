@@ -1,18 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mac/pen.h
+// Name:        pen.h
 // Purpose:     wxPen class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PEN_H_
 #define _WX_PEN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "pen.h"
 #endif
 
@@ -54,7 +54,7 @@ class WXDLLEXPORT wxPen: public wxGDIObject
   DECLARE_DYNAMIC_CLASS(wxPen)
 public:
   wxPen();
-  wxPen(const wxColour& col, int width = 1, int style = wxSOLID);
+  wxPen(const wxColour& col, int width, int style);
   wxPen(const wxBitmap& stipple, int width);
   wxPen(const wxPen& pen)
       : wxGDIObject()

@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
-# Date : 10 November 1999                                                    *
+# Date : 10 November 1999                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -27,8 +27,9 @@ OBJECTS = \
 		xmcombo.obj,\
 		accel.obj,\
 		app.obj,\
+		bitmap.obj,\
 		bmpbuttn.obj,\
-		bmpmotif.obj,\
+		brush.obj,\
 		button.obj,\
 		checkbox.obj,\
 		checklst.obj,\
@@ -45,12 +46,12 @@ OBJECTS = \
 		dcmemory.obj,\
 		dcscreen.obj,\
 		dialog.obj,\
-		evtloop.obj,\
 		filedlg.obj,\
 		font.obj,\
 		frame.obj,\
 		gauge.obj,\
 		gdiobj.obj,\
+		glcanvas.obj,\
 		gsockmot.obj,\
 		icon.obj,\
 		listbox.obj,\
@@ -61,8 +62,10 @@ OBJECTS = \
 		minifram.obj,\
 		msgdlg.obj,\
 		palette.obj,\
+		pen.obj,\
 		radiobox.obj,\
 		radiobut.obj,\
+		region.obj,\
 		scrolbar.obj,\
 		settings.obj,\
 		slider.obj,\
@@ -71,7 +74,6 @@ OBJECTS = \
 		statbox.obj,\
 		stattext.obj,\
 		textctrl.obj,\
-		toplevel.obj,\
 		timer.obj,\
 		toolbar.obj,\
 		utils.obj,\
@@ -80,8 +82,9 @@ OBJECTS = \
 SOURCES = \
 		accel.cpp,\
 		app.cpp,\
+		bitmap.cpp,\
 		bmpbuttn.cpp,\
-		bmpmotif.cpp,\
+		brush.cpp,\
 		button.cpp,\
 		checkbox.cpp,\
 		checklst.cpp,\
@@ -98,12 +101,12 @@ SOURCES = \
 		dcmemory.cpp,\
 		dcscreen.cpp,\
 		dialog.cpp,\
-		evtloop.cpp,\
 		filedlg.cpp,\
 		font.cpp,\
 		frame.cpp,\
 		gauge.cpp,\
 		gdiobj.cpp,\
+		glcanvas.cpp,\
 		gsockmot.c,\
 		icon.cpp,\
 		listbox.cpp,\
@@ -114,8 +117,10 @@ SOURCES = \
 		minifram.cpp,\
 		msgdlg.cpp,\
 		palette.cpp,\
+		pen.cpp,\
 		radiobox.cpp,\
 		radiobut.cpp,\
+		region.cpp,\
 		scrolbar.cpp,\
 		settings.cpp,\
 		slider.cpp,\
@@ -124,7 +129,6 @@ SOURCES = \
 		statbox.cpp,\
 		stattext.cpp,\
 		textctrl.cpp,\
-		toplevel.cpp,\
 		timer.cpp,\
 		toolbar.cpp,\
 		utils.cpp,\
@@ -142,8 +146,9 @@ xmcombo.obj : [.xmcombo]xmcombo.c
 
 accel.obj : accel.cpp
 app.obj : app.cpp
+bitmap.obj : bitmap.cpp
 bmpbuttn.obj : bmpbuttn.cpp
-bmpmotif.obj : bmpmotif.cpp
+brush.obj : brush.cpp
 button.obj : button.cpp
 checkbox.obj : checkbox.cpp
 checklst.obj : checklst.cpp
@@ -160,12 +165,12 @@ dcclient.obj : dcclient.cpp
 dcmemory.obj : dcmemory.cpp
 dcscreen.obj : dcscreen.cpp
 dialog.obj : dialog.cpp
-evtloop.obj : evtloop.cpp
 filedlg.obj : filedlg.cpp
 font.obj : font.cpp
 frame.obj : frame.cpp
 gauge.obj : gauge.cpp
 gdiobj.obj : gdiobj.cpp
+glcanvas.obj : glcanvas.cpp
 gsockmot.obj : gsockmot.c
 icon.obj : icon.cpp
 listbox.obj : listbox.cpp
@@ -176,8 +181,10 @@ menuitem.obj : menuitem.cpp
 minifram.obj : minifram.cpp
 msgdlg.obj : msgdlg.cpp
 palette.obj : palette.cpp
+pen.obj : pen.cpp
 radiobox.obj : radiobox.cpp
 radiobut.obj : radiobut.cpp
+region.obj : region.cpp
 scrolbar.obj : scrolbar.cpp
 settings.obj : settings.cpp
 slider.obj : slider.cpp
@@ -186,7 +193,6 @@ statbmp.obj : statbmp.cpp
 statbox.obj : statbox.cpp
 stattext.obj : stattext.cpp
 textctrl.obj : textctrl.cpp
-toplevel.obj : toplevel.cpp
 timer.obj : timer.cpp
 toolbar.obj : toolbar.cpp
 utils.obj : utils.cpp

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dirdlg.h"
 #endif
 
@@ -42,11 +42,6 @@
 
 #include "wx/msw/private.h"
 
-#ifdef __WXWINCE__
-#include <winreg.h>
-#include <objbase.h>
-#include <shlguid.h>
-#endif
 #include <shlobj.h> // Win95 shell
 
 // ----------------------------------------------------------------------------
@@ -55,18 +50,6 @@
 
 #ifndef MAX_PATH
     #define MAX_PATH 4096      // be generous
-#endif
-
-#ifndef BIF_NEWDIALOGSTYLE
-    #define BIF_NEWDIALOGSTYLE 0x0040
-#endif
-
-#ifndef BIF_NONEWFOLDERBUTTON
-    #define BIF_NONEWFOLDERBUTTON  0x0200
-#endif
-
-#ifndef BIF_EDITBOX
-    #define BIF_EDITBOX 16
 #endif
 
 // ----------------------------------------------------------------------------
@@ -132,6 +115,10 @@ void wxDirDialog::SetPath(const wxString& path)
     }
 }
 
+#ifndef BIF_NEWDIALOGSTYLE
+#define BIF_NEWDIALOGSTYLE 0x0040
+#endif
+
 int wxDirDialog::ShowModal()
 {
     wxWindow *parent = GetParent();
@@ -140,50 +127,17 @@ int wxDirDialog::ShowModal()
     bi.hwndOwner      = parent ? GetHwndOf(parent) : NULL;
     bi.pidlRoot       = NULL;
     bi.pszDisplayName = NULL;
-#ifdef __WXWINCE__
-    bi.lpszTitle      = m_message.mb_str();
-#else
     bi.lpszTitle      = m_message.c_str();
-#endif
     bi.ulFlags        = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
     bi.lpfn           = BrowseCallbackProc;
     bi.lParam         = (LPARAM)m_path.c_str();    // param for the callback
 
-    static const int verComCtl32 = wxApp::GetComCtl32Version();
-
-    // we always add the edit box (it doesn't hurt anybody, does it?) if it is
-    // supported by the system
-    if ( verComCtl32 >= 471 )
+    if ((GetStyle() & wxDD_NEW_DIR_BUTTON) &&
+        (wxApp::GetComCtl32Version() >= 500))
     {
-        bi.ulFlags |= BIF_EDITBOX;
+        bi.ulFlags |= BIF_NEWDIALOGSTYLE;
     }
 
-    // to have the "New Folder" button we must use the "new" dialog style which
-    // is also the only way to have a resizable dialog
-    //
-    // "new" style is only available in the version 5.0+ of comctl32.dll
-    const bool needNewDir = HasFlag(wxDD_NEW_DIR_BUTTON);
-    if ( (needNewDir || HasFlag(wxRESIZE_BORDER)) && (verComCtl32 >= 500) )
-    {
-        if (needNewDir)
-        {
-            bi.ulFlags |= BIF_NEWDIALOGSTYLE;
-        }
-        else
-        {
-            // Versions < 600 doesn't support BIF_NONEWFOLDERBUTTON
-            // The only way to get rid of the Make New Folder button is use
-            // the old dialog style which doesn't have the button thus we
-            // simply don't set the New Dialog Style for such comctl versions.
-            if (verComCtl32 >= 600)
-            {
-                bi.ulFlags |= BIF_NEWDIALOGSTYLE;
-                bi.ulFlags |= BIF_NONEWFOLDERBUTTON;
-            }
-        }
-    }
-
-    // do show the dialog
     LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
 
     if ( bi.pidlRoot )
@@ -197,7 +151,8 @@ int wxDirDialog::ShowModal()
         return wxID_CANCEL;
     }
 
-    BOOL ok = SHGetPathFromIDList(pidl, wxStringBuffer(m_path, MAX_PATH));
+    BOOL ok = SHGetPathFromIDList(pidl, m_path.GetWriteBuf(MAX_PATH));
+    m_path.UngetWriteBuf();
 
     ItemListFree(pidl);
 
@@ -225,36 +180,23 @@ BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
             // initial selection here
             //
             // wParam = TRUE => lParam is a string and not a PIDL
-#ifndef __WXWINCE__
             SendMessage(hwnd, BFFM_SETSELECTION, TRUE, pData);
-#endif
             break;
 
         case BFFM_SELCHANGED:
-            // note that this doesn't work with the new style UI (MSDN doesn't
-            // say anything about it, but the comments in shlobj.h do!) but we
-            // still execute this code in case it starts working again with the
-            // "new new UI" (or would it be "NewUIEx" according to tradition?)
             {
                 // Set the status window to the currently selected path.
-                wxString strDir;
-                if ( SHGetPathFromIDList((LPITEMIDLIST)lp,
-                                         wxStringBuffer(strDir, MAX_PATH)) )
+                TCHAR szDir[MAX_PATH];
+                if ( SHGetPathFromIDList((LPITEMIDLIST)lp, szDir) )
                 {
-                    // NB: this shouldn't be necessary with the new style box
-                    //     (which is resizable), but as for now it doesn't work
-                    //     anyhow (see the comment above) no harm in doing it
-
-                    // need to truncate or it displays incorrectly
-                    static const size_t maxChars = 37;
-                    if ( strDir.length() > maxChars )
+                    wxString strDir(szDir);
+                    int maxChars = 40; // Have to truncate string else it displays incorrectly
+                    if (strDir.Len() > (size_t) (maxChars - 3))
                     {
-                        strDir = strDir.Right(maxChars);
+                        strDir = strDir.Right(maxChars - 3);
                         strDir = wxString(wxT("...")) + strDir;
                     }
-
-                    SendMessage(hwnd, BFFM_SETSTATUSTEXT,
-                                0, (LPARAM)strDir.c_str());
+                    SendMessage(hwnd, BFFM_SETSTATUSTEXT, 0, (LPARAM) (const wxChar*) strDir);
                 }
             }
             break;

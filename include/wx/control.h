@@ -6,7 +6,7 @@
 // Created:     26.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CONTROL_H_BASE_
@@ -16,11 +16,9 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "controlbase.h"
 #endif
-
-#include "wx/defs.h"
 
 #if wxUSE_CONTROLS
 
@@ -35,8 +33,6 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxControlNameStr;
 class WXDLLEXPORT wxControlBase : public wxWindow
 {
 public:
-    wxControlBase() { }
-
     virtual ~wxControlBase();
 
     // Create() function adds the validator parameter
@@ -54,11 +50,6 @@ public:
     // get the control alignment (left/right/centre, top/bottom/centre)
     int GetAlignment() const { return m_windowStyle & wxALIGN_MASK; }
 
-    // controls by default inherit the colours of their parents, if a
-    // particular control class doesn't want to do it, it can override
-    // ShouldInheritColours() to return false
-    virtual bool ShouldInheritColours() const { return true; }
-
 protected:
     // creates the control (calls wxWindowBase::CreateBase inside) and adds it
     // to the list of parents children
@@ -75,8 +66,6 @@ protected:
 
     // initialize the common fields of wxCommandEvent
     void InitCommandEvent(wxCommandEvent& event) const;
-
-    DECLARE_NO_COPY_CLASS(wxControlBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -93,10 +82,10 @@ protected:
     #include "wx/gtk/control.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/control.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/control.h"
 #elif defined(__WXPM__)
     #include "wx/os2/control.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/control.h"
 #endif
 
 #endif // wxUSE_CONTROLS

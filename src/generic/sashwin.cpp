@@ -8,10 +8,10 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "sashwin.h"
 #endif
 
@@ -46,7 +46,7 @@ BEGIN_EVENT_TABLE(wxSashWindow, wxWindow)
     EVT_PAINT(wxSashWindow::OnPaint)
     EVT_SIZE(wxSashWindow::OnSize)
     EVT_MOUSE_EVENTS(wxSashWindow::OnMouseEvent)
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#ifdef __WXMSW__
     EVT_SET_CURSOR(wxSashWindow::OnSetCursor)
 #endif // wxMSW
 
@@ -488,7 +488,11 @@ void wxSashWindow::DrawSash(wxSashEdgePosition edge, wxDC& dc)
 
     if ( edge == wxSASH_LEFT || edge == wxSASH_RIGHT )
     {
-        int sashPosition = (edge == wxSASH_LEFT) ? 0 : ( w - GetEdgeMargin(edge) );
+        int sashPosition = 0;
+        if (edge == wxSASH_LEFT)
+            sashPosition = 0;
+        else
+            sashPosition = w - GetEdgeMargin(edge);
 
         dc.SetPen(facePen);
         dc.SetBrush(faceBrush);
@@ -514,7 +518,11 @@ void wxSashWindow::DrawSash(wxSashEdgePosition edge, wxDC& dc)
     }
     else // top or bottom
     {
-        int sashPosition = (edge == wxSASH_TOP) ? 0 : ( h - GetEdgeMargin(edge) );
+        int sashPosition = 0;
+        if (edge == wxSASH_TOP)
+            sashPosition = 0;
+        else
+            sashPosition = h - GetEdgeMargin(edge);
 
         dc.SetPen(facePen);
         dc.SetBrush(faceBrush);
@@ -609,9 +617,9 @@ void wxSashWindow::SizeWindows()
     int cw, ch;
     GetClientSize(&cw, &ch);
 
-    if (GetChildren().GetCount() == 1)
+    if (GetChildren().Number() == 1)
     {
-        wxWindow* child = GetChildren().GetFirst()->GetData();
+        wxWindow* child = (wxWindow*) (GetChildren().First()->Data());
 
         int x = 0;
         int y = 0;
@@ -650,7 +658,7 @@ void wxSashWindow::SizeWindows()
 
         child->SetSize(x, y, width, height);
     }
-    else if (GetChildren().GetCount() > 1)
+    else if (GetChildren().Number() > 1)
     {
         // Perhaps multiple children are themselves sash windows.
         // TODO: this doesn't really work because the subwindows sizes/positions
@@ -677,11 +685,11 @@ void wxSashWindow::InitColours()
     m_lightShadowColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT);
     m_hilightColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DHILIGHT);
 #else
-    m_faceColour = wxTheColourDatabase->Find("LIGHT GREY");
-    m_mediumShadowColour = wxTheColourDatabase->Find("GREY");
-    m_darkShadowColour = wxTheColourDatabase->Find("BLACK");
-    m_lightShadowColour = wxTheColourDatabase->Find("LIGHT GREY");
-    m_hilightColour = wxTheColourDatabase->Find("WHITE");
+    m_faceColour = *(wxTheColourDatabase->FindColour("LIGHT GREY"));
+    m_mediumShadowColour = *(wxTheColourDatabase->FindColour("GREY"));
+    m_darkShadowColour = *(wxTheColourDatabase->FindColour("BLACK"));
+    m_lightShadowColour = *(wxTheColourDatabase->FindColour("LIGHT GREY"));
+    m_hilightColour = *(wxTheColourDatabase->FindColour("WHITE"));
 #endif
 }
 
@@ -694,7 +702,7 @@ void wxSashWindow::SetSashVisible(wxSashEdgePosition edge, bool sash)
         m_sashes[edge].m_margin = 0;
 }
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#ifdef __WXMSW__
 
 // this is currently called (and needed) under MSW only...
 void wxSashWindow::OnSetCursor(wxSetCursorEvent& event)

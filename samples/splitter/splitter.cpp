@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +37,7 @@
 #endif
 
 #include "wx/splitter.h"
-#include "wx/dcmirror.h"
+#include "wx/sizer.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -62,11 +62,7 @@ enum
 class MyApp: public wxApp
 {
 public:
-    MyApp() { }
-
-    virtual bool OnInit();
-
-    DECLARE_NO_COPY_CLASS(MyApp)
+    bool OnInit();
 };
 
 class MyFrame: public wxFrame
@@ -89,14 +85,16 @@ public:
     void UpdateUIHorizontal(wxUpdateUIEvent& event);
     void UpdateUIVertical(wxUpdateUIEvent& event);
     void UpdateUIUnsplit(wxUpdateUIEvent& event);
+    
+    wxTextCtrl *GetLog()  { return m_log; }
 
 private:
     wxScrolledWindow *m_left, *m_right;
+    wxTextCtrl *m_log;
 
     wxSplitterWindow* m_splitter;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(MyFrame)
 };
 
 class MySplitterWindow : public wxSplitterWindow
@@ -114,21 +112,21 @@ private:
     wxFrame *m_frame;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(MySplitterWindow)
 };
 
 class MyCanvas: public wxScrolledWindow
 {
 public:
-    MyCanvas(wxWindow* parent, bool mirror);
+    MyCanvas(wxWindow* parent);
     virtual ~MyCanvas();
-
+    
+    void OnMouse(wxMouseEvent& event);
     virtual void OnDraw(wxDC& dc);
-
+    
 private:
-    bool m_mirror;
+    bool   m_capture;
 
-    DECLARE_NO_COPY_CLASS(MyCanvas)
+    DECLARE_EVENT_TABLE()
 };
 
 // ============================================================================
@@ -210,17 +208,24 @@ MyFrame::MyFrame()
     SetMenuBar(menuBar);
 
     menuBar->Check(SPLIT_LIVE, TRUE);
+    
+    wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
+    
     m_splitter = new MySplitterWindow(this);
+    sizer->Add( m_splitter, 1, wxGROW, 0 );
+    
+    m_log = new wxTextCtrl(this,-1,wxT(""),wxDefaultPosition,wxSize(100,80),wxTE_MULTILINE);
+    sizer->Add( m_log, 0, wxGROW );
 
 #if 1
-    m_left = new MyCanvas(m_splitter, true);
+    m_left = new MyCanvas(m_splitter);
     m_left->SetBackgroundColour(*wxRED);
-    m_left->SetScrollbars(20, 20, 5, 5);
+    m_left->SetScrollbars(20, 20, 50, 50);
     m_left->SetCursor(wxCursor(wxCURSOR_MAGNIFIER));
 
-    m_right = new MyCanvas(m_splitter, false);
+    m_right = new MyCanvas(m_splitter);
     m_right->SetBackgroundColour(*wxCYAN);
-    m_right->SetScrollbars(20, 20, 5, 5);
+    m_right->SetScrollbars(20, 20, 50, 50);
 #else // for testing kbd navigation inside the splitter
     m_left = new wxTextCtrl(m_splitter, -1, _T("first text"));
     m_right = new wxTextCtrl(m_splitter, -1, _T("second text"));
@@ -234,6 +239,8 @@ MyFrame::MyFrame()
     // you can also try -100
     m_splitter->SplitVertically(m_left, m_right, 100);
 #endif
+
+    SetSizer( sizer );
 
     SetStatusText(_T("Min pane size = 0"), 1);
 }
@@ -356,7 +363,7 @@ END_EVENT_TABLE()
 MySplitterWindow::MySplitterWindow(wxFrame *parent)
                 : wxSplitterWindow(parent, -1,
                                    wxDefaultPosition, wxDefaultSize,
-                                   0x700| wxSP_LIVE_UPDATE | wxCLIP_CHILDREN)
+                                   wxSP_3D | wxSP_LIVE_UPDATE | wxCLIP_CHILDREN)
 {
     m_frame = parent;
 }
@@ -395,29 +402,61 @@ void MySplitterWindow::OnUnsplit(wxSplitterEvent& event)
 // MyCanvas
 // ----------------------------------------------------------------------------
 
-MyCanvas::MyCanvas(wxWindow* parent, bool mirror)
-        : wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize,
-                           wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE)
+BEGIN_EVENT_TABLE(MyCanvas, wxScrolledWindow)
+    EVT_MOUSE_EVENTS(MyCanvas::OnMouse)
+END_EVENT_TABLE()
+
+MyCanvas::MyCanvas(wxWindow* parent)
+        : wxScrolledWindow(parent, -1)
 {
-    m_mirror = mirror;
+    m_capture = FALSE;
 }
 
 MyCanvas::~MyCanvas()
 {
 }
 
-void MyCanvas::OnDraw(wxDC& dcOrig)
+void MyCanvas::OnDraw(wxDC& dc)
 {
-    wxMirrorDC dc(dcOrig, m_mirror);
-
     dc.SetPen(*wxBLACK_PEN);
-    dc.DrawLine(0, 0, 100, 200);
+    dc.DrawLine(0, 0, 100, 100);
 
     dc.SetBackgroundMode(wxTRANSPARENT);
-    dc.DrawText(_T("Testing"), 50, 50);
+    dc.DrawText(wxT("Click and drag mouse to test enter/leave events."), 50, 50);
 
     dc.SetPen(*wxRED_PEN);
     dc.SetBrush(*wxGREEN_BRUSH);
     dc.DrawRectangle(120, 120, 100, 80);
+}
+
+void MyCanvas::OnMouse(wxMouseEvent& event)
+{
+    MyFrame *frame = (MyFrame*)GetGrandParent();
+    wxTextCtrl *log = frame->GetLog();
+    
+    if (event.GetEventType() == wxEVT_LEFT_DOWN)
+    {
+        log->WriteText( wxT("Left down\n") );
+        m_capture = TRUE;
+        CaptureMouse();
+    }
+    
+    if (event.GetEventType() == wxEVT_LEFT_UP)
+    {
+        log->WriteText( wxT("Left up\n") );
+        m_capture = FALSE;
+        ReleaseMouse();
+    }
+    
+    if (event.GetEventType() == wxEVT_ENTER_WINDOW)
+    {
+        log->WriteText( wxT("Enter\n") );
+    }
+    
+    if (event.GetEventType() == wxEVT_LEAVE_WINDOW)
+    {
+        log->WriteText( wxT("Leave\n") );
+    }
+    
 }
 

@@ -103,6 +103,7 @@ public:
     virtual void     Refresh( bool          bEraseBackground = TRUE
                              ,const wxRect* pRect = (const wxRect *)NULL
                             );
+    virtual void     Clear(void);
     virtual void     Freeze(void);
     virtual void     Update(void);
     virtual void     Thaw(void);
@@ -151,6 +152,47 @@ public:
 
     // Accept files for dragging
     virtual void DragAcceptFiles(bool bAccept);
+
+#if WXWIN_COMPATIBILITY
+    // Set/get scroll attributes
+    virtual void SetScrollRange( int  nOrient
+                                ,int  nRange
+                                ,bool bRefresh = TRUE
+                               );
+    virtual void SetScrollPage( int  nOrient
+                               ,int  nPage
+                               ,bool bRefresh = TRUE
+                              );
+    virtual int  OldGetScrollRange(int nOrient) const;
+    virtual int  GetScrollPage(int nOrient) const;
+
+    //
+    // event handlers
+    //
+        // Handle a control command
+    virtual void OnCommand( wxWindow&       rWin
+                           ,wxCommandEvent& rEvent
+                          );
+
+        // Override to define new behaviour for default action (e.g. double
+        // clicking on a listbox)
+    virtual void OnDefaultAction(wxControl* WXUNUSED(pInitiatingItem)) { }
+#endif // WXWIN_COMPATIBILITY
+
+#if wxUSE_CARET && WXWIN_COMPATIBILITY
+    void CreateCaret( int nWidth
+                     ,int nHeight
+                    );
+    void CreateCaret(const wxBitmap* pBitmap);
+    void DestroyCaret(void);
+    void ShowCaret(bool bShow);
+    void SetCaretPos( int nX
+                     ,int nY
+                    );
+    void GetCaretPos( int* pX
+                     ,int* pY
+                    ) const;
+#endif // wxUSE_CARET
 
 #ifndef __WXUNIVERSAL__
     // Native resource loading (implemented in src/os2/nativdlg.cpp)
@@ -210,6 +252,10 @@ public:
     static WXDWORD MakeExtendedStyle( long lStyle
                                      ,bool bEliminateBorders = TRUE
                                     );
+    // Determine whether 3D effects are wanted
+    WXDWORD Determine3DEffects( WXDWORD dwDefaultBorderStyle
+                               ,bool*   pbWant3D
+                              ) const;
 
     // PM only: TRUE if this control is part of the main control
     virtual bool ContainsHWND(WXHWND WXUNUSED(hWnd)) const { return FALSE; };
@@ -247,6 +293,13 @@ public:
     virtual bool OS2Command( WXUINT uParam
                             ,WXWORD nId
                            );
+
+#if WXWIN_COMPATIBILITY
+    wxObject*    GetChild(int nNumber) const;
+    virtual void OS2DeviceToLogical( float* pfX
+                                    ,float* pfY
+                                   ) const;
+#endif // WXWIN_COMPATIBILITY
 
 #ifndef __WXUNIVERSAL__
     // Create an appropriate wxWindow from a HWND
@@ -317,8 +370,6 @@ public:
     virtual long OS2OnMeasureItem( int                  nId
                                   ,WXMEASUREITEMSTRUCT* pItem
                                  );
-
-    virtual void OnPaint(wxPaintEvent& rEvent);
 
     // the rest are not virtual
     bool HandleCreate( WXLPCREATESTRUCT vCs
@@ -416,6 +467,11 @@ public:
                                 ,WXWPARAM wParam
                                 ,WXLPARAM lParam
                                );
+
+#if WXWIN_COMPATIBILITY
+    void SetShowing(bool bShow) { (void)Show(show); }
+    bool IsUserEnabled(void) const { return IsEnabled(); }
+#endif // WXWIN_COMPATIBILITY
 
     // Responds to colour changes: passes event on to children.
     void OnSysColourChanged(wxSysColourChangedEvent& rEvent);

@@ -11,7 +11,7 @@
 // Copyright:   (c) Julian Smart 1993
 //              (c) Guilhem Lavaux 1997, 1998
 //              (c) 2000 Guillermo Rodriguez <guille@iies.es>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ==========================================================================
@@ -22,7 +22,7 @@
 // headers
 // --------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "sckipc.h"
 #endif
 
@@ -89,7 +89,7 @@ static wxSockAddress *
 GetAddressFromName(const wxString& serverName, const wxString& host = _T(""))
 {
     // we always use INET sockets under non-Unix systems
-#if defined(__UNIX__) && !defined(__WXMAC__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXMAC__)
     // under Unix, if the server name looks like a path, create a AF_UNIX
     // socket instead of AF_INET one
     if ( serverName.Find(_T('/')) != wxNOT_FOUND )
@@ -125,7 +125,6 @@ public:
   void Server_OnRequest(wxSocketEvent& event);
 
   DECLARE_EVENT_TABLE()
-  DECLARE_NO_COPY_CLASS(wxTCPEventHandler)
 };
 
 enum
@@ -531,6 +530,7 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
   if (!connection)
     return;
 
+  int msg = 0;
   wxDataInputStream *codeci;
   wxDataOutputStream *codeco;
   wxSocketStream *sockstrm;
@@ -550,7 +550,7 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
   codeci = connection->m_codeci;
   codeco = connection->m_codeco;
   sockstrm = connection->m_sockstrm;
-  int msg = codeci->Read8();
+  msg = codeci->Read8();
 
   switch (msg)
   {
@@ -743,7 +743,7 @@ void wxTCPEventHandler::Server_OnRequest(wxSocketEvent &event)
 // wxTCPEventHandlerModule (private class)
 // --------------------------------------------------------------------------
 
-class wxTCPEventHandlerModule: public wxModule
+class WXDLLEXPORT wxTCPEventHandlerModule: public wxModule
 {
   DECLARE_DYNAMIC_CLASS(wxTCPEventHandlerModule)
 

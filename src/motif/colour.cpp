@@ -12,7 +12,7 @@
 //// TODO: make wxColour a ref-counted object,
 //// so pixel values get shared.
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "colour.h"
 #endif
 
@@ -37,15 +37,26 @@ IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 wxColour::wxColour ()
 {
     m_isInit = FALSE;
-    m_red =
-    m_blue =
-    m_green = 0;
+    m_red = m_blue = m_green = 0;
+    m_pixel = -1;
+}
+
+wxColour::wxColour (unsigned char r, unsigned char g, unsigned char b)
+{
+    m_red = r;
+    m_green = g;
+    m_blue = b;
+    m_isInit = TRUE;
     m_pixel = -1;
 }
 
 wxColour::wxColour (const wxColour& col)
 {
-    *this = col;
+    m_red = col.m_red;
+    m_green = col.m_green;
+    m_blue = col.m_blue;
+    m_isInit = col.m_isInit;
+    m_pixel = col.m_pixel;
 }
 
 wxColour& wxColour::operator =(const wxColour& col)
@@ -58,29 +69,24 @@ wxColour& wxColour::operator =(const wxColour& col)
     return *this;
 }
 
-void wxColour::InitFromName(const wxString& name)
+void wxColour::InitFromName(const wxString& col)
 {
-    *this = wxTheColourDatabase->Find(name);
-}
-
-/* static */
-wxColour wxColour::CreateByName(const wxString& name)
-{
-    wxColour col;
-
-    Display *dpy = wxGlobalDisplay();
-    WXColormap colormap = wxTheApp->GetMainColormap( dpy );
-    XColor xcol;
-    if ( XParseColor( dpy, (Colormap)colormap, name.mb_str(), &xcol ) )
+    wxColour *the_colour = wxTheColourDatabase->FindColour (col);
+    if (the_colour)
     {
-        col.m_red = xcol.red & 0xff;
-        col.m_green = xcol.green & 0xff;
-        col.m_blue = xcol.blue & 0xff;
-        col.m_isInit = TRUE;
-        col.m_pixel = -1;
+        m_red = the_colour->Red ();
+        m_green = the_colour->Green ();
+        m_blue = the_colour->Blue ();
+        m_pixel = the_colour->m_pixel;
+        m_isInit = TRUE;
     }
-
-    return col;
+    else
+    {
+        m_red = 0;
+        m_green = 0;
+        m_blue = 0;
+        m_isInit = FALSE;
+    }
 }
 
 wxColour::~wxColour ()

@@ -29,7 +29,6 @@
     #include "wx/log.h"
     #include "wx/timer.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/radiobox.h"
@@ -199,8 +198,6 @@ protected:
          m_posLast,
          m_selFrom,
          m_selTo;
-
-    wxString m_range10_20;
 
 private:
     // any class wishing to process wxWindows events must use this macro
@@ -545,7 +542,7 @@ void TextWidgetsPage::CreateText()
     {
         valueOld = m_text->GetValue();
 
-        m_sizerText->Detach( m_text );
+        m_sizerText->Remove(m_text);
         delete m_text;
     }
     else
@@ -634,12 +631,7 @@ void TextWidgetsPage::OnIdle(wxIdleEvent& WXUNUSED(event))
 
     if ( m_textRange )
     {
-        wxString range = m_text->GetRange(10, 20);
-        if ( range != m_range10_20 )
-        {
-            m_range10_20 = range;
-            m_textRange->SetValue(range);
-        }
+        m_textRange->SetValue(m_text->GetRange(10, 20));
     }
 }
 
@@ -742,7 +734,7 @@ void TextWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
                   (m_chkWrapLines->GetValue() != DEFAULTS.wraplines) );
 }
 
-void TextWidgetsPage::OnText(wxCommandEvent& WXUNUSED(event))
+void TextWidgetsPage::OnText(wxCommandEvent& event)
 {
     // small hack to suppress the very first message: by then the logging is
     // not yet redirected and so initial setting of the text value results in
@@ -762,7 +754,7 @@ void TextWidgetsPage::OnTextEnter(wxCommandEvent& event)
     wxLogMessage(_T("Text entered: '%s'"), event.GetString().c_str());
 }
 
-void TextWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void TextWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& event)
 {
     CreateText();
 }

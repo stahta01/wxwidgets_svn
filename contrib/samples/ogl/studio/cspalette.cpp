@@ -72,9 +72,9 @@ bool csEditorToolPalette::OnLeftClick(int toolIndex, bool toggled)
 
 void csEditorToolPalette::OnMouseEnter(int toolIndex)
 {
-    wxString msg = wxEmptyString;
+    wxString msg("");
     if (toolIndex == PALETTE_ARROW)
-        msg = _T("Pointer");
+        msg = "Pointer";
     else if (toolIndex != -1)
     {
         csSymbol* symbol = wxGetApp().GetSymbolDatabase()->FindSymbol(toolIndex);
@@ -115,8 +115,8 @@ bool csApp::CreatePalette(wxFrame *parent)
 
   // Load palette bitmaps
 #ifdef __WXMSW__
-    wxBitmap PaletteArrow(_T("arrowtool"));
-    wxBitmap TextTool(_T("texttool"));
+    wxBitmap PaletteArrow("arrowtool");
+    wxBitmap TextTool("texttool");
     wxSize toolBitmapSize(32, 32);
 #elif defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     wxBitmap PaletteArrow(arrow_xpm);
@@ -130,37 +130,37 @@ bool csApp::CreatePalette(wxFrame *parent)
 
   palette->SetToolBitmapSize(toolBitmapSize);
 
-  palette->AddTool(PALETTE_ARROW, PaletteArrow, wxNullBitmap, TRUE, 0, -1, NULL, _T("Pointer"));
-  palette->AddTool(PALETTE_TEXT_TOOL, TextTool, wxNullBitmap, TRUE, 0, -1, NULL, _T("Text"));
+  palette->AddTool(PALETTE_ARROW, PaletteArrow, wxNullBitmap, TRUE, 0, -1, NULL, "Pointer");
+  palette->AddTool(PALETTE_TEXT_TOOL, TextTool, wxNullBitmap, TRUE, 0, -1, NULL, "Text");
 
-  wxChar** symbols = new wxChar*[20];
+  char** symbols = new char*[20];
   int noSymbols = 0;
 
-  symbols[noSymbols] = _T("Wide Rectangle");
+  symbols[noSymbols] = "Wide Rectangle";
   noSymbols ++;
 
-  symbols[noSymbols] =  _T("Thin Rectangle");
+  symbols[noSymbols] =  "Thin Rectangle";
   noSymbols ++;
  
-  symbols[noSymbols] =  _T("Triangle");
+  symbols[noSymbols] =  "Triangle";
   noSymbols ++;
 
-  symbols[noSymbols] =  _T("Octagon");
+  symbols[noSymbols] =  "Octagon";
   noSymbols ++;
 
   // For some reason, we're getting Gdk errors with
   // some shapes, such as ones that use DrawEllipse.
 #ifndef __WXGTK__
-  symbols[noSymbols] =  _T("Group");
+  symbols[noSymbols] =  "Group";
   noSymbols ++;
 
-  symbols[noSymbols] =  _T("Circle");
+  symbols[noSymbols] =  "Circle";
   noSymbols ++;
 
-  symbols[noSymbols] =  _T("Circle shadow");
+  symbols[noSymbols] =  "Circle shadow";
   noSymbols ++;
 
-  symbols[noSymbols] =  _T("SemiCircle");
+  symbols[noSymbols] =  "SemiCircle";
   noSymbols ++;
 #endif
 

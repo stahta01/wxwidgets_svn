@@ -83,7 +83,7 @@ public:
 
 // Define an array of process pointers used by MyFrame
 class MyPipedProcess;
-WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyProcessesArray);
+WX_DEFINE_ARRAY(MyPipedProcess *, MyProcessesArray);
 
 // Define a new frame type: this is going to be our main frame
 class MyFrame : public wxFrame
@@ -192,9 +192,9 @@ public:
                 wxProcess *process);
 
 protected:
-    void OnTextEnter(wxCommandEvent& WXUNUSED(event)) { DoSend(); }
-    void OnBtnSend(wxCommandEvent& WXUNUSED(event)) { DoSend(); }
-    void OnBtnGet(wxCommandEvent& WXUNUSED(event)) { DoGet(); }
+    void OnTextEnter(wxCommandEvent& event) { DoSend(); }
+    void OnBtnSend(wxCommandEvent& event) { DoSend(); }
+    void OnBtnGet(wxCommandEvent& event) { DoGet(); }
 
     void OnClose(wxCloseEvent& event);
 
@@ -746,7 +746,7 @@ void MyFrame::OnExecWithPipe(wxCommandEvent& WXUNUSED(event))
     m_cmdLast = cmd;
 }
 
-void MyFrame::OnPOpen(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnPOpen(wxCommandEvent& event)
 {
     wxString cmd = wxGetTextFromUser(_T("Enter the command to launch: "),
                                      DIALOG_TITLE,
@@ -778,7 +778,7 @@ void MyFrame::OnPOpen(wxCommandEvent& WXUNUSED(event))
     new MyPipeFrame(this, cmd, process);
 }
 
-void MyFrame::OnFileExec(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnFileExec(wxCommandEvent& event)
 {
     static wxString s_filename;
 
@@ -1096,7 +1096,7 @@ void MyPipeFrame::OnClose(wxCloseEvent& event)
     event.Skip();
 }
 
-void MyPipeFrame::OnProcessTerm(wxProcessEvent& WXUNUSED(event))
+void MyPipeFrame::OnProcessTerm(wxProcessEvent& event)
 {
     delete m_process;
     m_process = NULL;

@@ -128,7 +128,7 @@ bool wxTextCtrl::Create(
     m_windowStyle = lStyle;
     m_bIsMLE = FALSE;
 
-    long                            lSstyle = WS_VISIBLE | WS_TABSTOP;
+    long                            lSstyle = WS_TABSTOP;
 
     //
     // Single and multiline edit fields are two different controls in PM
@@ -516,6 +516,7 @@ void wxTextCtrl::SetInsertionPointEnd()
     //
     if (GetInsertionPoint() == GetLastPosition())
         return;
+
     SetInsertionPoint(lPos);
 } // end of wxTextCtrl::SetInsertionPointEnd
 
@@ -709,15 +710,6 @@ bool wxTextCtrl::IsModified() const
         bRc = (bool)LONGFROMMR(::WinSendMsg(GetHwnd(), EM_QUERYCHANGED, 0, 0));
     return bRc;
 } // end of wxTextCtrl::IsModified
-
-void wxTextCtrl::MarkDirty()
-{
-    if (m_bIsMLE)
-        ::WinSendMsg(GetHwnd(), MLM_SETCHANGED, MPFROMLONG(TRUE), 0);
-    else
-        // EM controls do not have a SETCHANGED, what can we do??
-        wxFAIL_MSG( _T("not implemented") );
-}
 
 //
 // Makes 'unmodified'

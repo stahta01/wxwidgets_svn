@@ -56,7 +56,7 @@ extern PyObject *SWIG_newvarlink(void);
 
 #include "wxPython.h"
 #include "pyistream.h"
-#include "wx/xml/xml.h"
+#include "wx/xrc/xml.h"
 #include "wx/xrc/xmlres.h"
 #include <wx/filesys.h>
 #include <wx/fs_mem.h>
@@ -5307,6 +5307,9 @@ SWIGEXPORT(void) initxrcc() {
 	 PyDict_SetItemString(d,"wxXML_NOTATION_NODE", PyInt_FromLong((long) wxXML_NOTATION_NODE));
 	 PyDict_SetItemString(d,"wxXML_HTML_DOCUMENT_NODE", PyInt_FromLong((long) wxXML_HTML_DOCUMENT_NODE));
 
+
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
 
     wxXmlInitResourceModule();
     wxXmlResource::Get()->InitAllHandlers();

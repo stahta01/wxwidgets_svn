@@ -4,14 +4,14 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GTKTEXTCTRLH__
 #define __GTKTEXTCTRLH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "textctrl.h"
 #endif
 
@@ -65,8 +65,7 @@ public:
     virtual void Replace(long from, long to, const wxString& value);
     virtual void Remove(long from, long to);
 
-    // sets/clears the dirty flag
-    virtual void MarkDirty();
+    // clears the dirty flag
     virtual void DiscardEdits();
 
     virtual void SetMaxLength(unsigned long len);

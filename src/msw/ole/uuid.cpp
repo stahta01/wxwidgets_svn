@@ -6,14 +6,14 @@
 // Created:     12.09.96
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // Declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "uuid.h"
 #endif
 
@@ -30,7 +30,7 @@
 
 // standard headers
 #if wxCHECK_W32API_VERSION( 1, 0 )
-    #include "wx/msw/wrapwin.h"
+    #include <windows.h>
 #endif
 #include  <rpc.h>                       // UUID related functions
 
@@ -136,6 +136,10 @@ void Uuid::Create()
 // set the value
 bool Uuid::Set(const wxChar *pc)
 {
+#ifdef __WXWINE__
+    wxFAIL_MSG(_T("UUid::Set not implemented"));
+    return FALSE;
+#else
   // get UUID from string
 #ifdef _UNICODE
   if ( UuidFromString((unsigned short *)pc, &m_uuid) != RPC_S_OK)
@@ -156,6 +160,7 @@ bool Uuid::Set(const wxChar *pc)
   UuidToCForm();
 
   return TRUE;
+#endif
 }
 
 // stores m_uuid in m_pszCForm in a format required by

@@ -6,7 +6,7 @@
 // Created:     05.01.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "cmdline.h"
 #endif
 
@@ -114,19 +114,15 @@ struct wxCmdLineOption
         { Check(wxCMD_LINE_VAL_NUMBER); return m_longVal; }
     const wxString& GetStrVal() const
         { Check(wxCMD_LINE_VAL_STRING); return m_strVal;  }
-#if wxUSE_DATETIME
     const wxDateTime& GetDateVal() const
         { Check(wxCMD_LINE_VAL_DATE);   return m_dateVal; }
-#endif // wxUSE_DATETIME
 
     void SetLongVal(long val)
         { Check(wxCMD_LINE_VAL_NUMBER); m_longVal = val; m_hasVal = TRUE; }
     void SetStrVal(const wxString& val)
         { Check(wxCMD_LINE_VAL_STRING); m_strVal = val; m_hasVal = TRUE; }
-#if wxUSE_DATETIME
     void SetDateVal(const wxDateTime val)
         { Check(wxCMD_LINE_VAL_DATE); m_dateVal = val; m_hasVal = TRUE; }
-#endif // wxUSE_DATETIME
 
     void SetHasValue(bool hasValue = TRUE) { m_hasVal = hasValue; }
     bool HasValue() const { return m_hasVal; }
@@ -144,9 +140,7 @@ private:
 
     long m_longVal;
     wxString m_strVal;
-#if wxUSE_DATETIME
     wxDateTime m_dateVal;
-#endif // wxUSE_DATETIME
 };
 
 struct wxCmdLineParam
@@ -216,19 +210,19 @@ wxCmdLineParserData::wxCmdLineParserData()
 
 void wxCmdLineParserData::SetArguments(int argc, wxChar **argv)
 {
-    m_arguments.clear();
+    m_arguments.Empty();
 
     for ( int n = 0; n < argc; n++ )
     {
-        m_arguments.push_back(argv[n]);
+        m_arguments.Add(argv[n]);
     }
 }
 
 void wxCmdLineParserData::SetArguments(const wxString& cmdLine)
 {
-    m_arguments.clear();
+    m_arguments.Empty();
 
-    m_arguments.push_back(wxTheApp->GetAppName());
+    m_arguments.Add(wxTheApp->GetAppName());
 
     wxArrayString args = wxCmdLineParser::ConvertStringToArgs(cmdLine);
 
@@ -465,7 +459,6 @@ bool wxCmdLineParser::Found(const wxString& name, long *value) const
     return TRUE;
 }
 
-#if wxUSE_DATETIME
 bool wxCmdLineParser::Found(const wxString& name, wxDateTime *value) const
 {
     int i = m_data->FindOption(name);
@@ -484,11 +477,10 @@ bool wxCmdLineParser::Found(const wxString& name, wxDateTime *value) const
 
     return TRUE;
 }
-#endif // wxUSE_DATETIME
 
 size_t wxCmdLineParser::GetParamCount() const
 {
-    return m_data->m_parameters.size();
+    return m_data->m_parameters.GetCount();
 }
 
 wxString wxCmdLineParser::GetParam(size_t n) const
@@ -529,7 +521,7 @@ int wxCmdLineParser::Parse(bool showUsage)
 
     // parse everything
     wxString arg;
-    size_t count = m_data->m_arguments.size();
+    size_t count = m_data->m_arguments.GetCount();
     for ( size_t n = 1; ok && (n < count); n++ )    // 0 is program name
     {
         arg = m_data->m_arguments[n];
@@ -632,8 +624,7 @@ int wxCmdLineParser::Parse(bool showUsage)
                         wxString arg2 = arg[0u];
                         arg2 += arg.Mid(len + 1); // +1 for leading '-'
 
-                        m_data->m_arguments.insert
-                            (m_data->m_arguments.begin() + n + 1, arg2);
+                        m_data->m_arguments.Insert(arg2, n + 1);
                         count++;
                     }
                     //else: it's our value, we'll deal with it below
@@ -748,7 +739,6 @@ int wxCmdLineParser::Parse(bool showUsage)
                             }
                             break;
 
-#if wxUSE_DATETIME
                         case wxCMD_LINE_VAL_DATE:
                             {
                                 wxDateTime dt;
@@ -766,7 +756,6 @@ int wxCmdLineParser::Parse(bool showUsage)
                                 }
                             }
                             break;
-#endif // wxUSE_DATETIME
                     }
                 }
             }
@@ -780,7 +769,7 @@ int wxCmdLineParser::Parse(bool showUsage)
 
                 // TODO check the param type
 
-                m_data->m_parameters.push_back(arg);
+                m_data->m_parameters.Add(arg);
 
                 if ( !(param.flags & wxCMD_LINE_PARAM_MULTIPLE) )
                 {
@@ -906,7 +895,7 @@ wxString wxCmdLineParser::GetUsageString()
     wxString appname = wxTheApp->GetAppName();
     if ( !appname )
     {
-        wxCHECK_MSG( m_data->m_arguments.size() != 0, wxEmptyString,
+        wxCHECK_MSG( !m_data->m_arguments.IsEmpty(), wxEmptyString,
                      _T("no program name") );
 
         appname = wxFileNameFromPath(m_data->m_arguments[0]);
@@ -990,8 +979,8 @@ wxString wxCmdLineParser::GetUsageString()
             usage << _T(']');
         }
 
-        namesOptions.push_back(option);
-        descOptions.push_back(opt.description);
+        namesOptions.Add(option);
+        descOptions.Add(opt.description);
     }
 
     count = m_data->m_paramDesc.GetCount();
@@ -1022,7 +1011,7 @@ wxString wxCmdLineParser::GetUsageString()
 
     // now construct the detailed help message
     size_t len, lenMax = 0;
-    count = namesOptions.size();
+    count = namesOptions.GetCount();
     for ( n = 0; n < count; n++ )
     {
         len = namesOptions[n].length();
@@ -1121,10 +1110,24 @@ static wxString GetLongOptionName(const wxChar *p)
 
 /*
    This function is mainly used under Windows (as under Unix we always get the
-   command line arguments as argc/argv anyhow) and so it tries to follow
-   Windows conventions for the command line handling, not Unix ones. For
-   instance, backslash is not special except when it precedes double quote when
-   it does quote it.
+   command line arguments as argc/argv anyhow) and so it tries to handle the
+   Windows path names (separated by backslashes) correctly. For this it only
+   considers that a backslash may be used to escape another backslash (but
+   normally this is _not_ needed) or a quote but nothing else.
+
+   In particular, to pass a single argument containing a space to the program
+   it should be quoted:
+
+   myprog.exe foo bar       -> argc = 3, argv[1] = "foo", argv[2] = "bar"
+   myprog.exe "foo bar"     -> argc = 2, argv[1] = "foo bar"
+
+   To pass an argument containing spaces and quotes, the latter should be
+   escaped with a backslash:
+
+   myprog.exe "foo \"bar\"" -> argc = 2, argv[1] = "foo "bar""
+
+   This hopefully matches the conventions used by Explorer/command line
+   interpreter under Windows. If not, this function should be fixed.
  */
 
 /* static */
@@ -1135,7 +1138,7 @@ wxArrayString wxCmdLineParser::ConvertStringToArgs(const wxChar *p)
     wxString arg;
     arg.reserve(1024);
 
-    bool isInsideQuotes = false;
+    bool isInsideQuotes = FALSE;
     for ( ;; )
     {
         // skip white space
@@ -1147,48 +1150,83 @@ wxArrayString wxCmdLineParser::ConvertStringToArgs(const wxChar *p)
             break;
 
         // parse this parameter
-        bool endParam = false;
-        bool lastBS = false;
-        for ( arg.clear(); !endParam; p++ )
+        arg.clear();
+        for ( ;; p++ )
         {
+            // do we have a (lone) backslash?
+            bool isQuotedByBS = FALSE;
+            while ( *p == _T('\\') )
+            {
+                p++;
+
+                // if we have 2 backslashes in a row, output one
+                // unless it looks like a UNC path \\machine\dir\file.ext
+                if ( isQuotedByBS || arg.Len() == 0 )
+                {
+                    arg += _T('\\');
+                    isQuotedByBS = FALSE;
+                }
+                else // the next char is quoted
+                {
+                    isQuotedByBS = TRUE;
+                }
+            }
+
+            bool skipChar = FALSE,
+                 endParam = FALSE;
             switch ( *p )
             {
                 case _T('"'):
-                    if ( !lastBS )
+                    if ( !isQuotedByBS )
                     {
-                        isInsideQuotes = !isInsideQuotes;
+                        // don't put the quote itself in the arg
+                        skipChar = TRUE;
 
-                        // don't put quote in arg
-                        continue;
+                        isInsideQuotes = !isInsideQuotes;
                     }
-                    //else: quote has no special meaning but the backslash
-                    //      still remains -- makes no sense but this is what
-                    //      Windows does
+                    //else: insert a literal quote
+
                     break;
 
                 case _T(' '):
                 case _T('\t'):
-                    // backslash does *not* quote the space, only quotes do
+                    // we intentionally don't check for preceding backslash
+                    // here as if we allowed it to be used to escape spaces the
+                    // cmd line of the form "foo.exe a:\ c:\bar" wouldn't be
+                    // parsed correctly
                     if ( isInsideQuotes )
                     {
-                        // skip assignment below
+                        // preserve it, skip endParam below
                         break;
                     }
-                    // fall through
+                    //else: fall through
 
                 case _T('\0'):
                     endParam = TRUE;
+                    break;
 
-                    // exit from the loop directly, without changing arg
-                    continue;
+                default:
+                    if ( isQuotedByBS )
+                    {
+                        // ignore backslash before an ordinary character - this
+                        // is needed to properly handle the file names under
+                        // Windows appearing in the command line
+                        arg += _T('\\');
+                    }
             }
 
-            lastBS = *p == _T('\\');
+            // end of argument?
+            if ( endParam )
+                break;
 
-            arg += *p;
+            // otherwise copy this char to arg
+            if ( !skipChar )
+            {
+                arg += *p;
+            }
         }
 
-        args.push_back(arg);
+        args.Add(arg);
     }
 
     return args;

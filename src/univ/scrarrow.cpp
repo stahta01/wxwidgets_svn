@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univscrarrow.h"
 #endif
 
@@ -170,7 +170,7 @@ bool wxScrollArrows::HandleMouseMove(const wxMouseEvent& event) const
         arrow = m_control->HitTest(event.GetPosition());
     }
 
-    if ( m_captureData && m_captureData->m_timerScroll)
+    if ( m_captureData )
     {
         // the mouse is captured, we may want to pause scrolling if it goes
         // outside the arrow or to resume it if we had paused it before
@@ -187,7 +187,7 @@ bool wxScrollArrows::HandleMouseMove(const wxMouseEvent& event) const
                 return TRUE;
             }
         }
-        else // if ( 1 ) FIXME: m_control->ShouldPauseScrolling() )
+        else if ( 1 ) //FIXME: m_control->ShouldPauseScrolling() )
         {
             // we may want to stop it
             if ( arrow != m_captureData->m_arrowPressed )
@@ -246,23 +246,11 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
             m_captureData->m_window = m_control->GetWindow();
             m_captureData->m_window->CaptureMouse();
 
-            // start scrolling                       
-            wxScrollArrowTimer *tmpTimerScroll =
+            // start scrolling
+            m_captureData->m_timerScroll =
                 new wxScrollArrowTimer(m_control, arrow);
 
-            // Because in some cases wxScrollArrowTimer can cause 
-            // m_captureData to be destructed we need to test if it 
-            // is still valid before using.
-            if (m_captureData)
-            {
-                m_captureData->m_timerScroll = tmpTimerScroll;
-
-                m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, TRUE);
-            }
-            else
-            {
-                delete tmpTimerScroll;
-            }
+            m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, TRUE);
         }
         //else: mouse already captured, nothing to do
     }

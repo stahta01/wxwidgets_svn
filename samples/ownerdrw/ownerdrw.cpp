@@ -45,7 +45,6 @@ public:
 
     // notifications
     void OnQuit             (wxCommandEvent& event);
-    void OnMenuToggle       (wxCommandEvent& event);
     void OnAbout            (wxCommandEvent& event);
     void OnListboxSelect    (wxCommandEvent& event);
     void OnCheckboxToggle   (wxCommandEvent& event);
@@ -58,7 +57,6 @@ private:
     void InitMenu();
 
     wxCheckListBox *m_pListBox;
-    wxMenuItem *pAboutItem;
 };
 
 enum 
@@ -68,14 +66,11 @@ enum
     Menu_Test1, Menu_Test2, Menu_Test3, 
     Menu_Bitmap, Menu_Bitmap2, 
     Menu_Submenu, Menu_Sub1, Menu_Sub2, Menu_Sub3,
-    Menu_Toggle, Menu_About,
     Control_First = 1000,
     Control_Listbox, Control_Listbox2,
 };
 
 BEGIN_EVENT_TABLE(OwnerDrawnFrame, wxFrame)
-    EVT_MENU(Menu_Toggle, OwnerDrawnFrame::OnMenuToggle)
-    EVT_MENU(Menu_About, OwnerDrawnFrame::OnAbout)
     EVT_MENU(Menu_Quit, OwnerDrawnFrame::OnQuit)
     EVT_LISTBOX(Control_Listbox, OwnerDrawnFrame::OnListboxSelect)
     EVT_CHECKLISTBOX(Control_Listbox, OwnerDrawnFrame::OnCheckboxToggle)
@@ -113,11 +108,7 @@ void OwnerDrawnFrame::InitMenu()
            fontBmp(14, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE);
 
     // sorry for my artistic skills...
-    wxBitmap bmpBell(_T("bell")),
-             bmpSound(_T("sound")),
-             bmpNoSound(_T("nosound")),
-             bmpInfo(_T("info")),
-             bmpInfo_mono(_T("info_mono"));
+    wxBitmap bmpBell(_T("bell")), bmpSound(_T("sound")), bmpNoSound(_T("nosound"));
 
     // construct submenu
     pItem = new wxMenuItem(sub_menu, Menu_Sub1, _T("Submenu &first"), _T("large"));
@@ -139,6 +130,7 @@ void OwnerDrawnFrame::InitMenu()
     pItem = new wxMenuItem(file_menu, Menu_Test1, _T("&Uncheckable"), _T("red item"));
     pItem->SetFont(*wxITALIC_FONT);
     pItem->SetTextColour(wxColor(255, 0, 0));
+    pItem->SetMarginWidth(23);
     file_menu->Append(pItem);
 
     pItem = new wxMenuItem(file_menu, Menu_Test2, _T("&Checkable"),
@@ -174,21 +166,9 @@ void OwnerDrawnFrame::InitMenu()
     file_menu->Append(pItem);
 
     file_menu->AppendSeparator();
-    pItem = new wxMenuItem(file_menu, Menu_Toggle, _T("&Disable/Enable\tCtrl+D"), 
-                          _T("enables/disables the About-Item"), wxITEM_NORMAL);
-    pItem->SetFont(*wxNORMAL_FONT);
-    file_menu->Append(pItem);
-
-    // Of course Ctrl+RatherLongAccel will not work in this example:
-    pAboutItem = new wxMenuItem(file_menu, Menu_About, _T("&About\tCtrl+RatherLongAccel"), 
-                                _T("display program information"), wxITEM_NORMAL);
-    pAboutItem->SetBitmap(bmpInfo);
-    pAboutItem->SetDisabledBitmap(bmpInfo_mono);
-    file_menu->Append(pAboutItem);
-
-    file_menu->AppendSeparator();
     pItem = new wxMenuItem(file_menu, Menu_Quit, _T("&Quit"), _T("Normal item"),
                            wxITEM_NORMAL);
+    pItem->SetFont(*wxNORMAL_FONT);
     file_menu->Append(pItem);
 
     wxMenuBar *menu_bar = new wxMenuBar;
@@ -215,7 +195,8 @@ OwnerDrawnFrame::OwnerDrawnFrame(wxFrame *frame, wxChar *title,
     SetStatusText(_T("no selection"), 0);
 
     // make a panel with some controls
-    wxPanel *pPanel = new wxPanel(this);
+    wxPanel *pPanel = new wxPanel(this, -1, wxPoint(0, 0), 
+                                  wxSize(400, 200), wxTAB_TRAVERSAL);
 
     // check list box
     static const wxChar* aszChoices[] = { _T("Hello"), _T("world"), _T("and"), 
@@ -269,10 +250,12 @@ OwnerDrawnFrame::OwnerDrawnFrame(wxFrame *frame, wxChar *title,
             pPanel,              // parent
             Control_Listbox2,    // control id
             wxPoint(220, 10),    // listbox position
-            wxSize(200, 200),    // listbox size
-            WXSIZEOF(aszColors), // number of strings
+            wxDefaultSize,       // listbox size
+            WXSIZEOF(aszColors),   // number of strings
             astrChoices,         // array of strings
-            wxLB_OWNERDRAW       // owner-drawn
+            wxLB_OWNERDRAW,      // owner-drawn
+            wxDefaultValidator,  //
+            wxListBoxNameStr
         );
 
     for ( ui = 0; ui < WXSIZEOF(aszColors); ui++ )
@@ -297,20 +280,12 @@ OwnerDrawnFrame::~OwnerDrawnFrame()
 {
 }
 
-void OwnerDrawnFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void OwnerDrawnFrame::OnQuit(wxCommandEvent& event)
 {
     Close(TRUE);
 }
 
-void OwnerDrawnFrame::OnMenuToggle(wxCommandEvent& WXUNUSED(event))
-{
-    // This example shows the use of bitmaps in ownerdrawn menuitems and is not a good
-    // example on how to enable and disable menuitems - this should be done with the help of
-    // EVT_UPDATE_UI and EVT_UPDATE_UI_RANGE !
-    pAboutItem->Enable( pAboutItem->IsEnabled() ? FALSE : TRUE );
-}
-
-void OwnerDrawnFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void OwnerDrawnFrame::OnAbout(wxCommandEvent& event)
 {
     wxMessageDialog dialog(this,
                            _T("Demo of owner-drawn controls\n"),
@@ -327,7 +302,7 @@ void OwnerDrawnFrame::OnListboxSelect(wxCommandEvent& event)
     SetStatusText(strSelection);
 }
 
-void OwnerDrawnFrame::OnListboxDblClick(wxCommandEvent& WXUNUSED(event))
+void OwnerDrawnFrame::OnListboxDblClick(wxCommandEvent& event)
 {
     wxString strSelection;
     strSelection.Printf(wxT("item %d double clicked"),

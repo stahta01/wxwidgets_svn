@@ -22,28 +22,17 @@
 #include "wx/event.h"
 #include "wx/dynarray.h"
 
-#ifdef WXMAKINGDLL_PLOT
-    #define WXDLLIMPEXP_PLOT WXEXPORT
-    #define WXDLLIMPEXP_DATA_PLOT(type) WXEXPORT type
-#elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_PLOT WXIMPORT
-    #define WXDLLIMPEXP_DATA_PLOT(type) WXIMPORT type
-#else // not making nor using DLL
-    #define WXDLLIMPEXP_PLOT
-    #define WXDLLIMPEXP_DATA_PLOT(type) type
-#endif
-
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotEvent;
-class WXDLLIMPEXP_PLOT wxPlotCurve;
-class WXDLLIMPEXP_PLOT wxPlotValues;
-class WXDLLIMPEXP_PLOT wxPlotArea;
-class WXDLLIMPEXP_PLOT wxPlotXAxisArea;
-class WXDLLIMPEXP_PLOT wxPlotYAxisArea;
-class WXDLLIMPEXP_PLOT wxPlotWindow;
+class WXDLLEXPORT wxPlotEvent;
+class WXDLLEXPORT wxPlotCurve;
+class WXDLLEXPORT wxPlotValues;
+class WXDLLEXPORT wxPlotArea;
+class WXDLLEXPORT wxPlotXAxisArea;
+class WXDLLEXPORT wxPlotYAxisArea;
+class WXDLLEXPORT wxPlotWindow;
 
 //-----------------------------------------------------------------------------
 // consts
@@ -85,7 +74,7 @@ extern const int wxEVT_PLOT_AREA_CREATE;
 // wxPlotEvent
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotEvent: public wxNotifyEvent
+class WXDLLEXPORT wxPlotEvent: public wxNotifyEvent
 {
 public:
     wxPlotEvent( wxEventType commandType = wxEVT_NULL, int id = 0 );
@@ -115,7 +104,7 @@ private:
 // wxPlotCurve
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotCurve: public wxObject
+class WXDLLEXPORT wxPlotCurve: public wxObject
 {
 public:
     wxPlotCurve( int offsetY, double startY, double endY );
@@ -157,7 +146,7 @@ private:
 // wxPlotOnOffCurve
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotOnOff
+class WXDLLEXPORT wxPlotOnOff
 {
 public:
     wxPlotOnOff() { }
@@ -167,10 +156,9 @@ public:
     void     *m_clientData;
 };
 
-WX_DECLARE_OBJARRAY_WITH_DECL(wxPlotOnOff, wxArrayPlotOnOff,
-                              class WXDLLIMPEXP_PLOT);
+WX_DECLARE_EXPORTED_OBJARRAY(wxPlotOnOff, wxArrayPlotOnOff);
 
-class WXDLLIMPEXP_PLOT wxPlotOnOffCurve: public wxObject
+class WXDLLEXPORT wxPlotOnOffCurve: public wxObject
 {
 public:
     wxPlotOnOffCurve( int offsetY );
@@ -210,7 +198,7 @@ private:
 // wxPlotArea
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotArea: public wxWindow
+class WXDLLEXPORT wxPlotArea: public wxWindow
 {
 public:
     wxPlotArea() {}
@@ -237,7 +225,7 @@ private:
 // wxPlotXAxisArea
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotXAxisArea: public wxWindow
+class WXDLLEXPORT wxPlotXAxisArea: public wxWindow
 {
 public:
     wxPlotXAxisArea() {}
@@ -257,7 +245,7 @@ private:
 // wxPlotYAxisArea
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotYAxisArea: public wxWindow
+class WXDLLEXPORT wxPlotYAxisArea: public wxWindow
 {
 public:
     wxPlotYAxisArea() {}
@@ -277,7 +265,7 @@ private:
 // wxPlotWindow
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_PLOT wxPlotWindow: public wxScrolledWindow
+class WXDLLEXPORT wxPlotWindow: public wxScrolledWindow
 {
 public:
     wxPlotWindow() {}

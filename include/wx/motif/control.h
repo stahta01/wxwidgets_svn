@@ -12,13 +12,15 @@
 #ifndef _WX_CONTROL_H_
 #define _WX_CONTROL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "control.h"
 #endif
 
 #include "wx/window.h"
 #include "wx/list.h"
 #include "wx/validate.h"
+
+#define wxControlNameStr _T("control")
 
 // General item class
 class WXDLLEXPORT wxControl: public wxControlBase
@@ -54,24 +56,24 @@ public:
     virtual void SetLabel(const wxString& label);
     virtual wxString GetLabel() const ;
     
+#if WXWIN_COMPATIBILITY
+    void Callback(const wxFunction function) { m_callback = function; }; // Adds callback
+    
+    wxFunction GetCallback() { return m_callback; }
+#endif // WXWIN_COMPATIBILITY
+    
     bool InSetValue() const { return m_inSetValue; }
     
 protected:
-    // calls wxControlBase::CreateControl, also sets foreground, background and
-    // font to parent's values
-    bool CreateControl(wxWindow *parent,
-                       wxWindowID id,
-                       const wxPoint& pos,
-                       const wxSize& size,
-                       long style,
-                       const wxValidator& validator,
-                       const wxString& name);
-
-    // Motif: prevent callbacks being called while in SetValue
-    bool m_inSetValue;
+#if WXWIN_COMPATIBILITY
+    wxFunction          m_callback;     // Callback associated with the window
+#endif // WXWIN_COMPATIBILITY
+    
+    bool                m_inSetValue;   // Motif: prevent callbacks being called while
+    // in SetValue
     
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_CONTROL_H_
-
+#endif
+// _WX_CONTROL_H_

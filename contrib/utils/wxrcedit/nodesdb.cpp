@@ -159,7 +159,7 @@ void NodesDb::LoadDir(const wxString& path)
     wxString filename;
     bool cont;
 
-    cont = dir.GetFirst(&filename, _T("*.df"));
+    cont = dir.GetFirst(&filename, "*.df");
     while (cont)
     {
         LoadFile(filename);

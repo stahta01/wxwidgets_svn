@@ -206,18 +206,6 @@ class wxCheckBoxPtr(wxControlPtr):
     def SetValue(self, *_args, **_kwargs):
         val = controlsc.wxCheckBox_SetValue(self, *_args, **_kwargs)
         return val
-    def Get3StateValue(self, *_args, **_kwargs):
-        val = controlsc.wxCheckBox_Get3StateValue(self, *_args, **_kwargs)
-        return val
-    def Set3StateValue(self, *_args, **_kwargs):
-        val = controlsc.wxCheckBox_Set3StateValue(self, *_args, **_kwargs)
-        return val
-    def Is3State(self, *_args, **_kwargs):
-        val = controlsc.wxCheckBox_Is3State(self, *_args, **_kwargs)
-        return val
-    def Is3rdStateAllowedForUser(self, *_args, **_kwargs):
-        val = controlsc.wxCheckBox_Is3rdStateAllowedForUser(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxCheckBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxCheckBox(wxCheckBoxPtr):
@@ -396,9 +384,6 @@ class wxGaugePtr(wxControlPtr):
         return val
     def GetValue(self, *_args, **_kwargs):
         val = controlsc.wxGauge_GetValue(self, *_args, **_kwargs)
-        return val
-    def IsVertical(self, *_args, **_kwargs):
-        val = controlsc.wxGauge_IsVertical(self, *_args, **_kwargs)
         return val
     def SetBezelFace(self, *_args, **_kwargs):
         val = controlsc.wxGauge_SetBezelFace(self, *_args, **_kwargs)
@@ -619,9 +604,6 @@ class wxTextAttrPtr :
                 delfunc(self)
             except:
                 pass
-    def Init(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_Init(self, *_args, **_kwargs)
-        return val
     def SetTextColour(self, *_args, **_kwargs):
         val = controlsc.wxTextAttr_SetTextColour(self, *_args, **_kwargs)
         return val
@@ -631,21 +613,6 @@ class wxTextAttrPtr :
     def SetFont(self, *_args, **_kwargs):
         val = controlsc.wxTextAttr_SetFont(self, *_args, **_kwargs)
         return val
-    def SetAlignment(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_SetAlignment(self, *_args, **_kwargs)
-        return val
-    def SetTabs(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_SetTabs(self, *_args, **_kwargs)
-        return val
-    def SetLeftIndent(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_SetLeftIndent(self, *_args, **_kwargs)
-        return val
-    def SetRightIndent(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_SetRightIndent(self, *_args, **_kwargs)
-        return val
-    def SetFlags(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_SetFlags(self, *_args, **_kwargs)
-        return val
     def HasTextColour(self, *_args, **_kwargs):
         val = controlsc.wxTextAttr_HasTextColour(self, *_args, **_kwargs)
         return val
@@ -654,21 +621,6 @@ class wxTextAttrPtr :
         return val
     def HasFont(self, *_args, **_kwargs):
         val = controlsc.wxTextAttr_HasFont(self, *_args, **_kwargs)
-        return val
-    def HasAlignment(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_HasAlignment(self, *_args, **_kwargs)
-        return val
-    def HasTabs(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_HasTabs(self, *_args, **_kwargs)
-        return val
-    def HasLeftIndent(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_HasLeftIndent(self, *_args, **_kwargs)
-        return val
-    def HasRightIndent(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_HasRightIndent(self, *_args, **_kwargs)
-        return val
-    def HasFlag(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_HasFlag(self, *_args, **_kwargs)
         return val
     def GetTextColour(self, *_args, **_kwargs):
         val = controlsc.wxTextAttr_GetTextColour(self, *_args, **_kwargs)
@@ -681,21 +633,6 @@ class wxTextAttrPtr :
     def GetFont(self, *_args, **_kwargs):
         val = controlsc.wxTextAttr_GetFont(self, *_args, **_kwargs)
         if val: val = wxFontPtr(val) ; val.thisown = 1
-        return val
-    def GetAlignment(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_GetAlignment(self, *_args, **_kwargs)
-        return val
-    def GetTabs(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_GetTabs(self, *_args, **_kwargs)
-        return val
-    def GetLeftIndent(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_GetLeftIndent(self, *_args, **_kwargs)
-        return val
-    def GetRightIndent(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_GetRightIndent(self, *_args, **_kwargs)
-        return val
-    def GetFlags(self, *_args, **_kwargs):
-        val = controlsc.wxTextAttr_GetFlags(self, *_args, **_kwargs)
         return val
     def IsDefault(self, *_args, **_kwargs):
         val = controlsc.wxTextAttr_IsDefault(self, *_args, **_kwargs)
@@ -762,9 +699,6 @@ class wxTextCtrlPtr(wxControlPtr):
     def SaveFile(self, *_args, **_kwargs):
         val = controlsc.wxTextCtrl_SaveFile(self, *_args, **_kwargs)
         return val
-    def MarkDirty(self, *_args, **_kwargs):
-        val = controlsc.wxTextCtrl_MarkDirty(self, *_args, **_kwargs)
-        return val
     def DiscardEdits(self, *_args, **_kwargs):
         val = controlsc.wxTextCtrl_DiscardEdits(self, *_args, **_kwargs)
         return val
@@ -789,9 +723,6 @@ class wxTextCtrlPtr(wxControlPtr):
     def GetDefaultStyle(self, *_args, **_kwargs):
         val = controlsc.wxTextCtrl_GetDefaultStyle(self, *_args, **_kwargs)
         if val: val = wxTextAttrPtr(val) 
-        return val
-    def GetStyle(self, *_args, **_kwargs):
-        val = controlsc.wxTextCtrl_GetStyle(self, *_args, **_kwargs)
         return val
     def XYToPosition(self, *_args, **_kwargs):
         val = controlsc.wxTextCtrl_XYToPosition(self, *_args, **_kwargs)
@@ -1022,8 +953,11 @@ class wxRadioBoxPtr(wxControlPtr):
     def GetString(self, *_args, **_kwargs):
         val = controlsc.wxRadioBox_GetString(self, *_args, **_kwargs)
         return val
-    def SetString(self, *_args, **_kwargs):
-        val = controlsc.wxRadioBox_SetString(self, *_args, **_kwargs)
+    def GetItemLabel(self, *_args, **_kwargs):
+        val = controlsc.wxRadioBox_GetItemLabel(self, *_args, **_kwargs)
+        return val
+    def SetItemLabel(self, *_args, **_kwargs):
+        val = controlsc.wxRadioBox_SetItemLabel(self, *_args, **_kwargs)
         return val
     def GetSelection(self, *_args, **_kwargs):
         val = controlsc.wxRadioBox_GetSelection(self, *_args, **_kwargs)
@@ -1048,10 +982,6 @@ class wxRadioBoxPtr(wxControlPtr):
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxRadioBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-    
-    GetItemLabel = GetString
-    SetItemLabel = SetString
-    
     Number = GetCount
 class wxRadioBox(wxRadioBoxPtr):
     def __init__(self,*_args,**_kwargs):
@@ -1274,46 +1204,4 @@ def wxTextAttr_Combine(*_args, **_kwargs):
 
 cvar = controlsc.cvar
 wxDefaultValidator = wxValidatorPtr(controlsc.cvar.wxDefaultValidator)
-wxCHK_2STATE = controlsc.wxCHK_2STATE
-wxCHK_3STATE = controlsc.wxCHK_3STATE
-wxCHK_ALLOW_3RD_STATE_FOR_USER = controlsc.wxCHK_ALLOW_3RD_STATE_FOR_USER
-wxCHK_UNCHECKED = controlsc.wxCHK_UNCHECKED
-wxCHK_CHECKED = controlsc.wxCHK_CHECKED
-wxCHK_UNDETERMINED = controlsc.wxCHK_UNDETERMINED
-wxTE_NO_VSCROLL = controlsc.wxTE_NO_VSCROLL
-wxTE_AUTO_SCROLL = controlsc.wxTE_AUTO_SCROLL
-wxTE_READONLY = controlsc.wxTE_READONLY
-wxTE_MULTILINE = controlsc.wxTE_MULTILINE
-wxTE_PROCESS_TAB = controlsc.wxTE_PROCESS_TAB
-wxTE_LEFT = controlsc.wxTE_LEFT
-wxTE_CENTER = controlsc.wxTE_CENTER
-wxTE_RIGHT = controlsc.wxTE_RIGHT
-wxTE_CENTRE = controlsc.wxTE_CENTRE
-wxTE_RICH = controlsc.wxTE_RICH
-wxTE_PROCESS_ENTER = controlsc.wxTE_PROCESS_ENTER
-wxTE_PASSWORD = controlsc.wxTE_PASSWORD
-wxTE_AUTO_URL = controlsc.wxTE_AUTO_URL
-wxTE_NOHIDESEL = controlsc.wxTE_NOHIDESEL
-wxTE_DONTWRAP = controlsc.wxTE_DONTWRAP
-wxTE_LINEWRAP = controlsc.wxTE_LINEWRAP
-wxTE_WORDWRAP = controlsc.wxTE_WORDWRAP
-wxTE_RICH2 = controlsc.wxTE_RICH2
-wxTEXT_ATTR_TEXT_COLOUR = controlsc.wxTEXT_ATTR_TEXT_COLOUR
-wxTEXT_ATTR_BACKGROUND_COLOUR = controlsc.wxTEXT_ATTR_BACKGROUND_COLOUR
-wxTEXT_ATTR_FONT_FACE = controlsc.wxTEXT_ATTR_FONT_FACE
-wxTEXT_ATTR_FONT_SIZE = controlsc.wxTEXT_ATTR_FONT_SIZE
-wxTEXT_ATTR_FONT_WEIGHT = controlsc.wxTEXT_ATTR_FONT_WEIGHT
-wxTEXT_ATTR_FONT_ITALIC = controlsc.wxTEXT_ATTR_FONT_ITALIC
-wxTEXT_ATTR_FONT_UNDERLINE = controlsc.wxTEXT_ATTR_FONT_UNDERLINE
-wxTEXT_ATTR_FONT = controlsc.wxTEXT_ATTR_FONT
-wxTEXT_ATTR_ALIGNMENT = controlsc.wxTEXT_ATTR_ALIGNMENT
-wxTEXT_ATTR_LEFT_INDENT = controlsc.wxTEXT_ATTR_LEFT_INDENT
-wxTEXT_ATTR_RIGHT_INDENT = controlsc.wxTEXT_ATTR_RIGHT_INDENT
-wxTEXT_ATTR_TABS = controlsc.wxTEXT_ATTR_TABS
-wxTEXT_ALIGNMENT_DEFAULT = controlsc.wxTEXT_ALIGNMENT_DEFAULT
-wxTEXT_ALIGNMENT_LEFT = controlsc.wxTEXT_ALIGNMENT_LEFT
-wxTEXT_ALIGNMENT_CENTRE = controlsc.wxTEXT_ALIGNMENT_CENTRE
-wxTEXT_ALIGNMENT_CENTER = controlsc.wxTEXT_ALIGNMENT_CENTER
-wxTEXT_ALIGNMENT_RIGHT = controlsc.wxTEXT_ALIGNMENT_RIGHT
-wxTEXT_ALIGNMENT_JUSTIFIED = controlsc.wxTEXT_ALIGNMENT_JUSTIFIED
 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED = controlsc.wxEVT_COMMAND_TOGGLEBUTTON_CLICKED

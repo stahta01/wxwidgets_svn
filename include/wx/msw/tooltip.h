@@ -6,7 +6,7 @@
 // Created:     31.01.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Robert Roebling, Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 class WXDLLEXPORT wxToolTip : public wxObject
@@ -55,6 +55,5 @@ private:
     wxWindow *m_window;         // window we're associated with
 
     DECLARE_ABSTRACT_CLASS(wxToolTip)
-    DECLARE_NO_COPY_CLASS(wxToolTip)
 };
 

@@ -6,7 +6,7 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SETUP_H_
@@ -27,6 +27,24 @@
 // ----------------------------------------------------------------------------
 // compatibility settings
 // ----------------------------------------------------------------------------
+
+// This setting determines the compatibility with 1.68 API:
+// Level 0: no backward compatibility, all new features
+// Level 1: some extra methods are defined for compatibility.
+//
+// Default is 0.
+//
+// Recommended setting: 0 (in fact the compatibility code is now very minimal
+// so there is little advantage to setting it to 1.
+#define WXWIN_COMPATIBILITY  0
+
+// This setting determines the compatibility with 2.0 API: set it to 1 to
+// enable it
+//
+// Default is 0.
+//
+// Recommended setting: 0 (please update your code instead!)
+#define WXWIN_COMPATIBILITY_2 0
 
 // This setting determines the compatibility with 2.0 API: set it to 1 to
 // enable it
@@ -281,6 +299,15 @@
 // Recommended setting: 1
 #define wxUSE_DATETIME      1
 
+// wxUSE_TIMEDATE enables compilation of the old wxDate and wxTime classes (not
+// the same as wxDateTime!). These classes are obsolete and shouldn't be used
+// in new code
+//
+// Default is 0
+//
+// Recommended setting: 0 unless you have legacy code which uses these classes
+#define wxUSE_TIMEDATE 0
+
 // Set wxUSE_TIMER to 1 to compile wxTimer class
 //
 // Default is 1
@@ -504,10 +531,20 @@
 // Recommended setting: 0 (use wxNotebook)
 #define wxUSE_TAB_DIALOG    0
 
-// wxGrid class
-// Default is 1
+// wxGrid class comes in two flavours: the original (pre wxWin 2.2) one and
+// the new, much imporved and enhanced version. The new version is backwards
+// compatible with the old one and should be used whenever possible, i.e. if
+// you set wxUSE_GRID to 1, set wxUSE_NEW_GRID to 1 too.
 //
+// Default is 1 for both options.
+//
+// Recommended setting: 1 for wxUSE_NEW_GRID, 0 if you have an old code using
+// wxGrid and 100% backwards compatibality (with all old wxGrid quirks) is
+// essential.
+//
+// WIN16/BC++ resets wxUSE_NEW_GRID to 0 because it exceeds the data limit.
 #define wxUSE_GRID         0
+#define wxUSE_NEW_GRID     0
 
 // wxProperty[Value/Form/List] classes, used by Dialog Editor
 #define wxUSE_PROPSHEET    0
@@ -947,7 +984,7 @@
 //
 // Recommended setting: 1, only set it to 0 if your compiler doesn't have
 //                      or can't compile <richedit.h>
-#if defined(__WIN95__) && !defined(__WINE__) && !defined(__GNUWIN32_OLD__)
+#if defined(__WIN95__) && !defined(__TWIN32__) && !defined(__GNUWIN32_OLD__)
 #define wxUSE_RICHEDIT  1
 
 // TODO:  This should be ifdef'ed for any compilers that don't support
@@ -1062,6 +1099,16 @@
 #undef wxUSE_OWNER_DRAWN
 #define wxUSE_OWNER_DRAWN 0
 #endif // __SALFORDC__
+
+#ifdef __TWIN32__
+
+#undef wxUSE_THREADS
+#define wxUSE_THREADS 0
+
+#undef wxUSE_ODBC
+#define wxUSE_ODBC 0
+
+#endif // __TWIN32__
 
 // BC++/Win16 can't cope with the amount of data in resource.cpp
 #if defined(__WIN16__) && defined(__BORLANDC__)

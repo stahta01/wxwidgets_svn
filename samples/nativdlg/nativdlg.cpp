@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -27,6 +27,8 @@
 #ifndef __WXMSW__
 #error Sorry, this sample is only appropriate under Windows.
 #endif
+
+#include "wx/resource.h"
 
 #include <ctype.h>
 #include "nativdlg.h"

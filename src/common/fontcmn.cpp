@@ -6,7 +6,7 @@
 // Created:     20.09.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "fontbase.h"
 #endif
 
@@ -34,12 +34,6 @@
 #endif // WX_PRECOMP
 
 #include "wx/gdicmn.h"
-
-#if defined(__WXMSW__)
-  #include  "wx/msw/private.h"  // includes windows.h for LOGFONT
-  #include  "wx/msw/winundef.h"
-#endif
-
 #include "wx/fontutil.h" // for wxNativeFontInfo
 #include "wx/fontmap.h"
 
@@ -84,33 +78,6 @@ wxFont *wxFontBase::New(int size,
 }
 
 /* static */
-wxFont *wxFontBase::New(int pointSize,
-                        wxFontFamily family,
-                        int flags,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return New
-           (
-                pointSize,
-                family,
-                flags & wxFONTFLAG_ITALIC
-                    ? wxFONTSTYLE_ITALIC
-                    : flags & wxFONTFLAG_SLANT
-                        ? wxFONTSTYLE_SLANT
-                        : wxFONTSTYLE_NORMAL,
-                flags & wxFONTFLAG_LIGHT
-                    ? wxFONTWEIGHT_LIGHT
-                    : flags & wxFONTFLAG_BOLD
-                        ? wxFONTWEIGHT_BOLD
-                        : wxFONTWEIGHT_NORMAL,
-                (flags & wxFONTFLAG_UNDERLINED) != 0,
-                face,
-                encoding
-           );
-}
-
-/* static */
 wxFont *wxFontBase::New(const wxNativeFontInfo& info)
 {
     return new wxFont(info);
@@ -131,7 +98,26 @@ bool wxFontBase::IsFixedWidth() const
     return GetFamily() == wxFONTFAMILY_TELETYPE;
 }
 
-void wxFontBase::DoSetNativeFontInfo(const wxNativeFontInfo& info)
+wxNativeFontInfo *wxFontBase::GetNativeFontInfo() const
+{
+#ifdef wxNO_NATIVE_FONTINFO
+    wxNativeFontInfo *fontInfo = new wxNativeFontInfo();
+
+    fontInfo->SetPointSize(GetPointSize());
+    fontInfo->SetFamily((wxFontFamily)GetFamily());
+    fontInfo->SetStyle((wxFontStyle)GetStyle());
+    fontInfo->SetWeight((wxFontWeight)GetWeight());
+    fontInfo->SetUnderlined(GetUnderlined());
+    fontInfo->SetFaceName(GetFaceName());
+    fontInfo->SetEncoding(GetEncoding());
+
+    return fontInfo;
+#else
+    return (wxNativeFontInfo *)NULL;
+#endif
+}
+
+void wxFontBase::SetNativeFontInfo(const wxNativeFontInfo& info)
 {
 #ifdef wxNO_NATIVE_FONTINFO
     SetPointSize(info.pointSize);
@@ -149,10 +135,11 @@ void wxFontBase::DoSetNativeFontInfo(const wxNativeFontInfo& info)
 wxString wxFontBase::GetNativeFontInfoDesc() const
 {
     wxString fontDesc;
-    const wxNativeFontInfo *fontInfo = GetNativeFontInfo();
+    wxNativeFontInfo *fontInfo = GetNativeFontInfo();
     if ( fontInfo )
     {
         fontDesc = fontInfo->ToString();
+        delete fontInfo;
     }
 
     return fontDesc;
@@ -161,10 +148,11 @@ wxString wxFontBase::GetNativeFontInfoDesc() const
 wxString wxFontBase::GetNativeFontInfoUserDesc() const
 {
     wxString fontDesc;
-    const wxNativeFontInfo *fontInfo = GetNativeFontInfo();
+    wxNativeFontInfo *fontInfo = GetNativeFontInfo();
     if ( fontInfo )
     {
         fontDesc = fontInfo->ToUserString();
+        delete fontInfo;
     }
 
     return fontDesc;
@@ -341,7 +329,7 @@ wxString wxNativeFontInfo::ToString() const
 
 void wxNativeFontInfo::Init()
 {
-    pointSize = 0;
+    pointSize = wxNORMAL_FONT->GetPointSize();
     family = wxFONTFAMILY_DEFAULT;
     style = wxFONTSTYLE_NORMAL;
     weight = wxFONTWEIGHT_NORMAL;

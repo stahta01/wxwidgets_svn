@@ -16,13 +16,12 @@
 #pragma interface "constrnt.h"
 #endif
 
-
 /*
  * OGL Constraints
  *
  */
 
-class WXDLLIMPEXP_OGL wxOGLConstraintType: public wxObject
+class wxOGLConstraintType: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxOGLConstraintType)
 public:
@@ -58,7 +57,7 @@ extern wxList* wxOGLConstraintTypes;
 #define gyCONSTRAINT_MIDALIGNED_LEFT      14
 #define gyCONSTRAINT_MIDALIGNED_RIGHT     15
 
-class WXDLLIMPEXP_OGL wxOGLConstraint: public wxObject
+class wxOGLConstraint: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxOGLConstraint)
  public:

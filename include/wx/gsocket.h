@@ -13,9 +13,13 @@
 
 #ifndef __GSOCKET_STANDALONE__
 #include "wx/setup.h"
-#include "wx/platform.h"
 
-#include "wx/dlimpexp.h" // for WXDLLIMPEXP_NET
+/* kludge for GTK..  gsockgtk.c craps out miserably if we include
+   defs.h ...  no idea how other files get away with it.. */
+
+#if !defined( __WXMSW__ ) && !defined(  WXDLLEXPORT )
+#define WXDLLEXPORT
+#endif
 
 #endif
 
@@ -28,12 +32,8 @@
    having been defined in sys/types.h" when winsock.h is included later and
    doesn't seem to be necessary anyhow. It's not needed under Mac neither.
  */
-#if !defined(__WXMAC__) && !defined(__CYGWIN__) && !defined(__WXWINCE__)
+#if !defined(__WXMAC__) && !defined(__CYGWIN__)
 #include <sys/types.h>
-#endif
-
-#ifdef __WXWINCE__
-#include <stdlib.h>
 #endif
 
 #ifdef __cplusplus
@@ -91,36 +91,7 @@ typedef void (*GSocketCallback)(GSocket *socket, GSocketEvent event,
                                 char *cdata);
 
 
-/* Functions tables for internal use by GSocket code: */
-
-#ifndef __WINDOWS__
-struct GSocketBaseFunctionsTable
-{
-    void (*Detected_Read)(GSocket *socket);
-    void (*Detected_Write)(GSocket *socket);
-};
-#endif
-
-struct GSocketGUIFunctionsTable
-{
-    int  (*GUI_Init)(void);
-    void (*GUI_Cleanup)(void);
-    int  (*GUI_Init_Socket)(GSocket *socket);
-    void (*GUI_Destroy_Socket)(GSocket *socket);
-#ifndef __WINDOWS__
-    void (*Install_Callback)(GSocket *socket, GSocketEvent event);
-    void (*Uninstall_Callback)(GSocket *socket, GSocketEvent event);
-#endif
-    void (*Enable_Events)(GSocket *socket);
-    void (*Disable_Events)(GSocket *socket);
-};
-
-
 /* Global initializers */
-
-/* Sets GUI functions callbacks. Must be called *before* GSocket_Init
-   if the app uses async sockets. */
-void GSocket_SetGUIFunctions(struct GSocketGUIFunctionsTable *guifunc);
 
 /* GSocket_Init() must be called at the beginning */
 int GSocket_Init(void);
@@ -276,7 +247,7 @@ void GSocket_SetTimeout(GSocket *socket, unsigned long millisec);
  *  operations do not clear this back to GSOCK_NOERROR, so use it only
  *  after an error.
  */
-GSocketError WXDLLIMPEXP_NET GSocket_GetError(GSocket *socket);
+GSocketError WXDLLEXPORT GSocket_GetError(GSocket *socket);
 
 
 /* Callbacks */

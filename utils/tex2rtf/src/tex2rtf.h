@@ -10,11 +10,6 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef NO_GUI
-#include "wx/app.h"
-#include "wx/frame.h"
-
-class WXDLLEXPORT wxTextCtrl;
-
 // Define a new application type
 class MyApp: public wxApp
 { public:

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -69,12 +69,12 @@ void DrawingView::OnDraw(wxDC *dc)
   dc->SetFont(*wxNORMAL_FONT);
   dc->SetPen(*wxBLACK_PEN);
 
-  wxList::compatibility_iterator node = ((DrawingDocument *)GetDocument())->GetDoodleSegments().GetFirst();
+  wxNode *node = ((DrawingDocument *)GetDocument())->GetDoodleSegments().First();
   while (node)
   {
-    DoodleSegment *seg = (DoodleSegment *)node->GetData();
+    DoodleSegment *seg = (DoodleSegment *)node->Data();
     seg->Draw(dc);
-    node = node->GetNext();
+    node = node->Next();
   }
 }
 
@@ -106,7 +106,7 @@ bool DrawingView::OnClose(bool deleteWindow)
 
   // Clear the canvas in  case we're in single-window mode,
   // and the canvas stays.
-  canvas->ClearBackground();
+  canvas->Clear();
   canvas->view = (wxView *) NULL;
   canvas = (MyCanvas *) NULL;
 
@@ -117,7 +117,7 @@ bool DrawingView::OnClose(bool deleteWindow)
   SetFrame((wxFrame*)NULL);
 
   Activate(FALSE);
-
+  
   if (deleteWindow)
   {
     delete frame;
@@ -152,7 +152,7 @@ bool TextEditView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 
   frame->Show(TRUE);
   Activate(TRUE);
-
+  
   return TRUE;
 }
 
@@ -169,7 +169,7 @@ bool TextEditView::OnClose(bool deleteWindow)
 {
   if (!GetDocument()->Close())
     return FALSE;
-
+    
   Activate(FALSE);
 
   if (deleteWindow)
@@ -208,7 +208,7 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
 {
   if (!view)
     return;
-
+    
   static DoodleSegment *currentSegment = (DoodleSegment *) NULL;
 
   wxClientDC dc(this);
@@ -220,7 +220,7 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
 
   if (currentSegment && event.LeftUp())
   {
-    if (currentSegment->lines.GetCount() == 0)
+    if (currentSegment->lines.Number() == 0)
     {
       delete currentSegment;
       currentSegment = (DoodleSegment *) NULL;
@@ -236,19 +236,19 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
       currentSegment = (DoodleSegment *) NULL;
     }
   }
-
+  
   if (xpos > -1 && ypos > -1 && event.Dragging())
   {
     if (!currentSegment)
       currentSegment = new DoodleSegment;
 
     DoodleLine *newLine = new DoodleLine;
-    newLine->x1 = (long)xpos;
+    newLine->x1 = (long)xpos; 
     newLine->y1 = (long)ypos;
-    newLine->x2 = pt.x;
+    newLine->x2 = pt.x; 
     newLine->y2 = pt.y;
     currentSegment->lines.Append(newLine);
-
+    
     dc.DrawLine( (long)xpos, (long)ypos, pt.x, pt.y);
   }
   xpos = pt.x;

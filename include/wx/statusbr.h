@@ -6,13 +6,13 @@
 // Created:     05.02.00
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_STATUSBR_H_BASE_
 #define _WX_STATUSBR_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "statbar.h"
 #endif
 
@@ -21,7 +21,6 @@
 #if wxUSE_STATUSBAR
 
 #include "wx/list.h"
-#include "wx/dynarray.h"
 
 WX_DECLARE_LIST(wxString, wxListString);
 
@@ -112,8 +111,6 @@ protected:
     // stacks of previous values for PushStatusText/PopStatusText
     // this is created on demand, use GetStatusStack/GetOrCreateStatusStack
     wxListString **m_statusTextStacks;
-
-    DECLARE_NO_COPY_CLASS(wxStatusBarBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -122,19 +119,23 @@ protected:
 
 #if defined(__WXUNIVERSAL__)
     #define wxStatusBarUniv wxStatusBar
+    #define sm_classwxStatusBarUniv sm_classwxStatusBar
 
     #include "wx/univ/statusbr.h"
 #elif defined(__WIN32__) && wxUSE_NATIVE_STATUSBAR
     #define wxStatusBar95 wxStatusBar
+    #define sm_classwxStatusBar95 sm_classwxStatusBar
 
     #include "wx/msw/statbr95.h"
 #elif defined(__WXMAC__)
     #define wxStatusBarMac wxStatusBar
+    #define sm_classwxStatusBarMac sm_classwxStatusBar
 
     #include "wx/generic/statusbr.h"
     #include "wx/mac/statusbr.h"
 #else
     #define wxStatusBarGeneric wxStatusBar
+    #define sm_classwxStatusBarGeneric sm_classwxStatusBar
 
     #include "wx/generic/statusbr.h"
 #endif

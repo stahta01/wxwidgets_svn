@@ -12,7 +12,7 @@
 #ifndef _WX_HELPBEST_H_
 #define _WX_HELPBEST_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "helpbest.h"
 #endif
 
@@ -20,7 +20,7 @@
 
 #include "wx/helpbase.h"
 
-class WXDLLIMPEXP_HTML wxBestHelpController: public wxHelpControllerBase
+class WXDLLEXPORT wxBestHelpController: public wxHelpControllerBase
 {
 public:
     wxBestHelpController()
@@ -33,7 +33,6 @@ public:
 
     // Must call this to set the filename
     virtual bool Initialize(const wxString& file);
-    virtual bool Initialize(const wxString& file, int WXUNUSED(server) ) { return Initialize( file ); }
 
     // If file is "", reloads file given in Initialize
     virtual bool LoadFile(const wxString& file = wxEmptyString)
@@ -71,10 +70,9 @@ public:
         return m_helpController->DisplayTextPopup( text, pos );
     }
 
-    virtual bool KeywordSearch(const wxString& k,
-                               wxHelpSearchMode mode = wxHELP_SEARCH_ALL)
+    virtual bool KeywordSearch(const wxString& k)
     {
-        return m_helpController->KeywordSearch( k, mode );
+        return m_helpController->KeywordSearch( k );
     }
 
     virtual bool Quit()
@@ -112,7 +110,6 @@ protected:
     wxHelpControllerBase* m_helpController;
 
     DECLARE_DYNAMIC_CLASS(wxBestHelpController)
-    DECLARE_NO_COPY_CLASS(wxBestHelpController)
 };
 
 #endif // wxUSE_HELP && wxUSE_MS_HTML_HELP && defined(__WIN95__) && wxUSE_WXHTML_HELP

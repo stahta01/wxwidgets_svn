@@ -4,7 +4,7 @@
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "framebase.h"
 #endif
 
@@ -41,20 +41,19 @@
     #include "wx/statusbr.h"
 #endif
 
+// FIXME - temporary hack in absence of wxTLW in all ports!
+#ifndef wxTopLevelWindowNative
+    #define wxTopLevelWindow wxTopLevelWindowBase
+#endif
+
 // ----------------------------------------------------------------------------
 // event table
 // ----------------------------------------------------------------------------
 
-#if wxUSE_MENUS && wxUSE_STATUSBAR
-
 BEGIN_EVENT_TABLE(wxFrameBase, wxTopLevelWindow)
-    EVT_MENU_OPEN(wxFrameBase::OnMenuOpen)
-    EVT_MENU_CLOSE(wxFrameBase::OnMenuClose)
-
+    EVT_IDLE(wxFrameBase::OnIdle)
     EVT_MENU_HIGHLIGHT_ALL(wxFrameBase::OnMenuHighlight)
 END_EVENT_TABLE()
-
-#endif // wxUSE_MENUS && wxUSE_STATUSBAR
 
 // ============================================================================
 // implementation
@@ -155,7 +154,7 @@ wxPoint wxFrameBase::GetClientAreaOrigin() const
 {
     wxPoint pt = wxTopLevelWindow::GetClientAreaOrigin();
 
-#if wxUSE_TOOLBAR && !defined(__WXUNIVERSAL__) && !defined(__WXWINCE__)
+#if wxUSE_TOOLBAR && !defined(__WXUNIVERSAL__)
     wxToolBar *toolbar = GetToolBar();
     if ( toolbar && toolbar->IsShown() )
     {
@@ -212,39 +211,9 @@ bool wxFrameBase::ProcessCommand(int id)
 #endif // wxUSE_MENUS/!wxUSE_MENUS
 }
 
-// Do the UI update processing for this window. This is
-// provided for the application to call if it wants to
-// force a UI update, particularly for the menus and toolbar.
-void wxFrameBase::UpdateWindowUI(long flags)
-{
-    wxWindowBase::UpdateWindowUI(flags);
-    
-#if wxUSE_TOOLBAR
-    if (GetToolBar())
-        GetToolBar()->UpdateWindowUI(flags);
-#endif
-
-#if wxUSE_MENUS
-    if (GetMenuBar())
-    {
-        if ((flags & wxUPDATE_UI_FROMIDLE) && !wxUSE_IDLEMENUUPDATES)
-        {
-            // If coming from an idle event, we only
-            // want to update the menus if we're
-            // in the wxUSE_IDLEMENUUPDATES configuration:
-            // so if we're not, do nothing
-        }
-        else
-            DoMenuUpdates();
-    }
-#endif // wxUSE_MENUS
-}
-
 // ----------------------------------------------------------------------------
-// event handlers for status bar updates from menus
+// event handlers
 // ----------------------------------------------------------------------------
-
-#if wxUSE_MENUS && wxUSE_STATUSBAR
 
 void wxFrameBase::OnMenuHighlight(wxMenuEvent& event)
 {
@@ -253,40 +222,11 @@ void wxFrameBase::OnMenuHighlight(wxMenuEvent& event)
 #endif // wxUSE_STATUSBAR
 }
 
-void wxFrameBase::OnMenuOpen(wxMenuEvent& event)
+void wxFrameBase::OnIdle(wxIdleEvent& WXUNUSED(event) )
 {
-#if !wxUSE_IDLEMENUUPDATES
-    DoMenuUpdates(event.GetMenu());
-#endif // !wxUSE_IDLEMENUUPDATES
-}
-
-void wxFrameBase::OnMenuClose(wxMenuEvent& WXUNUSED(event))
-{
-    // do we have real status text to restore?
-    if ( m_oldStatusText.length() > 1 || m_oldStatusText[0u] )
-    {
-        if ( m_statusBarPane >= 0 )
-        {
-            wxStatusBar *statbar = GetStatusBar();
-            if ( statbar )
-                statbar->SetStatusText(m_oldStatusText, m_statusBarPane);
-        }
-
-        m_oldStatusText.clear();
-    }
-}
-
-#endif // wxUSE_MENUS && wxUSE_STATUSBAR
-
-// Implement internal behaviour (menu updating on some platforms)
-void wxFrameBase::OnInternalIdle()
-{
-    wxTopLevelWindow::OnInternalIdle();
-    
-#if wxUSE_MENUS && wxUSE_IDLEMENUUPDATES
-    if (wxUpdateUIEvent::CanUpdate(this))
-        DoMenuUpdates();
-#endif
+#if wxUSE_MENUS
+    DoMenuUpdates();
+#endif // wxUSE_MENUS
 }
 
 // ----------------------------------------------------------------------------
@@ -354,6 +294,18 @@ void wxFrameBase::PopStatusText(int number)
     m_frameStatusBar->PopStatusText(number);
 }
 
+void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
+{
+#if wxUSE_STATUSBAR
+    if ( m_statusBarPane < 0 ) return;
+    wxStatusBar* statbar = GetStatusBar();
+    if ( !statbar ) return;
+
+    wxString help = show ? text : wxString();
+    statbar->SetStatusText( help, m_statusBarPane );
+#endif // wxUSE_STATUSBAR
+}
+
 bool wxFrameBase::ShowMenuHelp(wxStatusBar *WXUNUSED(statbar), int menuId)
 {
 #if wxUSE_MENUS
@@ -384,48 +336,6 @@ bool wxFrameBase::ShowMenuHelp(wxStatusBar *WXUNUSED(statbar), int menuId)
 
 #endif // wxUSE_STATUSBAR
 
-void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
-{
-#if wxUSE_STATUSBAR
-    if ( m_statusBarPane < 0 )
-    {
-        // status bar messages disabled
-        return;
-    }
-
-    wxStatusBar *statbar = GetStatusBar();
-    if ( !statbar )
-        return;
-
-    wxString help;
-    if ( show )
-        help = text;
-
-    // remember the old status bar text if this is the first time we're called
-    // since the menu has been opened as we're going to overwrite it in our
-    // DoGiveHelp() and we want to restore it when the menu is closed
-    //
-    // note that it would be logical to do this in OnMenuOpen() but under MSW
-    // we get an EVT_MENU_HIGHLIGHT before EVT_MENU_OPEN, strangely enough, and
-    // so this doesn't work and instead we use the ugly trick with using
-    // special m_oldStatusText value as "menu opened" (but it is arguably
-    // better than adding yet another member variable to wxFrame on all
-    // platforms)
-    if ( m_oldStatusText.empty() )
-    {
-        m_oldStatusText = statbar->GetStatusText(m_statusBarPane);
-        if ( m_oldStatusText.empty() )
-        {
-            // use special value to prevent us from doing this the next time
-            m_oldStatusText += _T('\0');
-        }
-    }
-
-    statbar->SetStatusText(help, m_statusBarPane);
-#endif // wxUSE_STATUSBAR
-}
-
-
 // ----------------------------------------------------------------------------
 // toolbar stuff
 // ----------------------------------------------------------------------------
@@ -440,18 +350,6 @@ wxToolBar* wxFrameBase::CreateToolBar(long style,
     // before)
     wxCHECK_MSG( !m_frameToolBar, (wxToolBar *)NULL,
                  wxT("recreating toolbar in wxFrame") );
-
-    if ( style == -1 )
-    {
-        // use default style
-        //
-        // NB: we don't specify the default value in the method declaration
-        //     because
-        //      a) this allows us to have different defaults for different
-        //         platforms (even if we don't have them right now)
-        //      b) we don't need to include wx/toolbar.h in the header then
-        style = wxBORDER_NONE | wxTB_HORIZONTAL | wxTB_FLAT;
-    }
 
     m_frameToolBar = OnCreateToolBar(style, id, name);
 
@@ -476,18 +374,51 @@ wxToolBar* wxFrameBase::OnCreateToolBar(long style,
 #if wxUSE_MENUS
 
 // update all menus
-void wxFrameBase::DoMenuUpdates(wxMenu* menu)
+void wxFrameBase::DoMenuUpdates()
 {
-    wxEvtHandler* source = GetEventHandler();
     wxMenuBar* bar = GetMenuBar();
 
-    if (menu)
-        menu->UpdateUI(source);
-    else if ( bar != NULL )
+#ifdef __WXMSW__
+    wxWindow* focusWin = wxFindFocusDescendant((wxWindow*) this);
+#else
+    wxWindow* focusWin = (wxWindow*) NULL;
+#endif
+    if ( bar != NULL )
     {
         int nCount = bar->GetMenuCount();
         for (int n = 0; n < nCount; n++)
-            bar->GetMenu(n)->UpdateUI(source);
+            DoMenuUpdates(bar->GetMenu(n), focusWin);
+    }
+}
+
+// update a menu and all submenus recursively
+void wxFrameBase::DoMenuUpdates(wxMenu* menu, wxWindow* focusWin)
+{
+    wxEvtHandler* evtHandler = focusWin ? focusWin->GetEventHandler() : GetEventHandler();
+    wxMenuItemList::Node* node = menu->GetMenuItems().GetFirst();
+    while (node)
+    {
+        wxMenuItem* item = node->GetData();
+        if ( !item->IsSeparator() )
+        {
+            wxWindowID id = item->GetId();
+            wxUpdateUIEvent event(id);
+            event.SetEventObject( this );
+
+            if (evtHandler->ProcessEvent(event))
+            {
+                if (event.GetSetText())
+                    menu->SetLabel(id, event.GetText());
+                if (event.GetSetChecked())
+                    menu->Check(id, event.GetChecked());
+                if (event.GetSetEnabled())
+                    menu->Enable(id, event.GetEnabled());
+            }
+
+            if (item->GetSubMenu())
+                DoMenuUpdates(item->GetSubMenu(), focusWin);
+        }
+        node = node->GetNext();
     }
 }
 

@@ -6,14 +6,14 @@
 // Created:     14.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "control.h"
 #endif
 
@@ -70,7 +70,12 @@ bool wxControl::Create(wxWindow *parent,
                        const wxValidator& validator,
                        const wxString& name)
 {
-    if ( !wxControlBase::Create(parent, id, pos, size, style, validator, name) )
+    // Ee use wxNO_FULL_REPAINT_ON_RESIZE by default as it results in much
+    // less flicker and none of the standard controls needs to be entirely
+    // repainted after resize anyhow.
+    if ( !wxControlBase::Create(parent, id, pos, size,
+                                style | wxNO_FULL_REPAINT_ON_RESIZE ,
+                                validator, name) )
     {
         // underlying window creation failed?
         return FALSE;

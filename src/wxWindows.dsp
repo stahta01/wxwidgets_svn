@@ -26,7 +26,6 @@ CFG=wxWindows - Win32 Debug
 !MESSAGE "wxWindows - Win32 Debug DLL" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "wxWindows - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "wxWindows - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "wxWindows - Win32 Release With Debug Info" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -49,7 +48,7 @@ CFG=wxWindows - Win32 Debug
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MD /W4 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "WXWINDLL_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /O2 /I "../lib/mswdllu" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "_USRDLL" /D "NDEBUG" /D "WXMAKINGDLL" /D "_UNICODE" /D "UNICODE" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O2 /I "../lib/mswdllu" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "_USRDLL" /D "WIN32" /D "NDEBUG" /D WINVER=0x0400 /D "STRICT" /D "WXMAKINGDLL" /D "_UNICODE" /D "UNICODE" /Yu"wx/wxprec.h" /FD /c
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -60,8 +59,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\expat.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /dll /machine:I386 /out:"../lib/wxmsw250u.dll"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\expat.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /version:2.5 /dll /machine:I386 /out:"../lib/wxmsw250u.dll"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /dll /machine:I386 /out:"../lib/wxmsw24u.dll"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /version:2.4 /dll /machine:I386 /out:"../lib/wxmsw24u.dll"
 
 !ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug Unicode DLL"
 
@@ -78,7 +77,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MDd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "WXWINDLL_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswdllud" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "_USRDLL" /D "_DEBUG" /D "WXMAKINGDLL" /D "_UNICODE" /D "UNICODE" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswdllud" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "_USRDLL" /D "WIN32" /D "_DEBUG" /D WINVER=0x0400 /D "STRICT" /D "WXMAKINGDLL" /D "_UNICODE" /D "UNICODE" /Yu"wx/wxprec.h" /FD /c
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -89,8 +88,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\expatd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /dll /debug /machine:I386 /out:"../lib/wxmsw250ud.dll" /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\expatd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /nologo /version:2.5 /dll /machine:I386 /out:"../lib/wxmsw250ud.dll"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /dll /debug /machine:I386 /out:"../lib/wxmsw24ud.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /nologo /version:2.4 /dll /machine:I386 /out:"../lib/wxmsw24ud.dll"
 
 !ELSEIF  "$(CFG)" == "wxWindows - Win32 Release Unicode"
 
@@ -106,7 +105,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MD /W4 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /O2 /I "../lib/mswu" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "NDEBUG" /D "_UNICODE" /D "UNICODE" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O2 /I "../lib/mswu" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "WIN32" /D "NDEBUG" /D WINVER=0x0400 /D "STRICT" /D "_UNICODE" /D "UNICODE" /Yu"wx/wxprec.h" /FD /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
@@ -131,7 +130,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MDd /W4 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswud" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "_DEBUG" /D "__WXDEBUG__" /D "_UNICODE" /D "UNICODE" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswud" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "WIN32" /D "_DEBUG" /D "__WXDEBUG__" /D WINVER=0x0400 /D "STRICT" /D "_UNICODE" /D "UNICODE" /Yu"wx/wxprec.h" /FD /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
@@ -157,7 +156,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MD /W4 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "WXWINDLL_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /O2 /I "../lib/mswdll" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "_USRDLL" /D "NDEBUG" /D "WXMAKINGDLL" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O2 /I "../lib/mswdll" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "_USRDLL" /D "WIN32" /D "NDEBUG" /D WINVER=0x0400 /D "STRICT" /D "WXMAKINGDLL" /Yu"wx/wxprec.h" /FD /c
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -168,8 +167,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\expat.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /dll /machine:I386 /out:"../lib/wxmsw250.dll"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\expat.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /version:2.5 /dll /machine:I386 /out:"../lib/wxmsw250.dll"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /dll /machine:I386 /out:"../lib/wxmsw24.dll"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpeg.lib ..\lib\tiff.lib ..\lib\png.lib ..\lib\regex.lib ..\lib\zlib.lib /nologo /version:2.4 /dll /machine:I386 /out:"../lib/wxmsw24.dll"
 
 !ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug DLL"
 
@@ -186,7 +185,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MDd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "WXWINDLL_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswdlld" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "_USRDLL" /D "_DEBUG" /D "WXMAKINGDLL" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswdlld" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "_USRDLL" /D "WIN32" /D "_DEBUG" /D WINVER=0x0400 /D "STRICT" /D "WXMAKINGDLL" /Yu"wx/wxprec.h" /FD /c
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -197,8 +196,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\expatd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /dll /debug /machine:I386 /out:"../lib/wxmsw250d.dll" /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\expatd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /nologo /version:2.5 /dll /machine:I386 /out:"../lib/wxmsw250d.dll"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /dll /debug /machine:I386 /out:"../lib/wxmsw24d.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib advapi32.lib comdlg32.lib shell32.lib ole32.lib oleaut32.lib odbc32.lib uuid.lib rpcrt4.lib comctl32.lib wsock32.lib winmm.lib ..\lib\jpegd.lib ..\lib\tiffd.lib ..\lib\pngd.lib ..\lib\regexd.lib ..\lib\zlibd.lib /nologo /version:2.4 /dll /machine:I386 /out:"../lib/wxmsw24d.dll"
 
 !ELSEIF  "$(CFG)" == "wxWindows - Win32 Release"
 
@@ -214,7 +213,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MD /W4 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /O2 /I "../lib/msw" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "NDEBUG" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O2 /I "../lib/msw" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "WIN32" /D "NDEBUG" /D WINVER=0x0400 /D "STRICT" /Yu"wx/wxprec.h" /FD /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
@@ -239,7 +238,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /MDd /W4 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswd" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "_DEBUG" /D "__WXDEBUG__" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Zi /Od /I "../lib/mswd" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /D "WIN32" /D "_DEBUG" /D "__WXDEBUG__" /D WINVER=0x0400 /D "STRICT" /Yu"wx/wxprec.h" /FD /c
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
@@ -249,31 +248,6 @@ BSC32=bscmake.exe
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"..\lib\wxmswd.lib"
-
-!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release With Debug Info"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "wxWindows___Win32_Release_With_Debug_Info"
-# PROP BASE Intermediate_Dir "wxWindows___Win32_Release_With_Debug_Info"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "ReleaseDebug"
-# PROP Intermediate_Dir "ReleaseDebug"
-# PROP Target_Dir ""
-CPP=cl.exe
-# ADD BASE CPP /nologo /MD /W4 /O2 /I "../lib/msw" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "NDEBUG" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
-# ADD CPP /nologo /MD /W4 /Zi /O2 /I "../lib/msw" /I "../include" /I "./zlib" /I "./jpeg" /I "./png" /I "./regex" /I "./tiff" /I "./expat/lib" /D "NDEBUG" /D "WIN32" /D WINVER=0x0400 /D "STRICT" /D wxUSE_BASE=1 /Yu"wx/wxprec.h" /FD /c
-RSC=rc.exe
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"..\lib\wxmsw.lib"
-# ADD LIB32 /nologo /out:"..\lib\wxmsw.lib"
 
 !ENDIF 
 
@@ -287,18 +261,9 @@ LIB32=link.exe -lib
 # Name "wxWindows - Win32 Debug DLL"
 # Name "wxWindows - Win32 Release"
 # Name "wxWindows - Win32 Debug"
-# Name "wxWindows - Win32 Release With Debug Info"
 # Begin Group "Common Files"
 
 # PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\common\accesscmn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\appbase.cpp
-# End Source File
 # Begin Source File
 
 SOURCE=.\common\appcmn.cpp
@@ -310,14 +275,6 @@ SOURCE=.\common\artprov.cpp
 # Begin Source File
 
 SOURCE=.\common\artstd.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\bmpbase.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\bookctrl.cpp
 # End Source File
 # Begin Source File
 
@@ -362,10 +319,6 @@ SOURCE=.\common\ctrlcmn.cpp
 # Begin Source File
 
 SOURCE=.\common\ctrlsub.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\datacmn.cpp
 # End Source File
 # Begin Source File
 
@@ -417,7 +370,9 @@ SOURCE=.\common\docview.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\dpycmn.cpp
+SOURCE=.\common\dosyacc.c
+# ADD CPP /W1 /D "USE_DEFINE" /D "IDE_INVOKED"
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
@@ -482,14 +437,6 @@ SOURCE=.\common\filesys.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\fldlgcmn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\fmapbase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\fontcmn.cpp
 # End Source File
 # Begin Source File
@@ -531,10 +478,6 @@ SOURCE=.\common\geometry.cpp
 # Begin Source File
 
 SOURCE=.\common\gifdecod.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\gzstream.cpp
 # End Source File
 # Begin Source File
 
@@ -606,10 +549,6 @@ SOURCE=.\common\imagxpm.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\init.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\intl.cpp
 # End Source File
 # Begin Source File
@@ -674,6 +613,10 @@ SOURCE=.\common\object.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\common\odbc.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\common\paper.cpp
 # End Source File
 # Begin Source File
@@ -706,7 +649,7 @@ SOURCE=.\common\regex.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\rendcmn.cpp
+SOURCE=.\common\resource.cpp
 # End Source File
 # Begin Source File
 
@@ -746,10 +689,6 @@ SOURCE=.\common\statbar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\stopwatch.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\strconv.cpp
 # End Source File
 # Begin Source File
@@ -763,10 +702,6 @@ SOURCE=.\common\string.cpp
 # Begin Source File
 
 SOURCE=.\common\sysopt.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\taskbarcmn.cpp
 # End Source File
 # Begin Source File
 
@@ -847,19 +782,11 @@ SOURCE=.\common\wxchar.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\common\wxexpr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\common\xpmdecod.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\xti.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\xtistrm.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\xtixml.cpp
 # End Source File
 # Begin Source File
 
@@ -915,19 +842,7 @@ SOURCE=.\generic\gridsel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\helpext.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\htmllbox.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\laywin.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\listbkg.cpp
 # End Source File
 # Begin Source File
 
@@ -943,19 +858,19 @@ SOURCE=.\generic\panelg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\printps.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\prntdlgg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\progdlgg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\renderg.cpp
+SOURCE=.\generic\prop.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\generic\propform.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\generic\proplist.cpp
 # End Source File
 # Begin Source File
 
@@ -964,10 +879,6 @@ SOURCE=.\generic\sashwin.cpp
 # Begin Source File
 
 SOURCE=.\generic\scrlwing.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\selstore.cpp
 # End Source File
 # Begin Source File
 
@@ -987,6 +898,10 @@ SOURCE=.\generic\statusbr.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\generic\tbarsmpl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\generic\textdlgg.cpp
 # End Source File
 # Begin Source File
@@ -1003,11 +918,7 @@ SOURCE=.\generic\treectlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\vlbox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\vscroll.cpp
+SOURCE=.\generic\treelay.cpp
 # End Source File
 # Begin Source File
 
@@ -1101,6 +1012,34 @@ SOURCE=.\html\winpars.cpp
 # Begin Group "MSW Files"
 
 # PROP Default_Filter ""
+# Begin Group "OLE Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\msw\ole\automtn.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\ole\dataobj.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\ole\dropsrc.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\ole\droptgt.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\ole\oleutils.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\ole\uuid.cpp
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\msw\accel.cpp
@@ -1108,10 +1047,6 @@ SOURCE=.\msw\accel.cpp
 # Begin Source File
 
 SOURCE=.\msw\app.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\basemsw.cpp
 # End Source File
 # Begin Source File
 
@@ -1167,7 +1102,7 @@ SOURCE=.\msw\control.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\crashrpt.cpp
+SOURCE=.\msw\curico.cpp
 # End Source File
 # Begin Source File
 
@@ -1215,15 +1150,15 @@ SOURCE=.\msw\dib.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\msw\dibutils.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\msw\dir.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\msw\dirdlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\display.cpp
 # End Source File
 # Begin Source File
 
@@ -1378,34 +1313,6 @@ SOURCE=.\msw\notebook.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\ole\access.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\automtn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\dataobj.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\dropsrc.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\droptgt.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\oleutils.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\uuid.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\ownerdrw.cpp
 # End Source File
 # Begin Source File
@@ -1415,6 +1322,10 @@ SOURCE=.\msw\palette.cpp
 # Begin Source File
 
 SOURCE=.\msw\pen.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\penwin.cpp
 # End Source File
 # Begin Source File
 
@@ -1447,10 +1358,6 @@ SOURCE=.\msw\region.cpp
 # Begin Source File
 
 SOURCE=.\msw\registry.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\renderer.cpp
 # End Source File
 # Begin Source File
 
@@ -1546,11 +1453,38 @@ SOURCE=.\msw\utilsexc.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\utilsgui.cpp
+SOURCE=.\msw\uxtheme.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\uxtheme.cpp
+SOURCE=.\msw\version.rc
+
+!IF  "$(CFG)" == "wxWindows - Win32 Release Unicode DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug Unicode DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release Unicode"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug Unicode"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1563,14 +1497,6 @@ SOURCE=.\msw\wave.cpp
 # Begin Source File
 
 SOURCE=.\msw\window.cpp
-# End Source File
-# End Group
-# Begin Group "Other Sources"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\xml\xml.cpp
 # End Source File
 # End Group
 # Begin Group "Headers"
@@ -1663,16 +1589,6 @@ InputPath=..\include\wx\msw\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release With Debug Info"
-
-# Begin Custom Build - Creating ..\lib\msw\wx\setup.h from $(InputPath)
-InputPath=..\include\wx\msw\setup.h
-
-"../lib/msw/wx/setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy "$(InputPath)" ..\lib\msw\wx\setup.h
-
-# End Custom Build
-
 !ENDIF 
 
 # End Source File
@@ -1686,31 +1602,11 @@ SOURCE=..\include\wx\accel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\access.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\afterstd.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\app.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\apptrait.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\arrstr.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\artprov.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\beforestd.h
 # End Source File
 # Begin Source File
 
@@ -1719,10 +1615,6 @@ SOURCE=..\include\wx\bitmap.h
 # Begin Source File
 
 SOURCE=..\include\wx\bmpbuttn.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\bookctrl.h
 # End Source File
 # Begin Source File
 
@@ -1838,7 +1730,15 @@ SOURCE=..\include\wx\dataobj.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\date.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\datetime.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\datetime.inl
 # End Source File
 # Begin Source File
 
@@ -1875,10 +1775,6 @@ SOURCE=..\include\wx\dcclient.h
 # Begin Source File
 
 SOURCE=..\include\wx\dcmemory.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\dcmirror.h
 # End Source File
 # Begin Source File
 
@@ -1926,10 +1822,6 @@ SOURCE=..\include\wx\dirdlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\display.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\dnd.h
 # End Source File
 # Begin Source File
@@ -1966,19 +1858,11 @@ SOURCE=..\include\wx\encconv.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\encinfo.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\event.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\evtloop.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\except.h
+SOURCE=..\include\wx\expr.h
 # End Source File
 # Begin Source File
 
@@ -2015,10 +1899,6 @@ SOURCE=..\include\wx\filename.h
 # Begin Source File
 
 SOURCE=..\include\wx\filesys.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\fmappriv.h
 # End Source File
 # Begin Source File
 
@@ -2094,19 +1974,11 @@ SOURCE=..\include\wx\gsocket.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\gzstream.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\hash.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\include\wx\hashmap.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\hashset.h
 # End Source File
 # Begin Source File
 
@@ -2126,19 +1998,11 @@ SOURCE=..\include\wx\helpwin.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\htmllbox.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\icon.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\include\wx\iconbndl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\iconloc.h
 # End Source File
 # Begin Source File
 
@@ -2186,15 +2050,7 @@ SOURCE=..\include\wx\imagxpm.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\init.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\intl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\iosfwrap.h
 # End Source File
 # Begin Source File
 
@@ -2238,10 +2094,6 @@ SOURCE=..\include\wx\listbase.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\listbook.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\listbox.h
 # End Source File
 # Begin Source File
@@ -2255,10 +2107,6 @@ SOURCE=..\include\wx\log.h
 # Begin Source File
 
 SOURCE=..\include\wx\longlong.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\math.h
 # End Source File
 # Begin Source File
 
@@ -2314,10 +2162,6 @@ SOURCE=..\include\wx\msgout.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\msgout.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\mstream.h
 # End Source File
 # Begin Source File
@@ -2327,6 +2171,10 @@ SOURCE=..\include\wx\notebook.h
 # Begin Source File
 
 SOURCE=..\include\wx\object.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\odbc.h
 # End Source File
 # Begin Source File
 
@@ -2378,27 +2226,15 @@ SOURCE=..\include\wx\progdlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\protocol\file.h
+SOURCE=..\include\wx\prop.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\protocol\ftp.h
+SOURCE=..\include\wx\propform.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\protocol\http.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\protocol\protocol.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\ptr_scpd.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\ptr_scpd.h
+SOURCE=..\include\wx\proplist.h
 # End Source File
 # Begin Source File
 
@@ -2414,10 +2250,6 @@ SOURCE=..\include\wx\radiobut.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\rawbmp.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\regex.h
 # End Source File
 # Begin Source File
@@ -2426,7 +2258,7 @@ SOURCE=..\include\wx\region.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\renderer.h
+SOURCE=..\include\wx\resource.h
 # End Source File
 # Begin Source File
 
@@ -2446,27 +2278,11 @@ SOURCE=..\include\wx\sckstrm.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\scopeguard.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\scopeguard.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\scrolbar.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\scrolbar.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\include\wx\scrolwin.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\selstore.h
 # End Source File
 # Begin Source File
 
@@ -2530,10 +2346,6 @@ SOURCE=..\include\wx\statusbr.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\stopwatch.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\strconv.h
 # End Source File
 # Begin Source File
@@ -2566,6 +2378,10 @@ SOURCE=..\include\wx\tbarbase.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\tbarsmpl.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\textbuf.h
 # End Source File
 # Begin Source File
@@ -2587,6 +2403,10 @@ SOURCE=..\include\wx\tglbtn.h
 # Begin Source File
 
 SOURCE=..\include\wx\thread.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\time.h
 # End Source File
 # Begin Source File
 
@@ -2666,23 +2486,7 @@ SOURCE=..\include\wx\version.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\vidmode.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\vlbox.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\vms_x_fix.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\volume.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\vscroll.h
 # End Source File
 # Begin Source File
 
@@ -2706,7 +2510,23 @@ SOURCE=..\include\wx\wx.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\wx_cw.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\wx_cw_cm.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\wx_cw_d.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\wxchar.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\wxexpr.h
 # End Source File
 # Begin Source File
 
@@ -2718,27 +2538,7 @@ SOURCE=..\include\wx\wxprec.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\xml\xml.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\xpmdecod.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xpmhand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xti.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xtistrm.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\xtixml.h
 # End Source File
 # Begin Source File
 
@@ -2759,14 +2559,6 @@ SOURCE=..\include\wx\msw\accel.h
 # Begin Source File
 
 SOURCE=..\include\wx\msw\app.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\apptbase.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\apptrait.h
 # End Source File
 # Begin Source File
 
@@ -2798,10 +2590,6 @@ SOURCE=..\include\wx\msw\checklst.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\msw\chkconf.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\msw\choice.h
 # End Source File
 # Begin Source File
@@ -2826,7 +2614,11 @@ SOURCE=..\include\wx\msw\control.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\msw\crashrpt.h
+SOURCE=..\include\wx\msw\curico.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\msw\curicop.h
 # End Source File
 # Begin Source File
 
@@ -2866,6 +2658,10 @@ SOURCE=..\include\wx\msw\dib.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\msw\dibutils.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\msw\dirdlg.h
 # End Source File
 # Begin Source File
@@ -2902,6 +2698,10 @@ SOURCE=..\include\wx\msw\gauge95.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\msw\gaugemsw.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\msw\gccpriv.h
 # End Source File
 # Begin Source File
@@ -2915,14 +2715,6 @@ SOURCE=..\include\wx\msw\gdiobj.h
 # Begin Source File
 
 SOURCE=..\include\wx\msw\glcanvas.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\gnuwin32\winresrc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\gsockmsw.h
 # End Source File
 # Begin Source File
 
@@ -3006,42 +2798,6 @@ SOURCE=..\include\wx\msw\notebook.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\msw\ole\access.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\automtn.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\dataform.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\dataobj.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\dataobj2.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\dropsrc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\droptgt.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\oleutils.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\ole\uuid.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\msw\palette.h
 # End Source File
 # Begin Source File
@@ -3083,10 +2839,6 @@ SOURCE=..\include\wx\msw\registry.h
 # Begin Source File
 
 SOURCE=..\include\wx\msw\scrolbar.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\setup0.h
 # End Source File
 # Begin Source File
 
@@ -3176,14 +2928,6 @@ SOURCE=..\include\wx\msw\window.h
 
 SOURCE=..\include\wx\msw\winundef.h
 # End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\wrapcctl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\msw\wrapwin.h
-# End Source File
 # End Group
 # Begin Group "Generic"
 
@@ -3195,6 +2939,10 @@ SOURCE=..\include\wx\generic\accel.h
 # Begin Source File
 
 SOURCE=..\include\wx\generic\calctrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\caret.h
 # End Source File
 # Begin Source File
 
@@ -3214,7 +2962,15 @@ SOURCE=..\include\wx\generic\dirctrlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\generic\dirdlgg.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\generic\dragimgg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\fdrepdlg.h
 # End Source File
 # Begin Source File
 
@@ -3234,11 +2990,15 @@ SOURCE=..\include\wx\generic\gridctrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\generic\gridsel.h
+SOURCE=..\include\wx\generic\gridg.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\include\wx\generic\helpext.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\helphtml.h
 # End Source File
 # Begin Source File
 
@@ -3250,7 +3010,11 @@ SOURCE=..\include\wx\generic\laywin.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\generic\logg.h
+SOURCE=..\include\wx\generic\listctrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\mdig.h
 # End Source File
 # Begin Source File
 
@@ -3259,6 +3023,10 @@ SOURCE=..\include\wx\generic\msgdlgg.h
 # Begin Source File
 
 SOURCE=..\include\wx\generic\notebook.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\paletteg.h
 # End Source File
 # Begin Source File
 
@@ -3295,6 +3063,18 @@ SOURCE=..\include\wx\generic\splash.h
 # Begin Source File
 
 SOURCE=..\include\wx\generic\splitter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\statline.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\statusbr.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\tabg.h
 # End Source File
 # Begin Source File
 
@@ -3347,10 +3127,6 @@ SOURCE=..\include\wx\html\htmlfilt.h
 # Begin Source File
 
 SOURCE=..\include\wx\html\htmlpars.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\html\htmlproc.h
 # End Source File
 # Begin Source File
 

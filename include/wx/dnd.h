@@ -6,13 +6,13 @@
 // Created:     26.05.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows Team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DND_H_BASE_
 #define _WX_DND_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "dndbase.h"
 #endif
 
@@ -119,8 +119,6 @@ protected:
     wxCursor m_cursorCopy,
              m_cursorMove,
              m_cursorStop;
-
-    DECLARE_NO_COPY_CLASS(wxDropSourceBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -194,8 +192,6 @@ public:
 
 protected:
     wxDataObject *m_dataObject;
-
-    DECLARE_NO_COPY_CLASS(wxDropTargetBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -215,6 +211,8 @@ protected:
     #include "wx/mac/dnd.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dnd.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/dnd.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -231,9 +229,6 @@ public:
     virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text) = 0;
 
     virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxTextDropTarget)
 };
 
 // A drop target which accepts files (dragged from File Manager or Explorer)
@@ -247,9 +242,6 @@ public:
                              const wxArrayString& filenames) = 0;
 
     virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxFileDropTarget)
 };
 
 #endif // wxUSE_DRAG_AND_DROP

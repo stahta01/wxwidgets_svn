@@ -12,7 +12,7 @@
 #ifndef _WX_CHECKBOX_H_
 #define _WX_CHECKBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "checkbox.h"
 #endif
 
@@ -53,12 +53,8 @@ public:
 protected:
     virtual wxSize DoGetBestSize() const;
 
-    virtual void DoSet3StateValue(wxCheckBoxState value);
-
-    virtual wxCheckBoxState DoGet3StateValue() const;
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxCheckBox)
+    DECLARE_DYNAMIC_CLASS(wxCheckBox)
 };
 
 #endif

@@ -30,78 +30,26 @@
 
 //---------------------------------------------------------------------------
 
-enum Propagation_state
-{
-    // don't propagate it at all
-    wxEVENT_PROPAGATE_NONE = 0,
-
-    // propagate it until it is processed
-    wxEVENT_PROPAGATE_MAX = INT_MAX
-};
-
 
 int wxNewEventType();
 
-
-
 class wxEvent : public wxObject {
 public:
-    // wxEvent(int winid = 0, wxEventType commandType = wxEVT_NULL);     // *** This class is now an ABC
+    // wxEvent(int id = 0);     // *** This class is now an ABC
     ~wxEvent();
 
+    wxObject* GetEventObject();
+    wxEventType GetEventType();
+    int GetId();
+    bool GetSkipped();
+    long GetTimestamp();
+    void SetEventObject(wxObject* object);
     void SetEventType(wxEventType typ);
-    wxEventType GetEventType() const;
-    wxObject *GetEventObject() const;
-    void SetEventObject(wxObject *obj);
-    long GetTimestamp() const;
-    void SetTimestamp(long ts = 0);
-    int GetId() const;
-    void SetId(int Id);
-
-
-    bool IsCommandEvent() const;
-
-    // Can instruct event processor that we wish to ignore this event
-    // (treat as if the event table entry had not been found): this must be done
-    // to allow the event processing by the base classes (calling event.Skip()
-    // is the analog of calling the base class verstion of a virtual function)
+    void SetId(int id);
+    void SetTimestamp(long timeStamp);
     void Skip(bool skip = TRUE);
-    bool GetSkipped() const;
 
-    // Determine if this event should be propagating to the parent window.
-    bool ShouldPropagate() const;
-
-    // Stop an event from propagating to its parent window, returns the old
-    // propagation level value
-    int StopPropagation();
-
-    // Resume the event propagation by restoring the propagation level
-    // (returned by StopPropagation())
-    void ResumePropagation(int propagationLevel);
-
-    // this function is used to create a copy of the event polymorphically and
-    // all derived classes must implement it because otherwise wxPostEvent()
-    // for them wouldn't work (it needs to do a copy of the event)
-    virtual wxEvent *Clone() /* =0*/;
-};
-
-//---------------------------------------------------------------------------
-
-// Helper class to temporarily change an event not to propagate.
-class  wxPropagationDisabler
-{
-public:
-    wxPropagationDisabler(wxEvent& event);
-    ~wxPropagationDisabler();
-};
-
-
-// Another one to temporarily lower propagation level.
-class  wxPropagateOnce
-{
-public:
-    wxPropagateOnce(wxEvent& event);
-    ~wxPropagateOnce();
+    wxEvent *Clone();
 };
 
 //---------------------------------------------------------------------------
@@ -110,8 +58,6 @@ class wxSizeEvent : public wxEvent {
 public:
     wxSizeEvent(const wxSize& sz, int id = 0);
     wxSize GetSize();
-    wxRect GetRect() const;
-    void SetRect(wxRect rect);
 };
 
 //---------------------------------------------------------------------------
@@ -279,9 +225,9 @@ public:
     bool MetaDown();
     bool AltDown();
     bool ShiftDown();
+    long KeyCode();
 
     long GetKeyCode();
-    %pragma(python) addtoclass = "KeyCode = GetKeyCode"
     bool HasModifiers();
 
     // get the raw key code (platform-dependent)
@@ -327,9 +273,8 @@ public:
 class wxMoveEvent: public wxEvent {
 public:
     wxMoveEvent(const wxPoint& pt, int id = 0);
+
     wxPoint GetPosition();
-    wxRect GetRect() const;
-    void SetRect(wxRect rect);
 };
 
 //---------------------------------------------------------------------------
@@ -353,7 +298,7 @@ public:
 
 class wxFocusEvent: public wxEvent {
 public:
-    wxFocusEvent(int eventType = 0, int id = 0);
+    wxFocusEvent(WXTYPE eventType = 0, int id = 0);
 };
 
 //---------------------------------------------------------------------------
@@ -372,7 +317,7 @@ public:
 
 class wxActivateEvent: public wxEvent{
 public:
-    wxActivateEvent(int eventType = 0, int active = TRUE, int id = 0);
+    wxActivateEvent(WXTYPE eventType = 0, int active = TRUE, int id = 0);
     bool GetActive();
 };
 
@@ -387,10 +332,9 @@ public:
 
 class wxMenuEvent: public wxEvent {
 public:
-    wxMenuEvent(int id = 0, int winid = 0, wxMenu* menu = NULL);
+    wxMenuEvent(WXTYPE id = 0, int id = 0);
     int GetMenuId();
     bool IsPopup();
-    wxMenu* GetMenu() const;
 };
 
 //---------------------------------------------------------------------------
@@ -475,56 +419,14 @@ public:
 
 //---------------------------------------------------------------------------
 
-// Whether to always send idle events to windows, or
-// to only send update events to those with the
-// wxWS_EX_PROCESS_IDLE style.
-
-enum wxIdleMode
-{
-        // Send idle events to all windows
-    wxIDLE_PROCESS_ALL,
-
-        // Send idle events to windows that have
-        // the wxWS_EX_PROCESS_IDLE flag specified
-    wxIDLE_PROCESS_SPECIFIED
-};
-
-
 class wxIdleEvent: public wxEvent {
 public:
     wxIdleEvent();
     void RequestMore(bool needMore = TRUE);
     bool MoreRequested();
-
-    // Specify how wxWindows will send idle events: to
-    // all windows, or only to those which specify that they
-    // will process the events.
-    static void SetMode(wxIdleMode mode) { sm_idleMode = mode; }
-
-    // Returns the idle event mode
-    static wxIdleMode GetMode() { return sm_idleMode ; }
-
-    // Can we send an idle event?
-    static bool CanSend(wxWindow* win) ;
-
 };
 
 //---------------------------------------------------------------------------
-
-// Whether to always send update events to windows, or
-// to only send update events to those with the
-// wxWS_EX_PROCESS_UI_UPDATES style.
-
-enum wxUpdateUIMode
-{
-        // Send UI update events to all windows
-    wxUPDATE_UI_PROCESS_ALL,
-
-        // Send UI update events to windows that have
-        // the wxWS_EX_PROCESS_UI_UPDATES flag specified
-    wxUPDATE_UI_PROCESS_SPECIFIED
-};
-
 
 class wxUpdateUIEvent: public wxEvent {
 public:
@@ -539,29 +441,6 @@ public:
     void Check(bool check);
     void Enable(bool enable);
     void SetText(const wxString& text);
-
-
-    // Sets the interval between updates in milliseconds.
-    // Set to -1 to disable updates, or to 0 to update as frequently as possible.
-    static void SetUpdateInterval(long updateInterval);
-
-    // Returns the current interval between updates in milliseconds
-    static long GetUpdateInterval();
-
-    // Can we update this window?
-    static bool CanUpdate(wxWindow* win);
-
-    // Reset the update time to provide a delay until the next
-    // time we should update
-    static void ResetUpdateTime();
-
-    // Specify how wxWindows will send update events: to
-    // all windows, or only to those which specify that they
-    // will process the events.
-    static void SetMode(wxUpdateUIMode mode);
-
-    // Returns the UI update mode
-    static wxUpdateUIMode GetMode();
 };
 
 //---------------------------------------------------------------------------
@@ -671,7 +550,7 @@ public:
 
 class wxPyEvent : public wxEvent {
 public:
-    wxPyEvent(int winid=0, wxEventType commandType = wxEVT_NULL );
+    wxPyEvent(int id=0);
     ~wxPyEvent();
 
     %pragma(python) addtomethod = "__init__:self.SetSelf(self)"

@@ -5,11 +5,11 @@
 // Modified by: 
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Microsoft, Julian Smart
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "pnghand.h"
 #endif
 
@@ -22,9 +22,9 @@ class WXDLLEXPORT wxPNGFileHandler: public wxBitmapHandler
 public:
   inline wxPNGFileHandler(void)
   {
-    m_name = wxT("PNG bitmap file");
-    m_extension = wxT("bmp");
-    m_type = wxBITMAP_TYPE_PNG;
+	m_name = "PNG bitmap file";
+	m_extension = "bmp";
+	m_type = wxBITMAP_TYPE_PNG;
   };
 
   virtual bool LoadFile(wxBitmap *bitmap, const wxString& name, long flags,

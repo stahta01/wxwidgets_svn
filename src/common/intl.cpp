@@ -2,12 +2,11 @@
 // Name:        src/common/intl.cpp
 // Purpose:     Internationalization and localisation for wxWindows
 // Author:      Vadim Zeitlin
-// Modified by: Michael N. Filippov <michael@idisys.iae.nsk.su>
-//              (2003/09/30 - PluralForms support)
+// Modified by:
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -18,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "intl.h"
 #endif
 
@@ -32,11 +31,7 @@
 #if wxUSE_INTL
 
 // standard headers
-
-#ifndef __WXWINCE__
 #include <locale.h>
-#endif
-
 #include <ctype.h>
 #include <stdlib.h>
 #ifdef HAVE_LANGINFO_H
@@ -53,19 +48,18 @@
     #include "wx/dynarray.h"
 #endif // WX_PRECOMP
 
-#ifdef __WIN32__
-    #include "wx/msw/private.h"
-#elif defined(__UNIX_LIKE__)
-    #include "wx/fontmap.h"         // for CharsetToEncoding()
-#endif
-
 #include "wx/file.h"
 #include "wx/tokenzr.h"
 #include "wx/module.h"
 #include "wx/fontmap.h"
 #include "wx/encconv.h"
 #include "wx/hashmap.h"
-#include "wx/ptr_scpd.h"
+
+#ifdef __WIN32__
+    #include "wx/msw/private.h"
+#elif defined(__UNIX_LIKE__)
+    #include "wx/fontmap.h"         // for CharsetToEncoding()
+#endif
 
 #if defined(__WXMAC__)
   #include  "wx/mac/private.h"  // includes mac headers
@@ -148,714 +142,6 @@ static inline wxString ExtractNotLang(const wxString& langFull)
 
 
 // ----------------------------------------------------------------------------
-// Plural forms parser
-// ----------------------------------------------------------------------------
-
-/* 
-                                Simplified Grammar
-
-Expression:
-    LogicalOrExpression '?' Expression ':' Expression
-    LogicalOrExpression
-
-LogicalOrExpression:
-    LogicalAndExpression "||" LogicalOrExpression   // to (a || b) || c
-    LogicalAndExpression
-
-LogicalAndExpression:
-    EqualityExpression "&&" LogicalAndExpression    // to (a && b) && c
-    EqualityExpression
-
-EqualityExpression:
-    RelationalExpression "==" RelationalExperession
-    RelationalExpression "!=" RelationalExperession
-    RelationalExpression
-
-RelationalExpression:
-    MultiplicativeExpression '>' MultiplicativeExpression
-    MultiplicativeExpression '<' MultiplicativeExpression
-    MultiplicativeExpression ">=" MultiplicativeExpression
-    MultiplicativeExpression "<=" MultiplicativeExpression
-    MultiplicativeExpression
-    
-MultiplicativeExpression:
-    PmExpression '%' PmExpression
-    PmExpression
-
-PmExpression:
-    N
-    Number
-    '(' Expression ')'
-*/
-
-class wxPluralFormsToken
-{
-public:
-    enum Type
-    {
-        T_ERROR, T_EOF, T_NUMBER, T_N, T_PLURAL, T_NPLURALS, T_EQUAL, T_ASSIGN,
-        T_GREATER, T_GREATER_OR_EQUAL, T_LESS, T_LESS_OR_EQUAL,
-        T_REMINDER, T_NOT_EQUAL,
-        T_LOGICAL_AND, T_LOGICAL_OR, T_QUESTION, T_COLON, T_SEMICOLON,
-        T_LEFT_BRACKET, T_RIGHT_BRACKET
-    };
-    Type type() const { return m_type; }
-    void setType(Type type) { m_type = type; }
-    // for T_NUMBER only
-    typedef int Number;
-    Number number() const { return m_number; }
-    void setNumber(Number num) { m_number = num; }
-private:
-    Type m_type;
-    Number m_number;
-};
-
-
-class wxPluralFormsScanner
-{
-public:
-    wxPluralFormsScanner(const char* s);
-    const wxPluralFormsToken& token() const { return m_token; }
-    bool nextToken();  // returns false if error
-private:
-    const char* m_s;
-    wxPluralFormsToken m_token;
-};
-
-wxPluralFormsScanner::wxPluralFormsScanner(const char* s) : m_s(s)
-{
-    nextToken();
-}
-
-bool wxPluralFormsScanner::nextToken()
-{
-    wxPluralFormsToken::Type type = wxPluralFormsToken::T_ERROR;
-    while (isspace(*m_s))
-    {
-        ++m_s;
-    }
-    if (*m_s == 0)
-    {
-        type = wxPluralFormsToken::T_EOF;
-    }
-    else if (isdigit(*m_s))
-    {
-        wxPluralFormsToken::Number number = *m_s++ - '0';
-        while (isdigit(*m_s))
-        {
-            number = number * 10 + (*m_s++ - '0');
-        }
-        m_token.setNumber(number);
-        type = wxPluralFormsToken::T_NUMBER;
-    }
-    else if (isalpha(*m_s))
-    {
-        const char* begin = m_s++;
-        while (isalnum(*m_s))
-        {
-            ++m_s;
-        }
-        size_t size = m_s - begin;
-        if (size == 1 && memcmp(begin, "n", size) == 0)
-        {
-            type = wxPluralFormsToken::T_N;
-        }
-        else if (size == 6 && memcmp(begin, "plural", size) == 0)
-        {
-            type = wxPluralFormsToken::T_PLURAL;
-        }
-        else if (size == 8 && memcmp(begin, "nplurals", size) == 0)
-        {
-            type = wxPluralFormsToken::T_NPLURALS;
-        }
-    }
-    else if (*m_s == '=')
-    {
-        ++m_s;
-        if (*m_s == '=')
-        {
-            ++m_s;
-            type = wxPluralFormsToken::T_EQUAL;
-        }
-        else
-        {
-            type = wxPluralFormsToken::T_ASSIGN;
-        }
-    }
-    else if (*m_s == '>')
-    {
-        ++m_s;
-        if (*m_s == '=')
-        {
-            ++m_s;
-            type = wxPluralFormsToken::T_GREATER_OR_EQUAL;
-        }
-        else
-        {
-            type = wxPluralFormsToken::T_GREATER;
-        }
-    }
-    else if (*m_s == '<')
-    {
-        ++m_s;
-        if (*m_s == '=')
-        {
-            ++m_s;
-            type = wxPluralFormsToken::T_LESS_OR_EQUAL;
-        }
-        else
-        {
-            type = wxPluralFormsToken::T_LESS;
-        }
-    }
-    else if (*m_s == '%')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_REMINDER;
-    }
-    else if (*m_s == '!' && m_s[1] == '=')
-    {
-        m_s += 2;
-        type = wxPluralFormsToken::T_NOT_EQUAL;
-    }
-    else if (*m_s == '&' && m_s[1] == '&')
-    {
-        m_s += 2;
-        type = wxPluralFormsToken::T_LOGICAL_AND;
-    }
-    else if (*m_s == '|' && m_s[1] == '|')
-    {
-        m_s += 2;
-        type = wxPluralFormsToken::T_LOGICAL_OR;
-    }
-    else if (*m_s == '?')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_QUESTION;
-    }
-    else if (*m_s == ':')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_COLON;
-    } else if (*m_s == ';') {
-        ++m_s;
-        type = wxPluralFormsToken::T_SEMICOLON;
-    }
-    else if (*m_s == '(')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_LEFT_BRACKET;
-    }
-    else if (*m_s == ')')
-    {
-        ++m_s;
-        type = wxPluralFormsToken::T_RIGHT_BRACKET;
-    }
-    m_token.setType(type);
-    return type != wxPluralFormsToken::T_ERROR;
-}
-
-class wxPluralFormsNode;
-
-// NB: Can't use wxDEFINE_SCOPED_PTR_TYPE because wxPluralFormsNode is not
-//     fully defined yet:
-class wxPluralFormsNodePtr
-{
-public:
-    wxPluralFormsNodePtr(wxPluralFormsNode *p = NULL) : m_p(p) {}
-    ~wxPluralFormsNodePtr();
-    wxPluralFormsNode& operator*() const { return *m_p; }
-    wxPluralFormsNode* operator->() const { return m_p; }
-    wxPluralFormsNode* get() const { return m_p; }
-    wxPluralFormsNode* release();
-    void reset(wxPluralFormsNode *p);
-
-private:
-    wxPluralFormsNode *m_p;
-};
-
-class wxPluralFormsNode
-{
-public:
-    wxPluralFormsNode(const wxPluralFormsToken& token) : m_token(token) {}
-    const wxPluralFormsToken& token() const { return m_token; }
-    const wxPluralFormsNode* node(size_t i) const
-        { return m_nodes[i].get(); }
-    void setNode(size_t i, wxPluralFormsNode* n);
-    wxPluralFormsNode* releaseNode(size_t i);
-    wxPluralFormsToken::Number evaluate(wxPluralFormsToken::Number n) const;
-
-private:
-    wxPluralFormsToken m_token;
-    wxPluralFormsNodePtr m_nodes[3];
-};
-    
-wxPluralFormsNodePtr::~wxPluralFormsNodePtr()
-{
-    delete m_p;
-}
-wxPluralFormsNode* wxPluralFormsNodePtr::release()
-{
-    wxPluralFormsNode *p = m_p;
-    m_p = NULL;
-    return p;
-}
-void wxPluralFormsNodePtr::reset(wxPluralFormsNode *p)
-{
-    if (p != m_p)
-    {
-        delete m_p;
-        m_p = p;
-    }
-}
-
-
-void wxPluralFormsNode::setNode(size_t i, wxPluralFormsNode* n)
-{
-    m_nodes[i].reset(n);
-}
-
-wxPluralFormsNode*  wxPluralFormsNode::releaseNode(size_t i)
-{
-    return m_nodes[i].release();
-}
-
-wxPluralFormsToken::Number
-wxPluralFormsNode::evaluate(wxPluralFormsToken::Number n) const
-{
-    switch (token().type())
-    {
-        // leaf
-        case wxPluralFormsToken::T_NUMBER:
-            return token().number();
-        case wxPluralFormsToken::T_N:
-            return n;
-        // 2 args
-        case wxPluralFormsToken::T_EQUAL:
-            return node(0)->evaluate(n) == node(1)->evaluate(n);
-        case wxPluralFormsToken::T_NOT_EQUAL:
-            return node(0)->evaluate(n) != node(1)->evaluate(n);
-        case wxPluralFormsToken::T_GREATER:
-            return node(0)->evaluate(n) > node(1)->evaluate(n);
-        case wxPluralFormsToken::T_GREATER_OR_EQUAL:
-            return node(0)->evaluate(n) >= node(1)->evaluate(n);
-        case wxPluralFormsToken::T_LESS:
-            return node(0)->evaluate(n) < node(1)->evaluate(n);
-        case wxPluralFormsToken::T_LESS_OR_EQUAL:
-            return node(0)->evaluate(n) <= node(1)->evaluate(n);
-        case wxPluralFormsToken::T_REMINDER:
-            {
-                wxPluralFormsToken::Number number = node(1)->evaluate(n);
-                if (number != 0)
-                {
-                    return node(0)->evaluate(n) % number;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        case wxPluralFormsToken::T_LOGICAL_AND:
-            return node(0)->evaluate(n) && node(1)->evaluate(n);
-        case wxPluralFormsToken::T_LOGICAL_OR:
-            return node(0)->evaluate(n) || node(1)->evaluate(n);
-        // 3 args
-        case wxPluralFormsToken::T_QUESTION:
-            return node(0)->evaluate(n)
-                ? node(1)->evaluate(n)
-                : node(2)->evaluate(n);
-        default:
-            return 0;
-    }
-}
-
-
-class wxPluralFormsCalculator
-{
-public:
-    wxPluralFormsCalculator() : m_nplurals(0), m_plural(0) {}
-    
-    // input: number, returns msgstr index
-    int evaluate(int n) const;
-
-    // input: text after "Plural-Forms:" (e.g. "nplurals=2; plural=(n != 1);"),
-    // if s == 0, creates default handler
-    // returns 0 if error
-    static wxPluralFormsCalculator* make(const char* s = 0);
-
-    ~wxPluralFormsCalculator() {}
-
-    void  init(wxPluralFormsToken::Number nplurals, wxPluralFormsNode* plural);
-    wxString getString() const;
-    
-private:
-    wxPluralFormsToken::Number m_nplurals;
-    wxPluralFormsNodePtr m_plural;
-};
-
-wxDEFINE_SCOPED_PTR_TYPE(wxPluralFormsCalculator);
-
-void wxPluralFormsCalculator::init(wxPluralFormsToken::Number nplurals,
-                                   wxPluralFormsNode* plural)
-{
-    m_nplurals = nplurals;
-    m_plural.reset(plural);
-}
-
-int wxPluralFormsCalculator::evaluate(int n) const
-{
-    if (m_plural.get() == 0)
-    {
-        return 0;
-    }
-    wxPluralFormsToken::Number number = m_plural->evaluate(n);
-    if (number < 0 || number > m_nplurals)
-    {
-        return 0;
-    }
-    return number;
-}
-
-
-class wxPluralFormsParser
-{
-public:
-    wxPluralFormsParser(wxPluralFormsScanner& scanner) : m_scanner(scanner) {}
-    bool parse(wxPluralFormsCalculator& rCalculator);
-
-private:
-    wxPluralFormsNode* parsePlural();
-    // stops at T_SEMICOLON, returns 0 if error
-    wxPluralFormsScanner& m_scanner;
-    const wxPluralFormsToken& token() const;
-    bool nextToken();
-    
-    wxPluralFormsNode* expression();
-    wxPluralFormsNode* logicalOrExpression();
-    wxPluralFormsNode* logicalAndExpression();
-    wxPluralFormsNode* equalityExpression();
-    wxPluralFormsNode* multiplicativeExpression();
-    wxPluralFormsNode* relationalExpression();
-    wxPluralFormsNode* pmExpression();
-};
-
-bool wxPluralFormsParser::parse(wxPluralFormsCalculator& rCalculator)
-{
-    if (token().type() != wxPluralFormsToken::T_NPLURALS)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_ASSIGN)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_NUMBER)
-        return false;
-    wxPluralFormsToken::Number nplurals = token().number();
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_SEMICOLON)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_PLURAL)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_ASSIGN)
-        return false;
-    if (!nextToken())
-        return false;
-    wxPluralFormsNode* plural = parsePlural();
-    if (plural == 0)
-        return false;
-    if (token().type() != wxPluralFormsToken::T_SEMICOLON)
-        return false;
-    if (!nextToken())
-        return false;
-    if (token().type() != wxPluralFormsToken::T_EOF)
-        return false;
-    rCalculator.init(nplurals, plural);
-    return true;
-}
-
-wxPluralFormsNode* wxPluralFormsParser::parsePlural()
-{
-    wxPluralFormsNode* p = expression();
-    if (p == NULL)
-    {
-        return NULL;
-    }
-    wxPluralFormsNodePtr n(p);
-    if (token().type() != wxPluralFormsToken::T_SEMICOLON)
-    {
-        return NULL;
-    }
-    return n.release();
-}
-
-const wxPluralFormsToken& wxPluralFormsParser::token() const
-{
-    return m_scanner.token();
-}
-
-bool wxPluralFormsParser::nextToken()
-{
-    if (!m_scanner.nextToken())
-        return false;
-    return true;
-}
-
-wxPluralFormsNode* wxPluralFormsParser::expression()
-{
-    wxPluralFormsNode* p = logicalOrExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_QUESTION)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return 0;
-        }
-        p = expression();
-        if (p == 0)
-        {
-            return 0;
-        }
-        qn->setNode(1, p);
-        if (token().type() != wxPluralFormsToken::T_COLON)
-        {
-            return 0;
-        }
-        if (!nextToken())
-        {
-            return 0;
-        }
-        p = expression();
-        if (p == 0)
-        {
-            return 0;
-        }
-        qn->setNode(2, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode*wxPluralFormsParser::logicalOrExpression()
-{
-    wxPluralFormsNode* p = logicalAndExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr ln(p);
-    if (token().type() == wxPluralFormsToken::T_LOGICAL_OR)
-    {
-        wxPluralFormsNodePtr un(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return 0;
-        }
-        p = logicalOrExpression();
-        if (p == 0)
-        {
-            return 0;
-        }
-        wxPluralFormsNodePtr rn(p);    // right
-        if (rn->token().type() == wxPluralFormsToken::T_LOGICAL_OR)
-        {
-            // see logicalAndExpression comment
-            un->setNode(0, ln.release());
-            un->setNode(1, rn->releaseNode(0));
-            rn->setNode(0, un.release());
-            return rn.release();
-        }
-
-
-        un->setNode(0, ln.release());
-        un->setNode(1, rn.release());
-        return un.release();
-    }
-    return ln.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::logicalAndExpression()
-{
-    wxPluralFormsNode* p = equalityExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr ln(p);   // left
-    if (token().type() == wxPluralFormsToken::T_LOGICAL_AND)
-    {
-        wxPluralFormsNodePtr un(new wxPluralFormsNode(token()));  // up
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = logicalAndExpression();
-        if (p == 0)
-        {
-            return NULL;
-        }
-        wxPluralFormsNodePtr rn(p);    // right
-        if (rn->token().type() == wxPluralFormsToken::T_LOGICAL_AND)
-        {
-// transform 1 && (2 && 3) -> (1 && 2) && 3
-//     u                  r
-// l       r     ->   u      3
-//       2   3      l   2
-            un->setNode(0, ln.release());
-            un->setNode(1, rn->releaseNode(0));
-            rn->setNode(0, un.release());
-            return rn.release();
-        }
-
-        un->setNode(0, ln.release());
-        un->setNode(1, rn.release());
-        return un.release();
-    }
-    return ln.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::equalityExpression()
-{
-    wxPluralFormsNode* p = relationalExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_EQUAL
-        || token().type() == wxPluralFormsToken::T_NOT_EQUAL)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = relationalExpression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        qn->setNode(1, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::relationalExpression()
-{
-    wxPluralFormsNode* p = multiplicativeExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_GREATER
-            || token().type() == wxPluralFormsToken::T_LESS
-            || token().type() == wxPluralFormsToken::T_GREATER_OR_EQUAL
-            || token().type() == wxPluralFormsToken::T_LESS_OR_EQUAL)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = multiplicativeExpression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        qn->setNode(1, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::multiplicativeExpression()
-{
-    wxPluralFormsNode* p = pmExpression();
-    if (p == NULL)
-        return NULL;
-    wxPluralFormsNodePtr n(p);
-    if (token().type() == wxPluralFormsToken::T_REMINDER)
-    {
-        wxPluralFormsNodePtr qn(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        p = pmExpression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        qn->setNode(1, p);
-        qn->setNode(0, n.release());
-        return qn.release();
-    }
-    return n.release();
-}
-
-wxPluralFormsNode* wxPluralFormsParser::pmExpression()
-{
-    wxPluralFormsNodePtr n;
-    if (token().type() == wxPluralFormsToken::T_N
-        || token().type() == wxPluralFormsToken::T_NUMBER)
-    {
-        n.reset(new wxPluralFormsNode(token()));
-        if (!nextToken())
-        {
-            return NULL;
-        }
-    }
-    else if (token().type() == wxPluralFormsToken::T_LEFT_BRACKET) {
-        if (!nextToken())
-        {
-            return NULL;
-        }
-        wxPluralFormsNode* p = expression();
-        if (p == NULL)
-        {
-            return NULL;
-        }
-        n.reset(p);
-        if (token().type() != wxPluralFormsToken::T_RIGHT_BRACKET)
-        {
-            return NULL;
-        }
-        if (!nextToken())
-        {
-            return NULL;
-        }
-    }
-    else
-    {
-        return NULL;
-    }
-    return n.release();
-}
-
-wxPluralFormsCalculator* wxPluralFormsCalculator::make(const char* s)
-{
-    wxPluralFormsCalculatorPtr calculator(new wxPluralFormsCalculator);
-    if (s != NULL)
-    {
-        wxPluralFormsScanner scanner(s);
-        wxPluralFormsParser p(scanner);
-        if (!p.parse(*calculator))
-        {
-            return NULL;
-        }
-    }
-    return calculator.release();
-}
-
-
-
-
-// ----------------------------------------------------------------------------
 // wxMsgCatalogFile corresponds to one disk-file message catalog.
 //
 // This is a "low-level" class and is used only by wxMsgCatalog
@@ -871,8 +157,7 @@ public:
    ~wxMsgCatalogFile();
 
     // load the catalog from disk (szDirPrefix corresponds to language)
-    bool Load(const wxChar *szDirPrefix, const wxChar *szName,
-              wxPluralFormsCalculatorPtr& rPluralFormsCalculator);
+    bool Load(const wxChar *szDirPrefix, const wxChar *szName);
 
     // fills the hash with string-translation pairs
     void FillHash(wxMessagesHash& hash, bool convertEncoding) const;
@@ -902,41 +187,21 @@ private:
     // all data is stored here, NULL if no data loaded
     size_t8 *m_pData;
 
-    // amount of memory pointed to by m_pData.
-    size_t32 m_nSize;
-
     // data description
     size_t32          m_numStrings;   // number of strings in this domain
     wxMsgTableEntry  *m_pOrigTable,   // pointer to original   strings
                      *m_pTransTable;  //            translated
 
-    wxString m_charset;
-                     
-    // swap the 2 halves of 32 bit integer if needed
-    size_t32 Swap(size_t32 ui) const
-    {
-          return m_bSwapped ? (ui << 24) | ((ui & 0xff00) << 8) |
-                              ((ui >> 8) & 0xff00) | (ui >> 24)
-                            : ui;
-    }
+    const char *StringAtOfs(wxMsgTableEntry *pTable, size_t32 index) const
+      { return (const char *)(m_pData + Swap(pTable[index].ofsString)); }
 
-    const char *StringAtOfs(wxMsgTableEntry *pTable, size_t32 n) const
-    {
-        const wxMsgTableEntry * const ent = pTable + n;
+    wxString GetCharset() const;
 
-        // this check could fail for a corrupt message catalog
-        size_t32 ofsString = Swap(ent->ofsString);
-        if ( ofsString + Swap(ent->nLen) > m_nSize)
-        {
-            return NULL;
-        }
+    // utility functions
+      // big<->little endian
+    inline size_t32 Swap(size_t32 ui) const;
 
-        return (const char *)(m_pData + ofsString);
-    }    
-
-    bool m_bSwapped;   // wrong endianness?
-
-    DECLARE_NO_COPY_CLASS(wxMsgCatalogFile)
+    bool          m_bSwapped;   // wrong endianness?
 };
 
 
@@ -957,7 +222,7 @@ public:
     wxString GetName() const { return m_name; }
 
     // get the translated string: returns NULL if not found
-    const wxChar *GetString(const wxChar *sz, size_t n = size_t(-1)) const;
+    const wxChar *GetString(const wxChar *sz) const;
 
     // public variable pointing to the next element in a linked list (or NULL)
     wxMsgCatalog *m_pNext;
@@ -965,7 +230,6 @@ public:
 private:
     wxMessagesHash  m_messages; // all messages in the catalog
     wxString        m_name;     // name of the domain
-    wxPluralFormsCalculatorPtr  m_pluralFormsCalculator;
 };
 
 // ----------------------------------------------------------------------------
@@ -983,15 +247,22 @@ static wxArrayString s_searchPrefixes;
 // wxMsgCatalogFile class
 // ----------------------------------------------------------------------------
 
+// swap the 2 halves of 32 bit integer if needed
+size_t32 wxMsgCatalogFile::Swap(size_t32 ui) const
+{
+  return m_bSwapped ? (ui << 24) | ((ui & 0xff00) << 8) |
+                      ((ui >> 8) & 0xff00) | (ui >> 24)
+                    : ui;
+}
+
 wxMsgCatalogFile::wxMsgCatalogFile()
 {
-    m_pData = NULL;
-    m_nSize = 0;
+  m_pData = NULL;
 }
 
 wxMsgCatalogFile::~wxMsgCatalogFile()
 {
-    wxDELETEA(m_pData);
+  wxDELETEA(m_pData);
 }
 
 // return all directories to search for given prefix
@@ -1025,11 +296,9 @@ static wxString GetFullSearchPath(const wxChar *lang)
 
     // LC_PATH is a standard env var containing the search path for the .mo
     // files
-#ifndef __WXWINCE__
     const wxChar *pszLcPath = wxGetenv(wxT("LC_PATH"));
     if ( pszLcPath != NULL )
         searchPath << GetAllMsgCatalogSubdirs(pszLcPath, lang);
-#endif
 
 #ifdef __UNIX__
     // add some standard ones and the one in the tree where wxWin was installed:
@@ -1056,8 +325,7 @@ static wxString GetFullSearchPath(const wxChar *lang)
 }
 
 // open disk file and read in it's contents
-bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName0,
-                            wxPluralFormsCalculatorPtr& rPluralFormsCalculator)
+bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName0)
 {
    /* We need to handle locales like  de_AT.iso-8859-1
       For this we first chop off the .CHARSET specifier and ignore it.
@@ -1143,75 +411,41 @@ bool wxMsgCatalogFile::Load(const wxChar *szDirPrefix, const wxChar *szName0,
                    Swap(pHeader->ofsOrigTable));
   m_pTransTable = (wxMsgTableEntry *)(m_pData +
                    Swap(pHeader->ofsTransTable));
-  m_nSize = nSize;
-    
-  // now parse catalog's header and try to extract catalog charset and
-  // plural forms formula from it:
-
-  const char* headerData = StringAtOfs(m_pOrigTable, 0);
-  if (headerData && headerData[0] == 0)
-  {
-      // Extract the charset:
-      wxString header = wxString::FromAscii(StringAtOfs(m_pTransTable, 0));
-      int begin = header.Find(wxT("Content-Type: text/plain; charset="));
-      if (begin != wxNOT_FOUND)
-      {
-          begin += 34; //strlen("Content-Type: text/plain; charset=")
-          size_t end = header.find('\n', begin);
-          if (end != size_t(-1))
-          {
-              m_charset.assign(header, begin, end - begin);
-              if (m_charset == wxT("CHARSET"))
-              {
-                  // "CHARSET" is not valid charset, but lazy translator
-                  m_charset.Clear();
-              }
-          }
-      }
-      // else: incorrectly filled Content-Type header
-      
-      // Extract plural forms:
-      begin = header.Find(wxT("Plural-Forms:"));
-      if (begin != wxNOT_FOUND)
-      {
-          begin += 13;
-          size_t end = header.find('\n', begin);
-          if (end != size_t(-1))
-          {
-              wxString pfs(header, begin, end - begin);
-              wxPluralFormsCalculator* pCalculator = wxPluralFormsCalculator
-                  ::make(pfs.ToAscii());
-              if (pCalculator != 0)
-              {
-                  rPluralFormsCalculator.reset(pCalculator);
-              }
-              else
-              {
-                   wxLogVerbose(_("Cannot parse Plural-Forms:'%s'"),
-                          pfs.c_str());
-              }
-          }
-      }
-      if (rPluralFormsCalculator.get() == NULL)
-      {
-          rPluralFormsCalculator.reset(wxPluralFormsCalculator::make());
-      }
-  }
 
   // everything is fine
-  return true;
+  return TRUE;
 }
 
 void wxMsgCatalogFile::FillHash(wxMessagesHash& hash, bool convertEncoding) const
 {
+    wxString charset = GetCharset();
+
 #if wxUSE_WCHAR_T
     wxCSConv *csConv = NULL;
-    if ( !!m_charset )
-        csConv = new wxCSConv(m_charset);
+    if ( !!charset )
+        csConv = new wxCSConv(charset);
 
     wxMBConv& inputConv = csConv ? *((wxMBConv*)csConv) : *wxConvCurrent;
-#elif wxUSE_FONTMAP
-    wxEncodingConverter converter;
+
+    for (size_t i = 0; i < m_numStrings; i++)
+    {
+        wxString key(StringAtOfs(m_pOrigTable, i), inputConv);
+
+    #if wxUSE_UNICODE
+        hash[key] = wxString(StringAtOfs(m_pTransTable, i), inputConv);
+    #else
+        if ( convertEncoding )
+            hash[key] =
+                wxString(inputConv.cMB2WC(StringAtOfs(m_pTransTable, i)),
+                         wxConvLocal);
+        else
+            hash[key] = StringAtOfs(m_pTransTable, i);
+    #endif
+    }
+
+    delete csConv;
+#else // !wxUSE_WCHAR_T
+    #if wxUSE_FONTMAP
     if ( convertEncoding )
     {
         wxFontEncoding targetEnc = wxFONTENCODING_SYSTEM;
@@ -1238,60 +472,61 @@ void wxMsgCatalogFile::FillHash(wxMessagesHash& hash, bool convertEncoding) cons
 
         if ( convertEncoding )
         {
+            wxEncodingConverter converter;
             converter.Init(enc, targetEnc);
-        }
-    }
-#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
-    (void)convertEncoding; // get rid of warnings about unused parameter
 
-    for (size_t i = 0; i < m_numStrings; i++)
-    {
-        const char *data = StringAtOfs(m_pOrigTable, i);
-#if wxUSE_WCHAR_T
-        wxString msgid(data, inputConv);
-#else
-        wxString msgid(data);
-#endif
-
-        data = StringAtOfs(m_pTransTable, i);
-        size_t length = Swap(m_pTransTable[i].nLen);
-        size_t offset = 0;
-        size_t index = 0;
-        while (offset < length)
-        {
-            wxString msgstr;
-#if wxUSE_WCHAR_T
-        #if wxUSE_UNICODE
-            msgstr = wxString(data + offset, inputConv);
-        #else
-            if ( convertEncoding )
-                msgstr = wxString(inputConv.cMB2WC(data + offset), wxConvLocal);
-            else
-                msgstr = wxString(data + offset);
-        #endif
-#else // !wxUSE_WCHAR_T
-        #if wxUSE_FONTMAP
-            if ( convertEncoding )
-                msgstr = wxString(converter.Convert(data + offset));
-            else
-        #endif
-                msgstr = wxString(data + offset);
-#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
-
-            if ( !msgstr.empty() )
+            for (size_t i = 0; i < m_numStrings; i++)
             {
-                hash[index == 0 ? msgid : msgid + wxChar(index)] = msgstr;
+                wxString key(StringAtOfs(m_pOrigTable, i));
+                hash[key] =
+                    converter.Convert(wxString(StringAtOfs(m_pTransTable, i)));
             }
-            offset += strlen(data + offset) + 1;
-            ++index;
         }
     }
 
-#if wxUSE_WCHAR_T
-    delete csConv;
-#endif
+    if ( !convertEncoding )
+    #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
+    {
+        for (size_t i = 0; i < m_numStrings; i++)
+        {
+            wxString key(StringAtOfs(m_pOrigTable, i));
+            hash[key] = StringAtOfs(m_pTransTable, i);
+        }
+    }
+#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
 }
 
+wxString wxMsgCatalogFile::GetCharset() const
+{
+    // first, find encoding header:
+    const char *hdr = StringAtOfs(m_pOrigTable, 0);
+    if ( hdr == NULL || hdr[0] != 0 )
+    {
+        // not supported by this catalog, does not have correct header
+        return wxEmptyString;
+    }
+
+    wxString header = wxString::FromAscii( StringAtOfs(m_pTransTable, 0));
+    wxString charset;
+    int pos = header.Find(wxT("Content-Type: text/plain; charset="));
+    if ( pos == wxNOT_FOUND )
+    {
+        // incorrectly filled Content-Type header
+        return wxEmptyString;
+    }
+
+    size_t n = pos + 34; /*strlen("Content-Type: text/plain; charset=")*/
+    while ( header[n] != wxT('\n') )
+        charset << header[n++];
+
+    if ( charset == wxT("CHARSET") )
+    {
+        // "CHARSET" is not valid charset, but lazy translator
+        return wxEmptyString;
+    }
+
+    return charset;
+}
 
 // ----------------------------------------------------------------------------
 // wxMsgCatalog class
@@ -1304,7 +539,7 @@ bool wxMsgCatalog::Load(const wxChar *szDirPrefix, const wxChar *szName,
 
     m_name = szName;
 
-    if ( file.Load(szDirPrefix, szName, m_pluralFormsCalculator) )
+    if ( file.Load(szDirPrefix, szName) )
     {
         file.FillHash(m_messages, bConvertEncoding);
         return TRUE;
@@ -1313,23 +548,9 @@ bool wxMsgCatalog::Load(const wxChar *szDirPrefix, const wxChar *szName,
     return FALSE;
 }
 
-const wxChar *wxMsgCatalog::GetString(const wxChar *sz, size_t n) const
+const wxChar *wxMsgCatalog::GetString(const wxChar *sz) const
 {
-    int index = 0;
-    if (n != size_t(-1))
-    {
-        index = m_pluralFormsCalculator->evaluate(n);
-    }
-    wxMessagesHash::const_iterator i;
-    if (index != 0)
-    {
-        i = m_messages.find(wxString(sz) + wxChar(index));   // plural
-    }
-    else
-    {
-        i = m_messages.find(sz);
-    }
-
+    wxMessagesHash::const_iterator i = m_messages.find(sz);
     if ( i != m_messages.end() )
     {
         return i->second.c_str();
@@ -1388,31 +609,12 @@ bool wxLocale::Init(const wxChar *szName,
   {
     // the argument to setlocale()
     szLocale = szShort;
-
-    wxCHECK_MSG( szLocale, FALSE, _T("no locale to set in wxLocale::Init()") );
   }
 
-#ifdef __WXWINCE__
-  // FIXME: I'm guessing here
-  wxChar localeName[256];
-  int ret = GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLANGUAGE, localeName,
-      256);
-  if (ret != 0)
-  {
-    m_pszOldLocale = wxStrdup(localeName);      
-  }
-  else
-    m_pszOldLocale = NULL;
-
-  // TODO: how to find languageId
-  // SetLocaleInfo(languageId, SORT_DEFAULT, localeName);
-#else
   m_pszOldLocale = wxSetlocale(LC_ALL, szLocale);
   if ( m_pszOldLocale )
-      m_pszOldLocale = wxStrdup(m_pszOldLocale);
-#endif
-
-  if ( m_pszOldLocale == NULL )
+    m_pszOldLocale = wxStrdup(m_pszOldLocale);
+  else
     wxLogError(_("locale '%s' can not be set."), szLocale);
 
   // the short name will be used to look for catalog files as well,
@@ -1420,7 +622,7 @@ bool wxLocale::Init(const wxChar *szName,
   if ( m_strShort.IsEmpty() ) {
     // FIXME I don't know how these 2 letter abbreviations are formed,
     //       this wild guess is surely wrong
-    if ( szLocale && szLocale[0] )
+    if ( szLocale[0] )
     {
         m_strShort += (wxChar)wxTolower(szLocale[0]);
         if ( szLocale[1] )
@@ -1566,17 +768,10 @@ bool wxLocale::Init(int language, int flags)
         }
         else
         {
-            int codepage 
-                         #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
-                         = -1
-                         #endif
-                         ;
+            int codepage = -1;
             wxUint32 lcid = MAKELCID(MAKELANGID(info->WinLang, info->WinSublang),
                                      SORT_DEFAULT);
-            // FIXME
-#ifndef __WXWINCE__
             SetThreadLocale(lcid);
-#endif
             // NB: we must translate LCID to CRT's setlocale string ourselves,
             //     because SetThreadLocale does not modify change the
             //     interpretation of setlocale(LC_ALL, "") call:
@@ -1600,10 +795,7 @@ bool wxLocale::Init(int language, int flags)
             }
             else
             {
-            // FIXME
-#ifndef __WXWINCE__
                 retloc = wxSetlocale(LC_ALL, locale);
-#endif
 #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
                 if (codepage == 0 && (const wxChar*)retloc == NULL)
                 {
@@ -1615,12 +807,7 @@ bool wxLocale::Init(int language, int flags)
     }
     else
     {
-            // FIXME
-#ifndef __WXWINCE__
         retloc = wxSetlocale(LC_ALL, wxEmptyString);
-#else
-        retloc = NULL;
-#endif
 #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
         if ((const wxChar*)retloc == NULL)
         {
@@ -1652,11 +839,10 @@ bool wxLocale::Init(int language, int flags)
     bool ret = Init(name, canonical, retloc,
                     (flags & wxLOCALE_LOAD_DEFAULT) != 0,
                     (flags & wxLOCALE_CONV_ENCODING) != 0);
-    free(szLocale);
-
+    if (szLocale)
+        free(szLocale);
     if ( ret )
         m_language = lang;
-
     return ret;
 #endif
 }
@@ -1809,279 +995,279 @@ void wxLocale::AddCatalogLookupPathPrefix(const wxString& prefix)
         }
     }
 #elif defined(__WXMAC__)
-    const wxChar * lc = NULL ;
+    const char* lc = NULL ;
     long lang = GetScriptVariable( smSystemScript, smScriptLang) ;
     switch( GetScriptManagerVariable( smRegionCode ) ) {
       case verUS :
-        lc = wxT("en_US") ;
+        lc = "en_US" ;
         break ;
       case verFrance :
-        lc = wxT("fr_FR") ;
+        lc = "fr_FR" ;
         break ;
       case verBritain :
-        lc = wxT("en_GB") ;
+        lc = "en_GB" ;
         break ;
       case verGermany :
-        lc = wxT("de_DE") ;
+        lc = "de_DE" ;
         break ;
       case verItaly :
-        lc = wxT("it_IT") ;
+        lc = "it_IT" ;
         break ;
       case verNetherlands :
-        lc = wxT("nl_NL") ;
+        lc = "nl_NL" ;
         break ;
       case verFlemish :
-        lc = wxT("nl_BE") ;
+        lc = "nl_BE" ;
         break ;
       case verSweden :
-        lc = wxT("sv_SE" );
+        lc = "sv_SE" ;
         break ;
       case verSpain :
-        lc = wxT("es_ES" );
+        lc = "es_ES" ;
         break ;
       case verDenmark :
-        lc = wxT("da_DK") ;
+        lc = "da_DK" ;
         break ;
       case verPortugal :
-        lc = wxT("pt_PT") ;
+        lc = "pt_PT" ;
         break ;
       case verFrCanada:
-        lc = wxT("fr_CA") ;
+        lc = "fr_CA" ;
         break ;
       case verNorway:
-        lc = wxT("nb_NO") ;
+        lc = "no_NO" ;
         break ;
       case verIsrael:
-        lc = wxT("iw_IL") ;
+        lc = "iw_IL" ;
         break ;
       case verJapan:
-        lc = wxT("ja_JP") ;
+        lc = "ja_JP" ;
         break ;
       case verAustralia:
-        lc = wxT("en_AU") ;
+        lc = "en_AU" ;
         break ;
       case verArabic:
-        lc = wxT("ar") ;
+        lc = "ar" ;
         break ;
       case verFinland:
-        lc = wxT("fi_FI") ;
+        lc = "fi_FI" ;
         break ;
       case verFrSwiss:
-        lc = wxT("fr_CH") ;
+        lc = "fr_CH" ;
         break ;
       case verGrSwiss:
-        lc = wxT("de_CH") ;
+        lc = "de_CH" ;
         break ;
       case verGreece:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verIceland:
-        lc = wxT("is_IS") ;
+        lc = "is_IS" ;
         break ;
       case verMalta:
-        lc = wxT("mt_MT") ;
+        lc = "mt_MT" ;
         break ;
       case verCyprus:
       // _CY is not part of wx, so we have to translate according to the system language
         if ( lang == langGreek ) {
-          lc = wxT("el_GR") ;
+          lc = "el_GR" ;
         }
         else if ( lang == langTurkish ) {
-          lc = wxT("tr_TR") ;
+          lc = "tr_TR" ;
         }
         break ;
       case verTurkey:
-        lc = wxT("tr_TR") ;
+        lc = "tr_TR" ;
         break ;
       case verYugoCroatian:
-        lc = wxT("hr_HR") ;
+        lc = "hr_HR" ;
         break ;
       case verIndiaHindi:
-        lc = wxT("hi_IN") ;
+        lc = "hi_IN" ;
         break ;
       case verPakistanUrdu:
-        lc = wxT("ur_PK") ;
+        lc = "ur_PK" ;
         break ;
       case verTurkishModified:
-        lc = wxT("tr_TR") ;
+        lc = "tr_TR" ;
         break ;
       case verItalianSwiss:
-        lc = wxT("it_CH") ;
+        lc = "it_CH" ;
         break ;
       case verInternational:
-        lc = wxT("en") ;
+        lc = "en" ;
         break ;
       case verRomania:
-        lc = wxT("ro_RO") ;
+        lc = "ro_RO" ;
         break ;
       case verGreecePoly:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verLithuania:
-        lc = wxT("lt_LT") ;
+        lc = "lt_LT" ;
         break ;
       case verPoland:
-        lc = wxT("pl_PL") ;
+        lc = "pl_PL" ;
         break ;
       case verMagyar :
       case verHungary:
-        lc = wxT("hu_HU") ;
+        lc = "hu_HU" ;
         break ;
       case verEstonia:
-        lc = wxT("et_EE") ;
+        lc = "et_EE" ;
         break ;
       case verLatvia:
-        lc = wxT("lv_LV") ;
+        lc = "lv_LV" ;
         break ;
       case verSami:
         // not known
         break ;
       case verFaroeIsl:
-        lc = wxT("fo_FO") ;
+        lc = "fo_FO" ;
         break ;
       case verIran:
-        lc = wxT("fa_IR") ;
+        lc = "fa_IR" ;
         break ;
       case verRussia:
-        lc = wxT("ru_RU") ;
+        lc = "ru_RU" ;
         break ;
        case verIreland:
-        lc = wxT("ga_IE") ;
+        lc = "ga_IE" ;
         break ;
       case verKorea:
-        lc = wxT("ko_KR") ;
+        lc = "ko_KR" ;
         break ;
       case verChina:
-        lc = wxT("zh_CN") ;
+        lc = "zh_CN" ;
         break ;
       case verTaiwan:
-        lc = wxT("zh_TW") ;
+        lc = "zh_TW" ;
         break ;
       case verThailand:
-        lc = wxT("th_TH") ;
+        lc = "th_TH" ;
         break ;
       case verCzech:
-        lc = wxT("cs_CZ") ;
+        lc = "cs_CZ" ;
         break ;
       case verSlovak:
-        lc = wxT("sk_SK") ;
+        lc = "sk_SK" ;
         break ;
       case verBengali:
-        lc = wxT("bn") ;
+        lc = "bn" ;
         break ;
       case verByeloRussian:
-        lc = wxT("be_BY") ;
+        lc = "be_BY" ;
         break ;
       case verUkraine:
-        lc = wxT("uk_UA") ;
+        lc = "uk_UA" ;
         break ;
       case verGreeceAlt:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verSerbian:
-        lc = wxT("sr_YU") ;
+        lc = "sr_YU" ;
         break ;
       case verSlovenian:
-        lc = wxT("sl_SI") ;
+        lc = "sl_SI" ;
         break ;
       case verMacedonian:
-        lc = wxT("mk_MK") ;
+        lc = "mk_MK" ;
         break ;
       case verCroatia:
-        lc = wxT("hr_HR") ;
+        lc = "hr_HR" ;
         break ;
       case verBrazil:
-        lc = wxT("pt_BR ") ;
+        lc = "pt_BR " ;
         break ;
       case verBulgaria:
-        lc = wxT("bg_BG") ;
+        lc = "bg_BG" ;
         break ;
       case verCatalonia:
-        lc = wxT("ca_ES") ;
+        lc = "ca_ES" ;
         break ;
       case verScottishGaelic:
-        lc = wxT("gd") ;
+        lc = "gd" ;
         break ;
       case verManxGaelic:
-        lc = wxT("gv") ;
+        lc = "gv" ;
         break ;
       case verBreton:
-        lc = wxT("br") ;
+        lc = "br" ;
         break ;
       case verNunavut:
-        lc = wxT("iu_CA") ;
+        lc = "iu_CA" ;
         break ;
       case verWelsh:
-        lc = wxT("cy") ;
+        lc = "cy" ;
         break ;
       case verIrishGaelicScript:
-        lc = wxT("ga_IE") ;
+        lc = "ga_IE" ;
         break ;
       case verEngCanada:
-        lc = wxT("en_CA") ;
+        lc = "en_CA" ;
         break ;
       case verBhutan:
-        lc = wxT("dz_BT") ;
+        lc = "dz_BT" ;
         break ;
       case verArmenian:
-        lc = wxT("hy_AM") ;
+        lc = "hy_AM" ;
         break ;
       case verGeorgian:
-        lc = wxT("ka_GE") ;
+        lc = "ka_GE" ;
         break ;
       case verSpLatinAmerica:
-        lc = wxT("es_AR") ;
+        lc = "es_AR" ;
         break ;
       case verTonga:
-        lc = wxT("to_TO" );
+        lc = "to_TO" ;
         break ;
       case verFrenchUniversal:
-        lc = wxT("fr_FR") ;
+        lc = "fr_FR" ;
         break ;
       case verAustria:
-        lc = wxT("de_AT") ;
+        lc = "de_AT" ;
         break ;
       case verGujarati:
-        lc = wxT("gu_IN") ;
+        lc = "gu_IN" ;
         break ;
       case verPunjabi:
-        lc = wxT("pa") ;
+        lc = "pa" ;
         break ;
       case verIndiaUrdu:
-        lc = wxT("ur_IN") ;
+        lc = "ur_IN" ;
         break ;
       case verVietnam:
-        lc = wxT("vi_VN") ;
+        lc = "vi_VN" ;
         break ;
       case verFrBelgium:
-        lc = wxT("fr_BE") ;
+        lc = "fr_BE" ;
         break ;
       case verUzbek:
-        lc = wxT("uz_UZ") ;
+        lc = "uz_UZ" ;
         break ;
       case verSingapore:
-        lc = wxT("zh_SG") ;
+        lc = "zh_SG" ;
         break ;
       case verNynorsk:
-        lc = wxT("nn_NO") ;
+        lc = "nn_NO" ;
         break ;
       case verAfrikaans:
-        lc = wxT("af_ZA") ;
+        lc = "af_ZA" ;
         break ;
       case verEsperanto:
-        lc = wxT("eo") ;
+        lc = "eo" ;
         break ;
       case verMarathi:
-        lc = wxT("mr_IN") ;
+        lc = "mr_IN" ;
         break ;
       case verTibetan:
-        lc = wxT("bo") ;
+        lc = "bo" ;
         break ;
       case verNepal:
-        lc = wxT("ne_NP") ;
+        lc = "ne_NP" ;
         break ;
       case verGreenland:
-        lc = wxT("kl_GL") ;
+        lc = "kl_GL" ;
         break ;
       default :
         break ;
@@ -2280,7 +1466,7 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
 {
     CreateLanguagesDB();
 
-    const size_t count = ms_languagesDB->GetCount();
+    size_t count = ms_languagesDB->GetCount();
     for ( size_t i = 0; i < count; i++ )
     {
         if ( ms_languagesDB->Item(i).Language == lang )
@@ -2292,60 +1478,9 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
     return NULL;
 }
 
-/* static */
-wxString wxLocale::GetLanguageName(int lang)
-{
-    const wxLanguageInfo *info = GetLanguageInfo(lang);
-    if ( !info )
-        return wxEmptyString;
-    else
-        return info->Description;
-}
-
-/* static */
-const wxLanguageInfo *wxLocale::FindLanguageInfo(const wxString& locale)
-{
-    CreateLanguagesDB();
-
-    const wxLanguageInfo *infoRet = NULL;
-
-    const size_t count = ms_languagesDB->GetCount();
-    for ( size_t i = 0; i < count; i++ )
-    {
-        const wxLanguageInfo *info = &ms_languagesDB->Item(i);
-
-        if ( wxStricmp(locale, info->CanonicalName) == 0 ||
-                wxStricmp(locale, info->Description) == 0 )
-        {
-            // exact match, stop searching
-            infoRet = info;
-            break;
-        }
-
-        if ( wxStricmp(locale, info->CanonicalName.BeforeFirst(_T('_'))) == 0 )
-        {
-            // a match -- but maybe we'll find an exact one later, so continue
-            // looking
-            //
-            // OTOH, maybe we had already found a language match and in this
-            // case don't overwrite it becauce the entry for the default
-            // country always appears first in ms_languagesDB
-            if ( !infoRet )
-                infoRet = info;
-        }
-    }
-
-    return infoRet;
-}
-
 wxString wxLocale::GetSysName() const
 {
-            // FIXME
-#ifndef __WXWINCE__
     return wxSetlocale(LC_ALL, NULL);
-#else
-    return wxEmptyString;
-#endif
 }
 
 // clean up
@@ -2361,10 +1496,7 @@ wxLocale::~wxLocale()
 
     // restore old locale
     wxSetLocale(m_pOldLocale);
-    // FIXME
-#ifndef __WXWINCE__
     wxSetlocale(LC_ALL, m_pszOldLocale);
-#endif
     free((wxChar *)m_pszOldLocale);     // const_cast
 }
 
@@ -2372,16 +1504,8 @@ wxLocale::~wxLocale()
 const wxChar *wxLocale::GetString(const wxChar *szOrigString,
                                   const wxChar *szDomain) const
 {
-    return GetString(szOrigString, szOrigString, size_t(-1), szDomain);
-}
-
-const wxChar *wxLocale::GetString(const wxChar *szOrigString,
-                                  const wxChar *szOrigString2,
-                                  size_t n,
-                                  const wxChar *szDomain) const
-{
     if ( wxIsEmpty(szOrigString) )
-        return wxEmptyString;
+        return _T("");
 
     const wxChar *pszTrans = NULL;
     wxMsgCatalog *pMsgCat;
@@ -2392,14 +1516,14 @@ const wxChar *wxLocale::GetString(const wxChar *szOrigString,
 
         // does the catalog exist?
         if ( pMsgCat != NULL )
-            pszTrans = pMsgCat->GetString(szOrigString, n);
+            pszTrans = pMsgCat->GetString(szOrigString);
     }
     else
     {
         // search in all domains
         for ( pMsgCat = m_pMsgCat; pMsgCat != NULL; pMsgCat = pMsgCat->m_pNext )
         {
-            pszTrans = pMsgCat->GetString(szOrigString, n);
+            pszTrans = pMsgCat->GetString(szOrigString);
             if ( pszTrans != NULL )   // take the first found
                 break;
         }
@@ -2415,23 +1539,19 @@ const wxChar *wxLocale::GetString(const wxChar *szOrigString,
             if ( szDomain != NULL )
             {
                 wxLogTrace(_T("i18n"),
-                           _T("string '%s'[%d] not found in domain '%s' for locale '%s'."),
-                           szOrigString, n, szDomain, m_strLocale.c_str());
-
+                           _T("string '%s' not found in domain '%s' for locale '%s'."),
+                           szOrigString, szDomain, m_strLocale.c_str());
             }
             else
             {
                 wxLogTrace(_T("i18n"),
-                           _T("string '%s'[%d] not found in locale '%s'."),
-                           szOrigString, n, m_strLocale.c_str());
+                           _T("string '%s' not found in locale '%s'."),
+                           szOrigString, m_strLocale.c_str());
             }
         }
 #endif // __WXDEBUG__
 
-        if (n == size_t(-1))
-            return szOrigString;
-        else
-            return n == 1 ? szOrigString : szOrigString2;
+        return szOrigString;
     }
 
     return pszTrans;

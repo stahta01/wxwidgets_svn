@@ -7,7 +7,7 @@
 // Created:     20.09.99 (extracted from src/common/log.cpp)
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -18,15 +18,17 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "logg.h"
-#endif
+// no #pragma implementation "log.h" because it's already in src/common/log.cpp
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
   #pragma hdrstop
+#endif
+
+#if !wxUSE_GUI
+    #error "This file can't be compiled without GUI!"
 #endif
 
 #ifndef WX_PRECOMP
@@ -69,10 +71,6 @@
     #include "wx/msgdlg.h"
 #endif // wxUSE_LOG_DIALOG/!wxUSE_LOG_DIALOG
 
-#if defined(__MWERKS__) && wxUSE_UNICODE
-    #include <wtime.h>
-#endif
-
 // the suffix we add to the button to show that the dialog can be expanded
 #define EXPAND_SUFFIX _T(" >>")
 
@@ -86,10 +84,6 @@
 // allows to exclude the usage of wxDateTime
 static wxString TimeStamp(const wxChar *format, time_t t)
 {
-#ifdef __WXWINCE__
-    // FIXME
-    return wxEmptyString;
-#else
     wxChar buf[4096];
     if ( !wxStrftime(buf, WXSIZEOF(buf), format, localtime(&t)) )
     {
@@ -97,7 +91,6 @@ static wxString TimeStamp(const wxChar *format, time_t t)
         wxFAIL_MSG(_T("strftime() failed"));
     }
     return wxString(buf);
-#endif
 }
 
 
@@ -147,7 +140,6 @@ private:
     static wxString ms_details;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogDialog)
 };
 
 BEGIN_EVENT_TABLE(wxLogDialog, wxDialog)
@@ -203,11 +195,7 @@ void wxVLogStatus(wxFrame *pFrame, const wxChar *szFormat, va_list argptr)
 
     wxASSERT( gs_pFrame == NULL ); // should be reset!
     gs_pFrame = pFrame;
-#ifdef __WXWINCE__
-    wxLog::OnLog(wxLOG_Status, msg, 0);
-#else
     wxLog::OnLog(wxLOG_Status, msg, time(NULL));
-#endif
     gs_pFrame = (wxFrame *) NULL;
   }
 }
@@ -441,6 +429,8 @@ public:
 #endif // wxUSE_FILE
     void OnClear(wxCommandEvent& event);
 
+    void OnIdle(wxIdleEvent&);
+
     // accessors
     wxTextCtrl *TextCtrl() const { return m_pTextCtrl; }
 
@@ -460,7 +450,6 @@ private:
     wxLogWindow *m_log;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogFrame)
 };
 
 BEGIN_EVENT_TABLE(wxLogFrame, wxFrame)
@@ -629,6 +618,8 @@ void wxLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
                 wxLog::DoLog(level, szString, t);
         }
     }
+
+    m_bHasMessages = TRUE;
 }
 
 void wxLogWindow::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
@@ -1005,14 +996,14 @@ void wxLogDialog::OnDetails(wxCommandEvent& WXUNUSED(event))
     {
         m_btnDetails->SetLabel(ms_details + EXPAND_SUFFIX);
 
-        sizer->Detach( m_listctrl );
+        sizer->Remove(m_listctrl);
 
 #if wxUSE_STATLINE
-        sizer->Detach( m_statline );
+        sizer->Remove(m_statline);
 #endif // wxUSE_STATLINE
 
 #if wxUSE_FILE
-        sizer->Detach( m_btnSave );
+        sizer->Remove(m_btnSave);
 #endif // wxUSE_FILE
     }
     else // show details now
@@ -1111,7 +1102,7 @@ static int OpenLogFile(wxFile& file, wxString *pFilename)
 
     // open file
     // ---------
-    bool bOk;
+    bool bOk = FALSE;
     if ( wxFile::Exists(filename) ) {
         bool bAppend = FALSE;
         wxString strMsg;
@@ -1155,7 +1146,7 @@ static int OpenLogFile(wxFile& file, wxString *pFilename)
 
 #endif // !(wxUSE_LOGGUI || wxUSE_LOGWINDOW)
 
-#if wxUSE_LOG && wxUSE_TEXTCTRL
+#if wxUSE_TEXTCTRL
 
 // ----------------------------------------------------------------------------
 // wxLogTextCtrl implementation
@@ -1171,9 +1162,17 @@ void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
     wxString msg;
     TimeStamp(&msg);
 
+#if defined(__WXMAC__)
+    // VZ: this is a bug in wxMac, it *must* accept '\n' as new line, the
+    //     translation must be done in wxTextCtrl, not here! (FIXME)
+    msg << szString << wxT('\r');
+#else
     msg << szString << wxT('\n');
+#endif
+
     m_pTextCtrl->AppendText(msg);
 }
 
-#endif // wxUSE_LOG && wxUSE_TEXTCTRL
+#endif // wxUSE_TEXTCTRL
 
+// vi:sts=4:sw=4:et

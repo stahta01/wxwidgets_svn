@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -35,8 +35,8 @@ FORCE_LINK_ME(m_pre)
 static wxString LINKAGEMODE HtmlizeWhitespaces(const wxString& str)
 {
     wxString out;
-    size_t len = str.Len();
-    for (size_t i = 0; i < len; i++)
+    size_t i = 0, j = 0, len = str.Len();
+    for (i = 0; i < len; i++)
     {
         switch (str[i])
         {
@@ -52,10 +52,7 @@ static wxString LINKAGEMODE HtmlizeWhitespaces(const wxString& str)
                 out << wxT("<br>");
                 break;
             case wxT('\t'):
-                {
-                    for (size_t j = 8 - i%8; j > 0; j--)
-                        out << wxT("&nbsp;");
-                }
+                for (j = 8 - i%8; j > 0; j--) out << wxT("&nbsp;");
                 break;
             default:
                 out << str[i];
@@ -72,7 +69,6 @@ static wxString LINKAGEMODE HtmlizeWhitespaces(const wxString& str)
 
 
 TAG_HANDLER_BEGIN(PRE, "PRE")
-    TAG_HANDLER_CONSTR(PRE) { }
 
     TAG_HANDLER_PROC(tag)
     {

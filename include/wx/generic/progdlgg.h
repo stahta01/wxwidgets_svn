@@ -6,13 +6,13 @@
 // Created:     09.05.1999
 // RCS-ID:      $Id$
 // Copyright:   (c) Karsten Ballüder
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ////////////////////////////////////////////////////
 
 #ifndef __PROGDLGH_G__
 #define __PROGDLGH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "progdlgg.h"
 #endif
 
@@ -124,8 +124,6 @@ private:
 private:
     // Virtual function hiding supression
     virtual void Update() { wxDialog::Update(); }
-
-    DECLARE_NO_COPY_CLASS(wxProgressDialog)
 };
 #endif
 

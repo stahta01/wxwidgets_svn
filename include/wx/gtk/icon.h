@@ -11,7 +11,7 @@
 #ifndef __GTKICONH__
 #define __GTKICONH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -44,11 +44,6 @@ public:
     {
     }
     wxIcon( char **bits, int width=-1, int height=-1 );
-
-    wxIcon(const wxIconLocation& loc)
-        : wxBitmap(loc.GetFileName(), wxBITMAP_TYPE_ANY)
-    {
-    }
 
     wxIcon& operator=(const wxIcon& icon);
     bool operator==(const wxIcon& icon) const { return m_refData == icon.m_refData; }

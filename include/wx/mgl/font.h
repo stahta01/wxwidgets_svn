@@ -9,7 +9,7 @@
 #ifndef __WX_FONT_H__
 #define __WX_FONT_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "font.h"
 #endif
 
@@ -81,7 +81,6 @@ public:
     virtual bool GetUnderlined() const;
     virtual wxFontEncoding GetEncoding() const;
     virtual bool IsFixedWidth() const;
-    virtual const wxNativeFontInfo *GetNativeFontInfo() const;
 
     virtual void SetPointSize(int pointSize);
     virtual void SetFamily(int family);

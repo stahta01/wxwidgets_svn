@@ -11,7 +11,7 @@
 #ifndef _WX_GIFDECOD_H
 #define _WX_GIFDECOD_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "gifdecod.h"
 #endif
 
@@ -78,8 +78,6 @@ public:
     unsigned char *pal;             /* palette */
     GIFImage *next;                 /* next image */
     GIFImage *prev;                 /* prev image */
-
-    DECLARE_NO_COPY_CLASS(GIFImage)
 };
 
 
@@ -150,8 +148,6 @@ public:
 
     // convert current frame to wxImage
     bool ConvertToImage(wxImage *image) const;
-
-    DECLARE_NO_COPY_CLASS(wxGIFDecoder)
 };
 
 

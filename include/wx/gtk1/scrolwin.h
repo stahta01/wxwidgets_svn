@@ -6,13 +6,13 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GTK_SCROLLWIN_H_
 #define _WX_GTK_SCROLLWIN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "scrolwin.h"
 #endif
 
@@ -63,7 +63,7 @@ public:
     // the area between the scrollbars (spreadsheet: only cell area
     // will move).
     virtual void SetTargetWindow( wxWindow *target, bool pushEventHandler = FALSE );
-    virtual wxWindow *GetTargetWindow() const;
+    virtual wxWindow *GetTargetWindow();
 
     // Set the scrolled area of the window.
     virtual void DoSetVirtualSize( int x, int y );

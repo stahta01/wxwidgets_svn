@@ -6,7 +6,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "zipstrm.h"
 #endif
 
@@ -122,7 +122,7 @@ off_t wxZipInputStream::OnSysSeek(off_t seek, wxSeekMode mode)
         default : nextpos = m_Pos; break; /* just to fool compiler, never happens */
     }
 
-    size_t toskip;
+    size_t toskip = 0;
     if ( nextpos > m_Pos )
     {
         toskip = nextpos - m_Pos;

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "colordlg.h"
 #endif
 
@@ -42,15 +42,15 @@
     #include "wx/msgdlg.h"
 #endif
 
-#if wxUSE_COLOURDLG && !wxUSE_SMARTPHONE
+#include <windows.h>
+
+#if !defined(__WIN32__) || defined(__SALFORDC__) || defined(__WXWINE__)
+    #include <commdlg.h>
+#endif
 
 #include "wx/msw/private.h"
 #include "wx/colordlg.h"
 #include "wx/cmndata.h"
-
-#if !defined(__WIN32__) || defined(__WXWINCE__)
-    #include <commdlg.h>
-#endif
 
 #include <math.h>
 #include <stdlib.h>
@@ -127,12 +127,12 @@ int wxColourDialog::ShowModal()
 
     int i;
     for (i = 0; i < 16; i++)
-      custColours[i] = wxColourToRGB(m_colourData.m_custColours[i]);
+      custColours[i] = wxColourToRGB(m_colourData.custColours[i]);
 
     chooseColorStruct.lStructSize = sizeof(CHOOSECOLOR);
     if ( m_parent )
         chooseColorStruct.hwndOwner = GetHwndOf(m_parent);
-    chooseColorStruct.rgbResult = wxColourToRGB(m_colourData.m_dataColour);
+    chooseColorStruct.rgbResult = wxColourToRGB(m_colourData.dataColour);
     chooseColorStruct.lpCustColors = custColours;
 
     chooseColorStruct.Flags = CC_RGBINIT | CC_ENABLEHOOK;
@@ -158,10 +158,10 @@ int wxColourDialog::ShowModal()
     // Restore values
     for (i = 0; i < 16; i++)
     {
-      wxRGBToColour(m_colourData.m_custColours[i], custColours[i]);
+      wxRGBToColour(m_colourData.custColours[i], custColours[i]);
     }
 
-    wxRGBToColour(m_colourData.m_dataColour, chooseColorStruct.rgbResult);
+    wxRGBToColour(m_colourData.dataColour, chooseColorStruct.rgbResult);
 
     return success ? wxID_OK : wxID_CANCEL;
 }
@@ -226,4 +226,3 @@ void wxColourDialog::DoGetClientSize(int *width, int *height) const
         *height = 299;
 }
 
-#endif

@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "helpdata.h"
 #endif
 
@@ -85,14 +85,9 @@ wxHtmlHelpIndexCompareFunc(const void *a, const void *b)
 class HP_Parser : public wxHtmlParser
 {
 public:
-    HP_Parser() { }
-
     wxObject* GetProduct() { return NULL; }
-
 protected:
     virtual void AddText(const wxChar* WXUNUSED(txt)) {}
-
-    DECLARE_NO_COPY_CLASS(HP_Parser)
 };
 
 
@@ -119,8 +114,6 @@ class HP_TagHandler : public wxHtmlTagHandler
         bool HandleTag(const wxHtmlTag& tag);
         void WriteOut(wxHtmlContentsItem*& array, int& size);
         void ReadIn(wxHtmlContentsItem* array, int size);
-
-    DECLARE_NO_COPY_CLASS(HP_TagHandler)
 };
 
 
@@ -514,17 +507,13 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
     fi = fsys.OpenFile(bookfile.GetLocation() + wxT(".cached"));
 
     if (fi == NULL ||
-#if wxUSE_DATETIME
           fi->GetModificationTime() < bookfile.GetModificationTime() ||
-#endif // wxUSE_DATETIME
           !LoadCachedBook(bookr, fi->GetStream()))
     {
         if (fi != NULL) delete fi;
         fi = fsys.OpenFile(m_TempPath + wxFileNameFromPath(bookfile.GetLocation()) + wxT(".cached"));
         if (m_TempPath == wxEmptyString || fi == NULL ||
-#if wxUSE_DATETIME
             fi->GetModificationTime() < bookfile.GetModificationTime() ||
-#endif // wxUSE_DATETIME
             !LoadCachedBook(bookr, fi->GetStream()))
         {
             LoadMSProject(bookr, fsys, indexfile, contfile);
@@ -570,24 +559,14 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
 
 bool wxHtmlHelpData::AddBook(const wxString& book)
 {
-    wxString extension(book.Right(4).Lower());
-    if (extension == wxT(".zip") ||
-#if wxUSE_LIBMSPACK
-        extension == wxT(".chm") /*compressed html help book*/ ||
-#endif
-        extension == wxT(".htb") /*html book*/)
+    if (book.Right(4).Lower() == wxT(".zip") ||
+        book.Right(4).Lower() == wxT(".htb") /*html book*/)
     {
         wxFileSystem fsys;
         wxString s;
         bool rt = FALSE;
 
-#if wxUSE_LIBMSPACK
-        if (extension == wxT(".chm"))
-            s = fsys.FindFirst(book + wxT("#chm:*.hhp"), wxFILE);
-        else
-#endif
-            s = fsys.FindFirst(book + wxT("#zip:*.hhp"), wxFILE);
-
+        s = fsys.FindFirst(book + wxT("#zip:") + wxT("*.hhp"), wxFILE);
         while (!s.IsEmpty())
         {
             if (AddBook(s)) rt = TRUE;
@@ -596,58 +575,60 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
 
         return rt;
     }
-
-    wxFSFile *fi;
-    wxFileSystem fsys;
-
-    wxString title = _("noname"),
-             safetitle,
-             start = wxEmptyString,
-             contents = wxEmptyString,
-             index = wxEmptyString,
-             charset = wxEmptyString;
-
-    fi = fsys.OpenFile(book);
-    if (fi == NULL)
+    else
     {
-        wxLogError(_("Cannot open HTML help book: %s"), book.c_str());
-        return FALSE;
+        wxFSFile *fi;
+        wxFileSystem fsys;
+
+        wxString title = _("noname"),
+                 safetitle,
+                 start = wxEmptyString,
+                 contents = wxEmptyString,
+                 index = wxEmptyString,
+                 charset = wxEmptyString;
+
+        fi = fsys.OpenFile(book);
+        if (fi == NULL)
+        {
+            wxLogError(_("Cannot open HTML help book: %s"), book.c_str());
+            return FALSE;
+        }
+        fsys.ChangePathTo(book);
+
+        const wxChar *lineptr;
+        wxChar linebuf[300];
+        wxString tmp;
+        wxHtmlFilterPlainText filter;
+        tmp = filter.ReadFile(*fi);
+        lineptr = tmp.c_str();
+
+        do 
+        {
+            lineptr = ReadLine(lineptr, linebuf, 300);
+            
+            for (wxChar *ch = linebuf; *ch != wxT('\0') && *ch != wxT('='); ch++)
+               *ch = tolower(*ch);
+
+            if (wxStrstr(linebuf, _T("title=")) == linebuf)
+                title = linebuf + wxStrlen(_T("title="));
+            if (wxStrstr(linebuf, _T("default topic=")) == linebuf)
+                start = linebuf + wxStrlen(_T("default topic="));
+            if (wxStrstr(linebuf, _T("index file=")) == linebuf)
+                index = linebuf + wxStrlen(_T("index file="));
+            if (wxStrstr(linebuf, _T("contents file=")) == linebuf)
+                contents = linebuf + wxStrlen(_T("contents file="));
+            if (wxStrstr(linebuf, _T("charset=")) == linebuf)
+                charset = linebuf + wxStrlen(_T("charset="));
+        } while (lineptr != NULL);
+
+        wxFontEncoding enc;
+        if (charset == wxEmptyString) enc = wxFONTENCODING_SYSTEM;
+        else enc = wxFontMapper::Get()->CharsetToEncoding(charset);
+        bool rtval = AddBookParam(*fi, enc,
+                                  title, contents, index, start, fsys.GetPath());
+        delete fi;
+        return rtval;
     }
-    fsys.ChangePathTo(book);
-
-    const wxChar *lineptr;
-    wxChar linebuf[300];
-    wxString tmp;
-    wxHtmlFilterPlainText filter;
-    tmp = filter.ReadFile(*fi);
-    lineptr = tmp.c_str();
-
-    do 
-    {
-        lineptr = ReadLine(lineptr, linebuf, 300);
-        
-        for (wxChar *ch = linebuf; *ch != wxT('\0') && *ch != wxT('='); ch++)
-           *ch = tolower(*ch);
-
-        if (wxStrstr(linebuf, _T("title=")) == linebuf)
-            title = linebuf + wxStrlen(_T("title="));
-        if (wxStrstr(linebuf, _T("default topic=")) == linebuf)
-            start = linebuf + wxStrlen(_T("default topic="));
-        if (wxStrstr(linebuf, _T("index file=")) == linebuf)
-            index = linebuf + wxStrlen(_T("index file="));
-        if (wxStrstr(linebuf, _T("contents file=")) == linebuf)
-            contents = linebuf + wxStrlen(_T("contents file="));
-        if (wxStrstr(linebuf, _T("charset=")) == linebuf)
-            charset = linebuf + wxStrlen(_T("charset="));
-    } while (lineptr != NULL);
-
-    wxFontEncoding enc;
-    if (charset == wxEmptyString) enc = wxFONTENCODING_SYSTEM;
-    else enc = wxFontMapper::Get()->CharsetToEncoding(charset);
-    bool rtval = AddBookParam(*fi, enc,
-                              title, contents, index, start, fsys.GetPath());
-    delete fi;
-    return rtval;
 }
 
 wxString wxHtmlHelpData::FindPageByName(const wxString& x)

@@ -12,7 +12,7 @@
 #ifndef _WX_RADIOBOX_H_
 #define _WX_RADIOBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "radiobox.h"
 #endif
 
@@ -100,6 +100,14 @@ public:
     int GetNumVer() const;
     int GetNumHor() const;
 
+    // compatibility ctor
+#if WXWIN_COMPATIBILITY
+    wxRadioBox(wxWindow *parent, wxFunction func, const char *title,
+            int x = -1, int y = -1, int width = -1, int height = -1,
+            int n = 0, char **choices = NULL,
+            int majorDim = 0, long style = wxRA_HORIZONTAL, const char *name = wxRadioBoxNameStr);
+#endif // WXWIN_COMPATIBILITY
+
 protected:
     // subclass one radio button
     void SubclassRadioButton(WXHWND hWndBtn);
@@ -126,7 +134,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxRadioBox)
-    DECLARE_NO_COPY_CLASS(wxRadioBox)
 };
 
 #endif

@@ -136,7 +136,7 @@ protected:
 
     // is the value in range?
     bool IsValidValue(int val) const
-        { return (val >= 0) && (val < (int) m_notebook->GetPageCount()); }
+        { return (val >= 0) && (val < m_notebook->GetPageCount()); }
 
     // the controls
     // ------------
@@ -397,7 +397,7 @@ void NotebookWidgetsPage::CreateNotebook()
                                 notebook->GetPageImage(n));
         }
 
-        m_sizerNotebook->Detach( notebook );
+        m_sizerNotebook->Remove(notebook);
         delete notebook;
 
         // restore selection
@@ -459,7 +459,7 @@ void NotebookWidgetsPage::OnButtonDeleteAll(wxCommandEvent& WXUNUSED(event))
     m_notebook->DeleteAllPages();
 }
 
-void NotebookWidgetsPage::OnButtonSelectPage(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnButtonSelectPage(wxCommandEvent& event)
 {
     int pos = GetTextValue(m_textSelect);
     wxCHECK_RET( IsValidValue(pos), _T("button should be disabled") );
@@ -521,7 +521,7 @@ void NotebookWidgetsPage::OnUpdateUICurSelectText(wxUpdateUIEvent& event)
     event.SetText( wxString::Format(_T("%d"), m_notebook->GetSelection()) );
 }
 
-void NotebookWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void NotebookWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& event)
 {
     CreateNotebook();
 }

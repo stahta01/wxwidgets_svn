@@ -6,7 +6,7 @@
 // Created:     10/27/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FRAME_H_
@@ -66,7 +66,7 @@ public:
 
     // Toolbar
 #if wxUSE_TOOLBAR
-    virtual wxToolBar* CreateToolBar( long            lStyle = -1
+    virtual wxToolBar* CreateToolBar( long            lStyle = wxNO_BORDER | wxTB_HORIZONTAL | wxTB_FLAT
                                      ,wxWindowID      vId = -1
                                      ,const wxString& rsName = wxToolBarNameStr
                                     );

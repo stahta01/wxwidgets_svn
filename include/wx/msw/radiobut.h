@@ -12,7 +12,7 @@
 #ifndef _WX_RADIOBUT_H_
 #define _WX_RADIOBUT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "radiobut.h"
 #endif
 
@@ -52,6 +52,9 @@ public:
     // implementation only from now on
     virtual bool MSWCommand(WXUINT param, WXWORD id);
     virtual void Command(wxCommandEvent& event);
+    virtual long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+
+    virtual void SetFocus();
 
 protected:
     virtual wxSize DoGetBestSize() const;
@@ -60,11 +63,10 @@ private:
     // common part of all ctors
     void Init();
 
-    // we need to store the state internally as the result of GetValue()
-    // sometimes gets out of sync in WM_COMMAND handler
-    bool m_isChecked;
+    // see the comments in SetFocus()
+    bool m_focusJustSet;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxRadioButton)
+    DECLARE_DYNAMIC_CLASS(wxRadioButton)
 };
 
 #endif

@@ -8,7 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "htmltag.h"
 #endif
 
@@ -66,6 +66,7 @@ bool wxIsCDATAElement(const wxChar *tag)
 wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
 {
     const wxChar *src = source.c_str();
+    int tg, stpos;
     int lng = source.Length();
     wxChar tagBuffer[256];
 
@@ -80,9 +81,8 @@ wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
         {
             if (m_CacheSize % CACHE_INCREMENT == 0)
                 m_Cache = (wxHtmlCacheItem*) realloc(m_Cache, (m_CacheSize + CACHE_INCREMENT) * sizeof(wxHtmlCacheItem));
-            int tg = m_CacheSize++;
-            int stpos = pos++;
-            m_Cache[tg].Key = stpos;
+            tg = m_CacheSize++;
+            m_Cache[tg].Key = stpos = pos++;
 
             int i;
             for ( i = 0;
@@ -131,9 +131,7 @@ wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
                         // see if it matches
                         int match_pos = 0;
                         while (pos < lng && match_pos < tag_len && src[pos] != '>' && src[pos] != '<') {
-                            // cast to wxChar needed to suppress warning in
-                            // Unicode build
-                            if ((wxChar)wxToupper(src[pos]) == tagBuffer[match_pos]) {
+                            if (wxToupper(src[pos]) == tagBuffer[match_pos]) {
                                 ++match_pos;
                             }  
                             else if (src[pos] == wxT(' ') || src[pos] == wxT('\n') ||

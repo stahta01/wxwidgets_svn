@@ -12,13 +12,11 @@
 #ifndef _WX_UNIV_LISTBOX_H_
 #define _WX_UNIV_LISTBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univlistbox.h"
 #endif
 
 #include "wx/scrolwin.h"    // for wxScrollHelper
-#include "wx/dynarray.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // the actions supported by this control
@@ -86,11 +84,11 @@ public:
     virtual void Clear();
     virtual void Delete(int n);
 
-    virtual int GetCount() const { return (int)m_strings->GetCount(); }
-    virtual wxString GetString(int n) const { return (*m_strings)[n]; }
+    virtual int GetCount() const { return (int)m_strings.GetCount(); }
+    virtual wxString GetString(int n) const { return m_strings[n]; }
     virtual void SetString(int n, const wxString& s);
     virtual int FindString(const wxString& s) const
-        { return IsSorted() ? m_stringsSorted->Index(s) : m_strings->Index(s); }
+        { return m_strings.Index(s); }
 
     virtual bool IsSelected(int n) const
         { return m_selections.Index(n) != wxNOT_FOUND; }
@@ -167,8 +165,8 @@ public:
                                long numArg = 0l,
                                const wxString& strArg = wxEmptyString);
 
-    // idle processing
-    virtual void OnInternalIdle();
+    // let wxColourScheme choose the right colours for us
+    virtual bool IsContainerWindow() const { return TRUE; }
 
 protected:
     // geometry
@@ -184,6 +182,7 @@ protected:
     void Init();
 
     // event handlers
+    void OnIdle(wxIdleEvent& event);
     void OnSize(wxSizeEvent& event);
 
     // common part of Clear() and DoSetItems(): clears everything
@@ -222,14 +221,8 @@ protected:
     void UpdateItems();
 
     // the array containing all items (it is sorted if the listbox has
-    // wxLB_SORT style). Note the evil trick: the pointers share the
-    // same location, hence we use m_strings when we don't care if the
-    // array is sorted or not, m_stringsSorted when we do
-    union
-    {
-        wxArrayString* m_strings;
-        wxSortedArrayString* m_stringsSorted;
-    };
+    // wxLB_SORT style)
+    wxArrayString m_strings;
 
     // this array contains the indices of the selected items (for the single
     // selection listboxes only the first element of it is used and contains

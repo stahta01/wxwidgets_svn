@@ -11,7 +11,7 @@
 #ifndef __GTKBITMAPH__
 #define __GTKBITMAPH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -96,10 +96,8 @@ public:
     bool LoadFile( const wxString &name, int type = wxBITMAP_TYPE_XPM );
 
     wxPalette *GetPalette() const;
-    wxPalette *GetColourMap() const { return GetPalette(); };
-
-    static void InitStandardHandlers() { }
-    static void CleanUpHandlers() { }
+    wxPalette *GetColourMap() const
+    { return GetPalette(); };
 
     // implementation
     // --------------
@@ -113,8 +111,6 @@ public:
     GdkPixmap *GetPixmap() const;
     GdkBitmap *GetBitmap() const;
     
-    // Basically, this corresponds to Win32 StretchBlt()
-    wxBitmap Rescale( int clipx, int clipy, int clipwidth, int clipheight, int width, int height );
 protected:
     bool CreateFromXpm(const char **bits);
     bool CreateFromImage(const wxImage& image, int depth);

@@ -9,7 +9,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "automtn.h"
 #endif
 
@@ -92,8 +92,6 @@ public:
 
 public:
     WXIDISPATCH*  m_dispatchPtr;
-
-    DECLARE_NO_COPY_CLASS(wxAutomationObject)
 };
 
 

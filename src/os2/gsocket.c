@@ -3,8 +3,7 @@
  * Name:    gsocket.c
  * Authors: Guilhem Lavaux,
  *          Guillermo Rodriguez Garcia <guille@iies.es> (maintainer)
- * Purpose: GSocket main Unix and OS/2 file
- * Licence: The wxWindows licence
+ * Purpose: GSocket main Unix-style file
  * CVSID:   $Id$
  * -------------------------------------------------------------------------
  */
@@ -17,49 +16,44 @@
 #include "wx/setup.h"
 #endif
 
-#if defined(__VISAGECPP__)
-/* Seems to be needed by Visual Age C++, though I don't see how it manages
-   to not break on including a C++ header into a plain C source file      */
+#ifndef __EMX__
+/* I don't see, why this include is needed, but it seems to be necessary
+   sometimes. For EMX, including C++ headers into plain C source breaks
+   compilation, so don't do it there.                                   */
 #include "wx/defs.h"
-#define BSD_SELECT /* use Berkley Sockets select */
 #endif
 
 #if wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__)
 
+#define BSD_SELECT /* use Berkley Sockets select */
+
 #include <assert.h>
 #include <sys/types.h>
-#ifdef __VISAGECPP__
-#include <string.h>
-#include <sys/time.h>
-#include <types.h>
-#include <netinet/in.h>
-#endif
-#include <netdb.h>
-#include <sys/ioctl.h>
 
-#ifdef __VMS__
-#include <socket.h>
-struct sockaddr_un
-{
-    u_char  sun_len;        /* sockaddr len including null */
-    u_char  sun_family;     /* AF_UNIX */
-    char    sun_path[108];  /* path name (gag) */
-};
-#else
-#include <sys/socket.h>
-#include <sys/un.h>
-#endif
-
-#ifndef __VISAGECPP__
+#ifdef __EMX__
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <errno.h>
-#include <string.h>
 #include <unistd.h>
+#include <sys/un.h>
+#define HAVE_INET_ADDR
+
 #else
+
+#include <string.h>
+
+#include <sys/time.h>
+#include <types.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include <nerrno.h>
-#  if __IBMCPP__ < 400
+
+#endif
+
+#if defined(__VISAGECPP__) && __IBMCPP__ < 400
+
 #include <machine/endian.h>
 #include <socket.h>
 #include <ioctl.h>
@@ -68,15 +62,15 @@ struct sockaddr_un
 
 #define EBADF   SOCEBADF
 
-#    ifdef min
-#    undef min
-#    endif
-#  else
+#else
+
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
 
-#define close(a) soclose(a)
+#ifdef __EMX__
+#define soclose(a) close(a)
+#else
 #define select(a,b,c,d,e) bsdselect(a,b,c,d,e)
 int _System bsdselect(int,
                       struct fd_set *,
@@ -84,46 +78,39 @@ int _System bsdselect(int,
                       struct fd_set *,
                       struct timeval *);
 int _System soclose(int);
-#  endif
 #endif
+#endif
+
 #include <stdio.h>
-#include <stdlib.h>
+#if (defined(__VISAGECPP__) && __IBMCPP__ < 400) || defined(__EMX__)
+#  ifdef min
+#  undef min
+#  endif
+#  include <stdlib.h>
+#endif
 #include <stddef.h>
 #include <ctype.h>
-#ifdef sun
-#  include <sys/filio.h>
-#endif
-#ifdef sgi
-#  include <bstring.h>
-#endif
+#include <stdlib.h>
+
 #include <signal.h>
 
 #ifndef SOCKLEN_T
 
-#ifdef VMS
-#  define SOCKLEN_T unsigned int
+#ifdef __GLIBC__
+#      if __GLIBC__ == 2
+#         define SOCKLEN_T socklen_t
+#      endif
 #else
-#  ifdef __GLIBC__
-#    if __GLIBC__ == 2
-#      define SOCKLEN_T socklen_t
-#    endif
-#  else
-#    define SOCKLEN_T int
-#  endif
+#      define SOCKLEN_T int
 #endif
 
-#endif /* SOCKLEN_T */
+#endif
 
 /*
  * MSW defines this, Unices don't.
  */
 #ifndef INVALID_SOCKET
 #define INVALID_SOCKET -1
-#endif
-
-/* UnixWare reportedly needs this for FIONBIO definition */
-#ifdef __UNIXWARE__
-#include <sys/filio.h>
 #endif
 
 /*
@@ -153,6 +140,16 @@ int _System soclose(int);
 #  include "gsocket.h"
 #endif /* __GSOCKET_STANDALONE__ */
 
+/* redefine some GUI-only functions to do nothing in console mode */
+#if defined(wxUSE_GUI) && !wxUSE_GUI
+#  define _GSocket_GUI_Init(socket) (1)
+#  define _GSocket_GUI_Destroy(socket)
+#  define _GSocket_Enable_Events(socket)
+#  define _GSocket_Disable_Events(socket)
+#  define _GSocket_Install_Callback(socket, event)
+#  define _GSocket_Uninstall_Callback(socket, event)
+#endif /* wxUSE_GUI */
+
 /* debugging helpers */
 #ifdef __GSOCKET_DEBUG__
 #  define GSocket_Debug(args) printf args
@@ -160,60 +157,15 @@ int _System soclose(int);
 #  define GSocket_Debug(args)
 #endif /* __GSOCKET_DEBUG__ */
 
-/* Table of GUI-related functions. We must call them indirectly because
- * of wxBase and GUI separation: */
-
-static struct GSocketGUIFunctionsTable *gs_gui_functions;
-
-#define USE_GUI() (gs_gui_functions != NULL)
-
-/* Define macros to simplify indirection: */
-#define _GSocket_GUI_Init() \
-    if (gs_gui_functions) gs_gui_functions->GUI_Init()
-#define _GSocket_GUI_Cleanup() \
-    if (gs_gui_functions) gs_gui_functions->GUI_Cleanup()
-#define _GSocket_GUI_Init_Socket(socket) \
-    (gs_gui_functions ? gs_gui_functions->GUI_Init_Socket(socket) : 1)
-#define _GSocket_GUI_Destroy_Socket(socket) \
-    if (gs_gui_functions) gs_gui_functions->GUI_Destroy_Socket(socket)
-#define _GSocket_Enable_Events(socket) \
-    if (gs_gui_functions) gs_gui_functions->Enable_Events(socket)
-#define _GSocket_Disable_Events(socket) \
-    if (gs_gui_functions) gs_gui_functions->Disable_Events(socket)
-#define _GSocket_Install_Callback(socket, event) \
-    if (gs_gui_functions) gs_gui_functions->Install_Callback(socket, event)
-#define _GSocket_Uninstall_Callback(socket, event) \
-    if (gs_gui_functions) gs_gui_functions->Uninstall_Callback(socket, event)
-
-static struct GSocketBaseFunctionsTable gs_base_functions =
-{
-    _GSocket_Detected_Read,
-    _GSocket_Detected_Write
-};
-
 /* Global initialisers */
 
-void GSocket_SetGUIFunctions(struct GSocketGUIFunctionsTable *guifunc)
-{
-  gs_gui_functions = guifunc;
-}
-         
 int GSocket_Init(void)
 {
-  if (gs_gui_functions)
-  {
-      if ( !gs_gui_functions->GUI_Init() )
-        return 0;
-  }
   return 1;
 }
 
 void GSocket_Cleanup(void)
 {
-  if (gs_gui_functions)
-  {
-      gs_gui_functions->GUI_Cleanup();
-  }
 }
 
 /* Constructors / Destructors for GSocket */
@@ -245,10 +197,8 @@ GSocket *GSocket_new(void)
                                 /* 10 minutes * 60 sec * 1000 millisec */
   socket->m_establishing        = FALSE;
 
-  socket->m_functions           = &gs_base_functions;
-
   /* Per-socket GUI-specific initialization */
-  success = _GSocket_GUI_Init_Socket(socket);
+  success = _GSocket_GUI_Init(socket);
   if (!success)
   {
     free(socket);
@@ -261,7 +211,7 @@ GSocket *GSocket_new(void)
 void GSocket_close(GSocket *socket)
 {
     _GSocket_Disable_Events(socket);
-    close(socket->m_fd);
+    soclose(socket->m_fd);
     socket->m_fd = INVALID_SOCKET;
 }
 
@@ -274,7 +224,7 @@ void GSocket_destroy(GSocket *socket)
     GSocket_Shutdown(socket);
 
   /* Per-socket GUI-specific cleanup */
-  _GSocket_GUI_Destroy_Socket(socket);
+  _GSocket_GUI_Destroy(socket);
 
   /* Destroy private addresses */
   if (socket->m_local)
@@ -309,6 +259,7 @@ void GSocket_Shutdown(GSocket *socket)
     socket->m_cbacks[evt] = NULL;
 
   socket->m_detected = GSOCK_LOST_FLAG;
+  _GSocket_Disable_Events(socket);
 }
 
 /* Address handling */
@@ -473,11 +424,8 @@ GSocketError GSocket_SetServer(GSocket *sck)
     sck->m_error = GSOCK_IOERR;
     return GSOCK_IOERR;
   }
-#if defined(__EMX__) || defined(__VISAGECPP__)
+
   ioctl(sck->m_fd, FIONBIO, (char*)&arg, sizeof(arg));
-#else
-  ioctl(sck->m_fd, FIONBIO, &arg);
-#endif
   _GSocket_Enable_Events(sck);
 
   /* Bind to the local address,
@@ -581,11 +529,8 @@ GSocket *GSocket_WaitConnection(GSocket *socket)
     socket->m_error = err;
     return NULL;
   }
-#if defined(__EMX__) || defined(__VISAGECPP__)
+
   ioctl(connection->m_fd, FIONBIO, (char*)&arg, sizeof(arg));
-#else
-  ioctl(connection->m_fd, FIONBIO, &arg);
-#endif
   _GSocket_Enable_Events(connection);
 
   return connection;
@@ -653,11 +598,8 @@ GSocketError GSocket_Connect(GSocket *sck, GSocketStream stream)
     sck->m_error = GSOCK_IOERR;
     return GSOCK_IOERR;
   }
-#if defined(__EMX__) || defined(__VISAGECPP__)
+
   ioctl(sck->m_fd, FIONBIO, (char*)&arg, sizeof(arg));
-#else
-  ioctl(sck->m_fd, FIONBIO, &arg);
-#endif
   _GSocket_Enable_Events(sck);
 
   /* Connect it to the peer address, with a timeout (see below) */
@@ -760,11 +702,8 @@ GSocketError GSocket_SetNonOriented(GSocket *sck)
     sck->m_error = GSOCK_IOERR;
     return GSOCK_IOERR;
   }
-#if defined(__EMX__) || defined(__VISAGECPP__)
+
   ioctl(sck->m_fd, FIONBIO, (char*)&arg, sizeof(arg));
-#else
-  ioctl(sck->m_fd, FIONBIO, &arg);
-#endif
   _GSocket_Enable_Events(sck);
 
   /* Bind to the local address,
@@ -888,126 +827,123 @@ int GSocket_Write(GSocket *socket, const char *buffer, int size)
  */
 GSocketEventFlags GSocket_Select(GSocket *socket, GSocketEventFlags flags)
 {
-  if (!USE_GUI())
+#if defined(wxUSE_GUI) && !wxUSE_GUI
+
+  GSocketEventFlags result = 0;
+  fd_set readfds;
+  fd_set writefds;
+  fd_set exceptfds;
+  struct timeval tv;
+
+  /* Do not use a static struct, Linux can garble it */
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+
+  assert(socket != NULL);
+
+  FD_ZERO(&readfds);
+  FD_ZERO(&writefds);
+  FD_ZERO(&exceptfds);
+  FD_SET(socket->m_fd, &readfds);
+  FD_SET(socket->m_fd, &writefds);
+  FD_SET(socket->m_fd, &exceptfds);
+
+  /* Check 'sticky' CONNECTION flag first */
+  result |= (GSOCK_CONNECTION_FLAG & socket->m_detected);
+
+  /* If we have already detected a LOST event, then don't try
+   * to do any further processing.
+   */
+  if ((socket->m_detected & GSOCK_LOST_FLAG) != 0)
   {
+    socket->m_establishing = FALSE;
 
-    GSocketEventFlags result = 0;
-    fd_set readfds;
-    fd_set writefds;
-    fd_set exceptfds;
-    struct timeval tv;
+    return (GSOCK_LOST_FLAG & flags);
+  }
 
-    /* Do not use a static struct, Linux can garble it */
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-
-    assert(socket != NULL);
-
-    FD_ZERO(&readfds);
-    FD_ZERO(&writefds);
-    FD_ZERO(&exceptfds);
-    FD_SET(socket->m_fd, &readfds);
-    FD_SET(socket->m_fd, &writefds);
-    FD_SET(socket->m_fd, &exceptfds);
-
-    /* Check 'sticky' CONNECTION flag first */
-    result |= (GSOCK_CONNECTION_FLAG & socket->m_detected);
-
-    /* If we have already detected a LOST event, then don't try
-     * to do any further processing.
-     */
-    if ((socket->m_detected & GSOCK_LOST_FLAG) != 0)
-    {
-      socket->m_establishing = FALSE;
-
-      return (GSOCK_LOST_FLAG & flags);
-    }
-
-    /* Try select now */
-    if (select(socket->m_fd + 1, &readfds, &writefds, &exceptfds, &tv) <= 0)
-    {
-      /* What to do here? */
-      return (result & flags);
-    }
-
-    /* Check for readability */
-    if (FD_ISSET(socket->m_fd, &readfds))
-    {
-      char c;
-
-      if (recv(socket->m_fd, &c, 1, MSG_PEEK) > 0)
-      {
-        result |= GSOCK_INPUT_FLAG;
-      }
-      else
-      {
-        if (socket->m_server && socket->m_stream)
-        {
-          result |= GSOCK_CONNECTION_FLAG;
-          socket->m_detected |= GSOCK_CONNECTION_FLAG;
-        }
-        else
-        {
-          socket->m_detected = GSOCK_LOST_FLAG;
-          socket->m_establishing = FALSE;
-      
-          /* LOST event: Abort any further processing */
-          return (GSOCK_LOST_FLAG & flags);
-        }
-      }
-    }
-
-    /* Check for writability */
-    if (FD_ISSET(socket->m_fd, &writefds))
-    {
-      if (socket->m_establishing && !socket->m_server)
-      {
-        int error;
-        SOCKLEN_T len = sizeof(error);
-
-        socket->m_establishing = FALSE;
-
-        getsockopt(socket->m_fd, SOL_SOCKET, SO_ERROR, (void*)&error, &len);
-
-        if (error)
-        {
-          socket->m_detected = GSOCK_LOST_FLAG;
-
-          /* LOST event: Abort any further processing */
-          return (GSOCK_LOST_FLAG & flags);
-        }
-        else
-        {
-          result |= GSOCK_CONNECTION_FLAG;
-          socket->m_detected |= GSOCK_CONNECTION_FLAG;
-        }
-      }
-      else
-      {
-        result |= GSOCK_OUTPUT_FLAG;
-      }
-    }
-
-    /* Check for exceptions and errors (is this useful in Unices?) */
-    if (FD_ISSET(socket->m_fd, &exceptfds))
-    {
-      socket->m_establishing = FALSE;
-      socket->m_detected = GSOCK_LOST_FLAG;
-
-      /* LOST event: Abort any further processing */
-      return (GSOCK_LOST_FLAG & flags);
-    }
-
+  /* Try select now */
+  if (select(socket->m_fd + 1, &readfds, &writefds, &exceptfds, &tv) <= 0)
+  {
+    /* What to do here? */
     return (result & flags);
-
   }
-  else
+
+  /* Check for readability */
+  if (FD_ISSET(socket->m_fd, &readfds))
   {
+    char c;
 
-    assert(socket != NULL);
-    return flags & socket->m_detected;
-
+    if (recv(socket->m_fd, &c, 1, MSG_PEEK) > 0)
+    {
+      result |= GSOCK_INPUT_FLAG;
+    }
+    else
+    {
+      if (socket->m_server && socket->m_stream)
+      {
+        result |= GSOCK_CONNECTION_FLAG;
+        socket->m_detected |= GSOCK_CONNECTION_FLAG;
+      }
+      else
+      {
+        socket->m_detected = GSOCK_LOST_FLAG;
+        socket->m_establishing = FALSE;
+    
+        /* LOST event: Abort any further processing */
+        return (GSOCK_LOST_FLAG & flags);
+      }
+    }
   }
+
+  /* Check for writability */
+  if (FD_ISSET(socket->m_fd, &writefds))
+  {
+    if (socket->m_establishing && !socket->m_server)
+    {
+      int error;
+      SOCKLEN_T len = sizeof(error);
+
+      socket->m_establishing = FALSE;
+
+      getsockopt(socket->m_fd, SOL_SOCKET, SO_ERROR, (void*)&error, &len);
+
+      if (error)
+      {
+        socket->m_detected = GSOCK_LOST_FLAG;
+
+        /* LOST event: Abort any further processing */
+        return (GSOCK_LOST_FLAG & flags);
+      }
+      else
+      {
+        result |= GSOCK_CONNECTION_FLAG;
+        socket->m_detected |= GSOCK_CONNECTION_FLAG;
+      }
+    }
+    else
+    {
+      result |= GSOCK_OUTPUT_FLAG;
+    }
+  }
+
+  /* Check for exceptions and errors (is this useful in Unices?) */
+  if (FD_ISSET(socket->m_fd, &exceptfds))
+  {
+    socket->m_establishing = FALSE;
+    socket->m_detected = GSOCK_LOST_FLAG;
+
+    /* LOST event: Abort any further processing */
+    return (GSOCK_LOST_FLAG & flags);
+  }
+
+  return (result & flags);
+
+#else 
+
+  assert(socket != NULL);
+  return flags & socket->m_detected;
+
+#endif /* !wxUSE_GUI */
 }
 
 /* Flags */
@@ -1163,10 +1099,10 @@ GSocketError _GSocket_Input_Timeout(GSocket *socket)
     if (ret == -1)
     {
       GSocket_Debug(( "GSocket_Input_Timeout, select returned -1\n" ));
-      if (errno == EBADF) { GSocket_Debug(( "Invalid file descriptor\n" )); }
-      if (errno == EINTR) { GSocket_Debug(( "A non blocked signal was caught\n" )); }
-      if (errno == EINVAL) { GSocket_Debug(( "The highest number descriptor is negative\n" )); }
-      if (errno == ENOMEM) { GSocket_Debug(( "Not enough memory\n" )); }
+      if (errno == EBADF) GSocket_Debug(( "Invalid file descriptor\n" ));
+      if (errno == EINTR) GSocket_Debug(( "A non blocked signal was caught\n" ));
+      if (errno == EINVAL) GSocket_Debug(( "The highest number descriptor is negative\n" ));
+      if (errno == ENOMEM) GSocket_Debug(( "Not enough memory\n" ));
       socket->m_error = GSOCK_TIMEDOUT;
       return GSOCK_TIMEDOUT;
     }
@@ -1204,19 +1140,17 @@ GSocketError _GSocket_Output_Timeout(GSocket *socket)
     if (ret == -1)
     {
       GSocket_Debug(( "GSocket_Output_Timeout, select returned -1\n" ));
-      if (errno == EBADF) { GSocket_Debug(( "Invalid file descriptor\n" )); }
-      if (errno == EINTR) { GSocket_Debug(( "A non blocked signal was caught\n" )); }
-      if (errno == EINVAL) { GSocket_Debug(( "The highest number descriptor is negative\n" )); }
-      if (errno == ENOMEM) { GSocket_Debug(( "Not enough memory\n" )); }
+      if (errno == EBADF) GSocket_Debug(( "Invalid file descriptor\n" ));
+      if (errno == EINTR) GSocket_Debug(( "A non blocked signal was caught\n" ));
+      if (errno == EINVAL) GSocket_Debug(( "The highest number descriptor is negative\n" ));
+      if (errno == ENOMEM) GSocket_Debug(( "Not enough memory\n" ));
       socket->m_error = GSOCK_TIMEDOUT;
       return GSOCK_TIMEDOUT;
     }
-    if ( ! FD_ISSET(socket->m_fd, &writefds) ) {
-        GSocket_Debug(( "GSocket_Output_Timeout is buggy!\n" ));
-    }
-    else {
-        GSocket_Debug(( "GSocket_Output_Timeout seems correct\n" ));
-    }
+    if ( ! FD_ISSET(socket->m_fd, &writefds) )
+      GSocket_Debug(( "GSocket_Output_Timeout is buggy!\n" ));
+    else
+      GSocket_Debug(( "GSocket_Output_Timeout seems correct\n" ));
   }
   else
   {
@@ -1271,14 +1205,13 @@ int _GSocket_Send_Stream(GSocket *socket, const char *buffer, int size)
 {
   int ret;
 
-#ifndef __VISAGECPP__
+#ifdef __EMX__
   MASK_SIGNAL();
   ret = send(socket->m_fd, buffer, size, 0);
   UNMASK_SIGNAL();
 #else
   ret = send(socket->m_fd, (char *)buffer, size, 0);
 #endif
-
   return ret;
 }
 
@@ -1301,7 +1234,7 @@ int _GSocket_Send_Dgram(GSocket *socket, const char *buffer, int size)
     return -1;
   }
 
-#ifndef __VISAGECPP__
+#ifdef __EMX__
   MASK_SIGNAL();
   ret = sendto(socket->m_fd, buffer, size, 0, addr, len);
   UNMASK_SIGNAL();
@@ -1477,7 +1410,7 @@ void GAddress_destroy(GAddress *address)
   if (address->m_addr)
     free(address->m_addr);
 
-  free(address);
+/*    free(address); */
 }
 
 void GAddress_SetFamily(GAddress *address, GAddressType type)
@@ -1595,7 +1528,8 @@ GSocketError GAddress_INET_SetHostName(GAddress *address, const char *hostname)
   if (inet_aton(hostname, addr) == 0)
   {
 #elif defined(HAVE_INET_ADDR)
-  if ( (addr->s_addr = inet_addr(hostname)) == -1 )
+  addr->s_addr = inet_addr(hostname);
+  if ( addr->s_addr == -1 )
   {
 #else
   /* Use gethostbyname by default */
@@ -1745,7 +1679,7 @@ unsigned short GAddress_INET_GetPort(GAddress *address)
  * -------------------------------------------------------------------------
  */
 
-#ifndef __VISAGECPP__
+#ifdef __EMX__
 GSocketError _GAddress_Init_UNIX(GAddress *address)
 {
   address->m_len  = sizeof(struct sockaddr_un);
@@ -1794,6 +1728,8 @@ GSocketError GAddress_UNIX_GetPath(GAddress *address, char *path, size_t sbuf)
 
   return GSOCK_NOERROR;
 }
-#endif  /* !defined(__VISAGECPP__) */
-#endif  /* wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__) */
+#endif
+  /* __EMX__ */
+#endif
+  /* wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__) */
 

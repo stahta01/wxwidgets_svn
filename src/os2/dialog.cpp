@@ -24,14 +24,14 @@
 
 #include "wx/os2/private.h"
 #include "wx/log.h"
-#include "wx/evtloop.h"
-#include "wx/ptr_scpd.h"
 
 #define wxDIALOG_DEFAULT_X 300
 #define wxDIALOG_DEFAULT_Y 300
 
 #define wxDIALOG_DEFAULT_WIDTH 500
 #define wxDIALOG_DEFAULT_HEIGHT 500
+
+wxWindowList wxModalDialogs;
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
 
@@ -44,47 +44,11 @@ BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
     EVT_CLOSE(wxDialog::OnCloseWindow)
 END_EVENT_TABLE()
 
-// ----------------------------------------------------------------------------
-// wxDialogModalData
-// ----------------------------------------------------------------------------
-
-// this is simply a container for any data we need to implement modality which
-// allows us to avoid changing wxDialog each time the implementation changes
-class wxDialogModalData
-{
-public:
-    wxDialogModalData(wxDialog *dialog) : m_evtLoop(dialog) { }
-
-    void RunLoop()
-    {
-        m_evtLoop.Run();
-    }
-
-    void ExitLoop()
-    {
-        m_evtLoop.Exit();
-    }
-
-private:
-    wxModalEventLoop m_evtLoop;
-};
-
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// wxDialog construction
-// ----------------------------------------------------------------------------
-
 void wxDialog::Init()
 {
     m_pOldFocus = (wxWindow *)NULL;
     m_isShown = FALSE;
     m_pWindowDisabler = (wxWindowDisabler *)NULL;
-    m_modalData = NULL;
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 } // end of wxDialog::Init
 
@@ -205,7 +169,7 @@ bool wxDialog::IsModal() const
 
 bool wxDialog::IsModalShowing() const
 {
-    return m_modalData != NULL; // const_cast
+    return wxModalDialogs.Find((wxDialog *)this) != NULL; // const_cast
 } // end of wxDialog::IsModalShowing
 
 void wxDialog::DoShowModal()
@@ -217,6 +181,7 @@ void wxDialog::DoShowModal()
     wxCHECK_RET( !IsModalShowing(), _T("DoShowModal() called twice") );
     wxCHECK_RET( IsModal(), _T("can't DoShowModal() modeless dialog") );
 
+    wxModalDialogs.Append(this);
     if (pOldFocus)
         hWndOldFocus = (HWND)pOldFocus->GetHWND();
 
@@ -236,6 +201,12 @@ void wxDialog::DoShowModal()
     wxASSERT_MSG(!m_pWindowDisabler, _T("disabling windows twice?"));
 
     //
+    // Disables other app windows and window proc message processing
+    // until WinDismissDlg called
+    //
+    ::WinProcessDlg((HWND)GetHwnd());
+
+    //
     // Before entering the modal loop, reset the "is in OnIdle()" flag (see
     // comment in app.cpp)
     //
@@ -244,16 +215,25 @@ void wxDialog::DoShowModal()
 
     gbInOnIdle = FALSE;
 
-    // enter the modal loop
+    //
+    // Enter the modal loop
+    //
+    while ( IsModalShowing() )
     {
-        wxDialogModalDataTiedPtr modalData(&m_modalData,
-                                           new wxDialogModalData(this));
-        modalData->RunLoop();
+#if wxUSE_THREADS
+        wxMutexGuiLeaveOrEnter();
+#endif // wxUSE_THREADS
+
+        while ( !wxTheApp->Pending() && wxTheApp->ProcessIdle() )
+            ;
+
+        // a message came or no more idle processing to do
+        wxTheApp->DoMessage();
     }
     gbInOnIdle = bWasInOnIdle;
 
     //
-    // and restore focus
+    // Snd restore focus
     // Note that this code MUST NOT access the dialog object's data
     // in case the object has been deleted (which will be the case
     // for a modal dialog that has been destroyed before calling EndModal).
@@ -285,8 +265,6 @@ bool wxDialog::Show(
             delete m_pWindowDisabler;
             m_pWindowDisabler = NULL;
         }
-        if ( m_modalData )
-            m_modalData->ExitLoop();
     }
 
     //
@@ -302,14 +280,6 @@ bool wxDialog::Show(
 
     if (bShow)
     {
-        // dialogs don't get WM_SIZE message after creation unlike most (all?)
-        // other windows and so could start their life non laid out correctly
-        // if we didn't call Layout() from here
-        //
-        // NB: normally we should call it just the first time but doing it
-        //     every time is simpler than keeping a flag
-//         Layout();
-
         //
         // Usually will result in TransferDataToWindow() being called
         //
@@ -340,6 +310,14 @@ bool wxDialog::Show(
             }
             DoShowModal();
         }
+        else // end of modal dialog
+        {
+            //
+            // This will cause IsModalShowing() return FALSE and our local
+            // message loop will terminate
+            //
+            wxModalDialogs.DeleteObject(this);
+        }
     }
     return TRUE;
 } // end of wxDialog::Show
@@ -363,6 +341,7 @@ void wxDialog::EndModal(
 {
     SetReturnCode(nRetCode);
     Show(FALSE);
+    ::WinDismissDlg((HWND)GetHwnd(), nRetCode);
 } // end of wxDialog::EndModal
 
 // ----------------------------------------------------------------------------

@@ -16,12 +16,8 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "notebook.h"
-#endif
-
-#ifdef __VMS
-#pragma message disable unscomzer
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
@@ -37,7 +33,6 @@
 #include  "wx/generic/imaglist.h"
 #include  "wx/notebook.h"
 #include  "wx/dcclient.h"
-#include  "wx/generic/tabg.h"
 
 // ----------------------------------------------------------------------------
 // macros
@@ -60,6 +55,7 @@ BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_MOUSE_EVENTS(wxNotebook::OnMouseEvent)
     EVT_SET_FOCUS(wxNotebook::OnSetFocus)
     EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
+//    EVT_IDLE(wxNotebook::OnIdle)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxControl)
@@ -68,27 +64,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxCommandEvent)
 // ============================================================================
 // implementation
 // ============================================================================
-
-// ============================================================================
-// Private class
-// ============================================================================
-
-// This reuses wxTabView to draw the tabs.
-class WXDLLEXPORT wxNotebookTabView: public wxTabView
-{
-DECLARE_DYNAMIC_CLASS(wxNotebookTabView)
-public:
-  wxNotebookTabView(wxNotebook* notebook, long style = wxTAB_STYLE_DRAW_BOX | wxTAB_STYLE_COLOUR_INTERIOR);
-  ~wxNotebookTabView(void);
-
-  // Called when a tab is activated
-  virtual void OnTabActivate(int activateId, int deactivateId);
-  // Allows vetoing
-  virtual bool OnTabPreActivate(int activateId, int deactivateId);
-
-protected:
-   wxNotebook*      m_notebook;
-};
 
 // ----------------------------------------------------------------------------
 // wxNotebook construction
@@ -133,7 +108,8 @@ bool wxNotebook::Create(wxWindow *parent,
 
     m_windowId = id == -1 ? NewControlId() : id;
 
-    if (!wxControl::Create(parent, id, pos, size, style|wxNO_BORDER, wxDefaultValidator, name))
+    // It's like a normal window...
+    if (!wxWindow::Create(parent, id, pos, size, style|wxNO_BORDER, name))
         return FALSE;
 
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
@@ -158,8 +134,11 @@ int wxNotebook::GetRowCount() const
     return 0;
 }
 
-int wxNotebook::SetSelection(size_t nPage)
+int wxNotebook::SetSelection(int nPage)
 {
+    if (nPage == -1)
+      return 0;
+
     wxASSERT( IS_VALID_PAGE(nPage) );
 
 #if defined (__WIN16__)
@@ -185,7 +164,7 @@ void wxNotebook::AdvanceSelection(bool bForward)
 }
 #endif
 
-bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
+bool wxNotebook::SetPageText(int nPage, const wxString& strText)
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 #if defined (__WIN16__)
@@ -204,7 +183,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
     return FALSE;
 }
 
-wxString wxNotebook::GetPageText(size_t nPage) const
+wxString wxNotebook::GetPageText(int nPage) const
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 
@@ -219,7 +198,7 @@ wxString wxNotebook::GetPageText(size_t nPage) const
 #endif
 }
 
-int wxNotebook::GetPageImage(size_t nPage) const
+int wxNotebook::GetPageImage(int nPage) const
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 
@@ -227,7 +206,7 @@ int wxNotebook::GetPageImage(size_t nPage) const
     return 0;
 }
 
-bool wxNotebook::SetPageImage(size_t nPage, int nImage)
+bool wxNotebook::SetPageImage(int nPage, int nImage)
 {
     wxASSERT( IS_VALID_PAGE(nPage) );
 
@@ -258,7 +237,7 @@ void wxNotebook::SetTabSize(const wxSize& sz)
 // ----------------------------------------------------------------------------
 
 // remove one page from the notebook and delete it
-bool wxNotebook::DeletePage(size_t nPage)
+bool wxNotebook::DeletePage(int nPage)
 {
     wxCHECK( IS_VALID_PAGE(nPage), FALSE );
 
@@ -309,13 +288,8 @@ bool wxNotebook::DeletePage(wxNotebookPage* page)
         return FALSE;
 }
 
-bool wxNotebook::RemovePage(size_t nPage)
-{
-    return DoRemovePage(nPage) != NULL;
-}
-
 // remove one page from the notebook
-wxWindow* wxNotebook::DoRemovePage(size_t nPage)
+bool wxNotebook::RemovePage(int nPage)
 {
     wxCHECK( IS_VALID_PAGE(nPage), FALSE );
 
@@ -340,25 +314,25 @@ wxWindow* wxNotebook::DoRemovePage(size_t nPage)
     {
       // Only change the selection if the page we
       // deleted was the selection.
-      if (nPage == (size_t)m_nSelection)
+      if (nPage == m_nSelection)
       {
          m_nSelection = -1;
          // Select the first tab. Generates a ChangePage.
-         m_tabView->SetTabSelection(0, TRUE);
+         m_tabView->SetTabSelection((int) (long) GetPage(0), TRUE);
       }
       else
       {
 	// We must adjust which tab we think is selected.
         // If greater than the page we deleted, it must be moved down
         // a notch.
-        if (size_t(m_nSelection) > nPage)
+        if (m_nSelection > nPage)
           m_nSelection -- ;
       }
     }
 
     RefreshLayout(FALSE);
 
-    return pPage;
+    return TRUE;
 }
 
 bool wxNotebook::RemovePage(wxNotebookPage* page)
@@ -373,8 +347,8 @@ bool wxNotebook::RemovePage(wxNotebookPage* page)
 // Find the position of the wxNotebookPage, -1 if not found.
 int wxNotebook::FindPagePosition(wxNotebookPage* page) const
 {
-    size_t nPageCount = GetPageCount();
-    size_t nPage;
+    int nPageCount = GetPageCount();
+    int nPage;
     for ( nPage = 0; nPage < nPageCount; nPage++ )
         if (m_pages[nPage] == page)
             return nPage;
@@ -386,8 +360,8 @@ bool wxNotebook::DeleteAllPages()
 {
     m_tabView->ClearTabs(TRUE);
 
-    size_t nPageCount = GetPageCount();
-    size_t nPage;
+    int nPageCount = GetPageCount();
+    int nPage;
     for ( nPage = 0; nPage < nPageCount; nPage++ )
         delete m_pages[nPage];
 
@@ -397,7 +371,7 @@ bool wxNotebook::DeleteAllPages()
 }
 
 // same as AddPage() but does it at given position
-bool wxNotebook::InsertPage(size_t nPage,
+bool wxNotebook::InsertPage(int nPage,
                             wxNotebookPage *pPage,
                             const wxString& strText,
                             bool bSelect,
@@ -461,11 +435,8 @@ void wxNotebook::OnSize(wxSizeEvent& event)
 // This was supposed to cure the non-display of the notebook
 // until the user resizes the window.
 // What's going on?
-void wxNotebook::OnInternalIdle()
+void wxNotebook::OnIdle(wxIdleEvent& event)
 {
-    wxWindow::OnInternalIdle();
-
-#if 0    
     static bool s_bFirstTime = TRUE;
     if ( s_bFirstTime ) {
       /*
@@ -485,7 +456,7 @@ void wxNotebook::OnInternalIdle()
       */
       s_bFirstTime = FALSE;
     }
-#endif
+    event.Skip();
 }
 
 // Implementation: calculate the layout of the view rect
@@ -528,12 +499,12 @@ bool wxNotebook::RefreshLayout(bool force)
 
         // fit the notebook page to the tab control's display area
 
-        size_t nCount = m_pages.Count();
-        for ( size_t nPage = 0; nPage < nCount; nPage++ ) {
+        unsigned int nCount = m_pages.Count();
+        for ( unsigned int nPage = 0; nPage < nCount; nPage++ ) {
             wxNotebookPage *pPage = m_pages[nPage];
-            wxRect clientRect = GetAvailableClientSize();
             if (pPage->IsShown())
             {
+                wxRect clientRect = GetAvailableClientSize();
                 pPage->SetSize(clientRect.x, clientRect.y, clientRect.width, clientRect.height);
                 if ( pPage->GetAutoLayout() )
                    pPage->Layout();

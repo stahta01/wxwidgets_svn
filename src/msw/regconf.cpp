@@ -6,10 +6,10 @@
 // Created:     27.04.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "regconf.h"
 #endif
 
@@ -124,7 +124,7 @@ wxRegConfig::wxRegConfig(const wxString& appName, const wxString& vendorName,
   m_keyLocal.ReserveMemoryForName(MEMORY_PREALLOC);
 
   m_keyLocalRoot.SetName(wxRegKey::HKCU, SOFTWARE_KEY + str);
-  m_keyLocal.SetName(m_keyLocalRoot, wxEmptyString);
+  m_keyLocal.SetName(m_keyLocalRoot, _T(""));
 
   if ( bDoUseGlobal )
   {
@@ -134,7 +134,7 @@ wxRegConfig::wxRegConfig(const wxString& appName, const wxString& vendorName,
     m_keyGlobal.ReserveMemoryForName(MEMORY_PREALLOC);
 
     m_keyGlobalRoot.SetName(wxRegKey::HKLM, SOFTWARE_KEY + str);
-    m_keyGlobal.SetName(m_keyGlobalRoot, wxEmptyString);
+    m_keyGlobal.SetName(m_keyGlobalRoot, _T(""));
   }
 
   // Create() will Open() if key already exists
@@ -245,8 +245,7 @@ void wxRegConfig::SetPath(const wxString& strPath)
         size_t len = strFullPath.length();
         const wxChar *end = src + len;
 
-        wxStringBufferLength buf(m_strPath, len);
-        wxChar *dst = buf;
+        wxChar *dst = m_strPath.GetWriteBuf(len);
         wxChar *start = dst;
 
         for ( ; src < end; src++, dst++ )
@@ -338,7 +337,8 @@ void wxRegConfig::SetPath(const wxString& strPath)
         }
 
         *dst = _T('\0');
-        buf.SetLength(dst - start);
+
+        m_strPath.UngetWriteBuf(dst - start);
     }
 
 #ifdef WX_DEBUG_SET_PATH
@@ -355,8 +355,7 @@ void wxRegConfig::SetPath(const wxString& strPath)
         size_t len = m_strPath.length();
 
         const wxChar *src = m_strPath.c_str();
-        wxStringBufferLength buf(strRegPath, len);
-        wxChar *dst = buf;
+        wxChar *dst = strRegPath.GetWriteBuf(len);
 
         const wxChar *end = src + len;
         for ( ; src < end; src++, dst++ )
@@ -367,7 +366,7 @@ void wxRegConfig::SetPath(const wxString& strPath)
                 *dst = *src;
         }
 
-        buf.SetLength(len);
+        strRegPath.UngetWriteBuf(len);
     }
 
     // this is not needed any longer as we don't create keys unnecessarily any
@@ -386,14 +385,13 @@ void wxRegConfig::SetPath(const wxString& strPath)
 
     // change current key(s)
     m_keyLocal.SetName(m_keyLocalRoot, strRegPath);
+    m_keyGlobal.SetName(m_keyGlobalRoot, strRegPath);
 
-    if ( GetStyle() & wxCONFIG_USE_GLOBAL_FILE )
-    {
-      m_keyGlobal.SetName(m_keyGlobalRoot, strRegPath);
+    // don't create it right now, wait until it is accessed
+    //m_keyLocal.Create();
 
-      wxLogNull nolog;
-      m_keyGlobal.Open();
-    }
+    wxLogNull nolog;
+    m_keyGlobal.Open();
 }
 
 // ----------------------------------------------------------------------------

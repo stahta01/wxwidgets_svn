@@ -6,13 +6,13 @@
 // Created:     24/06/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PROCESSH__
 #define _WX_PROCESSH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "process.h"
 #endif
 
@@ -39,7 +39,7 @@ enum
 // function will be called when the process terminates.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxProcess : public wxEvtHandler
+class WXDLLEXPORT wxProcess : public wxEvtHandler
 {
 public:
     // kill the process with the given PID
@@ -128,7 +128,6 @@ protected:
     bool m_redirect;
 
     DECLARE_DYNAMIC_CLASS(wxProcess)
-    DECLARE_NO_COPY_CLASS(wxProcess)
 };
 
 // ----------------------------------------------------------------------------
@@ -136,10 +135,10 @@ protected:
 // ----------------------------------------------------------------------------
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_END_PROCESS, 440)
+    DECLARE_EVENT_TYPE(wxEVT_END_PROCESS, 440)
 END_DECLARE_EVENT_TYPES()
 
-class WXDLLIMPEXP_BASE wxProcessEvent : public wxEvent
+class WXDLLEXPORT wxProcessEvent : public wxEvent
 {
 public:
     wxProcessEvent(int id = 0, int pid = 0, int exitcode = 0) : wxEvent(id)
@@ -163,7 +162,7 @@ public:
     int m_pid,
         m_exitcode;
 
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxProcessEvent)
+    DECLARE_DYNAMIC_CLASS(wxProcessEvent)
 };
 
 typedef void (wxEvtHandler::*wxProcessEventFunction)(wxProcessEvent&);

@@ -15,9 +15,10 @@ look more like the native control under MacOS X.
 \begin{twocollist}\itemsep=0pt
 \twocolitem{\windowstyle{wxSP\_3D}}{Draws a 3D effect border and sash.}
 \twocolitem{\windowstyle{wxSP\_3DSASH}}{Draws a 3D effect sash.}
-\twocolitem{\windowstyle{wxSP\_3DBORDER}}{Synonym for wxSP\_BORDER.}
-\twocolitem{\windowstyle{wxSP\_BORDER}}{Draws a standard border.}
-\twocolitem{\windowstyle{wxSP\_NOBORDER}}{No border (default).}
+\twocolitem{\windowstyle{wxSP\_3DBORDER}}{Draws a 3D effect border.}
+\twocolitem{\windowstyle{wxSP\_FULLSASH}}{Draws the ends of the sash (so the window can be used without a border).}
+\twocolitem{\windowstyle{wxSP\_BORDER}}{Draws a thin black border around the window.}
+\twocolitem{\windowstyle{wxSP\_NOBORDER}}{No border, and a black sash.}
 \twocolitem{\windowstyle{wxSP\_PERMIT\_UNSPLIT}}{Always allow to
 unsplit, even with the minimum pane size other than zero.}
 \twocolitem{\windowstyle{wxSP\_LIVE\_UPDATE}}{Don't draw XOR line but resize the child windows immediately.}
@@ -189,7 +190,7 @@ This should be called if you wish to initially view only a single pane in the sp
 
 \constfunc{bool}{IsSplit}{\void}
 
-Returns true if the window is split, false otherwise.
+Returns TRUE if the window is split, FALSE otherwise.
 
 \membersection{wxSplitterWindow::OnDoubleClickSash}\label{wxsplitterwindowondoubleclicksash}
 
@@ -234,7 +235,7 @@ may wish to delete the window.
 \func{virtual bool}{OnSashPositionChange}{\param{int }{newSashPosition}}
 
 Application-overridable function called when the sash position is changed by 
-user. It may return false to prevent the change or true to allow it.
+user. It may return FALSE to prevent the change or TRUE to allow it.
 
 \wxheading{Parameters}
 
@@ -257,8 +258,8 @@ windows or only one.
 
 Both parameters should be non-NULL and {\it winOld} must specify one of the
 windows managed by the splitter. If the parameters are incorrect or the window
-couldn't be replaced, false is returned. Otherwise the function will return
-true, but please notice that it will not delete the replaced window and you
+couldn't be replaced, FALSE is returned. Otherwise the function will return
+TRUE, but please notice that it will not delete the replaced window and you
 may wish to do it yourself.
 
 \wxheading{See also}
@@ -273,7 +274,7 @@ may wish to do it yourself.
 
 \membersection{wxSplitterWindow::SetSashPosition}\label{wxsplitterwindowsetsashposition}
 
-\func{void}{SetSashPosition}{\param{int }{position}, \param{const bool}{ redraw = true}}
+\func{void}{SetSashPosition}{\param{int }{position}, \param{const bool}{ redraw = TRUE}}
 
 Sets the sash position.
 
@@ -281,7 +282,7 @@ Sets the sash position.
 
 \docparam{position}{The sash position in pixels.}
 
-\docparam{redraw}{If true, resizes the panes and redraws the sash and border.}
+\docparam{redraw}{If TRUE, resizes the panes and redraws the sash and border.}
 
 \wxheading{Remarks}
 
@@ -352,7 +353,7 @@ to choose the default position (half of the total window height).}
 
 \wxheading{Return value}
 
-true if successful, false otherwise (the window was already split).
+TRUE if successful, FALSE otherwise (the window was already split).
 
 \wxheading{Remarks}
 
@@ -385,7 +386,7 @@ to choose the default position (half of the total window width).}
 
 \wxheading{Return value}
 
-true if successful, false otherwise (the window was already split).
+TRUE if successful, FALSE otherwise (the window was already split).
 
 \wxheading{Remarks}
 
@@ -409,7 +410,7 @@ Unsplits the window.
 
 \wxheading{Return value}
 
-true if successful, false otherwise (the window was not split).
+TRUE if successful, FALSE otherwise (the window was not split).
 
 \wxheading{Remarks}
 

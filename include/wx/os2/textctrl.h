@@ -12,8 +12,6 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
-typedef int (wxCALLBACK *wxTreeCtrlCompare)(long lItem1, long lItem2, long lSortData);
-
 class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
 {
 public:
@@ -74,7 +72,6 @@ public:
 
     virtual bool LoadFile(const wxString& rsFile);
 
-    virtual void MarkDirty();
     virtual void DiscardEdits(void);
 
     virtual void WriteText(const wxString& rsText);

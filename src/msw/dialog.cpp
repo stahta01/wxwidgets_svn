@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dialog.h"
 #endif
 
@@ -40,8 +40,6 @@
 
 #include "wx/msw/private.h"
 #include "wx/log.h"
-#include "wx/evtloop.h"
-#include "wx/ptr_scpd.h"
 
 #if wxUSE_COMMON_DIALOGS && !defined(__WXMICROWIN__)
     #include <commdlg.h>
@@ -60,65 +58,17 @@
 #define wxDIALOG_DEFAULT_HEIGHT 500
 
 // ----------------------------------------------------------------------------
+// globals
+// ----------------------------------------------------------------------------
+
+// all modal dialogs currently shown
+static wxWindowList wxModalDialogs;
+
+// ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxDialogStyle )
-
-wxBEGIN_FLAGS( wxDialogStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-    
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxNO_BORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-
-    // dialog styles
-    wxFLAGS_MEMBER(wxDIALOG_MODAL)
-    wxFLAGS_MEMBER(wxDIALOG_MODELESS)
-    wxFLAGS_MEMBER(wxNO_3D)
-    wxFLAGS_MEMBER(wxWS_EX_VALIDATE_RECURSIVELY)
-    wxFLAGS_MEMBER(wxSTAY_ON_TOP)
-    wxFLAGS_MEMBER(wxCAPTION)
-    wxFLAGS_MEMBER(wxTHICK_FRAME)
-    wxFLAGS_MEMBER(wxSYSTEM_MENU)
-    wxFLAGS_MEMBER(wxRESIZE_BORDER)
-    wxFLAGS_MEMBER(wxRESIZE_BOX)
-    wxFLAGS_MEMBER(wxCLOSE_BOX)
-    wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
-    wxFLAGS_MEMBER(wxMINIMIZE_BOX)
-wxEND_FLAGS( wxDialogStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxDialog, wxTopLevelWindow,"wx/dialog.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxDialog)
-    wxPROPERTY( Title,wxString, SetTitle, GetTitle, wxString() , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY_FLAGS( WindowStyle , wxDialogStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxDialog)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_6( wxDialog , wxWindow* , Parent , wxWindowID , Id , wxString , Title , wxPoint , Position , wxSize , Size , long , WindowStyle) 
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
-#endif
 
 BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
     EVT_BUTTON(wxID_OK, wxDialog::OnOK)
@@ -131,33 +81,6 @@ BEGIN_EVENT_TABLE(wxDialog, wxDialogBase)
 
     EVT_CLOSE(wxDialog::OnCloseWindow)
 END_EVENT_TABLE()
-
-// ----------------------------------------------------------------------------
-// wxDialogModalData
-// ----------------------------------------------------------------------------
-
-// this is simply a container for any data we need to implement modality which
-// allows us to avoid changing wxDialog each time the implementation changes
-class wxDialogModalData
-{
-public:
-    wxDialogModalData(wxDialog *dialog) : m_evtLoop(dialog) { }
-
-    void RunLoop()
-    {
-        m_evtLoop.Run();
-    }
-
-    void ExitLoop()
-    {
-        m_evtLoop.Exit();
-    }
-
-private:
-    wxModalEventLoop m_evtLoop;
-};
-
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 
 // ============================================================================
 // implementation
@@ -173,7 +96,7 @@ void wxDialog::Init()
 
     m_isShown = FALSE;
 
-    m_modalData = NULL;
+    m_windowDisabler = (wxWindowDisabler *)NULL;
 
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 }
@@ -268,7 +191,7 @@ bool wxDialog::IsModal() const
 
 bool wxDialog::IsModalShowing() const
 {
-    return m_modalData != NULL;
+    return wxModalDialogs.Find((wxDialog *)this) != NULL; // const_cast
 }
 
 wxWindow *wxDialog::FindSuitableParent() const
@@ -298,6 +221,8 @@ void wxDialog::DoShowModal()
     wxCHECK_RET( !IsModalShowing(), _T("DoShowModal() called twice") );
     wxCHECK_RET( IsModal(), _T("can't DoShowModal() modeless dialog") );
 
+    wxModalDialogs.Append(this);
+
     wxWindow *parent = GetParent();
 
     wxWindow* oldFocus = m_oldFocus;
@@ -317,12 +242,32 @@ void wxDialog::DoShowModal()
             hwndOldFocus = GetHwndOf(parent);
     }
 
+    // disable all other app windows
+    wxASSERT_MSG( !m_windowDisabler, _T("disabling windows twice?") );
+
+    m_windowDisabler = new wxWindowDisabler(this);
+
+    // before entering the modal loop, reset the "is in OnIdle()" flag (see
+    // comment in app.cpp)
+    extern bool wxIsInOnIdleFlag;
+    bool wasInOnIdle = wxIsInOnIdleFlag;
+    wxIsInOnIdleFlag = FALSE;
+
     // enter the modal loop
+    while ( IsModalShowing() )
     {
-        wxDialogModalDataTiedPtr modalData(&m_modalData,
-                                           new wxDialogModalData(this));
-        modalData->RunLoop();
+#if wxUSE_THREADS
+        wxMutexGuiLeaveOrEnter();
+#endif // wxUSE_THREADS
+
+        while ( !wxTheApp->Pending() && wxTheApp->ProcessIdle() )
+            ;
+
+        // a message came or no more idle processing to do
+        wxTheApp->DoMessage();
     }
+
+    wxIsInOnIdleFlag = wasInOnIdle;
 
     // and restore focus
     // Note that this code MUST NOT access the dialog object's data
@@ -338,14 +283,16 @@ void wxDialog::DoShowModal()
 
 bool wxDialog::Show(bool show)
 {
-    if ( !show && m_modalData )
+    if ( !show )
     {
-        // we need to do this before calling wxDialogBase version because if we
-        // had disabled other app windows, they must be reenabled right now as
+        // if we had disabled other app windows, reenable them back now because
         // if they stay disabled Windows will activate another window (one
-        // which is enabled, anyhow) when we're hidden in the base class Show()
-        // and we will lose activation
-        m_modalData->ExitLoop();
+        // which is enabled, anyhow) and we will lose activation
+        if ( m_windowDisabler )
+        {
+            delete m_windowDisabler;
+            m_windowDisabler = NULL;
+        }
     }
 
     // ShowModal() may be called for already shown dialog
@@ -365,27 +312,31 @@ bool wxDialog::Show(bool show)
         //     every time is simpler than keeping a flag
         Layout();
 
-        // this usually will result in TransferDataToWindow() being called
+        // usually will result in TransferDataToWindow() being called
         InitDialog();
     }
 
-    if ( show && IsModal() )
+    if ( IsModal() )
     {
-        // modal dialog needs a parent window, so try to find one
-        if ( !GetParent() )
+        if ( show )
         {
-            m_parent = FindSuitableParent();
-        }
+            // modal dialog needs a parent window, so try to find one
+            if ( !GetParent() )
+            {
+                m_parent = FindSuitableParent();
+            }
 
-        DoShowModal();
+            DoShowModal();
+        }
+        else // end of modal dialog
+        {
+            // this will cause IsModalShowing() return FALSE and our local
+            // message loop will terminate
+            wxModalDialogs.DeleteObject(this);
+        }
     }
 
     return TRUE;
-}
-
-void wxDialog::Raise()
-{
-    ::SetForegroundWindow(GetHwnd());
 }
 
 // a special version for Show(TRUE) for modal dialogs which returns return code
@@ -502,7 +453,7 @@ long wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
             // creates flicker but at least doesn't show garbage on the screen
             rc = wxWindow::MSWWindowProc(message, wParam, lParam);
             processed = TRUE;
-            if ( HasFlag(wxFULL_REPAINT_ON_RESIZE) )
+            if ( !HasFlag(wxNO_FULL_REPAINT_ON_RESIZE) )
             {
                 ::InvalidateRect(GetHwnd(), NULL, FALSE /* erase bg */);
             }

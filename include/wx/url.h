@@ -6,13 +6,13 @@
 // Created:     20/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_URL_H
 #define _WX_URL_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "url.h"
 #endif
 
@@ -37,7 +37,7 @@ typedef enum {
   wxURL_PROTOERR
 } wxURLError;
 
-class WXDLLIMPEXP_NET wxURL : public wxObject
+class WXDLLEXPORT wxURL : public wxObject
 {
 public:
     wxURL(const wxString& url);
@@ -66,7 +66,7 @@ public:
 protected:
     static wxProtoInfo *ms_protocols;
 
-#if wxUSE_SOCKETS
+#if wxUSE_SOCKETS && wxUSE_PROTOCOL_HTTP
     static wxHTTP *ms_proxyDefault;
     static bool ms_useDefaultProxy;
     wxHTTP *m_proxy;

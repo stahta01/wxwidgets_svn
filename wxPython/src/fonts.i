@@ -74,7 +74,6 @@ enum wxFontWeight
 };
 
 
-
 // font encodings
 enum wxFontEncoding
 {
@@ -116,7 +115,7 @@ enum wxFontEncoding
         // and for Windows
     wxFONTENCODING_CP874,           // WinThai
     wxFONTENCODING_CP932,           // Japanese (shift-JIS)
-    wxFONTENCODING_CP936,           // Chinese simplified (GB)
+    wxFONTENCODING_CP936,           // Chiniese simplified (GB)
     wxFONTENCODING_CP949,           // Korean (Hangul charset)
     wxFONTENCODING_CP950,           // Chinese (traditional - Big5)
     wxFONTENCODING_CP1250,          // WinLatin2
@@ -131,26 +130,22 @@ enum wxFontEncoding
 
     wxFONTENCODING_UTF7,            // UTF-7 Unicode encoding
     wxFONTENCODING_UTF8,            // UTF-8 Unicode encoding
-    wxFONTENCODING_EUC_JP,          // Extended Unix Codepage for Japanese
-    wxFONTENCODING_UTF16BE,         // UTF-16 Big Endian Unicode encoding
-    wxFONTENCODING_UTF16LE,         // UTF-16 Little Endian Unicode encoding
-    wxFONTENCODING_UTF32BE,         // UTF-32 Big Endian Unicode encoding
-    wxFONTENCODING_UTF32LE,         // UTF-32 Little Endian Unicode encoding
-
-    wxFONTENCODING_MAX,
 
     // Far Eastern encodings
-    wxFONTENCODING_GB2312,          // Simplified Chinese
-    wxFONTENCODING_BIG5,            // Traditional Chinese
+        // Chinese
+    wxFONTENCODING_GB2312 = wxFONTENCODING_CP936, // Simplified Chinese
+    wxFONTENCODING_BIG5 = wxFONTENCODING_CP950,   // Traditional Chinese
 
-    wxFONTENCODING_SHIFT_JIS,       // Shift JIS
+        // Japanese (see http://zsigri.tripod.com/fontboard/cjk/jis.html)
+    wxFONTENCODING_SHIFT_JIS = wxFONTENCODING_CP932,  // Shift JIS
+    wxFONTENCODING_EUC_JP,          // Extended Unix Codepage for Japanese
 
+    wxFONTENCODING_UNICODE,         // Unicode - currently used only by
+                                    // wxEncodingConverter class
 
-    // Aliases
-    wxFONTENCODING_UTF16,
-    wxFONTENCODING_UTF32,
-    wxFONTENCODING_UNICODE,
+    wxFONTENCODING_MAX
 };
+
 
 
 //---------------------------------------------------------------------------
@@ -165,9 +160,6 @@ struct wxNativeFontInfo
 
     // reset to the default state
     void Init();
-
-    // init with the parameters of the given font
-    void InitFromFont(const wxFont& font);
 
     // accessors and modifiers for the font elements
     int GetPointSize() const;
@@ -207,30 +199,30 @@ struct wxNativeFontInfo
 
 %{
 // Fix some link errors...  Remove this when these methods get real implementations...
-// #if defined(__WXGTK__) || defined(__WXX11__)
-// #if wxUSE_PANGO
-// void wxNativeFontInfo::SetPointSize(int pointsize)
-//     { wxFAIL_MSG( _T("not implemented") ); }
+#if defined(__WXGTK__) || defined(__WXX11__)
+#if wxUSE_PANGO
+void wxNativeFontInfo::SetPointSize(int pointsize)
+    { wxFAIL_MSG( _T("not implemented") ); }
 
-// void wxNativeFontInfo::SetStyle(wxFontStyle style)
-//     { wxFAIL_MSG( _T("not implemented") ); }
+void wxNativeFontInfo::SetStyle(wxFontStyle style)
+    { wxFAIL_MSG( _T("not implemented") ); }
 
-// void wxNativeFontInfo::SetWeight(wxFontWeight weight)
-//     { wxFAIL_MSG( _T("not implemented") ); }
+void wxNativeFontInfo::SetWeight(wxFontWeight weight)
+    { wxFAIL_MSG( _T("not implemented") ); }
 
-// void wxNativeFontInfo::SetUnderlined(bool WXUNUSED(underlined))
-//     { wxFAIL_MSG( _T("not implemented") ); }
+void wxNativeFontInfo::SetUnderlined(bool WXUNUSED(underlined))
+    { wxFAIL_MSG( _T("not implemented") ); }
 
-// void wxNativeFontInfo::SetFaceName(wxString facename)
-//     { wxFAIL_MSG( _T("not implemented") ); }
+void wxNativeFontInfo::SetFaceName(wxString facename)
+    { wxFAIL_MSG( _T("not implemented") ); }
 
-// void wxNativeFontInfo::SetFamily(wxFontFamily family)
-//     { wxFAIL_MSG( _T("not implemented") ); }
+void wxNativeFontInfo::SetFamily(wxFontFamily family)
+    { wxFAIL_MSG( _T("not implemented") ); }
 
-// void wxNativeFontInfo::SetEncoding(wxFontEncoding encoding)
-//     { wxFAIL_MSG( _T("not implemented") ); }
-// #endif
-// #endif
+void wxNativeFontInfo::SetEncoding(wxFontEncoding encoding)
+    { wxFAIL_MSG( _T("not implemented") ); }
+#endif
+#endif
 %}
 
 //---------------------------------------------------------------------------
@@ -257,40 +249,13 @@ public:
     static wxFontMapper *Set(wxFontMapper *mapper);
 
 
-    // returns the encoding for the given charset (in the form of RFC 2046) or
-    // wxFONTENCODING_SYSTEM if couldn't decode it
-    //
-    // interactive parameter is ignored in the base class, we behave as if it
-    // were always false
-    virtual wxFontEncoding CharsetToEncoding(const wxString& charset,
-                                             bool interactive = true);
-
-
-    // get the number of font encodings we know about
-    static size_t GetSupportedEncodingsCount();
-
-    // get the n-th supported encoding
-    static wxFontEncoding GetEncoding(size_t n);
-
-    // return internal string identifier for the encoding (see also
-    // GetEncodingDescription())
-    static wxString GetEncodingName(wxFontEncoding encoding);
-
-    // return user-readable string describing the given encoding
-    //
-    // NB: hard-coded now, but might change later (read it from config?)
-    static wxString GetEncodingDescription(wxFontEncoding encoding);
-
-
-    // set the config object to use (may be NULL to use default)
-    void SetConfig(wxConfigBase *config);
-
-    // set the root config path to use (should be an absolute path)
-    void SetConfigPath(const wxString& prefix);
-
-    // return default config path
-    static const wxChar *GetDefaultConfigPath();
-
+    // find an alternative for the given encoding (which is supposed to not be
+    // available on this system). If successful, return TRUE and rwxFontEcoding
+    // that can be used it wxFont ctor otherwise return FALSE
+    //bool GetAltForEncoding(wxFontEncoding encoding,
+    //                       wxFontEncoding *alt_encoding,
+    //                       const wxString& facename = wxPyEmptyString,
+    //                       bool interactive = TRUE);
 
 
     // Find an alternative for the given encoding (which is supposed to not be
@@ -316,12 +281,40 @@ public:
     bool IsEncodingAvailable(wxFontEncoding encoding,
                              const wxString& facename = wxPyEmptyString);
 
+    // returns the encoding for the given charset (in the form of RFC 2046) or
+    // wxFONTENCODING_SYSTEM if couldn't decode it
+    wxFontEncoding CharsetToEncoding(const wxString& charset,
+                                     bool interactive = TRUE);
+
+    // return internal string identifier for the encoding (see also
+    // GetEncodingDescription())
+    static wxString GetEncodingName(wxFontEncoding encoding);
+
+    // return user-readable string describing the given encoding
+    //
+    // NB: hard-coded now, but might change later (read it from config?)
+    static wxString GetEncodingDescription(wxFontEncoding encoding);
+
     // the parent window for modal dialogs
-    void SetDialogParent(wxWindow *parent) { m_windowParent = parent; }
+    void SetDialogParent(wxWindow *parent);
 
     // the title for the dialogs (note that default is quite reasonable)
-    void SetDialogTitle(const wxString& title) { m_titleDialog = title; }
+    void SetDialogTitle(const wxString& title);
 
+    // functions which allow to configure the config object used: by default,
+    // the global one (from wxConfigBase::Get() will be used) and the default
+    // root path for the config settings is the string returned by
+    // GetDefaultConfigPath()
+
+
+    // set the config object to use (may be NULL to use default)
+    void SetConfig(wxConfigBase *config);
+
+    // set the root config path to use (should be an absolute path)
+    void SetConfigPath(const wxString& prefix);
+
+    // return default config path
+    static wxString GetDefaultConfigPath();
 };
 
 
@@ -356,7 +349,7 @@ public:
 
     bool IsFixedWidth();
 
-    const wxNativeFontInfo* GetNativeFontInfo() const;
+    wxNativeFontInfo* GetNativeFontInfo() const;
     wxString GetNativeFontInfoDesc() const;
     wxString GetNativeFontInfoUserDesc() const;
 
@@ -812,17 +805,6 @@ public:
     //
     // Returns NULL if no info found, pointer must *not* be deleted by caller
     static const wxLanguageInfo *GetLanguageInfo(int lang);
-
-    // Returns language name in English or empty string if the language
-    // is not in database
-    static wxString GetLanguageName(int lang);
-
-    // Find the language for the given locale string which may be either a
-    // canonical ISO 2 letter language code ("xx"), a language code followed by
-    // the country code ("xx_XX") or a Windows full language name ("Xxxxx...")
-    //
-    // Returns NULL if no info found, pointer must *not* be deleted by caller
-    static const wxLanguageInfo *FindLanguageInfo(const wxString& locale);
 
     // Add custom language to the list of known languages.
     // Notes: 1) wxLanguageInfo contains platform-specific data

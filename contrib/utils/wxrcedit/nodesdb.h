@@ -15,7 +15,6 @@
 #define _NODESDB_H_
 
 #include "wx/dynarray.h"
-#include "wx/arrstr.h"
 
 class WXDLLEXPORT wxXmlNode;
 class WXDLLEXPORT wxString;

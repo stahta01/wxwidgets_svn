@@ -12,7 +12,7 @@
 #ifndef _WX_SPINBUTT_H_
 #define _WX_SPINBUTT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "spinbutt.h"
 #endif
 
@@ -63,7 +63,7 @@ protected:
    virtual wxSize DoGetBestSize() const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxSpinButton)
+    DECLARE_DYNAMIC_CLASS(wxSpinButton)
 };
 
 #endif

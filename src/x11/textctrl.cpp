@@ -7,12 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "textctrl.h"
 #endif
 
 #include "wx/textctrl.h"
-
 #include "wx/utils.h"
 #include "wx/intl.h"
 #include "wx/log.h"
@@ -20,7 +19,6 @@
 #include "wx/panel.h"
 #include "wx/clipbrd.h"
 #include "wx/tokenzr.h"
-#include "wx/dcclient.h"
 
 #include "wx/univ/inphand.h"
 #include "wx/univ/renderer.h"
@@ -136,6 +134,7 @@ BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_ERASE_BACKGROUND(wxTextCtrl::OnEraseBackground)
     EVT_CHAR(wxTextCtrl::OnChar)
     EVT_MOUSE_EVENTS(wxTextCtrl::OnMouse)
+    EVT_IDLE(wxTextCtrl::OnIdle)
     EVT_KILL_FOCUS(wxTextCtrl::OnKillFocus)
     EVT_SET_FOCUS(wxTextCtrl::OnSetFocus)
     
@@ -156,6 +155,8 @@ void wxTextCtrl::Init()
 {
     m_editable = TRUE;
     m_modified = FALSE;
+    
+    m_undos.DeleteContents( TRUE );
     
     m_lang = wxSOURCE_LANG_NONE;
     
@@ -200,11 +201,6 @@ wxTextCtrl::wxTextCtrl( wxWindow *parent,
     Create( parent, id, value, pos, size, style, validator, name );
 }
 
-wxTextCtrl::~wxTextCtrl()
-{
-    WX_CLEAR_LIST(wxList, m_undos);
-}
-
 bool wxTextCtrl::Create( wxWindow *parent,
                          wxWindowID id,
                          const wxString &value,
@@ -221,7 +217,7 @@ bool wxTextCtrl::Create( wxWindow *parent,
         style |= wxALWAYS_SHOW_SB;
         
     wxTextCtrlBase::Create( parent, id, pos /* wxDefaultPosition */, size,
-                            style | wxVSCROLL | wxHSCROLL);
+                              style|wxVSCROLL|wxHSCROLL|wxNO_FULL_REPAINT_ON_RESIZE );
                               
     SetBackgroundColour( *wxWHITE );
     
@@ -401,7 +397,7 @@ void wxTextCtrl::Clear()
     
     SetScrollbars( m_charWidth, m_lineHeight, 0, 0, 0, 0 );
     Refresh();
-    WX_CLEAR_LIST(wxList, m_undos);
+    m_undos.Clear();
 }
 
 void wxTextCtrl::Replace(long from, long to, const wxString& value)
@@ -798,13 +794,12 @@ void wxTextCtrl::Undo()
 {
     if (m_undos.GetCount() == 0) return;
     
-    wxList::compatibility_iterator node = m_undos.Item( m_undos.GetCount()-1 );
-    wxSourceUndoStep *undo = (wxSourceUndoStep*) node->GetData();
+    wxNode *node = m_undos.Nth( m_undos.GetCount()-1 );
+    wxSourceUndoStep *undo = (wxSourceUndoStep*) node->Data();
     
     undo->Undo();
-
-    delete undo;
-    m_undos.Erase( node );
+    
+    delete node;
     
     m_modified = TRUE;
 }
@@ -1942,8 +1937,8 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
         }
         default: 
         {
-            if (  (event.GetKeyCode() >= 'a') &&
-                  (event.GetKeyCode() <= 'z') &&
+            if (  (event.KeyCode() >= 'a') &&
+                  (event.KeyCode() <= 'z') &&
                   (event.AltDown()) )
             {
                 // Alt-F etc.
@@ -1951,13 +1946,13 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
                 return;
             }
             
-            if (  (event.GetKeyCode() >= 32) && 
-                  (event.GetKeyCode() <= 255) &&
+            if (  (event.KeyCode() >= 32) && 
+                  (event.KeyCode() <= 255) &&
                  !(event.ControlDown() && !event.AltDown()) ) // filters out Ctrl-X but leaves Alt-Gr
             {
                 if (HasSelection())
                     Delete();
-                DoChar( (char) event.GetKeyCode() );
+                DoChar( (char) event.KeyCode() );
                 return;
             }
         }
@@ -1966,14 +1961,14 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
     event.Skip();
 }
 
-void wxTextCtrl::OnInternalIdle()
+void wxTextCtrl::OnIdle( wxIdleEvent &event )
 {
-    wxControl::OnInternalIdle();
-    
     m_ignoreInput = FALSE;
     
     if (m_lang != wxSOURCE_LANG_NONE)
         SearchForBrackets();
+    
+    event.Skip( TRUE );
 }
 
 void wxTextCtrl::Indent()

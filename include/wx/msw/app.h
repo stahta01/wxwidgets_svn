@@ -12,7 +12,7 @@
 #ifndef _WX_APP_H_
 #define _WX_APP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "app.h"
 #endif
 
@@ -36,11 +36,13 @@ public:
     virtual ~wxApp();
 
     // override base class (pure) virtuals
-    virtual bool Initialize(int& argc, wxChar **argv);
-    virtual void CleanUp();
-
+    virtual int MainLoop();
+    virtual void ExitMainLoop();
+    virtual bool Initialized();
+    virtual bool Pending();
+    virtual void Dispatch();
     virtual bool Yield(bool onlyIfNeeded = FALSE);
-    virtual void WakeUpIdle();
+    virtual bool ProcessIdle();
 
     virtual void SetPrintMode(int mode) { m_printMode = mode; }
     virtual int GetPrintMode() const { return m_printMode; }
@@ -50,19 +52,52 @@ public:
     void OnEndSession(wxCloseEvent& event);
     void OnQueryEndSession(wxCloseEvent& event);
 
+    // Send idle event to all top-level windows.
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents();
+
+    // Send idle event to window and all subwindows
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents(wxWindow* win);
+
+    void SetAuto3D(bool flag) { m_auto3D = flag; }
+    bool GetAuto3D() const { return m_auto3D; }
+
 protected:
+    bool   m_showOnInit;
     int    m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
+    bool   m_auto3D ;   // Always use 3D controls, except where overriden
 
     /* Windows-specific wxApp definitions */
 
 public:
 
     // Implementation
+    static bool Initialize();
+    static void CleanUp();
+
     static bool RegisterWindowClasses();
     static bool UnregisterWindowClasses();
 
+    // Convert Windows to argc, argv style
+    void ConvertToStandardCommandArgs(const char* p);
+
+    // message processing
+    // ------------------
+
+    // process the given message
+    virtual void DoMessage(WXMSG *pMsg);
+
+    // retrieve the next message from the queue and process it
+    virtual bool DoMessage();
+
+    // preprocess the message
+    virtual bool ProcessMessage(WXMSG* pMsg);
+
     // idle processing
     // ---------------
+
+    void DeletePendingObjects();
 
 #if wxUSE_RICHEDIT
     // initialize the richedit DLL of (at least) given version, return TRUE if
@@ -75,17 +110,21 @@ public:
     static int GetComCtl32Version();
 
 public:
-    // the SW_XXX value to be used for the frames opened by the application
-    // (currently seems unused which is a bug -- TODO)
-    static int m_nCmdShow;
+    int               m_nCmdShow;
 
 protected:
+    bool              m_keepGoing;
+
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxApp)
 };
 
+#if !defined(_WINDLL) || (defined(_WINDLL) && defined(WXMAKINGDLL))
 int WXDLLEXPORT wxEntry(WXHINSTANCE hInstance, WXHINSTANCE hPrevInstance,
-                        char *lpszCmdLine, int nCmdShow);
+                        char *lpszCmdLine, int nCmdShow, bool enterLoop = TRUE);
+#else
+int WXDLLEXPORT wxEntry(WXHINSTANCE hInstance);
+#endif
 
-#endif // _WX_APP_H_
+#endif
+    // _WX_APP_H_
 

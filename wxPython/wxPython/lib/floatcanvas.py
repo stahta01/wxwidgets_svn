@@ -1,6 +1,8 @@
-from Numeric import array,Float,cos,pi,sum,minimum,maximum,Int32
+#!/usr/bin/env python2.2
 
-from time import clock, sleep
+from Numeric import array,Float,cos,pi,sum,minimum,maximum
+
+from time import clock
 from wxPython.wx import *
 import types
 import os        
@@ -10,7 +12,6 @@ ID_ZOOM_OUT_BUTTON = wxNewId()
 ID_ZOOM_TO_FIT_BUTTON = wxNewId()
 ID_MOVE_MODE_BUTTON = wxNewId()
 ID_TEST_BUTTON = wxNewId()
-
 ID_ABOUT_MENU = wxNewId()          
 ID_EXIT_MENU  = wxNewId() 
 ID_ZOOM_TO_FIT_MENU = wxNewId()
@@ -205,13 +206,12 @@ class draw_object:
                 self.Brush = self.BrushList[(FillColor,FillStyle)]
                 
         def SetPen(self,LineColor,LineStyle,LineWidth):
-            if (LineColor is None) or (LineStyle is None):
+            if LineColor is None or LineStyle is None:
                 self.Pen = wxTRANSPARENT_PEN
                 self.LineStyle = 'Transparent'
-            else:
-                if not self.PenList.has_key((LineColor,LineStyle,LineWidth)):
-                    self.PenList[(LineColor,LineStyle,LineWidth)] = wxPen(LineColor,LineWidth,self.LineStyleList[LineStyle])
-                self.Pen = self.PenList[(LineColor,LineStyle,LineWidth)]
+            if not self.PenList.has_key((LineColor,LineStyle,LineWidth)):
+                self.PenList[(LineColor,LineStyle,LineWidth)] = wxPen(LineColor,LineWidth,self.LineStyleList[LineStyle])
+            self.Pen = self.PenList[(LineColor,LineStyle,LineWidth)]
 
         def SetPens(self,LineColors,LineStyles,LineWidths):
             """
@@ -360,13 +360,6 @@ class Line(draw_object):
 
         self.SetPen(LineColor,LineStyle,LineWidth)
 
-    def SetPoints(self,Points):
-        self.Points = Points
-        self.BoundingBox = array(((min(self.Points[:,0]),min(self.Points[:,1])),(max(self.Points[:,0]),max(self.Points[:,1]))),Float)
-        if self._Canvas:
-            # It looks like this shouldn't be private
-            self._Canvas.BoundingBoxDirty = 1
-            
     def _Draw(self,dc,WorldToPixel,ScaleFunction):
         Points = WorldToPixel(self.Points)
         dc.SetPen(self.Pen)
@@ -793,20 +786,16 @@ class FloatCanvas(wxPanel):
         
         self.Scale = 1
 
-        self.GUIMode = None
-        self.StartRBBox = None
-        self.PrevRBBox = None
-        self.StartMove = None
-        self.PrevMoveBox = None
         # called just to make sure everything is initialized
         self.OnSize(None)
 
-        
+        self.GUIMode = None
+        self.StartRBBox = None
+        self.StartMove = None
+
     def BuildToolbar(self):
         tb = wxToolBar(self,-1)
         self.ToolBar = tb
-        
-        tb.SetToolBitmapSize((23,23))
         
         tb.AddTool(ID_ZOOM_IN_BUTTON, GetPlusBitmap(), isToggle=true,shortHelpString = "Zoom In")
         EVT_TOOL(self, ID_ZOOM_IN_BUTTON, self.SetMode)
@@ -875,7 +864,6 @@ class FloatCanvas(wxPanel):
                     dc.EndDrawing()
                     
                 elif event.LeftUp() and self.StartRBBox :
-                    self.PrevRBBox = None
                     EndRBBox = (event.GetX(),event.GetY())
                     StartRBBox = self.StartRBBox
                     # if mouse has moved less that ten pixels, don't use the box.
@@ -889,7 +877,6 @@ class FloatCanvas(wxPanel):
                         Center = self.PixelToWorld(StartRBBox)
                         self.Zoom(1.5,Center)
                     self.StartRBBox = None
-                    
             if self.GUIMode == "ZoomOut":
                 if event.LeftDown():
                     Center = self.PixelToWorld((event.GetX(),event.GetY()))
@@ -914,7 +901,6 @@ class FloatCanvas(wxPanel):
                     dc.EndDrawing()
                   
                 elif event.LeftUp() and self.StartMove:
-                    self.PrevMoveBox = None
                     StartMove = self.StartMove
                     EndMove = array((event.GetX(),event.GetY()))
                     if sum((StartMove-EndMove)**2) > 16:
@@ -931,19 +917,18 @@ class FloatCanvas(wxPanel):
                 self.Zoom(1.5,Center)
             else:
                 event.Skip()
-        event.Skip()
-                
+
     def MakeNewBuffers(self):
         # Make new offscreen bitmap:
-        self._Buffer = wxEmptyBitmap(self.PanelSize[0],self.PanelSize[1])
+        self._Buffer = wxEmptyBitmap(int(self.PanelSize[0]), int(self.PanelSize[1]))
         if self.UseBackground:
-            self._BackBuffer = wxEmptyBitmap(self.PanelSize[0],self.PanelSize[1])
+            self._BackBuffer = wxEmptyBitmap((self.PanelSize[0]), (self.PanelSize[1]))
             self._BackgroundDirty = 1
         else:
             pass
                 
     def OnSize(self,event):
-        self.PanelSize  = array(self.DrawPanel.GetClientSizeTuple(),Int32)
+        self.PanelSize  = array(self.DrawPanel.GetClientSizeTuple(),Float)
         try:
             self.AspectRatio = self.PanelSize[0]/self.PanelSize[1]
         except ZeroDivisionError:
@@ -973,8 +958,6 @@ class FloatCanvas(wxPanel):
         """
         if self.Debug: start = clock()
         ScreenDC =  wxClientDC(self.DrawPanel)
-        ViewPortWorld = ( self.PixelToWorld((0,0)), self.PixelToWorld(self.PanelSize) )
-        ViewPortBB = array( ( minimum.reduce(ViewPortWorld), maximum.reduce(ViewPortWorld) ) )
         if self.UseBackground:
             dc = wxMemoryDC()
             dc.SelectObject(self._BackBuffer)
@@ -1015,31 +998,21 @@ class FloatCanvas(wxPanel):
                 dc.BeginDrawing()
                 dc.Clear()
                 i = 0
+                ViewPortWorld = array((self.PixelToWorld((0,0)), self.PixelToWorld(self.DrawPanel.GetSizeTuple() ) ),Float )
+                ViewPortBB = array( (minimum.reduce(ViewPortWorld), maximum.reduce(ViewPortWorld)) )
                 for Object in self._DrawList:
                     if self.BBCheck(Object.BoundingBox,ViewPortBB):
                         #print "object is in Bounding Box"
                         i+=1
                         Object._Draw(dc,self.WorldToPixel,self.ScaleFunction)
                         if i % self.NumBetweenBlits == 0:
-                            ScreenDC.Blit(0, 0, self.PanelSize[0],self.PanelSize[1], dc, 0, 0)
+                            ScreenDC.Blit(0, 0, int(self.PanelSize[0]), int(self.PanelSize[1]), dc, 0, 0)
+                print "there were %i objects drawn"%i
                 dc.EndDrawing()
             else:
                 dc.Clear()
         # now refresh the screen
-        #ScreenDC.DrawBitmap(self._Buffer,0,0) #NOTE: uisng DrawBitmap didn't work right on MSW
-        ScreenDC.Blit(0, 0, self.PanelSize[0],self.PanelSize[1], dc, 0, 0)
-
-        # If the canvas is in the middle of a zoom or move, the Rubber Band box needs to be re-drawn
-        if self.PrevRBBox:
-            ScreenDC.SetPen(wxPen('WHITE', 2,wxSHORT_DASH))
-            ScreenDC.SetBrush(wxTRANSPARENT_BRUSH)
-            ScreenDC.SetLogicalFunction(wxXOR)
-            ScreenDC.DrawRectangle(*self.PrevRBBox)
-        elif self.PrevMoveBox:
-            ScreenDC.SetPen(wxPen('WHITE', 1,))
-            ScreenDC.SetBrush(wxTRANSPARENT_BRUSH)
-            ScreenDC.SetLogicalFunction(wxXOR)
-            ScreenDC.DrawRectangle(*self.PrevMoveBox)
+        ScreenDC.DrawBitmap(self._Buffer,0,0)
         if self.Debug: print "Drawing took %f seconds of CPU time"%(clock()-start)
 
     def BBCheck(self, BB1, BB2):
@@ -1054,7 +1027,7 @@ class FloatCanvas(wxPanel):
         else:
             return False
 
-    def Move(self,shift,CoordType):
+    def	Move(self,shift,CoordType):
         """
         move the image in the window.
 
@@ -1342,7 +1315,6 @@ class FloatCanvas(wxPanel):
         self._AddBoundingBox(obj.BoundingBox)
         return None
         
-
 
 
 

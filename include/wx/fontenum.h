@@ -13,12 +13,11 @@
 #ifndef _WX_FONTENUM_H_
 #define _WX_FONTENUM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "fontenum.h"
 #endif
 
-#include "wx/fontenc.h"
-#include "wx/arrstr.h"
+#include "wx/font.h"
 
 // ----------------------------------------------------------------------------
 // wxFontEnumerator enumerates all available fonts on the system or only the
@@ -43,7 +42,7 @@ public:
     // enumerate the different encodings either for given font facename or for
     // all facenames - will result in OnFontEncoding() being called for each
     // available (facename, encoding) couple
-    virtual bool EnumerateEncodings(const wxString& facename = wxEmptyString);
+    virtual bool EnumerateEncodings(const wxString& facename = wxT(""));
 
     // callbacks which are called after one of EnumerateXXX() functions from
     // above is invoked - all of them may return FALSE to stop enumeration or
@@ -85,8 +84,6 @@ public:
     
 private:
     wxArrayString *m_Facenames, *m_Encodings;
-
-    DECLARE_NO_COPY_CLASS(wxFontEnumerator)
 };
 
 #endif // _WX_FONTENUM_H_

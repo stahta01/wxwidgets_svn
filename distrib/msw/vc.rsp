@@ -1,6 +1,3 @@
-build/msw/*.dsp
-build/msw/*.dsw
-
 src/wxWindows.dsp
 src/wxWindows.dsw
 src/wxUniv.dsp
@@ -23,12 +20,7 @@ src/png/png.dsw
 src/regex/regex.dsp
 src/regex/regex.dsw
 
-src/expat/expat.dsp
-
 samples/samples.dsw
-
-samples/access/access.dsp
-samples/access/access.dsw
 
 samples/artprov/artprov.dsp
 samples/artprov/artprov.dsw
@@ -65,9 +57,6 @@ samples/dialogs/dialogsUniv.dsw
 samples/dialup/dialup.dsp
 samples/dialup/dialup.dsw
 
-samples/display/display.dsp
-samples/display/display.dsw
-
 samples/dnd/dnd.dsp
 samples/dnd/dnd.dsw
 
@@ -98,14 +87,11 @@ samples/exec/exec.dsw
 samples/font/font.dsp
 samples/font/font.dsw
 
-samples/grid/griddemo.dsp
-samples/grid/griddemo.dsw
+samples/grid/grid.dsp
+samples/grid/grid.dsw
 
 samples/help/help.dsp
 samples/help/help.dsw
-
-samples/htlbox/htlbox.dsp
-samples/htlbox/htlbox.dsw
 
 samples/html/about/about.dsp
 samples/html/about/about.dsw
@@ -178,14 +164,17 @@ samples/multimon/multimon_test.dsw
 samples/nativdlg/nativdlg.dsp
 samples/nativdlg/nativdlg.dsw
 
+samples/newgrid/newgrid.dsp
+samples/newgrid/newgrid.dsw
+
 samples/notebook/notebook.dsp
 samples/notebook/notebook.dsw
 
 samples/oleauto/oleauto.dsp
 samples/oleauto/oleauto.dsw
 
-samples/ownerdrw/ownerdrw.dsp
-samples/ownerdrw/ownerdrw.dsw
+samples/ownerdrw/ownerDrw.dsp
+samples/ownerdrw/ownerDrw.dsw
 
 samples/png/png.dsp
 samples/png/png.dsw
@@ -193,14 +182,17 @@ samples/png/png.dsw
 samples/printing/printing.dsp
 samples/printing/printing.dsw
 
+samples/proplist/proplist.dsp
+samples/proplist/proplist.dsw
+
 samples/propsize/propsize.dsp
 samples/propsize/propsize.dsw
 
 samples/regtest/regtest.dsp
 samples/regtest/regtest.dsw
 
-samples/render/*.dsp
-samples/render/*.dsw
+samples/resource/resource.dsp
+samples/resource/resource.dsw
 
 samples/rotate/rotate.dsp
 samples/rotate/rotate.dsw
@@ -243,24 +235,22 @@ samples/toolbar/toolbar.dsw
 samples/treectrl/treetest.dsp
 samples/treectrl/treetest.dsw
 
+samples/treelay/treelay.dsp
+samples/treelay/treelay.dsw
+
 samples/typetest/typetest.dsp
 samples/typetest/typetest.dsw
 
 samples/validate/validate.dsp
 samples/validate/validate.dsw
 
-samples/vscroll/vscroll.dsp
-samples/vscroll/vscroll.dsw
-
 samples/wizard/wizard.dsp
 samples/wizard/wizard.dsw
-
-samples/wxtest/wxtest.dsp
-samples/wxtest/wxtest.dsw
 
 samples/widgets/widgets.dsp
 samples/widgets/widgets.dsw
 samples/widgets/widgetsUniv.dsp
+samples/widgets/widgetsUniv.dsw
 
 samples/opengl/cube/cube.dsp
 samples/opengl/cube/cube.dsw
@@ -319,10 +309,10 @@ contrib/samples/xrc/XrcDemoVC.dsp
 contrib/samples/xrc/XrcDemoVC.dsw
 
 contrib/src/mmedia/MmediaVC.dsp
-contrib/src/mmedia/MmediaVC.dsw
+contrib/src/mmedia/MMediaVC.dsw
 
-contrib/samples/mmedia/MMboardVC.dsp
-contrib/samples/mmedia/MMboardVC.dsw
+contrib/samples/mmedia/MmboardVC.dsp
+contrib/samples/mmedia/MmboardVC.dsw
 
 contrib/src/stc/StcVC.dsp
 contrib/src/stc/StcVC.dsw
@@ -369,21 +359,19 @@ contrib/src/animate/AnimateVC.dsw
 contrib/samples/animate/AniTestVC.dsp
 contrib/samples/animate/AniTestVC.dsw
 
-contrib/samples/fl/*.dsp
-contrib/samples/fl/*.dsw
+contrib/src/fl/flVC.dsp
+contrib/src/fl/flVC.dsw
+contrib/samples/fl/fl_demo1/fl_demo.dsp
+contrib/samples/fl/fl_demo1/fl_demo.dsw
+contrib/samples/fl/fl_demo2/fl_demo.dsp
+contrib/samples/fl/fl_demo2/fl_demo.dsw
+contrib/samples/fl/fl_sample1/fl_demo.dsp
+contrib/samples/fl/fl_sample1/fl_demo.dsw
+contrib/samples/fl/fl_sample2/fl_demo.dsp
+contrib/samples/fl/fl_sample2/fl_demo.dsw
+contrib/samples/fl/fl_sample3/fl_demo.dsp
+contrib/samples/fl/fl_sample3/fl_demo.dsw
 
 contrib/src/net/NetVC.dsp
 contrib/src/net/NetVC.dsw
-
-contrib/src/deprecated/deprecated.dsp
-
-contrib/samples/deprecated/proplist/proplist.dsp
-contrib/samples/deprecated/proplist/proplist.dsw
-
-contrib/samples/deprecated/resource/resource.dsp
-contrib/samples/deprecated/resource/resource.dsw
-
-contrib/samples/deprecated/treelay/treelay.dsp
-contrib/samples/deprecated/treelay/treelay.dsw
-
 

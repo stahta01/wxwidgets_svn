@@ -13,9 +13,8 @@
 #define _OGL_DIVIDED_H_
 
 #if defined(__GNUG__) && !defined(__APPLE__)
-#pragma interface "divided.h"
+#pragma interface "basic.h"
 #endif
-
 
 /*
  * Definition of a region
@@ -28,7 +27,7 @@
  */
 
 extern wxFont *g_oglNormalFont;
-class WXDLLIMPEXP_OGL wxDividedShape: public wxRectangleShape
+class wxDividedShape: public wxRectangleShape
 {
  DECLARE_DYNAMIC_CLASS(wxDividedShape)
 
@@ -64,7 +63,7 @@ class WXDLLIMPEXP_OGL wxDividedShape: public wxRectangleShape
   // Attachment points correspond to regions in the divided box
   bool GetAttachmentPosition(int attachment, double *x, double *y,
                                      int nth = 0, int no_arcs = 1, wxLineShape *line = NULL);
-  bool AttachmentIsValid(int attachment) const;
+  bool AttachmentIsValid(int attachment);
   int GetNumberOfAttachments() const;
 
   // Invoke editor on CTRL-right click

@@ -18,7 +18,6 @@
 #include "wx/string.h"
 
 #include "wx/intl.h"
-#include "wx/apptrait.h"
 #include "wx/log.h"
 #include "wx/process.h"
 
@@ -208,26 +207,24 @@ int wxDisplayDepth()
     return g_displayDC->getBitsPerPixel();
 }
 
-wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
-    static wxToolkitInfo info;
-    info.shortName = _T("mgluniv");
-    info.name = _T("wxMGL");
-    info.versionMajor = MGL_RELEASE_MAJOR;
-    info.versionMinor = MGL_RELEASE_MINOR;
-    info.os = wxGTK;
+    if ( majorVsn )
+        *majorVsn = MGL_RELEASE_MAJOR;
+    if ( minorVsn )
+        *minorVsn = MGL_RELEASE_MINOR;
+
 #if defined(__UNIX__)
-    info.os = wxMGL_UNIX;
+    return wxMGL_UNIX;
 #elif defined(__OS2__)
-    info.os = wxMGL_OS2;
+    return wxMGL_OS2;
 #elif defined(__WIN32__)
-    info.os = wxMGL_WIN32;
+    return wxMGL_WIN32;
 #elif defined(__DOS__)
-    info.os = wxMGL_DOS;
+    return wxMGL_DOS;
 #else
     #error Platform not supported by wxMGL!
 #endif
-    return info;
 }
 
 

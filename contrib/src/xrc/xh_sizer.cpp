@@ -21,13 +21,11 @@
 
 #include "wx/xrc/xh_sizer.h"
 #include "wx/sizer.h"
+#include "wx/panel.h"
 #include "wx/log.h"
 #include "wx/statbox.h"
 #include "wx/notebook.h"
-#include "wx/panel.h"
 #include "wx/tokenzr.h"
-
-IMPLEMENT_DYNAMIC_CLASS(wxSizerXmlHandler, wxXmlResourceHandler)
 
 bool wxSizerXmlHandler::IsSizerNode(wxXmlNode *node)
 {

@@ -19,9 +19,8 @@
 
 #if wxUSE_DIRDLG
 
-class WXDLLIMPEXP_XRC wxGenericDirCtrlXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxGenericDirCtrlXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxGenericDirCtrlXmlHandler)
 public:
     wxGenericDirCtrlXmlHandler();
     virtual wxObject *DoCreateResource();

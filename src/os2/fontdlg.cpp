@@ -21,7 +21,6 @@
 #endif
 
 #include "wx/fontdlg.h"
-#include "wx/fontutil.h"
 
 #define INCL_PM
 #include <os2.h>
@@ -68,7 +67,7 @@ int wxFontDialog::ShowModal()
         wxColour                    vColour((unsigned long)0x00000000);
         wxNativeFontInfo            vInfo;
 
-        m_fontData.m_fontColour = vColour;
+        m_fontData.fontColour = vColour;
 
         memset(&vFn, '\0', sizeof(FACENAMEDESC));
         vFn.usSize        = sizeof(FACENAMEDESC);
@@ -90,7 +89,7 @@ int wxFontDialog::ShowModal()
         int                         nPointSize = vFontDlg.fxPointSize >> 16;
 
         vChosenFont.SetPointSize(nPointSize);
-        m_fontData.m_chosenFont = vChosenFont;
+        m_fontData.chosenFont = vChosenFont;
 
         m_fontData.EncodingInfo().facename = vFontDlg.fAttrs.szFacename;
         m_fontData.EncodingInfo().charset = vFontDlg.fAttrs.usCodePage;

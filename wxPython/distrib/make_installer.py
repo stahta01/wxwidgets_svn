@@ -20,8 +20,6 @@ will be created.
 """
 
 
-# TODO:  Remove the registry entry upon uninstall.
-
 import sys, os, time
 
 KEEP_TEMPS = 0

@@ -3,8 +3,7 @@
 # Authors:      Jeff Childers, Will Sadkin
 # Email:        jchilders_98@yahoo.com, wsadkin@nameconnector.com
 # Created:      02/11/2003
-# Copyright:    (c) 2003 by Jeff Childers, 2003
-# Portions:     (c) 2002 by Will Sadkin, 2002-2003
+# Copyright:    (c) 2003 by Jeff Childers and Will Sadkin
 # RCS-ID:       $Id$
 # License:      wxWindows license
 #----------------------------------------------------------------------------

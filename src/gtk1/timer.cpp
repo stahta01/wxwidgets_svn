@@ -8,12 +8,11 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "timer.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_TIMER
 
@@ -33,20 +32,20 @@ extern "C" gint timeout_callback( gpointer data )
 
     // Don't change the order of anything in this callback!
     
-    if (timer->IsOneShot())
+    if ( timer->IsOneShot() )
     {
         // This sets m_tag to -1
         timer->Stop();
     }
-    
-    // When getting called from GDK's timer handler we
+
+    // when getting called from GDK's timer handler we
     // are no longer within GDK's grab on the GUI
-    // thread so we must lock it here ourselves.
+    // thread so we must lock it here ourselves
     gdk_threads_enter();
 
     timer->Notify();
 
-    // Release lock again.
+    /* release lock again */
     gdk_threads_leave();
 
     if (timer->IsOneShot())

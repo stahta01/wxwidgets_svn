@@ -12,7 +12,7 @@
 #ifndef _WX_MSGBOXDLG_H_
 #define _WX_MSGBOXDLG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "msgdlg.h"
 #endif
 
@@ -38,8 +38,6 @@ public:
         long style = wxOK|wxCENTRE, const wxPoint& pos = wxDefaultPosition);
 
     int ShowModal(void);
-
-    DECLARE_NO_COPY_CLASS(wxMessageDialog)
 };
 
 

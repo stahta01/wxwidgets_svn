@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "choicebase.h"
 #endif
 
@@ -37,10 +37,8 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxChoiceNameStr;
 class WXDLLEXPORT wxChoiceBase : public wxControlWithItems
 {
 public:
-    wxChoiceBase() { }
-    virtual ~wxChoiceBase();
-
     // all generic methods are in wxControlWithItems
+    virtual ~wxChoiceBase();
 
     // single selection logic
     virtual void SetSelection(int n) = 0;
@@ -49,16 +47,13 @@ public:
     // don't override this
     virtual void Select(int n) { SetSelection(n); }
 
-    // set/get the number of columns in the control (as they're not supported on
+    // set/get the number of columns in the control (as they're not supporte on
     // most platforms, they do nothing by default)
     virtual void SetColumns(int WXUNUSED(n) = 1 ) { }
     virtual int GetColumns() const { return 1 ; }
 
     // emulate selecting the item event.GetInt()
     void Command(wxCommandEvent& event);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxChoiceBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -75,10 +70,10 @@ private:
     #include "wx/gtk/choice.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/choice.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/choice.h"
 #elif defined(__WXPM__)
     #include "wx/os2/choice.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/choice.h"
 #endif
 
 #endif // wxUSE_CHOICE

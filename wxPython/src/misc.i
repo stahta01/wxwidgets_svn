@@ -14,6 +14,7 @@
 
 %{
 #include "helpers.h"
+#include <wx/resource.h>
 #include <wx/tooltip.h>
 #include <wx/busyinfo.h>
 #include <wx/geometry.h>
@@ -68,9 +69,6 @@ public:
     long GetHeight();
     void SetWidth(long w);
     void SetHeight(long h);
-
-    void IncTo(const wxSize& sz);
-    void DecTo(const wxSize& sz);
 
     %addmethods {
         PyObject* asTuple() {
@@ -670,7 +668,6 @@ wxAcceleratorEntry *wxGetAccelFromString(const wxString& label);
 #if 0  // we want to use the definition from the header, not the
        // one SWIG will generate.
 %}
-// See also wxPy_ReinitStockObjects in helpers.cpp
 extern wxAcceleratorTable wxNullAcceleratorTable;
 %{
 #endif

@@ -51,11 +51,15 @@
 // wxWindows
 #include "wx/wxprec.h"
 
+#if wxUSE_GUI
+    #error "This is a console program and can be only compiled using wxBase"
+#endif
+
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/dynarray.h"
-    #include "wx/app.h"
+    #include "wx/wx.h"
 #endif // WX_PRECOMP
 
 #include "wx/file.h"
@@ -73,6 +77,23 @@
 #ifdef GetCurrentTime
 #undef GetCurrentTime
 #endif
+
+// -----------------------------------------------------------------------------
+// global vars
+// -----------------------------------------------------------------------------
+
+class HelpGenApp: public wxApp
+{
+public:
+    HelpGenApp() {};
+
+    // don't let wxWin parse our cmd line, we do it ourselves
+    virtual bool OnInit() { return TRUE; }
+
+    virtual int OnRun();
+};
+
+// IMPLEMENT_APP(HelpGenApp);
 
 // -----------------------------------------------------------------------------
 // private functions
@@ -260,10 +281,8 @@ protected:
                                         IgnoreListEntry *second);
 
     // for efficiency, let's sort it
-public: // FIXME: macro requires it
     WX_DEFINE_SORTED_ARRAY(IgnoreListEntry *, ArrayNamesToIgnore);
 
-protected:
     ArrayNamesToIgnore m_ignore;
 
 private:
@@ -439,8 +458,6 @@ protected:
         wxString m_type;
     };
 
-    friend class ParamInfo; // for access to TypeInfo
-
     // info abotu a function parameter
     class ParamInfo
     {
@@ -462,7 +479,6 @@ protected:
         wxString m_value;     // default value
     };
 
-public: // FIXME: macro requires it
     WX_DEFINE_ARRAY(ParamInfo *, ArrayParamInfo);
 
     // info about a function
@@ -508,7 +524,6 @@ public: // FIXME: macro requires it
     WX_DEFINE_ARRAY(MethodInfo *, ArrayMethodInfo);
     WX_DEFINE_ARRAY(ArrayMethodInfo *, ArrayMethodInfos);
 
-private:
     // first array contains the names of all classes we found, the second has a
     // pointer to the array of methods of the given class at the same index as
     // the class name appears in m_classes
@@ -527,12 +542,10 @@ private:
 // implementation
 // =============================================================================
 
-static char **g_argv = NULL;
-
 // this function never returns
 static void usage()
 {
-    wxString prog = g_argv[0];
+    wxString prog = wxTheApp->argv[0];
     wxString basename = prog.AfterLast('/');
 #ifdef __WXMSW__
     if ( !basename )
@@ -568,18 +581,8 @@ static void usage()
     exit(1);
 }
 
-int main(int argc, char **argv)
+int HelpGenApp::OnRun()
 {
-    g_argv = argv;
-
-    wxInitializer initializer;
-    if ( !initializer )
-    {
-        fprintf(stderr, "Failed to initialize the wxWindows library, aborting.");
-
-        return -1;
-    }
-
     enum
     {
         Mode_None,
@@ -783,6 +786,21 @@ int main(int argc, char **argv)
     }
 
     return 0;
+}
+
+int main(int argc, char **argv)
+{
+    wxInitializer initializer;
+    if ( !initializer )
+    {
+        fprintf(stderr, "Failed to initialize the wxWindows library, aborting.");
+
+        return -1;
+    }
+	HelpGenApp app;
+	app.argc = argc;
+	app.argv = argv;
+	return app.OnRun();
 }
 
 // -----------------------------------------------------------------------------
@@ -1278,7 +1296,7 @@ void HelpGenVisitor::VisitOperation( spOperation& op )
 
     // check for the special case of dtor
     wxString dtor;
-    if ( (funcname[0u] == '~') && (m_classname == funcname.c_str() + 1) ) {
+    if ( (funcname[0] == '~') && (m_classname == funcname.c_str() + 1) ) {
         dtor.Printf("\\destruct{%s}", m_classname.c_str());
         funcname = dtor;
     }
@@ -2135,7 +2153,7 @@ static void TeXUnfilter(wxString* str)
 
     // undo TeXFilter
     static wxRegEx reNonSpecialSpecials("\\\\([#$%&_{}])"),
-                   reAccents("\\\\verb\\|([~^])\\|");
+                   reAccents("\\\\verb|([~^])|");
 
     reNonSpecialSpecials.ReplaceAll(str, "\\1");
     reAccents.ReplaceAll(str, "\\1");
@@ -2185,21 +2203,6 @@ static const wxString GetVersionString()
 
 /*
    $Log$
-   Revision 1.27  2003/10/13 17:21:30  MBN
-     Compilation fixes.
-
-   Revision 1.26  2003/09/29 15:18:35  MBN
-     (Blind) compilation fix for Sun compiler.
-
-   Revision 1.25  2003/09/03 17:39:27  MBN
-     Compilation fixes.
-
-   Revision 1.24  2003/08/13 22:59:37  VZ
-   compilation fix
-
-   Revision 1.23  2003/06/13 17:05:43  VZ
-   quote '|' inside regexes (fixes dump mode); fixed crash due to strange HelpGenApp code
-
    Revision 1.22  2002/01/21 21:18:50  JS
    Now adds 'include file' heading
 

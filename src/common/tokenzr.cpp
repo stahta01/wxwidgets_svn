@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "tokenzr.h"
 #endif
 
@@ -29,7 +29,6 @@
 #endif
 
 #include "wx/tokenzr.h"
-#include "wx/arrstr.h"
 
 // Required for wxIs... functions
 #include <ctype.h>

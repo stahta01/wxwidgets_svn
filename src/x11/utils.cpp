@@ -20,7 +20,6 @@
 #include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/app.h"
-#include "wx/apptrait.h"
 #include "wx/msgdlg.h"
 #include "wx/cursor.h"
 #include "wx/window.h" // for wxTopLevelWindows
@@ -67,14 +66,56 @@ void wxFlushEvents()
 
     XSync (display, FALSE);
 
+#ifdef __WXMOTIF__   
+    // XtAppPending returns availability of events AND timers/inputs, which
+    // are processed via callbacks, so XtAppNextEvent will not return if
+    // there are no events. So added '& XtIMXEvent' - Sergey.
+    while (XtAppPending ((XtAppContext) wxTheApp->GetAppContext()) & XtIMXEvent)
+    {
+        XFlush (XtDisplay ((Widget) wxTheApp->GetTopLevelWidget()));
+        // Jan Lessner: works better when events are non-X events
+        XtAppProcessEvent((XtAppContext) wxTheApp->GetAppContext(), XtIMXEvent);
+    }
+#endif
+#ifdef __WXX11__
     // TODO for X11
     // ??
+#endif
 }
 
 bool wxCheckForInterrupt(wxWindow *wnd)
 {
-    wxASSERT_MSG(FALSE, wxT("wxCheckForInterrupt not yet implemented."));
+#ifdef __WXMOTIF__
+    wxCHECK_MSG( wnd, FALSE, "NULL window in wxCheckForInterrupt" );
+
+    Display *dpy=(Display*) wnd->GetXDisplay();
+    Window win=(Window) wnd->GetXWindow();
+    XEvent event;
+    XFlush(dpy);
+    if (wnd->GetMainWidget())
+    {
+        XmUpdateDisplay((Widget)(wnd->GetMainWidget()));
+    }
+
+    bool hadEvents = FALSE;
+    while( XCheckMaskEvent(dpy,
+                           ButtonPressMask|ButtonReleaseMask|ButtonMotionMask|
+                           PointerMotionMask|KeyPressMask|KeyReleaseMask,
+                           &event) )
+    {
+        if ( event.xany.window == win )
+        {
+            hadEvents = TRUE;
+
+            XtDispatchEvent(&event);
+        }
+    }
+
+    return hadEvents;
+#else
+    wxASSERT_MSG(FALSE, "wxCheckForInterrupt not yet implemented.");
     return FALSE;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -83,8 +124,19 @@ bool wxCheckForInterrupt(wxWindow *wnd)
 
 int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 {
+#ifdef __WXMOTIF__
+    XtInputId id = XtAppAddInput((XtAppContext) wxTheApp->GetAppContext(),
+                                 fd,
+                                 (XtPointer *) XtInputReadMask,
+                                 (XtInputCallbackProc) xt_notify_end_process,
+                                 (XtPointer) proc_data);
+
+    return (int)id;
+#endif
+#ifdef __WXX11__
     // TODO
     return 0;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -92,24 +144,23 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 // ----------------------------------------------------------------------------
 
 // Emit a beeeeeep
-#ifndef __EMX__
-// on OS/2, we use the wxBell from wxBase library (src/os2/utils.cpp)
 void wxBell()
 {
     // Use current setting for the bell
     XBell ((Display*) wxGetDisplay(), 0);
 }
-#endif
 
-wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
-    static wxToolkitInfo info;
-    info.shortName = _T("x11univ");
-    info.name = _T("wxX11");
-    info.versionMajor = 0;
-    info.versionMinor = 0;
-    info.os = wxX11;
-    return info;
+#ifdef __WXX11__
+    if (majorVsn)
+        *majorVsn = 0;
+        
+    if (minorVsn)
+        *minorVsn = 0;
+        
+    return wxX11;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -191,7 +242,16 @@ WXDisplay *wxGetDisplay()
 {
     if (gs_currentDisplay)
         return gs_currentDisplay;
+#ifdef __WXMOTIF__
+    if (wxTheApp && wxTheApp->GetTopLevelWidget())
+        return XtDisplay ((Widget) wxTheApp->GetTopLevelWidget());
+    else if (wxTheApp)
+        return wxTheApp->GetInitialDisplay();
+    return NULL;
+#endif
+#ifdef __WXX11__
     return wxApp::GetDisplay();
+#endif
 }
 
 bool wxSetDisplay(const wxString& display_name)
@@ -608,7 +668,8 @@ wxString wxGetXEventName(XEvent& event)
 		"ClientMessage", "MappingNotify",                         // 33-34
 		"unknown(+)"};                                            // 35
 	    type = wxMin(35, type); type = wxMax(1, type);
-        return wxString::FromAscii(event_name[type]);
+        wxString str(event_name[type]);
+        return str;
 #endif
 }
 #endif

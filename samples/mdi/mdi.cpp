@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -275,13 +275,7 @@ void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
     subframe->Show(TRUE);
 }
 
-void MyFrame::OnSize(wxSizeEvent& 
-                                  #ifdef __WXUNIVERSAL__
-                                  event
-                                  #else
-                                  WXUNUSED(event)
-                                  #endif
-                                  )
+void MyFrame::OnSize(wxSizeEvent& event)
 {
     int w, h;
     GetClientSize(&w, &h);

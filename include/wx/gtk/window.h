@@ -11,7 +11,7 @@
 #ifndef __GTKWINDOWH__
 #define __GTKWINDOWH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface
 #endif
 
@@ -69,7 +69,7 @@ public:
     virtual void Refresh( bool eraseBackground = TRUE,
                           const wxRect *rect = (const wxRect *) NULL );
     virtual void Update();
-    virtual void ClearBackground();
+    virtual void Clear();
 
     virtual bool SetBackgroundColour( const wxColour &colour );
     virtual bool SetForegroundColour( const wxColour &colour );

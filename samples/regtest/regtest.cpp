@@ -104,7 +104,7 @@ private:
   // structure describing a registry key/value
   class TreeNode : public wxTreeItemData
   {
-  WX_DEFINE_ARRAY_PTR(TreeNode *, TreeChildren);
+  WX_DEFINE_ARRAY(TreeNode *, TreeChildren);
   public:
       RegTreeCtrl  *m_pTree;     // must be !NULL
       TreeNode     *m_pParent;    // NULL only for the root node
@@ -1071,7 +1071,7 @@ void RegTreeCtrl::GoTo(const wxString& location)
 void RegTreeCtrl::DeleteSelected()
 {
   long lCurrent = GetSelection(),
-       lParent  = GetItemParent(lCurrent);
+       lParent  = GetParent(lCurrent);
 
   if ( lParent == 0 ) {
     wxLogError(wxT("Can't delete root key."));

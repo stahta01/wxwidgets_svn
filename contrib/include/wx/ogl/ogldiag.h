@@ -16,14 +16,9 @@
 #pragma interface "ogldiag.h"
 #endif
 
-#include "wx/ogl/basic.h"
+#include <wx/ogl/basic.h>
 
-#if wxUSE_PROLOGIO
-#include <wx/deprecated/wxexpr.h>
-#endif
-
-
-class WXDLLIMPEXP_OGL wxDiagram: public wxObject
+class wxDiagram: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxDiagram)
 
@@ -67,7 +62,7 @@ public:
   inline void SetMouseTolerance(int tol) { m_mouseTolerance = tol; }
   inline int GetMouseTolerance() const { return m_mouseTolerance; }
   inline wxList *GetShapeList() const { return m_shapeList; }
-  inline int GetCount() const { return m_shapeList->GetCount(); }
+  inline int GetCount() const { return m_shapeList->Number(); }
 
   // Make sure all text that should be centred, is centred.
   void RecentreAll(wxDC& dc);
@@ -98,7 +93,7 @@ protected:
   wxList*               m_shapeList;
 };
 
-class WXDLLIMPEXP_OGL wxLineCrossing: public wxObject
+class wxLineCrossing: public wxObject
 {
 public:
     wxLineCrossing() { m_lineShape1 = NULL; m_lineShape2 = NULL; }
@@ -111,7 +106,7 @@ public:
     wxLineShape*    m_lineShape2;
 };
 
-class WXDLLIMPEXP_OGL wxLineCrossings: public wxObject
+class wxLineCrossings: public wxObject
 {
 public:
     wxLineCrossings();

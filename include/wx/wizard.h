@@ -7,11 +7,10 @@
 // Modified by: Robert Cavanaugh
 //              Added capability to use .WXR resource files in Wizard pages
 //              Added wxWIZARD_HELP event
-//              Robert Vazan (sizers)
 // Created:     15.08.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_WIZARD_H_
@@ -30,13 +29,11 @@
     #include "wx/event.h"       // wxEVT_XXX constants
 #endif // WX_PRECOMP
 
-#include "wx/bitmap.h"
-
 // Extended style to specify a help button
 #define wxWIZARD_EX_HELPBUTTON   0x00000010
 
 // forward declarations
-class WXDLLIMPEXP_ADV wxWizard;
+class WXDLLEXPORT wxWizard;
 
 // ----------------------------------------------------------------------------
 // wxWizardPage is one of the wizards screen: it must know what are the
@@ -46,7 +43,7 @@ class WXDLLIMPEXP_ADV wxWizard;
 // used as such (i.e. controls may be placed directly on it &c).
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxWizardPage : public wxPanel
+class WXDLLEXPORT wxWizardPage : public wxPanel
 {
 public:
     wxWizardPage() { Init(); }
@@ -81,7 +78,7 @@ protected:
     wxBitmap m_bitmap;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxWizardPage)
+    DECLARE_ABSTRACT_CLASS(wxWizardPage)
 };
 
 // ----------------------------------------------------------------------------
@@ -93,7 +90,7 @@ private:
 // this, you must derive from wxWizardPage directly.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxWizardPageSimple : public wxWizardPage
+class WXDLLEXPORT wxWizardPageSimple : public wxWizardPage
 {
 public:
     wxWizardPageSimple() { Init(); }
@@ -149,14 +146,14 @@ private:
     wxWizardPage *m_prev,
                  *m_next;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxWizardPageSimple)
+    DECLARE_DYNAMIC_CLASS(wxWizardPageSimple)
 };
 
 // ----------------------------------------------------------------------------
 // wxWizard
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxWizardBase : public wxDialog
+class WXDLLEXPORT wxWizardBase : public wxDialog
 {
 public:
     /*
@@ -167,10 +164,8 @@ public:
                  int id = -1,
                  const wxString& title = wxEmptyString,
                  const wxBitmap& bitmap = wxNullBitmap,
-                 const wxPoint& pos = wxDefaultPosition,
-                 long style = wxDEFAULT_DIALOG_STYLE);
+                 const wxPoint& pos = wxDefaultPosition);
     */
-    wxWizardBase() { }
 
     // executes the wizard starting from the given page, returns TRUE if it was
     // successfully finished, FALSE if user cancelled it
@@ -184,7 +179,8 @@ public:
     // itself and will never be less than some predefined fixed size
     virtual void SetPageSize(const wxSize& size) = 0;
 
-    // get the size available for the page
+    // get the size available for the page: the wizards are not resizeable, so
+    // this size doesn't change
     virtual wxSize GetPageSize() const = 0;
 
     // set the best size for the wizard, i.e. make it big enough to contain all
@@ -196,15 +192,8 @@ public:
     // default)
     virtual void FitToPage(const wxWizardPage *firstPage) = 0;
 
-    // Adding pages to page area sizer enlarges wizard
-    virtual wxSizer *GetPageAreaSizer() const = 0;
-    
-    // Set border around page area. Default is 0 if you add at least one
-    // page to GetPageAreaSizer and 5 if you don't.
-    virtual void SetBorder(int border) = 0;
-    
     // wxWizard should be created using "new wxWizard" now, not with Create()
-#if WXWIN_COMPATIBILITY_2_2
+#ifdef WXWIN_COMPATIBILITY_2_2
     static wxWizard *Create(wxWindow *parent,
                             int id = -1,
                             const wxString& title = wxEmptyString,
@@ -221,9 +210,6 @@ public:
 
     virtual bool HasPrevPage(wxWizardPage *page)
         { return page->GetPrev() != NULL; }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxWizardBase)
 };
 
 // include the real class declaration
@@ -235,7 +221,7 @@ private:
 // window hierarchy as usual
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxWizardEvent : public wxNotifyEvent
+class WXDLLEXPORT wxWizardEvent : public wxNotifyEvent
 {
 public:
     wxWizardEvent(wxEventType type = wxEVT_NULL,
@@ -256,7 +242,6 @@ private:
     wxWizardPage*    m_page;
 
     DECLARE_DYNAMIC_CLASS(wxWizardEvent)
-    DECLARE_NO_COPY_CLASS(wxWizardEvent)
 };
 
 // ----------------------------------------------------------------------------
@@ -264,11 +249,11 @@ private:
 // ----------------------------------------------------------------------------
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_PAGE_CHANGED, 900)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_PAGE_CHANGING, 901)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_CANCEL, 902)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_HELP, 903)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_FINISHED, 903)
+    DECLARE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGED, 900)
+    DECLARE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGING, 901)
+    DECLARE_EVENT_TYPE(wxEVT_WIZARD_CANCEL, 902)
+    DECLARE_EVENT_TYPE(wxEVT_WIZARD_HELP, 903)
+    DECLARE_EVENT_TYPE(wxEVT_WIZARD_FINISHED, 903)
 END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxWizardEventFunction)(wxWizardEvent&);

@@ -49,7 +49,6 @@
 //----------------------------------------------------------------------
 
 %readonly
-// See also wxPy_ReinitStockObjects in helpers.cpp
 wxValidator wxDefaultValidator;
 %readwrite
 
@@ -318,20 +317,6 @@ public:
 
 //----------------------------------------------------------------------
 
-enum {
-    wxCHK_2STATE,
-    wxCHK_3STATE,
-    wxCHK_ALLOW_3RD_STATE_FOR_USER,
-};
-
-enum wxCheckBoxState
-{
-    wxCHK_UNCHECKED,
-    wxCHK_CHECKED,
-    wxCHK_UNDETERMINED /* 3-state checkbox only */
-};
-
-
 class wxCheckBox : public wxControl {
 public:
     wxCheckBox(wxWindow* parent, wxWindowID id, const wxString& label,
@@ -355,10 +340,6 @@ public:
     bool GetValue();
     bool IsChecked();
     void SetValue(const bool state);
-    wxCheckBoxState Get3StateValue() const;
-    void Set3StateValue(wxCheckBoxState state);
-    bool Is3State() const;
-    bool Is3rdStateAllowedForUser() const;
 };
 
 //----------------------------------------------------------------------
@@ -476,11 +457,7 @@ public:
         }
 
         PyObject* GetClientData(int n) {
-#ifdef __WXMAC__
-            wxPyClientData* data = (wxPyClientData*)self->wxItemContainer::GetClientObject(n);
-#else
             wxPyClientData* data = (wxPyClientData*)self->GetClientObject(n);
-#endif
             if (data) {
                 Py_INCREF(data->m_obj);
                 return data->m_obj;
@@ -492,11 +469,7 @@ public:
 
         void SetClientData(int n, PyObject* clientData) {
             wxPyClientData* data = new wxPyClientData(clientData);
-#ifdef __WXMAC__
-            self->wxItemContainer::SetClientObject(n, data);
-#else
             self->SetClientObject(n, data);
-#endif
         }
     }
 
@@ -575,7 +548,6 @@ public:
     int GetRange();
     int GetShadowWidth();
     int GetValue();
-    bool IsVertical() const;
     void SetBezelFace(int width);
     void SetRange(int range);
     void SetShadowWidth(int width);
@@ -747,56 +719,6 @@ public:
 
 //----------------------------------------------------------------------
 
-enum {
-    // Styles
-    wxTE_NO_VSCROLL,
-    wxTE_AUTO_SCROLL,
-    wxTE_READONLY,
-    wxTE_MULTILINE,
-    wxTE_PROCESS_TAB,
-    wxTE_LEFT,
-    wxTE_CENTER,
-    wxTE_RIGHT,
-    wxTE_CENTRE,
-    wxTE_RICH,
-    wxTE_PROCESS_ENTER,
-    wxTE_PASSWORD,
-    wxTE_AUTO_URL,
-    wxTE_NOHIDESEL,
-    wxTE_DONTWRAP,
-    wxTE_LINEWRAP,
-    wxTE_WORDWRAP,
-    wxTE_RICH2,
-
-    // Flags to indicate which attributes are being applied
-    wxTEXT_ATTR_TEXT_COLOUR,
-    wxTEXT_ATTR_BACKGROUND_COLOUR,
-    wxTEXT_ATTR_FONT_FACE,
-    wxTEXT_ATTR_FONT_SIZE,
-    wxTEXT_ATTR_FONT_WEIGHT,
-    wxTEXT_ATTR_FONT_ITALIC,
-    wxTEXT_ATTR_FONT_UNDERLINE,
-    wxTEXT_ATTR_FONT,
-    wxTEXT_ATTR_ALIGNMENT,
-    wxTEXT_ATTR_LEFT_INDENT,
-    wxTEXT_ATTR_RIGHT_INDENT,
-    wxTEXT_ATTR_TABS,
-
-};
-
-
-enum wxTextAttrAlignment
-{
-    wxTEXT_ALIGNMENT_DEFAULT,
-    wxTEXT_ALIGNMENT_LEFT,
-    wxTEXT_ALIGNMENT_CENTRE,
-    wxTEXT_ALIGNMENT_CENTER,
-    wxTEXT_ALIGNMENT_RIGHT,
-    wxTEXT_ALIGNMENT_JUSTIFIED
-};
-
-
-
 
 class wxTextAttr
 {
@@ -804,41 +726,22 @@ public:
     // ctors
     wxTextAttr(const wxColour& colText = wxNullColour,
                const wxColour& colBack = wxNullColour,
-               const wxFont& font = wxNullFont,
-               wxTextAttrAlignment alignment = wxTEXT_ALIGNMENT_DEFAULT);
+               const wxFont& font = wxNullFont);
     ~wxTextAttr();
-
-    void Init();
 
     // setters
     void SetTextColour(const wxColour& colText);
     void SetBackgroundColour(const wxColour& colBack);
     void SetFont(const wxFont& font);
-    void SetAlignment(wxTextAttrAlignment alignment);
-    void SetTabs(const wxArrayInt& tabs);
-    void SetLeftIndent(int indent);
-    void SetRightIndent(int indent);
-    void SetFlags(long flags);
 
     // accessors
     bool HasTextColour() const;
     bool HasBackgroundColour() const;
     bool HasFont() const;
-    bool HasAlignment() const;
-    bool HasTabs() const;
-    bool HasLeftIndent() const;
-    bool HasRightIndent() const;
-    bool HasFlag(long flag) const;
 
     wxColour GetTextColour() const;
     wxColour GetBackgroundColour() const;
     wxFont GetFont() const;
-    wxTextAttrAlignment GetAlignment();
-    const wxArrayInt& GetTabs() const;
-    long GetLeftIndent() const;
-    long GetRightIndent() const;
-    long GetFlags() const;
-
 
     // returns false if we have any attributes set, true otherwise
     bool IsDefault();
@@ -900,9 +803,6 @@ public:
     bool LoadFile(const wxString& file);
     bool SaveFile(const wxString& file = wxPyEmptyString);
 
-    // sets the dirty flag
-    virtual void MarkDirty() = 0;
-
     // clears the dirty flag
     void DiscardEdits();
 
@@ -925,7 +825,6 @@ public:
     bool SetStyle(long start, long end, const wxTextAttr& style);
     bool SetDefaultStyle(const wxTextAttr& style);
     const wxTextAttr& GetDefaultStyle() const;
-    bool GetStyle(long position, wxTextAttr& style);
 
     // translate between the position (which is just an index in the text ctrl
     // considering all its contents as a single strings) and (x, y) coordinates
@@ -1105,15 +1004,18 @@ public:
     int FindString(const wxString& string);
 
     wxString GetString(int n);
+
+#ifdef __WXGTK__
+    %name(GetItemLabel)wxString GetLabel( int item );
+    %name(SetItemLabel)void SetLabel( int item, const wxString& label );
+#else
     void SetString(int n, const wxString& label);
     %pragma(python) addtoclass = "
     GetItemLabel = GetString
     SetItemLabel = SetString
     "
-#ifndef __WXGTK__
     int GetColumnCount();
     int GetRowCount();
-    int GetNextItem(int item, wxDirection dir, long style);
 #endif
 
     int GetSelection();

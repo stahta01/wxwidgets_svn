@@ -22,7 +22,6 @@
 #include "wx/xrc/xh_panel.h"
 #include "wx/panel.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxPanelXmlHandler, wxXmlResourceHandler)
 
 wxPanelXmlHandler::wxPanelXmlHandler() : wxXmlResourceHandler()
 {

@@ -13,7 +13,7 @@
 #ifndef _WX_CONTAINR_H_
 #define _WX_CONTAINR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "containr.h"
 #endif
 
@@ -69,9 +69,6 @@ public:
     // the focus and the default processing should take place
     bool DoSetFocus();
 
-    // can our child get the focus?
-    bool AcceptsFocus() const;
-
     // called from OnChildFocus() handler, i.e. when one of our (grand)
     // children gets the focus
     void SetLastFocus(wxWindow *win);
@@ -114,7 +111,6 @@ public: \
     virtual wxWindow *GetDefaultItem() const; \
     virtual wxWindow *SetDefaultItem(wxWindow *child); \
     virtual void SetTmpDefaultItem(wxWindow *win); \
-    virtual bool AcceptsFocus() const; \
 \
 protected: \
     wxControlContainer m_container
@@ -168,10 +164,6 @@ void classname::OnChildFocus(wxChildFocusEvent& event) \
 void classname::OnFocus(wxFocusEvent& event) \
 { \
     m_container.HandleOnFocus(event); \
-} \
-bool classname::AcceptsFocus() const \
-{ \
-    return m_container.AcceptsFocus(); \
 }
 
 

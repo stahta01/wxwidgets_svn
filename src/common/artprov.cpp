@@ -13,7 +13,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "artprov.h"
 #endif
 
@@ -32,9 +32,7 @@
 #include "wx/artprov.h"
 #include "wx/hashmap.h"
 #include "wx/module.h"
-#if wxUSE_IMAGE
 #include "wx/image.h"
-#endif
 
 // For the purposes of forcing this module to link
 extern char g_ArtProviderModule;
@@ -51,7 +49,15 @@ WX_DEFINE_LIST(wxArtProvidersList);
 // Cache class - stores already requested bitmaps
 // ----------------------------------------------------------------------------
 
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
+
 WX_DECLARE_EXPORTED_STRING_HASH_MAP(wxBitmap, wxArtProviderBitmapsHash);
+
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
 
 class WXDLLEXPORT wxArtProviderCache
 {
@@ -116,6 +122,7 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
     if ( !sm_providers )
     {
         sm_providers = new wxArtProvidersList;
+        sm_providers->DeleteContents(TRUE);
         sm_cache = new wxArtProviderCache;
     }
 
@@ -128,8 +135,7 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
     wxCHECK_MSG( sm_providers, FALSE, _T("no wxArtProvider exists") );
     wxCHECK_MSG( sm_providers->GetCount() > 0, FALSE, _T("wxArtProviders stack is empty") );
 
-    delete sm_providers->GetFirst()->GetData();
-    sm_providers->Erase(sm_providers->GetFirst());
+    sm_providers->DeleteNode(sm_providers->GetFirst());
     sm_cache->Clear();
     return TRUE;
 }
@@ -140,7 +146,6 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
 
     if ( sm_providers->DeleteObject(provider) )
     {
-        delete provider;
         sm_cache->Clear();
         return TRUE;
     }
@@ -150,7 +155,6 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
 
 /*static*/ void wxArtProvider::CleanUpProviders()
 {
-    WX_CLEAR_LIST(wxArtProvidersList, *sm_providers);
     wxDELETE(sm_providers);
     wxDELETE(sm_cache);
 }
@@ -169,13 +173,12 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
     wxBitmap bmp;
     if ( !sm_cache->GetBitmap(hashId, &bmp) )
     {
-        for (wxArtProvidersList::compatibility_iterator node = sm_providers->GetFirst();
+        for (wxArtProvidersList::Node *node = sm_providers->GetFirst();
              node; node = node->GetNext())
         {
             bmp = node->GetData()->CreateBitmap(id, client, size);
             if ( bmp.Ok() )
             {
-#if wxUSE_IMAGE
                 if ( size != wxDefaultSize &&
                      (bmp.GetWidth() != size.x || bmp.GetHeight() != size.y) )
                 {
@@ -183,7 +186,6 @@ wxArtProviderCache *wxArtProvider::sm_cache = NULL;
                     img.Rescale(size.x, size.y);
                     bmp = wxBitmap(img);
                 }
-#endif                
                 break;
             }
         }

@@ -6,14 +6,14 @@
 // Copyright:  (C) 1999-1997, Guilhem Lavaux
 //             (C) 2000-1999, Guillermo Rodriguez Garcia
 // RCS_ID:     $Id$
-// License:    see wxWindows licence
+// License:    see wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ==========================================================================
 // Declarations
 // ==========================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "socket.h"
 #endif
 
@@ -27,7 +27,6 @@
 #if wxUSE_SOCKETS
 
 #include "wx/app.h"
-#include "wx/apptrait.h"
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/string.h"
@@ -38,12 +37,12 @@
 #include "wx/intl.h"
 #include "wx/event.h"
 
+#if wxUSE_GUI
+  #include "wx/gdicmn.h"      // for wxPendingDelete
+#endif // wxUSE_GUI
+
 #include "wx/sckaddr.h"
 #include "wx/socket.h"
-
-// DLL options compatibility check:
-#include "wx/build.h"
-WX_CHECK_BUILD_OPTIONS("wxNet")
 
 // --------------------------------------------------------------------------
 // macros and constants
@@ -52,24 +51,30 @@ WX_CHECK_BUILD_OPTIONS("wxNet")
 // discard buffer
 #define MAX_DISCARD_SIZE (10 * 1024)
 
-// what to do within waits: we have 2 cases: from the main thread itself we
-// have to call wxYield() to let the events (including the GUI events and the
-// low-level (not wxWindows) events from GSocket) be processed. From another
-// thread it is enough to just call wxThread::Yield() which will give away the
-// rest of our time slice: the explanation is that the events will be processed
-// by the main thread anyhow, without calling wxYield(), but we don't want to
-// eat the CPU time uselessly while sitting in the loop waiting for the data
-#if wxUSE_THREADS
-    #define PROCESS_EVENTS()        \
-    {                               \
-        if ( wxThread::IsMain() )   \
-            wxYield();              \
-        else                        \
-            wxThread::Yield();      \
-    }
-#else // !wxUSE_THREADS
-    #define PROCESS_EVENTS() wxYield()
-#endif // wxUSE_THREADS/!wxUSE_THREADS
+// what to do within waits: in wxBase we don't do anything as we don't have
+// the event loop anyhow (for now). In GUI apps we have 2 cases: from the main
+// thread itself we have to call wxYield() to let the events (including the
+// GUI events and the low-level (not wxWindows) events from GSocket) be
+// processed. From another thread it is enough to just call wxThread::Yield()
+// which will give away the rest of our time slice: the explanation is that
+// the events will be processed by the main thread anyhow, without calling
+// wxYield(), but we don't want to eat the CPU time uselessly while sitting
+// in the loop waiting for the data
+#if wxUSE_GUI
+    #if wxUSE_THREADS
+        #define PROCESS_EVENTS()        \
+        {                               \
+            if ( wxThread::IsMain() )   \
+                wxYield();              \
+            else                        \
+                wxThread::Yield();      \
+        }
+    #else // !wxUSE_THREADS
+        #define PROCESS_EVENTS() wxYield()
+    #endif // wxUSE_THREADS/!wxUSE_THREADS
+#else // !wxUSE_GUI
+    #define PROCESS_EVENTS()
+#endif // wxUSE_GUI/!wxUSE_GUI
 
 #define wxTRACE_Socket _T("wxSocket")
 
@@ -94,11 +99,13 @@ public:
   wxSocketEventFlags       m_eventmask;
   bool                     m_notify;
   void                    *m_clientData;
+#if WXWIN_COMPATIBILITY
+  wxSocketBase::wxSockCbk  m_cbk;
+  char                    *m_cdata;
+#endif // WXWIN_COMPATIBILITY
 
 public:
   wxSocketState() : wxObject() {}
-
-    DECLARE_NO_COPY_CLASS(wxSocketState)
 };
 
 // ==========================================================================
@@ -122,12 +129,6 @@ bool wxSocketBase::Initialize()
 {
     if ( !m_countInit++ )
     {
-        wxAppTraits *traits = wxAppConsole::GetInstance() ?
-                              wxAppConsole::GetInstance()->GetTraits() : NULL;
-        GSocketGUIFunctionsTable *functions = 
-            traits ? traits->GetSocketGUIFunctionsTable() : NULL;
-        GSocket_SetGUIFunctions(functions);
-        
         if ( !GSocket_Init() )
         {
             m_countInit--;
@@ -180,6 +181,10 @@ void wxSocketBase::Init()
   m_clientData   = NULL;
   m_notify       = FALSE;
   m_eventmask    = 0;
+#if WXWIN_COMPATIBILITY
+  m_cbk          = NULL;
+  m_cdata        = NULL;
+#endif // WXWIN_COMPATIBILITY
 
   if ( !IsInitialized() )
   {
@@ -206,9 +211,9 @@ wxSocketBase::~wxSocketBase()
 {
   // Just in case the app called Destroy() *and* then deleted
   // the socket immediately: don't leave dangling pointers.
-  wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-  if ( traits )
-      traits->RemoveFromPendingDelete(this);
+#if wxUSE_GUI
+  wxPendingDelete.DeleteObject(this);
+#endif
 
   // Shutdown and close the socket
   if (!m_beingDeleted)
@@ -236,18 +241,12 @@ bool wxSocketBase::Destroy()
   // Supress events from now on
   Notify(FALSE);
 
-  // schedule this object for deletion
-  wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-  if ( traits )
-  {
-      // let the traits object decide what to do with us
-      traits->ScheduleForDestroy(this);
-  }
-  else // no app or no traits
-  {
-      // in wxBase we might have no app object at all, don't leak memory
-      delete this;
-  }
+#if wxUSE_GUI
+  if ( !wxPendingDelete.Member(this) )
+    wxPendingDelete.Append(this);
+#else
+  delete this;
+#endif
 
   return TRUE;
 }
@@ -303,6 +302,7 @@ wxSocketBase& wxSocketBase::Read(void* buffer, wxUint32 nbytes)
 wxUint32 wxSocketBase::_Read(void* buffer, wxUint32 nbytes)
 {
   int total;
+  int ret = 1;
 
   // Try the pushback buffer first
   total = GetPushback(buffer, nbytes, FALSE);
@@ -324,7 +324,6 @@ wxUint32 wxSocketBase::_Read(void* buffer, wxUint32 nbytes)
   // wxSOCKET_BLOCK
   // wxSOCKET_NONE
   //
-  int ret;
   if (m_flags & wxSOCKET_NOWAIT)
   {
     GSocket_SetNonBlocking(m_socket, 1);
@@ -504,6 +503,7 @@ wxSocketBase& wxSocketBase::Write(const void *buffer, wxUint32 nbytes)
 wxUint32 wxSocketBase::_Write(const void *buffer, wxUint32 nbytes)
 {
   wxUint32 total = 0;
+  int ret = 1;
 
   // If the socket is invalid or parameters are ill, return immediately
   if (!m_socket || !buffer || !nbytes)
@@ -515,7 +515,6 @@ wxUint32 wxSocketBase::_Write(const void *buffer, wxUint32 nbytes)
   // wxSOCKET_BLOCK
   // wxSOCKET_NONE
   //
-  int ret;
   if (m_flags & wxSOCKET_NOWAIT)
   {
     GSocket_SetNonBlocking(m_socket, 1);
@@ -558,6 +557,7 @@ wxSocketBase& wxSocketBase::WriteMsg(const void *buffer, wxUint32 nbytes)
 {
   wxUint32 total;
   bool error;
+  int old_flags;
   struct
   {
     unsigned char sig[4];
@@ -569,6 +569,7 @@ wxSocketBase& wxSocketBase::WriteMsg(const void *buffer, wxUint32 nbytes)
 
   error = TRUE;
   total = 0;
+  old_flags = m_flags;
   SetFlags((m_flags & wxSOCKET_BLOCK) | wxSOCKET_WAITALL);
 
   msg.sig[0] = (unsigned char) 0xad;
@@ -622,6 +623,7 @@ wxSocketBase& wxSocketBase::Unread(const void *buffer, wxUint32 nbytes)
 
 wxSocketBase& wxSocketBase::Discard()
 {
+  int old_flags;
   char *buffer = new char[MAX_DISCARD_SIZE];
   wxUint32 ret;
   wxUint32 total = 0;
@@ -629,6 +631,7 @@ wxSocketBase& wxSocketBase::Discard()
   // Mask read events
   m_reading = TRUE;
 
+  old_flags = m_flags;
   SetFlags(wxSOCKET_NOWAIT);
 
   do
@@ -816,27 +819,35 @@ void wxSocketBase::SaveState()
   state->m_notify     = m_notify;
   state->m_eventmask  = m_eventmask;
   state->m_clientData = m_clientData;
+#if WXWIN_COMPATIBILITY
+  state->m_cbk        = m_cbk;
+  state->m_cdata      = m_cdata;
+#endif // WXWIN_COMPATIBILITY
 
   m_states.Append(state);
 }
 
 void wxSocketBase::RestoreState()
 {
-  wxList::compatibility_iterator node;
+  wxNode *node;
   wxSocketState *state;
 
-  node = m_states.GetLast();
+  node = m_states.Last();
   if (!node)
     return;
 
-  state = (wxSocketState *)node->GetData();
+  state = (wxSocketState *)node->Data();
 
   m_flags      = state->m_flags;
   m_notify     = state->m_notify;
   m_eventmask  = state->m_eventmask;
   m_clientData = state->m_clientData;
-  
-  m_states.Erase(node);
+#if WXWIN_COMPATIBILITY
+  m_cbk        = state->m_cbk;
+  m_cdata      = state->m_cdata;
+#endif // WXWIN_COMPATIBILITY
+
+  delete node;
   delete state;
 }
 
@@ -857,6 +868,30 @@ void wxSocketBase::SetFlags(wxSocketFlags flags)
   m_flags = flags;
 }
 
+
+// --------------------------------------------------------------------------
+// Callbacks (now obsolete - use events instead)
+// --------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY
+
+wxSocketBase::wxSockCbk wxSocketBase::Callback(wxSockCbk cbk_)
+{
+  wxSockCbk old_cbk = cbk_;
+
+  m_cbk = cbk_;
+  return old_cbk;
+}
+
+char *wxSocketBase::CallbackData(char *data)
+{
+  char *old_data = m_cdata;
+
+  m_cdata = data;
+  return old_data;
+}
+
+#endif // WXWIN_COMPATIBILITY
 
 // --------------------------------------------------------------------------
 // Event handling
@@ -930,7 +965,6 @@ void wxSocketBase::OnRequest(wxSocketNotify notification)
   // Schedule the event
 
   wxSocketEventFlags flag = 0;
-  wxUnusedVar(flag);
   switch (notification)
   {
     case GSOCK_INPUT:      flag = GSOCK_INPUT_FLAG; break;
@@ -953,6 +987,11 @@ void wxSocketBase::OnRequest(wxSocketNotify notification)
 
       m_handler->AddPendingEvent(event);
     }
+
+#if WXWIN_COMPATIBILITY
+    if (m_cbk)
+      m_cbk(*this, notification, m_cdata);
+#endif // WXWIN_COMPATIBILITY
   }
 }
 
@@ -1260,7 +1299,7 @@ wxDatagramSocket& wxDatagramSocket::SendTo( wxSockAddress& addr,
 // wxSocketModule
 // ==========================================================================
 
-class wxSocketModule : public wxModule
+class WXDLLEXPORT wxSocketModule : public wxModule
 {
 public:
     virtual bool OnInit()

@@ -11,7 +11,7 @@
 #ifndef _WX_HTMPRINT_H_
 #define _WX_HTMPRINT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "htmprint.h"
 #endif
 
@@ -21,7 +21,6 @@
 
 #include "wx/html/htmlcell.h"
 #include "wx/html/winpars.h"
-#include "wx/html/htmlfilt.h"
 
 #include "wx/print.h"
 #include "wx/printdlg.h"
@@ -34,7 +33,7 @@
 //                  portion of DC
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlDCRenderer : public wxObject
+class WXDLLEXPORT wxHtmlDCRenderer : public wxObject
 {
 public:
     wxHtmlDCRenderer();
@@ -75,8 +74,17 @@ public:
     // set the same pagebreak twice.
     //
     // CAUTION! Render() changes DC's user scale and does NOT restore it!
-    int Render(int x, int y, int from = 0, int dont_render = FALSE, int to = INT_MAX,
-               int *known_pagebreaks = NULL, int number_of_pages = 0);
+    int Render(int x, int y, int from = 0, int dont_render = FALSE);
+// wx 2.5 will use this signature instead of the preceding:
+//    int Render(int x, int y, int from = 0, int dont_render = FALSE, int to = INT_MAX,
+//               int *known_pagebreaks = NULL, int number_of_pages = 0);
+// but for this backport we have to get rid of the default arguments
+// so that the following signature is distinct from the original. This is
+// OK because the implementation never uses those defaults, and user code
+// wouldn't know about the extra arguments anyway. The default argument
+// on the original signature above still works.
+    int Render(int x, int y, int from /* = 0 */, int dont_render /* = FALSE */, int to /* = INT_MAX */,
+               int *known_pagebreaks /* = NULL */, int number_of_pages /* = 0 */);
 
     // returns total height of the html document
     // (compare Render's return value with this)
@@ -88,8 +96,6 @@ private:
     wxFileSystem *m_FS;
     wxHtmlContainerCell *m_Cells;
     int m_MaxWidth, m_Width, m_Height;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlDCRenderer)
 };
 
 
@@ -111,7 +117,7 @@ enum {
 //--------------------------------------------------------------------------------
 
 
-class WXDLLIMPEXP_HTML wxHtmlPrintout : public wxPrintout
+class WXDLLEXPORT wxHtmlPrintout : public wxPrintout
 {
 public:
     wxHtmlPrintout(const wxString& title = wxT("Printout"));
@@ -152,13 +158,6 @@ public:
     bool HasPage(int page);
     void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo);
     bool OnBeginDocument(int startPage, int endPage);
-    void OnPreparePrinting();
-
-    // Adds input filter
-    static void AddFilter(wxHtmlFilter *filter);
-
-    // Cleanup
-    static void CleanUpStatics();
 
 private:
 
@@ -181,11 +180,6 @@ private:
     int m_HeaderHeight, m_FooterHeight;
     wxHtmlDCRenderer *m_Renderer, *m_RendererHdr;
     float m_MarginTop, m_MarginBottom, m_MarginLeft, m_MarginRight, m_MarginSpace;
-
-    // list of HTML filters
-    static wxList m_Filters;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlPrintout)
 };
 
 
@@ -204,10 +198,10 @@ private:
 //                         stores page&printer settings in it.
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlEasyPrinting : public wxObject
+class WXDLLEXPORT wxHtmlEasyPrinting : public wxObject
 {
 public:
-    wxHtmlEasyPrinting(const wxString& name = wxT("Printing"), wxWindow *parentWindow = NULL);
+    wxHtmlEasyPrinting(const wxString& name = wxT("Printing"), wxFrame *parent_frame = NULL);
     ~wxHtmlEasyPrinting();
 
     bool PreviewFile(const wxString &htmlfile);
@@ -234,9 +228,6 @@ public:
             // pg is one of wxPAGE_ODD, wxPAGE_EVEN and wx_PAGE_ALL constants.
             // You can set different header/footer for odd and even pages
 
-    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes = 0);
-    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used)
-
     wxPrintData *GetPrintData() {return m_PrintData;}
     wxPageSetupDialogData *GetPageSetupData() {return m_PageSetupData;}
             // return page setting data objects. 
@@ -251,13 +242,8 @@ private:
     wxPrintData *m_PrintData;
     wxPageSetupDialogData *m_PageSetupData;
     wxString m_Name;
-    int m_FontsSizesArr[7];
-    int *m_FontsSizes;
-    wxString m_FontFaceFixed, m_FontFaceNormal;
     wxString m_Headers[2], m_Footers[2];
-    wxWindow *m_ParentWindow;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlEasyPrinting)
+    wxFrame *m_Frame;
 };
 
 

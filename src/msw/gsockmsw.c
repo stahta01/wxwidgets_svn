@@ -8,14 +8,6 @@
  */
 
 /*
- * TODO: for WinCE we need to replace WSAAsyncSelect
- * (Windows message-based notification of network events for a socket)
- * with another mechanism.
- * We may need to have a separate thread that polls for socket events
- * using select() and sends a message to the main thread.
- */
-
-/*
  * PLEASE don't put C++ comments here - this is a C source file.
  */
 
@@ -27,17 +19,9 @@
 #  pragma warning(disable:4115) /* named type definition in parentheses */
 #endif
 
-/* This needs to be before the wx/defs/h inclusion
- * for some reason
- */
-
-#ifdef __WXWINCE__
-#include <windows.h>
-#endif
-
 #ifndef __GSOCKET_STANDALONE__
-#   include "wx/platform.h"
-#   include "wx/setup.h"
+#include "wx/defs.h"
+#include "wx/setup.h"
 #endif
 
 #if wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__)
@@ -47,7 +31,6 @@
 #include "wx/msw/gsockmsw.h"
 #include "wx/gsocket.h"
 
-HINSTANCE wxGetInstance(void);
 #define INSTANCE wxGetInstance()
 
 #else
@@ -63,14 +46,7 @@ HINSTANCE wxGetInstance(void);
 
 #endif /* __GSOCKET_STANDALONE__ */
 
-#ifndef __WXWINCE__
 #include <assert.h>
-#else
-#define assert(x)
-#include <winsock.h>
-#include "wx/msw/wince/net.h"
-#endif
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -84,10 +60,7 @@ HINSTANCE wxGetInstance(void);
 #endif
 
 #define CLASSNAME  TEXT("_GSocket_Internal_Window_Class")
-
-/* implemented in utils.cpp */
-extern WXDLLIMPEXP_BASE HWND
-wxCreateHiddenWindow(LPCTSTR *pclassname, LPCTSTR classname, WNDPROC wndproc);
+#define WINDOWNAME TEXT("_GSocket_Internal_Window_Name")
 
 /* Maximum number of different GSocket objects at a given time.
  * This value can be modified at will, but it CANNOT be greater
@@ -110,15 +83,31 @@ static int firstAvailable;
 
 /* Global initializers */
 
-int _GSocket_GUI_Init(void)
+int GSocket_Init(void)
 {
-  static LPCTSTR pclassname = NULL;
+  WSADATA wsaData;
+  WNDCLASS winClass;
   int i;
 
   /* Create internal window for event notifications */
-  hWin = wxCreateHiddenWindow(&pclassname, CLASSNAME, _GSocket_Internal_WinProc);
-  if (!hWin)
-      return FALSE;
+  winClass.style         = 0;
+  winClass.lpfnWndProc   = _GSocket_Internal_WinProc;
+  winClass.cbClsExtra    = 0;
+  winClass.cbWndExtra    = 0;
+  winClass.hInstance     = INSTANCE;
+  winClass.hIcon         = (HICON) NULL;
+  winClass.hCursor       = (HCURSOR) NULL;
+  winClass.hbrBackground = (HBRUSH) NULL;
+  winClass.lpszMenuName  = (LPCTSTR) NULL;
+  winClass.lpszClassName = CLASSNAME;
+
+  RegisterClass(&winClass);
+  hWin = CreateWindow(CLASSNAME,
+                      WINDOWNAME,
+                      0, 0, 0, 0, 0,
+                      (HWND) NULL, (HMENU) NULL, INSTANCE, (LPVOID) NULL);
+
+  if (!hWin) return FALSE;
 
   /* Initialize socket list */
   InitializeCriticalSection(&critical);
@@ -129,10 +118,11 @@ int _GSocket_GUI_Init(void)
   }
   firstAvailable = 0;
 
-  return TRUE;
+  /* Initialize WinSocket */
+  return (WSAStartup((1 << 8) | 1, &wsaData) == 0);
 }
 
-void _GSocket_GUI_Cleanup(void)
+void GSocket_Cleanup(void)
 {
   /* Destroy internal window */
   DestroyWindow(hWin);
@@ -140,11 +130,14 @@ void _GSocket_GUI_Cleanup(void)
 
   /* Delete critical section */
   DeleteCriticalSection(&critical);
+
+  /* Cleanup WinSocket */
+  WSACleanup();
 }
 
 /* Per-socket GUI initialization / cleanup */
 
-int _GSocket_GUI_Init_Socket(GSocket *socket)
+int _GSocket_GUI_Init(GSocket *socket)
 {
   int i;
 
@@ -171,7 +164,7 @@ int _GSocket_GUI_Init_Socket(GSocket *socket)
   return TRUE;
 }
 
-void _GSocket_GUI_Destroy_Socket(GSocket *socket)
+void _GSocket_GUI_Destroy(GSocket *socket)
 {
   /* Remove the socket from the list */
   EnterCriticalSection(&critical);

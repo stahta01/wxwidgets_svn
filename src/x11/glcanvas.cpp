@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        glcanvas.cpp
-// Purpose:     wxGLCanvas, for using OpenGL with wxWindows
+// Purpose:     wxGLCanvas, for using OpenGL with wxWindows 2.0 for Motif.
 //              Uses the GLX extension.
 // Author:      Julian Smart and Wolfram Gloger
 // Modified by:
@@ -10,7 +10,7 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "glcanvas.h"
 #endif
 
@@ -26,24 +26,11 @@
 #ifdef __VMS
 # pragma message disable nosimpint
 #endif
-#include <X11/Xlib.h>
+#include <Xm/Xm.h>
 #ifdef __VMS
 # pragma message enable nosimpint
 #endif
-#include "wx/x11/private.h"
-
-// DLL options compatibility check:
-#include "wx/build.h"
-WX_CHECK_BUILD_OPTIONS("wxGL")
-
-static inline WXWindow wxGetClientAreaWindow(wxWindow* win)
-{
-#ifdef __WXMOTIF__
-    return win->GetClientXWindow();
-#else
-    return win->GetClientAreaWindow();
-#endif
-}
+#include "wx/motif/private.h"
 
 #ifdef OLD_MESA
 // workaround for bug in Mesa's glx.c
@@ -73,12 +60,12 @@ wxGLContext::wxGLContext( bool WXUNUSED(isRGB), wxWindow *win,
     wxGLCanvas *gc = (wxGLCanvas*) win;
     XVisualInfo *vi = (XVisualInfo *) gc->m_vi;
     
-    wxCHECK_RET( vi, wxT("invalid visual for OpenGL") );
+    wxCHECK_RET( vi, "invalid visual for OpenGl" );
     
     m_glContext = glXCreateContext( (Display *)wxGetDisplay(), vi,
                                     None, GL_TRUE);
   
-    wxCHECK_RET( m_glContext, wxT("Couldn't create OpenGL context") );
+    wxCHECK_RET( m_glContext, "Couldn't create OpenGl context" );
 }
 
 wxGLContext::wxGLContext( 
@@ -93,7 +80,7 @@ wxGLContext::wxGLContext(
     wxGLCanvas *gc = (wxGLCanvas*) win;
     XVisualInfo *vi = (XVisualInfo *) gc->m_vi;
     
-    wxCHECK_RET( vi, wxT("invalid visual for OpenGL") );
+    wxCHECK_RET( vi, "invalid visual for OpenGl" );
     
     if( other != 0 )
         m_glContext = glXCreateContext( (Display *)wxGetDisplay(), vi, 
@@ -102,7 +89,7 @@ wxGLContext::wxGLContext(
         m_glContext = glXCreateContext( (Display *)wxGetDisplay(), vi,
                                         None, GL_TRUE );
     
-    wxCHECK_RET( m_glContext, wxT("Couldn't create OpenGL context") );
+    wxCHECK_RET( m_glContext, "Couldn't create OpenGl context" );
 }
 
 wxGLContext::~wxGLContext()
@@ -122,7 +109,7 @@ void wxGLContext::SwapBuffers()
     if (m_glContext)
     {
         Display* display = (Display*) wxGetDisplay();
-        glXSwapBuffers(display, (Window) wxGetClientAreaWindow(m_window));
+        glXSwapBuffers(display, (Window) m_window->GetClientAreaWindow());
     }
 }
 
@@ -131,39 +118,31 @@ void wxGLContext::SetCurrent()
     if (m_glContext) 
     { 
         Display* display = (Display*) wxGetDisplay();
-        glXMakeCurrent(display, (Window) wxGetClientAreaWindow(m_window), 
+        glXMakeCurrent(display, (Window) m_window->GetClientAreaWindow(), 
                        m_glContext );;
     }
 }
 
-void wxGLContext::SetColour(const wxChar *colour)
+void wxGLContext::SetColour(const char *colour)
 {
-    wxColour the_colour = wxTheColourDatabase->Find(colour);
-    if(the_colour.Ok())
-    {
-        GLboolean b;
-        glGetBooleanv(GL_RGBA_MODE, &b);
-        if(b)
-        {
-            glColor3ub(the_colour.Red(),
-                    the_colour.Green(),
-                    the_colour.Blue());
-        }
-        else
-        {
-#ifdef __WXMOTIF__
-            the_colour.AllocColour(m_window->GetXDisplay());
-#else
-            the_colour.CalcPixel(wxTheApp->GetMainColormap(wxGetDisplay()));
-#endif
-            GLint pix = (GLint)the_colour.GetPixel();
-            if(pix == -1)
+    wxColour *the_colour = wxTheColourDatabase->FindColour(colour);
+    if(the_colour) {
+	GLboolean b;
+	glGetBooleanv(GL_RGBA_MODE, &b);
+	if(b) {
+	    glColor3ub(the_colour->Red(),
+		       the_colour->Green(),
+		       the_colour->Blue());
+	} else {
+            the_colour->CalcPixel(wxTheApp->GetMainColormap(wxGetDisplay()));
+	    GLint pix = (GLint)the_colour->GetPixel();
+	    if(pix == -1)
             {
-                wxLogError(wxT("wxGLCanvas: cannot allocate color\n"));
-                return;
+                wxLogError("wxGLCanvas: cannot allocate color\n");
+		return;
             }
-            glIndexi(pix);
-        }
+	    glIndexi(pix);
+	}
     }
 }
 
@@ -259,7 +238,7 @@ bool wxGLCanvas::Create( wxWindow *parent,
 
     // Check for the presence of the GLX extension
     if(!glXQueryExtension(display, NULL, NULL)) {
-	wxLogDebug(wxT("wxGLCanvas: GLX extension is missing\n"));
+	wxLogDebug("wxGLCanvas: GLX extension is missing\n");
 	return FALSE;
     }
 
@@ -316,7 +295,7 @@ bool wxGLCanvas::Create( wxWindow *parent,
     } else {
 	// By default, we use the visual of xwindow
         // NI: is this really senseful ? opengl in e.g. color index mode ?
-	XGetWindowAttributes(display, (Window)wxGetClientAreaWindow(this), &xwa);
+	XGetWindowAttributes(display, (Window) GetClientAreaWindow(), &xwa);
 	vi_templ.visualid = XVisualIDFromVisual(xwa.visual);
 	vi = XGetVisualInfo(display, VisualIDMask, &vi_templ, &n);
 	if(!vi) return FALSE;
@@ -354,7 +333,7 @@ bool wxGLCanvas::Create( wxWindow *parent,
 
     m_vi = vi;  // safe for later use
     
-    wxCHECK_MSG( m_vi, FALSE, wxT("required visual couldn't be found") );
+    wxCHECK_MSG( m_vi, FALSE, "required visual couldn't be found" );
 
     // Create the GLX context and make it current
 
@@ -399,7 +378,7 @@ void wxGLCanvas::SetCurrent()
     // if(glx_cx) glXMakeCurrent(display, (Window) GetClientAreaWindow(), glx_cx);
 }
 
-void wxGLCanvas::SetColour(const wxChar *col)
+void wxGLCanvas::SetColour(const char *col)
 {
     if( m_glContext ) m_glContext->SetColour(col);
 }

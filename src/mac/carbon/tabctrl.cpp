@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        tabctrl.cpp
 // Purpose:     wxTabCtrl
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -34,22 +34,18 @@ wxTabCtrl::wxTabCtrl()
 bool wxTabCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
             long style, const wxString& name)
 {
-    if ( !wxControl::Create(parent, id, pos, size,
-                            style, wxDefaultValidator, name) )
-        return false;
+	Rect bounds ;
+	Str255 title ;
 
-    Rect bounds ;
-    Str255 title ;
-    
-    m_imageList = NULL;
-    
-    MacPreControlCreate( parent , id ,  wxEmptyString , pos , size ,style, wxDefaultValidator , name , &bounds , title ) ;
-    
-    m_macControl = ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1, 
-        kControlTabSmallProc , (long) this ) ;
-    
-    MacPostControlCreate() ;
-    return TRUE ;
+  m_imageList = NULL;
+	
+	MacPreControlCreate( parent , id ,  "" , pos , size ,style, wxDefaultValidator , name , &bounds , title ) ;
+
+	m_macControl = ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1, 
+	  	kControlTabSmallProc , (long) this ) ;
+	
+	MacPostControlCreate() ;
+	return TRUE ;
 }
 
 wxTabCtrl::~wxTabCtrl()
@@ -119,7 +115,7 @@ int wxTabCtrl::GetRowCount() const
 wxString wxTabCtrl::GetItemText(int item) const
 {
     // TODO
-    return wxEmptyString;
+    return wxString("");
 }
 
 // Get the item image

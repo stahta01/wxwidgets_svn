@@ -16,14 +16,17 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "gdicmn.h"
 #endif
 
-#include "wx/setup.h"
+#include "wx/object.h"
 #include "wx/list.h"
+#include "wx/hash.h"
 #include "wx/string.h"
-#include "wx/fontenc.h"
+#include "wx/setup.h"
+#include "wx/colour.h"
+#include "wx/font.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -181,7 +184,7 @@ enum wxStockCursor
 
 #if defined(__WXMSW__) || defined(__WXPM__)
     #define wxBITMAP(name) wxBitmap(wxT(#name), wxBITMAP_TYPE_RESOURCE)
-#elif defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXX11__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXCOCOA__)
+#elif defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXX11__) || defined(__WXMAC__) || defined(__WXMGL__)
     // Initialize from an included XPM
     #define wxBITMAP(name) wxBitmap( (const char**) name##_xpm )
 #else // other platforms
@@ -199,7 +202,9 @@ enum wxStockCursor
 class WXDLLEXPORT wxSize
 {
 public:
-    // members are public for compatibility, don't use them directly.
+    // members are public for compatibility (don't use them directly,
+    // especially that there names were chosen very unfortunately - they should
+    // have been called width and height)
     int x, y;
 
     // constructors
@@ -214,11 +219,6 @@ public:
     // FIXME are these really useful? If they're, we should have += &c as well
     wxSize operator+(const wxSize& sz) { return wxSize(x + sz.x, y + sz.y); }
     wxSize operator-(const wxSize& sz) { return wxSize(x - sz.x, y - sz.y); }
-    
-    void IncTo(const wxSize& sz)
-        { if ( sz.x > x ) x = sz.x; if ( sz.y > y ) y = sz.y; }
-    void DecTo(const wxSize& sz)
-        { if ( sz.x < x ) x = sz.x; if ( sz.y < y ) y = sz.y; }
 
     // accessors
     void Set(int xx, int yy) { x = xx; y = yy; }
@@ -274,6 +274,11 @@ public:
     wxPoint& operator+=(const wxPoint& p) { x += p.x; y += p.y; return *this; }
     wxPoint& operator-=(const wxPoint& p) { x -= p.x; y -= p.y; return *this; }
 };
+
+#if WXWIN_COMPATIBILITY
+    #define wxIntPoint wxPoint
+    #define wxRectangle wxRect
+#endif // WXWIN_COMPATIBILITY
 
 // ---------------------------------------------------------------------------
 // wxRect
@@ -377,6 +382,8 @@ typedef wxInt8 wxDash;
 
 class WXDLLEXPORT wxPenList : public wxList
 {
+    DECLARE_DYNAMIC_CLASS(wxPenList)
+
 public:
     wxPenList() { }
     ~wxPenList();
@@ -388,6 +395,8 @@ public:
 
 class WXDLLEXPORT wxBrushList : public wxList
 {
+    DECLARE_DYNAMIC_CLASS(wxBrushList)
+
 public:
     wxBrushList() { }
     ~wxBrushList();
@@ -397,8 +406,12 @@ public:
     wxBrush *FindOrCreateBrush(const wxColour& colour, int style);
 };
 
+WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
+
 class WXDLLEXPORT wxFontList : public wxList
 {
+    DECLARE_DYNAMIC_CLASS(wxFontList)
+
 public:
     wxFontList() { }
     ~wxFontList();
@@ -411,42 +424,29 @@ public:
                              wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 };
 
-class WXDLLEXPORT wxStringToColourHashMap;
-
-class WXDLLEXPORT wxColourDatabase
+class WXDLLEXPORT wxColourDatabase : public wxList
 {
+    DECLARE_CLASS(wxColourDatabase)
+
 public:
-    wxColourDatabase();
-    ~wxColourDatabase();
+    wxColourDatabase(int type);
+    ~wxColourDatabase() ;
 
-    // find colour by name or name for the given colour
-    wxColour Find(const wxString& name) const;
+    // Not const because it may add a name to the database
+    wxColour *FindColour(const wxString& colour) ;
     wxString FindName(const wxColour& colour) const;
-
-    // add a new colour to the database
-    void AddColour(const wxString& name, const wxColour& colour);
-
-    // deprecated, use Find()/Add() instead
-    wxColour *FindColour(const wxString& name);
-    void AddColour(const wxString& name, wxColour *colour);
-
-
+    void Initialize();
 #ifdef __WXPM__
     // PM keeps its own type of colour table
     long*                           m_palTable;
     size_t                          m_nSize;
 #endif
-
-private:
-    // load the database with the built in colour values when called for the
-    // first time, do nothing after this
-    void Initialize();
-
-    wxStringToColourHashMap *m_map;
 };
 
 class WXDLLEXPORT wxBitmapList : public wxList
 {
+    DECLARE_DYNAMIC_CLASS(wxBitmapList)
+
 public:
     wxBitmapList();
     ~wxBitmapList();
@@ -459,10 +459,11 @@ class WXDLLEXPORT wxResourceCache: public wxList
 {
 public:
     wxResourceCache() { }
-#if !wxUSE_STL
     wxResourceCache(const unsigned int keyType) : wxList(keyType) { }
-#endif
     ~wxResourceCache();
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxResourceCache)
 };
 
 // ---------------------------------------------------------------------------

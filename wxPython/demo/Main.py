@@ -18,16 +18,6 @@ import wx.html
 
 import images
 
-##wx.Trap()
-##raw_input("Press a key...")
-
-
-# Use Python's bool constants if available, make aliases if not
-try:
-    True
-except NameError:
-    True = 1==1
-    False = 1==0
 
 #---------------------------------------------------------------------------
 
@@ -35,11 +25,8 @@ except NameError:
 _treeList = [
     # new stuff
     ('Recent Additions', [
-        'wxVListBox',
-        'wxListbook',
         'wxMaskedNumCtrl',
         'FloatCanvas',
-        'wxXmlResourceSubclass',
         ]),
 
     # managed windows == things with a (optional) caption you can close
@@ -87,7 +74,6 @@ _treeList = [
         'wxGenericDirCtrl',
         'wxGrid',
         'wxGrid_MegaExample',
-        'wxListbook',
         'wxListBox',
         'wxListCtrl',
         'wxListCtrl_virtual',
@@ -148,7 +134,6 @@ _treeList = [
         'wxStyledTextCtrl_2',
         'wxTimeCtrl',
         'wxTreeListCtrl',
-        'wxVListBox',
         ]),
 
     # How to lay out the controls in a frame/dialog
@@ -161,7 +146,6 @@ _treeList = [
         'wxScrolledPanel',
         'wxXmlResource',
         'wxXmlResourceHandler',
-        'wxXmlResourceSubclass',
         ]),
 
     # ditto
@@ -199,9 +183,7 @@ _treeList = [
         'DialogUnits',
         'DrawXXXList',
         'FontEnumerator',
-        'NewNamespace',
         'PrintFramework',
-        'ShapedWindow',
         'Throbber',
         'Unicode',
         'wxFileHistory',
@@ -344,12 +326,12 @@ class wxPythonDemo(wx.Frame):
         self.Centre(wx.BOTH)
         self.CreateStatusBar(1, wx.ST_SIZEGRIP)
 
-        splitter = wx.SplitterWindow(self, -1)
-        splitter2 = wx.SplitterWindow(splitter, -1)
+        splitter = wx.SplitterWindow(self, -1, style=wx.NO_3D|wx.SP_3D)
+        splitter2 = wx.SplitterWindow(splitter, -1, style=wx.NO_3D|wx.SP_3D)
 
         def EmptyHandler(evt): pass
-        #wx.EVT_ERASE_BACKGROUND(splitter, EmptyHandler)
-        #wx.EVT_ERASE_BACKGROUND(splitter2, EmptyHandler)
+        wx.EVT_ERASE_BACKGROUND(splitter, EmptyHandler)
+        wx.EVT_ERASE_BACKGROUND(splitter2, EmptyHandler)
 
         # Prevent TreeCtrl from displaying all items after destruction when True
         self.dying = False
@@ -410,8 +392,9 @@ class wxPythonDemo(wx.Frame):
         # Create a TreeCtrl
         tID = wx.NewId()
         self.treeMap = {}
-        self.tree = wx.TreeCtrl(splitter, tID, style =
-                                wx.TR_DEFAULT_STYLE #| wx.TR_HAS_VARIABLE_ROW_HEIGHT
+        self.tree = wx.TreeCtrl(splitter, tID,
+                                style=wx.TR_HAS_BUTTONS |
+                                wx.TR_HAS_VARIABLE_ROW_HEIGHT
                                )
 
         root = self.tree.AddRoot("wxPython Overview")
@@ -480,20 +463,12 @@ class wxPythonDemo(wx.Frame):
 
 
         # add the windows to the splitter and split it.
-        splitter2.SplitHorizontally(self.nb, self.log, -120)
+        splitter2.SplitHorizontally(self.nb, self.log, 425)
         splitter.SplitVertically(self.tree, splitter2, 180)
 
         splitter.SetMinimumPaneSize(20)
         splitter2.SetMinimumPaneSize(20)
 
-
-        # Make the splitter on the right expand the top wind when resized
-        def SplitterOnSize(evt):
-            splitter = evt.GetEventObject()
-            sz = splitter.GetSize()
-            splitter.SetSashPosition(sz.height - 120, False)
-            evt.Skip()
-        wx.EVT_SIZE(splitter2, SplitterOnSize)
 
 
         # select initial items

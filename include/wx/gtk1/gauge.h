@@ -11,7 +11,7 @@
 #ifndef __GTKGAUGEH__
 #define __GTKGAUGEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -75,8 +75,6 @@ public:
     int GetRange() const;
     int GetValue() const;
 
-    bool IsVertical() const { return HasFlag(wxGA_VERTICAL); }
-    
     // implementation
     // -------------
 
@@ -87,8 +85,8 @@ public:
         m_gaugePos;
 
     // obsolete functions, don't use
-#if WXWIN_COMPATIBILITY_2_2
-    bool GetProgressBar() const { return true; }
+#ifdef WXWIN_COMPATIBILITY_2_2
+    bool GetProgressBar() const { return TRUE; }
 #endif // WXWIN_COMPATIBILITY_2_2
 
 protected:

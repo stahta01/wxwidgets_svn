@@ -10,7 +10,7 @@
 #ifndef __INFOWIN_H__
 #define __INFOWIN_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "busyinfo.h"
 #endif
 
@@ -28,9 +28,6 @@ class WXDLLEXPORT wxInfoFrame : public wxFrame
 {
 public:
     wxInfoFrame(wxWindow *parent, const wxString& message);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxInfoFrame)
 };
 
 
@@ -49,8 +46,6 @@ public:
 
 private:
     wxInfoFrame *m_InfoFrame;
-
-    DECLARE_NO_COPY_CLASS(wxBusyInfo)
 };
 
 

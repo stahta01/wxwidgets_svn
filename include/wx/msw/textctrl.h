@@ -12,7 +12,7 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "textctrl.h"
 #endif
 
@@ -74,7 +74,6 @@ public:
     virtual bool LoadFile(const wxString& file);
 
     // clears the dirty flag
-    virtual void MarkDirty();
     virtual void DiscardEdits();
 
     virtual void SetMaxLength(unsigned long len);
@@ -93,7 +92,6 @@ public:
     // controls)
     virtual bool SetStyle(long start, long end, const wxTextAttr& style);
     virtual bool SetDefaultStyle(const wxTextAttr& style);
-    virtual bool GetStyle(long position, wxTextAttr& style);
 #endif // wxUSE_RICHEDIT
 
     // translate between the position (which is just an index in the text ctrl
@@ -128,11 +126,6 @@ public:
 
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
-
-    // Caret handling (Windows only)
-
-    bool ShowNativeCaret(bool show = true);
-    bool HideNativeCaret() { return ShowNativeCaret(false); }
 
     // Implementation from now on
     // --------------------------
@@ -190,10 +183,6 @@ public:
     // EDIT control has one already)
     void OnRightClick(wxMouseEvent& event);
 
-    // be sure the caret remains invisible if the user
-    // called HideNativeCaret() before
-    void OnSetFocus(wxFocusEvent& event);
-
 protected:
     // common part of all ctors
     void Init();
@@ -208,13 +197,12 @@ protected:
     // false if we hit the limit set by SetMaxLength() and so didn't change it
     bool AdjustSpaceLimit();
 
-#if wxUSE_RICHEDIT && (!wxUSE_UNICODE || wxUSE_UNICODE_MSLU)
+#if wxUSE_RICHEDIT
     // replace the selection or the entire control contents with the given text
     // in the specified encoding
-    bool StreamIn(const wxString& value, wxFontEncoding encoding, bool selOnly);
-
-    // get the contents of the control out as text in the given encoding
-    wxString StreamOut(wxFontEncoding encoding, bool selOnly = false) const;
+    bool StreamIn(const wxString& value,
+                  wxFontEncoding encoding,
+                  bool selOnly);
 #endif // wxUSE_RICHEDIT
 
     // replace the contents of the selection or of the entire control with the
@@ -253,11 +241,9 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxTextCtrl)
+    DECLARE_DYNAMIC_CLASS(wxTextCtrl)
 
     wxMenu* m_privateContextMenu;
-
-    bool m_isNativeCaretShown;
 };
 
 #endif

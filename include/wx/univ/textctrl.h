@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_TEXTCTRL_H_
 #define _WX_UNIV_TEXTCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univtextctrl.h"
 #endif
 
@@ -152,8 +152,7 @@ public:
     virtual void Replace(wxTextPos from, wxTextPos to, const wxString& value);
     virtual void Remove(wxTextPos from, wxTextPos to);
 
-    // sets/clears the dirty flag
-    virtual void MarkDirty();
+    // clears the dirty flag
     virtual void DiscardEdits();
 
     // writing text inserts it at the current position, appending always
@@ -252,7 +251,8 @@ public:
     virtual void CalcUnscrolledPosition(int x, int y, int *xx, int *yy) const;
     virtual void CalcScrolledPosition(int x, int y, int *xx, int *yy) const;
 
-    // ensure we have correct default border
+    // set the right colours and border
+    virtual bool IsContainerWindow() const { return TRUE; }
     virtual wxBorder GetDefaultBorder() const { return wxBORDER_SUNKEN; }
 
     // perform an action
@@ -455,6 +455,7 @@ protected:
 
     // event handlers
     // --------------
+    void OnIdle(wxIdleEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnSize(wxSizeEvent& event);
 
@@ -475,8 +476,6 @@ protected:
     bool DoCut();
     bool DoPaste();
 
-    // idle processing
-    virtual void OnInternalIdle();
 private:
     // all these methods are for multiline text controls only
 

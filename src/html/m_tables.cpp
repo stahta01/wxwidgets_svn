@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -125,8 +125,6 @@ private:
     // Computes minimal and maximal widths of columns. Needs to be called
     // only once, before first Layout(). 
     void ComputeMinMaxWidths();
-
-    DECLARE_NO_COPY_CLASS(wxHtmlTableCell)
 };
 
 

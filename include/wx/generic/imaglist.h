@@ -4,23 +4,21 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __IMAGELISTH_G__
 #define __IMAGELISTH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "imaglist.h"
 #endif
 
 #include "wx/defs.h"
-#include "wx/list.h"
-
-class WXDLLEXPORT wxDC;
-class WXDLLEXPORT wxBitmap;
-class WXDLLEXPORT wxColour;
+#include "wx/gdicmn.h"
+#include "wx/bitmap.h"
+#include "wx/dc.h"
 
 /*
  * wxImageList is used for wxListCtrl, wxTreeCtrl. These controls refer to
@@ -56,7 +54,7 @@ enum {
 class WXDLLEXPORT wxGenericImageList: public wxObject
 {
 public:
-    wxGenericImageList() { m_width = m_height = 0; }
+    wxGenericImageList() { }
     wxGenericImageList( int width, int height, bool mask = TRUE, int initialCount = 1 );
     ~wxGenericImageList();
     bool Create( int width, int height, bool mask = TRUE, int initialCount = 1 );

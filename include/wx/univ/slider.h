@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univslider.h"
 #endif
 
@@ -95,14 +95,10 @@ public:
         { return IsVert() ? wxVERTICAL : wxHORIZONTAL; }
 
     // do we have labels?
-    bool HasLabels() const 
-        { return ((GetWindowStyle() & wxSL_LABELS) != 0) &
-                 ((GetWindowStyle() & (wxSL_TOP|wxSL_BOTTOM|wxSL_LEFT|wxSL_RIGHT)) != 0); }
+    bool HasLabels() const { return (GetWindowStyle() & wxSL_LABELS) != 0; }
 
     // do we have ticks?
-    bool HasTicks() const 
-        { return ((GetWindowStyle() & wxSL_TICKS) != 0) &
-                 ((GetWindowStyle() & (wxSL_TOP|wxSL_BOTTOM|wxSL_LEFT|wxSL_RIGHT|wxSL_BOTH)) != 0); }
+    bool HasTicks() const { return (GetWindowStyle() & wxSL_TICKS) != 0; }
 
     // implement wxControlWithThumb interface
     virtual wxWindow *GetWindow() { return this; }

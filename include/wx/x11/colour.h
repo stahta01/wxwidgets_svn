@@ -12,7 +12,7 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "colour.h"
 #endif
 
@@ -52,9 +52,6 @@ public:
 #if wxUSE_UNICODE
     wxColour( const wxChar *colourName ) { InitFromName( wxString(colourName) ); }
 #endif
-
-    // Get colour from name or wxNullColour
-    static wxColour CreateByName(const wxString& name);
 
     wxColour( const wxColour& col ) { Ref(col); }
     wxColour& operator = ( const wxColour& col ) { Ref(col); return *this; }

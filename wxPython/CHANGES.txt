@@ -2,34 +2,12 @@ CHANGES.txt for wxPython
 
 ----------------------------------------------------------------------
 
-2.5.1.x
--------
-
-(See also the MigrationGuide.txt file for details about some of the
-big changes that have happened in this release and how you should
-adapt your code.)
-
-Many, many little fixes, changes and additions done as part of the move
-to wxWindows 2.5 that I have forgotten about.
-
-Added wxMirrorDC.
-
-Added wxIconLocation
-
-
-Added Python wrappers for the new wxVScrolledWindow, wxVListBox, and
-wxHtmlListBox classes.
-
-Added wrappers for wxBookCtrl and wxListbook.  wxNotebook now derives
-from wxBookCtrl.
-
-
-
-
 2.4.2.4
 -------
 
 Use wxSTC in the demo for displaying the soucre code of the samples.
+
+Updated to Scintilla 1.54.
 
 Lots of bug fixes and such from the wxWindows folks.
 

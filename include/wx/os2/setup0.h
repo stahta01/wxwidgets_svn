@@ -16,16 +16,12 @@
 // global settings
 // ----------------------------------------------------------------------------
 
-#define wxUSE_EXCEPTIONS    1
-
 // define this to 1 if you want icons to behave as bitmaps
 #define wxICON_IS_BITMAP     0
 
 // define this to 0 when building wxBase library
 #define wxUSE_GUI            1
 
-//define this to 1 when adding support for multiple displays/screens
-#define wxUSE_DISPLAY        0
 // ----------------------------------------------------------------------------
 // General features
 // ----------------------------------------------------------------------------
@@ -122,7 +118,6 @@
 #define wxUSE_MIMETYPE     1
 #define wxUSE_MSGDLG       1
 #define wxUSE_NOTEBOOK     1
-#define wxUSE_LISTBOOK     1
 #define wxUSE_SPLITTER     1
 #define wxUSE_STOPWATCH    1
 #define wxUSE_TAB_DIALOG   1
@@ -148,7 +143,7 @@
 #define wxUSE_RESOURCE_LOADING_IN_OS2     1
                                     // Use dynamic icon/cursor loading/saving code
                                     // under OS2.
-#define wxUSE_WX_RESOURCES        0
+#define wxUSE_WX_RESOURCES        1
                                   // Use .wxr resource mechanism (requires PrologIO library)
 
 // support for startup tips (wxShowTip &c)
@@ -238,9 +233,6 @@
                                   // and make the library thread safe
 #define wxUSE_ZLIB          1
                                   // Use zlib for compression in streams and PNG code
-#define wxUSE_GZSTREAM      1
-                                  // Set to 1 to compile wxGzipInput/OutputStream classes.
-                                  // Requires wxUSE_ZLIB.
 #define wxUSE_IMAGE         1
                                   // Set to 1 for wxImage support (recommended).
 #define wxUSE_LIBPNG        1
@@ -346,6 +338,9 @@
 #define wxUSE_OWNER_DRAWN             1
                                     // Owner-drawn menus and listboxes
 
+#define wxUSE_NEW_GRID 1
+                                // Define 1 to use the new drid classes
+
 /*
  * Any platform
  *
@@ -404,6 +399,9 @@
 #define wxUSE_PROTOCOL_FILE     1
 
 #define wxUSE_GENERIC_MDI_AS_NATIVE 1
+
+// use wxExpr (a.k.a. PrologIO)
+#define wxUSE_PROLOGIO          1
 
 #endif
     // _WX_SETUP_H_

@@ -12,7 +12,7 @@
 #ifndef _WX_EMULATOR_H_
 #define _WX_EMULATOR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "emulator.h"
 #endif
 

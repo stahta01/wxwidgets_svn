@@ -6,7 +6,7 @@
 // Created:     11.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univradiobox.h"
 #endif
 
@@ -152,11 +152,6 @@ bool wxRadioBox::Create(wxWindow *parent,
     {
         SetClientSize(DoGetBestClientSize());
     }
-
-    // Need to move the radiobox in order to move the radio buttons
-    wxPoint actualPos = GetPosition();
-    wxSize actualSize = GetSize();
-    DoMoveWindow(actualPos.x, actualPos.y, actualSize.x, actualSize.y);
 
     // radiobox should already have selection so select at least one item
     SetSelection(0);

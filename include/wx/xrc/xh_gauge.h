@@ -22,9 +22,8 @@
 #include "wx/xrc/xmlres.h"
 
 
-class WXDLLIMPEXP_XRC wxGaugeXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxGaugeXmlHandler : public wxXmlResourceHandler
 {
-	DECLARE_DYNAMIC_CLASS(wxGaugeXmlHandler)
     enum
     {
         wxGAUGE_DEFAULT_RANGE = 100

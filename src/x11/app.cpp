@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "app.h"
 #endif
 
@@ -27,13 +27,18 @@
 #include "wx/evtloop.h"
 #include "wx/timer.h"
 #include "wx/filename.h"
-#include "wx/hash.h"
 
 #include "wx/univ/theme.h"
 #include "wx/univ/renderer.h"
 
+#define ABS(a)	   (((a) < 0) ? -(a) : (a))
+
 #if wxUSE_THREADS
     #include "wx/thread.h"
+#endif
+
+#if wxUSE_WX_RESOURCES
+    #include "wx/resource.h"
 #endif
 
 #include "wx/x11/private.h"
@@ -49,6 +54,10 @@ extern wxList wxPendingDelete;
 wxHashTable *wxWidgetHashTable = NULL;
 wxHashTable *wxClientWidgetHashTable = NULL;
 
+wxApp *wxTheApp = NULL;
+
+// This is set within wxEntryStart -- too early on
+// to put these in wxTheApp
 static bool g_showIconic = FALSE;
 static wxSize g_initialSize = wxDefaultSize;
 
@@ -88,125 +97,40 @@ WXDisplay *wxApp::ms_display = NULL;
 IMPLEMENT_DYNAMIC_CLASS(wxApp, wxEvtHandler)
 
 BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
-    EVT_IDLE(wxAppBase::OnIdle)
+    EVT_IDLE(wxApp::OnIdle)
 END_EVENT_TABLE()
 
-bool wxApp::Initialize(int& argc, wxChar **argv)
+bool wxApp::Initialize()
 {
-#if defined(__WXDEBUG__) && !wxUSE_NANOX
-    // install the X error handler
-    gs_pfnXErrorHandler = XSetErrorHandler( wxXErrorHandler );
-#endif // __WXDEBUG__
-
-    wxString displayName;
-    bool syncDisplay = FALSE;
-
-    int argcOrig = argc;
-    for ( int i = 0; i < argcOrig; i++ )
-    {
-        if (wxStrcmp( argv[i], _T("-display") ) == 0)
-        {
-            if (i < (argc - 1))
-            {
-                argv[i++] = NULL;
-
-                displayName = argv[i];
-
-                argv[i] = NULL;
-                argc -= 2;
-            }
-        }
-        else if (wxStrcmp( argv[i], _T("-geometry") ) == 0)
-        {
-            if (i < (argc - 1))
-            {
-                argv[i++] = NULL;
-
-                int w, h;
-                if (wxSscanf(argv[i], _T("%dx%d"), &w, &h) != 2)
-                {
-                    wxLogError( _("Invalid geometry specification '%s'"),
-                                wxString(argv[i]).c_str() );
-                }
-                else
-                {
-                    g_initialSize = wxSize(w, h);
-                }
-
-                argv[i] = NULL;
-                argc -= 2;
-            }
-        }
-        else if (wxStrcmp( argv[i], _T("-sync") ) == 0)
-        {
-            syncDisplay = TRUE;
-
-            argv[i] = NULL;
-            argc--;
-        }
-        else if (wxStrcmp( argv[i], _T("-iconic") ) == 0)
-        {
-            g_showIconic = TRUE;
-
-            argv[i] = NULL;
-            argc--;
-        }
-    }
-
-    if ( argc != argcOrig )
-    {
-        // remove the argumens we consumed
-        for ( int i = 0; i < argc; i++ )
-        {
-            while ( !argv[i] )
-            {
-                memmove(argv + i, argv + i + 1, argcOrig - i);
-            }
-        }
-    }
-
-    // X11 display stuff
-    Display *xdisplay;
-    if ( displayName.empty() )
-        xdisplay = XOpenDisplay( NULL );
-    else
-        xdisplay = XOpenDisplay( displayName.ToAscii() );
-    if (!xdisplay)
-    {
-        wxLogError( _("wxWindows could not open display. Exiting.") );
-        return false;
-    }
-
-    if (syncDisplay)
-        XSynchronize(xdisplay, True);
-
-    ms_display = (WXDisplay*) xdisplay;
-
-    XSelectInput( xdisplay, XDefaultRootWindow(xdisplay), PropertyChangeMask);
-
-    // Misc.
-    wxSetDetectableAutoRepeat( TRUE );
-
-    if ( !wxAppBase::Initialize(argc, argv) )
-    {
-        XCloseDisplay(xdisplay);
-
-        return false;
-    }
-
-#if wxUSE_UNICODE
-    // Glib's type system required by Pango
-    g_type_init();
-#endif
+    wxClassInfo::InitializeClasses();
 
 #if wxUSE_INTL
     wxFont::SetDefaultEncoding(wxLocale::GetSystemEncoding());
 #endif
 
+    // GL: I'm annoyed ... I don't know where to put this and I don't want to
+    // create a module for that as it's part of the core.
+#if wxUSE_THREADS
+    wxPendingEventsLocker = new wxCriticalSection();
+#endif
+
+    wxTheColourDatabase = new wxColourDatabase(wxKEY_STRING);
+    wxTheColourDatabase->Initialize();
+
+    wxInitializeStockLists();
+    wxInitializeStockObjects();
+
+#if wxUSE_WX_RESOURCES
+    wxInitializeResourceSystem();
+#endif
+
     wxWidgetHashTable = new wxHashTable(wxKEY_INTEGER);
     wxClientWidgetHashTable = new wxHashTable(wxKEY_INTEGER);
 
-    return true;
+    wxModule::RegisterModules();
+    if (!wxModule::InitializeModules()) return FALSE;
+
+    return TRUE;
 }
 
 void wxApp::CleanUp()
@@ -216,8 +140,242 @@ void wxApp::CleanUp()
     delete wxClientWidgetHashTable;
     wxClientWidgetHashTable = NULL;
 
-    wxAppBase::CleanUp();
+    wxModule::CleanUpModules();
+
+#if wxUSE_WX_RESOURCES
+    wxCleanUpResourceSystem();
+#endif
+
+    delete wxTheColourDatabase;
+    wxTheColourDatabase = NULL;
+
+    wxDeleteStockObjects();
+
+    wxDeleteStockLists();
+
+    delete wxTheApp;
+    wxTheApp = NULL;
+
+    wxClassInfo::CleanUpClasses();
+
+#if wxUSE_THREADS
+    delete wxPendingEvents;
+    delete wxPendingEventsLocker;
+#endif
+
+#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+    // At this point we want to check if there are any memory
+    // blocks that aren't part of the wxDebugContext itself,
+    // as a special case. Then when dumping we need to ignore
+    // wxDebugContext, too.
+    if (wxDebugContext::CountObjectsLeft(TRUE) > 0)
+    {
+        wxLogDebug("There were memory leaks.");
+        wxDebugContext::Dump();
+        wxDebugContext::PrintStatistics();
+    }
+#endif
+
+    // do it as the very last thing because everything else can log messages
+    wxLog::DontCreateOnDemand();
+    // do it as the very last thing because everything else can log messages
+    delete wxLog::SetActiveTarget(NULL);
 }
+
+// NB: argc and argv may be changed here, pass by reference!
+int wxEntryStart( int& argc, char *argv[] )
+{
+#ifdef __WXDEBUG__
+#if !wxUSE_NANOX
+    // install the X error handler
+    gs_pfnXErrorHandler = XSetErrorHandler( wxXErrorHandler );
+#endif
+#endif // __WXDEBUG__
+
+    char *displayName = NULL;
+    bool syncDisplay = FALSE;
+
+    int i;
+    for (i = 0; i < argc; i++)
+    {
+        if (strcmp( argv[i], "-display") == 0)
+        {
+            if (i < (argc - 1))
+            {
+                i ++;
+                displayName = argv[i];
+                continue;
+            }
+        }
+        else if (strcmp( argv[i], "-geometry") == 0)
+        {
+            if (i < (argc - 1))
+            {
+                i ++;
+                int w, h;
+                if (sscanf(argv[i], "%dx%d", &w, &h) != 2)
+                {
+                    wxLogError( _("Invalid geometry specification '%s'"), wxString::FromAscii(argv[i]).c_str() );
+                }
+                else
+                {
+                    g_initialSize = wxSize(w, h);
+                }
+                continue;
+            }
+        }
+        else if (strcmp( argv[i], "-sync") == 0)
+        {
+            syncDisplay = TRUE;
+            continue;
+        }
+        else if (strcmp( argv[i], "-iconic") == 0)
+        {
+            g_showIconic = TRUE;
+
+            continue;
+        }
+
+    }
+
+    // X11 display stuff    
+    Display* xdisplay = XOpenDisplay( displayName );
+    if (!xdisplay)
+    {
+        wxLogError( _("wxWindows could not open display. Exiting.") );
+        return -1;
+    }
+
+    if (syncDisplay)
+        XSynchronize(xdisplay, True);
+
+    wxApp::ms_display = (WXDisplay*) xdisplay;
+    
+    XSelectInput( xdisplay, XDefaultRootWindow(xdisplay), PropertyChangeMask);
+
+    // Misc.
+    wxSetDetectableAutoRepeat( TRUE );
+
+#if wxUSE_UNICODE
+    // Glib's type system required by Pango
+    g_type_init();
+#endif    
+
+    if (!wxApp::Initialize())
+        return -1;
+
+    return 0;
+}
+
+int wxEntryInitGui()
+{
+    int retValue = 0;
+
+    if ( !wxTheApp->OnInitGui() )
+        retValue = -1;
+
+    return retValue;
+}
+
+
+int wxEntry( int argc, char *argv[] )
+{
+#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+    // This seems to be necessary since there are 'rogue'
+    // objects present at this point (perhaps global objects?)
+    // Setting a checkpoint will ignore them as far as the
+    // memory checking facility is concerned.
+    // Of course you may argue that memory allocated in globals should be
+    // checked, but this is a reasonable compromise.
+    wxDebugContext::SetCheckpoint();
+#endif
+    int err = wxEntryStart(argc, argv);
+    if (err)
+        return err;
+
+    if (!wxTheApp)
+    {
+        if (!wxApp::GetInitializerFunction())
+        {
+            printf( "wxWindows error: No initializer - use IMPLEMENT_APP macro.\n" );
+            return 0;
+        }
+
+        wxTheApp = (wxApp*) (* wxApp::GetInitializerFunction()) ();
+    }
+
+    if (!wxTheApp)
+    {
+        printf( "wxWindows error: wxTheApp == NULL\n" );
+        return 0;
+    }
+
+    // Command line argument stuff
+    wxTheApp->argc = argc;
+#if wxUSE_UNICODE
+    wxTheApp->argv = new wxChar*[argc+1];
+    int mb_argc = 0;
+    while (mb_argc < argc)
+    {
+        wxString tmp = wxString::FromAscii( argv[mb_argc] );
+        wxTheApp->argv[mb_argc] = wxStrdup( tmp.c_str() );
+        mb_argc++;
+    }
+    wxTheApp->argv[mb_argc] = (wxChar *)NULL;
+#else
+    wxTheApp->argv = argv;
+#endif
+
+    if (wxTheApp->argc > 0)
+    {
+        wxFileName fname( wxTheApp->argv[0] );
+        wxTheApp->SetAppName( fname.GetName() );
+    }
+
+    wxTheApp->m_showIconic = g_showIconic;
+    wxTheApp->m_initialSize = g_initialSize;
+
+    int retValue;
+    retValue = wxEntryInitGui();
+
+    // Here frames insert themselves automatically into wxTopLevelWindows by
+    // getting created in OnInit().
+    if ( retValue == 0 )
+    {
+        if ( !wxTheApp->OnInit() )
+            retValue = -1;
+    }
+
+    if ( retValue == 0 )
+    {
+        if (wxTheApp->Initialized()) retValue = wxTheApp->OnRun();
+    }
+
+    // flush the logged messages if any
+    wxLog *pLog = wxLog::GetActiveTarget();
+    if ( pLog != NULL && pLog->HasPendingMessages() )
+        pLog->Flush();
+
+    delete wxLog::SetActiveTarget(new wxLogStderr); // So dialog boxes aren't used
+    // for further messages
+
+    if (wxTheApp->GetTopWindow())
+    {
+        delete wxTheApp->GetTopWindow();
+        wxTheApp->SetTopWindow(NULL);
+    }
+
+    wxTheApp->DeletePendingObjects();
+
+    wxTheApp->OnExit();
+
+    wxApp::CleanUp();
+
+    return retValue;
+};
+
+// Static member initialization
+wxAppInitializerFunction wxAppBase::m_appInitFn = (wxAppInitializerFunction) NULL;
 
 wxApp::wxApp()
 {
@@ -228,19 +386,45 @@ wxApp::wxApp()
     m_mainColormap = (WXColormap) NULL;
     m_topLevelWidget = (WXWindow) NULL;
     m_maxRequestSize = 0;
+    m_mainLoop = NULL;
     m_showIconic = FALSE;
     m_initialSize = wxDefaultSize;
 
 #if !wxUSE_NANOX
-    m_visualInfo = NULL;
+    m_visualColormap = NULL;
+    m_colorCube = NULL;
 #endif
 }
 
 wxApp::~wxApp()
 {
 #if !wxUSE_NANOX
-    delete m_visualInfo;
+    if (m_colorCube)
+        free( m_colorCube );
+
+    if (m_visualColormap)
+        delete [] (XColor*)m_visualColormap;
 #endif
+}
+
+bool wxApp::Initialized()
+{
+    if (GetTopWindow())
+        return TRUE;
+    else
+        return FALSE;
+}
+
+int wxApp::MainLoop()
+{
+    int rt;
+    m_mainLoop = new wxEventLoop;
+
+    rt = m_mainLoop->Run();
+
+    delete m_mainLoop;
+    m_mainLoop = NULL;
+    return rt;
 }
 
 #if !wxUSE_NANOX
@@ -364,9 +548,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 
                 // Only erase background, paint in idle time.
                 win->SendEraseEvents();
-
-                // EXPERIMENT
-                //win->Update();
+                // win->Update();
             }
 
             return TRUE;
@@ -375,6 +557,8 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 #if !wxUSE_NANOX
         case GraphicsExpose:
         {
+            printf( "GraphicExpose event\n" );
+
             wxLogTrace( _T("expose"), _T("GraphicsExpose from %s"), win->GetName().c_str());
 
             win->GetUpdateRegion().Union( event->xgraphicsexpose.x, event->xgraphicsexpose.y,
@@ -592,59 +776,95 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
             return win->GetEventHandler()->ProcessEvent( wxevent );
         }
         case FocusIn:
-#if !wxUSE_NANOX
-            if ((event->xfocus.detail != NotifyPointer) &&
-                (event->xfocus.mode == NotifyNormal))
-#endif
             {
-                wxLogTrace( _T("focus"), _T("FocusIn from %s of type %s"), win->GetName().c_str(), win->GetClassInfo()->GetClassName() );
-
-                extern wxWindow* g_GettingFocus;
-                if (g_GettingFocus && g_GettingFocus->GetParent() == win)
+#if !wxUSE_NANOX
+                if ((event->xfocus.detail != NotifyPointer) &&
+                    (event->xfocus.mode == NotifyNormal))
+#endif
                 {
-                    // Ignore this, this can be a spurious FocusIn
-                    // caused by a child having its focus set.
-                    g_GettingFocus = NULL;
-                    wxLogTrace( _T("focus"), _T("FocusIn from %s of type %s being deliberately ignored"), win->GetName().c_str(), win->GetClassInfo()->GetClassName() );
-                    return TRUE;
+                    wxLogTrace( _T("focus"), _T("FocusIn from %s of type %s"), win->GetName().c_str(), win->GetClassInfo()->GetClassName() );
+
+                    extern wxWindow* g_GettingFocus;
+                    if (g_GettingFocus && g_GettingFocus->GetParent() == win)
+                    {
+                        // Ignore this, this can be a spurious FocusIn
+                        // caused by a child having its focus set.
+                        g_GettingFocus = NULL;
+                        wxLogTrace( _T("focus"), _T("FocusIn from %s of type %s being deliberately ignored"), win->GetName().c_str(), win->GetClassInfo()->GetClassName() );
+                        return TRUE;
+                    }
+                    else
+                    {
+                        wxFocusEvent focusEvent(wxEVT_SET_FOCUS, win->GetId());
+                        focusEvent.SetEventObject(win);
+                        focusEvent.SetWindow( g_prevFocus );
+                        g_prevFocus = NULL;
+
+                        return win->GetEventHandler()->ProcessEvent(focusEvent);
+                    }
                 }
-                else
+                return FALSE;
+                break;
+            }
+        case FocusOut:
+            {
+#if !wxUSE_NANOX
+                if ((event->xfocus.detail != NotifyPointer) &&
+                    (event->xfocus.mode == NotifyNormal))
+#endif
                 {
-                    wxFocusEvent focusEvent(wxEVT_SET_FOCUS, win->GetId());
-                    focusEvent.SetEventObject(win);
-                    focusEvent.SetWindow( g_prevFocus );
-                    g_prevFocus = NULL;
+                    wxLogTrace( _T("focus"), _T("FocusOut from %s of type %s"), win->GetName().c_str(), win->GetClassInfo()->GetClassName() );
 
+                    wxFocusEvent focusEvent(wxEVT_KILL_FOCUS, win->GetId());
+                    focusEvent.SetEventObject(win);
+                    focusEvent.SetWindow( g_nextFocus );
+                    g_nextFocus = NULL;
                     return win->GetEventHandler()->ProcessEvent(focusEvent);
                 }
+                return FALSE;
+                break;
             }
-            return FALSE;
-
-        case FocusOut:
-#if !wxUSE_NANOX
-            if ((event->xfocus.detail != NotifyPointer) &&
-                (event->xfocus.mode == NotifyNormal))
-#endif
-            {
-                wxLogTrace( _T("focus"), _T("FocusOut from %s of type %s"), win->GetName().c_str(), win->GetClassInfo()->GetClassName() );
-
-                wxFocusEvent focusEvent(wxEVT_KILL_FOCUS, win->GetId());
-                focusEvent.SetEventObject(win);
-                focusEvent.SetWindow( g_nextFocus );
-                g_nextFocus = NULL;
-                return win->GetEventHandler()->ProcessEvent(focusEvent);
-            }
-            return FALSE;
-
-#ifdef __WXDEBUG__
         default:
+        {
+#ifdef __WXDEBUG__
             //wxString eventName = wxGetXEventName(XEvent& event);
             //wxLogDebug(wxT("Event %s not handled"), eventName.c_str());
+#endif
+            return FALSE;
             break;
-#endif // __WXDEBUG__
+        }
     }
-
     return FALSE;
+}
+
+// Returns TRUE if more time is needed.
+// Note that this duplicates wxEventLoopImpl::SendIdleEvent
+// but ProcessIdle may be needed by apps, so is kept.
+bool wxApp::ProcessIdle()
+{
+    wxIdleEvent event;
+    event.SetEventObject(this);
+    ProcessEvent(event);
+
+    return event.MoreRequested();
+}
+
+void wxApp::ExitMainLoop()
+{
+    if (m_mainLoop)
+        m_mainLoop->Exit(0);
+}
+
+// Is a message/event pending?
+bool wxApp::Pending()
+{
+    return wxEventLoop::GetActive()->Pending();
+}
+
+// Dispatch a message.
+void wxApp::Dispatch()
+{
+    wxEventLoop::GetActive()->Dispatch();
 }
 
 // This should be redefined in a derived class for
@@ -657,13 +877,119 @@ bool wxApp::HandlePropertyChange(WXEvent *event)
     return FALSE;
 }
 
-void wxApp::WakeUpIdle()
+void wxApp::OnIdle(wxIdleEvent& event)
 {
-    // TODO: use wxMotif implementation?
+    static bool s_inOnIdle = FALSE;
 
+    // Avoid recursion (via ProcessEvent default case)
+    if (s_inOnIdle)
+        return;
+
+    s_inOnIdle = TRUE;
+
+    // Resend in the main thread events which have been prepared in other
+    // threads
+    ProcessPendingEvents();
+
+    // 'Garbage' collection of windows deleted with Close()
+    DeletePendingObjects();
+
+    // Send OnIdle events to all windows
+    bool needMore = SendIdleEvents();
+
+    if (needMore)
+        event.RequestMore(TRUE);
+
+    s_inOnIdle = FALSE;
+}
+
+void wxWakeUpIdle()
+{
+    // **** please implement me! ****
     // Wake up the idle handler processor, even if it is in another thread...
 }
 
+
+// Send idle event to all top-level windows
+bool wxApp::SendIdleEvents()
+{
+    bool needMore = FALSE;
+
+    wxWindowList::Node* node = wxTopLevelWindows.GetFirst();
+    while (node)
+    {
+        wxWindow* win = node->GetData();
+        if (SendIdleEvents(win))
+            needMore = TRUE;
+        node = node->GetNext();
+    }
+
+    return needMore;
+}
+
+// Send idle event to window and all subwindows
+bool wxApp::SendIdleEvents(wxWindow* win)
+{
+    bool needMore = FALSE;
+
+    wxIdleEvent event;
+    event.SetEventObject(win);
+
+    win->GetEventHandler()->ProcessEvent(event);
+
+    if (event.MoreRequested())
+        needMore = TRUE;
+
+    wxNode* node = win->GetChildren().First();
+    while (node)
+    {
+        wxWindow* win = (wxWindow*) node->Data();
+        if (SendIdleEvents(win))
+            needMore = TRUE;
+
+        node = node->Next();
+    }
+
+    win->OnInternalIdle();
+
+    return needMore;
+}
+
+void wxApp::DeletePendingObjects()
+{
+    wxNode *node = wxPendingDelete.First();
+    while (node)
+    {
+        wxObject *obj = (wxObject *)node->Data();
+
+        delete obj;
+
+        if (wxPendingDelete.Member(obj))
+            delete node;
+
+        // Deleting one object may have deleted other pending
+        // objects, so start from beginning of list again.
+        node = wxPendingDelete.First();
+    }
+}
+
+static void wxCalcPrecAndShift( unsigned long mask, int *shift, int *prec )
+{
+  *shift = 0;
+  *prec = 0;
+
+  while (!(mask & 0x1))
+    {
+      (*shift)++;
+      mask >>= 1;
+    }
+
+  while (mask & 0x1)
+    {
+      (*prec)++;
+      mask >>= 1;
+    }
+}
 
 // Create display, and other initialization
 bool wxApp::OnInitGui()
@@ -681,8 +1007,99 @@ bool wxApp::OnInitGui()
     m_maxRequestSize = XMaxRequestSize( (Display*) wxApp::GetDisplay() );
 
 #if !wxUSE_NANOX
-    m_visualInfo = new wxXVisualInfo;
-    wxFillXVisualInfo( m_visualInfo, (Display*) wxApp::GetDisplay() );
+    // Get info about the current visual. It is enough
+    // to do this once here unless we support different
+    // visuals, displays and screens. Given that wxX11
+    // mostly for embedded things, that is no real
+    // limitation.
+    Display *xdisplay = (Display*) wxApp::GetDisplay();
+    int xscreen = DefaultScreen(xdisplay);
+    Visual* xvisual = DefaultVisual(xdisplay,xscreen);
+    int xdepth = DefaultDepth(xdisplay, xscreen);
+
+    XVisualInfo vinfo_template;
+    vinfo_template.visual = xvisual;
+    vinfo_template.visualid = XVisualIDFromVisual( xvisual );
+    vinfo_template.depth = xdepth;
+
+    int nitem = 0;
+    XVisualInfo *vi = XGetVisualInfo( xdisplay, VisualIDMask|VisualDepthMask, &vinfo_template, &nitem );
+    wxASSERT_MSG( vi, wxT("No visual info") );
+
+    m_visualType = vi->visual->c_class;
+    m_visualScreen = vi->screen;
+
+    m_visualRedMask = vi->red_mask;
+    m_visualGreenMask = vi->green_mask;
+    m_visualBlueMask = vi->blue_mask;
+
+    if (m_visualType != GrayScale && m_visualType != PseudoColor)
+    {
+        wxCalcPrecAndShift( m_visualRedMask, &m_visualRedShift, &m_visualRedPrec );
+        wxCalcPrecAndShift( m_visualGreenMask, &m_visualGreenShift, &m_visualGreenPrec );
+        wxCalcPrecAndShift( m_visualBlueMask, &m_visualBlueShift, &m_visualBluePrec );
+    }
+
+    m_visualDepth = xdepth;
+    if (xdepth == 16)
+        xdepth = m_visualRedPrec + m_visualGreenPrec + m_visualBluePrec;
+
+    m_visualColormapSize = vi->colormap_size;
+
+    XFree( vi );
+
+    if (m_visualDepth > 8)
+        return TRUE;
+
+    m_visualColormap = new XColor[m_visualColormapSize];
+    XColor* colors = (XColor*) m_visualColormap;
+
+    for (int i = 0; i < m_visualColormapSize; i++)
+	    colors[i].pixel = i;
+
+    XQueryColors( xdisplay, DefaultColormap(xdisplay,xscreen), colors, m_visualColormapSize );
+
+    m_colorCube = (unsigned char*)malloc(32 * 32 * 32);
+
+    for (int r = 0; r < 32; r++)
+    {
+        for (int g = 0; g < 32; g++)
+        {
+            for (int b = 0; b < 32; b++)
+            {
+                int rr = (r << 3) | (r >> 2);
+                int gg = (g << 3) | (g >> 2);
+                int bb = (b << 3) | (b >> 2);
+
+                int index = -1;
+
+                if (colors)
+                {
+                    int max = 3 * 65536;
+
+                    for (int i = 0; i < m_visualColormapSize; i++)
+                    {
+                        int rdiff = ((rr << 8) - colors[i].red);
+                        int gdiff = ((gg << 8) - colors[i].green);
+                        int bdiff = ((bb << 8) - colors[i].blue);
+                        int sum = ABS (rdiff) + ABS (gdiff) + ABS (bdiff);
+                        if (sum < max)
+                        {
+                            index = i; max = sum;
+                        }
+                    }
+                }
+                else
+                {
+                    // assume 8-bit true or static colors. this really exists
+                    index = (r >> (5 - m_visualRedPrec)) << m_visualRedShift;
+                    index |= (g >> (5 - m_visualGreenPrec)) << m_visualGreenShift;
+                    index |= (b >> (5 - m_visualBluePrec)) << m_visualBlueShift;
+                }
+                m_colorCube[ (r*1024) + (g*32) + b ] = index;
+            }
+        }
+    }
 #endif
 
     return TRUE;
@@ -699,9 +1116,9 @@ PangoContext* wxApp::GetPangoContext()
     static PangoContext *ret = NULL;
     if (ret)
         return ret;
-
+    
     Display *xdisplay = (Display*) wxApp::GetDisplay();
-
+    
 #if 1
     int xscreen = DefaultScreen(xdisplay);
     static int use_xft = -1;
@@ -710,16 +1127,16 @@ PangoContext* wxApp::GetPangoContext()
         wxString val = wxGetenv( L"GDK_USE_XFT" );
         use_xft = (val == L"1");
     }
-
+  
     if (use_xft)
         ret = pango_xft_get_context( xdisplay, xscreen );
     else
 #endif
         ret = pango_x_get_context( xdisplay );
-
+        
     if (!PANGO_IS_CONTEXT(ret))
         wxLogError( wxT("No pango context.") );
-
+        
     return ret;
 }
 #endif
@@ -742,7 +1159,7 @@ WXColormap wxApp::GetMainColormap(WXDisplay* display)
 
 Window wxGetWindowParent(Window window)
 {
-    wxASSERT_MSG( window, _T("invalid window") );
+    wxASSERT_MSG( window, "invalid window" );
 
     return (Window) 0;
 
@@ -769,11 +1186,18 @@ Window wxGetWindowParent(Window window)
         return (Window) 0;
 }
 
-void wxApp::Exit()
+void wxExit()
 {
-    wxApp::CleanUp();
+    int retValue = 0;
+    if (wxTheApp)
+        retValue = wxTheApp->OnExit();
 
-    wxAppConsole::Exit();
+    wxApp::CleanUp();
+    /*
+    * Exit in some platform-specific way. Not recommended that the app calls this:
+    * only for emergencies.
+    */
+    exit(retValue);
 }
 
 // Yield to other processes
@@ -813,7 +1237,7 @@ bool wxApp::Yield(bool onlyIfNeeded)
         // Call dispatch at least once so that sockets
         // can be tested
         wxTheApp->Dispatch();
-
+        
         while (wxTheApp && wxTheApp->Pending())
             wxTheApp->Dispatch();
 

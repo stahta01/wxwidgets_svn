@@ -14,7 +14,6 @@
 
 #include "wx/defs.h"
 #include "wx/string.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 #include "wx/mmedia/sndpcm.h"
 
@@ -22,7 +21,7 @@
 // OSS output class
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundStreamOSS : public wxSoundStream {
+class WXDLLEXPORT wxSoundStreamOSS : public wxSoundStream {
  public:
   wxSoundStreamOSS(const wxString& dev_name = wxT("/dev/dsp"));
   ~wxSoundStreamOSS();

@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "listboxbase.h"
 #endif
 
@@ -43,11 +43,10 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxListBoxNameStr;
 class WXDLLEXPORT wxListBoxBase : public wxControlWithItems
 {
 public:
-    wxListBoxBase() { }
-    virtual ~wxListBoxBase();
-
     // all generic methods are in wxControlWithItems, except for the following
     // ones which are not yet implemented by wxChoice/wxCombobox
+    virtual ~wxListBoxBase();
+
     void Insert(const wxString& item, int pos)
         { DoInsert(item, pos); }
     void Insert(const wxString& item, int pos, void *clientData)
@@ -110,16 +109,14 @@ public:
 protected:
     // NB: due to wxGTK implementation details, DoInsert() is implemented
     //     using DoInsertItems() and not the other way round
-    virtual int DoInsert(const wxString& item, int pos)
-        { InsertItems(1, &item, pos); return pos; }
+    void DoInsert(const wxString& item, int pos)
+        { InsertItems(1, &item, pos); }
 
     // to be implemented in derived classes
     virtual void DoInsertItems(const wxArrayString& items, int pos) = 0;
     virtual void DoSetItems(const wxArrayString& items, void **clientData) = 0;
 
     virtual void DoSetFirstItem(int n) = 0;
-
-    DECLARE_NO_COPY_CLASS(wxListBoxBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -138,8 +135,8 @@ protected:
     #include "wx/mac/listbox.h"
 #elif defined(__WXPM__)
     #include "wx/os2/listbox.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/listbox.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/listbox.h"
 #endif
 
 #endif // wxUSE_LISTBOX

@@ -14,12 +14,14 @@
 
 %{
 #include "helpers.h"
+#ifdef OLD_GRID
+#include <wx/grid.h>
+#endif
 #include <wx/notebook.h>
-#include <wx/listbook.h>
 #include <wx/splitter.h>
 #include <wx/imaglist.h>
 #ifdef __WXMSW__
-#include <wx/taskbar.h>
+#include <wx/msw/taskbar.h>
 #endif
 %}
 
@@ -52,147 +54,28 @@
 %pragma(python) code = "import wx"
 
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-
-// TODO:  Virtualize this class so other book controls can be derived in Python
-
-class wxBookCtrl : public wxControl
-{
-public:
-    // This is an ABC, it can't be constructed...
-//     wxBookCtrl(wxWindow *parent,
-//                wxWindowID id,
-//                const wxPoint& pos = wxDefaultPosition,
-//                const wxSize& size = wxDefaultSize,
-//                long style = 0,
-//                const wxString& name = wxPyEmptyString);
-//     %name(wxPreBookCtrl)wxBookCtrl();
-//     bool Create(wxWindow *parent,
-//                 wxWindowID id,
-//                 const wxPoint& pos = wxDefaultPosition,
-//                 const wxSize& size = wxDefaultSize,
-//                 long style = 0,
-//                 const wxString& name = wxPyEmptyString);
-//     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-//     %pragma(python) addtomethod = "wxPreBookCtrl:val._setOORInfo(val)"
-
-
-    // get number of pages in the dialog
-    virtual size_t GetPageCount() const;
-
-    // get the panel which represents the given page
-    virtual wxWindow *GetPage(size_t n);
-
-    // get the currently selected page or wxNOT_FOUND if none
-    virtual int GetSelection() const = 0;
-
-    // set/get the title of a page
-    virtual bool SetPageText(size_t n, const wxString& strText) = 0;
-    virtual wxString GetPageText(size_t n) const = 0;
-
-
-    // image list stuff: each page may have an image associated with it (all
-    // images belong to the same image list)
-
-    // sets the image list to use, it is *not* deleted by the control
-    virtual void SetImageList(wxImageList *imageList);
-
-    // as SetImageList() but we will delete the image list ourselves
-    void AssignImageList(wxImageList *imageList);
-    %pragma(python) addtomethod = "AssignImageList:_args[0].thisown = 0"
-
-    // get pointer (may be NULL) to the associated image list
-    wxImageList* GetImageList() const;
-
-    // sets/returns item's image index in the current image list
-    virtual int GetPageImage(size_t n) const = 0;
-    virtual bool SetPageImage(size_t n, int imageId) = 0;
-
-
-    // resize the notebook so that all pages will have the specified size
-    virtual void SetPageSize(const wxSize& size);
-
-    // calculate the size of the control from the size of its page
-    virtual wxSize CalcSizeFromPage(const wxSize& sizePage) const = 0;
-
-
-
-    // remove one page from the control and delete it
-    virtual bool DeletePage(size_t n);
-
-    // remove one page from the notebook, without deleting it
-    virtual bool RemovePage(size_t n);
-
-    // remove all pages and delete them
-    virtual bool DeleteAllPages();
-
-    // adds a new page to the control
-    virtual bool AddPage(wxWindow *page,
-                         const wxString& text,
-                         bool select = false,
-                         int imageId = -1);
-
-    // the same as AddPage(), but adds the page at the specified position
-    virtual bool InsertPage(size_t n,
-                            wxWindow *page,
-                            const wxString& text,
-                            bool select = false,
-                            int imageId = -1) = 0;
-
-    // set the currently selected page, return the index of the previously
-    // selected one (or -1 on error)
-    //
-    // NB: this function will _not_ generate PAGE_CHANGING/ED events
-    virtual int SetSelection(size_t n) = 0;
-
-
-    // cycle thru the pages
-    void AdvanceSelection(bool forward = true);
-};
-
-
-
-class wxBookCtrlEvent : public wxNotifyEvent
-{
-public:
-    wxBookCtrlEvent(wxEventType commandType = wxEVT_NULL, int id = 0,
-                    int nSel = -1, int nOldSel = -1);
-
-        // the currently selected page (-1 if none)
-    int GetSelection() const;
-    void SetSelection(int nSel);
-        // the page that was selected before the change (-1 if none)
-    int GetOldSelection() const;
-    void SetOldSelection(int nOldSel);
-};
-
-
-//---------------------------------------------------------------------------
 
 enum {
-    // notebook control event types
+     /* notebook control event types */
     wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED,
     wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING,
+};
 
-    // styles
-    wxNB_FIXEDWIDTH,
-    wxNB_TOP,
-    wxNB_LEFT,
-    wxNB_RIGHT,
-    wxNB_BOTTOM,
-    wxNB_MULTILINE,
 
-    // hittest flags
-    wxNB_HITTEST_NOWHERE = 1,   // not on tab
-    wxNB_HITTEST_ONICON  = 2,   // on icon
-    wxNB_HITTEST_ONLABEL = 4,   // on label
-    wxNB_HITTEST_ONITEM  = wxNB_HITTEST_ONICON | wxNB_HITTEST_ONLABEL,
+class wxNotebookEvent : public wxNotifyEvent {
+public:
+    wxNotebookEvent(wxEventType commandType = wxEVT_NULL, int id = 0,
+                    int sel = -1, int oldSel = -1);
 
+    int GetSelection();
+    int GetOldSelection();
+    void SetOldSelection(int page);
+    void SetSelection(int page);
 };
 
 
 
-class wxNotebook : public wxBookCtrl {
+class wxNotebook : public wxControl {
 public:
     wxNotebook(wxWindow *parent,
                wxWindowID id,
@@ -212,129 +95,48 @@ public:
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
     %pragma(python) addtomethod = "wxPreNotebook:val._setOORInfo(val)"
 
-
-    // get the number of rows for a control with wxNB_MULTILINE style (not all
-    // versions support it - they will always return 1 then)
-    virtual int GetRowCount() const;
-
-    // set the padding between tabs (in pixels)
-    virtual void SetPadding(const wxSize& padding);
-
-    // set the size of the tabs for wxNB_FIXEDWIDTH controls
-    virtual void SetTabSize(const wxSize& sz);
-
-    // hit test, returns which tab is hit and, optionally, where (icon, label)
-    // (not implemented on all platforms)
-    virtual int HitTest(const wxPoint& pt, long* OUTPUT) const;
-
-    // implement some base class functions
-    virtual wxSize CalcSizeFromPage(const wxSize& sizePage) const;
-
-#ifdef __WXMSW__
-    // Windows only: attempts to apply the UX theme page background to this page
-  void ApplyThemeBackground(wxWindow* window, const wxColour& colour);
-#endif
-};
-
-
-
-
-
-class wxNotebookEvent : public wxNotifyEvent {
-public:
-    wxNotebookEvent(wxEventType commandType = wxEVT_NULL, int id = 0,
-                    int sel = -1, int oldSel = -1);
-
+    int GetPageCount();
+    int SetSelection(int page);
+    void AdvanceSelection(bool forward = TRUE);
     int GetSelection();
-    int GetOldSelection();
-    void SetOldSelection(int page);
-    void SetSelection(int page);
-};
+    bool SetPageText(int page, const wxString& text);
+    wxString GetPageText(int page) const;
 
+    void SetImageList(wxImageList* imageList);
+    void AssignImageList(wxImageList *imageList) ;
+    %pragma(python) addtomethod = "AssignImageList:_args[0].thisown = 0"
 
-%pragma(python) code = "
-# wxNotebook events
-def EVT_NOTEBOOK_PAGE_CHANGED(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, func)
+    wxImageList* GetImageList();
+    int  GetPageImage(int page);
+    bool SetPageImage(int page, int image);
+    int GetRowCount();
 
-def EVT_NOTEBOOK_PAGE_CHANGING(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, func)
-"
+    void SetPageSize(const wxSize& size);
+    void SetPadding(const wxSize& padding);
+    bool DeletePage(int page);
+    bool RemovePage(int page);
+    bool DeleteAllPages();
+    bool AddPage(/*wxNotebookPage*/ wxWindow *page,
+                 const wxString& text,
+                 int select = FALSE,
+                 int imageId = -1);
+    bool InsertPage(int index,
+                    /*wxNotebookPage*/ wxWindow *page,
+                    const wxString& text,
+                    bool select = FALSE,
+                    int imageId = -1);
+    /*wxNotebookPage*/ wxWindow *GetPage(int page);
 
+    %addmethods {
+        void ResizeChildren() {
+            wxSizeEvent evt(self->GetClientSize());
+            self->GetEventHandler()->ProcessEvent(evt);
+        }
+    }
 
-//---------------------------------------------------------------------------
-
-
-enum
-{
-    // default alignment: left everywhere except Mac where it is top
-    wxLB_DEFAULT = 0,
-
-    // put the list control to the left/right/top/bottom of the page area
-    wxLB_TOP    = 0x1,
-    wxLB_BOTTOM = 0x2,
-    wxLB_LEFT   = 0x4,
-    wxLB_RIGHT  = 0x8,
-
-    // the mask which can be used to extract the alignment from the style
-    wxLB_ALIGN_MASK = 0xf,
-
-
-    wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED,
-    wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING,
-
-};
-
-
-
-class wxListbook : public wxBookCtrl
-{
-public:
-    wxListbook(wxWindow *parent,
-               wxWindowID id,
-               const wxPoint& pos = wxDefaultPosition,
-               const wxSize& size = wxDefaultSize,
-               long style = 0,
-               const wxString& name = wxPyEmptyString);
-    %name(wxPreListbook)wxListbook();
-
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    %pragma(python) addtomethod = "wxPreListbook:val._setOORInfo(val)"
-
-
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                const wxString& name = wxPyEmptyString);
-
-    // returns true if we have wxLB_TOP or wxLB_BOTTOM style
-    bool IsVertical() const;
 
 };
 
-
-
-class wxListbookEvent : public wxBookCtrlEvent
-{
-public:
-    wxListbookEvent(wxEventType commandType = wxEVT_NULL, int id = 0,
-                    int nSel = -1, int nOldSel = -1);
-};
-
-
-
-%pragma(python) code = "
-#wxListbook events
-def EVT_LISTBOOK_PAGE_CHANGED(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, func)
-
-def EVT_LISTBOOK_PAGE_CHANGING(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, func)
-"
-
-//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
 
@@ -344,25 +146,16 @@ enum {
     wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED,
     wxEVT_COMMAND_SPLITTER_UNSPLIT,
     wxEVT_COMMAND_SPLITTER_DOUBLECLICKED,
+};
 
+
+enum
+{
     wxSPLIT_HORIZONTAL,
     wxSPLIT_VERTICAL,
     wxSPLIT_DRAG_NONE,
     wxSPLIT_DRAG_DRAGGING,
-    wxSPLIT_DRAG_LEFT_DOWN,
-
-    wxSP_VERTICAL,
-    wxSP_HORIZONTAL,
-    wxSP_ARROW_KEYS,
-    wxSP_WRAP,
-    wxSP_NOBORDER,
-    wxSP_3D,
-    wxSP_3DSASH,
-    wxSP_3DBORDER,
-    wxSP_FULLSASH,
-    wxSP_BORDER,
-    wxSP_LIVE_UPDATE,
-    wxSP_PERMIT_UNSPLIT
+    wxSPLIT_DRAG_LEFT_DOWN
 };
 
 
@@ -470,7 +263,6 @@ public:
 
 //---------------------------------------------------------------------------
 
-// TODO:  This should be usable on wxGTK now too...
 #ifdef __WXMSW__
 
 enum {
@@ -481,13 +273,6 @@ enum {
     wxEVT_TASKBAR_RIGHT_UP,
     wxEVT_TASKBAR_LEFT_DCLICK,
     wxEVT_TASKBAR_RIGHT_DCLICK
-};
-
-
-class wxTaskBarIconEvent : public wxEvent
-{
-public:
-    wxTaskBarIconEvent(wxEventType evtType, wxTaskBarIcon *tbIcon);
 };
 
 
@@ -513,33 +298,6 @@ public:
     bool IsIconInstalled();
     bool IsOK();
 };
-
-
-
-%pragma(python) code = "
-def EVT_TASKBAR_MOVE(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_MOVE, func)
-
-def EVT_TASKBAR_LEFT_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DOWN, func)
-
-def EVT_TASKBAR_LEFT_UP(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_UP, func)
-
-def EVT_TASKBAR_RIGHT_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DOWN, func)
-
-def EVT_TASKBAR_RIGHT_UP(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_UP, func)
-
-def EVT_TASKBAR_LEFT_DCLICK(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DCLICK, func)
-
-def EVT_TASKBAR_RIGHT_DCLICK(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DCLICK, func)
-"
-
-
 #endif
 
 //---------------------------------------------------------------------------

@@ -25,9 +25,7 @@
 #include <wx/wx.h>
 #endif
 
-#if wxUSE_PROLOGIO
-#include <wx/deprecated/wxexpr.h>
-#endif
+#include <wx/wxexpr.h>
 
 #ifdef new
 #undef new
@@ -36,8 +34,13 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "wx/ogl/ogl.h"
-
+#include <wx/ogl/basic.h>
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/lines.h>
+#include <wx/ogl/linesp.h>
+#include <wx/ogl/drawn.h>
+#include <wx/ogl/misc.h>
+#include <wx/ogl/canvas.h>
 
 // Line shape
 IMPLEMENT_DYNAMIC_CLASS(wxLineShape, wxShape)
@@ -128,10 +131,10 @@ wxNode *wxLineShape::InsertLineControlPoint(wxDC* dc)
     if (dc)
         Erase(*dc);
 
-  wxNode *last = m_lineControlPoints->GetLast();
-  wxNode *second_last = last->GetPrevious();
-  wxRealPoint *last_point = (wxRealPoint *)last->GetData();
-  wxRealPoint *second_last_point = (wxRealPoint *)second_last->GetData();
+  wxNode *last = m_lineControlPoints->Last();
+  wxNode *second_last = last->Previous();
+  wxRealPoint *last_point = (wxRealPoint *)last->Data();
+  wxRealPoint *second_last_point = (wxRealPoint *)second_last->Data();
 
   // Choose a point half way between the last and penultimate points
   double line_x = ((last_point->x + second_last_point->x)/2);
@@ -144,13 +147,13 @@ wxNode *wxLineShape::InsertLineControlPoint(wxDC* dc)
 
 bool wxLineShape::DeleteLineControlPoint()
 {
-  if (m_lineControlPoints->GetCount() < 3)
+  if (m_lineControlPoints->Number() < 3)
     return FALSE;
 
-  wxNode *last = m_lineControlPoints->GetLast();
-  wxNode *second_last = last->GetPrevious();
+  wxNode *last = m_lineControlPoints->Last();
+  wxNode *second_last = last->Previous();
 
-  wxRealPoint *second_last_point = (wxRealPoint *)second_last->GetData();
+  wxRealPoint *second_last_point = (wxRealPoint *)second_last->Data();
   delete second_last_point;
   delete second_last;
 
@@ -162,19 +165,19 @@ void wxLineShape::Initialise()
   if (m_lineControlPoints)
   {
     // Just move the first and last control points
-    wxNode *first = m_lineControlPoints->GetFirst();
-    wxRealPoint *first_point = (wxRealPoint *)first->GetData();
+    wxNode *first = m_lineControlPoints->First();
+    wxRealPoint *first_point = (wxRealPoint *)first->Data();
 
-    wxNode *last = m_lineControlPoints->GetLast();
-    wxRealPoint *last_point = (wxRealPoint *)last->GetData();
+    wxNode *last = m_lineControlPoints->Last();
+    wxRealPoint *last_point = (wxRealPoint *)last->Data();
 
     // If any of the line points are at -999, we must
     // initialize them by placing them half way between the first
     // and the last.
-    wxNode *node = first->GetNext();
+    wxNode *node = first->Next();
     while (node)
     {
-      wxRealPoint *point = (wxRealPoint *)node->GetData();
+      wxRealPoint *point = (wxRealPoint *)node->Data();
       if (point->x == -999)
       {
         double x1, y1, x2, y2;
@@ -191,7 +194,7 @@ void wxLineShape::Initialise()
         point->x = ((x2 - x1)/2 + x1);
         point->y = ((y2 - y1)/2 + y1);
       }
-      node = node->GetNext();
+      node = node->Next();
     }
   }
 }
@@ -203,13 +206,13 @@ void wxLineShape::FormatText(wxDC& dc, const wxString& s, int i)
   double w, h;
   ClearText(i);
 
-  if (m_regions.GetCount() < 1)
+  if (m_regions.Number() < 1)
     return;
-  wxNode *node = m_regions.Item(i);
+  wxNode *node = m_regions.Nth(i);
   if (!node)
     return;
 
-  wxShapeRegion *region = (wxShapeRegion *)node->GetData();
+  wxShapeRegion *region = (wxShapeRegion *)node->Data();
   region->SetText(s);
   dc.SetFont(* region->GetFont());
 
@@ -222,13 +225,13 @@ void wxLineShape::FormatText(wxDC& dc, const wxString& s, int i)
   }
 
   wxStringList *string_list = oglFormatText(dc, s, (w-5), (h-5), region->GetFormatMode());
-  node = (wxNode*)string_list->GetFirst();
+  node = string_list->First();
   while (node)
   {
-    wxChar *s = (wxChar *)node->GetData();
+    wxChar *s = (wxChar *)node->Data();
     wxShapeTextLine *line = new wxShapeTextLine(0.0, 0.0, s);
     region->GetFormattedText().Append((wxObject *)line);
-    node = node->GetNext();
+    node = node->Next();
   }
   delete string_list;
   double actualW = w;
@@ -277,7 +280,7 @@ void wxLineShape::DrawRegion(wxDC& dc, wxShapeRegion *region, double x, double y
   double yp = yy + y;
 
   // First, clear a rectangle for the text IF there is any
-  if (region->GetFormattedText().GetCount() > 0)
+  if (region->GetFormattedText().Number() > 0)
   {
       dc.SetPen(GetBackgroundPen());
       dc.SetBrush(GetBackgroundBrush());
@@ -313,7 +316,7 @@ void wxLineShape::EraseRegion(wxDC& dc, wxShapeRegion *region, double x, double 
   double xp = xx + x;
   double yp = yy + y;
 
-  if (region->GetFormattedText().GetCount() > 0)
+  if (region->GetFormattedText().Number() > 0)
   {
       dc.SetPen(GetBackgroundPen());
       dc.SetBrush(GetBackgroundBrush());
@@ -332,14 +335,14 @@ void wxLineShape::GetLabelPosition(int position, double *x, double *y)
     case 0:
     {
       // Want to take the middle section for the label
-      int n = m_lineControlPoints->GetCount();
+      int n = m_lineControlPoints->Number();
       int half_way = (int)(n/2);
 
       // Find middle of this line
-      wxNode *node = m_lineControlPoints->Item(half_way - 1);
-      wxRealPoint *point = (wxRealPoint *)node->GetData();
-      wxNode *next_node = node->GetNext();
-      wxRealPoint *next_point = (wxRealPoint *)next_node->GetData();
+      wxNode *node = m_lineControlPoints->Nth(half_way - 1);
+      wxRealPoint *point = (wxRealPoint *)node->Data();
+      wxNode *next_node = node->Next();
+      wxRealPoint *next_point = (wxRealPoint *)next_node->Data();
 
       double dx = (next_point->x - point->x);
       double dy = (next_point->y - point->y);
@@ -349,16 +352,16 @@ void wxLineShape::GetLabelPosition(int position, double *x, double *y)
     }
     case 1:
     {
-      wxNode *node = m_lineControlPoints->GetFirst();
-      *x = ((wxRealPoint *)node->GetData())->x;
-      *y = ((wxRealPoint *)node->GetData())->y;
+      wxNode *node = m_lineControlPoints->First();
+      *x = ((wxRealPoint *)node->Data())->x;
+      *y = ((wxRealPoint *)node->Data())->y;
       break;
     }
     case 2:
     {
-      wxNode *node = m_lineControlPoints->GetLast();
-      *x = ((wxRealPoint *)node->GetData())->x;
-      *y = ((wxRealPoint *)node->GetData())->y;
+      wxNode *node = m_lineControlPoints->Last();
+      *x = ((wxRealPoint *)node->Data())->x;
+      *y = ((wxRealPoint *)node->Data())->y;
       break;
     }
     default:
@@ -387,29 +390,29 @@ void GraphicsStraightenLine(wxRealPoint *point1, wxRealPoint *point2)
 
 void wxLineShape::Straighten(wxDC *dc)
 {
-  if (!m_lineControlPoints || m_lineControlPoints->GetCount() < 3)
+  if (!m_lineControlPoints || m_lineControlPoints->Number() < 3)
     return;
 
   if (dc)
     Erase(* dc);
 
-  wxNode *first_point_node = m_lineControlPoints->GetFirst();
-  wxNode *last_point_node = m_lineControlPoints->GetLast();
-  wxNode *second_last_point_node = last_point_node->GetPrevious();
+  wxNode *first_point_node = m_lineControlPoints->First();
+  wxNode *last_point_node = m_lineControlPoints->Last();
+  wxNode *second_last_point_node = last_point_node->Previous();
 
-  wxRealPoint *last_point = (wxRealPoint *)last_point_node->GetData();
-  wxRealPoint *second_last_point = (wxRealPoint *)second_last_point_node->GetData();
+  wxRealPoint *last_point = (wxRealPoint *)last_point_node->Data();
+  wxRealPoint *second_last_point = (wxRealPoint *)second_last_point_node->Data();
 
   GraphicsStraightenLine(last_point, second_last_point);
 
   wxNode *node = first_point_node;
   while (node && (node != second_last_point_node))
   {
-    wxRealPoint *point = (wxRealPoint *)node->GetData();
-    wxRealPoint *next_point = (wxRealPoint *)(node->GetNext()->GetData());
+    wxRealPoint *point = (wxRealPoint *)node->Data();
+    wxRealPoint *next_point = (wxRealPoint *)(node->Next()->Data());
 
     GraphicsStraightenLine(point, next_point);
-    node = node->GetNext();
+    node = node->Next();
   }
 
   if (dc)
@@ -430,10 +433,10 @@ void wxLineShape::Unlink()
 void wxLineShape::SetEnds(double x1, double y1, double x2, double y2)
 {
   // Find centre point
-  wxNode *first_point_node = m_lineControlPoints->GetFirst();
-  wxNode *last_point_node = m_lineControlPoints->GetLast();
-  wxRealPoint *first_point = (wxRealPoint *)first_point_node->GetData();
-  wxRealPoint *last_point = (wxRealPoint *)last_point_node->GetData();
+  wxNode *first_point_node = m_lineControlPoints->First();
+  wxNode *last_point_node = m_lineControlPoints->Last();
+  wxRealPoint *first_point = (wxRealPoint *)first_point_node->Data();
+  wxRealPoint *last_point = (wxRealPoint *)last_point_node->Data();
 
   first_point->x = x1;
   first_point->y = y1;
@@ -447,10 +450,10 @@ void wxLineShape::SetEnds(double x1, double y1, double x2, double y2)
 // Get absolute positions of ends
 void wxLineShape::GetEnds(double *x1, double *y1, double *x2, double *y2)
 {
-  wxNode *first_point_node = m_lineControlPoints->GetFirst();
-  wxNode *last_point_node = m_lineControlPoints->GetLast();
-  wxRealPoint *first_point = (wxRealPoint *)first_point_node->GetData();
-  wxRealPoint *last_point = (wxRealPoint *)last_point_node->GetData();
+  wxNode *first_point_node = m_lineControlPoints->First();
+  wxNode *last_point_node = m_lineControlPoints->Last();
+  wxRealPoint *first_point = (wxRealPoint *)first_point_node->Data();
+  wxRealPoint *last_point = (wxRealPoint *)last_point_node->Data();
 
   *x1 = first_point->x; *y1 = first_point->y;
   *x2 = last_point->x; *y2 = last_point->y;
@@ -471,11 +474,11 @@ bool wxLineShape::HitTest(double x, double y, int *attachment, double *distance)
   bool inLabelRegion = FALSE;
   for (int i = 0; i < 3; i ++)
   {
-    wxNode *regionNode = m_regions.Item(i);
+    wxNode *regionNode = m_regions.Nth(i);
     if (regionNode)
     {
-      wxShapeRegion *region = (wxShapeRegion *)regionNode->GetData();
-      if (region->m_formattedText.GetCount() > 0)
+      wxShapeRegion *region = (wxShapeRegion *)regionNode->Data();
+      if (region->m_formattedText.Number() > 0)
       {
         double xp, yp, cx, cy, cw, ch;
         GetLabelPosition(i, &xp, &yp);
@@ -497,12 +500,12 @@ bool wxLineShape::HitTest(double x, double y, int *attachment, double *distance)
     }
   }
 
-  wxNode *node = m_lineControlPoints->GetFirst();
+  wxNode *node = m_lineControlPoints->First();
 
-  while (node && node->GetNext())
+  while (node && node->Next())
   {
-    wxRealPoint *point1 = (wxRealPoint *)node->GetData();
-    wxRealPoint *point2 = (wxRealPoint *)node->GetNext()->GetData();
+    wxRealPoint *point1 = (wxRealPoint *)node->Data();
+    wxRealPoint *point2 = (wxRealPoint *)node->Next()->Data();
 
     // For inaccurate mousing allow 8 pixel corridor
     int extra = 4;
@@ -514,7 +517,7 @@ bool wxLineShape::HitTest(double x, double y, int *attachment, double *distance)
       seg_len*((x-point1->x)*dy-(y-point1->y)*dx)/(dy*dy+dx*dx);
     double distance_from_prev =
       seg_len*((y-point1->y)*dy+(x-point1->x)*dx)/(dy*dy+dx*dx);
-
+    
     if ((fabs(distance_from_seg) < extra &&
          distance_from_prev >= 0 && distance_from_prev <= seg_len)
         || inLabelRegion)
@@ -524,7 +527,7 @@ bool wxLineShape::HitTest(double x, double y, int *attachment, double *distance)
       return TRUE;
     }
 
-    node = node->GetNext();
+    node = node->Next();
   }
   return FALSE;
 }
@@ -536,10 +539,10 @@ void wxLineShape::DrawArrows(wxDC& dc)
   double endArrowPos = 0.0;
   double middleArrowPos = 0.0;
 
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
     switch (arrow->GetArrowEnd())
     {
       case ARROW_POSITION_START:
@@ -578,21 +581,21 @@ void wxLineShape::DrawArrows(wxDC& dc)
         break;
       }
     }
-    node = node->GetNext();
+    node = node->Next();
   }
 }
 
 void wxLineShape::DrawArrow(wxDC& dc, wxArrowHead *arrow, double xOffset, bool proportionalOffset)
 {
-  wxNode *first_line_node = m_lineControlPoints->GetFirst();
-  wxRealPoint *first_line_point = (wxRealPoint *)first_line_node->GetData();
-  wxNode *second_line_node = first_line_node->GetNext();
-  wxRealPoint *second_line_point = (wxRealPoint *)second_line_node->GetData();
+  wxNode *first_line_node = m_lineControlPoints->First();
+  wxRealPoint *first_line_point = (wxRealPoint *)first_line_node->Data();
+  wxNode *second_line_node = first_line_node->Next();
+  wxRealPoint *second_line_point = (wxRealPoint *)second_line_node->Data();
 
-  wxNode *last_line_node = m_lineControlPoints->GetLast();
-  wxRealPoint *last_line_point = (wxRealPoint *)last_line_node->GetData();
-  wxNode *second_last_line_node = last_line_node->GetPrevious();
-  wxRealPoint *second_last_line_point = (wxRealPoint *)second_last_line_node->GetData();
+  wxNode *last_line_node = m_lineControlPoints->Last();
+  wxRealPoint *last_line_point = (wxRealPoint *)last_line_node->Data();
+  wxNode *second_last_line_node = last_line_node->Previous();
+  wxRealPoint *second_last_line_point = (wxRealPoint *)second_last_line_node->Data();
 
   // Position where we want to start drawing
   double positionOnLineX, positionOnLineY;
@@ -857,11 +860,11 @@ void wxLineShape::OnErase(wxDC& dc)
     // Undraw text regions
     for (int i = 0; i < 3; i++)
     {
-      wxNode *node = m_regions.Item(i);
+      wxNode *node = m_regions.Nth(i);
       if (node)
       {
         double x, y;
-        wxShapeRegion *region = (wxShapeRegion *)node->GetData();
+        wxShapeRegion *region = (wxShapeRegion *)node->Data();
         GetLabelPosition(i, &x, &y);
         EraseRegion(dc, region, x, y);
       }
@@ -897,17 +900,17 @@ void wxLineShape::GetBoundingBoxMin(double *w, double *h)
   double x2 = -10000;
   double y2 = -10000;
 
-  wxNode *node = m_lineControlPoints->GetFirst();
+  wxNode *node = m_lineControlPoints->First();
   while (node)
   {
-    wxRealPoint *point = (wxRealPoint *)node->GetData();
+    wxRealPoint *point = (wxRealPoint *)node->Data();
 
     if (point->x < x1) x1 = point->x;
     if (point->y < y1) y1 = point->y;
     if (point->x > x2) x2 = point->x;
     if (point->y > y2) y2 = point->y;
 
-    node = node->GetNext();
+    node = node->Next();
   }
   *w = (double)(x2 - x1);
   *h = (double)(y2 - y1);
@@ -922,7 +925,7 @@ void wxLineShape::FindNth(wxShape *image, int *nth, int *no_arcs, bool incoming)
 {
   int n = -1;
   int num = 0;
-  wxNode *node = image->GetLines().GetFirst();
+  wxNode *node = image->GetLines().First();
   int this_attachment;
   if (image == m_to)
     this_attachment = m_attachmentTo;
@@ -932,7 +935,7 @@ void wxLineShape::FindNth(wxShape *image, int *nth, int *no_arcs, bool incoming)
   // Find number of lines going into/out of this particular attachment point
   while (node)
   {
-    wxLineShape *line = (wxLineShape *)node->GetData();
+    wxLineShape *line = (wxLineShape *)node->Data();
 
     if (line->m_from == image)
     {
@@ -956,13 +959,13 @@ void wxLineShape::FindNth(wxShape *image, int *nth, int *no_arcs, bool incoming)
         num ++;
     }
 
-    node = node->GetNext();
+    node = node->Next();
   }
   *nth = n;
   *no_arcs = num;
 }
 
-void wxLineShape::OnDrawOutline(wxDC& dc, double WXUNUSED(x), double WXUNUSED(y), double WXUNUSED(w), double WXUNUSED(h))
+void wxLineShape::OnDrawOutline(wxDC& dc, double x, double y, double w, double h)
 {
   wxPen *old_pen = m_pen;
   wxBrush *old_brush = m_brush;
@@ -979,20 +982,20 @@ void wxLineShape::OnDrawOutline(wxDC& dc, double WXUNUSED(x), double WXUNUSED(y)
   else SetBrush(NULL);
 }
 
-bool wxLineShape::OnMovePre(wxDC& dc, double x, double y, double old_x, double old_y, bool WXUNUSED(display))
+bool wxLineShape::OnMovePre(wxDC& dc, double x, double y, double old_x, double old_y, bool display)
 {
   double x_offset = x - old_x;
   double y_offset = y - old_y;
 
   if (m_lineControlPoints && !(x_offset == 0.0 && y_offset == 0.0))
   {
-    wxNode *node = m_lineControlPoints->GetFirst();
+    wxNode *node = m_lineControlPoints->First();
     while (node)
     {
-      wxRealPoint *point = (wxRealPoint *)node->GetData();
+      wxRealPoint *point = (wxRealPoint *)node->Data();
       point->x += x_offset;
       point->y += y_offset;
-      node = node->GetNext();
+      node = node->Next();
     }
 
   }
@@ -1005,10 +1008,10 @@ bool wxLineShape::OnMovePre(wxDC& dc, double x, double y, double old_x, double o
       m_labelObjects[i]->Erase(dc);
       double xp, yp, xr, yr;
       GetLabelPosition(i, &xp, &yp);
-      wxNode *node = m_regions.Item(i);
+      wxNode *node = m_regions.Nth(i);
       if (node)
       {
-        wxShapeRegion *region = (wxShapeRegion *)node->GetData();
+        wxShapeRegion *region = (wxShapeRegion *)node->Data();
         region->GetPosition(&xr, &yr);
       }
       else
@@ -1027,7 +1030,7 @@ void wxLineShape::OnMoveLink(wxDC& dc, bool moveControlPoints)
   if (!m_from || !m_to)
    return;
 
-    if (m_lineControlPoints->GetCount() > 2)
+    if (m_lineControlPoints->Number() > 2)
       Initialise();
 
     // Do each end - nothing in the middle. User has to move other points
@@ -1037,10 +1040,10 @@ void wxLineShape::OnMoveLink(wxDC& dc, bool moveControlPoints)
 
     FindLineEndPoints(&end_x, &end_y, &other_end_x, &other_end_y);
 
-    wxNode *first = m_lineControlPoints->GetFirst();
-    /* wxRealPoint *first_point = */ (wxRealPoint *)first->GetData();
-    wxNode *last = m_lineControlPoints->GetLast();
-    /* wxRealPoint *last_point = */ (wxRealPoint *)last->GetData();
+    wxNode *first = m_lineControlPoints->First();
+    wxRealPoint *first_point = (wxRealPoint *)first->Data();
+    wxNode *last = m_lineControlPoints->Last();
+    wxRealPoint *last_point = (wxRealPoint *)last->Data();
 
 /* This is redundant, surely? Done by SetEnds.
     first_point->x = end_x; first_point->y = end_y;
@@ -1064,16 +1067,16 @@ void wxLineShape::OnMoveLink(wxDC& dc, bool moveControlPoints)
     // Only move control points if it's a self link. And only works if attachment mode is ON.
     if ((m_from == m_to) && (m_from->GetAttachmentMode() != ATTACHMENT_MODE_NONE) && moveControlPoints && m_lineControlPoints && !(x_offset == 0.0 && y_offset == 0.0))
     {
-      wxNode *node = m_lineControlPoints->GetFirst();
+      wxNode *node = m_lineControlPoints->First();
       while (node)
       {
-        if ((node != m_lineControlPoints->GetFirst()) && (node != m_lineControlPoints->GetLast()))
+        if ((node != m_lineControlPoints->First()) && (node != m_lineControlPoints->Last()))
         {
-          wxRealPoint *point = (wxRealPoint *)node->GetData();
+          wxRealPoint *point = (wxRealPoint *)node->Data();
           point->x += x_offset;
           point->y += y_offset;
         }
-        node = node->GetNext();
+        node = node->Next();
       }
     }
 
@@ -1094,18 +1097,18 @@ void wxLineShape::FindLineEndPoints(double *fromX, double *fromY, double *toX, d
   double end_x, end_y;
   double other_end_x, other_end_y;
 
-  wxNode *first = m_lineControlPoints->GetFirst();
-  /* wxRealPoint *first_point = */ (wxRealPoint *)first->GetData();
-  wxNode *last = m_lineControlPoints->GetLast();
-  /* wxRealPoint *last_point = */ (wxRealPoint *)last->GetData();
+  wxNode *first = m_lineControlPoints->First();
+  wxRealPoint *first_point = (wxRealPoint *)first->Data();
+  wxNode *last = m_lineControlPoints->Last();
+  wxRealPoint *last_point = (wxRealPoint *)last->Data();
 
-  wxNode *second = first->GetNext();
-  wxRealPoint *second_point = (wxRealPoint *)second->GetData();
+  wxNode *second = first->Next();
+  wxRealPoint *second_point = (wxRealPoint *)second->Data();
 
-  wxNode *second_last = last->GetPrevious();
-  wxRealPoint *second_last_point = (wxRealPoint *)second_last->GetData();
+  wxNode *second_last = last->Previous();
+  wxRealPoint *second_last_point = (wxRealPoint *)second_last->Data();
 
-  if (m_lineControlPoints->GetCount() > 2)
+  if (m_lineControlPoints->Number() > 2)
   {
     if (m_from->GetAttachmentMode() != ATTACHMENT_MODE_NONE)
     {
@@ -1179,12 +1182,12 @@ void wxLineShape::OnDraw(wxDC& dc)
     if (m_brush)
       dc.SetBrush(* m_brush);
 
-    int n = m_lineControlPoints->GetCount();
+    int n = m_lineControlPoints->Number();
     wxPoint *points = new wxPoint[n];
     int i;
     for (i = 0; i < n; i++)
     {
-        wxRealPoint* point = (wxRealPoint*) m_lineControlPoints->Item(i)->GetData();
+        wxRealPoint* point = (wxRealPoint*) m_lineControlPoints->Nth(i)->Data();
         points[i].x = WXROUND(point->x);
         points[i].y = WXROUND(point->y);
     }
@@ -1240,15 +1243,15 @@ void wxLineShape::OnEraseControlPoints(wxDC& dc)
   wxShape::OnEraseControlPoints(dc);
 }
 
-void wxLineShape::OnDragLeft(bool WXUNUSED(draw), double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys), int WXUNUSED(attachment))
+void wxLineShape::OnDragLeft(bool draw, double x, double y, int keys, int attachment)
 {
 }
 
-void wxLineShape::OnBeginDragLeft(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys), int WXUNUSED(attachment))
+void wxLineShape::OnBeginDragLeft(double x, double y, int keys, int attachment)
 {
 }
 
-void wxLineShape::OnEndDragLeft(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys), int WXUNUSED(attachment))
+void wxLineShape::OnEndDragLeft(double x, double y, int keys, int attachment)
 {
 }
 
@@ -1282,10 +1285,10 @@ void wxLineShape::OnDrawContents(wxDC& dc)
 
   for (int i = 0; i < 3; i++)
   {
-    wxNode *node = m_regions.Item(i);
+    wxNode *node = m_regions.Nth(i);
     if (node)
     {
-      wxShapeRegion *region = (wxShapeRegion *)node->GetData();
+      wxShapeRegion *region = (wxShapeRegion *)node->Data();
       double x, y;
       GetLabelPosition(i, &x, &y);
       DrawRegion(dc, region, x, y);
@@ -1307,10 +1310,10 @@ void wxLineShape::MakeControlPoints()
 {
   if (m_canvas && m_lineControlPoints)
   {
-    wxNode *first = m_lineControlPoints->GetFirst();
-    wxNode *last = m_lineControlPoints->GetLast();
-    wxRealPoint *first_point = (wxRealPoint *)first->GetData();
-    wxRealPoint *last_point = (wxRealPoint *)last->GetData();
+    wxNode *first = m_lineControlPoints->First();
+    wxNode *last = m_lineControlPoints->Last();
+    wxRealPoint *first_point = (wxRealPoint *)first->Data();
+    wxRealPoint *last_point = (wxRealPoint *)last->Data();
 
     wxLineControlPoint *control = new wxLineControlPoint(m_canvas, this, CONTROL_POINT_SIZE,
                                                first_point->x, first_point->y,
@@ -1320,10 +1323,10 @@ void wxLineShape::MakeControlPoints()
     m_controlPoints.Append(control);
 
 
-    wxNode *node = first->GetNext();
+    wxNode *node = first->Next();
     while (node != last)
     {
-      wxRealPoint *point = (wxRealPoint *)node->GetData();
+      wxRealPoint *point = (wxRealPoint *)node->Data();
 
       control = new wxLineControlPoint(m_canvas, this, CONTROL_POINT_SIZE,
                                                point->x, point->y,
@@ -1333,7 +1336,7 @@ void wxLineShape::MakeControlPoints()
       m_canvas->AddShape(control);
       m_controlPoints.Append(control);
 
-      node = node->GetNext();
+      node = node->Next();
     }
     control = new wxLineControlPoint(m_canvas, this, CONTROL_POINT_SIZE,
                                                last_point->x, last_point->y,
@@ -1348,19 +1351,19 @@ void wxLineShape::MakeControlPoints()
 
 void wxLineShape::ResetControlPoints()
 {
-  if (m_canvas && m_lineControlPoints && m_controlPoints.GetCount() > 0)
+  if (m_canvas && m_lineControlPoints && m_controlPoints.Number() > 0)
   {
-    wxNode *node = m_controlPoints.GetFirst();
-    wxNode *control_node = m_lineControlPoints->GetFirst();
+    wxNode *node = m_controlPoints.First();
+    wxNode *control_node = m_lineControlPoints->First();
     while (node && control_node)
     {
-      wxRealPoint *point = (wxRealPoint *)control_node->GetData();
-      wxLineControlPoint *control = (wxLineControlPoint *)node->GetData();
+      wxRealPoint *point = (wxRealPoint *)control_node->Data();
+      wxLineControlPoint *control = (wxLineControlPoint *)node->Data();
       control->SetX(point->x);
       control->SetY(point->y);
 
-      node = node->GetNext();
-      control_node = control_node->GetNext();
+      node = node->Next();
+      control_node = control_node->Next();
     }
   }
 }
@@ -1371,30 +1374,30 @@ void wxLineShape::WriteAttributes(wxExpr *clause)
   wxShape::WriteAttributes(clause);
 
   if (m_from)
-    clause->AddAttributeValue(_T("from"), m_from->GetId());
+    clause->AddAttributeValue("from", m_from->GetId());
   if (m_to)
-    clause->AddAttributeValue(_T("to"), m_to->GetId());
+    clause->AddAttributeValue("to", m_to->GetId());
 
   if (m_attachmentTo != 0)
-    clause->AddAttributeValue(_T("attachment_to"), (long)m_attachmentTo);
+    clause->AddAttributeValue("attachment_to", (long)m_attachmentTo);
   if (m_attachmentFrom != 0)
-    clause->AddAttributeValue(_T("attachment_from"), (long)m_attachmentFrom);
+    clause->AddAttributeValue("attachment_from", (long)m_attachmentFrom);
 
   if (m_alignmentStart != 0)
-    clause->AddAttributeValue(_T("align_start"), (long)m_alignmentStart);
+    clause->AddAttributeValue("align_start", (long)m_alignmentStart);
   if (m_alignmentEnd != 0)
-    clause->AddAttributeValue(_T("align_end"), (long)m_alignmentEnd);
+    clause->AddAttributeValue("align_end", (long)m_alignmentEnd);
 
-  clause->AddAttributeValue(_T("is_spline"), (long)m_isSpline);
+  clause->AddAttributeValue("is_spline", (long)m_isSpline);
   if (m_maintainStraightLines)
-    clause->AddAttributeValue(_T("keep_lines_straight"), (long)m_maintainStraightLines);
+    clause->AddAttributeValue("keep_lines_straight", (long)m_maintainStraightLines);
 
   // Make a list of lists for the (sp)line controls
   wxExpr *list = new wxExpr(wxExprList);
-  wxNode *node = m_lineControlPoints->GetFirst();
+  wxNode *node = m_lineControlPoints->First();
   while (node)
   {
-    wxRealPoint *point = (wxRealPoint *)node->GetData();
+    wxRealPoint *point = (wxRealPoint *)node->Data();
     wxExpr *point_list = new wxExpr(wxExprList);
     wxExpr *x_expr = new wxExpr((double) point->x);
     wxExpr *y_expr = new wxExpr((double) point->y);
@@ -1402,20 +1405,20 @@ void wxLineShape::WriteAttributes(wxExpr *clause)
     point_list->Append(y_expr);
     list->Append(point_list);
 
-    node = node->GetNext();
+    node = node->Next();
   }
-  clause->AddAttributeValue(_T("controls"), list);
+  clause->AddAttributeValue("controls", list);
 
   // Write arc arrows in new OGL format, if there are any.
   // This is a list of lists. Each sublist comprises:
   // (arrowType arrowEnd xOffset arrowSize)
-  if (m_arcArrows.GetCount() > 0)
+  if (m_arcArrows.Number() > 0)
   {
     wxExpr *arrow_list = new wxExpr(wxExprList);
-    node = m_arcArrows.GetFirst();
+    node = m_arcArrows.First();
     while (node)
     {
-      wxArrowHead *head = (wxArrowHead *)node->GetData();
+      wxArrowHead *head = (wxArrowHead *)node->Data();
       wxExpr *head_list = new wxExpr(wxExprList);
       head_list->Append(new wxExpr((long)head->_GetType()));
       head_list->Append(new wxExpr((long)head->GetArrowEnd()));
@@ -1430,9 +1433,9 @@ void wxLineShape::WriteAttributes(wxExpr *clause)
 
       arrow_list->Append(head_list);
 
-      node = node->GetNext();
+      node = node->Next();
     }
-    clause->AddAttributeValue(_T("arrows"), arrow_list);
+    clause->AddAttributeValue("arrows", arrow_list);
   }
 }
 
@@ -1452,20 +1455,20 @@ void wxLineShape::ReadAttributes(wxExpr *clause)
   clause->AssignAttributeValue(wxT("align_end"), &m_alignmentEnd);
 
   // Compatibility: check for no regions.
-  if (m_regions.GetCount() == 0)
+  if (m_regions.Number() == 0)
   {
     wxShapeRegion *newRegion = new wxShapeRegion;
-    newRegion->SetName(_T("Middle"));
+    newRegion->SetName("Middle");
     newRegion->SetSize(150, 50);
     m_regions.Append((wxObject *)newRegion);
-    if (m_text.GetCount() > 0)
+    if (m_text.Number() > 0)
     {
       newRegion->ClearText();
-      wxNode *node = m_text.GetFirst();
+      wxNode *node = m_text.First();
       while (node)
       {
-        wxShapeTextLine *textLine = (wxShapeTextLine *)node->GetData();
-        wxNode *next = node->GetNext();
+        wxShapeTextLine *textLine = (wxShapeTextLine *)node->Data();
+        wxNode *next = node->Next();
         newRegion->GetFormattedText().Append((wxObject *)textLine);
         delete node;
         node = next;
@@ -1598,11 +1601,11 @@ void wxLineShape::Copy(wxShape& copy)
   lineCopy.m_maintainStraightLines = m_maintainStraightLines;
   lineCopy.m_lineOrientations.Clear();
 
-  wxNode *node = m_lineOrientations.GetFirst();
+  wxNode *node = m_lineOrientations.First();
   while (node)
   {
-    lineCopy.m_lineOrientations.Append(node->GetData());
-    node = node->GetNext();
+    lineCopy.m_lineOrientations.Append(node->Data());
+    node = node->Next();
   }
 
   if (lineCopy.m_lineControlPoints)
@@ -1613,23 +1616,23 @@ void wxLineShape::Copy(wxShape& copy)
 
   lineCopy.m_lineControlPoints = new wxList;
 
-  node = m_lineControlPoints->GetFirst();
+  node = m_lineControlPoints->First();
   while (node)
   {
-    wxRealPoint *point = (wxRealPoint *)node->GetData();
+    wxRealPoint *point = (wxRealPoint *)node->Data();
     wxRealPoint *new_point = new wxRealPoint(point->x, point->y);
     lineCopy.m_lineControlPoints->Append((wxObject*) new_point);
-    node = node->GetNext();
+    node = node->Next();
   }
 
   // Copy arrows
   lineCopy.ClearArrowsAtPosition(-1);
-  node = m_arcArrows.GetFirst();
+  node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
     lineCopy.m_arcArrows.Append(new wxArrowHead(*arrow));
-    node = node->GetNext();
+    node = node->Next();
   }
 }
 
@@ -1641,11 +1644,11 @@ void wxLineShape::Select(bool select, wxDC* dc)
   {
     for (int i = 0; i < 3; i++)
     {
-      wxNode *node = m_regions.Item(i);
+      wxNode *node = m_regions.Nth(i);
       if (node)
       {
-        wxShapeRegion *region = (wxShapeRegion *)node->GetData();
-        if (region->m_formattedText.GetCount() > 0)
+        wxShapeRegion *region = (wxShapeRegion *)node->Data();
+        if (region->m_formattedText.Number() > 0)
         {
           double w, h, x, y, xx, yy;
           region->GetSize(&w, &h);
@@ -1726,7 +1729,7 @@ void wxLineControlPoint::OnEndDragLeft(double x, double y, int keys, int attachm
 
 // Control points ('handles') redirect control to the actual shape, to make it easier
 // to override sizing behaviour.
-void wxLineShape::OnSizingDragLeft(wxControlPoint* pt, bool WXUNUSED(draw), double x, double y, int WXUNUSED(keys), int WXUNUSED(attachment))
+void wxLineShape::OnSizingDragLeft(wxControlPoint* pt, bool draw, double x, double y, int keys, int attachment)
 {
   wxLineControlPoint* lpt = (wxLineControlPoint*) pt;
 
@@ -1768,7 +1771,7 @@ void wxLineShape::OnSizingDragLeft(wxControlPoint* pt, bool WXUNUSED(draw), doub
 
 }
 
-void wxLineShape::OnSizingBeginDragLeft(wxControlPoint* pt, double x, double y, int WXUNUSED(keys), int WXUNUSED(attachment))
+void wxLineShape::OnSizingBeginDragLeft(wxControlPoint* pt, double x, double y, int keys, int attachment)
 {
   wxLineControlPoint* lpt = (wxLineControlPoint*) pt;
 
@@ -1816,7 +1819,7 @@ void wxLineShape::OnSizingBeginDragLeft(wxControlPoint* pt, double x, double y, 
   }
 }
 
-void wxLineShape::OnSizingEndDragLeft(wxControlPoint* pt, double x, double y, int WXUNUSED(keys), int WXUNUSED(attachment))
+void wxLineShape::OnSizingEndDragLeft(wxControlPoint* pt, double x, double y, int keys, int attachment)
 {
   wxLineControlPoint* lpt = (wxLineControlPoint*) pt;
 
@@ -1872,8 +1875,8 @@ void wxLineShape::OnSizingEndDragLeft(wxControlPoint* pt, double x, double y, in
   // Needed?
 #if 0
   int i = 0;
-  for (i = 0; i < lineShape->GetLineControlPoints()->GetCount(); i++)
-    if (((wxRealPoint *)(lineShape->GetLineControlPoints()->Item(i)->GetData())) == lpt->m_point)
+  for (i = 0; i < lineShape->GetLineControlPoints()->Number(); i++)
+    if (((wxRealPoint *)(lineShape->GetLineControlPoints()->Nth(i)->Data())) == lpt->m_point)
       break;
 
   // N.B. in OnMoveControlPoint, an event handler in Hardy could have deselected
@@ -1979,8 +1982,8 @@ void wxLineControlPoint::OnEndDragRight(double x, double y, int keys, int attach
     }
   }
   int i = 0;
-  for (i = 0; i < lineShape->GetLineControlPoints()->GetCount(); i++)
-    if (((wxRealPoint *)(lineShape->GetLineControlPoints()->Item(i)->GetData())) == m_point)
+  for (i = 0; i < lineShape->GetLineControlPoints()->Number(); i++)
+    if (((wxRealPoint *)(lineShape->GetLineControlPoints()->Nth(i)->Data())) == m_point)
       break;
   lineShape->OnMoveControlPoint(i+1, x, y);
   if (!m_canvas->GetQuickEditMode()) m_canvas->Redraw(dc);
@@ -2021,15 +2024,15 @@ wxArrowHead *wxLineShape::AddArrow(WXTYPE type, int end, double size, double xOf
  */
 bool wxLineShape::AddArrowOrdered(wxArrowHead *arrow, wxList& referenceList, int end)
 {
-  wxNode *refNode = referenceList.GetFirst();
-  wxNode *currNode = m_arcArrows.GetFirst();
+  wxNode *refNode = referenceList.First();
+  wxNode *currNode = m_arcArrows.First();
   wxString targetName(arrow->GetName());
   if (!refNode) return FALSE;
 
   // First check whether we need to insert in front of list,
   // because this arrowhead is the first in the reference
   // list and should therefore be first in the current list.
-  wxArrowHead *refArrow = (wxArrowHead *)refNode->GetData();
+  wxArrowHead *refArrow = (wxArrowHead *)refNode->Data();
   if (refArrow->GetName() == targetName)
   {
     m_arcArrows.Insert(arrow);
@@ -2038,16 +2041,16 @@ bool wxLineShape::AddArrowOrdered(wxArrowHead *arrow, wxList& referenceList, int
 
   while (refNode && currNode)
   {
-    wxArrowHead *currArrow = (wxArrowHead *)currNode->GetData();
-    refArrow = (wxArrowHead *)refNode->GetData();
+    wxArrowHead *currArrow = (wxArrowHead *)currNode->Data();
+    refArrow = (wxArrowHead *)refNode->Data();
 
     // Matching: advance current arrow pointer
     if ((currArrow->GetArrowEnd() == end) &&
         (currArrow->GetName() == refArrow->GetName()))
     {
-      currNode = currNode->GetNext(); // Could be NULL now
+      currNode = currNode->Next(); // Could be NULL now
       if (currNode)
-        currArrow = (wxArrowHead *)currNode->GetData();
+        currArrow = (wxArrowHead *)currNode->Data();
     }
 
     // Check if we're at the correct position in the
@@ -2060,7 +2063,7 @@ bool wxLineShape::AddArrowOrdered(wxArrowHead *arrow, wxList& referenceList, int
         m_arcArrows.Append(arrow);
       return TRUE;
     }
-    refNode = refNode->GetNext();
+    refNode = refNode->Next();
   }
   m_arcArrows.Append(arrow);
   return TRUE;
@@ -2068,11 +2071,11 @@ bool wxLineShape::AddArrowOrdered(wxArrowHead *arrow, wxList& referenceList, int
 
 void wxLineShape::ClearArrowsAtPosition(int end)
 {
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
-    wxNode *next = node->GetNext();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
+    wxNode *next = node->Next();
     switch (end)
     {
       case -1:
@@ -2115,17 +2118,17 @@ void wxLineShape::ClearArrowsAtPosition(int end)
 
 bool wxLineShape::ClearArrow(const wxString& name)
 {
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
     if (arrow->GetName() == name)
     {
       delete arrow;
       delete node;
       return TRUE;
     }
-    node = node->GetNext();
+    node = node->Next();
   }
   return FALSE;
 }
@@ -2137,27 +2140,27 @@ bool wxLineShape::ClearArrow(const wxString& name)
 
 wxArrowHead *wxLineShape::FindArrowHead(int position, const wxString& name)
 {
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
     if (((position == -1) || (position == arrow->GetArrowEnd())) &&
         (arrow->GetName() == name))
       return arrow;
-    node = node->GetNext();
+    node = node->Next();
   }
   return NULL;
 }
 
 wxArrowHead *wxLineShape::FindArrowHead(long arrowId)
 {
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
     if (arrowId == arrow->GetId())
       return arrow;
-    node = node->GetNext();
+    node = node->Next();
   }
   return NULL;
 }
@@ -2169,10 +2172,10 @@ wxArrowHead *wxLineShape::FindArrowHead(long arrowId)
 
 bool wxLineShape::DeleteArrowHead(int position, const wxString& name)
 {
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
     if (((position == -1) || (position == arrow->GetArrowEnd())) &&
         (arrow->GetName() == name))
     {
@@ -2180,7 +2183,7 @@ bool wxLineShape::DeleteArrowHead(int position, const wxString& name)
       delete node;
       return TRUE;
     }
-    node = node->GetNext();
+    node = node->Next();
   }
   return FALSE;
 }
@@ -2188,17 +2191,17 @@ bool wxLineShape::DeleteArrowHead(int position, const wxString& name)
 // Overloaded DeleteArrowHead: pass arrowhead id.
 bool wxLineShape::DeleteArrowHead(long id)
 {
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrow = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrow = (wxArrowHead *)node->Data();
     if (arrow->GetId() == id)
     {
       delete arrow;
       delete node;
       return TRUE;
     }
-    node = node->GetNext();
+    node = node->Next();
   }
   return FALSE;
 }
@@ -2212,15 +2215,15 @@ bool wxLineShape::DeleteArrowHead(long id)
 double wxLineShape::FindMinimumWidth()
 {
   double minWidth = 0.0;
-  wxNode *node = m_arcArrows.GetFirst();
+  wxNode *node = m_arcArrows.First();
   while (node)
   {
-    wxArrowHead *arrowHead = (wxArrowHead *)node->GetData();
+    wxArrowHead *arrowHead = (wxArrowHead *)node->Data();
     minWidth += arrowHead->GetSize();
-    if (node->GetNext())
+    if (node->Next())
       minWidth += arrowHead->GetSpacing();
 
-    node = node->GetNext();
+    node = node->Next();
   }
   // We have ABSOLUTE minimum now. So
   // scale it to give it reasonable aesthetics
@@ -2317,7 +2320,7 @@ int wxLineShape::GetAlignmentType(bool isEnd)
 
 wxRealPoint *wxLineShape::GetNextControlPoint(wxShape *nodeObject)
 {
-  int n = m_lineControlPoints->GetCount();
+  int n = m_lineControlPoints->Number();
   int nn = 0;
   if (m_to == nodeObject)
   {
@@ -2326,13 +2329,13 @@ wxRealPoint *wxLineShape::GetNextControlPoint(wxShape *nodeObject)
     nn = n - 2;
   }
   else nn = 1;
-  wxNode *node = m_lineControlPoints->Item(nn);
+  wxNode *node = m_lineControlPoints->Nth(nn);
   if (node)
   {
-    return (wxRealPoint *)node->GetData();
+    return (wxRealPoint *)node->Data();
   }
   else
-    return FALSE;
+    return NULL;
 }
 
 /*
@@ -2439,7 +2442,7 @@ void wxLabelShape::OnDraw(wxDC& dc)
       dc.DrawRectangle(WXROUND(x1), WXROUND(y1), WXROUND(m_width), WXROUND(m_height));
 }
 
-void wxLabelShape::OnDrawContents(wxDC& WXUNUSED(dc))
+void wxLabelShape::OnDrawContents(wxDC& dc)
 {
 }
 
@@ -2463,20 +2466,20 @@ bool wxLabelShape::OnMovePre(wxDC& dc, double x, double y, double old_x, double 
     return m_lineShape->OnLabelMovePre(dc, this, x, y, old_x, old_y, display);
 }
 
-bool wxLineShape::OnLabelMovePre(wxDC& dc, wxLabelShape* labelShape, double x, double y, double WXUNUSED(old_x), double WXUNUSED(old_y), bool WXUNUSED(display))
+bool wxLineShape::OnLabelMovePre(wxDC& dc, wxLabelShape* labelShape, double x, double y, double old_x, double old_y, bool display)
 {
   labelShape->m_shapeRegion->SetSize(labelShape->GetWidth(), labelShape->GetHeight());
 
   // Find position in line's region list
   int i = 0;
-  wxNode *node = GetRegions().GetFirst();
+  wxNode *node = GetRegions().First();
   while (node)
   {
-    if (labelShape->m_shapeRegion == (wxShapeRegion *)node->GetData())
+    if (labelShape->m_shapeRegion == (wxShapeRegion *)node->Data())
       node = NULL;
     else
     {
-      node = node->GetNext();
+      node = node->Next();
       i ++;
     }
   }

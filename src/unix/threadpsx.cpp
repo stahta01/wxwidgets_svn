@@ -21,12 +21,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "thread.h"
 #endif
 
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_THREADS
 
@@ -57,12 +56,6 @@
     // For setpriority.
     #include <sys/time.h>
     #include <sys/resource.h>
-#endif
-
-#ifdef __VMS
-    #define THR_ID(thr) ((long long)(thr)->GetId())
-#else
-    #define THR_ID(thr) ((long)(thr)->GetId())
 #endif
 
 // ----------------------------------------------------------------------------
@@ -129,10 +122,10 @@ static wxMutex *gs_mutexDeleteThread = (wxMutex *)NULL;
 // gs_nThreadsBeingDeleted will have been deleted
 static wxCondition *gs_condAllDeleted = (wxCondition *)NULL;
 
-// this mutex must be acquired before any call to a GUI function
-// (it's not inside #if wxUSE_GUI because this file is compiled as part
-// of wxBase)
-static wxMutex *gs_mutexGui = NULL;
+#if wxUSE_GUI
+    // this mutex must be acquired before any call to a GUI function
+    static wxMutex *gs_mutexGui;
+#endif // wxUSE_GUI
 
 // when we wait for a thread to exit, we're blocking on a condition which the
 // thread signals in its SignalExit() method -- but this condition can't be a
@@ -172,12 +165,6 @@ private:
     // wxConditionInternal uses our m_mutex
     friend class wxConditionInternal;
 };
-
-#ifdef HAVE_PTHREAD_MUTEXATTR_T
-// on some systems pthread_mutexattr_settype() is not in the headers (but it is
-// in the library, otherwise we wouldn't compile this code at all)
-extern "C" int pthread_mutexattr_settype(pthread_mutexattr_t *, int);
-#endif
 
 wxMutexInternal::wxMutexInternal(wxMutexType mutexType)
 {
@@ -545,17 +532,8 @@ wxSemaError wxSemaphoreInternal::WaitTimeout(unsigned long milliseconds)
             return wxSEMA_TIMEOUT;
         }
 
-        switch ( m_cond.WaitTimeout(remainingTime) )
-        {
-            case wxCOND_TIMEOUT:
-                return wxSEMA_TIMEOUT;
-
-            default:
-                return wxSEMA_MISC_ERROR;
-
-            case wxCOND_NO_ERROR:
-                ;
-        }
+        if ( m_cond.Wait(remainingTime) != wxCOND_NO_ERROR )
+            return wxSEMA_MISC_ERROR;
     }
 
     m_count--;
@@ -718,8 +696,12 @@ void *wxThreadInternal::PthreadStart(wxThread *thread)
 {
     wxThreadInternal *pthread = thread->m_internal;
 
-    wxLogTrace(TRACE_THREADS, _T("Thread %ld started."), THR_ID(pthread));
-
+#ifdef __VMS
+   wxLogTrace(TRACE_THREADS, _T("Thread %ld started."), (long long)pthread->GetId());
+#else
+   wxLogTrace(TRACE_THREADS, _T("Thread %ld started."), (long)pthread->GetId());
+#endif
+   
     // associate the thread pointer with the newly created thread so that
     // wxThread::This() will work
     int rc = pthread_setspecific(gs_keySelf, thread);
@@ -755,16 +737,22 @@ void *wxThreadInternal::PthreadStart(wxThread *thread)
     if ( !dontRunAtAll )
     {
         // call the main entry
-        wxLogTrace(TRACE_THREADS,
-                   _T("Thread %ld about to enter its Entry()."),
-                   THR_ID(pthread));
-
+        wxLogTrace(TRACE_THREADS, _T("Thread %ld about to enter its Entry()."),
+#ifdef __VMS
+                   (long long)pthread->GetId());
+#else
+                   (long)pthread->GetId());
+#endif
+       
         pthread->m_exitcode = thread->Entry();
 
-        wxLogTrace(TRACE_THREADS,
-                   _T("Thread %ld Entry() returned %lu."),
-                   THR_ID(pthread), (unsigned long)pthread->m_exitcode);
-
+        wxLogTrace(TRACE_THREADS, _T("Thread %ld Entry() returned %lu."),
+#ifdef __VMS
+                   (long long)pthread->GetId(), (unsigned long)pthread->m_exitcode);
+#else
+                   (long)pthread->GetId(), (unsigned long)pthread->m_exitcode);
+#endif
+       
         {
             wxCriticalSectionLocker lock(thread->m_critsect);
 
@@ -873,9 +861,12 @@ void wxThreadInternal::Wait()
         wxMutexGuiLeave();
 
     wxLogTrace(TRACE_THREADS,
-               _T("Starting to wait for thread %ld to exit."),
-               THR_ID(this));
-
+#ifdef __VMS
+               _T("Starting to wait for thread %ld to exit."), (long long)GetId());
+#else
+               _T("Starting to wait for thread %ld to exit."), (long)GetId());
+#endif
+   
     // to avoid memory leaks we should call pthread_join(), but it must only be
     // done once so use a critical section to serialize the code below
     {
@@ -913,9 +904,12 @@ void wxThreadInternal::Pause()
     wxCHECK_RET( m_state == STATE_PAUSED,
                  wxT("thread must first be paused with wxThread::Pause().") );
 
-   wxLogTrace(TRACE_THREADS,
-              _T("Thread %ld goes to sleep."), THR_ID(this));
-
+#ifdef __VMS
+   wxLogTrace(TRACE_THREADS, _T("Thread %ld goes to sleep."), (long long)GetId());
+#else
+   wxLogTrace(TRACE_THREADS, _T("Thread %ld goes to sleep."), (long)GetId());
+#endif
+   
     // wait until the semaphore is Post()ed from Resume()
     m_semSuspend.Wait();
 }
@@ -929,9 +923,12 @@ void wxThreadInternal::Resume()
     // TestDestroy() since the last call to Pause() for example
     if ( IsReallyPaused() )
     {
-       wxLogTrace(TRACE_THREADS,
-                  _T("Waking up thread %ld"), THR_ID(this));
-
+#ifdef __VMS
+       wxLogTrace(TRACE_THREADS, _T("Waking up thread %ld"), (long long)GetId());
+#else
+       wxLogTrace(TRACE_THREADS, _T("Waking up thread %ld"), (long)GetId());
+#endif
+       
         // wake up Pause()
         m_semSuspend.Post();
 
@@ -940,8 +937,12 @@ void wxThreadInternal::Resume()
     }
     else
     {
-        wxLogTrace(TRACE_THREADS,
-                   _T("Thread %ld is not yet really paused"), THR_ID(this));
+        wxLogTrace(TRACE_THREADS, _T("Thread %ld is not yet really paused"),
+#ifdef __VMS
+                   (long long)GetId());
+#else
+                   (long)GetId());
+#endif
     }
 
     SetState(STATE_RUNNING);
@@ -987,8 +988,8 @@ int wxThread::GetCPUCount()
         wxString s;
         if ( file.ReadAll(&s) )
         {
-            // (ab)use Replace() to find the number of "processor: num" strings
-            size_t count = s.Replace(_T("processor\t:"), _T(""));
+            // (ab)use Replace() to find the number of "processor" strings
+            size_t count = s.Replace(_T("processor"), _T(""));
             if ( count > 0 )
             {
                 return count;
@@ -1014,23 +1015,18 @@ int wxThread::GetCPUCount()
     return -1;
 }
 
-// VMS is a 64 bit system and threads have 64 bit pointers.
-// FIXME: also needed for other systems????
 #ifdef __VMS
+  // VMS is a 64 bit system and threads have 64 bit pointers.
+  // ??? also needed for other systems????
 unsigned long long wxThread::GetCurrentId()
 {
     return (unsigned long long)pthread_self();
-}
-
-#else // !__VMS
-
+#else
 unsigned long wxThread::GetCurrentId()
 {
     return (unsigned long)pthread_self();
+#endif
 }
-
-#endif // __VMS/!__VMS
-
 
 bool wxThread::SetConcurrency(size_t level)
 {
@@ -1605,8 +1601,11 @@ bool wxThreadModule::OnInit()
 
     gs_tidMain = pthread_self();
 
+#if wxUSE_GUI
     gs_mutexGui = new wxMutex();
+
     gs_mutexGui->Lock();
+#endif // wxUSE_GUI
 
     gs_mutexDeleteThread = new wxMutex();
     gs_condAllDeleted = new wxCondition( *gs_mutexDeleteThread );
@@ -1651,9 +1650,12 @@ void wxThreadModule::OnExit()
         gs_allThreads[0]->Delete();
     }
 
+#if wxUSE_GUI
     // destroy GUI mutex
     gs_mutexGui->Unlock();
+
     delete gs_mutexGui;
+#endif // wxUSE_GUI
 
     // and free TLD slot
     (void)pthread_key_delete(gs_keySelf);
@@ -1702,12 +1704,16 @@ static void DeleteThread(wxThread *This)
 
 void wxMutexGuiEnter()
 {
+#if wxUSE_GUI
     gs_mutexGui->Lock();
+#endif // wxUSE_GUI
 }
 
 void wxMutexGuiLeave()
 {
+#if wxUSE_GUI
     gs_mutexGui->Unlock();
+#endif // wxUSE_GUI
 }
 
 // ----------------------------------------------------------------------------

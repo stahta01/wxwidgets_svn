@@ -9,14 +9,13 @@
 #define _WX_SNDWIN_H
 
 #include "wx/defs.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 
 typedef struct _wxSoundInternal wxSoundInternal;
 typedef struct _wxSoundInfoHeader wxSoundInfoHeader;
 
-// class WXDLLIMPEXP_MMEDIA wxSoundInternal;
-class WXDLLIMPEXP_MMEDIA wxSoundStreamWin : public wxSoundStream {
+// class WXDLLEXPORT wxSoundInternal;
+class WXDLLEXPORT wxSoundStreamWin : public wxSoundStream {
  public:
   wxSoundStreamWin();
   ~wxSoundStreamWin();
@@ -24,7 +23,7 @@ class WXDLLIMPEXP_MMEDIA wxSoundStreamWin : public wxSoundStream {
   wxSoundStream& Write(const void *buffer, wxUint32 len);
   wxSoundStream& Read(void *buffer, wxUint32 len); 
 
-  bool SetSoundFormat(const wxSoundFormatBase& base);
+  bool SetSoundFormat(wxSoundFormatBase& base);
 
   bool StartProduction(int evt);
   bool StopProduction();

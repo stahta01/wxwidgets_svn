@@ -296,10 +296,11 @@ void wxMultiCellSizer::RecalcSizes()
 	wxPoint c_point;
 	wxSize  c_size;
 
-	wxSizerItemList::Node 	*current = m_children.GetFirst();
+	wxNode *current;
+	current = m_children.GetFirst();
 	while (current != NULL)
 	{
-		wxSizerItem 	*item = current->GetData();
+		wxSizerItem *item = (wxSizerItem*) current->Data();
 
 		wxMultiCellItemHandle *rect;
 		if (item != NULL &&
@@ -371,7 +372,7 @@ void wxMultiCellSizer::RecalcSizes()
 			}
 			item->SetDimension(c_point, c_size);
 		}
-		current = current->GetNext();
+		current = current->Next();
 	}
 }
 //---------------------------------------------------------------------------
@@ -403,10 +404,10 @@ void wxMultiCellSizer :: GetMinimums()
 		m_weights[x]->SetWidth(0);
 	}
 
-	wxSizerItemList::Node 	*node = m_children.GetFirst();
+	wxNode *node = m_children.GetFirst();
 	while (node)
 	{
-		wxSizerItem 	*item = node->GetData();
+		wxSizerItem *item = (wxSizerItem*) node->Data();
 		wxMultiCellItemHandle *rect;
 		if (item != NULL &&
 			(rect = (wxMultiCellItemHandle *)item->GetUserData()) != NULL)
@@ -505,7 +506,7 @@ void wxMultiCellSizer :: GetMinimums()
 				m_maxWidth[col] = wxMax(m_maxWidth[col], m_defaultCellSize.GetWidth());
 				m_weights[col]->SetWidth(wxMax(m_weights[col]->GetWidth(), rect->GetWeight().GetWidth()));
 			}
-			node = node->GetNext();
+			node = node->Next();
 		}
 	}
 } // wxMultiCellSizer :: GetMinimums
@@ -632,14 +633,17 @@ wxMultiCellCanvas :: wxMultiCellCanvas(wxWindow *par, int numRows, int numCols)
 	m_minCellSize = wxSize(5, 5);
 }
 //---------------------------------------------------------------------------
+wxString itoa(int x)
+{
+	char    bfr[255];
+	sprintf(bfr, "%d", x);
+	return bfr;
+}
+//---------------------------------------------------------------------------
 void wxMultiCellCanvas :: Add(wxWindow *win, unsigned int row, unsigned int col)
 {
-  // thanks to unsigned data row and col are always >= 0
-	wxASSERT_MSG( /* row >= 0 && */ row < m_maxRows,
-                 wxString::Format(_T("Row %d out of bounds (0..%d)"), row, m_maxRows) );
-	wxASSERT_MSG( /* col >= 0 && */ col < m_maxCols,
-                 wxString::Format(_T("Column %d out of bounds (0..%d)"), col, m_maxCols) );
-
+	wxASSERT_MSG(row >= 0 && row < m_maxRows, wxString("Row ") + itoa(row) + " out of bounds (" + itoa(m_maxRows) + ")");
+	wxASSERT_MSG(col >= 0 && col < m_maxCols, wxString("Column ") + itoa(col) + " out of bounds (" + itoa(m_maxCols) + ")");
 	wxASSERT_MSG(m_cells[CELL_LOC(row, col)] == NULL, wxT("Cell already occupied"));
 
 	wxCell *newCell = new wxCell(win);
@@ -656,7 +660,7 @@ void wxMultiCellCanvas :: CalculateConstraints()
 			if (!m_cells[CELL_LOC(row, col)])
 			{
 				// Create an empty static text field as a placeholder
-				m_cells[CELL_LOC(row, col)] = new wxCell(new wxStaticText(m_parent, -1, wxT("")));
+				m_cells[CELL_LOC(row, col)] = new wxCell(new wxStaticText(m_parent, -1, ""));
 			}
 			wxFlexGridSizer::Add(m_cells[CELL_LOC(row, col)]->m_window);
 		}
@@ -664,4 +668,3 @@ void wxMultiCellCanvas :: CalculateConstraints()
 }
 
 /*** End of File ***/
-

@@ -423,19 +423,19 @@ void cbRowDragPlugin::OnDrawPaneBackground ( cbDrawPaneDecorEvent& event )
 
 int cbRowDragPlugin::GetHRowsCountForPane( cbDockPane* pPane )
 {
-    wxNode* pNode = mHiddenBars.GetFirst();
+    wxNode* pNode = mHiddenBars.First();
 
     int maxIconNo = -1;
 
     while( pNode )
     {
-        cbHiddenBarInfo* pHBInfo = (cbHiddenBarInfo*)pNode->GetData();
+        cbHiddenBarInfo* pHBInfo = (cbHiddenBarInfo*)pNode->Data();
 
         if ( pHBInfo->mAlignment == pPane->mAlignment )
 
             maxIconNo = wxMax( maxIconNo, pHBInfo->mIconNo );
 
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
     return ( maxIconNo + 1 );
@@ -805,7 +805,7 @@ void cbRowDragPlugin::ExpandRow( int collapsedIconIdx )
 
     cbRowInfo* pNewRow = new cbRowInfo();
 
-    wxNode* pNode = mHiddenBars.GetFirst();
+    wxNode* pNode = mHiddenBars.First();
 
     int rowNo = 0;
 
@@ -813,7 +813,7 @@ void cbRowDragPlugin::ExpandRow( int collapsedIconIdx )
 
     while( pNode )
     {
-        cbHiddenBarInfo* pHBInfo = (cbHiddenBarInfo*)pNode->GetData();
+        cbHiddenBarInfo* pHBInfo = (cbHiddenBarInfo*)pNode->Data();
 
         if ( pHBInfo->mAlignment     == mpPane->mAlignment &&
              pHBInfo->mIconNo        == collapsedIconIdx   )
@@ -831,7 +831,7 @@ void cbRowDragPlugin::ExpandRow( int collapsedIconIdx )
 
             // remove bar info from internal list
 
-            wxNode* pNext = pNode->GetNext();
+            wxNode* pNext = pNode->Next();
 
             delete pHBInfo;
             mHiddenBars.DeleteNode( pNode );
@@ -848,7 +848,7 @@ void cbRowDragPlugin::ExpandRow( int collapsedIconIdx )
 
                 --pHBInfo->mIconNo;
 
-            pNode = pNode->GetNext();
+            pNode = pNode->Next();
         }
     }
 
@@ -1409,7 +1409,7 @@ void cbRowDragPlugin::DrawRowDragHint( cbRowInfo* pRow , wxDC& dc, bool isHighli
     }
 }
 
-void cbRowDragPlugin::DrawRowsDragHintsBorder( wxDC& WXUNUSED(dc) )
+void cbRowDragPlugin::DrawRowsDragHintsBorder( wxDC& dc )
 {
     // FIXME:: what was that?
 }

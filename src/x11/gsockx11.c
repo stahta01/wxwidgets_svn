@@ -2,7 +2,6 @@
  * Project: GSocket (Generic Socket) for WX
  * Name:    gsockmot.c
  * Purpose: GSocket: X11 part
- * Licence: The wxWindows licence
  * CVSID:   $Id$
  * ------------------------------------------------------------------------- */
 
@@ -32,26 +31,17 @@ static void _GSocket_X11_Input(int *fid, void* data)
 {
   GSocket *socket = (GSocket *)data;
   
-  socket->m_functions->Detected_Read(socket);
+  _GSocket_Detected_Read(socket);
 }
 
 static void _GSocket_X11_Output(int *fid, void* data)
 {
   GSocket *socket = (GSocket *)data;
 
-  socket->m_functions->Detected_Write(socket);
+  _GSocket_Detected_Write(socket);
 }
 
-int _GSocket_GUI_Init(void)
-{
-    return 1;
-}
-
-void _GSocket_GUI_Cleanup(void)
-{
-}
-
-int _GSocket_GUI_Init_Socket(GSocket *socket)
+int _GSocket_GUI_Init(GSocket *socket)
 {
   int *m_id;
 
@@ -64,7 +54,7 @@ int _GSocket_GUI_Init_Socket(GSocket *socket)
   return TRUE;
 }
 
-void _GSocket_GUI_Destroy_Socket(GSocket *socket)
+void _GSocket_GUI_Destroy(GSocket *socket)
 {
   free(socket->m_gui_dependent);
 }

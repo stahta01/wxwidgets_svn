@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "dbtest.h"
 #endif
 
@@ -42,7 +42,7 @@ enum    DialogModes {mView,mCreate,mEdit,mSearch};
 const wxChar     CONTACT_TABLE_NAME[]       = "contacts";
 
 
-#define wxODBC_BLOB_EXPERIMENT 1
+#define wxODBC_BLOB_EXPERIMENT 0
 
 // Number of columns in the CONTACT table
 #if wxODBC_BLOB_EXPERIMENT > 0

@@ -16,12 +16,9 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "tbargtk.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/toolbar.h"
 
@@ -60,13 +57,7 @@ static void GetGtkStyle(long style,
 
     if ( style & wxTB_TEXT )
     {
-        *gtkStyle = style & wxTB_NOICONS
-                        ? GTK_TOOLBAR_TEXT
-                        : (
-#ifdef __WXGTK20__
-                          style & wxTB_HORZ_LAYOUT ? GTK_TOOLBAR_BOTH_HORIZ :
-#endif // __WXGTK20__
-                          GTK_TOOLBAR_BOTH);
+        *gtkStyle = style & wxTB_NOICONS ? GTK_TOOLBAR_TEXT : GTK_TOOLBAR_BOTH;
     }
     else // no text, hence we must have the icons or what would we show?
     {
@@ -139,7 +130,7 @@ protected:
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl)
+IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarBase)
 
 // ============================================================================
 // implementation
@@ -184,22 +175,7 @@ static void gtk_toolbar_callback( GtkWidget *WXUNUSED(widget),
         }
     }
 
-    if( !tbar->OnLeftClick( tool->GetId(), tool->IsToggled() ) && tool->CanBeToggled() )
-    {
-        // revert back
-        tool->Toggle();
-
-        wxBitmap bitmap = tool->GetBitmap();
-        if ( bitmap.Ok() )
-        {
-            GtkPixmap *pixmap = GTK_PIXMAP( tool->m_pixmap );
-
-            GdkBitmap *mask = bitmap.GetMask() ? bitmap.GetMask()->GetBitmap()
-                                               : (GdkBitmap *)NULL;
-
-            gtk_pixmap_set( pixmap, bitmap.GetPixmap(), mask );
-        }
-    }
+    tbar->OnLeftClick( tool->GetId(), tool->IsToggled() );
 }
 
 //-----------------------------------------------------------------------------
@@ -453,10 +429,8 @@ bool wxToolBar::DoInsertTool(size_t pos, wxToolBarToolBase *toolBase)
 
                 if ( tool->IsRadio() )
                 {
-                    wxToolBarToolsList::compatibility_iterator node
-                        = wxToolBarToolsList::compatibility_iterator();
-                    if ( pos ) node = m_tools.Item(pos - 1);
-
+                    wxToolBarToolsList::Node *node = pos ? m_tools.Item(pos - 1)
+                                                         : NULL;
                     while ( node )
                     {
                         wxToolBarTool *tool = (wxToolBarTool *)node->GetData();
@@ -682,7 +656,7 @@ void wxToolBar::OnInternalIdle()
             gdk_window_set_cursor( m_widget->window, cursor.GetCursor() );
         }
 
-        wxToolBarToolsList::compatibility_iterator node = m_tools.GetFirst();
+        wxToolBarToolsList::Node *node = m_tools.GetFirst();
         while ( node )
         {
             wxToolBarTool *tool = (wxToolBarTool *)node->GetData();
@@ -701,8 +675,7 @@ void wxToolBar::OnInternalIdle()
         }
     }
 
-    if (wxUpdateUIEvent::CanUpdate(this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 }
 
 #endif // wxUSE_TOOLBAR_NATIVE

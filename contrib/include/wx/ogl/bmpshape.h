@@ -16,8 +16,9 @@
 #pragma interface "bmpshape.h"
 #endif
 
+#include <wx/ogl/basic.h>
 
-class WXDLLIMPEXP_OGL wxBitmapShape: public wxRectangleShape
+class wxBitmapShape: public wxRectangleShape
 {
  DECLARE_DYNAMIC_CLASS(wxBitmapShape)
  public:

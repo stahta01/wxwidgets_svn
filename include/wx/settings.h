@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -28,11 +28,7 @@ enum wxSystemFont
     wxSYS_DEVICE_DEFAULT_FONT,
     wxSYS_DEFAULT_PALETTE,
     wxSYS_SYSTEM_FIXED_FONT,
-    wxSYS_DEFAULT_GUI_FONT,
-    wxSYS_ICONTITLE_FONT
-#ifndef __WXMSW__
-    = wxSYS_DEFAULT_GUI_FONT
-#endif
+    wxSYS_DEFAULT_GUI_FONT
 };
 
 // possible values for wxSystemSettings::GetColour() parameter

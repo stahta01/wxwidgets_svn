@@ -12,7 +12,7 @@
 #ifndef _WX_DC_H_
 #define _WX_DC_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "dc.h"
 #endif
 
@@ -241,7 +241,6 @@ protected:
 #endif
 
     DECLARE_DYNAMIC_CLASS(wxDC)
-    DECLARE_NO_COPY_CLASS(wxDC)
 };
 
 // ----------------------------------------------------------------------------
@@ -254,9 +253,6 @@ class WXDLLEXPORT wxDCTemp : public wxDC
 public:
     wxDCTemp(WXHDC hdc) { SetHDC(hdc); }
     virtual ~wxDCTemp() { SetHDC((WXHDC)NULL); }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxDCTemp)
 };
 
 #endif

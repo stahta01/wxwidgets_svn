@@ -24,9 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#if wxUSE_PROLOGIO
-#include <wx/deprecated/wxexpr.h>
-#endif
+#include <wx/wxexpr.h>
 
 #ifdef new
 #undef new
@@ -36,7 +34,13 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "wx/ogl/ogl.h"
+#include <wx/ogl/basic.h>
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/canvas.h>
+#include <wx/ogl/ogldiag.h>
+#include <wx/ogl/misc.h>
+#include <wx/ogl/lines.h>
+#include <wx/ogl/composit.h>
 
 #define CONTROL_POINT_SIZE       6
 
@@ -58,7 +62,7 @@ BEGIN_EVENT_TABLE(wxShapeCanvas, wxScrolledWindow)
     EVT_MOUSE_EVENTS(wxShapeCanvas::OnMouseEvent)
 END_EVENT_TABLE()
 
-const wxChar* wxShapeCanvasNameStr = wxT("shapeCanvas");
+wxChar* wxShapeCanvasNameStr = wxT("shapeCanvas");
 
 // Object canvas
 wxShapeCanvas::wxShapeCanvas(wxWindow *parent, wxWindowID id,
@@ -82,7 +86,7 @@ wxShapeCanvas::~wxShapeCanvas()
 {
 }
 
-void wxShapeCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
+void wxShapeCanvas::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
 
@@ -393,10 +397,10 @@ wxShape *wxShapeCanvas::FindShape(double x, double y, int *attachment, wxClassIn
   //     the other objects
   // (b) to find the control points FIRST if they exist
 
-  wxNode *current = GetDiagram()->GetShapeList()->GetLast();
+  wxNode *current = GetDiagram()->GetShapeList()->Last();
   while (current)
   {
-    wxShape *object = (wxShape *)current->GetData();
+    wxShape *object = (wxShape *)current->Data();
 
     double dist;
     int temp_attachment;
@@ -426,13 +430,13 @@ wxShape *wxShapeCanvas::FindShape(double x, double y, int *attachment, wxClassIn
       }
     }
     if (current)
-      current = current->GetPrevious();
+      current = current->Previous();
   }
 
-  current = GetDiagram()->GetShapeList()->GetLast();
+  current = GetDiagram()->GetShapeList()->Last();
   while (current)
   {
-    wxShape *object = (wxShape *)current->GetData();
+    wxShape *object = (wxShape *)current->Data();
     double dist;
     int temp_attachment;
 
@@ -457,7 +461,7 @@ wxShape *wxShapeCanvas::FindShape(double x, double y, int *attachment, wxClassIn
       }
     }
     if (current)
-      current = current->GetPrevious();
+      current = current->Previous();
   }
 
   *attachment = nearest_attachment;
@@ -469,35 +473,35 @@ wxShape *wxShapeCanvas::FindShape(double x, double y, int *attachment, wxClassIn
  *
  */
 
-void wxShapeCanvas::OnLeftClick(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnLeftClick(double x, double y, int keys)
 {
 }
 
-void wxShapeCanvas::OnRightClick(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnRightClick(double x, double y, int keys)
 {
 }
 
-void wxShapeCanvas::OnDragLeft(bool WXUNUSED(draw), double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnDragLeft(bool draw, double x, double y, int keys)
 {
 }
 
-void wxShapeCanvas::OnBeginDragLeft(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnBeginDragLeft(double x, double y, int keys)
 {
 }
 
-void wxShapeCanvas::OnEndDragLeft(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnEndDragLeft(double x, double y, int keys)
 {
 }
 
-void wxShapeCanvas::OnDragRight(bool WXUNUSED(draw), double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnDragRight(bool draw, double x, double y, int keys)
 {
 }
 
-void wxShapeCanvas::OnBeginDragRight(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnBeginDragRight(double x, double y, int keys)
 {
 }
 
-void wxShapeCanvas::OnEndDragRight(double WXUNUSED(x), double WXUNUSED(y), int WXUNUSED(keys))
+void wxShapeCanvas::OnEndDragRight(double x, double y, int keys)
 {
 }
 

@@ -61,7 +61,8 @@ class MyFrame : public wxFrame
 {
 public:
     // ctor(s)
-    MyFrame(const wxString& title);
+    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
+            long style = wxDEFAULT_FRAME_STYLE);
 
     // event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
@@ -80,7 +81,7 @@ private:
 enum
 {
     // menu items
-    Minimal_Quit = wxID_EXIT,
+    Minimal_Quit = 1,
 
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
@@ -119,7 +120,8 @@ IMPLEMENT_APP(MyApp)
 bool MyApp::OnInit()
 {
     // create the main application window
-    MyFrame *frame = new MyFrame(_T("Minimal wxWindows App"));
+    MyFrame *frame = new MyFrame(_T("Minimal wxWindows App"),
+                                 wxPoint(50, 50), wxSize(450, 340));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -136,8 +138,8 @@ bool MyApp::OnInit()
 // ----------------------------------------------------------------------------
 
 // frame constructor
-MyFrame::MyFrame(const wxString& title)
-       : wxFrame(NULL, -1, title)
+MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style)
+       : wxFrame(NULL, -1, title, pos, size, style)
 {
     // set the frame icon
     SetIcon(wxICON(mondrian));
@@ -161,7 +163,7 @@ MyFrame::MyFrame(const wxString& title)
     SetMenuBar(menuBar);
 #endif // wxUSE_MENUS
 
-#if wxUSE_STATUSBAR && !defined(__WXWINCE__)
+#if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
     SetStatusText(_T("Welcome to wxWindows!"));

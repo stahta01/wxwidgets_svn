@@ -9,9 +9,6 @@ class wxNativeFontInfoPtr :
     def Init(self, *_args, **_kwargs):
         val = fontsc.wxNativeFontInfo_Init(self, *_args, **_kwargs)
         return val
-    def InitFromFont(self, *_args, **_kwargs):
-        val = fontsc.wxNativeFontInfo_InitFromFont(self, *_args, **_kwargs)
-        return val
     def GetPointSize(self, *_args, **_kwargs):
         val = fontsc.wxNativeFontInfo_GetPointSize(self, *_args, **_kwargs)
         return val
@@ -89,26 +86,26 @@ class wxFontMapperPtr :
                 delfunc(self)
             except:
                 pass
-    def CharsetToEncoding(self, *_args, **_kwargs):
-        val = fontsc.wxFontMapper_CharsetToEncoding(self, *_args, **_kwargs)
-        return val
-    def SetConfig(self, *_args, **_kwargs):
-        val = fontsc.wxFontMapper_SetConfig(self, *_args, **_kwargs)
-        return val
-    def SetConfigPath(self, *_args, **_kwargs):
-        val = fontsc.wxFontMapper_SetConfigPath(self, *_args, **_kwargs)
-        return val
     def GetAltForEncoding(self, *_args, **_kwargs):
         val = fontsc.wxFontMapper_GetAltForEncoding(self, *_args, **_kwargs)
         return val
     def IsEncodingAvailable(self, *_args, **_kwargs):
         val = fontsc.wxFontMapper_IsEncodingAvailable(self, *_args, **_kwargs)
         return val
+    def CharsetToEncoding(self, *_args, **_kwargs):
+        val = fontsc.wxFontMapper_CharsetToEncoding(self, *_args, **_kwargs)
+        return val
     def SetDialogParent(self, *_args, **_kwargs):
         val = fontsc.wxFontMapper_SetDialogParent(self, *_args, **_kwargs)
         return val
     def SetDialogTitle(self, *_args, **_kwargs):
         val = fontsc.wxFontMapper_SetDialogTitle(self, *_args, **_kwargs)
+        return val
+    def SetConfig(self, *_args, **_kwargs):
+        val = fontsc.wxFontMapper_SetConfig(self, *_args, **_kwargs)
+        return val
+    def SetConfigPath(self, *_args, **_kwargs):
+        val = fontsc.wxFontMapper_SetConfigPath(self, *_args, **_kwargs)
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxFontMapper instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
@@ -432,10 +429,6 @@ def wxFontMapper_Set(*_args, **_kwargs):
     if val: val = wxFontMapperPtr(val)
     return val
 
-wxFontMapper_GetSupportedEncodingsCount = fontsc.wxFontMapper_GetSupportedEncodingsCount
-
-wxFontMapper_GetEncoding = fontsc.wxFontMapper_GetEncoding
-
 wxFontMapper_GetEncodingName = fontsc.wxFontMapper_GetEncodingName
 
 wxFontMapper_GetEncodingDescription = fontsc.wxFontMapper_GetEncodingDescription
@@ -456,13 +449,6 @@ wxLocale_AddCatalogLookupPathPrefix = fontsc.wxLocale_AddCatalogLookupPathPrefix
 
 def wxLocale_GetLanguageInfo(*_args, **_kwargs):
     val = fontsc.wxLocale_GetLanguageInfo(*_args,**_kwargs)
-    if val: val = wxLanguageInfoPtr(val)
-    return val
-
-wxLocale_GetLanguageName = fontsc.wxLocale_GetLanguageName
-
-def wxLocale_FindLanguageInfo(*_args, **_kwargs):
-    val = fontsc.wxLocale_FindLanguageInfo(*_args,**_kwargs)
     if val: val = wxLanguageInfoPtr(val)
     return val
 
@@ -535,18 +521,12 @@ wxFONTENCODING_CP1257 = fontsc.wxFONTENCODING_CP1257
 wxFONTENCODING_CP12_MAX = fontsc.wxFONTENCODING_CP12_MAX
 wxFONTENCODING_UTF7 = fontsc.wxFONTENCODING_UTF7
 wxFONTENCODING_UTF8 = fontsc.wxFONTENCODING_UTF8
-wxFONTENCODING_EUC_JP = fontsc.wxFONTENCODING_EUC_JP
-wxFONTENCODING_UTF16BE = fontsc.wxFONTENCODING_UTF16BE
-wxFONTENCODING_UTF16LE = fontsc.wxFONTENCODING_UTF16LE
-wxFONTENCODING_UTF32BE = fontsc.wxFONTENCODING_UTF32BE
-wxFONTENCODING_UTF32LE = fontsc.wxFONTENCODING_UTF32LE
-wxFONTENCODING_MAX = fontsc.wxFONTENCODING_MAX
 wxFONTENCODING_GB2312 = fontsc.wxFONTENCODING_GB2312
 wxFONTENCODING_BIG5 = fontsc.wxFONTENCODING_BIG5
 wxFONTENCODING_SHIFT_JIS = fontsc.wxFONTENCODING_SHIFT_JIS
-wxFONTENCODING_UTF16 = fontsc.wxFONTENCODING_UTF16
-wxFONTENCODING_UTF32 = fontsc.wxFONTENCODING_UTF32
+wxFONTENCODING_EUC_JP = fontsc.wxFONTENCODING_EUC_JP
 wxFONTENCODING_UNICODE = fontsc.wxFONTENCODING_UNICODE
+wxFONTENCODING_MAX = fontsc.wxFONTENCODING_MAX
 wxLANGUAGE_DEFAULT = fontsc.wxLANGUAGE_DEFAULT
 wxLANGUAGE_UNKNOWN = fontsc.wxLANGUAGE_UNKNOWN
 wxLANGUAGE_ABKHAZIAN = fontsc.wxLANGUAGE_ABKHAZIAN

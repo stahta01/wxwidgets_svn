@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -31,7 +31,6 @@ FORCE_LINK_ME(m_style)
 
 
 TAG_HANDLER_BEGIN(STYLE, "STYLE")
-    TAG_HANDLER_CONSTR(STYLE) { }
 
     TAG_HANDLER_PROC(WXUNUSED(tag))
     {

@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "colrdlgg.h"
 #endif
 
@@ -206,7 +206,7 @@ void wxGenericColourDialog::OnMouseEvent(wxMouseEvent& event)
 
 void wxGenericColourDialog::OnPaint(wxPaintEvent& event)
 {
-#if !defined(__WXMOTIF__) && !defined(__WXMAC__) && !defined(__WXPM__) && !defined(__WXCOCOA__)
+#if !defined(__WXMOTIF__) && !defined(__WXMAC__) && !defined(__WXPM__)
   wxDialog::OnPaint(event);
 #endif
 
@@ -304,14 +304,14 @@ void wxGenericColourDialog::InitializeColours(void)
 
     for (i = 0; i < WXSIZEOF(wxColourDialogNames); i++)
     {
-        wxColour col = wxTheColourDatabase->Find(wxColourDialogNames[i]);
-        if (col.Ok())
-            standardColours[i].Set(col.Red(), col.Green(), col.Blue());
+        wxColour *col = wxTheColourDatabase->FindColour(wxColourDialogNames[i]);
+        if (col)
+            standardColours[i].Set(col->Red(), col->Green(), col->Blue());
         else
             standardColours[i].Set(0, 0, 0);
     }
 
-    for (i = 0; i < WXSIZEOF(customColours); i++)
+    for (i = 0; i < 16; i++)
     {
         customColours[i] = colourData.GetCustomColour(i);
     }
@@ -333,12 +333,13 @@ void wxGenericColourDialog::InitializeColours(void)
         }
         if ( !initColourFound )
         {
-            for ( i = 0; i < WXSIZEOF(customColours); i++ )
+            for ( i = 0; i < 16; i++ )
             {
                 if ( customColours[i] == curr )
                 {
                     whichKind = 2;
                     colourSelection = i;
+                    initColourFound = TRUE;
                     break;
                 }
             }

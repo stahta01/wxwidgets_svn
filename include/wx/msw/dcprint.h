@@ -12,7 +12,7 @@
 #ifndef _WX_DCPRINT_H_
 #define _WX_DCPRINT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "dcprint.h"
 #endif
 
@@ -52,7 +52,7 @@ protected:
     wxPrintData m_printData;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxPrinterDC)
+    DECLARE_CLASS(wxPrinterDC)
 };
 
 // Gets an HDC for the default printer configuration

@@ -2,18 +2,18 @@
 // Name:        helpxxxx.h
 // Purpose:     Help system: native implementation for your system. Replace
 //              XXXX with suitable name.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_HELPXXXX_H_
 #define _WX_HELPXXXX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "helpxxxx.h"
 #endif
 
@@ -37,8 +37,7 @@ class WXDLLEXPORT wxXXXXHelpController: public wxHelpControllerBase
   virtual bool DisplayContents();
   virtual bool DisplaySection(int sectionNo);
   virtual bool DisplayBlock(long blockNo);
-  virtual bool KeywordSearch(const wxString& k,
-                             wxHelpSearchMode mode = wxHELP_SEARCH_ALL);
+  virtual bool KeywordSearch(const wxString& k);
 
   virtual bool Quit();
   virtual void OnQuit();

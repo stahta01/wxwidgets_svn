@@ -6,7 +6,7 @@
 // Created:     16.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "checklst.h"
 #endif
 
@@ -47,10 +47,8 @@
 #include "wx/ownerdrw.h"
 #include "wx/checklst.h"
 
-#include "wx/msw/wrapwin.h"
+#include <windows.h>
 #include <windowsx.h>
-
-#include "wx/msw/private.h"
 
 #if defined(__GNUWIN32_OLD__)
     #include "wx/msw/gnuwin32/extra.h"
@@ -67,65 +65,8 @@
 // implementation
 // ============================================================================
 
-// TODO: wxCONSTRUCTOR
-#if 0 // wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxCheckListBoxStyle )
-
-wxBEGIN_FLAGS( wxCheckListBoxStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-    
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxBORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxFULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxLB_SINGLE)
-    wxFLAGS_MEMBER(wxLB_MULTIPLE)
-    wxFLAGS_MEMBER(wxLB_EXTENDED)
-    wxFLAGS_MEMBER(wxLB_HSCROLL)
-    wxFLAGS_MEMBER(wxLB_ALWAYS_SB)
-    wxFLAGS_MEMBER(wxLB_NEEDED_SB)
-    wxFLAGS_MEMBER(wxLB_SORT)
-
-wxEND_FLAGS( wxCheckListBoxStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxCheckListBox, wxListBox,"wx/checklst.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxCheckListBox)
-	wxEVENT_PROPERTY( Toggle , wxEVT_COMMAND_CHECKLISTBOX_TOGGLED , wxCommandEvent )
-
-    wxPROPERTY_FLAGS( WindowStyle , wxCheckListBoxStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox, wxListBox)
-#endif
 
-/*
-TODO PROPERTIES
-	list content
-		item , checked (no)
-*/
 // ----------------------------------------------------------------------------
 // declaration and implementation of wxCheckListBoxItem class
 // ----------------------------------------------------------------------------
@@ -141,7 +82,7 @@ public:
   virtual bool OnDrawItem(wxDC& dc, const wxRect& rc, wxODAction act, wxODStatus stat);
 
   // simple accessors and operations
-  bool IsChecked() const { return m_bChecked; }
+  bool IsChecked() const  { return m_bChecked;        }
 
   void Check(bool bCheck);
   void Toggle() { Check(!IsChecked()); }
@@ -149,11 +90,9 @@ public:
   void SendEvent();
 
 private:
-
-    DECLARE_NO_COPY_CLASS(wxCheckListBoxItem)
   bool            m_bChecked;
   wxCheckListBox *m_pParent;
-  size_t          m_nIndex;
+  size_t            m_nIndex;
 };
 
 wxCheckListBoxItem::wxCheckListBoxItem(wxCheckListBox *pParent, size_t nIndex)
@@ -213,17 +152,29 @@ bool wxCheckListBoxItem::OnDrawItem(wxDC& dc, const wxRect& rc,
       HBITMAP hbmpOld = (HBITMAP)SelectObject(hdcMem, hbmpCheck);
 
       // then draw a check mark into it
-
+#if defined(__WIN32__) && !defined(__SYMANTEC__)
       RECT rect;
       rect.left   = 0;
       rect.top    = 0;
       rect.right  = nCheckWidth;
       rect.bottom = nCheckHeight;
 
-#ifdef __WXWINCE__
-      DrawFrameControl(hdcMem, &rect, DFC_BUTTON, DFCS_BUTTONCHECK);
-#else
       DrawFrameControl(hdcMem, &rect, DFC_MENU, DFCS_MENUCHECK);
+#else
+      // In WIN16, draw a cross
+      HPEN blackPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+      HPEN whiteBrush = (HPEN)GetStockObject(WHITE_BRUSH);
+      HPEN hPenOld = (HPEN)::SelectObject(hdcMem, blackPen);
+      HPEN hBrushOld = (HPEN)::SelectObject(hdcMem, whiteBrush);
+      ::SetROP2(hdcMem, R2_COPYPEN);
+      Rectangle(hdcMem, 0, 0, nCheckWidth, nCheckHeight);
+      MoveTo(hdcMem, 0, 0);
+      LineTo(hdcMem, nCheckWidth, nCheckHeight);
+      MoveTo(hdcMem, nCheckWidth, 0);
+      LineTo(hdcMem, 0, nCheckHeight);
+      ::SelectObject(hdcMem, hPenOld);
+      ::SelectObject(hdcMem, hBrushOld);
+      ::DeleteObject(blackPen);
 #endif
 
       // finally copy it to screen DC and clean up
@@ -355,6 +306,7 @@ bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
                              style | wxLB_OWNERDRAW, validator, name);
 }
 
+
 // misc overloaded methods
 // -----------------------
 
@@ -442,7 +394,7 @@ void wxCheckListBox::OnKeyDown(wxKeyEvent& event)
         Clear
     } oper;
 
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_SPACE:
             oper = Toggle;

@@ -8,20 +8,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "listbox.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#include "wx/defs.h"
+#include "wx/listbox.h"
 
 #if wxUSE_LISTBOX
 
-#include "wx/listbox.h"
 #include "wx/dynarray.h"
-#include "wx/arrstr.h"
 #include "wx/utils.h"
 #include "wx/intl.h"
 #include "wx/checklst.h"
@@ -248,9 +243,7 @@ static void gtk_listitem_deselect_callback( GtkWidget *widget, wxListBox *listbo
     gtk_listitem_select_cb( widget, listbox, FALSE );
 }
 
-static void gtk_listitem_select_cb( GtkWidget *widget,
-                                    wxListBox *listbox,
-                                    bool is_selection )
+static void gtk_listitem_select_cb( GtkWidget *widget, wxListBox *listbox, bool is_selection )
 {
     if (g_isIdle) wxapp_install_idle_handler();
 
@@ -262,8 +255,9 @@ static void gtk_listitem_select_cb( GtkWidget *widget,
     wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, listbox->GetId() );
     event.SetEventObject( listbox );
 
-    // indicate whether this is a selection or a deselection
-    event.SetExtraLong( is_selection );
+//    MSW doesn't do that either
+//    event.SetExtraLong( (long) is_selection );
+
 
     if ((listbox->GetWindowStyleFlag() & wxLB_SINGLE) != 0)
     {
@@ -453,7 +447,7 @@ void wxListBox::DoInsertItems(const wxArrayString& items, int pos)
             if (index != GetCount())
             {
                 GtkAddItem( items[n], index );
-                wxList::compatibility_iterator node = m_clientList.Item( index );
+                wxNode *node = m_clientList.Nth( index );
                 m_clientList.Insert( node, (wxObject*) NULL );
             }
             else
@@ -476,7 +470,7 @@ void wxListBox::DoInsertItems(const wxArrayString& items, int pos)
         }
         else
         {
-            wxList::compatibility_iterator node = m_clientList.Item( pos );
+            wxNode *node = m_clientList.Nth( pos );
             for ( size_t n = 0; n < nItems; n++ )
             {
                 GtkAddItem( items[n], pos+n );
@@ -502,7 +496,7 @@ int wxListBox::DoAppend( const wxString& item )
         {
            GtkAddItem( item, index );
 
-           wxList::compatibility_iterator node = m_clientList.Item( index );
+           wxNode *node = m_clientList.Nth( index );
            m_clientList.Insert( node, (wxObject *)NULL );
 
            return index;
@@ -624,11 +618,11 @@ void wxListBox::Clear()
         // destroy the data (due to Robert's idea of using wxList<wxObject>
         // and not wxList<wxClientData> we can't just say
         // m_clientList.DeleteContents(TRUE) - this would crash!
-        wxList::compatibility_iterator node = m_clientList.GetFirst();
+        wxNode *node = m_clientList.First();
         while ( node )
         {
-            delete (wxClientData *)node->GetData();
-            node = node->GetNext();
+            delete (wxClientData *)node->Data();
+            node = node->Next();
         }
     }
     m_clientList.Clear();
@@ -649,20 +643,20 @@ void wxListBox::Delete( int n )
     gtk_list_remove_items( m_list, list );
     g_list_free( list );
 
-    wxList::compatibility_iterator node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     if ( node )
     {
         if ( m_clientDataItemsType == wxClientData_Object )
         {
-            wxClientData *cd = (wxClientData*)node->GetData();
+            wxClientData *cd = (wxClientData*)node->Data();
             delete cd;
         }
 
-        m_clientList.Erase( node );
+        m_clientList.DeleteNode( node );
     }
 
     if ( m_strings )
-        m_strings->RemoveAt(n);
+        m_strings->Remove(n);
 }
 
 // ----------------------------------------------------------------------------
@@ -673,7 +667,7 @@ void wxListBox::DoSetItemClientData( int n, void* clientData )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid listbox control") );
 
-    wxList::compatibility_iterator node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_RET( node, wxT("invalid index in wxListBox::DoSetItemClientData") );
 
     node->SetData( (wxObject*) clientData );
@@ -683,17 +677,17 @@ void* wxListBox::DoGetItemClientData( int n ) const
 {
     wxCHECK_MSG( m_widget != NULL, NULL, wxT("invalid listbox control") );
 
-    wxList::compatibility_iterator node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_MSG( node, NULL, wxT("invalid index in wxListBox::DoGetItemClientData") );
 
-    return node->GetData();
+    return node->Data();
 }
 
 void wxListBox::DoSetItemClientObject( int n, wxClientData* clientData )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid listbox control") );
 
-    wxList::compatibility_iterator node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_RET( node, wxT("invalid index in wxListBox::DoSetItemClientObject") );
 
     // wxItemContainer already deletes data for us
@@ -705,11 +699,11 @@ wxClientData* wxListBox::DoGetItemClientObject( int n ) const
 {
     wxCHECK_MSG( m_widget != NULL, (wxClientData*) NULL, wxT("invalid listbox control") );
 
-    wxList::compatibility_iterator node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_MSG( node, (wxClientData *)NULL,
                  wxT("invalid index in wxListBox::DoGetItemClientObject") );
 
-    return (wxClientData*) node->GetData();
+    return (wxClientData*) node->Data();
 }
 
 // ----------------------------------------------------------------------------
@@ -1044,8 +1038,7 @@ void wxListBox::OnInternalIdle()
         }
     }
 
-    if (wxUpdateUIEvent::CanUpdate(this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 }
 
 wxSize wxListBox::DoGetBestSize() const

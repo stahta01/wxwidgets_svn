@@ -12,17 +12,15 @@
 #ifndef __TABGH_G__
 #define __TABGH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "tabg.h"
 #endif
 
 #define WXTAB_VERSION   1.1
 
-#include "wx/hashmap.h"
+#include "wx/hash.h"
 #include "wx/string.h"
 #include "wx/dialog.h"
-#include "wx/panel.h"
-#include "wx/list.h"
 
 class WXDLLEXPORT wxTabView;
 
@@ -87,13 +85,12 @@ protected:
 
 class WXDLLEXPORT wxTabLayer: public wxList
 {
+  DECLARE_DYNAMIC_CLASS(wxTabLayer)
 };
 
 /*
  * The wxTabView controls and draws the tabbed object
  */
-
-WX_DECLARE_LIST(wxTabLayer, wxTabLayerList);
 
 #define wxTAB_STYLE_DRAW_BOX         1   // Draws 3D boxes round tab layers
 #define wxTAB_STYLE_COLOUR_INTERIOR  2   // Colours interior of tabs, otherwise draws outline
@@ -105,8 +102,8 @@ public:
   wxTabView(long style = wxTAB_STYLE_DRAW_BOX | wxTAB_STYLE_COLOUR_INTERIOR);
   ~wxTabView();
 
-  inline int GetNumberOfLayers() const { return m_layers.GetCount(); }
-  inline wxList& GetLayers() { return (wxList&)m_layers; }
+  inline int GetNumberOfLayers() const { return m_layers.Number(); }
+  inline wxList& GetLayers() { return m_layers; }
 
   inline void SetWindow(wxWindow* wnd) { m_window = wnd; }
   inline wxWindow* GetWindow(void) const { return m_window; }
@@ -199,7 +196,7 @@ public:
   inline wxFont *GetSelectedTabFont() const { return (wxFont*) & m_tabSelectedFont; }
   inline void SetSelectedTabFont(const wxFont& f) { m_tabSelectedFont = f; }
   // Find the node and the column at which this control is positioned.
-  wxList::compatibility_iterator FindTabNodeAndColumn(wxTabControl *control, int *col) const ;
+  wxNode *FindTabNodeAndColumn(wxTabControl *control, int *col) const ;
   
   // Do the necessary to change to this tab
   virtual bool ChangeTab(wxTabControl *control);
@@ -212,7 +209,7 @@ public:
 
 protected:
    // List of layers, from front to back.
-   wxTabLayerList   m_layers;
+   wxList           m_layers;
    
    // Selected tab
    int              m_tabSelection;
@@ -323,9 +320,6 @@ protected:
 DECLARE_EVENT_TABLE()
 };
 
-WX_DECLARE_HASH_MAP(int, wxWindow*, wxIntegerHash, wxIntegerEqual,
-                    wxIntToWindowHashMap);
-
 class WXDLLEXPORT wxPanelTabView: public wxTabView
 {
 DECLARE_DYNAMIC_CLASS(wxPanelTabView)
@@ -343,14 +337,14 @@ public:
    inline wxWindow *GetCurrentWindow() const { return m_currentWindow; }
    
    void ShowWindowForTab(int id);
-   // inline wxList& GetWindows() const { return (wxList&) m_tabWindows; }
+   inline wxList& GetWindows() const { return (wxList&) m_tabWindows; }
 
 protected:
    // List of panels, one for each tab. Indexed
    // by tab ID.
-   wxIntToWindowHashMap m_tabWindows;
-   wxWindow*            m_currentWindow;
-   wxPanel*             m_panel;
+   wxList           m_tabWindows;
+   wxWindow*        m_currentWindow;
+   wxPanel*         m_panel;
 };
 
 #endif

@@ -16,7 +16,7 @@
 
 #if wxUSE_CARET
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "caret.h"
 #endif
 
@@ -212,25 +212,18 @@ public:
     wxCaretSuspend(wxWindow *win)
     {
         m_caret = win->GetCaret();
-        m_show = FALSE;        
-        if ( m_caret && m_caret->IsVisible() )
-        {
+        if ( m_caret )
             m_caret->Hide();
-            m_show = TRUE;
-        }
     }
 
     ~wxCaretSuspend()
     {
-        if ( m_caret && m_show )
+        if ( m_caret )
             m_caret->Show();
     }
 
 private:
     wxCaret *m_caret;
-    bool     m_show;
-
-    DECLARE_NO_COPY_CLASS(wxCaretSuspend)
 };
 
 #endif // wxUSE_CARET

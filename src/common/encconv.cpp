@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "encconv.h"
 #endif
 
@@ -37,11 +37,6 @@ typedef wchar_t tchar;
 typedef char tchar;
 #endif
 
-#ifdef __WXWINCE__
-#undef LINKAGEMODE
-#define LINKAGEMODE __cdecl
-#endif
-
 static wxUint16* LINKAGEMODE GetEncTable(wxFontEncoding enc)
 {
     for (int i = 0; encodings_list[i].table != NULL; i++)
@@ -56,6 +51,8 @@ typedef struct {
     wxUint16 u;
     wxUint8  c;
 } CharsetItem;
+
+
 
 extern "C" int LINKAGEMODE CompareCharsetItems(const void *i1, const void *i2)
 {
@@ -89,7 +86,7 @@ wxEncodingConverter::wxEncodingConverter()
 bool wxEncodingConverter::Init(wxFontEncoding input_enc, wxFontEncoding output_enc, int method)
 {
     unsigned i;
-    wxUint16 *in_tbl, *out_tbl = NULL;
+    wxUint16 *in_tbl = NULL, *out_tbl = NULL;
 
     if (m_Table) {delete[] m_Table; m_Table = NULL;}
 
@@ -121,8 +118,10 @@ bool wxEncodingConverter::Init(wxFontEncoding input_enc, wxFontEncoding output_e
             m_Table[out_tbl[i]] = (tchar)(128 + i);
 
         m_UnicodeInput = TRUE;
+        return TRUE;
     }
-    else // input !Unicode
+
+    else
     {
         if ((in_tbl = GetEncTable(input_enc)) == NULL) return FALSE;
         if (output_enc != wxFONTENCODING_UNICODE)
@@ -138,9 +137,7 @@ bool wxEncodingConverter::Init(wxFontEncoding input_enc, wxFontEncoding output_e
             for (i = 0; i < 128; i++)  m_Table[128 + i] = (tchar)in_tbl[i];
             return TRUE;
         }
-        // FIXME: write a substitute for bsearch
-#ifndef __WXWINCE__
-        else // output !Unicode
+        else
         {
             CharsetItem *rev = BuildReverseTable(out_tbl);
             CharsetItem *item;
@@ -164,16 +161,14 @@ bool wxEncodingConverter::Init(wxFontEncoding input_enc, wxFontEncoding output_e
             }
 
             delete[] rev;
+            return TRUE;
         }
-#endif // !__WXWINCE__
     }
-
-    return TRUE;
 }
 
 
 
-void wxEncodingConverter::Convert(const char* input, char* output) const
+void wxEncodingConverter::Convert(const char* input, char* output)
 {
     wxASSERT_MSG(!m_UnicodeOutput, wxT("You cannot convert to unicode if output is const char*!"));
     wxASSERT_MSG(!m_UnicodeInput, wxT("You cannot convert from unicode if input is const char*!"));
@@ -197,7 +192,7 @@ void wxEncodingConverter::Convert(const char* input, char* output) const
 
 #if wxUSE_WCHAR_T
 
-void wxEncodingConverter::Convert(const char* input, wchar_t* output) const
+void wxEncodingConverter::Convert(const char* input, wchar_t* output)
 {
     wxASSERT_MSG(m_UnicodeOutput, wxT("You cannot convert to 8-bit if output is const wchar_t*!"));
     wxASSERT_MSG(!m_UnicodeInput, wxT("You cannot convert from unicode if input is const char*!"));
@@ -222,7 +217,7 @@ void wxEncodingConverter::Convert(const char* input, wchar_t* output) const
 
 
 
-void wxEncodingConverter::Convert(const wchar_t* input, char* output) const
+void wxEncodingConverter::Convert(const wchar_t* input, char* output)
 {
     wxASSERT_MSG(!m_UnicodeOutput, wxT("You cannot convert to unicode if output is const char*!"));
     wxASSERT_MSG(m_UnicodeInput, wxT("You cannot convert from 8-bit if input is const wchar_t*!"));
@@ -247,7 +242,7 @@ void wxEncodingConverter::Convert(const wchar_t* input, char* output) const
 
 
 
-void wxEncodingConverter::Convert(const wchar_t* input, wchar_t* output) const
+void wxEncodingConverter::Convert(const wchar_t* input, wchar_t* output)
 {
     wxASSERT_MSG(m_UnicodeOutput, wxT("You cannot convert to 8-bit if output is const wchar_t*!"));
     wxASSERT_MSG(m_UnicodeInput, wxT("You cannot convert from 8-bit if input is const wchar_t*!"));
@@ -274,7 +269,7 @@ void wxEncodingConverter::Convert(const wchar_t* input, wchar_t* output) const
 #endif // wxUSE_WCHAR_T
 
 
-wxString wxEncodingConverter::Convert(const wxString& input) const
+wxString wxEncodingConverter::Convert(const wxString& input)
 {
     if (m_JustCopy) return input;
 
@@ -388,14 +383,7 @@ static wxFontEncoding
 };
 
 
-static bool FindEncoding(const wxFontEncodingArray& arr, wxFontEncoding f)
-{
-    for (wxFontEncodingArray::const_iterator it = arr.begin(), en = arr.end();
-         it != en; ++it)
-        if (*it == f)
-            return true;
-    return false;
-}
+
 
 wxFontEncodingArray wxEncodingConverter::GetPlatformEquivalents(wxFontEncoding enc, int platform)
 {
@@ -424,9 +412,9 @@ wxFontEncodingArray wxEncodingConverter::GetPlatformEquivalents(wxFontEncoding e
                 if (EquivalentEncodings[clas][i][e] == enc)
                 {
                     for (f = EquivalentEncodings[clas][platform]; *f != STOP; f++)
-                        if (*f == enc) arr.push_back(enc);
+                        if (*f == enc) arr.Add(enc);
                     for (f = EquivalentEncodings[clas][platform]; *f != STOP; f++)
-                        if (!FindEncoding(arr, *f)) arr.push_back(*f);
+                        if (arr.Index(*f) == wxNOT_FOUND) arr.Add(*f);
                     i = NUM_OF_PLATFORMS/*hack*/; break;
                 }
         clas++;
@@ -454,7 +442,7 @@ wxFontEncodingArray wxEncodingConverter::GetAllEquivalents(wxFontEncoding enc)
                 {
                     for (j = 0; j < NUM_OF_PLATFORMS; j++)
                         for (f = EquivalentEncodings[clas][j]; *f != STOP; f++)
-                            if (!FindEncoding(arr, *f)) arr.push_back(*f);
+                            if (arr.Index(*f) == wxNOT_FOUND) arr.Add(*f);
                     i = NUM_OF_PLATFORMS/*hack*/; break;
                 }
         clas++;

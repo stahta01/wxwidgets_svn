@@ -16,8 +16,6 @@
 
 WXDLLEXPORT_DATA(extern const char*) wxDialogNameStr;
 
-class WXDLLEXPORT wxDialogModalData;
-
 //
 // Dialog boxes
 //
@@ -112,6 +110,7 @@ public:
     //
     // Event handlers
     //
+    bool OnClose(void);
     void OnCharHook(wxKeyEvent& rEvent);
     void OnCloseWindow(wxCloseEvent& rEvent);
 
@@ -148,9 +147,6 @@ protected:
 
 private:
     wxWindow*                       m_pOldFocus;
-
-    // this pointer is non-NULL only while the modal event loop is running
-    wxDialogModalData *m_modalData;
 
     //
     // While we are showing a modal dialog we disable the other windows using

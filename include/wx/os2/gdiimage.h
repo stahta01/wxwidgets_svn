@@ -7,7 +7,7 @@
 // Created:     20.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // NB: this is a private header, it is not intended to be directly included by
@@ -40,6 +40,10 @@ public:
         m_nWidth = m_nHeight = m_nDepth = 0;
 
         m_hHandle = 0;
+
+#if WXWIN_COMPATIBILITY_2
+        m_bOk = FALSE;
+#endif // WXWIN_COMPATIBILITY_2
     }
 
     // accessors
@@ -76,6 +80,13 @@ public:
         WXHCURSOR                   m_hCursor;
     };
 
+    // this filed is redundant and using it is error prone but keep it for
+    // backwards compatibility
+#if WXWIN_COMPATIBILITY_2
+    void SetOk() { m_bOk = m_hHandle != 0; }
+
+    bool                            m_bOk;
+#endif // WXWIN_COMPATIBILITY_2
     UINT                            m_uId;
 };
 

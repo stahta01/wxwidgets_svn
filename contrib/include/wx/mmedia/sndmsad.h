@@ -14,7 +14,6 @@
 
 #include "wx/defs.h"
 #include "wx/dynarray.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndcodec.h"
 #include "wx/mmedia/sndbase.h"
 
@@ -23,7 +22,7 @@ WX_DEFINE_EXPORTED_ARRAY_INT(wxInt16, wxMSAdpcmCoeffs);
 //
 // MSADPCM format
 //
-class WXDLLIMPEXP_MMEDIA wxSoundFormatMSAdpcm: public wxSoundFormatBase {
+class WXDLLEXPORT wxSoundFormatMSAdpcm: public wxSoundFormatBase {
 public:
     wxSoundFormatMSAdpcm();
     ~wxSoundFormatMSAdpcm();
@@ -59,8 +58,8 @@ protected:
 //
 // MS ADPCM converter class
 //
-class WXDLLIMPEXP_MMEDIA wxSoundRouterStream;
-class WXDLLIMPEXP_MMEDIA wxSoundStreamMSAdpcm: public wxSoundStreamCodec {
+class WXDLLEXPORT wxSoundRouterStream;
+class WXDLLEXPORT wxSoundStreamMSAdpcm: public wxSoundStreamCodec {
 public:
     wxSoundStreamMSAdpcm(wxSoundStream& sndio);
     ~wxSoundStreamMSAdpcm();

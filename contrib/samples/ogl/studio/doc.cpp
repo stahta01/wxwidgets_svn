@@ -24,6 +24,8 @@
 #include <wx/wx.h>
 #endif
 
+#include <wx/wxexpr.h>
+
 #include "studio.h"
 #include "doc.h"
 #include "view.h"
@@ -55,21 +57,23 @@ bool csDiagramDocument::OnCloseDocument()
 
 bool csDiagramDocument::OnSaveDocument(const wxString& file)
 {
-  if (file == wxEmptyString)
+  if (file == "")
     return FALSE;
 
+#if wxUSE_PROLOGIO
   if (!m_diagram.SaveFile(file))
   {
     wxString msgTitle;
-    if (wxTheApp->GetAppName() != wxEmptyString)
+    if (wxTheApp->GetAppName() != "")
         msgTitle = wxTheApp->GetAppName();
     else
-        msgTitle = wxString(_T("File error"));
+        msgTitle = wxString("File error");
 
-    (void)wxMessageBox(_T("Sorry, could not open this file for saving."), msgTitle, wxOK | wxICON_EXCLAMATION,
+    (void)wxMessageBox("Sorry, could not open this file for saving.", msgTitle, wxOK | wxICON_EXCLAMATION,
       GetDocumentWindow());
     return FALSE;
   }
+#endif
 
   Modify(FALSE);
   SetFilename(file);
@@ -82,18 +86,20 @@ bool csDiagramDocument::OnOpenDocument(const wxString& file)
     return FALSE;
 
   wxString msgTitle;
-  if (wxTheApp->GetAppName() != wxEmptyString)
+  if (wxTheApp->GetAppName() != "")
     msgTitle = wxTheApp->GetAppName();
   else
-    msgTitle = wxString(_T("File error"));
+    msgTitle = wxString("File error");
 
   m_diagram.DeleteAllShapes();
+#if wxUSE_PROLOGIO
   if (!m_diagram.LoadFile(file))
   {
-    (void)wxMessageBox(_T("Sorry, could not open this file."), msgTitle, wxOK|wxICON_EXCLAMATION,
+    (void)wxMessageBox("Sorry, could not open this file.", msgTitle, wxOK|wxICON_EXCLAMATION,
      GetDocumentWindow());
     return FALSE;
   }
+#endif
   SetFilename(file, TRUE);
   Modify(FALSE);
   UpdateAllViews();

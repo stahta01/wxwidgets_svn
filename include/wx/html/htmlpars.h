@@ -11,7 +11,7 @@
 #ifndef _WX_HTMLPARS_H_
 #define _WX_HTMLPARS_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "htmlpars.h"
 #endif
 
@@ -23,10 +23,10 @@
 #include "wx/hash.h"
 #include "wx/fontenc.h"
 
-class WXDLLIMPEXP_BASE wxMBConv;
-class WXDLLIMPEXP_HTML wxHtmlParser;
-class WXDLLIMPEXP_HTML wxHtmlTagHandler;
-class WXDLLIMPEXP_HTML wxHtmlEntitiesParser;
+class WXDLLEXPORT wxMBConv;
+class WXDLLEXPORT wxHtmlParser;
+class WXDLLEXPORT wxHtmlTagHandler;
+class WXDLLEXPORT wxHtmlEntitiesParser;
 
 class wxHtmlTextPieces;
 class wxHtmlParserState;
@@ -43,7 +43,7 @@ enum wxHtmlURLType
 // the document and divide it into blocks of tags (where one block
 // consists of starting and ending tag and of text between these
 // 2 tags.
-class WXDLLIMPEXP_HTML wxHtmlParser : public wxObject
+class WXDLLEXPORT wxHtmlParser : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlParser)
 
@@ -174,8 +174,6 @@ protected:
     wxList m_HandlersList;
     wxHashTable m_HandlersHash;
 
-    DECLARE_NO_COPY_CLASS(wxHtmlParser)
-
     // class for opening files (file system)
     wxFileSystem *m_FS;
     // handlers stack used by PushTagHandler and PopTagHandler
@@ -197,7 +195,7 @@ protected:
 //    (using it's public methods)
 // 2. Parser parses source between starting and ending tag
 // 3. Handler restores original state of the parser
-class WXDLLIMPEXP_HTML wxHtmlTagHandler : public wxObject
+class WXDLLEXPORT wxHtmlTagHandler : public wxObject
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlTagHandler)
 
@@ -230,14 +228,12 @@ protected:
         { m_Parser->DoParsing(tag.GetBeginPos(), tag.GetEndPos1()); }
 
     wxHtmlParser *m_Parser;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlTagHandler)
 };
 
 
 // This class is used to parse HTML entities in strings. It can handle
 // both named entities and &#xxxx entries where xxxx is Unicode code.
-class WXDLLIMPEXP_HTML wxHtmlEntitiesParser : public wxObject
+class WXDLLEXPORT wxHtmlEntitiesParser : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlEntitiesParser)
 
@@ -268,8 +264,6 @@ protected:
     wxMBConv *m_conv;
     wxFontEncoding m_encoding;
 #endif
-
-    DECLARE_NO_COPY_CLASS(wxHtmlEntitiesParser)
 };
 
 

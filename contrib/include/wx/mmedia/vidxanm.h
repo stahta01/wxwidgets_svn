@@ -44,7 +44,6 @@
 // ----------------------------------------------------------------------------
 // wxMMedia2 headers
 
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/vidbase.h"
 
 // ----------------------------------------------------------------------------
@@ -66,7 +65,7 @@ typedef struct wxXANIMinternal {
 // ----------------------------------------------------------------------------
 // Class definition
 
-class WXDLLIMPEXP_MMEDIA wxVideoXANIM : public wxVideoBaseDriver {
+class WXDLLEXPORT wxVideoXANIM : public wxVideoBaseDriver {
     DECLARE_DYNAMIC_CLASS(wxVideoXANIM)
  protected:
     // Remember the state of the subprocess
