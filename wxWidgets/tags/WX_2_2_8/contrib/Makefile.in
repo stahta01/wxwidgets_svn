@@ -1,0 +1,13 @@
+#
+# Makefile : Builds wxWindows utils for Unix.
+#
+
+all:
+	cd src; $(MAKE)
+
+clean:
+	cd src; $(MAKE) clean
+	cd samples; $(MAKE) clean
+
+samples:
+	cd samples; $(MAKE)
