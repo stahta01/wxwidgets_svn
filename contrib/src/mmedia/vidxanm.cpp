@@ -503,8 +503,7 @@ bool wxVideoXANIM::RestartXANIM()
     m_video_output->SetSize(vibrato_size);
     vibrato_size.SetWidth(vibrato_size.GetWidth()-1);
     m_video_output->SetSize(vibrato_size);
-    // Very useful ! Actually it "should" sends a SETSIZE event to XAnim
-    // FIXME: This event is not sent !!
+    // Very useful ! Actually it sends a SETSIZE event to XAnim
     
     m_paused = FALSE;
     

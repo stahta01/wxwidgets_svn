@@ -172,7 +172,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxLayoutAlgorithm : public wxObject {
+class wxLayoutAlgorithm {
 public:
     wxLayoutAlgorithm();
     ~wxLayoutAlgorithm();

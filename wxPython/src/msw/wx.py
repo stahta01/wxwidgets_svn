@@ -64,6 +64,7 @@ class wxPyAppPtr(wxEvtHandlerPtr):
         return val
     def GetTopWindow(self, *_args, **_kwargs):
         val = apply(wxc.wxPyApp_GetTopWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def GetVendorName(self, *_args, **_kwargs):
         val = apply(wxc.wxPyApp_GetVendorName,(self,) + _args, _kwargs)
@@ -199,14 +200,11 @@ wxRESIZE_BOX = wxc.wxRESIZE_BOX
 wxRESIZE_BORDER = wxc.wxRESIZE_BORDER
 wxDIALOG_MODAL = wxc.wxDIALOG_MODAL
 wxDIALOG_MODELESS = wxc.wxDIALOG_MODELESS
-wxDIALOG_NO_PARENT = wxc.wxDIALOG_NO_PARENT
 wxDEFAULT_FRAME_STYLE = wxc.wxDEFAULT_FRAME_STYLE
 wxDEFAULT_DIALOG_STYLE = wxc.wxDEFAULT_DIALOG_STYLE
 wxFRAME_TOOL_WINDOW = wxc.wxFRAME_TOOL_WINDOW
 wxFRAME_FLOAT_ON_PARENT = wxc.wxFRAME_FLOAT_ON_PARENT
 wxFRAME_NO_WINDOW_MENU = wxc.wxFRAME_NO_WINDOW_MENU
-wxFRAME_NO_TASKBAR = wxc.wxFRAME_NO_TASKBAR
-wxFRAME_EX_CONTEXTHELP = wxc.wxFRAME_EX_CONTEXTHELP
 wxED_CLIENT_MARGIN = wxc.wxED_CLIENT_MARGIN
 wxED_BUTTONS_BOTTOM = wxc.wxED_BUTTONS_BOTTOM
 wxED_BUTTONS_RIGHT = wxc.wxED_BUTTONS_RIGHT
@@ -233,7 +231,6 @@ wxALIGN_TOP = wxc.wxALIGN_TOP
 wxALIGN_CENTER = wxc.wxALIGN_CENTER
 wxALIGN_CENTRE = wxc.wxALIGN_CENTRE
 wxSHAPED = wxc.wxSHAPED
-wxADJUST_MINSIZE = wxc.wxADJUST_MINSIZE
 wxLB_NEEDED_SB = wxc.wxLB_NEEDED_SB
 wxLB_ALWAYS_SB = wxc.wxLB_ALWAYS_SB
 wxLB_SORT = wxc.wxLB_SORT
@@ -304,8 +301,6 @@ wxLC_SORT_DESCENDING = wxc.wxLC_SORT_DESCENDING
 wxLC_MASK_TYPE = wxc.wxLC_MASK_TYPE
 wxLC_MASK_ALIGN = wxc.wxLC_MASK_ALIGN
 wxLC_MASK_SORT = wxc.wxLC_MASK_SORT
-wxLC_HRULES = wxc.wxLC_HRULES
-wxLC_VRULES = wxc.wxLC_VRULES
 wxSP_VERTICAL = wxc.wxSP_VERTICAL
 wxSP_HORIZONTAL = wxc.wxSP_HORIZONTAL
 wxSP_ARROW_KEYS = wxc.wxSP_ARROW_KEYS
@@ -384,8 +379,6 @@ wxID_COPY = wxc.wxID_COPY
 wxID_PASTE = wxc.wxID_PASTE
 wxID_CLEAR = wxc.wxID_CLEAR
 wxID_FIND = wxc.wxID_FIND
-wxID_DUPLICATE = wxc.wxID_DUPLICATE
-wxID_SELECTALL = wxc.wxID_SELECTALL
 wxID_FILE1 = wxc.wxID_FILE1
 wxID_FILE2 = wxc.wxID_FILE2
 wxID_FILE3 = wxc.wxID_FILE3
@@ -402,17 +395,32 @@ wxID_YES = wxc.wxID_YES
 wxID_NO = wxc.wxID_NO
 wxID_STATIC = wxc.wxID_STATIC
 wxID_SEPARATOR = wxc.wxID_SEPARATOR
-wxID_FORWARD = wxc.wxID_FORWARD
-wxID_BACKWARD = wxc.wxID_BACKWARD
-wxID_SETUP = wxc.wxID_SETUP
-wxID_MORE = wxc.wxID_MORE
+wxBITMAP_TYPE_BMP = wxc.wxBITMAP_TYPE_BMP
+wxBITMAP_TYPE_BMP_RESOURCE = wxc.wxBITMAP_TYPE_BMP_RESOURCE
+wxBITMAP_TYPE_ICO = wxc.wxBITMAP_TYPE_ICO
+wxBITMAP_TYPE_ICO_RESOURCE = wxc.wxBITMAP_TYPE_ICO_RESOURCE
+wxBITMAP_TYPE_CUR = wxc.wxBITMAP_TYPE_CUR
+wxBITMAP_TYPE_CUR_RESOURCE = wxc.wxBITMAP_TYPE_CUR_RESOURCE
+wxBITMAP_TYPE_XBM = wxc.wxBITMAP_TYPE_XBM
+wxBITMAP_TYPE_XBM_DATA = wxc.wxBITMAP_TYPE_XBM_DATA
+wxBITMAP_TYPE_XPM = wxc.wxBITMAP_TYPE_XPM
+wxBITMAP_TYPE_XPM_DATA = wxc.wxBITMAP_TYPE_XPM_DATA
+wxBITMAP_TYPE_TIF = wxc.wxBITMAP_TYPE_TIF
+wxBITMAP_TYPE_TIF_RESOURCE = wxc.wxBITMAP_TYPE_TIF_RESOURCE
+wxBITMAP_TYPE_GIF = wxc.wxBITMAP_TYPE_GIF
+wxBITMAP_TYPE_GIF_RESOURCE = wxc.wxBITMAP_TYPE_GIF_RESOURCE
+wxBITMAP_TYPE_PNG = wxc.wxBITMAP_TYPE_PNG
+wxBITMAP_TYPE_PNG_RESOURCE = wxc.wxBITMAP_TYPE_PNG_RESOURCE
+wxBITMAP_TYPE_ANY = wxc.wxBITMAP_TYPE_ANY
+wxBITMAP_TYPE_RESOURCE = wxc.wxBITMAP_TYPE_RESOURCE
+wxBITMAP_TYPE_JPEG = wxc.wxBITMAP_TYPE_JPEG
+wxBITMAP_TYPE_PCX = wxc.wxBITMAP_TYPE_PCX
 wxOPEN = wxc.wxOPEN
 wxSAVE = wxc.wxSAVE
 wxHIDE_READONLY = wxc.wxHIDE_READONLY
 wxOVERWRITE_PROMPT = wxc.wxOVERWRITE_PROMPT
 wxFILE_MUST_EXIST = wxc.wxFILE_MUST_EXIST
 wxMULTIPLE = wxc.wxMULTIPLE
-wxCHANGE_DIR = wxc.wxCHANGE_DIR
 wxACCEL_ALT = wxc.wxACCEL_ALT
 wxACCEL_CTRL = wxc.wxACCEL_CTRL
 wxACCEL_SHIFT = wxc.wxACCEL_SHIFT
@@ -456,7 +464,6 @@ wxJOY_BUTTON2 = wxc.wxJOY_BUTTON2
 wxJOY_BUTTON3 = wxc.wxJOY_BUTTON3
 wxJOY_BUTTON4 = wxc.wxJOY_BUTTON4
 wxJOY_BUTTON_ANY = wxc.wxJOY_BUTTON_ANY
-wxWS_EX_VALIDATE_RECURSIVELY = wxc.wxWS_EX_VALIDATE_RECURSIVELY
 wxDEFAULT = wxc.wxDEFAULT
 wxDECORATIVE = wxc.wxDECORATIVE
 wxROMAN = wxc.wxROMAN
@@ -582,37 +589,6 @@ WXK_NUMLOCK = wxc.WXK_NUMLOCK
 WXK_SCROLL = wxc.WXK_SCROLL
 WXK_PAGEUP = wxc.WXK_PAGEUP
 WXK_PAGEDOWN = wxc.WXK_PAGEDOWN
-wxBITMAP_TYPE_INVALID = wxc.wxBITMAP_TYPE_INVALID
-wxBITMAP_TYPE_BMP = wxc.wxBITMAP_TYPE_BMP
-wxBITMAP_TYPE_BMP_RESOURCE = wxc.wxBITMAP_TYPE_BMP_RESOURCE
-wxBITMAP_TYPE_RESOURCE = wxc.wxBITMAP_TYPE_RESOURCE
-wxBITMAP_TYPE_ICO = wxc.wxBITMAP_TYPE_ICO
-wxBITMAP_TYPE_ICO_RESOURCE = wxc.wxBITMAP_TYPE_ICO_RESOURCE
-wxBITMAP_TYPE_CUR = wxc.wxBITMAP_TYPE_CUR
-wxBITMAP_TYPE_CUR_RESOURCE = wxc.wxBITMAP_TYPE_CUR_RESOURCE
-wxBITMAP_TYPE_XBM = wxc.wxBITMAP_TYPE_XBM
-wxBITMAP_TYPE_XBM_DATA = wxc.wxBITMAP_TYPE_XBM_DATA
-wxBITMAP_TYPE_XPM = wxc.wxBITMAP_TYPE_XPM
-wxBITMAP_TYPE_XPM_DATA = wxc.wxBITMAP_TYPE_XPM_DATA
-wxBITMAP_TYPE_TIF = wxc.wxBITMAP_TYPE_TIF
-wxBITMAP_TYPE_TIF_RESOURCE = wxc.wxBITMAP_TYPE_TIF_RESOURCE
-wxBITMAP_TYPE_GIF = wxc.wxBITMAP_TYPE_GIF
-wxBITMAP_TYPE_GIF_RESOURCE = wxc.wxBITMAP_TYPE_GIF_RESOURCE
-wxBITMAP_TYPE_PNG = wxc.wxBITMAP_TYPE_PNG
-wxBITMAP_TYPE_PNG_RESOURCE = wxc.wxBITMAP_TYPE_PNG_RESOURCE
-wxBITMAP_TYPE_JPEG = wxc.wxBITMAP_TYPE_JPEG
-wxBITMAP_TYPE_JPEG_RESOURCE = wxc.wxBITMAP_TYPE_JPEG_RESOURCE
-wxBITMAP_TYPE_PNM = wxc.wxBITMAP_TYPE_PNM
-wxBITMAP_TYPE_PNM_RESOURCE = wxc.wxBITMAP_TYPE_PNM_RESOURCE
-wxBITMAP_TYPE_PCX = wxc.wxBITMAP_TYPE_PCX
-wxBITMAP_TYPE_PCX_RESOURCE = wxc.wxBITMAP_TYPE_PCX_RESOURCE
-wxBITMAP_TYPE_PICT = wxc.wxBITMAP_TYPE_PICT
-wxBITMAP_TYPE_PICT_RESOURCE = wxc.wxBITMAP_TYPE_PICT_RESOURCE
-wxBITMAP_TYPE_ICON = wxc.wxBITMAP_TYPE_ICON
-wxBITMAP_TYPE_ICON_RESOURCE = wxc.wxBITMAP_TYPE_ICON_RESOURCE
-wxBITMAP_TYPE_MACCURSOR = wxc.wxBITMAP_TYPE_MACCURSOR
-wxBITMAP_TYPE_MACCURSOR_RESOURCE = wxc.wxBITMAP_TYPE_MACCURSOR_RESOURCE
-wxBITMAP_TYPE_ANY = wxc.wxBITMAP_TYPE_ANY
 wxCURSOR_NONE = wxc.wxCURSOR_NONE
 wxCURSOR_ARROW = wxc.wxCURSOR_ARROW
 wxCURSOR_BULLSEYE = wxc.wxCURSOR_BULLSEYE
@@ -639,9 +615,6 @@ wxCURSOR_SPRAYCAN = wxc.wxCURSOR_SPRAYCAN
 wxCURSOR_WAIT = wxc.wxCURSOR_WAIT
 wxCURSOR_WATCH = wxc.wxCURSOR_WATCH
 wxCURSOR_BLANK = wxc.wxCURSOR_BLANK
-wxCURSOR_DEFAULT = wxc.wxCURSOR_DEFAULT
-wxCURSOR_ARROWWAIT = wxc.wxCURSOR_ARROWWAIT
-wxCURSOR_MAX = wxc.wxCURSOR_MAX
 wxPAPER_NONE = wxc.wxPAPER_NONE
 wxPAPER_LETTER = wxc.wxPAPER_LETTER
 wxPAPER_LEGAL = wxc.wxPAPER_LEGAL
@@ -740,7 +713,6 @@ wxEVT_COMMAND_TOOL_RCLICKED = wxc.wxEVT_COMMAND_TOOL_RCLICKED
 wxEVT_COMMAND_TOOL_ENTER = wxc.wxEVT_COMMAND_TOOL_ENTER
 wxEVT_SET_FOCUS = wxc.wxEVT_SET_FOCUS
 wxEVT_KILL_FOCUS = wxc.wxEVT_KILL_FOCUS
-wxEVT_MOUSEWHEEL = wxc.wxEVT_MOUSEWHEEL
 wxEVT_LEFT_DOWN = wxc.wxEVT_LEFT_DOWN
 wxEVT_LEFT_UP = wxc.wxEVT_LEFT_UP
 wxEVT_MIDDLE_DOWN = wxc.wxEVT_MIDDLE_DOWN
@@ -821,8 +793,6 @@ wxEVT_DRAW_ITEM = wxc.wxEVT_DRAW_ITEM
 wxEVT_MEASURE_ITEM = wxc.wxEVT_MEASURE_ITEM
 wxEVT_COMPARE_ITEM = wxc.wxEVT_COMPARE_ITEM
 wxEVT_INIT_DIALOG = wxc.wxEVT_INIT_DIALOG
-wxEVT_HELP = wxc.wxEVT_HELP
-wxEVT_DETAILED_HELP = wxc.wxEVT_DETAILED_HELP
 wxEVT_IDLE = wxc.wxEVT_IDLE
 wxEVT_UPDATE_UI = wxc.wxEVT_UPDATE_UI
 wxEVT_COMMAND_LEFT_CLICK = wxc.wxEVT_COMMAND_LEFT_CLICK
@@ -832,8 +802,50 @@ wxEVT_COMMAND_RIGHT_DCLICK = wxc.wxEVT_COMMAND_RIGHT_DCLICK
 wxEVT_COMMAND_SET_FOCUS = wxc.wxEVT_COMMAND_SET_FOCUS
 wxEVT_COMMAND_KILL_FOCUS = wxc.wxEVT_COMMAND_KILL_FOCUS
 wxEVT_COMMAND_ENTER = wxc.wxEVT_COMMAND_ENTER
+wxEVT_COMMAND_TREE_BEGIN_DRAG = wxc.wxEVT_COMMAND_TREE_BEGIN_DRAG
+wxEVT_COMMAND_TREE_BEGIN_RDRAG = wxc.wxEVT_COMMAND_TREE_BEGIN_RDRAG
+wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT = wxc.wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT
+wxEVT_COMMAND_TREE_END_LABEL_EDIT = wxc.wxEVT_COMMAND_TREE_END_LABEL_EDIT
+wxEVT_COMMAND_TREE_DELETE_ITEM = wxc.wxEVT_COMMAND_TREE_DELETE_ITEM
+wxEVT_COMMAND_TREE_GET_INFO = wxc.wxEVT_COMMAND_TREE_GET_INFO
+wxEVT_COMMAND_TREE_SET_INFO = wxc.wxEVT_COMMAND_TREE_SET_INFO
+wxEVT_COMMAND_TREE_ITEM_EXPANDED = wxc.wxEVT_COMMAND_TREE_ITEM_EXPANDED
+wxEVT_COMMAND_TREE_ITEM_EXPANDING = wxc.wxEVT_COMMAND_TREE_ITEM_EXPANDING
+wxEVT_COMMAND_TREE_ITEM_COLLAPSED = wxc.wxEVT_COMMAND_TREE_ITEM_COLLAPSED
+wxEVT_COMMAND_TREE_ITEM_COLLAPSING = wxc.wxEVT_COMMAND_TREE_ITEM_COLLAPSING
+wxEVT_COMMAND_TREE_SEL_CHANGED = wxc.wxEVT_COMMAND_TREE_SEL_CHANGED
+wxEVT_COMMAND_TREE_SEL_CHANGING = wxc.wxEVT_COMMAND_TREE_SEL_CHANGING
+wxEVT_COMMAND_TREE_KEY_DOWN = wxc.wxEVT_COMMAND_TREE_KEY_DOWN
+wxEVT_COMMAND_TREE_ITEM_ACTIVATED = wxc.wxEVT_COMMAND_TREE_ITEM_ACTIVATED
+wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK = wxc.wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK
+wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK = wxc.wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK
+wxEVT_COMMAND_LIST_BEGIN_DRAG = wxc.wxEVT_COMMAND_LIST_BEGIN_DRAG
+wxEVT_COMMAND_LIST_BEGIN_RDRAG = wxc.wxEVT_COMMAND_LIST_BEGIN_RDRAG
+wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT = wxc.wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT
+wxEVT_COMMAND_LIST_END_LABEL_EDIT = wxc.wxEVT_COMMAND_LIST_END_LABEL_EDIT
+wxEVT_COMMAND_LIST_DELETE_ITEM = wxc.wxEVT_COMMAND_LIST_DELETE_ITEM
+wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS = wxc.wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS
+wxEVT_COMMAND_LIST_GET_INFO = wxc.wxEVT_COMMAND_LIST_GET_INFO
+wxEVT_COMMAND_LIST_SET_INFO = wxc.wxEVT_COMMAND_LIST_SET_INFO
+wxEVT_COMMAND_LIST_ITEM_SELECTED = wxc.wxEVT_COMMAND_LIST_ITEM_SELECTED
+wxEVT_COMMAND_LIST_ITEM_DESELECTED = wxc.wxEVT_COMMAND_LIST_ITEM_DESELECTED
+wxEVT_COMMAND_LIST_KEY_DOWN = wxc.wxEVT_COMMAND_LIST_KEY_DOWN
+wxEVT_COMMAND_LIST_INSERT_ITEM = wxc.wxEVT_COMMAND_LIST_INSERT_ITEM
+wxEVT_COMMAND_LIST_COL_CLICK = wxc.wxEVT_COMMAND_LIST_COL_CLICK
+wxEVT_COMMAND_LIST_ITEM_ACTIVATED = wxc.wxEVT_COMMAND_LIST_ITEM_ACTIVATED
+wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK = wxc.wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK
+wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK = wxc.wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK
+wxEVT_COMMAND_TAB_SEL_CHANGED = wxc.wxEVT_COMMAND_TAB_SEL_CHANGED
+wxEVT_COMMAND_TAB_SEL_CHANGING = wxc.wxEVT_COMMAND_TAB_SEL_CHANGING
+wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED = wxc.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED
+wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING = wxc.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING
+wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING = wxc.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING
+wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED = wxc.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED
+wxEVT_COMMAND_SPLITTER_UNSPLIT = wxc.wxEVT_COMMAND_SPLITTER_UNSPLIT
+wxEVT_COMMAND_SPLITTER_DOUBLECLICKED = wxc.wxEVT_COMMAND_SPLITTER_DOUBLECLICKED
 wxEVT_NAVIGATION_KEY = wxc.wxEVT_NAVIGATION_KEY
 wxEVT_TIMER = wxc.wxEVT_TIMER
+wxEVT_END_PROCESS = wxc.wxEVT_END_PROCESS
 __version__ = wxc.__version__
 cvar = wxc.cvar
 wxDefaultPosition = wxPointPtr(wxc.cvar.wxDefaultPosition)
@@ -872,6 +884,38 @@ def _checkForCallback(obj, name, event, theID=-1):
     try:    cb = getattr(obj, name)
     except: pass
     else:   obj.Connect(theID, -1, event, cb)
+
+## def _StdWindowCallbacks(win):
+##     _checkForCallback(win, "OnChar",               wxEVT_CHAR)
+##     _checkForCallback(win, "OnSize",               wxEVT_SIZE)
+##     _checkForCallback(win, "OnEraseBackground",    wxEVT_ERASE_BACKGROUND)
+##     _checkForCallback(win, "OnSysColourChanged",   wxEVT_SYS_COLOUR_CHANGED)
+##     _checkForCallback(win, "OnInitDialog",         wxEVT_INIT_DIALOG)
+##     _checkForCallback(win, "OnPaint",              wxEVT_PAINT)
+##     _checkForCallback(win, "OnIdle",               wxEVT_IDLE)
+
+
+## def _StdFrameCallbacks(win):
+##     _StdWindowCallbacks(win)
+##     _checkForCallback(win, "OnActivate",           wxEVT_ACTIVATE)
+##     _checkForCallback(win, "OnMenuHighlight",      wxEVT_MENU_HIGHLIGHT)
+##     _checkForCallback(win, "OnCloseWindow",        wxEVT_CLOSE_WINDOW)
+
+
+## def _StdDialogCallbacks(win):
+##     _StdWindowCallbacks(win)
+##     _checkForCallback(win, "OnOk",     wxEVT_COMMAND_BUTTON_CLICKED,   wxID_OK)
+##     _checkForCallback(win, "OnApply",  wxEVT_COMMAND_BUTTON_CLICKED,   wxID_APPLY)
+##     _checkForCallback(win, "OnCancel", wxEVT_COMMAND_BUTTON_CLICKED,   wxID_CANCEL)
+##     _checkForCallback(win, "OnCloseWindow", wxEVT_CLOSE_WINDOW)
+##     _checkForCallback(win, "OnCharHook",    wxEVT_CHAR_HOOK)
+
+
+## def _StdOnScrollCallbacks(win):
+##     try:    cb = getattr(win, "OnScroll")
+##     except: pass
+##     else:   EVT_SCROLL(win, cb)
+
 
 
 #----------------------------------------------------------------------
@@ -1013,8 +1057,6 @@ def EVT_LEAVE_WINDOW(win, func):
 def EVT_ENTER_WINDOW(win, func):
     win.Connect(-1, -1, wxEVT_ENTER_WINDOW, func)
 
-def EVT_MOUSEWHEEL(win, func):
-    win.Connect(-1, -1, wxEVT_MOUSEWHEEL, func)
 
 # all mouse events
 def EVT_MOUSE_EVENTS(win, func):
@@ -1289,9 +1331,6 @@ def EVT_TREE_BEGIN_DRAG(win, id, func):
 def EVT_TREE_BEGIN_RDRAG(win, id, func):
     win.Connect(id, -1, wxEVT_COMMAND_TREE_BEGIN_RDRAG, func)
 
-def EVT_TREE_END_DRAG(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_TREE_END_DRAG, func)
-
 def EVT_TREE_BEGIN_LABEL_EDIT(win, id, func):
     win.Connect(id, -1, wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT, func)
 
@@ -1372,6 +1411,35 @@ def EVT_TASKBAR_LEFT_DCLICK(win, func):
 
 def EVT_TASKBAR_RIGHT_DCLICK(win, func):
     win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DCLICK, func)
+
+
+## # wxGrid  *** THE OLD ONE ***
+## def EVT_GRID_SELECT_CELL(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_SELECT_CELL, fn)
+
+## def EVT_GRID_CREATE_CELL(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CREATE_CELL, fn)
+
+## def EVT_GRID_CHANGE_LABELS(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CHANGE_LABELS, fn)
+
+## def EVT_GRID_CHANGE_SEL_LABEL(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CHANGE_SEL_LABEL, fn)
+
+## def EVT_GRID_CELL_CHANGE(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CELL_CHANGE, fn)
+
+## def EVT_GRID_CELL_LCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CELL_LCLICK, fn)
+
+## def EVT_GRID_CELL_RCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CELL_RCLICK, fn)
+
+## def EVT_GRID_LABEL_LCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_LABEL_LCLICK, fn)
+
+## def EVT_GRID_LABEL_RCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_LABEL_RCLICK, fn)
 
 
 # wxSashWindow
@@ -1465,10 +1533,10 @@ def EVT_END_PROCESS(eh, id, func):
 
 # wxJoyStick
 def EVT_JOY_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_DOWN, func)
+    win.Connect(-1, -1, wxEVT_JOY_DOWN, func)
 
 def EVT_JOY_UP(win, func):
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_UP, func)
+    win.Connect(-1, -1, wxEVT_JOY_UP, func)
 
 def EVT_JOY_MOVE(win, func):
     win.Connect(-1, -1, wxEVT_JOY_MOVE, func)
@@ -1477,15 +1545,10 @@ def EVT_JOY_ZMOVE(win, func):
     win.Connect(-1, -1, wxEVT_JOY_ZMOVE, func)
 
 def EVT_JOYSTICK_EVENTS(win, func):
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_DOWN, func)
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_UP, func)
+    win.Connect(-1, -1, wxEVT_JOY_DOWN, func)
+    win.Connect(-1, -1, wxEVT_JOY_UP, func)
     win.Connect(-1, -1, wxEVT_JOY_MOVE, func)
     win.Connect(-1, -1, wxEVT_JOY_ZMOVE, func)
-
-
-def EVT_TOGGLEBUTTON(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, func)
-
 
 #----------------------------------------------------------------------
 
@@ -1499,9 +1562,17 @@ class wxTimer(wxPyTimer):
             self.SetOwner(evtHandler, id)
 
 #----------------------------------------------------------------------
+# Some wxWin methods can take "NULL" as parameters, but the shadow classes
+# expect an object with the SWIG pointer as a 'this' member.  This class
+# and instance fools the shadow into passing the NULL pointer.
 
-NULL = None  # For backwards compatibility only.  You should really be
-             # using None now.
+## NOTE:  This is not needed anymore as None can be passed instead and
+#         will be interpreted as NULL.
+
+class _NullObj:
+    this = 'NULL'       # SWIG converts this to (void*)0
+
+NULL = _NullObj()
 
 
 #----------------------------------------------------------------------
@@ -1509,6 +1580,10 @@ NULL = None  # For backwards compatibility only.  You should really be
 
 wxColor      = wxColour
 wxNamedColor = wxNamedColour
+
+# aliases so that C++ documentation applies:
+#wxDefaultPosition  = wxPyDefaultPosition
+#wxDefaultSize      = wxPyDefaultSize
 
 
 # backwards compatibility
@@ -1538,16 +1613,11 @@ wxPyDefaultSize     = wxDefaultSize
 #
 
 def wxPyTypeCast(obj, typeStr):
-    if obj is None:
-        return None
-    theClass = globals()[typeStr+"Ptr"]
-    typeStr = __wxPyPtrTypeMap.get(typeStr, typeStr)
     if hasattr(obj, "this"):
-        if obj.__class__ is theClass:   # if already the right type then just return it
-            return obj
         newPtr = ptrcast(obj.this, typeStr+"_p")
     else:
         newPtr = ptrcast(obj, typeStr+"_p")
+    theClass = globals()[typeStr+"Ptr"]
     theObj = theClass(newPtr)
     if hasattr(obj, "this"):
         theObj.thisown = obj.thisown
@@ -1555,16 +1625,16 @@ def wxPyTypeCast(obj, typeStr):
 
 
 #----------------------------------------------------------------------
-#----------------------------------------------------------------------
 
 class wxPyOnDemandOutputWindow:
     def __init__(self, title = "wxPython: stdout/stderr"):
         self.frame  = None
         self.title  = title
-        self.parent = None
+
 
     def SetParent(self, parent):
         self.parent = parent
+
 
     def OnCloseWindow(self, event):
         if self.frame != None:
@@ -1572,16 +1642,11 @@ class wxPyOnDemandOutputWindow:
         self.frame = None
         self.text  = None
 
-    # These methods provide the file-like output behaviour.
-    def write(self, str):
-        if not wxThread_IsMain():
-            # Aquire the GUI mutex before making GUI calls.  Mutex is released
-            # when locker is deleted at the end of this function.
-            locker = wxMutexGuiLocker()
 
+    # this provides the file-like behaviour
+    def write(self, str):
         if not self.frame:
-            self.frame = wxFrame(self.parent, -1, self.title,
-                                 style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
+            self.frame = wxFrame(self.parent, -1, self.title)
             self.text  = wxTextCtrl(self.frame, -1, "",
                                     style = wxTE_MULTILINE|wxTE_READONLY)
             self.frame.SetSize(wxSize(450, 300))
@@ -1589,11 +1654,13 @@ class wxPyOnDemandOutputWindow:
             EVT_CLOSE(self.frame, self.OnCloseWindow)
         self.text.AppendText(str)
 
+
     def close(self):
         if self.frame != None:
-            if not wxThread_IsMain():
-                locker = wxMutexGuiLocker()
-            self.frame.Close()
+            self.frame.Destroy()
+        self.frame = None
+        self.text  = None
+
 
 
 _defRedirect = (wxPlatform == '__WXMSW__')
@@ -1626,6 +1693,7 @@ class wxApp(wxPyApp):
     def SetTopWindow(self, frame):
         if self.stdioWin:
             self.stdioWin.SetParent(frame)
+            sys.stderr = sys.stdout = self.stdioWin
         wxPyApp.SetTopWindow(self, frame)
 
 
@@ -1639,18 +1707,18 @@ class wxApp(wxPyApp):
             sys.stdout = sys.stderr = open(filename, 'a')
         else:
             self.stdioWin = self.outputWindowClass() # wxPyOnDemandOutputWindow
-            sys.stdout = sys.stderr = self.stdioWin
 
 
     def RestoreStdio(self):
         sys.stdout, sys.stderr = self.saveStdio
-
+        if self.stdioWin != None:
+            self.stdioWin.close()
 
 #----------------------------------------------------------------------------
 
 class wxPySimpleApp(wxApp):
-    def __init__(self, flag=0):
-        wxApp.__init__(self, flag)
+    def __init__(self):
+        wxApp.__init__(self, 0)
     def OnInit(self):
         return true
 
@@ -1682,6 +1750,7 @@ class __wxPyCleanup:
         self.cleanup()
 
 __cleanMeUp = __wxPyCleanup()
+#----------------------------------------------------------------------------
 
-#----------------------------------------------------------------------------
-#----------------------------------------------------------------------------
+
+

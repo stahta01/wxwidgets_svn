@@ -43,7 +43,7 @@ from utils import *
 
 from oglbasic import *
 import wx
-class wxPseudoMetaFilePtr(wxObjectPtr):
+class wxPseudoMetaFilePtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -570,6 +570,7 @@ class wxPyDrawnShapePtr(wxPyRectangleShapePtr):
         return val
     def GetMetaFile(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDrawnShape_GetMetaFile,(self,) + _args, _kwargs)
+        if val: val = wxPseudoMetaFilePtr(val) 
         return val
     def GetRotation(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDrawnShape_GetRotation,(self,) + _args, _kwargs)
@@ -708,10 +709,13 @@ class wxPyDrawnShape(wxPyDrawnShapePtr):
 
 
 
-class wxOGLConstraintPtr(wxObjectPtr):
+class wxOGLConstraintPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
+    def __del__(self,oglshapesc=oglshapesc):
+        if self.thisown == 1 :
+            oglshapesc.delete_wxOGLConstraint(self)
     def Evaluate(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxOGLConstraint_Evaluate,(self,) + _args, _kwargs)
         return val
@@ -743,12 +747,15 @@ class wxPyCompositeShapePtr(wxPyRectangleShapePtr):
         return val
     def AddConstraint(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyCompositeShape_AddConstraint,(self,) + _args, _kwargs)
+        if val: val = wxOGLConstraintPtr(val) 
         return val
     def AddConstrainedShapes(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyCompositeShape_AddConstrainedShapes,(self,) + _args, _kwargs)
+        if val: val = wxOGLConstraintPtr(val) 
         return val
     def AddSimpleConstraint(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyCompositeShape_AddSimpleConstraint,(self,) + _args, _kwargs)
+        if val: val = wxOGLConstraintPtr(val) 
         return val
     def CalculateSize(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyCompositeShape_CalculateSize,(self,) + _args, _kwargs)
@@ -764,6 +771,7 @@ class wxPyCompositeShapePtr(wxPyRectangleShapePtr):
         return val
     def FindContainerImage(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyCompositeShape_FindContainerImage,(self,) + _args, _kwargs)
+        if val: val = wxPyShapePtr(val) 
         return val
     def GetConstraints(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyCompositeShape_GetConstraints,(self,) + _args, _kwargs)
@@ -1016,12 +1024,14 @@ class wxPyDivisionShapePtr(wxPyCompositeShapePtr):
         return val
     def GetBottomSide(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDivisionShape_GetBottomSide,(self,) + _args, _kwargs)
+        if val: val = wxPyDivisionShapePtr(val) 
         return val
     def GetHandleSide(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDivisionShape_GetHandleSide,(self,) + _args, _kwargs)
         return val
     def GetLeftSide(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDivisionShape_GetLeftSide,(self,) + _args, _kwargs)
+        if val: val = wxPyDivisionShapePtr(val) 
         return val
     def GetLeftSideColour(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDivisionShape_GetLeftSideColour,(self,) + _args, _kwargs)
@@ -1032,9 +1042,11 @@ class wxPyDivisionShapePtr(wxPyCompositeShapePtr):
         return val
     def GetRightSide(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDivisionShape_GetRightSide,(self,) + _args, _kwargs)
+        if val: val = wxPyDivisionShapePtr(val) 
         return val
     def GetTopSide(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDivisionShape_GetTopSide,(self,) + _args, _kwargs)
+        if val: val = wxPyDivisionShapePtr(val) 
         return val
     def GetTopSidePen(self, *_args, **_kwargs):
         val = apply(oglshapesc.wxPyDivisionShape_GetTopSidePen,(self,) + _args, _kwargs)

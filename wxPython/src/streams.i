@@ -53,7 +53,28 @@
     if ($source) {
         _ptr = new wxPyInputStream($source);
     }
-    $target = wxPyConstructObject(_ptr, "wxInputStream", TRUE);
+    if (_ptr) {
+        char    swigptr[64];
+        SWIG_MakePtr(swigptr, _ptr, "_wxPyInputStream_p");
+
+        PyObject* classobj = PyDict_GetItemString(wxPython_dict, "wxInputStreamPtr");
+        if (! classobj) {
+            Py_INCREF(Py_None);
+            $target = Py_None;
+        } else {
+            PyObject* arg = Py_BuildValue("(s)", swigptr);
+            $target = PyInstance_New(classobj, arg, NULL);
+            Py_DECREF(arg);
+
+            // set ThisOwn
+            PyObject* one = PyInt_FromLong(1);
+            PyObject_SetAttrString($target, "thisown", one);
+            Py_DECREF(one);
+        }
+    } else {
+        Py_INCREF(Py_None);
+        $target = Py_None;
+    }
 }
 
 //----------------------------------------------------------------------
@@ -484,10 +505,3 @@ public:
 }
 
 
-//----------------------------------------------------------------------
-
-%init %{
-    wxPyPtrTypeMap_Add("wxInputStream", "wxPyInputStream");
-%}
-
-//----------------------------------------------------------------------

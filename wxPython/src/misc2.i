@@ -22,14 +22,7 @@
 #include <wx/fontenum.h>
 #include <wx/tipdlg.h>
 #include <wx/process.h>
-
-#if wxUSE_JOYSTICK || defined(__WXMSW__)
 #include <wx/joystick.h>
-#endif
-
-#if wxUSE_WAVE || defined(__WXMSW__)
-#include <wx/wave.h>
-#endif
 %}
 
 //----------------------------------------------------------------------
@@ -119,14 +112,13 @@ bool wxColourDisplay();
 int wxDisplayDepth();
 int wxGetDisplayDepth();
 
-void   wxDisplaySize(int* OUTPUT, int* OUTPUT);
+void wxDisplaySize(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySize();
 
-void   wxDisplaySizeMM(int* OUTPUT, int* OUTPUT);
+#ifdef FOR_2_3
+void wxDisplaySizeMM(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySizeMM();
-
-void   wxClientDisplayRect(int *OUTPUT, int *OUTPUT, int *OUTPUT, int *OUTPUT);
-wxRect wxGetClientDisplayRect();
+#endif
 
 void wxSetCursor(wxCursor& cursor);
 
@@ -139,13 +131,6 @@ wxWindow * wxFindWindowByName(const wxString& name, wxWindow *parent=NULL);
 void wxBeginBusyCursor(wxCursor *cursor = wxHOURGLASS_CURSOR);
 wxWindow * wxGetActiveWindow();
 
-wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt);
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt);
-
-#ifdef __WXMSW__
-bool wxCheckForInterrupt(wxWindow *wnd);
-void wxFlushEvents();
-#endif
 
 //---------------------------------------------------------------------------
 // Resource System
@@ -276,7 +261,7 @@ enum {
 //---------------------------------------------------------------------------
 // wxToolTip
 
-class wxToolTip : public wxObject {
+class wxToolTip {
 public:
     wxToolTip(const wxString &tip);
 
@@ -399,31 +384,10 @@ public:
 
 //----------------------------------------------------------------------
 
-bool wxSafeYield(wxWindow* win=NULL);
 void wxPostEvent(wxEvtHandler *dest, wxEvent& event);
 void wxWakeUpIdle();
 
-
-#ifdef __WXMSW__
-void wxWakeUpMainThread();
-#endif
-
-void wxMutexGuiEnter();
-void wxMutexGuiLeave();
-
-
-class wxMutexGuiLocker  {
-public:
-    wxMutexGuiLocker();
-    ~wxMutexGuiLocker();
-};
-
-
-%inline %{
-    bool wxThread_IsMain() {
-        return wxThread::IsMain();
-    }
-%}
+bool wxSafeYield(wxWindow* win=NULL);
 
 //----------------------------------------------------------------------
 
@@ -473,17 +437,18 @@ bool wxShowTip(wxWindow *parent, wxTipProvider *tipProvider, bool showAtStartup 
 
 %{
 #include <wx/generic/dragimgg.h>
+static wxPoint wxPyNullPoint;
 %}
 
-%name (wxDragImage) class wxGenericDragImage : public wxObject
+%name (wxDragImage) class wxGenericDragImage
 {
 public:
 
     wxGenericDragImage(const wxBitmap& image,
-                       const wxCursor& cursor = wxNullCursor);
+                       const wxCursor& cursor = wxNullCursor,
+                       const wxPoint& hotspot = wxPyNullPoint);
     ~wxGenericDragImage();
 
-    void SetBackingBitmap(wxBitmap* bitmap);
     bool BeginDrag(const wxPoint& hotspot, wxWindow* window,
                    bool fullScreen = FALSE, wxRect* rect = NULL);
 
@@ -503,10 +468,12 @@ public:
 
 // Alternate Constructors
 %new wxGenericDragImage* wxDragIcon(const wxIcon& image,
-                                   const wxCursor& cursor = wxNullCursor);
+                                   const wxCursor& cursor = wxNullCursor,
+                                   const wxPoint& hotspot = wxPyNullPoint);
 
 %new wxGenericDragImage* wxDragString(const wxString& str,
-                                      const wxCursor& cursor = wxNullCursor);
+                                      const wxCursor& cursor = wxNullCursor,
+                                      const wxPoint& hotspot = wxPyNullPoint);
 
 %new wxGenericDragImage* wxDragTreeItem(const wxTreeCtrl& treeCtrl, wxTreeItemId& id);
 
@@ -516,13 +483,15 @@ public:
 %{
 
 wxGenericDragImage* wxDragIcon(const wxIcon& image,
-                               const wxCursor& cursor) {
-    return new wxGenericDragImage(image, cursor);
+                               const wxCursor& cursor,
+                               const wxPoint& hotspot) {
+    return new wxGenericDragImage(image, cursor, hotspot);
 }
 
 wxGenericDragImage* wxDragString(const wxString& str,
-                                 const wxCursor& cursor) {
-    return new wxGenericDragImage(str, cursor);
+                                 const wxCursor& cursor,
+                                 const wxPoint& hotspot) {
+    return new wxGenericDragImage(str, cursor, hotspot);
 }
 
 wxGenericDragImage* wxDragTreeItem(const wxTreeCtrl& treeCtrl, wxTreeItemId& id) {
@@ -539,7 +508,7 @@ wxGenericDragImage* wxDragListItem(const wxListCtrl& listCtrl, long id) {
 
 //----------------------------------------------------------------------
 
-class wxPyTimer : public wxObject {
+class wxPyTimer {
 public:
     wxPyTimer(PyObject* notify);
     ~wxPyTimer();
@@ -664,13 +633,6 @@ void wxLogSysError(const char *szFormat);
 
 //----------------------------------------------------------------------
 
-
-enum {
-    /* event type */
-    wxEVT_END_PROCESS
-};
-
-
 class wxProcessEvent : public wxEvent {
 public:
     wxProcessEvent(int id = 0, int pid = 0, int exitcode = 0);
@@ -728,71 +690,10 @@ long wxExecute(const wxString& command,
 
 //----------------------------------------------------------------------
 
-%{
-#if !wxUSE_JOYSTICK && !defined(__WXMSW__)
-// A C++ stub class for wxJoystick for platforms that don't have it.
-class wxJoystick : public wxObject {
-public:
-    wxJoystick(int joystick = wxJOYSTICK1) {
-        bool doSave = wxPyRestoreThread();
-        PyErr_SetString(PyExc_NotImplementedError, "wxJoystick is not available on this platform.");
-        wxPySaveThread(doSave);
-    }
-    wxPoint GetPosition() { return wxPoint(-1,-1); }
-    int GetZPosition() { return -1; }
-    int GetButtonState() { return -1; }
-    int GetPOVPosition() { return -1; }
-    int GetPOVCTSPosition() { return -1; }
-    int GetRudderPosition() { return -1; }
-    int GetUPosition() { return -1; }
-    int GetVPosition() { return -1; }
-    int GetMovementThreshold() { return -1; }
-    void SetMovementThreshold(int threshold) {}
-
-    bool IsOk(void) { return FALSE; }
-    int GetNumberJoysticks() { return -1; }
-    int GetManufacturerId() { return -1; }
-    int GetProductId() { return -1; }
-    wxString GetProductName() { return ""; }
-    int GetXMin() { return -1; }
-    int GetYMin() { return -1; }
-    int GetZMin() { return -1; }
-    int GetXMax() { return -1; }
-    int GetYMax() { return -1; }
-    int GetZMax() { return -1; }
-    int GetNumberButtons() { return -1; }
-    int GetNumberAxes() { return -1; }
-    int GetMaxButtons() { return -1; }
-    int GetMaxAxes() { return -1; }
-    int GetPollingMin() { return -1; }
-    int GetPollingMax() { return -1; }
-    int GetRudderMin() { return -1; }
-    int GetRudderMax() { return -1; }
-    int GetUMin() { return -1; }
-    int GetUMax() { return -1; }
-    int GetVMin() { return -1; }
-    int GetVMax() { return -1; }
-
-    bool HasRudder() { return FALSE; }
-    bool HasZ() { return FALSE; }
-    bool HasU() { return FALSE; }
-    bool HasV() { return FALSE; }
-    bool HasPOV() { return FALSE; }
-    bool HasPOV4Dir() { return FALSE; }
-    bool HasPOVCTS() { return FALSE; }
-
-    bool SetCapture(wxWindow* win, int pollingFreq = 0) { return FALSE; }
-    bool ReleaseCapture() { return FALSE; }
-};
-#endif
-%}
-
-
-class wxJoystick : public wxObject {
+#ifdef __WXMSW__
+class wxJoystick {
 public:
     wxJoystick(int joystick = wxJOYSTICK1);
-    ~wxJoystick();
-
     wxPoint GetPosition();
     int GetZPosition();
     int GetButtonState();
@@ -839,60 +740,8 @@ public:
     bool SetCapture(wxWindow* win, int pollingFreq = 0);
     bool ReleaseCapture();
 };
-
-//----------------------------------------------------------------------
-
-%{
-#if !wxUSE_WAVE && !defined(__WXMSW__)
-// A C++ stub class for wxWave for platforms that don't have it.
-class wxWave : public wxObject
-{
-public:
-    wxWave(const wxString& fileName, bool isResource = FALSE) {
-        bool doSave = wxPyRestoreThread();
-        PyErr_SetString(PyExc_NotImplementedError, "wxWave is not available on this platform.");
-        wxPySaveThread(doSave);
-    }
-    wxWave(int size, const wxByte* data) {
-        bool doSave = wxPyRestoreThread();
-        PyErr_SetString(PyExc_NotImplementedError, "wxWave is not available on this platform.");
-        wxPySaveThread(doSave);
-    }
-
-    ~wxWave() {}
-
-    bool  IsOk() const { return FALSE; }
-    bool  Play(bool async = TRUE, bool looped = FALSE) const { return FALSE; }
-};
-
 #endif
-%}
-
-class wxWave : public wxObject
-{
-public:
-  wxWave(const wxString& fileName, bool isResource = FALSE);
-  ~wxWave();
-
-  bool  IsOk() const;
-  bool  Play(bool async = TRUE, bool looped = FALSE) const;
-};
-
-%new wxWave* wxWaveData(const wxString& data);
-%{ // Implementations of some alternate "constructors"
-    wxWave* wxWaveData(const wxString& data) {
-        return new wxWave(data.Len(), (wxByte*)data.c_str());
-    }
-%}
 
 //----------------------------------------------------------------------
-
-
-%init %{
-    wxPyPtrTypeMap_Add("wxFontEnumerator", "wxPyFontEnumerator");
-    wxPyPtrTypeMap_Add("wxDragImage", "wxGenericDragImage");
-    wxPyPtrTypeMap_Add("wxProcess", "wxPyProcess");
-%}
-
 //----------------------------------------------------------------------
 

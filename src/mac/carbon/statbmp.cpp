@@ -14,11 +14,8 @@
 #endif
 
 #include "wx/statbmp.h"
-#include "wx/dcclient.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap, wxControl)
-#endif
 
 /*
  * wxStaticBitmap
@@ -31,17 +28,17 @@ END_EVENT_TABLE()
 bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
            const wxBitmap& bitmap,
            const wxPoint& pos,
-           const wxSize& s,
+           const wxSize& size,
            long style,
            const wxString& name)
 {
     SetName(name);
-	wxSize size = s ;
 
     m_backgroundColour = parent->GetBackgroundColour() ;
     m_foregroundColour = parent->GetForegroundColour() ;
 
     m_messageBitmap = bitmap;
+
     if ( id == -1 )
   	    m_windowId = (int)NewControlId();
     else
@@ -50,8 +47,9 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
     m_windowStyle = style;
 
     bool ret = wxControl::Create( parent, id, pos, size, style , wxDefaultValidator , name );
-	SetSizeOrDefault( size ) ;
     
+	SetSizeOrDefault() ;
+	
     return ret;
 }
 
@@ -63,23 +61,21 @@ void wxStaticBitmap::SetSize(int x, int y, int width, int height, int sizeFlags)
 void wxStaticBitmap::SetBitmap(const wxBitmap& bitmap)
 {
     m_messageBitmap = bitmap;
-    Refresh() ;
     SetSizeOrDefault();
 }
-
 void wxStaticBitmap::OnPaint( wxPaintEvent &event ) 
 {
     wxPaintDC dc(this);
     PrepareDC(dc);
-
-    dc.DrawBitmap( m_messageBitmap , 0 , 0 , TRUE ) ;
+	dc.SetPalette( *m_messageBitmap.GetPalette() ) ;
+	dc.DrawBitmap( m_messageBitmap , 0 , 0 ) ;
 }
 
 wxSize wxStaticBitmap::DoGetBestSize() const
 {
-   if ( m_messageBitmap.Ok() )
-       return wxSize(m_messageBitmap.GetWidth(), m_messageBitmap.GetHeight());
-   else
-       return wxSize(16, 16);  // completely arbitrary
+    if ( m_messageBitmap.Ok() )
+        return wxSize(m_messageBitmap.GetWidth(), m_messageBitmap.GetHeight());
+    else
+        return wxSize(16, 16);  // completely arbitrary
 }
 

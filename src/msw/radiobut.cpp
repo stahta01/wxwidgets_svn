@@ -33,7 +33,7 @@
 IMPLEMENT_DYNAMIC_CLASS(wxRadioButton, wxControl)
 // IMPLEMENT_DYNAMIC_CLASS(wxBitmapRadioButton, wxRadioButton)
 
-bool wxRadioButton::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
+bool wxRadioButton::MSWCommand(WXUINT param, WXWORD id)
 {
   if (param == BN_CLICKED)
   {
@@ -81,10 +81,6 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
 
 //  long msStyle = groupStyle | RADIO_FLAGS;
   long msStyle = groupStyle | BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE /* | WS_CLIPSIBLINGS */;
-
-  if ( m_windowStyle & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
-
 
   bool want3D;
   WXDWORD exStyle = Determine3DEffects(0, &want3D) ;
@@ -176,17 +172,10 @@ void wxRadioButton::Command (wxCommandEvent & event)
   ProcessCommand (event);
 }
 
-WXHBRUSH wxRadioButton::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
-#if wxUSE_CTL3D
+WXHBRUSH wxRadioButton::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
                                WXUINT message,
                                WXWPARAM wParam,
-                               WXLPARAM lParam
-#else
-                               WXUINT WXUNUSED(message),
-                               WXWPARAM WXUNUSED(wParam),
-                               WXLPARAM WXUNUSED(lParam)
-#endif
-    )
+                               WXLPARAM lParam)
 {
 #if wxUSE_CTL3D
     if ( m_useCtl3D )

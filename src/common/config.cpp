@@ -132,9 +132,10 @@ bool wxConfigBase::Read(const wxString& key, long *pl, long defVal) const
 bool wxConfigBase::Read(const wxString& key, double* val) const
 {
     wxString str;
-    if ( Read(key, &str) )
+    if (Read(key, & str))
     {
-        return str.ToDouble(val);
+        *val = wxAtof(str);
+        return TRUE;
     }
 
     return FALSE;
@@ -189,29 +190,28 @@ bool wxConfigBase::Read(const wxString& key, int *pi, int defVal) const
 {
     long l;
     bool ret = Read(key, &l, (long) defVal);
-    if (ret)
-        *pi = (int) l;
+    *pi = (int) l;
     return ret;
 }
 
 bool wxConfigBase::Write(const wxString& key, double val)
 {
     wxString str;
-    str.Printf(wxT("%g"), val);
+    str.Printf(wxT("%f"), val);
     return Write(key, str);
 }
 
 bool wxConfigBase::Write(const wxString& key, bool value)
 {
-    return Write(key, value ? 1l : 0l);
+    long l = (value ? 1 : 0);
+    return Write(key, l);
 }
 
-bool wxConfigBase::Write(const wxString& key, const wxChar *value)
+bool wxConfigBase::Write( const wxString &key, const wxChar *text )
 {
-    // explicit cast needed, otherwise value would have been converted to bool
-    return Write(key, wxString(value));
+	wxString str( text ) ;
+	return Write( key, str ) ;
 }
-
 wxString wxConfigBase::ExpandEnvVars(const wxString& str) const
 {
     wxString tmp; // Required for BC++
@@ -246,9 +246,7 @@ wxConfigPathChanger::wxConfigPathChanger(const wxConfigBase *pContainer,
     m_bChanged = TRUE;
     m_strName = strEntry.AfterLast(wxCONFIG_PATH_SEPARATOR);
     m_strOldPath = m_pContainer->GetPath();
-    if ( m_strOldPath.Len() == 0 || 
-         m_strOldPath.Last() != wxCONFIG_PATH_SEPARATOR )
-        m_strOldPath += wxCONFIG_PATH_SEPARATOR;
+    m_strOldPath += wxCONFIG_PATH_SEPARATOR;
     m_pContainer->SetPath(strPath);
   }
   else {

@@ -135,39 +135,9 @@ void wxUsleep(unsigned long milliseconds)
 // process management
 // ----------------------------------------------------------------------------
 
-int wxKill(long pid, wxSignal sig, wxKillError *rc)
+int wxKill(long pid, wxSignal sig)
 {
-    int err = kill((pid_t)pid, (int)sig);
-    if ( rc )
-    {
-        switch ( err )
-        {
-            case 0:
-                *rc = wxKILL_OK;
-                break;
-
-            case EINVAL:
-                *rc = wxKILL_BAD_SIGNAL;
-                break;
-
-            case EPERM:
-                *rc = wxKILL_ACCESS_DENIED;
-                break;
-
-            case ESRCH:
-                *rc = wxKILL_NO_PROCESS;
-                break;
-
-            default:
-                // this goes against Unix98 docs so log it
-                wxLogDebug(_T("unexpected kill(2) return value %d"), err);
-
-                // something else...
-                *rc = wxKILL_ERROR;
-        }
-    }
-
-    return err;
+    return kill((pid_t)pid, (int)sig);
 }
 
 #define WXEXECUTE_NARGS   127
@@ -655,13 +625,6 @@ long wxExecute(wxChar **argv,
         return exitcode;
 #endif // wxUSE_GUI
     }
-#ifdef __VMS
-   // VMS does not recognise exit as a return and complains about
-   // a missing return
-   // I think VMS is wrong in this
-   //     JJ
-   return 0;
-#endif
 }
 
 #undef ERROR_RETURN_CODE
@@ -674,14 +637,9 @@ long wxExecute(wxChar **argv,
 const wxChar* wxGetHomeDir( wxString *home  )
 {
     *home = wxGetUserHome( wxString() );
-   wxString tmp;
     if ( home->IsEmpty() )
         *home = wxT("/");
-#ifdef __VMS
-   tmp = *home;
-   if ( tmp.Last() != wxT(']'))
-     if ( tmp.Last() != wxT('/')) *home << wxT('/');
-#endif
+
     return home->c_str();
 }
 
@@ -901,48 +859,6 @@ long wxGetFreeMemory()
 
     // can't find it out
     return -1;
-}
-
-// ----------------------------------------------------------------------------
-// env vars
-// ----------------------------------------------------------------------------
-
-bool wxGetEnv(const wxString& var, wxString *value)
-{
-    // wxGetenv is defined as getenv()
-    wxChar *p = wxGetenv(var);
-    if ( !p )
-        return FALSE;
-
-    if ( value )
-    {
-        *value = p;
-    }
-
-    return TRUE;
-}
-
-bool wxSetEnv(const wxString& variable, const wxChar *value)
-{
-#if defined(HAVE_SETENV)
-    return setenv(variable.mb_str(), value ? wxString(value).mb_str().data()
-                                           : NULL, 1 /* overwrite */) == 0;
-#elif defined(HAVE_PUTENV)
-    wxString s = variable;
-    if ( value )
-        s << _T('=') << value;
-
-    // transform to ANSI
-    const char *p = s.mb_str();
-
-    // the string will be free()d by libc
-    char *buf = (char *)malloc(strlen(p) + 1);
-    strcpy(buf, p);
-
-    return putenv(buf) == 0;
-#else // no way to set an env var
-    return FALSE;
-#endif
 }
 
 // ----------------------------------------------------------------------------

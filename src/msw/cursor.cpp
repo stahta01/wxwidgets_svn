@@ -191,11 +191,6 @@ wxCursor::wxCursor(int cursor_type)
 
   switch (cursor_type)
   {
-    case wxCURSOR_ARROWWAIT:
-#ifndef __WIN16__
-      refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_APPSTARTING);
-      break;
-#endif
     case wxCURSOR_WAIT:
       refData->m_hCursor = (WXHCURSOR) LoadCursor((HINSTANCE) NULL, IDC_WAIT);
       break;
@@ -294,7 +289,6 @@ wxCursor::wxCursor(int cursor_type)
     }
     case wxCURSOR_QUESTION_ARROW:
     {
-//      refData->m_hCursor = (WXHCURSOR) LoadImage(wxGetInstance(), wxT("wxCURSOR_QARROW"), IMAGE_CURSOR, 16, 16, LR_MONOCHROME);
       refData->m_hCursor = (WXHCURSOR) LoadCursor(wxGetInstance(), wxT("wxCURSOR_QARROW"));
       break;
     }

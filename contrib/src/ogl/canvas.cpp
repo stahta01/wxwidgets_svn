@@ -26,10 +26,6 @@
 
 #include <wx/wxexpr.h>
 
-#ifdef new
-#undef new
-#endif
-
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
 #else

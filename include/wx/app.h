@@ -61,9 +61,7 @@ class WXDLLEXPORT wxAppBase : public wxEvtHandler
 public:
     // the virtual functions which may/must be overridden in the derived class
     // -----------------------------------------------------------------------
-#ifdef __WXMAC_X__
-    virtual ~wxAppBase() {}  // Added min for Mac X
-#endif
+
         // called during the program initialization, returning FALSE from here
         // prevents the program from continuing - it's a good place to create
         // the top level program window and return TRUE.
@@ -171,7 +169,7 @@ public:
         // return the "main" top level window (if it hadn't been set previously
         // with SetTopWindow(), will return just some top level window and, if
         // there are none, will return NULL)
-    virtual wxWindow *GetTopWindow() const
+    wxWindow *GetTopWindow() const
     {
         if (m_topWindow)
             return m_topWindow;
@@ -326,7 +324,7 @@ extern void WXDLLEXPORT wxWakeUpIdle();
 
 // Post a message to the given eventhandler which will be processed during the
 // next event loop iteration
-inline void wxPostEvent(wxEvtHandler *dest, wxEvent& event)
+inline void WXDLLEXPORT wxPostEvent(wxEvtHandler *dest, wxEvent& event)
 {
     wxCHECK_RET( dest, wxT("need an object to post event to in wxPostEvent") );
 
@@ -350,27 +348,6 @@ extern bool WXDLLEXPORT wxInitialize();
 // clean up - the library can't be used any more after the last call to
 // wxUninitialize()
 extern void WXDLLEXPORT wxUninitialize();
-
-// create an object of this class on stack to initialize/cleanup thel ibrary
-// automatically
-class WXDLLEXPORT wxInitializer
-{
-public:
-    // initialize the library
-    wxInitializer() { m_ok = wxInitialize(); }
-
-    // has the initialization been successful? (explicit test)
-    bool IsOk() const { return m_ok; }
-
-    // has the initialization been successful? (implicit test)
-    operator bool() const { return m_ok; }
-
-    // dtor only does clean up if we initialized the library properly
-    ~wxInitializer() { if ( m_ok ) wxUninitialize(); }
-
-private:
-    bool m_ok;
-};
 
 #endif // !wxUSE_GUI
 
@@ -396,11 +373,6 @@ public:
 #if !wxUSE_GUI || defined(__WXMOTIF__) || defined(__WXGTK__) || defined(__WXPM__)
     #define IMPLEMENT_WXWIN_MAIN \
         extern int wxEntry( int argc, char *argv[] ); \
-        int main(int argc, char *argv[]) { return wxEntry(argc, argv); }
-#elif defined(__WXMAC__) && defined(__UNIX__)
-	// wxMac seems to have a specific wxEntry prototype
-    #define IMPLEMENT_WXWIN_MAIN \
-        extern int wxEntry( int argc, char *argv[], bool enterLoop = 1 ); \
         int main(int argc, char *argv[]) { return wxEntry(argc, argv); }
 #elif defined(__WXMSW__) && defined(WXUSINGDLL)
     // NT defines APIENTRY, 3.x not

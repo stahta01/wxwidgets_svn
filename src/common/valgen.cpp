@@ -530,6 +530,7 @@ bool wxGenericValidator::TransferFromWindow(void)
 
 /*
   Called by constructors to initialize ALL data members
+	Last change:  JAC  21 Jul 100    4:58 pm
 */
 void wxGenericValidator::Initialize()
 {

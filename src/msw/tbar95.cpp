@@ -50,10 +50,10 @@
 
 #ifndef __TWIN32__
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
-    #include <commctrl.h>
-#else
+#ifdef __GNUWIN32_OLD__
     #include "wx/msw/gnuwin32/extra.h"
+#else
+    #include <commctrl.h>
 #endif
 
 #endif // __TWIN32__
@@ -109,13 +109,13 @@
 // ----------------------------------------------------------------------------
 
 // adjust toolbar bitmap colours
-// static void wxMapBitmap(HBITMAP hBitmap, int width, int height);
+static void wxMapBitmap(HBITMAP hBitmap, int width, int height);
 
 // ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarBase)
+IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl)
 
 BEGIN_EVENT_TABLE(wxToolBar, wxToolBarBase)
     EVT_MOUSE_EVENTS(wxToolBar::OnMouseEvent)
@@ -213,9 +213,6 @@ bool wxToolBar::Create(wxWindow *parent,
     DWORD msflags = 0;      // WS_VISIBLE | WS_CHILD always included
     if (style & wxBORDER)
         msflags |= WS_BORDER;
-
-   if ( style & wxCLIP_SIBLINGS )
-        msflags |= WS_CLIPSIBLINGS;
 
 #ifdef TBSTYLE_TOOLTIPS
     msflags |= TBSTYLE_TOOLTIPS;
@@ -396,7 +393,8 @@ bool wxToolBar::Realize()
     wxMemoryDC dcAllButtons;
     wxBitmap bitmap(totalBitmapWidth, totalBitmapHeight);
     dcAllButtons.SelectObject(bitmap);
-    dcAllButtons.SetBackground(*wxLIGHT_GREY_BRUSH);
+    wxColour colTbar = wxSystemSettings::GetSystemColour(wxSYS_COLOUR_BTNFACE);
+    dcAllButtons.SetBackground(wxBrush(colTbar, wxSOLID));
     dcAllButtons.Clear();
 
     m_hBitmap = bitmap.GetHBITMAP();
@@ -436,8 +434,14 @@ bool wxToolBar::Realize()
             if ( bmp.Ok() )
             {
 #if USE_BITMAP_MASKS
-                // notice the last parameter: do use mask
-                dcAllButtons.DrawBitmap(tool->GetBitmap1(), x, 0, TRUE);
+                // blit the bitmap to the DC with the mask
+                wxBitmap bmpTool = tool->GetBitmap1();
+                if ( !bmpTool.GetMask() )
+                {
+                    // it doesn't have mask - create a default one
+                    bmpTool.SetMask(new wxMask(bmpTool, *wxLIGHT_GREY));
+                }
+                dcAllButtons.DrawBitmap(bmpTool, x, 0, TRUE);
 #else // !USE_BITMAP_MASKS
                 HBITMAP hbmp = GetHbitmapOf(bmp);
                 HBITMAP oldBitmap2 = (HBITMAP)::SelectObject(memoryDC2, hbmp);
@@ -474,10 +478,11 @@ bool wxToolBar::Realize()
     ::SelectObject(memoryDC, oldBitmap);
     ::DeleteDC(memoryDC);
     ::DeleteDC(memoryDC2);
+
 #endif // USE_BITMAP_MASKS/!USE_BITMAP_MASKS
 
     // Map to system colours
-    MapBitmap((WXHBITMAP) hBitmap, totalBitmapWidth, totalBitmapHeight);
+    wxMapBitmap(hBitmap, totalBitmapWidth, totalBitmapHeight);
 
     int bitmapId = 0;
 
@@ -521,7 +526,7 @@ bool wxToolBar::Realize()
         {
             if ( !::SendMessage(GetHwnd(), TB_DELETEBUTTON, 0, 0) )
             {
-                wxLogDebug(wxT("TB_DELETEBUTTON failed"));
+                wxLogLastError(wxT("TB_DELETEBUTTON"));
             }
         }
 
@@ -720,7 +725,7 @@ bool wxToolBar::Realize()
 // message handlers
 // ----------------------------------------------------------------------------
 
-bool wxToolBar::MSWCommand(WXUINT WXUNUSED(cmd), WXWORD id)
+bool wxToolBar::MSWCommand(WXUINT cmd, WXWORD id)
 {
     wxToolBarToolBase *tool = FindById((int)id);
     if ( !tool )
@@ -750,7 +755,7 @@ bool wxToolBar::MSWCommand(WXUINT WXUNUSED(cmd), WXWORD id)
 
 bool wxToolBar::MSWOnNotify(int WXUNUSED(idCtrl),
                             WXLPARAM lParam,
-                            WXLPARAM *WXUNUSED(result))
+                            WXLPARAM *result)
 {
     // First check if this applies to us
     NMHDR *hdr = (NMHDR *)lParam;
@@ -786,7 +791,7 @@ bool wxToolBar::MSWOnNotify(int WXUNUSED(idCtrl),
             ttText->lpszText = (wxChar *)help.c_str();
 #else
             // VZ: I don't know why it happens, but the versions of
-            //     comctl32.dll starting from 4.70 sometimes send TTN_NEEDTEXTW
+            //     comctl32.dll starting from 4.70 sometimes send TTN_NEEDTEXTW 
             //     even to ANSI programs (normally, this message is supposed
             //     to be sent to Unicode programs only) - hence we need to
             //     handle it as well, otherwise no tooltips will be shown in
@@ -915,7 +920,7 @@ void wxToolBar::DoToggleTool(wxToolBarToolBase *tool, bool toggle)
                   (WPARAM)tool->GetId(), (LPARAM)MAKELONG(toggle, 0));
 }
 
-void wxToolBar::DoSetToggle(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(toggle))
+void wxToolBar::DoSetToggle(wxToolBarToolBase *tool, bool toggle)
 {
     // VZ: AFAIK, the button has to be created either with TBSTYLE_CHECK or
     //     without, so we really need to delete the button and recreate it here
@@ -930,21 +935,15 @@ void wxToolBar::DoSetToggle(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(tog
 void wxToolBar::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
     m_backgroundColour = wxColour(GetRValue(GetSysColor(COLOR_BTNFACE)),
-                                  GetGValue(GetSysColor(COLOR_BTNFACE)),
-                                  GetBValue(GetSysColor(COLOR_BTNFACE)));
+          GetGValue(GetSysColor(COLOR_BTNFACE)), GetBValue(GetSysColor(COLOR_BTNFACE)));
 
     // Remap the buttons
     Realize();
 
-    // Relayout the toolbar
-    int nrows = m_maxRows;
-    m_maxRows = 0;      // otherwise SetRows() wouldn't do anything
-    SetRows(nrows);
-
     Refresh();
 
-    // let the event propagate further
-    event.Skip();
+    // Propagate the event to the non-top-level children
+    wxWindow::OnSysColourChanged(event);
 }
 
 void wxToolBar::OnMouseEvent(wxMouseEvent& event)
@@ -1015,21 +1014,19 @@ long wxToolBar::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 // system colors. Note that they are in BGR format because this is what Windows
 // wants (and not RGB)
 
-/*
 #define BGR_BUTTONTEXT      (RGB(000,000,000))  // black
 #define BGR_BUTTONSHADOW    (RGB(128,128,128))  // dark grey
 #define BGR_BUTTONFACE      (RGB(192,192,192))  // bright grey
 #define BGR_BUTTONHILIGHT   (RGB(255,255,255))  // white
 #define BGR_BACKGROUNDSEL   (RGB(000,000,255))  // blue
 #define BGR_BACKGROUND      (RGB(255,000,255))  // magenta
-*/
 
-bool wxToolBar::sm_coloursInit = FALSE;
-long wxToolBar::sm_stdColours[6];
+static bool sg_coloursInit = FALSE;
+static long sg_stdColours[6];
 
-void wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
+void wxMapBitmap(HBITMAP hBitmap, int width, int height)
 {
-    if (!sm_coloursInit)
+    if (!sg_coloursInit)
     {
         // When a bitmap is loaded, the RGB values can change. So we need to have a
         // reference bitmap which can tell us what the RGB values change to.
@@ -1044,33 +1041,31 @@ void wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
             for (i = 0; i < 6; i++)
             {
                 memDC.GetPixel(i, 0, & colour);
-                sm_stdColours[i] = RGB(colour.Red(), colour.Green(), colour.Blue());
+                sg_stdColours[i] = RGB(colour.Red(), colour.Green(), colour.Blue());
             }
-            sm_coloursInit = TRUE;
+            sg_coloursInit = TRUE;
             memDC.SelectObject(wxNullBitmap);
         }
         else
         {
-            sm_stdColours[0] = RGB(000,000,000) ;
-            sm_stdColours[1] = RGB(128,128,128) ;
-            sm_stdColours[2] = RGB(192,192,192) ;
-            sm_stdColours[3] = RGB(255,255,255) ;
-            sm_stdColours[4] = RGB(000,000,255) ;
-            sm_stdColours[5] = RGB(255,000,255) ;
-            sm_coloursInit = TRUE;
+            sg_stdColours[0] = RGB(000,000,000) ;
+            sg_stdColours[1] = RGB(128,128,128) ;
+            sg_stdColours[2] = RGB(192,192,192) ;
+            sg_stdColours[3] = RGB(255,255,255) ;
+            sg_stdColours[4] = RGB(000,000,255) ;
+            sg_stdColours[5] = RGB(255,000,255) ;
+            sg_coloursInit = TRUE;
         }
     }
 
-    HBITMAP hBitmap = (HBITMAP) bitmap;
-
     COLORMAP ColorMap[5];
-
-    ColorMap[0].from = sm_stdColours[0]; ColorMap[0].to = COLOR_BTNTEXT;      // black        (0, 0 0)
-    ColorMap[1].from = sm_stdColours[1]; ColorMap[1].to = COLOR_BTNSHADOW;    // dark grey    (128, 128, 128)
-    ColorMap[2].from = sm_stdColours[2]; ColorMap[2].to = COLOR_BTNFACE;      // bright grey  (192, 192, 192)
-    ColorMap[3].from = sm_stdColours[3]; ColorMap[3].to = COLOR_BTNHIGHLIGHT; // white        (255, 255, 255)
-    //  ColorMap[4].from = sm_stdColours[4]; ColorMap[4].to = COLOR_HIGHLIGHT;  // blue         (0, 0, 255)
-    ColorMap[4].from = sm_stdColours[5]; ColorMap[4].to = COLOR_WINDOW;       // magenta      (255, 0, 255)
+    
+    ColorMap[0].from = sg_stdColours[0]; ColorMap[0].to = COLOR_BTNTEXT;      // black        (0, 0 0)
+    ColorMap[1].from = sg_stdColours[1]; ColorMap[1].to = COLOR_BTNSHADOW;    // dark grey    (128, 128, 128)
+    ColorMap[2].from = sg_stdColours[2]; ColorMap[2].to = COLOR_BTNFACE;      // bright grey  (192, 192, 192)
+    ColorMap[3].from = sg_stdColours[3]; ColorMap[3].to = COLOR_BTNHIGHLIGHT; // white        (255, 255, 255)
+    //  ColorMap[4].from = sg_stdColours[4]; ColorMap[4].to = COLOR_HIGHLIGHT;  // blue         (0, 0, 255)
+    ColorMap[4].from = sg_stdColours[5]; ColorMap[4].to = COLOR_WINDOW;       // magenta      (255, 0, 255)
 
 #if 0
     {
@@ -1082,80 +1077,81 @@ void wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
         {BGR_BACKGROUND,    COLOR_WINDOW}       // magenta
     };
 #endif
-
+    
     int NUM_MAPS = (sizeof(ColorMap)/sizeof(COLORMAP));
     int n;
     for ( n = 0; n < NUM_MAPS; n++)
     {
         ColorMap[n].to = ::GetSysColor(ColorMap[n].to);
     }
+    
 
-    HBITMAP hbmOld;
-    HDC hdcMem = CreateCompatibleDC(NULL);
+  HBITMAP hbmOld;
+  HDC hdcMem = CreateCompatibleDC(NULL);
 
-    if (hdcMem)
+  if (hdcMem)
+  {
+    hbmOld = (HBITMAP) SelectObject(hdcMem, hBitmap);
+
+    int i, j, k;
+    for ( i = 0; i < width; i++)
     {
-        hbmOld = (HBITMAP) SelectObject(hdcMem, hBitmap);
-
-        int i, j, k;
-        for ( i = 0; i < width; i++)
+        for ( j = 0; j < height; j++)
         {
-            for ( j = 0; j < height; j++)
+            COLORREF pixel = ::GetPixel(hdcMem, i, j);
+            for ( k = 0; k < NUM_MAPS; k ++)
             {
-                COLORREF pixel = ::GetPixel(hdcMem, i, j);
-                /*
-                BYTE red = GetRValue(pixel);
-                BYTE green = GetGValue(pixel);
-                BYTE blue = GetBValue(pixel);
-                */
+                int distance = 0 ;
 
-                for ( k = 0; k < NUM_MAPS; k ++)
+                distance = abs( GetRValue( pixel ) - GetRValue( ColorMap[k].from )) ;
+                distance = max( distance , abs(GetGValue(pixel ) - GetGValue( ColorMap[k].from ))) ;
+                distance = max( distance , abs(GetBValue(pixel ) - GetBValue( ColorMap[k].from ))) ;
+                if ( distance < 0x10 )
+                //if ( ColorMap[k].from == pixel )
                 {
-                    if ( ColorMap[k].from == pixel )
-                    {
-                        /* COLORREF actualPixel = */ ::SetPixel(hdcMem, i, j, ColorMap[k].to);
-                        break;
-                    }
+                    ::SetPixel(hdcMem, i, j, ColorMap[k].to);
+                    break;
                 }
             }
         }
-
-
-        SelectObject(hdcMem, hbmOld);
-        DeleteObject(hdcMem);
     }
+
+
+    SelectObject(hdcMem, hbmOld);
+    DeleteObject(hdcMem);
+  }
+
 }
 
 // Some experiments...
 #if 0
-// What we want to do is create another bitmap which has a depth of 4,
-// and set the bits. So probably we want to convert this HBITMAP into a
-// DIB, then call SetDIBits.
-// AAAGH. The stupid thing is that if newBitmap has a depth of 4 (less than that of
-// the screen), then SetDIBits fails.
-HBITMAP newBitmap = ::CreateBitmap(totalBitmapWidth, totalBitmapHeight, 1, 4, NULL);
-HANDLE newDIB = ::BitmapToDIB((HBITMAP) m_hBitmap, NULL);
-LPBITMAPINFOHEADER lpbmi = (LPBITMAPINFOHEADER) GlobalLock(newDIB);
+  // What we want to do is create another bitmap which has a depth of 4,
+  // and set the bits. So probably we want to convert this HBITMAP into a
+  // DIB, then call SetDIBits.
+  // AAAGH. The stupid thing is that if newBitmap has a depth of 4 (less than that of
+  // the screen), then SetDIBits fails.
+  HBITMAP newBitmap = ::CreateBitmap(totalBitmapWidth, totalBitmapHeight, 1, 4, NULL);
+  HANDLE newDIB = ::BitmapToDIB((HBITMAP) m_hBitmap, NULL);
+  LPBITMAPINFOHEADER lpbmi = (LPBITMAPINFOHEADER) GlobalLock(newDIB);
 
-dc = ::GetDC(NULL);
+  dc = ::GetDC(NULL);
 //  LPBITMAPINFOHEADER lpbmi = (LPBITMAPINFOHEADER) newDIB;
 
-int result = ::SetDIBits(dc, newBitmap, 0, lpbmi->biHeight, FindDIBBits((LPSTR)lpbmi), (LPBITMAPINFO)lpbmi,
-                         DIB_PAL_COLORS);
-DWORD err = GetLastError();
+  int result = ::SetDIBits(dc, newBitmap, 0, lpbmi->biHeight, FindDIBBits((LPSTR)lpbmi), (LPBITMAPINFO)lpbmi,
+    DIB_PAL_COLORS);
+  DWORD err = GetLastError();
 
-::ReleaseDC(NULL, dc);
+  ::ReleaseDC(NULL, dc);
 
-// Delete the DIB
-GlobalUnlock (newDIB);
-GlobalFree (newDIB);
+  // Delete the DIB
+  GlobalUnlock (newDIB);
+  GlobalFree (newDIB);
 
 //  WXHBITMAP hBitmap2 = wxCreateMappedBitmap((WXHINSTANCE) wxGetInstance(), (WXHBITMAP) m_hBitmap);
-// Substitute our new bitmap for the old one
-::DeleteObject((HBITMAP) m_hBitmap);
-m_hBitmap = (WXHBITMAP) newBitmap;
+  // Substitute our new bitmap for the old one
+  ::DeleteObject((HBITMAP) m_hBitmap);
+  m_hBitmap = (WXHBITMAP) newBitmap;
 #endif
 
 
 #endif // wxUSE_TOOLBAR && Win95
-

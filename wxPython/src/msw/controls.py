@@ -442,53 +442,6 @@ class wxCheckListBox(wxCheckListBoxPtr):
 
 
 
-class wxTextAttrPtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,controlsc=controlsc):
-        if self.thisown == 1 :
-            controlsc.delete_wxTextAttr(self)
-    def SetTextColour(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_SetTextColour,(self,) + _args, _kwargs)
-        return val
-    def SetBackgroundColour(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_SetBackgroundColour,(self,) + _args, _kwargs)
-        return val
-    def SetFont(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_SetFont,(self,) + _args, _kwargs)
-        return val
-    def HasTextColour(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_HasTextColour,(self,) + _args, _kwargs)
-        return val
-    def HasBackgroundColour(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_HasBackgroundColour,(self,) + _args, _kwargs)
-        return val
-    def HasFont(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_HasFont,(self,) + _args, _kwargs)
-        return val
-    def GetTextColour(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_GetTextColour,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) 
-        return val
-    def GetBackgroundColour(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_GetBackgroundColour,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) 
-        return val
-    def GetFont(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextAttr_GetFont,(self,) + _args, _kwargs)
-        if val: val = wxFontPtr(val) 
-        return val
-    def __repr__(self):
-        return "<C wxTextAttr instance at %s>" % (self.this,)
-class wxTextAttr(wxTextAttrPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(controlsc.new_wxTextAttr,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
 class wxTextCtrlPtr(wxControlPtr):
     def __init__(self,this):
         self.this = this
@@ -597,16 +550,6 @@ class wxTextCtrlPtr(wxControlPtr):
         return val
     def Redo(self, *_args, **_kwargs):
         val = apply(controlsc.wxTextCtrl_Redo,(self,) + _args, _kwargs)
-        return val
-    def SetStyle(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextCtrl_SetStyle,(self,) + _args, _kwargs)
-        return val
-    def SetDefaultStyle(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextCtrl_SetDefaultStyle,(self,) + _args, _kwargs)
-        return val
-    def GetDefaultStyle(self, *_args, **_kwargs):
-        val = apply(controlsc.wxTextCtrl_GetDefaultStyle,(self,) + _args, _kwargs)
-        if val: val = wxTextAttrPtr(val) 
         return val
     def write(self, *_args, **_kwargs):
         val = apply(controlsc.wxTextCtrl_write,(self,) + _args, _kwargs)
@@ -888,29 +831,6 @@ class wxSpinCtrl(wxSpinCtrlPtr):
 
 
 
-class wxToggleButtonPtr(wxControlPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def SetValue(self, *_args, **_kwargs):
-        val = apply(controlsc.wxToggleButton_SetValue,(self,) + _args, _kwargs)
-        return val
-    def GetValue(self, *_args, **_kwargs):
-        val = apply(controlsc.wxToggleButton_GetValue,(self,) + _args, _kwargs)
-        return val
-    def SetLabel(self, *_args, **_kwargs):
-        val = apply(controlsc.wxToggleButton_SetLabel,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxToggleButton instance at %s>" % (self.this,)
-class wxToggleButton(wxToggleButtonPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(controlsc.new_wxToggleButton,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
 
 
 #-------------- FUNCTION WRAPPERS ------------------
@@ -926,4 +846,3 @@ def wxButton_GetDefaultSize(*_args, **_kwargs):
 
 cvar = controlsc.cvar
 wxDefaultValidator = wxValidatorPtr(controlsc.cvar.wxDefaultValidator)
-wxEVT_COMMAND_TOGGLEBUTTON_CLICKED = controlsc.wxEVT_COMMAND_TOGGLEBUTTON_CLICKED

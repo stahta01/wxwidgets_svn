@@ -8,16 +8,14 @@
 .first
 	define wx [--.include.wx]
 
-CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm
+CXX_DEFINE = /define=(__WXGTK__=1)
 
 .suffixes : .cpp
 
 .cpp.obj :
 	cxx $(CXXFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).cpp
 .c.obj :
-	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
+	cc $(CFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
 	accel.obj,\
@@ -56,12 +54,12 @@ OBJECTS = \
 	menu.obj,\
 	minifram.obj,\
 	notebook.obj,\
+	palette.obj,\
 	pen.obj,\
 	radiobox.obj,\
 	radiobut.obj,\
 	region.obj,\
 	scrolbar.obj,\
-	scrolwin.obj,\
 	settings.obj,\
 	slider.obj,\
         spinbutt.obj,\
@@ -72,13 +70,13 @@ OBJECTS = \
 	stattext.obj,\
 	tbargtk.obj,\
 	textctrl.obj,\
-	tglbtn.obj,\
 	timer.obj,\
 	tooltip.obj,\
 	utilsgtk.obj,\
 	utilsres.obj,\
+	window.obj,\
         win_gtk.obj,\
-	window.obj
+	wx_gtk_vmsjackets.obj
 
 SOURCES =\
 	accel.cpp,\
@@ -117,12 +115,12 @@ SOURCES =\
 	menu.cpp,\
 	minifram.cpp,\
 	notebook.cpp,\
+	palette.cpp,\
 	pen.cpp,\
 	radiobox.cpp,\
 	radiobut.cpp,\
 	region.cpp,\
 	scrolbar.cpp,\
-	scrolwin.cpp,\
 	settings.cpp,\
 	slider.cpp,\
         spinbutt.cpp,\
@@ -133,13 +131,13 @@ SOURCES =\
 	stattext.cpp,\
 	tbargtk.cpp,\
 	textctrl.cpp,\
-	tglbtn.cpp,\
 	timer.cpp,\
 	tooltip.cpp,\
 	utilsgtk.cpp,\
 	utilsres.cpp,\
+	window.cpp,\
         win_gtk.c,\
-	window.cpp
+	wx_gtk_vmsjackets.c
    
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -181,12 +179,12 @@ mdi.obj : mdi.cpp
 menu.obj : menu.cpp
 minifram.obj : minifram.cpp
 notebook.obj : notebook.cpp
+palette.obj : palette.cpp
 pen.obj : pen.cpp
 radiobox.obj : radiobox.cpp
 radiobut.obj : radiobut.cpp
 region.obj : region.cpp
 scrolbar.obj : scrolbar.cpp
-scrolwin.obj : scrolwin.cpp
 settings.obj : settings.cpp
 slider.obj : slider.cpp
 spinbutt.obj : spinbutt.cpp
@@ -197,10 +195,11 @@ statline.obj : statline.cpp
 stattext.obj : stattext.cpp
 tbargtk.obj : tbargtk.cpp
 textctrl.obj : textctrl.cpp
-tglbtn.obj : tglbtn.cpp
 timer.obj : timer.cpp
 tooltip.obj : tooltip.cpp
 utilsgtk.obj : utilsgtk.cpp
 utilsres.obj : utilsres.cpp
-win_gtk.obj : win_gtk.c
 window.obj : window.cpp
+win_gtk.obj : win_gtk.c
+wx_gtk_vmsjackets.obj : wx_gtk_vmsjackets.c
+	cc $(CFLAGS)$(CXX_DEFINE) wx_gtk_vmsjackets.c/name=(as_is,short)

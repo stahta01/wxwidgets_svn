@@ -29,6 +29,38 @@ def _checkForCallback(obj, name, event, theID=-1):
     except: pass
     else:   obj.Connect(theID, -1, event, cb)
 
+## def _StdWindowCallbacks(win):
+##     _checkForCallback(win, "OnChar",               wxEVT_CHAR)
+##     _checkForCallback(win, "OnSize",               wxEVT_SIZE)
+##     _checkForCallback(win, "OnEraseBackground",    wxEVT_ERASE_BACKGROUND)
+##     _checkForCallback(win, "OnSysColourChanged",   wxEVT_SYS_COLOUR_CHANGED)
+##     _checkForCallback(win, "OnInitDialog",         wxEVT_INIT_DIALOG)
+##     _checkForCallback(win, "OnPaint",              wxEVT_PAINT)
+##     _checkForCallback(win, "OnIdle",               wxEVT_IDLE)
+
+
+## def _StdFrameCallbacks(win):
+##     _StdWindowCallbacks(win)
+##     _checkForCallback(win, "OnActivate",           wxEVT_ACTIVATE)
+##     _checkForCallback(win, "OnMenuHighlight",      wxEVT_MENU_HIGHLIGHT)
+##     _checkForCallback(win, "OnCloseWindow",        wxEVT_CLOSE_WINDOW)
+
+
+## def _StdDialogCallbacks(win):
+##     _StdWindowCallbacks(win)
+##     _checkForCallback(win, "OnOk",     wxEVT_COMMAND_BUTTON_CLICKED,   wxID_OK)
+##     _checkForCallback(win, "OnApply",  wxEVT_COMMAND_BUTTON_CLICKED,   wxID_APPLY)
+##     _checkForCallback(win, "OnCancel", wxEVT_COMMAND_BUTTON_CLICKED,   wxID_CANCEL)
+##     _checkForCallback(win, "OnCloseWindow", wxEVT_CLOSE_WINDOW)
+##     _checkForCallback(win, "OnCharHook",    wxEVT_CHAR_HOOK)
+
+
+## def _StdOnScrollCallbacks(win):
+##     try:    cb = getattr(win, "OnScroll")
+##     except: pass
+##     else:   EVT_SCROLL(win, cb)
+
+
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -169,8 +201,6 @@ def EVT_LEAVE_WINDOW(win, func):
 def EVT_ENTER_WINDOW(win, func):
     win.Connect(-1, -1, wxEVT_ENTER_WINDOW, func)
 
-def EVT_MOUSEWHEEL(win, func):
-    win.Connect(-1, -1, wxEVT_MOUSEWHEEL, func)
 
 # all mouse events
 def EVT_MOUSE_EVENTS(win, func):
@@ -445,9 +475,6 @@ def EVT_TREE_BEGIN_DRAG(win, id, func):
 def EVT_TREE_BEGIN_RDRAG(win, id, func):
     win.Connect(id, -1, wxEVT_COMMAND_TREE_BEGIN_RDRAG, func)
 
-def EVT_TREE_END_DRAG(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_TREE_END_DRAG, func)
-
 def EVT_TREE_BEGIN_LABEL_EDIT(win, id, func):
     win.Connect(id, -1, wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT, func)
 
@@ -528,6 +555,35 @@ def EVT_TASKBAR_LEFT_DCLICK(win, func):
 
 def EVT_TASKBAR_RIGHT_DCLICK(win, func):
     win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DCLICK, func)
+
+
+## # wxGrid  *** THE OLD ONE ***
+## def EVT_GRID_SELECT_CELL(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_SELECT_CELL, fn)
+
+## def EVT_GRID_CREATE_CELL(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CREATE_CELL, fn)
+
+## def EVT_GRID_CHANGE_LABELS(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CHANGE_LABELS, fn)
+
+## def EVT_GRID_CHANGE_SEL_LABEL(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CHANGE_SEL_LABEL, fn)
+
+## def EVT_GRID_CELL_CHANGE(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CELL_CHANGE, fn)
+
+## def EVT_GRID_CELL_LCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CELL_LCLICK, fn)
+
+## def EVT_GRID_CELL_RCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_CELL_RCLICK, fn)
+
+## def EVT_GRID_LABEL_LCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_LABEL_LCLICK, fn)
+
+## def EVT_GRID_LABEL_RCLICK(win, fn):
+##     win.Connect(-1, -1, wxEVT_GRID_LABEL_RCLICK, fn)
 
 
 # wxSashWindow
@@ -621,10 +677,10 @@ def EVT_END_PROCESS(eh, id, func):
 
 # wxJoyStick
 def EVT_JOY_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_DOWN, func)
+    win.Connect(-1, -1, wxEVT_JOY_DOWN, func)
 
 def EVT_JOY_UP(win, func):
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_UP, func)
+    win.Connect(-1, -1, wxEVT_JOY_UP, func)
 
 def EVT_JOY_MOVE(win, func):
     win.Connect(-1, -1, wxEVT_JOY_MOVE, func)
@@ -633,15 +689,10 @@ def EVT_JOY_ZMOVE(win, func):
     win.Connect(-1, -1, wxEVT_JOY_ZMOVE, func)
 
 def EVT_JOYSTICK_EVENTS(win, func):
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_DOWN, func)
-    win.Connect(-1, -1, wxEVT_JOY_BUTTON_UP, func)
+    win.Connect(-1, -1, wxEVT_JOY_DOWN, func)
+    win.Connect(-1, -1, wxEVT_JOY_UP, func)
     win.Connect(-1, -1, wxEVT_JOY_MOVE, func)
     win.Connect(-1, -1, wxEVT_JOY_ZMOVE, func)
-
-
-def EVT_TOGGLEBUTTON(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, func)
-
 
 #----------------------------------------------------------------------
 
@@ -655,9 +706,17 @@ class wxTimer(wxPyTimer):
             self.SetOwner(evtHandler, id)
 
 #----------------------------------------------------------------------
+# Some wxWin methods can take "NULL" as parameters, but the shadow classes
+# expect an object with the SWIG pointer as a 'this' member.  This class
+# and instance fools the shadow into passing the NULL pointer.
 
-NULL = None  # For backwards compatibility only.  You should really be
-             # using None now.
+## NOTE:  This is not needed anymore as None can be passed instead and
+#         will be interpreted as NULL.
+
+class _NullObj:
+    this = 'NULL'       # SWIG converts this to (void*)0
+
+NULL = _NullObj()
 
 
 #----------------------------------------------------------------------
@@ -665,6 +724,10 @@ NULL = None  # For backwards compatibility only.  You should really be
 
 wxColor      = wxColour
 wxNamedColor = wxNamedColour
+
+# aliases so that C++ documentation applies:
+#wxDefaultPosition  = wxPyDefaultPosition
+#wxDefaultSize      = wxPyDefaultSize
 
 
 # backwards compatibility
@@ -694,16 +757,11 @@ wxPyDefaultSize     = wxDefaultSize
 #
 
 def wxPyTypeCast(obj, typeStr):
-    if obj is None:
-        return None
-    theClass = globals()[typeStr+"Ptr"]
-    typeStr = __wxPyPtrTypeMap.get(typeStr, typeStr)
     if hasattr(obj, "this"):
-        if obj.__class__ is theClass:   # if already the right type then just return it
-            return obj
         newPtr = ptrcast(obj.this, typeStr+"_p")
     else:
         newPtr = ptrcast(obj, typeStr+"_p")
+    theClass = globals()[typeStr+"Ptr"]
     theObj = theClass(newPtr)
     if hasattr(obj, "this"):
         theObj.thisown = obj.thisown
@@ -711,16 +769,16 @@ def wxPyTypeCast(obj, typeStr):
 
 
 #----------------------------------------------------------------------
-#----------------------------------------------------------------------
 
 class wxPyOnDemandOutputWindow:
     def __init__(self, title = "wxPython: stdout/stderr"):
         self.frame  = None
         self.title  = title
-        self.parent = None
+
 
     def SetParent(self, parent):
         self.parent = parent
+
 
     def OnCloseWindow(self, event):
         if self.frame != None:
@@ -728,16 +786,11 @@ class wxPyOnDemandOutputWindow:
         self.frame = None
         self.text  = None
 
-    # These methods provide the file-like output behaviour.
-    def write(self, str):
-        if not wxThread_IsMain():
-            # Aquire the GUI mutex before making GUI calls.  Mutex is released
-            # when locker is deleted at the end of this function.
-            locker = wxMutexGuiLocker()
 
+    # this provides the file-like behaviour
+    def write(self, str):
         if not self.frame:
-            self.frame = wxFrame(self.parent, -1, self.title,
-                                 style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
+            self.frame = wxFrame(self.parent, -1, self.title)
             self.text  = wxTextCtrl(self.frame, -1, "",
                                     style = wxTE_MULTILINE|wxTE_READONLY)
             self.frame.SetSize(wxSize(450, 300))
@@ -745,11 +798,13 @@ class wxPyOnDemandOutputWindow:
             EVT_CLOSE(self.frame, self.OnCloseWindow)
         self.text.AppendText(str)
 
+
     def close(self):
         if self.frame != None:
-            if not wxThread_IsMain():
-                locker = wxMutexGuiLocker()
-            self.frame.Close()
+            self.frame.Destroy()
+        self.frame = None
+        self.text  = None
+
 
 
 _defRedirect = (wxPlatform == '__WXMSW__')
@@ -782,6 +837,7 @@ class wxApp(wxPyApp):
     def SetTopWindow(self, frame):
         if self.stdioWin:
             self.stdioWin.SetParent(frame)
+            sys.stderr = sys.stdout = self.stdioWin
         wxPyApp.SetTopWindow(self, frame)
 
 
@@ -795,18 +851,18 @@ class wxApp(wxPyApp):
             sys.stdout = sys.stderr = open(filename, 'a')
         else:
             self.stdioWin = self.outputWindowClass() # wxPyOnDemandOutputWindow
-            sys.stdout = sys.stderr = self.stdioWin
 
 
     def RestoreStdio(self):
         sys.stdout, sys.stderr = self.saveStdio
-
+        if self.stdioWin != None:
+            self.stdioWin.close()
 
 #----------------------------------------------------------------------------
 
 class wxPySimpleApp(wxApp):
-    def __init__(self, flag=0):
-        wxApp.__init__(self, flag)
+    def __init__(self):
+        wxApp.__init__(self, 0)
     def OnInit(self):
         return true
 
@@ -838,6 +894,7 @@ class __wxPyCleanup:
         self.cleanup()
 
 __cleanMeUp = __wxPyCleanup()
+#----------------------------------------------------------------------------
 
-#----------------------------------------------------------------------------
-#----------------------------------------------------------------------------
+
+

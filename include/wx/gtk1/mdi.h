@@ -59,15 +59,14 @@ public:
         (void)Create(parent, id, title, pos, size, style, name);
     }
 
-    ~wxMDIParentFrame();
+    ~wxMDIParentFrame(void);
     bool Create( wxWindow *parent,
-                 wxWindowID id,
-                 const wxString& title,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
-                 long style = wxDEFAULT_FRAME_STYLE | wxVSCROLL | wxHSCROLL,
-                 const wxString& name = wxFrameNameStr );
+       wxWindowID id, const wxString& title,
+       const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+       long style = wxDEFAULT_FRAME_STYLE | wxVSCROLL | wxHSCROLL,
+       const wxString& name = wxFrameNameStr );
 
+    void GetClientSize(int *width, int *height) const;
     wxMDIChildFrame *GetActiveChild() const;
 
     wxMDIClientWindow *GetClientWindow() const;
@@ -90,8 +89,6 @@ public:
 protected:
     void Init();
 
-    virtual void DoGetClientSize(int *width, int *height) const;
-
 private:
     friend class wxMDIChildFrame;
 
@@ -107,25 +104,20 @@ class wxMDIChildFrame: public wxFrame
 public:
     wxMDIChildFrame();
     wxMDIChildFrame( wxMDIParentFrame *parent,
-                     wxWindowID id,
-                     const wxString& title,
-                     const wxPoint& pos = wxDefaultPosition,
-                     const wxSize& size = wxDefaultSize,
-                     long style = wxDEFAULT_FRAME_STYLE,
-                     const wxString& name = wxFrameNameStr );
-
-    virtual ~wxMDIChildFrame();
+      wxWindowID id, const wxString& title,
+      const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+      long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr );
+    ~wxMDIChildFrame();
     bool Create( wxMDIParentFrame *parent,
-                 wxWindowID id,
-                 const wxString& title,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
-                 long style = wxDEFAULT_FRAME_STYLE,
-                 const wxString& name = wxFrameNameStr );
+      wxWindowID id, const wxString& title,
+      const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+      long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr );
 
     virtual void SetMenuBar( wxMenuBar *menu_bar );
     virtual wxMenuBar *GetMenuBar() const;
 
+    wxSize GetClientSize() const { return wxFrame::GetClientSize(); }
+    virtual void GetClientSize( int *width, int *height ) const;
     virtual void AddChild( wxWindowBase *child );
 
     virtual void Activate();
@@ -150,10 +142,8 @@ public:
 
 #if wxUSE_TOOLBAR
     // no toolbar bars
-    virtual wxToolBar* CreateToolBar( long WXUNUSED(style),
-                                       wxWindowID WXUNUSED(id),
-                                       const wxString& WXUNUSED(name) )
-        { return (wxToolBar*)NULL; }
+    virtual wxToolBar* CreateToolBar( long WXUNUSED(style), wxWindowID WXUNUSED(id),
+        const wxString& WXUNUSED(name) ) { return (wxToolBar*)NULL; }
     virtual wxToolBar *GetToolBar() const { return (wxToolBar*)NULL; }
 #endif
 
@@ -178,9 +168,6 @@ public:
     wxMenuBar         *m_menuBar;
     GtkNotebookPage   *m_page;
     bool               m_justInserted;
-
-protected:
-    virtual void DoGetClientSize( int *width, int *height ) const;
 
 private:
     DECLARE_EVENT_TABLE()

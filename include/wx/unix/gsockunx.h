@@ -26,6 +26,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#if !defined(__cplusplus)
+typedef int bool;
+#endif
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -43,11 +47,11 @@ struct _GSocket
   GAddress *m_peer;
   GSocketError m_error;
 
-  int m_non_blocking;
-  int m_server;
-  int m_stream;
-  int m_oriented;
-  int m_establishing;
+  bool m_non_blocking;
+  bool m_server;
+  bool m_stream;
+  bool m_oriented;
+  bool m_establishing;
   unsigned long m_timeout;
 
   /* Callbacks */
@@ -81,7 +85,7 @@ int _GSocket_Send_Dgram(GSocket *socket, const char *buffer, int size);
 
 /* Callbacks */
 
-int  _GSocket_GUI_Init(GSocket *socket);
+bool _GSocket_GUI_Init(GSocket *socket);
 void _GSocket_GUI_Destroy(GSocket *socket);
 
 void _GSocket_Enable_Events(GSocket *socket);

@@ -24,7 +24,6 @@ public:
 
     void OnMenuRestore(wxCommandEvent&);
     void OnMenuExit(wxCommandEvent&);
-    void OnMenuSetNewIcon(wxCommandEvent&);
 
 DECLARE_EVENT_TABLE()
 };

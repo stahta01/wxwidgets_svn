@@ -258,7 +258,7 @@ void yyerror(char *s)
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
 int
-PROIO_yyparse()
+yyparse()
 {
     register int yym, yyn, yystate;
 #if YYDEBUG

@@ -36,9 +36,6 @@
 
 #ifdef __WIN32__
     #if !defined(__GNUWIN32__) || wxUSE_NORLANDER_HEADERS
-        #if wxCHECK_W32API_VERSION( 1, 0 )
-            #include <windows.h>
-        #endif
         #include <shlobj.h>            // for DROPFILES structure
     #endif
 #else
@@ -64,7 +61,11 @@ class wxIDropTarget : public IDropTarget
 {
 public:
     wxIDropTarget(wxDropTarget *p);
-    virtual ~wxIDropTarget();
+    // suppress gcc warning
+#ifdef __GNUG__
+    virtual
+#endif
+    ~wxIDropTarget();
 
     // accessors for wxDropTarget
     void SetHwnd(HWND hwnd) { m_hwnd = hwnd; }
@@ -308,7 +309,7 @@ bool wxDropTarget::Register(WXHWND hwnd)
 {
     HRESULT hr = ::CoLockObjectExternal(m_pIDropTarget, TRUE, FALSE);
     if ( FAILED(hr) ) {
-        wxLogApiError(wxT("CoLockObjectExternal"), hr);
+        wxLogApiError(_T("CoLockObjectExternal"), hr);
         return FALSE;
     }
 
@@ -316,7 +317,7 @@ bool wxDropTarget::Register(WXHWND hwnd)
     if ( FAILED(hr) ) {
         ::CoLockObjectExternal(m_pIDropTarget, FALSE, FALSE);
 
-        wxLogApiError(wxT("RegisterDragDrop"), hr);
+        wxLogApiError(_T("RegisterDragDrop"), hr);
         return FALSE;
     }
 
@@ -331,7 +332,7 @@ void wxDropTarget::Revoke(WXHWND hwnd)
     HRESULT hr = ::RevokeDragDrop((HWND) hwnd);
 
     if ( FAILED(hr) ) {
-        wxLogApiError(wxT("RevokeDragDrop"), hr);
+        wxLogApiError(_T("RevokeDragDrop"), hr);
     }
 
     ::CoLockObjectExternal(m_pIDropTarget, FALSE, TRUE);
@@ -424,8 +425,7 @@ wxDataFormat wxDropTarget::GetSupportedFormat(IDataObject *pIDataSource) const
 
     // get the list of supported formats
     size_t nFormats = m_dataObject->GetFormatCount(wxDataObject::Set);
-    wxDataFormat format;
-	wxDataFormat *formats;
+    wxDataFormat format, *formats;
     formats = nFormats == 1 ? &format :  new wxDataFormat[nFormats];
 
     m_dataObject->GetAllFormats(formats, wxDataObject::Set);

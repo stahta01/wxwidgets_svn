@@ -76,9 +76,6 @@ bool wxButton::Create(wxWindow *parent,
 
     long msStyle = WS_VISIBLE | WS_TABSTOP | WS_CHILD /* | WS_CLIPSIBLINGS */ ;
 
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
-
 #ifdef __WIN32__
     if(m_windowStyle & wxBU_LEFT)
         msStyle |= BS_LEFT;
@@ -258,7 +255,7 @@ void wxButton::Command(wxCommandEvent & event)
 // event/message handlers
 // ----------------------------------------------------------------------------
 
-bool wxButton::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
+bool wxButton::MSWCommand(WXUINT param, WXWORD id)
 {
     bool processed = FALSE;
     switch ( param )

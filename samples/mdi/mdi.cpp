@@ -31,7 +31,7 @@
 
 #include <wx/toolbar.h>
 
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
     #include "mondrian.xpm"
     #include "bitmaps/new.xpm"
     #include "bitmaps/open.xpm"
@@ -83,6 +83,8 @@ BEGIN_EVENT_TABLE(MyChild, wxMDIChildFrame)
     EVT_MENU(MDI_CHANGE_TITLE, MyChild::OnChangeTitle)
     EVT_MENU(MDI_CHANGE_POSITION, MyChild::OnChangePosition)
     EVT_MENU(MDI_CHANGE_SIZE, MyChild::OnChangeSize)
+
+    EVT_UPDATE_UI(MDI_REFRESH, MyChild::OnUpdateRefresh)
 
     EVT_SIZE(MyChild::OnSize)
     EVT_MOVE(MyChild::OnMove)
@@ -163,8 +165,7 @@ MyFrame::MyFrame(wxWindow *parent,
                  const wxPoint& pos,
                  const wxSize& size,
                  const long style)
-       : wxMDIParentFrame(parent, id, title, pos, size,
-                          style | wxNO_FULL_REPAINT_ON_RESIZE)
+       : wxMDIParentFrame(parent, id, title, pos, size, style)
 {
     textWindow = new wxTextCtrl(this, -1, "A help window",
                                 wxDefaultPosition, wxDefaultSize,
@@ -346,9 +347,7 @@ void MyFrame::InitToolBar(wxToolBar* toolBar)
 // Define a constructor for my canvas
 MyCanvas::MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size)
         : wxScrolledWindow(parent, -1, pos, size,
-                           wxSUNKEN_BORDER |
-                           wxNO_FULL_REPAINT_ON_RESIZE |
-                           wxVSCROLL | wxHSCROLL)
+                           wxSUNKEN_BORDER|wxVSCROLL|wxHSCROLL)
 {
     SetBackgroundColour(wxColour("WHITE"));
 
@@ -411,14 +410,10 @@ void MyCanvas::OnEvent(wxMouseEvent& event)
 MyChild::MyChild(wxMDIParentFrame *parent, const wxString& title,
                  const wxPoint& pos, const wxSize& size,
                  const long style)
-       : wxMDIChildFrame(parent, -1, title, pos, size,
-                         style | wxNO_FULL_REPAINT_ON_RESIZE)
+       : wxMDIChildFrame(parent, -1, title, pos, size, style)
 {
     canvas = (MyCanvas *) NULL;
     my_children.Append(this);
-
-    // this should work for MDI frames as well as for normal ones
-    SetSizeHints(100, 100);
 }
 
 MyChild::~MyChild()
@@ -429,6 +424,11 @@ MyChild::~MyChild()
 void MyChild::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
     Close(TRUE);
+}
+
+void MyChild::OnUpdateRefresh(wxUpdateUIEvent& event)
+{
+    event.Enable( canvas && canvas->IsDirty() );
 }
 
 void MyChild::OnRefresh(wxCommandEvent& WXUNUSED(event))

@@ -9,16 +9,6 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#define USE_GENERIC_TREECTRL 0
-
-#if USE_GENERIC_TREECTRL
-#include "wx/generic/treectlg.h"
-#ifndef wxTreeCtrl
-#define wxTreeCtrl wxGenericTreeCtrl
-#define sm_classwxTreeCtrl sm_classwxGenericTreeCtrl
-#endif
-#endif
-
 // Define a new application type
 class MyApp : public wxApp
 {
@@ -70,10 +60,7 @@ public:
     void OnBeginLabelEdit(wxTreeEvent& event);
     void OnEndLabelEdit(wxTreeEvent& event);
     void OnDeleteItem(wxTreeEvent& event);
-    void OnRMouseUp(wxMouseEvent& event);
     void OnGetInfo(wxTreeEvent& event);
-    void OnTreeRMouseClick(wxTreeEvent& event);
-    void OnItemRightClick(wxTreeEvent& event);
     void OnSetInfo(wxTreeEvent& event);
     void OnItemExpanded(wxTreeEvent& event);
     void OnItemExpanding(wxTreeEvent& event);
@@ -96,8 +83,6 @@ public:
     void DoEnsureVisible() { EnsureVisible(m_lastItem); }
 
     void DoToggleIcon(const wxTreeItemId& item);
-
-    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
 
 protected:
     virtual int OnCompareItems(const wxTreeItemId& i1, const wxTreeItemId& i2);

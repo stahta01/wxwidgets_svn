@@ -193,7 +193,7 @@ wxString wxFileSelectorEx(const wxChar *title,
 
 wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
         const wxString& defaultDir, const wxString& defaultFileName, const wxString& wildCard,
-        long style, const wxPoint& WXUNUSED(pos))
+        long style, const wxPoint& pos)
 {
     m_message = message;
     m_dialogStyle = style;
@@ -329,8 +329,8 @@ int wxFileDialog::ShowModal()
 
     //== Execute FileDialog >>=================================================
 
-    bool success = (m_dialogStyle & wxSAVE ? GetSaveFileName(&of)
-                                           : GetOpenFileName(&of)) != 0;
+    bool success = (m_dialogStyle & wxSAVE) ? (GetSaveFileName(&of) != 0)
+                                            : (GetOpenFileName(&of) != 0);
 
     DWORD errCode = CommDlgExtendedError();
 

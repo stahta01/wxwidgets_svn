@@ -260,7 +260,6 @@ public:
                    ,unsigned long lId
                    ,void*         pCtlData = NULL
                    ,void*         pPresParams = NULL
-                   ,WXDWORD       dwExStyle = 0L
                   );
     virtual bool OS2Command( WXUINT uParam
                             ,WXWORD nId
@@ -464,13 +463,12 @@ protected:
     // the old window proc (we subclass all windows)
     WXFARPROC                       m_fnOldWndProc;
 
-    // additional (OS2 specific) flags
+    // additional (MSW specific) flags
     bool                            m_bUseCtl3D:1; // Using CTL3D for this control
     bool                            m_bBackgroundTransparent:1;
     bool                            m_bMouseInWindow:1;
     bool                            m_bDoubleClickAllowed:1;
     bool                            m_bWinCaptured:1;
-    WXDWORD                         m_dwExStyle;
 
     // the size of one page for scrolling
     int                             m_nXThumbSize;
@@ -554,9 +552,6 @@ private:
     DECLARE_NO_COPY_CLASS(wxWindow);
     DECLARE_EVENT_TABLE()
 private:
-    HWND                            m_hWndScrollBarHorz;
-    HWND                            m_hWndScrollBarVert;
-
     // Virtual function hiding supression
     inline virtual bool Reparent(wxWindowBase* pNewParent)
     { return(wxWindowBase::Reparent(pNewParent));};

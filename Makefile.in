@@ -42,7 +42,7 @@ VP8 = @top_srcdir@/src/jpeg
 VP9 = @top_srcdir@/src/tiff
 VP10 = @top_srcdir@/src/zlib
 VP11 = @top_srcdir@/src/iodbc
-VP12 = @top_srcdir@/src/msw/ole
+VP12 = @top_srcdir@/src/ole
 
 FTVP01 = @top_srcdir@/src/freetype/unix
 FTVP02 = @top_srcdir@/src/freetype/autohint
@@ -153,7 +153,7 @@ INTLDIR  = $(WXDIR)/locale
 ########################## Archive name ###############################
 
 # append a version suffix x.y.z to all file names
-VER_SUFFIX=$(WX_MAJOR_VERSION_NUMBER).$(WX_MINOR_VERSION_NUMBER).$(WX_RELEASE_NUMBER)$(EXTRA_VER)
+VER_SUFFIX=$(WX_MAJOR_VERSION_NUMBER).$(WX_MINOR_VERSION_NUMBER).$(WX_RELEASE_NUMBER)
 WXARCHIVE = @DISTDIR@-$(VER_SUFFIX).tar.gz
 WXGLARCHIVE = @DISTDIR@-gl-$(VER_SUFFIX).tar.gz
 WXSAMPLES = wx$(TOOLKIT)-samples-$(VER_SUFFIX).tar.gz
@@ -337,15 +337,7 @@ IODBCOBJS = \
 		misc.o \
 		prepare.o \
 		result.o
-
-OLEOBJS = \
-		automtn.o \
-		dataobj.o \
-		dropsrc.o \
-		droptgt.o \
-		oleutils.o \
-		uuid.o
-
+        
 ############################## Rules ##################################
 
 BURNT_LIBRARY_NAME = @BURNT_LIBRARY_NAME@
@@ -370,12 +362,6 @@ all: @WX_ALL@
 @WX_LIBRARY_NAME_SHARED_GL@:  glcanvas.o
 	@$(INSTALL) -d ./lib
 	$(SHARED_LD) ./lib/$@ $(BURNT_LIBRARY_NAME_GL) glcanvas.o $(EXTRALIBS)
-
-./lib/lib@WX_LIBRARY@-$(WX_MAJOR_VERSION_NUMBER).$(WX_MINOR_VERSION_NUMBER).r: ./lib/lib@WX_LIBRARY@-$(WX_MAJOR_VERSION_NUMBER).$(WX_MINOR_VERSION_NUMBER).rsrc
-	$(DEREZ) $^ $(DEREZFLAGS) > $@
-
-./lib/lib@WX_LIBRARY@-$(WX_MAJOR_VERSION_NUMBER).$(WX_MINOR_VERSION_NUMBER).rsrc: $(MACRESOURCES)
-	$(REZ) $(REZFLAGS) $^ -o $@
 
 CREATE_LINKS: @WX_LIBRARY_NAME_SHARED@
 	@$(RM) ./lib/@WX_LIBRARY_LINK1@
@@ -729,7 +715,7 @@ DEMOS_DIST: ALL_GUI_DIST
 	cp $(DEMODIR)/configure.in $(DISTDIR)/demos
 
 	cp -R $(DEMODIR)/dbbrowse $(DISTDIR)/demos/dbbrowse
-
+    
 	mkdir $(DISTDIR)/demos/bombs
 	cp $(DEMODIR)/bombs/Makefile.in $(DISTDIR)/demos/bombs
 	cp $(DEMODIR)/bombs/makefile.unx $(DISTDIR)/demos/bombs
@@ -946,11 +932,10 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/image/horse.* $(DISTDIR)/samples/image
 	cp $(SAMPDIR)/image/smile.xbm $(DISTDIR)/samples/image
 	cp $(SAMPDIR)/image/smile.xpm $(DISTDIR)/samples/image
-
+    
 	mkdir $(DISTDIR)/samples/internat
 	mkdir $(DISTDIR)/samples/internat/de
 	mkdir $(DISTDIR)/samples/internat/fr
-	mkdir $(DISTDIR)/samples/internat/ru
 	cp $(SAMPDIR)/internat/Makefile.in $(DISTDIR)/samples/internat
 	cp $(SAMPDIR)/internat/makefile.unx $(DISTDIR)/samples/internat
 	cp $(SAMPDIR)/internat/*.cpp $(DISTDIR)/samples/internat
@@ -959,10 +944,10 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/internat/*.po $(DISTDIR)/samples/internat
 	cp $(SAMPDIR)/internat/fr/*.mo $(DISTDIR)/samples/internat/fr
 	cp $(SAMPDIR)/internat/de/*.mo $(DISTDIR)/samples/internat/de
-	cp $(SAMPDIR)/internat/ru/*.mo $(DISTDIR)/samples/internat/ru
+	cp $(SAMPDIR)/internat/ru/*.mo $(DISTDIR)/samples/internat/de
 	cp $(SAMPDIR)/internat/fr/*.po $(DISTDIR)/samples/internat/fr
 	cp $(SAMPDIR)/internat/de/*.po $(DISTDIR)/samples/internat/de
-	cp $(SAMPDIR)/internat/ru/*.po $(DISTDIR)/samples/internat/ru
+	cp $(SAMPDIR)/internat/ru/*.po $(DISTDIR)/samples/internat/de
 
 	mkdir $(DISTDIR)/samples/ipc
 	cp $(SAMPDIR)/ipc/Makefile.in $(DISTDIR)/samples/ipc
@@ -1094,7 +1079,7 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/rotate/makefile.unx $(DISTDIR)/samples/rotate
 	cp $(SAMPDIR)/rotate/*.cpp $(DISTDIR)/samples/rotate
 	cp $(SAMPDIR)/rotate/*.bmp $(DISTDIR)/samples/rotate
-
+    
 	mkdir $(DISTDIR)/samples/richedit
 	cp $(SAMPDIR)/richedit/Makefile.in $(DISTDIR)/samples/richedit
 	cp $(SAMPDIR)/richedit/makefile.unx $(DISTDIR)/samples/richedit
@@ -1103,35 +1088,35 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/richedit/*.xpm $(DISTDIR)/samples/richedit
 	cp $(SAMPDIR)/richedit/README $(DISTDIR)/samples/richedit
 	cp $(SAMPDIR)/richedit/TODO $(DISTDIR)/samples/richedit
-
+    
 	mkdir $(DISTDIR)/samples/proplist
 	cp $(SAMPDIR)/proplist/Makefile.in $(DISTDIR)/samples/proplist
 	cp $(SAMPDIR)/proplist/makefile.unx $(DISTDIR)/samples/proplist
 	cp $(SAMPDIR)/proplist/*.cpp $(DISTDIR)/samples/proplist
 	cp $(SAMPDIR)/proplist/*.h $(DISTDIR)/samples/proplist
-
+    
 	mkdir $(DISTDIR)/samples/propsize
 	cp $(SAMPDIR)/propsize/Makefile.in $(DISTDIR)/samples/propsize
 	cp $(SAMPDIR)/propsize/makefile.unx $(DISTDIR)/samples/propsize
 	cp $(SAMPDIR)/propsize/*.cpp $(DISTDIR)/samples/propsize
 	cp $(SAMPDIR)/propsize/*.xpm $(DISTDIR)/samples/propsize
-
+    
 	mkdir $(DISTDIR)/samples/sashtest
 	cp $(SAMPDIR)/sashtest/Makefile.in $(DISTDIR)/samples/sashtest
 	cp $(SAMPDIR)/sashtest/makefile.unx $(DISTDIR)/samples/sashtest
 	cp $(SAMPDIR)/sashtest/*.cpp $(DISTDIR)/samples/sashtest
 	cp $(SAMPDIR)/sashtest/*.h $(DISTDIR)/samples/sashtest
-
+    
 	mkdir $(DISTDIR)/samples/scroll
 	cp $(SAMPDIR)/scroll/Makefile.in $(DISTDIR)/samples/scroll
 	cp $(SAMPDIR)/scroll/makefile.unx $(DISTDIR)/samples/scroll
 	cp $(SAMPDIR)/scroll/*.cpp $(DISTDIR)/samples/scroll
-
+    
 	mkdir $(DISTDIR)/samples/scrollsub
 	cp $(SAMPDIR)/scrollsub/Makefile.in $(DISTDIR)/samples/scrollsub
 	cp $(SAMPDIR)/scrollsub/makefile.unx $(DISTDIR)/samples/scrollsub
 	cp $(SAMPDIR)/scrollsub/*.cpp $(DISTDIR)/samples/scrollsub
-
+    
 	mkdir $(DISTDIR)/samples/sockets
 	cp $(SAMPDIR)/sockets/Makefile.in $(DISTDIR)/samples/sockets
 	cp $(SAMPDIR)/sockets/makefile.unx $(DISTDIR)/samples/sockets
@@ -1142,7 +1127,7 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/splitter/Makefile.in $(DISTDIR)/samples/splitter
 	cp $(SAMPDIR)/splitter/makefile.unx $(DISTDIR)/samples/splitter
 	cp $(SAMPDIR)/splitter/*.cpp $(DISTDIR)/samples/splitter
-
+    
 	mkdir $(DISTDIR)/samples/statbar
 	cp $(SAMPDIR)/statbar/Makefile.in $(DISTDIR)/samples/statbar
 	cp $(SAMPDIR)/statbar/makefile.unx $(DISTDIR)/samples/statbar
@@ -1154,12 +1139,12 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/text/makefile.unx $(DISTDIR)/samples/text
 	cp $(SAMPDIR)/text/*.cpp $(DISTDIR)/samples/text
 	cp $(SAMPDIR)/text/*.xpm $(DISTDIR)/samples/text
-
+    
 	mkdir $(DISTDIR)/samples/thread
 	cp $(SAMPDIR)/thread/Makefile.in $(DISTDIR)/samples/thread
 	cp $(SAMPDIR)/thread/makefile.unx $(DISTDIR)/samples/thread
 	cp $(SAMPDIR)/thread/*.cpp $(DISTDIR)/samples/thread
-
+    
 	mkdir $(DISTDIR)/samples/toolbar
 	cp $(SAMPDIR)/toolbar/Makefile.in $(DISTDIR)/samples/toolbar
 	cp $(SAMPDIR)/toolbar/makefile.unx $(DISTDIR)/samples/toolbar
@@ -1167,7 +1152,7 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/toolbar/*.xpm $(DISTDIR)/samples/toolbar
 	mkdir $(DISTDIR)/samples/toolbar/bitmaps
 	cp $(SAMPDIR)/toolbar/bitmaps/*.xpm $(DISTDIR)/samples/toolbar/bitmaps
-
+    
 	mkdir $(DISTDIR)/samples/treectrl
 	cp $(SAMPDIR)/treectrl/Makefile.in $(DISTDIR)/samples/treectrl
 	cp $(SAMPDIR)/treectrl/makefile.unx $(DISTDIR)/samples/treectrl
@@ -1176,33 +1161,33 @@ SAMPLES_DIST: ALL_GUI_DIST
 	cp $(SAMPDIR)/treectrl/*.xpm $(DISTDIR)/samples/treectrl
 	mkdir $(DISTDIR)/samples/treectrl/bitmaps
 	cp $(SAMPDIR)/treectrl/bitmaps/*.bmp $(DISTDIR)/samples/treectrl/bitmaps
-
+    
 	mkdir $(DISTDIR)/samples/treelay
 	cp $(SAMPDIR)/treelay/Makefile.in $(DISTDIR)/samples/treelay
 	cp $(SAMPDIR)/treelay/makefile.unx $(DISTDIR)/samples/treelay
 	cp $(SAMPDIR)/treelay/*.cpp $(DISTDIR)/samples/treelay
 	cp $(SAMPDIR)/treelay/*.h $(DISTDIR)/samples/treelay
-
+    
 	mkdir $(DISTDIR)/samples/typetest
 	cp $(SAMPDIR)/typetest/Makefile.in $(DISTDIR)/samples/typetest
 	cp $(SAMPDIR)/typetest/makefile.unx $(DISTDIR)/samples/typetest
 	cp $(SAMPDIR)/typetest/*.cpp $(DISTDIR)/samples/typetest
 	cp $(SAMPDIR)/typetest/*.h $(DISTDIR)/samples/typetest
 	cp $(SAMPDIR)/typetest/*.xpm $(DISTDIR)/samples/typetest
-
+    
 	mkdir $(DISTDIR)/samples/validate
 	cp $(SAMPDIR)/validate/Makefile.in $(DISTDIR)/samples/validate
 	cp $(SAMPDIR)/validate/makefile.unx $(DISTDIR)/samples/validate
 	cp $(SAMPDIR)/validate/*.cpp $(DISTDIR)/samples/validate
 	cp $(SAMPDIR)/validate/*.h $(DISTDIR)/samples/validate
 	cp $(SAMPDIR)/validate/*.xpm $(DISTDIR)/samples/validate
-
+    
 	mkdir $(DISTDIR)/samples/wizard
 	cp $(SAMPDIR)/wizard/Makefile.in $(DISTDIR)/samples/wizard
 	cp $(SAMPDIR)/wizard/makefile.unx $(DISTDIR)/samples/wizard
 	cp $(SAMPDIR)/wizard/*.cpp $(DISTDIR)/samples/wizard
 	cp $(SAMPDIR)/wizard/*.xpm $(DISTDIR)/samples/wizard
-
+    
 UTILS_DIST: ALL_GUI_DIST
 	mkdir $(DISTDIR)/utils
 	cp $(UTILSDIR)/Makefile.in $(DISTDIR)/utils
@@ -1349,18 +1334,21 @@ bzip-dist-only:
 	tar ch wxDemos-${VER_SUFFIX} | bzip2 -f9 > ../../$(WXDEMOS_BZIP); \
 	mv wxDemos-${VER_SUFFIX} demos; \
 	fi
+
 bzip-dist: @GUIDIST@
 	cp $(WXDIR)/src/files.lst $(DISTDIR)/src/
 	@echo "*** Creating wxWindows distribution in $(DISTDIR)..."
 	cd _dist_dir; tar ch @DISTDIR@ | bzip2 -f9 > $(WXARCHIVE_BZIP); mv $(WXARCHIVE_BZIP) ..
 	@if test "$(USE_GUI)" = 1; then \
 	cd $(DISTDIR); \
-	mv samples wxSamples; \
-	tar ch wxSamples | bzip2 -f9 > ../../$(WXSAMPLES_BZIP); \
-	mv wxSamples samples; \
-	mv demos wxDemos; \
-	tar ch wxDemos | bzip2 -f9 > ../../$(WXDEMOS_BZIP); \
-	mv wxDemos demos; \
+	mv samples wxSamples-${VER_SUFFIX}; \
+	echo "*** Creating wxSamples archive..."; \
+	tar ch wxSamples-${VER_SUFFIX} | bzip2 -f9 > ../../$(WXSAMPLES_BZIP); \
+	mv wxSamples-${VER_SUFFIX} samples; \
+	mv demos wxDemos-${VER_SUFFIX}; \
+	echo "*** Creating wxDemos archive..."; \
+	tar ch wxDemos-${VER_SUFFIX} | bzip2 -f9 > ../../$(WXDEMOS_BZIP); \
+	mv wxDemos-${VER_SUFFIX} demos; \
 	fi
 
 debian-dist: @GUIDIST@ MANUAL_DIST PYTHON_DIST
@@ -1383,18 +1371,3 @@ clean:
 	$(RM) ./lib/lib*
 
 cleanall: clean
-
-
-RPMTOP=_dist_dir/_rpm_top
-
-rpm: dist
-	@echo "*** Building RPMs ***"
-	-mkdir $(RPMTOP)
-	-mkdir $(RPMTOP)/SOURCES
-	-mkdir $(RPMTOP)/SPECS
-	-mkdir $(RPMTOP)/BUILD
-	-mkdir $(RPMTOP)/RPMS
-	-mkdir $(RPMTOP)/SRPMS
-	cp -f $(WXARCHIVE) $(RPMTOP)/SOURCES
-	rpm -ba --define "_topdir `pwd`/$(RPMTOP)" $(WXDIR)/wx$(TOOLKIT).spec
-	mv -f `find $(RPMTOP) -name "wx$(TARGET)*.rpm"` .

@@ -71,7 +71,6 @@ public:
 	inline int GetNumberOfRowsOrCols() const { return m_noRowsOrCols; }
 	inline void SetNumberOfRowsOrCols(int n) { m_noRowsOrCols = n; }
 
-	void OnRadioButton( wxCommandEvent& event ) ;
 protected:
 	wxRadioButton		*m_radioButtonCycle;
   	
@@ -86,7 +85,6 @@ protected:
 	int GetNumHor() const;
 	int GetNumVer() const;
 
-    DECLARE_EVENT_TABLE()
 };
 
 #endif

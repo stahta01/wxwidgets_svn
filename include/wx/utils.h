@@ -40,7 +40,6 @@ class WXDLLEXPORT wxProcess;
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxWindow;
 class WXDLLEXPORT wxWindowList;
-class WXDLLEXPORT wxPoint;
 
 // FIXME should use wxStricmp() instead
 #if defined(__GNUWIN32__)
@@ -59,7 +58,7 @@ class WXDLLEXPORT wxPoint;
 // String functions (deprecated, use wxString)
 // ----------------------------------------------------------------------------
 
-// Useful buffer (FIXME VZ: To be removed!!!)
+// Useful buffer (FIXME VZ: yeah, that is. To be removed!)
 WXDLLEXPORT_DATA(extern wxChar*) wxBuffer;
 
 // Make a copy of this string using 'new'
@@ -180,22 +179,8 @@ enum wxSignal
     // further signals are different in meaning between different Unix systems
 };
 
-enum wxKillError
-{
-    wxKILL_OK,              // no error
-    wxKILL_BAD_SIGNAL,      // no such signal
-    wxKILL_ACCESS_DENIED,   // permission denied
-    wxKILL_NO_PROCESS,      // no such process
-    wxKILL_ERROR            // another, unspecified error
-};
-
-// send the given signal to the process (only NONE and KILL are supported under
-// Windows, all others mean TERM), return 0 if ok and -1 on error
-//
-// return detailed error in rc if not NULL
-WXDLLEXPORT int wxKill(long pid,
-                       wxSignal sig = wxSIGTERM,
-                       wxKillError *rc = NULL);
+// the argument is ignored under Windows - the process is always killed
+WXDLLEXPORT int wxKill(long pid, wxSignal sig = wxSIGTERM);
 
 // Execute a command in an interactive shell window (always synchronously)
 // If no command then just the shell
@@ -216,20 +201,6 @@ WXDLLEXPORT long wxGetFreeMemory();
 
 // should wxApp::OnFatalException() be called?
 WXDLLEXPORT bool wxHandleFatalExceptions(bool doit = TRUE);
-
-// ----------------------------------------------------------------------------
-// Environment variables
-// ----------------------------------------------------------------------------
-
-// returns TRUE if variable exists (value may be NULL if you just want to check
-// for this)
-WXDLLEXPORT bool wxGetEnv(const wxString& var, wxString *value);
-
-// set the env var name to the given value, return TRUE on success
-WXDLLEXPORT bool wxSetEnv(const wxString& var, const wxChar *value);
-
-// remove the env var from environment
-inline bool wxUnsetEnv(const wxString& var) { return wxSetEnv(var, NULL); }
 
 // ----------------------------------------------------------------------------
 // Network and username functions.
@@ -269,12 +240,6 @@ WXDLLEXPORT const wxMB2WXbuf wxGetUserHome(const wxString& user = wxEmptyString)
 WXDLLEXPORT wxChar* wxGetUserHome(const wxString& user = wxEmptyString);
 #endif
 
-#ifdef __WXMAC__
-WXDLLEXPORT wxString wxMacFindFolder(short 					vRefNum,
-								 OSType 				folderType,
-								 Boolean 				createFolder);
-#endif
-
 #if wxUSE_GUI // GUI only things from now on
 
 // ----------------------------------------------------------------------------
@@ -303,11 +268,6 @@ WXDLLEXPORT wxWindow* wxFindWindowByName(const wxString& name, wxWindow *parent 
 
 // Returns menu item id or -1 if none.
 WXDLLEXPORT int wxFindMenuItemId(wxFrame *frame, const wxString& menuString, const wxString& itemString);
-
-// Find the wxWindow at the given point. wxGenericFindWindowAtPoint
-// is always present but may be less reliable than a native version.
-WXDLLEXPORT wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt);
-WXDLLEXPORT wxWindow* wxFindWindowAtPoint(const wxPoint& pt);
 
 // ----------------------------------------------------------------------------
 // Message/event queue helpers
@@ -342,6 +302,11 @@ public:
 
 private:
     wxWindowList *m_winDisabled;
+
+    // not used any more but left here for binary compatibility
+#ifdef __WXMSW__
+    wxWindow *m_winTop;
+#endif // MSW
 };
 
 // ----------------------------------------------------------------------------

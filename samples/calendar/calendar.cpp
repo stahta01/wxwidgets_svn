@@ -178,7 +178,10 @@ bool MyApp::OnInit()
     MyFrame *frame = new MyFrame("Calendar wxWindows sample",
                                  wxPoint(50, 50), wxSize(450, 340));
 
+    // Show it and tell the application that it's our main window
+    // @@@ what does it do exactly, in fact? is it necessary here?
     frame->Show(TRUE);
+    SetTopWindow(frame);
 
     // success: wxApp::OnRun() will be called which will enter the main message
     // loop and the application will run. If we returned FALSE here, the

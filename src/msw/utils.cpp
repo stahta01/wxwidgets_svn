@@ -38,7 +38,7 @@
 
 // In some mingws there is a missing extern "C" int the winsock header,
 // so we put it here just to be safe. Note that this must appear _before_
-// #include "wx/msw/private.h" which itself includes <windows.h>, as this
+// #include "wx/msw/private.h" which itself includes <windows.h>, as this 
 // one in turn includes <winsock.h> unless we define WIN32_LEAN_AND_MEAN.
 //
 #if defined(__WIN32__) && !defined(__TWIN32__) && ! (defined(__GNUWIN32__) && !defined(__MINGW32__))
@@ -423,7 +423,7 @@ const wxChar* wxGetHomeDir(wxString *pstr)
   return strDir.c_str();
 }
 
-wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
+wxChar *wxGetUserHome(const wxString& user)
 {
     // VZ: the old code here never worked for user != "" anyhow! Moreover, it
     //     returned sometimes a malloc()'d pointer, sometimes a pointer to a
@@ -436,14 +436,29 @@ wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
 bool wxDirExists(const wxString& dir)
 {
 #if defined(__WIN32__)
-    DWORD attribs = GetFileAttributes(dir);
-    return ((attribs != (DWORD)-1) && (attribs & FILE_ATTRIBUTE_DIRECTORY));
+    WIN32_FIND_DATA fileInfo;
 #else // Win16
     #ifdef __BORLANDC__
         struct ffblk fileInfo;
     #else
         struct find_t fileInfo;
     #endif
+#endif // Win32/16
+
+#if defined(__WIN32__)
+    HANDLE h = ::FindFirstFile(dir, &fileInfo);
+
+    if ( h == INVALID_HANDLE_VALUE )
+    {
+        wxLogLastError(wxT("FindFirstFile"));
+
+        return FALSE;
+    }
+
+    ::FindClose(h);
+
+    return (fileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+#else // Win16
     // In Borland findfirst has a different argument
     // ordering from _dos_findfirst. But _dos_findfirst
     // _should_ be ok in both MS and Borland... why not?
@@ -458,259 +473,14 @@ bool wxDirExists(const wxString& dir)
 }
 
 // ----------------------------------------------------------------------------
-// env vars
-// ----------------------------------------------------------------------------
-
-bool wxGetEnv(const wxString& var, wxString *value)
-{
-#ifdef __WIN16__
-    const wxChar* ret = wxGetenv(var);
-    if (ret)
-    {
-        *value = ret;
-        return TRUE;
-    }
-    else
-        return FALSE;
-#else
-    // first get the size of the buffer
-    DWORD dwRet = ::GetEnvironmentVariable(var, NULL, 0);
-    if ( !dwRet )
-    {
-        // this means that there is no such variable
-        return FALSE;
-    }
-
-    if ( value )
-    {
-        (void)::GetEnvironmentVariable(var, value->GetWriteBuf(dwRet), dwRet);
-        value->UngetWriteBuf();
-    }
-
-    return TRUE;
-#endif
-}
-
-bool wxSetEnv(const wxString& var, const wxChar *value)
-{
-    // some compilers have putenv() or _putenv() or _wputenv() but it's better
-    // to always use Win32 function directly instead of dealing with them
-#if defined(__WIN32__)
-    if ( !::SetEnvironmentVariable(var, value) )
-    {
-        wxLogLastError(_T("SetEnvironmentVariable"));
-
-        return FALSE;
-    }
-
-    return TRUE;
-#else // no way to set env vars
-    return FALSE;
-#endif
-}
-
-// ----------------------------------------------------------------------------
 // process management
 // ----------------------------------------------------------------------------
 
-#ifdef __WIN32__
-
-// structure used to pass parameters from wxKill() to wxEnumFindByPidProc()
-struct wxFindByPidParams
+int wxKill(long pid, int sig)
 {
-    wxFindByPidParams() { hwnd = 0; pid = 0; }
+    // TODO use SendMessage(WM_QUIT) and TerminateProcess() if needed
 
-    // the HWND used to return the result
-    HWND hwnd;
-
-    // the PID we're looking from
-    DWORD pid;
-};
-
-// wxKill helper: EnumWindows() callback which is used to find the first (top
-// level) window belonging to the given process
-BOOL CALLBACK wxEnumFindByPidProc(HWND hwnd, LPARAM lParam)
-{
-    DWORD pid;
-    (void)::GetWindowThreadProcessId(hwnd, &pid);
-
-    wxFindByPidParams *params = (wxFindByPidParams *)lParam;
-    if ( pid == params->pid )
-    {
-        // remember the window we found
-        params->hwnd = hwnd;
-
-        // return FALSE to stop the enumeration
-        return FALSE;
-    }
-
-    // continue enumeration
-    return TRUE;
-}
-
-#endif // __WIN32__
-
-int wxKill(long pid, wxSignal sig, wxKillError *krc)
-{
-#ifdef __WIN32__
-    // get the process handle to operate on
-    HANDLE hProcess = ::OpenProcess(SYNCHRONIZE |
-                                    PROCESS_TERMINATE |
-                                    PROCESS_QUERY_INFORMATION,
-                                    FALSE, // not inheritable
-                                    (DWORD)pid);
-    if ( hProcess == NULL )
-    {
-        if ( krc )
-        {
-            if ( ::GetLastError() == ERROR_ACCESS_DENIED )
-            {
-                *krc = wxKILL_ACCESS_DENIED;
-            }
-            else
-            {
-                *krc = wxKILL_NO_PROCESS;
-            }
-        }
-
-        return -1;
-    }
-
-    bool ok = TRUE;
-    switch ( sig )
-    {
-        case wxSIGKILL:
-            // kill the process forcefully returning -1 as error code
-            if ( !::TerminateProcess(hProcess, (UINT)-1) )
-            {
-                wxLogSysError(_("Failed to kill process %d"), pid);
-
-                if ( krc )
-                {
-                    // this is not supposed to happen if we could open the
-                    // process
-                    *krc = wxKILL_ERROR;
-                }
-
-                ok = FALSE;
-            }
-            break;
-
-        case wxSIGNONE:
-            // do nothing, we just want to test for process existence
-            break;
-
-        default:
-            // any other signal means "terminate"
-            {
-                wxFindByPidParams params;
-                params.pid = (DWORD)pid;
-
-                // EnumWindows() has nice semantics: it returns 0 if it found
-                // something or if an error occured and non zero if it
-                // enumerated all the window
-                if ( !::EnumWindows(wxEnumFindByPidProc, (LPARAM)&params) )
-                {
-                    // did we find any window?
-                    if ( params.hwnd )
-                    {
-                        // tell the app to close
-                        //
-                        // NB: this is the harshest way, the app won't have
-                        //     opportunity to save any files, for example, but
-                        //     this is probably what we want here. If not we
-                        //     can also use SendMesageTimeout(WM_CLOSE)
-                        if ( !::PostMessage(params.hwnd, WM_QUIT, 0, 0) )
-                        {
-                            wxLogLastError(_T("PostMessage(WM_QUIT)"));
-                        }
-                    }
-                    else // it was an error then
-                    {
-                        wxLogLastError(_T("EnumWindows"));
-
-                        ok = FALSE;
-                    }
-                }
-                else // no windows for this PID
-                {
-                    if ( krc )
-                    {
-                        *krc = wxKILL_ERROR;
-                    }
-
-                    ok = FALSE;
-                }
-            }
-    }
-
-    // the return code
-    DWORD rc;
-
-    if ( ok )
-    {
-        // as we wait for a short time, we can use just WaitForSingleObject()
-        // and not MsgWaitForMultipleObjects()
-        switch ( ::WaitForSingleObject(hProcess, 500 /* msec */) )
-        {
-            case WAIT_OBJECT_0:
-                // process terminated
-                if ( !::GetExitCodeProcess(hProcess, &rc) )
-                {
-                    wxLogLastError(_T("GetExitCodeProcess"));
-                }
-                break;
-
-            default:
-                wxFAIL_MSG( _T("unexpected WaitForSingleObject() return") );
-                // fall through
-
-            case WAIT_FAILED:
-                wxLogLastError(_T("WaitForSingleObject"));
-                // fall through
-
-            case WAIT_TIMEOUT:
-                if ( krc )
-                {
-                    *krc = wxKILL_ERROR;
-                }
-
-                rc = STILL_ACTIVE;
-                break;
-        }
-    }
-    else // !ok
-    {
-        // just to suppress the warnings about uninitialized variable
-        rc = 0;
-    }
-
-    ::CloseHandle(hProcess);
-
-    // the return code is the same as from Unix kill(): 0 if killed
-    // successfully or -1 on error
-    if ( sig == wxSIGNONE )
-    {
-        if ( ok && rc == STILL_ACTIVE )
-        {
-            // there is such process => success
-            return 0;
-        }
-    }
-    else // not SIGNONE
-    {
-        if ( ok && rc != STILL_ACTIVE )
-        {
-            // killed => success
-            return 0;
-        }
-    }
-#else // Win15
-    wxFAIL_MSG( _T("not implemented") );
-#endif // Win32/Win16
-
-    // error
-    return -1;
+    return 0;
 }
 
 // Execute a program in an Interactive Shell
@@ -778,9 +548,15 @@ wxString wxGetOsDescription()
             case VER_PLATFORM_WIN32_WINDOWS:
                 str.Printf(_("Windows 9%c"),
                            info.dwMinorVersion == 0 ? _T('5') : _T('8'));
-                if ( !wxIsEmpty(info.szCSDVersion) )
                 {
-                    str << _T(" (") << info.szCSDVersion << _T(')');
+                    // we need to trim it as under my version of Win98 this is
+                    // just a space and "( )" at the end looks quite ugly
+                    wxString ver = info.szCSDVersion;
+                    ver.Trim();
+                    if ( !ver.IsEmpty() )
+                    {
+                        str << _T(" (") << ver << _T(')');
+                    }
                 }
                 break;
 
@@ -821,7 +597,7 @@ int wxGetOsVersion(int *majorVsn, int *minorVsn)
             *majorVsn = info.dwMajorVersion;
         if (minorVsn)
             *minorVsn = info.dwMinorVersion;
-
+        
         switch ( info.dwPlatformId )
         {
             case VER_PLATFORM_WIN32s:
@@ -1181,8 +957,6 @@ wxChar *wxLoadUserResource(const wxString& resourceName, const wxString& resourc
 // get display info
 // ----------------------------------------------------------------------------
 
-// See also the wxGetMousePosition in window.cpp
-// Deprecated: use wxPoint wxGetMousePosition() instead
 void wxGetMousePosition( int* x, int* y )
 {
     POINT pt;
@@ -1227,33 +1001,6 @@ void wxDisplaySize(int *width, int *height)
     if ( width ) *width = GetDeviceCaps(dc, HORZRES);
     if ( height ) *height = GetDeviceCaps(dc, VERTRES);
 }
-
-void wxDisplaySizeMM(int *width, int *height)
-{
-    ScreenHDC dc;
-
-    if ( width ) *width = GetDeviceCaps(dc, HORZSIZE);
-    if ( height ) *height = GetDeviceCaps(dc, VERTSIZE);
-}
-
-void wxClientDisplayRect(int *x, int *y, int *width, int *height)
-{
-#ifdef __WIN16__
-    *x = 0; *y = 0;
-    wxDisplaySize(width, height);
-#else
-    // Determine the desktop dimensions minus the taskbar and any other
-    // special decorations...
-    RECT r;
-
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
-    if (x)      *x = r.left;
-    if (y)      *y = r.top;
-    if (width)  *width = r.right - r.left;
-    if (height) *height = r.bottom - r.top;
-#endif
-}
-
 
 // ---------------------------------------------------------------------------
 // window information functions
@@ -1315,48 +1062,10 @@ wxString WXDLLEXPORT wxGetWindowClass(WXHWND hWnd)
 WXWORD WXDLLEXPORT wxGetWindowId(WXHWND hWnd)
 {
 #ifndef __WIN32__
-    return (WXWORD)GetWindowWord((HWND)hWnd, GWW_ID);
+    return GetWindowWord((HWND)hWnd, GWW_ID);
 #else // Win32
-    return (WXWORD)GetWindowLong((HWND)hWnd, GWL_ID);
+    return GetWindowLong((HWND)hWnd, GWL_ID);
 #endif // Win16/32
-}
-
-#endif // wxUSE_GUI
-
-#if wxUSE_GUI
-
-// ----------------------------------------------------------------------------
-// Metafile helpers
-// ----------------------------------------------------------------------------
-
-extern void PixelToHIMETRIC(LONG *x, LONG *y)
-{
-    ScreenHDC hdcRef;
-
-    int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE),
-        iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE),
-        iWidthPels = GetDeviceCaps(hdcRef, HORZRES),
-        iHeightPels = GetDeviceCaps(hdcRef, VERTRES);
-
-    *x *= (iWidthMM * 100);
-    *x /= iWidthPels;
-    *y *= (iHeightMM * 100);
-    *y /= iHeightPels;
-}
-
-extern void HIMETRICToPixel(LONG *x, LONG *y)
-{
-    ScreenHDC hdcRef;
-
-    int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE),
-        iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE),
-        iWidthPels = GetDeviceCaps(hdcRef, HORZRES),
-        iHeightPels = GetDeviceCaps(hdcRef, VERTRES);
-
-    *x *= iWidthPels;
-    *x /= (iWidthMM * 100);
-    *y *= iHeightPels;
-    *y /= (iHeightMM * 100);
 }
 
 #endif // wxUSE_GUI

@@ -65,8 +65,6 @@ public:
     void Rewind() { rewinddir(m_dir); }
     bool Read(wxString *filename);
 
-    const wxString& GetName() const { return m_dirname; }
-
 private:
     DIR     *m_dir;
 
@@ -228,22 +226,6 @@ bool wxDir::Open(const wxString& dirname)
 bool wxDir::IsOpened() const
 {
     return m_data != NULL;
-}
-
-wxString wxDir::GetName() const
-{
-    wxString name;
-    if ( m_data )
-    {
-        name = M_DIR->GetName();
-        if ( !name.empty() && (name.Last() == _T('/')) )
-        {
-            // chop off the last (back)slash
-            name.Truncate(name.length() - 1);
-        }
-    }
-
-    return name;
 }
 
 wxDir::~wxDir()

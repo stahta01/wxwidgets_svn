@@ -138,7 +138,6 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
     wxTopLevelWindows.Append(this);
 
   SetName(name);
-  wxWindowBase::Show(TRUE); // MDI child frame starts off shown
   m_windowStyle = style;
 
   if (parent) parent->AddChild(this);
@@ -997,12 +996,7 @@ MRESULT wxMDIChildFrame::OS2DefWindowProc(WXUINT message, WXWPARAM wParam, WXLPA
 
 bool wxMDIChildFrame::OS2TranslateMessage(WXMSG* msg)
 {
-#if wxUSE_ACCEL
     return m_acceleratorTable.Translate(GetParent()->GetHWND(), msg);
-#else
-    return FALSE;
-#endif  //wxUSE_ACCEL
-
 }
 
 // ---------------------------------------------------------------------------

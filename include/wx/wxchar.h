@@ -63,12 +63,6 @@
         #define wxHAVE_TCHAR_FUNCTIONS
     #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x520)
         #define wxHAVE_TCHAR_FUNCTIONS
-    // w32api isn't yet tchar safe, will be soon, this is a placeholder
-    #elif defined(__GNUWIN32__) && wxCHECK_W32API_VERSION( 10, 0 )
-        #define wxHAVE_TCHAR_FUNCTIONS
-        #include <stddef.h>
-        #include <string.h>
-        #include <ctype.h>
     #endif
 #elif defined(__VISAGECPP__) && (__IBMCPP__ >= 400)
     // VisualAge 4.0+ supports TCHAR
@@ -122,12 +116,6 @@
 #  include <tchar.h>
 
 #  if wxUSE_UNICODE // temporary - preserve binary compatibility
-#if defined(__GNUWIN32__)
-    #define _TCHAR   TCHAR
-    #define _TSCHAR  TCHAR
-    #define _TUCHAR  TCHAR
-#endif
-
 typedef  _TCHAR      wxChar;
 typedef  _TSCHAR     wxSChar;
 typedef  _TUCHAR     wxUChar;
@@ -288,11 +276,11 @@ typedef  _TUCHAR     wxUChar;
 #    ifdef HAVE_WCSTR_H
 #      include <wcstr.h>
 #    else
-#      if defined(__FreeBSD__) || (defined(__APPLE__) && defined(__UNIX__))
+#      ifndef __FreeBSD__
+#        include <wchar.h>
+#      else
 #        include <stdlib.h>
 #        define wxNEED_WCSLEN
-#      else
-#        include <wchar.h>
 #      endif
 #    endif
 #  endif
@@ -378,7 +366,7 @@ typedef unsigned __WCHAR_TYPE__ wxUChar;
 #     define wxUChar unsigned char
 #   endif
 
-#   if defined(__FreeBSD__) || (defined(__APPLE__) && defined(__UNIX__))
+#   ifdef __FreeBSD__
 #     undef _T
 #   endif
 
@@ -523,11 +511,11 @@ typedef unsigned __WCHAR_TYPE__ wxUChar;
 #endif
 
 // checks whether the passed in pointer is NULL and if the string is empty
-inline bool wxIsEmpty(const wxChar *p) { return !p || !*p; }
+WXDLLEXPORT inline bool wxIsEmpty(const wxChar *p) { return !p || !*p; }
 
 #ifndef wxNEED_WX_STRING_H
 // safe version of strlen() (returns 0 if passed NULL pointer)
-inline size_t wxStrlen(const wxChar *psz)
+WXDLLEXPORT inline size_t wxStrlen(const wxChar *psz)
    { return psz ? wxStrlen_(psz) : 0; }
 #endif
 

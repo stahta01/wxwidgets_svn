@@ -73,7 +73,13 @@ class wxIEnumFORMATETC : public IEnumFORMATETC
 {
 public:
     wxIEnumFORMATETC(const wxDataFormat* formats, ULONG nCount);
-    virtual ~wxIEnumFORMATETC() { delete [] m_formats; }
+
+    // to suppress the gcc warning about "class has virtual functions but non
+    // virtual dtor"
+#ifdef __GNUG__
+    virtual
+#endif
+    ~wxIEnumFORMATETC() { delete [] m_formats; }
 
     DECLARE_IUNKNOWN_METHODS;
 
@@ -97,7 +103,13 @@ class wxIDataObject : public IDataObject
 {
 public:
     wxIDataObject(wxDataObject *pDataObject);
-    virtual ~wxIDataObject();
+
+    // to suppress the gcc warning about "class has virtual functions but non
+    // virtual dtor"
+#ifdef __GNUG__
+    virtual
+#endif
+    ~wxIDataObject();
 
     // normally, wxDataObject controls our lifetime (i.e. we're deleted when it
     // is), but in some cases, the situation is inversed, that is we delete it
@@ -133,7 +145,7 @@ private:
 
 void wxDataFormat::SetId(const wxChar *format)
 {
-    m_format = (wxDataFormat::NativeFormat)::RegisterClipboardFormat(format);
+    m_format = ::RegisterClipboardFormat(format);
     if ( !m_format )
     {
         wxLogError(_("Couldn't register clipboard format '%s'."), format);
@@ -184,7 +196,7 @@ wxIEnumFORMATETC::wxIEnumFORMATETC(const wxDataFormat *formats, ULONG nCount)
 
 STDMETHODIMP wxIEnumFORMATETC::Next(ULONG      celt,
                                     FORMATETC *rgelt,
-                                    ULONG     *WXUNUSED(pceltFetched))
+                                    ULONG     *pceltFetched)
 {
     wxLogTrace(wxTRACE_OleCalls, wxT("wxIEnumFORMATETC::Next"));
 
@@ -599,7 +611,7 @@ STDMETHODIMP wxIDataObject::QueryGetData(FORMATETC *pformatetc)
     return S_OK;
 }
 
-STDMETHODIMP wxIDataObject::GetCanonicalFormatEtc(FORMATETC *WXUNUSED(pFormatetcIn),
+STDMETHODIMP wxIDataObject::GetCanonicalFormatEtc(FORMATETC *pFormatetcIn,
                                                   FORMATETC *pFormatetcOut)
 {
     wxLogTrace(wxTRACE_OleCalls, wxT("wxIDataObject::GetCanonicalFormatEtc"));
@@ -620,8 +632,7 @@ STDMETHODIMP wxIDataObject::EnumFormatEtc(DWORD dwDir,
                                                        : wxDataObject::Set;
 
     size_t nFormatCount = m_pDataObject->GetFormatCount(dir);
-    wxDataFormat format;
-	wxDataFormat *formats;
+    wxDataFormat format, *formats;
     formats = nFormatCount == 1 ? &format : new wxDataFormat[nFormatCount];
     m_pDataObject->GetAllFormats(formats, dir);
 
@@ -640,20 +651,20 @@ STDMETHODIMP wxIDataObject::EnumFormatEtc(DWORD dwDir,
 // advise sink functions (not implemented)
 // ----------------------------------------------------------------------------
 
-STDMETHODIMP wxIDataObject::DAdvise(FORMATETC   *WXUNUSED(pformatetc),
-                                    DWORD        WXUNUSED(advf),
-                                    IAdviseSink *WXUNUSED(pAdvSink),
-                                    DWORD       *WXUNUSED(pdwConnection))
+STDMETHODIMP wxIDataObject::DAdvise(FORMATETC   *pformatetc,
+                                    DWORD        advf,
+                                    IAdviseSink *pAdvSink,
+                                    DWORD       *pdwConnection)
 {
   return OLE_E_ADVISENOTSUPPORTED;
 }
 
-STDMETHODIMP wxIDataObject::DUnadvise(DWORD WXUNUSED(dwConnection))
+STDMETHODIMP wxIDataObject::DUnadvise(DWORD dwConnection)
 {
   return OLE_E_ADVISENOTSUPPORTED;
 }
 
-STDMETHODIMP wxIDataObject::EnumDAdvise(IEnumSTATDATA **WXUNUSED(ppenumAdvise))
+STDMETHODIMP wxIDataObject::EnumDAdvise(IEnumSTATDATA **ppenumAdvise)
 {
   return OLE_E_ADVISENOTSUPPORTED;
 }
@@ -741,7 +752,7 @@ bool wxBitmapDataObject::GetDataHere(void *buf) const
     return wxConvertBitmapToDIB((LPBITMAPINFO)buf, GetBitmap()) != 0;
 }
 
-bool wxBitmapDataObject::SetData(size_t WXUNUSED(len), const void *buf)
+bool wxBitmapDataObject::SetData(size_t len, const void *buf)
 {
     wxBitmap bitmap(wxConvertDIBToBitmap((const LPBITMAPINFO)buf));
 
@@ -1088,7 +1099,7 @@ size_t wxConvertBitmapToDIB(LPBITMAPINFO pbi, const wxBitmap& bitmap)
     // calculate the number of bits per pixel and the number of items in
     // bmiColors array (whose meaning depends on the bitmap format)
     WORD biBits = bm.bmPlanes * bm.bmBitsPixel;
-    WORD biColors = (WORD)wxGetNumOfBitmapColors(biBits);
+    WORD biColors = wxGetNumOfBitmapColors(biBits);
 
     BITMAPINFO bi2;
 

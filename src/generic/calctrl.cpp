@@ -97,17 +97,6 @@ END_EVENT_TABLE()
 IMPLEMENT_DYNAMIC_CLASS(wxCalendarCtrl, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxCalendarEvent, wxCommandEvent)
 
-// ----------------------------------------------------------------------------
-// events
-// ----------------------------------------------------------------------------
-
-DEFINE_EVENT_TYPE(wxEVT_CALENDAR_SEL_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_CALENDAR_DAY_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_CALENDAR_MONTH_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_CALENDAR_YEAR_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_CALENDAR_DOUBLECLICKED)
-DEFINE_EVENT_TYPE(wxEVT_CALENDAR_WEEKDAY_CLICKED)
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -472,14 +461,15 @@ wxSize wxCalendarCtrl::DoGetBestSize() const
     wxCoord width = 7*m_widthCol,
             height = 7*m_heightRow;
 
-    // the combobox doesn't report its height correctly (it returns the
-    // height including the drop down list) so don't use it
-    height += VERT_MARGIN + m_spinYear->GetBestSize().y;
+    wxSize sizeCombo = m_comboMonth->GetBestSize(),
+           sizeSpin = m_spinYear->GetBestSize();
+
+    height += VERT_MARGIN + wxMax(sizeCombo.y, sizeSpin.y);
 
     if ( GetWindowStyle() & (wxRAISED_BORDER | wxSUNKEN_BORDER) )
     {
         // the border would clip the last line otherwise
-        height += 6;
+        height += 4;
     }
 
     return wxSize(width, height);
@@ -647,7 +637,7 @@ void wxCalendarCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
 
                 wxCalendarDateAttr *attr = m_attrs[day - 1];
 
-                bool isSel = date.IsSameDate(m_date);
+                bool isSel = m_date == date;
                 if ( isSel )
                 {
                     dc.SetTextForeground(m_colHighlightFg);

@@ -39,7 +39,7 @@
 #include "wx/msw/private.h"
 
 #if wxUSE_TOOLTIPS
-    #if !defined(__GNUWIN32_OLD__) || defined(__CYGWIN10__)
+    #ifndef __GNUWIN32_OLD__
         #include <commctrl.h>
     #endif
     #include "wx/tooltip.h"
@@ -329,7 +329,7 @@ void wxRadioBox::SetLabel(int item, const wxString& label)
     SetWindowText((HWND)m_radioButtons[item], label.c_str());
 }
 
-void wxRadioBox::SetLabel(int WXUNUSED(item), wxBitmap *WXUNUSED(bitmap))
+void wxRadioBox::SetLabel(int item, wxBitmap *bitmap)
 {
     /*
        m_radioWidth[item] = bitmap->GetWidth() + FB_MARGIN;
@@ -836,17 +836,10 @@ long wxRadioBox::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
     return wxControl::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-WXHBRUSH wxRadioBox::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
-#if wxUSE_CTL3D
+WXHBRUSH wxRadioBox::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
                                WXUINT message,
                                WXWPARAM wParam,
-                               WXLPARAM lParam
-#else
-                               WXUINT WXUNUSED(message),
-                               WXWPARAM WXUNUSED(wParam),
-                               WXLPARAM WXUNUSED(lParam)
-#endif
-    )
+                               WXLPARAM lParam)
 {
 #if wxUSE_CTL3D
     if ( m_useCtl3D )
@@ -1032,49 +1025,6 @@ LRESULT APIENTRY _EXPORT wxRadioBtnWndProc(HWND hwnd,
                     }
                 }
             }
-            break;
-
-#ifdef __WIN32__
-        case WM_HELP:
-        {
-            wxRadioBox *radiobox = (wxRadioBox *)
-                    ::GetWindowLong(hwnd, GWL_USERDATA);
-
-            wxCHECK_MSG( radiobox, 0, wxT("radio button without radio box?") );
-
-            bool processed = TRUE;
-
-            HELPINFO* info = (HELPINFO*) lParam;
-            // Don't yet process menu help events, just windows
-            if (info->iContextType == HELPINFO_WINDOW)
-            {
-                wxWindow* subjectOfHelp = radiobox;
-                bool eventProcessed = FALSE;
-                while (subjectOfHelp && !eventProcessed)
-                {
-                    wxHelpEvent helpEvent(wxEVT_HELP, subjectOfHelp->GetId(), wxPoint(info->MousePos.x, info->MousePos.y) ) ; // info->iCtrlId);
-                    helpEvent.SetEventObject(radiobox);
-                    eventProcessed = radiobox->GetEventHandler()->ProcessEvent(helpEvent);
-
-                    // Go up the window hierarchy until the event is handled (or not)
-                    subjectOfHelp = subjectOfHelp->GetParent();
-                }
-                processed = eventProcessed;
-            }
-            else if (info->iContextType == HELPINFO_MENUITEM)
-            {
-                wxHelpEvent helpEvent(wxEVT_HELP, info->iCtrlId) ;
-                helpEvent.SetEventObject(radiobox);
-                processed = radiobox->GetEventHandler()->ProcessEvent(helpEvent);
-            }
-            else processed = FALSE;
-
-            if (processed)
-                return 0;
-
-            break;
-        }
-#endif
     }
 
     return ::CallWindowProc(CASTWNDPROC s_wndprocRadioBtn, hwnd, message, wParam, lParam);

@@ -24,8 +24,6 @@
 #  include "wx/stream.h"
 #endif
 
-#if wxUSE_IMAGE
-
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
@@ -100,13 +98,11 @@ public:
     wxImage( const wxImage& image );
     wxImage( const wxImage* image );
 
-#if wxUSE_GUI
-    // convertion to/from wxBitmap (deprecated, use wxBitmap's methods instead):
     wxImage( const wxBitmap &bitmap );
+    operator wxBitmap() const { return ConvertToBitmap(); }
     wxBitmap ConvertToBitmap() const;
 #ifdef __WXGTK__
-    wxBitmap ConvertToMonoBitmap( unsigned char red, unsigned char green, unsigned char blue ) const;
-#endif
+    wxBitmap ConvertToMonoBitmap( unsigned char red, unsigned char green, unsigned char blue );
 #endif
 
     void Create( int width, int height );
@@ -141,9 +137,6 @@ public:
     // replace one colour with another
     void Replace( unsigned char r1, unsigned char g1, unsigned char b1,
                   unsigned char r2, unsigned char g2, unsigned char b2 );
-		  
-    // convert to monochrome image (<r,g,b> will be replaced by white, everything else by black)
-    wxImage ConvertToMono( unsigned char r, unsigned char g, unsigned char b ) const;
 
     // these routines are slow but safe
     void SetRGB( int x, int y, unsigned char r, unsigned char g, unsigned char b );
@@ -176,26 +169,13 @@ public:
     char unsigned *GetData() const;
     void SetData( char unsigned *data );
     void SetData( char unsigned *data, int new_width, int new_height );
-
-    // Mask functions
+    
     void SetMaskColour( unsigned char r, unsigned char g, unsigned char b );
     unsigned char GetMaskRed() const;
     unsigned char GetMaskGreen() const;
     unsigned char GetMaskBlue() const;
     void SetMask( bool mask = TRUE );
     bool HasMask() const;
-
-    // Palette functions
-    bool HasPalette() const;
-    const wxPalette& GetPalette() const;
-    void SetPalette(const wxPalette& palette);
-
-    // Option functions (arbitrary name/value mapping)
-    void SetOption(const wxString& name, const wxString& value);
-    void SetOption(const wxString& name, int value);
-    wxString GetOption(const wxString& name) const;
-    int GetOptionInt(const wxString& name) const;
-    bool HasOption(const wxString& name) const;
 
     unsigned long CountColours( unsigned long stopafter = (unsigned long) -1 );
     unsigned long ComputeHistogram( wxHashTable &h );
@@ -225,7 +205,7 @@ public:
     static void InitStandardHandlers();
 
 protected:
-    static wxList   sm_handlers;
+    static wxList sm_handlers;
 
 private:
     friend class WXDLLEXPORT wxImageHandler;
@@ -236,7 +216,6 @@ private:
 
 extern void WXDLLEXPORT wxInitAllImageHandlers();
 
-WXDLLEXPORT_DATA(extern wxImage)    wxNullImage;
 
 //-----------------------------------------------------------------------------
 // wxImage handlers
@@ -249,9 +228,6 @@ WXDLLEXPORT_DATA(extern wxImage)    wxNullImage;
 #include "wx/imagjpeg.h"
 #include "wx/imagtiff.h"
 #include "wx/imagpnm.h"
-#include "wx/imagxpm.h"
-
-#endif // wxUSE_IMAGE
 
 #endif
   // _WX_IMAGE_H_

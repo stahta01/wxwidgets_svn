@@ -31,30 +31,34 @@
 %import _defs.i
 %import misc.i
 
+
 %{
     static wxString wxPyEmptyStr("");
 %}
 
 //---------------------------------------------------------------------------
 
-class wxGDIObject : public wxObject {
-public:
-    wxGDIObject();
-    ~wxGDIObject();
-
-    bool GetVisible();
-    void SetVisible( bool visible );
-
-    bool IsNull();
-
-};
+//  class wxGDIImage {
+//  public:
+//      long GetHandle();
+//      void SetHandle(long handle);
+//      bool Ok();
+//      int GetWidth();
+//      int GetHeight();
+//      int GetDepth();
+//      void SetWidth(int w);
+//      void SetHeight(int h);
+//      void SetDepth(int d);
+//      void SetSize(const wxSize& size);
+//  };
 
 //---------------------------------------------------------------------------
 
-class wxBitmap : public wxGDIObject
+class wxBitmap
+//: public wxGDIImage
 {
 public:
-    wxBitmap(const wxString& name, wxBitmapType type);
+    wxBitmap(const wxString& name, long type);
     ~wxBitmap();
 
     wxPalette* GetPalette();
@@ -101,87 +105,37 @@ public:
 };
 
 
-// Declarations of some alternate "constructors"
 %new wxBitmap* wxEmptyBitmap(int width, int height, int depth=-1);
-%new wxBitmap* wxBitmapFromXPMData(PyObject* listOfStrings);
-%new wxBitmap* wxBitmapFromIcon(const wxIcon& icon);
-%new wxBitmap* wxBitmapFromBits(char* bits, int width, int height, int depth = 1 );
 
-//  #ifdef __WXMSW__
-//  %new wxBitmap* wxBitmapFromData(PyObject* data, long type,
-//                                  int width, int height, int depth = 1);
-//  #endif
+#ifdef __WXMSW__
+%new wxBitmap* wxBitmapFromData(PyObject* data, long type,
+                                int width, int height, int depth = 1);
+#endif
 
-
-
-%{ // Implementations of some alternate "constructors"
-
+%{                              // Alternate 'constructor'
     wxBitmap* wxEmptyBitmap(int width, int height, int depth=-1) {
         return new wxBitmap(width, height, depth);
     }
 
-    static char** ConvertListOfStrings(PyObject* listOfStrings) {
-        char**    cArray = NULL;
-        int       count;
-
-        if (!PyList_Check(listOfStrings)) {
-            PyErr_SetString(PyExc_TypeError, "Expected a list of strings.");
+#ifdef __WXMSW__
+    wxBitmap* wxBitmapFromData(PyObject* data, long type,
+                               int width, int height, int depth = 1) {
+        if (! PyString_Check(data)) {
+            PyErr_SetString(PyExc_TypeError, "Expected string object");
             return NULL;
         }
-        count = PyList_Size(listOfStrings);
-        cArray = new char*[count];
 
-        for(int x=0; x<count; x++) {
-            // TODO: Need some validation and error checking here
-            cArray[x] = PyString_AsString(PyList_GET_ITEM(listOfStrings, x));
-        }
-        return cArray;
+        return new wxBitmap((void*)PyString_AsString(data), type, width, height, depth);
     }
-
-
-    wxBitmap* wxBitmapFromXPMData(PyObject* listOfStrings) {
-        char**    cArray = NULL;
-        wxBitmap* bmp;
-
-        cArray = ConvertListOfStrings(listOfStrings);
-        if (! cArray)
-            return NULL;
-        bmp = new wxBitmap(cArray);
-        delete [] cArray;
-        return bmp;
-    }
-
-
-    wxBitmap* wxBitmapFromIcon(const wxIcon& icon) {
-        return new wxBitmap(icon);
-    }
-
-
-    wxBitmap* wxBitmapFromBits(char* bits, int width, int height, int depth = 1 ) {
-        return new wxBitmap(bits, width, height, depth);
-    }
-
-
-//  #ifdef __WXMSW__
-//      wxBitmap* wxBitmapFromData(PyObject* data, long type,
-//                                 int width, int height, int depth = 1) {
-//          if (! PyString_Check(data)) {
-//              PyErr_SetString(PyExc_TypeError, "Expected string object");
-//              return NULL;
-//          }
-//          return new wxBitmap((void*)PyString_AsString(data), type, width, height, depth);
-//      }
-//  #endif
+#endif
 %}
 
 //---------------------------------------------------------------------------
 
-class wxMask : public wxObject {
+class wxMask {
 public:
     wxMask(const wxBitmap& bitmap);
     //~wxMask();
-
-    %addmethods { void Destroy() { delete self; } }
 };
 
 %new wxMask* wxMaskColour(const wxBitmap& bitmap, const wxColour& colour);
@@ -195,7 +149,8 @@ public:
 //---------------------------------------------------------------------------
 
 
-class wxIcon : public wxGDIObject
+class wxIcon
+//: public wxGDIImage
 {
 public:
     wxIcon(const wxString& name, long flags,
@@ -219,8 +174,6 @@ public:
 #ifdef __WXMSW__
     void SetSize(const wxSize& size);
 #endif
-    void CopyFromBitmap(const wxBitmap& bmp);
-
     %pragma(python) addtoclass = "
     def __del__(self,gdic=gdic):
         try:
@@ -229,34 +182,14 @@ public:
         except:
             pass
 "
+
 };
 
 
-// Declarations of some alternate "constructors"
-%new wxIcon* wxEmptyIcon();
-%new wxIcon* wxIconFromXPMData(PyObject* listOfStrings);
-
-%{ // Implementations of some alternate "constructors"
-    wxIcon* wxEmptyIcon() {
-        return new wxIcon();
-    }
-
-    wxIcon* wxIconFromXPMData(PyObject* listOfStrings) {
-        char**  cArray = NULL;
-        wxIcon* icon;
-
-        cArray = ConvertListOfStrings(listOfStrings);
-        if (! cArray)
-            return NULL;
-        icon = new wxIcon(cArray);
-        delete [] cArray;
-        return icon;
-    }
-%}
-
 //---------------------------------------------------------------------------
 
-class wxCursor : public wxGDIObject
+class wxCursor
+//: public wxGDIImage
 {
 public:
 #ifdef __WXMSW__
@@ -335,15 +268,23 @@ enum wxFontEncoding
     wxFONTENCODING_MAX
 };
 
-
-class wxFont : public wxGDIObject {
+class wxFont {
 public:
-    wxFont( int pointSize, int family, int style, int weight,
-            int underline=FALSE, char* faceName = "",
-            wxFontEncoding encoding=wxFONTENCODING_DEFAULT);
-    ~wxFont();
+    // I'll do it this way to use long-lived objects and not have to
+    // worry about when python may delete the object.
+    %addmethods {
+        wxFont( int pointSize, int family, int style, int weight,
+                int underline=FALSE, char* faceName = "",
+                wxFontEncoding encoding=wxFONTENCODING_DEFAULT) {
+
+            return wxTheFontList->FindOrCreateFont(pointSize, family, style, weight,
+                                                   underline, faceName, encoding);
+        }
+        // NO Destructor.
+    }
 
     bool Ok();
+
     wxString GetFaceName();
     int GetFamily();
 #ifdef __WXMSW__
@@ -376,21 +317,9 @@ public:
     }
 %}
 
-
-class wxFontList : public wxObject {
-public:
-
-    void AddFont(wxFont* font);
-    wxFont * FindOrCreateFont(int point_size, int family, int style, int weight,
-                              bool underline = FALSE, const char* facename = NULL,
-                              wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
-    void RemoveFont(wxFont *font);
-};
-
-
 //----------------------------------------------------------------------
 
-class wxColour : public wxObject {
+class wxColour {
 public:
     wxColour(unsigned char red=0, unsigned char green=0, unsigned char blue=0);
     ~wxColour();
@@ -423,31 +352,22 @@ public:
 %}
 
 
-
-class wxColourDatabase : public wxObject {
-public:
-
-    wxColour *FindColour(const wxString& colour);
-    wxString FindName(const wxColour& colour) const;
-
-    %addmethods {
-        void Append(const wxString& name, int red, int green, int blue) {
-            self->Append(name.c_str(), new wxColour(red, green, blue));
-        }
-    }
-};
-
-
 //----------------------------------------------------------------------
 
 
-class wxPen : public wxGDIObject {
+class wxPen {
 public:
-    wxPen(wxColour& colour, int width=1, int style=wxSOLID);
-    ~wxPen();
+    // I'll do it this way to use long-lived objects and not have to
+    // worry about when python may delete the object.
+    %addmethods {
+        wxPen(wxColour* colour, int width=1, int style=wxSOLID) {
+            return wxThePenList->FindOrCreatePen(*colour, width, style);
+        }
+        // NO Destructor.
+    }
 
     int GetCap();
-    wxColour GetColour();
+    wxColour& GetColour();
 
     int GetJoin();
     int GetStyle();
@@ -469,25 +389,22 @@ public:
 #endif
 };
 
-
-class wxPenList : public wxObject {
-public:
-
-    void AddPen(wxPen* pen);
-    wxPen* FindOrCreatePen(const wxColour& colour, int width, int style);
-    void RemovePen(wxPen* pen);
-};
-
-
-
 //----------------------------------------------------------------------
 
-class wxBrush : public wxGDIObject {
+class wxBrush {
 public:
-    wxBrush(const wxColour& colour, int style=wxSOLID);
-    ~wxBrush();
+    // I'll do it this way to use long-lived objects and not have to
+    // worry about when python may delete the object.
+    %addmethods {
+        wxBrush(const wxColour* colour, int style=wxSOLID) {
+            return wxTheBrushList->FindOrCreateBrush(*colour, style);
+        }
+        // NO Destructor.
+    }
 
-    wxColour GetColour();
+//      wxBrush(const wxColour& colour, int style=wxSOLID);
+
+    wxColour& GetColour();
     wxBitmap * GetStipple();
     int GetStyle();
     bool Ok();
@@ -496,20 +413,11 @@ public:
     void SetStyle(int style);
 };
 
-
-class wxBrushList {
-public:
-
-    void AddBrush(wxBrush *brush);
-    wxBrush * FindOrCreateBrush(const wxColour& colour, int style);
-    void RemoveBrush(wxBrush *brush);
-};
-
 //----------------------------------------------------------------------
 
 
 
-class wxDC : public wxObject {
+class wxDC {
 public:
 //    wxDC(); **** abstract base class, can't instantiate.
     ~wxDC();
@@ -572,12 +480,12 @@ public:
     %name(GetSizeTuple)void GetSize(int* OUTPUT, int* OUTPUT);
     wxSize GetSize();
     wxSize GetSizeMM();
-    wxColour GetTextBackground();
+    wxColour& GetTextBackground();
     void GetTextExtent(const wxString& string, long *OUTPUT, long *OUTPUT);
     %name(GetFullTextExtent)void GetTextExtent(const wxString& string,
                        long *OUTPUT, long *OUTPUT, long *OUTPUT, long* OUTPUT,
                        const wxFont* font = NULL);
-    wxColour GetTextForeground();
+    wxColour& GetTextForeground();
     void GetUserScale(double *OUTPUT, double *OUTPUT);
     long LogicalToDeviceX(long x);
     long LogicalToDeviceXRel(long x);
@@ -751,13 +659,6 @@ extern wxPalette wxNullPalette;
 extern wxFont   wxNullFont;
 extern wxColour wxNullColour;
 
-
-extern wxFontList*       wxTheFontList;
-extern wxPenList*        wxThePenList;
-extern wxBrushlist*      wxTheBrushList;
-extern wxColourDatabase* wxTheColourDatabase;
-
-
 %readwrite
 %{
 #endif
@@ -765,7 +666,7 @@ extern wxColourDatabase* wxTheColourDatabase;
 
 //---------------------------------------------------------------------------
 
-class wxPalette : public wxGDIObject {
+class wxPalette {
 public:
     wxPalette(int LCOUNT, byte* choices, byte* choices, byte* choices);
     ~wxPalette();
@@ -787,7 +688,7 @@ enum {
     wxIMAGE_LIST_STATE
 };
 
-class wxImageList : public wxObject {
+class wxImageList {
 public:
     wxImageList(int width, int height, int mask=TRUE, int initialCount=1);
     ~wxImageList();
@@ -810,71 +711,6 @@ public:
     bool Remove(int index);
     bool RemoveAll();
     void GetSize(int index, int& OUTPUT, int& OUTPUT);
-};
-
-
-//---------------------------------------------------------------------------
-// Regions, etc.
-
-enum wxRegionContain {
-	wxOutRegion, wxPartRegion, wxInRegion
-};
-
-
-class wxRegion : public wxGDIObject {
-public:
-    wxRegion(long x=0, long y=0, long width=0, long height=0);
-    ~wxRegion();
-
-    void Clear();
-    wxRegionContain Contains(long x, long y);
-    %name(ContainsPoint)wxRegionContain Contains(const wxPoint& pt);
-    %name(ContainsRect)wxRegionContain Contains(const wxRect& rect);
-    %name(ContainsRectDim)wxRegionContain Contains(long x, long y, long w, long h);
-
-    wxRect GetBox();
-
-    bool Intersect(long x, long y, long width, long height);
-    %name(IntersectRect)bool Intersect(const wxRect& rect);
-    %name(IntersectRegion)bool Intersect(const wxRegion& region);
-
-    bool IsEmpty();
-
-    bool Union(long x, long y, long width, long height);
-    %name(UnionRect)bool Union(const wxRect& rect);
-    %name(UnionRegion)bool Union(const wxRegion& region);
-
-    bool Subtract(long x, long y, long width, long height);
-    %name(SubtractRect)bool Subtract(const wxRect& rect);
-    %name(SubtractRegion)bool Subtract(const wxRegion& region);
-
-    bool Xor(long x, long y, long width, long height);
-    %name(XorRect)bool Xor(const wxRect& rect);
-    %name(XorRegion)bool Xor(const wxRegion& region);
-};
-
-
-
-class wxRegionIterator : public wxObject {
-public:
-    wxRegionIterator(const wxRegion& region);
-    ~wxRegionIterator();
-
-    long GetX();
-    long GetY();
-    long GetW();
-    long GetWidth();
-    long GetH();
-    long GetHeight();
-    wxRect GetRect();
-    bool HaveRects();
-    void Reset();
-
-    %addmethods {
-        void Next() {
-            (*self) ++;
-        }
-    };
 };
 
 

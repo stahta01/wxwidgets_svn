@@ -13,11 +13,6 @@
     #pragma implementation "app.h"
 #endif
 
-#ifdef __VMS
-#define XtParent XTPARENT
-#define XtDisplay XTDISPLAY
-#endif
-
 #include "wx/frame.h"
 #include "wx/app.h"
 #include "wx/utils.h"
@@ -736,12 +731,11 @@ void wxExit()
 }
 
 // Yield to other processes
-
 static bool gs_inYield = FALSE;
 
 bool wxYield()
 {
-#ifdef __WXDEBUG__    
+#ifdef __WXDEBUG__
     if (gs_inYield)
         wxFAIL_MSG( wxT("wxYield called recursively" ) );
 #endif
@@ -769,7 +763,6 @@ bool wxYieldIfNeeded()
         
     return wxYield();
 }
-
 
 // TODO use XmGetPixmap (?) to get the really standard icons!
 

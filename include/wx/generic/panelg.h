@@ -97,8 +97,6 @@ public:
     void SetLastFocus(wxWindow *win) { m_winLastFocused = win; }
     wxWindow *GetLastFocus() const { return m_winLastFocused; }
 
-    virtual void RemoveChild(wxWindowBase *child);
-
 protected:
     // common part of all ctors
     void Init();

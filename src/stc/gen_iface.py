@@ -19,14 +19,14 @@ from fileinput import FileInput
 IFACE         = './scintilla/include/Scintilla.iface'
 H_TEMPLATE    = './stc.h.in'
 CPP_TEMPLATE  = './stc.cpp.in'
-H_DEST        = '../../include/wx/stc/stc.h'
-CPP_DEST      = './stc.cpp'
+H_DEST        = '../../include/wx/stc/stc.h' # './stc_test.h' #
+CPP_DEST      = './stc.cpp' #'./stc_test.cpp'
 
 
 # Value prefixes to convert
 valPrefixes = [('SCI_', ''),
                ('SC_',  ''),
-               ('SCN_', None),  # just toss these out...
+               ('SCN_', None),  # just toss these...
                ('SCEN_', None),
                ('SCE_', ''),
                ('SCLEX_', 'LEX_'),
@@ -35,7 +35,7 @@ valPrefixes = [('SCI_', ''),
                ('SCWS_', 'WS_'),
 ]
 
-# Message function values that should have a CMD_ constant as well
+# Message funcion values that should have a CMD_ constant as well
 cmdValues = [ (2300, 2350), 2011, 2013, (2176, 2180) ]
 
 

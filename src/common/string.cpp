@@ -86,10 +86,10 @@ static const struct
 } g_strEmpty = { {-1, 0, 0}, wxT('\0') };
 
 #if defined(__VISAGECPP__) && __IBMCPP__ >= 400
-// must define this static for VA or else you get multiply defined symbols
-// everywhere
+// must define this static for VA or else you get multiply defined symbols everywhere
 const unsigned int wxSTRING_MAXLEN = UINT_MAX - 100;
-#endif // Visual Age
+
+#endif
 
 // empty C style string: points to 'string data' byte of g_strEmpty
 extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
@@ -116,8 +116,6 @@ extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
     #if defined(__VISUALC__) || (defined(__MINGW32__) && wxUSE_NORLANDER_HEADERS)
         #define wxVsnprintfA     _vsnprintf
     #endif
-#elif defined(__WXMAC__)
-    #define wxVsnprintfA       vsnprintf
 #else   // !Windows
     #ifdef HAVE_VSNPRINTF
         #define wxVsnprintfA       vsnprintf
@@ -132,7 +130,9 @@ extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
 
     #if defined(__VISUALC__)
         #pragma message("Using sprintf() because no snprintf()-like function defined")
-    #elif defined(__GNUG__)
+    #elif defined(__GNUG__) && !defined(__UNIX__)
+        #warning "Using sprintf() because no snprintf()-like function defined"
+    #elif defined(__MWERKS__)
         #warning "Using sprintf() because no snprintf()-like function defined"
     #endif //compiler
 #endif // no vsnprintf
@@ -153,7 +153,7 @@ extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
 //
 // ATTN: you can _not_ use both of these in the same program!
 
-wxSTD istream& operator>>(wxSTD istream& is, wxString& WXUNUSED(str))
+istream& operator>>(istream& is, wxString& WXUNUSED(str))
 {
 #if 0
   int w = is.width(0);
@@ -184,7 +184,7 @@ wxSTD istream& operator>>(wxSTD istream& is, wxString& WXUNUSED(str))
   return is;
 }
 
-wxSTD ostream& operator<<(wxSTD ostream& os, const wxString& str)
+ostream& operator<<(ostream& os, const wxString& str)
 {
   os << str.c_str();
   return os;
@@ -201,8 +201,7 @@ extern int WXDLLEXPORT wxVsnprintf(wxChar *buf, size_t len,
     int iLen = s.PrintfV(format, argptr);
     if ( iLen != -1 )
     {
-        wxStrncpy(buf, s.c_str(), len);
-        buf[len-1] = wxT('\0');
+        wxStrncpy(buf, s.c_str(), iLen);
     }
 
     return iLen;
@@ -987,22 +986,14 @@ wxString& wxString::MakeLower()
 // trimming and padding
 // ---------------------------------------------------------------------------
 
-// some compilers (VC++ 6.0 not to name them) return TRUE for a call to
-// isspace('ê') in the C locale which seems to be broken to me, but we have to
-// live with this by checking that the character is a 7 bit one - even if this
-// may fail to detect some spaces (I don't know if Unicode doesn't have
-// space-like symbols somewhere except in the first 128 chars), it is arguably
-// still better than trimming away accented letters
-inline int wxSafeIsspace(wxChar ch) { return (ch < 127) && wxIsspace(ch); }
-
 // trims spaces (in the sense of isspace) from left or right side
 wxString& wxString::Trim(bool bFromRight)
 {
   // first check if we're going to modify the string at all
   if ( !IsEmpty() &&
        (
-        (bFromRight && wxSafeIsspace(GetChar(Len() - 1))) ||
-        (!bFromRight && wxSafeIsspace(GetChar(0u)))
+        (bFromRight && wxIsspace(GetChar(Len() - 1))) ||
+        (!bFromRight && wxIsspace(GetChar(0u)))
        )
      )
   {
@@ -1013,7 +1004,7 @@ wxString& wxString::Trim(bool bFromRight)
     {
       // find last non-space character
       wxChar *psz = m_pchData + GetStringData()->nDataLength - 1;
-      while ( wxSafeIsspace(*psz) && (psz >= m_pchData) )
+      while ( wxIsspace(*psz) && (psz >= m_pchData) )
         psz--;
 
       // truncate at trailing space start
@@ -1024,7 +1015,7 @@ wxString& wxString::Trim(bool bFromRight)
     {
       // find first non-space character
       const wxChar *psz = m_pchData;
-      while ( wxSafeIsspace(*psz) )
+      while ( wxIsspace(*psz) )
         psz++;
 
       // fix up data and length
@@ -1411,7 +1402,7 @@ int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
 
   // NB: wxVsnprintf() may return either less than the buffer size or -1 if
   //     there is not enough place depending on implementation
-  int iLen = wxVsnprintfA(szScratch, WXSIZEOF(szScratch), (char *)pszFormat, argptr);
+  int iLen = wxVsnprintfA(szScratch, WXSIZEOF(szScratch), pszFormat, argptr);
   if ( iLen != -1 ) {
     // the whole string is in szScratch
     *this = szScratch;
@@ -1870,14 +1861,8 @@ void wxArrayString::Copy(const wxArrayString& src)
 void wxArrayString::Grow()
 {
   // only do it if no more place
-  if ( m_nCount == m_nSize ) {
-    // if ARRAY_DEFAULT_INITIAL_SIZE were set to 0, the initially empty would
-    // be never resized!
-    #if ARRAY_DEFAULT_INITIAL_SIZE == 0
-      #error "ARRAY_DEFAULT_INITIAL_SIZE must be > 0!"
-    #endif
-
-    if ( m_nSize == 0 ) {
+  if( m_nCount == m_nSize ) {
+    if( m_nSize == 0 ) {
       // was empty, alloc some memory
       m_nSize = ARRAY_DEFAULT_INITIAL_SIZE;
       m_pItems = new wxChar *[m_nSize];
@@ -1885,6 +1870,13 @@ void wxArrayString::Grow()
     else {
       // otherwise when it's called for the first time, nIncrement would be 0
       // and the array would never be expanded
+#if defined(__VISAGECPP__) && defined(__WXDEBUG__)
+      int array_size = ARRAY_DEFAULT_INITIAL_SIZE;
+      wxASSERT( array_size != 0 );
+#else
+      wxASSERT( ARRAY_DEFAULT_INITIAL_SIZE != 0 );
+#endif
+
       // add 50% but not too much
       size_t nIncrement = m_nSize < ARRAY_DEFAULT_INITIAL_SIZE
                           ? ARRAY_DEFAULT_INITIAL_SIZE : m_nSize >> 1;

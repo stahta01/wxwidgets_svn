@@ -12,12 +12,7 @@
 #ifdef __GNUG__
 #pragma implementation "joystick.h"
 #endif
-
-#include "wx/defs.h"
-
 #if wxUSE_JOYSTICK
-
-#include "wx/joystick.h"
 
 #include <linux/joystick.h>
 #include <sys/types.h>
@@ -26,9 +21,9 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-
 #include "wx/event.h"
 #include "wx/window.h"
+#include "wx/gtk/joystick.h"
 
 #define JOYSTICK_AXE_MAX 32767
 #define JOYSTICK_AXE_MIN -32767

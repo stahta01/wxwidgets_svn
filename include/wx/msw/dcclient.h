@@ -38,36 +38,34 @@ WX_DECLARE_EXPORTED_OBJARRAY(wxPaintDCInfo, wxArrayDCInfo);
 
 class WXDLLEXPORT wxWindowDC : public wxDC
 {
+    DECLARE_DYNAMIC_CLASS(wxWindowDC)
+
 public:
-    // default ctor
     wxWindowDC();
 
     // Create a DC corresponding to the whole window
     wxWindowDC(wxWindow *win);
 
-protected:
-    // intiialize the newly created DC
-    void InitDC();
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxWindowDC)
+    virtual ~wxWindowDC();
 };
 
 class WXDLLEXPORT wxClientDC : public wxWindowDC
 {
+    DECLARE_DYNAMIC_CLASS(wxClientDC)
+
 public:
-    // default ctor
     wxClientDC();
 
     // Create a DC corresponding to the client area of the window
     wxClientDC(wxWindow *win);
 
-private:
-    DECLARE_DYNAMIC_CLASS(wxClientDC)
+    virtual ~wxClientDC();
 };
 
 class WXDLLEXPORT wxPaintDC : public wxWindowDC
 {
+    DECLARE_DYNAMIC_CLASS(wxPaintDC)
+
 public:
     wxPaintDC();
 
@@ -76,17 +74,11 @@ public:
 
     virtual ~wxPaintDC();
 
-    // find the entry for this DC in the cache (keyed by the window)
-    static WXHDC FindDCInCache(wxWindow* win);
-
 protected:
     static wxArrayDCInfo ms_cache;
 
     // find the entry for this DC in the cache (keyed by the window)
     wxPaintDCInfo *FindInCache(size_t *index = NULL) const;
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxPaintDC)
 };
 
 #endif

@@ -63,10 +63,6 @@ public:
         m_bmpUnchecked = bmpUnchecked;
         m_bOwnerDrawn = TRUE; }
 
-  void SetBitmap(const wxBitmap& bmpChecked)
-      { m_bmpChecked = bmpChecked;
-        m_bOwnerDrawn = TRUE; }
-
   const wxBitmap& GetBitmap(bool bChecked = TRUE) const
       { return (bChecked ? m_bmpChecked : m_bmpUnchecked); }
 
@@ -91,10 +87,6 @@ public:
   const wxString& GetName() const { return m_strName;    }
   void SetCheckable(bool checkable) { m_bCheckable = checkable; }
   bool IsCheckable() const { return m_bCheckable; }
-
-  // this is for menu items only: accel string is drawn right aligned after the
-  // menu item if not empty
-  void SetAccelString(const wxString& strAccel) { m_strAccel = strAccel; }
 
   // this function might seem strange, but if it returns FALSE it means that
   // no non-standard attribute are set, so there is no need for this control
@@ -129,8 +121,7 @@ public:
   virtual bool OnDrawItem(wxDC& dc, const wxRect& rc, wxODAction act, wxODStatus stat);
 
 protected:
-  wxString  m_strName,      // label for a manu item
-            m_strAccel;     // the accel string ("Ctrl-F17") if any
+  wxString  m_strName;      // label for a manu item
 
 private:
   static size_t ms_nDefaultMarginWidth; // menu check mark width

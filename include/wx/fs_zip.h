@@ -3,7 +3,6 @@
 // Purpose:     ZIP file system
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// CVS-ID:      $Id$
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -27,8 +26,6 @@
 
 #include "wx/filesys.h"
 
-class WXDLLEXPORT wxHashTableLong;
-
 //--------------------------------------------------------------------------------
 // wxZipFSHandler
 //--------------------------------------------------------------------------------
@@ -48,7 +45,6 @@ class WXDLLEXPORT wxZipFSHandler : public wxFileSystemHandler
         void *m_Archive;
         wxString m_Pattern, m_BaseDir, m_ZipFile;
         bool m_AllowDirs, m_AllowFiles;
-        wxHashTableLong *m_DirsFound;
         
         wxString DoFind();
 };

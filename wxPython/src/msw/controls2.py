@@ -57,7 +57,7 @@ class wxListItemAttr(wxListItemAttrPtr):
 
 
 
-class wxListItemPtr(wxObjectPtr):
+class wxListItemPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -262,6 +262,7 @@ class wxListEventPtr(wxNotifyEventPtr):
         return val
     def GetItem(self, *_args, **_kwargs):
         val = apply(controls2c.wxListEvent_GetItem,(self,) + _args, _kwargs)
+        if val: val = wxListItemPtr(val) 
         return val
     def __setattr__(self,name,value):
         if name == "m_code" :
@@ -318,10 +319,6 @@ class wxListCtrlPtr(wxControlPtr):
     def Arrange(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_Arrange,(self,) + _args, _kwargs)
         return val
-    def AssignImageList(self, *_args, **_kwargs):
-        val = apply(controls2c.wxListCtrl_AssignImageList,(self,) + _args, _kwargs)
-        _args[0].thisown = 0
-        return val
     def DeleteItem(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_DeleteItem,(self,) + _args, _kwargs)
         return val
@@ -339,12 +336,14 @@ class wxListCtrlPtr(wxControlPtr):
         return val
     def EditLabel(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_EditLabel,(self,) + _args, _kwargs)
+        if val: val = wxTextCtrlPtr(val) 
         return val
     def EndEditLabel(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_EndEditLabel,(self,) + _args, _kwargs)
         return val
     def GetEditControl(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_GetEditControl,(self,) + _args, _kwargs)
+        if val: val = wxTextCtrlPtr(val) 
         return val
     def EnsureVisible(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_EnsureVisible,(self,) + _args, _kwargs)
@@ -369,12 +368,14 @@ class wxListCtrlPtr(wxControlPtr):
         return val
     def GetImageList(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_GetImageList,(self,) + _args, _kwargs)
+        if val: val = wxImageListPtr(val) 
         return val
     def GetItemData(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_GetItemData,(self,) + _args, _kwargs)
         return val
     def GetItem(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_GetItem,(self,) + _args, _kwargs)
+        if val: val = wxListItemPtr(val) ; val.thisown = 1
         return val
     def GetItemPosition(self, *_args, **_kwargs):
         val = apply(controls2c.wxListCtrl_GetItemPosition,(self,) + _args, _kwargs)
@@ -512,7 +513,7 @@ class wxTreeItemId(wxTreeItemIdPtr):
 
 
 
-class wxTreeItemDataPtr(wxObjectPtr):
+class wxTreeItemDataPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -577,10 +578,6 @@ class wxTreeCtrlPtr(wxControlPtr):
     def _setSelf(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl__setSelf,(self,) + _args, _kwargs)
         return val
-    def AssignImageList(self, *_args, **_kwargs):
-        val = apply(controls2c.wxTreeCtrl_AssignImageList,(self,) + _args, _kwargs)
-        _args[0].thisown = 0
-        return val
     def GetCount(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl_GetCount,(self,) + _args, _kwargs)
         return val
@@ -592,9 +589,11 @@ class wxTreeCtrlPtr(wxControlPtr):
         return val
     def GetImageList(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl_GetImageList,(self,) + _args, _kwargs)
+        if val: val = wxImageListPtr(val) 
         return val
     def GetStateImageList(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl_GetStateImageList,(self,) + _args, _kwargs)
+        if val: val = wxImageListPtr(val) 
         return val
     def SetImageList(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl_SetImageList,(self,) + _args, _kwargs)
@@ -760,9 +759,11 @@ class wxTreeCtrlPtr(wxControlPtr):
         return val
     def EditLabel(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl_EditLabel,(self,) + _args, _kwargs)
+        if val: val = wxTextCtrlPtr(val) 
         return val
     def GetEditControl(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl_GetEditControl,(self,) + _args, _kwargs)
+        if val: val = wxTextCtrlPtr(val) 
         return val
     def EndEditLabel(self, *_args, **_kwargs):
         val = apply(controls2c.wxTreeCtrl_EndEditLabel,(self,) + _args, _kwargs)
@@ -875,22 +876,6 @@ wxLIST_FORMAT_LEFT = controls2c.wxLIST_FORMAT_LEFT
 wxLIST_FORMAT_RIGHT = controls2c.wxLIST_FORMAT_RIGHT
 wxLIST_FORMAT_CENTRE = controls2c.wxLIST_FORMAT_CENTRE
 wxLIST_FORMAT_CENTER = controls2c.wxLIST_FORMAT_CENTER
-wxEVT_COMMAND_LIST_BEGIN_DRAG = controls2c.wxEVT_COMMAND_LIST_BEGIN_DRAG
-wxEVT_COMMAND_LIST_BEGIN_RDRAG = controls2c.wxEVT_COMMAND_LIST_BEGIN_RDRAG
-wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT = controls2c.wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT
-wxEVT_COMMAND_LIST_END_LABEL_EDIT = controls2c.wxEVT_COMMAND_LIST_END_LABEL_EDIT
-wxEVT_COMMAND_LIST_DELETE_ITEM = controls2c.wxEVT_COMMAND_LIST_DELETE_ITEM
-wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS = controls2c.wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS
-wxEVT_COMMAND_LIST_GET_INFO = controls2c.wxEVT_COMMAND_LIST_GET_INFO
-wxEVT_COMMAND_LIST_SET_INFO = controls2c.wxEVT_COMMAND_LIST_SET_INFO
-wxEVT_COMMAND_LIST_ITEM_SELECTED = controls2c.wxEVT_COMMAND_LIST_ITEM_SELECTED
-wxEVT_COMMAND_LIST_ITEM_DESELECTED = controls2c.wxEVT_COMMAND_LIST_ITEM_DESELECTED
-wxEVT_COMMAND_LIST_KEY_DOWN = controls2c.wxEVT_COMMAND_LIST_KEY_DOWN
-wxEVT_COMMAND_LIST_INSERT_ITEM = controls2c.wxEVT_COMMAND_LIST_INSERT_ITEM
-wxEVT_COMMAND_LIST_COL_CLICK = controls2c.wxEVT_COMMAND_LIST_COL_CLICK
-wxEVT_COMMAND_LIST_ITEM_ACTIVATED = controls2c.wxEVT_COMMAND_LIST_ITEM_ACTIVATED
-wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK = controls2c.wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK
-wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK = controls2c.wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK
 wxTreeItemIcon_Normal = controls2c.wxTreeItemIcon_Normal
 wxTreeItemIcon_Selected = controls2c.wxTreeItemIcon_Selected
 wxTreeItemIcon_Expanded = controls2c.wxTreeItemIcon_Expanded
@@ -910,21 +895,3 @@ wxTREE_HITTEST_TORIGHT = controls2c.wxTREE_HITTEST_TORIGHT
 wxTREE_HITTEST_ONITEMUPPERPART = controls2c.wxTREE_HITTEST_ONITEMUPPERPART
 wxTREE_HITTEST_ONITEMLOWERPART = controls2c.wxTREE_HITTEST_ONITEMLOWERPART
 wxTREE_HITTEST_ONITEM = controls2c.wxTREE_HITTEST_ONITEM
-wxEVT_COMMAND_TREE_BEGIN_DRAG = controls2c.wxEVT_COMMAND_TREE_BEGIN_DRAG
-wxEVT_COMMAND_TREE_BEGIN_RDRAG = controls2c.wxEVT_COMMAND_TREE_BEGIN_RDRAG
-wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT = controls2c.wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT
-wxEVT_COMMAND_TREE_END_LABEL_EDIT = controls2c.wxEVT_COMMAND_TREE_END_LABEL_EDIT
-wxEVT_COMMAND_TREE_DELETE_ITEM = controls2c.wxEVT_COMMAND_TREE_DELETE_ITEM
-wxEVT_COMMAND_TREE_GET_INFO = controls2c.wxEVT_COMMAND_TREE_GET_INFO
-wxEVT_COMMAND_TREE_SET_INFO = controls2c.wxEVT_COMMAND_TREE_SET_INFO
-wxEVT_COMMAND_TREE_ITEM_EXPANDED = controls2c.wxEVT_COMMAND_TREE_ITEM_EXPANDED
-wxEVT_COMMAND_TREE_ITEM_EXPANDING = controls2c.wxEVT_COMMAND_TREE_ITEM_EXPANDING
-wxEVT_COMMAND_TREE_ITEM_COLLAPSED = controls2c.wxEVT_COMMAND_TREE_ITEM_COLLAPSED
-wxEVT_COMMAND_TREE_ITEM_COLLAPSING = controls2c.wxEVT_COMMAND_TREE_ITEM_COLLAPSING
-wxEVT_COMMAND_TREE_SEL_CHANGED = controls2c.wxEVT_COMMAND_TREE_SEL_CHANGED
-wxEVT_COMMAND_TREE_SEL_CHANGING = controls2c.wxEVT_COMMAND_TREE_SEL_CHANGING
-wxEVT_COMMAND_TREE_KEY_DOWN = controls2c.wxEVT_COMMAND_TREE_KEY_DOWN
-wxEVT_COMMAND_TREE_ITEM_ACTIVATED = controls2c.wxEVT_COMMAND_TREE_ITEM_ACTIVATED
-wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK = controls2c.wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK
-wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK = controls2c.wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK
-wxEVT_COMMAND_TREE_END_DRAG = controls2c.wxEVT_COMMAND_TREE_END_DRAG

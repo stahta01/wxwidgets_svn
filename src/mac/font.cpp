@@ -16,15 +16,12 @@
 #include "wx/defs.h"
 #include "wx/string.h"
 #include "wx/font.h"
-#include "wx/fontutil.h"
 #include "wx/gdicmn.h"
-#include "wx/utils.h"
 
-#include "wx/fontutil.h"
-
-#if !USE_SHARED_LIBRARIES
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
-#endif
+
+
+
 
 // ============================================================================
 // implementation
@@ -80,7 +77,7 @@ void wxFontRefData::MacFindFont()
 				::GetFNum( "\pTimes" , &m_macFontNum) ;
 				break ;
 			case wxSWISS :
-				::GetFNum( "\pGeneva" , &m_macFontNum) ;
+				::GetFNum( "\pHelvetica" , &m_macFontNum) ;
 				break ;
 			case wxMODERN :
 				::GetFNum( "\pMonaco" , &m_macFontNum) ;
@@ -95,13 +92,9 @@ void wxFontRefData::MacFindFont()
 			m_macFontNum = ::GetAppFont() ;
 		else
 		{
-#if TARGET_CARBON
-			c2pstrcpy( (StringPtr) wxBuffer, m_faceName ) ;
-#else
-			strcpy( (char *) wxBuffer, m_faceName ) ;
-			c2pstr( (char *) wxBuffer ) ;
-#endif
-			::GetFNum( (StringPtr) wxBuffer, &m_macFontNum);
+			strcpy(wxBuffer, m_faceName);
+			C2PStr(wxBuffer);
+			::GetFNum( (unsigned char*) wxBuffer, &m_macFontNum);
 		}
 	}
 
@@ -123,19 +116,6 @@ void wxFont::Init()
 {
     if ( wxTheFontList )
         wxTheFontList->Append(this);
-}
-
-bool wxFont::Create(const wxNativeFontInfo& info)
-{
-    return Create(info.pointSize, info.family, info.style, info.weight,
-                  info.underlined, info.faceName, info.encoding);
-}
-
-wxFont::wxFont(const wxString& fontdesc)
-{
-    wxNativeFontInfo info;
-    if ( info.FromString(fontdesc) )
-        (void)Create(info);
 }
 
 bool wxFont::Create(int pointSize,

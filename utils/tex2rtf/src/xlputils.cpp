@@ -41,10 +41,6 @@ wxList hyperLinks(wxKEY_INTEGER);
 wxList hyperLabels(wxKEY_STRING);
 FILE *Index = NULL;
 
-
-extern wxHashTable TexReferences;
-
-
 void PadToTab(int tabPos)
 {
   int currentCol = GetCurrentColumn();

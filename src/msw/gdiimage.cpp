@@ -30,7 +30,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
-    #include "wx/log.h"
 #endif // WX_PRECOMP
 
 #include "wx/msw/private.h"
@@ -41,6 +40,10 @@
 #include "wx/msw/bitmap.h"
 #include "wx/msw/gdiimage.h"
 #include "wx/bitmap.h"
+
+#if wxUSE_XPM_IN_MSW
+#   include "wx/xpmhand.h"
+#endif // wxUSE_XPM_IN_MSW
 
 #ifdef __WIN16__
 #   include "wx/msw/curico.h"
@@ -297,6 +300,14 @@ void wxGDIImage::InitStandardHandlers()
 {
     AddHandler(new wxBMPResourceHandler);
     AddHandler(new wxBMPFileHandler);
+
+    // GRG: Add these handlers by default if XPM support is enabled
+
+#if wxUSE_XPM_IN_MSW
+    AddHandler(new wxXPMFileHandler);
+    AddHandler(new wxXPMDataHandler);
+#endif // wxUSE_XPM_IN_MSW
+
     AddHandler(new wxICOResourceHandler);
     AddHandler(new wxICOFileHandler);
 }
@@ -379,7 +390,7 @@ bool wxBMPFileHandler::SaveFile(wxBitmap *bitmap,
 
 bool wxICOFileHandler::LoadIcon(wxIcon *icon,
                                 const wxString& name,
-                                long WXUNUSED(flags),
+                                long flags,
                                 int desiredWidth, int desiredHeight)
 {
 #if wxUSE_RESOURCE_LOADING_IN_MSW
@@ -389,41 +400,7 @@ bool wxICOFileHandler::LoadIcon(wxIcon *icon,
     wxSize size;
 
 #ifdef __WIN32__
-    HICON hicon = NULL;
-
-    // were we asked for a large icon?
-    if ( desiredWidth == ::GetSystemMetrics(SM_CXICON) &&
-         desiredHeight == ::GetSystemMetrics(SM_CYICON) )
-    {
-        // get the first large icon from file
-        if ( !::ExtractIconEx(name, 0, &hicon, NULL, 1) )
-        {
-            // it is not an error, but it might still be useful to be informed
-            // about it optionally
-            wxLogTrace(_T("iconload"),
-                       _T("No large icons found in the file '%s'."),
-                       name.c_str());
-        }
-    }
-    else if ( desiredWidth == ::GetSystemMetrics(SM_CXSMICON) &&
-              desiredHeight == ::GetSystemMetrics(SM_CYSMICON) )
-    {
-        // get the first small icon from file
-        if ( !::ExtractIconEx(name, 0, NULL, &hicon, 1) )
-        {
-            wxLogTrace(_T("iconload"),
-                       _T("No small icons found in the file '%s'."),
-                       name.c_str());
-        }
-    }
-    //else: not standard size, load below
-
-    if ( !hicon )
-    {
-        // take any (the first one) icon from the file by default
-        hicon = ::ExtractIcon(wxGetInstance(), name, 0 /* first */);
-    }
-
+    HICON hicon = ::ExtractIcon(wxGetInstance(), name, 0 /* first */);
     if ( !hicon )
     {
         wxLogSysError(_T("Failed to load icon from the file '%s'"),
@@ -442,10 +419,9 @@ bool wxICOFileHandler::LoadIcon(wxIcon *icon,
     if ( (desiredWidth != -1 && desiredWidth != size.x) ||
          (desiredHeight != -1 && desiredHeight != size.y) )
     {
-        wxLogTrace(_T("iconload"),
-                   _T("Returning FALSE from wxICOFileHandler::Load because of the size mismatch: actual (%d, %d), requested (%d, %d)"),
-                   size.x, size.y,
-                   desiredWidth, desiredHeight);
+        wxLogDebug(_T("Returning FALSE from wxICOFileHandler::Load because of the size mismatch: actual (%d, %d), requested (%d, %d)"),
+                      size.x, size.y,
+                      desiredWidth, desiredHeight);
 
         ::DestroyIcon(hicon);
 
@@ -463,7 +439,7 @@ bool wxICOFileHandler::LoadIcon(wxIcon *icon,
 
 bool wxICOResourceHandler::LoadIcon(wxIcon *icon,
                                     const wxString& name,
-                                    long WXUNUSED(flags),
+                                    long flags,
                                     int desiredWidth, int desiredHeight)
 {
     HICON hicon;

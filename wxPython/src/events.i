@@ -30,10 +30,7 @@
 
 //---------------------------------------------------------------------------
 
-
-int wxNewEventType();
-
-class wxEvent : public wxObject {
+class wxEvent {
 public:
     wxEvent(int id = 0);
     ~wxEvent();
@@ -160,10 +157,6 @@ public:
     long GetX();
     long GetY();
 
-    int GetWheelRotation() const { return m_wheelRotation; }
-    int GetWheelDelta() const { return m_wheelDelta; }
-    int GetLinesPerAction() const { return m_linesPerAction; }
-
     long          m_x, m_y;
     bool          m_leftDown;
     bool          m_middleDown;
@@ -172,9 +165,6 @@ public:
     bool          m_shiftDown;
     bool          m_altDown;
     bool          m_metaDown;
-    int           m_wheelRotation;
-    int           m_wheelDelta;
-    int           m_linesPerAction;
 };
 
 //---------------------------------------------------------------------------
@@ -291,8 +281,7 @@ public:
 
 class wxIconizeEvent: public wxEvent {
 public:
-    wxIconizeEvent(int id = 0, bool iconized = TRUE);
-    bool Iconized();
+    wxIconizeEvent(int id = 0);
 };
 
 //---------------------------------------------------------------------------

@@ -3,8 +3,8 @@
 
 # Note that this is NOT a relocatable package
 %define pref /usr
-%define ver 2.3.1
-%define rel 1
+%define ver 2.2.7
+%define rel 0
 
 Summary: The Motif/Lesstif port of the wxWindows library
 Name: wxMotif

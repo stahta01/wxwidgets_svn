@@ -128,19 +128,19 @@
 
 #ifdef StartDoc
    #undef StartDoc
-   #if defined( __GNUG__ ) && !wxCHECK_W32API_VERSION( 0, 5 )
+   #ifdef __GNUG__
       #define DOCINFOW DOCINFO
       #define DOCINFOA DOCINFO
    #endif
    #ifdef _UNICODE
    inline int StartDoc(HDC h, CONST DOCINFOW* info)
    {
-      return StartDocW(h, (DOCINFOW*) info);
+      return StartDocW(h, info);
    }
    #else
    inline int StartDoc(HDC h, CONST DOCINFOA* info)
    {
-      return StartDocA(h, (DOCINFOA*) info);
+      return StartDocA(h, info);
    }
    #endif
 #endif

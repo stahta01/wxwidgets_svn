@@ -41,7 +41,7 @@ static void wxPyCoreAPI_IMPORT() {
 #define int_LIST_helper(a)              (wxPyCoreAPIPtr->p_int_LIST_helper(a))
 #define long_LIST_helper(a)             (wxPyCoreAPIPtr->p_long_LIST_helper(a))
 #define string_LIST_helper(a)           (wxPyCoreAPIPtr->p_string_LIST_helper(a))
-#define wxPoint_LIST_helper(a,b)        (wxPyCoreAPIPtr->p_wxPoint_LIST_helper(a, b))
+#define wxPoint_LIST_helper(a)          (wxPyCoreAPIPtr->p_wxPoint_LIST_helper(a))
 #define wxBitmap_LIST_helper(a)         (wxPyCoreAPIPtr->p_wxBitmap_LIST_helper(a))
 #define wxString_LIST_helper(a)         (wxPyCoreAPIPtr->p_wxString_LIST_helper(a))
 #define wxAcceleratorEntry_LIST_helper(a) (wxPyCoreAPIPtr->p_wxAcceleratorEntry_LIST_helper(a))
@@ -57,10 +57,6 @@ static void wxPyCoreAPI_IMPORT() {
 #define wxPyCBH_callCallback(a, b)      (wxPyCoreAPIPtr->p_wxPyCBH_callCallback(a, b))
 #define wxPyCBH_callCallbackObj(a, b)   (wxPyCoreAPIPtr->p_wxPyCBH_callCallbackObj(a, b))
 #define wxPyCBH_delete(a)               (wxPyCoreAPIPtr->p_wxPyCBH_delete(a))
-
-#define wxPyClassExists(a)              (wxPyCoreAPIPtr->p_wxPyClassExists(a))
-#define wxPyMake_wxObject(a)            (wxPyCoreAPIPtr->p_wxPyMake_wxObject(a))
-#define wxPyPtrTypeMap_Add(a, b)        (wxPyCoreAPIPtr->p_wxPyPtrTypeMap_Add(a, b))
 
 
 // This one is special.  It's the first function called in SWIG generated

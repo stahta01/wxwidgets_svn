@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
+    #pragma interface "text.cpp"
     #pragma implementation "text.cpp"
 #endif
 
@@ -140,6 +141,7 @@ public:
 
     void OnSetEditable(wxCommandEvent& event);
     void OnSetEnabled(wxCommandEvent& event);
+    void OnClear(wxCommandEvent& event);
 
     void OnIdle( wxIdleEvent& event );
 
@@ -165,7 +167,7 @@ enum
     TEXT_ABOUT,
     TEXT_LOAD,
     TEXT_SAVE,
-    TEXT_CLEAR,
+    TEXT_CLEAR_LOG,
 
     // clipboard menu
     TEXT_CLIPBOARD_COPY = 200,
@@ -179,18 +181,19 @@ enum
     TEXT_MOVE_ENDTEXT = 400,
     TEXT_MOVE_ENDENTRY,
     TEXT_SET_EDITABLE,
-    TEXT_SET_ENABLED
+    TEXT_SET_ENABLED,
+    TEXT_CLEAR
 };
 
 bool MyApp::OnInit()
 {
     // Create the main frame window
     MyFrame *frame = new MyFrame((wxFrame *) NULL,
-            "Text wxWindows sample", 50, 50, 700, 420);
+            "Text wxWindows sample", 50, 50, 660, 420);
     frame->SetSizeHints( 500, 400 );
 
     wxMenu *file_menu = new wxMenu;
-    file_menu->Append(TEXT_CLEAR, "&Clear the log\tCtrl-C",
+    file_menu->Append(TEXT_CLEAR_LOG, "&Clear the log\tCtrl-C",
                       "Clear the log window contents");
     file_menu->Append(TEXT_SAVE, "&Save file\tCtrl-S",
                       "Save the text control contents to file");
@@ -228,6 +231,7 @@ bool MyApp::OnInit()
     menuText->Append(TEXT_MOVE_ENDENTRY, "Move cursor to the end of &entry");
     menuText->Append(TEXT_SET_EDITABLE, "Toggle &editable state", "", TRUE);
     menuText->Append(TEXT_SET_ENABLED, "Toggle e&nabled state", "", TRUE);
+    menuText->Append(TEXT_CLEAR, "&Clear text");
     menuText->Check(TEXT_SET_EDITABLE, TRUE);
     menuText->Check(TEXT_SET_ENABLED, TRUE);
     menu_bar->Append(menuText, "&Text");
@@ -590,7 +594,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     // multi line text controls
 
-    m_horizontal = new MyTextCtrl( this, -1, "Multiline text control with a horizontal scrollbar.",
+    m_horizontal = new MyTextCtrl( this, -1, "",
       wxPoint(10,170), wxSize(140,70), wxTE_MULTILINE | wxHSCROLL );
 
     // a little hack to use the command line argument for encoding testing
@@ -614,7 +618,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     }
     else
     {
-        m_horizontal->SetValue("Text in default encoding");
+        m_horizontal->SetValue("Text in default encoding:\n"
+                               "Multiline text control with a horizontal scrollbar.");
     }
 
     m_multitext = new MyTextCtrl( this, -1, "Multi line.",
@@ -643,23 +648,10 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
                                 "and a very very very very very "
                                 "very very very long line to test"
                                 "wxHSCROLL style",
-                                wxPoint(450, 10), wxSize(230, 230),
+                                wxPoint(450, 10), wxSize(200, 230),
                                 wxTE_RICH | wxTE_MULTILINE | wxHSCROLL);
-
-    m_textrich->SetStyle(0, 10, *wxRED);
-    m_textrich->SetStyle(10, 20, *wxBLUE);
-    m_textrich->SetStyle(30, 40,
-                         wxTextAttr(*wxGREEN, wxNullColour, *wxITALIC_FONT));
-    m_textrich->SetDefaultStyle(wxTextAttr());
-    m_textrich->AppendText(_T("\n\nFirst 10 characters should be in red\n"));
-    m_textrich->AppendText(_T("Next 10 characters should be in blue\n"));
-    m_textrich->AppendText(_T("Next 10 characters should be normal\n"));
-    m_textrich->AppendText(_T("And the next 10 characters should be green and italic\n"));
-    m_textrich->SetDefaultStyle(wxTextAttr(*wxCYAN, *wxBLUE));
-    m_textrich->AppendText(_T("This text should be cyan on blue\n"));
-    m_textrich->SetDefaultStyle(*wxBLUE);
-    m_textrich->AppendText(_T("And this should be in blue and the text you ")
-                           _T("type should be in blue as well"));
+    m_textrich->SetForegroundColour(wxColour(0, 255, 255));
+    m_textrich->SetBackgroundColour(*wxBLUE);
 }
 
 void MyPanel::OnSize( wxSizeEvent &event )
@@ -775,11 +767,11 @@ void MyPanel::DoMoveToEndOfEntry()
 //----------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(TEXT_QUIT,   MyFrame::OnQuit)
-    EVT_MENU(TEXT_ABOUT,  MyFrame::OnAbout)
-    EVT_MENU(TEXT_SAVE,   MyFrame::OnFileSave)
-    EVT_MENU(TEXT_LOAD,   MyFrame::OnFileLoad)
-    EVT_MENU(TEXT_CLEAR,  MyFrame::OnLogClear)
+    EVT_MENU(TEXT_QUIT,     MyFrame::OnQuit)
+    EVT_MENU(TEXT_ABOUT,    MyFrame::OnAbout)
+    EVT_MENU(TEXT_SAVE,     MyFrame::OnFileSave)
+    EVT_MENU(TEXT_LOAD,     MyFrame::OnFileLoad)
+    EVT_MENU(TEXT_CLEAR_LOG,MyFrame::OnLogClear)
 
 #if wxUSE_TOOLTIPS
     EVT_MENU(TEXT_TOOLTIPS_SETDELAY,  MyFrame::OnSetTooltipDelay)
@@ -796,6 +788,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
     EVT_MENU(TEXT_SET_EDITABLE,       MyFrame::OnSetEditable)
     EVT_MENU(TEXT_SET_ENABLED,        MyFrame::OnSetEnabled)
+    EVT_MENU(TEXT_CLEAR,              MyFrame::OnClear)
 
     EVT_IDLE(MyFrame::OnIdle)
 END_EVENT_TABLE()
@@ -891,6 +884,15 @@ void MyFrame::OnSetEnabled(wxCommandEvent& WXUNUSED(event))
     m_panel->m_multitext->Enable(enabled);
     m_panel->m_readonly->Enable(enabled);
     m_panel->m_textrich->Enable(enabled);
+}
+
+void MyFrame::OnClear(wxCommandEvent& WXUNUSED(event))
+{
+    m_panel->m_text->Clear();
+    m_panel->m_password->Clear();
+    m_panel->m_multitext->Clear();
+    m_panel->m_readonly->Clear();
+    m_panel->m_textrich->Clear();
 }
 
 void MyFrame::OnFileSave(wxCommandEvent& event)

@@ -24,223 +24,115 @@ enum wxRegionContain {
 };
 
 // So far, for internal use only
-enum wxRegionOp { wxRGN_AND         // Creates the intersection of the two combined regions.
-                 ,wxRGN_COPY         // Creates a copy of the region identified by hrgnSrc1.
-                 ,wxRGN_DIFF         // Combines the parts of hrgnSrc1 that are not part of hrgnSrc2.
-                 ,wxRGN_OR           // Creates the union of two combined regions.
-                 ,wxRGN_XOR          // Creates the union of two combined regions except for any overlapping areas.
-                };
+enum wxRegionOp {
+wxRGN_AND,          // Creates the intersection of the two combined regions.
+wxRGN_COPY,         // Creates a copy of the region identified by hrgnSrc1.
+wxRGN_DIFF,         // Combines the parts of hrgnSrc1 that are not part of hrgnSrc2.
+wxRGN_OR,           // Creates the union of two combined regions.
+wxRGN_XOR           // Creates the union of two combined regions except for any overlapping areas.
+};
 
-class WXDLLEXPORT wxRegion : public wxGDIObject
-{
+class WXDLLEXPORT wxRegion : public wxGDIObject {
 DECLARE_DYNAMIC_CLASS(wxRegion);
     friend class WXDLLEXPORT wxRegionIterator;
 public:
-    wxRegion( wxCoord x
-             ,wxCoord y
-             ,wxCoord vWidth
-             ,wxCoord vHeight
-            );
-    wxRegion( const wxPoint& rTopLeft
-             ,const wxPoint& rBottomRight
-            );
-    wxRegion(const wxRect& rRect);
+    wxRegion(wxCoord x, wxCoord y, wxCoord w, wxCoord h);
+    wxRegion(const wxPoint& topLeft, const wxPoint& bottomRight);
+    wxRegion(const wxRect& rect);
     wxRegion(WXHRGN hRegion); // Hangs on to this region
 
     wxRegion();
     ~wxRegion();
 
-    //
-    // Copying
-    //
-    inline wxRegion(const wxRegion& rSrc)
-        { Ref(rSrc); }
-    inline wxRegion& operator = (const wxRegion& rSrc)
-        { Ref(rSrc); return (*this); }
+    //# Copying
+    inline wxRegion(const wxRegion& r)
+        { Ref(r); }
+    inline wxRegion& operator = (const wxRegion& r)
+        { Ref(r); return (*this); }
 
-    //
-    // Modify region
-    //
-
-    //
+    //# Modify region
     // Clear current region
-    //
-    void Clear(void);
+    void Clear();
 
-    //
     // Union rectangle or region with this.
-    //
-    inline bool Union( wxCoord x
-                      ,wxCoord y
-                      ,wxCoord vWidth
-                      ,wxCoord vHeight
-                     )
-    {
-        return Combine( x
-                       ,y
-                       ,vWidth
-                       ,vHeight
-                       ,wxRGN_OR
-                      );
-    }
-    inline bool Union( const wxRect& rRect) { return Combine(rRect, wxRGN_OR); }
-    inline bool Union(const wxRegion& rRegion) { return Combine(rRegion, wxRGN_OR); }
+    inline bool Union(wxCoord x, wxCoord y, wxCoord width, wxCoord height) { return Combine(x, y, width, height, wxRGN_OR); }
+    inline bool Union(const wxRect& rect) { return Combine(rect, wxRGN_OR); }
+    inline bool Union(const wxRegion& region) { return Combine(region, wxRGN_OR); }
 
-    //
     // Intersect rectangle or region with this.
-    //
-    inline bool Intersect( wxCoord x
-                          ,wxCoord y
-                          ,wxCoord vWidth
-                          ,wxCoord vHeight
-                         )
-    {
-        return Combine( x
-                       ,y
-                       ,vWidth
-                       ,vHeight
-                       ,wxRGN_AND
-                      );
-    }
-    inline bool Intersect(const wxRect& rRect)  { return Combine(rRect, wxRGN_AND); }
-    inline bool Intersect(const wxRegion& rRegion)  { return Combine(rRegion, wxRGN_AND); }
+    inline bool Intersect(wxCoord x, wxCoord y, wxCoord width, wxCoord height) { return Combine(x, y, width, height, wxRGN_AND); }
+    inline bool Intersect(const wxRect& rect)  { return Combine(rect, wxRGN_AND); }
+    inline bool Intersect(const wxRegion& region)  { return Combine(region, wxRGN_AND); }
 
-    //
     // Subtract rectangle or region from this:
     // Combines the parts of 'this' that are not part of the second region.
-    //
-    inline bool Subtract( wxCoord x
-                         ,wxCoord y
-                         ,wxCoord vWidth
-                         ,wxCoord vHeight
-                        )
-    {
-        return Combine( x
-                       ,y
-                       ,vWidth
-                       ,vHeight
-                       ,wxRGN_DIFF
-                      );
-    }
-    inline bool Subtract(const wxRect& rRect)  { return Combine(rRect, wxRGN_DIFF); }
-    inline bool Subtract(const wxRegion& rRegion)  { return Combine(rRegion, wxRGN_DIFF); }
+    inline bool Subtract(wxCoord x, wxCoord y, wxCoord width, wxCoord height) { return Combine(x, y, width, height, wxRGN_DIFF); }
+    inline bool Subtract(const wxRect& rect)  { return Combine(rect, wxRGN_DIFF); }
+    inline bool Subtract(const wxRegion& region)  { return Combine(region, wxRGN_DIFF); }
 
-    //
     // XOR: the union of two combined regions except for any overlapping areas.
-    //
-    inline bool Xor( wxCoord x
-                    ,wxCoord y
-                    ,wxCoord vWidth
-                    ,wxCoord vHeight
-                   )
-    {
-        return Combine( x
-                       ,y
-                       ,vWidth
-                       ,vHeight
-                       ,wxRGN_XOR
-                      );
-    }
-    inline bool Xor(const wxRect& rRect)  { return Combine(rRect, wxRGN_XOR); }
-    inline bool Xor(const wxRegion& rRegion)  { return Combine(rRegion, wxRGN_XOR); }
+    inline bool Xor(wxCoord x, wxCoord y, wxCoord width, wxCoord height) { return Combine(x, y, width, height, wxRGN_XOR); }
+    inline bool Xor(const wxRect& rect)  { return Combine(rect, wxRGN_XOR); }
+    inline bool Xor(const wxRegion& region)  { return Combine(region, wxRGN_XOR); }
 
-    //
-    // Information on region
+    //# Information on region
     // Outer bounds of region
-    //
-    void   GetBox( wxCoord& rX
-                  ,wxCoord& rY
-                  ,wxCoord& rWidth
-                  ,wxCoord& rHeight
-                 ) const;
-    wxRect GetBox(void) const;
+    void GetBox(wxCoord& x, wxCoord& y, wxCoord&w, wxCoord &h) const;
+    wxRect GetBox() const ;
 
-    //
     // Is region empty?
-    //
-    bool        Empty(void) const;
+    bool Empty() const;
     inline bool IsEmpty() const { return Empty(); }
 
-    //
-    // Tests
+    //# Tests
     // Does the region contain the point (x,y)?
-    //
-    wxRegionContain Contains( wxCoord lX
-                             ,wxCoord lY
-                            ) const;
-    //
+    wxRegionContain Contains(wxCoord x, wxCoord y) const;
     // Does the region contain the point pt?
-    //
-    wxRegionContain Contains(const wxPoint& rPoint) const;
-
-    //
+    wxRegionContain Contains(const wxPoint& pt) const;
     // Does the region contain the rectangle (x, y, w, h)?
-    //
-    wxRegionContain Contains( wxCoord x
-                             ,wxCoord y
-                             ,wxCoord lWidth
-                             ,wxCoord lHeight
-                            ) const;
-
-    //
+    wxRegionContain Contains(wxCoord x, wxCoord y, wxCoord w, wxCoord h) const;
     // Does the region contain the rectangle rect?
-    //
-    wxRegionContain Contains(const wxRect& rRect) const;
+    wxRegionContain Contains(const wxRect& rect) const;
 
-    //
-    // Internal
-    //
-    bool Combine( wxCoord    x
-                 ,wxCoord    y
-                 ,wxCoord    vWidth
-                 ,wxCoord    vHeight
-                 ,wxRegionOp eOp
-                );
-    bool Combine( const wxRegion& rRegion
-                 ,wxRegionOp      eOp
-                );
-    bool Combine( const wxRect& rRect
-                 ,wxRegionOp    eOp
-                );
+// Internal
+    bool Combine(wxCoord x, wxCoord y, wxCoord width, wxCoord height, wxRegionOp op);
+    bool Combine(const wxRegion& region, wxRegionOp op);
+    bool Combine(const wxRect& rect, wxRegionOp op);
 
-    //
     // Get internal region handle
-    //
-    WXHRGN GetHRGN(void) const;
-    void   SetPS(HPS hPS);
-}; // end of CLASS wxRegion
+    WXHRGN GetHRGN() const;
+};
 
-class WXDLLEXPORT wxRegionIterator : public wxObject
-{
+class WXDLLEXPORT wxRegionIterator : public wxObject {
 DECLARE_DYNAMIC_CLASS(wxRegionIterator);
 public:
     wxRegionIterator();
-    wxRegionIterator(const wxRegion& rRegion);
+    wxRegionIterator(const wxRegion& region);
     ~wxRegionIterator();
 
-    void Reset(void) { m_lCurrent = 0; }
-    void Reset(const wxRegion& rRegion);
+    void Reset() { m_current = 0; }
+    void Reset(const wxRegion& region);
 
-    operator bool (void) const { return m_lCurrent < m_lNumRects; }
-    bool HaveRects(void) const { return m_lCurrent < m_lNumRects; }
+    operator bool () const { return m_current < m_numRects; }
+    bool HaveRects() const { return m_current < m_numRects; }
 
-    void operator ++ (void);
+    void operator ++ ();
     void operator ++ (int);
 
-    wxCoord GetX(void) const;
-    wxCoord GetY(void) const;
-    wxCoord GetW(void) const;
-    wxCoord GetWidth(void) const { return GetW(); }
-    wxCoord GetH(void) const;
-    wxCoord GetHeight(void) const { return GetH(); }
-    wxRect  GetRect(void) const { return wxRect(GetX(), GetY(), GetWidth(), GetHeight()); }
+    wxCoord GetX() const;
+    wxCoord GetY() const;
+    wxCoord GetW() const;
+    wxCoord GetWidth() const { return GetW(); }
+    wxCoord GetH() const;
+    wxCoord GetHeight() const { return GetH(); }
+    wxRect GetRect() const { return wxRect(GetX(), GetY(), GetWidth(), GetHeight()); }
 
 private:
-    long                            m_lCurrent;
-    long                            m_lNumRects;
-    wxRegion                        m_vRegion;
-    wxRect*                         m_pRects;
-}; // end of wxRegionIterator
+    long     m_current;
+    long     m_numRects;
+    wxRegion m_region;
+    wxRect*  m_rects;
+};
 
 #endif
     // _WX_REGION_H_

@@ -112,14 +112,6 @@ public:
     void SetToolTipCtrl(WXHWND hwndTT) { m_hwndToolTip = hwndTT; }
 #endif // tooltips
 
-    // a MSW only function which sends a size event to the window using its
-    // current size - this has an effect of refreshing the window layout
-    void SendSizeEvent();
-
-    // called by wxWindow whenever it gets focus
-    void SetLastFocus(wxWindow *win) { m_winLastFocused = win; }
-    wxWindow *GetLastFocus() const { return m_winLastFocused; }
-
 protected:
     // common part of all ctors
     void Init();
@@ -150,15 +142,7 @@ protected:
     // window proc for the frames
     long MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
-    virtual bool IsMDIChild() const { return FALSE; }
-
-    // is the frame currently iconized?
-    bool m_iconized;
-
-    // should the frame be maximized when it will be shown? set by Maximize()
-    // when it is called while the frame is hidden
-    bool m_maximizeOnShow;
-
+    bool                  m_iconized;
     WXHICON               m_defaultIcon;
 
 #if wxUSE_STATUSBAR

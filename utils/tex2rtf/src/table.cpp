@@ -27,10 +27,6 @@
 
 #include <wx/hash.h>
 
-#ifdef new
-#undef new
-#endif
-
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
 #include <fstream.h>

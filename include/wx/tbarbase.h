@@ -236,7 +236,7 @@ public:
     // between the two states.
     wxToolBarToolBase *AddTool(int id,
                                const wxBitmap& bitmap,
-                               const wxBitmap& pushedBitmap,
+                               const wxBitmap& pushedBitmap = wxNullBitmap,
                                bool toggle = FALSE,
                                wxObject *clientData = NULL,
                                const wxString& shortHelpString = wxEmptyString,
@@ -335,7 +335,7 @@ public:
     virtual void SetToolSeparation(int separation)
         { m_toolSeparation = separation; }
 
-    virtual wxSize GetToolMargins() { return GetMargins(); }
+    virtual wxSize GetToolMargins() { return GetToolMargins(); }
     virtual int GetToolPacking() { return m_toolPacking; }
     virtual int GetToolSeparation() { return m_toolSeparation; }
 
@@ -470,7 +470,6 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_CLASS(wxToolBarBase)
 };
 
 #endif

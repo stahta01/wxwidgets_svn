@@ -120,14 +120,14 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 // backwards compatibility only.
 
 // checks whether the passed in pointer is NULL and if the string is empty
-inline bool IsEmpty(const char *p) { return (!p || !*p); }
+inline bool WXDLLEXPORT IsEmpty(const char *p) { return (!p || !*p); }
 
 // safe version of strlen() (returns 0 if passed NULL pointer)
-inline size_t Strlen(const char *psz)
+inline size_t WXDLLEXPORT Strlen(const char *psz)
   { return psz ? strlen(psz) : 0; }
 
 // portable strcasecmp/_stricmp
-inline int Stricmp(const char *psz1, const char *psz2)
+inline int WXDLLEXPORT Stricmp(const char *psz1, const char *psz2)
 {
 #if defined(__VISUALC__) || ( defined(__MWERKS__) && defined(__INTEL__) )
   return _stricmp(psz1, psz2);
@@ -401,28 +401,6 @@ public:
     wxChar& Last()
       { wxASSERT( !IsEmpty() ); CopyBeforeWrite(); return m_pchData[Len()-1]; }
 
-    /*
-        So why do we have all these overloaded operator[]s? A bit of history:
-        initially there was only one of them, taking size_t. Then people
-        started complaining because they wanted to use ints as indices (I
-        wonder why) and compilers were giving warnings about it, so we had to
-        add the operator[](int). Then it became apparent that you couldn't
-        write str[0] any longer because there was ambiguity between two
-        overloads and so you now had to write str[0u] (or, of course, use the
-        explicit casts to either int or size_t but nobody did this).
-
-        Finally, someone decided to compile wxWin on an Alpha machine and got
-        a surprize: str[0u] didn't compile there because it is of type
-        unsigned int and size_t is unsigned _long_ on Alpha and so there was
-        ambiguity between converting uint to int or ulong. To fix this one we
-        now add operator[](uint) for the machines where size_t is not already
-        the same as unsigned int - hopefully this fixes the problem (for some
-        time)
-
-        The only real fix is, of course, to remove all versions but the one
-        taking size_t...
-     */
-
     // operator version of GetChar
     wxChar  operator[](size_t n) const
       { ASSERT_VALID_INDEX( n ); return m_pchData[n]; }
@@ -430,20 +408,20 @@ public:
     // operator version of GetChar
     wxChar  operator[](int n) const
       { ASSERT_VALID_INDEX( n ); return m_pchData[n]; }
+#ifdef __alpha__
+    // operator version of GetChar
+    wxChar  operator[](unsigned int n) const
+      { ASSERT_VALID_INDEX( n ); return m_pchData[n]; }
+#endif
 
     // operator version of GetWriteableChar
     wxChar& operator[](size_t n)
       { ASSERT_VALID_INDEX( n ); CopyBeforeWrite(); return m_pchData[n]; }
-
-#ifndef wxSIZE_T_IS_UINT
-    // operator version of GetChar
-    wxChar operator[](unsigned int n) const
-      { ASSERT_VALID_INDEX( n ); return m_pchData[n]; }
-
+#ifdef __alpha__
     // operator version of GetWriteableChar
-    wxChar& operator[](unsigned int n)
+    wxChar&  operator[](unsigned int n)
       { ASSERT_VALID_INDEX( n ); CopyBeforeWrite(); return m_pchData[n]; }
-#endif // size_t != unsigned int
+#endif
 
     // implicit conversion to C string
     operator const wxChar*() const { return m_pchData; }
@@ -749,7 +727,7 @@ public:
   size_t Index(wxChar ch)         const { return Find(ch);  }
     // use Truncate
   wxString& Remove(size_t pos) { return Truncate(pos); }
-  wxString& RemoveLast(size_t n = 1) { return Truncate(Len() - n); }
+  wxString& RemoveLast() { return Truncate(Len() - 1); }
 
   wxString& Remove(size_t nStart, size_t nLen) { return erase( nStart, nLen ); }
 
@@ -1034,7 +1012,6 @@ public:
   void Remove(const wxChar *sz);
     // remove item by index
   void Remove(size_t nIndex);
-  void RemoveAt(size_t nIndex) { Remove(nIndex); }
 
   // sorting
     // sort array elements in alphabetical order (or reversed alphabetical
@@ -1079,42 +1056,42 @@ public:
 // wxString comparison functions: operator versions are always case sensitive
 // ---------------------------------------------------------------------------
 
-inline bool operator==(const wxString& s1, const wxString& s2)
-    { return (s1.Len() == s2.Len()) && (s1.Cmp(s2) == 0); }
-inline bool operator==(const wxString& s1, const wxChar  * s2)
-    { return s1.Cmp(s2) == 0; }
-inline bool operator==(const wxChar  * s1, const wxString& s2)
-    { return s2.Cmp(s1) == 0; }
-inline bool operator!=(const wxString& s1, const wxString& s2)
-    { return (s1.Len() != s2.Len()) || (s1.Cmp(s2) != 0); }
-inline bool operator!=(const wxString& s1, const wxChar  * s2)
-    { return s1.Cmp(s2) != 0; }
-inline bool operator!=(const wxChar  * s1, const wxString& s2)
-    { return s2.Cmp(s1) != 0; }
-inline bool operator< (const wxString& s1, const wxString& s2)
-    { return s1.Cmp(s2) < 0; }
-inline bool operator< (const wxString& s1, const wxChar  * s2)
-    { return s1.Cmp(s2) <  0; }
-inline bool operator< (const wxChar  * s1, const wxString& s2)
-    { return s2.Cmp(s1) >  0; }
-inline bool operator> (const wxString& s1, const wxString& s2)
-    { return s1.Cmp(s2) >  0; }
-inline bool operator> (const wxString& s1, const wxChar  * s2)
-    { return s1.Cmp(s2) >  0; }
-inline bool operator> (const wxChar  * s1, const wxString& s2)
-    { return s2.Cmp(s1) <  0; }
-inline bool operator<=(const wxString& s1, const wxString& s2)
-    { return s1.Cmp(s2) <= 0; }
-inline bool operator<=(const wxString& s1, const wxChar  * s2)
-    { return s1.Cmp(s2) <= 0; }
-inline bool operator<=(const wxChar  * s1, const wxString& s2)
-    { return s2.Cmp(s1) >= 0; }
-inline bool operator>=(const wxString& s1, const wxString& s2)
-    { return s1.Cmp(s2) >= 0; }
-inline bool operator>=(const wxString& s1, const wxChar  * s2)
-    { return s1.Cmp(s2) >= 0; }
-inline bool operator>=(const wxChar  * s1, const wxString& s2)
-    { return s2.Cmp(s1) <= 0; }
+//
+inline bool operator==(const wxString& s1, const wxString& s2) { return (s1.Cmp(s2) == 0); }
+//
+inline bool operator==(const wxString& s1, const wxChar  * s2) { return (s1.Cmp(s2) == 0); }
+//
+inline bool operator==(const wxChar  * s1, const wxString& s2) { return (s2.Cmp(s1) == 0); }
+//
+inline bool operator!=(const wxString& s1, const wxString& s2) { return (s1.Cmp(s2) != 0); }
+//
+inline bool operator!=(const wxString& s1, const wxChar  * s2) { return (s1.Cmp(s2) != 0); }
+//
+inline bool operator!=(const wxChar  * s1, const wxString& s2) { return (s2.Cmp(s1) != 0); }
+//
+inline bool operator< (const wxString& s1, const wxString& s2) { return (s1.Cmp(s2) < 0); }
+//
+inline bool operator< (const wxString& s1, const wxChar  * s2) { return (s1.Cmp(s2) <  0); }
+//
+inline bool operator< (const wxChar  * s1, const wxString& s2) { return (s2.Cmp(s1) >  0); }
+//
+inline bool operator> (const wxString& s1, const wxString& s2) { return (s1.Cmp(s2) >  0); }
+//
+inline bool operator> (const wxString& s1, const wxChar  * s2) { return (s1.Cmp(s2) >  0); }
+//
+inline bool operator> (const wxChar  * s1, const wxString& s2) { return (s2.Cmp(s1) <  0); }
+//
+inline bool operator<=(const wxString& s1, const wxString& s2) { return (s1.Cmp(s2) <= 0); }
+//
+inline bool operator<=(const wxString& s1, const wxChar  * s2) { return (s1.Cmp(s2) <= 0); }
+//
+inline bool operator<=(const wxChar  * s1, const wxString& s2) { return (s2.Cmp(s1) >= 0); }
+//
+inline bool operator>=(const wxString& s1, const wxString& s2) { return (s1.Cmp(s2) >= 0); }
+//
+inline bool operator>=(const wxString& s1, const wxChar  * s2) { return (s1.Cmp(s2) >= 0); }
+//
+inline bool operator>=(const wxChar  * s1, const wxString& s2) { return (s2.Cmp(s1) <= 0); }
 
 // comparison with char
 inline bool operator==(wxChar c, const wxString& s) { return s.IsSameAs(c); }
@@ -1131,7 +1108,7 @@ inline bool operator!=(const wxString& s1, const wxWCharBuffer& s2)
     { return (s1.Cmp((const wchar_t *)s2) != 0); }
 inline bool operator!=(const wxWCharBuffer& s1, const wxString& s2)
     { return (s2.Cmp((const wchar_t *)s1) != 0); }
-#else // !wxUSE_UNICODE
+#else
 inline bool operator==(const wxString& s1, const wxCharBuffer& s2)
     { return (s1.Cmp((const char *)s2) == 0); }
 inline bool operator==(const wxCharBuffer& s1, const wxString& s2)
@@ -1140,7 +1117,7 @@ inline bool operator!=(const wxString& s1, const wxCharBuffer& s2)
     { return (s1.Cmp((const char *)s2) != 0); }
 inline bool operator!=(const wxCharBuffer& s1, const wxString& s2)
     { return (s2.Cmp((const char *)s1) != 0); }
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+#endif
 
 wxString WXDLLEXPORT operator+(const wxString& string1,  const wxString& string2);
 wxString WXDLLEXPORT operator+(const wxString& string, wxChar ch);
@@ -1148,16 +1125,16 @@ wxString WXDLLEXPORT operator+(wxChar ch, const wxString& string);
 wxString WXDLLEXPORT operator+(const wxString& string, const wxChar *psz);
 wxString WXDLLEXPORT operator+(const wxChar *psz, const wxString& string);
 #if wxUSE_UNICODE
-inline wxString operator+(const wxString& string, const wxWCharBuffer& buf)
+inline wxString WXDLLEXPORT operator+(const wxString& string, const wxWCharBuffer& buf)
     { return string + (const wchar_t *)buf; }
-inline wxString operator+(const wxWCharBuffer& buf, const wxString& string)
+inline wxString WXDLLEXPORT operator+(const wxWCharBuffer& buf, const wxString& string)
     { return (const wchar_t *)buf + string; }
-#else // !wxUSE_UNICODE
-inline wxString operator+(const wxString& string, const wxCharBuffer& buf)
+#else
+inline wxString WXDLLEXPORT operator+(const wxString& string, const wxCharBuffer& buf)
     { return string + (const char *)buf; }
-inline wxString operator+(const wxCharBuffer& buf, const wxString& string)
+inline wxString WXDLLEXPORT operator+(const wxCharBuffer& buf, const wxString& string)
     { return (const char *)buf + string; }
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+#endif
 
 // ---------------------------------------------------------------------------
 // Implementation only from here until the end of file
@@ -1170,8 +1147,8 @@ inline wxString operator+(const wxCharBuffer& buf, const wxString& string)
 
 #include "wx/ioswrap.h"
 
-WXDLLEXPORT wxSTD istream& operator>>(wxSTD istream&, wxString&);
-WXDLLEXPORT wxSTD ostream& operator<<(wxSTD ostream&, const wxString&);
+WXDLLEXPORT istream& operator>>(istream&, wxString&);
+WXDLLEXPORT ostream& operator<<(ostream&, const wxString&);
 
 #endif  // wxSTD_STRING_COMPATIBILITY
 

@@ -90,7 +90,7 @@ class MyApp(wxApp):
 
             # This inner loop will process any GUI events until there
             # are no more waiting.
-           while self.Pending():
+            while self.Pending():
                 self.Dispatch()
 
             # Send idle events to idle handlers.  You may want to throtle
@@ -103,7 +103,7 @@ class MyApp(wxApp):
 
 
     def OnInit(self):
-        frame = MyFrame(None, -1, "This is a test")
+        frame = MyFrame(NULL, -1, "This is a test")
         frame.Show(true)
         self.SetTopWindow(frame)
 

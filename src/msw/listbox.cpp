@@ -100,7 +100,7 @@ wxListBoxItem::wxListBoxItem(const wxString& str) : wxOwnerDrawn(str, FALSE)
     SetMarginWidth(0);
 }
 
-wxOwnerDrawn *wxListBox::CreateItem(size_t WXUNUSED(n))
+wxOwnerDrawn *wxListBox::CreateItem(size_t n)
 {
     return new wxListBoxItem();
 }
@@ -157,12 +157,6 @@ bool wxListBox::Create(wxWindow *parent,
 
     DWORD wstyle = WS_VISIBLE | WS_VSCROLL | WS_TABSTOP |
                    LBS_NOTIFY | LBS_HASSTRINGS /* | WS_CLIPSIBLINGS */;
-
-    wxASSERT_MSG( !(style & wxLB_MULTIPLE) || !(style & wxLB_EXTENDED),
-                  _T("only one of listbox selection modes can be specified") );
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        wstyle |= WS_CLIPSIBLINGS;
-
     if (m_windowStyle & wxLB_MULTIPLE)
         wstyle |= LBS_MULTIPLESEL;
     else if (m_windowStyle & wxLB_EXTENDED)
@@ -239,6 +233,11 @@ void wxListBox::SetupColours()
 {
     SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOW));
     SetForegroundColour(GetParent()->GetForegroundColour());
+}
+
+bool wxListBox::HasMultipleSelection() const
+{
+    return (m_windowStyle & wxLB_MULTIPLE) || (m_windowStyle & wxLB_EXTENDED);
 }
 
 // ----------------------------------------------------------------------------
@@ -454,11 +453,6 @@ void wxListBox::DoSetItemClientData(int n, void *clientData)
         wxLogDebug(wxT("LB_SETITEMDATA failed"));
 }
 
-bool wxListBox::HasMultipleSelection() const
-{
-    return (m_windowStyle & wxLB_MULTIPLE) || (m_windowStyle & wxLB_EXTENDED);
-}
-
 // Return number of selections and an array of selected integers
 int wxListBox::GetSelections(wxArrayInt& aSelections) const
 {
@@ -663,10 +657,7 @@ wxSize wxListBox::DoGetBestSize() const
 
     wListbox += 3*cx;
 
-    // don't make the listbox too tall (limit height to 10 items) but don't
-    // make it too small neither
-    int hListbox = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)*
-                    wxMin(wxMax(m_noItems, 3), 10);
+    int hListbox = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)*(wxMax(m_noItems, 7));
 
     return wxSize(wListbox, hListbox);
 }
@@ -677,43 +668,41 @@ wxSize wxListBox::DoGetBestSize() const
 
 bool wxListBox::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
 {
-    wxEventType evtType;
     if ( param == LBN_SELCHANGE )
     {
-        evtType = wxEVT_COMMAND_LISTBOX_SELECTED;
+        wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, m_windowId);
+        event.SetEventObject( this );
+
+        wxArrayInt aSelections;
+        int n, count = GetSelections(aSelections);
+        if ( count > 0 )
+        {
+            n = aSelections[0];
+            if ( HasClientObjectData() )
+                event.SetClientObject( GetClientObject(n) );
+            else if ( HasClientUntypedData() )
+                event.SetClientData( GetClientData(n) );
+            event.SetString( GetString(n) );
+        }
+        else
+        {
+            n = -1;
+        }
+
+        event.m_commandInt = n;
+
+        return GetEventHandler()->ProcessEvent(event);
     }
     else if ( param == LBN_DBLCLK )
     {
-        evtType = wxEVT_COMMAND_LISTBOX_DOUBLECLICKED;
-    }
-    else
-    {
-        // some event we're not interested in
-        return FALSE;
-    }
+        wxCommandEvent event(wxEVT_COMMAND_LISTBOX_DOUBLECLICKED, m_windowId);
+        event.SetEventObject( this );
 
-    wxCommandEvent event(evtType, m_windowId);
-    event.SetEventObject( this );
-
-    wxArrayInt aSelections;
-    int n, count = GetSelections(aSelections);
-    if ( count > 0 )
-    {
-        n = aSelections[0];
-        if ( HasClientObjectData() )
-            event.SetClientObject( GetClientObject(n) );
-        else if ( HasClientUntypedData() )
-            event.SetClientData( GetClientData(n) );
-        event.SetString( GetString(n) );
+        return GetEventHandler()->ProcessEvent(event);
     }
-    else
-    {
-        n = -1;
-    }
+    //else:
 
-    event.m_commandInt = n;
-
-    return GetEventHandler()->ProcessEvent(event);
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -776,13 +765,14 @@ bool wxListBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 
     wxListBoxItem *pItem = (wxListBoxItem *)data;
 
-    wxDCTemp dc((WXHDC)pStruct->hDC);
+    wxDC dc;
+    dc.SetHDC((WXHDC)pStruct->hDC, FALSE);
     wxRect rect(wxPoint(pStruct->rcItem.left, pStruct->rcItem.top),
                 wxPoint(pStruct->rcItem.right, pStruct->rcItem.bottom));
 
     return pItem->OnDrawItem(dc, rect,
-                             (wxOwnerDrawn::wxODAction)pStruct->itemAction,
-                             (wxOwnerDrawn::wxODStatus)pStruct->itemState);
+            (wxOwnerDrawn::wxODAction)pStruct->itemAction,
+            (wxOwnerDrawn::wxODStatus)pStruct->itemState);
 }
 
 #endif

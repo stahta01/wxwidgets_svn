@@ -159,8 +159,6 @@ protected:
     void DrawCircles(wxDC& dc);
     void DrawDefault(wxDC& dc);
 
-    void DrawRegionsHelper(wxDC& dc, wxCoord x);
-
 private:
     MyFrame *m_owner;
 
@@ -346,11 +344,10 @@ BEGIN_EVENT_TABLE(MyCanvas, wxScrolledWindow)
     EVT_MOTION (MyCanvas::OnMouseMove)
 END_EVENT_TABLE()
 
-#include "smile.xpm"
+#include "../image/smile.xpm"
 
-MyCanvas::MyCanvas(MyFrame *parent)
-        : wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize,
-                           wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE)
+MyCanvas::MyCanvas( MyFrame *parent ) : 
+   wxScrolledWindow( parent, -1, wxDefaultPosition, wxDefaultSize, wxNO_FULL_REPAINT_ON_RESIZE )
 {
     m_owner = parent;
     m_show = Show_Default;
@@ -365,8 +362,8 @@ MyCanvas::MyCanvas(MyFrame *parent)
 // the colors of the monochrome bitmap pixels to the fillpattern
 //
 // I abused the the menu items for setting so called back and fore ground color
-// just to show how the those colors do influence the fillpatterns just play
-// with those, and with the code variations are endless using other logical
+// just to show how the those colors do influence the fillpatterns just play 
+// with those, and with the code variations are endless using other logical 
 // functions.
 
 void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
@@ -415,15 +412,15 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
                 dc.SetTextForeground(*wxCYAN);
                 dc.SetTextBackground(m_owner->m_colourBackground);
                 dc.DrawRectangle( x+10, y+10, 200, 200 );
-
+                
                 dc.SetPen( wxPen( "green", 4, wxSOLID) );
                 dc.SetBrush( *brush4_mono );
                 dc.SetTextForeground(*wxCYAN);
                 dc.SetTextBackground(m_owner->m_colourBackground);
                 dc.DrawRectangle( x+50, y+50, 200, 200 );
-
+                
                 dc.DrawCircle( x+400, y+50, 130 );
-
+                
                 dc.SetBrush(wxNullBrush);
                 dc.SetPen(wxNullPen);
                 break;
@@ -987,52 +984,32 @@ void MyCanvas::DrawCircles(wxDC& dc)
 
 void MyCanvas::DrawRegions(wxDC& dc)
 {
-    dc.DrawText("You should see a red rect partly covered by a cyan one "
-                "on the left", 10, 5);
-    dc.DrawText("and 5 smileys from which 4 are partially clipped on the "
-                "right (2 copies should be identical)",
-                10, 5 + dc.GetCharHeight());
-
-    DrawRegionsHelper(dc, 10);
-    DrawRegionsHelper(dc, 350);
-}
-
-void MyCanvas::DrawRegionsHelper(wxDC& dc, wxCoord x)
-{
-    dc.DestroyClippingRegion();
     dc.SetBrush( *wxWHITE_BRUSH );
     dc.SetPen( *wxTRANSPARENT_PEN );
-    dc.DrawRectangle( x,50,310,310 );
-
-    dc.SetClippingRegion( x+10,60,100,270 );
-
+    dc.DrawRectangle( 10,10,310,310 );
+    
+    dc.SetClippingRegion( 20,20,100,270 );
+    
     dc.SetBrush( *wxRED_BRUSH );
-    dc.DrawRectangle( x,50,310,310 );
+    dc.DrawRectangle( 10,10,310,310 );
 
-    dc.SetClippingRegion( x+10,60,100,100 );
-
+    dc.SetClippingRegion( 20,20,100,100 );
+    
     dc.SetBrush( *wxCYAN_BRUSH );
-    dc.DrawRectangle( x,50,310,310 );
+    dc.DrawRectangle( 10,10,310,310 );
 
-    // when drawing the left half, destroy the clipping region, when drawing
-    // the right one - leave it
-    //
-    // normally it shouldn't make any difference as SetClippingRegion()
-    // replaces the old clipping region
-    if ( x < 300 )
-        dc.DestroyClippingRegion();
-    dc.SetClippingRegion( x+110,70,100,270 );
-
+    dc.DestroyClippingRegion();
+    dc.SetClippingRegion( 120,30,100,270 );
+    
     dc.SetBrush( *wxGREY_BRUSH );
-    dc.DrawRectangle( x,50,310,310 );
-
+    dc.DrawRectangle( 10,10,310,310 );
+    
     if (m_smile_bmp.Ok())
     {
-        dc.DrawBitmap( m_smile_bmp, x+150, 200, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+130, 60, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+130, 330, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+100, 120, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+200, 120, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 140, 20, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 140, 290, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 110, 80, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 210, 80, TRUE );
     }
 }
 
@@ -1040,7 +1017,7 @@ void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
 {
     wxPaintDC dc(this);
     PrepareDC(dc);
-
+    
     m_owner->PrepareDC(dc);
 
     dc.SetBackgroundMode( m_owner->m_backgroundMode );
@@ -1106,13 +1083,13 @@ void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
         case Show_Ops:
             DrawWithLogicalOps(dc);
             break;
-
+          
         default:
         {
           dc.SetPen( *wxBLACK_PEN );
           dc.DrawLine( 0,0,100,100 );
         }
-
+    
     }
 }
 
@@ -1148,8 +1125,7 @@ END_EVENT_TABLE()
 
 // frame constructor
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-       : wxFrame((wxFrame *)NULL, -1, title, pos, size,
-                 wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
+       : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
     // set the frame icon
     SetIcon(wxICON(mondrian));

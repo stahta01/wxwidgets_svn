@@ -3,13 +3,12 @@
 
 enum
 {
-    wxOPEN              = 0x0001,
-    wxSAVE              = 0x0002,
-    wxOVERWRITE_PROMPT  = 0x0004,
-    wxHIDE_READONLY     = 0x0008,
-    wxFILE_MUST_EXIST   = 0x0010,
-    wxMULTIPLE          = 0x0020,
-    wxCHANGE_DIR        = 0x0040
+    wxOPEN  = 1,
+    wxSAVE = 2,
+    wxOVERWRITE_PROMPT = 4,
+    wxHIDE_READONLY = 8,
+    wxFILE_MUST_EXIST = 16,
+    wxMULTIPLE = 32
 };
 
 #if defined(__WXMSW__)
@@ -21,11 +20,7 @@ enum
 #elif defined(__WXQT__)
 #include "wx/qt/filedlg.h"
 #elif defined(__WXMAC__)
-#ifdef __WXMAC_X__
-#include "wx/generic/filedlgg.h"
-#else
 #include "wx/mac/filedlg.h"
-#endif
 #elif defined(__WXPM__)
 #include "wx/os2/filedlg.h"
 #elif defined(__WXSTUBS__)

@@ -13,10 +13,6 @@
 #pragma implementation "radiobox.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 #include "wx/radiobox.h"
 #include "wx/utils.h"
 
@@ -177,6 +173,7 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
                                                  NULL);
         XtAddCallback ((Widget) m_radioButtons[i], XmNvalueChangedCallback, (XtCallbackProc) wxRadioBoxCallback,
                      (XtPointer) this);
+
     }
     SetSelection (0);
 

@@ -65,13 +65,11 @@ caret.cpp	G	U
 choicdgg.cpp	G
 colrdlgg.cpp	G	G
 dcpsg.cpp	G	U
-dirctrlg.cpp	G
 dirdlgg.cpp	G	16,P
 dragimgg.cpp	G	P
 fontdlgg.cpp	G	G,R,P
 filedlgg.cpp	G	U,X,P
 grid.cpp	G
-gridctrl.cpp	G
 gridsel.cpp	G
 helpext.cpp	G	G
 helphtml.cpp	G	G
@@ -84,6 +82,7 @@ logg.cpp	G
 msgdlgg.cpp	G	G
 notebook.cpp	G	16,R,P
 panelg.cpp	G
+plot.cpp	G
 printps.cpp	G	PS
 prntdlgg.cpp	G	PS,U
 progdlgg.cpp	G
@@ -91,8 +90,7 @@ prop.cpp	G
 propform.cpp	G
 proplist.cpp	G
 sashwin.cpp	G
-scrolwin.cpp	G	R
-splash.cpp	G
+scrolwin.cpp	G
 splitter.cpp	G
 statline.cpp	G	U,R,P
 statusbr.cpp	G
@@ -101,8 +99,7 @@ numdlgg.cpp	G
 tbarsmpl.cpp	G
 textdlgg.cpp	G
 tipdlg.cpp	G
-tipwin.cpp	G
-treectlg.cpp	G
+treectrl.cpp	G	16
 treelay.cpp	G
 wizard.cpp	G
 
@@ -112,16 +109,13 @@ cmdline.cpp	C	B
 cmndata.cpp	C
 clipcmn.cpp	C
 config.cpp	C	B
-cshelp.cpp	C
 ctrlcmn.cpp	C
 ctrlsub.cpp	C
 datetime.cpp	C	B
 datstrm.cpp	C	B
-db.cpp	C	32,B
-dbgrid.cpp	C	32,B
-dbtable.cpp	C	32,B
+db.cpp	C
+dbtable.cpp	C
 dcbase.cpp	C
-dircmn.cpp	C	B
 dlgcmn.cpp	C
 dobjcmn.cpp	C
 dndcmn.cpp	C
@@ -129,7 +123,6 @@ docmdi.cpp	C
 docview.cpp	C
 dynarray.cpp	C	B
 dynlib.cpp	C	B
-effects.cpp	C
 encconv.cpp	C	B
 event.cpp	C	B
 extended.c	C	B
@@ -137,7 +130,6 @@ ffile.cpp	C	B
 file.cpp	C	B
 fileconf.cpp	C	B
 filefn.cpp	C	B
-filename.cpp	C	B
 filesys.cpp	C	B
 fontcmn.cpp	C
 fontmap.cpp	C	B
@@ -149,7 +141,6 @@ ftp.cpp	C	S,B
 gdicmn.cpp	C
 geometry.cpp	C
 gifdecod.cpp	C
-xpmdecod.cpp	C
 hash.cpp	C	B
 helpbase.cpp	C
 http.cpp	C	S,B
@@ -162,7 +153,6 @@ imagtiff.cpp	C	32
 imagpcx.cpp	C	32
 imagpng.cpp	C	32
 imagpnm.cpp	C	32
-imagxpm.cpp	C
 init.cpp	B
 intl.cpp	C	B
 ipcbase.cpp	C	B
@@ -171,8 +161,7 @@ lboxcmn.cpp	C
 list.cpp	C	B
 log.cpp	C	B
 longlong.cpp	C	B
-matrix.cpp	C
-memory.cpp	C	B
+memory.cpp	C
 menucmn.cpp	C
 mimecmn.cpp	C	32,B
 module.cpp	C	B
@@ -184,7 +173,6 @@ paper.cpp	C
 prntbase.cpp	C
 process.cpp	C	32,B
 protocol.cpp	C	S,B
-quantize.cpp	C
 resource.cpp	C
 sckaddr.cpp	C	S,B
 sckfile.cpp	C	S,B
@@ -201,7 +189,6 @@ textcmn.cpp	C
 textfile.cpp	C	B
 timercmn.cpp	C	B
 tokenzr.cpp	C	B
-treebase.cpp	C
 txtstrm.cpp	C	B
 unzip.c	C	B
 url.cpp	C	S,B
@@ -300,7 +287,6 @@ scrolbar.cpp	M
 settings.cpp	M
 slider95.cpp	M	32
 slidrmsw.cpp	M	16
-snglinst.cpp	M	B
 spinbutt.cpp	M
 spinctrl.cpp	M
 statbmp.cpp	M
@@ -313,7 +299,6 @@ taskbar.cpp	M	32
 tbar95.cpp	M	32
 tbarmsw.cpp	M	16
 textctrl.cpp	M
-tglbtn.cpp	M
 thread.cpp	M	32,B
 timer.cpp	M
 tooltip.cpp	M	32
@@ -323,13 +308,13 @@ utilsexc.cpp	M	B
 uuid.cpp	M	O
 wave.cpp	M
 window.cpp	M
+xpmhand.cpp	M
 
 dialup.cpp	U
 dir.cpp	U	B
 fontenum.cpp	U
 fontutil.cpp	U
 mimetype.cpp	U	B
-snglinst.cpp	U	B
 threadpsx.cpp	U	B
 utilsunx.cpp	U	B
 gsocket.c	U	B
@@ -372,13 +357,12 @@ mdi.cpp	R
 menu.cpp	R
 minifram.cpp	R
 notebook.cpp	R
-paletteg.cpp	G	U,X,P
+palette.cpp	R
 pen.cpp	R
 radiobox.cpp	R
 radiobut.cpp	R
 region.cpp	R
 scrolbar.cpp	R
-scrolwin.cpp	R
 settings.cpp	R
 slider.cpp	R
 spinbutt.cpp	R
@@ -389,7 +373,6 @@ statline.cpp	R
 stattext.cpp	R
 tbargtk.cpp	R
 textctrl.cpp	R
-tglbtn.cpp	R
 timer.cpp	R
 tooltip.cpp	R
 utilsgtk.cpp	R
@@ -529,7 +512,6 @@ utilsexc.cpp	O	B
 wave.cpp	O
 window.cpp	O
 gsocket.c	O
-gsockpm.c	O
 
 helpdata.cpp	H
 helpfrm.cpp	H
@@ -584,9 +566,8 @@ date.h	W	B
 datetime.h	W	B
 datetime.inl	W	B
 datstrm.h	W	B
-db.h	W	B
-dbgrid.h	W	B
-dbtable.h	W	B
+db.h	W
+dbtable.h	W
 dc.h	W
 dcclient.h	W
 dcmemory.h	W
@@ -614,7 +595,6 @@ file.h	W	B
 fileconf.h	W	B
 filedlg.h	W
 filefn.h	W	B
-filename.h	W	B
 filesys.h	W	B
 font.h	W
 fontdlg.h	W
@@ -632,16 +612,12 @@ gdicmn.h	W
 gdiobj.h	W
 geometry.h	W
 gifdecod.h	W
-xpmdecod.h	W
-dbkeyg.h	W	B
 glcanvas.h	W
 grid.h	W
-gridctrl.h	W
 gsocket.h	W	B
 hash.h	W	B
 help.h	W
 helpbase.h	W
-cshelp.h	W
 helphtml.h	W
 helpchm.h	W
 helpwin.h	W
@@ -653,7 +629,6 @@ imagbmp.h	W
 imagpng.h	W
 imagpcx.h	W
 imagpnm.h	W
-imagxpm.h	W
 imagtiff.h	W
 imagjpeg.h	W
 imaglist.h	W
@@ -691,6 +666,7 @@ palette.h	W
 panel.h	W
 paper.h	W
 pen.h	W
+plot.h	W
 print.h	W
 printdlg.h	W
 prntbase.h	W
@@ -715,10 +691,8 @@ setup.h	W	B
 sizer.h	W
 slider.h	W
 socket.h	W	B
-snglinst.h	W	B
 spinbutt.h	W
 spinctrl.h	W
-splash.h	W
 splitter.h	W
 statbmp.h	W
 statbox.h	W
@@ -736,18 +710,15 @@ tbarsmpl.h	W
 textctrl.h	W
 textdlg.h	W
 textfile.h	W	B
-tglbtn.h	W
+txtstrm.h	W	B
 thread.h	W	B
 time.h	W	B
 timer.h	W	B
 tipdlg.h	W
-tipwin.h	W
 tokenzr.h	W	B
 toolbar.h	W
 tooltip.h	W
-treebase.h	W
 treectrl.h	W
-txtstrm.h	W	B
 types.h	W
 url.h	W	B
 utils.h	W	B
@@ -768,6 +739,7 @@ wxchar.h	W	B
 wxexpr.h	W
 wxhtml.h	W
 wxprec.h	W	B
+xpmhand.h	W
 zipstrm.h	W	B
 zstream.h	W	B
 
@@ -809,13 +781,12 @@ menu.h	K
 menuitem.h	K
 minifram.h	K
 notebook.h	K
-paletteg.h	N	U,X,P
+palette.h	K
 pen.h	K
 radiobox.h	K
 radiobut.h	K
 region.h	K
 scrolbar.h	K
-scrolwin.h	K
 settings.h	K
 slider.h	K
 spinbutt.h	K
@@ -826,7 +797,6 @@ statline.h	K
 stattext.h	K
 tbargtk.h	K
 textctrl.h	K
-tglbtn.h	K
 timer.h	K
 tooltip.h	K
 treectrl.h	K
@@ -979,13 +949,13 @@ taskbar.h	9
 tbar95.h	9
 tbarmsw.h	9
 textctrl.h	9
-tglbtn.h	9
 timer.h	9
 tooltip.h	9
 treectrl.h	9
 wave.h	9
 window.h	9
 winundef.h	9
+xpmhand.h	9
 # blank.cur	9
 # bullseye.cur	9
 # child.ico	9
@@ -1114,13 +1084,11 @@ caret.h	N
 choicdgg.h	N
 colrdlgg.h	N
 dcpsg.h	N
-dirctrlg.h	N
 dirdlgg.h	N	16
 dragimgg.h	N	16
 fontdlgg.h	N
 filedlgg.h	N
 grid.h	N
-gridctrl.h	N
 gridg.h	N
 helpext.h	N
 helpwxht.h	N
@@ -1132,17 +1100,17 @@ listctrl.h	N	16
 msgdlgg.h	N
 notebook.h	N
 panelg.h	N
+plot.h	N
 printps.h	N
 prntdlgg.h	N
 progdlgg.h	N
 sashwin.h	N
 scrolwin.h	N
-splash.h	N
 splitter.h	N
 statusbr.h	N
 tabg.h	N	16
 textdlgg.h	N
-treectlg.h	N	16
+treectrl.h	N	16
 wizard.h	N
 
 # vi: set noet ts=16 nolist:

@@ -510,7 +510,9 @@ void MainWindow::Search(bool ask)
     if (s != "")
     {
       if (search_string) delete[] search_string;
+
       search_string = copystring(s);
+
       search_ok = TRUE;
     } else search_ok = FALSE;
   }
@@ -685,7 +687,7 @@ int MyApp::OnExit()
   delete ItalicFont;
   delete[] poem_buffer;
   if (search_string)
-    delete[] search_string;
+      delete[] search_string;
 
   return 0;
 }
@@ -924,7 +926,7 @@ long MainWindow::DoSearch(void)
     FILE *file;
     long i = 0;
     int ch = 0;
-    char buf[100];
+    char buf[512];
     long find_start;
     long previous_poem_start;
 
@@ -1023,7 +1025,7 @@ bool Compile(void)
     long i = 0;
     int j;
     int ch = 0;
-    char buf[100];
+    char buf[512];
 
     if (data_filename)
       sprintf(buf, "%s.dat", data_filename);

@@ -29,9 +29,6 @@
 class WXDLLEXPORT wxControlBase : public wxWindow
 {
 public:
-#ifdef __WXMAC_X__
-    virtual ~wxControlBase() {}   // Added min for Mac X
-#endif
     // simulates the event of given type (i.e. wxButton::Command() is just as
     // if the button was clicked)
     virtual void Command(wxCommandEvent &event);

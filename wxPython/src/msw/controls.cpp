@@ -61,7 +61,7 @@ extern PyObject *SWIG_newvarlink(void);
 #include <wx/spinctrl.h>
 #include <wx/dynarray.h>
 #include <wx/statline.h>
-#include <wx/tglbtn.h>
+//#include <wx/toggbutt.h>
 
 #ifdef __WXMSW__
 #if wxUSE_OWNER_DRAWN
@@ -74,38 +74,53 @@ extern PyObject *SWIG_newvarlink(void);
 #endif
 
 
+static PyObject* l_output_helper(PyObject* target, PyObject* o) {
+    PyObject*   o2;
+    if (!target) {                   
+        target = o;
+    } else if (target == Py_None) {  
+        Py_DECREF(Py_None);
+        target = o;
+    } else {                         
+        if (!PyList_Check(target)) {
+            o2 = target;
+            target = PyList_New(0);
+            PyList_Append(target, o2);
+	    Py_XDECREF(o2);
+        }
+        PyList_Append(target,o);
+	Py_XDECREF(o);
+    }
+    return target;
+}
 
 static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     PyObject*   o2;
     PyObject*   o3;
 
-    if (!target) {
+    if (!target) {                   
         target = o;
-    } else if (target == Py_None) {
+    } else if (target == Py_None) {  
         Py_DECREF(Py_None);
         target = o;
-    } else {
+    } else {                         
         if (!PyTuple_Check(target)) {
             o2 = target;
             target = PyTuple_New(1);
             PyTuple_SetItem(target, 0, o2);
         }
-        o3 = PyTuple_New(1);
-        PyTuple_SetItem(o3, 0, o);
+        o3 = PyTuple_New(1);            
+        PyTuple_SetItem(o3, 0, o);      
 
         o2 = target;
-        target = PySequence_Concat(o2, o3);
-        Py_DECREF(o2);
+        target = PySequence_Concat(o2, o3); 
+        Py_DECREF(o2);                      
         Py_DECREF(o3);
     }
     return target;
 }
 
-#if PYTHON_API_VERSION >= 1009
-    static char* wxStringErrorMsg = "String or Unicode type required";
-#else
-    static char* wxStringErrorMsg = "string type is required for parameter";
-#endif
+static char* wxStringErrorMsg = "string type is required for parameter";
 
     wxSize wxButton_GetDefaultSize() {
         return wxButton::GetDefaultSize();
@@ -142,7 +157,6 @@ static PyObject *_wrap_wxButton_GetDefaultSize(PyObject *self, PyObject *args, P
         _result = new wxSize (wxButton_GetDefaultSize());
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    SWIG_MakePtr(_ptemp, (void *) _result,"_wxSize_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
@@ -161,14 +175,6 @@ static void *SwigwxControlTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxControl *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxControlTowxObject(void *ptr) {
-    wxControl *src;
-    wxObject *dest;
-    src = (wxControl *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -226,7 +232,6 @@ static PyObject *_wrap_new_wxControl(PyObject *self, PyObject *args, PyObject *k
         _result = (wxControl *)new_wxControl(_arg0,_arg1,*_arg2,*_arg3,_arg4,*_arg5,_arg6);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxControl_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -268,7 +273,6 @@ static PyObject *_wrap_wxControl_Command(PyObject *self, PyObject *args, PyObjec
         wxControl_Command(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -297,7 +301,6 @@ static PyObject *_wrap_wxControl_GetLabel(PyObject *self, PyObject *args, PyObje
         _result = new wxString (wxControl_GetLabel(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -330,7 +333,7 @@ static PyObject *_wrap_wxControl_SetLabel(PyObject *self, PyObject *args, PyObje
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -349,7 +352,6 @@ static PyObject *_wrap_wxControl_SetLabel(PyObject *self, PyObject *args, PyObje
         wxControl_SetLabel(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -380,14 +382,6 @@ static void *SwigwxButtonTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxButton *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxButtonTowxObject(void *ptr) {
-    wxButton *src;
-    wxObject *dest;
-    src = (wxButton *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -427,7 +421,7 @@ static PyObject *_wrap_new_wxButton(PyObject *self, PyObject *args, PyObject *kw
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -465,7 +459,6 @@ static PyObject *_wrap_new_wxButton(PyObject *self, PyObject *args, PyObject *kw
         _result = (wxButton *)new_wxButton(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,*_arg6,_arg7);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxButton_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -502,7 +495,6 @@ static PyObject *_wrap_wxButton_SetDefault(PyObject *self, PyObject *args, PyObj
         wxButton_SetDefault(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -538,7 +530,6 @@ static PyObject *_wrap_wxButton_SetBackgroundColour(PyObject *self, PyObject *ar
         wxButton_SetBackgroundColour(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -574,7 +565,6 @@ static PyObject *_wrap_wxButton_SetForegroundColour(PyObject *self, PyObject *ar
         wxButton_SetForegroundColour(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -609,14 +599,6 @@ static void *SwigwxBitmapButtonTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxBitmapButton *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxBitmapButtonTowxObject(void *ptr) {
-    wxBitmapButton *src;
-    wxObject *dest;
-    src = (wxBitmapButton *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -683,7 +665,6 @@ static PyObject *_wrap_new_wxBitmapButton(PyObject *self, PyObject *args, PyObje
         _result = (wxBitmapButton *)new_wxBitmapButton(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,*_arg6,_arg7);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxBitmapButton_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -719,7 +700,6 @@ static PyObject *_wrap_wxBitmapButton_GetBitmapLabel(PyObject *self, PyObject *a
     _result = (wxBitmap *) &_result_ref;
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxBitmap_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -755,7 +735,6 @@ static PyObject *_wrap_wxBitmapButton_GetBitmapDisabled(PyObject *self, PyObject
     _result = (wxBitmap *) &_result_ref;
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxBitmap_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -791,7 +770,6 @@ static PyObject *_wrap_wxBitmapButton_GetBitmapFocus(PyObject *self, PyObject *a
     _result = (wxBitmap *) &_result_ref;
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxBitmap_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -827,7 +805,6 @@ static PyObject *_wrap_wxBitmapButton_GetBitmapSelected(PyObject *self, PyObject
     _result = (wxBitmap *) &_result_ref;
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxBitmap_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -869,7 +846,6 @@ static PyObject *_wrap_wxBitmapButton_SetBitmapDisabled(PyObject *self, PyObject
         wxBitmapButton_SetBitmapDisabled(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -906,7 +882,6 @@ static PyObject *_wrap_wxBitmapButton_SetBitmapFocus(PyObject *self, PyObject *a
         wxBitmapButton_SetBitmapFocus(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -943,7 +918,6 @@ static PyObject *_wrap_wxBitmapButton_SetBitmapSelected(PyObject *self, PyObject
         wxBitmapButton_SetBitmapSelected(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -980,7 +954,6 @@ static PyObject *_wrap_wxBitmapButton_SetBitmapLabel(PyObject *self, PyObject *a
         wxBitmapButton_SetBitmapLabel(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -1010,7 +983,6 @@ static PyObject *_wrap_wxBitmapButton_SetMargins(PyObject *self, PyObject *args,
         wxBitmapButton_SetMargins(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -1039,7 +1011,6 @@ static PyObject *_wrap_wxBitmapButton_GetMarginX(PyObject *self, PyObject *args,
         _result = (int )wxBitmapButton_GetMarginX(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -1067,7 +1038,6 @@ static PyObject *_wrap_wxBitmapButton_GetMarginY(PyObject *self, PyObject *args,
         _result = (int )wxBitmapButton_GetMarginY(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -1093,14 +1063,6 @@ static void *SwigwxCheckBoxTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxCheckBox *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxCheckBoxTowxObject(void *ptr) {
-    wxCheckBox *src;
-    wxObject *dest;
-    src = (wxCheckBox *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -1140,7 +1102,7 @@ static PyObject *_wrap_new_wxCheckBox(PyObject *self, PyObject *args, PyObject *
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -1178,7 +1140,6 @@ static PyObject *_wrap_new_wxCheckBox(PyObject *self, PyObject *args, PyObject *
         _result = (wxCheckBox *)new_wxCheckBox(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,*_arg6,_arg7);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxCheckBox_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -1216,7 +1177,6 @@ static PyObject *_wrap_wxCheckBox_GetValue(PyObject *self, PyObject *args, PyObj
         _result = (bool )wxCheckBox_GetValue(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -1246,7 +1206,6 @@ static PyObject *_wrap_wxCheckBox_SetValue(PyObject *self, PyObject *args, PyObj
         wxCheckBox_SetValue(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -1273,14 +1232,6 @@ static void *SwigwxChoiceTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxChoice *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxChoiceTowxObject(void *ptr) {
-    wxChoice *src;
-    wxObject *dest;
-    src = (wxChoice *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -1356,7 +1307,6 @@ static PyObject *_wrap_new_wxChoice(PyObject *self, PyObject *args, PyObject *kw
         _result = (wxChoice *)new_wxChoice(_arg0,_arg1,*_arg2,*_arg3,_arg4,_arg5,_arg6,*_arg7,_arg8);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxChoice_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -1393,7 +1343,7 @@ static PyObject *_wrap_wxChoice_Append(PyObject *self, PyObject *args, PyObject 
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1412,7 +1362,6 @@ static PyObject *_wrap_wxChoice_Append(PyObject *self, PyObject *args, PyObject 
         wxChoice_Append(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -1444,7 +1393,6 @@ static PyObject *_wrap_wxChoice_Clear(PyObject *self, PyObject *args, PyObject *
         wxChoice_Clear(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -1474,7 +1422,7 @@ static PyObject *_wrap_wxChoice_FindString(PyObject *self, PyObject *args, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1493,7 +1441,6 @@ static PyObject *_wrap_wxChoice_FindString(PyObject *self, PyObject *args, PyObj
         _result = (int )wxChoice_FindString(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
 {
     if (_obj1)
@@ -1525,7 +1472,6 @@ static PyObject *_wrap_wxChoice_GetColumns(PyObject *self, PyObject *args, PyObj
         _result = (int )wxChoice_GetColumns(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -1553,7 +1499,6 @@ static PyObject *_wrap_wxChoice_GetSelection(PyObject *self, PyObject *args, PyO
         _result = (int )wxChoice_GetSelection(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -1582,7 +1527,6 @@ static PyObject *_wrap_wxChoice_GetString(PyObject *self, PyObject *args, PyObje
         _result = new wxString (wxChoice_GetString(_arg0,_arg1));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -1615,7 +1559,6 @@ static PyObject *_wrap_wxChoice_GetStringSelection(PyObject *self, PyObject *arg
         _result = new wxString (wxChoice_GetStringSelection(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -1648,7 +1591,6 @@ static PyObject *_wrap_wxChoice_Number(PyObject *self, PyObject *args, PyObject 
         _result = (int )wxChoice_Number(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -1676,7 +1618,6 @@ static PyObject *_wrap_wxChoice_SetColumns(PyObject *self, PyObject *args, PyObj
         wxChoice_SetColumns(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -1705,7 +1646,6 @@ static PyObject *_wrap_wxChoice_SetSelection(PyObject *self, PyObject *args, PyO
         wxChoice_SetSelection(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -1734,7 +1674,7 @@ static PyObject *_wrap_wxChoice_SetStringSelection(PyObject *self, PyObject *arg
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1753,7 +1693,6 @@ static PyObject *_wrap_wxChoice_SetStringSelection(PyObject *self, PyObject *arg
         wxChoice_SetStringSelection(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -1792,14 +1731,6 @@ static void *SwigwxComboBoxTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxComboBox *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxComboBoxTowxObject(void *ptr) {
-    wxComboBox *src;
-    wxObject *dest;
-    src = (wxComboBox *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -1876,7 +1807,6 @@ static PyObject *_wrap_new_wxComboBox(PyObject *self, PyObject *args, PyObject *
         _result = (wxComboBox *)new_wxComboBox(_arg0,_arg1,_arg2,*_arg3,*_arg4,_arg5,_arg6,_arg7,*_arg8,_arg9);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxComboBox_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -1913,7 +1843,7 @@ static PyObject *_wrap_wxComboBox_Append(PyObject *self, PyObject *args, PyObjec
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1932,7 +1862,6 @@ static PyObject *_wrap_wxComboBox_Append(PyObject *self, PyObject *args, PyObjec
         wxComboBox_Append(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -1964,7 +1893,6 @@ static PyObject *_wrap_wxComboBox_Clear(PyObject *self, PyObject *args, PyObject
         wxComboBox_Clear(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -1992,7 +1920,6 @@ static PyObject *_wrap_wxComboBox_Copy(PyObject *self, PyObject *args, PyObject 
         wxComboBox_Copy(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2020,7 +1947,6 @@ static PyObject *_wrap_wxComboBox_Cut(PyObject *self, PyObject *args, PyObject *
         wxComboBox_Cut(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2049,7 +1975,6 @@ static PyObject *_wrap_wxComboBox_Delete(PyObject *self, PyObject *args, PyObjec
         wxComboBox_Delete(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2079,7 +2004,7 @@ static PyObject *_wrap_wxComboBox_FindString(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -2098,7 +2023,6 @@ static PyObject *_wrap_wxComboBox_FindString(PyObject *self, PyObject *args, PyO
         _result = (int )wxComboBox_FindString(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
 {
     if (_obj1)
@@ -2130,7 +2054,6 @@ static PyObject *_wrap_wxComboBox_GetInsertionPoint(PyObject *self, PyObject *ar
         _result = (long )wxComboBox_GetInsertionPoint(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("l",_result);
     return _resultobj;
 }
@@ -2158,7 +2081,6 @@ static PyObject *_wrap_wxComboBox_GetLastPosition(PyObject *self, PyObject *args
         _result = (long )wxComboBox_GetLastPosition(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("l",_result);
     return _resultobj;
 }
@@ -2186,7 +2108,6 @@ static PyObject *_wrap_wxComboBox_GetSelection(PyObject *self, PyObject *args, P
         _result = (int )wxComboBox_GetSelection(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -2215,7 +2136,6 @@ static PyObject *_wrap_wxComboBox_GetString(PyObject *self, PyObject *args, PyOb
         _result = new wxString (wxComboBox_GetString(_arg0,_arg1));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -2248,7 +2168,6 @@ static PyObject *_wrap_wxComboBox_GetStringSelection(PyObject *self, PyObject *a
         _result = new wxString (wxComboBox_GetStringSelection(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -2281,7 +2200,6 @@ static PyObject *_wrap_wxComboBox_GetValue(PyObject *self, PyObject *args, PyObj
         _result = new wxString (wxComboBox_GetValue(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -2314,7 +2232,6 @@ static PyObject *_wrap_wxComboBox_Number(PyObject *self, PyObject *args, PyObjec
         _result = (int )wxComboBox_Number(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -2341,7 +2258,6 @@ static PyObject *_wrap_wxComboBox_Paste(PyObject *self, PyObject *args, PyObject
         wxComboBox_Paste(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2372,7 +2288,7 @@ static PyObject *_wrap_wxComboBox_Replace(PyObject *self, PyObject *args, PyObje
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj3) && !PyUnicode_Check(_obj3)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj3, &tmpPtr, &tmpSize) == -1)
@@ -2391,7 +2307,6 @@ static PyObject *_wrap_wxComboBox_Replace(PyObject *self, PyObject *args, PyObje
         wxComboBox_Replace(_arg0,_arg1,_arg2,*_arg3);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -2425,7 +2340,6 @@ static PyObject *_wrap_wxComboBox_Remove(PyObject *self, PyObject *args, PyObjec
         wxComboBox_Remove(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2454,7 +2368,6 @@ static PyObject *_wrap_wxComboBox_SetInsertionPoint(PyObject *self, PyObject *ar
         wxComboBox_SetInsertionPoint(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2482,7 +2395,6 @@ static PyObject *_wrap_wxComboBox_SetInsertionPointEnd(PyObject *self, PyObject 
         wxComboBox_SetInsertionPointEnd(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2511,7 +2423,6 @@ static PyObject *_wrap_wxComboBox_SetSelection(PyObject *self, PyObject *args, P
         wxComboBox_SetSelection(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2541,7 +2452,6 @@ static PyObject *_wrap_wxComboBox_SetMark(PyObject *self, PyObject *args, PyObje
         wxComboBox_SetMark(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2570,7 +2480,7 @@ static PyObject *_wrap_wxComboBox_SetValue(PyObject *self, PyObject *args, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -2589,7 +2499,6 @@ static PyObject *_wrap_wxComboBox_SetValue(PyObject *self, PyObject *args, PyObj
         wxComboBox_SetValue(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -2620,14 +2529,6 @@ static void *SwigwxGaugeTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxGauge *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxGaugeTowxObject(void *ptr) {
-    wxGauge *src;
-    wxObject *dest;
-    src = (wxGauge *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -2686,7 +2587,6 @@ static PyObject *_wrap_new_wxGauge(PyObject *self, PyObject *args, PyObject *kwa
         _result = (wxGauge *)new_wxGauge(_arg0,_arg1,_arg2,*_arg3,*_arg4,_arg5,*_arg6,_arg7);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxGauge_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -2720,7 +2620,6 @@ static PyObject *_wrap_wxGauge_GetBezelFace(PyObject *self, PyObject *args, PyOb
         _result = (int )wxGauge_GetBezelFace(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -2748,7 +2647,6 @@ static PyObject *_wrap_wxGauge_GetRange(PyObject *self, PyObject *args, PyObject
         _result = (int )wxGauge_GetRange(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -2776,7 +2674,6 @@ static PyObject *_wrap_wxGauge_GetShadowWidth(PyObject *self, PyObject *args, Py
         _result = (int )wxGauge_GetShadowWidth(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -2804,7 +2701,6 @@ static PyObject *_wrap_wxGauge_GetValue(PyObject *self, PyObject *args, PyObject
         _result = (int )wxGauge_GetValue(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -2832,7 +2728,6 @@ static PyObject *_wrap_wxGauge_SetBezelFace(PyObject *self, PyObject *args, PyOb
         wxGauge_SetBezelFace(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2861,7 +2756,6 @@ static PyObject *_wrap_wxGauge_SetRange(PyObject *self, PyObject *args, PyObject
         wxGauge_SetRange(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2890,7 +2784,6 @@ static PyObject *_wrap_wxGauge_SetShadowWidth(PyObject *self, PyObject *args, Py
         wxGauge_SetShadowWidth(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2919,7 +2812,6 @@ static PyObject *_wrap_wxGauge_SetValue(PyObject *self, PyObject *args, PyObject
         wxGauge_SetValue(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -2946,14 +2838,6 @@ static void *SwigwxStaticBoxTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxStaticBox *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxStaticBoxTowxObject(void *ptr) {
-    wxStaticBox *src;
-    wxObject *dest;
-    src = (wxStaticBox *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -2991,7 +2875,7 @@ static PyObject *_wrap_new_wxStaticBox(PyObject *self, PyObject *args, PyObject 
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -3022,7 +2906,6 @@ static PyObject *_wrap_new_wxStaticBox(PyObject *self, PyObject *args, PyObject 
         _result = (wxStaticBox *)new_wxStaticBox(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,_arg6);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxStaticBox_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -3058,14 +2941,6 @@ static void *SwigwxStaticLineTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxStaticLine *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxStaticLineTowxObject(void *ptr) {
-    wxStaticLine *src;
-    wxObject *dest;
-    src = (wxStaticLine *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -3114,7 +2989,6 @@ static PyObject *_wrap_new_wxStaticLine(PyObject *self, PyObject *args, PyObject
         _result = (wxStaticLine *)new_wxStaticLine(_arg0,_arg1,*_arg2,*_arg3,_arg4,_arg5);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxStaticLine_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -3146,14 +3020,6 @@ static void *SwigwxStaticTextTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxStaticText *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxStaticTextTowxObject(void *ptr) {
-    wxStaticText *src;
-    wxObject *dest;
-    src = (wxStaticText *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -3191,7 +3057,7 @@ static PyObject *_wrap_new_wxStaticText(PyObject *self, PyObject *args, PyObject
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -3222,7 +3088,6 @@ static PyObject *_wrap_new_wxStaticText(PyObject *self, PyObject *args, PyObject
         _result = (wxStaticText *)new_wxStaticText(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,_arg6);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxStaticText_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -3260,7 +3125,6 @@ static PyObject *_wrap_wxStaticText_GetLabel(PyObject *self, PyObject *args, PyO
         _result = new wxString (wxStaticText_GetLabel(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -3293,7 +3157,7 @@ static PyObject *_wrap_wxStaticText_SetLabel(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -3312,7 +3176,6 @@ static PyObject *_wrap_wxStaticText_SetLabel(PyObject *self, PyObject *args, PyO
         wxStaticText_SetLabel(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -3343,14 +3206,6 @@ static void *SwigwxListBoxTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxListBox *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListBoxTowxObject(void *ptr) {
-    wxListBox *src;
-    wxObject *dest;
-    src = (wxListBox *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -3426,7 +3281,6 @@ static PyObject *_wrap_new_wxListBox(PyObject *self, PyObject *args, PyObject *k
         _result = (wxListBox *)new_wxListBox(_arg0,_arg1,*_arg2,*_arg3,_arg4,_arg5,_arg6,*_arg7,_arg8);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxListBox_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -3463,7 +3317,7 @@ static PyObject *_wrap_wxListBox_Append(PyObject *self, PyObject *args, PyObject
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -3482,7 +3336,6 @@ static PyObject *_wrap_wxListBox_Append(PyObject *self, PyObject *args, PyObject
         wxListBox_Append(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -3514,7 +3367,6 @@ static PyObject *_wrap_wxListBox_Clear(PyObject *self, PyObject *args, PyObject 
         wxListBox_Clear(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -3543,7 +3395,6 @@ static PyObject *_wrap_wxListBox_Delete(PyObject *self, PyObject *args, PyObject
         wxListBox_Delete(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -3572,7 +3423,6 @@ static PyObject *_wrap_wxListBox_Deselect(PyObject *self, PyObject *args, PyObje
         wxListBox_Deselect(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -3602,7 +3452,7 @@ static PyObject *_wrap_wxListBox_FindString(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -3621,7 +3471,6 @@ static PyObject *_wrap_wxListBox_FindString(PyObject *self, PyObject *args, PyOb
         _result = (int )wxListBox_FindString(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
 {
     if (_obj1)
@@ -3653,7 +3502,6 @@ static PyObject *_wrap_wxListBox_GetSelection(PyObject *self, PyObject *args, Py
         _result = (int )wxListBox_GetSelection(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -3689,7 +3537,6 @@ static PyObject *_wrap_wxListBox_GetSelections(PyObject *self, PyObject *args, P
         _result = (PyObject *)wxListBox_GetSelections(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
   _resultobj = _result;
 }
@@ -3736,7 +3583,6 @@ static PyObject *_wrap_wxListBox_InsertItems(PyObject *self, PyObject *args, PyO
         wxListBox_InsertItems(_arg0,_arg1,_arg2,_arg3);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -3769,7 +3615,6 @@ static PyObject *_wrap_wxListBox_GetString(PyObject *self, PyObject *args, PyObj
         _result = new wxString (wxListBox_GetString(_arg0,_arg1));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -3802,7 +3647,6 @@ static PyObject *_wrap_wxListBox_GetStringSelection(PyObject *self, PyObject *ar
         _result = new wxString (wxListBox_GetStringSelection(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -3835,7 +3679,6 @@ static PyObject *_wrap_wxListBox_Number(PyObject *self, PyObject *args, PyObject
         _result = (int )wxListBox_Number(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -3864,7 +3707,6 @@ static PyObject *_wrap_wxListBox_Selected(PyObject *self, PyObject *args, PyObje
         _result = (bool )wxListBox_Selected(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -3909,7 +3751,6 @@ static PyObject *_wrap_wxListBox_Set(PyObject *self, PyObject *args, PyObject *k
         wxListBox_Set(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -3941,7 +3782,6 @@ static PyObject *_wrap_wxListBox_SetFirstItem(PyObject *self, PyObject *args, Py
         wxListBox_SetFirstItem(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -3970,7 +3810,7 @@ static PyObject *_wrap_wxListBox_SetFirstItemStr(PyObject *self, PyObject *args,
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -3989,7 +3829,6 @@ static PyObject *_wrap_wxListBox_SetFirstItemStr(PyObject *self, PyObject *args,
         wxListBox_SetFirstItemStr(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -4025,7 +3864,6 @@ static PyObject *_wrap_wxListBox_SetSelection(PyObject *self, PyObject *args, Py
         wxListBox_SetSelection(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -4055,7 +3893,7 @@ static PyObject *_wrap_wxListBox_SetString(PyObject *self, PyObject *args, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -4074,7 +3912,6 @@ static PyObject *_wrap_wxListBox_SetString(PyObject *self, PyObject *args, PyObj
         wxListBox_SetString(_arg0,_arg1,*_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -4109,7 +3946,7 @@ static PyObject *_wrap_wxListBox_SetStringSelection(PyObject *self, PyObject *ar
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -4129,7 +3966,6 @@ static PyObject *_wrap_wxListBox_SetStringSelection(PyObject *self, PyObject *ar
         wxListBox_SetStringSelection(_arg0,*_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -4168,14 +4004,6 @@ static void *SwigwxCheckListBoxTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxCheckListBox *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxCheckListBoxTowxObject(void *ptr) {
-    wxCheckListBox *src;
-    wxObject *dest;
-    src = (wxCheckListBox *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -4251,7 +4079,6 @@ static PyObject *_wrap_new_wxCheckListBox(PyObject *self, PyObject *args, PyObje
         _result = (wxCheckListBox *)new_wxCheckListBox(_arg0,_arg1,*_arg2,*_arg3,_arg4,_arg5,_arg6,*_arg7,_arg8);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxCheckListBox_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -4289,7 +4116,6 @@ static PyObject *_wrap_wxCheckListBox_IsChecked(PyObject *self, PyObject *args, 
         _result = (bool )wxCheckListBox_IsChecked(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -4318,7 +4144,6 @@ static PyObject *_wrap_wxCheckListBox_Check(PyObject *self, PyObject *args, PyOb
         wxCheckListBox_Check(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -4364,7 +4189,6 @@ static PyObject *_wrap_wxCheckListBox_InsertItems(PyObject *self, PyObject *args
         wxCheckListBox_InsertItems(_arg0,_arg1,_arg2,_arg3);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -4396,390 +4220,7 @@ static PyObject *_wrap_wxCheckListBox_GetItemHeight(PyObject *self, PyObject *ar
         _result = (int )wxCheckListBox_GetItemHeight(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define new_wxTextAttr(_swigarg0,_swigarg1,_swigarg2) (new wxTextAttr(_swigarg0,_swigarg1,_swigarg2))
-static PyObject *_wrap_new_wxTextAttr(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxTextAttr * _result;
-    wxColour * _arg0 = (wxColour *) &wxNullColour;
-    wxColour * _arg1 = (wxColour *) &wxNullColour;
-    wxFont * _arg2 = (wxFont *) &wxNullFont;
-    wxColour  temp;
-    PyObject * _obj0 = 0;
-    wxColour  temp0;
-    PyObject * _obj1 = 0;
-    PyObject * _argo2 = 0;
-    char *_kwnames[] = { "colText","colBack","font", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"|OOO:new_wxTextAttr",_kwnames,&_obj0,&_obj1,&_argo2)) 
-        return NULL;
-    if (_obj0)
-{
-    _arg0 = &temp;
-    if (! wxColour_helper(_obj0, &_arg0))
-        return NULL;
-}
-    if (_obj1)
-{
-    _arg1 = &temp0;
-    if (! wxColour_helper(_obj1, &_arg1))
-        return NULL;
-}
-    if (_argo2) {
-        if (_argo2 == Py_None) { _arg2 = NULL; }
-        else if (SWIG_GetPtrObj(_argo2,(void **) &_arg2,"_wxFont_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of new_wxTextAttr. Expected _wxFont_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (wxTextAttr *)new_wxTextAttr(*_arg0,*_arg1,*_arg2);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxTextAttr_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-    return _resultobj;
-}
-
-#define delete_wxTextAttr(_swigobj) (delete _swigobj)
-static PyObject *_wrap_delete_wxTextAttr(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxTextAttr * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:delete_wxTextAttr",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of delete_wxTextAttr. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        delete_wxTextAttr(_arg0);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxTextAttr_SetTextColour(_swigobj,_swigarg0)  (_swigobj->SetTextColour(_swigarg0))
-static PyObject *_wrap_wxTextAttr_SetTextColour(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxTextAttr * _arg0;
-    wxColour * _arg1;
-    PyObject * _argo0 = 0;
-    wxColour  temp;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","colText", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxTextAttr_SetTextColour",_kwnames,&_argo0,&_obj1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_SetTextColour. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    _arg1 = &temp;
-    if (! wxColour_helper(_obj1, &_arg1))
-        return NULL;
-}
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        wxTextAttr_SetTextColour(_arg0,*_arg1);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxTextAttr_SetBackgroundColour(_swigobj,_swigarg0)  (_swigobj->SetBackgroundColour(_swigarg0))
-static PyObject *_wrap_wxTextAttr_SetBackgroundColour(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxTextAttr * _arg0;
-    wxColour * _arg1;
-    PyObject * _argo0 = 0;
-    wxColour  temp;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","colBack", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxTextAttr_SetBackgroundColour",_kwnames,&_argo0,&_obj1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_SetBackgroundColour. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    _arg1 = &temp;
-    if (! wxColour_helper(_obj1, &_arg1))
-        return NULL;
-}
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        wxTextAttr_SetBackgroundColour(_arg0,*_arg1);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxTextAttr_SetFont(_swigobj,_swigarg0)  (_swigobj->SetFont(_swigarg0))
-static PyObject *_wrap_wxTextAttr_SetFont(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxTextAttr * _arg0;
-    wxFont * _arg1;
-    PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    char *_kwnames[] = { "self","font", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxTextAttr_SetFont",_kwnames,&_argo0,&_argo1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_SetFont. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxFont_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxTextAttr_SetFont. Expected _wxFont_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        wxTextAttr_SetFont(_arg0,*_arg1);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxTextAttr_HasTextColour(_swigobj)  (_swigobj->HasTextColour())
-static PyObject *_wrap_wxTextAttr_HasTextColour(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxTextAttr * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxTextAttr_HasTextColour",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_HasTextColour. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (bool )wxTextAttr_HasTextColour(_arg0);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxTextAttr_HasBackgroundColour(_swigobj)  (_swigobj->HasBackgroundColour())
-static PyObject *_wrap_wxTextAttr_HasBackgroundColour(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxTextAttr * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxTextAttr_HasBackgroundColour",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_HasBackgroundColour. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (bool )wxTextAttr_HasBackgroundColour(_arg0);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxTextAttr_HasFont(_swigobj)  (_swigobj->HasFont())
-static PyObject *_wrap_wxTextAttr_HasFont(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxTextAttr * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxTextAttr_HasFont",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_HasFont. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (bool )wxTextAttr_HasFont(_arg0);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxTextAttr_GetTextColour(_swigobj)  (_swigobj->GetTextColour())
-static PyObject *_wrap_wxTextAttr_GetTextColour(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxColour * _result;
-    wxTextAttr * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxTextAttr_GetTextColour",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_GetTextColour. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        const wxColour & _result_ref = wxTextAttr_GetTextColour(_arg0);
-    _result = (wxColour *) &_result_ref;
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxColour_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-    return _resultobj;
-}
-
-#define wxTextAttr_GetBackgroundColour(_swigobj)  (_swigobj->GetBackgroundColour())
-static PyObject *_wrap_wxTextAttr_GetBackgroundColour(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxColour * _result;
-    wxTextAttr * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxTextAttr_GetBackgroundColour",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_GetBackgroundColour. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        const wxColour & _result_ref = wxTextAttr_GetBackgroundColour(_arg0);
-    _result = (wxColour *) &_result_ref;
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxColour_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-    return _resultobj;
-}
-
-#define wxTextAttr_GetFont(_swigobj)  (_swigobj->GetFont())
-static PyObject *_wrap_wxTextAttr_GetFont(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxFont * _result;
-    wxTextAttr * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxTextAttr_GetFont",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextAttr_GetFont. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        const wxFont & _result_ref = wxTextAttr_GetFont(_arg0);
-    _result = (wxFont *) &_result_ref;
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxFont_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
     return _resultobj;
 }
 
@@ -4804,14 +4245,6 @@ static void *SwigwxTextCtrlTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxTextCtrl *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxTextCtrlTowxObject(void *ptr) {
-    wxTextCtrl *src;
-    wxObject *dest;
-    src = (wxTextCtrl *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -4870,7 +4303,6 @@ static PyObject *_wrap_new_wxTextCtrl(PyObject *self, PyObject *args, PyObject *
         _result = (wxTextCtrl *)new_wxTextCtrl(_arg0,_arg1,_arg2,*_arg3,*_arg4,_arg5,*_arg6,_arg7);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxTextCtrl_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -4903,7 +4335,6 @@ static PyObject *_wrap_wxTextCtrl_Clear(PyObject *self, PyObject *args, PyObject
         wxTextCtrl_Clear(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -4931,7 +4362,6 @@ static PyObject *_wrap_wxTextCtrl_Copy(PyObject *self, PyObject *args, PyObject 
         wxTextCtrl_Copy(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -4959,7 +4389,6 @@ static PyObject *_wrap_wxTextCtrl_Cut(PyObject *self, PyObject *args, PyObject *
         wxTextCtrl_Cut(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -4987,7 +4416,6 @@ static PyObject *_wrap_wxTextCtrl_DiscardEdits(PyObject *self, PyObject *args, P
         wxTextCtrl_DiscardEdits(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5016,7 +4444,6 @@ static PyObject *_wrap_wxTextCtrl_GetInsertionPoint(PyObject *self, PyObject *ar
         _result = (long )wxTextCtrl_GetInsertionPoint(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("l",_result);
     return _resultobj;
 }
@@ -5044,7 +4471,6 @@ static PyObject *_wrap_wxTextCtrl_GetLastPosition(PyObject *self, PyObject *args
         _result = (long )wxTextCtrl_GetLastPosition(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("l",_result);
     return _resultobj;
 }
@@ -5073,7 +4499,6 @@ static PyObject *_wrap_wxTextCtrl_GetLineLength(PyObject *self, PyObject *args, 
         _result = (int )wxTextCtrl_GetLineLength(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5102,7 +4527,6 @@ static PyObject *_wrap_wxTextCtrl_GetLineText(PyObject *self, PyObject *args, Py
         _result = new wxString (wxTextCtrl_GetLineText(_arg0,_arg1));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -5135,7 +4559,6 @@ static PyObject *_wrap_wxTextCtrl_GetNumberOfLines(PyObject *self, PyObject *arg
         _result = (int )wxTextCtrl_GetNumberOfLines(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5163,7 +4586,6 @@ static PyObject *_wrap_wxTextCtrl_GetValue(PyObject *self, PyObject *args, PyObj
         _result = new wxString (wxTextCtrl_GetValue(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -5196,7 +4618,6 @@ static PyObject *_wrap_wxTextCtrl_IsModified(PyObject *self, PyObject *args, PyO
         _result = (bool )wxTextCtrl_IsModified(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5225,7 +4646,7 @@ static PyObject *_wrap_wxTextCtrl_LoadFile(PyObject *self, PyObject *args, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5244,7 +4665,6 @@ static PyObject *_wrap_wxTextCtrl_LoadFile(PyObject *self, PyObject *args, PyObj
         _result = (bool )wxTextCtrl_LoadFile(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
 {
     if (_obj1)
@@ -5275,7 +4695,6 @@ static PyObject *_wrap_wxTextCtrl_Paste(PyObject *self, PyObject *args, PyObject
         wxTextCtrl_Paste(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5314,7 +4733,6 @@ static PyObject *_wrap_wxTextCtrl_PositionToXY(PyObject *self, PyObject *args, P
         wxTextCtrl_PositionToXY(_arg0,_arg1,_arg2,_arg3);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -5354,7 +4772,6 @@ static PyObject *_wrap_wxTextCtrl_Remove(PyObject *self, PyObject *args, PyObjec
         wxTextCtrl_Remove(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5385,7 +4802,7 @@ static PyObject *_wrap_wxTextCtrl_Replace(PyObject *self, PyObject *args, PyObje
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj3) && !PyUnicode_Check(_obj3)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj3, &tmpPtr, &tmpSize) == -1)
@@ -5404,7 +4821,6 @@ static PyObject *_wrap_wxTextCtrl_Replace(PyObject *self, PyObject *args, PyObje
         wxTextCtrl_Replace(_arg0,_arg1,_arg2,*_arg3);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -5438,7 +4854,7 @@ static PyObject *_wrap_wxTextCtrl_SaveFile(PyObject *self, PyObject *args, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5457,7 +4873,6 @@ static PyObject *_wrap_wxTextCtrl_SaveFile(PyObject *self, PyObject *args, PyObj
         _result = (bool )wxTextCtrl_SaveFile(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
 {
     if (_obj1)
@@ -5491,7 +4906,6 @@ static PyObject *_wrap_wxTextCtrl_SetEditable(PyObject *self, PyObject *args, Py
         wxTextCtrl_SetEditable(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5520,7 +4934,6 @@ static PyObject *_wrap_wxTextCtrl_SetInsertionPoint(PyObject *self, PyObject *ar
         wxTextCtrl_SetInsertionPoint(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5548,7 +4961,6 @@ static PyObject *_wrap_wxTextCtrl_SetInsertionPointEnd(PyObject *self, PyObject 
         wxTextCtrl_SetInsertionPointEnd(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5578,7 +4990,6 @@ static PyObject *_wrap_wxTextCtrl_SetSelection(PyObject *self, PyObject *args, P
         wxTextCtrl_SetSelection(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5607,7 +5018,7 @@ static PyObject *_wrap_wxTextCtrl_SetValue(PyObject *self, PyObject *args, PyObj
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5626,7 +5037,6 @@ static PyObject *_wrap_wxTextCtrl_SetValue(PyObject *self, PyObject *args, PyObj
         wxTextCtrl_SetValue(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -5659,7 +5069,6 @@ static PyObject *_wrap_wxTextCtrl_ShowPosition(PyObject *self, PyObject *args, P
         wxTextCtrl_ShowPosition(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -5688,7 +5097,7 @@ static PyObject *_wrap_wxTextCtrl_WriteText(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5707,7 +5116,6 @@ static PyObject *_wrap_wxTextCtrl_WriteText(PyObject *self, PyObject *args, PyOb
         wxTextCtrl_WriteText(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -5740,7 +5148,7 @@ static PyObject *_wrap_wxTextCtrl_AppendText(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5759,7 +5167,6 @@ static PyObject *_wrap_wxTextCtrl_AppendText(PyObject *self, PyObject *args, PyO
         wxTextCtrl_AppendText(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -5794,7 +5201,6 @@ static PyObject *_wrap_wxTextCtrl_XYToPosition(PyObject *self, PyObject *args, P
         _result = (long )wxTextCtrl_XYToPosition(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("l",_result);
     return _resultobj;
 }
@@ -5822,7 +5228,6 @@ static PyObject *_wrap_wxTextCtrl_CanCopy(PyObject *self, PyObject *args, PyObje
         _result = (bool )wxTextCtrl_CanCopy(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5850,7 +5255,6 @@ static PyObject *_wrap_wxTextCtrl_CanCut(PyObject *self, PyObject *args, PyObjec
         _result = (bool )wxTextCtrl_CanCut(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5878,7 +5282,6 @@ static PyObject *_wrap_wxTextCtrl_CanPaste(PyObject *self, PyObject *args, PyObj
         _result = (bool )wxTextCtrl_CanPaste(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5906,7 +5309,6 @@ static PyObject *_wrap_wxTextCtrl_CanRedo(PyObject *self, PyObject *args, PyObje
         _result = (bool )wxTextCtrl_CanRedo(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5934,7 +5336,6 @@ static PyObject *_wrap_wxTextCtrl_CanUndo(PyObject *self, PyObject *args, PyObje
         _result = (bool )wxTextCtrl_CanUndo(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -5971,7 +5372,6 @@ static PyObject *_wrap_wxTextCtrl_GetSelection(PyObject *self, PyObject *args, P
         wxTextCtrl_GetSelection(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -6010,7 +5410,6 @@ static PyObject *_wrap_wxTextCtrl_IsEditable(PyObject *self, PyObject *args, PyO
         _result = (bool )wxTextCtrl_IsEditable(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6037,7 +5436,6 @@ static PyObject *_wrap_wxTextCtrl_Undo(PyObject *self, PyObject *args, PyObject 
         wxTextCtrl_Undo(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -6065,126 +5463,13 @@ static PyObject *_wrap_wxTextCtrl_Redo(PyObject *self, PyObject *args, PyObject 
         wxTextCtrl_Redo(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
 }
 
-#define wxTextCtrl_SetStyle(_swigobj,_swigarg0,_swigarg1,_swigarg2)  (_swigobj->SetStyle(_swigarg0,_swigarg1,_swigarg2))
-static PyObject *_wrap_wxTextCtrl_SetStyle(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxTextCtrl * _arg0;
-    long  _arg1;
-    long  _arg2;
-    wxTextAttr * _arg3;
-    PyObject * _argo0 = 0;
-    PyObject * _argo3 = 0;
-    char *_kwnames[] = { "self","start","end","style", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OllO:wxTextCtrl_SetStyle",_kwnames,&_argo0,&_arg1,&_arg2,&_argo3)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextCtrl_SetStyle. Expected _wxTextCtrl_p.");
-        return NULL;
-        }
-    }
-    if (_argo3) {
-        if (_argo3 == Py_None) { _arg3 = NULL; }
-        else if (SWIG_GetPtrObj(_argo3,(void **) &_arg3,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 4 of wxTextCtrl_SetStyle. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (bool )wxTextCtrl_SetStyle(_arg0,_arg1,_arg2,*_arg3);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxTextCtrl_SetDefaultStyle(_swigobj,_swigarg0)  (_swigobj->SetDefaultStyle(_swigarg0))
-static PyObject *_wrap_wxTextCtrl_SetDefaultStyle(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxTextCtrl * _arg0;
-    wxTextAttr * _arg1;
-    PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    char *_kwnames[] = { "self","style", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxTextCtrl_SetDefaultStyle",_kwnames,&_argo0,&_argo1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextCtrl_SetDefaultStyle. Expected _wxTextCtrl_p.");
-        return NULL;
-        }
-    }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxTextAttr_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxTextCtrl_SetDefaultStyle. Expected _wxTextAttr_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (bool )wxTextCtrl_SetDefaultStyle(_arg0,*_arg1);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxTextCtrl_GetDefaultStyle(_swigobj)  (_swigobj->GetDefaultStyle())
-static PyObject *_wrap_wxTextCtrl_GetDefaultStyle(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxTextAttr * _result;
-    wxTextCtrl * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxTextCtrl_GetDefaultStyle",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxTextCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxTextCtrl_GetDefaultStyle. Expected _wxTextCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        const wxTextAttr & _result_ref = wxTextCtrl_GetDefaultStyle(_arg0);
-    _result = (wxTextAttr *) &_result_ref;
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxTextAttr_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-    return _resultobj;
-}
-
 static void  wxTextCtrl_write(wxTextCtrl *self,const wxString & text) {
-            self->AppendText(text);
+            self->AppendText(text + '\n');
         }
 static PyObject *_wrap_wxTextCtrl_write(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -6208,7 +5493,7 @@ static PyObject *_wrap_wxTextCtrl_write(PyObject *self, PyObject *args, PyObject
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -6227,7 +5512,6 @@ static PyObject *_wrap_wxTextCtrl_write(PyObject *self, PyObject *args, PyObject
         wxTextCtrl_write(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -6258,14 +5542,6 @@ static void *SwigwxScrollBarTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxScrollBar *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxScrollBarTowxObject(void *ptr) {
-    wxScrollBar *src;
-    wxObject *dest;
-    src = (wxScrollBar *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -6323,7 +5599,6 @@ static PyObject *_wrap_new_wxScrollBar(PyObject *self, PyObject *args, PyObject 
         _result = (wxScrollBar *)new_wxScrollBar(_arg0,_arg1,*_arg2,*_arg3,_arg4,*_arg5,_arg6);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxScrollBar_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -6357,7 +5632,6 @@ static PyObject *_wrap_wxScrollBar_GetRange(PyObject *self, PyObject *args, PyOb
         _result = (int )wxScrollBar_GetRange(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6385,7 +5659,6 @@ static PyObject *_wrap_wxScrollBar_GetPageSize(PyObject *self, PyObject *args, P
         _result = (int )wxScrollBar_GetPageSize(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6413,7 +5686,6 @@ static PyObject *_wrap_wxScrollBar_GetThumbPosition(PyObject *self, PyObject *ar
         _result = (int )wxScrollBar_GetThumbPosition(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6441,7 +5713,6 @@ static PyObject *_wrap_wxScrollBar_GetThumbSize(PyObject *self, PyObject *args, 
         _result = (int )wxScrollBar_GetThumbSize(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6469,7 +5740,6 @@ static PyObject *_wrap_wxScrollBar_SetThumbPosition(PyObject *self, PyObject *ar
         wxScrollBar_SetThumbPosition(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -6504,7 +5774,6 @@ static PyObject *_wrap_wxScrollBar_SetScrollbar(PyObject *self, PyObject *args, 
         wxScrollBar_SetScrollbar(_arg0,_arg1,_arg2,_arg3,_arg4,_arg5);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -6531,14 +5800,6 @@ static void *SwigwxSpinButtonTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxSpinButton *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxSpinButtonTowxObject(void *ptr) {
-    wxSpinButton *src;
-    wxObject *dest;
-    src = (wxSpinButton *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -6587,7 +5848,6 @@ static PyObject *_wrap_new_wxSpinButton(PyObject *self, PyObject *args, PyObject
         _result = (wxSpinButton *)new_wxSpinButton(_arg0,_arg1,*_arg2,*_arg3,_arg4,_arg5);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxSpinButton_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -6621,7 +5881,6 @@ static PyObject *_wrap_wxSpinButton_GetMax(PyObject *self, PyObject *args, PyObj
         _result = (int )wxSpinButton_GetMax(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6649,7 +5908,6 @@ static PyObject *_wrap_wxSpinButton_GetMin(PyObject *self, PyObject *args, PyObj
         _result = (int )wxSpinButton_GetMin(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6677,7 +5935,6 @@ static PyObject *_wrap_wxSpinButton_GetValue(PyObject *self, PyObject *args, PyO
         _result = (int )wxSpinButton_GetValue(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -6706,7 +5963,6 @@ static PyObject *_wrap_wxSpinButton_SetRange(PyObject *self, PyObject *args, PyO
         wxSpinButton_SetRange(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -6735,7 +5991,6 @@ static PyObject *_wrap_wxSpinButton_SetValue(PyObject *self, PyObject *args, PyO
         wxSpinButton_SetValue(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -6762,14 +6017,6 @@ static void *SwigwxStaticBitmapTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxStaticBitmap *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxStaticBitmapTowxObject(void *ptr) {
-    wxStaticBitmap *src;
-    wxObject *dest;
-    src = (wxStaticBitmap *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -6827,7 +6074,6 @@ static PyObject *_wrap_new_wxStaticBitmap(PyObject *self, PyObject *args, PyObje
         _result = (wxStaticBitmap *)new_wxStaticBitmap(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,_arg6);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxStaticBitmap_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -6863,7 +6109,6 @@ static PyObject *_wrap_wxStaticBitmap_GetBitmap(PyObject *self, PyObject *args, 
     _result = (wxBitmap *) &_result_ref;
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxBitmap_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -6905,7 +6150,6 @@ static PyObject *_wrap_wxStaticBitmap_SetBitmap(PyObject *self, PyObject *args, 
         wxStaticBitmap_SetBitmap(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -6942,7 +6186,6 @@ static PyObject *_wrap_wxStaticBitmap_SetIcon(PyObject *self, PyObject *args, Py
         wxStaticBitmap_SetIcon(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -6969,14 +6212,6 @@ static void *SwigwxRadioBoxTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxRadioBox *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxRadioBoxTowxObject(void *ptr) {
-    wxRadioBox *src;
-    wxObject *dest;
-    src = (wxRadioBox *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -7020,7 +6255,7 @@ static PyObject *_wrap_new_wxRadioBox(PyObject *self, PyObject *args, PyObject *
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -7073,7 +6308,6 @@ static PyObject *_wrap_new_wxRadioBox(PyObject *self, PyObject *args, PyObject *
         _result = (wxRadioBox *)new_wxRadioBox(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,_arg6,_arg7,_arg8,*_arg9,_arg10);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxRadioBox_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -7116,7 +6350,6 @@ static PyObject *_wrap_wxRadioBox_Enable(PyObject *self, PyObject *args, PyObjec
         wxRadioBox_Enable(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7148,7 +6381,6 @@ static PyObject *_wrap_wxRadioBox_EnableItem(PyObject *self, PyObject *args, PyO
         wxRadioBox_EnableItem(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7178,7 +6410,7 @@ static PyObject *_wrap_wxRadioBox_FindString(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -7197,7 +6429,6 @@ static PyObject *_wrap_wxRadioBox_FindString(PyObject *self, PyObject *args, PyO
         _result = (int )wxRadioBox_FindString(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
 {
     if (_obj1)
@@ -7230,7 +6461,6 @@ static PyObject *_wrap_wxRadioBox_GetItemLabel(PyObject *self, PyObject *args, P
         _result = new wxString (wxRadioBox_GetItemLabel(_arg0,_arg1));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -7263,7 +6493,6 @@ static PyObject *_wrap_wxRadioBox_GetSelection(PyObject *self, PyObject *args, P
         _result = (int )wxRadioBox_GetSelection(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -7292,7 +6521,6 @@ static PyObject *_wrap_wxRadioBox_GetString(PyObject *self, PyObject *args, PyOb
         _result = new wxString (wxRadioBox_GetString(_arg0,_arg1));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -7325,7 +6553,6 @@ static PyObject *_wrap_wxRadioBox_GetStringSelection(PyObject *self, PyObject *a
         _result = new wxString (wxRadioBox_GetStringSelection(_arg0));
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }{
     _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
 }
@@ -7358,7 +6585,6 @@ static PyObject *_wrap_wxRadioBox_Number(PyObject *self, PyObject *args, PyObjec
         _result = (int )wxRadioBox_Number(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -7387,7 +6613,7 @@ static PyObject *_wrap_wxRadioBox_SetItemLabel(PyObject *self, PyObject *args, P
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -7406,7 +6632,6 @@ static PyObject *_wrap_wxRadioBox_SetItemLabel(PyObject *self, PyObject *args, P
         wxRadioBox_SetItemLabel(_arg0,_arg1,*_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -7439,7 +6664,6 @@ static PyObject *_wrap_wxRadioBox_SetSelection(PyObject *self, PyObject *args, P
         wxRadioBox_SetSelection(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7468,7 +6692,7 @@ static PyObject *_wrap_wxRadioBox_SetStringSelection(PyObject *self, PyObject *a
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -7487,7 +6711,6 @@ static PyObject *_wrap_wxRadioBox_SetStringSelection(PyObject *self, PyObject *a
         wxRadioBox_SetStringSelection(_arg0,*_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
 {
@@ -7522,7 +6745,6 @@ static PyObject *_wrap_wxRadioBox_Show(PyObject *self, PyObject *args, PyObject 
         wxRadioBox_Show(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7554,7 +6776,6 @@ static PyObject *_wrap_wxRadioBox_ShowItem(PyObject *self, PyObject *args, PyObj
         wxRadioBox_ShowItem(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7581,14 +6802,6 @@ static void *SwigwxRadioButtonTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxRadioButton *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxRadioButtonTowxObject(void *ptr) {
-    wxRadioButton *src;
-    wxObject *dest;
-    src = (wxRadioButton *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -7628,7 +6841,7 @@ static PyObject *_wrap_new_wxRadioButton(PyObject *self, PyObject *args, PyObjec
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -7666,7 +6879,6 @@ static PyObject *_wrap_new_wxRadioButton(PyObject *self, PyObject *args, PyObjec
         _result = (wxRadioButton *)new_wxRadioButton(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,*_arg6,_arg7);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxRadioButton_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -7704,7 +6916,6 @@ static PyObject *_wrap_wxRadioButton_GetValue(PyObject *self, PyObject *args, Py
         _result = (bool )wxRadioButton_GetValue(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -7734,7 +6945,6 @@ static PyObject *_wrap_wxRadioButton_SetValue(PyObject *self, PyObject *args, Py
         wxRadioButton_SetValue(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7761,14 +6971,6 @@ static void *SwigwxSliderTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxSlider *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxSliderTowxObject(void *ptr) {
-    wxSlider *src;
-    wxObject *dest;
-    src = (wxSlider *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -7829,7 +7031,6 @@ static PyObject *_wrap_new_wxSlider(PyObject *self, PyObject *args, PyObject *kw
         _result = (wxSlider *)new_wxSlider(_arg0,_arg1,_arg2,_arg3,_arg4,*_arg5,*_arg6,_arg7,*_arg8,_arg9);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxSlider_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -7862,7 +7063,6 @@ static PyObject *_wrap_wxSlider_ClearSel(PyObject *self, PyObject *args, PyObjec
         wxSlider_ClearSel(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7890,7 +7090,6 @@ static PyObject *_wrap_wxSlider_ClearTicks(PyObject *self, PyObject *args, PyObj
         wxSlider_ClearTicks(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -7919,7 +7118,6 @@ static PyObject *_wrap_wxSlider_GetLineSize(PyObject *self, PyObject *args, PyOb
         _result = (int )wxSlider_GetLineSize(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -7947,7 +7145,6 @@ static PyObject *_wrap_wxSlider_GetMax(PyObject *self, PyObject *args, PyObject 
         _result = (int )wxSlider_GetMax(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -7975,7 +7172,6 @@ static PyObject *_wrap_wxSlider_GetMin(PyObject *self, PyObject *args, PyObject 
         _result = (int )wxSlider_GetMin(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8003,7 +7199,6 @@ static PyObject *_wrap_wxSlider_GetPageSize(PyObject *self, PyObject *args, PyOb
         _result = (int )wxSlider_GetPageSize(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8031,7 +7226,6 @@ static PyObject *_wrap_wxSlider_GetSelEnd(PyObject *self, PyObject *args, PyObje
         _result = (int )wxSlider_GetSelEnd(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8059,7 +7253,6 @@ static PyObject *_wrap_wxSlider_GetSelStart(PyObject *self, PyObject *args, PyOb
         _result = (int )wxSlider_GetSelStart(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8087,7 +7280,6 @@ static PyObject *_wrap_wxSlider_GetThumbLength(PyObject *self, PyObject *args, P
         _result = (int )wxSlider_GetThumbLength(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8115,7 +7307,6 @@ static PyObject *_wrap_wxSlider_GetTickFreq(PyObject *self, PyObject *args, PyOb
         _result = (int )wxSlider_GetTickFreq(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8143,7 +7334,6 @@ static PyObject *_wrap_wxSlider_GetValue(PyObject *self, PyObject *args, PyObjec
         _result = (int )wxSlider_GetValue(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8172,7 +7362,6 @@ static PyObject *_wrap_wxSlider_SetRange(PyObject *self, PyObject *args, PyObjec
         wxSlider_SetRange(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8202,7 +7391,6 @@ static PyObject *_wrap_wxSlider_SetTickFreq(PyObject *self, PyObject *args, PyOb
         wxSlider_SetTickFreq(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8231,7 +7419,6 @@ static PyObject *_wrap_wxSlider_SetLineSize(PyObject *self, PyObject *args, PyOb
         wxSlider_SetLineSize(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8260,7 +7447,6 @@ static PyObject *_wrap_wxSlider_SetPageSize(PyObject *self, PyObject *args, PyOb
         wxSlider_SetPageSize(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8290,7 +7476,6 @@ static PyObject *_wrap_wxSlider_SetSelection(PyObject *self, PyObject *args, PyO
         wxSlider_SetSelection(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8319,7 +7504,6 @@ static PyObject *_wrap_wxSlider_SetThumbLength(PyObject *self, PyObject *args, P
         wxSlider_SetThumbLength(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8348,7 +7532,6 @@ static PyObject *_wrap_wxSlider_SetTick(PyObject *self, PyObject *args, PyObject
         wxSlider_SetTick(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8377,7 +7560,6 @@ static PyObject *_wrap_wxSlider_SetValue(PyObject *self, PyObject *args, PyObjec
         wxSlider_SetValue(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8412,14 +7594,6 @@ static void *SwigwxSpinCtrlTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxSpinCtrl *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxSpinCtrlTowxObject(void *ptr) {
-    wxSpinCtrl *src;
-    wxObject *dest;
-    src = (wxSpinCtrl *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -8472,7 +7646,6 @@ static PyObject *_wrap_new_wxSpinCtrl(PyObject *self, PyObject *args, PyObject *
         _result = (wxSpinCtrl *)new_wxSpinCtrl(_arg0,_arg1,_arg2,*_arg3,*_arg4,_arg5,_arg6,_arg7,_arg8,_arg9);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    if (_result) {
         SWIG_MakePtr(_ptemp, (char *) _result,"_wxSpinCtrl_p");
         _resultobj = Py_BuildValue("s",_ptemp);
@@ -8506,7 +7679,6 @@ static PyObject *_wrap_wxSpinCtrl_GetMax(PyObject *self, PyObject *args, PyObjec
         _result = (int )wxSpinCtrl_GetMax(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8534,7 +7706,6 @@ static PyObject *_wrap_wxSpinCtrl_GetMin(PyObject *self, PyObject *args, PyObjec
         _result = (int )wxSpinCtrl_GetMin(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8562,7 +7733,6 @@ static PyObject *_wrap_wxSpinCtrl_GetValue(PyObject *self, PyObject *args, PyObj
         _result = (int )wxSpinCtrl_GetValue(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -8591,7 +7761,6 @@ static PyObject *_wrap_wxSpinCtrl_SetRange(PyObject *self, PyObject *args, PyObj
         wxSpinCtrl_SetRange(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -8620,249 +7789,12 @@ static PyObject *_wrap_wxSpinCtrl_SetValue(PyObject *self, PyObject *args, PyObj
         wxSpinCtrl_SetValue(_arg0,_arg1);
 
     wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
-    return _resultobj;
-}
-
-static void *SwigwxToggleButtonTowxControl(void *ptr) {
-    wxToggleButton *src;
-    wxControl *dest;
-    src = (wxToggleButton *) ptr;
-    dest = (wxControl *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxToggleButtonTowxWindow(void *ptr) {
-    wxToggleButton *src;
-    wxWindow *dest;
-    src = (wxToggleButton *) ptr;
-    dest = (wxWindow *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxToggleButtonTowxEvtHandler(void *ptr) {
-    wxToggleButton *src;
-    wxEvtHandler *dest;
-    src = (wxToggleButton *) ptr;
-    dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxToggleButtonTowxObject(void *ptr) {
-    wxToggleButton *src;
-    wxObject *dest;
-    src = (wxToggleButton *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define new_wxToggleButton(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5,_swigarg6,_swigarg7) (new wxToggleButton(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5,_swigarg6,_swigarg7))
-static PyObject *_wrap_new_wxToggleButton(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxToggleButton * _result;
-    wxWindow * _arg0;
-    wxWindowID  _arg1;
-    wxString * _arg2;
-    wxPoint * _arg3 = (wxPoint *) &wxDefaultPosition;
-    wxSize * _arg4 = (wxSize *) &wxDefaultSize;
-    long  _arg5 = (long ) 0;
-    wxValidator * _arg6 = (wxValidator *) &wxDefaultValidator;
-    char * _arg7 = (char *) "toggle";
-    PyObject * _argo0 = 0;
-    PyObject * _obj2 = 0;
-    wxPoint  temp;
-    PyObject * _obj3 = 0;
-    wxSize  temp0;
-    PyObject * _obj4 = 0;
-    PyObject * _argo6 = 0;
-    char *_kwnames[] = { "parent","id","label","pos","size","style","validator","name", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiO|OOlOs:new_wxToggleButton",_kwnames,&_argo0,&_arg1,&_obj2,&_obj3,&_obj4,&_arg5,&_argo6,&_arg7)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of new_wxToggleButton. Expected _wxWindow_p.");
-        return NULL;
-        }
-    }
-{
-#if PYTHON_API_VERSION >= 1009
-    char* tmpPtr; int tmpSize;
-    if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
-        return NULL;
-    }
-    if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
-        return NULL;
-    _arg2 = new wxString(tmpPtr, tmpSize);
-#else
-    if (!PyString_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
-        return NULL;
-    }
-    _arg2 = new wxString(PyString_AS_STRING(_obj2), PyString_GET_SIZE(_obj2));
-#endif
-}
-    if (_obj3)
-{
-    _arg3 = &temp;
-    if (! wxPoint_helper(_obj3, &_arg3))
-        return NULL;
-}
-    if (_obj4)
-{
-    _arg4 = &temp0;
-    if (! wxSize_helper(_obj4, &_arg4))
-        return NULL;
-}
-    if (_argo6) {
-        if (_argo6 == Py_None) { _arg6 = NULL; }
-        else if (SWIG_GetPtrObj(_argo6,(void **) &_arg6,"_wxValidator_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 7 of new_wxToggleButton. Expected _wxValidator_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (wxToggleButton *)new_wxToggleButton(_arg0,_arg1,*_arg2,*_arg3,*_arg4,_arg5,*_arg6,_arg7);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxToggleButton_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-{
-    if (_obj2)
-        delete _arg2;
-}
-    return _resultobj;
-}
-
-#define wxToggleButton_SetValue(_swigobj,_swigarg0)  (_swigobj->SetValue(_swigarg0))
-static PyObject *_wrap_wxToggleButton_SetValue(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxToggleButton * _arg0;
-    bool  _arg1;
-    PyObject * _argo0 = 0;
-    int tempbool1;
-    char *_kwnames[] = { "self","value", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxToggleButton_SetValue",_kwnames,&_argo0,&tempbool1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxToggleButton_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxToggleButton_SetValue. Expected _wxToggleButton_p.");
-        return NULL;
-        }
-    }
-    _arg1 = (bool ) tempbool1;
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        wxToggleButton_SetValue(_arg0,_arg1);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxToggleButton_GetValue(_swigobj)  (_swigobj->GetValue())
-static PyObject *_wrap_wxToggleButton_GetValue(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxToggleButton * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxToggleButton_GetValue",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxToggleButton_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxToggleButton_GetValue. Expected _wxToggleButton_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (bool )wxToggleButton_GetValue(_arg0);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxToggleButton_SetLabel(_swigobj,_swigarg0)  (_swigobj->SetLabel(_swigarg0))
-static PyObject *_wrap_wxToggleButton_SetLabel(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxToggleButton * _arg0;
-    wxString * _arg1;
-    PyObject * _argo0 = 0;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","label", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxToggleButton_SetLabel",_kwnames,&_argo0,&_obj1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxToggleButton_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxToggleButton_SetLabel. Expected _wxToggleButton_p.");
-        return NULL;
-        }
-    }
-{
-#if PYTHON_API_VERSION >= 1009
-    char* tmpPtr; int tmpSize;
-    if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
-        return NULL;
-    }
-    if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
-        return NULL;
-    _arg1 = new wxString(tmpPtr, tmpSize);
-#else
-    if (!PyString_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
-        return NULL;
-    }
-    _arg1 = new wxString(PyString_AS_STRING(_obj1), PyString_GET_SIZE(_obj1));
-#endif
-}
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        wxToggleButton_SetLabel(_arg0,*_arg1);
-
-    wxPy_END_ALLOW_THREADS;
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-{
-    if (_obj1)
-        delete _arg1;
-}
     return _resultobj;
 }
 
 static PyMethodDef controlscMethods[] = {
-	 { "wxToggleButton_SetLabel", (PyCFunction) _wrap_wxToggleButton_SetLabel, METH_VARARGS | METH_KEYWORDS },
-	 { "wxToggleButton_GetValue", (PyCFunction) _wrap_wxToggleButton_GetValue, METH_VARARGS | METH_KEYWORDS },
-	 { "wxToggleButton_SetValue", (PyCFunction) _wrap_wxToggleButton_SetValue, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxToggleButton", (PyCFunction) _wrap_new_wxToggleButton, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSpinCtrl_SetValue", (PyCFunction) _wrap_wxSpinCtrl_SetValue, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSpinCtrl_SetRange", (PyCFunction) _wrap_wxSpinCtrl_SetRange, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSpinCtrl_GetValue", (PyCFunction) _wrap_wxSpinCtrl_GetValue, METH_VARARGS | METH_KEYWORDS },
@@ -8925,9 +7857,6 @@ static PyMethodDef controlscMethods[] = {
 	 { "wxScrollBar_GetRange", (PyCFunction) _wrap_wxScrollBar_GetRange, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxScrollBar", (PyCFunction) _wrap_new_wxScrollBar, METH_VARARGS | METH_KEYWORDS },
 	 { "wxTextCtrl_write", (PyCFunction) _wrap_wxTextCtrl_write, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextCtrl_GetDefaultStyle", (PyCFunction) _wrap_wxTextCtrl_GetDefaultStyle, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextCtrl_SetDefaultStyle", (PyCFunction) _wrap_wxTextCtrl_SetDefaultStyle, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextCtrl_SetStyle", (PyCFunction) _wrap_wxTextCtrl_SetStyle, METH_VARARGS | METH_KEYWORDS },
 	 { "wxTextCtrl_Redo", (PyCFunction) _wrap_wxTextCtrl_Redo, METH_VARARGS | METH_KEYWORDS },
 	 { "wxTextCtrl_Undo", (PyCFunction) _wrap_wxTextCtrl_Undo, METH_VARARGS | METH_KEYWORDS },
 	 { "wxTextCtrl_IsEditable", (PyCFunction) _wrap_wxTextCtrl_IsEditable, METH_VARARGS | METH_KEYWORDS },
@@ -8964,17 +7893,6 @@ static PyMethodDef controlscMethods[] = {
 	 { "wxTextCtrl_Copy", (PyCFunction) _wrap_wxTextCtrl_Copy, METH_VARARGS | METH_KEYWORDS },
 	 { "wxTextCtrl_Clear", (PyCFunction) _wrap_wxTextCtrl_Clear, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxTextCtrl", (PyCFunction) _wrap_new_wxTextCtrl, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_GetFont", (PyCFunction) _wrap_wxTextAttr_GetFont, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_GetBackgroundColour", (PyCFunction) _wrap_wxTextAttr_GetBackgroundColour, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_GetTextColour", (PyCFunction) _wrap_wxTextAttr_GetTextColour, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_HasFont", (PyCFunction) _wrap_wxTextAttr_HasFont, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_HasBackgroundColour", (PyCFunction) _wrap_wxTextAttr_HasBackgroundColour, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_HasTextColour", (PyCFunction) _wrap_wxTextAttr_HasTextColour, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_SetFont", (PyCFunction) _wrap_wxTextAttr_SetFont, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_SetBackgroundColour", (PyCFunction) _wrap_wxTextAttr_SetBackgroundColour, METH_VARARGS | METH_KEYWORDS },
-	 { "wxTextAttr_SetTextColour", (PyCFunction) _wrap_wxTextAttr_SetTextColour, METH_VARARGS | METH_KEYWORDS },
-	 { "delete_wxTextAttr", (PyCFunction) _wrap_delete_wxTextAttr, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxTextAttr", (PyCFunction) _wrap_new_wxTextAttr, METH_VARARGS | METH_KEYWORDS },
 	 { "wxCheckListBox_GetItemHeight", (PyCFunction) _wrap_wxCheckListBox_GetItemHeight, METH_VARARGS | METH_KEYWORDS },
 	 { "wxCheckListBox_InsertItems", (PyCFunction) _wrap_wxCheckListBox_InsertItems, METH_VARARGS | METH_KEYWORDS },
 	 { "wxCheckListBox_Check", (PyCFunction) _wrap_wxCheckListBox_Check, METH_VARARGS | METH_KEYWORDS },
@@ -9080,7 +7998,14 @@ static PyMethodDef controlscMethods[] = {
  * This table is used by the pointer type-checker
  */
 static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
+    { "_wxAcceleratorTable","_class_wxAcceleratorTable",0},
+    { "_wxEvent","_class_wxEvent",0},
+    { "_class_wxActivateEvent","_wxActivateEvent",0},
     { "_signed_long","_long",0},
+    { "_wxMenuEvent","_class_wxMenuEvent",0},
+    { "_wxPyBitmapDataObject","_class_wxPyBitmapDataObject",0},
+    { "_wxBitmapDataObject","_class_wxBitmapDataObject",0},
+    { "_class_wxPyCommandEvent","_wxPyCommandEvent",0},
     { "_wxPrintQuality","_wxCoord",0},
     { "_wxPrintQuality","_int",0},
     { "_wxPrintQuality","_signed_int",0},
@@ -9090,10 +8015,80 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxPrintQuality","_EBool",0},
     { "_wxPrintQuality","_size_t",0},
     { "_wxPrintQuality","_time_t",0},
+    { "_class_wxCustomDataObject","_wxCustomDataObject",0},
+    { "_wxSpinCtrl","_class_wxSpinCtrl",0},
+    { "_class_wxRegionIterator","_wxRegionIterator",0},
+    { "_class_wxPyTextDropTarget","_wxPyTextDropTarget",0},
+    { "_class_wxMenuBar","_wxMenuBar",0},
+    { "_class_wxEvtHandler","_class_wxSpinCtrl",SwigwxSpinCtrlTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxSpinCtrl",SwigwxSpinCtrlTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxSlider",SwigwxSliderTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxSlider",SwigwxSliderTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxRadioButton",SwigwxRadioButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxRadioButton",SwigwxRadioButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxRadioBox",SwigwxRadioBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxRadioBox",SwigwxRadioBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxStaticBitmap",SwigwxStaticBitmapTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxStaticBitmap",SwigwxStaticBitmapTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxSpinButton",SwigwxSpinButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxSpinButton",SwigwxSpinButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxScrollBar",SwigwxScrollBarTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxScrollBar",SwigwxScrollBarTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxTextCtrl",SwigwxTextCtrlTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxTextCtrl",SwigwxTextCtrlTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxCheckListBox",SwigwxCheckListBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxCheckListBox",SwigwxCheckListBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxListBox",SwigwxListBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxListBox",SwigwxListBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxStaticText",SwigwxStaticTextTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxStaticText",SwigwxStaticTextTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxStaticLine",SwigwxStaticLineTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxStaticLine",SwigwxStaticLineTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxStaticBox",SwigwxStaticBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxStaticBox",SwigwxStaticBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxGauge",SwigwxGaugeTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxGauge",SwigwxGaugeTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxComboBox",SwigwxComboBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxComboBox",SwigwxComboBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxChoice",SwigwxChoiceTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxChoice",SwigwxChoiceTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxCheckBox",SwigwxCheckBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxCheckBox",SwigwxCheckBoxTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxBitmapButton",SwigwxBitmapButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxBitmapButton",SwigwxBitmapButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxButton",SwigwxButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxButton",SwigwxButtonTowxEvtHandler},
+    { "_class_wxEvtHandler","_class_wxControl",SwigwxControlTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxControl",SwigwxControlTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxEvtHandler",0},
+    { "_wxPaintEvent","_class_wxPaintEvent",0},
+    { "_wxIndividualLayoutConstraint","_class_wxIndividualLayoutConstraint",0},
+    { "_wxCursor","_class_wxCursor",0},
+    { "_wxNotifyEvent","_class_wxNotifyEvent",0},
+    { "_wxMask","_class_wxMask",0},
+    { "_wxPen","_class_wxPen",0},
+    { "_wxUpdateUIEvent","_class_wxUpdateUIEvent",0},
     { "_byte","_unsigned_char",0},
+    { "_wxDataObject","_class_wxDataObject",0},
+    { "_wxStaticBox","_class_wxStaticBox",0},
+    { "_wxPyDataObjectSimple","_class_wxPyDataObjectSimple",0},
+    { "_wxPyDropSource","_class_wxPyDropSource",0},
+    { "_wxChoice","_class_wxComboBox",SwigwxComboBoxTowxChoice},
     { "_wxChoice","_wxComboBox",SwigwxComboBoxTowxChoice},
+    { "_wxChoice","_class_wxChoice",0},
+    { "_wxSlider","_class_wxSlider",0},
     { "_long","_unsigned_long",0},
     { "_long","_signed_long",0},
+    { "_wxImageList","_class_wxImageList",0},
+    { "_wxDataObjectSimple","_class_wxDataObjectSimple",0},
+    { "_wxDropFilesEvent","_class_wxDropFilesEvent",0},
+    { "_wxBitmapButton","_class_wxBitmapButton",0},
+    { "_class_wxAcceleratorTable","_wxAcceleratorTable",0},
+    { "_class_wxClipboard","_wxClipboard",0},
+    { "_class_wxGauge","_wxGauge",0},
+    { "_wxDC","_class_wxDC",0},
+    { "_class_wxBitmapDataObject","_wxBitmapDataObject",0},
+    { "_wxSpinEvent","_class_wxSpinEvent",0},
     { "_size_t","_wxCoord",0},
     { "_size_t","_wxPrintQuality",0},
     { "_size_t","_time_t",0},
@@ -9101,6 +8096,31 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_size_t","_int",0},
     { "_size_t","_wxWindowID",0},
     { "_size_t","_uint",0},
+    { "_class_wxRealPoint","_wxRealPoint",0},
+    { "_wxNavigationKeyEvent","_class_wxNavigationKeyEvent",0},
+    { "_wxWindowCreateEvent","_class_wxWindowCreateEvent",0},
+    { "_class_wxMenuItem","_wxMenuItem",0},
+    { "_class_wxPaintEvent","_wxPaintEvent",0},
+    { "_wxSysColourChangedEvent","_class_wxSysColourChangedEvent",0},
+    { "_wxPanel","_class_wxPanel",0},
+    { "_wxInitDialogEvent","_class_wxInitDialogEvent",0},
+    { "_wxCheckBox","_class_wxCheckBox",0},
+    { "_wxPyEvent","_class_wxPyEvent",0},
+    { "_wxTextCtrl","_class_wxTextCtrl",0},
+    { "_class_wxMask","_wxMask",0},
+    { "_wxTextDataObject","_class_wxTextDataObject",0},
+    { "_class_wxKeyEvent","_wxKeyEvent",0},
+    { "_wxColour","_class_wxColour",0},
+    { "_class_wxDialog","_wxDialog",0},
+    { "_class_wxFileDataObject","_wxFileDataObject",0},
+    { "_wxIdleEvent","_class_wxIdleEvent",0},
+    { "_class_wxUpdateUIEvent","_wxUpdateUIEvent",0},
+    { "_class_wxDataObject","_wxDataObject",0},
+    { "_wxStaticLine","_class_wxStaticLine",0},
+    { "_wxBrush","_class_wxBrush",0},
+    { "_wxDataFormat","_class_wxDataFormat",0},
+    { "_class_wxDataObjectSimple","_wxDataObjectSimple",0},
+    { "_wxShowEvent","_class_wxShowEvent",0},
     { "_uint","_wxCoord",0},
     { "_uint","_wxPrintQuality",0},
     { "_uint","_time_t",0},
@@ -9109,69 +8129,199 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_uint","_int",0},
     { "_uint","_wxWindowID",0},
     { "_wxChar","_char",0},
+    { "_wxPyValidator","_class_wxPyValidator",0},
+    { "_class_wxEvent","_wxEvent",0},
+    { "_wxCheckListBox","_class_wxCheckListBox",0},
+    { "_wxRect","_class_wxRect",0},
+    { "_wxCommandEvent","_class_wxCommandEvent",0},
+    { "_wxSizeEvent","_class_wxSizeEvent",0},
+    { "_wxPoint","_class_wxPoint",0},
+    { "_class_wxButton","_class_wxBitmapButton",SwigwxBitmapButtonTowxButton},
+    { "_class_wxButton","_wxBitmapButton",SwigwxBitmapButtonTowxButton},
+    { "_class_wxButton","_wxButton",0},
+    { "_wxRadioBox","_class_wxRadioBox",0},
+    { "_class_wxSpinCtrl","_wxSpinCtrl",0},
     { "_char","_wxChar",0},
+    { "_wxBitmap","_class_wxBitmap",0},
+    { "_wxWindowDC","_class_wxWindowDC",0},
+    { "_wxTimerEvent","_class_wxTimerEvent",0},
+    { "_wxScrollBar","_class_wxScrollBar",0},
+    { "_wxSpinButton","_class_wxSpinCtrl",SwigwxSpinCtrlTowxSpinButton},
     { "_wxSpinButton","_wxSpinCtrl",SwigwxSpinCtrlTowxSpinButton},
+    { "_wxSpinButton","_class_wxSpinButton",0},
+    { "_class_wxIndividualLayoutConstraint","_wxIndividualLayoutConstraint",0},
+    { "_class_wxNotifyEvent","_wxNotifyEvent",0},
+    { "_class_wxValidator","_wxValidator",0},
+    { "_class_wxPyEvent","_wxPyEvent",0},
+    { "_class_wxIconizeEvent","_wxIconizeEvent",0},
+    { "_class_wxStaticBitmap","_wxStaticBitmap",0},
+    { "_wxDropTarget","_class_wxDropTarget",0},
+    { "_class_wxStaticLine","_wxStaticLine",0},
+    { "_wxScrollEvent","_class_wxScrollEvent",0},
     { "_EBool","_wxCoord",0},
     { "_EBool","_wxPrintQuality",0},
     { "_EBool","_signed_int",0},
     { "_EBool","_int",0},
     { "_EBool","_wxWindowID",0},
+    { "_class_wxRegion","_wxRegion",0},
+    { "_class_wxDataFormat","_wxDataFormat",0},
+    { "_class_wxDropFilesEvent","_wxDropFilesEvent",0},
+    { "_wxWindowDestroyEvent","_class_wxWindowDestroyEvent",0},
+    { "_wxStaticText","_class_wxStaticText",0},
+    { "_wxFont","_class_wxFont",0},
+    { "_class_wxPyDropTarget","_wxPyDropTarget",0},
+    { "_wxCloseEvent","_class_wxCloseEvent",0},
     { "_unsigned_long","_long",0},
+    { "_class_wxRect","_wxRect",0},
+    { "_class_wxDC","_wxDC",0},
+    { "_wxScrollWinEvent","_class_wxScrollWinEvent",0},
+    { "_wxQueryNewPaletteEvent","_class_wxQueryNewPaletteEvent",0},
+    { "_class_wxWindowCreateEvent","_wxWindowCreateEvent",0},
+    { "_wxFocusEvent","_class_wxFocusEvent",0},
+    { "_wxMaximizeEvent","_class_wxMaximizeEvent",0},
+    { "_class_wxTimerEvent","_wxTimerEvent",0},
+    { "_class_wxSpinButton","_class_wxSpinCtrl",SwigwxSpinCtrlTowxSpinButton},
+    { "_class_wxSpinButton","_wxSpinCtrl",SwigwxSpinCtrlTowxSpinButton},
+    { "_class_wxSpinButton","_wxSpinButton",0},
+    { "_wxAcceleratorEntry","_class_wxAcceleratorEntry",0},
+    { "_class_wxPanel","_wxPanel",0},
+    { "_class_wxCheckBox","_wxCheckBox",0},
+    { "_wxComboBox","_class_wxComboBox",0},
+    { "_wxRadioButton","_class_wxRadioButton",0},
     { "_signed_int","_wxCoord",0},
     { "_signed_int","_wxPrintQuality",0},
     { "_signed_int","_EBool",0},
     { "_signed_int","_wxWindowID",0},
     { "_signed_int","_int",0},
+    { "_class_wxTextCtrl","_wxTextCtrl",0},
+    { "_wxLayoutConstraints","_class_wxLayoutConstraints",0},
+    { "_wxMetaFileDC","_class_wxMetaFileDC",0},
+    { "_class_wxTextDataObject","_wxTextDataObject",0},
+    { "_wxMenu","_class_wxMenu",0},
+    { "_class_wxMoveEvent","_wxMoveEvent",0},
+    { "_wxListBox","_class_wxCheckListBox",SwigwxCheckListBoxTowxListBox},
     { "_wxListBox","_wxCheckListBox",SwigwxCheckListBoxTowxListBox},
+    { "_wxListBox","_class_wxListBox",0},
+    { "_wxScreenDC","_class_wxScreenDC",0},
     { "_WXTYPE","_short",0},
     { "_WXTYPE","_signed_short",0},
     { "_WXTYPE","_unsigned_short",0},
+    { "_class_wxDropTarget","_wxDropTarget",0},
+    { "_class_wxBrush","_wxBrush",0},
     { "_unsigned_short","_WXTYPE",0},
     { "_unsigned_short","_short",0},
-    { "_wxObject","_wxToggleButton",SwigwxToggleButtonTowxObject},
-    { "_wxObject","_wxSpinCtrl",SwigwxSpinCtrlTowxObject},
-    { "_wxObject","_wxSlider",SwigwxSliderTowxObject},
-    { "_wxObject","_wxRadioButton",SwigwxRadioButtonTowxObject},
-    { "_wxObject","_wxRadioBox",SwigwxRadioBoxTowxObject},
-    { "_wxObject","_wxStaticBitmap",SwigwxStaticBitmapTowxObject},
-    { "_wxObject","_wxSpinButton",SwigwxSpinButtonTowxObject},
-    { "_wxObject","_wxScrollBar",SwigwxScrollBarTowxObject},
-    { "_wxObject","_wxTextCtrl",SwigwxTextCtrlTowxObject},
-    { "_wxObject","_wxCheckListBox",SwigwxCheckListBoxTowxObject},
-    { "_wxObject","_wxListBox",SwigwxListBoxTowxObject},
-    { "_wxObject","_wxStaticText",SwigwxStaticTextTowxObject},
-    { "_wxObject","_wxStaticLine",SwigwxStaticLineTowxObject},
-    { "_wxObject","_wxStaticBox",SwigwxStaticBoxTowxObject},
-    { "_wxObject","_wxGauge",SwigwxGaugeTowxObject},
-    { "_wxObject","_wxComboBox",SwigwxComboBoxTowxObject},
-    { "_wxObject","_wxChoice",SwigwxChoiceTowxObject},
-    { "_wxObject","_wxCheckBox",SwigwxCheckBoxTowxObject},
-    { "_wxObject","_wxBitmapButton",SwigwxBitmapButtonTowxObject},
-    { "_wxObject","_wxButton",SwigwxButtonTowxObject},
-    { "_wxObject","_wxControl",SwigwxControlTowxObject},
+    { "_class_wxWindow","_class_wxSpinCtrl",SwigwxSpinCtrlTowxWindow},
+    { "_class_wxWindow","_wxSpinCtrl",SwigwxSpinCtrlTowxWindow},
+    { "_class_wxWindow","_class_wxSlider",SwigwxSliderTowxWindow},
+    { "_class_wxWindow","_wxSlider",SwigwxSliderTowxWindow},
+    { "_class_wxWindow","_class_wxRadioButton",SwigwxRadioButtonTowxWindow},
+    { "_class_wxWindow","_wxRadioButton",SwigwxRadioButtonTowxWindow},
+    { "_class_wxWindow","_class_wxRadioBox",SwigwxRadioBoxTowxWindow},
+    { "_class_wxWindow","_wxRadioBox",SwigwxRadioBoxTowxWindow},
+    { "_class_wxWindow","_class_wxStaticBitmap",SwigwxStaticBitmapTowxWindow},
+    { "_class_wxWindow","_wxStaticBitmap",SwigwxStaticBitmapTowxWindow},
+    { "_class_wxWindow","_class_wxSpinButton",SwigwxSpinButtonTowxWindow},
+    { "_class_wxWindow","_wxSpinButton",SwigwxSpinButtonTowxWindow},
+    { "_class_wxWindow","_class_wxScrollBar",SwigwxScrollBarTowxWindow},
+    { "_class_wxWindow","_wxScrollBar",SwigwxScrollBarTowxWindow},
+    { "_class_wxWindow","_class_wxTextCtrl",SwigwxTextCtrlTowxWindow},
+    { "_class_wxWindow","_wxTextCtrl",SwigwxTextCtrlTowxWindow},
+    { "_class_wxWindow","_class_wxCheckListBox",SwigwxCheckListBoxTowxWindow},
+    { "_class_wxWindow","_wxCheckListBox",SwigwxCheckListBoxTowxWindow},
+    { "_class_wxWindow","_class_wxListBox",SwigwxListBoxTowxWindow},
+    { "_class_wxWindow","_wxListBox",SwigwxListBoxTowxWindow},
+    { "_class_wxWindow","_class_wxStaticText",SwigwxStaticTextTowxWindow},
+    { "_class_wxWindow","_wxStaticText",SwigwxStaticTextTowxWindow},
+    { "_class_wxWindow","_class_wxStaticLine",SwigwxStaticLineTowxWindow},
+    { "_class_wxWindow","_wxStaticLine",SwigwxStaticLineTowxWindow},
+    { "_class_wxWindow","_class_wxStaticBox",SwigwxStaticBoxTowxWindow},
+    { "_class_wxWindow","_wxStaticBox",SwigwxStaticBoxTowxWindow},
+    { "_class_wxWindow","_class_wxGauge",SwigwxGaugeTowxWindow},
+    { "_class_wxWindow","_wxGauge",SwigwxGaugeTowxWindow},
+    { "_class_wxWindow","_class_wxComboBox",SwigwxComboBoxTowxWindow},
+    { "_class_wxWindow","_wxComboBox",SwigwxComboBoxTowxWindow},
+    { "_class_wxWindow","_class_wxChoice",SwigwxChoiceTowxWindow},
+    { "_class_wxWindow","_wxChoice",SwigwxChoiceTowxWindow},
+    { "_class_wxWindow","_class_wxCheckBox",SwigwxCheckBoxTowxWindow},
+    { "_class_wxWindow","_wxCheckBox",SwigwxCheckBoxTowxWindow},
+    { "_class_wxWindow","_class_wxBitmapButton",SwigwxBitmapButtonTowxWindow},
+    { "_class_wxWindow","_wxBitmapButton",SwigwxBitmapButtonTowxWindow},
+    { "_class_wxWindow","_class_wxButton",SwigwxButtonTowxWindow},
+    { "_class_wxWindow","_wxButton",SwigwxButtonTowxWindow},
+    { "_class_wxWindow","_class_wxControl",SwigwxControlTowxWindow},
+    { "_class_wxWindow","_wxControl",SwigwxControlTowxWindow},
+    { "_class_wxWindow","_wxWindow",0},
+    { "_class_wxStaticText","_wxStaticText",0},
+    { "_class_wxFont","_wxFont",0},
+    { "_wxClipboard","_class_wxClipboard",0},
+    { "_class_wxPyValidator","_wxPyValidator",0},
+    { "_class_wxCloseEvent","_wxCloseEvent",0},
+    { "_wxBusyInfo","_class_wxBusyInfo",0},
+    { "_class_wxMenuEvent","_wxMenuEvent",0},
+    { "_wxPaletteChangedEvent","_class_wxPaletteChangedEvent",0},
+    { "_class_wxPyBitmapDataObject","_wxPyBitmapDataObject",0},
+    { "_wxClientDC","_class_wxClientDC",0},
+    { "_wxMouseEvent","_class_wxMouseEvent",0},
+    { "_class_wxPoint","_wxPoint",0},
+    { "_wxRealPoint","_class_wxRealPoint",0},
+    { "_class_wxRadioBox","_wxRadioBox",0},
     { "_signed_short","_WXTYPE",0},
     { "_signed_short","_short",0},
+    { "_wxMemoryDC","_class_wxMemoryDC",0},
+    { "_wxPyTextDataObject","_class_wxPyTextDataObject",0},
+    { "_wxPaintDC","_class_wxPaintDC",0},
+    { "_class_wxWindowDC","_wxWindowDC",0},
+    { "_class_wxFocusEvent","_wxFocusEvent",0},
+    { "_class_wxMaximizeEvent","_wxMaximizeEvent",0},
+    { "_class_wxAcceleratorEntry","_wxAcceleratorEntry",0},
+    { "_class_wxCursor","_wxCursor",0},
+    { "_wxPyFileDropTarget","_class_wxPyFileDropTarget",0},
+    { "_wxScrolledWindow","_class_wxScrolledWindow",0},
     { "_unsigned_char","_byte",0},
-    { "_wxControl","_wxToggleButton",SwigwxToggleButtonTowxControl},
+    { "_class_wxMetaFileDC","_wxMetaFileDC",0},
+    { "_class_wxMenu","_wxMenu",0},
+    { "_wxControl","_class_wxSpinCtrl",SwigwxSpinCtrlTowxControl},
     { "_wxControl","_wxSpinCtrl",SwigwxSpinCtrlTowxControl},
+    { "_wxControl","_class_wxSlider",SwigwxSliderTowxControl},
     { "_wxControl","_wxSlider",SwigwxSliderTowxControl},
+    { "_wxControl","_class_wxRadioButton",SwigwxRadioButtonTowxControl},
     { "_wxControl","_wxRadioButton",SwigwxRadioButtonTowxControl},
+    { "_wxControl","_class_wxRadioBox",SwigwxRadioBoxTowxControl},
     { "_wxControl","_wxRadioBox",SwigwxRadioBoxTowxControl},
+    { "_wxControl","_class_wxStaticBitmap",SwigwxStaticBitmapTowxControl},
     { "_wxControl","_wxStaticBitmap",SwigwxStaticBitmapTowxControl},
+    { "_wxControl","_class_wxSpinButton",SwigwxSpinButtonTowxControl},
     { "_wxControl","_wxSpinButton",SwigwxSpinButtonTowxControl},
+    { "_wxControl","_class_wxScrollBar",SwigwxScrollBarTowxControl},
     { "_wxControl","_wxScrollBar",SwigwxScrollBarTowxControl},
+    { "_wxControl","_class_wxTextCtrl",SwigwxTextCtrlTowxControl},
     { "_wxControl","_wxTextCtrl",SwigwxTextCtrlTowxControl},
+    { "_wxControl","_class_wxCheckListBox",SwigwxCheckListBoxTowxControl},
     { "_wxControl","_wxCheckListBox",SwigwxCheckListBoxTowxControl},
+    { "_wxControl","_class_wxListBox",SwigwxListBoxTowxControl},
     { "_wxControl","_wxListBox",SwigwxListBoxTowxControl},
+    { "_wxControl","_class_wxStaticText",SwigwxStaticTextTowxControl},
     { "_wxControl","_wxStaticText",SwigwxStaticTextTowxControl},
+    { "_wxControl","_class_wxStaticLine",SwigwxStaticLineTowxControl},
     { "_wxControl","_wxStaticLine",SwigwxStaticLineTowxControl},
+    { "_wxControl","_class_wxStaticBox",SwigwxStaticBoxTowxControl},
     { "_wxControl","_wxStaticBox",SwigwxStaticBoxTowxControl},
+    { "_wxControl","_class_wxGauge",SwigwxGaugeTowxControl},
     { "_wxControl","_wxGauge",SwigwxGaugeTowxControl},
+    { "_wxControl","_class_wxComboBox",SwigwxComboBoxTowxControl},
     { "_wxControl","_wxComboBox",SwigwxComboBoxTowxControl},
+    { "_wxControl","_class_wxChoice",SwigwxChoiceTowxControl},
     { "_wxControl","_wxChoice",SwigwxChoiceTowxControl},
+    { "_wxControl","_class_wxCheckBox",SwigwxCheckBoxTowxControl},
     { "_wxControl","_wxCheckBox",SwigwxCheckBoxTowxControl},
+    { "_wxControl","_class_wxBitmapButton",SwigwxBitmapButtonTowxControl},
     { "_wxControl","_wxBitmapButton",SwigwxBitmapButtonTowxControl},
+    { "_wxControl","_class_wxButton",SwigwxButtonTowxControl},
     { "_wxControl","_wxButton",SwigwxButtonTowxControl},
+    { "_wxControl","_class_wxControl",0},
+    { "_class_wxListBox","_class_wxCheckListBox",SwigwxCheckListBoxTowxListBox},
+    { "_class_wxListBox","_wxCheckListBox",SwigwxCheckListBoxTowxListBox},
+    { "_class_wxListBox","_wxListBox",0},
     { "_unsigned_int","_wxCoord",0},
     { "_unsigned_int","_wxPrintQuality",0},
     { "_unsigned_int","_time_t",0},
@@ -9179,9 +8329,24 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_unsigned_int","_uint",0},
     { "_unsigned_int","_wxWindowID",0},
     { "_unsigned_int","_int",0},
+    { "_wxIcon","_class_wxIcon",0},
+    { "_wxDialog","_class_wxDialog",0},
+    { "_class_wxPen","_wxPen",0},
     { "_short","_WXTYPE",0},
     { "_short","_unsigned_short",0},
     { "_short","_signed_short",0},
+    { "_class_wxStaticBox","_wxStaticBox",0},
+    { "_class_wxPyDataObjectSimple","_wxPyDataObjectSimple",0},
+    { "_class_wxPyDropSource","_wxPyDropSource",0},
+    { "_class_wxScrollEvent","_wxScrollEvent",0},
+    { "_wxJoystickEvent","_class_wxJoystickEvent",0},
+    { "_class_wxChoice","_class_wxComboBox",SwigwxComboBoxTowxChoice},
+    { "_class_wxChoice","_wxComboBox",SwigwxComboBoxTowxChoice},
+    { "_class_wxChoice","_wxChoice",0},
+    { "_class_wxSlider","_wxSlider",0},
+    { "_class_wxImageList","_wxImageList",0},
+    { "_class_wxBitmapButton","_wxBitmapButton",0},
+    { "_class_wxPaletteChangedEvent","_wxPaletteChangedEvent",0},
     { "_wxWindowID","_wxCoord",0},
     { "_wxWindowID","_wxPrintQuality",0},
     { "_wxWindowID","_time_t",0},
@@ -9191,6 +8356,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxWindowID","_int",0},
     { "_wxWindowID","_signed_int",0},
     { "_wxWindowID","_unsigned_int",0},
+    { "_class_wxScrollWinEvent","_wxScrollWinEvent",0},
     { "_int","_wxCoord",0},
     { "_int","_wxPrintQuality",0},
     { "_int","_time_t",0},
@@ -9200,6 +8366,10 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_int","_wxWindowID",0},
     { "_int","_unsigned_int",0},
     { "_int","_signed_int",0},
+    { "_class_wxMouseEvent","_wxMouseEvent",0},
+    { "_wxPyCommandEvent","_class_wxPyCommandEvent",0},
+    { "_class_wxSpinEvent","_wxSpinEvent",0},
+    { "_class_wxQueryNewPaletteEvent","_wxQueryNewPaletteEvent",0},
     { "_time_t","_wxCoord",0},
     { "_time_t","_wxPrintQuality",0},
     { "_time_t","_unsigned_int",0},
@@ -9207,7 +8377,67 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_time_t","_wxWindowID",0},
     { "_time_t","_uint",0},
     { "_time_t","_size_t",0},
+    { "_class_wxNavigationKeyEvent","_wxNavigationKeyEvent",0},
+    { "_wxButton","_class_wxBitmapButton",SwigwxBitmapButtonTowxButton},
     { "_wxButton","_wxBitmapButton",SwigwxBitmapButtonTowxButton},
+    { "_wxButton","_class_wxButton",0},
+    { "_wxSize","_class_wxSize",0},
+    { "_wxRegionIterator","_class_wxRegionIterator",0},
+    { "_class_wxPyTextDataObject","_wxPyTextDataObject",0},
+    { "_class_wxPaintDC","_wxPaintDC",0},
+    { "_class_wxSysColourChangedEvent","_wxSysColourChangedEvent",0},
+    { "_class_wxPyFileDropTarget","_wxPyFileDropTarget",0},
+    { "_class_wxInitDialogEvent","_wxInitDialogEvent",0},
+    { "_class_wxComboBox","_wxComboBox",0},
+    { "_class_wxRadioButton","_wxRadioButton",0},
+    { "_wxValidator","_class_wxValidator",0},
+    { "_class_wxLayoutConstraints","_wxLayoutConstraints",0},
+    { "_wxIconizeEvent","_class_wxIconizeEvent",0},
+    { "_class_wxControl","_class_wxSpinCtrl",SwigwxSpinCtrlTowxControl},
+    { "_class_wxControl","_wxSpinCtrl",SwigwxSpinCtrlTowxControl},
+    { "_class_wxControl","_class_wxSlider",SwigwxSliderTowxControl},
+    { "_class_wxControl","_wxSlider",SwigwxSliderTowxControl},
+    { "_class_wxControl","_class_wxRadioButton",SwigwxRadioButtonTowxControl},
+    { "_class_wxControl","_wxRadioButton",SwigwxRadioButtonTowxControl},
+    { "_class_wxControl","_class_wxRadioBox",SwigwxRadioBoxTowxControl},
+    { "_class_wxControl","_wxRadioBox",SwigwxRadioBoxTowxControl},
+    { "_class_wxControl","_class_wxStaticBitmap",SwigwxStaticBitmapTowxControl},
+    { "_class_wxControl","_wxStaticBitmap",SwigwxStaticBitmapTowxControl},
+    { "_class_wxControl","_class_wxSpinButton",SwigwxSpinButtonTowxControl},
+    { "_class_wxControl","_wxSpinButton",SwigwxSpinButtonTowxControl},
+    { "_class_wxControl","_class_wxScrollBar",SwigwxScrollBarTowxControl},
+    { "_class_wxControl","_wxScrollBar",SwigwxScrollBarTowxControl},
+    { "_class_wxControl","_class_wxTextCtrl",SwigwxTextCtrlTowxControl},
+    { "_class_wxControl","_wxTextCtrl",SwigwxTextCtrlTowxControl},
+    { "_class_wxControl","_class_wxCheckListBox",SwigwxCheckListBoxTowxControl},
+    { "_class_wxControl","_wxCheckListBox",SwigwxCheckListBoxTowxControl},
+    { "_class_wxControl","_class_wxListBox",SwigwxListBoxTowxControl},
+    { "_class_wxControl","_wxListBox",SwigwxListBoxTowxControl},
+    { "_class_wxControl","_class_wxStaticText",SwigwxStaticTextTowxControl},
+    { "_class_wxControl","_wxStaticText",SwigwxStaticTextTowxControl},
+    { "_class_wxControl","_class_wxStaticLine",SwigwxStaticLineTowxControl},
+    { "_class_wxControl","_wxStaticLine",SwigwxStaticLineTowxControl},
+    { "_class_wxControl","_class_wxStaticBox",SwigwxStaticBoxTowxControl},
+    { "_class_wxControl","_wxStaticBox",SwigwxStaticBoxTowxControl},
+    { "_class_wxControl","_class_wxGauge",SwigwxGaugeTowxControl},
+    { "_class_wxControl","_wxGauge",SwigwxGaugeTowxControl},
+    { "_class_wxControl","_class_wxComboBox",SwigwxComboBoxTowxControl},
+    { "_class_wxControl","_wxComboBox",SwigwxComboBoxTowxControl},
+    { "_class_wxControl","_class_wxChoice",SwigwxChoiceTowxControl},
+    { "_class_wxControl","_wxChoice",SwigwxChoiceTowxControl},
+    { "_class_wxControl","_class_wxCheckBox",SwigwxCheckBoxTowxControl},
+    { "_class_wxControl","_wxCheckBox",SwigwxCheckBoxTowxControl},
+    { "_class_wxControl","_class_wxBitmapButton",SwigwxBitmapButtonTowxControl},
+    { "_class_wxControl","_wxBitmapButton",SwigwxBitmapButtonTowxControl},
+    { "_class_wxControl","_class_wxButton",SwigwxButtonTowxControl},
+    { "_class_wxControl","_wxButton",SwigwxButtonTowxControl},
+    { "_class_wxControl","_wxControl",0},
+    { "_wxStaticBitmap","_class_wxStaticBitmap",0},
+    { "_class_wxIcon","_wxIcon",0},
+    { "_class_wxColour","_wxColour",0},
+    { "_class_wxScreenDC","_wxScreenDC",0},
+    { "_wxPalette","_class_wxPalette",0},
+    { "_class_wxIdleEvent","_wxIdleEvent",0},
     { "_wxCoord","_int",0},
     { "_wxCoord","_signed_int",0},
     { "_wxCoord","_unsigned_int",0},
@@ -9217,48 +8447,117 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxCoord","_size_t",0},
     { "_wxCoord","_time_t",0},
     { "_wxCoord","_wxPrintQuality",0},
-    { "_wxEvtHandler","_wxToggleButton",SwigwxToggleButtonTowxEvtHandler},
+    { "_wxEraseEvent","_class_wxEraseEvent",0},
+    { "_wxDataObjectComposite","_class_wxDataObjectComposite",0},
+    { "_class_wxJoystickEvent","_wxJoystickEvent",0},
+    { "_wxRegion","_class_wxRegion",0},
+    { "_class_wxShowEvent","_wxShowEvent",0},
+    { "_wxPyDropTarget","_class_wxPyDropTarget",0},
+    { "_wxActivateEvent","_class_wxActivateEvent",0},
+    { "_wxGauge","_class_wxGauge",0},
+    { "_class_wxCheckListBox","_wxCheckListBox",0},
+    { "_class_wxBusyInfo","_wxBusyInfo",0},
+    { "_class_wxCommandEvent","_wxCommandEvent",0},
+    { "_class_wxClientDC","_wxClientDC",0},
+    { "_class_wxSizeEvent","_wxSizeEvent",0},
+    { "_wxCustomDataObject","_class_wxCustomDataObject",0},
+    { "_class_wxSize","_wxSize",0},
+    { "_class_wxBitmap","_wxBitmap",0},
+    { "_class_wxMemoryDC","_wxMemoryDC",0},
+    { "_wxPyTextDropTarget","_class_wxPyTextDropTarget",0},
+    { "_wxMenuBar","_class_wxMenuBar",0},
+    { "_wxEvtHandler","_class_wxSpinCtrl",SwigwxSpinCtrlTowxEvtHandler},
     { "_wxEvtHandler","_wxSpinCtrl",SwigwxSpinCtrlTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxSlider",SwigwxSliderTowxEvtHandler},
     { "_wxEvtHandler","_wxSlider",SwigwxSliderTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxRadioButton",SwigwxRadioButtonTowxEvtHandler},
     { "_wxEvtHandler","_wxRadioButton",SwigwxRadioButtonTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxRadioBox",SwigwxRadioBoxTowxEvtHandler},
     { "_wxEvtHandler","_wxRadioBox",SwigwxRadioBoxTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxStaticBitmap",SwigwxStaticBitmapTowxEvtHandler},
     { "_wxEvtHandler","_wxStaticBitmap",SwigwxStaticBitmapTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxSpinButton",SwigwxSpinButtonTowxEvtHandler},
     { "_wxEvtHandler","_wxSpinButton",SwigwxSpinButtonTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxScrollBar",SwigwxScrollBarTowxEvtHandler},
     { "_wxEvtHandler","_wxScrollBar",SwigwxScrollBarTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxTextCtrl",SwigwxTextCtrlTowxEvtHandler},
     { "_wxEvtHandler","_wxTextCtrl",SwigwxTextCtrlTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxCheckListBox",SwigwxCheckListBoxTowxEvtHandler},
     { "_wxEvtHandler","_wxCheckListBox",SwigwxCheckListBoxTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxListBox",SwigwxListBoxTowxEvtHandler},
     { "_wxEvtHandler","_wxListBox",SwigwxListBoxTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxStaticText",SwigwxStaticTextTowxEvtHandler},
     { "_wxEvtHandler","_wxStaticText",SwigwxStaticTextTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxStaticLine",SwigwxStaticLineTowxEvtHandler},
     { "_wxEvtHandler","_wxStaticLine",SwigwxStaticLineTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxStaticBox",SwigwxStaticBoxTowxEvtHandler},
     { "_wxEvtHandler","_wxStaticBox",SwigwxStaticBoxTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxGauge",SwigwxGaugeTowxEvtHandler},
     { "_wxEvtHandler","_wxGauge",SwigwxGaugeTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxComboBox",SwigwxComboBoxTowxEvtHandler},
     { "_wxEvtHandler","_wxComboBox",SwigwxComboBoxTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxChoice",SwigwxChoiceTowxEvtHandler},
     { "_wxEvtHandler","_wxChoice",SwigwxChoiceTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxCheckBox",SwigwxCheckBoxTowxEvtHandler},
     { "_wxEvtHandler","_wxCheckBox",SwigwxCheckBoxTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxBitmapButton",SwigwxBitmapButtonTowxEvtHandler},
     { "_wxEvtHandler","_wxBitmapButton",SwigwxBitmapButtonTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxButton",SwigwxButtonTowxEvtHandler},
     { "_wxEvtHandler","_wxButton",SwigwxButtonTowxEvtHandler},
+    { "_wxEvtHandler","_class_wxControl",SwigwxControlTowxEvtHandler},
     { "_wxEvtHandler","_wxControl",SwigwxControlTowxEvtHandler},
-    { "_wxWindow","_wxToggleButton",SwigwxToggleButtonTowxWindow},
+    { "_wxEvtHandler","_class_wxEvtHandler",0},
+    { "_wxMenuItem","_class_wxMenuItem",0},
+    { "_class_wxScrollBar","_wxScrollBar",0},
+    { "_class_wxScrolledWindow","_wxScrolledWindow",0},
+    { "_wxKeyEvent","_class_wxKeyEvent",0},
+    { "_wxMoveEvent","_class_wxMoveEvent",0},
+    { "_class_wxPalette","_wxPalette",0},
+    { "_wxFileDataObject","_class_wxFileDataObject",0},
+    { "_class_wxEraseEvent","_wxEraseEvent",0},
+    { "_class_wxDataObjectComposite","_wxDataObjectComposite",0},
+    { "_wxWindow","_class_wxSpinCtrl",SwigwxSpinCtrlTowxWindow},
     { "_wxWindow","_wxSpinCtrl",SwigwxSpinCtrlTowxWindow},
+    { "_wxWindow","_class_wxSlider",SwigwxSliderTowxWindow},
     { "_wxWindow","_wxSlider",SwigwxSliderTowxWindow},
+    { "_wxWindow","_class_wxRadioButton",SwigwxRadioButtonTowxWindow},
     { "_wxWindow","_wxRadioButton",SwigwxRadioButtonTowxWindow},
+    { "_wxWindow","_class_wxRadioBox",SwigwxRadioBoxTowxWindow},
     { "_wxWindow","_wxRadioBox",SwigwxRadioBoxTowxWindow},
+    { "_wxWindow","_class_wxStaticBitmap",SwigwxStaticBitmapTowxWindow},
     { "_wxWindow","_wxStaticBitmap",SwigwxStaticBitmapTowxWindow},
+    { "_wxWindow","_class_wxSpinButton",SwigwxSpinButtonTowxWindow},
     { "_wxWindow","_wxSpinButton",SwigwxSpinButtonTowxWindow},
+    { "_wxWindow","_class_wxScrollBar",SwigwxScrollBarTowxWindow},
     { "_wxWindow","_wxScrollBar",SwigwxScrollBarTowxWindow},
+    { "_wxWindow","_class_wxTextCtrl",SwigwxTextCtrlTowxWindow},
     { "_wxWindow","_wxTextCtrl",SwigwxTextCtrlTowxWindow},
+    { "_wxWindow","_class_wxCheckListBox",SwigwxCheckListBoxTowxWindow},
     { "_wxWindow","_wxCheckListBox",SwigwxCheckListBoxTowxWindow},
+    { "_wxWindow","_class_wxListBox",SwigwxListBoxTowxWindow},
     { "_wxWindow","_wxListBox",SwigwxListBoxTowxWindow},
+    { "_wxWindow","_class_wxStaticText",SwigwxStaticTextTowxWindow},
     { "_wxWindow","_wxStaticText",SwigwxStaticTextTowxWindow},
+    { "_wxWindow","_class_wxStaticLine",SwigwxStaticLineTowxWindow},
     { "_wxWindow","_wxStaticLine",SwigwxStaticLineTowxWindow},
+    { "_wxWindow","_class_wxStaticBox",SwigwxStaticBoxTowxWindow},
     { "_wxWindow","_wxStaticBox",SwigwxStaticBoxTowxWindow},
+    { "_wxWindow","_class_wxGauge",SwigwxGaugeTowxWindow},
     { "_wxWindow","_wxGauge",SwigwxGaugeTowxWindow},
+    { "_wxWindow","_class_wxComboBox",SwigwxComboBoxTowxWindow},
     { "_wxWindow","_wxComboBox",SwigwxComboBoxTowxWindow},
+    { "_wxWindow","_class_wxChoice",SwigwxChoiceTowxWindow},
     { "_wxWindow","_wxChoice",SwigwxChoiceTowxWindow},
+    { "_wxWindow","_class_wxCheckBox",SwigwxCheckBoxTowxWindow},
     { "_wxWindow","_wxCheckBox",SwigwxCheckBoxTowxWindow},
+    { "_wxWindow","_class_wxBitmapButton",SwigwxBitmapButtonTowxWindow},
     { "_wxWindow","_wxBitmapButton",SwigwxBitmapButtonTowxWindow},
+    { "_wxWindow","_class_wxButton",SwigwxButtonTowxWindow},
     { "_wxWindow","_wxButton",SwigwxButtonTowxWindow},
+    { "_wxWindow","_class_wxControl",SwigwxControlTowxWindow},
     { "_wxWindow","_wxControl",SwigwxControlTowxWindow},
+    { "_wxWindow","_class_wxWindow",0},
+    { "_class_wxWindowDestroyEvent","_wxWindowDestroyEvent",0},
 {0,0,0}};
 
 static PyObject *SWIG_globals;
@@ -9272,7 +8571,6 @@ SWIGEXPORT(void) initcontrolsc() {
 	 d = PyModule_GetDict(m);
 	 PyDict_SetItemString(d,"cvar", SWIG_globals);
 	 SWIG_addvarlink(SWIG_globals,"wxDefaultValidator",_wrap_wxDefaultValidator_get, _wrap_wxDefaultValidator_set);
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_TOGGLEBUTTON_CLICKED", PyInt_FromLong((long) wxEVT_COMMAND_TOGGLEBUTTON_CLICKED));
 {
    int i;
    for (i = 0; _swig_mapping[i].n1; i++)

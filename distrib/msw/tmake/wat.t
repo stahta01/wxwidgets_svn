@@ -28,13 +28,6 @@
         $file =~ s/cp?p?$/obj/;
         $project{$tag} .= $file . " "
     }
-    
-    foreach $file (sort keys %wxHTML) {
-        next if $wxHTML{$file} =~ /\b16\b/;
-
-        $file =~ s/cp?p?$/obj/;
-        $project{"WXHTMLOBJS"} .= $file . " "
-    }
 
     foreach $file (sort keys %wxCommon) {
         $isCFile = $file =~ /\.c$/;
@@ -89,15 +82,15 @@ LIBTARGET   = $(WXLIB)\wx.lib
 DUMMY=dummydll
 # ODBCLIB     = ..\..\contrib\odbc\odbc32.lib
 
-EXTRATARGETS = png zlib jpeg tiff
-EXTRATARGETSCLEAN = clean_png clean_zlib clean_jpeg clean_tiff
+EXTRATARGETS = xpm png zlib jpeg tiff
+EXTRATARGETSCLEAN = clean_xpm clean_png clean_zlib clean_jpeg clean_tiff
 GENDIR=$(WXDIR)\src\generic
 COMMDIR=$(WXDIR)\src\common
+XPMDIR=$(WXDIR)\src\xpm
 JPEGDIR=$(WXDIR)\src\jpeg
 TIFFDIR=$(WXDIR)\src\tiff
 MSWDIR=$(WXDIR)\src\msw
 OLEDIR=$(MSWDIR)\ole
-HTMLDIR=$(WXDIR)\src\html
 
 DOCDIR = $(WXDIR)\docs
 
@@ -113,12 +106,10 @@ COMMONOBJS = &
 
 MSWOBJS = #$ ExpandGlue("WXMSWOBJS", "", " &\n\t")
 
-HTMLOBJS = #$ ExpandGlue("WXHTMLOBJS", "", " &\n\t")
-
 # Add $(NONESSENTIALOBJS) if wanting generic dialogs, PostScript etc.
-OBJECTS = $(COMMONOBJS) $(GENERICOBJS) $(MSWOBJS) $(HTMLOBJS)
+OBJECTS = $(COMMONOBJS) $(GENERICOBJS) $(MSWOBJS)
 
-all:        $(OBJECTS) $(LIBTARGET) $(EXTRATARGETS) .SYMBOLIC
+all:        $(OBJECTS) $(LIBTARGET) $(EXTRATARGETS)
 
 $(LIBTARGET) : $(OBJECTS)
     %create tmp.lbc
@@ -216,22 +207,72 @@ $(COMMDIR)\lex_yy.c:    $(COMMDIR)\doslex.c
     }
 #$}
 
+crbuffri.obj: $(XPMDIR)\crbuffri.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
 
-########################################################
-# HTML objects (always compiled)
+crbuffrp.obj: $(XPMDIR)\crbuffrp.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
 
-#${
-    $_ = $project{"WXHTMLOBJS"};
-    my @objs = split;
-    foreach (@objs) {
-        $text .= $_;
-        s/\.obj$//;
-        $text .= ':     $(HTMLDIR)\\';
-        $text .= $_ . ".cpp\n" .
-                 '  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<' . "\n\n";
-    }
-#$}
+crdatfri.obj: $(XPMDIR)\crdatfri.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
 
+crdatfrp.obj: $(XPMDIR)\crdatfrp.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+create.obj: $(XPMDIR)\create.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crifrbuf.obj: $(XPMDIR)\crifrbuf.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crifrdat.obj: $(XPMDIR)\crifrdat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crpfrbuf.obj: $(XPMDIR)\crpfrbuf.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+crpfrdat.obj: $(XPMDIR)\crpfrdat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+# TODO: what to do about this clash of filename????
+#data.obj: $(XPMDIR)\data.c
+#  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+hashtab.obj: $(XPMDIR)\hashtab.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+misc.obj: $(XPMDIR)\misc.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+parse.obj: $(XPMDIR)\parse.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rdftodat.obj: $(XPMDIR)\rdftodat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rdftoi.obj: $(XPMDIR)\rdftoi.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rdftop.obj: $(XPMDIR)\rdftop.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+rgb.obj: $(XPMDIR)\rgb.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+scan.obj: $(XPMDIR)\scan.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+simx.obj: $(XPMDIR)\simx.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+wrffrdat.obj: $(XPMDIR)\wrffrdat.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+wrffri.obj: $(XPMDIR)\wrffri.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
+
+wrffrp.obj: $(XPMDIR)\wrffrp.c
+  *$(CC) $(CPPFLAGS) $(IFLAGS) $<
 
 OBJ1 = adler32$(O) compress$(O) crc32$(O) gzio$(O) uncompr$(O) deflate$(O) \
   trees$(O)
@@ -281,6 +322,16 @@ uncompr.obj: uncompr.c zlib.h zconf.h
 
 zutil.obj: zutil.c zutil.h zlib.h zconf.h
 	$(CC) -c $(CFLAGS) $*.c
+
+xpm:   .SYMBOLIC
+    cd $(WXDIR)\src\xpm
+    wmake -f makefile.wat all
+    cd $(WXDIR)\src\msw
+
+clean_xpm:   .SYMBOLIC
+    cd $(WXDIR)\src\xpm
+    wmake -f makefile.wat clean
+    cd $(WXDIR)\src\msw
 
 png:   .SYMBOLIC
     cd $(WXDIR)\src\png

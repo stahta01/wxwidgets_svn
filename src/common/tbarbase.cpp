@@ -53,8 +53,6 @@
     END_EVENT_TABLE()
 #endif
 
-IMPLEMENT_CLASS(wxToolBarBase, wxControl)
-
 #include "wx/listimpl.cpp"
 
 WX_DEFINE_LIST(wxToolBarToolsList);
@@ -470,12 +468,7 @@ bool wxToolBarBase::OnLeftClick(int id, bool toggleDown)
 {
     wxCommandEvent event(wxEVT_COMMAND_TOOL_CLICKED, id);
     event.SetEventObject(this);
-
-    // we use SetInt() to make wxCommandEvent::IsChecked() return toggleDown
-    event.SetInt((int)toggleDown);
-
-    // and SetExtraLong() for backwards compatibility
-    event.SetExtraLong((long)toggleDown);
+    event.SetExtraLong((long) toggleDown);
 
     // Send events to this toolbar instead (and thence up the window hierarchy)
     GetEventHandler()->ProcessEvent(event);
@@ -533,17 +526,7 @@ void wxToolBarBase::OnIdle(wxIdleEvent& event)
 // Do the toolbar button updates (check for EVT_UPDATE_UI handlers)
 void wxToolBarBase::DoToolbarUpdates()
 {
-    wxWindow* parent = this;
-    while (parent->GetParent())
-        parent = parent->GetParent();
-
-#ifdef __WXMSW__
-    wxWindow* focusWin = wxFindFocusDescendant(parent);
-#else
-    wxWindow* focusWin = (wxWindow*) NULL;
-#endif
-
-    wxEvtHandler* evtHandler = focusWin ? focusWin->GetEventHandler() : GetEventHandler() ;
+    wxEvtHandler* evtHandler = GetEventHandler();
 
     for ( wxToolBarToolsList::Node* node = m_tools.GetFirst();
           node;

@@ -56,18 +56,15 @@
 // event table
 // ----------------------------------------------------------------------------
 
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
-
-BEGIN_EVENT_TABLE(wxNotebook, wxControl)
+  BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
     EVT_SIZE(wxNotebook::OnSize)
     EVT_SET_FOCUS(wxNotebook::OnSetFocus)
     EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
-END_EVENT_TABLE()
+  END_EVENT_TABLE()
 
-IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxControl)
-IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
+  IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxControl)
+  IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
 
 // ============================================================================
 // implementation
@@ -350,11 +347,8 @@ void wxNotebook::OnSize(wxSizeEvent& event)
     for ( unsigned int nPage = 0; nPage < nCount; nPage++ ) {
         wxNotebookPage *pPage = m_aPages[nPage];
         pPage->SetSize(0, 0, w, h);
-#if wxUSE_CONSTRAINTS
         if ( pPage->GetAutoLayout() )
             pPage->Layout();
-#endif //wxUSE_CONSTRAINTS
-
     }
 
     // Processing continues to next OnSize
@@ -416,10 +410,8 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
 
 void wxNotebook::SetConstraintSizes(bool /* recurse */)
 {
-#if wxUSE_CONSTRAINTS
     // don't set the sizes of the pages - their correct size is not yet known
     wxControl::SetConstraintSizes(FALSE);
-#endif
 }
 
 bool wxNotebook::DoPhase(int /* nPhase */)

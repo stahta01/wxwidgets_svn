@@ -48,7 +48,7 @@ class WXDLLEXPORT wxString;
 // ---------------------------------------------------------------------------
 
 // Bitmap flags
-enum wxBitmapType
+enum
 {
     wxBITMAP_TYPE_INVALID,          // should be == 0 for compatibility!
     wxBITMAP_TYPE_BMP,
@@ -123,8 +123,6 @@ enum wxStockCursor
     wxCURSOR_BASED_ARROW_DOWN,
 #endif // X11
 
-    wxCURSOR_ARROWWAIT,
-
     wxCURSOR_MAX
 };
 
@@ -169,7 +167,7 @@ enum wxStockCursor
 
 #if defined(__WXMSW__) || defined(__WXPM__)
     #define wxBITMAP(name) wxBitmap(#name, wxBITMAP_TYPE_RESOURCE)
-#elif defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#elif defined(__WXGTK__) || defined(__WXMOTIF__)
     // Initialize from an included XPM
     #define wxBITMAP(name) wxBitmap( (const char**) name##_xpm )
 #else // other platforms
@@ -315,7 +313,6 @@ public:
     bool operator!=(const wxRect& rect) const { return !(*this == rect); }
 
     bool Inside(int cx, int cy) const;
-    bool Inside(const wxPoint& pt) const { return Inside(pt.x, pt.y); }
     wxRect operator+(const wxRect& rect) const;
     wxRect& operator+=(const wxRect& rect);
 
@@ -385,11 +382,6 @@ public:
     wxColour *FindColour(const wxString& colour) ;
     wxString FindName(const wxColour& colour) const;
     void Initialize();
-#ifdef __WXPM__
-    // PM keeps its own type of colour table
-    long*                           m_palTable;
-    size_t                          m_nSize;
-#endif
 };
 
 class WXDLLEXPORT wxBitmapList : public wxList
@@ -503,15 +495,9 @@ extern bool WXDLLEXPORT wxColourDisplay();
 extern int WXDLLEXPORT wxDisplayDepth();
 #define wxGetDisplayDepth wxDisplayDepth
 
-// get the display size
+// get the diaplay size
 extern void WXDLLEXPORT wxDisplaySize(int *width, int *height);
 extern wxSize WXDLLEXPORT wxGetDisplaySize();
-extern void WXDLLEXPORT wxDisplaySizeMM(int *width, int *height);
-extern wxSize WXDLLEXPORT wxGetDisplaySizeMM();
-
-// Get position and size of the display workarea
-extern void WXDLLEXPORT wxClientDisplayRect(int *x, int *y, int *width, int *height);
-extern wxRect WXDLLEXPORT wxGetClientDisplayRect();
 
 // set global cursor
 extern void WXDLLEXPORT wxSetCursor(const wxCursor& cursor);

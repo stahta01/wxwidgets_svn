@@ -35,10 +35,6 @@
 #include "mondrian.xpm"
 #endif
 
-#ifdef new
-#undef new
-#endif
-
 #include "wx/ioswrap.h"
 
 #if wxUSE_IOSTREAMH
@@ -129,7 +125,7 @@ void MyApp::DoStreamDemo(wxCommandEvent& WXUNUSED(event))
 
     textCtrl.WriteText( "Writing to ofstream and wxFileOutputStream:\n" );
 
-    wxSTD ofstream std_file_output( "test_std.dat" );
+    ofstream std_file_output( "test_std.dat" );
     wxFileOutputStream file_output( wxString("test_wx.dat") );
     wxBufferedOutputStream buf_output( file_output );
     wxTextOutputStream text_output( buf_output );
@@ -167,7 +163,7 @@ void MyApp::DoStreamDemo(wxCommandEvent& WXUNUSED(event))
     
     textCtrl.WriteText( "\nReading from ifstream:\n" );
 
-    wxSTD ifstream std_file_input( "test_std.dat" );
+    ifstream std_file_input( "test_std.dat" );
 
     std_file_input >> si;
     tmp.Printf( _T("Signed int: %d\n"), si );

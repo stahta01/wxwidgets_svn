@@ -159,7 +159,6 @@ public:
     bool HandleMDIActivate(long bActivate, WXHWND, WXHWND);
     bool HandleWindowPosChanging(void *lpPos);
     bool HandleCommand(WXWORD id, WXWORD cmd, WXHWND control);
-    bool HandleGetMinMaxInfo(void *mmInfo);
 
     virtual long MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
     virtual long MSWDefWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
@@ -175,7 +174,6 @@ protected:
     virtual void DoGetPosition(int *x, int *y) const;
     virtual void DoSetClientSize(int width, int height);
     virtual void InternalSetMenuBar();
-    virtual bool IsMDIChild() const { return TRUE; }
 
     // common part of all ctors
     void Init();

@@ -36,13 +36,13 @@
 
 //----------------------------------------------------------------------
 
-class wxColourData : public wxObject {
+class wxColourData {
 public:
     wxColourData();
     ~wxColourData();
 
     bool GetChooseFull();
-    wxColour GetColour();
+    wxColour& GetColour();
     wxColour GetCustomColour(int i);
     void SetChooseFull(int flag);
     void SetColour(const wxColour& colour);
@@ -191,14 +191,14 @@ public:
 
 //----------------------------------------------------------------------
 
-class wxFontData : public wxObject {
+class wxFontData {
 public:
     wxFontData();
     ~wxFontData();
 
     void EnableEffects(bool enable);
     bool GetAllowSymbols();
-    wxColour GetColour();
+    wxColour& GetColour();
     wxFont GetChosenFont();
     bool GetEnableEffects();
     wxFont GetInitialFont();

@@ -119,7 +119,6 @@ public:
     void DoButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
     void DoButtonUp(Point pt, unsigned int curTime, bool ctrl);
     void DoButtonMove(Point pt);
-    void DoMouseWheel(int rotation, int delta, int linesPerAction);
     void DoAddChar(char ch);
     int  DoKeyDown(int key, bool shift, bool ctrl, bool alt);
     void DoTick() { Tick(); }
@@ -147,7 +146,6 @@ private:
 
     wxSTCDropTarget*    dropTarget;
     wxDragResult        dragResult;
-    int                 wheelRotation;
 };
 
 //----------------------------------------------------------------------

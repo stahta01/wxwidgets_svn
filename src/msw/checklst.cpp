@@ -45,7 +45,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#if defined(__GNUWIN32_OLD__)
+#ifdef __GNUWIN32_OLD__
     #include "wx/msw/gnuwin32/extra.h"
 #endif
 

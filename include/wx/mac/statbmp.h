@@ -47,16 +47,14 @@ class WXDLLEXPORT wxStaticBitmap: public wxControl
 
   virtual void Command(wxCommandEvent& WXUNUSED(event)) {};
   virtual void ProcessCommand(wxCommandEvent& WXUNUSED(event)) {};
-  virtual void OnPaint( wxPaintEvent &event ) ;
+	virtual void OnPaint( wxPaintEvent &event ) ;
   void SetSize(int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO);
 
-  inline const wxBitmap& GetBitmap() const { return m_messageBitmap; }
-  const wxIcon& GetIcon() const { return (const wxIcon&) GetBitmap() ; }
-  void  SetIcon(const wxIcon& icon) { SetBitmap( (const wxBitmap &)icon ) ; }
+  inline wxBitmap& GetBitmap() const { return (wxBitmap&) m_messageBitmap; }
 
   // overriden base class virtuals
   virtual bool AcceptsFocus() const { return FALSE; }
-  wxSize DoGetBestSize() const ;
+	wxSize DoGetBestSize() const ;
 
  protected:
   wxBitmap m_messageBitmap;

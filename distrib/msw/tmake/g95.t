@@ -95,10 +95,10 @@ WXDLL = $(WXDIR)/lib/wx$(WXVERSION).dll
 WXDEF = wx$(WXVERSION).def
 DLL_EXTRA_LIBS = $(WXDIR)/lib/libzlib.a \
                  $(WXDIR)/lib/libpng.a $(WXDIR)/lib/libjpeg.a \
-	             $(WXDIR)/lib/libtiff.a
+	              $(WXDIR)/lib/libxpm.a $(WXDIR)/lib/libtiff.a
 DLL_LDFLAGS = -L$(WXDIR)/lib
 DLL_LDLIBS = -mwindows -lcomctl32 -lctl3d32 -lole32 -loleaut32 \
-             -luuid -lrpcrt4 -lodbc32 -lwinmm -lopengl32 \
+             -luuid -lrpcrt4 -lodbc32 -lwinmm \
              -lwsock32 $(DLL_EXTRA_LIBS) \
 	          -lstdc++
 endif
@@ -113,6 +113,7 @@ HTMLDIR = $(WXDIR)/src/html
 ZLIBDIR = $(WXDIR)/src/zlib
 PNGDIR  = $(WXDIR)/src/png
 JPEGDIR = $(WXDIR)/src/jpeg
+XPMDIR  = $(WXDIR)/src/xpm
 TIFFDIR = $(WXDIR)/src/tiff
 OLEDIR  = $(WXDIR)/src/msw/ole
 MSWDIR  = $(WXDIR)/src/msw
@@ -120,6 +121,7 @@ MSWDIR  = $(WXDIR)/src/msw
 ZLIBLIB = $(WXDIR)/lib/libzlib.a
 PNGLIB  = $(WXDIR)/lib/libpng.a
 JPEGLIB = $(WXDIR)/lib/libjpeg.a
+XPMLIB  = $(WXDIR)/lib/libxpm.a
 TIFFLIB = $(WXDIR)/lib/libtiff.a
 
 DOCDIR = $(WXDIR)/docs
@@ -234,6 +236,27 @@ JPEGOBJS    = \
 		$(JPEGDIR)/jquant2.$(OBJSUFF) \
 		$(JPEGDIR)/jdmerge.$(OBJSUFF)
 
+# NOTE: these filenames are case sensitive!
+XPMOBJS =    $(XPMDIR)/Attrib.o\
+		$(XPMDIR)/CrBufFrI.o\
+		$(XPMDIR)/CrDatFrI.o\
+		$(XPMDIR)/create.o\
+		$(XPMDIR)/CrIFrBuf.o\
+		$(XPMDIR)/CrIFrDat.o\
+		$(XPMDIR)/data.o\
+		$(XPMDIR)/Image.o\
+		$(XPMDIR)/Info.o\
+		$(XPMDIR)/hashtab.o\
+		$(XPMDIR)/misc.o\
+		$(XPMDIR)/parse.o\
+		$(XPMDIR)/RdFToDat.o\
+		$(XPMDIR)/RdFToI.o\
+		$(XPMDIR)/rgb.o\
+		$(XPMDIR)/scan.o\
+		$(XPMDIR)/simx.o\
+		$(XPMDIR)/WrFFrDat.o\
+		$(XPMDIR)/WrFFrI.o
+
 TIFFOBJS = $(TIFFDIR)/tif_aux.o \
 		$(TIFFDIR)/tif_close.o \
 		$(TIFFDIR)/tif_codec.o \
@@ -279,9 +302,9 @@ else
 endif
 
 ifndef WXMAKINGDLL
-all:    $(OBJECTS) $(WXLIB) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(TIFFLIB)
+all:    $(OBJECTS) $(WXLIB) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(XPMLIB) $(TIFFLIB)
 else
-all:    $(OBJECTS) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(TIFFLIB) $(WXDLL)
+all:    $(OBJECTS) $(ZLIBLIB) $(PNGLIB) $(JPEGLIB) $(XPMLIB) $(TIFFLIB) $(WXDLL)
 endif
 
 ifndef WXMAKINGDLL
@@ -345,6 +368,10 @@ $(PNGLIB): $(PNGOBJS)
 
 $(JPEGLIB): $(JPEGOBJS)
 	$(AR) $(AROPTIONS) $@ $(JPEGOBJS)
+	$(RANLIB) $@
+
+$(XPMLIB): $(XPMOBJS)
+	$(AR) $(AROPTIONS) $@ $(XPMOBJS)
 	$(RANLIB) $@
 
 $(TIFFLIB): $(TIFFOBJS)
@@ -411,6 +438,8 @@ clean:
 	-$(RM) ../png/*.bak
 	-$(RM) ../jpeg/*.o
 	-$(RM) ../jpeg/*.bak
+	-$(RM) ../xpm/*.o
+	-$(RM) ../xpm/*.bak
 	-$(RM) ../tiff/*.o
 	-$(RM) ../tiff/*.bak
 
@@ -419,6 +448,7 @@ cleanall: clean
 	-$(RM) $(ZLIBLIB)
 	-$(RM) $(PNGLIB)
 	-$(RM) $(JPEGLIB)
+	-$(RM) $(XPMLIB)
 	-$(RM) $(TIFFLIB)
 
 ifdef WXMAKINGDLL

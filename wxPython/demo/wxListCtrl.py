@@ -57,7 +57,6 @@ musicdata = {
 39: ("Yes", "Rhythm Of Love", "Rock"),
 }
 
-import images
 
 class TestListCtrlPanel(wxPanel):
     def __init__(self, parent, log):
@@ -67,9 +66,8 @@ class TestListCtrlPanel(wxPanel):
         tID = wxNewId()
 
         self.il = wxImageList(16, 16)
-        bmp = images.getSmilesBitmap()
-        #idx1 = self.il.AddWithColourMask(bmp, wxWHITE)
-        idx1 = self.il.Add(bmp)
+        bmp = wxBitmap('bitmaps/smiles.bmp', wxBITMAP_TYPE_BMP)
+        idx1 = self.il.AddWithColourMask(bmp, wxWHITE)
 
         self.list = wxListCtrl(self, tID,
                                style=wxLC_REPORT|wxSUNKEN_BORDER)
@@ -93,7 +91,7 @@ class TestListCtrlPanel(wxPanel):
         self.list.SetColumnWidth(1, wxLIST_AUTOSIZE)
         ##self.list.SetColumnWidth(2, wxLIST_AUTOSIZE)
 
-        self.list.SetItemState(5, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED)
+        self.list.SetItemState(25, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED)
 
         #self.list.SetItemState(25, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED)
         #self.list.EnsureVisible(25)
@@ -133,16 +131,11 @@ class TestListCtrlPanel(wxPanel):
 
     def OnItemSelected(self, event):
         self.currentItem = event.m_itemIndex
-        self.log.WriteText("OnItemSelected: %s, %s, %s, %s\n" %
-                           (self.currentItem,
-                            self.list.GetItemText(self.currentItem),
+        self.log.WriteText("OnItemSelected: %s, %s, %s\n" %
+                           (self.list.GetItemText(self.currentItem),
                             self.getColumnText(self.currentItem, 1),
                             self.getColumnText(self.currentItem, 2)))
-        if self.currentItem == 10:
-            self.log.WriteText("OnItemSelected: Veto'd selection\n")
-            #event.Veto()  # doesn't work
-            # this does
-            self.list.SetItemState(10, 0, wxLIST_STATE_SELECTED)
+
 
     def OnItemActivated(self, event):
         self.currentItem = event.m_itemIndex
@@ -176,10 +169,7 @@ class TestListCtrlPanel(wxPanel):
         tPopupID3 = 2
         tPopupID4 = 3
         tPopupID5 = 5
-        #menu.Append(tPopupID1, "One")
-        item = wxMenuItem(menu, tPopupID1,"One")
-        item.SetBitmap(images.getSmilesBitmap())
-        menu.AppendItem(item)
+        menu.Append(tPopupID1, "One")
         menu.Append(tPopupID2, "Two")
         menu.Append(tPopupID3, "Three")
         menu.Append(tPopupID4, "DeleteAllItems")
@@ -244,4 +234,29 @@ def runTest(frame, nb, log):
 overview = """\
 A list control presents lists in a number of formats: list view, report view, icon view and small icon view. Elements are numbered from zero.
 
+wxListCtrl()
+------------------------
+
+Default constructor.
+
+wxListCtrl(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxLC_ICON, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listCtrl")
+
+Constructor, creating and showing a list control.
+
+Parameters
+-------------------
+
+parent = Parent window. Must not be NULL.
+
+id = Window identifier. A value of -1 indicates a default value.
+
+pos = Window position.
+
+size = Window size. If the default size (-1, -1) is specified then the window is sized appropriately.
+
+style = Window style. See wxListCtrl.
+
+validator = Window validator.
+
+name = Window name.
 """

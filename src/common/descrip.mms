@@ -10,17 +10,12 @@
 	set command $disk2:[joukj.com]bison.cld
 
 .ifdef __WXMOTIF__
-CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)
+CXX_DEFINE = /define=(__WXMOTIF__=1)
 .else
 .ifdef __WXGTK__
-CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
+CXX_DEFINE = /define=(__WXGTK__=1)
 .else
 CXX_DEFINE =
-CC_DEFINE =
 .endif
 .endif
 
@@ -35,7 +30,7 @@ LEX=flex
 .cpp.obj :
 	cxx $(CXXFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).cpp
 .c.obj :
-	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
+	cc $(CFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
 		parser.obj,\
@@ -45,7 +40,6 @@ OBJECTS = \
 		cmdline.obj,\
 		cmndata.obj,\
 		config.obj,\
-		cshelp.obj,\
 		ctrlcmn.obj,\
 		ctrlsub.obj,\
 		datetime.obj,\
@@ -65,7 +59,6 @@ OBJECTS = \
 		ffile.obj,\
 		file.obj,\
 		fileconf.obj,\
-		filename.obj,\
 		filefn.obj,\
 		filesys.obj,\
 		fontcmn.obj,\
@@ -89,7 +82,6 @@ OBJECTS1=framecmn.obj,\
 		imagpng.obj,\
 		imagpnm.obj,\
 		imagtiff.obj,\
-		imagxpm.obj,\
 		intl.obj,\
 		ipcbase.obj,\
 		layout.obj,\
@@ -124,7 +116,6 @@ OBJECTS1=framecmn.obj,\
 		textfile.obj,\
 		timercmn.obj,\
 		tokenzr.obj,\
-		treebase.obj,\
 		txtstrm.obj,\
 		unzip.obj,\
 		url.obj,\
@@ -137,7 +128,6 @@ OBJECTS1=framecmn.obj,\
 		wincmn.obj,\
 		wxchar.obj,\
 		wxexpr.obj,\
-		xpmdecod.obj,\
 		zipstrm.obj,\
 		zstream.obj
 
@@ -149,7 +139,6 @@ SOURCES = \
 		cmdline.cpp,\
 		cmndata.cpp,\
 		config.cpp,\
-		cshelp.cpp,\
 		ctrlcmn.cpp,\
 		ctrlsub.cpp,\
 		datetime.cpp,\
@@ -169,7 +158,6 @@ SOURCES = \
 		ffile.cpp,\
 		file.cpp,\
 		fileconf.cpp,\
-		filename.cpp,\
 		filefn.cpp,\
 		filesys.cpp,\
 		fontcmn.cpp,\
@@ -192,7 +180,6 @@ SOURCES = \
 		imagpng.cpp,\
 		imagpnm.cpp,\
 		imagtiff.cpp,\
-		imagxpm.cpp,\
 		intl.cpp,\
 		ipcbase.cpp,\
 		layout.cpp,\
@@ -227,7 +214,6 @@ SOURCES = \
 		textfile.cpp,\
 		timercmn.cpp,\
 		tokenzr.cpp,\
-		treebase.cpp,\
 		txtstrm.cpp,\
 		unzip.c,\
 		url.cpp,\
@@ -240,7 +226,6 @@ SOURCES = \
 		wincmn.cpp,\
 		wxchar.cpp,\
 		wxexpr.cpp,\
-		xpmdecod.cpp,\
 		zipstrm.cpp,\
 		zstream.cpp
 
@@ -282,7 +267,6 @@ clipcmn.obj : clipcmn.cpp
 cmndata.obj : cmndata.cpp
 cmdline.obj : cmdline.cpp
 config.obj : config.cpp
-cshelp.obj : cshelp.cpp
 ctrlcmn.obj : ctrlcmn.cpp
 ctrlsub.obj : ctrlsub.cpp
 datetime.obj : datetime.cpp
@@ -303,7 +287,6 @@ ffile.obj : ffile.cpp
 file.obj : file.cpp
 fileconf.obj : fileconf.cpp
 filefn.obj : filefn.cpp
-filename.obj : filename.cpp
 filesys.obj : filesys.cpp
 fontcmn.obj : fontcmn.cpp
 fontmap.obj : fontmap.cpp
@@ -325,7 +308,6 @@ imagpcx.obj : imagpcx.cpp
 imagpng.obj : imagpng.cpp
 imagpnm.obj : imagpnm.cpp
 imagtiff.obj : imagtiff.cpp
-imagxpm.obj : imagxpm.cpp
 intl.obj : intl.cpp
 ipcbase.obj : ipcbase.cpp
 layout.obj : layout.cpp
@@ -360,7 +342,6 @@ textcmn.obj : textcmn.cpp
 textfile.obj : textfile.cpp
 timercmn.obj : timercmn.cpp
 tokenzr.obj : tokenzr.cpp
-treebase.obj : treebase.cpp
 txtstrm.obj : txtstrm.cpp
 unzip.obj : unzip.c
 url.obj : url.cpp
@@ -373,6 +354,5 @@ wfstream.obj : wfstream.cpp
 wincmn.obj : wincmn.cpp
 wxchar.obj : wxchar.cpp
 wxexpr.obj : wxexpr.cpp
-xpmdecod.obj : xpmdecod.cpp
 zipstrm.obj : zipstrm.cpp
 zstream.obj : zstream.cpp

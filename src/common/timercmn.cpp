@@ -115,26 +115,6 @@ void wxTimerBase::Notify()
     (void)m_owner->ProcessEvent(event);
 }
 
-bool wxTimerBase::Start(int milliseconds, bool oneShot)
-{
-    if ( IsRunning() )
-    {
-        // not stopping the already running timer might work for some
-        // platforms (no problems under MSW) but leads to mysterious crashes
-        // on the others (GTK), so to be on the safe side do it here
-        Stop();
-    }
-
-    if ( milliseconds != -1 )
-    {
-        m_milli = milliseconds;
-    }
-
-    m_oneShot = oneShot;
-
-    return TRUE;
-}
-
 #endif // wxUSE_GUI
 
 // ----------------------------------------------------------------------------
@@ -220,8 +200,7 @@ long wxGetLocalTime()
 // Get UTC time as seconds since 00:00:00, Jan 1st 1970
 long wxGetUTCTime()
 {
-    struct tm tm;
-	struct tm *ptm;
+    struct tm tm, *ptm;
     time_t t0, t1;
 
     // This cannot be made static because mktime can overwrite it
@@ -273,8 +252,8 @@ wxLongLong wxGetLocalTimeMillis()
 {
     wxLongLong val = 1000l;
 
-    // If possible, use a function which avoids conversions from
-    // broken-up time structures to milliseconds
+    // If possible, use a functin which avoids conversions from
+    // broken-up time structures to milliseconds,
 
 #if defined(HAVE_GETTIMEOFDAY)
     struct timeval tp;

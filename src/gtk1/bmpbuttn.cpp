@@ -229,8 +229,8 @@ void wxBitmapButton::SetBitmap()
         GtkWidget *pixmap = gtk_pixmap_new(the_one.GetPixmap(), mask);
         gtk_widget_show(pixmap);
         gtk_container_add(GTK_CONTAINER(m_widget), pixmap);
-    } 
-    else 
+    }
+    else
     {   // subsequent bitmaps
         GtkPixmap *g_pixmap = GTK_PIXMAP(bin->child);
         gtk_pixmap_set(g_pixmap, the_one.GetPixmap(), mask);

@@ -26,19 +26,17 @@
 WXDLLEXPORT_DATA(extern const wxChar*) wxPanelNameStr;
 
 // default scrolled window style
-#ifndef wxScrolledWindowStyle
 #define wxScrolledWindowStyle (wxHSCROLL | wxVSCROLL)
-#endif
 
 // ----------------------------------------------------------------------------
-// wxGenericScrolledWindow
+// wxScrolledWindow
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxGenericScrolledWindow : public wxPanel
+class WXDLLEXPORT wxScrolledWindow : public wxPanel
 {
 public:
-    wxGenericScrolledWindow();
-    wxGenericScrolledWindow(wxWindow *parent,
+    wxScrolledWindow();
+    wxScrolledWindow(wxWindow *parent,
                      wxWindowID id = -1,
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
@@ -48,7 +46,7 @@ public:
         Create(parent, id, pos, size, style, name);
     }
 
-    ~wxGenericScrolledWindow();
+    ~wxScrolledWindow();
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -57,7 +55,7 @@ public:
                 long style = wxScrolledWindowStyle,
                 const wxString& name = wxPanelNameStr);
 
-    // Normally the wxGenericScrolledWindow will scroll itself, but in
+    // Normally the wxScrolledWindow will scroll itself, but in
     // some rare occasions you might want it to scroll another
     // window (e.g. a child of it in order to scroll only a portion
     // the area between the scrollbars (spreadsheet: only cell area
@@ -117,7 +115,7 @@ public:
     // Override this function to draw the graphic (or just process EVT_PAINT)
     virtual void OnDraw(wxDC& WXUNUSED(dc)) {};
 
-    // Override this function if you don't want to have wxGenericScrolledWindow
+    // Override this function if you don't want to have wxScrolledWindow
     // automatically change the origin according to the scroll position.
     virtual void PrepareDC(wxDC& dc);
 
@@ -126,7 +124,6 @@ public:
     void OnSize(wxSizeEvent& event);
     void OnPaint(wxPaintEvent& event);
     void OnChar(wxKeyEvent& event);
-    void OnMouseWheel(wxMouseEvent& event);
 
     // Calculate scroll increment
     virtual int CalcScrollInc(wxScrollWinEvent& event);
@@ -145,11 +142,10 @@ protected:
     int                   m_yScrollLinesPerPage;
     double                m_scaleX;
     double                m_scaleY;
-    int                   m_wheelRotation;
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_ABSTRACT_CLASS(wxGenericScrolledWindow)
+    DECLARE_ABSTRACT_CLASS(wxScrolledWindow)
 };
 
 #endif

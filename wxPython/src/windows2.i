@@ -19,7 +19,6 @@
 #endif
 #include <wx/notebook.h>
 #include <wx/splitter.h>
-#include <wx/imaglist.h>
 #ifdef __WXMSW__
 #include <wx/msw/taskbar.h>
 #endif
@@ -59,9 +58,9 @@ public:
     void      SetTextValue(const wxString& str);
     wxFont&   GetFont();
     void      SetFont(wxFont& f);
-    wxColour GetTextColour();
+    wxColour& GetTextColour();
     void      SetTextColour(const wxColour& colour);
-    wxColour GetBackgroundColour();
+    wxColour& GetBackgroundColour();
     void      SetBackgroundColour(const wxColour& colour);
     wxBrush&  GetBackgroundBrush();
     int       GetAlignment();
@@ -122,7 +121,7 @@ public:
     wxGridCell* GetCell(int row, int col);
     int GetCellAlignment(int row, int col);
     %name(GetDefCellAlignment)int GetCellAlignment();
-    wxColour GetCellBackgroundColour(int row, int col);
+    wxColour& GetCellBackgroundColour(int row, int col);
     %name(GetDefCellBackgroundColour) wxColour& GetCellBackgroundColour();
 
     //wxGridCell *** GetCells();
@@ -148,7 +147,7 @@ public:
             return rows;
         }
     }
-    wxColour GetCellTextColour(int row, int col);
+    wxColour& GetCellTextColour(int row, int col);
     %name(GetDefCellTextColour)wxColour& GetCellTextColour();
     wxFont& GetCellTextFont(int row, int col);
     %name(GetDefCellTextFont)wxFont& GetCellTextFont();
@@ -161,9 +160,9 @@ public:
     bool GetEditable();
     wxScrollBar * GetHorizScrollBar();
     int GetLabelAlignment(int orientation);
-    wxColour GetLabelBackgroundColour();
+    wxColour& GetLabelBackgroundColour();
     int GetLabelSize(int orientation);
-    wxColour GetLabelTextColour();
+    wxColour& GetLabelTextColour();
     wxFont& GetLabelTextFont();
     wxString& GetLabelValue(int orientation, int pos);
     int GetRowHeight(int row);
@@ -243,13 +242,6 @@ enum {
 
 //---------------------------------------------------------------------------
 
-enum {
-     /* notebook control event types */
-    wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED,
-    wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING,
-};
-
-
 class wxNotebookEvent : public wxNotifyEvent {
 public:
     int GetSelection();
@@ -312,15 +304,6 @@ public:
 //---------------------------------------------------------------------------
 
 
-enum {
-    /* splitter window events */
-    wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING,
-    wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED,
-    wxEVT_COMMAND_SPLITTER_UNSPLIT,
-    wxEVT_COMMAND_SPLITTER_DOUBLECLICKED,
-};
-
-
 enum
 {
     wxSPLIT_HORIZONTAL,
@@ -328,6 +311,7 @@ enum
     wxSPLIT_DRAG_NONE,
     wxSPLIT_DRAG_DRAGGING,
     wxSPLIT_DRAG_LEFT_DOWN
+
 };
 
 

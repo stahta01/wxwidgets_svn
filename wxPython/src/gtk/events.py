@@ -4,7 +4,7 @@ import eventsc
 from misc import *
 
 from gdi import *
-class wxEventPtr(wxObjectPtr):
+class wxEventPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -298,15 +298,6 @@ class wxMouseEventPtr(wxEventPtr):
     def GetY(self, *_args, **_kwargs):
         val = apply(eventsc.wxMouseEvent_GetY,(self,) + _args, _kwargs)
         return val
-    def GetWheelRotation(self, *_args, **_kwargs):
-        val = apply(eventsc.wxMouseEvent_GetWheelRotation,(self,) + _args, _kwargs)
-        return val
-    def GetWheelDelta(self, *_args, **_kwargs):
-        val = apply(eventsc.wxMouseEvent_GetWheelDelta,(self,) + _args, _kwargs)
-        return val
-    def GetLinesPerAction(self, *_args, **_kwargs):
-        val = apply(eventsc.wxMouseEvent_GetLinesPerAction,(self,) + _args, _kwargs)
-        return val
     def __setattr__(self,name,value):
         if name == "m_x" :
             eventsc.wxMouseEvent_m_x_set(self,value)
@@ -335,15 +326,6 @@ class wxMouseEventPtr(wxEventPtr):
         if name == "m_metaDown" :
             eventsc.wxMouseEvent_m_metaDown_set(self,value)
             return
-        if name == "m_wheelRotation" :
-            eventsc.wxMouseEvent_m_wheelRotation_set(self,value)
-            return
-        if name == "m_wheelDelta" :
-            eventsc.wxMouseEvent_m_wheelDelta_set(self,value)
-            return
-        if name == "m_linesPerAction" :
-            eventsc.wxMouseEvent_m_linesPerAction_set(self,value)
-            return
         self.__dict__[name] = value
     def __getattr__(self,name):
         if name == "m_x" : 
@@ -364,12 +346,6 @@ class wxMouseEventPtr(wxEventPtr):
             return eventsc.wxMouseEvent_m_altDown_get(self)
         if name == "m_metaDown" : 
             return eventsc.wxMouseEvent_m_metaDown_get(self)
-        if name == "m_wheelRotation" : 
-            return eventsc.wxMouseEvent_m_wheelRotation_get(self)
-        if name == "m_wheelDelta" : 
-            return eventsc.wxMouseEvent_m_wheelDelta_get(self)
-        if name == "m_linesPerAction" : 
-            return eventsc.wxMouseEvent_m_linesPerAction_get(self)
         raise AttributeError,name
     def __repr__(self):
         return "<C wxMouseEvent instance at %s>" % (self.this,)
@@ -491,6 +467,7 @@ class wxNavigationKeyEventPtr(wxEventPtr):
         return val
     def GetCurrentFocus(self, *_args, **_kwargs):
         val = apply(eventsc.wxNavigationKeyEvent_GetCurrentFocus,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def SetCurrentFocus(self, *_args, **_kwargs):
         val = apply(eventsc.wxNavigationKeyEvent_SetCurrentFocus,(self,) + _args, _kwargs)
@@ -543,6 +520,7 @@ class wxEraseEventPtr(wxEventPtr):
         self.thisown = 0
     def GetDC(self, *_args, **_kwargs):
         val = apply(eventsc.wxEraseEvent_GetDC,(self,) + _args, _kwargs)
+        if val: val = wxDCPtr(val) 
         return val
     def __repr__(self):
         return "<C wxEraseEvent instance at %s>" % (self.this,)
@@ -857,6 +835,7 @@ class wxPaletteChangedEventPtr(wxEventPtr):
         return val
     def GetChangedWindow(self, *_args, **_kwargs):
         val = apply(eventsc.wxPaletteChangedEvent_GetChangedWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def __repr__(self):
         return "<C wxPaletteChangedEvent instance at %s>" % (self.this,)
@@ -894,6 +873,7 @@ class wxWindowCreateEventPtr(wxCommandEventPtr):
         self.thisown = 0
     def GetWindow(self, *_args, **_kwargs):
         val = apply(eventsc.wxWindowCreateEvent_GetWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def __repr__(self):
         return "<C wxWindowCreateEvent instance at %s>" % (self.this,)
@@ -911,6 +891,7 @@ class wxWindowDestroyEventPtr(wxCommandEventPtr):
         self.thisown = 0
     def GetWindow(self, *_args, **_kwargs):
         val = apply(eventsc.wxWindowDestroyEvent_GetWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def __repr__(self):
         return "<C wxWindowDestroyEvent instance at %s>" % (self.this,)
@@ -990,8 +971,6 @@ class wxPyCommandEvent(wxPyCommandEventPtr):
 
 
 #-------------- FUNCTION WRAPPERS ------------------
-
-wxNewEventType = eventsc.wxNewEventType
 
 
 

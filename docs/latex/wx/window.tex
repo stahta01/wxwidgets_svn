@@ -178,7 +178,7 @@ centered relative to the screen anyhow.
 
 \func{void}{CentreOnParent}{\param{int}{ direction = wxBOTH}}
 
-Centres the window on its parent. This is a more readable synonym for
+Centres the window on its parent. This is a more readable synonym for 
 \helpref{Centre}{wxwindowcentre}.
 
 \wxheading{Parameters}
@@ -190,7 +190,7 @@ or {\tt wxBOTH}.}
 
 This methods provides for a way to center top level windows over their
 parents instead of the entire screen.  If there is no parent or if the
-window is not a top level window, then behaviour is the same as
+window is not a top level window, then behaviour is the same as 
 \helpref{wxWindow::Centre}{wxwindowcentre}.
 
 \wxheading{See also}
@@ -224,9 +224,6 @@ cause an erase background event to be generated.
 
 \constfunc{virtual void}{ClientToScreen}{\param{int* }{x}, \param{int* }{y}}
 
-\perlnote{In wxPerl this method returns a 2-element list intead of
-modifying its parameters.}
-
 \constfunc{virtual wxPoint}{ClientToScreen}{\param{const wxPoint\&}{ pt}}
 
 Converts to screen coordinates from coordinates relative to this window.
@@ -246,6 +243,7 @@ implements the following methods:\par
 \twocolitem{{\bf ClientToScreenXY(x, y)}}{Returns a 2-tuple, (x, y)}
 \end{twocollist}}
 }
+
 
 \membersection{wxWindow::Close}\label{wxwindowclose}
 
@@ -511,9 +509,6 @@ Returns a reference to the list of the window's children.
 
 \constfunc{virtual void}{GetClientSize}{\param{int* }{width}, \param{int* }{height}}
 
-\perlnote{In wxPerl this method takes no parameter and returns
-a 2-element list {\tt ( width, height )}.}
-
 \constfunc{virtual wxSize}{GetClientSize}{\void}
 
 This gets the size of the window `client area' in pixels.  The client area is the
@@ -528,8 +523,8 @@ area which may be drawn on by the programmer, excluding title bar, border etc.
 \pythonnote{In place of a single overloaded method name, wxPython
 implements the following methods:\par
 \indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf GetClientSizeTuple()}}{Returns a 2-tuple of (width, height)}
-\twocolitem{{\bf GetClientSize()}}{Returns a wxSize object}
+\twocolitem{{\bf wxGetClientSizeTuple()}}{Returns a 2-tuple of (width, height)}
+\twocolitem{{\bf wxGetClientSize()}}{Returns a wxSize object}
 \end{twocollist}}
 }
 
@@ -547,7 +542,7 @@ Returns the associated drop target, which may be NULL.
 
 \wxheading{See also}
 
-\helpref{wxWindow::SetDropTarget}{wxwindowsetdroptarget},
+\helpref{wxWindow::SetDropTarget}{wxwindowsetdroptarget}, 
 \helpref{Drag and drop overview}{wxdndoverview}
 
 \membersection{wxWindow::GetEventHandler}\label{wxwindowgeteventhandler}
@@ -605,7 +600,7 @@ be used at all.
 
 Returns the grandparent of a window, or NULL if there isn't one.
 
-\membersection{wxWindow::GetHandle}\label{wxwindowgethandle}
+\membersection{wxWindow::GetHandle}
 
 \constfunc{void*}{GetHandle}{\void}
 
@@ -613,19 +608,6 @@ Returns the platform-specific handle of the physical window. Cast it to an appro
 handle, such as {\bf HWND} for Windows, {\bf Widget} for Motif or {\bf GtkWidget} for GTK.
 
 \pythonnote{This method will return an integer in wxPython.}
-
-\membersection{wxWindow::GetHelpText}\label{wxwindowgethelptext}
-
-\constfunc{virtual wxString}{GetHelpText}{\void}
-
-Gets the help text to be used as context-sensitive help for this window.
-
-Note that the text is actually stored by the current \helpref{wxHelpProvider}{wxhelpprovider} implementation,
-and not in the window object itself.
-
-\wxheading{See also}
-
-\helpref{SetHelpText}{wxwindowsethelptext}, \helpref{wxHelpProvider}{wxhelpprovider}
 
 \membersection{wxWindow::GetId}\label{wxwindowgetid}
 
@@ -702,15 +684,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl there are two methods instead of a single overloaded
-method:\par
-\indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf GetPosition()}}{Returns a Wx::Point}
-\twocolitem{{\bf GetPositionXY()}}{Returns a 2-element list
- {\tt ( x, y )}}
-\end{twocollist}
-}}
-
 \membersection{wxWindow::GetRect}\label{wxwindowgetrect}
 
 \constfunc{virtual wxRect}{GetRect}{\void}
@@ -769,21 +742,7 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl there are two methods instead of a single overloaded
-method:\par
-\indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf GetSize()}}{Returns a Wx::Size}
-\twocolitem{{\bf GetSizeWH()}}{Returns a 2-element list
- {\tt ( width, height )}}
-\end{twocollist}
-}}
-
-\membersection{wxWindow::GetSizer}\label{wxwindowgetsizer}
-
-\constfunc{const wxSizer *}{GetSizer}{\void}
-
-Return the sizer associated with the window by a previous call to 
-\helpref{SetSizer()}{wxwindowsetsizer} or {\tt NULL}.
+\membersection{wxWindow::GetTextExtent}
 
 \constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{x}, \param{int* }{y},
  \param{int* }{descent = NULL}, \param{int* }{externalLeading = NULL},
@@ -818,9 +777,6 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
-\perlnote{In wxPerl this method takes only the {\tt string} and optionally
- {\tt font} parameters, and returns a 4-element list
- {\tt ( x, y, descent, externalLeading )}.}
 
 \membersection{wxWindow::GetTitle}\label{wxwindowgettitle}
 
@@ -1052,13 +1008,10 @@ Note that the ASCII values do not have explicit key codes: they are passed as AS
 values.
 
 Note that not all keypresses can be intercepted this way. If you wish to intercept modifier
-keypresses, then you will need to use \helpref{wxWindow::OnKeyDown}{wxwindowonkeydown} or
+keypresses, then you will need to use \helpref{wxWindow::OnKeyDown}{wxwindowonkeydown} or 
 \helpref{wxWindow::OnKeyUp}{wxwindowonkeyup}.
 
 Most, but not all, windows allow keypresses to be intercepted.
-
-{\bf Tip:} be sure to call {\tt event.Skip()} for events that you don't process in this function,
-otherwise menu shortcuts may cease to work under Windows.
 
 \wxheading{See also}
 
@@ -1092,7 +1045,7 @@ values.
 
 This function is only relevant to top-level windows (frames and dialogs), and under
 Windows only. Under GTK the normal EVT\_CHAR\_ event has the functionality, i.e.
-you can intercepts it and if you don't call \helpref{wxEvent::Skip}{wxeventskip}
+you can intercepts it and if you don't call \helpref{wxEvent::Skip}{wxeventskip} 
 the window won't get the event.
 
 \wxheading{See also}
@@ -1255,13 +1208,10 @@ use the EVT\_KEY\_DOWN macro in an event table definition. Your {\bf OnKeyDown} 
 default function to achieve default keypress functionality.
 
 Note that not all keypresses can be intercepted this way. If you wish to intercept special
-keys, such as shift, control, and function keys, then you will need to use \helpref{wxWindow::OnKeyDown}{wxwindowonkeydown} or
+keys, such as shift, control, and function keys, then you will need to use \helpref{wxWindow::OnKeyDown}{wxwindowonkeydown} or 
 \helpref{wxWindow::OnKeyUp}{wxwindowonkeyup}.
 
 Most, but not all, windows allow keypresses to be intercepted.
-
-{\bf Tip:} be sure to call {\tt event.Skip()} for events that you don't process in this function,
-otherwise menu shortcuts may cease to work under Windows.
 
 \wxheading{See also}
 
@@ -1287,7 +1237,7 @@ use the EVT\_KEY\_UP macro in an event table definition. Your {\bf OnKeyUp} hand
 default function to achieve default keypress functionality.
 
 Note that not all keypresses can be intercepted this way. If you wish to intercept special
-keys, such as shift, control, and function keys, then you will need to use \helpref{wxWindow::OnKeyDown}{wxwindowonkeydown} or
+keys, such as shift, control, and function keys, then you will need to use \helpref{wxWindow::OnKeyDown}{wxwindowonkeydown} or 
 \helpref{wxWindow::OnKeyUp}{wxwindowonkeyup}.
 
 Most, but not all, windows allow key up events to be intercepted.
@@ -1461,6 +1411,8 @@ Sent to the event handler when the window must be refreshed.
 \docparam{event}{Paint event. For more information, see \helpref{wxPaintEvent}{wxpaintevent}.}
 
 \wxheading{Remarks}
+
+
 
 Use the EVT\_PAINT macro in an event table definition to intercept paint events.
 
@@ -1819,8 +1771,7 @@ Sets the accelerator table for this window. See \helpref{wxAcceleratorTable}{wxa
 Determines whether the \helpref{wxWindow::Layout}{wxwindowlayout} function will
 be called automatically when the window is resized. Use in connection with 
 \helpref{wxWindow::SetSizer}{wxwindowsetsizer} and 
-\helpref{wxWindow::SetConstraints}{wxwindowsetconstraints} for laying out
-subwindows.
+\helpref{wxWindow::SetConstraints}{wxwindowsetconstraints} for laying out subwindows.
 
 \wxheading{Parameters}
 
@@ -1948,7 +1899,7 @@ If the window already has a drop target, it is deleted.
 
 \wxheading{See also}
 
-\helpref{wxWindow::GetDropTarget}{wxwindowgetdroptarget},
+\helpref{wxWindow::GetDropTarget}{wxwindowgetdroptarget}, 
 \helpref{Drag and drop overview}{wxdndoverview}
 
 \membersection{wxWindow::SetEventHandler}\label{wxwindowseteventhandler}
@@ -2040,19 +1991,6 @@ their parent windows.
 \helpref{wxWindow::GetForegroundColour}{wxwindowgetforegroundcolour},\rtfsp
 \helpref{wxWindow::SetBackgroundColour}{wxwindowsetbackgroundcolour},\rtfsp
 \helpref{wxWindow::GetBackgroundColour}{wxwindowgetbackgroundcolour}
-
-\membersection{wxWindow::SetHelpText}\label{wxwindowsethelptext}
-
-\func{virtual void}{SetHelpText}{\param{const wxString\& }{helpText}}
-
-Sets the help text to be used as context-sensitive help for this window.
-
-Note that the text is actually stored by the current \helpref{wxHelpProvider}{wxhelpprovider} implementation,
-and not in the window object itself.
-
-\wxheading{See also}
-
-\helpref{GetHelpText}{wxwindowgethelptext}, \helpref{wxHelpProvider}{wxhelpprovider}
 
 \membersection{wxWindow::SetId}\label{wxwindowsetid}
 
@@ -2384,9 +2322,9 @@ create a new validator of this type.
 
 \func{void}{SetToolTip}{\param{wxToolTip* }{tip}}
 
-Attach a tooltip to the window.
+Attach a tooltip to the window. 
 
-See also: \helpref{GetToolTip}{wxwindowgettooltip},
+See also: \helpref{GetToolTip}{wxwindowgettooltip}, 
           \helpref{wxToolTip}{wxtooltip}
 
 

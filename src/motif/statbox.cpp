@@ -13,10 +13,6 @@
 #pragma implementation "statbox.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 #include "wx/statbox.h"
 #include "wx/utils.h"
 

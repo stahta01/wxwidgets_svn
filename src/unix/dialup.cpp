@@ -46,9 +46,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-DEFINE_EVENT_TYPE(wxEVT_DIALUP_CONNECTED)
-DEFINE_EVENT_TYPE(wxEVT_DIALUP_DISCONNECTED)
-
 // ----------------------------------------------------------------------------
 // A class which groups functions dealing with connecting to the network from a
 // workstation using dial-up access to the net. There is at most one instance
@@ -680,7 +677,7 @@ wxDialUpManagerImpl::CheckIfconfig()
         cmd << " -a";
 #elif defined(__LINUX__) || defined(__SGI__)
         // nothing to be added to ifconfig
-#elif defined(__FREEBSD__) || defined(__WXMAC__)
+#elif defined(__FREEBSD__)
         // add -l flag
         cmd << " -l";
 #elif defined(__HPUX__)
@@ -712,15 +709,15 @@ wxDialUpManagerImpl::CheckIfconfig()
 
 #if defined(__SOLARIS__) || defined (__SUNOS__)
                     // dialup device under SunOS/Solaris
-                    hasModem = strstr(output,"ipdptp") != (char *)NULL;
-                    hasLAN = strstr(output, "hme") != (char *)NULL;
+                    hasModem = wxStrstr(output, _T("ipdptp")) != NULL;
+                    hasLAN = wxStrstr(output, _T("hme")) != NULL;
 #elif defined(__LINUX__) || defined (__FREEBSD__)
-                    hasModem = strstr(output,"ppp")    // ppp
-                        || strstr(output,"sl")  // slip
-                        || strstr(output,"pl"); // plip
-                    hasLAN = strstr(output, "eth") != NULL;
+                    hasModem = wxStrstr(output, _T("ppp"))    // ppp
+                        || wxStrstr(output, _T("sl"))  // slip
+                        || wxStrstr(output, _T("pl")); // plip
+                    hasLAN = wxStrstr(output, _T("eth")) != NULL;
 #elif defined(__SGI__)  // IRIX
-                    hasModem = strstr(output, "ppp") != NULL; // PPP
+                    hasModem = wxStrstr(output, _T("ppp")) != NULL; // PPP
 #elif defined(__HPUX__)
                     // if could run ifconfig on interface, then it exists
                     hasModem = TRUE;
@@ -775,7 +772,7 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
    cmd << m_PingPath << ' ';
 #if defined(__SOLARIS__) || defined (__SUNOS__)
    // nothing to add to ping command
-#elif defined(__LINUX__) || defined ( __FREEBSD__) || defined(__WXMAC__)
+#elif defined(__LINUX__) || defined ( __FREEBSD__)
    cmd << "-c 1 "; // only ping once
 #elif defined(__HPUX__)
    cmd << "64 1 "; // only ping once (need also specify the packet size)

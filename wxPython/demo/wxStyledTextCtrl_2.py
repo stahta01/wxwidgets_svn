@@ -12,7 +12,7 @@ demoText = """\
 
 
 """
-wxSTC_CMD_ZOOMIN
+
 #----------------------------------------------------------------------
 
 
@@ -39,9 +39,6 @@ else:
 class PythonSTC(wxStyledTextCtrl):
     def __init__(self, parent, ID):
         wxStyledTextCtrl.__init__(self, parent, ID)
-
-        self.CmdKeyAssign(ord('B'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMIN)
-        self.CmdKeyAssign(ord('N'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMOUT)
 
         self.SetLexer(wxSTC_LEX_PYTHON)
         self.SetKeyWords(0, string.join(keyword.kwlist))
@@ -265,29 +262,18 @@ class PythonSTC(wxStyledTextCtrl):
 
 #----------------------------------------------------------------------
 
-_USE_PANEL = 1
-
 def runTest(frame, nb, log):
-    if not _USE_PANEL:
-        ed = p = PythonSTC(nb, -1)
-    else:
-        p = wxPanel(nb, -1)
-        ed = PythonSTC(p, -1)
-        s = wxBoxSizer(wxHORIZONTAL)
-        s.Add(ed, 1, wxEXPAND)
-        p.SetSizer(s)
-        p.SetAutoLayout(true)
-
+    ed = PythonSTC(nb, -1)
 
     ed.SetText(demoText + open('Main.py').read())
     ed.EmptyUndoBuffer()
-    ed.Colourise(0, -1)
+
 
     # line numbers in the margin
     ed.SetMarginType(1, wxSTC_MARGIN_NUMBER)
     ed.SetMarginWidth(1, 25)
 
-    return p
+    return ed
 
 
 

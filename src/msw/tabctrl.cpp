@@ -32,7 +32,7 @@
 
 #include <windows.h>
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#if !(defined(__GNUWIN32_OLD__) || defined(__TWIN32__))
     #include <commctrl.h>
 #else
     #include "wx/msw/gnuwin32/extra.h"
@@ -45,9 +45,6 @@
 #include "wx/msw/imaglist.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTabCtrl, wxControl)
-
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TAB_SEL_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_TAB_SEL_CHANGING)
 
 BEGIN_EVENT_TABLE(wxTabCtrl, wxControl)
     EVT_SYS_COLOUR_CHANGED(wxTabCtrl::OnSysColourChanged)

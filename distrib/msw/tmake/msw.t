@@ -43,7 +43,7 @@
 
         ($fileobj = $file) =~ s/cp?p?$/\o/;
         ($filedep = $file) =~ s/cp?p?$/\d/;
-
+        
         if( $wxMSW{$file} =~ /\bO\b/ ) {
             $project{"MSW_SOURCES"} .= "msw/ole/" . $file . " ";
             $project{"OLEOBJS"} .= $fileobj . " ";

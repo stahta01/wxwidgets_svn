@@ -73,6 +73,8 @@
 
 class WXDLLEXPORT wxDC : public wxDCBase
 {
+    DECLARE_DYNAMIC_CLASS(wxDC)
+
 public:
     wxDC();
     ~wxDC();
@@ -195,6 +197,9 @@ protected:
                                wxCoord xoffset, wxCoord yoffset,
                                int fillStyle = wxODDEVEN_RULE);
 
+#if wxUSE_SPLINES
+    virtual void DoDrawSpline(wxList *points);
+#endif // wxUSE_SPLINES
 
     // common part of DoDrawText() and DoDrawRotatedText()
     void DrawAnyText(const wxString& text, wxCoord x, wxCoord y);
@@ -211,8 +216,10 @@ protected:
     // TRUE => DeleteDC() in dtor, FALSE => only ReleaseDC() it
     bool              m_bOwnsDC:1;
 
-    // our HDC
+    // our HDC and its usage count: we only free it when the usage count drops
+    // to 0
     WXHDC             m_hDC;
+    int               m_hDCCount;
 
     // Store all old GDI objects when do a SelectObject, so we can select them
     // back in (this unselecting user's objects) so we can safely delete the
@@ -222,20 +229,6 @@ protected:
     WXHBRUSH          m_oldBrush;
     WXHFONT           m_oldFont;
     WXHPALETTE        m_oldPalette;
-
-    DECLARE_DYNAMIC_CLASS(wxDC)
-};
-
-// ----------------------------------------------------------------------------
-// wxDCTemp: a wxDC which doesn't free the given HDC (used by wxWindows
-// only/mainly)
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxDCTemp : public wxDC
-{
-public:
-    wxDCTemp(WXHDC hdc) { SetHDC(hdc); }
-    virtual ~wxDCTemp() { SetHDC((WXHDC)NULL); }
 };
 
 #endif

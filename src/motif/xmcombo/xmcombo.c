@@ -91,9 +91,6 @@
  * Cambridge, MA 02139, USA.
  *
  */
-#ifdef __VMS
-#include <wx/vms_x_fix.h>
-#endif
 
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>

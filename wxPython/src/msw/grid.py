@@ -59,9 +59,6 @@ def EVT_GRID_EDITOR_SHOWN(win, fn):
 def EVT_GRID_EDITOR_HIDDEN(win, fn):
     win.Connect(-1, -1, wxEVT_GRID_EDITOR_HIDDEN, fn)
 
-def EVT_GRID_EDITOR_CREATED(win, fn):
-    win.Connect(-1, -1, wxEVT_GRID_EDITOR_CREATED, fn)
-
 
 class wxGridCellRendererPtr :
     def __init__(self,this):
@@ -194,6 +191,7 @@ class wxGridCellEditorPtr :
         return val
     def GetControl(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellEditor_GetControl,(self,) + _args, _kwargs)
+        if val: val = wxControlPtr(val) 
         return val
     def SetControl(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellEditor_SetControl,(self,) + _args, _kwargs)
@@ -372,21 +370,12 @@ class wxGridCellChoiceEditor(wxGridCellChoiceEditorPtr):
 
 
 class wxGridCellAttrPtr :
-    Any = gridc.wxGridCellAttr_Any
-    Default = gridc.wxGridCellAttr_Default
-    Cell = gridc.wxGridCellAttr_Cell
-    Row = gridc.wxGridCellAttr_Row
-    Col = gridc.wxGridCellAttr_Col
-    Merged = gridc.wxGridCellAttr_Merged
     def __init__(self,this):
         self.this = this
         self.thisown = 0
     def Clone(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellAttr_Clone,(self,) + _args, _kwargs)
         if val: val = wxGridCellAttrPtr(val) 
-        return val
-    def MergeWith(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridCellAttr_MergeWith,(self,) + _args, _kwargs)
         return val
     def IncRef(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellAttr_IncRef,(self,) + _args, _kwargs)
@@ -415,9 +404,6 @@ class wxGridCellAttrPtr :
     def SetEditor(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellAttr_SetEditor,(self,) + _args, _kwargs)
         return val
-    def SetKind(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridCellAttr_SetKind,(self,) + _args, _kwargs)
-        return val
     def HasTextColour(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellAttr_HasTextColour,(self,) + _args, _kwargs)
         return val
@@ -435,9 +421,6 @@ class wxGridCellAttrPtr :
         return val
     def HasEditor(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellAttr_HasEditor,(self,) + _args, _kwargs)
-        return val
-    def HasReadWriteMode(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridCellAttr_HasReadWriteMode,(self,) + _args, _kwargs)
         return val
     def GetTextColour(self, *_args, **_kwargs):
         val = apply(gridc.wxGridCellAttr_GetTextColour,(self,) + _args, _kwargs)
@@ -542,7 +525,7 @@ class wxPyGridCellAttrProvider(wxPyGridCellAttrProviderPtr):
 
 
 
-class wxGridTableBasePtr(wxObjectPtr):
+class wxGridTableBasePtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -558,6 +541,7 @@ class wxGridTableBasePtr(wxObjectPtr):
         return val
     def GetView(self, *_args, **_kwargs):
         val = apply(gridc.wxGridTableBase_GetView,(self,) + _args, _kwargs)
+        if val: val = wxGridPtr(val) 
         return val
     def GetNumberRows(self, *_args, **_kwargs):
         val = apply(gridc.wxGridTableBase_GetNumberRows,(self,) + _args, _kwargs)
@@ -764,6 +748,7 @@ class wxGridTableMessagePtr :
         return val
     def GetTableObject(self, *_args, **_kwargs):
         val = apply(gridc.wxGridTableMessage_GetTableObject,(self,) + _args, _kwargs)
+        if val: val = wxGridTableBasePtr(val) 
         return val
     def SetId(self, *_args, **_kwargs):
         val = apply(gridc.wxGridTableMessage_SetId,(self,) + _args, _kwargs)
@@ -857,6 +842,7 @@ class wxGridPtr(wxScrolledWindowPtr):
         return val
     def GetTable(self, *_args, **_kwargs):
         val = apply(gridc.wxGrid_GetTable,(self,) + _args, _kwargs)
+        if val: val = wxGridTableBasePtr(val) 
         return val
     def SetTable(self, *_args, **_kwargs):
         val = apply(gridc.wxGrid_SetTable,(self,) + _args, _kwargs)
@@ -1045,12 +1031,6 @@ class wxGridPtr(wxScrolledWindowPtr):
         val = apply(gridc.wxGrid_GetCellHighlightColour,(self,) + _args, _kwargs)
         if val: val = wxColourPtr(val) ; val.thisown = 1
         return val
-    def GetCellHighlightPenWidth(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_GetCellHighlightPenWidth,(self,) + _args, _kwargs)
-        return val
-    def GetCellHighlightROPenWidth(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_GetCellHighlightROPenWidth,(self,) + _args, _kwargs)
-        return val
     def SetRowLabelSize(self, *_args, **_kwargs):
         val = apply(gridc.wxGrid_SetRowLabelSize,(self,) + _args, _kwargs)
         return val
@@ -1083,12 +1063,6 @@ class wxGridPtr(wxScrolledWindowPtr):
         return val
     def SetCellHighlightColour(self, *_args, **_kwargs):
         val = apply(gridc.wxGrid_SetCellHighlightColour,(self,) + _args, _kwargs)
-        return val
-    def SetCellHighlightPenWidth(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_SetCellHighlightPenWidth,(self,) + _args, _kwargs)
-        return val
-    def SetCellHighlightROPenWidth(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_SetCellHighlightROPenWidth,(self,) + _args, _kwargs)
         return val
     def EnableDragRowSize(self, *_args, **_kwargs):
         val = apply(gridc.wxGrid_EnableDragRowSize,(self,) + _args, _kwargs)
@@ -1341,18 +1315,6 @@ class wxGridPtr(wxScrolledWindowPtr):
     def SetMargins(self, *_args, **_kwargs):
         val = apply(gridc.wxGrid_SetMargins,(self,) + _args, _kwargs)
         return val
-    def GetGridWindow(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_GetGridWindow,(self,) + _args, _kwargs)
-        return val
-    def GetGridRowLabelWindow(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_GetGridRowLabelWindow,(self,) + _args, _kwargs)
-        return val
-    def GetGridColLabelWindow(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_GetGridColLabelWindow,(self,) + _args, _kwargs)
-        return val
-    def GetGridCornerLabelWindow(self, *_args, **_kwargs):
-        val = apply(gridc.wxGrid_GetGridCornerLabelWindow,(self,) + _args, _kwargs)
-        return val
     def __repr__(self):
         return "<C wxGrid instance at %s>" % (self.this,)
 class wxGrid(wxGridPtr):
@@ -1484,38 +1446,6 @@ class wxGridRangeSelectEvent(wxGridRangeSelectEventPtr):
 
 
 
-class wxGridEditorCreatedEventPtr(wxCommandEventPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def GetRow(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridEditorCreatedEvent_GetRow,(self,) + _args, _kwargs)
-        return val
-    def GetCol(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridEditorCreatedEvent_GetCol,(self,) + _args, _kwargs)
-        return val
-    def GetControl(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridEditorCreatedEvent_GetControl,(self,) + _args, _kwargs)
-        return val
-    def SetRow(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridEditorCreatedEvent_SetRow,(self,) + _args, _kwargs)
-        return val
-    def SetCol(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridEditorCreatedEvent_SetCol,(self,) + _args, _kwargs)
-        return val
-    def SetControl(self, *_args, **_kwargs):
-        val = apply(gridc.wxGridEditorCreatedEvent_SetControl,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxGridEditorCreatedEvent instance at %s>" % (self.this,)
-class wxGridEditorCreatedEvent(wxGridEditorCreatedEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(gridc.new_wxGridEditorCreatedEvent,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
 
 
 #-------------- FUNCTION WRAPPERS ------------------
@@ -1557,7 +1487,6 @@ wxEVT_GRID_CELL_CHANGE = gridc.wxEVT_GRID_CELL_CHANGE
 wxEVT_GRID_SELECT_CELL = gridc.wxEVT_GRID_SELECT_CELL
 wxEVT_GRID_EDITOR_SHOWN = gridc.wxEVT_GRID_EDITOR_SHOWN
 wxEVT_GRID_EDITOR_HIDDEN = gridc.wxEVT_GRID_EDITOR_HIDDEN
-wxEVT_GRID_EDITOR_CREATED = gridc.wxEVT_GRID_EDITOR_CREATED
 
 
 #-------------- USER INCLUDE -----------------------
@@ -1569,7 +1498,6 @@ wxEVT_GRID_EDITOR_CREATED = gridc.wxEVT_GRID_EDITOR_CREATED
 wx.wxGridEventPtr                  = wxGridEventPtr
 wx.wxGridSizeEventPtr              = wxGridSizeEventPtr
 wx.wxGridRangeSelectEventPtr       = wxGridRangeSelectEventPtr
-wx.wxGridEditorCreatedEventPtr     = wxGridEditorCreatedEventPtr
 wx.wxGridCellRendererPtr           = wxGridCellRendererPtr
 wx.wxPyGridCellRendererPtr         = wxPyGridCellRendererPtr
 wx.wxGridCellEditorPtr             = wxGridCellEditorPtr

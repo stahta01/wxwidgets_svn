@@ -28,7 +28,6 @@ class WXDLLEXPORT wxIcon;
 class WXDLLEXPORT wxMask;
 class WXDLLEXPORT wxCursor;
 class WXDLLEXPORT wxControl;
-class WXDLLEXPORT wxImage;
 
 // ----------------------------------------------------------------------------
 // Bitmap data
@@ -83,19 +82,13 @@ public:
     wxBitmap(char **data) { CreateFromXpm((const char **)data); }
 
     // Load a file or resource
-    wxBitmap(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_BMP_RESOURCE);
+    wxBitmap(const wxString& name, long type = wxBITMAP_TYPE_BMP_RESOURCE);
 
     // New constructor for generalised creation from data
     wxBitmap(void *data, long type, int width, int height, int depth = 1);
 
     // If depth is omitted, will create a bitmap compatible with the display
     wxBitmap(int width, int height, int depth = -1);
-
-#if wxUSE_IMAGE
-    // Convert from wxImage:
-    wxBitmap(const wxImage& image, int depth = -1)
-        { (void)CreateFromImage(image, depth); }
-#endif // wxUSE_IMAGE
 
     // we must have this, otherwise icons are silently copied into bitmaps using
     // the copy ctor but the resulting bitmap is invalid!
@@ -124,13 +117,9 @@ public:
 
     virtual ~wxBitmap();
 
-#if wxUSE_IMAGE
-    wxImage ConvertToImage() const;
-#endif // wxUSE_IMAGE
-
     // get the given part of bitmap
     wxBitmap GetSubBitmap( const wxRect& rect ) const;
-
+ 
     // copies the contents and mask of the given (colour) icon to the bitmap
     bool CopyFromIcon(const wxIcon& icon);
 
@@ -196,11 +185,6 @@ protected:
 
     // creates the bitmap from XPM data, supposed to be called from ctor
     bool CreateFromXpm(const char **bits);
-
-#if wxUSE_IMAGE
-    // creates the bitmap from wxImage, supposed to be called from ctor
-    bool CreateFromImage(const wxImage& image, int depth);
-#endif // wxUSE_IMAGE
 
 private:
 #ifdef __WIN32__

@@ -18,7 +18,6 @@
 #endif
 
 #include "wx/utils.h"
-
 /* This is a small class which can be used by all ports
    to temporarily suspend the busy cursor. Useful in modal
    dialogs.
@@ -44,7 +43,6 @@ public:
         if( wxIsBusy() )
         {
             wxSetCursor( wxBusyCursor::GetStoredCursor() );
-            wxYield();
         }
     }
     ~wxBusyCursorSuspender()
@@ -52,7 +50,6 @@ public:
         if( wxIsBusy() )
         {
             wxSetCursor( wxBusyCursor::GetBusyCursor() );
-            wxYield();
         }
     }
 };

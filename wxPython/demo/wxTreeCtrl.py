@@ -6,14 +6,13 @@ import string
 #---------------------------------------------------------------------------
 
 class MyTreeCtrl(wxTreeCtrl):
-    def __init__(self, parent, id, pos, size, style, log):
+    def __init__(self, parent, id, pos, size, style):
         wxTreeCtrl.__init__(self, parent, id, pos, size, style)
-        self.log = log
+
 
     def OnCompareItems(self, item1, item2):
         t1 = self.GetItemText(item1)
         t2 = self.GetItemText(item2)
-        self.log.WriteText('compare: ' + t1 + ' <> ' + t2 + '\n')
         if t1 < t2: return -1
         if t1 == t2: return 0
         return 1
@@ -30,17 +29,14 @@ class TestTreeCtrlPanel(wxPanel):
         tID = NewId()
 
         self.tree = MyTreeCtrl(self, tID, wxDefaultPosition, wxDefaultSize,
-                               wxTR_HAS_BUTTONS | wxTR_EDIT_LABELS# | wxTR_MULTIPLE
-                               , self.log)
+                               wxTR_HAS_BUTTONS | wxTR_EDIT_LABELS)# | wxTR_MULTIPLE)
 
-
-        #import images
         #il = wxImageList(16, 16)
-        #idx1 = il.Add(images.getSmilesBitmap())
-        #idx2 = il.Add(images.getOpenBitmap())
-        #idx3 = il.Add(images.getNewBitmap())
-        #idx4 = il.Add(images.getCopyBitmap())
-        #idx5 = il.Add(images.getPasteBitmap())
+        #idx1 = il.Add(wxBitmap('bitmaps/smiles.bmp', wxBITMAP_TYPE_BMP))
+        #idx2 = il.Add(wxBitmap('bitmaps/open.bmp', wxBITMAP_TYPE_BMP))
+        #idx3 = il.Add(wxBitmap('bitmaps/new.bmp', wxBITMAP_TYPE_BMP))
+        #idx4 = il.Add(wxBitmap('bitmaps/copy.bmp', wxBITMAP_TYPE_BMP))
+        #idx5 = il.Add(wxBitmap('bitmaps/paste.bmp', wxBITMAP_TYPE_BMP))
 
         #self.tree.SetImageList(il)
         #self.il = il
@@ -176,4 +172,29 @@ def runTest(frame, nb, log):
 overview = """\
 A tree control presents information as a hierarchy, with items that may be expanded to show further items. Items in a tree control are referenced by wxTreeItemId handles.
 
+wxTreeCtrl()
+-------------------------
+
+Default constructor.
+
+wxTreeCtrl(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listCtrl")
+
+Constructor, creating and showing a tree control.
+
+Parameters
+-------------------
+
+parent = Parent window. Must not be NULL.
+
+id = Window identifier. A value of -1 indicates a default value.
+
+pos = Window position.
+
+size = Window size. If the default size (-1, -1) is specified then the window is sized appropriately.
+
+style = Window style. See wxTreeCtrl.
+
+validator = Window validator.
+
+name = Window name.
 """

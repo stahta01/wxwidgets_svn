@@ -17,7 +17,7 @@ from controls import *
 
 from events import *
 import wx
-class wxColourDataPtr(wxObjectPtr):
+class wxColourDataPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -29,7 +29,7 @@ class wxColourDataPtr(wxObjectPtr):
         return val
     def GetColour(self, *_args, **_kwargs):
         val = apply(cmndlgsc.wxColourData_GetColour,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
+        if val: val = wxColourPtr(val) 
         return val
     def GetCustomColour(self, *_args, **_kwargs):
         val = apply(cmndlgsc.wxColourData_GetCustomColour,(self,) + _args, _kwargs)
@@ -226,7 +226,7 @@ class wxTextEntryDialog(wxTextEntryDialogPtr):
 
 
 
-class wxFontDataPtr(wxObjectPtr):
+class wxFontDataPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -241,7 +241,7 @@ class wxFontDataPtr(wxObjectPtr):
         return val
     def GetColour(self, *_args, **_kwargs):
         val = apply(cmndlgsc.wxFontData_GetColour,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
+        if val: val = wxColourPtr(val) 
         return val
     def GetChosenFont(self, *_args, **_kwargs):
         val = apply(cmndlgsc.wxFontData_GetChosenFont,(self,) + _args, _kwargs)

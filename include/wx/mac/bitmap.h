@@ -27,12 +27,11 @@ class WXDLLEXPORT wxBitmap;
 class WXDLLEXPORT wxBitmapHandler;
 class WXDLLEXPORT wxIcon;
 class WXDLLEXPORT wxCursor;
-class WXDLLEXPORT wxImage;
 
-GWorldPtr 	wxMacCreateGWorld( int width , int height , int depth ) ;
-void 		wxMacDestroyGWorld( GWorldPtr gw ) ;
+GWorldPtr 	wxMacCreateGWorld( int height , int widtdh , int depth ) ;
+void 				wxMacDestroyGWorld( GWorldPtr gw ) ;
 PicHandle 	wxMacCreatePict( GWorldPtr gw , GWorldPtr mask = NULL ) ;
-void 		wxMacSetColorTableEntry( CTabHandle newColors , int index , int red , int green ,  int blue ) ;
+void 				wxMacSetColorTableEntry( CTabHandle newColors , int index , int red , int green ,  int blue ) ;
 CTabHandle 	wxMacCreateColorTable( int numColors ) ;
 
 // A mask is a mono bitmap used for drawing bitmaps
@@ -62,14 +61,13 @@ public:
   bool Create(const wxBitmap& bitmap);
 
   // Implementation
-  bool PointMasked(int x, int y);
   inline WXHBITMAP GetMaskBitmap() const { return m_maskBitmap; }
   inline void SetMaskBitmap(WXHBITMAP bmp) { m_maskBitmap = bmp; }
 protected:
   WXHBITMAP m_maskBitmap;
 };
 
-enum { kMacBitmapTypeUnknownType , kMacBitmapTypeGrafWorld, kMacBitmapTypePict , kMacBitmapTypeIcon } ;
+enum { kMacBitmapTypeUnknownType , kMacBitmapTypeGrafWorld, kMacBitmapTypePict } ;
 
 class WXDLLEXPORT wxBitmapRefData: public wxGDIRefData
 {
@@ -92,7 +90,6 @@ public:
 	int						m_bitmapType ;
 	PicHandle			m_hPict ;
 	WXHBITMAP     m_hBitmap;
-	WXHICON m_hIcon ;
   wxMask *      m_bitmapMask; // Optional mask
 };
 
@@ -103,9 +100,6 @@ class WXDLLEXPORT wxBitmapHandler: public wxObject
   DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
 public:
   wxBitmapHandler() { m_name = ""; m_extension = ""; m_type = 0; };
-#ifdef __WXMAC_X__
-  virtual ~wxBitmapHandler() {}  // Added min for Mac X
-#endif
 
   virtual bool Create(wxBitmap *bitmap, void *data, long flags, int width, int height, int depth = 1);
   virtual bool LoadFile(wxBitmap *bitmap, const wxString& name, long flags,
@@ -143,9 +137,7 @@ public:
   wxBitmap(const char bits[], int width, int height, int depth = 1);
 
   // Initialize with XPM data
-  bool CreateFromXpm(const char **bits);
-  wxBitmap(const char **bits);
-  wxBitmap(char **bits);
+  wxBitmap(const char **data);
 
   // Load a file or resource
   wxBitmap(const wxString& name, long type = wxBITMAP_TYPE_PICT_RESOURCE);
@@ -155,41 +147,30 @@ public:
 
   // If depth is omitted, will create a bitmap compatible with the display
   wxBitmap(int width, int height, int depth = -1);
-  
-  // Convert from wxImage:
-  wxBitmap(const wxImage& image, int depth = -1);
-  
   ~wxBitmap();
-  
-  wxImage ConvertToImage() const;
-
-  // get the given part of bitmap
-  wxBitmap GetSubBitmap( const wxRect& rect ) const;
 
   virtual bool Create(int width, int height, int depth = -1);
   virtual bool Create(void *data, long type, int width, int height, int depth = 1);
   virtual bool LoadFile(const wxString& name, long type = wxBITMAP_TYPE_BMP_RESOURCE);
   virtual bool SaveFile(const wxString& name, int type, const wxPalette *cmap = NULL);
 
-  bool Ok() const;
-  int GetWidth() const;
-  int GetHeight() const;
-  int GetDepth() const;
-  int GetQuality() const;
+  inline bool Ok() const { return (M_BITMAPDATA && M_BITMAPDATA->m_ok); }
+  inline int GetWidth() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_width : 0); }
+  inline int GetHeight() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_height : 0); }
+  inline int GetDepth() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_depth : 0); }
+  inline int GetQuality() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_quality : 0); }
   void SetWidth(int w);
   void SetHeight(int h);
   void SetDepth(int d);
   void SetQuality(int q);
   void SetOk(bool isOk);
 
-  wxPalette* GetPalette() const;
+  inline wxPalette* GetPalette() const { return (M_BITMAPDATA ? (& M_BITMAPDATA->m_bitmapPalette) : (wxPalette*) NULL); }
   void SetPalette(const wxPalette& palette);
 
-  wxMask *GetMask() const;
+  inline wxMask *GetMask() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_bitmapMask : (wxMask*) NULL); }
   void SetMask(wxMask *mask) ;
 
-  int GetBitmapType() const;
-  
   inline wxBitmap& operator = (const wxBitmap& bitmap) { if (*this == bitmap) return (*this); Ref(bitmap); return *this; }
   inline bool operator == (const wxBitmap& bitmap) { return m_refData == bitmap.m_refData; }
   inline bool operator != (const wxBitmap& bitmap) { return m_refData != bitmap.m_refData; }
@@ -211,12 +192,7 @@ protected:
   // TODO: Implementation
 public:
   void SetHBITMAP(WXHBITMAP bmp);
-  WXHBITMAP GetHBITMAP() const;
-  void SetHICON(WXHICON ico);
-  inline WXHICON GetHICON() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_hIcon : 0); }
-  
-  PicHandle GetPict() const;
-
+  inline WXHBITMAP GetHBITMAP() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_hBitmap : 0); }
   bool FreeResource(bool force = FALSE);
 };
 #endif

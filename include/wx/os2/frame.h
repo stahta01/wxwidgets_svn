@@ -140,19 +140,9 @@ public:
     void   SetToolTipCtrl(WXHWND hHwndTT) { m_hWndToolTip = hHwndTT; }
 #endif // tooltips
 
-    //
-    // Called by wxWindow whenever it gets focus
-    //
-    void SetLastFocus(wxWindow* pWin) { m_pWinLastFocused = pWin; }
-    wxWindow *GetLastFocus(void) const { return m_pWinLastFocused; }
-
     void      SetClient(WXHWND    c_Hwnd);
     void      SetClient(wxWindow* c_Window);
     wxWindow *GetClient();
-    HWND      GetFrame(void) const { return m_hFrame; }
-
- friend MRESULT EXPENTRY wxFrameWndProc(HWND  hWnd,ULONG ulMsg, MPARAM wParam, MPARAM lParam);
- friend MRESULT EXPENTRY wxFrameMainWndProc(HWND  hWnd,ULONG ulMsg, MPARAM wParam, MPARAM lParam);
 
 protected:
     // common part of all ctors
@@ -219,11 +209,8 @@ private:
 #endif // tooltips
 
     //
-    // Handles to child windows of the Frame, and the frame itself,
-    // that we don't have child objects for (m_hWnd in wxWindow is the
-    // handle of the Frame's client window!
+    // Handles to child windows of the Frame that we don't have child objects for
     //
-    WXHWND                          m_hFrame;
     WXHWND                          m_hTitleBar;
     WXHWND                          m_hHScroll;
     WXHWND                          m_hVScroll;

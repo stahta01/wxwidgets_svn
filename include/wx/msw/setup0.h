@@ -266,8 +266,6 @@
 // Compile in wxLibrary class for run-time DLL loading and function calling.
 // Required by wxUSE_DIALUP_MANAGER.
 //
-// This setting is for Win32 only
-//
 // Default is 1.
 //
 // Recommended setting: 1
@@ -275,6 +273,8 @@
 
 // Set to 1 to use socket classes
 #define wxUSE_SOCKETS       1
+
+#if wxUSE_GUI
 
 // Set to 1 to enable virtual file systems (required by wxHTML)
 #define wxUSE_FILESYSTEM    1
@@ -291,6 +291,18 @@
 // Set to 1 to compile wxZlibInput/OutputStream classes. Also required by
 // wxUSE_LIBPNG.
 #define wxUSE_ZLIB          1
+
+#else // !wxUSE_GUI
+
+// although it is possible to compile all of those in wxBase, this is not done
+// by default
+#define wxUSE_FILESYSTEM    0
+#define wxUSE_FS_ZIP        0
+#define wxUSE_FS_INET       0
+#define wxUSE_ZIPSTREAM     0
+#define wxUSE_ZLIB          0
+
+#endif // wxUSE_GUI/!wxUSE_GUI
 
 // If enabled, the code written by Apple will be used to write, in a portable
 // way, float on the disk. See extended.c for the license which is different
@@ -313,15 +325,6 @@
 
 // i18n support: _() macro, wxLocale class. Requires wxTextFile.
 #define wxUSE_INTL                1
-
-// Joystick support class
-#define wxUSE_JOYSTICK            1
-
-// Miscellaneous geometry code: needed for Canvas library
-#define wxUSE_GEOMETRY            1
-
-// Use menus
-#define wxUSE_MENUS               1
 
 // ----------------------------------------------------------------------------
 // Optional controls
@@ -374,7 +377,6 @@
 #define wxUSE_SPINCTRL     1
 #define wxUSE_STATLINE     1
 #define wxUSE_STATUSBAR    1
-#define wxUSE_TOGGLEBTN    1        // requires wxButton
 #define wxUSE_TOOLTIPS     1        // wxToolTip and wxWindow::SetToolTip()
 
 // Two status bar implementations are available under Win32: the generic one
@@ -491,6 +493,13 @@
 // smaller library.
 #define wxUSE_HTML          1
 
+// wxPlot is a class to display functions plots in wxWindow.
+//
+// Default is 1.
+//
+// Recommended setting: 1
+#define wxUSE_PLOT           1
+
 // OpenGL canvas
 #define wxUSE_GLCANVAS       0
 
@@ -500,15 +509,6 @@
 // ----------------------------------------------------------------------------
 // miscellaneous settings
 // ----------------------------------------------------------------------------
-
-// wxSingleInstanceChecker class allows to verify at startup if another program
-// instance is running (it is only available under Win32)
-//
-// Default is 1
-//
-// Recommended setting: 1 (the class is tiny, disabling it won't save much
-// space)
-#define wxUSE_SNGLINST_CHECKER  1
 
 #define wxUSE_IPC         1
                                 // 0 for no interprocess comms
@@ -530,6 +530,11 @@
 #define wxUSE_DRAG_AND_DROP 1
                                 // 0 for no drag and drop
 
+#define wxUSE_XPM_IN_MSW   1
+                                // 0 for no XPM support in wxBitmap.
+                                // Default is 1, as XPM is now fully
+                                // supported this makes easier the issue
+                                // of portable icons and bitmaps.
 #define wxUSE_IMAGE_LOADING_IN_MSW        1
                                 // Use dynamic DIB loading/saving code in utils/dib under MSW.
 #define wxUSE_RESOURCE_LOADING_IN_MSW     1
@@ -537,9 +542,6 @@
                                 // under MSW.
 #define wxUSE_WX_RESOURCES        1
                                 // Use .wxr resource mechanism (requires PrologIO library)
-
-#define wxUSE_MOUSEWHEEL        1
-                                // Include mouse wheel support
 
 // ----------------------------------------------------------------------------
 // postscript support settings
@@ -564,10 +566,10 @@
 
 // For backward compatibility reasons, this parameter now only controls the
 // default scrolling method used by cursors.  This default behavior can be
-// overriden by setting the second param of wxDB::wxDbGetConnection() or
+// overriden by setting the second param of wxDB::wxDbGetConnection() or 
 // wxDb() constructor to indicate whether the connection (and any wxDbTable()s
-// that use the connection) should support forward only scrolling of cursors,
-// or both forward and backward support for backward scrolling cursors is
+// that use the connection) should support forward only scrolling of cursors, 
+// or both forward and backward support for backward scrolling cursors is 
 // dependent on the data source as well as the ODBC driver being used.
 #define wxODBC_FWD_ONLY_CURSORS	 1
 
@@ -610,9 +612,6 @@
 // Some formats require an extra library which is included in wxWin sources
 // which is mentioned if it is the case.
 
-// Set to 1 for wxImage support (recommended).
-#define wxUSE_IMAGE         1
-
 // Set to 1 for PNG format support (requires libpng). Also requires wxUSE_ZLIB.
 #define wxUSE_LIBPNG        1
 
@@ -630,9 +629,6 @@
 
 // Set to 1 for PCX format support
 #define wxUSE_PCX           1
-
-// Set to 1 for XPM format support
-#define wxUSE_XPM           1
 
 // ----------------------------------------------------------------------------
 // Windows-only settings
@@ -689,15 +685,9 @@
 // Recommended setting: 1, only set it to 0 if your compiler doesn't have
 //                      or can't compile <richedit.h>
 #if defined(__WIN95__) && !defined(__TWIN32__) && !defined(__GNUWIN32_OLD__)
-#define wxUSE_RICHEDIT  1
-
-// TODO:  This should be ifdef'ed for any compilers that don't support
-//        RichEdit 2.0 but do have RichEdit 1.0...
-#define wxUSE_RICHEDIT2 1
-
+#define wxUSE_RICHEDIT 1
 #else
-#define wxUSE_RICHEDIT  0
-#define wxUSE_RICHEDIT2 0
+#define wxUSE_RICHEDIT 0
 #endif
 
 // Set this to 1 to enable support for the owner-drawn menu and listboxes. This
@@ -747,6 +737,9 @@
 
 #undef  wxUSE_DEBUG_NEW_ALWAYS
 #define wxUSE_DEBUG_NEW_ALWAYS          0
+
+#undef wxUSE_MS_HTML_HELP
+#define wxUSE_MS_HTML_HELP 0
 
 // Cygwin betas don't have wcslen
 #if defined(__CYGWIN__) || defined(__CYGWIN32__)
@@ -838,6 +831,12 @@
 #define wxUSE_LIBJPEG 0
 #endif
 
+#if defined(__BORLANDC__)
+// Need a BC++-specific htmlhelp.lib before we can enable this
+#undef wxUSE_MS_HTML_HELP
+#define wxUSE_MS_HTML_HELP 0
+#endif
+
 // wxUSE_DEBUG_NEW_ALWAYS = 1 not compatible with BC++ in DLL mode
 #if defined(__BORLANDC__) && (defined(WXMAKINGDLL) || defined(WXUSINGDLL))
 #undef wxUSE_DEBUG_NEW_ALWAYS
@@ -849,6 +848,9 @@
 #undef  wxUSE_GLCANVAS
 #define wxUSE_GLCANVAS 0
 */
+
+#undef wxUSE_MS_HTML_HELP
+#define wxUSE_MS_HTML_HELP 0
 
 #undef wxUSE_WCHAR_T
 #define wxUSE_WCHAR_T 0

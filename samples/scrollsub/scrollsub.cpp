@@ -357,8 +357,8 @@ MyFrame::MyFrame()
                   wxPoint(20,20), wxSize(470,500) )
 {
     wxMenu *file_menu = new wxMenu();
-    file_menu->Append( ID_ABOUT, "&About...");
-    file_menu->Append( ID_FULL, "&Full screen on/off");
+    file_menu->Append( ID_ABOUT, "&About..");
+    file_menu->Append( ID_FULL, "&Full screen..");
     file_menu->Append( ID_QUIT, "E&xit\tAlt-X");
 
     wxMenuBar *menu_bar = new wxMenuBar();
@@ -392,7 +392,9 @@ void MyFrame::OnQuit( wxCommandEvent &WXUNUSED(event) )
 
 void MyFrame::OnFullScreen( wxCommandEvent &WXUNUSED(event) )
 {
-   ShowFullScreen( !IsFullScreen(), wxFULLSCREEN_NOBORDER|wxFULLSCREEN_NOCAPTION );
+#ifdef __MSW__
+   ShowFullScreen( TRUE, wxFULLSCREEN_NOBORDER|wxFULLSCREEN_NOCAPTION );
+#endif
 }
 
 void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )

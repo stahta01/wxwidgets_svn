@@ -265,7 +265,6 @@ bool wxMenu::DoInsertOrAppend(
 {
     ERRORID                         vError;
     wxString                        sError;
-    char                            zMsg[128];
 #if wxUSE_ACCEL
     UpdateAccel(pItem);
 #endif // wxUSE_ACCEL
@@ -326,14 +325,12 @@ bool wxMenu::DoInsertOrAppend(
     {
         //
         // Want to get {Measure|Draw}Item messages?
-        // item draws itself, passing pointer to data doesn't work in OS/2
+        // item draws itself, pass pointer to it in data parameter
         // Will eventually need to set the image handle somewhere into vItem.hItem
         //
         rItem.afStyle |= MIS_OWNERDRAW;
-        pData = (BYTE*)NULL;
-        rItem.hItem = (HBITMAP)pItem->GetBitmap().GetHBITMAP();
-        pItem->m_vMenuData.afStyle = rItem.afStyle;
-        pItem->m_vMenuData.hItem = rItem.hItem;
+        pData = (BYTE*)pItem;
+        // vItem.hItem = ????
     }
     else
 #endif
@@ -361,21 +358,6 @@ bool wxMenu::DoInsertOrAppend(
                               ,(MPARAM)&rItem
                               ,(MPARAM)pData
                              );
-#if wxUSE_OWNER_DRAWN
-    if (pItem->IsOwnerDrawn())
-    {
-        BOOL                       rc;
-        MENUITEM                   vMenuItem;
-
-        ::WinSendMsg( GetHmenu()
-                     ,MM_QUERYITEM
-                     ,MPFROM2SHORT( (USHORT)pItem->GetId()
-                                   ,(USHORT)(FALSE)
-                                  )
-                     ,&vMenuItem
-                    );
-    }
-#endif
     if (rc == MIT_MEMERROR || rc == MIT_ERROR)
     {
         vError = ::WinGetLastError(vHabmain);
@@ -389,7 +371,7 @@ bool wxMenu::DoInsertOrAppend(
         //
         // If we're already attached to the menubar, we must update it
         //
-        if (IsAttached() && m_menuBar->IsAttached())
+        if (IsAttached())
         {
             m_menuBar->Refresh();
         }
@@ -460,7 +442,7 @@ wxMenuItem* wxMenu::DoRemove(
                  ,MPFROM2SHORT(pItem->GetId(), TRUE)
                  ,(MPARAM)0
                 );
-    if (IsAttached() && m_menuBar->IsAttached())
+    if (IsAttached())
     {
         //
         // Otherwise, the chane won't be visible
@@ -635,42 +617,6 @@ wxWindow* wxMenu::GetWindow() const
 
     return NULL;
 } // end of wxMenu::GetWindow
-
-// recursive search for item by id
-wxMenuItem* wxMenu::FindItem(
-  int                               nItemId
-, ULONG                             hItem
-, wxMenu**                          ppItemMenu
-) const
-{
-    if ( ppItemMenu )
-        *ppItemMenu = NULL;
-
-    wxMenuItem*                     pItem = NULL;
-
-    for ( wxMenuItemList::Node *node = m_items.GetFirst();
-          node && !pItem;
-          node = node->GetNext() )
-    {
-        pItem = node->GetData();
-
-        if ( pItem->GetId() == nItemId && pItem->m_vMenuData.hItem == hItem)
-        {
-            if ( ppItemMenu )
-                *ppItemMenu = (wxMenu *)this;
-        }
-        else if ( pItem->IsSubMenu() )
-        {
-            pItem = pItem->GetSubMenu()->FindItem(nItemId, hItem, ppItemMenu);
-        }
-        else
-        {
-            // don't exit the loop
-            pItem = NULL;
-        }
-    }
-    return pItem;
-} // end of wxMenu::FindItem
 
 // ---------------------------------------------------------------------------
 // Menu Bar
@@ -1144,25 +1090,4 @@ wxMenuItem* wxMenuBar::FindItem(
     return pItem;
 } // end of wxMenuBar::FindItem
 
-wxMenuItem* wxMenuBar::FindItem(
-  int                               nId
-, ULONG                             hItem
-, wxMenu**                          ppItemMenu
-) const
-{
-    if (ppItemMenu)
-        *ppItemMenu = NULL;
-
-    wxMenuItem*                     pItem = NULL;
-    size_t                          nCount = GetMenuCount();
-
-    for (size_t i = 0; !pItem && (i < nCount); i++)
-    {
-        pItem = m_menus[i]->FindItem( nId
-                                     ,hItem
-                                     ,ppItemMenu
-                                    );
-    }
-    return pItem;
-} // end of wxMenuBar::FindItem
 

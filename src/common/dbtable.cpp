@@ -24,39 +24,64 @@
 // SYNOPSIS START
 // SYNOPSIS STOP
 */
-#ifdef __GNUG__
-    #pragma implementation "dbtable.h"
-#endif
 
+// Use this line for wxWindows v1.x
+//#include "wx_ver.h"
+// Use this line for wxWindows v2.x
 #include  "wx/wxprec.h"
+#include "wx/version.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
+#if wxMAJOR_VERSION == 2
+    #ifdef __GNUG__
+        #pragma implementation "dbtable.h"
+    #endif
 #endif
 
 #ifdef DBDEBUG_CONSOLE
-    #include "iostream.h"
     #include "wx/ioswrap.h"
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/string.h"
-    #include "wx/object.h"
-    #include "wx/list.h"
-    #include "wx/utils.h"
-    #include "wx/msgdlg.h"
-    #include "wx/log.h"
+
+#ifdef    __BORLANDC__
+    #pragma hdrstop
+#endif  //__BORLANDC__
+
+#if wxMAJOR_VERSION == 2
+    #ifndef WX_PRECOMP
+        #include "wx/string.h"
+        #include "wx/object.h"
+        #include "wx/list.h"
+        #include "wx/utils.h"
+        #include "wx/msgdlg.h"
+        #include "wx/log.h"
+    #endif
+    #include "wx/filefn.h"
 #endif
-#include "wx/filefn.h"
+
+#if wxMAJOR_VERSION == 1
+#   if defined(wx_msw) || defined(wx_x)
+#       ifdef WX_PRECOMP
+#           include "wx_prec.h"
+#       else
+#           include "wx.h"
+#       endif
+#   endif
+#   define wxUSE_ODBC 1
+#endif
+
 
 #if wxUSE_ODBC
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <assert.h>
+#include <assert.h>
 
-#include "wx/dbtable.h"
+#if   wxMAJOR_VERSION == 1
+    #include "table.h"
+#elif wxMAJOR_VERSION == 2
+    #include "wx/dbtable.h"
+#endif
 
 #ifdef __UNIX__
 // The HPUX preprocessor lines below were commented out on 8/20/97
@@ -77,67 +102,14 @@ ULONG lastTableID = 0;
 #endif
 
 
-/********** wxDbColDef::wxDbColDef() Constructor **********/
-wxDbColDef::wxDbColDef()
+/********** wxDbTable::wxDbTable() **********/
+wxDbTable::wxDbTable(wxDb *pwxDb, const char *tblName, const int nCols,
+                    const char *qryTblName, bool qryOnly, const char *tblPath)
 {
-    Initialize();
-}  // Constructor
-
-
-bool wxDbColDef::Initialize()
-{
-    ColName[0]      = 0;
-    DbDataType      = DB_DATA_TYPE_INTEGER;
-    SqlCtype        = SQL_C_LONG;
-    PtrDataObj      = NULL;
-    SzDataObj       = 0;
-    KeyField        = FALSE;
-    Updateable      = FALSE;
-    InsertAllowed   = FALSE;
-    DerivedCol      = FALSE;
-    CbValue         = 0;
-    Null = FALSE;
-
-    return TRUE;
-}  // wxDbColDef::Initialize()
-
-
-/********** wxDbTable::wxDbTable() Constructor **********/
-wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-                    const wxString &qryTblName, bool qryOnly, const wxString &tblPath)
-{
-    if (!initialize(pwxDb, tblName, numColumns, qryTblName, qryOnly, tblPath))
-        cleanup();
-}  // wxDbTable::wxDbTable()
-
-
-/***** DEPRECATED: use wxDbTable::wxDbTable() format above *****/
-wxDbTable::wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-                    const wxChar *qryTblName, bool qryOnly, const wxString &tblPath)
-{
-    wxString tempQryTblName;
-    tempQryTblName = qryTblName;
-    if (!initialize(pwxDb, tblName, numColumns, tempQryTblName, qryOnly, tblPath))
-        cleanup();
-}  // wxDbTable::wxDbTable()
-
-
-/********** wxDbTable::~wxDbTable() **********/
-wxDbTable::~wxDbTable()
-{
-    this->cleanup();
-}  // wxDbTable::~wxDbTable()
-
-
-bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-                    const wxString &qryTblName, bool qryOnly, const wxString &tblPath)
-{
-    // Initializing member variables
     pDb                 = pwxDb;                    // Pointer to the wxDb object
     henv                = 0;
     hdbc                = 0;
     hstmt               = 0;
-    m_hstmtGridQuery               = 0;
     hstmtDefault        = 0;                        // Initialized below
     hstmtCount          = 0;                        // Initialized first time it is needed
     hstmtInsert         = 0;
@@ -146,40 +118,34 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     hstmtInternal       = 0;
     colDefs             = 0;
     tableID             = 0;
-    noCols              = numColumns;               // Number of cols in the table
-    where.Empty();                                  // Where clause
-    orderBy.Empty();                                // Order By clause
-    from.Empty();                                   // From clause
+    noCols              = nCols;                    // No. of cols in the table
+    where               = "";                       // Where clause
+    orderBy             = "";                       // Order By clause
+    from                = "";                       // From clause
     selectForUpdate     = FALSE;                    // SELECT ... FOR UPDATE; Indicates whether to include the FOR UPDATE phrase
     queryOnly           = qryOnly;
     insertable          = TRUE;
-    tablePath.Empty();
-    tableName.Empty();
-    queryTableName.Empty();
 
-    wxASSERT(tblName.Length());
-    wxASSERT(pDb);
+    assert (tblName);
 
-    if (!pDb)
-        return FALSE;
-
-    tableName = tblName;                        // Table Name
-    if (tblPath.Length())
-        tablePath = tblPath;                    // Table Path - used for dBase files
-    else
-        tablePath.Empty();
+    wxStrcpy(tableName, tblName);               // Table Name
+    if (tblPath)
+        wxStrcpy(tablePath, tblPath);           // Table Path - used for dBase files
     
-    if (qryTblName.Length())                    // Name of the table/view to query
-        queryTableName = qryTblName;
+    if (qryTblName)                             // Name of the table/view to query
+        wxStrcpy(queryTableName, qryTblName);
     else
-        queryTableName = tblName;
+        wxStrcpy(queryTableName, tblName);
+    
+    if (!pDb)
+        return;
     
     pDb->incrementTableCount();
     
     wxString s;
     tableID = ++lastTableID;
-    s.Printf(wxT("wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]"), tblName.c_str(), tableID, pDb);
-
+    s.sprintf("wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]", tblName,tableID,pDb);
+    
 #ifdef __WXDEBUG__
     wxTablesInUse *tableInUse;
     tableInUse            = new wxTablesInUse();
@@ -189,7 +155,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     TablesInUse.Append(tableInUse);
 #endif
     
-    pDb->WriteSqlLog(s);
+    pDb->WriteSqlLog(s.c_str());
     
     // Grab the HENV and HDBC from the wxDb object
     henv = pDb->GetHENV();
@@ -197,7 +163,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     
     // Allocate space for column definitions
     if (noCols)
-        colDefs = new wxDbColDef[noCols];  // Points to the first column definition
+        colDefs = new wxDbColDef[noCols];  // Points to the first column defintion
     
     // Allocate statement handles for the table
     if (!queryOnly)
@@ -223,7 +189,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     { 
         // Check to see if cursor type is supported
         pDb->GetNextError(henv, hdbc, hstmtInternal);
-        if (! wxStrcmp(pDb->sqlState, wxT("01S02")))  // Option Value Changed
+        if (! wxStrcmp(pDb->sqlState, "01S02"))  // Option Value Changed
         {
             // Datasource does not support static cursors.  Driver
             // will substitute a cursor type.  Call SQLGetStmtOption()
@@ -231,20 +197,20 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
             if (SQLGetStmtOption(hstmtInternal, SQL_CURSOR_TYPE, &cursorType) != SQL_SUCCESS)
                 pDb->DispAllErrors(henv, hdbc, hstmtInternal);
 #ifdef DBDEBUG_CONSOLE
-            cout << wxT("Static cursor changed to: ");
+            cout << "Static cursor changed to: ";
             switch(cursorType)
             {
             case SQL_CURSOR_FORWARD_ONLY:
-                cout << wxT("Forward Only");
+                cout << "Forward Only";
                 break;
             case SQL_CURSOR_STATIC:
-                cout << wxT("Static");
+                cout << "Static";
                 break;
             case SQL_CURSOR_KEYSET_DRIVEN:
-                cout << wxT("Keyset Driven");
+                cout << "Keyset Driven";
                 break;
             case SQL_CURSOR_DYNAMIC:
-                cout << wxT("Dynamic");
+                cout << "Dynamic";
                 break;
             }
             cout << endl << endl;
@@ -258,7 +224,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
                 {
                     // Should never happen
                     pDb->GetNextError(henv, hdbc, hstmtInternal);
-                    return FALSE;
+                    return;
                 }
             }
         }
@@ -270,7 +236,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     }
 #ifdef DBDEBUG_CONSOLE
     else
-        cout << wxT("Cursor Type set to STATIC") << endl << endl;
+        cout << "Cursor Type set to STATIC" << endl << endl;
 #endif
     
     if (!queryOnly)
@@ -288,21 +254,20 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     
     // Make the default cursor the active cursor
     hstmtDefault = GetNewCursor(FALSE,FALSE);
-    wxASSERT(hstmtDefault);
+    assert(hstmtDefault);
     hstmt = *hstmtDefault;
-
-    return TRUE;
-
-}  // wxDbTable::initialize()
+    
+}  // wxDbTable::wxDbTable()
 
 
-void wxDbTable::cleanup()
+/********** wxDbTable::~wxDbTable() **********/
+wxDbTable::~wxDbTable()
 {
     wxString s;
     if (pDb)
     {
-        s.Printf(wxT("wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]"), tableName.c_str(), tableID, pDb);
-        pDb->WriteSqlLog(s);
+        s.sprintf("wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]", tableName,tableID,pDb);
+        pDb->WriteSqlLog(s.c_str());
     }
 
 #ifdef __WXDEBUG__
@@ -319,7 +284,7 @@ void wxDbTable::cleanup()
             {
                 found = TRUE;
                 if (!TablesInUse.DeleteNode(pNode))
-                    wxLogDebug (s,wxT("Unable to delete node!"));
+                    wxLogDebug (s.c_str(),wxT("Unable to delete node!"));
             }
             else
                 pNode = pNode->Next();
@@ -327,8 +292,8 @@ void wxDbTable::cleanup()
         if (!found)
         {
             wxString msg;
-            msg.Printf(wxT("Unable to find the tableID in the linked\nlist of tables in use.\n\n%s"),s.c_str());
-            wxLogDebug (msg,wxT("NOTICE..."));
+            msg.sprintf(wxT("Unable to find the tableID in the linked\nlist of tables in use.\n\n%s"),s.c_str());
+            wxLogDebug (msg.c_str(),wxT("NOTICE..."));
         }
     }
 #endif
@@ -345,41 +310,20 @@ void wxDbTable::cleanup()
     if (!queryOnly)
     {
         if (hstmtInsert)
-        {
-/*
-ODBC 3.0 says to use this form
-            if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-*/
             if (SQLFreeStmt(hstmtInsert, SQL_DROP) != SQL_SUCCESS)
                 pDb->DispAllErrors(henv, hdbc);
-        }
 
         if (hstmtDelete)
-        {
-/*
-ODBC 3.0 says to use this form
-            if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-*/
             if (SQLFreeStmt(hstmtDelete, SQL_DROP) != SQL_SUCCESS)
-                pDb->DispAllErrors(henv, hdbc);
-        }
 
         if (hstmtUpdate)
-        {
-/*
-ODBC 3.0 says to use this form
-            if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-*/
             if (SQLFreeStmt(hstmtUpdate, SQL_DROP) != SQL_SUCCESS)
                 pDb->DispAllErrors(henv, hdbc);
-        }
     }
 
     if (hstmtInternal)
-    {
         if (SQLFreeStmt(hstmtInternal, SQL_DROP) != SQL_SUCCESS)
             pDb->DispAllErrors(henv, hdbc);
-    }
 
     // Delete dynamically allocated cursors
     if (hstmtDefault)
@@ -388,19 +332,88 @@ ODBC 3.0 says to use this form
     if (hstmtCount)
         DeleteCursor(hstmtCount);
 
-    if (m_hstmtGridQuery)
-        DeleteCursor(m_hstmtGridQuery);
+}  // wxDbTable::~wxDbTable()
 
-}  // wxDbTable::cleanup()
 
 
 /***************************** PRIVATE FUNCTIONS *****************************/
 
 
-/********** wxDbTable::bindParams() **********/
-bool wxDbTable::bindParams(bool forUpdate)
+
+/********** wxDbTable::bindInsertParams() **********/
+bool wxDbTable::bindInsertParams(void)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
+    if (queryOnly)
+        return(FALSE);
+
+    SWORD   fSqlType    = 0;
+    UDWORD  precision   = 0;
+    SWORD   scale       = 0;
+
+    // Bind each column (that can be inserted) of the table to a parameter marker
+    int i,colNo;
+    for (i = 0, colNo = 1; i < noCols; i++)
+    {
+        if (! colDefs[i].InsertAllowed)
+            continue;
+        switch(colDefs[i].DbDataType)
+        {
+            case DB_DATA_TYPE_VARCHAR:
+                fSqlType = pDb->GetTypeInfVarchar().FsqlType;      
+                precision = colDefs[i].SzDataObj;
+                scale = 0;
+                colDefs[i].CbValue = SQL_NTS;
+                break;
+            case DB_DATA_TYPE_INTEGER:
+                fSqlType = pDb->GetTypeInfInteger().FsqlType;
+                precision = pDb->GetTypeInfInteger().Precision;
+                scale = 0;
+                colDefs[i].CbValue = 0;
+                break;
+            case DB_DATA_TYPE_FLOAT:
+                fSqlType = pDb->GetTypeInfFloat().FsqlType;
+                precision = pDb->GetTypeInfFloat().Precision;
+                scale = pDb->GetTypeInfFloat().MaximumScale;
+                // SQL Sybase Anywhere v5.5 returned a negative number for the
+                // MaxScale.  This caused ODBC to kick out an error on ibscale.
+                // I check for this here and set the scale = precision.
+                //if (scale < 0)
+                //  scale = (short) precision;
+                colDefs[i].CbValue = 0;
+                break;
+            case DB_DATA_TYPE_DATE:
+                fSqlType = pDb->GetTypeInfDate().FsqlType;
+                precision = pDb->GetTypeInfDate().Precision;
+                scale = 0;
+                colDefs[i].CbValue = 0;
+                break;
+        }
+        // Null values
+        if (colDefs[i].Null)
+        {
+            colDefs[i].CbValue = SQL_NULL_DATA;
+            colDefs[i].Null = FALSE;
+        }
+
+        if (SQLBindParameter(hstmtInsert, colNo++, SQL_PARAM_INPUT, colDefs[i].SqlCtype,
+                             fSqlType, precision, scale, (UCHAR*) colDefs[i].PtrDataObj, 
+                             precision+1,&colDefs[i].CbValue) != SQL_SUCCESS)
+        {
+            return(pDb->DispAllErrors(henv, hdbc, hstmtInsert));
+        }
+    }
+
+    // Completed successfully
+    return(TRUE);
+
+}  // wxDbTable::bindInsertParams()
+
+
+/********** wxDbTable::bindUpdateParams() **********/
+bool wxDbTable::bindUpdateParams(void)
+{
+    assert(!queryOnly);
     if (queryOnly)
         return(FALSE);
     
@@ -408,43 +421,25 @@ bool wxDbTable::bindParams(bool forUpdate)
     UDWORD  precision   = 0;
     SWORD   scale       = 0;
     
-    // Bind each column of the table that should be bound
-    // to a parameter marker
-    int i;
-    UWORD colNo;
-
-    for (i=0, colNo=1; i < noCols; i++)
+    // Bind each UPDATEABLE column of the table to a parameter marker
+    int i,colNo;
+    for (i = 0, colNo = 1; i < noCols; i++)
     {
-        if (forUpdate)
-        {
-            if (!colDefs[i].Updateable)
-                continue;
-        }
-        else
-        {
-            if (!colDefs[i].InsertAllowed)
-                continue;
-        }
-
+        if (! colDefs[i].Updateable)
+            continue;
         switch(colDefs[i].DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
                 fSqlType = pDb->GetTypeInfVarchar().FsqlType;
                 precision = colDefs[i].SzDataObj;
                 scale = 0;
-                if (colDefs[i].Null)
-                    colDefs[i].CbValue = SQL_NULL_DATA;
-                else
-                    colDefs[i].CbValue = SQL_NTS;
+                colDefs[i].CbValue = SQL_NTS;
                 break;
             case DB_DATA_TYPE_INTEGER:
                 fSqlType = pDb->GetTypeInfInteger().FsqlType;
                 precision = pDb->GetTypeInfInteger().Precision;
                 scale = 0;
-                if (colDefs[i].Null)
-                    colDefs[i].CbValue = SQL_NULL_DATA;
-                else
-                    colDefs[i].CbValue = 0;
+                colDefs[i].CbValue = 0;
                 break;
             case DB_DATA_TYPE_FLOAT:
                 fSqlType = pDb->GetTypeInfFloat().FsqlType;
@@ -455,79 +450,41 @@ bool wxDbTable::bindParams(bool forUpdate)
                 // I check for this here and set the scale = precision.
                 //if (scale < 0)
                 // scale = (short) precision;
-                if (colDefs[i].Null)
-                    colDefs[i].CbValue = SQL_NULL_DATA;
-                else
-                    colDefs[i].CbValue = 0;
+                colDefs[i].CbValue = 0;
                 break;
             case DB_DATA_TYPE_DATE:
                 fSqlType = pDb->GetTypeInfDate().FsqlType;
                 precision = pDb->GetTypeInfDate().Precision;
                 scale = 0;
-                if (colDefs[i].Null)
-                    colDefs[i].CbValue = SQL_NULL_DATA;
-                else
-                    colDefs[i].CbValue = 0;
-                break;
-            case DB_DATA_TYPE_BLOB:
-                fSqlType = pDb->GetTypeInfBlob().FsqlType;
-                precision = 50000;
-                scale = 0;
-                if (colDefs[i].Null)
-                    colDefs[i].CbValue = SQL_NULL_DATA;
-                else
-                    colDefs[i].CbValue = SQL_LEN_DATA_AT_EXEC(colDefs[i].SzDataObj);
+                colDefs[i].CbValue = 0;
                 break;
         }
-        if (forUpdate)
+        
+        if (SQLBindParameter(hstmtUpdate, colNo++, SQL_PARAM_INPUT, colDefs[i].SqlCtype,
+                             fSqlType, precision, scale, (UCHAR*) colDefs[i].PtrDataObj, 
+                             precision+1, &colDefs[i].CbValue) != SQL_SUCCESS)
         {
-            if (SQLBindParameter(hstmtUpdate, colNo++, SQL_PARAM_INPUT, colDefs[i].SqlCtype,
-                                 fSqlType, precision, scale, (UCHAR*) colDefs[i].PtrDataObj, 
-                                 precision+1, &colDefs[i].CbValue) != SQL_SUCCESS)
-            {
-                return(pDb->DispAllErrors(henv, hdbc, hstmtUpdate));
-            }
-        }
-        else
-        {
-            if (SQLBindParameter(hstmtInsert, colNo++, SQL_PARAM_INPUT, colDefs[i].SqlCtype,
-                                 fSqlType, precision, scale, (UCHAR*) colDefs[i].PtrDataObj, 
-                                 precision+1,&colDefs[i].CbValue) != SQL_SUCCESS)
-            {
-                return(pDb->DispAllErrors(henv, hdbc, hstmtInsert));
-            }
+            return(pDb->DispAllErrors(henv, hdbc, hstmtUpdate));
         }
     }
     
     // Completed successfully
     return(TRUE);
 
-}  // wxDbTable::bindParams()
-
-
-/********** wxDbTable::bindInsertParams() **********/
-bool wxDbTable::bindInsertParams(void)
-{
-    return bindParams(FALSE);
-}  // wxDbTable::bindInsertParams()
-
-
-/********** wxDbTable::bindUpdateParams() **********/
-bool wxDbTable::bindUpdateParams(void)
-{
-    return bindParams(TRUE);
 }  // wxDbTable::bindUpdateParams()
 
 
 /********** wxDbTable::bindCols() **********/
 bool wxDbTable::bindCols(HSTMT cursor)
 {
+    static SDWORD  cb;
+    
     // Bind each column of the table to a memory address for fetching data
-    UWORD i;
+    int i;
     for (i = 0; i < noCols; i++)
     {
-        if (SQLBindCol(cursor, (UWORD)(i+1), colDefs[i].SqlCtype, (UCHAR*) colDefs[i].PtrDataObj,
-                       colDefs[i].SzDataObj, &colDefs[i].CbValue ) != SQL_SUCCESS)
+        if (SQLBindCol(cursor, i+1, colDefs[i].SqlCtype, (UCHAR*) colDefs[i].PtrDataObj,
+                       colDefs[i].SzDataObj, &cb) != SQL_SUCCESS)     
         {
           return (pDb->DispAllErrors(henv, hdbc, cursor));
         }
@@ -551,20 +508,12 @@ bool wxDbTable::getRec(UWORD fetchType)
         UWORD   rowStatus;
 
         retcode = SQLExtendedFetch(hstmt, fetchType, 0, &cRowsFetched, &rowStatus);
-        if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+        if (retcode  != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         {
             if (retcode == SQL_NO_DATA_FOUND)
                 return(FALSE);
             else
                 return(pDb->DispAllErrors(henv, hdbc, hstmt));
-        }
-        else
-        {
-            // Set the Null member variable to indicate the Null state
-            // of each column just read in.
-            int i;
-            for (i = 0; i < noCols; i++)
-                colDefs[i].Null = (colDefs[i].CbValue == SQL_NULL_DATA);
         }
     }
     else
@@ -578,14 +527,6 @@ bool wxDbTable::getRec(UWORD fetchType)
             else
                 return(pDb->DispAllErrors(henv, hdbc, hstmt));
         }
-        else
-        {
-            // Set the Null member variable to indicate the Null state
-            // of each column just read in.
-            int i;
-            for (i = 0; i < noCols; i++)
-                colDefs[i].Null = (colDefs[i].CbValue == SQL_NULL_DATA);
-        }
     }
 
     // Completed successfully
@@ -595,54 +536,37 @@ bool wxDbTable::getRec(UWORD fetchType)
 
 
 /********** wxDbTable::execDelete() **********/
-bool wxDbTable::execDelete(const wxString &pSqlStmt)
+bool wxDbTable::execDelete(const char *pSqlStmt)
 {
-    RETCODE retcode;
-
     // Execute the DELETE statement
-    retcode = SQLExecDirect(hstmtDelete, (UCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
+    if (SQLExecDirect(hstmtDelete, (UCHAR FAR *) pSqlStmt, SQL_NTS) != SQL_SUCCESS)
+        return(pDb->DispAllErrors(henv, hdbc, hstmtDelete));
 
-    if (retcode == SQL_SUCCESS ||
-        retcode == SQL_NO_DATA_FOUND ||
-        retcode == SQL_SUCCESS_WITH_INFO)
-    {
-        // Record deleted successfully
-        return(TRUE);
-    }
-
-    // Problem deleting record
-    return(pDb->DispAllErrors(henv, hdbc, hstmtDelete));
+    // Record deleted successfully
+    return(TRUE);
 
 }  // wxDbTable::execDelete()
 
 
 /********** wxDbTable::execUpdate() **********/
-bool wxDbTable::execUpdate(const wxString &pSqlStmt)
+bool wxDbTable::execUpdate(const char *pSqlStmt)
 {
-    RETCODE retcode;
-
     // Execute the UPDATE statement
-    retcode = SQLExecDirect(hstmtUpdate, (UCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
+    if (SQLExecDirect(hstmtUpdate, (UCHAR FAR *) pSqlStmt, SQL_NTS) != SQL_SUCCESS)
+        return(pDb->DispAllErrors(henv, hdbc, hstmtUpdate));
 
-    if (retcode == SQL_SUCCESS ||
-        retcode == SQL_NO_DATA_FOUND ||
-        retcode == SQL_SUCCESS_WITH_INFO)
-    {
-        // Record updated successfully
-        return(TRUE);
-    }
-
-    // Problem updating record
-    return(pDb->DispAllErrors(henv, hdbc, hstmtUpdate));
+    // Record deleted successfully
+    return(TRUE);
 
 }  // wxDbTable::execUpdate()
 
 
 /********** wxDbTable::query() **********/
-bool wxDbTable::query(int queryType, bool forUpdate, bool distinct, const wxString &pSqlStmt)
+bool wxDbTable::query(int queryType, bool forUpdate, bool distinct, const char *pSqlStmt)
 {
-    wxString sqlStmt;
+    char sqlStmt[DB_MAX_STATEMENT_LEN];
 
+    // Set the selectForUpdate member variable
     if (forUpdate)
         // The user may wish to select for update, but the DBMS may not be capable
         selectForUpdate = CanSelectForUpdate();
@@ -655,14 +579,25 @@ bool wxDbTable::query(int queryType, bool forUpdate, bool distinct, const wxStri
         BuildSelectStmt(sqlStmt, queryType, distinct);
         pDb->WriteSqlLog(sqlStmt);
     }
+    else 
+        wxStrcpy(sqlStmt, pSqlStmt);
+
+    SQLFreeStmt(hstmt, SQL_CLOSE);
+    if (SQLExecDirect(hstmt, (UCHAR FAR *) sqlStmt, SQL_NTS) == SQL_SUCCESS)
+        return(TRUE);
+    else
+    {
+        pDb->DispAllErrors(henv, hdbc, hstmt);
+        return(FALSE);
+    }
 
     // Make sure the cursor is closed first
-    if (!CloseCursor(hstmt))
+    if (! CloseCursor(hstmt))
         return(FALSE);
 
     // Execute the SQL SELECT statement
     int retcode;     
-    retcode = SQLExecDirect(hstmt, (UCHAR FAR *) (queryType == DB_SELECT_STATEMENT ? pSqlStmt.c_str() : sqlStmt.c_str()), SQL_NTS);
+    retcode = SQLExecDirect(hstmt, (UCHAR FAR *) (queryType == DB_SELECT_STATEMENT ? pSqlStmt : sqlStmt), SQL_NTS);      
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
         return(pDb->DispAllErrors(henv, hdbc, hstmt));
 
@@ -676,63 +611,27 @@ bool wxDbTable::query(int queryType, bool forUpdate, bool distinct, const wxStri
 
 
 /********** wxDbTable::Open() **********/
-bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
+bool wxDbTable::Open(void)
 {
     if (!pDb)
         return FALSE;   
 
     int i;
     wxString sqlStmt;
-    wxString s;
-//    int NumKeyCols=0;
 
-    // Calculate the maximum size of the concatenated
-    // keys for use with wxDbGrid
-    m_keysize = 0;
-    for (i=0; i < noCols; i++)
-    {
-        if (colDefs[i].KeyField)
-        {
-//            NumKeyCols++;
-            m_keysize += colDefs[i].SzDataObj;
-        }
-    }
-
-    s.Empty();
     // Verify that the table exists in the database
-    if (checkTableExists && !pDb->TableExists(tableName, pDb->GetUsername(), tablePath))
+    if (!pDb->TableExists(tableName,pDb->GetUsername(),tablePath))
     {
-        s = wxT("Table/view does not exist in the database");
-        if ( *(pDb->dbInf.accessibleTables) == wxT('Y'))
-            s += wxT(", or you have no permissions.\n");
+        wxString s;
+        if (wxStrcmp(tablePath,""))
+            s.sprintf(wxT("Error opening '%s/%s'.\n"),tablePath,tableName);
         else
-            s += wxT(".\n");
-    }
-    else if (checkPrivileges)
-    {
-        // Verify the user has rights to access the table.
-        // Shortcut boolean evaluation to optimize out call to 
-        // TablePrivileges
-        //
-        // Unfortunately this optimization doesn't seem to be
-        // reliable!
-        if (// *(pDb->dbInf.accessibleTables) == 'N' && 
-            !pDb->TablePrivileges(tableName,wxT("SELECT"), pDb->GetUsername(), pDb->GetUsername(), tablePath))
-            s = wxT("Current logged in user does not have sufficient privileges to access this table.\n");
-    }
-
-    if (!s.IsEmpty())
-    {
-        wxString p;
-
-        if (!tablePath.IsEmpty())
-            p.Printf(wxT("Error opening '%s/%s'.\n"),tablePath.c_str(),tableName.c_str());
+            s.sprintf(wxT("Error opening '%s'.\n"), tableName);
+        if (!pDb->TableExists(tableName,NULL,tablePath))
+            s += wxT("Table/view does not exist in the database.\n");
         else
-            p.Printf(wxT("Error opening '%s'.\n"), tableName.c_str());
-
-        p += s;
-        pDb->LogError(p.GetData());
-
+            s += wxT("Current logged in user does not have sufficient privileges to access this table.\n");
+        pDb->LogError(s.c_str());
         return(FALSE);
     }
 
@@ -752,8 +651,8 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
     
     if (!bindCols(hstmtInternal))                   // Internal use only
         return(FALSE);
-
-     /*
+    
+    /*
      * Do NOT bind the hstmtCount cursor!!!
      */
 
@@ -761,18 +660,18 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
     if (!queryOnly && noCols > 0)
     {
         bool needComma = FALSE;
-        sqlStmt.Printf(wxT("INSERT INTO %s ("), tableName.c_str());
+        sqlStmt.sprintf("INSERT INTO %s (", tableName);
         for (i = 0; i < noCols; i++)
         {
             if (! colDefs[i].InsertAllowed)
                 continue;
             if (needComma)
-                sqlStmt += wxT(",");
+                sqlStmt += ",";
             sqlStmt += colDefs[i].ColName;
             needComma = TRUE;
         }
         needComma = FALSE;
-        sqlStmt += wxT(") VALUES (");
+        sqlStmt += ") VALUES (";
 
         int insertableCount = 0;
 
@@ -781,12 +680,12 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
             if (! colDefs[i].InsertAllowed)
                 continue;
             if (needComma)
-                sqlStmt += wxT(",");
-            sqlStmt += wxT("?");
+                sqlStmt += ",";
+            sqlStmt += "?";
             needComma = TRUE;
             insertableCount++;
         }
-        sqlStmt += wxT(")");
+        sqlStmt += ")";
         
         // Prepare the insert statement for execution
         if (insertableCount)  
@@ -814,7 +713,7 @@ bool wxDbTable::Query(bool forUpdate, bool distinct)
 
 
 /********** wxDbTable::QueryBySqlStmt() **********/
-bool wxDbTable::QueryBySqlStmt(const wxString &pSqlStmt)
+bool wxDbTable::QueryBySqlStmt(const char *pSqlStmt)
 {
     pDb->WriteSqlLog(pSqlStmt);
 
@@ -897,88 +796,19 @@ bool wxDbTable::GetLast(void)
 }  // wxDbTable::GetLast()
 
 
-/********** wxDbTable::BuildDeleteStmt() **********/
-void wxDbTable::BuildDeleteStmt(wxString &pSqlStmt, int typeOfDel, const wxString &pWhereClause)
-{
-    wxASSERT(!queryOnly);
-    if (queryOnly)
-        return;
-
-    wxString whereClause;
-
-    whereClause.Empty();
-
-    // Handle the case of DeleteWhere() and the where clause is blank.  It should
-    // delete all records from the database in this case.
-    if (typeOfDel == DB_DEL_WHERE && (pWhereClause.Length() == 0))
-    {
-        pSqlStmt.Printf(wxT("DELETE FROM %s"), tableName.c_str());
-        return;
-    }
-
-    pSqlStmt.Printf(wxT("DELETE FROM %s WHERE "), tableName.c_str());
-
-    // Append the WHERE clause to the SQL DELETE statement
-    switch(typeOfDel)
-    {
-        case DB_DEL_KEYFIELDS:
-            // If the datasource supports the ROWID column, build
-            // the where on ROWID for efficiency purposes.
-            // e.g. DELETE FROM PARTS WHERE ROWID = '111.222.333'
-            if (CanUpdByROWID())
-            {
-                SDWORD cb;
-                wxChar   rowid[wxDB_ROWID_LEN+1];
-
-                // Get the ROWID value.  If not successful retreiving the ROWID,
-                // simply fall down through the code and build the WHERE clause
-                // based on the key fields.
-                if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
-                {
-                    pSqlStmt += wxT("ROWID = '");
-                    pSqlStmt += rowid;
-                    pSqlStmt += wxT("'");
-                    break;
-                }
-            }
-            // Unable to delete by ROWID, so build a WHERE
-            // clause based on the keyfields.
-            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
-            pSqlStmt += whereClause;
-            break;
-        case DB_DEL_WHERE:
-            pSqlStmt += pWhereClause;
-            break;
-        case DB_DEL_MATCHING:
-            BuildWhereClause(whereClause, DB_WHERE_MATCHING);
-            pSqlStmt += whereClause;
-            break;
-    }
-
-}  // BuildDeleteStmt()
-
-
-/***** DEPRECATED: use wxDbTable::BuildDeleteStmt(wxString &....) form *****/
-void wxDbTable::BuildDeleteStmt(wxChar *pSqlStmt, int typeOfDel, const wxString &pWhereClause)
-{
-    wxString tempSqlStmt;
-    BuildDeleteStmt(tempSqlStmt, typeOfDel, pWhereClause);
-    wxStrcpy(pSqlStmt, tempSqlStmt);
-}  // wxDbTable::BuildDeleteStmt()
-
-
 /********** wxDbTable::BuildSelectStmt() **********/
-void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool distinct)
+void wxDbTable::BuildSelectStmt(char *pSqlStmt, int typeOfSelect, bool distinct)
 {
-    wxString whereClause;
-    whereClause.Empty();
+    char whereClause[DB_MAX_WHERE_CLAUSE_LEN];
+
+    whereClause[0] = 0;
 
     // Build a select statement to query the database
-    pSqlStmt = wxT("SELECT ");
+    wxStrcpy(pSqlStmt, "SELECT ");
 
     // SELECT DISTINCT values only?
     if (distinct)
-        pSqlStmt += wxT("DISTINCT ");
+        wxStrcat(pSqlStmt, "DISTINCT ");
 
     // Was a FROM clause specified to join tables to the base table?
     // Available for ::Query() only!!!
@@ -996,14 +826,14 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
     for (i = 0; i < noCols; i++)
     {
         // If joining tables, the base table column names must be qualified to avoid ambiguity
-        if (appendFromClause || pDb->Dbms() == dbmsACCESS)
+        if (appendFromClause)
         {
-            pSqlStmt += queryTableName;
-            pSqlStmt += wxT(".");
+            wxStrcat(pSqlStmt, queryTableName);
+            wxStrcat(pSqlStmt, ".");
         }
-        pSqlStmt += colDefs[i].ColName;
+        wxStrcat(pSqlStmt, colDefs[i].ColName);
         if (i + 1 < noCols)
-            pSqlStmt += wxT(",");
+            wxStrcat(pSqlStmt, ",");
     }
 
     // If the datasource supports ROWID, get this column as well.  Exception: Don't retrieve
@@ -1011,19 +841,19 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
     if (!distinct && CanUpdByROWID())
     {
         // If joining tables, the base table column names must be qualified to avoid ambiguity
-        if (appendFromClause || pDb->Dbms() == dbmsACCESS)
+        if (appendFromClause)
         {
-            pSqlStmt += wxT(",");
-            pSqlStmt += queryTableName;
-            pSqlStmt += wxT(".ROWID");
+            wxStrcat(pSqlStmt, ",");
+            wxStrcat(pSqlStmt, queryTableName);
+            wxStrcat(pSqlStmt, ".ROWID");
         }
         else
-            pSqlStmt += wxT(",ROWID");
+            wxStrcat(pSqlStmt, ",ROWID");
     }
 
     // Append the FROM tablename portion
-    pSqlStmt += wxT(" FROM ");
-    pSqlStmt += queryTableName;
+    wxStrcat(pSqlStmt, " FROM ");
+    wxStrcat(pSqlStmt, queryTableName);
 
     // Sybase uses the HOLDLOCK keyword to lock a record during query.
     // The HOLDLOCK keyword follows the table name in the from clause.
@@ -1031,10 +861,10 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
     // NOHOLDLOCK (the default).  Note: The "FOR UPDATE" clause
     // is parsed but ignored in SYBASE Transact-SQL.
     if (selectForUpdate && (pDb->Dbms() == dbmsSYBASE_ASA || pDb->Dbms() == dbmsSYBASE_ASE))
-        pSqlStmt += wxT(" HOLDLOCK");
+        wxStrcat(pSqlStmt, " HOLDLOCK");
 
     if (appendFromClause)
-        pSqlStmt += from;
+        wxStrcat(pSqlStmt, from);
 
     // Append the WHERE clause.  Either append the where clause for the class
     // or build a where clause.  The typeOfSelect determines this.
@@ -1047,24 +877,24 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
             if (where.Length())   // May not want a where clause!!!
 #endif
             {
-                pSqlStmt += wxT(" WHERE ");
-                pSqlStmt += where;
+                wxStrcat(pSqlStmt, " WHERE ");
+                wxStrcat(pSqlStmt, where);
             }
             break;
         case DB_SELECT_KEYFIELDS:
             BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
-            if (whereClause.Length())
+            if (wxStrlen(whereClause))
             {
-                pSqlStmt += wxT(" WHERE ");
-                pSqlStmt += whereClause;
+                wxStrcat(pSqlStmt, " WHERE ");
+                wxStrcat(pSqlStmt, whereClause);
             }
             break;
         case DB_SELECT_MATCHING:
             BuildWhereClause(whereClause, DB_WHERE_MATCHING);
-            if (whereClause.Length())
+            if (wxStrlen(whereClause))
             {
-                pSqlStmt += wxT(" WHERE ");
-                pSqlStmt += whereClause;
+                wxStrcat(pSqlStmt, " WHERE ");
+                wxStrcat(pSqlStmt, whereClause);
             }
             break;
     }
@@ -1076,179 +906,17 @@ void wxDbTable::BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool disti
     if (orderBy.Length())
 #endif
     {
-        pSqlStmt += wxT(" ORDER BY ");
-        pSqlStmt += orderBy;
+        wxStrcat(pSqlStmt, " ORDER BY ");
+        wxStrcat(pSqlStmt, orderBy);
     }
 
     // SELECT FOR UPDATE if told to do so and the datasource is capable.  Sybase
     // parses the FOR UPDATE clause but ignores it.  See the comment above on the
     // HOLDLOCK for Sybase.
     if (selectForUpdate && CanSelectForUpdate())
-        pSqlStmt += wxT(" FOR UPDATE");
+        wxStrcat(pSqlStmt, " FOR UPDATE");
 
 }  // wxDbTable::BuildSelectStmt()
-
-
-/***** DEPRECATED: use wxDbTable::BuildSelectStmt(wxString &....) form *****/
-void wxDbTable::BuildSelectStmt(wxChar *pSqlStmt, int typeOfSelect, bool distinct)
-{
-    wxString tempSqlStmt;
-    BuildSelectStmt(tempSqlStmt, typeOfSelect, distinct);
-    wxStrcpy(pSqlStmt, tempSqlStmt);
-}  // wxDbTable::BuildSelectStmt()
-
-
-/********** wxDbTable::BuildUpdateStmt() **********/
-void wxDbTable::BuildUpdateStmt(wxString &pSqlStmt, int typeOfUpd, const wxString &pWhereClause)
-{
-    wxASSERT(!queryOnly);
-    if (queryOnly)
-        return;
-
-    wxString whereClause;
-    whereClause.Empty();
-
-    bool firstColumn = TRUE;
-
-    pSqlStmt.Printf(wxT("UPDATE %s SET "), tableName.Upper().c_str());
-
-    // Append a list of columns to be updated
-    int i;
-    for (i = 0; i < noCols; i++)
-    {
-        // Only append Updateable columns
-        if (colDefs[i].Updateable)
-        {
-            if (!firstColumn)
-                pSqlStmt += wxT(",");
-            else
-                firstColumn = FALSE;
-            pSqlStmt += colDefs[i].ColName;
-            pSqlStmt += wxT(" = ?");
-        }
-    }
-
-    // Append the WHERE clause to the SQL UPDATE statement
-    pSqlStmt += wxT(" WHERE ");
-    switch(typeOfUpd)
-    {
-        case DB_UPD_KEYFIELDS:
-            // If the datasource supports the ROWID column, build
-            // the where on ROWID for efficiency purposes.
-            // e.g. UPDATE PARTS SET Col1 = ?, Col2 = ? WHERE ROWID = '111.222.333'
-            if (CanUpdByROWID())
-            {
-                SDWORD cb;
-                wxChar rowid[wxDB_ROWID_LEN+1];
-
-                // Get the ROWID value.  If not successful retreiving the ROWID,
-                // simply fall down through the code and build the WHERE clause
-                // based on the key fields.
-                if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
-                {
-                    pSqlStmt += wxT("ROWID = '");
-                    pSqlStmt += rowid;
-                    pSqlStmt += wxT("'");
-                    break;
-                }
-            }
-            // Unable to delete by ROWID, so build a WHERE
-            // clause based on the keyfields.
-            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
-            pSqlStmt += whereClause;
-            break;
-        case DB_UPD_WHERE:
-            pSqlStmt += pWhereClause;
-            break;
-    }
-}  // BuildUpdateStmt()
-
-
-/***** DEPRECATED: use wxDbTable::BuildUpdateStmt(wxString &....) form *****/
-void wxDbTable::BuildUpdateStmt(wxChar *pSqlStmt, int typeOfUpd, const wxString &pWhereClause)
-{
-    wxString tempSqlStmt;
-    BuildUpdateStmt(tempSqlStmt, typeOfUpd, pWhereClause);
-    wxStrcpy(pSqlStmt, tempSqlStmt);
-}  // BuildUpdateStmt()
-
-
-/********** wxDbTable::BuildWhereClause() **********/
-void wxDbTable::BuildWhereClause(wxString &pWhereClause, int typeOfWhere,
-                                 const wxString &qualTableName, bool useLikeComparison)
-/*
- * Note: BuildWhereClause() currently ignores timestamp columns.
- *       They are not included as part of the where clause.
- */
-{
-    bool moreThanOneColumn = FALSE;
-    wxString colValue;
-
-    // Loop through the columns building a where clause as you go
-    int i;
-    for (i = 0; i < noCols; i++)
-    {
-        // Determine if this column should be included in the WHERE clause
-        if ((typeOfWhere == DB_WHERE_KEYFIELDS && colDefs[i].KeyField) ||
-             (typeOfWhere == DB_WHERE_MATCHING  && (!IsColNull(i))))
-        {
-            // Skip over timestamp columns
-            if (colDefs[i].SqlCtype == SQL_C_TIMESTAMP)
-                continue;
-            // If there is more than 1 column, join them with the keyword "AND"
-            if (moreThanOneColumn)
-                pWhereClause += wxT(" AND ");
-            else
-                moreThanOneColumn = TRUE;
-            // Concatenate where phrase for the column
-            if (qualTableName.Length())
-            {
-                pWhereClause += qualTableName;
-                pWhereClause += wxT(".");
-            }
-            pWhereClause += colDefs[i].ColName;
-            if (useLikeComparison && (colDefs[i].SqlCtype == SQL_C_CHAR))
-                pWhereClause += wxT(" LIKE ");
-            else
-                pWhereClause += wxT(" = ");
-            switch(colDefs[i].SqlCtype)
-            {
-                case SQL_C_CHAR:
-                    colValue.Printf(wxT("'%s'"), (UCHAR FAR *) colDefs[i].PtrDataObj);
-                    break;
-                case SQL_C_SSHORT:
-                    colValue.Printf(wxT("%hi"), *((SWORD *) colDefs[i].PtrDataObj));
-                    break;
-                case SQL_C_USHORT:
-                    colValue.Printf(wxT("%hu"), *((UWORD *) colDefs[i].PtrDataObj));
-                    break;
-                case SQL_C_SLONG:
-                    colValue.Printf(wxT("%li"), *((SDWORD *) colDefs[i].PtrDataObj));
-                    break;
-                case SQL_C_ULONG:
-                    colValue.Printf(wxT("%lu"), *((UDWORD *) colDefs[i].PtrDataObj));
-                    break;
-                case SQL_C_FLOAT:
-                    colValue.Printf(wxT("%.6f"), *((SFLOAT *) colDefs[i].PtrDataObj));
-                    break;
-                case SQL_C_DOUBLE:
-                    colValue.Printf(wxT("%.6f"), *((SDOUBLE *) colDefs[i].PtrDataObj));
-                    break;
-            }
-            pWhereClause += colValue;
-        }
-    }
-}  // wxDbTable::BuildWhereClause()
-
-
-/***** DEPRECATED: use wxDbTable::BuildWhereClause(wxString &....) form *****/
-void wxDbTable::BuildWhereClause(wxChar *pWhereClause, int typeOfWhere,
-                                 const wxString &qualTableName, bool useLikeComparison)
-{
-    wxString tempSqlStmt;
-    BuildWhereClause(tempSqlStmt, typeOfWhere, qualTableName, useLikeComparison);
-    wxStrcpy(pWhereClause, tempSqlStmt);
-}  // wxDbTable::BuildWhereClause()
 
 
 /********** wxDbTable::GetRowNum() **********/
@@ -1290,7 +958,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     wxString sqlStmt;
 
 #ifdef DBDEBUG_CONSOLE
-    cout << wxT("Creating Table ") << tableName << wxT("...") << endl;
+    cout << "Creating Table " << tableName << "..." << endl;
 #endif
 
     // Drop table first
@@ -1304,23 +972,20 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         // Exclude derived columns since they are NOT part of the base table
         if (colDefs[i].DerivedCol)
             continue;
-        cout << i + 1 << wxT(": ") << colDefs[i].ColName << wxT("; ");
+        cout << i + 1 << ": " << colDefs[i].ColName << "; ";
         switch(colDefs[i].DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
-                cout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << colDefs[i].SzDataObj << wxT(")");
+                cout << pDb->typeInfVarchar.TypeName << "(" << colDefs[i].SzDataObj << ")";
                 break;
             case DB_DATA_TYPE_INTEGER:
-                cout << pDb->GetTypeInfInteger().TypeName;
+                cout << pDb->typeInfInteger.TypeName;
                 break;
             case DB_DATA_TYPE_FLOAT:
-                cout << pDb->GetTypeInfFloat().TypeName;
+                cout << pDb->typeInfFloat.TypeName;
                 break;
             case DB_DATA_TYPE_DATE:
-                cout << pDb->GetTypeInfDate().TypeName;
-                break;
-            case DB_DATA_TYPE_BLOB:
-                cout << pDb->GetTypeInfBlob().TypeName;
+                cout << pDb->typeInfDate.TypeName;
                 break;
         }
         cout << endl;
@@ -1329,7 +994,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
 
     // Build a CREATE TABLE string from the colDefs structure.
     bool needComma = FALSE;
-    sqlStmt.Printf(wxT("CREATE TABLE %s ("), tableName.c_str());
+    sqlStmt.sprintf("CREATE TABLE %s (", tableName);
 
     for (i = 0; i < noCols; i++)
     {
@@ -1338,10 +1003,10 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             continue;
         // Comma Delimiter
         if (needComma)
-            sqlStmt += wxT(",");
+            sqlStmt += ",";
         // Column Name
         sqlStmt += colDefs[i].ColName;
-        sqlStmt += wxT(" ");
+        sqlStmt += " ";
         // Column Type
         switch(colDefs[i].DbDataType)
         {
@@ -1357,28 +1022,23 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             case DB_DATA_TYPE_DATE:
                 sqlStmt += pDb->GetTypeInfDate().TypeName;
                 break;
-            case DB_DATA_TYPE_BLOB:
-                sqlStmt += pDb->GetTypeInfBlob().TypeName;
-                break;
         }
         // For varchars, append the size of the string
-        if (colDefs[i].DbDataType == DB_DATA_TYPE_VARCHAR)// ||
-//            colDefs[i].DbDataType == DB_DATA_TYPE_BLOB)
+        if (colDefs[i].DbDataType == DB_DATA_TYPE_VARCHAR)
         {
             wxString s;
-            s.Printf(wxT("(%d)"), colDefs[i].SzDataObj);
-            sqlStmt += s;
+            // wxStrcat(sqlStmt, "(");
+            // wxStrcat(sqlStmt, itoa(colDefs[i].SzDataObj, s, 10));
+            // wxStrcat(sqlStmt, ")");
+            s.sprintf("(%d)", colDefs[i].SzDataObj);
+            sqlStmt += s.c_str();
         }
 
-        if (pDb->Dbms() == dbmsDB2 ||
-            pDb->Dbms() == dbmsMY_SQL ||
-            pDb->Dbms() == dbmsSYBASE_ASE  ||
-            pDb->Dbms() == dbmsINTERBASE  ||
-            pDb->Dbms() == dbmsMS_SQL_SERVER)
+        if (pDb->Dbms() == dbmsSYBASE_ASE || pDb->Dbms() == dbmsMY_SQL)
         {
             if (colDefs[i].KeyField)
             {
-                sqlStmt += wxT(" NOT NULL");
+                sqlStmt += " NOT NULL";
             }
         }
         
@@ -1395,32 +1055,16 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     }
     if (j && pDb->Dbms() != dbmsDBASE)  // Found a keyfield
     {
-        switch (pDb->Dbms())
+        if (pDb->Dbms() != dbmsMY_SQL)
         {
-            case dbmsINFORMIX:
-            case dbmsSYBASE_ASA:
-            case dbmsSYBASE_ASE:
-            case dbmsMY_SQL:
-            {
-                // MySQL goes out on this one. We also declare the relevant key NON NULL above
-                sqlStmt += wxT(",PRIMARY KEY (");
-                break;
-            }
-            default:
-            {
-                sqlStmt += wxT(",CONSTRAINT ");
-                //  DB2 is limited to 18 characters for index names
-                if (pDb->Dbms() == dbmsDB2)
-                {
-                    wxASSERT_MSG((tableName && wxStrlen(tableName) <= 13), wxT("DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters."));
-                    sqlStmt += tableName.substr(0, 13);
-                }
-                else
-                    sqlStmt += tableName;
-
-                sqlStmt += wxT("_PIDX PRIMARY KEY (");
-                break;
-            }
+            sqlStmt += ",CONSTRAINT ";
+            sqlStmt += tableName;
+            sqlStmt += "_PIDX PRIMARY KEY (";
+        }
+        else
+        {
+            /* MySQL goes out on this one. We also declare the relevant key NON NULL above */
+            sqlStmt += ", PRIMARY KEY (";
         }
 
         // List column name(s) of column(s) comprising the primary key
@@ -1429,25 +1073,16 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             if (colDefs[i].KeyField)
             {
                 if (j++) // Multi part key, comma separate names
-                    sqlStmt += wxT(",");
+                    sqlStmt += ",";
                 sqlStmt += colDefs[i].ColName;
             }
         }
-        sqlStmt += wxT(")");
-
-        if (pDb->Dbms() == dbmsINFORMIX ||
-            pDb->Dbms() == dbmsSYBASE_ASA ||
-            pDb->Dbms() == dbmsSYBASE_ASE)
-        {
-            sqlStmt += wxT(" CONSTRAINT ");
-            sqlStmt += tableName;
-            sqlStmt += wxT("_PIDX");
-        }
+       sqlStmt += ")";
     }
     // Append the closing parentheses for the create table statement
-    sqlStmt += wxT(")");
+    sqlStmt += ")";
 
-    pDb->WriteSqlLog(sqlStmt);
+    pDb->WriteSqlLog(sqlStmt.c_str());
 
 #ifdef DBDEBUG_CONSOLE
     cout << endl << sqlStmt.c_str() << endl;
@@ -1485,35 +1120,29 @@ bool wxDbTable::DropTable()
 
     wxString sqlStmt;
 
-    sqlStmt.Printf(wxT("DROP TABLE %s"), tableName.c_str());
+    sqlStmt.sprintf("DROP TABLE %s", tableName);
 
-    pDb->WriteSqlLog(sqlStmt);
+    pDb->WriteSqlLog(sqlStmt.c_str());
 
 #ifdef DBDEBUG_CONSOLE
     cout << endl << sqlStmt.c_str() << endl;
 #endif
 
-
-
-
-    RETCODE retcode = SQLExecDirect(hstmt, (UCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
-    if (retcode != SQL_SUCCESS)
+    if (SQLExecDirect(hstmt, (UCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
     {
         // Check for "Base table not found" error and ignore
         pDb->GetNextError(henv, hdbc, hstmt);   
-        if (wxStrcmp(pDb->sqlState, wxT("S0002")) /*&&
-            wxStrcmp(pDb->sqlState, wxT("S1000"))*/)  // "Base table not found" 
-        {
+        if (wxStrcmp(pDb->sqlState,"S0002") && wxStrcmp(pDb->sqlState, "S1000"))  // "Base table not found" 
+        {    
             // Check for product specific error codes
-            if (!((pDb->Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(pDb->sqlState,wxT("42000")))   ||  // 5.x (and lower?)
-                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,wxT("37000")))   ||   
-                  (pDb->Dbms() == dbmsPERVASIVE_SQL && !wxStrcmp(pDb->sqlState,wxT("S1000")))   ||  // Returns an S1000 then an S0002
-                  (pDb->Dbms() == dbmsPOSTGRES      && !wxStrcmp(pDb->sqlState,wxT("08S01")))))     
+            if (!((pDb->Dbms() == dbmsSYBASE_ASA  && !wxStrcmp(pDb->sqlState,"42000"))   ||  // 5.x (and lower?)
+                (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,"37000"))   ||   
+                (pDb->Dbms() == dbmsPOSTGRES      && !wxStrcmp(pDb->sqlState,"08S01"))))     
             {
                 pDb->DispNextError();
                 pDb->DispAllErrors(henv, hdbc, hstmt);
                 pDb->RollbackTrans();
-//                CloseCursor(hstmt);
+                CloseCursor(hstmt);
                 return(FALSE);
             }
         }
@@ -1530,8 +1159,7 @@ bool wxDbTable::DropTable()
 
 
 /********** wxDbTable::CreateIndex() **********/
-bool wxDbTable::CreateIndex(const wxString &idxName, bool unique, UWORD noIdxCols,
-                                     wxDbIdxDef *pIdxDefs, bool attemptDrop)
+bool wxDbTable::CreateIndex(const char * idxName, bool unique, int noIdxCols, wxDbIdxDef *pIdxDefs, bool attemptDrop)
 {
     wxString sqlStmt;
 
@@ -1570,10 +1198,35 @@ bool wxDbTable::CreateIndex(const wxString &idxName, bool unique, UWORD noIdxCol
             
             if (found)
             {
-                ok = pDb->ModifyColumn(tableName, pIdxDefs[i].ColName,
-                                        colDefs[j].DbDataType, colDefs[j].SzDataObj,
-                                        wxT("NOT NULL"));
-
+                wxString typeNameAndSize;
+                
+                switch(colDefs[j].DbDataType)
+                {
+                    case DB_DATA_TYPE_VARCHAR:
+                        typeNameAndSize = pDb->GetTypeInfVarchar().TypeName;
+                        break;
+                    case DB_DATA_TYPE_INTEGER:
+                        typeNameAndSize = pDb->GetTypeInfInteger().TypeName;
+                        break;
+                    case DB_DATA_TYPE_FLOAT:
+                        typeNameAndSize = pDb->GetTypeInfFloat().TypeName;
+                        break;
+                    case DB_DATA_TYPE_DATE:
+                        typeNameAndSize = pDb->GetTypeInfDate().TypeName;
+                        break;
+                }
+                
+                // For varchars, append the size of the string
+                if (colDefs[j].DbDataType == DB_DATA_TYPE_VARCHAR)
+                {
+                    wxString s;
+                    s.sprintf("(%d)", colDefs[i].SzDataObj);
+                    typeNameAndSize += s.c_str();
+                }
+                
+                sqlStmt.sprintf("ALTER TABLE %s MODIFY %s %s NOT NULL",tableName,pIdxDefs[i].ColName,typeNameAndSize.c_str());
+                ok = pDb->ExecSql(sqlStmt.c_str());
+                
                 if (!ok)
                 {
                     wxODBC_ERRORS retcode;
@@ -1596,42 +1249,38 @@ bool wxDbTable::CreateIndex(const wxString &idxName, bool unique, UWORD noIdxCol
     }
     
     // Build a CREATE INDEX statement
-    sqlStmt = wxT("CREATE ");
+    sqlStmt = "CREATE ";
     if (unique)
-        sqlStmt += wxT("UNIQUE ");
+        sqlStmt += "UNIQUE ";
     
-    sqlStmt += wxT("INDEX ");
+    sqlStmt += "INDEX ";
     sqlStmt += idxName;
-    sqlStmt += wxT(" ON ");
+    sqlStmt += " ON ";
     sqlStmt += tableName;
-    sqlStmt += wxT(" (");
+    sqlStmt += " (";
     
     // Append list of columns making up index
     int i;
     for (i = 0; i < noIdxCols; i++)
     {
         sqlStmt += pIdxDefs[i].ColName;
-
-        // Postgres and SQL Server 7 do not support the ASC/DESC keywords for index columns
-        if (!((pDb->Dbms() == dbmsMS_SQL_SERVER) && (strncmp(pDb->dbInf.dbmsVer,"07",2)==0)) &&
-            !(pDb->Dbms() == dbmsPOSTGRES))
+        /* Postgres doesn't cope with ASC */
+        if (pDb->Dbms() != dbmsPOSTGRES)
         {
             if (pIdxDefs[i].Ascending)
-                sqlStmt += wxT(" ASC");
+                sqlStmt += " ASC";
             else
-                sqlStmt += wxT(" DESC");
+                sqlStmt += " DESC";
         }
-        else
-            wxASSERT_MSG(pIdxDefs[i].Ascending, "Datasource does not support DESCending index columns");
 
         if ((i + 1) < noIdxCols)
-            sqlStmt += wxT(",");
+            sqlStmt += ",";
     }
     
     // Append closing parentheses
-    sqlStmt += wxT(")");
+    sqlStmt += ")";
 
-    pDb->WriteSqlLog(sqlStmt);
+    pDb->WriteSqlLog(sqlStmt.c_str());
 
 #ifdef DBDEBUG_CONSOLE
     cout << endl << sqlStmt.c_str() << endl << endl;
@@ -1659,25 +1308,23 @@ bool wxDbTable::CreateIndex(const wxString &idxName, bool unique, UWORD noIdxCol
 
 
 /********** wxDbTable::DropIndex() **********/
-bool wxDbTable::DropIndex(const wxString &idxName)
+bool wxDbTable::DropIndex(const char * idxName)
 {
     // NOTE: This function returns TRUE if the Index does not exist, but
     //       only for identified databases.  Code will need to be added
-    //       below for any other databases when those databases are defined
+    //          below for any other databases when those databases are defined
     //       to handle this situation consistently
 
     wxString sqlStmt;
 
-    if (pDb->Dbms() == dbmsACCESS || pDb->Dbms() == dbmsMY_SQL ||
-        pDb->Dbms() == dbmsDBASE /*|| Paradox needs this syntax too when we add support*/)
-        sqlStmt.Printf(wxT("DROP INDEX %s ON %s"),idxName.c_str(), tableName.c_str());
-    else if ((pDb->Dbms() == dbmsMS_SQL_SERVER) ||
-             (pDb->Dbms() == dbmsSYBASE_ASE))
-        sqlStmt.Printf(wxT("DROP INDEX %s.%s"),tableName.c_str(), idxName.c_str());
+    if (pDb->Dbms() == dbmsACCESS || pDb->Dbms() == dbmsMY_SQL)
+        sqlStmt.sprintf("DROP INDEX %s ON %s",idxName,tableName);
+    else if (pDb->Dbms() == dbmsSYBASE_ASE)
+        sqlStmt.sprintf("DROP INDEX %s.%s",tableName,idxName);
     else
-        sqlStmt.Printf(wxT("DROP INDEX %s"),idxName.c_str());
+        sqlStmt.sprintf("DROP INDEX %s",idxName);
 
-    pDb->WriteSqlLog(sqlStmt);
+    pDb->WriteSqlLog(sqlStmt.c_str());
 
 #ifdef DBDEBUG_CONSOLE
     cout << endl << sqlStmt.c_str() << endl;
@@ -1687,16 +1334,15 @@ bool wxDbTable::DropIndex(const wxString &idxName)
     {
         // Check for "Index not found" error and ignore
         pDb->GetNextError(henv, hdbc, hstmt);
-        if (wxStrcmp(pDb->sqlState,wxT("S0012")))  // "Index not found"
+        if (wxStrcmp(pDb->sqlState,"S0012"))  // "Index not found"
         {
             // Check for product specific error codes
-            if (!((pDb->Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(pDb->sqlState,wxT("42000"))) ||  // v5.x (and lower?)
-                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,wxT("37000"))) ||
-                  (pDb->Dbms() == dbmsMS_SQL_SERVER && !wxStrcmp(pDb->sqlState,wxT("S1000"))) ||
-                  (pDb->Dbms() == dbmsINTERBASE      && !wxStrcmp(pDb->sqlState,wxT("S1000"))) ||
-                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,wxT("S0002"))) ||  // Base table not found
-                  (pDb->Dbms() == dbmsMY_SQL        && !wxStrcmp(pDb->sqlState,wxT("42S12"))) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
-                  (pDb->Dbms() == dbmsPOSTGRES      && !wxStrcmp(pDb->sqlState,wxT("08S01")))
+            if (!((pDb->Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(pDb->sqlState,"42000")) ||  // v5.x (and lower?)
+                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,"37000")) ||
+                  (pDb->Dbms() == dbmsMS_SQL_SERVER && !wxStrcmp(pDb->sqlState,"S1000")) ||
+                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,"S0002")) ||  // Base table not found
+                  (pDb->Dbms() == dbmsMY_SQL        && !wxStrcmp(pDb->sqlState,"42S12")) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
+                  (pDb->Dbms() == dbmsPOSTGRES      && !wxStrcmp(pDb->sqlState,"08S01"))
                ))
             {
                 pDb->DispNextError();
@@ -1718,46 +1364,10 @@ bool wxDbTable::DropIndex(const wxString &idxName)
 }  // wxDbTable::DropIndex()
 
 
-/********** wxDbTable::SetOrderByColNums() **********/
-bool wxDbTable::SetOrderByColNums(UWORD first, ... )
-{
-    int        colNo = first;  // using 'int' to be able to look for wxDB_NO_MORE_COLUN_NUMBERS
-    va_list     argptr;
-
-    bool        abort = FALSE;
-    wxString    tempStr;
-
-    va_start(argptr, first);     /* Initialize variable arguments. */
-    while (!abort && (colNo != wxDB_NO_MORE_COLUMN_NUMBERS))
-    {
-        // Make sure the passed in column number
-        // is within the valid range of columns
-        //
-        // Valid columns are 0 thru noCols-1
-        if (colNo >= noCols || colNo < 0)
-        {
-            abort = TRUE;
-            continue;
-        }
-
-        if (colNo != first)
-            tempStr += wxT(",");
-
-        tempStr += colDefs[colNo].ColName;
-        colNo = va_arg (argptr, int);
-    }
-    va_end (argptr);              /* Reset variable arguments.      */
-
-    SetOrderByClause(tempStr);
-
-    return (!abort);
-}  // wxDbTable::SetOrderByColNums()
-
-
 /********** wxDbTable::Insert() **********/
 int wxDbTable::Insert(void)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
     if (queryOnly || !insertable)
         return(DB_FAILURE);
 
@@ -1770,7 +1380,7 @@ int wxDbTable::Insert(void)
     {
         // Check to see if integrity constraint was violated
         pDb->GetNextError(henv, hdbc, hstmtInsert);
-        if (! wxStrcmp(pDb->sqlState, wxT("23000")))  // Integrity constraint violated
+        if (! wxStrcmp(pDb->sqlState, "23000"))  // Integrity constraint violated
             return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
         else
         {
@@ -1789,11 +1399,11 @@ int wxDbTable::Insert(void)
 /********** wxDbTable::Update() **********/
 bool wxDbTable::Update(void)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
     if (queryOnly)
         return(FALSE);
 
-    wxString sqlStmt;
+    char sqlStmt[DB_MAX_STATEMENT_LEN];
 
     // Build the SQL UPDATE statement
     BuildUpdateStmt(sqlStmt, DB_UPD_KEYFIELDS);
@@ -1801,7 +1411,7 @@ bool wxDbTable::Update(void)
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl << endl;
+    cout << endl << sqlStmt << endl << endl;
 #endif
 
     // Execute the SQL UPDATE statement
@@ -1811,9 +1421,9 @@ bool wxDbTable::Update(void)
 
 
 /********** wxDbTable::Update(pSqlStmt) **********/
-bool wxDbTable::Update(const wxString &pSqlStmt)
+bool wxDbTable::Update(const char *pSqlStmt)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
     if (queryOnly)
         return(FALSE);
 
@@ -1825,13 +1435,13 @@ bool wxDbTable::Update(const wxString &pSqlStmt)
 
 
 /********** wxDbTable::UpdateWhere() **********/
-bool wxDbTable::UpdateWhere(const wxString &pWhereClause)
+bool wxDbTable::UpdateWhere(const char *pWhereClause)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
     if (queryOnly)
         return(FALSE);
 
-    wxString sqlStmt;
+    char sqlStmt[DB_MAX_STATEMENT_LEN];
 
     // Build the SQL UPDATE statement
     BuildUpdateStmt(sqlStmt, DB_UPD_WHERE, pWhereClause);
@@ -1839,7 +1449,7 @@ bool wxDbTable::UpdateWhere(const wxString &pWhereClause)
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl << endl;
+    cout << endl << sqlStmt << endl << endl;
 #endif
 
     // Execute the SQL UPDATE statement
@@ -1851,12 +1461,11 @@ bool wxDbTable::UpdateWhere(const wxString &pWhereClause)
 /********** wxDbTable::Delete() **********/
 bool wxDbTable::Delete(void)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
     if (queryOnly)
         return(FALSE);
 
-    wxString sqlStmt;
-    sqlStmt.Empty();
+    char sqlStmt[DB_MAX_STATEMENT_LEN];
 
     // Build the SQL DELETE statement
     BuildDeleteStmt(sqlStmt, DB_DEL_KEYFIELDS);
@@ -1870,14 +1479,13 @@ bool wxDbTable::Delete(void)
 
 
 /********** wxDbTable::DeleteWhere() **********/
-bool wxDbTable::DeleteWhere(const wxString &pWhereClause)
+bool wxDbTable::DeleteWhere(const char *pWhereClause)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
     if (queryOnly)
         return(FALSE);
 
-    wxString sqlStmt;
-    sqlStmt.Empty();
+    char sqlStmt[DB_MAX_STATEMENT_LEN];
 
     // Build the SQL DELETE statement
     BuildDeleteStmt(sqlStmt, DB_DEL_WHERE, pWhereClause);
@@ -1893,12 +1501,11 @@ bool wxDbTable::DeleteWhere(const wxString &pWhereClause)
 /********** wxDbTable::DeleteMatching() **********/
 bool wxDbTable::DeleteMatching(void)
 {
-    wxASSERT(!queryOnly);
+    assert(!queryOnly);
     if (queryOnly)
         return(FALSE);
 
-    wxString sqlStmt;
-    sqlStmt.Empty();
+    char sqlStmt[DB_MAX_STATEMENT_LEN];
 
     // Build the SQL DELETE statement
     BuildDeleteStmt(sqlStmt, DB_DEL_MATCHING);
@@ -1911,13 +1518,203 @@ bool wxDbTable::DeleteMatching(void)
 }  // wxDbTable::DeleteMatching()
 
 
-/********** wxDbTable::IsColNull() **********/
-bool wxDbTable::IsColNull(UWORD colNo) const
+/********** wxDbTable::BuildUpdateStmt() **********/
+void wxDbTable::BuildUpdateStmt(char *pSqlStmt, int typeOfUpd, const char *pWhereClause)
 {
-/*
-    This logic is just not right.  It would indicate TRUE
-    if a numeric field were set to a value of 0.
+    assert(!queryOnly);
+    if (queryOnly)
+        return;
 
+    char whereClause[DB_MAX_WHERE_CLAUSE_LEN];
+    bool firstColumn = TRUE;
+
+    whereClause[0] = 0;
+    sprintf(pSqlStmt, "UPDATE %s SET ", tableName);
+
+    // Append a list of columns to be updated
+    int i;
+    for (i = 0; i < noCols; i++)
+    {
+        // Only append Updateable columns
+        if (colDefs[i].Updateable)
+        {
+            if (! firstColumn)
+                wxStrcat(pSqlStmt, ",");
+            else
+                firstColumn = FALSE;
+            wxStrcat(pSqlStmt, colDefs[i].ColName);
+            wxStrcat(pSqlStmt, " = ?");
+        }
+    }
+
+    // Append the WHERE clause to the SQL UPDATE statement
+    wxStrcat(pSqlStmt, " WHERE ");
+    switch(typeOfUpd)
+    {
+        case DB_UPD_KEYFIELDS:
+            // If the datasource supports the ROWID column, build
+            // the where on ROWID for efficiency purposes.
+            // e.g. UPDATE PARTS SET Col1 = ?, Col2 = ? WHERE ROWID = '111.222.333'
+            if (CanUpdByROWID())
+            {
+                SDWORD cb;
+                char   rowid[wxDB_ROWID_LEN];
+
+                // Get the ROWID value.  If not successful retreiving the ROWID,
+                // simply fall down through the code and build the WHERE clause
+                // based on the key fields.
+                if (SQLGetData(hstmt, noCols+1, SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
+                {
+                    wxStrcat(pSqlStmt, "ROWID = '");
+                    wxStrcat(pSqlStmt, rowid);
+                    wxStrcat(pSqlStmt, "'");
+                    break;
+                }
+            }
+            // Unable to delete by ROWID, so build a WHERE
+            // clause based on the keyfields.
+            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
+            wxStrcat(pSqlStmt, whereClause);
+            break;
+        case DB_UPD_WHERE:
+            wxStrcat(pSqlStmt, pWhereClause);
+            break;
+    }
+}  // BuildUpdateStmt()
+
+
+/********** wxDbTable::BuildDeleteStmt() **********/
+void wxDbTable::BuildDeleteStmt(char *pSqlStmt, int typeOfDel, const char *pWhereClause)
+{
+    assert(!queryOnly);
+    if (queryOnly)
+        return;
+
+    char whereClause[DB_MAX_WHERE_CLAUSE_LEN];
+
+    whereClause[0] = 0;
+
+    // Handle the case of DeleteWhere() and the where clause is blank.  It should
+    // delete all records from the database in this case.
+    if (typeOfDel == DB_DEL_WHERE && (pWhereClause == 0 || wxStrlen(pWhereClause) == 0))
+    {
+        sprintf(pSqlStmt, "DELETE FROM %s", tableName);
+        return;
+    }
+
+    sprintf(pSqlStmt, "DELETE FROM %s WHERE ", tableName);
+
+    // Append the WHERE clause to the SQL DELETE statement
+    switch(typeOfDel)
+    {
+        case DB_DEL_KEYFIELDS:
+            // If the datasource supports the ROWID column, build
+            // the where on ROWID for efficiency purposes.
+            // e.g. DELETE FROM PARTS WHERE ROWID = '111.222.333'
+            if (CanUpdByROWID())
+            {
+                SDWORD cb;
+                char   rowid[wxDB_ROWID_LEN];
+
+                // Get the ROWID value.  If not successful retreiving the ROWID,
+                // simply fall down through the code and build the WHERE clause
+                // based on the key fields.
+                if (SQLGetData(hstmt, noCols+1, SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
+                {
+                    wxStrcat(pSqlStmt, "ROWID = '");
+                    wxStrcat(pSqlStmt, rowid);
+                    wxStrcat(pSqlStmt, "'");
+                    break;
+                }
+            }
+            // Unable to delete by ROWID, so build a WHERE
+            // clause based on the keyfields.
+            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
+            wxStrcat(pSqlStmt, whereClause);
+            break;
+        case DB_DEL_WHERE:
+            wxStrcat(pSqlStmt, pWhereClause);
+            break;
+        case DB_DEL_MATCHING:
+            BuildWhereClause(whereClause, DB_WHERE_MATCHING);
+            wxStrcat(pSqlStmt, whereClause);
+            break;
+    }
+
+}  // BuildDeleteStmt()
+
+
+/********** wxDbTable::BuildWhereClause() **********/
+void wxDbTable::BuildWhereClause(char *pWhereClause, int typeOfWhere,
+                                 const char *qualTableName, bool useLikeComparison)
+/*
+ * Note: BuildWhereClause() currently ignores timestamp columns.
+ *       They are not included as part of the where clause.
+ */
+{
+    bool moreThanOneColumn = FALSE;
+    char colValue[255];
+
+    // Loop through the columns building a where clause as you go
+    int i;
+    for (i = 0; i < noCols; i++)
+    {
+        // Determine if this column should be included in the WHERE clause
+        if ((typeOfWhere == DB_WHERE_KEYFIELDS && colDefs[i].KeyField) ||
+             (typeOfWhere == DB_WHERE_MATCHING  && (! IsColNull(i))))
+        {
+            // Skip over timestamp columns
+            if (colDefs[i].SqlCtype == SQL_C_TIMESTAMP)
+                continue;
+            // If there is more than 1 column, join them with the keyword "AND"
+            if (moreThanOneColumn)
+                wxStrcat(pWhereClause, " AND ");
+            else
+                moreThanOneColumn = TRUE;
+            // Concatenate where phrase for the column
+            if (qualTableName && wxStrlen(qualTableName))
+            {
+                wxStrcat(pWhereClause, qualTableName);
+                wxStrcat(pWhereClause, ".");
+            }
+            wxStrcat(pWhereClause, colDefs[i].ColName);
+            if (useLikeComparison && (colDefs[i].SqlCtype == SQL_C_CHAR))
+                wxStrcat(pWhereClause, " LIKE ");
+            else
+                wxStrcat(pWhereClause, " = ");
+            switch(colDefs[i].SqlCtype)
+            {
+                case SQL_C_CHAR:
+                    sprintf(colValue, "'%s'", (UCHAR FAR *) colDefs[i].PtrDataObj);
+                    break;
+                case SQL_C_SSHORT:
+                    sprintf(colValue, "%hi", *((SWORD *) colDefs[i].PtrDataObj));
+                    break;
+                case SQL_C_USHORT:
+                    sprintf(colValue, "%hu", *((UWORD *) colDefs[i].PtrDataObj));
+                    break;
+                case SQL_C_SLONG:
+                    sprintf(colValue, "%li", *((SDWORD *) colDefs[i].PtrDataObj));
+                    break;
+                case SQL_C_ULONG:
+                    sprintf(colValue, "%lu", *((UDWORD *) colDefs[i].PtrDataObj));
+                    break;
+                case SQL_C_FLOAT:
+                    sprintf(colValue, "%.6f", *((SFLOAT *) colDefs[i].PtrDataObj));
+                    break;
+                case SQL_C_DOUBLE:
+                    sprintf(colValue, "%.6f", *((SDOUBLE *) colDefs[i].PtrDataObj));
+                    break;
+            }
+            wxStrcat(pWhereClause, colValue);
+        }
+    }
+}  // wxDbTable::BuildWhereClause()
+
+
+/********** wxDbTable::IsColNull() **********/
+bool wxDbTable::IsColNull(int colNo)
+{
     switch(colDefs[colNo].SqlCtype)
     {
         case SQL_C_CHAR:
@@ -1944,22 +1741,16 @@ bool wxDbTable::IsColNull(UWORD colNo) const
         default:
             return(TRUE);
     }
-*/
-    return (colDefs[colNo].Null);
 }  // wxDbTable::IsColNull()
 
 
 /********** wxDbTable::CanSelectForUpdate() **********/
 bool wxDbTable::CanSelectForUpdate(void)
 {
-    if (queryOnly)
-        return FALSE;
-
     if (pDb->Dbms() == dbmsMY_SQL)
         return FALSE;
 
-    if ((pDb->Dbms() == dbmsORACLE) ||
-        (pDb->dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
+    if (pDb->dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE)
         return(TRUE);
     else
         return(FALSE);
@@ -1975,12 +1766,12 @@ bool wxDbTable::CanUpdByROWID(void)
  *        as the ROWID is not getting updated correctly
  */
     return FALSE;
-/*
+
     if (pDb->Dbms() == dbmsORACLE)
         return(TRUE);
     else
         return(FALSE);
-*/
+
 }  // wxDbTable::CanUpdByROWID()
 
 
@@ -1995,61 +1786,49 @@ bool wxDbTable::IsCursorClosedOnCommit(void)
 }  // wxDbTable::IsCursorClosedOnCommit()
 
 
-
-/********** wxDbTable::ClearMemberVar() **********/
-void wxDbTable::ClearMemberVar(UWORD colNo, bool setToNull)
-{
-    wxASSERT(colNo < noCols);
-
-    switch(colDefs[colNo].SqlCtype)
-    {
-        case SQL_C_CHAR:
-            ((UCHAR FAR *) colDefs[colNo].PtrDataObj)[0]    = 0;
-            break;
-        case SQL_C_SSHORT:
-            *((SWORD *) colDefs[colNo].PtrDataObj)          = 0;
-            break;
-        case SQL_C_USHORT:
-            *((UWORD*) colDefs[colNo].PtrDataObj)           = 0;
-            break;
-        case SQL_C_SLONG:
-            *((SDWORD *) colDefs[colNo].PtrDataObj)         = 0;
-            break;
-        case SQL_C_ULONG:
-            *((UDWORD *) colDefs[colNo].PtrDataObj)         = 0;
-            break;
-        case SQL_C_FLOAT:
-            *((SFLOAT *) colDefs[colNo].PtrDataObj)         = 0.0f;
-            break;
-        case SQL_C_DOUBLE:
-            *((SDOUBLE *) colDefs[colNo].PtrDataObj)        = 0.0f;
-            break;
-        case SQL_C_TIMESTAMP:
-            TIMESTAMP_STRUCT *pDt;
-            pDt = (TIMESTAMP_STRUCT *) colDefs[colNo].PtrDataObj;
-            pDt->year = 0;
-            pDt->month = 0;
-            pDt->day = 0;
-            pDt->hour = 0;
-            pDt->minute = 0;
-            pDt->second = 0;
-            pDt->fraction = 0;
-            break;
-    }
-
-    if (setToNull)
-        SetColNull(colNo);
-}  // wxDbTable::ClearMemberVar()
-
-
 /********** wxDbTable::ClearMemberVars() **********/
-void wxDbTable::ClearMemberVars(bool setToNull)
+void wxDbTable::ClearMemberVars(void)
 {
-    int i;
-
     // Loop through the columns setting each member variable to zero
-    for (i=0; i < noCols; i++)
-        ClearMemberVar(i,setToNull);
+    int i;
+    for (i = 0; i < noCols; i++)
+    {
+        switch(colDefs[i].SqlCtype)
+        {
+            case SQL_C_CHAR:
+                ((UCHAR FAR *) colDefs[i].PtrDataObj)[0]    = 0;
+                break;
+            case SQL_C_SSHORT:
+                *((SWORD *) colDefs[i].PtrDataObj)          = 0;
+                break;
+            case SQL_C_USHORT:
+                *((UWORD*) colDefs[i].PtrDataObj)           = 0;
+                break;
+            case SQL_C_SLONG:
+                *((SDWORD *) colDefs[i].PtrDataObj)         = 0;
+                break;
+            case SQL_C_ULONG:
+                *((UDWORD *) colDefs[i].PtrDataObj)         = 0;
+                break;
+            case SQL_C_FLOAT:
+                *((SFLOAT *) colDefs[i].PtrDataObj)         = 0.0f;
+                break;
+            case SQL_C_DOUBLE:
+                *((SDOUBLE *) colDefs[i].PtrDataObj)        = 0.0f;
+                break;
+            case SQL_C_TIMESTAMP:
+                TIMESTAMP_STRUCT *pDt;
+                pDt = (TIMESTAMP_STRUCT *) colDefs[i].PtrDataObj;
+                pDt->year = 0;
+                pDt->month = 0;
+                pDt->day = 0;
+                pDt->hour = 0;
+                pDt->minute = 0;
+                pDt->second = 0;
+                pDt->fraction = 0;
+                break;
+        }
+    }
 
 }  // wxDbTable::ClearMemberVars()
 
@@ -2073,21 +1852,17 @@ bool wxDbTable::SetQueryTimeout(UDWORD nSeconds)
 
 
 /********** wxDbTable::SetColDefs() **********/
-void wxDbTable::SetColDefs(UWORD index, const wxString &fieldName, int dataType, void *pData,
-                           SWORD cType, int size, bool keyField, bool upd,
-                           bool insAllow, bool derivedCol)
+void wxDbTable::SetColDefs (int index, const char *fieldName, int dataType, void *pData,
+                            int cType, int size, bool keyField, bool upd,
+                            bool insAllow, bool derivedCol)
 {
     if (!colDefs)  // May happen if the database connection fails
         return;
 
-    if (fieldName.Length() > (unsigned int) DB_MAX_COLUMN_NAME_LEN)
+    if (wxStrlen(fieldName) > (unsigned int) DB_MAX_COLUMN_NAME_LEN)
     {
-        int assertColumnNameTooLong = 0;
-        wxStrncpy(colDefs[index].ColName, fieldName, DB_MAX_COLUMN_NAME_LEN);
+        wxStrncpy (colDefs[index].ColName, fieldName, DB_MAX_COLUMN_NAME_LEN);
         colDefs[index].ColName[DB_MAX_COLUMN_NAME_LEN] = 0;
-        wxString tmpMsg;
-        tmpMsg.Printf("Column name '%s' is too long. Truncated to '%s'.",fieldName.c_str(),colDefs[index].ColName);
-        wxASSERT_MSG(assertColumnNameTooLong,tmpMsg.c_str());
     }
     else
         wxStrcpy(colDefs[index].ColName, fieldName);
@@ -2115,15 +1890,15 @@ void wxDbTable::SetColDefs(UWORD index, const wxString &fieldName, int dataType,
 }  // wxDbTable::SetColDefs()
 
 
-/********** wxDbTable::SetColDefs() **********/
-wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
+/********** wxDbTable::SetColDef() **********/
+wxDbColDataPtr* wxDbTable::SetColDefs (wxDbColInf *pColInfs, ULONG numCols)
 {
-    wxASSERT(pColInfs);
+    assert(pColInfs);
     wxDbColDataPtr *pColDataPtrs = NULL;
 
     if (pColInfs)
     {
-        UWORD index;
+        ULONG index;
        
         pColDataPtrs = new wxDbColDataPtr[numCols+1];
 
@@ -2133,7 +1908,7 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
             switch (pColInfs[index].dbDataType)
             {
                 case DB_DATA_TYPE_VARCHAR:
-                   pColDataPtrs[index].PtrDataObj = new wxChar[pColInfs[index].bufferLength+1];
+                   pColDataPtrs[index].PtrDataObj = new char[pColInfs[index].bufferLength+1];
                    pColDataPtrs[index].SzDataObj  = pColInfs[index].columnSize;
                    pColDataPtrs[index].SqlCtype   = SQL_C_CHAR;
                    break;
@@ -2172,32 +1947,14 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
                     pColDataPtrs[index].SzDataObj  = sizeof(TIMESTAMP_STRUCT);
                     pColDataPtrs[index].SqlCtype   = SQL_C_TIMESTAMP;
                     break;
-                case DB_DATA_TYPE_BLOB:
-                    int notSupportedYet = 0;
-                    wxASSERT_MSG(notSupportedYet, wxT("This form of ::SetColDefs() cannot be used with BLOB columns"));
-                    pColDataPtrs[index].PtrDataObj = /*BLOB ADDITION NEEDED*/NULL;
-                    pColDataPtrs[index].SzDataObj  = /*BLOB ADDITION NEEDED*/sizeof(void *);
-                    pColDataPtrs[index].SqlCtype   = SQL_VARBINARY;
-                    break;
             }
-            if (pColDataPtrs[index].PtrDataObj != NULL)
-                SetColDefs (index,pColInfs[index].colName,pColInfs[index].dbDataType, pColDataPtrs[index].PtrDataObj, pColDataPtrs[index].SqlCtype, pColDataPtrs[index].SzDataObj);
-            else
-            {
-                // Unable to build all the column definitions, as either one of 
-                // the calls to "new" failed above, or there was a BLOB field
-                // to have a column definition for.  If BLOBs are to be used,
-                // the other form of ::SetColDefs() must be used, as it is impossible
-                // to know the maximum size to create the PtrDataObj to be.
-                delete [] pColDataPtrs;
-                return NULL;
-            }
+            SetColDefs (index,pColInfs[index].colName,pColInfs[index].dbDataType, pColDataPtrs[index].PtrDataObj, pColDataPtrs[index].SqlCtype, pColDataPtrs[index].SzDataObj);
         }
     }
 
     return (pColDataPtrs);
 
-} // wxDbTable::SetColDefs()
+} // wxDbTable::SetColDef()
 
 
 /********** wxDbTable::SetCursor() **********/
@@ -2211,17 +1968,17 @@ void wxDbTable::SetCursor(HSTMT *hstmtActivate)
 }  // wxDbTable::SetCursor()
 
 
-/********** wxDbTable::Count(const wxString &) **********/
-ULONG wxDbTable::Count(const wxString &args)
+/********** wxDbTable::Count(const char *) **********/
+ULONG wxDbTable::Count(const char *args)
 {
     ULONG count;
     wxString sqlStmt;
     SDWORD cb;
 
     // Build a "SELECT COUNT(*) FROM queryTableName [WHERE whereClause]" SQL Statement
-    sqlStmt  = wxT("SELECT COUNT(");
+    sqlStmt  = "SELECT COUNT(";
     sqlStmt += args;
-    sqlStmt += wxT(") FROM ");
+    sqlStmt += ") FROM ";
     sqlStmt += queryTableName;
 #if wxODBC_BACKWARD_COMPATABILITY
     if (from && wxStrlen(from))
@@ -2237,17 +1994,17 @@ ULONG wxDbTable::Count(const wxString &args)
     if (where.Length())
 #endif
     {
-        sqlStmt += wxT(" WHERE ");
+        sqlStmt += " WHERE ";
         sqlStmt += where;
     }
 
-    pDb->WriteSqlLog(sqlStmt);
+    pDb->WriteSqlLog(sqlStmt.c_str());
 
     // Initialize the Count cursor if it's not already initialized
     if (!hstmtCount)
     {
         hstmtCount = GetNewCursor(FALSE,FALSE);
-        wxASSERT(hstmtCount);
+        assert(hstmtCount);
         if (!hstmtCount)
             return(0);
     }
@@ -2267,7 +2024,7 @@ ULONG wxDbTable::Count(const wxString &args)
     }
 
     // Obtain the result
-    if (SQLGetData(*hstmtCount, (UWORD)1, SQL_C_ULONG, &count, sizeof(count), &cb) != SQL_SUCCESS)
+    if (SQLGetData(*hstmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb) != SQL_SUCCESS)
     {
         pDb->DispAllErrors(henv, hdbc, *hstmtCount);
         return(0);
@@ -2301,23 +2058,22 @@ bool wxDbTable::Refresh(void)
 #endif
     // Build a where clause to refetch the record with.  Try and use the
     // ROWID if it's available, ow use the key fields.
-    wxString whereClause;
-    whereClause.Empty();
-
+    char whereClause[DB_MAX_WHERE_CLAUSE_LEN+1];
+    wxStrcpy(whereClause, "");
     if (CanUpdByROWID())
     {
         SDWORD cb;
-        wxChar   rowid[wxDB_ROWID_LEN+1];
+        char   rowid[wxDB_ROWID_LEN+1];
 
         // Get the ROWID value.  If not successful retreiving the ROWID,
         // simply fall down through the code and build the WHERE clause
         // based on the key fields.
-        if (SQLGetData(hstmt, (UWORD)(noCols+1), SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
+        if (SQLGetData(hstmt, noCols+1, SQL_C_CHAR, (UCHAR*) rowid, wxDB_ROWID_LEN, &cb) == SQL_SUCCESS)
         {
-            whereClause += queryTableName;
-            whereClause += wxT(".ROWID = '");
-            whereClause += rowid;
-            whereClause += wxT("'");
+            wxStrcat(whereClause, queryTableName);
+            wxStrcat(whereClause, ".ROWID = '");
+            wxStrcat(whereClause, rowid);
+            wxStrcat(whereClause, "'");
         }
     }
 
@@ -2327,7 +2083,7 @@ bool wxDbTable::Refresh(void)
 
     // Requery the record
     where = whereClause;
-    orderBy.Empty();
+    orderBy = "";
     if (!Query())
         result = FALSE;
 
@@ -2350,24 +2106,19 @@ bool wxDbTable::Refresh(void)
 }  // wxDbTable::Refresh()
 
 
-/********** wxDbTable::SetColNull() **********/
-bool wxDbTable::SetColNull(UWORD colNo, bool set)
+/********** wxDbTable::SetNull(int colNo) **********/
+bool wxDbTable::SetNull(int colNo)
 {
     if (colNo < noCols)
-    {
-        colDefs[colNo].Null = set;
-        if (set)  // Blank out the values in the member variable
-            ClearMemberVar(colNo,FALSE);  // Must call with FALSE, or infinite recursion will happen
-        return(TRUE);
-    }
+        return(colDefs[colNo].Null = TRUE);
     else
         return(FALSE);
 
-}  // wxDbTable::SetColNull()
+}  // wxDbTable::SetNull(int colNo)
 
 
-/********** wxDbTable::SetColNull() **********/
-bool wxDbTable::SetColNull(const wxString &colName, bool set)
+/********** wxDbTable::SetNull(char *colName) **********/
+bool wxDbTable::SetNull(const char *colName)
 {
     int i;
     for (i = 0; i < noCols; i++)
@@ -2377,23 +2128,18 @@ bool wxDbTable::SetColNull(const wxString &colName, bool set)
     }
 
     if (i < noCols)
-    {
-        colDefs[i].Null = set;
-        if (set)  // Blank out the values in the member variable
-            ClearMemberVar(i,FALSE);  // Must call with FALSE, or infinite recursion will happen
-        return(TRUE);
-    }
+        return(colDefs[i].Null = TRUE);
     else
         return(FALSE);
 
-}  // wxDbTable::SetColNull()
+}  // wxDbTable::SetNull(char *colName)
 
 
 /********** wxDbTable::GetNewCursor() **********/
 HSTMT *wxDbTable::GetNewCursor(bool setCursor, bool bindColumns)
 {
     HSTMT *newHSTMT = new HSTMT;
-    wxASSERT(newHSTMT);
+    assert(newHSTMT);
     if (!newHSTMT)
         return(0);
 
@@ -2413,7 +2159,7 @@ HSTMT *wxDbTable::GetNewCursor(bool setCursor, bool bindColumns)
 
     if (bindColumns)
     {
-        if (!bindCols(*newHSTMT))
+        if(!bindCols(*newHSTMT))
         {
             delete newHSTMT;
             return(0);
@@ -2436,11 +2182,6 @@ bool wxDbTable::DeleteCursor(HSTMT *hstmtDel)
     if (!hstmtDel)  // Cursor already deleted
         return(result);
 
-/*
-ODBC 3.0 says to use this form
-    if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-    
-*/
     if (SQLFreeStmt(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
     {
         pDb->DispAllErrors(henv, hdbc);
@@ -2452,229 +2193,6 @@ ODBC 3.0 says to use this form
     return(result);
 
 }  // wxDbTable::DeleteCursor()
-
-//////////////////////////////////////////////////////////////
-// wxDbGrid support functions
-//////////////////////////////////////////////////////////////
-
-void wxDbTable::SetRowMode(const rowmode_t rowmode)
-{
-    if (!m_hstmtGridQuery)
-    {
-        m_hstmtGridQuery = GetNewCursor(FALSE,FALSE);
-        if (!bindCols(*m_hstmtGridQuery))
-            return;
-    }
-
-    m_rowmode = rowmode;
-    switch (m_rowmode)
-    {
-        case WX_ROW_MODE_QUERY:
-            SetCursor(m_hstmtGridQuery);
-            break;
-        case WX_ROW_MODE_INDIVIDUAL:
-            SetCursor(hstmtDefault);
-            break;
-        default:
-            assert(0);
-    }
-}  // wxDbTable::SetRowMode()
-
-
-wxVariant wxDbTable::GetCol(const int col) const
-{
-    wxVariant val;
-    if ((col < noCols) && (!IsColNull(col)))
-    {
-        switch (colDefs[col].SqlCtype)
-        {
-            case SQL_CHAR:
-            case SQL_VARCHAR:
-                val = (char *)(colDefs[col].PtrDataObj);
-                break;
-            case SQL_C_LONG:
-            case SQL_C_SLONG:
-                val = *(long *)(colDefs[col].PtrDataObj);
-                break;
-            case SQL_C_SHORT:
-            case SQL_C_SSHORT:
-                val = (long int )(*(short *)(colDefs[col].PtrDataObj));
-                break;
-            case SQL_C_ULONG:
-                val = (long)(*(unsigned long *)(colDefs[col].PtrDataObj));
-                break;
-            case SQL_C_TINYINT:
-                val = (long)(*(char *)(colDefs[col].PtrDataObj));
-                break;
-            case SQL_C_UTINYINT:
-                val = (long)(*(unsigned char *)(colDefs[col].PtrDataObj));
-                break;
-            case SQL_C_USHORT:
-                val = (long)(*(UWORD *)(colDefs[col].PtrDataObj));
-                break;
-            case SQL_C_DATE:
-                val = (DATE_STRUCT *)(colDefs[col].PtrDataObj);
-                break;
-            case SQL_C_TIME:
-                val = (TIME_STRUCT *)(colDefs[col].PtrDataObj);
-                break;
-            case SQL_C_TIMESTAMP:
-                val = (TIMESTAMP_STRUCT *)(colDefs[col].PtrDataObj);
-                break;
-            case SQL_C_DOUBLE:
-                val = *(double *)(colDefs[col].PtrDataObj);
-                break;
-            default:
-                assert(0);
-        }
-    }
-    return val;
-}  // wxDbTable::GetCol()
-
-
-void csstrncpyt(char *s, const char *t, int n)
-{
-    while ((*s++ = *t++) && --n)
-    {};
-
-    *s = '\0';
-}
-
-void wxDbTable::SetCol(const int col, const wxVariant val)
-{
-    //FIXME: Add proper wxDateTime support to wxVariant..
-    wxDateTime dateval;
-
-    SetColNull(col, val.IsNull());
-
-    if (!val.IsNull())
-    {
-        if ((colDefs[col].SqlCtype == SQL_C_DATE) 
-            || (colDefs[col].SqlCtype == SQL_C_TIME)
-            || (colDefs[col].SqlCtype == SQL_C_TIMESTAMP))
-        {
-            //Returns null if invalid!
-            if (!dateval.ParseDate(val.GetString()))
-                SetColNull(col,TRUE);
-        }               
-
-        switch (colDefs[col].SqlCtype)
-        {
-            case SQL_CHAR:
-            case SQL_VARCHAR:
-                csstrncpyt((char *)(colDefs[col].PtrDataObj),
-                           val.GetString().c_str(), 
-                           colDefs[col].SzDataObj-1);
-                break;
-            case SQL_C_LONG:
-            case SQL_C_SLONG:
-                *(long *)(colDefs[col].PtrDataObj) = val;
-                break;
-            case SQL_C_SHORT:
-            case SQL_C_SSHORT:
-                *(short *)(colDefs[col].PtrDataObj) = val.GetLong();
-                break;
-            case SQL_C_ULONG:
-                *(unsigned long *)(colDefs[col].PtrDataObj) = val.GetLong();
-                break;
-            case SQL_C_TINYINT:
-                *(char *)(colDefs[col].PtrDataObj) = val.GetChar();
-                break;
-            case SQL_C_UTINYINT:
-                *(unsigned char *)(colDefs[col].PtrDataObj) = val.GetChar();
-                break;
-            case SQL_C_USHORT:
-                *(unsigned short *)(colDefs[col].PtrDataObj) = val.GetLong();
-                break;
-            //FIXME: Add proper wxDateTime support to wxVariant..
-            case SQL_C_DATE:
-                {
-                    DATE_STRUCT *dataptr =
-                        (DATE_STRUCT *)colDefs[col].PtrDataObj;
-                
-                    dataptr->year   = dateval.GetYear();
-                    dataptr->month  = dateval.GetMonth()+1;
-                    dataptr->day    = dateval.GetDay();
-                }
-                break;
-            case SQL_C_TIME:
-                {
-                    TIME_STRUCT *dataptr =
-                        (TIME_STRUCT *)colDefs[col].PtrDataObj;
-                
-                    dataptr->hour   = dateval.GetHour();
-                    dataptr->minute = dateval.GetMinute();
-                    dataptr->second = dateval.GetSecond();
-                }
-                break;
-            case SQL_C_TIMESTAMP:
-                {
-                    TIMESTAMP_STRUCT *dataptr =
-                        (TIMESTAMP_STRUCT *)colDefs[col].PtrDataObj;
-                    dataptr->year   = dateval.GetYear();
-                    dataptr->month  = dateval.GetMonth()+1;
-                    dataptr->day    = dateval.GetDay();
-                
-                    dataptr->hour   = dateval.GetHour();
-                    dataptr->minute = dateval.GetMinute();
-                    dataptr->second = dateval.GetSecond();
-                }
-                break;
-            case SQL_C_DOUBLE:
-                *(double *)(colDefs[col].PtrDataObj) = val;
-                break;
-            default:
-                assert(0);
-        }  // switch
-    }  // if (!val.IsNull())
-}  // wxDbTable::SetCol()
-
-
-GenericKey wxDbTable::GetKey()
-{
-    void *blk;
-    char *blkptr;
-    
-    blk = malloc(m_keysize);
-    blkptr = (char *) blk;
-    
-    int i;
-    for (i=0; i < noCols; i++)
-    {
-        if (colDefs[i].KeyField)
-        {
-            memcpy(blkptr,colDefs[i].PtrDataObj, colDefs[i].SzDataObj);
-            blkptr += colDefs[i].SzDataObj;
-        }
-    }
-
-    GenericKey k = GenericKey(blk, m_keysize);
-    free(blk);
-
-    return k;
-}  // wxDbTable::GetKey()
-
-
-void wxDbTable::SetKey(const GenericKey& k)
-{
-    void *blk;
-    char *blkptr;
-    
-    blk = k.GetBlk();
-    blkptr = (char *)blk;
-
-    int i;
-    for (i=0; i < noCols; i++)
-    {
-        if (colDefs[i].KeyField)
-        {
-            SetColNull(i, FALSE);
-            memcpy(colDefs[i].PtrDataObj, blkptr, colDefs[i].SzDataObj);
-            blkptr += colDefs[i].SzDataObj;
-        }
-    }
-}  // wxDbTable::SetKey()
-
 
 #endif  // wxUSE_ODBC
 

@@ -20,7 +20,7 @@
 #include "wx/gdiobj.h"
 
 #if wxUSE_DRAG_AND_DROP
-#include "wx/dataobj.h"
+#include "wx/dataobj.h" wx/defs.h
 #endif
 
 /*
@@ -120,7 +120,10 @@ bool WXDLLEXPORT wxMakeMetaFilePlaceable(const wxString& filename, int x1, int y
 // wxMetafileDataObject is a specialization of wxDataObject for metafile data
 // ----------------------------------------------------------------------------
 
-#if wxUSE_DATAOBJ
+// TODO: implement OLE side of things. At present, it's just for clipboard
+// use.
+
+#if wxUSE_DRAG_AND_DROP
 class WXDLLEXPORT wxMetafileDataObject : public wxDataObject
 {
 public:

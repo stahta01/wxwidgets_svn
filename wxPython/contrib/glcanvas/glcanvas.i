@@ -15,12 +15,7 @@
 
 %{
 #include "export.h"
-#ifdef __WXMSW__
-#include "myglcanvas.h"
-#else
 #include <wx/glcanvas.h>
-#endif
-
 %}
 
 //---------------------------------------------------------------------------
@@ -52,7 +47,7 @@ class wxGLCanvas;
 
 //---------------------------------------------------------------------------
 
-class wxGLContext : public wxObject {
+class wxGLContext {
 public:
     wxGLContext(bool isRGB, wxGLCanvas *win, const wxPalette& palette = wxNullPalette);
     ~wxGLContext();

@@ -27,7 +27,7 @@
 
 class wxPen;
 
-#if defined(__WXGTK127__) || defined(__WXGTK20__)
+#ifdef __WXGTK127__
 typedef    gint8 wxGTKDash;
 #else
 typedef    gchar wxGTKDash;

@@ -16,7 +16,6 @@
 %{
 #include "helpers.h"
 #include <wx/menuitem.h>
-#include <wx/tooltip.h>
 %}
 
 //----------------------------------------------------------------------
@@ -39,7 +38,7 @@
 
 //---------------------------------------------------------------------------
 
-class wxEvtHandler : public wxObject {
+class wxEvtHandler {
 public:
     wxEvtHandler();
 
@@ -71,11 +70,13 @@ public:
                                    (wxObjectEventFunction)
                                     &wxPyCallback::EventThunker);
         }
+
     }
 
-//      %pragma(python) addtoclass = "
-//      _prop_list_ = {}
-//      "
+    %pragma(python) addtoclass = "
+    _prop_list_ = {}
+    "
+
 //      %pragma(python) addtoclass = "
 //      def __getattr__(self, name):
 //          pl = self._prop_list_
@@ -111,9 +112,6 @@ public:
     wxWindow* GetWindow();
     void SetWindow(wxWindow* window);
 
-    static bool IsSilent();
-    static void SetBellOnError(int doIt = TRUE);
-
 //      // Properties list
 //      %pragma(python) addtoclass = "
 //      _prop_list_ = {
@@ -123,6 +121,15 @@ public:
 //      "
 };
 
+%inline %{
+    bool wxValidator_IsSilent() {
+        return wxValidator::IsSilent();
+    }
+
+    void wxValidator_SetBellOnError(int doIt = TRUE) {
+        wxValidator::SetBellOnError(doIt);
+    }
+%}
 
 //----------------------------------------------------------------------
 %{
@@ -131,6 +138,7 @@ class wxPyValidator : public wxValidator {
 public:
     wxPyValidator() {
     }
+//    wxPyValidator(const wxPyValidator& other);
 
     ~wxPyValidator() {
     }
@@ -158,12 +166,12 @@ public:
         return ptr;
     }
 
-
     DEC_PYCALLBACK_BOOL_WXWIN(Validate);
     DEC_PYCALLBACK_BOOL_(TransferToWindow);
     DEC_PYCALLBACK_BOOL_(TransferFromWindow);
 
     PYPRIVATE;
+//    PyObject*   m_data;
 };
 
 IMP_PYCALLBACK_BOOL_WXWIN(wxPyValidator, wxValidator, Validate);
@@ -177,9 +185,12 @@ IMPLEMENT_DYNAMIC_CLASS(wxPyValidator, wxValidator);
 class wxPyValidator : public wxValidator {
 public:
     wxPyValidator();
+//    ~wxPyValidator();
+
+    %addmethods { void Destroy() { delete self; } }
 
     void _setSelf(PyObject* self, PyObject* _class, int incref=TRUE);
-    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyValidator, 1)"
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyValidator, 0)"
 
 };
 
@@ -206,8 +217,6 @@ public:
     void CentreOnScreen(int direction = wxBOTH );
     void CenterOnScreen(int direction = wxBOTH );
 
-    void Clear();
-
     // (uses apply'ed INOUT typemap, see above)
     %name(ClientToScreenXY)void ClientToScreen(int* x, int* y);
     wxPoint ClientToScreen(const wxPoint& pt);
@@ -215,7 +224,6 @@ public:
     bool Close(int force = FALSE);
     bool Destroy();
     void DestroyChildren();
-    bool IsBeingDeleted();
 #ifdef __WXMSW__
     void DragAcceptFiles(bool accept);
 #endif
@@ -340,7 +348,6 @@ public:
     //void SetPalette(wxPalette* palette);
     void SetCursor(const wxCursor&cursor);
     void SetEventHandler(wxEvtHandler* handler);
-    void SetExtraStyle(long exStyle);
     void SetTitle(const wxString& title);
     bool Show(bool show);
     bool TransferDataFromWindow();
@@ -375,11 +382,23 @@ public:
 
     void SetCaret(wxCaret *caret);
     wxCaret *GetCaret();
-    %pragma(python) addtoclass = "# replaces broken shadow method
+    %pragma(python) addtoclass = "# replaces broken shadow methods
     def GetCaret(self, *_args, **_kwargs):
         from misc2 import wxCaretPtr
         val = apply(windowsc.wxWindow_GetCaret,(self,) + _args, _kwargs)
         if val: val = wxCaretPtr(val)
+        return val
+
+    def GetSizer(self, *_args, **_kwargs):
+        from sizers import wxSizerPtr
+        val = apply(windowsc.wxWindow_GetSizer,(self,) + _args, _kwargs)
+        if val: val = wxSizerPtr(val)
+        return val
+
+    def GetToolTip(self, *_args, **_kwargs):
+        from misc2 import wxToolTipPtr
+        val = apply(windowsc.wxWindow_GetToolTip,(self,) + _args, _kwargs)
+        if val: val = wxToolTipPtr(val)
         return val
     "
 
@@ -483,6 +502,14 @@ public:
     wxButton* GetDefaultItem();
     void SetDefaultItem(wxButton *btn);
 
+    // fix some SWIG trouble...
+    %pragma(python) addtoclass = "
+    def GetDefaultItem(self):
+        import controls
+        val = windowsc.wxPanel_GetDefaultItem(self.this)
+        val = controls.wxButtonPtr(val)
+        return val
+"
 };
 
 //---------------------------------------------------------------------------
@@ -512,10 +539,6 @@ public:
 
     int  GetReturnCode();
     void SetReturnCode(int retCode);
-
-    wxSizer* CreateTextSizer( const wxString &message );
-    wxSizer* CreateButtonSizer( long flags );
-
 };
 
 //---------------------------------------------------------------------------
@@ -551,11 +574,6 @@ public:
     void CalcScrolledPosition( int x, int y, int *OUTPUT, int *OUTPUT);
     void CalcUnscrolledPosition( int x, int y, int *OUTPUT, int *OUTPUT);
 
-    void SetScale(double xs, double ys);
-    double GetScaleX();
-    double GetScaleY();
-
-    void AdjustScrollbars();
 };
 
 //----------------------------------------------------------------------
@@ -661,7 +679,7 @@ public:
 
 //----------------------------------------------------------------------
 
-class wxMenuItem : public wxObject {
+class wxMenuItem {
 public:
     wxMenuItem(wxMenu* parentMenu=NULL, int id=wxID_SEPARATOR,
                const wxString& text = wxPyEmptyStr,
@@ -691,30 +709,6 @@ public:
     wxAcceleratorEntry *GetAccel();
     void SetAccel(wxAcceleratorEntry *accel);
 
-    static wxString GetLabelFromText(const wxString& text);
-
-    // wxOwnerDrawn methods
-#ifdef __WXMSW__
-    void SetFont(const wxFont& font);
-    wxFont& GetFont();
-    void SetTextColour(const wxColour& colText);
-    wxColour GetTextColour();
-    void SetBackgroundColour(const wxColour& colBack);
-    wxColour GetBackgroundColour();
-    void SetBitmaps(const wxBitmap& bmpChecked,
-                    const wxBitmap& bmpUnchecked = wxNullBitmap);
-    void SetBitmap(const wxBitmap& bmpChecked);
-    const wxBitmap& GetBitmap(bool bChecked = TRUE);
-    void SetMarginWidth(int nWidth);
-    int GetMarginWidth();
-    static int GetDefaultMarginWidth();
-    //void SetName(const wxString& strName);
-    //const wxString& GetName();
-    //void SetCheckable(bool checkable);
-    //bool IsCheckable();
-    bool IsOwnerDrawn();
-    void ResetOwnerDrawn();
-#endif
 };
 
 //---------------------------------------------------------------------------

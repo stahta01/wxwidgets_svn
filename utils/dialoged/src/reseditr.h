@@ -182,7 +182,7 @@ public:
     virtual wxResourceEditorScrolledWindow *OnCreateEditorPanel(wxFrame *parent);
     virtual wxToolBar *OnCreateToolBar(wxFrame *parent);
     
-    // Create a window information object for the given window
+    // Create a window information object for the give window
     wxWindowPropertyInfo* CreatePropertyInfoForWindow(wxWindow *win);
     // Edit the given window
     void EditWindow(wxWindow *win);
@@ -391,9 +391,8 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-#define OBJECT_MENU_TITLE     1
-#define OBJECT_MENU_EDIT      2
-#define OBJECT_MENU_DELETE    3
+#define OBJECT_MENU_EDIT      1
+#define OBJECT_MENU_DELETE    2
 
 /*
 * Main toolbar

@@ -26,6 +26,9 @@
 
 #include "wx/frame.h"
 
+#ifdef __VMS__
+#define gtk_pixmap_set_build_insensitive gtk_pixmap_set_build_insensitiv
+#endif
 #include "glib.h"
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
@@ -82,7 +85,7 @@ protected:
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarBase)
+IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl)
 
 // ============================================================================
 // implementation
@@ -141,7 +144,35 @@ static gint gtk_toolbar_enter_callback( GtkWidget *WXUNUSED(widget),
     
     wxToolBar *tb = (wxToolBar *)tool->GetToolBar();
     
-    // emit the event
+#if (GTK_MINOR_VERSION == 0)
+    /* we grey-out the tip text of disabled tool in GTK 1.0 */
+    if (tool->IsEnabled())
+    {
+        if (tb->m_fg->red != 0)
+        {
+            tb->m_fg->red = 0;
+            tb->m_fg->green = 0;
+            tb->m_fg->blue = 0;
+            gdk_color_alloc( gtk_widget_get_colormap( GTK_WIDGET(tb->m_toolbar) ), tb->m_fg );
+            
+            gtk_tooltips_set_colors( GTK_TOOLBAR(tb->m_toolbar)->tooltips, tb->m_bg, tb->m_fg );
+        }
+    }
+    else
+    {
+        if (tb->m_fg->red == 0)
+        {
+            tb->m_fg->red = 33000;
+            tb->m_fg->green = 33000;
+            tb->m_fg->blue = 33000;
+            gdk_color_alloc( gtk_widget_get_colormap( GTK_WIDGET(tb->m_toolbar) ), tb->m_fg );
+            gtk_tooltips_set_colors( GTK_TOOLBAR(tb->m_toolbar)->tooltips, tb->m_bg, tb->m_fg );
+        }
+    }
+#endif
+    
+    /* emit the event */
+  
     tb->OnMouseEnter( tool->GetId() );
   
     return FALSE;
@@ -154,7 +185,7 @@ static gint gtk_toolbar_enter_callback( GtkWidget *WXUNUSED(widget),
 static void wxInsertChildInToolBar( wxToolBar* WXUNUSED(parent),
                                     wxWindow* WXUNUSED(child) )
 {
-    // we don't do anything here
+    /* we don't do anything here but pray */
 }
 
 // ----------------------------------------------------------------------------
@@ -192,7 +223,9 @@ void wxToolBar::Init()
 {
     m_fg =
     m_bg = (GdkColor *)NULL;
+
     m_toolbar = (GtkToolbar *)NULL;
+
     m_blockNextEvent = FALSE;
 }
 
@@ -232,8 +265,10 @@ bool wxToolBar::Create( wxWindow *parent,
         gtk_container_add( GTK_CONTAINER(m_widget), GTK_WIDGET(m_toolbar) );
         gtk_widget_show( GTK_WIDGET(m_toolbar) );
 
+#if (GTK_MINOR_VERSION > 0)
         if (style & wxTB_FLAT)
             gtk_handle_box_set_shadow_type( GTK_HANDLE_BOX(m_widget), GTK_SHADOW_NONE );
+#endif
     }
     else
     {     
@@ -371,8 +406,7 @@ bool wxToolBar::DoInsertTool(size_t pos, wxToolBarToolBase *toolBase)
     }
 
     GtkRequisition req;
-    (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(m_widget) )->size_request )
-        (m_widget, &req );
+    (* GTK_WIDGET_CLASS( GTK_OBJECT(m_widget)->klass )->size_request ) (m_widget, &req );
     m_width = req.width + m_xMargin;
     m_height = req.height + 2*m_yMargin;
 
@@ -476,18 +510,6 @@ void wxToolBar::SetToolSeparation( int separation )
     m_toolSeparation = separation;
 }
 
-void wxToolBar::SetToolShortHelp( int id, const wxString& helpString )
-{
-    wxToolBarTool *tool = (wxToolBarTool *)FindById(id);
-
-    if ( tool )
-    {
-        (void)tool->SetShortHelp(helpString);
-        gtk_tooltips_set_tip(m_toolbar->tooltips, tool->m_item,
-                             helpString.mbc_str(), "");
-    }
-}
-
 // ----------------------------------------------------------------------------
 // wxToolBar idle handling
 // ----------------------------------------------------------------------------
@@ -537,4 +559,4 @@ void wxToolBar::OnInternalIdle()
     UpdateWindowUI();
 }
 
-#endif // wxUSE_TOOLBAR_NATIVE
+#endif

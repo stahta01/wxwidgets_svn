@@ -295,7 +295,7 @@ WXHANDLE wxPen::GetResourceHandle()
                 return (WXHANDLE)M_PENDATA->m_hPen;
 }
 
-bool wxPen::FreeResource(bool WXUNUSED(force))
+bool wxPen::FreeResource(bool force)
 {
   if (M_PENDATA && (M_PENDATA->m_hPen != 0))
   {

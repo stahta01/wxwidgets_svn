@@ -98,11 +98,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(TreeTest_ToggleIcon, MyFrame::OnToggleIcon)
 END_EVENT_TABLE()
 
-#if USE_GENERIC_TREECTRL
-BEGIN_EVENT_TABLE(MyTreeCtrl, wxGenericTreeCtrl)
-#else
 BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
-#endif
     EVT_TREE_BEGIN_DRAG(TreeTest_Ctrl, MyTreeCtrl::OnBeginDrag)
     EVT_TREE_BEGIN_RDRAG(TreeTest_Ctrl, MyTreeCtrl::OnBeginRDrag)
     EVT_TREE_END_DRAG(TreeTest_Ctrl, MyTreeCtrl::OnEndDrag)
@@ -117,9 +113,6 @@ BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
     EVT_TREE_ITEM_EXPANDING(TreeTest_Ctrl, MyTreeCtrl::OnItemExpanding)
     EVT_TREE_ITEM_COLLAPSED(TreeTest_Ctrl, MyTreeCtrl::OnItemCollapsed)
     EVT_TREE_ITEM_COLLAPSING(TreeTest_Ctrl, MyTreeCtrl::OnItemCollapsing)
-    EVT_TREE_ITEM_RIGHT_CLICK(TreeTest_Ctrl, MyTreeCtrl::OnItemRightClick)
-
-    EVT_RIGHT_UP(MyTreeCtrl::OnRMouseUp)
     EVT_TREE_SEL_CHANGED(TreeTest_Ctrl, MyTreeCtrl::OnSelChanged)
     EVT_TREE_SEL_CHANGING(TreeTest_Ctrl, MyTreeCtrl::OnSelChanging)
     EVT_TREE_KEY_DOWN(TreeTest_Ctrl, MyTreeCtrl::OnTreeKeyDown)
@@ -218,14 +211,14 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
 
     m_treeCtrl = new MyTreeCtrl(this, TreeTest_Ctrl,
                                 wxDefaultPosition, wxDefaultSize,
-                                wxTR_MAC_BUTTONS | wxTR_NO_LINES |
+                                wxTR_HAS_BUTTONS |
                                 wxTR_EDIT_LABELS |
 #ifndef NO_VARIABLE_HEIGHT
                                 wxTR_HAS_VARIABLE_ROW_HEIGHT |
 #endif
                                 wxSUNKEN_BORDER);
 
-//    m_treeCtrl->SetBackgroundColour( *wxLIGHT_GREY );
+    m_treeCtrl->SetBackgroundColour(wxColour(204, 205, 79));
 
     m_textCtrl = new wxTextCtrl(this, -1, "",
                                 wxDefaultPosition, wxDefaultSize,
@@ -520,11 +513,7 @@ void MyFrame::OnToggleIcon(wxCommandEvent& WXUNUSED(event))
 }
 
 // MyTreeCtrl implementation
-#if USE_GENERIC_TREECTRL
-IMPLEMENT_DYNAMIC_CLASS(MyTreeCtrl, wxGenericTreeCtrl)
-#else
 IMPLEMENT_DYNAMIC_CLASS(MyTreeCtrl, wxTreeCtrl)
-#endif
 
 MyTreeCtrl::MyTreeCtrl(wxWindow *parent, const wxWindowID id,
                        const wxPoint& pos, const wxSize& size,
@@ -842,36 +831,6 @@ void MyTreeCtrl::OnItemActivated(wxTreeEvent& event)
     }
 
     wxLogMessage("OnItemActivated");
-}
-
-void MyTreeCtrl::OnItemRightClick(wxTreeEvent& event)
-{
-    ShowMenu(event.GetItem(), event.GetPoint());
-}
-
-void MyTreeCtrl::OnRMouseUp(wxMouseEvent& event)
-{
-    wxPoint pt = event.GetPosition();
-    ShowMenu(HitTest(pt), pt);
-}
-
-void MyTreeCtrl::ShowMenu(wxTreeItemId id, const wxPoint& pt)
-{
-    wxString title;
-    if ( id.IsOk() )
-    {
-        title << _T("Menu for ") << GetItemText(id);
-    }
-    else
-    {
-        title = _T("Menu for no particular item");
-    }
-
-    wxMenu menu(title);
-    menu.Append(TreeTest_About, _T("&About..."));
-    menu.Append(TreeTest_Dump, _T("&Dump"));
-
-    PopupMenu(&menu, pt);
 }
 
 void MyTreeCtrl::OnRMouseDClick(wxMouseEvent& event)

@@ -1,8 +1,6 @@
 
 from wxPython.wx import *
 
-import images
-
 #---------------------------------------------------------------------------
 
 class MyCanvas(wxScrolledWindow):
@@ -22,7 +20,7 @@ class MyCanvas(wxScrolledWindow):
 
 
         self.SetCursor(wxStockCursor(wxCURSOR_PENCIL))
-        bmp = images.getTest2Bitmap()
+        bmp = wxBitmap('bitmaps/test2.bmp', wxBITMAP_TYPE_BMP)
         mask = wxMaskColour(bmp, wxBLUE)
         bmp.SetMask(mask)
         self.bmp = bmp
@@ -44,14 +42,16 @@ class MyCanvas(wxScrolledWindow):
 
     def DoDrawing(self, dc):
         dc.BeginDrawing()
-        dc.SetPen(wxPen(wxNamedColour('RED')))
+        pen1 = wxPen(wxNamedColour('RED'))
+        dc.SetPen(pen1)
         dc.DrawRectangle(5, 5, 50, 50)
 
         dc.SetBrush(wxLIGHT_GREY_BRUSH)
         dc.SetPen(wxPen(wxNamedColour('BLUE'), 4))
         dc.DrawRectangle(15, 15, 50, 50)
 
-        dc.SetFont(wxFont(14, wxSWISS, wxNORMAL, wxNORMAL))
+        font = wxFont(14, wxSWISS, wxNORMAL, wxNORMAL)
+        dc.SetFont(font)
         dc.SetTextForeground(wxColour(0xFF, 0x20, 0xFF))
         te = dc.GetTextExtent("Hello World")
         dc.DrawText("Hello World", 60, 65)
@@ -81,8 +81,11 @@ class MyCanvas(wxScrolledWindow):
         dc.DrawRectangle(50,500,50,50)
         dc.DrawRectangle(100,500,50,50)
 
-        dc.SetPen(wxPen(wxNamedColour('RED')))
+        dc.SetPen(pen1)
         dc.DrawEllipticArc(200, 500, 50, 75, 0, 90)
+
+        #from wxPython import dch
+        #dch.FillRect(dc, wxRect(50, 400, 50, 50), wxBLACK)
 
         self.DrawSavedLines(dc)
         dc.EndDrawing()
@@ -126,27 +129,6 @@ class MyCanvas(wxScrolledWindow):
             self.lines.append(self.curLine)
             self.curLine = []
             self.ReleaseMouse()
-
-
-## This is an example of what to do for the EVT_MOUSEWHEEL event,
-## but since wxScrolledWindow does this already it's not
-## necessary to do it ourselves.
-
-##     wheelScroll = 0
-##     def OnWheel(self, evt):
-##         delta = evt.GetWheelDelta()
-##         rot = evt.GetWheelRotation()
-##         linesPer = evt.GetLinesPerAction()
-##         ws = self.wheelScroll
-##         ws = ws + rot
-##         lines = ws / delta
-##         ws = ws - lines * delta
-##         self.wheelScroll = ws
-##         if lines != 0:
-##             lines = lines * linesPer
-##             vsx, vsy = self.GetViewStart()
-##             scrollTo = vsy - lines
-##             self.Scroll(-1, scrollTo)
 
 #---------------------------------------------------------------------------
 

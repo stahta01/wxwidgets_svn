@@ -40,10 +40,10 @@
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-class wxDiagram : public wxObject {
+class wxDiagram {
 public:
     wxDiagram();
-    //~wxDiagram();
+    ~wxDiagram();
 
     void AddShape(wxPyShape*shape, wxPyShape *addAfter = NULL);
     void Clear(wxDC& dc);
@@ -91,7 +91,7 @@ public:
     void SetQuickEditMode(bool mode);
     void SetSnapToGrid(bool snap);
     void ShowAll(bool show);
-    void Snap(double *INOUT, double *INOUT);
+    void Snap(double *OUTPUT, double *OUTPUT);
 
 };
 
@@ -147,7 +147,7 @@ public:
     void Redraw(wxDC& dc);
     void RemoveShape(wxPyShape *shape);
     void SetDiagram(wxDiagram *diagram);
-    void Snap(double *INOUT, double *INOUT);
+    void Snap(double *OUTPUT, double *OUTPUT);
 
 };
 

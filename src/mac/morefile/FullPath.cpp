@@ -28,8 +28,8 @@
 
 #define	__COMPILINGMOREFILES
 
-#include "fspcompa.h"
-#include "fullpath.h"
+#include "FSpCompa.h"
+#include "FullPath.h"
 
 /*
 	IMPORTANT NOTE:
@@ -180,11 +180,7 @@ pascal	OSErr	FSpGetFullPath(const FSSpec *spec,
 	if ( result == noErr )
 	{
 		/* Return the length */
-#if TARGET_CARBON
-		*fullPathLength = GetHandleSize(*fullPath);
-#else
 		*fullPathLength = InlineGetHandleSize(*fullPath);
-#endif
 		result = realResult;	// return realResult in case it was fnfErr
 	}
 	else

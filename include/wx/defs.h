@@ -20,61 +20,6 @@
 // compiler and OS identification
 // ----------------------------------------------------------------------------
 
-// first define Windows symbols if they're not defined on the command line: we
-// can autodetect everything we need if _WIN32 is defined
-#if defined(_WIN32) || defined(WIN32) || defined(__NT__)
-    #ifndef __WXMSW__
-        #define __WXMSW__
-    #endif
-
-    #ifndef __WIN32__
-        #define __WIN32__
-    #endif
-
-    // Win95 means Win95-style UI, i.e. Win9x/NT 4+
-    #if !defined(__WIN95__) && defined(WINVER) && (WINVER >= 0x0400)
-        #define __WIN95__
-    #endif
-#endif // Win32
-
-#ifdef __WXWINE__
-    #ifndef __WIN32__
-        #define __WIN32__
-    #endif
-    #ifndef __WIN95__
-        #define __WIN95__
-    #endif
-    #ifndef STRICT
-        #define STRICT
-    #endif
-#endif // WINE
-
-#if defined(TWIN32) && !defined(__TWIN32__)
-    #define __TWIN32__
-#endif // Twin32
-
-#include "wx/setup.h"
-
-// old C++ headers (like <iostream.h>) declare classes in the global namespace
-// while the new, standard ones (like <iostream>) do it in std:: namespace
-//
-// using this macro allows constuctions like "wxSTD iostream" to work in
-// either case
-#if !wxUSE_IOSTREAMH
- #define wxSTD std::
-#else
- #define wxSTD
-#endif
-
-// just in case they were defined in setup.h
-#ifdef PACKAGE
-#undef PACKAGE
-#endif
-
-#ifdef VERSION
-#undef VERSION
-#endif
-
 // OS: first test for generic Unix defines, then for particular flavours and
 //     finally for Unix-like systems
 #if defined(__UNIX__) || defined(__unix) || defined(__unix__) || \
@@ -107,50 +52,8 @@
         #define OS2EMX_PLAIN_CHAR
     #endif
 
-    // define __HPUX__ for HP-UX where standard macro is __hpux
-    #if defined(__hpux) && !defined(__HPUX__)
-        #define __HPUX__
-    #endif // HP-UX
-
-    #if defined(__APPLE__)
-        // MacOS X
-        #ifndef __WXMAC__
-            #define __WXMAC__
-        #endif
-        #ifndef __WXMAC_X__
-            // This define really should not be necessary since __WXMAC__
-            // combined with __UNIX__ is sufficient to differentiate
-            // Classic Mac OS from Mac OS X. However, some code has been
-            // added to workaround defects(?) in the bundled gcc compiler
-            // and these corrections are identified by __WXMAC_X__
-            #define __WXMAC_X__
-        #endif
-
-        #define PM_USE_SESSION_APIS 0
-        #include <Carbon/Carbon.h>
-    #endif // __APPLE__
-#elif defined(applec) || \
-      defined(THINK_C) || \
-      (defined(__MWERKS__) && !defined(__INTEL__))
-      // MacOS
-#elif defined(__WXMAC__) && defined(__APPLE__)
-    // MacOS X
-    #define __UNIX_LIKE__
-
-    #ifndef __WXMAC__
-        #define __WXMAC__
-    #endif
-    #ifndef __WXMAC_X__
-        // This define really should not be necessary since __WXMAC__
-        // combined with __UNIX__ is sufficient to differentiate
-        // Classic Mac OS from Mac OS X. However, some code has been
-        // added to workaround defects(?) in the bundled gcc compiler
-        // and these corrections are identified by __WXMAC_X__
-        #define __WXMAC_X__
-    #endif
-
-    #define PM_USE_SESSION_APIS 0
-    #include <Carbon/Carbon.h>
+#elif defined(applec) || defined(THINK_C) || ( defined( __MWERKS__ ) && !defined(__INTEL__) )
+        // MacOS
 #elif defined(__OS2__)
     #if defined(__IBMCPP__)
         #define __VISAGEAVER__ __IBMCPP__
@@ -167,16 +70,10 @@
         // VisualAge is the only thing that understands _Optlink
         #define LINKAGEMODE _Optlink
     #endif
-    #define wxSIZE_T_IS_UINT
 #else   // Windows
     #ifndef __WINDOWS__
         #define __WINDOWS__
     #endif  // Windows
-
-    // to be changed for Win64!
-    #ifndef __WIN32__
-        #define __WIN16__
-    #endif
 
     // define another standard symbol for Microsoft Visual C++: the standard one
     // (_MSC_VER) is also defined by Metrowerks compiler
@@ -185,19 +82,11 @@
     #elif defined(__BCPLUSPLUS__) && !defined(__BORLANDC__)
         #define __BORLANDC__
       #elif defined(__WATCOMC__)
+    //#define __WATCOMC__
     #elif defined(__SC__)
         #define __SYMANTECC__
     #endif  // compiler
-
-    // size_t is the same as unsigned int for all Windows compilers we know
-    #define wxSIZE_T_IS_UINT
 #endif  // OS
-
-// if we're on a Unix system but didn't use configure (so that setup.h didn't
-// define __UNIX__), do define __UNIX__ now
-#if !defined(__UNIX__) && defined(__UNIX_LIKE__)
-    #define __UNIX__
-#endif // Unix
 
 // LINKAGEMODE mode is empty for everyting except OS/2
 #ifndef LINKAGEMODE
@@ -220,12 +109,6 @@
 // This one is really annoying, since it occurs for each cast to (HANDLE)...
 #   pragma warning(disable:4305)    // truncation of long to near ptr
 #endif
-#endif // __VISUALC__
-
-// suppress some Watcom C++ warnings
-#ifdef __WATCOMC__
-#   pragma warning 849 9			// Disable 'virtual function hidden'
-#   pragma warning 549 9			// Disable 'operand contains compiler generated information'
 #endif // __VISUALC__
 
 // suppress some Salford C++ warnings
@@ -257,15 +140,28 @@
     #define va_list __gnuc_va_list
 #endif // HP-UX
 
-// This macro can be used to check that the version of mingw32 compiler is
-// at least maj.min
-#if defined( __GNUWIN32__ ) || defined( __MINGW32__ ) || defined( __CYGWIN__ )
-    #include "wx/msw/gccpriv.h"
+// Cygwin / Mingw32 with gcc >= 2.95 use new windows headers which
+// are more ms-like (header author is Anders Norlander, hence the name)
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95)))
+    #ifndef wxUSE_NORLANDER_HEADERS
+        #define wxUSE_NORLANDER_HEADERS 1
+    #endif
 #else
-    #undef wxCHECK_W32API_VERSION
-    #define wxCHECK_W32API_VERSION(maj, min) (0)
+    #ifndef wxUSE_NORLANDER_HEADERS
+        #define wxUSE_NORLANDER_HEADERS 0
+    #endif
 #endif
 
+// "old" GNUWIN32 is the one without Norlander's headers: it lacks the
+// standard Win32 headers and we define the used stuff ourselves for it
+// in wx/msw/gnuwin32/extra.h
+#if defined(__GNUC__) && !wxUSE_NORLANDER_HEADERS
+    #define __GNUWIN32_OLD__
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////
+// Currently Only MS-Windows/NT, XView and Motif are supported
+//
 #if defined(__HPUX__) && !defined(__WXGTK__)
     #ifndef __WXMOTIF__
         #define __WXMOTIF__
@@ -276,18 +172,72 @@
     #define __X__
 #endif
 
+#ifdef __WXMSW__
+
+#if defined(_WIN32) || defined(WIN32) || defined(__NT__)
+    #ifndef __WIN32__
+        #define __WIN32__
+    #endif
+#endif
+
+#ifdef __WXWINE__
+  #ifndef __WIN32__
+    #define __WIN32__
+  #endif
+  #ifndef __WIN95__
+    #define __WIN95__
+  #endif
+  #ifndef STRICT
+    #define STRICT
+  #endif
+#endif
+
+#ifndef __WIN32__
+#define __WIN16__
+#endif
+
+#if !defined(__WIN95__) && (WINVER >= 0x0400)
+#define __WIN95__
+#endif
+
+#if defined(TWIN32) && !defined(__TWIN32__)
+#define __TWIN32__
+#endif
+
+#endif // wxMSW
+
 // Make sure the environment is set correctly
 #if defined(__WXMSW__) && defined(__X__)
     #error "Target can't be both X and Windows"
 #elif !defined(__WXMOTIF__) && !defined(__WXMSW__) && !defined(__WXGTK__) && \
       !defined(__WXPM__) && !defined(__WXMAC__) && !defined(__X__) && \
       !defined(__WXQT__) && !defined(__WXSTUBS__) && wxUSE_GUI
-    #ifdef __UNIX__
-        #error "No Target! You should wx-config program for compilation flags!"
-    #else // !Unix
-        #error "No Target! You should supplied makefiles for compilation!"
-    #endif // Unix/!Unix
+    #error "No Target! Use -D[__WXMOTIF__|__WXGTK__|__WXMSW__|__WXMAC__|__WXQT__|__WXPM__|__WXSTUBS__]"
 #endif
+
+// ----------------------------------------------------------------------------
+// wxWindows options
+// ----------------------------------------------------------------------------
+
+#include <stddef.h>
+
+#include "wx/setup.h"
+
+// just in case they were defined in setup.h
+#undef PACKAGE
+#undef VERSION
+
+// this has to be done after including setup.h which might
+// define __HPUX__ 1 itself
+#if defined(__hpux) && !defined(__HPUX__)
+    #define __HPUX__
+#endif // HP-UX
+
+// if we're on a Unix system but didn't use configure (so that setup.h didn't
+// define __UNIX__), do define __UNIX__ now
+#if !defined(__UNIX__) && defined(__UNIX_LIKE__)
+    #define __UNIX__
+#endif // Unix
 
 #include "wx/version.h"
 
@@ -434,8 +384,8 @@ typedef int wxWindowID;
 
 #if defined(__WXMSW__)
 
-// __declspec works in BC++ 5 and later, Watcom C++ 11.0 and later as well as VC++ and gcc
-#if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__GNUC__) || defined(__WATCOMC__)
+// __declspec works in BC++ 5 and later, as well as VC++ and gcc
+#if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__GNUC__)
 #  ifdef WXMAKINGDLL
 #    define WXDLLEXPORT __declspec( dllexport )
 #    define WXDLLEXPORT_DATA(type) __declspec( dllexport ) type
@@ -497,10 +447,8 @@ typedef int wxWindowID;
 #  define WXDLLIMPORT
 #endif
 
-#ifdef __cplusplus
 class WXDLLEXPORT wxObject;
 class WXDLLEXPORT wxEvent;
-#endif
 
  /** symbolic constant used by all Find()-like functions returning positive
       integer on success as failure indicator */
@@ -511,12 +459,7 @@ class WXDLLEXPORT wxEvent;
 // ----------------------------------------------------------------------------
 
 // everybody gets the assert and other debug macros
-#ifdef __cplusplus
 #include "wx/debug.h"
-#endif
-
-// NULL declaration
-#include <stddef.h>
 
 //@{
 /// delete pointer if it is not NULL and NULL it afterwards
@@ -585,9 +528,7 @@ class WXDLLEXPORT wxEvent;
 #endif
 
 // Callback function type definition
-#ifdef __cplusplus
 typedef void (*wxFunction) (wxObject&, wxEvent&);
-#endif
 
 // ----------------------------------------------------------------------------
 // OS mnemonics -- Identify the running OS (useful for Windows)
@@ -873,8 +814,7 @@ enum wxStretch
     wxSHRINK                  = 0x1000,
     wxGROW                    = 0x2000,
     wxEXPAND                  = wxGROW,
-    wxSHAPED                  = 0x4000,
-    wxADJUST_MINSIZE          = 0x8000
+    wxSHAPED                  = 0x4000
 };
 
 // ----------------------------------------------------------------------------
@@ -922,9 +862,6 @@ enum wxStretch
 // splitter windows, but can't be used in a panel where a static box must be
 // 'transparent' (panel paints the background for it)
 #define wxCLIP_CHILDREN         0x00400000
-// Note we're reusing the wxCAPTION style because we won't need captions
-// for subwindows/controls
-#define wxCLIP_SIBLINGS         0x20000000
 
 // Add this style to a panel to get tab traversal working outside of dialogs
 // (on by default for wxPanel, wxDialog, wxScrolledWindow)
@@ -967,24 +904,15 @@ enum wxStretch
 #define wxTINY_CAPTION_VERT     0x0080
 #define wxRESIZE_BORDER         0x0040
 
-#define wxDIALOG_NO_PARENT      0x0001  // Don't make owned by apps top window
-#define wxFRAME_NO_TASKBAR      0x0002  // No taskbar button (MSW only)
-#define wxFRAME_TOOL_WINDOW     0x0004  // No taskbar button, no system menu
-
 // deprecated versions defined for compatibility reasons
 #define wxRESIZE_BOX            wxMAXIMIZE_BOX
 #define wxTHICK_FRAME           wxRESIZE_BORDER
 
-// obsolete styles, unused any more
 #define wxDIALOG_MODAL          0x0020
 #define wxDIALOG_MODELESS       0x0000
 
-// deprecated flag, don't use any more, defined for compatibility only
-#define wxFRAME_FLOAT_ON_PARENT 0
-
-// Context-sensitive help
-#define wxFRAME_EX_CONTEXTHELP  0x00000004
-#define wxDIALOG_EX_CONTEXTHELP 0x00000004
+// Add for normal Windows frame behaviour
+#define wxFRAME_FLOAT_ON_PARENT 0x0020
 
 /*
  * MDI parent frame style flags
@@ -1161,14 +1089,10 @@ enum wxStretch
 #define wxTR_EXTENDED        0x0040
 #define wxTR_HAS_VARIABLE_ROW_HEIGHT 0x0080
 #define wxTR_NO_LINES        0x0100
-#define wxTR_MAC_BUTTONS     0x0200
-#define wxTR_ROW_LINES       0x0400
 
 /*
  * wxListCtrl flags
  */
-#define wxLC_VRULES          0x0001
-#define wxLC_HRULES          0x0002
 #define wxLC_ICON            0x0004
 #define wxLC_SMALL_ICON      0x0008
 #define wxLC_LIST            0x0010
@@ -1217,6 +1141,12 @@ enum wxStretch
 #define wxSP_3DBORDER         0x0200
 #define wxSP_FULLSASH         0x0400
 #define wxSP_3D               (wxSP_3DBORDER | wxSP_3DSASH)
+
+/*
+ * wxFrame extra flags
+ */
+// No title on taskbar
+#define wxFRAME_TOOL_WINDOW 0x0004
 
 /*
  * wxTabCtrl flags
@@ -1371,12 +1301,6 @@ enum wxStretch
 #define wxID_MORE               5109
 #define wxID_SETUP              5110
 #define wxID_RESET              5111
-#define wxID_CONTEXT_HELP       5112
-#define wxID_YESTOALL           5113
-#define wxID_NOTOALL            5114
-#define wxID_ABORT              5115
-#define wxID_RETRY              5116
-#define wxID_IGNORE             5117
 
 // IDs used by generic file dialog (11 consecutive starting from this value)
 #define wxID_FILEDLGG           5900
@@ -1754,16 +1678,9 @@ typedef enum {
     wxPRINT_MODE_PRINTER = 3    // Send to printer
 } wxPrintMode;
 
-// ----------------------------------------------------------------------------
-// miscellaneous
-// ----------------------------------------------------------------------------
-
-// define this macro if font handling is done using the X font names
-#if defined(__WXGTK__) || defined(__X__)
-    #define _WX_X_FONTLIKE
-#endif
-
-// macro to specify "All Files" on different platforms
+// ---------------------------------------------------------------------------
+// Macro to specify "All Files" on different platforms
+// ---------------------------------------------------------------------------
 #if defined(__WXMSW__)
 #   define wxALL_FILES_PATTERN   "*.*"
 #   define wxALL_FILES           gettext_noop("All files (*.*)|*.*")
@@ -1771,7 +1688,6 @@ typedef enum {
 #   define wxALL_FILES_PATTERN   "*"
 #   define wxALL_FILES           gettext_noop("All files (*)|*")
 #endif
-
 // ---------------------------------------------------------------------------
 // macros that enable wxWindows apps to be compiled in absence of the
 // sytem headers, although some platform specific types are used in the
@@ -1877,7 +1793,7 @@ typedef void *          WXLPCREATESTRUCT;
 typedef unsigned long   WXMPARAM;
 typedef unsigned long   WXMSGID;
 typedef void*           WXRESULT;
-//typedef int             (*WXFARPROC)();
+// typedef WXRESULT        (*WXFARPROC)(WXHWND, WXMSGID, WXMPARAM, WXMPARAM);
 // some windows handles not defined by PM
 typedef unsigned long   HANDLE;
 typedef unsigned long   HICON;
@@ -1896,7 +1812,7 @@ typedef unsigned short  WORD;
 // WIN32 graphics types for OS/2 GPI
 
 // RGB under OS2 is more like a PALETTEENTRY struct under Windows so we need a real RGB def
-#define OS2RGB(r,g,b) ((DWORD ((BYTE) (b) | ((WORD) (g) << 8)) | (((DWORD)(BYTE)(r)) << 16)))
+#define OS2RGB(r,g,b) ((DWORD ((BYTE) (r) | ((WORD) (g) << 8)) | (((DWORD)(BYTE)(b)) << 16)))
 
 typedef unsigned long COLORREF;
 #define GetBValue(rgb) ((BYTE)((rgb) >> 16))

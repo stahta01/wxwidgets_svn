@@ -14,7 +14,7 @@ from controls import *
 from events import *
 import wx
 import string
-class wxSizerItemPtr(wxObjectPtr):
+class wxSizerItemPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -52,12 +52,14 @@ class wxSizerItemPtr(wxObjectPtr):
         return val
     def GetWindow(self, *_args, **_kwargs):
         val = apply(sizersc.wxSizerItem_GetWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def SetWindow(self, *_args, **_kwargs):
         val = apply(sizersc.wxSizerItem_SetWindow,(self,) + _args, _kwargs)
         return val
     def GetSizer(self, *_args, **_kwargs):
         val = apply(sizersc.wxSizerItem_GetSizer,(self,) + _args, _kwargs)
+        if val: val = wxSizerPtr(val) 
         return val
     def SetSizer(self, *_args, **_kwargs):
         val = apply(sizersc.wxSizerItem_SetSizer,(self,) + _args, _kwargs)
@@ -95,7 +97,7 @@ class wxSizerItem(wxSizerItemPtr):
 
 
 
-class wxSizerPtr(wxObjectPtr):
+class wxSizerPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -180,37 +182,37 @@ class wxSizerPtr(wxObjectPtr):
     def __repr__(self):
         return "<C wxSizer instance at %s>" % (self.this,)
     
-    def Add(self, *args, **kw):
+    def Add(self, *args):
         if type(args[0]) == type(1):
-            apply(self.AddSpacer, args, kw)
+            apply(self.AddSpacer, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.AddSizer, args, kw)
+            apply(self.AddSizer, args)
         else:
-            apply(self.AddWindow, args, kw)
+            apply(self.AddWindow, args)
 
-    def Insert(self, *args, **kw):
+    def Insert(self, *args):
         if type(args[1]) == type(1):
-            apply(self.InsertSpacer, args, kw)
+            apply(self.InsertSpacer, args)
         elif string.find(args[1].this, 'Sizer') != -1:
-            apply(self.InsertSizer, args, kw)
+            apply(self.InsertSizer, args)
         else:
-            apply(self.InsertWindow, args, kw)
+            apply(self.InsertWindow, args)
 
-    def Prepend(self, *args, **kw):
+    def Prepend(self, *args):
         if type(args[0]) == type(1):
-            apply(self.PrependSpacer, args, kw)
+            apply(self.PrependSpacer, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.PrependSizer, args, kw)
+            apply(self.PrependSizer, args)
         else:
-            apply(self.PrependWindow, args, kw)
+            apply(self.PrependWindow, args)
 
-    def Remove(self, *args, **kw):
+    def Remove(self, *args):
         if type(args[0]) == type(1):
-            apply(self.RemovePos, args, kw)
+            apply(self.RemovePos, args)
         elif string.find(args[0].this, 'Sizer') != -1:
-            apply(self.RemoveSizer, args, kw)
+            apply(self.RemoveSizer, args)
         else:
-            apply(self.RemoveWindow, args, kw)
+            apply(self.RemoveWindow, args)
 
     def AddMany(self, widgets):
         for childinfo in widgets:
@@ -282,6 +284,7 @@ class wxStaticBoxSizerPtr(wxBoxSizerPtr):
         self.thisown = 0
     def GetStaticBox(self, *_args, **_kwargs):
         val = apply(sizersc.wxStaticBoxSizer_GetStaticBox,(self,) + _args, _kwargs)
+        if val: val = wxStaticBoxPtr(val) 
         return val
     def RecalcSizes(self, *_args, **_kwargs):
         val = apply(sizersc.wxStaticBoxSizer_RecalcSizes,(self,) + _args, _kwargs)
@@ -313,6 +316,7 @@ class wxNotebookSizerPtr(wxSizerPtr):
         return val
     def GetNotebook(self, *_args, **_kwargs):
         val = apply(sizersc.wxNotebookSizer_GetNotebook,(self,) + _args, _kwargs)
+        if val: val = wxNotebookPtr(val) 
         return val
     def __repr__(self):
         return "<C wxNotebookSizer instance at %s>" % (self.this,)

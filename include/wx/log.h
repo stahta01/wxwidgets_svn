@@ -161,7 +161,7 @@ public:
     void SetVerbose(bool bVerbose = TRUE) { m_bVerbose = bVerbose; }
         // should GetActiveTarget() try to create a new log object if the
         // current is NULL?
-    static void DontCreateOnDemand();
+    static void DontCreateOnDemand() { ms_bAutoCreate = FALSE; }
 
         // trace mask (see wxTraceXXX constants for details)
     static void SetTraceMask(wxTraceMask ulMask) { ms_ulTraceMask = ulMask; }
@@ -169,8 +169,6 @@ public:
     static void AddTraceMask(const wxString& str) { ms_aTraceMasks.Add(str); }
         // add string trace mask
     static void RemoveTraceMask(const wxString& str);
-        // remove all string trace masks
-    static void ClearTraceMasks();
 
         // sets the timestamp string: this is used as strftime() format string
         // for the log targets which add time stamps to the messages - set it
@@ -251,14 +249,14 @@ class WXDLLEXPORT wxLogStream : public wxLog
 {
 public:
     // redirect log output to an ostream
-    wxLogStream(wxSTD ostream *ostr = (wxSTD ostream *) NULL);
+    wxLogStream(ostream *ostr = (ostream *) NULL);
 
 protected:
     // implement sink function
     virtual void DoLogString(const wxChar *szString, time_t t);
 
     // using ptr here to avoid including <iostream.h> from this file
-    wxSTD ostream *m_ostr;
+    ostream *m_ostr;
 };
 #endif
 

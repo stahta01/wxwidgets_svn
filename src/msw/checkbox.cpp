@@ -104,9 +104,6 @@ bool wxCheckBox::Create(wxWindow *parent,
     if ( style & wxALIGN_RIGHT )
         msStyle |= BS_LEFTTEXT;
 
-    if ( style & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
-
     // We perhaps have different concepts of 3D here - a 3D border,
     // versus a 3D button.
     // So we only wish to give a border if this is specified
@@ -159,7 +156,10 @@ wxSize wxCheckBox::DoGetBestSize() const
         wxScreenDC dc;
         dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
 
-        s_checkSize = (3*dc.GetCharHeight())/2;
+        // the height of a standard button in the dialog units is 8,
+        // translate this to pixels (as one dialog unit is precisely equal to
+        // 8 character heights, it's just the char height)
+        s_checkSize = dc.GetCharHeight();
     }
 
     wxString str = wxGetWindowText(GetHWND());
@@ -210,7 +210,7 @@ void wxCheckBox::Command (wxCommandEvent & event)
 // wxBitmapCheckBox
 // ----------------------------------------------------------------------------
 
-bool wxBitmapCheckBox::Create(wxWindow *parent, wxWindowID id, const wxBitmap *WXUNUSED(label),
+bool wxBitmapCheckBox::Create(wxWindow *parent, wxWindowID id, const wxBitmap *label,
            const wxPoint& pos,
            const wxSize& size, long style,
            const wxValidator& validator,
@@ -265,7 +265,7 @@ bool wxBitmapCheckBox::Create(wxWindow *parent, wxWindowID id, const wxBitmap *W
   return TRUE;
 }
 
-void wxBitmapCheckBox::SetLabel(const wxBitmap& WXUNUSED(bitmap))
+void wxBitmapCheckBox::SetLabel(const wxBitmap& bitmap)
 {
     wxFAIL_MSG(wxT("not implemented"));
 }

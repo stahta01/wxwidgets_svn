@@ -27,7 +27,7 @@ I STRONGLY recommend reading and understanding these macros!!
 
 
 #ifdef __GNUG__
-#pragma interface "m_templ.h"
+#pragma interface
 #pragma implementation
 #endif
 
@@ -87,7 +87,7 @@ I STRONGLY recommend reading and understanding these macros!!
 
 
 #define TAGS_MODULE_ADD(handler)                                          \
-                    parser->AddTagHandler(new HTML_Handler_##handler);
+                    parser -> AddTagHandler(new HTML_Handler_##handler);
 
 
 

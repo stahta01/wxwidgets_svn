@@ -65,6 +65,7 @@ class wxNotebookPtr(wxControlPtr):
         return val
     def GetImageList(self, *_args, **_kwargs):
         val = apply(windows2c.wxNotebook_GetImageList,(self,) + _args, _kwargs)
+        if val: val = wxImageListPtr(val) 
         return val
     def GetPageImage(self, *_args, **_kwargs):
         val = apply(windows2c.wxNotebook_GetPageImage,(self,) + _args, _kwargs)
@@ -98,6 +99,7 @@ class wxNotebookPtr(wxControlPtr):
         return val
     def GetPage(self, *_args, **_kwargs):
         val = apply(windows2c.wxNotebook_GetPage,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def ResizeChildren(self, *_args, **_kwargs):
         val = apply(windows2c.wxNotebook_ResizeChildren,(self,) + _args, _kwargs)
@@ -128,6 +130,7 @@ class wxSplitterEventPtr(wxCommandEventPtr):
         return val
     def GetWindowBeingRemoved(self, *_args, **_kwargs):
         val = apply(windows2c.wxSplitterEvent_GetWindowBeingRemoved,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def SetSashPosition(self, *_args, **_kwargs):
         val = apply(windows2c.wxSplitterEvent_SetSashPosition,(self,) + _args, _kwargs)
@@ -162,9 +165,11 @@ class wxSplitterWindowPtr(wxWindowPtr):
         return val
     def GetWindow1(self, *_args, **_kwargs):
         val = apply(windows2c.wxSplitterWindow_GetWindow1,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def GetWindow2(self, *_args, **_kwargs):
         val = apply(windows2c.wxSplitterWindow_GetWindow2,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def Initialize(self, *_args, **_kwargs):
         val = apply(windows2c.wxSplitterWindow_Initialize,(self,) + _args, _kwargs)
@@ -218,12 +223,6 @@ class wxSplitterWindow(wxSplitterWindowPtr):
 
 #-------------- VARIABLE WRAPPERS ------------------
 
-wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED = windows2c.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED
-wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING = windows2c.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING
-wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING = windows2c.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING
-wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED = windows2c.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED
-wxEVT_COMMAND_SPLITTER_UNSPLIT = windows2c.wxEVT_COMMAND_SPLITTER_UNSPLIT
-wxEVT_COMMAND_SPLITTER_DOUBLECLICKED = windows2c.wxEVT_COMMAND_SPLITTER_DOUBLECLICKED
 wxSPLIT_HORIZONTAL = windows2c.wxSPLIT_HORIZONTAL
 wxSPLIT_VERTICAL = windows2c.wxSPLIT_VERTICAL
 wxSPLIT_DRAG_NONE = windows2c.wxSPLIT_DRAG_NONE

@@ -12,7 +12,7 @@ from clip_dnd import *
 from events import *
 
 from streams import *
-class wxToolTipPtr(wxObjectPtr):
+class wxToolTipPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -24,6 +24,7 @@ class wxToolTipPtr(wxObjectPtr):
         return val
     def GetWindow(self, *_args, **_kwargs):
         val = apply(misc2c.wxToolTip_GetWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def __repr__(self):
         return "<C wxToolTip instance at %s>" % (self.this,)
@@ -64,6 +65,7 @@ class wxCaretPtr :
         return val
     def GetWindow(self, *_args, **_kwargs):
         val = apply(misc2c.wxCaret_GetWindow,(self,) + _args, _kwargs)
+        if val: val = wxWindowPtr(val) 
         return val
     def MoveXY(self, *_args, **_kwargs):
         val = apply(misc2c.wxCaret_MoveXY,(self,) + _args, _kwargs)
@@ -160,23 +162,6 @@ class wxWindowDisabler(wxWindowDisablerPtr):
 
 
 
-class wxMutexGuiLockerPtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,misc2c=misc2c):
-        if self.thisown == 1 :
-            misc2c.delete_wxMutexGuiLocker(self)
-    def __repr__(self):
-        return "<C wxMutexGuiLocker instance at %s>" % (self.this,)
-class wxMutexGuiLocker(wxMutexGuiLockerPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(misc2c.new_wxMutexGuiLocker,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
 class wxTipProviderPtr :
     def __init__(self,this):
         self.this = this
@@ -213,16 +198,13 @@ class wxPyTipProvider(wxPyTipProviderPtr):
 
 
 
-class wxDragImagePtr(wxObjectPtr):
+class wxDragImagePtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
     def __del__(self,misc2c=misc2c):
         if self.thisown == 1 :
             misc2c.delete_wxDragImage(self)
-    def SetBackingBitmap(self, *_args, **_kwargs):
-        val = apply(misc2c.wxDragImage_SetBackingBitmap,(self,) + _args, _kwargs)
-        return val
     def BeginDrag(self, *_args, **_kwargs):
         val = apply(misc2c.wxDragImage_BeginDrag,(self,) + _args, _kwargs)
         return val
@@ -258,7 +240,7 @@ class wxDragImage(wxDragImagePtr):
 
 
 
-class wxPyTimerPtr(wxObjectPtr):
+class wxPyTimerPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -370,6 +352,7 @@ class wxLogWindowPtr(wxLogPtr):
         return val
     def GetFrame(self, *_args, **_kwargs):
         val = apply(misc2c.wxLogWindow_GetFrame,(self,) + _args, _kwargs)
+        if val: val = wxFramePtr(val) 
         return val
     def GetOldLog(self, *_args, **_kwargs):
         val = apply(misc2c.wxLogWindow_GetOldLog,(self,) + _args, _kwargs)
@@ -488,13 +471,10 @@ class wxProcess(wxProcessPtr):
 
 
 
-class wxJoystickPtr(wxObjectPtr):
+class wxJoystickPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def __del__(self,misc2c=misc2c):
-        if self.thisown == 1 :
-            misc2c.delete_wxJoystick(self)
     def GetPosition(self, *_args, **_kwargs):
         val = apply(misc2c.wxJoystick_GetPosition,(self,) + _args, _kwargs)
         if val: val = wxPointPtr(val) ; val.thisown = 1
@@ -632,29 +612,6 @@ class wxJoystick(wxJoystickPtr):
 
 
 
-class wxWavePtr(wxObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,misc2c=misc2c):
-        if self.thisown == 1 :
-            misc2c.delete_wxWave(self)
-    def IsOk(self, *_args, **_kwargs):
-        val = apply(misc2c.wxWave_IsOk,(self,) + _args, _kwargs)
-        return val
-    def Play(self, *_args, **_kwargs):
-        val = apply(misc2c.wxWave_Play,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxWave instance at %s>" % (self.this,)
-class wxWave(wxWavePtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(misc2c.new_wxWave,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
 
 
 #-------------- FUNCTION WRAPPERS ------------------
@@ -686,47 +643,24 @@ def wxGetDisplaySize(*_args, **_kwargs):
     if val: val = wxSizePtr(val); val.thisown = 1
     return val
 
-wxDisplaySizeMM = misc2c.wxDisplaySizeMM
-
-def wxGetDisplaySizeMM(*_args, **_kwargs):
-    val = apply(misc2c.wxGetDisplaySizeMM,_args,_kwargs)
-    if val: val = wxSizePtr(val); val.thisown = 1
-    return val
-
-wxClientDisplayRect = misc2c.wxClientDisplayRect
-
-def wxGetClientDisplayRect(*_args, **_kwargs):
-    val = apply(misc2c.wxGetClientDisplayRect,_args,_kwargs)
-    if val: val = wxRectPtr(val); val.thisown = 1
-    return val
-
 wxSetCursor = misc2c.wxSetCursor
 
 def wxFindWindowByLabel(*_args, **_kwargs):
     val = apply(misc2c.wxFindWindowByLabel,_args,_kwargs)
+    if val: val = wxWindowPtr(val)
     return val
 
 def wxFindWindowByName(*_args, **_kwargs):
     val = apply(misc2c.wxFindWindowByName,_args,_kwargs)
+    if val: val = wxWindowPtr(val)
     return val
 
 wxBeginBusyCursor = misc2c.wxBeginBusyCursor
 
 def wxGetActiveWindow(*_args, **_kwargs):
     val = apply(misc2c.wxGetActiveWindow,_args,_kwargs)
+    if val: val = wxWindowPtr(val)
     return val
-
-def wxGenericFindWindowAtPoint(*_args, **_kwargs):
-    val = apply(misc2c.wxGenericFindWindowAtPoint,_args,_kwargs)
-    return val
-
-def wxFindWindowAtPoint(*_args, **_kwargs):
-    val = apply(misc2c.wxFindWindowAtPoint,_args,_kwargs)
-    return val
-
-wxCheckForInterrupt = misc2c.wxCheckForInterrupt
-
-wxFlushEvents = misc2c.wxFlushEvents
 
 wxResourceAddIdentifier = misc2c.wxResourceAddIdentifier
 
@@ -744,6 +678,7 @@ def wxResourceCreateIcon(*_args, **_kwargs):
 
 def wxResourceCreateMenuBar(*_args, **_kwargs):
     val = apply(misc2c.wxResourceCreateMenuBar,_args,_kwargs)
+    if val: val = wxMenuBarPtr(val)
     return val
 
 wxResourceGetIdentifier = misc2c.wxResourceGetIdentifier
@@ -774,19 +709,11 @@ wxCaret_GetBlinkTime = misc2c.wxCaret_GetBlinkTime
 
 wxCaret_SetBlinkTime = misc2c.wxCaret_SetBlinkTime
 
-wxSafeYield = misc2c.wxSafeYield
-
 wxPostEvent = misc2c.wxPostEvent
 
 wxWakeUpIdle = misc2c.wxWakeUpIdle
 
-wxWakeUpMainThread = misc2c.wxWakeUpMainThread
-
-wxMutexGuiEnter = misc2c.wxMutexGuiEnter
-
-wxMutexGuiLeave = misc2c.wxMutexGuiLeave
-
-wxThread_IsMain = misc2c.wxThread_IsMain
+wxSafeYield = misc2c.wxSafeYield
 
 wxShowTip = misc2c.wxShowTip
 
@@ -838,11 +765,6 @@ wxLogStatusFrame = misc2c.wxLogStatusFrame
 wxLogSysError = misc2c.wxLogSysError
 
 wxExecute = misc2c.wxExecute
-
-def wxWaveData(*_args, **_kwargs):
-    val = apply(misc2c.wxWaveData,_args,_kwargs)
-    if val: val = wxWavePtr(val); val.thisown = 1
-    return val
 
 wxLog_IsEnabled = misc2c.wxLog_IsEnabled
 
@@ -978,4 +900,3 @@ wxLOG_Debug = misc2c.wxLOG_Debug
 wxLOG_Trace = misc2c.wxLOG_Trace
 wxLOG_Progress = misc2c.wxLOG_Progress
 wxLOG_User = misc2c.wxLOG_User
-wxEVT_END_PROCESS = misc2c.wxEVT_END_PROCESS

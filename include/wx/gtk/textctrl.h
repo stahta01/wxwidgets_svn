@@ -28,7 +28,7 @@ class wxTextCtrl;
 class wxTextCtrl: public wxTextCtrlBase
 {
 public:
-    wxTextCtrl() { Init(); }
+    wxTextCtrl();
     wxTextCtrl(wxWindow *parent,
                wxWindowID id,
                const wxString &value = wxEmptyString,
@@ -78,10 +78,6 @@ public:
     // inserts it at the end
     virtual void WriteText(const wxString& text);
     virtual void AppendText(const wxString& text);
-
-    // apply text attribute to the range of text (only works with richedit
-    // controls)
-    virtual bool SetStyle(long start, long end, const wxTextAttr& style);
 
     // translate between the position (which is just an index in the text ctrl
     // considering all its contents as a single strings) and (x, y) coordinates
@@ -134,39 +130,26 @@ public:
     void OnUpdateUndo(wxUpdateUIEvent& event);
     void OnUpdateRedo(wxUpdateUIEvent& event);
 
-    bool SetFont(const wxFont& font);
-    bool SetForegroundColour(const wxColour& colour);
-    bool SetBackgroundColour(const wxColour& colour);
+    bool SetFont( const wxFont &font );
+    bool SetForegroundColour(const wxColour &colour);
+    bool SetBackgroundColour(const wxColour &colour);
 
     GtkWidget* GetConnectWidget();
     bool IsOwnGtkWindow( GdkWindow *window );
     void ApplyWidgetStyle();
     void CalculateScrollbar();
     void OnInternalIdle();
-    void UpdateFontIfNeeded();
 
     void SetModified() { m_modified = TRUE; }
-
-    // wxGTK-specific: called recursively by Enable,
-    // to give widgets an oppprtunity to correct their colours after they
-    // have been changed by Enable
-    virtual void OnParentEnable( bool enable ) ;
 
 protected:
     virtual wxSize DoGetBestSize() const;
 
-    // common part of all ctors
-    void Init();
-
 private:
-    // change the font for everything in this control
-    void ChangeFontGlobally();
-
     bool        m_modified;
     GtkWidget  *m_text;
     GtkWidget  *m_vScrollbar;
     bool        m_vScrollbarVisible;
-    bool        m_updateFont;
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxTextCtrl);

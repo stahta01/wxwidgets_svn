@@ -16,13 +16,11 @@
 #include "wx/scrolbar.h"
 #include "wx/mac/uma.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxScrollBar, wxControl)
 
 BEGIN_EVENT_TABLE(wxScrollBar, wxControl)
 END_EVENT_TABLE()
 
-#endif
 
 extern ControlActionUPP wxMacLiveScrollbarActionUPP ;
 
@@ -41,7 +39,7 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
 	
 	MacPreControlCreate( parent , id ,  "" , pos , size ,style, validator , name , &bounds , title ) ;
 
-	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , false , 0 , 0 , 100, 
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true , 0 , 0 , 100, 
 		kControlScrollBarLiveProc , (long) this ) ;
 	
 	wxASSERT_MSG( m_macControl != NULL , "No valid mac control" ) ;
@@ -82,10 +80,9 @@ void wxScrollBar::SetScrollbar(int position, int thumbSize, int range, int pageS
 
     if ( UMAGetAppearanceVersion() >= 0x0110  )
     {
-        if ( SetControlViewSize != (void*) kUnresolvedCFragSymbolAddress )
-        {
+#if UMA_USE_8_6    	
 			SetControlViewSize( m_macControl , m_pageSize ) ;
-        }
+#endif
     }
     Refresh() ;
 }

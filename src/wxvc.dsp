@@ -109,10 +109,6 @@ SOURCE=.\common\config.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\cshelp.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\ctrlcmn.cpp
 # End Source File
 # Begin Source File
@@ -133,19 +129,11 @@ SOURCE=.\common\db.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\dbgrid.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\dbtable.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\common\dcbase.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\dircmn.cpp
 # End Source File
 # Begin Source File
 
@@ -179,10 +167,6 @@ SOURCE=.\common\dynlib.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\effects.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\encconv.cpp
 # End Source File
 # Begin Source File
@@ -209,10 +193,6 @@ SOURCE=.\common\fileconf.cpp
 # Begin Source File
 
 SOURCE=.\common\filefn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\filename.cpp
 # End Source File
 # Begin Source File
 
@@ -250,10 +230,6 @@ SOURCE=.\common\ftp.cpp
 # Begin Source File
 
 SOURCE=.\common\gdicmn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\geometry.cpp
 # End Source File
 # Begin Source File
 
@@ -309,10 +285,6 @@ SOURCE=.\common\imagpnm.cpp
 
 SOURCE=.\common\imagtiff.cpp
 # ADD CPP /I "tiff" /I "zlib"
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\imagxpm.cpp
 # End Source File
 # Begin Source File
 
@@ -396,10 +368,6 @@ SOURCE=.\common\protocol.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\quantize.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\resource.cpp
 # End Source File
 # Begin Source File
@@ -464,10 +432,6 @@ SOURCE=.\common\tokenzr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\treebase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\txtstrm.cpp
 # End Source File
 # Begin Source File
@@ -518,10 +482,6 @@ SOURCE=.\common\wxexpr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\xpmdecod.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\zipstrm.cpp
 # ADD CPP /I "zlib"
 # End Source File
@@ -556,19 +516,11 @@ SOURCE=.\generic\choicdgg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\dirctrlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\dragimgg.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\generic\grid.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\gridctrl.cpp
 # End Source File
 # Begin Source File
 
@@ -604,6 +556,10 @@ SOURCE=.\generic\panelg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\generic\plot.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\generic\progdlgg.cpp
 # End Source File
 # Begin Source File
@@ -628,10 +584,6 @@ SOURCE=.\generic\scrolwin.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\splash.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\splitter.cpp
 # End Source File
 # Begin Source File
@@ -653,14 +605,6 @@ SOURCE=.\generic\textdlgg.cpp
 # Begin Source File
 
 SOURCE=.\generic\tipdlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\tipwin.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\treectlg.cpp
 # End Source File
 # Begin Source File
 
@@ -1079,10 +1023,6 @@ SOURCE=.\msw\slidrmsw.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\snglinst.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\spinbutt.cpp
 # End Source File
 # Begin Source File
@@ -1127,10 +1067,6 @@ SOURCE=.\msw\textctrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\tglbtn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\thread.cpp
 # End Source File
 # Begin Source File
@@ -1160,6 +1096,11 @@ SOURCE=.\msw\wave.cpp
 # Begin Source File
 
 SOURCE=.\msw\window.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\xpmhand.cpp
+# ADD CPP /I "../src/xpm"
 # End Source File
 # End Group
 # Begin Group "OLE Files"

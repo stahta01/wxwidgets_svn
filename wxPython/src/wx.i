@@ -186,12 +186,7 @@ static wxPyCoreAPI API = {
     wxPyCBH_callCallback,
     wxPyCBH_callCallbackObj,
     wxPyCBH_delete,
-
-    wxPyClassExists,
-    wxPyMake_wxObject,
-    wxPyPtrTypeMap_Add,
 };
-
 
 %}
 

@@ -37,8 +37,6 @@ public:
         (void)Create(size, family, style, weight, underlined, face, encoding);
     }
 
-    wxFont(const wxNativeFontInfo& info);
-
     bool Create(int size,
                 int family,
                 int style,

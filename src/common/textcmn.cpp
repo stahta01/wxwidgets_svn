@@ -64,34 +64,9 @@ wxTextCtrlBase::~wxTextCtrlBase()
 {
 #ifndef NO_TEXT_WINDOW_STREAM
 #if !wxUSE_IOSTREAMH
-  delete[] m_streambuf;
+  delete m_streambuf;
 #endif
 #endif
-}
-
-// ----------------------------------------------------------------------------
-// style functions - not implemented here
-// ----------------------------------------------------------------------------
-
-// apply styling to text range
-bool wxTextCtrlBase::SetStyle(long WXUNUSED(start), long WXUNUSED(end),
-                              const wxTextAttr& WXUNUSED(style))
-{
-    // to be implemented in derived TextCtrl classes
-    return FALSE;
-}
-
-// change default text attributes
-bool wxTextCtrlBase::SetDefaultStyle(const wxTextAttr &style)
-{
-    m_defaultStyle = style;
-    return TRUE;
-}
-
-// get default text attributes
-const wxTextAttr& wxTextCtrlBase::GetDefaultStyle() const
-{
-    return m_defaultStyle;
 }
 
 // ----------------------------------------------------------------------------

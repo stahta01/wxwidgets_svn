@@ -25,7 +25,7 @@
 #include <Types.h>
 #include <Files.h>
 
-#include "optim.h"
+#include "Optim.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -215,6 +215,6 @@ pascal	OSErr	FSpFileCopy(const FSSpec *srcSpec,
 }
 #endif
 
-#include "optimend.h"
+#include "OptimEnd.h"
 
 #endif	/* __FILECOPY__ */

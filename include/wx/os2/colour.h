@@ -71,10 +71,6 @@ public:
             ,(unsigned char)(lColRGB >> 16)
            );
     }
-    void Set(const wxString& rsColour)
-    {
-        InitFromName(rsColour);
-    }
 
     //
     // Accessors

@@ -7,19 +7,19 @@
 CFG=wxvc_dll - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "wxvc_dll.mak".
-!MESSAGE
+!MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "wxvc_dll.mak" CFG="wxvc_dll - Win32 Debug"
-!MESSAGE
+!MESSAGE 
 !MESSAGE Possible choices for configuration are:
-!MESSAGE
+!MESSAGE 
 !MESSAGE "wxvc_dll - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "wxvc_dll - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE
+!MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"../lib/wx23_1.dll"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"../lib/wx22_7.dll"
 
 !ELSEIF  "$(CFG)" == "wxvc_dll - Win32 Debug"
 
@@ -79,9 +79,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../lib/wx23_1d.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib rpcrt4.lib winmm.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"../lib/wx22_7d.dll" /pdbtype:sept
 
-!ENDIF
+!ENDIF 
 
 # Begin Target
 
@@ -116,10 +116,6 @@ SOURCE=.\common\config.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\cshelp.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\ctrlcmn.cpp
 # End Source File
 # Begin Source File
@@ -140,19 +136,11 @@ SOURCE=.\common\db.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\dbgrid.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\dbtable.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\common\dcbase.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\dircmn.cpp
 # End Source File
 # Begin Source File
 
@@ -186,10 +174,6 @@ SOURCE=.\common\dynlib.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\effects.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\encconv.cpp
 # End Source File
 # Begin Source File
@@ -216,10 +200,6 @@ SOURCE=.\common\fileconf.cpp
 # Begin Source File
 
 SOURCE=.\common\filefn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\filename.cpp
 # End Source File
 # Begin Source File
 
@@ -257,10 +237,6 @@ SOURCE=.\common\ftp.cpp
 # Begin Source File
 
 SOURCE=.\common\gdicmn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\geometry.cpp
 # End Source File
 # Begin Source File
 
@@ -316,10 +292,6 @@ SOURCE=.\common\imagpnm.cpp
 
 SOURCE=.\common\imagtiff.cpp
 # ADD CPP /I "tiff" /I "zlib"
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\imagxpm.cpp
 # End Source File
 # Begin Source File
 
@@ -403,10 +375,6 @@ SOURCE=.\common\protocol.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\quantize.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\resourc2.cpp
 # End Source File
 # Begin Source File
@@ -475,10 +443,6 @@ SOURCE=.\common\tokenzr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\treebase.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\txtstrm.cpp
 # End Source File
 # Begin Source File
@@ -529,10 +493,6 @@ SOURCE=.\common\wxexpr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\xpmdecod.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\zipstrm.cpp
 # ADD CPP /I "zlib"
 # End Source File
@@ -563,10 +523,6 @@ SOURCE=.\generic\dragimgg.cpp
 # Begin Source File
 
 SOURCE=.\generic\grid.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\gridctrl.cpp
 # End Source File
 # Begin Source File
 
@@ -602,6 +558,10 @@ SOURCE=.\generic\panelg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\generic\plot.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\generic\progdlgg.cpp
 # End Source File
 # Begin Source File
@@ -626,10 +586,6 @@ SOURCE=.\generic\scrolwin.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\splash.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\splitter.cpp
 # End Source File
 # Begin Source File
@@ -651,14 +607,6 @@ SOURCE=.\generic\textdlgg.cpp
 # Begin Source File
 
 SOURCE=.\generic\tipdlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\tipwin.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\treectlg.cpp
 # End Source File
 # Begin Source File
 
@@ -1077,10 +1025,6 @@ SOURCE=.\msw\slidrmsw.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\snglinst.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\spinbutt.cpp
 # End Source File
 # Begin Source File
@@ -1125,10 +1069,6 @@ SOURCE=.\msw\textctrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\tglbtn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\thread.cpp
 # End Source File
 # Begin Source File
@@ -1158,6 +1098,11 @@ SOURCE=.\msw\wave.cpp
 # Begin Source File
 
 SOURCE=.\msw\window.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\xpmhand.cpp
+# ADD CPP /I "../src/xpm"
 # End Source File
 # End Group
 # Begin Group "OLE Files"
@@ -1288,6 +1233,105 @@ SOURCE=.\png\pngwutil.c
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # End Group
+# Begin Group "XPM Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\xpm\attrib.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\crbuffri.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\crdatfri.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\create.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\crifrbuf.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\crifrdat.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\dataxpm.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\hashtab.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\imagexpm.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\info.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\misc.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\parse.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\rdftodat.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\rdftoi.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\rgb.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\scan.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\simx.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\wrffrdat.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\xpm\wrffri.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# End Group
 # Begin Group "Zlib Files"
 
 # PROP Default_Filter ""
@@ -1387,7 +1431,7 @@ SOURCE=.\jpeg\jcapimin.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1404,7 +1448,7 @@ SOURCE=.\jpeg\jcapistd.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1421,7 +1465,7 @@ SOURCE=.\jpeg\jccoefct.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1438,7 +1482,7 @@ SOURCE=.\jpeg\jccolor.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1455,7 +1499,7 @@ SOURCE=.\jpeg\jcdctmgr.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1472,7 +1516,7 @@ SOURCE=.\jpeg\jchuff.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1489,7 +1533,7 @@ SOURCE=.\jpeg\jcinit.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1506,7 +1550,7 @@ SOURCE=.\jpeg\jcmainct.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1523,7 +1567,7 @@ SOURCE=.\jpeg\jcmarker.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1540,7 +1584,7 @@ SOURCE=.\jpeg\jcmaster.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1557,7 +1601,7 @@ SOURCE=.\jpeg\jcomapi.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1574,7 +1618,7 @@ SOURCE=.\jpeg\jcparam.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1591,7 +1635,7 @@ SOURCE=.\jpeg\jcphuff.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1608,7 +1652,7 @@ SOURCE=.\jpeg\jcprepct.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1625,7 +1669,7 @@ SOURCE=.\jpeg\jcsample.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1642,7 +1686,7 @@ SOURCE=.\jpeg\jctrans.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1659,7 +1703,7 @@ SOURCE=.\jpeg\jdapimin.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1676,7 +1720,7 @@ SOURCE=.\jpeg\jdapistd.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1693,7 +1737,7 @@ SOURCE=.\jpeg\jdatadst.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1710,7 +1754,7 @@ SOURCE=.\jpeg\jdatasrc.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1727,7 +1771,7 @@ SOURCE=.\jpeg\jdcoefct.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1744,7 +1788,7 @@ SOURCE=.\jpeg\jdcolor.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1761,7 +1805,7 @@ SOURCE=.\jpeg\jddctmgr.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1778,7 +1822,7 @@ SOURCE=.\jpeg\jdhuff.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1795,7 +1839,7 @@ SOURCE=.\jpeg\jdinput.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1812,7 +1856,7 @@ SOURCE=.\jpeg\jdmainct.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1829,7 +1873,7 @@ SOURCE=.\jpeg\jdmarker.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1846,7 +1890,7 @@ SOURCE=.\jpeg\jdmaster.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1863,7 +1907,7 @@ SOURCE=.\jpeg\jdmerge.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1880,7 +1924,7 @@ SOURCE=.\jpeg\jdphuff.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1897,7 +1941,7 @@ SOURCE=.\jpeg\jdpostct.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1914,7 +1958,7 @@ SOURCE=.\jpeg\jdsample.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1931,7 +1975,7 @@ SOURCE=.\jpeg\jdtrans.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1948,7 +1992,7 @@ SOURCE=.\jpeg\jerror.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1965,7 +2009,7 @@ SOURCE=.\jpeg\jfdctflt.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1982,7 +2026,7 @@ SOURCE=.\jpeg\jfdctfst.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -1999,7 +2043,7 @@ SOURCE=.\jpeg\jfdctint.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2016,7 +2060,7 @@ SOURCE=.\jpeg\jidctflt.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2033,7 +2077,7 @@ SOURCE=.\jpeg\jidctfst.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2050,7 +2094,7 @@ SOURCE=.\jpeg\jidctint.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2067,7 +2111,7 @@ SOURCE=.\jpeg\jidctred.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2084,7 +2128,7 @@ SOURCE=.\jpeg\jmemmgr.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2101,7 +2145,7 @@ SOURCE=.\jpeg\jmemnobs.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2118,7 +2162,7 @@ SOURCE=.\jpeg\jquant1.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2135,7 +2179,7 @@ SOURCE=.\jpeg\jquant2.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -2152,7 +2196,7 @@ SOURCE=.\jpeg\jutils.c
 # ADD CPP /Zi /I ".."
 # SUBTRACT CPP /YX /Yc /Yu
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # End Group

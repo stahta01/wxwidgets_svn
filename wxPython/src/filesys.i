@@ -87,7 +87,7 @@
 
 
 
-class wxFSFile : public wxObject {
+class wxFSFile {
 public:
     wxFSFile(wxInputStream *stream, const wxString& loc,
              const wxString& mimetype, const wxString& anchor,
@@ -151,8 +151,8 @@ IMP_PYCALLBACK_STRING__pure(wxPyFileSystemHandler, wxFileSystemHandler, FindNext
 %}
 
 
-%name(wxCPPFileSystemHandler)class wxFileSystemHandler : public wxObject {
-    wxFileSystemHandler();
+%name(wxCPPFileSystemHandler)class wxFileSystemHandler {
+      wxFileSystemHandler();
 }
 
 %name(wxFileSystemHandler)class wxPyFileSystemHandler : public wxFileSystemHandler {
@@ -176,7 +176,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxFileSystem : public wxObject {
+class wxFileSystem {
 public:
     wxFileSystem();
 
@@ -272,11 +272,5 @@ def wxMemoryFSHandler_AddFile(filename, a, b=''):
     else: raise TypeError, 'wxImage, wxBitmap or string expected'
 "
 
-
-//---------------------------------------------------------------------------
-
-%init %{
-    wxPyPtrTypeMap_Add("wxFileSystemHandler", "wxPyFileSystemHandler");
-%}
 
 //---------------------------------------------------------------------------

@@ -40,7 +40,7 @@
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-class wxPseudoMetaFile : public wxObject {
+class wxPseudoMetaFile {
 public:
   wxPseudoMetaFile();
   ~wxPseudoMetaFile();
@@ -326,7 +326,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxOGLConstraint : public wxObject {
+class wxOGLConstraint  {
 public:
     //wxOGLConstraint(int type, wxPyShape *constraining, wxList& constrained);
     %addmethods {
@@ -337,8 +337,7 @@ public:
             return rv;
         }
     }
-
-    //~wxOGLConstraint();  The wxCompositShape takes ownership of the constraint
+    ~wxOGLConstraint();
 
     bool Evaluate();
     void SetSpacing(double x, double y);

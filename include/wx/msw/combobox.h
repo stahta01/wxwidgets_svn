@@ -84,6 +84,10 @@ public:
             WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
     WXHWND GetEditHWND() const;
+
+protected:
+    virtual void DoMoveWindow(int x, int y, int width, int height);
+    virtual wxSize DoGetBestSize() const;
 };
 
 #endif // wxUSE_COMBOBOX

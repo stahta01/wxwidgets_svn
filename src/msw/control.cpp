@@ -24,14 +24,13 @@
 #include "wx/event.h"
 #include "wx/app.h"
 #include "wx/dcclient.h"
-#include "wx/log.h"
 #endif
 
 #include "wx/control.h"
 
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) || defined(__TWIN32__))
     #include <commctrl.h>
 #endif
 
@@ -145,7 +144,7 @@ bool wxControl::ProcessCommand(wxCommandEvent& event)
 #if WXWIN_COMPATIBILITY
     if ( m_callback )
     {
-        (void)(*m_callback)(*this, event);
+        (void)(*m_callback)(this, event);
 
         return TRUE;
     }
@@ -223,17 +222,10 @@ void wxControl::OnEraseBackground(wxEraseEvent& event)
     ::SetMapMode(hdc, mode);
 }
 
-WXHBRUSH wxControl::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
-#if wxUSE_CTL3D
+WXHBRUSH wxControl::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
                                WXUINT message,
                                WXWPARAM wParam,
-                               WXLPARAM lParam
-#else
-                               WXUINT WXUNUSED(message),
-                               WXWPARAM WXUNUSED(wParam),
-                               WXLPARAM WXUNUSED(lParam)
-#endif
-    )
+                               WXLPARAM lParam)
 {
 #if wxUSE_CTL3D
     if ( m_useCtl3D )

@@ -28,6 +28,12 @@
 
 #define wxUSE_FILESYSTEM       1 // better have this is you want to compile wxHTML
 
+#define wxUSE_PCX              1 // Utilize PCX images
+
+#define wxUSE_PNM              1 // Utilize PNM images
+
+#define wxUSE_GIF              1 // Utilize GIF images
+
 #if defined(__VISAGECPP__) && (__IBMCPP__ < 400 || __IBMC__ < 400 )
 #define wxUSE_LONGLONG        1
 #endif
@@ -55,12 +61,6 @@
 
 #define wxUSE_TIMEDATE    1
                                 // 0 for no wxTime/wxDate classes
-
-#define wxUSE_MENUS       1
-                                // 0 for no menus
-
-#define wxUSE_JOYSTICK    1
-                                // 0 for no joystick functions
 
 #define wxUSE_CLIPBOARD   1
                                 // 0 for no clipboard functions
@@ -110,8 +110,6 @@
                                     // Define 1 to compile check listbox
 #define wxUSE_CARET       1
                                     // Define 1 to use wxCaret class
-#define wxUSE_TREECTRL    1
-                                    // Define 1 to use wxTree* classes
 #define wxUSE_XPM_IN_OS2  1
                                     // Define 1 to support the XPM package in wxBitmap.
 #define wxUSE_IMAGE_LOADING_IN_OS2        1
@@ -213,23 +211,10 @@
                                   // and make the library thread safe
 #define wxUSE_ZLIB          1
                                   // Use zlib for compression in streams and PNG code
-#define wxUSE_IMAGE         1
-                                  // Set to 1 for wxImage support (recommended).
 #define wxUSE_LIBPNG        1
-                                  // Set to 1 for PNG format support
+                                  // Use PNG bitmap code
 #define wxUSE_LIBJPEG       1
-                                  // Set to 1 for JPEG format support
-#define wxUSE_LIBTIFF       1
-                                  // Set to 1 for TIFF format support
-#define wxUSE_GIF           1
-                                  // Set to 1 for GIF format support
-#define wxUSE_PNM           1
-                                  // Set to 1 for PNM format support
-#define wxUSE_PCX           1
-                                  // Set to 1 for PCX format support
-#define wxUSE_XPM           1
-                                  // Set to 1 for XPM format support
-
+                                  // Use JPEG bitmap code
 #define wxUSE_SERIAL        1
                                   // Use serialization (requires utils/serialize)
 #define wxUSE_DYNLIB_CLASS  1
@@ -305,9 +290,6 @@
 #define wxUSE_OWNER_DRAWN             1
                                     // Owner-drawn menus and listboxes
 
-#define wxUSE_NEW_GRID 1
-                                // Define 1 to use the new drid classes
-
 /*
  * Any platform
  *
@@ -327,13 +309,5 @@
 #define wxUSE_GENERIC_DIALOGS_IN_OS2 0
                                 // Define 1 to use generic dialogs in Windows, even though
                                 // they duplicate native common dialog (e.g. wxColourDialog)
-
-#define wxUSE_SNGLINST_CHECKER  1
-
-#define wxUSE_GEOMETRY  1
-                                // needed for wxCanvas
-#define wxUSE_MENUS               1
-
-
 #endif
     // _WX_SETUP_H_

@@ -1,8 +1,4 @@
-#ifdef __UNIX__
-#  include <Carbon.r>
-#else
-#  include <Types.r>
-#endif
+#include <Types.r>
 #include "apprsrc.h"
 
 resource 'STR#' ( 128 , "Simple Alert Messages" )

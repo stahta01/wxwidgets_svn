@@ -69,8 +69,6 @@ public:
     // menu handle depending on what we're
     int GetRealId() const;
 
-	static int MacBuildMenuString(StringPtr outMacItemText, SInt16 *outMacShortcutChar , UInt8 *outMacModifiers , const char *inItemName , bool useShortcuts ) ;
-
 private:
     DECLARE_DYNAMIC_CLASS(wxMenuItem)
 };

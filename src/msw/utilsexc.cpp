@@ -363,7 +363,6 @@ long wxExecute(const wxString& cmd, bool sync, wxProcess *handler)
     wxCHECK_MSG( !!cmd, 0, wxT("empty command in wxExecute") );
 
     wxString command;
-
 #if wxUSE_IPC
     // DDE hack: this is really not pretty, but we need to allow this for
     // transparent handling of DDE servers in wxMimeTypesManager. Usually it
@@ -371,7 +370,7 @@ long wxExecute(const wxString& cmd, bool sync, wxProcess *handler)
     // given type. Sometimes, however, this command just launches the server
     // and an additional DDE request must be made to really open the file. To
     // keep all this well hidden from the application, we allow a special form
-    // of command: WX_DDE#<command>#DDE_SERVER#DDE_TOPIC#DDE_COMMAND in which
+    // of command: WX_DDE:<command>:DDE_SERVER:DDE_TOPIC:DDE_COMMAND in which
     // case we execute just <command> and process the rest below
     wxString ddeServer, ddeTopic, ddeCommand;
     static const size_t lenDdePrefix = 7;   // strlen("WX_DDE:")
@@ -463,9 +462,9 @@ long wxExecute(const wxString& cmd, bool sync, wxProcess *handler)
 #if wxUSE_STREAMS
     // the first elements are reading ends, the second are the writing ones
     HANDLE hpipeStdin[2],
+           hpipeStdinWrite = INVALID_HANDLE_VALUE,
            hpipeStdout[2],
            hpipeStderr[2];
-    HANDLE hpipeStdinWrite = INVALID_HANDLE_VALUE;
 
     // open the pipes to which child process IO will be redirected if needed
     if ( handler && handler->IsRedirected() )
@@ -707,6 +706,11 @@ long wxExecute(const wxString& cmd, bool sync, wxProcess *handler)
                 // ok, process ready to accept DDE requests
                 ok = wxExecuteDDE(ddeServer, ddeTopic, ddeCommand);
         }
+
+        if ( !ok )
+        {
+            wxLogError(_("Couldn't launch DDE server '%s'."), command.c_str());
+        }
     }
 #endif // wxUSE_IPC
 
@@ -768,3 +772,40 @@ long wxExecute(char **argv, bool sync, wxProcess *handler)
     return wxExecute(command, sync, handler);
 }
 
+#if wxUSE_GUI
+
+// ----------------------------------------------------------------------------
+// Metafile helpers
+// ----------------------------------------------------------------------------
+
+extern void PixelToHIMETRIC(LONG *x, LONG *y)
+{
+    ScreenHDC hdcRef;
+
+    int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE),
+        iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE),
+        iWidthPels = GetDeviceCaps(hdcRef, HORZRES),
+        iHeightPels = GetDeviceCaps(hdcRef, VERTRES);
+
+    *x *= (iWidthMM * 100);
+    *x /= iWidthPels;
+    *y *= (iHeightMM * 100);
+    *y /= iHeightPels;
+}
+
+extern void HIMETRICToPixel(LONG *x, LONG *y)
+{
+    ScreenHDC hdcRef;
+
+    int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE),
+        iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE),
+        iWidthPels = GetDeviceCaps(hdcRef, HORZRES),
+        iHeightPels = GetDeviceCaps(hdcRef, VERTRES);
+
+    *x *= iWidthPels;
+    *x /= (iWidthMM * 100);
+    *y *= iHeightPels;
+    *y /= (iHeightMM * 100);
+}
+
+#endif // wxUSE_GUI

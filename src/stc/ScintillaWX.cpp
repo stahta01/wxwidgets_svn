@@ -95,7 +95,6 @@ ScintillaWX::ScintillaWX(wxStyledTextCtrl* win) {
     wMain = win;
     wDraw = win;
     stc   = win;
-    wheelRotation = 0;
     Initialise();
 }
 
@@ -326,59 +325,59 @@ void ScintillaWX::DoPaint(wxDC* dc, wxRect rect) {
 
 void ScintillaWX::DoHScroll(int type, int pos) {
     int xPos = xOffset;
-    if (type == wxEVT_SCROLLWIN_LINEUP)
+    switch (type) {
+    case wxEVT_SCROLLWIN_LINEUP:
         xPos -= H_SCROLL_STEP;
-    else if (type == wxEVT_SCROLLWIN_LINEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_LINEDOWN:
         xPos += H_SCROLL_STEP;
-    else if (type == wxEVT_SCROLLWIN_PAGEUP)
+        break;
+    case wxEVT_SCROLLWIN_PAGEUP:
         xPos -= H_SCROLL_PAGE;
-    else if (type == wxEVT_SCROLLWIN_PAGEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_PAGEDOWN:
         xPos += H_SCROLL_PAGE;
-    else if (type == wxEVT_SCROLLWIN_TOP)
+        break;
+    case wxEVT_SCROLLWIN_TOP:
         xPos = 0;
-    else if (type == wxEVT_SCROLLWIN_BOTTOM)
+        break;
+    case wxEVT_SCROLLWIN_BOTTOM:
         xPos = H_SCROLL_MAX;
-    else if (type == wxEVT_SCROLLWIN_THUMBTRACK)
+        break;
+    case wxEVT_SCROLLWIN_THUMBTRACK:
         xPos = pos;
-
+        break;
+    }
     HorizontalScrollTo(xPos);
 }
 
 void ScintillaWX::DoVScroll(int type, int pos) {
     int topLineNew = topLine;
-    if (type == wxEVT_SCROLLWIN_LINEUP)
+    switch (type) {
+    case wxEVT_SCROLLWIN_LINEUP:
         topLineNew -= 1;
-    else if (type == wxEVT_SCROLLWIN_LINEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_LINEDOWN:
         topLineNew += 1;
-    else if (type ==  wxEVT_SCROLLWIN_PAGEUP)
+        break;
+    case wxEVT_SCROLLWIN_PAGEUP:
         topLineNew -= LinesToScroll();
-    else if (type ==  wxEVT_SCROLLWIN_PAGEDOWN)
+        break;
+    case wxEVT_SCROLLWIN_PAGEDOWN:
         topLineNew += LinesToScroll();
-    else if (type ==  wxEVT_SCROLLWIN_TOP)
+        break;
+    case wxEVT_SCROLLWIN_TOP:
         topLineNew = 0;
-    else if (type ==  wxEVT_SCROLLWIN_BOTTOM)
+        break;
+    case wxEVT_SCROLLWIN_BOTTOM:
         topLineNew = MaxScrollPos();
-    else if (type ==   wxEVT_SCROLLWIN_THUMBTRACK)
+        break;
+    case wxEVT_SCROLLWIN_THUMBTRACK:
         topLineNew = pos;
-
+        break;
+    }
     ScrollTo(topLineNew);
 }
-
-
-void ScintillaWX::DoMouseWheel(int rotation, int delta, int linesPerAction) {
-    int topLineNew = topLine;
-    int lines;
-
-    wheelRotation += rotation;
-    lines = wheelRotation / delta;
-    wheelRotation -= lines * delta;
-    if (lines != 0) {
-        lines *= linesPerAction;
-        topLineNew -= lines;
-        ScrollTo(topLineNew);
-    }
-}
-
 
 void ScintillaWX::DoSize(int width, int height) {
     PRectangle rcClient(0,0,width,height);

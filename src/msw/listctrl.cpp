@@ -40,12 +40,12 @@
 
 #include "wx/textctrl.h"
 #include "wx/imaglist.h"
+
 #include "wx/listctrl.h"
-#include "wx/dcclient.h"
 
 #include "wx/msw/private.h"
 
-#if ((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#ifdef __GNUWIN32_OLD__
     #include "wx/msw/gnuwin32/extra.h"
 #else
     #include <commctrl.h>
@@ -72,32 +72,11 @@ static void wxConvertToMSWListItem(const wxListCtrl *ctrl, wxListItem& info, LV_
 static void wxConvertFromMSWListItem(const wxListCtrl *ctrl, wxListItem& info, LV_ITEM& tvItem, HWND getFullInfo = 0);
 
 // ----------------------------------------------------------------------------
-// events
+// macros
 // ----------------------------------------------------------------------------
-
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_DRAG)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_RDRAG)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_END_LABEL_EDIT)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ITEM)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_GET_INFO)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_SET_INFO)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_SELECTED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_DESELECTED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_KEY_DOWN)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_INSERT_ITEM)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_ACTIVATED)
 
 IMPLEMENT_DYNAMIC_CLASS(wxListCtrl, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxListItem, wxObject)
-
-BEGIN_EVENT_TABLE(wxListCtrl, wxControl)
-    EVT_PAINT(wxListCtrl::OnPaint)
-END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
@@ -147,7 +126,6 @@ void wxListCtrl::Init()
     m_imageListNormal = NULL;
     m_imageListSmall = NULL;
     m_imageListState = NULL;
-    m_ownsImageListNormal = m_ownsImageListSmall = m_ownsImageListState = FALSE;
     m_baseStyle = 0;
     m_colCount = 0;
     m_textCtrl = NULL;
@@ -190,10 +168,6 @@ bool wxListCtrl::Create(wxWindow *parent,
 
     DWORD wstyle = WS_VISIBLE | WS_CHILD | WS_TABSTOP |
                    LVS_SHAREIMAGELISTS | LVS_SHOWSELALWAYS;
-
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        wstyle |= WS_CLIPSIBLINGS;
-
     if ( wxStyleHasBorder(m_windowStyle) )
         wstyle |= WS_BORDER;
     m_baseStyle = wstyle;
@@ -280,6 +254,7 @@ void wxListCtrl::FreeAllAttrs(bool dontRecreate)
 {
     if ( m_hasAnyAttr )
     {
+        m_attrs.BeginFind();
         for ( wxNode *node = m_attrs.Next(); node; node = m_attrs.Next() )
         {
             delete (wxListItemAttr *)node->Data();
@@ -306,10 +281,6 @@ wxListCtrl::~wxListCtrl()
         delete m_textCtrl;
         m_textCtrl = NULL;
     }
-
-    if (m_ownsImageListNormal) delete m_imageListNormal;
-    if (m_ownsImageListSmall) delete m_imageListSmall;
-    if (m_ownsImageListState) delete m_imageListState;
 }
 
 // ----------------------------------------------------------------------------
@@ -743,7 +714,7 @@ bool wxListCtrl::SetItemState(long item, long state, long stateMask)
 }
 
 // Sets the item image
-bool wxListCtrl::SetItemImage(long item, int image, int WXUNUSED(selImage))
+bool wxListCtrl::SetItemImage(long item, int image, int selImage)
 {
     wxListItem info;
 
@@ -947,36 +918,19 @@ void wxListCtrl::SetImageList(wxImageList *imageList, int which)
     if ( which == wxIMAGE_LIST_NORMAL )
     {
         flags = LVSIL_NORMAL;
-        if (m_ownsImageListNormal) delete m_imageListNormal;
         m_imageListNormal = imageList;
-        m_ownsImageListNormal = FALSE;
     }
     else if ( which == wxIMAGE_LIST_SMALL )
     {
         flags = LVSIL_SMALL;
-        if (m_ownsImageListSmall) delete m_imageListSmall;
         m_imageListSmall = imageList;
-        m_ownsImageListSmall = FALSE;
     }
     else if ( which == wxIMAGE_LIST_STATE )
     {
         flags = LVSIL_STATE;
-        if (m_ownsImageListState) delete m_imageListState;
         m_imageListState = imageList;
-        m_ownsImageListState = FALSE;
     }
     ListView_SetImageList(GetHwnd(), (HIMAGELIST) imageList ? imageList->GetHIMAGELIST() : 0, flags);
-}
-
-void wxListCtrl::AssignImageList(wxImageList *imageList, int which)
-{
-    SetImageList(imageList, which);
-    if ( which == wxIMAGE_LIST_NORMAL )
-        m_ownsImageListNormal = TRUE;
-    else if ( which == wxIMAGE_LIST_SMALL )
-        m_ownsImageListSmall = TRUE;
-    else if ( which == wxIMAGE_LIST_STATE )
-        m_ownsImageListState = TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -1002,7 +956,35 @@ bool wxListCtrl::Arrange(int flag)
 // Deletes an item
 bool wxListCtrl::DeleteItem(long item)
 {
-    return (ListView_DeleteItem(GetHwnd(), (int) item) != 0);
+    if ( !ListView_DeleteItem(GetHwnd(), (int)item) )
+    {
+        wxLogDebug(_T("ListView_DeleteItem() failed"));
+
+        return FALSE;
+    }
+
+    if ( m_hasAnyAttr )
+    {
+        // first, delete the attribute associated with this item, if any
+        (void)m_attrs.Delete(item);
+
+        // then, as in InsertItem(), we have to adjust the existing attributes
+        // keyed on item index
+        long count = GetItemCount();
+        while ( item < count )
+        {
+            wxObject *attr = m_attrs.Delete(item + 1);
+            if ( attr )
+            {
+                // add it back with new key
+                m_attrs.Put(item, attr);
+            }
+
+            item++;
+        }
+    }
+
+    return TRUE;
 }
 
 // Deletes all items
@@ -1053,8 +1035,6 @@ wxTextCtrl* wxListCtrl::EditLabel(long item, wxClassInfo* textControlClass)
 {
     wxASSERT( (textControlClass->IsKindOf(CLASSINFO(wxTextCtrl))) );
 
-    // VS: ListView_EditLabel requires that the list has focus.  
-    SetFocus();
     HWND hWnd = (HWND) ListView_EditLabel(GetHwnd(), item);
 
     if (m_textCtrl)
@@ -1073,7 +1053,7 @@ wxTextCtrl* wxListCtrl::EditLabel(long item, wxClassInfo* textControlClass)
 }
 
 // End label editing, optionally cancelling the edit
-bool wxListCtrl::EndEditLabel(bool WXUNUSED(cancel))
+bool wxListCtrl::EndEditLabel(bool cancel)
 {
     wxFAIL;
 
@@ -1113,10 +1093,8 @@ long wxListCtrl::FindItem(long start, const wxString& str, bool partial)
 
     // ListView_FindItem() excludes the first item from search and to look
     // through all the items you need to start from -1 which is unnatural and
-    // inconsistent with the generic version - so we adjust the index
-    if (start != -1)
-        start --;
-    return ListView_FindItem(GetHwnd(), (int) start, &findInfo);
+    // inconsitent with the generic version - so we adjust the index
+    return ListView_FindItem(GetHwnd(), (int) start - 1, &findInfo);
 }
 
 // Find an item whose data matches this data, starting from the item after 'start'
@@ -1192,23 +1170,50 @@ long wxListCtrl::InsertItem(wxListItem& info)
     LV_ITEM item;
     wxConvertToMSWListItem(this, info, item);
 
+    long lItem = ListView_InsertItem(GetHwnd(), &item);
+    if ( lItem == -1 )
+    {
+        wxLogDebug(_T("ListView_InsertItem() failed"));
+
+        return -1;
+    }
+
+    if ( m_hasAnyAttr )
+    {
+        // we have to offset all existing item attributes for the items
+        // following this one as the attrs are keyed on the position
+        //
+        // NB: it would be faster to traverse the hash table looking for all
+        //     elements with keys > lItem, but wxHashTable doesn't seem to
+        //     support and because of this the code below is, of course,
+        //     horribly inefficient (FIXME)
+
+        // we have to go in downwards direction to avoid overwriting the old
+        // attributes
+        for ( long n = GetItemCount() - 1; n > lItem; n-- )
+        {
+            wxObject *attr = m_attrs.Delete(n - 1);
+            if ( attr )
+            {
+                // add it back with new key
+                m_attrs.Put(n, attr);
+            }
+        }
+    }
+
     // check whether it has any custom attributes
     if ( info.HasAttributes() )
     {
+        // there can't be any attr for this id as the item was just inserted!
+        wxASSERT_MSG( !m_attrs.Get(item.iItem),
+                      _T("error in wxListCtrl attributes handling code") );
 
-        wxListItemAttr *attr;
-        attr = (wxListItemAttr*) m_attrs.Get(item.iItem);
-
-        if (attr == NULL)
-
-            m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
-
-        else *attr = *info.GetAttributes();
+        m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
 
         m_hasAnyAttr = TRUE;
     }
 
-    return (long) ListView_InsertItem(GetHwnd(), & item);
+    return lItem;
 }
 
 long wxListCtrl::InsertItem(long index, const wxString& label)
@@ -1338,11 +1343,73 @@ bool wxListCtrl::ScrollList(int dx, int dy)
 // The return value is a negative number if the first item should precede the second
 // item, a positive number of the second item should precede the first,
 // or zero if the two items are equivalent.
-
+//
 // data is arbitrary data to be passed to the sort function.
+
+// FIXME: this is horrible and MT-unsafe and everything else but I don't have
+//        time for anything better right now (VZ)
+static long gs_sortData = 0;
+static wxListCtrl *gs_sortCtrl = NULL;
+static wxListCtrlCompare gs_sortFunction = NULL;
+
+int wxCMPFUNC_CONV wxListCtrlCompareFn(const void *arg1, const void *arg2)
+{
+    int n1 = *(const int *)arg1,
+        n2 = *(const int *)arg2;
+
+    return gs_sortFunction(gs_sortCtrl->GetItemData(n1),
+                           gs_sortCtrl->GetItemData(n2),
+                           gs_sortData);
+}
+
 bool wxListCtrl::SortItems(wxListCtrlCompare fn, long data)
 {
-    return (ListView_SortItems(GetHwnd(), (PFNLVCOMPARE) fn, data) != 0);
+    // sort the attributes too
+    if ( m_hasAnyAttr )
+    {
+        int n,
+            count = GetItemCount();
+        int *aItems = new int[count];
+        for ( n = 0; n < count; n++ )
+        {
+            aItems[n] = n;
+        }
+
+        gs_sortData = data;
+        gs_sortCtrl = this;
+        gs_sortFunction = fn;
+
+        qsort(aItems, count, sizeof(int), wxListCtrlCompareFn);
+
+        gs_sortData = 0;
+        gs_sortCtrl = NULL;
+        gs_sortFunction = NULL;
+
+        wxHashTable attrsNew(wxKEY_INTEGER, 1000);
+        for ( n = 0; n < count; n++ )
+        {
+            wxObject *attr = m_attrs.Delete(n);
+            if ( attr )
+            {
+                attrsNew.Put(aItems[n], attr);
+            }
+        }
+
+        // FIXME: workaround for wxHashTable memory leak
+        m_attrs.Destroy();
+        m_attrs = attrsNew;
+
+        delete [] aItems;
+    }
+
+    if ( !ListView_SortItems(GetHwnd(), (PFNLVCOMPARE)fn, data) )
+    {
+        wxLogDebug(_T("ListView_SortItems() failed"));
+
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -1682,7 +1749,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                         return TRUE;
                 }
             }
-//            break; // can never be reached
+            break;
 #endif // _WIN32_IE >= 0x300
 
         default:
@@ -1750,71 +1817,6 @@ wxChar *wxListCtrl::AddPool(const wxString& str)
     return (wxChar *)node->Data();
 }
 
-// Necessary for drawing hrules and vrules, if specified
-void wxListCtrl::OnPaint(wxPaintEvent& event)
-{
-    wxPaintDC dc(this);
-
-    wxControl::OnPaint(event);
-
-    // Reset the device origin since it may have been set
-    dc.SetDeviceOrigin(0, 0);
-
-    bool drawHRules = ((GetWindowStyle() & wxLC_HRULES) != 0);
-    bool drawVRules = ((GetWindowStyle() & wxLC_VRULES) != 0);
-
-    if (!drawHRules && !drawVRules)
-        return;
-    if ((GetWindowStyle() & wxLC_REPORT) == 0)
-        return;
-
-    wxPen pen(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DLIGHT), 1, wxSOLID);
-    dc.SetPen(pen);
-    dc.SetBrush(* wxTRANSPARENT_BRUSH);
-
-    wxSize clientSize = GetClientSize();
-    wxRect itemRect;
-    int cy=0;
-
-    int itemCount = GetItemCount();
-    int i;
-    for (i = 0; i < itemCount; i++)
-    {
-        if (GetItemRect(i, itemRect))
-        {
-            cy = itemRect.GetTop();
-            if (i != 0) // Don't draw the first one
-            {
-                dc.DrawLine(0, cy, clientSize.x, cy);
-            }
-            // Draw last line
-            if (i == (GetItemCount() - 1))
-            {
-                cy = itemRect.GetBottom();
-                dc.DrawLine(0, cy, clientSize.x, cy);
-            }
-        }
-    }
-    i = (GetItemCount() - 1);
-    if (drawVRules && (i > -1))
-    {
-        wxRect firstItemRect;
-        GetItemRect(0, firstItemRect);
-
-        if (GetItemRect(i, itemRect))
-        {
-            int col;
-            int x = itemRect.GetX();
-            for (col = 0; col < GetColumnCount(); col++)
-            {
-                int colWidth = GetColumnWidth(col);
-                x += colWidth ;
-                dc.DrawLine(x, firstItemRect.GetY() - 2, x, itemRect.GetBottom());
-            }
-        }
-    }
-}
-
 // ----------------------------------------------------------------------------
 // wxListItem
 // ----------------------------------------------------------------------------
@@ -1859,7 +1861,7 @@ void wxListItem::ClearAttributes()
     m_attr = NULL;
 }
 
-static void wxConvertFromMSWListItem(const wxListCtrl *WXUNUSED(ctrl), wxListItem& info, LV_ITEM& lvItem, HWND getFullInfo)
+static void wxConvertFromMSWListItem(const wxListCtrl *ctrl, wxListItem& info, LV_ITEM& lvItem, HWND getFullInfo)
 {
     info.m_data = lvItem.lParam;
     info.m_mask = 0;

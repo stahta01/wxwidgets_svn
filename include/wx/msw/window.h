@@ -87,7 +87,7 @@ public:
 
     virtual void SetFocus();
 
-    virtual bool Reparent( wxWindowBase *newParent );
+    virtual bool Reparent( wxWindow *newParent );
 
     virtual void WarpPointer(int x, int y);
     virtual void CaptureMouse();
@@ -163,10 +163,7 @@ public:
 
     // a MSW only function which sends a size event to the window using its
     // current size - this has an effect of refreshing the window layout
-/*
-FUNCTION IS NOW A MEMBER OF wxFrame - gt
     void SendSizeEvent();
-*/
 
     // implementation from now on
     // --------------------------
@@ -188,7 +185,6 @@ FUNCTION IS NOW A MEMBER OF wxFrame - gt
     void OnSetFocus(wxFocusEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnIdle(wxIdleEvent& event);
-    void OnPaint(wxPaintEvent& event);
 
 public:
     // For implementation purposes - sometimes decorations make the client area
@@ -211,7 +207,7 @@ public:
 
     // Make a Windows extended style from the given wxWindows window style
     static WXDWORD MakeExtendedStyle(long style,
-                                     bool eliminateBorders = FALSE);
+                                     bool eliminateBorders = TRUE);
     // Determine whether 3D effects are wanted
     WXDWORD Determine3DEffects(WXDWORD defaultBorderStyle, bool *want3D) const;
 
@@ -262,7 +258,7 @@ public:
                           WXWORD *item, WXWORD *flags, WXHMENU *hmenu);
 
     // ------------------------------------------------------------------------
-    // internal handlers for MSW messages: all handlers return a boolean value:
+    // internal handlers for MSW messages: all handlers return a boolen value:
     // TRUE means that the handler processed the event and FALSE that it didn't
     // ------------------------------------------------------------------------
 
@@ -327,11 +323,10 @@ public:
 
     bool HandleMouseEvent(WXUINT msg, int x, int y, WXUINT flags);
     bool HandleMouseMove(int x, int y, WXUINT flags);
-    bool HandleMouseWheel(WXWPARAM wParam, WXLPARAM lParam);
 
-    bool HandleChar(WXWPARAM wParam, WXLPARAM lParam, bool isASCII = FALSE);
-    bool HandleKeyDown(WXWPARAM wParam, WXLPARAM lParam);
-    bool HandleKeyUp(WXWPARAM wParam, WXLPARAM lParam);
+    bool HandleChar(WXWORD wParam, WXLPARAM lParam, bool isASCII = FALSE);
+    bool HandleKeyDown(WXWORD wParam, WXLPARAM lParam);
+    bool HandleKeyUp(WXWORD wParam, WXLPARAM lParam);
 
     bool HandleQueryDragIcon(WXHICON *hIcon);
 

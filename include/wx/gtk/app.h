@@ -82,6 +82,16 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+#ifdef __VMS
+
+extern "C"
+  {
+     extern guint vms_gtk_major_version(void);
+     extern guint vms_gtk_minor_version(void);
+     extern guint vms_gtk_micro_version(void);
+  }
+#endif
+
 int WXDLLEXPORT wxEntry( int argc, char *argv[] );
 
 #endif // __GTKAPPH__

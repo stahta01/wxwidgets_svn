@@ -18,10 +18,6 @@
 #pragma hdrstop
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_IMAGE
-
 #include "wx/imagbmp.h"
 #include "wx/bitmap.h"
 #include "wx/debug.h"
@@ -68,9 +64,9 @@ bool wxBMPHandler::SaveFile(wxImage *image,
     }
 
     unsigned width = image->GetWidth();
-    unsigned row_width = width * 3 +
+    unsigned row_width = width * 3 + 
                          (((width % 4) == 0) ? 0 : (4 - (width * 3) % 4));
-                         // each row must be aligned to dwords
+                         // each row must be aligned to dwords  
     struct
     {
         // BitmapHeader:
@@ -78,7 +74,7 @@ bool wxBMPHandler::SaveFile(wxImage *image,
         wxUint32  filesize;       // total file size, inc. headers
         wxUint32  reserved;       // for future use
         wxUint32  data_offset;    // image data offset in the file
-
+        
         // BitmapInfoHeader:
         wxUint32  bih_size;       // 2nd part's size
         wxUint32  width, height;  // bitmap's dimensions
@@ -94,19 +90,19 @@ bool wxBMPHandler::SaveFile(wxImage *image,
 
     hdr.magic = wxUINT16_SWAP_ON_BE(0x4D42/*'BM'*/);
     hdr.filesize = wxUINT32_SWAP_ON_BE(
-                   hdr_size +
+                   hdr_size + 
                    row_width * image->GetHeight()
                    );
     hdr.reserved = 0;
     hdr.data_offset = wxUINT32_SWAP_ON_BE(hdr_size);
-
+    
     hdr.bih_size = wxUINT32_SWAP_ON_BE(hdr_size - 14);
     hdr.width = wxUINT32_SWAP_ON_BE(image->GetWidth());
     hdr.height = wxUINT32_SWAP_ON_BE(image->GetHeight());
     hdr.planes = wxUINT16_SWAP_ON_BE(1); // always 1 plane
     hdr.bpp = wxUINT16_SWAP_ON_BE(24); // always TrueColor
     hdr.compression = 0; // RGB uncompressed
-    hdr.size_of_bmp = wxUINT32_SWAP_ON_BE(row_width * image->GetHeight());
+    hdr.size_of_bmp = wxUINT32_SWAP_ON_BE(row_width * image->GetHeight()); 
     hdr.h_res = hdr.v_res = wxUINT32_SWAP_ON_BE(72); // 72dpi is standard
     hdr.num_clrs = 0; // maximal possible = 2^24
     hdr.num_signif_clrs = 0; // all colors are significant
@@ -129,7 +125,7 @@ bool wxBMPHandler::SaveFile(wxImage *image,
         !stream.Write(&hdr.v_res, 4) ||
         !stream.Write(&hdr.num_clrs, 4) ||
         !stream.Write(&hdr.num_signif_clrs, 4)
-       )
+       ) 
     {
         if (verbose)
             wxLogError(_("BMP: Couldn't write the file header."));
@@ -151,7 +147,7 @@ bool wxBMPHandler::SaveFile(wxImage *image,
             buffer[3 * x + 0] = buffer[3 * x + 2];
             buffer[3 * x + 2] = tmpvar;
         }
-
+        
         if (!stream.Write(buffer, row_width))
         {
             if (verbose)
@@ -185,8 +181,8 @@ bool wxBMPHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
     int             rshift = 0, gshift = 0, bshift = 0;
     wxUint8         aByte;
     wxUint16        aWord;
-    wxInt32         dbuf[4];
-	wxInt32         aDword, rmask = 0, gmask = 0, bmask = 0;
+    wxInt32         dbuf[4], aDword,
+                    rmask = 0, gmask = 0, bmask = 0;
     wxInt8          bbuf[4];
     struct _cmap {
         unsigned char r, g, b;
@@ -201,7 +197,7 @@ bool wxBMPHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
      * Read the BMP header
      */
 
-    stream.Read( bbuf, 2 );
+    stream.Read( &bbuf, 2 );
     stream.Read( dbuf, 4 * 4 );
 
 #if 0 // unused
@@ -290,26 +286,13 @@ bool wxBMPHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
      */
     if (bpp < 16 && ncolors != 0)
     {
-        unsigned char* r = new unsigned char[ncolors];
-        unsigned char* g = new unsigned char[ncolors];
-        unsigned char* b = new unsigned char[ncolors];
         for (int j = 0; j < ncolors; j++)
         {
             stream.Read( bbuf, 4 );
             cmap[j].b = bbuf[0];
             cmap[j].g = bbuf[1];
             cmap[j].r = bbuf[2];
-
-            r[j] = cmap[j].r;
-            g[j] = cmap[j].g;
-            b[j] = cmap[j].b;
         }
-        // Set the palette for the wxImage
-        image->SetPalette(wxPalette(ncolors, r, g, b));
-
-        delete[] r;
-        delete[] g;
-        delete[] b;
     }
     else if (bpp == 16 || bpp == 32)
     {
@@ -487,7 +470,7 @@ bool wxBMPHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
                }
                else if (bpp == 24)
                {
-                   stream.Read( bbuf, 3 );
+                   stream.Read( &bbuf, 3 );
                    linepos += 3;
                    ptr[poffset    ] = (unsigned char)bbuf[2];
                    ptr[poffset + 1] = (unsigned char)bbuf[1];
@@ -543,11 +526,11 @@ bool wxBMPHandler::DoCanRead( wxInputStream& stream )
 {
     unsigned char hdr[2];
 
-    stream.Read(hdr, 2);
+    stream.Read(&hdr, 2);
     stream.SeekI(-2, wxFromCurrent);
     return (hdr[0] == 'B' && hdr[1] == 'M');
 }
 
 #endif // wxUSE_STREAMS
 
-#endif // wxUSE_IMAGE
+

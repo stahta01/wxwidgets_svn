@@ -46,7 +46,7 @@
     #endif
 #endif
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) || defined(__TWIN32__))
     #include <commctrl.h>
 #endif
 
@@ -81,9 +81,6 @@
 // event table
 // ----------------------------------------------------------------------------
 
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
-
 BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
 
@@ -109,7 +106,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
 void wxNotebook::Init()
 {
   m_pImageList = NULL;
-  m_bOwnsImageList = FALSE;
   m_nSelection = -1;
 }
 
@@ -153,8 +149,6 @@ bool wxNotebook::Create(wxWindow *parent,
 
   long tabStyle = WS_CHILD | WS_VISIBLE | WS_TABSTOP | TCS_TABS;
 
-  if ( m_windowStyle & wxCLIP_SIBLINGS )
-    tabStyle |= WS_CLIPSIBLINGS;
   if (m_windowStyle & wxCLIP_CHILDREN)
     tabStyle |= WS_CLIPCHILDREN;
   if ( m_windowStyle & wxTC_MULTILINE )
@@ -194,7 +188,6 @@ bool wxNotebook::Create(wxWindow *parent,
 // dtor
 wxNotebook::~wxNotebook()
 {
-  if (m_bOwnsImageList) delete m_pImageList;
 }
 
 // ----------------------------------------------------------------------------
@@ -283,16 +276,8 @@ bool wxNotebook::SetPageImage(int nPage, int nImage)
 
 void wxNotebook::SetImageList(wxImageList* imageList)
 {
-  if (m_bOwnsImageList) delete m_pImageList;
   m_pImageList = imageList;
-  m_bOwnsImageList = FALSE;
   TabCtrl_SetImageList(m_hwnd, (HIMAGELIST)imageList->GetHIMAGELIST());
-}
-
-void wxNotebook::AssignImageList(wxImageList* imageList)
-{
-  SetImageList(imageList);
-  m_bOwnsImageList = TRUE;
 }
 
 // ----------------------------------------------------------------------------

@@ -54,8 +54,8 @@ cat Basics
 ################################################
 ## For Scintilla.h
 val INVALID_POSITION=-1
-# Define start of Scintilla messages to be greater than all edit (EM_*) messages
-# as many EM_ messages can be used although that use is deprecated.
+## Define start of Scintilla messages to be greater than all edit (EM_*) messages
+## as many EM_ messages can be used although that use is deprecated.
 val SCI_START=2000
 val SCI_OPTIONAL_START=3000
 val SCI_LEXER_START=4000
@@ -380,8 +380,8 @@ val INDIC_STRIKE=4
 val INDIC0_MASK=32
 val INDIC1_MASK=64
 val INDIC2_MASK=128
-val INDICS_MASK=224
-##INDIC0_MASK | INDIC1_MASK | INDIC2_MASK
+##val INDICS_MASK=INDIC0_MASK | INDIC1_MASK | INDIC2_MASK
+val INDICS_MASK=32 | 64 | 128
 
 # Set an indicator to plain, squiggle or TT.
 set void IndicSetStyle=2080(int indic, int style)

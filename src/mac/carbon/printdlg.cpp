@@ -16,14 +16,11 @@
 #include "wx/object.h"
 #include "wx/printdlg.h"
 #include "wx/dcprint.h"
-#include "wx/mac/uma.h"
 
 // Use generic page setup dialog: use your own native one if one exists.
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxPrintDialog, wxDialog)
 IMPLEMENT_CLASS(wxPageSetupDialog, wxDialog)
-#endif
 
 wxPrintDialog::wxPrintDialog()
 {
@@ -67,17 +64,15 @@ wxPrintDialog::~wxPrintDialog()
 int wxPrintDialog::ShowModal()
 {
 	int result = wxID_CANCEL ;
-#if !TARGET_CARBON
-	
 	OSErr err ;
 	wxString message ;
-	::UMAPrOpen() ;
+	::PrOpen() ;
 	err = PrError() ;
 	
 	if ( !err )
 	{
 		m_printDialogData.ConvertToNative() ;
-		if  ( ::PrJobDialog( m_printDialogData.GetPrintData().m_macPrintInfo ) )
+		if  ( m_printDialogData.m_macPrintInfo && ::PrJobDialog( m_printDialogData.m_macPrintInfo ) )
 		{
 			m_printDialogData.ConvertFromNative() ;
 			result = wxID_OK ;
@@ -89,14 +84,8 @@ int wxPrintDialog::ShowModal()
 		message.Printf( "Print Error %d", err ) ;
 		wxMessageDialog dialog( NULL , message  , "", wxICON_HAND | wxOK) ;
 	}
-	::UMAPrClose() ;
-#else
-  #if __UNIX__
-    #warning "TODO:Printing for carbon"
-  #else
-    #pragma warning "TODO:Printing for carbon"
-  #endif
-#endif
+	::PrClose() ;
+
 	return result ;
 }
 
@@ -138,17 +127,15 @@ wxPageSetupDialog::~wxPageSetupDialog()
 int wxPageSetupDialog::ShowModal()
 {
 	int result = wxID_CANCEL ;
-#if !TARGET_CARBON
-
 	OSErr err ;
 	wxString message ;
-	::UMAPrOpen() ;
+	::PrOpen() ;
 	err = PrError() ;
 	
 	if ( !err )
 	{
 		m_pageSetupData.ConvertToNative() ;
-		if  ( ::PrStlDialog( m_pageSetupData.GetPrintData().m_macPrintInfo ) )
+		if  ( m_pageSetupData.m_macPageSetupInfo && ::PrStlDialog( m_pageSetupData.m_macPageSetupInfo ) )
 		{
 			m_pageSetupData.ConvertFromNative() ;
 			result = wxID_OK ;
@@ -160,14 +147,8 @@ int wxPageSetupDialog::ShowModal()
 		message.Printf( "Print Error %d", err ) ;
 		wxMessageDialog dialog( NULL , message , "", wxICON_HAND | wxOK) ;
 	}
-	::UMAPrClose() ;
-#else
-  #if __UNIX__
-    #warning "TODO:Printing for carbon"
-  #else
-    #pragma warning "TODO:Printing for carbon"
-  #endif
-#endif
+	::PrClose() ;
+
 	return result ;
 }
 

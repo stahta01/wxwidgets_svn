@@ -258,7 +258,7 @@ class wxCustomDataObject(wxCustomDataObjectPtr):
 
 
 
-class wxClipboardPtr(wxObjectPtr):
+class wxClipboardPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0

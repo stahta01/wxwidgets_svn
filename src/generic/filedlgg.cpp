@@ -534,7 +534,7 @@ void wxFileCtrl::Update()
         InsertColumn( 1, _("Size"), wxLIST_FORMAT_LEFT, 60 );
         InsertColumn( 2, _("Date"), wxLIST_FORMAT_LEFT, 65 );
         InsertColumn( 3, _("Time"), wxLIST_FORMAT_LEFT, 50 );
-        InsertColumn( 4, _("Permissions"), wxLIST_FORMAT_LEFT, 120 );
+        InsertColumn( 4, _("Permissions"), wxLIST_FORMAT_LEFT, 110 );
     }
     wxFileData *fd = (wxFileData *) NULL;
     wxListItem item;
@@ -894,10 +894,10 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
 
     if (m_dialogStyle & wxMULTIPLE)
         m_list = new wxFileCtrl( this, ID_LIST_CTRL, m_dir, firstWild, wxDefaultPosition,
-                                 wxSize(440,180), s_lastViewStyle | wxSUNKEN_BORDER );
+                                 wxSize(510,180), s_lastViewStyle | wxSUNKEN_BORDER );
     else
         m_list = new wxFileCtrl( this, ID_LIST_CTRL, m_dir, firstWild, wxDefaultPosition,
-                                 wxSize(440,180), s_lastViewStyle | wxSUNKEN_BORDER | wxLC_SINGLE_SEL );
+                                 wxSize(510,180), s_lastViewStyle | wxSUNKEN_BORDER | wxLC_SINGLE_SEL );
     m_list -> ShowHidden(s_lastShowHidden);
     mainsizer->Add( m_list, 1, wxEXPAND | wxLEFT|wxRIGHT, 10 );
 
@@ -1097,18 +1097,6 @@ void wxFileDialog::HandleAction( const wxString &fn )
 
     SetPath( filename );
 
-    // change to the directory where the user went if asked
-    if ( m_dialogStyle & wxCHANGE_DIR )
-    {
-        wxString cwd;
-        wxSplitPath(filename, &cwd, NULL, NULL);
-
-        if ( cwd != wxGetWorkingDirectory() )
-        {
-            wxSetWorkingDirectory(cwd);
-        }
-    }
-
     wxCommandEvent event;
     wxDialog::OnOK(event);
 }
@@ -1274,17 +1262,19 @@ wxString wxFileSelector( const wxChar *title,
     }
 }
 
-wxString wxLoadFileSelector( const wxChar *what, const wxChar *ext, const wxChar *default_name, wxWindow *parent )
+wxString wxLoadFileSelector( const wxChar *what, const wxChar *extension, const wxChar *default_name, wxWindow *parent )
 {
-    wxString prompt = wxString::Format(_("Load %s file"), what);
+    wxChar *ext = (wxChar *)extension;
 
-    if (*ext == wxT('.'))
-        ext++;
+    wxChar prompt[50];
+    wxString str = _("Load %s file");
+    wxSprintf(prompt, str, what);
 
-    wxString wild = wxString::Format(_T("*.%s"), ext);
+    if (*ext == wxT('.')) ext++;
+    wxChar wild[60];
+    wxSprintf(wild, wxT("*.%s"), ext);
 
-    return wxFileSelector(prompt, (const wxChar *) NULL, default_name,
-                          ext, wild, 0, parent);
+    return wxFileSelector (prompt, (const wxChar *) NULL, default_name, ext, wild, 0, parent);
 }
 
 wxString wxSaveFileSelector(const wxChar *what, const wxChar *extension, const wxChar *default_name,
@@ -1292,15 +1282,15 @@ wxString wxSaveFileSelector(const wxChar *what, const wxChar *extension, const w
 {
     wxChar *ext = (wxChar *)extension;
 
-    wxString prompt = wxString::Format(_("Save %s file"), what);
+    wxChar prompt[50];
+    wxString str = _("Save %s file");
+    wxSprintf(prompt, str, what);
 
-    if (*ext == wxT('.'))
-        ext++;
+    if (*ext == wxT('.')) ext++;
+    wxChar wild[60];
+    wxSprintf(wild, wxT("*.%s"), ext);
 
-    wxString wild = wxString::Format(_T("*.%s"), ext);
-
-    return wxFileSelector(prompt, (const wxChar *) NULL, default_name,
-                          ext, wild, 0, parent);
+    return wxFileSelector (prompt, (const wxChar *) NULL, default_name, ext, wild, 0, parent);
 }
 
 

@@ -66,7 +66,7 @@ class TestListBox(wxPanel):
         EVT_LISTBOX(self, 60, self.EvtListBox)
         EVT_LISTBOX_DCLICK(self, 60, self.EvtListBoxDClick)
         EVT_RIGHT_UP(self.lb1, self.EvtRightButton)
-        self.lb1.SetSelection(3)
+        self.lb1.SetSelection(0)
 
 
         wxStaticText(self, -1, "Select many:", wxPoint(200, 50), wxSize(65, 18))
@@ -124,4 +124,35 @@ def runTest(frame, nb, log):
 overview = """\
 A listbox is used to select one or more of a list of strings. The strings are displayed in a scrolling box, with the selected string(s) marked in reverse video. A listbox can be single selection (if an item is selected, the previous selection is removed) or multiple selection (clicking an item toggles the item on or off independently of other selections).
 
+List box elements are numbered from zero.
+
+wxListBox()
+---------------------
+
+Default constructor.
+
+wxListBox(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int n, const wxString choices[] = NULL, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = "listBox")
+
+Constructor, creating and showing a list box.
+
+Parameters
+-------------------
+
+parent = Parent window. Must not be NULL.
+
+id = Window identifier. A value of -1 indicates a default value.
+
+pos = Window position.
+
+size = Window size. If the default size (-1, -1) is specified then the window is sized appropriately.
+
+n = Number of strings with which to initialise the control.
+
+choices = An array of strings with which to initialise the control.
+
+style = Window style. See wxListBox.
+
+validator = Window validator.
+
+name = Window name.
 """

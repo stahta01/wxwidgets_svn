@@ -40,11 +40,6 @@
 #include <wx/generic/fontdlgg.h>
 #endif
 
-#if !defined(__WXMSW__) || defined(wxUSE_DIRDLGG) && wxUSE_DIRDLGG
-// New wxGenericDirCtrl
-#include "wx/dirctrl.h"
-#endif
-
 #include "dialogs.h"
 
 IMPLEMENT_APP(MyApp)
@@ -62,13 +57,10 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(DIALOGS_PASSWORD_ENTRY,                MyFrame::PasswordEntry)
     EVT_MENU(DIALOGS_NUM_ENTRY,                     MyFrame::NumericEntry)
     EVT_MENU(DIALOGS_SINGLE_CHOICE,                 MyFrame::SingleChoice)
-    EVT_MENU(DIALOGS_MULTI_CHOICE,                  MyFrame::MultiChoice)
     EVT_MENU(DIALOGS_FILE_OPEN,                     MyFrame::FileOpen)
-    EVT_MENU(DIALOGS_FILE_OPEN2,                    MyFrame::FileOpen2)
     EVT_MENU(DIALOGS_FILES_OPEN,                    MyFrame::FilesOpen)
     EVT_MENU(DIALOGS_FILE_SAVE,                     MyFrame::FileSave)
     EVT_MENU(DIALOGS_DIR_CHOOSE,                    MyFrame::DirChoose)
-    EVT_MENU(DIALOGS_GENERIC_DIR_CHOOSE,            MyFrame::GenericDirChoose)
     EVT_MENU(DIALOGS_MODAL,                         MyFrame::ModalDlg)
     EVT_MENU(DIALOGS_MODELESS,                      MyFrame::ModelessDlg)
     EVT_MENU(DIALOGS_TIP,                           MyFrame::ShowTip)
@@ -130,16 +122,13 @@ bool MyApp::OnInit()
   file_menu->Append(DIALOGS_PASSWORD_ENTRY,  "&Password entry\tCtrl-P");
   file_menu->Append(DIALOGS_NUM_ENTRY, "&Numeric entry\tCtrl-N");
   file_menu->Append(DIALOGS_SINGLE_CHOICE,  "&Single choice\tCtrl-C");
-  file_menu->Append(DIALOGS_MULTI_CHOICE,  "M&ultiple choice\tCtrl-U");
   file_menu->AppendSeparator();
   file_menu->Append(DIALOGS_TIP,  "&Tip of the day\tCtrl-T");
   file_menu->AppendSeparator();
   file_menu->Append(DIALOGS_FILE_OPEN,  "&Open file\tCtrl-O");
-  file_menu->Append(DIALOGS_FILE_OPEN2,  "&Second open file\tCtrl-2");
   file_menu->Append(DIALOGS_FILES_OPEN,  "Open &files\tCtrl-Q");
   file_menu->Append(DIALOGS_FILE_SAVE,  "Sa&ve file\tCtrl-S");
   file_menu->Append(DIALOGS_DIR_CHOOSE,  "&Choose a directory\tCtrl-D");
-  file_menu->Append(DIALOGS_GENERIC_DIR_CHOOSE,  "&Choose a directory (generic implementation)");
 #if wxUSE_PROGRESSDLG
   file_menu->Append(DIALOGS_PROGRESS, "Pro&gress dialog\tCtrl-G");
 #endif // wxUSE_PROGRESSDLG
@@ -353,32 +342,6 @@ void MyFrame::SingleChoice(wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-void MyFrame::MultiChoice(wxCommandEvent& WXUNUSED(event) )
-{
-    const wxString choices[] = { "One", "Two", "Three", "Four", "Five" } ;
-    int n = 5;
-
-    wxArrayInt selections;
-    size_t count = wxGetMultipleChoices(selections,
-                                        "This is a small sample\n"
-                                        "A multi-choice convenience dialog",
-                                        "Please select a value",
-                                        n, (const wxString *)choices,
-                                        this);
-    if ( count )
-    {
-        wxString msg;
-        msg.Printf("You selected %u items:\n", count);
-        for ( size_t n = 0; n < count; n++ )
-        {
-            msg += wxString::Format("\t%u: %u (%s)\n", n, selections[n],
-                                    choices[selections[n]].c_str());
-        }
-        wxLogMessage(msg);
-    }
-    //else: cancelled or nothing selected
-}
-
 void MyFrame::FileOpen(wxCommandEvent& WXUNUSED(event) )
 {
     wxFileDialog dialog(this, "Testing open file dialog", "", "", "*.txt", 0);
@@ -395,31 +358,6 @@ void MyFrame::FileOpen(wxCommandEvent& WXUNUSED(event) )
         wxMessageDialog dialog2(this, info, "Selected file");
         dialog2.ShowModal();
     }
-}
-
-// this shows how to take advantage of specifying a default extension in the
-// call to wxFileSelector: it is remembered after each new call and the next
-// one will use it by default
-void MyFrame::FileOpen2(wxCommandEvent& WXUNUSED(event) )
-{
-    static wxString s_extDef;
-    wxString path = wxFileSelector(
-                                    _T("Select the file to load"),
-                                    _T(""), _T(""),
-                                    s_extDef,
-                                    _T("Waveform (*.wav)|*.wav|Plain text (*.txt)|*.txt|All files (*.*)|*.*"),
-                                    0,
-                                    this
-                                   );
-
-    if ( !path )
-        return;
-
-    // it is just a sample, would use wxSplitPath in real program
-    s_extDef = path.AfterLast(_T('.'));
-
-    wxLogMessage(_T("You selected the file '%s', remembered extension '%s'"),
-                 (const wxChar*) path, (const wxChar*) s_extDef);
 }
 
 void MyFrame::FilesOpen(wxCommandEvent& WXUNUSED(event) )
@@ -478,26 +416,6 @@ void MyFrame::DirChoose(wxCommandEvent& WXUNUSED(event) )
         wxMessageDialog dialog2(this, dialog.GetPath(), "Selected path");
         dialog2.ShowModal();
     }
-}
-
-void MyFrame::GenericDirChoose(wxCommandEvent& WXUNUSED(event) )
-{
-#if !defined(__WXMSW__) || defined(wxUSE_DIRDLGG) && wxUSE_DIRDLGG
-    // pass some initial dir to wxDirDialog
-    wxString dirHome;
-    wxGetHomeDir(&dirHome);
-
-    wxGenericDirDialog dialog(this, "Testing generic directory picker", dirHome);
-
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        wxMessageDialog dialog2(this, dialog.GetPath(), "Selected path");
-        dialog2.ShowModal();
-    }
-#else
-    wxLogError("Sorry, generic dir dialog not available:\n"
-               "set wxUSE_DIRDLGG to 1 and recompile");
-#endif
 }
 
 void MyFrame::ModalDlg(wxCommandEvent& WXUNUSED(event))

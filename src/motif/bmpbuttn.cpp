@@ -13,10 +13,6 @@
 #pragma implementation "bmpbuttn.h"
 #endif
 
-#ifdef __VMS
-#define XtScreen XTSCREEN
-#endif
-
 #include "wx/bmpbuttn.h"
 
 #ifdef __VMS__

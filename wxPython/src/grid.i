@@ -43,27 +43,27 @@
 
 
 %{
-#define PYCALLBACK_GCA_INTINTKIND(PCLASS, CBNAME)                               \
-    wxGridCellAttr* CBNAME(int a, int b, wxGridCellAttr::wxAttrKind c) {        \
-        wxGridCellAttr* rval = NULL;                                            \
-        bool doSave = wxPyRestoreThread();                                      \
-        if (wxPyCBH_findCallback(m_myInst, #CBNAME)) {                          \
-            PyObject* ro;                                                       \
-            wxGridCellAttr* ptr;                                                \
-            ro = wxPyCBH_callCallbackObj(m_myInst, Py_BuildValue("(iii)", a, b, c)); \
-            if (ro) {                                                           \
+#define PYCALLBACK_GCA_INTINT(PCLASS, CBNAME)                           \
+    wxGridCellAttr* CBNAME(int a, int b) {                              \
+        wxGridCellAttr* rval = NULL;                                    \
+        bool doSave = wxPyRestoreThread();                              \
+        if (wxPyCBH_findCallback(m_myInst, #CBNAME)) {                           \
+            PyObject* ro;                                               \
+            wxGridCellAttr* ptr;                                        \
+            ro = wxPyCBH_callCallbackObj(m_myInst, Py_BuildValue("(ii)", a, b)); \
+            if (ro) {                                                   \
                 if (!SWIG_GetPtrObj(ro, (void **)&ptr, "_wxGridCellAttr_p"))    \
-                    rval = ptr;                                                 \
-                Py_DECREF(ro);                                                  \
-            }                                                                   \
-        }                                                                       \
-        else                                                                    \
-            rval = PCLASS::CBNAME(a, b, c);                                     \
-        wxPySaveThread(doSave);                                                 \
-        return rval;                                                            \
-    }                                                                           \
-    wxGridCellAttr *base_##CBNAME(int a, int b, wxGridCellAttr::wxAttrKind c) { \
-        return PCLASS::CBNAME(a, b, c);                                         \
+                    rval = ptr;                                         \
+                Py_DECREF(ro);                                          \
+            }                                                           \
+        }                                                               \
+        else                                                            \
+            rval = PCLASS::CBNAME(a, b);                                \
+        wxPySaveThread(doSave);                                         \
+        return rval;                                                    \
+    }                                                                   \
+    wxGridCellAttr *base_##CBNAME(int a, int b) {                       \
+        return PCLASS::CBNAME(a, b);                                    \
     }
 
 
@@ -809,20 +809,9 @@ public:
 class wxGridCellAttr
 {
 public:
-    enum wxAttrKind
-    {
-        Any,
-        Default,
-        Cell,
-        Row,
-        Col,
-        Merged
-    };
-
     wxGridCellAttr();
 
     wxGridCellAttr *Clone() const;
-    void MergeWith(wxGridCellAttr *mergefrom);
     void IncRef();
     void DecRef();
     void SetTextColour(const wxColour& colText);
@@ -833,7 +822,6 @@ public:
 
     void SetRenderer(wxGridCellRenderer *renderer);
     void SetEditor(wxGridCellEditor* editor);
-    void SetKind(wxAttrKind kind);
 
     bool HasTextColour() const;
     bool HasBackgroundColour() const;
@@ -841,7 +829,6 @@ public:
     bool HasAlignment() const;
     bool HasRenderer() const;
     bool HasEditor() const;
-    bool HasReadWriteMode() const;
 
     const wxColour& GetTextColour() const;
     const wxColour& GetBackgroundColour() const;
@@ -862,8 +849,7 @@ public:
     wxGridCellAttrProvider();
     // ???? virtual ~wxGridCellAttrProvider();
 
-    wxGridCellAttr *GetAttr(int row, int col,
-                            wxGridCellAttr::wxAttrKind  kind) const;
+    wxGridCellAttr *GetAttr(int row, int col) const;
     void SetAttr(wxGridCellAttr *attr, int row, int col);
     void SetRowAttr(wxGridCellAttr *attr, int row);
     void SetColAttr(wxGridCellAttr *attr, int col);
@@ -881,7 +867,7 @@ class wxPyGridCellAttrProvider : public wxGridCellAttrProvider
 public:
     wxPyGridCellAttrProvider() : wxGridCellAttrProvider() {};
 
-    PYCALLBACK_GCA_INTINTKIND(wxGridCellAttrProvider, GetAttr);
+    PYCALLBACK_GCA_INTINT(wxGridCellAttrProvider, GetAttr);
     PYCALLBACK__GCAINTINT(wxGridCellAttrProvider, SetAttr);
     PYCALLBACK__GCAINT(wxGridCellAttrProvider, SetRowAttr);
     PYCALLBACK__GCAINT(wxGridCellAttrProvider, SetColAttr);
@@ -899,8 +885,7 @@ public:
     void _setSelf(PyObject* self, PyObject* _class);
     %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyGridCellAttrProvider)"
 
-    wxGridCellAttr *base_GetAttr(int row, int col,
-                                 wxGridCellAttr::wxAttrKind kind);
+    wxGridCellAttr *base_GetAttr(int row, int col);
     void base_SetAttr(wxGridCellAttr *attr, int row, int col);
     void base_SetRowAttr(wxGridCellAttr *attr, int row);
     void base_SetColAttr(wxGridCellAttr *attr, int col);
@@ -912,7 +897,7 @@ public:
 
 
 
-class wxGridTableBase : public wxObject
+class wxGridTableBase
 {
 public:
     // wxGridTableBase();   This is an ABC
@@ -961,8 +946,7 @@ public:
 
     virtual bool CanHaveAttributes();
 
-    virtual wxGridCellAttr *GetAttr( int row, int col,
-                                     wxGridCellAttr::wxAttrKind  kind);
+    virtual wxGridCellAttr *GetAttr( int row, int col );
     virtual void SetAttr(wxGridCellAttr* attr, int row, int col);
     virtual void SetRowAttr(wxGridCellAttr *attr, int row);
     virtual void SetColAttr(wxGridCellAttr *attr, int col);
@@ -996,7 +980,7 @@ public:
     PYCALLBACK__INTSTRING(wxGridTableBase, SetRowLabelValue);
     PYCALLBACK__INTSTRING(wxGridTableBase, SetColLabelValue);
     PYCALLBACK_BOOL_(wxGridTableBase, CanHaveAttributes);
-    PYCALLBACK_GCA_INTINTKIND(wxGridTableBase, GetAttr);
+    PYCALLBACK_GCA_INTINT(wxGridTableBase, GetAttr);
     PYCALLBACK__GCAINTINT(wxGridTableBase, SetAttr);
     PYCALLBACK__GCAINT(wxGridTableBase, SetRowAttr);
     PYCALLBACK__GCAINT(wxGridTableBase, SetColAttr);
@@ -1124,8 +1108,7 @@ public:
     void base_SetRowLabelValue( int row, const wxString& value );
     void base_SetColLabelValue( int col, const wxString& value );
     bool base_CanHaveAttributes();
-    wxGridCellAttr *base_GetAttr( int row, int col,
-                                  wxGridCellAttr::wxAttrKind kind );
+    wxGridCellAttr *base_GetAttr( int row, int col );
     void base_SetAttr(wxGridCellAttr* attr, int row, int col);
     void base_SetRowAttr(wxGridCellAttr *attr, int row);
     void base_SetColAttr(wxGridCellAttr *attr, int col);
@@ -1448,8 +1431,6 @@ public:
     wxString GetColLabelValue( int col );
     wxColour GetGridLineColour();
     wxColour GetCellHighlightColour();
-    int      GetCellHighlightPenWidth();
-    int      GetCellHighlightROPenWidth();
 
     void     SetRowLabelSize( int width );
     void     SetColLabelSize( int height );
@@ -1462,8 +1443,6 @@ public:
     void     SetColLabelValue( int col, const wxString& );
     void     SetGridLineColour( const wxColour& );
     void     SetCellHighlightColour( const wxColour& );
-    void     SetCellHighlightPenWidth(int width);
-    void     SetCellHighlightROPenWidth(int width);
 
     void     EnableDragRowSize( bool enable = TRUE );
     void     DisableDragRowSize();
@@ -1616,15 +1595,6 @@ public:
     // grid may occupy more space than needed for its rows/columns, this
     // function allows to set how big this extra space is
     void SetMargins(int extraWidth, int extraHeight);
-
-
-    // Accessors for component windows
-    wxWindow* GetGridWindow();
-    wxWindow* GetGridRowLabelWindow();
-    wxWindow* GetGridColLabelWindow();
-    wxWindow* GetGridCornerLabelWindow();
-
-
 };
 
 
@@ -1693,22 +1663,6 @@ public:
     bool        AltDown();
 };
 
-
-class wxGridEditorCreatedEvent : public wxCommandEvent {
-public:
-    wxGridEditorCreatedEvent(int id, wxEventType type, wxObject* obj,
-                             int row, int col, wxControl* ctrl);
-
-    int GetRow();
-    int GetCol();
-    wxControl* GetControl();
-    void SetRow(int row);
-    void SetCol(int col);
-    void SetControl(wxControl* ctrl);
-};
-
-
-
 enum {
     wxEVT_GRID_CELL_LEFT_CLICK,
     wxEVT_GRID_CELL_RIGHT_CLICK,
@@ -1725,7 +1679,6 @@ enum {
     wxEVT_GRID_SELECT_CELL,
     wxEVT_GRID_EDITOR_SHOWN,
     wxEVT_GRID_EDITOR_HIDDEN,
-    wxEVT_GRID_EDITOR_CREATED,
 };
 
 
@@ -1775,9 +1728,6 @@ def EVT_GRID_EDITOR_SHOWN(win, fn):
 
 def EVT_GRID_EDITOR_HIDDEN(win, fn):
     win.Connect(-1, -1, wxEVT_GRID_EDITOR_HIDDEN, fn)
-
-def EVT_GRID_EDITOR_CREATED(win, fn):
-    win.Connect(-1, -1, wxEVT_GRID_EDITOR_CREATED, fn)
 
 "
 

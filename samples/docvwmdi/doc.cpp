@@ -44,7 +44,7 @@ DrawingDocument::~DrawingDocument(void)
 }
 
 #if wxUSE_STD_IOSTREAM
-wxSTD ostream& DrawingDocument::SaveObject(wxSTD ostream& stream)
+ostream& DrawingDocument::SaveObject(ostream& stream)
 {
   wxDocument::SaveObject(stream);
   
@@ -88,7 +88,7 @@ wxOutputStream& DrawingDocument::SaveObject(wxOutputStream& stream)
 #endif
 
 #if wxUSE_STD_IOSTREAM
-wxSTD istream& DrawingDocument::LoadObject(wxSTD istream& stream)
+istream& DrawingDocument::LoadObject(istream& stream)
 {
   wxDocument::LoadObject(stream);
   
@@ -152,7 +152,7 @@ DoodleSegment::~DoodleSegment(void)
 }
 
 #if wxUSE_STD_IOSTREAM
-wxSTD ostream& DoodleSegment::SaveObject(wxSTD ostream& stream)
+ostream& DoodleSegment::SaveObject(ostream& stream)
 {
   wxInt32 n = lines.Number();
   stream << n << '\n';
@@ -194,7 +194,7 @@ wxOutputStream &DoodleSegment::SaveObject(wxOutputStream& stream)
 #endif
 
 #if wxUSE_STD_IOSTREAM
-wxSTD istream& DoodleSegment::LoadObject(wxSTD istream& stream)
+istream& DoodleSegment::LoadObject(istream& stream)
 {
   wxInt32 n = 0;
   stream >> n;

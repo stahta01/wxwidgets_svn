@@ -221,7 +221,7 @@ class wxSashLayoutWindow(wxSashLayoutWindowPtr):
 
 
 
-class wxLayoutAlgorithmPtr(wxObjectPtr):
+class wxLayoutAlgorithmPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0

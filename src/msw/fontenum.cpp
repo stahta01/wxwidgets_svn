@@ -32,7 +32,6 @@
   #include "wx/font.h"
 #endif
 
-#include "wx/fontutil.h"
 #include "wx/fontenum.h"
 #include "wx/fontmap.h"
 
@@ -133,9 +132,9 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
     return TRUE;
 }
 
-#if defined(__GNUWIN32__) && !defined(__CYGWIN10__)
+#if defined(__GNUWIN32__)
     #if wxUSE_NORLANDER_HEADERS
-        #define wxFONTENUMPROC int(*)(const LOGFONT *, const TEXTMETRIC *, long unsigned int, LPARAM)
+        #define wxFONTENUMPROC int(*)(const LOGFONTA *, const TEXTMETRICA *, long unsigned int, LPARAM)
     #else
         #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
     #endif

@@ -28,10 +28,6 @@
 #include "wx/wx.h"
 #include "wx/busyinfo.h"
 
-#if wxUSE_HELP
-#include "wx/tipwin.h"
-#endif
-
 IMPLEMENT_DYNAMIC_CLASS(wxHtmlHelpController, wxHelpControllerBase)
 
 wxHtmlHelpController::wxHtmlHelpController(int style)
@@ -83,8 +79,7 @@ bool wxHtmlHelpController::AddBook(const wxString& book, bool show_wait_msg)
 #if wxUSE_BUSYINFO
     wxBusyInfo* busy = NULL;
     wxString info;
-    if (show_wait_msg)
-    {
+    if (show_wait_msg) {
         info.Printf(_("Adding book %s"), book.c_str());
         busy = new wxBusyInfo(info);
     }
@@ -93,7 +88,7 @@ bool wxHtmlHelpController::AddBook(const wxString& book, bool show_wait_msg)
 #if wxUSE_BUSYINFO
     if (show_wait_msg)
         delete busy;
-#endif
+#endif 
     return retval;
 }
 
@@ -107,13 +102,12 @@ wxHtmlHelpFrame *wxHtmlHelpController::CreateHelpFrame(wxHtmlHelpData *data)
 
 void wxHtmlHelpController::CreateHelpWindow()
 {
-    if (m_helpFrame)
-    {
+    if (m_helpFrame) {
         m_helpFrame->Raise();
         return ;
     }
 
-    if (m_Config == NULL)
+    if (m_Config == NULL) 
     {
         m_Config = wxConfigBase::Get(FALSE);
         if (m_Config != NULL)
@@ -150,7 +144,7 @@ void wxHtmlHelpController::UseConfig(wxConfigBase *config, const wxString& rootp
 {
     m_Config = config;
     m_ConfigRoot = rootpath;
-    if (m_helpFrame) m_helpFrame->UseConfig(config, rootpath);
+    if (m_helpFrame) m_helpFrame -> UseConfig(config, rootpath);
     ReadCustomization(config, rootpath);
 }
 
@@ -191,30 +185,6 @@ bool wxHtmlHelpController::DisplaySection(int sectionNo)
     return Display(sectionNo);
 }
 
-bool wxHtmlHelpController::DisplayTextPopup(const wxString& text, const wxPoint& WXUNUSED(pos))
-{
-#if wxUSE_HELP
-    static wxTipWindow* s_tipWindow = NULL;
-
-    if (s_tipWindow)
-    {
-        // Prevent s_tipWindow being nulled in OnIdle,
-        // thereby removing the chance for the window to be closed by ShowHelp
-        s_tipWindow->SetTipWindowPtr(NULL);
-        s_tipWindow->Close();
-    }
-    s_tipWindow = NULL;
-
-    if ( !text.empty() )
-    {
-        s_tipWindow = new wxTipWindow(wxTheApp->GetTopWindow(), text, 100, & s_tipWindow);
-
-        return TRUE;
-    }
-#endif
-    return FALSE;
-}
-
 void wxHtmlHelpController::SetFrameParameters(const wxString& title,
                                    const wxSize& size,
                                    const wxPoint& pos,
@@ -245,5 +215,6 @@ bool wxHtmlHelpController::Quit()
     DestroyHelpWindow();
     return TRUE;
 }
+
 
 #endif

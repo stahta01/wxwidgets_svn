@@ -61,8 +61,7 @@ protected:
 #endif // platform
 
 // Macro must be defined here, not event.h, since it must reference wxSpinEventFunction
-#define EVT_SPINCTRL(id, fn) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_SPINCTRL_UPDATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_SPINCTRL(id, fn) { wxEVT_COMMAND_SPINCTRL_UPDATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSpinEventFunction) & fn, (wxObject *) NULL },
 
 #endif // _WX_SPINCTRL_H_
 

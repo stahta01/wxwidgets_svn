@@ -230,7 +230,6 @@ public:
     // So you have to set a NULL small-icon image list to be sure that
     // the wxLC_LIST mode works without icons. Of course, you may want icons...
     void SetImageList(wxImageList *imageList, int which) ;
-    void AssignImageList(wxImageList *imageList, int which) ;
 
     // Operations
     ////////////////////////////////////////////////////////////////////////////
@@ -330,11 +329,6 @@ public:
     // still exist across 3 callbacks.
     wxChar *AddPool(const wxString& str);
 
-    // Event handlers
-    ////////////////////////////////////////////////////////////////////////////
-    // Necessary for drawing hrules and vrules, if specified
-    void OnPaint(wxPaintEvent& event);
-
 protected:
     // common part of all ctors
     void Init();
@@ -346,9 +340,6 @@ protected:
     wxImageList *     m_imageListNormal; // The image list for normal icons
     wxImageList *     m_imageListSmall;  // The image list for small icons
     wxImageList *     m_imageListState;  // The image list state icons (not implemented yet)
-    bool              m_ownsImageListNormal,
-                      m_ownsImageListSmall,
-                      m_ownsImageListState;
 
     long              m_baseStyle;  // Basic Windows style flags, for recreation purposes
     wxStringList      m_stringPool; // Pool of 3 strings to satisfy Windows callback requirements
@@ -365,7 +356,6 @@ private:
     bool DoCreateControl(int x, int y, int w, int h);
 
     DECLARE_DYNAMIC_CLASS(wxListCtrl)
-    DECLARE_EVENT_TABLE()
 };
 
 #endif

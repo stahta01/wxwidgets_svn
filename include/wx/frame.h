@@ -58,9 +58,6 @@ class WXDLLEXPORT wxFrameBase : public wxWindow
 public:
     // construction
     wxFrameBase();
-#ifdef __WXMAC_X__
-    virtual ~wxFrameBase() {}  // Added min for Mac X
-#endif
 
     wxFrame *New(wxWindow *parent,
                  wxWindowID id,
@@ -214,9 +211,6 @@ protected:
     // toolbar which may shift the origin of the client area
     virtual void DoClientToScreen(int *x, int *y) const;
     virtual void DoScreenToClient(int *x, int *y) const;
-
-    // send the iconize event, return TRUE if processed
-    bool SendIconizeEvent(bool iconized = TRUE);
 
     // the frame icon
     wxIcon m_icon;

@@ -28,10 +28,6 @@
 #include "tex2rtf.h"
 #include "table.h"
 
-
-extern wxHashTable TexReferences;
-
-
 extern void DecToHex(int, char *);
 void GenerateHTMLIndexFile(char *fname);
 
@@ -83,7 +79,6 @@ extern char *BigBuffer;
 // DHS Two-column table dimensions.
 static int TwoColWidthA = -1;
 static int TwoColWidthB = -1;
-
 
 class HyperReference: public wxObject
 {
@@ -1907,9 +1902,6 @@ bool HTMLOnArgument(int macroId, int arg_no, bool start)
             if (helpRefText)
               TraverseChildrenFromChunk(helpRefText);
             TexOutput(" (REF NOT FOUND)");
-            wxString errBuf;
-            errBuf.Printf("Warning: unresolved reference '%s'", refName);
-            OnInform((char *)errBuf.c_str());
           }
         }
         else TexOutput("??");

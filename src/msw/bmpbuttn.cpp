@@ -77,9 +77,6 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
 
 	long msStyle = WS_VISIBLE | WS_TABSTOP | WS_CHILD | BS_OWNERDRAW ;
 
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        msStyle |= WS_CLIPSIBLINGS;
-
 #ifdef __WIN32__
     if(m_windowStyle & wxBU_LEFT)
         msStyle |= BS_LEFT;
@@ -97,7 +94,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
                     wxT("BUTTON"),
                     wxT(""),
                     msStyle,
-                    0, 0, 0, 0,
+                    0, 0, 0, 0, 
                     GetWinHwnd(parent),
                     (HMENU)m_windowId,
                     wxGetInstance(),
@@ -199,7 +196,7 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     wxDC dst;
     dst.SetHDC((WXHDC) hDC, FALSE);
     dst.DrawBitmap(*bitmap, x1, y1, TRUE);
-
+    
     // draw focus / disabled state, if auto-drawing
     if ( (state & ODS_DISABLED) && autoDraw )
     {
@@ -355,7 +352,6 @@ void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right, in
     if ( sel )
         OffsetRect( &rect, 1, 1 );
 */
-	(void)sel;
     DrawFocusRect( (HDC) dc, &rect );
 }
 

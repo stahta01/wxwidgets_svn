@@ -53,16 +53,9 @@
     // note about dlopen() flags: we use RTLD_NOW to have more Windows-like
     // behaviour (Win won't let you load a library with missing symbols) and
     // RTLD_GLOBAL because it is needed sometimes and probably doesn't hurt
-    // otherwise. On True64-Unix RTLD_GLOBAL is not allowed and on VMS the
-    // second argument on dlopen is ignored.
-#ifdef __VMS
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), 0 )
-#elif defined( __osf__ )
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY )
-#else
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY | RTLD_GLOBAL)
-#endif
-#define wxDllGetSymbol(handle, name)  dlsym(handle, name)
+    // otherwise
+#   define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY | RTLD_GLOBAL)
+#   define wxDllGetSymbol(handle, name)  dlsym(handle, name)
 #   define wxDllClose                    dlclose
 #elif defined(HAVE_SHL_LOAD)
 #   define wxDllOpen(lib)                shl_load(lib.fn_str(), BIND_DEFERRED, 0)
@@ -76,15 +69,6 @@
         else
             return (void *)0;
     }
-#elif defined(__APPLE__) && defined(__UNIX__)
-void *dlopen(const char *path, int mode /* mode is ignored */);
-void *dlsym(void *handle, const char *symbol);
-int   dlclose(void *handle);
-const char *dlerror(void);
-
-#   define wxDllOpen(lib)                dlopen(lib.fn_str(), 0)
-#   define wxDllGetSymbol(handle, name)  dlsym(handle, name)
-#   define wxDllClose                    dlclose
 #elif defined(__WINDOWS__)
     // using LoadLibraryEx under Win32 to avoid name clash with LoadLibrary
 #   ifdef __WIN32__
@@ -98,8 +82,6 @@ const char *dlerror(void);
 #   endif  // Win32/16
 #   define wxDllGetSymbol(handle, name)    ::GetProcAddress(handle, name)
 #   define wxDllClose                      ::FreeLibrary
-#elif defined(__WXMAC__)
-#   define wxDllClose(handle)               CloseConnection(&handle)
 #else
 #   error "Don't know how to load shared libraries on this platform."
 #endif // OS
@@ -168,7 +150,7 @@ void wxLibrary::PrepareClasses(wxClassInfo *first)
     {
         if (info->m_className)
             classTable.Put(info->m_className, (wxObject *)info);
-        info = (wxClassInfo *)info->GetNext();
+        info = info->GetNext();
     }
 
     // Set base pointers for each wxClassInfo
@@ -216,10 +198,10 @@ wxDllLoader::GetProgramHandle(void)
 {
 #if defined( HAVE_DLOPEN ) && !defined(__EMX__)
    // optain handle for main program
-   return dlopen(NULL, RTLD_NOW/*RTLD_LAZY*/);
+   return dlopen(NULL, RTLD_NOW/*RTLD_LAZY*/); 
 #elif defined (HAVE_SHL_LOAD)
    // shl_findsymbol with NULL handle looks up in main program
-   return 0;
+   return 0; 
 #else
    wxFAIL_MSG( wxT("This method is not implemented under Windows or OS/2"));
    return 0;
@@ -232,18 +214,18 @@ wxDllLoader::LoadLibrary(const wxString & libname, bool *success)
 {
     wxDllType handle;
 
-#if defined(__WXMAC__) && !defined(__UNIX__)
+#if defined(__WXMAC__)
     FSSpec myFSSpec ;
     Ptr myMainAddr ;
     Str255 myErrName ;
 
-    wxMacFilename2FSSpec( libname , &myFSSpec ) ;
+    wxMacPathToFSSpec( libname , &myFSSpec ) ;
     if (GetDiskFragment( &myFSSpec , 0 , kCFragGoesToEOF , "\p" , kPrivateCFragCopy , &handle , &myMainAddr ,
                 myErrName ) != noErr )
     {
         p2cstr( myErrName ) ;
-        wxLogSysError( _("Failed to load shared library '%s' Error '%s'") , libname.c_str() , (char*)myErrName ) ;
-        handle = NULL ;
+        wxASSERT_MSG( 1 , (char*)myErrName ) ;
+        return NULL ;
     }
 #elif defined(__WXPM__) || defined(__EMX__)
     char zError[256] = "";
@@ -305,17 +287,13 @@ wxDllLoader::GetSymbol(wxDllType dllHandle, const wxString &name)
 {
     void *symbol = NULL;    // return value
 
-#if defined(__WXMAC__) && !defined(__UNIX__)
+#if defined( __WXMAC__ )
     Ptr symAddress ;
     CFragSymbolClass symClass ;
     Str255 symName ;
 
-#if TARGET_CARBON
-    c2pstrcpy( (StringPtr) symName , name ) ;
-#else
-    strcpy( (char *) symName , name ) ;
-	c2pstr( (char *) symName ) ;
-#endif
+    strcpy( (char*) symName , name ) ;
+    c2pstr( (char*) symName ) ;
 
     if ( FindSymbol( dllHandle , symName , &symAddress , &symClass ) == noErr )
         symbol = (void *)symAddress ;
@@ -365,7 +343,7 @@ wxLibrary *wxLibraries::LoadLibrary(const wxString& name)
     if (node != NULL)
         return ((wxLibrary *)node->Data());
 #else // !OS/2
-    if ( (node = m_loaded.Find(name.GetData())) != NULL)
+    if ( (node = m_loaded.Find(name.GetData())) )
         return ((wxLibrary *)node->Data());
 #endif
     // If DLL shares data, this is necessary.

@@ -95,8 +95,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxWindow)
 
 void wxFrame::Init()
 {
-    m_iconized =
-    m_maximizeOnShow = FALSE;
+    m_iconized = FALSE;
 
 #if wxUSE_TOOLTIPS
     m_hwndToolTip = 0;
@@ -147,6 +146,13 @@ bool wxFrame::Create(wxWindow *parent,
   int height = size.y;
 
   m_iconized = FALSE;
+
+  // we pass NULL as parent to MSWCreate because frames with parents behave
+  // very strangely under Win95 shell
+  // Alteration by JACS: keep normal Windows behaviour (float on top of parent)
+  // with this style.
+  if ((m_windowStyle & wxFRAME_FLOAT_ON_PARENT) == 0)
+    parent = NULL;
 
   wxTopLevelWindows.Append(this);
 
@@ -219,61 +225,62 @@ void wxFrame::DoGetClientSize(int *x, int *y) const
 // to wxWindows)
 void wxFrame::DoSetClientSize(int width, int height)
 {
-    HWND hWnd = GetHwnd();
+  HWND hWnd = GetHwnd();
 
-    RECT rectClient;
-    ::GetClientRect(hWnd, &rectClient);
+  RECT rect;
+  ::GetClientRect(hWnd, &rect);
 
-    RECT rectTotal;
-    ::GetWindowRect(hWnd, &rectTotal);
+  RECT rect2;
+  GetWindowRect(hWnd, &rect2);
 
-    // Find the difference between the entire window (title bar and all)
-    // and the client area; add this to the new client size to move the
-    // window
-    width += rectTotal.right - rectTotal.left - rectClient.right;
-    height += rectTotal.bottom - rectTotal.top - rectClient.bottom;
+  // Find the difference between the entire window (title bar and all)
+  // and the client area; add this to the new client size to move the
+  // window
+  int actual_width = rect2.right - rect2.left - rect.right + width;
+  int actual_height = rect2.bottom - rect2.top - rect.bottom + height;
 
 #if wxUSE_STATUSBAR
-    wxStatusBar *statbar = GetStatusBar();
-    if ( statbar && statbar->IsShown() )
-    {
-        // leave enough space for the status bar
-        height += statbar->GetSize().y;
-    }
+  if ( GetStatusBar() && GetStatusBar()->IsShown())
+  {
+    int statusX, statusY;
+    GetStatusBar()->GetClientSize(&statusX, &statusY);
+    actual_height += statusY;
+  }
 #endif // wxUSE_STATUSBAR
 
-    // note that this takes the toolbar into account
-    wxPoint pt = GetClientAreaOrigin();
-    width += pt.x;
-    height += pt.y;
+  wxPoint pt(GetClientAreaOrigin());
+  actual_width += pt.y;
+  actual_height += pt.x;
 
-    if ( !::MoveWindow(hWnd, rectTotal.left, rectTotal.top,
-                       width, height, TRUE /* redraw */) )
-    {
-        wxLogLastError(_T("MoveWindow"));
-    }
+  POINT point;
+  point.x = rect2.left;
+  point.y = rect2.top;
 
-    wxSizeEvent event(wxSize(width, height), m_windowId);
-    event.SetEventObject(this);
-    GetEventHandler()->ProcessEvent(event);
+  MoveWindow(hWnd, point.x, point.y, actual_width, actual_height, (BOOL)TRUE);
+
+  wxSizeEvent event(wxSize(width, height), m_windowId);
+  event.SetEventObject( this );
+  GetEventHandler()->ProcessEvent(event);
 }
 
 void wxFrame::DoGetSize(int *width, int *height) const
 {
-    RECT rect;
-    ::GetWindowRect(GetHwnd(), &rect);
-
-    *width = rect.right - rect.left;
-    *height = rect.bottom - rect.top;
+  RECT rect;
+  GetWindowRect(GetHwnd(), &rect);
+  *width = rect.right - rect.left;
+  *height = rect.bottom - rect.top;
 }
 
 void wxFrame::DoGetPosition(int *x, int *y) const
 {
-    RECT rect;
-    ::GetWindowRect(GetHwnd(), &rect);
+  RECT rect;
+  GetWindowRect(GetHwnd(), &rect);
+  POINT point;
+  point.x = rect.left;
+  point.y = rect.top;
 
-    *x = rect.left;
-    *y = rect.top;
+  *x = point.x;
+  *y = point.y;
 }
 
 // ----------------------------------------------------------------------------
@@ -293,27 +300,7 @@ bool wxFrame::Show(bool show)
     if ( !wxWindowBase::Show(show) )
         return FALSE;
 
-    int nShowCmd;
-    if ( show )
-    {
-        if ( m_maximizeOnShow )
-        {
-            // show and maximize
-            nShowCmd = SW_MAXIMIZE;
-
-            m_maximizeOnShow = FALSE;
-        }
-        else // just show
-        {
-            nShowCmd = SW_SHOW;
-        }
-    }
-    else // hide
-    {
-        nShowCmd = SW_HIDE;
-    }
-
-    DoShowWindow(nShowCmd);
+    DoShowWindow(show ? SW_SHOW : SW_HIDE);
 
     if ( show )
     {
@@ -323,7 +310,7 @@ bool wxFrame::Show(bool show)
         event.SetEventObject( this );
         GetEventHandler()->ProcessEvent(event);
     }
-    else // hide
+    else
     {
         // Try to highlight the correct window (the parent)
         if ( GetParent() )
@@ -344,16 +331,14 @@ void wxFrame::Iconize(bool iconize)
 
 void wxFrame::Maximize(bool maximize)
 {
+    // maximizing a hidden frame shows it - which is often much worse than not
+    // maximizing it at all
+    //
+    // the correct workaround this bug breaks binary compatibility and so is
+    // only in 2.3
     if ( IsShown() )
     {
-        // just maximize it directly
         DoShowWindow(maximize ? SW_MAXIMIZE : SW_RESTORE);
-    }
-    else // hidden
-    {
-        // we can't maximize the hidden frame because it shows it as well, so
-        // just remember that we should do it later in this case
-        m_maximizeOnShow = TRUE;
     }
 }
 
@@ -385,27 +370,6 @@ void wxFrame::SetIcon(const wxIcon& icon)
                     (WPARAM)TRUE, (LPARAM)(HICON) m_icon.GetHICON());
     }
 #endif // __WIN95__
-}
-
-// generate an artificial resize event
-void wxFrame::SendSizeEvent()
-{
-    RECT r;
-#ifdef __WIN16__
-    ::GetWindowRect(GetHwnd(), &r);
-#else
-    if ( !::GetWindowRect(GetHwnd(), &r) )
-    {
-        wxLogLastError(_T("GetWindowRect"));
-    }
-#endif
-
-    if ( !m_iconized )
-    {
-        (void)::PostMessage(GetHwnd(), WM_SIZE,
-                            IsMaximized() ? SIZE_MAXIMIZED : SIZE_RESTORED,
-                            MAKELPARAM(r.right - r.left, r.bottom - r.top));
-    }
 }
 
 #if wxUSE_STATUSBAR
@@ -716,24 +680,13 @@ bool wxFrame::MSWCreate(int id, wxWindow *parent, const wxChar *wclass, wxWindow
 
   WXDWORD extendedStyle = MakeExtendedStyle(style);
 
-  // make all frames appear in the win9x shell taskbar unless
-  // wxFRAME_TOOL_WINDOW or wxFRAME_NO_TASKBAR is given - without giving them
-  // WS_EX_APPWINDOW style, the child (i.e. owned) frames wouldn't appear in it
 #if !defined(__WIN16__) && !defined(__SC__)
-  if ( (style & wxFRAME_TOOL_WINDOW) ||
-       (style & wxFRAME_NO_TASKBAR) )
-      extendedStyle |= WS_EX_TOOLWINDOW;
-  else if ( !(style & wxFRAME_NO_TASKBAR) )
-      extendedStyle |= WS_EX_APPWINDOW;
+  if (style & wxFRAME_TOOL_WINDOW)
+    extendedStyle |= WS_EX_TOOLWINDOW;
 #endif
 
   if (style & wxSTAY_ON_TOP)
     extendedStyle |= WS_EX_TOPMOST;
-
-#ifndef __WIN16__
-  if (m_exStyle & wxFRAME_EX_CONTEXTHELP)
-    extendedStyle |= WS_EX_CONTEXTHELP;
-#endif
 
   m_iconized = FALSE;
   if ( !wxWindow::MSWCreate(id, parent, wclass, wx_win, title, x, y, width, height,
@@ -876,7 +829,7 @@ void wxFrame::IconizeChildFrames(bool bIconize)
         // the child MDI frames are a special case and should not be touched by
         // the parent frame - instead, they are managed by the user
         wxFrame *frame = wxDynamicCast(win, wxFrame);
-        if ( frame && !frame->IsMDIChild() )
+        if ( frame && !wxDynamicCast(frame, wxMDIChildFrame) )
         {
             frame->Iconize(bIconize);
         }
@@ -974,8 +927,6 @@ bool wxFrame::HandleSize(int x, int y, WXUINT id)
             // restore all child frames too
             IconizeChildFrames(FALSE);
 
-            (void)SendIconizeEvent(FALSE);
-
             // fall through
 
         case SIZEFULLSCREEN:
@@ -985,8 +936,6 @@ bool wxFrame::HandleSize(int x, int y, WXUINT id)
         case SIZEICONIC:
             // iconize all child frames too
             IconizeChildFrames(TRUE);
-
-            (void)SendIconizeEvent();
 
             m_iconized = TRUE;
             break;

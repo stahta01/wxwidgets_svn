@@ -19,7 +19,7 @@
 #include <wx/spinctrl.h>
 #include <wx/dynarray.h>
 #include <wx/statline.h>
-#include <wx/tglbtn.h>
+//#include <wx/toggbutt.h>
 
 #ifdef __WXMSW__
 #if wxUSE_OWNER_DRAWN
@@ -124,6 +124,31 @@ public:
     int GetMarginX() const { return m_marginX; }
     int GetMarginY() const { return m_marginY; }
 };
+
+//----------------------------------------------------------------------
+
+//  class wxToggleButton : public wxControl {
+//  public:
+//      wxToggleButton(wxWindow *parent, wxWindowID id, const wxString& label,
+//                     const wxPoint& pos = wxDefaultPosition,
+//                     const wxSize& size = wxDefaultSize, long style = 0,
+//                     const wxValidator& validator = wxDefaultValidator,
+//                     const char* name = "toggle");
+//      void SetValue(bool value);
+//      bool GetValue() const ;
+//      void SetLabel(const wxString& label);
+//  };
+
+//  class wxBitmapToggleButton : public wxToggleButton {
+//  public:
+//      wxBitmapToggleButton(wxWindow *parent, wxWindowID id, const wxBitmap *label,
+//                           const wxPoint& pos = wxDefaultPosition,
+//                           const wxSize& size = wxDefaultSize, long style = 0,
+//                           const wxValidator& validator = wxDefaultValidator,
+//                           const char *name = "toggle");
+//      void SetLabel(const wxBitmap& bitmap);
+//  };
+
 
 //----------------------------------------------------------------------
 
@@ -350,33 +375,6 @@ public:
 
 //----------------------------------------------------------------------
 
-
-class wxTextAttr
-{
-public:
-    // ctors
-    wxTextAttr(const wxColour& colText = wxNullColour,
-               const wxColour& colBack = wxNullColour,
-               const wxFont& font = wxNullFont);
-    ~wxTextAttr();
-
-    // setters
-    void SetTextColour(const wxColour& colText);
-    void SetBackgroundColour(const wxColour& colBack);
-    void SetFont(const wxFont& font);
-
-    // accessors
-    bool HasTextColour() const;
-    bool HasBackgroundColour() const;
-    bool HasFont() const;
-
-    const wxColour& GetTextColour() const;
-    const wxColour& GetBackgroundColour() const;
-    const wxFont& GetFont() const;
-};
-
-
-
 class wxTextCtrl : public wxControl {
 public:
     wxTextCtrl(wxWindow* parent, wxWindowID id, char* value = "",
@@ -425,13 +423,9 @@ public:
     void Undo();
     void Redo();
 
-    bool SetStyle(long start, long end, const wxTextAttr& style);
-    bool SetDefaultStyle(const wxTextAttr& style);
-    const wxTextAttr& GetDefaultStyle() const;
-
     %addmethods {
         void write(const wxString& text) {
-            self->AppendText(text);
+            self->AppendText(text + '\n');
         }
     }
 };
@@ -607,29 +601,6 @@ public:
 };
 
 
-//----------------------------------------------------------------------
-
-enum { wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, };
-
-class wxToggleButton : public wxControl {
-public:
-    wxToggleButton(wxWindow *parent,
-                   wxWindowID id,
-                   const wxString& label,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = 0,
-                   const wxValidator& validator = wxDefaultValidator,
-                   const char* name = "toggle");
-
-    void SetValue(bool value);
-    bool GetValue() const ;
-    void SetLabel(const wxString& label);
-
-};
-
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 
 

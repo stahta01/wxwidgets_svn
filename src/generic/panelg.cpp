@@ -284,13 +284,6 @@ void wxPanel::OnNavigationKey( wxNavigationKeyEvent& event )
     event.Skip();
 }
 
-void wxPanel::RemoveChild(wxWindowBase *child)
-{
-    if ( child == m_winLastFocused )
-        m_winLastFocused = NULL;
-    wxWindow::RemoveChild(child);
-}
-
 void wxPanel::SetFocus()
 {
     wxLogTrace(_T("focus"), _T("SetFocus on wxPanel 0x%08x."), GetHandle());

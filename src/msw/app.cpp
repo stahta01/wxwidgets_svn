@@ -86,7 +86,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) || defined(__TWIN32__))
     #include <commctrl.h>
 #endif
 
@@ -601,9 +601,7 @@ void wxApp::CleanUp()
 #if wxUSE_THREADS
     delete wxPendingEventsLocker;
     // If we don't do the following, we get an apparent memory leak.
-#if wxUSE_VALIDATORS
     ((wxEvtHandler&) wxDefaultValidator).ClearEventLocker();
-#endif
 #endif
 
     wxClassInfo::CleanUpClasses();
@@ -726,33 +724,15 @@ int wxEntry(WXHINSTANCE hInstance,
 
         int retValue = 0;
 
-        // it is common to create a modal dialog in OnInit() (to ask/notify the
-        // user about something) but it wouldn't work if we don't change the
-        // "exit on delete last frame" flag here as when this dialog is
-        // deleted, the app would terminate (it was the last top level window
-        // as the main frame wasn't created yet!), so disable this behaviour
-        // temproarily
-        bool exitOnLastFrameDelete = wxTheApp->GetExitOnFrameDelete();
-        wxTheApp->SetExitOnFrameDelete(FALSE);
-
-        // init the app
-        retValue = wxTheApp->OnInit() ? 0 : -1;
-
-        // restore the old flag value
-        wxTheApp->SetExitOnFrameDelete(exitOnLastFrameDelete);
-
-        if ( retValue == 0 )
+        if ( wxTheApp->OnInit() )
         {
             if ( enterLoop )
             {
-                // run the main loop
                 retValue = wxTheApp->OnRun();
             }
             else
-            {
-                // we want to initialize, but not run or exit immediately.
+                // We want to initialize, but not run or exit immediately.
                 return 1;
-            }
         }
         //else: app initialization failed, so we skipped OnRun()
 
@@ -957,19 +937,14 @@ bool wxApp::DoMessage()
 #endif // wxUSE_THREADS
 
         // Process the message
-        DoMessage((WXMSG *)&s_currentMsg);
+        if ( !ProcessMessage((WXMSG *)&s_currentMsg) )
+        {
+            ::TranslateMessage(&s_currentMsg);
+            ::DispatchMessage(&s_currentMsg);
+        }
     }
 
     return TRUE;
-}
-
-void wxApp::DoMessage(WXMSG *pMsg)
-{
-    if ( !ProcessMessage(pMsg) )
-    {
-        ::TranslateMessage((MSG *)pMsg);
-        ::DispatchMessage((MSG *)pMsg);
-    }
 }
 
 /*
@@ -1060,20 +1035,23 @@ bool wxApp::ProcessMessage(WXMSG *wxmsg)
     // Try translations first; find the youngest window with
     // a translation table.
     wxWindow *wnd;
-
-    bool pastTopLevelWindow = FALSE;
     for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
     {
-        if ( !pastTopLevelWindow && wnd->MSWTranslateMessage(wxmsg))
-            return TRUE;
-        if ( wnd->MSWProcessMessage(wxmsg) )
+        if ( wnd->MSWTranslateMessage(wxmsg) )
             return TRUE;
 
         // stop at first top level window, i.e. don't try to process the key
         // strokes originating in a dialog using the accelerators of the parent
         // frame - this doesn't make much sense
         if ( wnd->IsTopLevel() )
-            pastTopLevelWindow = TRUE;
+            break;
+    }
+
+    // Anyone for a non-translation message? Try youngest descendants first.
+    for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
+    {
+        if ( wnd->MSWProcessMessage(wxmsg) )
+            return TRUE;
     }
 
     return FALSE;
@@ -1288,10 +1266,9 @@ void wxExit()
     exit(0);
 }
 
-// Yield to incoming messages
-
 static bool gs_inYield = FALSE;
 
+// Yield to incoming messages
 bool wxYield()
 {
     // disable log flushing from here because a call to wxYield() shouldn't
@@ -1302,7 +1279,7 @@ bool wxYield()
     if (gs_inYield)
         wxFAIL_MSG( wxT("wxYield called recursively" ) );
 #endif
-
+    
     gs_inYield = TRUE;
 
     // we don't want to process WM_QUIT from here - it should be processed in
@@ -1336,7 +1313,7 @@ bool wxYieldIfNeeded()
 {
     if (gs_inYield)
         return FALSE;
-
+        
     return wxYield();
 }
 
@@ -1349,8 +1326,7 @@ bool wxHandleFatalExceptions(bool doit)
     return TRUE;
 #else
     wxFAIL_MSG(_T("set wxUSE_ON_FATAL_EXCEPTION to 1 to sue this function"));
-	
-	(void)doit;
+
     return FALSE;
 #endif
 }

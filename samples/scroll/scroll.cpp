@@ -117,8 +117,6 @@ MyCanvas::MyCanvas( wxWindow *parent, wxWindowID id,
     (void) new wxButton( this, ID_MOVEBUTTON, "move button", wxPoint(150,10) );
     (void) new wxButton( this, ID_SCROLLWIN, "scroll win", wxPoint(250,10) );
 
-#if 0
-
     wxString choices[] =
     {
         "This",
@@ -127,15 +125,15 @@ MyCanvas::MyCanvas( wxWindow *parent, wxWindowID id,
         "wonderful",
         "examples."
     };
-
+  
     m_button = new wxButton( this, ID_QUERYPOS, "Query position", wxPoint(10,110) );
-
+  
     (void) new wxTextCtrl( this, -1, "wxTextCtrl", wxPoint(10,150), wxSize(80,-1) );
-
+  
     (void) new wxRadioButton( this, -1, "Disable", wxPoint(10,190) );
-
+  
     (void) new wxComboBox( this, -1, "This", wxPoint(10,230), wxDefaultSize, 5, choices );
-
+  
     (void) new wxRadioBox( this, -1, "This", wxPoint(10,310), wxDefaultSize, 5, choices, 2, wxRA_SPECIFY_COLS );
 
     (void) new wxRadioBox( this, -1, "This", wxPoint(10,440), wxDefaultSize, 5, choices, 2, wxRA_SPECIFY_ROWS );
@@ -157,31 +155,24 @@ MyCanvas::MyCanvas( wxWindow *parent, wxWindowID id,
 
     (void) new wxListBox( this, -1, wxPoint(260,280), wxSize(120,120), 5, choices, wxLB_ALWAYS_SB );
 
-#endif
-
-    wxPanel *test = new wxPanel( this, -1, wxPoint(10, 10), wxSize(130,50), wxSIMPLE_BORDER | wxTAB_TRAVERSAL );
+    wxPanel *test = new wxPanel( this, -1, wxPoint(10, 530), wxSize(130,120), wxSIMPLE_BORDER | wxTAB_TRAVERSAL );
     test->SetBackgroundColour( "WHEAT" );
-
-#if 0
-
     wxButton *test2 = new wxButton( test, -1, "Hallo", wxPoint(10,10) );
-
+  
     test = new wxPanel( this, -1, wxPoint(160, 530), wxSize(130,120), wxSUNKEN_BORDER | wxTAB_TRAVERSAL );
     test->SetBackgroundColour( "WHEAT" );
     test->SetCursor( wxCursor( wxCURSOR_NO_ENTRY ) );
     test2 = new wxButton( test, -1, "Hallo", wxPoint(10,10) );
     test2->SetCursor( wxCursor( wxCURSOR_PENCIL ) );
-
+  
     test = new wxPanel( this, -1, wxPoint(310, 530), wxSize(130,120), wxRAISED_BORDER | wxTAB_TRAVERSAL );
     test->SetBackgroundColour( "WHEAT" );
     test->SetCursor( wxCursor( wxCURSOR_PENCIL ) );
     test2 = new wxButton( test, -1, "Hallo", wxPoint(10,10) );
     test2->SetCursor( wxCursor( wxCURSOR_NO_ENTRY ) );
 
-#endif
-
-    SetBackgroundColour( "BLUE" );
-
+    SetBackgroundColour( "WHEAT" );
+  
     SetCursor( wxCursor( wxCURSOR_IBEAM ) );
 }
 
@@ -211,7 +202,7 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
     dc.DrawText( "Press mouse button to test calculations!", 160, 50 );
 
     dc.DrawText( "Some text", 140, 140 );
-
+  
     dc.DrawRectangle( 100, 160, 200, 200 );
 }
 
@@ -306,15 +297,15 @@ MyFrame::MyFrame()
 
     m_canvas = new MyCanvas( this, -1, wxPoint(0,0), wxSize(100,100) );
     m_canvas->SetScrollbars( 10, 10, 50, 100 );
-#if 0
+  
     m_log = new wxTextCtrl( this, -1, "This is the log window.\n", wxPoint(0,0), wxSize(100,100), wxTE_MULTILINE );
     wxLog *old_log = wxLog::SetActiveTarget( new wxLogTextCtrl( m_log ) );
     delete old_log;
-#endif
+    
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-
+    
     topsizer->Add( m_canvas, 1, wxEXPAND );
-//  topsizer->Add( m_log, 0, wxEXPAND );
+    topsizer->Add( m_log, 0, wxEXPAND );
 
     SetAutoLayout( TRUE );
     SetSizer( topsizer );
