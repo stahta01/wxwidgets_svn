@@ -1,0 +1,361 @@
+#!/bin/bash
+# ---------------------------------------------------------------------------
+# Master build script for building all the installers and such on all the 
+# build machines in my lab, and then distributing the results as needed.
+# ---------------------------------------------------------------------------
+
+set -o errexit
+#set -o xtrace
+
+# ---------------------------------------------------------------------------
+# Some control variables...
+
+# the local spot that we put everything when done, before possibly copying 
+# to remote hosts
+STAGING_DIR=./BUILD
+
+
+# host name of the machine to use for windows builds
+WIN_HOST=beast
+# Where is the build dir from the remote machine's perspective?
+WIN_BUILD=/c/BUILD
+
+
+# Just like the above
+OSX_HOST=bigmac
+OSX_BUILD=/tmp/BUILD
+
+
+# Alsmost the same...  See below
+LINUX_HOST=rh9
+LINUX_BUILD=/tmp/BUILD
+
+
+# Upload server locations
+UPLOAD_HOST=starship.python.net
+UPLOAD_DAILY_ROOT=/home/crew/robind/public_html/wxPython/daily
+UPLOAD_PREVIEW_ROOT=/home/crew/robind/public_html/wxPython/preview
+
+
+
+# ---------------------------------------------------------------------------
+# functions
+
+function usage {
+    echo ""
+    echo "Usage: $0 [command flags...]"
+    echo ""
+    echo "build types:"
+    echo "   dryrun       Do the build, but don't copy anywhere (default)"
+    echo "   daily        Do a daily build, copy to starship"
+    echo "   release      Do a normal release build, copy to starship"
+    echo ""
+    echo "optional command flags:"
+    echo "   2.2          Build for Python 2.2 (default=off)"
+    echo "   2.3          Build for Python 2.3 (default=on)"
+    echo "   all          Build for all supported Python versions"
+    echo ""
+    echo "   skipsource   Don't build the source archives, use the ones"
+    echo "                already in the staging dir."
+    echo "   onlysource   Exit after building the source archives"
+    echo "   skipwin      Don't do the remote Windows build"
+    echo "   skiposx      Don't do the remote OSX build"
+    echo "   skiplinux    Don't do the remote Linux build"
+    echo "   skipclean    Don't do the cleanup step on the remote builds"
+    echo ""
+
+
+}
+
+# ---------------------------------------------------------------------------
+
+# Make sure we are running in the right directory.  TODO: make this
+# test more robust.  Currenly we just test for the presence of
+# 'wxPython' and 'wx' subdirs.
+if [ ! -d wxPython -o ! -d wx ]; then  
+    echo "Please run this script from the root wxPython directory."
+    exit 1
+fi
+
+
+
+# Set defaults and check the command line options
+KIND=dryrun
+PYVER=2.3
+skipsource=no
+onlysource=no
+skipwin=no
+skiposx=no
+skiplinux=no
+skipclean=no
+
+for flag in $*; do
+    case $flag in 
+	dryrun)   KIND=dryrun                    ;;
+	daily)    KIND=daily                     ;;
+	release)  KIND=release                   ;;
+
+	2.2)      PYVER=2.2                      ;;
+	2.3)      PYVER=2.3                      ;;
+	all)      PYVER="2.2 2.3"                ;;
+
+	skipsource)  skipsource=yes              ;;
+	onlysource)  onlysource=yes              ;;
+	skipwin)     skipwin=yes                 ;;
+	skiposx)     skiposx=yes                 ;;
+	skiplinux)   skiplinux=yes               ;;
+	skipclean)   skipclean=yes               ;;
+
+	help) usage; exit 1                      ;;
+	*)    echo "Unknown flag \"$flag\""
+	      usage
+	      exit 1
+    esac
+done
+
+
+# ensure the staging area exists
+if [ ! -d $STAGING_DIR ]; then 
+    mkdir -p $STAGING_DIR
+fi
+
+# Figure out the wxPython version number, possibly adjusted for being a daily build
+if [ $KIND = daily ]; then
+    DAILY=`date +%Y%m%d`   # should it include the hour too?  2-digit year?
+    echo $DAILY > DAILY_BUILD
+fi
+VERSION=`python -c "import setup;print setup.VERSION"`
+
+
+#echo VERSION=$VERSION
+#exit 0
+
+echo "Getting started at " `date`
+
+# ---------------------------------------------------------------------------
+# Make the sources and other basic stuff.
+
+if [ $skipsource != yes -o $onlysource = yes ]; then
+
+    # clean out the local dist dir
+    rm -f dist/*
+
+    # Regenerate the reST docs
+    echo "Regenerating the reST docs..."
+    cd docs
+    for x in *.txt; do
+	docutils-html $x `basename $x .txt`.html
+    done
+    cd -
+       
+    # build the doc and demo tarballs
+    distrib/makedemo
+    distrib/makedocs
+
+    # build the new docs too
+    docs/bin/everything
+
+    # make the source tarball
+    distrib/makerpm 2.3 skipclean skiprpm gtk2
+
+    # make the source RPMs
+    for ver in $PYVER; do 
+	distrib/makerpm $ver skipclean skipcopy skiptar srpm
+	distrib/makerpm $ver skipclean skipcopy skiptar srpm gtk2
+    done
+
+    # Copy everything to the staging dir
+    echo "Moving stuff to $STAGING_DIR..."
+    rm -f dist/*.spec
+    mv dist/* $STAGING_DIR
+    for doc in CHANGES BUILD INSTALL MigrationGuide default; do
+	cp docs/$doc.* $STAGING_DIR
+    done
+
+    # cleanup
+    echo "Cleaning up..."
+    rm -f dist/*
+    rm -rf _build_rpm
+fi 
+
+if [ $KIND = daily ]; then
+    rm DAILY_BUILD
+fi
+
+if [ $onlysource = yes ]; then
+    exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# Windows build
+
+if [ $skipwin != yes ]; then
+    echo "-=-=- Starting Windows build..."
+
+    echo "Copying source file and build script..."
+    scp $STAGING_DIR/wxPythonSrc-$VERSION.tar.gz \
+	distrib/all/build-windows \
+	$WIN_HOST:$WIN_BUILD
+    
+     echo "Running build script on $WIN_HOST..."
+     wxdir=$WIN_BUILD/wxPythonSrc-$VERSION
+     cmd=./build-windows
+     ssh $WIN_HOST "cd $WIN_BUILD && $cmd $wxdir $WIN_BUILD $skipclean $VERSION $PYVER && rm $cmd"
+
+     echo "Fetching the results..."
+     scp $WIN_HOST:$WIN_BUILD/wxPythonWIN32*  $STAGING_DIR
+     ssh $WIN_HOST "rm $WIN_BUILD/wxPythonWIN32*"
+fi
+
+
+# ---------------------------------------------------------------------------
+# OSX build
+
+if [ $skiposx != yes ]; then
+    echo "-=-=- Starting OSX build..."
+
+    echo "Copying source files and build script..."
+    ssh $OSX_HOST "mkdir -p $OSX_BUILD && rm -rf $OSX_BUILD/*"
+    scp $STAGING_DIR/wxPythonSrc-$VERSION.tar.gz \
+	$STAGING_DIR/wxPythonDocs-$VERSION.tar.gz \
+	$STAGING_DIR/wxPythonDemo-$VERSION.tar.gz \
+	distrib/all/build-osx \
+	$OSX_HOST:$OSX_BUILD
+
+     echo "Running build script on $OSX_HOST..."
+     wxdir=$OSX_BUILD/wxPythonSrc-$VERSION
+     cmd=./build-osx
+     ssh root@$OSX_HOST "cd $OSX_BUILD && $cmd $wxdir $OSX_BUILD $skipclean $VERSION $PYVER && rm $cmd"
+
+     echo "Fetching the results..."
+     scp "$OSX_HOST:$OSX_BUILD/wxPythonOSX*"  $STAGING_DIR
+     ssh $OSX_HOST "rm $OSX_BUILD/wxPythonOSX*"
+fi
+
+
+# ---------------------------------------------------------------------------
+# Linux build
+
+# This build is optional, check if the target machine is up and
+# running
+if [ $skiplinux != yes ]; then
+    if  ping -q -c1 -w1 $LINUX_HOST > /dev/null; then
+        # the ping succeeded
+	skiplinux=no
+    else
+        # the ping failed, skip the build
+	skiplinux=yes
+	echo "-----------------------------------------------------------------"
+	echo "The $LINUX_HOST machine is offline, skipping the binary RPM build."
+	echo "-----------------------------------------------------------------"
+    fi
+fi
+
+
+if [ $skiplinux != yes ]; then
+    echo "-=-=- Starting Linux build..."
+
+    # The remote linux build is a bit different than the others.  The
+    # SRPMs will have already been built in the initial source
+    # building steps, the only  thing that the remote build needs to
+    # do is an "rpmbuild --rebuild"  for each package.  So we'll just
+    # copy the build script over and  execute it, there is no need to
+    # unpack the tarball and most of the  other steps...
+
+    
+    echo "Copying source files and build script..."
+    ssh root@$LINUX_HOST "mkdir -p $LINUX_BUILD && rm -rf $LINUX_BUILD/*"
+    scp $STAGING_DIR/wxPython*.src.rpm \
+	distrib/all/build-linux \
+	root@$LINUX_HOST:$LINUX_BUILD
+
+    echo "Running build script on $LINUX_HOST..."
+    cmd=./build-linux
+    ssh root@$LINUX_HOST "cd $LINUX_BUILD && $cmd $LINUX_BUILD $skipclean $VERSION $PYVER"
+    
+    echo "Fetching the results..."
+    scp root@$LINUX_HOST:$LINUX_BUILD/wxPythonGTK*.i[0-9]86.rpm  $STAGING_DIR
+    ssh root@$LINUX_HOST "rm $LINUX_BUILD/wxPythonGTK*.i[0-9]86.rpm"
+fi
+
+
+
+
+# ---------------------------------------------------------------------------
+# Final disposition of build results...
+
+chmod a+r $STAGING_DIR/*
+
+if [ $KIND = dryrun ]; then
+    # we're done
+    echo "Finished at " `date`
+    exit 0
+fi
+
+
+if [ $KIND = daily ]; then 
+
+    destdir=$UPLOAD_DAILY_ROOT/$DAILY
+    echo "Copying to the starship at $destdir..."
+    ssh $UPLOAD_HOST "mkdir -p $destdir"
+    scp $STAGING_DIR/* $UPLOAD_HOST:/$destdir
+    ssh $UPLOAD_HOST "cd $destdir && ls -al"
+
+
+    echo "Cleaning up staging dir..."
+    rm $STAGING_DIR/*
+    rmdir $STAGING_DIR
+
+    # TODO: something to remove old builds from starship, keeping 
+    # only N days worth
+
+    # TODO:  Send email to wxPython-dev?
+    DATE=`date`
+    TO=wxPython-dev@lists.wxwidgets.org
+
+    cat <<EOF  | /usr/sbin/sendmail  $TO
+From: R'bot <rbot@wxpython.org>
+To: $TO
+Subject: New test build uploaded
+Date: $DATE
+
+Hi,
+
+A new test build of wxPython has been uploaded to starship.  
+
+   Version: $VERSION
+   Pythons: $PYVER
+   URL:     http://starship.python.net/crew/robind/wxPython/daily/$DAILY
+
+Have fun!
+R'bot
+
+EOF
+
+    echo "Finished at " `date`
+    exit 0
+fi
+
+
+if [ $KIND = release ]; then 
+
+    echo "Copying to the local file server..."
+    destdir=/stuff/Development/wxPython/dist/$VERSION
+    mkdir -p $destdir
+    cp $STAGING_DIR/* $destdir
+
+    echo "Copying to the starship..."
+    destdir=$UPLOAD_PREVIEW_ROOT/$VERSION
+    ssh $UPLOAD_HOST "mkdir -p $destdir"
+    scp $STAGING_DIR/* $UPLOAD_HOST:/$destdir
+
+    echo "Cleaning up staging dir..."
+    rm $STAGING_DIR/*
+    rmdir $STAGING_DIR
+
+    echo "Finished at " `date`
+    exit 0
+fi
+
+
+# ---------------------------------------------------------------------------
