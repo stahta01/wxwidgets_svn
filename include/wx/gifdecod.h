@@ -78,8 +78,6 @@ public:
     unsigned char *pal;             /* palette */
     GIFImage *next;                 /* next image */
     GIFImage *prev;                 /* prev image */
-
-    DECLARE_NO_COPY_CLASS(GIFImage)
 };
 
 
@@ -150,8 +148,6 @@ public:
 
     // convert current frame to wxImage
     bool ConvertToImage(wxImage *image) const;
-
-    DECLARE_NO_COPY_CLASS(wxGIFDecoder)
 };
 
 

@@ -570,12 +570,7 @@ wxKeyEvent::wxKeyEvent(const wxKeyEvent& evt)
     m_uniChar = evt.m_uniChar;
 #endif
 }
-
-long wxKeyEvent::KeyCode() const
-{
-    return m_keyCode;
-}
-
+    
 wxWindowCreateEvent::wxWindowCreateEvent(wxWindow *win)
 {
     SetEventType(wxEVT_CREATE);

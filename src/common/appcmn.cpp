@@ -121,6 +121,9 @@ bool wxAppBase::OnInitGui()
 #ifdef __WXUNIVERSAL__
     if ( !wxTheme::Get() && !wxTheme::CreateDefault() )
         return FALSE;
+    wxArtProvider *art = wxTheme::Get()->GetArtProvider();
+    if ( art )
+        wxArtProvider::PushProvider(art);
 #endif // __WXUNIVERSAL__
 
     return TRUE;
@@ -382,8 +385,6 @@ bool wxAppBase::OnCmdLineParsed(wxCmdLineParser& parser)
             return FALSE;
         }
 
-        // Delete the defaultly created theme and set the new theme.
-        delete wxTheme::Get();
         wxTheme::Set(theme);
     }
 #endif // __WXUNIVERSAL__

@@ -202,8 +202,6 @@ private:
     inline size_t32 Swap(size_t32 ui) const;
 
     bool          m_bSwapped;   // wrong endianness?
-
-    DECLARE_NO_COPY_CLASS(wxMsgCatalogFile)
 };
 
 

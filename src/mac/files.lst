@@ -841,7 +841,15 @@ GENERICOBJS = \
 		wizard.o
 
 GUIOBJS = \
-		MoreFilesX.o \
+		DirectoryCopy.o \
+		FSpCompat.o \
+		FileCopy.o \
+		FullPath.o \
+		IterateDirectory.o \
+		MoreDesktopMgr.o \
+		MoreFiles.o \
+		MoreFilesExtras.o \
+		Search.o \
 		accel.o \
 		aga.o \
 		app.o \

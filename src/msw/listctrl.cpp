@@ -119,7 +119,12 @@ private:
 #if wxUSE_WCHAR_T
         if ( (item.mask & LVIF_TEXT) && item.pszText )
         {
+#ifdef __WXWINE__
+            // FIXME
+            m_buf = new wxWC2WXbuf(wxConvLocal.cWC2WX((const __wchar_t* ) item.pszText));
+#else
             m_buf = new wxWC2WXbuf(wxConvLocal.cWC2WX(item.pszText));
+#endif
             m_item->pszText = (wxChar*)m_buf->data();
         }
         else
@@ -132,8 +137,6 @@ private:
 #endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
     LV_ITEM *m_item;
-
-    DECLARE_NO_COPY_CLASS(wxLV_ITEM)
 };
 
 ///////////////////////////////////////////////////////
@@ -180,8 +183,6 @@ public:
        if (attr)
            delete attr;
    };
-
-    DECLARE_NO_COPY_CLASS(wxListItemInternalData)
 };
 
 // Get the internal data structure

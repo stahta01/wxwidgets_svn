@@ -1,45 +1,5 @@
-----------------------------
-wxWindows 2.5/2.6 Change Log
-----------------------------
-
-INCOMPATIBLE CHANGES SINCE 2.4.x
-================================
-
-OTHER CHANGES
-=============
-
-2.5.0
------
-
-All:
-
-- Implemented GetEditControl for wxGenericTreeCtrl (Peter Stieber)
-- Improved contrib/utils/convertrc parsing (David J. Cooke)
-- Fixed handling of URLs and filenames in wxFileSystem
-- Implemented alignment for wxGrid bool editor and renderer
-- Support wxListCtrl columns alignment for all platforms and not just MSW
-- Added wxDateSpan::operator==() and !=() (Lukasz Michalski)
-
-Unix:
-
-- fixed compilation on systems with zlib installed but < 1.1.3 version
-
-wxGTK:
-
-- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
-- made wxTextCtrl::EmulateKeyPress() work for Delete and Backspace
-
-wxMSW:
-
-- possibility to use DIBs for wxBitmap implementation (Derry Bryson)
-- wxStaticBitmap doesn't stretch its bitmap any longer (like other ports)
-- support for accelerator keys in the owner drawn menus (Derry Bryson)
-- wxCaret::SetSize() doesn't hide the caret any longer as it used to
-- wxCheckListBox::Check() doesn't send CHECKLISTBOX_TOGGLE event any more
-- fixed bug with wxTR_EDIT_LABELS not workign with wxTR_MULTIPLE
-
-OLD CHANGES
-===========
+wxWindows 2 Change Log
+----------------------
 
 INCOMPATIBLE CHANGES SINCE 2.2.x
 ================================
@@ -216,6 +176,16 @@ OTHER CHANGES
 wxMSW:
 
 - fixed loss of client data in wxChoice::SetString()
+
+wxGTK:
+
+- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
+
+All:
+
+- Improved contrib/utils/convertrc parsing (David J. Cooke)
+- Fixed handling of URLs and filenames in wxFileSystem
+- Implemented alignment for wxGrid bool editor and renderer
 
 2.3.4
 -----

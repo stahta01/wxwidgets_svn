@@ -85,7 +85,6 @@ public:
 
 private:
     DECLARE_CLASS(wxPrinterBase)
-    DECLARE_NO_COPY_CLASS(wxPrinterBase)
 };
 
 /*
@@ -151,7 +150,6 @@ private:
 
 private:
     DECLARE_ABSTRACT_CLASS(wxPrintout)
-    DECLARE_NO_COPY_CLASS(wxPrintout)
 };
 
 /*
@@ -180,7 +178,6 @@ private:
 
     DECLARE_CLASS(wxPreviewCanvas)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewCanvas)
 };
 
 /*
@@ -212,7 +209,6 @@ protected:
 private:
     DECLARE_CLASS(wxPreviewFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewFrame)
 };
 
 /*
@@ -293,7 +289,6 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewControlBar)
 };
 
 /*
@@ -382,8 +377,6 @@ protected:
 
 private:
     void Init(wxPrintout *printout, wxPrintout *printoutForPrinting);
-
-    DECLARE_NO_COPY_CLASS(wxPrintPreviewBase)
 };
 
 /*

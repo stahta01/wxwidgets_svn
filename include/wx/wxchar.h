@@ -80,13 +80,6 @@
 // Required for wxPrintf() etc
 #include <stdarg.h>
 
-// Almost all compiler have strdup(), but not quite all: CodeWarrior under Mac
-// and VC++ for Windows CE don't provide it
-#if !(defined(__MWERKS__) && defined(__WXMAC__)) && !defined(__WXWINCE__)
-    // use #define, not inline wrapper, as it is tested with #ifndef below
-    #define wxStrdupA strdup
-#endif
-
 // non Unix compilers which do have wchar.h (but not tchar.h which is included
 // below and which includes wchar.h anyhow).
 // Actually MinGW has tchar.h, but it does not include wchar.h
@@ -276,7 +269,7 @@
     #define  wxStrcoll   _tcscoll
     #define  wxStrcpy    _tcscpy
     #define  wxStrcspn   _tcscspn
-    #define  wxStrdupW   _wcsdup        // notice the 'W'!
+    #define  wxStrdup    _tcsdup
     #define  wxStrftime  _tcsftime
     #define  wxStricmp   _tcsicmp
     #define  wxStrnicmp  _tcsnicmp
@@ -466,7 +459,9 @@
         #define  wxStrcoll   strcoll
         #define  wxStrcpy    strcpy
         #define  wxStrcspn   strcspn
-
+        #if !defined(__MWERKS__) || !defined(__WXMAC__)
+            #define  wxStrdup    strdup
+        #endif
         // wxStricmp and wxStrnicmp are defined below
         #define  wxStrlen_   strlen // used in wxStrlen inline function
         #define  wxStrncat   strncat
@@ -576,17 +571,6 @@ inline bool wxIsEmpty(const wxChar *p) { return !p || !*p; }
 
 // safe version of strlen() (returns 0 if passed NULL pointer)
 inline size_t wxStrlen(const wxChar *psz) { return psz ? wxStrlen_(psz) : 0; }
-
-// each of strdup() and wcsdup() may or may not be available but we need both
-// of them anyhow for wx/buffer.h so we define the missing one(s) in
-// wxchar.cpp and so we should always have both wxStrdupA and wxStrdupW
-// defined -- if this is somehow not the case in some situations, please
-// correct that and not the lines here
-#if wxUSE_UNICODE
-    #define wxStrdup wxStrdupW
-#else
-    #define wxStrdup wxStrdupA
-#endif
 
 WXDLLEXPORT bool wxOKlibc(); // for internal use
 
@@ -752,12 +736,8 @@ WXDLLEXPORT bool wxOKlibc(); // for internal use
     WXDLLEXPORT size_t   wxStrxfrm(wxChar *dest, const wxChar *src, size_t n);
 #endif // wxNEED_WX_STRING_H
 
-#ifndef wxStrdupA
-WXDLLEXPORT char *wxStrdupA(const char *psz);
-#endif
-
-#ifndef wxStrdupW
-WXDLLEXPORT wchar_t *wxStrdupW(const wchar_t *pwz);
+#ifndef wxStrdup
+WXDLLEXPORT wxChar * wxStrdup(const wxChar *psz);
 #endif
 
 #ifndef wxStricmp

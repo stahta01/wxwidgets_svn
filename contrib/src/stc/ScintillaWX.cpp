@@ -139,6 +139,7 @@ END_EVENT_TABLE()
 
 
 ScintillaWX::ScintillaWX(wxStyledTextCtrl* win) {
+    capturedMouse = false;
     wMain = win;
     stc   = win;
     wheelRotation = 0;
@@ -220,15 +221,16 @@ void ScintillaWX::SetTicking(bool on) {
 
 
 void ScintillaWX::SetMouseCapture(bool on) {
-    if (on && !stc->HasCapture())
+    if (on && !capturedMouse)
         stc->CaptureMouse();
-    else if (!on && stc->HasCapture())
+    else if (!on && capturedMouse && stc->HasCapture())
         stc->ReleaseMouse();
+    capturedMouse = on;
 }
 
 
 bool ScintillaWX::HaveMouseCapture() {
-    return stc->HasCapture();
+    return capturedMouse;
 }
 
 
@@ -465,8 +467,22 @@ long ScintillaWX::WndProc(unsigned int iMessage, unsigned long wParam, long lPar
               ct.wCallTip.SetPositionRelative(rc, wMain);
               ct.wCallTip.Show();
           }
-      }
           break;
+      }
+
+      case SCI_SETCARETWIDTH:
+          // NOTE: Allows a caet width of zero.  This one has been added to
+          // Scintilla CVS so it can be removed from here when we update to
+          // version 1.50.
+          if (wParam <= 0)
+              vs.caretWidth = 0;
+          else if (wParam >= 3)
+              vs.caretWidth = 3;
+          else
+              vs.caretWidth = wParam;
+          InvalidateStyleRedraw();
+          break;
+
 
       default:
           return ScintillaBase::WndProc(iMessage, wParam, lParam);

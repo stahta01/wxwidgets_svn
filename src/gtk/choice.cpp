@@ -448,11 +448,14 @@ wxSize wxChoice::DoGetBestSize() const
     ret.x = 0;
     if ( m_widget )
     {
-        int width;
+        GdkFont *font = m_font.GetInternalFont();
+
+        wxCoord width;
         size_t count = GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
-            GetTextExtent( GetString(n), &width, NULL, NULL, NULL, &m_font );
+            // FIXME GTK 2.0
+            width = (wxCoord)gdk_string_width(font, wxGTK_CONV( GetString(n) ) );
             if ( width > ret.x )
                 ret.x = width;
         }

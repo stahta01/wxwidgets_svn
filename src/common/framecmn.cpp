@@ -41,6 +41,11 @@
     #include "wx/statusbr.h"
 #endif
 
+// FIXME - temporary hack in absence of wxTLW in all ports!
+#ifndef wxTopLevelWindowNative
+    #define wxTopLevelWindow wxTopLevelWindowBase
+#endif
+
 // ----------------------------------------------------------------------------
 // event table
 // ----------------------------------------------------------------------------

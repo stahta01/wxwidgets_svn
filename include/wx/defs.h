@@ -95,7 +95,7 @@
 // compiler defects workarounds
 // ----------------------------------------------------------------------------
 
-#if defined(__VISUALC__) && !defined(WIN32) && !defined(__WXWINCE__)
+#if defined(__VISUALC__) && !defined(WIN32)
     // VC1.5 does not have LPTSTR type
 #define LPTSTR  LPSTR
 #define LPCTSTR LPCSTR
@@ -231,7 +231,7 @@ typedef int wxWindowID;
 
 // check for explicit keyword support
 #ifndef HAVE_EXPLICIT
-    #if defined(__VISUALC__) && (__VISUALC__ >= 1200)
+    #if defined(__VISUALC__) && (__VISUALC__ > 1200)
         // VC++ 6.0 has explicit (what about the earlier versions?)
         #define HAVE_EXPLICIT
     #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x0520)
@@ -254,7 +254,7 @@ typedef int wxWindowID;
 // ----------------------------------------------------------------------------
 
 // stdcall is used for all functions called by Windows under Windows
-#if defined(__WINDOWS__)
+#if defined(__WINDOWS__) && !defined(__WXWINE__)
     #if defined(__GNUWIN32__)
         #define wxSTDCALL __attribute__((stdcall))
     #else
@@ -389,15 +389,6 @@ class WXDLLEXPORT wxEvent;
 #    define ATTRIBUTE_PRINTF_4
 #    define ATTRIBUTE_PRINTF_5
 #  endif /* ATTRIBUTE_PRINTF */
-#endif
-
-// Macro to issue warning when using deprecated functions with gcc3 or MSVC7:
-#if wxCHECK_GCC_VERSION(3, 1)
-    #define wxDEPRECATED(x) x __attribute__ ((deprecated))
-#elif defined(__VISUALC__) && (__VISUALC__ >= 1300)
-    #define wxDEPRECATED(x) __declspec(deprecated) x
-#else
-    #define wxDEPRECATED(x) x
 #endif
 
 // everybody gets the assert and other debug macros
@@ -1931,7 +1922,7 @@ typedef WXHWND          WXWidget;
 typedef unsigned int    WXWPARAM;
 typedef long            WXLPARAM;
 
-#if !defined(__WIN32__) || defined(__GNUWIN32__) || defined(__WXMICROWIN__)
+#if !defined(__WIN32__) || defined(__GNUWIN32__) || defined(__WXWINE__) || defined(__WXMICROWIN__)
 typedef int             (*WXFARPROC)();
 #else
 typedef int             (__stdcall *WXFARPROC)();

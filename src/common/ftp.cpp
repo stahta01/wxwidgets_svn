@@ -524,8 +524,6 @@ public:
 
     wxFTP *m_ftp;
     size_t m_ftpsize;
-
-    DECLARE_NO_COPY_CLASS(wxInputFTPStream)
 };
 
 class wxOutputFTPStream : public wxSocketOutputStream
@@ -560,8 +558,6 @@ public:
     }
 
     wxFTP *m_ftp;
-
-    DECLARE_NO_COPY_CLASS(wxOutputFTPStream)
 };
 
 wxSocketClient *wxFTP::GetPort()

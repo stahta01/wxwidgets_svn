@@ -15,7 +15,9 @@
 WXDIR = ..
 
 THISDIR=$(WXDIR)/samples
-CMDLINE=-fmakefile.g95 WXUSINGDLL='$(WXUSINGDLL)' UNICODE='$(UNICODE)'
+MAKEFILE=makefile.g95
+MAKEFLAGS=WXUSINGDLL=$(WXUSINGDLL) UNICODE=$(UNICODE)
+CMDLINE=-f $(MAKEFILE) $(MAKEFLAGS)
 
 # Mingw make may not have a shell to use, so can't use a loop here. Sigh.
 # Please add new sample directories alphabetically to make it easier to

@@ -502,8 +502,6 @@ private:
     bool           m_bConvertEncoding;
 
     static wxLanguageInfoArray *ms_languagesDB;
-
-    DECLARE_NO_COPY_CLASS(wxLocale)
 };
 
 // ----------------------------------------------------------------------------

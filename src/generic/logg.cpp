@@ -140,7 +140,6 @@ private:
     static wxString ms_details;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogDialog)
 };
 
 BEGIN_EVENT_TABLE(wxLogDialog, wxDialog)
@@ -451,7 +450,6 @@ private:
     wxLogWindow *m_log;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogFrame)
 };
 
 BEGIN_EVENT_TABLE(wxLogFrame, wxFrame)
@@ -998,14 +996,14 @@ void wxLogDialog::OnDetails(wxCommandEvent& WXUNUSED(event))
     {
         m_btnDetails->SetLabel(ms_details + EXPAND_SUFFIX);
 
-        sizer->Detach( m_listctrl );
+        sizer->Remove(m_listctrl);
 
 #if wxUSE_STATLINE
-        sizer->Detach( m_statline );
+        sizer->Remove(m_statline);
 #endif // wxUSE_STATLINE
 
 #if wxUSE_FILE
-        sizer->Detach( m_btnSave );
+        sizer->Remove(m_btnSave);
 #endif // wxUSE_FILE
     }
     else // show details now

@@ -307,6 +307,8 @@ protected:
     #include "wx/mac/textctrl.h"
 #elif defined(__WXPM__)
     #include "wx/os2/textctrl.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/textctrl.h"
 #endif
 
 // ----------------------------------------------------------------------------

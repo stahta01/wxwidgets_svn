@@ -113,8 +113,6 @@ class wxHtmlHelpHtmlWindow : public wxHtmlWindow
 
     private:
         wxHtmlHelpFrame *m_Frame;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpHtmlWindow)
 };
 
 
@@ -1028,7 +1026,6 @@ Normal face<br>(and <u>underlined</u>. <i>Italic face.</i> \
     }
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrameOptionsDialog)
 };
 
 BEGIN_EVENT_TABLE(wxHtmlHelpFrameOptionsDialog, wxDialog)

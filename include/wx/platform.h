@@ -18,7 +18,7 @@
    first define Windows symbols if they're not defined on the command line: we
    can autodetect everything we need if _WIN32 is defined
  */
-#if defined(_WIN32) || defined(WIN32) || defined(__NT__) || defined(__WXWINCE__)
+#if defined(_WIN32) || defined(WIN32) || defined(__NT__)
     #ifndef __WXMSW__
         #define __WXMSW__
     #endif
@@ -39,9 +39,15 @@
     #endif
 #endif
 
-#ifdef __WINE__
+#ifdef __WXWINE__
+    #ifndef __WIN32__
+        #define __WIN32__
+    #endif
     #ifndef __WIN95__
         #define __WIN95__
+    #endif
+    #ifndef STRICT
+        #define STRICT
     #endif
 #endif /* WINE */
 
@@ -131,7 +137,7 @@
         #define __HPUX__
     #endif /* HP-UX */
 
-    #if defined(__CYGWIN__) || defined(__WINE__)
+    #if defined(__CYGWIN__)
         #if !defined(wxSIZE_T_IS_UINT)
             #define wxSIZE_T_IS_UINT
         #endif

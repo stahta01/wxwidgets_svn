@@ -47,7 +47,7 @@ dnl The resulting library name will be of the form:
 dnl   libwx_$(TOOLKIT)-$(WX_RELEASE).so.$(WX_CURRENT).$(WX_REVISION).$(WX_AGE)
 
 WX_MAJOR_VERSION_NUMBER=2
-WX_MINOR_VERSION_NUMBER=5
+WX_MINOR_VERSION_NUMBER=4
 WX_RELEASE_NUMBER=0
 
 WX_VERSION=$WX_MAJOR_VERSION_NUMBER.$WX_MINOR_VERSION_NUMBER.$WX_RELEASE_NUMBER
@@ -2358,7 +2358,7 @@ equivalent variable and GTK+ is version 1.2.3 or above.
         GUI_TK_LIBRARY="$GUI_TK_LIBRARY -lwine$mesa_link$xpm_link -lXxf86dga -lXxf86vm -lSM -lICE -lXext -lXmu -lX11 -lncurses"
         TOOLKIT=MSW
         GUIDIST=MSW_DIST
-        TOOLCHAIN_DEFS="${TOOLCHAIN_DEFS} -D__WINE__"
+        TOOLCHAIN_DEFS="${TOOLCHAIN_DEFS} -D__WXWINE__"
     fi
 
     if test "$wxUSE_MOTIF" = 1; then
@@ -2529,9 +2529,9 @@ equivalent variable and GTK+ is version 1.2.3 or above.
     fi
 
     if test "$wxUSE_MAC" = 1; then
-        CPPFLAGS="$CPPFLAGS -fpascal-strings -I\${top_srcdir}/src/mac/morefilex -I/Developer/Headers/FlatCarbon"
+        CPPFLAGS="$CPPFLAGS -fpascal-strings -I\${top_srcdir}/src/mac/morefile -I/Developer/Headers/FlatCarbon"
 
-        TOOLKIT_VPATH="\${top_srcdir}/src/mac${PATH_IFS}\${top_srcdir}/src/mac/morefilex"
+        TOOLKIT_VPATH="\${top_srcdir}/src/mac${PATH_IFS}\${top_srcdir}/src/mac/morefile"
         TOOLKIT=MAC
         dnl we can't call this MAC_DIST or autoconf thinks its a macro
         GUIDIST=MACX_DIST
@@ -5413,13 +5413,11 @@ wx_cv_release=${WX_RELEASE}
 wx_cv_current=${WX_CURRENT}
 wx_cv_revision=${WX_REVISION}
 wx_cv_age=${WX_AGE}
-wx_cv_use_gui=${USE_GUI}
-wx_cv_use_resources=${wxUSE_RESOURCES}
 export wx_cv_path_samplesubdirs wx_cv_if_gnu_make \
        wx_cv_path_ifs wx_cv_program_ext \
        wx_cv_target_library wx_cv_target_library_gl wx_cv_target_libtype \
-       wx_cv_library_basename wx_cv_release wx_cv_current wx_cv_revision wx_cv_age \
-       wx_cv_use_gui wx_cv_use_resources
+       wx_cv_library_basename wx_cv_release wx_cv_current wx_cv_revision wx_cv_age
+
 
 AC_CONFIG_SUBDIRS(demos samples utils contrib)
 

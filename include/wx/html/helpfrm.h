@@ -226,7 +226,6 @@ protected:
     int m_hfStyle;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrame)
 };
 
 #endif // wxUSE_WXHTML_HELP

@@ -172,23 +172,16 @@ void wxWindow::UnmanageAndDestroy(WXWidget widget)
     }
 }
 
-bool wxWindow::MapOrUnmap(WXWidget widget, bool domap)
+bool wxWindow::MapOrUnmap(WXWidget widget, bool map)
 {
     Widget w = (Widget)widget;
     if ( !w )
         return FALSE;
 
-    if ( domap )
+    if ( map )
         XtMapWidget(w);
     else
         XtUnmapWidget(w);
-
-    //   Rationale: a lot of common operations (including but not
-    // limited to moving, resizing and appending items to a listbox)
-    // unmamange the widget, do their work, then manage it again.
-    // This means that, for example adding an item to a listbox will show it,
-    // or that most controls are shown every time they are moved or resized!
-    XtSetMappedWhenManaged( w, domap );
 
     return TRUE;
 }
@@ -2993,9 +2986,8 @@ void wxWindow::ChangeFont(bool keepOriginalSize)
         int width, height, width1, height1;
         GetSize(& width, & height);
 
-        // lesstif 0.87 hangs here, but 0.93 does not
-#if !defined(LESSTIF_VERSION) \
-    || (defined(LesstifVersion) && LesstifVersion >= 93)
+        // lesstif 0.87 hangs here
+#ifndef LESSTIF_VERSION
         XtVaSetValues (w,
             XmNfontList, (XmFontList) m_font.GetFontList(1.0, XtDisplay(w)),
             NULL);

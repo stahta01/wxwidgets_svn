@@ -168,9 +168,7 @@
 // Default is 0
 //
 // Recommended setting: 0 (unless you only plan to use Windows NT/2000/XP)
-#ifndef wxUSE_UNICODE
-    #define wxUSE_UNICODE 0
-#endif
+#define wxUSE_UNICODE 0
 
 // Set wxUSE_UNICODE_MSLU to 1 if you want to compile wxWindows in Unicode mode
 // and be able to run compiled apps under Windows 9x as well as NT/2000/XP. This
@@ -636,10 +634,6 @@
 // wxDC cacheing implementation
 #define wxUSE_DC_CACHEING 1
 
-// Set this to 1 to enable the use of DIB's for wxBitmap to support
-// bitmaps > 16MB on Win95/98/Me.  Set to 0 to use DDB's only.
-#define wxUSE_DIB_FOR_BITMAP 0
-
 // ----------------------------------------------------------------------------
 // common dialogs
 // ----------------------------------------------------------------------------
@@ -1068,7 +1062,7 @@
 // ----------------------------------------------------------------------------
 
 #ifndef wxUSE_NORLANDER_HEADERS
-#if ((defined(__MINGW32__) && defined(__CYGWIN__)) ||defined(__WINE__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95)))
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95)))
 #   define wxUSE_NORLANDER_HEADERS 1
 #else
 #   define wxUSE_NORLANDER_HEADERS 0

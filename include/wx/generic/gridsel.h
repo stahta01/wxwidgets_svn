@@ -83,8 +83,6 @@ private:
     wxGrid::wxGridSelectionModes        m_selectionMode;
 
     friend class WXDLLEXPORT wxGrid;
-
-    DECLARE_NO_COPY_CLASS(wxGridSelection)
 };
 
 #endif  // #ifdef __WXGRIDSEL_H__

@@ -55,6 +55,5 @@ private:
     wxWindow *m_window;         // window we're associated with
 
     DECLARE_ABSTRACT_CLASS(wxToolTip)
-    DECLARE_NO_COPY_CLASS(wxToolTip)
 };
 

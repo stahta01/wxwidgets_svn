@@ -229,7 +229,6 @@ ALL_SOURCES = \
 		motif/textctrl.cpp \
 		motif/timer.cpp \
 		motif/toolbar.cpp \
-		motif/toplevel.cpp \
 		motif/utils.cpp \
 		motif/window.cpp \
 		unix/dialup.cpp \
@@ -562,7 +561,6 @@ ALL_HEADERS = \
 		motif/textctrl.h \
 		motif/timer.h \
 		motif/toolbar.h \
-		motif/toplevel.h \
 		motif/window.h \
 		generic/accel.h \
 		generic/calctrl.h \
@@ -861,7 +859,6 @@ GUIOBJS = \
 		textctrl.o \
 		timer.o \
 		toolbar.o \
-		toplevel.o \
 		utils.o \
 		window.o
 

@@ -82,8 +82,6 @@ private:
     wxScrollHelper *m_scrollHelper;
 
     bool m_hasDrawnWindow;
-
-    DECLARE_NO_COPY_CLASS(wxScrollHelperEvtHandler)
 };
 
 // ----------------------------------------------------------------------------
@@ -106,8 +104,6 @@ private:
     wxEventType m_eventType;
     int m_pos,
         m_orient;
-
-    DECLARE_NO_COPY_CLASS(wxAutoScrollTimer)
 };
 
 // ============================================================================
@@ -355,7 +351,7 @@ void wxScrollHelper::SetScrollbars(int pixelsPerUnitX,
 #else
     int x = noUnitsX * pixelsPerUnitX;
     int y = noUnitsY * pixelsPerUnitY;
-#endif    
+#endif
     m_targetWindow->SetVirtualSizeHints( x, y );
 
     // The above should arguably be deprecated, this however we still need.
@@ -365,14 +361,8 @@ void wxScrollHelper::SetScrollbars(int pixelsPerUnitX,
     if (do_refresh && !noRefresh)
         m_targetWindow->Refresh(TRUE, GetRect());
 
-    // TODO: check if we can use AdjustScrollbars always.
-#ifdef __WXUNIVERSAL__
-    AdjustScrollbars();
-#else    
-    // This is also done by AdjustScrollbars, above
 #ifdef __WXMAC__
     m_targetWindow->MacUpdateImmediately() ;
-#endif
 #endif
 }
 
