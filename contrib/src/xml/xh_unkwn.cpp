@@ -57,7 +57,6 @@ void wxUnknownControlContainer::AddChild(wxWindowBase *child)
     
     SetBackgroundColour(m_bg);
     child->SetName(m_controlName);
-    child->SetId(XMLID(m_controlName));
     m_controlAdded = TRUE;
     
     wxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -78,7 +77,7 @@ wxObject *wxUnknownWidgetXmlHandler::DoCreateResource()
 { 
     wxPanel *panel = 
         new wxUnknownControlContainer(m_parentAsWindow,
-                                      GetName(), -1,
+                                      GetName(), GetID(),
                                       GetPosition(), GetSize());
     SetupWindow(panel);
     return panel;

@@ -82,10 +82,9 @@ void wxScrollBar::SetScrollbar(int position, int thumbSize, int range, int pageS
 
     if ( UMAGetAppearanceVersion() >= 0x0110  )
     {
-        if ( SetControlViewSize != (void*) kUnresolvedCFragSymbolAddress )
-        {
+#if UMA_USE_8_6    	
 			SetControlViewSize( m_macControl , m_pageSize ) ;
-        }
+#endif
     }
     Refresh() ;
 }

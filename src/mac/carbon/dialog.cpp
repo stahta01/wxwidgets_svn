@@ -215,7 +215,6 @@ void wxDialog::DoShowModal()
     }
 	// TODO : test whether parent gets disabled
 
-	bool formerModal = s_macIsInModalLoop ;
 	s_macIsInModalLoop = true ;
 
 	while ( IsModalShowing() )
@@ -226,7 +225,7 @@ void wxDialog::DoShowModal()
 		wxTheApp->MacDoOneEvent() ;
 	}
 	
-	s_macIsInModalLoop = formerModal ;
+	s_macIsInModalLoop = false ;
 
     // TODO probably reenable the parent window if any
 

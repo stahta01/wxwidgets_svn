@@ -126,7 +126,7 @@ empty) and flags, return TRUE on success.
 Continue enumerating files satisfying the criteria specified by the last call
 to \helpref{GetFirst}{wxdirgetfirst}.
 
-\membersection{wxDir::Traverse}\label{wxdirtraverse}
+\membersection{wxDir::Traverse}{wxdirtraverse}
 
 \func{size\_t}{Traverse}{\param{wxDirTraverser& }{sink}, \param{const wxString& }{filespec = wxEmptyString}, \param{int }{flags = wxDIR\_DEFAULT}}
 
@@ -148,7 +148,7 @@ error.
 
 See also: \helpref{GetAllFiles}{wxdirgetallfiles}
 
-\membersection{wxDir::GetAllFiles}\label{wxdirgetallfiles}
+\membersection{wxDirTraverser::GetAllFiles}{wxdirtraversergetallfiles}
 
 \func{static size\_t}{GetAllFiles}{\param{const wxString& }{dirname}, \param{wxArrayString *}{files}, \param{const wxString& }{filespec = wxEmptyString}, \param{int }{flags = wxDIR\_DEFAULT}}
 
@@ -216,7 +216,6 @@ enum wxDirTraverseResult
     wxDIR_CONTINUE          // continue into this directory
 };
 \end{verbatim}
-}
 
 \wxheading{Include files}
 
@@ -224,7 +223,7 @@ enum wxDirTraverseResult
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxDirTraverser::OnFile}\label{wxdirtraverseronfile}
+\membersection{wxDirTraverser::OnFile}{wxdirtraverseronfile}
 
 \func{virtual wxDirTraverseResult}{OnFile}{\param{const wxString& }{filename}}
 
@@ -232,7 +231,7 @@ This function is called for each file. It may return {\tt wxDIR\_STOP} to abort
 traversing (for example, if the file being searched is found) or 
 {\tt wxDIR\_CONTINUE} to proceed.
 
-\membersection{wxDirTraverser::OnDir}\label{wxdirtraverserondir}
+\membersection{wxDirTraverser::OnDir}{wxdirtraverserondir}
 
 \func{virtual wxDirTraverseResult}{OnDir}{\param{const wxString& }{dirname}}
 

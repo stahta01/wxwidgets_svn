@@ -1277,7 +1277,7 @@ void wxWindow::SetScrollbar(int orient, int pos, int thumbVisible,
 				{
 					if ( !m_hScrollBar->IsShown() )
 						m_hScrollBar->Show(true) ;
-					m_hScrollBar->SetScrollbar( pos , thumbVisible , range , thumbVisible , refresh ) ;
+					m_hScrollBar->SetScrollbar( pos , thumbVisible , range , refresh ) ;
 				}
 			}
 		}
@@ -1294,7 +1294,7 @@ void wxWindow::SetScrollbar(int orient, int pos, int thumbVisible,
 				{
 					if ( !m_vScrollBar->IsShown() )
 						m_vScrollBar->Show(true) ;
-					m_vScrollBar->SetScrollbar( pos , thumbVisible , range , thumbVisible , refresh ) ;
+					m_vScrollBar->SetScrollbar( pos , thumbVisible , range , refresh ) ;
 				}
 			}
 		}
@@ -1855,7 +1855,7 @@ void wxWindow::MacRedraw( RgnHandle updatergn , long time)
         		// eventually test for transparent windows
 		        if ( child->GetMacRootWindow() == window && child->IsShown() )
 		        {
-		            if ( !child->IsKindOf( CLASSINFO( wxControl ) ) && ((wxControl*)child)->GetMacControl() )
+		            if ( !child->IsKindOf( CLASSINFO( wxNotebook ) ) && !child->IsKindOf( CLASSINFO( wxTabCtrl ) ) )
 		            {
         		        SetRectRgn( childarea , child->m_x , child->m_y , child->m_x + child->m_width ,  child->m_y + child->m_height ) ;
         		        DiffRgn( ownUpdateRgn , childarea , ownUpdateRgn ) ;
@@ -1866,7 +1866,7 @@ void wxWindow::MacRedraw( RgnHandle updatergn , long time)
 
 	  		if ( GetParent() && m_backgroundColour != GetParent()->GetBackgroundColour() )
 	  			eraseBackground = true ;
-			SetClip( ownUpdateRgn ) ;
+			SetClip( updatergn ) ;
 			if ( m_macEraseOnRedraw ) {
     			if ( eraseBackground  )
     			{

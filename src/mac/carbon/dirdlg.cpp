@@ -492,7 +492,7 @@ int wxDirDialog::ShowModal()
 		}
 		else
 		{
-			m_path = wxMacFSSpec2MacFilename( &reply.sfFile ) ;
+			m_path = wxMacFSSpec2UnixFilename( &reply.sfFile ) ;
 			return wxID_OK ;
 		}
 		return wxID_CANCEL;
@@ -589,7 +589,7 @@ int wxDirDialog::ShowModal()
 						   name, &outFileSpec);
 							
 			// outFolderDirID = thePB.dirInfo.ioDrDirID;
-			m_path = wxMacFSSpec2MacFilename( &outFileSpec ) ;
+			m_path = wxMacFSSpec2UnixFilename( &outFileSpec ) ;
 			return wxID_OK ;
 		}
 		return wxID_CANCEL;

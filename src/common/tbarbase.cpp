@@ -470,12 +470,7 @@ bool wxToolBarBase::OnLeftClick(int id, bool toggleDown)
 {
     wxCommandEvent event(wxEVT_COMMAND_TOOL_CLICKED, id);
     event.SetEventObject(this);
-
-    // we use SetInt() to make wxCommandEvent::IsChecked() return toggleDown
-    event.SetInt((int)toggleDown);
-
-    // and SetExtraLong() for backwards compatibility
-    event.SetExtraLong((long)toggleDown);
+    event.SetExtraLong((long) toggleDown);
 
     // Send events to this toolbar instead (and thence up the window hierarchy)
     GetEventHandler()->ProcessEvent(event);

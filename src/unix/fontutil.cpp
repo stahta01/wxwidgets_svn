@@ -318,14 +318,11 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
           *xFontName = newFontName;
     }
 
-    // try to load exactly the font requested first
     if( !font )
-    {
         font = wxLoadQueryFont( pointSize, family, style, weight,
-                                underlined, facename,
+                                         underlined, facename,
                                 info.xregistry, info.xencoding,
                                 xFontName );
-    }
 
     if ( !font )
     {
@@ -360,49 +357,22 @@ wxNativeFont wxLoadQueryNearestFont(int pointSize,
                                    xFontName );
         }
 
-        // ignore size, family, style and weight but try to find font with the
-        // given facename and encoding
+        // Bogus font I
         if ( !font )
         {
             font = wxLoadQueryFont(120, wxDEFAULT, wxNORMAL, wxNORMAL,
                                    underlined, facename,
                                    info.xregistry, info.xencoding,
                                    xFontName);
+        }
 
-            // ignore family as well
-            if ( !font )
-            {
-                font = wxLoadQueryFont(120, wxDEFAULT, wxNORMAL, wxNORMAL,
-                                       underlined, wxEmptyString,
-                                       info.xregistry, info.xencoding,
-                                       xFontName);
-
-                // if it still failed, try to get the font of any size but
-                // with the requested encoding: this can happen if the
-                // encoding is only available in one size which happens to be
-                // different from 120
-                if ( !font )
-                {
-                    font = wxLoadQueryFont(-1, wxDEFAULT, wxNORMAL, wxNORMAL,
-                                           FALSE, wxEmptyString,
-                                           info.xregistry, info.xencoding,
-                                           xFontName);
-
-                    // this should never happen as we had tested for it in the
-                    // very beginning, but if it does, do return something non
-                    // NULL or we'd crash in wxFont code
-                    if ( !font )
-                    {
-                        wxFAIL_MSG( _T("this encoding should be available!") );
-
-                        font = wxLoadQueryFont(-1,
-                                               wxDEFAULT, wxNORMAL, wxNORMAL,
-                                               FALSE, wxEmptyString,
-                                               _T("*"), _T("*"),
-                                               xFontName);
-                    }
-                }
-            }
+        // Bogus font II
+        if ( !font )
+        {
+            font = wxLoadQueryFont(120, wxDEFAULT, wxNORMAL, wxNORMAL,
+                                   underlined, wxEmptyString,
+                                   info.xregistry, info.xencoding,
+                                   xFontName);
         }
     }
 
@@ -621,21 +591,10 @@ static wxNativeFont wxLoadQueryFont(int pointSize,
         default:           xweight = wxT("*"); break;
     }
 
-    // if pointSize is -1, don't specify any
-    wxString sizeSpec;
-    if ( fontSpec == -1 )
-    {
-        sizeSpec = _T('*');
-    }
-    else
-    {
-        sizeSpec.Printf(_T("%d"), pointSize);
-    }
-
     // construct the X font spec from our data
-    fontSpec.Printf(wxT("-*-%s-%s-%s-normal-*-*-%s-*-*-*-*-%s-%s"),
+    fontSpec.Printf(wxT("-*-%s-%s-%s-normal-*-*-%d-*-*-*-*-%s-%s"),
                     xfamily.c_str(), xweight.c_str(), xstyle.c_str(),
-                    sizeSpec.c_str(), xregistry.c_str(), xencoding.c_str());
+                    pointSize, xregistry.c_str(), xencoding.c_str());
 
     if( xFontName )
         *xFontName = fontSpec;

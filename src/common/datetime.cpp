@@ -3429,19 +3429,6 @@ bool wxDateTime::IsWorkDay(Country WXUNUSED(country)) const
 // wxTimeSpan
 // ============================================================================
 
-// this enum is only used in wxTimeSpan::Format() below but we can't declare
-// it locally to the method as it provokes an internal compiler error in egcs
-// 2.91.60 when building with -O2
-enum TimeSpanPart
-{
-    Part_Week,
-    Part_Day,
-    Part_Hour,
-    Part_Min,
-    Part_Sec,
-    Part_MSec
-};
-
 // not all strftime(3) format specifiers make sense here because, for example,
 // a time span doesn't have a year nor a timezone
 //
@@ -3479,7 +3466,15 @@ wxString wxTimeSpan::Format(const wxChar *format) const
     // should use GetMinutes() % 60, otherwise just GetMinutes() &c
 
     // we remember the most important unit found so far
-    TimeSpanPart partBiggest = Part_MSec;
+    enum TimeSpanPart
+    {
+        Part_Week,
+        Part_Day,
+        Part_Hour,
+        Part_Min,
+        Part_Sec,
+        Part_MSec
+    } partBiggest = Part_MSec;
 
     for ( const wxChar *pch = format; *pch; pch++ )
     {

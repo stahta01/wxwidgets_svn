@@ -15,8 +15,6 @@
 
 #include <wx/joystick.h>
 
-#if wxUSE_JOYSTICK
-
 IMPLEMENT_DYNAMIC_CLASS(wxJoystick, wxObject)
 
 // Attributes
@@ -278,7 +276,4 @@ bool wxJoystick::ReleaseCapture()
     // TODO
     return FALSE;
 }
-
-#endif
-	// wxUSE_JOYSTICK
 

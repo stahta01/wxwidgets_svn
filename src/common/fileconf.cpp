@@ -802,7 +802,7 @@ bool wxFileConfig::Flush(bool /* bCurrentOnly */)
   {
   	FSSpec spec ;
   	
-  	wxMacFilename2FSSpec( m_strLocalFile , &spec ) ;
+  	wxUnixFilename2FSSpec( m_strLocalFile , &spec ) ;
   	FInfo finfo ;
   	if ( FSpGetFInfo( &spec , &finfo ) == noErr )
   	{

@@ -155,8 +155,6 @@ int SetBkMode(
 
 wxDC::wxDC(void)
 {
-    wxColour                        vColor;
-
     m_pCanvas      = NULL;
 
     m_hOldBitmap   = 0;
@@ -170,11 +168,7 @@ wxDC::wxDC(void)
     m_hOldPS       = NULL;
     m_hPS          = NULL;
     m_bIsPaintTime = FALSE; // True at Paint Time
-
-    vColor.InitFromName("BLACK");
-    m_pen.SetColour(vColor);
-    vColor.Set("WHITE");
-    m_brush.SetColour(vColor);
+    m_brush.GetColour().Set("WHITE");
 } // end of wxDC::wxDC
 
 wxDC::~wxDC(void)
@@ -822,7 +816,7 @@ void wxDC::DoDrawRectangle(
         vPoint[0].x = vX + 1;
         vPoint[0].y = vY + 1;
         vPoint[1].x = vX + vWidth - 2;
-        vPoint[1].y = vY + vHeight - 2;
+        vPoint[1].y = vY + vHeight + 2;
         ::GpiMove(m_hPS, &vPoint[0]);
         ::GpiBox( m_hPS
                  ,lControl

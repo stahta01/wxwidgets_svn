@@ -66,7 +66,6 @@ public:
 
     // override some more virtuals
     virtual bool Show(bool bShow = TRUE);
-    virtual void RemoveChild(wxWindowBase* pChild);
 
     // event handlers
     void OnActivate(wxActivateEvent& rEvent);

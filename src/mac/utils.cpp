@@ -329,7 +329,7 @@ wxString wxMacFindFolder( short 					vol,
 		FSSpec file ;
 		if ( FSMakeFSSpec( vRefNum , dirID , "\p" , &file ) == noErr )
 		{
-			strDir = wxMacFSSpec2MacFilename( &file ) + ":" ;
+			strDir = wxMacFSSpec2UnixFilename( &file ) + "/" ;
 		}
 	}
 	return strDir ;

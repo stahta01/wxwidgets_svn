@@ -88,12 +88,7 @@
     #endif
 
     class WXDLLEXPORT wxLongLongWx;
-#if defined(__VISUALC__) && !defined(__WIN32__)
-    #define wxLongLong wxLongLongWx
-#else
     typedef wxLongLongWx wxLongLong;
-#endif
-
 #else
     // if nothing is defined, use native implementation by default, of course
     #ifndef wxUSE_LONGLONG_NATIVE

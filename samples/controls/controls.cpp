@@ -794,7 +794,6 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     (void)new wxToggleButton(panel, ID_BUTTON_LABEL,
                              "&Toggle label", wxPoint(250, 20));
 #endif // wxUSE_TOGGLEBTN
-
     m_label = new wxStaticText(panel, -1, "Label with some long text",
                                wxPoint(250, 60), wxDefaultSize,
                                wxALIGN_RIGHT /*| wxST_NO_AUTORESIZE*/);
@@ -870,16 +869,12 @@ void MyPanel::OnPageChanging( wxNotebookEvent &event )
         }
     }
 
-    *m_text << "Notebook selection is being changed from " << selOld
-            << " to " << event.GetSelection()
-            << " (current page from notebook is "
-            << m_notebook->GetSelection() << ")\n";
+    *m_text << "Notebook selection is being changed from " << selOld << "\n";
 }
 
 void MyPanel::OnPageChanged( wxNotebookEvent &event )
 {
-    *m_text << "Notebook selection is now " << event.GetSelection()
-            << " (from notebook: " << m_notebook->GetSelection() << ")\n";
+    *m_text << "Notebook selection is " << event.GetSelection() << "\n";
 }
 
 void MyPanel::OnTestButton(wxCommandEvent& event)
