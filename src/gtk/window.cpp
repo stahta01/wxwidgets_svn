@@ -2732,6 +2732,8 @@ bool wxWindowGTK::Create( wxWindow *parent,
 
     PostCreation();
 
+    Show( TRUE );
+
     return TRUE;
 }
 
@@ -2916,11 +2918,6 @@ void wxWindowGTK::PostCreation()
     }
 
     m_hasVMT = TRUE;
-
-    // unless the window was created initially hidden (i.e. Hide() had been
-    // called before Create()), we should show it at GTK+ level as well
-    if ( IsShown() )
-        gtk_widget_show( m_widget );
 }
 
 void wxWindowGTK::ConnectWidget( GtkWidget *widget )
@@ -3007,22 +3004,18 @@ void wxWindowGTK::DoSetSize( int x, int y, int width, int height, int sizeFlags 
             m_x = x + pizza->xoffset;
             m_y = y + pizza->yoffset;
         }
+        if (width != -1) m_width = width;
+        if (height != -1) m_height = height;
 
-        // calculate the best size if we should auto size the window
-        if ( ((sizeFlags & wxSIZE_AUTO_WIDTH) && width == -1) ||
-                ((sizeFlags & wxSIZE_AUTO_HEIGHT) && height == -1) )
+        if ((sizeFlags & wxSIZE_AUTO_WIDTH) == wxSIZE_AUTO_WIDTH)
         {
-            const wxSize sizeBest = GetBestSize();
-            if ( (sizeFlags & wxSIZE_AUTO_WIDTH) && width == -1 )
-                width = sizeBest.x;
-            if ( (sizeFlags & wxSIZE_AUTO_HEIGHT) && height == -1 )
-                height = sizeBest.y;
+             if (width == -1) m_width = 80;
         }
 
-        if (width != -1)
-            m_width = width;
-        if (height != -1)
-            m_height = height;
+        if ((sizeFlags & wxSIZE_AUTO_HEIGHT) == wxSIZE_AUTO_HEIGHT)
+        {
+             if (height == -1) m_height = 26;
+        }
 
         int minWidth = GetMinWidth(),
             minHeight = GetMinHeight(),
@@ -3428,8 +3421,7 @@ int wxWindowGTK::GetCharHeight() const
 {
     wxCHECK_MSG( (m_widget != NULL), 12, wxT("invalid window") );
 
-    wxFont font = GetFont();
-    wxCHECK_MSG( font.Ok(), 12, wxT("invalid font") );
+    wxCHECK_MSG( m_font.Ok(), 12, wxT("invalid font") );
 
 #ifdef __WXGTK20__
     PangoContext *context = NULL;
@@ -3439,7 +3431,7 @@ int wxWindowGTK::GetCharHeight() const
     if (!context)
         return 0;
 
-    PangoFontDescription *desc = font.GetNativeFontInfo()->description;
+    PangoFontDescription *desc = m_font.GetNativeFontInfo()->description;
     PangoLayout *layout = pango_layout_new(context);
     pango_layout_set_font_description(layout, desc);
     pango_layout_set_text(layout, "H", 1);
@@ -3452,9 +3444,9 @@ int wxWindowGTK::GetCharHeight() const
 
     return (int) (rect.height / PANGO_SCALE);
 #else
-    GdkFont *gfont = font.GetInternalFont( 1.0 );
+    GdkFont *font = m_font.GetInternalFont( 1.0 );
 
-    return gfont->ascent + gfont->descent;
+    return font->ascent + font->descent;
 #endif
 }
 
@@ -3462,8 +3454,7 @@ int wxWindowGTK::GetCharWidth() const
 {
     wxCHECK_MSG( (m_widget != NULL), 8, wxT("invalid window") );
 
-    wxFont font = GetFont();
-    wxCHECK_MSG( font.Ok(), 8, wxT("invalid font") );
+    wxCHECK_MSG( m_font.Ok(), 8, wxT("invalid font") );
 
 #ifdef __WXGTK20__
     PangoContext *context = NULL;
@@ -3473,7 +3464,7 @@ int wxWindowGTK::GetCharWidth() const
     if (!context)
         return 0;
 
-    PangoFontDescription *desc = font.GetNativeFontInfo()->description;
+    PangoFontDescription *desc = m_font.GetNativeFontInfo()->description;
     PangoLayout *layout = pango_layout_new(context);
     pango_layout_set_font_description(layout, desc);
     pango_layout_set_text(layout, "g", 1);
@@ -3486,9 +3477,9 @@ int wxWindowGTK::GetCharWidth() const
 
     return (int) (rect.width / PANGO_SCALE);
 #else
-    GdkFont *gfont = font.GetInternalFont( 1.0 );
+    GdkFont *font = m_font.GetInternalFont( 1.0 );
 
-    return gdk_string_width( gfont, "g" );
+    return gdk_string_width( font, "g" );
 #endif
 }
 
@@ -3499,7 +3490,8 @@ void wxWindowGTK::GetTextExtent( const wxString& string,
                               int *externalLeading,
                               const wxFont *theFont ) const
 {
-    wxFont fontToUse = theFont ? *theFont : GetFont();
+    wxFont fontToUse = m_font;
+    if (theFont) fontToUse = *theFont;
 
     wxCHECK_RET( fontToUse.Ok(), wxT("invalid font") );
 
@@ -4169,7 +4161,7 @@ void wxWindowGTK::SetWidgetStyle()
 
     GtkStyle *style = GetWidgetStyle();
 
-    if ( m_hasFont )
+    if (m_font != wxSystemSettings::GetFont( wxSYS_DEFAULT_GUI_FONT ))
     {
 #ifdef __WXGTK20__
         pango_font_description_free( style->font_desc );
@@ -4180,7 +4172,7 @@ void wxWindowGTK::SetWidgetStyle()
 #endif
     }
 
-    if ( m_hasFgCol )
+    if (m_foregroundColour.Ok())
     {
         m_foregroundColour.CalcPixel( gtk_widget_get_colormap( m_widget ) );
         if (m_foregroundColour != wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT))
@@ -4206,7 +4198,7 @@ void wxWindowGTK::SetWidgetStyle()
         }
     }
 
-    if ( m_hasBgCol )
+    if (m_backgroundColour.Ok())
     {
         m_backgroundColour.CalcPixel( gtk_widget_get_colormap( m_widget ) );
         if (m_backgroundColour != wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE))

@@ -1235,10 +1235,10 @@ void wxMenu::Detach()
 
 wxWindow *wxMenu::GetRootWindow() const
 {
-    if ( GetMenuBar() )
+    if ( m_menuBar )
     {
         // simple case - a normal menu attached to the menubar
-        return GetMenuBar();
+        return m_menuBar;
     }
 
     // we're a popup menu but the trouble is that only the top level popup menu

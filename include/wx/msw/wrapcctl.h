@@ -46,15 +46,14 @@
 // Set Unicode format for a common control
 inline void wxSetCCUnicodeFormat(HWND hwnd)
 {
-#ifndef __WXWINCE__
-    ::SendMessage(hwnd, CCM_SETUNICODEFORMAT, wxUSE_UNICODE, 0);
-#endif // __WXWINCE__
+    SendMessage(hwnd, CCM_SETUNICODEFORMAT,
+#if wxUSE_UNICODE
+                TRUE
+#else
+                FALSE
+#endif
+                , 0);
 }
-
-// Return the default font for the common controls
-//
-// this is implemented in msw/settings.cpp
-extern wxFont wxGetCCDefaultFont();
 
 #endif // _WX_MSW_WRAPCCTL_H_
 

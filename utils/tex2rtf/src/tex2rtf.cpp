@@ -293,6 +293,11 @@ bool MyApp::OnInit()
   TheTex2RTFServer->Create(_T("TEX2RTF"));
 #endif
 
+#if defined(__WXMSW__) && defined(__WIN16__)
+  // Limit to max Windows array size
+  if (BufSize > 64) BufSize = 64;
+#endif
+
   TexInitialize(BufSize);
   ResetContentsLevels(0);
 
@@ -860,8 +865,13 @@ void ChooseOutputFile(bool force)
     }
     case TEX_HTML:
     {
+#if defined(__WXMSW__) && defined(__WIN16__)
+      wxStrcpy(extensionBuf, _T("htm"));
+      wxStrcat(wildBuf, _T("htm"));
+#else
       wxStrcpy(extensionBuf, _T("html"));
       wxStrcat(wildBuf, _T("html"));
+#endif
       break;
     }
   }

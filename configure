@@ -26837,9 +26837,9 @@ echo "${ECHO_T}xlc" >&6
 echo "${ECHO_T}none" >&6
         fi
 
-        CPPFLAGS="$CPPFLAGS $CPPFLAGS_PASCAL -I\${top_srcdir}/src/mac/carbon/morefilex -I/Developer/Headers/FlatCarbon"
+        CPPFLAGS="$CPPFLAGS $CPPFLAGS_PASCAL -I\${top_srcdir}/src/mac/morefilex -I/Developer/Headers/FlatCarbon"
 
-        TOOLKIT_VPATH="\${top_srcdir}/src/mac/carbon${PATH_IFS}\${top_srcdir}/src/mac/carbon/morefilex"
+        TOOLKIT_VPATH="\${top_srcdir}/src/mac${PATH_IFS}\${top_srcdir}/src/mac/morefilex"
         TOOLKIT=MAC
                 GUIDIST=MACX_DIST
                         WXBASEPORT="_carbon"

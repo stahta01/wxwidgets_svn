@@ -241,6 +241,8 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     ::SetWindowText((HWND) m_hWnd, wxEmptyString);
 
+    SetFont(parent->GetFont());
+
     if ( m_windowStyle & wxSL_LABELS )
     {
         // Finally, create max value static item

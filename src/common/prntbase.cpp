@@ -184,13 +184,9 @@ void wxPrintout::GetPageInfo(int *minPage, int *maxPage, int *fromPage, int *toP
 * Preview canvas
 */
 
-// VZ: the current code doesn't refresh properly without
-//     wxFULL_REPAINT_ON_RESIZE, this must be fixed as otherwise we have
-//     really horrible flicker when resizing the preview frame, but without
-//     this style it simply doesn't work correctly at all...
 wxPreviewCanvas::wxPreviewCanvas(wxPrintPreviewBase *preview, wxWindow *parent,
                                  const wxPoint& pos, const wxSize& size, long style, const wxString& name):
-wxScrolledWindow(parent, -1, pos, size, style | wxFULL_REPAINT_ON_RESIZE, name)
+wxScrolledWindow(parent, -1, pos, size, style, name)
 {
     m_printPreview = preview;
 #ifdef __WXMAC__
@@ -500,34 +496,23 @@ void wxPreviewControlBar::CreateButtons()
 
 void wxPreviewControlBar::SetZoomControl(int zoom)
 {
+    wxChar buf[20];
+    wxSprintf( buf, wxT("%d%%"), zoom );
+
     if (m_zoomControl)
-    {
-        int n, count = m_zoomControl->GetCount();
-        long val;
-        for (n=0; n<count; n++)
-        {
-            if (m_zoomControl->GetString(n).BeforeFirst(wxT('%')).ToLong(&val) &&
-                (val >= long(zoom)))
-            {
-                m_zoomControl->SetSelection(n);
-                return;
-            }
-        }
-        
-        m_zoomControl->SetSelection(count-1);
-    }
+        m_zoomControl->SetStringSelection(buf);
 }
 
 int wxPreviewControlBar::GetZoomControl()
 {
-    if (m_zoomControl && (m_zoomControl->GetStringSelection() != wxEmptyString))
+    wxChar buf[20];
+    if (m_zoomControl && (m_zoomControl->GetStringSelection() != wxT("")))
     {
-        long val;
-        if (m_zoomControl->GetStringSelection().BeforeFirst(wxT('%')).ToLong(&val))
-            return int(val);
+        wxStrcpy(buf, m_zoomControl->GetStringSelection());
+        buf[wxStrlen(buf) - 1] = 0;
+        return (int)wxAtoi(buf);
     }
-    
-    return 0;
+    else return 0;
 }
 
 

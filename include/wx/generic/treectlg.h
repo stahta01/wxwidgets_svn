@@ -378,9 +378,6 @@ public:
     virtual bool SetBackgroundColour(const wxColour& colour);
     virtual bool SetForegroundColour(const wxColour& colour);
 
-    virtual void Freeze();
-    virtual void Thaw();
- 
     // callbacks
     void OnPaint( wxPaintEvent &event );
     void OnSetFocus( wxFocusEvent &event );
@@ -422,7 +419,6 @@ protected:
                         *m_imageListState,
                         *m_imageListButtons;
 
-    int                  m_freezeCount; 
     int                  m_dragCount;
     wxPoint              m_dragStart;
     wxGenericTreeItem   *m_dropTarget;
@@ -499,7 +495,7 @@ private:
     DECLARE_NO_COPY_CLASS(wxGenericTreeCtrl)
 };
 
-#if !defined(__WXMSW__) || defined(__WXUNIVERSAL__)
+#if !defined(__WXMSW__) || defined(__WIN16__) || defined(__WXUNIVERSAL__)
 /*
  * wxTreeCtrl has to be a real class or we have problems with
  * the run-time information.
@@ -522,7 +518,7 @@ public:
     {
     }
 };
-#endif // !__WXMSW__ || __WXUNIVERSAL__
+#endif // !__WXMSW__ || __WIN16__ || __WXUNIVERSAL__
 
 #endif // wxUSE_TREECTRL
 

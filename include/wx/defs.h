@@ -234,7 +234,11 @@ typedef int wxWindowID;
 /*  general, but there are places where you can use them to advantage */
 /*  without totally breaking ports that cannot use them.  If you do, then */
 /*  wrap it in this guard, but such cases should still be relatively rare. */
-#define wxUSE_NESTED_CLASSES    1
+#ifndef __WIN16__
+    #define wxUSE_NESTED_CLASSES    1
+#else
+    #define wxUSE_NESTED_CLASSES    0
+#endif
 
 /*  check for explicit keyword support */
 #ifndef HAVE_EXPLICIT
@@ -562,8 +566,14 @@ enum
     /*  to ensure compatibility with 2.0, we must use long */
     #define wxCoord long
 #else  /*  !wxUSE_COMPATIBLE_COORD_TYPES */
+    #ifdef __WIN16__
+        /*  under Win16, int is too small, so use long to allow for bigger */
+        /*  virtual canvases */
+        typedef long wxCoord;
+    #else /*  !Win16 */
         /*  other platforms we support have at least 32bit int - quite enough */
         typedef int wxCoord;
+    #endif /*  Win16/!Win16 */
 #endif /*  wxUSE_COMPATIBLE_COORD_TYPES/!wxUSE_COMPATIBLE_COORD_TYPES */
 
 
@@ -1031,11 +1041,8 @@ enum wxStretch
     wxGROW                    = 0x2000,
     wxEXPAND                  = wxGROW,
     wxSHAPED                  = 0x4000,
-    // free value: 0x8000 (old wxADJUST_MINSIZE)
-    wxTILE                    = 0xc000,
-
-    // for compatibility only, default now, don't use explicitly any more
-    wxADJUST_MINSIZE          = 0x0000
+    wxADJUST_MINSIZE          = 0x8000,
+    wxTILE                    = 0xc000
 };
 
 /*  border flags: the values are chosen for backwards compatibility */
@@ -2028,8 +2035,6 @@ enum wxUpdateUI
 
 #ifdef __WXMAC__
 
-#define WX_OPAQUE_TYPE( name ) struct wxOpaque##name
-
 typedef unsigned char WXCOLORREF[6];
 typedef void*       WXHBITMAP;
 typedef void*       WXHMETAFILE;
@@ -2049,11 +2054,8 @@ typedef unsigned int    WXUINT;
 typedef unsigned long   WXDWORD;
 typedef unsigned short  WXWORD;
 
-
-//typedef void*       WXWidget;
-//typedef void*       WXWindow;
-typedef WX_OPAQUE_TYPE(ControlRef ) * WXWidget ;
-typedef WX_OPAQUE_TYPE(WindowRef) * WXWindow ;
+typedef void*       WXWidget;
+typedef void*       WXWindow;
 typedef void*       WXDisplay;
 
 /* typedef WindowPtr       WXHWND; */
@@ -2151,9 +2153,17 @@ typedef WX_NSView WXWidget; /*  wxWindows BASE definition */
 #ifdef __WXMSW__
 
 /*  the keywords needed for WinMain() declaration */
-#ifndef WXFAR
+#ifdef __WIN16__
+#  ifdef __VISUALC__
+#    define WXFAR __far
+#  else
+#    define WXFAR _far
+#  endif
+#else  /*  Win32 */
+#  ifndef WXFAR
 #    define WXFAR
-#endif
+#  endif
+#endif /*  Win16/32 */
 
 /*  Stand-ins for Windows types to avoid #including all of windows.h */
 typedef void *          WXHWND;

@@ -72,9 +72,6 @@
 
 #include "wx/renderer.h"
 
-#ifdef __WXMAC__
-    #include "wx/mac/private.h"
-#endif
 // ----------------------------------------------------------------------------
 // events
 // ----------------------------------------------------------------------------
@@ -4614,11 +4611,6 @@ bool wxGenericListCtrl::Create(wxWindow *parent,
 
     m_mainWin = new wxListMainWindow( this, -1, wxPoint(0,0), size, style );
 
-#if defined( __WXMAC__ ) && __WXMAC_CARBON__
-    wxFont font ;
-    font.MacCreateThemeFont( kThemeViewsFont ) ;
-    SetFont( font ) ;
-#endif
     if ( InReportView() )
     {
         CreateHeaderWindow();

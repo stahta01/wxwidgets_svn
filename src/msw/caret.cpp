@@ -43,9 +43,15 @@
 // macros
 // ---------------------------------------------------------------------------
 
-#define CALL_CARET_API(api, args)   \
+// under Win16 the caret APIs are void but under Win32 they may return an
+// error code which we want to check - this macro does just this
+#ifdef __WIN16__
+    #define CALL_CARET_API(api, args)   api args
+#else // Win32
+    #define CALL_CARET_API(api, args)   \
         if ( !api args )                \
             wxLogLastError(_T(#api))
+#endif // Win16/32
 
 // ===========================================================================
 // implementation

@@ -581,7 +581,7 @@ void wxFrame::AttachMenuBar( wxMenuBar *menuBar )
                 GTK_SIGNAL_FUNC(gtk_menu_detached_callback), (gpointer)this );
         }
         
-        gtk_widget_show( m_frameMenuBar->m_widget );
+        m_frameMenuBar->Show( TRUE );
 
         UpdateMenuBarSize();
     }

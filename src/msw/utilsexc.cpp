@@ -113,10 +113,12 @@ struct wxExecuteData
 public:
     ~wxExecuteData()
     {
+#ifndef __WIN16__
         if ( !::CloseHandle(hProcess) )
         {
             wxLogLastError(wxT("CloseHandle(hProcess)"));
         }
+#endif
     }
 
     HWND       hWnd;          // window to send wxWM_PROC_TERMINATED to

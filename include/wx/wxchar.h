@@ -22,7 +22,10 @@
 
 /* check whether we have wchar_t and which size it is if we do */
 #if !defined(wxUSE_WCHAR_T)
-    #if defined(__UNIX__)
+    #if defined(__WIN16__)
+        /* no wchar_t under Win16 regadrless of compiler used */
+        #define wxUSE_WCHAR_T 0
+    #elif defined(__UNIX__)
         #if defined(HAVE_WCSTR_H) || defined(HAVE_WCHAR_H) || defined(__FreeBSD__) || defined(__DARWIN__)
             #define wxUSE_WCHAR_T 1
         #else
@@ -750,7 +753,12 @@ WXDLLIMPEXP_BASE bool wxOKlibc(); /* for internal use */
    We choose to always emulate Windows behaviour as more useful for us so even
    if we have wprintf() we still must wrap it in a non trivial wxPrintf().
 
+   However, if we don't have any vswprintf() at all we don't need to redefine
+   anything as our own wxVsnprintf_() already behaves as needed.
 */
+#ifndef wxVsnprintf_
+    #undef wxNEED_PRINTF_CONVERSION
+#endif
 
 #if defined(wxNEED_PRINTF_CONVERSION) || defined(wxNEED_WPRINTF)
     /*
@@ -775,11 +783,7 @@ WXDLLIMPEXP_BASE bool wxOKlibc(); /* for internal use */
 
 /* these 2 can be simply mapped to the versions with underscore at the end */
 /* if we don't have to do the conversion */
-/*
-   However, if we don't have any vswprintf() at all we don't need to redefine
-   anything as our own wxVsnprintf_() already behaves as needed.
-*/
-#if defined(wxNEED_PRINTF_CONVERSION) && defined(wxVsnprintf_)
+#ifdef wxNEED_PRINTF_CONVERSION
     int wxSnprintf( wxChar *str, size_t size, const wxChar *format, ... ) ATTRIBUTE_PRINTF_3;
     int wxVsnprintf( wxChar *str, size_t size, const wxChar *format, va_list ap );
 #else

@@ -11,16 +11,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/wxprec.h"
-
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif // WX_PRECOMP
-
+#include "wx/wx.h"
 #include "wx/strconv.h"
 #include "wx/string.h"
 
@@ -42,7 +33,7 @@ private:
 
     void WC2CP1250();
 
-    DECLARE_NO_COPY_CLASS(MBConvTestCase)
+    DECLARE_NO_COPY_CLASS(MBConvTestCase);
 };
 
 // register in the unnamed registry so that these tests are run by default

@@ -29,9 +29,10 @@ enum wxSystemFont
     wxSYS_DEFAULT_PALETTE,
     wxSYS_SYSTEM_FIXED_FONT,
     wxSYS_DEFAULT_GUI_FONT,
-
-    // this was just a temporary aberration, do not use it any more
-    wxSYS_ICONTITLE_FONT = wxSYS_DEFAULT_GUI_FONT
+    wxSYS_ICONTITLE_FONT
+#ifndef __WXMSW__
+    = wxSYS_DEFAULT_GUI_FONT
+#endif
 };
 
 // possible values for wxSystemSettings::GetColour() parameter

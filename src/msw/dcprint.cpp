@@ -195,11 +195,13 @@ bool wxPrinterDC::StartDoc(const wxString& message)
 
     int ret = ::StartDoc(GetHdc(), &docinfo);
 
+#ifndef __WIN16__
     if (ret <= 0)
     {
         DWORD lastError = GetLastError();
         wxLogDebug(wxT("wxDC::StartDoc failed with error: %ld\n"), lastError);
     }
+#endif
 
     return (ret > 0);
 }

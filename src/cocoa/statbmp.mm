@@ -14,7 +14,6 @@
     #include "wx/app.h"
     #include "wx/statbmp.h"
 #endif //WX_PRECOMP
-#include "wx/cocoa/autorelease.h"
 
 #import <AppKit/NSImageView.h>
 
@@ -30,7 +29,6 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID winid,
            long style,
            const wxString& name)
 {
-    wxAutoNSAutoreleasePool pool;
     if(!CreateControl(parent,winid,pos,size,style,wxDefaultValidator,name))
         return false;
     m_cocoaNSView = NULL;

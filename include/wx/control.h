@@ -47,21 +47,17 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxControlNameStr);
 
+    // simulates the event of given type (i.e. wxButton::Command() is just as
+    // if the button was clicked)
+    virtual void Command(wxCommandEvent &event);
+
     // get the control alignment (left/right/centre, top/bottom/centre)
     int GetAlignment() const { return m_windowStyle & wxALIGN_MASK; }
-
 
     // controls by default inherit the colours of their parents, if a
     // particular control class doesn't want to do it, it can override
     // ShouldInheritColours() to return false
     virtual bool ShouldInheritColours() const { return true; }
-
-
-    // WARNING: this doesn't work for all controls nor all platforms!
-    //
-    // simulates the event of given type (i.e. wxButton::Command() is just as
-    // if the button was clicked)
-    virtual void Command(wxCommandEvent &event);
 
 protected:
     // creates the control (calls wxWindowBase::CreateBase inside) and adds it
@@ -74,9 +70,8 @@ protected:
                        const wxValidator& validator,
                        const wxString& name);
 
-    // this function is obsolete, it is only kept for backwards compatibility,
-    // do *not* use it
-    void InheritAttributes() { }
+    // inherit colour and font settings from the parent window
+    void InheritAttributes();
 
     // initialize the common fields of wxCommandEvent
     void InitCommandEvent(wxCommandEvent& event) const;

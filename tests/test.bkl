@@ -12,7 +12,6 @@
             mbconv/main.cpp
             formatconverter/formatconverter.cpp
             regex/regex.cpp
-            filesys/filesys.cpp
         </sources>
         <wx-lib>base</wx-lib>
     </exe>

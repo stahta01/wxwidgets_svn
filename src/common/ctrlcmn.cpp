@@ -89,6 +89,29 @@ bool wxControlBase::CreateControl(wxWindowBase *parent,
     return TRUE;
 }
 
+// inherit colour and font settings from the parent window
+void wxControlBase::InheritAttributes()
+{
+    if ( ShouldInheritColours() )
+    {
+        wxWindow *parent = GetParent();
+
+        wxCHECK_RET( parent, _T("a control without parent?") );
+
+        SetBackgroundColour(parent->GetBackgroundColour());
+        SetForegroundColour(parent->GetForegroundColour());
+    }
+
+#ifdef __WXPM__
+    //
+    // All OS/2 ctrls use the small font
+    //
+    SetFont(*wxSMALL_FONT);
+#else
+    SetFont(GetParent()->GetFont());
+#endif
+}
+
 void wxControlBase::Command(wxCommandEvent& event)
 {
     (void)GetEventHandler()->ProcessEvent(event);

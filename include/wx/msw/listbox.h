@@ -129,20 +129,9 @@ public:
     // Windows callbacks
     bool MSWCommand(WXUINT param, WXWORD id);
 
-    virtual wxVisualAttributes GetDefaultAttributes() const
-    {
-        return GetClassDefaultAttributes(GetWindowVariant());
-    }
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL)
-    {
-        return GetCompositeControlsDefaultAttributes(variant);
-    }
+    virtual void SetupColours();
 
 protected:
-    WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
     // free memory (common part of Clear() and dtor)
     void Free();
 
