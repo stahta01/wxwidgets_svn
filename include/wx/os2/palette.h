@@ -13,7 +13,6 @@
 #define _WX_PALETTE_H_
 
 #include "wx/gdiobj.h"
-#include "wx/os2/private.h"
 
 class WXDLLEXPORT wxPalette;
 

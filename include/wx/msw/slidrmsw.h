@@ -12,7 +12,7 @@
 #ifndef _SLIDRMSW_H_
 #define _SLIDRMSW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "slidrmsw.h"
 #endif
 

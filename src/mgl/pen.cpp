@@ -8,7 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "pen.h"
 #endif
 
@@ -21,7 +21,6 @@
 
 #include "wx/pen.h"
 #include "wx/bitmap.h"
-#include "wx/colour.h"
 #include "wx/mgl/private.h"
 
 //-----------------------------------------------------------------------------

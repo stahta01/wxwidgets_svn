@@ -303,25 +303,12 @@ public:
     %addmethods {
         PyObject* GetPoints() {
             wxList* list = self->GetPoints();
-            PyObject*   pyList;
-            PyObject*   pyObj;
-            wxObject*   wxObj;
-            wxNode*     node = list->GetFirst();
-
-            wxPyBeginBlockThreads();
-            pyList = PyList_New(0);
-            while (node) {
-                wxObj = node->GetData();
-                pyObj = wxPyConstructObject(wxObj, wxT("wxRealPoint"), 0);
-                PyList_Append(pyList, pyObj);
-                node = node->GetNext();
-            }
-            wxPyEndBlockThreads();
-            return pyList;
+            return wxPy_ConvertList(list, "wxRealPoint");
         }
     }
 
     void UpdateOriginalPoints();
+
 
     void base_OnDraw(wxDC& dc);
     void base_OnDrawContents(wxDC& dc);

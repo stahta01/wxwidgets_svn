@@ -12,7 +12,7 @@
 #ifndef _WX_DC_H_BASE_
 #define _WX_DC_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "dcbase.h"
 #endif
 
@@ -30,7 +30,6 @@
 #include "wx/palette.h"
 #include "wx/list.h"            // we use wxList in inline functions
 
-class WXDLLEXPORT wxDC;
 class WXDLLEXPORT wxDCBase;
 
 class WXDLLEXPORT wxDrawObject
@@ -301,54 +300,6 @@ public:
     void DrawSpline(wxList *points) { DoDrawSpline(points); }
 #endif // wxUSE_SPLINES
 
-    // Eventually we will have wxUSE_GENERIC_DRAWELLIPSE
-#ifdef __WXWINCE__
-    //! Generic method to draw ellipses, circles and arcs with current pen and brush.
-    /*! \param x Upper left corner of bounding box.
-     *  \param y Upper left corner of bounding box.
-     *  \param w Width of bounding box.
-     *  \param h Height of bounding box.
-     *  \param sa Starting angle of arc 
-     *            (counterclockwise, start at 3 o'clock, 360 is full circle).
-     *  \param ea Ending angle of arc.
-     *  \param angle Rotation angle, the Arc will be rotated after 
-     *               calculating begin and end.
-     */
-    void DrawEllipticArcRot( wxCoord x, wxCoord y, 
-                             wxCoord width, wxCoord height, 
-                             double sa = 0, double ea = 0, double angle = 0 )
-    { DoDrawEllipticArcRot( x, y, width, height, sa, ea, angle ); }
-    
-    void DrawEllipticArcRot( const wxPoint& pt, 
-                             const wxSize& sz,
-                             double sa = 0, double ea = 0, double angle = 0 )
-    { DoDrawEllipticArcRot( pt.x, pt.y, sz.x, sz.y, sa, ea, angle ); }
-
-    void DrawEllipticArcRot( const wxRect& rect,
-                             double sa = 0, double ea = 0, double angle = 0 )
-    { DoDrawEllipticArcRot( rect.x, rect.y, rect.width, rect.height, sa, ea, angle ); }
-
-    virtual void DoDrawEllipticArcRot( wxCoord x, wxCoord y, 
-                                       wxCoord w, wxCoord h, 
-                                       double sa = 0, double ea = 0, double angle = 0 );
-    
-    //! Rotates points around center.
-    /*! This is a quite straight method, it calculates in pixels
-     *  and so it produces rounding errors.
-     *  \param points The points inside will be rotated.
-     *  \param angle Rotating angle (counterclockwise, start at 3 o'clock, 360 is full circle).
-     *  \param center Center of rotation.
-     */ 
-    void Rotate( wxList* points, double angle, wxPoint center = wxPoint() );
-
-    // used by DrawEllipticArcRot
-    // Careful: wxList gets filled with points you have to delete later.
-    void CalculateEllipticPoints( wxList* points, 
-                                  wxCoord xStart, wxCoord yStart, 
-                                  wxCoord w, wxCoord h, 
-                                  double sa, double ea );
-#endif
-    
     // global DC operations
     // --------------------
 
@@ -390,15 +341,10 @@ public:
         { DoGetClippingBox(x, y, w, h); }
     void GetClippingBox(wxRect& rect) const
         {
-#if 1
-          DoGetClippingBox(&rect.x, &rect.y, &rect.width, &rect.height);
-#else
           // Necessary to use intermediate variables for 16-bit compilation
-          // REMOVE ME if the above is OK for all current platforms
           wxCoord x, y, w, h;
           DoGetClippingBox(&x, &y, &w, &h);
           rect.x = x; rect.y = y; rect.width = w; rect.height = h;
-#endif
         }
 
     // text extent
@@ -545,6 +491,16 @@ public:
     virtual void SetOptimization(bool WXUNUSED(opt)) { }
     virtual bool GetOptimization() { return FALSE; }
 
+    // Some platforms have a DC cache, which should be cleared
+    // at appropriate points such as after a series of DC operations.
+    // Put ClearCache in the wxDC implementation class, since it has to be
+    // static.
+    // static void ClearCache() ;
+#if 0 // wxUSE_DC_CACHEING
+    static void EnableCache(bool cacheing) { sm_cacheing = cacheing; }
+    static bool CacheEnabled() { return sm_cacheing ; }
+#endif
+
     // bounding box
     // ------------
 
@@ -635,6 +591,20 @@ public:
         if (h) *h = hh;
     }
 #endif // !Win16
+
+#if WXWIN_COMPATIBILITY
+
+#if wxUSE_PALETTE
+    virtual void SetColourMap(const wxPalette& palette) { SetPalette(palette); }
+#endif // wxUSE_PALETTE
+
+    void GetTextExtent(const wxString& string, float *x, float *y,
+            float *descent = NULL, float *externalLeading = NULL,
+            wxFont *theFont = NULL, bool use16bit = FALSE) const ;
+    void GetSize(float* width, float* height) const { int w, h; GetSize(& w, & h); *width = w; *height = h; }
+    void GetSizeMM(float *width, float *height) const { long w, h; GetSizeMM(& w, & h); *width = (float) w; *height = (float) h; }
+
+#endif // WXWIN_COMPATIBILITY
 
 protected:
     // the pure virtual functions which should be implemented by wxDC
@@ -738,6 +708,9 @@ protected:
     bool m_clipping:1;
     bool m_isInteractive:1;
     bool m_isBBoxValid:1;
+#if wxUSE_DC_CACHEING
+//    static bool sm_cacheing;
+#endif
 
     // coordinate system variables
 
@@ -795,10 +768,10 @@ private:
     #include "wx/mgl/dc.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dc.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/dc.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dc.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/dc.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -828,8 +801,6 @@ private:
     wxDC& m_dc;
 
     wxColour m_colFgOld;
-
-    DECLARE_NO_COPY_CLASS(wxDCTextColourChanger)
 };
 
 // ----------------------------------------------------------------------------
@@ -849,8 +820,6 @@ public:
 
 private:
     wxDC& m_dc;
-
-    DECLARE_NO_COPY_CLASS(wxDCClipper)
 };
 
 #endif

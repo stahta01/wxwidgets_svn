@@ -35,6 +35,11 @@
 // wxDateTime construction
 // ----------------------------------------------------------------------------
 
+// only define this once, when included from datetime.cpp
+#ifdef wxDEFINE_TIME_CONSTANTS
+    const long wxDateTime::TIME_T_FACTOR = 1000l;
+#endif // wxDEFINE_TIME_CONSTANTS
+
 inline bool wxDateTime::IsInStdRange() const
 {
     return m_time >= 0l && (m_time / TIME_T_FACTOR) < LONG_MAX;
@@ -100,8 +105,7 @@ inline wxDateTime& wxDateTime::Set(const Tm& tm)
 {
     wxASSERT_MSG( tm.IsValid(), _T("invalid broken down date/time") );
 
-    return Set(tm.mday, (Month)tm.mon, tm.year,
-               tm.hour, tm.min, tm.sec, tm.msec);
+    return Set(tm.mday, (Month)tm.mon, tm.year, tm.hour, tm.min, tm.sec);
 }
 
 inline wxDateTime::wxDateTime(wxDateTime_t hour,

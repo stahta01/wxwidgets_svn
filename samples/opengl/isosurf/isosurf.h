@@ -18,12 +18,11 @@ class MyApp: public wxApp
     bool OnInit(void);
 };
 
-#if wxUSE_GLCANVAS
 class TestGLCanvas: public wxGLCanvas
 {
  public:
    TestGLCanvas(wxWindow *parent, const wxWindowID id = -1, const wxPoint& pos = wxDefaultPosition,
-      const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = _T("TestGLCanvas"),
+      const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = "TestGLCanvas",
       int* gl_attrib = NULL);
    ~TestGLCanvas(void);
 
@@ -35,7 +34,6 @@ class TestGLCanvas: public wxGLCanvas
 
 DECLARE_EVENT_TABLE()
 };
-#endif
 
 class MyFrame: public wxFrame
 {
@@ -45,9 +43,7 @@ public:
 
     void OnExit(wxCommandEvent& event);
 public:
-#if wxUSE_GLCANVAS
     TestGLCanvas*    m_canvas;
-#endif
 
 DECLARE_EVENT_TABLE()
 };

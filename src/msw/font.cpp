@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "font.h"
 #endif
 
@@ -35,7 +35,6 @@
     #include "wx/app.h"
     #include "wx/font.h"
     #include "wx/log.h"
-    #include "wx/encinfo.h"
 #endif // WX_PRECOMP
 
 #include "wx/msw/private.h"
@@ -45,51 +44,7 @@
 
 #include "wx/tokenzr.h"
 
-#if wxUSE_EXTENDED_RTTI
-
-wxBEGIN_ENUM( wxFontFamily )
-	wxENUM_MEMBER( wxDEFAULT )
-	wxENUM_MEMBER( wxDECORATIVE )
-	wxENUM_MEMBER( wxROMAN )
-	wxENUM_MEMBER( wxSCRIPT )
-	wxENUM_MEMBER( wxSWISS )
-	wxENUM_MEMBER( wxMODERN )
-	wxENUM_MEMBER( wxTELETYPE )
-wxEND_ENUM( wxFontFamily )
-
-wxBEGIN_ENUM( wxFontStyle )
-	wxENUM_MEMBER( wxNORMAL )
-	wxENUM_MEMBER( wxITALIC )
-	wxENUM_MEMBER( wxSLANT )
-wxEND_ENUM( wxFontStyle )
-
-wxBEGIN_ENUM( wxFontWeight )
-	wxENUM_MEMBER( wxNORMAL )
-	wxENUM_MEMBER( wxLIGHT )
-	wxENUM_MEMBER( wxBOLD )
-wxEND_ENUM( wxFontWeight )
-
-IMPLEMENT_DYNAMIC_CLASS_WITH_COPY_XTI(wxFont, wxGDIObject,"wx/font.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxFont)
-	wxPROPERTY( Size,int, SetPointSize, GetPointSize, 12 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( Family, int  , SetFamily, GetFamily, (int)wxDEFAULT , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // wxFontFamily
-	wxPROPERTY( Style, int , SetStyle, GetStyle, (int)wxNORMAL , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // wxFontStyle
-	wxPROPERTY( Weight, int , SetWeight, GetWeight, (int)wxNORMAL , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // wxFontWeight
-	wxPROPERTY( Underlined, bool , SetUnderlined, GetUnderlined, false , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( Face, wxString , SetFaceName, GetFaceName, , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( Encoding, wxFontEncoding , SetEncoding, GetEncoding, wxFONTENCODING_DEFAULT , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-wxEND_PROPERTIES_TABLE()
-
-wxCONSTRUCTOR_6( wxFont , int , Size , int , Family , int , Style , int , Weight , bool , Underlined , wxString , Face )  
-
-wxBEGIN_HANDLERS_TABLE(wxFont)
-wxEND_HANDLERS_TABLE()
-
-#else
-	IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
-#endif
-
+IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
 
 // ----------------------------------------------------------------------------
 // constants
@@ -109,7 +64,7 @@ public:
     wxFontRefData()
     {
         Init(-1, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
-             FALSE, wxEmptyString, wxFONTENCODING_DEFAULT);
+             FALSE, _T(""), wxFONTENCODING_DEFAULT);
     }
 
     wxFontRefData(int size,
@@ -884,7 +839,7 @@ void wxFont::SetEncoding(wxFontEncoding encoding)
     RealizeResource();
 }
 
-void wxFont::DoSetNativeFontInfo(const wxNativeFontInfo& info)
+void wxFont::SetNativeFontInfo(const wxNativeFontInfo& info)
 {
     Unshare();
 
@@ -936,7 +891,7 @@ bool wxFont::GetUnderlined() const
 
 wxString wxFont::GetFaceName() const
 {
-    wxCHECK_MSG( Ok(), wxEmptyString, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), wxT(""), wxT("invalid font") );
 
     return M_FONTDATA->GetFaceName();
 }

@@ -61,10 +61,10 @@ public:
     #include "wx/gtk/combobox.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/combobox.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/combobox.h"
 #elif defined(__WXPM__)
     #include "wx/os2/combobox.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/combobox.h"
 #endif
 
 #endif // wxUSE_COMBOBOX

@@ -5,8 +5,8 @@
 // Modified by: VZ at 11.12.99 (wxScrollableToolBar splitted off)
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "tbarbase.h"
 #endif
 
@@ -38,13 +38,16 @@
 #include "wx/image.h"
 #include "wx/settings.h"
 
-#include "wx/toolbar.h"
+#include "wx/tbarbase.h"
 
 // ----------------------------------------------------------------------------
 // wxWindows macros
 // ----------------------------------------------------------------------------
 
+IMPLEMENT_CLASS(wxToolBarBase, wxControl)
+
 BEGIN_EVENT_TABLE(wxToolBarBase, wxControl)
+    EVT_IDLE(wxToolBarBase::OnIdle)
 END_EVENT_TABLE()
 
 #include "wx/listimpl.cpp"
@@ -123,6 +126,8 @@ wxToolBarToolBase::~wxToolBarToolBase()
 wxToolBarBase::wxToolBarBase()
 {
     // the list owns the pointers
+    m_tools.DeleteContents(TRUE);
+
     m_xMargin = m_yMargin = 0;
 
     m_maxRows = m_maxCols = 0;
@@ -159,29 +164,10 @@ wxToolBarToolBase *wxToolBarBase::InsertTool(size_t pos,
     wxToolBarToolBase *tool = CreateTool(id, label, bitmap, bmpDisabled, kind,
                                          clientData, shortHelp, longHelp);
 
-    if ( !InsertTool(pos, tool) )
+    if ( !tool || !DoInsertTool(pos, tool) )
     {
         delete tool;
 
-        return NULL;
-    }
-
-    return tool;
-}
-
-wxToolBarToolBase *wxToolBarBase::AddTool(wxToolBarToolBase *tool)
-{
-    return InsertTool(GetToolsCount(), tool);
-}
-
-wxToolBarToolBase *
-wxToolBarBase::InsertTool(size_t pos, wxToolBarToolBase *tool)
-{
-    wxCHECK_MSG( pos <= GetToolsCount(), (wxToolBarToolBase *)NULL,
-                 _T("invalid position in wxToolBar::InsertTool()") );
-
-    if ( !tool || !DoInsertTool(pos, tool) )
-    {
         return NULL;
     }
 
@@ -208,19 +194,21 @@ wxToolBarToolBase *wxToolBarBase::InsertControl(size_t pos, wxControl *control)
 
     wxToolBarToolBase *tool = CreateTool(control);
 
-    if ( !InsertTool(pos, tool) )
+    if ( !tool || !DoInsertTool(pos, tool) )
     {
         delete tool;
 
         return NULL;
     }
 
+    m_tools.Insert(pos, tool);
+
     return tool;
 }
 
 wxControl *wxToolBarBase::FindControl( int id )
 {
-    for ( wxToolBarToolsList::compatibility_iterator node = m_tools.GetFirst();
+    for ( wxToolBarToolsList::Node* node = m_tools.GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -275,7 +263,7 @@ wxToolBarToolBase *wxToolBarBase::InsertSeparator(size_t pos)
 wxToolBarToolBase *wxToolBarBase::RemoveTool(int id)
 {
     size_t pos = 0;
-    wxToolBarToolsList::compatibility_iterator node;
+    wxToolBarToolsList::Node *node;
     for ( node = m_tools.GetFirst(); node; node = node->GetNext() )
     {
         if ( node->GetData()->GetId() == id )
@@ -297,7 +285,10 @@ wxToolBarToolBase *wxToolBarBase::RemoveTool(int id)
         return (wxToolBarToolBase *)NULL;
     }
 
-    m_tools.Erase(node);
+    // the node would delete the data, so set it to NULL to avoid this
+    node->SetData(NULL);
+
+    m_tools.DeleteNode(node);
 
     return tool;
 }
@@ -307,15 +298,14 @@ bool wxToolBarBase::DeleteToolByPos(size_t pos)
     wxCHECK_MSG( pos < GetToolsCount(), FALSE,
                  _T("invalid position in wxToolBar::DeleteToolByPos()") );
 
-    wxToolBarToolsList::compatibility_iterator node = m_tools.Item(pos);
+    wxToolBarToolsList::Node *node = m_tools.Item(pos);
 
     if ( !DoDeleteTool(pos, node->GetData()) )
     {
         return FALSE;
     }
 
-    delete node->GetData();
-    m_tools.Erase(node);
+    m_tools.DeleteNode(node);
 
     return TRUE;
 }
@@ -323,7 +313,7 @@ bool wxToolBarBase::DeleteToolByPos(size_t pos)
 bool wxToolBarBase::DeleteTool(int id)
 {
     size_t pos = 0;
-    wxToolBarToolsList::compatibility_iterator node;
+    wxToolBarToolsList::Node *node;
     for ( node = m_tools.GetFirst(); node; node = node->GetNext() )
     {
         if ( node->GetData()->GetId() == id )
@@ -337,8 +327,7 @@ bool wxToolBarBase::DeleteTool(int id)
         return FALSE;
     }
 
-    delete node->GetData();
-    m_tools.Erase(node);
+    m_tools.DeleteNode(node);
 
     return TRUE;
 }
@@ -347,7 +336,7 @@ wxToolBarToolBase *wxToolBarBase::FindById(int id) const
 {
     wxToolBarToolBase *tool = (wxToolBarToolBase *)NULL;
 
-    for ( wxToolBarToolsList::compatibility_iterator node = m_tools.GetFirst();
+    for ( wxToolBarToolsList::Node *node = m_tools.GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -366,7 +355,7 @@ wxToolBarToolBase *wxToolBarBase::FindById(int id) const
 
 void wxToolBarBase::ClearTools()
 {
-    WX_CLEAR_LIST(wxToolBarToolsList, m_tools);
+    m_tools.Clear();
 }
 
 bool wxToolBarBase::Realize()
@@ -376,7 +365,6 @@ bool wxToolBarBase::Realize()
 
 wxToolBarBase::~wxToolBarBase()
 {
-    WX_CLEAR_LIST(wxToolBarToolsList, m_tools);
 }
 
 // ----------------------------------------------------------------------------
@@ -451,22 +439,6 @@ void wxToolBarBase::SetToolClientData(int id, wxObject *clientData)
     wxCHECK_RET( tool, _T("no such tool in wxToolBar::SetToolClientData") );
 
     tool->SetClientData(clientData);
-}
-
-int wxToolBarBase::GetToolPos(int id) const
-{
-    size_t pos = 0;
-    wxToolBarToolsList::compatibility_iterator node;
-
-    for ( node = m_tools.GetFirst(); node; node = node->GetNext() )
-    {
-        if ( node->GetData()->GetId() == id )
-            return pos;
-
-        pos++;
-    }
-
-    return wxNOT_FOUND;
 }
 
 bool wxToolBarBase::GetToolState(int id) const
@@ -576,14 +548,33 @@ void wxToolBarBase::OnMouseEnter(int id)
 // UI updates
 // ----------------------------------------------------------------------------
 
-// Do the toolbar button updates (check for EVT_UPDATE_UI handlers)
-void wxToolBarBase::UpdateWindowUI(long flags)
+void wxToolBarBase::OnIdle(wxIdleEvent& event)
 {
-    wxWindowBase::UpdateWindowUI(flags);
+    DoToolbarUpdates();
 
-    wxEvtHandler* evtHandler = GetEventHandler() ;
+    event.Skip();
+}
 
-    for ( wxToolBarToolsList::compatibility_iterator node = m_tools.GetFirst();
+// Do the toolbar button updates (check for EVT_UPDATE_UI handlers)
+void wxToolBarBase::DoToolbarUpdates()
+{
+    wxWindow* parent = this;
+    while (parent->GetParent())
+        parent = parent->GetParent();
+
+// This kind of #ifdef is a good way to annoy people. It breaks
+// apps, but only on one platform and due to a hack in officially
+// platform independent code. It took me hours to fix this. RR.
+//
+// #ifdef __WXMSW__
+//    wxWindow* focusWin = wxFindFocusDescendant(parent);
+// #else
+    wxWindow* focusWin = (wxWindow*) NULL;
+// #endif
+
+    wxEvtHandler* evtHandler = focusWin ? focusWin->GetEventHandler() : GetEventHandler() ;
+
+    for ( wxToolBarToolsList::Node* node = m_tools.GetFirst();
           node;
           node = node->GetNext() )
     {

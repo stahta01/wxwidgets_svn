@@ -37,7 +37,7 @@ CC_DEFINE =
 .c.obj :
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
-OBJECTS =       baseunix.obj,\
+OBJECTS = \
 		dialup.obj,\
 		dir.obj,\
 		fontenum.obj,\
@@ -48,7 +48,7 @@ OBJECTS =       baseunix.obj,\
 		utilsunx.obj,\
 		utilsx11.obj
 
-SOURCES =       baseunix.cpp,\
+SOURCES = \
 		dialup.cpp,\
 		dir.cpp,\
 		fontenum.cpp,\
@@ -73,7 +73,6 @@ all : $(SOURCES)
 .endif
 .endif
 
-baseunix.obj : baseunix.cpp
 dialup.obj : dialup.cpp
 dir.obj : dir.cpp
 fontenum.obj : fontenum.cpp

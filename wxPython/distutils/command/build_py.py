@@ -86,11 +86,25 @@ class build_py (Command):
         # Two options control which modules will be installed: 'packages'
         # and 'py_modules'.  The former lets us work with whole packages, not
         # specifying individual modules at all; the latter is for
-        # specifying modules one-at-a-time.
+        # specifying modules one-at-a-time.  Currently they are mutually
+        # exclusive: you can define one or the other (or neither), but not
+        # both.  It remains to be seen how limiting this is.
 
+        # Dispose of the two "unusual" cases first: no pure Python modules
+        # at all (no problem, just return silently), and over-specified
+        # 'packages' and 'py_modules' options.
+
+        if not self.py_modules and not self.packages:
+            return
+        if self.py_modules and self.packages:
+            raise DistutilsOptionError, \
+                  "build_py: supplying both 'packages' and 'py_modules' " + \
+                  "options is not allowed"
+
+        # Now we're down to two cases: 'py_modules' only and 'packages' only.
         if self.py_modules:
             self.build_modules()
-        if self.packages:
+        else:
             self.build_packages()
 
         self.byte_compile(self.get_outputs(include_bytecode=0))
@@ -262,10 +276,10 @@ class build_py (Command):
         (package, module, module_file), just like 'find_modules()' and
         'find_package_modules()' do."""
 
-        modules = []
         if self.py_modules:
-            modules.extend(self.find_modules())
-        if self.packages:
+            modules = self.find_modules()
+        else:
+            modules = []
             for package in self.packages:
                 package_dir = self.get_package_dir(package)
                 m = self.find_package_modules(package, package_dir)

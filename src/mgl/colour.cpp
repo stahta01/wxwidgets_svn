@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "colour.h"
 #endif
 
@@ -21,7 +21,6 @@
 #endif
 
 #include "wx/gdicmn.h"
-#include "wx/colour.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
@@ -88,3 +87,14 @@ void wxColour::Set(unsigned char r, unsigned char g, unsigned char b)
   m_blue = b;
   m_isInit = TRUE;
 }
+
+// Obsolete
+#if WXWIN_COMPATIBILITY
+void wxColour::Get(unsigned char *r, unsigned char *g, unsigned char *b) const
+{
+  *r = m_red;
+  *g = m_green;
+  *b = m_blue;
+}
+#endif
+

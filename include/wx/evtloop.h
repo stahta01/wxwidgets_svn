@@ -12,13 +12,9 @@
 #ifndef _WX_EVTLOOP_H_
 #define _WX_EVTLOOP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "evtloop.h"
 #endif
-
-#include "wx/utils.h"
-
-class WXDLLEXPORT wxEventLoopImpl;
 
 // ----------------------------------------------------------------------------
 // wxEventLoop: a GUI event loop
@@ -47,7 +43,7 @@ public:
 
     // is the event loop running now?
     virtual bool IsRunning() const;
-
+    
     // return currently active (running) event loop, may be NULL
     static wxEventLoop *GetActive() { return ms_activeLoop; }
 
@@ -55,48 +51,10 @@ public:
     static void SetActive(wxEventLoop* loop) { ms_activeLoop = loop; }
 
 protected:
-    // this function should be called before the event loop terminates, whether
-    // this happens normally (because of Exit() call) or abnormally (because of
-    // an exception thrown from inside the loop)
-    virtual void OnExit() { }
-
-
+    // the pointer to the port specific implementation class
+    class WXDLLEXPORT wxEventLoopImpl *m_impl;
     // the pointer to currently active loop
     static wxEventLoop *ms_activeLoop;
-
-    // the pointer to the port specific implementation class
-    wxEventLoopImpl *m_impl;
-
-    DECLARE_NO_COPY_CLASS(wxEventLoop)
-};
-
-// ----------------------------------------------------------------------------
-// wxModalEventLoop
-// ----------------------------------------------------------------------------
-
-// this is a naive generic implementation which uses wxWindowDisabler to
-// implement modality, we will surely need platform-specific implementations
-// too, this generic implementation is here only temporarily to see how it
-// works
-class WXDLLEXPORT wxModalEventLoop : public wxEventLoop
-{
-public:
-    wxModalEventLoop(wxWindow *winModal)
-    {
-        m_windowDisabler = new wxWindowDisabler(winModal);
-    }
-
-protected:
-    virtual void OnExit()
-    {
-        delete m_windowDisabler;
-        m_windowDisabler = NULL;
-
-        wxEventLoop::OnExit();
-    }
-
-private:
-    wxWindowDisabler *m_windowDisabler;
 };
 
 #endif // _WX_EVTLOOP_H_

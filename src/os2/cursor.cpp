@@ -20,10 +20,10 @@
 #include "wx/app.h"
 #include "wx/cursor.h"
 #include "wx/icon.h"
+#include "wx/resource.h"
 #endif
 
 #include "wx/os2/private.h"
-#include "wx/os2/wxrsc.h"
 #include "wx/image.h"
 
 #include "assert.h"
@@ -311,9 +311,6 @@ wxCursor::wxCursor(
                                                                   );
             break;
     }
-    //
-    // No need to destroy the stock cursors
-    //
     ((wxCursorRefData *)m_refData)->m_bDestroyCursor = FALSE;
 } // end of wxCursor::wxCursor
 

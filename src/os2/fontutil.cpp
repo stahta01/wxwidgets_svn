@@ -6,7 +6,7 @@
 // Created:     01.03.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 #define DEBUG_PRINTF(NAME)   { static int raz=0; \
   printf( #NAME " %i\n",raz); fflush(stdout);       \
@@ -39,7 +39,6 @@
 
 #include "wx/fontutil.h"
 #include "wx/fontmap.h"
-#include "wx/encinfo.h"
 
 #include "wx/tokenzr.h"
 

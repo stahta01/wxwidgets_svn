@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PRNTBASEH__
 #define _WX_PRNTBASEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "prntbase.h"
 #endif
 
@@ -85,7 +85,6 @@ public:
 
 private:
     DECLARE_CLASS(wxPrinterBase)
-    DECLARE_NO_COPY_CLASS(wxPrinterBase)
 };
 
 /*
@@ -151,7 +150,6 @@ private:
 
 private:
     DECLARE_ABSTRACT_CLASS(wxPrintout)
-    DECLARE_NO_COPY_CLASS(wxPrintout)
 };
 
 /*
@@ -171,7 +169,6 @@ public:
     ~wxPreviewCanvas();
 
     void OnPaint(wxPaintEvent& event);
-    void OnChar(wxKeyEvent &event);
 
     // Responds to colour changes
     void OnSysColourChanged(wxSysColourChangedEvent& event);
@@ -181,7 +178,6 @@ private:
 
     DECLARE_CLASS(wxPreviewCanvas)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewCanvas)
 };
 
 /*
@@ -193,7 +189,7 @@ class WXDLLEXPORT wxPreviewFrame: public wxFrame
 {
 public:
     wxPreviewFrame(wxPrintPreviewBase *preview,
-                   wxWindow *parent,
+                   wxFrame *parent,
                    const wxString& title = wxT("Print Preview"),
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
@@ -205,18 +201,14 @@ public:
     virtual void Initialize();
     virtual void CreateCanvas();
     virtual void CreateControlBar();
-
-    inline wxPreviewControlBar* GetControlBar() const { return m_controlBar; }
-
 protected:
-    wxPreviewCanvas*      m_previewCanvas;
+    wxWindow*             m_previewCanvas;
     wxPreviewControlBar*  m_controlBar;
     wxPrintPreviewBase*   m_printPreview;
 
 private:
     DECLARE_CLASS(wxPreviewFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewFrame)
 };
 
 /*
@@ -257,7 +249,7 @@ public:
                         wxWindow *parent,
                         const wxPoint& pos = wxDefaultPosition,
                         const wxSize& size = wxDefaultSize,
-                        long style = wxTAB_TRAVERSAL,
+                        long style = 0,
                         const wxString& name = wxT("panel"));
     ~wxPreviewControlBar();
 
@@ -267,19 +259,19 @@ public:
     virtual wxPrintPreviewBase *GetPrintPreview() const
         { return m_printPreview; }
 
+    void OnPrint(wxCommandEvent& event);
     void OnWindowClose(wxCommandEvent& event);
     void OnNext();
     void OnPrevious();
     void OnFirst();
     void OnLast();
     void OnGoto();
-    void OnPrint();
-    void OnPrintButton(wxCommandEvent& WXUNUSED(event)) { OnPrint(); }
     void OnNextButton(wxCommandEvent & WXUNUSED(event)) { OnNext(); }
     void OnPreviousButton(wxCommandEvent & WXUNUSED(event)) { OnPrevious(); }
     void OnFirstButton(wxCommandEvent & WXUNUSED(event)) { OnFirst(); }
     void OnLastButton(wxCommandEvent & WXUNUSED(event)) { OnLast(); }
     void OnGotoButton(wxCommandEvent & WXUNUSED(event)) { OnGoto(); }
+    void OnChar(wxKeyEvent &event);
     void OnZoom(wxCommandEvent& event);
     void OnPaint(wxPaintEvent& event);
 
@@ -297,7 +289,6 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewControlBar)
 };
 
 /*
@@ -326,19 +317,16 @@ public:
     wxPrintout *GetPrintoutForPrinting() const { return m_printPrintout; };
 
     void SetFrame(wxFrame *frame) { m_previewFrame = frame; };
-    void SetCanvas(wxPreviewCanvas *canvas) { m_previewCanvas = canvas; };
+    void SetCanvas(wxWindow *canvas) { m_previewCanvas = canvas; };
 
     virtual wxFrame *GetFrame() const { return m_previewFrame; }
-    virtual wxPreviewCanvas *GetCanvas() const { return m_previewCanvas; }
+    virtual wxWindow *GetCanvas() const { return m_previewCanvas; }
 
     // The preview canvas should call this from OnPaint
-    virtual bool PaintPage(wxPreviewCanvas *canvas, wxDC& dc);
+    virtual bool PaintPage(wxWindow *canvas, wxDC& dc);
 
     // This draws a blank page onto the preview canvas
-    virtual bool DrawBlankPage(wxPreviewCanvas *canvas, wxDC& dc);
-
-    // Adjusts the scrollbars for the current scale
-    virtual void AdjustScrollbars(wxPreviewCanvas *canvas);
+    virtual bool DrawBlankPage(wxWindow *canvas, wxDC& dc);
 
     // This is called by wxPrintPreview to render a page into a wxMemoryDC.
     virtual bool RenderPage(int pageNum);
@@ -369,7 +357,7 @@ public:
 
 protected:
     wxPrintDialogData m_printDialogData;
-    wxPreviewCanvas*  m_previewCanvas;
+    wxWindow*         m_previewCanvas;
     wxFrame*          m_previewFrame;
     wxBitmap*         m_previewBitmap;
     wxPrintout*       m_previewPrintout;
@@ -389,8 +377,6 @@ protected:
 
 private:
     void Init(wxPrintout *printout, wxPrintout *printoutForPrinting);
-
-    DECLARE_NO_COPY_CLASS(wxPrintPreviewBase)
 };
 
 /*
@@ -414,7 +400,6 @@ public:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPrintAbortDialog)
 };
 
 #endif // wxUSE_PRINTING_ARCHITECTURE

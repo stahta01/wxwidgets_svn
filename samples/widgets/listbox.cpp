@@ -28,7 +28,6 @@
 #ifndef WX_PRECOMP
     #include "wx/log.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/combobox.h"
@@ -352,7 +351,7 @@ void ListboxWidgetsPage::CreateLbox()
             items.Add(m_lbox->GetString(n));
         }
 
-        m_sizerLbox->Detach( m_lbox );
+        m_sizerLbox->Remove(m_lbox);
         delete m_lbox;
     }
 
@@ -422,12 +421,12 @@ void ListboxWidgetsPage::OnButtonDeleteSel(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void ListboxWidgetsPage::OnButtonClear(wxCommandEvent& WXUNUSED(event))
+void ListboxWidgetsPage::OnButtonClear(wxCommandEvent& event)
 {
     m_lbox->Clear();
 }
 
-void ListboxWidgetsPage::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
+void ListboxWidgetsPage::OnButtonAdd(wxCommandEvent& event)
 {
     static unsigned int s_item = 0;
 
@@ -450,7 +449,7 @@ void ListboxWidgetsPage::OnButtonAddMany(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void ListboxWidgetsPage::OnButtonAddSeveral(wxCommandEvent& WXUNUSED(event))
+void ListboxWidgetsPage::OnButtonAddSeveral(wxCommandEvent& event)
 {
     wxArrayString items;
     items.Add(_T("First"));
@@ -508,7 +507,7 @@ void ListboxWidgetsPage::OnCheckListbox(wxCommandEvent& event)
     wxLogMessage( _T("Listbox item %ld toggled"), event.GetInt() );
 }
 
-void ListboxWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
+void ListboxWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& event)
 {
     CreateLbox();
 }

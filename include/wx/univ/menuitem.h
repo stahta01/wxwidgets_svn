@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_MENUITEM_H_
 #define _WX_UNIV_MENUITEM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univmenuitem.h"
 #endif
 
@@ -47,11 +47,6 @@ public:
     void SetBitmap(const wxBitmap& bmp) { SetBitmaps(bmp); }
     const wxBitmap& GetBitmap(bool checked = TRUE) const
       { return checked ? m_bmpChecked : m_bmpUnchecked; }
-
-    // mark item as belonging to the given radio group
-    void SetAsRadioGroupStart();
-    void SetRadioGroupStart(int start);
-    void SetRadioGroupEnd(int end);
 
     // wxUniv-specific methods for implementation only starting from here
 
@@ -93,19 +88,6 @@ protected:
     // the bitmaps (may be invalid, then they're not used)
     wxBitmap m_bmpChecked,
              m_bmpUnchecked;
-
-    // the positions of the first and last items of the radio group this item
-    // belongs to or -1: start is the radio group start and is valid for all
-    // but first radio group items (m_isRadioGroupStart == FALSE), end is valid
-    // only for the first one
-    union
-    {
-        int start;
-        int end;
-    } m_radioGroup;
-
-    // does this item start a radio group?
-    bool m_isRadioGroupStart;
 
     // the position of the accelerator in our label, -1 if none
     int m_indexAccel;

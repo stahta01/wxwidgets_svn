@@ -6,7 +6,7 @@
 // Created:     31.05.01 (extracted from other files)
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_ACCEL_H_BASE_
@@ -122,10 +122,10 @@ private:
     #include "wx/gtk/accel.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/accel.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/generic/accel.h"
 #elif defined(__WXPM__)
     #include "wx/os2/accel.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/accel.h"
 #endif
 
 WXDLLEXPORT_DATA(extern wxAcceleratorTable) wxNullAcceleratorTable;

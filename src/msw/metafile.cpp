@@ -5,8 +5,8 @@
 // Modified by: VZ 07.01.00: implemented wxMetaFileDataObject
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "metafile.h"
 #endif
 
@@ -94,7 +94,7 @@ wxMetafile::wxMetafile(const wxString& file)
 
     M_METAFILEDATA->m_windowsMappingMode = wxMM_ANISOTROPIC;
     M_METAFILEDATA->m_metafile = 0;
-    if (!file.IsNull() && (file.Cmp(wxEmptyString) == 0))
+    if (!file.IsNull() && (file.Cmp(wxT("")) == 0))
         M_METAFILEDATA->m_metafile = (WXHANDLE) GetMetaFile(file);
 }
 
@@ -180,7 +180,7 @@ wxMetafileDC::wxMetafileDC(const wxString& file)
     if (!file.IsNull() && wxFileExists(file))
         wxRemoveFile(file);
 
-    if (!file.IsNull() && (file != wxEmptyString))
+    if (!file.IsNull() && (file != wxT("")))
         m_hDC = (WXHDC) CreateMetaFile(file);
     else
         m_hDC = (WXHDC) CreateMetaFile(NULL);

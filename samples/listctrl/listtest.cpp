@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -114,14 +114,11 @@ static const int NUM_ITEMS = 30;
 // number of items in icon/small icon view
 static const int NUM_ICONS = 9;
 
-int wxCALLBACK MyCompareFunction(long item1, long item2, long WXUNUSED(sortData))
+int wxCALLBACK MyCompareFunction(long item1, long item2, long sortData)
 {
     // inverse the order
-    if (item1 < item2)
-        return -1;
-    if (item1 > item2)
-        return 1;
-
+    if (item1 < item2) return -1;
+    if (item1 > item2) return 1;
     return 0;
 }
 
@@ -274,14 +271,14 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
     dialog.ShowModal();
 }
 
-void MyFrame::OnFreeze(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnFreeze(wxCommandEvent& event)
 {
     wxLogMessage(_T("Freezing the control"));
 
     m_listCtrl->Freeze();
 }
 
-void MyFrame::OnThaw(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnThaw(wxCommandEvent& event)
 {
     wxLogMessage(_T("Thawing the control"));
 
@@ -394,20 +391,23 @@ void MyFrame::InitWithReportItems()
 {
     m_listCtrl->SetImageList(m_imageListSmall, wxIMAGE_LIST_SMALL);
 
-    // note that under MSW for SetColumnWidth() to work we need to create the
-    // items with images initially even if we specify dummy image id
+    // under MSW for SetColumnWidth() to work we need to create the items with
+    // images initially
+#if 1
     wxListItem itemCol;
-    itemCol.SetText(_T("Column 1"));
-    itemCol.SetImage(-1);
+    itemCol.m_mask = wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE;
+    itemCol.m_text = _T("Column 1");
+    itemCol.m_image = -1;
     m_listCtrl->InsertColumn(0, itemCol);
-
-    itemCol.SetText(_T("Column 2"));
-    itemCol.SetAlign(wxLIST_FORMAT_CENTRE);
+    itemCol.m_text = _T("Column 2");
     m_listCtrl->InsertColumn(1, itemCol);
-
-    itemCol.SetText(_T("Column 3"));
-    itemCol.SetAlign(wxLIST_FORMAT_RIGHT);
+    itemCol.m_text = _T("Column 3");
     m_listCtrl->InsertColumn(2, itemCol);
+#else
+    m_listCtrl->InsertColumn(0, _T("Column 1")); // , wxLIST_FORMAT_LEFT, 140);
+    m_listCtrl->InsertColumn(1, _T("Column 2")); // , wxLIST_FORMAT_LEFT, 140);
+    m_listCtrl->InsertColumn(2, _T("One More Column (2)")); // , wxLIST_FORMAT_LEFT, 140);
+#endif
 
     // to speed up inserting we hide the control temporarily
     m_listCtrl->Hide();
@@ -515,7 +515,7 @@ void MyFrame::OnSort(wxCommandEvent& WXUNUSED(event))
                                             sw.Time()));
 }
 
-void MyFrame::OnShowSelInfo(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnShowSelInfo(wxCommandEvent& event)
 {
     int selCount = m_listCtrl->GetSelectedItemCount();
     wxLogMessage(_T("%d items selected:"), selCount);
@@ -541,7 +541,7 @@ void MyFrame::OnShowSelInfo(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void MyFrame::OnShowColInfo(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnShowColInfo(wxCommandEvent& event)
 {
     int count = m_listCtrl->GetColumnCount();
     wxLogMessage(wxT("%d columns:"), count);
@@ -675,13 +675,6 @@ void MyListCtrl::LogColEvent(const wxListEvent& event, const wxChar *name)
 void MyListCtrl::OnColBeginDrag(wxListEvent& event)
 {
     LogColEvent( event, wxT("OnColBeginDrag") );
-
-    if ( event.GetColumn() == 0 )
-    {
-        wxLogMessage(_T("Resizing this column shouldn't work."));
-
-        event.Veto();
-    }
 }
 
 void MyListCtrl::OnColDragging(wxListEvent& event)
@@ -909,7 +902,7 @@ wxString MyListCtrl::OnGetItemText(long item, long column) const
     return wxString::Format(_T("Column %ld of item %ld"), column, item);
 }
 
-int MyListCtrl::OnGetItemImage(long WXUNUSED(item)) const
+int MyListCtrl::OnGetItemImage(long item) const
 {
     return 0;
 }

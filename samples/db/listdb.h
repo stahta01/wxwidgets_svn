@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "listdb.h"
 #endif
 

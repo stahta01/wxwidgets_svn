@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +50,9 @@ bool MyApp::OnInit(void)
   // Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
   frame->SetIcon(wxIcon(_T("sashtest_icn")));
+#endif
+#ifdef __X__
+  frame->SetIcon(wxIcon(_T("sashtest.xbm")));
 #endif
 
   // Make a menubar

@@ -12,16 +12,13 @@
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "region.h"
 #endif
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/log.h"
 

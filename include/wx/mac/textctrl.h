@@ -1,24 +1,25 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        textctrl.h
 // Purpose:     wxTextCtrl class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "textctrl.h"
 #endif
 
 #include "wx/control.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxTextCtrlNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxTextCtrlNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxEmptyString;
 
 // Single-line text item
 class WXDLLEXPORT wxTextCtrl: public wxTextCtrlBase
@@ -28,18 +29,16 @@ class WXDLLEXPORT wxTextCtrl: public wxTextCtrlBase
 public:
   // creation
   // --------
-  wxTextCtrl() { Init(); }
+  wxTextCtrl();
   ~wxTextCtrl();
-  wxTextCtrl(wxWindow *parent, wxWindowID id,
-             const wxString& value = wxEmptyString,
-             const wxPoint& pos = wxDefaultPosition,
-             const wxSize& size = wxDefaultSize, long style = 0,
-             const wxValidator& validator = wxDefaultValidator,
-             const wxString& name = wxTextCtrlNameStr)
+  inline wxTextCtrl(wxWindow *parent, wxWindowID id,
+                    const wxString& value = wxEmptyString,
+                    const wxPoint& pos = wxDefaultPosition,
+                    const wxSize& size = wxDefaultSize, long style = 0,
+                    const wxValidator& validator = wxDefaultValidator,
+                    const wxString& name = wxTextCtrlNameStr)
   {
-      Init();
-
-      Create(parent, id, value, pos, size, style, validator, name);
+    Create(parent, id, value, pos, size, style, validator, name);
   }
   
   bool Create(wxWindow *parent, wxWindowID id,
@@ -152,23 +151,16 @@ public:
     void OnUpdateUndo(wxUpdateUIEvent& event);
     void OnUpdateRedo(wxUpdateUIEvent& event);
 
-       virtual bool MacCanFocus() const { return true ; }
+   	virtual bool MacCanFocus() const { return true ; }
     virtual bool MacSetupCursor( const wxPoint& pt ) ;
 
-    virtual void      MacSuperShown( bool show ) ;
-    virtual bool     Show(bool show = TRUE) ;
+    virtual void 	 MacSuperShown( bool show ) ;
+    virtual bool	 Show(bool show = TRUE) ;
 
 protected:
-    // common part of all ctors
-    void Init();
-
   virtual wxSize DoGetBestSize() const;
 
   bool  m_editable ;
-
-  // flag is set to true when the user edits the controls contents
-  bool m_dirty;
-
   // one of the following objects is used for representation, the other one is NULL
   void*  m_macTE ;
   void*  m_macTXN ;

@@ -6,7 +6,7 @@
 // Created:     28 Jan 02
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 George Policello
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "fsvolume.h"
 #endif
 
@@ -30,9 +30,7 @@
 #if wxUSE_FSVOLUME
 
 #ifndef WX_PRECOMP
-    #if wxUSE_GUI
-        #include "wx/icon.h"
-    #endif
+    #include "wx/icon.h"
     #include "wx/intl.h"
 #endif // WX_PRECOMP
 
@@ -44,9 +42,46 @@
 #include "wx/volume.h"
 
 #include <shellapi.h>
-#include "wx/msw/missing.h"
 
-#if wxUSE_BASE
+#ifndef SHGetFileInfo
+#ifdef UNICODE
+#define SHGetFileInfo SHGetFileInfoW
+#else
+#define SHGetFileInfo SHGetFileInfoA
+#endif
+#endif
+
+#ifndef SHGFI_ATTRIBUTES
+    #define SHGFI_ATTRIBUTES 2048
+#endif
+
+#ifndef SFGAO_READONLY
+    #define SFGAO_READONLY 0x00040000L
+#endif
+
+#ifndef SFGAO_REMOVABLE
+    #define SFGAO_REMOVABLE 0x02000000L
+#endif
+
+#ifndef SHGFI_DISPLAYNAME
+    #define SHGFI_DISPLAYNAME 512
+#endif
+
+#ifndef SHGFI_ICON
+    #define SHGFI_ICON 256
+#endif
+
+#ifndef SHGFI_SMALLICON
+     #define SHGFI_SMALLICON 1
+#endif
+
+#ifndef SHGFI_SHELLICONSIZE
+    #define SHGFI_SHELLICONSIZE 4
+#endif
+
+#ifndef SHGFI_OPENICON
+    #define SHGFI_OPENICON 2
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Dynamic library function defs.
@@ -92,6 +127,14 @@ static FileInfoMap& GetFileInfoMap()
     return s_fileInfo;
 }
 #define s_fileInfo (GetFileInfoMap())
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Other initialization.
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#if wxUSE_GUI
+// already in wx/iconbndl.h
+// WX_DEFINE_OBJARRAY(wxIconArray);
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Local helper functions.
@@ -289,9 +332,9 @@ static void BuildListFromNN(wxArrayString& list, NETRESOURCE* pResSrc,
 // Function: CompareFcn
 // Purpose: Used to sort the NN list alphabetically, case insensitive.
 //=============================================================================
-static int CompareFcn(wxString* first, wxString* second)
+static int CompareFcn(const wxString& first, const wxString& second)
 {
-    return wxStricmp(first->c_str(), second->c_str());
+    return wxStricmp(first.c_str(), second.c_str());
 } // CompareFcn
 
 //=============================================================================
@@ -356,7 +399,7 @@ static bool BuildRemoteList(wxArrayString& list, NETRESOURCE* pResSrc,
             {
                 // Found the element.  Remove it or mark it mounted.
                 if (flagsUnset & wxFS_VOL_MOUNTED)
-                    list.RemoveAt(iList);
+                    list.Remove(iList);
                 else
                     s_fileInfo[list[iList]].m_flags |= wxFS_VOL_MOUNTED;
 
@@ -378,7 +421,7 @@ static bool BuildRemoteList(wxArrayString& list, NETRESOURCE* pResSrc,
 // Purpose: Generate and return a list of all volumes (drives) available.
 // Notes:
 //=============================================================================
-wxArrayString wxFSVolumeBase::GetVolumes(int flagsSet, int flagsUnset)
+wxArrayString wxFSVolume::GetVolumes(int flagsSet, int flagsUnset)
 {
     InterlockedExchange(&s_cancelSearch, FALSE);     // reset
 
@@ -447,7 +490,7 @@ wxArrayString wxFSVolumeBase::GetVolumes(int flagsSet, int flagsUnset)
 //          performing the search.  This is the only thread-safe function
 //          provided by the class.
 //=============================================================================
-void wxFSVolumeBase::CancelSearch()
+void wxFSVolume::CancelSearch()
 {
     InterlockedExchange(&s_cancelSearch, TRUE);
 } // CancelSearch
@@ -456,7 +499,7 @@ void wxFSVolumeBase::CancelSearch()
 // Function: constructor
 // Purpose: default constructor
 //=============================================================================
-wxFSVolumeBase::wxFSVolumeBase()
+wxFSVolume::wxFSVolume()
 {
     m_isOk = FALSE;
 } // wxVolume
@@ -465,7 +508,7 @@ wxFSVolumeBase::wxFSVolumeBase()
 // Function: constructor
 // Purpose: constructor that calls Create
 //=============================================================================
-wxFSVolumeBase::wxFSVolumeBase(const wxString& name)
+wxFSVolume::wxFSVolume(const wxString& name)
 {
     Create(name);
 } // wxVolume
@@ -474,7 +517,7 @@ wxFSVolumeBase::wxFSVolumeBase(const wxString& name)
 // Function: Create
 // Purpose: Finds, logs in, etc. to the request volume.
 //=============================================================================
-bool wxFSVolumeBase::Create(const wxString& name)
+bool wxFSVolume::Create(const wxString& name)
 {
     // assume fail.
     m_isOk = FALSE;
@@ -492,6 +535,16 @@ bool wxFSVolumeBase::Create(const wxString& name)
     }
     m_dispName = fi.szDisplayName;
 
+#if wxUSE_GUI
+
+    m_icons.Alloc(wxFS_VOL_ICO_MAX);
+    int idx;
+    wxIcon null;
+    for (idx = 0; idx < wxFS_VOL_ICO_MAX; idx++)
+        m_icons.Add(null);
+
+#endif
+
     // all tests passed.
     return m_isOk = TRUE;
 } // Create
@@ -502,7 +555,7 @@ bool wxFSVolumeBase::Create(const wxString& name)
 // Notes: For fixed disks, it must exist.  For removable disks, it must also
 //        be present.  For Network Shares, it must also be logged in, etc.
 //=============================================================================
-bool wxFSVolumeBase::IsOk() const
+bool wxFSVolume::IsOk() const
 {
     return m_isOk;
 } // IsOk
@@ -511,7 +564,7 @@ bool wxFSVolumeBase::IsOk() const
 // Function: GetKind
 // Purpose: Return the type of the volume.
 //=============================================================================
-wxFSVolumeKind wxFSVolumeBase::GetKind() const
+wxFSVolumeKind wxFSVolume::GetKind() const
 {
     if (!m_isOk)
         return wxFS_VOL_OTHER;
@@ -528,7 +581,7 @@ wxFSVolumeKind wxFSVolumeBase::GetKind() const
 // Purpose: Return the caches flags for this volume.
 // Notes: - Returns -1 if no flags were cached.
 //=============================================================================
-int wxFSVolumeBase::GetFlags() const
+int wxFSVolume::GetFlags() const
 {
     if (!m_isOk)
         return -1;
@@ -540,52 +593,40 @@ int wxFSVolumeBase::GetFlags() const
     return itr->second.m_flags;
 } // GetFlags
 
-#endif // wxUSE_BASE
-
-// ============================================================================
-// wxFSVolume
-// ============================================================================
-
 #if wxUSE_GUI
-
-void wxFSVolume::InitIcons()
-{
-    m_icons.Alloc(wxFS_VOL_ICO_MAX);
-    wxIcon null;
-    for (int idx = 0; idx < wxFS_VOL_ICO_MAX; idx++)
-        m_icons.Add(null);
-}
 
 //=============================================================================
 // Function: GetIcon
 // Purpose: return the requested icon.
 //=============================================================================
-
 wxIcon wxFSVolume::GetIcon(wxFSIconType type) const
 {
-    wxCHECK_MSG( type >= 0 && (size_t)type < m_icons.GetCount(), wxNullIcon,
-                 _T("wxFSIconType::GetIcon(): invalid icon index") );
+    wxCHECK_MSG(type < (int)m_icons.GetCount(), wxNullIcon, 
+                _T("Invalid request for icon type!"));
+    wxCHECK_MSG( type >= 0 && (size_t)type < m_icons.GetCount(),
+                 wxIcon(),                 
+                 _T("invalid icon index") );
 
     // Load on demand.
     if (m_icons[type].IsNull())
     {
-        UINT flags = SHGFI_ICON;
+        unsigned flags = 0;
         switch (type)
         {
         case wxFS_VOL_ICO_SMALL:
-            flags |= SHGFI_SMALLICON;
+            flags = SHGFI_ICON | SHGFI_SMALLICON;
             break;
 
         case wxFS_VOL_ICO_LARGE:
-            flags |= SHGFI_SHELLICONSIZE;
+            flags = SHGFI_ICON | SHGFI_SHELLICONSIZE;
             break;
 
         case wxFS_VOL_ICO_SEL_SMALL:
-            flags |= SHGFI_SMALLICON | SHGFI_OPENICON;
+            flags = SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OPENICON;
             break;
 
         case wxFS_VOL_ICO_SEL_LARGE:
-            flags |= SHGFI_SHELLICONSIZE | SHGFI_OPENICON;
+            flags = SHGFI_ICON | SHGFI_SHELLICONSIZE | SHGFI_OPENICON;
             break;
             
         case wxFS_VOL_ICO_MAX:

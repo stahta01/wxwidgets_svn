@@ -5,7 +5,7 @@
 // Modified by: VZ at 25.02.00: type safe hashes with WX_DECLARE_HASH()
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "hash.h"
 #endif
 
@@ -33,8 +33,6 @@
 #endif
 
 #include "wx/hash.h"
-
-#if !wxUSE_STL
 
 #include <string.h>
 #include <stdarg.h>
@@ -120,8 +118,6 @@ wxNodeBase *wxHashTableBase::GetNode(long key, long value) const
 
     return node;
 }
-
-#if WXWIN_COMPATIBILITY_2_4
 
 // ----------------------------------------------------------------------------
 // wxHashTableLong
@@ -338,8 +334,6 @@ bool wxStringHashTable::Delete(long key) const
     return FALSE;
 }
 
-#endif // WXWIN_COMPATIBILITY_2_4
-
 // ----------------------------------------------------------------------------
 // old not type safe wxHashTable
 // ----------------------------------------------------------------------------
@@ -499,7 +493,7 @@ wxObject *wxHashTable::Get (long key, long value) const
     {
       wxNode *node = hash_table[position]->Find (value);
       if (node)
-        return node->GetData ();
+        return node->Data ();
       else
         return (wxObject *) NULL;
     }
@@ -519,7 +513,7 @@ wxObject *wxHashTable::Get (long key, const wxChar *value) const
     {
       wxNode *node = hash_table[position]->Find (value);
       if (node)
-        return node->GetData ();
+        return node->Data ();
       else
         return (wxObject *) NULL;
     }
@@ -538,7 +532,7 @@ wxObject *wxHashTable::Get (long key) const
   else
     {
       wxNode *node = hash_table[position]->Find (k);
-      return node ? node->GetData () : (wxObject*)NULL;
+      return node ? node->Data () : (wxObject*)NULL;
     }
 }
 
@@ -552,7 +546,7 @@ wxObject *wxHashTable::Get (const wxChar *key) const
   else
     {
       wxNode *node = hash_table[position]->Find (key);
-      return node ? node->GetData () : (wxObject*)NULL;
+      return node ? node->Data () : (wxObject*)NULL;
     }
 }
 
@@ -571,7 +565,7 @@ wxObject *wxHashTable::Delete (long key)
       wxNode *node = hash_table[position]->Find (k);
       if (node)
         {
-          wxObject *data = node->GetData ();
+          wxObject *data = node->Data ();
           delete node;
           m_count--;
           return data;
@@ -593,7 +587,7 @@ wxObject *wxHashTable::Delete (const wxChar *key)
       wxNode *node = hash_table[position]->Find (key);
       if (node)
         {
-          wxObject *data = node->GetData ();
+          wxObject *data = node->Data ();
           delete node;
           m_count--;
           return data;
@@ -618,7 +612,7 @@ wxObject *wxHashTable::Delete (long key, int value)
       wxNode *node = hash_table[position]->Find (value);
       if (node)
         {
-          wxObject *data = node->GetData ();
+          wxObject *data = node->Data ();
           delete node;
           m_count--;
           return data;
@@ -640,7 +634,7 @@ wxObject *wxHashTable::Delete (long key, const wxChar *value)
       wxNode *node = hash_table[position]->Find (value);
       if (node)
         {
-          wxObject *data = node->GetData ();
+          wxObject *data = node->Data ();
           delete node;
           m_count--;
           return data;
@@ -685,14 +679,14 @@ wxNode *wxHashTable::Next ()
             {
               if (hash_table[current_position])
                 {
-                  current_node = hash_table[current_position]->GetFirst ();
+                  current_node = hash_table[current_position]->First ();
                   found = current_node;
                 }
             }
         }
       else
         {
-          current_node = current_node->GetNext ();
+          current_node = current_node->Next ();
           found = current_node;
         }
     }
@@ -724,4 +718,3 @@ void wxHashTable::Clear ()
   m_count = 0;
 }
 
-#endif // !wxUSE_STL

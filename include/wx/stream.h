@@ -6,13 +6,13 @@
 // Created:     11/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_WXSTREAM_H__
 #define _WX_WXSTREAM_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "stream.h"
 #endif
 
@@ -25,14 +25,14 @@
 #include "wx/string.h"
 #include "wx/filefn.h"  // for off_t, wxInvalidOffset and wxSeekMode
 
-class WXDLLIMPEXP_BASE wxStreamBase;
-class WXDLLIMPEXP_BASE wxInputStream;
-class WXDLLIMPEXP_BASE wxOutputStream;
+class WXDLLEXPORT wxStreamBase;
+class WXDLLEXPORT wxInputStream;
+class WXDLLEXPORT wxOutputStream;
 
 typedef wxInputStream& (*__wxInputManip)(wxInputStream&);
 typedef wxOutputStream& (*__wxOutputManip)(wxOutputStream&);
 
-WXDLLIMPEXP_BASE wxOutputStream& wxEndL(wxOutputStream& o_stream);
+WXDLLEXPORT wxOutputStream& wxEndL(wxOutputStream& o_stream);
 
 // ----------------------------------------------------------------------------
 // constants
@@ -67,7 +67,7 @@ enum wxStreamError
 // wxStreamBase: common (but non virtual!) base for all stream classes
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxStreamBase
+class WXDLLEXPORT wxStreamBase
 {
 public:
     wxStreamBase();
@@ -81,7 +81,7 @@ public:
     // reset the stream state
     void Reset() { m_lasterror = wxSTREAM_NO_ERROR; }
 
-    // this doesn't make sense for all streams, always test its return value
+    // deprecated (doesn't make sense!), don't use
     virtual size_t GetSize() const { return 0; }
 
 #if WXWIN_COMPATIBILITY_2_2
@@ -98,15 +98,13 @@ protected:
     wxStreamError m_lasterror;
 
     friend class wxStreamBuffer;
-
-    DECLARE_NO_COPY_CLASS(wxStreamBase)
 };
 
 // ----------------------------------------------------------------------------
 // wxInputStream: base class for the input streams
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxInputStream : public wxStreamBase
+class WXDLLEXPORT wxInputStream : public wxStreamBase
 {
 public:
     // ctor and dtor, nothing exciting
@@ -232,15 +230,13 @@ protected:
     size_t m_wbackcur;
 
     friend class wxStreamBuffer;
-
-    DECLARE_NO_COPY_CLASS(wxInputStream)
 };
 
 // ----------------------------------------------------------------------------
 // wxOutputStream: base for the output streams
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxOutputStream : public wxStreamBase
+class WXDLLEXPORT wxOutputStream : public wxStreamBase
 {
 public:
     wxOutputStream();
@@ -266,8 +262,6 @@ protected:
     virtual size_t OnSysWrite(const void *buffer, size_t bufsize);
 
     friend class wxStreamBuffer;
-
-    DECLARE_NO_COPY_CLASS(wxOutputStream)
 };
 
 // ============================================================================
@@ -278,7 +272,7 @@ protected:
 // A stream for measuring streamed output
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxCountingOutputStream : public wxOutputStream
+class WXDLLEXPORT wxCountingOutputStream : public wxOutputStream
 {
 public:
     wxCountingOutputStream();
@@ -292,15 +286,13 @@ protected:
     virtual off_t OnSysTell() const;
 
     size_t m_currentPos;
-
-    DECLARE_NO_COPY_CLASS(wxCountingOutputStream)
 };
 
 // ---------------------------------------------------------------------------
 // "Filter" streams
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFilterInputStream : public wxInputStream
+class WXDLLEXPORT wxFilterInputStream : public wxInputStream
 {
 public:
     wxFilterInputStream();
@@ -315,11 +307,9 @@ public:
 
 protected:
     wxInputStream *m_parent_i_stream;
-
-    DECLARE_NO_COPY_CLASS(wxFilterInputStream)
 };
 
-class WXDLLIMPEXP_BASE wxFilterOutputStream : public wxOutputStream
+class WXDLLEXPORT wxFilterOutputStream : public wxOutputStream
 {
 public:
     wxFilterOutputStream();
@@ -332,8 +322,6 @@ public:
 
 protected:
     wxOutputStream *m_parent_o_stream;
-
-    DECLARE_NO_COPY_CLASS(wxFilterOutputStream)
 };
 
 // ============================================================================
@@ -345,7 +333,7 @@ protected:
 // wxBufferedStreams to implement custom buffering
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxStreamBuffer
+class WXDLLEXPORT wxStreamBuffer
 {
 public:
     enum BufMode
@@ -449,21 +437,13 @@ protected:
     bool m_destroybuf,      // deallocate buffer?
          m_fixed,
          m_flushable;
-
-private:
-// Cannot use
-//  DECLARE_NO_COPY_CLASS(wxStreamBuffer)
-// because copy constructor is explicitly declared above;
-// but no copy assignment operator is defined, so declare
-// it private to prevent the compiler from defining it:
-    wxStreamBuffer& operator=(const wxStreamBuffer&);
 };
 
 // ---------------------------------------------------------------------------
 // wxBufferedInputStream
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxBufferedInputStream : public wxFilterInputStream
+class WXDLLEXPORT wxBufferedInputStream : public wxFilterInputStream
 {
 public:
     // if a non NULL buffer is given to the stream, it will be deleted by it
@@ -491,15 +471,13 @@ protected:
     virtual off_t OnSysTell() const;
 
     wxStreamBuffer *m_i_streambuf;
-
-    DECLARE_NO_COPY_CLASS(wxBufferedInputStream)
 };
 
 // ----------------------------------------------------------------------------
 // wxBufferedOutputStream
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxBufferedOutputStream : public wxFilterOutputStream
+class WXDLLEXPORT wxBufferedOutputStream : public wxFilterOutputStream
 {
 public:
     // if a non NULL buffer is given to the stream, it will be deleted by it
@@ -530,8 +508,6 @@ protected:
     virtual off_t OnSysTell() const;
 
     wxStreamBuffer *m_o_streambuf;
-
-    DECLARE_NO_COPY_CLASS(wxBufferedOutputStream)
 };
 
 #endif // wxUSE_STREAMS

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,23 +17,24 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "radiobut.h"
+#ifdef __GNUG__
+#pragma implementation "radiobut.h"
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #if wxUSE_RADIOBTN
 
 #ifndef WX_PRECOMP
-    #include "wx/radiobut.h"
-    #include "wx/settings.h"
-    #include "wx/dcscreen.h"
+#include "wx/radiobut.h"
+#include "wx/settings.h"
+#include "wx/brush.h"
+#include "wx/dcscreen.h"
 #endif
 
 #include "wx/msw/private.h"
@@ -46,65 +47,11 @@
 // wxRadioButton creation
 // ----------------------------------------------------------------------------
 
-
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxRadioButtonStyle )
-
-wxBEGIN_FLAGS( wxRadioButtonStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-    
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxNO_BORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxNO_FULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxRB_GROUP)
-
-wxEND_FLAGS( wxRadioButtonStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxRadioButton, wxControl,"wx/radiobut.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxRadioButton)
-    wxEVENT_PROPERTY( Click , wxEVT_COMMAND_RADIOBUTTON_SELECTED , wxCommandEvent )
-    wxPROPERTY( Font , wxFont , SetFont , GetFont  , , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( Label,wxString, SetLabel, GetLabel, wxString(), 0 /*flags*/ , wxT("Helpstring") , wxT("group") )
-    wxPROPERTY( Value ,bool, SetValue, GetValue,, 0 /*flags*/ , wxT("Helpstring") , wxT("group") )
-    wxPROPERTY_FLAGS( WindowStyle , wxRadioButtonStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxRadioButton)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_6( wxRadioButton , wxWindow* , Parent , wxWindowID , Id , wxString , Label , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxRadioButton, wxControl)
-#endif
-
 
 void wxRadioButton::Init()
 {
-    m_isChecked = false;
+    m_focusJustSet = FALSE;
 }
 
 bool wxRadioButton::Create(wxWindow *parent,
@@ -117,7 +64,7 @@ bool wxRadioButton::Create(wxWindow *parent,
                            const wxString& name)
 {
     if ( !CreateControl(parent, id, pos, size, style, validator, name) )
-        return false;
+        return FALSE;
 
     long msStyle = WS_TABSTOP;
     if ( HasFlag(wxRB_GROUP) )
@@ -140,16 +87,16 @@ bool wxRadioButton::Create(wxWindow *parent,
         msStyle |= WS_CLIPSIBLINGS;
 
     if ( !MSWCreateControl(_T("BUTTON"), msStyle, pos, size, label, 0) )
-        return false;
+        return FALSE;
 
     // for compatibility with wxGTK, the first radio button in a group is
     // always checked (this makes sense anyhow as you need to ensure that at
     // least one button in the group is checked and this is the simlpest way to
     // do it)
     if ( HasFlag(wxRB_GROUP) )
-        SetValue(true);
+        SetValue(TRUE);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -162,46 +109,44 @@ void wxRadioButton::SetValue(bool value)
     // value as is (we don't use BST_XXX here as they're not defined for Win16)
     (void)::SendMessage(GetHwnd(), BM_SETCHECK, (WPARAM)value, 0L);
 
-    m_isChecked = value;
-
     // if we set the value of one radio button we also must clear all the other
     // buttons in the same group: Windows doesn't do it automatically
-    if ( m_isChecked )
+    if ( value )
     {
         const wxWindowList& siblings = GetParent()->GetChildren();
-        wxWindowList::compatibility_iterator nodeThis = siblings.Find(this);
+        wxWindowList::Node *nodeThis = siblings.Find(this);
         wxCHECK_RET( nodeThis, _T("radio button not a child of its parent?") );
 
         // if it's not the first item of the group ...
         if ( !HasFlag(wxRB_GROUP) )
         {
             // ... turn off all radio buttons before it
-            for ( wxWindowList::compatibility_iterator nodeBefore = nodeThis->GetPrevious();
-                  nodeBefore;
-                  nodeBefore = nodeBefore->GetPrevious() )
+        for ( wxWindowList::Node *nodeBefore = nodeThis->GetPrevious();
+              nodeBefore;
+              nodeBefore = nodeBefore->GetPrevious() )
+        {
+            wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
+                                               wxRadioButton);
+            if ( !btn )
             {
-                wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
-                                                   wxRadioButton);
-                if ( !btn )
-                {
                     // the radio buttons in a group must be consecutive, so
                     // there are no more of them
-                    break;
-                }
-
-                btn->SetValue(false);
-
-                if ( btn->HasFlag(wxRB_GROUP) )
-                {
-                    // even if there are other radio buttons before this one,
-                    // they're not in the same group with us
-                    break;
-                }
+                break;
             }
+
+            btn->SetValue(FALSE);
+
+            if ( btn->HasFlag(wxRB_GROUP) )
+            {
+                // even if there are other radio buttons before this one,
+                // they're not in the same group with us
+                break;
+            }
+        }
         }
 
         // ... and also turn off all buttons after this one
-        for ( wxWindowList::compatibility_iterator nodeAfter = nodeThis->GetNext();
+        for ( wxWindowList::Node *nodeAfter = nodeThis->GetNext();
               nodeAfter;
               nodeAfter = nodeAfter->GetNext() )
         {
@@ -214,18 +159,16 @@ void wxRadioButton::SetValue(bool value)
                 break;
             }
 
-            btn->SetValue(false);
+            btn->SetValue(FALSE);
         }
     }
 }
 
 bool wxRadioButton::GetValue() const
 {
-    wxASSERT_MSG( m_isChecked ==
-                    (::SendMessage(GetHwnd(), BM_GETCHECK, 0, 0L) != 0),
-                  _T("wxRadioButton::m_isChecked is out of sync?") );
-
-    return m_isChecked;
+    // NB: this will also return TRUE for BST_INDETERMINATE value if we ever
+    //     have 3-state radio buttons
+    return ::SendMessage(GetHwnd(), BM_GETCHECK, 0, 0L) != 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -238,26 +181,53 @@ void wxRadioButton::Command (wxCommandEvent& event)
     ProcessCommand(event);
 }
 
+void wxRadioButton::SetFocus()
+{
+    // when the radio button receives a WM_SETFOCUS message it generates a
+    // BN_CLICKED which is totally unexpected and leads to catastrophic results
+    // if you pop up a dialog from the radio button event handler as, when the
+    // dialog is dismissed, the focus is returned to the radio button which
+    // generates BN_CLICKED which leads to showing another dialog and so on
+    // without end!
+    //
+    // to avoid this, we drop the pseudo BN_CLICKED events generated when the
+    // button gains focus
+    m_focusJustSet = TRUE;
+
+    wxControl::SetFocus();
+}
+
 bool wxRadioButton::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
 {
     if ( param != BN_CLICKED )
-        return false;
+        return FALSE;
 
-    if ( !m_isChecked )
+    if ( m_focusJustSet )
     {
-        // we have to do this for BS_RADIOBUTTON anyhow and, strangely enough,
-        // sometimes this is needed even for BS_AUTORADIOBUTTON (when we
-        // receive focus the button gets BN_CLICKED but stays unchecked!)
-        SetValue(true);
+        // see above: we want to ignore this event
+        m_focusJustSet = FALSE;
+    }
+    else // a real clicked event
+    {
+        bool isChecked = GetValue();
+
+        if ( HasFlag(wxRB_SINGLE) )
+        {
+            // when we use a "manual" radio button, we have to check the button
+            // ourselves -- but it's reset to unchecked state by the user code
+            // (presumably when another button is pressed)
+            if ( !isChecked )
+                SetValue(TRUE);
+        }
 
         wxCommandEvent event(wxEVT_COMMAND_RADIOBUTTON_SELECTED, GetId());
         event.SetEventObject( this );
-        event.SetInt(true); // always checked
+        event.SetInt(isChecked);
 
         ProcessCommand(event);
     }
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -296,5 +266,19 @@ wxSize wxRadioButton::DoGetBestSize() const
     return wxSize(wRadio, hRadio);
 }
 
-#endif // wxUSE_RADIOBTN
+long wxRadioButton::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
+{
+    if (nMsg == WM_SETFOCUS)
+    {
+        m_focusJustSet = TRUE;
 
+        long ret = wxControl::MSWWindowProc(nMsg, wParam, lParam);
+
+        m_focusJustSet = FALSE;
+
+        return ret;
+    }
+    return wxControl::MSWWindowProc(nMsg, wParam, lParam);
+}
+
+#endif // wxUSE_RADIOBTN

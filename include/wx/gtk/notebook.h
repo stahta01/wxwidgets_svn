@@ -5,13 +5,13 @@
 // Modified by:
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart and Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GTKNOTEBOOKH__
 #define __GTKNOTEBOOKH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -56,17 +56,17 @@ public:
     // set the currently selected page, return the index of the previously
     // selected one (or -1 on error)
     // NB: this function will _not_ generate wxEVT_NOTEBOOK_PAGE_xxx events
-  int SetSelection(size_t nPage);
+  int SetSelection(int nPage);
     // get the currently selected page
   int GetSelection() const;
 
     // set/get the title of a page
-  bool SetPageText(size_t nPage, const wxString& strText);
-  wxString GetPageText(size_t nPage) const;
+  bool SetPageText(int nPage, const wxString& strText);
+  wxString GetPageText(int nPage) const;
 
     // sets/returns item's image index in the current image list
-  int  GetPageImage(size_t nPage) const;
-  bool SetPageImage(size_t nPage, int nImage);
+  int  GetPageImage(int nPage) const;
+  bool SetPageImage(int nPage, int nImage);
 
   // control the appearance of the notebook pages
     // set the size (the same for all pages)
@@ -79,14 +79,14 @@ public:
   // operations
   // ----------
     // remove one page from the notebook
-  bool DeletePage(size_t nPage);
+  bool DeletePage(int nPage);
     // remove all pages
   bool DeleteAllPages();
 
     // adds a new page to the notebook (it will be deleted ny the notebook,
     // don't delete it yourself). If bSelect, this page becomes active.
     // the same as AddPage(), but adds it at the specified position
-    bool InsertPage( size_t position,
+    bool InsertPage( int position,
                      wxNotebookPage *win,
                      const wxString& strText,
                      bool bSelect = FALSE,
@@ -127,7 +127,7 @@ public:
 
 protected:
     // remove one page from the notebook but do not destroy it
-    virtual wxNotebookPage *DoRemovePage(size_t nPage);
+    virtual wxNotebookPage *DoRemovePage(int nPage);
 
 private:
     // the padding set by SetPadding()

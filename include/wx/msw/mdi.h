@@ -12,7 +12,7 @@
 #ifndef _WX_MDI_H_
 #define _WX_MDI_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "mdi.h"
 #endif
 
@@ -114,7 +114,6 @@ private:
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
-    DECLARE_NO_COPY_CLASS(wxMDIParentFrame)
 };
 
 // ---------------------------------------------------------------------------
@@ -189,7 +188,7 @@ private:
     bool m_needsResize; // flag which tells us to artificially resize the frame
 
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMDIChildFrame)
+    DECLARE_DYNAMIC_CLASS(wxMDIChildFrame)
 };
 
 // ---------------------------------------------------------------------------
@@ -224,7 +223,7 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxMDIClientWindow)
+    DECLARE_DYNAMIC_CLASS(wxMDIClientWindow)
 };
 
 #endif

@@ -6,7 +6,7 @@
 // Created:     01.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "evtloop.h"
 #endif
 
@@ -34,23 +34,17 @@
 #endif //WX_PRECOMP
 
 #include "wx/evtloop.h"
-
 #include "wx/tooltip.h"
-#include "wx/except.h"
-#include "wx/ptr_scpd.h"
 
 #include "wx/msw/private.h"
 
 #if wxUSE_THREADS
-    #include "wx/thread.h"
-
     // define the array of MSG strutures
     WX_DECLARE_OBJARRAY(MSG, wxMsgArray);
-
-    #include "wx/arrimpl.cpp"
-
-    WX_DEFINE_OBJARRAY(wxMsgArray);
-#endif // wxUSE_THREADS
+    // VS: this is a bit dirty - it duplicates same declaration in app.cpp
+    //     (and there's no WX_DEFINE_OBJARRAY for that reason - it is already
+    //     defined in app.cpp).
+#endif
 
 // ----------------------------------------------------------------------------
 // wxEventLoopImpl
@@ -81,36 +75,6 @@ private:
     int m_exitcode;
 };
 
-// ----------------------------------------------------------------------------
-// helper class
-// ----------------------------------------------------------------------------
-
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoopImpl);
-
-// this object sets the wxEventLoop given to the ctor as the currently active
-// one and unsets it in its dtor
-class wxEventLoopActivator
-{
-public:
-    wxEventLoopActivator(wxEventLoop **pActive,
-                         wxEventLoop *evtLoop)
-    {
-        m_pActive = pActive;
-        m_evtLoopOld = *pActive;
-        *pActive = evtLoop;
-    }
-
-    ~wxEventLoopActivator()
-    {
-        // restore the previously active event loop
-        *m_pActive = m_evtLoopOld;
-    }
-
-private:
-    wxEventLoop *m_evtLoopOld;
-    wxEventLoop **m_pActive;
-};
-
 // ============================================================================
 // wxEventLoopImpl implementation
 // ============================================================================
@@ -132,29 +96,13 @@ void wxEventLoopImpl::ProcessMessage(MSG *msg)
 
 bool wxEventLoopImpl::PreProcessMessage(MSG *msg)
 {
-    HWND hwnd = msg->hwnd;
-    wxWindow *wndThis = wxGetWindowFromHWND((WXHWND)hwnd);
-
-    // this may happen if the event occured in a standard modeless dialog (the
-    // only example of which I know of is the find/replace dialog) - then call
-    // IsDialogMessage() to make TAB navigation in it work
-    if ( !wndThis )
-    {
-        // we need to find the dialog containing this control as
-        // IsDialogMessage() just eats all the messages (i.e. returns TRUE for
-        // them) if we call it for the control itself
-        while ( hwnd && ::GetWindowLong(hwnd, GWL_STYLE) & WS_CHILD )
-        {
-            hwnd = ::GetParent(hwnd);
-        }
-
-        return hwnd && ::IsDialogMessage(hwnd, msg) != 0;
-    }
+    HWND hWnd = msg->hwnd;
+    wxWindow *wndThis = wxGetWindowFromHWND((WXHWND)hWnd);
 
 #if wxUSE_TOOLTIPS
     // we must relay WM_MOUSEMOVE events to the tooltip ctrl if we want it to
     // popup the tooltip bubbles
-    if ( msg->message == WM_MOUSEMOVE )
+    if ( wndThis && (msg->message == WM_MOUSEMOVE) )
     {
         wxToolTip *tt = wndThis->GetToolTip();
         if ( tt )
@@ -164,39 +112,22 @@ bool wxEventLoopImpl::PreProcessMessage(MSG *msg)
     }
 #endif // wxUSE_TOOLTIPS
 
-    // allow the window to prevent certain messages from being
-    // translated/processed (this is currently used by wxTextCtrl to always
-    // grab Ctrl-C/V/X, even if they are also accelerators in some parent)
-    if ( !wndThis->MSWShouldPreProcessMessage((WXMSG *)msg) )
-    {
-        return FALSE;
-    }
-
-    // try translations first: the accelerators override everything
+    // try translations first; find the youngest window with a translation
+    // table.
     wxWindow *wnd;
-
     for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
     {
-        if ( wnd->MSWTranslateMessage((WXMSG *)msg))
+        if ( wnd->MSWTranslateMessage((WXMSG *)msg) )
             return TRUE;
-
-        // stop at first top level window, i.e. don't try to process the key
-        // strokes originating in a dialog using the accelerators of the parent
-        // frame - this doesn't make much sense
-        if ( wnd->IsTopLevel() )
-            break;
     }
 
-    // now try the other hooks (kbd navigation is handled here): we start from
-    // wndThis->GetParent() because wndThis->MSWProcessMessage() was already
-    // called above
-    for ( wnd = wndThis->GetParent(); wnd; wnd = wnd->GetParent() )
+    // Anyone for a non-translation message? Try youngest descendants first.
+    for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
     {
         if ( wnd->MSWProcessMessage((WXMSG *)msg) )
             return TRUE;
     }
 
-    // no special preprocessing for this message, dispatch it normally
     return FALSE;
 }
 
@@ -206,7 +137,9 @@ bool wxEventLoopImpl::PreProcessMessage(MSG *msg)
 
 bool wxEventLoopImpl::SendIdleMessage()
 {
-    return wxTheApp->ProcessIdle();
+    wxIdleEvent event;
+
+    return wxTheApp->ProcessEvent(event) && event.MoreRequested();
 }
 
 // ============================================================================
@@ -234,25 +167,10 @@ int wxEventLoop::Run()
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
-    // SendIdleMessage() and Dispatch() below may throw so the code here should
-    // be exception-safe, hence we must use local objects for all actions we
-    // should undo
-    wxEventLoopActivator activate(&ms_activeLoop, this);
-    wxEventLoopImplTiedPtr impl(&m_impl, new wxEventLoopImpl);
-
-    class CallEventLoopMethod
-    {
-    public:
-        typedef void (wxEventLoop::*FuncType)();
-
-        CallEventLoopMethod(wxEventLoop *evtLoop, FuncType fn)
-            : m_evtLoop(evtLoop), m_fn(fn) { }
-        ~CallEventLoopMethod() { (m_evtLoop->*m_fn)(); }
-
-    private:
-        wxEventLoop *m_evtLoop;
-        FuncType m_fn;
-    } callOnExit(this, wxEventLoop::OnExit);
+    m_impl = new wxEventLoopImpl;
+    
+    wxEventLoop *oldLoop = ms_activeLoop;
+    ms_activeLoop = this;
 
     for ( ;; )
     {
@@ -265,8 +183,8 @@ int wxEventLoop::Run()
         while ( !Pending() && m_impl->SendIdleMessage() )
             ;
 
-        // a message came or no more idle processing to do, sit in
-        // Dispatch() waiting for the next message
+        // a message came or no more idle processing to do, sit in Dispatch()
+        // waiting for the next message
         if ( !Dispatch() )
         {
             // we got WM_QUIT
@@ -274,7 +192,13 @@ int wxEventLoop::Run()
         }
     }
 
-    return m_impl->GetExitCode();
+    int exitcode = m_impl->GetExitCode();
+    delete m_impl;
+    m_impl = NULL;
+
+    ms_activeLoop = oldLoop;
+
+    return exitcode;
 }
 
 void wxEventLoop::Exit(int rc)

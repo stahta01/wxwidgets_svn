@@ -6,9 +6,8 @@ Classes: \helpref{wxString}{wxstring}, \helpref{wxArrayString}{wxarraystring}, \
 
 wxString is a class which represents a character string of arbitrary length (limited by 
 {\it MAX\_INT} which is usually 2147483647 on 32 bit machines) and containing
-arbitrary characters. The ASCII NUL character is allowed, but be aware that
-in the current string implementation some methods might not work correctly
-in this case.
+arbitrary characters. The ASCII NUL character is allowed, although care should be
+taken when passing strings containing it to other functions.
 
 wxString works with both ASCII (traditional, 7 or 8 bit, characters) as well as
 Unicode (wide characters) strings.
@@ -141,7 +140,7 @@ to them will probably lead to program crash). Moreover, some very useful
 functions are not standard at all. This is why in addition to all wxString
 functions, there are also a few global string functions which try to correct
 these problems: \helpref{wxIsEmpty()}{wxisempty} verifies whether the string
-is empty (returning {\tt true} for {\tt NULL} pointers), 
+is empty (returning {\tt TRUE} for {\tt NULL} pointers), 
 \helpref{wxStrlen()}{wxstrlen} also handles NULLs correctly and returns 0 for
 them and \helpref{wxStricmp()}{wxstricmp} is just a platform-independent
 version of case-insensitive string comparison function known either as

@@ -12,7 +12,7 @@
 #ifndef _WX_MSW_FONTDLG_H_
 #define _WX_MSW_FONTDLG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "fontdlg.h"
 #endif
 
@@ -36,7 +36,7 @@ public:
         : wxFontDialogBase(parent, data) { Create(parent, data); }
 
 protected:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxFontDialog)
+    DECLARE_DYNAMIC_CLASS(wxFontDialog)
 };
 
 #endif

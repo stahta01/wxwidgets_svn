@@ -25,7 +25,7 @@
     #include "wx/wx.h"
 #endif
 
-#include "wx/xml/xml.h"
+#include "wx/xrc/xml.h"
 #include "wx/image.h"
 #include "wx/wx.h"
 
@@ -49,7 +49,7 @@ bool MyApp::OnInit()
 {
     SetVendorName(wxT("wxWindows"));
     SetAppName(wxT("wxrcedit"));
-    wxString arg = (argc >= 1) ? argv[1] : _T("");
+    wxString arg = (argc >= 1) ? argv[1] : "";
     wxInitAllImageHandlers();
     wxFrame *frame = new EditorFrame(NULL, arg);
     SetTopWindow(frame);

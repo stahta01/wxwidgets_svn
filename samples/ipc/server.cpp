@@ -171,7 +171,7 @@ IPCDialogBox::~IPCDialogBox( )
         m_connection->dialog = NULL;
 }
 
-void IPCDialogBox::OnQuit(wxCommandEvent& WXUNUSED(event))
+void IPCDialogBox::OnQuit(wxCommandEvent& event)
 {
     m_connection->Disconnect();
     delete m_connection;

@@ -6,7 +6,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univwindow.h"
 #endif
 
@@ -121,29 +121,17 @@ bool wxWindow::Create(wxWindow *parent,
                       long style,
                       const wxString& name)
 {
-    long actualStyle = style;
-    
-    // FIXME: may need this on other platforms
-#ifdef __WXMSW__
-    actualStyle &= ~wxVSCROLL;
-    actualStyle &= ~wxHSCROLL;
-#endif    
-    
     // we add wxCLIP_CHILDREN to get the same ("natural") behaviour under MSW
     // as under the other platforms
     if ( !wxWindowNative::Create(parent, id, pos, size,
-                                 actualStyle | wxCLIP_CHILDREN,
+                                 style | wxCLIP_CHILDREN,
                                  name) )
     {
         return FALSE;
     }
 
-    // Set full style again, including those we didn't want present
-    // when calling the base window Create().
-    wxWindowBase::SetWindowStyleFlag(style);
-
-    // if we should always have a vertical scrollbar, do show it
-    if ( style & wxALWAYS_SHOW_SB )
+    // if we should always have the scrollbar, do show it
+    if ( GetWindowStyle() & wxALWAYS_SHOW_SB )
     {
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( TRUE );
@@ -154,25 +142,8 @@ bool wxWindow::Create(wxWindow *parent,
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( FALSE );
 #endif
-    }
 
-    // if we should always have a horizontal scrollbar, do show it
-    if ( style & wxHSCROLL )
-    {
-#if wxUSE_TWO_WINDOWS
-        SetInsertIntoMain( TRUE );
-#endif
-        m_scrollbarHorz = new wxScrollBar(this, -1,
-                                          wxDefaultPosition, wxDefaultSize,
-                                          wxSB_HORIZONTAL);
-#if wxUSE_TWO_WINDOWS
-        SetInsertIntoMain( FALSE );
-#endif
-    }
-    
-    if (m_scrollbarHorz || m_scrollbarVert)
-    {
-        // position it/them
+        // and position it
         PositionScrollbars();
     }
 
@@ -211,7 +182,7 @@ const wxBitmap& wxWindow::GetBackgroundBitmap(int *alignment,
 // ----------------------------------------------------------------------------
 
 // the event handlers executed when the window must be repainted
-void wxWindow::OnNcPaint(wxPaintEvent& WXUNUSED(event))
+void wxWindow::OnNcPaint(wxPaintEvent& event)
 {
     if ( m_renderer )
     {
@@ -369,7 +340,7 @@ void wxWindow::DoDrawBorder(wxDC& dc, const wxRect& rect)
     }
 }
 
-void wxWindow::DoDraw(wxControlRenderer * WXUNUSED(renderer))
+void wxWindow::DoDraw(wxControlRenderer *renderer)
 {
 }
 
@@ -422,7 +393,7 @@ void wxWindow::Refresh(bool eraseBackground, const wxRect *rectClient)
     wxWindowNative::Refresh(eraseBackground, &rectWin);
 
     // Refresh all sub controls if any.
-    wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    wxWindowList::Node *node = GetChildren().GetFirst();
     while ( node )
     {
         wxWindow *win = node->GetData();
@@ -920,7 +891,7 @@ void wxWindow::SetScrollbar(int orient,
     }
 }
 
-void wxWindow::SetScrollPos(int orient, int pos, bool WXUNUSED(refresh))
+void wxWindow::SetScrollPos(int orient, int pos, bool refresh)
 {
     wxScrollBar *scrollbar = GetScrollbar(orient);
     wxCHECK_RET( scrollbar, _T("no scrollbar to set position for") );
@@ -983,7 +954,7 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
     // scroll children accordingly:
     wxPoint offset(dx, dy);
 
-    for (wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    for (wxWindowList::Node *node = GetChildren().GetFirst();
          node; node = node->GetNext())
     {
         wxWindow *child = node->GetData();

@@ -12,7 +12,7 @@
 #ifndef   _REGCONF_H
 #define   _REGCONF_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "regconf.h"
 #endif
 
@@ -25,15 +25,15 @@
 // wxRegConfig
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxRegConfig : public wxConfigBase
+class WXDLLEXPORT wxRegConfig : public wxConfigBase
 {
 public:
   // ctor & dtor
     // will store data in HKLM\appName and HKCU\appName
-  wxRegConfig(const wxString& appName = wxEmptyString,
-              const wxString& vendorName = wxEmptyString,
-              const wxString& localFilename = wxEmptyString,
-              const wxString& globalFilename = wxEmptyString,
+  wxRegConfig(const wxString& appName = _T(""),
+              const wxString& vendorName = _T(""),
+              const wxString& localFilename = _T(""),
+              const wxString& globalFilename = _T(""),
               long style = 0);
 
     // dtor will save unsaved data

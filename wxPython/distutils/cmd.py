@@ -191,7 +191,7 @@ class Command:
         """If the current verbosity level is of greater than or equal to
         'level' print 'msg' to stdout.
         """
-        log.log(level, msg)
+        log.debug(msg)
 
     def debug_print (self, msg):
         """Print 'msg' to stdout if the global DEBUG (taken from the

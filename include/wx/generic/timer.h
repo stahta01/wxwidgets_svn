@@ -3,7 +3,7 @@
 // Purpose:     Generic implementation of wxTimer class
 // Author:      Vaclav Slavik
 // Id:          $Id$
-// Copyright:   (c) Vaclav Slavik
+// Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -11,7 +11,7 @@
 #ifndef __WX_TIMER_H__
 #define __WX_TIMER_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "timer.h"
 #endif
 

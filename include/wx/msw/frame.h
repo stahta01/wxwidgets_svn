@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FRAME_H_
 #define _WX_FRAME_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "frame.h"
 #endif
 
@@ -56,7 +56,7 @@ public:
 
     // Toolbar
 #if wxUSE_TOOLBAR
-    virtual wxToolBar* CreateToolBar(long style = -1,
+    virtual wxToolBar* CreateToolBar(long style = wxNO_BORDER | wxTB_HORIZONTAL | wxTB_FLAT,
                                      wxWindowID id = -1,
                                      const wxString& name = wxToolBarNameStr);
 
@@ -128,9 +128,6 @@ protected:
     // window proc for the frames
     long MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
-    // handle WM_INITMENUPOPUP message
-    bool HandleInitMenuPopup(WXHMENU hMenu);
-
     virtual bool IsMDIChild() const { return FALSE; }
 
     // get default (wxWindows) icon for the frame
@@ -154,7 +151,7 @@ private:
     bool m_wasMinimized;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxFrame)
+    DECLARE_DYNAMIC_CLASS(wxFrame)
 };
 
 #endif

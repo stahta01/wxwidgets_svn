@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univcombobox.h"
 #endif
 
@@ -93,7 +93,7 @@ public:
     }
 
 protected:
-    void OnButton(wxCommandEvent& WXUNUSED(event)) { m_combo->ShowPopup(); }
+    void OnButton(wxCommandEvent& event) { m_combo->ShowPopup(); }
 
     virtual wxSize DoGetBestClientSize() const
     {
@@ -123,11 +123,8 @@ public:
 
     // implement wxComboPopup methods
     virtual bool SetSelection(const wxString& value);
-    virtual void SetSelection(int n, bool select)
-        { wxListBox::SetSelection( n, select); };
     virtual wxControl *GetControl() { return this; }
     virtual void OnShow();
-    virtual wxCoord GetBestWidth() const;
 
 protected:
     // we shouldn't return height too big from here
@@ -292,7 +289,7 @@ wxComboControl::~wxComboControl()
 // ----------------------------------------------------------------------------
 
 void wxComboControl::DoSetSize(int x, int y,
-                               int width, int WXUNUSED(height),
+                               int width, int height,
                                int sizeFlags)
 {
     // combo height is always fixed
@@ -303,15 +300,8 @@ wxSize wxComboControl::DoGetBestClientSize() const
 {
     wxSize sizeBtn = m_btn->GetBestSize(),
            sizeText = m_text->GetBestSize();
-    wxCoord widthPopup = 0;
 
-    if (m_popup)
-    {
-        widthPopup = m_popup->GetBestWidth();
-    }
-
-    return wxSize(wxMax(sizeText.x + g_comboMargin + sizeBtn.x, widthPopup), 
-                  wxMax(sizeBtn.y, sizeText.y));
+    return wxSize(sizeText.x + g_comboMargin + sizeBtn.x, wxMax(sizeBtn.y, sizeText.y));
 }
 
 void wxComboControl::DoMoveWindow(int x, int y, int width, int height)
@@ -625,12 +615,6 @@ void wxComboListBox::OnMouseMove(wxMouseEvent& event)
     }
 }
 
-wxCoord wxComboListBox::GetBestWidth() const
-{
-    wxSize size = wxListBox::GetBestSize();
-    return size.x;
-}
-
 wxSize wxComboListBox::DoGetBestClientSize() const
 {
     // don't return size too big or we risk to not fit on the screen
@@ -825,18 +809,6 @@ int wxComboBox::GetSelection() const
 int wxComboBox::DoAppend(const wxString& item)
 {
     return GetLBox()->Append(item);
-}
-
-int wxComboBox::DoInsert(const wxString& item, int pos)
-{
-    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
-
-    if (pos == GetCount())
-        return DoAppend(item);
-
-    GetLBox()->Insert(item, pos);
-    return pos;
 }
 
 void wxComboBox::DoSetItemClientData(int n, void* clientData)

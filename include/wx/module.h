@@ -12,7 +12,7 @@
 #ifndef _WX_MODULEH__
 #define _WX_MODULEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "module.h"
 #endif
 
@@ -21,12 +21,12 @@
 
 // declare a linked list of modules
 class wxModule;
-WX_DECLARE_USER_EXPORTED_LIST(wxModule, wxModuleList, WXDLLIMPEXP_BASE);
+WX_DECLARE_EXPORTED_LIST(wxModule, wxModuleList);
 
 // declaring a class derived from wxModule will automatically create an
 // instance of this class on program startup, call its OnInit() method and call
 // OnExit() on program termination (but only if OnInit() succeeded)
-class WXDLLIMPEXP_BASE wxModule : public wxObject
+class WXDLLEXPORT wxModule : public wxObject
 {
 public:
     wxModule() {}

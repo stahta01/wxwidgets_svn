@@ -9,31 +9,7 @@
 // License:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-// this sample can be used to test both wxNotebook and wxListbook
-//#define TEST_LISTBOOK
-
-#ifdef TEST_LISTBOOK
-    #include "wx/listbook.h"
-
-    #define wxNotebook wxListbook
-    #define wxNotebookEvent wxListbookEvent
-
-    #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED
-    #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING
-    #define EVT_NOTEBOOK_PAGE_CHANGED EVT_LISTBOOK_PAGE_CHANGED
-    #define EVT_NOTEBOOK_PAGE_CHANGING EVT_LISTBOOK_PAGE_CHANGING
-
-    #undef wxNB_TOP
-    #define wxNB_TOP wxLB_TOP
-    #undef wxNB_BOTTOM
-    #define wxNB_BOTTOM wxLB_BOTTOM
-    #undef wxNB_LEFT
-    #define wxNB_LEFT wxLB_LEFT
-    #undef wxNB_RIGHT
-    #define wxNB_RIGHT wxLB_RIGHT
-#else
-    #include "wx/notebook.h"
-#endif
+#include "wx/notebook.h"
 
 // Define a new application
 class MyApp : public wxApp
@@ -72,7 +48,7 @@ class MyFrame : public wxFrame
 {
 public:
     MyFrame(const wxString& title, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE|wxCLIP_CHILDREN|wxNO_FULL_REPAINT_ON_RESIZE);
+        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
     virtual ~MyFrame();
 
@@ -130,7 +106,7 @@ private:
     wxBoxSizer *m_sizerTop;
 
     // Sizer for m_notebook
-    wxBookCtrlSizer *m_sizerNotebook;
+    wxNotebookSizer *m_sizerNotebook;
 
     wxImageList *m_imageList;
 

@@ -27,7 +27,6 @@
 #include "wx/event.h"
 #include "wx/calctrl.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxCalendarCtrlXmlHandler, wxXmlResourceHandler)
 
 wxCalendarCtrlXmlHandler::wxCalendarCtrlXmlHandler() 
 : wxXmlResourceHandler() 
@@ -37,9 +36,6 @@ wxCalendarCtrlXmlHandler::wxCalendarCtrlXmlHandler()
     XRC_ADD_STYLE(wxCAL_SHOW_HOLIDAYS);
     XRC_ADD_STYLE(wxCAL_NO_YEAR_CHANGE);
     XRC_ADD_STYLE(wxCAL_NO_MONTH_CHANGE);
-    XRC_ADD_STYLE(wxCAL_SEQUENTIAL_MONTH_SELECTION);
-    XRC_ADD_STYLE(wxCAL_SHOW_SURROUNDING_WEEKS);
-
     AddWindowStyles();
 }
 

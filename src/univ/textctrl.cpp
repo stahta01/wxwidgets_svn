@@ -6,7 +6,7 @@
 // Created:     15.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -117,7 +117,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univtextctrl.h"
 #endif
 
@@ -128,8 +128,6 @@
 #endif
 
 #if wxUSE_TEXTCTRL
-
-#include <ctype.h>
 
 #ifndef WX_PRECOMP
     #include "wx/log.h"
@@ -528,8 +526,6 @@ public:
 
     virtual bool CanUndo() const;
     virtual bool Do(wxTextCtrl *text);
-    virtual bool Do() { return wxTextCtrlCommand::Do(); }
-    virtual bool Undo() { return wxTextCtrlCommand::Undo(); }
     virtual bool Undo(wxTextCtrl *text);
 
 private:
@@ -553,8 +549,6 @@ public:
 
     virtual bool CanUndo() const;
     virtual bool Do(wxTextCtrl *text);
-    virtual bool Do() { return wxTextCtrlCommand::Do(); }
-    virtual bool Undo() { return wxTextCtrlCommand::Undo(); }
     virtual bool Undo(wxTextCtrl *text);
 
 private:
@@ -614,6 +608,8 @@ BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
     EVT_CHAR(wxTextCtrl::OnChar)
 
     EVT_SIZE(wxTextCtrl::OnSize)
+
+    EVT_IDLE(wxTextCtrl::OnIdle)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
@@ -740,9 +736,6 @@ bool wxTextCtrl::Create(wxWindow *parent,
     m_hasCaret = FALSE;
 
     CreateInputHandler(wxINP_HANDLER_TEXTCTRL);
-
-    wxSizeEvent sizeEvent(GetSize(), GetId());
-    GetEventHandler()->ProcessEvent(sizeEvent);
 
     return TRUE;
 }
@@ -1873,9 +1866,7 @@ wxPoint wxTextCtrl::GetCaretPosition() const
 // pos may be -1 to show the current position
 void wxTextCtrl::ShowPosition(wxTextPos pos)
 {
-    bool showCaret = GetCaret() && GetCaret()->IsVisible();
-    if (showCaret)
-        HideCaret();
+    HideCaret();
 
     if ( IsSingleLine() )
     {
@@ -1995,8 +1986,7 @@ void wxTextCtrl::ShowPosition(wxTextPos pos)
     }
     //else: multiline but no scrollbars, hence nothing to do
 
-    if (showCaret)
-        ShowCaret();
+    ShowCaret();
 }
 
 // ----------------------------------------------------------------------------
@@ -2455,7 +2445,7 @@ void wxTextCtrl::UpdateLastVisible()
     SData().m_colLastVisible += SData().m_colStart;
 
     wxLogTrace(_T("text"), _T("Last visible column/position is %d/%ld"),
-               (int) SData().m_colLastVisible, (long) SData().m_posLastVisible);
+               SData().m_colLastVisible, SData().m_posLastVisible);
 }
 
 void wxTextCtrl::OnSize(wxSizeEvent& event)
@@ -3581,7 +3571,7 @@ void wxTextCtrl::UpdateScrollbars()
     MData().m_updateScrollbarY = FALSE;
 }
 
-void wxTextCtrl::OnInternalIdle()
+void wxTextCtrl::OnIdle(wxIdleEvent& event)
 {
     // notice that single line text control never has scrollbars
     if ( !IsSingleLine() &&
@@ -3589,7 +3579,8 @@ void wxTextCtrl::OnInternalIdle()
     {
         UpdateScrollbars();
     }
-    wxControl::OnInternalIdle();
+
+    event.Skip();
 }
 
 bool wxTextCtrl::SendAutoScrollEvents(wxScrollWinEvent& event) const
@@ -4191,7 +4182,7 @@ void wxTextCtrl::DoDraw(wxControlRenderer *renderer)
 
     // show caret first time only: we must show it after drawing the text or
     // the display can be corrupted when it's hidden
-    if ( !m_hasCaret && GetCaret() && (FindFocus() == this) )
+    if ( !m_hasCaret && GetCaret() )
     {
         ShowCaret();
 
@@ -4234,10 +4225,7 @@ bool wxTextCtrl::Enable(bool enable)
     if ( !wxTextCtrlBase::Enable(enable) )
         return FALSE;
 
-    if (FindFocus() == this && GetCaret() &&
-        ((enable && !GetCaret()->IsVisible()) ||
-         (!enable && GetCaret()->IsVisible())))
-        ShowCaret(enable);
+    ShowCaret(enable);
 
     return TRUE;
 }
@@ -4273,9 +4261,7 @@ void wxTextCtrl::ShowCaret(bool show)
         caret->Move(GetCaretPosition());
 
         // and show it there
-        if ((show && !caret->IsVisible()) ||
-            (!show && caret->IsVisible()))
-            caret->Show(show);
+        caret->Show(show);
     }
 }
 
@@ -4917,25 +4903,13 @@ bool wxStdTextCtrlInputHandler::HandleMouseMove(wxInputConsumer *consumer,
     return wxStdInputHandler::HandleMouseMove(consumer, event);
 }
 
-bool
-wxStdTextCtrlInputHandler::HandleFocus(wxInputConsumer *consumer,
-                                       const wxFocusEvent& event)
+bool wxStdTextCtrlInputHandler::HandleFocus(wxInputConsumer *consumer,
+                                            const wxFocusEvent& event)
 {
     wxTextCtrl *text = wxStaticCast(consumer->GetInputWindow(), wxTextCtrl);
 
     // the selection appearance changes depending on whether we have the focus
     text->RefreshSelection();
-
-    if (event.GetEventType() == wxEVT_SET_FOCUS)
-    {
-        if (text->GetCaret() && !text->GetCaret()->IsVisible())
-            text->ShowCaret();
-    }
-    else
-    {
-        if (text->GetCaret() && text->GetCaret()->IsVisible())
-            text->HideCaret();
-    }
 
     // never refresh entirely
     return FALSE;

@@ -1,18 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        stattext.h
 // Purpose:     wxStaticText class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_STATTEXT_H_
 #define _WX_STATTEXT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "stattext.h"
 #endif
 
@@ -53,7 +53,7 @@ class WXDLLEXPORT wxStaticText: public wxStaticTextBase
   virtual wxSize DoGetBestSize() const ;
   virtual bool AcceptsFocus() const { return FALSE; }
  private :
-     wxString    m_label ;
+ 	wxString	m_label ;
 
    DECLARE_EVENT_TABLE()
 };

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DCCLIENT_H_
@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "dcclient.h"
 #endif
 
@@ -53,7 +53,7 @@ protected:
     virtual void DoGetSize(int *width, int *height) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxWindowDC)
+    DECLARE_DYNAMIC_CLASS(wxWindowDC)
 };
 
 class WXDLLEXPORT wxClientDC : public wxWindowDC
@@ -74,7 +74,7 @@ protected:
     virtual void DoGetSize(int *width, int *height) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxClientDC)
+    DECLARE_DYNAMIC_CLASS(wxClientDC)
 };
 
 class WXDLLEXPORT wxPaintDC : public wxClientDC
@@ -97,25 +97,7 @@ protected:
     wxPaintDCInfo *FindInCache(size_t *index = NULL) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxPaintDC)
-};
-
-/*
- * wxPaintDCEx
- * This class is used when an application sends an HDC with the WM_PAINT
- * message. It is used in HandlePaint and need not be used by an application.
- */
-
-class WXDLLEXPORT wxPaintDCEx : public wxPaintDC
-{
-public:
-    wxPaintDCEx(wxWindow *canvas, WXHDC dc);
-    virtual ~wxPaintDCEx();
-private:
-    int saveState;
-
-    DECLARE_CLASS(wxPaintDCEx)
-    DECLARE_NO_COPY_CLASS(wxPaintDCEx)
+    DECLARE_DYNAMIC_CLASS(wxPaintDC)
 };
 
 #endif

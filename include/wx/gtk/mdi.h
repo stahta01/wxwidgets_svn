@@ -11,7 +11,7 @@
 #ifndef __MDIH__
 #define __MDIH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -22,6 +22,8 @@
 #include "wx/panel.h"
 #include "wx/frame.h"
 #include "wx/toolbar.h"
+
+#if wxUSE_MDI_ARCHITECTURE
 
 //-----------------------------------------------------------------------------
 // classes
@@ -211,6 +213,8 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxMDIClientWindow)
 };
+
+#endif // if USE_MDI...
 
 #endif // __MDIH__
 

@@ -12,7 +12,7 @@
 #ifndef _WX_BUTTON_H_
 #define _WX_BUTTON_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "button.h"
 #endif
 
@@ -78,10 +78,10 @@ protected:
 
     // usually overridden base class virtuals
     virtual wxSize DoGetBestSize() const;
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const ;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxButton)
+    DECLARE_DYNAMIC_CLASS(wxButton)
 };
 
 #endif

@@ -7,7 +7,7 @@
 // Created:     09.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -18,7 +18,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "snglinst.h"
 #endif
 
@@ -35,9 +35,9 @@
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
+    #include "wx/file.h"
 #endif //WX_PRECOMP
 
-#include "wx/file.h"
 #include "wx/utils.h"           // wxGetHomeDir()
 
 #include "wx/snglinst.h"

@@ -11,7 +11,7 @@
 // Branched From : dbgrid.cpp,v 1.18 2000/12/19 13:00:58
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dbgrid.h"
 #endif
 
@@ -23,7 +23,7 @@
 
 
 #if wxUSE_ODBC
-#if wxUSE_GRID
+#if wxUSE_NEW_GRID
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
@@ -32,10 +32,6 @@
 
 #include "wx/generic/gridctrl.h"
 #include "wx/dbgrid.h"
-
-// DLL options compatibility check:
-#include "wx/app.h"
-WX_CHECK_BUILD_OPTIONS("wxDbGrid")
 
 
 wxDbGridCellAttrProvider::wxDbGridCellAttrProvider()
@@ -263,7 +259,7 @@ bool wxDbGridTableBase::AssignDbTable(wxDbTable *tab, int count, bool takeOwners
     return TRUE;
 }
 
-wxString wxDbGridTableBase::GetTypeName(int WXUNUSED(row), int col)
+wxString wxDbGridTableBase::GetTypeName(int row, int col)
 {
     if (GetNumberCols() > col)
     {
@@ -370,7 +366,7 @@ bool wxDbGridTableBase::CanGetValueAs(int row, int col, const wxString& typeName
     return FALSE;
 }
 
-bool wxDbGridTableBase::CanSetValueAs(int WXUNUSED(row), int col, const wxString& typeName)
+bool wxDbGridTableBase::CanSetValueAs(int row, int col, const wxString& typeName)
 {
     if (typeName == wxGRID_VALUE_STRING)
     {
@@ -680,7 +676,7 @@ void wxDbGridTableBase::ValidateRow(int row)
         m_data->SetKey(k);
         if (!m_data->QueryOnKeyFields())
         {
-            wxDbLogExtendedErrorMsg(_T("ODBC error during Query()\n\n"), m_data->GetDb(),__TFILE__,__LINE__);
+            wxDbLogExtendedErrorMsg("ODBC error during Query()\n\n", m_data->GetDb(),__FILE__,__LINE__);
         }
 
         m_data->GetNext();
@@ -724,6 +720,6 @@ bool wxDbGridTableBase::Writeback() const
 
 WX_DEFINE_EXPORTED_OBJARRAY(keyarray);
 
-#endif  // #if wxUSE_GRID
+#endif  // #if wxUSE_NEW_GRID
 #endif  // #if wxUSE_ODBC
 

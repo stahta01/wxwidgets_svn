@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "helpctrl.h"
 #endif
 
@@ -271,7 +271,7 @@ void wxHtmlHelpController::AddGrabIfNeeded()
     
     // Check if there are any modal windows present,
     // in which case we need to add a grab.
-    for ( wxWindowList::compatibility_iterator node = wxTopLevelWindows.GetFirst();
+    for ( wxWindowList::Node * node = wxTopLevelWindows.GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -319,11 +319,10 @@ bool wxHtmlHelpController::DisplayIndex()
     return success;
 }
 
-bool wxHtmlHelpController::KeywordSearch(const wxString& keyword,
-                                         wxHelpSearchMode mode)
+bool wxHtmlHelpController::KeywordSearch(const wxString& keyword)
 {
     CreateHelpWindow();
-    bool success = m_helpFrame->KeywordSearch(keyword, mode);
+    bool success = m_helpFrame->KeywordSearch(keyword);
     AddGrabIfNeeded();
     return success;
 }

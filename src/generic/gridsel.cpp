@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "gridsel.h"
 #endif
 
@@ -30,7 +30,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GRID
+#if defined(wxUSE_NEW_GRID) && (wxUSE_NEW_GRID)
 
 #include "wx/generic/gridsel.h"
 
@@ -931,7 +931,7 @@ void wxGridSelection::UpdateRows( size_t pos, int numRows )
     count = m_rowSelection.GetCount();
     for ( n = 0; n < count; n++ )
     {
-    int  rowOrCol_ = m_rowSelection [ n ];
+      int  rowOrCol_ = m_rowSelection [ n ];
 
       if ( ( size_t ) rowOrCol_ >= pos )
       {
@@ -1039,8 +1039,7 @@ void wxGridSelection::UpdateCols( size_t pos, int numCols )
     count = m_colSelection.GetCount();
     for ( n = 0; n < count; n++ )
     {
-
-      int   rowOrCol = m_colSelection [ n ];
+        int   rowOrCol = m_colSelection [ n ];
         if ( ( size_t ) rowOrCol >= pos )
         {
             if ( numCols > 0 )
@@ -1057,7 +1056,6 @@ void wxGridSelection::UpdateCols( size_t pos, int numCols )
                 }
             }
         }
-
     }
 
     // No need to touch selected rows, unless we removed _all_

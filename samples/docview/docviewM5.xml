@@ -480,9 +480,9 @@
                 <SETTING><NAME>MWMerge_MacOS_copyResources</NAME><VALUE>1</VALUE></SETTING>
                 <SETTING><NAME>MWMerge_MacOS_skipResources</NAME>
                     <SETTING><VALUE></VALUE></SETTING>
-                    <SETTING><VALUE>îÛ–</VALUE></SETTING>
-                    <SETTING><VALUE>	=√H</VALUE></SETTING>
-                    <SETTING><VALUE>	=ÿ:</VALUE></SETTING>
+                    <SETTING><VALUE>{ê</VALUE></SETTING>
+                    <SETTING><VALUE>%#H</VALUE></SETTING>
+                    <SETTING><VALUE>%8*</VALUE></SETTING>
                 </SETTING>
 
                 <!-- Settings for "PPC CodeGen" panel -->
@@ -557,7 +557,7 @@
                 <!-- Settings for "PPC Project" panel -->
                 <SETTING><NAME>MWProject_PPC_type</NAME><VALUE>Application</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_outfile</NAME><VALUE>docview Classic Release</VALUE></SETTING>
-                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1465404737</VALUE></SETTING>
+                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1061109567</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_filetype</NAME><VALUE>1095782476</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_size</NAME><VALUE>3840</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_minsize</NAME><VALUE>3840</VALUE></SETTING>
@@ -851,34 +851,6 @@
                     <FILEKIND>Library</FILEKIND>
                     <FILEFLAGS></FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -1064,26 +1036,6 @@
                 <FILEREF>
                     <PATHTYPE>Name</PATHTYPE>
                     <PATH>UnicodeConverter</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
                     <PATHFORMAT>MacOS</PATHFORMAT>
                 </FILEREF>
             </LINKORDER>
@@ -1528,9 +1480,9 @@
                 <SETTING><NAME>MWMerge_MacOS_copyResources</NAME><VALUE>1</VALUE></SETTING>
                 <SETTING><NAME>MWMerge_MacOS_skipResources</NAME>
                     <SETTING><VALUE></VALUE></SETTING>
-                    <SETTING><VALUE>îÛ–</VALUE></SETTING>
-                    <SETTING><VALUE>	=√H</VALUE></SETTING>
-                    <SETTING><VALUE>	=ÿ:</VALUE></SETTING>
+                    <SETTING><VALUE>{ê</VALUE></SETTING>
+                    <SETTING><VALUE>%#H</VALUE></SETTING>
+                    <SETTING><VALUE>%8*</VALUE></SETTING>
                 </SETTING>
 
                 <!-- Settings for "PPC CodeGen" panel -->
@@ -1605,7 +1557,7 @@
                 <!-- Settings for "PPC Project" panel -->
                 <SETTING><NAME>MWProject_PPC_type</NAME><VALUE>Application</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_outfile</NAME><VALUE>docview Classic Debug</VALUE></SETTING>
-                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1465404737</VALUE></SETTING>
+                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1061109567</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_filetype</NAME><VALUE>1095782476</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_size</NAME><VALUE>3840</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_minsize</NAME><VALUE>3840</VALUE></SETTING>
@@ -1899,34 +1851,6 @@
                     <FILEKIND>Library</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -2112,26 +2036,6 @@
                 <FILEREF>
                     <PATHTYPE>Name</PATHTYPE>
                     <PATH>UnicodeConverter</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
                     <PATHFORMAT>MacOS</PATHFORMAT>
                 </FILEREF>
             </LINKORDER>
@@ -2568,9 +2472,9 @@
                 <SETTING><NAME>MWMerge_MacOS_copyResources</NAME><VALUE>1</VALUE></SETTING>
                 <SETTING><NAME>MWMerge_MacOS_skipResources</NAME>
                     <SETTING><VALUE></VALUE></SETTING>
-                    <SETTING><VALUE>îÛ–</VALUE></SETTING>
-                    <SETTING><VALUE>	=√H</VALUE></SETTING>
-                    <SETTING><VALUE>	=ÿ:</VALUE></SETTING>
+                    <SETTING><VALUE>{ê</VALUE></SETTING>
+                    <SETTING><VALUE>%#H</VALUE></SETTING>
+                    <SETTING><VALUE>%8*</VALUE></SETTING>
                 </SETTING>
 
                 <!-- Settings for "PPC CodeGen" panel -->
@@ -2645,7 +2549,7 @@
                 <!-- Settings for "PPC Project" panel -->
                 <SETTING><NAME>MWProject_PPC_type</NAME><VALUE>Application</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_outfile</NAME><VALUE>docview Carbon Debug</VALUE></SETTING>
-                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1465404737</VALUE></SETTING>
+                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1061109567</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_filetype</NAME><VALUE>1095782476</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_size</NAME><VALUE>3840</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_minsize</NAME><VALUE>3840</VALUE></SETTING>
@@ -2778,41 +2682,6 @@
                     <FILEKIND>Library</FILEKIND>
                     <FILEFLAGS>Debug</FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>CarbonFrameworkLib</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Library</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS>Debug</FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -2883,31 +2752,6 @@
                 <FILEREF>
                     <PATHTYPE>Name</PATHTYPE>
                     <PATH>CarbonLib</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>CarbonFrameworkLib</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
                     <PATHFORMAT>MacOS</PATHFORMAT>
                 </FILEREF>
             </LINKORDER>
@@ -3344,9 +3188,9 @@
                 <SETTING><NAME>MWMerge_MacOS_copyResources</NAME><VALUE>1</VALUE></SETTING>
                 <SETTING><NAME>MWMerge_MacOS_skipResources</NAME>
                     <SETTING><VALUE></VALUE></SETTING>
-                    <SETTING><VALUE>îÛ–</VALUE></SETTING>
-                    <SETTING><VALUE>	=√H</VALUE></SETTING>
-                    <SETTING><VALUE>	=ÿ:</VALUE></SETTING>
+                    <SETTING><VALUE>{ê</VALUE></SETTING>
+                    <SETTING><VALUE>%#H</VALUE></SETTING>
+                    <SETTING><VALUE>%8*</VALUE></SETTING>
                 </SETTING>
 
                 <!-- Settings for "PPC CodeGen" panel -->
@@ -3421,7 +3265,7 @@
                 <!-- Settings for "PPC Project" panel -->
                 <SETTING><NAME>MWProject_PPC_type</NAME><VALUE>Application</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_outfile</NAME><VALUE>docview Carbon Release</VALUE></SETTING>
-                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1465404737</VALUE></SETTING>
+                <SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>1061109567</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_filetype</NAME><VALUE>1095782476</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_size</NAME><VALUE>3840</VALUE></SETTING>
                 <SETTING><NAME>MWProject_PPC_minsize</NAME><VALUE>3840</VALUE></SETTING>
@@ -3554,41 +3398,6 @@
                     <FILEKIND>Library</FILEKIND>
                     <FILEFLAGS></FILEFLAGS>
                 </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>CarbonFrameworkLib</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Library</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
-                <FILE>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                    <FILEKIND>Text</FILEKIND>
-                    <FILEFLAGS></FILEFLAGS>
-                </FILE>
             </FILELIST>
             <LINKORDER>
                 <FILEREF>
@@ -3661,31 +3470,6 @@
                     <PATH>CarbonLib</PATH>
                     <PATHFORMAT>MacOS</PATHFORMAT>
                 </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>CarbonFrameworkLib</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>doc.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>docview.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>mondrian.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>chart.r</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
             </LINKORDER>
         </TARGET>
     </TARGETLIST>
@@ -3714,30 +3498,6 @@
             <TARGETNAME>Classic Release</TARGETNAME>
             <PATHTYPE>Name</PATHTYPE>
             <PATH>view.cpp</PATH>
-            <PATHFORMAT>MacOS</PATHFORMAT>
-        </FILEREF>
-        <FILEREF>
-            <TARGETNAME>Classic Release</TARGETNAME>
-            <PATHTYPE>Name</PATHTYPE>
-            <PATH>chart.r</PATH>
-            <PATHFORMAT>MacOS</PATHFORMAT>
-        </FILEREF>
-        <FILEREF>
-            <TARGETNAME>Classic Release</TARGETNAME>
-            <PATHTYPE>Name</PATHTYPE>
-            <PATH>doc.r</PATH>
-            <PATHFORMAT>MacOS</PATHFORMAT>
-        </FILEREF>
-        <FILEREF>
-            <TARGETNAME>Classic Release</TARGETNAME>
-            <PATHTYPE>Name</PATHTYPE>
-            <PATH>docview.r</PATH>
-            <PATHFORMAT>MacOS</PATHFORMAT>
-        </FILEREF>
-        <FILEREF>
-            <TARGETNAME>Classic Release</TARGETNAME>
-            <PATHTYPE>Name</PATHTYPE>
-            <PATH>mondrian.r</PATH>
             <PATHFORMAT>MacOS</PATHFORMAT>
         </FILEREF>
         <GROUP><NAME>wx</NAME>
@@ -3848,12 +3608,6 @@
                     <TARGETNAME>Carbon Debug</TARGETNAME>
                     <PATHTYPE>Name</PATHTYPE>
                     <PATH>CarbonLib</PATH>
-                    <PATHFORMAT>MacOS</PATHFORMAT>
-                </FILEREF>
-                <FILEREF>
-                    <TARGETNAME>Carbon Debug</TARGETNAME>
-                    <PATHTYPE>Name</PATHTYPE>
-                    <PATH>CarbonFrameworkLib</PATH>
                     <PATHFORMAT>MacOS</PATHFORMAT>
                 </FILEREF>
             </GROUP>

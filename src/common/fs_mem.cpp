@@ -7,14 +7,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA) && !defined(__EMX__)
-// Some older compilers (such as EMX) cannot handle
-// #pragma interface/implementation correctly, iff 
-// #pragma implementation is used in _two_ translation
-// units (as created by e.g. event.cpp compiled for
-// libwx_base and event.cpp compiled for libwx_gui_core).
-// So we must not use those pragmas for those compilers in
-// such files.
+#ifdef __GNUG__
 #pragma implementation "fs_mem.h"
 #endif
 
@@ -26,19 +19,14 @@
 
 #if wxUSE_FILESYSTEM && wxUSE_STREAMS
 
-#include "wx/fs_mem.h"
-
-#if wxUSE_GUI
-    #include "wx/image.h"
-    #include "wx/bitmap.h"
-#endif // wxUSE_GUI
-
 #ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/hash.h"
 #endif
 
+#include "wx/filesys.h"
+#include "wx/fs_mem.h"
 #include "wx/mstream.h"
 
 class MemFSHashObj : public wxObject
@@ -50,7 +38,7 @@ class MemFSHashObj : public wxObject
             m_Data = new char[len];
             memcpy(m_Data, data, len);
             m_Len = len;
-            InitTime();
+            m_Time = wxDateTime::Now();
         }
 
         MemFSHashObj(wxMemoryOutputStream& stream)
@@ -58,7 +46,7 @@ class MemFSHashObj : public wxObject
             m_Len = stream.GetSize();
             m_Data = new char[m_Len];
             stream.CopyTo(m_Data, m_Len);
-            InitTime();
+            m_Time = wxDateTime::Now();
         }
 
         ~MemFSHashObj()
@@ -68,22 +56,8 @@ class MemFSHashObj : public wxObject
 
         char *m_Data;
         size_t m_Len;
-#if wxUSE_DATETIME
         wxDateTime m_Time;
-#endif // wxUSE_DATETIME
-
-    DECLARE_NO_COPY_CLASS(MemFSHashObj)
-
-    private:
-        void InitTime()
-        {
-#if wxUSE_DATETIME
-            m_Time = wxDateTime::Now();
-#endif // wxUSE_DATETIME            
-        }
 };
-
-#if wxUSE_BASE
 
 
 //--------------------------------------------------------------------------------
@@ -91,32 +65,28 @@ class MemFSHashObj : public wxObject
 //--------------------------------------------------------------------------------
 
 
-wxHashTable *wxMemoryFSHandlerBase::m_Hash = NULL;
+wxHashTable *wxMemoryFSHandler::m_Hash = NULL;
 
 
-wxMemoryFSHandlerBase::wxMemoryFSHandlerBase() : wxFileSystemHandler()
+wxMemoryFSHandler::wxMemoryFSHandler() : wxFileSystemHandler()
 {
 }
 
 
 
-wxMemoryFSHandlerBase::~wxMemoryFSHandlerBase()
+wxMemoryFSHandler::~wxMemoryFSHandler()
 {
     // as only one copy of FS handler is supposed to exist, we may silently
     // delete static data here. (There is no way how to remove FS handler from
     // wxFileSystem other than releasing _all_ handlers.)
 
-    if (m_Hash)
-    {
-        WX_CLEAR_HASH_TABLE(*m_Hash);
-        delete m_Hash;
-        m_Hash = NULL;
-    }
+    if (m_Hash) delete m_Hash;
+    m_Hash = NULL;
 }
 
 
 
-bool wxMemoryFSHandlerBase::CanOpen(const wxString& location)
+bool wxMemoryFSHandler::CanOpen(const wxString& location)
 {
     wxString p = GetProtocol(location);
     return (p == wxT("memory"));
@@ -125,7 +95,7 @@ bool wxMemoryFSHandlerBase::CanOpen(const wxString& location)
 
 
 
-wxFSFile* wxMemoryFSHandlerBase::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& location)
+wxFSFile* wxMemoryFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& location)
 {
     if (m_Hash)
     {
@@ -134,40 +104,38 @@ wxFSFile* wxMemoryFSHandlerBase::OpenFile(wxFileSystem& WXUNUSED(fs), const wxSt
         else return new wxFSFile(new wxMemoryInputStream(obj -> m_Data, obj -> m_Len),
                             location,
                             GetMimeTypeFromExt(location),
-                            GetAnchor(location)
-#if wxUSE_DATETIME
-                            , obj -> m_Time
-#endif // wxUSE_DATETIME                            
-                            );
+                            GetAnchor(location),
+                            obj -> m_Time);
     }
     else return NULL;
 }
 
 
 
-wxString wxMemoryFSHandlerBase::FindFirst(const wxString& WXUNUSED(spec),
+wxString wxMemoryFSHandler::FindFirst(const wxString& WXUNUSED(spec),
                                       int WXUNUSED(flags))
 {
-    wxFAIL_MSG(wxT("wxMemoryFSHandlerBase::FindFirst not implemented"));
+    wxFAIL_MSG(wxT("wxMemoryFSHandler::FindFirst not implemented"));
 
     return wxEmptyString;
 }
 
 
 
-wxString wxMemoryFSHandlerBase::FindNext()
+wxString wxMemoryFSHandler::FindNext()
 {
-    wxFAIL_MSG(wxT("wxMemoryFSHandlerBase::FindNext not implemented"));
+    wxFAIL_MSG(wxT("wxMemoryFSHandler::FindNext not implemented"));
 
     return wxEmptyString;
 }
 
 
-bool wxMemoryFSHandlerBase::CheckHash(const wxString& filename)
+bool wxMemoryFSHandler::CheckHash(const wxString& filename)
 {
     if (m_Hash == NULL)
     {
         m_Hash = new wxHashTable(wxKEY_STRING);
+        m_Hash -> DeleteContents(TRUE);
     }
 
     if (m_Hash -> Get(filename) != NULL)
@@ -182,13 +150,42 @@ bool wxMemoryFSHandlerBase::CheckHash(const wxString& filename)
 }
 
 
-/*static*/ void wxMemoryFSHandlerBase::AddFile(const wxString& filename, const wxString& textdata)
+
+#if wxUSE_GUI
+
+/*static*/ void wxMemoryFSHandler::AddFile(const wxString& filename, wxImage& image, long type)
+{
+    if (!CheckHash(filename)) return;
+
+
+    wxMemoryOutputStream mems;
+    if (image.Ok() && image.SaveFile(mems, (int)type))
+        m_Hash -> Put(filename, new MemFSHashObj(mems));
+    else
+    {
+        wxString s;
+        s.Printf(_("Failed to store image '%s' to memory VFS!"), filename.c_str());
+        wxPrintf(wxT("'%s'\n"), s.c_str());
+        wxLogError(s);
+    }
+}
+
+
+/*static*/ void wxMemoryFSHandler::AddFile(const wxString& filename, const wxBitmap& bitmap, long type)
+{
+    wxImage img = bitmap.ConvertToImage();
+    AddFile(filename, img, type);
+}
+
+#endif
+
+/*static*/ void wxMemoryFSHandler::AddFile(const wxString& filename, const wxString& textdata)
 {
     AddFile(filename, (const void*) textdata.mb_str(), textdata.Length());
 }
 
 
-/*static*/ void wxMemoryFSHandlerBase::AddFile(const wxString& filename, const void *binarydata, size_t size)
+/*static*/ void wxMemoryFSHandler::AddFile(const wxString& filename, const void *binarydata, size_t size)
 {
     if (!CheckHash(filename)) return;
     m_Hash -> Put(filename, new MemFSHashObj(binarydata, size));
@@ -196,7 +193,7 @@ bool wxMemoryFSHandlerBase::CheckHash(const wxString& filename)
 
 
 
-/*static*/ void wxMemoryFSHandlerBase::RemoveFile(const wxString& filename)
+/*static*/ void wxMemoryFSHandler::RemoveFile(const wxString& filename)
 {
     if (m_Hash == NULL ||
         m_Hash -> Get(filename) == NULL)
@@ -210,37 +207,6 @@ bool wxMemoryFSHandlerBase::CheckHash(const wxString& filename)
         delete m_Hash -> Delete(filename);
 }
 
-#endif // wxUSE_BASE
-
-#if wxUSE_GUI
-
-#if wxUSE_IMAGE
-/*static*/ void
-wxMemoryFSHandler::AddFile(const wxString& filename, wxImage& image, long type)
-{
-    if (!CheckHash(filename)) return;
-
-    wxMemoryOutputStream mems;
-    if (image.Ok() && image.SaveFile(mems, (int)type))
-        m_Hash -> Put(filename, new MemFSHashObj(mems));
-    else
-    {
-        wxString s;
-        s.Printf(_("Failed to store image '%s' to memory VFS!"), filename.c_str());
-        wxPrintf(wxT("'%s'\n"), s.c_str());
-        wxLogError(s);
-    }
-}
-#endif // wxUSE_IMAGE
-
-/*static*/ void wxMemoryFSHandler::AddFile(const wxString& filename, const wxBitmap& bitmap, long type)
-{
-    wxImage img = bitmap.ConvertToImage();
-    AddFile(filename, img, type);
-}
-
-#endif
 
 
 #endif // wxUSE_FILESYSTEM && wxUSE_FS_ZIP
-

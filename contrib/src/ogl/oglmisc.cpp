@@ -24,10 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#if wxUSE_PROLOGIO
-#include <wx/deprecated/wxexpr.h>
-#endif
-
+#include <wx/wxexpr.h>
 #include <wx/types.h>
 
 #ifdef new
@@ -38,8 +35,11 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "wx/ogl/ogl.h"
-
+#include <wx/ogl/basic.h>
+#include <wx/ogl/basicp.h>
+#include <wx/ogl/misc.h>
+#include <wx/ogl/constrnt.h>
+#include <wx/ogl/composit.h>
 
 wxFont*         g_oglNormalFont;
 wxPen*          g_oglBlackPen;
@@ -49,7 +49,7 @@ wxBrush*        g_oglWhiteBackgroundBrush;
 wxPen*          g_oglBlackForegroundPen;
 wxCursor*       g_oglBullseyeCursor = NULL;
 
-wxChar*           oglBuffer = NULL;
+char*           oglBuffer = NULL;
 
 wxList          oglObjectCopyMapping(wxKEY_INTEGER);
 
@@ -71,7 +71,7 @@ void wxOGLInitialize()
   OGLInitializeConstraintTypes();
 
   // Initialize big buffer used when writing images
-  oglBuffer = new wxChar[3000];
+  oglBuffer = new char[3000];
 
 }
 
@@ -83,7 +83,6 @@ void wxOGLCleanUp()
         oglBuffer = NULL;
     }
     oglBuffer = NULL;
-
     if (g_oglBullseyeCursor)
     {
         delete g_oglBullseyeCursor;
@@ -341,7 +340,7 @@ void oglCentreTextNoClipping(wxDC& dc, wxList *text_list,
 }
 
 void oglGetCentredTextExtent(wxDC& dc, wxList *text_list,
-                              double WXUNUSED(m_xpos), double WXUNUSED(m_ypos), double WXUNUSED(width), double WXUNUSED(height),
+                              double m_xpos, double m_ypos, double width, double height,
                               double *actual_width, double *actual_height)
 {
   int n = text_list->GetCount();
@@ -378,7 +377,7 @@ void oglGetCentredTextExtent(wxDC& dc, wxList *text_list,
 
 // Format a string to a list of strings that fit in the given box.
 // Interpret %n and 10 or 13 as a new line.
-wxStringList *oglFormatText(wxDC& dc, const wxString& text, double width, double WXUNUSED(height), int formatMode)
+wxStringList *oglFormatText(wxDC& dc, const wxString& text, double width, double height, int formatMode)
 {
   // First, parse the string into a list of words
   wxStringList word_list;

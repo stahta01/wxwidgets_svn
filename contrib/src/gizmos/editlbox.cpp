@@ -158,11 +158,11 @@ wxEditableListBox::wxEditableListBox(wxWindow *parent, wxWindowID id,
     subsizer->Add(m_bDown, 0, wxALIGN_CENTRE_VERTICAL | wxTOP | wxBOTTOM, BTN_BORDER);
 
 #if wxUSE_TOOLTIPS
-    if ( m_bEdit ) m_bEdit->SetToolTip(_("Edit item"));
-    if ( m_bNew ) m_bNew->SetToolTip(_("New item"));
-    if ( m_bDel ) m_bDel->SetToolTip(_("Delete item"));
-    m_bUp->SetToolTip(_("Move up"));
-    m_bDown->SetToolTip(_("Move down"));
+    if ( m_bEdit ) m_bEdit->SetToolTip(wxT("Edit item"));
+    if ( m_bNew ) m_bNew->SetToolTip(wxT("New item"));
+    if ( m_bDel ) m_bDel->SetToolTip(wxT("Delete item"));
+    m_bUp->SetToolTip(wxT("Move up"));
+    m_bDown->SetToolTip(wxT("Move down"));
 #endif
 
     subp->SetAutoLayout(TRUE);
@@ -217,7 +217,7 @@ void wxEditableListBox::OnItemSelected(wxListEvent& event)
         m_bDel->Enable(m_selection < m_listCtrl->GetItemCount()-1);
 }
 
-void wxEditableListBox::OnNewItem(wxCommandEvent& WXUNUSED(event))
+void wxEditableListBox::OnNewItem(wxCommandEvent& event)
 {
     m_listCtrl->SetItemState(m_listCtrl->GetItemCount()-1,
                              wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
@@ -236,19 +236,19 @@ void wxEditableListBox::OnEndLabelEdit(wxListEvent& event)
     }
 }
 
-void wxEditableListBox::OnDelItem(wxCommandEvent& WXUNUSED(event))
+void wxEditableListBox::OnDelItem(wxCommandEvent& event)
 {
     m_listCtrl->DeleteItem(m_selection);
     m_listCtrl->SetItemState(m_selection,
                              wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
-void wxEditableListBox::OnEditItem(wxCommandEvent& WXUNUSED(event))
+void wxEditableListBox::OnEditItem(wxCommandEvent& event)
 {
     m_listCtrl->EditLabel(m_selection);
 }
 
-void wxEditableListBox::OnUpItem(wxCommandEvent& WXUNUSED(event))
+void wxEditableListBox::OnUpItem(wxCommandEvent& event)
 {
     wxString t1, t2;
 
@@ -260,7 +260,7 @@ void wxEditableListBox::OnUpItem(wxCommandEvent& WXUNUSED(event))
                              wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
-void wxEditableListBox::OnDownItem(wxCommandEvent& WXUNUSED(event))
+void wxEditableListBox::OnDownItem(wxCommandEvent& event)
 {
     wxString t1, t2;
 

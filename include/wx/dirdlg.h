@@ -12,6 +12,7 @@
 WXDLLEXPORT_DATA(extern const wxChar*) wxDirDialogNameStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxDirDialogDefaultFolderStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxDirSelectorPromptStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 
 #define wxDD_DEFAULT_STYLE \
     (wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxDD_NEW_DIR_BUTTON)
@@ -43,7 +44,7 @@ public:
 */
 
 #if defined(__WXMSW__)
-    #if defined(__WXWINCE__) || (defined(__GNUWIN32__) && !wxUSE_NORLANDER_HEADERS) || defined(__SALFORDC__) || !wxUSE_OLE
+    #if defined(__WIN16__) || (defined(__GNUWIN32__) && !wxUSE_NORLANDER_HEADERS) || defined(__SALFORDC__) || !wxUSE_OLE
         #include "wx/generic/dirdlgg.h"
         #define wxDirDialog wxGenericDirDialog
     #else
@@ -59,8 +60,6 @@ public:
     #include "wx/generic/dirdlgg.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/dirdlg.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/generic/dirdlgg.h"
 #elif defined(__WXPM__)
     #include "wx/generic/dirdlgg.h"
 #endif

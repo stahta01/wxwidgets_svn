@@ -13,7 +13,6 @@
 #endif
 
 #include "wx/defs.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 #include "wx/mmedia/sndcodec.h"
 #include "wx/mmedia/sndbase.h"
@@ -30,7 +29,7 @@ typedef struct g72x_state g72state;
 //
 // G72X format
 //
-class WXDLLIMPEXP_MMEDIA wxSoundFormatG72X: public wxSoundFormatBase {
+class WXDLLEXPORT wxSoundFormatG72X: public wxSoundFormatBase {
  public:
   wxSoundFormatG72X();
   ~wxSoundFormatG72X();
@@ -58,8 +57,8 @@ class WXDLLIMPEXP_MMEDIA wxSoundFormatG72X: public wxSoundFormatBase {
 // ULAW converter class
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundRouterStream;
-class WXDLLIMPEXP_MMEDIA wxSoundStreamG72X: public wxSoundStreamCodec {
+class WXDLLEXPORT wxSoundRouterStream;
+class WXDLLEXPORT wxSoundStreamG72X: public wxSoundStreamCodec {
  public:
   wxSoundStreamG72X(wxSoundStream& sndio);
   ~wxSoundStreamG72X();

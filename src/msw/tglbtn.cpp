@@ -93,7 +93,7 @@ bool wxToggleButton::Create(wxWindow *parent, wxWindowID id,
 
    WXDWORD exStyle = 0;
    long msStyle = MSWGetStyle(style, & exStyle) ;
-
+    
    msStyle |= BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP ;
 
 #ifdef __WIN32__

@@ -1,24 +1,24 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        statbox.h
 // Purpose:     wxStaticBox class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_STATBOX_H_
 #define _WX_STATBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "statbox.h"
 #endif
 
 #include "wx/control.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxStaticBoxNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxStaticBoxNameStr;
 
 // Group box
 class WXDLLEXPORT wxStaticBox: public wxControl

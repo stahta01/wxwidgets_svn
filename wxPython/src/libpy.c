@@ -5,10 +5,10 @@
  * Contains variable linking and pointer type-checking code.
  ************************************************************************/
 
-#include "Python.h"
-
 #include <string.h>
 #include <stdlib.h>
+
+#include "Python.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -402,7 +402,6 @@ SWIGSTATICRUNTIME(char *)
 SWIG_GetPtrObj(PyObject *obj, void **ptr, char *type) {
   PyObject *sobj = obj;
   char     *str;
-
   if (!PyString_Check(obj)) {
       if (!PyInstance_Check(obj) || !(sobj = PyObject_GetAttrString(obj,"this")))
           return "";

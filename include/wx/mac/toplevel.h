@@ -1,18 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name:        wx/mac/toplevel.h
 // Purpose:     wxTopLevelWindowMac is the Mac implementation of wxTLW
-// Author:      Stefan Csomor
+// Author:      Vadim Zeitlin
 // Modified by:
 // Created:     20.09.01
 // RCS-ID:      $Id$
-// Copyright:   (c) 2001 Stefan Csomor
+// Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MSW_TOPLEVEL_H_
 #define _WX_MSW_TOPLEVEL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "toplevel.h"
 #endif
 
@@ -58,7 +58,7 @@ public:
     virtual void SetIcons(const wxIconBundle& icons) { SetIcon( icons.GetIcon( -1 ) ); }
     virtual void Restore();
 
-    virtual bool SetShape(const wxRegion& region);
+    /*virtual*/ bool SetShape(const wxRegion& region);
 
     virtual bool ShowFullScreen(bool WXUNUSED(show), long WXUNUSED(style) = wxFULLSCREEN_ALL)
     { return FALSE; }
@@ -67,7 +67,6 @@ public:
     // implementation from now on
     // --------------------------
 
-    static void MacDelayedDeactivation(long timestamp);
     virtual void MacCreateRealWindow( const wxString& title,
                                       const wxPoint& pos,
                                       const wxSize& size,
@@ -75,18 +74,16 @@ public:
                                       const wxString& name ) ;
     static WXWindow MacGetWindowInUpdate() { return s_macWindowInUpdate ; }
     virtual void MacGetPortParams(WXPOINTPTR localOrigin, WXRECTPTR clipRect, WXWindow *window , wxWindowMac** rootwin ) ;
-    virtual void ClearBackground() ;
+    virtual void Clear() ;
     virtual WXWidget MacGetContainerForEmbedding() ;
     WXWindow MacGetWindowRef() { return m_macWindow ; }
-    virtual void MacActivate( long timestamp , bool inIsActivating ) ;
+    virtual void MacActivate( WXEVENTREF ev , bool inIsActivating ) ;
     virtual void MacUpdate( long timestamp ) ;
-#if !TARGET_CARBON
     virtual void MacMouseDown( WXEVENTREF ev , short windowPart ) ;
     virtual void MacMouseUp( WXEVENTREF ev , short windowPart ) ;
     virtual void MacMouseMoved( WXEVENTREF ev , short windowPart ) ;
     virtual void MacKeyDown( WXEVENTREF ev ) ;
-#endif
-    virtual void MacFireMouseEvent( wxUint16 kind , wxInt32 x , wxInt32 y ,wxUint32 modifiers , long timestamp ) ;
+    virtual void MacFireMouseEvent( WXEVENTREF ev ) ;
     virtual void Raise();
     virtual void Lower();
     virtual void SetTitle( const wxString& title);
@@ -94,10 +91,7 @@ public:
     virtual void DoMoveWindow(int x, int y, int width, int height);
     void MacInvalidate( const WXRECTPTR rect, bool eraseBackground ) ;
     short MacGetWindowBackgroundTheme() const { return m_macWindowBackgroundTheme ; }
-
-#if TARGET_CARBON
-    WXEVENTHANDLERREF    MacGetEventHandler() { return m_macEventHandler ; }
-#endif
+    virtual void MacInstallEventHandler() ;
 protected:
     // common part of all ctors
     void Init();
@@ -115,13 +109,9 @@ protected:
     wxWindowMac* m_macFocus ;
     WXHRGN m_macNoEraseUpdateRgn ;
     bool m_macNeedsErasing ;
+    void* m_macEventHandler ;
 
     static WXWindow s_macWindowInUpdate ;
-    static wxTopLevelWindowMac *s_macDeactivateWindow;
-private :
-#if TARGET_CARBON
-    WXEVENTHANDLERREF    m_macEventHandler ;
-#endif
 };
 
 // list of all frames and modeless dialogs

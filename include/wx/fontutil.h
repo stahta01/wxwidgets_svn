@@ -6,7 +6,7 @@
 // Created:     05.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // General note: this header is private to wxWindows and is not supposed to be
@@ -16,7 +16,7 @@
 #ifndef _WX_FONTUTIL_H_
 #define _WX_FONTUTIL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "fontutil.h"
 #endif
 
@@ -30,8 +30,6 @@
     #include <windows.h>
     #include "wx/msw/winundef.h"
 #endif
-
-struct WXDLLEXPORT wxNativeEncodingInfo;
 
 #if defined(_WX_X_FONTLIKE)
 

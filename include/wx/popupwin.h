@@ -6,13 +6,13 @@
 // Created:     06.01.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_POPUPWIN_H_BASE_
 #define _WX_POPUPWIN_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "popupwinbase.h"
 #endif
 
@@ -45,8 +45,6 @@ public:
     // the point must be given in screen coordinates!
     virtual void Position(const wxPoint& ptOrigin,
                           const wxSize& size);
-
-    DECLARE_NO_COPY_CLASS(wxPopupWindowBase)
 };
 
 
@@ -129,7 +127,6 @@ protected:
     wxPopupFocusHandler  *m_handlerFocus;
 
     DECLARE_DYNAMIC_CLASS(wxPopupTransientWindow)
-    DECLARE_NO_COPY_CLASS(wxPopupTransientWindow)
 };
 
 #if wxUSE_COMBOBOX && defined(__WXUNIVERSAL__)

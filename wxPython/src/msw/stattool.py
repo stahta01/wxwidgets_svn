@@ -241,9 +241,6 @@ class wxToolBarBasePtr(wxControlPtr):
     def SetToolClientData(self, *_args, **_kwargs):
         val = stattoolc.wxToolBarBase_SetToolClientData(self, *_args, **_kwargs)
         return val
-    def GetToolPos(self, *_args, **_kwargs):
-        val = stattoolc.wxToolBarBase_GetToolPos(self, *_args, **_kwargs)
-        return val
     def GetToolState(self, *_args, **_kwargs):
         val = stattoolc.wxToolBarBase_GetToolState(self, *_args, **_kwargs)
         return val
@@ -477,6 +474,33 @@ def wxPreToolBar(*_args,**_kwargs):
     return val
 
 
+class wxToolBarSimplePtr(wxToolBarBasePtr):
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def Create(self, *_args, **_kwargs):
+        val = stattoolc.wxToolBarSimple_Create(self, *_args, **_kwargs)
+        return val
+    def FindToolForPosition(self, *_args, **_kwargs):
+        val = stattoolc.wxToolBarSimple_FindToolForPosition(self, *_args, **_kwargs)
+        return val
+    def __repr__(self):
+        return "<%s.%s instance; proxy of C++ wxToolBarSimple instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
+class wxToolBarSimple(wxToolBarSimplePtr):
+    def __init__(self,*_args,**_kwargs):
+        self.this = stattoolc.new_wxToolBarSimple(*_args,**_kwargs)
+        self.thisown = 1
+        self._setOORInfo(self)
+
+
+
+def wxPreToolBarSimple(*_args,**_kwargs):
+    val = wxToolBarSimplePtr(stattoolc.new_wxPreToolBarSimple(*_args,**_kwargs))
+    val.thisown = 1
+    val._setOORInfo(val)
+    return val
+
+
 
 
 #-------------- FUNCTION WRAPPERS ------------------
@@ -488,14 +512,3 @@ def wxPreToolBar(*_args,**_kwargs):
 wxTOOL_STYLE_BUTTON = stattoolc.wxTOOL_STYLE_BUTTON
 wxTOOL_STYLE_SEPARATOR = stattoolc.wxTOOL_STYLE_SEPARATOR
 wxTOOL_STYLE_CONTROL = stattoolc.wxTOOL_STYLE_CONTROL
-wxTB_HORIZONTAL = stattoolc.wxTB_HORIZONTAL
-wxTB_VERTICAL = stattoolc.wxTB_VERTICAL
-wxTB_3DBUTTONS = stattoolc.wxTB_3DBUTTONS
-wxTB_FLAT = stattoolc.wxTB_FLAT
-wxTB_DOCKABLE = stattoolc.wxTB_DOCKABLE
-wxTB_NOICONS = stattoolc.wxTB_NOICONS
-wxTB_TEXT = stattoolc.wxTB_TEXT
-wxTB_NODIVIDER = stattoolc.wxTB_NODIVIDER
-wxTB_NOALIGN = stattoolc.wxTB_NOALIGN
-wxTB_HORZ_LAYOUT = stattoolc.wxTB_HORZ_LAYOUT
-wxTB_HORZ_TEXT = stattoolc.wxTB_HORZ_TEXT

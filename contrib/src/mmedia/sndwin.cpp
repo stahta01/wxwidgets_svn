@@ -121,10 +121,14 @@ wxSoundStreamWin::~wxSoundStreamWin()
 // -----------------------------------------------------------------------
 // _wxSoundHandlerWndProc: Window callback to handle buffer completion
 // -----------------------------------------------------------------------
-LRESULT APIENTRY _EXPORT 
+/*
+LRESULT APIENTRY _EXPORT
+*/
+
+LRESULT WXDLLEXPORT APIENTRY _EXPORT 
 
  _wxSoundHandlerWndProc(HWND hWnd, UINT message,
-                 WPARAM wParam, LPARAM WXUNUSED(lParam))
+                 WPARAM wParam, LPARAM lParam)
 {
   wxSoundStreamWin *sndwin;
 
@@ -154,13 +158,13 @@ void wxSoundStreamWin::CreateSndWindow()
 {
   FARPROC proc = MakeProcInstance((FARPROC)_wxSoundHandlerWndProc,
                                   wxGetInstance());
-  // NB: class name must be kept in sync with wxCanvasClassName in 
-  // src/msw/app.cpp!
-  m_internal->m_sndWin = ::CreateWindow(wxT("wxWindowClass"), NULL, 0,
+  int error;
+
+  m_internal->m_sndWin = ::CreateWindow(wxCanvasClassName, NULL, 0,
 					0, 0, 0, 0, NULL, (HMENU) NULL,
                                         wxGetInstance(), NULL);
 
-  GetLastError();
+  error = GetLastError();
 
   ::SetWindowLong(m_internal->m_sndWin, GWL_WNDPROC, (LONG)proc);
 
@@ -659,7 +663,7 @@ wxSoundStream& wxSoundStreamWin::Read(void *buffer, wxUint32 len)
 // fragment finished. It reinitializes the parameters of the fragment and
 // sends an event to the clients.
 // -------------------------------------------------------------------------
-void wxSoundStreamWin::NotifyDoneBuffer(wxUint32 WXUNUSED(dev_handle), int flag)
+void wxSoundStreamWin::NotifyDoneBuffer(wxUint32 dev_handle, int flag)
 {
     wxSoundInfoHeader *info;
     
@@ -693,7 +697,7 @@ void wxSoundStreamWin::NotifyDoneBuffer(wxUint32 WXUNUSED(dev_handle), int flag)
 // -------------------------------------------------------------------------
 // SetSoundFormat()
 // -------------------------------------------------------------------------
-bool wxSoundStreamWin::SetSoundFormat(const wxSoundFormatBase& base)
+bool wxSoundStreamWin::SetSoundFormat(wxSoundFormatBase& base)
 {
   // TODO: detect best format
   return wxSoundStream::SetSoundFormat(base);
@@ -760,7 +764,7 @@ bool wxSoundStreamWin::QueueFilled() const
 // wxSoundWinModule
 // --------------------------------------------------------------------------
 
-class wxSoundWinModule : public wxModule {
+class WXDLLEXPORT wxSoundWinModule : public wxModule {
    DECLARE_DYNAMIC_CLASS(wxSoundWinModule)
  public:
    bool OnInit();

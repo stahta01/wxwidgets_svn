@@ -11,7 +11,7 @@
 #ifndef __GTKSCROLLBARH__
 #define __GTKSCROLLBARH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "scrolbar.h"
 #endif
 
@@ -76,9 +76,6 @@ public:
 
     GtkAdjustment  *m_adjust;
     float           m_oldPos;
-
-protected:
-    virtual wxSize DoGetBestSize() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxScrollBar)

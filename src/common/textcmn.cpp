@@ -6,14 +6,14 @@
 // Created:     13.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "textctrlbase.h"
 #endif
 
@@ -69,30 +69,6 @@ wxTextCtrlBase::~wxTextCtrlBase()
 // style functions - not implemented here
 // ----------------------------------------------------------------------------
 
-wxTextAttr::wxTextAttr(const wxColour& colText,
-               const wxColour& colBack,
-               const wxFont& font,
-               wxTextAttrAlignment alignment)
-    : m_colText(colText), m_colBack(colBack), m_font(font), m_textAlignment(alignment)
-{
-    m_flags = 0;
-    m_leftIndent = 0;
-    m_rightIndent = 0;
-    if (m_colText.Ok()) m_flags |= wxTEXT_ATTR_TEXT_COLOUR;
-    if (m_colBack.Ok()) m_flags |= wxTEXT_ATTR_BACKGROUND_COLOUR;
-    if (m_font.Ok()) m_flags |= wxTEXT_ATTR_FONT;
-    if (alignment != wxTEXT_ALIGNMENT_DEFAULT)
-        m_flags |= wxTEXT_ATTR_ALIGNMENT;
-}
-
-void wxTextAttr::Init()
-{
-    m_textAlignment = wxTEXT_ALIGNMENT_DEFAULT;
-    m_flags = 0;
-    m_leftIndent = 0;
-    m_rightIndent = 0;
-}
-
 /* static */
 wxTextAttr wxTextAttr::Combine(const wxTextAttr& attr,
                                const wxTextAttr& attrDef,
@@ -125,54 +101,12 @@ wxTextAttr wxTextAttr::Combine(const wxTextAttr& attr,
             colBg = text->GetBackgroundColour();
     }
 
-    wxTextAttr newAttr(colFg, colBg, font);
-    
-    if (attr.HasAlignment())
-        newAttr.SetAlignment(attr.GetAlignment());
-    else if (attrDef.HasAlignment())
-        newAttr.SetAlignment(attrDef.GetAlignment());
-    
-    if (attr.HasTabs())
-        newAttr.SetTabs(attr.GetTabs());
-    else if (attrDef.HasTabs())
-        newAttr.SetTabs(attrDef.GetTabs());
-    
-    if (attr.HasLeftIndent())
-        newAttr.SetLeftIndent(attr.GetLeftIndent());
-    else if (attrDef.HasLeftIndent())
-        newAttr.SetLeftIndent(attrDef.GetLeftIndent());
-    
-    if (attr.HasRightIndent())
-        newAttr.SetRightIndent(attr.GetRightIndent());
-    else if (attrDef.HasRightIndent())
-        newAttr.SetRightIndent(attrDef.GetRightIndent());    
-    
-    return newAttr;
+    return wxTextAttr(colFg, colBg, font);
 }
-
-void wxTextAttr::operator= (const wxTextAttr& attr)
-{
-    m_font = attr.m_font;
-    m_colText = attr.m_colText;
-    m_colBack = attr.m_colBack;
-    m_textAlignment = attr.m_textAlignment;
-    m_leftIndent = attr.m_leftIndent;
-    m_rightIndent = attr.m_rightIndent;
-    m_tabs = attr.m_tabs;
-    m_flags = attr.m_flags;
-}
-
 
 // apply styling to text range
 bool wxTextCtrlBase::SetStyle(long WXUNUSED(start), long WXUNUSED(end),
                               const wxTextAttr& WXUNUSED(style))
-{
-    // to be implemented in derived TextCtrl classes
-    return FALSE;
-}
-
-// get the styling at the given position
-bool wxTextCtrlBase::GetStyle(long WXUNUSED(position), wxTextAttr& WXUNUSED(style))
 {
     // to be implemented in derived TextCtrl classes
     return FALSE;
@@ -239,7 +173,7 @@ bool wxTextCtrlBase::SaveFile(const wxString& filename)
     }
 
 #if wxUSE_FFILE
-    wxFFile file(filename, _T("w"));
+    wxFFile file(filename, "w");
     if ( file.IsOpened() && file.Write(GetValue()) )
     {
         // it's not modified any longer
@@ -347,16 +281,11 @@ bool wxTextCtrlBase::CanPaste() const
 // emulating key presses
 // ----------------------------------------------------------------------------
 
-#ifdef __WIN32__
-// the generic version is unused in wxMSW
-bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& WXUNUSED(event))
-{
-    return FALSE;
-}
-#else // !__WIN32__
 bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
 {
-    wxChar ch = 0;
+    // the generic version is unused in wxMSW
+#ifndef __WIN32__
+    wxChar ch;
     int keycode = event.GetKeyCode();
     switch ( keycode )
     {
@@ -398,26 +327,6 @@ bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
             ch = _T('/');
             break;
 
-        case WXK_DELETE:
-        case WXK_NUMPAD_DELETE:
-            // delete the character at cursor
-            {
-                const long pos = GetInsertionPoint(),
-                           last = GetLastPosition();
-                if ( pos < last )
-                    Remove(pos, pos + 1);
-            }
-            break;
-
-        case WXK_BACK:
-            // delete the character before the cursor
-            {
-                const long pos = GetInsertionPoint();
-                if ( pos > 0 )
-                    Remove(pos - 1, pos);
-            }
-            break;
-
         default:
             if ( keycode < 256 && keycode >= 0 && wxIsprint(keycode) )
             {
@@ -441,10 +350,10 @@ bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
 
         return TRUE;
     }
+#endif // !__WIN32__
 
     return FALSE;
 }
-#endif // !__WIN32__
 
 // ----------------------------------------------------------------------------
 // selection and ranges
@@ -473,20 +382,6 @@ wxString wxTextCtrlBase::GetRange(long from, long to) const
 
     return sel;
 }
-
-// do the window-specific processing after processing the update event
-void wxTextCtrlBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
-{
-    if ( event.GetSetEnabled() )
-        Enable(event.GetEnabled());
-    
-    if ( event.GetSetText() )
-    {
-        if ( event.GetText() != GetValue() )
-            SetValue(event.GetText());
-    }    
-}
-
 
 #else // !wxUSE_TEXTCTRL
 

@@ -36,7 +36,7 @@
 #ifndef _WX_UNIV_COMBOBOX_H_
 #define _WX_UNIV_COMBOBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univcombobox.h"
 #endif
 
@@ -82,8 +82,6 @@ public:
 
     // called immediately after the control is shown
     virtual void OnShow() = 0;
-
-    virtual wxCoord GetBestWidth() const {return 0; }
 
 protected:
     wxComboControl *m_combo;
@@ -277,13 +275,59 @@ public:
     virtual int GetSelection() const;
     void SetSelection(int n) { Select(n); }
 
-    void SetStringSelection(const wxString& WXUNUSED(s)) {  }
+    void SetStringSelection(const wxString& s) {  }
 
-    wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
+    // we have to redefine these functions here to avoid ambiguities in classes
+    // deriving from us which would arise otherwise because we inherit these
+    // methods (with different signatures) from both wxItemContainer via
+    // wxComboBoxBase (with "int n" parameter) and from wxEvtHandler via
+    // wxControl and wxComboControl (without)
+    //
+    // hopefully, a smart compiler can optimize away these simple inline
+    // wrappers so we don't suffer much from this
+
+    void SetClientData(void *data)
+    {
+        wxControl::SetClientData(data);
+    }
+
+    void *GetClientData() const
+    {
+        return wxControl::GetClientData();
+    }
+
+    void SetClientObject(wxClientData *data)
+    {
+        wxControl::SetClientObject(data);
+    }
+
+    wxClientData *GetClientObject() const
+    {
+        return wxControl::GetClientObject();
+    }
+
+    void SetClientData(int n, void* clientData)
+    {
+        wxItemContainer::SetClientData(n, clientData);
+    }
+
+    void* GetClientData(int n) const
+    {
+        return wxItemContainer::GetClientData(n);
+    }
+
+    void SetClientObject(int n, wxClientData* clientData)
+    {
+        wxItemContainer::SetClientObject(n, clientData);
+    }
+
+    wxClientData* GetClientObject(int n) const
+    {
+        return wxItemContainer::GetClientObject(n);
+    }
 
 protected:
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, int pos);
     virtual void DoSetItemClientData(int n, void* clientData);
     virtual void* DoGetItemClientData(int n) const;
     virtual void DoSetItemClientObject(int n, wxClientData* clientData);

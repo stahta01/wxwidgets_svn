@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "colrdlgg.h"
 #endif
 
@@ -206,7 +206,7 @@ void wxGenericColourDialog::OnMouseEvent(wxMouseEvent& event)
 
 void wxGenericColourDialog::OnPaint(wxPaintEvent& event)
 {
-#if !defined(__WXMOTIF__) && !defined(__WXMAC__) && !defined(__WXPM__) && !defined(__WXCOCOA__)
+#if !defined(__WXMOTIF__) && !defined(__WXMAC__) && !defined(__WXPM__)
   wxDialog::OnPaint(event);
 #endif
 

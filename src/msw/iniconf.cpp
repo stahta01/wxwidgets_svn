@@ -6,10 +6,10 @@
 // Created:     27.07.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "iniconf.h"
 #endif
 
@@ -41,7 +41,7 @@
 // _WINDOWS_ is defined when windows.h is included,
 // __WXMSW__ is defined for MS Windows compilation
 #if       defined(__WXMSW__) && !defined(_WINDOWS_)
-  #include  "wx/msw/wrapwin.h"
+  #include  <windows.h>
 #endif  //windows.h
 
 // ----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ wxIniConfig::wxIniConfig(const wxString& strAppName,
     }
 
     // set root path
-    SetPath(wxEmptyString);
+    SetPath(wxT(""));
 }
 
 wxIniConfig::~wxIniConfig()
@@ -200,28 +200,28 @@ wxString wxIniConfig::GetKeyName(const wxString& szKey) const
 // ----------------------------------------------------------------------------
 
 // not implemented
-bool wxIniConfig::GetFirstGroup(wxString& WXUNUSED(str), long& WXUNUSED(lIndex)) const
+bool wxIniConfig::GetFirstGroup(wxString& str, long& lIndex) const
 {
   wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
-bool wxIniConfig::GetNextGroup (wxString& WXUNUSED(str), long& WXUNUSED(lIndex)) const
+bool wxIniConfig::GetNextGroup (wxString& str, long& lIndex) const
 {
   wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
-bool wxIniConfig::GetFirstEntry(wxString& WXUNUSED(str), long& WXUNUSED(lIndex)) const
+bool wxIniConfig::GetFirstEntry(wxString& str, long& lIndex) const
 {
   wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
-bool wxIniConfig::GetNextEntry (wxString& WXUNUSED(str), long& WXUNUSED(lIndex)) const
+bool wxIniConfig::GetNextEntry (wxString& str, long& lIndex) const
 {
   wxFAIL_MSG("not implemented");
 
@@ -233,28 +233,28 @@ bool wxIniConfig::GetNextEntry (wxString& WXUNUSED(str), long& WXUNUSED(lIndex))
 // ----------------------------------------------------------------------------
 
 // not implemented
-size_t wxIniConfig::GetNumberOfEntries(bool WXUNUSED(bRecursive)) const
+size_t wxIniConfig::GetNumberOfEntries(bool bRecursive) const
 {
   wxFAIL_MSG("not implemented");
 
   return (size_t)-1;
 }
 
-size_t wxIniConfig::GetNumberOfGroups(bool WXUNUSED(bRecursive)) const
+size_t wxIniConfig::GetNumberOfGroups(bool bRecursive) const
 {
   wxFAIL_MSG("not implemented");
 
   return (size_t)-1;
 }
 
-bool wxIniConfig::HasGroup(const wxString& WXUNUSED(strName)) const
+bool wxIniConfig::HasGroup(const wxString& strName) const
 {
   wxFAIL_MSG("not implemented");
 
   return FALSE;
 }
 
-bool wxIniConfig::HasEntry(const wxString& WXUNUSED(strName)) const
+bool wxIniConfig::HasEntry(const wxString& strName) const
 {
   wxFAIL_MSG("not implemented");
 
@@ -449,15 +449,13 @@ bool wxIniConfig::DeleteAll()
   return TRUE;
 }
 
-bool wxIniConfig::RenameEntry(const wxString& WXUNUSED(oldName),
-                              const wxString& WXUNUSED(newName))
+bool wxIniConfig::RenameEntry(const wxString& oldName, const wxString& newName)
 {
     // Not implemented
     return FALSE;
 }
 
-bool wxIniConfig::RenameGroup(const wxString& WXUNUSED(oldName),
-                              const wxString& WXUNUSED(newName))
+bool wxIniConfig::RenameGroup(const wxString& oldName, const wxString& newName)
 {
     // Not implemented
     return FALSE;

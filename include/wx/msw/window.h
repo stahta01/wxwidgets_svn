@@ -6,7 +6,7 @@
 //              elimination of Default(), ...
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "window.h"
 #endif
 
@@ -95,6 +95,7 @@ public:
     virtual void Refresh( bool eraseBackground = TRUE,
                           const wxRect *rect = (const wxRect *) NULL );
     virtual void Update();
+    virtual void Clear();
     virtual void Freeze();
     virtual void Thaw();
 
@@ -134,11 +135,32 @@ public:
     // Accept files for dragging
     virtual void DragAcceptFiles(bool accept);
 
-#if WXWIN_COMPATIBILITY_2_4
-    wxDEPRECATED( bool GetUseCtl3D() const );
-    wxDEPRECATED( bool GetTransparentBackground() const );
-    wxDEPRECATED( void SetTransparent(bool t = TRUE) );
-#endif // WXWIN_COMPATIBILITY_2_4
+#if WXWIN_COMPATIBILITY
+    // Set/get scroll attributes
+    virtual void SetScrollRange(int orient, int range, bool refresh = TRUE);
+    virtual void SetScrollPage(int orient, int page, bool refresh = TRUE);
+    virtual int OldGetScrollRange(int orient) const;
+    virtual int GetScrollPage(int orient) const;
+
+    // event handlers
+        // Handle a control command
+    virtual void OnCommand(wxWindow& win, wxCommandEvent& event);
+
+        // Override to define new behaviour for default action (e.g. double
+        // clicking on a listbox)
+    virtual void OnDefaultAction(wxControl * WXUNUSED(initiatingItem)) { }
+#endif // WXWIN_COMPATIBILITY
+
+#if wxUSE_CARET && WXWIN_COMPATIBILITY
+    // caret manipulation (old MSW only functions, see wxCaret class for the
+    // new API)
+    void CreateCaret(int w, int h);
+    void CreateCaret(const wxBitmap *bitmap);
+    void DestroyCaret();
+    void ShowCaret(bool show);
+    void SetCaretPos(int x, int y);
+    void GetCaretPos(int *x, int *y) const;
+#endif // wxUSE_CARET
 
 #ifndef __WXUNIVERSAL__
     // Native resource loading (implemented in src/msw/nativdlg.cpp)
@@ -148,12 +170,6 @@ public:
     wxWindow* GetWindowChild1(wxWindowID id);
     wxWindow* GetWindowChild(wxWindowID id);
 #endif // __WXUNIVERSAL__
-
-#if wxUSE_HOTKEY
-    // install and deinstall a system wide hotkey
-    virtual bool RegisterHotKey(int hotkeyId, int modifiers, int keycode);
-    virtual bool UnregisterHotKey(int hotkeyId);
-#endif // wxUSE_HOTKEY
 
     // implementation from now on
     // --------------------------
@@ -165,10 +181,15 @@ public:
     void SetHWND(WXHWND hWnd) { m_hWnd = hWnd; }
     virtual WXWidget GetHandle() const { return GetHWND(); }
 
+    bool GetUseCtl3D() const { return m_useCtl3D; }
+    bool GetTransparentBackground() const { return m_backgroundTransparent; }
+    void SetTransparent(bool t = TRUE) { m_backgroundTransparent = t; }
+
     // event handlers
     // --------------
 
     void OnEraseBackground(wxEraseEvent& event);
+    void OnIdle(wxIdleEvent& event);
     void OnPaint(wxPaintEvent& event);
 
 public:
@@ -191,6 +212,15 @@ public:
     wxWindow *FindItem(long id) const;
     wxWindow *FindItemByHWND(WXHWND hWnd, bool controlOnly = FALSE) const;
 
+    // Make a Windows extended style from the given wxWindows window style
+    // OBSOLETE: do not use. Use MSWGetStyle instead.
+    static WXDWORD MakeExtendedStyle(long style,
+                                     bool eliminateBorders = FALSE);
+
+    // Determine whether 3D effects are wanted
+    // OBSOLETE: do not use. Use MSWGetStyle instead.
+    WXDWORD Determine3DEffects(WXDWORD defaultBorderStyle, bool *want3D) const;
+
     // MSW only: TRUE if this control is part of the main control
     virtual bool ContainsHWND(WXHWND WXUNUSED(hWnd)) const { return FALSE; };
 
@@ -199,7 +229,7 @@ public:
     //
     // this is the function that should be overridden in the derived classes,
     // but you will mostly use MSWGetCreateWindowFlags() below
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const ;
+    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
     // get the MSW window flags corresponding to wxWindows ones
     //
@@ -232,6 +262,11 @@ public:
                    WXDWORD exendedStyle = 0);
 
     virtual bool MSWCommand(WXUINT param, WXWORD id);
+
+#if WXWIN_COMPATIBILITY
+    wxObject *GetChild(int number) const;
+    virtual void MSWDeviceToLogical(float *x, float *y) const;
+#endif // WXWIN_COMPATIBILITY
 
 #ifndef __WXUNIVERSAL__
     // Create an appropriate wxWindow from a HWND
@@ -297,7 +332,6 @@ public:
     bool HandleMinimize();
     bool HandleMaximize();
     bool HandleSize(int x, int y, WXUINT flag);
-    bool HandleSizing(wxRect& rect);
     bool HandleGetMinMaxInfo(void *mmInfo);
 
     bool HandleShow(bool show, int status);
@@ -335,12 +369,6 @@ public:
     bool HandleChar(WXWPARAM wParam, WXLPARAM lParam, bool isASCII = FALSE);
     bool HandleKeyDown(WXWPARAM wParam, WXLPARAM lParam);
     bool HandleKeyUp(WXWPARAM wParam, WXLPARAM lParam);
-#if wxUSE_ACCEL
-    bool HandleHotKey(WXWPARAM wParam, WXLPARAM lParam);
-#endif
-#ifdef __WIN32__
-    int HandleMenuChar(int chAccel, WXLPARAM lParam);
-#endif
 
     bool HandleQueryDragIcon(WXHICON *hIcon);
 
@@ -376,6 +404,11 @@ public:
                                 WXWPARAM wParam,
                                 WXLPARAM lParam);
 
+#if WXWIN_COMPATIBILITY
+    void SetShowing(bool show) { (void)Show(show); }
+    bool IsUserEnabled() const { return IsEnabled(); }
+#endif // WXWIN_COMPATIBILITY
+
     // Responds to colour changes: passes event on to children.
     void OnSysColourChanged(wxSysColourChangedEvent& event);
 
@@ -385,10 +418,6 @@ public:
     // check if mouse is in the window
     bool IsMouseInWindow() const;
 
-    // virtual function for implementing internal idle
-    // behaviour
-    virtual void OnInternalIdle() ;
-
 protected:
     // the window handle
     WXHWND                m_hWnd;
@@ -397,6 +426,8 @@ protected:
     WXFARPROC             m_oldWndProc;
 
     // additional (MSW specific) flags
+    bool                  m_useCtl3D:1; // Using CTL3D for this control
+    bool                  m_backgroundTransparent:1;
     bool                  m_mouseInWindow:1;
     bool                  m_lastKeydownProcessed:1;
 
@@ -453,7 +484,6 @@ private:
 
     // the (non-virtual) handlers for the events
     bool HandleMove(int x, int y);
-    bool HandleMoving(wxRect& rect);
     bool HandleJoystickEvent(WXUINT msg, int x, int y, WXUINT flags);
 
 #ifdef __WIN95__
@@ -467,18 +497,6 @@ private:
     DECLARE_NO_COPY_CLASS(wxWindowMSW)
     DECLARE_EVENT_TABLE()
 };
-
-// ----------------------------------------------------------------------------
-// inline functions
-// ----------------------------------------------------------------------------
-
-#if WXWIN_COMPATIBILITY_2_4
-
-inline bool wxWindowMSW::GetUseCtl3D() const { return false; }
-inline bool wxWindowMSW::GetTransparentBackground() const { return false; }
-inline void wxWindowMSW::SetTransparent(bool WXUNUSED(t)) { }
-
-#endif // WXWIN_COMPATIBILITY_2_4
 
 // ---------------------------------------------------------------------------
 // global functions

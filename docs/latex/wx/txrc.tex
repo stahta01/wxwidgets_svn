@@ -79,7 +79,7 @@ load using for example {\tt wxXmlResource::Get()->LoadDialog(\&dlg, this, "dlg1"
 to a suitable integer identifier, for example {\tt EVT\_MENU(XRCID("quit"), MyFrame::OnQuit)}.
 \end{itemize}
 
-To create an XRC file, you can use one of the following methods.
+To create an XRC file, use one of the following methods.
 
 \begin{itemize}\itemsep=0pt
 \item Create the file by hand;
@@ -233,8 +233,8 @@ bool MyApp::OnInit()
 
     MyFrame *frame = new MyFrame("XML resources demo",
                                  wxPoint(50, 50), wxSize(450, 340));
-    frame->Show(true);
-    return true;
+    frame->Show(TRUE);
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -254,8 +254,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 // event handlers
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    // true is to force the frame to close
-    Close(true);
+    // TRUE is to force the frame to close
+    Close(TRUE);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))

@@ -6,10 +6,10 @@
 // Created:     29.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "calctrl.h"
 #endif
 
@@ -29,7 +29,7 @@ class WXDLLEXPORT wxSpinCtrl;
 // wxCalendarCtrl: a control allowing the user to pick a date interactively
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxCalendarCtrl : public wxControl
+class WXDLLEXPORT wxCalendarCtrl : public wxControl
 {
 friend class wxMonthComboBox;
 friend class wxYearSpinCtrl;
@@ -302,7 +302,6 @@ private:
 
     DECLARE_DYNAMIC_CLASS(wxCalendarCtrl)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxCalendarCtrl)
 };
 
 #endif // _WX_GENERIC_CALCTRL_H

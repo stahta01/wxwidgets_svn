@@ -12,7 +12,7 @@
 #ifndef _WX_TBARMSW_H_
 #define _WX_TBARMSW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "tbarmsw.h"
 #endif
 

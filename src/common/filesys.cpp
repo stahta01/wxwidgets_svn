@@ -7,7 +7,7 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "filesys.h"
 #endif
 
@@ -26,6 +26,7 @@
 #include "wx/mimetype.h"
 #include "wx/filename.h"
 #include "wx/log.h"
+
 
 
 //--------------------------------------------------------------------------------
@@ -198,11 +199,8 @@ wxFSFile* wxLocalFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString&
     return new wxFSFile(is,
                         right,
                         GetMimeTypeFromExt(location),
-                        GetAnchor(location)
-#if wxUSE_DATETIME
-                        ,wxDateTime(wxFileModificationTime(fullpath))
-#endif // wxUSE_DATETIME
-                        );
+                        GetAnchor(location),
+                        wxDateTime(wxFileModificationTime(fullpath)));
 }
 
 wxString wxLocalFSHandler::FindFirst(const wxString& spec, int flags)
@@ -331,7 +329,7 @@ wxFSFile* wxFileSystem::OpenFile(const wxString& location)
     unsigned i, ln;
     char meta;
     wxFSFile *s = NULL;
-    wxList::compatibility_iterator node;
+    wxNode *node;
 
     ln = loc.Length();
     meta = 0;
@@ -385,7 +383,7 @@ wxFSFile* wxFileSystem::OpenFile(const wxString& location)
 
 wxString wxFileSystem::FindFirst(const wxString& spec, int flags)
 {
-    wxList::compatibility_iterator node;
+    wxNode *node;
     wxString spec2(spec);
 
     m_FindFileHandler = NULL;
@@ -432,7 +430,8 @@ void wxFileSystem::AddHandler(wxFileSystemHandler *handler)
 
 void wxFileSystem::CleanUpHandlers()
 {
-    WX_CLEAR_LIST(wxList, m_Handlers);
+    m_Handlers.DeleteContents(TRUE);
+    m_Handlers.Clear();
 }
 
 const static wxString g_unixPathString(wxT("/"));

@@ -5,14 +5,14 @@
 // Modified by:
 // Created:     4/1/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_IPCBASEH__
 #define _WX_IPCBASEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "ipcbase.h"
 #endif
 
@@ -42,10 +42,10 @@ enum wxIPCFormat
   wxIPC_PRIVATE =          20
 };
 
-class WXDLLIMPEXP_BASE wxServerBase;
-class WXDLLIMPEXP_BASE wxClientBase;
+class WXDLLEXPORT wxServerBase;
+class WXDLLEXPORT wxClientBase;
 
-class WXDLLIMPEXP_BASE wxConnectionBase: public wxObject
+class WXDLLEXPORT wxConnectionBase: public wxObject
 {
   DECLARE_CLASS(wxConnectionBase)
 
@@ -122,14 +122,10 @@ private:
   wxChar *      m_buffer;
   size_t        m_buffersize;
   bool          m_deletebufferwhendone;
-
-  // can't use DECLARE_NO_COPY_CLASS(wxConnectionBase) because we already
-  // have copy ctor but still forbid the default assignment operator
-  wxConnectionBase& operator=(const wxConnectionBase&);
 };
 
 
-class WXDLLIMPEXP_BASE wxServerBase: public wxObject
+class WXDLLEXPORT wxServerBase: public wxObject
 {
   DECLARE_CLASS(wxServerBase)
 
@@ -144,7 +140,7 @@ public:
   virtual wxConnectionBase *OnAcceptConnection(const wxString& topic) = 0;
 };
 
-class WXDLLIMPEXP_BASE wxClientBase: public wxObject
+class WXDLLEXPORT wxClientBase: public wxObject
 {
   DECLARE_CLASS(wxClientBase)
 

@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // Name:        grid.i
 // Purpose:     SWIG definitions for the new wxGrid and related classes
 //
@@ -819,7 +819,7 @@ public:
     }
 
 
-    wxGridCellEditor* Clone() const {
+    wxGridCellEditor*Clone() const {
         wxGridCellEditor* rval = NULL;
         wxPyBeginBlockThreads();
         if (wxPyCBH_findCallback(m_myInst, "Clone")) {
@@ -883,7 +883,6 @@ public:
     DEC_PYCALLBACK__(StartingClick);
     DEC_PYCALLBACK__(Destroy);
     DEC_PYCALLBACK__STRING(SetParameters);
-    DEC_PYCALLBACK_STRING__constpure(GetValue);
 
     PYPRIVATE;
 };
@@ -897,7 +896,6 @@ IMP_PYCALLBACK__any(wxPyGridCellEditor, wxGridCellEditor, StartingKey, wxKeyEven
 IMP_PYCALLBACK__any(wxPyGridCellEditor, wxGridCellEditor, HandleReturn, wxKeyEvent);
 IMP_PYCALLBACK__(wxPyGridCellEditor, wxGridCellEditor, StartingClick);
 IMP_PYCALLBACK__(wxPyGridCellEditor, wxGridCellEditor, Destroy);
-IMP_PYCALLBACK_STRING__constpure(wxPyGridCellEditor, wxGridCellEditor, GetValue);
 
 %}
 
@@ -913,7 +911,7 @@ public:
     void base_SetSize(const wxRect& rect);
     void base_Show(bool show, wxGridCellAttr *attr = NULL);
     void base_PaintBackground(const wxRect& rectCell, wxGridCellAttr *attr);
-    bool base_IsAcceptedKey(wxKeyEvent& event);
+    void base_IsAcceptedKey(wxKeyEvent& event);
     void base_StartingKey(wxKeyEvent& event);
     void base_StartingClick();
     void base_HandleReturn(wxKeyEvent& event);
@@ -929,7 +927,6 @@ class wxGridCellTextEditor : public wxGridCellEditor
 public:
     wxGridCellTextEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -938,7 +935,6 @@ class wxGridCellNumberEditor : public wxGridCellTextEditor
 public:
     wxGridCellNumberEditor(int min = -1, int max = -1);
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -947,7 +943,6 @@ class wxGridCellFloatEditor : public wxGridCellTextEditor
 public:
     wxGridCellFloatEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -956,7 +951,6 @@ class wxGridCellBoolEditor : public wxGridCellEditor
 public:
     wxGridCellBoolEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 class wxGridCellChoiceEditor : public wxGridCellEditor
@@ -966,7 +960,6 @@ public:
                            const wxString* choices = NULL,
                            bool allowOthers = FALSE);
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -975,7 +968,6 @@ class wxGridCellEnumEditor : public wxGridCellChoiceEditor
 public:
     wxGridCellEnumEditor( const wxString& choices = wxPyEmptyString );
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -984,7 +976,6 @@ class wxGridCellAutoWrapStringEditor : public wxGridCellTextEditor
 public:
     wxGridCellAutoWrapStringEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -1023,7 +1014,7 @@ public:
     void SetFont(const wxFont& font);
     void SetAlignment(int hAlign, int vAlign);
     void SetSize(int num_rows, int num_cols);
-    void SetOverflow( bool allow = TRUE );
+    void SetOverflow( bool allow );
     void SetReadOnly(bool isReadOnly = TRUE);
 
     void SetRenderer(wxGridCellRenderer *renderer);
@@ -1037,7 +1028,6 @@ public:
     bool HasRenderer() const;
     bool HasEditor() const;
     bool HasReadWriteMode() const;
-    bool HasOverflowMode() const;
 
     wxColour GetTextColour() const;
     wxColour GetBackgroundColour() const;
@@ -1561,8 +1551,7 @@ public:
     //
     void DrawTextRectangle( wxDC& dc, const wxString&, const wxRect&,
                             int horizontalAlignment = wxLEFT,
-                            int verticalAlignment = wxTOP,
-                            int textOrientation = wxHORIZONTAL );
+                            int verticalAlignment = wxTOP );
 
 //      // Split a string containing newline chararcters into an array of
 //      // strings and return the number of lines
@@ -1667,7 +1656,6 @@ public:
     wxFont   GetLabelFont();
     void     GetRowLabelAlignment( int *OUTPUT, int *OUTPUT );
     void     GetColLabelAlignment( int *OUTPUT, int *OUTPUT );
-    int      GetColLabelTextOrientation();
     wxString GetRowLabelValue( int row );
     wxString GetColLabelValue( int col );
     wxColour GetGridLineColour();
@@ -1682,7 +1670,6 @@ public:
     void     SetLabelFont( const wxFont& );
     void     SetRowLabelAlignment( int horiz, int vert );
     void     SetColLabelAlignment( int horiz, int vert );
-    void     SetColLabelTextOrientation( int textOrientation );
     void     SetRowLabelValue( int row, const wxString& );
     void     SetColLabelValue( int col, const wxString& );
     void     SetGridLineColour( const wxColour& );
@@ -1754,13 +1741,6 @@ public:
     // auto size the grid, that is make the columns/rows of the "right" size
     // and also set the grid size to just fit its contents
     void     AutoSize();
-
-    // autosize row height depending on label text
-    void     AutoSizeRowLabelSize( int row );
-
-    // autosize column width depending on label text
-    void     AutoSizeColLabelSize( int col );
-
 
     // column won't be resized to be lesser width - this must be called during
     // the grid creation because it won't resize the column if it's already
@@ -2038,6 +2018,8 @@ def EVT_GRID_EDITOR_CREATED(win, fn):
 //---------------------------------------------------------------------------
 
 %init %{
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
 %}
 
 //---------------------------------------------------------------------------

@@ -38,20 +38,16 @@ class wxSizerItem : public wxObject {
 public:
     // No need to ever create one directly in Python...
 
-    //wxSizerItem( int width, int height, int proportion, int flag, int border, wxObject* userData);
-    //wxSizerItem( wxWindow *window, int proportion, int flag, int border, wxObject* userData );
-    //wxSizerItem( wxSizer *sizer, int proportion, int flag, int border, wxObject* userData );
+    //wxSizerItem( int width, int height, int option, int flag, int border, wxObject* userData);
+    //wxSizerItem( wxWindow *window, int option, int flag, int border, wxObject* userData );
+    //wxSizerItem( wxSizer *sizer, int option, int flag, int border, wxObject* userData );
 
     void DeleteWindows();
-    void DetachSizer();
 
+    wxPoint GetPosition();
     wxSize GetSize();
     wxSize CalcMin();
     void SetDimension( wxPoint pos, wxSize size );
-
-    wxSize GetMinSize();
-    void SetInitSize( int x, int y );
-
     %name(SetRatioWH) void SetRatio( int width, int height );
     %name(SetRatioSize) void SetRatio( wxSize size );
     void SetRatio( float ratio );
@@ -60,27 +56,21 @@ public:
     bool IsWindow();
     bool IsSizer();
     bool IsSpacer();
-
-    void SetProportion( int proportion );
-    int GetProportion();
-    %pragma(python) addtoclass = "SetOption = SetProportion"
-    %pragma(python) addtoclass = "GetOption = GetProportion"
-    void SetFlag( int flag );
-    int GetFlag();
-    void SetBorder( int border );
-    int GetBorder();
+    bool IsShown();
 
     wxWindow *GetWindow();
     void SetWindow( wxWindow *window );
     wxSizer *GetSizer();
     void SetSizer( wxSizer *sizer );
-    const wxSize& GetSpacer();
-    void SetSpacer( const wxSize &size );
+    int GetOption();
+    int GetFlag();
+    int GetBorder();
 
-    void Show( bool show );
-    bool IsShown();
-
-    wxPoint GetPosition();
+    void SetInitSize( int x, int y );
+    void SetOption( int option );
+    void SetFlag( int flag );
+    void SetBorder( int border );
+    void Show(bool show);
 
     // wxObject* GetUserData();
     %addmethods {
@@ -100,7 +90,6 @@ public:
 
 
 //---------------------------------------------------------------------------
-
 
 class wxSizer : public wxObject {
 public:
@@ -478,19 +467,6 @@ public:
 
 //---------------------------------------------------------------------------
 
-enum wxFlexSizerGrowMode
-{
-    // don't resize the cells in non-flexible direction at all
-    wxFLEX_GROWMODE_NONE,
-
-    // uniformly resize only the specified ones (default)
-    wxFLEX_GROWMODE_SPECIFIED,
-
-    // uniformly resize all cells
-    wxFLEX_GROWMODE_ALL
-};
-
-
 class wxFlexGridSizer: public wxGridSizer
 {
 public:
@@ -500,22 +476,11 @@ public:
     void RecalcSizes();
     wxSize CalcMin();
 
-    void AddGrowableRow( size_t idx, int proportion = 0  );
+    void AddGrowableRow( size_t idx );
     void RemoveGrowableRow( size_t idx );
-    void AddGrowableCol( size_t idx, int proportion = 0  );
+    void AddGrowableCol( size_t idx );
     void RemoveGrowableCol( size_t idx );
 
-    // the sizer cells may grow in both directions, not grow at all or only
-    // grow in one direction but not the other
-
-    // the direction may be wxVERTICAL, wxHORIZONTAL or wxBOTH (default)
-    void SetFlexibleDirection(int direction);
-    int GetFlexibleDirection();
-
-    // note that the grow mode only applies to the direction which is not
-    // flexible
-    void SetNonFlexibleGrowMode(wxFlexSizerGrowMode mode);
-    wxFlexSizerGrowMode GetNonFlexibleGrowMode();
 };
 
 //---------------------------------------------------------------------------

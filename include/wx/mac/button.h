@@ -1,25 +1,25 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        button.h
 // Purpose:     wxButton class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_BUTTON_H_
 #define _WX_BUTTON_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "button.h"
 #endif
 
 #include "wx/control.h"
 #include "wx/gdicmn.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxButtonNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxButtonNameStr;
 
 // Pushbutton
 class WXDLLEXPORT wxButton: public wxButtonBase
@@ -42,7 +42,7 @@ class WXDLLEXPORT wxButton: public wxButtonBase
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxButtonNameStr);
 
-    virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
+	virtual void MacHandleControlClick( WXWidget control , short controlpart ) ;
     static wxSize GetDefaultSize();
 
   virtual void SetDefault();

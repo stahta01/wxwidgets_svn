@@ -6,7 +6,7 @@
 // Created:     12.04.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // these classes are for private use only for now, they're not documented
@@ -15,6 +15,8 @@
 #define _WX_BUFFER_H
 
 #include "wx/wxchar.h"
+
+#include <string.h> // strdup
 
 // ----------------------------------------------------------------------------
 // Special classes for (wide) character strings: they use malloc/free instead
@@ -93,11 +95,19 @@ private:                                                                    \
     chartype *m_str;                                                        \
 }
 
-DEFINE_BUFFER(wxCharBuffer, char, wxStrdupA);
+DEFINE_BUFFER(wxCharBuffer, char, strdup);
 
 #if wxUSE_WCHAR_T
 
-DEFINE_BUFFER(wxWCharBuffer, wchar_t, wxStrdupW);
+inline wchar_t *wxWcsdupReplacement(const wchar_t *wcs)
+{
+    const size_t siz = (wxWcslen(wcs) + 1)*sizeof(wchar_t);
+    wchar_t *wcsCopy = (wchar_t *)malloc(siz);
+    memcpy(wcsCopy, wcs, siz);
+    return wcsCopy;
+}
+
+DEFINE_BUFFER(wxWCharBuffer, wchar_t, wxWcsdupReplacement);
 
 #endif // wxUSE_WCHAR_T
 
@@ -172,8 +182,6 @@ private:
 
     // the reference count
     size_t m_ref;
-
-    DECLARE_NO_COPY_CLASS(wxMemoryBufferData)
 };
 
 

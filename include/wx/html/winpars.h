@@ -11,7 +11,7 @@
 #ifndef _WX_WINPARS_H_
 #define _WX_WINPARS_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "winpars.h"
 #endif
 
@@ -24,10 +24,10 @@
 #include "wx/html/htmlcell.h"
 #include "wx/encconv.h"
 
-class WXDLLIMPEXP_HTML wxHtmlWindow;
-class WXDLLIMPEXP_HTML wxHtmlWinParser;
-class WXDLLIMPEXP_HTML wxHtmlWinTagHandler;
-class WXDLLIMPEXP_HTML wxHtmlTagsModule;
+class WXDLLEXPORT wxHtmlWindow;
+class WXDLLEXPORT wxHtmlWinParser;
+class WXDLLEXPORT wxHtmlWinTagHandler;
+class WXDLLEXPORT wxHtmlTagsModule;
 
 //--------------------------------------------------------------------------------
 // wxHtmlWinParser
@@ -36,7 +36,7 @@ class WXDLLIMPEXP_HTML wxHtmlTagsModule;
 //                  wxHtmlWindow. It uses special wxHtmlWinTagHandler.
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlWinParser : public wxHtmlParser
+class WXDLLEXPORT wxHtmlWinParser : public wxHtmlParser
 {
     friend class wxHtmlWindow;
 
@@ -145,7 +145,7 @@ private:
             // This list is used to initialize m_Handlers member.
 
     wxHtmlContainerCell *m_Container;
-            // current container. See Open/CloseContainer for details.
+            // actual container. See Open/CloseContainer for details.
 
     int m_FontBold, m_FontItalic, m_FontUnderlined, m_FontFixed; // this is not TRUE,FALSE but 1,0, we need it for indexing
     int m_FontSize; /* -2 to +4,  0 is default */
@@ -181,10 +181,6 @@ private:
             // I/O font encodings
     wxEncodingConverter *m_EncConv;
 #endif
-
-    wxHtmlWordCell *m_lastWordCell;
-    
-    DECLARE_NO_COPY_CLASS(wxHtmlWinParser)
 };
 
 
@@ -192,14 +188,14 @@ private:
 
 
 
-//-----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlWinTagHandler
 //                  This is basicly wxHtmlTagHandler except
 //                  it is extended with protected member m_Parser pointing to
 //                  the wxHtmlWinParser object
-//-----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlWinTagHandler : public wxHtmlTagHandler
+class WXDLLEXPORT wxHtmlWinTagHandler : public wxHtmlTagHandler
 {
     DECLARE_ABSTRACT_CLASS(wxHtmlWinTagHandler)
 
@@ -210,8 +206,6 @@ public:
 
 protected:
     wxHtmlWinParser *m_WParser; // same as m_Parser, but overcasted
-
-    DECLARE_NO_COPY_CLASS(wxHtmlWinTagHandler)
 };
 
 
@@ -219,15 +213,15 @@ protected:
 
 
 
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlTagsModule
 //                  This is basic of dynamic tag handlers binding.
 //                  The class provides methods for filling parser's handlers
 //                  hash table.
 //                  (See documentation for details)
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlTagsModule : public wxModule
+class WXDLLEXPORT wxHtmlTagsModule : public wxModule
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlTagsModule)
 
@@ -238,8 +232,8 @@ public:
     virtual void OnExit();
 
     // This is called by wxHtmlWinParser.
-    // The method must simply call parser->AddTagHandler(new
-    // <handler_class_name>); for each handler
+    // The method must simply call parser->AddTagHandler(new <handler_class_name>);
+    // for each handler
     virtual void FillHandlersTable(wxHtmlWinParser * WXUNUSED(parser)) { }
 };
 
@@ -247,3 +241,8 @@ public:
 #endif
 
 #endif // _WX_WINPARS_H_
+
+
+
+
+

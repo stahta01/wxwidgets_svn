@@ -6,7 +6,7 @@
 // Created:     26.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "controlbase.h"
     #pragma implementation "statbmpbase.h"
 #endif
@@ -55,7 +55,7 @@ bool wxControlBase::Create(wxWindow *parent,
                            const wxPoint &pos,
                            const wxSize &size,
                            long style,
-                           const wxValidator& wxVALIDATOR_PARAM(validator),
+                           const wxValidator& validator,
                            const wxString &name)
 {
     bool ret = wxWindow::Create(parent, id, pos, size, style, name);

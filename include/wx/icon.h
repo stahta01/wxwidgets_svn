@@ -1,7 +1,11 @@
 #ifndef _WX_ICON_H_BASE_
 #define _WX_ICON_H_BASE_
 
-#include "wx/iconloc.h"
+/* Commenting out since duplicated in gdicmn.h
+// this is for Unix (i.e. now for anything other than MSW)
+#undef  wxICON
+#define wxICON(icon_name)   wxIcon(icon_name##_xpm)
+*/
 
 #if defined(__WXMSW__)
   #include "wx/msw/icon.h"
@@ -15,10 +19,10 @@
   #include "wx/mgl/icon.h"
 #elif defined(__WXMAC__)
   #include "wx/mac/icon.h"
-#elif defined(__WXCOCOA__)
-  #include "wx/cocoa/icon.h"
 #elif defined(__WXPM__)
   #include "wx/os2/icon.h"
+#elif defined(__WXSTUBS__)
+  #include "wx/stubs/icon.h"
 #endif
 
 #endif

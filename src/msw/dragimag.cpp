@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dragimag.h"
 #endif
 
@@ -51,7 +51,7 @@
 #include "wx/msw/dragimag.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
 #include <commctrl.h>
 #endif
 
@@ -117,9 +117,6 @@ bool wxDragImage::Create(const wxBitmap& image, const wxCursor& cursor)
     m_hImageList = 0;
 
     UINT flags = 0 ;
-#ifdef __WXWINCE__
-    flags = ILC_COLOR;
-#else
     if (image.GetDepth() <= 4)
         flags = ILC_COLOR4;
     else if (image.GetDepth() <= 8)
@@ -130,7 +127,6 @@ bool wxDragImage::Create(const wxBitmap& image, const wxCursor& cursor)
         flags = ILC_COLOR24;
     else
         flags = ILC_COLOR32;
-#endif
 
     bool mask = (image.GetMask() != 0);
 
@@ -174,9 +170,6 @@ bool wxDragImage::Create(const wxIcon& image, const wxCursor& cursor)
     m_hImageList = 0;
 
     UINT flags = 0 ;
-#ifdef __WXWINCE__
-    flags = ILC_COLOR;
-#else
     if (image.GetDepth() <= 4)
         flags = ILC_COLOR4;
     else if (image.GetDepth() <= 8)
@@ -187,7 +180,6 @@ bool wxDragImage::Create(const wxIcon& image, const wxCursor& cursor)
         flags = ILC_COLOR24;
     else
         flags = ILC_COLOR32;
-#endif
     bool mask = TRUE;
     if ( mask )
         flags |= ILC_MASK;
@@ -245,19 +237,15 @@ bool wxDragImage::Create(const wxString& str, const wxCursor& cursor)
     return Create(wxBitmap(image), cursor);
 }
 
-#if wxUSE_TREECTRL
 // Create a drag image for the given tree control item
 bool wxDragImage::Create(const wxTreeCtrl& treeCtrl, wxTreeItemId& id)
 {
     if ( m_hImageList )
         ImageList_Destroy(GetHimageList());
-    m_hImageList = (WXHIMAGELIST)
-        TreeView_CreateDragImage(GetHwndOf(&treeCtrl), (HTREEITEM) id.m_pItem);
-    return m_hImageList != 0;
+    m_hImageList = (WXHIMAGELIST) TreeView_CreateDragImage((HWND) treeCtrl.GetHWND(), (HTREEITEM) (WXHTREEITEM) id);
+    return TRUE;
 }
-#endif
 
-#if wxUSE_LISTCTRL
 // Create a drag image for the given list control item
 bool wxDragImage::Create(const wxListCtrl& listCtrl, long id)
 {
@@ -268,7 +256,6 @@ bool wxDragImage::Create(const wxListCtrl& listCtrl, long id)
     m_hImageList = (WXHIMAGELIST) ListView_CreateDragImage((HWND) listCtrl.GetHWND(), id, & pt);
     return TRUE;
 }
-#endif
 
 // Begin drag
 bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullScreen, wxRect* rect)

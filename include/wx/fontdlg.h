@@ -6,7 +6,7 @@
 // Created:     12.05.02
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997-2002 wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONTDLG_H_BASE_
@@ -57,16 +57,13 @@ protected:
         { if ( data ) m_fontData = *data; }
 
     wxFontData m_fontData;
-
-    DECLARE_NO_COPY_CLASS(wxFontDialogBase)
 };
 
 // ----------------------------------------------------------------------------
 // platform-specific wxFontDialog implementation
 // ----------------------------------------------------------------------------
 
-#if defined(__WXUNIVERSAL__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXCOCOA__) \
-    || defined(__WXWINCE__)
+#if defined(__WXUNIVERSAL__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     #include "wx/generic/fontdlgg.h"
     #define wxFontDialog wxGenericFontDialog
     #define sm_classwxFontDialog sm_classwxGenericFontDialog

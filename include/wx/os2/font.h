@@ -102,6 +102,7 @@ public:
     virtual void SetFaceName(const wxString& rsFaceName);
     virtual void SetUnderlined(bool bUnderlined);
     virtual void SetEncoding(wxFontEncoding vEncoding);
+    virtual void SetNativeFontInfo(const wxNativeFontInfo& rInfo);
 
     //
     // For internal use only!
@@ -120,10 +121,7 @@ public:
     virtual bool     FreeResource(bool bForce = FALSE);
 
     WXHFONT GetHFONT(void) const;
-
 protected:
-    virtual void DoSetNativeFontInfo(const wxNativeFontInfo& rInfo);
-
     //
     // Common part of all ctors
     //

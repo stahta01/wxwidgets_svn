@@ -12,19 +12,18 @@
 #ifndef _WX_DCBUFFER_H_
 #define _WX_DCBUFFER_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "dcbuffer.h"
 #endif
 
 #include "wx/dcmemory.h"
-#include "wx/dcclient.h"
 
 
 // ==============================================================
 //   Double buffering helper.
 // --------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxBufferedDC : public wxMemoryDC
+class WXDLLEXPORT wxBufferedDC : public wxMemoryDC
 {
 private:
 
@@ -73,8 +72,6 @@ public:
         // to) is destroyed.
 
     void UnMask();
-
-    DECLARE_NO_COPY_CLASS(wxBufferedDC)
 };
 
 
@@ -85,7 +82,7 @@ public:
 // Creates a double buffered wxPaintDC, optionally allowing the
 // user to specify their own buffer to use.
 
-class WXDLLIMPEXP_ADV wxBufferedPaintDC : public wxBufferedDC
+class WXDLLEXPORT wxBufferedPaintDC : public wxBufferedDC
 {
 private:
 
@@ -98,10 +95,9 @@ public:
     // default copy ctor ok.
 
     ~wxBufferedPaintDC();
-
-    DECLARE_NO_COPY_CLASS(wxBufferedPaintDC)
 };
 
 
 #endif  // _WX_DCBUFFER_H_
 
+// vi:sts=4:sw=4:et

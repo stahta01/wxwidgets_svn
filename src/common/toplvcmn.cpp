@@ -4,7 +4,7 @@
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "toplevelbase.h"
 #endif
 
@@ -46,7 +46,10 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-IMPLEMENT_DYNAMIC_CLASS(wxTopLevelWindow, wxWindow)
+// FIXME: some platforms don't have wxTopLevelWindow yet
+#ifdef wxTopLevelWindowNative
+    IMPLEMENT_DYNAMIC_CLASS(wxTopLevelWindow, wxWindow)
+#endif
 
 // ----------------------------------------------------------------------------
 // construction/destruction
@@ -79,9 +82,6 @@ bool wxTopLevelWindowBase::Destroy()
     // loop iteration
     if ( !wxPendingDelete.Member(this) )
         wxPendingDelete.Append(this);
-
-    // but hide it immediately
-    Hide();
 
     return TRUE;
 }
@@ -164,7 +164,7 @@ void wxTopLevelWindowBase::OnSize(wxSizeEvent& WXUNUSED(event))
     {
         // do we have _exactly_ one child?
         wxWindow *child = (wxWindow *)NULL;
-        for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+        for ( wxWindowList::Node *node = GetChildren().GetFirst();
               node;
               node = node->GetNext() )
         {
@@ -216,19 +216,6 @@ bool wxTopLevelWindowBase::SendIconizeEvent(bool iconized)
     event.SetEventObject(this);
 
     return GetEventHandler()->ProcessEvent(event);
-}
-
-// do the window-specific processing after processing the update event
-void wxTopLevelWindowBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
-{
-    if ( event.GetSetEnabled() )
-        Enable(event.GetEnabled());
-    
-    if ( event.GetSetText() )
-    {
-        if ( event.GetText() != GetTitle() )
-            SetTitle(event.GetText());
-    }
 }
 
 // vi:sts=4:sw=4:et

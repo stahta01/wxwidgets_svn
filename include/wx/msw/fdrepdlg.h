@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "mswfdrepdlg.h"
 #endif
 
@@ -57,7 +57,6 @@ protected:
     wxFindReplaceDialogImpl *m_impl;
 
     DECLARE_DYNAMIC_CLASS(wxFindReplaceDialog)
-    DECLARE_NO_COPY_CLASS(wxFindReplaceDialog)
 };
 
 

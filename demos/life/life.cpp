@@ -355,17 +355,16 @@ void LifeFrame::UpdateUI()
     // start / stop
     GetToolBar()->EnableTool(ID_START, !m_running);
     GetToolBar()->EnableTool(ID_STOP,  m_running);
-    GetMenuBar()->Enable(ID_START, !m_running);
-    GetMenuBar()->Enable(ID_STEP,  !m_running);
-    GetMenuBar()->Enable(ID_STOP,  m_running);
-    GetMenuBar()->Enable(ID_TOPSPEED, !m_topspeed);
+    GetMenuBar()->GetMenu(2)->Enable(ID_START, !m_running);
+    GetMenuBar()->GetMenu(2)->Enable(ID_STEP,  !m_running);
+    GetMenuBar()->GetMenu(2)->Enable(ID_STOP,  m_running);
 
     // zooming
     int cellsize = m_canvas->GetCellSize();
     GetToolBar()->EnableTool(ID_ZOOMIN,  cellsize < 32);
     GetToolBar()->EnableTool(ID_ZOOMOUT, cellsize > 1);
-    GetMenuBar()->Enable(ID_ZOOMIN,  cellsize < 32);
-    GetMenuBar()->Enable(ID_ZOOMOUT, cellsize > 1);
+    GetMenuBar()->GetMenu(1)->Enable(ID_ZOOMIN,  cellsize < 32);
+    GetMenuBar()->GetMenu(1)->Enable(ID_ZOOMOUT, cellsize > 1);
 }
 
 // Event handlers -----------------------------------------------------------
@@ -809,7 +808,7 @@ void LifeCanvas::DrawChanged()
 }
 
 // event handlers
-void LifeCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
+void LifeCanvas::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
     wxRect  rect = GetUpdateRegion().GetBox();

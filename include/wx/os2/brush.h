@@ -44,7 +44,7 @@ class WXDLLEXPORT wxBrush: public wxGDIObject
 public:
     wxBrush();
     wxBrush( const wxColour& rCol
-            ,int             nStyle = wxSOLID
+            ,int             nStyle
            );
     wxBrush(const wxBitmap& rStipple);
     inline wxBrush(const wxBrush& rBrush) { Ref(rBrush); }

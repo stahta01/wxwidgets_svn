@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "textdlgg.h"
 #endif
 
@@ -114,7 +114,6 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
 
     Centre( wxBOTH );
 
-    m_textctrl->SetSelection(-1, -1);
     m_textctrl->SetFocus();
 
     wxEndBusyCursor();

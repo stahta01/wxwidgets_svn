@@ -10,7 +10,7 @@
 #ifndef _WX_IMAGJPEG_H_
 #define _WX_IMAGJPEG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "imagjpeg.h"
 #endif
 

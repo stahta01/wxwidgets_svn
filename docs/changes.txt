@@ -1,271 +1,5 @@
-----------------------------
-wxWindows 2.5/2.6 Change Log
-----------------------------
-
-INCOMPATIBLE CHANGES SINCE 2.4.x
-================================
-
-- no initialization/cleanup can be done in wxApp/~wxApp because they are
-  now called much earlier/later than before; please move any exiting code
-  from there to wxApp::OnInit()/OnExit()
-- also, OnExit() is not called if OnInit() fails
-- wxTheApp can't be assigned to any longer, use wxApp::SetInstance() instead
-- wxFileType::GetIcon() returns wxIconLocation, not wxIcon
-- wxWindow::Clear() is now called ClearBackground()
-
-
-DEPRECATED METHODS SINCE 2.4.x
-==============================
-
-Deprecated methods may still be used but will disappear in future wxWindows
-versions, please update your code to not use them.
-
-- wxDocManager::GetNoHistoryFiles() renamed to GetHistoryFilesCount()
-- wxSizer::Remove(wxWindow *), use Detach() instead [it is more clear]
-- wxSizer::Set/GetOption(): use Set/GetProportion() instead
-- wxKeyEvent::KeyCode(): use GetKeyCode instead
-- wxList::Number, First, Last, Nth: use GetCount, GetFirst/Last, Item instead
-- wxNode::Next, Previous, Data: use GetNext, GetPrevious, GetData instead
-- wxListBase::operator wxList&(): use typesafe lists instead
-- wxTheFontMapper: use wxFontMapper::Get() instead
-- wxStringHashTable: use wxHashMap instead
-- wxHashTableLong: use wxHashMap instead
-- wxArrayString::GetStringArray: no replacement
-- wxArrayString::Remove(index, count): use RemoveAt instead
-- wxTreeItemId conversion to long is deprecated and shouldn't be used
-- [MSW only] wxWindow::GetUseCtl3D(), GetTransparentBackground() and
-             SetTransparent() as well as wxNO_3D and wxUSER_COLOURS styles
-
-
-OTHER CHANGES
-=============
-
-2.5.1
------
-
-All:
-
-- wxDateTime::ParseDateTime() implemented (Linus McCabe)
-- wxHTTP::GetResponse() added (David Nock)
-- added conversions to/from UTF 16/32 LE/BE (Andreas Pflug)
-
-All (GUI):
-
-- added some support for C++ exceptions in the library (do read the manual!)
-- added wxListCtrl::GetViewRect()
-
-wxMSW:
-
-- fixed wxTE_*WRAP styles handling
-- wxTextCtrl::GetValue() works with text in non default encoding
-- changed wxCrashReport to generate minidumps instead of text files
-- wxRadioButtons are now checked when they get focus (standard behaviour)
-- several fixes to owner drawn menu items (Christian Sturmlechner)
-
-wxGTK:
-
-- fixes to wxTextCtrl scrolling under GTK2 (Nerijus Baliunas)
-
-
-2.5.0
------
-
-All:
-
-- It is now possible to build several smaller libraries instead of single
-  huge wxWindows library; wxBase is now dependency of GUI ports rather then
-  separately compiled library
-- added wxDateSpan::operator==() and !=() (Lukasz Michalski)
-- added wxFileName::GetForbiddenChars() (Dimitri Schoolwerth)
-- use true/false throughout the library instead of TRUE/FALSE
-- wxStopWatch::Start() resumes the stop watch if paused, as per the docs
-- added wxDirTraverser::OnOpenError() to customize the error handling
-- added wxArray::SetCount()
-- wxFile, wxFFile, wxTextFile and wxTempFile now all use UTF-8 encoding
-  by default in Unicode mode
-- bug in wxDateTime with timezones on systems with tm_gmtoff in struct tm fixed
-- added wx/math.h (John Labenski)
-- added Catalan translations (Pau Bosch i Crespo)
-- added Ukrainian translations (Eugene Manko)
-- fixed bug with deleting entries at root level in wxFileConfig
-- chkconf.h now includes platform-specific versions (for MSW
-  and Mac) which contain some tests that were in setup.h
-- added event sink argument to wxEvtHandler::Connect()
-- added support for POST method and alt ports to wxHTTP (Roger Chickering)
-- added wxSocket::IPAddress() (Chris Mellon)
-- wxDataStreams can read/write many elements at once (Mickael Gilabert)
-- added wxRecursionGuard class
-- added wxThreadHelper class (Daniel Howard)
-
-wxBase:
-
-- added Watcom makefiles
-- fixed bug with searching in sorted arrays (Jürgen Palm)
-
-All GUI ports:
-
-- added wxVScrolledWindow, wxVListBox and wxHtmlLbox classes
-- added wxListbook
-- added alpha channel support to wxImage
-- added wxRenderer class allowing to customize the drawing of generic controls
-- added wxCLOSE_BOX style for dialogs and frames
-- added wxSplitterWindow and wxWizard handlers to XRC
-- wxWizard is now sizer-friendly and may be made resizeable (Robert Vazan)
-- added proportion to wxFlexGridSizer::AddGrowableRow/Col (Maxim Babitski)
-- added wxFlexGridSizer::SetFlexibleDirection() (Szczepan Holyszewski)
-- implemented GetEditControl for wxGenericTreeCtrl (Peter Stieber)
-- improved contrib/utils/convertrc parsing (David J. Cooke)
-- fixed handling of URLs and filenames in wxFileSystem
-- implemented alignment for wxGrid bool editor and renderer
-- support wxListCtrl columns alignment for all platforms and not just MSW
-- added wxToolBar Add/InsertTool(tool) (Janusz Piwowarski)
-- added wxTB_HORZ_TEXT style for MSW and GTK (Axel Schlueter)
-- fixed user dash handling for MSW and GTK (Ken Edwards)
-- WXR resources can now be used in Unicode builds
-- it is now possible to use several wxFileHistory objects in the same menu
-  by giving them different base IDs (Dimitri Schoolwerth)
-- Added wxTLW::SetShape with implementations for wxMSW and wxGTK (so far)
-- FL: rmoved const from EnableTool parameters
-- FL: signal child window when toolbar is closed
-- In various places, changed tests for pathsep on last char of string to call
-  wxEndsWithPathSeparator(s)
-- Added to defs.h a couple of macros (wxPtrToULong & wxULongToPtr)
-- Minor improvements to document/view framework, including
-  delayed deletion of a document (until after the user has chosen
-  a new document), and more intelligent addition of filenames to
-  the file history, including not adding filenames if not using the
-  default extension for the template
-- sped up wxImage::Scale using fixed point arithmetic (Wade Brainerd)
-- Added BLOB support to wxDB (John Skiff)
-- wxWizard now validates when pressing Back or Next
-- Implemented wxNotebook::DoGetBestSize so Fit now works
-- Added FindItemByPosition to wxMenu
-- wxTimer now derives from wxEvtHandler and is its own owner object by default
-- Extended wxTextAttr and added wxTextCtrl::GetStyle stub
-  to allow better rich text support.
-- implemented wxFlexGridSizer::Show() (Wade Brainerd)
-- Added m_ prefix to wxColourData and wxFontData members
-- Added wxHtmlPrintout::AddFilter so HTML printing can be subject to
-  custom filters as well as HTML viewing.
-- Moved wxApp::SendIdleEvents and wxApp::ProcessIdle into common code.
-- wxWindow::OnInternalIdle is now used in all ports, and ensures that
-  user OnIdle events do not interfere with crucial internal processing.
-- wxWindow::UpdateWindowUI is now a documented function that
-  sends wxUpdateUIEvents, and can be overridden. It has a helper function
-  DoUpdateWindowUI for taking appropriate wxUpdateUIEvent action.
-- Added functions to wxUpdateUIEvent: Set/GetMode, Set/GetUpdateInterval,
-  CanUpdate, to assist with optimising update event frequency.
-- Added functions to wxIdleEvent: Set/GetMode, CanSend, to
-  determine whether a window should receive idle events.
-- Added wxWS_EX_PROCESS_IDLE, wxWS_EX_PROCESS_UI_UPDATES window
-  styles for use with conservative idle and update event modes.
-- send menu update events only when a menu is about to be used (MSW/GTK)
-- improved event processing performance (Hans Van Leemputten)
-- added wxMirrorDC class
-- printing improvements: GetPageInfo() gets called after the DC has
-  been set and after OnPreparePrinting() has been called so it can
-  report the number of pages accurately; doesn't try to set
-  number of pages in print dialog, in common with other Windows apps;
-  wxHTML easy printing's preview shows number of pages
-  correctly; preview scrollbars are set correctly; keyboard navigation
-  improved
-
-Unix:
-
-- fixed compilation on systems with zlib installed but < 1.1.3 version
-- fixed compilation on Solaris 7 with large files support enabled
-- added wxTaskBarIcon implementation for X11
-- added support for GNU/Hurd in configure
-- wxLocale::Init now tries to set .utf8 locale in Unicode mode (Andreas Pflug)
-
-Generic controls:
-
-- implemented wxListCtrl::Refresh() (Norbert Berzen)
-- support adding/removing columns dynamically (Donald C. Taylor)
-- wxToolBarSimple, property list classes, wxTreeLayout moved
-  to contrib/src/deprecated
-
-wxGTK:
-
-- added support for label mnemonics to GTK+2 build (Michael Moss)
-- added native wxMessageDialog implementation for GTK+2 build
-- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
-- made wxTextCtrl::EmulateKeyPress() work for Delete and Backspace
-- fixed wxTopLevelWindow::ShowFullScreen to work with kwin, IceWM and
-  window managers that support _NET_WM_STATE_FULLSCREEN
-- added wxEVT_MENU_OPEN event generation
-- fixed bug in generic file selector causing incomplete file extensions to
-  be appended to filenames with no extension
-- added wxTextCtrl::SetSelection implementation for GTK+ 2
-- fixed wxTextCtrl::IsEditable() for GTK+ 2
-- fixed wxStaticText alignment for GTK+ 2 (Kevin Hock)
-- don't consume 100% CPU when showing a poup menu
-
-wxMac:
-
-- generate wxEVT_SCROLL_THUMBRELEASE and wxEVT_SCROLLWIN_THUMBRELEASE events
-- generate wxEVT_MENU_OPEN and wxEVT_MENU_CLOSE events
-
-wxMSW:
-
-- possibility to use DIBs for wxBitmap implementation (Derry Bryson)
-- added wxCrashReport
-- wxStaticBitmap doesn't stretch its bitmap any longer (like other ports)
-- support for accelerator keys in the owner drawn menus (Derry Bryson)
-- wxCaret::SetSize() doesn't hide the caret any longer as it used to
-- wxCheckListBox::Check() doesn't send CHECKLISTBOX_TOGGLE event any more
-- fixed bugs in wxThread::Wait() and IsAlive()
-- fixed bug with wxTR_EDIT_LABELS not working with wxTR_MULTIPLE
-- fixes for compilation with OpenWatcom and DigitalMars compilers
-- fixed wxStaticText best size calculation (was wrong by '&' width)
-- fixed calling wxFrame::Maximize(FALSE) before the window is shown
-- added wxNotebook::HitTest() (Otto Wyss)
-- libraries built with makefile.g95 have a _min or _cyg suffix (MinGW/Cygwin)
-- when using DLL, wxLocalFSHandler was not being exported
-- fixed problem with wxEvtHandler object not removed from wxPendingEvents
-- Windows XP manifest is now included in wx.rc; it is no longer neccessary
-  to ship .exe.manifest file with applications to support XP themes
-- wxLocale::Init no longer reports error if trying to set Unicode-only locale
-  or if user's default locale is Unicode-only
-- improved border handling under Windows XP
-- partial fix for wxNotebook pages looking bad under XP: wxUSE_UXTHEME
-  enables XP theme engine code, and wxUSE_UXTHEME_AUTO tells
-  wxWindows to use the theme tab colour for control backgrounds.
-- disable wxNB_RIGHT, wxNB_LEFT, wxNB_BOTTOM notebook styles under Windows XP
-- fixed release mode build with VC 7.x (Martin Ecker)
-- added support for wxALWAYS_SHOW_SB style
-- you don't need to add opengl32.lib when using VC++ now (David Falkinder)
-
-wxMotif:
-
-- made wxFileDialog behaviour with complex wildcards more sensible (it still
-  does not support all the features other ports do); refer to wxFileDialog
-  documentation for a detailed explanation
-- implemented wxWakeUpIdle
-- for Motif 2.0, used the native combobox widget instead of the GPL'd
-  xmcombo; xmcombo is still used for Motif 1.x and Lesstif when compiled
-  with Motif 1.x compatibility
-- implemented wxToggleButton
-- wxRadioBox and wxStaticBox now use the default shadow (border) style
-  instead of a sunken border
-- implemented wxBitmapDataObject
-- finished wxClipboard implementation
-
-wxUniv:
-
-- controls in toolbars now supported
-
-wxHTML:
-
-- added text selection to wxHtmlWindow
-- added SetFonts to HTML printing classes (Adrian Philip Look)
-- it is now possible to force page break when printing by inserting
-  <div style="page-break-before:always"> into the markup (Greg Chicares)
-- wxHtmlWindow now uses double buffering to prevent flicker
-
-
-OLD CHANGES
-===========
+wxWindows 2 Change Log
+----------------------
 
 INCOMPATIBLE CHANGES SINCE 2.2.x
 ================================
@@ -315,6 +49,7 @@ wxBase:
   must modify YourApp::OnAssert() signature if you were using it to override
   the default assert handling.
 
+
 All (GUI):
 
 ! the event type constants are not constants any more but are dynamically
@@ -332,6 +67,12 @@ All (GUI):
 ! if you handle (and don't skip) EVT_KEY_DOWN, the EVT_CHAR event is not
   generated at all, so you must call event.Skip() in your OnKeyDown() if
   you want to get OnChar() as well
+
+- the (command) events are not propagated beyond the first top level window
+  containing them because they now have wxWS_EX_BLOCK_EVENTS style by default,
+  you need to explicitly unset it if you want to have the old behaviour when
+  you could process the events from the controls in a dialog in its parent
+  frame.
 
 - in general, the key events sent for the various non ASCII key combinations
   have been changed to make them consistent over all supported platforms,
@@ -377,6 +118,7 @@ All (GUI):
   to obtain the previous behaviour, add
   wxMessageOutput::Set(new wxMessageOutputLog); to your program
   (you will need to #include <wx/msgout.h>)
+
 
 wxMSW:
 
@@ -436,12 +178,182 @@ wxThread and related classes:
 OTHER CHANGES
 =============
 
+2.4.2
+-----
+
+All:
+
+- always NUL-terminate the log messages
+- wxRegEx::Compile() now calculates the number of groups correctly
+- wxHTTP::GetHeader() didn't find headers which were not all in upper case
+- wxHTTP input stream didn't detect EOF correctly
+- wxString::find_last_of() ignored "start" parameter (Robert Vazan)
+- a bug in wxArrayString::Shrink() fixed (Gunnar Roth)
+- added wxIPV4address::IPAddress()
+
+All (GUI):
+
+- rare crash in wxFontMapper fixed (Robert Vazan)
+- added wxMenu::FindItemByPosition.
+- copy wxImage options when copying the images
+
+Generic:
+
+- wxListCtrl: respect wxLC_NO_HEADER style when inserting first column
+
+Unix:
+
+- fixed build problems with OpenGL when libGL(U) were in different directories
+- added --basename and --release flags to wx-config (Robert O'Connor)
+- added support for GNU/Hurd in configure
+- fixed wx-config --rezflags output on platforms different from Mac
+- changed wxNativeFontInfo::FromXFontName to treat names with all
+  components being empty or '*' as default font (since default font is
+  converted to such a string by GetXFontName).
+- wxLocale::Init now tries to set .utf8 locale in Unicode mode (Andreas Pflug)
+
+wxGTK
+
+- fixed compilation with --disable-compat-22
+- set the event object correctly for wxMenu events (Bob Balfour)
+- fixed memory leak in wxFileDialog (Christian Sturmlechner)
+
+wxMSW:
+
+- compilation fix for VC++ command line build (missing version.mak)
+- fixed release mode build with VC 7.x (Martin Ecker)
+- fix iostream.h problem with VC 7.1 (it doesn't support it any longer) 
+- compilation fix for XRC with mingw32
+
+wxMotif:
+
+- fixed "make install"
+
+wxXRC:
+
+- added wxNO_FULL_REPAINT_ON_RESIZE to "unknown" class handler (John Anderson)
+
+
+2.4.1
+-----
+
+All:
+
+- fixed wxLANGUAGE_CHINESE_TAIWAN to use zh_TW catalogs
+- added missing wx/quantize.h to install
+- improved wxScrolledWindow/sizer interaction
+- fixed assert (and crash in debug) in wxFileConfigGroup::DeleteSubgroupByName
+- fix for deleting entries at root level in wxFileConfig
+- wxStopWatch::Start() didn't resume it contrary to the docs
+- accept '\r' as delimiter when parsing dates
+- fixed duplicate wxFontEncoding values
+- wxFileConfig now always uses UTF-8 to store settings in Unicode build;
+  it will be possible to set different charset in wxWindows >= 2.5.0
+- added wxFileName::MakeAbsolute
+- bugs in wxCalCtrl fixed (year not being updated)
+
+Unix (GUI):
+
+- fixed the "close" button of dialogs under KDE 3.1
+- fixed memory leak in wxMimeTypesManager
+- use GNOME2's /usr/share/pixmaps/document-icons in wxMimeTypesManager
+
+wxBase
+
+- compilation with wxUSE_ODBC=1 fixed (dbkeyg.h file was missing in the archive)
+- bug in wxDateTime with timezones on systems with tm_gmtoff in struct tm fixed
+- fixed bug in wxArray::Shrink() (Seth Manley)
+- fixed bug with searching in sorted arrays (Jürgen Palm)
+- wxFileConfig parse bug fixed
+
+wxGTK:
+
+- added wxEVT_MENU_OPEN event generation
+- fixed bug in generic file selector causing incomplete file extensions to
+  be appended to filenames with no extension
+- added SetSelection implementation for GTK+ 2
+- fixed a memory leak in generic wxFileDialog
+- implemented wxTextCtrl::Remove/Replace() for GTK2
+- improved X11 ShowFullScreen
+- added support for GTK2 label mnemonics
+- don't consume 100% CPU when showing a poup menu
+
+wxMSW:
+
+- no longer take ampersand into account in wxStaticText::GetBestSize
+- set orientation for scrollbar events
+- fix for explicit keyword detection (VC++)
+- fix for sending event from wxCheckListBox::Check()
+- wxCaret::SetSize correction for showing caret
+- fix for wxTreeCtrl label editing in wxTR_MULTIPLE mode
+- wxFrame::Maximize(FALSE) would maximize the window if
+  called before showing it
+- use ES_DISABLENOSCROLL to work around the vertical scrollbar bug in
+  wxTE_RICH2 text control
+- fixes for wxLocale::Init and Borland C++
+- fix for bug whereby owner-drawn buttons didn't draw multiline labels correctly
+- Alt-letter didn't switch focus to a spin ctrl following static control with
+  hotkey
+- fix for multiple consecutive groups of radiobuttons
+- fix for incorrect display of tooltips in non English locales (Niki Spahiev)
+- fixed memory leak when setting new wxMask for wxBitmap
+- improved border handling so it no longer shows a thin and
+  sunken border under XP
+- partial fix for wxNotebook pages looking bad under XP: wxUSE_UXTHEME
+  enables XP theme engine code, and wxUSE_UXTHEME_AUTO tells
+  wxWindows to use the theme tab colour for control backgrounds.
+  Proper XP theme support is planned for 2.6
+- disable wxNB_RIGHT, wxNB_LEFT, wxNB_BOTTOM notebook styles
+  if the version of CommCtl doesn't support it (XP)
+
+wxMotif:
+
+- don't use stipples in DoDrawText
+
+wxUniv:
+
+- fixed refresh problem when message box is shown
+
+wxMac:
+
+- implement wxExecute with proper callback on Mac OS X
+
+wxHTML:
+
+- fixed parsing of CDATA tags (Bill Nalen)
+- content of <script> tags is not displayed anymore
+- added wxHtmlWindow::LoadFile
+- added SetFonts methods to wxHtmlDCRenderer and wxHtmlPrintout classes
+- 'sizes' argument to SetFonts can now be NULL to use default font sizes
+  (both by Adrian Philip Look)
+- it is now possible to force page break when printing by inserting
+  <div style="page-break-before:always"> into the markup (Greg Chicares)
+
+wxXRC:
+
+- wxrc fixes: fixed compilation of wxBitmap, wxIcon toplevel
+  nodes; fixed wxrc when using -o dirname/filename
+- wxToolBar handler now supports all wxToolBar's features
+- <object_ref> handling was fixed
+- loading of resources specified using relative file names was fixed
+- added wxSplitterWindow and wxWizard support
+
 2.4.0
 -----
 
 wxMSW:
 
 - fixed loss of client data in wxChoice::SetString()
+
+wxGTK:
+
+- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
+
+All:
+
+- Improved contrib/utils/convertrc parsing (David J. Cooke)
+- Fixed handling of URLs and filenames in wxFileSystem
+- Implemented alignment for wxGrid bool editor and renderer
 
 2.3.4
 -----
@@ -459,10 +371,12 @@ Unix (Base/GUI):
 - shared library symbols are now versioned on platforms that support it (Linux)
 
 wxGTK:
+
 - Further work for GTK 2.0 and Unicode support.
 - Addition of native frame site grip.
 
 wxX11:
+
 - Unicode support through Pango library.
 
 wxMSW:
@@ -484,7 +398,7 @@ wxBase:
 - fixes to the command line parsing error and usage messages
 - modified wxFileName::CreateTempFileName() to open the file atomically
   (if possible) and, especially, not to leak the file descriptors under Unix
-- memory leak in wxHTTP fixed (Dimitri Schoolwerth)
+- memory leak in wxHTTP fixed (Dimitri)
 - fixes to AM_PATH_WXCONFIG autoconf macro
 - added wxHashMap class that replaces type-unsafe wxHashTable and is modelled
   after (non standard) STL hash_map
@@ -545,7 +459,8 @@ All (GUI):
   (Rene Rivera).
 - Added wxTreeEvent::IsEditCancelled so the application can tell
   whether a label edit was cancelled.
-- added static wxFontMapper::Get() accessor
+- added static wxFontMapper::Get() accessor (use of wxTheFontMapper is now
+  deprecated)
 
 wxMSW:
 

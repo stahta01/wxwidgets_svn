@@ -4,14 +4,14 @@
 // Author:      Julian Smart and others
 // Modified by:
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart and Robert Roebling
+// Copyright:   (c) Julian Smart, Robert Roebling and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DCPSG_H_
 #define _WX_DCPSG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "dcpsg.h"
 #endif
 
@@ -38,18 +38,17 @@ class wxPostScriptDC;
 class WXDLLEXPORT wxPostScriptDC: public wxDC
 {
 public:
-    wxPostScriptDC();
+  wxPostScriptDC();
 
-    // Recommended constructor
-    wxPostScriptDC(const wxPrintData& printData);
+  // Recommended constructor
+  wxPostScriptDC(const wxPrintData& printData);
   
-    // Recommended destructor :-)
-    ~wxPostScriptDC();
+  ~wxPostScriptDC();
 
 #if WXWIN_COMPATIBILITY_2_2
-    wxPostScriptDC( const wxString &output, bool interactive = FALSE, wxWindow *parent = NULL )
-        { Create( output, interactive, parent ); }
-    bool Create ( const wxString &output, bool interactive = FALSE, wxWindow *parent = NULL );
+  wxPostScriptDC( const wxString &output, bool interactive = FALSE, wxWindow *parent = NULL )
+      { Create( output, interactive, parent ); }
+  bool Create ( const wxString &output, bool interactive = FALSE, wxWindow *parent = NULL );
 #endif
 
   virtual bool Ok() const;
@@ -133,12 +132,6 @@ private:
     static float ms_PSScaleFactor;
 
 protected:
-#if wxUSE_PANGO
-    PangoContext *m_context;
-    PangoLayout *m_layout;
-    PangoFontDescription *m_fontdesc;
-#endif
-
     FILE*             m_pstream;    // PostScript output stream
     wxString          m_title;
     unsigned char     m_currentRed;

@@ -23,13 +23,9 @@
 class WXDLLEXPORT wxCheckListBoxBase : public wxListBox
 {
 public:
-    wxCheckListBoxBase() { }
-
     // check list box specific methods
     virtual bool IsChecked(size_t item) const = 0;
     virtual void Check(size_t item, bool check = TRUE) = 0;
-
-    DECLARE_NO_COPY_CLASS(wxCheckListBoxBase)
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -42,10 +38,10 @@ public:
     #include "wx/gtk/checklst.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/checklst.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/checklst.h"
 #elif defined(__WXPM__)
     #include "wx/os2/checklst.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/checklst.h"
 #endif
 
 #endif // wxUSE_CHECKLISTBOX

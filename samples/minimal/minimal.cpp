@@ -81,7 +81,7 @@ private:
 enum
 {
     // menu items
-    Minimal_Quit = wxID_EXIT,
+    Minimal_Quit = 1,
 
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
@@ -121,11 +121,7 @@ bool MyApp::OnInit()
 {
     // create the main application window
     MyFrame *frame = new MyFrame(_T("Minimal wxWindows App"),
-#ifdef __WXWINCE__
-        wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxSYSTEM_MENU|wxCLIP_CHILDREN);
-#else
-        wxPoint(50, 50), wxSize(450, 340));
-#endif
+                                 wxPoint(50, 50), wxSize(450, 340));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -167,7 +163,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
     SetMenuBar(menuBar);
 #endif // wxUSE_MENUS
 
-#if wxUSE_STATUSBAR && !defined(__WXWINCE__)
+#if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
     SetStatusText(_T("Welcome to wxWindows!"));

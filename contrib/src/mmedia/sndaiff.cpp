@@ -55,7 +55,7 @@ wxSoundAiff::~wxSoundAiff()
 
 wxString wxSoundAiff::GetCodecName() const
 {
-    return wxT("wxSoundAiff codec");
+    return "wxSoundAiff codec";
 }
 
 bool wxSoundAiff::CanRead()
@@ -175,7 +175,7 @@ bool wxSoundAiff::PrepareToPlay()
     return TRUE;
 }
 
-bool wxSoundAiff::PrepareToRecord(wxUint32 WXUNUSED(time))
+bool wxSoundAiff::PrepareToRecord(wxUint32 time)
 {
     // TODO
     return FALSE;
@@ -187,7 +187,7 @@ bool wxSoundAiff::FinishRecording()
     return FALSE;
 }
 
-bool wxSoundAiff::RepositionStream(wxUint32 WXUNUSED(position))
+bool wxSoundAiff::RepositionStream(wxUint32 position)
 {
     // If the stream is not seekable "TellI() returns wxInvalidOffset" we cannot reposition stream
     if (m_base_offset == wxInvalidOffset)

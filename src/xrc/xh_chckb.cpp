@@ -24,8 +24,6 @@
 
 #if wxUSE_CHECKBOX
 
-IMPLEMENT_DYNAMIC_CLASS(wxCheckBoxXmlHandler, wxXmlResourceHandler)
-
 wxCheckBoxXmlHandler::wxCheckBoxXmlHandler() 
 : wxXmlResourceHandler() 
 {

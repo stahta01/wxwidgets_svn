@@ -1,25 +1,23 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        dcprint.h
 // Purpose:     wxPrinterDC class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DCPRINT_H_
 #define _WX_DCPRINT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "dcprint.h"
 #endif
 
 #include "wx/dc.h"
 #include "wx/cmndata.h"
-
-class wxNativePrinterDC ;
 
 class WXDLLEXPORT wxPrinterDC: public wxDC
 {
@@ -35,12 +33,9 @@ class WXDLLEXPORT wxPrinterDC: public wxDC
     virtual void EndDoc(void) ;
     virtual void StartPage(void) ;
     virtual void EndPage(void) ;
-    wxPrintData& GetPrintData() { return m_printData; }
-    virtual void DoGetSize( int *width, int *height ) const;
-    
  protected:
-    wxPrintData   m_printData ;
-    wxNativePrinterDC* m_nativePrinterDC ;
+      void*         m_macPrintSessionPort ;
+      wxPrintData   m_printData ;
 #endif // wxUSE_PRINTING_ARCHITECTURE
 };
 

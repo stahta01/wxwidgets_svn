@@ -34,7 +34,7 @@ class csFrame;
 // Define a new application
 class csApp: public wxApp
 {
-    friend class csFrame;
+    friend csFrame;
 public:
     csApp();
     ~csApp();
@@ -60,7 +60,7 @@ public:
     void CreateDiagramToolBar(wxFrame* parent);
 
     wxMDIChildFrame *CreateChildFrame(wxDocument *doc, wxView *view, wxMenu** editMenu);
-    csCanvas *CreateCanvas(wxView *view, wxMDIChildFrame *parent);
+    csCanvas *CreateCanvas(wxView *view, wxFrame *parent);
 
     // Fill out the project tree control
     void FillProjectTreeCtrl();

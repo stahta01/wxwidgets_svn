@@ -12,7 +12,7 @@
 #ifndef _WX_DIALUP_H
 #define _WX_DIALUP_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "dialup.h"
 #endif
 
@@ -25,6 +25,8 @@
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxArrayString;
+
+WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 
 #define WXDIALUP_MANAGER_DEFAULT_BEACONHOST  wxT("www.yahoo.com")
 
@@ -182,9 +184,6 @@ public:
 
     // implement the base class pure virtual
     virtual wxEvent *Clone() const { return new wxDialUpEvent(*this); }
-
-private:
-    DECLARE_NO_ASSIGN_CLASS(wxDialUpEvent)
 };
 
 // the type of dialup event handler function

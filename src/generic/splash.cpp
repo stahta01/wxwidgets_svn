@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "splash.h"
 #endif
 
@@ -24,7 +24,6 @@
 
 #ifndef WX_PRECOMP
 #include "wx/dcmemory.h"
-#include "wx/dcclient.h"
 #endif
 
 #include "wx/splash.h"
@@ -71,7 +70,7 @@ wxSplashScreen::wxSplashScreen(const wxBitmap& bitmap, long splashStyle, int mil
 
     Show(TRUE);
     m_window->SetFocus();
-#if defined( __WXMSW__ ) || defined(__WXMAC__)
+#if defined(__WXMSW__) || defined(__WXMAC__)
     Update(); // Without this, you see a blank screen for an instant
 #else
     wxYieldIfNeeded(); // Should eliminate this

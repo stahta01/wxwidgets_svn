@@ -18,7 +18,7 @@
 #endif
 
 #include "wx/wx.h"
-#include "wx/xml/xml.h"
+#include "wx/xrc/xml.h"
 #include "propframe.h"
 #include "propedit.h"
 #include "xmlhelpr.h"
@@ -37,12 +37,12 @@ BEGIN_EVENT_TABLE(PropEditCtrl, wxPanel)
     EVT_BUTTON(ID_DETAILS, PropEditCtrl::OnButtonDetails)
 END_EVENT_TABLE()
 
-void PropEditCtrl::OnButtonDetails(wxCommandEvent& WXUNUSED(event))
+void PropEditCtrl::OnButtonDetails(wxCommandEvent& event)
 {
     OnDetails();
 }
 
-void PropEditCtrl::OnButtonClear(wxCommandEvent& WXUNUSED(event))
+void PropEditCtrl::OnButtonClear(wxCommandEvent& event)
 {
     Clear();
     EditorFrame::Get()->NotifyChanged(CHANGED_PROPS);        

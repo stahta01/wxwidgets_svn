@@ -6,7 +6,20 @@
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+/*
+
+REMARKS :
+
+This FS creates local cache (in /tmp directory). The cache is freed
+on program exit.
+
+Size of cache is limited to cca 1000 items (due to GetTempFileName
+limitation)
+
+
+*/
+
+#ifdef __GNUG__
 #pragma implementation "fs_inet.h"
 #endif
 
@@ -32,37 +45,26 @@
 #include "wx/fs_inet.h"
 #include "wx/module.h"
 
-// ----------------------------------------------------------------------------
-// Helper classes
-// ----------------------------------------------------------------------------
-
-// This stream deletes the file when destroyed
-class wxTemporaryFileInputStream : public wxFileInputStream
+class wxInetCacheNode : public wxObject
 {
-public:
-    wxTemporaryFileInputStream(const wxString& filename) :
-        wxFileInputStream(filename), m_filename(filename) {}
-    
-    ~wxTemporaryFileInputStream()
-    {
-        // NB: copied from wxFileInputStream dtor, we need to do it before
-        //     wxRemoveFile
-        if (m_file_destroy)
-        {
-            delete m_file;
-            m_file_destroy = false;
-        }
-        wxRemoveFile(m_filename);        
-    }
+    private:
+        wxString m_Temp;
+        wxString m_Mime;
 
-protected:
-    wxString m_filename;
+    public:
+        wxInetCacheNode(const wxString& l, const wxString& m) : wxObject() {m_Temp = l; m_Mime = m;}
+        const wxString& GetTemp() const {return m_Temp;}
+        const wxString& GetMime() const {return m_Mime;}
 };
 
 
-// ----------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------
 // wxInternetFSHandler
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+
 
 static wxString StripProtocolAnchor(const wxString& location)
 {
@@ -82,6 +84,7 @@ static wxString StripProtocolAnchor(const wxString& location)
 }
 
 
+
 bool wxInternetFSHandler::CanOpen(const wxString& location)
 {
     wxString p = GetProtocol(location);
@@ -95,43 +98,72 @@ bool wxInternetFSHandler::CanOpen(const wxString& location)
 }
 
 
-wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
-                                        const wxString& location)
+wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString& location)
 {
-    wxString right =
-        GetProtocol(location) + wxT(":") + StripProtocolAnchor(location);
+    wxString right = GetProtocol(location) + wxT(":") + StripProtocolAnchor(location);
+    wxInputStream *s;
+    wxString content;
+    wxInetCacheNode *info;
 
-    wxURL url(right);
-    if (url.GetError() == wxURL_NOERR)
+    info = (wxInetCacheNode*) m_Cache.Get(right);
+
+    // Add item into cache:
+    if (info == NULL)
     {
-        wxInputStream *s = url.GetInputStream();
-        wxString content = url.GetProtocol().GetContentType();
-        if (content == wxEmptyString) content = GetMimeTypeFromExt(location);
-        if (s)
+        wxURL url(right);
+        if (url.GetError() == wxURL_NOERR)
         {
-            wxString tmpfile =
-                wxFileName::CreateTempFileName(wxT("wxhtml"));
+            s = url.GetInputStream();
+            content = url.GetProtocol().GetContentType();
+            if (content == wxEmptyString) content = GetMimeTypeFromExt(location);
+            if (s)
+            {
+                wxChar buf[256];
 
-            {   // now copy streams content to temporary file:
-                wxFileOutputStream sout(tmpfile);
-                s->Read(sout);
+                wxGetTempFileName( wxT("wxhtml"), buf);
+                info = new wxInetCacheNode(buf, content);
+                m_Cache.Put(right, info);
+
+                {   // ok, now copy it:
+                    wxFileOutputStream sout((wxString)buf);
+                    s -> Read(sout); // copy the stream
+                }
+                delete s;
             }
-            delete s;
-    
-            return new wxFSFile(new wxTemporaryFileInputStream(tmpfile),
-                                right,
-                                content,
-                                GetAnchor(location)
-#if wxUSE_DATETIME
-                                , wxDateTime::Now()
-#endif // wxUSE_DATETIME
-                        );
+            else
+                return (wxFSFile*) NULL; // we can't open the URL
         }
+        else
+            return (wxFSFile*) NULL; // incorrect URL
     }
 
-    return (wxFSFile*) NULL; // incorrect URL
+    // Load item from cache:
+    s = new wxFileInputStream(info->GetTemp());
+    if (!s)
+        return (wxFSFile*) NULL;
+
+    return new wxFSFile(s,
+                        right,
+                        info->GetMime(),
+                        GetAnchor(location),
+                        wxDateTime::Now());
 }
 
+
+
+wxInternetFSHandler::~wxInternetFSHandler()
+{
+    wxNode *n;
+    wxInetCacheNode *n2;
+
+    m_Cache.BeginFind();
+    while ((n = m_Cache.Next()) != NULL)
+    {
+        n2 = (wxInetCacheNode*) n->GetData();
+        wxRemoveFile(n2->GetTemp());
+        delete n2;
+    }
+}
 
 class wxFileSystemInternetModule : public wxModule
 {

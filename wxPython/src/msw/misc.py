@@ -50,12 +50,6 @@ class wxSizePtr :
     def SetHeight(self, *_args, **_kwargs):
         val = miscc.wxSize_SetHeight(self, *_args, **_kwargs)
         return val
-    def IncTo(self, *_args, **_kwargs):
-        val = miscc.wxSize_IncTo(self, *_args, **_kwargs)
-        return val
-    def DecTo(self, *_args, **_kwargs):
-        val = miscc.wxSize_DecTo(self, *_args, **_kwargs)
-        return val
     def asTuple(self, *_args, **_kwargs):
         val = miscc.wxSize_asTuple(self, *_args, **_kwargs)
         return val
@@ -812,8 +806,6 @@ wxGetHomeDir = miscc.wxGetHomeDir
 wxGetUserHome = miscc.wxGetUserHome
 
 wxGetProcessId = miscc.wxGetProcessId
-
-wxTrap = miscc.wxTrap
 
 def wxGetAccelFromString(*_args, **_kwargs):
     val = miscc.wxGetAccelFromString(*_args,**_kwargs)

@@ -75,11 +75,11 @@
 
 #define wxHTML_COND_ISANCHOR              1
         // Finds the anchor of 'param' name (pointer to wxString).
-    
+	
 #define wxHTML_COND_ISIMAGEMAP            2
         // Finds imagemap of 'param' name (pointer to wxString).
-    // (used exclusively by m_image.cpp)
-    
+	// (used exclusively by m_image.cpp)
+	
 #define wxHTML_COND_USER              10000
         // User-defined conditions should start from this number
 
@@ -125,6 +125,33 @@
    #define wxHTML_FONT_SIZE_6             24
    #define wxHTML_FONT_SIZE_7             32
 #endif
+
+
+#if WXWIN_COMPATIBILITY_2
+
+#define HTML_ALIGN_LEFT            wxHTML_ALIGN_LEFT
+#define HTML_ALIGN_RIGHT           wxHTML_ALIGN_RIGHT
+#define HTML_ALIGN_TOP             wxHTML_ALIGN_TOP
+#define HTML_ALIGN_BOTTOM          wxHTML_ALIGN_BOTTOM
+#define HTML_ALIGN_CENTER          wxHTML_ALIGN_CENTER
+#define HTML_CLR_FOREGROUND        wxHTML_CLR_FOREGROUND
+#define HTML_CLR_BACKGROUND        wxHTML_CLR_BACKGROUND
+#define HTML_UNITS_PIXELS          wxHTML_UNITS_PIXELS
+#define HTML_UNITS_PERCENT         wxHTML_UNITS_PERCENT
+#define HTML_INDENT_LEFT           wxHTML_INDENT_LEFT
+#define HTML_INDENT_RIGHT          wxHTML_INDENT_RIGHT
+#define HTML_INDENT_TOP            wxHTML_INDENT_TOP
+#define HTML_INDENT_BOTTOM         wxHTML_INDENT_BOTTOM
+#define HTML_INDENT_HORIZONTAL     wxHTML_INDENT_HORIZONTAL
+#define HTML_INDENT_VERTICAL       wxHTML_INDENT_VERTICAL
+#define HTML_INDENT_ALL            wxHTML_INDENT_ALL
+#define HTML_COND_ISANCHOR         wxHTML_COND_ISANCHOR
+#define HTML_COND_ISIMAGEMAP       wxHTML_COND_ISIMAGEMAP
+#define HTML_COND_USER             wxHTML_COND_USER
+
+#endif
+
+
 
 #endif
 #endif

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/stattext.h
+// Name:        stattext.h
 // Purpose:     wxStaticText class
 // Author:      Julian Smart
 // Modified by:
@@ -12,7 +12,7 @@
 #ifndef _WX_STATTEXT_H_
 #define _WX_STATTEXT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "stattext.h"
 #endif
 
@@ -45,14 +45,11 @@ public:
     virtual bool SetFont( const wxFont &font );
 
 protected:
-    // implement/override some base class virtuals
-    virtual wxBorder GetDefaultBorder() const;
     virtual void DoSetSize(int x, int y, int w, int h,
                            int sizeFlags = wxSIZE_AUTO);
     virtual wxSize DoGetBestSize() const;
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxStaticText)
+    DECLARE_DYNAMIC_CLASS(wxStaticText)
 };
 
 #endif

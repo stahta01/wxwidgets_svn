@@ -12,7 +12,7 @@
 #ifndef   __CHECKLST__H_
 #define   __CHECKLST__H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "checklst.h"
 #endif
 
@@ -78,7 +78,7 @@ private:
   size_t    m_nItemHeight;  // height of checklistbox items (the same for all)
 
   DECLARE_EVENT_TABLE()
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxCheckListBox)
+  DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 };
 
 #endif    //_CHECKLST_H

@@ -28,6 +28,7 @@
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in wx_setup.h!
 #endif
 
+#include <wx/wxexpr.h>
 #include "ogledit.h"
 #include "doc.h"
 #include "view.h"
@@ -87,37 +88,39 @@ wxSTD istream& DiagramDocument::LoadObject(wxSTD istream& stream)
 
 wxOutputStream& DiagramDocument::SaveObject(wxOutputStream& stream)
 {
-#if wxUSE_PROLOGIO
-
   wxDocument::SaveObject(stream);
-  wxChar buf[400];
-  (void) wxGetTempFileName(_T("diag"), buf);
+  char buf[400];
+  (void) wxGetTempFileName("diag", buf);
 
+#if wxUSE_PROLOGIO
   diagram.SaveFile(buf);
+#endif
 
   wxTransferFileToStream(buf, stream);
 
   wxRemoveFile(buf);
-
-#endif
+  
 
   return stream;
 }
 
 wxInputStream& DiagramDocument::LoadObject(wxInputStream& stream)
 {
-#if wxUSE_PROLOGIO
   wxDocument::LoadObject(stream);
 
-  wxChar buf[400];
-  (void) wxGetTempFileName(_T("diag"), buf);
+
+  char buf[400];
+  (void) wxGetTempFileName("diag", buf);
 
   wxTransferStreamToFile(stream, buf);
 
   diagram.DeleteAllShapes();
+
+#if wxUSE_PROLOGIO
   diagram.LoadFile(buf);
-  wxRemoveFile(buf);
 #endif
+
+  wxRemoveFile(buf);
 
   return stream;
 }
@@ -128,7 +131,7 @@ wxInputStream& DiagramDocument::LoadObject(wxInputStream& stream)
  * Implementation of drawing command
  */
 
-DiagramCommand::DiagramCommand(const wxString& name, int command, DiagramDocument *ddoc, wxClassInfo *info, double xx, double yy,
+DiagramCommand::DiagramCommand(char *name, int command, DiagramDocument *ddoc, wxClassInfo *info, double xx, double yy,
   bool sel, wxShape *theShape, wxShape *fs, wxShape *ts):
   wxCommand(TRUE, name)
 {
@@ -146,7 +149,7 @@ DiagramCommand::DiagramCommand(const wxString& name, int command, DiagramDocumen
   deleteShape = FALSE;
 }
 
-DiagramCommand::DiagramCommand(const wxString& name, int command, DiagramDocument *ddoc, wxBrush *backgroundColour, wxShape *theShape):
+DiagramCommand::DiagramCommand(char *name, int command, DiagramDocument *ddoc, wxBrush *backgroundColour, wxShape *theShape):
   wxCommand(TRUE, name)
 {
   doc = ddoc;
@@ -163,7 +166,7 @@ DiagramCommand::DiagramCommand(const wxString& name, int command, DiagramDocumen
   shapePen = NULL;
 }
 
-DiagramCommand::DiagramCommand(const wxString& name, int command, DiagramDocument *ddoc, const wxString& lab, wxShape *theShape):
+DiagramCommand::DiagramCommand(char *name, int command, DiagramDocument *ddoc, const wxString& lab, wxShape *theShape):
   wxCommand(TRUE, name)
 {
   doc = ddoc;
@@ -229,7 +232,7 @@ bool DiagramCommand::Do(void)
       {
         theShape = (wxShape *)shapeInfo->CreateObject();
         theShape->AssignNewIds();
-        theShape->SetEventHandler(new MyEvtHandler(theShape, theShape, wxEmptyString));
+        theShape->SetEventHandler(new MyEvtHandler(theShape, theShape, wxString("")));
         theShape->SetCentreResize(FALSE);
         theShape->SetPen(wxBLACK_PEN);
         theShape->SetBrush(wxCYAN_BRUSH);
@@ -260,7 +263,7 @@ bool DiagramCommand::Do(void)
       {
         theShape = (wxShape *)shapeInfo->CreateObject();
         theShape->AssignNewIds();
-        theShape->SetEventHandler(new MyEvtHandler(theShape, theShape, wxEmptyString));
+        theShape->SetEventHandler(new MyEvtHandler(theShape, theShape, wxString("")));
         theShape->SetPen(wxBLACK_PEN);
         theShape->SetBrush(wxRED_BRUSH);
 
@@ -269,7 +272,7 @@ bool DiagramCommand::Do(void)
         // Yes, you can have more than 2 control points, in which case
         // it becomes a multi-segment line.
         lineShape->MakeLineControlPoints(2);
-        lineShape->AddArrow(ARROW_ARROW, ARROW_POSITION_END, 10.0, 0.0, _T("Normal arrowhead"));
+        lineShape->AddArrow(ARROW_ARROW, ARROW_POSITION_END, 10.0, 0.0, "Normal arrowhead");
       }
       
       doc->GetDiagram()->AddShape(theShape);
@@ -323,7 +326,7 @@ bool DiagramCommand::Do(void)
         wxClientDC dc(shape->GetCanvas());
         shape->GetCanvas()->PrepareDC(dc);
 
-        shape->FormatText(dc, /* (char*) (const char*) */ myHandler->label);
+        shape->FormatText(dc, (char*) (const char*) myHandler->label);
         shape->Draw(dc);
         
         doc->Modify(TRUE);
@@ -408,7 +411,7 @@ bool DiagramCommand::Undo(void)
         wxClientDC dc(shape->GetCanvas());
         shape->GetCanvas()->PrepareDC(dc);
 
-        shape->FormatText(dc, /* (char*) (const char*) */ myHandler->label);
+        shape->FormatText(dc, (char*) (const char*) myHandler->label);
         shape->Draw(dc);
         
         doc->Modify(TRUE);
@@ -428,7 +431,7 @@ void DiagramCommand::RemoveLines(wxShape *shape)
   while (node)
   {
     wxLineShape *line = (wxLineShape *)node->Data();
-    doc->GetCommandProcessor()->Submit(new DiagramCommand(_T("Cut"), OGLEDIT_CUT, doc, NULL, 0.0, 0.0, line->Selected(), line));
+    doc->GetCommandProcessor()->Submit(new DiagramCommand("Cut", OGLEDIT_CUT, doc, NULL, 0.0, 0.0, line->Selected(), line));
     
     node = shape->GetLines().First();
   }
@@ -438,7 +441,7 @@ void DiagramCommand::RemoveLines(wxShape *shape)
  * MyEvtHandler: an event handler class for all shapes
  */
  
-void MyEvtHandler::OnLeftClick(double WXUNUSED(x), double WXUNUSED(y), int keys, int WXUNUSED(attachment))
+void MyEvtHandler::OnLeftClick(double x, double y, int keys, int attachment)
 {
   wxClientDC dc(GetShape()->GetCanvas());
   GetShape()->GetCanvas()->PrepareDC(dc);
@@ -488,7 +491,7 @@ void MyEvtHandler::OnLeftClick(double WXUNUSED(x), double WXUNUSED(y), int keys,
  * Implement connection of two shapes by right-dragging between them.
  */
 
-void MyEvtHandler::OnBeginDragRight(double x, double y, int WXUNUSED(keys), int attachment)
+void MyEvtHandler::OnBeginDragRight(double x, double y, int keys, int attachment)
 {
   // Force attachment to be zero for now. Eventually we can deal with
   // the actual attachment point, e.g. a rectangle side if attachment mode is on.
@@ -506,7 +509,7 @@ void MyEvtHandler::OnBeginDragRight(double x, double y, int WXUNUSED(keys), int 
   GetShape()->GetCanvas()->CaptureMouse();
 }
 
-void MyEvtHandler::OnDragRight(bool WXUNUSED(draw), double x, double y, int WXUNUSED(keys), int attachment)
+void MyEvtHandler::OnDragRight(bool draw, double x, double y, int keys, int attachment)
 {
   // Force attachment to be zero for now
   attachment = 0;
@@ -522,7 +525,7 @@ void MyEvtHandler::OnDragRight(bool WXUNUSED(draw), double x, double y, int WXUN
   dc.DrawLine((long) xp, (long) yp, (long) x, (long) y);
 }
 
-void MyEvtHandler::OnEndDragRight(double x, double y, int WXUNUSED(keys), int WXUNUSED(attachment))
+void MyEvtHandler::OnEndDragRight(double x, double y, int keys, int attachment)
 {
   GetShape()->GetCanvas()->ReleaseMouse();
   MyCanvas *canvas = (MyCanvas *)GetShape()->GetCanvas();
@@ -534,38 +537,37 @@ void MyEvtHandler::OnEndDragRight(double x, double y, int WXUNUSED(keys), int WX
   if (otherShape && !otherShape->IsKindOf(CLASSINFO(wxLineShape)))
   {
     canvas->view->GetDocument()->GetCommandProcessor()->Submit(
-      new DiagramCommand(_T("wxLineShape"), OGLEDIT_ADD_LINE, (DiagramDocument *)canvas->view->GetDocument(), CLASSINFO(wxLineShape),
+      new DiagramCommand("wxLineShape", OGLEDIT_ADD_LINE, (DiagramDocument *)canvas->view->GetDocument(), CLASSINFO(wxLineShape),
       0.0, 0.0, FALSE, NULL, GetShape(), otherShape));
   }
 }
 
-void MyEvtHandler::OnEndSize(double WXUNUSED(x), double WXUNUSED(y))
+void MyEvtHandler::OnEndSize(double x, double y)
 {
   wxClientDC dc(GetShape()->GetCanvas());
   GetShape()->GetCanvas()->PrepareDC(dc);
 
-  GetShape()->FormatText(dc, /* (char*) (const char*) */ label);
+  GetShape()->FormatText(dc, (char*) (const char*) label);
 }
 
 /*
  * Diagram
  */
-
-#if wxUSE_PROLOGIO
  
+#if wxUSE_PROLOGIO
 bool MyDiagram::OnShapeSave(wxExprDatabase& db, wxShape& shape, wxExpr& expr)
 {
   wxDiagram::OnShapeSave(db, shape, expr);
   MyEvtHandler *handler = (MyEvtHandler *)shape.GetEventHandler();
-  expr.AddAttributeValueString(_T("label"), handler->label);
+  expr.AddAttributeValueString("label", handler->label);
   return TRUE;
 }
 
 bool MyDiagram::OnShapeLoad(wxExprDatabase& db, wxShape& shape, wxExpr& expr)
 {
   wxDiagram::OnShapeLoad(db, shape, expr);
-  wxChar *label = NULL;
-  expr.AssignAttributeValue(_T("label"), &label);
+  char *label = NULL;
+  expr.AssignAttributeValue("label", &label);
   MyEvtHandler *handler = new MyEvtHandler(&shape, &shape, wxString(label));
   shape.SetEventHandler(handler);
   
@@ -573,7 +575,6 @@ bool MyDiagram::OnShapeLoad(wxExprDatabase& db, wxShape& shape, wxExpr& expr)
     delete[] label;
   return TRUE;
 }
-
 #endif
 
 /*

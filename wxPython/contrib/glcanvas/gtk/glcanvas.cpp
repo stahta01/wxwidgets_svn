@@ -55,11 +55,6 @@ extern PyObject *SWIG_newvarlink(void);
 #define SWIG_name    "glcanvasc"
 
 #include "wxPython.h"
-
-#ifdef __WXMAC__  // avoid a bug in Carbon headers
-#define scalb scalbn
-#endif
-
 #ifdef __WXMSW__
 #include "myglcanvas.h"
 #else
@@ -943,6 +938,9 @@ SWIGEXPORT(void) initglcanvasc() {
 	 PyDict_SetItemString(d,"WX_GL_MIN_ACCUM_BLUE", PyInt_FromLong((long) WX_GL_MIN_ACCUM_BLUE));
 	 PyDict_SetItemString(d,"WX_GL_MIN_ACCUM_ALPHA", PyInt_FromLong((long) WX_GL_MIN_ACCUM_ALPHA));
 
+
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
 
 {
    int i;

@@ -10,7 +10,7 @@
 #ifndef _WX_IMAGTIFF_H_
 #define _WX_IMAGTIFF_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "imagtiff.h"
 #endif
 
@@ -25,7 +25,13 @@
 class WXDLLEXPORT wxTIFFHandler: public wxImageHandler
 {
 public:
-    wxTIFFHandler();
+    inline wxTIFFHandler()
+    {
+        m_name = wxT("TIFF file");
+        m_extension = wxT("tif");
+        m_type = wxBITMAP_TYPE_TIF;
+        m_mime = wxT("image/tiff");
+    }
 
 #if wxUSE_STREAMS
     virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );

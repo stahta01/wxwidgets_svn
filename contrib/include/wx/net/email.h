@@ -23,7 +23,7 @@
  * Miscellaneous email functions
  */
 
-class WXDLLIMPEXP_NETUTILS wxEmail
+class wxEmail
 {
 public:
 //// Ctor/dtor

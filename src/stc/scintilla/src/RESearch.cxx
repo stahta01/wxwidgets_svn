@@ -30,6 +30,10 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.5.2.4  2003/09/18 18:14:11  RD
+ * Updated wxSTC in 2.4 branch to Scintilla 1.54.
+ * Also includes patches from ABX and new sample from Otto Wyss
+ *
  * Revision 1.8  2003/09/18 05:05:38  RD
  * Updated to Scintilla 1.54
  * Applied most of patch #806092

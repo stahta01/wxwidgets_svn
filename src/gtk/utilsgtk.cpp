@@ -3,17 +3,13 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/utils.h"
 #include "wx/string.h"
 
-#include "wx/apptrait.h"
 #include "wx/intl.h"
 #include "wx/log.h"
 
@@ -56,14 +52,11 @@ extern GtkWidget *wxGetRootWindow();
 //----------------------------------------------------------------------------
 // misc.
 //----------------------------------------------------------------------------
-#ifndef __EMX__
-// on OS/2, we use the wxBell from wxBase library
 
 void wxBell()
 {
     gdk_beep();
 }
-#endif
 
 /* Don't synthesize KeyUp events holding down a key and producing
    KeyDown events with autorepeat. */
@@ -128,23 +121,12 @@ int wxDisplayDepth()
     return gdk_window_get_visual( wxGetRootWindow()->window )->depth;
 }
 
-wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
-    static wxToolkitInfo info;
-#ifdef __WXGTK20__
-    info.shortName = _T("gtk2");
-#else
-    info.shortName = _T("gtk");
-#endif
-    info.name = _T("wxGTK");
-#ifdef __WXUNIVERSAL__
-    info.shortName << _T("univ");
-    info.name << _T("/wxUniversal");
-#endif
-    info.versionMajor = GTK_MAJOR_VERSION;
-    info.versionMinor = GTK_MINOR_VERSION;
-    info.os = wxGTK;
-    return info;
+  if (majorVsn) *majorVsn = GTK_MAJOR_VERSION;
+  if (minorVsn) *minorVsn = GTK_MINOR_VERSION;
+
+  return wxGTK;
 }
 
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)

@@ -36,8 +36,6 @@
     #include "wx/frame.h"
 #endif
 
-#include "wx/mmedia/defs.h"
-
 // ----------------------------------------------------------------------------
 // wxMMedia2 (video) types
 
@@ -56,7 +54,7 @@ typedef enum {
 // ----------------------------------------------------------------------------
 // Classes definition
 
-class WXDLLIMPEXP_MMEDIA wxVideoBaseDriver : public wxObject {
+class WXDLLEXPORT wxVideoBaseDriver : public wxObject {
     DECLARE_ABSTRACT_CLASS(wxVideoBaseDriver)
 protected:
     wxWindow *m_video_output;
@@ -106,7 +104,7 @@ public:
     virtual bool IsStopped() const = 0;
 };
 
-WXDLLIMPEXP_MMEDIA wxFrame *wxVideoCreateFrame(wxVideoBaseDriver *vid_drv);
+WXDLLEXPORT wxFrame *wxVideoCreateFrame(wxVideoBaseDriver *vid_drv);
 
 
 #endif

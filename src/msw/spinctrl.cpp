@@ -13,7 +13,7 @@
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "spinctrlbase.h"
     #pragma implementation "spinctrl.h"
 #endif
@@ -40,7 +40,7 @@
 #include "wx/spinctrl.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -50,70 +50,7 @@
 // macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxSpinCtrlStyle )
-
-wxBEGIN_FLAGS( wxSpinCtrlStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-    
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxNO_BORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxNO_FULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxSP_HORIZONTAL)
-    wxFLAGS_MEMBER(wxSP_VERTICAL)
-    wxFLAGS_MEMBER(wxSP_ARROW_KEYS)
-    wxFLAGS_MEMBER(wxSP_WRAP)
-
-wxEND_FLAGS( wxSpinCtrlStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxSpinCtrl, wxControl,"wx/spinbut.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxSpinCtrl)
-    wxEVENT_RANGE_PROPERTY( Spin , wxEVT_SCROLL_TOP , wxEVT_SCROLL_ENDSCROLL , wxSpinEvent )
-    wxEVENT_PROPERTY( Updated , wxEVT_COMMAND_SPINCTRL_UPDATED , wxCommandEvent )
-    wxEVENT_PROPERTY( TextUpdated , wxEVT_COMMAND_TEXT_UPDATED , wxCommandEvent ) 
-    wxEVENT_PROPERTY( TextEnter , wxEVT_COMMAND_TEXT_ENTER , wxCommandEvent )
-
-    wxPROPERTY( ValueString , wxString , SetValue , GetValue , , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) ;
-	wxPROPERTY( Value , int , SetValue, GetValue, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( Min , int , SetMin, GetMin, 0, 0 /*flags*/ , wxT("Helpstring") , wxT("group") )
-	wxPROPERTY( Max , int , SetMax, GetMax, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY_FLAGS( WindowStyle , wxSpinCtrlStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-/*
-	TODO PROPERTIES
-		style wxSP_ARROW_KEYS
-*/
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxSpinCtrl)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_6( wxSpinCtrl , wxWindow* , Parent , wxWindowID , Id , wxString , ValueString , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
-#endif
 
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
@@ -234,7 +171,7 @@ bool wxSpinCtrl::ProcessTextCommand(WXWORD cmd, WXWORD WXUNUSED(id))
 
 void wxSpinCtrl::OnChar(wxKeyEvent& event)
 {
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_RETURN:
             {
@@ -301,9 +238,6 @@ bool wxSpinCtrl::Create(wxWindow *parent,
 
     SetWindowStyle(style);
 
-    WXDWORD exStyle = 0;
-    WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;
-
     // calculate the sizes: the size given is the toal size for both controls
     // and we need to fit them both in the given width (height is the same)
     wxSize sizeText(size), sizeBtn(size);
@@ -331,9 +265,12 @@ bool wxSpinCtrl::Create(wxWindow *parent,
 
     // create the text window
 
+    WXDWORD exStyle = 0;
+    WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;
+
     m_hwndBuddy = (WXHWND)::CreateWindowEx
                     (
-                     exStyle,                // sunken border
+                     exStyle,       // sunken border
                      _T("EDIT"),             // window class
                      NULL,                   // no window title
                      msStyle,                // style (will be shown later)

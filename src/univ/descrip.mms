@@ -40,6 +40,7 @@ OBJECTS = \
 		notebook.obj,\
 		radiobox.obj,\
 		radiobut.obj,\
+		renderer.obj,\
 		scrarrow.obj,\
 		scrolbar.obj,\
 		scrthumb.obj,\
@@ -76,6 +77,7 @@ SOURCES =\
 		notebook.cpp \
 		radiobox.cpp \
 		radiobut.cpp \
+		renderer.cpp \
 		scrarrow.cpp \
 		scrolbar.cpp \
 		scrthumb.cpp \
@@ -116,6 +118,7 @@ menu.obj : menu.cpp
 notebook.obj : notebook.cpp
 radiobox.obj : radiobox.cpp
 radiobut.obj : radiobut.cpp
+renderer.obj : renderer.cpp
 scrarrow.obj : scrarrow.cpp
 scrolbar.obj : scrolbar.cpp
 scrthumb.obj : scrthumb.cpp

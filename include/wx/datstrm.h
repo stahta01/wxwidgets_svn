@@ -2,17 +2,17 @@
 // Name:        datstrm.h
 // Purpose:     Data stream classes
 // Author:      Guilhem Lavaux
-// Modified by: Mickael Gilabert
+// Modified by:
 // Created:     28/06/1998
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:   	wxWindows licence
+// Licence:   	wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DATSTREAM_H_
 #define _WX_DATSTREAM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "datstrm.h"
 #endif
 
@@ -22,7 +22,7 @@
 
 #if wxUSE_STREAMS
 
-class WXDLLIMPEXP_BASE wxDataInputStream
+class WXDLLEXPORT wxDataInputStream
 {
 public:
 #if wxUSE_UNICODE
@@ -40,12 +40,6 @@ public:
     wxUint8 Read8();
     double ReadDouble();
     wxString ReadString();
-
-    void Read64(wxUint64 *buffer, size_t size);
-    void Read32(wxUint32 *buffer, size_t size);
-    void Read16(wxUint16 *buffer, size_t size);
-    void Read8(wxUint8 *buffer, size_t size);
-    void ReadDouble(double *buffer, size_t size);
 
     wxDataInputStream& operator>>(wxString& s);
     wxDataInputStream& operator>>(wxInt8& c);
@@ -66,11 +60,9 @@ protected:
 #if wxUSE_UNICODE
     wxMBConv& m_conv;
 #endif
-
-    DECLARE_NO_COPY_CLASS(wxDataInputStream)
 };
 
-class WXDLLIMPEXP_BASE wxDataOutputStream
+class WXDLLEXPORT wxDataOutputStream
 {
 public:
 #if wxUSE_UNICODE
@@ -88,12 +80,6 @@ public:
     void Write8(wxUint8 i);
     void WriteDouble(double d);
     void WriteString(const wxString& string);
-
-    void Write64(const wxUint64 *buffer, size_t size);
-    void Write32(const wxUint32 *buffer, size_t size);
-    void Write16(const wxUint16 *buffer, size_t size);
-    void Write8(const wxUint8 *buffer, size_t size);
-    void WriteDouble(const double *buffer, size_t size);
 
     wxDataOutputStream& operator<<(const wxChar *string);
     wxDataOutputStream& operator<<(const wxString& string);
@@ -115,8 +101,6 @@ protected:
 #if wxUSE_UNICODE
     wxMBConv& m_conv;
 #endif
-
-    DECLARE_NO_COPY_CLASS(wxDataOutputStream)
 };
 
 #endif

@@ -149,7 +149,7 @@ MyCanvas::MyCanvas(wxWindow* parent):
   wxScrolledWindow(parent, -1)
 {
     SetBackgroundColour (wxColour (0,80,60));
-    ClearBackground();
+    Clear();
 }
 
 // Rotate with interpolation and with offset correction

@@ -53,9 +53,9 @@ def set_threshold(level):
     _global_log.threshold = level
 
 def set_verbosity(v):
-    if v <= 0:
+    if v == 0:
         set_threshold(WARN)
-    elif v == 1:
+    if v == 1:
         set_threshold(INFO)
-    elif v >= 2:
+    if v == 2:
         set_threshold(DEBUG)

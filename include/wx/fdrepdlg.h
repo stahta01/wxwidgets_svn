@@ -12,7 +12,7 @@
 #ifndef _WX_FINDREPLACEDLG_H_
 #define _WX_FINDREPLACEDLG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "fdrepdlg.h"
 #endif
 
@@ -124,12 +124,10 @@ protected:
 
     // the last string we searched for
     wxString m_lastSearch;
-
-    DECLARE_NO_COPY_CLASS(wxFindReplaceDialogBase)
 };
 
 // include wxFindReplaceDialog declaration
-#if defined(__WXMSW__) && !defined(__WXUNIVERSAL__) && !defined(__WXWINCE__)
+#if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
     #include "wx/msw/fdrepdlg.h"
 #else
     #define wxGenericFindReplaceDialog wxFindReplaceDialog
@@ -163,7 +161,7 @@ public:
 private:
     wxString m_strReplace;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxFindDialogEvent)
+    DECLARE_DYNAMIC_CLASS(wxFindDialogEvent)
 };
 
 BEGIN_DECLARE_EVENT_TYPES()

@@ -7,12 +7,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+
+#ifdef __GNUG__
 #pragma implementation "cursor.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/cursor.h"
 #include "wx/utils.h"
@@ -254,17 +252,6 @@ wxCursor::wxCursor( const wxImage & image )
                              (unsigned char)(colNextMostFreq >> 8),
                              (unsigned char)(colNextMostFreq) );
 
-    int fg_intensity = fg.Red() + fg.Green() + fg.Blue();
-    int bg_intensity = bg.Red() + bg.Green() + bg.Blue();
-	
-	if (bg_intensity > fg_intensity)
-	{
-        //swap fg and bg
-        wxColour tmp = fg;
-        fg = bg;
-        bg = tmp;
-	}							 
-
     int hotSpotX;
     int hotSpotY;
 
@@ -367,7 +354,7 @@ void wxEndBusyCursor()
     gs_savedCursor = wxNullCursor;
 
     if (wxTheApp)
-        wxTheApp->ProcessIdle();
+        wxTheApp->SendIdleEvents();
 }
 
 void wxBeginBusyCursor( wxCursor *WXUNUSED(cursor) )

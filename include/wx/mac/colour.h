@@ -1,18 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        colour.h
 // Purpose:     wxColour class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "colour.h"
 #endif
 
@@ -36,7 +36,7 @@ public:
   wxColour( const wxString &colourName )
       : m_isInit(FALSE), m_red(0), m_blue(0), m_green(0)
       { InitFromName(colourName); }
-  wxColour( const wxChar *colourName )
+  wxColour( const char *colourName )
       : m_isInit(FALSE), m_red(0), m_blue(0), m_green(0)
       { InitFromName(colourName); }
 
@@ -61,6 +61,11 @@ public:
 
   // accessors
   bool Ok() const {return m_isInit; }
+
+  // Let's remove this inelegant function
+#if WXWIN_COMPATIBILITY
+  void Get(unsigned char *r, unsigned char *g, unsigned char *b) const;
+#endif
 
   unsigned char Red() const { return m_red; }
   unsigned char Green() const { return m_green; }

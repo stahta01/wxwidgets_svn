@@ -12,31 +12,18 @@
 #ifndef _WX_MINIFRAM_H_
 #define _WX_MINIFRAM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "minifram.h"
 #endif
 
 #include "wx/frame.h"
 
+#ifdef __WIN32__
+
 class WXDLLEXPORT wxMiniFrame : public wxFrame
 {
 public:
   wxMiniFrame() { }
-
-  bool Create(wxWindow *parent,
-              wxWindowID id,
-              const wxString& title,
-              const wxPoint& pos = wxDefaultPosition,
-              const wxSize& size = wxDefaultSize,
-              long style = wxCAPTION | wxCLIP_CHILDREN | wxRESIZE_BORDER,
-              const wxString& name = wxFrameNameStr)
-  {
-      return wxFrame::Create(parent, id, title, pos, size,
-                             style |
-                             wxFRAME_TOOL_WINDOW |
-                             (parent ? wxFRAME_FLOAT_ON_PARENT : 0), name);
-  }
-
   wxMiniFrame(wxWindow *parent,
               wxWindowID id,
               const wxString& title,
@@ -45,12 +32,42 @@ public:
               long style = wxCAPTION | wxCLIP_CHILDREN | wxRESIZE_BORDER,
               const wxString& name = wxFrameNameStr)
   {
-      Create(parent, id, title, pos, size, style, name);
+      Create(parent, id, title, pos, size,
+             style |
+             wxFRAME_TOOL_WINDOW |
+             (parent ? wxFRAME_FLOAT_ON_PARENT : 0), name);
   }
 
 protected:
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxMiniFrame)
+  DECLARE_DYNAMIC_CLASS(wxMiniFrame)
 };
+
+
+#else // !Win32
+
+class WXDLLEXPORT wxMiniFrame : public wxFrame
+{
+public:
+  wxMiniFrame() { }
+  wxMiniFrame(wxWindow *parent,
+              wxWindowID id,
+              const wxString& title,
+              const wxPoint& pos = wxDefaultPosition,
+              const wxSize& size = wxDefaultSize,
+              long style = wxDEFAULT_FRAME_STYLE|wxTINY_CAPTION_HORIZ,
+              const wxString& name = wxFrameNameStr)
+  {
+      Create(parent, id, title, pos, size, style, name);
+  }
+
+  virtual ~wxMiniFrame();
+
+  virtual long MSWDefWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+
+  DECLARE_DYNAMIC_CLASS(wxMiniFrame)
+};
+
+#endif // Win32/!Win32
 
 #endif
     // _WX_MINIFRAM_H_

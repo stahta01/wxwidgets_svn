@@ -54,7 +54,7 @@ DEFINE_EVENT_TYPE(wxEVT_DIALUP_DISCONNECTED)
     (!defined(__GNUWIN32__) || wxCHECK_W32API_VERSION(0, 5)) && \
     !defined(__GNUWIN32_OLD__) && \
     !defined(__WATCOMC__) && \
-    !defined(__WINE__) && \
+    !defined(__WXWINE__) && \
     (!defined(__VISUALC__) || (__VISUALC__ >= 1020))
 
 #include <ras.h>
@@ -215,8 +215,6 @@ private:
 
     private:
         wxDialUpManagerMSW *m_dialUpManager;
-
-        DECLARE_NO_COPY_CLASS(RasTimer)
     } m_timerStatusPolling;
 
     // thread handle for the thread sitting on connection change event
@@ -227,13 +225,19 @@ private:
     wxRasThreadData m_data;
 
     // the handle of rasapi32.dll when it's loaded
-    wxDynamicLibrary m_dllRas;
+    wxPluginManager m_dllRas;
 
     // the hidden window we use for passing messages between threads
     static HWND ms_hwndRas;
 
     // the handle of the connection we initiated or 0 if none
     static HRASCONN ms_hRasConnection;
+
+    // FIXME: There is probably no reason these really need to
+    //        be static anymore since the dll refcounting is
+    //        handled by wxPluginManager now.  Whether or not
+    //        we still _want_ them to be static is another
+    //        issue entirely..
 
     // the pointers to RAS functions
     static RASDIAL ms_pfnRasDial;
@@ -266,8 +270,6 @@ private:
 
     // this flag tells us whether a call to RasDial() is in progress
     static wxDialUpManagerMSW *ms_dialer;
-
-    DECLARE_NO_COPY_CLASS(wxDialUpManagerMSW)
 };
 
 // ----------------------------------------------------------------------------
@@ -335,8 +337,8 @@ wxDialUpManager *wxDialUpManager::Create()
 #endif // VC++
 
 wxDialUpManagerMSW::wxDialUpManagerMSW()
-                  : m_timerStatusPolling(this),
-                    m_dllRas(_T("RASAPI32"))
+                  : m_timerStatusPolling(this)
+                  , m_dllRas(_T("RASAPI32"))
 {
     // initialize our data
     m_hThread = 0;
@@ -930,7 +932,7 @@ bool wxDialUpManagerMSW::IsAlwaysOnline() const
     //     but we allow multiple instances of wxDialUpManagerMSW so
     //     we might as well use the ref counted version here too.
 
-    wxDynamicLibrary hDll(_T("WININET"));
+    wxPluginManager hDll(_T("WININET"));
     if ( hDll.IsLoaded() )
     {
         typedef BOOL (WINAPI *INTERNETGETCONNECTEDSTATE)(LPDWORD, DWORD);
@@ -960,12 +962,6 @@ bool wxDialUpManagerMSW::IsAlwaysOnline() const
 bool wxDialUpManagerMSW::IsOnline() const
 {
     wxCHECK_MSG( IsOk(), FALSE, wxT("using uninitialized wxDialUpManager") );
-
-    if ( IsAlwaysOnline() )
-    {
-        // always => now
-        return true;
-    }
 
     if ( ms_userSpecifiedOnlineStatus != -1 )
     {
@@ -1246,7 +1242,7 @@ static LRESULT APIENTRY wxRasStatusWindowProc(HWND hWnd, UINT message,
     return 0;
 }
 
-static void WINAPI wxRasDialFunc(UINT WXUNUSED(unMsg),
+static void WINAPI wxRasDialFunc(UINT unMsg,
                                  RASCONNSTATE rasconnstate,
                                  DWORD dwError)
 {

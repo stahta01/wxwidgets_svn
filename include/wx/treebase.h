@@ -12,7 +12,7 @@
 #ifndef _WX_TREEBASE_H_
 #define _WX_TREEBASE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "treebase.h"
 #endif
 
@@ -24,7 +24,6 @@
 
 #include "wx/window.h"  // for wxClientData
 #include "wx/event.h"
-#include "wx/dynarray.h"
 
 // ----------------------------------------------------------------------------
 // wxTreeItemId identifies an element of the tree. In this implementation, it's
@@ -34,51 +33,32 @@
 // ----------------------------------------------------------------------------
 
 // Using this typedef removes an ambiguity when calling Remove()
-typedef void *wxTreeItemIdValue;
+typedef long wxTreeItemIdValue;
 
 class WXDLLEXPORT wxTreeItemId
 {
-    friend bool operator==(const wxTreeItemId&, const wxTreeItemId&);
 public:
     // ctors
         // 0 is invalid value for HTREEITEM
     wxTreeItemId() { m_pItem = 0; }
 
-        // construct wxTreeItemId from the native item id
-    wxTreeItemId(void *pItem) { m_pItem = pItem; }
+        // this one is used in the generic version
+    wxTreeItemId(void *pItem) { m_pItem = (long) pItem; }
+
+        // and this one under MSW
+    wxTreeItemId(long lItem) { m_pItem = lItem; }
 
         // default copy ctor/assignment operator are ok for us
 
     // accessors
         // is this a valid tree item?
     bool IsOk() const { return m_pItem != 0; }
-        // return true if this item is not valid
-    bool operator!() const { return !IsOk(); }
 
-    // operations
-        // invalidate the item
-    void Unset() { m_pItem = 0; }
-
-#if WXWIN_COMPATIBILITY_2_4
-    // deprecated: only for compatibility, don't work on 64 bit archs
-    wxTreeItemId(long item) { m_pItem = (wxTreeItemIdValue)item; }
-    operator long() const { return (long)m_pItem; }
-#else // !WXWIN_COMPATIBILITY_2_4
-    operator bool() const { return IsOk(); }
-#endif // WXWIN_COMPATIBILITY_2_4/!WXWIN_COMPATIBILITY_2_4
+    // deprecated: only for compatibility
+    operator wxTreeItemIdValue() const { return m_pItem; }
 
     wxTreeItemIdValue m_pItem;
 };
-
-inline bool operator==(const wxTreeItemId& i1, const wxTreeItemId& i2)
-{
-    return i1.m_pItem == i2.m_pItem;
-}
-
-inline bool operator!=(const wxTreeItemId& i1, const wxTreeItemId& i2)
-{
-    return i1.m_pItem != i2.m_pItem;
-}
 
 // ----------------------------------------------------------------------------
 // wxTreeItemData is some (arbitrary) user class associated with some item. The
@@ -114,14 +94,7 @@ protected:
     wxTreeItemId m_pItem;
 };
 
-WX_DEFINE_EXPORTED_ARRAY_NO_PTR(wxTreeItemIdValue, wxArrayTreeItemIdsBase);
-
-class WXDLLEXPORT wxArrayTreeItemIds : public wxArrayTreeItemIdsBase
-{
-public:
-    void Add(const wxTreeItemId& id)
-        { wxArrayTreeItemIdsBase::Add(id.m_pItem); }
-};
+WX_DEFINE_EXPORTED_ARRAY_LONG(wxTreeItemId, wxArrayTreeItemIds);
 
 // ----------------------------------------------------------------------------
 // constants
@@ -137,33 +110,34 @@ enum wxTreeItemIcon
     wxTreeItemIcon_Max
 };
 
-// ----------------------------------------------------------------------------
-// wxTreeCtrl flags
-// ----------------------------------------------------------------------------
-
+/*
+ * wxTreeCtrl flags
+ */
+// TODO: maybe renumber these?
 #define wxTR_NO_BUTTONS              0x0000     // for convenience
-#define wxTR_HAS_BUTTONS             0x0001     // draw collapsed/expanded btns
-#define wxTR_NO_LINES                0x0004     // don't draw lines at all
+#define wxTR_HAS_BUTTONS             0x0001     // generates a +/- button
+#define wxTR_TWIST_BUTTONS           0x0002     // generates a twister button
+#define wxTR_NO_LINES                0x0004     // don't generate level connectors
 #define wxTR_LINES_AT_ROOT           0x0008     // connect top-level nodes
+#define wxTR_MAC_BUTTONS             wxTR_TWIST_BUTTONS // backward compatibility
+#define wxTR_AQUA_BUTTONS            0x0010     // used internally
 
 #define wxTR_SINGLE                  0x0000     // for convenience
 #define wxTR_MULTIPLE                0x0020     // can select multiple items
 #define wxTR_EXTENDED                0x0040     // TODO: allow extended selection
-#define wxTR_HAS_VARIABLE_ROW_HEIGHT 0x0080     // what it says
+#define wxTR_FULL_ROW_HIGHLIGHT      0x2000     // highlight full horizontal space
 
 #define wxTR_EDIT_LABELS             0x0200     // can edit item labels
 #define wxTR_ROW_LINES               0x0400     // put border around items
 #define wxTR_HIDE_ROOT               0x0800     // don't display root node
+#define wxTR_HAS_VARIABLE_ROW_HEIGHT 0x0080     // what it says
 
-#define wxTR_FULL_ROW_HIGHLIGHT      0x2000     // highlight full horz space
-
-#define wxTR_DEFAULT_STYLE           (wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT)
-
-// deprecated, don't use
-#define wxTR_TWIST_BUTTONS           0
-#define wxTR_MAC_BUTTONS             0
-#define wxTR_AQUA_BUTTONS            0
-
+// TODO: different default styles for wxGTK, wxMotif, whatever?
+#ifdef __WXMAC__
+    #define wxTR_DEFAULT_STYLE (wxTR_TWIST_BUTTONS|wxTR_NO_LINES|wxTR_ROW_LINES)
+#else
+    #define wxTR_DEFAULT_STYLE (wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT)
+#endif
 
 // values for the `flags' parameter of wxTreeCtrl::HitTest() which determine
 // where exactly the specified point is situated:
@@ -291,7 +265,7 @@ private:
     friend class WXDLLEXPORT wxTreeCtrl;
     friend class WXDLLEXPORT wxGenericTreeCtrl;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxTreeEvent)
+    DECLARE_DYNAMIC_CLASS(wxTreeEvent);
 };
 
 typedef void (wxEvtHandler::*wxTreeEventFunction)(wxTreeEvent&);
@@ -319,7 +293,6 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, 615)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK, 616)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_TREE_END_DRAG, 617)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TREE_STATE_IMAGE_CLICK, 618)
 END_DECLARE_EVENT_TYPES()
 
 // GetItem() returns the item being dragged, GetPoint() the mouse coords
@@ -371,9 +344,6 @@ END_DECLARE_EVENT_TYPES()
 // GetItem() returns the item that was clicked on
 #define EVT_TREE_ITEM_RIGHT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxTreeEventFunction) & fn, NULL ),
 #define EVT_TREE_ITEM_MIDDLE_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_TREE_ITEM_MIDDLE_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxTreeEventFunction) & fn, NULL ),
-
-// GetItem() returns the item whose state image was clicked on
-#define EVT_TREE_STATE_IMAGE_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_TREE_STATE_IMAGE_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxTreeEventFunction) & fn, NULL ),
 
 #endif // wxUSE_TREECTRL
 

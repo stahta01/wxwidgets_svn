@@ -84,40 +84,7 @@ static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     return target;
 }
 
-// Using this macro can sometimes provoke an Internal Compiler Error in MSVC
-// 6, so instead I'l just expand it out by hand...
-//    WXSHAPE_IMP_CALLBACKS(wxPyRectangleShape, wxRectangleShape);
-
-    IMP_PYCALLBACK__                (wxPyRectangleShape, wxRectangleShape,  OnDelete);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnDraw);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnDrawContents);
-    IMP_PYCALLBACK__DCBOOL          (wxPyRectangleShape, wxRectangleShape,  OnDrawBranches);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnMoveLinks);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnErase);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnEraseContents);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnHighlight);
-    IMP_PYCALLBACK__2DBL2INT        (wxPyRectangleShape, wxRectangleShape,  OnLeftClick);
-    IMP_PYCALLBACK__2DBL2INT        (wxPyRectangleShape, wxRectangleShape,  OnLeftDoubleClick);
-    IMP_PYCALLBACK__2DBL2INT        (wxPyRectangleShape, wxRectangleShape,  OnRightClick);
-    IMP_PYCALLBACK__2DBL            (wxPyRectangleShape, wxRectangleShape,  OnSize);
-    IMP_PYCALLBACK_BOOL_DC4DBLBOOL  (wxPyRectangleShape, wxRectangleShape,  OnMovePre);
-    IMP_PYCALLBACK__DC4DBLBOOL      (wxPyRectangleShape, wxRectangleShape,  OnMovePost);
-    IMP_PYCALLBACK__BOOL2DBL2INT    (wxPyRectangleShape, wxRectangleShape,  OnDragLeft);
-    IMP_PYCALLBACK__2DBL2INT        (wxPyRectangleShape, wxRectangleShape,  OnBeginDragLeft);
-    IMP_PYCALLBACK__2DBL2INT        (wxPyRectangleShape, wxRectangleShape,  OnEndDragLeft);
-    IMP_PYCALLBACK__BOOL2DBL2INT    (wxPyRectangleShape, wxRectangleShape,  OnDragRight);
-    IMP_PYCALLBACK__2DBL2INT        (wxPyRectangleShape, wxRectangleShape,  OnBeginDragRight);
-    IMP_PYCALLBACK__2DBL2INT        (wxPyRectangleShape, wxRectangleShape,  OnEndDragRight);
-    IMP_PYCALLBACK__DC4DBL          (wxPyRectangleShape, wxRectangleShape,  OnDrawOutline);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnDrawControlPoints);
-    IMP_PYCALLBACK__DC              (wxPyRectangleShape, wxRectangleShape,  OnEraseControlPoints);
-    IMP_PYCALLBACK__DCBOOL          (wxPyRectangleShape, wxRectangleShape,  OnMoveLink);
-    IMP_PYCALLBACK__WXCPBOOL2DBL2INT(wxPyRectangleShape, wxRectangleShape,  OnSizingDragLeft);
-    IMP_PYCALLBACK__WXCP2DBL2INT    (wxPyRectangleShape, wxRectangleShape,  OnSizingBeginDragLeft);
-    IMP_PYCALLBACK__WXCP2DBL2INT    (wxPyRectangleShape, wxRectangleShape,  OnSizingEndDragLeft);
-    IMP_PYCALLBACK__2DBL            (wxPyRectangleShape, wxRectangleShape,  OnBeginSize);
-    IMP_PYCALLBACK__2DBL            (wxPyRectangleShape, wxRectangleShape,  OnEndSize)
-        
+    WXSHAPE_IMP_CALLBACKS(wxPyRectangleShape, wxRectangleShape);
 
     WXSHAPE_IMP_CALLBACKS(wxPyControlPoint, wxControlPoint);
 
@@ -12871,8 +12838,6 @@ SWIGEXPORT(void) initoglshapesc() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("oglshapesc", oglshapescMethods);
 	 d = PyModule_GetDict(m);
-	 PyDict_SetItemString(d,"oglMETAFLAGS_OUTLINE", PyInt_FromLong((long) oglMETAFLAGS_OUTLINE));
-	 PyDict_SetItemString(d,"oglMETAFLAGS_ATTACHMENTS", PyInt_FromLong((long) oglMETAFLAGS_ATTACHMENTS));
 {
    int i;
    for (i = 0; _swig_mapping[i].n1; i++)

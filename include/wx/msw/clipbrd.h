@@ -12,7 +12,7 @@
 #ifndef _WX_CLIPBRD_H_
 #define _WX_CLIPBRD_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "clipbrd.h"
 #endif
 
@@ -94,7 +94,6 @@ public:
 
 private:
     bool m_clearOnExit;
-    bool m_isOpened;
 };
 
 #endif // wxUSE_CLIPBOARD

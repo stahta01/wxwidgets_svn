@@ -17,7 +17,6 @@
 // wxWindows
 #ifndef WX_PRECOMP
   #include "wx/app.h"
-  #include "wx/dcclient.h"
   #include "wx/string.h"
   #include "wx/settings.h"
 #endif  // WX_PRECOMP
@@ -187,7 +186,7 @@ WXDWORD wxNotebook::OS2GetStyle (
 // wxNotebook accessors
 // ----------------------------------------------------------------------------
 
-size_t wxNotebook::GetPageCount() const
+int wxNotebook::GetPageCount() const
 {
     int                             nPageInternal = m_pages.Count();
     int                             nPageAPI = (int)::WinSendMsg(GetHWND(), BKM_QUERYPAGECOUNT, (MPARAM)0, (MPARAM)BKA_END);
@@ -209,7 +208,7 @@ int wxNotebook::GetRowCount() const
 } // end of wxNotebook::GetRowCount
 
 int wxNotebook::SetSelection(
-  size_t                            nPage
+  int                               nPage
 )
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, wxT("notebook page out of range") );
@@ -246,7 +245,7 @@ int wxNotebook::SetSelection(
 } // end of wxNotebook::SetSelection
 
 bool wxNotebook::SetPageText(
-  size_t                            nPage
+  int                               nPage
 , const wxString&                   rsStrText
 )
 {
@@ -263,7 +262,7 @@ bool wxNotebook::SetPageText(
 } // end of wxNotebook::SetPageText
 
 wxString wxNotebook::GetPageText (
-  size_t                            nPage
+  int                               nPage
 ) const
 {
     BOOKTEXT                        vBookText;
@@ -315,7 +314,7 @@ wxString wxNotebook::GetPageText (
 } // end of wxNotebook::GetPageText
 
 int wxNotebook::GetPageImage (
-  size_t                            nPage
+  int                               nPage
 ) const
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, wxT("notebook page out of range") );
@@ -327,7 +326,7 @@ int wxNotebook::GetPageImage (
 } // end of wxNotebook::GetPageImage
 
 bool wxNotebook::SetPageImage (
-  size_t                            nPage
+  int                               nPage
 , int                               nImage
 )
 {
@@ -407,7 +406,7 @@ void wxNotebook::SetTabSize (
 // Remove one page from the notebook, without deleting
 //
 wxNotebookPage* wxNotebook::DoRemovePage (
-  size_t                            nPage
+  int                               nPage
 )
 {
     wxNotebookPage*                 pPageRemoved = wxNotebookBase::DoRemovePage(nPage);
@@ -519,7 +518,7 @@ bool wxNotebook::AddPage (
 // Same as AddPage() but does it at given position
 //
 bool wxNotebook::InsertPage (
-  size_t                            nPage
+  int                               nPage
 , wxNotebookPage*                   pPage
 , const wxString&                   rsStrText
 , bool                              bSelect

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -90,12 +90,12 @@ void DrawingView::OnDraw(wxDC *dc)
     dc->SetFont(*wxNORMAL_FONT);
     dc->SetPen(*wxBLACK_PEN);
     
-    wxList::compatibility_iterator node = ((DrawingDocument *)GetDocument())->GetDoodleSegments().GetFirst();
+    wxNode *node = ((DrawingDocument *)GetDocument())->GetDoodleSegments().First();
     while (node)
     {
-        DoodleSegment *seg = (DoodleSegment *)node->GetData();
+        DoodleSegment *seg = (DoodleSegment *)node->Data();
         seg->Draw(dc);
-        node = node->GetNext();
+        node = node->Next();
     }
 }
 
@@ -127,7 +127,7 @@ bool DrawingView::OnClose(bool deleteWindow)
     
     // Clear the canvas in  case we're in single-window mode,
     // and the canvas stays.
-    canvas->ClearBackground();
+    canvas->Clear();
     canvas->view = (wxView *) NULL;
     canvas = (MyCanvas *) NULL;
     
@@ -241,7 +241,7 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
     
     if (currentSegment && event.LeftUp())
     {
-        if (currentSegment->lines.GetCount() == 0)
+        if (currentSegment->lines.Number() == 0)
         {
             delete currentSegment;
             currentSegment = (DoodleSegment *) NULL;

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     09/17/99
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +35,10 @@ END_EVENT_TABLE()
 // Item members
 wxControl::wxControl()
 {
+
+#if WXWIN_COMPATIBILITY
+  m_callback = 0;
+#endif // WXWIN_COMPATIBILITY
 } // end of wxControl::wxControl
 
 bool wxControl::Create(
@@ -99,13 +103,14 @@ bool wxControl::OS2CreateControl(
 , WXDWORD                           dwExstyle
 )
 {
+    bool                            bWant3D = FALSE;
+
     //
     // Doesn't do anything at all under OS/2
     //
     if (dwExstyle == (WXDWORD)-1)
     {
-        dwExstyle = 0;
-	(void) OS2GetStyle(GetWindowStyle(), &dwExstyle);
+        dwExstyle = Determine3DEffects(WS_EX_CLIENTEDGE, &bWant3D);
     }
     //
     // All controls should have these styles (wxWindows creates all controls
@@ -128,8 +133,6 @@ bool wxControl::OS2CreateControl(
         zClass = WC_BUTTON;
     else if ((strcmp(zClassname, "NOTEBOOK")) == 0)
         zClass = WC_NOTEBOOK;
-    else if ((strcmp(zClassname, "CONTAINER")) == 0)
-        zClass = WC_CONTAINER;
     dwStyle |= WS_VISIBLE;
 
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
@@ -181,6 +184,16 @@ wxSize wxControl::DoGetBestSize() const
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
+#if WXWIN_COMPATIBILITY
+    if ( m_callback )
+    {
+        (void)(*m_callback)(this, event);
+
+        return TRUE;
+    }
+    else
+#endif // WXWIN_COMPATIBILITY
+
     return GetEventHandler()->ProcessEvent(event);
 }
 

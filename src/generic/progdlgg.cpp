@@ -6,7 +6,7 @@
 // Created:     09.05.1999
 // RCS-ID:      $Id$
 // Copyright:   (c) Karsten Ballüder
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "progdlgg.h"
 #endif
 
@@ -337,7 +337,8 @@ wxProgressDialog::Update(int value, const wxString& newmsg)
     if ( (m_elapsed || m_remaining || m_estimated) && (value != 0) )
     {
         unsigned long elapsed = wxGetCurrentTime() - m_timeStart;
-        unsigned long estimated = (unsigned long)(( (double) elapsed * m_maximum ) / ((double)value)) ;
+        unsigned long estimated = (unsigned long)( ( (double) elapsed * m_maximum ) 
+            / ((double)value) ) ;
         unsigned long remaining = estimated - elapsed;
 
         SetTimeLabel(elapsed, m_elapsed);

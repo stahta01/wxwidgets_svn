@@ -33,6 +33,7 @@
     #include "wx/dynarray.h"
     #include "wx/wxchar.h"
     #include "wx/icon.h"
+    #include "wx/timer.h"
 #endif
 
 #include "wx/log.h"
@@ -66,7 +67,18 @@ extern "C" int _System bsdselect(int,
 
 #if wxUSE_THREADS
     #include "wx/thread.h"
+
+    // define the array of QMSG strutures
+    WX_DECLARE_OBJARRAY(QMSG, wxMsgArray);
+
+    #include "wx/arrimpl.cpp"
+
+    WX_DEFINE_OBJARRAY(wxMsgArray);
 #endif // wxUSE_THREADS
+
+#if wxUSE_WX_RESOURCES
+    #include "wx/resource.h"
+#endif
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -85,6 +97,8 @@ extern wxList WXDLLEXPORT           wxPendingDelete;
 extern wxCursor*                    g_globalCursor;
 
 HAB                                 vHabmain = NULLHANDLE;
+QMSG                                svCurrentMsg;
+wxApp*                              wxTheApp = NULL;
 
 
 HICON wxSTD_FRAME_ICON          = (HICON) NULL;
@@ -213,11 +227,10 @@ void wxApp::HandleSockets()
 //
 // Initialize
 //
-bool wxApp::Initialize(int& argc, wxChar **argv)
+bool wxApp::Initialize(
+  HAB                               vHab
+)
 {
-    if ( !wxAppBase::Initialize(argc, argv) )
-        return false;
-
 #if defined(wxUSE_CONSOLEDEBUG)
   #if wxUSE_CONSOLEDEBUG
 /***********************************************/
@@ -240,20 +253,35 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
   #endif //wxUSE_CONSOLEDEBUG
 #endif
 
+    wxBuffer = new wxChar[1500]; // FIXME; why?
+
+    wxClassInfo::InitializeClasses();
+
+#if wxUSE_THREADS
+    wxPendingEventsLocker = new wxCriticalSection;
+#endif
+
+    wxTheColourDatabase = new wxColourDatabase(wxKEY_STRING);
+    wxTheColourDatabase->Initialize();
+
+    wxInitializeStockLists();
+    wxInitializeStockObjects();
+
+#if wxUSE_WX_RESOURCES
+    wxInitializeResourceSystem();
+#endif
+
+    wxBitmap::InitStandardHandlers();
+
     //
     // OS2 has to have an anchorblock
     //
-    vHabmain = WinInitialize(0);
+    vHab = WinInitialize(0);
 
-    if (!vHabmain)
-    {
-        // TODO: at least give some error message here...
-        wxAppBase::CleanUp();
-
+    if (!vHab)
         return FALSE;
-    }
-
-    wxBuffer = new wxChar[1500]; // FIXME; why?
+    else
+        vHabmain = vHab;
 
     // Some people may wish to use this, but
     // probably it shouldn't be here by default.
@@ -272,8 +300,10 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 
     // wxSetKeyboardHook(TRUE);
 
-    RegisterWindowClasses(vHabmain);
-
+    wxModule::RegisterModules();
+    if (!wxModule::InitializeModules())
+        return FALSE;
+    RegisterWindowClasses(vHab);
     return TRUE;
 } // end of wxApp::Initialize
 
@@ -412,6 +442,49 @@ bool wxApp::RegisterWindowClasses(
 //
 void wxApp::CleanUp()
 {
+    //
+    // COMMON CLEANUP
+    //
+
+#if wxUSE_LOG
+
+    //
+    // Flush the logged messages if any and install a 'safer' log target: the
+    // default one (wxLogGui) can't be used after the resources are freed just
+    // below and the user suppliedo ne might be even more unsafe (using any
+    // wxWindows GUI function is unsafe starting from now)
+    //
+    wxLog::DontCreateOnDemand();
+
+    //
+    // This will flush the old messages if any
+    //
+    delete wxLog::SetActiveTarget(new wxLogStderr);
+#endif // wxUSE_LOG
+
+    //
+    // One last chance for pending objects to be cleaned up
+    //
+    wxTheApp->DeletePendingObjects();
+
+    wxModule::CleanUpModules();
+
+#if wxUSE_WX_RESOURCES
+    wxCleanUpResourceSystem();
+#endif
+
+    wxDeleteStockObjects();
+
+    //
+    // Destroy all GDI lists, etc.
+    //
+    wxDeleteStockLists();
+
+    delete wxTheColourDatabase;
+    wxTheColourDatabase = NULL;
+
+    wxBitmap::CleanUpHandlers();
+
     delete[] wxBuffer;
     wxBuffer = NULL;
 
@@ -443,12 +516,139 @@ void wxApp::CleanUp()
     if (wxWinHandleList)
         delete wxWinHandleList;
 
+    delete wxPendingEvents;
+#if wxUSE_THREADS
+    delete wxPendingEventsLocker;
+    // If we don't do the following, we get an apparent memory leak.
+    ((wxEvtHandler&) wxDefaultValidator).ClearEventLocker();
+#endif
+
+    wxClassInfo::CleanUpClasses();
+
     // Delete Message queue
     if (wxTheApp->m_hMq)
         ::WinDestroyMsgQueue(wxTheApp->m_hMq);
 
-    wxAppBase::CleanUp();
+    delete wxTheApp;
+    wxTheApp = NULL;
+
+#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+    // At this point we want to check if there are any memory
+    // blocks that aren't part of the wxDebugContext itself,
+    // as a special case. Then when dumping we need to ignore
+    // wxDebugContext, too.
+    if (wxDebugContext::CountObjectsLeft(TRUE) > 0)
+    {
+        wxLogDebug(wxT("There were memory leaks."));
+        wxDebugContext::Dump();
+        wxDebugContext::PrintStatistics();
+    }
+    //  wxDebugContext::SetStream(NULL, NULL);
+#endif
+
+#if wxUSE_LOG
+    // do it as the very last thing because everything else can log messages
+    delete wxLog::SetActiveTarget(NULL);
+#endif // wxUSE_LOG
 } // end of wxApp::CleanUp
+
+//----------------------------------------------------------------------
+// Main wxWindows entry point
+//----------------------------------------------------------------------
+int wxEntry(
+  int                               argc
+, char*                             argv[]
+)
+{
+    HAB                             vHab = 0;
+
+    if (!wxApp::Initialize(vHab))
+        return 0;
+
+    //
+    // create the application object or ensure that one already exists
+    //
+    if (!wxTheApp)
+    {
+        // The app may have declared a global application object, but we recommend
+        // the IMPLEMENT_APP macro is used instead, which sets an initializer
+        // function for delayed, dynamic app object construction.
+        wxCHECK_MSG( wxApp::GetInitializerFunction(), 0,
+                     wxT("No initializer - use IMPLEMENT_APP macro.") );
+        wxTheApp = (*wxApp::GetInitializerFunction()) ();
+    }
+    wxCHECK_MSG( wxTheApp, 0, wxT("You have to define an instance of wxApp!") );
+    wxTheApp->argc = argc;
+
+#if wxUSE_UNICODE
+    wxTheApp->argv = new wxChar*[argc+1];
+
+    int                             nArgc = 0;
+
+    while (nArgc < argc)
+    {
+          wxTheApp->argv[nArgc] = wxStrdup(wxConvLibc.cMB2WX(argv[nArgc]));
+          nArgc++;
+    }
+    wxTheApp->argv[nArgc] = (wxChar *)NULL;
+#else
+    wxTheApp->argv = argv;
+#endif
+
+    wxString                        sName(wxFileNameFromPath(argv[0]));
+
+    wxStripExtension(sName);
+    wxTheApp->SetAppName(sName);
+
+    int                             nRetValue = 0;
+
+    if (!wxTheApp->OnInitGui())
+        nRetValue = -1;
+
+    if (nRetValue == 0)
+    {
+        if (wxTheApp->OnInit())
+        {
+            wxTheApp->OnRun();
+        }
+        // Normal exit
+        wxWindow*                   pTopWindow = wxTheApp->GetTopWindow();
+        if (pTopWindow)
+        {
+            // Forcibly delete the window.
+            if (pTopWindow->IsKindOf(CLASSINFO(wxFrame)) ||
+                pTopWindow->IsKindOf(CLASSINFO(wxDialog)) )
+            {
+                pTopWindow->Close(TRUE);
+                wxTheApp->DeletePendingObjects();
+            }
+            else
+            {
+                delete pTopWindow;
+                wxTheApp->SetTopWindow(NULL);
+            }
+        }
+    }
+    else // app initialization failed
+    {
+        wxLogLastError(" Gui initialization failed, exitting");
+    }
+#if wxUSE_CONSOLEDEBUG
+    printf("wxTheApp->OnExit ");
+    fflush(stdout);
+#endif
+    nRetValue = wxTheApp->OnExit();
+#if wxUSE_CONSOLEDEBUG
+    printf("wxApp::CleanUp ");
+    fflush(stdout);
+#endif
+    wxApp::CleanUp();
+#if wxUSE_CONSOLEDEBUG
+    printf("return %i ", nRetValue);
+    fflush(stdout);
+#endif
+    return(nRetValue);
+} // end of wxEntry
 
 bool wxApp::OnInitGui()
 {
@@ -470,11 +670,20 @@ bool wxApp::OnInitGui()
     return TRUE;
 } // end of wxApp::OnInitGui
 
+//
+// Static member initialization
+//
+wxAppInitializerFunction wxAppBase::m_appInitFn = (wxAppInitializerFunction) NULL;
+
 wxApp::wxApp()
 {
+    m_topWindow = NULL;
+    wxTheApp = this;
+
     argc = 0;
     argv = NULL;
     m_nPrintMode = wxPRINT_WINDOWS;
+    m_bAuto3D = TRUE;
     m_hMq = 0;
     m_maxSocketHandles = 0;
     m_maxSocketNr = 0;
@@ -505,6 +714,252 @@ bool wxApp::Initialized()
         return FALSE;
 } // end of wxApp::Initialized
 
+//
+// Get and process a message, returning FALSE if WM_QUIT
+// received (and also set the flag telling the app to exit the main loop)
+//
+
+bool wxApp::DoMessage()
+{
+    BOOL                            bRc = ::WinGetMsg(vHabmain, &svCurrentMsg, HWND(NULL), 0, 0);
+
+    if (bRc == 0)
+    {
+        // got WM_QUIT
+        m_bKeepGoing = FALSE;
+        return FALSE;
+    }
+    else if (bRc == -1)
+    {
+        // should never happen, but let's test for it nevertheless
+        wxLogLastError("GetMessage");
+    }
+    else
+    {
+#if wxUSE_THREADS
+        wxASSERT_MSG( wxThread::IsMain()
+                     ,wxT("only the main thread can process Windows messages")
+                    );
+
+        static bool                 sbHadGuiLock = TRUE;
+        static wxMsgArray           svSavedMessages;
+
+        //
+        // If a secondary thread owns is doing GUI calls, save all messages for
+        // later processing - we can't process them right now because it will
+        // lead to recursive library calls (and we're not reentrant)
+        //
+        if (!wxGuiOwnedByMainThread())
+        {
+            sbHadGuiLock = FALSE;
+
+            //
+            // Leave out WM_COMMAND messages: too dangerous, sometimes
+            // the message will be processed twice
+            //
+            if ( !wxIsWaitingForThread() ||
+                    svCurrentMsg.msg != WM_COMMAND )
+            {
+                svSavedMessages.Add(svCurrentMsg);
+            }
+            return TRUE;
+        }
+        else
+        {
+            //
+            // Have we just regained the GUI lock? if so, post all of the saved
+            // messages
+            //
+            if (!sbHadGuiLock )
+            {
+                sbHadGuiLock = TRUE;
+
+                size_t             nCount = svSavedMessages.Count();
+
+                for (size_t n = 0; n < nCount; n++)
+                {
+                    QMSG            vMsg = svSavedMessages[n];
+
+                    DoMessage((WXMSG*)&vMsg);
+                }
+                svSavedMessages.Empty();
+            }
+        }
+#endif // wxUSE_THREADS
+
+        //
+        // Process the message
+        //
+        DoMessage((WXMSG *)&svCurrentMsg);
+    }
+    return TRUE;
+} // end of wxApp::DoMessage
+
+void wxApp::DoMessage(
+  WXMSG*                            pMsg
+)
+{
+    if (!ProcessMessage((WXMSG *)&svCurrentMsg))
+    {
+        ::WinDispatchMsg(vHabmain, (PQMSG)&svCurrentMsg);
+    }
+} // end of wxApp::DoMessage
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Keep trying to process messages until WM_QUIT
+// received.
+//
+// If there are messages to be processed, they will all be
+// processed and OnIdle will not be called.
+// When there are no more messages, OnIdle is called.
+// If OnIdle requests more time,
+// it will be repeatedly called so long as there are no pending messages.
+// A 'feature' of this is that once OnIdle has decided that no more processing
+// is required, then it won't get processing time until further messages
+// are processed (it'll sit in DoMessage).
+//
+//////////////////////////////////////////////////////////////////////////////
+int wxApp::MainLoop()
+{
+    m_bKeepGoing = TRUE;
+    while (m_bKeepGoing)
+    {
+#if wxUSE_THREADS
+        wxMutexGuiLeaveOrEnter();
+#endif // wxUSE_THREADS
+        while (!Pending() && ProcessIdle())
+        {
+            HandleSockets();
+            wxUsleep(10);
+        }
+        HandleSockets();
+        if (Pending())
+            DoMessage();
+        else
+            wxUsleep(10);
+
+    }
+    return (int)svCurrentMsg.mp1;
+} // end of wxApp::MainLoop
+
+//
+// Returns TRUE if more time is needed.
+//
+bool wxApp::ProcessIdle()
+{
+    wxIdleEvent                     vEvent;
+
+    vEvent.SetEventObject(this);
+    ProcessEvent(vEvent);
+    return vEvent.MoreRequested();
+} // end of wxApp::ProcessIdle
+
+void wxApp::ExitMainLoop()
+{
+    ::WinPostMsg(NULL, WM_QUIT, 0, 0);
+} // end of wxApp::ExitMainLoop
+
+bool wxApp::Pending()
+{
+    return (::WinPeekMsg(vHabmain, (PQMSG)&svCurrentMsg, (HWND)NULL, 0, 0, PM_NOREMOVE) != 0);
+} // end of wxApp::Pending
+
+void wxApp::Dispatch()
+{
+    DoMessage();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Give all windows a chance to preprocess
+// the message. Some may have accelerator tables, or have
+// MDI complications.
+//
+//////////////////////////////////////////////////////////////////////////////
+bool wxApp::ProcessMessage(
+  WXMSG*                            pWxmsg
+)
+{
+    QMSG*                           pMsg = (PQMSG)pWxmsg;
+    HWND                            hWnd = pMsg->hwnd;
+    wxWindow*                       pWndThis = wxFindWinFromHandle((WXHWND)hWnd);
+    wxWindow*                       pWnd;
+
+    //
+    // Pass non-system timer messages to the wxTimerProc
+    //
+    if (pMsg->msg == WM_TIMER &&
+        (SHORT1FROMMP(pMsg->mp1) != TID_CURSOR &&
+         SHORT1FROMMP(pMsg->mp1) != TID_FLASHWINDOW &&
+         SHORT1FROMMP(pMsg->mp1) != TID_SCROLL &&
+         SHORT1FROMMP(pMsg->mp1) != 0x0000
+        ))
+        wxTimerProc(NULL, 0, (int)pMsg->mp1, 0);
+
+    //
+    // Allow the window to prevent certain messages from being
+    // translated/processed (this is currently used by wxTextCtrl to always
+    // grab Ctrl-C/V/X, even if they are also accelerators in some parent)
+    //
+    if (pWndThis && !pWndThis->OS2ShouldPreProcessMessage(pWxmsg))
+    {
+        return FALSE;
+    }
+
+    //
+    // For some composite controls (like a combobox), wndThis might be NULL
+    // because the subcontrol is not a wxWindow, but only the control itself
+    // is - try to catch this case
+    //
+    while (hWnd && !pWndThis)
+    {
+        hWnd = ::WinQueryWindow(hWnd, QW_PARENT);
+        pWndThis = wxFindWinFromHandle((WXHWND)hWnd);
+    }
+
+    //
+    // Try translations first; find the youngest window with
+    // a translation table. OS/2 has case sensative accels, so
+    // this block, coded by BK, removes that and helps make them
+    // case insensative.
+    //
+    if(pMsg->msg == WM_CHAR)
+    {
+       PBYTE                        pChmsg = (PBYTE)&(pMsg->msg);
+       USHORT                       uSch  = CHARMSG(pChmsg)->chr;
+       bool                         bRc;
+
+       //
+       // Do not process keyup events
+       //
+       if(!(CHARMSG(pChmsg)->fs & KC_KEYUP))
+       {
+           if((CHARMSG(pChmsg)->fs & (KC_ALT | KC_CTRL)) && CHARMSG(pChmsg)->chr != 0)
+                CHARMSG(pChmsg)->chr = (USHORT)wxToupper((UCHAR)uSch);
+
+
+           for(pWnd = pWndThis; pWnd; pWnd = pWnd->GetParent() )
+           {
+               if((bRc = pWnd->OS2TranslateMessage(pWxmsg)) == TRUE)
+                   break;
+           }
+
+            if(!bRc)    // untranslated, should restore original value
+                CHARMSG(pChmsg)->chr = uSch;
+        }
+    }
+    //
+    // Anyone for a non-translation message? Try youngest descendants first.
+    //
+//  for (pWnd = pWndThis; pWnd; pWnd = pWnd->GetParent())
+//  {
+//      if (pWnd->OS2ProcessMessage(pWxmsg))
+//          return TRUE;
+//  }
+    return FALSE;
+} // end of wxApp::ProcessMessage
+
 bool                                gbInOnIdle = FALSE;
 
 void wxApp::OnIdle(
@@ -519,8 +974,25 @@ void wxApp::OnIdle(
         return;
 
     gbInOnIdle = TRUE;
-    
-    wxAppBase::OnIdle(rEvent);
+
+    //
+    // If there are pending events, we must process them: pending events
+    // are either events to the threads other than main or events posted
+    // with wxPostEvent() functions
+    //
+    ProcessPendingEvents();
+
+    //
+    // 'Garbage' collection of windows deleted with Close().
+    //
+    DeletePendingObjects();
+
+#if wxUSE_LOG
+    //
+    // Flush the logged messages if any
+    //
+    wxLog::FlushActive();
+#endif // wxUSE_LOG
 
 #if wxUSE_DC_CACHEING
     // automated DC cache management: clear the cached DCs and bitmap
@@ -532,8 +1004,86 @@ void wxApp::OnIdle(
         wxDC::ClearCache();
 #endif // wxUSE_DC_CACHEING
 
+    //
+    // Send OnIdle events to all windows
+    //
+    if (SendIdleEvents())
+    {
+        //
+        // SendIdleEvents() returns TRUE if at least one window requested more
+        // idle events
+        //
+        rEvent.RequestMore(TRUE);
+    }
     gbInOnIdle = FALSE;
 } // end of wxApp::OnIdle
+
+// Send idle event to all top-level windows
+bool wxApp::SendIdleEvents()
+{
+    bool                            bNeedMore = FALSE;
+    wxWindowList::Node*             pNode = wxTopLevelWindows.GetFirst();
+
+    while (pNode)
+    {
+        wxWindow*                   pWin = pNode->GetData();
+
+        if (SendIdleEvents(pWin))
+            bNeedMore = TRUE;
+        pNode = pNode->GetNext();
+    }
+    return bNeedMore;
+} // end of wxApp::SendIdleEvents
+
+//
+// Send idle event to window and all subwindows
+//
+bool wxApp::SendIdleEvents(
+  wxWindow*                         pWin
+)
+{
+    bool                            bNeedMore = FALSE;
+    wxIdleEvent                     vEvent;
+
+    vEvent.SetEventObject(pWin);
+    pWin->GetEventHandler()->ProcessEvent(vEvent);
+
+    if (vEvent.MoreRequested())
+        bNeedMore = TRUE;
+
+    wxNode*                         pNode = pWin->GetChildren().First();
+
+    while (pNode)
+    {
+        wxWindow*                   pWin = (wxWindow*) pNode->Data();
+
+        if (SendIdleEvents(pWin))
+            bNeedMore = TRUE;
+        pNode = pNode->Next();
+    }
+    return bNeedMore;
+} // end of wxApp::SendIdleEvents
+
+void wxApp::DeletePendingObjects()
+{
+    wxNode*                         pNode = wxPendingDelete.First();
+
+    while (pNode)
+    {
+        wxObject*                   pObj = (wxObject *)pNode->Data();
+
+        delete pObj;
+
+        if (wxPendingDelete.Member(pObj))
+            delete pNode;
+
+        //
+        // Deleting one object may have deleted other pending
+        // objects, so start from beginning of list again.
+        //
+        pNode = wxPendingDelete.First();
+    }
+} // end of wxApp::DeletePendingObjects
 
 void wxApp::OnEndSession(
   wxCloseEvent&                     WXUNUSED(rEvent))
@@ -556,6 +1106,13 @@ void wxApp::OnQueryEndSession(
             rEvent.Veto(TRUE);
     }
 } // end of wxApp::OnQueryEndSession
+
+void wxExit()
+{
+    wxLogError(_("Fatal error: exiting"));
+
+    wxApp::CleanUp();
+} // end of wxExit
 
 //
 // Yield to incoming messages
@@ -594,7 +1151,7 @@ bool wxApp::Yield(bool onlyIfNeeded)
 #if wxUSE_THREADS
         wxMutexGuiLeaveOrEnter();
 #endif // wxUSE_THREADS
-        if (!wxTheApp->Dispatch())
+        if (!wxTheApp->DoMessage())
             break;
     }
     //
@@ -664,7 +1221,7 @@ void wxApp::RemoveSocketHandler(int handle)
 // wxWakeUpIdle
 //-----------------------------------------------------------------------------
 
-void wxApp::WakeUpIdle()
+void wxWakeUpIdle()
 {
     //
     // Send the top window a dummy message so idle handler processing will

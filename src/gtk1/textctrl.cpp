@@ -1,3 +1,4 @@
+
 /////////////////////////////////////////////////////////////////////////////
 // Name:        textctrl.cpp
 // Purpose:
@@ -7,12 +8,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "textctrl.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/textctrl.h"
 #include "wx/utils.h"
@@ -68,16 +66,28 @@ static void wxGtkTextInsert(GtkWidget *text,
                         ? attr.GetBackgroundColour().GetColor()
                         : NULL;
 
+    GtkTextIter start, end;
+    GtkTextMark *mark;
+    // iterators are invalidated by any mutation that affects 'indexable' buffer contents,
+    // so we save current position in a mark
+    // we need a mark of left gravity, so we cannot use
+    // mark = gtk_text_buffer_get_insert (text_buffer)
+
+    gtk_text_buffer_get_iter_at_mark( text_buffer, &start,
+                                     gtk_text_buffer_get_insert (text_buffer) );
+    mark = gtk_text_buffer_create_mark( text_buffer, NULL, &start, TRUE/*left gravity*/ );
+
+    gtk_text_buffer_insert_at_cursor( text_buffer, buffer, strlen(buffer) );
+
+    gtk_text_buffer_get_iter_at_mark( text_buffer, &end,
+                                     gtk_text_buffer_get_insert (text_buffer) );
+    gtk_text_buffer_get_iter_at_mark( text_buffer, &start, mark );
+
     GtkTextTag *tag;
     tag = gtk_text_buffer_create_tag( text_buffer, NULL, "font-desc", font_description,
                                      "foreground-gdk", colFg,
                                      "background-gdk", colBg, NULL );
-
-    GtkTextIter iter;
-    gtk_text_buffer_get_iter_at_mark( text_buffer, &iter,
-                                     gtk_text_buffer_get_insert (text_buffer) );
-
-    gtk_text_buffer_insert_with_tags( text_buffer, &iter, buffer, strlen(buffer), tag, NULL );
+    gtk_text_buffer_apply_tag( text_buffer, tag, &start, &end );
 }
 #else
 static void wxGtkTextInsert(GtkWidget *text,
@@ -587,13 +597,11 @@ void wxTextCtrl::WriteText( const wxString &text )
         // TODO: Call whatever is needed to delete the selection.
         wxGtkTextInsert( m_text, text_buffer, m_defaultStyle, buffer );
 
-        GtkAdjustment *adj = gtk_scrolled_window_get_vadjustment( GTK_SCROLLED_WINDOW(m_widget) );
-        // Scroll to cursor, but only if scrollbar thumb is at the very bottom
-        if ( adj->value == adj->upper - adj->page_size )
-        {
-            gtk_text_view_scroll_to_mark( GTK_TEXT_VIEW(m_text),
-                    gtk_text_buffer_get_insert( text_buffer ), 0.0, FALSE, 0.0, 1.0 );
-        }
+        // Scroll to cursor.
+        GtkTextIter iter;
+        gtk_text_buffer_get_iter_at_mark( text_buffer, &iter,  gtk_text_buffer_get_insert( text_buffer ) );
+        gtk_text_view_scroll_to_iter( GTK_TEXT_VIEW(m_text), &iter, 0.0, FALSE, 0.0, 1.0 );
+
 #else // GTK 1.x
         // After cursor movements, gtk_text_get_point() is wrong by one.
         gtk_text_set_point( GTK_TEXT(m_text), GET_EDITABLE_POS(m_text) );
@@ -1008,16 +1016,9 @@ void wxTextCtrl::SetSelection( long from, long to )
 
 void wxTextCtrl::ShowPosition( long pos )
 {
+#ifndef __WXGTK20__
     if (m_windowStyle & wxTE_MULTILINE)
     {
-#ifdef __WXGTK20__
-        GtkTextBuffer *buf = gtk_text_view_get_buffer( GTK_TEXT_VIEW(m_text) );
-        GtkTextIter iter;
-        gtk_text_buffer_get_start_iter( buf, &iter );
-        gtk_text_iter_set_offset( &iter, pos );
-        GtkTextMark *mark = gtk_text_buffer_create_mark( buf, NULL, &iter, TRUE );
-        gtk_text_view_scroll_to_mark( GTK_TEXT_VIEW(m_text), mark, 0.0, FALSE, 0.0, 0.0 );
-#else // GTK 1.x
         GtkAdjustment *vp = GTK_TEXT(m_text)->vadj;
         float totalLines =  (float) GetNumberOfLines();
         long posX;
@@ -1026,8 +1027,8 @@ void wxTextCtrl::ShowPosition( long pos )
         float posLine = (float) posY;
         float p = (posLine/totalLines)*(vp->upper - vp->lower) + vp->lower;
         gtk_adjustment_set_value(GTK_TEXT(m_text)->vadj, p);
-#endif // GTK 1.x/2.x
     }
+#endif
 }
 
 long wxTextCtrl::GetInsertionPoint() const
@@ -1269,7 +1270,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ((key_event.GetKeyCode() == WXK_RETURN) && (m_windowStyle & wxPROCESS_ENTER))
+    if ((key_event.KeyCode() == WXK_RETURN) && (m_windowStyle & wxPROCESS_ENTER))
     {
         wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
         event.SetEventObject(this);
@@ -1277,7 +1278,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
         if (GetEventHandler()->ProcessEvent(event)) return;
     }
 
-    if ((key_event.GetKeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
+    if ((key_event.KeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
     {
         // This will invoke the dialog default action, such
         // as the clicking the default button.
@@ -1606,8 +1607,7 @@ void wxTextCtrl::OnInternalIdle()
         }
     }
 
-    if (wxUpdateUIEvent::CanUpdate(this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 }
 
 wxSize wxTextCtrl::DoGetBestSize() const

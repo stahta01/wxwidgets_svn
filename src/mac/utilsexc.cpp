@@ -1,16 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        utilsexec.cpp
 // Purpose:     Execution-related utilities
-// Author:      Stefan Csomor
-// Modified by: David Elliott
-// Created:     1998-01-01
+// Author:      AUTHOR
+// Modified by:
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-//#pragma implementation
+#pragma implementation
 #endif
 
 #include "wx/log.h"
@@ -19,9 +19,7 @@
 #include "wx/unix/execute.h"
 #include <unistd.h>
 #include <sys/wait.h>
-extern "C" {
 #include <mach/mach.h>
-}
 #include <CoreFoundation/CFMachPort.h>
 #endif
 
@@ -44,12 +42,12 @@ long wxExecute(const wxString& command, int flags, wxProcess *handler)
 void wxMAC_MachPortEndProcessDetect(CFMachPortRef port, void *data)
 {
 	wxEndProcessData *proc_data = (wxEndProcessData*)data;
-	wxLogDebug(wxT("Wow.. this actually worked!"));
+	wxLogDebug("Wow.. this actually worked!");
 	int status = 0;
 	int rc = waitpid(abs(proc_data->pid), &status, WNOHANG);
 	if(!rc)
 	{
-		wxLogDebug(wxT("Mach port was invalidated, but process hasn't terminated!"));
+		wxLogDebug("Mach port was invalidated, but process hasn't terminated!");
 		return;
 	}
 	if((rc != -1) && WIFEXITED(status))
@@ -69,14 +67,14 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     taskOfOurProcess = mach_task_self();
     if(taskOfOurProcess == MACH_PORT_NULL)
     {
-        wxLogDebug(wxT("No mach_task_self()"));
+        wxLogDebug("No mach_task_self()");
         return -1;
     }
-    wxLogDebug(wxT("pid=%d"),pid);
+    wxLogDebug("pid=%d",pid);
     kernResult = task_for_pid(taskOfOurProcess,pid, &machPortForProcess);
     if(kernResult != KERN_SUCCESS)
     {
-        wxLogDebug(wxT("no task_for_pid()"));
+        wxLogDebug("no task_for_pid()");
         // try seeing if it is already dead or something
         // FIXME: a better method would be to call the callback function
         // from idle time until the process terminates. Of course, how
@@ -97,7 +95,7 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     CFMachPortForProcess = CFMachPortCreateWithPort(NULL, machPortForProcess, NULL, &termcb_contextinfo, &ShouldFreePort);
     if(!CFMachPortForProcess)
     {
-        wxLogDebug(wxT("No CFMachPortForProcess"));
+        wxLogDebug("No CFMachPortForProcess");
         mach_port_deallocate(taskOfOurProcess, machPortForProcess);
         return -1;
     }
@@ -106,7 +104,7 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
         kernResult = mach_port_deallocate(taskOfOurProcess, machPortForProcess);
         if(kernResult!=KERN_SUCCESS)
         {
-            wxLogDebug(wxT("Couldn't deallocate mach port"));
+            wxLogDebug("Couldn't deallocate mach port");
             return -1;
         }
     }
@@ -115,7 +113,7 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     runloopsource = CFMachPortCreateRunLoopSource(NULL,CFMachPortForProcess, (CFIndex)0);
     if(!runloopsource)
     {
-        wxLogDebug(wxT("Couldn't create runloopsource"));
+        wxLogDebug("Couldn't create runloopsource");
         return -1;
     }
     
@@ -123,7 +121,7 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
 
     CFRunLoopAddSource(CFRunLoopGetCurrent(),runloopsource,kCFRunLoopDefaultMode);
     CFRelease(runloopsource);
-    wxLogDebug(wxT("Successfully added notification to the runloop"));
-    return 0;
+    wxLogDebug("Successfully added notification to the runloop");
+   return 0;
 }
 #endif

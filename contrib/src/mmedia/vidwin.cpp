@@ -18,7 +18,7 @@
 #include "wx/wx.h"
 #endif
 
-#if defined(__WINDOWS__) && !defined(__GNUWIN32__) && !defined(__WATCOMC__)
+#if defined(__WINDOWS__) && !defined(__GNUWIN32__)
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -48,7 +48,7 @@ wxVideoWindows::wxVideoWindows(wxInputStream& str)
 {
     m_internal    = new wxVIDWinternal;
     m_remove_file = TRUE;
-    m_filename    = wxGetTempFileName(_T("wxvid"));
+    m_filename    = wxGetTempFileName("wxvid");
     m_paused      = FALSE;
     m_stopped     = TRUE;
     m_frameRate   = 1.0;
@@ -84,12 +84,13 @@ void wxVideoWindows::OpenFile()
     MCI_DGV_OPEN_PARMS openStruct;
     MCI_DGV_SET_PARMS setStruct;
     MCI_STATUS_PARMS statusStruct;
+    DWORD ret;
 
-    openStruct.lpstrDeviceType = _T("avivideo");
-    openStruct.lpstrElementName = (wxChar *)m_filename.mb_str().data();
+    openStruct.lpstrDeviceType = "avivideo";
+    openStruct.lpstrElementName = (LPSTR)(m_filename.mb_str());
     openStruct.hWndParent = 0;
     
-    mciSendCommand(0, MCI_OPEN,
+    ret = mciSendCommand(0, MCI_OPEN,
 			 MCI_OPEN_ELEMENT|MCI_DGV_OPEN_PARENT|MCI_OPEN_TYPE|MCI_DGV_OPEN_32BIT,
                          (DWORD)(LPVOID)&openStruct);
     m_internal->m_dev_id = openStruct.wDeviceID;
@@ -98,20 +99,20 @@ void wxVideoWindows::OpenFile()
     setStruct.dwCallback = 0;
     setStruct.dwTimeFormat = MCI_FORMAT_FRAMES;
 
-    mciSendCommand(m_internal->m_dev_id, MCI_SET, MCI_SET_TIME_FORMAT,
+    ret = mciSendCommand(m_internal->m_dev_id, MCI_SET, MCI_SET_TIME_FORMAT,
                          (DWORD)(LPVOID)&setStruct);
 
 
     statusStruct.dwCallback = 0;
     statusStruct.dwItem = MCI_DGV_STATUS_FRAME_RATE;
-    mciSendCommand(m_internal->m_dev_id, MCI_STATUS,
+    ret = mciSendCommand(m_internal->m_dev_id, MCI_STATUS,
                          MCI_STATUS_ITEM,
                          (DWORD)(LPVOID)&statusStruct);
 
     m_frameRate = ((double)statusStruct.dwReturn) / 1000;
 
     statusStruct.dwItem = MCI_DGV_STATUS_BITSPERSAMPLE;
-    mciSendCommand(m_internal->m_dev_id, MCI_STATUS, MCI_STATUS_ITEM,
+    ret = mciSendCommand(m_internal->m_dev_id, MCI_STATUS, MCI_STATUS_ITEM,
                          (DWORD)(LPVOID)&statusStruct);
     m_bps = statusStruct.dwReturn;
 
@@ -150,12 +151,12 @@ bool wxVideoWindows::GetSize(wxSize& size) const
     return TRUE;
 }
 
-bool wxVideoWindows::SetSize(wxSize WXUNUSED(size))
+bool wxVideoWindows::SetSize(wxSize size)
 {
     return TRUE;
 }
 
-bool wxVideoWindows::IsCapable(wxVideoType v_type) const
+bool wxVideoWindows::IsCapable(wxVideoType v_type)
 {
     return (v_type == wxVIDEO_MSAVI);
 }

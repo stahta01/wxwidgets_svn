@@ -640,8 +640,8 @@ bool wxResourceManager::DeleteWindow(wxWindow* win)
     
     win->Destroy();
     
-    //if (clearDisplay)
-    //    m_editorPanel->Clear();
+    if (clearDisplay)
+        m_editorPanel->Clear();
     
     return TRUE;
 }
@@ -950,7 +950,7 @@ bool wxResourceManager::Edit(wxItemResource *res)
         wxResourceEditorDialogHandler *handler = new wxResourceEditorDialogHandler(panel, res, panel->GetEventHandler(),
             this);
         
-        wxLoadFromResource(panel, m_editorPanel, res->GetName(), &m_resourceTable);
+        panel->LoadFromResource(m_editorPanel, res->GetName(), &m_resourceTable);
         
         panel->PushEventHandler(handler);
         
@@ -1218,7 +1218,7 @@ void wxResourceManager::ClearCurrentDialog()
         DisassociateResource(m_editorPanel->m_childWindow);
         DeleteWindow(m_editorPanel->m_childWindow);
         m_editorPanel->m_childWindow = NULL;
-        //m_editorPanel->Clear();
+        m_editorPanel->Clear();
     }
 }
 
@@ -1235,7 +1235,7 @@ bool wxResourceManager::TestCurrentDialog(wxWindow* parent)
         
         ResourceEditorDialogTester* dialog = new ResourceEditorDialogTester;
         bool success = FALSE;
-        if (wxLoadFromResource(dialog, parent, item->GetName(), & m_resourceTable))
+        if (dialog->LoadFromResource(parent, item->GetName(), & m_resourceTable))
         {
             dialog->Centre();
             dialog->ShowModal();

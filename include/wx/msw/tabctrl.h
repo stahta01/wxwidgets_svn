@@ -12,7 +12,7 @@
 #ifndef _WX_TABCTRL_H_
 #define _WX_TABCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "tabctrl.h"
 #endif
 
@@ -124,7 +124,6 @@ protected:
     wxImageList*    m_imageList;
 
 DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTabCtrl)
 };
 
 class WXDLLEXPORT wxTabEvent : public wxNotifyEvent
@@ -150,7 +149,7 @@ private:
     int m_nSel,     // currently selected page
         m_nOldSel;  // previously selected page
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxTabEvent)
+    DECLARE_DYNAMIC_CLASS(wxTabEvent)
 };
 
 typedef void (wxEvtHandler::*wxTabEventFunction)(wxTabEvent&);

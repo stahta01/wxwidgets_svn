@@ -8,7 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "htmltag.h"
 #endif
 
@@ -131,9 +131,7 @@ wxHtmlTagsCache::wxHtmlTagsCache(const wxString& source)
                         // see if it matches
                         int match_pos = 0;
                         while (pos < lng && match_pos < tag_len && src[pos] != '>' && src[pos] != '<') {
-                            // cast to wxChar needed to suppress warning in
-                            // Unicode build
-                            if ((wxChar)wxToupper(src[pos]) == tagBuffer[match_pos]) {
+                            if (wxToupper(src[pos]) == tagBuffer[match_pos]) {
                                 ++match_pos;
                             }  
                             else if (src[pos] == wxT(' ') || src[pos] == wxT('\n') ||

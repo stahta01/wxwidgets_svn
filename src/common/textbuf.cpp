@@ -4,14 +4,14 @@
 // Created:     14.11.01
 // Author:      Morten Hanssen, Vadim Zeitlin
 // Copyright:   (c) 1998-2001 wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // headers
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "textbuf.h"
 #endif
 

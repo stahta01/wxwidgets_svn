@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "bmpbuttn.h"
 #endif
 
@@ -30,80 +30,14 @@
 
 #include "wx/msw/private.h"
 
-// ----------------------------------------------------------------------------
-// macros
-// ----------------------------------------------------------------------------
-
-#if wxUSE_EXTENDED_RTTI
-
-WX_DEFINE_FLAGS( wxBitmapButtonStyle )
-
-wxBEGIN_FLAGS( wxBitmapButtonStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-    
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxNO_BORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxNO_FULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxBU_AUTODRAW)
-    wxFLAGS_MEMBER(wxBU_LEFT)
-    wxFLAGS_MEMBER(wxBU_RIGHT)
-    wxFLAGS_MEMBER(wxBU_TOP)
-    wxFLAGS_MEMBER(wxBU_BOTTOM)
-wxEND_FLAGS( wxBitmapButtonStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxBitmapButton, wxButton,"wx/bmpbuttn.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxBitmapButton)
-    wxPROPERTY_FLAGS( WindowStyle , wxBitmapButtonStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxBitmapButton)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_5( wxBitmapButton , wxWindow* , Parent , wxWindowID , Id , wxBitmap , Bitmap , wxPoint , Position , wxSize , Size )
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton, wxButton)
-#endif
-
-/*
-TODO PROPERTIES :
-
-long "style" , wxBU_AUTODRAW
-bool "default" , 0
-bitmap "selected" ,
-bitmap "focus" ,
-bitmap "disabled" ,
-*/
 
 #define BUTTON_HEIGHT_FACTOR (EDIT_CONTROL_FACTOR * 1.1)
 
 bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bitmap,
            const wxPoint& pos,
            const wxSize& size, long style,
-           const wxValidator& wxVALIDATOR_PARAM(validator),
+           const wxValidator& validator,
            const wxString& name)
 {
   m_bmpNormal = bitmap;
@@ -161,7 +95,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
                    (
                     0,
                     wxT("BUTTON"),
-                    wxEmptyString,
+                    wxT(""),
                     msStyle,
                     0, 0, 0, 0,
                     GetWinHwnd(parent),
@@ -185,7 +119,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bit
 
 bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 {
-#ifndef __WXWINCE__
+#if defined(__WIN95__)
     long style = GetWindowLong((HWND) GetHWND(), GWL_STYLE);
     if (style & BS_BITMAP)
     {
@@ -315,21 +249,20 @@ void wxBitmapButton::DrawFace( WXHDC dc, int left, int top, int right, int botto
 
     // draw the border
     oldp = (HPEN) SelectObject( (HDC) dc, sel? penDkShadow : penHiLight);
-
-    wxDrawLine((HDC) dc, left, top, right-1, top);
-    wxDrawLine((HDC) dc, left, top+1, left, bottom-1);
+    MoveToEx((HDC) dc, left, top, NULL); LineTo((HDC) dc, right-1, top);
+    MoveToEx((HDC) dc, left, top+1, NULL); LineTo((HDC) dc, left, bottom-1);
 
     SelectObject( (HDC) dc, sel? penShadow : penLight);
-    wxDrawLine((HDC) dc, left+1, top+1, right-2, top+1);
-    wxDrawLine((HDC) dc, left+1, top+2, left+1, bottom-2);
+    MoveToEx((HDC) dc, left+1, top+1, NULL); LineTo((HDC) dc, right-2, top+1);
+    MoveToEx((HDC) dc, left+1, top+2, NULL); LineTo((HDC) dc, left+1, bottom-2);
 
     SelectObject( (HDC) dc, sel? penLight : penShadow);
-    wxDrawLine((HDC) dc, left+1, bottom-2, right-1, bottom-2);
-    wxDrawLine((HDC) dc, right-2, bottom-3, right-2, top);
+    MoveToEx((HDC) dc, left+1, bottom-2, NULL); LineTo((HDC) dc, right-1, bottom-2);
+    MoveToEx((HDC) dc, right-2, bottom-3, NULL); LineTo((HDC) dc, right-2, top);
 
     SelectObject( (HDC) dc, sel? penHiLight : penDkShadow);
-    wxDrawLine((HDC) dc, left, bottom-1, right+2, bottom-1);
-    wxDrawLine((HDC) dc, right-1, bottom-2, right-1, top-1);
+    MoveToEx((HDC) dc, left, bottom-1, NULL); LineTo((HDC) dc, right+2, bottom-1);
+    MoveToEx((HDC) dc, right-1, bottom-2, NULL); LineTo((HDC) dc, right-1, top-1);
 
     // delete allocated resources
     SelectObject((HDC) dc,oldp);

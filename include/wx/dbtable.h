@@ -30,7 +30,7 @@
 
 #include "wx/version.h"
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
   #pragma interface "dbtable.h"
 #endif
 
@@ -56,7 +56,7 @@ const int   wxDB_NO_MORE_COLUMN_NUMBERS = -1;
 // wxDbTable class which allows it to create a table in the data
 // source, exchange data between the data source and the C++
 // object, and so on.
-class WXDLLIMPEXP_ODBC wxDbColDef
+class WXDLLEXPORT wxDbColDef
 {
 public:
     wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
@@ -77,7 +77,7 @@ public:
 };  // wxDbColDef
 
 
-class WXDLLIMPEXP_ODBC wxDbColDataPtr
+class WXDLLEXPORT wxDbColDataPtr
 {
 public:
     void    *PtrDataObj;
@@ -87,7 +87,7 @@ public:
 
 
 // This structure is used when creating secondary indexes.
-class WXDLLIMPEXP_ODBC wxDbIdxDef
+class WXDLLEXPORT wxDbIdxDef
 {
 public:
     wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];
@@ -95,7 +95,7 @@ public:
 };  // wxDbIdxDef
 
 
-class WXDLLIMPEXP_ODBC wxDbTable
+class WXDLLEXPORT wxDbTable
 {
 private:
     ULONG       tableID;  // Used for debugging.  This can help to match up mismatched constructors/destructors
@@ -189,13 +189,13 @@ public:
 #endif
     // Public member functions
     wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-              const wxString &qryTblName=wxEmptyString, bool qryOnly = !wxDB_QUERY_ONLY, 
-              const wxString &tblPath=wxEmptyString);
+              const wxString &qryTblName="", bool qryOnly = !wxDB_QUERY_ONLY, 
+              const wxString &tblPath="");
 
     // DEPRECATED
     wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-              const wxChar *qryTblName=wxEmptyString, bool qryOnly = !wxDB_QUERY_ONLY, 
-              const wxString &tblPath=wxEmptyString);
+              const wxChar *qryTblName="", bool qryOnly = !wxDB_QUERY_ONLY, 
+              const wxString &tblPath="");
 
     virtual ~wxDbTable();
 
@@ -267,14 +267,14 @@ public:
     void            BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool distinct);
     void            BuildSelectStmt(wxChar *pSqlStmt, int typeOfSelect, bool distinct);
 
-    void            BuildDeleteStmt(wxString &pSqlStmt, int typeOfDel, const wxString &pWhereClause=wxEmptyString);
-    void            BuildDeleteStmt(wxChar *pSqlStmt, int typeOfDel, const wxString &pWhereClause=wxEmptyString);
+    void            BuildDeleteStmt(wxString &pSqlStmt, int typeOfDel, const wxString &pWhereClause="");
+    void            BuildDeleteStmt(wxChar *pSqlStmt, int typeOfDel, const wxString &pWhereClause="");
 
-    void            BuildUpdateStmt(wxString &pSqlStmt, int typeOfUpd, const wxString &pWhereClause=wxEmptyString);
-    void            BuildUpdateStmt(wxChar *pSqlStmt, int typeOfUpd, const wxString &pWhereClause=wxEmptyString);
+    void            BuildUpdateStmt(wxString &pSqlStmt, int typeOfUpd, const wxString &pWhereClause="");
+    void            BuildUpdateStmt(wxChar *pSqlStmt, int typeOfUpd, const wxString &pWhereClause="");
 
-    void            BuildWhereClause(wxString &pWhereClause, int typeOfWhere, const wxString &qualTableName=wxEmptyString, bool useLikeComparison=FALSE);
-    void            BuildWhereClause(wxChar *pWhereClause, int typeOfWhere, const wxString &qualTableName=wxEmptyString, bool useLikeComparison=FALSE);
+    void            BuildWhereClause(wxString &pWhereClause, int typeOfWhere, const wxString &qualTableName="", bool useLikeComparison=FALSE);
+    void            BuildWhereClause(wxChar *pWhereClause, int typeOfWhere, const wxString &qualTableName="", bool useLikeComparison=FALSE);
 
 #if wxODBC_BACKWARD_COMPATABILITY
 // The following member functions are deprecated.  You should use the BuildXxxxxStmt functions (above)
@@ -311,7 +311,7 @@ public:
     HSTMT          *NewCursor(bool setCursor = FALSE, bool bindColumns = TRUE) {  return GetNewCursor(setCursor,bindColumns); }
 #endif
 
-    ULONG           Count(const wxString &args=_T("*"));
+    ULONG           Count(const wxString &args="*");
     int             DB_STATUS(void) { return(pDb->DB_STATUS); }
 
     bool            IsColNull(UWORD colNo) const;

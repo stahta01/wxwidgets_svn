@@ -2,7 +2,6 @@
  * Project: GSocket (Generic Socket) for WX
  * Name:    gsockpm.c
  * Purpose: GSocket: PM part
- * Licence: The wxWindows licence
  * CVSID:   $Id$
  * ------------------------------------------------------------------------- */
 
@@ -25,25 +24,16 @@ extern void wxAppRemoveSocketHandler(int handle);
 static void _GSocket_PM_Input(void *data)
 {
     GSocket *socket = (GSocket *) data;
-    socket->m_functions->Detected_Read(socket);
+    _GSocket_Detected_Read(socket);
 }
 
 static void _GSocket_PM_Output(void *data)
 {
     GSocket *socket = (GSocket *) data;
-    socket->m_functions->Detected_Write(socket);
+    _GSocket_Detected_Write(socket);
 }
 
-int _GSocket_GUI_Init(void)
-{
-    return 1;
-}
-
-void _GSocket_GUI_Cleanup(void)
-{
-}
-
-int _GSocket_GUI_Init_Socket(GSocket *socket)
+int _GSocket_GUI_Init(GSocket *socket)
 {
     int *m_id;
     socket->m_gui_dependent = (char *)malloc(sizeof(int)*2);
@@ -54,7 +44,7 @@ int _GSocket_GUI_Init_Socket(GSocket *socket)
     return TRUE;
 }
 
-void _GSocket_GUI_Destroy_Socket(GSocket *socket)
+void _GSocket_GUI_Destroy(GSocket *socket)
 {
     free(socket->m_gui_dependent);
 }

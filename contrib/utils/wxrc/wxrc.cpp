@@ -20,26 +20,39 @@
     #pragma hdrstop
 #endif
 
-// for all others, include the necessary headers
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/log.h"
+    #include "wx/wx.h"
 #endif
 
 #include "wx/cmdline.h"
-#include "wx/xml/xml.h"
+#include "wx/xrc/xml.h"
 #include "wx/ffile.h"
 #include "wx/filename.h"
 #include "wx/wfstream.h"
 
 
-class XmlResApp : public wxAppConsole
+
+
+
+/*
+#if wxUSE_GUI
+#error "You must compile the resource compiler with wxBase!"
+#endif
+*/
+
+class XmlResApp : public wxApp
 {
 public:
-    // don't use builtin cmd line parsing:
-    virtual bool OnInit() { return true; } 
 
+#if wxUSE_GUI
+    bool OnInit();
+    int OnRun() { return 0; }
+    int OnExit() { return retCode; }
+#else
     virtual int OnRun();
+#endif
     
 private:
     
@@ -64,9 +77,13 @@ private:
     int retCode;
 };
 
-IMPLEMENT_APP_CONSOLE(XmlResApp)
+IMPLEMENT_APP(XmlResApp)
 
+#if wxUSE_GUI
+bool XmlResApp::OnInit()
+#else
 int XmlResApp::OnRun()
+#endif
 {
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
@@ -94,10 +111,7 @@ int XmlResApp::OnRun()
     {
         case -1:
             return 0;
-            #if 0
-            // break is unreachable because of return earlier
             break;
-            #endif
 
         case 0:
             retCode = 0;
@@ -106,20 +120,21 @@ int XmlResApp::OnRun()
                 OutputGettext();
             else
                 CompileRes();
+#if wxUSE_GUI
+            return TRUE;
+#else
             return retCode;
-            #if 0
-            // break is unreachable because of return earlier
+#endif
             break;
-            #endif
 
-        #if 0
-        // default return moved outside of switch to avoid warning about lack of return in function
         default:
+#if wxUSE_GUI
+            return FALSE;
+#else
             return 1;
+#endif
             break;
-        #endif
     }
-    return 1;
 }
 
 
@@ -248,7 +263,6 @@ wxArrayString XmlResApp::PrepareTempFiles()
     return flist;
 }
 
-
 // Does 'node' contain filename information at all?
 static bool NodeContainsFilename(wxXmlNode *node)
 {
@@ -279,6 +293,7 @@ static bool NodeContainsFilename(wxXmlNode *node)
    
    return FALSE;
 }
+
 
 // find all files mentioned in structure, e.g. <bitmap>filename</bitmap>
 void XmlResApp::FindFilesInXML(wxXmlNode *node, wxArrayString& flist, const wxString& inputPath)
@@ -344,7 +359,7 @@ void XmlResApp::MakePackageZIP(const wxArrayString& flist)
     
     if (flagVerbose) 
         wxPrintf(_T("compressing ") + parOutput +  _T("...\n"));
-    
+
     wxString cwd = wxGetCwd();
     wxSetWorkingDirectory(parOutputPath);
     int execres = wxExecute(_T("zip -9 -j ") + 
@@ -368,7 +383,7 @@ static wxString FileToCppArray(wxString filename, int num)
     wxString output;
     wxString tmp;
     wxString snum;
-    wxFFile file(filename, wxT("rb"));
+    wxFFile file(filename, "rb");
     size_t lng = file.Length();
     
     snum.Printf(_T("%i"), num);
@@ -403,7 +418,7 @@ static wxString FileToCppArray(wxString filename, int num)
 
 void XmlResApp::MakePackageCPP(const wxArrayString& flist)
 {
-    wxFFile file(parOutput, wxT("wt"));
+    wxFFile file(parOutput, "wt");
     size_t i;
 
     if (flagVerbose) 
@@ -472,7 +487,7 @@ static wxString FileToPythonArray(wxString filename, int num)
     wxString output;
     wxString tmp;
     wxString snum;
-    wxFFile file(filename, wxT("rb"));
+    wxFFile file(filename, "rb");
     size_t lng = file.Length();
     
     snum.Printf(_T("%i"), num);
@@ -514,7 +529,7 @@ static wxString FileToPythonArray(wxString filename, int num)
 
 void XmlResApp::MakePackagePython(const wxArrayString& flist)
 {
-    wxFFile file(parOutput, wxT("wt"));
+    wxFFile file(parOutput, "wt");
     size_t i;
 
     if (flagVerbose) 
@@ -551,7 +566,7 @@ void XmlResApp::OutputGettext()
     
     wxFFile fout;
     if (!parOutput) fout.Attach(stdout);
-    else fout.Open(parOutput, wxT("wt"));
+    else fout.Open(parOutput, "wt");
     
     for (size_t i = 0; i < str.GetCount(); i++)
         fout.Write(_T("_(\"") + str[i] + _T("\");\n"));

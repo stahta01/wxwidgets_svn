@@ -14,7 +14,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univtoplevel.h"
 #endif
 
@@ -354,10 +354,7 @@ static bool wxGetResizingCursor(long hitTestResult, wxCursor& cursor)
                 break;
             default:
                 return FALSE;
-                #if 0
-                // not rachable due to earlier return
                 break;
-                #endif
         }
         return TRUE;
     }
@@ -474,7 +471,7 @@ void wxInteractiveMoveHandler::OnMouseMove(wxMouseEvent& event)
     }
 }
 
-void wxInteractiveMoveHandler::OnMouseDown(wxMouseEvent& WXUNUSED(event))
+void wxInteractiveMoveHandler::OnMouseDown(wxMouseEvent& event)
 {
     if ( m_data.m_flags & wxINTERACTIVE_WAIT_FOR_INPUT )
     {
@@ -601,7 +598,7 @@ void wxInteractiveMoveHandler::OnKeyDown(wxKeyEvent& event)
     }
 }
 
-void wxInteractiveMoveHandler::OnMouseUp(wxMouseEvent& WXUNUSED(event))
+void wxInteractiveMoveHandler::OnMouseUp(wxMouseEvent& event)
 {
     m_data.m_evtLoop->Exit();
 }
@@ -694,7 +691,7 @@ void wxTopLevelWindow::ClickTitleBarButton(long button)
 
 bool wxTopLevelWindow::PerformAction(const wxControlAction& action,
                                      long numArg,
-                                     const wxString& WXUNUSED(strArg))
+                                     const wxString& strArg)
 {
     bool isActive = numArg != 0;
 

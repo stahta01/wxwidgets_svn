@@ -4,14 +4,14 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __LISTCTRLH_G__
 #define __LISTCTRLH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "listctrl.h"
 #endif
 
@@ -91,7 +91,6 @@ public:
     int GetColumnWidth( int col ) const;
     bool SetColumnWidth( int col, int width);
     int GetCountPerPage() const; // not the same in wxGLC as in Windows, I think
-    wxRect GetViewRect() const;
 
     bool GetItem( wxListItem& info ) const;
     bool SetItem( wxListItem& info ) ;
@@ -109,7 +108,7 @@ public:
     int GetItemCount() const;
     int GetColumnCount() const;
     void SetItemSpacing( int spacing, bool isSmall = FALSE );
-    wxSize GetItemSpacing() const;
+    int GetItemSpacing( bool isSmall ) const;
     void SetItemTextColour( long item, const wxColour& col);
     wxColour GetItemTextColour( long item ) const;
     void SetItemBackgroundColour( long item, const wxColour &col);
@@ -149,8 +148,8 @@ public:
     long InsertItem( long index, int imageIndex );
     long InsertItem( long index, const wxString& label, int imageIndex );
     long InsertColumn( long col, wxListItem& info );
-    long InsertColumn( long col, const wxString& heading,
-                       int format = wxLIST_FORMAT_LEFT, int width = -1 );
+    long InsertColumn( long col, const wxString& heading, int format = wxLIST_FORMAT_LEFT,
+      int width = -1 );
     bool ScrollList( int dx, int dy );
     bool SortItems( wxListCtrlCompare fn, long data );
     bool Update( long item );
@@ -162,19 +161,13 @@ public:
     void RefreshItem(long item);
     void RefreshItems(long itemFrom, long itemTo);
 
-    // obsolete, don't use
-    wxDEPRECATED( int GetItemSpacing( bool isSmall ) const );
-
-
     // implementation only from now on
     // -------------------------------
 
-    void OnInternalIdle( );
+    void OnIdle( wxIdleEvent &event );
     void OnSize( wxSizeEvent &event );
 
     // We have to hand down a few functions
-    virtual void Refresh(bool eraseBackground = TRUE,
-                         const wxRect *rect = NULL);
 
     virtual void Freeze();
     virtual void Thaw();
@@ -206,7 +199,6 @@ public:
                          m_ownsImageListState;
     wxListHeaderWindow  *m_headerWin;
     wxListMainWindow    *m_mainWin;
-    wxCoord              m_headerHeight;
 
 protected:
     // return the text for the given column of the given item
@@ -227,9 +219,6 @@ private:
 
     // create the header window
     void CreateHeaderWindow();
-
-    // calculate and set height of the header
-    void CalculateAndSetHeaderHeight();
 
     // reposition the header and the main window in the report view depending
     // on whether it should be shown or not

@@ -66,7 +66,7 @@ wxUint16 wxSoundFormatMSAdpcm::GetChannels() const
     return m_nchannels; 
 }
 
-void wxSoundFormatMSAdpcm::SetCoefs(wxInt16 **WXUNUSED(coefs), wxUint16 ncoefs,
+void wxSoundFormatMSAdpcm::SetCoefs(wxInt16 **coefs, wxUint16 ncoefs,
                                     wxUint16 coefs_len)
 {
     wxUint16 i;
@@ -152,7 +152,7 @@ wxSoundStreamMSAdpcm::~wxSoundStreamMSAdpcm()
     delete m_router;
 }
 
-wxSoundStream& wxSoundStreamMSAdpcm::Read(void *WXUNUSED(buffer), wxUint32 WXUNUSED(len))
+wxSoundStream& wxSoundStreamMSAdpcm::Read(void *buffer, wxUint32 len)
 {
     m_snderror = wxSOUND_NOCODEC;
     m_lastcount = 0;
@@ -368,7 +368,8 @@ bool wxSoundStreamMSAdpcm::SetSoundFormat(const wxSoundFormatBase& format)
     adpcm->GetCoefs(m_coefs, ncoefs, coefs_len);
 
     if (!ncoefs) {
-        wxLogError(wxT("Number of ADPCM coefficients must be non null"));
+        wxLogError(__FILE__ ":%d: Number of ADPCM coefficients"
+                   " must be non null", __LINE__);
         return FALSE;
     }
     

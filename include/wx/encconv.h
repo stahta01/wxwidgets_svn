@@ -10,7 +10,7 @@
 #ifndef _WX_ENCCONV_H_
 #define _WX_ENCCONV_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "encconv.h"
 #endif
 
@@ -55,7 +55,7 @@ WX_DEFINE_ARRAY_INT(wxFontEncoding, wxFontEncodingArray);
 //                  8bit encodings/charsets. It can also convert from/to Unicode
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxEncodingConverter : public wxObject
+class WXDLLEXPORT wxEncodingConverter : public wxObject
 {
     public:
 
@@ -148,7 +148,6 @@ class WXDLLIMPEXP_BASE wxEncodingConverter : public wxObject
             bool m_UnicodeInput, m_UnicodeOutput;
             bool m_JustCopy;
 
-    DECLARE_NO_COPY_CLASS(wxEncodingConverter)
 };
 
 #endif // wxUSE_FONTMAP

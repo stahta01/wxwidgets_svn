@@ -6,14 +6,14 @@
 // Created:     12.09.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // headers
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dynarray.h"
 #endif
 
@@ -53,65 +53,7 @@ wxCOMPILE_TIME_ASSERT( sizeof(long) <= sizeof(void *),
 // wxBaseArray - dynamic array of 'T's
 // ----------------------------------------------------------------------------
 
-#define _WX_DEFINE_BASEARRAY_COMMON(T, name)                                \
-/* searches the array for an item (forward or backwards) */                 \
-int name::Index(T lItem, bool bFromEnd) const                               \
-{                                                                           \
-  if ( bFromEnd ) {                                                         \
-    if ( size() > 0 ) {                                                     \
-      size_t n = size();                                                    \
-      do {                                                                  \
-        if ( (*this)[--n] == lItem )                                        \
-          return n;                                                         \
-      }                                                                     \
-      while ( n != 0 );                                                     \
-    }                                                                       \
-  }                                                                         \
-  else {                                                                    \
-    for( size_t n = 0; n < size(); n++ ) {                                  \
-      if( (*this)[n] == lItem )                                             \
-        return n;                                                           \
-    }                                                                       \
-  }                                                                         \
-                                                                            \
-  return wxNOT_FOUND;                                                       \
-}                                                                           \
-                                                                            \
-/* add item assuming the array is sorted with fnCompare function */         \
-size_t name::Add(T lItem, CMPFUNC fnCompare)                                \
-{                                                                           \
-  size_t idx = IndexForInsert(lItem, fnCompare);                            \
-  Insert(lItem, idx);                                                       \
-  return idx;                                                               \
-}
-
-#if wxUSE_STL
-
-#define _WX_DEFINE_BASEARRAY_NOCOMMON(T, name)                              \
-size_t name::IndexForInsert(T lItem, CMPFUNC fnCompare) const               \
-{                                                                           \
-    Predicate p((SCMPFUNC)fnCompare);                                       \
-    const_iterator it = std::lower_bound(begin(), end(), lItem, p);         \
-    return it - begin();                                                    \
-}                                                                           \
-                                                                            \
-int name::Index(T lItem, CMPFUNC fnCompare) const                           \
-{                                                                           \
-    Predicate p((SCMPFUNC)fnCompare);                                       \
-    const_iterator it = std::lower_bound(begin(), end(), lItem, p);         \
-    return (it != end() &&                                                  \
-            p(lItem, *it)) ? (int)(it - begin()) : wxNOT_FOUND;             \
-}                                                                           \
-                                                                            \
-void name::Shrink()                                                         \
-{                                                                           \
-    name tmp(*this);                                                        \
-    swap(tmp);                                                              \
-}
-
-#else // if !wxUSE_STL
-
-#define _WX_DEFINE_BASEARRAY_NOCOMMON(T, name)                              \
+#define _WX_DEFINE_BASEARRAY(T, name)                                       \
 /* ctor */                                                                  \
 name::name()                                                                \
 {                                                                           \
@@ -164,23 +106,6 @@ name& name::operator=(const name& src)                                      \
   return *this;                                                             \
 }                                                                           \
                                                                             \
-/* allocate new buffer of the given size and move our data to it */         \
-bool name::Realloc(size_t nSize)                                            \
-{                                                                           \
-  T *pNew = new T[nSize];                                                   \
-  /* only grow if allocation succeeded */                                   \
-  if ( !pNew )                                                              \
-      return false;                                                         \
-                                                                            \
-  m_nSize = nSize;                                                          \
-  /* copy data to new location */                                           \
-  memcpy(pNew, m_pItems, m_nCount*sizeof(T));                               \
-  delete [] m_pItems;                                                       \
-  m_pItems = pNew;                                                          \
-                                                                            \
-  return true;                                                              \
-}                                                                           \
-                                                                            \
 /* grow the array */                                                        \
 void name::Grow(size_t nIncrement)                                          \
 {                                                                           \
@@ -206,32 +131,17 @@ void name::Grow(size_t nIncrement)                                          \
         ndefIncrement = ARRAY_MAXSIZE_INCREMENT;                            \
       if ( nIncrement < ndefIncrement )                                     \
         nIncrement = ndefIncrement;                                         \
-      Realloc(m_nSize + nIncrement);                                        \
+      T *pNew = new T[m_nSize + nIncrement];                                \
+      /* only grow if allocation succeeded */                               \
+      if ( pNew ) {                                                         \
+          m_nSize += nIncrement;                                            \
+          /* copy data to new location */                                   \
+          memcpy(pNew, m_pItems, m_nCount*sizeof(T));                       \
+          delete [] m_pItems;                                               \
+          m_pItems = pNew;                                                  \
+      }                                                                     \
     }                                                                       \
   }                                                                         \
-}                                                                           \
-                                                                            \
-/* make sure that the array has at least count elements */                  \
-void name::SetCount(size_t count, T defval)                                 \
-{                                                                           \
-    if ( m_nSize < count )                                                  \
-    {                                                                       \
-        /* need to realloc memory: don't overallocate it here as if */      \
-        /* SetCount() is called, it probably means that the caller  */      \
-        /* knows in advance how many elements there will be in the  */      \
-        /* array and so it won't be necessary to realloc it later   */      \
-        if ( !Realloc(count) )                                              \
-        {                                                                   \
-            /* out of memory -- what can we do? */                          \
-            return;                                                         \
-        }                                                                   \
-    }                                                                       \
-                                                                            \
-    /* add new elements if we extend the array */                           \
-    while ( m_nCount < count )                                              \
-    {                                                                       \
-        m_pItems[m_nCount++] = defval;                                      \
-    }                                                                       \
 }                                                                           \
                                                                             \
 /* dtor */                                                                  \
@@ -279,40 +189,32 @@ void name::Shrink()                                                         \
         memcpy(pNew, m_pItems, m_nCount*sizeof(T));                         \
         delete [] m_pItems;                                                 \
         m_pItems = pNew;                                                    \
-                                                                            \
-        /* update the size of the new block */                              \
         m_nSize = m_nCount;                                                 \
     }                                                                       \
-    /* else: don't do anything, better keep old memory block! */            \
   }                                                                         \
 }                                                                           \
                                                                             \
-/* add item at the end */                                                   \
-void name::Add(T lItem, size_t nInsert)                                     \
+/* searches the array for an item (forward or backwards) */                 \
+int name::Index(T lItem, bool bFromEnd) const                               \
 {                                                                           \
-  if (nInsert == 0)                                                         \
-      return;                                                               \
-  Grow(nInsert);                                                            \
-  for (size_t i = 0; i < nInsert; i++)                                      \
-      m_pItems[m_nCount++] = lItem;                                         \
-}                                                                           \
+  if ( bFromEnd ) {                                                         \
+    if ( m_nCount > 0 ) {                                                   \
+      size_t n = m_nCount;                                                  \
+      do {                                                                  \
+        if ( m_pItems[--n] == lItem )                                       \
+          return n;                                                         \
+      }                                                                     \
+      while ( n != 0 );                                                     \
+    }                                                                       \
+  }                                                                         \
+  else {                                                                    \
+    for( size_t n = 0; n < m_nCount; n++ ) {                                \
+      if( m_pItems[n] == lItem )                                            \
+        return n;                                                           \
+    }                                                                       \
+  }                                                                         \
                                                                             \
-/* add item at the given position */                                        \
-void name::Insert(T lItem, size_t nIndex, size_t nInsert)                   \
-{                                                                           \
-  wxCHECK_RET( nIndex <= m_nCount, wxT("bad index in wxArray::Insert") );   \
-  wxCHECK_RET( m_nCount <= m_nCount + nInsert,                              \
-               wxT("array size overflow in wxArray::Insert") );             \
-                                                                            \
-  if (nInsert == 0)                                                         \
-      return;                                                               \
-  Grow(nInsert);                                                            \
-                                                                            \
-  memmove(&m_pItems[nIndex + nInsert], &m_pItems[nIndex],                   \
-          (m_nCount - nIndex)*sizeof(T));                                   \
-  for (size_t i = 0; i < nInsert; i++)                                      \
-      m_pItems[nIndex + i] = lItem;                                         \
-  m_nCount += nInsert;                                                      \
+  return wxNOT_FOUND;                                                       \
 }                                                                           \
                                                                             \
 /* search for a place to insert item into sorted array (binary search) */   \
@@ -352,6 +254,40 @@ int name::Index(T lItem, CMPFUNC fnCompare) const                           \
                                                             : (int)n;       \
 }                                                                           \
                                                                             \
+/* add item at the end */                                                   \
+void name::Add(T lItem, size_t nInsert)                                     \
+{                                                                           \
+  if (nInsert == 0)                                                         \
+      return;                                                               \
+  Grow(nInsert);                                                            \
+  for (size_t i = 0; i < nInsert; i++)                                      \
+      m_pItems[m_nCount++] = lItem;                                         \
+}                                                                           \
+                                                                            \
+/* add item assuming the array is sorted with fnCompare function */         \
+void name::Add(T lItem, CMPFUNC fnCompare)                                  \
+{                                                                           \
+  Insert(lItem, IndexForInsert(lItem, fnCompare));                          \
+}                                                                           \
+                                                                            \
+/* add item at the given position */                                        \
+void name::Insert(T lItem, size_t nIndex, size_t nInsert)                   \
+{                                                                           \
+  wxCHECK_RET( nIndex <= m_nCount, wxT("bad index in wxArray::Insert") );   \
+  wxCHECK_RET( m_nCount <= m_nCount + nInsert,                              \
+               wxT("array size overflow in wxArray::Insert") );             \
+                                                                            \
+  if (nInsert == 0)                                                         \
+      return;                                                               \
+  Grow(nInsert);                                                            \
+                                                                            \
+  memmove(&m_pItems[nIndex + nInsert], &m_pItems[nIndex],                   \
+          (m_nCount - nIndex)*sizeof(T));                                   \
+  for (size_t i = 0; i < nInsert; i++)                                      \
+      m_pItems[nIndex + i] = lItem;                                         \
+  m_nCount += nInsert;                                                      \
+}                                                                           \
+                                                                            \
 /* removes item from array (by index) */                                    \
 void name::RemoveAt(size_t nIndex, size_t nRemove)                          \
 {                                                                           \
@@ -379,99 +315,11 @@ void name::Remove(T lItem)                                                  \
 void name::Sort(CMPFUNC fCmp)                                               \
 {                                                                           \
   qsort(m_pItems, m_nCount, sizeof(T), fCmp);                               \
-}                                                                           \
-                                                                            \
-void name::assign(const_iterator first, const_iterator last)                \
-{                                                                           \
-  clear();                                                                  \
-  reserve(last - first);                                                    \
-  for(; first != last; ++first)                                             \
-    push_back(*first);                                                      \
-}                                                                           \
-                                                                            \
-void name::assign(size_type n, const_reference v)                           \
-{                                                                           \
-  clear();                                                                  \
-  reserve(n);                                                               \
-  for( size_type i = 0; i < n; ++i )                                        \
-    push_back(v);                                                           \
-}                                                                           \
-                                                                            \
-void name::insert(iterator it, const_iterator first, const_iterator last)   \
-{                                                                           \
-  size_t nInsert = last - first, nIndex = it - begin();                     \
-  if (nInsert == 0)                                                         \
-      return;                                                               \
-  Grow(nInsert);                                                            \
-                                                                            \
-  memmove(&m_pItems[nIndex + nInsert], &m_pItems[nIndex],                   \
-          (m_nCount - nIndex)*sizeof(T));                                   \
-  for (size_t i = 0; i < nInsert; ++i, ++it, ++first)                       \
-      *it = *first;                                                         \
-  m_nCount += nInsert;                                                      \
 }
-
-#endif
-
-#define _WX_DEFINE_BASEARRAY(T, name)                                       \
-        _WX_DEFINE_BASEARRAY_COMMON(T, name)                                \
-        _WX_DEFINE_BASEARRAY_NOCOMMON(T, name)
 
 _WX_DEFINE_BASEARRAY(const void *, wxBaseArrayPtrVoid)
 _WX_DEFINE_BASEARRAY(short,        wxBaseArrayShort)
 _WX_DEFINE_BASEARRAY(int,          wxBaseArrayInt)
 _WX_DEFINE_BASEARRAY(long,         wxBaseArrayLong)
-_WX_DEFINE_BASEARRAY(double,       wxBaseArrayDouble)
+//_WX_DEFINE_BASEARRAY(double,       wxBaseArrayDouble)
 
-#if wxUSE_STL
-#include "wx/arrstr.h"
-
-#include "wx/beforestd.h"
-#include <functional>
-#include "wx/afterstd.h"
-
-_WX_DEFINE_BASEARRAY(wxString, wxBaseArrayStringBase);
-
-int wxArrayString::Index(const wxChar* sz, bool bCase, bool bFromEnd) const
-{
-    wxArrayString::const_iterator it;
-
-    if (bCase)
-        it = std::find_if(begin(), end(),
-                          std::not1(std::bind2nd(std::ptr_fun(wxStrcmp), sz)));
-    else
-        it = std::find_if(begin(), end(),
-                          std::not1(std::bind2nd(std::ptr_fun(wxStricmp), sz)));
-
-    return it == end() ? wxNOT_FOUND : it - begin();
-}
-
-class wxStringCompareLess
-{
-public:
-    typedef int (wxCMPFUNC_CONV * fnc)(const wxChar*, const wxChar*);
-public:
-    wxStringCompareLess(fnc f) : m_f(f) { }
-    bool operator()(const wxChar* s1, const wxChar* s2)
-        { return m_f(s1, s2) < 0; }
-private:
-    fnc m_f;
-};
-
-int wxSortedArrayString::Index(const wxChar* sz, bool bCase, bool bFromEnd) const
-{
-    wxSortedArrayString::const_iterator it;
-
-    if (bCase)
-        it = std::lower_bound(begin(), end(), sz,
-                              wxStringCompareLess(wxStrcmp));
-    else
-        it = std::lower_bound(begin(), end(), sz,
-                              wxStringCompareLess(wxStricmp));
-
-    if (it == end() || (bCase ? wxStrcmp : wxStricmp)(it->c_str(), sz) != 0)
-        return wxNOT_FOUND;
-    return it - begin();
-}
-
-#endif

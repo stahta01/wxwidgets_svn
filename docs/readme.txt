@@ -1,13 +1,5 @@
-wxWindows 2.5.1
+wxWindows 2.4.2
 ---------------
-
-*** Please note that this is an UNSTABLE DEVELOPMENT SNAPSHOT.
-*** Unless you need the new features and bug fixes, you may wish to
-*** use the official 2.4.x stable series. You are still encouraged
-*** to try the releases from 2.5.x branch, of course, and unstable
-*** doesn't mean that they crash all the time -- just that the API
-*** may change in backwards incompatible way. If this doesn't frighten
-*** you, do try this release and please let us know what you think!
 
 Welcome to wxWindows, a sophisticated cross-platform C++
 framework for writing advanced GUI applications using (where
@@ -164,7 +156,7 @@ If compiled with --enable-odbc (Unix only), wxWindows library will
 contain iODBC library which is covered by LGPL.
 
 If you use TIFF image handler, please see src/tiff/COPYRIGHT
-for libtiff licence details.
+for libtiff license details.
 
 If you use JPEG image handler, documentation for your program should
 contain following sentence: "This software is based in part on the work of
@@ -173,9 +165,6 @@ the Independent JPEG Group". See src/jpeg/README for details.
 If you use wxRegEx class on a system without native regular expressions
 support (i.e. MS Windows), see src/regex/COPYRIGHT file for Henry Spencer's
 regular expression library copyright.
-
-If you use wxXML classes or XRC, see src/expat/COPYING for licence details.
-
 
 Documentation
 -------------
@@ -211,5 +200,5 @@ web site.
 
 Have fun!
 
-The wxWindows Team, August 2003
+The wxWindows Team, September 2003
 

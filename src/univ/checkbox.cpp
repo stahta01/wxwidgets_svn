@@ -6,7 +6,7 @@
 // Created:     25.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univcheckbox.h"
 #endif
 
@@ -67,7 +67,7 @@ bool wxCheckBox::Create(wxWindow *parent,
                         const wxValidator& validator,
                         const wxString &name)
 {
-    if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
+    if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
     SetLabel(label);
@@ -279,7 +279,7 @@ wxStdCheckboxInputHandler::wxStdCheckboxInputHandler(wxInputHandler *inphand)
 }
 
 bool wxStdCheckboxInputHandler::HandleActivation(wxInputConsumer *consumer,
-                                                 bool WXUNUSED(activated))
+                                                 bool activated)
 {
     // only the focused checkbox appearance changes when the app gains/loses
     // activation

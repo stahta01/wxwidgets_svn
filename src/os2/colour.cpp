@@ -12,10 +12,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#ifndef WX_PRECOMP
-    #include "wx/colour.h"
-#endif
-
 #include "wx/gdicmn.h"
 #define INCL_GPI
 #define INCL_PM
@@ -107,3 +103,20 @@ void wxColour::Set (
     m_bIsInit = TRUE;
     m_vPixel  = OS2RGB (m_cRed, m_cGreen, m_cBlue);
 } // end of wxColour::Set
+
+//
+// Obsolete
+//
+#if WXWIN_COMPATIBILITY
+void wxColour::Get (
+  unsigned char*                   pRed
+, unsigned char*                   pGreen
+, unsigned char*                   pBlue
+) const
+{
+    *Red   = m_cRed;
+    *Green = m_cGreen;
+    *Blue  = m_cBlue;
+} // end of wxColour::Get
+#endif
+

@@ -9,14 +9,11 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#include "wx/setup.h"
+
+#ifdef __GNUG__
 #   pragma implementation "dialup.h"
 #endif
-
-// for compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
-#include "wx/setup.h"
 
 #if wxUSE_DIALUP_MANAGER
 

@@ -12,7 +12,7 @@
 #ifndef _WX_PAPERH__
 #define _WX_PAPERH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "paper.h"
 #endif
 
@@ -23,7 +23,7 @@
 
 /*
  * Paper type: see defs.h for wxPaperSize enum.
- * A wxPrintPaperType can have an id and a name, or just a name and wxPAPER_NONE,
+ * A wxPrintePaperType can have an id and a name, or just a name and wxPAPER_NONE,
  * so you can add further paper types without needing new ids.
  */
 
@@ -69,14 +69,10 @@ private:
     DECLARE_DYNAMIC_CLASS(wxPrintPaperType)
 };
 
-class WXDLLEXPORT wxStringToPrintPaperTypeHashMap;
-class WXDLLEXPORT wxPrintPaperTypeList;
-
-class WXDLLEXPORT wxPrintPaperDatabase
+class WXDLLEXPORT wxPrintPaperDatabase: public wxList
 {
 public:
     wxPrintPaperDatabase();
-    ~wxPrintPaperDatabase();
 
     void CreateDatabase();
     void ClearDatabase();
@@ -108,13 +104,8 @@ public:
     // Get the paper size
     wxPaperSize GetSize(const wxSize& size);
 
-    //
-    wxPrintPaperType* Item(size_t index) const;
-    size_t GetCount() const;
 private:
-    wxStringToPrintPaperTypeHashMap* m_map;
-    wxPrintPaperTypeList* m_list;
-    // DECLARE_DYNAMIC_CLASS(wxPrintPaperDatabase)
+    DECLARE_DYNAMIC_CLASS(wxPrintPaperDatabase)
 };
 
 WXDLLEXPORT_DATA(extern wxPrintPaperDatabase*) wxThePrintPaperDatabase;

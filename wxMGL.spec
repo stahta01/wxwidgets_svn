@@ -1,6 +1,6 @@
 %define pref /usr
-%define ver 2.5.1
-%define ver2 2.5
+%define ver 2.4.2
+%define ver2 2.4
 %define rel 1
 
 Summary: The SciTech MGL port of the wxWindows library
@@ -58,7 +58,7 @@ fi
 
 mkdir obj-shared
 cd obj-shared
-../configure --prefix=%{pref} --with-mgl
+../configure --prefix=%{pref} --enable-soname --with-mgl
 $MAKE
 cd ..
 

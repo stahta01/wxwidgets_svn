@@ -6,7 +6,7 @@
 // Created:     August 1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 #ifndef _WX_HTTP_H
 #define _WX_HTTP_H
@@ -15,65 +15,44 @@
 
 #if wxUSE_PROTOCOL_HTTP
 
-#include "wx/hashmap.h"
+#include "wx/list.h"
 #include "wx/protocol/protocol.h"
 
-WX_DECLARE_STRING_HASH_MAP_WITH_DECL( wxString, wxStringToStringHashMap,
-                                      class WXDLLIMPEXP_NET );
-
-class WXDLLIMPEXP_NET wxHTTP : public wxProtocol
-{
+class WXDLLEXPORT wxHTTP : public wxProtocol {
+  DECLARE_DYNAMIC_CLASS(wxHTTP)
+  DECLARE_PROTOCOL(wxHTTP)
+protected:
+  wxProtocolError m_perr;
+  wxList m_headers;
+  bool m_read, m_proxy_mode;
+  wxSockAddress *m_addr;
 public:
   wxHTTP();
   ~wxHTTP();
 
-  virtual bool Connect(const wxString& host, unsigned short port);
-  virtual bool Connect(const wxString& host) { return Connect(host, 0); }
-  virtual bool Connect(wxSockAddress& addr, bool wait);
+  bool Connect(const wxString& host);
+  bool Connect(wxSockAddress& addr, bool wait);
   bool Abort();
   wxInputStream *GetInputStream(const wxString& path);
   inline wxProtocolError GetError() { return m_perr; }
   wxString GetContentType();
 
   void SetHeader(const wxString& header, const wxString& h_data);
-  wxString GetHeader(const wxString& header) const;
-  void SetPostBuffer(const wxString& post_buf);
+  wxString GetHeader(const wxString& header);
 
   void SetProxyMode(bool on);
 
-  int GetResponse() { return m_http_response; }
-
 protected:
-  enum wxHTTP_Req
-  {
+  typedef enum {
     wxHTTP_GET,
-    wxHTTP_POST,
     wxHTTP_HEAD
-  };
-
-  typedef wxStringToStringHashMap::iterator wxHeaderIterator;
-
+  } wxHTTP_Req;
   bool BuildRequest(const wxString& path, wxHTTP_Req req);
   void SendHeaders();
   bool ParseHeaders();
 
-  // find the header in m_headers
-  wxHeaderIterator FindHeader(const wxString& header) const;
-
   // deletes the header value strings
   void ClearHeaders();
-
-  wxProtocolError m_perr;
-  wxStringToStringHashMap m_headers;
-  bool m_read,
-       m_proxy_mode;
-  wxSockAddress *m_addr;
-  wxString m_post_buf;
-  int m_http_response;
-
-  DECLARE_DYNAMIC_CLASS(wxHTTP)
-  DECLARE_PROTOCOL(wxHTTP)
-  DECLARE_NO_COPY_CLASS(wxHTTP)
 };
 
 #endif // wxUSE_PROTOCOL_HTTP

@@ -7,13 +7,13 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MIMETYPE_H_
 #define _WX_MIMETYPE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "mimetypebase.h"
 #endif // __GNUG__
 
@@ -30,9 +30,9 @@
 #include "wx/dynarray.h"
 
 // fwd decls
-class WXDLLIMPEXP_BASE wxIconLocation;
-class WXDLLIMPEXP_BASE wxFileTypeImpl;
-class WXDLLIMPEXP_BASE wxMimeTypesManagerImpl;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxFileTypeImpl;
+class WXDLLEXPORT wxMimeTypesManagerImpl;
 
 // these constants define the MIME informations source under UNIX and are used
 // by wxMimeTypesManager::Initialize()
@@ -49,7 +49,7 @@ enum wxMailcapStyle
 /*
     TODO: would it be more convenient to have this class?
 
-class WXDLLIMPEXP_BASE wxMimeType : public wxString
+class WXDLLEXPORT wxMimeType : public wxString
 {
 public:
     // all string ctors here
@@ -76,7 +76,7 @@ public:
 // This class is used with wxMimeTypesManager::AddFallbacks() and Associate()
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFileTypeInfo
+class WXDLLEXPORT wxFileTypeInfo
 {
 public:
     // ctors
@@ -149,8 +149,7 @@ private:
 #endif // 0
 };
 
-WX_DECLARE_USER_EXPORTED_OBJARRAY(wxFileTypeInfo, wxArrayFileTypeInfo,
-                                  WXDLLIMPEXP_BASE);
+WX_DECLARE_EXPORTED_OBJARRAY(wxFileTypeInfo, wxArrayFileTypeInfo);
 
 // ----------------------------------------------------------------------------
 // wxFileType: gives access to all information about the files of given type.
@@ -163,9 +162,9 @@ WX_DECLARE_USER_EXPORTED_OBJARRAY(wxFileTypeInfo, wxArrayFileTypeInfo,
 // the accessors *must* be checked!
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFileType
+class WXDLLEXPORT wxFileType
 {
-friend class WXDLLIMPEXP_BASE wxMimeTypesManagerImpl;  // it has access to m_impl
+friend class WXDLLEXPORT wxMimeTypesManagerImpl;  // it has access to m_impl
 
 public:
     // An object of this class must be passed to Get{Open|Print}Command. The
@@ -178,7 +177,7 @@ public:
         // ctors
         MessageParameters() { }
         MessageParameters(const wxString& filename,
-                          const wxString& mimetype = wxEmptyString)
+                          const wxString& mimetype = _T(""))
             : m_filename(filename), m_mimetype(mimetype) { }
 
         // accessors (called by GetOpenCommand)
@@ -210,10 +209,12 @@ public:
         // fill passed in array with all extensions associated with this file
         // type
     bool GetExtensions(wxArrayString& extensions);
-        // get the icon corresponding to this file type and of the given size
-    bool GetIcon(wxIconLocation *iconloc) const;
-    bool GetIcon(wxIconLocation *iconloc,
-                 const MessageParameters& params) const;
+        // get the icon corresponding to this file type, the name of the file
+        // where the icon resides is return in iconfile if !NULL and its index
+        // in this file (Win-only) is in iconIndex
+    bool GetIcon(wxIcon *icon,
+                 wxString *iconFile = NULL,
+                 int *iconIndex = NULL) const;
         // get a brief file type description ("*.txt" => "text document")
     bool GetDescription(wxString *desc) const;
 
@@ -281,7 +282,7 @@ private:
 // given type) about them.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMimeTypesManager
+class WXDLLEXPORT wxMimeTypesManager
 {
 public:
     // static helper functions
@@ -304,7 +305,7 @@ public:
     //
     // use the extraDir parameter if you want to look for files in another
     // directory
-    void Initialize(int mailcapStyle = wxMAILCAP_ALL,
+    void Initialize(int mailcapStyle = wxMAILCAP_STANDARD,
                     const wxString& extraDir = wxEmptyString);
 
     // and this function clears all the data from the manager
@@ -388,7 +389,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // the default mime manager for wxWindows programs
-WXDLLIMPEXP_DATA_BASE(extern wxMimeTypesManager *) wxTheMimeTypesManager;
+WXDLLEXPORT_DATA(extern wxMimeTypesManager *) wxTheMimeTypesManager;
 
 #endif // wxUSE_MIMETYPE
 

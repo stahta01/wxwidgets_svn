@@ -113,21 +113,6 @@ initial width:
 
 Within wxDesigner, this stretch factor gets set from the {\it Option} menu.
 
-\subsubsection{Hiding controls using sizers}\label{sizershiding}
-
-You can hide controls contained in sizers the same way you would hide any control,
-using the \helpref{wxWindow::Show}{wxwindowshow} method.
-
-However, wxSizer also offers a separate method which can tell the sizer not to 
-consider that control in its size calculations.  To hide a window using the sizer,
-call \helpref{wxSizer::Show}{wxsizershow}.  You must then call Layout on the sizer 
-to force an update.
-
-This is useful when hiding parts of the interface, since you can avoid removing
-the controls from the sizer and having to add them back later.
-
-Note: This is supported only by wxBoxSizer and wxFlexGridSizer.
-
 \wxheading{wxBoxSizer}
 
 \helpref{wxBoxSizer}{wxboxsizer} can lay out its children either vertically
@@ -301,7 +286,7 @@ sizer.
 In order to query the size of notebook page, this page needs to have its
 own sizer, otherwise the wxNotebookSizer will ignore it. Notebook pages
 get their sizer by assigning one to them using \helpref{wxWindow::SetSizer}{wxwindowsetsizer} 
-and setting the auto-layout option to true using 
+and setting the auto-layout option to TRUE using 
 \helpref{wxWindow::SetAutoLayout}{wxwindowsetautolayout}. Here is one
 example showing how to add a notebook page that the notebook sizer is
 aware of:
@@ -318,7 +303,7 @@ aware of:
 
     // Add controls to panel and panelsizer here...
 
-    panel->SetAutoLayout( true );
+    panel->SetAutoLayout( TRUE );
     panel->SetSizer( panelsizer );
 \end{verbatim}
 

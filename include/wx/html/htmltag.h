@@ -11,7 +11,7 @@
 #ifndef _WX_HTMLTAG_H_
 #define _WX_HTMLTAG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "htmltag.h"
 #endif
 
@@ -20,10 +20,9 @@
 #if wxUSE_HTML
 
 #include "wx/object.h"
-#include "wx/arrstr.h"
 
-class WXDLLIMPEXP_CORE wxColour;
-class WXDLLIMPEXP_HTML wxHtmlEntitiesParser;
+class WXDLLEXPORT wxColour;
+class WXDLLEXPORT wxHtmlEntitiesParser;
 
 //-----------------------------------------------------------------------------
 // wxHtmlTagsCache
@@ -32,7 +31,7 @@ class WXDLLIMPEXP_HTML wxHtmlEntitiesParser;
 
 struct wxHtmlCacheItem;
 
-class WXDLLIMPEXP_HTML wxHtmlTagsCache : public wxObject
+class WXDLLEXPORT wxHtmlTagsCache : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlTagsCache)
 
@@ -48,8 +47,6 @@ public:
 
     // Finds parameters for tag starting at at and fills the variables
     void QueryTag(int at, int* end1, int* end2);
-
-    DECLARE_NO_COPY_CLASS(wxHtmlTagsCache)
 };
 
 
@@ -59,7 +56,7 @@ public:
 //                  by wxHtmlParser.
 //--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_HTML wxHtmlTag : public wxObject
+class WXDLLEXPORT wxHtmlTag : public wxObject
 {
     DECLARE_CLASS(wxHtmlTag)
 
@@ -145,8 +142,6 @@ private:
     wxHtmlTag *m_Prev;
     wxHtmlTag *m_FirstChild, *m_LastChild;
     wxHtmlTag *m_Parent;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlTag)
 };
 
 

@@ -7,13 +7,13 @@
 // Created:     10.02.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_LONGLONG_H
 #define _WX_LONGLONG_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "longlong.h"
 #endif
 
@@ -60,10 +60,9 @@
 #elif defined(__BORLANDC__) && defined(__WIN32__) && (__BORLANDC__ >= 0x520)
     #define wxLongLong_t __int64
     #define wxLongLongSuffix i64
-    #define wxLongLongFmtSpec _T("Ld")
+    #define wxLongLongFmtSpec _T("I64")
 #elif (defined(SIZEOF_LONG_LONG) && SIZEOF_LONG_LONG >= 8)  || \
         defined(__MINGW32__) || \
-        defined(__GNUC__) || \
         defined(__CYGWIN__) || \
         defined(__WXMICROWIN__) || \
         (defined(__DJGPP__) && __DJGPP__ >= 2)
@@ -111,8 +110,8 @@
         #define wxUSE_LONGLONG_NATIVE 0
     #endif
 
-    class WXDLLIMPEXP_BASE wxLongLongWx;
-    class WXDLLIMPEXP_BASE wxULongLongWx;
+    class WXDLLEXPORT wxLongLongWx;
+    class WXDLLEXPORT wxULongLongWx;
 #if defined(__VISUALC__) && !defined(__WIN32__)
     #define wxLongLong wxLongLongWx
     #define wxULongLong wxULongLongWx
@@ -130,8 +129,8 @@
 
 #ifndef wxUSE_LONGLONG_WX
     #define wxUSE_LONGLONG_WX 0
-    class WXDLLIMPEXP_BASE wxLongLongNative;
-    class WXDLLIMPEXP_BASE wxULongLongNative;
+    class WXDLLEXPORT wxLongLongNative;
+    class WXDLLEXPORT wxULongLongNative;
     typedef wxLongLongNative wxLongLong;
     typedef wxULongLongNative wxULongLong;
 #endif
@@ -144,11 +143,11 @@
 // ----------------------------------------------------------------------------
 
 // we use iostream for wxLongLong output
-#include "wx/iosfwrap.h"
+#include "wx/ioswrap.h"
 
 #if wxUSE_LONGLONG_NATIVE
 
-class WXDLLIMPEXP_BASE wxLongLongNative
+class WXDLLEXPORT wxLongLongNative
 {
 public:
     // ctors
@@ -350,7 +349,7 @@ private:
 };
 
 
-class WXDLLIMPEXP_BASE wxULongLongNative
+class WXDLLEXPORT wxULongLongNative
 {
 public:
     // ctors
@@ -536,7 +535,7 @@ private:
 
 #if wxUSE_LONGLONG_WX
 
-class WXDLLIMPEXP_BASE wxLongLongWx
+class WXDLLEXPORT wxLongLongWx
 {
 public:
     // ctors
@@ -733,7 +732,7 @@ private:
 };
 
 
-class WXDLLIMPEXP_BASE wxULongLongWx
+class WXDLLEXPORT wxULongLongWx
 {
 public:
     // ctors

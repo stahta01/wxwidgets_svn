@@ -52,10 +52,10 @@ the list wraps, unlike a wxListBox.}
 \twocolitem{\windowstyle{wxLC\_ALIGN\_TOP}}{Icons align to the top. Win32 default, Win32 only. }
 \twocolitem{\windowstyle{wxLC\_ALIGN\_LEFT}}{Icons align to the left. }
 \twocolitem{\windowstyle{wxLC\_AUTOARRANGE}}{Icons arrange themselves. Win32 only. }
-\twocolitem{\windowstyle{wxLC\_VIRTUAL}}{The application provides items text on demand.}
+\twocolitem{\windowstyle{wxLC\_USER\_TEXT}}{The application provides label text on demand, except for column headers. Win32 only. }
 \twocolitem{\windowstyle{wxLC\_EDIT\_LABELS}}{Labels are editable: the application will be notified when editing starts.}
-\twocolitem{\windowstyle{wxLC\_NO\_HEADER}}{No header in report mode. }
-\twocolitem{\windowstyle{wxLC\_SINGLE\_SEL}}{Single selection (default is multiple).}
+\twocolitem{\windowstyle{wxLC\_NO\_HEADER}}{No header in report mode. Win32 only. }
+\twocolitem{\windowstyle{wxLC\_SINGLE\_SEL}}{Single selection.}
 \twocolitem{\windowstyle{wxLC\_SORT\_ASCENDING}}{Sort in ascending order (must still supply a comparison callback in SortItems.}
 \twocolitem{\windowstyle{wxLC\_SORT\_DESCENDING}}{Sort in descending order (must still supply a comparison callback in SortItems.}
 \twocolitem{\windowstyle{wxLC\_HRULES}}{Draws light horizontal rules between rows in report mode.}
@@ -228,7 +228,7 @@ Ensures this item is visible.
 
 \membersection{wxListCtrl::FindItem}\label{wxlistctrlfinditem}
 
-\func{long}{FindItem}{\param{long }{start}, \param{const wxString\& }{str}, \param{const bool }{partial = false}}
+\func{long}{FindItem}{\param{long }{start}, \param{const wxString\& }{str}, \param{const bool }{partial = FALSE}}
 
 Find an item whose label matches this string, starting from the item after {\it start} or
 the beginning if {\it start} is -1.
@@ -246,7 +246,7 @@ the item after {\it start} or the beginning if {\it start} is -1.
 \pythonnote{In place of a single overloaded method name, wxPython
 implements the following methods:\par
 \indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf FindItem(start, str, partial=false)}}{}
+\twocolitem{{\bf FindItem(start, str, partial=FALSE)}}{}
 \twocolitem{{\bf FindItemData(start, data)}}{}
 \twocolitem{{\bf FindItemAtPos(start, point, direction)}}{}
 \end{twocollist}}
@@ -255,7 +255,7 @@ implements the following methods:\par
 \perlnote{In wxPerl there are three methods instead of a single overloaded
 method:\par
 \indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf FindItem( start, str, partial = false ) }}{}
+\twocolitem{{\bf FindItem( start, str, partial = FALSE ) }}{}
 \twocolitem{{\bf FindItemData( start, data ) }}{}
 \twocolitem{{\bf FindItemAtPos( start, point, direction )}}{}
 \end{twocollist}
@@ -294,12 +294,9 @@ or small icon view).
 
 \membersection{wxListCtrl::GetEditControl}\label{wxlistctrlgeteditcontrol}
 
-\constfunc{wxTextCtrl *}{GetEditControl}{\void}
+\constfunc{wxTextCtrl\&}{GetEditControl}{\void}
 
-Returns the edit control being currently used to edit a label. Returns {\tt NULL}
-if no label is being edited.
-
-{\bf NB:} It is currently only implemented for wxMSW.
+Gets the edit control for editing labels.
 
 \membersection{wxListCtrl::GetImageList}\label{wxlistctrlgetimagelist}
 
@@ -369,15 +366,13 @@ ID and code and returns the wxRect.}
 \perlnote{In wxPerl this method takes only the {\bf item} parameter and
 returns a Wx::Rect ( or undef ).}
 
-
 \membersection{wxListCtrl::GetItemSpacing}\label{wxlistctrlgetitemspacing}
 
-\constfunc{wxSize}{GetItemSpacing}{\void}
+\constfunc{int}{GetItemSpacing}{\param{bool }{isSmall}}
 
-Retrieves the spacing between icons in pixels: horizontal spacing is returned
-as \texttt{x} component of the \helpref{wxSize}{wxsize} object and the vertical
-spacing as its \texttt{y} component.
-
+Retrieves the spacing between icons in pixels.
+If {\it small} is TRUE, gets the spacing for the small icon
+view, otherwise the large icon view.
 
 \membersection{wxListCtrl::GetItemState}\label{wxlistctrlgetitemstate}
 
@@ -465,19 +460,6 @@ Gets the text colour of the list control.
 Gets the index of the topmost visible item when in
 list or report view.
 
-
-\membersection{wxRect}{wxListCtrl::GetViewRect}\label{wxlistctrlgetviewrect}
-
-\constfunc{wxRect}{GetViewRect}{\void}
-
-Returns the rectangle taken by all items in the control. In other words, if the
-controls client size were equal to the size of this rectangle, no scrollbars
-would be needed and no free space would be left.
-
-Note that this function only works in the icon and small icon views, not in
-list or report views (this is a limitation of the native Win32 control).
-
-
 \membersection{wxListCtrl::HitTest}\label{wxlistctrlhittest}
 
 \func{long}{HitTest}{\param{const wxPoint\& }{point}, \param{int\& }{flags}}
@@ -511,10 +493,12 @@ flags value mentioned above.}
 
 \func{long}{InsertColumn}{\param{long }{col}, \param{wxListItem\& }{info}}
 
+For list view mode (only), inserts a column. For more details, see \helpref{wxListCtrl::SetItem}{wxlistctrlsetitem}.
+
 \func{long}{InsertColumn}{\param{long }{col}, \param{const wxString\& }{heading}, \param{int }{format = wxLIST\_FORMAT\_LEFT},\rtfsp
 \param{int }{width = -1}}
 
-For report view mode (only), inserts a column. For more details, see \helpref{wxListCtrl::SetItem}{wxlistctrlsetitem}.
+For list view mode (only), inserts a column. For more details, see \helpref{wxListCtrl::SetItem}{wxlistctrlsetitem}.
 
 \pythonnote{In place of a single overloaded method name, wxPython
 implements the following methods:\par
@@ -811,7 +795,7 @@ Sets the item text for this item.
 
 \membersection{wxListCtrl::SetSingleStyle}\label{wxlistctrlsetsinglestyle}
 
-\func{void}{SetSingleStyle}{\param{long }{style}, \param{const bool }{add = true}}
+\func{void}{SetSingleStyle}{\param{long }{style}, \param{const bool }{add = TRUE}}
 
 Adds or removes a single window style.
 

@@ -5,8 +5,8 @@
 // Modified by: Vadim Zeitlin to be less MSW-specific on 10/10/98
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TREECTRL_H_
@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "treectrl.h"
 #endif
 
@@ -25,7 +25,6 @@
 #include "wx/textctrl.h"
 #include "wx/dynarray.h"
 #include "wx/treebase.h"
-#include "wx/hashmap.h"
 
 #ifdef __GNUWIN32__
     // Cygwin windows.h defines these identifiers
@@ -33,10 +32,18 @@
     #undef GetNextSibling
 #endif // Cygwin
 
+// the type for "untyped" data
+typedef long wxDataType;
+
 // fwd decl
 class  WXDLLEXPORT wxImageList;
 class  WXDLLEXPORT wxDragImage;
 struct WXDLLEXPORT wxTreeViewItem;
+
+// a callback function used for sorting tree items, it should return -1 if the
+// first item precedes the second, +1 if the second precedes the first or 0 if
+// they're equivalent
+class wxTreeItemData;
 
 // NB: all the following flags are for compatbility only and will be removed in the
 //     next versions
@@ -50,18 +57,13 @@ enum
     wxTREE_EXPAND_TOGGLE
 };
 
-// flags for deprecated InsertItem() variant (their values are the same as of
-// TVI_FIRST and TVI_LAST)
+// flags for deprecated InsertItem() variant
 #define wxTREE_INSERT_FIRST 0xFFFF0001
 #define wxTREE_INSERT_LAST  0xFFFF0002
-
-// hash storing attributes for our items
-WX_DECLARE_EXPORTED_VOIDPTR_HASH_MAP(wxTreeItemAttr *, wxMapTreeAttr);
 
 // ----------------------------------------------------------------------------
 // wxTreeCtrl
 // ----------------------------------------------------------------------------
-
 class WXDLLEXPORT wxTreeCtrl : public wxControl
 {
 public:
@@ -239,11 +241,9 @@ public:
         // the same!
 
         // get the first child of this item
-    wxTreeItemId GetFirstChild(const wxTreeItemId& item,
-                               wxTreeItemIdValue& cookie) const;
+    wxTreeItemId GetFirstChild(const wxTreeItemId& item, long& _cookie) const;
         // get the next child
-    wxTreeItemId GetNextChild(const wxTreeItemId& item,
-                              wxTreeItemIdValue& cookie) const;
+    wxTreeItemId GetNextChild(const wxTreeItemId& item, long& _cookie) const;
         // get the last child of this item - this method doesn't use cookies
     wxTreeItemId GetLastChild(const wxTreeItemId& item) const;
 
@@ -371,37 +371,33 @@ public:
     // deprecated
     // ----------
 
-#if WXWIN_COMPATIBILITY_2_4
     // these methods are deprecated and will be removed in future versions of
     // wxWindows, they're here for compatibility only, don't use them in new
     // code (the comments indicate why these methods are now useless and how to
     // replace them)
 
         // use Expand, Collapse, CollapseAndReset or Toggle
-    wxDEPRECATED( void ExpandItem(const wxTreeItemId& item, int action) );
+    void ExpandItem(const wxTreeItemId& item, int action);
 
         // use AddRoot, PrependItem or AppendItem
-    wxDEPRECATED( wxTreeItemId InsertItem(const wxTreeItemId& parent,
+    wxTreeItemId InsertItem(const wxTreeItemId& parent,
                             const wxString& text,
                             int image = -1, int selImage = -1,
-                            long insertAfter = wxTREE_INSERT_LAST) );
+                            long insertAfter = wxTREE_INSERT_LAST);
 
         // use Set/GetImageList and Set/GetStateImageList
-    wxImageList *GetImageList(int) const { return GetImageList(); }
-    void SetImageList(wxImageList *imageList, int) { SetImageList(imageList); }
+    wxImageList *GetImageList(int) const
+        { return GetImageList(); }
+    void SetImageList(wxImageList *imageList, int)
+        { SetImageList(imageList); }
 
     // use Set/GetItemImage directly
+        // get the selected item image
     int GetItemSelectedImage(const wxTreeItemId& item) const
         { return GetItemImage(item, wxTreeItemIcon_Selected); }
+        // set the selected item image
     void SetItemSelectedImage(const wxTreeItemId& item, int image)
         { SetItemImage(item, image, wxTreeItemIcon_Selected); }
-
-    // use the versions taking wxTreeItemIdValue cookies
-    wxDEPRECATED( wxTreeItemId GetFirstChild(const wxTreeItemId& item,
-                                             long& cookie) const );
-    wxDEPRECATED( wxTreeItemId GetNextChild(const wxTreeItemId& item,
-                                            long& cookie) const );
-#endif // WXWIN_COMPATIBILITY_2_4
 
     // implementation
     // --------------
@@ -417,10 +413,6 @@ public:
     // get/set the check state for the item (only for wxTR_MULTIPLE)
     bool IsItemChecked(const wxTreeItemId& item) const;
     void SetItemCheck(const wxTreeItemId& item, bool check = TRUE);
-
-    // set/get the item state.image (state == -1 means cycle to the next one)
-    void SetState(const wxTreeItemId& node, int state);
-    int GetState(const wxTreeItemId& node);
 
 protected:
     // SetImageList helper
@@ -467,8 +459,8 @@ private:
     bool IsDataIndirect(wxTreeItemData *data) const
         { return data && data->GetId().m_pItem == 0; }
 
-    // the hash storing the items attributes (indexed by item ids)
-    wxMapTreeAttr m_attrs;
+    // the hash storing the items attributes (indexed by items ids)
+    wxHashTable m_attrs;
 
     // TRUE if the hash above is not empty
     bool m_hasAnyAttr;
@@ -480,13 +472,12 @@ private:
     void* m_pVirtualRoot;
 
     // the starting item for selection with Shift
-    wxTreeItemId m_htSelStart;
+    WXHTREEITEM m_htSelStart;
 
     friend class wxTreeItemIndirectData;
     friend class wxTreeSortHelper;
 
     DECLARE_DYNAMIC_CLASS(wxTreeCtrl)
-    DECLARE_NO_COPY_CLASS(wxTreeCtrl)
 };
 
 #endif // wxUSE_TREECTRL

@@ -7,13 +7,13 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997 Karsten Ballüder   Ballueder@usa.net
 //                       Vadim Zeitlin      <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "confbase.h"
 #endif
 
@@ -335,11 +335,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
           wxString strVarName(str.c_str() + n + 1, m - n - 1);
 
-#ifdef __WXWINCE__
-          const wxChar *pszValue = NULL;
-#else
           const wxChar *pszValue = wxGetenv(strVarName);
-#endif
           if ( pszValue != NULL ) {
             strResult += pszValue;
           }
@@ -399,7 +395,7 @@ wxString wxExpandEnvVars(const wxString& str)
 // this function is used to properly interpret '..' in path
 void wxSplitPath(wxArrayString& aParts, const wxChar *sz)
 {
-  aParts.clear();
+  aParts.Empty();
 
   wxString strCurrent;
   const wxChar *pc = sz;
@@ -410,15 +406,15 @@ void wxSplitPath(wxArrayString& aParts, const wxChar *sz)
       }
       else if ( strCurrent == wxT("..") ) {
         // go up one level
-        if ( aParts.size() == 0 )
+        if ( aParts.IsEmpty() )
           wxLogWarning(_("'%s' has extra '..', ignored."), sz);
         else
-          aParts.erase(aParts.end() - 1);
+          aParts.Remove(aParts.Count() - 1);
 
         strCurrent.Empty();
       }
       else if ( !strCurrent.IsEmpty() ) {
-        aParts.push_back(strCurrent);
+        aParts.Add(strCurrent);
         strCurrent.Empty();
       }
       //else:

@@ -85,6 +85,7 @@
 # Author:   Julian Smart, Robert Roebling, Vadim Zeitlin
 # Created:  1993
 # Updated:  1999
+# Copyright:(c) 1993, AIAI, University of Edinburgh,
 # Copyright:(c) 1999, Vadim Zeitlin
 # Copyright:(c) 1999, Robert Roebling
 #
@@ -99,13 +100,11 @@ include $(WXDIR)/src/makeg95.env
 
 # DLL Name, if building wxWindows as a DLL.
 ifdef WXMAKINGDLL
-WXDLL = $(WXDIR)/lib/wx$(TOOLKIT)$(WXVERSION)$(UNIEXT)$(DEBEXT)$(MIN_SUFFIX).dll
+WXDLL = $(WXDIR)/lib/wx$(TOOLKIT)$(WXVERSION)$(UNIEXT)$(DEBEXT).dll
 WXDEF = wx$(TOOLKIT)$(WXVERSION)$(UNIEXT)$(DEBEXT).def
-DLL_EXTRA_LIBS = $(WXDIR)/lib/libzlib$(MIN_SUFFIX).a \
-                 $(WXDIR)/lib/libpng$(MIN_SUFFIX).a \
-                 $(WXDIR)/lib/libjpeg$(MIN_SUFFIX).a \
-                 $(WXDIR)/lib/libtiff$(MIN_SUFFIX).a \
-                 $(WXDIR)/lib/libregex$(MIN_SUFFIX).a
+DLL_EXTRA_LIBS = $(WXDIR)/lib/libzlib.a \
+                 $(WXDIR)/lib/libpng.a $(WXDIR)/lib/libjpeg.a \
+	             $(WXDIR)/lib/libtiff.a $(WXDIR)/lib/libregex.a
 DLL_LDFLAGS = -L$(WXDIR)/lib
 DLL_BASE_LDLIBS = $(DLL_EXTRA_LIBS) -lstdc++ -lwsock32
 ifeq ($(wxUSE_GUI),0)
@@ -132,11 +131,11 @@ OLEDIR  = $(WXDIR)/src/msw/ole
 MSWDIR  = $(WXDIR)/src/msw
 REGEXDIR= $(WXDIR)/src/regex
 
-ZLIBLIB = $(WXDIR)/lib/libzlib$(MIN_SUFFIX).a
-PNGLIB  = $(WXDIR)/lib/libpng$(MIN_SUFFIX).a
-JPEGLIB = $(WXDIR)/lib/libjpeg$(MIN_SUFFIX).a
-TIFFLIB = $(WXDIR)/lib/libtiff$(MIN_SUFFIX).a
-REGEXLIB= $(WXDIR)/lib/libregex$(MIN_SUFFIX).a
+ZLIBLIB = $(WXDIR)/lib/libzlib.a
+PNGLIB  = $(WXDIR)/lib/libpng.a
+JPEGLIB = $(WXDIR)/lib/libjpeg.a
+TIFFLIB = $(WXDIR)/lib/libtiff.a
+REGEXLIB= $(WXDIR)/lib/libregex.a
 
 DOCDIR = $(WXDIR)/docs
 
@@ -167,6 +166,7 @@ COMMONOBJS_BASEONLY  = \
 
 COMMONOBJS  = \
                 $(COMMONOBJS_BASE) \
+		$(COMMDIR)/y_tab.$(OBJSUFF) \
 		#$ ExpandList("WXCOMMONOBJS");
 
 HTMLOBJS = \
@@ -413,15 +413,56 @@ $(TIFFLIB): $(TIFFOBJS)
 	$(RANLIB) $@
 
 $(REGEXLIB):
-	$(MAKE) -C $(REGEXDIR) -f makefile.g95 MINGW32=$(MINGW32) WXDIR=$(WXDIR) WXWIN=$(WXDIR)
+	$(MAKE) -C $(REGEXDIR) -f makefile.g95 WXDIR=$(WXDIR) WXWIN=$(WXDIR)
 
 $(OBJECTS):	$(WXINC)/wx/defs.h $(WXINC)/wx/object.h $(ARCHINCDIR)/wx/setup.h
+
+$(COMMDIR)/y_tab.$(OBJSUFF):    $(COMMDIR)/y_tab.c $(COMMDIR)/lex_yy.c
+	$(CCLEX) -c $(ALL_CPPFLAGS) $(ALL_CFLAGS) -DUSE_DEFINE -DYY_USE_PROTOS -o $@ $(COMMDIR)/y_tab.c
+
+$(COMMDIR)/y_tab.c:     $(COMMDIR)/dosyacc.c
+	$(COPY) ../common/dosyacc.c ../common/y_tab.c
+
+$(COMMDIR)/lex_yy.c:    $(COMMDIR)/doslex.c
+	$(COPY) ../common/doslex.c ../common/lex_yy.c
+
+# Replace lex with flex if you run into compilation
+# problems with lex_yy.c. See also note about LEX_SCANNER
+# above.
+# $(COMMDIR)/lex_yy.c:	$(COMMDIR)/lexer.l
+#	$(LEX) -L -o$(COMMDIR)/lex_yy.c $(COMMDIR)/lexer.l
+#
+# Try one of these if the above line doesn't work.
+# Alternative syntax (1)
+#	$(LEX) -t -L $(COMMDIR)/lexer.l > $(COMMDIR)/lex_yy.c
+# Alternative syntax (2)
+#	$(LEX) -L -o$(COMMDIR)/lex_yy.c $(COMMDIR)/lexer.l
+#
+#	sed -e "s/BUFSIZ/5000/g" < lex.yy.c | \
+#	sed -e "s/yyoutput(c)/void yyoutput(c)/g" | \
+#       sed -e "s/YYLMAX 200/YYLMAX 5000/g" > lex_yy.c
+#	rm -f lex.yy.c
+#
+# Replace yacc with bison if you run into compilation
+# problems with y_tab.c.
+#
+# $(COMMDIR)/y_tab.c:	$(COMMDIR)/parser.y
+#	$(YACC) -o $(COMMDIR)/y_tab.c $(COMMDIR)/parser.y
+#
+# If you use e.g. gcc on Unix, uncomment these lines
+# and comment out the above.
+#
+# $(COMMDIR)/y_tab.c:	$(COMMDIR)/parser.y
+#	$(YACC) $(COMMDIR)/parser.y
+#	mv y.tab.c $(COMMDIR)/y_tab.c
 
 clean:
 	-$(RM) *.o
 	-$(RM) ole/*.o
 	-$(RM) *.bak
 	-$(RM) core
+	-$(RM) ../common/y_tab.c
+	-$(RM) ../common/lex_yy.c
 	-$(RM) ../common/*.o
 	-$(RM) ../common/*.bak
 	-$(RM) ../generic/*.o

@@ -53,7 +53,7 @@ struct cbRectInfo
 
 static inline cbRectInfo& node_to_rect_info( wxNode* pNode )
 {
-    return *( (cbRectInfo*) (pNode->GetData()) );
+    return *( (cbRectInfo*) (pNode->Data()) );
 }
 
 /***** Implementation for class cbSimpleUpdatesMgr *****/
@@ -172,8 +172,8 @@ void cbGCUpdatesMgr::UpdateNow()
             // number of bars, that were changed in the current row
             int nBars = 0; 
 
-            //wxRect r1 = pRow->mUMgrData.mPrevBounds;
-            //wxRect r2 = pRow->mBoundsInParent;
+            wxRect r1 = pRow->mUMgrData.mPrevBounds;
+            wxRect r2 = pRow->mBoundsInParent;
 
             if ( WasChanged( pRow->mUMgrData, pRow->mBoundsInParent ) )
             
@@ -276,13 +276,13 @@ void cbGCUpdatesMgr::UpdateNow()
 
 void cbGCUpdatesMgr::DoRepositionItems( wxList& items )
 {
-    wxNode* pNode1 = items.GetFirst();
+    wxNode* pNode1 = items.First();
 
     while( pNode1 )
     {
         cbRectInfo& info = node_to_rect_info( pNode1 );
 
-        wxNode* pNode2 = items.GetFirst();
+        wxNode* pNode2 = items.First();
 
         // and node itself
 
@@ -305,10 +305,10 @@ void cbGCUpdatesMgr::DoRepositionItems( wxList& items )
                     mGC.AddDependency( &info,      &otherInfo      );
             }
 
-            pNode2 = pNode2->GetNext();
+            pNode2 = pNode2->Next();
         }
 
-        pNode1 = pNode1->GetNext();
+        pNode1 = pNode1->Next();
     }
 
     mGC.ArrangeCollection(); // order nodes according "least-dependency" rule,
@@ -318,7 +318,7 @@ void cbGCUpdatesMgr::DoRepositionItems( wxList& items )
     // they stand in linear (not cyclic) dependency with other
     // regular nodes).
 
-    wxNode* pNode = mGC.GetRegularObjects().GetFirst();
+    wxNode* pNode = mGC.GetRegularObjects().First();
 
     while ( pNode )
     {
@@ -330,12 +330,12 @@ void cbGCUpdatesMgr::DoRepositionItems( wxList& items )
         else
             info.mpPane->SizeBar( info.mpBar );
 
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
     // cycled item nodes, need to be both resized and repainted
 
-    pNode = mGC.GetCycledObjects().GetFirst();
+    pNode = mGC.GetCycledObjects().First();
 
     while ( pNode )
     {
@@ -380,20 +380,20 @@ void cbGCUpdatesMgr::DoRepositionItems( wxList& items )
             pWnd->Refresh();
         }
 
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
     // release data prepared for GC alg.
 
-    pNode = items.GetFirst();
+    pNode = items.First();
 
     while( pNode )
     {
-        cbRectInfo* pInfo = (cbRectInfo*)(pNode->GetData());
+        cbRectInfo* pInfo = (cbRectInfo*)(pNode->Data());
 
         delete pInfo;
 
-        pNode = pNode->GetNext();
+        pNode = pNode->Next();
     }
 
     mGC.Reset(); // reinit GC

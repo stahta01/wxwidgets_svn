@@ -2,18 +2,18 @@
 // Name:        statusbr.h
 // Purpose:     native implementation of wxStatusBar. Optional; can use generic
 //              version instead.
-// Author:      Stefan Csomor
-// Modified by:
-// Created:     1998-01-01
+// Author:      AUTHOR
+// Modified by: 
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_STATBAR_H_
 #define   _WX_STATBAR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "statbrma.h"
 #endif
 

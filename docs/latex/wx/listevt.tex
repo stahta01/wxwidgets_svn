@@ -23,7 +23,7 @@ functions that take a wxListEvent argument.
 \twocolitem{{\bf EVT\_LIST\_BEGIN\_DRAG(id, func)}}{Begin dragging with the left mouse button.}
 \twocolitem{{\bf EVT\_LIST\_BEGIN\_RDRAG(id, func)}}{Begin dragging with the right mouse button.}
 \twocolitem{{\bf EVT\_LIST\_BEGIN\_LABEL\_EDIT(id, func)}}{Begin editing a label. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
-\twocolitem{{\bf EVT\_LIST\_END\_LABEL\_EDIT(id, func)}}{Finish editing a label. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}.}
+\twocolitem{{\bf EVT\_LIST\_END\_LABEL\_EDIT(id, func)}}{Finish editing a label. This can be prevented by calling \helpref{Veto()}{wxnotifyeventveto}. Not sent when editing was cancelled. }
 \twocolitem{{\bf EVT\_LIST\_DELETE\_ITEM(id, func)}}{Delete an item.}
 \twocolitem{{\bf EVT\_LIST\_DELETE\_ALL\_ITEMS(id, func)}}{Delete all items.}
 %\twocolitem{{\bf EVT\_LIST\_GET\_INFO(id, func)}}{Request information from the application, usually the item text.}
@@ -90,6 +90,12 @@ The column position: it is only used with {\tt COL} events. For the column
 dragging events, it is the column to the left of the divider being dragged, for
 the column click events it may be $-1$ if the user clicked in the list control
 header outside any column.
+
+\membersection{wxListEvent::Cancelled}\label{wxlisteventcancelled}
+
+\constfunc{bool}{Cancelled}{\void}
+
+TRUE if this event is an end edit event and the user cancelled the edit.
 
 \membersection{wxListEvent::GetPoint}\label{wxlisteventgetpoint}
 

@@ -316,7 +316,6 @@ class TestListCtrlPanel(wxPanel, wxColumnSorterMixin):
             self.log.WriteText("      %s: %s\n" % (self.list.GetItemText(index), self.getColumnText(index, 1)))
             index = self.list.GetNextSelected(index)
 
-
     def OnPopupThree(self, event):
         self.log.WriteText("Popup three\n")
         self.list.ClearAll()

@@ -1,10 +1,9 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/missing.h
+// Name:        missing.h
 // Purpose:     Declarations for parts of the Win32 SDK that are missing in
-//              the versions that come with some compilers
+//              the version that comes with some compilers
 // Created:     2002/04/23
 // RCS-ID:      $Id$
-// Copyright:   (c) 2002 Mattia Barbon
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -179,10 +178,6 @@ typedef struct {
 #endif
 #endif
 
-#ifndef LVM_SETUNICODEFORMAT
-#define LVM_SETUNICODEFORMAT 0x2005
-#endif
-
 // ----------------------------------------------------------------------------
 // Toolbar define value missing 
 // ----------------------------------------------------------------------------
@@ -251,183 +246,6 @@ struct HH_AKLINK
     BOOL      fIndexOnFail;
 };
 
-// ----------------------------------------------------------------------------
-// SHGetFileInfo-related things
-// ----------------------------------------------------------------------------
-
-#ifndef SHGetFileInfo
-    #ifdef UNICODE
-        #define SHGetFileInfo SHGetFileInfoW
-    #else
-        #define SHGetFileInfo SHGetFileInfoA
-    #endif
-#endif
-
-#ifndef SHGFI_ATTRIBUTES
-    #define SHGFI_ATTRIBUTES 2048
-#endif
-
-#ifndef SFGAO_READONLY
-    #define SFGAO_READONLY 0x00040000L
-#endif
-
-#ifndef SFGAO_REMOVABLE
-    #define SFGAO_REMOVABLE 0x02000000L
-#endif
-
-#ifndef SHGFI_DISPLAYNAME
-    #define SHGFI_DISPLAYNAME 512
-#endif
-
-#ifndef SHGFI_ICON
-    #define SHGFI_ICON 256
-#endif
-
-#ifndef SHGFI_SMALLICON
-     #define SHGFI_SMALLICON 1
-#endif
-
-#ifndef SHGFI_SHELLICONSIZE
-    #define SHGFI_SHELLICONSIZE 4
-#endif
-
-#ifndef SHGFI_OPENICON
-    #define SHGFI_OPENICON 2
-#endif
-
-// ----------------------------------------------------------------------------
-// Rich text control
-// ----------------------------------------------------------------------------
-
-#if wxUSE_RICHEDIT && defined(MAX_TAB_STOPS)
-
-// old mingw32 doesn't define this
-#ifndef CFM_CHARSET
-    #define CFM_CHARSET 0x08000000
-#endif // CFM_CHARSET
-
-#ifndef CFM_BACKCOLOR
-    #define CFM_BACKCOLOR 0x04000000
-#endif
-
-// cygwin does not have these defined for richedit
-#ifndef ENM_LINK
-    #define ENM_LINK 0x04000000
-#endif
-
-#ifndef EM_AUTOURLDETECT
-    #define EM_AUTOURLDETECT (WM_USER + 91)
-#endif
-
-#ifndef EN_LINK
-    #define EN_LINK 0x070b
-
-    typedef struct _enlink
-    {
-        NMHDR nmhdr;
-        UINT msg;
-        WPARAM wParam;
-        LPARAM lParam;
-        CHARRANGE chrg;
-    } ENLINK;
-#endif // ENLINK
-
-#ifndef SF_UNICODE
-    #define SF_UNICODE 0x0010
-#endif
-
-// Watcom C++ doesn't define this
-#ifndef SCF_ALL
-    #define SCF_ALL 0x0004
-#endif
-
-#ifndef PFA_JUSTIFY
-#define PFA_JUSTIFY 4
-
-typedef struct _paraformat2 {
-    UINT cbSize;
-    DWORD dwMask;
-    WORD wNumbering;
-    WORD wEffects;
-    LONG dxStartIndent;
-    LONG dxRightIndent;
-    LONG dxOffset;
-    WORD wAlignment;
-    SHORT cTabCount;
-    LONG rgxTabs[MAX_TAB_STOPS];
-    LONG dySpaceBefore;
-    LONG dySpaceAfter;
-    LONG dyLineSpacing;
-    SHORT sStype;
-    BYTE bLineSpacingRule;
-    BYTE bOutlineLevel;
-    WORD wShadingWeight;
-    WORD wShadingStyle;
-    WORD wNumberingStart;
-    WORD wNumberingStyle;
-    WORD wNumberingTab;
-    WORD wBorderSpace;
-    WORD wBorderWidth;
-    WORD wBorders;
-} PARAFORMAT2;
-#define wxEffects wReserved
-
-#endif
-
-#endif // wxUSE_RICHEDIT
-
-// ----------------------------------------------------------------------------
-// ToolBar
-// ----------------------------------------------------------------------------
-
-#if wxUSE_TOOLBAR
-
-#if !defined(TBIF_SIZE)
-
-#define TBIF_SIZE 64
-#define TB_SETBUTTONINFO (WM_USER+66)
-
-typedef struct {
-    UINT cbSize;
-    DWORD dwMask;
-    int idCommand;
-    int iImage;
-    BYTE fsState;
-    BYTE fsStyle;
-    WORD cx;
-    DWORD lParam;
-    LPTSTR pszText;
-    int cchText;
-} TBBUTTONINFO, *LPTBBUTTONINFO;
-
-#endif // !defined(TBIF_SIZE)
-
-#endif // wxUSE_TOOLBAR
-
-// ----------------------------------------------------------------------------
-// Tree control
-// ----------------------------------------------------------------------------
-
-#ifndef TVIS_FOCUSED
-    #define TVIS_FOCUSED            0x0001
-#endif
-
-#ifndef TV_FIRST
-    #define TV_FIRST                0x1100
-#endif
-
-#ifndef TVS_CHECKBOXES
-    #define TVS_CHECKBOXES          0x0100
-#endif
-
-#ifndef TVS_FULLROWSELECT
-    #define TVS_FULLROWSELECT       0x1000
-#endif
-
-#ifndef TVM_SETBKCOLOR
-    #define TVM_SETBKCOLOR          (TV_FIRST + 29)
-    #define TVM_SETTEXTCOLOR        (TV_FIRST + 30)
-#endif
 
 // ----------------------------------------------------------------------------
 // Misc stuff
@@ -437,16 +255,18 @@ typedef struct {
     #define QS_ALLPOSTMESSAGE    0x0100
 #endif
 
-#ifndef WS_EX_CLIENTEDGE
-    #define WS_EX_CLIENTEDGE 0x00000200L
+#ifdef __WXWINE__
+#define LV_ITEMA LVITEMA
+#define LV_ITEMW LVITEMW
+#define LV_DISPINFOA NMLVDISPINFOA
+#define LV_DISPINFOW NMLVDISPINFOW
+
+#if wxUSE_UNICODE
+#define LV_FINDINFO LVFINDINFOW
+#else
+#define LV_FINDINFO LVFINDINFOA
 #endif
 
-#ifndef ENDSESSION_LOGOFF
-    #define ENDSESSION_LOGOFF    0x80000000
-#endif
-
-#ifndef HANGUL_CHARSET
-    #define HANGUL_CHARSET  129
 #endif
 
 #endif

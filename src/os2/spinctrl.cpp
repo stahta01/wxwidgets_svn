@@ -50,8 +50,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
 
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
-    EVT_SPIN(-1, wxSpinCtrl::OnSpinChange)
     EVT_SET_FOCUS(wxSpinCtrl::OnSetFocus)
+    EVT_SPIN(-1, wxSpinCtrl::OnSpinChange)
 END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 // constants
@@ -145,8 +145,7 @@ bool wxSpinCtrl::Create(
 
     int                             lSstyle = 0L;
 
-    lSstyle = WS_VISIBLE      |
-              WS_TABSTOP      |
+    lSstyle = WS_TABSTOP      |
               SPBS_MASTER     | // We use only single field spin buttons
               SPBS_NUMERICONLY; // We default to numeric data
 

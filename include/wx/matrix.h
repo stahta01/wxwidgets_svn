@@ -1,18 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        matrix.h
 // Purpose:     wxTransformMatrix class. NOT YET USED
-// Author:      Chris Breeze, Julian Smart
+//! Author:      Chris Breeze, Julian Smart
 // Modified by:  Klaas Holwerda
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart, Chris Breeze
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MATRIXH__
 #define _WX_MATRIXH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "matrix.h"
 #endif
 
@@ -27,10 +27,10 @@
 // Note: this is intended to be used in wxDC at some point to replace
 // the current system of scaling/translation. It is not yet used.
 
-//:definition
+//:defenition
 //  A 3x3 matrix to do 2D transformations.
-//  It can be used to map data to window coordinates,
-//  and also for manipulating your own data.
+//  It can be used to map data to window coordinates.
+//  But also for manipulating your own data.
 //  For example drawing a picture (composed of several primitives)
 //  at a certain coordinate and angle within another parent picture.
 //  At all times m_isIdentity is set if the matrix itself is an Identity matrix.

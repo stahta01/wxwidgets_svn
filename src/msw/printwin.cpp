@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "printwin.h"
 #endif
 
@@ -30,9 +30,7 @@
 
 #include "wx/defs.h"
 
-// Don't use the Windows printer if we're in wxUniv mode and using
-// the PostScript architecture
-#if wxUSE_PRINTING_ARCHITECTURE && (!defined(__WXUNIVERSAL__) || !wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW)
+#if wxUSE_PRINTING_ARCHITECTURE
 
 #ifndef WX_PRECOMP
     #include "wx/window.h"
@@ -91,7 +89,7 @@ wxWindowsPrinter::~wxWindowsPrinter()
 {
     // avoids warning about statement with no effect (FreeProcInstance
 	// doesn't do anything under Win32)
-#if !defined(__WIN32__) && !defined(__NT__)
+#if !defined(WIN32) && !defined(_WIN32) && !defined(__WIN32__) && !defined(__NT__) && !defined(__GNUWIN32__)
     FreeProcInstance((FARPROC) m_lpAbortProc);
 #endif
 }
@@ -109,10 +107,43 @@ bool wxWindowsPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt
 
     printout->SetIsPreview(FALSE);
 
-    if (m_printDialogData.GetMinPage() < 1)
-        m_printDialogData.SetMinPage(1);
-    if (m_printDialogData.GetMaxPage() < 1)
-        m_printDialogData.SetMaxPage(9999);
+    // 4/9/99, JACS: this is a silly place to allow preparation, considering
+    // the DC and no parameters have been set in the printout object.
+    // Moved further down.
+    // printout->OnPreparePrinting();
+
+    // Get some parameters from the printout, if defined
+    int fromPage, toPage;
+    int minPage, maxPage;
+    printout->GetPageInfo(&minPage, &maxPage, &fromPage, &toPage);
+
+    if (maxPage == 0)
+    {
+        sm_lastError = wxPRINTER_ERROR;
+        return FALSE;
+    }
+
+    m_printDialogData.SetMinPage(minPage);
+    m_printDialogData.SetMaxPage(maxPage);
+    if (fromPage != 0)
+        m_printDialogData.SetFromPage(fromPage);
+    if (toPage != 0)
+        m_printDialogData.SetToPage(toPage);
+
+    if (minPage != 0)
+    {
+        m_printDialogData.EnablePageNumbers(TRUE);
+        if (m_printDialogData.GetFromPage() < m_printDialogData.GetMinPage())
+            m_printDialogData.SetFromPage(m_printDialogData.GetMinPage());
+        else if (m_printDialogData.GetFromPage() > m_printDialogData.GetMaxPage())
+            m_printDialogData.SetFromPage(m_printDialogData.GetMaxPage());
+        if (m_printDialogData.GetToPage() > m_printDialogData.GetMaxPage())
+            m_printDialogData.SetToPage(m_printDialogData.GetMaxPage());
+        else if (m_printDialogData.GetToPage() < m_printDialogData.GetMinPage())
+            m_printDialogData.SetToPage(m_printDialogData.GetMinPage());
+    }
+    else
+        m_printDialogData.EnablePageNumbers(FALSE);
 
     // Create a suitable device context
     wxDC *dc = NULL;
@@ -124,6 +155,7 @@ bool wxWindowsPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt
     }
     else
     {
+        //      dc = new wxPrinterDC("", "", "", FALSE, m_printData.GetOrientation());
         dc = new wxPrinterDC(m_printDialogData.GetPrintData());
     }
 
@@ -170,23 +202,6 @@ bool wxWindowsPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt
     wxBeginBusyCursor();
 
     printout->OnPreparePrinting();
-
-    // Get some parameters from the printout, if defined
-    int fromPage, toPage;
-    int minPage, maxPage;
-    printout->GetPageInfo(&minPage, &maxPage, &fromPage, &toPage);
-
-    if (maxPage == 0)
-    {
-        sm_lastError = wxPRINTER_ERROR;
-        wxEndBusyCursor();
-        return FALSE;
-    }
-
-    // Only set min and max, because from and to have been
-    // set by the user
-    m_printDialogData.SetMinPage(minPage);
-    m_printDialogData.SetMaxPage(maxPage);
 
     wxWindow *win = CreateAbortWindow(parent, printout);
     wxYield();

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "printdlg.h"
 #endif
 
@@ -28,9 +28,7 @@
     #pragma hdrstop
 #endif
 
-// Don't use the Windows print dialog if we're in wxUniv mode and using
-// the PostScript architecture
-#if wxUSE_PRINTING_ARCHITECTURE && (!defined(__WXUNIVERSAL__) || !wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW)
+#if wxUSE_PRINTING_ARCHITECTURE
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"

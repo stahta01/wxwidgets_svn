@@ -7,18 +7,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "app.h"
 #endif
 
 #ifdef __VMS
-// vms_jackets.h should for proper working be included before anything else
-# include <vms_jackets.h>
-#undef ConnectionNumber
+#include <vms_jackets.h>
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/app.h"
 #include "wx/gdicmn.h"
@@ -32,6 +27,11 @@
 #include "wx/msgdlg.h"
 #include "wx/file.h"
 #include "wx/filename.h"
+
+#if wxUSE_WX_RESOURCES
+    #include "wx/resource.h"
+#endif
+
 #include "wx/module.h"
 #include "wx/image.h"
 
@@ -80,6 +80,9 @@
 // global data
 //-----------------------------------------------------------------------------
 
+wxApp *wxTheApp = (wxApp *)  NULL;
+wxAppInitializerFunction wxAppBase::m_appInitFn = (wxAppInitializerFunction) NULL;
+
 bool   g_mainThreadLocked = FALSE;
 gint   g_pendingTag = 0;
 
@@ -92,6 +95,15 @@ static GtkWidget *gs_RootWindow = (GtkWidget*) NULL;
 extern bool g_isIdle;
 
 void wxapp_install_idle_handler();
+
+//-----------------------------------------------------------------------------
+// wxExit
+//-----------------------------------------------------------------------------
+
+void wxExit()
+{
+    gtk_main_quit();
+}
 
 //-----------------------------------------------------------------------------
 // wxYield
@@ -160,15 +172,20 @@ bool wxApp::Yield(bool onlyIfNeeded)
 // wxWakeUpIdle
 //-----------------------------------------------------------------------------
 
-void wxApp::WakeUpIdle()
+static bool gs_WakeUpIdle = false;
+
+void wxWakeUpIdle()
 {
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
         wxMutexGuiEnter();
 #endif
 
-    if (g_isIdle)
+    if (g_isIdle) {
+        gs_WakeUpIdle = true;
         wxapp_install_idle_handler();
+        gs_WakeUpIdle = false;
+    }
 
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
@@ -225,12 +242,8 @@ static gint wxapp_idle_callback( gpointer WXUNUSED(data) )
         // But repaint the assertion message if necessary
         if (wxTopLevelWindows.GetCount() > 0)
         {
-            wxWindow* win = (wxWindow*) wxTopLevelWindows.GetLast()->GetData();
-#ifdef __WXGTK20__
-            if (win->IsKindOf(CLASSINFO(wxMessageDialog)))
-#else
+            wxWindow* win = (wxWindow*) wxTopLevelWindows.Last()->Data();
             if (win->IsKindOf(CLASSINFO(wxGenericMessageDialog)))
-#endif
                 win->OnInternalIdle();
         }
         return TRUE;
@@ -354,7 +367,7 @@ static gint wxapp_poll_func( GPollFD *ufds, guint nfds, gint timeout )
 void wxapp_install_idle_handler()
 {
     // GD: this assert is raised when using the thread sample (which works)
-    //     so the test is probably not so easy. Can widget callbacks be
+    //     so the test is probably not so easy. Can widget callbacks be 
     //     triggered from child threads and, if so, for which widgets?
     // wxASSERT_MSG( wxThread::IsMain() || gs_WakeUpIdle, wxT("attempt to install idle handler from widget callback in child thread (should be exclusively from wxWakeUpIdle)") );
 
@@ -394,7 +407,7 @@ GtkWidget* wxGetRootWindow()
 IMPLEMENT_DYNAMIC_CLASS(wxApp,wxEvtHandler)
 
 BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
-    EVT_IDLE(wxAppBase::OnIdle)
+    EVT_IDLE(wxApp::OnIdle)
 END_EVENT_TABLE()
 
 wxApp::wxApp()
@@ -538,17 +551,113 @@ GdkVisual *wxApp::GetGdkVisual()
     return visual;
 }
 
+bool wxApp::ProcessIdle()
+{
+    wxWindowList::Node* node = wxTopLevelWindows.GetFirst();
+    node = wxTopLevelWindows.GetFirst();
+    while (node)
+    {
+        wxWindow* win = node->GetData();
+        CallInternalIdle( win );
+
+        node = node->GetNext();
+    }
+
+    wxIdleEvent event;
+    event.SetEventObject( this );
+    ProcessEvent( event );
+
+    return event.MoreRequested();
+}
+
+void wxApp::OnIdle( wxIdleEvent &event )
+{
+    static bool s_inOnIdle = FALSE;
+
+    // Avoid recursion (via ProcessEvent default case)
+    if (s_inOnIdle)
+        return;
+
+    s_inOnIdle = TRUE;
+
+    // Resend in the main thread events which have been prepared in other
+    // threads
+    ProcessPendingEvents();
+
+    // 'Garbage' collection of windows deleted with Close()
+    DeletePendingObjects();
+
+    // Send OnIdle events to all windows
+    bool needMore = SendIdleEvents();
+
+    if (needMore)
+        event.RequestMore(TRUE);
+
+    s_inOnIdle = FALSE;
+}
+
+bool wxApp::SendIdleEvents()
+{
+    bool needMore = FALSE;
+
+    wxWindowList::Node* node = wxTopLevelWindows.GetFirst();
+    while (node)
+    {
+        wxWindow* win = node->GetData();
+        if (SendIdleEvents(win))
+            needMore = TRUE;
+
+        node = node->GetNext();
+    }
+
+    return needMore;
+}
+
+bool wxApp::CallInternalIdle( wxWindow* win )
+{
+    win->OnInternalIdle();
+
+    wxNode* node = win->GetChildren().First();
+    while (node)
+    {
+        wxWindow* win = (wxWindow*) node->Data();
+        CallInternalIdle( win );
+
+        node = node->Next();
+    }
+
+    return TRUE;
+}
+
+bool wxApp::SendIdleEvents( wxWindow* win )
+{
+    bool needMore = FALSE;
+
+    wxIdleEvent event;
+    event.SetEventObject(win);
+
+    win->GetEventHandler()->ProcessEvent(event);
+
+    if (event.MoreRequested())
+        needMore = TRUE;
+
+    wxNode* node = win->GetChildren().First();
+    while (node)
+    {
+        wxWindow* win = (wxWindow*) node->Data();
+        if (SendIdleEvents(win))
+            needMore = TRUE;
+
+        node = node->Next();
+    }
+
+    return needMore;
+}
+
 int wxApp::MainLoop()
 {
     gtk_main();
     return 0;
-}
-
-void wxApp::Exit()
-{
-    // VZ: no idea why is it different from ExitMainLoop() but this is what
-    //     wxExit() used to do
-    gtk_main_quit();
 }
 
 void wxApp::ExitMainLoop()
@@ -567,14 +676,110 @@ bool wxApp::Pending()
     return (gtk_events_pending() > 0);
 }
 
-bool wxApp::Dispatch()
+void wxApp::Dispatch()
 {
     gtk_main_iteration();
-
-    return true;
 }
 
-bool wxApp::Initialize(int& argc, wxChar **argv)
+void wxApp::DeletePendingObjects()
+{
+    wxNode *node = wxPendingDelete.First();
+    while (node)
+    {
+        wxObject *obj = (wxObject *)node->Data();
+
+        delete obj;
+
+        if (wxPendingDelete.Find(obj))
+            delete node;
+
+        node = wxPendingDelete.First();
+    }
+}
+
+bool wxApp::Initialize()
+{
+    wxClassInfo::InitializeClasses();
+
+    // GL: I'm annoyed ... I don't know where to put this and I don't want to
+    // create a module for that as it's part of the core.
+#if wxUSE_THREADS
+    wxPendingEvents = new wxList();
+    wxPendingEventsLocker = new wxCriticalSection();
+#endif
+
+    wxTheColourDatabase = new wxColourDatabase( wxKEY_STRING );
+    wxTheColourDatabase->Initialize();
+
+    wxInitializeStockLists();
+    wxInitializeStockObjects();
+
+#if wxUSE_WX_RESOURCES
+    wxInitializeResourceSystem();
+#endif
+
+    wxModule::RegisterModules();
+    if (!wxModule::InitializeModules())
+        return FALSE;
+
+#if wxUSE_INTL
+    wxFont::SetDefaultEncoding(wxLocale::GetSystemEncoding());
+#endif
+
+    return TRUE;
+}
+
+void wxApp::CleanUp()
+{
+    wxModule::CleanUpModules();
+
+#if wxUSE_WX_RESOURCES
+    wxCleanUpResourceSystem();
+#endif
+
+    delete wxTheColourDatabase;
+    wxTheColourDatabase = (wxColourDatabase*) NULL;
+
+    wxDeleteStockObjects();
+
+    wxDeleteStockLists();
+
+    delete wxTheApp;
+    wxTheApp = (wxApp*) NULL;
+
+    wxClassInfo::CleanUpClasses();
+
+#if wxUSE_THREADS
+    delete wxPendingEvents;
+    delete wxPendingEventsLocker;
+#endif
+
+    // check for memory leaks
+#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+    if (wxDebugContext::CountObjectsLeft(TRUE) > 0)
+    {
+        wxLogDebug(wxT("There were memory leaks.\n"));
+        wxDebugContext::Dump();
+        wxDebugContext::PrintStatistics();
+    }
+#endif // Debug
+
+#if wxUSE_LOG
+    // do this as the very last thing because everything else can log messages
+    wxLog::DontCreateOnDemand();
+
+    wxLog *oldLog = wxLog::SetActiveTarget( (wxLog*) NULL );
+    if (oldLog)
+        delete oldLog;
+#endif // wxUSE_LOG
+}
+
+//-----------------------------------------------------------------------------
+// wxEntry
+//-----------------------------------------------------------------------------
+
+// NB: argc and argv may be changed here, pass by reference!
+int wxEntryStart( int& argc, char *argv[] )
 {
 #if wxUSE_THREADS
     // GTK 1.2 up to version 1.2.3 has broken threads
@@ -589,92 +794,162 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
         if (!g_thread_supported())
             g_thread_init(NULL);
     }
-#endif // wxUSE_THREADS
+#endif
 
     gtk_set_locale();
 
     // We should have the wxUSE_WCHAR_T test on the _outside_
 #if wxUSE_WCHAR_T
-    #if defined(__WXGTK20__)
-        // gtk+ 2.0 supports Unicode through UTF-8 strings
-        wxConvCurrent = &wxConvUTF8;
-    #else // GTK 1.x
-        if (!wxOKlibc())
-            wxConvCurrent = &wxConvLocal;
-    #endif
-#else // !wxUSE_WCHAR_T
-    if (!wxOKlibc())
-        wxConvCurrent = (wxMBConv*) NULL;
-#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
+#if defined(__WXGTK20__)
+    // gtk+ 2.0 supports Unicode through UTF-8 strings
+    wxConvCurrent = &wxConvUTF8;
+#else
+    if (!wxOKlibc()) wxConvCurrent = &wxConvLocal;
+#endif
+#else
+    if (!wxOKlibc()) wxConvCurrent = (wxMBConv*) NULL;
+#endif
 
-#if wxUSE_UNICODE
-    // gtk_init() wants UTF-8, not wchar_t, so convert
-    int i;
-    char **argvGTK = new char *[argc + 1];
-    for ( i = 0; i < argc; i++ )
-    {
-        argvGTK[i] = wxStrdupA(wxConvUTF8.cWX2MB(argv[i]));
-    }
-
-    argvGTK[argc] = NULL;
-
-    int argcGTK = argc;
-    gtk_init( &argcGTK, &argvGTK );
-
-    if ( argcGTK != argc )
-    {
-        // we have to drop the parameters which were consumed by GTK+
-        for ( i = 0; i < argcGTK; i++ )
-        {
-            while ( strcmp(wxConvUTF8.cWX2MB(argv[i]), argvGTK[i]) != 0 )
-            {
-                memmove(argv + i, argv + i + 1, argc - i);
-            }
-        }
-
-        argc = argcGTK;
-    }
-    //else: gtk_init() didn't modify our parameters
-
-    // free our copy
-    for ( i = 0; i < argcGTK; i++ )
-    {
-        free(argvGTK[i]);
-    }
-
-    delete [] argvGTK;
-#else // !wxUSE_UNICODE
-    // gtk_init() shouldn't actually change argv itself (just its contents) so
-    // it's ok to pass pointer to it
     gtk_init( &argc, &argv );
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
-    // we can not enter threads before gtk_init is done
+    /* we can not enter threads before gtk_init is done */
     gdk_threads_enter();
-
-    if ( !wxAppBase::Initialize(argc, argv) )
-    {
-        gdk_threads_leave();
-
-        return false;
-    }
 
     wxSetDetectableAutoRepeat( TRUE );
 
-#if wxUSE_INTL
-    wxFont::SetDefaultEncoding(wxLocale::GetSystemEncoding());
-#endif
+    if (!wxApp::Initialize())
+    {
+        gdk_threads_leave();
+        return -1;
+    }
+
+    return 0;
+}
+
+
+int wxEntryInitGui()
+{
+    int retValue = 0;
+
+    if ( !wxTheApp->OnInitGui() )
+        retValue = -1;
 
     wxGetRootWindow();
 
-    return true;
+    return retValue;
 }
 
-void wxApp::CleanUp()
-{
-    gdk_threads_leave();
 
-    wxAppBase::CleanUp();
+void wxEntryCleanup()
+{
+#if wxUSE_LOG
+    // flush the logged messages if any
+    wxLog *log = wxLog::GetActiveTarget();
+    if (log != NULL && log->HasPendingMessages())
+        log->Flush();
+
+    // continuing to use user defined log target is unsafe from now on because
+    // some resources may be already unavailable, so replace it by something
+    // more safe
+    wxLog *oldlog = wxLog::SetActiveTarget(new wxLogStderr);
+    if ( oldlog )
+        delete oldlog;
+#endif // wxUSE_LOG
+
+    wxApp::CleanUp();
+
+    gdk_threads_leave();
+}
+
+
+int wxEntry( int argc, char *argv[] )
+{
+#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
+    // This seems to be necessary since there are 'rogue'
+    // objects present at this point (perhaps global objects?)
+    // Setting a checkpoint will ignore them as far as the
+    // memory checking facility is concerned.
+    // Of course you may argue that memory allocated in globals should be
+    // checked, but this is a reasonable compromise.
+    wxDebugContext::SetCheckpoint();
+#endif
+    int err = wxEntryStart(argc, argv);
+    if (err)
+        return err;
+
+    if (!wxTheApp)
+    {
+        wxCHECK_MSG( wxApp::GetInitializerFunction(), -1,
+                     wxT("wxWindows error: No initializer - use IMPLEMENT_APP macro.\n") );
+
+        wxAppInitializerFunction app_ini = wxApp::GetInitializerFunction();
+
+        wxObject *test_app = app_ini();
+
+        wxTheApp = (wxApp*) test_app;
+    }
+
+    wxCHECK_MSG( wxTheApp, -1, wxT("wxWindows error: no application object") );
+
+    wxTheApp->argc = argc;
+#if wxUSE_UNICODE
+    wxTheApp->argv = new wxChar*[argc+1];
+    int mb_argc = 0;
+    while (mb_argc < argc)
+    {
+        wxTheApp->argv[mb_argc] = wxStrdup(wxConvLibc.cMB2WX(argv[mb_argc]));
+        mb_argc++;
+    }
+    wxTheApp->argv[mb_argc] = (wxChar *)NULL;
+#else
+    wxTheApp->argv = argv;
+#endif
+
+    if (wxTheApp->argc > 0)
+    {
+        wxFileName fname( wxTheApp->argv[0] );
+        wxTheApp->SetAppName( fname.GetName() );
+    }
+
+    int retValue;
+    retValue = wxEntryInitGui();
+
+    // Here frames insert themselves automatically into wxTopLevelWindows by
+    // getting created in OnInit().
+    if ( retValue == 0 )
+    {
+        if ( !wxTheApp->OnInit() )
+            retValue = -1;
+    }
+
+    if ( retValue == 0 )
+    {
+        // Delete pending toplevel windows
+        wxTheApp->DeletePendingObjects();
+
+        // When is the app not initialized ?
+        wxTheApp->m_initialized = TRUE;
+
+        if (wxTheApp->Initialized())
+        {
+            wxTheApp->OnRun();
+
+            wxWindow *topWindow = wxTheApp->GetTopWindow();
+
+            // Delete all pending windows if any
+            wxTheApp->DeletePendingObjects();
+
+            // Reset top window
+            if (topWindow)
+                wxTheApp->SetTopWindow( (wxWindow*) NULL );
+
+            retValue = wxTheApp->OnExit();
+        }
+    }
+
+    wxEntryCleanup();
+
+    return retValue;
 }
 
 #ifdef __WXDEBUG__

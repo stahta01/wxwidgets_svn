@@ -6,10 +6,10 @@
 // Created:     26/04/97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
   #pragma implementation "sckaddr.h"
 #endif
 
@@ -46,7 +46,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxIPV4address, wxSockAddress)
 #ifdef ENABLE_IPV6
 IMPLEMENT_DYNAMIC_CLASS(wxIPV6address, wxSockAddress)
 #endif
-#if defined(__UNIX__) && !defined(__WINE__) && (!defined(__WXMAC__) || defined(__DARWIN__))
+#if defined(__UNIX__) && (!defined(__WXMAC__) || defined(__DARWIN__))
 IMPLEMENT_DYNAMIC_CLASS(wxUNIXaddress, wxSockAddress)
 #endif
 
@@ -174,23 +174,23 @@ unsigned short wxIPV4address::Service()
   return GAddress_INET_GetPort(m_address);
 }
 
+wxString wxIPV4address::IPAddress() const
+{
+    unsigned long raw =  GAddress_INET_GetHostAddress(m_address);
+    return wxString::Format(
+        _T("%u.%u.%u.%u"),
+        (unsigned char)(raw & 0xff),
+        (unsigned char)((raw>>8) & 0xff),
+        (unsigned char)((raw>>16) & 0xff),
+        (unsigned char)((raw>>24) & 0xff)
+        );
+}
+
 wxSockAddress *wxIPV4address::Clone() const
 {
     wxIPV4address *addr = new wxIPV4address(*this);
     addr->m_origHostname = m_origHostname;
     return addr;
-}
-
-wxString wxIPV4address::IPAddress() const
-{	
-	unsigned long raw =  GAddress_INET_GetHostAddress(m_address);
-	return wxString::Format(
-		_T("%u.%u.%u.%u"),
-		(unsigned char)(raw & 0xff),
-		(unsigned char)((raw>>8) & 0xff),
-		(unsigned char)((raw>>16) & 0xff),
-		(unsigned char)((raw>>24) & 0xff)
-		);
 }
 
 #if 0
@@ -249,7 +249,7 @@ unsigned short wxIPV6address::Service()
 
 #endif // 0
 
-#if defined(__UNIX__) && !defined(__WINE__) && (!defined(__WXMAC__) || defined(__DARWIN__))
+#if defined(__UNIX__) && (!defined(__WXMAC__) || defined(__DARWIN__))
 
 // ---------------------------------------------------------------------------
 // wxUNIXaddress

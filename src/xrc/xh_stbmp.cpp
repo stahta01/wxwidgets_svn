@@ -22,8 +22,6 @@
 #include "wx/xrc/xh_stbmp.h"
 #include "wx/statbmp.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmapXmlHandler, wxXmlResourceHandler)
-
 wxStaticBitmapXmlHandler::wxStaticBitmapXmlHandler() 
 : wxXmlResourceHandler() 
 {

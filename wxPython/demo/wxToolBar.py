@@ -23,8 +23,6 @@ class TestToolBar(wxFrame):
         #               wxTB_HORIZONTAL | wxNO_BORDER | wxTB_FLAT)
         #self.SetToolBar(tb)
 
-        log.write("Default toolbar tool size: %s\n" % tb.GetToolBitmapSize())
-
         self.CreateStatusBar()
 
         tb.AddSimpleTool(10, images.getNewBitmap(), "New", "Long help for 'New'")
@@ -71,8 +69,6 @@ class TestToolBar(wxFrame):
 
     def OnToolClick(self, event):
         self.log.WriteText("tool %s clicked\n" % event.GetId())
-        tb = self.GetToolBar()
-        tb.EnableTool(10, not tb.GetToolEnabled(10))
 
     def OnToolRClick(self, event):
         self.log.WriteText("tool %s right-clicked\n" % event.GetId())

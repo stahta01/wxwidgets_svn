@@ -12,7 +12,7 @@
 #ifndef _WX_BMPBUTTN_H_
 #define _WX_BMPBUTTN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "bmpbuttn.h"
 #endif
 
@@ -47,6 +47,10 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxButtonNameStr);
 
+#if WXWIN_COMPATIBILITY
+    wxBitmap *GetBitmap() const { return (wxBitmap *) & m_bmp; }
+#endif
+
     // Implementation
     virtual void SetDefault();
     virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item);
@@ -55,7 +59,7 @@ public:
     virtual void DrawButtonDisable( WXHDC dc, int left, int top, int right, int bottom, bool with_marg );
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxBitmapButton)
+    DECLARE_DYNAMIC_CLASS(wxBitmapButton)
 };
 
 #endif

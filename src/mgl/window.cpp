@@ -5,7 +5,7 @@
 //              (based on GTK & MSW implementations)
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -16,7 +16,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "window.h"
 #endif
 
@@ -524,6 +524,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
 IMPLEMENT_ABSTRACT_CLASS(wxWindowMGL, wxWindowBase)
 
 BEGIN_EVENT_TABLE(wxWindowMGL, wxWindowBase)
+    EVT_IDLE(wxWindowMGL::OnIdle)
 END_EVENT_TABLE()
 
 // ===========================================================================
@@ -562,7 +563,10 @@ void wxWindowMGL::Init()
 // Destructor
 wxWindowMGL::~wxWindowMGL()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent((wxWindow*)this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
     m_isBeingDeleted = TRUE;
 
@@ -591,7 +595,13 @@ wxWindowMGL::~wxWindowMGL()
     if ( gs_windowUnderMouse == this )
         gs_windowUnderMouse = NULL;
 
+    // VS: destroy children first and _then_ detach *this from its parent.
+    //     If we'd do it the other way around, children wouldn't be able
+    //     find their parent frame (see above).
     DestroyChildren();
+
+    if ( m_parent )
+        m_parent->RemoveChild(this);
 
     if ( m_wnd )
         MGL_wmDestroyWindow(m_wnd);
@@ -849,6 +859,37 @@ void wxWindowMGL::WarpPointer(int x, int y)
     EVT_setMousePos(x, y);
 }
 
+#if WXWIN_COMPATIBILITY
+// If nothing defined for this, try the parent.
+// E.g. we may be a button loaded from a resource, with no callback function
+// defined.
+void wxWindowMGL::OnCommand(wxWindow& win, wxCommandEvent& event)
+{
+    if ( GetEventHandler()->ProcessEvent(event)  )
+        return;
+    if ( m_parent )
+        m_parent->GetEventHandler()->OnCommand(win, event);
+}
+#endif // WXWIN_COMPATIBILITY_2
+
+#if WXWIN_COMPATIBILITY
+wxObject* wxWindowMGL::GetChild(int number) const
+{
+    // Return a pointer to the Nth object in the Panel
+    wxNode *node = GetChildren().First();
+    int n = number;
+    while (node && n--)
+        node = node->Next();
+    if ( node )
+    {
+        wxObject *obj = (wxObject *)node->Data();
+        return(obj);
+    }
+    else
+        return NULL;
+}
+#endif // WXWIN_COMPATIBILITY
+
 // Set this window to be the child of 'parent'.
 bool wxWindowMGL::Reparent(wxWindowBase *parent)
 {
@@ -1066,6 +1107,48 @@ void wxWindowMGL::GetTextExtent(const wxString& string,
     dc.GetTextExtent(string, x, y, descent, externalLeading, (wxFont*)theFont);
 }
 
+#if wxUSE_CARET && WXWIN_COMPATIBILITY
+// ---------------------------------------------------------------------------
+// Caret manipulation
+// ---------------------------------------------------------------------------
+
+void wxWindowMGL::CreateCaret(int w, int h)
+{
+    SetCaret(new wxCaret(this, w, h));
+}
+
+void wxWindowMGL::CreateCaret(const wxBitmap *WXUNUSED(bitmap))
+{
+    wxFAIL_MSG("not implemented");
+}
+
+void wxWindowMGL::ShowCaret(bool show)
+{
+    wxCHECK_RET( m_caret, "no caret to show" );
+
+    m_caret->Show(show);
+}
+
+void wxWindowMGL::DestroyCaret()
+{
+    SetCaret(NULL);
+}
+
+void wxWindowMGL::SetCaretPos(int x, int y)
+{
+    wxCHECK_RET( m_caret, "no caret to move" );
+
+    m_caret->Move(x, y);
+}
+
+void wxWindowMGL::GetCaretPos(int *x, int *y) const
+{
+    wxCHECK_RET( m_caret, "no caret to get position of" );
+
+    m_caret->GetPosition(x, y);
+}
+#endif // wxUSE_CARET
+
 
 // ---------------------------------------------------------------------------
 // painting
@@ -1196,8 +1279,7 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 // idle events processing
 // ---------------------------------------------------------------------------
 
-void wxWindowMGL::OnInternalIdle()
+void wxWindowMGL::OnIdle(wxIdleEvent& WXUNUSED(event))
 {
-    if (wxUpdateUIEvent::CanUpdate(this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 }

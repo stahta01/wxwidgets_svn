@@ -6,7 +6,7 @@
 // Created:     05.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -36,7 +36,6 @@
 
 #include "wx/fontutil.h"
 #include "wx/fontmap.h"
-#include "wx/encinfo.h"
 
 #include "wx/tokenzr.h"
 

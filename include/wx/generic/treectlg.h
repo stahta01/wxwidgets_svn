@@ -6,13 +6,13 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997,1998 Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _GENERIC_TREECTRL_H_
 #define _GENERIC_TREECTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "treectlg.h"
 #endif
 
@@ -207,9 +207,9 @@ public:
 #if WXWIN_COMPATIBILITY_2_2
         // deprecated:  Use GetItemParent instead.
     wxTreeItemId GetParent(const wxTreeItemId& item) const
-        { return GetItemParent( item ); }
+    	{ return GetItemParent( item ); }
 
-        // Expose the base class method hidden by the one above.
+    	// Expose the base class method hidden by the one above.
     wxWindow *GetParent() const { return wxScrolledWindow::GetParent(); }
 #endif  // WXWIN_COMPATIBILITY_2_2
 
@@ -221,11 +221,9 @@ public:
         // the same!
 
         // get the first child of this item
-    wxTreeItemId GetFirstChild(const wxTreeItemId& item,
-                               wxTreeItemIdValue& cookie) const;
+    wxTreeItemId GetFirstChild(const wxTreeItemId& item, long& cookie) const;
         // get the next child
-    wxTreeItemId GetNextChild(const wxTreeItemId& item,
-                              wxTreeItemIdValue& cookie) const;
+    wxTreeItemId GetNextChild(const wxTreeItemId& item, long& cookie) const;
         // get the last child of this item - this method doesn't use cookies
     wxTreeItemId GetLastChild(const wxTreeItemId& item) const;
 
@@ -344,23 +342,13 @@ public:
         // NB: this function is not reentrant and not MT-safe (FIXME)!
     void SortChildren(const wxTreeItemId& item);
 
-#if WXWIN_COMPATIBILITY_2_4
     // deprecated functions: use Set/GetItemImage directly
+        // get the selected item image
     int GetItemSelectedImage(const wxTreeItemId& item) const
         { return GetItemImage(item, wxTreeItemIcon_Selected); }
+        // set the selected item image
     void SetItemSelectedImage(const wxTreeItemId& item, int image)
         { SetItemImage(item, image, wxTreeItemIcon_Selected); }
-
-    // use the versions taking wxTreeItemIdValue cookies (note that
-    // GetNextChild() is not inside wxDEPRECATED on purpose, as otherwise we
-    // get twice as many warnings without any added benefit: it is always used
-    // with GetFirstChild() anyhow)
-    wxDEPRECATED( wxTreeItemId GetFirstChild(const wxTreeItemId& item,
-                                             long& cookie) const );
-    wxTreeItemId GetNextChild(const wxTreeItemId& item,
-                              long& cookie) const;
-#endif // WXWIN_COMPATIBILITY_2_4
-
 
     // implementation only from now on
 
@@ -374,7 +362,7 @@ public:
     void OnKillFocus( wxFocusEvent &event );
     void OnChar( wxKeyEvent &event );
     void OnMouse( wxMouseEvent &event );
-    void OnInternalIdle( );
+    void OnIdle( wxIdleEvent &event );
 
     // implementation helpers
 protected:
@@ -388,9 +376,7 @@ protected:
 
     wxGenericTreeItem   *m_anchor;
     wxGenericTreeItem   *m_current,
-                        *m_key_current,
-                        // A hint to select a parent item after deleting a child
-                        *m_select_me;
+                        *m_key_current;
     unsigned short       m_indent;
     unsigned short       m_spacing;
     int                  m_lineHeight;
@@ -416,6 +402,9 @@ protected:
     wxTreeTextCtrl      *m_textCtrl;
 
     wxTimer             *m_renameTimer;
+
+    wxBitmap            *m_arrowRight,
+                        *m_arrowDown;
 
     // incremental search data
     wxString             m_findPrefix;
@@ -443,7 +432,9 @@ protected:
     // find the first item starting with the given prefix after the given item
     wxTreeItemId FindItem(const wxTreeItemId& id, const wxString& prefix) const;
 
-    bool HasButtons() const { return HasFlag(wxTR_HAS_BUTTONS); }
+    bool HasButtons(void) const
+        { return (m_imageListButtons != NULL)
+              || HasFlag(wxTR_TWIST_BUTTONS|wxTR_HAS_BUTTONS); }
 
     void CalculateLineHeight();
     int  GetLineHeight(wxGenericTreeItem *item) const;
@@ -476,7 +467,6 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxGenericTreeCtrl)
-    DECLARE_NO_COPY_CLASS(wxGenericTreeCtrl)
 };
 
 #if !defined(__WXMSW__) || defined(__WIN16__) || defined(__WXUNIVERSAL__)

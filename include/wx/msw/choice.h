@@ -12,7 +12,7 @@
 #ifndef _WX_CHOICE_H_
 #define _WX_CHOICE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "choice.h"
 #endif
 
@@ -22,6 +22,8 @@
 
 class WXDLLEXPORT wxChoice : public wxChoiceBase
 {
+    DECLARE_DYNAMIC_CLASS(wxChoice)
+
 public:
     // ctors
     wxChoice() { }
@@ -50,7 +52,6 @@ public:
 
     // implement base class pure virtuals
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, int pos);
     virtual void Delete(int n);
     virtual void Clear();
 
@@ -83,8 +84,6 @@ protected:
 
     // free all memory we have (used by Clear() and dtor)
     void Free();
-
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxChoice)
 };
 
 #endif // _WX_CHOICE_H_

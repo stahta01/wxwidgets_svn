@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "fontdlgg.h"
 #endif
 
@@ -204,7 +204,7 @@ int wxGenericFontDialog::ShowModal()
 
     if (ret != wxID_CANCEL)
     {
-      m_fontData.m_chosenFont = dialogFont;
+      m_fontData.chosenFont = dialogFont;
     }
 
     return ret;
@@ -257,7 +257,7 @@ void wxGenericFontDialog::CreateWidgets()
   familyChoice->SetStringSelection( wxFontFamilyIntToString(dialogFont.GetFamily()) );
   styleChoice->SetStringSelection(wxFontStyleIntToString(dialogFont.GetStyle()));
   weightChoice->SetStringSelection(wxFontWeightIntToString(dialogFont.GetWeight()));
-  wxString name(wxTheColourDatabase->FindName(m_fontData.GetColour()));
+  wxString name(wxTheColourDatabase->FindName(m_fontData.fontColour));
   colourChoice->SetStringSelection(name);
 
   underLineCheckBox->SetValue(dialogFont.GetUnderlined());
@@ -310,13 +310,13 @@ void wxGenericFontDialog::InitializeFont()
   int fontSize = 12;
   int fontUnderline = FALSE;
 
-  if (m_fontData.m_initialFont.Ok())
+  if (m_fontData.initialFont.Ok())
   {
-      fontFamily = m_fontData.m_initialFont.GetFamily();
-      fontWeight = m_fontData.m_initialFont.GetWeight();
-      fontStyle = m_fontData.m_initialFont.GetStyle();
-      fontSize = m_fontData.m_initialFont.GetPointSize();
-      fontUnderline = m_fontData.m_initialFont.GetUnderlined();
+      fontFamily = m_fontData.initialFont.GetFamily();
+      fontWeight = m_fontData.initialFont.GetWeight();
+      fontStyle = m_fontData.initialFont.GetStyle();
+      fontSize = m_fontData.initialFont.GetPointSize();
+      fontUnderline = m_fontData.initialFont.GetUnderlined();
   }
 
   dialogFont = wxFont(fontSize, fontFamily, fontStyle, fontWeight, (fontUnderline != 0));
@@ -346,9 +346,9 @@ void wxGenericFontDialog::OnChangeFont(wxCommandEvent& WXUNUSED(event))
     col = wxTheColourDatabase->FindColour(colourChoice->GetStringSelection());
     if (col)
     {
-      m_fontData.m_fontColour = *col;
+      m_fontData.fontColour = *col;
       m_previewer->SetForegroundColour(*col);
-      delete col;
+      delete col; 
     }
   }
   m_previewer->Refresh();

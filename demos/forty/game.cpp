@@ -193,8 +193,8 @@ void Game::DoMove(wxDC& dc, Pile* src, Pile* dest)
 
 		if (frame)
 		{
-			wxNode *node = (wxNode *)frame->GetChildren().GetFirst();
-			if (node) canvas = (wxWindow*)node->GetData();
+			wxNode *node = frame->GetChildren().First();
+			if (node) canvas = (wxWindow*)node->Data();
 		}
 
 		// This game is over

@@ -14,18 +14,18 @@
 
 #include "wx/defs.h"
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "helpctrl.h"
 #endif
 
 #if wxUSE_WXHTML_HELP
 
-#include "wx/helpbase.h"
 #include "wx/html/helpfrm.h"
+#include "wx/helpbase.h"
 
 #define wxID_HTML_HELPFRAME   (wxID_HIGHEST + 1)
 
-class WXDLLIMPEXP_HTML wxHtmlHelpController : public wxHelpControllerBase // wxEvtHandler
+class WXDLLEXPORT wxHtmlHelpController : public wxHelpControllerBase // wxEvtHandler
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlHelpController)
 
@@ -42,8 +42,7 @@ public:
     bool Display(int id);
     bool DisplayContents();
     bool DisplayIndex();
-    bool KeywordSearch(const wxString& keyword,
-                       wxHelpSearchMode mode = wxHELP_SEARCH_ALL);
+    bool KeywordSearch(const wxString& keyword);
 
     wxHtmlHelpFrame* GetFrame() { return m_helpFrame; }
     void UseConfig(wxConfigBase *config, const wxString& rootpath = wxEmptyString);
@@ -100,8 +99,6 @@ protected:
     wxString            m_titleFormat;
     int                 m_FrameStyle;
     // DECLARE_EVENT_TABLE()
-
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpController)
 };
 
 #endif // wxUSE_WXHTML_HELP

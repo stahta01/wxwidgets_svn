@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "slider95.h"
 #endif
 
@@ -33,76 +33,11 @@
 #include "wx/msw/slider95.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxSliderStyle )
-
-wxBEGIN_FLAGS( wxSliderStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-    
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxNO_BORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxNO_FULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxSL_HORIZONTAL)
-    wxFLAGS_MEMBER(wxSL_VERTICAL)
-    wxFLAGS_MEMBER(wxSL_AUTOTICKS)
-    wxFLAGS_MEMBER(wxSL_LABELS)
-    wxFLAGS_MEMBER(wxSL_LEFT)
-    wxFLAGS_MEMBER(wxSL_TOP)
-    wxFLAGS_MEMBER(wxSL_RIGHT)
-    wxFLAGS_MEMBER(wxSL_BOTTOM)
-    wxFLAGS_MEMBER(wxSL_BOTH)
-    wxFLAGS_MEMBER(wxSL_SELRANGE)
-
-wxEND_FLAGS( wxSliderStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxSlider95, wxControl,"wx/scrolbar.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxSlider95)
-    wxEVENT_RANGE_PROPERTY( Scroll , wxEVT_SCROLL_TOP , wxEVT_SCROLL_ENDSCROLL , wxScrollEvent )
-    wxEVENT_PROPERTY( Updated , wxEVT_COMMAND_SLIDER_UPDATED , wxCommandEvent )
-
-    wxPROPERTY( Value , int , SetValue, GetValue , 0, 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( Minimum , int , SetMin, GetMin, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( Maximum , int , SetMax, GetMax, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( PageSize , int , SetPageSize, GetLineSize, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( LineSize , int , SetLineSize, GetLineSize, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-	wxPROPERTY( ThumbLength , int , SetThumbLength, GetThumbLength, 1 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY_FLAGS( WindowStyle , wxSliderStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxSlider95)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_8( wxSlider95 , wxWindow* , Parent , wxWindowID , Id , int , Value , int , Minimum , int , Maximum , wxPoint , Position , wxSize , Size , long , WindowStyle )
-#else
-IMPLEMENT_DYNAMIC_CLASS(wxSlider95, wxControl)
-#endif
+IMPLEMENT_DYNAMIC_CLASS(wxSlider, wxControl)
 
 // Slider
 wxSlider95::wxSlider95()
@@ -121,7 +56,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
            int value, int minValue, int maxValue,
            const wxPoint& pos,
            const wxSize& size, long style,
-           const wxValidator& wxVALIDATOR_PARAM(validator),
+           const wxValidator& validator,
            const wxString& name)
 {
     if ( (style & wxBORDER_MASK) == wxBORDER_DEFAULT )
@@ -137,9 +72,9 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
     SetBackgroundColour(parent->GetBackgroundColour()) ;
     SetForegroundColour(parent->GetForegroundColour()) ;
 
-    m_staticValue = (WXHWND) NULL;;
-    m_staticMin = (WXHWND) NULL;;
-    m_staticMax = (WXHWND) NULL;;
+    m_staticValue = (WXHWND) NULL;
+    m_staticMin = (WXHWND) NULL;
+    m_staticMax = (WXHWND) NULL;
     m_pageSize = 1;
     m_lineSize = 1;
     m_windowStyle = style;
@@ -194,6 +129,9 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;    
 
+    if ( m_windowStyle & wxCLIP_SIBLINGS )
+        msStyle |= WS_CLIPSIBLINGS;
+
     if (m_windowStyle & wxSL_VERTICAL)
         msStyle = TBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP ;
     else
@@ -220,7 +158,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     HWND scroll_bar = CreateWindowEx
         (
-            exStyle, TRACKBAR_CLASS, wxEmptyString,
+            exStyle, TRACKBAR_CLASS, wxT(""),
             msStyle,
             0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)m_windowId,
             wxGetInstance(), NULL
@@ -239,7 +177,7 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
 
     SubclassWin(GetHWND());
 
-    ::SetWindowText((HWND) m_hWnd, wxEmptyString);
+    ::SetWindowText((HWND) m_hWnd, wxT(""));
 
     SetFont(parent->GetFont());
 
@@ -659,13 +597,9 @@ void wxSlider95::SetRange(int minValue, int maxValue)
 WXHBRUSH wxSlider95::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
             WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-#ifndef __WXWINCE__
     if ( nCtlColor == CTLCOLOR_SCROLLBAR )
         return 0;
-#else
-    if ( nCtlColor != CTLCOLOR_STATIC )
-        return 0;
-#endif
+
     // Otherwise, it's a static
     return wxControl::OnCtlColor(pDC, pWnd, nCtlColor, message, wParam, lParam);
 }

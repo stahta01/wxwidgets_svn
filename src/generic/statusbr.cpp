@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "statusbr.h"
 #endif
 
@@ -330,7 +330,7 @@ bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
 void wxStatusBarGeneric::InitColours()
 {
     // Shadow colours
-#if defined(__WIN95__) || defined(__WXMAC__)
+#if defined(__WIN95__)
     wxColour mediumShadowColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW));
     m_mediumShadowPen = wxPen(mediumShadowColour, 1, wxSOLID);
 

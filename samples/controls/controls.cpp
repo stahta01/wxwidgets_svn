@@ -481,8 +481,6 @@ EVT_TEXT      (ID_SPINCTRL,             MyPanel::OnSpinCtrlText)
 #endif // wxUSE_SPINCTRL
 #if wxUSE_TOGGLEBTN
 EVT_TOGGLEBUTTON(ID_BUTTON_LABEL,       MyPanel::OnUpdateLabel)
-#else
-EVT_CHECKBOX(ID_BUTTON_LABEL,       MyPanel::OnUpdateLabel)
 #endif // wxUSE_TOGGLEBTN
 EVT_CHECKBOX  (ID_CHANGE_COLOUR,        MyPanel::OnChangeColour)
 EVT_BUTTON    (ID_BUTTON_TEST1,         MyPanel::OnTestButton)
@@ -553,6 +551,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
                             wxPoint(0, 250), wxSize(100, 50), wxTE_MULTILINE);
     m_text->SetBackgroundColour(wxT("wheat"));
 
+    if ( 0 )
+        wxLog::AddTraceMask(_T("focus"));
     m_logTargetOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_text));
 
     m_notebook = new wxNotebook(this, ID_NOTEBOOK);
@@ -574,11 +574,9 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     };
 
     // fill the image list
-    wxBitmap bmp(list_xpm);
+    wxImageList *imagelist = new wxImageList(32, 32);
 
-    wxImageList *imagelist = new wxImageList(bmp.GetWidth(), bmp.GetHeight());
-
-    imagelist-> Add( bmp );
+    imagelist-> Add( wxBitmap( list_xpm ));
     imagelist-> Add( wxBitmap( choice_xpm ));
     imagelist-> Add( wxBitmap( combo_xpm ));
     imagelist-> Add( wxBitmap( text_xpm ));
@@ -812,7 +810,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     (void)new wxBitmapButton(panel, ID_BITMAP_BTN, bitmap, wxPoint(100, 20));
 
-#if defined(__WXMSW__) || defined(__WXMOTIF__)
+#ifdef __WXMSW__
     // test for masked bitmap display
     bitmap = wxBitmap(_T("test2.bmp"), wxBITMAP_TYPE_BMP);
     if (bitmap.Ok())
@@ -839,9 +837,6 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 #if wxUSE_TOGGLEBTN
     (void)new wxToggleButton(panel, ID_BUTTON_LABEL,
                              _T("&Toggle label"), wxPoint(250, 20));
-#else
-    (void)new wxCheckBox(panel, ID_BUTTON_LABEL,
-                         _T("&Toggle label"), wxPoint(250, 20));
 #endif // wxUSE_TOGGLEBTN
 
     m_label = new wxStaticText(panel, -1, _T("Label with some long text"),
@@ -983,7 +978,7 @@ void MyPanel::OnTestButton(wxCommandEvent& event)
                  event.GetId() == ID_BUTTON_TEST1 ? _T('1') : _T('2'));
 }
 
-void MyPanel::OnBmpButton(wxCommandEvent& WXUNUSED(event))
+void MyPanel::OnBmpButton(wxCommandEvent& event)
 {
     wxLogMessage(_T("Bitmap button clicked."));
 }
@@ -1609,7 +1604,7 @@ void MyFrame::OnClearLog(wxCommandEvent& WXUNUSED(event))
 }
 
 #if wxUSE_TOOLTIPS
-void MyFrame::OnSetTooltipDelay(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnSetTooltipDelay(wxCommandEvent& event)
 {
     static long s_delay = 5000;
 
@@ -1630,7 +1625,7 @@ void MyFrame::OnSetTooltipDelay(wxCommandEvent& WXUNUSED(event))
     wxLogStatus(this, _T("Tooltip delay set to %ld milliseconds"), s_delay);
 }
 
-void MyFrame::OnToggleTooltips(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnToggleTooltips(wxCommandEvent& event)
 {
     static bool s_enabled = TRUE;
 
@@ -1694,7 +1689,7 @@ void MyComboBox::OnChar(wxKeyEvent& event)
 {
     wxLogMessage(_T("MyComboBox::OnChar"));
 
-    if ( event.GetKeyCode() == 'w' )
+    if ( event.KeyCode() == 'w' )
         wxLogMessage(_T("MyComboBox: 'w' will be ignored."));
     else
         event.Skip();
@@ -1704,7 +1699,7 @@ void MyComboBox::OnKeyDown(wxKeyEvent& event)
 {
     wxLogMessage(_T("MyComboBox::OnKeyDown"));
 
-    if ( event.GetKeyCode() == 'w' )
+    if ( event.KeyCode() == 'w' )
         wxLogMessage(_T("MyComboBox: 'w' will be ignored."));
     else
         event.Skip();

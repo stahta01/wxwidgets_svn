@@ -62,8 +62,7 @@ This code was used as a starting point for my rc2xml converter
 
 #include "wx/image.h"
 
-#include "wx/deprecated/setup.h"
-#include "wx/deprecated/resource.h"
+#include "wx/resource.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -139,7 +138,7 @@ ParseDialog(prevtok);
 
 }
 
-
+	
 
 
 
@@ -149,7 +148,7 @@ if (tok=="MENU")
 
 ParseMenu(prevtok);
 
-}
+}	
 
 
 
@@ -161,7 +160,7 @@ prevtok=tok;
 
 fclose(m_wxr);
 
-//fclose(m_rc);
+//fclose(m_rc);  
 
 m_rc.Close();
 
@@ -175,7 +174,7 @@ m_rc.Close();
 
 /*
 
-Example .rc
+Example .rc 
 
 Microsoft style as of v5.0
 
@@ -223,7 +222,7 @@ static int dlgid=999;
 
 dlgid++;
 
-/* Make sure that this really is a dialog
+/* Make sure that this really is a dialog 
 
 microsoft reuses the keyword DIALOG for other things
 
@@ -251,7 +250,7 @@ if (!tok.IsNumber())
 
 //Generate Dialog text
 
-fprintf(m_wxr,"static char *dialog%i = \"dialog(name = '%s',\\\n",dlgid,dlgname.c_str());
+fprintf(m_wxr,"static char *dialog%i = \"dialog(name = '%s',\\\n",dlgid,dlgname);
 
 //be lazy about style for now. add it later
 
@@ -295,7 +294,7 @@ if (tok=="CAPTION")
 
 title=GetQuoteField();
 
-fprintf(m_wxr,"title = '%s',\\\n",title.c_str());
+fprintf(m_wxr,"title = '%s',\\\n",title);
 
 }
 
@@ -329,7 +328,7 @@ BEGIN
 
 
 
-    EDITTEXT        IDC_BANDS,36,83,22,14,ES_AUTOHSCROLL | ES_NUMBER | NOT
+    EDITTEXT        IDC_BANDS,36,83,22,14,ES_AUTOHSCROLL | ES_NUMBER | NOT 
 
                     WS_TABSTOP
 
@@ -413,7 +412,7 @@ int x,y,width,height;
 
 ReadRect(x,y,width,height);
 
-fprintf(m_wxr,"  control = [%i,wxStaticText,'%s','0','%s',",m_controlid,phrase.c_str(),varname.c_str());
+fprintf(m_wxr,"  control = [%i,wxStaticText,'%s','0','%s',",m_controlid,phrase,varname);
 
 fprintf(m_wxr,"%i,%i,%i,%i,'',\\\n",x,y,width,height);
 
@@ -439,7 +438,7 @@ int x,y,width,height;
 
 ReadRect(x,y,width,height);
 
-fprintf(m_wxr,"  control = [%i,wxTextCtrl,'','0','%s',",m_controlid,varname.c_str());
+fprintf(m_wxr,"  control = [%i,wxTextCtrl,'','0','%s',",m_controlid,varname);
 
 fprintf(m_wxr,"%i,%i,%i,%i,'',\\\n",x,y,width,height);
 
@@ -491,7 +490,7 @@ int x,y,width,height;
 
 ReadRect(x,y,width,height);
 
-fprintf(m_wxr,"  control = [%i,wxButton,'%s','0','%s',",c,phrase.c_str(),varname.c_str());
+fprintf(m_wxr,"  control = [%i,wxButton,'%s','0','%s',",c,phrase,varname);
 
 fprintf(m_wxr,"%i,%i,%i,%i,'',\\\n",x,y,width,height);
 
@@ -551,7 +550,7 @@ int x,y,width,height;
 
 ReadRect(x,y,width,height);
 
-fprintf(m_wxr,"  control = [%i,wxStaticBox,'%s','0','%s',",m_controlid,phrase.c_str(),varname.c_str());
+fprintf(m_wxr,"  control = [%i,wxStaticBox,'%s','0','%s',",m_controlid,phrase,varname);
 
 fprintf(m_wxr,"%i,%i,%i,%i,'',\\\n",x,y,width,height);
 
@@ -643,7 +642,7 @@ m_done=TRUE;
 
 }
 
-
+  
 
 
 
@@ -693,7 +692,7 @@ while (ch!=34)
 
   ReadChar(ch);
 
-
+  
 
   ReadChar(ch);
 
@@ -753,7 +752,7 @@ void rc2wxr::ParseComboBox()
 
 {
 
-/* COMBOBOX        IDC_SCALECOMBO,10,110,48,52,CBS_DROPDOWNLIST | CBS_SORT |
+/* COMBOBOX        IDC_SCALECOMBO,10,110,48,52,CBS_DROPDOWNLIST | CBS_SORT | 
 
                     WS_VSCROLL | WS_TABSTOP */
 
@@ -771,7 +770,7 @@ ReadRect(x,y,width,height);
 
 
 
-fprintf(m_wxr,"  control = [%i,wxChoice,'','0','%s',",m_controlid,varname.c_str());
+fprintf(m_wxr,"  control = [%i,wxChoice,'','0','%s',",m_controlid,varname);
 
 fprintf(m_wxr,"%i,%i,%i,%i,[],\\\n",x,y,width,height);
 
@@ -795,7 +794,7 @@ static int menuid=0;
 
 menuid++;
 
-fprintf(m_wxr,"static char *MenuBar%i = \"menu(name = '%s',\\\n",menuid,name.c_str());
+fprintf(m_wxr,"static char *MenuBar%i = \"menu(name = '%s',\\\n",menuid,name);  
 
 fprintf(m_wxr,"menu = \\\n");
 
@@ -857,7 +856,7 @@ spot=tok.First("\\t");
 
 tok=tok.Left(spot);
 
-fprintf(m_wxr,"  ['%s',%i,'',\\\n",tok.c_str(),menuitem);
+fprintf(m_wxr,"  ['%s',%i,'',\\\n",tok,menuitem);
 
 while ((tok!="BEGIN")&(tok!="{"))
 
@@ -893,7 +892,7 @@ tok=tok.Left(spot);
 
 menuitem++;
 
-fprintf(m_wxr,"      ['%s',%i,''],\\\n",tok.c_str(),menuitem);
+fprintf(m_wxr,"      ['%s',%i,''],\\\n",tok,menuitem);
 
 }
 
@@ -905,7 +904,7 @@ fprintf(m_wxr,"      ['%s',%i,''],\\\n",tok.c_str(),menuitem);
 
 
 
-
+    
 
 }
 
@@ -965,7 +964,7 @@ if (kindctrl=="BUTTON")
 
 }
 
-/*    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH |
+/*    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
 
                     TBS_NOTICKS | WS_TABSTOP,52,73,100,15
 
@@ -981,7 +980,7 @@ wxString tok;
 
 while (ReadOrs(tok));
 
-fprintf(m_wxr,"  control = [%i,wxSlider,'','wxSL_HORIZONTAL','%s',",m_controlid,varname.c_str());
+fprintf(m_wxr,"  control = [%i,wxSlider,'','wxSL_HORIZONTAL','%s',",m_controlid,varname);  
 
 int x,y,width,height;
 
@@ -995,7 +994,7 @@ fprintf(m_wxr,"[8, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'MS Sans Serif']],\\\n"
 
 }
 
-/*
+/*    
 
 CONTROL         "Progress1",CG_IDC_PROGDLG_PROGRESS,"msctls_progress32",
 
@@ -1011,7 +1010,7 @@ wxString tok;
 
 while (ReadOrs(tok));
 
-fprintf(m_wxr,"  control = [%i,wxGauge,'','wxGA_HORIZONTAL','%s',",m_controlid,varname.c_str());
+fprintf(m_wxr,"  control = [%i,wxGauge,'','wxGA_HORIZONTAL','%s',",m_controlid,varname);  
 
 int x,y,width,height;
 
@@ -1069,9 +1068,9 @@ if (tok=="BS_AUTOCHECKBOX")
 
 {
 
-    fprintf(m_wxr,"  control = [%i,wxCheckBox,'%s','0','%s',",m_controlid,label.c_str(),varname.c_str());
+    fprintf(m_wxr,"  control = [%i,wxCheckBox,'%s','0','%s',",m_controlid,label,varname);    
 
-    while (ReadOrs(tok));
+    while (ReadOrs(tok));	
 
     ReadRect(x,y,width,height);
 
@@ -1087,9 +1086,9 @@ if (tok=="BS_AUTORADIOBUTTON")
 
 {
 
-    fprintf(m_wxr,"  control = [%i,wxRadioButton,'%s','0','%s',",m_controlid,label.c_str(),varname.c_str());
+    fprintf(m_wxr,"  control = [%i,wxRadioButton,'%s','0','%s',",m_controlid,label,varname);    
 
-    while(ReadOrs(tok));
+    while(ReadOrs(tok));	
 
     ReadRect(x,y,width,height);
 

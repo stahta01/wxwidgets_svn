@@ -4,14 +4,14 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "evtloop.h"
 #endif
 
@@ -97,7 +97,9 @@ void wxEventLoopImpl::Dispatch()
 
 bool wxEventLoopImpl::SendIdleEvent()
 {
-    return wxTheApp->ProcessIdle();
+    wxIdleEvent event;
+
+    return wxTheApp->ProcessEvent(event) && event.MoreRequested();
 }
 
 // ============================================================================

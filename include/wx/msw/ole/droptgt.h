@@ -12,7 +12,7 @@
 #ifndef   _WX_OLEDROPTGT_H
 #define   _WX_OLEDROPTGT_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "droptgt.h"
 #endif
 
@@ -69,8 +69,6 @@ private:
 
     wxIDropTarget *m_pIDropTarget; // the pointer to our COM interface
     IDataObject   *m_pIDataSource; // the pointer to the source data object
-
-    DECLARE_NO_COPY_CLASS(wxDropTarget)
 };
 
 #endif  //_WX_OLEDROPTGT_H

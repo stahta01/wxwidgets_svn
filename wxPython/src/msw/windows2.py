@@ -15,185 +15,6 @@ from controls import *
 
 from events import *
 import wx
-
-# wxNotebook events
-def EVT_NOTEBOOK_PAGE_CHANGED(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, func)
-
-def EVT_NOTEBOOK_PAGE_CHANGING(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, func)
-
-
-#wxListbook events
-def EVT_LISTBOOK_PAGE_CHANGED(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, func)
-
-def EVT_LISTBOOK_PAGE_CHANGING(win, id, func):
-    win.Connect(id, -1, wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, func)
-
-
-def EVT_TASKBAR_MOVE(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_MOVE, func)
-
-def EVT_TASKBAR_LEFT_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DOWN, func)
-
-def EVT_TASKBAR_LEFT_UP(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_UP, func)
-
-def EVT_TASKBAR_RIGHT_DOWN(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DOWN, func)
-
-def EVT_TASKBAR_RIGHT_UP(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_UP, func)
-
-def EVT_TASKBAR_LEFT_DCLICK(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DCLICK, func)
-
-def EVT_TASKBAR_RIGHT_DCLICK(win, func):
-    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DCLICK, func)
-
-class wxBookCtrlPtr(wxControlPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def GetPageCount(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_GetPageCount(self, *_args, **_kwargs)
-        return val
-    def GetPage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_GetPage(self, *_args, **_kwargs)
-        return val
-    def GetSelection(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_GetSelection(self, *_args, **_kwargs)
-        return val
-    def SetPageText(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_SetPageText(self, *_args, **_kwargs)
-        return val
-    def GetPageText(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_GetPageText(self, *_args, **_kwargs)
-        return val
-    def SetImageList(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_SetImageList(self, *_args, **_kwargs)
-        return val
-    def AssignImageList(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_AssignImageList(self, *_args, **_kwargs)
-        _args[0].thisown = 0
-        return val
-    def GetImageList(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_GetImageList(self, *_args, **_kwargs)
-        return val
-    def GetPageImage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_GetPageImage(self, *_args, **_kwargs)
-        return val
-    def SetPageImage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_SetPageImage(self, *_args, **_kwargs)
-        return val
-    def SetPageSize(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_SetPageSize(self, *_args, **_kwargs)
-        return val
-    def CalcSizeFromPage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_CalcSizeFromPage(self, *_args, **_kwargs)
-        if val: val = wxSizePtr(val) ; val.thisown = 1
-        return val
-    def DeletePage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_DeletePage(self, *_args, **_kwargs)
-        return val
-    def RemovePage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_RemovePage(self, *_args, **_kwargs)
-        return val
-    def DeleteAllPages(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_DeleteAllPages(self, *_args, **_kwargs)
-        return val
-    def AddPage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_AddPage(self, *_args, **_kwargs)
-        return val
-    def InsertPage(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_InsertPage(self, *_args, **_kwargs)
-        return val
-    def SetSelection(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_SetSelection(self, *_args, **_kwargs)
-        return val
-    def AdvanceSelection(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrl_AdvanceSelection(self, *_args, **_kwargs)
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxBookCtrl instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxBookCtrl(wxBookCtrlPtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxBookCtrlEventPtr(wxNotifyEventPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def GetSelection(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrlEvent_GetSelection(self, *_args, **_kwargs)
-        return val
-    def SetSelection(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrlEvent_SetSelection(self, *_args, **_kwargs)
-        return val
-    def GetOldSelection(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrlEvent_GetOldSelection(self, *_args, **_kwargs)
-        return val
-    def SetOldSelection(self, *_args, **_kwargs):
-        val = windows2c.wxBookCtrlEvent_SetOldSelection(self, *_args, **_kwargs)
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxBookCtrlEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxBookCtrlEvent(wxBookCtrlEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = windows2c.new_wxBookCtrlEvent(*_args,**_kwargs)
-        self.thisown = 1
-
-
-
-
-class wxNotebookPtr(wxBookCtrlPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def Create(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_Create(self, *_args, **_kwargs)
-        return val
-    def GetRowCount(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_GetRowCount(self, *_args, **_kwargs)
-        return val
-    def SetPadding(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_SetPadding(self, *_args, **_kwargs)
-        return val
-    def SetTabSize(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_SetTabSize(self, *_args, **_kwargs)
-        return val
-    def HitTest(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_HitTest(self, *_args, **_kwargs)
-        return val
-    def CalcSizeFromPage(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_CalcSizeFromPage(self, *_args, **_kwargs)
-        if val: val = wxSizePtr(val) ; val.thisown = 1
-        return val
-    def ApplyThemeBackground(self, *_args, **_kwargs):
-        val = windows2c.wxNotebook_ApplyThemeBackground(self, *_args, **_kwargs)
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxNotebook instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxNotebook(wxNotebookPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = windows2c.new_wxNotebook(*_args,**_kwargs)
-        self.thisown = 1
-        self._setOORInfo(self)
-
-
-
-def wxPreNotebook(*_args,**_kwargs):
-    val = wxNotebookPtr(windows2c.new_wxPreNotebook(*_args,**_kwargs))
-    val.thisown = 1
-    val._setOORInfo(val)
-    return val
-
-
 class wxNotebookEventPtr(wxNotifyEventPtr):
     def __init__(self,this):
         self.this = this
@@ -220,45 +41,92 @@ class wxNotebookEvent(wxNotebookEventPtr):
 
 
 
-class wxListbookPtr(wxBookCtrlPtr):
+class wxNotebookPtr(wxControlPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
     def Create(self, *_args, **_kwargs):
-        val = windows2c.wxListbook_Create(self, *_args, **_kwargs)
+        val = windows2c.wxNotebook_Create(self, *_args, **_kwargs)
         return val
-    def IsVertical(self, *_args, **_kwargs):
-        val = windows2c.wxListbook_IsVertical(self, *_args, **_kwargs)
+    def GetPageCount(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetPageCount(self, *_args, **_kwargs)
+        return val
+    def SetSelection(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_SetSelection(self, *_args, **_kwargs)
+        return val
+    def AdvanceSelection(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_AdvanceSelection(self, *_args, **_kwargs)
+        return val
+    def GetSelection(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetSelection(self, *_args, **_kwargs)
+        return val
+    def SetPageText(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_SetPageText(self, *_args, **_kwargs)
+        return val
+    def GetPageText(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetPageText(self, *_args, **_kwargs)
+        return val
+    def SetImageList(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_SetImageList(self, *_args, **_kwargs)
+        return val
+    def AssignImageList(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_AssignImageList(self, *_args, **_kwargs)
+        _args[0].thisown = 0
+        return val
+    def GetImageList(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetImageList(self, *_args, **_kwargs)
+        return val
+    def GetPageImage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetPageImage(self, *_args, **_kwargs)
+        return val
+    def SetPageImage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_SetPageImage(self, *_args, **_kwargs)
+        return val
+    def GetRowCount(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetRowCount(self, *_args, **_kwargs)
+        return val
+    def SetPageSize(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_SetPageSize(self, *_args, **_kwargs)
+        return val
+    def SetPadding(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_SetPadding(self, *_args, **_kwargs)
+        return val
+    def DeletePage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_DeletePage(self, *_args, **_kwargs)
+        return val
+    def RemovePage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_RemovePage(self, *_args, **_kwargs)
+        return val
+    def DeleteAllPages(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_DeleteAllPages(self, *_args, **_kwargs)
+        return val
+    def AddPage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_AddPage(self, *_args, **_kwargs)
+        return val
+    def InsertPage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_InsertPage(self, *_args, **_kwargs)
+        return val
+    def GetPage(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_GetPage(self, *_args, **_kwargs)
+        return val
+    def ResizeChildren(self, *_args, **_kwargs):
+        val = windows2c.wxNotebook_ResizeChildren(self, *_args, **_kwargs)
         return val
     def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxListbook instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxListbook(wxListbookPtr):
+        return "<%s.%s instance; proxy of C++ wxNotebook instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
+class wxNotebook(wxNotebookPtr):
     def __init__(self,*_args,**_kwargs):
-        self.this = windows2c.new_wxListbook(*_args,**_kwargs)
+        self.this = windows2c.new_wxNotebook(*_args,**_kwargs)
         self.thisown = 1
         self._setOORInfo(self)
 
 
 
-def wxPreListbook(*_args,**_kwargs):
-    val = wxListbookPtr(windows2c.new_wxPreListbook(*_args,**_kwargs))
+def wxPreNotebook(*_args,**_kwargs):
+    val = wxNotebookPtr(windows2c.new_wxPreNotebook(*_args,**_kwargs))
     val.thisown = 1
     val._setOORInfo(val)
     return val
-
-
-class wxListbookEventPtr(wxBookCtrlEventPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxListbookEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxListbookEvent(wxListbookEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = windows2c.new_wxListbookEvent(*_args,**_kwargs)
-        self.thisown = 1
-
-
 
 
 class wxSplitterEventPtr(wxNotifyEventPtr):
@@ -375,20 +243,6 @@ def wxPreSplitterWindow(*_args,**_kwargs):
     val.thisown = 1
     val._setOORInfo(val)
     return val
-
-
-class wxTaskBarIconEventPtr(wxEventPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxTaskBarIconEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxTaskBarIconEvent(wxTaskBarIconEventPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = windows2c.new_wxTaskBarIconEvent(*_args,**_kwargs)
-        self.thisown = 1
-
-
 
 
 class wxTaskBarIconPtr(wxEvtHandlerPtr):
@@ -671,24 +525,6 @@ class wxPyPanel(wxPyPanelPtr):
 
 wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED = windows2c.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED
 wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING = windows2c.wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING
-wxNB_FIXEDWIDTH = windows2c.wxNB_FIXEDWIDTH
-wxNB_TOP = windows2c.wxNB_TOP
-wxNB_LEFT = windows2c.wxNB_LEFT
-wxNB_RIGHT = windows2c.wxNB_RIGHT
-wxNB_BOTTOM = windows2c.wxNB_BOTTOM
-wxNB_MULTILINE = windows2c.wxNB_MULTILINE
-wxNB_HITTEST_NOWHERE = windows2c.wxNB_HITTEST_NOWHERE
-wxNB_HITTEST_ONICON = windows2c.wxNB_HITTEST_ONICON
-wxNB_HITTEST_ONLABEL = windows2c.wxNB_HITTEST_ONLABEL
-wxNB_HITTEST_ONITEM = windows2c.wxNB_HITTEST_ONITEM
-wxLB_DEFAULT = windows2c.wxLB_DEFAULT
-wxLB_TOP = windows2c.wxLB_TOP
-wxLB_BOTTOM = windows2c.wxLB_BOTTOM
-wxLB_LEFT = windows2c.wxLB_LEFT
-wxLB_RIGHT = windows2c.wxLB_RIGHT
-wxLB_ALIGN_MASK = windows2c.wxLB_ALIGN_MASK
-wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED = windows2c.wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED
-wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING = windows2c.wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING
 wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING = windows2c.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING
 wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED = windows2c.wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED
 wxEVT_COMMAND_SPLITTER_UNSPLIT = windows2c.wxEVT_COMMAND_SPLITTER_UNSPLIT
@@ -698,18 +534,6 @@ wxSPLIT_VERTICAL = windows2c.wxSPLIT_VERTICAL
 wxSPLIT_DRAG_NONE = windows2c.wxSPLIT_DRAG_NONE
 wxSPLIT_DRAG_DRAGGING = windows2c.wxSPLIT_DRAG_DRAGGING
 wxSPLIT_DRAG_LEFT_DOWN = windows2c.wxSPLIT_DRAG_LEFT_DOWN
-wxSP_VERTICAL = windows2c.wxSP_VERTICAL
-wxSP_HORIZONTAL = windows2c.wxSP_HORIZONTAL
-wxSP_ARROW_KEYS = windows2c.wxSP_ARROW_KEYS
-wxSP_WRAP = windows2c.wxSP_WRAP
-wxSP_NOBORDER = windows2c.wxSP_NOBORDER
-wxSP_3D = windows2c.wxSP_3D
-wxSP_3DSASH = windows2c.wxSP_3DSASH
-wxSP_3DBORDER = windows2c.wxSP_3DBORDER
-wxSP_FULLSASH = windows2c.wxSP_FULLSASH
-wxSP_BORDER = windows2c.wxSP_BORDER
-wxSP_LIVE_UPDATE = windows2c.wxSP_LIVE_UPDATE
-wxSP_PERMIT_UNSPLIT = windows2c.wxSP_PERMIT_UNSPLIT
 wxEVT_TASKBAR_MOVE = windows2c.wxEVT_TASKBAR_MOVE
 wxEVT_TASKBAR_LEFT_DOWN = windows2c.wxEVT_TASKBAR_LEFT_DOWN
 wxEVT_TASKBAR_LEFT_UP = windows2c.wxEVT_TASKBAR_LEFT_UP

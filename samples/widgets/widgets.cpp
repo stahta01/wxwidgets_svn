@@ -142,7 +142,7 @@ private:
         }
     }
 
-    virtual void DoLogString(const wxChar *szString, time_t WXUNUSED(t))
+    virtual void DoLogString(const wxChar *szString, time_t t)
     {
         wxString msg;
         TimeStamp(&msg);
@@ -164,7 +164,7 @@ private:
 };
 
 // array of pages
-WX_DEFINE_ARRAY_NO_PTR(WidgetsPage *, ArrayWidgetsPage);
+WX_DEFINE_ARRAY(WidgetsPage *, ArrayWidgetsPage);
 
 // ----------------------------------------------------------------------------
 // misc macros
@@ -228,12 +228,7 @@ bool WidgetsApp::OnInit()
 // ----------------------------------------------------------------------------
 
 WidgetsFrame::WidgetsFrame(const wxString& title)
-            : wxFrame(NULL, -1, title,
-                      wxPoint(0, 50), wxDefaultSize,
-                      wxDEFAULT_FRAME_STYLE |
-                      wxNO_FULL_REPAINT_ON_RESIZE |
-                      wxCLIP_CHILDREN |
-                      wxTAB_TRAVERSAL)
+            : wxFrame(NULL, -1, title, wxPoint(0, 50))
 {
     // init everything
     m_lboxLog = (wxListBox *)NULL;
@@ -242,14 +237,14 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
     m_imaglist = (wxImageList *)NULL;
 
     // create controls
-    m_panel = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN);
+    m_panel = new wxPanel(this, -1);
 
     wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
 
     // we have 2 panes: notebook which pages demonstrating the controls in the
     // upper one and the log window with some buttons in the lower
 
-    m_notebook = new wxNotebook(m_panel, -1, wxDefaultPosition, wxDefaultSize, wxNO_FULL_REPAINT_ON_RESIZE|wxCLIP_CHILDREN);
+    m_notebook = new wxNotebook(m_panel, -1);
     InitNotebook();
     wxSizer *sizerUp = new wxNotebookSizer(m_notebook);
 
@@ -338,7 +333,7 @@ void WidgetsFrame::OnButtonQuit(wxCommandEvent& WXUNUSED(event))
     Close();
 }
 
-void WidgetsFrame::OnButtonClearLog(wxCommandEvent& WXUNUSED(event))
+void WidgetsFrame::OnButtonClearLog(wxCommandEvent& event)
 {
     m_lboxLog->Clear();
 }
@@ -363,11 +358,7 @@ WidgetsPageInfo::WidgetsPageInfo(Constructor ctor, const wxChar *label)
 // ----------------------------------------------------------------------------
 
 WidgetsPage::WidgetsPage(wxNotebook *notebook)
-           : wxPanel(notebook, -1,
-                     wxDefaultPosition, wxDefaultSize,
-                     wxNO_FULL_REPAINT_ON_RESIZE |
-                     wxCLIP_CHILDREN |
-                     wxTAB_TRAVERSAL)
+           : wxPanel(notebook, -1)
 {
 }
 

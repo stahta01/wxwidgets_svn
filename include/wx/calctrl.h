@@ -6,7 +6,7 @@
 // Created:     29.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -24,8 +24,6 @@
 #if wxUSE_CALENDARCTRL
 
 #include "wx/datetime.h"
-#include "wx/colour.h"
-#include "wx/font.h"
 
 // ----------------------------------------------------------------------------
 // wxCalendarCtrl flags
@@ -83,7 +81,7 @@ enum wxCalendarDateBorder
 // wxCalendarDateAttr: custom attributes for a calendar date
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxCalendarDateAttr
+class WXDLLEXPORT wxCalendarDateAttr
 {
 #if !defined(__VISAGECPP__)
 protected:
@@ -159,9 +157,9 @@ private:
 // wxCalendarCtrl events
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxCalendarCtrl;
+class WXDLLEXPORT wxCalendarCtrl;
 
-class WXDLLIMPEXP_ADV wxCalendarEvent : public wxCommandEvent
+class WXDLLEXPORT wxCalendarEvent : public wxCommandEvent
 {
 friend class wxCalendarCtrl;
 public:
@@ -178,7 +176,7 @@ private:
     wxDateTime m_date;
     wxDateTime::WeekDay m_wday;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxCalendarEvent)
+    DECLARE_DYNAMIC_CLASS(wxCalendarEvent)
 };
 
 // ----------------------------------------------------------------------------
@@ -193,12 +191,12 @@ private:
 // ----------------------------------------------------------------------------
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_CALENDAR_SEL_CHANGED, 950)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_CALENDAR_DAY_CHANGED, 951)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_CALENDAR_MONTH_CHANGED, 952)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_CALENDAR_YEAR_CHANGED, 953)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_CALENDAR_DOUBLECLICKED, 954)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_CALENDAR_WEEKDAY_CLICKED, 955)
+    DECLARE_EVENT_TYPE(wxEVT_CALENDAR_SEL_CHANGED, 950)
+    DECLARE_EVENT_TYPE(wxEVT_CALENDAR_DAY_CHANGED, 951)
+    DECLARE_EVENT_TYPE(wxEVT_CALENDAR_MONTH_CHANGED, 952)
+    DECLARE_EVENT_TYPE(wxEVT_CALENDAR_YEAR_CHANGED, 953)
+    DECLARE_EVENT_TYPE(wxEVT_CALENDAR_DOUBLECLICKED, 954)
+    DECLARE_EVENT_TYPE(wxEVT_CALENDAR_WEEKDAY_CLICKED, 955)
 END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxCalendarEventFunction)(wxCalendarEvent&);

@@ -16,12 +16,13 @@
 #pragma interface "drawn.h"
 #endif
 
+#include <wx/ogl/basic.h>
 
 #define oglMETAFLAGS_OUTLINE         1
 #define oglMETAFLAGS_ATTACHMENTS     2
 
-class WXDLLIMPEXP_OGL wxDrawnShape;
-class WXDLLIMPEXP_OGL wxPseudoMetaFile: public wxObject
+class wxDrawnShape;
+class wxPseudoMetaFile: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxPseudoMetaFile)
  public:
@@ -73,7 +74,7 @@ class WXDLLIMPEXP_OGL wxPseudoMetaFile: public wxObject
   inline wxList& GetOps() const { return (wxList&) m_ops; }
 
   // Is this a valid (non-empty) metafile?
-  inline bool IsValid() const { return (m_ops.GetCount() > 0); }
+  inline bool IsValid() const { return (m_ops.Number() > 0); }
 
 public:
   /// Set of functions for drawing into a pseudo metafile.
@@ -129,7 +130,7 @@ public:
 #define oglDRAWN_ANGLE_180      2
 #define oglDRAWN_ANGLE_270      3
 
-class WXDLLIMPEXP_OGL wxDrawnShape: public wxRectangleShape
+class wxDrawnShape: public wxRectangleShape
 {
  DECLARE_DYNAMIC_CLASS(wxDrawnShape)
  public:

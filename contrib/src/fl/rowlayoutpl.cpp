@@ -120,12 +120,8 @@ void cbRowLayoutPlugin::ExpandNotFixedBars( cbRowInfo* pRow )
 {
     ApplyLengthRatios( pRow );
 
-    #if 1
-
    // FIXME:: something's wrong?
    return;
-
-    #else
 
     double freeSpc = (double)GetRowFreeSpace( pRow );
 
@@ -160,18 +156,14 @@ void cbRowLayoutPlugin::ExpandNotFixedBars( cbRowInfo* pRow )
         bar.mBounds.x = curX;
         curX = bar.mBounds.x + bar.mBounds.width;
     }
-    #endif
 }
 
-void cbRowLayoutPlugin::AdjustLengthOfInserted( cbRowInfo* WXUNUSED(pRow), cbBarInfo* WXUNUSED(pTheBar) )
+void cbRowLayoutPlugin::AdjustLengthOfInserted( cbRowInfo* pRow, cbBarInfo* pTheBar )
 {
-    return;
-
-#if 0
-
-    // TBD: Makes following code unreachable
+    return;  // TBD: Makes following code unreachable
 
     // pTheBar is not-fixed
+
 
     // FIXME:: what is this for??
 
@@ -211,9 +203,6 @@ void cbRowLayoutPlugin::AdjustLengthOfInserted( cbRowInfo* WXUNUSED(pRow), cbBar
 
         pTheBar->mBounds.width = freeSpc * (1.0 - pcntSum);
 #endif
-
-#endif
-
 }
 
 void cbRowLayoutPlugin::FitBarsToRange( int from, int till,
@@ -444,9 +433,6 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
     // look like total of mLetRatio's is 1.0, thus original
     // len. ratios are _preserved_:
 
-    if (pcntSum == 0.0)
-        pcntSum = 1.0;
-
     double unit = freeSpc / pcntSum;
 
     bool haveSquished = FALSE;
@@ -469,6 +455,9 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
             }
         }
     }  // for
+
+    if (pcntSum == 0.0)
+        pcntSum = 1.0;
 
     if ( haveSquished )
         unit = freeSpc / pcntSum;
@@ -678,7 +667,7 @@ void cbRowLayoutPlugin::SlideRightSideBars( cbBarInfo* pTheBar )
     }
 }
 
-void cbRowLayoutPlugin::ShiftLeftTrashold( cbBarInfo* WXUNUSED(pTheBar), cbRowInfo& row )
+void cbRowLayoutPlugin::ShiftLeftTrashold( cbBarInfo* pTheBar, cbRowInfo& row )
 {
     wxRect& first = row.mBars[0]->mBounds;
 

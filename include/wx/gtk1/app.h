@@ -10,7 +10,7 @@
 #ifndef __GTKAPPH__
 #define __GTKAPPH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -45,17 +45,20 @@ public:
     virtual void ExitMainLoop();
     virtual bool Initialized();
     virtual bool Pending();
-    virtual bool Dispatch();
-
-    virtual void Exit();
-
+    virtual void Dispatch();
     virtual bool Yield(bool onlyIfNeeded = FALSE);
-    virtual void WakeUpIdle();
+    virtual bool ProcessIdle();
 
-    virtual bool Initialize(int& argc, wxChar **argv);
-    virtual void CleanUp();
+    // implementation only from now on
+    void OnIdle( wxIdleEvent &event );
+    bool SendIdleEvents();
+    bool SendIdleEvents( wxWindow* win );
 
+    static bool Initialize();
     static bool InitialzeVisual();
+    static void CleanUp();
+
+    void DeletePendingObjects();
 
 #ifdef __WXDEBUG__
     virtual void OnAssert(const wxChar *file, int line, const wxChar *cond, const wxChar *msg);
@@ -84,8 +87,12 @@ private:
     bool m_isInAssert;
 #endif // __WXDEBUG__
 
+    bool CallInternalIdle( wxWindow* win );
+
     DECLARE_DYNAMIC_CLASS(wxApp)
     DECLARE_EVENT_TABLE()
 };
+
+int WXDLLEXPORT wxEntry( int argc, char *argv[] );
 
 #endif // __GTKAPPH__

@@ -4,7 +4,7 @@ This class is used for a variety of menu-related events. Note that
 these do not include menu command events, which are
 handled using \helpref{wxCommandEvent}{wxcommandevent} objects.
 
-The default handler for wxEVT\_MENU\_HIGHLIGHT displays help
+The handler \helpref{wxFrame::OnMenuHighlight}{wxframeonmenuhighlight} displays help
 text in the first field of the status bar.
 
 \wxheading{Derived from}
@@ -63,8 +63,8 @@ only used with the {\tt HIGHLIGHT} events.
 
 \constfunc{bool}{IsPopup}{\void}
 
-Returns {\tt true} if the menu which is being opened or closed is a popup menu, 
-{\tt false} if it is a normal one.
+Returns {\tt TRUE} if the menu which is being opened or closed is a popup menu, 
+{\tt FALSE} if it is a normal one.
 
 This method should be only used with the {\tt OPEN} and {\tt CLOSE} events.
 

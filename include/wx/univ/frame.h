@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_FRAME_H_
 #define _WX_UNIV_FRAME_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univframe.h"
 #endif
 
@@ -55,7 +55,7 @@ public:
 
 #if wxUSE_TOOLBAR
     // create main toolbar bycalling OnCreateToolBar()
-    virtual wxToolBar* CreateToolBar(long style = -1,
+    virtual wxToolBar* CreateToolBar(long style = wxNO_BORDER|wxTB_HORIZONTAL,
                                      wxWindowID id = -1,
                                      const wxString& name = wxToolBarNameStr);
     virtual void PositionToolBar();

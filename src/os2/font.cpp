@@ -35,7 +35,6 @@
 
 #include "wx/fontutil.h"
 #include "wx/fontmap.h"
-#include "wx/encinfo.h"
 
 #include "wx/tokenzr.h"
 
@@ -1074,7 +1073,7 @@ void wxFont::SetEncoding(
     RealizeResource();
 } // end of wxFont::SetEncoding
 
-void wxFont::DoSetNativeFontInfo(
+void wxFont::SetNativeFontInfo(
   const wxNativeFontInfo&           rInfo
 )
 {

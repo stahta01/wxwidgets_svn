@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:      msw/region.cpp
 // Purpose:   wxRegion implementation using Win32 API
-// Author:    Vadim Zeitlin
+// Author:    Markus Holzem, Vadim Zeitlin
 // Modified by:
 // Created:   Fri Oct 24 10:46:34 MET 1997
 // RCS-ID:    $Id$
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "region.h"
 #endif
 
@@ -50,7 +50,7 @@ public:
 
     wxRegionRefData(const wxRegionRefData& data)
     {
-#if defined(__WIN32__) && !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#if defined(__WIN32__) && !defined(__WXMICROWIN__)
         DWORD noBytes = ::GetRegionData(data.m_region, 0, NULL);
         RGNDATA *rgnData = (RGNDATA*) new char[noBytes];
         ::GetRegionData(data.m_region, noBytes, rgnData);
@@ -70,14 +70,6 @@ public:
     }
 
     HRGN m_region;
-
-private:
-// Cannot use
-//  DECLARE_NO_COPY_CLASS(wxRegionRefData)
-// because copy constructor is explicitly declared above;
-// but no copy assignment operator is defined, so declare
-// it private to prevent the compiler from defining it:
-    wxRegionRefData& operator=(const wxRegionRefData&);
 };
 
 #define M_REGION (((wxRegionRefData*)m_refData)->m_region)
@@ -122,7 +114,7 @@ wxRegion::wxRegion(const wxRect& rect)
 
 wxRegion::wxRegion(size_t n, const wxPoint *points, int fillStyle)
 {
-#if defined(__WXMICROWIN__) || defined(__WXWINCE__)
+#ifdef __WXMICROWIN__
     m_refData = NULL;
     M_REGION = NULL;
 #else

@@ -6,7 +6,7 @@
 // Created:     07.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_RADIOBUT_H_BASE_
@@ -16,7 +16,7 @@
 
 /*
    There is no wxRadioButtonBase class as wxRadioButton interface is the same
-   as wxCheckBox(Base), but under some platforms wxRadioButton really
+   as of wxCheckBox(Base), but under some platforms wxRadioButton really
    derives from wxCheckBox and on the others it doesn't.
 
    The pseudo-declaration of wxRadioButtonBase would look like this:
@@ -43,10 +43,10 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxRadioButtonNameStr;
     #include "wx/gtk/radiobut.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/radiobut.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/radiobut.h"
 #elif defined(__WXPM__)
     #include "wx/os2/radiobut.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/radiobut.h"
 #endif
 
 #endif // wxUSE_RADIOBTN

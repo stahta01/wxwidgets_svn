@@ -12,7 +12,7 @@
 #ifndef _WX_GAUGE_H_BASE_
 #define _WX_GAUGE_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "gaugebase.h"
 #endif
 
@@ -31,7 +31,6 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxGaugeNameStr;
 class WXDLLEXPORT wxGaugeBase : public wxControl
 {
 public:
-    wxGaugeBase() { }
     virtual ~wxGaugeBase();
 
     bool Create(wxWindow *parent,
@@ -68,8 +67,6 @@ protected:
 
     // the current position
     int m_gaugePos;
-
-    DECLARE_NO_COPY_CLASS(wxGaugeBase)
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -80,7 +77,9 @@ protected:
         #define wxGauge wxGauge95
         #define sm_classwxGauge sm_classwxGauge95
     #else // !__WIN95__
-        // Gauge no longer supported on 16-bit Windows
+        #include "wx/msw/gaugemsw.h"
+        #define wxGauge wxGaugeMSW
+        #define sm_classwxGauge sm_classwxGaugeMSW
     #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/gauge.h"
@@ -88,10 +87,10 @@ protected:
     #include "wx/gtk/gauge.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/gauge.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/gauge.h"
 #elif defined(__WXPM__)
     #include "wx/os2/gauge.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/gauge.h"
 #endif
 
 #endif // wxUSE_GAUGE

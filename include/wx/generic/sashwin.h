@@ -8,13 +8,13 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SASHWIN_H_G_
 #define _WX_SASHWIN_H_G_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "sashwin.h"
 #endif
 
@@ -40,7 +40,7 @@ enum wxSashEdgePosition {
  * wxSashEdge represents one of the four edges of a window.
  */
 
-class WXDLLIMPEXP_ADV wxSashEdge
+class WXDLLEXPORT wxSashEdge
 {
 public:
     wxSashEdge() { m_show = FALSE; m_border = FALSE; m_margin = 0; }
@@ -67,7 +67,7 @@ public:
  * of wxSashWindow.
  */
 
-class WXDLLIMPEXP_ADV wxSashWindow: public wxWindow
+class WXDLLEXPORT wxSashWindow: public wxWindow
 {
 public:
     // Default constructor
@@ -138,7 +138,7 @@ public:
     // Adjusts the panes
     void OnSize(wxSizeEvent& event);
 
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
     // Handle cursor correctly
     void OnSetCursor(wxSetCursorEvent& event);
 #endif // wxMSW
@@ -193,12 +193,10 @@ private:
 private:
     DECLARE_DYNAMIC_CLASS(wxSashWindow)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSashWindow)
 };
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,
-                                wxEVT_SASH_DRAGGED, wxEVT_FIRST + 1200)
+    DECLARE_EVENT_TYPE(wxEVT_SASH_DRAGGED, wxEVT_FIRST + 1200)
 END_DECLARE_EVENT_TYPES()
 
 // #define wxEVT_SASH_DRAGGED (wxEVT_FIRST + 1200)
@@ -209,7 +207,7 @@ enum wxSashDragStatus
     wxSASH_STATUS_OUT_OF_RANGE
 };
 
-class WXDLLIMPEXP_ADV wxSashEvent: public wxCommandEvent
+class WXDLLEXPORT wxSashEvent: public wxCommandEvent
 {
 public:
     inline wxSashEvent(int id = 0, wxSashEdgePosition edge = wxSASH_NONE) {
@@ -233,7 +231,7 @@ private:
     wxSashDragStatus    m_dragStatus;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxSashEvent)
+    DECLARE_DYNAMIC_CLASS(wxSashEvent)
 };
 
 typedef void (wxEvtHandler::*wxSashEventFunction)(wxSashEvent&);

@@ -90,7 +90,7 @@ license is as follows:
  * in this Software without prior written authorization from GROUPE BULL.
  */
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "xpmdecod.h"
 #endif
 
@@ -758,12 +758,6 @@ wxImage wxXPMDecoder::ReadData(const char **xpm_data)
             if ( entry == end )
             {
                 wxLogError(_("XPM: Malformed pixel data!"));
-
-                // better return right now as otherwise we risk to flood the
-                // user with error messages as something seems to be seriously
-                // wrong with the file and so we could give this message for
-                // each remaining pixel if we don't bail out
-                return wxNullImage;
             }
             else
             {

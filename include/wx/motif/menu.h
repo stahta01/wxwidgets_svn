@@ -12,13 +12,12 @@
 #ifndef _WX_MOTIF_MENU_H_
 #define _WX_MOTIF_MENU_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "menu.h"
 #endif
 
 #include "wx/colour.h"
 #include "wx/font.h"
-#include "wx/arrstr.h"
 
 class wxFrame;
 
@@ -47,6 +46,14 @@ public:
     virtual void SetTitle(const wxString& title);
     
     bool ProcessCommand(wxCommandEvent& event);
+    
+    wxMenu(const wxString& title, const wxFunction func)
+        : wxMenuBase(title)
+    {
+        Init();
+        
+        Callback(func);
+    }
     
     //// Motif-specific
     WXWidget GetButtonWidget() const { return m_buttonWidget; }
@@ -86,8 +93,7 @@ public:
     WXWidget GetHandle() const { return m_menuWidget; }
     
     bool IsTearOff() const { return (m_style & wxMENU_TEAROFF) != 0; }
-
-    void DestroyWidgetAndDetach();
+    
 public:
     // Motif-specific data
     int               m_numColumns;

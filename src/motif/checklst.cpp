@@ -13,14 +13,13 @@
 // headers & declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "checklst.h"
 #endif
 
 #include "wx/defs.h"
 
 #include "wx/checklst.h"
-#include "wx/arrstr.h"
 
 // ============================================================================
 // implementation

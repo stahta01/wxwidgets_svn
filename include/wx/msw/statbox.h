@@ -12,7 +12,7 @@
 #ifndef _WX_STATBOX_H_
 #define _WX_STATBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "statbox.h"
 #endif
 
@@ -51,7 +51,7 @@ protected:
     virtual wxSize DoGetBestSize() const;
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxStaticBox)
+    DECLARE_DYNAMIC_CLASS(wxStaticBox)
 };
 
 #endif

@@ -7,24 +7,22 @@
 // Created:     04.01.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CMDLINE_H_
 #define _WX_CMDLINE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "cmdline.h"
 #endif
 
 #include "wx/defs.h"
+#include "wx/string.h"
 
 #if wxUSE_CMDLINE_PARSER
 
-#include "wx/string.h"
-#include "wx/arrstr.h"
-
-class WXDLLIMPEXP_BASE wxDateTime;
+class WXDLLEXPORT wxDateTime;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -93,7 +91,7 @@ struct wxCmdLineEntryDesc
 // 4. use GetXXX() to retrieve the parsed info
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxCmdLineParser
+class WXDLLEXPORT wxCmdLineParser
 {
 public:
     // ctors and initializers
@@ -187,11 +185,9 @@ public:
     // the value in the provided pointer
     bool Found(const wxString& name, long *value) const;
 
-#if wxUSE_DATETIME
     // returns TRUE if an option taking a date value was found and stores the
     // value in the provided pointer
     bool Found(const wxString& name, wxDateTime *value) const;
-#endif // wxUSE_DATETIME
 
     // gets the number of parameters found
     size_t GetParamCount() const;
@@ -213,15 +209,13 @@ private:
     void Init();
 
     struct wxCmdLineParserData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxCmdLineParser)
 };
 
 #else // !wxUSE_CMDLINE_PARSER
 
 // this function is always available (even if !wxUSE_CMDLINE_PARSER) because it
 // is used by wxWin itself under Windows
-class WXDLLIMPEXP_BASE wxCmdLineParser
+class WXDLLEXPORT wxCmdLineParser
 {
 public:
     static wxArrayString ConvertStringToArgs(const wxChar *cmdline);

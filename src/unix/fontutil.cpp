@@ -6,7 +6,7 @@
 // Created:     05.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "fontutil.h"
 #endif
 
@@ -29,7 +29,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/encinfo.h"
 #endif // PCH
 
 #include "wx/fontutil.h"
@@ -133,12 +132,14 @@ wxFontEncoding wxNativeFontInfo::GetEncoding() const
     return wxFONTENCODING_SYSTEM;
 }
 
-bool wxNativeFontInfo::FromString(const wxString& s)
+bool wxNativeFontInfo::FromString( const wxString& str )
 {
     if (description)
         pango_font_description_free( description );
 
-    description = pango_font_description_from_string( wxGTK_CONV( s ) );
+    description = pango_font_description_from_string( wxGTK_CONV( str ) );
+    
+    // wxPrintf( L"FromString result: %s\n", ToString().c_str() );
 
     return TRUE;
 }
@@ -152,9 +153,9 @@ wxString wxNativeFontInfo::ToString() const
     return tmp;
 }
 
-bool wxNativeFontInfo::FromUserString(const wxString& s)
+bool wxNativeFontInfo::FromUserString( const wxString& str )
 {
-    return FromString( s );
+    return FromString( str );
 }
 
 wxString wxNativeFontInfo::ToUserString() const
@@ -236,13 +237,7 @@ static wxHashTable *g_fontHash = (wxHashTable*) NULL;
 #elif defined(__WXGTK__)
     wxNativeFont wxLoadFont(const wxString& fontSpec)
     {
-        // VZ: we should use gdk_fontset_load() instead of gdk_font_load()
-        //     here to be able to display Japanese fonts correctly (at least
-        //     this is what people report) but unfortunately doing it results
-        //     in tons of warnings when using GTK with "normal" European
-        //     languages and so we can't always do it and I don't know enough
-        //     to determine when should this be done... (FIXME)
-        return gdk_font_load( wxConvertWX2MB(fontSpec) );
+       return gdk_font_load( wxConvertWX2MB(fontSpec) );
     }
 
     inline void wxFreeFont(wxNativeFont font)
@@ -381,6 +376,9 @@ bool wxNativeFontInfo::FromXFontName(const wxString& fontname)
     // TODO: we should be able to handle the font aliases here, but how?
     wxStringTokenizer tokenizer(fontname, _T("-"));
 
+    // we're not initialized yet.
+    m_isDefault = TRUE;
+
     // skip the leading, usually empty field (font name registry)
     if ( !tokenizer.HasMoreTokens() )
         return FALSE;
@@ -394,10 +392,9 @@ bool wxNativeFontInfo::FromXFontName(const wxString& fontname)
             // not enough elements in the XLFD - or maybe an alias
             return FALSE;
         }
-
+        
         wxString field = tokenizer.GetNextToken();
-        if ( !field.empty() && field != _T('*') )
-        {
+        if (!field.empty() && field != _T('*')) {
             // we're really initialized now
             m_isDefault = FALSE;
         }
@@ -408,7 +405,7 @@ bool wxNativeFontInfo::FromXFontName(const wxString& fontname)
     // this should be all
     if ( tokenizer.HasMoreTokens() )
         return FALSE;
-
+ 
     return TRUE;
 }
 

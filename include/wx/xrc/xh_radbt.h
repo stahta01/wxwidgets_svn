@@ -20,9 +20,8 @@
 
 #if wxUSE_RADIOBOX
 
-class WXDLLIMPEXP_XRC wxRadioButtonXmlHandler : public wxXmlResourceHandler
+class WXXMLDLLEXPORT wxRadioButtonXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxRadioButtonXmlHandler)
 public:
     wxRadioButtonXmlHandler();
     virtual wxObject *DoCreateResource();

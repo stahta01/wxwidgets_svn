@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "memory.h"
 #endif
 
@@ -26,7 +26,7 @@
 
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 // #pragma implementation
 #endif
 
@@ -54,7 +54,7 @@
 #include <string.h>
 
 #ifdef __WXMSW__
-#include "wx/msw/wrapwin.h"
+#include <windows.h>
 
 #ifdef GetClassInfo
 #undef GetClassInfo
@@ -768,14 +768,14 @@ bool wxDebugContext::PrintClasses(void)
   }
 
   int n = 0;
-  wxHashTable::compatibility_iterator node;
+  wxNode *node;
   wxClassInfo *info;
 
   wxClassInfo::sm_classTable->BeginFind();
   node = wxClassInfo::sm_classTable->Next();
   while (node)
   {
-    info = (wxClassInfo *)node->GetData();
+    info = (wxClassInfo *)node->Data();
     if (info->GetClassName())
     {
         wxString msg(info->GetClassName());
@@ -1076,8 +1076,6 @@ void wxTraceLevel(int, const wxChar * ...)
 }
 
 #else // wxUSE_MEMORY_TRACING && defined(__WXDEBUG__)
-// Already defined in memory.h
-#if 0
 void wxTrace(const char *WXUNUSED(fmt) ...)
 {
 }
@@ -1085,6 +1083,5 @@ void wxTrace(const char *WXUNUSED(fmt) ...)
 void wxTraceLevel(int WXUNUSED(level), const char *WXUNUSED(fmt) ...)
 {
 }
-#endif
 #endif
 
