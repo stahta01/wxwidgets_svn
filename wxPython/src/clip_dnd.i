@@ -418,16 +418,12 @@ public:
     void UsePrimarySelection( int primary = FALSE );
 };
 
-
+%{
+    // See below in the init function...
+    wxClipboard* wxPyTheClipboard;
+%}
 %readonly
-%{
-#if 0
-%}
-// See also wxPy_ReinitStockObjects in helpers.cpp
-extern wxClipboard* wxTheClipboard;
-%{
-#endif
-%}
+%name(wxTheClipboard) wxClipboard* wxPyTheClipboard;
 %readwrite
 
 //----------------------------------------------------------------------
@@ -458,7 +454,7 @@ bool wxIsDragResultOk(wxDragResult res);
 %{
 class wxPyDropSource : public wxDropSource {
 public:
-#ifndef __WXGTK__
+#ifdef __WXMSW__
      wxPyDropSource(wxWindow *win = NULL,
                     const wxCursor &copy = wxNullCursor,
                     const wxCursor &move = wxNullCursor,
@@ -484,7 +480,7 @@ IMP_PYCALLBACK_BOOL_DR(wxPyDropSource, wxDropSource, GiveFeedback);
 
 %name(wxDropSource) class wxPyDropSource {
 public:
-#ifndef __WXGTK__
+#ifdef __WXMSW__
      wxPyDropSource(wxWindow *win = NULL,
                     const wxCursor &copy = wxNullCursor,
                     const wxCursor &move = wxNullCursor,
@@ -678,6 +674,7 @@ public:
 
 %init %{
 
+    wxPyTheClipboard = wxTheClipboard;
     wxPyPtrTypeMap_Add("wxDropSource", "wxPyDropSource");
     wxPyPtrTypeMap_Add("wxTextDropTarget", "wxPyTextDropTarget");
     wxPyPtrTypeMap_Add("wxFileDropTarget", "wxPyFileDropTarget");

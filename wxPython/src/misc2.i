@@ -17,6 +17,7 @@
 %{
 #include "helpers.h"
 #include "pyistream.h"
+#include <wx/resource.h>
 #include <wx/tooltip.h>
 #include <wx/caret.h>
 #include <wx/tipdlg.h>
@@ -33,7 +34,7 @@
 #include <wx/mimetype.h>
 #include <wx/snglinst.h>
 #include <wx/effects.h>
-#include <wx/sysopt.h>
+//#include <wx/spawnbrowser.h>
 %}
 
 //----------------------------------------------------------------------
@@ -72,9 +73,6 @@ wxString wxFileSelector(const wxString& message = wxPyFileSelectorPromptStr,
                         int flags = 0,
                         wxWindow *parent = NULL,
                         int x = -1, int y = -1);
-
-// TODO: wxFileSelectorEx
-
 
 // Ask for filename to load
 wxString wxLoadFileSelector(const wxString& what,
@@ -175,7 +173,7 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt);
 
 #ifdef __WXMSW__
 bool wxCheckForInterrupt(wxWindow *wnd);
-// link error? void wxFlushEvents();
+void wxFlushEvents();
 #endif
 
 wxWindow* wxGetTopLevelParent(wxWindow *win);
@@ -343,23 +341,6 @@ public:
 
 };
 
-
-
-class wxSystemOptions : public wxObject
-{
-public:
-    wxSystemOptions() { }
-
-    // User-customizable hints to wxWindows or associated libraries
-    // These could also be used to influence GetSystem... calls, indeed
-    // to implement SetSystemColour/Font/Metric
-
-    static void SetOption(const wxString& name, const wxString& value);
-    %name(SetOptionInt)static void SetOption(const wxString& name, int value);
-    static wxString GetOption(const wxString& name) ;
-    static int GetOptionInt(const wxString& name) ;
-    static bool HasOption(const wxString& name) ;
-};
 
 
 //---------------------------------------------------------------------------
@@ -628,6 +609,8 @@ public:
     static void OnLog(unsigned long level, const wxString& szString, int t=0);
 
     virtual void Flush();
+    bool HasPendingMessages() const;
+
     static void FlushActive();
     static wxLog *GetActiveTarget();
     static wxLog *SetActiveTarget(wxLog *pLogger);
@@ -1270,9 +1253,9 @@ public:
     %addmethods {
         // Get the icon corresponding to this file type
         %new wxIcon* GetIcon() {
-            wxIconLocation loc;
-            if (self->GetIcon(&loc))
-                return new wxIcon(loc);
+            wxIcon icon;
+            if (self->GetIcon(&icon))
+                return new wxIcon(icon);
             else
                 return NULL;
         }
@@ -1280,18 +1263,14 @@ public:
         // Get the icon corresponding to this file type, the name of the file
         // where this icon resides, and its index in this file if applicable.
         PyObject* GetIconInfo() {
-            wxIconLocation loc;
-            if (self->GetIcon(&loc)) {
-                wxString iconFile = loc.GetFileName();
-                int iconIndex     = -1;
-#ifdef __WXMSW__
-                iconIndex = loc.GetIndex();
-#endif
-                // Make a tuple and put the values in it
+            wxIcon icon;
+            wxString iconFile;
+            int iconIndex;
+            if (self->GetIcon(&icon, &iconFile, &iconIndex)) {
                 wxPyBeginBlockThreads();
                 PyObject* tuple = PyTuple_New(3);
-                PyTuple_SetItem(tuple, 0,
-                                wxPyConstructObject(new wxIcon(loc), wxT("wxIcon"), TRUE));
+                PyTuple_SetItem(tuple, 0, wxPyConstructObject(new wxIcon(icon),
+                                                              wxT("wxIcon"), TRUE));
 #if wxUSE_UNICODE
                 PyTuple_SetItem(tuple, 1, PyUnicode_FromWideChar(iconFile.c_str(), iconFile.Len()));
 #else
@@ -1425,7 +1404,7 @@ public:
     //
     // use the extraDir parameter if you want to look for files in another
     // directory
-    void Initialize(int mailcapStyle = wxMAILCAP_ALL,
+    void Initialize(int mailcapStyle = wxMAILCAP_STANDARD,
                     const wxString& extraDir = wxPyEmptyString);
 
     // and this function clears all the data from the manager
@@ -1493,7 +1472,6 @@ public:
 %{
 #if 0
 %}
-// See also wxPy_ReinitStockObjects in helpers.cpp
 extern wxMimeTypesManager* wxTheMimeTypesManager;
 %{
 #endif
@@ -1550,7 +1528,6 @@ wxART_ERROR                = 'wxART_ERROR'
 wxART_QUESTION             = 'wxART_QUESTION'
 wxART_WARNING              = 'wxART_WARNING'
 wxART_INFORMATION          = 'wxART_INFORMATION'
-wxART_MISSING_IMAGE        = 'wxART_MISSING_IMAGE'
 "
 
 %{  // Python aware wxArtProvider
@@ -1651,8 +1628,9 @@ public:
     // Accessors
     wxString GetHistoryFile(int i) const;
 
+    // A synonym for GetNoHistoryFiles
     int GetCount() const;
-    %pragma(python) addtoclass = "GetNoHistoryFiles = GetCount"
+    int GetNoHistoryFiles() const;
 
 };
 
@@ -1720,25 +1698,18 @@ public:
 
 //----------------------------------------------------------------------
 
-%{
-#ifdef __WXMSW__
-#include <wx/msw/private.h>
-#endif
-%}
 
-%inline %{
-
-void wxDrawWindowOnDC(wxWindow* window, const wxDC& dc)
-{
-#ifdef __WXMSW__
-    ::SendMessage(GetHwndOf(window), WM_PAINT, (long)GetHdcOf(dc), 0);
-//     ::SendMessage(GetHwndOf(window), WM_PRINTCLIENT, (long)GetHdcOf(dc),
-//                   PRF_CLIENT | PRF_NONCLIENT | PRF_CHILDREN );
-#endif
-}
-
-%}
-//----------------------------------------------------------------------
+// %{
+// #if wxUSE_UNICODE
+// #define ADD_STRING(dict, str) \
+//     wxString tmp##str(str); \
+//     PyDict_SetItemString(dict, #str, \
+//                          PyUnicode_FromWideChar(tmp##str.c_str(), tmp##str.Len()))
+// #else
+// #define ADD_STRING(dict, str) \
+//     PyDict_SetItemString(d, #str, PyString_FromString(str))
+// #endif
+// %}
 
 
 %init %{

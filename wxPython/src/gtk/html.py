@@ -324,188 +324,6 @@ class wxHtmlWinTagHandler(wxHtmlWinTagHandlerPtr):
 
 
 
-class wxHtmlSelectionPtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self, delfunc=htmlc.delete_wxHtmlSelection):
-        if self.thisown == 1:
-            try:
-                delfunc(self)
-            except:
-                pass
-    def Set(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_Set(self, *_args, **_kwargs)
-        return val
-    def SetCells(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_SetCells(self, *_args, **_kwargs)
-        return val
-    def GetFromCell(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_GetFromCell(self, *_args, **_kwargs)
-        if val: val = wxHtmlCellPtr(val) 
-        return val
-    def GetToCell(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_GetToCell(self, *_args, **_kwargs)
-        if val: val = wxHtmlCellPtr(val) 
-        return val
-    def GetFromPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_GetFromPos(self, *_args, **_kwargs)
-        if val: val = wxPointPtr(val) 
-        return val
-    def GetToPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_GetToPos(self, *_args, **_kwargs)
-        if val: val = wxPointPtr(val) 
-        return val
-    def GetFromPrivPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_GetFromPrivPos(self, *_args, **_kwargs)
-        if val: val = wxPointPtr(val) 
-        return val
-    def GetToPrivPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_GetToPrivPos(self, *_args, **_kwargs)
-        if val: val = wxPointPtr(val) 
-        return val
-    def SetFromPrivPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_SetFromPrivPos(self, *_args, **_kwargs)
-        return val
-    def SetToPrivPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_SetToPrivPos(self, *_args, **_kwargs)
-        return val
-    def ClearPrivPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_ClearPrivPos(self, *_args, **_kwargs)
-        return val
-    def IsEmpty(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlSelection_IsEmpty(self, *_args, **_kwargs)
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxHtmlSelection instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxHtmlSelection(wxHtmlSelectionPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = htmlc.new_wxHtmlSelection(*_args,**_kwargs)
-        self.thisown = 1
-
-
-
-
-class wxHtmlRenderingStatePtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self, delfunc=htmlc.delete_wxHtmlRenderingState):
-        if self.thisown == 1:
-            try:
-                delfunc(self)
-            except:
-                pass
-    def SetSelectionState(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingState_SetSelectionState(self, *_args, **_kwargs)
-        return val
-    def GetSelectionState(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingState_GetSelectionState(self, *_args, **_kwargs)
-        return val
-    def SetFgColour(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingState_SetFgColour(self, *_args, **_kwargs)
-        return val
-    def GetFgColour(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingState_GetFgColour(self, *_args, **_kwargs)
-        if val: val = wxColourPtr(val) 
-        return val
-    def SetBgColour(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingState_SetBgColour(self, *_args, **_kwargs)
-        return val
-    def GetBgColour(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingState_GetBgColour(self, *_args, **_kwargs)
-        if val: val = wxColourPtr(val) 
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxHtmlRenderingState instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxHtmlRenderingState(wxHtmlRenderingStatePtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = htmlc.new_wxHtmlRenderingState(*_args,**_kwargs)
-        self.thisown = 1
-
-
-
-
-class wxHtmlRenderingStylePtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def GetSelectedTextColour(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingStyle_GetSelectedTextColour(self, *_args, **_kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
-        return val
-    def GetSelectedTextBgColour(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingStyle_GetSelectedTextBgColour(self, *_args, **_kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxHtmlRenderingStyle instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxHtmlRenderingStyle(wxHtmlRenderingStylePtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxDefaultHtmlRenderingStylePtr(wxHtmlRenderingStylePtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def GetSelectedTextColour(self, *_args, **_kwargs):
-        val = htmlc.wxDefaultHtmlRenderingStyle_GetSelectedTextColour(self, *_args, **_kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
-        return val
-    def GetSelectedTextBgColour(self, *_args, **_kwargs):
-        val = htmlc.wxDefaultHtmlRenderingStyle_GetSelectedTextBgColour(self, *_args, **_kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxDefaultHtmlRenderingStyle instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxDefaultHtmlRenderingStyle(wxDefaultHtmlRenderingStylePtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxHtmlRenderingInfoPtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self, delfunc=htmlc.delete_wxHtmlRenderingInfo):
-        if self.thisown == 1:
-            try:
-                delfunc(self)
-            except:
-                pass
-    def SetSelection(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingInfo_SetSelection(self, *_args, **_kwargs)
-        return val
-    def GetSelection(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingInfo_GetSelection(self, *_args, **_kwargs)
-        if val: val = wxHtmlSelectionPtr(val) 
-        return val
-    def SetStyle(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingInfo_SetStyle(self, *_args, **_kwargs)
-        return val
-    def GetStyle(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingInfo_GetStyle(self, *_args, **_kwargs)
-        if val: val = wxHtmlRenderingStylePtr(val) 
-        return val
-    def GetState(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlRenderingInfo_GetState(self, *_args, **_kwargs)
-        if val: val = wxHtmlRenderingStatePtr(val) 
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxHtmlRenderingInfo instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxHtmlRenderingInfo(wxHtmlRenderingInfoPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = htmlc.new_wxHtmlRenderingInfo(*_args,**_kwargs)
-        self.thisown = 1
-
-
-
-
 class wxHtmlCellPtr(wxObjectPtr):
     def __init__(self,this):
         self.this = this
@@ -537,17 +355,6 @@ class wxHtmlCellPtr(wxObjectPtr):
         val = htmlc.wxHtmlCell_GetParent(self, *_args, **_kwargs)
         if val: val = wxHtmlContainerCellPtr(val) 
         return val
-    def GetFirstChild(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_GetFirstChild(self, *_args, **_kwargs)
-        if val: val = wxHtmlCellPtr(val) 
-        return val
-    def GetCursor(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_GetCursor(self, *_args, **_kwargs)
-        if val: val = wxCursorPtr(val) ; val.thisown = 1
-        return val
-    def IsFormattingCell(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_IsFormattingCell(self, *_args, **_kwargs)
-        return val
     def SetLink(self, *_args, **_kwargs):
         val = htmlc.wxHtmlCell_SetLink(self, *_args, **_kwargs)
         return val
@@ -578,37 +385,6 @@ class wxHtmlCellPtr(wxObjectPtr):
         return val
     def SetCanLiveOnPagebreak(self, *_args, **_kwargs):
         val = htmlc.wxHtmlCell_SetCanLiveOnPagebreak(self, *_args, **_kwargs)
-        return val
-    def IsLinebreakAllowed(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_IsLinebreakAllowed(self, *_args, **_kwargs)
-        return val
-    def IsTerminalCell(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_IsTerminalCell(self, *_args, **_kwargs)
-        return val
-    def FindCellByPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_FindCellByPos(self, *_args, **_kwargs)
-        if val: val = wxHtmlCellPtr(val) 
-        return val
-    def GetAbsPos(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_GetAbsPos(self, *_args, **_kwargs)
-        if val: val = wxPointPtr(val) ; val.thisown = 1
-        return val
-    def GetFirstTerminal(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_GetFirstTerminal(self, *_args, **_kwargs)
-        if val: val = wxHtmlCellPtr(val) 
-        return val
-    def GetLastTerminal(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_GetLastTerminal(self, *_args, **_kwargs)
-        if val: val = wxHtmlCellPtr(val) 
-        return val
-    def GetDepth(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_GetDepth(self, *_args, **_kwargs)
-        return val
-    def IsBefore(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_IsBefore(self, *_args, **_kwargs)
-        return val
-    def ConvertToText(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlCell_ConvertToText(self, *_args, **_kwargs)
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxHtmlCell instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
@@ -684,13 +460,12 @@ class wxHtmlContainerCellPtr(wxHtmlCellPtr):
     def SetBorder(self, *_args, **_kwargs):
         val = htmlc.wxHtmlContainerCell_SetBorder(self, *_args, **_kwargs)
         return val
-    def GetFirstChild(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlContainerCell_GetFirstChild(self, *_args, **_kwargs)
+    def GetFirstCell(self, *_args, **_kwargs):
+        val = htmlc.wxHtmlContainerCell_GetFirstCell(self, *_args, **_kwargs)
         if val: val = wxHtmlCellPtr(val) 
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxHtmlContainerCell instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-    GetFirstCell = GetFirstChild
 class wxHtmlContainerCell(wxHtmlContainerCellPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = htmlc.new_wxHtmlContainerCell(*_args,**_kwargs)
@@ -977,9 +752,6 @@ class wxHtmlEasyPrintingPtr(wxObjectPtr):
     def SetFooter(self, *_args, **_kwargs):
         val = htmlc.wxHtmlEasyPrinting_SetFooter(self, *_args, **_kwargs)
         return val
-    def SetFonts(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlEasyPrinting_SetFonts(self, *_args, **_kwargs)
-        return val
     def GetPrintData(self, *_args, **_kwargs):
         val = htmlc.wxHtmlEasyPrinting_GetPrintData(self, *_args, **_kwargs)
         if val: val = wxPrintDataPtr(val) 
@@ -1006,10 +778,6 @@ wxHtmlWinParser_AddTagHandler = htmlc.wxHtmlWinParser_AddTagHandler
 
 wxHtmlWindow_AddFilter = htmlc.wxHtmlWindow_AddFilter
 
-wxHtmlPrintout_AddFilter = htmlc.wxHtmlPrintout_AddFilter
-
-wxHtmlPrintout_CleanUpStatics = htmlc.wxHtmlPrintout_CleanUpStatics
-
 
 
 #-------------- VARIABLE WRAPPERS ------------------
@@ -1035,20 +803,12 @@ wxHTML_COND_ISIMAGEMAP = htmlc.wxHTML_COND_ISIMAGEMAP
 wxHTML_COND_USER = htmlc.wxHTML_COND_USER
 wxHW_SCROLLBAR_NEVER = htmlc.wxHW_SCROLLBAR_NEVER
 wxHW_SCROLLBAR_AUTO = htmlc.wxHW_SCROLLBAR_AUTO
-wxHW_NO_SELECTION = htmlc.wxHW_NO_SELECTION
-wxHW_DEFAULT_STYLE = htmlc.wxHW_DEFAULT_STYLE
 wxHTML_OPEN = htmlc.wxHTML_OPEN
 wxHTML_BLOCK = htmlc.wxHTML_BLOCK
 wxHTML_REDIRECT = htmlc.wxHTML_REDIRECT
 wxHTML_URL_PAGE = htmlc.wxHTML_URL_PAGE
 wxHTML_URL_IMAGE = htmlc.wxHTML_URL_IMAGE
 wxHTML_URL_OTHER = htmlc.wxHTML_URL_OTHER
-wxHTML_SEL_OUT = htmlc.wxHTML_SEL_OUT
-wxHTML_SEL_IN = htmlc.wxHTML_SEL_IN
-wxHTML_SEL_CHANGING = htmlc.wxHTML_SEL_CHANGING
-wxHTML_FIND_EXACT = htmlc.wxHTML_FIND_EXACT
-wxHTML_FIND_NEAREST_BEFORE = htmlc.wxHTML_FIND_NEAREST_BEFORE
-wxHTML_FIND_NEAREST_AFTER = htmlc.wxHTML_FIND_NEAREST_AFTER
 wxPAGE_ODD = htmlc.wxPAGE_ODD
 wxPAGE_EVEN = htmlc.wxPAGE_EVEN
 wxPAGE_ALL = htmlc.wxPAGE_ALL

@@ -41,12 +41,6 @@ def EVT_SIZE(win, func):
 def EVT_MOVE(win, func):
     win.Connect(-1, -1, wxEVT_MOVE, func)
 
-def EVT_SIZING(win, func):
-    win.Connect(-1, -1, wxEVT_SIZING, func)
-
-def EVT_MOVING(win, func):
-    win.Connect(-1, -1, wxEVT_MOVING, func)
-
 def EVT_CLOSE(win, func):
     win.Connect(-1, -1, wxEVT_CLOSE_WINDOW, func)
 
@@ -67,9 +61,6 @@ def EVT_KEY_DOWN(win, func):
 
 def EVT_KEY_UP(win, func):
     win.Connect(-1, -1, wxEVT_KEY_UP, func)
-
-def EVT_HOTKEY(win, func):
-    win.Connect(-1, -1, wxEVT_HOTKEY, func)
 
 def EVT_MENU_OPEN(win, func):
     win.Connect(-1, -1, wxEVT_MENU_OPEN, func)
@@ -476,6 +467,14 @@ def EVT_COMMAND_ENTER(win, id, func):
     win.Connect(id, -1, wxEVT_COMMAND_ENTER, func)
 
 
+# wxNotebook events
+def EVT_NOTEBOOK_PAGE_CHANGED(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, func)
+
+def EVT_NOTEBOOK_PAGE_CHANGING(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, func)
+
+
 # wxSpinButton
 def EVT_SPIN_UP(win, id, func):
     win.Connect(id, -1, wxEVT_SCROLL_LINEUP, func)
@@ -485,6 +484,29 @@ def EVT_SPIN_DOWN(win, id, func):
 
 def EVT_SPIN(win, id, func):
     win.Connect(id, -1, wxEVT_SCROLL_THUMBTRACK,func)
+
+
+# wxTaskBarIcon
+def EVT_TASKBAR_MOVE(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_MOVE, func)
+
+def EVT_TASKBAR_LEFT_DOWN(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DOWN, func)
+
+def EVT_TASKBAR_LEFT_UP(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_UP, func)
+
+def EVT_TASKBAR_RIGHT_DOWN(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DOWN, func)
+
+def EVT_TASKBAR_RIGHT_UP(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_UP, func)
+
+def EVT_TASKBAR_LEFT_DCLICK(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_LEFT_DCLICK, func)
+
+def EVT_TASKBAR_RIGHT_DCLICK(win, func):
+    win.Connect(-1, -1, wxEVT_TASKBAR_RIGHT_DCLICK, func)
 
 
 # wxSashWindow

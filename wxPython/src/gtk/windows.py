@@ -137,8 +137,8 @@ class wxWindowPtr(wxEvtHandlerPtr):
     def CenterOnScreen(self, *_args, **_kwargs):
         val = windowsc.wxWindow_CenterOnScreen(self, *_args, **_kwargs)
         return val
-    def ClearBackground(self, *_args, **_kwargs):
-        val = windowsc.wxWindow_ClearBackground(self, *_args, **_kwargs)
+    def Clear(self, *_args, **_kwargs):
+        val = windowsc.wxWindow_Clear(self, *_args, **_kwargs)
         return val
     def ClientToScreenXY(self, *_args, **_kwargs):
         val = windowsc.wxWindow_ClientToScreenXY(self, *_args, **_kwargs)
@@ -180,6 +180,9 @@ class wxWindowPtr(wxEvtHandlerPtr):
     def GetBackgroundColour(self, *_args, **_kwargs):
         val = windowsc.wxWindow_GetBackgroundColour(self, *_args, **_kwargs)
         if val: val = wxColourPtr(val) ; val.thisown = 1
+        return val
+    def GetBorder(self, *_args, **_kwargs):
+        val = windowsc.wxWindow_GetBorder(self, *_args, **_kwargs)
         return val
     def GetChildren(self, *_args, **_kwargs):
         val = windowsc.wxWindow_GetChildren(self, *_args, **_kwargs)
@@ -619,12 +622,6 @@ class wxWindowPtr(wxEvtHandlerPtr):
         val = windowsc.wxWindow_GetAcceleratorTable(self, *_args, **_kwargs)
         if val: val = wxAcceleratorTablePtr(val) 
         return val
-    def RegisterHotKey(self, *_args, **_kwargs):
-        val = windowsc.wxWindow_RegisterHotKey(self, *_args, **_kwargs)
-        return val
-    def UnregisterHotKey(self, *_args, **_kwargs):
-        val = windowsc.wxWindow_UnregisterHotKey(self, *_args, **_kwargs)
-        return val
     def GetDefaultItem(self, *_args, **_kwargs):
         val = windowsc.wxWindow_GetDefaultItem(self, *_args, **_kwargs)
         return val
@@ -651,12 +648,6 @@ class wxWindowPtr(wxEvtHandlerPtr):
         return val
     def GetThemeEnabled(self, *_args, **_kwargs):
         val = windowsc.wxWindow_GetThemeEnabled(self, *_args, **_kwargs)
-        return val
-    def GetBorderFlags(self, *_args, **_kwargs):
-        val = windowsc.wxWindow_GetBorderFlags(self, *_args, **_kwargs)
-        return val
-    def GetBorder(self, *_args, **_kwargs):
-        val = windowsc.wxWindow_GetBorder(self, *_args, **_kwargs)
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxWindow instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
@@ -894,9 +885,6 @@ class wxMenuPtr(wxEvtHandlerPtr):
         return val
     def FindItemById(self, *_args, **_kwargs):
         val = windowsc.wxMenu_FindItemById(self, *_args, **_kwargs)
-        return val
-    def FindItemByPosition(self, *_args, **_kwargs):
-        val = windowsc.wxMenu_FindItemByPosition(self, *_args, **_kwargs)
         return val
     def GetTitle(self, *_args, **_kwargs):
         val = windowsc.wxMenu_GetTitle(self, *_args, **_kwargs)

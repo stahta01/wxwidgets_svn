@@ -51,9 +51,10 @@ class PythonSTC(wxStyledTextCtrl):
         self.SetProperty("tab.timmy.whinge.level", "1")
         self.SetMargins(0,0)
 
-        self.SetViewWhiteSpace(False)
+        #self.SetViewWhiteSpace(True)
         #self.SetBufferedDraw(False)
         #self.SetViewEOL(True)
+        #self.SetTwoPhaseDraw(False)
 
         self.SetEdgeMode(wxSTC_EDGE_BACKGROUND)
         self.SetEdgeColumn(78)
@@ -138,7 +139,7 @@ class PythonSTC(wxStyledTextCtrl):
         # register some images for use in the AutoComplete box.
         self.RegisterImage(1, images.getSmilesBitmap())
         self.RegisterImage(2, images.getFile1Bitmap())
-        self.RegisterImage(3, images.getCopy2Bitmap())
+        self.RegisterImage(3, images.getCopyBitmap())
 
 
 

@@ -925,6 +925,9 @@ public:
 
 %init %{
 
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
+
     wxPyPtrTypeMap_Add("wxTreeCompanionWindow", "wxPyTreeCompanionWindow");
     wxPyPtrTypeMap_Add("wxTreeListCtrl", "wxPyTreeListCtrl");
 %}

@@ -16,6 +16,7 @@
 %{
 #include "helpers.h"
 #include <wx/toolbar.h>
+#include <wx/tbarsmpl.h>
 %}
 
 //----------------------------------------------------------------------
@@ -88,20 +89,6 @@ enum wxToolBarToolStyle
     wxTOOL_STYLE_BUTTON    = 1,
     wxTOOL_STYLE_SEPARATOR = 2,
     wxTOOL_STYLE_CONTROL
-};
-
-enum {
-    wxTB_HORIZONTAL,
-    wxTB_VERTICAL,
-    wxTB_3DBUTTONS,
-    wxTB_FLAT,
-    wxTB_DOCKABLE,
-    wxTB_NOICONS,
-    wxTB_TEXT,
-    wxTB_NODIVIDER,
-    wxTB_NOALIGN,
-    wxTB_HORZ_LAYOUT,
-    wxTB_HORZ_TEXT,
 };
 
 
@@ -354,9 +341,6 @@ public:
                               shortHelp, longHelp, clientData)
     "
 
-    // TODO?
-    //wxToolBarToolBase *AddTool (wxToolBarToolBase *tool);
-    //wxToolBarToolBase *InsertTool (size_t pos, wxToolBarToolBase *tool);
 
     wxToolBarToolBase *AddControl(wxControl *control);
     wxToolBarToolBase *InsertControl(size_t pos, wxControl *control);
@@ -395,8 +379,6 @@ public:
         }
     }
 
-    // returns tool pos, or wxNOT_FOUND if tool isn't found
-    int GetToolPos(int id) const;
 
     bool GetToolState(int id);
     bool GetToolEnabled(int id);
@@ -460,28 +442,28 @@ public:
 
 
 
-// class wxToolBarSimple : public wxToolBarBase {
-// public:
-//     wxToolBarSimple(wxWindow *parent,
-//                     wxWindowID id,
-//                     const wxPoint& pos = wxDefaultPosition,
-//                     const wxSize& size = wxDefaultSize,
-//                     long style = wxNO_BORDER | wxTB_HORIZONTAL,
-//                     const wxString& name = wxPyToolBarNameStr);
-//     %name(wxPreToolBarSimple)wxToolBarSimple();
+class wxToolBarSimple : public wxToolBarBase {
+public:
+    wxToolBarSimple(wxWindow *parent,
+                    wxWindowID id,
+                    const wxPoint& pos = wxDefaultPosition,
+                    const wxSize& size = wxDefaultSize,
+                    long style = wxNO_BORDER | wxTB_HORIZONTAL,
+                    const wxString& name = wxPyToolBarNameStr);
+    %name(wxPreToolBarSimple)wxToolBarSimple();
 
-//     bool Create(wxWindow *parent,
-//                     wxWindowID id,
-//                     const wxPoint& pos = wxDefaultPosition,
-//                     const wxSize& size = wxDefaultSize,
-//                     long style = wxNO_BORDER | wxTB_HORIZONTAL,
-//                     const wxString& name = wxPyToolBarNameStr);
+    bool Create(wxWindow *parent,
+                    wxWindowID id,
+                    const wxPoint& pos = wxDefaultPosition,
+                    const wxSize& size = wxDefaultSize,
+                    long style = wxNO_BORDER | wxTB_HORIZONTAL,
+                    const wxString& name = wxPyToolBarNameStr);
 
-//     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-//     %pragma(python) addtomethod = "wxPreToolBarSimple:val._setOORInfo(val)"
+    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    %pragma(python) addtomethod = "wxPreToolBarSimple:val._setOORInfo(val)"
 
-//     wxToolBarToolBase *FindToolForPosition(wxCoord x, wxCoord y);
-// };
+    wxToolBarToolBase *FindToolForPosition(wxCoord x, wxCoord y);
+};
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------

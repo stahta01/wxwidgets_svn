@@ -188,7 +188,7 @@ enum {
     wxNO_BORDER,
     wxUSER_COLOURS,
     wxNO_3D,
-
+//wxOVERRIDE_KEY_TRANSLATIONS,
     wxTAB_TRAVERSAL,
     wxWANTS_CHARS,
     wxPOPUP_WINDOW,
@@ -203,7 +203,6 @@ enum {
     wxICONIZE,
     wxMINIMIZE,
     wxMAXIMIZE,
-    wxCLOSE_BOX,
     wxTHICK_FRAME,
     wxSYSTEM_MENU,
     wxMINIMIZE_BOX,
@@ -236,6 +235,16 @@ enum {
     wxRETAINED,
     wxBACKINGSTORE,
 
+    wxTB_HORIZONTAL,
+    wxTB_VERTICAL,
+    wxTB_3DBUTTONS,
+    wxTB_FLAT,
+    wxTB_DOCKABLE,
+    wxTB_NOICONS,
+    wxTB_TEXT,
+    wxTB_NODIVIDER,
+    wxTB_NOALIGN,
+
     wxCOLOURED,
     wxFIXED_LENGTH,
     wxALIGN_LEFT,
@@ -261,6 +270,25 @@ enum {
     wxLB_HSCROLL,
     wxPROCESS_ENTER,
     wxPASSWORD,
+
+    wxTE_READONLY,
+    wxTE_MULTILINE,
+    wxTE_PROCESS_TAB,
+    wxTE_RICH,
+    wxTE_RICH2,
+    wxTE_NO_VSCROLL,
+    wxTE_AUTO_SCROLL,
+    wxTE_PROCESS_ENTER,
+    wxTE_PASSWORD,
+    wxTE_AUTO_URL,
+    wxTE_NOHIDESEL,
+    wxTE_DONTWRAP,
+    wxTE_LINEWRAP,
+    wxTE_WORDWRAP,
+    wxTE_LEFT,
+    wxTE_RIGHT,
+    wxTE_CENTER,
+    wxTE_CENTRE,
 
     wxCB_SIMPLE,
     wxCB_DROPDOWN,
@@ -299,6 +327,18 @@ enum {
     wxBU_BOTTOM,
     wxBU_EXACTFIT,
 
+    wxSP_VERTICAL,
+    wxSP_HORIZONTAL,
+    wxSP_ARROW_KEYS,
+    wxSP_WRAP,
+    wxSP_NOBORDER,
+    wxSP_3D,
+    wxSP_3DSASH,
+    wxSP_3DBORDER,
+    wxSP_FULLSASH,
+    wxSP_BORDER,
+    wxSP_LIVE_UPDATE,
+    wxSP_PERMIT_UNSPLIT,
     wxFLOOD_SURFACE,
     wxFLOOD_BORDER,
     wxODDEVEN_RULE,
@@ -377,20 +417,6 @@ enum {
     wxID_DUPLICATE,
     wxID_SELECTALL,
 
-    wxID_DELETE,
-    wxID_REPLACE,
-    wxID_REPLACE_ALL,
-    wxID_PROPERTIES,
-
-    wxID_VIEW_DETAILS,
-    wxID_VIEW_LARGEICONS,
-    wxID_VIEW_SMALLICONS,
-    wxID_VIEW_LIST,
-    wxID_VIEW_SORTDATE,
-    wxID_VIEW_SORTNAME,
-    wxID_VIEW_SORTSIZE,
-    wxID_VIEW_SORTTYPE,
-
     wxID_FILE1,
     wxID_FILE2,
     wxID_FILE3,
@@ -465,6 +491,13 @@ enum {
     wxGROW,
     wxEXPAND,
 
+    wxNB_FIXEDWIDTH,
+    wxNB_TOP,
+    wxNB_LEFT,
+    wxNB_RIGHT,
+    wxNB_BOTTOM,
+    wxNB_MULTILINE,
+
     wxLI_HORIZONTAL,
     wxLI_VERTICAL,
 
@@ -479,11 +512,6 @@ enum {
     wxWS_EX_VALIDATE_RECURSIVELY,
     wxWS_EX_BLOCK_EVENTS,
     wxWS_EX_TRANSIENT,
-
-    wxWS_EX_THEMED_BACKGROUND,
-    wxWS_EX_PROCESS_IDLE,
-    wxWS_EX_PROCESS_UI_UPDATES,
-
 
     // Mapping modes (as per Windows)
     wxMM_TEXT,
@@ -707,11 +735,7 @@ enum wxKeyCode {
   WXK_NUMPAD_SEPARATOR,
   WXK_NUMPAD_SUBTRACT,
   WXK_NUMPAD_DECIMAL,
-  WXK_NUMPAD_DIVIDE,
-
-  WXK_WINDOWS_LEFT,
-  WXK_WINDOWS_RIGHT,
-  WXK_WINDOWS_MENU
+  WXK_NUMPAD_DIVIDE
 
 };
 
@@ -910,38 +934,6 @@ enum wxHitTest
 };
 
 
-%{
-#if ! wxUSE_HOTKEY
-enum wxHotkeyModifier
-{
-    wxMOD_NONE = 0,
-    wxMOD_ALT = 1,
-    wxMOD_CONTROL = 2,
-    wxMOD_SHIFT = 4,
-    wxMOD_WIN = 8
-};
-#define wxEVT_HOTKEY 9999
-#endif
-%}
-
-enum wxHotkeyModifier
-{
-    wxMOD_NONE = 0,
-    wxMOD_ALT = 1,
-    wxMOD_CONTROL = 2,
-    wxMOD_SHIFT = 4,
-    wxMOD_WIN = 8
-};
-
-
-enum wxUpdateUI
-{
-    wxUPDATE_UI_NONE          = 0x0000,
-    wxUPDATE_UI_RECURSE       = 0x0001,
-    wxUPDATE_UI_FROMIDLE      = 0x0002 // Invoked from On(Internal)Idle
-};
-
-
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
@@ -1019,7 +1011,6 @@ enum wxEventType {
  wxEVT_KEY_DOWN,
  wxEVT_KEY_UP,
  wxEVT_CHAR_HOOK,
- wxEVT_HOTKEY,
 
  /*
   * Scrollbar event identifiers
@@ -1048,8 +1039,6 @@ enum wxEventType {
 
  wxEVT_SIZE = wxEVT_FIRST + 200,
  wxEVT_MOVE,
- wxEVT_SIZING,
- wxEVT_MOVING,
  wxEVT_CLOSE_WINDOW,
  wxEVT_END_SESSION,
  wxEVT_QUERY_END_SESSION,

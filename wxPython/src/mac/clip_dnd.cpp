@@ -199,14 +199,12 @@ void wxPyBitmapDataObject::SetBitmap(const wxBitmap& bitmap) {
 
 #include <wx/metafile.h>
 
-#if 0
-extern wxClipboard * wxTheClipboard; 
-
-#endif
+    // See below in the init function...
+    wxClipboard* wxPyTheClipboard;
 
 class wxPyDropSource : public wxDropSource {
 public:
-#ifndef __WXGTK__
+#ifdef __WXMSW__
      wxPyDropSource(wxWindow *win = NULL,
                     const wxCursor &copy = wxNullCursor,
                     const wxCursor &move = wxNullCursor,
@@ -368,17 +366,17 @@ static PyObject *_wrap_wxPyFormatInvalid_get() {
     return pyobj;
 }
 
-static int _wrap_wxTheClipboard_set(PyObject *val) {
+static int _wrap_wxPyTheClipboard_set(PyObject *val) {
 
     PyErr_SetString(PyExc_TypeError,"Variable wxTheClipboard is read-only.");
     return 1;
 }
 
-static PyObject *_wrap_wxTheClipboard_get() {
+static PyObject *_wrap_wxPyTheClipboard_get() {
     PyObject * pyobj;
     char ptemp[128];
 
-    SWIG_MakePtr(ptemp, (char *) wxTheClipboard,"_wxClipboard_p");
+    SWIG_MakePtr(ptemp, (char *) wxPyTheClipboard,"_wxClipboard_p");
     pyobj = PyString_FromString(ptemp);
     return pyobj;
 }
@@ -2463,9 +2461,9 @@ static PyObject *_wrap_new_wxDropSource(PyObject *self, PyObject *args, PyObject
     PyObject * _resultobj;
     wxPyDropSource * _result;
     wxWindow * _arg0 = (wxWindow *) NULL;
-    wxCursor * _arg1 = (wxCursor *) &wxNullCursor;
-    wxCursor * _arg2 = (wxCursor *) &wxNullCursor;
-    wxCursor * _arg3 = (wxCursor *) &wxNullCursor;
+    wxIcon * _arg1 = (wxIcon *) &wxNullIcon;
+    wxIcon * _arg2 = (wxIcon *) &wxNullIcon;
+    wxIcon * _arg3 = (wxIcon *) &wxNullIcon;
     PyObject * _argo0 = 0;
     PyObject * _argo1 = 0;
     PyObject * _argo2 = 0;
@@ -2484,20 +2482,20 @@ static PyObject *_wrap_new_wxDropSource(PyObject *self, PyObject *args, PyObject
         }
     }
     if (_argo1) {
-        if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxCursor_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of new_wxDropSource. Expected _wxCursor_p.");
+        if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxIcon_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of new_wxDropSource. Expected _wxIcon_p.");
         return NULL;
         }
     }
     if (_argo2) {
-        if (SWIG_GetPtrObj(_argo2,(void **) &_arg2,"_wxCursor_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of new_wxDropSource. Expected _wxCursor_p.");
+        if (SWIG_GetPtrObj(_argo2,(void **) &_arg2,"_wxIcon_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of new_wxDropSource. Expected _wxIcon_p.");
         return NULL;
         }
     }
     if (_argo3) {
-        if (SWIG_GetPtrObj(_argo3,(void **) &_arg3,"_wxCursor_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 4 of new_wxDropSource. Expected _wxCursor_p.");
+        if (SWIG_GetPtrObj(_argo3,(void **) &_arg3,"_wxIcon_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 4 of new_wxDropSource. Expected _wxIcon_p.");
         return NULL;
         }
     }
@@ -3796,7 +3794,7 @@ SWIGEXPORT(void) initclip_dndc() {
 	 PyDict_SetItemString(d,"wxDF_MAX", PyInt_FromLong((long) wxDF_MAX));
 	 PyDict_SetItemString(d,"cvar", SWIG_globals);
 	 SWIG_addvarlink(SWIG_globals,"wxFormatInvalid",_wrap_wxPyFormatInvalid_get, _wrap_wxPyFormatInvalid_set);
-	 SWIG_addvarlink(SWIG_globals,"wxTheClipboard",_wrap_wxTheClipboard_get, _wrap_wxTheClipboard_set);
+	 SWIG_addvarlink(SWIG_globals,"wxTheClipboard",_wrap_wxPyTheClipboard_get, _wrap_wxPyTheClipboard_set);
 	 PyDict_SetItemString(d,"wxDrag_CopyOnly", PyInt_FromLong((long) wxDrag_CopyOnly));
 	 PyDict_SetItemString(d,"wxDrag_AllowMove", PyInt_FromLong((long) wxDrag_AllowMove));
 	 PyDict_SetItemString(d,"wxDrag_DefaultMove", PyInt_FromLong((long) wxDrag_DefaultMove));
@@ -3808,6 +3806,7 @@ SWIGEXPORT(void) initclip_dndc() {
 	 PyDict_SetItemString(d,"wxDragCancel", PyInt_FromLong((long) wxDragCancel));
 
 
+    wxPyTheClipboard = wxTheClipboard;
     wxPyPtrTypeMap_Add("wxDropSource", "wxPyDropSource");
     wxPyPtrTypeMap_Add("wxTextDropTarget", "wxPyTextDropTarget");
     wxPyPtrTypeMap_Add("wxFileDropTarget", "wxPyFileDropTarget");

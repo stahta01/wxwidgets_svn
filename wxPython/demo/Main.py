@@ -25,7 +25,14 @@ import images
 _treeList = [
     # new stuff
     ('Recent Additions', [
-        'wxVListBox',
+        'wxScrolledPanel',
+        'ShapedWindow',
+        'NewNamespace',
+        'PopupMenu',
+        'AnalogClockWindow',
+        'MaskedEditControls',
+        'wxTreeListCtrl',
+        'wxGrid_MegaExample',
         ]),
 
     # managed windows == things with a (optional) caption you can close
@@ -131,7 +138,6 @@ _treeList = [
         'wxStyledTextCtrl_2',
         'wxTimeCtrl',
         'wxTreeListCtrl',
-        'wxVListBox',
         ]),
 
     # How to lay out the controls in a frame/dialog
@@ -181,9 +187,7 @@ _treeList = [
         'DialogUnits',
         'DrawXXXList',
         'FontEnumerator',
-        'NewNamespace',
         'PrintFramework',
-        'ShapedWindow',
         'Throbber',
         'Unicode',
         'wxFileHistory',
@@ -324,8 +328,8 @@ class wxPythonDemo(wx.Frame):
         self.Centre(wx.BOTH)
         self.CreateStatusBar(1, wx.ST_SIZEGRIP)
 
-        splitter = wx.SplitterWindow(self, -1)
-        splitter2 = wx.SplitterWindow(splitter, -1)
+        splitter = wx.SplitterWindow(self, -1, style=wx.NO_3D|wx.SP_3D)
+        splitter2 = wx.SplitterWindow(splitter, -1, style=wx.NO_3D|wx.SP_3D)
 
         def EmptyHandler(evt): pass
         wx.EVT_ERASE_BACKGROUND(splitter, EmptyHandler)
@@ -390,8 +394,9 @@ class wxPythonDemo(wx.Frame):
         # Create a TreeCtrl
         tID = wx.NewId()
         self.treeMap = {}
-        self.tree = wx.TreeCtrl(splitter, tID, style =
-                                wx.TR_DEFAULT_STYLE #| wx.TR_HAS_VARIABLE_ROW_HEIGHT
+        self.tree = wx.TreeCtrl(splitter, tID,
+                                style=wx.TR_HAS_BUTTONS |
+                                wx.TR_HAS_VARIABLE_ROW_HEIGHT
                                )
 
         root = self.tree.AddRoot("wxPython Overview")

@@ -55,12 +55,14 @@ extern PyObject *SWIG_newvarlink(void);
 #define SWIG_name    "windows2c"
 
 #include "helpers.h"
+#ifdef OLD_GRID
+#include <wx/grid.h>
+#endif
 #include <wx/notebook.h>
-#include <wx/listbook.h>
 #include <wx/splitter.h>
 #include <wx/imaglist.h>
 #ifdef __WXMSW__
-#include <wx/taskbar.h>
+#include <wx/msw/taskbar.h>
 #endif
 
     // Put some wx default wxChar* values into wxStrings.
@@ -303,741 +305,60 @@ IMP_PYCALLBACK_VOID_WXWINBASE(wxPyPanel, wxPanel, RemoveChild);
 #ifdef __cplusplus
 extern "C" {
 #endif
-static void *SwigwxBookCtrlTowxControl(void *ptr) {
-    wxBookCtrl *src;
-    wxControl *dest;
-    src = (wxBookCtrl *) ptr;
-    dest = (wxControl *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxBookCtrlTowxWindow(void *ptr) {
-    wxBookCtrl *src;
-    wxWindow *dest;
-    src = (wxBookCtrl *) ptr;
-    dest = (wxWindow *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxBookCtrlTowxEvtHandler(void *ptr) {
-    wxBookCtrl *src;
-    wxEvtHandler *dest;
-    src = (wxBookCtrl *) ptr;
-    dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxBookCtrlTowxObject(void *ptr) {
-    wxBookCtrl *src;
-    wxObject *dest;
-    src = (wxBookCtrl *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define wxBookCtrl_GetPageCount(_swigobj)  (_swigobj->GetPageCount())
-static PyObject *_wrap_wxBookCtrl_GetPageCount(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    size_t  _result;
-    wxBookCtrl * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxBookCtrl_GetPageCount",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_GetPageCount. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (size_t )wxBookCtrl_GetPageCount(_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_GetPage(_swigobj,_swigarg0)  (_swigobj->GetPage(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_GetPage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxWindow * _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","n", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrl_GetPage",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_GetPage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxWindow *)wxBookCtrl_GetPage(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}{ _resultobj = wxPyMake_wxObject(_result); }
-    return _resultobj;
-}
-
-#define wxBookCtrl_GetSelection(_swigobj)  (_swigobj->GetSelection())
-static PyObject *_wrap_wxBookCtrl_GetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxBookCtrl * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxBookCtrl_GetSelection",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_GetSelection. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxBookCtrl_GetSelection(_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_SetPageText(_swigobj,_swigarg0,_swigarg1)  (_swigobj->SetPageText(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxBookCtrl_SetPageText(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    wxString * _arg2;
-    PyObject * _argo0 = 0;
-    PyObject * _obj2 = 0;
-    char *_kwnames[] = { "self","n","strText", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiO:wxBookCtrl_SetPageText",_kwnames,&_argo0,&_arg1,&_obj2)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_SetPageText. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    _arg2 = wxString_in_helper(_obj2);
-    if (_arg2 == NULL)
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxBookCtrl_SetPageText(_arg0,_arg1,*_arg2);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-{
-    if (_obj2)
-        delete _arg2;
-}
-    return _resultobj;
-}
-
-#define wxBookCtrl_GetPageText(_swigobj,_swigarg0)  (_swigobj->GetPageText(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_GetPageText(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxString * _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","n", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrl_GetPageText",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_GetPageText. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = new wxString (wxBookCtrl_GetPageText(_arg0,_arg1));
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}{
-#if wxUSE_UNICODE
-    _resultobj = PyUnicode_FromWideChar(_result->c_str(), _result->Len());
-#else
-    _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
-#endif
-}
-{
-    delete _result;
-}
-    return _resultobj;
-}
-
-#define wxBookCtrl_SetImageList(_swigobj,_swigarg0)  (_swigobj->SetImageList(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_SetImageList(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxBookCtrl * _arg0;
-    wxImageList * _arg1;
-    PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    char *_kwnames[] = { "self","imageList", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxBookCtrl_SetImageList",_kwnames,&_argo0,&_argo1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_SetImageList. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxImageList_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxBookCtrl_SetImageList. Expected _wxImageList_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxBookCtrl_SetImageList(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxBookCtrl_AssignImageList(_swigobj,_swigarg0)  (_swigobj->AssignImageList(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_AssignImageList(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxBookCtrl * _arg0;
-    wxImageList * _arg1;
-    PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    char *_kwnames[] = { "self","imageList", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxBookCtrl_AssignImageList",_kwnames,&_argo0,&_argo1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_AssignImageList. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxImageList_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxBookCtrl_AssignImageList. Expected _wxImageList_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxBookCtrl_AssignImageList(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxBookCtrl_GetImageList(_swigobj)  (_swigobj->GetImageList())
-static PyObject *_wrap_wxBookCtrl_GetImageList(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxImageList * _result;
-    wxBookCtrl * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxBookCtrl_GetImageList",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_GetImageList. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxImageList *)wxBookCtrl_GetImageList(_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}{ _resultobj = wxPyMake_wxObject(_result); }
-    return _resultobj;
-}
-
-#define wxBookCtrl_GetPageImage(_swigobj,_swigarg0)  (_swigobj->GetPageImage(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_GetPageImage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","n", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrl_GetPageImage",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_GetPageImage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxBookCtrl_GetPageImage(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_SetPageImage(_swigobj,_swigarg0,_swigarg1)  (_swigobj->SetPageImage(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxBookCtrl_SetPageImage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    int  _arg2;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","n","imageId", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oii:wxBookCtrl_SetPageImage",_kwnames,&_argo0,&_arg1,&_arg2)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_SetPageImage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxBookCtrl_SetPageImage(_arg0,_arg1,_arg2);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_SetPageSize(_swigobj,_swigarg0)  (_swigobj->SetPageSize(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_SetPageSize(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxBookCtrl * _arg0;
-    wxSize * _arg1;
-    PyObject * _argo0 = 0;
-    wxSize  temp;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","size", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxBookCtrl_SetPageSize",_kwnames,&_argo0,&_obj1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_SetPageSize. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    _arg1 = &temp;
-    if (! wxSize_helper(_obj1, &_arg1))
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxBookCtrl_SetPageSize(_arg0,*_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxBookCtrl_CalcSizeFromPage(_swigobj,_swigarg0)  (_swigobj->CalcSizeFromPage(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_CalcSizeFromPage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxSize * _result;
-    wxBookCtrl * _arg0;
-    wxSize * _arg1;
-    PyObject * _argo0 = 0;
-    wxSize  temp;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","sizePage", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxBookCtrl_CalcSizeFromPage",_kwnames,&_argo0,&_obj1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_CalcSizeFromPage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    _arg1 = &temp;
-    if (! wxSize_helper(_obj1, &_arg1))
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = new wxSize (wxBookCtrl_CalcSizeFromPage(_arg0,*_arg1));
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    SWIG_MakePtr(_ptemp, (void *) _result,"_wxSize_p");
-    _resultobj = Py_BuildValue("s",_ptemp);
-    return _resultobj;
-}
-
-#define wxBookCtrl_DeletePage(_swigobj,_swigarg0)  (_swigobj->DeletePage(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_DeletePage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","n", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrl_DeletePage",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_DeletePage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxBookCtrl_DeletePage(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_RemovePage(_swigobj,_swigarg0)  (_swigobj->RemovePage(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_RemovePage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","n", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrl_RemovePage",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_RemovePage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxBookCtrl_RemovePage(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_DeleteAllPages(_swigobj)  (_swigobj->DeleteAllPages())
-static PyObject *_wrap_wxBookCtrl_DeleteAllPages(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxBookCtrl * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxBookCtrl_DeleteAllPages",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_DeleteAllPages. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxBookCtrl_DeleteAllPages(_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_AddPage(_swigobj,_swigarg0,_swigarg1,_swigarg2,_swigarg3)  (_swigobj->AddPage(_swigarg0,_swigarg1,_swigarg2,_swigarg3))
-static PyObject *_wrap_wxBookCtrl_AddPage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxBookCtrl * _arg0;
-    wxWindow * _arg1;
-    wxString * _arg2;
-    bool  _arg3 = (bool ) false;
-    int  _arg4 = (int ) -1;
-    PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    PyObject * _obj2 = 0;
-    int tempbool3 = (int) false;
-    char *_kwnames[] = { "self","page","text","bSelect","imageId", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO|ii:wxBookCtrl_AddPage",_kwnames,&_argo0,&_argo1,&_obj2,&tempbool3,&_arg4)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_AddPage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxBookCtrl_AddPage. Expected _wxWindow_p.");
-        return NULL;
-        }
-    }
-{
-    _arg2 = wxString_in_helper(_obj2);
-    if (_arg2 == NULL)
-        return NULL;
-}
-    _arg3 = (bool ) tempbool3;
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxBookCtrl_AddPage(_arg0,_arg1,*_arg2,_arg3,_arg4);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-{
-    if (_obj2)
-        delete _arg2;
-}
-    return _resultobj;
-}
-
-#define wxBookCtrl_InsertPage(_swigobj,_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4)  (_swigobj->InsertPage(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4))
-static PyObject *_wrap_wxBookCtrl_InsertPage(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    bool  _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    wxWindow * _arg2;
-    wxString * _arg3;
-    bool  _arg4 = (bool ) false;
-    int  _arg5 = (int ) -1;
-    PyObject * _argo0 = 0;
-    PyObject * _argo2 = 0;
-    PyObject * _obj3 = 0;
-    int tempbool4 = (int) false;
-    char *_kwnames[] = { "self","n","page","text","bSelect","imageId", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiOO|ii:wxBookCtrl_InsertPage",_kwnames,&_argo0,&_arg1,&_argo2,&_obj3,&tempbool4,&_arg5)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_InsertPage. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-    if (_argo2) {
-        if (_argo2 == Py_None) { _arg2 = NULL; }
-        else if (SWIG_GetPtrObj(_argo2,(void **) &_arg2,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of wxBookCtrl_InsertPage. Expected _wxWindow_p.");
-        return NULL;
-        }
-    }
-{
-    _arg3 = wxString_in_helper(_obj3);
-    if (_arg3 == NULL)
-        return NULL;
-}
-    _arg4 = (bool ) tempbool4;
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxBookCtrl_InsertPage(_arg0,_arg1,_arg2,*_arg3,_arg4,_arg5);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-{
-    if (_obj3)
-        delete _arg3;
-}
-    return _resultobj;
-}
-
-#define wxBookCtrl_SetSelection(_swigobj,_swigarg0)  (_swigobj->SetSelection(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_SetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxBookCtrl * _arg0;
-    size_t  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","n", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrl_SetSelection",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_SetSelection. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxBookCtrl_SetSelection(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrl_AdvanceSelection(_swigobj,_swigarg0)  (_swigobj->AdvanceSelection(_swigarg0))
-static PyObject *_wrap_wxBookCtrl_AdvanceSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxBookCtrl * _arg0;
-    bool  _arg1 = (bool ) true;
-    PyObject * _argo0 = 0;
-    int tempbool1 = (int) true;
-    char *_kwnames[] = { "self","forward", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O|i:wxBookCtrl_AdvanceSelection",_kwnames,&_argo0,&tempbool1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrl_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrl_AdvanceSelection. Expected _wxBookCtrl_p.");
-        return NULL;
-        }
-    }
-    _arg1 = (bool ) tempbool1;
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxBookCtrl_AdvanceSelection(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-static void *SwigwxBookCtrlEventTowxNotifyEvent(void *ptr) {
-    wxBookCtrlEvent *src;
+static void *SwigwxNotebookEventTowxNotifyEvent(void *ptr) {
+    wxNotebookEvent *src;
     wxNotifyEvent *dest;
-    src = (wxBookCtrlEvent *) ptr;
+    src = (wxNotebookEvent *) ptr;
     dest = (wxNotifyEvent *) src;
     return (void *) dest;
 }
 
-static void *SwigwxBookCtrlEventTowxCommandEvent(void *ptr) {
-    wxBookCtrlEvent *src;
+static void *SwigwxNotebookEventTowxCommandEvent(void *ptr) {
+    wxNotebookEvent *src;
     wxCommandEvent *dest;
-    src = (wxBookCtrlEvent *) ptr;
+    src = (wxNotebookEvent *) ptr;
     dest = (wxCommandEvent *) src;
     return (void *) dest;
 }
 
-static void *SwigwxBookCtrlEventTowxEvent(void *ptr) {
-    wxBookCtrlEvent *src;
+static void *SwigwxNotebookEventTowxEvent(void *ptr) {
+    wxNotebookEvent *src;
     wxEvent *dest;
-    src = (wxBookCtrlEvent *) ptr;
+    src = (wxNotebookEvent *) ptr;
     dest = (wxEvent *) src;
     return (void *) dest;
 }
 
-static void *SwigwxBookCtrlEventTowxObject(void *ptr) {
-    wxBookCtrlEvent *src;
+static void *SwigwxNotebookEventTowxObject(void *ptr) {
+    wxNotebookEvent *src;
     wxObject *dest;
-    src = (wxBookCtrlEvent *) ptr;
+    src = (wxNotebookEvent *) ptr;
     dest = (wxObject *) src;
     return (void *) dest;
 }
 
-#define new_wxBookCtrlEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3) (new wxBookCtrlEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3))
-static PyObject *_wrap_new_wxBookCtrlEvent(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define new_wxNotebookEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3) (new wxNotebookEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3))
+static PyObject *_wrap_new_wxNotebookEvent(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
-    wxBookCtrlEvent * _result;
+    wxNotebookEvent * _result;
     wxEventType  _arg0 = (wxEventType ) wxEVT_NULL;
     int  _arg1 = (int ) 0;
     int  _arg2 = (int ) -1;
     int  _arg3 = (int ) -1;
-    char *_kwnames[] = { "commandType","id","nSel","nOldSel", NULL };
+    char *_kwnames[] = { "commandType","id","sel","oldSel", NULL };
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"|iiii:new_wxBookCtrlEvent",_kwnames,&_arg0,&_arg1,&_arg2,&_arg3)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"|iiii:new_wxNotebookEvent",_kwnames,&_arg0,&_arg1,&_arg2,&_arg3)) 
         return NULL;
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxBookCtrlEvent *)new_wxBookCtrlEvent(_arg0,_arg1,_arg2,_arg3);
+    _result = (wxNotebookEvent *)new_wxNotebookEvent(_arg0,_arg1,_arg2,_arg3);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxBookCtrlEvent_p");
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxNotebookEvent_p");
         _resultobj = Py_BuildValue("s",_ptemp);
     } else {
         Py_INCREF(Py_None);
@@ -1046,27 +367,27 @@ static PyObject *_wrap_new_wxBookCtrlEvent(PyObject *self, PyObject *args, PyObj
     return _resultobj;
 }
 
-#define wxBookCtrlEvent_GetSelection(_swigobj)  (_swigobj->GetSelection())
-static PyObject *_wrap_wxBookCtrlEvent_GetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebookEvent_GetSelection(_swigobj)  (_swigobj->GetSelection())
+static PyObject *_wrap_wxNotebookEvent_GetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     int  _result;
-    wxBookCtrlEvent * _arg0;
+    wxNotebookEvent * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxBookCtrlEvent_GetSelection",_kwnames,&_argo0)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebookEvent_GetSelection",_kwnames,&_argo0)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrlEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrlEvent_GetSelection. Expected _wxBookCtrlEvent_p.");
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_GetSelection. Expected _wxNotebookEvent_p.");
         return NULL;
         }
     }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxBookCtrlEvent_GetSelection(_arg0);
+    _result = (int )wxNotebookEvent_GetSelection(_arg0);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
@@ -1074,27 +395,55 @@ static PyObject *_wrap_wxBookCtrlEvent_GetSelection(PyObject *self, PyObject *ar
     return _resultobj;
 }
 
-#define wxBookCtrlEvent_SetSelection(_swigobj,_swigarg0)  (_swigobj->SetSelection(_swigarg0))
-static PyObject *_wrap_wxBookCtrlEvent_SetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebookEvent_GetOldSelection(_swigobj)  (_swigobj->GetOldSelection())
+static PyObject *_wrap_wxNotebookEvent_GetOldSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
-    wxBookCtrlEvent * _arg0;
-    int  _arg1;
+    int  _result;
+    wxNotebookEvent * _arg0;
     PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","nSel", NULL };
+    char *_kwnames[] = { "self", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrlEvent_SetSelection",_kwnames,&_argo0,&_arg1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebookEvent_GetOldSelection",_kwnames,&_argo0)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrlEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrlEvent_SetSelection. Expected _wxBookCtrlEvent_p.");
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_GetOldSelection. Expected _wxNotebookEvent_p.");
         return NULL;
         }
     }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxBookCtrlEvent_SetSelection(_arg0,_arg1);
+    _result = (int )wxNotebookEvent_GetOldSelection(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxNotebookEvent_SetOldSelection(_swigobj,_swigarg0)  (_swigobj->SetOldSelection(_swigarg0))
+static PyObject *_wrap_wxNotebookEvent_SetOldSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxNotebookEvent * _arg0;
+    int  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","page", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebookEvent_SetOldSelection",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_SetOldSelection. Expected _wxNotebookEvent_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    wxNotebookEvent_SetOldSelection(_arg0,_arg1);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
@@ -1103,69 +452,33 @@ static PyObject *_wrap_wxBookCtrlEvent_SetSelection(PyObject *self, PyObject *ar
     return _resultobj;
 }
 
-#define wxBookCtrlEvent_GetOldSelection(_swigobj)  (_swigobj->GetOldSelection())
-static PyObject *_wrap_wxBookCtrlEvent_GetOldSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebookEvent_SetSelection(_swigobj,_swigarg0)  (_swigobj->SetSelection(_swigarg0))
+static PyObject *_wrap_wxNotebookEvent_SetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
-    int  _result;
-    wxBookCtrlEvent * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxBookCtrlEvent_GetOldSelection",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrlEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrlEvent_GetOldSelection. Expected _wxBookCtrlEvent_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxBookCtrlEvent_GetOldSelection(_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxBookCtrlEvent_SetOldSelection(_swigobj,_swigarg0)  (_swigobj->SetOldSelection(_swigarg0))
-static PyObject *_wrap_wxBookCtrlEvent_SetOldSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxBookCtrlEvent * _arg0;
+    wxNotebookEvent * _arg0;
     int  _arg1;
     PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","nOldSel", NULL };
+    char *_kwnames[] = { "self","page", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxBookCtrlEvent_SetOldSelection",_kwnames,&_argo0,&_arg1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebookEvent_SetSelection",_kwnames,&_argo0,&_arg1)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxBookCtrlEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxBookCtrlEvent_SetOldSelection. Expected _wxBookCtrlEvent_p.");
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_SetSelection. Expected _wxNotebookEvent_p.");
         return NULL;
         }
     }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxBookCtrlEvent_SetOldSelection(_arg0,_arg1);
+    wxNotebookEvent_SetSelection(_arg0,_arg1);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
-}
-
-static void *SwigwxNotebookTowxBookCtrl(void *ptr) {
-    wxNotebook *src;
-    wxBookCtrl *dest;
-    src = (wxNotebook *) ptr;
-    dest = (wxBookCtrl *) src;
-    return (void *) dest;
 }
 
 static void *SwigwxNotebookTowxControl(void *ptr) {
@@ -1362,6 +675,361 @@ static PyObject *_wrap_wxNotebook_Create(PyObject *self, PyObject *args, PyObjec
     return _resultobj;
 }
 
+#define wxNotebook_GetPageCount(_swigobj)  (_swigobj->GetPageCount())
+static PyObject *_wrap_wxNotebook_GetPageCount(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    int  _result;
+    wxNotebook * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebook_GetPageCount",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_GetPageCount. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (int )wxNotebook_GetPageCount(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxNotebook_SetSelection(_swigobj,_swigarg0)  (_swigobj->SetSelection(_swigarg0))
+static PyObject *_wrap_wxNotebook_SetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    int  _result;
+    wxNotebook * _arg0;
+    int  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","page", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebook_SetSelection",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_SetSelection. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (int )wxNotebook_SetSelection(_arg0,_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxNotebook_AdvanceSelection(_swigobj,_swigarg0)  (_swigobj->AdvanceSelection(_swigarg0))
+static PyObject *_wrap_wxNotebook_AdvanceSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxNotebook * _arg0;
+    bool  _arg1 = (bool ) TRUE;
+    PyObject * _argo0 = 0;
+    int tempbool1 = (int) TRUE;
+    char *_kwnames[] = { "self","forward", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O|i:wxNotebook_AdvanceSelection",_kwnames,&_argo0,&tempbool1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_AdvanceSelection. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+    _arg1 = (bool ) tempbool1;
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    wxNotebook_AdvanceSelection(_arg0,_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
+#define wxNotebook_GetSelection(_swigobj)  (_swigobj->GetSelection())
+static PyObject *_wrap_wxNotebook_GetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    int  _result;
+    wxNotebook * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebook_GetSelection",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_GetSelection. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (int )wxNotebook_GetSelection(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxNotebook_SetPageText(_swigobj,_swigarg0,_swigarg1)  (_swigobj->SetPageText(_swigarg0,_swigarg1))
+static PyObject *_wrap_wxNotebook_SetPageText(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxNotebook * _arg0;
+    int  _arg1;
+    wxString * _arg2;
+    PyObject * _argo0 = 0;
+    PyObject * _obj2 = 0;
+    char *_kwnames[] = { "self","page","text", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiO:wxNotebook_SetPageText",_kwnames,&_argo0,&_arg1,&_obj2)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_SetPageText. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    _arg2 = wxString_in_helper(_obj2);
+    if (_arg2 == NULL)
+        return NULL;
+}
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (bool )wxNotebook_SetPageText(_arg0,_arg1,*_arg2);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+{
+    if (_obj2)
+        delete _arg2;
+}
+    return _resultobj;
+}
+
+#define wxNotebook_GetPageText(_swigobj,_swigarg0)  (_swigobj->GetPageText(_swigarg0))
+static PyObject *_wrap_wxNotebook_GetPageText(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxString * _result;
+    wxNotebook * _arg0;
+    int  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","page", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebook_GetPageText",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_GetPageText. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = new wxString (wxNotebook_GetPageText(_arg0,_arg1));
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}{
+#if wxUSE_UNICODE
+    _resultobj = PyUnicode_FromWideChar(_result->c_str(), _result->Len());
+#else
+    _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
+#endif
+}
+{
+    delete _result;
+}
+    return _resultobj;
+}
+
+#define wxNotebook_SetImageList(_swigobj,_swigarg0)  (_swigobj->SetImageList(_swigarg0))
+static PyObject *_wrap_wxNotebook_SetImageList(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxNotebook * _arg0;
+    wxImageList * _arg1;
+    PyObject * _argo0 = 0;
+    PyObject * _argo1 = 0;
+    char *_kwnames[] = { "self","imageList", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxNotebook_SetImageList",_kwnames,&_argo0,&_argo1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_SetImageList. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+    if (_argo1) {
+        if (_argo1 == Py_None) { _arg1 = NULL; }
+        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxImageList_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxNotebook_SetImageList. Expected _wxImageList_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    wxNotebook_SetImageList(_arg0,_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
+#define wxNotebook_AssignImageList(_swigobj,_swigarg0)  (_swigobj->AssignImageList(_swigarg0))
+static PyObject *_wrap_wxNotebook_AssignImageList(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxNotebook * _arg0;
+    wxImageList * _arg1;
+    PyObject * _argo0 = 0;
+    PyObject * _argo1 = 0;
+    char *_kwnames[] = { "self","imageList", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxNotebook_AssignImageList",_kwnames,&_argo0,&_argo1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_AssignImageList. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+    if (_argo1) {
+        if (_argo1 == Py_None) { _arg1 = NULL; }
+        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxImageList_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxNotebook_AssignImageList. Expected _wxImageList_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    wxNotebook_AssignImageList(_arg0,_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
+#define wxNotebook_GetImageList(_swigobj)  (_swigobj->GetImageList())
+static PyObject *_wrap_wxNotebook_GetImageList(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxImageList * _result;
+    wxNotebook * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebook_GetImageList",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_GetImageList. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (wxImageList *)wxNotebook_GetImageList(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}{ _resultobj = wxPyMake_wxObject(_result); }
+    return _resultobj;
+}
+
+#define wxNotebook_GetPageImage(_swigobj,_swigarg0)  (_swigobj->GetPageImage(_swigarg0))
+static PyObject *_wrap_wxNotebook_GetPageImage(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    int  _result;
+    wxNotebook * _arg0;
+    int  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","page", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebook_GetPageImage",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_GetPageImage. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (int )wxNotebook_GetPageImage(_arg0,_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxNotebook_SetPageImage(_swigobj,_swigarg0,_swigarg1)  (_swigobj->SetPageImage(_swigarg0,_swigarg1))
+static PyObject *_wrap_wxNotebook_SetPageImage(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxNotebook * _arg0;
+    int  _arg1;
+    int  _arg2;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","page","image", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oii:wxNotebook_SetPageImage",_kwnames,&_argo0,&_arg1,&_arg2)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_SetPageImage. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (bool )wxNotebook_SetPageImage(_arg0,_arg1,_arg2);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
 #define wxNotebook_GetRowCount(_swigobj)  (_swigobj->GetRowCount())
 static PyObject *_wrap_wxNotebook_GetRowCount(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -1387,6 +1055,42 @@ static PyObject *_wrap_wxNotebook_GetRowCount(PyObject *self, PyObject *args, Py
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxNotebook_SetPageSize(_swigobj,_swigarg0)  (_swigobj->SetPageSize(_swigarg0))
+static PyObject *_wrap_wxNotebook_SetPageSize(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxNotebook * _arg0;
+    wxSize * _arg1;
+    PyObject * _argo0 = 0;
+    wxSize  temp;
+    PyObject * _obj1 = 0;
+    char *_kwnames[] = { "self","size", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxNotebook_SetPageSize",_kwnames,&_argo0,&_obj1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_SetPageSize. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    _arg1 = &temp;
+    if (! wxSize_helper(_obj1, &_arg1))
+        return NULL;
+}
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    wxNotebook_SetPageSize(_arg0,*_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    Py_INCREF(Py_None);
+    _resultobj = Py_None;
     return _resultobj;
 }
 
@@ -1426,644 +1130,252 @@ static PyObject *_wrap_wxNotebook_SetPadding(PyObject *self, PyObject *args, PyO
     return _resultobj;
 }
 
-#define wxNotebook_SetTabSize(_swigobj,_swigarg0)  (_swigobj->SetTabSize(_swigarg0))
-static PyObject *_wrap_wxNotebook_SetTabSize(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebook_DeletePage(_swigobj,_swigarg0)  (_swigobj->DeletePage(_swigarg0))
+static PyObject *_wrap_wxNotebook_DeletePage(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
+    bool  _result;
     wxNotebook * _arg0;
-    wxSize * _arg1;
+    int  _arg1;
     PyObject * _argo0 = 0;
-    wxSize  temp;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","sz", NULL };
+    char *_kwnames[] = { "self","page", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxNotebook_SetTabSize",_kwnames,&_argo0,&_obj1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebook_DeletePage",_kwnames,&_argo0,&_arg1)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
         else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_SetTabSize. Expected _wxNotebook_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_DeletePage. Expected _wxNotebook_p.");
         return NULL;
         }
     }
 {
-    _arg1 = &temp;
-    if (! wxSize_helper(_obj1, &_arg1))
-        return NULL;
-}
-{
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxNotebook_SetTabSize(_arg0,*_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxNotebook_HitTest(_swigobj,_swigarg0,_swigarg1)  (_swigobj->HitTest(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxNotebook_HitTest(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxNotebook * _arg0;
-    wxPoint * _arg1;
-    long * _arg2;
-    long  temp;
-    PyObject * _argo0 = 0;
-    wxPoint  temp0;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","pt", NULL };
-
-    self = self;
-{
-  _arg2 = &temp;
-}
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxNotebook_HitTest",_kwnames,&_argo0,&_obj1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_HitTest. Expected _wxNotebook_p.");
-        return NULL;
-        }
-    }
-{
-    _arg1 = &temp0;
-    if (! wxPoint_helper(_obj1, &_arg1))
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxNotebook_HitTest(_arg0,*_arg1,_arg2);
+    _result = (bool )wxNotebook_DeletePage(_arg0,_arg1);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
-{
-    PyObject *o;
-    o = PyInt_FromLong((long) (*_arg2));
-    _resultobj = t_output_helper(_resultobj, o);
-}
     return _resultobj;
 }
 
-#define wxNotebook_CalcSizeFromPage(_swigobj,_swigarg0)  (_swigobj->CalcSizeFromPage(_swigarg0))
-static PyObject *_wrap_wxNotebook_CalcSizeFromPage(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebook_RemovePage(_swigobj,_swigarg0)  (_swigobj->RemovePage(_swigarg0))
+static PyObject *_wrap_wxNotebook_RemovePage(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
-    wxSize * _result;
+    bool  _result;
     wxNotebook * _arg0;
-    wxSize * _arg1;
+    int  _arg1;
     PyObject * _argo0 = 0;
-    wxSize  temp;
-    PyObject * _obj1 = 0;
-    char *_kwnames[] = { "self","sizePage", NULL };
-    char _ptemp[128];
+    char *_kwnames[] = { "self","page", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxNotebook_CalcSizeFromPage",_kwnames,&_argo0,&_obj1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebook_RemovePage",_kwnames,&_argo0,&_arg1)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
         else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_CalcSizeFromPage. Expected _wxNotebook_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_RemovePage. Expected _wxNotebook_p.");
         return NULL;
         }
     }
 {
-    _arg1 = &temp;
-    if (! wxSize_helper(_obj1, &_arg1))
-        return NULL;
-}
-{
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = new wxSize (wxNotebook_CalcSizeFromPage(_arg0,*_arg1));
+    _result = (bool )wxNotebook_RemovePage(_arg0,_arg1);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
-}    SWIG_MakePtr(_ptemp, (void *) _result,"_wxSize_p");
-    _resultobj = Py_BuildValue("s",_ptemp);
+}    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
-#define wxNotebook_ApplyThemeBackground(_swigobj,_swigarg0,_swigarg1)  (_swigobj->ApplyThemeBackground(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxNotebook_ApplyThemeBackground(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebook_DeleteAllPages(_swigobj)  (_swigobj->DeleteAllPages())
+static PyObject *_wrap_wxNotebook_DeleteAllPages(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
+    bool  _result;
     wxNotebook * _arg0;
-    wxWindow * _arg1;
-    wxColour * _arg2;
     PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    wxColour  temp;
-    PyObject * _obj2 = 0;
-    char *_kwnames[] = { "self","window","colour", NULL };
+    char *_kwnames[] = { "self", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxNotebook_ApplyThemeBackground",_kwnames,&_argo0,&_argo1,&_obj2)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebook_DeleteAllPages",_kwnames,&_argo0)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
         else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_ApplyThemeBackground. Expected _wxNotebook_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_DeleteAllPages. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (bool )wxNotebook_DeleteAllPages(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
+#define wxNotebook_AddPage(_swigobj,_swigarg0,_swigarg1,_swigarg2,_swigarg3)  (_swigobj->AddPage(_swigarg0,_swigarg1,_swigarg2,_swigarg3))
+static PyObject *_wrap_wxNotebook_AddPage(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxNotebook * _arg0;
+    wxWindow * _arg1;
+    wxString * _arg2;
+    int  _arg3 = (int ) FALSE;
+    int  _arg4 = (int ) -1;
+    PyObject * _argo0 = 0;
+    PyObject * _argo1 = 0;
+    PyObject * _obj2 = 0;
+    char *_kwnames[] = { "self","page","text","select","imageId", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO|ii:wxNotebook_AddPage",_kwnames,&_argo0,&_argo1,&_obj2,&_arg3,&_arg4)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_AddPage. Expected _wxNotebook_p.");
         return NULL;
         }
     }
     if (_argo1) {
         if (_argo1 == Py_None) { _arg1 = NULL; }
         else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxNotebook_ApplyThemeBackground. Expected _wxWindow_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxNotebook_AddPage. Expected _wxWindow_p.");
         return NULL;
         }
     }
 {
-    _arg2 = &temp;
-    if (! wxColour_helper(_obj2, &_arg2))
+    _arg2 = wxString_in_helper(_obj2);
+    if (_arg2 == NULL)
         return NULL;
 }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxNotebook_ApplyThemeBackground(_arg0,_arg1,*_arg2);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-static void *SwigwxNotebookEventTowxNotifyEvent(void *ptr) {
-    wxNotebookEvent *src;
-    wxNotifyEvent *dest;
-    src = (wxNotebookEvent *) ptr;
-    dest = (wxNotifyEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxNotebookEventTowxCommandEvent(void *ptr) {
-    wxNotebookEvent *src;
-    wxCommandEvent *dest;
-    src = (wxNotebookEvent *) ptr;
-    dest = (wxCommandEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxNotebookEventTowxEvent(void *ptr) {
-    wxNotebookEvent *src;
-    wxEvent *dest;
-    src = (wxNotebookEvent *) ptr;
-    dest = (wxEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxNotebookEventTowxObject(void *ptr) {
-    wxNotebookEvent *src;
-    wxObject *dest;
-    src = (wxNotebookEvent *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define new_wxNotebookEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3) (new wxNotebookEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3))
-static PyObject *_wrap_new_wxNotebookEvent(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxNotebookEvent * _result;
-    wxEventType  _arg0 = (wxEventType ) wxEVT_NULL;
-    int  _arg1 = (int ) 0;
-    int  _arg2 = (int ) -1;
-    int  _arg3 = (int ) -1;
-    char *_kwnames[] = { "commandType","id","sel","oldSel", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"|iiii:new_wxNotebookEvent",_kwnames,&_arg0,&_arg1,&_arg2,&_arg3)) 
-        return NULL;
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxNotebookEvent *)new_wxNotebookEvent(_arg0,_arg1,_arg2,_arg3);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxNotebookEvent_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-    return _resultobj;
-}
-
-#define wxNotebookEvent_GetSelection(_swigobj)  (_swigobj->GetSelection())
-static PyObject *_wrap_wxNotebookEvent_GetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxNotebookEvent * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebookEvent_GetSelection",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_GetSelection. Expected _wxNotebookEvent_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxNotebookEvent_GetSelection(_arg0);
+    _result = (bool )wxNotebook_AddPage(_arg0,_arg1,*_arg2,_arg3,_arg4);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxNotebookEvent_GetOldSelection(_swigobj)  (_swigobj->GetOldSelection())
-static PyObject *_wrap_wxNotebookEvent_GetOldSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxNotebookEvent * _arg0;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebookEvent_GetOldSelection",_kwnames,&_argo0)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_GetOldSelection. Expected _wxNotebookEvent_p.");
-        return NULL;
-        }
-    }
 {
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxNotebookEvent_GetOldSelection(_arg0);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define wxNotebookEvent_SetOldSelection(_swigobj,_swigarg0)  (_swigobj->SetOldSelection(_swigarg0))
-static PyObject *_wrap_wxNotebookEvent_SetOldSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxNotebookEvent * _arg0;
-    int  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","page", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebookEvent_SetOldSelection",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_SetOldSelection. Expected _wxNotebookEvent_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxNotebookEvent_SetOldSelection(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define wxNotebookEvent_SetSelection(_swigobj,_swigarg0)  (_swigobj->SetSelection(_swigarg0))
-static PyObject *_wrap_wxNotebookEvent_SetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxNotebookEvent * _arg0;
-    int  _arg1;
-    PyObject * _argo0 = 0;
-    char *_kwnames[] = { "self","page", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebookEvent_SetSelection",_kwnames,&_argo0,&_arg1)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebookEvent_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebookEvent_SetSelection. Expected _wxNotebookEvent_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxNotebookEvent_SetSelection(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-static void *SwigwxListbookTowxBookCtrl(void *ptr) {
-    wxListbook *src;
-    wxBookCtrl *dest;
-    src = (wxListbook *) ptr;
-    dest = (wxBookCtrl *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookTowxControl(void *ptr) {
-    wxListbook *src;
-    wxControl *dest;
-    src = (wxListbook *) ptr;
-    dest = (wxControl *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookTowxWindow(void *ptr) {
-    wxListbook *src;
-    wxWindow *dest;
-    src = (wxListbook *) ptr;
-    dest = (wxWindow *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookTowxEvtHandler(void *ptr) {
-    wxListbook *src;
-    wxEvtHandler *dest;
-    src = (wxListbook *) ptr;
-    dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookTowxObject(void *ptr) {
-    wxListbook *src;
-    wxObject *dest;
-    src = (wxListbook *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define new_wxListbook(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5) (new wxListbook(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5))
-static PyObject *_wrap_new_wxListbook(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxListbook * _result;
-    wxWindow * _arg0;
-    wxWindowID  _arg1;
-    wxPoint * _arg2 = (wxPoint *) &wxDefaultPosition;
-    wxSize * _arg3 = (wxSize *) &wxDefaultSize;
-    long  _arg4 = (long ) 0;
-    wxString * _arg5 = (wxString *) &wxPyEmptyString;
-    PyObject * _argo0 = 0;
-    wxPoint  temp;
-    PyObject * _obj2 = 0;
-    wxSize  temp0;
-    PyObject * _obj3 = 0;
-    PyObject * _obj5 = 0;
-    char *_kwnames[] = { "parent","id","pos","size","style","name", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi|OOlO:new_wxListbook",_kwnames,&_argo0,&_arg1,&_obj2,&_obj3,&_arg4,&_obj5)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of new_wxListbook. Expected _wxWindow_p.");
-        return NULL;
-        }
-    }
     if (_obj2)
-{
-    _arg2 = &temp;
-    if (! wxPoint_helper(_obj2, &_arg2))
-        return NULL;
-}
-    if (_obj3)
-{
-    _arg3 = &temp0;
-    if (! wxSize_helper(_obj3, &_arg3))
-        return NULL;
-}
-    if (_obj5)
-{
-    _arg5 = wxString_in_helper(_obj5);
-    if (_arg5 == NULL)
-        return NULL;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxListbook *)new_wxListbook(_arg0,_arg1,*_arg2,*_arg3,_arg4,*_arg5);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxListbook_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-{
-    if (_obj5)
-        delete _arg5;
+        delete _arg2;
 }
     return _resultobj;
 }
 
-#define new_wxPreListbook() (new wxListbook())
-static PyObject *_wrap_new_wxPreListbook(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxListbook * _result;
-    char *_kwnames[] = {  NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,":new_wxPreListbook",_kwnames)) 
-        return NULL;
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxListbook *)new_wxPreListbook();
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxListbook_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-    return _resultobj;
-}
-
-#define wxListbook_Create(_swigobj,_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5)  (_swigobj->Create(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5))
-static PyObject *_wrap_wxListbook_Create(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebook_InsertPage(_swigobj,_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4)  (_swigobj->InsertPage(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4))
+static PyObject *_wrap_wxNotebook_InsertPage(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     bool  _result;
-    wxListbook * _arg0;
-    wxWindow * _arg1;
-    wxWindowID  _arg2;
-    wxPoint * _arg3 = (wxPoint *) &wxDefaultPosition;
-    wxSize * _arg4 = (wxSize *) &wxDefaultSize;
-    long  _arg5 = (long ) 0;
-    wxString * _arg6 = (wxString *) &wxPyEmptyString;
+    wxNotebook * _arg0;
+    int  _arg1;
+    wxWindow * _arg2;
+    wxString * _arg3;
+    bool  _arg4 = (bool ) FALSE;
+    int  _arg5 = (int ) -1;
     PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    wxPoint  temp;
+    PyObject * _argo2 = 0;
     PyObject * _obj3 = 0;
-    wxSize  temp0;
-    PyObject * _obj4 = 0;
-    PyObject * _obj6 = 0;
-    char *_kwnames[] = { "self","parent","id","pos","size","style","name", NULL };
+    int tempbool4 = (int) FALSE;
+    char *_kwnames[] = { "self","index","page","text","select","imageId", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOi|OOlO:wxListbook_Create",_kwnames,&_argo0,&_argo1,&_arg2,&_obj3,&_obj4,&_arg5,&_obj6)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiOO|ii:wxNotebook_InsertPage",_kwnames,&_argo0,&_arg1,&_argo2,&_obj3,&tempbool4,&_arg5)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxListbook_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxListbook_Create. Expected _wxListbook_p.");
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_InsertPage. Expected _wxNotebook_p.");
         return NULL;
         }
     }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxListbook_Create. Expected _wxWindow_p.");
+    if (_argo2) {
+        if (_argo2 == Py_None) { _arg2 = NULL; }
+        else if (SWIG_GetPtrObj(_argo2,(void **) &_arg2,"_wxWindow_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of wxNotebook_InsertPage. Expected _wxWindow_p.");
         return NULL;
         }
     }
-    if (_obj3)
 {
-    _arg3 = &temp;
-    if (! wxPoint_helper(_obj3, &_arg3))
+    _arg3 = wxString_in_helper(_obj3);
+    if (_arg3 == NULL)
         return NULL;
 }
-    if (_obj4)
-{
-    _arg4 = &temp0;
-    if (! wxSize_helper(_obj4, &_arg4))
-        return NULL;
-}
-    if (_obj6)
-{
-    _arg6 = wxString_in_helper(_obj6);
-    if (_arg6 == NULL)
-        return NULL;
-}
+    _arg4 = (bool ) tempbool4;
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxListbook_Create(_arg0,_arg1,_arg2,*_arg3,*_arg4,_arg5,*_arg6);
+    _result = (bool )wxNotebook_InsertPage(_arg0,_arg1,_arg2,*_arg3,_arg4,_arg5);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
 {
-    if (_obj6)
-        delete _arg6;
+    if (_obj3)
+        delete _arg3;
 }
     return _resultobj;
 }
 
-#define wxListbook_IsVertical(_swigobj)  (_swigobj->IsVertical())
-static PyObject *_wrap_wxListbook_IsVertical(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxNotebook_GetPage(_swigobj,_swigarg0)  (_swigobj->GetPage(_swigarg0))
+static PyObject *_wrap_wxNotebook_GetPage(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
-    bool  _result;
-    wxListbook * _arg0;
+    wxWindow * _result;
+    wxNotebook * _arg0;
+    int  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","page", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxNotebook_GetPage",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_GetPage. Expected _wxNotebook_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (wxWindow *)wxNotebook_GetPage(_arg0,_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}{ _resultobj = wxPyMake_wxObject(_result); }
+    return _resultobj;
+}
+
+static void  wxNotebook_ResizeChildren(wxNotebook *self) {
+            wxSizeEvent evt(self->GetClientSize());
+            self->GetEventHandler()->ProcessEvent(evt);
+        }
+static PyObject *_wrap_wxNotebook_ResizeChildren(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxNotebook * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxListbook_IsVertical",_kwnames,&_argo0)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxNotebook_ResizeChildren",_kwnames,&_argo0)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxListbook_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxListbook_IsVertical. Expected _wxListbook_p.");
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxNotebook_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxNotebook_ResizeChildren. Expected _wxNotebook_p.");
         return NULL;
         }
     }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (bool )wxListbook_IsVertical(_arg0);
+    wxNotebook_ResizeChildren(_arg0);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-static void *SwigwxListbookEventTowxBookCtrlEvent(void *ptr) {
-    wxListbookEvent *src;
-    wxBookCtrlEvent *dest;
-    src = (wxListbookEvent *) ptr;
-    dest = (wxBookCtrlEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookEventTowxNotifyEvent(void *ptr) {
-    wxListbookEvent *src;
-    wxNotifyEvent *dest;
-    src = (wxListbookEvent *) ptr;
-    dest = (wxNotifyEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookEventTowxCommandEvent(void *ptr) {
-    wxListbookEvent *src;
-    wxCommandEvent *dest;
-    src = (wxListbookEvent *) ptr;
-    dest = (wxCommandEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookEventTowxEvent(void *ptr) {
-    wxListbookEvent *src;
-    wxEvent *dest;
-    src = (wxListbookEvent *) ptr;
-    dest = (wxEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxListbookEventTowxObject(void *ptr) {
-    wxListbookEvent *src;
-    wxObject *dest;
-    src = (wxListbookEvent *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define new_wxListbookEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3) (new wxListbookEvent(_swigarg0,_swigarg1,_swigarg2,_swigarg3))
-static PyObject *_wrap_new_wxListbookEvent(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxListbookEvent * _result;
-    wxEventType  _arg0 = (wxEventType ) wxEVT_NULL;
-    int  _arg1 = (int ) 0;
-    int  _arg2 = (int ) -1;
-    int  _arg3 = (int ) -1;
-    char *_kwnames[] = { "commandType","id","nSel","nOldSel", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"|iiii:new_wxListbookEvent",_kwnames,&_arg0,&_arg1,&_arg2,&_arg3)) 
-        return NULL;
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxListbookEvent *)new_wxListbookEvent(_arg0,_arg1,_arg2,_arg3);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxListbookEvent_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
+}    Py_INCREF(Py_None);
+    _resultobj = Py_None;
     return _resultobj;
 }
 
@@ -2308,7 +1620,7 @@ static PyObject *_wrap_new_wxSplitterWindow(PyObject *self, PyObject *args, PyOb
     wxWindowID  _arg1;
     wxPoint * _arg2 = (wxPoint *) &wxDefaultPosition;
     wxSize * _arg3 = (wxSize *) &wxDefaultSize;
-    long  _arg4 = (long ) (wxSP_3D)|wxCLIP_CHILDREN;
+    long  _arg4 = (long ) wxSP_3D|wxCLIP_CHILDREN;
     wxString * _arg5 = (wxString *) &wxPySplitterNameStr;
     PyObject * _argo0 = 0;
     wxPoint  temp;
@@ -2402,7 +1714,7 @@ static PyObject *_wrap_wxSplitterWindow_Create(PyObject *self, PyObject *args, P
     wxWindowID  _arg2;
     wxPoint * _arg3 = (wxPoint *) &wxDefaultPosition;
     wxSize * _arg4 = (wxSize *) &wxDefaultSize;
-    long  _arg5 = (long ) (wxSP_3D)|wxCLIP_CHILDREN;
+    long  _arg5 = (long ) wxSP_3D|wxCLIP_CHILDREN;
     wxString * _arg6 = (wxString *) &wxPySplitterNameStr;
     PyObject * _argo0 = 0;
     PyObject * _argo1 = 0;
@@ -3132,58 +2444,6 @@ static PyObject *_wrap_wxSplitterWindow_GetNeedUpdating(PyObject *self, PyObject
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-static void *SwigwxTaskBarIconEventTowxEvent(void *ptr) {
-    wxTaskBarIconEvent *src;
-    wxEvent *dest;
-    src = (wxTaskBarIconEvent *) ptr;
-    dest = (wxEvent *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxTaskBarIconEventTowxObject(void *ptr) {
-    wxTaskBarIconEvent *src;
-    wxObject *dest;
-    src = (wxTaskBarIconEvent *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define new_wxTaskBarIconEvent(_swigarg0,_swigarg1) (new wxTaskBarIconEvent(_swigarg0,_swigarg1))
-static PyObject *_wrap_new_wxTaskBarIconEvent(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxTaskBarIconEvent * _result;
-    wxEventType  _arg0;
-    wxTaskBarIcon * _arg1;
-    PyObject * _argo1 = 0;
-    char *_kwnames[] = { "evtType","tbIcon", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"iO:new_wxTaskBarIconEvent",_kwnames,&_arg0,&_argo1)) 
-        return NULL;
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxTaskBarIcon_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of new_wxTaskBarIconEvent. Expected _wxTaskBarIcon_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxTaskBarIconEvent *)new_wxTaskBarIconEvent(_arg0,_arg1);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxTaskBarIconEvent_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
     return _resultobj;
 }
 
@@ -5708,7 +4968,6 @@ static PyMethodDef windows2cMethods[] = {
 	 { "wxTaskBarIcon_SetIcon", (PyCFunction) _wrap_wxTaskBarIcon_SetIcon, METH_VARARGS | METH_KEYWORDS },
 	 { "delete_wxTaskBarIcon", (PyCFunction) _wrap_delete_wxTaskBarIcon, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxTaskBarIcon", (PyCFunction) _wrap_new_wxTaskBarIcon, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxTaskBarIconEvent", (PyCFunction) _wrap_new_wxTaskBarIconEvent, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSplitterWindow_GetNeedUpdating", (PyCFunction) _wrap_wxSplitterWindow_GetNeedUpdating, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSplitterWindow_SetNeedUpdating", (PyCFunction) _wrap_wxSplitterWindow_SetNeedUpdating, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSplitterWindow_SizeWindows", (PyCFunction) _wrap_wxSplitterWindow_SizeWindows, METH_VARARGS | METH_KEYWORDS },
@@ -5739,49 +4998,35 @@ static PyMethodDef windows2cMethods[] = {
 	 { "wxSplitterEvent_GetX", (PyCFunction) _wrap_wxSplitterEvent_GetX, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSplitterEvent_GetSashPosition", (PyCFunction) _wrap_wxSplitterEvent_GetSashPosition, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxSplitterEvent", (PyCFunction) _wrap_new_wxSplitterEvent, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxListbookEvent", (PyCFunction) _wrap_new_wxListbookEvent, METH_VARARGS | METH_KEYWORDS },
-	 { "wxListbook_IsVertical", (PyCFunction) _wrap_wxListbook_IsVertical, METH_VARARGS | METH_KEYWORDS },
-	 { "wxListbook_Create", (PyCFunction) _wrap_wxListbook_Create, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxPreListbook", (PyCFunction) _wrap_new_wxPreListbook, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxListbook", (PyCFunction) _wrap_new_wxListbook, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_ResizeChildren", (PyCFunction) _wrap_wxNotebook_ResizeChildren, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_GetPage", (PyCFunction) _wrap_wxNotebook_GetPage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_InsertPage", (PyCFunction) _wrap_wxNotebook_InsertPage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_AddPage", (PyCFunction) _wrap_wxNotebook_AddPage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_DeleteAllPages", (PyCFunction) _wrap_wxNotebook_DeleteAllPages, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_RemovePage", (PyCFunction) _wrap_wxNotebook_RemovePage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_DeletePage", (PyCFunction) _wrap_wxNotebook_DeletePage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_SetPadding", (PyCFunction) _wrap_wxNotebook_SetPadding, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_SetPageSize", (PyCFunction) _wrap_wxNotebook_SetPageSize, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_GetRowCount", (PyCFunction) _wrap_wxNotebook_GetRowCount, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_SetPageImage", (PyCFunction) _wrap_wxNotebook_SetPageImage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_GetPageImage", (PyCFunction) _wrap_wxNotebook_GetPageImage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_GetImageList", (PyCFunction) _wrap_wxNotebook_GetImageList, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_AssignImageList", (PyCFunction) _wrap_wxNotebook_AssignImageList, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_SetImageList", (PyCFunction) _wrap_wxNotebook_SetImageList, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_GetPageText", (PyCFunction) _wrap_wxNotebook_GetPageText, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_SetPageText", (PyCFunction) _wrap_wxNotebook_SetPageText, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_GetSelection", (PyCFunction) _wrap_wxNotebook_GetSelection, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_AdvanceSelection", (PyCFunction) _wrap_wxNotebook_AdvanceSelection, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_SetSelection", (PyCFunction) _wrap_wxNotebook_SetSelection, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_GetPageCount", (PyCFunction) _wrap_wxNotebook_GetPageCount, METH_VARARGS | METH_KEYWORDS },
+	 { "wxNotebook_Create", (PyCFunction) _wrap_wxNotebook_Create, METH_VARARGS | METH_KEYWORDS },
+	 { "new_wxPreNotebook", (PyCFunction) _wrap_new_wxPreNotebook, METH_VARARGS | METH_KEYWORDS },
+	 { "new_wxNotebook", (PyCFunction) _wrap_new_wxNotebook, METH_VARARGS | METH_KEYWORDS },
 	 { "wxNotebookEvent_SetSelection", (PyCFunction) _wrap_wxNotebookEvent_SetSelection, METH_VARARGS | METH_KEYWORDS },
 	 { "wxNotebookEvent_SetOldSelection", (PyCFunction) _wrap_wxNotebookEvent_SetOldSelection, METH_VARARGS | METH_KEYWORDS },
 	 { "wxNotebookEvent_GetOldSelection", (PyCFunction) _wrap_wxNotebookEvent_GetOldSelection, METH_VARARGS | METH_KEYWORDS },
 	 { "wxNotebookEvent_GetSelection", (PyCFunction) _wrap_wxNotebookEvent_GetSelection, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxNotebookEvent", (PyCFunction) _wrap_new_wxNotebookEvent, METH_VARARGS | METH_KEYWORDS },
-	 { "wxNotebook_ApplyThemeBackground", (PyCFunction) _wrap_wxNotebook_ApplyThemeBackground, METH_VARARGS | METH_KEYWORDS },
-	 { "wxNotebook_CalcSizeFromPage", (PyCFunction) _wrap_wxNotebook_CalcSizeFromPage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxNotebook_HitTest", (PyCFunction) _wrap_wxNotebook_HitTest, METH_VARARGS | METH_KEYWORDS },
-	 { "wxNotebook_SetTabSize", (PyCFunction) _wrap_wxNotebook_SetTabSize, METH_VARARGS | METH_KEYWORDS },
-	 { "wxNotebook_SetPadding", (PyCFunction) _wrap_wxNotebook_SetPadding, METH_VARARGS | METH_KEYWORDS },
-	 { "wxNotebook_GetRowCount", (PyCFunction) _wrap_wxNotebook_GetRowCount, METH_VARARGS | METH_KEYWORDS },
-	 { "wxNotebook_Create", (PyCFunction) _wrap_wxNotebook_Create, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxPreNotebook", (PyCFunction) _wrap_new_wxPreNotebook, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxNotebook", (PyCFunction) _wrap_new_wxNotebook, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrlEvent_SetOldSelection", (PyCFunction) _wrap_wxBookCtrlEvent_SetOldSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrlEvent_GetOldSelection", (PyCFunction) _wrap_wxBookCtrlEvent_GetOldSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrlEvent_SetSelection", (PyCFunction) _wrap_wxBookCtrlEvent_SetSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrlEvent_GetSelection", (PyCFunction) _wrap_wxBookCtrlEvent_GetSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxBookCtrlEvent", (PyCFunction) _wrap_new_wxBookCtrlEvent, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_AdvanceSelection", (PyCFunction) _wrap_wxBookCtrl_AdvanceSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_SetSelection", (PyCFunction) _wrap_wxBookCtrl_SetSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_InsertPage", (PyCFunction) _wrap_wxBookCtrl_InsertPage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_AddPage", (PyCFunction) _wrap_wxBookCtrl_AddPage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_DeleteAllPages", (PyCFunction) _wrap_wxBookCtrl_DeleteAllPages, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_RemovePage", (PyCFunction) _wrap_wxBookCtrl_RemovePage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_DeletePage", (PyCFunction) _wrap_wxBookCtrl_DeletePage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_CalcSizeFromPage", (PyCFunction) _wrap_wxBookCtrl_CalcSizeFromPage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_SetPageSize", (PyCFunction) _wrap_wxBookCtrl_SetPageSize, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_SetPageImage", (PyCFunction) _wrap_wxBookCtrl_SetPageImage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_GetPageImage", (PyCFunction) _wrap_wxBookCtrl_GetPageImage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_GetImageList", (PyCFunction) _wrap_wxBookCtrl_GetImageList, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_AssignImageList", (PyCFunction) _wrap_wxBookCtrl_AssignImageList, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_SetImageList", (PyCFunction) _wrap_wxBookCtrl_SetImageList, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_GetPageText", (PyCFunction) _wrap_wxBookCtrl_GetPageText, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_SetPageText", (PyCFunction) _wrap_wxBookCtrl_SetPageText, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_GetSelection", (PyCFunction) _wrap_wxBookCtrl_GetSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_GetPage", (PyCFunction) _wrap_wxBookCtrl_GetPage, METH_VARARGS | METH_KEYWORDS },
-	 { "wxBookCtrl_GetPageCount", (PyCFunction) _wrap_wxBookCtrl_GetPageCount, METH_VARARGS | METH_KEYWORDS },
 	 { NULL, NULL }
 };
 #ifdef __cplusplus
@@ -5791,11 +5036,8 @@ static PyMethodDef windows2cMethods[] = {
  * This table is used by the pointer type-checker
  */
 static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
-    { "_wxEvent","_wxTaskBarIconEvent",SwigwxTaskBarIconEventTowxEvent},
     { "_wxEvent","_wxSplitterEvent",SwigwxSplitterEventTowxEvent},
-    { "_wxEvent","_wxListbookEvent",SwigwxListbookEventTowxEvent},
     { "_wxEvent","_wxNotebookEvent",SwigwxNotebookEventTowxEvent},
-    { "_wxEvent","_wxBookCtrlEvent",SwigwxBookCtrlEventTowxEvent},
     { "_signed_long","_long",0},
     { "_wxPrintQuality","_wxCoord",0},
     { "_wxPrintQuality","_int",0},
@@ -5807,9 +5049,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxPrintQuality","_size_t",0},
     { "_wxPrintQuality","_time_t",0},
     { "_wxNotifyEvent","_wxSplitterEvent",SwigwxSplitterEventTowxNotifyEvent},
-    { "_wxNotifyEvent","_wxListbookEvent",SwigwxListbookEventTowxNotifyEvent},
     { "_wxNotifyEvent","_wxNotebookEvent",SwigwxNotebookEventTowxNotifyEvent},
-    { "_wxNotifyEvent","_wxBookCtrlEvent",SwigwxBookCtrlEventTowxNotifyEvent},
     { "_byte","_unsigned_char",0},
     { "_long","_unsigned_long",0},
     { "_long","_signed_long",0},
@@ -5821,7 +5061,6 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_size_t","_wxWindowID",0},
     { "_size_t","_uint",0},
     { "_wxPanel","_wxPyPanel",SwigwxPyPanelTowxPanel},
-    { "_wxBookCtrlEvent","_wxListbookEvent",SwigwxListbookEventTowxBookCtrlEvent},
     { "_uint","_wxCoord",0},
     { "_uint","_wxPrintQuality",0},
     { "_uint","_time_t",0},
@@ -5831,9 +5070,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_uint","_wxWindowID",0},
     { "_wxChar","_char",0},
     { "_wxCommandEvent","_wxSplitterEvent",SwigwxSplitterEventTowxCommandEvent},
-    { "_wxCommandEvent","_wxListbookEvent",SwigwxListbookEventTowxCommandEvent},
     { "_wxCommandEvent","_wxNotebookEvent",SwigwxNotebookEventTowxCommandEvent},
-    { "_wxCommandEvent","_wxBookCtrlEvent",SwigwxBookCtrlEventTowxCommandEvent},
     { "_char","_wxChar",0},
     { "_struct_wxNativeFontInfo","_wxNativeFontInfo",0},
     { "_EBool","_wxCoord",0},
@@ -5857,22 +5094,15 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxObject","_wxPyControl",SwigwxPyControlTowxObject},
     { "_wxObject","_wxPyWindow",SwigwxPyWindowTowxObject},
     { "_wxObject","_wxTaskBarIcon",SwigwxTaskBarIconTowxObject},
-    { "_wxObject","_wxTaskBarIconEvent",SwigwxTaskBarIconEventTowxObject},
     { "_wxObject","_wxSplitterWindow",SwigwxSplitterWindowTowxObject},
     { "_wxObject","_wxSplitterEvent",SwigwxSplitterEventTowxObject},
-    { "_wxObject","_wxListbookEvent",SwigwxListbookEventTowxObject},
-    { "_wxObject","_wxListbook",SwigwxListbookTowxObject},
-    { "_wxObject","_wxNotebookEvent",SwigwxNotebookEventTowxObject},
     { "_wxObject","_wxNotebook",SwigwxNotebookTowxObject},
-    { "_wxObject","_wxBookCtrlEvent",SwigwxBookCtrlEventTowxObject},
-    { "_wxObject","_wxBookCtrl",SwigwxBookCtrlTowxObject},
+    { "_wxObject","_wxNotebookEvent",SwigwxNotebookEventTowxObject},
     { "_signed_short","_WXTYPE",0},
     { "_signed_short","_short",0},
     { "_unsigned_char","_byte",0},
     { "_wxControl","_wxPyControl",SwigwxPyControlTowxControl},
-    { "_wxControl","_wxListbook",SwigwxListbookTowxControl},
     { "_wxControl","_wxNotebook",SwigwxNotebookTowxControl},
-    { "_wxControl","_wxBookCtrl",SwigwxBookCtrlTowxControl},
     { "_unsigned_int","_wxCoord",0},
     { "_unsigned_int","_wxPrintQuality",0},
     { "_unsigned_int","_time_t",0},
@@ -5883,8 +5113,6 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_short","_WXTYPE",0},
     { "_short","_unsigned_short",0},
     { "_short","_signed_short",0},
-    { "_wxBookCtrl","_wxListbook",SwigwxListbookTowxBookCtrl},
-    { "_wxBookCtrl","_wxNotebook",SwigwxNotebookTowxBookCtrl},
     { "_wxWindowID","_wxCoord",0},
     { "_wxWindowID","_wxPrintQuality",0},
     { "_wxWindowID","_time_t",0},
@@ -5924,16 +5152,12 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxEvtHandler","_wxPyWindow",SwigwxPyWindowTowxEvtHandler},
     { "_wxEvtHandler","_wxTaskBarIcon",SwigwxTaskBarIconTowxEvtHandler},
     { "_wxEvtHandler","_wxSplitterWindow",SwigwxSplitterWindowTowxEvtHandler},
-    { "_wxEvtHandler","_wxListbook",SwigwxListbookTowxEvtHandler},
     { "_wxEvtHandler","_wxNotebook",SwigwxNotebookTowxEvtHandler},
-    { "_wxEvtHandler","_wxBookCtrl",SwigwxBookCtrlTowxEvtHandler},
     { "_wxWindow","_wxPyPanel",SwigwxPyPanelTowxWindow},
     { "_wxWindow","_wxPyControl",SwigwxPyControlTowxWindow},
     { "_wxWindow","_wxPyWindow",SwigwxPyWindowTowxWindow},
     { "_wxWindow","_wxSplitterWindow",SwigwxSplitterWindowTowxWindow},
-    { "_wxWindow","_wxListbook",SwigwxListbookTowxWindow},
     { "_wxWindow","_wxNotebook",SwigwxNotebookTowxWindow},
-    { "_wxWindow","_wxBookCtrl",SwigwxBookCtrlTowxWindow},
 {0,0,0}};
 
 static PyObject *SWIG_globals;
@@ -5947,24 +5171,6 @@ SWIGEXPORT(void) initwindows2c() {
 	 d = PyModule_GetDict(m);
 	 PyDict_SetItemString(d,"wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED", PyInt_FromLong((long) wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED));
 	 PyDict_SetItemString(d,"wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING", PyInt_FromLong((long) wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING));
-	 PyDict_SetItemString(d,"wxNB_FIXEDWIDTH", PyInt_FromLong((long) wxNB_FIXEDWIDTH));
-	 PyDict_SetItemString(d,"wxNB_TOP", PyInt_FromLong((long) wxNB_TOP));
-	 PyDict_SetItemString(d,"wxNB_LEFT", PyInt_FromLong((long) wxNB_LEFT));
-	 PyDict_SetItemString(d,"wxNB_RIGHT", PyInt_FromLong((long) wxNB_RIGHT));
-	 PyDict_SetItemString(d,"wxNB_BOTTOM", PyInt_FromLong((long) wxNB_BOTTOM));
-	 PyDict_SetItemString(d,"wxNB_MULTILINE", PyInt_FromLong((long) wxNB_MULTILINE));
-	 PyDict_SetItemString(d,"wxNB_HITTEST_NOWHERE", PyInt_FromLong((long) wxNB_HITTEST_NOWHERE));
-	 PyDict_SetItemString(d,"wxNB_HITTEST_ONICON", PyInt_FromLong((long) wxNB_HITTEST_ONICON));
-	 PyDict_SetItemString(d,"wxNB_HITTEST_ONLABEL", PyInt_FromLong((long) wxNB_HITTEST_ONLABEL));
-	 PyDict_SetItemString(d,"wxNB_HITTEST_ONITEM", PyInt_FromLong((long) wxNB_HITTEST_ONITEM));
-	 PyDict_SetItemString(d,"wxLB_DEFAULT", PyInt_FromLong((long) wxLB_DEFAULT));
-	 PyDict_SetItemString(d,"wxLB_TOP", PyInt_FromLong((long) wxLB_TOP));
-	 PyDict_SetItemString(d,"wxLB_BOTTOM", PyInt_FromLong((long) wxLB_BOTTOM));
-	 PyDict_SetItemString(d,"wxLB_LEFT", PyInt_FromLong((long) wxLB_LEFT));
-	 PyDict_SetItemString(d,"wxLB_RIGHT", PyInt_FromLong((long) wxLB_RIGHT));
-	 PyDict_SetItemString(d,"wxLB_ALIGN_MASK", PyInt_FromLong((long) wxLB_ALIGN_MASK));
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED", PyInt_FromLong((long) wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED));
-	 PyDict_SetItemString(d,"wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING", PyInt_FromLong((long) wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING));
 	 PyDict_SetItemString(d,"wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING", PyInt_FromLong((long) wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING));
 	 PyDict_SetItemString(d,"wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED", PyInt_FromLong((long) wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED));
 	 PyDict_SetItemString(d,"wxEVT_COMMAND_SPLITTER_UNSPLIT", PyInt_FromLong((long) wxEVT_COMMAND_SPLITTER_UNSPLIT));
@@ -5974,18 +5180,6 @@ SWIGEXPORT(void) initwindows2c() {
 	 PyDict_SetItemString(d,"wxSPLIT_DRAG_NONE", PyInt_FromLong((long) wxSPLIT_DRAG_NONE));
 	 PyDict_SetItemString(d,"wxSPLIT_DRAG_DRAGGING", PyInt_FromLong((long) wxSPLIT_DRAG_DRAGGING));
 	 PyDict_SetItemString(d,"wxSPLIT_DRAG_LEFT_DOWN", PyInt_FromLong((long) wxSPLIT_DRAG_LEFT_DOWN));
-	 PyDict_SetItemString(d,"wxSP_VERTICAL", PyInt_FromLong((long) wxSP_VERTICAL));
-	 PyDict_SetItemString(d,"wxSP_HORIZONTAL", PyInt_FromLong((long) wxSP_HORIZONTAL));
-	 PyDict_SetItemString(d,"wxSP_ARROW_KEYS", PyInt_FromLong((long) wxSP_ARROW_KEYS));
-	 PyDict_SetItemString(d,"wxSP_WRAP", PyInt_FromLong((long) wxSP_WRAP));
-	 PyDict_SetItemString(d,"wxSP_NOBORDER", PyInt_FromLong((long) wxSP_NOBORDER));
-	 PyDict_SetItemString(d,"wxSP_3D", PyInt_FromLong((long) wxSP_3D));
-	 PyDict_SetItemString(d,"wxSP_3DSASH", PyInt_FromLong((long) wxSP_3DSASH));
-	 PyDict_SetItemString(d,"wxSP_3DBORDER", PyInt_FromLong((long) wxSP_3DBORDER));
-	 PyDict_SetItemString(d,"wxSP_FULLSASH", PyInt_FromLong((long) wxSP_FULLSASH));
-	 PyDict_SetItemString(d,"wxSP_BORDER", PyInt_FromLong((long) wxSP_BORDER));
-	 PyDict_SetItemString(d,"wxSP_LIVE_UPDATE", PyInt_FromLong((long) wxSP_LIVE_UPDATE));
-	 PyDict_SetItemString(d,"wxSP_PERMIT_UNSPLIT", PyInt_FromLong((long) wxSP_PERMIT_UNSPLIT));
 	 PyDict_SetItemString(d,"wxEVT_TASKBAR_MOVE", PyInt_FromLong((long) wxEVT_TASKBAR_MOVE));
 	 PyDict_SetItemString(d,"wxEVT_TASKBAR_LEFT_DOWN", PyInt_FromLong((long) wxEVT_TASKBAR_LEFT_DOWN));
 	 PyDict_SetItemString(d,"wxEVT_TASKBAR_LEFT_UP", PyInt_FromLong((long) wxEVT_TASKBAR_LEFT_UP));
