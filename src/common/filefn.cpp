@@ -428,11 +428,7 @@ wxChar *wxRealPath (wxChar *path)
             if (p[1] == wxT('.') && p[2] == wxT('.') && (p[3] == SEP || p[3] == wxT('\0')))
               {
                 wxChar *q;
-                for (q = p - 1; q >= path && *q != SEP; q--)
-                {
-                    // Empty
-                }
-
+                for (q = p - 1; q >= path && *q != SEP; q--);
                 if (q[0] == SEP && (q[1] != wxT('.') || q[2] != wxT('.') || q[3] != SEP)
                     && (q - 1 <= path || q[-1] != SEP))
                   {
@@ -596,11 +592,7 @@ wxChar *wxExpandPath(wxChar *buf, const wxChar *name)
             *--d = 0;
             value = wxGetenv(braces ? start + 1 : start);
             if (value) {
-                for ((d = start - 1); (*d++ = *value++) != 0;)
-                {
-                    // Empty
-                }
-
+                for ((d = start - 1); (*d++ = *value++) != 0;);
                 d--;
                 if (braces && *s)
                     s++;
@@ -624,10 +616,7 @@ wxChar *wxExpandPath(wxChar *buf, const wxChar *name)
         {                /* ~user/filename */
             register wxChar  *nnm;
             register wxChar  *home;
-            for (s = nm; *s && *s != SEP; s++)
-            {
-                // Empty
-            }
+            for (s = nm; *s && *s != SEP; s++);
             int was_sep; /* MATTHEW: Was there a separator, or NULL? */
             was_sep = (*s == SEP);
             nnm = *s ? s + 1 : s;
@@ -654,10 +643,7 @@ wxChar *wxExpandPath(wxChar *buf, const wxChar *name)
           *(d - 1) = SEP;
     }
     s = nm;
-    while ((*d++ = *s++) != 0)
-    {
-        // Empty
-    }
+    while ((*d++ = *s++) != 0);
     delete[] nm_tmp; // clean up alloc
     /* Now clean up the buffer */
     return wxRealPath(buf);

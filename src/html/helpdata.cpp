@@ -570,6 +570,7 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
     {
         wxFSFile *fi;
         wxFileSystem fsys;
+        wxString bookFull;
 
         wxString title = _("noname"),
                  safetitle,
@@ -578,13 +579,23 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
                  index = wxEmptyString,
                  charset = wxEmptyString;
 
-        fi = fsys.OpenFile(book);
+#if defined(__WXMAC__) && !defined(__DARWIN__)
+        if (wxIsAbsolutePath(book)) bookFull = book;
+        else bookFull = wxGetCwd() + book; // no slash or dot
+        wxFileName fn( bookFull );
+        bookFull = fn.GetFullPath( wxPATH_UNIX );
+#else
+        if (wxIsAbsolutePath(book)) bookFull = book;
+        else bookFull = wxGetCwd() + wxT("/") + book;
+#endif
+
+        fi = fsys.OpenFile(bookFull);
         if (fi == NULL)
         {
-            wxLogError(_("Cannot open HTML help book: %s"), book.c_str());
+            wxLogError(_("Cannot open HTML help book: %s"), bookFull.c_str());
             return FALSE;
         }
-        fsys.ChangePathTo(book);
+        fsys.ChangePathTo(bookFull);
 
         const wxChar *lineptr;
         wxChar linebuf[300];

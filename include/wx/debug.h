@@ -12,9 +12,7 @@
 #ifndef   _WX_DEBUG_H_
 #define   _WX_DEBUG_H_
 
-#ifndef __WXWINCE__
 #include  <assert.h>
-#endif
 #include  <limits.h>            // for CHAR_BIT used below
 
 #include  "wx/wxchar.h"         // for __TFILE__ and wxChar
@@ -181,18 +179,11 @@ WXDLLEXPORT_DATA(extern const bool) wxFalse;
   particular, this is why we define a struct and not an object (which would
   result in a warning about unused variable) and a named struct (otherwise we'd
   get a warning about an unnamed struct not used to define an object!).
-  The _n__ part is to stop VC++ 7 being confused since it encloses __LINE++ in
-  parentheses. Unfortunately this does not work with other compilers, so
-  we will only enable it when we know the _precise_ symbols to test for.
  */
 
 #define wxMAKE_ASSERT_NAME_HELPER(line)     wxAssert_ ## line
 #define wxMAKE_ASSERT_NAME(line)            wxMAKE_ASSERT_NAME_HELPER(line)
-#if 0
-#define wxMAKE_UNIQUE_ASSERT_NAME           wxMAKE_ASSERT_NAME(_n___ ## __LINE__)
-#else
 #define wxMAKE_UNIQUE_ASSERT_NAME           wxMAKE_ASSERT_NAME(__LINE__)
-#endif
 #define wxMAKE_UNIQUE_ASSERT_NAME2(text)    wxMAKE_ASSERT_NAME(text)
 
 /*

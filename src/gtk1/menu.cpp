@@ -448,36 +448,6 @@ wxMenu *wxMenuBar::Replace(size_t pos, wxMenu *menu, const wxString& title)
     return menuOld;
 }
 
-static wxMenu *CopyMenu (wxMenu *menu)
-{
-    wxMenu *menucopy = new wxMenu ();
-    wxMenuItemList::Node *node = menu->GetMenuItems().GetFirst();
-    while (node)
-    {
-        wxMenuItem *item = node->GetData();
-        int itemid = item->GetId();
-        wxString text = item->GetText();
-        text.Replace(wxT("_"), wxT("&"));
-        wxMenu *submenu = item->GetSubMenu();
-        if (!submenu)
-        {
-            wxMenuItem* itemcopy = new wxMenuItem(menucopy,
-                                        itemid, text,
-                                        menu->GetHelpString(itemid));
-            itemcopy->SetBitmap(item->GetBitmap());
-            itemcopy->SetCheckable(item->IsCheckable());
-            menucopy->Append(itemcopy);
-        }
-        else
-          menucopy->Append (itemid, text, CopyMenu(submenu),
-                            menu->GetHelpString(itemid));
-    
-        node = node->GetNext();
-    }
-  
-    return menucopy;
-}
-
 wxMenu *wxMenuBar::Remove(size_t pos)
 {
     wxMenu *menu = wxMenuBarBase::Remove(pos);
@@ -491,17 +461,13 @@ wxMenu *wxMenuBar::Remove(size_t pos)
     printf( "menu shell entries before %d\n", (int)g_list_length( menu_shell->children ) );
 */
 
-    wxMenu *menucopy = CopyMenu( menu );
-
     // unparent calls unref() and that would delete the widget so we raise
     // the ref count to 2 artificially before invoking unparent.
     gtk_widget_ref( menu->m_menu );
     gtk_widget_unparent( menu->m_menu );
 
     gtk_widget_destroy( menu->m_owner );
-    delete menu;
 
-    menu = menucopy;
 /*
     printf( "factory entries after %d\n", (int)g_slist_length(m_factory->items) );
     printf( "menu shell entries after %d\n", (int)g_list_length( menu_shell->children ) );
@@ -624,9 +590,6 @@ wxString wxMenuBar::GetLabelTop( size_t pos ) const
             // '_' is the escape character for GTK+
             continue;
         }
-
-        // don't remove ampersands '&' since if we have them in the menu title
-        // it means that they were doubled to indicate "&" instead of accelerator
 
         label += *pc;
     }
@@ -815,7 +778,7 @@ wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 
     for ( const wxChar *pc = text.c_str(); *pc; pc++ )
     {
-        if ( *pc == wxT('_') )
+        if ( *pc == wxT('_')  )
         {
             // GTK 1.2 escapes "xxx_xxx" to "xxx__xxx"
             pc++;
@@ -833,15 +796,9 @@ wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
         }
 #endif
 
-        if ( (*pc == wxT('&')) && (*(pc+1) != wxT('&')) )
-        {
-            // wxMSW escapes "&"
-            // "&" is doubled to indicate "&" instead of accelerator
-            continue;
-        }
-        
         label += *pc;
     }
+
     return label;
 }
 
@@ -1013,9 +970,6 @@ wxString wxMenuItem::GetFactoryPath() const
             // remove '_' unconditionally
             continue;
         }
-
-        // don't remove ampersands '&' since if we have them in the menu item title
-        // it means that they were doubled to indicate "&" instead of accelerator
 
         path += *pc;
     }

@@ -1020,17 +1020,13 @@ Normal face<br>(and <u>underlined</u>. <i>Italic face.</i> \
     {
         UpdateTestWin();
     }
-    void OnUpdateSpin(wxSpinEvent& WXUNUSED(event))
-    {
-        UpdateTestWin();
-    }
 
     DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(wxHtmlHelpFrameOptionsDialog, wxDialog)
     EVT_COMBOBOX(-1, wxHtmlHelpFrameOptionsDialog::OnUpdate)
-    EVT_SPINCTRL(-1, wxHtmlHelpFrameOptionsDialog::OnUpdateSpin)
+    EVT_SPINCTRL(-1, wxHtmlHelpFrameOptionsDialog::OnUpdate)
 END_EVENT_TABLE()
 
 

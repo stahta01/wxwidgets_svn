@@ -427,8 +427,6 @@ void wxTreeTextCtrl::Finish()
 {
     if ( !m_finished )
     {
-        m_owner->ResetTextControl();
-
         wxPendingDelete.Append(this);
 
         m_finished = TRUE;
@@ -757,7 +755,6 @@ void wxGenericTreeCtrl::Init()
     m_dragCount = 0;
     m_isDragging = FALSE;
     m_dropTarget = m_oldSelection = (wxGenericTreeItem *)NULL;
-    m_textCtrl = NULL;
 
     m_renameTimer = NULL;
     m_findTimer = NULL;
@@ -1266,12 +1263,6 @@ wxTreeItemId wxGenericTreeCtrl::GetPrevVisible(const wxTreeItemId& item) const
     wxFAIL_MSG(wxT("not implemented"));
 
     return wxTreeItemId();
-}
-
-// called by wxTextTreeCtrl when it marks itself for deletion
-void wxGenericTreeCtrl::ResetTextControl()
-{
-  m_textCtrl = NULL;
 }
 
 // find the first item starting with the given prefix after the given item
@@ -2818,17 +2809,9 @@ void wxGenericTreeCtrl::Edit( const wxTreeItemId& item )
     if ( m_dirty )
         wxYieldIfNeeded();
 
-    m_textCtrl = new wxTreeTextCtrl(this, itemEdit);
+    wxTreeTextCtrl *text = new wxTreeTextCtrl(this, itemEdit);
 
-    m_textCtrl->SetFocus();
-}
-
-// returns a pointer to the text edit control if the item is being
-// edited, NULL otherwise (it's assumed that no more than one item may
-// be edited simultaneously)
-wxTextCtrl* wxGenericTreeCtrl::GetEditControl() const
-{
-    return m_textCtrl;
+    text->SetFocus();
 }
 
 bool wxGenericTreeCtrl::OnRenameAccept(wxGenericTreeItem *item,

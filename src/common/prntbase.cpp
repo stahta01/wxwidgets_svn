@@ -370,9 +370,9 @@ void wxPreviewControlBar::OnGoto(void)
             wxString strPrompt;
             wxString strPage;
 
-            strPrompt.Printf( wxT("%d...%d"),
+            strPrompt.Printf( _("%d...%d"),
                 preview->GetMinPage(), preview->GetMaxPage());
-            strPage.Printf( wxT("%d"), preview->GetCurrentPage() );
+            strPage.Printf( _("%d"), preview->GetCurrentPage() );
 
             strPage =
                 wxGetTextFromUser( strPrompt, _("Goto Page"), strPage);

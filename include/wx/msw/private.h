@@ -20,13 +20,6 @@
 
 #include <windows.h>
 
-
-#if defined (__WXWINCE__)
-    #include <wingdi.h>     // RGB, COLORREF
-    #include <winuser.h>    // Global Namespaces ::GetKeyState, ::GetWindowRect
-#endif
-
-
 #ifdef __WXMICROWIN__
     // Extra prototypes and symbols not defined by MicroWindows
     #include "wx/msw/microwin.h"
@@ -88,14 +81,11 @@ WXDLLEXPORT_DATA(extern HFONT) wxSTATUS_LINE_FONT;
 
 // this defines a CASTWNDPROC macro which casts a pointer to the type of a
 // window proc
-#if defined(__WXWINCE__)
-    typedef FARPROC WndProcCast;
-#elif defined(STRICT) || defined(__GNUC__)
+#if defined(STRICT) || defined(__GNUC__)
     typedef WNDPROC WndProcCast;
 #else
     typedef FARPROC WndProcCast;
 #endif
-
 
 #define CASTWNDPROC (WndProcCast)
 

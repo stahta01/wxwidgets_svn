@@ -454,7 +454,10 @@ void wxSingleChoiceDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
     m_selection = m_listbox->GetSelection();
     m_stringSelection = m_listbox->GetStringSelection();
+    // TODO!
+#ifndef __WXMOTIF__
     if ( m_listbox->HasClientUntypedData() )
+#endif
         SetClientData(m_listbox->GetClientData(m_selection));
     EndModal(wxID_OK);
 }
@@ -464,7 +467,10 @@ void wxSingleChoiceDialog::OnListBoxDClick(wxCommandEvent& WXUNUSED(event))
     m_selection = m_listbox->GetSelection();
     m_stringSelection = m_listbox->GetStringSelection();
 
+    // TODO!
+#ifndef __WXMOTIF__
     if ( m_listbox->HasClientUntypedData() )
+#endif
         SetClientData(m_listbox->GetClientData(m_selection));
 
     EndModal(wxID_OK);
@@ -504,6 +510,11 @@ void wxMultiChoiceDialog::SetSelections(const wxArrayInt& selections)
 
 bool wxMultiChoiceDialog::TransferDataFromWindow()
 {
+    // VZ: I hate to do it but I can't fix wxMotif right now (FIXME)
+#ifdef __WXMOTIF__
+    #define IsSelected Selected
+#endif
+
     m_selections.Empty();
     size_t count = m_listbox->GetCount();
     for ( size_t n = 0; n < count; n++ )

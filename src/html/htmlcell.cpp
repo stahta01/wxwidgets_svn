@@ -408,8 +408,9 @@ void wxHtmlContainerCell::Layout(int w)
 void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
 {
     // container visible, draw it:
-    if ((y + m_PosY <= view_y2) && (y + m_PosY + m_Height > view_y1))
+    if ((y + m_PosY < view_y2) && (y + m_PosY + m_Height > view_y1))
     {
+
         if (m_UseBkColour)
         {
             wxBrush myb = wxBrush(m_BkColour, wxSOLID);
@@ -429,10 +430,10 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
 
             dc.SetPen(mypen1);
             dc.DrawLine(x + m_PosX, y + m_PosY, x + m_PosX, y + m_PosY + m_Height - 1);
-            dc.DrawLine(x + m_PosX, y + m_PosY, x + m_PosX + m_Width, y + m_PosY);
+            dc.DrawLine(x + m_PosX, y + m_PosY, x + m_PosX + m_Width - 1, y + m_PosY);
             dc.SetPen(mypen2);
             dc.DrawLine(x + m_PosX + m_Width - 1, y + m_PosY, x + m_PosX +  m_Width - 1, y + m_PosY + m_Height - 1);
-            dc.DrawLine(x + m_PosX, y + m_PosY + m_Height - 1, x + m_PosX + m_Width, y + m_PosY + m_Height - 1);
+            dc.DrawLine(x + m_PosX, y + m_PosY + m_Height - 1, x + m_PosX + m_Width - 1, y + m_PosY + m_Height - 1);
         }
 
         if (m_Cells)

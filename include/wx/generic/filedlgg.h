@@ -91,7 +91,6 @@ public:
     void OnNew( wxCommandEvent &event );
     void OnChoiceFilter( wxCommandEvent &event );
     void OnTextEnter( wxCommandEvent &event );
-    void OnTextChange( wxCommandEvent &event );
     void OnCheck( wxCommandEvent &event );
 
     void HandleAction( const wxString &fn );

@@ -284,10 +284,10 @@ bool wxWindow::DoDrawBackground(wxDC& dc)
         AdjustForParentClientOrigin( pos.x, pos.y, 0 );
 
         // Adjust DC logical origin
-        wxCoord org_x, org_y, x, y;
-        dc.GetLogicalOrigin( &org_x, &org_y );
-        x = org_x + pos.x;
-        y = org_y + pos.y;
+        wxCoord x,y;
+        dc.GetLogicalOrigin( &x, &y );
+        x += pos.x;
+        y += pos.y;
         dc.SetLogicalOrigin( x, y );
 
         // Adjust draw rect
@@ -296,9 +296,6 @@ bool wxWindow::DoDrawBackground(wxDC& dc)
 
         // Let parent draw the background
         parent->EraseBackground( dc, rect );
-
-        // Restore DC logical origin
-        dc.SetLogicalOrigin( org_x, org_y );
     }
     else
     {

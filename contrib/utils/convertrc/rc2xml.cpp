@@ -101,8 +101,6 @@ bool rc2xml::Convert(wxString rcfile, wxString xmlfile)
     m_xmlfile.Write("</resource>\n");
     m_xmlfile.Close();
     m_rc.Close();
-    wxMessageBox(_("Conversion complete."), _("Done"), 
-                            wxOK | wxICON_INFORMATION);
 
 return TRUE;
 }
@@ -118,8 +116,7 @@ microsoft reuses the keyword DIALOG for other things
 */
     token=PeekToken();
 //Microsoft notation?
-    while ((token=="DISCARDABLE")
-            ||(token=="LOADONCALL")||(token=="MOVEABLE"))
+    if (token=="DISCARDABLE")
     {
     token=GetToken();
     token=PeekToken();
@@ -180,60 +177,32 @@ END
 void rc2xml::ParseControls()
 {
     wxString token;
-    wxString label,varname;
 
     token=GetToken();
     while ((token!="END")&(token!="}"))
         {
         if (token=="AUTOCHECKBOX")
-           {
-            label=GetQuoteField();
-            varname=GetToken();
-            ParseCheckBox(label,varname);
-            }
+            ParseCheckBox();
         else
         if (token=="AUTORADIOBUTTON")
-           {
-            label=GetQuoteField();
-            varname=GetToken();
-            ParseRadioButton(label,varname);
-           }
+            ParseRadioButton();
         else
         if (token=="LTEXT")
-           {
-            label=GetQuoteField();
-            varname=GetToken();
-            ParseStaticText(label,varname);
-            }
+            ParseStaticText();
         else if (token=="EDITTEXT")
-           {
-            varname=GetToken();
-            ParseTextCtrl(varname);
-            }
-        else if ((token=="PUSHBUTTON")||(token=="DEFPUSHBUTTON"))
-           {
-            label=GetQuoteField();
-            varname=GetToken();
-            ParsePushButton(label,varname);
-            }
+            ParseTextCtrl();
+        else if (token=="PUSHBUTTON")
+            ParsePushButton();
+        else if (token=="DEFPUSHBUTTON")
+            ParsePushButton();
         else if (token=="GROUPBOX")
-           {
-            label=GetQuoteField();
-            varname=GetToken();
-            ParseGroupBox(label,varname);
-            }
+            ParseGroupBox();
         else if (token=="COMBOBOX")
-            {
-            varname=GetToken();
-            ParseComboBox(varname);
-             }
+            ParseComboBox();
         else if (token=="CONTROL")
             ParseControlMS();
         else if (token=="LISTBOX")
-           {
-            varname=GetToken();
-            ParseListBox(varname);
-            }
+            ParseListBox();
         else if (token=="ICON")
             ParseIconStatic();
         else if (token=="SCROLLBAR")
@@ -243,15 +212,12 @@ void rc2xml::ParseControls()
 
 }
 //LTEXT           "Radius",IDC_STATIC,9,67,23,8
-void rc2xml::ParseStaticText(wxString phrase, wxString varname)
+void rc2xml::ParseStaticText()
 {
     wxString token;
-    token=PeekToken();
-    while (!token.IsNumber())
-        {
-        token=GetToken();
-        token=PeekToken();
-        }
+    wxString phrase,varname;
+    phrase=GetQuoteField();
+    varname=GetToken();
     int x,y,width,height;
     ReadRect(x,y,width,height);
 
@@ -261,16 +227,11 @@ void rc2xml::ParseStaticText(wxString phrase, wxString varname)
 
 }
 //EDITTEXT        IDC_RADIUS,36,65,40,14,ES_AUTOHSCROLL
-void rc2xml::ParseTextCtrl(wxString varname)
+void rc2xml::ParseTextCtrl()
 {
     wxString token;
-    wxString style;
-    token=PeekToken();
-    while (!token.IsNumber())
-        {
-        token=GetToken();
-        token=PeekToken();
-        }
+    wxString varname,style;
+    varname=GetToken();
     int x,y,width,height;
     ReadRect(x,y,width,height);
 //TODO
@@ -281,15 +242,13 @@ void rc2xml::ParseTextCtrl(wxString varname)
 
 }
 //AUTOCHECKBOX "&log.", ID_XLOG, 25, 24, 21, 12
-void rc2xml::ParseCheckBox(wxString phrase, wxString varname)
+void rc2xml::ParseCheckBox()
 {
     wxString token;
-    token=PeekToken();
-    while (!token.IsNumber())
-        {
-        token=GetToken();
-        token=PeekToken();
-        }
+    wxString phrase,varname;
+    phrase=GetQuoteField();
+    varname=GetToken();
+
     int x,y,width,height;
     ReadRect(x,y,width,height);
 
@@ -300,14 +259,15 @@ void rc2xml::ParseCheckBox(wxString phrase, wxString varname)
 
 }
 //AUTORADIOBUTTON "&text", ID_SW10, 13, 12, 68, 10, BS_AUTORADIOBUTTON | WS_GROUP
-void rc2xml::ParseRadioButton(wxString phrase, wxString varname)
+void rc2xml::ParseRadioButton()
 {
     wxString token,style;
+    wxString phrase,varname;
+    phrase=GetQuoteField();
+    varname=GetToken();
+
     int x,y,width,height;
-    bool GotOrs;
-    GotOrs = ReadOrs(token);
     if (ReadRect(x,y,width,height))
-        if (GotOrs==FALSE)
       ReadOrs(token);
     if (token.Find("WS_GROUP") != -1)
         style += "wxRB_GROUP";
@@ -321,16 +281,13 @@ void rc2xml::ParseRadioButton(wxString phrase, wxString varname)
 }
 
 //PUSHBUTTON      "Create/Update",IDC_CREATE,15,25,53,13,NOT WS_TABSTOP
-void rc2xml::ParsePushButton(wxString phrase, wxString varname)
+void rc2xml::ParsePushButton()
 {
     wxString token;
+    wxString phrase,varname;
+    phrase=GetQuoteField();
+    varname=GetToken();
 
-    token=PeekToken();
-    while (!token.IsNumber())
-        {
-        token=GetToken();
-        token=PeekToken();
-        }
     int x,y,width,height;
     ReadRect(x,y,width,height);
 
@@ -357,16 +314,13 @@ bool rc2xml::Seperator(int ch)
     return FALSE;
 }
 
-void rc2xml::ParseGroupBox(wxString phrase, wxString varname)
+void rc2xml::ParseGroupBox()
 {
 //    GROUPBOX        "Rotate",IDC_STATIC,1,1,71,79
     wxString token;
-    token=PeekToken();
-    while (!token.IsNumber())
-        {
-        token=GetToken();
-        token=PeekToken();
-        }
+    wxString phrase,varname;
+    phrase=GetQuoteField();
+    varname=GetToken();
     int x,y,width,height;
     ReadRect(x,y,width,height);
 
@@ -441,56 +395,14 @@ wxString rc2xml::GetQuoteField()
 
     while (ch!=34)
         ReadChar(ch);
-    ReadChar(ch);
   
+    ReadChar(ch);
+
     while (ch!=34)
     {
     phrase+=(char)ch;
     ReadChar(ch);
     }
-    return phrase;
-}
-
-// string in stringtable may contain embedded quotes
-// escape characters retained to allow strings to be rewritten
-wxString rc2xml::GetStringQuote()
-{
-    wxString phrase;
-    //ASCII code 34 "
-    bool done=FALSE;
-    int p,ch=0,lastch=0;
-    ReadChar(ch);
-
-    while (ch!=34)
-        ReadChar(ch);
-    ReadChar(ch);
-    while (done==FALSE)
-        {
-        if ((ch==34)&&(lastch!='\\'))
-            {
-            p=m_rc.Tell();
-            ReadChar(ch);
-// RC supports "", for embedded quote, as well as  \"
-            if (ch==34)              
-                phrase+='\\';         
-            else
-    {
-                m_rc.Seek(p);
-                done = TRUE;
-                }
-            }
-         if (done==TRUE)
-             break;
-         if (ch=='\r')
-             ReadChar(ch);                    // skip
-         if ((ch=='\n')&&(lastch=='\\'))      // lastch <should> be this
-             phrase+='n';                     // escape
-         else
-    phrase+=(char)ch;
-         lastch=ch;
-    ReadChar(ch);
-    }
-
     return phrase;
 }
 
@@ -511,16 +423,15 @@ void rc2xml::ReadChar(int &ch)
         m_done=TRUE;
 }
 
-void rc2xml::ParseComboBox(wxString varname)
+void rc2xml::ParseComboBox()
 {
 /* COMBOBOX        IDC_SCALECOMBO,10,110,48,52,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP */
     wxString token,style;
+    wxString varname;
+    varname=GetToken();
     int x,y,width,height;
-    bool GotOrs;
-    GotOrs = ReadOrs(token);
     if (ReadRect(x,y,width,height))
-        if (GotOrs==FALSE)
       ReadOrs(token);
 
     m_xmlfile.Write("\t\t<object class=\"wxComboBox\"");
@@ -552,8 +463,6 @@ void rc2xml::ParseMenu(wxString varname)
     while ((token!="END")&(token!="}"))
     {
     token=GetToken();
-    token.MakeUpper();
-
     if (token=="POPUP")
         {
         ParsePopupMenu();
@@ -588,8 +497,6 @@ void rc2xml::ParsePopupMenu()
     while ((token!="END")&(token!="}"))
     {
     token=GetToken();
-    token.MakeUpper();
-
     if (token=="POPUP")
         ParsePopupMenu();
 	
@@ -682,26 +589,33 @@ bool rc2xml::ReadOrs(wxString & orstring)
     return TRUE;
 }
 
-//Is it a checkbutton or a radiobutton or a pushbutton or a groupbox
+//Is it a check button or a radio button
 void rc2xml::ParseCtrlButton(wxString label, wxString varname)
 {
     wxString token;
-    int p;
-    p=m_rc.Tell();
     ReadOrs(token);
-    m_rc.Seek(p);
+    int x,y,width,height;
 
     if (token.Find("BS_AUTOCHECKBOX")!=-1)
-        ParseCheckBox(label, varname);
-    else if ((token.Find("BS_AUTORADIOBUTTON")!=-1)||
-                  (token.Find("BS_RADIOBUTTON")!=-1))
-        ParseRadioButton(label, varname);
-    else if (token.Find("BS_GROUPBOX")!=-1)
-        ParseGroupBox(label, varname);        
-    else  // if ((token.Find("BS_PUSHBUTTON")!=-1)||
-//                (token.Find("BS_DEFPUSHBUTTON")!=-1))
-        ParsePushButton(label, varname);           // make default case
+        {
+        ReadRect(x,y,width,height);
+        m_xmlfile.Write("\t\t<object class=\"wxCheckBox\"");
+        WriteBasicInfo(x,y,width,height,varname);
+        WriteLabel(label);
+        m_xmlfile.Write("\t\t</object>\n");
+        }
+
+    if (token.Find("BS_AUTORADIOBUTTON")!=-1)
+        {
+        ReadRect(x,y,width,height);
+        m_xmlfile.Write("\t\t<object class=\"wxRadioButton\"");
+        WriteBasicInfo(x,y,width,height,varname);
+        WriteLabel(label);
+        m_xmlfile.Write("\t\t</object>\n");
+        }
+
 }
+
 
 void rc2xml::WriteSize(int width, int height)
 {
@@ -799,15 +713,11 @@ void rc2xml::WriteStyle(wxString style)
     LISTBOX         IDC_LIST1,16,89,48,40,LBS_SORT | LBS_MULTIPLESEL | 
                     LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
 */
-void rc2xml::ParseListBox(wxString varname)
+void rc2xml::ParseListBox()
 {
     wxString token;
-    token=PeekToken();
-    while (!token.IsNumber())
-        {
-        token=GetToken();
-        token=PeekToken();
-        }
+    wxString varname;
+    varname=GetToken();
     int x,y,width,height;
     ReadRect(x,y,width,height);
 
@@ -901,7 +811,7 @@ void rc2xml::SecondPass()
     while (!m_done)
         {
         token=GetToken();
-        if ((token=="DIALOG")||(token=="DIALOGEX"))
+        if (token=="DIALOG")
             ParseDialog(prevtok);
         else if (token=="MENU")
             ParseMenu(prevtok);
@@ -945,7 +855,7 @@ void rc2xml::ParseToolBar(wxString varname)
     int c=0;	
     wxString buttonname,msg,tip,longhelp;
     token=GetToken();
-    while ((token!="BEGIN")&(token!="{"))
+    while ((token!="BEGIN"))
         token=GetToken();
 
     while ((token!="END")&(token!="}"))
@@ -995,7 +905,7 @@ void rc2xml::ParseStringTable(wxString varname)
 {
     wxString token;
     token=GetToken();
-    while ((token!="BEGIN")&(token!="{"))
+    while ((token!="BEGIN"))
         token=GetToken();
     token=GetToken();
     wxString *msg;
@@ -1003,7 +913,7 @@ void rc2xml::ParseStringTable(wxString varname)
     while ((token!="END")&(token!="}"))
         {
         msg=new wxString;
-        *msg=GetStringQuote();
+        *msg=GetQuoteField();
         m_stringtable->Append(token,msg);
         token=GetToken();
         }
@@ -1059,8 +969,7 @@ void rc2xml::ParseMenuItem()
     m_xmlfile.Write(">\n");
     WriteLabel(token);
 //Look up help if any listed in stringtable
-//can't assume numbers correlate, restrict to string identifiers
-    if ((!name.IsNumber())&&(LookUpString(name,msg)))  
+    if (LookUpString(name,msg))
         {
         SplitHelp(msg,tip,longhelp);
         m_xmlfile.Write("\t\t\t<help>"
@@ -1069,11 +978,9 @@ void rc2xml::ParseMenuItem()
 //look for extra attributes like checked and break
     wxString ptoken;
     ptoken=PeekToken();
-    ptoken.MakeUpper();
     while ((ptoken!="MENUITEM")&(ptoken!="POPUP")&(ptoken!="END"))
         {
         token=GetToken();
-        ptoken.MakeUpper();
         if (token=="CHECKED")
             m_xmlfile.Write("\t\t\t<checkable>1</checkable>\n");
         else if (token=="MENUBREAK");
@@ -1083,7 +990,6 @@ void rc2xml::ParseMenuItem()
             wxLogError("Unknown Menu Item token:"+token);
         
         ptoken=PeekToken();
-        ptoken.MakeUpper();
         }
     m_xmlfile.Write("\t\t\t</object>\n"); 
 
@@ -1094,10 +1000,6 @@ void rc2xml::ParseIconStatic()
 {
     wxString token;
     wxString varname,iconname;
-    token = PeekToken();
-    if (token.Contains("\""))
-        iconname = GetQuoteField();
-    else
     iconname=GetToken();
 //Look up icon
     varname=GetToken();
@@ -1144,7 +1046,8 @@ void rc2xml::ParseStaticBitmap(wxString bitmapname, wxString varname)
 {
     wxString token;
     //Grab SS_BITMAP
-    ReadOrs(token);
+    token=GetToken();
+
 
 
     int x,y,width,height;
@@ -1182,23 +1085,6 @@ kindctrl.MakeUpper();
         ParseCtrlButton(label,varname);
     if (kindctrl=="RICHEDIT")
         ParseRichEdit(label,varname);
-    if (kindctrl=="STATIC")
-        {
-        wxString token;
-        int p=m_rc.Tell();
-        ReadOrs(token);
-        m_rc.Seek(p);
-        if (token.Find("SS_BITMAP")!=-1)
-            ParseStaticBitmap(label,varname);
-        else
-            ParseStaticText(label,varname);
-        }
-    if (kindctrl=="EDIT")
-        ParseTextCtrl(varname);
-    if (kindctrl=="LISTBOX")
-        ParseListBox(varname);
-    if (kindctrl=="COMBOBOX")
-        ParseComboBox(varname);
 
 }
 

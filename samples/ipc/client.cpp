@@ -76,7 +76,7 @@ bool MyApp::OnInit()
     wxString service = IPC_SERVICE;
 
     // ignored under DDE, host name in TCP/IP based classes
-    wxString hostName = _T("localhost");
+    wxString hostName = "localhost";
 
     if (argc > 1)
         service = argv[1];
@@ -94,23 +94,23 @@ bool MyApp::OnInit()
 
         while ( !the_connection )
         {
-            if ( wxMessageBox(_T("Failed to make connection to server.\nRetry?"),
-                              _T("Client Demo Error"),
+            if ( wxMessageBox("Failed to make connection to server.\nRetry?",
+                              "Client Demo Error",
                               wxICON_ERROR | wxYES_NO | wxCANCEL ) != wxYES )
             {
                 // no server
                 return FALSE;
             }
 
-            the_connection = (MyConnection *)my_client->MakeConnection(hostName, service, _T("IPC TEST"));
+            the_connection = (MyConnection *)my_client->MakeConnection(hostName, service, "IPC TEST");
         }
     }
 
     if (!the_connection->StartAdvise(IPC_ADVISE_NAME))
-        wxMessageBox(_T("StartAdvise failed"), _T("Client Demo Error"));
+        wxMessageBox("StartAdvise failed", "Client Demo Error");
 
     // Create the main frame window
-    (new MyFrame(NULL, _T("Client")))->Show(TRUE);
+    (new MyFrame(NULL, "Client"))->Show(TRUE);
 
     return TRUE;
 }
@@ -139,50 +139,50 @@ MyFrame::MyFrame(wxFrame *frame, const wxString& title)
     // Make a menubar
     wxMenu *file_menu = new wxMenu;
 
-    file_menu->Append(CLIENT_EXECUTE, _T("&Execute\tCtrl-E"));
-    file_menu->Append(CLIENT_REQUEST, _T("&Request\tCtrl-R"));
-    file_menu->Append(CLIENT_POKE, _T("&Poke\tCtrl-P"));
-    file_menu->Append(CLIENT_QUIT, _T("&Quit\tCtrl-Q"));
+    file_menu->Append(CLIENT_EXECUTE, "&Execute\tCtrl-E");
+    file_menu->Append(CLIENT_REQUEST, "&Request\tCtrl-R");
+    file_menu->Append(CLIENT_POKE, "&Poke\tCtrl-P");
+    file_menu->Append(CLIENT_QUIT, "&Quit\tCtrl-Q");
 
     wxMenuBar *menu_bar = new wxMenuBar;
 
-    menu_bar->Append(file_menu, _T("&File"));
+    menu_bar->Append(file_menu, "&File");
 
     // Associate the menu bar with the frame
     SetMenuBar(menu_bar);
 
     // Make a listbox which shows the choices made in the server
     the_list = new wxListBox(this, CLIENT_LISTBOX, wxPoint(5, 5));
-    the_list->Append(_T("Apple"));
-    the_list->Append(_T("Pear"));
-    the_list->Append(_T("Orange"));
-    the_list->Append(_T("Banana"));
-    the_list->Append(_T("Fruit"));
+    the_list->Append("Apple");
+    the_list->Append("Pear");
+    the_list->Append("Orange");
+    the_list->Append("Banana");
+    the_list->Append("Fruit");
 }
 
 void MyFrame::OnExecute(wxCommandEvent& event)
 {
     if (the_connection)
-        if (!the_connection->Execute(_T("Hello from the client!")))
-            wxMessageBox(_T("Execute failed"), _T("Client Demo Error"));
+        if (!the_connection->Execute("Hello from the client!"))
+            wxMessageBox("Execute failed", "Client Demo Error");
 }
 
 void MyFrame::OnPoke(wxCommandEvent& event)
 {
     if (the_connection)
-        if (!the_connection->Poke(_T("An item"), _T("Some data to poke at the server!")))
-            wxMessageBox(_T("Poke failed"), _T("Client Demo Error"));
+        if (!the_connection->Poke("An item", "Some data to poke at the server!"))
+            wxMessageBox("Poke failed", "Client Demo Error");
 }
 
 void MyFrame::OnRequest(wxCommandEvent& event)
 {
     if (the_connection)
     {
-        wxChar *data = the_connection->Request(_T("An item"));
+        char *data = the_connection->Request("An item");
         if (data)
-            wxMessageBox(data, _T("Client: Request"), wxOK);
+            wxMessageBox(data, "Client: Request", wxOK);
         else
-            wxMessageBox(_T("Request failed"), _T("Client Demo Error"));
+            wxMessageBox("Request failed", "Client Demo Error");
     }
 }
 
@@ -196,7 +196,7 @@ wxConnectionBase *MyClient::OnMakeConnection()
     return new MyConnection;
 }
 
-bool MyConnection::OnAdvise(const wxString& topic, const wxString& item, wxChar *data, int size, wxIPCFormat format)
+bool MyConnection::OnAdvise(const wxString& topic, const wxString& item, char *data, int size, wxIPCFormat format)
 {
     if (the_list)
     {

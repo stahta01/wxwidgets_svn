@@ -47,15 +47,15 @@ dnl The resulting library name will be of the form:
 dnl   libwx_$(TOOLKIT)-$(WX_RELEASE).so.$(WX_CURRENT).$(WX_REVISION).$(WX_AGE)
 
 WX_MAJOR_VERSION_NUMBER=2
-WX_MINOR_VERSION_NUMBER=5
-WX_RELEASE_NUMBER=0
+WX_MINOR_VERSION_NUMBER=3
+WX_RELEASE_NUMBER=4
 
 WX_VERSION=$WX_MAJOR_VERSION_NUMBER.$WX_MINOR_VERSION_NUMBER.$WX_RELEASE_NUMBER
 WX_RELEASE=$WX_MAJOR_VERSION_NUMBER.$WX_MINOR_VERSION_NUMBER
 
 WX_MSW_VERSION=$WX_MAJOR_VERSION_NUMBER$WX_MINOR_VERSION_NUMBER$WX_RELEASE_NUMBER
 
-WX_CURRENT=0
+WX_CURRENT=2
 WX_REVISION=0
 WX_AGE=0
 
@@ -1697,61 +1697,13 @@ if test "$wxUSE_ZLIB" != "no" ; then
     AC_DEFINE(wxUSE_ZLIB)
 
     if test "$wxUSE_ZLIB" = "sys" -o "$wxUSE_ZLIB" = "yes" ; then
-        dnl don't test for zlib under Mac -- its verson there is 1.1.3 but we
-        dnl should still use it because hopefully (can someone confirm this?)
-        dnl Apple did fix the security problem in it and not using the system
-        dnl library results in a whole bunch of warnings when linking with
-        dnl Carbon framework
-        if test "$USE_DARWIN" = 1; then
-            system_zlib_h_ok="yes"
-        else
-            dnl we have troubles with ancient zlib versions (e.g. 1.0.4 is
-            dnl known to not work) and although I don't know which is
-            dnl the minimal required version it's safer to test for 1.1.4 as
-            dnl it fixes a security problem in 1.1.3 -- and hopefully nobody
-            dnl has anything more ancient (1.1.3 was released in July 1998)
-            dnl anyhow
-            AC_CACHE_CHECK([for zlib.h >= 1.1.4], ac_cv_header_zlib_h,
-                AC_TRY_RUN(
-                    [
-                        dnl zlib.h defines ZLIB_VERSION="x.y.z"
-                        #include <zlib.h>
-                        #include <stdio.h>
-
-                        dnl don't use the brackets as quotes, we need them
-                        changequote(,)
-                        int main()
-                        {
-                            FILE *f=fopen("conftestval", "w");
-                            if (!f) exit(1);
-                            fprintf(f, "%s",
-                                    ZLIB_VERSION[0] == '1' &&
-                                    (ZLIB_VERSION[2] > '1' ||
-                                    (ZLIB_VERSION[2] == '1' &&
-                                     ZLIB_VERSION[4] >= '4')) ? "yes" : "no");
-                            exit(0);
-                        }
-                        changequote([,])
-                    ],
-                    ac_cv_header_zlib_h=`cat conftestval`,
-                    ac_cv_header_zlib_h=no,
-                    dnl cross-compiling: test if we have any zlib.h
-                    AC_CHECK_HEADER(zlib.h)
-                )
-            )
-
-            system_zlib_h_ok=$ac_cv_header_zlib_h
-        fi
-
-        if test "$system_zlib_h_ok" = "yes"; then
-            AC_CHECK_LIB(z, deflate, ZLIB_LINK=" -lz")
-        fi
+        AC_CHECK_HEADER(zlib.h, AC_CHECK_LIB(z, deflate, ZLIB_LINK=" -lz"))
 
         if test "x$ZLIB_LINK" = "x" ; then
             if test "$wxUSE_ZLIB" = "sys" ; then
-                AC_MSG_ERROR([zlib library not found or too old! Use --with-zlib=builtin to use built-in version])
+                AC_MSG_ERROR([system zlib compression library not found! Use --with-zlib=builtin to use built-in version])
             else
-                AC_MSG_WARN([zlib library not found or too old, will use built-in instead])
+                AC_MSG_WARN([system zlib compression library not found, will use built-in instead])
                 wxUSE_ZLIB=builtin
             fi
         else
@@ -1790,40 +1742,18 @@ if test "$wxUSE_LIBPNG" != "no" ; then
     if test "$wxUSE_MGL" != 1 ; then
         dnl Don't check for libpng when building wxMGL, libmgl contains it
         if test "$wxUSE_LIBPNG" = "sys" -o "$wxUSE_LIBPNG" = "yes" ; then
-            dnl libpng version 0.9 is known to not work, if an even newer
-            dnl version is required, just bump it up in the test below
-            AC_CACHE_CHECK([for png.h > 0.90], ac_cv_header_png_h,
-                AC_TRY_RUN(
-                    [
-                        dnl png.h defines PNG_LIBPNG_VER=number
-                        #include <png.h>
-                        #include <stdio.h>
-
-                        int main()
-                        {
-                            FILE *f=fopen("conftestval", "w");
-                            if (!f) exit(1);
-                            fprintf(f, "%s",
-                                     PNG_LIBPNG_VER > 90 ? "yes" : "no");
-                            exit(0);
-                        }
-                    ],
-                    ac_cv_header_png_h=`cat conftestval`,
-                    ac_cv_header_png_h=no,
-                    dnl cross-compiling: test if we have any png.h
-                    AC_CHECK_HEADER(png.h)
-                )
-            )
-
-            if test "$ac_cv_header_png_h" = "yes"; then
-                AC_CHECK_LIB(png, png_check_sig, PNG_LINK=" -lpng", , [-lz -lm])
-            fi
+            AC_CHECK_HEADER(png.h,
+                            AC_CHECK_LIB(png, png_check_sig,
+                                         PNG_LINK=" -lpng",
+                                         ,
+                                         [-lz -lm])
+                           )
 
             if test "x$PNG_LINK" = "x" ; then
                 if test "$wxUSE_LIBPNG" = "sys" ; then
                     AC_MSG_ERROR([system png library not found! Use --with-libpng=builtin to use built-in version])
                 else
-                    AC_MSG_WARN([png library not found or too old, will use built-in instead])
+                    AC_MSG_WARN([system png library not found, will use built-in instead])
                     wxUSE_LIBPNG=builtin
                 fi
             else
@@ -5402,13 +5332,11 @@ wx_cv_release=${WX_RELEASE}
 wx_cv_current=${WX_CURRENT}
 wx_cv_revision=${WX_REVISION}
 wx_cv_age=${WX_AGE}
-wx_cv_use_gui=${USE_GUI}
-wx_cv_use_resources=${wxUSE_RESOURCES}
 export wx_cv_path_samplesubdirs wx_cv_if_gnu_make \
        wx_cv_path_ifs wx_cv_program_ext \
        wx_cv_target_library wx_cv_target_library_gl wx_cv_target_libtype \
-       wx_cv_library_basename wx_cv_release wx_cv_current wx_cv_revision wx_cv_age \
-       wx_cv_use_gui wx_cv_use_resources
+       wx_cv_library_basename wx_cv_release wx_cv_current wx_cv_revision wx_cv_age
+
 
 AC_CONFIG_SUBDIRS(demos samples utils contrib)
 

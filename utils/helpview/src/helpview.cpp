@@ -60,7 +60,9 @@ bool hvApp::OnInit()
 	
     wxArtProvider::PushProvider(new AlternateArtProvider);
 	
-    int istyle = wxHF_DEFAULT_STYLE;
+	int istyle = wxHF_DEFAULT_STYLE;
+	
+    wxArtProvider::PushProvider(new AlternateArtProvider);
 	
     wxString service, windowName, book[10], titleFormat, argStr;
     int bookCount = 0;
@@ -69,9 +71,7 @@ bool hvApp::OnInit()
     bool hasWindowName = FALSE;
     bool createServer = FALSE;
 	
-#if hvUSE_IPC
     m_server = NULL;
-#endif
 	
     // Help books are recognized by extension ".hhp" ".htb" or ".zip".
     // Service and window_name can occur anywhere in arguments,
@@ -200,8 +200,7 @@ bool hvApp::OnInit()
 	
     for( i=0; i < bookCount; i++ )
     {
-        wxFileName fileName(book[i]);
-		m_helpController->AddBook(fileName);
+		m_helpController->AddBook(book[i]);
     }
 	
 #ifdef __WXMOTIF__
@@ -259,8 +258,7 @@ bool hvApp::OpenBook(wxHtmlHelpController* controller)
         if (ext == _T(".zip") || ext == _T(".htb") || ext == _T(".hhp"))
         {
             wxBusyCursor bcur;
-            wxFileName fileName(s);
-            controller->AddBook(fileName);
+            controller->AddBook(s);
             return TRUE;
         }
     }

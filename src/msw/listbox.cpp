@@ -161,10 +161,6 @@ bool wxListBox::Create(wxWindow *parent,
 
     wxASSERT_MSG( !(style & wxLB_MULTIPLE) || !(style & wxLB_EXTENDED),
                   _T("only one of listbox selection modes can be specified") );
-
-    if ( (m_windowStyle & wxBORDER_MASK) == wxBORDER_DEFAULT )
-        m_windowStyle |= wxBORDER_SUNKEN;
-
     if ( m_windowStyle & wxCLIP_SIBLINGS )
         wstyle |= WS_CLIPSIBLINGS;
 

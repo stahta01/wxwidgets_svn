@@ -9917,6 +9917,8 @@ EXPORTS
       GetEventTable__23wxGenericMDIParentFrameCFv
       ;wxGenericMDIParentFrame::GetClientWindow() const
       GetClientWindow__23wxGenericMDIParentFrameCFv
+      ;wxMDIParentFrame::GetActiveChild() const
+      GetActiveChild__16wxMDIParentFrameCFv
       ;wxGenericMDIChildFrame::Create(wxGenericMDIParentFrame*,int,const wxString&,const wxPoint&,const wxSize&,long,const wxString&)
       Create__22wxGenericMDIChildFrameFP23wxGenericMDIParentFrameiRC8wxStringRC7wxPointRC6wxSizelT3
       ;wxGenericMDIChildFrame::OnMenuHighlight(wxMenuEvent&)
