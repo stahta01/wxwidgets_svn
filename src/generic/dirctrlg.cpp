@@ -57,7 +57,8 @@
 // FIXME - Mingw32 1.0 has both _getdrive() and _chdrive(). For now, let's assume
 //         older releases don't, but it should be verified and the checks modified
 //         accordingly.
-#if !defined(__GNUWIN32__) || (defined(__MINGW32_MAJOR_VERSION) && __MINGW32_MAJOR_VERSION >= 1)
+#if !defined(__WXWINE__) && (!defined(__GNUWIN32__) || \
+    (defined(__MINGW32_MAJOR_VERSION) && __MINGW32_MAJOR_VERSION >= 1))
   #include <direct.h>
   #include <stdlib.h>
   #include <ctype.h>
@@ -78,11 +79,7 @@
 #endif // __WXPM__
 
 #if defined(__WXMAC__)
-#  ifdef __DARWIN__
-#    include "MoreFilesX.h"
-#  else
-#    include "MoreFilesExtras.h"
-#  endif
+#  include "MoreFilesExtras.h"
 #endif
 
 #ifdef __BORLANDC__
@@ -376,11 +373,12 @@ bool wxIsDriveAvailable(const wxString& dirName)
     bool success = TRUE;
 
     // Check if this is a root directory and if so,
-    // whether the drive is available.
+    // whether the drive is avaiable.
     if (dirName.Len() == 3 && dirName[(size_t)1] == wxT(':'))
     {
         wxString dirNameLower(dirName.Lower());
-#if defined(__GNUWIN32__) && !(defined(__MINGW32_MAJOR_VERSION) && __MINGW32_MAJOR_VERSION >= 1)
+#if defined(__WXWINE__) || (defined(__GNUWIN32__) && \
+    !(defined(__MINGW32_MAJOR_VERSION) && __MINGW32_MAJOR_VERSION >= 1))
         success = wxPathExists(dirNameLower);
 #else
         int currentDrive = _getdrive();
@@ -662,81 +660,16 @@ void wxGenericDirCtrl::SetupSections()
 #endif // __WIN32__/!__WIN32__
 
 #elif defined(__WXMAC__)
-#  ifdef __DARWIN__
-    FSRef     **theVolRefs;
-    ItemCount   theVolCount;
-    char        thePath[FILENAME_MAX];
-    
-    if (FSGetMountedVolumes(&theVolRefs, &theVolCount) == noErr) {
-        ItemCount index;
-        ::HLock( (Handle)theVolRefs ) ;
-        for (index = 0; index < theVolCount; ++index) {
-            // get the POSIX path associated with the FSRef
-            if ( FSRefMakePath(&((*theVolRefs)[index]),
-                                 (UInt8 *)thePath, sizeof(thePath)) != noErr ) {
-                continue;
-            }
-            // add path separator at end if necessary
-            wxString path( thePath ) ;
-            if (path.Last() != wxFILE_SEP_PATH) {
-                path += wxFILE_SEP_PATH;
-            }
-            // get Mac volume name for display
-            FSVolumeRefNum vRefNum ;
-            HFSUniStr255 volumeName ;
-            
-            if ( FSGetVRefNum(&((*theVolRefs)[index]), &vRefNum) != noErr ) {
-                continue;
-            }
-            if ( FSGetVInfo(vRefNum, &volumeName, NULL, NULL) != noErr ) {
-                continue;
-            }
-            // get C string from Unicode HFS name
-            //   see: http://developer.apple.com/carbon/tipsandtricks.html
-            CFStringRef cfstr = CFStringCreateWithCharacters( kCFAllocatorDefault, 
-                                                              volumeName.unicode,
-                                                              volumeName.length );
-            //	Do something with str
-            char *cstr = NewPtr(CFStringGetLength(cfstr) + 1);
-            if (( cstr == NULL ) ||
-                !CFStringGetCString(cfstr, cstr, CFStringGetLength(cfstr) + 1, 
-                                    kCFStringEncodingMacRoman)) {
-                CFRelease( cstr );
-                continue;
-            }
-            wxString name( cstr ) ;
-            DisposePtr( cstr ) ;
-            CFRelease( cfstr );
-
-            GetVolParmsInfoBuffer volParmsInfo;
-            UInt32 actualSize;
-            if ( FSGetVolParms(vRefNum, sizeof(volParmsInfo), &volParmsInfo, &actualSize) != noErr ) {
-                continue;
-            }
-
-            if ( VolIsEjectable(&volParmsInfo) ) {
-                AddSection(path, name, 5/*cd-rom*/);
-            }
-            else {
-                AddSection(path, name, 4/*disk*/);
-            }
-        }
-        ::HUnlock( (Handle)theVolRefs ) ;
-        ::DisposeHandle( (Handle)theVolRefs ) ;
-    }
-#  else
     FSSpec volume ;
     short index = 1 ;
     while(1) {
       short actualCount = 0 ;
-      if ( OnLine( &volume , 1 , &actualCount , &index ) != noErr || actualCount == 0 ) {
+      if ( OnLine( &volume , 1 , &actualCount , &index ) != noErr || actualCount == 0 )
         break ;
-      }
-      
+
       wxString name = wxMacFSSpec2MacFilename( &volume ) ;
-      AddSection(name + wxFILE_SEP_PATH, name, 4/*disk*/);
+      AddSection(name + wxFILE_SEP_PATH, name, 0);
     }
-#  endif /* __DARWIN__ */
 #elif defined(__UNIX__)
     AddSection(wxT("/"), wxT("/"), 3/*computer icon*/);
 #else

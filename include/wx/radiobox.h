@@ -106,6 +106,8 @@ public:
     #include "wx/mac/radiobox.h"
 #elif defined(__WXPM__)
     #include "wx/os2/radiobox.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/radiobox.h"
 #endif
 
 #endif // wxUSE_RADIOBOX

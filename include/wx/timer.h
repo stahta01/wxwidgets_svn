@@ -103,8 +103,6 @@ protected:
 
     int     m_milli;        // the timer interval
     bool    m_oneShot;      // TRUE if one shot
-
-    DECLARE_NO_COPY_CLASS(wxTimerBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -123,6 +121,8 @@ protected:
     #include "wx/mac/timer.h"
 #elif defined(__WXPM__)
     #include "wx/os2/timer.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/timer.h"
 #endif
 
 // ----------------------------------------------------------------------------

@@ -128,7 +128,6 @@ protected:
     bool m_redirect;
 
     DECLARE_DYNAMIC_CLASS(wxProcess)
-    DECLARE_NO_COPY_CLASS(wxProcess)
 };
 
 // ----------------------------------------------------------------------------

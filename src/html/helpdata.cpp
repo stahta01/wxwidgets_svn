@@ -114,8 +114,6 @@ class HP_TagHandler : public wxHtmlTagHandler
         bool HandleTag(const wxHtmlTag& tag);
         void WriteOut(wxHtmlContentsItem*& array, int& size);
         void ReadIn(wxHtmlContentsItem* array, int size);
-
-    DECLARE_NO_COPY_CLASS(HP_TagHandler)
 };
 
 
@@ -339,12 +337,7 @@ inline static wxChar* CacheReadString(wxInputStream *f)
 #endif
 }
 
-#define CURRENT_CACHED_BOOK_VERSION     4
-
-// Additional flags to detect incompatibilities of the runtime environment:
-#define CACHED_BOOK_FORMAT_FLAGS \
-                     (wxUSE_UNICODE << 0)
-
+#define CURRENT_CACHED_BOOK_VERSION     3
 
 bool wxHtmlHelpData::LoadCachedBook(wxHtmlBookRecord *book, wxInputStream *f)
 {
@@ -362,9 +355,6 @@ bool wxHtmlHelpData::LoadCachedBook(wxHtmlBookRecord *book, wxInputStream *f)
         //     create new .cached file immediately afterward.
         return FALSE;
     }
-
-    if (CacheReadInt32(f) != CACHED_BOOK_FORMAT_FLAGS)
-        return FALSE;
 
     /* load contents : */
     st = m_ContentsCnt;
@@ -403,7 +393,6 @@ bool wxHtmlHelpData::SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f)
 
     /* save header - version info : */
     CacheWriteInt32(f, CURRENT_CACHED_BOOK_VERSION);
-    CacheWriteInt32(f, CACHED_BOOK_FORMAT_FLAGS);
 
     /* save contents : */
     for (cnt = 0, i = 0; i < m_ContentsCnt; i++) 

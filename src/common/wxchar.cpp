@@ -105,7 +105,7 @@ size_t WXDLLEXPORT wxWC2MB(char *buf, const wchar_t *pwz, size_t n)
 
 bool WXDLLEXPORT wxOKlibc()
 {
-#if wxUSE_WCHAR_T && defined(__UNIX__) && defined(__GLIBC__) && !defined(__WINE__)
+#if wxUSE_WCHAR_T && defined(__UNIX__) && defined(__GLIBC__)
   // glibc 2.0 uses UTF-8 even when it shouldn't
   wchar_t res = 0;
   if ((MB_CUR_MAX == 2) &&
@@ -964,26 +964,15 @@ WXDLLEXPORT int wxTolower(wxChar ch) { return (wxChar)CharLower((LPTSTR)(ch)); }
 WXDLLEXPORT int wxToupper(wxChar ch) { return (wxChar)CharUpper((LPTSTR)(ch)); }
 #endif
 
-#ifndef wxStrdupA
-
-WXDLLEXPORT char *wxStrdupA(const char *s)
+#ifndef wxStrdup
+WXDLLEXPORT wxChar * wxStrdup(const wxChar *psz)
 {
-    return strcpy((char *)malloc(strlen(s) + 1), s);
-}
-
-#endif // wxStrdupA
-
-#ifndef wxStrdupW
-
-WXDLLEXPORT wchar_t * wxStrdupW(const wchar_t *pwz)
-{
-  size_t size = (wxWcslen(pwz) + 1) * sizeof(wchar_t);
-  wchar_t *ret = (wchar_t *) malloc(size);
-  memcpy(ret, pwz, size);
+  size_t size = (wxStrlen(psz) + 1) * sizeof(wxChar);
+  wxChar *ret = (wxChar *) malloc(size);
+  memcpy(ret, psz, size);
   return ret;
 }
-
-#endif // wxStrdupW
+#endif
 
 #ifndef wxStricmp
 int WXDLLEXPORT wxStricmp(const wxChar *psz1, const wxChar *psz2)

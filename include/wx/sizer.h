@@ -6,7 +6,6 @@
 // Created:
 // RCS-ID:      $Id$
 // Copyright:   (c) Robin Dunn, Dirk Holtwick and Robert Roebling
-//              (c) 2003, Ron Lee
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -39,34 +38,17 @@ class WXDLLEXPORT wxSizerItem: public wxObject
 {
 public:
     // spacer
-    wxSizerItem( int width,
-                 int height,
-                 int proportion,
-                 int flag,
-                 int border,
-                 wxObject* userData);
+    wxSizerItem( int width, int height, int option, int flag, int border, wxObject* userData);
 
     // window
-    wxSizerItem( wxWindow *window,
-                 int proportion,
-                 int flag,
-                 int border,
-                 wxObject* userData );
+    wxSizerItem( wxWindow *window, int option, int flag, int border, wxObject* userData );
 
     // subsizer
-    wxSizerItem( wxSizer *sizer,
-                 int proportion,
-                 int flag,
-                 int border,
-                 wxObject* userData );
+    wxSizerItem( wxSizer *sizer, int option, int flag, int border, wxObject* userData );
 
     ~wxSizerItem();
     
     virtual void DeleteWindows();
-
-    // Enable deleting the SizerItem without destroying the contained sizer.
-    void DetachSizer()
-        { m_sizer = 0; }
 
     virtual wxSize GetSize();
     virtual wxSize CalcMin();
@@ -74,8 +56,6 @@ public:
 
     wxSize GetMinSize()
         { return m_minSize; }
-    void SetInitSize( int x, int y )
-        { m_minSize.x = x; m_minSize.y = y; }
 
     void SetRatio( int width, int height )
         // if either of dimensions is zero, ratio is assumed to be 1
@@ -92,22 +72,16 @@ public:
     bool IsSizer();
     bool IsSpacer();
 
-    // Deprecated in 2.6, use {G,S}etProportion instead.
-    wxDEPRECATED( void SetOption( int option ) );
-    wxDEPRECATED( int GetOption() const );
-
-    void SetProportion( int proportion )
-        { m_proportion = proportion; }
-    int GetProportion() const
-        { return m_proportion; }
+    void SetInitSize( int x, int y )
+        { m_minSize.x = x; m_minSize.y = y; }
+    void SetOption( int option )
+        { m_option = option; }
     void SetFlag( int flag )
         { m_flag = flag; }
-    int GetFlag() const
-        { return m_flag; }
     void SetBorder( int border )
         { m_border = border; }
-    int GetBorder() const
-        { return m_border; }
+    void Show ( bool show )
+        { m_show = show; }
 
     wxWindow *GetWindow() const
         { return m_window; }
@@ -117,15 +91,14 @@ public:
         { return m_sizer; }
     void SetSizer( wxSizer *sizer )
         { m_sizer = sizer; }
-    const wxSize &GetSpacer() const
-        { return m_size; }
-    void SetSpacer( const wxSize &size )
-        { m_size = size; m_minSize = size; }
-
-    void Show ( bool show );
+    int GetOption() const
+        { return m_option; }
+    int GetFlag() const
+        { return m_flag; }
+    int GetBorder() const
+        { return m_border; }
     bool IsShown() const
         { return m_show; }
-
     wxObject* GetUserData()
         { return m_userData; }
     wxPoint GetPosition()
@@ -137,27 +110,23 @@ protected:
     wxSize       m_size;
     wxPoint      m_pos;
     wxSize       m_minSize;
-    int          m_proportion;
+    int          m_option;
     int          m_border;
     int          m_flag;
 
-    // If true, then this item is considered in the layout
+    // If TRUE, then this item is considered in the layout
     // calculation.  Otherwise, it is skipped over. 
     bool         m_show;
-
-    // Aspect ratio can always be calculated from m_size,
-    // but this would cause precision loss when the window
-    // is shrunk.  It is safer to preserve the initial value.
+    // als: aspect ratio can always be calculated from m_size,
+    //      but this would cause precision loss when the window
+    //      is shrinked.  it is safer to preserve initial value.
     float        m_ratio;
 
     wxObject    *m_userData;
 
-    DECLARE_DYNAMIC_CLASS(wxSizerItem);
-    DECLARE_NO_COPY_CLASS(wxSizerItem)
+private:
+    DECLARE_CLASS(wxSizerItem);
 };
-
-WX_DECLARE_EXPORTED_LIST( wxSizerItem, wxSizerItemList );
-
 
 //---------------------------------------------------------------------------
 // wxSizer
@@ -170,75 +139,23 @@ public:
     ~wxSizer();
 
     /* These should be called Append() really. */
-    virtual void Add( wxWindow *window,
-                      int proportion = 0,
-                      int flag = 0,
-                      int border = 0,
-                      wxObject* userData = NULL );
-    virtual void Add( wxSizer *sizer,
-                      int proportion = 0,
-                      int flag = 0,
-                      int border = 0,
-                      wxObject* userData = NULL );
-    virtual void Add( int width,
-                      int height,
-                      int proportion = 0,
-                      int flag = 0,
-                      int border = 0,
-                      wxObject* userData = NULL );
-    virtual void Add( wxSizerItem *item );
+    virtual void Add( wxWindow *window, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
+    virtual void Add( wxSizer *sizer, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
+    virtual void Add( int width, int height, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
 
-    virtual void Insert( size_t index,
-                         wxWindow *window,
-                         int proportion = 0,
-                         int flag = 0,
-                         int border = 0,
-                         wxObject* userData = NULL );
-    virtual void Insert( size_t index,
-                         wxSizer *sizer,
-                         int proportion = 0,
-                         int flag = 0,
-                         int border = 0,
-                         wxObject* userData = NULL );
-    virtual void Insert( size_t index,
-                         int width,
-                         int height,
-                         int proportion = 0,
-                         int flag = 0,
-                         int border = 0,
-                         wxObject* userData = NULL );
-    virtual void Insert( size_t index,
-                         wxSizerItem *item );
+    virtual void Insert( int before, wxWindow *window, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
+    virtual void Insert( int before, wxSizer *sizer, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
+    virtual void Insert( int before, int width, int height, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
 
-    virtual void Prepend( wxWindow *window,
-                          int proportion = 0,
-                          int flag = 0,
-                          int border = 0,
-                          wxObject* userData = NULL );
-    virtual void Prepend( wxSizer *sizer,
-                          int proportion = 0,
-                          int flag = 0,
-                          int border = 0,
-                          wxObject* userData = NULL );
-    virtual void Prepend( int width,
-                          int height,
-                          int proportion = 0,
-                          int flag = 0,
-                          int border = 0,
-                          wxObject* userData = NULL );
-    virtual void Prepend( wxSizerItem *item );
+    virtual void Prepend( wxWindow *window, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
+    virtual void Prepend( wxSizer *sizer, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
+    virtual void Prepend( int width, int height, int option = 0, int flag = 0, int border = 0, wxObject* userData = NULL );
 
-    // Deprecated in 2.6 since historically it does not delete the window,
-    // use Detach instead.
-    wxDEPRECATED( virtual bool Remove( wxWindow *window ) );
+    virtual bool Remove( wxWindow *window );
     virtual bool Remove( wxSizer *sizer );
-    virtual bool Remove( size_t index );
-
-    virtual bool Detach( wxWindow *window );
-    virtual bool Detach( wxSizer *sizer );
-    virtual bool Detach( size_t index );
-
-    virtual void Clear( bool delete_windows=false );
+    virtual bool Remove( int pos );
+    
+    virtual void Clear( bool delete_windows=FALSE );
     virtual void DeleteWindows();
 
     void SetMinSize( int width, int height )
@@ -258,10 +175,10 @@ public:
     bool SetItemMinSize( wxSizer *sizer, wxSize size )
         { return DoSetItemMinSize( sizer, size.x, size.y ); }
 
-    bool SetItemMinSize( size_t index, int width, int height )
-        { return DoSetItemMinSize( index, width, height ); }
-    bool SetItemMinSize( size_t index, wxSize size )
-        { return DoSetItemMinSize( index, size.x, size.y ); }
+    bool SetItemMinSize( int pos, int width, int height )
+        { return DoSetItemMinSize( pos, width, height ); }
+    bool SetItemMinSize( int pos, wxSize size )
+        { return DoSetItemMinSize( pos, size.x, size.y ); }
 
     wxSize GetSize()
         { return m_size; }
@@ -281,36 +198,31 @@ public:
     void SetSizeHints( wxWindow *window );
     void SetVirtualSizeHints( wxWindow *window );
 
-    wxSizerItemList& GetChildren()
+    wxList& GetChildren()
         { return m_children; }
 
     void SetDimension( int x, int y, int width, int height );
 
-    // Manage whether individual scene items are considered
+    // Manage whether individual windows or sub-sizers are considered
     // in the layout calculations or not.
-    void Show( wxWindow *window, bool show = true );
-    void Show( wxSizer *sizer, bool show = true );
-    void Show( size_t index, bool show = true );
-
-    void Hide( wxSizer *sizer )
-        { Show( sizer, false ); }
+    void Show( wxWindow *window, bool show = TRUE );
     void Hide( wxWindow *window )
-        { Show( window, false ); }
-    void Hide( size_t index )
-        { Show( index, false ); }
+        { Show (window, FALSE); }
+    void Show( wxSizer *sizer, bool show = TRUE );
+    void Hide( wxSizer *sizer )
+        { Show (sizer, FALSE); }
 
     bool IsShown( wxWindow *window );
     bool IsShown( wxSizer *sizer );
-    bool IsShown( size_t index );
     
     // Recursively call wxWindow::Show () on all sizer items.
     void ShowItems (bool show);
 
 protected:
-    wxSize              m_size;
-    wxSize              m_minSize;
-    wxPoint             m_position;
-    wxSizerItemList     m_children;
+    wxSize  m_size;
+    wxSize  m_minSize;
+    wxPoint m_position;
+    wxList  m_children;
 
     wxSize GetMaxWindowSize( wxWindow *window );
     wxSize GetMinWindowSize( wxWindow *window );
@@ -322,9 +234,10 @@ protected:
     virtual void DoSetMinSize( int width, int height );
     virtual bool DoSetItemMinSize( wxWindow *window, int width, int height );
     virtual bool DoSetItemMinSize( wxSizer *sizer, int width, int height );
-    virtual bool DoSetItemMinSize( size_t index, int width, int height );
+    virtual bool DoSetItemMinSize( int pos, int width, int height );
 
-    DECLARE_DYNAMIC_CLASS(wxSizer);
+private:
+    DECLARE_CLASS(wxSizer);
 };
 
 //---------------------------------------------------------------------------
@@ -360,7 +273,8 @@ protected:
 
     void SetItemBounds( wxSizerItem *item, int x, int y, int w, int h );
 
-    DECLARE_DYNAMIC_CLASS(wxGridSizer);
+private:
+    DECLARE_CLASS(wxGridSizer);
 };
 
 //---------------------------------------------------------------------------
@@ -390,8 +304,8 @@ protected:
 
     void CreateArrays();
 
-    DECLARE_DYNAMIC_CLASS(wxFlexGridSizer);
-    DECLARE_NO_COPY_CLASS(wxFlexGridSizer)
+private:
+    DECLARE_CLASS(wxFlexGridSizer);
 };
 
 //---------------------------------------------------------------------------
@@ -420,7 +334,8 @@ protected:
     int m_fixedWidth;
     int m_fixedHeight;
 
-    DECLARE_DYNAMIC_CLASS(wxBoxSizer);
+private:
+    DECLARE_CLASS(wxBoxSizer);
 };
 
 //---------------------------------------------------------------------------
@@ -445,8 +360,8 @@ public:
 protected:
     wxStaticBox   *m_staticBox;
 
-    DECLARE_DYNAMIC_CLASS(wxStaticBoxSizer);
-    DECLARE_NO_COPY_CLASS(wxStaticBoxSizer)
+private:
+    DECLARE_CLASS(wxStaticBoxSizer);
 };
 
 #endif // wxUSE_STATBOX
@@ -473,8 +388,8 @@ public:
 protected:
     wxNotebook   *m_notebook;
 
-    DECLARE_DYNAMIC_CLASS(wxNotebookSizer);
-    DECLARE_NO_COPY_CLASS(wxNotebookSizer)
+private:
+    DECLARE_CLASS(wxNotebookSizer);
 };
 
 #endif // wxUSE_NOTEBOOK

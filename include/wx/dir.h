@@ -132,8 +132,6 @@ private:
     friend class WXDLLEXPORT wxDirData;
 
     wxDirData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxDir)
 };
 
 #endif // _WX_DIR_H_

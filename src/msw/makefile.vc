@@ -124,7 +124,6 @@ GENERICOBJS= $(GENDIR)\$D\busyinfo.obj \
 # but sometimes it's useful to do so for testing purposes.
 NONESSENTIALOBJS= $(GENDIR)\$D\colrdlgg.obj \
 		$(GENDIR)\$D\dirdlgg.obj \
-		$(GENDIR)\$D\filedlgg.obj \
 		$(GENDIR)\$D\fontdlgg.obj \
 		$(GENDIR)\$D\helpext.obj \
 		$(GENDIR)\$D\helphtml.obj \

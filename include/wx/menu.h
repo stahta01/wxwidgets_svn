@@ -389,8 +389,6 @@ protected:
     long           m_style;             // combination of wxMENU_XXX flags
 
     wxEvtHandler  *m_eventHandler;      // a pluggable in event handler
-
-    DECLARE_NO_COPY_CLASS(wxMenuBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -518,8 +516,6 @@ protected:
 
     // the frame we are attached to (may be NULL)
     wxFrame *m_menuBarFrame;
-
-    DECLARE_NO_COPY_CLASS(wxMenuBarBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -541,6 +537,8 @@ protected:
     #include "wx/mac/menu.h"
 #elif defined(__WXPM__)
     #include "wx/os2/menu.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/menu.h"
 #endif
 #endif // wxUSE_BASE_CLASSES_ONLY/!wxUSE_BASE_CLASSES_ONLY
 

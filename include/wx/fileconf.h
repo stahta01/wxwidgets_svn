@@ -210,8 +210,6 @@ private:
 #ifdef __UNIX__
   int m_umask;                    // the umask to use for file creation
 #endif // __UNIX__
-
-    DECLARE_NO_COPY_CLASS(wxFileConfig)
 };
 
 #endif

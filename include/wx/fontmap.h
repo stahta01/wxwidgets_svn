@@ -188,8 +188,6 @@ protected:
     
 private:
     static wxFontMapper *sm_instance;
-
-    DECLARE_NO_COPY_CLASS(wxFontMapper)
 };
 
 // ----------------------------------------------------------------------------

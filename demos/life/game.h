@@ -58,18 +58,9 @@ public:
         m_name        = name;
         m_description = description;
         m_rules       = _("");
-        m_shape.Add( wxString::Format(_T("%i %i"), -width/2, -height/2) );
+        m_shape.Add( wxString::Format("%i %i", -width/2, -height/2) );
         for(int j = 0; j < height; j++)
-        {
-            wxString tmp;
-
-            for(int i = 0; i < width; i++)
-            {
-                tmp += wxChar(shape[j * width + i]);
-            }
-
-            m_shape.Add( tmp );
-        }
+            m_shape.Add( wxString(shape + (j * width), (size_t) width) );        
     };
 
     wxString      m_name;

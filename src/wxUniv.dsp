@@ -1016,10 +1016,6 @@ SOURCE=.\msw\mimetype.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\minifram.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\msw\palette.cpp
 # End Source File
 # Begin Source File

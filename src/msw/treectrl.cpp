@@ -322,8 +322,6 @@ public:
 
 private:
     wxTreeItemData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxVirtualNode)
 };
 
 #ifdef __VISUALC__
@@ -362,8 +360,6 @@ private:
     bool Traverse(const wxTreeItemId& root, bool recursively);
 
     const wxTreeCtrl *m_tree;
-
-    DECLARE_NO_COPY_CLASS(wxTreeTraversal)
 };
 
 // internal class for getting the selected items
@@ -491,8 +487,6 @@ private:
 
     // the real client data
     wxTreeItemData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxTreeItemIndirectData)
 };
 
 // ----------------------------------------------------------------------------
@@ -1673,7 +1667,6 @@ void wxTreeCtrl::DeleteAllItems()
     }
 
     // and all the real items
-
     if ( !TreeView_DeleteAllItems(GetHwnd()) )
     {
         wxLogLastError(wxT("TreeView_DeleteAllItems"));
@@ -2036,8 +2029,8 @@ long wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 
     if ( (nMsg >= WM_MOUSEFIRST) && (nMsg <= WM_MOUSELAST) )
     {
-        // we only process mouse messages here and these parameters have the
-        // same meaning for all of them
+        // we only process mouse messages here and these parameters have the same
+        // meaning for all of them
         int x = GET_X_LPARAM(lParam),
             y = GET_Y_LPARAM(lParam);
         HTREEITEM htItem = GetItemFromPoint(GetHwnd(), x, y);
@@ -2098,23 +2091,13 @@ long wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
                     }
                     else // normal click
                     {
-                        // avoid doing anything if we click on the only
-                        // currently selected item
-                        wxArrayTreeItemIds selections;
-                        size_t count = GetSelections(selections);
-                        if ( count == 0 ||
-                                count > 1 ||
-                                    HITEM(selections[0]) != htItem )
-                        {
-                            // clear the previously selected items
-                            UnselectAll();
+                        // clear the selection and then let the default handler
+                        // do the job
+                        UnselectAll();
 
-                            // prevent the click from starting in-place editing
-                            // which should only happen if we click on the
-                            // already selected item (and nothing else is
-                            // selected)
-                            TreeView_SelectItem(GetHwnd(), 0);
-                        }
+                        // prevent the click from starting in-place editing
+                        // when there was no selection in the control
+                        TreeView_SelectItem(GetHwnd(), 0);
 
                         // reset on any click without Shift
                         m_htSelStart = 0;
@@ -2248,19 +2231,6 @@ long wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
         }
     }
 #endif // !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
-    else if ( nMsg == WM_CHAR )
-    {
-        // don't let the control process Space and Return keys because it
-        // doesn't do anything useful with them anyhow but always beeps
-        // annoyingly when it receives them and there is no way to turn it off
-        // simply if you just process TREEITEM_ACTIVATED event to which Space
-        // and Enter presses are mapped in your code
-        if ( wParam == VK_SPACE || wParam == VK_RETURN )
-        {
-            processed = true;
-        }
-    }
-
     if ( !processed )
         rc = wxControl::MSWWindowProc(nMsg, wParam, lParam);
 

@@ -24,9 +24,8 @@
 
 // Watcom C++ gives a linker error if this is compiled in.
 // With Borland C++, all samples crash if this is compiled in.
-#if wxUSE_OLE &&!defined(__WATCOMC__) && !(defined(__BORLANDC__) && (__BORLANDC__ < 0x520)) && !defined(__CYGWIN10__)
+#if wxUSE_OLE &&!defined(__WATCOMC__) && !(defined(__BORLANDC__) && (__BORLANDC__ < 0x520)) && !defined(__CYGWIN10__) && !defined(__WXWINE__)
 
-#define _FORCENAMELESSUNION
 #include "wx/log.h"
 #include "wx/msw/ole/automtn.h"
 #include "wx/msw/private.h"
@@ -184,8 +183,8 @@ bool wxAutomationObject::Invoke(const wxString& member, int action,
 	if (FAILED(hr)) 
 	{
 //		ShowException(szMember, hr, NULL, 0);
-	    delete[] argNames;
-	    delete[] dispIds;
+        delete[] argNames;
+        delete[] dispIds;
 		return FALSE;
 	}
 

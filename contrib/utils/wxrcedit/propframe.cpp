@@ -38,18 +38,7 @@ class PropsTree: public wxRemotelyScrolledTreeCtrl
         PropsTree(wxWindow* parent, wxWindowID id, const wxPoint& pt = wxDefaultPosition,
             const wxSize& sz = wxDefaultSize, long style = wxTR_HAS_BUTTONS)
             : wxRemotelyScrolledTreeCtrl(parent, id, pt, sz, style),
-              m_EditCtrl(NULL) 
-		{
-#if 0
-            // VS: Don't do it, it is *extremely* ugly.
-            //     FIXME: find a better solution.
-
-			//make text larger so controls will fit properly
-			wxFont font = GetFont();
-			font.SetPointSize(font.GetPointSize()*1.5);
-			SetFont(font);
-#endif
-        }
+              m_EditCtrl(NULL) {}
 
 	    void OnPaint(wxPaintEvent& event)
         {
@@ -61,8 +50,8 @@ class PropsTree: public wxRemotelyScrolledTreeCtrl
             dc.SetDeviceOrigin(0, 0);
 
 	        wxPen pen(wxColour(_T("BLACK")), 1, wxSOLID);
-	        dc.SetPen(pen);          
-
+	        dc.SetPen(pen);
+            
 	        dc.SetBrush(* wxTRANSPARENT_BRUSH);
 
             wxSize clientSize = GetClientSize();
@@ -74,7 +63,6 @@ class PropsTree: public wxRemotelyScrolledTreeCtrl
 		        if (h.IsOk() && GetBoundingRect(h, itemRect))
 		        {
 			        cy = itemRect.GetTop();
-
 			        dc.DrawLine(0, cy, clientSize.x, cy);
 			        lastH = h;
 		        }
@@ -85,7 +73,7 @@ class PropsTree: public wxRemotelyScrolledTreeCtrl
 		        dc.DrawLine(0, cy, clientSize.x, cy);
 	        }
         }
-
+        
         void OnSelChange(wxTreeEvent& event)
         {
             if (m_EditCtrl != NULL)
@@ -100,7 +88,6 @@ class PropsTree: public wxRemotelyScrolledTreeCtrl
             {
                 wxRect bounding;
                 GetBoundingRect(item, bounding);
-
                 bounding.SetX(0);
                 bounding.SetWidth(GetCompanionWindow()->GetSize().x); 
                 dt->EditCtrl->BeginEdit(bounding, item);
@@ -181,6 +168,7 @@ class PropsValueWindow: public wxTreeCompanionWindow
             wxTreeItemId item = GetTreeCtrl()->HitTest(wxPoint(1, event.GetY()), flags);
             if (item.IsOk())
             {
+                GetTreeCtrl()->ScrollTo(item);
                 GetTreeCtrl()->SelectItem(item);
             }
         }

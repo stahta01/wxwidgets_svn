@@ -15,6 +15,8 @@
 #include "wx/mac/pen.h"
 #elif defined(__WXPM__)
 #include "wx/os2/pen.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/pen.h"
 #endif
 
 #endif

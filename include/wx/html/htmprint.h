@@ -74,8 +74,6 @@ private:
     wxFileSystem *m_FS;
     wxHtmlContainerCell *m_Cells;
     int m_MaxWidth, m_Width, m_Height;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlDCRenderer)
 };
 
 
@@ -157,8 +155,6 @@ private:
     int m_HeaderHeight, m_FooterHeight;
     wxHtmlDCRenderer *m_Renderer, *m_RendererHdr;
     float m_MarginTop, m_MarginBottom, m_MarginLeft, m_MarginRight, m_MarginSpace;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlPrintout)
 };
 
 
@@ -223,8 +219,6 @@ private:
     wxString m_Name;
     wxString m_Headers[2], m_Footers[2];
     wxFrame *m_Frame;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlEasyPrinting)
 };
 
 

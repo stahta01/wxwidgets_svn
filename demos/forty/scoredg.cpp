@@ -27,6 +27,16 @@
 #include "wx/wx.h"
 #endif
 
+#if wxUSE_IOSTREAMH
+#if defined(__WXMSW__) && !defined(__GNUWIN32__) && !defined(__MWERKS__)
+#include <strstrea.h>
+#else
+#include <strstream.h>
+#endif
+#else
+#include <strstream>
+//using namespace std;
+#endif
 #include "scorefil.h"
 #include "scoredg.h"
 
@@ -56,9 +66,9 @@ ScoreCanvas::ScoreCanvas(wxWindow* parent, ScoreFile* scoreFile) :
         wxArrayString players;
 	scoreFile->GetPlayerList( players);
 
-	wxString os;
+	ostrstream os;
 
-	os << wxT("Player\tWins\tGames\tScore\n");
+	os << "Player\tWins\tGames\tScore\n";
 	for (unsigned int i = 0; i < players.Count(); i++)
 	{
 		int wins, games, score;
@@ -69,13 +79,15 @@ ScoreCanvas::ScoreCanvas(wxWindow* parent, ScoreFile* scoreFile) :
 			average = (2 * score + games) / (2 * games);
 		}
 
-		os << players[i] << wxT('\t') 
-		   << wins  << wxT('\t')
-		   << games << wxT('\t')
-		   << average << wxT('\n');
+		os << players[i] << '\t' 
+		   << wins  << '\t'
+		   << games << '\t'
+		   << average << '\n';
 	}
-	os << wxT('\0');
-	m_text = os;
+	os << '\0';
+	char* str = os.str();
+	m_text = str;
+	delete str;
 }
 
 ScoreCanvas::~ScoreCanvas()

@@ -127,7 +127,6 @@ protected:
     friend class wxURL;
 
     DECLARE_DYNAMIC_CLASS(wxProtoInfo)
-    DECLARE_NO_COPY_CLASS(wxProtoInfo)
 };
 
 #endif // wxUSE_PROTOCOL

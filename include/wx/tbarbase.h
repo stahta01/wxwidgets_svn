@@ -234,8 +234,6 @@ protected:
     // short and long help strings
     wxString m_shortHelpString;
     wxString m_longHelpString;
-
-    DECLARE_NO_COPY_CLASS(wxToolBarToolBase)
 };
 
 // a list of toolbar tools
