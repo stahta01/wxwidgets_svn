@@ -1,0 +1,16 @@
+[OPTIONS]
+TITLE=wxWindows Porting Guide
+CONTENTS=Contents
+COMPRESS=HIGH
+
+[FILES]
+porting.rtf
+
+[CONFIG]
+CreateButton("Up", "&Up", "JumpId(`porting.hlp', `Contents')")
+BrowseButtons()
+
+[MAP]
+
+[BITMAPS]
+
