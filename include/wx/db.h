@@ -31,9 +31,13 @@
 #define OLD_GETCOLUMNS 1
 #define EXPERIMENTAL_WXDB_FUNCTIONS 1
 
+#include "wx/version.h"
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma interface "db.h"
 #endif
+
+#include "wx/setup.h"
 
 #include "wx/defs.h"
 #include "wx/string.h"

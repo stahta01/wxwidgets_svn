@@ -94,11 +94,9 @@ To compile using the emulator on eVC++4:
 Status
 ======
 
-It's possible to create working PocketPC or Smartphone
-applications with this port. For further information
+Currently under development. For further information
 about what has been done and what needs to be
-done, see the wxWinCE topic in the reference manual,
-and also:
+done, see:
 
 http://wiki.wxwindows.org/wiki.pl?Developers_Notebook/WxWinCE
 

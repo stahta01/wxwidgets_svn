@@ -990,10 +990,6 @@ SOURCE=.\generic\progdlgg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\propdlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\renderg.cpp
 # End Source File
 # Begin Source File
@@ -2643,10 +2639,6 @@ SOURCE=..\include\wx\progdlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\propdlg.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\protocol\file.h
 # End Source File
 # Begin Source File
@@ -3752,10 +3744,6 @@ SOURCE=..\include\wx\generic\prntdlgg.h
 # Begin Source File
 
 SOURCE=..\include\wx\generic\progdlgg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\generic\propdlg.h
 # End Source File
 # Begin Source File
 

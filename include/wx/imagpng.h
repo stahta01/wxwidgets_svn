@@ -14,15 +14,13 @@
 #pragma interface "imagpng.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/image.h"
 
 //-----------------------------------------------------------------------------
 // wxPNGHandler
 //-----------------------------------------------------------------------------
 
 #if wxUSE_LIBPNG
-
-#include "wx/image.h"
 
 #define wxIMAGE_OPTION_PNG_FORMAT    wxT("PngFormat")
 #define wxIMAGE_OPTION_PNG_BITDEPTH  wxT("PngBitDepth")
@@ -54,9 +52,8 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxPNGHandler)
 };
-
 #endif
-  // wxUSE_LIBPNG
+
 
 #endif
   // _WX_IMAGPNG_H_

@@ -12,11 +12,9 @@
 #ifndef _WX_WXMMSTREAM_H__
 #define _WX_WXMMSTREAM_H__
 
-#include "wx/defs.h"
+#include "wx/stream.h"
 
 #if wxUSE_STREAMS
-
-#include "wx/stream.h"
 
 class WXDLLIMPEXP_BASE wxMemoryInputStream : public wxInputStream
 {

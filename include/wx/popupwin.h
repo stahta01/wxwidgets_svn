@@ -16,12 +16,9 @@
     #pragma interface "popupwinbase.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_POPUPWIN
-
 #include "wx/window.h"
 
+#if wxUSE_POPUPWIN
 // ----------------------------------------------------------------------------
 // wxPopupWindow: a special kind of top level window used for popup menus,
 // combobox popups and such.
@@ -109,7 +106,7 @@ public:
 
     // Overridden to grab the input on some plaforms
     virtual bool Show( bool show = true );
-
+    
 protected:
     // common part of all ctors
     void Init();

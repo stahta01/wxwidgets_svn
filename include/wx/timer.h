@@ -17,14 +17,14 @@
     #pragma interface "timerbase.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_GUI && wxUSE_TIMER
-
+#include "wx/setup.h"
 #include "wx/object.h"
 #include "wx/longlong.h"
 #include "wx/event.h"
+
 #include "wx/stopwatch.h" // for backwards compatibility
+
+#if wxUSE_GUI && wxUSE_TIMER
 
 // ----------------------------------------------------------------------------
 // wxTimer

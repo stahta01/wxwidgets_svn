@@ -14,16 +14,14 @@
 #pragma interface "imagjpeg.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/image.h"
+
 
 //-----------------------------------------------------------------------------
 // wxJPEGHandler
 //-----------------------------------------------------------------------------
 
 #if wxUSE_LIBJPEG
-
-#include "wx/image.h"
-
 class WXDLLEXPORT wxJPEGHandler: public wxImageHandler
 {
 public:
@@ -44,8 +42,7 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxJPEGHandler)
 };
-
-#endif // wxUSE_LIBJPEG
+#endif
 
 #endif // _WX_IMAGJPEG_H_
 

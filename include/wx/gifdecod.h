@@ -15,7 +15,7 @@
 #pragma interface "gifdecod.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 #if wxUSE_STREAMS && wxUSE_GIF
 

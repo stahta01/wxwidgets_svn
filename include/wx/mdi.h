@@ -1,18 +1,7 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:        mdi.h
-// Purpose:     wxMDI base header
-// Author:      wxWidgets Team
-// Modified by:
-// Created:
-// Copyright:   (c) wxWidgets Team
-// RCS-ID:      $Id$
-// Licence:     wxWindows licence
-/////////////////////////////////////////////////////////////////////////////
-
 #ifndef _WX_MDI_H_BASE_
 #define _WX_MDI_H_BASE_
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 #if wxUSE_MDI
 

@@ -14,7 +14,7 @@
 #pragma interface "filesys.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 #if !wxUSE_STREAMS
 #error You cannot compile virtual file systems without wxUSE_STREAMS

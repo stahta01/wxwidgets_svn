@@ -604,9 +604,7 @@ enum
     wxWIN32S,                 /*  Windows 32S API */
     wxWIN95,                  /*  Windows 95 */
     wxWIN386,                 /*  Watcom 32-bit supervisor modus */
-    wxWINDOWS_CE,             /*  Windows CE (generic) */
-    wxWINDOWS_POCKETPC,       /*  Windows CE PocketPC */
-    wxWINDOWS_SMARTPHONE,     /*  Windows CE Smartphone */
+    wxWINDOWS_CE,             /*  Windows CE */
     wxMGL_UNIX,               /*  MGL with direct hardware access */
     wxMGL_X,                  /*  MGL on X */
     wxMGL_WIN32,              /*  MGL on Win32 */
@@ -614,8 +612,7 @@ enum
     wxMGL_DOS,                /*  MGL on MS-DOS */
     wxWINDOWS_OS2,            /*  Native OS/2 PM */
     wxUNIX,                   /*  wxBase under Unix */
-    wxX11,                    /*  Plain X11 and Universal widgets */
-    wxPALMOS                  /*  PalmOS */
+    wxX11                     /*  Plain X11 and Universal widgets */
 };
 
 /*  ---------------------------------------------------------------------------- */

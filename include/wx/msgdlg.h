@@ -12,7 +12,7 @@
 #ifndef _WX_MSGDLG_H_BASE_
 #define _WX_MSGDLG_H_BASE_
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 #if wxUSE_MSGDLG
 

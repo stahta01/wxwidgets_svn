@@ -14,7 +14,7 @@
 #pragma interface "xpmdecod.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 
 class WXDLLIMPEXP_CORE wxImage;

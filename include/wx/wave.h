@@ -12,7 +12,7 @@
 #ifndef _WX_WAVE_H_BASE_
 #define _WX_WAVE_H_BASE_
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 #if wxUSE_SOUND
 
