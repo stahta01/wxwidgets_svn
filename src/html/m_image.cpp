@@ -50,11 +50,11 @@ WX_DECLARE_OBJARRAY(int, CoordArray);
 WX_DEFINE_OBJARRAY(CoordArray);
 
 
-// ---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlImageMapAreaCell
-//                  0-width, 0-height cell that represents single area in
-//                  imagemap (it's GetLink is called from wxHtmlImageCell's)
-// ---------------------------------------------------------------------------
+//                  0-width, 0-height cell that represents single area in imagemap
+//                  (it's GetLink is called from wxHtmlImageCell's)
+//--------------------------------------------------------------------------------
 
 class wxHtmlImageMapAreaCell : public wxHtmlCell
 {
@@ -67,10 +67,6 @@ class wxHtmlImageMapAreaCell : public wxHtmlCell
     public:
         wxHtmlImageMapAreaCell( celltype t, wxString &coords, double pixel_scale = 1.0);
         virtual wxHtmlLinkInfo *GetLink( int x = 0, int y = 0 ) const;
-        void Draw(wxDC& WXUNUSED(dc),
-                  int WXUNUSED(x), int WXUNUSED(y),
-                  int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                  wxHtmlRenderingState& WXUNUSED(state)) {}
 };
 
 
@@ -243,10 +239,6 @@ class wxHtmlImageMapCell : public wxHtmlCell
     public:
         virtual wxHtmlLinkInfo *GetLink( int x = 0, int y = 0 ) const;
         virtual const wxHtmlCell *Find( int cond, const void *param ) const;
-        void Draw(wxDC& WXUNUSED(dc),
-                  int WXUNUSED(x), int WXUNUSED(y),
-                  int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                  wxHtmlRenderingState& WXUNUSED(state)) {}
 };
 
 
@@ -290,8 +282,7 @@ public:
                     double scale = 1.0, int align = wxHTML_ALIGN_BOTTOM,
                     const wxString& mapname = wxEmptyString);
     ~wxHtmlImageCell();
-    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-              wxHtmlRenderingState& state);
+    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
     virtual wxHtmlLinkInfo *GetLink(int x = 0, int y = 0) const;
 
     void SetImage(const wxImage& img);
@@ -528,9 +519,7 @@ wxHtmlImageCell::~wxHtmlImageCell()
 }
 
 
-void wxHtmlImageCell::Draw(wxDC& dc, int x, int y,
-                           int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                           wxHtmlRenderingState& WXUNUSED(state))
+void wxHtmlImageCell::Draw(wxDC& dc, int x, int y, int WXUNUSED(view_y1), int WXUNUSED(view_y2))
 {
     if ( m_showFrame )
     {

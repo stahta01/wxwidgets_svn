@@ -622,21 +622,11 @@ void wxHtmlWindow::AddFilter(wxHtmlFilter *filter)
 }
 
 
-bool wxHtmlWindow::IsSelectionEnabled() const
-{
-#if wxUSE_CLIPBOARD
-    return !(m_Style & wxHW_NO_SELECTION);
-#else
-    return false;
-#endif
-}
 
 
 void wxHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
-    const wxMouseEvent *e = link.GetEvent();
-    if (e == NULL || e->LeftUp())
-        LoadPage(link.GetHref());
+    LoadPage(link.GetHref());
 }
 
 void wxHtmlWindow::OnCellClicked(wxHtmlCell *cell,
@@ -665,11 +655,9 @@ void wxHtmlWindow::OnDraw(wxDC& dc)
     dc.SetBackgroundMode(wxTRANSPARENT);
     GetViewStart(&x, &y);
 
-    wxHtmlRenderingState rstate(NULL);
     m_Cell->Draw(dc, 0, 0,
                  y * wxHTML_SCROLL_STEP + rect.GetTop(),
-                 y * wxHTML_SCROLL_STEP + rect.GetBottom(),
-                 rstate);
+                 y * wxHTML_SCROLL_STEP + rect.GetBottom());
 }
 
 
@@ -683,32 +671,32 @@ void wxHtmlWindow::OnSize(wxSizeEvent& event)
 }
 
 
-void wxHtmlWindow::OnMouseMove(wxMouseEvent& event)
+void wxHtmlWindow::OnMouseEvent(wxMouseEvent& event)
 {
-    m_tmpMouseMoved = true;
-}
+    m_tmpMouseMoved = TRUE;
 
-void wxHtmlWindow::OnMouseButton(wxMouseEvent& event)
-{
-    SetFocus();
-    if ( m_Cell )
+    if (event.ButtonDown())
     {
-        int sx, sy;
-        GetViewStart(&sx, &sy);
-        sx *= wxHTML_SCROLL_STEP;
-        sy *= wxHTML_SCROLL_STEP;
+        SetFocus();
+        if ( m_Cell )
+        {
+            int sx, sy;
+            GetViewStart(&sx, &sy);
+            sx *= wxHTML_SCROLL_STEP;
+            sy *= wxHTML_SCROLL_STEP;
 
-        wxPoint pos = event.GetPosition();
-        pos.x += sx;
-        pos.y += sy;
+            wxPoint pos = event.GetPosition();
+            pos.x += sx;
+            pos.y += sy;
 
-        wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
+            wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
 
-        // VZ: is it possible that we don't find anything at all?
-        // VS: yes. FindCellByPos returns terminal cell and
-        //     containers may have empty borders
-        if ( cell )
-            OnCellClicked(cell, pos.x, pos.y, event);
+            // VZ: is it possible that we don't find anything at all?
+            // VS: yes. FindCellByPos returns terminal cell and
+            //     containers may have empty borders
+            if ( cell )
+                OnCellClicked(cell, pos.x, pos.y, event);
+        }
     }
 }
 
@@ -776,9 +764,9 @@ IMPLEMENT_DYNAMIC_CLASS(wxHtmlWindow,wxScrolledWindow)
 
 BEGIN_EVENT_TABLE(wxHtmlWindow, wxScrolledWindow)
     EVT_SIZE(wxHtmlWindow::OnSize)
-    EVT_LEFT_UP(wxHtmlWindow::OnMouseButton)
-    EVT_RIGHT_UP(wxHtmlWindow::OnMouseButton)
-    EVT_MOTION(wxHtmlWindow::OnMouseMove)
+    EVT_LEFT_DOWN(wxHtmlWindow::OnMouseEvent)
+    EVT_RIGHT_DOWN(wxHtmlWindow::OnMouseEvent)
+    EVT_MOTION(wxHtmlWindow::OnMouseEvent)
     EVT_IDLE(wxHtmlWindow::OnIdle)
 END_EVENT_TABLE()
 
