@@ -4,10 +4,10 @@ rem using Inno Setup + ScriptMaker
 set src=%wxwin
 set dest=%src\deliver
 set webfiles=c:\wx2dev\wxWebSite
-set inno=1
+set inno=0
 
 Rem Set this to the required version
-set version=2.5.0
+set version=2.3.4
 
 if "%src" == "" goto usage
 if "%dest" == "" goto usage
@@ -118,8 +118,6 @@ zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\xml.rsp
 zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\stc.rsp
 zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\contrib.rsp
 zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\makefile.rsp
-
-zip32 -@ %dest%\wxWindows-%version%-CW-Mac.zip < %src%\distrib\msw\cw_mac.rsp
 
 erase /Y %src%\include\wx\setup.h
 

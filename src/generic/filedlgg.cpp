@@ -30,8 +30,8 @@
 
 #if wxUSE_FILEDLG
 
-#if !defined(__UNIX__) && !defined(__DOS__) && !defined(__WIN32__)
-#error wxFileDialog currently only supports Unix, win32 and DOS
+#if !defined(__UNIX__) && !defined(__DOS__)
+#error wxFileDialog currently only supports Unix and DOS
 #endif
 
 #include "wx/checkbox.h"
@@ -76,9 +76,7 @@
 #endif
 
 #include <time.h>
-#if defined(__UNIX__) || defined(__DOS__)
 #include <unistd.h>
-#endif
 
 // ----------------------------------------------------------------------------
 // constants
@@ -254,7 +252,7 @@ wxFileIconsTable::wxFileIconsTable() :
 
 static wxBitmap CreateAntialiasedBitmap(const wxImage& img)
 {
-    wxImage smallimg (16, 16);
+    wxImage small(16, 16);
     unsigned char *p1, *p2, *ps;
     unsigned char mr = img.GetMaskRed(),
                   mg = img.GetMaskGreen(),
@@ -263,8 +261,8 @@ static wxBitmap CreateAntialiasedBitmap(const wxImage& img)
     unsigned x, y;
     unsigned sr, sg, sb, smask;
 
-    p1 = img.GetData(), p2 = img.GetData() + 3 * 32, ps = smallimg.GetData();
-    smallimg.SetMaskColour(mr, mr, mr);
+    p1 = img.GetData(), p2 = img.GetData() + 3 * 32, ps = small.GetData();
+    small.SetMaskColour(mr, mr, mr);
 
     for (y = 0; y < 16; y++)
     {
@@ -297,7 +295,7 @@ static wxBitmap CreateAntialiasedBitmap(const wxImage& img)
         p1 += 32 * 3, p2 += 32 * 3;
     }
 
-    return wxBitmap(smallimg);
+    return wxBitmap(small);
 }
 
 // finds empty borders and return non-empty area of image:
@@ -366,16 +364,7 @@ int wxFileIconsTable::GetIconID(const wxString& extension, const wxString& mime)
         m_HashTable.Put(extension, new wxFileIconEntry(newid));
         return newid;
     }
-#ifdef __WIN32__
-    wxBitmap myBitmap (ic.GetWidth(), ic.GetHeight() ) ;
-    wxMemoryDC memDC;
-    memDC.SelectObject( myBitmap );
-    memDC.DrawIcon(ic,0,0);
-    memDC.SelectObject( wxNullBitmap );
-    wxImage img = myBitmap.ConvertToImage();
-#else
     wxImage img = ic.ConvertToImage();
-#endif
     delete ft;
 
     int id = m_ImageList.GetImageCount();
@@ -407,7 +396,7 @@ int wxFileIconsTable::GetIconID(const wxString& extension, const wxString& mime)
 // ----------------------------------------------------------------------------
 
 static
-int ListCompare( long data1, long data2, long WXUNUSED(data))
+int ListCompare( long data1, long data2, long WXUNUSED(data) )
 {
      wxFileData *fd1 = (wxFileData*)data1 ;
      wxFileData *fd2 = (wxFileData*)data2 ;
@@ -467,12 +456,8 @@ wxFileData::wxFileData( const wxString &name, const wxString &fname )
 //  struct passwd *user = getpwuid( buff.st_uid );
 //  struct group *grp = getgrgid( buff.st_gid );
 
-#ifdef __VISUALC__
-    m_isDir = ((buff.st_mode & _S_IFDIR ) == _S_IFDIR );
-#else
-	m_isDir = S_ISDIR( buff.st_mode );
-#endif // VC++
-    m_isExe = ((buff.st_mode & wxS_IXUSR ) == wxS_IXUSR );
+    m_isDir = S_ISDIR( buff.st_mode );
+    m_isExe = ((buff.st_mode & S_IXUSR ) == S_IXUSR );
 
     m_size = buff.st_size;
 
@@ -485,9 +470,9 @@ wxFileData::wxFileData( const wxString &name, const wxString &fname )
 
     char buffer[10];
     sprintf( buffer, "%c%c%c",
-     ((( buff.st_mode & wxS_IRUSR ) == wxS_IRUSR ) ? 'r' : '-'),
-     ((( buff.st_mode & wxS_IWUSR ) == wxS_IWUSR ) ? 'w' : '-'),
-     ((( buff.st_mode & wxS_IXUSR ) == wxS_IXUSR ) ? 'x' : '-') );
+     ((( buff.st_mode & S_IRUSR ) == S_IRUSR ) ? 'r' : '-'),
+     ((( buff.st_mode & S_IWUSR ) == S_IWUSR ) ? 'w' : '-'),
+     ((( buff.st_mode & S_IXUSR ) == S_IXUSR ) ? 'x' : '-') );
 #if wxUSE_UNICODE
     m_permissions = wxConvUTF8.cMB2WC( buffer );
 #else
@@ -803,7 +788,7 @@ void wxFileCtrl::UpdateFiles()
         }
     }
 
-    SortItems((wxListCtrlCompare)ListCompare, 0);
+    SortItems(ListCompare, 0);
 
     if ( my_style & wxLC_REPORT )
     {
@@ -866,7 +851,7 @@ void wxFileCtrl::MakeDir()
 
     if (id != -1)
     {
-        SortItems( (wxListCtrlCompare) ListCompare, 0 );
+        SortItems( ListCompare, 0 );
         id = FindItem( 0, (long)fd );
         EnsureVisible( id );
         EditLabel( id );
@@ -1020,7 +1005,6 @@ BEGIN_EVENT_TABLE(wxFileDialog,wxDialog)
         EVT_LIST_ITEM_ACTIVATED(ID_LIST_CTRL, wxFileDialog::OnActivated)
         EVT_CHOICE(ID_CHOICE,wxFileDialog::OnChoiceFilter)
         EVT_TEXT_ENTER(ID_TEXT,wxFileDialog::OnTextEnter)
-        EVT_TEXT(ID_TEXT,wxFileDialog::OnTextChange)
         EVT_CHECKBOX(ID_CHECK,wxFileDialog::OnCheck)
 END_EVENT_TABLE()
 
@@ -1301,27 +1285,6 @@ void wxFileDialog::OnTextEnter( wxCommandEvent &WXUNUSED(event) )
     GetEventHandler()->ProcessEvent( cevent );
 }
 
-static bool ignoreChanges = FALSE;
-
-void wxFileDialog::OnTextChange( wxCommandEvent &WXUNUSED(event) )
-{
-    if (!ignoreChanges)
-    {
-        // Clear selections.  Otherwise when the user types in a value they may
-        // not get the file whose name they typed.
-        if (m_list->GetSelectedItemCount() > 0)
-        {
-    	    long item = m_list->GetNextItem(-1, wxLIST_NEXT_ALL,
-                wxLIST_STATE_SELECTED);
-            while ( item != -1 )
-    	    {
-                m_list->SetItemState(item,0, wxLIST_STATE_SELECTED);
-                item = m_list->GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-    	    }
-        }
-    }
-}
-
 void wxFileDialog::OnSelected( wxListEvent &event )
 {
     wxString filename( event.m_item.m_text );
@@ -1334,9 +1297,7 @@ void wxFileDialog::OnSelected( wxListEvent &event )
     dir += filename;
     if (wxDirExists(dir)) return;
 
-    ignoreChanges = TRUE;
     m_text->SetValue( filename );
-    ignoreChanges = FALSE;
 }
 
 void wxFileDialog::HandleAction( const wxString &fn )

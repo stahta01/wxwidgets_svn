@@ -1005,11 +1005,10 @@ int wxImage::GetImageCount( const wxString &name, long type )
 {
 #if wxUSE_STREAMS
   wxFileInputStream stream(name);
-  if (stream.Ok())
-      return GetImageCount(stream, type);
-#endif
-
+  return GetImageCount(stream, type);
+#else
   return 0;
+#endif
 }
 
 #if wxUSE_STREAMS
@@ -1265,6 +1264,10 @@ void wxImage::InitStandardHandlers()
 #if wxUSE_STREAMS
     AddHandler(new wxBMPHandler);
 #endif // wxUSE_STREAMS
+
+#if wxUSE_XPM && !defined(__WXGTK__) && !defined(__WXMOTIF__)
+    AddHandler(new wxXPMHandler);
+#endif
 }
 
 void wxImage::CleanUpHandlers()

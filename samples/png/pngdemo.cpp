@@ -38,7 +38,7 @@ bool MyApp::OnInit(void)
   wxImage::AddHandler(new wxPNGHandler);
 
   // Create the main frame window
-  frame = new MyFrame((wxFrame *) NULL, _T("wxPNGBitmap Demo"), wxPoint(0, 0), wxSize(300, 300));
+  frame = new MyFrame((wxFrame *) NULL, "wxPNGBitmap Demo", wxPoint(0, 0), wxSize(300, 300));
 
   // Give it a status line
   frame->CreateStatusBar(2);
@@ -47,15 +47,15 @@ bool MyApp::OnInit(void)
   wxMenu *file_menu = new wxMenu;
   wxMenu *help_menu = new wxMenu;
 
-  file_menu->Append(PNGDEMO_LOAD_FILE, _T("&Load file"),                _T("Load file"));
-  file_menu->Append(PNGDEMO_SAVE_FILE, _T("&Save file"),                _T("Save file"));
-  file_menu->Append(PNGDEMO_QUIT, _T("E&xit"),                _T("Quit program"));
-  help_menu->Append(PNGDEMO_ABOUT, _T("&About"),              _T("About PNG demo"));
+  file_menu->Append(PNGDEMO_LOAD_FILE, "&Load file",                "Load file");
+  file_menu->Append(PNGDEMO_SAVE_FILE, "&Save file",                "Save file");
+  file_menu->Append(PNGDEMO_QUIT, "E&xit",                "Quit program");
+  help_menu->Append(PNGDEMO_ABOUT, "&About",              "About PNG demo");
 
   wxMenuBar *menu_bar = new wxMenuBar;
 
-  menu_bar->Append(file_menu, _T("&File"));
-  menu_bar->Append(help_menu, _T("&Help"));
+  menu_bar->Append(file_menu, "&File");
+  menu_bar->Append(help_menu, "&Help");
 
   // Associate the menu bar with the frame
   frame->SetMenuBar(menu_bar);
@@ -68,7 +68,7 @@ bool MyApp::OnInit(void)
 
   frame->Show(TRUE);
 
-  frame->SetStatusText(_T("Hello, wxWindows"));
+  frame->SetStatusText("Hello, wxWindows");
 
   return TRUE;
 }
@@ -104,8 +104,8 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    (void)wxMessageBox(_T("PNG demo\nJulian Smart (c) 1998"),
-            _T("About PNG Demo"), wxOK);
+    (void)wxMessageBox("PNG demo\nJulian Smart (c) 1998",
+            "About PNG Demo", wxOK);
 }
 
 void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
@@ -114,7 +114,7 @@ void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
                                (const wxChar *)NULL,
                                wxT("png"), wxT("PNG files (*.png)|*.png") );
 
-  if (f == _T(""))  return;
+  if (f == "")  return;
   
   wxBitmap *backstore = new wxBitmap( 150, 150 );
   
@@ -127,7 +127,7 @@ void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
   memDC.SetPen( *wxBLACK_PEN );
   memDC.DrawLine( 0, 0, 0, 10 );
   memDC.SetTextForeground( *wxWHITE );
-  memDC.DrawText( _T("This is a memory dc."), 10, 10 );
+  memDC.DrawText( "This is a memory dc.", 10, 10 );
   
   memDC.SelectObject( wxNullBitmap );
   
@@ -143,7 +143,7 @@ void MyFrame::OnLoadFile(wxCommandEvent& WXUNUSED(event))
                                     (const wxChar *) NULL, wxT("png"),
                                     wxT("PNG files (*.png)|*.png"));
 
-    if (f == _T(""))
+    if (f == "")
         return;
 
     if ( g_TestBitmap )

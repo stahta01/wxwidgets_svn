@@ -661,10 +661,6 @@ SOURCE=.\generic\fdrepdlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\generic\filedlgg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\generic\fontdlgg.cpp
 # End Source File
 # Begin Source File
@@ -960,6 +956,10 @@ SOURCE=.\msw\evtloop.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\msw\filedlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\msw\font.cpp
 # End Source File
 # Begin Source File
@@ -977,18 +977,6 @@ SOURCE=.\msw\gdiimage.cpp
 # Begin Source File
 
 SOURCE=.\msw\gdiobj.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\helpbest.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\helpchm.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\helpwin.cpp
 # End Source File
 # Begin Source File
 

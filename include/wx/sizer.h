@@ -323,9 +323,6 @@ public:
     int GetOrientation()
         { return m_orient; }
 
-    void SetOrientation(int orient)
-        { m_orient = orient; }
-
 protected:
     int m_orient;
     int m_stretchable;

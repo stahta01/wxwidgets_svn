@@ -155,11 +155,19 @@
 
       help.UseConfig(wxConfig::Get());
       bool ret;
+#if defined(__WXMAC__) && !defined(__DARWIN__)
+      ret = help.AddBook(wxT(":helpfiles:testing.hhp"));
+#else
       help.SetTempDir(wxT("."));
-      ret = help.AddBook(wxFileName(wxT("helpfiles/testing.hhp"), wxPATH_UNIX));
+      ret = help.AddBook(wxT("helpfiles/testing.hhp"));
+#endif
       if (! ret)
         wxMessageBox(wxT("Failed adding book helpfiles/testing.hhp"));
-      ret = help.AddBook(wxFileName(wxT("helpfiles/another.hhp"), wxPATH_UNIX));
+#if defined(__WXMAC__) && !defined(__DARWIN__)
+      ret = help.AddBook(wxT(":helpfiles:another.hhp"));
+#else
+      ret = help.AddBook(wxT("helpfiles/another.hhp"));
+#endif
       if (! ret)
         wxMessageBox(_("Failed adding book helpfiles/another.hhp"));
    }

@@ -1,30 +1,5 @@
-----------------------------
-wxWindows 2.5/2.6 Change Log
-----------------------------
-
-INCOMPATIBLE CHANGES SINCE 2.4.x
-================================
-
-OTHER CHANGES
-=============
-
-2.5.0
------
-
-Unix:
-
-- fixed compilation on systems with zlib installed but < 1.1.3 version
-
-All:
-
-- Implemented GetEditControl for wxGenericTreeCtrl (Peter
-  Stieber)
-- Improved contrib/utils/convertrc parsing (David J. Cooke)
-- Fixed handling of URLs and filenames in wxFileSystem
-- Implemented alignment for wxGrid bool editor and renderer
-
-OLD CHANGES
-===========
+wxWindows 2 Change Log
+----------------------
 
 INCOMPATIBLE CHANGES SINCE 2.2.x
 ================================

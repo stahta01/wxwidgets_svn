@@ -333,11 +333,14 @@ void *wxDllLoader::GetSymbol(wxDllType dllHandle, const wxString &name, bool *su
 
     if ( !symbol )
     {
+        wxString msg(_("wxDllLoader failed to GetSymbol '%s'"));
+
 #ifdef HAVE_DLERROR
         const wxChar *err = dlerror();
         if( err )
         {
-            wxLogError(wxT("%s"), err);
+            failed = TRUE;
+            wxLogError( msg, err );
         }
 #else
         failed = TRUE;

@@ -224,6 +224,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
     Str255 fontName ;
     SInt16 fontSize ;
     Style fontStyle ;
+	SInt16 fontNum ;
 #if TARGET_CARBON
 	GetThemeFont(kThemeViewsFont , GetApplicationScript() , fontName , &fontSize , &fontStyle ) ;
 #else
@@ -649,6 +650,7 @@ wxSize wxListBox::DoGetBestSize() const
 
 	{
 		wxMacPortStateHelper st( UMAGetWindowPort( (WindowRef) MacGetRootWindow() ) ) ; 
+ 		Rect drawRect ;
 
 		wxFontRefData * font = (wxFontRefData*) m_font.GetRefData() ;
 

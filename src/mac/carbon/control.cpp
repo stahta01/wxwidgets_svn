@@ -400,10 +400,6 @@ void wxControl::MacPostControlCreate()
 	{
 	    wxMacControlActionUPP = NewControlDefUPP( wxMacControlDefintion ) ;
 	}
-    // The following block of code is responsible for crashes when switching
-    // back to windows, which can be seen in the dialogs sample.
-    // It is disabled until a proper solution can be found.
-#if 0
 #if TARGET_CARBON
 /*
     only working under classic carbon
@@ -421,7 +417,6 @@ void wxControl::MacPostControlCreate()
       (**cdef).function = (void(*)()) wxMacControlActionUPP;
       (**(ControlHandle)m_macControl).contrlDefProc = (Handle) cdef ;
     }
-#endif
 #endif
 	SetControlColorProc( (ControlHandle) m_macControl , wxMacSetupControlBackgroundUPP ) ;
  

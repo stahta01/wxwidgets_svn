@@ -103,6 +103,7 @@ bool wxXmlResource::Load(const wxString& filemask)
         if (filemask.Lower().Matches(wxT("*.zip")) ||
             filemask.Lower().Matches(wxT("*.xrs")))
         {
+            rt = rt && Load(fnd + wxT("#zip:*.xmlbin"));
             rt = rt && Load(fnd + wxT("#zip:*.xrc"));
         }
         else
@@ -1109,7 +1110,7 @@ void wxXmlResourceHandler::CreateChildren(wxObject *parent, bool this_hnd_only)
     while (n)
     {
         if (n->GetType() == wxXML_ELEMENT_NODE &&
-           (n->GetName() == wxT("object") || n->GetName() == wxT("object_ref")))
+            n->GetName() == wxT("object"))
         {
             if (this_hnd_only && CanHandle(n))
                 CreateResource(n, parent, NULL);

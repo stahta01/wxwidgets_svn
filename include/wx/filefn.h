@@ -18,17 +18,11 @@
 
 #include "wx/list.h"
 
-#ifndef __WXWINCE__
 #include <time.h>
-#endif
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
-
-#ifdef __WXWINCE__
-    typedef long off_t;
-#else
 
 // define off_t
 #if !defined(__WXMAC__) || defined(__UNIX__)
@@ -45,8 +39,6 @@
     typedef long off_t;
 #elif defined(__MWERKS__) && !defined(__INTEL__)
     typedef long off_t;
-#endif
-
 #endif
 
 #if defined(__VISAGECPP__) && __IBMCPP__ >= 400

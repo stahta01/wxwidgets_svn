@@ -1659,14 +1659,8 @@ void wxTreeCtrl::DeleteChildren(const wxTreeItemId& item)
 
 void wxTreeCtrl::DeleteAllItems()
 {
-    // delete the "virtual" root item.
-    if ( GET_VIRTUAL_ROOT() )
-    {
-        delete GET_VIRTUAL_ROOT();
-        m_pVirtualRoot = NULL;
-    }
-
-    // and all the real items
+    // delete stored root item.
+    delete GET_VIRTUAL_ROOT();
 
     if ( !TreeView_DeleteAllItems(GetHwnd()) )
     {
@@ -2030,8 +2024,8 @@ long wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 
     if ( (nMsg >= WM_MOUSEFIRST) && (nMsg <= WM_MOUSELAST) )
     {
-        // we only process mouse messages here and these parameters have the
-        // same meaning for all of them
+        // we only process mouse messages here and these parameters have the same
+        // meaning for all of them
         int x = GET_X_LPARAM(lParam),
             y = GET_Y_LPARAM(lParam);
         HTREEITEM htItem = GetItemFromPoint(GetHwnd(), x, y);
@@ -2232,19 +2226,6 @@ long wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
         }
     }
 #endif // !wxUSE_CHECKBOXES_IN_MULTI_SEL_TREE
-    else if ( nMsg == WM_CHAR )
-    {
-        // don't let the control process Space and Return keys because it
-        // doesn't do anything useful with them anyhow but always beeps
-        // annoyingly when it receives them and there is no way to turn it off
-        // simply if you just process TREEITEM_ACTIVATED event to which Space
-        // and Enter presses are mapped in your code
-        if ( wParam == VK_SPACE || wParam == VK_RETURN )
-        {
-            processed = true;
-        }
-    }
-
     if ( !processed )
         rc = wxControl::MSWWindowProc(nMsg, wParam, lParam);
 
@@ -2416,34 +2397,20 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             }
             break;
 
-        // NB: MSLU is broken and sends TVN_SELCHANGEDA instead of 
-        //     TVN_SELCHANGEDW in Unicode mode under Win98. Therefore
-        //     we have to handle both messages:
-        case TVN_SELCHANGEDA:
-        case TVN_SELCHANGEDW:
+        case TVN_SELCHANGED:
             eventType = wxEVT_COMMAND_TREE_SEL_CHANGED;
             // fall through
 
-        case TVN_SELCHANGINGA:
-        case TVN_SELCHANGINGW:
+        case TVN_SELCHANGING:
             {
                 if ( eventType == wxEVT_NULL )
                     eventType = wxEVT_COMMAND_TREE_SEL_CHANGING;
                 //else: already set above
 
-                if (hdr->code == TVN_SELCHANGINGW || 
-                    hdr->code == TVN_SELCHANGEDW)
-                {
-                    NM_TREEVIEWW* tv = (NM_TREEVIEWW *)lParam;
-                    event.m_item = (WXHTREEITEM) tv->itemNew.hItem;
-                    event.m_itemOld = (WXHTREEITEM) tv->itemOld.hItem;
-                }
-                else
-                {
-                    NM_TREEVIEWA* tv = (NM_TREEVIEWA *)lParam;
-                    event.m_item = (WXHTREEITEM) tv->itemNew.hItem;
-                    event.m_itemOld = (WXHTREEITEM) tv->itemOld.hItem;
-                }
+                NM_TREEVIEW* tv = (NM_TREEVIEW *)lParam;
+
+                event.m_item = (WXHTREEITEM) tv->itemNew.hItem;
+                event.m_itemOld = (WXHTREEITEM) tv->itemOld.hItem;
             }
             break;
 

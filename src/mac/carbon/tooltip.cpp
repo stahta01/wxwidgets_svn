@@ -190,10 +190,7 @@ void wxMacToolTip::Setup( WindowRef win  , wxString text , wxPoint localPosition
 	m_mark++ ;
 	Clear() ;
 	m_position = localPosition ;
-    if( wxApp::s_macDefaultEncodingIsPC )
-        m_label = wxMacMakeMacStringFromPC( text ) ;
- 	else
-        m_label = text ;
+	m_label = wxMacMakeMacStringFromPC( text ) ;
     m_window =win;
 	s_ToolTipWindowRef = m_window ;
 	m_backpict = NULL ;
