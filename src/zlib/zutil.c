@@ -1,5 +1,5 @@
 /* zutil.c -- target dependent utility functions for the compression library
- * Copyright (C) 1995-1998 Jean-loup Gailly.
+ * Copyright (C) 1995-2002 Jean-loup Gailly.
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
@@ -31,19 +31,15 @@ const char * ZEXPORT zlibVersion()
     return ZLIB_VERSION;
 }
 
-#ifdef __WXDEBUG__
+#ifdef DEBUG
 
 #  ifndef verbose
 #    define verbose 0
 #  endif
 int z_verbose = verbose;
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-void z_error (char* m)
-#else
 void z_error (m)
     char *m;
-#endif
 {
     fprintf(stderr, "%s\n", m);
     exit(1);
@@ -53,12 +49,8 @@ void z_error (m)
 /* exported to allow conversion of error code to string for compress() and
  * uncompress()
  */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-const char* ZEXPORT zError(int err)
-#else
 const char * ZEXPORT zError(err)
     int err;
-#endif
 {
     return ERR_MSG(err);
 }
@@ -66,14 +58,10 @@ const char * ZEXPORT zError(err)
 
 #ifndef HAVE_MEMCPY
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-void zmemcpy(Bytef* dest, Bytef* source, Uint len)
-#else
 void zmemcpy(dest, source, len)
     Bytef* dest;
-    Bytef* source;
+    const Bytef* source;
     uInt  len;
-#endif
 {
     if (len == 0) return;
     do {
@@ -81,14 +69,10 @@ void zmemcpy(dest, source, len)
     } while (--len != 0);
 }
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int zmemcmp(Bytef* s1, Bytef* s2, int len)
-#else
 int zmemcmp(s1, s2, len)
-    Bytef* s1;
-    Bytef* s2;
+    const Bytef* s1;
+    const Bytef* s2;
     uInt  len;
-#endif
 {
     uInt j;
 
@@ -98,13 +82,9 @@ int zmemcmp(s1, s2, len)
     return 0;
 }
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-void zmemzero(Bytef* dest, uInt len)
-#else
 void zmemzero(dest, len)
     Bytef* dest;
     uInt  len;
-#endif
 {
     if (len == 0) return;
     do {
@@ -198,7 +178,7 @@ void  zcfree (voidpf opaque, voidpf ptr)
 
 #  define MY_ZCALLOC
 
-#if (!defined(_MSC_VER) || (_MSC_VER < 600))
+#if (!defined(_MSC_VER) || (_MSC_VER <= 600))
 #  define _halloc  halloc
 #  define _hfree   hfree
 #endif
@@ -225,26 +205,18 @@ extern voidp  calloc OF((uInt items, uInt size));
 extern void   free   OF((voidpf ptr));
 #endif
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-voidpf zcalloc (voidpf opaque, unsigned items, unsigned size)
-#else
 voidpf zcalloc (opaque, items, size)
     voidpf opaque;
     unsigned items;
     unsigned size;
-#endif
 {
     if (opaque) items += size - size; /* make compiler happy */
     return (voidpf)calloc(items, size);
 }
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-void zcfree(voidpf opaque, voidpf ptr)
-#else
 void  zcfree (opaque, ptr)
     voidpf opaque;
     voidpf ptr;
-#endif
 {
     free(ptr);
     if (opaque) return; /* make compiler happy */

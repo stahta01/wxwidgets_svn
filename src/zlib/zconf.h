@@ -51,7 +51,7 @@
 #if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
 #  define WIN32
 #endif
-#if defined(__GNUC__) || defined(WIN32) || defined(OS232) || defined(__386__) || defined(i386)
+#if defined(__GNUC__) || defined(WIN32) || defined(__386__) || defined(i386)
 #  ifndef __32BIT__
 #    define __32BIT__
 #  endif
@@ -71,7 +71,7 @@
 #  define UNALIGNED_OK
 #endif
 
-#if (defined(MSDOS) || defined(_WINDOWS) || defined(WIN32) || defined(OS232))  && !defined(STDC)
+#if (defined(MSDOS) || defined(_WINDOWS) || defined(WIN32))  && !defined(STDC)
 #  define STDC
 #endif
 #if defined(__STDC__) || defined(__cplusplus) || defined(__OS2__)
@@ -87,7 +87,7 @@
 #endif
 
 /* Some Mac compilers merge all .h files incorrectly: */
-#if defined(__MWERKS__) || defined(applec) ||defined(THINK_C) ||(defined(__SC__) && !defined(__DMC__))
+#if defined(__MWERKS__) || defined(applec) ||defined(THINK_C) ||defined(__SC__)
 #  define NO_DUMMY_DECL
 #endif
 
@@ -179,7 +179,7 @@
 #      include <windows.h>
 #      define ZEXPORT __declspec(dllexport) WINAPI
 #      define ZEXPORTRVA __declspec(dllexport) WINAPIV
-#else
+#    else
 #      if defined (_Windows) && defined (__DLL__)
 #       define ZEXPORT _export
 #       define ZEXPORTVA _export
@@ -201,7 +201,7 @@
 #endif
 #ifndef ZEXPORTVA
 #       define ZEXPORTVA
-#   endif
+#endif
 #ifndef ZEXTERN
 #  define ZEXTERN extern
 #endif
@@ -221,9 +221,6 @@ typedef unsigned long  uLong; /* 32 bits or more */
 #  define Bytef Byte FAR
 #else
    typedef Byte  FAR Bytef;
-#endif
-#if defined(__VISAGECPP__)
-#  define Bytef Byte FAR
 #endif
 typedef char  FAR charf;
 typedef int   FAR intf;

@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="zlib" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 6.00 
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
@@ -23,8 +23,8 @@ CFG=zlib - Win32 Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""
-# PROP Scc_LocalPath ""
+# PROP Scc_ProjName "ZlibVC"
+# PROP Scc_LocalPath "."
 CPP=cl.exe
 RSC=rc.exe
 

@@ -5,7 +5,7 @@
 
 /* @(#) $Id$ */
 
-#include "../zlib/zlib.h"
+#include "zlib.h"
 
 #define BASE 65521L /* largest prime smaller than 65536 */
 #define NMAX 5552
@@ -18,14 +18,10 @@
 #define DO16(buf)   DO8(buf,0); DO8(buf,8);
 
 /* ========================================================================= */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-uLong ZEXPORT adler32 (uLong adler, const Bytef* buf, uInt len)
-#else
 uLong ZEXPORT adler32(adler, buf, len)
     uLong adler;
     const Bytef *buf;
     uInt len;
-#endif
 {
     unsigned long s1 = adler & 0xffff;
     unsigned long s2 = (adler >> 16) & 0xffff;

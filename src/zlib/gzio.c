@@ -70,14 +70,10 @@ local uLong  getLong      OF((gz_stream *s));
    can be checked to distinguish the two cases (if errno is zero, the
    zlib error is Z_MEM_ERROR).
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-local gzFile gz_open (const char* path, const char* mode, int fd)
-#else
 local gzFile gz_open (path, mode, fd)
     const char *path;
     const char *mode;
     int  fd;
-#endif
 {
     int err;
     int level = Z_DEFAULT_COMPRESSION; /* compression level */
@@ -184,13 +180,9 @@ local gzFile gz_open (path, mode, fd)
 /* ===========================================================================
      Opens a gzip (.gz) file for reading or writing.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-gzFile ZEXPORT gzopen (const char* path, const char* mode)
-#else
 gzFile ZEXPORT gzopen (path, mode)
     const char *path;
     const char *mode;
-#endif
 {
     return gz_open (path, mode, -1);
 }
@@ -199,13 +191,9 @@ gzFile ZEXPORT gzopen (path, mode)
      Associate a gzFile with the file descriptor fd. fd is not dup'ed here
    to mimic the behavio(u)r of fdopen.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-gzFile ZEXPORT gzdopen (int fd, const char* mode)
-#else
 gzFile ZEXPORT gzdopen (fd, mode)
     int fd;
     const char *mode;
-#endif
 {
     char name[20];
 
@@ -218,14 +206,10 @@ gzFile ZEXPORT gzdopen (fd, mode)
 /* ===========================================================================
  * Update the compression level and strategy
  */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzsetparams (gzFile file, int level, int strategy)
-#else
 int ZEXPORT gzsetparams (file, level, strategy)
     gzFile file;
     int level;
     int strategy;
-#endif
 {
     gz_stream *s = (gz_stream*)file;
 
@@ -249,12 +233,8 @@ int ZEXPORT gzsetparams (file, level, strategy)
    for end of file.
    IN assertion: the stream s has been sucessfully opened for reading.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-local int get_byte(gz_stream* s)
-#else
 local int get_byte(s)
     gz_stream *s;
-#endif
 {
     if (s->z_eof) return EOF;
     if (s->stream.avail_in == 0) {
@@ -280,12 +260,8 @@ local int get_byte(s)
        s->stream.avail_in is zero for the first time, but may be non-zero
        for concatenated .gz files.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-local void check_header(gz_stream* s)
-#else
 local void check_header(s)
     gz_stream *s;
-#endif
 {
     int method; /* method byte */
     int flags;  /* flags byte */
@@ -337,12 +313,8 @@ local void check_header(s)
  * Cleanup then free the given gz_stream. Return a zlib error code.
    Try freeing in the reverse order of allocations.
  */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-local int destroy (gz_stream* s)
-#else
 local int destroy (s)
     gz_stream *s;
-#endif
 {
     int err = Z_OK;
 
@@ -380,14 +352,10 @@ local int destroy (s)
      Reads the given number of uncompressed bytes from the compressed file.
    gzread returns the number of bytes actually read (0 for end of file).
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzread (gzFile file, voidp buf, unsigned len)
-#else
 int ZEXPORT gzread (file, buf, len)
     gzFile file;
     voidp buf;
     unsigned len;
-#endif
 {
     gz_stream *s = (gz_stream*)file;
     Bytef *start = (Bytef*)buf; /* starting point for crc computation */
@@ -478,12 +446,8 @@ int ZEXPORT gzread (file, buf, len)
       Reads one byte from the compressed file. gzgetc returns this byte
    or -1 in case of end of file or error.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzgetc(gzFile file)
-#else
 int ZEXPORT gzgetc(file)
     gzFile file;
-#endif
 {
     unsigned char c;
 
@@ -500,14 +464,10 @@ int ZEXPORT gzgetc(file)
 
       The current implementation is not optimized at all.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-char* ZEXPORT gzgets(gzFile file, char* buf, int len)
-#else
 char * ZEXPORT gzgets(file, buf, len)
     gzFile file;
     char *buf;
     int len;
-#endif
 {
     char *b = buf;
     if (buf == Z_NULL || len <= 0) return Z_NULL;
@@ -523,14 +483,10 @@ char * ZEXPORT gzgets(file, buf, len)
      Writes the given number of uncompressed bytes into the compressed file.
    gzwrite returns the number of bytes actually written (0 in case of error).
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzwrite (gzFile file, const voidp buf, unsigned len)
-#else
 int ZEXPORT gzwrite (file, buf, len)
     gzFile file;
     const voidp buf;
     unsigned len;
-#endif
 {
     gz_stream *s = (gz_stream*)file;
 
@@ -586,18 +542,12 @@ int ZEXPORTVA gzprintf (gzFile file, const char *format, /* args */ ...)
 }
 #else /* not ANSI C */
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORTVA gzprintf (gzFile file const char* format, int a1, int a2, int a3, int a4,
-                        int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12
-                        int a13, int a14, int a15, int a16, int a17, int a18, int a19, int a20)
-#else
 int ZEXPORTVA gzprintf (file, format, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
 	               a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)
     gzFile file;
     const char *format;
     int a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
 	a11, a12, a13, a14, a15, a16, a17, a18, a19, a20;
-#endif
 {
     char buf[Z_PRINTF_BUFSIZE];
     int len;
@@ -620,13 +570,9 @@ int ZEXPORTVA gzprintf (file, format, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
       Writes c, converted to an unsigned char, into the compressed file.
    gzputc returns the value that was written, or -1 in case of error.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzputc(gzFile file, int c)
-#else
 int ZEXPORT gzputc(file, c)
     gzFile file;
     int c;
-#endif
 {
     unsigned char cc = (unsigned char) c; /* required for big endian systems */
 
@@ -639,13 +585,9 @@ int ZEXPORT gzputc(file, c)
    the terminating null character.
       gzputs returns the number of characters written, or -1 in case of error.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzputs(gzFile file, const char* s)
-#else
 int ZEXPORT gzputs(file, s)
     gzFile file;
     const char *s;
-#endif
 {
     return gzwrite(file, (char*)s, (unsigned)strlen(s));
 }
@@ -655,13 +597,9 @@ int ZEXPORT gzputs(file, s)
      Flushes all pending output into the compressed file. The parameter
    flush is as in the deflate() function.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-local int do_flush (gzFile file, int flush)
-#else
 local int do_flush (file, flush)
     gzFile file;
     int flush;
-#endif
 {
     uInt len;
     int done = 0;
@@ -698,13 +636,9 @@ local int do_flush (file, flush)
     return  s->z_err == Z_STREAM_END ? Z_OK : s->z_err;
 }
 
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzflush (gzFile file, int flush)
-#else
 int ZEXPORT gzflush (file, flush)
      gzFile file;
      int flush;
-#endif
 {
     gz_stream *s = (gz_stream*)file;
     int err = do_flush (file, flush);
@@ -723,14 +657,10 @@ int ZEXPORT gzflush (file, flush)
       SEEK_END is not implemented, returns error.
       In this version of the library, gzseek can be extremely slow.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-z_off_t ZEXPORT gzseek (gzFile file, z_off_t offset, int whence)
-#else
 z_off_t ZEXPORT gzseek (file, offset, whence)
     gzFile file;
     z_off_t offset;
     int whence;
-#endif
 {
     gz_stream *s = (gz_stream*)file;
 
@@ -808,12 +738,8 @@ z_off_t ZEXPORT gzseek (file, offset, whence)
 /* ===========================================================================
      Rewinds input file.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzrewind (gzFile file)
-#else
 int ZEXPORT gzrewind (file)
     gzFile file;
-#endif
 {
     gz_stream *s = (gz_stream*)file;
 
@@ -839,12 +765,8 @@ int ZEXPORT gzrewind (file)
    given compressed file. This position represents a number of bytes in the
    uncompressed data stream.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-z_off_t ZEXPORT gztell (gzFile file)
-#else
 z_off_t ZEXPORT gztell (file)
     gzFile file;
-#endif
 {
     return gzseek(file, 0L, SEEK_CUR);
 }
@@ -853,12 +775,8 @@ z_off_t ZEXPORT gztell (file)
      Returns 1 when EOF has previously been detected reading the given
    input stream, otherwise zero.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzeof (gzFile file)
-#else
 int ZEXPORT gzeof (file)
     gzFile file;
-#endif
 {
     gz_stream *s = (gz_stream*)file;
 
@@ -868,13 +786,9 @@ int ZEXPORT gzeof (file)
 /* ===========================================================================
    Outputs a long in LSB order to the given file
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-local void putLong (FILE* file, uLong x)
-#else
 local void putLong (file, x)
     FILE *file;
     uLong x;
-#endif
 {
     int n;
     for (n = 0; n < 4; n++) {
@@ -887,12 +801,8 @@ local void putLong (file, x)
    Reads a long in LSB order from the given gz_stream. Sets z_err in case
    of error.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-local uLong getLong (gz_stream* s)
-#else
 local uLong getLong (s)
     gz_stream *s;
-#endif
 {
     uLong x = (uLong)get_byte(s);
     int c;
@@ -909,12 +819,8 @@ local uLong getLong (s)
      Flushes all pending output if necessary, closes the compressed file
    and deallocates all the (de)compression state.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-int ZEXPORT gzclose (gzFile file)
-#else
 int ZEXPORT gzclose (file)
     gzFile file;
-#endif
 {
     int err;
     gz_stream *s = (gz_stream*)file;
@@ -942,13 +848,9 @@ int ZEXPORT gzclose (file)
    errnum is set to Z_ERRNO and the application may consult errno
    to get the exact error code.
 */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-const char* ZEXPORT gzerror (gzFile file, int* errnum)
-#else
 const char*  ZEXPORT gzerror (file, errnum)
     gzFile file;
     int *errnum;
-#endif
 {
     char *m;
     gz_stream *s = (gz_stream*)file;

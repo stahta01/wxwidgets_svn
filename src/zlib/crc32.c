@@ -5,7 +5,7 @@
 
 /* @(#) $Id$ */
 
-#include "../zlib/zlib.h"
+#include "zlib.h"
 
 #define local static
 
@@ -139,14 +139,10 @@ const uLongf * ZEXPORT get_crc_table()
 #define DO8(buf)  DO4(buf); DO4(buf);
 
 /* ========================================================================= */
-#if defined(__VISAGECPP__) /* Visualage can't handle this antiquated interface */
-uLong ZEXPORT crc32(uLong crc, const Bytef* buf, uInt len)
-#else
 uLong ZEXPORT crc32(crc, buf, len)
     uLong crc;
     const Bytef *buf;
     uInt len;
-#endif
 {
     if (buf == Z_NULL) return 0L;
 #ifdef DYNAMIC_CRC_TABLE
