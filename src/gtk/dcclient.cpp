@@ -11,10 +11,6 @@
 #pragma implementation "dcclient.h"
 #endif
 
-#ifdef __VMS
-#define XCopyPlane XCOPYPLANE
-#endif
-
 #include "wx/dcclient.h"
 #include "wx/dcmemory.h"
 #include "wx/image.h"
@@ -26,7 +22,6 @@
 
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
-#include <gdk/gdkprivate.h>
 #include <gtk/gtk.h>
 
 //-----------------------------------------------------------------------------
@@ -87,47 +82,24 @@ void gdk_wx_draw_bitmap     (GdkDrawable  *drawable,
                           gint                width,
                           gint                height)
 {
-    gint src_width, src_height;
-#ifndef __WXGTK20__
     GdkWindowPrivate *drawable_private;
     GdkWindowPrivate *src_private;
     GdkGCPrivate *gc_private;
-#endif
 
     g_return_if_fail (drawable != NULL);
     g_return_if_fail (src != NULL);
     g_return_if_fail (gc != NULL);
 
-#ifdef __WXGTK20__
-    if (GDK_WINDOW_DESTROYED(drawable) || GDK_WINDOW_DESTROYED(src))
-        return;
-
-    gdk_drawable_get_size(src, &src_width, &src_height);
-#else
     drawable_private = (GdkWindowPrivate*) drawable;
     src_private = (GdkWindowPrivate*) src;
     if (drawable_private->destroyed || src_private->destroyed)
         return;
 
-    src_width = src_private->width;
-    src_height = src_private->height;
-
     gc_private = (GdkGCPrivate*) gc;
-#endif
 
-    if (width == -1) width = src_width;
-    if (height == -1) height = src_height;
+    if (width == -1) width = src_private->width;
+    if (height == -1) height = src_private->height;
 
-#ifdef __WXGTK20__
-    XCopyPlane( GDK_WINDOW_XDISPLAY(drawable),
-                GDK_WINDOW_XID(src),
-                GDK_WINDOW_XID(drawable),
-                GDK_GC_XGC(gc),
-                xsrc, ysrc,
-                width, height,
-                xdest, ydest,
-                1 );
-#else
     XCopyPlane( drawable_private->xdisplay,
                 src_private->xwindow,
                 drawable_private->xwindow,
@@ -136,7 +108,6 @@ void gdk_wx_draw_bitmap     (GdkDrawable  *drawable,
                 width, height,
                 xdest, ydest,
                 1 );
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -238,10 +209,6 @@ wxWindowDC::wxWindowDC()
     m_isMemDC = FALSE;
     m_isScreenDC = FALSE;
     m_owner = (wxWindow *)NULL;
-#ifdef __WXGTK20__
-    m_context = (PangoContext *)NULL;
-    m_fontdesc = (PangoFontDescription *)NULL;
-#endif
 }
 
 wxWindowDC::wxWindowDC( wxWindow *window )
@@ -270,11 +237,6 @@ wxWindowDC::wxWindowDC( wxWindow *window )
     }
 
     wxASSERT_MSG( widget, wxT("DC needs a widget") );
-
-#ifdef __WXGTK20__
-    m_context = gtk_widget_get_pango_context( widget );
-    m_fontdesc = widget->style->font_desc;
-#endif
 
     GtkPizza *pizza = GTK_PIZZA( widget );
     m_window = pizza->bin_window;
@@ -393,13 +355,6 @@ void wxWindowDC::SetUpDC()
     }
 }
 
-void wxWindowDC::DoGetSize( int* width, int* height ) const
-{
-    wxCHECK_RET( m_owner, _T("GetSize() doesn't work without window") );
-
-    m_owner->GetSize(width, height);
-}
-
 void wxWindowDC::DoFloodFill( wxCoord WXUNUSED(x), wxCoord WXUNUSED(y),
                            const wxColour &WXUNUSED(col), int WXUNUSED(style) )
 {
@@ -415,7 +370,6 @@ bool wxWindowDC::DoGetPixel( wxCoord x1, wxCoord y1, wxColour *col ) const
     memdc.SelectObject(bitmap);
     memdc.Blit(0, 0, 1, 1, (wxDC*) this, x1, y1);
     memdc.SelectObject(wxNullBitmap);
-    
     wxImage image(bitmap);
     col->Set(image.GetRed(0, 0), image.GetGreen(0, 0), image.GetBlue(0, 0));
     return TRUE;
@@ -536,7 +490,7 @@ void wxWindowDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2,
         if (m_pen.GetStyle() != wxTRANSPARENT)
         {
             gdk_draw_arc( m_window, m_penGC, FALSE, xxc-r, yyc-r, 2*r,2*r, alpha1, alpha2 );
-
+            
             gdk_draw_line( m_window, m_penGC, xx1, yy1, xxc, yyc );
             gdk_draw_line( m_window, m_penGC, xxc, yyc, xx2, yy2 );
         }
@@ -1334,57 +1288,34 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 
     wxCHECK_RET( font, wxT("invalid font") );
 
-#ifdef __WXGTK20__
-    wxCHECK_RET( m_context, wxT("no Pango context") );
-#endif
-
     x = XLOG2DEV(x);
     y = YLOG2DEV(y);
 
-#ifdef __WXGTK20__
-    /* FIXME: the layout engine should probably be abstracted at a higher level in wxDC... */
-    PangoLayout *layout = pango_layout_new(m_context);
-    pango_layout_set_font_description(layout, m_fontdesc);
-    {
-        wxWX2MBbuf data = text.mb_str(wxConvUTF8);
-        pango_layout_set_text(layout, data, strlen(data));
-    }
-    PangoLayoutLine *line = (PangoLayoutLine *)pango_layout_get_lines(layout)->data;
-    PangoRectangle rect;
-    pango_layout_line_get_extents(line, NULL, &rect);
-    wxCoord width = rect.width;
-    wxCoord height = rect.height;
-    gdk_draw_layout( m_window, m_textGC, x, y, layout );
-#else
-    wxCoord width = gdk_string_width( font, text.mbc_str() );
-    wxCoord height = font->ascent + font->descent;
     /* CMB 21/5/98: draw text background if mode is wxSOLID */
     if (m_backgroundMode == wxSOLID)
     {
+        wxCoord width = gdk_string_width( font, text.mbc_str() );
+        wxCoord height = font->ascent + font->descent;
         gdk_gc_set_foreground( m_textGC, m_textBackgroundColour.GetColor() );
         gdk_draw_rectangle( m_window, m_textGC, TRUE, x, y, width, height );
         gdk_gc_set_foreground( m_textGC, m_textForegroundColour.GetColor() );
     }
     gdk_draw_string( m_window, font, m_textGC, x, y + font->ascent, text.mbc_str() );
-#endif
 
     /* CMB 17/7/98: simple underline: ignores scaling and underlying
        X font's XA_UNDERLINE_POSITION and XA_UNDERLINE_THICKNESS
        properties (see wxXt implementation) */
     if (m_font.GetUnderlined())
     {
+        wxCoord width = gdk_string_width( font, text.mbc_str() );
         wxCoord ul_y = y + font->ascent;
         if (font->descent > 0) ul_y++;
         gdk_draw_line( m_window, m_textGC, x, ul_y, x + width, ul_y);
     }
 
-#ifdef __WXGTK20__
-    g_object_unref( G_OBJECT( layout ) );
-#endif
-
-    width = wxCoord(width / m_scaleX);
-    height = wxCoord(height / m_scaleY);
-    CalcBoundingBox (x + width, y + height);
+    wxCoord w, h;
+    GetTextExtent (text, &w, &h);
+    CalcBoundingBox (x + w, y + h);
     CalcBoundingBox (x, y);
 }
 
@@ -1565,9 +1496,6 @@ void wxWindowDC::Clear()
 void wxWindowDC::SetFont( const wxFont &font )
 {
     m_font = font;
-#ifdef __WXGTK20__
-    // fix fontdesc?
-#endif
 }
 
 void wxWindowDC::SetPen( const wxPen &pen )
@@ -2041,7 +1969,7 @@ void wxWindowDC::ComputeScaleAndOrigin()
 // Resolution in pixels per logical inch
 wxSize wxWindowDC::GetPPI() const
 {
-    return wxSize(m_mm_to_pix_x * 25.4 + 0.5, m_mm_to_pix_y * 25.4 + 0.5);
+    return wxSize(100, 100);
 }
 
 int wxWindowDC::GetDepth() const
@@ -2225,15 +2153,20 @@ void wxWindowDC::DoDrawSpline( wxList *points )
 // wxPaintDC
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxClientDC)
+IMPLEMENT_DYNAMIC_CLASS(wxPaintDC,wxWindowDC)
+
+wxPaintDC::wxPaintDC()
+  : wxWindowDC()
+{
+}
 
 wxPaintDC::wxPaintDC( wxWindow *win )
-         : wxClientDC( win )
+  : wxWindowDC( win )
 {
 #if USE_PAINT_REGION
     if (!win->m_clipPaintRegion)
         return;
-
+        
     m_paintClippingRegion = win->GetUpdateRegion();
     GdkRegion *region = m_paintClippingRegion.GetRegion();
     if ( region )
@@ -2252,18 +2185,16 @@ wxPaintDC::wxPaintDC( wxWindow *win )
 // wxClientDC
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
+IMPLEMENT_DYNAMIC_CLASS(wxClientDC,wxWindowDC)
 
-wxClientDC::wxClientDC( wxWindow *win )
-          : wxWindowDC( win )
+wxClientDC::wxClientDC()
+  : wxWindowDC()
 {
 }
 
-void wxClientDC::DoGetSize(int *width, int *height) const
+wxClientDC::wxClientDC( wxWindow *win )
+  : wxWindowDC( win )
 {
-    wxCHECK_RET( m_owner, _T("GetSize() doesn't work without window") );
-
-    m_owner->GetClientSize( width, height );
 }
 
 // ----------------------------------------------------------------------------

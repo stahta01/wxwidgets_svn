@@ -54,7 +54,7 @@
 #define CELLBOX    8          // cells in a cellbox (do not change!)
 
 
-class LifeCellBox
+class CellBox
 {
 public:
     // members
@@ -62,21 +62,21 @@ public:
     inline bool SetCell(int dx, int dy, bool alive);
 
     // attributes
-    wxInt32       m_x, m_y;                     // position in universe
-    wxUint32      m_live1, m_live2;             // alive cells (1 bit per cell)
-    wxUint32      m_old1, m_old2;               // old values for m_live1, 2
-    wxUint32      m_on[8];                      // neighbouring info
-    wxUint32      m_dead;                       // been dead for n generations
-    LifeCellBox  *m_up, *m_dn, *m_lf, *m_rt;    // neighbour CellBoxes
-    LifeCellBox  *m_prev, *m_next;              // in linked list
-    LifeCellBox  *m_hprev, *m_hnext;            // in hash table
+    wxInt32   m_x, m_y;                     // position in universe
+    wxUint32  m_live1, m_live2;             // alive cells (1 bit per cell)
+    wxUint32  m_old1, m_old2;               // old values for m_live1, 2
+    wxUint32  m_on[8];                      // neighbouring info
+    wxUint32  m_dead;                       // been dead for n generations
+    CellBox  *m_up, *m_dn, *m_lf, *m_rt;    // neighbour CellBoxes
+    CellBox  *m_prev, *m_next;              // in linked list
+    CellBox  *m_hprev, *m_hnext;            // in hash table
 };
 
 
 // IsAlive:
 //  Returns whether cell dx, dy in this box is alive
 //
-bool LifeCellBox::IsAlive(int dx, int dy) const
+bool CellBox::IsAlive(int dx, int dy) const
 {
     if (dy > 3)
         return (m_live2 & 1 << ((dy - 4) * 8 + dx));
@@ -88,7 +88,7 @@ bool LifeCellBox::IsAlive(int dx, int dy) const
 //  Sets cell dx, dy in this box to 'alive', returns TRUE if
 //  the previous value was different, FALSE if it was the same.
 //
-bool LifeCellBox::SetCell(int dx, int dy, bool alive)
+bool CellBox::SetCell(int dx, int dy, bool alive)
 {
     if (IsAlive(dx, dy) != alive)
     {
@@ -124,14 +124,14 @@ Life::Life()
 
     // pattern data
     m_numcells    = 0;
-    m_boxes       = new LifeCellBox *[HASHSIZE];
+    m_boxes       = new CellBox *[HASHSIZE];
     m_head        = NULL;
     m_available   = NULL;
     for (int i = 0; i < HASHSIZE; i++)
         m_boxes[i] = NULL;
 
     // state vars for BeginFind & FindMore
-    m_cells       = new LifeCell[ARRAYSIZE];
+    m_cells       = new Cell[ARRAYSIZE];
     m_ncells      = 0;
     m_findmore    = FALSE;
     m_changed     = FALSE;
@@ -150,7 +150,7 @@ Life::~Life()
 //
 void Life::Clear()
 {
-    LifeCellBox *c, *nc;
+    CellBox *c, *nc;
 
     // clear the hash table pointers
     for (int i = 0; i < HASHSIZE; i++)
@@ -192,7 +192,7 @@ void Life::Clear()
 //
 bool Life::IsAlive(wxInt32 x, wxInt32 y)
 {
-    LifeCellBox *c = LinkBox(x, y, FALSE);
+    CellBox *c = LinkBox(x, y, FALSE);
 
     return (c && c->IsAlive( x - c->m_x, y - c->m_y ));
 }
@@ -202,7 +202,7 @@ bool Life::IsAlive(wxInt32 x, wxInt32 y)
 //
 void Life::SetCell(wxInt32 x, wxInt32 y, bool alive)
 {
-    LifeCellBox *c  = LinkBox(x, y);
+    CellBox *c  = LinkBox(x, y);
     wxUint32 dx = x - c->m_x;
     wxUint32 dy = y - c->m_y;
 
@@ -257,15 +257,15 @@ void Life::SetPattern(const LifePattern& pattern)
 //  Creates a box in x, y, either taking it from the list
 //  of available boxes, or allocating a new one.
 //
-LifeCellBox* Life::CreateBox(wxInt32 x, wxInt32 y, wxUint32 hv)
+CellBox* Life::CreateBox(wxInt32 x, wxInt32 y, wxUint32 hv)
 {
-    LifeCellBox *c;
+    CellBox *c;
 
     // if there are no available boxes, alloc a few more
     if (!m_available)
         for (int i = 1; i <= ALLOCBOXES; i++)
         {
-            c = new LifeCellBox();
+            c = new CellBox();
 
             if (!c)
             {
@@ -289,7 +289,7 @@ LifeCellBox* Life::CreateBox(wxInt32 x, wxInt32 y, wxUint32 hv)
     m_available = c->m_next;
 
     // reset everything
-    memset((void *) c, 0, sizeof(LifeCellBox));
+    memset((void *) c, 0, sizeof(CellBox));
     c->m_x = x;
     c->m_y = y;
 
@@ -311,10 +311,10 @@ LifeCellBox* Life::CreateBox(wxInt32 x, wxInt32 y, wxUint32 hv)
 //  it returns NULL or creates a new one, depending on the value
 //  of the 'create' parameter.
 //
-LifeCellBox* Life::LinkBox(wxInt32 x, wxInt32 y, bool create)
+CellBox* Life::LinkBox(wxInt32 x, wxInt32 y, bool create)
 {
     wxUint32 hv;
-    LifeCellBox *c;
+    CellBox *c;
 
     x &= 0xfffffff8;
     y &= 0xfffffff8;
@@ -325,14 +325,14 @@ LifeCellBox* Life::LinkBox(wxInt32 x, wxInt32 y, bool create)
         if ((c->m_x == x) && (c->m_y == y)) return c;
 
     // if not found, and (create == TRUE), create a new one
-    return create? CreateBox(x, y, hv) : (LifeCellBox*) NULL;
+    return create? CreateBox(x, y, hv) : (CellBox*) NULL;
 }
 
 // KillBox:
 //  Removes this box from the list and the hash table and
 //  puts it in the list of available boxes.
 //
-void Life::KillBox(LifeCellBox *c)
+void Life::KillBox(CellBox *c)
 {
     wxUint32 hv = HASH(c->m_x, c->m_y);
 
@@ -365,7 +365,7 @@ void Life::KillBox(LifeCellBox *c)
 // Navigation
 // --------------------------------------------------------------------------
 
-LifeCell Life::FindCenter()
+Cell Life::FindCenter()
 {
     double sx, sy;
     int n;
@@ -373,7 +373,7 @@ LifeCell Life::FindCenter()
     sy = 0.0;
     n = 0;
 
-    LifeCellBox *c;
+    CellBox *c;
     for (c = m_head; c; c = c->m_next)
         if (!c->m_dead)
         {
@@ -388,18 +388,18 @@ LifeCell Life::FindCenter()
         sy = (sy / n) + CELLBOX / 2;
     }
 
-    LifeCell cell;
+    Cell cell;
     cell.i = (wxInt32) sx;
     cell.j = (wxInt32) sy;
     return cell;
 }
 
-LifeCell Life::FindNorth()
+Cell Life::FindNorth()
 {
     wxInt32 x = 0, y = 0;
     bool first = TRUE;
 
-    LifeCellBox *c;
+    CellBox *c;
     for (c = m_head; c; c = c->m_next)
         if (!c->m_dead && ((first) || (c->m_y < y)))
         {
@@ -408,18 +408,18 @@ LifeCell Life::FindNorth()
             first = FALSE;
         }
     
-    LifeCell cell;
+    Cell cell;
     cell.i = first? 0 : x + CELLBOX / 2;
     cell.j = first? 0 : y + CELLBOX / 2;
     return cell;
 }
 
-LifeCell Life::FindSouth()
+Cell Life::FindSouth()
 {
     wxInt32 x = 0, y = 0;
     bool first = TRUE;
 
-    LifeCellBox *c;
+    CellBox *c;
     for (c = m_head; c; c = c->m_next)
         if (!c->m_dead && ((first) || (c->m_y > y)))
         {
@@ -428,18 +428,18 @@ LifeCell Life::FindSouth()
             first = FALSE;
         }
     
-    LifeCell cell;
+    Cell cell;
     cell.i = first? 0 : x + CELLBOX / 2;
     cell.j = first? 0 : y + CELLBOX / 2;
     return cell;
 }
 
-LifeCell Life::FindWest()
+Cell Life::FindWest()
 {
     wxInt32 x = 0, y = 0;
     bool first = TRUE;
 
-    LifeCellBox *c;
+    CellBox *c;
     for (c = m_head; c; c = c->m_next)
         if (!c->m_dead && ((first) || (c->m_x < x)))
         {
@@ -448,18 +448,18 @@ LifeCell Life::FindWest()
             first = FALSE;
         }
     
-    LifeCell cell;
+    Cell cell;
     cell.i = first? 0 : x + CELLBOX / 2;
     cell.j = first? 0 : y + CELLBOX / 2;
     return cell;
 }
 
-LifeCell Life::FindEast()
+Cell Life::FindEast()
 {
     wxInt32 x = 0, y = 0;
     bool first = TRUE;
 
-    LifeCellBox *c;
+    CellBox *c;
     for (c = m_head; c; c = c->m_next)
         if (!c->m_dead && ((first) || (c->m_x > x)))
         {
@@ -468,7 +468,7 @@ LifeCell Life::FindEast()
             first = FALSE;
         }
     
-    LifeCell cell;
+    Cell cell;
     cell.i = first? 0 : x + CELLBOX / 2;
     cell.j = first? 0 : y + CELLBOX / 2;
     return cell;
@@ -517,9 +517,9 @@ void Life::BeginFind(wxInt32 x0, wxInt32 y0, wxInt32 x1, wxInt32 y1, bool change
     m_changed = changed;
 }
 
-bool Life::FindMore(LifeCell *cells[], size_t *ncells)
+bool Life::FindMore(Cell *cells[], size_t *ncells)
 {
-    LifeCellBox *c;
+    CellBox *c;
     *cells = m_cells;
     m_ncells = 0;
 
@@ -592,7 +592,7 @@ extern int g_tab2[];
 //
 bool Life::NextTic()
 {
-    LifeCellBox  *c, *up, *dn, *lf, *rt;
+    CellBox  *c, *up, *dn, *lf, *rt;
     wxUint32 t1, t2, t3, t4;
     bool     changed = FALSE;
 
@@ -896,7 +896,7 @@ bool Life::NextTic()
         }
         else
         {
-            LifeCellBox *aux = c->m_next;
+            CellBox *aux = c->m_next;
             if (c->m_dead++ > MAXDEAD)
                KillBox(c);
 

@@ -13,10 +13,6 @@
 #pragma implementation "gdicmn.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -36,7 +32,6 @@
 #include "wx/app.h"
 #include "wx/dc.h"
 #include "wx/utils.h"
-#include "wx/settings.h"
 
 #include "wx/log.h"
 #include <string.h>
@@ -136,9 +131,6 @@ wxColourDatabase::~wxColourDatabase ()
       delete col;
       node = next;
     }
-#ifdef __WXPM__
-    delete [] m_palTable;
-#endif
 }
 
 // Colour database stuff
@@ -228,22 +220,11 @@ void wxColourDatabase::Initialize ()
         {wxT("MEDIUM GREY"), 100, 100, 100},
     };
 
-    size_t      n;
-
-    for ( n = 0; n < WXSIZEOF(wxColourTable); n++ )
+    for ( size_t n = 0; n < WXSIZEOF(wxColourTable); n++ )
     {
         const wxColourDesc& cc = wxColourTable[n];
         Append(cc.name, new wxColour(cc.r,cc.g,cc.b));
     }
-#ifdef __WXPM__
-    m_palTable = new long[n];
-    for ( n = 0; n < WXSIZEOF(wxColourTable); n++ )
-    {
-        const wxColourDesc& cc = wxColourTable[n];
-        m_palTable[n] = OS2RGB(cc.r,cc.g,cc.b);
-    }
-    m_nSize = n;
-#endif
 }
 
 /*
@@ -375,20 +356,13 @@ void wxInitializeStockObjects ()
 #endif
 
   // why under MSW fonts shouldn't have the standard system size?
-/*
 #ifdef __WXMSW__
   static const int sizeFont = 10;
 #else
-#endif
-*/
-#if defined(__WXPM__) || defined(__WXMAC__)
   static const int sizeFont = 12;
-  wxNORMAL_FONT = new wxFont (sizeFont, wxMODERN, wxNORMAL, wxNORMAL);
-#else
-  wxNORMAL_FONT = new wxFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
-  static const int sizeFont = wxNORMAL_FONT->GetPointSize();
 #endif
 
+  wxNORMAL_FONT = new wxFont (sizeFont, wxMODERN, wxNORMAL, wxNORMAL);
   wxSMALL_FONT = new wxFont (sizeFont - 2, wxSWISS, wxNORMAL, wxNORMAL);
   wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
   wxSWISS_FONT = new wxFont (sizeFont, wxSWISS, wxNORMAL, wxNORMAL);
@@ -421,6 +395,23 @@ void wxInitializeStockObjects ()
   wxBLUE = new wxColour ("BLUE");
   wxGREEN = new wxColour ("GREEN");
   wxCYAN = new wxColour ("CYAN");
+
+  // VZ: Here is why this colour is treated specially: normally, wxLIGHT_GREY
+  //     is the window background colour and it is also used as the
+  //     "transparent" colour in the bitmaps - for example, for the toolbar
+  //     bitmaps. In particular, the mask creation code in tbar95.cpp assumes
+  //     this - but it fails under Win2K where the system 3D colour is not
+  //     0xc0c0c0 (usual light grey) but 0xc6c3c6. To make everything work as
+  //     expected there we have to define wxLIGHT_GREY accordingly - another
+  //     solution would be to hack wxMask::Create()...
+#ifdef __WIN32__
+  int majOs, minOs;
+  if ( wxGetOsVersion(&majOs, &minOs) == wxWINDOWS_NT && (majOs == 5) )
+  {
+      wxLIGHT_GREY = new wxColour(0xc6c3c6);
+  }
+  else
+#endif // MSW
   wxLIGHT_GREY = new wxColour ("LIGHT GREY");
 
   wxSTANDARD_CURSOR = new wxCursor (wxCURSOR_ARROW);
@@ -704,13 +695,6 @@ wxSize wxGetDisplaySize()
 {
     int x, y;
     wxDisplaySize(& x, & y);
-    return wxSize(x, y);
-}
-
-wxSize wxGetDisplaySizeMM()
-{
-    int x, y;
-    wxDisplaySizeMM(& x, & y);
     return wxSize(x, y);
 }
 

@@ -41,7 +41,7 @@
 // resources
 // --------------------------------------------------------------------------
 
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
     // application icon
     #include "mondrian.xpm"
 
@@ -503,7 +503,7 @@ void LifeFrame::OnZoom(wxCommandEvent& event)
 
 void LifeFrame::OnNavigate(wxCommandEvent& event)
 {
-    LifeCell c;
+    Cell c;
 
     switch (event.GetId())
     {
@@ -772,7 +772,7 @@ void LifeCanvas::DrawChanged()
     wxClientDC dc(this);
 
     size_t ncells;
-    LifeCell *cells;
+    Cell *cells;
     bool done = FALSE;
 
     m_life->BeginFind(m_viewportX,
@@ -824,7 +824,7 @@ void LifeCanvas::OnPaint(wxPaintEvent& event)
     j1 = YToCell(y + h - 1);
 
     size_t ncells;
-    LifeCell *cells;
+    Cell *cells;
     bool done = FALSE;
 
     m_life->BeginFind(i0, j0, i1, j1, FALSE);
@@ -1021,60 +1021,47 @@ void LifeCanvas::OnScroll(wxScrollWinEvent& event)
 
     // calculate scroll increment
     int scrollinc = 0;
-    if (type == wxEVT_SCROLLWIN_TOP)
+    switch (type)
     {
-        if (orient == wxHORIZONTAL)
-            scrollinc = -m_viewportW;
-        else
-            scrollinc = -m_viewportH;
-    }
-    else
-    if (type == wxEVT_SCROLLWIN_BOTTOM)
-    {
-        if (orient == wxHORIZONTAL)
-            scrollinc = m_viewportW;
-        else
-            scrollinc = m_viewportH;
-    }
-    else
-    if (type == wxEVT_SCROLLWIN_LINEUP)
-    {
-        scrollinc = -1;
-    }
-    else
-    if (type == wxEVT_SCROLLWIN_LINEDOWN)
-    {
-        scrollinc = +1;
-    }
-    else
-    if (type == wxEVT_SCROLLWIN_PAGEUP)
-    {
-        scrollinc = -10;
-    }
-    else
-    if (type == wxEVT_SCROLLWIN_PAGEDOWN)
-    {
-        scrollinc = -10;
-    }
-    else
-    if (type == wxEVT_SCROLLWIN_THUMBTRACK)
-    {
-        if (orient == wxHORIZONTAL)
+        case wxEVT_SCROLLWIN_TOP:
         {
-            scrollinc = pos - m_thumbX;
-            m_thumbX = pos;
+            if (orient == wxHORIZONTAL)
+                scrollinc = -m_viewportW;
+            else
+                scrollinc = -m_viewportH;
+            break;    
         }
-        else
+        case wxEVT_SCROLLWIN_BOTTOM:
         {
-            scrollinc = pos - m_thumbY;
-            m_thumbY = pos;
+            if (orient == wxHORIZONTAL)
+                scrollinc = m_viewportW;
+            else
+                scrollinc = m_viewportH;
+            break;    
         }
-    }
-    else
-    if (type == wxEVT_SCROLLWIN_THUMBRELEASE)
-    {
-        m_thumbX = m_viewportW;
-        m_thumbY = m_viewportH;
+        case wxEVT_SCROLLWIN_LINEUP:   scrollinc = -1; break;
+        case wxEVT_SCROLLWIN_LINEDOWN: scrollinc = +1; break;
+        case wxEVT_SCROLLWIN_PAGEUP:   scrollinc = -10; break;
+        case wxEVT_SCROLLWIN_PAGEDOWN: scrollinc = +10; break;
+        case wxEVT_SCROLLWIN_THUMBTRACK:
+        {
+            if (orient == wxHORIZONTAL)
+            {
+                scrollinc = pos - m_thumbX;
+                m_thumbX = pos;
+            }
+            else
+            {
+                scrollinc = pos - m_thumbY;
+                m_thumbY = pos;
+            }
+            break;
+        }
+        case wxEVT_SCROLLWIN_THUMBRELEASE:
+        {
+            m_thumbX = m_viewportW;
+            m_thumbY = m_viewportH;
+        }
     }
 
 #if defined(__WXGTK__) || defined(__WXMOTIF__)

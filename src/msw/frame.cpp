@@ -147,6 +147,13 @@ bool wxFrame::Create(wxWindow *parent,
 
   m_iconized = FALSE;
 
+  // we pass NULL as parent to MSWCreate because frames with parents behave
+  // very strangely under Win95 shell
+  // Alteration by JACS: keep normal Windows behaviour (float on top of parent)
+  // with this style.
+  if ((m_windowStyle & wxFRAME_FLOAT_ON_PARENT) == 0)
+    parent = NULL;
+
   wxTopLevelWindows.Append(this);
 
   MSWCreate(m_windowId, parent, wxFrameClassName, this, title,
@@ -665,24 +672,13 @@ bool wxFrame::MSWCreate(int id, wxWindow *parent, const wxChar *wclass, wxWindow
 
   WXDWORD extendedStyle = MakeExtendedStyle(style);
 
-  // make all frames appear in the win9x shell taskbar unless
-  // wxFRAME_TOOL_WINDOW or wxFRAME_NO_TASKBAR is given - without giving them
-  // WS_EX_APPWINDOW style, the child (i.e. owned) frames wouldn't appear in it
 #if !defined(__WIN16__) && !defined(__SC__)
-  if ( (style & wxFRAME_TOOL_WINDOW) ||
-       (style & wxFRAME_NO_TASKBAR) )
-      extendedStyle |= WS_EX_TOOLWINDOW;
-  else if ( !(style & wxFRAME_NO_TASKBAR) )
-      extendedStyle |= WS_EX_APPWINDOW;
+  if (style & wxFRAME_TOOL_WINDOW)
+    extendedStyle |= WS_EX_TOOLWINDOW;
 #endif
 
   if (style & wxSTAY_ON_TOP)
     extendedStyle |= WS_EX_TOPMOST;
-
-#ifndef __WIN16__
-  if (m_exStyle & wxFRAME_EX_CONTEXTHELP)
-    extendedStyle |= WS_EX_CONTEXTHELP;
-#endif
 
   m_iconized = FALSE;
   if ( !wxWindow::MSWCreate(id, parent, wclass, wx_win, title, x, y, width, height,
@@ -808,7 +804,7 @@ void wxFrame::IconizeChildFrames(bool bIconize)
         // the child MDI frames are a special case and should not be touched by
         // the parent frame - instead, they are managed by the user
         wxFrame *frame = wxDynamicCast(win, wxFrame);
-        if ( frame && !frame->IsMDIChild() )
+        if ( frame && !wxDynamicCast(frame, wxMDIChildFrame) )
         {
             frame->Iconize(bIconize);
         }

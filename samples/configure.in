@@ -31,7 +31,6 @@ AC_OUTPUT([
             dragimag/Makefile
             drawing/Makefile
             dynamic/Makefile
-            event/Makefile
             exec/Makefile
             font/Makefile
             grid/Makefile
@@ -44,7 +43,6 @@ AC_OUTPUT([
             listctrl/Makefile
             mdi/Makefile
             menu/Makefile
-            memcheck/Makefile
             minifram/Makefile
             minimal/Makefile
             newgrid/Makefile

@@ -329,8 +329,8 @@ int wxFileDialog::ShowModal()
 
     //== Execute FileDialog >>=================================================
 
-    bool success = (m_dialogStyle & wxSAVE ? GetSaveFileName(&of)
-                                           : GetOpenFileName(&of)) != 0;
+    bool success = (m_dialogStyle & wxSAVE) ? (GetSaveFileName(&of) != 0)
+                                            : (GetOpenFileName(&of) != 0);
 
     DWORD errCode = CommDlgExtendedError();
 

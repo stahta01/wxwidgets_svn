@@ -107,19 +107,6 @@
 #endif // !WX_TIMEZONE
 
 // ----------------------------------------------------------------------------
-// macros
-// ----------------------------------------------------------------------------
-
-// debugging helper: just a convenient replacement of wxCHECK()
-#define wxDATETIME_CHECK(expr, msg)     \
-        if ( !(expr) )                  \
-        {                               \
-            wxFAIL_MSG(msg);            \
-            *this = wxInvalidDateTime;  \
-            return *this;               \
-        }
-
-// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -186,11 +173,9 @@ static const wxDateTime::wxDateTime_t gs_cumulatedDays[2][MONTHS_IN_YEAR] =
 // global data
 // ----------------------------------------------------------------------------
 
-// in the fine tradition of ANSI C we use our equivalent of (time_t)-1 to
-// indicate an invalid wxDateTime object
-static const wxDateTime gs_dtDefault = wxLongLong((long)ULONG_MAX, ULONG_MAX);
+static wxDateTime gs_dtDefault;
 
-const wxDateTime& wxDefaultDateTime = gs_dtDefault;
+wxDateTime& wxDefaultDateTime = gs_dtDefault;
 
 wxDateTime::Country wxDateTime::ms_country = wxDateTime::Country_Unknown;
 
@@ -247,9 +232,9 @@ static int GetTimeZone()
     {
         // just call localtime() instead of figuring out whether this system
         // supports tzset(), _tzset() or something else
-        time_t                 t = 0;
-
+        time_t t;
         (void)localtime(&t);
+
         s_timezoneSet = TRUE;
     }
 
@@ -1086,9 +1071,7 @@ wxDateTime& wxDateTime::Set(const struct tm& tm)
 
         wxFAIL_MSG( _T("mktime() failed") );
 
-        *this = wxInvalidDateTime;
-
-        return *this;
+        return wxInvalidDateTime;
     }
     else
     {
@@ -1105,16 +1088,14 @@ wxDateTime& wxDateTime::Set(wxDateTime_t hour,
 
     // we allow seconds to be 61 to account for the leap seconds, even if we
     // don't use them really
-    wxDATETIME_CHECK( hour < 24 &&
-                      second < 62 &&
-                      minute < 60 &&
-                      millisec < 1000,
-                      _T("Invalid time in wxDateTime::Set()") );
+    wxCHECK_MSG( hour < 24 && second < 62 && minute < 60 && millisec < 1000,
+                 wxInvalidDateTime,
+                 _T("Invalid time in wxDateTime::Set()") );
 
     // get the current date from system
     struct tm *tm = GetTmNow();
 
-    wxDATETIME_CHECK( tm, _T("localtime() failed") );
+    wxCHECK_MSG( tm, wxInvalidDateTime, _T("localtime() failed") );
 
     // adjust the time
     tm->tm_hour = hour;
@@ -1137,16 +1118,15 @@ wxDateTime& wxDateTime::Set(wxDateTime_t day,
 {
     wxASSERT_MSG( IsValid(), _T("invalid wxDateTime") );
 
-    wxDATETIME_CHECK( hour < 24 &&
-                      second < 62 &&
-                      minute < 60 &&
-                      millisec < 1000,
-                      _T("Invalid time in wxDateTime::Set()") );
+    wxCHECK_MSG( hour < 24 && second < 62 && minute < 60 && millisec < 1000,
+                 wxInvalidDateTime,
+                 _T("Invalid time in wxDateTime::Set()") );
 
     ReplaceDefaultYearMonthWithCurrent(&year, &month);
 
-    wxDATETIME_CHECK( (0 < day) && (day <= GetNumberOfDays(month, year)),
-                      _T("Invalid date in wxDateTime::Set()") );
+    wxCHECK_MSG( (0 < day) && (day <= GetNumberOfDays(month, year)),
+                 wxInvalidDateTime,
+                 _T("Invalid date in wxDateTime::Set()") );
 
     // the range of time_t type (inclusive)
     static const int yearMinInRange = 1970;
@@ -1499,7 +1479,7 @@ wxDateTime& wxDateTime::SetToLastMonthDay(Month month,
 
 wxDateTime& wxDateTime::SetToWeekDayInSameWeek(WeekDay weekday)
 {
-    wxDATETIME_CHECK( weekday != Inv_WeekDay, _T("invalid weekday") );
+    wxCHECK_MSG( weekday != Inv_WeekDay, wxInvalidDateTime, _T("invalid weekday") );
 
     WeekDay wdayThis = GetWeekDay();
     if ( weekday == wdayThis )
@@ -1519,7 +1499,7 @@ wxDateTime& wxDateTime::SetToWeekDayInSameWeek(WeekDay weekday)
 
 wxDateTime& wxDateTime::SetToNextWeekDay(WeekDay weekday)
 {
-    wxDATETIME_CHECK( weekday != Inv_WeekDay, _T("invalid weekday") );
+    wxCHECK_MSG( weekday != Inv_WeekDay, wxInvalidDateTime, _T("invalid weekday") );
 
     int diff;
     WeekDay wdayThis = GetWeekDay();
@@ -1543,7 +1523,7 @@ wxDateTime& wxDateTime::SetToNextWeekDay(WeekDay weekday)
 
 wxDateTime& wxDateTime::SetToPrevWeekDay(WeekDay weekday)
 {
-    wxDATETIME_CHECK( weekday != Inv_WeekDay, _T("invalid weekday") );
+    wxCHECK_MSG( weekday != Inv_WeekDay, wxInvalidDateTime, _T("invalid weekday") );
 
     int diff;
     WeekDay wdayThis = GetWeekDay();
@@ -1691,8 +1671,8 @@ wxDateTime::wxDateTime_t wxDateTime::GetWeekOfMonth(wxDateTime::WeekFlags flags,
 wxDateTime& wxDateTime::SetToYearDay(wxDateTime::wxDateTime_t yday)
 {
     int year = GetYear();
-    wxDATETIME_CHECK( (0 < yday) && (yday <= GetNumberOfDays(year)),
-                      _T("invalid year day") );
+    wxCHECK_MSG( (0 < yday) && (yday <= GetNumberOfDays(year)),
+                 wxInvalidDateTime, _T("invalid year day") );
 
     bool isLeap = IsLeapYear(year);
     for ( Month mon = Jan; mon < Inv_Month; wxNextMonth(mon) )
@@ -3157,27 +3137,14 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
                 // it's a month
                 if ( haveMon )
                 {
-                    // but we already have a month - maybe we guessed wrong?
-                    if ( !haveDay )
-                    {
-                    	// no need to check in month range as always < 12, but
-                        // the days are counted from 1 unlike the months
-                        day = (wxDateTime_t)mon + 1;
-                        haveDay = TRUE;
-                    }
-                    else
-                    {
-                        // could possible be the year (doesn't the year come
-                        // before the month in the japanese format?) (FIXME)
-                        break;
-                	}
+                    break;
                 }
 
                 mon = mon2;
 
                 haveMon = TRUE;
             }
-            else // not a valid month name
+            else
             {
                 wday = GetWeekDayFromName(token, Name_Full | Name_Abbr);
                 if ( wday != Inv_WeekDay )
@@ -3190,7 +3157,7 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
 
                     haveWDay = TRUE;
                 }
-                else // not a valid weekday name
+                else
                 {
                     // try the ordinals
                     static const wxChar *ordinals[] =
@@ -3216,7 +3183,7 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
                         wxTRANSLATE("nineteenth"),
                         wxTRANSLATE("twentieth"),
                         // that's enough - otherwise we'd have problems with
-                        // composite (or not) ordinals
+                        // composite (or not) ordinals otherwise
                     };
 
                     size_t n;

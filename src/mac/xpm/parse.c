@@ -38,7 +38,7 @@
  * HeDu (hedu@cul-ipn.uni-kiel.de) 4/94
  */
 
-#include "XpmI.h"
+#include "xpmi.h"
 #include <ctype.h>
 
 LFUNC(ParsePixels, int, (xpmData *data, unsigned int width,
@@ -111,8 +111,7 @@ xpmParseValues(data, width, height, ncolors, cpp,
 	    ptr = buf;
 	    got_one = False;
 	    while (!got_one) {
-	    #if defined(macintosh) || defined(__APPLE__)
-	    // we have a strange parameter problem here
+	    #ifdef macintosh // we have a strange parameter problem here
 		ptr = strchr(ptr, '_'); // index
 	    #else
 		ptr = index(ptr, '_'); 

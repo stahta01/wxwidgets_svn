@@ -96,8 +96,6 @@ public:
         { DoEnumerateFamilies(TRUE); }
     void OnEnumerateEncodings(wxCommandEvent& event);
 
-    void OnCheckNativeToFromString(wxCommandEvent& event);
-
     void OnSize(wxSizeEvent& event);
 
 protected:
@@ -138,7 +136,6 @@ enum
     Font_EnumFamilies,
     Font_EnumFixedFamilies,
     Font_EnumEncodings,
-    Font_CheckNativeToFromString,
     Font_Max
 };
 
@@ -160,7 +157,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Font_EnumFamilies, MyFrame::OnEnumerateFamilies)
     EVT_MENU(Font_EnumFixedFamilies, MyFrame::OnEnumerateFixedFamilies)
     EVT_MENU(Font_EnumEncodings, MyFrame::OnEnumerateEncodings)
-    EVT_MENU(Font_CheckNativeToFromString, MyFrame::OnCheckNativeToFromString)
 
     EVT_SIZE(MyFrame::OnSize)
 END_EVENT_TABLE()
@@ -232,9 +228,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuFont->Append(Font_EnumFamiliesForEncoding,
                      "Find font for en&coding...\tCtrl-C",
                      "Find font families for given encoding");
-    menuFont->AppendSeparator();
-    menuFont->Append(Font_CheckNativeToFromString,
-                     "Check Native Font Info To/From String");
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar;
@@ -389,7 +382,7 @@ void MyFrame::OnEnumerateFamiliesForEncoding(wxCommandEvent& WXUNUSED(event))
         wxFONTENCODING_CP1252,
     };
 
-    static const wxString encodingNames[] =
+    static const char *encodingNames[] =
     {
         "Western European (ISO-8859-1)",
         "Central European (ISO-8859-2)",
@@ -404,32 +397,13 @@ void MyFrame::OnEnumerateFamiliesForEncoding(wxCommandEvent& WXUNUSED(event))
 
     int n = wxGetSingleChoiceIndex("Choose an encoding", "Font demo",
                                    WXSIZEOF(encodingNames),
-                                   encodingNames,
+                                   (char **)encodingNames,
                                    this);
 
     if ( n != -1 )
     {
         DoEnumerateFamilies(FALSE, encodings[n]);
     }
-}
-
-void MyFrame::OnCheckNativeToFromString(wxCommandEvent& WXUNUSED(event))
-{
-    wxString fontInfo = m_canvas->GetTextFont().GetNativeFontInfoDesc();
-
-    if ( fontInfo.IsEmpty() )
-    {
-        wxLogError("Native font info string is empty!");
-    }
-    else
-    {
-        wxFont *font = wxFont::New(fontInfo);
-        if ( fontInfo != font->GetNativeFontInfoDesc() )
-            wxLogError("wxNativeFontInfo ToString()/FromString() broken!");
-        else
-            wxLogError("wxNativeFontInfo works: %s", fontInfo.c_str());
-        delete font;
-     }
 }
 
 void MyFrame::DoResizeFont(int diff)
@@ -451,7 +425,7 @@ void MyFrame::DoResizeFont(int diff)
 
 void MyFrame::DoChangeFont(const wxFont& font, const wxColour& col)
 {
-    Resize(GetClientSize(), font);
+    Resize(GetSize(), font);
 
     m_canvas->SetTextFont(font);
     if ( col.Ok() )
@@ -610,7 +584,9 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnSize(wxSizeEvent& event)
 {
-    Resize(GetClientSize());
+    wxSize size = event.GetSize();
+
+    Resize(size);
 
     event.Skip();
 }
@@ -673,14 +649,6 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
                     m_font.GetWeightString().c_str());
 
     dc.DrawText(fontInfo, 5, 5);
-
-    if ( m_font.Ok() )
-    {
-        wxString fontDesc = m_font.GetNativeFontInfoDesc();
-        dc.SetFont(wxFont(fontDesc));
-        fontInfo.Printf("Native font info: %s", fontDesc.c_str());
-        dc.DrawText(fontInfo, 5, 5 + dc.GetCharHeight());
-    }
 
     // prepare to draw the font
     dc.SetFont(m_font);

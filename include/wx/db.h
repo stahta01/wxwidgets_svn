@@ -6,7 +6,7 @@
 // Author:      Doug Card
 // Modified by: George Tasker
 //              Bart Jourquin
-//              Mark Johnson, wxWindows@mj10777.de
+//              Mark Johnson
 // Mods:        Dec, 1998:
 //                -Added support for SQL statement logging and database cataloging
 //                     April, 1999
@@ -44,7 +44,7 @@
 // BJO 20000503: introduce new GetColumns members which are more database independant and 
 //               return columns in the order they were created
 #define OLD_GETCOLUMNS 1
-#define EXPERIMENTAL_WXDB_FUNCTIONS 1
+#define EXPERIMENTAL_WXDB_FUNCTIONS 0
 
 // Use this line for wxWindows v1.x
 //#include "wx_ver.h"
@@ -61,34 +61,19 @@
 
 #if wxMAJOR_VERSION == 2
     extern "C" {
-#ifdef __VISUALC__
-// If you use the wxDbCreateDataSource() function with MSW/VC6,
-// you cannot use the iODBC headers, you must use the VC headers,
-// plus the odbcinst.h header - gt Nov 2 2000
-//
-//  Must add "odbccp32.lib" in \wx2\wxWindows\src\makevc.env to the WINLIBS= line
-//
-    #include "sql.h"
-    #include "sqlext.h"
-    #include "odbcinst.h"
-#else
     #include "wx/isql.h"
     #include "wx/isqlext.h"
-#endif
+// If you use the wxCreateDataSource() function with MSW/VC6,
+// you cannot use the iODBC headers, you must use the VC headers,
+// plus the odbcinst.h header
+    //#include "sql.h"
+    //#include "sqlext.h"
+    //#include "odbcinst.h"
     }
 #else  // version == 1
     extern "C" {
-#ifdef __VISUALC__
-// If you use the wxDbCreateDataSource() function with MSW/VC6,
-// you cannot use the iODBC headers, you must use the VC headers,
-// plus the odbcinst.h header - gt Nov 2 2000
-    #include "sql.h"
-    #include "sqlext.h"
-    #include "odbcinst.h"
-#else
     #include "iodbc.h"
     #include "isqlext.h"
-#endif
     }
 #endif
 
@@ -118,14 +103,14 @@ enum enumDummy {enumDum1};
 
 const int wxDB_PATH_MAX                 = 254;
 
-extern wxChar const *SQL_LOG_FILENAME;
-extern wxChar const *SQL_CATALOG_FILENAME;
+extern char const *SQL_LOG_FILENAME;
+extern char const *SQL_CATALOG_FILENAME;
 
 
 // Database Globals
 const int DB_TYPE_NAME_LEN            = 40;
-const int DB_MAX_STATEMENT_LEN        = 4096;
-const int DB_MAX_WHERE_CLAUSE_LEN     = 2048;
+const int DB_MAX_STATEMENT_LEN        = 2048;
+const int DB_MAX_WHERE_CLAUSE_LEN     = 1024;
 const int DB_MAX_ERROR_MSG_LEN        = 512;
 const int DB_MAX_ERROR_HISTORY        = 5;
 const int DB_MAX_TABLE_NAME_LEN       = 128;
@@ -254,104 +239,46 @@ enum wxODBC_ERRORS
     DB_ERR_TIMEOUT_EXPIRED                             // SqlState = 'S1T00'
 };
 
-#ifndef MAXNAME
-#define MAXNAME         31
-#endif
 
-#ifndef SQL_MAX_AUTHSTR_LEN
-// There does not seem to be a standard for this, so I am
-// defaulting to the value that MS uses
-#define SQL_MAX_AUTHSTR_LEN MAXNAME
-#endif
-
-class wxDbConnectInf
+struct wxDbConnectInf
 {
-    private:
-        bool freeHenvOnDestroy;
+    HENV Henv;
+    char Dsn[SQL_MAX_DSN_LENGTH+1];                    // Data Source Name
+    char Uid[20+1];                                    // User ID
+    char AuthStr[20+1];                                // Authorization string (password)
 
-    public:
-	    HENV Henv;
-	    wxChar Dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
-	    wxChar Uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
-	    wxChar AuthStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
+    char description[SQL_MAX_DSN_LENGTH+1];            // Not sure what the max length is
+    char fileType[SQL_MAX_DSN_LENGTH+1];               // Not sure what the max length is
 
-        wxString Description;                              // Not sure what the max length is
-        wxString FileType;                                 // Not sure what the max length is
-
-        // Optionals needed for some databases like dBase
-        wxString DefaultDir;                               // Directory that db file resides in
-
-    public:
-
-        wxDbConnectInf();
-        wxDbConnectInf(HENV henv, const wxString &dsn, const wxString &userID=wxEmptyString, 
-                       const wxString &password=wxEmptyString, const wxString &defaultDir=wxEmptyString, 
-                       const wxString &description=wxEmptyString, const wxString &fileType=wxEmptyString);
-
-        ~wxDbConnectInf();
-
-        bool             Initialize();
-
-        bool             AllocHenv();
-        void             FreeHenv();
-
-        // Accessors
-        const HENV       &GetHenv()          { return Henv; };
-
-        const wxChar    *GetDsn()           { return Dsn; };
-
-        const wxChar    *GetUid()           { return Uid; };
-        const wxChar    *GetUserID()        { return Uid; };
-
-        const wxChar    *GetAuthStr()       { return AuthStr; };
-        const wxChar    *GetPassword()      { return AuthStr; };
-
-        const wxChar    *GetDescription()   { return Description; };
-        const wxChar    *GetFileType()      { return FileType; };
-        const wxChar    *GetDefaultDir()    { return DefaultDir; };
-
-        void             SetHenv(const HENV henv)               { Henv = henv; };
-
-        void             SetDsn(const wxString &dsn);
-
-        void             SetUserID(const wxString &userID);
-        void             SetUid(const wxString &uid)            { SetUserID(uid); };
-
-        void             SetPassword(const wxString &password);
-        void             SetAuthStr(const wxString &authstr)    { SetPassword(authstr); };
-
-        void             SetDescription(const wxString &desc)   { Description   = desc;     };
-        void             SetFileType(const wxString &fileType)  { FileType      = fileType; };
-        void             SetDefaultDir(const wxString &defDir)  { DefaultDir    = defDir;   };
-};  // class wxDbConnectInf
-
+    // Optionals needed for some databases like dBase
+    char defaultDir[wxDB_PATH_MAX];                      // Directory that db file resides in
+};
 
 struct wxDbSqlTypeInfo
 {
-    wxString    TypeName;
-    int         FsqlType;
-    long        Precision;
-    short       CaseSensitive;
-//    short     MinimumScale;
-    short       MaximumScale;
+    char    TypeName[DB_TYPE_NAME_LEN];
+    int     FsqlType;
+    long    Precision;
+    short   CaseSensitive;
+//    short MinimumScale;
+    short   MaximumScale;
 };
 
 
 class WXDLLEXPORT wxDbColFor
 {
 public:
-    wxString       s_Field;              // Formated String for Output
-    wxString       s_Format[7];          // Formated Objects - TIMESTAMP has the biggest (7)
+    wxString       s_Field;             // Formated String for Output
+    wxString       s_Format[7];         // Formated Objects - TIMESTAMP has the biggest (7)
     wxString       s_Amount[7];          // Formated Objects - amount of things that can be formatted
     int            i_Amount[7];          // Formated Objects - TT MM YYYY HH MM SS m
-    int            i_Nation;             // 0 = timestamp , 1=EU, 2=UK, 3=International, 4=US
-    int            i_dbDataType;         // conversion of the 'sqlDataType' to the generic data type used by these classes
+    int            i_Nation;            // 0 = timestamp , 1=EU, 2=UK, 3=International, 4=US
+    int            i_dbDataType;        // conversion of the 'sqlDataType' to the generic data type used by these classes
     SWORD          i_sqlDataType;
 
     wxDbColFor();
     ~wxDbColFor();
 
-    void           Initialize();
     int            Format(int Nation, int dbDataType, SWORD sqlDataType, short columnSize, short decimalDigits);
 };
 
@@ -359,30 +286,28 @@ public:
 class WXDLLEXPORT wxDbColInf
 {
 public:
-    wxChar       catalog[128+1];
-    wxChar       schema[128+1];
-    wxChar       tableName[DB_MAX_TABLE_NAME_LEN+1];
-    wxChar       colName[DB_MAX_COLUMN_NAME_LEN+1];
+    char         catalog[128+1];
+    char         schema[128+1];
+    char         tableName[DB_MAX_TABLE_NAME_LEN+1];
+    char         colName[DB_MAX_COLUMN_NAME_LEN+1];
     SWORD        sqlDataType;
-    wxChar       typeName[128+1];
+    char         typeName[128+1];
     SWORD        columnSize;
     SWORD        bufferLength;
     short        decimalDigits;
     short        numPrecRadix;
     short        nullable;
-    wxChar       remarks[254+1];
+    char         remarks[254+1];
     int          dbDataType;  // conversion of the 'sqlDataType' to the generic data type used by these classes
  // mj10777.19991224 : new
     int          PkCol;       // Primary key column       0=No; 1= First Key, 2 = Second Key etc.
-    wxChar       PkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
+    char         PkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
     int          FkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
-    wxChar       FkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
+    char         FkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
     wxDbColFor  *pColFor;                              // How should this columns be formatted
 
     wxDbColInf();
     ~wxDbColInf();
-
-    bool Initialize();
 };
 
 
@@ -391,31 +316,26 @@ public:
 class WXDLLEXPORT wxDbTableInf        // Description of a Table
 {
 public:
-    wxChar      tableName[DB_MAX_TABLE_NAME_LEN+1];
-    wxChar      tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
-    wxChar      tableRemarks[254+1];
+    char        tableName[DB_MAX_TABLE_NAME_LEN+1];
+    char        tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
+    char        tableRemarks[254+1];
     int         numCols;                    // How many Columns does this Table have: GetColumnCount(..);
     wxDbColInf *pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
-
     wxDbTableInf();
     ~wxDbTableInf();
-
-    bool             Initialize();
 };
 
 
 class WXDLLEXPORT wxDbInf     // Description of a Database
 {
 public:
-    wxChar        catalog[128+1];
-    wxChar        schema[128+1];
+    char          catalog[128+1];
+    char          schema[128+1];
     int           numTables;           // How many tables does this database have
     wxDbTableInf *pTableInf;           // pTableInf = new wxDbTableInf[numTables];
 
     wxDbInf();
     ~wxDbInf();
-
-    bool          Initialize();
 };
 
 
@@ -440,9 +360,7 @@ enum wxDBMS
     dbmsACCESS,
     dbmsDBASE,
     dbmsINFORMIX,
-    dbmsVIRTUOSO,
-    dbmsDB2,
-    dbmsINTERBASE
+    dbmsVIRTUOSO
 };
 
 
@@ -453,29 +371,25 @@ enum wxDBMS
 // why the connection failed.  Note: as each wxDb object is closed, it
 // will overwrite the errors of the previously destroyed wxDb object in
 // this variable.
-extern wxChar DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN];
+extern char DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN];
 
 
 class WXDLLEXPORT wxDb
 {
 private:
     bool             dbIsOpen;
-    wxString         dsn;             // Data source name
-    wxString         uid;             // User ID
-    wxString         authStr;         // Authorization string (password)
+    char            *dsn;             // Data source name
+    char            *uid;             // User ID
+    char            *authStr;         // Authorization string (password)
     FILE            *fpSqlLog;        // Sql Log file pointer
     wxDbSqlLogState  sqlLogState;     // On or Off
     bool             fwdOnlyCursors;
-    wxDBMS           dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
     // Private member functions
     bool             getDbInfo(void);
     bool             getDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo);
     bool             setConnectionOptions(void);
-    void             logError(const wxString &errMsg, const wxString &SQLState);
-    const wxChar    *convertUserID(const wxChar *userID, wxString &UserID);
-    void             initialize();
-
+    void             logError(const char *errMsg, const char *SQLState);
 #if !wxODBC_BACKWARD_COMPATABILITY
     // ODBC handles
     HENV  henv;        // ODBC Environment handle
@@ -518,17 +432,19 @@ public:
     // datasource when the datasource is first opened.
     struct
     {
-        wxChar dbmsName[40];                             // Name of the dbms product
-        wxChar dbmsVer[64];                              // Version # of the dbms product
-        wxChar driverName[40];                           // Driver name
-        wxChar odbcVer[60];                              // ODBC version of the driver
-        wxChar drvMgrOdbcVer[60];                        // ODBC version of the driver manager
-        wxChar driverVer[60];                            // Driver version
-        wxChar serverName[80];                           // Server Name, typically a connect string
-        wxChar databaseName[128];                        // Database filename
-        wxChar outerJoins[2];                            // Indicates whether the data source supports outer joins
-        wxChar procedureSupport[2];                      // Indicates whether the data source supports stored procedures
-        wxChar accessibleTables[2];                      // Indicates whether the data source only reports accessible tables in SQLTables.
+        char   dbmsName[40];                             // Name of the dbms product
+        char   dbmsVer[64];                              // Version # of the dbms product
+        char   driverName[40];                           // Driver name
+        char   odbcVer[60];                              // ODBC version of the driver
+        char   drvMgrOdbcVer[60];                        // ODBC version of the driver manager
+        char   driverVer[60];                            // Driver version
+        char   serverName[80];                           // Server Name, typically a connect string
+        char   databaseName[128];                        // Database filename
+        char   outerJoins[2];                            // Indicates whether the data source supports outer joins
+        char   procedureSupport[2];                      // Indicates whether the data source supports stored procedures
+#if EXPERIMENTAL_WXDB_FUNCTIONS  // will be added in 2.4
+        char   accessibleTables[2];                      // Indicates whether the data source only reports accessible tables in SQLTables.
+#endif
         UWORD  maxConnections;                           // Maximum # of connections the data source supports
         UWORD  maxStmts;                                 // Maximum # of HSTMTs per HDBC
         UWORD  apiConfLvl;                               // ODBC API conformance level
@@ -537,7 +453,7 @@ public:
         UWORD  cursorCommitBehavior;                     // Indicates how cursors are affected by a db commit
         UWORD  cursorRollbackBehavior;                   // Indicates how cursors are affected by a db rollback
         UWORD  supportNotNullClause;                     // Indicates if data source supports NOT NULL clause
-        wxChar supportIEF[2];                            // Integrity Enhancement Facility (Referential Integrity)
+        char   supportIEF[2];                            // Integrity Enhancement Facility (Referential Integrity)
         UDWORD txnIsolation;                             // Default transaction isolation level supported by the driver
         UDWORD txnIsolationOptions;                      // Transaction isolation level options available
         UDWORD fetchDirections;                          // Fetch directions supported
@@ -573,58 +489,52 @@ public:
 #endif
 
     // Public member functions
-    wxDb(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
-
-    bool         Open(const wxString &Dsn, const wxString &Uid, const wxString &AuthStr);  // Data Source Name, User ID, Password
-    bool         Open(wxDbConnectInf *dbConnectInf);
-    bool         Open(wxDb *copyDb);  // pointer to a wxDb whose connection info should be copied rather than re-queried
+    wxDb(HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
+    bool         Open(char *Dsn, char *Uid, char *AuthStr);  // Data Source Name, User ID, Password
     void         Close(void);
     bool         CommitTrans(void);
     bool         RollbackTrans(void);
     bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
     bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
     void         DispNextError(void);
-    bool         CreateView(const wxString &viewName, const wxString &colList, const wxString &pSqlStmt, bool attemptDrop=TRUE);
-    bool         DropView(const wxString &viewName);
-    bool         ExecSql(const wxString &pSqlStmt);
+    bool         CreateView(const char *viewName, const char *colList, const char *pSqlStmt, bool attemptDrop=TRUE);
+    bool         DropView(const char *viewName);
+    bool         ExecSql(const char *pSqlStmt);
     bool         GetNext(void);
     bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SDWORD FAR *cbReturned);
-    bool         Grant(int privileges, const wxString &tableName, const wxString &userList = wxT("PUBLIC"));
-    int          TranslateSqlState(const wxString &SQLState);
-    wxDbInf     *GetCatalog(const wxChar *userID=NULL);
-    bool         Catalog(const wxChar *userID=NULL, const wxString &fileName=SQL_CATALOG_FILENAME);
-    int          GetKeyFields(const wxString &tableName, wxDbColInf* colInf, int nocols);
+    bool         Grant(int privileges, const char *tableName, const char *userList = "PUBLIC");
+    int          TranslateSqlState(const wxChar *SQLState);
+    wxDbInf     *GetCatalog(char *userID);
+    bool         Catalog(const char *userID=NULL, const char *fileName = SQL_CATALOG_FILENAME);
+    int          GetKeyFields(char *tableName, wxDbColInf* colInf, int nocols);
 
-    wxDbColInf  *GetColumns(wxChar *tableName[], const wxChar *userID=NULL);
-    wxDbColInf  *GetColumns(const wxString &tableName, int *numCols, const wxChar *userID=NULL); 
+    wxDbColInf  *GetColumns(char *tableName[], const char *userID=NULL);
+    wxDbColInf  *GetColumns(char *tableName, int *numCols, const char *userID=NULL); 
 
-    int          GetColumnCount(const wxString &tableName, const wxChar *userID=NULL);
-    const wxChar *GetDatabaseName(void)  {return dbInf.dbmsName;}
-    const wxString &GetDataSource(void)    {return dsn;}
-    const wxString &GetDatasourceName(void){return dsn;}
-    const wxString &GetUsername(void)      {return uid;}
-    const wxString &GetPassword(void)      {return authStr;}
-    bool         IsOpen(void)           {return dbIsOpen;}
-    HENV         GetHENV(void)          {return henv;}
-    HDBC         GetHDBC(void)          {return hdbc;}
-    HSTMT        GetHSTMT(void)         {return hstmt;}
-    int          GetTableCount()        {return nTables;};  // number of tables using this connection
-    wxDbSqlTypeInfo GetTypeInfVarchar() {return typeInfVarchar;}
-    wxDbSqlTypeInfo GetTypeInfInteger() {return typeInfInteger;}
-    wxDbSqlTypeInfo GetTypeInfFloat()   {return typeInfFloat;}
-    wxDbSqlTypeInfo GetTypeInfDate()    {return typeInfDate;}
+    int          GetColumnCount(char *tableName, const char *userID=NULL);
+    char        *GetDatabaseName(void) {return dbInf.dbmsName;}
+    char        *GetDataSource(void)   {return dsn;}
+    char        *GetUsername(void)     {return uid;}
+    char        *GetPassword(void)     {return authStr;}
+    bool         IsOpen(void)          {return dbIsOpen;}
+    HENV         GetHENV(void)         {return henv;}
+    HDBC         GetHDBC(void)         {return hdbc;}
+    HSTMT        GetHSTMT(void)        {return hstmt;}
+    int          GetTableCount()       {return nTables;};  // number of tables using this connection
+    wxDbSqlTypeInfo GetTypeInfVarchar(){return typeInfVarchar;}
+    wxDbSqlTypeInfo GetTypeInfInteger(){return typeInfInteger;}
+    wxDbSqlTypeInfo GetTypeInfFloat()  {return typeInfFloat;}
+    wxDbSqlTypeInfo GetTypeInfDate()   {return typeInfDate;}
 
-    bool         TableExists(const wxString &tableName, const wxChar *userID=NULL, const wxString &tablePath=wxEmptyString);  // tableName can refer to a table, view, alias or synonym
-    bool         TablePrivileges(const wxString &tableName, const wxString &priv, const wxChar *userID=NULL, const wxChar *schema=NULL, const wxString &path=wxEmptyString);  // tableName can refer to a table, view, alias or synonym
-    void         LogError(const wxString &errMsg, const wxString &SQLState = wxEmptyString) { logError(errMsg, SQLState); }
+    bool         TableExists(const char *tableName, const char *userID=NULL, const char *path=NULL);  // Table name can refer to a table, view, alias or synonym
+#if EXPERIMENTAL_WXDB_FUNCTIONS  // will be added in 2.4
+    bool         TablePrivileges(const char *tableName, const char* priv, const char *userID=NULL, const char *path=NULL);  // Table name can refer to a table, view, alias or synonym
+#endif
+    void         LogError(const char *errMsg, const char *SQLState = 0) {logError(errMsg, SQLState);}
     void         SetDebugErrorMessages(bool state) { silent = !state; }
-    bool         SetSqlLogging(wxDbSqlLogState state, const wxString &filename = SQL_LOG_FILENAME, bool append = FALSE);
-    bool         WriteSqlLog(const wxString &logMsg);
+    bool         SetSqlLogging(wxDbSqlLogState state, const wxChar *filename = SQL_LOG_FILENAME, bool append = FALSE);
+    bool         WriteSqlLog(const wxChar *logMsg);
     wxDBMS       Dbms(void);
-    bool         ModifyColumn(const wxString &tableName, const wxString &columnName,
-                              int dataType, ULONG columnLength=0,
-                              const wxString &optionalParam=wxEmptyString);
-
     bool         FwdOnlyCursors(void)  {return fwdOnlyCursors;}
 
     // These two functions are provided strictly for use by wxDbTable.
@@ -641,22 +551,19 @@ public:
 // or for multiple database support.
 struct wxDbList
 {
-    wxDbList *PtrPrev;       // Pointer to previous item in the list
-    wxString  Dsn;           // Data Source Name
-    wxString  Uid;           // User ID
-    wxString  AuthStr;       // Authorization string (password)
-    wxDb     *PtrDb;         // Pointer to the wxDb object
-    bool      Free;          // Is item free or in use?
-    wxDbList *PtrNext;       // Pointer to next item in the list
+    wxDbList *PtrPrev;                      // Pointer to previous item in the list
+    wxChar    Dsn[SQL_MAX_DSN_LENGTH+1];    // Data Source Name
+    wxDb     *PtrDb;                        // Pointer to the wxDb object
+    bool      Free;                         // Is item free or in use?
+    wxDbList *PtrNext;                      // Pointer to next item in the list
 };
-
 
 #ifdef __WXDEBUG__
 #include "wx/object.h"
 class wxTablesInUse : public wxObject
 {
     public:
-        const wxChar  *tableName;
+        const char    *tableName;
         ULONG          tableID;
         class wxDb    *pDb;
 };  // wxTablesInUse
@@ -673,21 +580,21 @@ int   WXDLLEXPORT  wxDbConnectionsInUse(void);
 
 
 // This function sets the sql log state for all open wxDb objects
-bool wxDbSqlLog(wxDbSqlLogState state, const wxString &filename = SQL_LOG_FILENAME);
+bool wxDbSqlLog(wxDbSqlLogState state, const wxChar *filename = SQL_LOG_FILENAME);
 
 
 #if 0
 // MSW/VC6 ONLY!!!  Experimental
-int WXDLLEXPORT wxDbCreateDataSource(const wxString &driverName, const wxString &dsn, const wxString &description=wxEmptyString,
-                                     bool sysDSN=FALSE, const wxString &defDir=wxEmptyString, wxWindow *parent=NULL);
+int WXDLLEXPORT wxDbCreateDataSource(const char *driverName, const char *dsn, const char *description="",
+                                     bool sysDSN=FALSE, const char *defDir="", wxWindow *parent=NULL);
 #endif
 
 // This routine allows you to query a driver manager
 // for a list of available datasources.  Call this routine
 // the first time using SQL_FETCH_FIRST.  Continue to call it
 // using SQL_FETCH_NEXT until you've exhausted the list.
-bool WXDLLEXPORT wxDbGetDataSource(HENV henv, wxChar *Dsn, SWORD DsnMax, wxChar *DsDesc,
-                                   SWORD DsDescMax, UWORD direction = SQL_FETCH_NEXT);
+bool WXDLLEXPORT wxDbGetDataSource(HENV henv, char *Dsn, SWORD DsnMax, char *DsDesc, SWORD DsDescMax,
+                                   UWORD direction = SQL_FETCH_NEXT);
 
 
 // Change this to 0 to remove use of all deprecated functions
@@ -723,7 +630,7 @@ bool  WXDLLEXPORT  FreeDbConnection(wxDB *pDb);
 void  WXDLLEXPORT  CloseDbConnections(void);
 int   WXDLLEXPORT  NumberDbConnectionsInUse(void);
 
-bool SqlLog(sqlLog state, const char *filename = SQL_LOG_FILENAME);
+bool SqlLog(sqlLog state, const wxChar *filename = SQL_LOG_FILENAME);
 
 bool WXDLLEXPORT GetDataSource(HENV henv, char *Dsn, SWORD DsnMax, char *DsDesc, SWORD DsDescMax,
                                UWORD direction = SQL_FETCH_NEXT);

@@ -21,13 +21,11 @@
 #include "wx/utils.h"
 #include "extldef.h"
 
-#if !USE_SHARED_LIBRARY
   IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 
 BEGIN_EVENT_TABLE(wxListBox, wxControl)
 	EVT_SIZE( wxListBox::OnSize ) 
 END_EVENT_TABLE()
-#endif
 
 #include <wx/mac/uma.h>
 
@@ -43,7 +41,6 @@ wxListBox::wxListBox()
 {
   m_noItems = 0;
   m_selected = 0;
-  m_macList = NULL ;
 }
 
 bool wxListBox::Create(wxWindow *parent, wxWindowID id,
@@ -59,6 +56,8 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
 
 	Rect bounds ;
 	Str255 title ;
+	m_macHorizontalBorder = 5 ; // additional pixels around the real control
+	m_macVerticalBorder = 5 ;
 	
 	MacPreControlCreate( parent , id ,  "" , pos , size ,style, validator , name , &bounds , title ) ;
 
@@ -68,7 +67,6 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
 	long	result ;
 	UMAGetControlData( m_macControl , kControlNoPart , kControlListBoxListHandleTag , sizeof( ListHandle ) , (char*) &m_macList  , &result ) ;
 
-	HLock( (Handle) m_macList ) ;
 	NewExtLDEFInfo( m_macList , MacDrawStringCell , (long) this ) ;
 	(**m_macList).selFlags = 0 ;
 	if ( style & wxLB_MULTIPLE )
@@ -111,11 +109,7 @@ bool wxListBox::Create(wxWindow *parent, wxWindowID id,
 wxListBox::~wxListBox()
 {
 	Free() ;
-	if ( m_macList )
-	{
-		DisposeExtLDEFInfo( m_macList ) ;
-		m_macList = NULL ;
-	}
+	DisposeExtLDEFInfo( m_macList ) ;
 }
 
 void wxListBox::Free()
@@ -162,7 +156,7 @@ void wxListBox::Delete(int N)
 #endif // wxUSE_OWNER_DRAWN/!wxUSE_OWNER_DRAWN
 	m_stringArray.Remove( N ) ;
 	m_dataArray.Remove( N ) ;
-	m_noItems --;
+  	m_noItems --;
 	
 	MacDelete( N ) ;
 }
@@ -173,12 +167,9 @@ int wxListBox::DoAppend(const wxString& item)
 	if( wxApp::s_macDefaultEncodingIsPC )
 	{
 		m_stringArray.Add( wxMacMakeMacStringFromPC( item ) ) ;
-		m_dataArray.Add( NULL );
 	}
-	else {
+	else
 		m_stringArray.Add( item ) ;
-		m_dataArray.Add( NULL );
-	}
  	m_noItems ++;
 	MacAppend( item ) ;
 
@@ -245,29 +236,19 @@ int wxListBox::FindString(const wxString& st) const
 	{
 		wxString search = s.Left( s.Length() - 1 ) ;
 		int len = search.Length() ;
-    	Str255 s1 , s2 ;
-	    strcpy( (char*) s2 , search.c_str() ) ;
-	    c2pstr( (char*) s2 ) ;
-    	for ( int i = 0 ; i < m_noItems ; ++ i )
-	    {
-	    	strcpy( (char*) s1 , m_stringArray[i].Left( len ).c_str() ) ;
-	    	c2pstr( (char*) s1 ) ;
-	    	if ( EqualString( s1 , s2 , false , false ) )
-	    		return i ;
-	    }
+    for ( int i = 0 ; i < m_noItems ; ++ i )
+    {
+    	if ( equalstring( m_stringArray[i].Left( len ) , search , false , false ) )
+    		return i ;
+    }
 	}
 	else
 	{
-    	Str255 s1 , s2 ;
-	    strcpy( (char*) s2 , s.c_str() ) ;
-	    c2pstr( (char*) s2 ) ;
-	    for ( int i = 0 ; i < m_noItems ; ++ i )
-	    {
-	    	strcpy( (char*) s1 , m_stringArray[i].c_str() ) ;
-	    	c2pstr( (char*) s1 ) ;
-	    	if ( EqualString( s1 , s2 , false , false ) )
-	    		return i ;
-	    }
+    for ( int i = 0 ; i < m_noItems ; ++ i )
+    {
+    	if ( equalstring( m_stringArray[i] , s , false , false ) )
+    		return i ;
+    }
    }
    return -1;
 }
@@ -327,7 +308,7 @@ void wxListBox::DoSetItemClientData(int N, void *Client_data)
 	if ( m_dataArray.GetCount() > N )
 	{
     	m_dataArray[N] = (char*) Client_data ;
-    }
+	}
     else
     {
     	m_dataArray.Add( (char*) Client_data ) ;
@@ -398,14 +379,7 @@ void wxListBox::DoInsertItems(const wxArrayString& items, int pos)
 
 void wxListBox::SetString(int N, const wxString& s)
 {
-	wxString str ;
-	if( wxApp::s_macDefaultEncodingIsPC )
-	{
-		str = wxMacMakeMacStringFromPC( s )  ;
-	}
-	else
-		str = s ;
-	m_stringArray[N] = str ;
+	m_stringArray[N] = s ;
 	MacSet( N , s ) ;
 }
 
@@ -565,7 +539,7 @@ void wxListBox::MacScrollTo( int n )
 void wxListBox::OnSize( const wxSizeEvent &event)
 {
 	Point pt = (**m_macList).cellSize ;
-	pt.h =  m_width - 15  ;
+	pt.h =  m_width - 15 /* scrollbar */ - m_macHorizontalBorder * 2 ;
 	LCellSize( pt , m_macList ) ;
 }
 

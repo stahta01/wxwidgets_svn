@@ -6,27 +6,19 @@
 
 #define WX_COMP_INLINE_NO_CLASS // defined if the compiler does not want the classname repeated for inlines within a class definition
 
-#if __MWERKS__ >= 0x2400
-#pragma old_argmatch on
-#endif
-
 #if (__MWERKS__ < 0x0900) || macintosh
     #define __MAC__
     #define __WXMAC__
     #if TARGET_CARBON
 	    #define	USE_PRECOMPILED_MAC_HEADERS	0  /*Set to 0 if you don't want to use precompiled MacHeaders*/
-		#include "MacHeaders.c"
-    	/*
-	    #define	USE_PRECOMPILED_MAC_HEADERS	0 
-	   		#ifdef __cplusplus
+			#ifdef __cplusplus
 					#include <MacHeadersPPCX++>
 			#else
 					#include <MacHeadersPPCX>
 			#endif
-			*/
-	#else
-    #define	USE_PRECOMPILED_MAC_HEADERS	1  /*Set to 0 if you don't want to use precompiled MacHeaders*/		
-    #endif
+		#else
+	    #define	USE_PRECOMPILED_MAC_HEADERS	1  /*Set to 0 if you don't want to use precompiled MacHeaders*/
+		#endif
 // automatically includes MacHeaders
 #elif (__MWERKS__ >= 0x0900) && __INTEL__
     #define __WXMSW__

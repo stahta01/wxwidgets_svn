@@ -31,7 +31,6 @@
   #include "wx/utils.h"
 #endif
 
-#include "wx/settings.h"
 #include "wx/ownerdrw.h"
 #include "wx/menuitem.h"
 
@@ -52,8 +51,6 @@ wxOwnerDrawn::wxOwnerDrawn(const wxString& str,
   m_bOwnerDrawn  = FALSE;
   m_nHeight      = 0;
   m_nMarginWidth = ms_nLastMarginWidth;
-  if (wxNORMAL_FONT)
-    m_font = * wxNORMAL_FONT;
 }
 
 #if defined(__WXMSW__) && defined(__WIN32__) && defined(SM_CXMENUCHECK)
@@ -73,7 +70,11 @@ bool wxOwnerDrawn::OnMeasureItem(size_t *pwidth, size_t *pheight)
   wxMemoryDC dc;
   dc.SetFont(GetFont());
 
-  wxString str = wxStripMenuCodes(m_strName);
+  // ## ugly...
+  wxChar *szStripped = new wxChar[m_strName.Len()];
+  wxStripMenuCodes((wxChar *)m_strName.c_str(), szStripped);
+  wxString str = szStripped;
+  delete [] szStripped;
 
   // # without this menu items look too tightly packed (at least under Windows)
   str += wxT('W'); // 'W' is typically the widest letter

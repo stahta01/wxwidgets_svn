@@ -65,7 +65,7 @@
 #undef __WXGTK127__
 
 /* Define this if your version of GTK+ is greater than 1.3 */
-#undef __WXGTK20__
+#undef __WXGTK13__
 
 /*
  * Define to 1 for Unix[-like] system
@@ -143,10 +143,6 @@
 #define wxUSE_ODBC 0
 #define wxODBC_FWD_ONLY_CURSORS 1
 #define wxODBC_BACKWARD_COMPATABILITY 0
-/*
- * Use freetype
- */
-#define wxUSE_FREETYPE 0
 /*
  * Use Threads
  */
@@ -273,6 +269,10 @@
  */
 #define wxUSE_NOTEBOOK 0
 /*
+ * Use wxPlot class
+ */
+#define wxUSE_PLOT 0
+/*
  * Use this control
  */
 #define wxUSE_RADIOBOX 0
@@ -361,20 +361,13 @@
 #define wxUSE_LONGLONG 0
 
 /*
- * Use geometry classes
- */
-#define wxUSE_GEOMETRY 0
-
-/*
  * Use wxFile class
  */
 #define wxUSE_FILE 0
-
 /*
  * Use wxTextFile class
  */
 #define wxUSE_TEXTFILE 0
-
 /*
  * Use log classes and logging functions
  */
@@ -710,9 +703,6 @@
 /* The number of bytes in a char.  */
 #undef SIZEOF_CHAR
 
-/* The number of bytes in a wchar_t.  */
-#undef SIZEOF_WCHAR_T
-
 /* The number of bytes in a int.  */
 #undef SIZEOF_INT
 
@@ -745,12 +735,6 @@
 
 /* Define if you have the nanosleep function.  */
 #undef HAVE_NANOSLEEP
-
-/* Define if you have the putenv function.  */
-#undef HAVE_PUTENV
-
-/* Define if you have the setenv function.  */
-#undef HAVE_SETENV
 
 /* Define if you have the shl_load function.  */
 #undef HAVE_SHL_LOAD
@@ -791,20 +775,11 @@
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
-/* Define if you have the <fcntl.h> header file.  */
-#undef HAVE_FCNTL_H
-
 /* Define if you have the <wchar.h> header file.  */
 #undef HAVE_WCHAR_H
 
 /* Define if you have the <wcstr.h> header file.  */
 #undef HAVE_WCSTR_H
-
-/* Define if you have the <iconv.h> header file.  */
-#undef HAVE_ICONV_H
-
-/* Define if you have the <langinfo.h> header file.  */
-#undef HAVE_LANGINFO_H
 
 /* Define this if you are using gtk and gdk contains support for X11R6 XIM */
 #undef HAVE_XIM

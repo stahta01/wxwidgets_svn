@@ -39,8 +39,6 @@ the list wraps, unlike a wxListBox.}
 \twocolitem{\windowstyle{wxLC\_SINGLE\_SEL}}{Single selection.}
 \twocolitem{\windowstyle{wxLC\_SORT\_ASCENDING}}{Sort in ascending order (must still supply a comparison callback in SortItems.}
 \twocolitem{\windowstyle{wxLC\_SORT\_DESCENDING}}{Sort in descending order (must still supply a comparison callback in SortItems.}
-\twocolitem{\windowstyle{wxLC\_HRULES}}{Draws light horizontal rules between rows in report mode.}
-\twocolitem{\windowstyle{wxLC\_VRULES}}{Draws light vertical rules between columns in report mode.}
 \end{twocollist}
 
 See also \helpref{window styles overview}{windowstyles}.
@@ -66,7 +64,6 @@ functions that take a \helpref{wxListEvent}{wxlistevent} argument.
 \twocolitem{{\bf EVT\_LIST\_KEY\_DOWN(id, func)}}{A key has been pressed.}
 \twocolitem{{\bf EVT\_LIST\_INSERT\_ITEM(id, func)}}{An item has been inserted.}
 \twocolitem{{\bf EVT\_LIST\_COL\_CLICK(id, func)}}{A column ({\bf m\_col}) has been left-clicked.}
-\twocolitem{{\bf EVT\_LIST\_ITEM\_RIGHT\_CLICK(id, func)}}{An item has been right-clicked.}
 \end{twocollist}%
 
 \wxheading{See also}
@@ -129,25 +126,6 @@ Arranges the items in icon or small icon view. This only has effect on Win32. {\
 \twocolitem{wxLIST\_ALIGN\_SNAP\_TO\_GRID}{Snap to grid.}
 \end{twocollist}
 
-\membersection{wxListCtrl::AssignImageList}\label{wxlistctrlassignimagelist}
-
-\func{void}{AssignImageList}{\param{wxImageList*}{ imageList}, \param{int }{which}}
-
-Sets the image list associated with the control and 
-takes ownership of it (i.e. the control will, unlike when using
-SetImageList, delete the list when destroyed). {\it which} is one of
-wxIMAGE\_LIST\_NORMAL, wxIMAGE\_LIST\_SMALL, wxIMAGE\_LIST\_STATE (the last is unimplemented).
-
-\wxheading{See also}
-
-\helpref{wxListCtrl::SetImageList}{wxlistctrlsetimagelist}
-
-\membersection{wxListCtrl::ClearAll}\label{wxlistctrlclearall}
-
-\func{void}{ClearAll}{}
-
-Deletes all items and all columns.
-
 \membersection{wxListCtrl::Create}\label{wxlistctrlcreate}
 
 \func{bool}{Create}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id},\rtfsp
@@ -155,6 +133,21 @@ Deletes all items and all columns.
 \param{long}{ style = wxLC\_ICON}, \param{const wxValidator\& }{validator = wxDefaultValidator}, \param{const wxString\& }{name = ``listCtrl"}}
 
 Creates the list control. See \helpref{wxListCtrl::wxListCtrl}{wxlistctrlconstr} for further details.
+
+\membersection{wxListCtrl::ClearAll}\label{wxlistctrlclearall}
+
+\func{void}{ClearAll}{}
+
+Deletes all items and all columns.
+
+\membersection{wxListCtrl::DeleteItem}\label{wxlistctrldeleteitem}
+
+\func{bool}{DeleteItem}{\param{long }{item}}
+
+Deletes the specified item. This function sends the
+{\tt wxEVT\_COMMAND\_LIST\_DELETE\_ITEM} event for the item being deleted.
+
+See also: \helpref{DeleteAllItems}{wxlistctrldeleteallitems}
 
 \membersection{wxListCtrl::DeleteAllItems}\label{wxlistctrldeleteallitems}
 
@@ -171,15 +164,6 @@ from the control would be too slow then (unlike \helpref{DeleteItem}{wxlistctrld
 \func{bool}{DeleteColumn}{\param{int }{col}}
 
 Deletes a column.
-
-\membersection{wxListCtrl::DeleteItem}\label{wxlistctrldeleteitem}
-
-\func{bool}{DeleteItem}{\param{long }{item}}
-
-Deletes the specified item. This function sends the
-{\tt wxEVT\_COMMAND\_LIST\_DELETE\_ITEM} event for the item being deleted.
-
-See also: \helpref{DeleteAllItems}{wxlistctrldeleteallitems}
 
 \membersection{wxListCtrl::EditLabel}\label{wxlistctrledit}
 
@@ -203,18 +187,21 @@ Ensures this item is visible.
 
 \func{long}{FindItem}{\param{long }{start}, \param{const wxString\& }{str}, \param{const bool }{partial = FALSE}}
 
-Find an item whose label matches this string, starting from the item after {\it start} or
-the beginning if {\it start} is -1.
+Find an item whose label matches this string, starting from the item 
+{\it start}.
 
 \func{long}{FindItem}{\param{long }{start}, \param{long }{data}}
 
-Find an item whose data matches this data, starting from the item after {\it start} or
-the beginning if 'start' is -1.
+Find an item whose data matches this data, starting from the item {\it start}.
 
 \func{long}{FindItem}{\param{long }{start}, \param{const wxPoint\& }{pt}, \param{int }{direction}}
 
 Find an item nearest this position in the specified direction, starting from
-the item after {\it start} or the beginning if {\it start} is -1.
+the item {\it start}.
+
+{\bf NB:} The meaning of parameters {\it start} has changed in wxMSW
+version 2.2.0, previously the item with this index was excluded from the
+search but it is included now.
 
 \pythonnote{In place of a single overloaded method name, wxPython
 implements the following methods:\par
@@ -280,12 +267,6 @@ before calling this method.
 for the item ID, an optional integer for the column number, and
 returns the wxListItem object.  }
 
-\membersection{wxListCtrl::GetItemCount}\label{wxlistctrlgetitemcount}
-
-\constfunc{int}{GetItemCount}{\void}
-
-Returns the number of items in the list control.
-
 \membersection{wxListCtrl::GetItemData}\label{wxlistctrlgetitemdata}
 
 \constfunc{long}{GetItemData}{\param{long }{item}}
@@ -312,14 +293,6 @@ Returns the rectangle representing the item's size and position, in client coord
 \pythonnote{The wxPython version of this method accepts only the item
 ID and code and returns the wxRect.}
 
-\membersection{wxListCtrl::GetItemSpacing}\label{wxlistctrlgetitemspacing}
-
-\constfunc{int}{GetItemSpacing}{\param{bool }{isSmall}}
-
-Retrieves the spacing between icons in pixels.
-If {\it small} is TRUE, gets the spacing for the small icon
-view, otherwise the large icon view.
-
 \membersection{wxListCtrl::GetItemState}\label{wxlistctrlgetitemstate}
 
 \constfunc{int}{GetItemState}{\param{long }{item}, \param{long }{stateMask}}
@@ -327,6 +300,20 @@ view, otherwise the large icon view.
 Gets the item state. For a list of state flags, see \helpref{wxListCtrl::SetItem}{wxlistctrlsetitem}.
 
 The {\bf stateMask} indicates which state flags are of interest.
+
+\membersection{wxListCtrl::GetItemCount}\label{wxlistctrlgetitemcount}
+
+\constfunc{int}{GetItemCount}{\void}
+
+Returns the number of items in the list control.
+
+\membersection{wxListCtrl::GetItemSpacing}\label{wxlistctrlgetitemspacing}
+
+\constfunc{int}{GetItemSpacing}{\param{bool }{isSmall}}
+
+Retrieves the spacing between icons in pixels.
+If {\it small} is TRUE, gets the spacing for the small icon
+view, otherwise the large icon view.
 
 \membersection{wxListCtrl::GetItemText}\label{wxlistctrlgetitemtext}
 
@@ -535,14 +522,6 @@ In small or normal icon view, {\it col} must be -1, and the column width is set 
 
 Sets the image list associated with the control. {\it which} is one of
 wxIMAGE\_LIST\_NORMAL, wxIMAGE\_LIST\_SMALL, wxIMAGE\_LIST\_STATE (the last is unimplemented).
-
-This method does not take ownership of the image list, you have to
-delete it yourself.
-
-\wxheading{See also}
-
-\helpref{wxListCtrl::AssignImageList}{wxlistctrlassignimagelist}
-
 
 \membersection{wxListCtrl::SetItem}\label{wxlistctrlsetitem}
 

@@ -40,6 +40,7 @@ class wxStaticBoxSizer;
 
 class WXDLLEXPORT wxSizerItem: public wxObject
 {
+    DECLARE_CLASS(wxSizerItem);
 public:
     // spacer
     wxSizerItem( int width, int height, int option, int flag, int border, wxObject* userData);
@@ -55,7 +56,7 @@ public:
     virtual wxSize GetSize();
     virtual wxSize CalcMin();
     virtual void SetDimension( wxPoint pos, wxSize size );
-
+    
     wxSize GetMinSize()
         { return m_minSize; }
 
@@ -67,7 +68,7 @@ public:
         { m_ratio = (size.x && size.y) ? ((float) size.x / (float) size.y) : 1; }
     void SetRatio( float ratio ) 
         { m_ratio = ratio; }
-    float GetRatio() const 
+    float GetRatio() const
         { return m_ratio; }
 
     bool IsWindow();
@@ -111,14 +112,14 @@ protected:
     int          m_option;
     int          m_border;
     int          m_flag;
+    
     // als: aspect ratio can always be calculated from m_size,
     //      but this would cause precision loss when the window
     //      is shrinked.  it is safer to preserve initial value.
     float        m_ratio;
+    
+    // user data for shadow objects
     wxObject    *m_userData;
-  
-private:
-    DECLARE_CLASS(wxSizerItem);
 };
 
 //---------------------------------------------------------------------------

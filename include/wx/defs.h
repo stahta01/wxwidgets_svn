@@ -224,13 +224,8 @@
 #include "wx/setup.h"
 
 // just in case they were defined in setup.h
-#ifdef PACKAGE
 #undef PACKAGE
-#endif
-
-#ifdef VERSION
 #undef VERSION
-#endif
 
 // this has to be done after including setup.h which might
 // define __HPUX__ 1 itself
@@ -867,9 +862,6 @@ enum wxStretch
 // splitter windows, but can't be used in a panel where a static box must be
 // 'transparent' (panel paints the background for it)
 #define wxCLIP_CHILDREN         0x00400000
-// Note we're reusing the wxCAPTION style because we won't need captions
-// for subwindows/controls
-#define wxCLIP_SIBLINGS         0x20000000
 
 // Add this style to a panel to get tab traversal working outside of dialogs
 // (on by default for wxPanel, wxDialog, wxScrolledWindow)
@@ -912,24 +904,15 @@ enum wxStretch
 #define wxTINY_CAPTION_VERT     0x0080
 #define wxRESIZE_BORDER         0x0040
 
-#define wxDIALOG_NO_PARENT      0x0001  // Don't make owned by apps top window
-#define wxFRAME_NO_TASKBAR      0x0002  // No taskbar button (MSW only)
-#define wxFRAME_TOOL_WINDOW     0x0004  // No taskbar button, no system menu
-
 // deprecated versions defined for compatibility reasons
 #define wxRESIZE_BOX            wxMAXIMIZE_BOX
 #define wxTHICK_FRAME           wxRESIZE_BORDER
 
-// obsolete styles, unused any more
 #define wxDIALOG_MODAL          0x0020
 #define wxDIALOG_MODELESS       0x0000
 
-// deprecated flag, don't use any more, defined for compatibility only
-#define wxFRAME_FLOAT_ON_PARENT 0
-
-// Context-sensitive help
-#define wxFRAME_EX_CONTEXTHELP  0x00000004
-#define wxDIALOG_EX_CONTEXTHELP 0x00000004
+// Add for normal Windows frame behaviour
+#define wxFRAME_FLOAT_ON_PARENT 0x0020
 
 /*
  * MDI parent frame style flags
@@ -1110,8 +1093,6 @@ enum wxStretch
 /*
  * wxListCtrl flags
  */
-#define wxLC_VRULES          0x0001
-#define wxLC_HRULES          0x0002
 #define wxLC_ICON            0x0004
 #define wxLC_SMALL_ICON      0x0008
 #define wxLC_LIST            0x0010
@@ -1160,6 +1141,12 @@ enum wxStretch
 #define wxSP_3DBORDER         0x0200
 #define wxSP_FULLSASH         0x0400
 #define wxSP_3D               (wxSP_3DBORDER | wxSP_3DSASH)
+
+/*
+ * wxFrame extra flags
+ */
+// No title on taskbar
+#define wxFRAME_TOOL_WINDOW 0x0004
 
 /*
  * wxTabCtrl flags
@@ -1314,12 +1301,6 @@ enum wxStretch
 #define wxID_MORE               5109
 #define wxID_SETUP              5110
 #define wxID_RESET              5111
-#define wxID_CONTEXT_HELP       5112
-#define wxID_YESTOALL           5113
-#define wxID_NOTOALL            5114
-#define wxID_ABORT              5115
-#define wxID_RETRY              5116
-#define wxID_IGNORE             5117
 
 // IDs used by generic file dialog (11 consecutive starting from this value)
 #define wxID_FILEDLGG           5900
@@ -1697,16 +1678,9 @@ typedef enum {
     wxPRINT_MODE_PRINTER = 3    // Send to printer
 } wxPrintMode;
 
-// ----------------------------------------------------------------------------
-// miscellaneous
-// ----------------------------------------------------------------------------
-
-// define this macro if font handling is done using the X font names
-#if defined(__WXGTK__) || defined(__X__)
-    #define _WX_X_FONTLIKE
-#endif
-
-// macro to specify "All Files" on different platforms
+// ---------------------------------------------------------------------------
+// Macro to specify "All Files" on different platforms
+// ---------------------------------------------------------------------------
 #if defined(__WXMSW__)
 #   define wxALL_FILES_PATTERN   "*.*"
 #   define wxALL_FILES           gettext_noop("All files (*.*)|*.*")
@@ -1714,7 +1688,6 @@ typedef enum {
 #   define wxALL_FILES_PATTERN   "*"
 #   define wxALL_FILES           gettext_noop("All files (*)|*")
 #endif
-
 // ---------------------------------------------------------------------------
 // macros that enable wxWindows apps to be compiled in absence of the
 // sytem headers, although some platform specific types are used in the
@@ -1820,7 +1793,7 @@ typedef void *          WXLPCREATESTRUCT;
 typedef unsigned long   WXMPARAM;
 typedef unsigned long   WXMSGID;
 typedef void*           WXRESULT;
-//typedef int             (*WXFARPROC)();
+// typedef WXRESULT        (*WXFARPROC)(WXHWND, WXMSGID, WXMPARAM, WXMPARAM);
 // some windows handles not defined by PM
 typedef unsigned long   HANDLE;
 typedef unsigned long   HICON;
@@ -1839,7 +1812,7 @@ typedef unsigned short  WORD;
 // WIN32 graphics types for OS/2 GPI
 
 // RGB under OS2 is more like a PALETTEENTRY struct under Windows so we need a real RGB def
-#define OS2RGB(r,g,b) ((DWORD ((BYTE) (b) | ((WORD) (g) << 8)) | (((DWORD)(BYTE)(r)) << 16)))
+#define OS2RGB(r,g,b) ((DWORD ((BYTE) (r) | ((WORD) (g) << 8)) | (((DWORD)(BYTE)(b)) << 16)))
 
 typedef unsigned long COLORREF;
 #define GetBValue(rgb) ((BYTE)((rgb) >> 16))

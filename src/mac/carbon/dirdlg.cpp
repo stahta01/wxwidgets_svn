@@ -20,9 +20,19 @@
 
 #include "wx/cmndata.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_CLASS(wxDirDialog, wxDialog)
-#endif
+
+enum {
+	kSelectItem = 10, 			// select button item number
+	kSFGetFolderDlgID = 250,	// dialog resource number
+	kStrListID = 250,			// our strings
+	kSelectStrNum = 1,			// word 'Select: ' for button
+	kDesktopStrNum = 2,			// word 'Desktop' for button
+	kSelectNoQuoteStrNum = 3,	// word 'Select: ' for button
+	
+	kUseQuotes = true,			// parameter for SetButtonName
+	kDontUseQuotes = false
+};
 
 // the data we need to pass to our standard file hook routine
 // includes a pointer to the dialog, a pointer to the standard
@@ -37,21 +47,6 @@ struct UserDataRec {
 };
 typedef struct UserDataRec
 	UserDataRec, *UserDataRecPtr;
-
-#if !TARGET_CARBON
-
-enum {
-	kSelectItem = 10, 			// select button item number
-	kSFGetFolderDlgID = 250,	// dialog resource number
-	kStrListID = 250,			// our strings
-	kSelectStrNum = 1,			// word 'Select: ' for button
-	kDesktopStrNum = 2,			// word 'Desktop' for button
-	kSelectNoQuoteStrNum = 3,	// word 'Select: ' for button
-	
-	kUseQuotes = true,			// parameter for SetButtonName
-	kDontUseQuotes = false
-};
-
 
 static void GetLabelString(StringPtr theStr, short stringNum)
 {
@@ -307,7 +302,6 @@ static pascal short SFGetFolderDialogHook(short item, DialogPtr theDlgPtr, Ptr d
 	
 	return item;
 }
-#endif
 
 void StandardGetFolder( ConstStr255Param message , ConstStr255Param path , FileFilterYDUPP fileFilter, StandardFileReply *theSFR)
 {
@@ -327,15 +321,13 @@ void StandardGetFolder( ConstStr255Param message , ConstStr255Param path , FileF
 	
 	// set initial contents of Select button to a space
 	
-	memcpy(theSFR->sfFile.name, "\p ", 2);
+	CopyPStr("\p ", theSFR->sfFile.name);
 	
 	// point the user data parameter at the reply record so we can get to it later
 	
 	myData.sfrPtr = theSFR;
 	
 	// display the dialog
-	
-	#if !TARGET_CARBON
 	
 	dlgHookUPP = NewDlgHookYDProc(SFGetFolderDialogHook);
 	myModalFilterUPP = NewModalFilterYDProc(SFGetFolderModalDialogFilter);
@@ -358,8 +350,6 @@ void StandardGetFolder( ConstStr255Param message , ConstStr255Param path , FileF
 					
 	DisposeRoutineDescriptor(dlgHookUPP);
 	DisposeRoutineDescriptor(myModalFilterUPP);
-	#else
-	#endif
 	
 	// if cancel wasn't pressed and no fatal error occurred...
 	
@@ -455,18 +445,14 @@ int wxDirDialog::ShowModal()
 		strcpy((char *)path, m_path ) ;
 		c2pstr((char *)path ) ;
 
+		FileFilterYDUPP 	invisiblesExcludedCustomFilterUPP;
 		StandardFileReply	reply ;
-		FileFilterYDUPP 	invisiblesExcludedCustomFilterUPP = 0 ;
-		#if !TARGET_CARBON
 		invisiblesExcludedCustomFilterUPP = 
 			NewFileFilterYDProc(OnlyVisibleFoldersCustomFileFilter);
-		#endif
 
 		StandardGetFolder( prompt , path , invisiblesExcludedCustomFilterUPP, &reply);
 	
-		#if !TARGET_CARBON
 		DisposeRoutineDescriptor(invisiblesExcludedCustomFilterUPP);
-		#endif
 		if ( reply.sfGood == false )
 		{
 			m_path = "" ;

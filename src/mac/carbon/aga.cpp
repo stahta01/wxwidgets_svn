@@ -1,8 +1,5 @@
 #include <wx/mac/uma.h>
 #include <wx/mac/aga.h>
-
-#if !TARGET_CARBON
-
 #include <extcdef.h>
 #include <PictUtils.h>
 
@@ -20,151 +17,151 @@ SInt16 kAGARootControlProcID ;
 int gAGABackgroundColor = 0 ;
 
 const RGBColor gAGAColorArray[] = {	{0xFFFF, 0xFFFF, 0xFFFF},		//	W
-					{0xEEEE, 0xEEEE, 0xEEEE}, 	//	1
-					{0xDDDD, 0xDDDD, 0xDDDD}, 	//	2
-					{0xCCCC, 0xCCCC, 0xCCCC}, 	//	3
-					{0xBBBB, 0xBBBB, 0xBBBB}, 	//	4
-					{0xAAAA, 0xAAAA, 0xAAAA}, 	//	5
-					{0x9999, 0x9999, 0x9999}, 	//	6
-					{0x8888, 0x8888, 0x8888},		//	7
-					{0x7777, 0x7777, 0x7777},		//	8
-					{0x6666, 0x6666, 0x6666},		//	9
-					{0x5555, 0x5555, 0x5555},		//	10
-					{0x4444, 0x4444, 0x4444},		//	11
-					{0x2222, 0x2222, 0x2222},		//	12
-					{0x0000, 0x0000, 0x0000}		//	B
-};
+																		{0xEEEE, 0xEEEE, 0xEEEE}, 	//	1
+																		{0xDDDD, 0xDDDD, 0xDDDD}, 	//	2
+																		{0xCCCC, 0xCCCC, 0xCCCC}, 	//	3
+																		{0xBBBB, 0xBBBB, 0xBBBB}, 	//	4
+																		{0xAAAA, 0xAAAA, 0xAAAA}, 	//	5
+																		{0x9999, 0x9999, 0x9999}, 	//	6
+																		{0x8888, 0x8888, 0x8888},		//	7
+																		{0x7777, 0x7777, 0x7777},		//	8
+																		{0x6666, 0x6666, 0x6666},		//	9
+																		{0x5555, 0x5555, 0x5555},		//	10
+																		{0x4444, 0x4444, 0x4444},		//	11
+																		{0x2222, 0x2222, 0x2222},		//	12
+																		{0x0000, 0x0000, 0x0000}		//	B
+																	};
 
 char LAGADefaultOutline_mCorners[4][5][5] =	{
-  //	topleft
-  {
-    { -1, -1, -1, 12,  B },
-    { -1, -1,  B,  2,  2 },
-    { -1,  B,  2,  2,  5 },
-    { 12,  2,  2,  2,  8 },
-    {  B,  2,  5,  8, -1 }
-  },
-  //	topright
-  {
-    {  B, 12, -1, -1, -1 },
-    {  2,  3,  B, -1, -1 },
-    {  5,  5,  4,  B, -1 },
-    {  8,  5,  5,  7, 12 },
-    { -1,  8,  5,  8,  B }
-  },
-  //	bottomleft
-  {
-    {  B,  2,  5,  8, -1 },
-    { 12,  3,  5,  5,  8 },
-    { -1,  B,  4,  5,  5 },
-    { -1, -1,  B,  7,  8 },
-    { -1, -1, -1, 12,  B }
-  },
-  //	bottomright
-  {
-    { -1,  8,  5,  8,  B },
-    {  8,  5,  7,  8, 12 },
-    {  5,  7,  8,  B, -1 },
-    {  8,  8,  B, -1, -1 },
-    {  B, 12, -1, -1, -1 }
-  }
-};
+																								//	topleft
+																								{
+																									{ -1, -1, -1, 12,  B },
+																									{ -1, -1,  B,  2,  2 },
+																									{ -1,  B,  2,  2,  5 },
+																									{ 12,  2,  2,  2,  8 },
+																									{  B,  2,  5,  8, -1 }
+																								},
+																								//	topright
+																								{
+																									{  B, 12, -1, -1, -1 },
+																									{  2,  3,  B, -1, -1 },
+																									{  5,  5,  4,  B, -1 },
+																									{  8,  5,  5,  7, 12 },
+																									{ -1,  8,  5,  8,  B }
+																								},
+																								//	bottomleft
+																								{
+																									{  B,  2,  5,  8, -1 },
+																									{ 12,  3,  5,  5,  8 },
+																									{ -1,  B,  4,  5,  5 },
+																									{ -1, -1,  B,  7,  8 },
+																									{ -1, -1, -1, 12,  B }
+																								},
+																								//	bottomright
+																								{
+																									{ -1,  8,  5,  8,  B },
+																									{  8,  5,  7,  8, 12 },
+																									{  5,  7,  8,  B, -1 },
+																									{  8,  8,  B, -1, -1 },
+																									{  B, 12, -1, -1, -1 }
+																								}
+																							};
 
 char LAGAPushButton_mCorners[3][4][4][4] =	{
-  //	Enabled
-  {
-    //	topleft
-    {
-      { -1, -1, 12,  B },
-      { -1,  B,  4,  2 },
-      { 12,  4,  W,  W },
-      {  B,  2,  W,  W }
-    },
-    //	topright
-    {
-      {  B, 12, -1, -1 },
-      {  2,  4,  B, -1 },
-      {  W,  2,  5, 12 },
-      {  2,  5,  8,  B }
-    },
-    //	bottomleft
-    {
-      {  B,  2,  W,  2 },
-      { 12,  4,  2,  5 },
-      { -1,  B,  4,  8 },
-      { -1, -1, 12,  B }
-    },
-    //	bottomright
-    {
-      {  5,  5,  8,  B },
-      {  5,  8,  8, 12 },
-      {  8,  8,  B, -1 },
-      {  B, 12, -1, -1 }
-    }
-  },
-  //	Pressed
-  {
-    //	topleft
-    {
-      { -1, -1, 12,  B },
-      { -1,  B, 10,  8 },
-      { 12, 10,  8,  4 },
-      {  B,  8,  4,  4 }
-    },
-    //	topright
-    {
-      {  B, 12, -1, -1 },
-      {  8, 10,  B, -1 },
-      {  4,  4,  8, 12 },
-      {  4,  4,  4,  B }
-    },
-    //	bottomleft
-    {
-      {  B,  8,  4,  4 },
-      { 12, 10,  4,  4 },
-      { -1,  B, 10,  4 },
-      { -1, -1, 12,  B }
-    },
-    //	bottomright
-    {
-      {  4,  4,  4,  B },
-      {  4,  4, 10, 12 },
-      {  4, 10,  B, -1 },
-      {  B, 12, -1, -1 }
-    }
-  },
-  //	Disabled
-  {
-    //	topleft
-    {
-      { -1, -1,  7,  7 },
-      { -1,  7,  4,  2 },
-      {  7,  4,  1,  1 },
-      {  7,  2,  1,  1 }
-    },
-    //	topright
-    {
-      {  7,  7, -1, -1 },
-      {  2,  4,  7, -1 },
-      {  1,  2,  4,  7 },
-      {  2,  4,  5,  7 }
-    },
-    //	bottomleft
-    {
-      {  7,  2,  1,  2 },
-      {  7,  4,  2,  4 },
-      { -1,  7,  4,  5 },
-      { -1, -1,  7,  7 }
-    },
-    //	bottomright
-    {
-      {  4,  4,  5,  7 },
-      {  4,  5,  5,  7 },
-      {  5,  5,  7, -1 },
-      {  7,  7, -1, -1 }
-    }
-  }
-};
+																							//	Enabled
+																							{
+																								//	topleft
+																								{
+																									{ -1, -1, 12,  B },
+																									{ -1,  B,  4,  2 },
+																									{ 12,  4,  W,  W },
+																									{  B,  2,  W,  W }
+																								},
+																								//	topright
+																								{
+																									{  B, 12, -1, -1 },
+																									{  2,  4,  B, -1 },
+																									{  W,  2,  5, 12 },
+																									{  2,  5,  8,  B }
+																								},
+																								//	bottomleft
+																								{
+																									{  B,  2,  W,  2 },
+																									{ 12,  4,  2,  5 },
+																									{ -1,  B,  4,  8 },
+																									{ -1, -1, 12,  B }
+																								},
+																								//	bottomright
+																								{
+																									{  5,  5,  8,  B },
+																									{  5,  8,  8, 12 },
+																									{  8,  8,  B, -1 },
+																									{  B, 12, -1, -1 }
+																								}
+																							},
+																							//	Pressed
+																							{
+																								//	topleft
+																								{
+																									{ -1, -1, 12,  B },
+																									{ -1,  B, 10,  8 },
+																									{ 12, 10,  8,  4 },
+																									{  B,  8,  4,  4 }
+																								},
+																								//	topright
+																								{
+																									{  B, 12, -1, -1 },
+																									{  8, 10,  B, -1 },
+																									{  4,  4,  8, 12 },
+																									{  4,  4,  4,  B }
+																								},
+																								//	bottomleft
+																								{
+																									{  B,  8,  4,  4 },
+																									{ 12, 10,  4,  4 },
+																									{ -1,  B, 10,  4 },
+																									{ -1, -1, 12,  B }
+																								},
+																								//	bottomright
+																								{
+																									{  4,  4,  4,  B },
+																									{  4,  4, 10, 12 },
+																									{  4, 10,  B, -1 },
+																									{  B, 12, -1, -1 }
+																								}
+																							},
+																							//	Disabled
+																							{
+																								//	topleft
+																								{
+																									{ -1, -1,  7,  7 },
+																									{ -1,  7,  4,  2 },
+																									{  7,  4,  1,  1 },
+																									{  7,  2,  1,  1 }
+																								},
+																								//	topright
+																								{
+																									{  7,  7, -1, -1 },
+																									{  2,  4,  7, -1 },
+																									{  1,  2,  4,  7 },
+																									{  2,  4,  5,  7 }
+																								},
+																								//	bottomleft
+																								{
+																									{  7,  2,  1,  2 },
+																									{  7,  4,  2,  4 },
+																									{ -1,  7,  4,  5 },
+																									{ -1, -1,  7,  7 }
+																								},
+																								//	bottomright
+																								{
+																									{  4,  4,  5,  7 },
+																									{  4,  5,  5,  7 },
+																									{  5,  5,  7, -1 },
+																									{  7,  7, -1, -1 }
+																								}
+																							}
+																						};
 
 RGBColor gAGARamp[] =
 {
@@ -603,10 +600,6 @@ void AGADeactivateControl( ControlHandle inControl )
 			}
 		}
 	}
-	else
-	{
-		::HiliteControl( inControl , 255 ) ;
-	}
 }
 
 void AGAActivateControl( ControlHandle inControl ) 
@@ -621,10 +614,6 @@ void AGAActivateControl( ControlHandle inControl )
 				info->defProc( info->procID , inControl , kControlMsgActivate , 1 ) ;
 			}
 		}
-	}
-	else
-	{
-		::HiliteControl( inControl , 0 ) ;
 	}
 }
 
@@ -729,7 +718,6 @@ void DisposeExtCDEFInfo( ControlHandle theControl)
 			DisposeHandle( info->children ) ;
 			info->children = NULL ;
 			free( (void*) (**theControl).contrlRfCon ) ;
-			(**theControl).contrlRfCon = NULL ;
 		}
 	}
 }
@@ -934,6 +922,51 @@ void AGASetFontStyle( ControlFontStyleRec *fontstyle )
 		::RGBBackColor( &fontstyle->backColor ) ;
 } ;
 
+class AGAPortHelper 
+{
+public :
+	AGAPortHelper() 
+	{
+		GetPenState( &oldPenState ) ;
+		GetBackColor( &oldBackColor ) ;
+		GetForeColor( &oldForeColor ) ;
+
+		GetPort( &port ) ;
+		clip = NewRgn() ;
+		GetClip( clip );
+		font = port->txFont;
+		size = port->txSize;
+		style = port->txFace;
+		mode = port->txMode;	
+
+	}
+	~AGAPortHelper()
+	{
+			SetPort( port ) ;
+			SetClip( clip ) ;
+			DisposeRgn( clip ) ;
+			RGBForeColor(&oldForeColor);
+			RGBBackColor(&oldBackColor);
+			SetPenState(&oldPenState);				
+
+			TextFont( font );
+			TextSize( size );
+			TextFace( style );
+			TextMode( mode );
+	}
+
+private :
+				GrafPtr			port ;
+				PenState		oldPenState ;
+				RGBColor		oldForeColor ;
+				RGBColor		oldBackColor ;
+				RgnHandle		clip ;
+				short				font ;
+				short				size ;
+				short				style ;
+				short 			mode ;
+} ;
+
 pascal SInt32 AGAProgressBarDefProc (SInt16 procID, ControlHandle theControl, ControlDefProcMessage message, SInt32 param)
 {	
 	switch( message )
@@ -1046,7 +1079,7 @@ pascal SInt32 AGABevelButtonDefProc (SInt16 procID, ControlHandle theControl, Co
 					return 0 ;
 					
 				{
-					AGAPortHelper help((**theControl).contrlOwner) ;
+					AGAPortHelper help() ;
 					AGASetFontStyle( &info->fontStyle ) ;
 					Boolean mRadioBehavior = false ;
 					
@@ -1186,7 +1219,7 @@ pascal SInt32 AGAButtonDefProc (SInt16 procID, ControlHandle theControl, Control
 					return 0 ;
 					
 				{
-					AGAPortHelper help((**theControl).contrlOwner) ;
+					AGAPortHelper help() ;
 					AGASetFontStyle( &info->fontStyle ) ;
 					Boolean mRadioBehavior = false ;
 					
@@ -1423,7 +1456,7 @@ pascal SInt32 AGACheckBoxDefProc (SInt16 procID, ControlHandle theControl, Contr
 						return 0 ;
 						
 					{
-						AGAPortHelper help((**theControl).contrlOwner) ;
+						AGAPortHelper help() ;
 						Rect frame =  (**theControl).contrlRect ;
 						Boolean hasColor = true;
 						Boolean disabled = (*theControl)->contrlHilite == 255 ;
@@ -1811,7 +1844,7 @@ pascal SInt32 AGAStaticGroupBoxTextDefProc (SInt16 procID, ControlHandle theCont
 				{
 					bool disabled = false ;
 					bool hasColor = true ;
-					AGAPortHelper help((**theControl).contrlOwner) ;
+					AGAPortHelper help() ;
 					AGASetFontStyle( &info->fontStyle ) ;
 					FontInfo fi ;
 					::GetFontInfo( &fi ) ;
@@ -1897,7 +1930,7 @@ pascal SInt32 AGAStaticTextDefProc (SInt16 procID, ControlHandle theControl, Con
 					return 0 ;
 					
 				{
-					AGAPortHelper help((**theControl).contrlOwner) ;
+					AGAPortHelper help() ;
 					AGASetFontStyle( &info->fontStyle ) ;
 					int x =	(**theControl).contrlRect.left ;
 					int y =	(**theControl).contrlRect.top ;
@@ -2092,7 +2125,7 @@ pascal SInt32 AGAEditTextDefProc (SInt16 procID, ControlHandle theControl, Contr
 	{
 		case initCntl :
 			{
-				AGAPortHelper help((**theControl).contrlOwner) ;
+				AGAPortHelper help() ;
 				SetPort( (**theControl).contrlOwner ) ;
 				::TextFont( kFontIDGeneva ) ; 
 				::TextSize( 10 ) ;
@@ -2114,7 +2147,7 @@ pascal SInt32 AGAEditTextDefProc (SInt16 procID, ControlHandle theControl, Contr
 			break ;
 		case drawCntl :
 			{
-				AGAPortHelper help((**theControl).contrlOwner) ;
+				AGAPortHelper help() ;
 				AGASetFontStyle( &info->fontStyle ) ;
 				SetPort( (**theControl).contrlOwner ) ;
 				RGBBackColor( &gAGARamp[ kAGAWhite ] ) ;
@@ -2221,8 +2254,9 @@ pascal SInt32 AGAEditTextDefProc (SInt16 procID, ControlHandle theControl, Contr
 			break ;
 		case kControlMsgKeyDown :
 			{
-				AGAPortHelper help( (**theControl).contrlOwner ) ;
+				AGAPortHelper help() ;
 				AGASetFontStyle( &info->fontStyle ) ;
+				SetPort( (**theControl).contrlOwner ) ;
 				RGBBackColor( &gAGARamp[ kAGAWhite ] ) ;
 				RGBForeColor( &gAGARamp[ kAGABlack ] ) ;
 				ControlKeyDownRec * rec = (ControlKeyDownRec*) param ;
@@ -2330,7 +2364,7 @@ pascal SInt32 AGAListControlDefProc (SInt16 procID, ControlHandle theControl, Co
 			break ;
 		case drawCntl :
 			{
-				AGAPortHelper help((**theControl).contrlOwner) ;
+				AGAPortHelper help() ;
 				AGASetFontStyle( &info->fontStyle ) ;
 				RGBBackColor( &gAGARamp[ kAGAWhite ] ) ;
 				EraseRect( &(**theControl).contrlRect ) ;
@@ -2544,78 +2578,4 @@ void			AGASetThemeWindowBackground		(WindowRef 				inWindow,
 	SetPort( port ) ;
 }
 
-void AGAApplyThemeBackground(ThemeBackgroundKind 	inKind,
-								 const Rect *			bounds,
-								 ThemeDrawState 		inState,
-								 SInt16 				inDepth,
-								 Boolean 				inColorDev) 
-{
-}
-
-#endif
-AGAPortHelper::AGAPortHelper( GrafPtr newport) 
-{
-	GetPort( &port ) ;
-	SetPort( newport ) ;
-//	wxASSERT( newport->portRect.left == 0 && newport->portRect.top == 0 ) ; 
-	GetPenState( &oldPenState ) ;
-	GetBackColor( &oldBackColor ) ;
-	GetForeColor( &oldForeColor ) ;
-
-	clip = NewRgn() ;
-	GetClip( clip );
-	font = GetPortTextFont( newport);
-	size = GetPortTextSize( newport);
-	style = GetPortTextFace( newport);
-	mode = GetPortTextMode( newport);	
-	nport = newport ;
-
-}
-AGAPortHelper::AGAPortHelper()
-{
-	clip = NULL ;
-}
-void AGAPortHelper::Setup( GrafPtr newport )
-{
-	GetPort( &port ) ;
-	SetPort( newport ) ;
-//	wxASSERT( newport->portRect.left == 0 && newport->portRect.top == 0 ) ; 
-	GetPenState( &oldPenState ) ;
-	GetBackColor( &oldBackColor ) ;
-	GetForeColor( &oldForeColor ) ;
-
-	clip = NewRgn() ;
-	GetClip( clip );
-	font = GetPortTextFont( newport);
-	size = GetPortTextSize( newport);
-	style = GetPortTextFace( newport);
-	mode = GetPortTextMode( newport);	
-	nport = newport ;
-}
-void AGAPortHelper::Clear()
-{
-	if ( clip )
-	{
-		DisposeRgn( clip ) ;
-		clip = NULL ;
-	}
-}
-AGAPortHelper::~AGAPortHelper()
-{
-	if ( clip )
-	{
-		SetPort( nport ) ;
-		SetClip( clip ) ;
-		DisposeRgn( clip ) ;
-		RGBForeColor(&oldForeColor);
-		RGBBackColor(&oldBackColor);
-		SetPenState(&oldPenState);				
-
-		TextFont( font );
-		TextSize( size );
-		TextFace( style );
-		TextMode( mode );
-		SetPort( port ) ;
-	}
-}
 

@@ -9,7 +9,7 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1996 Remstar International, Inc.
 // Licence:     wxWindows licence, plus:
-// Notice:      This class library and its intellectual design are free of charge for use,
+// Notice:        This class library and its intellectual design are free of charge for use,
 //              modification, enhancement, debugging under the following conditions:
 //              1) These classes may only be used as part of the implementation of a
 //                 wxWindows-based application
@@ -50,10 +50,6 @@ const int   wxDB_DEFAULT_CURSOR  = 0;
 const bool  wxDB_QUERY_ONLY      = TRUE;
 const bool  wxDB_DISABLE_VIEW    = TRUE;
 
-// Used to indicate end of a variable length list of
-// column numbers passed to member functions
-const int   wxDB_NO_MORE_COLUMN_NUMBERS = -1;
-
 // The following class is used to define a column of a table.
 // The wxDbTable constructor will dynamically allocate as many of
 // these as there are columns in the table.  The class derived
@@ -65,7 +61,7 @@ const int   wxDB_NO_MORE_COLUMN_NUMBERS = -1;
 class WXDLLEXPORT wxDbColDef
 {
 public:
-    wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
+    char    ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
     int     DbDataType;                         // Logical Data Type; e.g. DB_DATA_TYPE_INTEGER
     int     SqlCtype;                           // C data type; e.g. SQL_C_LONG
     void   *PtrDataObj;                         // Address of the data object
@@ -76,10 +72,6 @@ public:
     bool    DerivedCol;                         // Specifies whether this column is a derived value
     SDWORD  CbValue;                            // Internal use only!!!
     bool    Null;                               // NOT FULLY IMPLEMENTED - Allows NULL values in Inserts and Updates
-
-    wxDbColDef();
-
-    bool    Initialize();
 };  // wxDbColDef
 
 
@@ -96,8 +88,8 @@ public:
 class WXDLLEXPORT wxDbIdxDef
 {
 public:
-    wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];
-    bool    Ascending;
+    char ColName[DB_MAX_COLUMN_NAME_LEN+1];
+    bool Ascending;
 };  // wxDbIdxDef
 
 
@@ -111,19 +103,13 @@ private:
     bool        insertable;
 
     // Private member functions
-    bool        initialize(wxDb *pwxDb, const wxString &tblName, const int nCols,
-                       const wxString &qryTblName, bool qryOnly, const wxString &tblPath);
-    void        cleanup();
-
-    bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
     bool        bindInsertParams(void);
     bool        bindUpdateParams(void);
-
     bool        bindCols(HSTMT cursor);
     bool        getRec(UWORD fetchType);
-    bool        execDelete(const wxString &pSqlStmt);
-    bool        execUpdate(const wxString &pSqlStmt);
-    bool        query(int queryType, bool forUpdate, bool distinct, const wxString &pSqlStmt=wxEmptyString);
+    bool        execDelete(const char *pSqlStmt);
+    bool        execUpdate(const char *pSqlStmt);
+    bool        query(int queryType, bool forUpdate, bool distinct, const char *pSqlStmt = 0);
 
 #if !wxODBC_BACKWARD_COMPATABILITY
 // these were public
@@ -150,9 +136,9 @@ private:
     wxDb       *pDb;
 
     // Table Inf.
-    wxString    tablePath;                                 // needed for dBase tables
-    wxString    tableName;                                 // Table name
-    wxString    queryTableName;                            // Query Table Name
+    char        tablePath[wxDB_PATH_MAX];                  // needed for dBase tables
+    char        tableName[DB_MAX_TABLE_NAME_LEN+1];        // Table name
+    char        queryTableName[DB_MAX_TABLE_NAME_LEN+1];   // Query Table Name
     int         noCols;                                    // # of columns in the table
     bool        queryOnly;                                 // Query Only, no inserts, updates or deletes
 
@@ -194,23 +180,15 @@ public:
     wxDbColDef *colDefs;         // Array of wxDbColDef structures
 #endif
     // Public member functions
-    wxDbTable(wxDb *pwxDb, const wxString &tblName, const int nCols,
-              const wxString &qryTblName="", bool qryOnly = !wxDB_QUERY_ONLY, 
-              const wxString &tblPath="");
-
-    // DEPRECATED
-    wxDbTable(wxDb *pwxDb, const wxString &tblName, const int nCols,
-              const wxChar *qryTblName="", bool qryOnly = !wxDB_QUERY_ONLY, 
-              const wxString &tblPath="");
-
+    wxDbTable(wxDb *pwxDb, const char *tblName, const int nCols,
+              const char *qryTblName = 0, bool qryOnly = !wxDB_QUERY_ONLY, const char *tblPath=NULL);
     virtual ~wxDbTable();
 
-    bool            Open(bool checkPrivileges=FALSE);
+    bool            Open(void);
     bool            CreateTable(bool attemptDrop=TRUE);
     bool            DropTable(void);
-    bool            CreateIndex(const wxString &idxName, bool unique, int noIdxCols, 
-                                wxDbIdxDef *pIdxDefs, bool attemptDrop=TRUE);
-    bool            DropIndex(const wxString &idxName);
+    bool            CreateIndex(const char * idxName, bool unique, int noIdxCols, wxDbIdxDef *pIdxDefs, bool attemptDrop=TRUE);
+    bool            DropIndex(const char * idxName);
 
     // Accessors
 
@@ -218,16 +196,16 @@ public:
     // set when the wxDbTable instance is createand cannot be 
     // changed, hence there is no corresponding SetXxxx function
     wxDb           *GetDb()              { return pDb; }
-    const wxString &GetTableName()       { return tableName; }
-    const wxString &GetQueryTableName()  { return queryTableName; }
-    const wxString &GetTablePath()       { return tablePath; }
+    const char     *GetTableName()       { return tableName; }
+    const char     *GetQueryTableName()  { return queryTableName; }
+    const char     *GetTablePath()       { return tablePath; }
 
     int             GetNumberOfColumns() { return noCols; }  // number of "defined" columns for this wxDbTable instance
        
 
-    const wxString &GetFromClause()      { return from; }
-    const wxString &GetOrderByClause()   { return orderBy; }
-    const wxString &GetWhereClause()     { return where; }
+    const char     *GetFromClause()      { return from; }
+    const char     *GetOrderByClause()   { return orderBy; }
+    const char     *GetWhereClause()     { return where; }
 
     bool            IsQueryOnly()        { return queryOnly; }
 #if wxODBC_BACKWARD_COMPATABILITY
@@ -235,26 +213,19 @@ public:
     void            SetOrderByClause(const char *OrderBy) { orderBy = (char *)OrderBy; }
     void            SetWhereClause(const char *Where) { where = (char *)Where; }
 #else
-    void            SetFromClause(const wxString &From) { from = From; }
-    void            SetOrderByClause(const wxString &OrderBy) { orderBy = OrderBy; }
-    bool            SetOrderByColNums(int first, ...);
-    void            SetWhereClause(const wxString &Where) { where = Where; }
-    void            From(const wxString &From) { from = From; }
-    void            OrderBy(const wxString &OrderBy) { orderBy = OrderBy; }
-    void            Where(const wxString &Where) { where = Where; }
-    const wxString &Where()   { return where; }
-    const wxString &OrderBy() { return orderBy; }
-    const wxString &From()    { return from; }
+    void            SetFromClause(const wxString& From) { from = From; }
+    void            SetOrderByClause(const wxString& OrderBy) { orderBy = OrderBy; }
+    void            SetWhereClause(const wxString& Where) { where = Where; }
 #endif
     int             Insert(void);
     bool            Update(void);
-    bool            Update(const wxString &pSqlStmt);
-    bool            UpdateWhere(const wxString &pWhereClause);
+    bool            Update(const char *pSqlStmt);
+    bool            UpdateWhere(const char *pWhereClause);
     bool            Delete(void);
-    bool            DeleteWhere(const wxString &pWhereClause);
+    bool            DeleteWhere(const char *pWhereClause);
     bool            DeleteMatching(void);
     virtual bool    Query(bool forUpdate = FALSE, bool distinct = FALSE);
-    bool            QueryBySqlStmt(const wxString &pSqlStmt);
+    bool            QueryBySqlStmt(const char *pSqlStmt);
     bool            QueryMatching(bool forUpdate = FALSE, bool distinct = FALSE);
     bool            QueryOnKeyFields(bool forUpdate = FALSE, bool distinct = FALSE);
     bool            Refresh(void);
@@ -271,39 +242,29 @@ public:
     bool            IsCursorClosedOnCommit(void);
     UWORD           GetRowNum(void);
 
-    void            BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool distinct);
-    void            BuildSelectStmt(wxChar *pSqlStmt, int typeOfSelect, bool distinct);
-
-    void            BuildDeleteStmt(wxString &pSqlStmt, int typeOfDel, const wxString &pWhereClause="");
-    void            BuildDeleteStmt(wxChar *pSqlStmt, int typeOfDel, const wxString &pWhereClause="");
-
-    void            BuildUpdateStmt(wxString &pSqlStmt, int typeOfUpd, const wxString &pWhereClause="");
-    void            BuildUpdateStmt(wxChar *pSqlStmt, int typeOfUpd, const wxString &pWhereClause="");
-
-    void            BuildWhereClause(wxString &pWhereClause, int typeOfWhere, const wxString &qualTableName="", bool useLikeComparison=FALSE);
-    void            BuildWhereClause(wxChar *pWhereClause, int typeOfWhere, const wxString &qualTableName="", bool useLikeComparison=FALSE);
-
+    void            BuildSelectStmt(char *pSqlStmt, int typeOfSelect, bool distinct);
+    void            BuildDeleteStmt(char *pSqlStmt, int typeOfDel, const char *pWhereClause = 0);
+    void            BuildUpdateStmt(char *pSqlStmt, int typeOfUpd, const char *pWhereClause = 0);
+    void            BuildWhereClause(char *pWhereClause, int typeOfWhere, const char *qualTableName = 0, bool useLikeComparison=FALSE);
 #if wxODBC_BACKWARD_COMPATABILITY
 // The following member functions are deprecated.  You should use the BuildXxxxxStmt functions (above)
     void            GetSelectStmt(char *pSqlStmt, int typeOfSelect, bool distinct)
                            { BuildSelectStmt(pSqlStmt,typeOfSelect,distinct); }
-    void            GetDeleteStmt(char *pSqlStmt, int typeOfDel, const char *pWhereClause = NULL)
+    void            GetDeleteStmt(char *pSqlStmt, int typeOfDel, const char *pWhereClause = 0)
                            { BuildDeleteStmt(pSqlStmt,typeOfDel,pWhereClause); }
-    void            GetUpdateStmt(char *pSqlStmt, int typeOfUpd, const char *pWhereClause = NULL)
+    void            GetUpdateStmt(char *pSqlStmt, int typeOfUpd, const char *pWhereClause = 0)
                            { BuildUpdateStmt(pSqlStmt,typeOfUpd,pWhereClause); }
     void            GetWhereClause(char *pWhereClause, int typeOfWhere, 
-                                   const char *qualTableName = NULL, bool useLikeComparison=FALSE)
+                                   const char *qualTableName = 0, bool useLikeComparison=FALSE)
                            { BuildWhereClause(pWhereClause,typeOfWhere,qualTableName,useLikeComparison); }
 #endif
     bool            CanSelectForUpdate(void);
     bool            CanUpdByROWID(void);
-    void            ClearMemberVar(int colNo, bool setToNull=FALSE);
-    void            ClearMemberVars(bool setToNull=FALSE);
+    void            ClearMemberVars(void);
     bool            SetQueryTimeout(UDWORD nSeconds);
 
     wxDbColDef     *GetColDefs() { return colDefs; }
-    void            SetColDefs(int index, const wxString &fieldName, int dataType, 
-                               void *pData, int cType,
+    void            SetColDefs(int index, const char *fieldName, int dataType, void *pData, int cType,
                                int size, bool keyField = FALSE, bool upd = TRUE,
                                bool insAllow = TRUE, bool derivedCol = FALSE);
     wxDbColDataPtr *SetColDefs(wxDbColInf *colInfs, ULONG numCols);
@@ -318,17 +279,13 @@ public:
     HSTMT          *NewCursor(bool setCursor = FALSE, bool bindColumns = TRUE) {  return GetNewCursor(setCursor,bindColumns); }
 #endif
 
-    ULONG           Count(const wxString &args="*");
+    ULONG           Count(const char *args="*");
     int             DB_STATUS(void) { return(pDb->DB_STATUS); }
 
     bool            IsColNull(int colNo);
-    bool            SetColNull(int colNo, bool set=TRUE);
-    bool            SetColNull(const wxString &colName, bool set=TRUE);
-#if wxODBC_BACKWARD_COMPATABILITY
-// The following member functions are deprecated.  You should use the SetColNull()
-    bool            SetNull(int colNo, bool set=TRUE) { return (SetNull(colNo,set)); }
-    bool            SetNull(const char *colName, bool set=TRUE) { return (SetNull(colName,set)); }
-#endif
+    bool            SetNull(int colNo);
+    bool            SetNull(const char *colName);
+
 #ifdef __WXDEBUG__
     ULONG           GetTableID() { return tableID; }
 #endif

@@ -1886,9 +1886,9 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_class_wxRealPoint","_wxRealPoint",0},
     { "_wxNavigationKeyEvent","_class_wxNavigationKeyEvent",0},
     { "_wxPNMHandler","_class_wxPNMHandler",0},
-    { "_wxPrinterDC","_class_wxPrinterDC",0},
     { "_wxWindowCreateEvent","_class_wxWindowCreateEvent",0},
     { "_wxLogGui","_class_wxLogGui",0},
+    { "_wxPrinterDC","_class_wxPrinterDC",0},
     { "_class_wxMenuItem","_wxMenuItem",0},
     { "_class_wxPaintEvent","_wxPaintEvent",0},
     { "_wxSysColourChangedEvent","_class_wxSysColourChangedEvent",0},
@@ -2195,12 +2195,12 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_class_wxPyApp","_wxPyApp",0},
     { "_wxSize","_class_wxSize",0},
     { "_wxRegionIterator","_class_wxRegionIterator",0},
-    { "_class_wxPrinterDC","_wxPrinterDC",0},
     { "_class_wxPyTextDataObject","_wxPyTextDataObject",0},
     { "_class_wxLogTextCtrl","_wxLogTextCtrl",0},
     { "_class_wxLogGui","_wxLogGui",0},
     { "_class_wxMDIParentFrame","_wxMDIParentFrame",0},
     { "_wxPyTreeItemData","_class_wxPyTreeItemData",0},
+    { "_class_wxPrinterDC","_wxPrinterDC",0},
     { "_wxStaticBoxSizer","_class_wxStaticBoxSizer",0},
     { "_class_wxTimeSpan","_wxTimeSpan",0},
     { "_class_wxPyFileSystemHandler","_wxPyFileSystemHandler",0},
@@ -2458,6 +2458,9 @@ SWIGEXPORT(void) initwxc() {
 	 PyDict_SetItemString(d,"wxSP_WRAP", PyInt_FromLong((long) wxSP_WRAP));
 	 PyDict_SetItemString(d,"wxSP_NOBORDER", PyInt_FromLong((long) wxSP_NOBORDER));
 	 PyDict_SetItemString(d,"wxSP_3D", PyInt_FromLong((long) wxSP_3D));
+	 PyDict_SetItemString(d,"wxSP_3DSASH", PyInt_FromLong((long) wxSP_3DSASH));
+	 PyDict_SetItemString(d,"wxSP_3DBORDER", PyInt_FromLong((long) wxSP_3DBORDER));
+	 PyDict_SetItemString(d,"wxSP_FULLSASH", PyInt_FromLong((long) wxSP_FULLSASH));
 	 PyDict_SetItemString(d,"wxSP_BORDER", PyInt_FromLong((long) wxSP_BORDER));
 	 PyDict_SetItemString(d,"wxSP_LIVE_UPDATE", PyInt_FromLong((long) wxSP_LIVE_UPDATE));
 	 PyDict_SetItemString(d,"wxSP_PERMIT_UNSPLIT", PyInt_FromLong((long) wxSP_PERMIT_UNSPLIT));

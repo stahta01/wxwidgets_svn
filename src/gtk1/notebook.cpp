@@ -26,13 +26,6 @@
 #include "wx/gtk/win_gtk.h"
 #include <gdk/gdkkeysyms.h>
 
-// ----------------------------------------------------------------------------
-// events
-// ----------------------------------------------------------------------------
-
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
-
 //-----------------------------------------------------------------------------
 // idle system
 //-----------------------------------------------------------------------------
@@ -221,10 +214,8 @@ END_EVENT_TABLE()
 void wxNotebook::Init()
 {
     m_imageList = (wxImageList *) NULL;
-    m_ownsImageList = FALSE;
     m_pages.DeleteContents( TRUE );
     m_lastSelection = -1;
-    m_themeEnabled = TRUE;
 }
 
 wxNotebook::wxNotebook()
@@ -247,7 +238,6 @@ wxNotebook::~wxNotebook()
       GTK_SIGNAL_FUNC(gtk_notebook_page_change_callback), (gpointer) this );
 
     DeleteAllPages();
-    if (m_ownsImageList) delete m_imageList;
 }
 
 bool wxNotebook::Create(wxWindow *parent, wxWindowID id,
@@ -397,15 +387,7 @@ void wxNotebook::AdvanceSelection( bool forward )
 
 void wxNotebook::SetImageList( wxImageList* imageList )
 {
-    if (m_ownsImageList) delete m_imageList;
     m_imageList = imageList;
-    m_ownsImageList = FALSE;
-}
-
-void wxNotebook::AssignImageList( wxImageList* imageList )
-{
-    SetImageList(imageList);
-    m_ownsImageList = TRUE;
 }
 
 bool wxNotebook::SetPageText( int page, const wxString &text )
@@ -578,9 +560,6 @@ bool wxNotebook::InsertPage( int position, wxNotebookPage* win, const wxString& 
     /* don't receive switch page during addition */
     gtk_signal_disconnect_by_func( GTK_OBJECT(m_widget),
       GTK_SIGNAL_FUNC(gtk_notebook_page_change_callback), (gpointer) this );
-
-    if (m_themeEnabled)
-        win->SetThemeEnabled(TRUE);
 
     GtkNotebook *notebook = GTK_NOTEBOOK(m_widget);
 

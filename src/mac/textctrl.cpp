@@ -38,33 +38,21 @@
 
 #include "wx/mac/uma.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxControl)
 
 BEGIN_EVENT_TABLE(wxTextCtrl, wxControl)
 	EVT_DROP_FILES(wxTextCtrl::OnDropFiles)
 	EVT_CHAR(wxTextCtrl::OnChar)
-    EVT_MENU(wxID_CUT, wxTextCtrl::OnCut)
-    EVT_MENU(wxID_COPY, wxTextCtrl::OnCopy)
-    EVT_MENU(wxID_PASTE, wxTextCtrl::OnPaste)
-    EVT_MENU(wxID_UNDO, wxTextCtrl::OnUndo)
-    EVT_MENU(wxID_REDO, wxTextCtrl::OnRedo)
-
-    EVT_UPDATE_UI(wxID_CUT, wxTextCtrl::OnUpdateCut)
-    EVT_UPDATE_UI(wxID_COPY, wxTextCtrl::OnUpdateCopy)
-    EVT_UPDATE_UI(wxID_PASTE, wxTextCtrl::OnUpdatePaste)
-    EVT_UPDATE_UI(wxID_UNDO, wxTextCtrl::OnUpdateUndo)
-    EVT_UPDATE_UI(wxID_REDO, wxTextCtrl::OnUpdateRedo)
 END_EVENT_TABLE()
-#endif
 
 // Text item
 wxTextCtrl::wxTextCtrl()
+#ifndef NO_TEXT_WINDOW_STREAM
+ :streambuf()
+#endif
 {
+    m_fileName = "";
 }
-
-const short kVerticalMargin = 2 ;
-const short kHorizontalMargin = 2 ;
 
 bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
 		   const wxString& st,
@@ -73,40 +61,25 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
            const wxValidator& validator,
            const wxString& name)
 {
-    // base initialization
-    if ( !CreateBase(parent, id, pos, size, style, validator, name) )
-        return FALSE;
+	m_macHorizontalBorder = 2 ; // additional pixels around the real control
+	m_macVerticalBorder = 2 ;
 
 	wxSize mySize = size ;
-	if ( UMAHasAppearance() )
-	{
-		m_macHorizontalBorder = 5 ; // additional pixels around the real control
-		m_macVerticalBorder = 5 ;
-	}
-	else
-	{
-		m_macHorizontalBorder = 0 ; // additional pixels around the real control
-		m_macVerticalBorder = 0 ;
-	}
-
 
 	Rect bounds ;
 	Str255 title ;
-
+	
 	if ( mySize.y == -1 )
 	{
 		if ( UMAHasAppearance() )
-			mySize.y = 13 ;
+			mySize.y = 16 ;
 		else
 			mySize.y = 24 ;
-		
-		mySize.y += 2 * m_macVerticalBorder ;
 	}
-
 	MacPreControlCreate( parent , id ,  "" , pos , mySize ,style, validator , name , &bounds , title ) ;
 
 	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , "\p" , true , 0 , 0 , 1, 
-	  	( style & wxTE_PASSWORD ) ? kControlEditTextPasswordProc : kControlEditTextProc , (long) this ) ;
+	  	kControlEditTextProc , (long) this ) ;
 	MacPostControlCreate() ;
 
 	wxString value ;
@@ -115,7 +88,7 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
 		value = wxMacMakeMacStringFromPC( st ) ;
 	else
 		value = st ;
-	UMASetControlData( m_macControl, 0, ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag , value.Length() , (char*) ((const char*)value) ) ;
+	UMASetControlData( m_macControl, 0, kControlEditTextTextTag , value.Length() , (char*) ((const char*)value) ) ;
 
   return TRUE;
 }
@@ -123,24 +96,12 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
 wxString wxTextCtrl::GetValue() const
 {
 	Size actualsize;
-	UMAGetControlData( m_macControl, 0, ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag , 32767 , wxBuffer , &actualsize) ;
+	UMAGetControlData( m_macControl, 0, kControlEditTextTextTag , 32767 , wxBuffer , &actualsize) ;
 	wxBuffer[actualsize] = 0 ;
 	if( wxApp::s_macDefaultEncodingIsPC )
 		return wxMacMakePCStringFromMac( wxBuffer ) ;
 	else
     	return wxString(wxBuffer);
-}
-
-void wxTextCtrl::GetSelection(long* from, long* to) const
-{
-   ControlEditTextSelectionRec selection ;
-   TEHandle teH ;
-   long size ;
-   
-   UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
-
-    *from = (**teH).selStart;
-    *to = (**teH).selEnd;
 }
 
 void wxTextCtrl::SetValue(const wxString& st)
@@ -151,116 +112,44 @@ void wxTextCtrl::SetValue(const wxString& st)
 		value = wxMacMakeMacStringFromPC( st ) ;
 	else
 		value = st ;
-	UMASetControlData( m_macControl, 0, ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag , value.Length() , (char*) ((const char*)value) ) ;
+	UMASetControlData( m_macControl, 0, kControlEditTextTextTag , value.Length() , (char*) ((const char*)value) ) ;
 	Refresh() ;
 //	MacInvalidateControl() ;
+}
+
+void wxTextCtrl::SetSize(int x, int y, int width, int height, int sizeFlags)
+{
+    wxControl::SetSize( x , y , width , height , sizeFlags ) ;
 }
 
 // Clipboard operations
 void wxTextCtrl::Copy()
 {
-    if (CanCopy())
-    {
-   		TEHandle teH ;
-   		long size ;
+   TEHandle teH ;
+   long size ;
    
-  		 UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
-		TECopy( teH ) ;
-#if TARGET_CARBON
-		OSStatus err ;
-		err = ClearCurrentScrap( );
-#else
-		OSErr err ;
-		err = ZeroScrap( );
-#endif
-		TEToScrap() ;
-	}
+   UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
+	TECopy( teH ) ;
 }
 
 void wxTextCtrl::Cut()
 {
-    if (CanCut())
-    {
-   		TEHandle teH ;
-   		long size ;
+   TEHandle teH ;
+   long size ;
    
-   		UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
-		TECut( teH ) ;
-#if TARGET_CARBON
-		OSStatus err ;
-		err = ClearCurrentScrap( );
-#else
-		OSErr err ;
-		err = ZeroScrap( );
-#endif
-		TEToScrap() ;
-		//	MacInvalidateControl() ;
-	}
+   UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
+	TECut( teH ) ;
+//	MacInvalidateControl() ;
 }
 
 void wxTextCtrl::Paste()
 {
-    if (CanPaste())
-    {
-   		TEHandle teH ;
-   		long size ;
+   TEHandle teH ;
+   long size ;
    
-   		UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
-		TEFromScrap() ;
-		TEPaste( teH ) ;
+   UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
+	TEPaste( teH ) ;
 //	MacInvalidateControl() ;
-	}
-}
-
-bool wxTextCtrl::CanCopy() const
-{
-    // Can copy if there's a selection
-    long from, to;
-    GetSelection(& from, & to);
-    return (from != to);
-}
-
-bool wxTextCtrl::CanCut() const
-{
-    // Can cut if there's a selection
-    long from, to;
-    GetSelection(& from, & to);
-    return (from != to);
-}
-
-bool wxTextCtrl::CanPaste() const
-{
-    if (!IsEditable())
-        return FALSE;
-
-	long offset ;
-#if TARGET_CARBON
-	OSStatus err = noErr;
-	ScrapRef scrapRef;
-	
-	err = GetCurrentScrap( &scrapRef );
-	if ( err != noTypeErr && err != memFullErr )	
-	{
-		ScrapFlavorFlags	flavorFlags;
-		Size				byteCount;
-		
-		if (( err = GetScrapFlavorFlags( scrapRef, 'TEXT', &flavorFlags )) == noErr)
-		{
-			if (( err = GetScrapFlavorSize( scrapRef, 'TEXT', &byteCount )) == noErr)
-			{
-				return TRUE ;
-			}
-		}
-	}
-	return FALSE;
-	
-#else
-	if ( GetScrap( NULL , 'TEXT' , &offset ) > 0 )
-	{
-		return TRUE ;
-	}
-#endif
-	return FALSE ;
 }
 
 void wxTextCtrl::SetEditable(bool editable)
@@ -354,10 +243,65 @@ void wxTextCtrl::SetSelection(long from, long to)
 
 bool wxTextCtrl::LoadFile(const wxString& file)
 {
-    if ( wxTextCtrlBase::LoadFile(file) )
+    if (!wxFileExists(file))
+        return FALSE;
+
+    m_fileName = file;
+
+    Clear();
+
+#ifndef __WXMAC__
+    ifstream input((char*) (const char*) file, ios::nocreate | ios::in);
+#else
+    ifstream input((char*) (const char*) file, ios::in);
+#endif
+    if (!input.bad())
     {
-        return TRUE;
+        struct stat stat_buf;
+        if (stat(file, &stat_buf) < 0)
+            return FALSE;
+        // This may need to be a bigger buffer than the file size suggests,
+        // if it's a UNIX file. Give it an extra 1000 just in case.
+        char *tmp_buffer = (char*)malloc((size_t)(stat_buf.st_size+1+1000));
+        long no_lines = 0;
+        long pos = 0;
+        while (!input.eof() && input.peek() != EOF)
+        {
+            input.getline(wxBuffer, 500);
+	        int len = strlen(wxBuffer);
+	        wxBuffer[len] = 13;
+	        wxBuffer[len+1] = 10;
+	        wxBuffer[len+2] = 0;
+	        strcpy(tmp_buffer+pos, wxBuffer);
+	        pos += strlen(wxBuffer);
+	        no_lines++;
+         }
+
+         // TODO add line
+
+         free(tmp_buffer);
+
+         return TRUE;
     }
+    return FALSE;
+}
+
+// If file is null, try saved file name first
+// Returns TRUE if succeeds.
+bool wxTextCtrl::SaveFile(const wxString& file)
+{
+    wxString theFile(file);
+    if (theFile == "")
+        theFile = m_fileName;
+    if (theFile == "")
+        return FALSE;
+    m_fileName = theFile;
+
+    ofstream output((char*) (const char*) theFile);
+    if (output.bad())
+	    return FALSE;
+
+    // TODO get and save text
 
     return FALSE;
 }
@@ -385,80 +329,23 @@ void wxTextCtrl::AppendText(const wxString& text)
 
 void wxTextCtrl::Clear()
 {
-	UMASetControlData( m_macControl, 0, ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag , 0 , (char*) ((const char*)NULL) ) ;
-	Refresh() ;
+    TEHandle teH ;
+    long size ;
+   	ControlEditTextSelectionRec selection ;
+   
+  	selection.selStart = 0 ;
+   	selection.selEnd = 32767 ;
+   
+    UMASetControlData( m_macControl , 0, kControlEditTextSelectionTag , sizeof( selection ) , (char*) &selection ) ;
+   
+    UMAGetControlData( m_macControl , 0, kControlEditTextTEHandleTag , sizeof( TEHandle ) , (char*) &teH , &size ) ;
+		TECut( teH ) ;
+//	MacInvalidateControl() ;
 }
 
 bool wxTextCtrl::IsModified() const
 {
     return TRUE;
-}
-
-bool wxTextCtrl::IsEditable() const
-{
-    return IsEnabled();
-}
-
-bool wxTextCtrl::AcceptsFocus() const
-{
-    // we don't want focus if we can't be edited
-    return IsEditable() && wxControl::AcceptsFocus();
-}
-
-wxSize wxTextCtrl::DoGetBestSize() const
-{
-    int wText = 100 ;
-	
-    int hText ;
-		if ( UMAHasAppearance() )
-			hText = 13 ;
-		else
-			hText = 24 ;
-	hText += 2 * m_macHorizontalBorder ;
-/*
-    int cx, cy;
-    wxGetCharSize(GetHWND(), &cx, &cy, &GetFont());
-
-    int wText = DEFAULT_ITEM_WIDTH;
-
-    int hText = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy);
-
-    return wxSize(wText, hText);
-*/
-    if ( m_windowStyle & wxTE_MULTILINE )
-    {
-        hText *= wxMin(GetNumberOfLines(), 5);
-    }
-    //else: for single line control everything is ok
-    return wxSize(wText, hText);
-}
-
-// ----------------------------------------------------------------------------
-// Undo/redo
-// ----------------------------------------------------------------------------
-
-void wxTextCtrl::Undo()
-{
-    if (CanUndo())
-    {
-    }
-}
-
-void wxTextCtrl::Redo()
-{
-    if (CanRedo())
-    {
-    }
-}
-
-bool wxTextCtrl::CanUndo() const
-{
-    return FALSE ;
-}
-
-bool wxTextCtrl::CanRedo() const
-{
-    return FALSE ;
 }
 
 // Makes 'unmodified'
@@ -479,9 +366,9 @@ long wxTextCtrl::XYToPosition(long x, long y) const
     return 0;
 }
 
-bool wxTextCtrl::PositionToXY(long pos, long *x, long *y) const
+void wxTextCtrl::PositionToXY(long pos, long *x, long *y) const
 {
-    return FALSE ;
+    // TODO
 }
 
 void wxTextCtrl::ShowPosition(long pos)
@@ -520,125 +407,204 @@ void wxTextCtrl::OnDropFiles(wxDropFilesEvent& event)
 
 void wxTextCtrl::OnChar(wxKeyEvent& event)
 {
-    switch ( event.KeyCode() )
+    switch( event.KeyCode() )
     {
         case WXK_RETURN:
-        	if (m_windowStyle & wxPROCESS_ENTER)
-        	{
+        {
+            if ( !(m_windowStyle & wxTE_MULTILINE) )
+            {
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
                 event.SetEventObject( this );
                 if ( GetEventHandler()->ProcessEvent(event) )
                     return;
-        	} 
-            if ( !(m_windowStyle & wxTE_MULTILINE) )
-            {
-    			wxWindow *parent = GetParent();
-    			wxPanel *panel = wxDynamicCast(parent, wxPanel);
-    			while ( parent != NULL && panel == NULL )
-    			{
-    				parent = parent->GetParent() ;
-    				panel = wxDynamicCast(parent, wxPanel);
-    			}
-           		if ( panel && panel->GetDefaultItem() )
-           		{
-           			wxButton *def = panel->GetDefaultItem() ;
-    				wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, def->GetId() );
-   					event.SetEventObject(def);
-   					def->Command(event);
-               		event.Skip() ;
-                	return ;
-           		}
             }
             //else: multiline controls need Enter for themselves
 
             break;
-
+        }
         case WXK_TAB:
             // always produce navigation event - even if we process TAB
             // ourselves the fact that we got here means that the user code
             // decided to skip processing of this TAB - probably to let it
             // do its default job.
+            //
+            // NB: Notice that Ctrl-Tab is handled elsewhere and Alt-Tab is
+            //     handled by Windows
             {
                 wxNavigationKeyEvent eventNav;
                 eventNav.SetDirection(!event.ShiftDown());
-                eventNav.SetWindowChange(event.ControlDown());
+                eventNav.SetWindowChange(FALSE);
                 eventNav.SetEventObject(this);
 
-                if ( GetParent()->GetEventHandler()->ProcessEvent(eventNav) )
+                if ( GetEventHandler()->ProcessEvent(eventNav) )
                     return;
-               	event.Skip() ;
-                return ;
             }
             break;
+
+        default:
+            event.Skip();
+            return;
     }
 
-	EventRecord *ev = wxTheApp->MacGetCurrentEvent() ;
-	short keycode ;
-	short keychar ;
-	keychar = short(ev->message & charCodeMask);
-	keycode = short(ev->message & keyCodeMask) >> 8 ;
-	UMAHandleControlKey( m_macControl , keycode , keychar , ev->modifiers ) ;
-	if ( keychar >= 0x20 || event.KeyCode() == WXK_RETURN)
-	{
-        wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, m_windowId);
-        event.SetString( GetValue() ) ;
-        event.SetEventObject( this );
-        GetEventHandler()->ProcessEvent(event);
-	}
+    // don't just call event.Skip() because this will cause TABs and ENTERs
+    // be passed upwards and we don't always want this - instead process it
+    // right here
 
+    // FIXME
+    event.Skip();
+}
+// The streambuf code was partly taken from chapter 3 by Jerry Schwarz of
+// AT&T's "C++ Lanuage System Release 3.0 Library Manual" - Stein Somers
+
+//=========================================================================
+// Called then the buffer is full (gcc 2.6.3) 
+// or when "endl" is output (Borland 4.5)
+//=========================================================================
+// Class declaration using multiple inheritance doesn't work properly for
+// Borland. See note in wb_text.h.
+#ifndef NO_TEXT_WINDOW_STREAM
+int wxTextCtrl::overflow(int c)
+{
+  // Make sure there is a holding area
+  if ( allocate()==EOF )
+  {
+    wxError("Streambuf allocation failed","Internal error");
+    return EOF;
+  }
+  
+  // Verify that there are no characters in get area
+  if ( gptr() && gptr() < egptr() )
+  {
+     wxError("Who's trespassing my get area?","Internal error");
+     return EOF;
+  }
+
+  // Reset get area
+  setg(0,0,0);
+
+  // Make sure there is a put area
+  if ( ! pptr() )
+  {
+/* This doesn't seem to be fatal so comment out error message */
+//    wxError("Put area not opened","Internal error");
+    setp( base(), base() );
+  }
+
+  // Determine how many characters have been inserted but no consumed
+  int plen = pptr() - pbase();
+
+  // Now Jerry relies on the fact that the buffer is at least 2 chars
+  // long, but the holding area "may be as small as 1" ???
+  // And we need an additional \0, so let's keep this inefficient but
+  // safe copy.
+
+  // If c!=EOF, it is a character that must also be comsumed
+  int xtra = c==EOF? 0 : 1;
+
+  // Write temporary C-string to wxTextWindow
+  {
+  char *txt = new char[plen+xtra+1];
+  memcpy(txt, pbase(), plen);
+  txt[plen] = (char)c;     // append c
+  txt[plen+xtra] = '\0';   // append '\0' or overwrite c
+    // If the put area already contained \0, output will be truncated there
+  AppendText(txt);
+    delete[] txt;
+  }
+
+  // Reset put area
+  setp(pbase(), epptr());
+
+#if defined(__WATCOMC__)
+  return __NOT_EOF;
+#elif defined(zapeof)     // HP-UX (all cfront based?)
+  return zapeof(c);
+#else
+  return c!=EOF ? c : 0;  // this should make everybody happy
+#endif
 }
 
-// ----------------------------------------------------------------------------
-// standard handlers for standard edit menu events
-// ----------------------------------------------------------------------------
-
-void wxTextCtrl::OnCut(wxCommandEvent& event)
+//=========================================================================
+// called then "endl" is output (gcc) or then explicit sync is done (Borland)
+//=========================================================================
+int wxTextCtrl::sync()
 {
-    Cut();
+  // Verify that there are no characters in get area
+  if ( gptr() && gptr() < egptr() )
+  {
+     wxError("Who's trespassing my get area?","Internal error");
+     return EOF;
+  }
+
+  if ( pptr() && pptr() > pbase() ) return overflow(EOF);
+
+  return 0;
+/* OLD CODE
+  int len = pptr() - pbase();
+  char *txt = new char[len+1];
+  strncpy(txt, pbase(), len);
+  txt[len] = '\0';
+  (*this) << txt;
+  setp(pbase(), epptr());
+  delete[] txt;
+  return 0;
+*/
 }
 
-void wxTextCtrl::OnCopy(wxCommandEvent& event)
+//=========================================================================
+// Should not be called by a "ostream". Used by a "istream"
+//=========================================================================
+int wxTextCtrl::underflow()
 {
-    Copy();
+  return EOF;
+}
+#endif
+
+wxTextCtrl& wxTextCtrl::operator<<(const wxString& s)
+{
+    AppendText(s);
+    return *this;
 }
 
-void wxTextCtrl::OnPaste(wxCommandEvent& event)
+wxTextCtrl& wxTextCtrl::operator<<(float f)
 {
-    Paste();
+    wxString str;
+    str.Printf("%.2f", f);
+    AppendText(str);
+    return *this;
 }
 
-void wxTextCtrl::OnUndo(wxCommandEvent& event)
+wxTextCtrl& wxTextCtrl::operator<<(double d)
 {
-    Undo();
+    wxString str;
+    str.Printf("%.2f", d);
+    AppendText(str);
+    return *this;
 }
 
-void wxTextCtrl::OnRedo(wxCommandEvent& event)
+wxTextCtrl& wxTextCtrl::operator<<(int i)
 {
-    Redo();
+    wxString str;
+    str.Printf("%d", i);
+    AppendText(str);
+    return *this;
 }
 
-void wxTextCtrl::OnUpdateCut(wxUpdateUIEvent& event)
+wxTextCtrl& wxTextCtrl::operator<<(long i)
 {
-    event.Enable( CanCut() );
+    wxString str;
+    str.Printf("%ld", i);
+    AppendText(str);
+    return *this;
 }
 
-void wxTextCtrl::OnUpdateCopy(wxUpdateUIEvent& event)
+wxTextCtrl& wxTextCtrl::operator<<(const char c)
 {
-    event.Enable( CanCopy() );
-}
+    char buf[2];
 
-void wxTextCtrl::OnUpdatePaste(wxUpdateUIEvent& event)
-{
-    event.Enable( CanPaste() );
-}
-
-void wxTextCtrl::OnUpdateUndo(wxUpdateUIEvent& event)
-{
-    event.Enable( CanUndo() );
-}
-
-void wxTextCtrl::OnUpdateRedo(wxUpdateUIEvent& event)
-{
-    event.Enable( CanRedo() );
+    buf[0] = c;
+    buf[1] = 0;
+    AppendText(buf);
+    return *this;
 }
 

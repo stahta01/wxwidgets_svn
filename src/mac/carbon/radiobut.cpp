@@ -15,9 +15,7 @@
 
 #include "wx/radiobut.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxRadioButton, wxControl)
-#endif
 
 #include <wx/mac/uma.h>
 
@@ -50,8 +48,7 @@ void wxRadioButton::SetValue(bool val)
 	
    ::SetControlValue( m_macControl , val ) ;
    
-   if (val) 
-   {
+   if (val) {
    		cycle=this->NextInCycle();
   		if (cycle!=NULL) {
    			while (cycle!=this) {
@@ -97,3 +94,4 @@ wxRadioButton *wxRadioButton::AddInCycle(wxRadioButton *cycle)
 	  	return(cycle);
   	}
 }  
+

@@ -9,5 +9,4 @@ TN0008   How to learn wxWindows programming
 TN0009   Creating and converting icons
 TN0010   Compiling wxWindows applications in the VC++ IDE
 
-
 Version: $Id$

@@ -1,22 +1,108 @@
-wxWindows 2 Change Log
-----------------------
+wxWindows 2.2 Change Log
+========================
 
-2.4.0
+INCOMPATIBLE CHANGES
+--------------------
+
+wxMSW:
+
+- wxListCtrl::Find() parameter meaning changed, see docs for details
+  (starting item is now included in the search, use 0 to search from the
+   beginning)
+
+OTHER CHANGES
+-------------
+
+2.2.6
 -----
 
-2.3.0
+wxMSW:
+
+- wxChoice sizing bug introduced in 2.2.5 fixed (oops) and calculating of
+  the size of initially empty wxChoice controls fixed as well
+
+2.2.5
+-----
+
+- fixed memory corruption/crash in wxStreamBuffer
+- wxTree/ListCtrl position fix (Mike Oliver <oliver@math.ucla.edu>)
+- Italian translations updated
+- Windows 2000 toolbar colours problem fixed
+
+2.2.4
+-----
+
+- chinese translations added
+- wxTreeEvent::GetPoint() returns correct position for ITEM_XXX_CLICK events
+
+2.2.3
+-----
+
+wxGTK:
+
+- frames created with wxDefaultSize will have some reasonable default size and
+  not be created with 0 size
+
+2.2.2
+-----
+
+wxGTK:
+
+- better (implicit) themes support
+
+2.2.1
 -----
 
 wxBase:
 
-- wxMimeTypesManager now can create file associations too
-- wxCopyFile() respects the file permissions (Roland Scholz)
-- wxFTP::GetFileSize() added (Søren Erland Vestø)
+- Fixed logic bug in wxDateTime::ParseDate.
+- wxDB: replaced German variable names with English.
+- wxDbGetConnection() did not check for the correct scrolling
+  of cursors when re-using a cached database connection.
+    
+All (GUI):
+
+- Corrected uninitialized variable in wxDocument constructor.
+- DocView now finds more appropriate parent frame for dialogs.
+- Filter index checked, then path to find correct doc template.
+- Unicode compile fixes.
+- Generic list control column sizing bug fixed.
+- Corrected wxComboBox validation behaviour.
+- Added EVT_UPDATE_UI_RANGE macro.
+- Some DB sample problems corrected.
+- wxGrid fixes.
+- Fixed low resolution problem with wxPostScriptDC.
 
 wxMSW:
 
-- threads: bug in wxCondition::Broadcast fixed (Pieter van der Meulen)
-- fixed bug in MDI children flags (mis)handling
+- Removed delayed loading for winmm in VC++ makefile (problems
+  reported); USE_GLCANVAS now a variable in makefile.vc.
+- Comments added to setup.h.
+- wxCommandEvent::IsChecked now works for menu items.
+- wxDEFAULT font size handled properly.
+- Mods for Cygwin 1.1.
+- Updated VC++ project and makefiles for consistency. DLL now
+  has version number in name.
+- Added insertion point functions implementation for wxComboBox.
+- Handle wxNO_FULL_REPAINT_ON_RESIZE for MDI children.
+- Fixed problem with iconizing miniframes.
+- Fixed bug with radiobox size being miscalculated if the label was
+  too long.
+- The MSW radiobutton now informs about its state in the event (m_int)
+  as wxGTK did.
+
+wxGTK:
+
+- Please see docs/gtk/changes.txt.
+
+wxMotif:
+
+- Small compilation fixes
+
+Documentation:
+
+- Added wxDb documentation.
+- Added notes for Cygwin 1.1 to MSW install.txt.
 
 2.2.0
 -----

@@ -21,12 +21,6 @@
     #pragma implementation "window.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#define XtWindow XTWINDOW
-#define XtScreen XTSCREEN
-#endif
-
 #include "wx/setup.h"
 #include "wx/menu.h"
 #include "wx/dc.h"
@@ -1205,7 +1199,7 @@ void wxWindow::DoGetSize(int *x, int *y) const
     Widget widget = (Widget) GetTopWidget();
     Dimension xx, yy;
     XtVaGetValues(widget, XmNwidth, &xx, XmNheight, &yy, NULL);
-    if(x) *x = xx; if(y) *y = yy;
+    *x = xx; *y = yy;
 }
 
 void wxWindow::DoGetPosition(int *x, int *y) const
@@ -1228,7 +1222,7 @@ void wxWindow::DoGetPosition(int *x, int *y) const
         yy -= pt.y;
     }
 
-    if(x) *x = xx; if(y) *y = yy;
+    *x = xx; *y = yy;
 }
 
 void wxWindow::DoScreenToClient(int *x, int *y) const
@@ -1264,7 +1258,7 @@ void wxWindow::DoGetClientSize(int *x, int *y) const
     Widget widget = (Widget) GetClientWidget();
     Dimension xx, yy;
     XtVaGetValues(widget, XmNwidth, &xx, XmNheight, &yy, NULL);
-    if(x) *x = xx; if(y) *y = yy;
+    *x = xx; *y = yy;
 }
 
 void wxWindow::DoSetSize(int x, int y, int width, int height, int sizeFlags)
@@ -2984,32 +2978,7 @@ void wxWindow::ChangeFont(bool keepOriginalSize)
 wxWindow *wxGetActiveWindow()
 {
     // TODO
-    wxFAIL_MSG("Not implemented");
     return NULL;
-}
-
-// Find the wxWindow at the current mouse position, returning the mouse
-// position.
-wxWindow* wxFindWindowAtPointer(wxPoint& pt)
-{
-    return wxFindWindowAtPoint(wxGetMousePosition());
-}
-
-// Get the current mouse position.
-wxPoint wxGetMousePosition()
-{
-    Display *display = (Display*) wxGetDisplay();
-    Window rootWindow = RootWindowOfScreen (DefaultScreenOfDisplay(display));
-    Window rootReturn, childReturn;
-    int rootX, rootY, winX, winY;
-    unsigned int maskReturn;
-
-    XQueryPointer (display,
-		   rootWindow,
-		   &rootReturn,
-                   &childReturn,
-                   &rootX, &rootY, &winX, &winY, &maskReturn);
-    return wxPoint(rootX, rootY);
 }
 
 // ----------------------------------------------------------------------------

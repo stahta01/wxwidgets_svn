@@ -33,9 +33,6 @@
 
 #include "wx/msw/private.h"
 
-// from src/msw/app.cpp
-extern void WXDLLEXPORT wxEntryCleanup();
-
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -98,24 +95,22 @@ BOOL WINAPI DllEntryPoint (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
 BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
 #endif
 {
-#ifndef WXMAKINGDLL
     switch (fdwReason)
     {
         case DLL_PROCESS_ATTACH:
             // Only call wxEntry if the application itself is part of the DLL.
-            // If only the wxWindows library is in the DLL, then the
-            // initialisation will be called when the application implicitly
-            // calls WinMain.
+            // If only the wxWindows library is in the DLL, then the initialisation
+            // will be called when the application implicitly calls WinMain.
+
+#if !defined(WXMAKINGDLL)
             return wxEntry((WXHINSTANCE) hModule);
+#endif
+            break;
 
         case DLL_PROCESS_DETACH:
-           if ( wxTheApp )
-              wxTheApp->OnExit();
-           wxEntryCleanup();
-           break;
+        default:
+            break;
     }
-#endif // !WXMAKINGDLL
-
     return TRUE;
 }
 

@@ -126,25 +126,6 @@ bool wxGIFDecoder::ConvertToImage(wxImage *image) const
     else
         image->SetMask(FALSE);
 
-    // Set the palette
-    // Palette creation not yet implemented on wxGTK
-#ifndef __WXGTK__
-    if (pal)
-    {
-        unsigned char* r = new unsigned char[256];
-        unsigned char* g = new unsigned char[256];
-        unsigned char* b = new unsigned char[256];
-        for (i = 0; i < 256; i++)
-        {
-            r[i] = pal[3*i + 0];
-            g[i] = pal[3*i + 1];
-            b[i] = pal[3*i + 2];
-        }
-        image->SetPalette(wxPalette(256, r, g, b));
-        delete[] r; delete[] g; delete[] b;
-    }
-#endif
-
     /* copy image data */
     for (i = 0; i < (GetWidth() * GetHeight()); i++, src++)
     {
@@ -336,15 +317,10 @@ int wxGIFDecoder::getcode(int bits, int ab_fin)
 //
 int wxGIFDecoder::dgif(GIFImage *img, int interl, int bits)
 {
-#ifdef __WXMAC__
-    int *ab_prefix = new int[4096];        /* alphabet (prefixes) */
-    int *ab_tail = new int[4096];          /* alphabet (tails) */
-    int *stack = new int[4096];            /* decompression stack */
-#else
     int ab_prefix[4096];        /* alphabet (prefixes) */
     int ab_tail[4096];          /* alphabet (tails) */
     int stack[4096];            /* decompression stack */
-#endif
+
     int ab_clr;                 /* clear code */
     int ab_fin;                 /* end of info code */
     int ab_bits;                /* actual symbol width, in bits */
@@ -468,11 +444,6 @@ int wxGIFDecoder::dgif(GIFImage *img, int interl, int bits)
     }
     while (code != ab_fin);
 
-#ifdef __WXMAC__
-    delete [] ab_prefix ;       
-    delete [] ab_tail ;       
-    delete [] stack ;       
-#endif
     return 0;
 }
 

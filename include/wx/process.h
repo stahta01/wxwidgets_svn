@@ -21,14 +21,35 @@
 #include "wx/event.h"
 
 #if wxUSE_STREAMS
-    #include "wx/stream.h"
+#include "wx/stream.h"
 #endif
 
-// ----------------------------------------------------------------------------
+// Process Event handling
+class WXDLLEXPORT wxProcessEvent : public wxEvent
+{
+DECLARE_DYNAMIC_CLASS(wxProcessEvent)
+
+public:
+    wxProcessEvent(int id = 0, int pid = 0, int exitcode = 0) : wxEvent(id)
+    {
+        m_eventType = wxEVT_END_PROCESS;
+        m_pid = pid;
+        m_exitcode = exitcode;
+    }
+
+    // accessors
+        // PID of process which terminated
+    int GetPid() { return m_pid; }
+
+        // the exit code
+    int GetExitCode() { return m_exitcode; }
+
+public:
+    int m_pid, m_exitcode;
+};
+
 // A wxProcess object should be passed to wxExecute - than its OnTerminate()
 // function will be called when the process terminates.
-// ----------------------------------------------------------------------------
-
 class WXDLLEXPORT wxProcess : public wxEvtHandler
 {
 DECLARE_DYNAMIC_CLASS(wxProcess)
@@ -83,41 +104,9 @@ protected:
     bool m_redirect;
 };
 
-// ----------------------------------------------------------------------------
-// wxProcess events
-// ----------------------------------------------------------------------------
-
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_END_PROCESS, 440)
-END_DECLARE_EVENT_TYPES()
-
-class WXDLLEXPORT wxProcessEvent : public wxEvent
-{
-public:
-    wxProcessEvent(int id = 0, int pid = 0, int exitcode = 0) : wxEvent(id)
-    {
-        m_eventType = wxEVT_END_PROCESS;
-        m_pid = pid;
-        m_exitcode = exitcode;
-    }
-
-    // accessors
-        // PID of process which terminated
-    int GetPid() { return m_pid; }
-
-        // the exit code
-    int GetExitCode() { return m_exitcode; }
-
-public:
-    int m_pid, m_exitcode;
-
-    DECLARE_DYNAMIC_CLASS(wxProcessEvent)
-};
-
 typedef void (wxObject::*wxProcessEventFunction)(wxProcessEvent&);
 
-#define EVT_END_PROCESS(id, func) \
-   DECLARE_EVENT_TABLE_ENTRY( wxEVT_END_PROCESS, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxProcessEventFunction) & func, NULL),
+#define EVT_END_PROCESS(id, func) { wxEVT_END_PROCESS, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxProcessEventFunction) & func, NULL},
 
 #endif
     // _WX_PROCESSH__

@@ -498,7 +498,7 @@ bool wxTextCtrl::CanCopy() const
     // Can copy if there's a selection
     long from, to;
     GetSelection(& from, & to);
-    return (from != to) ;
+    return (from != to);
 }
 
 bool wxTextCtrl::CanCut() const
@@ -1079,7 +1079,7 @@ wxSize wxTextCtrl::DoGetBestSize() const
     int hText = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy);
     if ( m_windowStyle & wxTE_MULTILINE )
     {
-        hText *= wxMax(GetNumberOfLines(), 5);
+        hText *= wxMin(GetNumberOfLines(), 5);
     }
     //else: for single line control everything is ok
 

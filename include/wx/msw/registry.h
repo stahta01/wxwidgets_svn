@@ -182,14 +182,8 @@ public:
 
     // set the string value
   bool  SetValue(const wxChar *szValue, const wxString& strValue);
-    // retrieve the string value
-  bool  QueryValue(const wxChar *szValue, wxString& strValue) const
-    { return QueryValue(szValue, strValue, FALSE); }
-    // retrieve raw string value
-  bool  QueryRawValue(const wxChar *szValue, wxString& strValue) const
-    { return QueryValue(szValue, strValue, TRUE); }
-    // retrieve either raw or expanded string value
-  bool  QueryValue(const wxChar *szValue, wxString& strValue, bool raw) const;
+    // return the string value
+  bool  QueryValue(const wxChar *szValue, wxString& strValue) const;
 
 #ifdef  __WIN32__
     // set the numeric value

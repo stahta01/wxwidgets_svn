@@ -36,15 +36,10 @@ public:
     // ctors and such
     wxFont() { Init(); }
     wxFont(const wxFont& font) { Init(); Ref(font); }
-    wxFont(const wxString& fontname,
-           wxFontEncoding fontenc = wxFONTENCODING_DEFAULT)
-    {
-        Init();
+    wxFont(const wxString& fontname, const wxFontData& fontdata);
 
-        Create(fontname, fontenc);
-    }
-
-    wxFont(const wxNativeFontInfo& info);
+    // assignment
+    wxFont& operator=(const wxFont& font);
 
     wxFont(int size,
            int family,
@@ -67,15 +62,7 @@ public:
                 const wxString& face = wxEmptyString,
                 wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
-    // wxGTK-specific
-    bool Create(const wxString& fontname,
-                wxFontEncoding fontenc = wxFONTENCODING_DEFAULT);
-    bool Create(const wxNativeFontInfo& fontinfo);
-
     ~wxFont();
-
-    // assignment
-    wxFont& operator=(const wxFont& font);
 
     // implement base class pure virtuals
     virtual int GetPointSize() const;
@@ -85,7 +72,6 @@ public:
     virtual wxString GetFaceName() const;
     virtual bool GetUnderlined() const;
     virtual wxFontEncoding GetEncoding() const;
-    virtual wxNativeFontInfo *GetNativeFontInfo() const;
 
     virtual void SetPointSize( int pointSize );
     virtual void SetFamily( int family );
@@ -94,7 +80,6 @@ public:
     virtual void SetFaceName( const wxString& faceName );
     virtual void SetUnderlined( bool underlined );
     virtual void SetEncoding(wxFontEncoding encoding);
-    virtual void SetNativeFontInfo( const wxNativeFontInfo& info );
 
     // implementation from now on
     void Unshare();

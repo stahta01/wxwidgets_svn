@@ -188,7 +188,6 @@ private:
     wxColour    m_darkShadowColour;
     wxColour    m_hilightColour;
     wxColour    m_faceColour;
-    bool        m_mouseCaptured;
 
 DECLARE_EVENT_TABLE()
 };
@@ -228,10 +227,8 @@ class WXDLLEXPORT wxSashEvent: public wxCommandEvent
 
 typedef void (wxEvtHandler::*wxSashEventFunction)(wxSashEvent&);
 
-#define EVT_SASH_DRAGGED(id, fn) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_SASH_DRAGGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSashEventFunction) & fn, NULL ),
-#define EVT_SASH_DRAGGED_RANGE(id1, id2, fn) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_SASH_DRAGGED, id1, id2, (wxObjectEventFunction) (wxEventFunction) (wxSashEventFunction) & fn, NULL ),
+#define EVT_SASH_DRAGGED(id, fn) { wxEVT_SASH_DRAGGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxSashEventFunction) & fn, NULL },
+#define EVT_SASH_DRAGGED_RANGE(id1, id2, fn) { wxEVT_SASH_DRAGGED, id1, id2, (wxObjectEventFunction) (wxEventFunction) (wxSashEventFunction) & fn, NULL },
 
 #endif // wxUSE_SASH
 

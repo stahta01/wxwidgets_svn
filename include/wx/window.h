@@ -333,9 +333,6 @@ public:
         // make the window modal (all other windows unresponsive)
     virtual void MakeModal(bool modal = TRUE);
 
-    virtual void SetThemeEnabled(bool enableTheme) { m_themeEnabled = enableTheme; }
-    virtual bool GetThemeEnabled() const { return m_themeEnabled; }
-
     // focus handling
     // --------------
 
@@ -582,24 +579,8 @@ public:
     virtual void ScrollWindow( int dx, int dy,
                                const wxRect* rect = (wxRect *) NULL ) = 0;
 
-    // context-sensitive help
-    // ----------------------
-
-    // these are the convenience functions wrapping wxHelpProvider methods
-
-#if wxUSE_HELP
-        // associate this help text with this window
-    void SetHelpText(const wxString& text);
-        // associate this help text with all windows with the same id as this
-        // one
-    void SetHelpTextForId(const wxString& text);
-        // get the help string associated with this window (may be empty)
-    wxString GetHelpText() const;
-#endif // wxUSE_HELP
-
     // tooltips
     // --------
-
 #if wxUSE_TOOLTIPS
         // the easiest way to set a tooltip for a window is to use this method
     void SetToolTip( const wxString &tip );
@@ -680,9 +661,6 @@ public:
     void OnSysColourChanged( wxSysColourChangedEvent& event );
     void OnInitDialog( wxInitDialogEvent &event );
     void OnMiddleClick( wxMouseEvent& event );
-#if wxUSE_HELP
-    void OnHelp(wxHelpEvent& event);
-#endif // wxUSE_HELP
 
         // get the haqndle of the window for the underlying window system: this
         // is only used for wxWin itself or for user code which wants to call
@@ -776,7 +754,6 @@ protected:
     long                 m_windowStyle,
                          m_exStyle;
     wxString             m_windowName;
-    bool                 m_themeEnabled;
 
 protected:
     // common part of all ctors: it is not virtual because it is called from
@@ -908,17 +885,10 @@ inline wxWindow *wxWindowBase::GetGrandParent() const
 }
 
 // ----------------------------------------------------------------------------
-// global functions
+// global function
 // ----------------------------------------------------------------------------
 
 WXDLLEXPORT extern wxWindow* wxGetActiveWindow();
-
-// Find the wxWindow at the current mouse position, also returning the mouse
-// position.
-WXDLLEXPORT extern wxWindow* wxFindWindowAtPointer(wxPoint& pt);
-
-// Get the current mouse position.
-WXDLLEXPORT extern wxPoint wxGetMousePosition();
 
 // deprecated (doesn't start with 'wx' prefix), use wxWindow::NewControlId()
 inline WXDLLEXPORT int NewControlId() { return wxWindowBase::NewControlId(); }

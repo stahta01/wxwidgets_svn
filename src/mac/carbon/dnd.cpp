@@ -18,8 +18,6 @@
 #include "wx/app.h"
 #include "wx/gdicmn.h"
 
-#if wxUSE_DRAG_AND_DROP
-
 // ----------------------------------------------------------------------------
 // global
 // ----------------------------------------------------------------------------
@@ -133,4 +131,3 @@ wxDragResult wxDropSource::DoDragDrop( bool WXUNUSED(bAllowMove) )
     return wxDragError;
 };
 
-#endif

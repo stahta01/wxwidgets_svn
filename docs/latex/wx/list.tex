@@ -9,7 +9,7 @@ when random access is required.
 While wxList class in the previous versions of wxWindows only could contain
 elements of type wxObject and had essentially untyped interface (thus allowing
 you to put apples in the list and read back oranges from it), the new wxList
-classes family may contain elements of any type and has much more strict type
+classes family may contain elements of any type and has much more stricter type
 checking. Unfortunately, it also requires an additional line to be inserted in
 your program for each list class you use (which is the only solution short of
 using templates which is not done in wxWindows because of portability issues).
@@ -66,9 +66,7 @@ macros):
 
 For compatibility with previous versions wxList and wxStringList classes are
 still defined, but their usage is deprecated and they will disappear in the
-future versions completely. The use of the latter is especially discouraged as
-it is not only unsafe but is also much less efficient than 
-\helpref{wxArrayString}{wxarraystring} class.
+future versions completely.
 
 In the documentation of the list classes below, you should replace wxNode with
 wxListName::Node and wxObject with the list element type (i.e. the first
@@ -292,12 +290,8 @@ Returns the number of elements in the list.
 
 Allows the sorting of arbitrary lists by giving
 a function to compare two list elements. We use the system {\bf qsort} function
-for the actual sorting process.
-
-If you use untyped wxList the sort function receives pointers to wxObject
-pointers (wxObject **), so be careful to dereference appropriately - but,
-of course, a better solution is to use list of appropriate type defined with
-{\tt WX\_DECLARE\_LIST}.
+for the actual sorting process. The sort function receives pointers to wxObject pointers (wxObject **),
+so be careful to dereference appropriately.
 
 Example:
 

@@ -1,5 +1,8 @@
-wxWindows 2.2.0
+wxWindows 2.2.5
 ---------------
+
+README
+------
 
 Welcome to wxWindows 2, a sophisticated cross-platform C++
 framework for writing advanced GUI applications using (where
@@ -34,6 +37,9 @@ wxWindows 2 currently supports the following platforms:
 - Mac (not covered here: please see the wxWindows web site
   for details)
 
+Additionally, the wxBase library containing only the non GUI classes can be
+built under Unix/Win32 and (with some limitation) BeOS.
+
 Most popular C++ compilers are supported; see the install.txt
 file for each platform (available via docs/html/index.htm) for details.
 See also http://www.lpthe.jussieu.fr/~zeitlin/wxWindows/platform.html.
@@ -45,7 +51,7 @@ The distribution is available in archive formats appropriate to the
 target system. Documentation is available mainly in zip format.
 Some add-on libraries (such as the Object Graphics Library) are
 available in zip form only. In the following, x.y.z represents
-the current version number.
+the current version number (for example, 2.2.3).
 
 wxWindows for GTK distribution
 ------------------------------
@@ -87,6 +93,24 @@ As well as the core source, the wxMSW distribution contains:
 - the JPEG library source;
 - the TIFF library source.
 
+wxBase (wxWindows without GUI) distribution
+-------------------------------------------
+
+wxBase-x.y.z.tgz                    wxBase source distribution (the same files
+wxBase-x.y.z.zip                    but compressed using different formats)
+
+wxBase-x.y.z-0.i386.rpm             wxBase Linux binaries as an RPM
+wxBase-x.y.z-0.src.rpm              source for the i386 RPM above
+wxBase-devel-x.y.z-0.i386.rpm       wxBase headers (requires wxBase.rpm)
+
+wxBase doesn't include the documentation as you are likely to already have it
+from either wxGTK or wxMSW distributions. If you don't, please download the
+manual separately.
+
+NB: you can also build wxBase from the files included in either wxMSW or wxGTK
+    distribution (follow the same instructions as for wxBase distribution in
+    doc/base/install.txt)
+    
 Documentation files
 -------------------
 
@@ -126,6 +150,7 @@ the samples or write your own applications.
 For installation information, please see the install.txt file
 in the individual directories:
 
+  docs/base
   docs/msw
   docs/gtk
   docs/motif
@@ -206,5 +231,5 @@ web site) or contact Julian Smart <julian.smart@ukonline.co.uk>.
 
 Good luck!
 
-The wxWindows Team, 9th July, 2000
+The wxWindows Team, 28th January, 2001
 

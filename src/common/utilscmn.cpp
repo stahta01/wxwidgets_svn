@@ -66,10 +66,6 @@
 
 #if wxUSE_GUI
     #include "wx/colordlg.h"
-    #include "wx/notebook.h"
-    #include "wx/frame.h"
-    #include "wx/statusbr.h"
-    #include "wx/toolbar.h"
 #endif // wxUSE_GUI
 
 #include <time.h>
@@ -671,95 +667,6 @@ wxFindMenuItemId (wxFrame * frame, const wxString& menuString, const wxString& i
   return menuBar->FindMenuItem (menuString, itemString);
 }
 
-// Try to find the deepest child that contains 'pt'.
-// We go backwards, to try to allow for controls that are spacially
-// within other controls, but are still siblings (e.g. buttons within
-// static boxes). Static boxes are likely to be created _before_ controls
-// that sit inside them.
-wxWindow* wxFindWindowAtPoint(wxWindow* win, const wxPoint& pt)
-{
-    if (!win->IsShown())
-        return NULL;
-
-    // Hack for wxNotebook case: at least in wxGTK, all pages
-    // claim to be shown, so we must only deal with the selected one.
-    if (win->IsKindOf(CLASSINFO(wxNotebook)))
-    {
-      wxNotebook* nb = (wxNotebook*) win;
-      int sel = nb->GetSelection();
-      if (sel >= 0)
-      {
-        wxWindow* child = nb->GetPage(sel);
-        wxWindow* foundWin = wxFindWindowAtPoint(child, pt);
-        if (foundWin)
-           return foundWin;
-      }
-    }
-    /* Doesn't work
-    // Frame case
-    else if (win->IsKindOf(CLASSINFO(wxFrame)))
-    {
-      // Pseudo-children that may not be mentioned in the child list
-      wxWindowList extraChildren;
-      wxFrame* frame = (wxFrame*) win;
-      if (frame->GetStatusBar())
-        extraChildren.Append(frame->GetStatusBar());
-      if (frame->GetToolBar())
-        extraChildren.Append(frame->GetToolBar());
-
-      wxNode* node = extraChildren.First();
-      while (node)
-      {
-          wxWindow* child = (wxWindow*) node->Data();
-          wxWindow* foundWin = wxFindWindowAtPoint(child, pt);
-          if (foundWin)
-            return foundWin;
-          node = node->Next();
-      }
-    }
-    */
-
-    wxNode* node = win->GetChildren().Last();
-    while (node)
-    {
-        wxWindow* child = (wxWindow*) node->Data();
-        wxWindow* foundWin = wxFindWindowAtPoint(child, pt);
-        if (foundWin)
-          return foundWin;
-        node = node->Previous();
-    }
-
-    wxPoint pos = win->GetPosition();
-    wxSize sz = win->GetSize();
-    if (win->GetParent())
-    {
-        pos = win->GetParent()->ClientToScreen(pos);
-    }
-
-    wxRect rect(pos, sz);
-    if (rect.Inside(pt))
-        return win;
-    else
-        return NULL;
-}
-
-wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt)
-{
-    // Go backwards through the list since windows
-    // on top are likely to have been appended most
-    // recently.
-    wxNode* node = wxTopLevelWindows.Last();
-    while (node)
-    {
-        wxWindow* win = (wxWindow*) node->Data();
-        wxWindow* found = wxFindWindowAtPoint(win, pt);
-        if (found)
-            return found;
-        node = node->Previous();
-    }
-    return NULL;
-}
-
 #endif // wxUSE_GUI
 
 /*
@@ -1071,6 +978,17 @@ void wxEnableTopLevelWindows(bool enable)
 
 wxWindowDisabler::wxWindowDisabler(wxWindow *winToSkip)
 {
+#ifdef __WXMSW__
+#ifdef __WIN32__
+    // and the top level window too
+    HWND hwndFG = ::GetForegroundWindow();
+    m_winTop = hwndFG ? wxFindWinFromHandle((WXHWND)hwndFG) : (wxWindow *)NULL;
+#else
+    HWND hwndFG = ::GetTopWindow(0);
+    m_winTop = hwndFG ? wxFindWinFromHandle((WXHWND)hwndFG) : (wxWindow *)NULL;
+#endif
+#endif // MSW
+
     // remember the top level windows which were already disabled, so that we
     // don't reenable them later
     m_winDisabled = NULL;
@@ -1112,6 +1030,29 @@ wxWindowDisabler::~wxWindowDisabler()
     }
 
     delete m_winDisabled;
+
+#ifdef __WXMSW__
+#ifdef __WIN32__
+    if ( m_winTop )
+    {
+        if ( !::SetForegroundWindow(GetHwndOf(m_winTop)) )
+        {
+            wxLogLastError(wxT("SetForegroundWindow"));
+        }
+    }
+#else
+    if ( m_winTop )
+    {
+        // 16-bit SetForegroundWindow() replacement
+        RECT reWin;
+        GetWindowRect((HWND) m_winTop, &reWin);
+        SetWindowPos ((HWND) m_winTop, HWND_TOP,
+                             reWin.left, reWin.top, 
+                             reWin.right - reWin.left, reWin.bottom, 
+                             SWP_SHOWWINDOW);
+    }
+#endif
+#endif // MSW
 }
 
 // Yield to other apps/messages and disable user input to all windows except

@@ -82,23 +82,19 @@ void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
     templen = 0;
     i = begin_pos;
 
-    while (i < end_pos) 
-    {
+    while (i < end_pos) {
         c = m_Source[(unsigned int) i];
 
         // continue building word:
-        if (c != '<') 
-	    {
+        if (c != '<') {
             temp[templen++] = c;
             i++;
         }
 
-        else if (c == '<')  
-	    {
+        else if (c == '<')  {
             wxHtmlTag tag(m_Source, i, end_pos, m_Cache);
 
-            if (templen) 
-	        {
+            if (templen) {
                 temp[templen] = 0;
                 AddText(temp);
                 templen = 0;
@@ -109,8 +105,7 @@ void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
         }
     }
 
-    if (templen) 
-    { // last word of block :-(
+    if (templen) { // last word of block :-(
         temp[templen] = 0;
         AddText(temp);
     }
@@ -126,9 +121,8 @@ void wxHtmlParser::AddTag(const wxHtmlTag& tag)
 
     h = (wxHtmlTagHandler*) m_HandlersHash.Get(tag.GetName());
     if (h)
-        inner = h->HandleTag(tag);
-    if (!inner) 
-    {
+        inner = h -> HandleTag(tag);
+    if (!inner) {
         if (tag.HasEnding())
             DoParsing(tag.GetBeginPos(), tag.GetEndPos1());
     }
@@ -138,7 +132,7 @@ void wxHtmlParser::AddTag(const wxHtmlTag& tag)
 
 void wxHtmlParser::AddTagHandler(wxHtmlTagHandler *handler)
 {
-    wxString s(handler->GetSupportedTags());
+    wxString s(handler -> GetSupportedTags());
     wxStringTokenizer tokenizer(s, ", ");
 
     while (tokenizer.HasMoreTokens())
@@ -147,7 +141,7 @@ void wxHtmlParser::AddTagHandler(wxHtmlTagHandler *handler)
     if (m_HandlersList.IndexOf(handler) == wxNOT_FOUND)
         m_HandlersList.Append(handler);
 
-    handler->SetParser(this);
+    handler -> SetParser(this);
 }
 
 
@@ -157,16 +151,14 @@ void wxHtmlParser::PushTagHandler(wxHtmlTagHandler *handler, wxString tags)
     wxStringTokenizer tokenizer(tags, ", ");
     wxString key;
 
-    if (m_HandlersStack == NULL) 
-    {
+    if (m_HandlersStack == NULL) {
         m_HandlersStack = new wxList;
-        m_HandlersStack->DeleteContents(TRUE);
+        m_HandlersStack -> DeleteContents(TRUE);
     }
 
-    m_HandlersStack->Insert(new wxHashTable(m_HandlersHash));
+    m_HandlersStack -> Insert(new wxHashTable(m_HandlersHash));
 
-    while (tokenizer.HasMoreTokens()) 
-    {
+    while (tokenizer.HasMoreTokens()) {
         key = tokenizer.NextToken();
         m_HandlersHash.Delete(key);
         m_HandlersHash.Put(key, handler);
@@ -180,13 +172,13 @@ void wxHtmlParser::PopTagHandler()
     wxNode *first;
     
     if (m_HandlersStack == NULL || 
-        (first = m_HandlersStack->GetFirst()) == NULL) 
+        (first = m_HandlersStack -> GetFirst()) == NULL) 
     {
         wxLogWarning(_("Warning: attempt to remove HTML tag handler from empty stack."));
         return;
     }
-    m_HandlersHash = *((wxHashTable*) first->GetData());
-    m_HandlersStack->DeleteNode(first);
+    m_HandlersHash = *((wxHashTable*) first -> GetData());
+    m_HandlersStack -> DeleteNode(first);
 }
 
 

@@ -26,8 +26,6 @@
 
 #include "wx/process.h"
 
-DEFINE_EVENT_TYPE(wxEVT_END_PROCESS)
-
 IMPLEMENT_DYNAMIC_CLASS(wxProcess, wxEvtHandler)
 IMPLEMENT_DYNAMIC_CLASS(wxProcessEvent, wxEvent)
 

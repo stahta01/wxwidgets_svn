@@ -40,7 +40,6 @@ class WXDLLEXPORT wxProcess;
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxWindow;
 class WXDLLEXPORT wxWindowList;
-class WXDLLEXPORT wxPoint;
 
 // FIXME should use wxStricmp() instead
 #if defined(__GNUWIN32__)
@@ -59,7 +58,7 @@ class WXDLLEXPORT wxPoint;
 // String functions (deprecated, use wxString)
 // ----------------------------------------------------------------------------
 
-// Useful buffer (FIXME VZ: To be removed!!!)
+// Useful buffer (FIXME VZ: yeah, that is. To be removed!)
 WXDLLEXPORT_DATA(extern wxChar*) wxBuffer;
 
 // Make a copy of this string using 'new'
@@ -204,20 +203,6 @@ WXDLLEXPORT long wxGetFreeMemory();
 WXDLLEXPORT bool wxHandleFatalExceptions(bool doit = TRUE);
 
 // ----------------------------------------------------------------------------
-// Environment variables
-// ----------------------------------------------------------------------------
-
-// returns TRUE if variable exists (value may be NULL if you just want to check
-// for this)
-WXDLLEXPORT bool wxGetEnv(const wxString& var, wxString *value);
-
-// set the env var name to the given value, return TRUE on success
-WXDLLEXPORT bool wxSetEnv(const wxString& var, const wxChar *value);
-
-// remove the env var from environment
-inline bool wxUnsetEnv(const wxString& var) { return wxSetEnv(var, NULL); }
-
-// ----------------------------------------------------------------------------
 // Network and username functions.
 // ----------------------------------------------------------------------------
 
@@ -284,11 +269,6 @@ WXDLLEXPORT wxWindow* wxFindWindowByName(const wxString& name, wxWindow *parent 
 // Returns menu item id or -1 if none.
 WXDLLEXPORT int wxFindMenuItemId(wxFrame *frame, const wxString& menuString, const wxString& itemString);
 
-// Find the wxWindow at the given point. wxGenericFindWindowAtPoint
-// is always present but may be less reliable than a native version.
-WXDLLEXPORT wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt);
-WXDLLEXPORT wxWindow* wxFindWindowAtPoint(const wxPoint& pt);
-
 // ----------------------------------------------------------------------------
 // Message/event queue helpers
 // ----------------------------------------------------------------------------
@@ -319,6 +299,11 @@ public:
 
 private:
     wxWindowList *m_winDisabled;
+
+    // not used any more but left here for binary compatibility
+#ifdef __WXMSW__
+    wxWindow *m_winTop;
+#endif // MSW
 };
 
 // ----------------------------------------------------------------------------

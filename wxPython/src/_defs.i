@@ -218,6 +218,10 @@ enum {
     wxFRAME_TOOL_WINDOW,
     wxFRAME_FLOAT_ON_PARENT,
     wxFRAME_NO_WINDOW_MENU,
+#ifdef FOR_2_3
+    wxFRAME_NO_TASKBAR,
+    wxFRAME_EX_CONTEXTHELP,
+#endif
     wxED_CLIENT_MARGIN,
     wxED_BUTTONS_BOTTOM,
     wxED_BUTTONS_RIGHT,
@@ -316,12 +320,19 @@ enum {
     wxLC_MASK_TYPE,
     wxLC_MASK_ALIGN,
     wxLC_MASK_SORT,
+#ifdef FOR_2_3
+    wxLC_HRULES,
+    wxLC_VRULES,
+#endif
     wxSP_VERTICAL,
     wxSP_HORIZONTAL,
     wxSP_ARROW_KEYS,
     wxSP_WRAP,
     wxSP_NOBORDER,
     wxSP_3D,
+    wxSP_3DSASH,
+    wxSP_3DBORDER,
+    wxSP_FULLSASH,
     wxSP_BORDER,
     wxSP_LIVE_UPDATE,
     wxSP_PERMIT_UNSPLIT,

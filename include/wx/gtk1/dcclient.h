@@ -40,8 +40,7 @@ public:
     virtual bool CanDrawBitmap() const { return TRUE; }
     virtual bool CanGetTextExtent() const { return TRUE; }
 
-protected:
-    virtual void DoGetSize(int *width, int *height) const;
+//protected:
     virtual void DoFloodFill( wxCoord x, wxCoord y, const wxColour& col, int style=wxFLOOD_SURFACE );
     virtual bool DoGetPixel( wxCoord x1, wxCoord y1, wxColour *col ) const;
 
@@ -79,8 +78,6 @@ protected:
                                 wxCoord *descent = (wxCoord *) NULL,
                                 wxCoord *externalLeading = (wxCoord *) NULL,
                                 wxFont *theFont = (wxFont *) NULL) const;
-
-public:
     virtual wxCoord GetCharWidth() const;
     virtual wxCoord GetCharHeight() const;
 
@@ -122,10 +119,6 @@ public:
     wxWindow     *m_owner;
     wxRegion      m_currentClippingRegion;
     wxRegion      m_paintClippingRegion;
-#ifdef __WXGTK20__
-    PangoContext *m_context;
-    PangoFontDescription *m_fontdesc;
-#endif
 
     void SetUpDC();
     void Destroy();
@@ -138,34 +131,31 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// wxPaintDC
+//-----------------------------------------------------------------------------
+
+class wxPaintDC : public wxWindowDC
+{
+public:
+    wxPaintDC();
+    wxPaintDC( wxWindow *win );
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxPaintDC)
+};
+
+//-----------------------------------------------------------------------------
 // wxClientDC
 //-----------------------------------------------------------------------------
 
 class wxClientDC : public wxWindowDC
 {
 public:
-    wxClientDC() { }
+    wxClientDC();
     wxClientDC( wxWindow *win );
-
-protected:
-    virtual void DoGetSize(int *width, int *height) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxClientDC)
-};
-
-//-----------------------------------------------------------------------------
-// wxPaintDC
-//-----------------------------------------------------------------------------
-
-class wxPaintDC : public wxClientDC
-{
-public:
-    wxPaintDC() { }
-    wxPaintDC( wxWindow *win );
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxPaintDC)
 };
 
 #endif // __GTKDCCLIENTH__

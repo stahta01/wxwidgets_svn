@@ -427,23 +427,18 @@ void wxFrameBase::DoMenuUpdates()
 {
     wxMenuBar* bar = GetMenuBar();
 
-#ifdef __WXMSW__
-    wxWindow* focusWin = wxFindFocusDescendant((wxWindow*) this);
-#else
-    wxWindow* focusWin = (wxWindow*) NULL;
-#endif
     if ( bar != NULL )
     {
         int nCount = bar->GetMenuCount();
         for (int n = 0; n < nCount; n++)
-            DoMenuUpdates(bar->GetMenu(n), focusWin);
+            DoMenuUpdates(bar->GetMenu(n), (wxWindow*) NULL);
     }
 }
 
 // update a menu and all submenus recursively
-void wxFrameBase::DoMenuUpdates(wxMenu* menu, wxWindow* focusWin)
+void wxFrameBase::DoMenuUpdates(wxMenu* menu, wxWindow* WXUNUSED(focusWin))
 {
-    wxEvtHandler* evtHandler = focusWin ? focusWin->GetEventHandler() : GetEventHandler();
+    wxEvtHandler* evtHandler = GetEventHandler();
     wxMenuItemList::Node* node = menu->GetMenuItems().GetFirst();
     while (node)
     {

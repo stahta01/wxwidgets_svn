@@ -1042,7 +1042,7 @@ long wxMDIChildFrame::MSWDefWindowProc(WXUINT message, WXUINT wParam, WXLPARAM l
 
 bool wxMDIChildFrame::MSWTranslateMessage(WXMSG* msg)
 {
-    return wxFrame::MSWTranslateMessage(msg);
+    return m_acceleratorTable.Translate(GetParent(), msg);
 }
 
 // ---------------------------------------------------------------------------
@@ -1088,31 +1088,25 @@ bool wxMDIChildFrame::ResetWindowStyle(void *vrect)
     wxMDIChildFrame* pChild = pFrameWnd->GetActiveChild();
     if (!pChild || (pChild == this))
     {
-        HWND hwndClient = GetWinHwnd(pFrameWnd->GetClientWindow());
-        DWORD dwStyle = ::GetWindowLong(hwndClient, GWL_EXSTYLE);
-
-        // we want to test whether there is a maximized child, so just set
-        // dwThisStyle to 0 if there is no child at all
-        DWORD dwThisStyle = pChild
-            ? ::GetWindowLong(GetWinHwnd(pChild), GWL_STYLE) : NULL;
+        DWORD dwStyle = ::GetWindowLong(GetWinHwnd(pFrameWnd->GetClientWindow()), GWL_EXSTYLE);
+        DWORD dwThisStyle = ::GetWindowLong(GetHwnd(), GWL_STYLE);
         DWORD dwNewStyle = dwStyle;
-        if ( dwThisStyle & WS_MAXIMIZE )
+        if (pChild != NULL && (dwThisStyle & WS_MAXIMIZE))
             dwNewStyle &= ~(WS_EX_CLIENTEDGE);
         else
             dwNewStyle |= WS_EX_CLIENTEDGE;
 
         if (dwStyle != dwNewStyle)
         {
-            // force update of everything
-            ::RedrawWindow(hwndClient, NULL, NULL,
-                           RDW_INVALIDATE | RDW_ALLCHILDREN);
-            ::SetWindowLong(hwndClient, GWL_EXSTYLE, dwNewStyle);
-            ::SetWindowPos(hwndClient, NULL, 0, 0, 0, 0,
+            HWND hwnd = GetWinHwnd(pFrameWnd->GetClientWindow());
+            ::RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ALLCHILDREN);
+            ::SetWindowLong(hwnd, GWL_EXSTYLE, dwNewStyle);
+            ::SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
                            SWP_FRAMECHANGED | SWP_NOACTIVATE |
                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
                            SWP_NOCOPYBITS);
             if (rect)
-                ::GetClientRect(hwndClient, rect);
+                ::GetClientRect(hwnd, rect);
 
             return TRUE;
         }
@@ -1140,7 +1134,7 @@ bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
         ccs.hWindowMenu = (HMENU) parent->GetWindowMenu()->GetHMenu();
     ccs.idFirstChild = wxFIRST_MDI_CHILD;
 
-    DWORD msStyle = MDIS_ALLCHILDSTYLES | WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN;
+    DWORD msStyle = WS_VISIBLE | WS_CHILD | WS_CLIPCHILDREN;
     if ( style & wxHSCROLL )
         msStyle |= WS_HSCROLL;
     if ( style & wxVSCROLL )

@@ -663,7 +663,6 @@ trap 'rm -fr `echo "
             dragimag/Makefile
             drawing/Makefile
             dynamic/Makefile
-            event/Makefile
             exec/Makefile
             font/Makefile
             grid/Makefile
@@ -676,7 +675,6 @@ trap 'rm -fr `echo "
             listctrl/Makefile
             mdi/Makefile
             menu/Makefile
-            memcheck/Makefile
             minifram/Makefile
             minimal/Makefile
             newgrid/Makefile
@@ -808,7 +806,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             dragimag/Makefile
             drawing/Makefile
             dynamic/Makefile
-            event/Makefile
             exec/Makefile
             font/Makefile
             grid/Makefile
@@ -821,7 +818,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             listctrl/Makefile
             mdi/Makefile
             menu/Makefile
-            memcheck/Makefile
             minifram/Makefile
             minimal/Makefile
             newgrid/Makefile

@@ -21,8 +21,6 @@
 #include "wx/gdicmn.h"
 #include "wx/dnd.h"
 
-#if wxUSE_DRAG_AND_DROP
-
 // ----------------------------------------------------------------------------
 // global
 // ----------------------------------------------------------------------------
@@ -136,4 +134,3 @@ void wxDropSource::Init()
     // TODO
 };
 
-#endif //wxUSE_DRAG_AND_DROP

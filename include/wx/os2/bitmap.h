@@ -54,12 +54,11 @@ public:
     // ------------
 
     wxDC*                           m_pSelectedInto;
+    HPS                             m_hPresentationSpace;
 
-    //
-    // Optional mask for transparent drawing
-    //
+    // optional mask for transparent drawing
     wxMask*                         m_pBitmapMask;
-}; // end of CLASS wxBitmapRefData
+};
 
 // ----------------------------------------------------------------------------
 // wxBitmap: a mono or colour bitmap
@@ -83,8 +82,9 @@ public:
             );
 
     // Initialize with XPM data
-    wxBitmap(const char** ppData);
-    wxBitmap(char** ppData);
+    wxBitmap( char**     ppData
+             ,wxControl* pAnItem = NULL
+            );
 
     // Load a file or resource
     wxBitmap( const wxString& rName
@@ -131,9 +131,6 @@ public:
     }
 
     virtual ~wxBitmap();
-
-    // get the given part of bitmap
-    wxBitmap GetSubBitmap(const wxRect& rRect) const;
 
     // copies the contents and mask of the given (colour) icon to the bitmap
     bool CopyFromIcon(const wxIcon& rIcon);
@@ -213,10 +210,6 @@ public:
     // An OS/2 version that probably doesn't do anything like the msw version
     wxBitmap GetBitmapForDC(wxDC& rDc) const;
 
-//    inline LONG GetId() const
-//      { return (GetBitmapData() ? GetBitmapData()->m_lId : 0L); }
-
-
 protected:
     // common part of all ctors
     void Init();
@@ -224,14 +217,11 @@ protected:
     inline virtual wxGDIImageRefData* CreateData() const
         { return new wxBitmapRefData; }
 
-    // creates the bitmap from XPM data, supposed to be called from ctor
-    bool CreateFromXpm(const char **bits);
-
 private:
     bool CopyFromIconOrCursor(const wxGDIImage& rIcon);
 
     DECLARE_DYNAMIC_CLASS(wxBitmap)
-}; // end of CLASS wxBitmap
+};
 
 // ----------------------------------------------------------------------------
 // wxMask: a mono bitmap used for drawing bitmaps transparently.
@@ -280,7 +270,10 @@ public:
 protected:
     WXHBITMAP                       m_hMaskBitmap;
     DECLARE_DYNAMIC_CLASS(wxMask)
-}; // end of CLASS wxMask
+private:
+    HDC                             m_hDc;
+    HPS                             m_hPs;
+};
 
 // ----------------------------------------------------------------------------
 // wxBitmapHandler is a class which knows how to load/save bitmaps to/from file
@@ -344,7 +337,7 @@ public:
                      );
 private:
     DECLARE_DYNAMIC_CLASS(wxBitmapHandler)
-}; // end of CLASS wxBitmapHandler
+};
 
 #endif
   // _WX_BITMAP_H_

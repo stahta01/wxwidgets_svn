@@ -23,8 +23,10 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 // Dialog boxes
 class WXDLLEXPORT wxDialog : public wxDialogBase
 {
+    DECLARE_DYNAMIC_CLASS(wxDialog)
+
 public:
-    wxDialog() { Init(); }
+    wxDialog();
 
     // Constructor with a modal flag, but no window id - the old convention
     wxDialog(wxWindow *parent,
@@ -114,17 +116,9 @@ protected:
     // show modal dialog and enter modal loop
     void DoShowModal();
 
-    // common part of all ctors
-    void Init();
-
 private:
     wxWindow *m_oldFocus;
 
-    // while we are showing a modal dialog we disable the other windows using
-    // this object
-    class wxWindowDisabler *m_windowDisabler;
-
-    DECLARE_DYNAMIC_CLASS(wxDialog)
     DECLARE_EVENT_TABLE()
 };
 

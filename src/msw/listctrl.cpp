@@ -40,8 +40,8 @@
 
 #include "wx/textctrl.h"
 #include "wx/imaglist.h"
+
 #include "wx/listctrl.h"
-#include "wx/dcclient.h"
 
 #include "wx/msw/private.h"
 
@@ -72,32 +72,11 @@ static void wxConvertToMSWListItem(const wxListCtrl *ctrl, wxListItem& info, LV_
 static void wxConvertFromMSWListItem(const wxListCtrl *ctrl, wxListItem& info, LV_ITEM& tvItem, HWND getFullInfo = 0);
 
 // ----------------------------------------------------------------------------
-// events
+// macros
 // ----------------------------------------------------------------------------
-
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_DRAG)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_RDRAG)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_END_LABEL_EDIT)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ITEM)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_GET_INFO)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_SET_INFO)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_SELECTED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_DESELECTED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_KEY_DOWN)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_INSERT_ITEM)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_ACTIVATED)
 
 IMPLEMENT_DYNAMIC_CLASS(wxListCtrl, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxListItem, wxObject)
-
-BEGIN_EVENT_TABLE(wxListCtrl, wxControl)
-    EVT_PAINT(wxListCtrl::OnPaint)
-END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
@@ -147,7 +126,6 @@ void wxListCtrl::Init()
     m_imageListNormal = NULL;
     m_imageListSmall = NULL;
     m_imageListState = NULL;
-    m_ownsImageListNormal = m_ownsImageListSmall = m_ownsImageListState = FALSE;
     m_baseStyle = 0;
     m_colCount = 0;
     m_textCtrl = NULL;
@@ -302,10 +280,6 @@ wxListCtrl::~wxListCtrl()
         delete m_textCtrl;
         m_textCtrl = NULL;
     }
-    
-    if (m_ownsImageListNormal) delete m_imageListNormal;
-    if (m_ownsImageListSmall) delete m_imageListSmall;
-    if (m_ownsImageListState) delete m_imageListState;
 }
 
 // ----------------------------------------------------------------------------
@@ -661,14 +635,11 @@ bool wxListCtrl::SetItem(wxListItem& info)
     // check whether it has any custom attributes
     if ( info.HasAttributes() )
     {
-
         wxListItemAttr *attr;
         attr = (wxListItemAttr*) m_attrs.Get(item.iItem);
 
         if (attr == NULL)
-
             m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
-
         else *attr = *info.GetAttributes();
 
         m_hasAnyAttr = TRUE;
@@ -934,36 +905,19 @@ void wxListCtrl::SetImageList(wxImageList *imageList, int which)
     if ( which == wxIMAGE_LIST_NORMAL )
     {
         flags = LVSIL_NORMAL;
-        if (m_ownsImageListNormal) delete m_imageListNormal;
         m_imageListNormal = imageList;
-        m_ownsImageListNormal = FALSE;
     }
     else if ( which == wxIMAGE_LIST_SMALL )
     {
         flags = LVSIL_SMALL;
-        if (m_ownsImageListSmall) delete m_imageListSmall;
         m_imageListSmall = imageList;
-        m_ownsImageListSmall = FALSE;
     }
     else if ( which == wxIMAGE_LIST_STATE )
     {
         flags = LVSIL_STATE;
-        if (m_ownsImageListState) delete m_imageListState;
         m_imageListState = imageList;
-        m_ownsImageListState = FALSE;
     }
     ListView_SetImageList(GetHwnd(), (HIMAGELIST) imageList ? imageList->GetHIMAGELIST() : 0, flags);
-}
-
-void wxListCtrl::AssignImageList(wxImageList *imageList, int which)
-{
-    SetImageList(imageList, which);
-    if ( which == wxIMAGE_LIST_NORMAL )
-        m_ownsImageListNormal = TRUE;
-    else if ( which == wxIMAGE_LIST_SMALL )
-        m_ownsImageListSmall = TRUE;
-    else if ( which == wxIMAGE_LIST_STATE )
-        m_ownsImageListState = TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -1098,10 +1052,8 @@ long wxListCtrl::FindItem(long start, const wxString& str, bool partial)
 
     // ListView_FindItem() excludes the first item from search and to look
     // through all the items you need to start from -1 which is unnatural and
-    // inconsistent with the generic version - so we adjust the index
-    if (start != -1)
-        start --;
-    return ListView_FindItem(GetHwnd(), (int) start, &findInfo);
+    // inconsitent with the generic version - so we adjust the index
+    return ListView_FindItem(GetHwnd(), (int) start - 1, &findInfo);
 }
 
 // Find an item whose data matches this data, starting from the item after 'start'
@@ -1180,14 +1132,11 @@ long wxListCtrl::InsertItem(wxListItem& info)
     // check whether it has any custom attributes
     if ( info.HasAttributes() )
     {
-
         wxListItemAttr *attr;
         attr = (wxListItemAttr*) m_attrs.Get(item.iItem);
 
         if (attr == NULL)
-
             m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
-
         else *attr = *info.GetAttributes();
 
         m_hasAnyAttr = TRUE;
@@ -1730,71 +1679,6 @@ wxChar *wxListCtrl::AddPool(const wxString& str)
     }
     wxNode *node = m_stringPool.Add(WXSTRINGCAST str);
     return (wxChar *)node->Data();
-}
-
-// Necessary for drawing hrules and vrules, if specified
-void wxListCtrl::OnPaint(wxPaintEvent& event)
-{
-    wxPaintDC dc(this);
-
-    wxControl::OnPaint(event);
-
-    // Reset the device origin since it may have been set
-    dc.SetDeviceOrigin(0, 0);
-
-    bool drawHRules = ((GetWindowStyle() & wxLC_HRULES) != 0);
-    bool drawVRules = ((GetWindowStyle() & wxLC_VRULES) != 0);
-
-    if (!drawHRules && !drawVRules)
-        return;
-    if ((GetWindowStyle() & wxLC_REPORT) == 0)
-        return;
-
-    wxPen pen(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DLIGHT), 1, wxSOLID);
-    dc.SetPen(pen);
-    dc.SetBrush(* wxTRANSPARENT_BRUSH);
-
-    wxSize clientSize = GetClientSize();
-    wxRect itemRect;
-    int cy=0;
-
-    int itemCount = GetItemCount();
-    int i;
-    for (i = 0; i < itemCount; i++)
-    {
-        if (GetItemRect(i, itemRect))
-        {
-            cy = itemRect.GetTop();
-            if (i != 0) // Don't draw the first one
-            {
-                dc.DrawLine(0, cy, clientSize.x, cy);
-            }
-            // Draw last line
-            if (i == (GetItemCount() - 1))
-            {
-                cy = itemRect.GetBottom();
-                dc.DrawLine(0, cy, clientSize.x, cy);
-            }
-        }
-    }
-    i = (GetItemCount() - 1);
-    if (drawVRules && (i > -1))
-    {
-        wxRect firstItemRect;
-        GetItemRect(0, firstItemRect);
-
-        if (GetItemRect(i, itemRect))
-        {
-            int col;
-            int x = itemRect.GetX();
-            for (col = 0; col < GetColumnCount(); col++)
-            {
-                int colWidth = GetColumnWidth(col);
-                x += colWidth ;
-                dc.DrawLine(x, firstItemRect.GetY() - 2, x, itemRect.GetBottom());
-            }
-        }
-    }
 }
 
 // ----------------------------------------------------------------------------

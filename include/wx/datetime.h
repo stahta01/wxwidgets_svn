@@ -100,7 +100,7 @@ class WXDLLEXPORT wxDateSpan;
 // wxInvalidDateTime)
 class WXDLLEXPORT wxDateTime;
 
-WXDLLEXPORT_DATA(extern const wxDateTime&) wxDefaultDateTime;
+WXDLLEXPORT_DATA(extern wxDateTime&) wxDefaultDateTime;
 #define wxInvalidDateTime wxDefaultDateTime
 
 // ----------------------------------------------------------------------------
@@ -760,9 +760,8 @@ public:
     // result of timezone shift)
     // ------------------------------------------------------------------------
 
-        // is the date valid? Note that this will return TRUE for non
-        // initialized objects but FALSE if *this == wxInvalidDateTime
-    inline bool IsValid() const { return m_time != wxInvalidDateTime.m_time; }
+        // is the date valid (TRUE even for non initialized objects)?
+    inline bool IsValid() const { return this != &wxInvalidDateTime; }
 
         // get the broken down date/time representation in the given timezone
         //

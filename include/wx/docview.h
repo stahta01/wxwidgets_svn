@@ -348,9 +348,9 @@ public:
     virtual wxDocTemplate *SelectDocumentPath(wxDocTemplate **templates,
             int noTemplates, wxString& path, long flags, bool save = FALSE);
     virtual wxDocTemplate *SelectDocumentType(wxDocTemplate **templates,
-            int noTemplates, bool sort = FALSE);
+            int noTemplates);
     virtual wxDocTemplate *SelectViewType(wxDocTemplate **templates,
-            int noTemplates, bool sort = FALSE);
+            int noTemplates);
     virtual wxDocTemplate *FindTemplateForPath(const wxString& path);
 
     void AssociateTemplate(wxDocTemplate *temp);
@@ -373,8 +373,7 @@ public:
     virtual void ActivateView(wxView *view, bool activate = TRUE, bool deleting = FALSE);
     virtual wxView *GetCurrentView() const;
 
-    wxList& GetDocuments() { return m_docs; }
-    wxList& GetTemplates() { return m_templates; }
+    virtual wxList& GetDocuments() const { return (wxList&) m_docs; }
 
     // Make a default document name
     virtual bool MakeDefaultName(wxString& buf);
@@ -566,20 +565,11 @@ public:
     int GetMaxCommands() const { return m_maxNoCommands; }
     virtual void ClearCommands();
 
-    // By default, the accelerators are "\tCtrl+Z" and "\tCtrl+Y"
-    const wxString& GetUndoAccelerator() const { return m_undoAccelerator; }
-    const wxString& GetRedoAccelerator() const { return m_redoAccelerator; }
-
-    void SetUndoAccelerator(const wxString& accel) { m_undoAccelerator = accel; }
-    void SetRedoAccelerator(const wxString& accel) { m_redoAccelerator = accel; }
-
 protected:
     int           m_maxNoCommands;
     wxList        m_commands;
     wxNode*       m_currentCommand;
     wxMenu*       m_commandEditMenu;
-    wxString      m_undoAccelerator;
-    wxString      m_redoAccelerator;
 };
 
 // ----------------------------------------------------------------------------
