@@ -317,16 +317,13 @@ wxSize wxRadioBox::LayoutItems()
         num_of_cols = num_per_major;
         num_of_rows = m_majorDim;
     }
-    
-    int lineheight = GetCharHeight()+2;
-    
+
     if ( HasFlag(wxRA_SPECIFY_COLS) ||
          (HasFlag(wxRA_SPECIFY_ROWS) && (num_of_cols > 1)) )
     {
         for (int j = 0; j < num_of_cols; j++)
         {
-            y = 3;
-            y += lineheight;
+            y = 15;
 
             int max_len = 0;
             wxList::compatibility_iterator node = m_boxes.Item( j*num_of_rows );
@@ -339,7 +336,7 @@ wxSize wxRadioBox::LayoutItems()
                 req.height = 2;
                 (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(button) )->size_request )
                       (button, &req );
-                      
+
                 if (req.width > max_len) max_len = req.width;
 
                 gtk_pizza_move( GTK_PIZZA(m_parent->m_wxwindow), button, m_x+x, m_y+y );
@@ -356,7 +353,7 @@ wxSize wxRadioBox::LayoutItems()
             {
                 GtkWidget *button = GTK_WIDGET( node->GetData() );
 
-                gtk_pizza_resize( GTK_PIZZA(m_parent->m_wxwindow), button, max_len, lineheight );
+                gtk_pizza_resize( GTK_PIZZA(m_parent->m_wxwindow), button, max_len, 20 );
 
                 node = node->GetNext();
                 if (!node) break;
@@ -395,7 +392,7 @@ wxSize wxRadioBox::LayoutItems()
         {
             GtkWidget *button = GTK_WIDGET( node->GetData() );
 
-            gtk_pizza_set_size( GTK_PIZZA(m_parent->m_wxwindow), button, m_x+x, m_y+y, max, lineheight );
+            gtk_pizza_set_size( GTK_PIZZA(m_parent->m_wxwindow), button, m_x+x, m_y+y, max, 20 );
             x += max;
 
             node = node->GetNext();

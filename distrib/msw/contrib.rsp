@@ -60,6 +60,7 @@ contrib/configure
 
 contrib/src/animate/*.cpp
 contrib/src/animate/*.h
+contrib/src/animate/make*
 contrib/src/animate/readme.txt
 contrib/include/wx/animate/*.h
 
@@ -103,6 +104,7 @@ contrib/src/deprecated/*.cpp
 contrib/src/deprecated/*.h
 contrib/src/deprecated/*.l
 contrib/src/deprecated/*.c
+contrib/src/deprecated/make*
 contrib/src/deprecated/readme.txt
 contrib/include/wx/deprecated/*.h
 
@@ -154,6 +156,7 @@ contrib/samples/deprecated/treelay/*.bkl
 contrib/src/fl/*.cpp
 contrib/src/fl/*.h
 contrib/src/fl/files.lst
+contrib/src/fl/make*
 contrib/include/wx/fl/*.h
 
 contrib/samples/fl/makefile*
@@ -174,6 +177,7 @@ contrib/samples/fl/*.bkl
 
 contrib/src/gizmos/*.cpp
 contrib/src/gizmos/*.h
+contrib/src/gizmos/make*
 contrib/src/gizmos/*.xpm
 contrib/src/gizmos/*.bmp
 contrib/include/wx/gizmos/*.h
@@ -264,6 +268,7 @@ contrib/samples/gizmos/splittree/*.bkl
 
 contrib/src/plot/*.cpp
 contrib/src/plot/*.h
+contrib/src/plot/make*
 contrib/include/wx/plot/*.h
 contrib/include/wx/plot/*.xpm
 contrib/include/wx/plot/*.bmp
@@ -285,9 +290,11 @@ contrib/samples/plot/*.bkl
 
 contrib/src/net/*.cpp
 contrib/src/net/*.h
+contrib/src/net/make*
 contrib/include/wx/net/*.h
 
 contrib/src/svg/*.cpp
+contrib/src/svg/make*
 contrib/src/svg/README.TXT
 contrib/include/wx/svg/*.h
 contrib/samples/svg/make*
