@@ -13,8 +13,10 @@
 #define _WX_LISTCTRL_H_
 
 #ifdef __GNUG__
-#pragma interface "listctrl.h"
+    #pragma interface "listctrl.h"
 #endif
+
+#if wxUSE_LISTCTRL
 
 #include "wx/control.h"
 #include "wx/event.h"
@@ -329,11 +331,6 @@ public:
     // still exist across 3 callbacks.
     wxChar *AddPool(const wxString& str);
 
-    // Event handlers
-    ////////////////////////////////////////////////////////////////////////////
-    // Necessary for drawing hrules and vrules, if specified
-    void OnPaint(wxPaintEvent& event);
-
 protected:
     // common part of all ctors
     void Init();
@@ -361,8 +358,9 @@ private:
     bool DoCreateControl(int x, int y, int w, int h);
 
     DECLARE_DYNAMIC_CLASS(wxListCtrl)
-    DECLARE_EVENT_TABLE()
 };
+
+#endif // wxUSE_LISTCTRL
 
 #endif
     // _WX_LISTCTRL_H_

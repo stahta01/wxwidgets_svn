@@ -267,7 +267,6 @@ samples/help/*.hhc
 samples/help/*.hpj
 samples/help/*.tex
 samples/help/*.ini
-samples/help/cshelp.txt
 samples/help/doc/*.html
 samples/help/doc/*.htm
 samples/help/doc/*.class
@@ -604,7 +603,6 @@ samples/dnd/*.xpm
 samples/dnd/*.png
 samples/dnd/*.ico
 samples/dnd/*.txt
-samples/dnd/*.cur
 
 samples/tab/*.cpp
 samples/tab/*.h

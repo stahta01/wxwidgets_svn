@@ -27,8 +27,6 @@
 #include "wx/intl.h"
 #include "wx/tokenzr.h"
 #include "wx/module.h"
-#include "wx/bitmap.h"
-#include "wx/image.h"
 
 #include "wx/xml/xml.h"
 #include "wx/xml/xmlres.h"
@@ -135,13 +133,6 @@ wxMenu *wxXmlResource::LoadMenu(const wxString& name)
 wxMenuBar *wxXmlResource::LoadMenuBar(const wxString& name)
 {
     return (wxMenuBar*)CreateResFromNode(FindResource(name, wxT("menubar")), NULL, NULL);
-}
-
-
-
-wxToolBar *wxXmlResource::LoadToolBar(wxWindow *parent, const wxString& name)
-{
-    return (wxToolBar*)CreateResFromNode(FindResource(name, wxT("toolbar")), parent, NULL);
 }
 
 
@@ -305,12 +296,7 @@ wxXmlNode *wxXmlResource::FindResource(const wxString& name, const wxString& typ
                     (!type || node->GetName() == type) &&
                     node->GetPropVal(wxT("name"), &dummy) &&
                     dummy == name)
-            {
-#if wxUSE_FILESYSTEM
-                m_CurFileSystem.ChangePathTo(m_Data[f].File);
-#endif
                 return node;
-            }
     }
 
     wxLogError(_("XML resource '%s' (type '%s') not found!"), 
@@ -384,21 +370,6 @@ void wxXmlResourceHandler::AddStyle(const wxString& name, int value)
     m_StyleNames.Add(name);
     m_StyleValues.Add(value);
 }
-
-
-
-void wxXmlResourceHandler::AddWindowStyles()
-{
-    ADD_STYLE(wxSIMPLE_BORDER);
-    ADD_STYLE(wxSUNKEN_BORDER);
-    ADD_STYLE(wxDOUBLE_BORDER);
-    ADD_STYLE(wxRAISED_BORDER);
-    ADD_STYLE(wxSTATIC_BORDER);
-    ADD_STYLE(wxTRANSPARENT_WINDOW);
-    ADD_STYLE(wxWANTS_CHARS);
-    ADD_STYLE(wxNO_FULL_REPAINT_ON_RESIZE);
-}
-
 
 
 bool wxXmlResourceHandler::HasParam(const wxString& param)
@@ -537,50 +508,6 @@ wxColour wxXmlResourceHandler::GetColour(const wxString& param)
 }
 
 
-
-wxBitmap wxXmlResourceHandler::GetBitmap(const wxString& param, wxSize size)
-{
-    wxString name = GetParamValue(param);
-    if (name.IsEmpty()) return wxNullBitmap;
-#if wxUSE_FILESYSTEM
-    wxFSFile *fsfile = GetCurFileSystem().OpenFile(name);
-    if (fsfile == NULL)
-    {
-        wxLogError(_("XML resource: Cannot create bitmap from '%s'."), param.mb_str());
-        return wxNullBitmap;
-    }    
-    wxImage img(*(fsfile->GetStream()));
-    delete fsfile;
-#else
-    wxImage img(GetParamValue(_T("bitmap")));
-#endif
-    if (!img.Ok()) 
-    {
-        wxLogError(_("XML resource: Cannot create bitmap from '%s'."), param.mb_str());
-        return wxNullBitmap;
-    }
-    if (!(size == wxDefaultSize)) img.Rescale(size.x, size.y);
-    return img.ConvertToBitmap();
-}
-
-
-
-wxIcon wxXmlResourceHandler::GetIcon(const wxString& param, wxSize size)
-{
-#if wxCHECK_VERSION(2,3,0) || defined(__WXMSW__)
-    wxIcon icon;
-    icon.CopyFromBitmap(GetBitmap(param, size));
-#else
-    wxIcon *iconpt;
-    wxBitmap bmppt = GetBitmap(param, size);
-    iconpt = (wxIcon*)(&bmppt);
-    wxIcon icon(*iconpt);
-#endif
-    return icon;
-}
-
-
-
 wxXmlNode *wxXmlResourceHandler::GetParamNode(const wxString& param)
 {
     wxXmlNode *n = m_Node->GetChildren();
@@ -662,39 +589,6 @@ wxPoint wxXmlResourceHandler::GetPosition(const wxString& param)
 
 
 
-wxCoord wxXmlResourceHandler::GetDimension(const wxString& param, wxCoord defaultv)
-{
-    wxString s = GetParamValue(param);
-    if (s.IsEmpty()) return defaultv;
-    bool is_dlg;
-    long sx;
-    
-    is_dlg = s[s.Length()-1] == _T('d');
-    if (is_dlg) s.RemoveLast();
-    
-    if (!s.ToLong(&sx))
-    {
-        wxLogError(_("Cannot parse dimension from '%s'."), s.mb_str());
-        return defaultv;
-    }
-    
-    if (is_dlg)
-    {
-        if (m_InstanceAsWindow)
-            return wxDLG_UNIT(m_InstanceAsWindow, wxSize(sx, 0)).x;
-        else if (m_ParentAsWindow)
-            return wxDLG_UNIT(m_ParentAsWindow, wxSize(sx, 0)).x;
-        else
-        {
-            wxLogError(_("Cannot convert dialog units: dialog unknown."));
-            return defaultv;
-        }
-    }
-    else return sx;
-}
-
-
-
 void wxXmlResourceHandler::SetupWindow(wxWindow *wnd)
 {
     //FIXME : add font, cursor
@@ -723,9 +617,9 @@ void wxXmlResourceHandler::CreateChildren(wxObject *parent,
 {
     if (children_node == NULL) children_node = GetParamNode(_T("children"));
     if (children_node == NULL) return;
-
+    
     wxXmlNode *n = children_node->GetChildren();
-
+    
     while (n)
     {
         if (n->GetType() == wxXML_ELEMENT_NODE)
@@ -751,6 +645,7 @@ void wxXmlResourceHandler::CreateChildren(wxObject *parent,
 
 
 // --------------- XMLID implementation -----------------------------
+
 
 #define XMLID_TABLE_SIZE     1024
 
@@ -778,6 +673,9 @@ static int XMLID_LastID = wxID_HIGHEST;
     {
         if (strcmp(rec->key, str_id) == 0)
         {
+#ifdef DEBUG_XMLID_HASH
+            printf("XMLID: matched '%s' (%ith item)\n", rec->key, matchcnt);
+#endif
             return rec->id;
         }
         matchcnt++;
@@ -790,6 +688,10 @@ static int XMLID_LastID = wxID_HIGHEST;
     (*rec_var)->id = ++XMLID_LastID;
     (*rec_var)->key = strdup(str_id);
     (*rec_var)->next = NULL;
+#ifdef DEBUG_XMLID_HASH
+    printf("XMLID: new key for '%s': %i at %i (%ith item)\n", 
+           (*rec_var)->key, (*rec_var)->id, index, matchcnt);
+#endif
     
     return (*rec_var)->id;
 }
@@ -799,6 +701,9 @@ static void CleanXMLID_Record(XMLID_record *rec)
 {
     if (rec)
     {
+#ifdef DEBUG_XMLID_HASH
+        printf("XMLID: clearing '%s'\n", rec->key);
+#endif
         CleanXMLID_Record(rec->next);
         free (rec->key);
         delete rec;

@@ -16,7 +16,6 @@
 #define LPSTR char *
 #define LONG long
 
-//#if 0
 /* RTF control */
 #define EM_CANPASTE	(1074)
 #define EM_CANUNDO	(198)
@@ -53,10 +52,12 @@
 
 #define WM_NULL		(0)
 #define WM_CLEAR	(771)
+#define WM_COMMAND	(273)
 #define WM_COPY	(769)
 #define WM_CUT	(768)
 #define WM_GETTEXT	(13)
 #define WM_GETTEXTLENGTH	(14)
+#define WM_NOTIFY	(78)
 #define WM_PASTE	(770)
 #define WM_SETTEXT	(12)
 #define WM_UNDO	(772)
@@ -69,9 +70,6 @@
 #define EC_RIGHTMARGIN 2
 #define EC_USEFONTINFO 0xffff
 
-//#endif
-
-#if 0
 #if PLAT_GTK
 #define VK_DOWN GDK_Down
 #define VK_UP GDK_Up
@@ -111,16 +109,12 @@
 #define VK_SUBTRACT     WXK_SUBTRACT
 //TODO:
 #define VK_DIVIDE	WXK_DIVIDE
-#endif
-
-#define SHIFT_PRESSED 1
-#define LEFT_CTRL_PRESSED 2
-#define LEFT_ALT_PRESSED 4
 
 // Are these needed any more
 #define LPSTR char *
 #define LONG long
 #define LPDWORD (long *)
+#endif
 
 /* SELCHANGE structure */
 #define SEL_EMPTY	(0)
@@ -129,6 +123,15 @@
 #define SEL_MULTICHAR	(4)
 #define SEL_MULTIOBJECT	(8)
 
+/* FINDREPLACE structure */
+#define FR_MATCHCASE	(0x4)
+#define FR_WHOLEWORD	(0x2)
+#define FR_DOWN		(0x1)
+
+#define SHIFT_PRESSED 1
+#define LEFT_CTRL_PRESSED 2
+#define LEFT_ALT_PRESSED 4
+
 struct RECT {
 	LONG left;
 	LONG top;
@@ -136,15 +139,6 @@ struct RECT {
 	LONG bottom;
 };
 
-/* FINDREPLACE structure */
-
-#define FR_MATCHCASE	(0x4)
-#define FR_WHOLEWORD	(0x2)
-#define FR_DOWN		(0x1)
-
-#endif
-
-#if 0
 struct CHARRANGE {
 	LONG cpMin;
 	LONG cpMax;
@@ -174,10 +168,9 @@ struct FORMATRANGE {
 	RECT rcPage;
 	CHARRANGE chrg;
 };
-#endif
 
-//#define MAKELONG(a, b) ((a) | ((b) << 16))
-//#define LOWORD(x) (x & 0xffff)
-//#define HIWORD(x) (x >> 16)
+#define MAKELONG(a, b) ((a) | ((b) << 16))
+#define LOWORD(x) (x & 0xffff)
+#define HIWORD(x) (x >> 16)
 
 #endif

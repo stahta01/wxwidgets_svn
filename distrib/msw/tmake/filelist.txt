@@ -44,6 +44,7 @@
 #  P	Not required for the os2Pm port
 #		(unfortunately I can't use O since that is
 #		 in use already - and above I can't use P :-( )
+#  L	Low level GUI toolkit file, used by wxUniversal as well
 #
 #  WX	Base header
 #  GTK	GTK header
@@ -101,7 +102,6 @@ numdlgg.cpp	G
 tbarsmpl.cpp	G
 textdlgg.cpp	G
 tipdlg.cpp	G
-tipwin.cpp	G
 treectlg.cpp	G
 treelay.cpp	G
 wizard.cpp	G
@@ -112,7 +112,6 @@ cmdline.cpp	C	B
 cmndata.cpp	C
 clipcmn.cpp	C
 config.cpp	C	B
-cshelp.cpp	C
 ctrlcmn.cpp	C
 ctrlsub.cpp	C
 datetime.cpp	C	B
@@ -195,7 +194,7 @@ textcmn.cpp	C
 textfile.cpp	C	B
 timercmn.cpp	C	B
 tokenzr.cpp	C	B
-treebase.cpp	C
+treebase.cpp	C	B
 txtstrm.cpp	C	B
 unzip.c	C	B
 url.cpp	C	S,B
@@ -328,49 +327,49 @@ gsocket.c	U	B
 mimetype.cpp	U	B
 
 gsockgtk.c	R
-win_gtk.c	R
+win_gtk.c	R	L
 accel.cpp	R
-app.cpp	R
-bitmap.cpp	R
+app.cpp	R	L
+bitmap.cpp	R	L
 bmpbuttn.cpp	R
-brush.cpp	R
+brush.cpp	R	L
 button.cpp	R
 checkbox.cpp	R
 checklst.cpp	R
 choice.cpp	R
 clipbrd.cpp	R
-colour.cpp	R
+colour.cpp	R	L
 combobox.cpp	R
 control.cpp	R
-cursor.cpp	R
-data.cpp	R
+cursor.cpp	R	L
+data.cpp	R	L
 dataobj.cpp	R
-dc.cpp	R
-dcclient.cpp	R
-dcmemory.cpp	R
-dcscreen.cpp	R
-dialog.cpp	R
+dc.cpp	R	L
+dcclient.cpp	R	L
+dcmemory.cpp	R	L
+dcscreen.cpp	R	L
+dialog.cpp	R	L
 dnd.cpp	R
-font.cpp	R
+font.cpp	R	L
 fontdlg.cpp	R
-frame.cpp	R
+frame.cpp	R	L
 gauge.cpp	R
-gdiobj.cpp	R
-icon.cpp	R
+gdiobj.cpp	R	L
+icon.cpp	R	L
 joystick.cpp	R
 listbox.cpp	R
-main.cpp	R
+main.cpp	R	L
 mdi.cpp	R
 menu.cpp	R
 minifram.cpp	R
 notebook.cpp	R
-palette.cpp	R
-pen.cpp	R
+palette.cpp	R	L
+pen.cpp	R	L
 radiobox.cpp	R
 radiobut.cpp	R
-region.cpp	R
+region.cpp	R	L
 scrolbar.cpp	R
-settings.cpp	R
+settings.cpp	R	L
 slider.cpp	R
 spinbutt.cpp	R
 spinctrl.cpp	R
@@ -382,10 +381,10 @@ tbargtk.cpp	R
 textctrl.cpp	R
 timer.cpp	R
 tooltip.cpp	R
-utilsgtk.cpp	R
+utilsgtk.cpp	R	L
 utilsres.cpp	R
 wave.cpp	R
-window.cpp	R
+window.cpp	R	L
 
 gsockmot.c	X	S
 accel.cpp	X
@@ -625,7 +624,6 @@ gsocket.h	W	B
 hash.h	W	B
 help.h	W
 helpbase.h	W
-cshelp.h	W
 helphtml.h	W
 helpchm.h	W
 helpwin.h	W
@@ -723,7 +721,6 @@ thread.h	W	B
 time.h	W	B
 timer.h	W	B
 tipdlg.h	W
-tipwin.h	W
 tokenzr.h	W	B
 toolbar.h	W
 tooltip.h	W

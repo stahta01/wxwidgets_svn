@@ -16,6 +16,8 @@
     #pragma interface "treectlg.h"
 #endif
 
+#if wxUSE_TREECTRL
+
 #include "wx/defs.h"
 #include "wx/string.h"
 #include "wx/object.h"
@@ -57,7 +59,6 @@ public:
                const wxValidator &validator = wxDefaultValidator,
                const wxString& name = wxTreeCtrlNameStr)
     {
-        Init();
         Create(parent, id, pos, size, style, validator, name);
     }
 
@@ -210,10 +211,6 @@ public:
     wxTreeItemId GetNextVisible(const wxTreeItemId& item) const;
         // get the previous visible item: item must be visible itself!
     wxTreeItemId GetPrevVisible(const wxTreeItemId& item) const;
-
-        // Only for internal use right now, but should probably be public
-    wxTreeItemId GetNext(const wxTreeItemId& item) const;
-    wxTreeItemId GetPrev(const wxTreeItemId& item) const;
 
     // operations
     // ----------
@@ -376,9 +373,7 @@ protected:
                               int image, int selectedImage,
                               wxTreeItemData *data);
 
-public:
     void AdjustMyScrollbars();
-protected:
     int  GetLineHeight(wxGenericTreeItem *item) const;
     void PaintLevel( wxGenericTreeItem *item, wxDC& dc, int level, int &y );
     void PaintItem( wxGenericTreeItem *item, wxDC& dc);
@@ -432,6 +427,8 @@ public:
 };
 
 #endif
+
+#endif // wxUSE_TREECTRL
 
 #endif // _GENERIC_TREECTRL_H_
 

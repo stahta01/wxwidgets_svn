@@ -11,10 +11,6 @@
 #pragma implementation "dcclient.h"
 #endif
 
-#ifdef __VMS
-#define XCopyPlane XCOPYPLANE
-#endif
-
 #include "wx/dcclient.h"
 #include "wx/dcmemory.h"
 #include "wx/image.h"
@@ -526,12 +522,7 @@ void wxWindowDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2,
         }
 
         if (m_pen.GetStyle() != wxTRANSPARENT)
-        {
             gdk_draw_arc( m_window, m_penGC, FALSE, xxc-r, yyc-r, 2*r,2*r, alpha1, alpha2 );
-            
-            gdk_draw_line( m_window, m_penGC, xx1, yy1, xxc, yyc );
-            gdk_draw_line( m_window, m_penGC, xxc, yyc, xx2, yy2 );
-        }
     }
 
     CalcBoundingBox (x1, y1);
@@ -554,7 +545,7 @@ void wxWindowDC::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord width, wxCoord
     if (m_window)
     {
         wxCoord start = wxCoord(sa * 64.0);
-        wxCoord end = wxCoord((ea-sa) * 64.0);
+        wxCoord end = wxCoord(ea * 64.0);
 
         if (m_brush.GetStyle() != wxTRANSPARENT)
         {
@@ -2217,15 +2208,10 @@ void wxWindowDC::DoDrawSpline( wxList *points )
 // wxPaintDC
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxPaintDC,wxWindowDC)
-
-wxPaintDC::wxPaintDC()
-  : wxWindowDC()
-{
-}
+IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxClientDC)
 
 wxPaintDC::wxPaintDC( wxWindow *win )
-  : wxWindowDC( win )
+         : wxClientDC( win )
 {
 #if USE_PAINT_REGION
     if (!win->m_clipPaintRegion)
@@ -2242,7 +2228,13 @@ wxPaintDC::wxPaintDC( wxWindow *win )
         gdk_gc_set_clip_region( m_textGC, region );
         gdk_gc_set_clip_region( m_bgGC, region );
     }
-#endif
+#endif // USE_PAINT_REGION
+
+#ifdef __WXUNIVERSAL__
+    wxPoint ptOrigin = win->GetClientAreaOrigin();
+    SetDeviceOrigin(ptOrigin.x, ptOrigin.y);
+    SetClippingRegion(ptOrigin, win->GetClientSize());
+#endif // __WXUNIVERSAL__
 }
 
 //-----------------------------------------------------------------------------

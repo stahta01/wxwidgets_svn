@@ -26,7 +26,6 @@ wxStaticTextXmlHandler::wxStaticTextXmlHandler()
 : wxXmlResourceHandler() 
 {
     ADD_STYLE( wxST_NO_AUTORESIZE );
-    AddWindowStyles();
 }
 
 wxObject *wxStaticTextXmlHandler::DoCreateResource()

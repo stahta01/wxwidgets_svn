@@ -23,22 +23,14 @@
 #include "wx/button.h"
 
 
-wxButtonXmlHandler::wxButtonXmlHandler() 
-: wxXmlResourceHandler() 
-{
-    AddWindowStyles();
-}
-
-
 wxObject *wxButtonXmlHandler::DoCreateResource()
 { 
     wxButton *button = new wxButton(m_ParentAsWindow,
                                     GetID(),
                                     GetText(_T("label")),
                                     GetPosition(), GetSize(),
-                                    GetStyle(),
-                                    wxDefaultValidator,
-                                    GetName());
+                                    GetStyle());
+    button->SetName(GetName());
     if (GetBool(_T("default"), 0) == 1) button->SetDefault();
     SetupWindow(button);
     

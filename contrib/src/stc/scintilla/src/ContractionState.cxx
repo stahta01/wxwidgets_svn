@@ -171,6 +171,12 @@ bool ContractionState::SetVisible(int lineDocStart, int lineDocEnd, bool visible
 				delta += visible ? 1 : -1;		
 				lines[line].visible = visible;
 			}
+			lines[line].displayLine += delta;
+		}
+		if (delta != 0) {
+			for (int line=lineDocEnd+1; line <= linesInDoc; line++) {
+				lines[line].displayLine += delta;
+			}
 		}
 	}
 	linesInDisplay += delta;
@@ -199,10 +205,4 @@ bool ContractionState::SetExpanded(int lineDoc, bool expanded) {
 		}
 	}
 	return false;
-}
-
-void ContractionState::ShowAll() {
-	delete []lines;
-	lines = 0;
-	size = 0;
 }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        listbox.cpp
+// Name:        src/msw/listbox.cpp
 // Purpose:     wxListBox
 // Author:      Julian Smart
 // Modified by: Vadim Zeitlin (owner drawn stuff)
@@ -20,8 +20,7 @@
     #pragma hdrstop
 #endif
 
-#include "wx/window.h"
-#include "wx/msw/private.h"
+#if wxUSE_LISTBOX
 
 #ifndef WX_PRECOMP
 #include "wx/listbox.h"
@@ -31,6 +30,9 @@
 #include "wx/dc.h"
 #include "wx/utils.h"
 #endif
+
+#include "wx/window.h"
+#include "wx/msw/private.h"
 
 #include <windowsx.h>
 
@@ -307,12 +309,8 @@ void wxListBox::DoSetItems(const wxArrayString& choices, void** clientData)
         if ( clientData )
         {
 #if wxUSE_OWNER_DRAWN
-            if ( m_windowStyle & wxLB_OWNERDRAW )
-            {
-                wxASSERT_MSG(clientData[i] == NULL,
-                             wxT("Can't use client data with owner-drawn listboxes"));
-            }
-            ListBox_SetItemData(GetHwnd(), i, clientData[i]);
+            wxASSERT_MSG(clientData[i] == NULL,
+                         wxT("Can't use client data with owner-drawn listboxes"));
 #else // !wxUSE_OWNER_DRAWN
             ListBox_SetItemData(GetHwnd(), i, clientData[i]);
 #endif // wxUSE_OWNER_DRAWN/!wxUSE_OWNER_DRAWN
@@ -775,5 +773,6 @@ bool wxListBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
             (wxOwnerDrawn::wxODStatus)pStruct->itemState);
 }
 
-#endif
-    // wxUSE_OWNER_DRAWN
+#endif // wxUSE_OWNER_DRAWN
+
+#endif // wxUSE_LISTBOX

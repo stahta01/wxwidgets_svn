@@ -20,7 +20,7 @@
 #pragma hdrstop
 #endif
 
-#include "wx/defs.h"
+#if wxUSE_GRID
 
 #include "wx/utils.h"
 #include "wx/dialog.h"
@@ -51,10 +51,6 @@
 #include <direct.h>
 #include <stdlib.h>
 #include <ctype.h>
-#endif
-
-#ifdef __BORLANDC__
-#include "dos.h"
 #endif
 
 // If compiled under Windows, this macro can cause problems
@@ -1248,3 +1244,5 @@ wxString wxGenericDirDialog::GetPath(void) const
 {
     return m_dirCtrl->GetPath();
 }
+
+#endif // wxUSE_GRID

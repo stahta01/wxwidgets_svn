@@ -661,54 +661,12 @@ wxFindWindowByName1 (const wxString& title, wxWindow * parent)
 int
 wxFindMenuItemId (wxFrame * frame, const wxString& menuString, const wxString& itemString)
 {
+#if wxUSE_MENUS
   wxMenuBar *menuBar = frame->GetMenuBar ();
-  if (!menuBar)
-    return -1;
-  return menuBar->FindMenuItem (menuString, itemString);
-}
-
-// Try to find the deepest child that contains 'pt'
-wxWindow* wxFindWindowAtPoint(wxWindow* win, const wxPoint& pt)
-{
-    wxNode* node = win->GetChildren().First();
-    while (node)
-    {
-        wxWindow* child = (wxWindow*) node->Data();
-        wxWindow* foundWin = wxFindWindowAtPoint(child, pt);
-        if (foundWin)
-            return foundWin;
-        node = node->Next();
-    }
-
-    wxPoint pos = win->GetPosition();
-    wxSize sz = win->GetSize();
-    if (win->GetParent())
-    {
-        pos = win->GetParent()->ClientToScreen(pos);
-    }
-
-    wxRect rect(pos, sz);
-    if (rect.Inside(pt))
-        return win;
-    else
-        return NULL;
-}
-
-wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt)
-{
-    // Go backwards through the list since windows
-    // on top are likely to have been appended most
-    // recently.
-    wxNode* node = wxTopLevelWindows.Last();
-    while (node)
-    {
-        wxWindow* win = (wxWindow*) node->Data();
-        wxWindow* found = wxFindWindowAtPoint(win, pt);
-        if (found)
-            return found;
-        node = node->Previous();
-    }
-    return NULL;
+  if (menuBar)
+      return menuBar->FindMenuItem (menuString, itemString);
+#endif // wxUSE_MENUS
+  return -1;
 }
 
 #endif // wxUSE_GUI
@@ -917,6 +875,8 @@ whereami(name)
  * since otherwise the generic code may be pulled in unnecessarily.
  */
 
+#if wxUSE_MSGDLG
+
 int wxMessageBox(const wxString& message, const wxString& caption, long style,
                  wxWindow *parent, int WXUNUSED(x), int WXUNUSED(y) )
 {
@@ -940,7 +900,10 @@ int wxMessageBox(const wxString& message, const wxString& caption, long style,
     return wxCANCEL;
 }
 
+#endif // wxUSE_MSGDLG
+
 #if wxUSE_TEXTDLG
+
 wxString wxGetTextFromUser(const wxString& message, const wxString& caption,
                         const wxString& defaultValue, wxWindow *parent,
                         int x, int y, bool WXUNUSED(centre) )
@@ -973,6 +936,8 @@ wxString wxGetPasswordFromUser(const wxString& message,
 
 #endif // wxUSE_TEXTDLG
 
+#if wxUSE_COLOURDLG
+
 wxColour wxGetColourFromUser(wxWindow *parent, const wxColour& colInit)
 {
       wxColourData data;
@@ -992,6 +957,8 @@ wxColour wxGetColourFromUser(wxWindow *parent, const wxColour& colInit)
 
       return colRet;
 }
+
+#endif // wxUSE_COLOURDLG
 
 // ----------------------------------------------------------------------------
 // missing C RTL functions (FIXME shouldn't be here at all)

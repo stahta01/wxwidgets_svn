@@ -69,13 +69,11 @@ void wxHtmlParser::DoneParser()
 
 
 
+#define wxHTML_MAX_BUFLEN 1024
 
 void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
 {
-    if (end_pos <= begin_pos) return;
-
-    char c;
-    char *temp = new char[end_pos - begin_pos + 1];
+    char temp[wxHTML_BUFLEN], c;
     int i;
     int templen;
 
@@ -88,6 +86,11 @@ void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
         // continue building word:
         if (c != '<') {
             temp[templen++] = c;
+            if (templen == wxHTML_BUFLEN-1) {
+                temp[templen] = 0;
+                AddText(temp);
+                templen = 0;
+            }
             i++;
         }
 
@@ -109,7 +112,6 @@ void wxHtmlParser::DoParsing(int begin_pos, int end_pos)
         temp[templen] = 0;
         AddText(temp);
     }
-    delete[] temp;
 }
 
 

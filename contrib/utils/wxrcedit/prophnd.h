@@ -24,8 +24,6 @@ class WXDLLEXPORT wxWindow;
 #include "wx/xml/xml.h"
 #include "wx/dynarray.h"
 
-/* ADD NEW PROPERTY TYPES HERE 
-   (search for other occurences of this comment in _all_ files) */
 enum PropertyType
 {
     PROP_TEXT = 0,
@@ -34,10 +32,9 @@ enum PropertyType
     PROP_BOOL = 3,
     PROP_INTEGER = 4,
     PROP_COORD = 5,
-    PROP_DIMENSION = 6,
-    PROP_NOT_IMPLEMENTED = 7,
+    PROP_NOT_IMPLEMENTED = 6,
 };
-#define PROP_TYPES_CNT  8
+#define PROP_TYPES_CNT  7
 
 class PropertyInfo
 {
@@ -96,14 +93,6 @@ class CoordPropertyHandler : public PropertyHandler
 {
     public:
         CoordPropertyHandler() {}
-        virtual wxPanel *CreateEditPanel(wxWindow *parent, PropsListInfo *pli);
-};
-
-
-class DimensionPropertyHandler : public PropertyHandler
-{
-    public:
-        DimensionPropertyHandler() {}
         virtual wxPanel *CreateEditPanel(wxWindow *parent, PropsListInfo *pli);
 };
 

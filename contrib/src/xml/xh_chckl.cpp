@@ -26,7 +26,6 @@ wxCheckListXmlHandler::wxCheckListXmlHandler()
 : wxXmlResourceHandler(), m_InsideBox(FALSE)
 {
     // no styles
-    AddWindowStyles();
 }
 
 wxObject *wxCheckListXmlHandler::DoCreateResource()

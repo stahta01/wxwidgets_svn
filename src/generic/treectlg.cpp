@@ -25,8 +25,10 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+    #pragma hdrstop
 #endif
+
+#if wxUSE_TREECTRL
 
 #include "wx/generic/treectlg.h"
 #include "wx/imaglist.h"
@@ -638,6 +640,8 @@ bool wxGenericTreeCtrl::Create(wxWindow *parent, wxWindowID id,
                         const wxValidator &validator,
                         const wxString& name )
 {
+    Init();
+
     wxScrolledWindow::Create( parent, id, pos, size, style|wxHSCROLL|wxVSCROLL, name );
 
 #if wxUSE_VALIDATORS
@@ -801,34 +805,9 @@ void wxGenericTreeCtrl::SetItemFont(const wxTreeItemId& item, const wxFont& font
 // item status inquiries
 // -----------------------------------------------------------------------------
 
-bool wxGenericTreeCtrl::IsVisible(const wxTreeItemId& item) const
+bool wxGenericTreeCtrl::IsVisible(const wxTreeItemId& WXUNUSED(item)) const
 {
-    wxCHECK_MSG( item.IsOk(), FALSE, wxT("invalid tree item") );
-
-	// An item is only visible if it's not a descendant of a collapsed item
-    wxGenericTreeItem *pItem = (wxGenericTreeItem*) item.m_pItem;
-	wxGenericTreeItem* parent = pItem->GetParent();
-	while (parent)
-	{
-		if (!parent->IsExpanded())
-			return FALSE;
-		parent = parent->GetParent();
-	}
-
-    int startX, startY;
-    GetViewStart(& startX, & startY);
-
-    wxSize clientSize = GetClientSize();
-
-    wxRect rect;
-    if (!GetBoundingRect(item, rect))
-        return FALSE;
-	if (rect.GetWidth() == 0 || rect.GetHeight() == 0)
-		return FALSE;
-    if (rect.GetBottom() < 0 || rect.GetTop() > clientSize.y)
-        return FALSE;
-    if (rect.GetRight() < 0 || rect.GetLeft() > clientSize.x)
-        return FALSE;
+    wxFAIL_MSG(wxT("not implemented"));
 
     return TRUE;
 }
@@ -944,54 +923,9 @@ wxTreeItemId wxGenericTreeCtrl::GetPrevSibling(const wxTreeItemId& item) const
                     : wxTreeItemId(siblings[(size_t)(index - 1)]);
 }
 
-// Only for internal use right now, but should probably be public
-wxTreeItemId wxGenericTreeCtrl::GetNext(const wxTreeItemId& item) const
-{
-  wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-
-  wxGenericTreeItem *i = (wxGenericTreeItem*) item.m_pItem;
-
-  // First see if there are any children.
-  wxArrayGenericTreeItems& children = i->GetChildren();
-  if (children.GetCount() > 0)
-  {
-     return children.Item(0);
-  }
-  else
-  {
-     // Try a sibling of this or ancestor instead
-     wxTreeItemId p = item;
-     wxTreeItemId toFind;
-     do
-     {
-        toFind = GetNextSibling(p);
-        p = GetParent(p);
-     } while (p.IsOk() && !toFind.IsOk());
-     return toFind;
-  }
-}
-
-wxTreeItemId wxGenericTreeCtrl::GetPrev(const wxTreeItemId& item) const
-{
-  wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
-
-  wxFAIL_MSG(wxT("not implemented"));
-
-  return wxTreeItemId();
-}
-
 wxTreeItemId wxGenericTreeCtrl::GetFirstVisibleItem() const
 {
-  wxTreeItemId id = GetRootItem();
-  if (!id.IsOk())
-    return id;
-
-  do
-  {
-    if (IsVisible(id))
-        return id;
-    id = GetNext(id);
-  } while (id.IsOk());
+  wxFAIL_MSG(wxT("not implemented"));
 
   return wxTreeItemId();
 }
@@ -1000,14 +934,8 @@ wxTreeItemId wxGenericTreeCtrl::GetNextVisible(const wxTreeItemId& item) const
 {
   wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
 
-  wxTreeItemId id = item;
-  while (id.IsOk())
-  {
-	  id = GetNext(id);
+  wxFAIL_MSG(wxT("not implemented"));
 
-	  if (id.IsOk() && IsVisible(id))
-		  return id;
-  }
   return wxTreeItemId();
 }
 
@@ -1043,7 +971,7 @@ wxTreeItemId wxGenericTreeCtrl::DoInsertItem(const wxTreeItemId& parentId,
 
     if ( data != NULL )
     {
-        data->m_pItem = (long) item;
+        data->m_pItem = item;
     }
 
     parent->Insert( item, previous );
@@ -1064,7 +992,7 @@ wxTreeItemId wxGenericTreeCtrl::AddRoot(const wxString& text,
                                    image, selImage, data);
     if ( data != NULL )
     {
-        data->m_pItem = (long) m_anchor;
+        data->m_pItem = m_anchor;
     }
 
     if (!HasFlag(wxTR_MULTIPLE))
@@ -1141,7 +1069,7 @@ wxTreeItemId wxGenericTreeCtrl::AppendItem(const wxTreeItemId& parentId,
 void wxGenericTreeCtrl::SendDeleteEvent(wxGenericTreeItem *item)
 {
     wxTreeEvent event( wxEVT_COMMAND_TREE_DELETE_ITEM, GetId() );
-    event.m_item = (long) item;
+    event.m_item = item;
     event.SetEventObject( this );
     ProcessEvent( event );
 }
@@ -1220,7 +1148,7 @@ void wxGenericTreeCtrl::Expand(const wxTreeItemId& itemId)
         return;
 
     wxTreeEvent event( wxEVT_COMMAND_TREE_ITEM_EXPANDING, GetId() );
-    event.m_item = (long) item;
+    event.m_item = item;
     event.SetEventObject( this );
 
     if ( ProcessEvent( event ) && !event.IsAllowed() )
@@ -1262,7 +1190,7 @@ void wxGenericTreeCtrl::Collapse(const wxTreeItemId& itemId)
         return;
 
     wxTreeEvent event( wxEVT_COMMAND_TREE_ITEM_COLLAPSING, GetId() );
-    event.m_item = (long) item;
+    event.m_item = item;
     event.SetEventObject( this );
     if ( ProcessEvent( event ) && !event.IsAllowed() )
     {
@@ -1438,8 +1366,8 @@ void wxGenericTreeCtrl::SelectItem(const wxTreeItemId& itemId,
     }
 
     wxTreeEvent event( wxEVT_COMMAND_TREE_SEL_CHANGING, GetId() );
-    event.m_item = (long) item;
-    event.m_itemOld = (long) m_current;
+    event.m_item = item;
+    event.m_itemOld = m_current;
     event.SetEventObject( this );
     // TODO : Here we don't send any selection mode yet !
 
@@ -1816,7 +1744,7 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
             if ( attr && attr->HasTextColour() )
                 colText = attr->GetTextColour();
             else
-                colText = wxSystemSettings::GetSystemColour( wxSYS_COLOUR_WINDOWTEXT );
+                colText = *wxBLACK;
         }
 
         // prepare to draw
@@ -2020,7 +1948,7 @@ void wxGenericTreeCtrl::OnChar( wxKeyEvent &event )
         case WXK_RETURN:
             {
                 wxTreeEvent event( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, GetId() );
-                event.m_item = (long) m_current;
+                event.m_item = m_current;
                 event.m_code = 0;
                 event.SetEventObject( this );
                 GetEventHandler()->ProcessEvent( event );
@@ -2188,20 +2116,20 @@ bool wxGenericTreeCtrl::GetBoundingRect(const wxTreeItemId& item,
                          wxRect& rect,
                          bool textOnly) const
 {
-    wxCHECK_MSG( item.IsOk(), FALSE, _T("invalid item in wxGenericTreeCtrl::GetBoundingRect") );
+    wxCHECK2_MSG( item.IsOk(), FALSE, _T("invalid item in wxGenericTreeCtrl::GetBoundingRect") );
 
     wxGenericTreeItem *i = (wxGenericTreeItem*) item.m_pItem;
 
     int startX, startY;
     GetViewStart(& startX, & startY);
 
-    rect.x = i->GetX() - startX*PIXELS_PER_UNIT;
-	rect.y = i->GetY() - startY*PIXELS_PER_UNIT;
-    rect.width = i->GetWidth();
-	//rect.height = i->GetHeight();
-	rect.height = GetLineHeight(i);
+    rect.x = i->GetX() - startX*PIXELS_PER_UNIT; rect.y = i->GetY()*PIXELS_PER_UNIT;
+    rect.width = i->GetWidth(); rect.height = i->GetHeight();
 
     return TRUE;
+
+    // wxFAIL_MSG(wxT("GetBoundingRect unimplemented"));
+    // return FALSE;
 }
 
 /* **** */
@@ -2213,7 +2141,7 @@ void wxGenericTreeCtrl::Edit( const wxTreeItemId& item )
     m_currentEdit = (wxGenericTreeItem*) item.m_pItem;
 
     wxTreeEvent te( wxEVT_COMMAND_TREE_BEGIN_LABEL_EDIT, GetId() );
-    te.m_item = (long) m_currentEdit;
+    te.m_item = m_currentEdit;
     te.SetEventObject( this );
     GetEventHandler()->ProcessEvent( te );
 
@@ -2267,7 +2195,7 @@ void wxGenericTreeCtrl::OnRenameTimer()
 void wxGenericTreeCtrl::OnRenameAccept()
 {
     wxTreeEvent le( wxEVT_COMMAND_TREE_END_LABEL_EDIT, GetId() );
-    le.m_item = (long) m_currentEdit;
+    le.m_item = m_currentEdit;
     le.SetEventObject( this );
     le.m_label = m_renameRes;
     GetEventHandler()->ProcessEvent( le );
@@ -2322,7 +2250,7 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
                               : wxEVT_COMMAND_TREE_BEGIN_DRAG;
 
         wxTreeEvent nevent( command, GetId() );
-        nevent.m_item = (long) m_current;
+        nevent.m_item = m_current;
         nevent.SetEventObject(this);
 
         // by default the dragging is not supported, the user code must
@@ -2376,7 +2304,7 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
         // generate the drag end event
         wxTreeEvent event(wxEVT_COMMAND_TREE_END_DRAG, GetId());
 
-        event.m_item = (long) item;
+        event.m_item = item;
         event.m_pointDrag = wxPoint(x, y);
         event.SetEventObject(this);
 
@@ -2409,27 +2337,21 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
         if ( event.RightDown() )
         {
             wxTreeEvent nevent(wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, GetId());
-            nevent.m_item = (long) item;
+            nevent.m_item = item;
             nevent.m_code = 0;
             nevent.SetEventObject(this);
             GetEventHandler()->ProcessEvent(nevent);
         }
-        else if ( event.LeftUp() )
+        else if ( event.LeftUp() && m_lastOnSame )
         {
-            if ( m_lastOnSame )
+            if ( (item == m_current) &&
+                 (flags & wxTREE_HITTEST_ONITEMLABEL) &&
+                 HasFlag(wxTR_EDIT_LABELS) )
             {
-                if ( (item == m_current) &&
-                     (flags & wxTREE_HITTEST_ONITEMLABEL) &&
-                     HasFlag(wxTR_EDIT_LABELS) )
-                {
-                    if ( m_renameTimer->IsRunning() )
-                        m_renameTimer->Stop();
-
-                    m_renameTimer->Start( 100, TRUE );
-                }
-
-                m_lastOnSame = FALSE;
+                m_renameTimer->Start( 100, TRUE );
             }
+
+            m_lastOnSame = FALSE;
         }
         else
         {
@@ -2461,7 +2383,7 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
                 m_lastOnSame = FALSE;
 
                 wxTreeEvent nevent( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, GetId() );
-                nevent.m_item = (long) item;
+                nevent.m_item = item;
                 nevent.m_code = 0;
                 nevent.SetEventObject( this );
                 GetEventHandler()->ProcessEvent( nevent );
@@ -2610,3 +2532,4 @@ void wxGenericTreeCtrl::RefreshLine( wxGenericTreeItem *item )
     Refresh( TRUE, &rect );
 }
 
+#endif // wxUSE_TREECTRL

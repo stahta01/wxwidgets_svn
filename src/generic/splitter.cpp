@@ -833,7 +833,7 @@ void wxSplitterWindow::InitColours()
     wxDELETE( m_hilightPen );
 
     // Shadow colours
-#ifndef __WIN16__
+#if defined(__WIN95__)
     wxColour faceColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DFACE));
     m_facePen = new wxPen(faceColour, 1, wxSOLID);
     m_faceBrush = new wxBrush(faceColour, wxSOLID);
@@ -849,14 +849,14 @@ void wxSplitterWindow::InitColours()
 
     wxColour hilightColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DHILIGHT));
     m_hilightPen = new wxPen(hilightColour, 1, wxSOLID);
-#else
+#else // !Win32
     m_facePen = new wxPen("LIGHT GREY", 1, wxSOLID);
     m_faceBrush = new wxBrush("LIGHT GREY", wxSOLID);
     m_mediumShadowPen = new wxPen("GREY", 1, wxSOLID);
     m_darkShadowPen = new wxPen("BLACK", 1, wxSOLID);
     m_lightShadowPen = new wxPen("LIGHT GREY", 1, wxSOLID);
     m_hilightPen = new wxPen("WHITE", 1, wxSOLID);
-#endif // __WIN16__
+#endif // Win32/!Win32
 }
 
 void wxSplitterWindow::SendUnsplitEvent(wxWindow *winRemoved)

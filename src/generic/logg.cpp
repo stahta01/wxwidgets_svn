@@ -31,6 +31,8 @@
     #error "This file can't be compiled without GUI!"
 #endif
 
+#if wxUSE_LOGGUI || wxUSE_LOGWINDOW
+
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/button.h"
@@ -196,11 +198,7 @@ void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 {
     wxString msg;
     TimeStamp(&msg);
-#ifdef __WXMAC__
-    msg << szString << wxT('\r');
-#else
     msg << szString << wxT('\n');
-#endif
 
     m_pTextCtrl->AppendText(msg);
 }
@@ -251,7 +249,7 @@ void wxLogGui::Flush()
         titleFormat = _("%s Information");
         style = wxICON_INFORMATION;
     }
-    
+
     wxString title;
     title.Printf(titleFormat, appName.c_str());
 
@@ -1056,3 +1054,4 @@ static int OpenLogFile(wxFile& file, wxString *pFilename)
 
 #endif // wxUSE_FILE
 
+#endif // !(wxUSE_LOGGUI || wxUSE_LOGWINDOW)

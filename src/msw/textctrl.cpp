@@ -28,6 +28,8 @@
     #pragma hdrstop
 #endif
 
+#if wxUSE_TEXTCTRL
+
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
     #include "wx/settings.h"
@@ -493,7 +495,7 @@ bool wxTextCtrl::CanCopy() const
     // Can copy if there's a selection
     long from, to;
     GetSelection(& from, & to);
-    return (from != to) ;
+    return (from != to);
 }
 
 bool wxTextCtrl::CanCut() const
@@ -501,7 +503,7 @@ bool wxTextCtrl::CanCut() const
     // Can cut if there's a selection
     long from, to;
     GetSelection(& from, & to);
-    return (from != to) && (IsEditable());
+    return (from != to);
 }
 
 bool wxTextCtrl::CanPaste() const
@@ -1253,3 +1255,4 @@ bool wxRichEditModule::Load(int version)
 
 #endif // wxUSE_RICHEDIT
 
+#endif // wxUSE_TEXTCTRL

@@ -20,6 +20,8 @@
 #pragma hdrstop
 #endif
 
+#if wxUSE_SPLASH
+
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif
@@ -46,14 +48,7 @@ wxSplashScreen::wxSplashScreen(const wxBitmap& bitmap, long splashStyle, int mil
 
     m_window = new wxSplashScreenWindow(bitmap, this, -1, pos, size, wxNO_BORDER);
 
-    // For some reason, we need to make the client size a couple of pixels
-    // bigger for all of the bitmap to show.
-#ifdef __WXMSW__
-    int fudge = 2;
-#else
-    int fudge = 0;
-#endif
-    SetClientSize(bitmap.GetWidth()+fudge, bitmap.GetHeight()+fudge);
+    SetClientSize(bitmap.GetWidth(), bitmap.GetHeight());
 
     if (m_splashStyle & wxSPLASH_CENTRE_ON_PARENT)
         CentreOnParent();
@@ -116,7 +111,6 @@ static void wxDrawSplashBitmap(wxDC& dc, const wxBitmap& bitmap, int x, int y)
 {
     wxMemoryDC dcMem;
 
-#ifndef __WXGTK__
     bool hiColour = (wxDisplayDepth() >= 16) ;
     
     if (bitmap.GetPalette() && !hiColour)
@@ -124,19 +118,14 @@ static void wxDrawSplashBitmap(wxDC& dc, const wxBitmap& bitmap, int x, int y)
         dc.SetPalette(* bitmap.GetPalette());
         dcMem.SetPalette(* bitmap.GetPalette());
     }
-#endif
-
     dcMem.SelectObject(bitmap);
     dc.Blit(0, 0, bitmap.GetWidth(), bitmap.GetHeight(), & dcMem, 0, 0);
     dcMem.SelectObject(wxNullBitmap);
-
-#ifndef __WXGTK__
     if (bitmap.GetPalette() && !hiColour)
     {
         dc.SetPalette(wxNullPalette);
         dcMem.SetPalette(wxNullPalette);
     }
-#endif
 }
 
 void wxSplashScreenWindow::OnEraseBackground(wxEraseEvent& event)
@@ -169,3 +158,4 @@ void wxSplashScreenWindow::OnChar(wxKeyEvent& event)
     GetParent()->Close(TRUE);
 }
 
+#endif // wxUSE_SPLASH

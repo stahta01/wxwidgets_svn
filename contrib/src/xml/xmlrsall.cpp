@@ -66,7 +66,4 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_LISTBOX
     AddHandler(new wxListBoxXmlHandler);
 #endif
-#if wxUSE_TOOLBAR
-    AddHandler(new wxToolBarXmlHandler);
-#endif
 }

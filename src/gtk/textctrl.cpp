@@ -744,7 +744,7 @@ bool wxTextCtrl::CanCut() const
     // Can cut if there's a selection
     long from, to;
     GetSelection(& from, & to);
-    return (from != to) && (IsEditable());
+    return (from != to) ;
 }
 
 bool wxTextCtrl::CanPaste() const

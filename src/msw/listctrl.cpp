@@ -29,6 +29,8 @@
     #pragma hdrstop
 #endif
 
+#if wxUSE_LISTCTRL
+
 #ifdef __WIN95__
 
 #ifndef WX_PRECOMP
@@ -40,8 +42,8 @@
 
 #include "wx/textctrl.h"
 #include "wx/imaglist.h"
+
 #include "wx/listctrl.h"
-#include "wx/dcclient.h"
 
 #include "wx/msw/private.h"
 
@@ -77,10 +79,6 @@ static void wxConvertFromMSWListItem(const wxListCtrl *ctrl, wxListItem& info, L
 
 IMPLEMENT_DYNAMIC_CLASS(wxListCtrl, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxListItem, wxObject)
-
-BEGIN_EVENT_TABLE(wxListCtrl, wxControl)
-    EVT_PAINT(wxListCtrl::OnPaint)
-END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
@@ -603,9 +601,6 @@ bool wxListCtrl::GetItem(wxListItem& info) const
     if (info.m_mask & wxLIST_MASK_DATA)
         lvItem.mask |= LVIF_PARAM;
 
-    if (info.m_mask & wxLIST_MASK_IMAGE)
-        lvItem.mask |= LVIF_IMAGE;
-
     if ( info.m_mask & wxLIST_MASK_STATE )
     {
         lvItem.mask |= LVIF_STATE;
@@ -639,15 +634,7 @@ bool wxListCtrl::SetItem(wxListItem& info)
     // check whether it has any custom attributes
     if ( info.HasAttributes() )
     {
-
-        wxListItemAttr *attr;
-        attr = (wxListItemAttr*) m_attrs.Get(item.iItem);
-
-        if (attr == NULL)
-
-            m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
-
-        else *attr = *info.GetAttributes();
+        m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
 
         m_hasAnyAttr = TRUE;
     }
@@ -791,7 +778,7 @@ bool wxListCtrl::GetItemRect(long item, wxRect& rect, int code) const
     rect.x = rect2.left;
     rect.y = rect2.top;
     rect.width = rect2.right - rect2.left;
-    rect.height = rect2.bottom - rect2.top;
+    rect.height = rect2.bottom - rect2.left;
     return success;
 }
 
@@ -1139,15 +1126,7 @@ long wxListCtrl::InsertItem(wxListItem& info)
     // check whether it has any custom attributes
     if ( info.HasAttributes() )
     {
-
-        wxListItemAttr *attr;
-        attr = (wxListItemAttr*) m_attrs.Get(item.iItem);
-
-        if (attr == NULL)
-
-            m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
-
-        else *attr = *info.GetAttributes();
+        m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
 
         m_hasAnyAttr = TRUE;
     }
@@ -1689,73 +1668,6 @@ wxChar *wxListCtrl::AddPool(const wxString& str)
     return (wxChar *)node->Data();
 }
 
-// Necessary for drawing hrules and vrules, if specified
-void wxListCtrl::OnPaint(wxPaintEvent& event)
-{
-    wxPaintDC dc(this);
-
-    wxControl::OnPaint(event);
-
-    // Reset the device origin since it may have been set
-    dc.SetDeviceOrigin(0, 0);
-
-    bool drawHRules = ((GetWindowStyle() & wxLC_HRULES) != 0);
-    bool drawVRules = ((GetWindowStyle() & wxLC_VRULES) != 0);
-
-    if (!drawHRules && !drawVRules)
-        return;
-    if ((GetWindowStyle() & wxLC_REPORT) == 0)
-        return;
-
-    wxPen pen(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DLIGHT), 1, wxSOLID);
-    dc.SetPen(pen);
-    dc.SetBrush(* wxTRANSPARENT_BRUSH);
-
-    wxSize clientSize = GetClientSize();
-    wxRect itemRect;
-    int cy=0;
-
-    int lastH = 0;
-    int itemCount = GetItemCount();
-    int i;
-    for (i = 0; i < itemCount; i++)
-    {
-        if (GetItemRect(i, itemRect))
-        {
-            cy = itemRect.GetTop();
-            if (i != 0) // Don't draw the first one
-            {
-                dc.DrawLine(0, cy, clientSize.x, cy);
-
-                // Draw last line
-                if (i == (GetItemCount() - 1))
-                {
-                    cy = itemRect.GetBottom();
-                    dc.DrawLine(0, cy, clientSize.x, cy);
-                }
-            }
-        }
-    }
-    i = (GetItemCount() - 1);
-    if (drawVRules && (i > -1))
-    {
-        wxRect firstItemRect;
-        GetItemRect(0, firstItemRect);
-
-        if (GetItemRect(i, itemRect))
-        {
-            int col;
-            int x = itemRect.GetX();
-            for (col = 0; col < GetColumnCount(); col++)
-            {
-                int colWidth = GetColumnWidth(col);
-                x += colWidth ;
-                dc.DrawLine(x, firstItemRect.GetY() - 2, x, itemRect.GetBottom());
-            }
-        }
-    }
-}
-
 // ----------------------------------------------------------------------------
 // wxListItem
 // ----------------------------------------------------------------------------
@@ -1962,3 +1874,4 @@ wxListEvent::wxListEvent(wxEventType commandType, int id)
 
 #endif // __WIN95__
 
+#endif // wxUSE_LISTCTRL

@@ -245,11 +245,6 @@ END_EVENT_TABLE()
 
 wxApp::wxApp()
 {
-    wxTheApp = this;
-
-    m_topWindow = (wxWindow *) NULL;
-    m_exitOnFrameDelete = TRUE;
-
     m_idleTag = gtk_idle_add_priority( 1000, wxapp_idle_callback, (gpointer) NULL );
 
 #if wxUSE_THREADS
@@ -258,8 +253,6 @@ wxApp::wxApp()
 #endif
 
     m_colorCube = (unsigned char*) NULL;
-
-    m_useBestVisual = FALSE;
 }
 
 wxApp::~wxApp()
@@ -275,6 +268,9 @@ wxApp::~wxApp()
 
 bool wxApp::OnInitGui()
 {
+    if ( !wxAppBase::OnInitGui() )
+        return FALSE;
+
     GdkVisual *visual = gdk_visual_get_system();
 
     /* on some machines, the default visual is just 256 colours, so
@@ -548,7 +544,7 @@ void wxApp::CleanUp()
 
     // check for memory leaks
 #if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
-    if (wxDebugContext::CountObjectsLeft(TRUE) > 0)
+    if (wxDebugContext::CountObjectsLeft() > 0)
     {
         wxLogDebug(wxT("There were memory leaks.\n"));
         wxDebugContext::Dump();
@@ -575,9 +571,15 @@ int wxEntryStart( int argc, char *argv[] )
 {
 #if wxUSE_THREADS
     /* GTK 1.2 up to version 1.2.3 has broken threads */
+#ifdef __VMS__
+   if ((vms_gtk_major_version() == 1) &&
+        (vms_gtk_minor_version() == 2) &&
+        (vms_gtk_micro_version() < 4))
+#else
    if ((gtk_major_version == 1) &&
         (gtk_minor_version == 2) &&
         (gtk_micro_version < 4))
+#endif
      {
         printf( "wxWindows warning: GUI threading disabled due to outdated GTK version\n" );
     }
@@ -618,11 +620,11 @@ int wxEntryInitGui()
 {
     int retValue = 0;
 
-    if ( !wxTheApp->OnInitGui() )
-        retValue = -1;
-
     wxRootWindow = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_widget_realize( wxRootWindow );
+
+    if ( !wxTheApp->OnInitGui() )
+        retValue = -1;
 
     return retValue;
 }
@@ -653,15 +655,6 @@ void wxEntryCleanup()
 
 int wxEntry( int argc, char *argv[] )
 {
-#if (defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING) || wxUSE_DEBUG_CONTEXT
-    // This seems to be necessary since there are 'rogue'
-    // objects present at this point (perhaps global objects?)
-    // Setting a checkpoint will ignore them as far as the
-    // memory checking facility is concerned.
-    // Of course you may argue that memory allocated in globals should be
-    // checked, but this is a reasonable compromise.
-    wxDebugContext::SetCheckpoint();
-#endif
     int err = wxEntryStart(argc, argv);
     if (err)
         return err;

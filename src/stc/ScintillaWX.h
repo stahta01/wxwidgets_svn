@@ -97,12 +97,8 @@ public:
     virtual void AddToPopUp(const char *label, int cmd = 0, bool enabled = true);
     virtual void ClaimSelection();
 
-    virtual long DefWndProc(unsigned int iMessage,
-                            unsigned long wParam,
-                            long lParam);
-    virtual long WndProc(unsigned int iMessage,
-                         unsigned long wParam,
-                         long lParam);
+    virtual LRESULT DefWndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);
+    virtual LRESULT WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);
 
     virtual void NotifyChange();
     virtual void NotifyParent(SCNotification scn);

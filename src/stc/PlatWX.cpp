@@ -15,7 +15,7 @@ Point Point::FromLong(long lpoint) {
 
 wxRect wxRectFromPRectangle(PRectangle prc) {
     wxRect rc(prc.left, prc.top,
-              prc.right-prc.left, prc.bottom-prc.top);
+              prc.right-prc.left+1, prc.bottom-prc.top+1);
     return rc;
 }
 
@@ -169,7 +169,7 @@ void Surface::InitPixMap(int width, int height, Surface *surface_) {
     Release();
     hdc = new wxMemoryDC(surface_->hdc);
     hdcOwned = true;
-    bitmap = new wxBitmap(width, height);
+    bitmap = new wxBitmap(width, height+1);
     ((wxMemoryDC*)hdc)->SelectObject(*bitmap);
     // **** ::SetTextAlign(hdc, TA_BASELINE);
 }
@@ -183,7 +183,12 @@ void Surface::BrushColor(Colour back) {
 }
 
 void Surface::SetFont(Font &font_) {
-  if (font_.GetID()) {
+
+  // I think the following check is valid.
+  // It eliminates a crash for me.  -- eric@sourcegear.com
+
+  if (font_.GetID())
+    {
       hdc->SetFont(*font_.GetID());
     }
 }
@@ -356,6 +361,9 @@ void Surface::SetClip(PRectangle rc) {
 }
 
 void Surface::FlushCachedState() {
+  // TODO Is there anything we need to do here? eric@sourcegear.com
+  // TODO I had to add this method when I merged new Scintilla code
+  // TODO from Neil.
 }
 
 Window::~Window() {
@@ -387,7 +395,7 @@ void Window::SetPositionRelative(PRectangle rc, Window) {
 
 PRectangle Window::GetClientPosition() {
     wxSize sz = id->GetClientSize();
-    return  PRectangle(0, 0, sz.x, sz.y);
+    return  PRectangle(0, 0, sz.x - 1, sz.y - 1);
 }
 
 void Window::Show(bool show) {
@@ -458,25 +466,6 @@ void ListBox::Create(Window &parent, int ctrlID) {
                        0, NULL, wxLB_SINGLE | wxLB_SORT);
 }
 
-PRectangle ListBox::GetDesiredRect() {
-    wxSize sz = ((wxListBox*)id)->GetBestSize();
-    PRectangle rc;
-    rc.top = 0;
-    rc.left = 0;
-    rc.right = sz.x;
-    rc.bottom = sz.y;
-
-    return rc;
-}
-
-void ListBox::SetAverageCharWidth(int width) {
-    aveCharWidth = width;
-}
-
-void ListBox::SetFont(Font &font) {
-    Window::SetFont(font);
-}
-
 void ListBox::Clear() {
     ((wxListBox*)id)->Clear();
 }
@@ -498,12 +487,10 @@ int ListBox::GetSelection() {
 }
 
 int ListBox::Find(const char *prefix) {
-    if (prefix) {
-        for (int x=0; x < ((wxListBox*)id)->Number(); x++) {
-            wxString text = ((wxListBox*)id)->GetString(x);
-            if (text.StartsWith(prefix))
-                return x;
-        }
+    for (int x=0; x < ((wxListBox*)id)->Number(); x++) {
+        wxString text = ((wxListBox*)id)->GetString(x);
+        if (text.StartsWith(prefix))
+            return x;
     }
     return -1;
 }

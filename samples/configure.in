@@ -43,7 +43,6 @@ AC_OUTPUT([
             listctrl/Makefile
             mdi/Makefile
             menu/Makefile
-            memcheck/Makefile
             minifram/Makefile
             minimal/Makefile
             newgrid/Makefile
@@ -69,6 +68,7 @@ AC_OUTPUT([
             typetest/Makefile
             validate/Makefile
             sockets/Makefile
+            univ/Makefile
             wizard/Makefile
             html/Makefile
             html/about/Makefile

@@ -20,7 +20,7 @@
 #pragma hdrstop
 #endif
 
-//#if !defined(__WIN32__) || !wxUSE_NATIVE_STATUSBAR
+#if wxUSE_STATUSBAR
 
 #ifndef WX_PRECOMP
 #include "wx/setup.h"
@@ -179,7 +179,6 @@ void wxStatusBarGeneric::OnPaint(wxPaintEvent& WXUNUSED(event) )
   if ( GetFont().Ok() )
     dc.SetFont(GetFont());
   dc.SetBackgroundMode(wxTRANSPARENT);
-  dc.SetTextForeground(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOWTEXT));
 
   for ( i = 0; i < m_nFields; i ++ )
     DrawField(dc, i);
@@ -321,7 +320,7 @@ bool wxStatusBarGeneric::GetFieldRect(int n, wxRect& rect) const
 void wxStatusBarGeneric::InitColours()
 {
     // Shadow colours
-#ifndef __WIN16__
+#if defined(__WIN95__)
     wxColour mediumShadowColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DSHADOW));
     m_mediumShadowPen = wxPen(mediumShadowColour, 1, wxSOLID);
 
@@ -360,4 +359,4 @@ void wxStatusBarGeneric::SetMinHeight(int height)
     }
 }
 
-//#endif // Win32 && wxUSE_NATIVE_STATUSBAR
+#endif // wxUSE_STATUSBAR

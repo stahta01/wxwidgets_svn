@@ -9,8 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////// */
 
-#ifdef VMS
-#define XCheckIfEvent XCHECKIFEVENT
+#ifdef __VMS
+#define gtk_widget_get_child_requisition gtk_widget_get_child_requisitio
+#define gtk_marshal_NONE__POINTER_POINTER gtk_marshal_NONE__POINTER_POINT
 #endif
 
 #include "wx/setup.h"
@@ -521,18 +522,20 @@ gtk_pizza_realize (GtkWidget *widget)
     attributes.width = widget->allocation.width;
     attributes.height = widget->allocation.height;
 
+#ifndef __WXUNIVERSAL__
     if (pizza->shadow_type == GTK_MYSHADOW_NONE)
     {
         /* no border, no changes to sizes */
-    } else
-    if (pizza->shadow_type == GTK_MYSHADOW_THIN)
+    }
+    else if (pizza->shadow_type == GTK_MYSHADOW_THIN)
     {
         /* GTK_MYSHADOW_THIN == wxSIMPLE_BORDER */
         attributes.x += 1;
         attributes.y += 1;
         attributes.width -= 2;
         attributes.height -= 2;
-    } else
+    }
+    else
     {
         /* GTK_MYSHADOW_IN == wxSUNKEN_BORDER */
         /* GTK_MYSHADOW_OUT == wxRAISED_BORDER */
@@ -541,6 +544,7 @@ gtk_pizza_realize (GtkWidget *widget)
         attributes.width -= 4;
         attributes.height -= 4;
     }
+#endif /* __WXUNIVERSAL__ */
 
     /* minimal size */
     if (attributes.width < 2) attributes.width = 2;

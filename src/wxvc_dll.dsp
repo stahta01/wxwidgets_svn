@@ -116,10 +116,6 @@ SOURCE=.\common\config.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\cshelp.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\ctrlcmn.cpp
 # End Source File
 # Begin Source File
@@ -627,10 +623,6 @@ SOURCE=.\generic\textdlgg.cpp
 # Begin Source File
 
 SOURCE=.\generic\tipdlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\generic\tipwin.cpp
 # End Source File
 # Begin Source File
 

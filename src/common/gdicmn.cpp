@@ -13,10 +13,6 @@
 #pragma implementation "gdicmn.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -36,7 +32,6 @@
 #include "wx/app.h"
 #include "wx/dc.h"
 #include "wx/utils.h"
-#include "wx/settings.h"
 
 #include "wx/log.h"
 #include <string.h>
@@ -68,8 +63,8 @@ wxRect::wxRect(const wxPoint& topLeft, const wxPoint& bottomRight)
 {
   x = topLeft.x;
   y = topLeft.y;
-  width = bottomRight.x - topLeft.x + 1;
-  height = bottomRight.y - topLeft.y + 1;
+  width = bottomRight.x - topLeft.x;
+  height = bottomRight.y - topLeft.y;
 
   if (width < 0)
   {
@@ -361,18 +356,13 @@ void wxInitializeStockObjects ()
 #endif
 
   // why under MSW fonts shouldn't have the standard system size?
-/*
 #ifdef __WXMSW__
   static const int sizeFont = 10;
 #else
   static const int sizeFont = 12;
 #endif
-*/
 
-//  wxNORMAL_FONT = new wxFont (sizeFont, wxMODERN, wxNORMAL, wxNORMAL);
-  wxNORMAL_FONT = new wxFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
-  static const int sizeFont = wxNORMAL_FONT->GetPointSize();
-
+  wxNORMAL_FONT = new wxFont (sizeFont, wxMODERN, wxNORMAL, wxNORMAL);
   wxSMALL_FONT = new wxFont (sizeFont - 2, wxSWISS, wxNORMAL, wxNORMAL);
   wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
   wxSWISS_FONT = new wxFont (sizeFont, wxSWISS, wxNORMAL, wxNORMAL);

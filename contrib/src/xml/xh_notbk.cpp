@@ -34,7 +34,6 @@ wxNotebookXmlHandler::wxNotebookXmlHandler()
     ADD_STYLE(wxNB_LEFT);
     ADD_STYLE(wxNB_RIGHT);
     ADD_STYLE(wxNB_BOTTOM);
-    AddWindowStyles();
 }
 
 

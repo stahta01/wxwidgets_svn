@@ -28,7 +28,6 @@ wxRadioButtonXmlHandler::wxRadioButtonXmlHandler()
 : wxXmlResourceHandler() 
 {
     ADD_STYLE( wxRB_GROUP );
-    AddWindowStyles();
 }
 
 wxObject *wxRadioButtonXmlHandler::DoCreateResource()

@@ -26,7 +26,7 @@
 // If we don't do something like this, then the linker tends to "optimize"
 // them away. (eric@sourcegear.com)
 
-static int wxForceScintillaLexers(void)
+int wxForceScintillaLexers(void)
 {
   extern LexerModule lmCPP;
   extern LexerModule lmHTML;
@@ -39,7 +39,6 @@ static int wxForceScintillaLexers(void)
   extern LexerModule lmPython;
   extern LexerModule lmSQL;
   extern LexerModule lmVB;
-  extern LexerModule lmLua;
 
   if (
       &lmCPP
@@ -53,10 +52,13 @@ static int wxForceScintillaLexers(void)
       && &lmPython
       && &lmSQL
       && &lmVB
-      && &lmLua
       )
     {
       return 1;
+    }
+  else
+    {
+      return 0;
     }
 }
 
@@ -129,7 +131,7 @@ wxString wxStyledTextCtrl::GetText() {
     int   len  = GetTextLength();
     char* buff = text.GetWriteBuf(len+1);
 
-    SendMsg(SCI_GETTEXT, len, (long)buff);
+    SendMsg(WM_GETTEXT, len, (long)buff);
     buff[len] = 0;
     text.UngetWriteBuf();
     return text;
@@ -137,7 +139,7 @@ wxString wxStyledTextCtrl::GetText() {
 
 
 bool wxStyledTextCtrl::SetText(const wxString& text) {
-    return SendMsg(SCI_SETTEXT, 0, (long)text.c_str()) != 0;
+    return SendMsg(WM_SETTEXT, 0, (long)text.c_str()) != 0;
 }
 
 
@@ -146,7 +148,8 @@ wxString wxStyledTextCtrl::GetLine(int line) {
     int   len  = GetLineLength(line);
     char* buff = text.GetWriteBuf(len+1);
 
-    SendMsg(SCI_GETLINE, line, (long)buff);
+    *((WORD*)buff) = len;
+    SendMsg(EM_GETLINE, line, (long)buff);
     buff[len] = 0;
     text.UngetWriteBuf();
     return text;
@@ -154,12 +157,12 @@ wxString wxStyledTextCtrl::GetLine(int line) {
 
 
 void wxStyledTextCtrl::ReplaceSelection(const wxString& text) {
-    SendMsg(SCI_REPLACESEL, 0, (long)text.c_str());
+    SendMsg(EM_REPLACESEL, 0, (long)text.c_str());
 }
 
 
 void wxStyledTextCtrl::SetReadOnly(bool readOnly) {
-    SendMsg(SCI_SETREADONLY, (long)readOnly);
+    SendMsg(EM_SETREADONLY, (long)readOnly);
     m_readOnly = readOnly;
 }
 
@@ -172,18 +175,18 @@ bool wxStyledTextCtrl::GetReadOnly() {
 
 
 void wxStyledTextCtrl::GetTextRange(int startPos, int endPos, char* buff) {
-    TextRange tr;
+    TEXTRANGE tr;
     tr.lpstrText = buff;
     tr.chrg.cpMin = startPos;
     tr.chrg.cpMax = endPos;
-    SendMsg(SCI_GETTEXTRANGE, 0, (long)&tr);
+    SendMsg(EM_GETTEXTRANGE, 0, (long)&tr);
 }
 
 
 wxString wxStyledTextCtrl::GetTextRange(int startPos, int endPos) {
     wxString  text;
     int       len  = endPos - startPos;
-    char*     buff = text.GetWriteBuf(len+1);
+    char*     buff = text.GetWriteBuf(len);
     GetTextRange(startPos, endPos, buff);
     text.UngetWriteBuf();
     return text;
@@ -191,7 +194,7 @@ wxString wxStyledTextCtrl::GetTextRange(int startPos, int endPos) {
 
 
 void wxStyledTextCtrl::GetStyledTextRange(int startPos, int endPos, char* buff) {
-    TextRange tr;
+    TEXTRANGE tr;
     tr.lpstrText = buff;
     tr.chrg.cpMin = startPos;
     tr.chrg.cpMax = endPos;
@@ -202,7 +205,7 @@ void wxStyledTextCtrl::GetStyledTextRange(int startPos, int endPos, char* buff) 
 wxString wxStyledTextCtrl::GetStyledTextRange(int startPos, int endPos) {
     wxString  text;
     int       len  = endPos - startPos;
-    char*     buff = text.GetWriteBuf(len*2+1);
+    char*     buff = text.GetWriteBuf(len*2);
     GetStyledTextRange(startPos, endPos, buff);
     text.UngetWriteBuf(len*2);
     return text;
@@ -254,27 +257,27 @@ int  wxStyledTextCtrl::GetStyleBits() {
 
 
 void wxStyledTextCtrl::Cut() {
-    SendMsg(SCI_CUT);
+    SendMsg(WM_CUT);
 }
 
 
 void wxStyledTextCtrl::Copy() {
-    SendMsg(SCI_COPY);
+    SendMsg(WM_COPY);
 }
 
 
 void wxStyledTextCtrl::Paste() {
-    SendMsg(SCI_PASTE);
+    SendMsg(WM_PASTE);
 }
 
 
 bool wxStyledTextCtrl::CanPaste() {
-    return SendMsg(SCI_CANPASTE) != 0;
+    return SendMsg(EM_CANPASTE) != 0;
 }
 
 
 void wxStyledTextCtrl::ClearClipbrd() {
-    SendMsg(SCI_CLEAR);
+    SendMsg(WM_CLEAR);
 }
 
 
@@ -283,17 +286,17 @@ void wxStyledTextCtrl::ClearClipbrd() {
 // Undo and Redo
 
 void wxStyledTextCtrl::Undo() {
-    SendMsg(SCI_UNDO);
+    SendMsg(WM_UNDO);
 }
 
 
 bool wxStyledTextCtrl::CanUndo() {
-    return SendMsg(SCI_CANUNDO) != 0;
+    return SendMsg(EM_CANUNDO) != 0;
 }
 
 
 void wxStyledTextCtrl::EmptyUndoBuffer() {
-    SendMsg(SCI_EMPTYUNDOBUFFER);
+    SendMsg(EM_EMPTYUNDOBUFFER);
 }
 
 
@@ -337,14 +340,12 @@ void wxStyledTextCtrl::EndUndoAction() {
 
 
 void wxStyledTextCtrl::GetSelection(int* startPos, int* endPos) {
-//    SendMsg(EM_GETSEL, (long)startPos, (long)endPos);
-    *startPos = SendMsg(SCI_GETSELECTIONSTART);
-    *endPos = SendMsg(SCI_GETSELECTIONEND);
+    SendMsg(EM_GETSEL, (long)startPos, (long)endPos);
 }
 
 
 void wxStyledTextCtrl::SetSelection(int  startPos, int  endPos) {
-    SendMsg(SCI_SETSEL, startPos, endPos);
+    SendMsg(EM_SETSEL, startPos, endPos);
 }
 
 
@@ -355,16 +356,16 @@ wxString wxStyledTextCtrl::GetSelectedText() {
 
     GetSelection(&start, &end);
     int   len  = end - start;
-    char* buff = text.GetWriteBuf(len+1);
+    char* buff = text.GetWriteBuf(len);
 
-    SendMsg(SCI_GETSELTEXT, 0, (long)buff);
+    SendMsg(EM_GETSELTEXT, 0, (long)buff);
     text.UngetWriteBuf();
     return text;
 }
 
 
 void wxStyledTextCtrl::HideSelection(bool hide) {
-    SendMsg(SCI_HIDESELECTION, hide);
+    SendMsg(EM_HIDESELECTION, hide);
 }
 
 
@@ -374,32 +375,46 @@ bool wxStyledTextCtrl::GetHideSelection() {
 
 
 int wxStyledTextCtrl::GetTextLength() {
-    return SendMsg(SCI_GETTEXTLENGTH);
+    return SendMsg(WM_GETTEXTLENGTH);
 }
 
 
 int wxStyledTextCtrl::GetFirstVisibleLine() {
-    return SendMsg(SCI_GETFIRSTVISIBLELINE);
+    return SendMsg(EM_GETFIRSTVISIBLELINE);
 }
 
 
 int wxStyledTextCtrl::GetLineCount() {
-    return SendMsg(SCI_GETLINECOUNT);
+    return SendMsg(EM_GETLINECOUNT);
 }
 
 
 bool wxStyledTextCtrl::GetModified() {
-    return SendMsg(SCI_GETMODIFY) != 0;
+    return SendMsg(EM_GETMODIFY) != 0;
+}
+
+
+wxRect wxStyledTextCtrl::GetRect() {
+    PRectangle pr;
+    SendMsg(EM_GETRECT, 0, (long)&pr);
+
+    wxRect rect = wxRectFromPRectangle(pr);
+    return rect;
 }
 
 
 int wxStyledTextCtrl::GetLineFromPos(int pos) {
-    return SendMsg(SCI_LINEFROMPOSITION, pos);
+    return SendMsg(EM_LINEFROMCHAR, pos);
 }
 
 
 int wxStyledTextCtrl::GetLineStartPos(int line) {
-    return SendMsg(SCI_POSITIONFROMLINE, line);
+    return SendMsg(EM_LINEINDEX, line);
+}
+
+
+int wxStyledTextCtrl::GetLineLengthAtPos(int pos) {
+    return SendMsg(EM_LINELENGTH, pos);
 }
 
 
@@ -430,14 +445,23 @@ wxString wxStyledTextCtrl::GetCurrentLineText(int* linePos) {
 
 
 int wxStyledTextCtrl::PositionFromPoint(wxPoint pt) {
-    return SendMsg(SCI_POSITIONFROMPOINT, pt.x, pt.y);
+    Point spt(pt.x, pt.y);
+    long rv = SendMsg(EM_CHARFROMPOS, 0, (long)&spt);
+    return LOWORD(rv);
+}
+
+
+int wxStyledTextCtrl::LineFromPoint(wxPoint pt) {
+    Point spt(pt.x, pt.y);
+    long rv = SendMsg(EM_CHARFROMPOS, 0, (long)&spt);
+    return HIWORD(rv);
 }
 
 
 wxPoint wxStyledTextCtrl::PointFromPosition(int pos) {
-    int x = SendMsg(SCI_POINTXFROMPOSITION, 0, pos);
-    int y = SendMsg(SCI_POINTYFROMPOSITION, 0, pos);
-    return wxPoint(x, y);
+    Point pt;
+    SendMsg(EM_POSFROMCHAR, (long)&pt, pos);
+    return wxPoint(pt.x, pt.y);
 }
 
 
@@ -489,7 +513,7 @@ void wxStyledTextCtrl::PageMove(int cmdKey, bool extendSelection) {
 
 
 void wxStyledTextCtrl::ScrollBy(int columnDelta, int lineDelta) {
-    SendMsg(SCI_LINESCROLL, columnDelta, lineDelta);
+    SendMsg(EM_LINESCROLL, columnDelta, lineDelta);
 }
 
 void wxStyledTextCtrl::ScrollToLine(int line) {
@@ -503,12 +527,17 @@ void wxStyledTextCtrl::ScrollToColumn(int column) {
 
 
 void wxStyledTextCtrl::EnsureCaretVisible() {
-    SendMsg(SCI_SCROLLCARET);
+    SendMsg(EM_SCROLLCARET);
 }
 
 
 void wxStyledTextCtrl::SetCaretPolicy(int policy, int slop) {
     SendMsg(SCI_SETCARETPOLICY, policy, slop);
+}
+
+
+int wxStyledTextCtrl::GetSelectionType() {
+    return SendMsg(EM_SELECTIONTYPE);
 }
 
 
@@ -539,18 +568,18 @@ bool wxStyledTextCtrl::GetUseHorizontalScrollBar() {
 // Searching
 
 int wxStyledTextCtrl::FindText(int minPos, int maxPos,
-                               const wxString& text,
-                               bool caseSensitive, bool wholeWord) {
-    TextToFind  ft;
+                                     const wxString& text,
+                                     bool caseSensitive, bool wholeWord) {
+    FINDTEXTEX  ft;
     int         flags = 0;
 
-    flags |= caseSensitive ? SCFIND_MATCHCASE : 0;
-    flags |= wholeWord     ? SCFIND_WHOLEWORD : 0;
+    flags |= caseSensitive ? FR_MATCHCASE : 0;
+    flags |= wholeWord     ? FR_WHOLEWORD : 0;
     ft.chrg.cpMin = minPos;
     ft.chrg.cpMax = maxPos;
     ft.lpstrText = (char*)text.c_str();
 
-    return SendMsg(SCI_FINDTEXT, flags, (long)&ft);
+    return SendMsg(EM_FINDTEXT, flags, (long)&ft);
 }
 
 
@@ -561,8 +590,8 @@ void wxStyledTextCtrl::SearchAnchor() {
 
 int wxStyledTextCtrl::SearchNext(const wxString& text, bool caseSensitive, bool wholeWord) {
     int flags = 0;
-    flags |= caseSensitive ? SCFIND_MATCHCASE : 0;
-    flags |= wholeWord     ? SCFIND_WHOLEWORD : 0;
+    flags |= caseSensitive ? FR_MATCHCASE : 0;
+    flags |= wholeWord     ? FR_WHOLEWORD : 0;
 
     return SendMsg(SCI_SEARCHNEXT, flags, (long)text.c_str());
 }
@@ -570,8 +599,8 @@ int wxStyledTextCtrl::SearchNext(const wxString& text, bool caseSensitive, bool 
 
 int wxStyledTextCtrl::SearchPrev(const wxString& text, bool caseSensitive, bool wholeWord) {
     int flags = 0;
-    flags |= caseSensitive ? SCFIND_MATCHCASE : 0;
-    flags |= wholeWord     ? SCFIND_WHOLEWORD : 0;
+    flags |= caseSensitive ? FR_MATCHCASE : 0;
+    flags |= wholeWord     ? FR_WHOLEWORD : 0;
 
     return SendMsg(SCI_SEARCHPREV, flags, (long)text.c_str());
 }
@@ -807,24 +836,29 @@ void wxStyledTextCtrl::StyleSetUnderline(int styleNum, bool underline) {
 // Margins in the edit area
 
 int wxStyledTextCtrl::GetLeftMargin() {
-    return SendMsg(SCI_GETMARGINLEFT);
+    return LOWORD(SendMsg(EM_GETMARGINS));
 }
 
 
 int wxStyledTextCtrl::GetRightMargin() {
-    return SendMsg(SCI_GETMARGINRIGHT);
+    return HIWORD(SendMsg(EM_GETMARGINS));
 }
 
 
 void wxStyledTextCtrl::SetMargins(int left, int right) {
     int flag = 0;
+    int val = 0;
 
     if (right != -1) {
-        SendMsg(SCI_SETMARGINRIGHT, 0, right);
+        flag |= EC_RIGHTMARGIN;
+        val = right << 16;
     }
     if (left != -1) {
-        SendMsg(SCI_SETMARGINLEFT, 0, left);
+        flag |= EC_LEFTMARGIN;
+        val |= (left & 0xffff);
     }
+
+    SendMsg(EM_SETMARGINS, flag, val);
 }
 
 
@@ -1146,8 +1180,6 @@ void wxStyledTextCtrl::CallTipSetBackground(const wxColour& colour) {
 //----------------------------------------------------------------------
 // Key bindings
 
-#define MAKELONG(a, b) ((a) | ((b) << 16))
-
 void wxStyledTextCtrl::CmdKeyAssign(int key, int modifiers, int cmd) {
     SendMsg(SCI_ASSIGNCMDKEY, MAKELONG(key, modifiers), cmd);
 }
@@ -1180,7 +1212,7 @@ wxStyledTextCtrl::FormatRange(bool   doDraw,
                                     wxDC*  target,  // Why does it use two? Can they be the same?
                                     wxRect renderRect,
                                     wxRect pageRect) {
-    RangeToFormat fr;
+    FORMATRANGE fr;
 
     fr.hdc = draw;
     fr.hdcTarget = target;
@@ -1195,7 +1227,7 @@ wxStyledTextCtrl::FormatRange(bool   doDraw,
     fr.chrg.cpMin = startPos;
     fr.chrg.cpMax = endPos;
 
-    return SendMsg(SCI_FORMATRANGE, doDraw, (long)&fr);
+    return SendMsg(EM_FORMATRANGE, doDraw, (long)&fr);
 }
 
 

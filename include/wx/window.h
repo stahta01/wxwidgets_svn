@@ -259,6 +259,17 @@ public:
         return wxSize(w, h);
     }
 
+        // get the origin of the client area of the window relative to the
+        // window top left corner (the client area may be shifted because of
+        // the borders, scrollbars, other decorations...)
+    virtual wxPoint GetClientAreaOrigin() const;
+
+        // get the client rectangle in window (i.e. client) coordinates
+    wxRect GetClientRect() const
+    {
+        return wxRect(GetClientAreaOrigin(), GetClientSize());
+    }
+
         // get the size best suited for the window (in fact, minimal
         // acceptable size using which it will still look "nice")
     wxSize GetBestSize() const { return DoGetBestSize(); }
@@ -554,12 +565,18 @@ public:
     // misc
     // ----
 
+    // get the window border style: uses the current style and falls back to
+    // the default style for this class otherwise (see GetDefaultBorder())
+    wxBorder GetBorder() const;
+
     void UpdateWindowUI();
 
+#if wxUSE_MENUS
     bool PopupMenu( wxMenu *menu, const wxPoint& pos )
         { return DoPopupMenu(menu, pos.x, pos.y); }
     bool PopupMenu( wxMenu *menu, int x, int y )
         { return DoPopupMenu(menu, x, y); }
+#endif // wxUSE_MENUS
 
     // scrollbars
     // ----------
@@ -567,7 +584,7 @@ public:
         // configure the window scrollbars
     virtual void SetScrollbar( int orient,
                                int pos,
-                               int thumbVisible,
+                               int thumbvisible,
                                int range,
                                bool refresh = TRUE ) = 0;
     virtual void SetScrollPos( int orient, int pos, bool refresh = TRUE ) = 0;
@@ -579,24 +596,8 @@ public:
     virtual void ScrollWindow( int dx, int dy,
                                const wxRect* rect = (wxRect *) NULL ) = 0;
 
-    // context-sensitive help
-    // ----------------------
-
-    // these are the convenience functions wrapping wxHelpProvider methods
-
-#if wxUSE_HELP
-        // associate this help text with this window
-    void SetHelpText(const wxString& text);
-        // associate this help text with all windows with the same id as this
-        // one
-    void SetHelpTextForId(const wxString& text);
-        // get the help string associated with this window (may be empty)
-    wxString GetHelpText() const;
-#endif // wxUSE_HELP
-
     // tooltips
     // --------
-
 #if wxUSE_TOOLTIPS
         // the easiest way to set a tooltip for a window is to use this method
     void SetToolTip( const wxString &tip );
@@ -677,9 +678,6 @@ public:
     void OnSysColourChanged( wxSysColourChangedEvent& event );
     void OnInitDialog( wxInitDialogEvent &event );
     void OnMiddleClick( wxMouseEvent& event );
-#if wxUSE_HELP
-    void OnHelp(wxHelpEvent& event);
-#endif // wxUSE_HELP
 
         // get the haqndle of the window for the underlying window system: this
         // is only used for wxWin itself or for user code which wants to call
@@ -779,28 +777,29 @@ protected:
     // ctor
     void InitBase();
 
+    // override this to change the default (i.e. used when no style is
+    // specified) border for the window class
+    virtual wxBorder GetDefaultBorder() const;
+
     // get the default size for the new window if no explicit size given
     // FIXME why 20 and not 30, 10 or ...?
     static int WidthDefault(int w) { return w == -1 ? 20 : w; }
     static int HeightDefault(int h) { return h == -1 ? 20 : h; }
 
-    // sets the size to be size but take width and/or height from
-    // DoGetBestSize() if width/height of size is -1
-    //
-    // NB: when calling this function from the ctor, the DoGetBestSize() of
-    //     the class with the same name as the ctor, not the real (most
-    //     derived) one - but this is what we usually want
-    void SetSizeOrDefault(const wxSize& size = wxDefaultSize)
+    // set the best size for the control if the default size was given:
+    // replaces the fields of size == -1 with the best values for them and
+    // calls SetSize() if needed
+    void SetBestSize(const wxSize& size)
     {
         if ( size.x == -1 || size.y == -1 )
         {
-            wxSize sizeDef = GetBestSize();
-            SetSize( size.x == -1 ? sizeDef.x : size.x,
-                     size.y == -1 ? sizeDef.y : size.y);
-        }
-        else
-        {
-            SetSize(size);
+            wxSize sizeBest = DoGetBestSize();
+            if ( size.x != -1 )
+                sizeBest.x = size.x;
+            if ( size.y != -1 )
+                sizeBest.y = size.y;
+
+            SetSize(sizeBest);
         }
     }
 
@@ -850,7 +849,9 @@ protected:
     virtual void DoSetToolTip( wxToolTip *tip );
 #endif // wxUSE_TOOLTIPS
 
+#if wxUSE_MENUS
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y ) = 0;
+#endif // wxUSE_MENUS
 
     // client data accessors
     virtual void DoSetClientObject( wxClientData *data );
@@ -879,18 +880,29 @@ private:
 // now include the declaration of wxWindow class
 // ----------------------------------------------------------------------------
 
+// include the declaration of the platform-specific class
 #if defined(__WXMSW__)
     #include "wx/msw/window.h"
+    #define wxWindowNative wxWindowMSW
 #elif defined(__WXMOTIF__)
     #include "wx/motif/window.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/window.h"
+    #define wxWindowNative wxWindowGTK
 #elif defined(__WXQT__)
     #include "wx/qt/window.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/window.h"
 #elif defined(__WXPM__)
     #include "wx/os2/window.h"
+#endif
+
+// for wxUniversal, we now derive the real wxWindow from wxWindow<platform>,
+// for the native ports we just rename wxWindow<platform> into wxWindows
+#if defined(__WXUNIVERSAL__)
+    #include "wx/univ/window.h"
+#else
+    #define wxWindow wxWindowNative
 #endif
 
 // ----------------------------------------------------------------------------
@@ -904,17 +916,10 @@ inline wxWindow *wxWindowBase::GetGrandParent() const
 }
 
 // ----------------------------------------------------------------------------
-// global functions
+// global function
 // ----------------------------------------------------------------------------
 
-WXDLLEXPORT extern wxWindow* wxGetActiveWindow();
-
-// Find the wxWindow at the current mouse position, also returning the mouse
-// position.
-WXDLLEXPORT extern wxWindow* wxFindWindowAtPointer(wxPoint& pt);
-
-// Get the current mouse position.
-WXDLLEXPORT extern wxPoint wxGetMousePosition();
+WXDLLEXPORT extern wxWindow *wxGetActiveWindow();
 
 // deprecated (doesn't start with 'wx' prefix), use wxWindow::NewControlId()
 inline WXDLLEXPORT int NewControlId() { return wxWindowBase::NewControlId(); }

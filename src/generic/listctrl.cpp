@@ -19,16 +19,13 @@
 #pragma hdrstop
 #endif
 
+#if wxUSE_LISTCTRL
+
 #include "wx/dcscreen.h"
 #include "wx/app.h"
 #include "wx/listctrl.h"
 #include "wx/generic/imaglist.h"
 #include "wx/dynarray.h"
-
-#ifdef __WXGTK__
-#include <gtk/gtk.h>
-#include "wx/gtk/win_gtk.h"
-#endif
 
 #ifndef wxUSE_GENERIC_LIST_EXTENSIONS
 #define wxUSE_GENERIC_LIST_EXTENSIONS 1
@@ -735,23 +732,6 @@ void wxListLineData::CalculateSize( wxDC *dc, int spacing )
             m_bound_all.width = 0;
             m_bound_all.height = 0;
             wxNode *node = m_items.First();
-            if (node)
-            {
-                wxListItemData *item = (wxListItemData*)node->Data();
-                if (item->HasImage())
-                {
-                    int w = 0;
-                    int h = 0;
-                    m_owner->GetImageSize( item->GetImage(), w, h );
-                    m_bound_icon.width = w;
-                    m_bound_icon.height = h;
-                }
-                else
-                {
-                    m_bound_icon.width = 0;
-                    m_bound_icon.height = 0;
-                }
-            }
             while (node)
             {
                 wxListItemData *item = (wxListItemData*)node->Data();
@@ -1195,15 +1175,6 @@ wxListHeaderWindow::~wxListHeaderWindow( void )
 
 void wxListHeaderWindow::DoDrawRect( wxDC *dc, int x, int y, int w, int h )
 {
-#ifdef __WXGTK__
-    GtkStateType state = GTK_STATE_NORMAL;
-    if (!m_parent->IsEnabled()) state = GTK_STATE_INSENSITIVE;
-    
-    x = dc->XLOG2DEV( x );
-    
-	gtk_paint_box (m_wxwindow->style, GTK_PIZZA(m_wxwindow)->bin_window, state, GTK_SHADOW_OUT,
-		(GdkRectangle*) NULL, m_wxwindow, "button", x-1, y-1, w+2, h+2);
-#else
     const int m_corner = 1;
 
     dc->SetBrush( *wxTRANSPARENT_BRUSH );
@@ -1223,7 +1194,6 @@ void wxListHeaderWindow::DoDrawRect( wxDC *dc, int x, int y, int w, int h )
     dc->DrawRectangle( x, y, 1, h );              // left (outer)
     dc->DrawLine( x, y+h-1, x+1, y+h-1 );
     dc->DrawLine( x+w-1, y, x+w-1, y+1 );
-#endif
 }
 
 // shift the DC origin to match the position of the main window horz
@@ -1263,8 +1233,7 @@ void wxListHeaderWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
     // do *not* use the listctrl colour for headers - one day we will have a
     // function to set it separately
-    //dc.SetTextForeground( *wxBLACK );
-    dc.SetTextForeground(wxSystemSettings::GetSystemColour( wxSYS_COLOUR_WINDOWTEXT ));
+    dc.SetTextForeground( *wxBLACK );
 
     int x = 1;          // left of the header rect
     const int y = 1;    // top
@@ -1658,12 +1627,6 @@ void wxListMainWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
     if (m_mode & wxLC_REPORT)
     {
-        wxPen pen(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DLIGHT), 1, wxSOLID);
-        dc.SetPen(pen);
-        dc.SetBrush(* wxTRANSPARENT_BRUSH);
-
-        wxSize clientSize = GetClientSize();
-
         int lineSpacing = 0;
         wxListLineData *line = &m_lines[0];
         int dummy = 0;
@@ -1674,35 +1637,10 @@ void wxListMainWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
         size_t i_to = y_s / lineSpacing + m_visibleLines+2;
         if (i_to >= m_lines.GetCount()) i_to = m_lines.GetCount();
-        size_t i;
-        for (i = y_s / lineSpacing; i < i_to; i++)
+        for (size_t i = y_s / lineSpacing; i < i_to; i++)
         {
             m_lines[i].Draw( &dc );
-            // Draw horizontal rule if required
-            if (GetWindowStyle() & wxLC_HRULES)
-                dc.DrawLine(0, i*lineSpacing, clientSize.x, i*lineSpacing);
         }
-
-        // Draw last horizontal rule
-        if ((i > (size_t) (y_s / lineSpacing)) && (GetWindowStyle() & wxLC_HRULES))
-            dc.DrawLine(0, i*lineSpacing, clientSize.x, i*lineSpacing);
-
-        // Draw vertical rules if required
-        if ((GetWindowStyle() & wxLC_VRULES) && (GetItemCount() > 0))
-        {
-            int col = 0;
-            wxRect firstItemRect;
-            wxRect lastItemRect;
-            GetItemRect(0, firstItemRect);
-            GetItemRect(GetItemCount() - 1, lastItemRect);
-            int x = firstItemRect.GetX();
-            for (col = 0; col < GetColumnCount(); col++)
-            {
-                int colWidth = GetColumnWidth(col);
-                x += colWidth ;
-                dc.DrawLine(x, firstItemRect.GetY() - 1, x, lastItemRect.GetBottom() + 1);
-            }
-	}
     }
     else
     {
@@ -1767,7 +1705,7 @@ void wxListMainWindow::DeleteLine( wxListLineData *line )
 
 void wxListMainWindow::EditLabel( long item )
 {
-    wxCHECK_RET( ((size_t)item < m_lines.GetCount()),
+    wxCHECK_RET( ((size_t)item < m_lines.GetCount()), 
                  wxT("wrong index in wxListCtrl::Edit()") );
 
     m_currentEdit = &m_lines[(size_t)item];
@@ -1832,7 +1770,6 @@ void wxListMainWindow::OnRenameAccept()
 
 void wxListMainWindow::OnMouse( wxMouseEvent &event )
 {
-    event.SetEventObject( GetParent() );
     if (GetParent()->GetEventHandler()->ProcessEvent( event)) return;
 
     if (!m_current) return;
@@ -1952,7 +1889,7 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
             else if (event.ShiftDown())
             {
                 size_t j;
-
+                
                 m_current = line;
 
                 int numOfCurrent = -1;
@@ -2160,7 +2097,7 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
             if (index != wxNOT_FOUND)
             {
                 index -= steps;
-                if (index < 0) index = 0;
+                if (index < 0) index = 0;          
                 OnArrowChar( &m_lines[index], event.ShiftDown() );
             }
             break;
@@ -2181,7 +2118,7 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
             if (index != wxNOT_FOUND)
             {
                 index += steps;
-                if ((size_t)index >= m_lines.GetCount())
+                if ((size_t)index >= m_lines.GetCount()) 
                     index = m_lines.GetCount()-1;
                 OnArrowChar( &m_lines[index], event.ShiftDown() );
             }
@@ -2209,7 +2146,7 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
                 if (index != wxNOT_FOUND)
                 {
                     index += m_visibleLines;
-                    if ((size_t)index >= m_lines.GetCount())
+                    if ((size_t)index >= m_lines.GetCount()) 
                         index = m_lines.GetCount()-1;
                     OnArrowChar( &m_lines[index], event.ShiftDown() );
                 }
@@ -2446,7 +2383,7 @@ void wxListMainWindow::SetColumnWidth( int col, int width )
         wxClientDC dc(this);
         dc.SetFont( GetFont() );
         int max = 10;
-
+        
         for (size_t i = 0; i < m_lines.GetCount(); i++)
         {
             wxListLineData *line = &m_lines[i];
@@ -2980,7 +2917,7 @@ long wxListMainWindow::HitTest( int x, int y, int &flags )
     {
         wxListLineData *line = &m_lines[i];
         long ret = line->IsHit( x, y );
-        if (ret) //  & flags) // No: flags is output-only so may be garbage at this point
+        if (ret & flags)
         {
             flags = (int)ret;
             return count;
@@ -3019,7 +2956,6 @@ void wxListMainWindow::InsertItem( wxListItem &item )
     else
     {
         m_lines.Add( line );
-        item.m_itemId = m_lines.GetCount()-1;
     }
 }
 
@@ -3794,3 +3730,5 @@ void wxListCtrl::SetFocus()
     if ( FindFocus() != this )
         m_mainWin->SetFocus();
 }
+
+#endif // wxUSE_LISTCTRL

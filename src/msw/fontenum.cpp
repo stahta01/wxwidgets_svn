@@ -28,6 +28,8 @@
   #pragma hdrstop
 #endif
 
+#if wxUSE_FONTMAP
+
 #ifndef WX_PRECOMP
   #include "wx/font.h"
 #endif
@@ -104,7 +106,7 @@ int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
 wxFontEnumeratorHelper::wxFontEnumeratorHelper(wxFontEnumerator *fontEnum)
 {
     m_fontEnum = fontEnum;
-    m_charset = DEFAULT_CHARSET;
+    m_charset = -1;
     m_fixedOnly = FALSE;
     m_enumEncodings = FALSE;
 }
@@ -178,7 +180,7 @@ bool wxFontEnumeratorHelper::OnFont(const LPLOGFONT lf,
             wxConstCast(this, wxFontEnumeratorHelper)->m_charsets.Add(cs);
 
             wxFontEncoding enc = wxGetFontEncFromCharSet(cs);
-            return m_fontEnum->OnFontEncoding(lf->lfFaceName,
+            return m_fontEnum->OnFontEncoding(m_family,
                                               wxFontMapper::GetEncodingName(enc));
         }
         else
@@ -258,3 +260,4 @@ int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
     return fontEnum->OnFont(lplf, lptm);
 }
 
+#endif // wxUSE_FONTMAP

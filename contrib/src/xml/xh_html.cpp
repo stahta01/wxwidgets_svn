@@ -31,7 +31,6 @@ wxHtmlWindowXmlHandler::wxHtmlWindowXmlHandler()
 {
     ADD_STYLE( wxHW_SCROLLBAR_NEVER );
     ADD_STYLE( wxHW_SCROLLBAR_AUTO );
-    AddWindowStyles();
 }
 
 wxObject *wxHtmlWindowXmlHandler::DoCreateResource()
@@ -45,7 +44,7 @@ wxObject *wxHtmlWindowXmlHandler::DoCreateResource()
 
     if( HasParam( _T("borders") ))
     {
-        control->SetBorders( GetDimension( _T("borders" )));
+        control->SetBorders( GetLong( _T("borders" )));
     }
 
     if( HasParam( _T("url") ))

@@ -10,17 +10,12 @@
 	set command $disk2:[joukj.com]bison.cld
 
 .ifdef __WXMOTIF__
-CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)
+CXX_DEFINE = /define=(__WXMOTIF__=1)
 .else
 .ifdef __WXGTK__
-CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
+CXX_DEFINE = /define=(__WXGTK__=1)
 .else
 CXX_DEFINE =
-CC_DEFINE =
 .endif
 .endif
 
@@ -35,7 +30,7 @@ LEX=flex
 .cpp.obj :
 	cxx $(CXXFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).cpp
 .c.obj :
-	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
+	cc $(CFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
 		parser.obj,\
@@ -45,7 +40,6 @@ OBJECTS = \
 		cmdline.obj,\
 		cmndata.obj,\
 		config.obj,\
-		cshelp.obj,\
 		ctrlcmn.obj,\
 		ctrlsub.obj,\
 		datetime.obj,\
@@ -146,7 +140,6 @@ SOURCES = \
 		cmdline.cpp,\
 		cmndata.cpp,\
 		config.cpp,\
-		cshelp.cpp,\
 		ctrlcmn.cpp,\
 		ctrlsub.cpp,\
 		datetime.cpp,\
@@ -276,7 +269,6 @@ clipcmn.obj : clipcmn.cpp
 cmndata.obj : cmndata.cpp
 cmdline.obj : cmdline.cpp
 config.obj : config.cpp
-cshelp.obj : cshelp.cpp
 ctrlcmn.obj : ctrlcmn.cpp
 ctrlsub.obj : ctrlsub.cpp
 datetime.obj : datetime.cpp

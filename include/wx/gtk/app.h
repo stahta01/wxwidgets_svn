@@ -74,7 +74,7 @@ public:
     unsigned char  *m_colorCube;
 
 private:
-    /// Set to TRUE while we are in wxYield().
+    // Set to TRUE while we are in wxYield().
     bool m_suppressIdleEvents;
 
 private:
@@ -82,6 +82,14 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-int WXDLLEXPORT wxEntry( int argc, char *argv[] );
+#ifdef __VMS
+
+extern "C"
+  {
+     extern guint vms_gtk_major_version(void);
+     extern guint vms_gtk_minor_version(void);
+     extern guint vms_gtk_micro_version(void);
+  }
+#endif
 
 #endif // __GTKAPPH__

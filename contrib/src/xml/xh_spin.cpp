@@ -31,7 +31,6 @@ wxSpinButtonXmlHandler::wxSpinButtonXmlHandler()
     ADD_STYLE( wxSP_VERTICAL );
     ADD_STYLE( wxSP_ARROW_KEYS );
     ADD_STYLE( wxSP_WRAP );
-    AddWindowStyles();
 }
 
 wxObject *wxSpinButtonXmlHandler::DoCreateResource()

@@ -19,10 +19,6 @@
     #pragma implementation "frame.h"
 #endif
 
-#ifdef __VMS
-#define XIconifyWindow XICONIFYWINDOW
-#endif
-
 #include "wx/frame.h"
 #include "wx/dialog.h"
 #include "wx/control.h"
@@ -150,6 +146,7 @@ static gint gtk_frame_delete_callback( GtkWidget *WXUNUSED(widget), GdkEvent *WX
     return TRUE;
 }
 
+#if wxUSE_MENUS
 //-----------------------------------------------------------------------------
 // "child_attached" of menu bar
 //-----------------------------------------------------------------------------
@@ -173,6 +170,7 @@ static void gtk_menu_detached_callback( GtkWidget *WXUNUSED(widget), GtkWidget *
     win->m_menuBarDetached = TRUE;
     win->GtkUpdateSize();
 }
+#endif // wxUSE_MENUS
 
 #if wxUSE_TOOLBAR
 //-----------------------------------------------------------------------------
@@ -246,13 +244,13 @@ gtk_frame_configure_callback( GtkWidget *WXUNUSED(widget), GdkEventConfigure *ev
 /* we cannot MWM hints and icons before the widget has been realized,
    so we do this directly after realization */
 
-static void
+static gint
 gtk_frame_realized_callback( GtkWidget * WXUNUSED(widget), wxFrame *win )
 {
     if (g_isIdle)
         wxapp_install_idle_handler();
 
-    if ((win->m_miniEdge > 0) || (win->HasFlag(wxSIMPLE_BORDER)) || (win->HasFlag(wxNO_BORDER)))
+    if ((win->m_miniEdge > 0) || (win->HasFlag(wxSIMPLE_BORDER)))
     {
         /* This is a mini-frame or a borderless frame. */
         gdk_window_set_decorations( win->m_widget->window, (GdkWMDecoration)0 );
@@ -321,30 +319,8 @@ gtk_frame_realized_callback( GtkWidget * WXUNUSED(widget), wxFrame *win )
 
         node = node->GetNext();
     }
-}
 
-//-----------------------------------------------------------------------------
-// "map_event" from m_widget
-//-----------------------------------------------------------------------------
-
-static void
-gtk_frame_map_callback( GtkWidget * WXUNUSED(widget),
-                        GdkEvent * WXUNUSED(event),
-                        wxFrame *win )
-{
-    win->m_isIconized = FALSE;
-}
-
-//-----------------------------------------------------------------------------
-// "unmap_event" from m_widget
-//-----------------------------------------------------------------------------
-
-static void
-gtk_frame_unmap_callback( GtkWidget * WXUNUSED(widget),
-                          GdkEvent * WXUNUSED(event),
-                          wxFrame *win )
-{
-    win->m_isIconized = TRUE;
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -420,8 +396,6 @@ void wxFrame::Init()
     m_menuBarDetached = FALSE;
     m_toolBarDetached = FALSE;
     m_insertInClientArea = TRUE;
-    m_isIconized = FALSE;
-    m_fsIsShowing = FALSE;
 }
 
 bool wxFrame::Create( wxWindow *parent,
@@ -448,9 +422,6 @@ bool wxFrame::Create( wxWindow *parent,
     m_insertCallback = (wxInsertChildFunction) wxInsertChildInFrame;
 
     GtkWindowType win_type = GTK_WINDOW_TOPLEVEL;
-    
-    if (style & wxFRAME_TOOL_WINDOW)
-        win_type = GTK_WINDOW_POPUP;
 
     m_widget = gtk_window_new( win_type );
 
@@ -514,16 +485,6 @@ bool wxFrame::Create( wxWindow *parent,
     gtk_signal_connect( GTK_OBJECT(m_widget), "configure_event",
         GTK_SIGNAL_FUNC(gtk_frame_configure_callback), (gpointer)this );
 
-    /* map and unmap for iconized state */
-    gtk_signal_connect( GTK_OBJECT(m_widget), "map_event",
-        GTK_SIGNAL_FUNC(gtk_frame_map_callback), (gpointer)this );
-    gtk_signal_connect( GTK_OBJECT(m_widget), "unmap_event",
-        GTK_SIGNAL_FUNC(gtk_frame_unmap_callback), (gpointer)this );
-
-    /* the only way to get the window size is to connect to this event */
-    gtk_signal_connect( GTK_OBJECT(m_widget), "configure_event",
-        GTK_SIGNAL_FUNC(gtk_frame_configure_callback), (gpointer)this );
-
     /* disable native tab traversal */
     gtk_signal_connect( GTK_OBJECT(m_widget), "focus",
         GTK_SIGNAL_FUNC(gtk_frame_focus_callback), (gpointer)this );
@@ -547,48 +508,6 @@ wxFrame::~wxFrame()
     {
         wxTheApp->ExitMainLoop();
     }
-}
-
-bool wxFrame::ShowFullScreen(bool show, long style )
-{
-    if (show == m_fsIsShowing) return FALSE; // return what?
-
-    m_fsIsShowing = show;
-    
-    if (show)
-    {
-        m_fsSaveStyle = m_windowStyle;
-        m_fsSaveFlag = style;
-        GetPosition( &m_fsSaveFrame.x, &m_fsSaveFrame.y );
-        GetSize( &m_fsSaveFrame.width, &m_fsSaveFrame.height );
-        
-        gtk_widget_hide( m_widget );
-        gtk_widget_unrealize( m_widget );
-        
-        m_windowStyle = wxSIMPLE_BORDER;
-        
-        int x;
-        int y;
-        wxDisplaySize( &x, &y );
-        SetSize( 0, 0, x, y );
-        
-        gtk_widget_realize( m_widget );
-        gtk_widget_show( m_widget );
-    }
-    else
-    {
-        gtk_widget_hide( m_widget );
-        gtk_widget_unrealize( m_widget );
-    
-        m_windowStyle = m_fsSaveStyle;
-        
-        SetSize( m_fsSaveFrame.x, m_fsSaveFrame.y, m_fsSaveFrame.width, m_fsSaveFrame.height );
-        
-        gtk_widget_realize( m_widget );
-        gtk_widget_show( m_widget );
-    }
-    
-    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -695,6 +614,7 @@ void wxFrame::DoGetClientSize( int *width, int *height ) const
     wxWindow::DoGetClientSize( width, height );
     if (height)
     {
+#if wxUSE_MENUS
         /* menu bar */
         if (m_frameMenuBar)
         {
@@ -703,15 +623,16 @@ void wxFrame::DoGetClientSize( int *width, int *height ) const
             else
                 (*height) -= wxPLACE_HOLDER;
         }
+#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
         /* status bar */
-        if (m_frameStatusBar && m_frameStatusBar->IsShown()) (*height) -= wxSTATUS_HEIGHT;
+        if (m_frameStatusBar) (*height) -= wxSTATUS_HEIGHT;
 #endif // wxUSE_STATUSBAR
 
 #if wxUSE_TOOLBAR
         /* tool bar */
-        if (m_frameToolBar && m_frameToolBar->IsShown())
+        if (m_frameToolBar)
         {
             if (m_toolBarDetached)
             {
@@ -746,6 +667,7 @@ void wxFrame::DoSetClientSize( int width, int height )
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid frame") );
 
+#if wxUSE_MENUS
         /* menu bar */
         if (m_frameMenuBar)
         {
@@ -754,15 +676,16 @@ void wxFrame::DoSetClientSize( int width, int height )
             else
                 height += wxPLACE_HOLDER;
         }
+#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
         /* status bar */
-        if (m_frameStatusBar && m_frameStatusBar->IsShown()) height += wxSTATUS_HEIGHT;
+        if (m_frameStatusBar) height += wxSTATUS_HEIGHT;
 #endif
 
 #if wxUSE_TOOLBAR
         /* tool bar */
-        if (m_frameToolBar && m_frameToolBar->IsShown())
+        if (m_frameToolBar)
         {
             if (m_toolBarDetached)
             {
@@ -842,6 +765,7 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
          * this hurts in the eye, but I don't want to call SetSize()
          * because I don't want to call any non-native functions here. */
 
+#if wxUSE_MENUS
         if (m_frameMenuBar)
         {
             int xx = m_miniEdge;
@@ -858,13 +782,15 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
                                   xx, yy, ww, hh );
             client_area_y_offset += hh;
         }
+#endif // wxUSE_MENUS
 
 #if wxUSE_TOOLBAR
-        if ((m_frameToolBar) && m_frameToolBar->IsShown() &&
+        if ((m_frameToolBar) &&
             (m_frameToolBar->m_widget->parent == m_mainWidget))
         {
             int xx = m_miniEdge;
             int yy = m_miniEdge + m_miniTitle;
+#if wxUSE_MENUS
             if (m_frameMenuBar)
             {
                 if (!m_menuBarDetached)
@@ -872,6 +798,7 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
                 else
                     yy += wxPLACE_HOLDER;
             }
+#endif // wxUSE_MENUS
 
             m_frameToolBar->m_x = xx;
             m_frameToolBar->m_y = yy;
@@ -916,7 +843,7 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
     }
 
 #if wxUSE_STATUSBAR
-    if (m_frameStatusBar && m_frameStatusBar->IsShown())
+    if (m_frameStatusBar)
     {
         int xx = 0 + m_miniEdge;
         int yy = m_height - wxSTATUS_HEIGHT - m_miniEdge - client_area_y_offset;
@@ -931,7 +858,7 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
                             xx, yy, ww, hh );
         gtk_widget_draw( m_frameStatusBar->m_widget, (GdkRectangle*) NULL );
     }
-#endif
+#endif // wxUSE_STATUSBAR
 
     m_sizeSet = TRUE;
 
@@ -940,6 +867,7 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
     event.SetEventObject( this );
     GetEventHandler()->ProcessEvent( event );
 
+#if wxUSE_STATUSBAR
     // send size event to status bar
     if (m_frameStatusBar)
     {
@@ -947,6 +875,7 @@ void wxFrame::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y),
         event2.SetEventObject( m_frameStatusBar );
         m_frameStatusBar->GetEventHandler()->ProcessEvent( event2 );
     }
+#endif // wxUSE_STATUSBAR
 
     m_resizing = FALSE;
 }
@@ -971,7 +900,9 @@ void wxFrame::OnInternalIdle()
         return;
     }
 
+#if wxUSE_MENUS
     if (m_frameMenuBar) m_frameMenuBar->OnInternalIdle();
+#endif // wxUSE_MENUS
 #if wxUSE_TOOLBAR
     if (m_frameToolBar) m_frameToolBar->OnInternalIdle();
 #endif
@@ -985,6 +916,8 @@ void wxFrame::OnInternalIdle()
 // ----------------------------------------------------------------------------
 // menu/tool/status bar stuff
 // ----------------------------------------------------------------------------
+
+#if wxUSE_MENUS
 
 void wxFrame::SetMenuBar( wxMenuBar *menuBar )
 {
@@ -1042,7 +975,10 @@ void wxFrame::SetMenuBar( wxMenuBar *menuBar )
     m_sizeSet = FALSE;
 }
 
+#endif // wxUSE_MENUS
+
 #if wxUSE_TOOLBAR
+
 wxToolBar* wxFrame::CreateToolBar( long style, wxWindowID id, const wxString& name )
 {
     wxASSERT_MSG( (m_widget != NULL), wxT("invalid frame") );
@@ -1134,24 +1070,20 @@ void wxFrame::SetIcon( const wxIcon &icon )
 }
 
 // ----------------------------------------------------------------------------
-// frame state: maximized/iconized/normal
+// frame state: maximized/iconized/normal (TODO)
 // ----------------------------------------------------------------------------
 
 void wxFrame::Maximize(bool WXUNUSED(maximize))
 {
-    wxFAIL_MSG( _T("not implemented") );
 }
 
 bool wxFrame::IsMaximized() const
 {
-    wxFAIL_MSG( _T("not implemented") );
-
     return FALSE;
 }
 
 void wxFrame::Restore()
 {
-    wxFAIL_MSG( _T("not implemented") );
 }
 
 void wxFrame::Iconize( bool iconize )
@@ -1166,5 +1098,5 @@ void wxFrame::Iconize( bool iconize )
 
 bool wxFrame::IsIconized() const
 {
-    return m_isIconized;
+    return FALSE;
 }
