@@ -4,9 +4,7 @@
 //              sequence of dialogs which allows to simply perform some task
 // Author:      Vadim Zeitlin (partly based on work by Ron Kuris and Kevin B.
 //              Smith)
-// Modified by: Robert Cavanaugh
-//              Added capability to use .WXR resource files in Wizard pages
-//              Added wxWIZARD_HELP event
+// Modified by:
 // Created:     15.08.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -16,21 +14,15 @@
 #ifndef _WX_WIZARD_H_
 #define _WX_WIZARD_H_
 
-#if wxUSE_WIZARDDLG
-
 // ----------------------------------------------------------------------------
 // headers and other simple declarations
 // ----------------------------------------------------------------------------
 
 #ifndef WX_PRECOMP
     #include "wx/dialog.h"      // the base class
-    #include "wx/panel.h"       // ditto
 
     #include "wx/event.h"       // wxEVT_XXX constants
 #endif // WX_PRECOMP
-
-// Extended style to specify a help button
-#define wxWIZARD_EX_HELPBUTTON   0x00000010
 
 // forward declarations
 class WXDLLEXPORT wxWizard;
@@ -50,9 +42,7 @@ public:
     // of the default one for this wizard (should be of the same size). Notice
     // that no other parameters are needed because the wizard will resize and
     // reposition the page anyhow
-    wxWizardPage(wxWizard *parent,
-                const wxBitmap& bitmap = wxNullBitmap,
-                const wxChar* resource = NULL);
+    wxWizardPage(wxWizard *parent, const wxBitmap& bitmap = wxNullBitmap);
 
     // these functions are used by the wizard to show another page when the
     // user chooses "Back" or "Next" button
@@ -87,10 +77,8 @@ public:
     // ctor takes the previous and next pages
     wxWizardPageSimple(wxWizard *parent = NULL, // let it be default ctor too
                        wxWizardPage *prev = (wxWizardPage *)NULL,
-                       wxWizardPage *next = (wxWizardPage *)NULL,
-                       const wxBitmap& bitmap = wxNullBitmap,
-                       const wxChar* resource = NULL)
-        : wxWizardPage(parent, bitmap, resource)
+                       wxWizardPage *next = (wxWizardPage *)NULL)
+        : wxWizardPage(parent)
     {
         m_prev = prev;
         m_next = next;
@@ -169,8 +157,7 @@ class WXDLLEXPORT wxWizardEvent : public wxNotifyEvent
 public:
     wxWizardEvent(wxEventType type = wxEVT_NULL,
                   int id = -1,
-                  bool direction = TRUE,
-                  wxWizardPage* page = NULL);
+                  bool direction = TRUE);
 
     // for EVT_WIZARD_PAGE_CHANGING, return TRUE if we're going forward or
     // FALSE otherwise and for EVT_WIZARD_PAGE_CHANGED return TRUE if we came
@@ -178,11 +165,8 @@ public:
     // (this function doesn't make sense for CANCEL events)
     bool GetDirection() const { return m_direction; }
 
-    wxWizardPage*   GetPage() const { return m_page; }
-
 private:
     bool m_direction;
-    wxWizardPage*    m_page;
 
     DECLARE_DYNAMIC_CLASS(wxWizardEvent)
 };
@@ -191,29 +175,17 @@ private:
 // macros for handling wxWizardEvents
 // ----------------------------------------------------------------------------
 
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGED, 900)
-    DECLARE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGING, 901)
-    DECLARE_EVENT_TYPE(wxEVT_WIZARD_CANCEL, 902)
-    DECLARE_EVENT_TYPE(wxEVT_WIZARD_HELP, 903)
-END_DECLARE_EVENT_TYPES()
-
 typedef void (wxEvtHandler::*wxWizardEventFunction)(wxWizardEvent&);
 
 // notifies that the page has just been changed (can't be vetoed)
-#define EVT_WIZARD_PAGE_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_WIZARD_PAGE_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL),
+#define EVT_WIZARD_PAGE_CHANGED(id, fn) { wxEVT_WIZARD_PAGE_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL },
 
 // the user pressed "<Back" or "Next>" button and the page is going to be
 // changed - unless the event handler vetoes the event
-#define EVT_WIZARD_PAGE_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_WIZARD_PAGE_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL),
+#define EVT_WIZARD_PAGE_CHANGING(id, fn) { wxEVT_WIZARD_PAGE_CHANGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL },
 
 // the user pressed "Cancel" button and the wizard is going to be dismissed -
 // unless the event handler vetoes the event
-#define EVT_WIZARD_CANCEL(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_WIZARD_CANCEL, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL),
-
-// the user pressed "Help" button 
-#define EVT_WIZARD_HELP(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_WIZARD_HELP, id, -1, (wxObjectEventFunction) (wxEventFunction) wxWizardEventFunction) & fn, (wxObject *)NULL),
-
-#endif // wxUSE_WIZARDDLG
+#define EVT_WIZARD_CANCEL(id, fn) { wxEVT_WIZARD_CANCEL, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxWizardEventFunction) & fn, (wxObject *)NULL },
 
 #endif // _WX_WIZARD_H_

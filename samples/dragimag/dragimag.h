@@ -46,7 +46,6 @@ class MyApp: public wxApp
 public:
     MyApp();
     virtual bool OnInit();
-    virtual int OnExit();
 
 //// Operations
 

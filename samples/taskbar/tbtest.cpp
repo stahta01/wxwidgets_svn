@@ -30,13 +30,13 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit(void)
 {
-    wxIcon icon(wxT("mondrian_icon"));
+    wxIcon icon("mondrian_icon");
 
-    if (!m_taskBarIcon.SetIcon(icon, wxT("wxTaskBarIcon Sample")))
-        wxMessageBox(wxT("Could not set icon."));
+    if (!m_taskBarIcon.SetIcon(icon, "wxTaskBarIcon Sample"))
+        wxMessageBox("Could not set icon.");
 
     // Create the main frame window
-    dialog = new MyDialog(NULL, -1, wxT("wxTaskBarIcon Test Dialog"), wxPoint(-1, -1), wxSize(365, 290), wxDIALOG_MODELESS|wxDEFAULT_DIALOG_STYLE);
+    dialog = new MyDialog(NULL, -1, "wxTaskBarIcon Test Dialog", wxPoint(-1, -1), wxSize(365, 290), wxDIALOG_MODELESS|wxDEFAULT_DIALOG_STYLE);
 
     dialog->Show(TRUE);
 
@@ -76,21 +76,24 @@ void MyDialog::OnCloseWindow(wxCloseEvent& event)
 
 void MyDialog::Init(void)
 {
-  (void)new wxStaticText(this, -1, "Press OK to hide me, Exit to quit.",
-                         wxPoint(10, 20));
+  int dialogWidth = 365;
+  int dialogHeight = 290;
 
-  (void)new wxStaticText(this, -1, "Double-click on the taskbar icon to show me again.",
-                         wxPoint(10, 40));
+  wxStaticText* stat = new wxStaticText(this, -1, "Press OK to hide me, Exit to quit.",
+    wxPoint(10, 20));
 
-  (void)new wxButton(this, wxID_EXIT, "Exit", wxPoint(185, 230), wxSize(80, 25));
-  (new wxButton(this, wxID_OK, "OK", wxPoint(100, 230), wxSize(80, 25)))->SetDefault();
-  Centre(wxBOTH);
+  wxStaticText* stat2 = new wxStaticText(this, -1, "Double-click on the taskbar icon to show me again.",
+    wxPoint(10, 40));
+
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK", wxPoint(100, 230), wxSize(80, 25));
+  wxButton *exitButton = new wxButton(this, wxID_EXIT, "Exit", wxPoint(185, 230), wxSize(80, 25));
+  okButton->SetDefault();
+  this->Centre(wxBOTH);
 }
 
 
 enum {
     PU_RESTORE = 10001,
-    PU_NEW_ICON,
     PU_EXIT,
 };
 
@@ -98,7 +101,6 @@ enum {
 BEGIN_EVENT_TABLE(MyTaskBarIcon, wxTaskBarIcon)
     EVT_MENU(PU_RESTORE, MyTaskBarIcon::OnMenuRestore)
     EVT_MENU(PU_EXIT,    MyTaskBarIcon::OnMenuExit)
-    EVT_MENU(PU_NEW_ICON,MyTaskBarIcon::OnMenuSetNewIcon)
 END_EVENT_TABLE()
 
 void MyTaskBarIcon::OnMenuRestore(wxCommandEvent& )
@@ -116,15 +118,6 @@ void MyTaskBarIcon::OnMenuExit(wxCommandEvent& )
     wxGetApp().ProcessIdle();
 }
 
-void MyTaskBarIcon::OnMenuSetNewIcon(wxCommandEvent&)
-{
-#ifdef __WXMSW__
-    wxIcon icon(wxT("wxDEFAULT_FRAME"));
-
-    if (!SetIcon(icon, wxT("wxTaskBarIcon Sample")))
-        wxMessageBox(wxT("Could not set new icon."));
-#endif
-}
 
 // Overridables
 void MyTaskBarIcon::OnMouseMove(wxEvent&)
@@ -148,9 +141,6 @@ void MyTaskBarIcon::OnRButtonUp(wxEvent&)
     wxMenu      menu;
 
     menu.Append(PU_RESTORE, "&Restore TBTest");
-#ifdef __WXMSW__
-    menu.Append(PU_NEW_ICON,"&Set New Icon");
-#endif
     menu.Append(PU_EXIT,    "E&xit");
 
     PopupMenu(&menu);

@@ -17,19 +17,13 @@
 #pragma implementation "checklst.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_CHECKLISTBOX
-
 #include "wx/checklst.h"
 
 // ============================================================================
 // implementation
 // ============================================================================
 
-#if !USE_SHARED_LIBRARY
   IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox, wxListBox)
-#endif
 
 // ----------------------------------------------------------------------------
 // implementation of wxCheckListBox class
@@ -44,7 +38,7 @@ END_EVENT_TABLE()
 // ----------------
 
 // def ctor: use Create() to really create the control
-wxCheckListBox::wxCheckListBox() : wxCheckListBoxBase()
+wxCheckListBox::wxCheckListBox() : wxListBox()
 {
 }
 
@@ -54,7 +48,7 @@ wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
                                int nStrings, const wxString choices[],
                                long style, const wxValidator& val,
                                const wxString& name)
-              : wxCheckListBoxBase()
+              : wxListBox()
 {
     // TODO: you'll probably need a separate Create instead of using
     // the wxListBox one as here.
@@ -75,5 +69,4 @@ void wxCheckListBox::Check(size_t uiIndex, bool bCheck)
     // TODO
 }
 
-#endif // wxUSE_CHECKLISTBOX
 

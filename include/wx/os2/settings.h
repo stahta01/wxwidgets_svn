@@ -21,11 +21,16 @@ class WXDLLEXPORT wxSystemSettings: public wxObject
 {
 public:
     inline wxSystemSettings() {}
+
+    // Get a system colour
     static wxColour    GetSystemColour(int index);
+
+    // Get a system font
     static wxFont      GetSystemFont(int index);
+
+    // Get a system metric, e.g. scrollbar size
     static int         GetSystemMetric(int index);
-    static bool        GetCapability(int index);
-}; // end of CLASS wxSystemSettings
+};
 
 #endif
     // _WX_SETTINGS_H_

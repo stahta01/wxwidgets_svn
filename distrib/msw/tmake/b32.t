@@ -98,6 +98,7 @@ WXBUILDDLL=1
 # Please set these according to the settings in wx_setup.h, so we can include
 # the appropriate libraries in wx.lib
 USE_CTL3D=0
+USE_XPM_IN_MSW=1
 
 PERIPH_LIBS=
 PERIPH_TARGET=
@@ -110,16 +111,22 @@ PERIPH_TARGET=ctl3d $(PERIPH_TARGET)
 PERIPH_CLEAN_TARGET=clean_ctl3d $(PERIPH_CLEAN_TARGET)
 !endif
 
+!if "$(USE_XPM_IN_MSW)" == "1"
+PERIPH_LIBS=$(WXDIR)\lib\xpm.lib $(PERIPH_LIBS)
+PERIPH_TARGET=xpm $(PERIPH_TARGET)
+PERIPH_CLEAN_TARGET=clean_xpm $(PERIPH_CLEAN_TARGET)
+!endif
+
 #PERIPH_LIBS=$(WXDIR)\lib\zlib.lib $(WXDIR)\lib\winpng.lib $(WXDIR)\lib\jpeg.lib $(WXDIR)\lib\tiff.lib $(PERIPH_LIBS)
 PERIPH_LIBS=
-PERIPH_TARGET=zlib png jpeg tiff regex $(PERIPH_TARGET)
-PERIPH_CLEAN_TARGET=clean_zlib clean_png clean_jpeg clean_tiff clean_regex $(PERIPH_CLEAN_TARGET)
+PERIPH_TARGET=zlib png jpeg tiff $(PERIPH_TARGET)
+PERIPH_CLEAN_TARGET=clean_zlib clean_png clean_jpeg clean_tiff $(PERIPH_CLEAN_TARGET)
 
 !if "$(DLL)" == "0"
 DUMMY=dummy
 !else
 DUMMY=dummydll
-LIBS= cw32mti import32 ole2w32 odbc32 zlib winpng jpeg tiff regex
+LIBS= cw32mti import32 ole2w32 odbc32 xpm zlib winpng jpeg tiff
 !endif
 
 LIBTARGET=$(WXLIB)
@@ -159,7 +166,7 @@ default:	wx
 
 wx:    $(CFG) $(DUMMY).obj $(OBJECTS) $(PERIPH_TARGET) $(LIBTARGET)
 
-all:	wx
+all:	all_libs all_execs
 
 !if "$(DLL)" == "0"
 
@@ -181,14 +188,12 @@ nul
 $(PERIPH_LIBS) $(LIBS)
 wxb32
 !
-	-erase $(WXLIBDIR)\version.res
-        brc32 -r -i$(WXDIR)\include\ $(MSWDIR)\version.rc
         implib -c $(LIBTARGET) $(WXLIBDIR)\wx.dll
 
 !endif
 
 dummy.obj: dummy.$(SRCSUFF) $(LOCALHEADERS) $(BASEHEADERS) $(WXDIR)\include\wx\wx.h
-dummydll.obj: dummydll.$(SRCSUFF) $(LOCALHEADERS) $(BASEHEADERS) $(WXDIR)\include\wx\wx.h version.res
+dummydll.obj: dummydll.$(SRCSUFF) $(LOCALHEADERS) $(BASEHEADERS) $(WXDIR)\include\wx\wx.h
 
 $(MSWDIR)\y_tab.obj:     $(COMMDIR)\y_tab.c $(COMMDIR)\lex_yy.c
 
@@ -276,6 +281,16 @@ all_execs:
     make -f makefile.b32 all_execs
     cd $(WXDIR)\src\msw
 
+wxxpm:	$(CFG)
+	cd $(WXDIR)\src\xpm
+	make -f makefile.b32 -DCFG=$(CFG) -DFINAL=$(FINAL) -DWXWIN=$(WXDIR) -DDEBUG=$(DEBUG)
+	cd $(WXDIR)\src\msw
+
+clean_wxxpm:	$(CFG)
+	cd $(WXDIR)\src\xpm
+	make -f makefile.b32 clean
+	cd $(WXDIR)\src\msw
+
 png:    $(CFG)
         cd $(WXDIR)\src\png
         make -f makefile.b32
@@ -306,13 +321,13 @@ clean_jpeg:
         make -f makefile.b32 clean
         cd $(WXDIR)\src\msw
 
-regex:   $(CFG)
-        cd $(WXDIR)\src\regex
+xpm:    $(CFG)
+        cd $(WXDIR)\src\xpm
         make -f makefile.b32 lib
         cd $(WXDIR)\src\msw
 
-clean_regex:
-        cd $(WXDIR)\src\regex
+clean_xpm:
+        cd $(WXDIR)\src\xpm
         make -f makefile.b32 clean
         cd $(WXDIR)\src\msw
 
@@ -341,7 +356,7 @@ $(CFG): makefile.b32
 -WE
 -tWM
 
--I$(WXINC);$(BCCDIR)\include;$(WXDIR)/src/generic;$(WXDIR)/src/png;$(WXDIR)/src/jpeg;$(WXDIR)/src/zlib;$(WXDIR)/src/tiff
+-I$(WXINC);$(BCCDIR)\include;$(WXDIR)/src/generic;$(WXDIR)/src/png;$(WXDIR)/src/jpeg;$(WXDIR)/src/zlib;$(WXDIR)/src/xpm;$(WXDIR)/src/tiff
 -I$(WXDIR)\include\wx\msw\gnuwin32
 
 -L$(BCCDIR)\lib;$(BCCDIR)\lib\psdk

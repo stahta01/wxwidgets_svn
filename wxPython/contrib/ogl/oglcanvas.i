@@ -31,7 +31,7 @@
 
 %include _ogldefs.i
 
-%import oglbasic.i
+%extern oglbasic.i
 
 
 %pragma(python) code = "import wx"
@@ -40,16 +40,25 @@
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-class wxDiagram : public wxObject {
+class wxDiagram {
 public:
     wxDiagram();
-    //~wxDiagram();
+    ~wxDiagram();
 
-    void AddShape(wxPyShape* shape, wxPyShape *addAfter = NULL);
+    void AddShape(wxPyShape*shape, wxPyShape *addAfter = NULL);
     void Clear(wxDC& dc);
     void DeleteAllShapes();
     void DrawOutline(wxDC& dc, double x1, double y1, double x2, double y2);
+
     wxPyShape* FindShape(long id);
+    %pragma(python) addtoclass = "# replaces broken shadow methods
+    def FindShape(self, *_args, **_kwargs):
+        from oglbasic import wxPyShapePtr
+        val = apply(oglcanvasc.wxDiagram_FindShape,(self,) + _args, _kwargs)
+        if val: val = wxPyShapePtr(val)
+        return val
+    "
+
     wxPyShapeCanvas* GetCanvas();
     int GetCount();
     double GetGridSpacing();
@@ -91,7 +100,7 @@ public:
     void SetQuickEditMode(bool mode);
     void SetSnapToGrid(bool snap);
     void ShowAll(bool show);
-    void Snap(double *INOUT, double *INOUT);
+    void Snap(double *OUTPUT, double *OUTPUT);
 
 };
 
@@ -116,9 +125,11 @@ public:
                     const wxSize& size = wxDefaultSize,
                     long style = wxBORDER);
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyShapeCanvas)"
-    %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxPyShapeCanvas)"
+
+    %pragma(python) addtomethod = "__init__:#wx._StdWindowCallbacks(self)"
+    %pragma(python) addtomethod = "__init__:#wx._StdOnScrollCallbacks(self)"
 
     void AddShape(wxPyShape *shape, wxPyShape *addAfter = NULL);
 
@@ -145,7 +156,7 @@ public:
     void Redraw(wxDC& dc);
     void RemoveShape(wxPyShape *shape);
     void SetDiagram(wxDiagram *diagram);
-    void Snap(double *INOUT, double *INOUT);
+    void Snap(double *OUTPUT, double *OUTPUT);
 
 };
 

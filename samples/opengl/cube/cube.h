@@ -12,7 +12,7 @@
 #ifndef _WX_CUBE_H_
 #define _WX_CUBE_H_
 
-#include "wx/glcanvas.h"
+#include <wx/glcanvas.h>
 
 // Define a new application type
 class MyApp: public wxApp
@@ -30,9 +30,9 @@ public:
             const wxSize& size, long style = wxDEFAULT_FRAME_STYLE);
 
     void OnExit(wxCommandEvent& event);
-    void OnNewWindow(wxCommandEvent& event);
-    void OnDefRotateLeftKey(wxCommandEvent& event);
-    void OnDefRotateRightKey(wxCommandEvent& event);
+    void OnNewWindow();
+    void OnDefRotateLeftKey();
+    void OnDefRotateRightKey();
     
 public:
     TestGLCanvas*    m_canvas;

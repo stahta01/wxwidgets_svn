@@ -13,8 +13,6 @@
 #pragma implementation "statbmp.h"
 #endif
 
-#include "wx/defs.h"
-
 #include "wx/statbmp.h"
 
 #ifdef __VMS__

@@ -24,11 +24,7 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/hash.h"
-
-#ifdef new
-#undef new
-#endif
+#include <wx/hash.h>
 
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
@@ -243,9 +239,9 @@ int ParseUnitArgument(char *unitArg)
       if (strcmp(units, "in") == 0)
         conversionFactor = 72.0;
       else if (strcmp(units, "cm") == 0)
-        conversionFactor = (float)72.0/(float)2.51;
+        conversionFactor = 72.0/2.51;
       else if (strcmp(units, "mm") == 0)
-        conversionFactor = (float)72.0/(float)25.1;
+        conversionFactor = 72.0/25.1;
       else if (strcmp(units, "pt") == 0)
         conversionFactor = 1;
     }
@@ -382,7 +378,7 @@ void AddTexRef(char *name, char *file, char *sectionName,
 
 void WriteTexReferences(char *filename)
 {
-  wxSTD ofstream ostr(filename);
+  ofstream ostr(filename);
   if (ostr.bad()) return;
   char buf[200];
   
@@ -409,7 +405,7 @@ void ReadTexReferences(char *filename)
   if (!wxFileExists(filename))
       return;
 
-  wxSTD ifstream istr(filename, ios::in);
+  ifstream istr(filename, ios::in);
 
   if (istr.bad()) return;
 
@@ -436,14 +432,7 @@ void ReadTexReferences(char *filename)
         istr.get(ch);
       }
       section[i] = 0;
-
-      // gt - needed to trick the hash table "TexReferences" into deleting the key 
-      // strings it creates in the Put() function, but not the item that is
-      // created here, as that is destroyed elsewhere.  Without doing this, there
-      // were massive memory leaks
-      TexReferences.DeleteContents(TRUE);
       TexReferences.Put(label, new TexRef(label, file, section, sectionName));
-      TexReferences.DeleteContents(FALSE);
     }
   }
 }
@@ -454,7 +443,7 @@ void ReadTexReferences(char *filename)
  *
  */
 
-void BibEatWhiteSpace(wxSTD istream& str)
+void BibEatWhiteSpace(istream& str)
 {
   char ch = str.peek();
   
@@ -482,7 +471,7 @@ void BibEatWhiteSpace(wxSTD istream& str)
 }
 
 // Read word up to { or , or space
-void BibReadWord(wxSTD istream& istr, char *buffer)
+void BibReadWord(istream& istr, char *buffer)
 {
   int i = 0;
   buffer[i] = 0;
@@ -499,7 +488,7 @@ void BibReadWord(wxSTD istream& istr, char *buffer)
 }
 
 // Read string (double-quoted or not) to end quote or EOL
-void BibReadToEOL(wxSTD istream& istr, char *buffer)
+void BibReadToEOL(istream& istr, char *buffer)
 {
   int i = 0;
   buffer[i] = 0;
@@ -528,7 +517,7 @@ void BibReadToEOL(wxSTD istream& istr, char *buffer)
 }
 
 // Read }-terminated value, taking nested braces into account.
-void BibReadValue(wxSTD istream& istr, char *buffer, bool ignoreBraces = TRUE,
+void BibReadValue(istream& istr, char *buffer, bool ignoreBraces = TRUE,
                   bool quotesMayTerminate = TRUE)
 {
   int braceCount = 1;
@@ -584,7 +573,7 @@ bool ReadBib(char *filename)
       return FALSE;
 
   char buf[300];
-  wxSTD ifstream istr(filename, ios::in);
+  ifstream istr(filename, ios::in);
   if (istr.bad()) return FALSE;
 
   BibLine = 1;
@@ -1306,7 +1295,7 @@ bool ReadCustomMacros(char *filename)
   if (!wxFileExists(filename))
       return FALSE;
 
-  wxSTD ifstream istr(filename, ios::in);
+  ifstream istr(filename, ios::in);
 
   if (istr.bad()) return FALSE;
 

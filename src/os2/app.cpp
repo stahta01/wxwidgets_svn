@@ -27,39 +27,14 @@
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
     #include "wx/dynarray.h"
-    #include "wx/wxchar.h"
-    #include "wx/icon.h"
-    #include "wx/timer.h"
+#   include "wx/wxchar.h"
+#   include "wx/icon.h"
 #endif
 
 #include "wx/log.h"
 #include "wx/module.h"
 
 #include "wx/os2/private.h"
-
-#ifdef __EMX__
-
-#include <sys/ioctl.h>
-#include <sys/select.h>
-
-#else
-
-#include <nerrno.h>
-#include <sys/ioctl.h>
-#include <sys/select.h>
-#include <sys/time.h>
-
-#endif //
-
-#ifndef __EMX__
-
-#define select(a,b,c,d,e) bsdselect(a,b,c,d,e)
-extern "C" int _System bsdselect(int,
-                                 struct fd_set *,
-                                 struct fd_set *,
-                                 struct fd_set *,
-                                 struct timeval *);
-#endif
 
 #if wxUSE_THREADS
     #include "wx/thread.h"
@@ -117,111 +92,10 @@ HICON wxDEFAULT_MDIPARENTFRAME_ICON  = (HICON) NULL;
 
 HBRUSH wxDisableButtonBrush = (HBRUSH) 0;
 
-MRESULT EXPENTRY wxWndProc( HWND hWnd,ULONG message,MPARAM mp1,MPARAM mp2);
-MRESULT EXPENTRY wxFrameWndProc( HWND hWnd,ULONG message,MPARAM mp1,MPARAM mp2);
-
 // ===========================================================================
 // implementation
 // ===========================================================================
 
-// ---------------------------------------------------------------------------
-// helper struct and functions for socket handling
-// ---------------------------------------------------------------------------
-
-struct GsocketCallbackInfo{
-    void (*proc)(void *);
-    int type;
-    int handle;
-    void* gsock;
-};
-
-// These defines and wrapper functions are used here and in gsockpm.c
-#define wxSockReadMask  0x01
-#define wxSockWriteMask 0x02
-
-#ifdef __EMX__
-extern "C"
-int wxAppAddSocketHandler(int handle, int mask,
-                           void (*callback)(void*), void * gsock)
-{
-    return wxTheApp->AddSocketHandler(handle, mask, callback, gsock);
-}
-extern "C"
-void wxAppRemoveSocketHandler(int handle)
-{
-    wxTheApp->RemoveSocketHandler(handle);
-}
-#else
-//  Linkage mode problems using callbacks with extern C in a .cpp module
-int wxAppAddSocketHandler(int handle, int mask,
-                           void (*callback)(void*), void * gsock)
-{
-    return wxTheApp->AddSocketHandler(handle, mask, callback, gsock);
-}
-void wxAppRemoveSocketHandler(int handle)
-{
-    wxTheApp->RemoveSocketHandler(handle);
-}
-#endif
-
-void wxApp::HandleSockets()
-{
-    bool pendingEvent = FALSE;
-
-    // Check whether it's time for Gsocket operation
-    if (m_maxSocketHandles > 0 && m_maxSocketNr > 0)
-    {
-        fd_set readfds = m_readfds;
-        fd_set writefds = m_writefds;
-        struct timeval timeout;
-        int i;
-        struct GsocketCallbackInfo
-          *CallbackInfo = (struct GsocketCallbackInfo *)m_sockCallbackInfo;
-        int r = 0;
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 0;
-        if ( select(m_maxSocketNr, &readfds, &writefds, 0, &timeout) > 0)
-        {
-            for (i = m_lastUsedHandle + 1; i != m_lastUsedHandle; i++)
-            {
-                if (i == m_maxSocketNr)
-                    i = 0;
-                if (FD_ISSET(i, &readfds))
-                {
-                    int r;
-                    for (r = 0; r < m_maxSocketHandles; r++){
-                        if(CallbackInfo[r].handle == i &&
-                           CallbackInfo[r].type == wxSockReadMask)
-                            break;
-                    }
-                    if (r < m_maxSocketHandles)
-                    {
-                        CallbackInfo[r].proc(CallbackInfo[r].gsock);
-                        pendingEvent = TRUE;
-                        wxYield();
-                    }
-                }
-                if (FD_ISSET(i, &writefds))
-                {
-                    int r;
-                    for (r = 0; r < m_maxSocketHandles; r++)
-                        if(CallbackInfo[r].handle == i &&
-                           CallbackInfo[r].type == wxSockWriteMask)
-                            break;
-                    if (r < m_maxSocketHandles)
-                    {
-                        CallbackInfo[r].proc(CallbackInfo[r].gsock);
-                        pendingEvent = TRUE;
-                        wxYield();
-                    }
-                }
-            }
-            m_lastUsedHandle = i;
-        }
-        if (pendingEvent)
-            wxYield();
-    }
-}
 // ---------------------------------------------------------------------------
 // wxApp
 // ---------------------------------------------------------------------------
@@ -241,28 +115,6 @@ bool wxApp::Initialize(
   HAB                               vHab
 )
 {
-#if defined(wxUSE_CONSOLEDEBUG)
-  #if wxUSE_CONSOLEDEBUG
-/***********************************************/
-/* Code for using stdout debug                 */
-/* To use it you mast link app as "Window" - EK*/
-/***********************************************/
-  {
-     PPIB pib;
-     PTIB tib;
-
-    printf("In console\n");
-
-  DosGetInfoBlocks(&tib, &pib);
-/* Try morphing into a PM application. */
-//  if(pib->pib_ultype == 2)    /* VIO */
-    pib->pib_ultype = 3;
-   }
-/**********************************************/
-/**********************************************/
-  #endif //wxUSE_CONSOLEDEBUG
-#endif
-
     //
     // OS2 has to have an anchorblock
     //
@@ -317,7 +169,6 @@ bool wxApp::Initialize(
     return TRUE;
 } // end of wxApp::Initialize
 
-const char*                         CANTREGISTERCLASS = " Can't register Class ";
 // ---------------------------------------------------------------------------
 // RegisterWindowClasses
 // ---------------------------------------------------------------------------
@@ -326,38 +177,13 @@ bool wxApp::RegisterWindowClasses(
   HAB                               vHab
 )
 {
+    APIRET                          rc;
     ERRORID                         vError = 0L;
     wxString                        sError;
 
     if (!::WinRegisterClass( vHab
                             ,wxFrameClassName
-                            ,wxFrameWndProc
-                            ,CS_SIZEREDRAW | CS_SYNCPAINT  | CS_CLIPCHILDREN
-                            ,sizeof(ULONG)
-                           ))
-    {
-        vError = ::WinGetLastError(vHab);
-        sError = wxPMErrorToStr(vError);
-        wxLogLastError(sError);
-        return FALSE;
-    }
-
-    if (!::WinRegisterClass( vHab
-                            ,wxFrameClassNameNoRedraw
-                            ,wxWndProc
-                            ,0
-                            ,sizeof(ULONG)
-                           ))
-    {
-        vError = ::WinGetLastError(vHab);
-        sError = wxPMErrorToStr(vError);
-        wxLogLastError(sError);
-        return FALSE;
-    }
-
-    if (!::WinRegisterClass( vHab
-                            ,wxMDIFrameClassName
-                            ,wxWndProc
+                            ,NULL
                             ,CS_SIZEREDRAW | CS_MOVENOTIFY | CS_SYNCPAINT
                             ,sizeof(ULONG)
                            ))
@@ -369,10 +195,36 @@ bool wxApp::RegisterWindowClasses(
     }
 
     if (!::WinRegisterClass( vHab
-                            ,wxMDIFrameClassNameNoRedraw
-                            ,wxWndProc
+                            ,wxFrameClassNameNoRedraw
+                            ,NULL
                             ,0
-                            ,sizeof(ULONG)
+                            ,0
+                           ))
+    {
+        vError = ::WinGetLastError(vHab);
+        sError = wxPMErrorToStr(vError);
+        wxLogLastError(sError);
+        return FALSE;
+    }
+
+    if (!::WinRegisterClass( vHab
+                            ,wxMDIFrameClassName
+                            ,NULL
+                            ,CS_SIZEREDRAW | CS_MOVENOTIFY | CS_SYNCPAINT
+                            ,0
+                           ))
+    {
+        vError = ::WinGetLastError(vHab);
+        sError = wxPMErrorToStr(vError);
+        wxLogLastError(sError);
+        return FALSE;
+    }
+
+    if (!::WinRegisterClass( vHab
+                            ,wxMDIFrameClassNameNoRedraw
+                            ,NULL
+                            ,0
+                            ,0
                            ))
     {
         vError = ::WinGetLastError(vHab);
@@ -383,9 +235,9 @@ bool wxApp::RegisterWindowClasses(
 
     if (!::WinRegisterClass( vHab
                             ,wxMDIChildFrameClassName
-                            ,wxWndProc
+                            ,NULL
                             ,CS_MOVENOTIFY | CS_SIZEREDRAW | CS_SYNCPAINT | CS_HITTEST
-                            ,sizeof(ULONG)
+                            ,0
                            ))
     {
         vError = ::WinGetLastError(vHab);
@@ -396,9 +248,9 @@ bool wxApp::RegisterWindowClasses(
 
     if (!::WinRegisterClass( vHab
                             ,wxMDIChildFrameClassNameNoRedraw
-                            ,wxWndProc
+                            ,NULL
                             ,CS_HITTEST
-                            ,sizeof(ULONG)
+                            ,0
                            ))
     {
         vError = ::WinGetLastError(vHab);
@@ -409,9 +261,9 @@ bool wxApp::RegisterWindowClasses(
 
     if (!::WinRegisterClass( vHab
                             ,wxPanelClassName
-                            ,wxWndProc
+                            ,NULL
                             ,CS_MOVENOTIFY | CS_SIZEREDRAW | CS_HITTEST | CS_SAVEBITS | CS_SYNCPAINT
-                            ,sizeof(ULONG)
+                            ,0
                            ))
     {
         vError = ::WinGetLastError(vHab);
@@ -422,9 +274,9 @@ bool wxApp::RegisterWindowClasses(
 
     if (!::WinRegisterClass( vHab
                             ,wxCanvasClassName
-                            ,wxWndProc
-                            ,CS_SIZEREDRAW | CS_HITTEST | CS_SYNCPAINT | CS_CLIPCHILDREN
-                            ,sizeof(ULONG)
+                            ,NULL
+                            ,0 // CS_MOVENOTIFY | CS_SIZEREDRAW | CS_HITTEST | CS_SAVEBITS | CS_SYNCPAINT
+                            ,0
                            ))
     {
         vError = ::WinGetLastError(vHab);
@@ -550,9 +402,6 @@ void wxApp::CleanUp()
 #endif // wxUSE_LOG
 } // end of wxApp::CleanUp
 
-//----------------------------------------------------------------------
-// Main wxWindows entry point
-//----------------------------------------------------------------------
 int wxEntry(
   int                               argc
 , char*                             argv[]
@@ -608,43 +457,29 @@ int wxEntry(
         if (wxTheApp->OnInit())
         {
             nRetValue = wxTheApp->OnRun();
-        }
-        // Normal exit
-        wxWindow*                   pTopWindow = wxTheApp->GetTopWindow();
-        if (pTopWindow)
-        {
-            // Forcibly delete the window.
-            if (pTopWindow->IsKindOf(CLASSINFO(wxFrame)) ||
-                pTopWindow->IsKindOf(CLASSINFO(wxDialog)) )
-            {
-                pTopWindow->Close(TRUE);
-                wxTheApp->DeletePendingObjects();
-            }
-            else
-            {
-                delete pTopWindow;
-                wxTheApp->SetTopWindow(NULL);
-            }
+//          nRetValue = -1;
         }
     }
-    else // app initialization failed
+
+    wxWindow*                       pTopWindow = wxTheApp->GetTopWindow();
+
+    if (pTopWindow)
     {
-        wxLogLastError(" Gui initialization failed, exitting");
+        // Forcibly delete the window.
+        if (pTopWindow->IsKindOf(CLASSINFO(wxFrame)) ||
+            pTopWindow->IsKindOf(CLASSINFO(wxDialog)) )
+        {
+            pTopWindow->Close(TRUE);
+            wxTheApp->DeletePendingObjects();
+        }
+        else
+        {
+            delete pTopWindow;
+            wxTheApp->SetTopWindow(NULL);
+        }
     }
-#if wxUSE_CONSOLEDEBUG
-    printf("wxTheApp->OnExit ");
-    fflush(stdout);
-#endif
     wxTheApp->OnExit();
-#if wxUSE_CONSOLEDEBUG
-    printf("wxApp::CleanUp ");
-    fflush(stdout);
-#endif
     wxApp::CleanUp();
-#if wxUSE_CONSOLEDEBUG
-    printf("return %i ", nRetValue);
-    fflush(stdout);
-#endif
     return(nRetValue);
 } // end of wxEntry
 
@@ -652,9 +487,6 @@ bool wxApp::OnInitGui()
 {
     ERRORID                         vError;
     wxString                        sError;
-
-    if (!wxAppBase::OnInitGui())
-        return FALSE;
 
     m_hMq = ::WinCreateMsgQueue(vHabmain, 0);
     if (!m_hMq)
@@ -664,7 +496,6 @@ bool wxApp::OnInitGui()
         wxLogDebug(sError);
         return FALSE;
     }
-
     return TRUE;
 } // end of wxApp::OnInitGui
 
@@ -685,9 +516,6 @@ wxApp::wxApp()
     m_exitOnFrameDelete = TRUE;
     m_bAuto3D = TRUE;
     m_hMq = 0;
-    m_maxSocketHandles = 0;
-    m_maxSocketNr = 0;
-    m_sockCallbackInfo = 0;
 } // end of wxApp::wxApp
 
 wxApp::~wxApp()
@@ -718,11 +546,11 @@ bool wxApp::Initialized()
 // Get and process a message, returning FALSE if WM_QUIT
 // received (and also set the flag telling the app to exit the main loop)
 //
-
 bool wxApp::DoMessage()
 {
     BOOL                            bRc = ::WinGetMsg(vHabmain, &svCurrentMsg, HWND(NULL), 0, 0);
 
+//    wxUsleep(1000);
     if (bRc == 0)
     {
         // got WM_QUIT
@@ -790,22 +618,13 @@ bool wxApp::DoMessage()
         }
 #endif // wxUSE_THREADS
 
-        //
         // Process the message
-        //
-        DoMessage((WXMSG *)&svCurrentMsg);
+        if (!ProcessMessage((WXMSG *)&svCurrentMsg))
+        {
+            ::WinDispatchMsg(vHabmain, (PQMSG)&svCurrentMsg);
+        }
     }
     return TRUE;
-} // end of wxApp::DoMessage
-
-void wxApp::DoMessage(
-  WXMSG*                            pMsg
-)
-{
-    if (!ProcessMessage((WXMSG *)&svCurrentMsg))
-    {
-        ::WinDispatchMsg(vHabmain, (PQMSG)&svCurrentMsg);
-    }
 } // end of wxApp::DoMessage
 
 //////////////////////////////////////////////////////////////////////////////
@@ -832,17 +651,11 @@ int wxApp::MainLoop()
 #if wxUSE_THREADS
         wxMutexGuiLeaveOrEnter();
 #endif // wxUSE_THREADS
-        while (!Pending() && ProcessIdle())
+        while (/*Pending() &&*/ ProcessIdle())
         {
-            HandleSockets();
-            wxUsleep(10000);
+//          wxUsleep(10000);
         }
-        HandleSockets();
-        if (Pending())
-            DoMessage();
-        else
-            wxUsleep(10000);
-
+        DoMessage();
     }
     return (int)svCurrentMsg.mp1;
 } // end of wxApp::MainLoop
@@ -906,12 +719,6 @@ bool wxApp::ProcessMessage(
 #endif // wxUSE_TOOLTIPS
 
     //
-    // We must relay Timer events to wxTimer's processing function
-    //
-    if (pMsg->msg == WM_TIMER)
-        wxTimerProc(NULL, 0, (int)pMsg->mp1, 0);
-
-    //
     // For some composite controls (like a combobox), wndThis might be NULL
     // because the subcontrol is not a wxWindow, but only the control itself
     // is - try to catch this case
@@ -942,13 +749,13 @@ bool wxApp::ProcessMessage(
            if((CHARMSG(pChmsg)->fs & (KC_ALT | KC_CTRL)) && CHARMSG(pChmsg)->chr != 0)
                 CHARMSG(pChmsg)->chr = (USHORT)wxToupper((UCHAR)uSch);
 
-
+  
            for(pWnd = pWndThis; pWnd; pWnd = pWnd->GetParent() )
            {
                if((bRc = pWnd->OS2TranslateMessage(pWxmsg)) == TRUE)
                    break;
            }
-
+  
             if(!bRc)    // untranslated, should restore original value
                 CHARMSG(pChmsg)->chr = uSch;
         }
@@ -996,16 +803,6 @@ void wxApp::OnIdle(
     //
     wxLog::FlushActive();
 #endif // wxUSE_LOG
-
-#if wxUSE_DC_CACHEING
-    // automated DC cache management: clear the cached DCs and bitmap
-    // if it's likely that the app has finished with them, that is, we
-    // get an idle event and we're not dragging anything.
-    if (!::WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) &&
-        !::WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) &&
-        !::WinGetKeyState(HWND_DESKTOP, VK_BUTTON2))
-        wxDC::ClearCache();
-#endif // wxUSE_DC_CACHEING
 
     //
     // Send OnIdle events to all windows
@@ -1120,20 +917,8 @@ void wxExit()
 //
 // Yield to incoming messages
 //
-bool wxApp::Yield(bool onlyIfNeeded)
+bool wxYield()
 {
-    static bool s_inYield = FALSE;
-
-    if ( s_inYield )
-    {
-        if ( !onlyIfNeeded )
-        {
-            wxFAIL_MSG( _T("wxYield() called recursively") );
-        }
-
-        return FALSE;
-    }
-
     HAB                             vHab = 0;
     QMSG                            vMsg;
 
@@ -1142,8 +927,6 @@ bool wxApp::Yield(bool onlyIfNeeded)
     // normally result in message boxes popping up &c
     //
     wxLog::Suspend();
-
-    s_inYield = TRUE;
 
     //
     // We want to go back to the main message loop
@@ -1167,7 +950,6 @@ bool wxApp::Yield(bool onlyIfNeeded)
     // Let the logs be flashed again
     //
     wxLog::Resume();
-    s_inYield = FALSE;
     return TRUE;
 } // end of wxYield
 
@@ -1195,54 +977,6 @@ wxIcon wxApp::GetStdIcon(
     }
     return wxIcon("wxICON_ERROR");
 } // end of wxApp::GetStdIcon
-
-int wxApp::AddSocketHandler(int handle, int mask,
-                            void (*callback)(void*), void * gsock)
-{
-    int find;
-    struct GsocketCallbackInfo
-        *CallbackInfo = (struct GsocketCallbackInfo *)m_sockCallbackInfo;
-
-    for (find = 0; find < m_maxSocketHandles; find++)
-        if (CallbackInfo[find].handle == -1)
-            break;
-    if (find == m_maxSocketHandles)
-    {
-        // Allocate new memory
-        m_sockCallbackInfo = realloc(m_sockCallbackInfo,
-                                     (m_maxSocketHandles+=10)*
-                                     sizeof(struct GsocketCallbackInfo));
-        CallbackInfo = (struct GsocketCallbackInfo *)m_sockCallbackInfo;
-        for (find = m_maxSocketHandles - 10; find < m_maxSocketHandles; find++)
-            CallbackInfo[find].handle = -1;
-        find = m_maxSocketHandles - 10;
-    }
-    CallbackInfo[find].proc = callback;
-    CallbackInfo[find].type = mask;
-    CallbackInfo[find].handle = handle;
-    CallbackInfo[find].gsock = gsock;
-    if (mask & wxSockReadMask)
-        FD_SET(handle, &m_readfds);
-    if (mask & wxSockWriteMask)
-        FD_SET(handle, &m_writefds);
-    if (handle >= m_maxSocketNr)
-        m_maxSocketNr = handle + 1;
-    return find;
-}
-
-void wxApp::RemoveSocketHandler(int handle)
-{
-    struct GsocketCallbackInfo
-        *CallbackInfo = (struct GsocketCallbackInfo *)m_sockCallbackInfo;
-    if (handle < m_maxSocketHandles)
-    {
-        if (CallbackInfo[handle].type & wxSockReadMask)
-            FD_CLR(CallbackInfo[handle].handle, &m_readfds);
-        if (CallbackInfo[handle].type & wxSockWriteMask)
-            FD_CLR(CallbackInfo[handle].handle, &m_writefds);
-        CallbackInfo[handle].handle = -1;
-    }
-}
 
 //-----------------------------------------------------------------------------
 // wxWakeUpIdle

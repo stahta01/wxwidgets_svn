@@ -17,11 +17,13 @@
 #pragma interface "checklst.h"
 #endif
 
-#if !defined(__MWERKS__) && !defined(__UNIX__)
+#include "wx/listbox.h"
+
+#ifndef __MWERKS__
 typedef   unsigned int  size_t;
 #endif
 
-class wxCheckListBox : public wxCheckListBoxBase
+class wxCheckListBox : public wxListBox
 {
   DECLARE_DYNAMIC_CLASS(wxCheckListBox)
 public:

@@ -8,13 +8,12 @@ CXX="@CXX@"
 LD="@SHARED_LD@"
 cross_compiling=@cross_compiling@
 target=@host_alias@
-static_flag=no
 
 usage()
 {
     cat <<EOF
-Usage: wx-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--version] [--static]
-                 [--libs] [--gl-libs] [--cppflags] [--cflags] [--cxxflags] [--rezflags]
+Usage: wx-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--version]
+                 [--libs] [--gl-libs] [--cppflags] [--cflags] [--cxxflags]
                  [--cc] [--cxx] [--ld]
 
 wx-config returns configuration information about the installed
@@ -36,14 +35,8 @@ cppflags()
     then
         includes=-I@includedir@
     fi
-
     includes="-I@libdir@/wx/include/@TOOLCHAIN_NAME@ $includes"
-
-    if test $static_flag = yes ; then
-        echo $includes @WXDEBUG_DEFINE@ @TOOLCHAIN_DEFS@ @WXCONFIG_INCLUDE@
-    else
-        echo $includes @WXDEBUG_DEFINE@ @TOOLCHAIN_DEFS@ @TOOLCHAIN_DLL_DEFS@ @WXCONFIG_INCLUDE@
-    fi
+    echo $includes @WXDEBUG_DEFINE@ @TOOLCHAIN_DEFS@ @WXCONFIG_INCLUDE@
 }
 
 if test $# -eq 0; then
@@ -76,9 +69,6 @@ while test $# -gt 0; do
     --version)
       echo @WX_MAJOR_VERSION_NUMBER@.@WX_MINOR_VERSION_NUMBER@.@WX_RELEASE_NUMBER@
       ;;
-    --static)
-      static_flag=yes
-      ;;
     --cppflags)
       cppflags
       ;;
@@ -88,9 +78,6 @@ while test $# -gt 0; do
     --cxxflags)
       echo `cppflags` @CODE_GEN_FLAGS@ @CODE_GEN_FLAGS_CXX@
       ;;
-    --rezflags)
-      echo @LIBWXMACRESWXCONFIG@
-      ;;
     --libs)
       if test "@libdir@" != "/usr/lib" \
               -a \( "${cross_compiling}" != "yes" \
@@ -98,21 +85,10 @@ while test $# -gt 0; do
       then
           libs="-L@libdir@"
       fi
-
-      if test $static_flag = yes ; then
-          echo "$libs @LDFLAGS@ @libdir@/@WXCONFIG_LIBS_STATIC@ @LIBS@ @DMALLOC_LIBS@"
-      else
-          echo $libs @LDFLAGS@ @WXCONFIG_LIBS@ @DMALLOC_LIBS@
-      fi
-
+      echo $libs @LDFLAGS@ @WXCONFIG_LIBS@ @EXTRA_LIBS@
       ;;
     --gl-libs)
-      if test $static_flag = yes -a "x" != "x@WXCONFIG_LIBS_STATIC_GL@" ; then
-          gllibs="@libdir@/@WXCONFIG_LIBS_STATIC_GL@"
-      else
-          gllibs="@WXCONFIG_LIBS_GL@"
-      fi
-      echo @LDFLAGS_GL@ "$gllibs"
+      echo @WXCONFIG_LIBS_GL@
       ;;
     --cc)
       echo $CC

@@ -16,8 +16,7 @@ if not %@INDEX["%WXDIR%","wxWindows"] == "-1" set FATWXWIN=%@PATH[%WXDIR%]wxwind
 if not %@INDEX["%WXDIR%","wxWindows"] == "-1" set FULLWXWIN=%@PATH[%WXDIR%]wxWindows
 
 Rem The following line is for a specific environment -- edit, or comment out
-Rem Not working in 4NT?
-Rem if not %@INDEX["%WXDIR%","wx2stable"] == "-1" set FATWXWIN=c:\wx2sta~1\wxwind~1
+if not %@INDEX["%WXDIR%","wx2stable"] == "-1" set FATWXWIN=d:\wx2sta~1\wxwind~1
 
 echo Full wxWindows path is %FULLWXWIN%, FAT path is %FATWXWIN%
 set BUILDDEST=%TEMP%\wxWinBuild
@@ -29,7 +28,7 @@ rem goto end
 if "%1" == "vc6" goto dovc6
 if "%1" == "bc55" goto dobc55
 if "%1" == "bc50" goto dobc50
-if "%1" == "ming2952" goto doming2952
+if "%1" == "ming2992" goto doming2952
 if "%1" == "cygwin11" goto docygwin11
 if "%1" == "vc1" goto dovc1
 if "%1" == "bc16" goto dobc16
@@ -319,8 +318,6 @@ make -f makefile.b32 cleanall
 
 if "%CARRYON" == "0" goto end
 
-Rem Skip BC++ 5.0, obsolete
-goto docygwin11
 :dobc50
 
 

@@ -32,7 +32,7 @@ public:
     int ShowModal();
     wxFontData& GetFontData() { return m_fontData; }
 
-//EK protected:
+protected:
     wxWindow*   m_dialogParent;
     wxFontData  m_fontData;
 };

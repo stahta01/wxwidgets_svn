@@ -30,10 +30,7 @@
 
 //---------------------------------------------------------------------------
 
-
-int wxNewEventType();
-
-class wxEvent : public wxObject {
+class wxEvent {
 public:
     wxEvent(int id = 0);
     ~wxEvent();
@@ -48,8 +45,6 @@ public:
     void SetId(int id);
     void SetTimestamp(long timeStamp);
     void Skip(bool skip = TRUE);
-
-    wxEvent *Clone();
 };
 
 //---------------------------------------------------------------------------
@@ -91,18 +86,6 @@ public:
     void SetExtraLong(long extraLong);
     void SetInt(int i);
 
-    %addmethods {
-        PyObject* GetClientData() {
-            wxPyClientData* data = (wxPyClientData*)self->GetClientObject();
-            if (data) {
-                Py_INCREF(data->m_obj);
-                return data->m_obj;
-            } else {
-                Py_INCREF(Py_None);
-                return Py_None;
-            }
-        }
-    }
 };
 
 
@@ -174,10 +157,6 @@ public:
     long GetX();
     long GetY();
 
-    int GetWheelRotation() const { return m_wheelRotation; }
-    int GetWheelDelta() const { return m_wheelDelta; }
-    int GetLinesPerAction() const { return m_linesPerAction; }
-
     long          m_x, m_y;
     bool          m_leftDown;
     bool          m_middleDown;
@@ -186,9 +165,6 @@ public:
     bool          m_shiftDown;
     bool          m_altDown;
     bool          m_metaDown;
-    int           m_wheelRotation;
-    int           m_wheelDelta;
-    int           m_linesPerAction;
 };
 
 //---------------------------------------------------------------------------
@@ -305,8 +281,7 @@ public:
 
 class wxIconizeEvent: public wxEvent {
 public:
-    wxIconizeEvent(int id = 0, bool iconized = TRUE);
-    bool Iconized();
+    wxIconizeEvent(int id = 0);
 };
 
 //---------------------------------------------------------------------------
@@ -460,17 +435,6 @@ public:
     int GetInterval();
 };
 
-//---------------------------------------------------------------------------
-
-class wxTextUrlEvent : public wxCommandEvent
-{
-public:
-    wxTextUrlEvent(int id, const wxMouseEvent& evtMouse,
-                   long start, long end);
-    const wxMouseEvent& GetMouseEvent();
-    long GetURLStart();
-    long GetURLEnd();
-};
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------

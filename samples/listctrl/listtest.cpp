@@ -48,8 +48,8 @@
 #include "listtest.h"
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_SIZE(MyFrame::OnSize)
-
+    EVT_MENU(BUSY_ON, MyFrame::BusyOn)
+    EVT_MENU(BUSY_OFF, MyFrame::BusyOff)
     EVT_MENU(LIST_QUIT, MyFrame::OnQuit)
     EVT_MENU(LIST_ABOUT, MyFrame::OnAbout)
     EVT_MENU(LIST_LIST_VIEW, MyFrame::OnListView)
@@ -58,24 +58,15 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(LIST_ICON_TEXT_VIEW, MyFrame::OnIconTextView)
     EVT_MENU(LIST_SMALL_ICON_VIEW, MyFrame::OnSmallIconView)
     EVT_MENU(LIST_SMALL_ICON_TEXT_VIEW, MyFrame::OnSmallIconTextView)
-    EVT_MENU(LIST_VIRTUAL_VIEW, MyFrame::OnVirtualView)
-
-    EVT_MENU(LIST_FOCUS_LAST, MyFrame::OnFocusLast)
     EVT_MENU(LIST_TOGGLE_FIRST, MyFrame::OnToggleFirstSel)
     EVT_MENU(LIST_DESELECT_ALL, MyFrame::OnDeselectAll)
     EVT_MENU(LIST_SELECT_ALL, MyFrame::OnSelectAll)
-    EVT_MENU(LIST_DELETE, MyFrame::OnDelete)
-    EVT_MENU(LIST_ADD, MyFrame::OnAdd)
     EVT_MENU(LIST_DELETE_ALL, MyFrame::OnDeleteAll)
     EVT_MENU(LIST_SORT, MyFrame::OnSort)
     EVT_MENU(LIST_SET_FG_COL, MyFrame::OnSetFgColour)
     EVT_MENU(LIST_SET_BG_COL, MyFrame::OnSetBgColour)
     EVT_MENU(LIST_TOGGLE_MULTI_SEL, MyFrame::OnToggleMultiSel)
     EVT_MENU(LIST_SHOW_COL_INFO, MyFrame::OnShowColInfo)
-    EVT_MENU(LIST_SHOW_SEL_INFO, MyFrame::OnShowSelInfo)
-    EVT_MENU(LIST_FREEZE, MyFrame::OnFreeze)
-    EVT_MENU(LIST_THAW, MyFrame::OnThaw)
-
     EVT_UPDATE_UI(LIST_SHOW_COL_INFO, MyFrame::OnUpdateShowColInfo)
 END_EVENT_TABLE()
 
@@ -92,26 +83,12 @@ BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
     EVT_LIST_ITEM_DESELECTED(LIST_CTRL, MyListCtrl::OnDeselected)
     EVT_LIST_KEY_DOWN(LIST_CTRL, MyListCtrl::OnListKeyDown)
     EVT_LIST_ITEM_ACTIVATED(LIST_CTRL, MyListCtrl::OnActivated)
-    EVT_LIST_ITEM_FOCUSED(LIST_CTRL, MyListCtrl::OnFocused)
-
     EVT_LIST_COL_CLICK(LIST_CTRL, MyListCtrl::OnColClick)
-    EVT_LIST_COL_RIGHT_CLICK(LIST_CTRL, MyListCtrl::OnColRightClick)
-    EVT_LIST_COL_BEGIN_DRAG(LIST_CTRL, MyListCtrl::OnColBeginDrag)
-    EVT_LIST_COL_DRAGGING(LIST_CTRL, MyListCtrl::OnColDragging)
-    EVT_LIST_COL_END_DRAG(LIST_CTRL, MyListCtrl::OnColEndDrag)
-
-    EVT_LIST_CACHE_HINT(LIST_CTRL, MyListCtrl::OnCacheHint)
 
     EVT_CHAR(MyListCtrl::OnChar)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
-
-// number of items in list/report view
-static const int NUM_ITEMS = 30;
-
-// number of items in icon/small icon view
-static const int NUM_ICONS = 9;
 
 int wxCALLBACK MyCompareFunction(long item1, long item2, long sortData)
 {
@@ -123,7 +100,7 @@ int wxCALLBACK MyCompareFunction(long item1, long item2, long sortData)
 bool MyApp::OnInit()
 {
   // Create the main frame window
-  MyFrame *frame = new MyFrame(wxT("wxListCtrl Test"), 50, 50, 450, 340);
+  MyFrame *frame = new MyFrame("wxListCtrl Test", 50, 50, 450, 340);
 
   // Show the frame
   frame->Show(TRUE);
@@ -176,50 +153,57 @@ MyFrame::MyFrame(const wxChar *title, int x, int y, int w, int h)
 
     // Make a menubar
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(LIST_ABOUT, _T("&About"));
+    menuFile->Append(LIST_ABOUT, "&About");
     menuFile->AppendSeparator();
-    menuFile->Append(LIST_QUIT, _T("E&xit\tAlt-X"));
+#if 0 // what is this for? (VZ)
+    menuFile->Append(BUSY_ON,         "&Busy cursor on");
+    menuFile->Append(BUSY_OFF,         "&Busy cursor off");
+    menuFile->AppendSeparator();
+#endif
+    menuFile->Append(LIST_QUIT, "E&xit\tAlt-X");
 
     wxMenu *menuView = new wxMenu;
-    menuView->Append(LIST_LIST_VIEW, _T("&List view\tF1"));
-    menuView->Append(LIST_REPORT_VIEW, _T("&Report view\tF2"));
-    menuView->Append(LIST_ICON_VIEW, _T("&Icon view\tF3"));
-    menuView->Append(LIST_ICON_TEXT_VIEW, _T("Icon view with &text\tF4"));
-    menuView->Append(LIST_SMALL_ICON_VIEW, _T("&Small icon view\tF5"));
-    menuView->Append(LIST_SMALL_ICON_TEXT_VIEW, _T("Small icon &view with text\tF6"));
-    menuView->Append(LIST_VIRTUAL_VIEW, _T("Virtual view\tF7"));
+    menuView->Append(LIST_LIST_VIEW,         "&List view\tF1");
+    menuView->Append(LIST_REPORT_VIEW,         "&Report view\tF2");
+    menuView->Append(LIST_ICON_VIEW,         "&Icon view\tF3");
+    menuView->Append(LIST_ICON_TEXT_VIEW,     "Icon view with &text\tF4");
+    menuView->Append(LIST_SMALL_ICON_VIEW,     "&Small icon view\tF5");
+    menuView->Append(LIST_SMALL_ICON_TEXT_VIEW,     "Small icon &view with text\tF6");
 
     wxMenu *menuList = new wxMenu;
-    menuList->Append(LIST_FOCUS_LAST, _T("&Make last item current\tCtrl-L"));
-    menuList->Append(LIST_TOGGLE_FIRST, _T("To&ggle first item\tCtrl-G"));
-    menuList->Append(LIST_DESELECT_ALL, _T("&Deselect All\tCtrl-D"));
-    menuList->Append(LIST_SELECT_ALL, _T("S&elect All\tCtrl-A"));
+    menuList->Append(LIST_TOGGLE_FIRST, "&Toggle first item\tCtrl-T");
+    menuList->Append(LIST_DESELECT_ALL, "&Deselect All\tCtrl-D");
+    menuList->Append(LIST_SELECT_ALL, "S&elect All\tCtrl-A");
+    menuList->Append(LIST_SHOW_COL_INFO, "Show &column info\tCtrl-C");
     menuList->AppendSeparator();
-    menuList->Append(LIST_SHOW_COL_INFO, _T("Show &column info\tCtrl-C"));
-    menuList->Append(LIST_SHOW_SEL_INFO, _T("Show &selected items\tCtrl-S"));
+    menuList->Append(LIST_SORT, "&Sort\tCtrl-S");
     menuList->AppendSeparator();
-    menuList->Append(LIST_SORT, _T("&Sort\tCtrl-S"));
+    menuList->Append(LIST_DELETE_ALL, "Delete &all items");
     menuList->AppendSeparator();
-    menuList->Append(LIST_ADD, _T("&Append an item\tCtrl-P"));
-    menuList->Append(LIST_DELETE, _T("&Delete first item\tCtrl-X"));
-    menuList->Append(LIST_DELETE_ALL, _T("Delete &all items"));
-    menuList->AppendSeparator();
-    menuList->Append(LIST_FREEZE, _T("Free&ze\tCtrl-Z"));
-    menuList->Append(LIST_THAW, _T("Tha&w\tCtrl-W"));
-    menuList->AppendSeparator();
-    menuList->Append(LIST_TOGGLE_MULTI_SEL, _T("&Multiple selection\tCtrl-M"),
-            _T("Toggle multiple selection"), TRUE);
+    menuList->Append(LIST_TOGGLE_MULTI_SEL, "&Multiple selection\tCtrl-M",
+            "Toggle multiple selection", TRUE);
 
     wxMenu *menuCol = new wxMenu;
-    menuCol->Append(LIST_SET_FG_COL, _T("&Foreground colour..."));
-    menuCol->Append(LIST_SET_BG_COL, _T("&Background colour..."));
+    menuCol->Append(LIST_SET_FG_COL, "&Foreground colour...");
+    menuCol->Append(LIST_SET_BG_COL, "&Background colour...");
 
     wxMenuBar *menubar = new wxMenuBar;
-    menubar->Append(menuFile, _T("&File"));
-    menubar->Append(menuView, _T("&View"));
-    menubar->Append(menuList, _T("&List"));
-    menubar->Append(menuCol, _T("&Colour"));
+    menubar->Append(menuFile, "&File");
+    menubar->Append(menuView, "&View");
+    menubar->Append(menuList, "&List");
+    menubar->Append(menuCol, "&Colour");
     SetMenuBar(menubar);
+
+    m_listCtrl = new MyListCtrl(this, LIST_CTRL,
+                                wxDefaultPosition, wxDefaultSize,
+                                wxLC_LIST |
+                                wxSUNKEN_BORDER |
+                                wxLC_EDIT_LABELS |
+                                // wxLC_USER_TEXT requires app to supply all
+                                // text on demand
+                                //wxLC_USER_TEXT |
+                                wxLC_SINGLE_SEL
+                               );
 
     m_logWindow = new wxTextCtrl(this, -1, wxEmptyString,
                                  wxDefaultPosition, wxDefaultSize,
@@ -227,7 +211,26 @@ MyFrame::MyFrame(const wxChar *title, int x, int y, int w, int h)
 
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_logWindow));
 
-    RecreateList(wxLC_REPORT | wxLC_SINGLE_SEL);
+    wxLayoutConstraints *c = new wxLayoutConstraints;
+    c->top.SameAs            (this, wxTop);
+    c->left.SameAs        (this, wxLeft);
+    c->right.SameAs        (this, wxRight);
+    c->height.PercentOf    (this, wxHeight, 66);
+    m_listCtrl->SetConstraints(c);
+
+    c = new wxLayoutConstraints;
+    c->top.Below            (m_listCtrl);
+    c->left.SameAs        (this, wxLeft);
+    c->right.SameAs        (this, wxRight);
+    c->bottom.SameAs        (this, wxBottom);
+    m_logWindow->SetConstraints(c);
+    SetAutoLayout(TRUE);
+
+    for ( int i = 0; i < 30; i++ )
+    {
+        long idx = m_listCtrl->InsertItem(i, wxString::Format(_T("Item %d"), i));
+        m_listCtrl->SetItemData(idx, i*i);
+    }
 
     CreateStatusBar(3);
 }
@@ -240,22 +243,19 @@ MyFrame::~MyFrame()
     delete m_imageListSmall;
 }
 
-void MyFrame::OnSize(wxSizeEvent& event)
-{
-    if ( !m_logWindow )
-        return;
-
-    wxSize size = GetClientSize();
-    wxCoord y = (2*size.y)/3;
-    m_listCtrl->SetSize(0, 0, size.x, y);
-    m_logWindow->SetSize(0, y + 1, size.x, size.y - y);
-
-    event.Skip();
-}
-
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
     Close(TRUE);
+}
+
+void MyFrame::BusyOn(wxCommandEvent& WXUNUSED(event))
+{
+   wxBeginBusyCursor();
+}
+
+void MyFrame::BusyOff(wxCommandEvent& WXUNUSED(event))
+{
+   wxEndBusyCursor();
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
@@ -264,32 +264,6 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
             "About list test", wxOK|wxCANCEL);
 
     dialog.ShowModal();
-}
-
-void MyFrame::OnFreeze(wxCommandEvent& event)
-{
-    wxLogMessage(_T("Freezing the control"));
-
-    m_listCtrl->Freeze();
-}
-
-void MyFrame::OnThaw(wxCommandEvent& event)
-{
-    wxLogMessage(_T("Thawing the control"));
-
-    m_listCtrl->Thaw();
-}
-
-void MyFrame::OnFocusLast(wxCommandEvent& WXUNUSED(event))
-{
-    long index = m_listCtrl->GetItemCount() - 1;
-    if ( index == -1 )
-    {
-        return;
-    }
-
-    m_listCtrl->SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
-    m_listCtrl->EnsureVisible(index);
 }
 
 void MyFrame::OnToggleFirstSel(wxCommandEvent& WXUNUSED(event))
@@ -311,107 +285,54 @@ void MyFrame::OnSelectAll(wxCommandEvent& WXUNUSED(event))
         m_listCtrl->SetItemState(i,wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
-// ----------------------------------------------------------------------------
-// changing listctrl modes
-// ----------------------------------------------------------------------------
-
-void MyFrame::RecreateList(long flags, bool withText)
-{
-    // we could avoid recreating it if we don't set/clear the wxLC_VIRTUAL
-    // style, but it is more trouble to do it than not
-#if 0
-    if ( !m_listCtrl || ((flags & wxLC_VIRTUAL) !=
-            (m_listCtrl->GetWindowStyleFlag() & wxLC_VIRTUAL)) )
-#endif
-    {
-        delete m_listCtrl;
-
-        m_listCtrl = new MyListCtrl(this, LIST_CTRL,
-                                    wxDefaultPosition, wxDefaultSize,
-                                    flags |
-                                    wxSUNKEN_BORDER);
-
-        switch ( flags & wxLC_MASK_TYPE )
-        {
-            case wxLC_LIST:
-                InitWithListItems();
-                break;
-
-            case wxLC_ICON:
-                InitWithIconItems(withText);
-                break;
-
-            case wxLC_SMALL_ICON:
-                InitWithIconItems(withText, TRUE);
-                break;
-
-            case wxLC_REPORT:
-                if ( flags & wxLC_VIRTUAL )
-                    InitWithVirtualItems();
-                else
-                    InitWithReportItems();
-                break;
-
-            default:
-                wxFAIL_MSG( _T("unknown listctrl mode") );
-        }
-    }
-
-#ifdef __WXMSW__
-        SendSizeEvent();
-#endif
-
-    m_logWindow->Clear();
-}
-
 void MyFrame::OnListView(wxCommandEvent& WXUNUSED(event))
 {
-    RecreateList(wxLC_LIST);
-}
+    m_listCtrl->ClearAll();
+    m_logWindow->Clear();
 
-void MyFrame::InitWithListItems()
-{
-    for ( int i = 0; i < NUM_ITEMS; i++ )
+    m_listCtrl->SetSingleStyle(wxLC_LIST);
+    m_listCtrl->SetImageList((wxImageList *) NULL, wxIMAGE_LIST_NORMAL);
+    m_listCtrl->SetImageList((wxImageList *) NULL, wxIMAGE_LIST_SMALL);
+
+    for ( int i=0; i < 30; i++)
     {
-        m_listCtrl->InsertItem(i, wxString::Format(_T("Item %d"), i));
+        wxChar buf[20];
+        wxSprintf(buf, _T("Item %d"), i);
+        m_listCtrl->InsertItem(i, buf);
     }
 }
 
 void MyFrame::OnReportView(wxCommandEvent& WXUNUSED(event))
 {
-    RecreateList(wxLC_REPORT);
-}
+    m_logWindow->Clear();
+    m_listCtrl->ClearAll();
 
-void MyFrame::InitWithReportItems()
-{
+    m_listCtrl->SetSingleStyle(wxLC_REPORT);
+    m_listCtrl->SetImageList((wxImageList *) NULL, wxIMAGE_LIST_NORMAL);
     m_listCtrl->SetImageList(m_imageListSmall, wxIMAGE_LIST_SMALL);
 
-    // under MSW for SetColumnWidth() to work we need to create the items with
-    // images initially
-#if 1
-    wxListItem itemCol;
-    itemCol.m_mask = wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE;
-    itemCol.m_text = "Column 1";
-    itemCol.m_image = -1;
-    m_listCtrl->InsertColumn(0, itemCol);
-    itemCol.m_text = "Column 2";
-    m_listCtrl->InsertColumn(1, itemCol);
-    itemCol.m_text = "Column 3";
-    m_listCtrl->InsertColumn(2, itemCol);
-#else
     m_listCtrl->InsertColumn(0, "Column 1"); // , wxLIST_FORMAT_LEFT, 140);
     m_listCtrl->InsertColumn(1, "Column 2"); // , wxLIST_FORMAT_LEFT, 140);
     m_listCtrl->InsertColumn(2, "One More Column (2)"); // , wxLIST_FORMAT_LEFT, 140);
-#endif
 
     // to speed up inserting we hide the control temporarily
     m_listCtrl->Hide();
 
     wxStopWatch sw;
 
+    wxString buf;
+    static const int NUM_ITEMS = 30;//00;
     for ( int i = 0; i < NUM_ITEMS; i++ )
     {
-        m_listCtrl->InsertItemInReportView(i);
+        buf.Printf(_T("This is item %d"), i);
+        long tmp = m_listCtrl->InsertItem(i, buf, 0);
+        m_listCtrl->SetItemData(tmp, i);
+
+        buf.Printf(_T("Col 1, item %d"), i);
+        tmp = m_listCtrl->SetItem(i, 1, buf);
+
+        buf.Printf(_T("Item %d in column 2"), i);
+        tmp = m_listCtrl->SetItem(i, 2, buf);
     }
 
     m_logWindow->WriteText(wxString::Format(_T("%d items inserted in %ldms\n"),
@@ -441,60 +362,66 @@ void MyFrame::InitWithReportItems()
     m_listCtrl->SetColumnWidth( 2, wxLIST_AUTOSIZE );
 }
 
-void MyFrame::InitWithIconItems(bool withText, bool sameIcon)
+void MyFrame::OnIconView(wxCommandEvent& WXUNUSED(event))
 {
+    m_logWindow->Clear();
+    m_listCtrl->ClearAll();
+
+    m_listCtrl->SetSingleStyle(wxLC_ICON);
     m_listCtrl->SetImageList(m_imageListNormal, wxIMAGE_LIST_NORMAL);
     m_listCtrl->SetImageList(m_imageListSmall, wxIMAGE_LIST_SMALL);
 
-    for ( int i = 0; i < NUM_ICONS; i++ )
+    for ( int i=0; i < 9; i++)
     {
-        int image = sameIcon ? 0 : i;
-
-        if ( withText )
-        {
-            m_listCtrl->InsertItem(i, wxString::Format(_T("Label %d"), i),
-                                   image);
-        }
-        else
-        {
-            m_listCtrl->InsertItem(i, image);
-        }
+        m_listCtrl->InsertItem(i, i);
     }
-}
-
-void MyFrame::OnIconView(wxCommandEvent& WXUNUSED(event))
-{
-    RecreateList(wxLC_ICON, FALSE);
 }
 
 void MyFrame::OnIconTextView(wxCommandEvent& WXUNUSED(event))
 {
-    RecreateList(wxLC_ICON);
+    m_logWindow->Clear();
+    m_listCtrl->ClearAll();
+
+    m_listCtrl->SetSingleStyle(wxLC_ICON);
+    m_listCtrl->SetImageList(m_imageListNormal, wxIMAGE_LIST_NORMAL);
+    m_listCtrl->SetImageList(m_imageListSmall, wxIMAGE_LIST_SMALL);
+
+    for ( int i=0; i < 9; i++)
+    {
+        wxChar buf[20];
+        wxSprintf(buf, _T("Label %d"), i);
+        m_listCtrl->InsertItem(i, buf, i);
+    }
 }
 
 void MyFrame::OnSmallIconView(wxCommandEvent& WXUNUSED(event))
 {
-    RecreateList(wxLC_SMALL_ICON, FALSE);
+    m_logWindow->Clear();
+    m_listCtrl->ClearAll();
+
+    m_listCtrl->SetSingleStyle(wxLC_SMALL_ICON);
+    m_listCtrl->SetImageList(m_imageListNormal, wxIMAGE_LIST_NORMAL);
+    m_listCtrl->SetImageList(m_imageListSmall, wxIMAGE_LIST_SMALL);
+
+    for ( int i=0; i < 9; i++)
+    {
+        m_listCtrl->InsertItem(i, 0);
+    }
 }
 
 void MyFrame::OnSmallIconTextView(wxCommandEvent& WXUNUSED(event))
 {
-    RecreateList(wxLC_SMALL_ICON);
-}
+    m_logWindow->Clear();
+    m_listCtrl->ClearAll();
 
-void MyFrame::OnVirtualView(wxCommandEvent& WXUNUSED(event))
-{
-    RecreateList(wxLC_REPORT | wxLC_VIRTUAL);
-}
+    m_listCtrl->SetSingleStyle(wxLC_SMALL_ICON);
+    m_listCtrl->SetImageList(m_imageListNormal, wxIMAGE_LIST_NORMAL);
+    m_listCtrl->SetImageList(m_imageListSmall, wxIMAGE_LIST_SMALL);
 
-void MyFrame::InitWithVirtualItems()
-{
-    m_listCtrl->InsertColumn(0, "First Column");
-    m_listCtrl->InsertColumn(1, "Second Column");
-    m_listCtrl->SetColumnWidth(0, 150);
-    m_listCtrl->SetColumnWidth(1, 150);
-
-    m_listCtrl->SetItemCount(1000000);
+    for ( int i=0; i < 9; i++)
+    {
+        m_listCtrl->InsertItem(i, "Label", 0);
+    }
 }
 
 void MyFrame::OnSort(wxCommandEvent& WXUNUSED(event))
@@ -508,39 +435,13 @@ void MyFrame::OnSort(wxCommandEvent& WXUNUSED(event))
                                             sw.Time()));
 }
 
-void MyFrame::OnShowSelInfo(wxCommandEvent& event)
-{
-    int selCount = m_listCtrl->GetSelectedItemCount();
-    wxLogMessage(_T("%d items selected:"), selCount);
-
-    // don't show too many items
-    size_t shownCount = 0;
-
-    long item = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL,
-                                        wxLIST_STATE_SELECTED);
-    while ( item != -1 )
-    {
-        wxLogMessage(_T("\t%ld (%s)"),
-                     item, m_listCtrl->GetItemText(item).c_str());
-
-        if ( ++shownCount > 10 )
-        {
-            wxLogMessage(_T("\t... more selected items snipped..."));
-            break;
-        }
-
-        item = m_listCtrl->GetNextItem(item, wxLIST_NEXT_ALL,
-                                       wxLIST_STATE_SELECTED);
-    }
-}
-
 void MyFrame::OnShowColInfo(wxCommandEvent& event)
 {
     int count = m_listCtrl->GetColumnCount();
-    wxLogMessage(wxT("%d columns:"), count);
+    wxLogMessage("%d columns:", count);
     for ( int c = 0; c < count; c++ )
     {
-        wxLogMessage(wxT("\tcolumn %d has width %d"), c,
+        wxLogMessage("\tcolumn %d has width %d", c,
                      m_listCtrl->GetColumnWidth(c));
     }
 }
@@ -552,16 +453,21 @@ void MyFrame::OnUpdateShowColInfo(wxUpdateUIEvent& event)
 
 void MyFrame::OnToggleMultiSel(wxCommandEvent& WXUNUSED(event))
 {
+    m_logWindow->WriteText("Current selection mode: ");
+
     long flags = m_listCtrl->GetWindowStyleFlag();
     if ( flags & wxLC_SINGLE_SEL )
-        flags &= ~wxLC_SINGLE_SEL;
+    {
+        m_listCtrl->SetWindowStyleFlag(flags & ~wxLC_SINGLE_SEL);
+        m_logWindow->WriteText("multiple");
+    }
     else
-        flags |= wxLC_SINGLE_SEL;
+    {
+        m_listCtrl->SetWindowStyleFlag(flags | wxLC_SINGLE_SEL);
+        m_logWindow->WriteText("single");
+    }
 
-    m_logWindow->WriteText(wxString::Format(wxT("Current selection mode: %sle\n"),
-                           (flags & wxLC_SINGLE_SEL) ? "sing" : "multip"));
-
-    RecreateList(flags);
+    m_logWindow->WriteText("\nRecreate the control now\n");
 }
 
 void MyFrame::OnSetFgColour(wxCommandEvent& WXUNUSED(event))
@@ -574,23 +480,6 @@ void MyFrame::OnSetBgColour(wxCommandEvent& WXUNUSED(event))
 {
     m_listCtrl->SetBackgroundColour(wxGetColourFromUser(this));
     m_listCtrl->Refresh();
-}
-
-void MyFrame::OnAdd(wxCommandEvent& WXUNUSED(event))
-{
-    m_listCtrl->InsertItem(m_listCtrl->GetItemCount(), _T("Appended item"));
-}
-
-void MyFrame::OnDelete(wxCommandEvent& WXUNUSED(event))
-{
-    if ( m_listCtrl->GetItemCount() )
-    {
-        m_listCtrl->DeleteItem(0);
-    }
-    else
-    {
-        m_logWindow->WriteText("Nothing to delete");
-    }
 }
 
 void MyFrame::OnDeleteAll(wxCommandEvent& WXUNUSED(event))
@@ -606,74 +495,31 @@ void MyFrame::OnDeleteAll(wxCommandEvent& WXUNUSED(event))
 
 // MyListCtrl
 
-void MyListCtrl::OnCacheHint(wxListEvent& event)
-{
-    wxLogMessage( wxT("OnCacheHint: cache items %ld..%ld"),
-                  event.GetCacheFrom(), event.GetCacheTo() );
-}
-
-void MyListCtrl::SetColumnImage(int col, int image)
-{
-    wxListItem item;
-    item.SetMask(wxLIST_MASK_IMAGE);
-    item.SetImage(image);
-    SetColumn(col, item);
-}
-
 void MyListCtrl::OnColClick(wxListEvent& event)
 {
-    int col = event.GetColumn();
-    SetColumnImage(col, 0);
-
-    wxLogMessage( wxT("OnColumnClick at %d."), col );
-}
-
-void MyListCtrl::OnColRightClick(wxListEvent& event)
-{
-    int col = event.GetColumn();
-    SetColumnImage(col, -1);
-
-    wxLogMessage( wxT("OnColumnRightClick at %d."), event.GetColumn() );
-}
-
-void MyListCtrl::OnColBeginDrag(wxListEvent& event)
-{
-    wxLogMessage( wxT("OnColBeginDrag: column %d."), event.GetColumn() );
-}
-
-void MyListCtrl::OnColDragging(wxListEvent& event)
-{
-    wxLogMessage( wxT("OnColDragging: column %d."), event.GetColumn() );
-}
-
-void MyListCtrl::OnColEndDrag(wxListEvent& event)
-{
-    wxLogMessage( wxT("OnColEndDrag: column %d."), event.GetColumn() );
+    wxLogMessage( "OnColumnClick at %d.", event.GetColumn() );
 }
 
 void MyListCtrl::OnBeginDrag(wxListEvent& event)
 {
-    const wxPoint& pt = event.m_pointDrag;
-
-    int flags;
-    wxLogMessage( wxT("OnBeginDrag at (%d, %d), item %ld."),
-                  pt.x, pt.y, HitTest(pt, flags) );
+    wxLogMessage( "OnBeginDrag at %d,%d.",
+                  event.m_pointDrag.x, event.m_pointDrag.y );
 }
 
 void MyListCtrl::OnBeginRDrag(wxListEvent& event)
 {
-    wxLogMessage( wxT("OnBeginRDrag at %d,%d."),
+    wxLogMessage( "OnBeginRDrag at %d,%d.",
                   event.m_pointDrag.x, event.m_pointDrag.y );
 }
 
 void MyListCtrl::OnBeginLabelEdit(wxListEvent& event)
 {
-    wxLogMessage( wxT("OnBeginLabelEdit: %s"), event.m_item.m_text.c_str());
+    wxLogMessage("OnBeginLabelEdit: %s", event.m_item.m_text.c_str());
 }
 
 void MyListCtrl::OnEndLabelEdit(wxListEvent& event)
 {
-    wxLogMessage( wxT("OnEndLabelEdit: %s"), event.m_item.m_text.c_str());
+    wxLogMessage("OnEndLabelEdit: %s", event.m_item.m_text.c_str());
 }
 
 void MyListCtrl::OnDeleteItem(wxListEvent& event)
@@ -731,12 +577,12 @@ void MyListCtrl::OnSelected(wxListEvent& event)
         info.m_mask = wxLIST_MASK_TEXT;
         if ( GetItem(info) )
         {
-            wxLogMessage(wxT("Value of the 2nd field of the selected item: %s"),
+            wxLogMessage("Value of the 2nd field of the selected item: %s",
                          info.m_text.c_str());
         }
         else
         {
-            wxFAIL_MSG(wxT("wxListCtrl::GetItem() failed"));
+            wxFAIL_MSG("wxListCtrl::GetItem() failed");
         }
     }
 }
@@ -751,105 +597,18 @@ void MyListCtrl::OnActivated(wxListEvent& event)
     LogEvent(event, _T("OnActivated"));
 }
 
-void MyListCtrl::OnFocused(wxListEvent& event)
-{
-    LogEvent(event, _T("OnFocused"));
-}
-
 void MyListCtrl::OnListKeyDown(wxListEvent& event)
 {
-    switch ( event.GetCode() )
-    {
-        case 'c': // colorize
-        case 'C':
-            {
-                wxListItem info;
-                info.m_itemId = event.GetIndex();
-                GetItem(info);
+    LogEvent(event, _T("OnListKeyDown"));
 
-                wxListItemAttr *attr = info.GetAttributes();
-                if ( !attr || !attr->HasTextColour() )
-                {
-                    info.SetTextColour(*wxCYAN);
-
-                    SetItem(info);
-
-                    RefreshItem(info.m_itemId);
-                }
-            }
-            break;
-
-        case 'n': // next
-        case 'N':
-            {
-                long item = GetNextItem(-1,
-                                        wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-                if ( item++ == GetItemCount() - 1 )
-                {
-                    item = 0;
-                }
-
-                wxLogMessage(_T("Focusing item %ld"), item);
-
-                SetItemState(item, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
-                EnsureVisible(item);
-            }
-            break;
-
-        case WXK_DELETE:
-            {
-                long item = GetNextItem(-1,
-                                        wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-                while ( item != -1 )
-                {
-                    DeleteItem(item);
-
-                    wxLogMessage(_T("Item %ld deleted"), item);
-
-                    // -1 because the indices were shifted by DeleteItem()
-                    item = GetNextItem(item - 1,
-                                       wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-                }
-            }
-            break;
-
-        case WXK_INSERT:
-            if ( GetWindowStyle() & wxLC_REPORT )
-            {
-                if ( GetWindowStyle() & wxLC_VIRTUAL )
-                {
-                    SetItemCount(GetItemCount() + 1);
-                }
-                else // !virtual
-                {
-                    InsertItemInReportView(event.GetIndex());
-                }
-            }
-            //else: fall through
-
-        default:
-            LogEvent(event, _T("OnListKeyDown"));
-
-            event.Skip();
-    }
+    event.Skip();
 }
 
 void MyListCtrl::OnChar(wxKeyEvent& event)
 {
     wxLogMessage(_T("Got char event."));
 
-    switch ( event.GetKeyCode() )
-    {
-        case 'n':
-        case 'N':
-        case 'c':
-        case 'C':
-            // these are the keys we process ourselves
-            break;
-
-        default:
-            event.Skip();
-    }
+    event.Skip();
 }
 
 void MyListCtrl::LogEvent(const wxListEvent& event, const wxChar *eventName)
@@ -857,34 +616,5 @@ void MyListCtrl::LogEvent(const wxListEvent& event, const wxChar *eventName)
     wxLogMessage(_T("Item %ld: %s (item text = %s, data = %ld)"),
                  event.GetIndex(), eventName,
                  event.GetText().c_str(), event.GetData());
-}
-
-wxString MyListCtrl::OnGetItemText(long item, long column) const
-{
-    return wxString::Format(_T("Column %ld of item %ld"), column, item);
-}
-
-int MyListCtrl::OnGetItemImage(long item) const
-{
-    return 0;
-}
-
-wxListItemAttr *MyListCtrl::OnGetItemAttr(long item) const
-{
-    return item % 2 ? NULL : (wxListItemAttr *)&m_attr;
-}
-
-void MyListCtrl::InsertItemInReportView(int i)
-{
-    wxString buf;
-    buf.Printf(_T("This is item %d"), i);
-    long tmp = InsertItem(i, buf, 0);
-    SetItemData(tmp, i);
-
-    buf.Printf(_T("Col 1, item %d"), i);
-    SetItem(i, 1, buf);
-
-    buf.Printf(_T("Item %d in column 2"), i);
-    SetItem(i, 2, buf);
 }
 

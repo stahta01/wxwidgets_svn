@@ -76,6 +76,8 @@ public:
 
     // implementation from now on
 
+    void GtkDisableEvents();
+    void GtkEnableEvents();
     void GtkAddItem( const wxString &item, int pos=-1 );
     int GtkGetIndex( GtkWidget *item ) const;
     GtkWidget *GetConnectWidget();
@@ -94,9 +96,6 @@ public:
     bool       m_hasCheckBoxes;
 #endif // wxUSE_CHECKLISTBOX
 
-    int        m_prevSelection;
-    bool       m_blockEvent;
-    
 protected:
     virtual wxSize DoGetBestSize() const;
 

@@ -14,7 +14,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -292,9 +292,8 @@ void MyCanvas::OnLeftClick(double x, double y, int keys)
   }
   if (info)
   {
-    view->GetDocument()->GetCommandProcessor()->Submit(
-      new DiagramCommand((char*) info->GetClassName(), OGLEDIT_ADD_SHAPE, (DiagramDocument *)view->GetDocument(), info,
-         x, y));
+    view->GetDocument()->GetCommandProcessor()->Submit(new DiagramCommand((char*) info->GetClassName(), OGLEDIT_ADD_SHAPE, (DiagramDocument *)view->GetDocument(), info,
+      x, y));
   }
 }
 

@@ -20,20 +20,78 @@
 // compiler and OS identification
 // ----------------------------------------------------------------------------
 
-#include "wx/platform.h"
+// OS: first test for generic Unix defines, then for particular flavours and
+//     finally for Unix-like systems
+#if defined(__UNIX__) || defined(__unix) || defined(__unix__) || \
+    defined(____SVR4____) || defined(__LINUX__) || defined(__sgi) || \
+    defined(__hpux) || defined(sun) || defined(__SUN__) || defined(_AIX) || \
+    defined(__EMX__) || defined(__VMS) || defined(__BEOS__)
 
-// Make sure the environment is set correctly
-#if defined(__WXMSW__) && defined(__X__)
-    #error "Target can't be both X and Windows"
-#elif !defined(__WXMOTIF__) && !defined(__WXMSW__) && !defined(__WXGTK__) && \
-      !defined(__WXPM__) && !defined(__WXMAC__) && !defined(__X__) && \
-      !defined(__WXMGL__) && wxUSE_GUI
-    #ifdef __UNIX__
-        #error "No Target! You should use wx-config program for compilation flags!"
-    #else // !Unix
-        #error "No Target! You should use supplied makefiles for compilation!"
-    #endif // Unix/!Unix
-#endif
+    #define __UNIX_LIKE__
+
+    // Helps SGI compilation, apparently
+    #ifdef __SGI__
+        #ifdef __GNUG__
+            #define __need_wchar_t
+        #else // !gcc
+            // Note I use the term __SGI_CC__ for both cc and CC, its not a good
+            // idea to mix gcc and cc/CC, the name mangling is different
+            #define __SGI_CC__
+        #endif // gcc/!gcc
+    #endif  // SGI
+
+    #if defined(sun) || defined(__SUN__)
+        #ifndef __GNUG__
+            #ifndef __SUNCC__
+                #define __SUNCC__
+            #endif // Sun CC
+        #endif
+    #endif // Sun
+
+    #ifdef __EMX__
+        #define OS2EMX_PLAIN_CHAR
+    #endif
+
+#elif defined(applec) || defined(THINK_C) || ( defined( __MWERKS__ ) && !defined(__INTEL__) )
+        // MacOS
+#elif defined(__OS2__)
+    #if defined(__IBMCPP__)
+        #define __VISAGEAVER__ __IBMCPP__
+    #endif
+    #ifndef __WXOS2__
+        #define __WXOS2__
+    #endif
+    #ifndef __WXPM__
+        #define __WXPM__
+    #endif
+
+    // Place other OS/2 compiler environment defines here
+    #if defined(__VISAGECPP__)
+        // VisualAge is the only thing that understands _Optlink
+        #define LINKAGEMODE _Optlink
+    #endif
+#else   // Windows
+    #ifndef __WINDOWS__
+        #define __WINDOWS__
+    #endif  // Windows
+
+    // define another standard symbol for Microsoft Visual C++: the standard one
+    // (_MSC_VER) is also defined by Metrowerks compiler
+    #if defined(_MSC_VER) && !defined(__MWERKS__)
+        #define __VISUALC__ _MSC_VER
+    #elif defined(__BCPLUSPLUS__) && !defined(__BORLANDC__)
+        #define __BORLANDC__
+      #elif defined(__WATCOMC__)
+    //#define __WATCOMC__
+    #elif defined(__SC__)
+        #define __SYMANTECC__
+    #endif  // compiler
+#endif  // OS
+
+// LINKAGEMODE mode is empty for everyting except OS/2
+#ifndef LINKAGEMODE
+    #define LINKAGEMODE
+#endif // LINKAGEMODE
 
 // suppress some Visual C++ warnings
 #ifdef __VISUALC__
@@ -53,12 +111,6 @@
 #endif
 #endif // __VISUALC__
 
-// suppress some Watcom C++ warnings
-#ifdef __WATCOMC__
-#   pragma warning 849 9            // Disable 'virtual function hidden'
-#   pragma warning 549 9            // Disable 'operand contains compiler generated information'
-#endif // __VISUALC__
-
 // suppress some Salford C++ warnings
 #ifdef __SALFORDC__
 #   pragma suppress 353             // Possible nested comments
@@ -68,51 +120,141 @@
 #   pragma suppress 571             // Virtual function hiding
 #endif // __SALFORDC__
 
-// ----------------------------------------------------------------------------
-// wxWindows version and compatibility defines
-// ----------------------------------------------------------------------------
-
-#include "wx/version.h"
-
-// possibility to build non GUI apps is new, so don't burden ourselves with
-// compatibility code
-#if !wxUSE_GUI
-    #undef WXWIN_COMPATIBILITY_2
-    #undef WXWIN_COMPATIBILITY_2_2
-
-    #define WXWIN_COMPATIBILITY_2 0
-    #define WXWIN_COMPATIBILITY_2_2 0
-#endif // !GUI
-
-// ============================================================================
-// non portable C++ features
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// compiler defects workarounds
-// ----------------------------------------------------------------------------
-
 #if defined(__VISUALC__) && !defined(WIN32)
     // VC1.5 does not have LPTSTR type
     #define LPTSTR LPSTR
     #define LPCTSTR LPCSTR
 #endif // VC++ 1.5
 
-/*
-   Digital Unix C++ compiler only defines this symbol for .cxx and .hxx files,
-   so define it ourselves (newer versions do it for all files, though, and
-   don't allow it to be redefined)
- */
+// Digital Unix C++ compiler only defines this symbol for .cxx and .hxx files,
+// so define it ourselves (newer versions do it for all files, though, and
+// don't allow it to be redefined)
 #ifdef __DECCXX
     #if !defined(__VMS) && !defined(__cplusplus)
         #define __cplusplus
     #endif
-#endif /* __DECCXX */
+#endif // __DECCXX
 
-// Resolves linking problems under HP-UX when compiling with gcc/g++
+// Resolves linking problems under HP-UX
 #if defined(__HPUX__) && defined(__GNUG__)
     #define va_list __gnuc_va_list
 #endif // HP-UX
+
+// Cygwin / Mingw32 with gcc >= 2.95 use new windows headers which
+// are more ms-like (header author is Anders Norlander, hence the name)
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95)))
+    #ifndef wxUSE_NORLANDER_HEADERS
+        #define wxUSE_NORLANDER_HEADERS 1
+    #endif
+#else
+    #ifndef wxUSE_NORLANDER_HEADERS
+        #define wxUSE_NORLANDER_HEADERS 0
+    #endif
+#endif
+
+// "old" GNUWIN32 is the one without Norlander's headers: it lacks the
+// standard Win32 headers and we define the used stuff ourselves for it
+// in wx/msw/gnuwin32/extra.h
+#if defined(__GNUC__) && !wxUSE_NORLANDER_HEADERS
+    #define __GNUWIN32_OLD__
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////
+// Currently Only MS-Windows/NT, XView and Motif are supported
+//
+#if defined(__HPUX__) && !defined(__WXGTK__)
+    #ifndef __WXMOTIF__
+        #define __WXMOTIF__
+    #endif // __WXMOTIF__
+#endif
+
+#if defined(__WXMOTIF__)
+    #define __X__
+#endif
+
+#ifdef __WXMSW__
+
+#if defined(_WIN32) || defined(WIN32) || defined(__NT__)
+    #ifndef __WIN32__
+        #define __WIN32__
+    #endif
+#endif
+
+#ifdef __WXWINE__
+  #ifndef __WIN32__
+    #define __WIN32__
+  #endif
+  #ifndef __WIN95__
+    #define __WIN95__
+  #endif
+  #ifndef STRICT
+    #define STRICT
+  #endif
+#endif
+
+#ifndef __WIN32__
+#define __WIN16__
+#endif
+
+#if !defined(__WIN95__) && (WINVER >= 0x0400)
+#define __WIN95__
+#endif
+
+#if defined(TWIN32) && !defined(__TWIN32__)
+#define __TWIN32__
+#endif
+
+#endif // wxMSW
+
+// Make sure the environment is set correctly
+#if defined(__WXMSW__) && defined(__X__)
+    #error "Target can't be both X and Windows"
+#elif !defined(__WXMOTIF__) && !defined(__WXMSW__) && !defined(__WXGTK__) && \
+      !defined(__WXPM__) && !defined(__WXMAC__) && !defined(__X__) && \
+      !defined(__WXQT__) && !defined(__WXSTUBS__) && wxUSE_GUI
+    #error "No Target! Use -D[__WXMOTIF__|__WXGTK__|__WXMSW__|__WXMAC__|__WXQT__|__WXPM__|__WXSTUBS__]"
+#endif
+
+// ----------------------------------------------------------------------------
+// wxWindows options
+// ----------------------------------------------------------------------------
+
+#include <stddef.h>
+
+#include "wx/setup.h"
+
+// just in case they were defined in setup.h
+#undef PACKAGE
+#undef VERSION
+
+// this has to be done after including setup.h which might
+// define __HPUX__ 1 itself
+#if defined(__hpux) && !defined(__HPUX__)
+    #define __HPUX__
+#endif // HP-UX
+
+// if we're on a Unix system but didn't use configure (so that setup.h didn't
+// define __UNIX__), do define __UNIX__ now
+#if !defined(__UNIX__) && defined(__UNIX_LIKE__)
+    #define __UNIX__
+#endif // Unix
+
+#include "wx/version.h"
+
+// ----------------------------------------------------------------------------
+// compatibility defines
+// ----------------------------------------------------------------------------
+
+// possibility to build non GUI apps is new, so don't burden ourselves with
+// compatibility code
+#if !wxUSE_GUI
+    #undef WXWIN_COMPATIBILITY_2
+    #define WXWIN_COMPATIBILITY_2 0
+#endif // !GUI
+
+// ============================================================================
+// non portable C++ features
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // check for native bool type and TRUE/FALSE constants
@@ -182,6 +324,20 @@ typedef short int WXTYPE;
 // because -1 is a valid (and largely used) value for window id.
 typedef int wxWindowID;
 
+// Macro to cut down on compiler warnings.
+#if REMOVE_UNUSED_ARG
+    #define WXUNUSED(identifier) /* identifier */
+#else  // stupid, broken compiler
+    #define WXUNUSED(identifier) identifier
+#endif
+
+// some arguments are only used in debug mode, but unused in release one
+#ifdef __WXDEBUG__
+    #define WXUNUSED_UNLESS_DEBUG(param)  param
+#else
+    #define WXUNUSED_UNLESS_DEBUG(param)  WXUNUSED(param)
+#endif
+
 // ----------------------------------------------------------------------------
 // portable calling conventions macros
 // ----------------------------------------------------------------------------
@@ -200,14 +356,9 @@ typedef int wxWindowID;
     #define wxSTDCALL
 #endif // platform
 
-// LINKAGEMODE mode is empty for everyting except OS/2
-#ifndef LINKAGEMODE
-    #define LINKAGEMODE
-#endif // LINKAGEMODE
-
 // wxCALLBACK should be used for the functions which are called back by
 // Windows (such as compare function for wxListCtrl)
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__)
     #define wxCALLBACK wxSTDCALL
 #else
     // no stdcall under Unix nor Win16
@@ -232,48 +383,62 @@ typedef int wxWindowID;
 // ----------------------------------------------------------------------------
 
 #if defined(__WXMSW__)
-    // __declspec works in BC++ 5 and later, Watcom C++ 11.0 and later as well
-    // as VC++ and gcc
-    #if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__GNUC__) || defined(__WATCOMC__)
-        #define WXEXPORT __declspec(dllexport)
-        #define WXIMPORT __declspec(dllimport)
-    #else // compiler doesn't support __declspec()
-        #define WXEXPORT
-        #define WXIMPORT
-    #endif
+
+// __declspec works in BC++ 5 and later, as well as VC++ and gcc
+#if defined(__VISUALC__) || defined(__BORLANDC__) || defined(__GNUC__)
+#  ifdef WXMAKINGDLL
+#    define WXDLLEXPORT __declspec( dllexport )
+#    define WXDLLEXPORT_DATA(type) __declspec( dllexport ) type
+#    define WXDLLEXPORT_CTORFN
+#  elif defined(WXUSINGDLL)
+#    define WXDLLEXPORT __declspec( dllimport )
+#    define WXDLLEXPORT_DATA(type) __declspec( dllimport ) type
+#    define WXDLLEXPORT_CTORFN
+#  else
+#    define WXDLLEXPORT
+#    define WXDLLEXPORT_DATA(type) type
+#    define WXDLLEXPORT_CTORFN
+#  endif
+#else
+#    define WXDLLEXPORT
+#    define WXDLLEXPORT_DATA(type) type
+#    define WXDLLEXPORT_CTORFN
+#endif
+
 #elif defined(__WXPM__)
-    #if defined (__WATCOMC__)
-        #define WXEXPORT __declspec(dllexport)
-        // __declspec(dllimport) prepends __imp to imported symbols. We do NOT
-        // want that!
-        #define WXIMPORT
-    #elif (!(defined(__VISAGECPP__) && (__IBMCPP__ < 400 || __IBMC__ < 400 )))
-        #define WXEXPORT _Export
-        #define WXIMPORT _Export
-    #endif
+
+#  if (!(defined(__VISAGECPP__) && (__IBMCPP__ < 400 || __IBMC__ < 400 )))
+
+#    ifdef WXMAKINGDLL
+#      define WXDLLEXPORT _Export
+#      define WXDLLEXPORT_DATA(type) _Export type
+#      define WXDLLEXPORT_CTORFN
+#    elif defined(WXUSINGDLL)
+#      define WXDLLEXPORT _Export
+#      define WXDLLEXPORT_DATA(type) _Export type
+#      define WXDLLEXPORT_CTORFN
+#    else
+#      define WXDLLEXPORT
+#      define WXDLLEXPORT_DATA(type) type
+#      define WXDLLEXPORT_CTORFN
+#    endif
+
+#  else
+
+#    define WXDLLEXPORT
+#    define WXDLLEXPORT_DATA(type) type
+#    define WXDLLEXPORT_CTORFN
+
+#  endif
+
+#else  // !(MSW or OS2)
+
+#  define WXDLLEXPORT
+#  define WXDLLEXPORT_DATA(type) type
+#  define WXDLLEXPORT_CTORFN
+
 #endif
 
-// for other platforms/compilers we don't anything
-#ifndef WXEXPORT
-    #define WXEXPORT
-    #define WXIMPORT
-#endif
-
-// WXDLLEXPORT maps to export declaration when building the DLL, to import
-// declaration if using it or to nothing at all if we don't use wxWin DLL
-#ifdef WXMAKINGDLL
-    #define WXDLLEXPORT WXEXPORT
-    #define WXDLLEXPORT_DATA(type) WXEXPORT type
-    #define WXDLLEXPORT_CTORFN
-#elif defined(WXUSINGDLL)
-    #define WXDLLEXPORT WXIMPORT
-    #define WXDLLEXPORT_DATA(type) WXIMPORT type
-    #define WXDLLEXPORT_CTORFN
-#else // not making nor using DLL
-    #define WXDLLEXPORT
-    #define WXDLLEXPORT_DATA(type) type
-    #define WXDLLEXPORT_CTORFN
-#endif
 
 // For ostream, istream ofstream
 #if defined(__BORLANDC__) && defined( _RTLDLL )
@@ -282,13 +447,11 @@ typedef int wxWindowID;
 #  define WXDLLIMPORT
 #endif
 
-#ifdef __cplusplus
 class WXDLLEXPORT wxObject;
 class WXDLLEXPORT wxEvent;
-#endif
 
-// symbolic constant used by all Find()-like functions returning positive
-// integer on success as failure indicator
+ /** symbolic constant used by all Find()-like functions returning positive
+      integer on success as failure indicator */
 #define wxNOT_FOUND       (-1)
 
 // ----------------------------------------------------------------------------
@@ -296,40 +459,37 @@ class WXDLLEXPORT wxEvent;
 // ----------------------------------------------------------------------------
 
 // everybody gets the assert and other debug macros
-#ifdef __cplusplus
 #include "wx/debug.h"
-#endif
 
-// NULL declaration: it must be defined as 0 for C++ programs (in particular,
-// it must not be defined as "(void *)0" which is standard for C but completely
-// breaks C++ code)
-#include <stddef.h>
-
-// Macro to cut down on compiler warnings.
-#if REMOVE_UNUSED_ARG
-    #define WXUNUSED(identifier) /* identifier */
-#else  // stupid, broken compiler
-    #define WXUNUSED(identifier) identifier
-#endif
-
-// some arguments are only used in debug mode, but unused in release one
-#ifdef __WXDEBUG__
-    #define WXUNUSED_UNLESS_DEBUG(param)  param
-#else
-    #define WXUNUSED_UNLESS_DEBUG(param)  WXUNUSED(param)
-#endif
-
-// delete pointer if it is not NULL and NULL it afterwards
+//@{
+/// delete pointer if it is not NULL and NULL it afterwards
 // (checking that it's !NULL before passing it to delete is just a
 //  a question of style, because delete will do it itself anyhow, but it might
 //  be considered as an error by some overzealous debugging implementations of
 //  the library, so we do it ourselves)
+#if defined(__SGI_CC__)
+// Okay this is bad styling, but the native SGI compiler is very picky, it
+// wont let you compare/assign between a NULL (void *) and another pointer
+// type. To be really clean we'd need to pass in another argument, the type
+// of p.
+// Also note the use of 0L, this would allow future possible 64bit support
+// (as yet untested) by ensuring that we zero all the bits in a pointer
+// (which is always the same length as a long (at least with the LP64 standard)
+// --- offer aug 98
+#define wxDELETE(p)      if ( (p) ) { delete (p); p = 0L; }
+#else
 #define wxDELETE(p)      if ( (p) != NULL ) { delete p; p = NULL; }
+#endif /* __SGI__CC__ */
 
 // delete an array and NULL it (see comments above)
-#define wxDELETEA(p)     if ( (p) ) { delete [] (p); p = NULL; }
+#if defined(__SGI_CC__)
+// see above comment.
+#define wxDELETEA(p)      if ( (p) ) { delete [] (p); p = 0L; }
+#else
+#define wxDELETEA(p)      if ( ((void *) (p)) != NULL ) { delete [] p; p = NULL; }
+#endif /* __SGI__CC__ */
 
-// size of statically declared array
+/// size of statically declared array
 #define WXSIZEOF(array)   (sizeof(array)/sizeof(array[0]))
 
 // ----------------------------------------------------------------------------
@@ -368,9 +528,7 @@ class WXDLLEXPORT wxEvent;
 #endif
 
 // Callback function type definition
-#ifdef __cplusplus
 typedef void (*wxFunction) (wxObject&, wxEvent&);
-#endif
 
 // ----------------------------------------------------------------------------
 // OS mnemonics -- Identify the running OS (useful for Windows)
@@ -385,13 +543,13 @@ enum
     wxMOTIF_X,                // OSF Motif 1.x.x
     wxCOSE_X,                 // OSF Common Desktop Environment
     wxNEXTSTEP,               // NeXTStep
-    wxMAC,                    // Apple Mac OS 8/9/X with Mac paths
-    wxMAC_DARWIN,             // Apple Mac OS X with Unix paths
+    wxMACINTOSH,              // Apple System 7 and 8
     wxBEOS,                   // BeOS
     wxGTK,                    // GTK on X
     wxGTK_WIN32,              // GTK on Win32
     wxGTK_OS2,                // GTK on OS/2
     wxGTK_BEOS,               // GTK on BeOS
+    wxQT,                     // Qt
     wxGEOS,                   // GEOS
     wxOS2_PM,                 // OS/2 Workplace
     wxWINDOWS,                // Windows or WfW
@@ -647,10 +805,7 @@ enum wxAlignment
     wxALIGN_CENTRE_VERTICAL   = wxALIGN_CENTER_VERTICAL,
 
     wxALIGN_CENTER            = (wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL),
-    wxALIGN_CENTRE            = wxALIGN_CENTER,
-
-    // a mask to extract alignment from the combination of flags
-    wxALIGN_MASK              = 0x0f00
+    wxALIGN_CENTRE            = wxALIGN_CENTER
 };
 
 enum wxStretch
@@ -659,27 +814,7 @@ enum wxStretch
     wxSHRINK                  = 0x1000,
     wxGROW                    = 0x2000,
     wxEXPAND                  = wxGROW,
-    wxSHAPED                  = 0x4000,
-    wxADJUST_MINSIZE          = 0x8000,
-    wxTILE                    = 0xc000
-};
-
-// border flags: the values are chosen for backwards compatibility
-enum wxBorder
-{
-    // this is different from wxBORDER_NONE as by default the controls do have
-    // border
-    wxBORDER_DEFAULT = 0,
-
-    wxBORDER_NONE   = 0x00200000,
-    wxBORDER_STATIC = 0x01000000,
-    wxBORDER_SIMPLE = 0x02000000,
-    wxBORDER_RAISED = 0x04000000,
-    wxBORDER_SUNKEN = 0x08000000,
-    wxBORDER_DOUBLE = 0x10000000,
-
-    // a mask to extract border style from the combination of flags
-    wxBORDER_MASK   = 0x1f200000
+    wxSHAPED                  = 0x4000
 };
 
 // ----------------------------------------------------------------------------
@@ -706,40 +841,27 @@ enum wxBorder
 #define wxHSCROLL               0x40000000
 #define wxCAPTION               0x20000000
 
-// New styles (border styles are now in their own enum)
-#define wxDOUBLE_BORDER         wxBORDER_DOUBLE
-#define wxSUNKEN_BORDER         wxBORDER_SUNKEN
-#define wxRAISED_BORDER         wxBORDER_RAISED
-#define wxBORDER                wxBORDER_SIMPLE
-#define wxSIMPLE_BORDER         wxBORDER_SIMPLE
-#define wxSTATIC_BORDER         wxBORDER_STATIC
-#define wxNO_BORDER             wxBORDER_NONE
+// New styles
+#define wxDOUBLE_BORDER         0x10000000
+#define wxSUNKEN_BORDER         0x08000000
+#define wxRAISED_BORDER         0x04000000
+#define wxBORDER                0x02000000
+#define wxSIMPLE_BORDER         wxBORDER
+#define wxSTATIC_BORDER         0x01000000
+#define wxTRANSPARENT_WINDOW    0x00100000
+#define wxNO_BORDER             0x00200000
 
 // Override CTL3D etc. control colour processing to allow own background
 // colour.
+// OBSOLETE - use wxNO_3D instead
+#define wxUSER_COLOURS          0x00800000
 // Override CTL3D or native 3D styles for children
 #define wxNO_3D                 0x00800000
-
-// OBSOLETE - use wxNO_3D instead
-#define wxUSER_COLOURS          wxNO_3D
-
-// wxALWAYS_SHOW_SB: instead of hiding the scrollbar when it is not needed,
-// disable it - but still show (see also wxLB_ALWAYS_SB style)
-//
-// NB: as this style is only supported by wxUniversal so far as it doesn't use
-//     wxUSER_COLOURS/wxNO_3D, we reuse the same style value
-#define wxALWAYS_SHOW_SB        0x00800000
 
 // Clip children when painting, which reduces flicker in e.g. frames and
 // splitter windows, but can't be used in a panel where a static box must be
 // 'transparent' (panel paints the background for it)
 #define wxCLIP_CHILDREN         0x00400000
-
-// Note we're reusing the wxCAPTION style because we won't need captions
-// for subwindows/controls
-#define wxCLIP_SIBLINGS         0x20000000
-
-#define wxTRANSPARENT_WINDOW    0x00100000
 
 // Add this style to a panel to get tab traversal working outside of dialogs
 // (on by default for wxPanel, wxDialog, wxScrolledWindow)
@@ -749,14 +871,9 @@ enum wxBorder
 // Windows, it won't normally get the dialog navigation key events)
 #define wxWANTS_CHARS           0x00040000
 
-// Make window retained (mostly Motif, I think) -- obsolete (VZ)?
+// Make window retained (mostly Motif, I think)
 #define wxRETAINED              0x00020000
 #define wxBACKINGSTORE          wxRETAINED
-
-// set this flag to create a special popup window: it will be always shown on
-// top of other windows, will capture the mouse and will be dismissed when the
-// mouse is clicked outside of it or if it loses focus in any other way
-#define wxPOPUP_WINDOW          0x00020000
 
 // don't invalidate the whole window (resulting in a PAINT event) when the
 // window is resized (currently, makes sense for wxMSW only)
@@ -771,13 +888,6 @@ enum wxBorder
 // window (compatible behaviour), set this flag to make them recursively
 // descend into all subwindows
 #define wxWS_EX_VALIDATE_RECURSIVELY    0x00000001
-
-// wxCommandEvents and the objects of the derived classes are forwarded to the
-// parent window and so on recursively by default. Using this flag for the
-// given window allows to block this propagation at this window, i.e. prevent
-// the events from being propagated further upwards. The dialogs have this
-// flag on by default.
-#define wxWS_EX_BLOCK_EVENTS            0x00000002
 
 /*
  * wxFrame/wxDialog style flags
@@ -794,24 +904,15 @@ enum wxBorder
 #define wxTINY_CAPTION_VERT     0x0080
 #define wxRESIZE_BORDER         0x0040
 
-#define wxDIALOG_NO_PARENT      0x0001  // Don't make owned by apps top window
-#define wxFRAME_NO_TASKBAR      0x0002  // No taskbar button (MSW only)
-#define wxFRAME_TOOL_WINDOW     0x0004  // No taskbar button, no system menu
-
 // deprecated versions defined for compatibility reasons
 #define wxRESIZE_BOX            wxMAXIMIZE_BOX
 #define wxTHICK_FRAME           wxRESIZE_BORDER
 
-// obsolete styles, unused any more
 #define wxDIALOG_MODAL          0x0020
 #define wxDIALOG_MODELESS       0x0000
 
-// deprecated flag, don't use any more, defined for compatibility only
-#define wxFRAME_FLOAT_ON_PARENT 0
-
-// Context-sensitive help
-#define wxFRAME_EX_CONTEXTHELP  0x00000004
-#define wxDIALOG_EX_CONTEXTHELP 0x00000004
+// Add for normal Windows frame behaviour
+#define wxFRAME_FLOAT_ON_PARENT 0x0020
 
 /*
  * MDI parent frame style flags
@@ -891,18 +992,25 @@ enum wxBorder
 #define wxLB_NEEDED_SB      0x0200
 #define wxLB_ALWAYS_SB      0x0400
 #define wxLB_HSCROLL        wxHSCROLL
-// always show an entire number of rows
-#define wxLB_INT_HEIGHT     0x0800
 
-// use wxHSCROLL to not wrap text at all, wxTE_LINEWRAP to wrap it at any
-// position and wxTE_WORDWRAP to wrap at words boundary
-#define wxTE_DONTWRAP       wxHSCROLL
-#define wxTE_LINEWRAP       0x0800
-#define wxTE_WORDWRAP       0x0000  // it's just == !wxHSCROLL
-
-// deprecated synonyms
-#define wxPROCESS_ENTER     wxTE_PROCESS_ENTER
-#define wxPASSWORD          wxTE_PASSWORD
+/*
+ * wxTextCtrl style flags
+ */
+// the flag bits 0x0001, 2, 4 and 8 are free but should be used only for the
+// things which don't make sense for a text control used by wxTextEntryDialog
+// because they would otherwise conflict with wxOK, wxCANCEL, wxCENTRE
+#define wxTE_READONLY       0x0010
+#define wxTE_MULTILINE      0x0020
+#define wxTE_PROCESS_TAB    0x0040
+// this style means to use RICHEDIT control and does something only under wxMSW
+// and Win32 and is silently ignored under all other platforms
+#define wxTE_RICH           0x0080
+#define wxTE_NO_VSCROLL     0x0100
+#define wxTE_AUTO_SCROLL    0x0200
+#define wxPROCESS_ENTER     0x0400
+#define wxPASSWORD          0x0800
+#define wxTE_PROCESS_ENTER  wxPROCESS_ENTER
+#define wxTE_PASSWORD       wxPASSWORD
 
 /*
  * wxComboBox style flags
@@ -915,15 +1023,9 @@ enum wxBorder
 /*
  * wxRadioBox style flags
  */
-// should we number the items from left to right or from top to bottom in a 2d
-// radiobox?
-#define wxRA_LEFTTORIGHT    0x0001
-#define wxRA_TOPTOBOTTOM    0x0002
-
 // New, more intuitive names to specify majorDim argument
 #define wxRA_SPECIFY_COLS   wxHORIZONTAL
 #define wxRA_SPECIFY_ROWS   wxVERTICAL
-
 // Old names for compatibility
 #define wxRA_HORIZONTAL     wxHORIZONTAL
 #define wxRA_VERTICAL       wxVERTICAL
@@ -949,8 +1051,8 @@ enum wxBorder
 #define wxSL_VERTICAL        wxVERTICAL   // 8
 // The next one is obsolete - use scroll events instead
 #define wxSL_NOTIFY_DRAG     0x0000
-#define wxSL_TICKS           0x0010
-#define wxSL_AUTOTICKS       wxSL_TICKS // we don't support manual ticks
+#define wxSL_AUTOTICKS       0x0010
+// #define wxSL_MANUALTICKS     0x0010
 #define wxSL_LABELS          0x0020
 #define wxSL_LEFT            0x0040
 #define wxSL_TOP             0x0080
@@ -964,6 +1066,57 @@ enum wxBorder
  */
 #define wxSB_HORIZONTAL      wxHORIZONTAL
 #define wxSB_VERTICAL        wxVERTICAL
+
+/*
+ * wxButton flags (Win32 only)
+ */
+#define wxBU_AUTODRAW        0x0004
+#define wxBU_NOAUTODRAW      0x0000
+#define wxBU_LEFT            0x0040
+#define wxBU_TOP             0x0080
+#define wxBU_RIGHT           0x0100
+#define wxBU_BOTTOM          0x0200
+
+/*
+ * wxTreeCtrl flags
+ */
+#define wxTR_HAS_BUTTONS     0x0004
+#define wxTR_EDIT_LABELS     0x0008
+#define wxTR_LINES_AT_ROOT   0x0010
+
+#define wxTR_SINGLE          0x0000
+#define wxTR_MULTIPLE        0x0020
+#define wxTR_EXTENDED        0x0040
+#define wxTR_HAS_VARIABLE_ROW_HEIGHT 0x0080
+#define wxTR_NO_LINES        0x0100
+
+/*
+ * wxListCtrl flags
+ */
+#define wxLC_ICON            0x0004
+#define wxLC_SMALL_ICON      0x0008
+#define wxLC_LIST            0x0010
+#define wxLC_REPORT          0x0020
+#define wxLC_ALIGN_TOP       0x0040
+#define wxLC_ALIGN_LEFT      0x0080
+#define wxLC_AUTOARRANGE     0x0100
+#define wxLC_USER_TEXT       0x0200
+#define wxLC_EDIT_LABELS     0x0400
+#define wxLC_NO_HEADER       0x0800
+#define wxLC_NO_SORT_HEADER  0x1000
+#define wxLC_SINGLE_SEL      0x2000
+#define wxLC_SORT_ASCENDING  0x4000
+#define wxLC_SORT_DESCENDING 0x8000
+
+#define wxLC_MASK_TYPE       (wxLC_ICON | wxLC_SMALL_ICON | wxLC_LIST | wxLC_REPORT)
+#define wxLC_MASK_ALIGN      (wxLC_ALIGN_TOP | wxLC_ALIGN_LEFT)
+#define wxLC_MASK_SORT       (wxLC_SORT_ASCENDING | wxLC_SORT_DESCENDING)
+
+// Omitted because (a) too much detail (b) not enough style flags
+// #define wxLC_NO_SCROLL
+// #define wxLC_NO_LABEL_WRAP
+// #define wxLC_OWNERDRAW_FIXED
+// #define wxLC_SHOW_SEL_ALWAYS
 
 /*
  * wxSpinButton flags.
@@ -990,22 +1143,26 @@ enum wxBorder
 #define wxSP_3D               (wxSP_3DBORDER | wxSP_3DSASH)
 
 /*
- * wxNotebook flags
+ * wxFrame extra flags
  */
-#define wxNB_FIXEDWIDTH       0x0010
-#define wxNB_TOP              0x0000    // default
-#define wxNB_LEFT             0x0020
-#define wxNB_RIGHT            0x0040
-#define wxNB_BOTTOM           0x0080
-#define wxNB_MULTILINE        0x0100
+// No title on taskbar
+#define wxFRAME_TOOL_WINDOW 0x0004
 
 /*
  * wxTabCtrl flags
  */
+#define wxTC_MULTILINE        0x0000
 #define wxTC_RIGHTJUSTIFY     0x0010
 #define wxTC_FIXEDWIDTH       0x0020
 #define wxTC_OWNERDRAW        0x0040
-#define wxTC_MULTILINE        wxNB_MULTILINE
+
+/*
+ * wxNotebook flags
+ */
+#define wxNB_FIXEDWIDTH       0x0010
+#define wxNB_LEFT             0x0020
+#define wxNB_RIGHT            0x0040
+#define wxNB_BOTTOM           0x0080
 
 /*
  * wxStatusBar95 flags
@@ -1016,11 +1173,6 @@ enum wxBorder
  * wxStaticText flags
  */
 #define wxST_NO_AUTORESIZE    0x0001
-
-/*
- * wxStaticBitmap flags
- */
-#define wxBI_EXPAND           wxEXPAND
 
 /*
  * wxStaticLine flags
@@ -1046,6 +1198,15 @@ enum wxBorder
  */
 #define wxHW_SCROLLBAR_NEVER    0x0002
 #define wxHW_SCROLLBAR_AUTO     0x0004
+
+/*
+ * wxCalendarCtrl flags
+ */
+#define wxCAL_SUNDAY_FIRST      0x0000
+#define wxCAL_MONDAY_FIRST      0x0001
+#define wxCAL_SHOW_HOLIDAYS     0x0002
+#define wxCAL_NO_YEAR_CHANGE    0x0004
+#define wxCAL_NO_MONTH_CHANGE   0x000c // no month change => no year change
 
 /*
  * extended dialog specifiers. these values are stored in a different
@@ -1140,46 +1301,10 @@ enum wxBorder
 #define wxID_MORE               5109
 #define wxID_SETUP              5110
 #define wxID_RESET              5111
-#define wxID_CONTEXT_HELP       5112
-#define wxID_YESTOALL           5113
-#define wxID_NOTOALL            5114
-#define wxID_ABORT              5115
-#define wxID_RETRY              5116
-#define wxID_IGNORE             5117
 
 // IDs used by generic file dialog (11 consecutive starting from this value)
 #define wxID_FILEDLGG           5900
 #define wxID_HIGHEST            5999
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// hit test results
-enum wxHitTest
-{
-    wxHT_NOWHERE,
-
-    // scrollbar
-    wxHT_SCROLLBAR_FIRST = wxHT_NOWHERE,
-    wxHT_SCROLLBAR_ARROW_LINE_1,    // left or upper arrow to scroll by line
-    wxHT_SCROLLBAR_ARROW_LINE_2,    // right or down
-    wxHT_SCROLLBAR_ARROW_PAGE_1,    // left or upper arrow to scroll by page
-    wxHT_SCROLLBAR_ARROW_PAGE_2,    // right or down
-    wxHT_SCROLLBAR_THUMB,           // on the thumb
-    wxHT_SCROLLBAR_BAR_1,           // bar to the left/above the thumb
-    wxHT_SCROLLBAR_BAR_2,           // bar to the right/below the thumb
-    wxHT_SCROLLBAR_LAST,
-
-    // window
-    wxHT_WINDOW_OUTSIDE,            // not in this window at all
-    wxHT_WINDOW_INSIDE,             // in the client area
-    wxHT_WINDOW_VERT_SCROLLBAR,     // on the vertical scrollbar
-    wxHT_WINDOW_HORZ_SCROLLBAR,     // on the horizontal scrollbar
-    wxHT_WINDOW_CORNER,             // on the corner between 2 scrollbars
-
-    wxHT_MAX
-};
 
 // ----------------------------------------------------------------------------
 // Possible SetSize flags
@@ -1553,16 +1678,9 @@ typedef enum {
     wxPRINT_MODE_PRINTER = 3    // Send to printer
 } wxPrintMode;
 
-// ----------------------------------------------------------------------------
-// miscellaneous
-// ----------------------------------------------------------------------------
-
-// define this macro if font handling is done using the X font names
-#if defined(__WXGTK__) || defined(__X__)
-    #define _WX_X_FONTLIKE
-#endif
-
-// macro to specify "All Files" on different platforms
+// ---------------------------------------------------------------------------
+// Macro to specify "All Files" on different platforms
+// ---------------------------------------------------------------------------
 #if defined(__WXMSW__)
 #   define wxALL_FILES_PATTERN   "*.*"
 #   define wxALL_FILES           gettext_noop("All files (*.*)|*.*")
@@ -1570,7 +1688,6 @@ typedef enum {
 #   define wxALL_FILES_PATTERN   "*"
 #   define wxALL_FILES           gettext_noop("All files (*)|*")
 #endif
-
 // ---------------------------------------------------------------------------
 // macros that enable wxWindows apps to be compiled in absence of the
 // sytem headers, although some platform specific types are used in the
@@ -1650,17 +1767,17 @@ typedef unsigned long   WXHDC;
 typedef unsigned int    WXUINT;
 typedef unsigned long   WXDWORD;
 typedef unsigned short  WXWORD;
-#ifdef __WXMSW__
-typedef unsigned int    WXWPARAM;
-typedef long            WXLPARAM;
-#else
+#ifdef __WXPM__
 #  define WXWPARAM      MPARAM
 #  define WXLPARAM      MPARAM
 #  define RECT          RECTL
 #  define LOGFONT       FATTRS
 #  define LOWORD        SHORT1FROMMP
 #  define HIWORD        SHORT2FROMMP
-#endif // __WXMSW__
+#else
+typedef unsigned int    WXWPARAM;
+typedef long            WXLPARAM;
+#endif // __WXPM__
 typedef unsigned long   WXCOLORREF;
 typedef void *          WXRGNDATA;
 typedef void *          WXMSG;
@@ -1676,7 +1793,7 @@ typedef void *          WXLPCREATESTRUCT;
 typedef unsigned long   WXMPARAM;
 typedef unsigned long   WXMSGID;
 typedef void*           WXRESULT;
-//typedef int             (*WXFARPROC)();
+// typedef WXRESULT        (*WXFARPROC)(WXHWND, WXMSGID, WXMPARAM, WXMPARAM);
 // some windows handles not defined by PM
 typedef unsigned long   HANDLE;
 typedef unsigned long   HICON;
@@ -1695,10 +1812,7 @@ typedef unsigned short  WORD;
 // WIN32 graphics types for OS/2 GPI
 
 // RGB under OS2 is more like a PALETTEENTRY struct under Windows so we need a real RGB def
-// WARNING: The OS/2 headers typedef BYTE simply as 'char'; if the default is signed, all
-// hell will break loose!
-//#define OS2RGB(r,g,b) ((DWORD ((BYTE) (b) | ((WORD) (g) << 8)) | (((DWORD)(BYTE)(r)) << 16)))
-#define OS2RGB(r,g,b) ((DWORD)((unsigned char)(b) | ((unsigned char)(g) << 8)) | ((unsigned char)(r) << 16))
+#define OS2RGB(r,g,b) ((DWORD ((BYTE) (r) | ((WORD) (g) << 8)) | (((DWORD)(BYTE)(b)) << 16)))
 
 typedef unsigned long COLORREF;
 #define GetBValue(rgb) ((BYTE)((rgb) >> 16))
@@ -1722,12 +1836,12 @@ typedef struct tagLOGPALETTE
 } LOGPALETTE;
 #endif //__WXPM__
 
-#if defined(__GNUWIN32__) || defined(__WXWINE__) || defined(__WXMICROWIN__)
+#if defined(__GNUWIN32__) || defined(__WXWINE__)
     typedef int (*WXFARPROC)();
 #elif defined(__WIN32__)
     typedef int (__stdcall *WXFARPROC)();
 #elif defined(__WXPM__)
-#  if (defined(__VISAGECPP__) && (__IBMCPP__ < 400)) || defined (__WATCOMC__)
+#  if defined(__VISAGECPP__) && (__IBMCPP__ < 400 || __IBMC__ < 400 )
     // VA 3.0 for some reason needs base data types when typedefing a proc proto???
     typedef void* (_System *WXFARPROC)(unsigned long, unsigned long, void*, void*);
 #  else
@@ -1765,6 +1879,7 @@ typedef void*           WXGC;
 typedef void*           WXRegion;
 typedef void*           WXFont;
 typedef void*           WXImage;
+typedef void*           WXCursor;
 typedef void*           WXFontList;
 
 typedef unsigned long   Atom;  /* this might fail on a few architectures */
@@ -1832,10 +1947,6 @@ typedef struct _PangoFontDescription PangoFontDescription;
 #endif
 #endif // GTK
 
-#ifdef __WXMGL__
-typedef struct window_t *WXWidget;
-#endif // MGL
-
 // This is required because of clashing macros in windows.h, which may be
 // included before or after wxWindows classes, and therefore must be
 // disabled here before any significant wxWindows headers are included.
@@ -1877,7 +1988,7 @@ typedef struct window_t *WXWidget;
 #define DECLARE_NO_COPY_CLASS(classname)        \
     private:                                    \
         classname(const classname&);            \
-        classname& operator=(const classname&);
+        classname& operator=(const classname&)
 
 #endif
     // _WX_DEFS_H_

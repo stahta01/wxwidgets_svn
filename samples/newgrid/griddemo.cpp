@@ -35,7 +35,6 @@
 #include "wx/colordlg.h"
 
 #include "wx/grid.h"
-#include "wx/generic/gridctrl.h"
 
 #include "griddemo.h"
 
@@ -98,19 +97,6 @@ BEGIN_EVENT_TABLE( GridFrame, wxFrame )
     EVT_MENU( ID_VTABLE, GridFrame::OnVTable)
     EVT_MENU( ID_BUGS_TABLE, GridFrame::OnBugsTable)
 
-    EVT_MENU( ID_DESELECT_CELL, GridFrame::DeselectCell)
-    EVT_MENU( ID_DESELECT_COL, GridFrame::DeselectCol)
-    EVT_MENU( ID_DESELECT_ROW, GridFrame::DeselectRow)
-    EVT_MENU( ID_DESELECT_ALL, GridFrame::DeselectAll)
-    EVT_MENU( ID_SELECT_CELL, GridFrame::SelectCell)
-    EVT_MENU( ID_SELECT_COL, GridFrame::SelectCol)
-    EVT_MENU( ID_SELECT_ROW, GridFrame::SelectRow)
-    EVT_MENU( ID_SELECT_ALL, GridFrame::SelectAll)
-    EVT_MENU( ID_SELECT_UNSELECT, GridFrame::OnAddToSelectToggle)
-
-    EVT_MENU( ID_SET_HIGHLIGHT_WIDTH, GridFrame::OnSetHighlightWidth)
-    EVT_MENU( ID_SET_RO_HIGHLIGHT_WIDTH, GridFrame::OnSetROHighlightWidth)
-
     EVT_GRID_LABEL_LEFT_CLICK( GridFrame::OnLabelLeftClick )
     EVT_GRID_CELL_LEFT_CLICK( GridFrame::OnCellLeftClick )
     EVT_GRID_ROW_SIZE( GridFrame::OnRowSize )
@@ -146,8 +132,6 @@ GridFrame::GridFrame()
     viewMenu->Append( ID_TOGGLECOLSIZING, "C&ol drag-resize", "", TRUE );
     viewMenu->Append( ID_TOGGLEGRIDSIZING, "&Grid drag-resize", "", TRUE );
     viewMenu->Append( ID_TOGGLEGRIDLINES, "&Grid Lines", "", TRUE );
-    viewMenu->Append( ID_SET_HIGHLIGHT_WIDTH, "&Set Cell Highlight Width...", "" );
-    viewMenu->Append( ID_SET_RO_HIGHLIGHT_WIDTH, "&Set Cell RO Highlight Width...", "" );
     viewMenu->Append( ID_AUTOSIZECOLS, "&Auto-size cols" );
 
     wxMenu *rowLabelMenu = new wxMenu;
@@ -182,27 +166,15 @@ GridFrame::GridFrame()
     editMenu->Append( ID_DELETECOL, "Delete selected co&ls" );
     editMenu->Append( ID_CLEARGRID, "Cl&ear grid cell contents" );
 
-    wxMenu *selectMenu = new wxMenu;
-    selectMenu->Append( ID_SELECT_UNSELECT, "Add new cells to the selection",
-                        "When off, old selection is deselected before "
-                        "selecting the new cells", TRUE );
-    selectMenu->Append( ID_SELECT_ALL, "Select all");
-    selectMenu->Append( ID_SELECT_ROW, "Select row 2");
-    selectMenu->Append( ID_SELECT_COL, "Select col 2");
-    selectMenu->Append( ID_SELECT_CELL, "Select cell (3, 1)");
-    selectMenu->Append( ID_DESELECT_ALL, "Deselect all");
-    selectMenu->Append( ID_DESELECT_ROW, "Deselect row 2");
-    selectMenu->Append( ID_DESELECT_COL, "Deselect col 2");
-    selectMenu->Append( ID_DESELECT_CELL, "Deselect cell (3, 1)");
     wxMenu *selectionMenu = new wxMenu;
-    selectMenu->Append( ID_CHANGESEL, "Change &selection mode",
+
+    editMenu->Append( ID_CHANGESEL, "Change &selection mode",
                       selectionMenu,
                       "Change selection mode" );
 
     selectionMenu->Append( ID_SELCELLS, "Select &Cells" );
     selectionMenu->Append( ID_SELROWS, "Select &Rows" );
     selectionMenu->Append( ID_SELCOLS, "Select C&ols" );
-
 
     wxMenu *helpMenu = new wxMenu;
     helpMenu->Append( ID_ABOUT, "&About wxGrid demo" );
@@ -212,12 +184,9 @@ GridFrame::GridFrame()
     menuBar->Append( viewMenu, "&View" );
     menuBar->Append( colMenu,  "&Colours" );
     menuBar->Append( editMenu, "&Edit" );
-    menuBar->Append( selectMenu, "&Select" );
     menuBar->Append( helpMenu, "&Help" );
 
     SetMenuBar( menuBar );
-
-    m_addToSel = FALSE;
 
     grid = new wxGrid( this,
                        -1,
@@ -242,15 +211,10 @@ GridFrame::GridFrame()
     grid->SetRowSize( 0, 60 );
     grid->SetCellValue( 0, 0, "Ctrl+Home\nwill go to\nthis cell" );
 
-    grid->SetCellValue( 0, 1, "A long piece of text to demonstrate wrapping." );
-    grid->SetCellRenderer(0 , 1, new wxGridCellAutoWrapStringRenderer);
-    grid->SetCellEditor( 0,  1 , new wxGridCellAutoWrapStringEditor);
-    
+    grid->SetCellValue( 0, 1, "Blah" );
     grid->SetCellValue( 0, 2, "Blah" );
     grid->SetCellValue( 0, 3, "Read only" );
     grid->SetReadOnly( 0, 3 );
-    
-    grid->SetCellValue( 0, 4, "Can veto edit this cell" );
 
     grid->SetCellValue( 0, 5, "Press\nCtrl+arrow\nto skip over\ncells" );
 
@@ -265,10 +229,10 @@ GridFrame::GridFrame()
     grid->SetCellBackgroundColour(3, 3, *wxLIGHT_GREY);
 
     grid->SetCellValue(4, 4, "a weird looking cell");
-    grid->SetCellAlignment(4, 4, wxALIGN_CENTRE, wxALIGN_CENTRE);
+    grid->SetCellAlignment(4, 4, wxCENTRE, wxCENTRE);
     grid->SetCellRenderer(4, 4, new MyGridCellRenderer);
 
-    grid->SetCellValue(3, 0, "0");
+    grid->SetCellValue(3, 0, "1");
     grid->SetCellRenderer(3, 0, new wxGridCellBoolRenderer);
     grid->SetCellEditor(3, 0, new wxGridCellBoolEditor);
 
@@ -277,26 +241,22 @@ GridFrame::GridFrame()
     attr->SetTextColour(*wxBLUE);
     grid->SetColAttr(5, attr);
     attr = new wxGridCellAttr;
-    attr->SetBackgroundColour(*wxRED);
+    attr->SetBackgroundColour(*wxBLUE);
     grid->SetRowAttr(5, attr);
 
     grid->SetCellValue(2, 4, "a wider column");
     grid->SetColSize(4, 120);
     grid->SetColMinimalWidth(4, 120);
 
-    grid->SetCellTextColour(5, 8, *wxGREEN);
-    grid->SetCellValue(5, 8, "Bg from row attr\nText col from cell attr");
-    grid->SetCellValue(5, 5, "Bg from row attr\nText col from col attr");
+    grid->SetColFormatFloat(5);
+    grid->SetCellValue(0, 5, "3.1415");
+    grid->SetCellValue(1, 5, "1415");
+    grid->SetCellValue(2, 5, "12345.67890");
 
-    grid->SetColFormatFloat(6);
+    grid->SetColFormatFloat(6, 6, 2);
     grid->SetCellValue(0, 6, "3.1415");
     grid->SetCellValue(1, 6, "1415");
     grid->SetCellValue(2, 6, "12345.67890");
-
-    grid->SetColFormatFloat(7, 6, 2);
-    grid->SetCellValue(0, 7, "3.1415");
-    grid->SetCellValue(1, 7, "1415");
-    grid->SetCellValue(2, 7, "12345.67890");
 
     wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
     topSizer->Add( grid,
@@ -395,35 +355,6 @@ void GridFrame::ToggleGridLines( wxCommandEvent& WXUNUSED(ev) )
         GetMenuBar()->IsChecked( ID_TOGGLEGRIDLINES ) );
 }
 
-void GridFrame::OnSetHighlightWidth( wxCommandEvent& WXUNUSED(ev) )
-{
-    wxString choices[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-
-    wxSingleChoiceDialog dlg(this, "Choose the thickness of the highlight pen:",
-                             "Pen Width", 11, choices);
-
-    int current = grid->GetCellHighlightPenWidth();
-    dlg.SetSelection(current);
-    if (dlg.ShowModal() == wxID_OK) {
-        grid->SetCellHighlightPenWidth(dlg.GetSelection());
-    }
-}
-
-void GridFrame::OnSetROHighlightWidth( wxCommandEvent& WXUNUSED(ev) )
-{
-    wxString choices[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-
-    wxSingleChoiceDialog dlg(this, "Choose the thickness of the highlight pen:",
-                             "Pen Width", 11, choices);
-
-    int current = grid->GetCellHighlightROPenWidth();
-    dlg.SetSelection(current);
-    if (dlg.ShowModal() == wxID_OK) {
-        grid->SetCellHighlightROPenWidth(dlg.GetSelection());
-    }
-}
-
-
 
 void GridFrame::AutoSizeCols( wxCommandEvent& WXUNUSED(ev) )
 {
@@ -467,16 +398,16 @@ void GridFrame::SetRowLabelHorizAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( horiz )
     {
-        case wxALIGN_LEFT:
-            horiz = wxALIGN_CENTRE;
+        case wxLEFT:
+            horiz = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            horiz = wxALIGN_RIGHT;
+        case wxCENTRE:
+            horiz = wxRIGHT;
             break;
 
-        case wxALIGN_RIGHT:
-            horiz = wxALIGN_LEFT;
+        case wxRIGHT:
+            horiz = wxLEFT;
             break;
     }
 
@@ -490,16 +421,16 @@ void GridFrame::SetRowLabelVertAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( vert )
     {
-        case wxALIGN_TOP:
-            vert = wxALIGN_CENTRE;
+        case wxTOP:
+            vert = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            vert = wxALIGN_BOTTOM;
+        case wxCENTRE:
+            vert = wxBOTTOM;
             break;
 
-        case wxALIGN_BOTTOM:
-            vert = wxALIGN_TOP;
+        case wxBOTTOM:
+            vert = wxTOP;
             break;
     }
 
@@ -514,16 +445,16 @@ void GridFrame::SetColLabelHorizAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( horiz )
     {
-        case wxALIGN_LEFT:
-            horiz = wxALIGN_CENTRE;
+        case wxLEFT:
+            horiz = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            horiz = wxALIGN_RIGHT;
+        case wxCENTRE:
+            horiz = wxRIGHT;
             break;
 
-        case wxALIGN_RIGHT:
-            horiz = wxALIGN_LEFT;
+        case wxRIGHT:
+            horiz = wxLEFT;
             break;
     }
 
@@ -538,16 +469,16 @@ void GridFrame::SetColLabelVertAlignment( wxCommandEvent& WXUNUSED(ev) )
 
     switch ( vert )
     {
-        case wxALIGN_TOP:
-            vert = wxALIGN_CENTRE;
+        case wxTOP:
+            vert = wxCENTRE;
             break;
 
-        case wxALIGN_CENTRE:
-            vert = wxALIGN_BOTTOM;
+        case wxCENTRE:
+            vert = wxBOTTOM;
             break;
 
-        case wxALIGN_BOTTOM:
-            vert = wxALIGN_TOP;
+        case wxBOTTOM:
+            vert = wxTOP;
             break;
     }
 
@@ -651,51 +582,6 @@ void GridFrame::SetCellBgColour( wxCommandEvent& WXUNUSED(ev) )
     }
 }
 
-void GridFrame::DeselectCell(wxCommandEvent& WXUNUSED(event))
-{
-      grid->DeselectCell(3, 1);
-}
-
-void GridFrame::DeselectCol(wxCommandEvent& WXUNUSED(event))
-{
-      grid->DeselectCol(2);
-}
-
-void GridFrame::DeselectRow(wxCommandEvent& WXUNUSED(event))
-{
-      grid->DeselectRow(2);
-}
-
-void GridFrame::DeselectAll(wxCommandEvent& WXUNUSED(event))
-{
-      grid->ClearSelection();
-}
-
-void GridFrame::SelectCell(wxCommandEvent& WXUNUSED(event))
-{
-      grid->SelectBlock(3, 1, 3, 1, m_addToSel);
-}
-
-void GridFrame::SelectCol(wxCommandEvent& WXUNUSED(event))
-{
-      grid->SelectCol(2, m_addToSel);
-}
-
-void GridFrame::SelectRow(wxCommandEvent& WXUNUSED(event))
-{
-      grid->SelectRow(2, m_addToSel);
-}
-
-void GridFrame::SelectAll(wxCommandEvent& WXUNUSED(event))
-{
-      grid->SelectAll();
-}
-
-void GridFrame::OnAddToSelectToggle(wxCommandEvent& event)
-{
-    m_addToSel = event.IsChecked();
-}
-
 void GridFrame::OnLabelLeftClick( wxGridEvent& ev )
 {
     logBuf = "";
@@ -714,7 +600,7 @@ void GridFrame::OnLabelLeftClick( wxGridEvent& ev )
 
     if ( ev.ShiftDown() ) logBuf << " (shift down)";
     if ( ev.ControlDown() ) logBuf << " (control down)";
-    wxLogMessage( wxT("%s"), logBuf.c_str() );
+    wxLogMessage( "%s", logBuf.c_str() );
 
     // you must call event skip if you want default grid processing
     //
@@ -727,7 +613,7 @@ void GridFrame::OnCellLeftClick( wxGridEvent& ev )
     logBuf = "";
     logBuf << "Left click at row " << ev.GetRow()
            << " col " << ev.GetCol();
-    wxLogMessage( wxT("%s"), logBuf.c_str() );
+    wxLogMessage( "%s", logBuf.c_str() );
 
     // you must call event skip if you want default grid processing
     // (cell highlighting etc.)
@@ -740,7 +626,7 @@ void GridFrame::OnRowSize( wxGridSizeEvent& ev )
 {
     logBuf = "";
     logBuf << "Resized row " << ev.GetRowOrCol();
-    wxLogMessage( wxT("%s"), logBuf.c_str() );
+    wxLogMessage( "%s", logBuf.c_str() );
 
     ev.Skip();
 }
@@ -750,7 +636,7 @@ void GridFrame::OnColSize( wxGridSizeEvent& ev )
 {
     logBuf = "";
     logBuf << "Resized col " << ev.GetRowOrCol();
-    wxLogMessage( wxT("%s"), logBuf.c_str() );
+    wxLogMessage( "%s", logBuf.c_str() );
 
     ev.Skip();
 }
@@ -769,7 +655,7 @@ void GridFrame::OnSelectCell( wxGridEvent& ev )
            << ", ShiftDown: "<< (ev.ShiftDown() ? 'T':'F')
            << ", AltDown: "<< (ev.AltDown() ? 'T':'F')
            << ", MetaDown: "<< (ev.MetaDown() ? 'T':'F') << " )";
-    wxLogMessage( wxT("%s"), logBuf.c_str() );
+    wxLogMessage( "%s", logBuf.c_str() );
 
     // you must call Skip() if you want the default processing
     // to occur in wxGrid
@@ -791,7 +677,7 @@ void GridFrame::OnRangeSelected( wxGridRangeSelectEvent& ev )
            << ", ShiftDown: "<< (ev.ShiftDown() ? 'T':'F')
            << ", AltDown: "<< (ev.AltDown() ? 'T':'F')
            << ", MetaDown: "<< (ev.MetaDown() ? 'T':'F') << " )";
-    wxLogMessage( wxT("%s"), logBuf.c_str() );
+    wxLogMessage( "%s", logBuf.c_str() );
 
     ev.Skip();
 }
@@ -803,42 +689,21 @@ void GridFrame::OnCellValueChanged( wxGridEvent& ev )
             << " row " << ev.GetRow()
             << " col " << ev.GetCol();
 
-    wxLogMessage( wxT("%s"), logBuf.c_str() );
+    wxLogMessage( "%s", logBuf.c_str() );
 
     ev.Skip();
 }
 
 void GridFrame::OnEditorShown( wxGridEvent& ev )
 {
-
-    if ( (ev.GetCol() == 4) &&
-         (ev.GetRow() == 0) &&
-	 (wxMessageBox(_T("Are you sure you wish to edit this cell"),
-	               _T("Checking"),wxYES_NO) == wxNO ) ) {
-
-	 ev.Veto();
-	 return;
-    }
-		      
-	
-    wxLogMessage( wxT("Cell editor shown.") );
+    wxLogMessage( "Cell editor shown." );
 
     ev.Skip();
 }
 
 void GridFrame::OnEditorHidden( wxGridEvent& ev )
 {
-   
-    if ( (ev.GetCol() == 4) &&
-         (ev.GetRow() == 0) &&
-	 (wxMessageBox(_T("Are you sure you wish to finish editing this cell"),
-	               _T("Checking"),wxYES_NO) == wxNO ) ) {
-
-	 ev.Veto();
-	 return;
-    }
-
-    wxLogMessage( wxT("Cell editor hidden.") );
+    wxLogMessage( "Cell editor hidden." );
 
     ev.Skip();
 }
@@ -863,7 +728,6 @@ void GridFrame::OnBugsTable(wxCommandEvent& )
     BugsGridFrame *frame = new BugsGridFrame;
     frame->Show(TRUE);
 }
-
 
 void GridFrame::OnVTable(wxCommandEvent& )
 {
@@ -930,10 +794,9 @@ MyGridCellAttrProvider::~MyGridCellAttrProvider()
     m_attrForOddRows->DecRef();
 }
 
-wxGridCellAttr *MyGridCellAttrProvider::GetAttr(int row, int col,
-                           wxGridCellAttr::wxAttrKind  kind /* = wxGridCellAttr::Any */) const
+wxGridCellAttr *MyGridCellAttrProvider::GetAttr(int row, int col) const
 {
-    wxGridCellAttr *attr = wxGridCellAttrProvider::GetAttr(row, col, kind);
+    wxGridCellAttr *attr = wxGridCellAttrProvider::GetAttr(row, col);
 
     if ( row % 2 )
     {
@@ -1284,7 +1147,8 @@ BugsGridFrame::BugsGridFrame()
     grid->SetMargins(0, 0);
 
     grid->Fit();
-    SetClientSize(grid->GetSize());
+    wxSize size = grid->GetSize();
+    size.x += 10;
+    size.y += 10;
+    SetClientSize(size);
 }
-
-

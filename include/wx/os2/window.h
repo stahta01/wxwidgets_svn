@@ -44,21 +44,21 @@ enum
 // wxWindow declaration for OS/2 PM
 // ---------------------------------------------------------------------------
 
-class WXDLLEXPORT wxWindowOS2 : public wxWindowBase
+class WXDLLEXPORT wxWindow : public wxWindowBase
 {
 public:
-    wxWindowOS2()
+    wxWindow()
     {
         Init();
     }
 
-    wxWindowOS2( wxWindow*       pParent
-                ,wxWindowID      vId
-                ,const wxPoint&  rPos = wxDefaultPosition
-                ,const wxSize&   rSize = wxDefaultSize
-                ,long            lStyle = 0
-                ,const wxString& rName = wxPanelNameStr
-               )
+    wxWindow( wxWindow*       pParent
+             ,wxWindowID      vId
+             ,const wxPoint&  rPos = wxDefaultPosition
+             ,const wxSize&   rSize = wxDefaultSize
+             ,long            lStyle = 0
+             ,const wxString& rName = wxPanelNameStr
+            )
     {
         Init();
         Create( pParent
@@ -70,7 +70,7 @@ public:
               );
     }
 
-    virtual ~wxWindowOS2();
+    virtual ~wxWindow();
 
     bool Create( wxWindow*       pParent
                 ,wxWindowID      vId
@@ -109,12 +109,10 @@ public:
                                    ,int*            pExternalLeading = (int *)NULL
                                    ,const wxFont*   pTheFont = (const wxFont *)NULL
                                   ) const;
-#if wxUSE_MENUS_NATIVE
     virtual bool     DoPopupMenu( wxMenu* pMenu
                                  ,int     nX
                                  ,int     nY
                                 );
-#endif // wxUSE_MENUS_NATIVE
 
     virtual void     SetScrollbar( int  nOrient
                                   ,int  nPos
@@ -182,7 +180,6 @@ public:
                     ) const;
 #endif // wxUSE_CARET
 
-#ifndef __WXUNIVERSAL__
     // Native resource loading (implemented in src/os2/nativdlg.cpp)
     // FIXME: should they really be all virtual?
     virtual bool LoadNativeDialog( wxWindow*   pParent
@@ -193,7 +190,6 @@ public:
                                  );
     wxWindow*    GetWindowChild1(wxWindowID vId);
     wxWindow*    GetWindowChild(wxWindowID vId);
-#endif //__WXUNIVERSAL__
 
     // implementation from now on
     // --------------------------
@@ -218,6 +214,13 @@ public:
     // For implementation purposes - sometimes decorations make the client area
     // smaller
     virtual wxPoint GetClientAreaOrigin(void) const;
+
+    // Makes an adjustment to the window position (for example, a frame that has
+    // a toolbar that it manages itself).
+    virtual void AdjustForParentClientOrigin( int& rX
+                                             ,int& rY
+                                             ,int  nSizeFlags
+                                            );
 
     // Windows subclassing
     void SubclassWin(WXHWND hWnd);
@@ -257,7 +260,6 @@ public:
                    ,unsigned long lId
                    ,void*         pCtlData = NULL
                    ,void*         pPresParams = NULL
-                   ,WXDWORD       dwExStyle = 0L
                   );
     virtual bool OS2Command( WXUINT uParam
                             ,WXWORD nId
@@ -270,7 +272,6 @@ public:
                                    ) const;
 #endif // WXWIN_COMPATIBILITY
 
-#ifndef __WXUNIVERSAL__
     // Create an appropriate wxWindow from a HWND
     virtual wxWindow* CreateWindowFromHWND( wxWindow* pParent
                                            ,WXHWND    hWnd
@@ -278,7 +279,6 @@ public:
 
     // Make sure the window style reflects the HWND style (roughly)
     virtual void AdoptAttributesFromHWND(void);
-#endif
 
     // Setup background and foreground colours correctly
     virtual void SetupColours(void);
@@ -368,7 +368,11 @@ public:
     bool HandleSysCommand( WXWPARAM wParam
                           ,WXLPARAM lParam
                          );
+    bool HandleWindowParams( PWNDPARAMS pParams
+                            ,WXLPARAM   lParam
+                           );
     bool HandlePaletteChanged();
+    bool HandlePresParamChanged(WXWPARAM wParam);
     bool HandleSysColorChange(void);
     bool HandleCtlColor(WXHBRUSH* hBrush);
     bool HandleSetFocus(WXHWND hWnd);
@@ -383,14 +387,14 @@ public:
                          ,int    nY
                          ,WXUINT uFlags
                         );
-    bool HandleChar( WXDWORD  wParam
+    bool HandleChar( WXWORD   wParam
                     ,WXLPARAM lParam
                     ,bool     bIsASCII = FALSE
                    );
     bool HandleKeyDown( WXWORD   wParam
                        ,WXLPARAM lParam
                       );
-    bool HandleKeyUp( WXDWORD  wParam
+    bool HandleKeyUp( WXWORD   wParam
                      ,WXLPARAM lParam
                     );
     bool HandleQueryDragIcon(WXHICON* phIcon);
@@ -459,13 +463,12 @@ protected:
     // the old window proc (we subclass all windows)
     WXFARPROC                       m_fnOldWndProc;
 
-    // additional (OS2 specific) flags
+    // additional (MSW specific) flags
     bool                            m_bUseCtl3D:1; // Using CTL3D for this control
     bool                            m_bBackgroundTransparent:1;
     bool                            m_bMouseInWindow:1;
     bool                            m_bDoubleClickAllowed:1;
     bool                            m_bWinCaptured:1;
-    WXDWORD                         m_dwExStyle;
 
     // the size of one page for scrolling
     int                             m_nXThumbSize;
@@ -545,13 +548,10 @@ private:
     // the helper functions used by HandleChar/KeyXXX methods
     wxKeyEvent CreateKeyEvent(wxEventType evType, int id, WXLPARAM lp) const;
 
-    DECLARE_DYNAMIC_CLASS(wxWindowOS2);
-    DECLARE_NO_COPY_CLASS(wxWindowOS2)
+    DECLARE_DYNAMIC_CLASS(wxWindow);
+    DECLARE_NO_COPY_CLASS(wxWindow);
     DECLARE_EVENT_TABLE()
 private:
-    HWND                            m_hWndScrollBarHorz;
-    HWND                            m_hWndScrollBarVert;
-
     // Virtual function hiding supression
     inline virtual bool Reparent(wxWindowBase* pNewParent)
     { return(wxWindowBase::Reparent(pNewParent));};

@@ -11,7 +11,7 @@ The following constants are defined in wxWindows:
 \begin{itemize}\itemsep=0pt
 \item {\tt wxMAJOR\_VERSION} is the major version of wxWindows
 \item {\tt wxMINOR\_VERSION} is the minor version of wxWindows
-\item {\tt wxRELEASE\_NUMBER} is the release number
+\item {\tt wxRELASE\_NUMBER} is the release number
 \end{itemize}
 
 For example, the values or these constants for wxWindows 2.1.15 are 2, 1 and
@@ -118,7 +118,7 @@ Returns TRUE if the directory exists.
 
 \membersection{::wxDos2UnixFilename}
 
-\func{void}{wxDos2UnixFilename}{\param{wxChar *}{s}}
+\func{void}{Dos2UnixFilename}{\param{const wxString\& }{s}}
 
 Converts a DOS to a Unix filename by replacing backslashes with forward
 slashes.
@@ -177,27 +177,6 @@ Returns the next file that matches the path passed to \helpref{wxFindFirstFile}{
 
 See \helpref{wxFindFirstFile}{wxfindfirstfile} for an example.
 
-\membersection{::wxGetDiskSpace}\label{wxgetdiskspace}
-
-\func{bool}{wxGetDiskSpace}{\param{const wxString\& }{path}, \param{wxLongLong }{*total = NULL}, \param{wxLongLong }{*free = NULL}}
-
-This function returns the total number of bytes and number of free bytes on
-the disk containing the directory {\it path} (it should exist). Both
-{\it total} and {\it free} parameters may be {\tt NULL} if the corresponding
-information is not needed.
-
-\wxheading{Returns}
-
-{\tt TRUE} on success, {\tt FALSE} if an error occured (for example, the
-directory doesn't exist).
-
-\wxheading{Portability}
-
-This function is implemented for Win16 (only for drives less than 2Gb), Win32,
-Mac OS and generic Unix provided the system has {\tt statfs()} function.
-
-This function first appeared in wxWindows 2.3.2.
-
 \membersection{::wxGetOSDirectory}\label{wxgetosdirectory}
 
 \func{wxString}{wxGetOSDirectory}{\void}
@@ -234,12 +213,9 @@ TRUE if successful.
 
 \membersection{::wxCopyFile}
 
-\func{bool}{wxCopyFile}{\param{const wxString\& }{file1}, \param{const wxString\& }{file2}, \param{bool }{overwrite = TRUE}}
+\func{bool}{wxCopyFile}{\param{const wxString\& }{file1}, \param{const wxString\& }{file2}}
 
-Copies {\it file1} to {\it file2}, returning TRUE if successful. If
-{\it overwrite} parameter is TRUE (default), the destination file is overwritten
-if it exists, but if {\it overwrite} is FALSE, the functions failes in this
-case.
+Copies {\it file1} to {\it file2}, returning TRUE if successful.
 
 \membersection{::wxGetCwd}\label{wxgetcwd}
 
@@ -482,33 +458,14 @@ if successful, FALSE otherwise.
 Makes a copy of the string {\it s} using the C++ new operator, so it can be
 deleted with the {\it delete} operator.
 
-\membersection{::wxIsEmpty}\label{wxisempty}
-
-\func{bool}{wxIsEmpty}{\param{const char *}{ p}}
-
-Returns {\tt TRUE} if the pointer is either {\tt NULL} or points to an empty
-string, {\tt FALSE} otherwise.
-
-\membersection{::wxStricmp}\label{wxstricmp}
-
-\func{int}{wxStricmp}{\param{const char *}{p1}, \param{const char *}{p2}}
-
-Returns a negative value, 0, or positive value if {\it p1} is less than, equal
-to or greater than {\it p2}. The comparison is case-insensitive.
-
-This function complements the standard C function {\it strcmp()} which performs
-case-sensitive comparison.
-
 \membersection{::wxStringMatch}
 
 \func{bool}{wxStringMatch}{\param{const wxString\& }{s1}, \param{const wxString\& }{s2},\\
   \param{bool}{ subString = TRUE}, \param{bool}{ exact = FALSE}}
 
-Returns {\tt TRUE} if the substring {\it s1} is found within {\it s2},
-ignoring case if {\it exact} is FALSE. If {\it subString} is {\tt FALSE},
+Returns TRUE if the substring {\it s1} is found within {\it s2},
+ignoring case if {\it exact} is FALSE. If {\it subString} is FALSE,
 no substring matching is done.
-
-This function is obsolete, use \helpref{wxString::Find}{wxstringfind} instead.
 
 \membersection{::wxStringEq}\label{wxstringeq}
 
@@ -520,21 +477,36 @@ A macro defined as:
 #define wxStringEq(s1, s2) (s1 && s2 && (strcmp(s1, s2) == 0))
 \end{verbatim}
 
-This function is obsolete, use \helpref{wxString}{wxstring} instead.
+\membersection{::IsEmpty}\label{isempty}
 
-\membersection{::wxStrlen}\label{wxstrlen}
+\func{bool}{IsEmpty}{\param{const char *}{ p}}
 
-\func{size\_t}{wxStrlen}{\param{const char *}{ p}}
+Returns TRUE if the string is empty, FALSE otherwise. It is safe to pass NULL
+pointer to this function and it will return TRUE for it.
+
+\membersection{::Stricmp}\label{stricmp}
+
+\func{int}{Stricmp}{\param{const char *}{p1}, \param{const char *}{p2}}
+
+Returns a negative value, 0, or positive value if {\it p1} is less than, equal
+to or greater than {\it p2}. The comparison is case-insensitive.
+
+This function complements the standard C function {\it strcmp()} which performs
+case-sensitive comparison.
+
+\membersection{::Strlen}\label{strlen}
+
+\func{size\_t}{Strlen}{\param{const char *}{ p}}
 
 This is a safe version of standard function {\it strlen()}: it does exactly the
-same thing (i.e. returns the length of the string) except that it returns 0 if
-{\it p} is the {\tt NULL} pointer.
+same thing (i.e. returns the length of the string) except that it returns 0 if 
+{\it p} is the NULL pointer.
 
 \membersection{::wxGetTranslation}\label{wxgettranslation}
 
 \func{const char *}{wxGetTranslation}{\param{const char * }{str}}
 
-This function returns the translation of string {\it str} in the current
+This function returns the translation of string {\it str} in the current 
 \helpref{locale}{wxlocale}. If the string is not found in any of the loaded
 message catalogs (see \helpref{internationalization overview}{internationalization}), the
 original string is returned. In debug build, an error message is logged - this
@@ -597,32 +569,6 @@ is remembered between the 2 program runs.}
 
 <wx/tipdlg.h>
 
-\membersection{::wxDirSelector}\label{wxdirselector}
-
-\func{wxString}{wxDirSelector}{\param{const wxString\& }{message = wxDirSelectorPromptStr},\\
- \param{const wxString\& }{default\_path = ""},\\
- \param{long }{style = 0}, \param{const wxPoint\& }{pos = wxDefaultPosition},\\
- \param{wxWindow *}{parent = NULL}}
-
-Pops up a directory selector dialog. The arguments have the same meaning as
-those of wxDirDialog::wxDirDialog(). The message is displayed at the top,
-and the default\_path, if specified, is set as the initial selection.
-
-The application must check for an empty return value (if the user pressed
-Cancel). For example:
-
-\begin{verbatim}
-const wxString& dir = wxDirSelector("Choose a folder");
-if ( !dir.empty() )
-{
-  ...
-}
-\end{verbatim}
-
-\wxheading{Include files}
-
-<wx/dirdlg.h>
-
 \membersection{::wxFileSelector}\label{wxfileselector}
 
 \func{wxString}{wxFileSelector}{\param{const wxString\& }{message}, \param{const wxString\& }{default\_path = ""},\\
@@ -644,7 +590,7 @@ filename containing wildcards (*, ?) in the filename text item, and
 clicking on Ok, will result in only those files matching the pattern being
 displayed.
 
-The wildcard may be a specification for multiple types of file
+The wildcard may be a specification for multiple types of file 
 with a description for each, such as:
 
 \begin{verbatim}
@@ -684,49 +630,6 @@ is valid) if the dialog was cancelled.
 
 <wx/colordlg.h>
 
-\membersection{::wxGetMultipleChoices}\label{wxgetmultiplechoices}
-
-\func{size\_t}{wxGetMultipleChoices}{\\
- \param{wxArrayInt\& }{selections},\\
- \param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
-
-\func{size\_t}{wxGetMultipleChoices}{\\
- \param{wxArrayInt\& }{selections},\\
- \param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
-
-Pops up a dialog box containing a message, OK/Cancel buttons and a
-multiple-selection listbox. The user may choose an arbitrary (including 0)
-number of items in the listbox whose indices will be returned in
-{\it selection} array. The initial contents of this array will be used to
-select the items when the dialog is shown.
-
-You may pass the list of strings to choose from either using {\it choices}
-which is an array of {\it n} strings for the listbox or by using a single
-{\it aChoices} parameter of type \helpref{wxArrayString}{wxarraystring}.
-
-If {\it centre} is TRUE, the message text (which may include new line
-characters) is centred; if FALSE, the message is left-justified.
-
-\wxheading{Include files}
-
-<wx/choicdlg.h>
-
-\perlnote{In wxPerl there is just an array reference in place of {\tt n}
-and {\tt choices}, and no {\tt selections} parameter; the function
-returns an array containing the user selections.}
-
 \membersection{::wxGetNumberFromUser}\label{wxgetnumberfromuser}
 
 \func{long}{wxGetNumberFromUser}{
@@ -739,7 +642,7 @@ returns an array containing the user selections.}
  \param{wxWindow *}{parent = NULL},
  \param{const wxPoint\& }{pos = wxDefaultPosition}}
 
-Shows a dialog asking the user for numeric input. The dialogs title is set to
+Shows a dialog asking the user for numeric input. The dialogs title is set to 
 {\it caption}, it contains a (possibly) multiline {\it message} above the
 single line {\it prompt} and the zone for entering the number.
 
@@ -747,7 +650,7 @@ The number entered must be in the range {\it min}..{\it max} (both of which
 should be positive) and {\it value} is the initial value of it. If the user
 enters an invalid value or cancels the dialog, the function will return -1.
 
-Dialog is centered on its {\it parent} unless an explicit position is given in
+Dialog is centered on its {\it parent} unless an explicit position is given in 
 {\it pos}.
 
 \wxheading{Include files}
@@ -812,96 +715,48 @@ is centred; if FALSE, the message is left-justified.
 
 \membersection{::wxGetSingleChoice}\label{wxgetsinglechoice}
 
-\func{wxString}{wxGetSingleChoice}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
+\func{wxString}{wxGetSingleChoice}{\param{const wxString\& }{message}, \param{const wxString\& }{caption}, \param{int}{ n}, \param{const wxString\& }{choices[]},\\
+ \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1}, \param{int}{ y = -1},\\
+ \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
 
-\func{wxString}{wxGetSingleChoice}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE},\\
- \param{int }{width=150}, \param{int }{height=200}}
+Pops up a dialog box containing a message, OK/Cancel buttons and a single-selection
+listbox. The user may choose an item and press OK to return a string or
+Cancel to return the empty string.
 
-Pops up a dialog box containing a message, OK/Cancel buttons and a
-single-selection listbox. The user may choose an item and press OK to return a
-string or Cancel to return the empty string. Use
-\helpref{wxGetSingleChoiceIndex}{wxgetsinglechoiceindex} if empty string is a
-valid choice and if you want to be able to detect pressing Cancel reliably.
+{\it choices} is an array of {\it n} strings for the listbox.
 
-You may pass the list of strings to choose from either using {\it choices}
-which is an array of {\it n} strings for the listbox or by using a single
-{\it aChoices} parameter of type \helpref{wxArrayString}{wxarraystring}.
-
-If {\it centre} is TRUE, the message text (which may include new line
-characters) is centred; if FALSE, the message is left-justified.
+If {\it centre} is TRUE, the message text (which may include new line characters)
+is centred; if FALSE, the message is left-justified.
 
 \wxheading{Include files}
 
 <wx/choicdlg.h>
-
-\perlnote{In wxPerl there is just an array reference in place of {\tt n}
-and {\tt choices}.}
 
 \membersection{::wxGetSingleChoiceIndex}\label{wxgetsinglechoiceindex}
 
-\func{int}{wxGetSingleChoiceIndex}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
+\func{int}{wxGetSingleChoiceIndex}{\param{const wxString\& }{message}, \param{const wxString\& }{caption}, \param{int}{ n}, \param{const wxString\& }{choices[]},\\
  \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1}, \param{int}{ y = -1},\\
  \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
 
-\func{int}{wxGetSingleChoiceIndex}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
-
-As {\bf wxGetSingleChoice} but returns the index representing the selected
-string. If the user pressed cancel, -1 is returned.
+As {\bf wxGetSingleChoice} but returns the index representing the selected string.
+If the user pressed cancel, -1 is returned.
 
 \wxheading{Include files}
 
 <wx/choicdlg.h>
-
-\perlnote{In wxPerl there is just an array reference in place of {\tt n}
-and {\tt choices}.}
 
 \membersection{::wxGetSingleChoiceData}\label{wxgetsinglechoicedata}
 
-\func{wxString}{wxGetSingleChoiceData}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{const wxArrayString\& }{aChoices},\\
- \param{const wxString\& }{client\_data[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
-
-\func{wxString}{wxGetSingleChoiceData}{\param{const wxString\& }{message},\\
- \param{const wxString\& }{caption},\\
- \param{int}{ n}, \param{const wxString\& }{choices[]},\\
- \param{const wxString\& }{client\_data[]},\\
- \param{wxWindow *}{parent = NULL},\\
- \param{int}{ x = -1}, \param{int}{ y = -1},\\
- \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
+\func{wxString}{wxGetSingleChoiceData}{\param{const wxString\& }{message}, \param{const wxString\& }{caption}, \param{int}{ n}, \param{const wxString\& }{choices[]},\\
+ \param{const wxString\& }{client\_data[]}, \param{wxWindow *}{parent = NULL}, \param{int}{ x = -1},\\
+ \param{int}{ y = -1}, \param{bool}{ centre = TRUE}, \param{int }{width=150}, \param{int }{height=200}}
 
 As {\bf wxGetSingleChoice} but takes an array of client data pointers
-corresponding to the strings, and returns one of these pointers or NULL if
-Cancel was pressed. The {\it client\_data} array must have the same number of
-elements as {\it choices} or {\it aChoices}!
+corresponding to the strings, and returns one of these pointers.
 
 \wxheading{Include files}
 
 <wx/choicdlg.h>
-
-\perlnote{In wxPerl there is just an array reference in place of {\tt n}
-and {\tt choices}, and the client data array must have the
-same length as the choices array.}
 
 \membersection{::wxMessageBox}\label{wxmessagebox}
 
@@ -983,18 +838,6 @@ The following are relevant to the GDI (Graphics Device Interface).
 
 <wx/gdicmn.h>
 
-\membersection{::wxClientDisplayRect}
-
-\func{void}{wxClientDisplayRect}{\param{int *}{x}, \param{int *}{y},
-\param{int *}{width}, \param{int *}{height}}
-
-\func{wxRect}{wxGetClientDisplayRect}{\void}
-
-Returns the dimensions of the work area on the display.  On Windows
-this means the area not covered by the taskbar, etc.  Other platforms
-are currently defaulting to the whole display until a way is found to
-provide this info for all window managers, etc.
-
 \membersection{::wxColourDisplay}
 
 \func{bool}{wxColourDisplay}{\void}
@@ -1006,22 +849,6 @@ Returns TRUE if the display is colour, FALSE otherwise.
 \func{int}{wxDisplayDepth}{\void}
 
 Returns the depth of the display (a value of 1 denotes a monochrome display).
-
-\membersection{::wxDisplaySize}
-
-\func{void}{wxDisplaySize}{\param{int *}{width}, \param{int *}{height}}
-
-\func{wxSize}{wxGetDisplaySize}{\void}
-
-Returns the display size in pixels.
-
-\membersection{::wxDisplaySizeMM}
-
-\func{void}{wxDisplaySizeMM}{\param{int *}{width}, \param{int *}{height}}
-
-\func{wxSize}{wxGetDisplaySizeMM}{\void}
-
-Returns the display size in millimeters.
 
 \membersection{::wxMakeMetafilePlaceable}\label{wxmakemetafileplaceable}
 
@@ -1170,7 +997,7 @@ Sets the translation (from the top left corner) for PostScript output. The defau
 \section{Clipboard functions}\label{clipsboard}
 
 These clipboard functions are implemented for Windows only. The use of these functions
-is deprecated and the code is no longer maintained. Use the \helpref{wxClipboard}{wxclipboard}
+is deprecated and the code is no longer maintained. Use the \helpref{wxClipboard}{wxclipboard} 
 class instead.
 
 \wxheading{Include files}
@@ -1202,18 +1029,18 @@ Empties the clipboard.
 Enumerates the formats found in a list of available formats that belong
 to the clipboard. Each call to this  function specifies a known
 available format; the function returns the format that appears next in
-the list.
+the list. 
 
 {\it dataFormat} specifies a known format. If this parameter is zero,
-the function returns the first format in the list.
+the function returns the first format in the list. 
 
 The return value specifies the next known clipboard data format if the
 function is successful. It is zero if the {\it dataFormat} parameter specifies
 the last  format in the list of available formats, or if the clipboard
-is not open.
+is not open. 
 
-Before it enumerates the formats function, an application must open the clipboard by using the
-wxOpenClipboard function.
+Before it enumerates the formats function, an application must open the clipboard by using the 
+wxOpenClipboard function. 
 
 \membersection{::wxGetClipboardData}
 
@@ -1274,7 +1101,7 @@ The clipboard must have previously been opened for this call to succeed.
 
 \section{Miscellaneous functions}\label{miscellany}
 
-\membersection{::wxDROP\_ICON}\label{wxdropicon}
+\membersection{::wxDROP\_ICON}\label{wxdropicon} 
 
 \func{wxIconOrCursor}{wxDROP\_ICON}{\param{const char *}{name}}
 
@@ -1282,7 +1109,7 @@ This macro creates either a cursor (MSW) or an icon (elsewhere) with the given
 name. Under MSW, the cursor is loaded from the resource file and the icon is
 loaded from XPM file under other platforms.
 
-This macro should be used with
+This macro should be used with 
 \helpref{wxDropSource constructor}{wxdropsourcewxdropsource}.
 
 \wxheading{Include files}
@@ -1364,7 +1191,7 @@ Initializes the DDE system. May be called multiple times without harm.
 This no longer needs to be called by the application: it will be called
 by wxWindows if necessary.
 
-See also \helpref{wxDDEServer}{wxddeserver}, \helpref{wxDDEClient}{wxddeclient}, \helpref{wxDDEConnection}{wxddeconnection},
+See also \helpref{wxDDEServer}{wxddeserver}, \helpref{wxDDEClient}{wxddeclient}, \helpref{wxDDEConnection}{wxddeconnection}, 
 \helpref{wxDDECleanUp}{wxddecleanup}.
 
 \wxheading{Include files}
@@ -1410,7 +1237,7 @@ Gets the physical size of the display in pixels.
 
 \func{void}{wxEnableTopLevelWindow}{\param{bool}{ enable = TRUE}}
 
-This function enables or disables all top level windows. It is used by
+This function enables or disables all top level windows. It is used by 
 \helpref{::wxSafeYield}{wxsafeyield}.
 
 \wxheading{Include files}
@@ -1513,7 +1340,7 @@ the process (which terminates by the moment the function returns) and will be
 $-1$ if the process couldn't be started and typically 0 if the process
 terminated successfully. Also, while waiting for the process to
 terminate, wxExecute will call \helpref{wxYield}{wxyield}. The caller
-should ensure that this can cause no recursion, in the simplest case by
+should ensure that this can cause no recursion, in the simplest case by 
 calling \helpref{wxEnableTopLevelWindows(FALSE)}{wxenabletoplevelwindows}.
 
 For asynchronous execution, however, the return value is the process id and
@@ -1525,16 +1352,16 @@ and only this, case the calling code will not get the notification about
 process termination.
 
 If callback isn't NULL and if execution is asynchronous (note that callback
-parameter can not be non-NULL for synchronous execution),
+parameter can not be non-NULL for synchronous execution), 
 \helpref{wxProcess::OnTerminate}{wxprocessonterminate} will be called when
 the process finishes.
 
 Finally, you may use the third overloaded version of this function to execute
-a process (always synchronously) and capture its output in the array
+a process (always synchronously) and capture its output in the array 
 {\it output}. The fourth version adds the possibility to additionally capture
 the messages from standard error output in the {\it errors} array.
 
-See also \helpref{wxShell}{wxshell}, \helpref{wxProcess}{wxprocess},
+See also \helpref{wxShell}{wxshell}, \helpref{wxProcess}{wxprocess}, 
 \helpref{Exec sample}{sampleexec}.
 
 \wxheading{Include files}
@@ -1576,7 +1403,7 @@ Find a menu item identifier associated with the given frame's menu bar.
 
 <wx/utils.h>
 
-\membersection{::wxFindWindowByLabel}\label{wxfindwindowbylabel}
+\membersection{::wxFindWindowByLabel}
 
 \func{wxWindow *}{wxFindWindowByLabel}{\param{const wxString\& }{label}, \param{wxWindow *}{parent=NULL}}
 
@@ -1603,20 +1430,6 @@ If no such named window is found, {\bf wxFindWindowByLabel} is called.
 \wxheading{Include files}
 
 <wx/utils.h>
-
-\membersection{::wxFindWindowAtPoint}\label{wxfindwindowatpoint}
-
-\func{wxWindow *}{wxFindWindowAtPoint}{\param{const wxPoint\& }{pt}}
-
-Find the deepest window at the given mouse position in screen coordinates,
-returning the window if found, or NULL if not.
-
-\membersection{::wxFindWindowAtPointer}\label{wxfindwindowatpointer}
-
-\func{wxWindow *}{wxFindWindowAtPointer}{\param{wxPoint\& }{pt}}
-
-Find the deepest window at the mouse pointer position, returning the window
-and current pointer position in screen coordinates.
 
 \membersection{::wxGetActiveWindow}\label{wxgetactivewindow}
 
@@ -1664,9 +1477,9 @@ under Windows, Linux and Solaris.
 
 <wx/utils.h>
 
-\membersection{::wxGetMousePosition}\label{wxgetmouseposition}
+\membersection{::wxGetMousePosition}
 
-\func{wxPoint}{wxGetMousePosition}{\void}
+\func{void}{wxGetMousePosition}{\param{int* }{x}, \param{int* }{y}}
 
 Returns the mouse position in screen coordinates.
 
@@ -1679,7 +1492,7 @@ Returns the mouse position in screen coordinates.
 \func{wxString}{wxGetOsDescription}{\void}
 
 Returns the string containing the description of the current platform in a
-user-readable form. For example, this function may return strings like
+user-readable form. For example, this function may return strings like  
 {\tt Windows NT Version 4.0} or {\tt Linux 2.2.2 i386}.
 
 \wxheading{See also}
@@ -1698,7 +1511,7 @@ Gets operating system version information.
 
 \begin{twocollist}\itemsep=0pt
 \twocolitemruled{Platform}{Return types}
-\twocolitem{Mac OS}{Return value is wxMAC when compiled with CodeWarrior under Mac OS 8.x/9.x and Mac OS X, wxMAC\_DARWIN when compiled with the Apple Developer Tools under Mac OS X.}
+\twocolitem{Macintosh}{Return value is wxMACINTOSH.}
 \twocolitem{GTK}{Return value is wxGTK, For GTK 1.0, {\it major} is 1, {\it minor} is 0. }
 \twocolitem{Motif}{Return value is wxMOTIF\_X, {\it major} is X version, {\it minor} is X revision.}
 \twocolitem{OS/2}{Return value is wxOS2\_PM.}
@@ -1769,7 +1582,7 @@ Under Windows, this returns ``user''.
 \func{const wxChar *}{wxGetUserHome}{\param{const wxString\& }{user = ""}}
 
 Returns the home directory for the given user. If the username is empty
-(default value), this function behaves like
+(default value), this function behaves like 
 \helpref{wxGetHomeDir}{wxgethomedir}.
 
 \wxheading{Include files}
@@ -1800,6 +1613,20 @@ normal way which usually just means that the application will be terminated.
 Calling wxHandleFatalExceptions() with {\it doIt} equal to FALSE will restore
 this default behaviour.
 
+\membersection{::wxKill}\label{wxkill}
+
+\func{int}{wxKill}{\param{long}{ pid}, \param{int}{ sig}}
+
+Under Unix (the only supported platform), equivalent to the Unix kill function.
+Returns 0 on success, -1 on failure.
+
+Tip: sending a signal of 0 to a process returns -1 if the process does not exist.
+It does not raise a signal in the receiving process.
+
+\wxheading{Include files}
+
+<wx/utils.h>
+
 \membersection{::wxInitAllImageHandlers}\label{wxinitallimagehandlers}
 
 \func{void}{wxInitAllImageHandlers}{\void}
@@ -1811,30 +1638,6 @@ see \helpref{wxImage}{wximage}.
 
 \helpref{wxImage}{wximage}, \helpref{wxImageHandler}{wximagehandler}
 
-\wxheading{Include files}
-
-<wx/image.h>
-
-\membersection{::wxInitialize}\label{wxinitialize}
-
-\func{bool}{wxInitialize}{\void}
-
-This function is used in wxBase only and only if you don't create
-\helpref{wxApp}{wxapp} object at all. In this case you must call it from your
-{\tt main()} function before calling any other wxWindows functions.
-
-If the function returns {\tt FALSE} the initialization could not be performed,
-in this case the library cannot be used and
-\helpref{wxUninitialize}{wxuninitialize} shouldn't be called neither.
-
-This function may be called several times but
-\helpref{wxUninitialize}{wxuninitialize} must be called for each successful
-call to this function.
-
-\wxheading{Include files}
-
-<wx/app.h>
-
 \membersection{::wxIsBusy}\label{wxisbusy}
 
 \func{bool}{wxIsBusy}{\void}
@@ -1843,63 +1646,6 @@ Returns TRUE if between two \helpref{wxBeginBusyCursor}{wxbeginbusycursor} and\r
 \helpref{wxEndBusyCursor}{wxendbusycursor} calls.
 
 See also \helpref{wxBusyCursor}{wxbusycursor}.
-
-\wxheading{Include files}
-
-<wx/utils.h>
-
-\membersection{::wxKill}\label{wxkill}
-
-\func{int}{wxKill}{\param{long}{ pid}, \param{int}{ sig = wxSIGTERM}, \param{wxKillError }{*rc = NULL}}
-
-Equivalent to the Unix kill function: send the given signal {\it sig} to the
-process with PID {\it pid}. The valud signal values are
-
-\begin{verbatim}
-enum wxSignal
-{
-    wxSIGNONE = 0,  // verify if the process exists under Unix
-    wxSIGHUP,
-    wxSIGINT,
-    wxSIGQUIT,
-    wxSIGILL,
-    wxSIGTRAP,
-    wxSIGABRT,
-    wxSIGEMT,
-    wxSIGFPE,
-    wxSIGKILL,      // forcefully kill, dangerous!
-    wxSIGBUS,
-    wxSIGSEGV,
-    wxSIGSYS,
-    wxSIGPIPE,
-    wxSIGALRM,
-    wxSIGTERM       // terminate the process gently
-};
-\end{verbatim}
-
-{\tt wxSIGNONE}, {\tt wxSIGKILL} and {\tt wxSIGTERM} have the same meaning
-under both Unix and Windows but all the other signals are equivalent to
-{\tt wxSIGTERM} under Windows.
-
-Returns 0 on success, -1 on failure. If {\it rc} parameter is not NULL, it will
-be filled with an element of {\tt wxKillError} enum:
-
-\begin{verbatim}
-enum wxKillError
-{
-    wxKILL_OK,              // no error
-    wxKILL_BAD_SIGNAL,      // no such signal
-    wxKILL_ACCESS_DENIED,   // permission denied
-    wxKILL_NO_PROCESS,      // no such process
-    wxKILL_ERROR            // another, unspecified error
-};
-\end{verbatim}
-
-\wxheading{See also}
-
-\helpref{wxProcess::Kill}{wxprocesskill},\rtfsp
-\helpref{wxProcess::Exists}{wxprocessexists},\rtfsp
-\helpref{Exec sample}{sampleexec}
 
 \wxheading{Include files}
 
@@ -1985,7 +1731,7 @@ uses internally).
 
 This function is similar to wxYield, except that it disables the user input to
 all program windows before calling wxYield and re-enables it again
-afterwards. If {\it win} is not NULL, this window will remain enabled,
+afterwards. If {\it win} is not NULL, this window will remain enabled, 
 allowing the implementation of some limited user interaction.
 
 Returns the result of the call to \helpref{::wxYield}{wxyield}.
@@ -2097,31 +1843,6 @@ This function is now obsolete, replaced by \helpref{Log functions}{logfunctions}
 
 <wx/memory.h>
 
-\membersection{::wxTrap}\label{wxtrap}
-
-\func{void}{wxTrap}{\void}
-
-In debug mode (when {\tt \_\_WXDEBUG\_\_} is defined) this function generates a
-debugger exception meaning that the control is passed to the debugger if one is
-attached to the process. Otherwise the program just terminates abnormally.
-
-In release mode this function does nothing.
-
-\wxheading{Include files}
-
-<wx/debug.h>
-
-\membersection{::wxUninitialize}\label{wxuninitialize}
-
-\func{void}{wxUninitialize}{\void}
-
-This function is for use in console (wxBase) programs only. It must be called
-once for each previous successful call to \helpref{wxInitialize}{wxinitialize}.
-
-\wxheading{Include files}
-
-<wx/app.h>
-
 \membersection{::wxUsleep}\label{wxusleep}
 
 \func{void}{wxUsleep}{\param{unsigned long}{ milliseconds}}
@@ -2169,10 +1890,22 @@ See also \helpref{wxGetResource}{wxgetresource}, \helpref{wxConfigBase}{wxconfig
 
 \func{bool}{wxYield}{\void}
 
-Calls \helpref{wxApp::Yield}{wxappyield}.
+Yields control to pending messages in the windowing system. This can be useful, for example, when a
+time-consuming process writes to a text window. Without an occasional
+yield, the text window will not be updated properly, and on systems with
+cooperative multitasking, such as Windows 3.1 other processes will not respond.
 
-This function is kept only for backwards compatibility, please use the
-wxApp method instead in any new code.
+Caution should be exercised, however, since yielding may allow the
+user to perform actions which are not compatible with the current task.
+Disabling menu items or whole menus during processing can avoid unwanted
+reentrance of code: see \helpref{::wxSafeYield}{wxsafeyield} for a better
+function.
+
+Note that wxYield will not flush the message logs. This is intentional as
+calling wxYield is usually done to quickly update the screen and popping up a
+message box dialog may be undesirable. If you do wish to flush the log
+messages immediately (otherwise it will be done during the next idle loop
+iteration), call \helpref{wxLog::FlushActive}{wxlogflushactive}.
 
 \wxheading{Include files}
 
@@ -2186,7 +1919,7 @@ This functions wakes up the (internal and platform dependent) idle system, i.e. 
 will force the system to send an idle event even if the system currently {\it is}
  idle and thus would not send any idle event until after some other event would get
 sent. This is also useful for sending events between two threads and is used by
-the corresponding functions \helpref{::wxPostEvent}{wxpostevent} and
+the corresponding functions \helpref{::wxPostEvent}{wxpostevent} and 
 \helpref{wxEvtHandler::AddPendingEvent}{wxevthandleraddpendingevent}.
 
 \wxheading{Include files}
@@ -2222,10 +1955,10 @@ endian to big endian or vice versa.
 
 This macro will swap the bytes of the {\it value} variable from little
 endian to big endian or vice versa if the program is compiled on a
-big-endian architecture (such as Sun work stations). If the program has
+big-endian architecture (such as Sun work stations). If the program has 
 been compiled on a little-endian architecture, the value will be unchanged.
 
-Use these macros to read data from and write data to a file that stores
+Use these macros to read data from and write data to a file that stores 
 data in little endian (Intel i386) format.
 
 \membersection{wxINTXX\_SWAP\_ON\_LE}\label{intswaponle}
@@ -2240,10 +1973,10 @@ data in little endian (Intel i386) format.
 
 This macro will swap the bytes of the {\it value} variable from little
 endian to big endian or vice versa if the program is compiled on a
-little-endian architecture (such as Intel PCs). If the program has
+little-endian architecture (such as Intel PCs). If the program has 
 been compiled on a big-endian architecture, the value will be unchanged.
 
-Use these macros to read data from and write data to a file that stores
+Use these macros to read data from and write data to a file that stores 
 data in big endian format.
 
 \membersection{CLASSINFO}\label{classinfo}
@@ -2463,7 +2196,7 @@ avoid using {\tt \#ifdef}s when creating bitmaps.
 
 \wxheading{See also}
 
-\helpref{Bitmaps and icons overview}{wxbitmapoverview},
+\helpref{Bitmaps and icons overview}{wxbitmapoverview}, 
 \helpref{wxICON}{wxiconmacro}
 
 \wxheading{Include files}
@@ -2472,7 +2205,7 @@ avoid using {\tt \#ifdef}s when creating bitmaps.
 
 \membersection{wxConstCast}\label{wxconstcast}
 
-\func{classname *}{wxConstCast}{ptr, classname}
+\func{}{wxConstCast}{ptr, classname}
 
 This macro expands into {\tt const\_cast<classname *>(ptr)} if the compiler
 supports {\it const\_cast} or into an old, C-style cast, otherwise.
@@ -2501,15 +2234,14 @@ In non-debug mode, this is defined as the normal new operator.
 
 \membersection{wxDynamicCast}\label{wxdynamiccast}
 
-\func{classname *}{wxDynamicCast}{ptr, classname}
+\func{}{wxDynamicCast}{ptr, classname}
 
 This macro returns the pointer {\it ptr} cast to the type {\it classname *} if
-the pointer is of this type (the check is done during the run-time) or
-{\tt NULL} otherwise. Usage of this macro is preferred over obsoleted
-wxObject::IsKindOf() function.
+the pointer is of this type (the check is done during the run-time) or NULL
+otherwise. Usage of this macro is preferred over obsoleted wxObject::IsKindOf()
+function.
 
-The {\it ptr} argument may be {\tt NULL}, in which case {\tt NULL} will be
-returned.
+The {\it ptr} argument may be NULL, in which case NULL will be returned.
 
 Example:
 
@@ -2529,22 +2261,8 @@ Example:
 \wxheading{See also}
 
 \helpref{RTTI overview}{runtimeclassoverview}\\
-\helpref{wxDynamicCastThis}{wxdynamiccastthis}\\
 \helpref{wxConstCast}{wxconstcast}\\
 \helpref{wxStatiicCast}{wxstaticcast}
-
-\membersection{wxDynamicCastThis}\label{wxdynamiccastthis}
-
-\func{classname *}{wxDynamicCastThis}{classname}
-
-This macro is equivalent to {\tt wxDynamicCast(this, classname)} but the
-latter provokes spurious compilation warnings from some compilers (because it
-tests whether {\tt this} pointer is non {\tt NULL} which is always true), so
-this macro should be used to avoid them.
-
-\wxheading{See also}
-
-\helpref{wxDynamicCast}{wxdynamiccast}
 
 \membersection{wxICON}\label{wxiconmacro}
 
@@ -2556,7 +2274,7 @@ avoid using {\tt \#ifdef}s when creating icons.
 
 \wxheading{See also}
 
-\helpref{Bitmaps and icons overview}{wxbitmapoverview},
+\helpref{Bitmaps and icons overview}{wxbitmapoverview}, 
 \helpref{wxBITMAP}{wxbitmapmacro}
 
 \wxheading{Include files}
@@ -2565,7 +2283,7 @@ avoid using {\tt \#ifdef}s when creating icons.
 
 \membersection{wxStaticCast}\label{wxstaticcast}
 
-\func{classname *}{wxStaticCast}{ptr, classname}
+\func{}{wxStaticCast}{ptr, classname}
 
 This macro checks that the cast is valid in debug mode (an assert failure will
 result if {\tt wxDynamicCast(ptr, classname) == NULL}) and then returns the
@@ -2628,7 +2346,7 @@ loading from resource data.
 \func{bool}{wxResourceAddIdentifier}{\param{const wxString\& }{name}, \param{int }{value}}
 
 Used for associating a name with an integer identifier (equivalent to dynamically\rtfsp
-\tt{#}defining a name to an integer). Unlikely to be used by an application except
+\verb$#$defining a name to an integer). Unlikely to be used by an application except
 perhaps for implementing resource functionality for interpreted languages.
 
 \membersection{::wxResourceClear}
@@ -2794,7 +2512,7 @@ load an entire {\tt .wxr file} into a string.
 
 \func{bool}{wxResourceRegisterBitmapData}{\param{const wxString\& }{name}, \param{char** }{xpm\_data}}
 
-Makes \tt{#}included XBM or XPM bitmap data known to the wxWindows resource system.
+Makes \verb$#$included XBM or XPM bitmap data known to the wxWindows resource system. 
 This is required if other resources will use the bitmap data, since otherwise there
 is no connection between names used in resources, and the global bitmap data.
 
@@ -2903,13 +2621,13 @@ it a separate function from it is that usually there are a lot of trace
 messages, so it might make sense to separate them from other debug messages.
 
 The trace messages also usually can be separated into different categories and
-the second and third versions of this function only log the message if the
+the second and third versions of this function only log the message if the 
 {\it mask} which it has is currently enabled in \helpref{wxLog}{wxlog}. This
 allows to selectively trace only some operations and not others by changing
 the value of the trace mask (possible during the run-time).
 
 For the second function (taking a string mask), the message is logged only if
-the mask has been previously enabled by the call to
+the mask has been previously enabled by the call to 
 \helpref{AddTraceMask}{wxlogaddtracemask}. The predefined string trace masks
 used by wxWindows are:
 
@@ -2952,8 +2670,8 @@ Returns the error code from the last system call. This function uses
 
 \func{const wxChar *}{wxSysErrorMsg}{\param{unsigned long }{errCode = 0}}
 
-Returns the error message corresponding to the given system error code. If
-{\it errCode} is $0$ (default), the last error code (as returned by
+Returns the error message corresponding to the given system error code. If 
+{\it errCode} is $0$ (default), the last error code (as returned by 
 \helpref{wxSysErrorCode}{wxsyserrorcode}) is used.
 
 \wxheading{See also}
@@ -2965,10 +2683,10 @@ Returns the error message corresponding to the given system error code. If
 
 The functions in this section deal with getting the current time and
 starting/stopping the global timers. Please note that the timer functions are
-deprecated because they work with one global timer only and
+deprecated because they work with one global timer only and 
 \helpref{wxTimer}{wxtimer} and/or \helpref{wxStopWatch}{wxstopwatch} classes
-should be used instead. For retrieving the current time, you may also use
-\helpref{wxDateTime::Now}{wxdatetimenow} or
+should be used instead. For retrieving the current time, you may also use 
+\helpref{wxDateTime::Now}{wxdatetimenow} or 
 \helpref{wxDateTime::UNow}{wxdatetimeunow} methods.
 
 \membersection{::wxGetElapsedTime}\label{wxgetelapsedtime}
@@ -3114,7 +2832,7 @@ This check is done even in release mode.
 Checks that the condition is true, returns with the given return value if not (FAILs in debug mode).
 This check is done even in release mode.
 
-This macro may be only used in non void functions, see also
+This macro may be only used in non void functions, see also 
 \helpref{wxCHECK\_RET}{wxcheckret}.
 
 \membersection{wxCHECK\_RET}\label{wxcheckret}
@@ -3124,15 +2842,15 @@ This macro may be only used in non void functions, see also
 Checks that the condition is true, and returns if not (FAILs with given error
 message in debug mode). This check is done even in release mode.
 
-This macro should be used in void functions instead of
+This macro should be used in void functions instead of 
 \helpref{wxCHECK\_MSG}{wxcheckmsg}.
 
 \membersection{wxCHECK2}\label{wxcheck2}
 
 \func{}{wxCHECK2}{\param{}{condition}, \param{}{operation}}
 
-Checks that the condition is true and \helpref{wxFAIL}{wxfail} and execute
-{\it operation} if it is not. This is a generalisation of
+Checks that the condition is true and \helpref{wxFAIL}{wxfail} and execute 
+{\it operation} if it is not. This is a generalisation of 
 \helpref{wxCHECK}{wxcheck} and may be used when something else than just
 returning from the function must be done when the {\it condition} is false.
 
@@ -3142,60 +2860,7 @@ This check is done even in release mode.
 
 \func{}{wxCHECK2}{\param{}{condition}, \param{}{operation}, \param{}{msg}}
 
-This is the same as \helpref{wxCHECK2}{wxcheck2}, but
+This is the same as \helpref{wxCHECK2}{wxcheck2}, but 
 \helpref{wxFAIL\_MSG}{wxfailmsg} with the specified {\it msg} is called
 instead of wxFAIL() if the {\it condition} is false.
-
-\section{Environment access functions}\label{environfunctions}
-
-The functions in this section allow to access (get) or change value of
-environment variables in a portable way. They are currently implemented under
-Win32 and POSIX-like systems (Unix).
-
-% TODO add some stuff about env var inheriting but not propagating upwards (VZ)
-
-\wxheading{Include files}
-
-<wx/utils.h>
-
-\membersection{wxGetenv}\label{wxgetenvmacro}
-
-\func{wxChar *}{wxGetEnv}{\param{const wxString\&}{ var}}
-
-This is a macro defined as {\tt getenv()} or its wide char version in Unicode
-mode.
-
-Note that under Win32 it may not return correct value for the variables set
-with \helpref{wxSetEnv}{wxsetenv}, use \helpref{wxGetEnv}{wxgetenv} function
-instead.
-
-\membersection{wxGetEnv}\label{wxgetenv}
-
-\func{bool}{wxGetEnv}{\param{const wxString\&}{ var}, \param{wxString *}{value}}
-
-Returns the current value of the environment variable {\it var} in {\it value}.
-{\it value} may be {\tt NULL} if you just want to know if the variable exists
-and are not interested in its value.
-
-Returns {\tt TRUE} if the variable exists, {\tt FALSE} otherwise.
-
-\membersection{wxSetEnv}\label{wxsetenv}
-
-\func{bool}{wxSetEnv}{\param{const wxString\&}{ var}, \param{const wxChar *}{value}}
-
-Sets the value of the environment variable {\it var} (adding it if necessary)
-to {\it value}.
-
-Returns {\tt TRUE} on success.
-
-\membersection{wxUnsetEnv}\label{wxunsetenv}
-
-\func{bool}{wxUnsetEnv}{\param{const wxString\&}{ var}}
-
-Removes the variable {\it var} from the environment.
-\helpref{wxGetEnv}{wxgetenv} will return {\tt NULL} after the call to this
-function.
-
-Returns {\tt TRUE} on success.
-
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/textctrl.h
+// Name:        textctrl.h
 // Purpose:     wxTextCtrl class
 // Author:      Julian Smart
 // Modified by:
@@ -55,8 +55,8 @@ public:
     virtual bool IsModified() const;
     virtual bool IsEditable() const;
 
+    // If the return values from and to are the same, there is no selection.
     virtual void GetSelection(long* from, long* to) const;
-    virtual wxString GetStringSelection() const;
 
     // operations
     // ----------
@@ -72,18 +72,10 @@ public:
     // clears the dirty flag
     virtual void DiscardEdits();
 
-    virtual void SetMaxLength(unsigned long len);
-
     // writing text inserts it at the current position, appending always
     // inserts it at the end
     virtual void WriteText(const wxString& text);
     virtual void AppendText(const wxString& text);
-
-#if wxUSE_RICHEDIT
-    // apply text attribute to the range of text (only works with richedit
-    // controls)
-    virtual bool SetStyle(long start, long end, const wxTextAttr& style);
-#endif // wxUSE_RICHEDIT
 
     // translate between the position (which is just an index in the text ctrl
     // considering all its contents as a single strings) and (x, y) coordinates
@@ -133,8 +125,6 @@ public:
 #endif
 
 #if wxUSE_RICHEDIT
-    virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
-
     bool IsRich() const { return m_isRich; }
     void SetRichEdit(bool isRich) { m_isRich = isRich; }
 
@@ -145,6 +135,7 @@ public:
 #endif // wxUSE_RICHEDIT
 
     virtual void AdoptAttributesFromHWND();
+    virtual void SetupColours();
 
     virtual bool AcceptsFocus() const;
 
@@ -165,20 +156,15 @@ public:
     void OnUpdateRedo(wxUpdateUIEvent& event);
 
 protected:
+#if wxUSE_RICHEDIT
+    bool      m_isRich; // Are we using rich text edit to implement this?
+#endif
+
     // call this to increase the size limit (will do nothing if the current
     // limit is big enough)
-    //
-    // returns true if we increased the limit to allow entering more text,
-    // false if we hit the limit set by SetMaxLength() and so didn't change it
-    bool AdjustSpaceLimit();
+    void AdjustSpaceLimit();
 
-    // override some base class virtuals
-    virtual bool MSWShouldPreProcessMessage(WXMSG* pMsg);
     virtual wxSize DoGetBestSize() const;
-
-#if wxUSE_RICHEDIT
-    bool m_isRich; // Are we using rich text edit to implement this?
-#endif
 
 private:
     DECLARE_EVENT_TABLE()

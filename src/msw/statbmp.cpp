@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_STATBMP
-
 #include "wx/window.h"
 #include "wx/msw/private.h"
 
@@ -53,42 +51,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap, wxControl)
 // ---------------------------------------------------------------------------
 // wxStaticBitmap
 // ---------------------------------------------------------------------------
-
-// we may have either bitmap or icon: if a bitmap with mask is passed, we
-// will transform it to an icon ourselves because otherwise the mask will
-// be ignored by Windows
-// note that this function will create a new object every time
-// it is called even if the image needs no conversion
-
-#ifndef __WIN16__
-
-static wxGDIImage* ConvertImage( const wxGDIImage& bitmap )
-{
-    bool isIcon = bitmap.IsKindOf( CLASSINFO(wxIcon) );
-
-    if( !isIcon )
-    {
-        wxASSERT_MSG( wxDynamicCast(&bitmap, wxBitmap),
-                      _T("not an icon and not a bitmap?") );
-
-        const wxBitmap& bmp = (const wxBitmap&)bitmap;
-        wxMask *mask = bmp.GetMask();
-        if ( mask && mask->GetMaskBitmap() )
-        {
-            wxIcon* icon = new wxIcon;
-            icon->CopyFromBitmap(bmp);
-
-            return icon;
-        }
-
-        return new wxBitmap( bmp );
-    }
-
-    // copying a bitmap is a cheap operation
-    return new wxIcon( (const wxIcon&)bitmap );
-}
-
-#endif
 
 bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
                             const wxGDIImage& bitmap,
@@ -121,17 +83,26 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
     // we may have either bitmap or icon: if a bitmap with mask is passed, we
     // will transform it to an icon ourselves because otherwise the mask will
     // be ignored by Windows
-    wxGDIImage *image = (wxGDIImage *)NULL;
+    wxIcon *icon = (wxIcon *)NULL;
     m_isIcon = bitmap.IsKindOf(CLASSINFO(wxIcon));
 
 #ifdef __WIN16__
     wxASSERT_MSG( !m_isIcon, "Icons are not supported in wxStaticBitmap under WIN16." );
-    image = &bitmap;
 #endif
 
 #ifndef __WIN16__
-    image = ConvertImage( bitmap );
-    m_isIcon = image->IsKindOf( CLASSINFO(wxIcon) );
+    if ( !m_isIcon )
+    {
+        const wxBitmap& bmp = (const wxBitmap&)bitmap;
+        wxMask *mask = bmp.GetMask();
+        if ( mask && mask->GetMaskBitmap() )
+        {
+            icon = new wxIcon;
+            icon->CopyFromBitmap(bmp);
+
+            m_isIcon = TRUE;
+        }
+    }
 #endif
 
 #ifdef __WIN32__
@@ -143,10 +114,6 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
     const wxChar *classname = wxT("BUTTON");
     int winstyle = BS_OWNERDRAW;
 #endif // Win32
-
-    if ( m_windowStyle & wxCLIP_SIBLINGS )
-        winstyle |= WS_CLIPSIBLINGS;
-
 
     m_hWnd = (WXHWND)::CreateWindow
                        (
@@ -163,8 +130,8 @@ bool wxStaticBitmap::Create(wxWindow *parent, wxWindowID id,
 
     wxCHECK_MSG( m_hWnd, FALSE, wxT("Failed to create static bitmap") );
 
-    // no need to delete the new image
-    SetImageNoCopy( image );
+    SetImage(icon ? icon : &bitmap);
+    delete icon; // may be NULL, ok
 
     // Subclass again for purposes of dialog editing mode
     SubclassWin(m_hWnd);
@@ -195,19 +162,25 @@ wxSize wxStaticBitmap::DoGetBestSize() const
     return wxWindow::DoGetBestSize();
 }
 
-void wxStaticBitmap::SetImage( const wxGDIImage* image )
-{
-    wxGDIImage* convertedImage = ConvertImage( *image );
-    SetImageNoCopy( convertedImage );
-}
-
-void wxStaticBitmap::SetImageNoCopy( wxGDIImage* image)
+void wxStaticBitmap::SetImage(const wxGDIImage* image)
 {
     Free();
 
-    m_isIcon = image->IsKindOf( CLASSINFO(wxIcon) );
-    // the image has already been copied
-    m_image = image;
+    const wxIcon *icon = wxDynamicCast(image, wxIcon);
+    m_isIcon = icon != NULL;
+    if ( m_isIcon )
+    {
+        m_image = new wxIcon(*icon);
+    }
+    else
+    {
+        wxASSERT_MSG( wxDynamicCast(image, wxBitmap),
+                      _T("not an icon and not a bitmap?") );
+
+        const wxBitmap *bitmap = (wxBitmap *)image;
+
+        m_image = new wxBitmap(*bitmap);
+    }
 
     int x, y;
     int w, h;
@@ -216,9 +189,6 @@ void wxStaticBitmap::SetImageNoCopy( wxGDIImage* image)
 
 #ifdef __WIN32__
     HANDLE handle = (HANDLE)m_image->GetHandle();
-    LONG style = ::GetWindowLong( (HWND)GetHWND(), GWL_STYLE ) ;
-    ::SetWindowLong( (HWND)GetHWND(), GWL_STYLE, ( style & ~( SS_BITMAP|SS_ICON ) ) |
-                     ( m_isIcon ? SS_ICON : SS_BITMAP ) );
     ::SendMessage(GetHwnd(), STM_SETIMAGE,
                   m_isIcon ? IMAGE_ICON : IMAGE_BITMAP, (LPARAM)handle);
 #endif // Win32
@@ -296,4 +266,3 @@ long wxStaticBitmap::MSWWindowProc(WXUINT nMsg,
     return wxWindow::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-#endif // wxUSE_STATBMP

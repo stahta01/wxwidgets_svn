@@ -30,7 +30,7 @@
 
 //---------------------------------------------------------------------------
 
-class wxImageHandler : public wxObject {
+class wxImageHandler {
 public:
     // wxImageHandler();    Abstract Base Class
     wxString GetName();
@@ -90,18 +90,14 @@ public:
 
 //---------------------------------------------------------------------------
 
-class wxImage : public wxObject {
+class wxImage {
 public:
     wxImage( const wxString& name, long type = wxBITMAP_TYPE_ANY );
     ~wxImage();
 
     wxBitmap ConvertToBitmap();
-#ifdef __WXGTK__
-    wxBitmap ConvertToMonoBitmap( unsigned char red, unsigned char green, unsigned char blue ) const;
-#endif
     void Create( int width, int height );
     void Destroy();
-
     wxImage Scale( int width, int height );
     wxImage& Rescale(int width, int height);
 
@@ -110,8 +106,7 @@ public:
     unsigned char GetGreen( int x, int y );
     unsigned char GetBlue( int x, int y );
 
-    static bool CanRead( const wxString& name );
-    bool LoadFile( const wxString& name, long type = wxBITMAP_TYPE_ANY );
+    bool LoadFile( const wxString& name, long type = wxBITMAP_TYPE_PNG );
     %name(LoadMimeFile)bool LoadFile( const wxString& name, const wxString& mimetype );
 
     bool SaveFile( const wxString& name, int type );
@@ -165,34 +160,23 @@ public:
     void Replace( unsigned char r1, unsigned char g1, unsigned char b1,
                   unsigned char r2, unsigned char g2, unsigned char b2 );
 
-    // convert to monochrome image (<r,g,b> will be replaced by white, everything else by black)
-    wxImage ConvertToMono( unsigned char r, unsigned char g, unsigned char b ) const;
-
-    void SetOption(const wxString& name, const wxString& value);
-    %name(SetOptionInt)void SetOption(const wxString& name, int value);
-    wxString GetOption(const wxString& name) const;
-    int GetOptionInt(const wxString& name) const;
-    bool HasOption(const wxString& name) const;
-
     unsigned long CountColours( unsigned long stopafter = (unsigned long) -1 );
     // TODO: unsigned long ComputeHistogram( wxHashTable &h );
 
-    static void AddHandler( wxImageHandler *handler );
-    static void InsertHandler( wxImageHandler *handler );
-    static bool RemoveHandler( const wxString& name );
 };
 
-
 // Alternate constructors
-%new wxImage* wxEmptyImage(int width=0, int height=0);
+%new wxImage* wxNullImage();
+%new wxImage* wxEmptyImage(int width, int height);
 %new wxImage* wxImageFromMime(const wxString& name, const wxString& mimetype);
 %new wxImage* wxImageFromBitmap(const wxBitmap &bitmap);
 %{
-    wxImage* wxEmptyImage(int width=0, int height=0) {
-        if (width == 0 && height == 0)
-            return new wxImage;
-        else
-            return new wxImage(width, height);
+    wxImage* wxNullImage() {
+        return new wxImage;
+    }
+
+    wxImage* wxEmptyImage(int width, int height) {
+        return new wxImage(width, height);
     }
 
     wxImage* wxImageFromMime(const wxString& name, const wxString& mimetype) {
@@ -204,34 +188,15 @@ public:
     }
 %}
 
+// Static Methods
+void wxImage_AddHandler(wxImageHandler *handler);
+%{
+    void wxImage_AddHandler(wxImageHandler *handler) {
+        wxImage::AddHandler(handler);
+    }
+%}
+
 void wxInitAllImageHandlers();
 
-
-%readonly
-%{
-#if 0
-%}
-
-extern wxImage    wxNullImage;
-
-%readwrite
-%{
-#endif
-%}
-
-
-
 //---------------------------------------------------------------------------
-// This one is here to avoid circular imports
-
-%new wxBitmap* wxBitmapFromImage(const wxImage& img, int depth=-1);
-
-%{
-    wxBitmap* wxBitmapFromImage(const wxImage& img, int depth=-1) {
-        return new wxBitmap(img, depth);
-    }
-
-%}
-
-
 //---------------------------------------------------------------------------

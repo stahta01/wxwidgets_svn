@@ -15,12 +15,10 @@ program_dir = samples/html/test
 
 PROGRAM=test
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 DATAFILES=f.html fft.html imagemap.htm imagemap.png pic.png pic2.bmp \
     tables.htm test.htm i18n.gif 8859_2.htm cp1250.htm
 
 include ../../../src/makeprog.env
 
--include $(DEPFILES)

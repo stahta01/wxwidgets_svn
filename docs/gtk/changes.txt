@@ -2,13 +2,29 @@ This file contains the detailed log of wxGTK-specific changes, please see
 doc/changes.txt for the concise log of important changes in all wxWindows
 ports.
 
-*** wxWindows 2.3.1 ***
+*** next release ***
 
-*** wxWindows 2.3.0 ***
+*** 22th May 2001: wxWindows 2.2.7 released ***
 
-scaling for map modes other than wxMM_TEXT works correctly (Derry Bryson)
+Applied patch to allow using non-Latin keyboards.
 
-*** wxWindows 2.2.6 ***
+Added wxActivateEvent for top level windows.
+
+Corrected wxActivateEvent for app (now wxEVT_ACTIAVTE_APP).
+
+wxTextCtrl sends focus events.
+
+Corrected so-library name.
+
+wxTreeCtrl now shows an item, if it was programmatically selected.
+
+wxTextCtrl no longer sends any text event upon its construction.
+
+wxSpinCtrl misbehaviour fixed.
+
+*** 7th March 2001: wxWindows 2.2.6 released ***
+
+wxWakeUpIdle() works again
 
 wxGauge now supports wxGA_VERTICAL (Shane Forsythe)
 

@@ -117,7 +117,7 @@ protected:
 
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
             wxDC *source, wxCoord xsrc, wxCoord ysrc,
-            int rop = wxCOPY, bool useMask = FALSE, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
+            int rop = wxCOPY, bool useMask = FALSE);
 
     virtual void DoSetClippingRegionAsRegion(const wxRegion& region);
     virtual void DoSetClippingRegion(wxCoord x, wxCoord y,
@@ -128,6 +128,10 @@ protected:
     virtual void DoDrawPolygon(int n, wxPoint points[],
             wxCoord xoffset, wxCoord yoffset,
             int fillStyle = wxODDEVEN_RULE);
+
+#if wxUSE_SPLINES
+    virtual void DoDrawSpline(wxList *points);
+#endif // wxUSE_SPLINES
 
     WXGC         m_gc;
     WXGC         m_gcBacking;

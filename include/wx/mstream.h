@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mstream.h
+// Name:        mstream.h
 // Purpose:     Memory stream classes
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -8,7 +8,6 @@
 // Copyright:   (c) Guilhem Lavaux
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
 #ifndef _WX_WXMMSTREAM_H__
 #define _WX_WXMMSTREAM_H__
 
@@ -16,54 +15,45 @@
 
 #if wxUSE_STREAMS
 
-class WXDLLEXPORT wxMemoryInputStream : public wxInputStream
-{
-public:
-    wxMemoryInputStream(const void *data, size_t length);
-    virtual ~wxMemoryInputStream();
-    virtual size_t GetSize() const { return m_length; }
-    virtual bool Eof() const;
+class WXDLLEXPORT wxMemoryInputStream: public wxInputStream {
+ private:
+  size_t m_length;
+  
+ public:
+  wxMemoryInputStream(const char *data, size_t length);
+  virtual ~wxMemoryInputStream();
+  virtual size_t GetSize() const { return m_length; }
 
-    char Peek();
+  char Peek();
 
-    wxStreamBuffer *GetInputStreamBuffer() const { return m_i_streambuf; }
+  wxStreamBuffer *InputStreamBuffer() const { return m_i_streambuf; }
 
-    // deprecated, compatibility only
-    wxStreamBuffer *InputStreamBuffer() const { return m_i_streambuf; }
+ protected:
+  wxStreamBuffer *m_i_streambuf;
 
-protected:
-    wxStreamBuffer *m_i_streambuf;
-
-    size_t OnSysRead(void *buffer, size_t nbytes);
-    off_t OnSysSeek(off_t pos, wxSeekMode mode);
-    off_t OnSysTell() const;
-
-private:
-    size_t m_length;
+ protected:
+  size_t OnSysRead(void *buffer, size_t nbytes);
+  off_t OnSysSeek(off_t pos, wxSeekMode mode);
+  off_t OnSysTell() const;
 };
 
-class WXDLLEXPORT wxMemoryOutputStream : public wxOutputStream
-{
-public:
-    // if data is !NULL it must be allocated with malloc()
-    wxMemoryOutputStream(void *data = NULL, size_t length = 0);
-    virtual ~wxMemoryOutputStream();
-    virtual size_t GetSize() const { return m_o_streambuf->GetLastAccess(); }
+class WXDLLEXPORT wxMemoryOutputStream:  public wxOutputStream {
+ public:
+  wxMemoryOutputStream(char *data = NULL, size_t length = 0);
+  virtual ~wxMemoryOutputStream();
+  virtual size_t GetSize() const { return m_o_streambuf->GetLastAccess(); }
 
-    size_t CopyTo(void *buffer, size_t len) const;
+  wxStreamBuffer *OutputStreamBuffer() const { return m_o_streambuf; }
 
-    wxStreamBuffer *GetOutputStreamBuffer() const { return m_o_streambuf; }
+  size_t CopyTo(char *buffer, size_t len) const;
 
-    // deprecated, compatibility only
-    wxStreamBuffer *OutputStreamBuffer() const { return m_o_streambuf; }
+ protected:
+  wxStreamBuffer *m_o_streambuf;
 
-protected:
-    wxStreamBuffer *m_o_streambuf;
-
-protected:
-    size_t OnSysWrite(const void *buffer, size_t nbytes);
-    off_t OnSysSeek(off_t pos, wxSeekMode mode);
-    off_t OnSysTell() const;
+ protected:
+  size_t OnSysWrite(const void *buffer, size_t nbytes);
+  off_t OnSysSeek(off_t pos, wxSeekMode mode);
+  off_t OnSysTell() const;
 };
 
 #endif

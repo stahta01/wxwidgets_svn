@@ -10,17 +10,12 @@
 	set command $disk2:[joukj.com]bison.cld
 
 .ifdef __WXMOTIF__
-CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)
+CXX_DEFINE = /define=(__WXMOTIF__=1)
 .else
 .ifdef __WXGTK__
-CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm
+CXX_DEFINE = /define=(__WXGTK__=1)
 .else
 CXX_DEFINE =
-CC_DEFINE =
 .endif
 .endif
 
@@ -35,26 +30,21 @@ LEX=flex
 .cpp.obj :
 	cxx $(CXXFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).cpp
 .c.obj :
-	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
+	cc $(CFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
 		parser.obj,\
 		appcmn.obj,\
 		choiccmn.obj,\
 		clipcmn.obj,\
-		clntdata.obj,\
 		cmdline.obj,\
-		cmdproc.obj,\
 		cmndata.obj,\
 		config.obj,\
-		containr.obj,\
-		cshelp.obj,\
 		ctrlcmn.obj,\
 		ctrlsub.obj,\
 		datetime.obj,\
 		datstrm.obj,\
 		db.obj,\
-		dbgrid.obj,\
 		dbtable.obj,\
 		dcbase.obj,\
 		dlgcmn.obj,\
@@ -69,7 +59,6 @@ OBJECTS = \
 		ffile.obj,\
 		file.obj,\
 		fileconf.obj,\
-		filename.obj,\
 		filefn.obj,\
 		filesys.obj,\
 		fontcmn.obj,\
@@ -93,7 +82,6 @@ OBJECTS1=framecmn.obj,\
 		imagpng.obj,\
 		imagpnm.obj,\
 		imagtiff.obj,\
-		imagxpm.obj,\
 		intl.obj,\
 		ipcbase.obj,\
 		layout.obj,\
@@ -106,14 +94,12 @@ OBJECTS1=framecmn.obj,\
 		mimecmn.obj,\
 		module.obj,\
 		mstream.obj,\
-		nbkbase.obj,\
 		object.obj,\
 		objstrm.obj,\
 		paper.obj,\
 		prntbase.obj,\
 		process.obj,\
 		protocol.obj,\
-		quantize.obj,\
 		resource.obj,\
 		sckaddr.obj,\
 		sckfile.obj,\
@@ -122,19 +108,14 @@ OBJECTS1=framecmn.obj,\
 		serbase.obj,\
 		sizer.obj,\
 		socket.obj,\
-		statbar.obj,\
 		strconv.obj,\
 		stream.obj,\
 		string.obj,\
-		sysopt.obj,\
 		tbarbase.obj,\
-		textbuf.obj,\
 		textcmn.obj,\
 		textfile.obj,\
 		timercmn.obj,\
 		tokenzr.obj,\
-		toplvcmn.obj,\
-		treebase.obj,\
 		txtstrm.obj,\
 		unzip.obj,\
 		url.obj,\
@@ -146,9 +127,7 @@ OBJECTS1=framecmn.obj,\
 		wfstream.obj,\
 		wincmn.obj,\
 		wxchar.obj,\
-		wxexpr.obj
-
-OBJECTS2=xpmdecod.obj,\
+		wxexpr.obj,\
 		zipstrm.obj,\
 		zstream.obj
 
@@ -157,19 +136,14 @@ SOURCES = \
 		appcmn.cpp,\
 		choiccmn.cpp,\
 		clipcmn.cpp,\
-		clntdata.cpp,\
 		cmdline.cpp,\
-		cmdproc.cpp,\
 		cmndata.cpp,\
 		config.cpp,\
-		containr.cpp,\
-		cshelp.cpp,\
 		ctrlcmn.cpp,\
 		ctrlsub.cpp,\
 		datetime.cpp,\
 		datstrm.cpp,\
 		db.cpp,\
-		dbgrid.cpp,\
 		dbtable.cpp,\
 		dcbase.cpp,\
 		dlgcmn.cpp,\
@@ -184,7 +158,6 @@ SOURCES = \
 		ffile.cpp,\
 		file.cpp,\
 		fileconf.cpp,\
-		filename.cpp,\
 		filefn.cpp,\
 		filesys.cpp,\
 		fontcmn.cpp,\
@@ -207,7 +180,6 @@ SOURCES = \
 		imagpng.cpp,\
 		imagpnm.cpp,\
 		imagtiff.cpp,\
-		imagxpm.cpp,\
 		intl.cpp,\
 		ipcbase.cpp,\
 		layout.cpp,\
@@ -220,14 +192,12 @@ SOURCES = \
 		mimecmn.cpp,\
 		module.cpp,\
 		mstream.cpp,\
-		nbkbase.cpp,\
 		object.cpp,\
 		objstrm.cpp,\
 		paper.cpp,\
 		prntbase.cpp,\
 		process.cpp,\
 		protocol.cpp,\
-		quantize.cpp,\
 		resource.cpp,\
 		sckaddr.cpp,\
 		sckfile.cpp,\
@@ -236,19 +206,14 @@ SOURCES = \
 		serbase.cpp,\
 		sizer.cpp,\
 		socket.cpp,\
-		statbar.cpp,\
 		strconv.cpp,\
 		stream.cpp,\
-		sysopt.cpp,\
 		string.cpp,\
 		tbarbase.cpp,\
-		textbuf.cpp,\
 		textcmn.cpp,\
 		textfile.cpp,\
 		timercmn.cpp,\
 		tokenzr.cpp,\
-		toplvcmn.cpp,\
-		treebase.cpp,\
 		txtstrm.cpp,\
 		unzip.c,\
 		url.cpp,\
@@ -261,23 +226,19 @@ SOURCES = \
 		wincmn.cpp,\
 		wxchar.cpp,\
 		wxexpr.cpp,\
-		xpmdecod.cpp,\
 		zipstrm.cpp,\
 		zstream.cpp
 
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS1)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS2)
 .ifdef __WXMOTIF__
 	library [--.lib]libwx_motif.olb $(OBJECTS)
 	library [--.lib]libwx_motif.olb $(OBJECTS1)
-	library [--.lib]libwx_motif.olb $(OBJECTS2)
 .else
 .ifdef __WXGTK__
 	library [--.lib]libwx_gtk.olb $(OBJECTS)
 	library [--.lib]libwx_gtk.olb $(OBJECTS1)
-	library [--.lib]libwx_gtk.olb $(OBJECTS2)
 .endif
 .endif
 
@@ -303,19 +264,14 @@ lexer.c : lexer.l
 appcmn.obj : appcmn.cpp
 choiccmn.obj : choiccmn.cpp
 clipcmn.obj : clipcmn.cpp
-clntdata.obj : clntdata.cpp
-cmdline.obj : cmdline.cpp
-cmdproc.obj : cmdproc.cpp
 cmndata.obj : cmndata.cpp
+cmdline.obj : cmdline.cpp
 config.obj : config.cpp
-containr.obj : containr.cpp
-cshelp.obj : cshelp.cpp
 ctrlcmn.obj : ctrlcmn.cpp
 ctrlsub.obj : ctrlsub.cpp
 datetime.obj : datetime.cpp
 datstrm.obj : datstrm.cpp
 db.obj : db.cpp
-dbgrid.obj : dbgrid.cpp
 dbtable.obj : dbtable.cpp
 dcbase.obj : dcbase.cpp
 dlgcmn.obj : dlgcmn.cpp
@@ -331,7 +287,6 @@ ffile.obj : ffile.cpp
 file.obj : file.cpp
 fileconf.obj : fileconf.cpp
 filefn.obj : filefn.cpp
-filename.obj : filename.cpp
 filesys.obj : filesys.cpp
 fontcmn.obj : fontcmn.cpp
 fontmap.obj : fontmap.cpp
@@ -353,7 +308,6 @@ imagpcx.obj : imagpcx.cpp
 imagpng.obj : imagpng.cpp
 imagpnm.obj : imagpnm.cpp
 imagtiff.obj : imagtiff.cpp
-imagxpm.obj : imagxpm.cpp
 intl.obj : intl.cpp
 ipcbase.obj : ipcbase.cpp
 layout.obj : layout.cpp
@@ -366,14 +320,12 @@ menucmn.obj : menucmn.cpp
 mimecmn.obj : mimecmn.cpp
 module.obj : module.cpp
 mstream.obj : mstream.cpp
-nbkbase.obj : nbkbase.cpp
 object.obj : object.cpp
 objstrm.obj : objstrm.cpp
 paper.obj : paper.cpp
 prntbase.obj : prntbase.cpp
 process.obj : process.cpp
 protocol.obj : protocol.cpp
-quantize.obj : quantize.cpp
 resource.obj : resource.cpp
 sckaddr.obj : sckaddr.cpp
 sckfile.obj : sckfile.cpp
@@ -382,19 +334,14 @@ sckstrm.obj : sckstrm.cpp
 serbase.obj : serbase.cpp
 sizer.obj : sizer.cpp
 socket.obj : socket.cpp
-statbar.obj : statbar.cpp
 strconv.obj : strconv.cpp
 stream.obj : stream.cpp
-sysopt.obj : sysopt.cpp
 string.obj : string.cpp
 tbarbase.obj : tbarbase.cpp
-textbuf.obj : textbuf.cpp
 textcmn.obj : textcmn.cpp
 textfile.obj : textfile.cpp
 timercmn.obj : timercmn.cpp
 tokenzr.obj : tokenzr.cpp
-toplvcmn.obj : toplvcmn.cpp
-treebase.obj : treebase.cpp
 txtstrm.obj : txtstrm.cpp
 unzip.obj : unzip.c
 url.obj : url.cpp
@@ -407,6 +354,5 @@ wfstream.obj : wfstream.cpp
 wincmn.obj : wincmn.cpp
 wxchar.obj : wxchar.cpp
 wxexpr.obj : wxexpr.cpp
-xpmdecod.obj : xpmdecod.cpp
 zipstrm.obj : zipstrm.cpp
 zstream.obj : zstream.cpp

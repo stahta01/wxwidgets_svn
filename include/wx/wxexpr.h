@@ -50,6 +50,9 @@ typedef bool (*wxExprErrorHandler) (int errorType, char *msg);
 
 WXDLLEXPORT_DATA(extern wxExprErrorHandler) currentwxExprErrorHandler;
 
+extern "C" WXDLLEXPORT_DATA(FILE*) yyin;
+
+extern "C" WXDLLEXPORT int yyparse(void);
 
 typedef enum {
     wxExprNull,

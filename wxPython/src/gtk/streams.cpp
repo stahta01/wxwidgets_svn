@@ -86,11 +86,7 @@ static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     return target;
 }
 
-#if PYTHON_API_VERSION >= 1009
-    static char* wxStringErrorMsg = "String or Unicode type required";
-#else
-    static char* wxStringErrorMsg = "String type required";
-#endif
+static char* wxStringErrorMsg = "string type is required for parameter";
   // C++
 // definitions of wxStringPtrList and wxPyInputStream
 #include <wx/listimpl.cpp>
@@ -279,7 +275,7 @@ protected:
         if (bufsize == 0)
             return 0;
 
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         PyObject* arglist = Py_BuildValue("(i)", bufsize);
         PyObject* result = PyEval_CallObject(read, arglist);
         Py_DECREF(arglist);
@@ -297,7 +293,7 @@ protected:
         }
         else
             m_lasterror = wxSTREAM_READ_ERROR;
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
         m_lastcount = o;
         return o;
     }
@@ -308,17 +304,17 @@ protected:
     }
 
     virtual off_t OnSysSeek(off_t off, wxSeekMode mode){
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         PyObject*arglist = Py_BuildValue("(ii)", off, mode);
         PyObject*result = PyEval_CallObject(seek, arglist);
         Py_DECREF(arglist);
         Py_XDECREF(result);
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
         return OnSysTell();
     }
 
     virtual off_t OnSysTell() const{
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         PyObject* arglist = Py_BuildValue("()");
         PyObject* result = PyEval_CallObject(tell, arglist);
         Py_DECREF(arglist);
@@ -327,7 +323,7 @@ protected:
             o = PyInt_AsLong(result);
             Py_DECREF(result);
         };
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
         return o;
     }
 
@@ -337,12 +333,12 @@ protected:
 
 public:
     ~wxPyCBInputStream() {
-        wxPyTState* state = wxPyBeginBlockThreads();
+        bool doSave = wxPyRestoreThread();
         Py_XDECREF(py);
         Py_XDECREF(read);
         Py_XDECREF(seek);
         Py_XDECREF(tell);
-        wxPyEndBlockThreads(state);
+        wxPySaveThread(doSave);
     }
 
     virtual size_t GetSize() {
@@ -692,7 +688,7 @@ static PyObject *_wrap_wxOutputStream_write(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -841,8 +837,6 @@ SWIGEXPORT(void) initstreamsc() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("streamsc", streamscMethods);
 	 d = PyModule_GetDict(m);
-
-    wxPyPtrTypeMap_Add("wxInputStream", "wxPyInputStream");
 {
    int i;
    for (i = 0; _swig_mapping[i].n1; i++)

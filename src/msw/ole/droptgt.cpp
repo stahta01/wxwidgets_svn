@@ -30,15 +30,12 @@
 
 #include "wx/setup.h"
 
-#if wxUSE_OLE && wxUSE_DRAG_AND_DROP
+#if wxUSE_DRAG_AND_DROP
 
 #include "wx/log.h"
 
 #ifdef __WIN32__
     #if !defined(__GNUWIN32__) || wxUSE_NORLANDER_HEADERS
-        #if wxCHECK_W32API_VERSION( 1, 0 )
-            #include <windows.h>
-        #endif
         #include <shlobj.h>            // for DROPFILES structure
     #endif
 #else
@@ -64,7 +61,11 @@ class wxIDropTarget : public IDropTarget
 {
 public:
     wxIDropTarget(wxDropTarget *p);
-    virtual ~wxIDropTarget();
+    // suppress gcc warning
+#ifdef __GNUG__
+    virtual
+#endif
+    ~wxIDropTarget();
 
     // accessors for wxDropTarget
     void SetHwnd(HWND hwnd) { m_hwnd = hwnd; }
@@ -142,31 +143,9 @@ STDMETHODIMP wxIDropTarget::DragEnter(IDataObject *pIDataSource,
                                       POINTL       pt,
                                       DWORD       *pdwEffect)
 {
-    wxLogTrace(wxTRACE_OleCalls, wxT("IDropTarget::DragEnter"));
+    wxLogDebug(wxT("IDropTarget::DragEnter"));
 
-    wxASSERT_MSG( m_pIDataObject == NULL,
-                  _T("drop target must have data object") );
-
-    // show the list of formats supported by the source data object for the
-    // debugging purposes, this is quite useful sometimes - please don't remove
-#if 0
-    IEnumFORMATETC *penumFmt;
-    if ( SUCCEEDED(pIDataSource->EnumFormatEtc(DATADIR_GET, &penumFmt)) )
-    {
-        FORMATETC fmt;
-        while ( penumFmt->Next(1, &fmt, NULL) == S_OK )
-        {
-            wxLogDebug(_T("Drop source supports format %s"),
-                       wxDataObject::GetFormatName(fmt.cfFormat));
-        }
-
-        penumFmt->Release();
-    }
-    else
-    {
-        wxLogLastError(_T("IDataObject::EnumFormatEtc"));
-    }
-#endif // 0
+    wxASSERT( m_pIDataObject == NULL );
 
     if ( !m_pTarget->IsAcceptedData(pIDataSource) ) {
         // we don't accept this kind of data
@@ -238,7 +217,7 @@ STDMETHODIMP wxIDropTarget::DragOver(DWORD   grfKeyState,
 // Notes   : good place to do any clean-up
 STDMETHODIMP wxIDropTarget::DragLeave()
 {
-  wxLogTrace(wxTRACE_OleCalls, wxT("IDropTarget::DragLeave"));
+  wxLogDebug(wxT("IDropTarget::DragLeave"));
 
   // remove the UI feedback
   m_pTarget->OnLeave();
@@ -263,7 +242,7 @@ STDMETHODIMP wxIDropTarget::Drop(IDataObject *pIDataSource,
                                  POINTL       pt,
                                  DWORD       *pdwEffect)
 {
-    wxLogTrace(wxTRACE_OleCalls, wxT("IDropTarget::Drop"));
+    wxLogDebug(wxT("IDropTarget::Drop"));
 
     // TODO I don't know why there is this parameter, but so far I assume
     //      that it's the same we've already got in DragEnter
@@ -330,7 +309,7 @@ bool wxDropTarget::Register(WXHWND hwnd)
 {
     HRESULT hr = ::CoLockObjectExternal(m_pIDropTarget, TRUE, FALSE);
     if ( FAILED(hr) ) {
-        wxLogApiError(wxT("CoLockObjectExternal"), hr);
+        wxLogApiError(_T("CoLockObjectExternal"), hr);
         return FALSE;
     }
 
@@ -338,7 +317,7 @@ bool wxDropTarget::Register(WXHWND hwnd)
     if ( FAILED(hr) ) {
         ::CoLockObjectExternal(m_pIDropTarget, FALSE, FALSE);
 
-        wxLogApiError(wxT("RegisterDragDrop"), hr);
+        wxLogApiError(_T("RegisterDragDrop"), hr);
         return FALSE;
     }
 
@@ -353,7 +332,7 @@ void wxDropTarget::Revoke(WXHWND hwnd)
     HRESULT hr = ::RevokeDragDrop((HWND) hwnd);
 
     if ( FAILED(hr) ) {
-        wxLogApiError(wxT("RevokeDragDrop"), hr);
+        wxLogApiError(_T("RevokeDragDrop"), hr);
     }
 
     ::CoLockObjectExternal(m_pIDropTarget, FALSE, TRUE);
@@ -402,11 +381,11 @@ bool wxDropTarget::GetData()
             rc = TRUE;
         }
         else {
-            wxLogApiError(wxT("IDataObject::SetData()"), hr);
+            wxLogLastError(wxT("IDataObject::SetData()"));
         }
     }
     else {
-        wxLogApiError(wxT("IDataObject::GetData()"), hr);
+        wxLogLastError(wxT("IDataObject::GetData()"));
     }
 
     return rc;
@@ -446,8 +425,7 @@ wxDataFormat wxDropTarget::GetSupportedFormat(IDataObject *pIDataSource) const
 
     // get the list of supported formats
     size_t nFormats = m_dataObject->GetFormatCount(wxDataObject::Set);
-    wxDataFormat format;
-    wxDataFormat *formats;
+    wxDataFormat format, *formats;
     formats = nFormats == 1 ? &format :  new wxDataFormat[nFormats];
 
     m_dataObject->GetAllFormats(formats, wxDataObject::Set);
@@ -484,9 +462,6 @@ static wxDragResult ConvertDragEffectToResult(DWORD dwEffect)
         case DROPEFFECT_COPY:
             return wxDragCopy;
 
-        case DROPEFFECT_LINK:
-            return wxDragLink;
-
         case DROPEFFECT_MOVE:
             return wxDragMove;
 
@@ -504,9 +479,6 @@ static DWORD ConvertDragResultToEffect(wxDragResult result)
     switch ( result ) {
         case wxDragCopy:
             return DROPEFFECT_COPY;
-
-        case wxDragLink:
-            return DROPEFFECT_LINK;
 
         case wxDragMove:
             return DROPEFFECT_MOVE;

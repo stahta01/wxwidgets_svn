@@ -62,16 +62,6 @@ class GridFrame : public wxFrame
     void SelectRows( wxCommandEvent& );
     void SelectCols( wxCommandEvent& );
 
-    void DeselectCell(wxCommandEvent& event);
-    void DeselectCol(wxCommandEvent& event);
-    void DeselectRow(wxCommandEvent& event);
-    void DeselectAll(wxCommandEvent& event);
-    void SelectCell(wxCommandEvent& event);
-    void SelectCol(wxCommandEvent& event);
-    void SelectRow(wxCommandEvent& event);
-    void SelectAll(wxCommandEvent& event);
-    void OnAddToSelectToggle(wxCommandEvent& event);
-
     void OnLabelLeftClick( wxGridEvent& );
     void OnCellLeftClick( wxGridEvent& );
     void OnRowSize( wxGridSizeEvent& );
@@ -82,9 +72,6 @@ class GridFrame : public wxFrame
 
     void OnEditorShown(wxGridEvent&);
     void OnEditorHidden(wxGridEvent&);
-
-    void OnSetHighlightWidth(wxCommandEvent&);
-    void OnSetROHighlightWidth(wxCommandEvent&);
 
 public:
     GridFrame();
@@ -119,35 +106,20 @@ public:
         ID_DELETEROW,
         ID_DELETECOL,
         ID_CLEARGRID,
-        ID_CHANGESEL,
-        ID_SELCELLS,
-        ID_SELROWS,
-        ID_SELCOLS,
+	ID_CHANGESEL,
+	ID_SELCELLS,
+	ID_SELROWS,
+	ID_SELCOLS,
         ID_SET_CELL_FG_COLOUR,
         ID_SET_CELL_BG_COLOUR,
         ID_ABOUT,
         ID_VTABLE,
         ID_BUGS_TABLE,
-        ID_SELECT_UNSELECT,
-        ID_SELECT_ALL,
-        ID_SELECT_ROW,
-        ID_SELECT_COL,
-        ID_SELECT_CELL,
-        ID_DESELECT_ALL,
-        ID_DESELECT_ROW,
-        ID_DESELECT_COL,
-        ID_DESELECT_CELL,
-
-        ID_SET_HIGHLIGHT_WIDTH,
-        ID_SET_RO_HIGHLIGHT_WIDTH,
 
         ID_TESTFUNC
     };
 
     wxLog *m_logOld;
-
-    // add the cells to selection when using commands from select menu?
-    bool m_addToSel;
 
     DECLARE_EVENT_TABLE()
 };
@@ -177,7 +149,7 @@ public:
     int GetNumberCols() { return m_sizeGrid; }
     wxString GetValue( int row, int col )
     {
-        return wxString::Format(wxT("(%d, %d)"), row, col);
+        return wxString::Format("(%d, %d)", row, col);
     }
 
     void SetValue( int , int , const wxString&  ) { /* ignore */ }
@@ -207,8 +179,7 @@ public:
     MyGridCellAttrProvider();
     virtual ~MyGridCellAttrProvider();
 
-    virtual wxGridCellAttr *GetAttr(int row, int col,
-                                    wxGridCellAttr::wxAttrKind  kind) const;
+    virtual wxGridCellAttr *GetAttr(int row, int col) const;
 
 private:
     wxGridCellAttr *m_attrForOddRows;
@@ -247,7 +218,6 @@ class BugsGridFrame : public wxFrame
 public:
     BugsGridFrame();
 };
-
 
 #endif // griddemo_h
 

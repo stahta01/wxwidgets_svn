@@ -1,20 +1,15 @@
 @echo off
-REM ----------------------------------------------------------------------
-REM Note:  This is a 4NT script
-REM ----------------------------------------------------------------------
 setlocal
 
 set FLAGS=USE_SWIG=1 IN_CVS_TREE=1
 
 
 rem  Use non-default python?
-iff "%1" == "15" .or. "%1" == "20" .or. "%1" == "21" .or. "%1" == "22" then
+iff "%1" == "15" .or. "%1" == "20" .or. "%1" == "21" then
 	set PYTHON=c:\tools\python%1%\python.exe
 	shift
 else
-	beep
-	echo You must specify Python version as first parameter.
-	quit
+	set PYTHON=python
 endiff
 set SETUP=%PYTHON% -u setup.py
 
@@ -33,20 +28,10 @@ elseiff "%1" == "d" then
 	shift
 	set CMD=del wxPython\*.pyd
 
-rem touch all the *.i files so swig will regenerate
-elseiff "%1" == "t" then
-	shift
-	set CMD=touch src\*.i & touch contrib\glcanvas\*.i & touch contrib\ogl\*.i & touch contrib\stc\*.i
-
 rem "i" --> install
 elseiff "%1" == "i" then
 	shift
 	set CMD=%SETUP% build install
-
-rem "r" --> make installer
-elseiff "%1" == "r" then
-	shift
-	set CMD=%PYTHON% distrib\make_installer.py
 
 rem "s" --> source dist
 elseiff "%1" == "s" then
@@ -62,33 +47,6 @@ rem "h" --> HYBRID
 elseiff "%1" == "h" then
 	shift
 	set CMD=%SETUP% %FLAGS% HYBRID=1 build_ext --inplace %1 %2 %3 %4 %5 %6 %7 %8 %9
-
-rem "a" --> make all installers
-elseiff "%1" == "a" then
-	shift
-	set CMD=echo Finished!
-	call b.bat 15 c
-	call b.bat 15 f
-	call b.bat 15 r
-	call b.bat 15 c
-	call b.bat 15 h
-	call b.bat 15 r
-
-	call b.bat 21 c
-	call b.bat 21 f
-	call b.bat 21 r
-	call b.bat 21 c
-	call b.bat 21 h
-	call b.bat 21 r
-
-	rem call b.bat 22 c
-	rem call b.bat 22 f
-	rem call b.bat 22 r
-	rem call b.bat 22 c
-	rem call b.bat 22 h
-	rem call b.bat 22 r
-
-
 
 rem (no command arg) --> normal build for development
 else

@@ -35,9 +35,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 // Create a DC representing the whole screen
 wxScreenDC::wxScreenDC()
 {
-    m_hDC = ::WinOpenWindowDC(HWND_DESKTOP);
-    m_hPS = ::WinGetScreenPS(HWND_DESKTOP);
-    ::GpiSetBackMix(m_hPS, BM_LEAVEALONE);
-} // end of wxScreenDC::wxScreenDC()
+    // TODO
+}
 
+wxScreenDC::~wxScreenDC()
+{
+    // TODO
+}
 

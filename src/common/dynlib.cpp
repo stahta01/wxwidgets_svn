@@ -53,16 +53,9 @@
     // note about dlopen() flags: we use RTLD_NOW to have more Windows-like
     // behaviour (Win won't let you load a library with missing symbols) and
     // RTLD_GLOBAL because it is needed sometimes and probably doesn't hurt
-    // otherwise. On True64-Unix RTLD_GLOBAL is not allowed and on VMS the
-    // second argument on dlopen is ignored.
-#ifdef __VMS
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), 0 )
-#elif defined( __osf__ )
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY )
-#else
-# define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY | RTLD_GLOBAL)
-#endif
-#define wxDllGetSymbol(handle, name)  dlsym(handle, name)
+    // otherwise
+#   define wxDllOpen(lib)                dlopen(lib.fn_str(), RTLD_LAZY | RTLD_GLOBAL)
+#   define wxDllGetSymbol(handle, name)  dlsym(handle, name)
 #   define wxDllClose                    dlclose
 #elif defined(HAVE_SHL_LOAD)
 #   define wxDllOpen(lib)                shl_load(lib.fn_str(), BIND_DEFERRED, 0)
@@ -76,21 +69,6 @@
         else
             return (void *)0;
     }
-#elif defined(__DARWIN__)
-/* Porting notes:
- *   The dlopen port is a port from dl_next.xs by Anno Siegel.
- *   dl_next.xs is itself a port from dl_dlopen.xs by Paul Marquess.
- *   The method used here is just to supply the sun style dlopen etc.
- *   functions in terms of Darwin NS*.
- */
-void *dlopen(const char *path, int mode /* mode is ignored */);
-void *dlsym(void *handle, const char *symbol);
-int   dlclose(void *handle);
-const char *dlerror(void);
-
-#   define wxDllOpen(lib)                dlopen(lib.fn_str(), 0)
-#   define wxDllGetSymbol(handle, name)  dlsym(handle, name)
-#   define wxDllClose                    dlclose
 #elif defined(__WINDOWS__)
     // using LoadLibraryEx under Win32 to avoid name clash with LoadLibrary
 #   ifdef __WIN32__
@@ -104,8 +82,6 @@ const char *dlerror(void);
 #   endif  // Win32/16
 #   define wxDllGetSymbol(handle, name)    ::GetProcAddress(handle, name)
 #   define wxDllClose                      ::FreeLibrary
-#elif defined(__WXMAC__)
-#   define wxDllClose(handle)               CloseConnection(&handle)
 #else
 #   error "Don't know how to load shared libraries on this platform."
 #endif // OS
@@ -174,7 +150,7 @@ void wxLibrary::PrepareClasses(wxClassInfo *first)
     {
         if (info->m_className)
             classTable.Put(info->m_className, (wxObject *)info);
-        info = (wxClassInfo *)info->GetNext();
+        info = info->GetNext();
     }
 
     // Set base pointers for each wxClassInfo
@@ -222,10 +198,10 @@ wxDllLoader::GetProgramHandle(void)
 {
 #if defined( HAVE_DLOPEN ) && !defined(__EMX__)
    // optain handle for main program
-   return dlopen(NULL, RTLD_NOW/*RTLD_LAZY*/);
+   return dlopen(NULL, RTLD_NOW/*RTLD_LAZY*/); 
 #elif defined (HAVE_SHL_LOAD)
    // shl_findsymbol with NULL handle looks up in main program
-   return 0;
+   return 0; 
 #else
    wxFAIL_MSG( wxT("This method is not implemented under Windows or OS/2"));
    return 0;
@@ -238,18 +214,18 @@ wxDllLoader::LoadLibrary(const wxString & libname, bool *success)
 {
     wxDllType handle;
 
-#if defined(__WXMAC__) && !defined(__UNIX__)
+#if defined(__WXMAC__)
     FSSpec myFSSpec ;
     Ptr myMainAddr ;
     Str255 myErrName ;
 
-    wxMacFilename2FSSpec( libname , &myFSSpec ) ;
+    wxMacPathToFSSpec( libname , &myFSSpec ) ;
     if (GetDiskFragment( &myFSSpec , 0 , kCFragGoesToEOF , "\p" , kPrivateCFragCopy , &handle , &myMainAddr ,
                 myErrName ) != noErr )
     {
         p2cstr( myErrName ) ;
-        wxLogSysError( _("Failed to load shared library '%s' Error '%s'") , libname.c_str() , (char*)myErrName ) ;
-        handle = NULL ;
+        wxASSERT_MSG( 1 , (char*)myErrName ) ;
+        return NULL ;
     }
 #elif defined(__WXPM__) || defined(__EMX__)
     char zError[256] = "";
@@ -311,17 +287,13 @@ wxDllLoader::GetSymbol(wxDllType dllHandle, const wxString &name)
 {
     void *symbol = NULL;    // return value
 
-#if defined(__WXMAC__) && !defined(__UNIX__)
+#if defined( __WXMAC__ )
     Ptr symAddress ;
     CFragSymbolClass symClass ;
     Str255 symName ;
 
-#if TARGET_CARBON
-    c2pstrcpy( (StringPtr) symName , name ) ;
-#else
-    strcpy( (char *) symName , name ) ;
-	c2pstr( (char *) symName ) ;
-#endif
+    strcpy( (char*) symName , name ) ;
+    c2pstr( (char*) symName ) ;
 
     if ( FindSymbol( dllHandle , symName , &symAddress , &symClass ) == noErr )
         symbol = (void *)symAddress ;
@@ -371,7 +343,7 @@ wxLibrary *wxLibraries::LoadLibrary(const wxString& name)
     if (node != NULL)
         return ((wxLibrary *)node->Data());
 #else // !OS/2
-    if ( (node = m_loaded.Find(name.GetData())) != NULL)
+    if ( (node = m_loaded.Find(name.GetData())) )
         return ((wxLibrary *)node->Data());
 #endif
     // If DLL shares data, this is necessary.
@@ -436,101 +408,5 @@ wxObject *wxLibraries::CreateObject(const wxString& path)
     }
     return NULL;
 }
-
-#ifdef __DARWIN__
-// ---------------------------------------------------------------------------
-// For Darwin/Mac OS X
-//   supply the sun style dlopen functions in terms of Darwin NS*
-// ---------------------------------------------------------------------------
-
-extern "C" {
-#import <mach-o/dyld.h>
-};
-
-enum dyldErrorSource
-{
-    OFImage,
-};
-
-static char dl_last_error[1024];
-
-static
-void TranslateError(const char *path, enum dyldErrorSource type, int number)
-{
-    unsigned int index;
-    static char *OFIErrorStrings[] =
-    {
-	"%s(%d): Object Image Load Failure\n",
-	"%s(%d): Object Image Load Success\n",
-	"%s(%d): Not an recognisable object file\n",
-	"%s(%d): No valid architecture\n",
-	"%s(%d): Object image has an invalid format\n",
-	"%s(%d): Invalid access (permissions?)\n",
-	"%s(%d): Unknown error code from NSCreateObjectFileImageFromFile\n",
-    };
-#define NUM_OFI_ERRORS (sizeof(OFIErrorStrings) / sizeof(OFIErrorStrings[0]))
-
-    switch (type)
-    {
-     case OFImage:
-	 index = number;
-	 if (index > NUM_OFI_ERRORS - 1) {
-	     index = NUM_OFI_ERRORS - 1;
-	 }
-	 sprintf(dl_last_error, OFIErrorStrings[index], path, number);
-	 break;
-	 
-     default:
-	 sprintf(dl_last_error, "%s(%d): Totally unknown error type %d\n",
-		 path, number, type);
-	 break;
-    }
-}
-
-const char *dlerror()
-{
-    return dl_last_error;
-}
-
-void *dlopen(const char *path, int mode /* mode is ignored */)
-{
-    int dyld_result;
-    NSObjectFileImage ofile;
-    NSModule handle = NULL;
-
-    dyld_result = NSCreateObjectFileImageFromFile(path, &ofile);
-    if (dyld_result != NSObjectFileImageSuccess)
-    {
-	TranslateError(path, OFImage, dyld_result);
-    }
-    else
-    {
-	// NSLinkModule will cause the run to abort on any link error's
-	// not very friendly but the error recovery functionality is limited.
-	handle = NSLinkModule(ofile, path, TRUE);
-    }
-
-    return handle;
-}
-
-int dlclose(void *handle) /* stub only */
-{
-    return 0;
-}
-
-void *dlsym(void *handle, const char *symbol)
-{
-    void *addr;
-
-    if (NSIsSymbolNameDefined(symbol)) {
-	addr = NSAddressOfSymbol(NSLookupAndBindSymbol(symbol));
-    }
-    else {
-	addr = NULL;
-    }
-    return addr;
-}
-
-#endif // __DARWIN__
 
 #endif // wxUSE_DYNLIB_CLASS

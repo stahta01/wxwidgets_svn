@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/window.h
+// Name:        window.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -19,36 +19,36 @@
 // callback definition for inserting a window (internal)
 //-----------------------------------------------------------------------------
 
-class wxWindowGTK;
-typedef void (*wxInsertChildFunction)( wxWindowGTK*, wxWindowGTK* );
+typedef void (*wxInsertChildFunction)( wxWindow*, wxWindow* );
 
 //-----------------------------------------------------------------------------
-// wxWindowGTK
+// wxWindow
 //-----------------------------------------------------------------------------
 
-class wxWindowGTK : public wxWindowBase
+class wxWindow : public wxWindowBase
 {
+    DECLARE_DYNAMIC_CLASS(wxWindow)
+
 public:
     // creating the window
     // -------------------
-    wxWindowGTK();
-    wxWindowGTK(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                const wxString& name = wxPanelNameStr);
+    wxWindow();
+    wxWindow(wxWindow *parent,
+             wxWindowID id,
+             const wxPoint& pos = wxDefaultPosition,
+             const wxSize& size = wxDefaultSize,
+             long style = 0,
+             const wxString& name = wxPanelNameStr);
     bool Create(wxWindow *parent,
                 wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
                 const wxString& name = wxPanelNameStr);
-    virtual ~wxWindowGTK();
+    virtual ~wxWindow();
 
     // implement base class (pure) virtual methods
     // -------------------------------------------
-
     virtual bool Destroy();
 
     virtual void Raise();
@@ -86,9 +86,7 @@ public:
                                const wxFont *theFont = (const wxFont *) NULL)
                                const;
 
-#if wxUSE_MENUS_NATIVE
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
-#endif // wxUSE_MENUS_NATIVE
 
     virtual void SetScrollbar( int orient, int pos, int thumbVisible,
                                int range, bool refresh = TRUE );
@@ -116,19 +114,14 @@ public:
     /* For compatibility across platforms (not in event table) */
     void OnIdle(wxIdleEvent& WXUNUSED(event)) {};
 
-    // wxGTK-specific: called recursively by Enable,
-    // to give widgets an oppprtunity to correct their colours after they
-    // have been changed by Enable
-    virtual void OnParentEnable( bool WXUNUSED(enable) ) {};
-
     /* used by all window classes in the widget creation process */
-    bool PreCreation( wxWindowGTK *parent, const wxPoint &pos, const wxSize &size );
+    bool PreCreation( wxWindow *parent, const wxPoint &pos, const wxSize &size );
     void PostCreation();
 
     /* internal addition of child windows. differs from class
        to class not by using virtual functions but by using
        the m_insertCallback */
-    void DoAddChild(wxWindowGTK *child);
+    void DoAddChild(wxWindow *child);
 
     /* the methods below are required because many native widgets
        are composed of several subwidgets and setting a style for
@@ -159,53 +152,49 @@ public:
     // the layouting functions have to be called later on
     // (i.e. in idle time, implemented in OnInternalIdle() ).
     void GtkUpdateSize() { m_sizeSet = FALSE; }
-    
+
     // position and size of the window
     int                  m_x, m_y;
     int                  m_width, m_height;
     int                  m_oldClientWidth,m_oldClientHeight;
 
-    // see the docs in src/gtk/window.cpp
-    GtkWidget           *m_widget;          // mostly the widget seen by the rest of GTK
-    GtkWidget           *m_wxwindow;        // mostly the client area as per wxWindows
-    
-    // this widget will be queried for GTK's focus events
-    GtkWidget           *m_focusWidget;
+    /* see the docs in src/gtk/window.cpp */
+    GtkWidget           *m_widget;
+    GtkWidget           *m_wxwindow;
 
 #if HAVE_XIM
-    // XIM support for wxWindows
+    /* XIM support for wxWindows */
     GdkIC               *m_ic;
     GdkICAttr           *m_icattr;
 #endif
-
-    // scrolling stuff
+    
+    /* scrolling stuff */
     GtkAdjustment       *m_hAdjust,*m_vAdjust;
     float                m_oldHorizontalPos;
     float                m_oldVerticalPos;
 
     // extra (wxGTK-specific) flags
-    bool                 m_needParent:1;        // ! wxFrame, wxDialog, wxNotebookPage ?
-    bool                 m_noExpose:1;          // wxGLCanvas has its own redrawing
-    bool                 m_nativeSizeEvent:1;   // wxGLCanvas sends wxSizeEvent upon "alloc_size"
+    bool                 m_needParent:1;        /* ! wxFrame, wxDialog, wxNotebookPage ?  */
+    bool                 m_noExpose:1;          /* wxGLCanvas has its own redrawing */
+    bool                 m_nativeSizeEvent:1;   /* wxGLCanvas sends wxSizeEvent upon "alloc_size" */
     bool                 m_hasScrolling:1;
     bool                 m_hasVMT:1;
     bool                 m_sizeSet:1;
     bool                 m_resizing:1;
-    bool                 m_isStaticBox:1;       // faster than IS_KIND_OF
-    bool                 m_isRadioButton:1;     // faster than IS_KIND_OF
-    bool                 m_isListBox:1;         // faster than IS_KIND_OF
-    bool                 m_isFrame:1;           // faster than IS_KIND_OF
-    bool                 m_acceptsFocus:1;      // not wxStaticBox, not wxStaticBitmap etc.
+    bool                 m_isStaticBox:1;    /* faster than IS_KIND_OF */
+    bool                 m_isRadioButton:1;  /* faster than IS_KIND_OF */
+    bool                 m_isFrame:1;        /* faster than IS_KIND_OF */
+    bool                 m_acceptsFocus:1;   /* not wxStaticBox, not wxStaticBitmap etc.  */
     bool                 m_isScrolling;
-    bool                 m_clipPaintRegion;     // TRUE after ScrollWindow()
-    bool                 m_queuedFullRedraw;    // TRUE after DoMoveWindow
+    bool                 m_clipPaintRegion;  /* TRUE after ScrollWindow() */
+    bool                 m_queuedFullRedraw; /* TRUE after DoMoveWindow */
 
     // these are true if the style were set before the widget was realized
     // (typcally in the constructor) but the actual GTK style must not be set
     // before the widget has been "realized"
     bool                 m_delayedForegroundColour:1;
     bool                 m_delayedBackgroundColour:1;
-
+    
     // contains GTK's widgets internal information about non-default widget
     // font and colours. we create one for each widget that gets any
     // non-default attribute set via SetFont() or SetForegroundColour() /
@@ -237,10 +226,7 @@ public:
     void Init();
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxWindowGTK)
-    DECLARE_NO_COPY_CLASS(wxWindowGTK)
+    DECLARE_NO_COPY_CLASS(wxWindow);
 };
-
-extern wxWindow *wxFindFocusedChild(wxWindowGTK *win);
 
 #endif // __GTKWINDOWH__

@@ -30,13 +30,13 @@ class wxRegion;
 
 enum wxRegionContain
 {
-    wxOutRegion = 0,
-    wxPartRegion = 1,
+    wxOutRegion = 0, 
+    wxPartRegion = 1, 
     wxInRegion = 2
 };
 
 // So far, for internal use only
-enum wxRegionOp
+enum wxRegionOp 
 {
    wxRGN_AND,          // Creates the intersection of the two combined regions.
    wxRGN_COPY,         // Creates a copy of the region identified by hrgnSrc1.
@@ -45,22 +45,23 @@ enum wxRegionOp
    wxRGN_XOR           // Creates the union of two combined regions except for any overlapping areas.
 };
 
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // wxRegion
-// ----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class wxRegion : public wxGDIObject
 {
 public:
-    wxRegion();
     wxRegion( wxCoord x, wxCoord y, wxCoord w, wxCoord h );
     wxRegion( const wxPoint& topLeft, const wxPoint& bottomRight );
     wxRegion( const wxRect& rect );
-    wxRegion(size_t n, const wxPoint *points, int fillStyle = wxODDEVEN_RULE );
-    virtual ~wxRegion();
+    wxRegion();
+    ~wxRegion();
 
-    wxRegion( const wxRegion& r ) { Ref(r); }
-    wxRegion& operator = ( const wxRegion& r ) { Ref(r); return *this; }
+    inline wxRegion( const wxRegion& r ): wxGDIObject()
+      { Ref(r); }
+    inline wxRegion& operator = ( const wxRegion& r )
+      { Ref(r); return (*this); }
 
     bool operator == ( const wxRegion& region );
     bool operator != ( const wxRegion& region );
@@ -97,21 +98,10 @@ public:
 public:
     wxList    *GetRectList() const;
     GdkRegion *GetRegion() const;
-
-protected:
-    // helper of Intersect()
-    bool IntersectRegionOnly(const wxRegion& reg);
-
-    // call this before modifying the region
-    void Unshare();
-
+    
 private:
-    DECLARE_DYNAMIC_CLASS(wxRegion);
+  DECLARE_DYNAMIC_CLASS(wxRegion);
 };
-
-// ----------------------------------------------------------------------------
-// wxRegionIterator: decomposes a region into rectangles
-// ----------------------------------------------------------------------------
 
 class wxRegionIterator: public wxObject
 {
@@ -134,7 +124,7 @@ public:
     wxCoord GetWidth() const { return GetW(); }
     wxCoord GetH() const;
     wxCoord GetHeight() const { return GetH(); }
-    wxRect GetRect() const;
+    wxRect GetRect() const { return wxRect(GetX(), GetY(), GetWidth(), GetHeight()); }
 
 private:
     size_t   m_current;

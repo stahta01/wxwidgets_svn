@@ -10,7 +10,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-#pragma implementation "proplist_sample.h"
+// watch out for conflict with wxWindows code
+#pragma implementation "sample_proplist.h"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -22,11 +23,6 @@
 
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
-#endif
-
-
-#if !wxUSE_PROPSHEET
-#error Please set wxUSE_PROPSHEET to 1 in include/wx/msw/setup.h and recompile.
 #endif
 
 #include "proplist.h"
@@ -163,10 +159,10 @@ void MyApp::PropertyListTest(bool useDialog)
   sheet->AddProperty(new wxProperty("bill", 25.0, "real", new wxRealListValidator(0.0, 100.0)));
   sheet->AddProperty(new wxProperty("julian", "one", "string"));
   sheet->AddProperty(new wxProperty("bitmap", "none", "string", new wxFilenameListValidator("Select a bitmap file", "*.bmp")));
-  wxStringList *strings = new wxStringList(wxT("one"), wxT("two"), wxT("three"), NULL);
+  wxStringList *strings = new wxStringList("one", "two", "three", NULL);
   sheet->AddProperty(new wxProperty("constrained", "one", "string", new wxStringListValidator(strings)));
 
-  wxStringList *strings2 = new wxStringList(wxT("earth"), wxT("fire"), wxT("wind"), wxT("water"), NULL);
+  wxStringList *strings2 = new wxStringList("earth", "fire", "wind", "water", NULL);
   sheet->AddProperty(new wxProperty("string list", strings2, "stringlist"));
 
   wxPropertyListView *view =
@@ -192,7 +188,7 @@ void MyApp::PropertyListTest(bool useDialog)
 
   if (useDialog)
   {
-    view->ShowView(sheet, (wxPanel *)propDialog);
+    view->ShowView(sheet, propDialog);
     propDialog->Centre(wxBOTH);
     propDialog->Show(TRUE);
   }
@@ -217,7 +213,7 @@ void MyApp::PropertyFormTest(bool useDialog)
   sheet->AddProperty(new wxProperty("tough choice", (bool)TRUE, "bool"));
   sheet->AddProperty(new wxProperty("ian", (long)45, "integer", new wxIntegerFormValidator(-50, 50)));
   sheet->AddProperty(new wxProperty("julian", "one", "string"));
-  wxStringList *strings = new wxStringList(wxT("one"), wxT("two"), wxT("three"), NULL);
+  wxStringList *strings = new wxStringList("one", "two", "three", NULL);
   sheet->AddProperty(new wxProperty("constrained", "one", "string", new wxStringFormValidator(strings)));
 
   wxPropertyFormView *view = new wxPropertyFormView(NULL);
@@ -238,7 +234,7 @@ void MyApp::PropertyFormTest(bool useDialog)
     m_childWindow = propFrame;
   }
   
-  wxWindow *panel = propDialog ? propDialog : propFrame->GetPropertyPanel();
+  wxPanel *panel = propDialog ? propDialog : propFrame->GetPropertyPanel();
   wxLayoutConstraints* c;
 
 #if 0

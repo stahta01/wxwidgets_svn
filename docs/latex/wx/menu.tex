@@ -51,7 +51,7 @@ Constructs a wxMenu object.
 
 \docparam{title}{A title for the popup menu: the empty string denotes no title.}
 
-\docparam{style}{If set to {\tt wxMENU\_TEAROFF}, the menu will be detachable (wxGTK only).}
+\docparam{style}{If set to {\tt wxMENU\_TEAROFF}, the menu will be detachable.}
 
 \func{}{wxMenu}{\param{long}{ style}}
 
@@ -59,7 +59,7 @@ Constructs a wxMenu object.
 
 \wxheading{Parameters}
 
-\docparam{style}{If set to {\tt wxMENU\_TEAROFF}, the menu will be detachable (wxGTK only).}
+\docparam{style}{If set to {\tt wxMENU\_TEAROFF}, the menu will be detachable.}
 
 \membersection{wxMenu::\destruct{wxMenu}}
 
@@ -233,10 +233,6 @@ Finds the menu item id for a menu item string.
 
 Finds the menu item object associated with the given menu item identifier and,
 optionally, the (sub)menu it belongs to.
-
-\perlnote{In wxPerl this method takes just the {\tt id} parameter;
-in scalar context it returns the associated {\tt Wx::MenuItem}, in list
-context it returns a 2-element list ( item, submenu )}
 
 \wxheading{Parameters}
 
@@ -481,11 +477,6 @@ then the events are sent directly to the frame. This allows command and UI updat
 handling to be processed by specific windows and controls, and not necessarily
 by the application frame.
 
-{\bf Tip:} under Windows, if you discover that menu shortcuts (for example, Alt-F to show the file menu)
-are not working, check any EVT\_CHAR events you are handling in child windows.
-If you are not calling {\tt event.Skip()} for events that you don't process in these event handlers,
-menu shortcuts may cease to work.
-
 \wxheading{See also}
 
 \helpref{wxMenu}{wxmenu}, \helpref{Event handling overview}{eventhandlingoverview}
@@ -515,9 +506,6 @@ menu bar.}
 
 \pythonnote{Only the default constructor is supported in wxPython.
 Use wxMenuBar.Append instead.}
-
-\perlnote{wxPerl only supports the first contructor: 
-use {\tt Append} instead.}
 
 \membersection{wxMenuBar::\destruct{wxMenuBar}}
 

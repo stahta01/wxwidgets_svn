@@ -25,7 +25,7 @@
   class WXDLLEXPORT wxOwnerDrawn;
 
   // define the array of list box items
-  #include  "wx/dynarray.h"
+  #include  <wx/dynarray.h>
 
   WX_DEFINE_EXPORTED_ARRAY(wxOwnerDrawn *, wxListBoxItemsArray);
 #endif // wxUSE_OWNER_DRAWN
@@ -66,8 +66,7 @@ public:
                 const wxString& name = wxListBoxNameStr);
 
     virtual ~wxListBox();
-    virtual void Refresh(bool eraseBack = TRUE, const wxRect *rect = NULL);
-    
+
     // implement base class pure virtuals
     virtual void Clear();
     virtual void Delete(int n);
@@ -92,7 +91,6 @@ public:
     virtual void* DoGetItemClientData(int n) const;
     virtual void DoSetItemClientObject(int n, wxClientData* clientData);
     virtual wxClientData* DoGetItemClientObject(int n) const;
-	  virtual void  	 DoSetSize(int x, int y,int width, int height,int sizeFlags = wxSIZE_AUTO ) ;
 
     // wxCheckListBox support
 #if wxUSE_OWNER_DRAWN
@@ -114,7 +112,6 @@ public:
   	ListHandle		m_macList ;
 	wxArrayString 	m_stringArray ;
 	wxListDataArray m_dataArray ;
-	wxArrayInt m_selectionPreImage ;
 	void 			MacSetRedraw( bool doDraw ) ;
 protected:
 	void			MacDestroy() ;			
@@ -141,7 +138,7 @@ protected:
     int m_noItems;
     int m_selected;
 
-    virtual wxSize DoGetBestSize() const;
+    virtual wxSize DoGetBestSize() const ;
 
 #if wxUSE_OWNER_DRAWN
     // control items

@@ -72,9 +72,7 @@ public:
 
     wxCalendarCtrl *GetCal() const { return m_calendar; }
 
-    // turn on/off the specified style bit on the calendar control
-    void ToggleCalStyle(bool on, int style);
-
+    void StartWithMonday(bool on);
     void HighlightSpecial(bool on);
 
 private:
@@ -102,9 +100,6 @@ public:
     void OnCalAllowMonth(wxCommandEvent& event);
     void OnCalAllowYear(wxCommandEvent& event);
 
-    void OnCalSeqMonth(wxCommandEvent& event);
-    void OnCalShowSurroundingWeeks(wxCommandEvent& event);
-
     void OnAllowYearUpdate(wxUpdateUIEvent& event);
 
 private:
@@ -129,8 +124,6 @@ enum
     Calendar_Cal_Special,
     Calendar_Cal_Month,
     Calendar_Cal_Year,
-    Calendar_Cal_SeqMonth,
-    Calendar_Cal_SurroundWeeks,
     Calendar_CalCtrl = 1000,
 };
 
@@ -151,9 +144,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
     EVT_MENU(Calendar_Cal_Month, MyFrame::OnCalAllowMonth)
     EVT_MENU(Calendar_Cal_Year, MyFrame::OnCalAllowYear)
-
-    EVT_MENU(Calendar_Cal_SeqMonth, MyFrame::OnCalSeqMonth)
-    EVT_MENU(Calendar_Cal_SurroundWeeks, MyFrame::OnCalShowSurroundingWeeks)
 
     EVT_UPDATE_UI(Calendar_Cal_Year, MyFrame::OnAllowYearUpdate)
 END_EVENT_TABLE()
@@ -188,7 +178,10 @@ bool MyApp::OnInit()
     MyFrame *frame = new MyFrame("Calendar wxWindows sample",
                                  wxPoint(50, 50), wxSize(450, 340));
 
+    // Show it and tell the application that it's our main window
+    // @@@ what does it do exactly, in fact? is it necessary here?
     frame->Show(TRUE);
+    SetTopWindow(frame);
 
     // success: wxApp::OnRun() will be called which will enter the main message
     // loop and the application will run. If we returned FALSE here, the
@@ -222,15 +215,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuCal->Append(Calendar_Cal_Special, "Highlight &special dates\tCtrl-S",
                     "Test custom highlighting",
                     TRUE);
-    menuCal->Append(Calendar_Cal_SurroundWeeks,
-                    "Show s&urrounding weeks\tCtrl-W",
-                    "Show the neighbouring weeks in the prev/next month",
-                    TRUE);
     menuCal->AppendSeparator();
-    menuCal->Append(Calendar_Cal_SeqMonth,
-                    "To&ggle month selector style\tCtrl-G",
-                    "Use another style for the calendar controls",
-                    TRUE);
     menuCal->Append(Calendar_Cal_Month, "&Month can be changed\tCtrl-M",
                     "Allow changing the month in the calendar",
                     TRUE);
@@ -274,15 +259,12 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnCalMonday(wxCommandEvent& event)
 {
-    bool enable = GetMenuBar()->IsChecked(event.GetId());
-
-    m_panel->ToggleCalStyle(enable, wxCAL_MONDAY_FIRST);
+    m_panel->StartWithMonday(GetMenuBar()->IsChecked(event.GetId()));
 }
 
 void MyFrame::OnCalHolidays(wxCommandEvent& event)
 {
     bool enable = GetMenuBar()->IsChecked(event.GetId());
-
     m_panel->GetCal()->EnableHolidayDisplay(enable);
 }
 
@@ -305,20 +287,6 @@ void MyFrame::OnCalAllowYear(wxCommandEvent& event)
     m_panel->GetCal()->EnableYearChange(allow);
 }
 
-void MyFrame::OnCalSeqMonth(wxCommandEvent& event)
-{
-    bool allow = GetMenuBar()->IsChecked(event.GetId());
-
-    m_panel->ToggleCalStyle(allow, wxCAL_SEQUENTIAL_MONTH_SELECTION);
-}
-
-void MyFrame::OnCalShowSurroundingWeeks(wxCommandEvent& event)
-{
-    bool allow = GetMenuBar()->IsChecked(event.GetId());
-
-    m_panel->ToggleCalStyle(allow, wxCAL_SHOW_SURROUNDING_WEEKS);
-}
-
 void MyFrame::OnAllowYearUpdate(wxUpdateUIEvent& event)
 {
     event.Enable( GetMenuBar()->IsChecked(Calendar_Cal_Month));
@@ -334,7 +302,7 @@ MyPanel::MyPanel(wxFrame *frame)
     SetAutoLayout(TRUE);
 
     wxString date;
-    date.Printf(wxT("Selected date: %s"),
+    date.Printf("Selected date: %s",
                 wxDateTime::Today().FormatISODate().c_str());
     m_date = new wxStaticText(this, -1, date);
     m_calendar = new wxCalendarCtrl(this, Calendar_CalCtrl,
@@ -364,41 +332,41 @@ MyPanel::MyPanel(wxFrame *frame)
 
 void MyPanel::OnCalendar(wxCalendarEvent& event)
 {
-    wxLogMessage(wxT("Selected %s from calendar"),
+    wxLogMessage("Selected %s from calendar",
                  event.GetDate().FormatISODate().c_str());
 }
 
 void MyPanel::OnCalendarChange(wxCalendarEvent& event)
 {
     wxString s;
-    s.Printf(wxT("Selected date: %s"), event.GetDate().FormatISODate().c_str());
+    s.Printf("Selected date: %s", event.GetDate().FormatISODate().c_str());
 
     m_date->SetLabel(s);
 }
 
 void MyPanel::OnCalMonthChange(wxCalendarEvent& WXUNUSED(event))
 {
-    wxLogStatus(wxT("Calendar month changed"));
+    wxLogStatus("Calendar month changed");
 }
 
 void MyPanel::OnCalYearChange(wxCalendarEvent& WXUNUSED(event))
 {
-    wxLogStatus(wxT("Calendar year changed"));
+    wxLogStatus("Calendar year changed");
 }
 
 void MyPanel::OnCalendarWeekDayClick(wxCalendarEvent& event)
 {
-    wxLogMessage(wxT("Clicked on %s"),
+    wxLogMessage("Clicked on %s",
                  wxDateTime::GetWeekDayName(event.GetWeekDay()).c_str());
 }
 
-void MyPanel::ToggleCalStyle(bool on, int flag)
+void MyPanel::StartWithMonday(bool on)
 {
     long style = m_calendar->GetWindowStyle();
     if ( on )
-        style |= flag;
+        style |= wxCAL_MONDAY_FIRST;
     else
-        style &= ~flag;
+        style &= ~wxCAL_MONDAY_FIRST;
 
     m_calendar->SetWindowStyle(style);
 
@@ -427,3 +395,4 @@ void MyPanel::HighlightSpecial(bool on)
 
     m_calendar->Refresh();
 }
+

@@ -13,12 +13,6 @@
 #pragma implementation "button.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
-#include "wx/defs.h"
-
 #include "wx/button.h"
 #include "wx/utils.h"
 #include "wx/panel.h"
@@ -110,8 +104,9 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 void wxButton::SetDefault()
 {
     wxWindow *parent = GetParent();
-    if ( parent )
-        parent->SetDefaultItem(this);
+    wxPanel *panel = wxDynamicCast(parent, wxPanel);
+    if ( panel )
+        panel->SetDefaultItem(this);
 
     // We initially do not set XmNdefaultShadowThickness, to have small buttons.
     // Unfortunately, buttons are now mis-aligned. We try to correct this

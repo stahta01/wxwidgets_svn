@@ -11,7 +11,7 @@
 #pragma implementation "wxLayout.h"
 #endif
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifdef __BORLANDC__
 #  pragma hdrstop
 #endif
@@ -469,7 +469,7 @@ void MyFrame::OnPageSetup(wxCommandEvent& WXUNUSED(event))
 #endif
    wxPageSetupData data;
 
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
    wxPageSetupDialog pageSetupDialog(this, & data);
 #else
    wxGenericPageSetupDialog pageSetupDialog(this, & data);
@@ -485,7 +485,7 @@ void MyFrame::OnPrintSetupPS(wxCommandEvent& WXUNUSED(event))
 
    wxPrintData data;
 
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
    wxPrintDialog printerDialog(this, & data);
 #else
    wxGenericPrintDialog printerDialog(this, & data);
@@ -498,7 +498,7 @@ void MyFrame::OnPageSetupPS(wxCommandEvent& WXUNUSED(event))
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 
    wxPageSetupData data;
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
    wxPageSetupDialog pageSetupDialog(this, & data);
 #else
    wxGenericPageSetupDialog pageSetupDialog(this, & data);

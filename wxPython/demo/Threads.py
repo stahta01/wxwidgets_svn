@@ -71,11 +71,11 @@ class GraphWindow(wxWindow):
         for label in labels:
             self.values.append((label, 0))
 
-        font = wxFont(12, wxSWISS, wxNORMAL, wxBOLD)
-        self.SetFont(font)
+        self.font = wxFont(12, wxSWISS, wxNORMAL, wxBOLD)
+        self.SetFont(self.font)
 
         self.colors = [ wxRED, wxGREEN, wxBLUE, wxCYAN,
-                        "Yellow", "Navy" ]
+                        wxNamedColour("Yellow"), wxNamedColor("Navy") ]
 
         EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
         EVT_PAINT(self, self.OnPaint)
@@ -98,12 +98,8 @@ class GraphWindow(wxWindow):
         self.barHeight = hmax
 
 
-    def GetBestHeight(self):
-        return 2 * (self.barHeight + 1) * len(self.values)
-
-
     def Draw(self, dc, size):
-        dc.SetFont(self.GetFont())
+        dc.SetFont(self.font)
         dc.SetTextForeground(wxBLUE)
         dc.SetBackground(wxBrush(self.GetBackgroundColour()))
         dc.Clear()
@@ -165,7 +161,6 @@ class TestFrame(wxFrame):
 
         self.graph = GraphWindow(self, ['Zero', 'One', 'Two', 'Three', 'Four',
                                         'Five', 'Six', 'Seven'])
-        self.graph.SetSize((450, self.graph.GetBestHeight()))
 
         sizer = wxBoxSizer(wxVERTICAL)
         sizer.Add(panel, 0, wxEXPAND)
@@ -173,7 +168,11 @@ class TestFrame(wxFrame):
 
         self.SetSizer(sizer)
         self.SetAutoLayout(true)
-        sizer.Fit(self)
+
+        #self.graph.SetValue(0, 25)
+        #self.graph.SetValue(1, 50)
+        #self.graph.SetValue(2, 75)
+        #self.graph.SetValue(3, 100)
 
         EVT_UPDATE_BARGRAPH(self, self.OnUpdate)
         self.threads = []
@@ -199,7 +198,6 @@ class TestFrame(wxFrame):
 
     def OnCloseWindow(self, evt):
         busy = wxBusyInfo("One moment please, waiting for threads to die...")
-        wxYield()
         for t in self.threads:
             t.Stop()
         running = 1

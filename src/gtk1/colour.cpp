@@ -15,7 +15,6 @@
 #include "wx/gdicmn.h"
 
 #include <gdk/gdk.h>
-#include <gdk/gdkx.h>
 #include <gdk/gdkprivate.h>
 
 //-----------------------------------------------------------------------------
@@ -27,17 +26,17 @@ class wxColourRefData: public wxObjectRefData
 public:
     wxColourRefData();
     ~wxColourRefData();
-
+    
     void FreeColour();
     void AllocColour( GdkColormap* cmap );
 
-public:
+private:
+    friend class wxColour;
+
     GdkColor     m_color;
     GdkColormap *m_colormap;
     bool         m_hasPixel;
-
-    friend class wxColour;
-
+    
     // reference counter for systems with <= 8-Bit display
     static gushort colMapAllocCounter[ 256 ];
 };
@@ -78,20 +77,15 @@ void wxColourRefData::FreeColour()
 {
     if (m_colormap)
     {
-#ifdef __WXGTK20__
-        if ((m_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
-            (m_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#else
         GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) m_colormap;
         if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
             (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#endif
         {
             int idx = m_color.pixel;
             colMapAllocCounter[ idx ] = colMapAllocCounter[ idx ] - 1;
-        
+            
             if (colMapAllocCounter[ idx ] == 0)
-            gdk_colormap_free_colors( m_colormap, &m_color, 1 );
+                gdk_colormap_free_colors( m_colormap, &m_color, 1 );
         }
     }
 }
@@ -103,14 +97,9 @@ void wxColourRefData::AllocColour( GdkColormap *cmap )
 
     FreeColour();
     
-#ifdef __WXGTK20__
-    if ((m_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
-	(m_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#else
     GdkColormapPrivate *private_colormap = (GdkColormapPrivate*) cmap;
     if ((private_colormap->visual->type == GDK_VISUAL_GRAYSCALE) ||
         (private_colormap->visual->type == GDK_VISUAL_PSEUDO_COLOR))
-#endif
     {
         m_hasPixel = gdk_colormap_alloc_color( cmap, &m_color, FALSE, TRUE );
         int idx = m_color.pixel;
@@ -158,15 +147,8 @@ void wxColour::InitFromName( const wxString &colourName )
         m_refData = new wxColourRefData();
         if (!gdk_color_parse( colourName.mb_str(), &M_COLDATA->m_color ))
         {
-            // VZ: asserts are good in general but this one is triggered by
-            //     calling wxColourDatabase::FindColour() with an
-            //     unrecognized colour name and this can't be avoided from the
-            //     user code, so don't give it here
-            //
-            //     a better solution would be to changed code in FindColour()
-
-            //wxFAIL_MSG( wxT("wxColour: couldn't find colour") );
-
+            wxFAIL_MSG( wxT("wxColour: couldn't find colour") );
+      
             delete m_refData;
             m_refData = (wxObjectRefData *) NULL;
         }
@@ -192,16 +174,16 @@ wxColour& wxColour::operator = ( const wxColour& col )
 bool wxColour::operator == ( const wxColour& col ) const
 {
     if (m_refData == col.m_refData) return TRUE;
-
+    
     if (!m_refData) return FALSE;
     if (!col.m_refData) return FALSE;
-
+    
     GdkColor *own = &(((wxColourRefData*)m_refData)->m_color);
     GdkColor *other = &(((wxColourRefData*)col.m_refData)->m_color);
     if (own->red != other->red) return FALSE;
     if (own->blue != other->blue) return FALSE;
     if (own->green != other->green) return FALSE;
-
+    
     return TRUE;
 }
 
@@ -266,5 +248,4 @@ GdkColor *wxColour::GetColor() const
 
     return &M_COLDATA->m_color;
 }
-
 

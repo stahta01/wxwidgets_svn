@@ -43,7 +43,7 @@
 // ----------------------------------------------------------------------------
 
 // the application icon
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
     #include "mondrian.xpm"
 #endif
 
@@ -158,8 +158,6 @@ protected:
     void DrawRegions(wxDC& dc);
     void DrawCircles(wxDC& dc);
     void DrawDefault(wxDC& dc);
-
-    void DrawRegionsHelper(wxDC& dc, wxCoord x);
 
 private:
     MyFrame *m_owner;
@@ -310,9 +308,9 @@ bool MyApp::OnInit()
 
     if ( !LoadImages() )
     {
-        wxLogError(wxT("Can't load one of the bitmap files needed ")
-                   wxT("for this sample from the current or parent ")
-                   wxT("directory, please copy them there."));
+        wxLogError("Can't load one of the bitmap files needed for this sample "
+                   "from the current or parent directory, please copy them "
+                   "there.");
 
         // stop here
         DeleteBitmaps();
@@ -346,11 +344,10 @@ BEGIN_EVENT_TABLE(MyCanvas, wxScrolledWindow)
     EVT_MOTION (MyCanvas::OnMouseMove)
 END_EVENT_TABLE()
 
-#include "smile.xpm"
+#include "../image/smile.xpm"
 
-MyCanvas::MyCanvas(MyFrame *parent)
-        : wxScrolledWindow(parent, -1, wxDefaultPosition, wxDefaultSize,
-                           wxHSCROLL | wxVSCROLL | wxNO_FULL_REPAINT_ON_RESIZE)
+MyCanvas::MyCanvas( MyFrame *parent ) : 
+   wxScrolledWindow( parent, -1, wxDefaultPosition, wxDefaultSize, wxNO_FULL_REPAINT_ON_RESIZE )
 {
     m_owner = parent;
     m_show = Show_Default;
@@ -365,8 +362,8 @@ MyCanvas::MyCanvas(MyFrame *parent)
 // the colors of the monochrome bitmap pixels to the fillpattern
 //
 // I abused the the menu items for setting so called back and fore ground color
-// just to show how the those colors do influence the fillpatterns just play
-// with those, and with the code variations are endless using other logical
+// just to show how the those colors do influence the fillpatterns just play 
+// with those, and with the code variations are endless using other logical 
 // functions.
 
 void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
@@ -406,24 +403,24 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
             {
                 dc.SetLogicalFunction(wxCOPY);
 
-                dc.SetPen( wxPen( wxT("black"), 4, wxSOLID) );
+                dc.SetPen( wxPen( "black", 4, wxSOLID) );
                 dc.SetBrush( *brush4 );
                 dc.DrawPolygon(5,todraw,0,0,wxWINDING_RULE);
 
-                dc.SetPen( wxPen( wxT("red"), 4, wxSOLID) );
+                dc.SetPen( wxPen( "red", 4, wxSOLID) );
                 dc.SetBrush( *brush36 );
                 dc.SetTextForeground(*wxCYAN);
                 dc.SetTextBackground(m_owner->m_colourBackground);
                 dc.DrawRectangle( x+10, y+10, 200, 200 );
-
-                dc.SetPen( wxPen( wxT("green"), 4, wxSOLID) );
+                
+                dc.SetPen( wxPen( "green", 4, wxSOLID) );
                 dc.SetBrush( *brush4_mono );
                 dc.SetTextForeground(*wxCYAN);
                 dc.SetTextBackground(m_owner->m_colourBackground);
                 dc.DrawRectangle( x+50, y+50, 200, 200 );
-
+                
                 dc.DrawCircle( x+400, y+50, 130 );
-
+                
                 dc.SetBrush(wxNullBrush);
                 dc.SetPen(wxNullPen);
                 break;
@@ -441,7 +438,7 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
                 memDC->Clear();
                 memDC->SetBackground(wxNullBrush);
 
-                memDC->SetPen( wxPen( wxT("black"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "black", 4, wxSOLID) );
                 memDC->SetBrush( wxNullBrush);
                 memDC->SetBrush( *brush4 );
                 memDC->SetTextForeground(*wxBLACK);            // 0s --> 0x000000 (black)
@@ -463,12 +460,12 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
 
 
                 //don't understand how but the outline is also depending on logicalfunction
-                memDC->SetPen( wxPen( wxT("red"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "red", 4, wxSOLID) );
                 memDC->DrawPolygon(5,todraw2,0,0,wxWINDING_RULE);
 
                 memDC->SetLogicalFunction(wxCOPY);
 
-                memDC->SetPen( wxPen( wxT("black"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "black", 4, wxSOLID) );
                 memDC->SetBrush( wxNullBrush);
                 memDC->SetBrush( *brush36 );
                 memDC->SetTextForeground(*wxBLACK);            // 0s --> 0x000000 (black)
@@ -487,7 +484,7 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
                 memDC->SetLogicalFunction(wxOR);
 
                 //don't understand how but the outline is also depending on logicalfunction
-                memDC->SetPen( wxPen( wxT("yellow"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "yellow", 4, wxSOLID) );
                 memDC->DrawRectangle( 10, 10, 200, 200 );
 
                 memDC->SetBrush(wxNullBrush);
@@ -510,7 +507,7 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
                 memDC->Clear();
                 memDC->SetBackground(wxNullBrush);
 
-                memDC->SetPen( wxPen( wxT("black"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "black", 4, wxSOLID) );
                 memDC->SetBrush( *brush4 );
                 memDC->SetTextBackground(*wxBLACK);            // 0s --> 0x000000 (black)
                 memDC->SetTextForeground(*wxWHITE);    // 1s --> 0xFFFFFF (white)
@@ -530,12 +527,12 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
 
 
                 //don't understand how but the outline is also depending on logicalfunction
-                memDC->SetPen( wxPen( wxT("red"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "red", 4, wxSOLID) );
                 memDC->DrawPolygon(5,todraw2,0,0,wxWINDING_RULE);
 
                 memDC->SetLogicalFunction(wxCOPY);
 
-                memDC->SetPen( wxPen( wxT("black"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "black", 4, wxSOLID) );
                 memDC->SetBrush( *brush36 );
                 memDC->SetTextBackground(*wxBLACK);            // 0s --> 0x000000 (black)
                 memDC->SetTextForeground(*wxWHITE);    // 1s --> 0xFFFFFF (white)
@@ -552,7 +549,7 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
                 memDC->SetLogicalFunction(wxOR);
 
                 //don't understand how but the outline is also depending on logicalfunction
-                memDC->SetPen( wxPen( wxT("yellow"), 4, wxSOLID) );
+                memDC->SetPen( wxPen( "yellow", 4, wxSOLID) );
                 memDC->DrawRectangle( 10, 10, 200, 200 );
 
                 memDC->SetBrush(wxNullBrush);
@@ -570,39 +567,39 @@ void MyCanvas::DrawTestPoly( int x, int y,wxDC &dc,int transparent )
 
 void MyCanvas::DrawTestLines( int x, int y, int width, wxDC &dc )
 {
-    dc.SetPen( wxPen( wxT("black"), width, wxSOLID) );
+    dc.SetPen( wxPen( "black", width, wxSOLID) );
     dc.SetBrush( *wxRED_BRUSH );
-    dc.DrawText(wxString::Format(wxT("Testing lines of width %d"), width), x + 10, y - 10);
+    dc.DrawText(wxString::Format("Testing lines of width %d", width), x + 10, y - 10);
     dc.DrawRectangle( x+10, y+10, 100, 190 );
 
     dc.DrawText("Solid/dot/short dash/long dash/dot dash", x + 150, y + 10);
-    dc.SetPen( wxPen( wxT("black"), width, wxSOLID) );
+    dc.SetPen( wxPen( "black", width, wxSOLID) );
     dc.DrawLine( x+20, y+20, 100, y+20 );
-    dc.SetPen( wxPen( wxT("black"), width, wxDOT) );
+    dc.SetPen( wxPen( "black", width, wxDOT) );
     dc.DrawLine( x+20, y+30, 100, y+30 );
-    dc.SetPen( wxPen( wxT("black"), width, wxSHORT_DASH) );
+    dc.SetPen( wxPen( "black", width, wxSHORT_DASH) );
     dc.DrawLine( x+20, y+40, 100, y+40 );
-    dc.SetPen( wxPen( wxT("black"), width, wxLONG_DASH) );
+    dc.SetPen( wxPen( "black", width, wxLONG_DASH) );
     dc.DrawLine( x+20, y+50, 100, y+50 );
-    dc.SetPen( wxPen( wxT("black"), width, wxDOT_DASH) );
+    dc.SetPen( wxPen( "black", width, wxDOT_DASH) );
     dc.DrawLine( x+20, y+60, 100, y+60 );
 
     dc.DrawText("Misc hatches", x + 150, y + 70);
-    dc.SetPen( wxPen( wxT("black"), width, wxBDIAGONAL_HATCH) );
+    dc.SetPen( wxPen( "black", width, wxBDIAGONAL_HATCH) );
     dc.DrawLine( x+20, y+70, 100, y+70 );
-    dc.SetPen( wxPen( wxT("black"), width, wxCROSSDIAG_HATCH) );
+    dc.SetPen( wxPen( "black", width, wxCROSSDIAG_HATCH) );
     dc.DrawLine( x+20, y+80, 100, y+80 );
-    dc.SetPen( wxPen( wxT("black"), width, wxFDIAGONAL_HATCH) );
+    dc.SetPen( wxPen( "black", width, wxFDIAGONAL_HATCH) );
     dc.DrawLine( x+20, y+90, 100, y+90 );
-    dc.SetPen( wxPen( wxT("black"), width, wxCROSS_HATCH) );
+    dc.SetPen( wxPen( "black", width, wxCROSS_HATCH) );
     dc.DrawLine( x+20, y+100, 100, y+100 );
-    dc.SetPen( wxPen( wxT("black"), width, wxHORIZONTAL_HATCH) );
+    dc.SetPen( wxPen( "black", width, wxHORIZONTAL_HATCH) );
     dc.DrawLine( x+20, y+110, 100, y+110 );
-    dc.SetPen( wxPen( wxT("black"), width, wxVERTICAL_HATCH) );
+    dc.SetPen( wxPen( "black", width, wxVERTICAL_HATCH) );
     dc.DrawLine( x+20, y+120, 100, y+120 );
 
     dc.DrawText("User dash", x + 150, y + 140);
-    wxPen ud( wxT("black"), width, wxUSER_DASH );
+    wxPen ud( "black", width, wxUSER_DASH );
     wxDash dash1[1];
     dash1[0] = 0;
     ud.SetDashes( 1, dash1 );
@@ -622,7 +619,7 @@ void MyCanvas::DrawDefault(wxDC& dc)
 {
     // mark the origin
     dc.DrawCircle(0, 0, 10);
-#if !(defined __WXGTK__) && !(defined __WXMOTIF__) && !(defined __WXMGL__)
+#if !(defined __WXGTK__) && !(defined __WXMOTIF__)
     // not implemented in wxGTK or wxMOTIF :-(
     dc.FloodFill(0, 0, wxColour(255, 0, 0));
 #endif //
@@ -824,16 +821,14 @@ void MyCanvas::DrawText(wxDC& dc)
     dc.DrawText( "This is text", 110, 10 );
     dc.DrawRotatedText( "That is text", 20, 10, -45 );
 
-    // use wxSWISS_FONT and not wxNORMAL_FONT as the latter can't be rotated
-    // under Win9x (it is not TrueType)
-    dc.SetFont( *wxSWISS_FONT );
+    dc.SetFont( *wxNORMAL_FONT );
 
     wxString text;
     dc.SetBackgroundMode(wxTRANSPARENT);
 
     for ( int n = -180; n < 180; n += 30 )
     {
-        text.Printf(wxT("     %d rotated text"), n);
+        text.Printf("     %d rotated text", n);
         dc.DrawRotatedText(text , 400, 400, n);
     }
 
@@ -845,10 +840,10 @@ void MyCanvas::DrawText(wxDC& dc)
     long height;
     long descent;
     dc.GetTextExtent( "This is Swiss 18pt text.", &length, &height, &descent );
-    text.Printf( wxT("Dimensions are length %ld, height %ld, descent %ld"), length, height, descent );
+    text.Printf( "Dimensions are length %ld, height %ld, descent %ld", length, height, descent );
     dc.DrawText( text, 110, 80 );
 
-    text.Printf( wxT("CharHeight() returns: %d"), dc.GetCharHeight() );
+    text.Printf( "CharHeight() returns: %d", dc.GetCharHeight() );
     dc.DrawText( text, 110, 120 );
 
     dc.DrawRectangle( 100, 40, 4, height );
@@ -878,21 +873,21 @@ static const struct
     int           rop;
 } rasterOperations[] =
 {
-    { wxT("wxAND"),          wxAND           },
-    { wxT("wxAND_INVERT"),   wxAND_INVERT    },
-    { wxT("wxAND_REVERSE"),  wxAND_REVERSE   },
-    { wxT("wxCLEAR"),        wxCLEAR         },
-    { wxT("wxCOPY"),         wxCOPY          },
-    { wxT("wxEQUIV"),        wxEQUIV         },
-    { wxT("wxINVERT"),       wxINVERT        },
-    { wxT("wxNAND"),         wxNAND          },
-    { wxT("wxNO_OP"),        wxNO_OP         },
-    { wxT("wxOR"),           wxOR            },
-    { wxT("wxOR_INVERT"),    wxOR_INVERT     },
-    { wxT("wxOR_REVERSE"),   wxOR_REVERSE    },
-    { wxT("wxSET"),          wxSET           },
-    { wxT("wxSRC_INVERT"),   wxSRC_INVERT    },
-    { wxT("wxXOR"),          wxXOR           },
+    { "wxAND",          wxAND           },
+    { "wxAND_INVERT",   wxAND_INVERT    },
+    { "wxAND_REVERSE",  wxAND_REVERSE   },
+    { "wxCLEAR",        wxCLEAR         },
+    { "wxCOPY",         wxCOPY          },
+    { "wxEQUIV",        wxEQUIV         },
+    { "wxINVERT",       wxINVERT        },
+    { "wxNAND",         wxNAND          },
+    { "wxNO_OP",        wxNO_OP         },
+    { "wxOR",           wxOR            },
+    { "wxOR_INVERT",    wxOR_INVERT     },
+    { "wxOR_REVERSE",   wxOR_REVERSE    },
+    { "wxSET",          wxSET           },
+    { "wxSRC_INVERT",   wxSRC_INVERT    },
+    { "wxXOR",          wxXOR           },
 };
 
 void MyCanvas::DrawImages(wxDC& dc)
@@ -989,52 +984,32 @@ void MyCanvas::DrawCircles(wxDC& dc)
 
 void MyCanvas::DrawRegions(wxDC& dc)
 {
-    dc.DrawText("You should see a red rect partly covered by a cyan one "
-                "on the left", 10, 5);
-    dc.DrawText("and 5 smileys from which 4 are partially clipped on the "
-                "right (2 copies should be identical)",
-                10, 5 + dc.GetCharHeight());
-
-    DrawRegionsHelper(dc, 10);
-    DrawRegionsHelper(dc, 350);
-}
-
-void MyCanvas::DrawRegionsHelper(wxDC& dc, wxCoord x)
-{
-    dc.DestroyClippingRegion();
     dc.SetBrush( *wxWHITE_BRUSH );
     dc.SetPen( *wxTRANSPARENT_PEN );
-    dc.DrawRectangle( x,50,310,310 );
-
-    dc.SetClippingRegion( x+10,60,100,270 );
-
+    dc.DrawRectangle( 10,10,310,310 );
+    
+    dc.SetClippingRegion( 20,20,100,270 );
+    
     dc.SetBrush( *wxRED_BRUSH );
-    dc.DrawRectangle( x,50,310,310 );
+    dc.DrawRectangle( 10,10,310,310 );
 
-    dc.SetClippingRegion( x+10,60,100,100 );
-
+    dc.SetClippingRegion( 20,20,100,100 );
+    
     dc.SetBrush( *wxCYAN_BRUSH );
-    dc.DrawRectangle( x,50,310,310 );
+    dc.DrawRectangle( 10,10,310,310 );
 
-    // when drawing the left half, destroy the clipping region, when drawing
-    // the right one - leave it
-    //
-    // normally it shouldn't make any difference as SetClippingRegion()
-    // replaces the old clipping region
-    if ( x < 300 )
-        dc.DestroyClippingRegion();
-    dc.SetClippingRegion( x+110,70,100,270 );
-
+    dc.DestroyClippingRegion();
+    dc.SetClippingRegion( 120,30,100,270 );
+    
     dc.SetBrush( *wxGREY_BRUSH );
-    dc.DrawRectangle( x,50,310,310 );
-
+    dc.DrawRectangle( 10,10,310,310 );
+    
     if (m_smile_bmp.Ok())
     {
-        dc.DrawBitmap( m_smile_bmp, x+150, 200, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+130, 60, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+130, 330, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+100, 120, TRUE );
-        dc.DrawBitmap( m_smile_bmp, x+200, 120, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 140, 20, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 140, 290, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 110, 80, TRUE );
+        dc.DrawBitmap( m_smile_bmp, 210, 80, TRUE );
     }
 }
 
@@ -1042,7 +1017,7 @@ void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
 {
     wxPaintDC dc(this);
     PrepareDC(dc);
-
+    
     m_owner->PrepareDC(dc);
 
     dc.SetBackgroundMode( m_owner->m_backgroundMode );
@@ -1108,13 +1083,13 @@ void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
         case Show_Ops:
             DrawWithLogicalOps(dc);
             break;
-
+          
         default:
         {
           dc.SetPen( *wxBLACK_PEN );
           dc.DrawLine( 0,0,100,100 );
         }
-
+    
     }
 }
 
@@ -1128,7 +1103,7 @@ void MyCanvas::OnMouseMove(wxMouseEvent &event)
     long x = dc.DeviceToLogicalX( pos.x );
     long y = dc.DeviceToLogicalY( pos.y );
     wxString str;
-    str.Printf( wxT("Current mouse position: %d,%d"), (int)x, (int)y );
+    str.Printf( "Current mouse position: %d,%d", (int)x, (int)y );
     m_owner->SetStatusText( str );
 }
 
@@ -1150,8 +1125,7 @@ END_EVENT_TABLE()
 
 // frame constructor
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-       : wxFrame((wxFrame *)NULL, -1, title, pos, size,
-                 wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
+       : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
     // set the frame icon
     SetIcon(wxICON(mondrian));

@@ -10,7 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -96,8 +96,6 @@ public:
         { DoEnumerateFamilies(TRUE); }
     void OnEnumerateEncodings(wxCommandEvent& event);
 
-    void OnCheckNativeToFromString(wxCommandEvent& event);
-
     void OnSize(wxSizeEvent& event);
 
 protected:
@@ -138,7 +136,6 @@ enum
     Font_EnumFamilies,
     Font_EnumFixedFamilies,
     Font_EnumEncodings,
-    Font_CheckNativeToFromString,
     Font_Max
 };
 
@@ -160,7 +157,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Font_EnumFamilies, MyFrame::OnEnumerateFamilies)
     EVT_MENU(Font_EnumFixedFamilies, MyFrame::OnEnumerateFixedFamilies)
     EVT_MENU(Font_EnumEncodings, MyFrame::OnEnumerateEncodings)
-    EVT_MENU(Font_CheckNativeToFromString, MyFrame::OnCheckNativeToFromString)
 
     EVT_SIZE(MyFrame::OnSize)
 END_EVENT_TABLE()
@@ -232,9 +228,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuFont->Append(Font_EnumFamiliesForEncoding,
                      "Find font for en&coding...\tCtrl-C",
                      "Find font families for given encoding");
-    menuFont->AppendSeparator();
-    menuFont->Append(Font_CheckNativeToFromString,
-                     "Check Native Font Info To/From String");
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar;
@@ -262,10 +255,10 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 class MyEncodingEnumerator : public wxFontEnumerator
 {
 public:
-    MyEncodingEnumerator()
+    MyEncodingEnumerator() 
         { m_n = 0; }
 
-    const wxString& GetText() const
+    const wxString& GetText() const 
         { return m_text; }
 
 protected:
@@ -273,7 +266,7 @@ protected:
                                 const wxString& encoding)
     {
         wxString text;
-        text.Printf(wxT("Encoding %d: %s (available in facename '%s')\n"),
+        text.Printf("Encoding %d: %s (available in facename '%s')\n",
                     ++m_n, encoding.c_str(), facename.c_str());
         m_text += text;
         return TRUE;
@@ -290,7 +283,7 @@ void MyFrame::OnEnumerateEncodings(wxCommandEvent& WXUNUSED(event))
 
     fontEnumerator.EnumerateEncodings();
 
-    wxLogMessage(wxT("Enumerating all available encodings:\n%s"),
+    wxLogMessage("Enumerating all available encodings:\n%s",
                  fontEnumerator.GetText().c_str());
 }
 
@@ -299,10 +292,10 @@ void MyFrame::OnEnumerateEncodings(wxCommandEvent& WXUNUSED(event))
 class MyFontEnumerator : public wxFontEnumerator
 {
 public:
-    bool GotAny() const
+    bool GotAny() const 
         { return !m_facenames.IsEmpty(); }
 
-    const wxArrayString& GetFacenames() const
+    const wxArrayString& GetFacenames() const 
         { return m_facenames; }
 
 protected:
@@ -329,8 +322,8 @@ bool MyFrame::DoEnumerateFamilies(bool fixedWidthOnly,
         int nFacenames = fontEnumerator.GetFacenames().GetCount();
         if ( !silent )
         {
-            wxLogStatus(this, wxT("Found %d %sfonts"),
-                        nFacenames, fixedWidthOnly ? wxT("fixed width ") : wxT(""));
+            wxLogStatus(this, "Found %d %sfonts",
+                        nFacenames, fixedWidthOnly ? "fixed width " : "");
         }
 
         wxString facename;
@@ -368,7 +361,7 @@ bool MyFrame::DoEnumerateFamilies(bool fixedWidthOnly,
     }
     else if ( !silent )
     {
-        wxLogWarning(wxT("No such fonts found."));
+        wxLogWarning("No such fonts found.");
     }
 
     return FALSE;
@@ -389,7 +382,7 @@ void MyFrame::OnEnumerateFamiliesForEncoding(wxCommandEvent& WXUNUSED(event))
         wxFONTENCODING_CP1252,
     };
 
-    static const wxString encodingNames[] =
+    static const char *encodingNames[] =
     {
         "Western European (ISO-8859-1)",
         "Central European (ISO-8859-2)",
@@ -404,32 +397,13 @@ void MyFrame::OnEnumerateFamiliesForEncoding(wxCommandEvent& WXUNUSED(event))
 
     int n = wxGetSingleChoiceIndex("Choose an encoding", "Font demo",
                                    WXSIZEOF(encodingNames),
-                                   encodingNames,
+                                   (char **)encodingNames,
                                    this);
 
     if ( n != -1 )
     {
         DoEnumerateFamilies(FALSE, encodings[n]);
     }
-}
-
-void MyFrame::OnCheckNativeToFromString(wxCommandEvent& WXUNUSED(event))
-{
-    wxString fontInfo = m_canvas->GetTextFont().GetNativeFontInfoDesc();
-
-    if ( fontInfo.IsEmpty() )
-    {
-        wxLogError(wxT("Native font info string is empty!"));
-    }
-    else
-    {
-        wxFont *font = wxFont::New(fontInfo);
-        if ( fontInfo != font->GetNativeFontInfoDesc() )
-            wxLogError(wxT("wxNativeFontInfo ToString()/FromString() broken!"));
-        else
-            wxLogError(wxT("wxNativeFontInfo works: %s"), fontInfo.c_str());
-        delete font;
-     }
 }
 
 void MyFrame::DoResizeFont(int diff)
@@ -451,7 +425,7 @@ void MyFrame::DoResizeFont(int diff)
 
 void MyFrame::DoChangeFont(const wxFont& font, const wxColour& col)
 {
-    Resize(GetClientSize(), font);
+    Resize(GetSize(), font);
 
     m_canvas->SetTextFont(font);
     if ( col.Ok() )
@@ -526,7 +500,7 @@ void MyFrame::OnViewMsg(wxCommandEvent& WXUNUSED(event))
         if ( line.Left(len) == prefix )
         {
             // found!
-            const wxChar *pc = line.c_str() + len;
+            const char *pc = line.c_str() + len;
             if ( *pc == '"' )
                 pc++;
 
@@ -541,7 +515,7 @@ void MyFrame::OnViewMsg(wxCommandEvent& WXUNUSED(event))
 
     if ( !charset )
     {
-        wxLogError(wxT("The file '%s' doesn't contain charset information."),
+        wxLogError("The file '%s' doesn't contain charset information.",
                    filename.c_str());
 
         return;
@@ -551,21 +525,20 @@ void MyFrame::OnViewMsg(wxCommandEvent& WXUNUSED(event))
     wxFontEncoding fontenc = wxTheFontMapper->CharsetToEncoding(charset);
     if ( fontenc == wxFONTENCODING_SYSTEM )
     {
-        wxLogError(wxT("Charset '%s' is unsupported."), charset.c_str());
+        wxLogError("Charset '%s' is unsupported.", charset.c_str());
         return;
     }
 
     m_textctrl->LoadFile(filename);
 
-    if ( fontenc == wxFONTENCODING_UTF8 ||
-            !wxTheFontMapper->IsEncodingAvailable(fontenc) )
+    if (!wxTheFontMapper->IsEncodingAvailable(fontenc))
     {
         // try to find some similar encoding:
         wxFontEncoding encAlt;
         if ( wxTheFontMapper->GetAltForEncoding(fontenc, &encAlt) )
         {
             wxEncodingConverter conv;
-
+            
             if (conv.Init(fontenc, encAlt))
             {
                 fontenc = encAlt;
@@ -573,13 +546,13 @@ void MyFrame::OnViewMsg(wxCommandEvent& WXUNUSED(event))
             }
             else
             {
-                wxLogWarning(wxT("Cannot convert from '%s' to '%s'."),
+                wxLogWarning("Cannot convert from '%s' to '%s'.",
                              wxFontMapper::GetEncodingDescription(fontenc).c_str(),
                              wxFontMapper::GetEncodingDescription(encAlt).c_str());
             }
         }
         else
-            wxLogWarning(wxT("No fonts for encoding '%s' on this system."),
+            wxLogWarning("No fonts for encoding '%s' on this system.",
                          wxFontMapper::GetEncodingDescription(fontenc).c_str());
     }
 
@@ -595,7 +568,7 @@ void MyFrame::OnViewMsg(wxCommandEvent& WXUNUSED(event))
         }
         else
         {
-            wxLogWarning(wxT("No fonts for encoding '%s' on this system."),
+            wxLogWarning("No fonts for encoding '%s' on this system.",
                          wxFontMapper::GetEncodingDescription(fontenc).c_str());
         }
     }
@@ -611,7 +584,9 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnSize(wxSizeEvent& event)
 {
-    Resize(GetClientSize());
+    wxSize size = event.GetSize();
+
+    Resize(size);
 
     event.Skip();
 }
@@ -662,26 +637,18 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
     PrepareDC(dc);
 
     // set background
-    dc.SetBackground(wxBrush(wxT("white"), wxSOLID));
+    dc.SetBackground(wxBrush("white", wxSOLID));
     dc.Clear();
 
     // output the font name/info
     wxString fontInfo;
-    fontInfo.Printf(wxT("Font size is %d points, family is %s, style %s, weight %s"),
+    fontInfo.Printf("Font size is %d points, family is %s, style %s, weight %s",
                     m_font.GetPointSize(),
                     m_font.GetFamilyString().c_str(),
                     m_font.GetStyleString().c_str(),
                     m_font.GetWeightString().c_str());
 
     dc.DrawText(fontInfo, 5, 5);
-
-    if ( m_font.Ok() )
-    {
-        wxString fontDesc = m_font.GetNativeFontInfoDesc();
-        dc.SetFont(m_font);
-        fontInfo.Printf(wxT("Native font info: %s"), fontDesc.c_str());
-        dc.DrawText(fontInfo, 5, 5 + dc.GetCharHeight());
-    }
 
     // prepare to draw the font
     dc.SetFont(m_font);
@@ -700,7 +667,7 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
     {
         for ( int j = 0; j < 32; j++ )
         {
-            dc.DrawText(wxChar(32*i + j), x + w*j, y + h*i);
+            dc.DrawText(char(32*i + j), x + w*j, y + h*i);
         }
     }
 

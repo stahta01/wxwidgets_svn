@@ -24,11 +24,8 @@
 #include "wx/wx.h"
 #endif
 
-#include "wx/hash.h"
 
-#ifdef new
-#undef new
-#endif
+#include <wx/hash.h>
 
 #if wxUSE_IOSTREAMH
 #include <iostream.h>

@@ -13,12 +13,7 @@
     #pragma implementation "listbox.h"
 #endif
 
-#ifdef __VMS
-#define XtParent XTPARENT
-#define XtDisplay XTDISPLAY
-#endif
-
-# include "wx/listbox.h"
+#include "wx/listbox.h"
 #include "wx/settings.h"
 #include "wx/dynarray.h"
 #include "wx/log.h"
@@ -414,7 +409,7 @@ void wxListBox::SetSelection(int N, bool select)
     m_inSetValue = FALSE;
 }
 
-bool wxListBox::IsSelected(int N) const
+bool wxListBox::Selected(int N) const
 {
     // In Motif, no simple way to determine if the item is selected.
     wxArrayInt theSelections;

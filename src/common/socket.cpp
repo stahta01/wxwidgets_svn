@@ -481,7 +481,7 @@ wxUint32 wxSocketBase::_Write(const void *buffer, wxUint32 nbytes)
   {
     bool more = TRUE;
 
-    while (more)
+    while (more)            
     {
       if ( !(m_flags & wxSOCKET_BLOCK) && !WaitForWrite() )
         break;
@@ -1010,7 +1010,7 @@ wxUint32 wxSocketBase::GetPushback(void *buffer, wxUint32 size, bool peek)
 
 
 // ==========================================================================
-// wxSocketServer
+// wxSocketServer                             
 // ==========================================================================
 
 // --------------------------------------------------------------------------
@@ -1233,6 +1233,25 @@ wxDatagramSocket& wxDatagramSocket::SendTo( wxSockAddress& addr,
     GSocket_SetPeer(m_socket, addr.GetAddress());
     Write(buf, nBytes);
     return (*this);
+}
+
+// ==========================================================================
+// wxSocketEvent
+// ==========================================================================
+
+wxSocketEvent::wxSocketEvent(int id) : wxEvent(id)
+{
+  SetEventType( (wxEventType)wxEVT_SOCKET );
+}
+
+void wxSocketEvent::CopyObject(wxObject& object_dest) const
+{
+  wxSocketEvent *event = (wxSocketEvent *)&object_dest;
+
+  wxEvent::CopyObject(object_dest);
+
+  event->m_event      = m_event;
+  event->m_clientData = m_clientData;
 }
 
 // ==========================================================================

@@ -16,8 +16,6 @@
     #pragma interface "listctrlbase.h"
 #endif
 
-#if wxUSE_LISTCTRL
-
 // ----------------------------------------------------------------------------
 // types
 // ----------------------------------------------------------------------------
@@ -28,43 +26,6 @@ typedef int (wxCALLBACK *wxListCtrlCompare)(long item1, long item2, long sortDat
 // ----------------------------------------------------------------------------
 // wxListCtrl constants
 // ----------------------------------------------------------------------------
-
-// style flags
-#define wxLC_VRULES          0x0001
-#define wxLC_HRULES          0x0002
-
-#define wxLC_ICON            0x0004
-#define wxLC_SMALL_ICON      0x0008
-#define wxLC_LIST            0x0010
-#define wxLC_REPORT          0x0020
-
-#define wxLC_ALIGN_TOP       0x0040
-#define wxLC_ALIGN_LEFT      0x0080
-#define wxLC_AUTOARRANGE     0x0100
-#define wxLC_VIRTUAL         0x0200
-#define wxLC_EDIT_LABELS     0x0400
-#define wxLC_NO_HEADER       0x0800
-#define wxLC_NO_SORT_HEADER  0x1000
-#define wxLC_SINGLE_SEL      0x2000
-#define wxLC_SORT_ASCENDING  0x4000
-#define wxLC_SORT_DESCENDING 0x8000
-
-#define wxLC_MASK_TYPE       (wxLC_ICON | wxLC_SMALL_ICON | wxLC_LIST | wxLC_REPORT)
-#define wxLC_MASK_ALIGN      (wxLC_ALIGN_TOP | wxLC_ALIGN_LEFT)
-#define wxLC_MASK_SORT       (wxLC_SORT_ASCENDING | wxLC_SORT_DESCENDING)
-
-// for compatibility only
-#define wxLC_USER_TEXT       wxLC_VIRTUAL
-
-// Omitted because
-//  (a) too much detail
-//  (b) not enough style flags
-//  (c) not implemented anyhow in the generic version
-//
-// #define wxLC_NO_SCROLL
-// #define wxLC_NO_LABEL_WRAP
-// #define wxLC_OWNERDRAW_FIXED
-// #define wxLC_SHOW_SEL_ALWAYS
 
 // Mask flags to tell app/GUI what fields of wxListItem are valid
 #define wxLIST_MASK_STATE           0x0001
@@ -278,79 +239,25 @@ private:
 // include the wxListCtrl class declaration
 // ----------------------------------------------------------------------------
 
-#if defined(__WIN32__) && !defined(__WXUNIVERSAL__)
-    #include "wx/msw/listctrl.h"
-#else
+#if defined(__WXMSW__)
+    #ifdef __WIN16__
+        #include "wx/generic/listctrl.h"
+    #else
+        #include "wx/msw/listctrl.h"
+    #endif
+#elif defined(__WXMOTIF__)
+    #include "wx/generic/listctrl.h"
+#elif defined(__WXGTK__)
+    #include "wx/generic/listctrl.h"
+#elif defined(__WXQT__)
+    #include "wx/generic/listctrl.h"
+#elif defined(__WXMAC__)
+    #include "wx/generic/listctrl.h"
+#elif defined(__WXPM__)
+    #include "wx/generic/listctrl.h"
+#elif defined(__WXSTUBS__)
     #include "wx/generic/listctrl.h"
 #endif
-
-// ----------------------------------------------------------------------------
-// wxListView: a class which provides a better API for list control
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxListView : public wxListCtrl
-{
-public:
-    wxListView() { }
-    wxListView( wxWindow *parent,
-                wxWindowID id = -1,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = wxLC_REPORT,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString &name = "listctrl" )
-    {
-        Create(parent, id, pos, size, style, wxDefaultValidator, name);
-    }
-
-    // focus/selection stuff
-    // ---------------------
-
-    // [de]select an item
-    void Select(long n, bool on = TRUE)
-    {
-        SetItemState(n, on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED);
-    }
-
-    // focus and show the given item
-    void Focus(long index)
-    {
-        SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
-        EnsureVisible(index);
-    }
-
-    // get the currently focused item or -1 if none
-    long GetFocusedItem() const
-    {
-        return GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-    }
-
-    // get first and subsequent selected items, return -1 when no more
-    long GetNextSelected(long item) const
-        { return GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED); }
-    long GetFirstSelected() const
-        { return GetNextSelected(-1); }
-
-    // return TRUE if the item is selected
-    bool IsSelected(long index)
-        { return GetItemState(index, wxLIST_STATE_SELECTED) != 0; }
-
-    // columns
-    // -------
-
-    void SetColumnImage(int col, int image)
-    {
-        wxListItem item;
-        item.SetMask(wxLIST_MASK_IMAGE);
-        item.SetImage(image);
-        SetColumn(col, item);
-    }
-
-    void ClearColumnImage(int col) { SetColumnImage(col, -1); }
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxListView)
-};
 
 // ----------------------------------------------------------------------------
 // wxListEvent - the event class for the wxListCtrl notifications
@@ -359,18 +266,23 @@ private:
 class WXDLLEXPORT wxListEvent : public wxNotifyEvent
 {
 public:
-    wxListEvent(wxEventType commandType = wxEVT_NULL, int id = 0)
-        : wxNotifyEvent(commandType, id)
-        {
-            m_code = 0;
-            m_itemIndex =
-            m_oldItemIndex = 0;
-            m_col = 0;
-        }
+    wxListEvent(wxEventType commandType = wxEVT_NULL, int id = 0);
+
+    int           m_code;
+    long          m_itemIndex;
+    long          m_oldItemIndex;
+    int           m_col;
+    bool          m_cancelled;
+    wxPoint       m_pointDrag;
+
+    wxListItem    m_item;
 
     int GetCode() const { return m_code; }
     long GetIndex() const { return m_itemIndex; }
+    long GetOldIndex() const { return m_oldItemIndex; }
+    long GetOldItem() const { return m_oldItemIndex; }
     int GetColumn() const { return m_col; }
+    bool Cancelled() const { return m_cancelled; }
     wxPoint GetPoint() const { return m_pointDrag; }
     const wxString& GetLabel() const { return m_item.m_text; }
     const wxString& GetText() const { return m_item.m_text; }
@@ -379,89 +291,30 @@ public:
     long GetMask() const { return m_item.m_mask; }
     const wxListItem& GetItem() const { return m_item; }
 
-    // for wxEVT_COMMAND_LIST_CACHE_HINT only
-    long GetCacheFrom() const { return m_oldItemIndex; }
-    long GetCacheTo() const { return m_itemIndex; }
-
-    // these methods don't do anything at all
-#if WXWIN_COMPATIBILITY_2_2
-    long GetOldIndex() const { return 0; }
-    long GetOldItem() const { return 0; }
-#endif // WXWIN_COMPATIBILITY_2_2
-
-    virtual wxEvent *Clone() const { return new wxListEvent(*this); }
-
-//protected: -- not for backwards compatibility
-    int           m_code;
-    long          m_oldItemIndex; // only for wxEVT_COMMAND_LIST_CACHE_HINT
-    long          m_itemIndex;
-    int           m_col;
-    wxPoint       m_pointDrag;
-
-    wxListItem    m_item;
+    void CopyObject(wxObject& object_dest) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxListEvent)
 };
 
-// ----------------------------------------------------------------------------
-// wxListCtrl event macros
-// ----------------------------------------------------------------------------
-
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_DRAG, 700)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_RDRAG, 701)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT, 702)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_END_LABEL_EDIT, 703)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ITEM, 704)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS, 705)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_GET_INFO, 706)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_SET_INFO, 707)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_SELECTED, 708)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_DESELECTED, 709)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_KEY_DOWN, 710)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_INSERT_ITEM, 711)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_CLICK, 712)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, 713)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK, 714)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_ACTIVATED, 715)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_CACHE_HINT, 716)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_RIGHT_CLICK, 717)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_BEGIN_DRAG, 718)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_DRAGGING, 719)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_COL_END_DRAG, 720)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_FOCUSED, 721)
-END_DECLARE_EVENT_TYPES()
-
 typedef void (wxEvtHandler::*wxListEventFunction)(wxListEvent&);
 
-#define EVT_LIST_BEGIN_DRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_BEGIN_DRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_BEGIN_RDRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_BEGIN_RDRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_BEGIN_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_END_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_END_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_DELETE_ITEM(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_DELETE_ITEM, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_DELETE_ALL_ITEMS(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_GET_INFO(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_GET_INFO, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_SET_INFO(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_SET_INFO, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_KEY_DOWN(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_KEY_DOWN, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_INSERT_ITEM(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_INSERT_ITEM, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-
-#define EVT_LIST_COL_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_COL_RIGHT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_COL_BEGIN_DRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_BEGIN_DRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_COL_DRAGGING(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_DRAGGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_COL_END_DRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_END_DRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-
-#define EVT_LIST_ITEM_SELECTED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_SELECTED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_ITEM_DESELECTED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_DESELECTED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
-#define EVT_LIST_ITEM_RIGHT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
-#define EVT_LIST_ITEM_MIDDLE_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
-#define EVT_LIST_ITEM_ACTIVATED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
-#define EVT_LIST_ITEM_FOCUSED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_FOCUSED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
-
-#define EVT_LIST_CACHE_HINT(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_CACHE_HINT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
-
-#endif // wxUSE_LISTCTRL
+#define EVT_LIST_BEGIN_DRAG(id, fn) { wxEVT_COMMAND_LIST_BEGIN_DRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_BEGIN_RDRAG(id, fn) { wxEVT_COMMAND_LIST_BEGIN_RDRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_BEGIN_LABEL_EDIT(id, fn) { wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_END_LABEL_EDIT(id, fn) { wxEVT_COMMAND_LIST_END_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_DELETE_ITEM(id, fn) { wxEVT_COMMAND_LIST_DELETE_ITEM, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_DELETE_ALL_ITEMS(id, fn) { wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_GET_INFO(id, fn) { wxEVT_COMMAND_LIST_GET_INFO, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_SET_INFO(id, fn) { wxEVT_COMMAND_LIST_SET_INFO, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_ITEM_SELECTED(id, fn) { wxEVT_COMMAND_LIST_ITEM_SELECTED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_ITEM_DESELECTED(id, fn) { wxEVT_COMMAND_LIST_ITEM_DESELECTED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_KEY_DOWN(id, fn) { wxEVT_COMMAND_LIST_KEY_DOWN, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_INSERT_ITEM(id, fn) { wxEVT_COMMAND_LIST_INSERT_ITEM, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_COL_CLICK(id, fn) { wxEVT_COMMAND_LIST_COL_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL },
+#define EVT_LIST_ITEM_RIGHT_CLICK(id, fn) { wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL },
+#define EVT_LIST_ITEM_MIDDLE_CLICK(id, fn) { wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL },
+#define EVT_LIST_ITEM_ACTIVATED(id, fn) { wxEVT_COMMAND_LIST_ITEM_ACTIVATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL },
 
 #endif
     // _WX_LISTCTRL_H_BASE_

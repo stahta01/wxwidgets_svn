@@ -60,11 +60,6 @@
 #  endif
 #endif
 
-#if defined(__MWERKS__) && defined(__WXMSW__)
-#   undef HAVE_FTIME
-#   undef HAVE_GETTIMEOFDAY
-#endif
-
 #include <time.h>
 #ifndef __WXMAC__
     #include <sys/types.h>      // for time_t
@@ -81,7 +76,7 @@
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-#if wxUSE_GUI && wxUSE_TIMER
+#if wxUSE_GUI
     IMPLEMENT_DYNAMIC_CLASS(wxTimerEvent, wxEvent)
 #endif // wxUSE_GUI
 
@@ -108,7 +103,7 @@
 // wxTimerBase
 // ----------------------------------------------------------------------------
 
-#if wxUSE_GUI && wxUSE_TIMER
+#if wxUSE_GUI
 
 void wxTimerBase::Notify()
 {
@@ -120,33 +115,11 @@ void wxTimerBase::Notify()
     (void)m_owner->ProcessEvent(event);
 }
 
-bool wxTimerBase::Start(int milliseconds, bool oneShot)
-{
-    if ( IsRunning() )
-    {
-        // not stopping the already running timer might work for some
-        // platforms (no problems under MSW) but leads to mysterious crashes
-        // on the others (GTK), so to be on the safe side do it here
-        Stop();
-    }
-
-    if ( milliseconds != -1 )
-    {
-        m_milli = milliseconds;
-    }
-
-    m_oneShot = oneShot;
-
-    return TRUE;
-}
-
 #endif // wxUSE_GUI
 
 // ----------------------------------------------------------------------------
 // wxStopWatch
 // ----------------------------------------------------------------------------
-
-#if wxUSE_LONGLONG
 
 void wxStopWatch::Start(long t)
 {
@@ -164,13 +137,9 @@ long wxStopWatch::Time() const
     return (m_pause ? m_pause : GetElapsedTime());
 }
 
-#endif // wxUSE_LONGLONG
-
 // ----------------------------------------------------------------------------
 // old timer functions superceded by wxStopWatch
 // ----------------------------------------------------------------------------
-
-#if wxUSE_LONGLONG
 
 static wxLongLong wxStartTime = 0l;
 
@@ -192,7 +161,6 @@ long wxGetElapsedTime(bool resetTimer)
     return (newTime - oldTime).GetLo();
 }
 
-#endif // wxUSE_LONGLONG
 
 // ----------------------------------------------------------------------------
 // the functions to get the current time and timezone info
@@ -232,8 +200,7 @@ long wxGetLocalTime()
 // Get UTC time as seconds since 00:00:00, Jan 1st 1970
 long wxGetUTCTime()
 {
-    struct tm tm;
-    struct tm *ptm;
+    struct tm tm, *ptm;
     time_t t0, t1;
 
     // This cannot be made static because mktime can overwrite it
@@ -279,15 +246,14 @@ long wxGetUTCTime()
     return -1;
 }
 
-#if wxUSE_LONGLONG
 
 // Get local time as milliseconds since 00:00:00, Jan 1st 1970
 wxLongLong wxGetLocalTimeMillis()
 {
     wxLongLong val = 1000l;
 
-    // If possible, use a function which avoids conversions from
-    // broken-up time structures to milliseconds
+    // If possible, use a functin which avoids conversions from
+    // broken-up time structures to milliseconds,
 
 #if defined(HAVE_GETTIMEOFDAY)
     struct timeval tp;
@@ -335,7 +301,7 @@ wxLongLong wxGetLocalTimeMillis()
     // do NOT just shut off these warnings, drop me a line instead at
     // <guille@iies.es>
 
-    #if defined(__VISUALC__) || defined (__WATCOMC__)
+    #if defined(__VISUALC__)
         #pragma message("wxStopWatch will be up to second resolution!")
     #elif defined(__BORLANDC__)
         #pragma message "wxStopWatch will be up to second resolution!"
@@ -348,6 +314,3 @@ wxLongLong wxGetLocalTimeMillis()
 
 #endif // time functions
 }
-
-#endif // wxUSE_LONGLONG
-

@@ -146,13 +146,7 @@ if __name__ == '__main__':
 #----------------------------------------------------------------------------
 #
 # $Log$
-# Revision 1.4  2001/02/16 08:19:38  robind
-# Copied/merged from the 2.2 branch.
-#
-# Changes needed to build with new event system
-#
 # Revision 1.1.2.2  2001/01/30 20:54:16  robind
-#
 # Gobs of changes move from the main trunk to the 2.2 branch in
 # preparataion for 2.2.5 release.  See CHANGES.txt for details.
 #

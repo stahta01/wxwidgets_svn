@@ -38,8 +38,6 @@
   #include "wx/thread.h"
 #endif
 
-#include "wx/regex.h"   // for wxString::Matches()
-
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
@@ -47,6 +45,10 @@
 #ifdef __SALFORDC__
   #include <clib.h>
 #endif
+
+#if wxUSE_WCSRTOMBS
+  #include <wchar.h>    // for wcsrtombs(), see comments where it's used
+#endif // GNU
 
 #ifdef  WXSTRING_IS_WXOBJECT
   IMPLEMENT_DYNAMIC_CLASS(wxString, wxObject)
@@ -66,12 +68,6 @@
 // static class variables definition
 // ---------------------------------------------------------------------------
 
-#if defined(__VISAGECPP__) && __IBMCPP__ >= 400
-// must define this static for VA or else you get multiply defined symbols
-// everywhere
-const unsigned int wxSTRING_MAXLEN = UINT_MAX - 100;
-#endif // Visual Age
-
 #ifdef  wxSTD_STRING_COMPATIBILITY
   const size_t wxString::npos = wxSTRING_MAXLEN;
 #endif // wxSTD_STRING_COMPATIBILITY
@@ -88,6 +84,12 @@ static const struct
   wxStringData data;
   wxChar dummy;
 } g_strEmpty = { {-1, 0, 0}, wxT('\0') };
+
+#if defined(__VISAGECPP__) && __IBMCPP__ >= 400
+// must define this static for VA or else you get multiply defined symbols everywhere
+const unsigned int wxSTRING_MAXLEN = UINT_MAX - 100;
+
+#endif
 
 // empty C style string: points to 'string data' byte of g_strEmpty
 extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
@@ -114,8 +116,6 @@ extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
     #if defined(__VISUALC__) || (defined(__MINGW32__) && wxUSE_NORLANDER_HEADERS)
         #define wxVsnprintfA     _vsnprintf
     #endif
-#elif defined(__WXMAC__)
-    #define wxVsnprintfA       vsnprintf
 #else   // !Windows
     #ifdef HAVE_VSNPRINTF
         #define wxVsnprintfA       vsnprintf
@@ -130,7 +130,9 @@ extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
 
     #if defined(__VISUALC__)
         #pragma message("Using sprintf() because no snprintf()-like function defined")
-    #elif defined(__GNUG__)
+    #elif defined(__GNUG__) && !defined(__UNIX__)
+        #warning "Using sprintf() because no snprintf()-like function defined"
+    #elif defined(__MWERKS__)
         #warning "Using sprintf() because no snprintf()-like function defined"
     #endif //compiler
 #endif // no vsnprintf
@@ -151,7 +153,7 @@ extern const wxChar WXDLLEXPORT *wxEmptyString = &g_strEmpty.dummy;
 //
 // ATTN: you can _not_ use both of these in the same program!
 
-wxSTD istream& operator>>(wxSTD istream& is, wxString& WXUNUSED(str))
+istream& operator>>(istream& is, wxString& WXUNUSED(str))
 {
 #if 0
   int w = is.width(0);
@@ -182,7 +184,7 @@ wxSTD istream& operator>>(wxSTD istream& is, wxString& WXUNUSED(str))
   return is;
 }
 
-wxSTD ostream& operator<<(wxSTD ostream& os, const wxString& str)
+ostream& operator<<(ostream& os, const wxString& str)
 {
   os << str.c_str();
   return os;
@@ -199,8 +201,7 @@ extern int WXDLLEXPORT wxVsnprintf(wxChar *buf, size_t len,
     int iLen = s.PrintfV(format, argptr);
     if ( iLen != -1 )
     {
-        wxStrncpy(buf, s.c_str(), len);
-        buf[len-1] = wxT('\0');
+        wxStrncpy(buf, s.c_str(), iLen);
     }
 
     return iLen;
@@ -497,21 +498,18 @@ void wxString::Shrink()
 {
   wxStringData *pData = GetStringData();
 
-  size_t nLen = pData->nDataLength;
-  void *p = realloc(pData, sizeof(wxStringData) + (nLen + 1)*sizeof(wxChar));
+  // this variable is unused in release build, so avoid the compiler warning
+  // by just not declaring it
+#ifdef __WXDEBUG__
+  void *p =
+#endif
+  realloc(pData, sizeof(wxStringData) + (pData->nDataLength + 1)*sizeof(wxChar));
 
-  wxASSERT_MSG( p != NULL, _T("can't free memory?") );
+  // we rely on a reasonable realloc() implementation here - so far I haven't
+  // seen any which wouldn't behave like this
 
-  if ( p != pData )
-  {
-      // contrary to what one might believe, some realloc() implementation do
-      // move the memory block even when its size is reduced
-      pData = (wxStringData *)p;
-
-      m_pchData = pData->data();
-  }
-
-  pData->nAllocLength = nLen;
+  wxASSERT( p != NULL );  // can't free memory?
+  wxASSERT( p == pData ); // we're decrementing the size - block shouldn't move!
 }
 
 // get the pointer to writable buffer of (at least) nLen bytes
@@ -589,7 +587,6 @@ wxString& wxString::operator=(wxChar ch)
   AssignCopy(1, &ch);
   return *this;
 }
-
 
 // assigns C string
 wxString& wxString::operator=(const wxChar *psz)
@@ -989,22 +986,14 @@ wxString& wxString::MakeLower()
 // trimming and padding
 // ---------------------------------------------------------------------------
 
-// some compilers (VC++ 6.0 not to name them) return TRUE for a call to
-// isspace('ê') in the C locale which seems to be broken to me, but we have to
-// live with this by checking that the character is a 7 bit one - even if this
-// may fail to detect some spaces (I don't know if Unicode doesn't have
-// space-like symbols somewhere except in the first 128 chars), it is arguably
-// still better than trimming away accented letters
-inline int wxSafeIsspace(wxChar ch) { return (ch < 127) && wxIsspace(ch); }
-
 // trims spaces (in the sense of isspace) from left or right side
 wxString& wxString::Trim(bool bFromRight)
 {
   // first check if we're going to modify the string at all
   if ( !IsEmpty() &&
        (
-        (bFromRight && wxSafeIsspace(GetChar(Len() - 1))) ||
-        (!bFromRight && wxSafeIsspace(GetChar(0u)))
+        (bFromRight && wxIsspace(GetChar(Len() - 1))) ||
+        (!bFromRight && wxIsspace(GetChar(0u)))
        )
      )
   {
@@ -1015,7 +1004,7 @@ wxString& wxString::Trim(bool bFromRight)
     {
       // find last non-space character
       wxChar *psz = m_pchData + GetStringData()->nDataLength - 1;
-      while ( wxSafeIsspace(*psz) && (psz >= m_pchData) )
+      while ( wxIsspace(*psz) && (psz >= m_pchData) )
         psz--;
 
       // truncate at trailing space start
@@ -1026,7 +1015,7 @@ wxString& wxString::Trim(bool bFromRight)
     {
       // find first non-space character
       const wxChar *psz = m_pchData;
-      while ( wxSafeIsspace(*psz) )
+      while ( wxIsspace(*psz) )
         psz++;
 
       // fix up data and length
@@ -1093,26 +1082,26 @@ int wxString::Find(const wxChar *pszSub) const
 // conversion to numbers
 // ----------------------------------------------------------------------------
 
-bool wxString::ToLong(long *val, int base) const
+bool wxString::ToLong(long *val) const
 {
     wxCHECK_MSG( val, FALSE, _T("NULL pointer in wxString::ToLong") );
 
     const wxChar *start = c_str();
     wxChar *end;
-    *val = wxStrtol(start, &end, base);
+    *val = wxStrtol(start, &end, 10);
 
     // return TRUE only if scan was stopped by the terminating NUL and if the
     // string was not empty to start with
     return !*end && (end != start);
 }
 
-bool wxString::ToULong(unsigned long *val, int base) const
+bool wxString::ToULong(unsigned long *val) const
 {
     wxCHECK_MSG( val, FALSE, _T("NULL pointer in wxString::ToULong") );
 
     const wxChar *start = c_str();
     wxChar *end;
-    *val = wxStrtoul(start, &end, base);
+    *val = wxStrtoul(start, &end, 10);
 
     // return TRUE only if scan was stopped by the terminating NUL and if the
     // string was not empty to start with
@@ -1413,7 +1402,7 @@ int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
 
   // NB: wxVsnprintf() may return either less than the buffer size or -1 if
   //     there is not enough place depending on implementation
-  int iLen = wxVsnprintfA(szScratch, WXSIZEOF(szScratch), (char *)pszFormat, argptr);
+  int iLen = wxVsnprintfA(szScratch, WXSIZEOF(szScratch), pszFormat, argptr);
   if ( iLen != -1 ) {
     // the whole string is in szScratch
     *this = szScratch;
@@ -1458,77 +1447,21 @@ int wxString::PrintfV(const wxChar* pszFormat, va_list argptr)
 // of them)
 bool wxString::Matches(const wxChar *pszMask) const
 {
-#if wxUSE_REGEX
-    // first translate the shell-like mask into a regex
-    wxString pattern;
-    pattern.reserve(wxStrlen(pszMask));
-
-    pattern += _T('^');
-    while ( *pszMask )
-    {
-        switch ( *pszMask )
-        {
-            case _T('?'):
-                pattern += _T('.');
-                break;
-
-            case _T('*'):
-                pattern += _T(".*");
-                break;
-
-            case _T('^'):
-            case _T('.'):
-            case _T('$'):
-            case _T('('):
-            case _T(')'):
-            case _T('|'):
-            case _T('+'):
-            case _T('\\'):
-                // these characters are special in a RE, quote them
-                // (however note that we don't quote '[' and ']' to allow
-                // using them for Unix shell like matching)
-                pattern += _T('\\');
-                // fall through
-
-            default:
-                pattern += *pszMask;
-        }
-
-        pszMask++;
-    }
-    pattern += _T('$');
-
-    // and now use it
-    return wxRegEx(pattern, wxRE_NOSUB | wxRE_EXTENDED).Matches(c_str());
-#else // !wxUSE_REGEX
-  // TODO: this is, of course, awfully inefficient...
-
-  // the char currently being checked
-  const wxChar *pszTxt = c_str();
-
-  // the last location where '*' matched
-  const wxChar *pszLastStarInText = NULL;
-  const wxChar *pszLastStarInMask = NULL;
-
-match:
-  for ( ; *pszMask != wxT('\0'); pszMask++, pszTxt++ ) {
+  // check char by char
+  const wxChar *pszTxt;
+  for ( pszTxt = c_str(); *pszMask != wxT('\0'); pszMask++, pszTxt++ ) {
     switch ( *pszMask ) {
       case wxT('?'):
         if ( *pszTxt == wxT('\0') )
           return FALSE;
 
-        // pszTxt and pszMask will be incremented in the loop statement
+        // pszText and pszMask will be incremented in the loop statement
 
         break;
 
       case wxT('*'):
         {
-          // remember where we started to be able to backtrack later
-          pszLastStarInText = pszTxt;
-          pszLastStarInMask = pszMask;
-
           // ignore special chars immediately following this one
-          // (should this be an error?)
           while ( *pszMask == wxT('*') || *pszMask == wxT('?') )
             pszMask++;
 
@@ -1568,23 +1501,7 @@ match:
   }
 
   // match only if nothing left
-  if ( *pszTxt == wxT('\0') )
-    return TRUE;
-
-  // if we failed to match, backtrack if we can
-  if ( pszLastStarInText ) {
-    pszTxt = pszLastStarInText + 1;
-    pszMask = pszLastStarInMask;
-
-    pszLastStarInText = NULL;
-
-    // don't bother resetting pszLastStarInMask, it's unnecessary
-
-    goto match;
-  }
-
-  return FALSE;
-#endif // wxUSE_REGEX/!wxUSE_REGEX
+  return *pszTxt == wxT('\0');
 }
 
 // Count the number of chars
@@ -1928,8 +1845,6 @@ wxArrayString& wxArrayString::operator=(const wxArrayString& src)
 
   Copy(src);
 
-  m_autoSort = src.m_autoSort;
-
   return *this;
 }
 
@@ -1946,14 +1861,8 @@ void wxArrayString::Copy(const wxArrayString& src)
 void wxArrayString::Grow()
 {
   // only do it if no more place
-  if ( m_nCount == m_nSize ) {
-    // if ARRAY_DEFAULT_INITIAL_SIZE were set to 0, the initially empty would
-    // be never resized!
-    #if ARRAY_DEFAULT_INITIAL_SIZE == 0
-      #error "ARRAY_DEFAULT_INITIAL_SIZE must be > 0!"
-    #endif
-
-    if ( m_nSize == 0 ) {
+  if( m_nCount == m_nSize ) {
+    if( m_nSize == 0 ) {
       // was empty, alloc some memory
       m_nSize = ARRAY_DEFAULT_INITIAL_SIZE;
       m_pItems = new wxChar *[m_nSize];
@@ -1961,6 +1870,13 @@ void wxArrayString::Grow()
     else {
       // otherwise when it's called for the first time, nIncrement would be 0
       // and the array would never be expanded
+#if defined(__VISAGECPP__) && defined(__WXDEBUG__)
+      int array_size = ARRAY_DEFAULT_INITIAL_SIZE;
+      wxASSERT( array_size != 0 );
+#else
+      wxASSERT( ARRAY_DEFAULT_INITIAL_SIZE != 0 );
+#endif
+
       // add 50% but not too much
       size_t nIncrement = m_nSize < ARRAY_DEFAULT_INITIAL_SIZE
                           ? ARRAY_DEFAULT_INITIAL_SIZE : m_nSize >> 1;
@@ -2156,20 +2072,10 @@ void wxArrayString::Insert(const wxString& str, size_t nIndex)
   m_nCount++;
 }
 
-// expand the array
-void wxArrayString::SetCount(size_t count)
-{
-    Alloc(count);
-
-    wxString s;
-    while ( m_nCount < count )
-        m_pItems[m_nCount++] = (wxChar *)s.c_str();
-}
-
 // removes item from array (by index)
-void wxArrayString::Remove(size_t nIndex)
+void wxArrayString::RemoveAt(size_t nIndex)
 {
-  wxCHECK_RET( nIndex <= m_nCount, wxT("bad index in wxArrayString::Remove") );
+  wxCHECK_RET( nIndex <= m_nCount, wxT("bad index in wxArrayString::RemoveAt") );
 
   // release our lock
   Item(nIndex).GetStringData()->Unlock();
@@ -2178,6 +2084,12 @@ void wxArrayString::Remove(size_t nIndex)
           (m_nCount - nIndex - 1)*sizeof(wxChar *));
   m_nCount--;
 }
+
+void wxArrayString::Remove(size_t nIndex)
+{
+    RemoveAt( nIndex );
+}
+
 
 // removes item from array (by value)
 void wxArrayString::Remove(const wxChar *sz)

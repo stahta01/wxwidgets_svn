@@ -9,8 +9,7 @@
 
 
 #ifdef __GNUG__
-#pragma implementation "htmlwin.h"
-#pragma implementation "htmlproc.h"
+#pragma implementation
 #endif
 
 #include "wx/wxprec.h"
@@ -23,53 +22,21 @@
 #endif
 
 #ifndef WXPRECOMP
-    #include "wx/log.h"
-    #include "wx/intl.h"
-    #include "wx/dcclient.h"
-    #include "wx/frame.h"
+#include "wx/wx.h"
 #endif
 
 #include "wx/html/htmlwin.h"
-#include "wx/html/htmlproc.h"
-#include "wx/list.h"
+#include "wx/log.h"
 
-#include "wx/arrimpl.cpp"
-#include "wx/listimpl.cpp"
-
-//-----------------------------------------------------------------------------
-// wxHtmlHistoryItem
-//-----------------------------------------------------------------------------
-
-// item of history list
-class WXDLLEXPORT wxHtmlHistoryItem : public wxObject
-{
-public:
-    wxHtmlHistoryItem(const wxString& p, const wxString& a) {m_Page = p, m_Anchor = a, m_Pos = 0;}
-    int GetPos() const {return m_Pos;}
-    void SetPos(int p) {m_Pos = p;}
-    const wxString& GetPage() const {return m_Page;}
-    const wxString& GetAnchor() const {return m_Anchor;}
-
-private:
-    wxString m_Page;
-    wxString m_Anchor;
-    int m_Pos;
-};
-
-
-//-----------------------------------------------------------------------------
-// our private arrays:
-//-----------------------------------------------------------------------------
-
-WX_DECLARE_OBJARRAY(wxHtmlHistoryItem, wxHtmlHistoryArray);
-WX_DEFINE_OBJARRAY(wxHtmlHistoryArray);
-
-WX_DECLARE_LIST(wxHtmlProcessor, wxHtmlProcessorList);
-WX_DEFINE_LIST(wxHtmlProcessorList);
 
 //-----------------------------------------------------------------------------
 // wxHtmlWindow
 //-----------------------------------------------------------------------------
+
+
+
+#include "wx/arrimpl.cpp"
+WX_DEFINE_OBJARRAY(HtmlHistoryArray)
 
 
 wxHtmlWindow::wxHtmlWindow(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
@@ -77,23 +44,20 @@ wxHtmlWindow::wxHtmlWindow(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
 {
     m_tmpMouseMoved = FALSE;
     m_tmpLastLink = NULL;
-    m_tmpLastCell = NULL;
     m_tmpCanDrawLocks = 0;
     m_FS = new wxFileSystem();
     m_RelatedStatusBar = -1;
     m_RelatedFrame = NULL;
-    m_TitleFormat = wxT("%s");
+    m_TitleFormat = "%s";
     m_OpenedPage = m_OpenedAnchor = m_OpenedPageTitle = wxEmptyString;
     m_Cell = NULL;
     m_Parser = new wxHtmlWinParser(this);
-    m_Parser->SetFS(m_FS);
+    m_Parser -> SetFS(m_FS);
     SetBorders(10);
     m_HistoryPos = -1;
     m_HistoryOn = TRUE;
-    m_History = new wxHtmlHistoryArray;
-    m_Processors = NULL;
     m_Style = style;
-    SetPage(wxT("<html><body></body></html>"));
+    SetPage("<html><body></body></html>");
 }
 
 
@@ -106,8 +70,6 @@ wxHtmlWindow::~wxHtmlWindow()
 
     delete m_Parser;
     delete m_FS;
-    delete m_History;
-    delete m_Processors;
 }
 
 
@@ -131,9 +93,8 @@ void wxHtmlWindow::SetFonts(wxString normal_face, wxString fixed_face, const int
 {
     wxString op = m_OpenedPage;
 
-    m_Parser->SetFonts(normal_face, fixed_face, sizes);
-    // fonts changed => contents invalid, so reload the page:
-    SetPage(wxT("<html><body></body></html>"));
+    m_Parser -> SetFonts(normal_face, fixed_face, sizes);
+    SetPage(wxT("<html><body></body></html>")); // fonts changed => contents invalid
     if (!op.IsEmpty()) LoadPage(op);
 }
 
@@ -141,123 +102,75 @@ void wxHtmlWindow::SetFonts(wxString normal_face, wxString fixed_face, const int
 
 bool wxHtmlWindow::SetPage(const wxString& source)
 {
-    wxString newsrc(source);
-
-    // pass HTML through registered processors:
-    if (m_Processors || m_GlobalProcessors)
-    {
-        wxHtmlProcessorList::Node *nodeL, *nodeG;
-        int prL, prG;
-
-        nodeL = (m_Processors) ? m_Processors->GetFirst() : NULL;
-        nodeG = (m_GlobalProcessors) ? m_GlobalProcessors->GetFirst() : NULL;
-
-        // VS: there are two lists, global and local, both of them sorted by
-        //     priority. Since we have to go through _both_ lists with
-        //     decreasing priority, we "merge-sort" the lists on-line by
-        //     processing that one of the two heads that has higher priority
-        //     in every iteration
-        while (nodeL || nodeG)
-        {
-            prL = (nodeL) ? nodeL->GetData()->GetPriority() : -1;
-            prG = (nodeG) ? nodeG->GetData()->GetPriority() : -1;
-            if (prL > prG)
-            {
-                if (nodeL->GetData()->IsEnabled())
-                    newsrc = nodeL->GetData()->Process(newsrc);
-                nodeL = nodeL->GetNext();
-            }
-            else // prL <= prG
-            {
-                if (nodeG->GetData()->IsEnabled())
-                    newsrc = nodeG->GetData()->Process(newsrc);
-                nodeG = nodeG->GetNext();
-            }
-        }
-    }
-
-    // ...and run the parser on it:
     wxClientDC *dc = new wxClientDC(this);
-    dc->SetMapMode(wxMM_TEXT);
+
+    dc -> SetMapMode(wxMM_TEXT);
     SetBackgroundColour(wxColour(0xFF, 0xFF, 0xFF));
     m_OpenedPage = m_OpenedAnchor = m_OpenedPageTitle = wxEmptyString;
-    m_Parser->SetDC(dc);
-    if (m_Cell)
-    {
+    m_Parser -> SetDC(dc);
+    if (m_Cell) {
         delete m_Cell;
         m_Cell = NULL;
     }
-    m_Cell = (wxHtmlContainerCell*) m_Parser->Parse(newsrc);
+    m_Cell = (wxHtmlContainerCell*) m_Parser -> Parse(source);
     delete dc;
-    m_Cell->SetIndent(m_Borders, wxHTML_INDENT_ALL, wxHTML_UNITS_PIXELS);
-    m_Cell->SetAlignHor(wxHTML_ALIGN_CENTER);
+    m_Cell -> SetIndent(m_Borders, wxHTML_INDENT_ALL, wxHTML_UNITS_PIXELS);
+    m_Cell -> SetAlignHor(wxHTML_ALIGN_CENTER);
     CreateLayout();
-    if (m_tmpCanDrawLocks == 0)
-        Refresh();
+    if (m_tmpCanDrawLocks == 0) Refresh();
     return TRUE;
 }
 
-bool wxHtmlWindow::AppendToPage(const wxString& source)
-{
-    return SetPage(*(GetParser()->GetSource()) + source);
-}
 
 bool wxHtmlWindow::LoadPage(const wxString& location)
 {
     wxFSFile *f;
     bool rt_val;
     bool needs_refresh = FALSE;
-
+    
     SetCursor(*wxHOURGLASS_CURSOR);
     wxYield(); Refresh(FALSE);
 
     m_tmpCanDrawLocks++;
-    if (m_HistoryOn && (m_HistoryPos != -1))
-    {
-        // store scroll position into history item:
+    if (m_HistoryOn && (m_HistoryPos != -1)) { // store scroll position into history item
         int x, y;
-        GetViewStart(&x, &y);
-        (*m_History)[m_HistoryPos].SetPos(y);
+        ViewStart(&x, &y);
+        m_History[m_HistoryPos].SetPos(y);
     }
 
-    if (location[0] == wxT('#'))
-    {
-        // local anchor:
+    if (location[0] == wxT('#')) { // local anchor
         wxString anch = location.Mid(1) /*1 to end*/;
         m_tmpCanDrawLocks--;
         rt_val = ScrollToAnchor(anch);
         m_tmpCanDrawLocks++;
     }
-    else if (location.Find(wxT('#')) != wxNOT_FOUND && location.BeforeFirst(wxT('#')) == m_OpenedPage)
-    {
+    else if (location.Find(wxT('#')) != wxNOT_FOUND && location.BeforeFirst(wxT('#')) == m_OpenedPage) {
         wxString anch = location.AfterFirst(wxT('#'));
         m_tmpCanDrawLocks--;
         rt_val = ScrollToAnchor(anch);
         m_tmpCanDrawLocks++;
     }
-    else if (location.Find(wxT('#')) != wxNOT_FOUND &&
-             (m_FS->GetPath() + location.BeforeFirst(wxT('#'))) == m_OpenedPage)
-    {
+    else if (location.Find(wxT('#')) != wxNOT_FOUND && 
+             (m_FS -> GetPath() + location.BeforeFirst(wxT('#'))) == m_OpenedPage) {
         wxString anch = location.AfterFirst(wxT('#'));
         m_tmpCanDrawLocks--;
         rt_val = ScrollToAnchor(anch);
         m_tmpCanDrawLocks++;
     }
 
-    else
-    {
+    else {
         needs_refresh = TRUE;
         // load&display it:
-        if (m_RelatedStatusBar != -1)
-        {
-            m_RelatedFrame->SetStatusText(_("Connecting..."), m_RelatedStatusBar);
+        if (m_RelatedStatusBar != -1) {
+            m_RelatedFrame -> SetStatusText(_("Connecting..."), m_RelatedStatusBar);
             Refresh(FALSE);
         }
 
-        f = m_FS->OpenFile(location);
+        f = m_FS -> OpenFile(location);
+        
+        if (f == NULL) {
+            wxString err;
 
-        if (f == NULL)
-        {
             wxLogError(_("Unable to open requested HTML document: %s"), location.c_str());
             m_tmpCanDrawLocks--;
 
@@ -265,71 +178,58 @@ bool wxHtmlWindow::LoadPage(const wxString& location)
             return FALSE;
         }
 
-        else
-        {
+        else {
             wxNode *node;
             wxString src = wxEmptyString;
 
-            if (m_RelatedStatusBar != -1)
-            {
+            if (m_RelatedStatusBar != -1) {
                 wxString msg = _("Loading : ") + location;
-                m_RelatedFrame->SetStatusText(msg, m_RelatedStatusBar);
+                m_RelatedFrame -> SetStatusText(msg, m_RelatedStatusBar);
                 Refresh(FALSE);
             }
 
             node = m_Filters.GetFirst();
-            while (node)
-            {
-                wxHtmlFilter *h = (wxHtmlFilter*) node->GetData();
-                if (h->CanRead(*f))
-                {
-                    src = h->ReadFile(*f);
+            while (node){
+                wxHtmlFilter *h = (wxHtmlFilter*) node -> GetData();
+                if (h -> CanRead(*f)) {
+                    src = h -> ReadFile(*f);
                     break;
                 }
-                node = node->GetNext();
+                node = node -> GetNext();
             }
-            if (src == wxEmptyString)
-            {
+            if (src == wxEmptyString) {
                 if (m_DefaultFilter == NULL) m_DefaultFilter = GetDefaultFilter();
-                src = m_DefaultFilter->ReadFile(*f);
+                src = m_DefaultFilter -> ReadFile(*f);
             }
 
-            m_FS->ChangePathTo(f->GetLocation());
+            m_FS -> ChangePathTo(f -> GetLocation());
             rt_val = SetPage(src);
-            m_OpenedPage = f->GetLocation();
-            if (f->GetAnchor() != wxEmptyString)
-            {
+            m_OpenedPage = f -> GetLocation();
+            if (f -> GetAnchor() != wxEmptyString) {
                 wxYield();
-                ScrollToAnchor(f->GetAnchor());
+                ScrollToAnchor(f -> GetAnchor());
             }
 
             delete f;
 
-            if (m_RelatedStatusBar != -1) m_RelatedFrame->SetStatusText(_("Done"), m_RelatedStatusBar);
+            if (m_RelatedStatusBar != -1) m_RelatedFrame -> SetStatusText(_("Done"), m_RelatedStatusBar);
         }
     }
 
-    if (m_HistoryOn) // add this page to history there:
-    {
-        int c = m_History->GetCount() - (m_HistoryPos + 1);
+    if (m_HistoryOn) { // add this page to history there:
+        int c = m_History.GetCount() - (m_HistoryPos + 1);
 
-        if (m_HistoryPos < 0 ||
-            (*m_History)[m_HistoryPos].GetPage() != m_OpenedPage ||
-            (*m_History)[m_HistoryPos].GetAnchor() != m_OpenedAnchor)
-        {
-            m_HistoryPos++;
-            for (int i = 0; i < c; i++)
-                m_History->RemoveAt(m_HistoryPos);
-            m_History->Add(new wxHtmlHistoryItem(m_OpenedPage, m_OpenedAnchor));
-        }
+        m_HistoryPos++;
+        for (int i = 0; i < c; i++)
+            m_History.Remove(m_HistoryPos);
+        m_History.Add(new HtmlHistoryItem(m_OpenedPage, m_OpenedAnchor));
     }
 
     if (m_OpenedPageTitle == wxEmptyString)
         OnSetTitle(wxFileNameFromPath(m_OpenedPage));
     SetCursor(*wxSTANDARD_CURSOR);
 
-    if (needs_refresh)
-    {
+    if (needs_refresh) {    
         wxYield();
         m_tmpCanDrawLocks--;
         Refresh();
@@ -344,17 +244,16 @@ bool wxHtmlWindow::LoadPage(const wxString& location)
 
 bool wxHtmlWindow::ScrollToAnchor(const wxString& anchor)
 {
-    const wxHtmlCell *c = m_Cell->Find(wxHTML_COND_ISANCHOR, &anchor);
+    const wxHtmlCell *c = m_Cell -> Find(wxHTML_COND_ISANCHOR, &anchor);
     if (!c)
     {
         wxLogWarning(_("HTML anchor %s does not exist."), anchor.c_str());
         return FALSE;
     }
-    else
-    {
+    else {
         int y;
 
-        for (y = 0; c != NULL; c = c->GetParent()) y += c->GetPosY();
+        for (y = 0; c != NULL; c = c -> GetParent()) y += c -> GetPosY();
         Scroll(-1, y / wxHTML_SCROLL_STEP);
         m_OpenedAnchor = anchor;
         return TRUE;
@@ -364,11 +263,10 @@ bool wxHtmlWindow::ScrollToAnchor(const wxString& anchor)
 
 void wxHtmlWindow::OnSetTitle(const wxString& title)
 {
-    if (m_RelatedFrame)
-    {
+    if (m_RelatedFrame) {
         wxString tit;
         tit.Printf(m_TitleFormat, title.c_str());
-        m_RelatedFrame->SetTitle(tit);
+        m_RelatedFrame -> SetTitle(tit);
     }
     m_OpenedPageTitle = title;
 }
@@ -383,29 +281,26 @@ void wxHtmlWindow::CreateLayout()
 
     if (!m_Cell) return;
 
-    if (m_Style & wxHW_SCROLLBAR_NEVER)
-    {
-        SetScrollbars(wxHTML_SCROLL_STEP, 1, m_Cell->GetWidth() / wxHTML_SCROLL_STEP, 0); // always off
+    if (m_Style & wxHW_SCROLLBAR_NEVER) {
+        SetScrollbars(wxHTML_SCROLL_STEP, 1, m_Cell -> GetWidth() / wxHTML_SCROLL_STEP, 0); // always off
         GetClientSize(&ClientWidth, &ClientHeight);
-        m_Cell->Layout(ClientWidth);
+        m_Cell -> Layout(ClientWidth);
     }
 
     else {
         GetClientSize(&ClientWidth, &ClientHeight);
-        m_Cell->Layout(ClientWidth);
-        if (ClientHeight < m_Cell->GetHeight() + GetCharHeight())
-        {
+        m_Cell -> Layout(ClientWidth);
+        if (ClientHeight < m_Cell -> GetHeight() + GetCharHeight()) {
             SetScrollbars(
                   wxHTML_SCROLL_STEP, wxHTML_SCROLL_STEP,
-                  m_Cell->GetWidth() / wxHTML_SCROLL_STEP,
-                  (m_Cell->GetHeight() + GetCharHeight()) / wxHTML_SCROLL_STEP
+                  m_Cell -> GetWidth() / wxHTML_SCROLL_STEP,
+                  (m_Cell -> GetHeight() + GetCharHeight()) / wxHTML_SCROLL_STEP
                   /*cheat: top-level frag is always container*/);
         }
-        else /* we fit into window, no need for scrollbars */
-        {
-            SetScrollbars(wxHTML_SCROLL_STEP, 1, m_Cell->GetWidth() / wxHTML_SCROLL_STEP, 0); // disable...
+        else { /* we fit into window, no need for scrollbars */
+            SetScrollbars(wxHTML_SCROLL_STEP, 1, m_Cell -> GetWidth() / wxHTML_SCROLL_STEP, 0); // disable...
             GetClientSize(&ClientWidth, &ClientHeight);
-            m_Cell->Layout(ClientWidth); // ...and relayout
+            m_Cell -> Layout(ClientWidth); // ...and relayout
         }
     }
 }
@@ -419,24 +314,22 @@ void wxHtmlWindow::ReadCustomization(wxConfigBase *cfg, wxString path)
     int p_fontsizes[7];
     wxString p_fff, p_ffn;
 
-    if (path != wxEmptyString)
-    {
-        oldpath = cfg->GetPath();
-        cfg->SetPath(path);
+    if (path != wxEmptyString) {
+        oldpath = cfg -> GetPath();
+        cfg -> SetPath(path);
     }
 
-    m_Borders = cfg->Read(wxT("wxHtmlWindow/Borders"), m_Borders);
-    p_fff = cfg->Read(wxT("wxHtmlWindow/FontFaceFixed"), m_Parser->m_FontFaceFixed);
-    p_ffn = cfg->Read(wxT("wxHtmlWindow/FontFaceNormal"), m_Parser->m_FontFaceNormal);
-    for (int i = 0; i < 7; i++)
-    {
+    m_Borders = cfg -> Read("wxHtmlWindow/Borders", m_Borders);
+    p_fff = cfg -> Read("wxHtmlWindow/FontFaceFixed", m_Parser -> m_FontFaceFixed);
+    p_ffn = cfg -> Read("wxHtmlWindow/FontFaceNormal", m_Parser -> m_FontFaceNormal);
+    for (int i = 0; i < 7; i++) {
         tmp.Printf(wxT("wxHtmlWindow/FontsSize%i"), i);
-        p_fontsizes[i] = cfg->Read(tmp, m_Parser->m_FontsSizes[i]);
+        p_fontsizes[i] = cfg -> Read(tmp, m_Parser -> m_FontsSizes[i]);
     }
     SetFonts(p_ffn, p_fff, p_fontsizes);
 
     if (path != wxEmptyString)
-        cfg->SetPath(oldpath);
+        cfg -> SetPath(oldpath);
 }
 
 
@@ -446,23 +339,21 @@ void wxHtmlWindow::WriteCustomization(wxConfigBase *cfg, wxString path)
     wxString oldpath;
     wxString tmp;
 
-    if (path != wxEmptyString)
-    {
-        oldpath = cfg->GetPath();
-        cfg->SetPath(path);
+    if (path != wxEmptyString) {
+        oldpath = cfg -> GetPath();
+        cfg -> SetPath(path);
     }
 
-    cfg->Write(wxT("wxHtmlWindow/Borders"), (long) m_Borders);
-    cfg->Write(wxT("wxHtmlWindow/FontFaceFixed"), m_Parser->m_FontFaceFixed);
-    cfg->Write(wxT("wxHtmlWindow/FontFaceNormal"), m_Parser->m_FontFaceNormal);
-    for (int i = 0; i < 7; i++)
-    {
+    cfg -> Write("wxHtmlWindow/Borders", (long) m_Borders);
+    cfg -> Write("wxHtmlWindow/FontFaceFixed", m_Parser -> m_FontFaceFixed);
+    cfg -> Write("wxHtmlWindow/FontFaceNormal", m_Parser -> m_FontFaceNormal);
+    for (int i = 0; i < 7; i++) {
         tmp.Printf(wxT("wxHtmlWindow/FontsSize%i"), i);
-        cfg->Write(tmp, (long) m_Parser->m_FontsSizes[i]);
+        cfg -> Write(tmp, (long) m_Parser -> m_FontsSizes[i]);
     }
 
     if (path != wxEmptyString)
-        cfg->SetPath(oldpath);
+        cfg -> SetPath(oldpath);
 }
 
 
@@ -473,16 +364,10 @@ bool wxHtmlWindow::HistoryBack()
 
     if (m_HistoryPos < 1) return FALSE;
 
-    // store scroll position into history item:
-    int x, y;
-    GetViewStart(&x, &y);
-    (*m_History)[m_HistoryPos].SetPos(y);
-
-    // go to previous position:
     m_HistoryPos--;
 
-    l = (*m_History)[m_HistoryPos].GetPage();
-    a = (*m_History)[m_HistoryPos].GetAnchor();
+    l = m_History[m_HistoryPos].GetPage();
+    a = m_History[m_HistoryPos].GetAnchor();
     m_HistoryOn = FALSE;
     m_tmpCanDrawLocks++;
     if (a == wxEmptyString) LoadPage(l);
@@ -490,16 +375,11 @@ bool wxHtmlWindow::HistoryBack()
     m_HistoryOn = TRUE;
     wxYield();
     m_tmpCanDrawLocks--;
-    Scroll(0, (*m_History)[m_HistoryPos].GetPos());
+    Scroll(0, m_History[m_HistoryPos].GetPos());
     Refresh();
     return TRUE;
 }
 
-bool wxHtmlWindow::HistoryCanBack()
-{
-    if (m_HistoryPos < 1) return FALSE;
-    return TRUE ;
-}
 
 
 bool wxHtmlWindow::HistoryForward()
@@ -507,13 +387,13 @@ bool wxHtmlWindow::HistoryForward()
     wxString a, l;
 
     if (m_HistoryPos == -1) return FALSE;
-    if (m_HistoryPos >= (int)m_History->GetCount() - 1)return FALSE;
+    if (m_HistoryPos >= (int)m_History.GetCount() - 1)return FALSE;
 
     m_OpenedPage = wxEmptyString; // this will disable adding new entry into history in LoadPage()
 
     m_HistoryPos++;
-    l = (*m_History)[m_HistoryPos].GetPage();
-    a = (*m_History)[m_HistoryPos].GetAnchor();
+    l = m_History[m_HistoryPos].GetPage();
+    a = m_History[m_HistoryPos].GetAnchor();
     m_HistoryOn = FALSE;
     m_tmpCanDrawLocks++;
     if (a == wxEmptyString) LoadPage(l);
@@ -521,63 +401,17 @@ bool wxHtmlWindow::HistoryForward()
     m_HistoryOn = TRUE;
     wxYield();
     m_tmpCanDrawLocks--;
-    Scroll(0, (*m_History)[m_HistoryPos].GetPos());
+    Scroll(0, m_History[m_HistoryPos].GetPos());
     Refresh();
     return TRUE;
 }
 
-bool wxHtmlWindow::HistoryCanForward()
-{
-    if (m_HistoryPos == -1) return FALSE;
-    if (m_HistoryPos >= (int)m_History->GetCount() - 1)return FALSE;
-    return TRUE ;
-}
 
 
 void wxHtmlWindow::HistoryClear()
 {
-    m_History->Empty();
+    m_History.Empty();
     m_HistoryPos = -1;
-}
-
-void wxHtmlWindow::AddProcessor(wxHtmlProcessor *processor)
-{
-    if (!m_Processors)
-    {
-        m_Processors = new wxHtmlProcessorList;
-        m_Processors->DeleteContents(TRUE);
-    }
-    wxHtmlProcessorList::Node *node;
-
-    for (node = m_Processors->GetFirst(); node; node = node->GetNext())
-    {
-        if (processor->GetPriority() > node->GetData()->GetPriority())
-        {
-            m_Processors->Insert(node, processor);
-            return;
-        }
-    }
-    m_Processors->Append(processor);
-}
-
-/*static */ void wxHtmlWindow::AddGlobalProcessor(wxHtmlProcessor *processor)
-{
-    if (!m_GlobalProcessors)
-    {
-        m_GlobalProcessors = new wxHtmlProcessorList;
-        m_GlobalProcessors->DeleteContents(TRUE);
-    }
-    wxHtmlProcessorList::Node *node;
-
-    for (node = m_GlobalProcessors->GetFirst(); node; node = node->GetNext())
-    {
-        if (processor->GetPriority() > node->GetData()->GetPriority())
-        {
-            m_GlobalProcessors->Insert(node, processor);
-            return;
-        }
-    }
-    m_GlobalProcessors->Append(processor);
 }
 
 
@@ -586,18 +420,15 @@ wxList wxHtmlWindow::m_Filters;
 wxHtmlFilter *wxHtmlWindow::m_DefaultFilter = NULL;
 wxCursor *wxHtmlWindow::s_cur_hand = NULL;
 wxCursor *wxHtmlWindow::s_cur_arrow = NULL;
-wxHtmlProcessorList *wxHtmlWindow::m_GlobalProcessors = NULL;
 
 void wxHtmlWindow::CleanUpStatics()
 {
-    delete m_DefaultFilter;
+    if (m_DefaultFilter) delete m_DefaultFilter;
     m_DefaultFilter = NULL;
     m_Filters.DeleteContents(TRUE);
     m_Filters.Clear();
-    delete m_GlobalProcessors;
-    m_GlobalProcessors = NULL;
-    delete s_cur_hand;
-    delete s_cur_arrow;
+    if (s_cur_hand) delete s_cur_hand;
+    if (s_cur_arrow) delete s_cur_arrow;
 }
 
 
@@ -615,35 +446,33 @@ void wxHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
     LoadPage(link.GetHref());
 }
 
-void wxHtmlWindow::OnCellClicked(wxHtmlCell *cell,
-                                 wxCoord x, wxCoord y,
-                                 const wxMouseEvent& event)
-{
-    wxCHECK_RET( cell, _T("can't be called with NULL cell") );
 
-    cell->OnMouseClick(this, x, y, event);
-}
-
-void wxHtmlWindow::OnCellMouseHover(wxHtmlCell * WXUNUSED(cell),
-                                    wxCoord WXUNUSED(x), wxCoord WXUNUSED(y))
-{
-    // do nothing here
-}
 
 void wxHtmlWindow::OnDraw(wxDC& dc)
 {
-    if (m_tmpCanDrawLocks > 0 || m_Cell == NULL) return;
-
     int x, y;
-    wxRect rect = GetUpdateRegion().GetBox();
+    wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
+    int v_y, v_h;
 
+    if (m_tmpCanDrawLocks > 0) return;
+    
     dc.SetMapMode(wxMM_TEXT);
+#if 0
+/* VS - I don't think this is neccessary any longer 
+        MSC_VER 1200 means MSVC 6.0 and it works fine */
+#if defined(_MSC_VER) && (_MSC_VER == 1200)
+    ::SetMapMode((HDC)dc.GetHDC(), MM_TEXT);
+#endif
+#endif
     dc.SetBackgroundMode(wxTRANSPARENT);
-    GetViewStart(&x, &y);
+    ViewStart(&x, &y);
 
-    m_Cell->Draw(dc, 0, 0, 
-                 y * wxHTML_SCROLL_STEP + rect.GetTop(), 
-                 y * wxHTML_SCROLL_STEP + rect.GetBottom());
+    while (upd) {
+        v_y = upd.GetY();
+        v_h = upd.GetH();
+        if (m_Cell) m_Cell -> Draw(dc, 0, 0, y * wxHTML_SCROLL_STEP + v_y, y * wxHTML_SCROLL_STEP + v_h + v_y);
+        upd++;
+    }
 }
 
 
@@ -661,96 +490,63 @@ void wxHtmlWindow::OnMouseEvent(wxMouseEvent& event)
 {
     m_tmpMouseMoved = TRUE;
 
-    if (event.ButtonDown())
-    {
-        if ( m_Cell )
-        {
-            int sx, sy;
-            GetViewStart(&sx, &sy);
-            sx *= wxHTML_SCROLL_STEP;
-            sy *= wxHTML_SCROLL_STEP;
+    if (event.ButtonDown()) {
+        int sx, sy;
+        wxPoint pos;
+        wxString lnk;
 
-            wxPoint pos = event.GetPosition();
-            pos.x += sx;
-            pos.y += sy;
+        ViewStart(&sx, &sy); sx *= wxHTML_SCROLL_STEP; sy *= wxHTML_SCROLL_STEP;
+        pos = event.GetPosition();
 
-            wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
-
-            // VZ: is it possible that we don't find anything at all?
-            // VS: yes. FindCellByPos returns terminal cell and
-            //     containers may have empty borders
-            if ( cell )
-                OnCellClicked(cell, pos.x, pos.y, event);
-        }
+        if (m_Cell)
+            m_Cell -> OnMouseClick(this, sx + pos.x, sy + pos.y, event);
     }
 }
 
 
 
-void wxHtmlWindow::OnIdle(wxIdleEvent& WXUNUSED(event))
+void wxHtmlWindow::OnIdle(wxIdleEvent& event)
 {
-    if (s_cur_hand == NULL)
+    if (s_cur_hand == NULL) 
     {
         s_cur_hand = new wxCursor(wxCURSOR_HAND);
         s_cur_arrow = new wxCursor(wxCURSOR_ARROW);
     }
 
-    if (m_tmpMouseMoved && (m_Cell != NULL))
-    {
+    if (m_tmpMouseMoved && (m_Cell != NULL)) {
         int sx, sy;
-        GetViewStart(&sx, &sy);
-        sx *= wxHTML_SCROLL_STEP;
-        sy *= wxHTML_SCROLL_STEP;
-
         int x, y;
+        wxHtmlLinkInfo *lnk;
+
+        ViewStart(&sx, &sy); sx *= wxHTML_SCROLL_STEP; sy *= wxHTML_SCROLL_STEP;
         wxGetMousePosition(&x, &y);
         ScreenToClient(&x, &y);
-        x += sx;
-        y += sy;
+        lnk = m_Cell -> GetLink(sx + x, sy + y);
 
-        wxHtmlCell *cell = m_Cell->FindCellByPos(x, y);
-        if ( cell != m_tmpLastCell )
-        {
-            wxHtmlLinkInfo *lnk = cell ? cell->GetLink(x, y) : NULL;
-
-            if (lnk != m_tmpLastLink)
-            {
-                if (lnk == NULL)
-                {
-                    SetCursor(*s_cur_arrow);
-                    if (m_RelatedStatusBar != -1)
-                        m_RelatedFrame->SetStatusText(wxEmptyString, m_RelatedStatusBar);
-                }
-                else
-                {
-                    SetCursor(*s_cur_hand);
-                    if (m_RelatedStatusBar != -1)
-                        m_RelatedFrame->SetStatusText(lnk->GetHref(), m_RelatedStatusBar);
-                }
-                m_tmpLastLink = lnk;
+        if (lnk != m_tmpLastLink) {
+            if (lnk == NULL) {
+                SetCursor(*s_cur_arrow);
+                if (m_RelatedStatusBar != -1) m_RelatedFrame -> SetStatusText(wxEmptyString, m_RelatedStatusBar);
             }
-
-            m_tmpLastCell = cell;
+            else {
+                SetCursor(*s_cur_hand);
+                if (m_RelatedStatusBar != -1) 
+                    m_RelatedFrame -> SetStatusText(lnk -> GetHref(), m_RelatedStatusBar);
+            }
+            m_tmpLastLink = lnk;
         }
-        else // mouse moved but stayed in the same cell
-        {
-            if ( cell )
-                OnCellMouseHover(cell, x, y);
-        }
-
         m_tmpMouseMoved = FALSE;
     }
 }
 
 
-IMPLEMENT_ABSTRACT_CLASS(wxHtmlProcessor,wxObject)
+
 
 IMPLEMENT_DYNAMIC_CLASS(wxHtmlWindow,wxScrolledWindow)
 
 BEGIN_EVENT_TABLE(wxHtmlWindow, wxScrolledWindow)
     EVT_SIZE(wxHtmlWindow::OnSize)
     EVT_LEFT_DOWN(wxHtmlWindow::OnMouseEvent)
-    EVT_RIGHT_DOWN(wxHtmlWindow::OnMouseEvent)
     EVT_MOTION(wxHtmlWindow::OnMouseEvent)
     EVT_IDLE(wxHtmlWindow::OnIdle)
 END_EVENT_TABLE()
@@ -779,5 +575,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxHtmlWinModule, wxModule)
 // (wxHTML doesn't work without handlers from these files)
 #include "wx/html/forcelnk.h"
 FORCE_WXHTML_MODULES()
+
 
 #endif

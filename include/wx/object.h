@@ -52,47 +52,42 @@ typedef wxObject * (*wxObjectConstructorFn) (void);
 
 class WXDLLEXPORT wxClassInfo
 {
-public:
-   wxClassInfo(const wxChar *cName,
-               const wxChar *baseName1,
-               const wxChar *baseName2,
-               int sz,
-               wxObjectConstructorFn fn);
+ public:
+   wxClassInfo(wxChar *cName, wxChar *baseName1, wxChar *baseName2, int sz, wxObjectConstructorFn fn);
 
    wxObject *CreateObject(void);
 
-   const wxChar *GetClassName() const { return m_className; }
-   const wxChar *GetBaseClassName1() const { return m_baseClassName1; }
-   const wxChar *GetBaseClassName2() const { return m_baseClassName2; }
-   const wxClassInfo* GetBaseClass1() const { return m_baseInfo1; }
-   const wxClassInfo* GetBaseClass2() const { return m_baseInfo2; }
-   int GetSize() const { return m_objectSize; }
-   wxObjectConstructorFn GetConstructor() const { return m_objectConstructor; }
-   static const wxClassInfo* GetFirst() { return sm_first; }
-   const wxClassInfo* GetNext() const { return m_next; }
-   bool IsKindOf(const wxClassInfo *info) const;
+   inline wxChar *GetClassName(void) const { return m_className; }
+   inline wxChar *GetBaseClassName1(void) const { return m_baseClassName1; }
+   inline wxChar *GetBaseClassName2(void) const { return m_baseClassName2; }
+   inline wxClassInfo* GetBaseClass1() const { return m_baseInfo1; }
+   inline wxClassInfo* GetBaseClass2() const { return m_baseInfo2; }
+   inline int GetSize(void) const { return m_objectSize; }
+   inline wxObjectConstructorFn GetConstructor() const { return m_objectConstructor; }
+   static inline wxClassInfo* GetFirst() { return sm_first; }
+   inline wxClassInfo* GetNext() const { return m_next; }
+   bool IsKindOf(wxClassInfo *info) const;
 
-   static wxClassInfo *FindClass(const wxChar *c);
+   static wxClassInfo *FindClass(wxChar *c);
 
    // Initializes parent pointers and hash table for fast searching.
-   static void InitializeClasses();
+   static void InitializeClasses(void);
 
    // Cleans up hash table used for fast searching.
-   static void CleanUpClasses();
+   static void CleanUpClasses(void);
 
 public:
-   const wxChar*            m_className;
-   const wxChar*            m_baseClassName1;
-   const wxChar*            m_baseClassName2;
+   wxChar*                  m_className;
+   wxChar*                  m_baseClassName1;
+   wxChar*                  m_baseClassName2;
    int                      m_objectSize;
    wxObjectConstructorFn    m_objectConstructor;
 
    // Pointers to base wxClassInfos: set in InitializeClasses
-   const wxClassInfo*       m_baseInfo1;
-   const wxClassInfo*       m_baseInfo2;
+   // called from wx_main.cc
+   wxClassInfo*             m_baseInfo1;
+   wxClassInfo*             m_baseInfo2;
 
-   // class info object live in a linked list: pointers to its head and the
-   // next element in it
    static wxClassInfo*      sm_first;
    wxClassInfo*             m_next;
 
@@ -175,13 +170,6 @@ wxObject* WXDLLEXPORT_CTORFN wxConstructorFor##name(void) \
         ? (className *)(obj) \
         : (className *)0)
 
-// The 'this' pointer is always true, so use this version to cast the this
-// pointer and avoid compiler warnings.
-#define wxDynamicCastThis(className) \
-        (IsKindOf(&className::sm_class##className) \
-        ? (className *)(this) \
-        : (className *)0)
-
 #define wxConstCast(obj, className) ((className *)(obj))
 
 #ifdef __WXDEBUG__
@@ -198,14 +186,12 @@ wxObject* WXDLLEXPORT_CTORFN wxConstructorFor##name(void) \
 #endif // Debug/!Debug
 
 // Unfortunately Borland seems to need this include.
-#if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
 #ifdef __BORLANDC__
     #if wxUSE_IOSTREAMH
         #include <iostream.h>
     #else
         #include <iostream>
     #endif
-#endif
 #endif
 
 class WXDLLEXPORT wxObjectRefData;
@@ -221,40 +207,36 @@ class WXDLLEXPORT wxObject
   virtual ~wxObject(void);
 
   virtual wxClassInfo *GetClassInfo(void) const { return &sm_classwxObject; }
+  wxObject *Clone(void) const;
+  virtual void CopyObject(wxObject& object_dest) const;
 
   bool IsKindOf(wxClassInfo *info) const;
 
 #if defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING
   void * operator new (size_t size, wxChar * fileName = NULL, int lineNum = 0);
-#  if defined(__VISAGECPP__)
-#    if __DEBUG_ALLOC__
-       void operator delete (void * buf,const char * _fname, size_t _line);
-#    endif  //__DEBUG_ALLOC__
-#  else // Everybody else
-    void operator delete (void * buf);
-#  endif // end of VISAGECPP
+  void operator delete (void * buf);
 
 // VC++ 6.0
-#  if defined(__VISUALC__) && (__VISUALC__ >= 1200)
-    void operator delete(void *buf, wxChar*, int);
-#  endif
+#if defined(__VISUALC__) && (__VISUALC__ >= 1200)
+  void operator delete(void *buf, wxChar*, int);
+#endif
 
     // Causes problems for VC++
-#  if wxUSE_ARRAY_MEMORY_OPERATORS && !defined(__VISUALC__) && !defined( __MWERKS__)
-    void * operator new[] (size_t size, wxChar * fileName = NULL, int lineNum = 0);
-    void operator delete[] (void * buf);
-#  endif
+#if wxUSE_ARRAY_MEMORY_OPERATORS && !defined(__VISUALC__) && !defined( __MWERKS__)
+  void * operator new[] (size_t size, wxChar * fileName = NULL, int lineNum = 0);
+  void operator delete[] (void * buf);
+#endif
 
-#  ifdef __MWERKS__
-    void * operator new[] (size_t size, wxChar * fileName , int lineNum = 0);
-    void * operator new[] (size_t size) { return operator new[] ( size , NULL , 0 ) ; }
-    void operator delete[] (void * buf);
-#  endif
+#ifdef __MWERKS__
+  void * operator new[] (size_t size, wxChar * fileName , int lineNum = 0);
+  void * operator new[] (size_t size) { return operator new[] ( size , NULL , 0 ) ; }
+  void operator delete[] (void * buf);
+#endif
 
 #endif // Debug & memory tracing
 
 #if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
-  virtual void Dump(wxSTD ostream& str);
+  virtual void Dump(ostream& str);
 #endif
 
 #if wxUSE_SERIAL

@@ -43,7 +43,7 @@
 // --------------------------------------------------------------------------
 
 // the application icon
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
 #  include "mondrian.xpm"
 #endif
 
@@ -210,7 +210,8 @@ MyFrame::MyFrame() : wxFrame((wxFrame *)NULL, -1,
 
   // Make a textctrl for logging
   m_text  = new wxTextCtrl(this, -1,
-                           _("Welcome to wxSocket demo: Client\nClient ready\n"),
+                           _("Welcome to wxSocket demo: Client\n"
+                             "Client ready\n"),
                            wxDefaultPosition, wxDefaultSize,
                            wxTE_MULTILINE | wxTE_READONLY);
 
@@ -244,7 +245,8 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-  wxMessageBox(_("wxSocket demo: Client\n(c) 1999 Guillermo Rodriguez Garcia\n"),
+  wxMessageBox(_("wxSocket demo: Client\n"
+                 "(c) 1999 Guillermo Rodriguez Garcia\n"),
                _("About Client"),
                wxOK | wxICON_INFORMATION, this);
 }
@@ -332,8 +334,8 @@ void MyFrame::OnOpenConnection(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
 {
-  const wxChar *buf1;
-  wxChar       *buf2;
+  const char *buf1;
+  char       *buf2;
   unsigned char len;
 
   // Disable socket menu entries (exception: Close Session)
@@ -361,8 +363,8 @@ void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
   m_sock->SetFlags(wxSOCKET_WAITALL);
 
   buf1 = _("Test string (less than 256 chars!)");
-  len  = (wxStrlen(buf1) + 1) * sizeof(wxChar);
-  buf2 = new wxChar[wxStrlen(buf1) + 1];
+  len  = wxStrlen(buf1) + 1;
+  buf2 = new char[len];
 
   m_text->AppendText(_("Sending a test buffer to the server ..."));
   m_sock->Write(&len, 1);
@@ -393,8 +395,8 @@ void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnTest2(wxCommandEvent& WXUNUSED(event))
 {
-  const wxChar *msg1;
-  wxChar *msg2;
+  char *msg1;
+  char *msg2;
   size_t len;
 
   // Disable socket menu entries (exception: Close Session)
@@ -421,9 +423,9 @@ void MyFrame::OnTest2(wxCommandEvent& WXUNUSED(event))
     _("Test 2 ..."),
     _("Yes I like wxWindows!"));
 
-  msg1 = s.c_str();
-  len  = (wxStrlen(msg1) + 1) * sizeof(wxChar);
-  msg2 = new wxChar[wxStrlen(msg1) + 1];
+  msg1 = (char *)s.c_str();
+  len  = wxStrlen(msg1) + 1;
+  msg2 = new char[len];
 
   m_text->AppendText(_("Sending the string with WriteMsg ..."));
   m_sock->WriteMsg(msg1, len);
@@ -564,7 +566,9 @@ void MyFrame::OnTestURL(wxCommandEvent& WXUNUSED(event))
 
   // Print the contents type and file size
   wxString s;
-  s.Printf(_("Contents type: %s\nFile size: %i\nStarting to download...\n"),
+  s.Printf(_("Contents type: %s\n"
+             "File size: %i\n"
+             "Starting to download...\n"),
              url.GetProtocol().GetContentType().c_str(),
              data->GetSize());
   m_text->AppendText(s);

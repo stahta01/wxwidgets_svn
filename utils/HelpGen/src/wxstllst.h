@@ -17,9 +17,7 @@
 #endif
 
 #include <stddef.h>
-#if !defined(__WXMAC__) || defined(__DARWIN__)
-#  include <sys/types.h>
-#endif
+#include <sys/types.h>
 #include <memory.h>
 #include <limits.h>
 #include <new.h>

@@ -34,7 +34,6 @@ option ProjectOptions = gen(arch, "pentium2"), lang(longlong, "yes"),  gen(mangl
       source "COMMON\\db.cpp"
       source "COMMON\\dbtable.cpp"
       source "COMMON\\dcbase.cpp"
-      source "COMMON\\dircmn.cpp"
       source "COMMON\\dlgcmn.cpp"
       source "COMMON\\dndcmn.cpp"
       source "COMMON\\dobjcmn.cpp"
@@ -52,7 +51,6 @@ option ProjectOptions = gen(arch, "pentium2"), lang(longlong, "yes"),  gen(mangl
       source "COMMON\\file.cpp"
       source "COMMON\\fileconf.cpp"
       source "COMMON\\filefn.cpp"
-      source "COMMON\\filename.cpp"
       source "COMMON\\filesys.cpp"
       source "COMMON\\fontcmn.cpp"
       source "COMMON\\fontmap.cpp"
@@ -76,7 +74,6 @@ option ProjectOptions = gen(arch, "pentium2"), lang(longlong, "yes"),  gen(mangl
       source "COMMON\\imagpng.cpp"
       source "COMMON\\imagpnm.cpp"
       source "COMMON\\imagtiff.cpp"
-      source "COMMON\\imagxpm.cpp"
       source "COMMON\\intl.cpp"
       source "COMMON\\ipcbase.cpp"
       source "COMMON\\layout.cpp"
@@ -96,7 +93,6 @@ option ProjectOptions = gen(arch, "pentium2"), lang(longlong, "yes"),  gen(mangl
       source "COMMON\\prntbase.cpp"
       source "COMMON\\process.cpp"
       source "COMMON\\protocol.cpp"
-      source "COMMON\\quantize.cpp"
       source "COMMON\\resource.cpp"
       source "COMMON\\sckaddr.cpp"
       source "COMMON\\sckfile.cpp"
@@ -113,7 +109,6 @@ option ProjectOptions = gen(arch, "pentium2"), lang(longlong, "yes"),  gen(mangl
       source "COMMON\\textfile.cpp"
       source "COMMON\\timercmn.cpp"
       source "COMMON\\tokenzr.cpp"
-      source "COMMON\\treelist.cpp"
       source "COMMON\\txtstrm.cpp"
       option report(level, "E")
       {
@@ -144,7 +139,6 @@ option ProjectOptions = gen(arch, "pentium2"), lang(longlong, "yes"),  gen(mangl
       source "GENERIC\\DRAGIMGG.CPP"
       source "GENERIC\\FONTDLGG.CPP"
       source "GENERIC\\GRID.CPP"
-      source "GENERIC\\GRIDCTRL.CPP"
       source "GENERIC\\GRIDSEL.CPP"
       source "GENERIC\\HELPEXT.CPP"
       source "GENERIC\\HELPHTML.CPP"
@@ -230,10 +224,6 @@ option ProjectOptions = gen(arch, "pentium2"), lang(longlong, "yes"),  gen(mangl
       option report(level, "E")
       {
          source type("c") "OS2\\GSOCKET.C"
-      }
-      option report(level, "E")
-      {
-         source type("c") "OS2\\GSOCKPM.C"
       }
       source "OS2\\HELPWIN.CPP"
       source "OS2\\ICON.CPP"

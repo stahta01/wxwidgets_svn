@@ -50,27 +50,16 @@
 
 #ifndef __TWIN32__
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
-    #include <commctrl.h>
-#else
+#ifdef __GNUWIN32_OLD__
     #include "wx/msw/gnuwin32/extra.h"
+#else
+    #include <commctrl.h>
 #endif
 
 #endif // __TWIN32__
 
 #include "wx/msw/dib.h"
 #include "wx/app.h"         // for GetComCtl32Version
-
-#if defined(__MWERKS__) && defined(__WXMSW__)
-// including <windef.h> for max definition doesn't seem
-// to work using CodeWarrior 6 Windows. So we define it
-// here. (Otherwise we get a undefined identifier 'max'
-// later on in this file.) (Added by dimitri@shortcut.nl)
-#   ifndef max
-#       define max(a,b)            (((a) > (b)) ? (a) : (b))
-#   endif
-
-#endif
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -120,13 +109,13 @@
 // ----------------------------------------------------------------------------
 
 // adjust toolbar bitmap colours
-// static void wxMapBitmap(HBITMAP hBitmap, int width, int height);
+static void wxMapBitmap(HBITMAP hBitmap, int width, int height);
 
 // ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarBase)
+IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxControl)
 
 BEGIN_EVENT_TABLE(wxToolBar, wxToolBarBase)
     EVT_MOUSE_EVENTS(wxToolBar::OnMouseEvent)
@@ -207,8 +196,6 @@ void wxToolBar::Init()
 
     m_defaultWidth = DEFAULTBITMAPX;
     m_defaultHeight = DEFAULTBITMAPY;
-
-    m_pInTool = 0;
 }
 
 bool wxToolBar::Create(wxWindow *parent,
@@ -218,20 +205,14 @@ bool wxToolBar::Create(wxWindow *parent,
                        long style,
                        const wxString& name)
 {
-    // toolbars never have border, giving one to them results in broken
-    // appearance
-    style &= ~wxBORDER_MASK;
-    style |= wxBORDER_NONE;
-
     // common initialisation
     if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
     // prepare flags
     DWORD msflags = 0;      // WS_VISIBLE | WS_CHILD always included
-
-   if ( style & wxCLIP_SIBLINGS )
-        msflags |= WS_CLIPSIBLINGS;
+    if (style & wxBORDER)
+        msflags |= WS_BORDER;
 
 #ifdef TBSTYLE_TOOLTIPS
     msflags |= TBSTYLE_TOOLTIPS;
@@ -280,8 +261,11 @@ wxToolBar::~wxToolBar()
 {
     // we must refresh the frame size when the toolbar is deleted but the frame
     // is not - otherwise toolbar leaves a hole in the place it used to occupy
+    //
+    // NB: a frame is being deleted only if it is not any longer in
+    //     wxTopLevelWindows list
     wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
-    if ( frame && !frame->IsBeingDeleted() )
+    if ( frame && wxTopLevelWindows.Find(frame) )
     {
         frame->SendSizeEvent();
     }
@@ -409,7 +393,8 @@ bool wxToolBar::Realize()
     wxMemoryDC dcAllButtons;
     wxBitmap bitmap(totalBitmapWidth, totalBitmapHeight);
     dcAllButtons.SelectObject(bitmap);
-    dcAllButtons.SetBackground(*wxLIGHT_GREY_BRUSH);
+    wxColour colTbar = wxSystemSettings::GetSystemColour(wxSYS_COLOUR_BTNFACE);
+    dcAllButtons.SetBackground(wxBrush(colTbar, wxSOLID));
     dcAllButtons.Clear();
 
     m_hBitmap = bitmap.GetHBITMAP();
@@ -449,8 +434,14 @@ bool wxToolBar::Realize()
             if ( bmp.Ok() )
             {
 #if USE_BITMAP_MASKS
-                // notice the last parameter: do use mask
-                dcAllButtons.DrawBitmap(tool->GetBitmap1(), x, 0, TRUE);
+                // blit the bitmap to the DC with the mask
+                wxBitmap bmpTool = tool->GetBitmap1();
+                if ( !bmpTool.GetMask() )
+                {
+                    // it doesn't have mask - create a default one
+                    bmpTool.SetMask(new wxMask(bmpTool, *wxLIGHT_GREY));
+                }
+                dcAllButtons.DrawBitmap(bmpTool, x, 0, TRUE);
 #else // !USE_BITMAP_MASKS
                 HBITMAP hbmp = GetHbitmapOf(bmp);
                 HBITMAP oldBitmap2 = (HBITMAP)::SelectObject(memoryDC2, hbmp);
@@ -487,10 +478,11 @@ bool wxToolBar::Realize()
     ::SelectObject(memoryDC, oldBitmap);
     ::DeleteDC(memoryDC);
     ::DeleteDC(memoryDC2);
+
 #endif // USE_BITMAP_MASKS/!USE_BITMAP_MASKS
 
     // Map to system colours
-    MapBitmap((WXHBITMAP) hBitmap, totalBitmapWidth, totalBitmapHeight);
+    wxMapBitmap(hBitmap, totalBitmapWidth, totalBitmapHeight);
 
     int bitmapId = 0;
 
@@ -534,7 +526,7 @@ bool wxToolBar::Realize()
         {
             if ( !::SendMessage(GetHwnd(), TB_DELETEBUTTON, 0, 0) )
             {
-                wxLogDebug(wxT("TB_DELETEBUTTON failed"));
+                wxLogLastError(wxT("TB_DELETEBUTTON"));
             }
         }
 
@@ -615,18 +607,19 @@ bool wxToolBar::Realize()
     // ------------------------------
 
     // adjust the controls size to fit nicely in the toolbar
-    int y = 0;
     size_t index = 0;
     for ( node = m_tools.GetFirst(); node; node = node->GetNext(), index++ )
     {
         wxToolBarToolBase *tool = node->GetData();
-
-        // we calculate the running y coord for vertical toolbars so we need to
-        // get the items size for all items but for the horizontal ones we
-        // don't need to deal with the non controls
-        bool isControl = tool->IsControl();
-        if ( !isControl && !isVertical )
+        if ( !tool->IsControl() )
             continue;
+
+        wxControl *control = tool->GetControl();
+
+        wxSize size = control->GetSize();
+
+        // the position of the leftmost controls corner
+        int left = -1;
 
         // note that we use TB_GETITEMRECT and not TB_GETRECT because the
         // latter only appeared in v4.70 of comctl32.dll
@@ -637,75 +630,60 @@ bool wxToolBar::Realize()
             wxLogLastError(wxT("TB_GETITEMRECT"));
         }
 
-        if ( !isControl )
-        {
-            // can only be control if isVertical
-            y += r.bottom - r.top;
-
-            continue;
-        }
-
-        wxControl *control = tool->GetControl();
-
-        wxSize size = control->GetSize();
-
-        // the position of the leftmost controls corner
-        int left = -1;
-
         // TB_SETBUTTONINFO message is only supported by comctl32.dll 4.71+
-#if defined(_WIN32_IE) && (_WIN32_IE >= 0x400 )
-        // available in headers, now check whether it is available now
-        // (during run-time)
-        if ( wxTheApp->GetComCtl32Version() >= 471 )
-        {
-            // set the (underlying) separators width to be that of the
-            // control
-            TBBUTTONINFO tbbi;
-            tbbi.cbSize = sizeof(tbbi);
-            tbbi.dwMask = TBIF_SIZE;
-            tbbi.cx = size.x;
-            if ( !SendMessage(GetHwnd(), TB_SETBUTTONINFO,
-                              tool->GetId(), (LPARAM)&tbbi) )
+        #if defined(_WIN32_IE) && (_WIN32_IE >= 0x400 )
+            // available in headers, now check whether it is available now
+            // (during run-time)
+            if ( wxTheApp->GetComCtl32Version() >= 471 )
             {
-                // the id is probably invalid?
-                wxLogLastError(wxT("TB_SETBUTTONINFO"));
-            }
-        }
-        else
-#endif // comctl32.dll 4.71
-        // TB_SETBUTTONINFO unavailable
-        {
-            // try adding several separators to fit the controls width
-            int widthSep = r.right - r.left;
-            left = r.left;
-
-            TBBUTTON tbb;
-            wxZeroMemory(tbb);
-            tbb.idCommand = 0;
-            tbb.fsState = TBSTATE_ENABLED;
-            tbb.fsStyle = TBSTYLE_SEP;
-
-            size_t nSeparators = size.x / widthSep;
-            for ( size_t nSep = 0; nSep < nSeparators; nSep++ )
-            {
-                if ( !SendMessage(GetHwnd(), TB_INSERTBUTTON,
-                                  index, (LPARAM)&tbb) )
+                // set the (underlying) separators width to be that of the
+                // control
+                TBBUTTONINFO tbbi;
+                tbbi.cbSize = sizeof(tbbi);
+                tbbi.dwMask = TBIF_SIZE;
+                tbbi.cx = size.x;
+                if ( !SendMessage(GetHwnd(), TB_SETBUTTONINFO,
+                                  tool->GetId(), (LPARAM)&tbbi) )
                 {
-                    wxLogLastError(wxT("TB_INSERTBUTTON"));
+                    // the id is probably invalid?
+                    wxLogLastError(wxT("TB_SETBUTTONINFO"));
+                }
+            }
+            else
+        #endif // comctl32.dll 4.71
+            // TB_SETBUTTONINFO unavailable
+            {
+                // try adding several separators to fit the controls width
+                int widthSep = r.right - r.left;
+                left = r.left;
+
+                TBBUTTON tbb;
+                wxZeroMemory(tbb);
+                tbb.idCommand = 0;
+                tbb.fsState = TBSTATE_ENABLED;
+                tbb.fsStyle = TBSTYLE_SEP;
+
+                size_t nSeparators = size.x / widthSep;
+                for ( size_t nSep = 0; nSep < nSeparators; nSep++ )
+                {
+                    if ( !SendMessage(GetHwnd(), TB_INSERTBUTTON,
+                                      index, (LPARAM)&tbb) )
+                    {
+                        wxLogLastError(wxT("TB_INSERTBUTTON"));
+                    }
+
+                    index++;
                 }
 
-                index++;
+                // remember the number of separators we used - we'd have to
+                // delete all of them later
+                ((wxToolBarTool *)tool)->SetSeparatorsCount(nSeparators);
+
+                // adjust the controls width to exactly cover the separators
+                control->SetSize((nSeparators + 1)*widthSep, -1);
             }
 
-            // remember the number of separators we used - we'd have to
-            // delete all of them later
-            ((wxToolBarTool *)tool)->SetSeparatorsCount(nSeparators);
-
-            // adjust the controls width to exactly cover the separators
-            control->SetSize((nSeparators + 1)*widthSep, -1);
-        }
-
-        // position the control itself correctly vertically
+        // and position the control itself correctly vertically
         int height = r.bottom - r.top;
         int diff = height - size.y;
         if ( diff < 0 )
@@ -716,23 +694,7 @@ bool wxToolBar::Realize()
             diff = 2;
         }
 
-        int top;
-        if ( isVertical )
-        {
-            left = 0;
-            top = y;
-
-            y += height + 2*GetMargins().y;
-        }
-        else // horizontal toolbar
-        {
-            if ( left == -1 )
-                left = r.left;
-
-            top = r.top;
-        }
-
-        control->Move(left, top + (diff + 1) / 2);
+        control->Move(left == -1 ? r.left : left, r.top + (diff + 1) / 2);
     }
 
     // the max index is the "real" number of buttons - i.e. counting even the
@@ -763,7 +725,7 @@ bool wxToolBar::Realize()
 // message handlers
 // ----------------------------------------------------------------------------
 
-bool wxToolBar::MSWCommand(WXUINT WXUNUSED(cmd), WXWORD id)
+bool wxToolBar::MSWCommand(WXUINT cmd, WXWORD id)
 {
     wxToolBarToolBase *tool = FindById((int)id);
     if ( !tool )
@@ -793,7 +755,7 @@ bool wxToolBar::MSWCommand(WXUINT WXUNUSED(cmd), WXWORD id)
 
 bool wxToolBar::MSWOnNotify(int WXUNUSED(idCtrl),
                             WXLPARAM lParam,
-                            WXLPARAM *WXUNUSED(result))
+                            WXLPARAM *result)
 {
     // First check if this applies to us
     NMHDR *hdr = (NMHDR *)lParam;
@@ -829,16 +791,15 @@ bool wxToolBar::MSWOnNotify(int WXUNUSED(idCtrl),
             ttText->lpszText = (wxChar *)help.c_str();
 #else
             // VZ: I don't know why it happens, but the versions of
-            //     comctl32.dll starting from 4.70 sometimes send TTN_NEEDTEXTW
+            //     comctl32.dll starting from 4.70 sometimes send TTN_NEEDTEXTW 
             //     even to ANSI programs (normally, this message is supposed
             //     to be sent to Unicode programs only) - hence we need to
             //     handle it as well, otherwise no tooltips will be shown in
             //     this case
 
             size_t lenAnsi = help.Len();
-            #if defined( __MWERKS__ ) || defined( __CYGWIN__ )
+            #ifdef __MWERKS__
                 // MetroWerks doesn't like calling mbstowcs with NULL argument
-                // neither Cygwin does
                 size_t lenUnicode = 2*lenAnsi;
             #else
                 size_t lenUnicode = mbstowcs(NULL, help, lenAnsi);
@@ -858,6 +819,9 @@ bool wxToolBar::MSWOnNotify(int WXUNUSED(idCtrl),
 #endif
         }
     }
+
+    // For backward compatibility...
+    OnMouseEnter(tool->GetId());
 
     return TRUE;
 }
@@ -897,8 +861,7 @@ void wxToolBar::SetRows(int nRows)
 wxSize wxToolBar::GetToolSize() const
 {
     // TB_GETBUTTONSIZE is supported from version 4.70
-#if defined(_WIN32_IE) && (_WIN32_IE >= 0x300 ) \
-    && !( defined(__GNUWIN32__) && !wxCHECK_W32API_VERSION( 1, 0 ) )
+#if defined(_WIN32_IE) && (_WIN32_IE >= 0x300 )
     if ( wxTheApp->GetComCtl32Version() >= 470 )
     {
         DWORD dw = ::SendMessage(GetHwnd(), TB_GETBUTTONSIZE, 0, 0);
@@ -913,54 +876,19 @@ wxSize wxToolBar::GetToolSize() const
     }
 }
 
-static
-wxToolBarToolBase *GetItemSkippingDummySpacers(const wxToolBarToolsList& tools,
-                                               size_t index )
-{
-    wxToolBarToolsList::Node* current = tools.GetFirst();
-
-    for ( ; current != 0; current = current->GetNext() )
-    {
-        if ( index == 0 )
-            return current->GetData();
-
-        wxToolBarTool *tool = (wxToolBarTool *)current->GetData();
-        size_t separators = tool->GetSeparatorsCount();
-
-        // if it is a normal button, sepcount == 0, so skip 1 item (the button)
-        // otherwise, skip as many items as the separator count, plus the
-        // control itself
-        index -= separators ? separators + 1 : 1;
-    }
-
-    return 0;
-}
-
 wxToolBarToolBase *wxToolBar::FindToolForPosition(wxCoord x, wxCoord y) const
 {
     POINT pt;
     pt.x = x;
     pt.y = y;
     int index = (int)::SendMessage(GetHwnd(), TB_HITTEST, 0, (LPARAM)&pt);
-    // MBN: when the point ( x, y ) is close to the toolbar border
-    //      TB_HITTEST returns m_nButtons ( not -1 )
-    if ( index < 0 || (size_t)index >= m_nButtons )
+    if ( index < 0 )
     {
         // it's a separator or there is no tool at all there
         return (wxToolBarToolBase *)NULL;
     }
 
-    // if comctl32 version < 4.71 wxToolBar95 adds dummy spacers
-#if defined(_WIN32_IE) && (_WIN32_IE >= 0x400 )
-    if ( wxTheApp->GetComCtl32Version() >= 471 )
-    {
-        return m_tools.Item((size_t)index)->GetData();
-    }
-    else
-#endif
-    {
-        return GetItemSkippingDummySpacers( m_tools, (size_t) index );
-    }
+    return m_tools.Item((size_t)index)->GetData();
 }
 
 void wxToolBar::UpdateSize()
@@ -992,7 +920,7 @@ void wxToolBar::DoToggleTool(wxToolBarToolBase *tool, bool toggle)
                   (WPARAM)tool->GetId(), (LPARAM)MAKELONG(toggle, 0));
 }
 
-void wxToolBar::DoSetToggle(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(toggle))
+void wxToolBar::DoSetToggle(wxToolBarToolBase *tool, bool toggle)
 {
     // VZ: AFAIK, the button has to be created either with TBSTYLE_CHECK or
     //     without, so we really need to delete the button and recreate it here
@@ -1006,20 +934,16 @@ void wxToolBar::DoSetToggle(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(tog
 // Responds to colour changes, and passes event on to children.
 void wxToolBar::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
-    wxRGBToColour(m_backgroundColour, ::GetSysColor(COLOR_BTNFACE));
+    m_backgroundColour = wxColour(GetRValue(GetSysColor(COLOR_BTNFACE)),
+          GetGValue(GetSysColor(COLOR_BTNFACE)), GetBValue(GetSysColor(COLOR_BTNFACE)));
 
     // Remap the buttons
     Realize();
 
-    // Relayout the toolbar
-    int nrows = m_maxRows;
-    m_maxRows = 0;      // otherwise SetRows() wouldn't do anything
-    SetRows(nrows);
-
     Refresh();
 
-    // let the event propagate further
-    event.Skip();
+    // Propagate the event to the non-top-level children
+    wxWindow::OnSysColourChanged(event);
 }
 
 void wxToolBar::OnMouseEvent(wxMouseEvent& event)
@@ -1078,28 +1002,6 @@ long wxToolBar::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
             return 0;
         }
     }
-    else if ( nMsg == WM_MOUSEMOVE )
-    {
-        wxCoord x = GET_X_LPARAM(lParam), y = GET_Y_LPARAM(lParam);
-        wxToolBarToolBase* tool = FindToolForPosition( x, y );
-
-        // cursor left current tool
-        if( tool != m_pInTool && !tool )
-        {
-            m_pInTool = 0;
-            OnMouseEnter( -1 );
-        }
-
-        // cursor entered a tool
-        if( tool != m_pInTool && tool )
-        {
-            m_pInTool = tool;
-            OnMouseEnter( tool->GetId() );
-        }
-
-        // we don't handle mouse moves, so fall through
-        // to wxControl::MSWWindowProc
-    }
 
     return wxControl::MSWWindowProc(nMsg, wParam, lParam);
 }
@@ -1108,12 +1010,23 @@ long wxToolBar::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 // private functions
 // ----------------------------------------------------------------------------
 
-bool wxToolBar::sm_coloursInit = FALSE;
-long wxToolBar::sm_stdColours[6];
+// These are the default colors used to map the bitmap colors to the current
+// system colors. Note that they are in BGR format because this is what Windows
+// wants (and not RGB)
 
-void wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
+#define BGR_BUTTONTEXT      (RGB(000,000,000))  // black
+#define BGR_BUTTONSHADOW    (RGB(128,128,128))  // dark grey
+#define BGR_BUTTONFACE      (RGB(192,192,192))  // bright grey
+#define BGR_BUTTONHILIGHT   (RGB(255,255,255))  // white
+#define BGR_BACKGROUNDSEL   (RGB(000,000,255))  // blue
+#define BGR_BACKGROUND      (RGB(255,000,255))  // magenta
+
+static bool sg_coloursInit = FALSE;
+static long sg_stdColours[6];
+
+void wxMapBitmap(HBITMAP hBitmap, int width, int height)
 {
-    if (!sm_coloursInit)
+    if (!sg_coloursInit)
     {
         // When a bitmap is loaded, the RGB values can change. So we need to have a
         // reference bitmap which can tell us what the RGB values change to.
@@ -1128,102 +1041,117 @@ void wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
             for (i = 0; i < 6; i++)
             {
                 memDC.GetPixel(i, 0, & colour);
-                sm_stdColours[i] = RGB(colour.Red(), colour.Green(), colour.Blue());
+                sg_stdColours[i] = RGB(colour.Red(), colour.Green(), colour.Blue());
             }
-            sm_coloursInit = TRUE;
+            sg_coloursInit = TRUE;
             memDC.SelectObject(wxNullBitmap);
         }
         else
         {
-            sm_stdColours[0] = RGB(000,000,000) ;
-            sm_stdColours[1] = RGB(128,128,128) ;
-            sm_stdColours[2] = RGB(192,192,192) ;
-            sm_stdColours[3] = RGB(255,255,255) ;
-            sm_stdColours[4] = RGB(000,000,255) ;
-            sm_stdColours[5] = RGB(255,000,255) ;
-            sm_coloursInit = TRUE;
+            sg_stdColours[0] = RGB(000,000,000) ;
+            sg_stdColours[1] = RGB(128,128,128) ;
+            sg_stdColours[2] = RGB(192,192,192) ;
+            sg_stdColours[3] = RGB(255,255,255) ;
+            sg_stdColours[4] = RGB(000,000,255) ;
+            sg_stdColours[5] = RGB(255,000,255) ;
+            sg_coloursInit = TRUE;
         }
     }
 
-    HBITMAP hBitmap = (HBITMAP) bitmap;
-
     COLORMAP ColorMap[5];
+    
+    ColorMap[0].from = sg_stdColours[0]; ColorMap[0].to = COLOR_BTNTEXT;      // black        (0, 0 0)
+    ColorMap[1].from = sg_stdColours[1]; ColorMap[1].to = COLOR_BTNSHADOW;    // dark grey    (128, 128, 128)
+    ColorMap[2].from = sg_stdColours[2]; ColorMap[2].to = COLOR_BTNFACE;      // bright grey  (192, 192, 192)
+    ColorMap[3].from = sg_stdColours[3]; ColorMap[3].to = COLOR_BTNHIGHLIGHT; // white        (255, 255, 255)
+    //  ColorMap[4].from = sg_stdColours[4]; ColorMap[4].to = COLOR_HIGHLIGHT;  // blue         (0, 0, 255)
+    ColorMap[4].from = sg_stdColours[5]; ColorMap[4].to = COLOR_WINDOW;       // magenta      (255, 0, 255)
 
-    ColorMap[0].from = sm_stdColours[0]; ColorMap[0].to = COLOR_BTNTEXT;      // black        (0, 0 0)
-    ColorMap[1].from = sm_stdColours[1]; ColorMap[1].to = COLOR_BTNSHADOW;    // dark grey    (128, 128, 128)
-    ColorMap[2].from = sm_stdColours[2]; ColorMap[2].to = COLOR_BTNFACE;      // bright grey  (192, 192, 192)
-    ColorMap[3].from = sm_stdColours[3]; ColorMap[3].to = COLOR_BTNHIGHLIGHT; // white        (255, 255, 255)
-    //  ColorMap[4].from = sm_stdColours[4]; ColorMap[4].to = COLOR_HIGHLIGHT;  // blue         (0, 0, 255)
-    ColorMap[4].from = sm_stdColours[5]; ColorMap[4].to = COLOR_WINDOW;       // magenta      (255, 0, 255)
-
-    for ( size_t n = 0; n < WXSIZEOF(ColorMap); n++)
+#if 0
+    {
+        {BGR_BUTTONTEXT,    COLOR_BTNTEXT},     // black
+        {BGR_BUTTONSHADOW,  COLOR_BTNSHADOW},   // dark grey
+        {BGR_BUTTONFACE,    COLOR_BTNFACE},     // bright grey
+        {BGR_BUTTONHILIGHT, COLOR_BTNHIGHLIGHT},// white
+        /*    {BGR_BACKGROUNDSEL, COLOR_HIGHLIGHT},   // blue */
+        {BGR_BACKGROUND,    COLOR_WINDOW}       // magenta
+    };
+#endif
+    
+    int NUM_MAPS = (sizeof(ColorMap)/sizeof(COLORMAP));
+    int n;
+    for ( n = 0; n < NUM_MAPS; n++)
     {
         ColorMap[n].to = ::GetSysColor(ColorMap[n].to);
     }
+    
 
-    HBITMAP hbmOld;
-    HDC hdcMem = CreateCompatibleDC(NULL);
+  HBITMAP hbmOld;
+  HDC hdcMem = CreateCompatibleDC(NULL);
 
-    if (hdcMem)
+  if (hdcMem)
+  {
+    hbmOld = (HBITMAP) SelectObject(hdcMem, hBitmap);
+
+    int i, j, k;
+    for ( i = 0; i < width; i++)
     {
-        hbmOld = (HBITMAP) SelectObject(hdcMem, hBitmap);
-
-        for ( int i = 0; i < width; i++ )
+        for ( j = 0; j < height; j++)
         {
-            for ( int j = 0; j < height; j++ )
+            COLORREF pixel = ::GetPixel(hdcMem, i, j);
+            for ( k = 0; k < NUM_MAPS; k ++)
             {
-                COLORREF pixel = ::GetPixel(hdcMem, i, j);
+                int distance = 0 ;
 
-                for ( size_t k = 0; k < WXSIZEOF(ColorMap); k++ )
+                distance = abs( GetRValue( pixel ) - GetRValue( ColorMap[k].from )) ;
+                distance = max( distance , abs(GetGValue(pixel ) - GetGValue( ColorMap[k].from ))) ;
+                distance = max( distance , abs(GetBValue(pixel ) - GetBValue( ColorMap[k].from ))) ;
+                if ( distance < 0x10 )
+                //if ( ColorMap[k].from == pixel )
                 {
-                    int distance = abs( GetRValue( pixel ) - GetRValue( ColorMap[k].from )) ;
-                    distance = max( distance , abs(GetGValue(pixel ) - GetGValue( ColorMap[k].from ))) ;
-                    distance = max( distance , abs(GetBValue(pixel ) - GetBValue( ColorMap[k].from ))) ;
-                    if ( distance < 0x10 )
-                    {
-                        ::SetPixel(hdcMem, i, j, ColorMap[k].to);
-                        break;
-                    }
+                    ::SetPixel(hdcMem, i, j, ColorMap[k].to);
+                    break;
                 }
             }
         }
-
-
-        SelectObject(hdcMem, hbmOld);
-        DeleteObject(hdcMem);
     }
+
+
+    SelectObject(hdcMem, hbmOld);
+    DeleteObject(hdcMem);
+  }
+
 }
 
 // Some experiments...
 #if 0
-// What we want to do is create another bitmap which has a depth of 4,
-// and set the bits. So probably we want to convert this HBITMAP into a
-// DIB, then call SetDIBits.
-// AAAGH. The stupid thing is that if newBitmap has a depth of 4 (less than that of
-// the screen), then SetDIBits fails.
-HBITMAP newBitmap = ::CreateBitmap(totalBitmapWidth, totalBitmapHeight, 1, 4, NULL);
-HANDLE newDIB = ::BitmapToDIB((HBITMAP) m_hBitmap, NULL);
-LPBITMAPINFOHEADER lpbmi = (LPBITMAPINFOHEADER) GlobalLock(newDIB);
+  // What we want to do is create another bitmap which has a depth of 4,
+  // and set the bits. So probably we want to convert this HBITMAP into a
+  // DIB, then call SetDIBits.
+  // AAAGH. The stupid thing is that if newBitmap has a depth of 4 (less than that of
+  // the screen), then SetDIBits fails.
+  HBITMAP newBitmap = ::CreateBitmap(totalBitmapWidth, totalBitmapHeight, 1, 4, NULL);
+  HANDLE newDIB = ::BitmapToDIB((HBITMAP) m_hBitmap, NULL);
+  LPBITMAPINFOHEADER lpbmi = (LPBITMAPINFOHEADER) GlobalLock(newDIB);
 
-dc = ::GetDC(NULL);
+  dc = ::GetDC(NULL);
 //  LPBITMAPINFOHEADER lpbmi = (LPBITMAPINFOHEADER) newDIB;
 
-int result = ::SetDIBits(dc, newBitmap, 0, lpbmi->biHeight, FindDIBBits((LPSTR)lpbmi), (LPBITMAPINFO)lpbmi,
-                         DIB_PAL_COLORS);
-DWORD err = GetLastError();
+  int result = ::SetDIBits(dc, newBitmap, 0, lpbmi->biHeight, FindDIBBits((LPSTR)lpbmi), (LPBITMAPINFO)lpbmi,
+    DIB_PAL_COLORS);
+  DWORD err = GetLastError();
 
-::ReleaseDC(NULL, dc);
+  ::ReleaseDC(NULL, dc);
 
-// Delete the DIB
-GlobalUnlock (newDIB);
-GlobalFree (newDIB);
+  // Delete the DIB
+  GlobalUnlock (newDIB);
+  GlobalFree (newDIB);
 
 //  WXHBITMAP hBitmap2 = wxCreateMappedBitmap((WXHINSTANCE) wxGetInstance(), (WXHBITMAP) m_hBitmap);
-// Substitute our new bitmap for the old one
-::DeleteObject((HBITMAP) m_hBitmap);
-m_hBitmap = (WXHBITMAP) newBitmap;
+  // Substitute our new bitmap for the old one
+  ::DeleteObject((HBITMAP) m_hBitmap);
+  m_hBitmap = (WXHBITMAP) newBitmap;
 #endif
 
 
 #endif // wxUSE_TOOLBAR && Win95
-

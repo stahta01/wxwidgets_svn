@@ -18,7 +18,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
-    #include "wx/scrolwin.h"
     #include "wx/settings.h"
     #include "wx/brush.h"
     #include "wx/utils.h"
@@ -42,11 +41,6 @@
 #   include <fstream.h>
 #else
 #   include <fstream>
-#endif
-
-#if !defined(MLE_INDEX)
-#define MLE_INDEX  0
-#define MLE_RGB    1
 #endif
 
 
@@ -86,213 +80,144 @@ wxTextCtrl::wxTextCtrl()
 {
 }
 
-bool wxTextCtrl::Create(
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxString&                   rsValue
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, long                              lStyle
+bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
+                        const wxString& value,
+                        const wxPoint& pos,
+                        const wxSize& size,
+                        long style,
 #if wxUSE_VALIDATORS
-, const wxValidator&                rValidator
+                        const wxValidator& validator,
 #endif
-, const wxString&                   rsName
-)
+                        const wxString& name)
 {
-    HWND                            hParent;
-    int                             nTempy;
-    //
-    // Base initialization
-    //
-    if ( !CreateBase( pParent
-                     ,vId
-                     ,rPos
-                     ,rSize
-                     ,lStyle
-#if wxUSE_VALIDATORS
-                     ,rValidator
-#endif
-                     ,rsName
-                    ))
+    // base initialization
+    if ( !CreateBase(parent, id, pos, size, style, validator, name) )
         return FALSE;
 
-    wxPoint                         vPos = rPos; // The OS/2 position
+    // Validator was set in CreateBase
+    //SetValidator(validator);
+    if ( parent )
+        parent->AddChild(this);
 
-    if (pParent )
-    {
-        pParent->AddChild(this);
-        hParent = GetWinHwnd(pParent);
-        //
-        // OS2 uses normal coordinates, no bassackwards Windows ones
-        //
-        if (pParent->IsKindOf(CLASSINFO(wxGenericScrolledWindow)) ||
-            pParent->IsKindOf(CLASSINFO(wxScrolledWindow))
-           )
-        {
-            wxWindow*               pGrandParent = NULL;
+    // set colours
+    SetupColours();
 
-            pGrandParent = pParent->GetParent();
-            if (pGrandParent)
-                nTempy = pGrandParent->GetSize().y - (vPos.y + rSize.y);
-            else
-                nTempy = pParent->GetSize().y - (vPos.y + rSize.y);
-        }
-        else
-            nTempy = pParent->GetSize().y - (vPos.y + rSize.y);
-        vPos.y = nTempy;
-    }
-    else
-    {
-        RECTL                   vRect;
-
-        ::WinQueryWindowRect(HWND_DESKTOP, &vRect);
-        hParent = HWND_DESKTOP;
-        vPos.y = vRect.yTop - (vPos.y + rSize.y);
-    }
-
-    m_windowStyle = lStyle;
-
-    long                            lSstyle = WS_VISIBLE | WS_TABSTOP;
-
-    //
-    // Single and multiline edit fields are two different controls in PM
-    //
+    // translate wxWin style flags to MSW ones, checking for consistency while
+    // doing it
+// TODO:
+/*
+    long msStyle = ES_LEFT | WS_VISIBLE | WS_CHILD | WS_TABSTOP;
     if ( m_windowStyle & wxTE_MULTILINE )
     {
-        lSstyle |= MLS_BORDER | MLS_WORDWRAP;
-        m_bIsMLE = TRUE;
+        wxASSERT_MSG( !(m_windowStyle & wxTE_PROCESS_ENTER),
+                      wxT("wxTE_PROCESS_ENTER style is ignored for multiline "
+                         "text controls (they always process it)") );
 
+        msStyle |= ES_MULTILINE | ES_WANTRETURN;
         if ((m_windowStyle & wxTE_NO_VSCROLL) == 0)
-            lSstyle |= MLS_VSCROLL;
-        if (m_windowStyle & wxHSCROLL)
-            lSstyle |= MLS_HSCROLL;
-        if (m_windowStyle & wxTE_READONLY)
-            lSstyle |= MLS_READONLY;
+            msStyle |= WS_VSCROLL;
+        m_windowStyle |= wxTE_PROCESS_ENTER;
     }
     else
-    {
-        lSstyle |= ES_LEFT | ES_AUTOSCROLL | ES_MARGIN;
+        msStyle |= ES_AUTOHSCROLL;
 
-        if (m_windowStyle & wxHSCROLL)
-            lSstyle |=  ES_AUTOSCROLL;
-        if (m_windowStyle & wxTE_READONLY)
-            lSstyle |= ES_READONLY;
-        if (m_windowStyle & wxTE_PASSWORD) // hidden input
-            lSstyle |= ES_UNREADABLE;
-    }
-    if ( pParent->IsKindOf(CLASSINFO(wxGenericScrolledWindow)) ||
-         pParent->IsKindOf(CLASSINFO(wxScrolledWindow))
-       )
-        lSstyle |= WS_CLIPSIBLINGS;
-    if (m_bIsMLE)
-    {
-        m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
-                                           ,WC_MLE                   // Window class
-                                           ,(PSZ)rsValue.c_str()     // Initial Text
-                                           ,(ULONG)lSstyle           // Style flags
-                                           ,(LONG)0                  // X pos of origin
-                                           ,(LONG)0                  // Y pos of origin
-                                           ,(LONG)0                  // field width
-                                           ,(LONG)0                  // field height
-                                           ,(HWND)GetHwndOf(pParent) // owner window handle (same as parent
-                                           ,HWND_TOP                 // initial z position
-                                           ,(ULONG)vId               // Window identifier
-                                           ,NULL                     // no control data
-                                           ,NULL                     // no Presentation parameters
-                                          );
-    }
-    else
-    {
-        m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
-                                           ,WC_ENTRYFIELD            // Window class
-                                           ,(PSZ)rsValue.c_str()     // Initial Text
-                                           ,(ULONG)lSstyle           // Style flags
-                                           ,(LONG)0                  // X pos of origin
-                                           ,(LONG)0                  // Y pos of origin
-                                           ,(LONG)0                  // field width
-                                           ,(LONG)0                  // field height
-                                           ,(HWND)GetHwndOf(pParent) // owner window handle (same as parent
-                                           ,HWND_TOP                 // initial z position
-                                           ,(ULONG)vId               // Window identifier
-                                           ,NULL                     // no control data
-                                           ,NULL                     // no Presentation parameters
-                                          );
-    }
+    if (m_windowStyle & wxHSCROLL)
+        msStyle |= (WS_HSCROLL | ES_AUTOHSCROLL);
 
-    if (m_hWnd == 0)
-    {
-        return FALSE;
-    }
+    if (m_windowStyle & wxTE_READONLY)
+        msStyle |= ES_READONLY;
 
+    if (m_windowStyle & wxHSCROLL)
+        msStyle |= (WS_HSCROLL | ES_AUTOHSCROLL);
+    if (m_windowStyle & wxTE_PASSWORD) // hidden input
+        msStyle |= ES_PASSWORD;
+
+    // we always want the characters and the arrows
+    m_lDlgCode = DLGC_WANTCHARS | DLGC_WANTARROWS;
+
+    // we may have several different cases:
+    // 1. normal case: both TAB and ENTER are used for dialog navigation
+    // 2. ctrl which wants TAB for itself: ENTER is used to pass to the next
+    //    control in the dialog
+    // 3. ctrl which wants ENTER for itself: TAB is used for dialog navigation
+    // 4. ctrl which wants both TAB and ENTER: Ctrl-ENTER is used to pass to
+    //    the next control
+    if ( m_windowStyle & wxTE_PROCESS_ENTER )
+        m_lDlgCode |= DLGC_WANTMESSAGE;
+    if ( m_windowStyle & wxTE_PROCESS_TAB )
+        m_lDlgCode |= DLGC_WANTTAB;
+
+    // do create the control - either an EDIT or RICHEDIT
+    const wxChar *windowClass = wxT("EDIT");
+
+    bool want3D;
+    WXDWORD exStyle = Determine3DEffects(WS_EX_CLIENTEDGE, &want3D);
+
+    // Even with extended styles, need to combine with WS_BORDER for them to
+    // look right.
+    if ( want3D || wxStyleHasBorder(m_windowStyle) )
+        msStyle |= WS_BORDER;
+
+    // NB: don't use pos and size as CreateWindowEx arguments because they
+    //     might be -1 in which case we should use the default values (and
+    //     SetSize called below takes care of it)
+    m_hWnd = (WXHWND)::CreateWindowEx(exStyle,
+                                      windowClass,
+                                      NULL,
+                                      msStyle,
+                                      0, 0, 0, 0,
+                                      GetHwndOf(parent),
+                                      (HMENU)m_windowId,
+                                      wxGetInstance(),
+                                      NULL);
+
+    wxCHECK_MSG( m_hWnd, FALSE, wxT("Failed to create text ctrl") );
+*/
     SubclassWin(GetHWND());
 
-    //
-    // Set font, position, size and initial value
-    //
-    wxFont&                         vFontParent = pParent->GetFont();
-
-    if (vFontParent.Ok())
+    // set font, position, size and initial value
+    wxFont& fontParent = parent->GetFont();
+    if ( fontParent.Ok() )
     {
-        SetFont(vFontParent);
+        SetFont(fontParent);
     }
     else
     {
         SetFont(wxSystemSettings::GetSystemFont(wxSYS_SYSTEM_FONT));
     }
-    if (!rsValue.IsEmpty())
-    {
-        SetValue(rsValue);
-    }
-    SetupColours();
-    SetSize( vPos.x
-            ,vPos.y
-            ,rSize.x
-            ,rSize.y
-           );
-    return TRUE;
-} // end of wxTextCtrl::Create
 
-//
+    SetSize(pos.x, pos.y, size.x, size.y);
+
+    return TRUE;
+}
+
 // Make sure the window style (etc.) reflects the HWND style (roughly)
-//
 void wxTextCtrl::AdoptAttributesFromHWND()
 {
-    HWND                            hWnd = GetHwnd();
-    LONG                            lStyle = ::WinQueryWindowULong(hWnd, QWL_STYLE);
+  wxWindow::AdoptAttributesFromHWND();
 
-    wxWindow::AdoptAttributesFromHWND();
+  HWND hWnd = GetHwnd();
+  // TODO:
+  /*
+  long style = GetWindowLong(hWnd, GWL_STYLE);
 
-    if (m_bIsMLE)
-    {
-        m_windowStyle |= wxTE_MULTILINE;
-        if (lStyle & MLS_READONLY)
-            m_windowStyle |= wxTE_READONLY;
-    }
-    else
-    {
-        if (lStyle & ES_UNREADABLE)
-            m_windowStyle |= wxTE_PASSWORD;
-        if (lStyle & ES_READONLY)
-            m_windowStyle |= wxTE_READONLY;
-    }
-} // end of wxTextCtrl::AdoptAttributesFromHWND
+  if (style & ES_MULTILINE)
+    m_windowStyle |= wxTE_MULTILINE;
+  if (style & ES_PASSWORD)
+    m_windowStyle |= wxTE_PASSWORD;
+  if (style & ES_READONLY)
+    m_windowStyle |= wxTE_READONLY;
+  if (style & ES_WANTRETURN)
+    m_windowStyle |= wxTE_PROCESS_ENTER;
+  */
+}
 
 void wxTextCtrl::SetupColours()
 {
-    wxColour                        vBkgndColour;
-
-    vBkgndColour = wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOW);
-    SetBackgroundColour(vBkgndColour);
+    // FIXME why is bg colour not inherited from parent?
+    SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_WINDOW));
     SetForegroundColour(GetParent()->GetForegroundColour());
-    if (m_bIsMLE)
-    {
-        ::WinSendMsg( GetHwnd()
-                     ,MLM_SETTEXTCOLOR
-                     ,(MPARAM)GetParent()->GetForegroundColour().GetPixel()
-                     ,(MPARAM)MLE_RGB
-                    );
-    }
-} // end of wxTextCtrl::SetupColours
+}
 
 // ----------------------------------------------------------------------------
 // set/get the controls text
@@ -300,60 +225,46 @@ void wxTextCtrl::SetupColours()
 
 wxString wxTextCtrl::GetValue() const
 {
-    wxString                        sStr = wxGetWindowText(GetHWND());
-    char*                           zStr = (char*)sStr.c_str();
+    return wxGetWindowText(GetHWND());
+}
 
-    for ( ; *zStr; zStr++ )
-    {
-        //
-        // this will replace \r\n with just \n
-        //
-        if (*zStr == '\n')
-            *zStr = '\0';
-        if (*zStr == '\r')
-            *zStr = '\n';
-    }
-    sStr = zStr;
-    return sStr;
-} // end of wxTextCtrl::GetValue
-
-void wxTextCtrl::SetValue(
-  const wxString&                   rsValue
-)
+void wxTextCtrl::SetValue(const wxString& value)
 {
-    //
-    // If the text is long enough, it's faster to just set it instead of first
-    // comparing it with the old one (chances are that it will be different
-    // anyhow, this comparison is there to avoid flicker for small single-line
-    // edit controls mostly)
-    //
-    if ((rsValue.length() > 0x400) || (rsValue != GetValue()))
-    {
-        ::WinSetWindowText(GetHwnd(), rsValue.c_str());
-        AdjustSpaceLimit();
-    }
-} // end of wxTextCtrl::SetValue
+// TODO:
+/*
+    wxString valueDos = wxTextFile::Translate(value, wxTextFileType_Dos);
 
-void wxTextCtrl::WriteText(
-  const wxString&                   rsValue
-)
-{
-    ::WinSetWindowText(GetHwnd(), rsValue.c_str());
+    SetWindowText(GetHwnd(), valueDos);
+
     AdjustSpaceLimit();
-} // end of wxTextCtrl::WriteText
+*/
+}
 
-void wxTextCtrl::AppendText(
-  const wxString&                   rsText
-)
+void wxTextCtrl::WriteText(const wxString& value)
 {
+// TODO:
+/*
+    wxString valueDos = wxTextFile::Translate(value, wxTextFileType_Dos);
+
+    SendMessage(GetHwnd(), EM_REPLACESEL, 0, (LPARAM)valueDos.c_str());
+
+    AdjustSpaceLimit();
+*/
+}
+
+void wxTextCtrl::AppendText(const wxString& text)
+{
+// TODO:
+/*
     SetInsertionPointEnd();
-    WriteText(rsText);
-} // end of wxTextCtrl::AppendText
+    WriteText(text);
+*/
+}
 
 void wxTextCtrl::Clear()
 {
-    ::WinSetWindowText(GetHwnd(), "");
-} // end of wxTextCtrl::Clear
+//    SetWindowText(GetHwnd(), wxT(""));
+}
 
 // ----------------------------------------------------------------------------
 // Clipboard operations
@@ -364,418 +275,286 @@ void wxTextCtrl::Copy()
     if (CanCopy())
     {
         HWND hWnd = GetHwnd();
-        if (m_bIsMLE)
-            ::WinSendMsg(hWnd, MLM_COPY, 0, 0);
-        else
-            ::WinSendMsg(hWnd, EM_COPY, 0, 0);
+//        SendMessage(hWnd, WM_COPY, 0, 0L);
     }
-} // end of wxTextCtrl::Copy
+}
 
 void wxTextCtrl::Cut()
 {
     if (CanCut())
     {
         HWND hWnd = GetHwnd();
-
-        if (m_bIsMLE)
-            ::WinSendMsg(hWnd, MLM_CUT, 0, 0);
-        else
-            ::WinSendMsg(hWnd, EM_CUT, 0, 0);
+//        SendMessage(hWnd, WM_CUT, 0, 0L);
     }
-} // end of wxTextCtrl::Cut
+}
 
 void wxTextCtrl::Paste()
 {
     if (CanPaste())
     {
-        HWND                        hWnd = GetHwnd();
-
-        ::WinSendMsg(hWnd, EM_PASTE, 0, 0);
+        HWND hWnd = GetHwnd();
+//        SendMessage(hWnd, WM_PASTE, 0, 0L);
     }
-} // end of wxTextCtrl::Paste
+}
 
 bool wxTextCtrl::CanCopy() const
 {
-    //
     // Can copy if there's a selection
-    //
-    long                            lFrom = 0L;
-    long                            lTo = 0L;
-
-    GetSelection(&lFrom, &lTo);
-    return (lFrom != lTo);
-} // end of wxTextCtrl::CanCopy
+    long from = 0L;
+    long to = 0L;
+//    GetSelection(& from, & to);
+    return (from != to);
+}
 
 bool wxTextCtrl::CanCut() const
 {
-    //
     // Can cut if there's a selection
-    //
-    long                            lFrom = 0L;
-    long                            lTo = 0L;
-
-    GetSelection(&lFrom, &lTo);
-    return (lFrom != lTo);
-} // end of wxTextCtrl::CanCut
+    long from = 0L;
+    long to = 0L;
+//    GetSelection(& from, & to);
+    return (from != to);
+}
 
 bool wxTextCtrl::CanPaste() const
 {
-    bool                            bIsTextAvailable = FALSE;
-
     if (!IsEditable())
         return FALSE;
 
-    //
-    // Check for straight text on clipboard
-    //
-    if (::WinOpenClipbrd(vHabmain))
+    // Standard edit control: check for straight text on clipboard
+    bool isTextAvailable = FALSE;
+//TODO:
+/*
+    if ( ::OpenClipboard(GetHwndOf(wxTheApp->GetTopWindow())) )
     {
-        bIsTextAvailable = (::WinQueryClipbrdData(vHabmain, CF_TEXT) != 0);
-        ::WinCloseClipbrd(vHabmain);
+        isTextAvailable = (::IsClipboardFormatAvailable(CF_TEXT) != 0);
+        ::CloseClipboard();
     }
-    return bIsTextAvailable;
-} // end of wxTextCtrl::CanPaste
+*/
+    return isTextAvailable;
+}
 
 // ----------------------------------------------------------------------------
 // Accessors
 // ----------------------------------------------------------------------------
 
-void wxTextCtrl::SetEditable(
-  bool                              bEditable
-)
+void wxTextCtrl::SetEditable(bool editable)
 {
-    HWND                            hWnd = GetHwnd();
+    HWND hWnd = GetHwnd();
+//    SendMessage(hWnd, EM_SETREADONLY, (WPARAM)!editable, (LPARAM)0L);
+}
 
-    if (m_bIsMLE)
-        ::WinSendMsg(hWnd, MLM_SETREADONLY, MPFROMLONG(!bEditable), (MPARAM)0);
-    else
-        ::WinSendMsg(hWnd, EM_SETREADONLY, MPFROMLONG(!bEditable), (MPARAM)0);
-} // end of wxTextCtrl::SetEditable
-
-void wxTextCtrl::SetInsertionPoint(
-  long                              lPos
-)
+void wxTextCtrl::SetInsertionPoint(long pos)
 {
-    HWND                            hWnd = GetHwnd();
-
-    if (m_bIsMLE)
-        ::WinSendMsg(hWnd, MLM_SETSEL, (MPARAM)lPos, (MPARAM)lPos);
-    else
-        ::WinSendMsg(hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lPos, (USHORT)lPos), (MPARAM)0);
-} // end of wxTextCtrl::SetInsertionPoint
+// TODO:
+/*
+    HWND hWnd = GetHwnd();
+    {
+        SendMessage(hWnd, EM_SETSEL, pos, pos);
+        SendMessage(hWnd, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0);
+    }
+    static const char *nothing = "";
+    SendMessage(hWnd, EM_REPLACESEL, 0, (LPARAM)nothing);
+*/
+}
 
 void wxTextCtrl::SetInsertionPointEnd()
 {
-    long                            lPos = GetLastPosition();
-
-    SetInsertionPoint(lPos);
-} // end of wxTextCtrl::SetInsertionPointEnd
+// TODO:
+/*
+    long pos = GetLastPosition();
+    SetInsertionPoint(pos);
+*/
+}
 
 long wxTextCtrl::GetInsertionPoint() const
 {
-    WXDWORD                         dwPos = 0L;
-
-    if (m_bIsMLE)
-        dwPos = (WXDWORD)::WinSendMsg(GetHwnd(), MLM_QUERYSEL, (MPARAM)MLFQS_MINSEL, 0);
-    else
-    {
-        dwPos = (WXDWORD)::WinSendMsg(GetHwnd(), EM_QUERYSEL, 0, 0);
-        dwPos = SHORT1FROMMP((MPARAM)dwPos);  // the first 16 bit value is the min pos
-    }
-    return (dwPos & 0xFFFF);
-} // end of wxTextCtrl::GetInsertionPoint
+// TODO:
+/*
+    DWORD Pos = (DWORD)SendMessage(GetHwnd(), EM_GETSEL, 0, 0L);
+    return Pos & 0xFFFF;
+*/
+    return 0;
+}
 
 long wxTextCtrl::GetLastPosition() const
 {
-    HWND                            hWnd = GetHwnd();
-    long                            lCharIndex;
-    long                            lLineLength;
+    HWND hWnd = GetHwnd();
 
-    if (m_bIsMLE)
-    {
-        lCharIndex = 0;
+// TODO:
+/*
+    // Will always return a number > 0 (according to docs)
+    int noLines = (int)SendMessage(hWnd, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0L);
 
-        //
-        // This just gets the total text length.  The last will be this value
-        //
-        lLineLength = (long)::WinSendMsg(hWnd, MLM_QUERYTEXTLENGTH, 0, 0);
-    }
-    else
-    {
-        WNDPARAMS                   vParams;
+    // This gets the char index for the _beginning_ of the last line
+    int charIndex = (int)SendMessage(hWnd, EM_LINEINDEX, (WPARAM)(noLines-1), (LPARAM)0L);
 
-        lCharIndex = 0;
-        vParams.fsStatus = WPM_CCHTEXT;
-        if (::WinSendMsg( GetHwnd()
-                         ,WM_QUERYWINDOWPARAMS
-                         ,&vParams
-                         ,0
-                        ))
-        {
-            lLineLength = (long)vParams.cchText;
-        }
-        else
-            lLineLength = 0;
-    }
-    return(lCharIndex + lLineLength);
-} // end of wxTextCtrl::GetLastPosition
+    // Get number of characters in the last line. We'll add this to the character
+    // index for the last line, 1st position.
+    int lineLength = (int)SendMessage(hWnd, EM_LINELENGTH, (WPARAM)charIndex, (LPARAM)0L);
+
+    return (long)(charIndex + lineLength);
+*/
+    return 0L;
+}
 
 // If the return values from and to are the same, there is no
 // selection.
-void wxTextCtrl::GetSelection(
-  long*                             plFrom
-, long*                             plTo
-) const
+void wxTextCtrl::GetSelection(long* from, long* to) const
 {
-    WXDWORD                         dwPos;
+    DWORD dwStart, dwEnd;
+    MPARAM wParam = (MPARAM) (DWORD*) & dwStart; // receives starting position
+    MPARAM lParam = (MPARAM) (DWORD*) & dwEnd;   // receives ending position
 
-    if (m_bIsMLE)
-        dwPos = (WXDWORD)::WinSendMsg(GetHwnd(), MLM_QUERYSEL, (MPARAM)MLFQS_MINSEL, 0);
-    else
-    {
-        dwPos = (WXDWORD)::WinSendMsg(GetHwnd(), EM_QUERYSEL, 0, 0);
-    }
-    *plFrom = SHORT1FROMMP((MPARAM)dwPos);  // the first 16 bit value is the min pos
-    *plTo = SHORT2FROMMP((MPARAM)dwPos);  // the first 16 bit value is the min pos
-} // end of wxTextCtrl::GetSelection
+//    ::SendMessage(GetHwnd(), EM_GETSEL, wParam, lParam);
+
+    *from = dwStart;
+    *to = dwEnd;
+}
 
 bool wxTextCtrl::IsEditable() const
 {
-    if (m_bIsMLE)
-        return((bool)LONGFROMMR(::WinSendMsg(GetHwnd(), MLM_QUERYREADONLY, 0, 0)));
-    else
-        return((bool)LONGFROMMR(::WinSendMsg(GetHwnd(), EM_QUERYREADONLY, 0, 0)));
-} // end of wxTextCtrl::IsEditable
+// TODO:
+/*
+    long style = ::GetWindowLong(GetHwnd(), GWL_STYLE);
+
+    return ((style & ES_READONLY) == 0);
+*/
+    return FALSE;
+}
 
 // ----------------------------------------------------------------------------
 // Editing
 // ----------------------------------------------------------------------------
 
-void wxTextCtrl::Replace(
-  long                              lFrom
-, long                              lTo
-, const wxString&                   rsValue
-)
+void wxTextCtrl::Replace(long from, long to, const wxString& value)
 {
 #if wxUSE_CLIPBOARD
-    HWND                            hWnd      = GetHwnd();
-    long                            lFromChar = lFrom;
-    long                            lToChar   = lTo;
+    HWND hWnd = GetHwnd();
+    long fromChar = from;
+    long toChar = to;
 
-    //
     // Set selection and remove it
-    //
-    if (m_bIsMLE)
-    {
-        ::WinSendMsg(hWnd, MLM_SETSEL, MPFROM2SHORT((USHORT)lFrom, (USHORT)lTo), 0);
-        ::WinSendMsg(hWnd, MLM_CUT, 0, 0);
-    }
-    else
-    {
-        ::WinSendMsg(hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lFrom, (USHORT)lTo), 0);
-        ::WinSendMsg(hWnd, EM_CUT, 0, 0);
-    }
+//    SendMessage(hWnd, EM_SETSEL, fromChar, toChar);
+//    SendMessage(hWnd, WM_CUT, (WPARAM)0, (LPARAM)0);
 
-    //
     // Now replace with 'value', by pasting.
-    //
-    wxSetClipboardData(wxDF_TEXT, (wxObject *) (const wxChar *)rsValue, 0, 0);
+    wxSetClipboardData(wxDF_TEXT, (wxObject *) (const wxChar *)value, 0, 0);
 
     // Paste into edit control
-    if (m_bIsMLE)
-        ::WinSendMsg(hWnd, MLM_PASTE, (MPARAM)0, (MPARAM)0);
-    else
-        ::WinSendMsg(hWnd, EM_PASTE, (MPARAM)0, (MPARAM)0);
+//    SendMessage(hWnd, WM_PASTE, (WPARAM)0, (LPARAM)0L);
 #else
     wxFAIL_MSG("wxTextCtrl::Replace not implemented if wxUSE_CLIPBOARD is 0.");
 #endif
-}  // end of wxTextCtrl::Replace
+}
 
-void wxTextCtrl::Remove(
-  long                              lFrom
-, long                              lTo
-)
+void wxTextCtrl::Remove(long from, long to)
 {
-    HWND                            hWnd      = GetHwnd();
-    long                            lFromChar = lFrom;
-    long                            lToChar   = lTo;
+    HWND hWnd = GetHwnd();
+    long fromChar = from;
+    long toChar = to;
 
-    if (m_bIsMLE)
-    {
-        ::WinSendMsg(hWnd, MLM_SETSEL, MPFROM2SHORT((USHORT)lFrom, (USHORT)lTo), 0);
-        ::WinSendMsg(hWnd, MLM_CUT, 0, 0);
-    }
-    else
-    {
-        ::WinSendMsg(hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lFrom, (USHORT)lTo), 0);
-        ::WinSendMsg(hWnd, EM_CUT, 0, 0);
-    }
-} // end of wxTextCtrl::Remove
+    // Cut all selected text
+//    SendMessage(hWnd, EM_SETSEL, fromChar, toChar);
+//    SendMessage(hWnd, WM_CUT, (WPARAM)0, (LPARAM)0);
+}
 
-void wxTextCtrl::SetSelection(
-  long                              lFrom
-, long                              lTo
-)
+void wxTextCtrl::SetSelection(long from, long to)
 {
-    HWND                            hWnd = GetHwnd();
-    long                            lFromChar = lFrom;
-    long                            lToChar = lTo;
+    HWND hWnd = GetHwnd();
+    long fromChar = from;
+    long toChar = to;
 
-    //
-    // If from and to are both -1, it means (in wxWindows) that all text should
+    // if from and to are both -1, it means (in wxWindows) that all text should
     // be selected. Translate into Windows convention
-    //
-    if ((lFrom == -1L) && (lTo == -1L))
+    if ((from == -1) && (to == -1))
     {
-        lFromChar = 0L;
-        lToChar   = -1L;
+      fromChar = 0;
+      toChar = -1;
     }
-    if (m_bIsMLE)
-        ::WinSendMsg(hWnd, MLM_SETSEL, (MPARAM)lFromChar, (MPARAM)lToChar);
-    else
-        ::WinSendMsg(hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lFromChar, (USHORT)lToChar), (MPARAM)0);
-} // end of wxTextCtrl::SetSelection
 
-bool wxTextCtrl::LoadFile(
-  const wxString&                   rsFile
-)
+//    SendMessage(hWnd, EM_SETSEL, (WPARAM)fromChar, (LPARAM)toChar);
+//    SendMessage(hWnd, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0);
+}
+
+bool wxTextCtrl::LoadFile(const wxString& file)
 {
-    if ( wxTextCtrlBase::LoadFile(rsFile) )
+// TODO:
+/*
+    if ( wxTextCtrlBase::LoadFile(file) )
     {
-        //
-        // Update the size limit if needed
-        //
+        // update the size limit if needed
         AdjustSpaceLimit();
+
         return TRUE;
     }
+*/
     return FALSE;
-} // end of wxTextCtrl::LoadFile
+}
 
 bool wxTextCtrl::IsModified() const
 {
-    bool                            bRc;
+//    return (SendMessage(GetHwnd(), EM_GETMODIFY, 0, 0) != 0);
+    return FALSE;
+}
 
-    if (m_bIsMLE)
-        bRc = (bool)LONGFROMMR(::WinSendMsg(GetHwnd(), MLM_QUERYCHANGED, 0, 0));
-    else
-        bRc = (bool)LONGFROMMR(::WinSendMsg(GetHwnd(), EM_QUERYCHANGED, 0, 0));
-    return bRc;
-} // end of wxTextCtrl::IsModified
-
-//
 // Makes 'unmodified'
-//
 void wxTextCtrl::DiscardEdits()
 {
-    if (m_bIsMLE)
-        ::WinSendMsg(GetHwnd(), MLM_SETCHANGED, MPFROMLONG(FALSE), 0);
-    else
-        //
-        // EM controls do not have a SETCHANGED but issuing a query should reset it
-        //
-        ::WinSendMsg(GetHwnd(), EM_QUERYCHANGED, 0, 0);
-} // end of wxTextCtrl::DiscardEdits
+//    SendMessage(GetHwnd(), EM_SETMODIFY, FALSE, 0L);
+}
 
 int wxTextCtrl::GetNumberOfLines() const
 {
-    int                             nNumLines;
+//    return (int)SendMessage(GetHwnd(), EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+    return 0;
+}
 
-    if (m_bIsMLE)
-        nNumLines = (int)::WinSendMsg(GetHwnd(), MLM_QUERYLINECOUNT, 0, 0);
-    else
-        nNumLines = 1;
-    return nNumLines;
-} // end of wxTextCtrl::GetNumberOfLines
-
-long wxTextCtrl::XYToPosition(
-  long                              lX
-, long                              lY
-) const
+long wxTextCtrl::XYToPosition(long x, long y) const
 {
-    HWND                            hWnd = GetHwnd();
-    long                            lCharIndex = 0L;
-    long                            lLen;
+    HWND hWnd = GetHwnd();
 
-    if (m_bIsMLE)
-    {
-        lLen = (long)::WinSendMsg(GetHwnd(), MLM_QUERYLINELENGTH, 0, 0);
-        lCharIndex = ((lLen * lY) + lX);
-    }
-    else
-        lCharIndex = lX;
-    return lCharIndex;
-} // end of wxTextCtrl::XYToPosition
+    // This gets the char index for the _beginning_ of this line
+// TODO:
+/*
+    int charIndex = (int)SendMessage(hWnd, EM_LINEINDEX, (WPARAM)y, (LPARAM)0);
+    return (long)(x + charIndex);
+*/
+    return 0L;
+}
 
-bool wxTextCtrl::PositionToXY(
-  long                              lPos
-, long*                             plX
-, long*                             plY
-) const
+bool wxTextCtrl::PositionToXY(long pos, long *x, long *y) const
 {
-    HWND                            hWnd = GetHwnd();
-    long                            nLineNo = -1;
-    long                            lCharIndex = 0;
+    HWND hWnd = GetHwnd();
 
-    if (m_bIsMLE)
-        nLineNo = (long)::WinSendMsg(hWnd, MLM_LINEFROMCHAR, (MPARAM)lPos, 0);
-    else
-        nLineNo = 0;
+    // This gets the line number containing the character
+    int lineNo = -1;
+//    lineNo = (int)SendMessage(hWnd, EM_LINEFROMCHAR, (WPARAM)pos, 0);
 
-    if (nLineNo == -1)
+    if ( lineNo == -1 )
     {
         // no such line
         return FALSE;
     }
 
-    //
     // This gets the char index for the _beginning_ of this line
-    //
-    long                            lLineWidth;
-
-    if (m_bIsMLE)
-    {
-        lLineWidth = (long)::WinSendMsg(hWnd, MLM_QUERYLINELENGTH, (MPARAM)0, (MPARAM)0);
-        lCharIndex = (nLineNo + 1) * lLineWidth;
-    }
-    else
-    {
-        WNDPARAMS                   vParams;
-
-        vParams.fsStatus = WPM_CCHTEXT;
-        if (::WinSendMsg( hWnd
-                         ,WM_QUERYWINDOWPARAMS
-                         ,&vParams
-                         ,0
-                        ))
-        {
-            lCharIndex = vParams.cchText;
-        }
-        else
-            lCharIndex = 32;
-    }
-
-    if (lCharIndex == -1)
+    int charIndex = 0; // TODO: (int)SendMessage(hWnd, EM_LINEINDEX, (WPARAM)lineNo, (LPARAM)0);
+    if ( charIndex == -1 )
     {
         return FALSE;
     }
 
-    //
-    // The X position must therefore be the difference between pos and charIndex
-    //
-    if (plX)
-        *plX = lPos - lCharIndex;
-    if (plY)
-        *plY = nLineNo;
+    // The X position must therefore be the different between pos and charIndex
+    if ( x )
+        *x = (long)(pos - charIndex);
+    if ( y )
+        *y = (long)lineNo;
 
     return TRUE;
-} // end of wxTextCtrl::PositionToXY
+}
 
-void wxTextCtrl::ShowPosition(
-  long                              lPos
-)
+void wxTextCtrl::ShowPosition(long pos)
 {
-    HWND                            hWnd = GetHwnd();
-    long                            lCurrentLineLineNo = 0L;
+    HWND hWnd = GetHwnd();
 
     // To scroll to a position, we pass the number of lines and characters
     // to scroll *by*. This means that we need to:
@@ -784,97 +563,49 @@ void wxTextCtrl::ShowPosition(
     // (3) Scroll by (pos - current).
     // For now, ignore the horizontal scrolling.
 
-    //
     // Is this where scrolling is relative to - the line containing the caret?
     // Or is the first visible line??? Try first visible line.
-    //
-    if (m_bIsMLE)
-    {
-        //
-        // In PM this is the actual char position
-        //
-        lCurrentLineLineNo = (long)::WinSendMsg(hWnd, MLM_QUERYFIRSTCHAR, (MPARAM)0, (MPARAM)0);
+//    int currentLineLineNo1 = (int)SendMessage(hWnd, EM_LINEFROMCHAR, (WPARAM)-1, (LPARAM)0L);
 
-        //
-        // This will cause a scroll to the selected position
-        //
-        ::WinSendMsg(hWnd, MLM_SETSEL, (MPARAM)lCurrentLineLineNo, (MPARAM)lCurrentLineLineNo);
-    }
-} // end of wxTextCtrl::ShowPosition
+// TODO:
+/*
+    int currentLineLineNo = (int)SendMessage(hWnd, EM_GETFIRSTVISIBLELINE, (WPARAM)0, (LPARAM)0L);
 
-int wxTextCtrl::GetLineLength(
-  long                              lLineNo
-) const
+    int specifiedLineLineNo = (int)SendMessage(hWnd, EM_LINEFROMCHAR, (WPARAM)pos, (LPARAM)0L);
+
+    int linesToScroll = specifiedLineLineNo - currentLineLineNo;
+
+    if (linesToScroll != 0)
+      (void)SendMessage(hWnd, EM_LINESCROLL, (WPARAM)0, (LPARAM)linesToScroll);
+*/
+}
+
+int wxTextCtrl::GetLineLength(long lineNo) const
 {
-    long                            lLen = 0L;
+// TODO:
+/*
 
-    if (m_bIsMLE)
-        lLen = (long)::WinSendMsg(GetHwnd(), MLM_QUERYLINELENGTH, 0, 0);
-    else
-    {
-        WNDPARAMS                   vParams;
+    long charIndex = XYToPosition(0, lineNo);
+    int len = (int)SendMessage(GetHwnd(), EM_LINELENGTH, charIndex, 0);
+    return len;
+*/
+    return 0;
+}
 
-        vParams.fsStatus = WPM_CCHTEXT;
-        if (::WinSendMsg( GetHwnd()
-                         ,WM_QUERYWINDOWPARAMS
-                         ,&vParams
-                         ,0
-                        ))
-        {
-            lLen = vParams.cchText;
-        }
-        else
-            lLen = 32;
-    }
-    return lLen;
-} // end ofwxTextCtrl::GetLineLength
-
-wxString wxTextCtrl::GetLineText(
-  long                              lLineNo
-) const
+wxString wxTextCtrl::GetLineText(long lineNo) const
 {
-    long                            lLen = (long)GetLineLength((long)lLineNo) + 1;
-    wxString                        sStr;
-    char*                           zBuf;
+    size_t len = (size_t)GetLineLength(lineNo) + 1;
+    char *buf = (char *)malloc(len);
+    *(WORD *)buf = len;
+    int noChars = 0; // TODO:(int)SendMessage(GetHwnd(), EM_GETLINE, lineNo, (LPARAM)buf);
+    buf[noChars] = 0;
 
-    //
-    // There must be at least enough place for the length WORD in the
-    // buffer
-    //
-    lLen += sizeof(WORD);
-    zBuf = new char[lLen];
-    if (m_bIsMLE)
-    {
-        long                        lIndex;
-        long                        lBuflen;
-        long                        lCopied;
+    wxString str(buf);
 
-        lLen = (long)::WinSendMsg(GetHwnd(), MLM_QUERYLINELENGTH, 0, 0);
-        lIndex = lLen * lLineNo;
+    free(buf);
 
-        ::WinSendMsg(GetHwnd(), MLM_SETSEL, (MPARAM)lIndex, (MPARAM)lIndex);
-        ::WinSendMsg(GetHwnd(), MLM_SETIMPORTEXPORT, MPFROMP(zBuf), MPFROMSHORT((USHORT)sizeof(zBuf)));
-        lBuflen = (long)::WinSendMsg(GetHwnd(), MLM_QUERYFORMATTEXTLENGTH, MPFROMLONG(lIndex), MPFROMLONG(-1));
-        lCopied = (long)::WinSendMsg(GetHwnd(), MLM_EXPORT, MPFROMP(&lIndex), MPFROMP(&lBuflen));
-        zBuf[lCopied] = '\0';
-    }
-    else
-    {
-        WNDPARAMS                   vParams;
-
-        vParams.fsStatus = WPM_CCHTEXT;
-        if (::WinSendMsg( GetHwnd()
-                         ,WM_QUERYWINDOWPARAMS
-                         ,&vParams
-                         ,0
-                        ))
-         memcpy(zBuf, vParams.pszText, vParams.cchText);
-         zBuf[vParams.cchText] = '\0';
-     }
-     sStr = zBuf;
-     delete [] zBuf;
-     return sStr;
-} // end of wxTextCtrl::GetLineText
+    return str;
+}
 
 // ----------------------------------------------------------------------------
 // Undo/redo
@@ -884,114 +615,80 @@ void wxTextCtrl::Undo()
 {
     if (CanUndo())
     {
-        if (m_bIsMLE)
-            ::WinSendMsg(GetHwnd(), MLM_UNDO, 0, 0);
-        // Simple entryfields cannot be undone
+//        ::SendMessage(GetHwnd(), EM_UNDO, 0, 0);
     }
-} // end of wxTextCtrl::Undo
+}
 
 void wxTextCtrl::Redo()
 {
     if (CanRedo())
     {
-        if (m_bIsMLE)
-            ::WinSendMsg(GetHwnd(), MLM_UNDO, 0, 0);
-        // Simple entryfields cannot be undone
+        // Same as Undo, since Undo undoes the undo, i.e. a redo.
+//        ::SendMessage(GetHwnd(), EM_UNDO, 0, 0);
     }
-} // end of wxTextCtrl::Redo
+}
 
 bool wxTextCtrl::CanUndo() const
 {
-    bool                            bOk;
-
-    if (m_bIsMLE)
-        bOk = (::WinSendMsg(GetHwnd(), MLM_QUERYUNDO, 0, 0) != 0);
-    else
-        bOk = FALSE; // can't undo regular edit fields in PM
-    return bOk;
-} // end of wxTextCtrl::CanUndo
+//    return (::SendMessage(GetHwnd(), EM_CANUNDO, 0, 0) != 0);
+    return FALSE;
+}
 
 bool wxTextCtrl::CanRedo() const
 {
-    bool                            bOk;
-
-    if (m_bIsMLE)
-        bOk = (::WinSendMsg(GetHwnd(), MLM_QUERYUNDO, 0, 0) != 0);
-    else
-        bOk = FALSE; // can't undo regular edit fields in PM
-    return bOk;
-} // end of wxTextCtrl::CanRedo
+//    return (::SendMessage(GetHwnd(), EM_CANUNDO, 0, 0) != 0);
+    return FALSE;
+}
 
 // ----------------------------------------------------------------------------
 // implemenation details
 // ----------------------------------------------------------------------------
 
-void wxTextCtrl::Command(
-  wxCommandEvent&                   rEvent
-)
+void wxTextCtrl::Command(wxCommandEvent & event)
 {
-    SetValue(rEvent.GetString());
-    ProcessCommand (rEvent);
-} // end of wxTextCtrl::Command
+    SetValue(event.GetString());
+    ProcessCommand (event);
+}
 
-void wxTextCtrl::OnDropFiles(
-  wxDropFilesEvent&                 rEvent
-)
+void wxTextCtrl::OnDropFiles(wxDropFilesEvent& event)
 {
     // By default, load the first file into the text window.
-    if (rEvent.GetNumberOfFiles() > 0)
+    if (event.GetNumberOfFiles() > 0)
     {
-        LoadFile(rEvent.GetFiles()[0]);
+        LoadFile(event.GetFiles()[0]);
     }
-} // end of wxTextCtrl::OnDropFiles
+}
 
-WXHBRUSH wxTextCtrl::OnCtlColor(
-  WXHDC                             hWxDC
-, WXHWND                            hWnd
-, WXUINT                            uCtlColor
-, WXUINT                            uMessage
-, WXWPARAM                          wParam
-, WXLPARAM                          lParam
-)
+WXHBRUSH wxTextCtrl::OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
+                                WXUINT message, WXWPARAM wParam,
+                                WXLPARAM lParam)
 {
-    HPS                             hPS = (HPS)hWxDC;
-    wxBrush*                        pBrush = NULL;
-    wxColour                        vColBack = GetBackgroundColour();
-    wxColour                        vColFore = GetForegroundColour();
-    wxBrush*                        pBackgroundBrush = wxTheBrushList->FindOrCreateBrush( GetBackgroundColour()
-                                                                                         ,wxSOLID
-                                                                                        );
+    HDC hdc = (HDC)pDC;
+// TODO:
+/*
+    SetBkMode(hdc, GetParent()->GetTransparentBackground() ? TRANSPARENT
+                                                           : OPAQUE);
 
-    if (m_bUseCtl3D)
-    {
-        HBRUSH                      hBrush = NULLHANDLE;
+    ::SetBkColor(hdc, RGB(GetBackgroundColour().Red(), GetBackgroundColour().Green(), GetBackgroundColour().Blue()));
+    ::SetTextColor(hdc, RGB(GetForegroundColour().Red(), GetForegroundColour().Green(), GetForegroundColour().Blue()));
+*/
+    wxBrush *backgroundBrush = wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID);
 
-        return hBrush;
-    }
-    if (GetParent()->GetTransparentBackground())
-        ::GpiSetBackMix(hPS, BM_LEAVEALONE);
-    else
-        ::GpiSetBackMix(hPS, BM_OVERPAINT);
-    if (!IsEnabled() && (GetWindowStyle() & wxTE_MULTILINE) == 0)
-        vColBack = wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DFACE);
-    ::GpiSetBackColor(hPS, vColBack.GetPixel());
-    ::GpiSetColor(hPS, vColFore.GetPixel());
-    return (WXHBRUSH)pBackgroundBrush->GetResourceHandle();
-} // end of wxTextCtrl::OnCtlColor
+    return (WXHBRUSH) backgroundBrush->GetResourceHandle();
+}
 
-void wxTextCtrl::OnChar(
-  wxKeyEvent&                       rEvent
-)
+void wxTextCtrl::OnChar(wxKeyEvent& event)
 {
-    switch (rEvent.KeyCode())
+    switch ( event.KeyCode() )
     {
+// TODO:
+/*
         case WXK_RETURN:
             if ( !(m_windowStyle & wxTE_MULTILINE) )
             {
-                wxCommandEvent      vEvent(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
-
-                vEvent.SetEventObject(this);
-                if ( GetEventHandler()->ProcessEvent(vEvent))
+                wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
+                event.SetEventObject( this );
+                if ( GetEventHandler()->ProcessEvent(event) )
                     return;
             }
             //else: multiline controls need Enter for themselves
@@ -1007,283 +704,168 @@ void wxTextCtrl::OnChar(
             // NB: Notice that Ctrl-Tab is handled elsewhere and Alt-Tab is
             //     handled by Windows
             {
-                wxNavigationKeyEvent    vEventNav;
+                wxNavigationKeyEvent eventNav;
+                eventNav.SetDirection(!event.ShiftDown());
+                eventNav.SetWindowChange(FALSE);
+                eventNav.SetEventObject(this);
 
-                vEventNav.SetDirection(!rEvent.ShiftDown());
-                vEventNav.SetWindowChange(FALSE);
-                vEventNav.SetEventObject(this);
-
-                if ( GetEventHandler()->ProcessEvent(vEventNav) )
+                if ( GetEventHandler()->ProcessEvent(eventNav) )
                     return;
             }
             break;
+*/
+        default:
+            event.Skip();
+            return;
     }
-    rEvent.Skip();
-} // end of wxTextCtrl::OnChar
 
-bool wxTextCtrl::OS2Command(
-  WXUINT                            uParam
-, WXWORD                            WXUNUSED(vId)
-)
+    // don't just call event.Skip() because this will cause TABs and ENTERs
+    // be passed upwards and we don't always want this - instead process it
+    // right here
+
+    // FIXME
+    event.Skip();
+}
+
+bool wxTextCtrl::OS2Command(WXUINT param, WXWORD WXUNUSED(id))
 {
-    switch (uParam)
+    switch (param)
     {
+// TODO:
+/*
         case EN_SETFOCUS:
         case EN_KILLFOCUS:
             {
-                wxFocusEvent        vEvent( uParam == EN_KILLFOCUS ? wxEVT_KILL_FOCUS
-                                                                   : wxEVT_SET_FOCUS
-                                           ,m_windowId
-                                          );
-
-                vEvent.SetEventObject(this);
-                GetEventHandler()->ProcessEvent(vEvent);
+                wxFocusEvent event(param == EN_KILLFOCUS ? wxEVT_KILL_FOCUS
+                        : wxEVT_SET_FOCUS,
+                        m_windowId);
+                event.SetEventObject( this );
+                GetEventHandler()->ProcessEvent(event);
             }
             break;
 
         case EN_CHANGE:
             {
-                wxCommandEvent      vEvent( wxEVT_COMMAND_TEXT_UPDATED
-                                           ,m_windowId
-                                          );
-
-                InitCommandEvent(vEvent);
-                vEvent.SetString((char*)GetValue().c_str());
-                ProcessCommand(vEvent);
+                wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, m_windowId);
+                wxString val(GetValue());
+                if ( !val.IsNull() )
+                    event.m_commandString = WXSTRINGCAST val;
+                event.SetEventObject( this );
+                ProcessCommand(event);
             }
             break;
 
-        case EN_OVERFLOW:
-            //
-            // The text size limit has been hit - increase it
-            //
+        case EN_ERRSPACE:
+            // the text size limit has been hit - increase it
             AdjustSpaceLimit();
             break;
 
-        case EN_SCROLL:
-        case EN_INSERTMODETOGGLE:
-        case EN_MEMERROR:
-            return FALSE;
+            // the other notification messages are not processed
+        case EN_UPDATE:
+        case EN_MAXTEXT:
+        case EN_HSCROLL:
+        case EN_VSCROLL:
+*/
         default:
             return FALSE;
     }
 
-    //
-    // Processed
-    //
+    // processed
     return TRUE;
-} // end of wxTextCtrl::OS2Command
+}
 
 void wxTextCtrl::AdjustSpaceLimit()
 {
-    unsigned int                    uLen = 0;
-    unsigned int                    uLimit = 0;
-
-    uLen   = ::WinQueryWindowTextLength(GetHwnd());
-    if (m_bIsMLE)
+// TODO:
+/*
+    unsigned int len = ::GetWindowTextLength(GetHwnd()),
+    limit = ::SendMessage(GetHwnd(), EM_GETLIMITTEXT, 0, 0);
+    if ( len > limit )
     {
-        uLimit = (unsigned int)::WinSendMsg( GetHwnd()
-                                            ,MLM_QUERYTEXTLIMIT
-                                            ,0
-                                            ,0
-                                           );
-    }
-    else
-    {
-        ENTRYFDATA*                 pEfd;
-        WNDPARAMS                   vParams;
+        limit = len + 0x8000;    // 32Kb
 
-        vParams.fsStatus = WPM_CBCTLDATA;
-        vParams.cbCtlData = sizeof(ENTRYFDATA);
-
-        if (::WinSendMsg( GetHwnd()
-                         ,WM_QUERYWINDOWPARAMS
-                         ,&vParams
-                         ,0
-                        ))
-        {
-            pEfd = (ENTRYFDATA*)vParams.pCtlData;
-            uLimit = (unsigned int)pEfd->cchEditLimit;
-        }
+        if ( limit > 0xffff )
+            ::SendMessage(GetHwnd(), EM_LIMITTEXT, 0, limit);
         else
-            uLimit = 32; //PM's default
+            ::SendMessage(GetHwnd(), EM_LIMITTEXT, limit, 0);
     }
-    if (uLen >= uLimit)
-    {
-        uLimit = uLen + 0x8000;    // 32Kb
-        if (uLimit > 0xffff)
-        {
-            uLimit = 0L;
-        }
-        if (m_bIsMLE)
-            ::WinSendMsg(GetHwnd(), MLM_SETTEXTLIMIT, MPFROMLONG(uLimit), 0);
-        else
-            ::WinSendMsg(GetHwnd(), EM_SETTEXTLIMIT, MPFROMLONG(uLimit), 0);
-    }
-} // end of wxTextCtrl::AdjustSpaceLimit
+*/
+}
 
 bool wxTextCtrl::AcceptsFocus() const
 {
-    //
-    // We don't want focus if we can't be edited
-    //
+    // we don't want focus if we can't be edited
     return IsEditable() && wxControl::AcceptsFocus();
-} // end of wxTextCtrl::Command
+}
 
 wxSize wxTextCtrl::DoGetBestSize() const
 {
-    int                             nCx;
-    int                             nCy;
+    int cx, cy;
+    wxGetCharSize(GetHWND(), &cx, &cy, (wxFont*)&GetFont());
 
-    wxGetCharSize(GetHWND(), &nCx, &nCy, (wxFont*)&GetFont());
+    int wText = DEFAULT_ITEM_WIDTH;
 
-    int                             wText = DEFAULT_ITEM_WIDTH;
-    int                             hText = (EDIT_HEIGHT_FROM_CHAR_HEIGHT(nCy) * .8);
-
-    if (m_windowStyle & wxTE_MULTILINE)
+    int hText = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy);
+    if ( m_windowStyle & wxTE_MULTILINE )
     {
         hText *= wxMin(GetNumberOfLines(), 5);
     }
     //else: for single line control everything is ok
+
     return wxSize(wText, hText);
-} // end of wxTextCtrl::DoGetBestSize
+}
 
 // ----------------------------------------------------------------------------
 // standard handlers for standard edit menu events
 // ----------------------------------------------------------------------------
 
-void wxTextCtrl::OnCut(
-  wxCommandEvent&                   rEvent
-)
+void wxTextCtrl::OnCut(wxCommandEvent& event)
 {
     Cut();
-} // end of wxTextCtrl::OnCut
+}
 
-void wxTextCtrl::OnCopy(
-  wxCommandEvent&                   rEvent
-)
+void wxTextCtrl::OnCopy(wxCommandEvent& event)
 {
     Copy();
-} // end of wxTextCtrl::OnCopy
+}
 
-void wxTextCtrl::OnPaste(
-  wxCommandEvent&                   rEvent
-)
+void wxTextCtrl::OnPaste(wxCommandEvent& event)
 {
     Paste();
-} // end of wxTextCtrl::OnPaste
+}
 
-void wxTextCtrl::OnUndo(
-  wxCommandEvent&                   rEvent
-)
+void wxTextCtrl::OnUndo(wxCommandEvent& event)
 {
     Undo();
-} // end of wxTextCtrl::OnUndo
+}
 
-void wxTextCtrl::OnRedo(
-  wxCommandEvent&                   rEvent
-)
+void wxTextCtrl::OnRedo(wxCommandEvent& event)
 {
     Redo();
-} // end of wxTextCtrl::OnRedo
+}
 
-void wxTextCtrl::OnUpdateCut(
-  wxUpdateUIEvent&                  rEvent
-)
+void wxTextCtrl::OnUpdateCut(wxUpdateUIEvent& event)
 {
-    rEvent.Enable(CanCut());
-} // end of wxTextCtrl::OnUpdateCut
+    event.Enable( CanCut() );
+}
 
-void wxTextCtrl::OnUpdateCopy(
-  wxUpdateUIEvent&                  rEvent
-)
+void wxTextCtrl::OnUpdateCopy(wxUpdateUIEvent& event)
 {
-    rEvent.Enable(CanCopy());
-} // end of wxTextCtrl::OnUpdateCopy
+    event.Enable( CanCopy() );
+}
 
-void wxTextCtrl::OnUpdatePaste(
-  wxUpdateUIEvent&                  rEvent
-)
+void wxTextCtrl::OnUpdatePaste(wxUpdateUIEvent& event)
 {
-    rEvent.Enable(CanPaste());
-} // end of wxTextCtrl::OnUpdatePaste
+    event.Enable( CanPaste() );
+}
 
-void wxTextCtrl::OnUpdateUndo(
-  wxUpdateUIEvent&                  rEvent
-)
+void wxTextCtrl::OnUpdateUndo(wxUpdateUIEvent& event)
 {
-    rEvent.Enable(CanUndo());
-} // end of wxTextCtrl::OnUpdateUndo
+    event.Enable( CanUndo() );
+}
 
-void wxTextCtrl::OnUpdateRedo(
-  wxUpdateUIEvent&                  rEvent
-)
+void wxTextCtrl::OnUpdateRedo(wxUpdateUIEvent& event)
 {
-    rEvent.Enable(CanRedo());
-} // end of wxTextCtrl::OnUpdateRedo
-
-bool wxTextCtrl::SetBackgroundColour(
-  const wxColour&                   rColour
-)
-{
-    if (m_bIsMLE)
-        ::WinSendMsg(GetHwnd(), MLM_SETBACKCOLOR, (MPARAM)rColour.GetPixel(), MLE_INDEX);
-    return TRUE;
-} // end of wxTextCtrl::SetBackgroundColour
-
-bool wxTextCtrl::SetForegroundColour(
-  const wxColour&                   rColour
-)
-{
-    if (m_bIsMLE)
-        ::WinSendMsg(GetHwnd(), MLM_SETTEXTCOLOR, (MPARAM)rColour.GetPixel(), MLE_INDEX);
-    return TRUE;
-} // end of wxTextCtrl::SetForegroundColour
-
-bool wxTextCtrl::SetStyle(
-  long                              lStart
-, long                              lEnd
-, const wxTextAttr&                 rStyle
-)
-{
-    HWND                            hWnd = GetHwnd();
-
-    if (lStart > lEnd)
-    {
-        long                        lTmp = lStart;
-
-        lStart = lEnd;
-        lEnd   = lTmp;
-    }
-
-    //
-    // We can only change the format of the selection, so select the range we
-    // want and restore the old selection later
-    //
-    long                            lStartOld;
-    long                            lEndOld;
-
-    GetSelection( &lStartOld
-                 ,&lEndOld
-                );
-
-    //
-    // But do we really have to change the selection?
-    //
-    bool                            bChangeSel = lStart != lStartOld ||
-                                                 lEnd != lEndOld;
-
-    if (bChangeSel)
-    {
-        if (m_bIsMLE)
-            ::WinSendMsg(hWnd, MLM_SETSEL, MPFROM2SHORT((USHORT)lStart, (USHORT)lEnd), 0);
-        else
-            ::WinSendMsg(hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lStart, (USHORT)lEnd), 0);
-    }
-
-    //
-    // TODO:: finish this part
-    //
-    return TRUE;
-} // end of wxTextCtrl::SetStyle
+    event.Enable( CanRedo() );
+}
 

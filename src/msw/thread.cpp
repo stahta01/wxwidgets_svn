@@ -45,42 +45,21 @@
     #define _MT
 #endif
 
-#if defined(__BORLANDC__)
-    #if !defined(__MT__)
-        // I can't set -tWM in the IDE (anyone?) so have to do this
-        #define __MT__
-    #endif
-
-    #if !defined(__MFC_COMPAT__)
-        // Needed to know about _beginthreadex etc..
-        #define __MFC_COMPAT__
-    #endif
-#endif // BC++
-
-// define wxUSE_BEGIN_THREAD if the compiler has _beginthreadex() function
-// which should be used instead of Win32 ::CreateThread() if possible
 #if defined(__VISUALC__) || \
     (defined(__BORLANDC__) && (__BORLANDC__ >= 0x500)) || \
-    (defined(__GNUG__) && defined(__MSVCRT__)) || \
-    defined(__WATCOMC__)
+    (defined(__GNUG__) && defined(__MSVCRT__))
 
-    #undef wxUSE_BEGIN_THREAD
-    #define wxUSE_BEGIN_THREAD
+#if defined(__BORLANDC__) && !defined(__MT__)
+// I can't set -tWM in the IDE (anyone?) so have to do this
+#define __MT__
 #endif
 
-#ifdef wxUSE_BEGIN_THREAD
-    // this is where _beginthreadex() is declared
+#if defined(__BORLANDC__) && !defined(__MFC_COMPAT__)
+// Needed to know about _beginthreadex etc..
+#define __MFC_COMPAT__
+#endif
+
     #include <process.h>
-
-    // the return type of the thread function entry point
-    typedef unsigned THREAD_RETVAL;
-
-    // the calling convention of the thread function entry point
-    #define THREAD_CALLCONV __stdcall
-#else
-    // the settings for CreateThread()
-    typedef DWORD THREAD_RETVAL;
-    #define THREAD_CALLCONV WINAPI
 #endif
 
 // ----------------------------------------------------------------------------
@@ -348,14 +327,8 @@ void wxCondition::Broadcast()
 
 wxCriticalSection::wxCriticalSection()
 {
-#ifdef __WXDEBUG__
-    // Done this way to stop warnings during compilation about statement
-    // always being false
-	 int csSize = sizeof(CRITICAL_SECTION);
-	 int bSize  = sizeof(m_buffer);
-    wxASSERT_MSG( csSize <= bSize,
+    wxASSERT_MSG( sizeof(CRITICAL_SECTION) <= sizeof(m_buffer),
                   _T("must increase buffer size in wx/thread.h") );
-#endif
 
     ::InitializeCriticalSection((CRITICAL_SECTION *)m_buffer);
 }
@@ -431,7 +404,7 @@ public:
     DWORD  GetId() const { return m_tid; }
 
     // thread function
-    static THREAD_RETVAL THREAD_CALLCONV WinThreadStart(void *thread);
+    static DWORD WinThreadStart(wxThread *thread);
 
 private:
     HANDLE        m_hThread;    // handle of the thread
@@ -440,17 +413,16 @@ private:
     DWORD         m_tid;        // thread id
 };
 
-THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)
+DWORD wxThreadInternal::WinThreadStart(wxThread *thread)
 {
-    THREAD_RETVAL rc;
+    DWORD rc;
     bool wasCancelled;
 
     // first of all, check whether we hadn't been cancelled already and don't
     // start the user code at all then
-    wxThread *thread = (wxThread *)param;
     if ( thread->m_internal->GetState() == STATE_EXITED )
     {
-        rc = (THREAD_RETVAL)-1;
+        rc = (DWORD)-1;
         wasCancelled = TRUE;
     }
     else // do run thread
@@ -463,7 +435,7 @@ THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)
             return (DWORD)-1;
         }
 
-        rc = (THREAD_RETVAL)thread->Entry();
+        rc = (DWORD)thread->Entry();
 
         // enter m_critsect before changing the thread state
         thread->m_critsect.Enter();
@@ -519,26 +491,23 @@ bool wxThreadInternal::Create(wxThread *thread)
     // for compilers which have it, we should use C RTL function for thread
     // creation instead of Win32 API one because otherwise we will have memory
     // leaks if the thread uses C RTL (and most threads do)
-#ifdef wxUSE_BEGIN_THREAD
-    m_hThread = (HANDLE)_beginthreadex
-                        (
-                            NULL,   // default security
-#ifdef __WATCOMC__
-                            10240,  // stack size can't be NULL in Watcom
-#else
-                            0,      // default stack size
-#endif
-                            wxThreadInternal::WinThreadStart, // entry point
-                            thread,
-                            CREATE_SUSPENDED,
-                            (unsigned int *)&m_tid
-                        );
+#if defined(__VISUALC__) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x500)) || \
+    (defined(__GNUG__) && defined(__MSVCRT__))
+    typedef unsigned (__stdcall *RtlThreadStart)(void *);
+
+    m_hThread = (HANDLE)_beginthreadex(NULL, 0,
+                                       (RtlThreadStart)
+                                       wxThreadInternal::WinThreadStart,
+                                       thread, CREATE_SUSPENDED,
+                                       (unsigned int *)&m_tid);
 #else // compiler doesn't have _beginthreadex
     m_hThread = ::CreateThread
                   (
                     NULL,                               // default security
                     0,                                  // default stack size
-                    wxThreadInternal::WinThreadStart,   // thread entry point
+                    (LPTHREAD_START_ROUTINE)            // thread entry point
+                    wxThreadInternal::WinThreadStart,   //
                     (LPVOID)thread,                     // parameter
                     CREATE_SUSPENDED,                   // flags
                     &m_tid                              // [out] thread id
@@ -1010,7 +979,9 @@ void wxThread::Exit(ExitCode status)
         delete this;
     }
 
-#ifdef wxUSE_BEGIN_THREAD
+#if defined(__VISUALC__) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x500)) || \
+    (defined(__GNUG__) && defined(__MSVCRT__))
     _endthreadex((unsigned)status);
 #else // !VC++
     ::ExitThread((DWORD)status);

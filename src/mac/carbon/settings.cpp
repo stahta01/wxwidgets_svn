@@ -14,7 +14,6 @@
 #endif
 
 #include "wx/settings.h"
-#include "wx/gdicmn.h"
 
 wxColour wxSystemSettings::GetSystemColour(int index)
 {
@@ -33,9 +32,6 @@ wxColour wxSystemSettings::GetSystemColour(int index)
 			return wxColor( 0xDD , 0xDD , 0xDD ) ;
 			break ;
 
-		case wxSYS_COLOUR_LISTBOX :
-			return wxColor( 0xEE , 0xEE , 0xEE ) ;
-			break ;
 		case wxSYS_COLOUR_BTNSHADOW:
 			return wxColor( 0x44 , 0x44 , 0x44 ) ;
 			break ;
@@ -78,6 +74,7 @@ wxColour wxSystemSettings::GetSystemColour(int index)
 			break ;
 		case wxSYS_COLOUR_INFOBK :
 		case wxSYS_COLOUR_APPWORKSPACE:	
+		case wxSYS_COLOUR_LISTBOX:
 			return *wxWHITE ;
 			break ;
 	}
@@ -220,14 +217,3 @@ int wxSystemSettings::GetSystemMetric(int index)
 	return 0;
 }
 
-bool wxSystemSettings::GetCapability(int index)
-{
-    switch (index)
-    {
-        case wxSYS_CAN_ICONIZE_FRAME: 
-        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-            return TRUE; break;
-        default:
-            return FALSE;
-    }
-}

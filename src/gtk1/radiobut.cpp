@@ -12,11 +12,9 @@
 #pragma implementation "radiobut.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/radiobut.h"
 
 #if wxUSE_RADIOBOX
-
-#include "wx/radiobut.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
@@ -47,10 +45,8 @@ void gtk_radiobutton_clicked_callback( GtkToggleButton *button, wxRadioButton *r
     if (!rb->m_hasVMT) return;
   
     if (g_blockEventsOnDrag) return;
-  
-    if (!button->active) return;
     
-    if (rb->m_blockEvent) return;
+    if (!button->active) return;
   
     wxCommandEvent event( wxEVT_COMMAND_RADIOBUTTON_SELECTED, rb->GetId());
     event.SetInt( rb->GetValue() );
@@ -71,24 +67,22 @@ bool wxRadioButton::Create( wxWindow *parent, wxWindowID id, const wxString& lab
     m_acceptsFocus = TRUE;
     m_needParent = TRUE;
     m_isRadioButton = TRUE;
-    
-    m_blockEvent = FALSE;
 
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxRadioButton creation failed") );
-        return FALSE;
+    return FALSE;
     }
 
     if (HasFlag(wxRB_GROUP))
     {
-        // start a new group
+        /* start a new group */
         m_radioButtonGroup = (GSList*) NULL;
     }
     else
     {
-        // search backward for last group start
+        /* search backward for last group start */
         wxRadioButton *chief = (wxRadioButton*) NULL;
         wxWindowList::Node *node = parent->GetChildren().GetLast();
         while (node)
@@ -103,12 +97,12 @@ bool wxRadioButton::Create( wxWindow *parent, wxWindowID id, const wxString& lab
         }
         if (chief)
         {
-            // we are part of the group started by chief
+            /* we are part of the group started by chief */
             m_radioButtonGroup = gtk_radio_button_group( GTK_RADIO_BUTTON(chief->m_widget) );
         }
         else
         {
-            // start a new group
+            /* start a new group */
             m_radioButtonGroup = (GSList*) NULL;
         }
     }
@@ -160,11 +154,12 @@ void wxRadioButton::SetValue( bool val )
     if (val == GetValue())
         return;
 
-    m_blockEvent = TRUE;
+    gtk_signal_disconnect_by_func( GTK_OBJECT(m_widget),
+      GTK_SIGNAL_FUNC(gtk_radiobutton_clicked_callback), (gpointer*)this );
 
     if (val)
     {
-        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(m_widget), TRUE );
+        gtk_toggle_button_set_state( GTK_TOGGLE_BUTTON(m_widget), TRUE );
     }
     else
     {
@@ -173,7 +168,8 @@ void wxRadioButton::SetValue( bool val )
         //      as FALSE.  Failing silently is probably TRTTD here.
     }
 
-    m_blockEvent = FALSE;
+    gtk_signal_connect( GTK_OBJECT(m_widget), "clicked", 
+      GTK_SIGNAL_FUNC(gtk_radiobutton_clicked_callback), (gpointer*)this );
 }
 
 bool wxRadioButton::GetValue() const

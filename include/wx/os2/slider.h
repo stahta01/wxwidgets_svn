@@ -17,7 +17,7 @@
 WXDLLEXPORT_DATA(extern const char*) wxSliderNameStr;
 
 // Slider
-class WXDLLEXPORT wxSlider: public wxSliderBase
+class WXDLLEXPORT wxSlider: public wxControl
 {
   DECLARE_DYNAMIC_CLASS(wxSlider)
 

@@ -113,10 +113,10 @@ bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
         notifyData.hWnd = (HWND) m_hWnd;
         notifyData.uCallbackMessage = sm_taskbarMsg;
         notifyData.uFlags = NIF_MESSAGE ;
-    if (icon.Ok())
+        if (icon.Ok())
     {
-        notifyData.uFlags |= NIF_ICON;
-        notifyData.hIcon = (HICON) icon.GetHICON();
+                notifyData.uFlags |= NIF_ICON;
+            notifyData.hIcon = (HICON) icon.GetHICON();
     }
 
     if (((const wxChar*) tooltip != NULL) && (tooltip != wxT("")))
@@ -355,7 +355,9 @@ long wxTaskBarIcon::WindowProc( WXHWND hWnd, unsigned int msg, unsigned int wPar
         }
 
     if (eventType) {
-        wxTaskBarIconEvent event(eventType, this);
+        wxEvent event;
+        event.SetEventType(eventType);
+        event.SetEventObject(this);
 
         ProcessEvent(event);
     }

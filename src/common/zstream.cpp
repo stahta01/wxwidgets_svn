@@ -34,7 +34,7 @@
 #if defined(__WXMSW__) && !defined(__WX_SETUP_H__) && !defined(wxUSE_ZLIB_H_IN_PATH)
    #include "../zlib/zlib.h"
 #else
-   #include "zlib.h"
+   #include <zlib.h>
 #endif
 
 #define ZSTREAM_BUFFER_SIZE 1024
@@ -46,6 +46,8 @@
 wxZlibInputStream::wxZlibInputStream(wxInputStream& stream)
   : wxFilterInputStream(stream)
 {
+  int err;
+
   // I need a private stream buffer.
   m_inflate = new z_stream_s;
 
@@ -53,7 +55,7 @@ wxZlibInputStream::wxZlibInputStream(wxInputStream& stream)
   m_inflate->zfree = (free_func)0;
   m_inflate->opaque = (voidpf)0;
 
-  int err = inflateInit(m_inflate);
+  err = inflateInit(m_inflate);
   if (err != Z_OK) {
     inflateEnd(m_inflate);
     delete m_inflate;
@@ -71,8 +73,6 @@ wxZlibInputStream::~wxZlibInputStream()
 {
   inflateEnd(m_inflate);
   delete m_inflate;
-
-  delete [] m_z_buffer;
 }
 
 size_t wxZlibInputStream::OnSysRead(void *buffer, size_t size)
@@ -157,7 +157,6 @@ wxZlibOutputStream::~wxZlibOutputStream()
   }
 
   deflateEnd(m_deflate);
-  delete m_deflate;
 
   delete[] m_z_buffer;
 }

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 from wxPython.wx import *
 from wxPython.grid import *
@@ -45,8 +46,7 @@ class MyCellEditor(wxPyGridCellEditor):
         PaintBackground and do something meaningful there.
         """
         self.log.write("MyCellEditor: SetSize %s\n" % rect)
-        self._tc.SetDimensions(rect.x, rect.y, rect.width+2, rect.height+2,
-                               wxSIZE_ALLOW_MINUS_ONE)
+        self._tc.SetDimensions(rect.x, rect.y, rect.width+2, rect.height+2)
 
 
     def Show(self, show, attr):
@@ -210,7 +210,6 @@ class GridEditorTest(wxGrid):
         self.SetColSize(0, 150)
         self.SetColSize(1, 150)
         self.SetColSize(2, 150)
-
 
 #---------------------------------------------------------------------------
 

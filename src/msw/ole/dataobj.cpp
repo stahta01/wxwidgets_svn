@@ -28,14 +28,14 @@
     #pragma hdrstop
 #endif
 
+#if defined(__WIN32__) && !defined(__GNUWIN32_OLD__)
+
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
 #endif
 
 #include "wx/dataobj.h"
-
-#if wxUSE_OLE && defined(__WIN32__) && !defined(__GNUWIN32_OLD__)
 
 #include "wx/msw/private.h"         // includes <windows.h>
 
@@ -55,10 +55,6 @@
 
 #include "wx/msw/dib.h"
 
-#ifndef CFSTR_SHELLURL
-#define CFSTR_SHELLURL _T("UniformResourceLocator")
-#endif
-
 // ----------------------------------------------------------------------------
 // functions
 // ----------------------------------------------------------------------------
@@ -66,7 +62,7 @@
 #ifdef __WXDEBUG__
     static const wxChar *GetTymedName(DWORD tymed);
 #else // !Debug
-    #define GetTymedName(tymed) _T("")
+    #define GetTymedName(tymed) ""
 #endif // Debug/!Debug
 
 // ----------------------------------------------------------------------------
@@ -77,7 +73,13 @@ class wxIEnumFORMATETC : public IEnumFORMATETC
 {
 public:
     wxIEnumFORMATETC(const wxDataFormat* formats, ULONG nCount);
-    virtual ~wxIEnumFORMATETC() { delete [] m_formats; }
+
+    // to suppress the gcc warning about "class has virtual functions but non
+    // virtual dtor"
+#ifdef __GNUG__
+    virtual
+#endif
+    ~wxIEnumFORMATETC() { delete [] m_formats; }
 
     DECLARE_IUNKNOWN_METHODS;
 
@@ -101,7 +103,13 @@ class wxIDataObject : public IDataObject
 {
 public:
     wxIDataObject(wxDataObject *pDataObject);
-    virtual ~wxIDataObject();
+
+    // to suppress the gcc warning about "class has virtual functions but non
+    // virtual dtor"
+#ifdef __GNUG__
+    virtual
+#endif
+    ~wxIDataObject();
 
     // normally, wxDataObject controls our lifetime (i.e. we're deleted when it
     // is), but in some cases, the situation is inversed, that is we delete it
@@ -137,7 +145,7 @@ private:
 
 void wxDataFormat::SetId(const wxChar *format)
 {
-    m_format = (wxDataFormat::NativeFormat)::RegisterClipboardFormat(format);
+    m_format = ::RegisterClipboardFormat(format);
     if ( !m_format )
     {
         wxLogError(_("Couldn't register clipboard format '%s'."), format);
@@ -188,7 +196,7 @@ wxIEnumFORMATETC::wxIEnumFORMATETC(const wxDataFormat *formats, ULONG nCount)
 
 STDMETHODIMP wxIEnumFORMATETC::Next(ULONG      celt,
                                     FORMATETC *rgelt,
-                                    ULONG     *WXUNUSED(pceltFetched))
+                                    ULONG     *pceltFetched)
 {
     wxLogTrace(wxTRACE_OleCalls, wxT("wxIEnumFORMATETC::Next"));
 
@@ -328,9 +336,7 @@ STDMETHODIMP wxIDataObject::GetData(FORMATETC *pformatetcIn, STGMEDIUM *pmedium)
             if ( !format.IsStandard() ) {
                 // for custom formats, put the size with the data - alloc the
                 // space for it
-                // MB: not completely sure this is correct,
-                //     even if I can't figure out what's wrong
-                size += m_pDataObject->GetBufferOffset( format );
+                size += sizeof(size_t);
             }
 
             HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, size);
@@ -392,12 +398,14 @@ STDMETHODIMP wxIDataObject::GetDataHere(FORMATETC *pformatetc,
                     return E_OUTOFMEMORY;
                 }
 
-                wxDataFormat format = pformatetc->cfFormat;
-                if ( !format.IsStandard() ) {
+                if ( !wxDataFormat(pformatetc->cfFormat).IsStandard() ) {
                     // for custom formats, put the size with the data
-                    pBuf = m_pDataObject->SetSizeInBuffer( pBuf, GlobalSize(hGlobal), format );
+                    size_t *p = (size_t *)pBuf;
+                    *p++ = GlobalSize(hGlobal);
+                    pBuf = p;
                 }
 
+                wxDataFormat format = pformatetc->cfFormat;
                 if ( !m_pDataObject->GetDataHere(format, pBuf) )
                     return E_UNEXPECTED;
 
@@ -447,7 +455,7 @@ STDMETHODIMP wxIDataObject::SetData(FORMATETC *pformatetc,
                 }
 
                 // copy data
-                const void *pBuf = GlobalLock(pmedium->hGlobal);
+                void *pBuf = GlobalLock(pmedium->hGlobal);
                 if ( pBuf == NULL ) {
                     wxLogLastError(wxT("GlobalLock"));
 
@@ -468,11 +476,10 @@ STDMETHODIMP wxIDataObject::SetData(FORMATETC *pformatetc,
                         break;
 #if !defined(__WATCOMC__) && ! (defined(__BORLANDC__) && (__BORLANDC__ < 0x500))
                     case CF_UNICODETEXT:
-#if ( defined(__BORLANDC__) && (__BORLANDC__ > 0x530) ) \
-    || ( defined(__MWERKS__) && defined(__WXMSW__) )
-                        size = std::wcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
+#if (defined(__BORLANDC__) && (__BORLANDC__ > 0x530))
+                        size = std::wcslen((const wchar_t *)pBuf);
 #else
-                        size = ::wcslen((const wchar_t *)pBuf) * sizeof(wchar_t);
+                        size = ::wcslen((const wchar_t *)pBuf);
 #endif
                         break;
 #endif
@@ -496,10 +503,12 @@ STDMETHODIMP wxIDataObject::SetData(FORMATETC *pformatetc,
                     default:
                         {
                             // we suppose that the size precedes the data
-                            pBuf = m_pDataObject->GetSizeFromBuffer( pBuf, &size, format );
+                            size_t *p = (size_t *)pBuf;
+                            size = *p++;
+                            pBuf = p;
                             if (! format.IsStandard() ) {
                                 // see GetData for coresponding increment
-                                size -= m_pDataObject->GetBufferOffset( format  );
+                                size -= sizeof(size_t);
                             }
                         }
                 }
@@ -602,7 +611,7 @@ STDMETHODIMP wxIDataObject::QueryGetData(FORMATETC *pformatetc)
     return S_OK;
 }
 
-STDMETHODIMP wxIDataObject::GetCanonicalFormatEtc(FORMATETC *WXUNUSED(pFormatetcIn),
+STDMETHODIMP wxIDataObject::GetCanonicalFormatEtc(FORMATETC *pFormatetcIn,
                                                   FORMATETC *pFormatetcOut)
 {
     wxLogTrace(wxTRACE_OleCalls, wxT("wxIDataObject::GetCanonicalFormatEtc"));
@@ -623,8 +632,7 @@ STDMETHODIMP wxIDataObject::EnumFormatEtc(DWORD dwDir,
                                                        : wxDataObject::Set;
 
     size_t nFormatCount = m_pDataObject->GetFormatCount(dir);
-    wxDataFormat format;
-    wxDataFormat *formats;
+    wxDataFormat format, *formats;
     formats = nFormatCount == 1 ? &format : new wxDataFormat[nFormatCount];
     m_pDataObject->GetAllFormats(formats, dir);
 
@@ -643,20 +651,20 @@ STDMETHODIMP wxIDataObject::EnumFormatEtc(DWORD dwDir,
 // advise sink functions (not implemented)
 // ----------------------------------------------------------------------------
 
-STDMETHODIMP wxIDataObject::DAdvise(FORMATETC   *WXUNUSED(pformatetc),
-                                    DWORD        WXUNUSED(advf),
-                                    IAdviseSink *WXUNUSED(pAdvSink),
-                                    DWORD       *WXUNUSED(pdwConnection))
+STDMETHODIMP wxIDataObject::DAdvise(FORMATETC   *pformatetc,
+                                    DWORD        advf,
+                                    IAdviseSink *pAdvSink,
+                                    DWORD       *pdwConnection)
 {
   return OLE_E_ADVISENOTSUPPORTED;
 }
 
-STDMETHODIMP wxIDataObject::DUnadvise(DWORD WXUNUSED(dwConnection))
+STDMETHODIMP wxIDataObject::DUnadvise(DWORD dwConnection)
 {
   return OLE_E_ADVISENOTSUPPORTED;
 }
 
-STDMETHODIMP wxIDataObject::EnumDAdvise(IEnumSTATDATA **WXUNUSED(ppenumAdvise))
+STDMETHODIMP wxIDataObject::EnumDAdvise(IEnumSTATDATA **ppenumAdvise)
 {
   return OLE_E_ADVISENOTSUPPORTED;
 }
@@ -683,29 +691,6 @@ void wxDataObject::SetAutoDelete()
 
     // so that the dtor doesnt' crash
     m_pIDataObject = NULL;
-}
-
-size_t wxDataObject::GetBufferOffset( const wxDataFormat& format )
-{
-    return sizeof(size_t);
-}
-
-const void* wxDataObject::GetSizeFromBuffer( const void* buffer, size_t* size,
-                                             const wxDataFormat& format )
-{
-    size_t* p = (size_t*)buffer;
-    *size = *p;
-
-    return p + 1;
-}
-
-void* wxDataObject::SetSizeInBuffer( void* buffer, size_t size,
-                                       const wxDataFormat& format )
-{
-    size_t* p = (size_t*)buffer;
-    *p = size;
-
-    return p + 1;
 }
 
 #ifdef __WXDEBUG__
@@ -767,7 +752,7 @@ bool wxBitmapDataObject::GetDataHere(void *buf) const
     return wxConvertBitmapToDIB((LPBITMAPINFO)buf, GetBitmap()) != 0;
 }
 
-bool wxBitmapDataObject::SetData(size_t WXUNUSED(len), const void *buf)
+bool wxBitmapDataObject::SetData(size_t len, const void *buf)
 {
     wxBitmap bitmap(wxConvertDIBToBitmap((const LPBITMAPINFO)buf));
 
@@ -1055,96 +1040,9 @@ bool wxFileDataObject::GetDataHere(void *pData) const
         *pbuf++ = wxT('\0');
     }
 
-    // add final null terminator
-    *pbuf = wxT('\0');
+    *pbuf = wxT('\0');	// add final null terminator
 
     return TRUE;
-}
-
-// ----------------------------------------------------------------------------
-// wxURLDataObject
-// ----------------------------------------------------------------------------
-
-class CFSTR_SHELLURLDataObject:public wxCustomDataObject
-{
-public:
-    CFSTR_SHELLURLDataObject() : wxCustomDataObject(CFSTR_SHELLURL) {}
-protected:
-    virtual size_t GetBufferOffset( const wxDataFormat& format )
-    {
-        return 0;
-    }
-
-    virtual const void* GetSizeFromBuffer( const void* buffer, size_t* size,
-                                           const wxDataFormat& format )
-    {
-        // CFSTR_SHELLURL is _always_ ANSI text
-        *size = strlen( (const char*)buffer );
-
-        return buffer;
-    }
-
-    virtual void* SetSizeInBuffer( void* buffer, size_t size,
-                                   const wxDataFormat& format )
-    {
-        return buffer;
-    }
-#if wxUSE_UNICODE
-    virtual bool GetDataHere( void* buffer ) const
-    {
-        // CFSTR_SHELLURL is _always_ ANSI!
-        wxCharBuffer char_buffer( GetDataSize() );
-        wxCustomDataObject::GetDataHere( (void*)char_buffer.data() );
-        wxString unicode_buffer( char_buffer );
-        memcpy( buffer, unicode_buffer.c_str(),
-                ( unicode_buffer.length() + 1 ) * sizeof(wxChar) );
-
-        return TRUE;
-    }
-#endif
-};
-
-wxURLDataObject::wxURLDataObject()
-{
-    // we support CF_TEXT and CFSTR_SHELLURL formats which are basicly the same
-    // but it seems that some browsers only provide one of them so we have to
-    // support both
-    Add(new wxTextDataObject);
-    Add(new CFSTR_SHELLURLDataObject());
-
-    // we don't have any data yet
-    m_dataObjectLast = NULL;
-}
-
-bool wxURLDataObject::SetData(const wxDataFormat& format,
-                              size_t len,
-                              const void *buf)
-{
-    m_dataObjectLast = GetObject(format);
-
-    wxCHECK_MSG( m_dataObjectLast, FALSE,
-                 wxT("unsupported format in wxURLDataObject"));
-
-    return m_dataObjectLast->SetData(len, buf);
-}
-
-wxString wxURLDataObject::GetURL() const
-{
-    wxString url;
-    wxCHECK_MSG( m_dataObjectLast, url, _T("no data in wxURLDataObject") );
-
-    size_t len = m_dataObjectLast->GetDataSize();
-
-    m_dataObjectLast->GetDataHere(url.GetWriteBuf(len));
-    url.UngetWriteBuf();
-
-    return url;
-}
-
-void wxURLDataObject::SetURL(const wxString& url)
-{
-    SetData(wxDataFormat(wxDF_TEXT), url.Length()+1, url.c_str());
-    SetData(wxDataFormat(CFSTR_SHELLURL), url.Length()+1, url.c_str());
 }
 
 // ----------------------------------------------------------------------------
@@ -1201,7 +1099,7 @@ size_t wxConvertBitmapToDIB(LPBITMAPINFO pbi, const wxBitmap& bitmap)
     // calculate the number of bits per pixel and the number of items in
     // bmiColors array (whose meaning depends on the bitmap format)
     WORD biBits = bm.bmPlanes * bm.bmBitsPixel;
-    WORD biColors = (WORD)wxGetNumOfBitmapColors(biBits);
+    WORD biColors = wxGetNumOfBitmapColors(biBits);
 
     BITMAPINFO bi2;
 
@@ -1299,29 +1197,5 @@ static const wxChar *GetTymedName(DWORD tymed)
 
 #endif // Debug
 
-#else // not using OLE at all
-// ----------------------------------------------------------------------------
-// wxDataObject
-// ----------------------------------------------------------------------------
-
-wxDataObject::wxDataObject()
-{
-}
-
-wxDataObject::~wxDataObject()
-{
-}
-
-void wxDataObject::SetAutoDelete()
-{
-}
-
-#ifdef __WXDEBUG__
-const wxChar *wxDataObject::GetFormatName(wxDataFormat format)
-{
-    return NULL;
-}
-#endif
-
-#endif
+#endif // not using OLE at all
 

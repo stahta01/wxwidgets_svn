@@ -18,7 +18,7 @@
 // ----------------------------------------------------------------------------
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -31,7 +31,6 @@
 #include <wx/toolbar.h>
 #include <wx/log.h>
 #include <wx/image.h>
-#include <wx/spinctrl.h>
 
 // define this to 1 to use wxToolBarSimple instead of the native one
 #define USE_GENERIC_TBAR 0
@@ -110,7 +109,6 @@ public:
     void OnEnablePrint(wxCommandEvent& WXUNUSED(event)) { DoEnablePrint(); }
     void OnDeletePrint(wxCommandEvent& WXUNUSED(event)) { DoDeletePrint(); }
     void OnInsertPrint(wxCommandEvent& event);
-    void OnChangeToolTip(wxCommandEvent& event);
     void OnToggleHelp(wxCommandEvent& WXUNUSED(event)) { DoToggleHelp(); }
 
     void OnToolLeftClick(wxCommandEvent& event);
@@ -152,8 +150,6 @@ private:
 
 const int ID_TOOLBAR = 500;
 
-static const long TOOLBAR_STYLE = wxNO_BORDER | wxTB_FLAT | wxTB_DOCKABLE;
-
 enum
 {
     IDM_TOOLBAR_TOGGLETOOLBARSIZE = 200,
@@ -165,7 +161,6 @@ enum
     IDM_TOOLBAR_TOGGLEHELP,
     IDM_TOOLBAR_TOGGLEFULLSCREEN,
     IDM_TOOLBAR_TOGGLE_ANOTHER_TOOLBAR,
-    IDM_TOOLBAR_CHANGE_TOOLTIP,
 
     ID_COMBO = 1000
 };
@@ -194,7 +189,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(IDM_TOOLBAR_INSERTPRINT, MyFrame::OnInsertPrint)
     EVT_MENU(IDM_TOOLBAR_TOGGLEHELP, MyFrame::OnToggleHelp)
     EVT_MENU(IDM_TOOLBAR_TOGGLEFULLSCREEN, MyFrame::OnToggleFullScreen)
-    EVT_MENU(IDM_TOOLBAR_CHANGE_TOOLTIP, MyFrame::OnChangeToolTip)
 
     EVT_MENU(-1, MyFrame::OnToolLeftClick)
 
@@ -242,7 +236,7 @@ void MyFrame::RecreateToolbar()
 
     SetToolBar(NULL);
 
-    long style = TOOLBAR_STYLE;
+    long style = wxNO_BORDER | wxTB_FLAT | wxTB_DOCKABLE;
     style |= m_horzToolbar ? wxTB_HORIZONTAL : wxTB_VERTICAL;
 
     toolBar = CreateToolBar(style, ID_TOOLBAR);
@@ -301,15 +295,12 @@ void MyFrame::RecreateToolbar()
     // adding a combo to a vertical toolbar is not very smart
     if ( m_horzToolbar )
     {
-        wxComboBox *combo = new wxComboBox(toolBar, ID_COMBO, "", wxDefaultPosition, wxSize(200,-1) );
+        wxComboBox *combo = new wxComboBox(toolBar, ID_COMBO);
         combo->Append("This");
         combo->Append("is a");
         combo->Append("combobox");
         combo->Append("in a");
         combo->Append("toolbar");
-/*
-        wxTextCtrl *combo = new wxTextCtrl( toolBar, -1, "", wxDefaultPosition, wxSize(80,-1) );
-*/
         toolBar->AddControl(combo);
     }
 #endif // toolbars which don't support controls
@@ -387,10 +378,11 @@ MyFrame::MyFrame(wxFrame* parent,
     tbarMenu->Append(IDM_TOOLBAR_DELETEPRINT, "&Delete print button\tCtrl-D", "");
     tbarMenu->Append(IDM_TOOLBAR_INSERTPRINT, "&Insert print button\tCtrl-I", "");
     tbarMenu->Append(IDM_TOOLBAR_TOGGLEHELP, "Toggle &help button\tCtrl-T", "");
-    tbarMenu->AppendSeparator();
-    tbarMenu->Append(IDM_TOOLBAR_CHANGE_TOOLTIP, "Change tool tip", "");
+
+#ifdef __WXMSW__
     tbarMenu->AppendSeparator();
     tbarMenu->Append(IDM_TOOLBAR_TOGGLEFULLSCREEN, "Toggle &full screen mode\tCtrl-F", "");
+#endif
 
     wxMenu *fileMenu = new wxMenu;
     fileMenu->Append(wxID_EXIT, "E&xit", "Quit toolbar sample" );
@@ -467,7 +459,7 @@ void MyFrame::OnToggleAnotherToolbar(wxCommandEvent& WXUNUSED(event))
     {
         m_tbar = new wxToolBar(this, -1,
                                wxDefaultPosition, wxDefaultSize,
-                               TOOLBAR_STYLE | wxTB_VERTICAL);
+                               wxTB_VERTICAL);
         m_tbar->AddTool(wxID_HELP, wxBITMAP(help),
                         wxNullBitmap, FALSE,
                         NULL,
@@ -575,11 +567,6 @@ void MyFrame::OnUpdateCopyAndCut(wxUpdateUIEvent& event)
     event.Enable( m_textWindow->CanCopy() );
 }
 
-void MyFrame::OnChangeToolTip(wxCommandEvent& WXUNUSED(event))
-{
-    GetToolBar()->SetToolShortHelp(wxID_NEW, _T("New toolbar button"));
-}
-
 void MyFrame::OnInsertPrint(wxCommandEvent& WXUNUSED(event))
 {
     wxBitmap bmp = wxBITMAP(print);
@@ -606,6 +593,8 @@ void MyFrame::OnToolEnter(wxCommandEvent& event)
 
 void MyFrame::OnToggleFullScreen(wxCommandEvent& event)
 {
+#ifdef __WXMSW__
     ShowFullScreen(!IsFullScreen());
+#endif
 }
 

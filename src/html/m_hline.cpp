@@ -21,10 +21,10 @@
 #endif
 
 #ifndef WXPRECOMP
-    #include "wx/brush.h"
-    #include "wx/pen.h"
-    #include "wx/dc.h"
+#include "wx/wx.h"
 #endif
+
+
 
 #include "wx/html/forcelnk.h"
 #include "wx/html/m_templ.h"
@@ -41,21 +41,16 @@ FORCE_LINK_ME(m_hline)
 class wxHtmlLineCell : public wxHtmlCell
 {
     public:
-        wxHtmlLineCell(int size, bool shading) : wxHtmlCell() {m_Height = size; m_HasShading = shading;}
+        wxHtmlLineCell(int size) : wxHtmlCell() {m_Height = size;}
         void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
-        void Layout(int w)
-            { m_Width = w; wxHtmlCell::Layout(w); }
-
-    private:
-        // Should we draw 3-D shading or not
-      bool m_HasShading;
+        void Layout(int w) {m_Width = w; wxHtmlCell::Layout(w);}
 };
 
 
-void wxHtmlLineCell::Draw(wxDC& dc, int x, int y, int WXUNUSED(view_y1), int WXUNUSED(view_y2))
+void wxHtmlLineCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2)
 {
-    wxBrush mybrush(wxT("GREY"), (m_HasShading) ? wxTRANSPARENT : wxSOLID);
-    wxPen mypen(wxT("GREY"), 1, wxSOLID);
+    wxBrush mybrush("BLACK", wxSOLID);
+    wxPen mypen("BLACK", 1, wxSOLID);
     dc.SetBrush(mybrush);
     dc.SetPen(mypen);
     dc.DrawRectangle(x + m_PosX, y + m_PosY, m_Width, m_Height);
@@ -75,22 +70,20 @@ TAG_HANDLER_BEGIN(HR, "HR")
     {
         wxHtmlContainerCell *c;
         int sz;
-        bool HasShading;
 
-        m_WParser->CloseContainer();
-        c = m_WParser->OpenContainer();
+        m_WParser -> CloseContainer();
+        c = m_WParser -> OpenContainer();
 
-        c->SetIndent(m_WParser->GetCharHeight(), wxHTML_INDENT_VERTICAL);
-        c->SetAlignHor(wxHTML_ALIGN_CENTER);
-        c->SetAlign(tag);
-        c->SetWidthFloat(tag);
+        c -> SetIndent(m_WParser -> GetCharHeight(), wxHTML_INDENT_VERTICAL);
+        c -> SetAlignHor(wxHTML_ALIGN_CENTER);
+        c -> SetAlign(tag);
+        c -> SetWidthFloat(tag);
         sz = 1;
-        tag.GetParamAsInt(wxT("SIZE"), &sz);
-        HasShading = !(tag.HasParam(wxT("NOSHADE")));
-        c->InsertCell(new wxHtmlLineCell((int)((double)sz * m_WParser->GetPixelScale()), HasShading));
+        if (tag.HasParam(wxT("SIZE")) && tag.ScanParam(wxT("SIZE"), wxT("%i"), &sz) == 1) {}
+        c -> InsertCell(new wxHtmlLineCell((int)((double)sz * m_WParser -> GetPixelScale())));
 
-        m_WParser->CloseContainer();
-        m_WParser->OpenContainer();
+        m_WParser -> CloseContainer();
+        m_WParser -> OpenContainer();
 
         return FALSE;
     }

@@ -125,10 +125,10 @@ Returns the current print quality. This can be a positive integer, denoting the 
 one of the following identifiers:
 
 \begin{verbatim}
-wxPRINT_QUALITY_HIGH
-wxPRINT_QUALITY_MEDIUM
-wxPRINT_QUALITY_LOW
-wxPRINT_QUALITY_DRAFT
+wxPRINT\_QUALITY\_HIGH
+wxPRINT\_QUALITY\_MEDIUM
+wxPRINT\_QUALITY\_LOW
+wxPRINT\_QUALITY\_DRAFT
 \end{verbatim}
 
 On input you should pass one of these identifiers, but on return you may get back a positive integer
@@ -262,10 +262,10 @@ Sets the desired print quality. This can be a positive integer, denoting the num
 one of the following identifiers:
 
 \begin{verbatim}
-wxPRINT_QUALITY_HIGH
-wxPRINT_QUALITY_MEDIUM
-wxPRINT_QUALITY_LOW
-wxPRINT_QUALITY_DRAFT
+wxPRINT\_QUALITY\_HIGH
+wxPRINT\_QUALITY\_MEDIUM
+wxPRINT\_QUALITY\_LOW
+wxPRINT\_QUALITY\_DRAFT
 \end{verbatim}
 
 On input you should pass one of these identifiers, but on return you may get back a positive integer
@@ -760,10 +760,6 @@ it should be designed to take no parameters (other than the self
 reference) and to return a tuple of four integers.
 }
 
-\perlnote{When this method is overridden in a derived class,
-it must not take any parameters, an return a 4-element list.
-}
-
 \membersection{wxPrintout::GetPageSizeMM}\label{wxprintoutgetpagesizemm}
 
 \func{void}{GetPageSizeMM}{\param{int *}{w}, \param{int *}{h}}
@@ -771,9 +767,6 @@ it must not take any parameters, an return a 4-element list.
 Returns the size of the printer page in millimetres.
 
 \pythonnote{This method returns the output-only parameters as a tuple.}
-
-\perlnote{In wxPerl this method takes no arguments and returns a
-2-element list {\tt ( w, h )}}
 
 \membersection{wxPrintout::GetPageSizePixels}\label{wxprintoutgetpagesizepixels}
 
@@ -788,9 +781,6 @@ previewing is to be supported.
 
 \pythonnote{This method returns the output-only parameters as a tuple.}
 
-\perlnote{In wxPerl this method takes no arguments and returns a
-2-element list {\tt ( w, h )}}
-
 \membersection{wxPrintout::GetPPIPrinter}\label{wxprintoutgetppiprinter}
 
 \func{void}{GetPPIPrinter}{\param{int *}{w}, \param{int *}{h}}
@@ -802,9 +792,6 @@ this by a scaling factor to take the preview DC size into account.
 
 \pythonnote{This method returns the output-only parameters as a tuple.}
 
-\perlnote{In wxPerl this method takes no arguments and returns a
-2-element list {\tt ( w, h )}}
-
 \membersection{wxPrintout::GetPPIScreen}\label{wxprintoutgetppiscreen}
 
 \func{void}{GetPPIScreen}{\param{int *}{w}, \param{int *}{h}}
@@ -815,9 +802,6 @@ factor for drawing text onto the printer. Remember to multiply
 this by a scaling factor to take the preview DC size into account.
 
 \pythonnote{This method returns the output-only parameters as a tuple.}
-
-\perlnote{In wxPerl this method takes no arguments and returns a
-2-element list {\tt ( w, h )}}
 
 \membersection{wxPrintout::HasPage}\label{wxprintouthaspage}
 
@@ -846,7 +830,7 @@ checked) from within the overridden function, since it calls wxDC::StartDoc.
 
 \pythonnote{If this method is overridden in a Python class then the
 base class version can be called by using the method
-{\tt base\_OnBeginDocument(startPage, endPage)}. }
+{\tt base_OnBeginDocument(startPage, endPage)}. }
 
 \membersection{wxPrintout::OnEndDocument}\label{wxprintoutonenddocument}
 

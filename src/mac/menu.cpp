@@ -22,10 +22,8 @@
 #pragma implementation "menuitem.h"
 #endif
 
-#include "wx/app.h"
 #include "wx/menu.h"
 #include "wx/menuitem.h"
-#include "wx/window.h"
 #include "wx/log.h"
 #include "wx/utils.h"
 
@@ -35,10 +33,8 @@
 // ----------------------
 #include <string.h>
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxMenu, wxEvtHandler)
 IMPLEMENT_DYNAMIC_CLASS(wxMenuBar, wxEvtHandler)
-#endif
 
 // the (popup) menu title has this special id
 static const int idMenuTitle = -2;
@@ -51,16 +47,151 @@ const short kwxMacAppleMenuId = 1 ;
 // implementation
 // ============================================================================
 
+//
+// Helper Functions to get Mac Menus the way they should be ;-)
+//
+
+void wxMacCtoPString(const char* theCString, Str255 thePString);
+
+// remove inappropriate characters, if useShortcuts is false, the ampersand will not auto-generate a mac menu-shortcut
+
+void wxMacBuildMenuString(StringPtr outMacItemText, char *outMacShortcutChar , short *outMacModifiers , const char *inItemText , bool useShortcuts )
+{
+	char *p = (char *) &outMacItemText[1] ;
+	short macModifiers = 0 ;
+	char macShortCut = 0 ;
+	const char *inItemName ;
+	wxString inItemTextMac ;
+	
+	if (wxApp::s_macDefaultEncodingIsPC)
+	{
+		inItemTextMac =  wxMacMakeMacStringFromPC( inItemText ) ;
+		inItemName = inItemTextMac ;
+	}
+	else
+	{
+		inItemName = inItemText ;
+	}
+	
+	if ( useShortcuts && !wxApp::s_macSupportPCMenuShortcuts )
+		useShortcuts = false ;
+	
+	// we have problems with a leading hypen - it will be taken as a separator
+	
+	while ( *inItemName == '-' )
+		inItemName++ ;
+		
+	while( *inItemName )
+	{
+		switch ( *inItemName )
+		{
+			// special characters for macintosh menus -> use some replacement
+			case ';' :
+				*p++ = ',' ;
+				break ;
+			case '^' :
+				*p++ = ' ' ;
+				break ;
+			case '!' :
+				*p++ = ' ' ;
+				break ;
+			case '<' :
+				*p++ = ' ' ;
+				break ;
+			case '/' :
+				*p++ = '|' ;
+				break ;
+			case '(' :
+				*p++ = '[' ;
+				break ;
+			case ')' :	
+				*p++ = ']' ;
+				break ;
+			// shortcuts
+			case '&' :
+				{
+					++inItemName ;
+					if ( *inItemName )
+					{
+						*p++ = *inItemName ;
+						if ( useShortcuts )
+							macShortCut = *inItemName ;
+					}
+					else
+						--inItemName ;
+				}
+				break ;
+			// win-like accelerators
+			case '\t' :
+				{
+					++inItemName ;
+					while( *inItemName )
+					{
+						if (strncmp("Ctrl", inItemName, 4) == 0) 
+						{
+							inItemName = inItemName + 5;
+							macShortCut = *inItemName;
+						}
+						else if  (strncmp("Cntrl", inItemName, 5) == 0) 
+						{
+							inItemName = inItemName + 6;
+							macShortCut = *inItemName;
+						}
+						else if (strncmp("Alt", inItemName, 3) == 0) 
+						{
+							inItemName = inItemName + 4;
+							macModifiers |= kMenuOptionModifier ;
+							macShortCut = *inItemName ;
+						}
+						else if (strncmp("Shift", inItemName, 5) == 0) 
+						{
+							inItemName = inItemName + 6;
+							macModifiers |= kMenuShiftModifier ;
+							macShortCut = *inItemName ;
+						}
+						else if (strncmp("F", inItemName, 1) == 0) 
+						{
+							inItemName += strlen( inItemName ) ;
+							// no function keys at the moment
+							// macModifiers |= kMenuShiftModifier ;
+							// macShortCut = *inItemName ;
+						}
+						else
+						{
+							break ;
+						}
+					}
+
+					if ( *inItemName == 0 )
+						--inItemName ;
+						
+				}
+				break ;
+			default :
+				*p++ = *inItemName ;
+		}
+		++inItemName ;
+	}
+
+	outMacItemText[0] = (p - (char *)outMacItemText) - 1;
+	if ( outMacShortcutChar )
+		*outMacShortcutChar = macShortCut ;
+	if ( outMacModifiers )
+		*outMacModifiers = macModifiers ;
+	if ( macShortCut )
+	{
+			int pos = outMacItemText[0] ;
+			outMacItemText[++pos] = '/';
+			outMacItemText[++pos] = toupper( macShortCut );
+			outMacItemText[0] = pos ;
+	}
+}
 
 // Menus
 
 // Construct a menu with optional title (then use append)
 
-#ifdef __DARWIN__
-short wxMenu::s_macNextMenuId = 3 ;
-#else
 short wxMenu::s_macNextMenuId = 2 ;
-#endif
 
 void wxMenu::Init()
 {
@@ -68,7 +199,7 @@ void wxMenu::Init()
 
     // create the menu
 	Str255 	label;
-	wxMenuItem::MacBuildMenuString( label, NULL , NULL , m_title , false );
+	wxMacBuildMenuString( label, NULL , NULL , m_title , false );
 	m_macMenuId = s_macNextMenuId++; 
     wxCHECK_RET( s_macNextMenuId < 236 , "menu ids > 235 cannot be used for submenus on mac" );
 	m_hMenu = ::NewMenu(m_macMenuId, label);
@@ -140,7 +271,7 @@ void wxMenu::UpdateAccel(wxMenuItem *item)
         if ( accel )
             m_accels[n] = accel;
         else
-            m_accels.RemoveAt(n);
+            m_accels.Remove(n);
     }
 
     if ( IsAttached() )
@@ -179,8 +310,20 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
  			Str255 label;
    			wxASSERT_MSG( pSubMenu->m_hMenu != NULL , "invalid submenu added");
 		    pSubMenu->m_menuParent = this ;
-			wxMenuItem::MacBuildMenuString( label , NULL , NULL , pItem->GetText() ,false);
+			wxMacBuildMenuString( label , NULL , NULL , pItem->GetText() ,false);
 		
+			// hardcoded adding of the submenu combination for mac
+		
+			int theEnd = label[0] + 1; 
+			if (theEnd > 251) 
+				theEnd = 251; // mac allows only 255 characters
+			label[theEnd++] = '/';
+			label[theEnd++] = hMenuCmd; 
+			label[theEnd++] = '!';
+			label[theEnd++] = pSubMenu->m_macMenuId; 
+			label[theEnd] = 0x00;
+			label[0] = theEnd;
+
 			if (wxMenuBar::MacGetInstalledMenuBar() == m_menuBar) 
 			{
 				::InsertMenu( pSubMenu->m_hMenu , -1 ) ;
@@ -188,19 +331,17 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 			
 			if ( pos == (size_t)-1 )
 			{
-				UMAAppendSubMenuItem(m_hMenu, label, pSubMenu->m_macMenuId);
+				MacAppendMenu(m_hMenu, label);
 			}
 			else
 			{
-				UMAInsertSubMenuItem(m_hMenu, label , pos, pSubMenu->m_macMenuId);
+				MacInsertMenuItem(m_hMenu, label , pos);
 			}
 		}
 		else
 		{
 			Str255 label ;
-			UInt8 modifiers ;
-			SInt16 key ;
-			wxMenuItem::MacBuildMenuString( label, &key  , &modifiers , pItem->GetText(), pItem->GetId() == wxApp::s_macAboutMenuItemId);
+			wxMacBuildMenuString( label , NULL , NULL , pItem->GetText(), pItem->GetId() == wxApp::s_macAboutMenuItemId);
 			if ( label[0] == 0 )
 			{
 				// we cannot add empty menus on mac
@@ -209,17 +350,17 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 			}
 			if ( pos == (size_t)-1 )
 			{
-				UMAAppendMenuItem(m_hMenu, label,key,modifiers);
+				MacAppendMenu(m_hMenu, label);
 			}
 			else
 			{
-				UMAInsertMenuItem(m_hMenu, label , pos,key,modifiers);
+				MacInsertMenuItem(m_hMenu, label , pos);
 			}
   			if ( pItem->GetId() == idMenuTitle ) 
   			{
   				if ( pos == (size_t)-1 )
 				{
-					UMADisableMenuItem( m_hMenu , CountMenuItems( m_hMenu ) ) ;
+					UMADisableMenuItem( m_hMenu , CountMItems( m_hMenu ) ) ;
 				}
 				else
 				{
@@ -269,7 +410,7 @@ wxMenuItem *wxMenu::DoRemove(wxMenuItem *item)
     {
         delete m_accels[n];
 
-        m_accels.RemoveAt(n);
+        m_accels.Remove(n);
     }
     //else: this item doesn't have an accel, nothing to do
 #endif // wxUSE_ACCEL
@@ -311,9 +452,113 @@ void wxMenu::SetTitle(const wxString& label)
 {
 	Str255 title ;
     m_title = label ;
-	wxMenuItem::MacBuildMenuString( title, NULL , NULL , label , false );
+	wxMacBuildMenuString( title, NULL , NULL , label , false );
 	UMASetMenuTitle( m_hMenu , title ) ;
 }
+
+/*
+
+void wxMenu::SetLabel(int id, const wxString& label)
+{
+    Str255 maclabel ;
+   int index ;
+    wxMenuItem *item = FindItemForId(id) ;
+    if (item==NULL)
+        return;
+
+    index = MacGetIndexFromItem( item ) ;
+    if (index < 1)
+		return;
+
+    if (item->GetSubMenu()==NULL)
+    {
+		wxMacBuildMenuString( maclabel , NULL , NULL , label , false );
+		::SetMenuItemText( m_hMenu , index , maclabel ) ;
+    }
+    else
+    {
+		wxMacBuildMenuString( maclabel , NULL , NULL , label , false );
+		::SetMenuItemText( m_hMenu , index , maclabel ) ;
+    }
+    item->SetName(label);
+}
+
+wxString wxMenu::GetLabel(int Id) const
+{
+    wxMenuItem *pItem = FindItemForId(Id) ;
+    return pItem->GetName() ;
+}
+
+// Finds the item id matching the given string, -1 if not found.
+int wxMenu::FindItem (const wxString& itemString) const
+{
+    char buf1[200];
+    char buf2[200];
+    wxStripMenuCodes ((char *)(const char *)itemString, buf1);
+
+    for (wxNode * node = m_menuItems.First (); node; node = node->Next ())
+    {
+      wxMenuItem *item = (wxMenuItem *) node->Data ();
+      if (item->GetSubMenu())
+      {
+        int ans = item->GetSubMenu()->FindItem(itemString);
+        if (ans > -1)
+          return ans;
+      }
+      if ( !item->IsSeparator() )
+      {
+        wxStripMenuCodes((char *)item->GetName().c_str(), buf2);
+        if (strcmp(buf1, buf2) == 0)
+          return item->GetId();
+      }
+    }
+
+    return -1;
+}
+
+wxMenuItem *wxMenu::FindItemForId(int itemId, wxMenu ** itemMenu) const
+{
+    if (itemMenu)
+        *itemMenu = NULL;
+    for (wxNode * node = m_menuItems.First (); node; node = node->Next ())
+    {
+        wxMenuItem *item = (wxMenuItem *) node->Data ();
+
+        if (item->GetId() == itemId)
+        {
+            if (itemMenu)
+                *itemMenu = (wxMenu *) this;
+            return item;
+        }
+
+        if (item->GetSubMenu())
+        {
+            wxMenuItem *ans = item->GetSubMenu()->FindItemForId (itemId, itemMenu);
+            if (ans)
+                return ans;
+        }
+    }
+
+    if (itemMenu)
+        *itemMenu = NULL;
+    return NULL;
+}
+
+void wxMenu::SetHelpString(int itemId, const wxString& helpString)
+{
+    wxMenuItem *item = FindItemForId (itemId);
+    if (item)
+        item->SetHelp(helpString);
+}
+
+wxString wxMenu::GetHelpString (int itemId) const
+{
+    wxMenuItem *item = FindItemForId (itemId);
+    wxString str("");
+    return (item == NULL) ? str : item->GetHelp();
+}
+*/
+
 bool wxMenu::ProcessCommand(wxCommandEvent & event)
 {
     bool processed = FALSE;
@@ -347,12 +592,28 @@ bool wxMenu::ProcessCommand(wxCommandEvent & event)
 // other
 // ---------------------------------------------------------------------------
 
+void wxMenu::Attach(wxMenuBar *menubar)
+{
+    // menu can be in at most one menubar because otherwise they would both
+    // delete the menu pointer
+    wxASSERT_MSG( !m_menuBar, wxT("menu belongs to 2 menubars, expect a crash") );
+
+    m_menuBar = menubar;
+}
+
+void wxMenu::Detach()
+{
+    wxASSERT_MSG( m_menuBar, wxT("can't detach menu if it's not attached") );
+
+    m_menuBar = NULL;
+}
+
 wxWindow *wxMenu::GetWindow() const
 {
     if ( m_invokingWindow != NULL )
         return m_invokingWindow;
     else if ( m_menuBar != NULL)
-        return (wxWindow *) m_menuBar->GetFrame();
+        return m_menuBar->GetFrame();
 
     return NULL;
 }
@@ -417,10 +678,7 @@ bool wxMenu::MacMenuSelect( wxEvtHandler* handler, long when , int macMenuId, in
 		if (node) 
 		{
 			wxMenuItem *pItem = (wxMenuItem*)node->Data();
-
-			if (pItem->IsCheckable())
-				pItem->Check(! pItem->IsChecked());
-
+	
 			wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, pItem->GetId());
 			event.m_timeStamp = when;
 			event.SetEventObject(handler);
@@ -450,7 +708,6 @@ bool wxMenu::MacMenuSelect( wxEvtHandler* handler, long when , int macMenuId, in
 			return true ;
 		}
 	}
-#ifndef __DARWIN__
 	else if ( macMenuId == kHMHelpMenuID )
 	{
 		int menuItem = formerHelpMenuItems ;
@@ -499,7 +756,6 @@ bool wxMenu::MacMenuSelect( wxEvtHandler* handler, long when , int macMenuId, in
 			}
 	  }
 	}
-#endif // __DARWIN__
 
   for (pos = 0, node = GetMenuItems().First(); node; node = node->Next(), pos++) 
   {	
@@ -619,9 +875,6 @@ void wxMenuBar::RebuildAccelTable()
 
 void wxMenuBar::MacInstallMenuBar() 
 {
-	if ( s_macInstalledMenuBar == this )
-		return ;
-		
   	Handle menubar = ::GetNewMBar( kwxMacMenuBarResource ) ;
   	wxString message ;
   	wxCHECK_RET( menubar != NULL, "can't read MBAR resource" );
@@ -639,8 +892,7 @@ void wxMenuBar::MacInstallMenuBar()
     	int pos ;
 			wxMenu* menu = m_menus[i] , *subMenu = NULL ;
 		
-#if !TARGET_CARBON
-			/* the help menu does not exist in CARBON anymore */			
+			
 			if( m_titles[i] == "?" || m_titles[i] == "&?"  || m_titles[i] == wxApp::s_macHelpMenuTitleName )
 			{
 				MenuHandle mh = NULL ;
@@ -654,8 +906,8 @@ void wxMenuBar::MacInstallMenuBar()
 						formerHelpMenuItems = CountMenuItems( mh ) ;
 				}
 					
-			  	for (pos = 0 , node = menu->GetMenuItems().First(); node; node = node->Next(), pos++) 
-		  		{
+		  	for (pos = 0 , node = menu->GetMenuItems().First(); node; node = node->Next(), pos++) 
+	  		{
 		 			item = (wxMenuItem *)node->Data();
 		 			subMenu = item->GetSubMenu() ;
 					if (subMenu)	 		
@@ -667,14 +919,12 @@ void wxMenuBar::MacInstallMenuBar()
 						if ( item->IsSeparator() )
 						{
 							if ( mh )
-								UMAAppendMenuItem(mh, "\p-" );
+								::AppendMenu(mh, "\p-" );
 						}
 						else
 						{
 							Str255 label ;
-							UInt8 modifiers ;
-							SInt16 key ;
-							wxMenuItem::MacBuildMenuString( label, &key , &modifiers  , item->GetText(), item->GetId() != wxApp::s_macAboutMenuItemId); // no shortcut in about menu
+							wxMacBuildMenuString( label , NULL , NULL , item->GetText(), item->GetId() != wxApp::s_macAboutMenuItemId); // no shortcut in about menu
 							if ( label[0] == 0 )
 							{
 								// we cannot add empty menus on mac
@@ -684,99 +934,32 @@ void wxMenuBar::MacInstallMenuBar()
 							if ( item->GetId() == wxApp::s_macAboutMenuItemId )
 							{ 
 									::SetMenuItemText( GetMenuHandle( kwxMacAppleMenuId ) , 1 , label );
-									UMAEnableMenuItem( GetMenuHandle( kwxMacAppleMenuId ) , 1 );
+			//					::EnableMenuItem( GetMenuHandle( kwxMacAppleMenuId ) , 1 );
+									::EnableItem( GetMenuHandle( kwxMacAppleMenuId ) , 1 );
 	 						}
 							else
 							{
 								if ( mh )
-									UMAAppendMenuItem(mh, label , key , modifiers );
+									::AppendMenu(mh, label );
 							}
 						}
 					}
 				}
 			}
-#else
-			if( m_titles[i] == "?" || m_titles[i] == "&?"  || m_titles[i] == wxApp::s_macHelpMenuTitleName )
-			{
-				  wxMenuItem::MacBuildMenuString( label, NULL , NULL , m_titles[i] , false );
-				  UMASetMenuTitle( menu->GetHMenu() , label ) ;
-					
-					wxArrayPtrVoid submenus ;
-					
-			  	for (pos = 0 , node = menu->GetMenuItems().First(); node; node = node->Next(), pos++) 
-		  		{
-  		 			item = (wxMenuItem *)node->Data();
-  		 			subMenu = item->GetSubMenu() ;
-  					if (subMenu)	 		
-  					{
-  					  submenus.Add(subMenu) ;
-  					}
-  					else
-  					{
-  						if ( item->GetId() == wxApp::s_macAboutMenuItemId )
-  						{ 
-  							Str255 label ;
-  							UInt8 modifiers ;
-  							SInt16 key ;
-  							wxMenuItem::MacBuildMenuString( label, &key , &modifiers  , item->GetText(), item->GetId() != wxApp::s_macAboutMenuItemId); // no shortcut in about menu
-  							::SetMenuItemText( GetMenuHandle( kwxMacAppleMenuId ) , 1 , label );
-  							UMAEnableMenuItem( GetMenuHandle( kwxMacAppleMenuId ) , 1 );
-   						}
-  					}
-  				}
-  				::InsertMenu(m_menus[i]->GetHMenu(), 0);
-  				for ( int i = 0 ; i < submenus.GetCount() ; ++i )
-  				{
-  				  wxMenu* submenu = (wxMenu*) submenus[i] ;
-          	wxNode *subnode;
-          	wxMenuItem *subitem;
-          	int subpos ;
-            for ( subpos = 0 , subnode = submenu->GetMenuItems().First(); subnode; subnode = subnode->Next(), subpos++) 
-  		  		{
-    		 			subitem = (wxMenuItem *)subnode->Data();
-    		 			wxMenu* itsSubMenu = subitem->GetSubMenu() ;
-    					if (itsSubMenu)	 		
-    					{
-    						submenus.Add(itsSubMenu) ;
-    					}  				
-    				}
-  					::InsertMenu( submenu->GetHMenu() , -1 ) ;
-    			}
-			}
-#endif
 			else
 			{
-				wxMenuItem::MacBuildMenuString( label, NULL , NULL , m_titles[i] , false );
+				wxMacBuildMenuString( label, NULL , NULL , m_titles[i] , false );
 				UMASetMenuTitle( menu->GetHMenu() , label ) ;
-					wxArrayPtrVoid submenus ;
-					
-		  		for (pos = 0, node = menu->GetMenuItems().First(); node; node = node->Next(), pos++) 
-	  			{
+		  	for (pos = 0, node = menu->GetMenuItems().First(); node; node = node->Next(), pos++) 
+	  		{
 		 			item = (wxMenuItem *)node->Data();
 		 			subMenu = item->GetSubMenu() ;
 					if (subMenu)	 		
 					{
-  					  submenus.Add(subMenu) ;
+						::InsertMenu( subMenu->GetHMenu() , -1 ) ;
 					}
 				}
 				::InsertMenu(m_menus[i]->GetHMenu(), 0);
-				for ( int i = 0 ; i < submenus.GetCount() ; ++i )
-				{
-				  wxMenu* submenu = (wxMenu*) submenus[i] ;
-        	wxNode *subnode;
-        	wxMenuItem *subitem;
-        	int subpos ;
-          for ( subpos = 0 , subnode = submenu->GetMenuItems().First(); subnode; subnode = subnode->Next(), subpos++) 
-		  		{
-  		 			subitem = (wxMenuItem *)subnode->Data();
-  		 			wxMenu* itsSubMenu = subitem->GetSubMenu() ;
-  					if (itsSubMenu)	 		
-  					{
-  						submenus.Add(itsSubMenu) ;
-  					}  				
-  				}
-					::InsertMenu( submenu->GetHMenu() , -1 ) ;
-  			}
 			}
 		}
 		::DrawMenuBar() ;
@@ -857,7 +1040,7 @@ wxMenu *wxMenuBar::Replace(size_t pos, wxMenu *menu, const wxString& title)
 			::DeleteMenu( menuOld->MacGetMenuId() /* m_menus[pos]->MacGetMenuId() */ ) ;
 			{
 				Str255 	label;
-				wxMenuItem::MacBuildMenuString( label, NULL , NULL , title , false );
+				wxMacBuildMenuString( label, NULL , NULL , title , false );
 				UMASetMenuTitle( menu->GetHMenu() , label ) ;
 				if ( pos == m_menus.GetCount() - 1)
 				{
@@ -935,11 +1118,8 @@ void wxMenuBar::MacMenuSelect(wxEvtHandler* handler, long when , int macMenuId, 
 	{		
 	  for (int i = 0; i < m_menus.GetCount() ; i++)
 	  {
-	  	if ( m_menus[i]->MacGetMenuId() == macMenuId
-#ifndef __DARWIN__
-		     || 
+	  	if ( m_menus[i]->MacGetMenuId() == macMenuId || 
 	  		( macMenuId == kHMHelpMenuID && ( m_titles[i] == "?" || m_titles[i] == "&?"  || m_titles[i] == wxApp::s_macHelpMenuTitleName ) )
-#endif
 	  		)
 	  	{
 	  		if ( m_menus[i]->MacMenuSelect( handler , when , macMenuId , macMenuItemNum ) )
@@ -1001,6 +1181,8 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
     if ( !wxMenuBarBase::Append(menu, title) )
         return FALSE;
 
+    menu->Attach(this);
+
     m_titles.Add(title);
 
     if ( IsAttached() )
@@ -1024,19 +1206,6 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
     return TRUE;
 }
 
-void wxMenuBar::Detach()
-{
-    wxMenuBarBase::Detach() ;
-}
-
-void wxMenuBar::Attach(wxFrame *frame)
-{
-    wxMenuBarBase::Attach( frame ) ;
-
-#if wxUSE_ACCEL
-    RebuildAccelTable();
-#endif // wxUSE_ACCEL
-}
 // ---------------------------------------------------------------------------
 // wxMenuBar searching for menu items
 // ---------------------------------------------------------------------------

@@ -73,7 +73,7 @@ static wxString TextToLabel(const wxString& rTitle)
 {
     wxString Title;
     const wxChar *pc;
-    for (pc = rTitle.c_str(); *pc != wxT('\0'); pc++ )
+    for (pc = rTitle; *pc != wxT('\0'); pc++ )
     {
         if (*pc == wxT('&') )
         {
@@ -85,6 +85,10 @@ static wxString TextToLabel(const wxString& rTitle)
             else
                 Title << wxT('~');
         }
+//         else if (*pc == wxT('/'))
+//         {
+//             Title << wxT('\\');
+//         }
         else
         {
             if ( *pc == wxT('~') )
@@ -240,7 +244,7 @@ void wxMenu::UpdateAccel(
         if (pAccel)
             m_vAccels[n] = pAccel;
         else
-            m_vAccels.RemoveAt(n);
+            m_vAccels.Remove(n);
     }
 
     if (IsAttached())
@@ -261,7 +265,6 @@ bool wxMenu::DoInsertOrAppend(
 {
     ERRORID                         vError;
     wxString                        sError;
-    char                            zMsg[128];
 #if wxUSE_ACCEL
     UpdateAccel(pItem);
 #endif // wxUSE_ACCEL
@@ -322,14 +325,12 @@ bool wxMenu::DoInsertOrAppend(
     {
         //
         // Want to get {Measure|Draw}Item messages?
-        // item draws itself, passing pointer to data doesn't work in OS/2
+        // item draws itself, pass pointer to it in data parameter
         // Will eventually need to set the image handle somewhere into vItem.hItem
         //
         rItem.afStyle |= MIS_OWNERDRAW;
-        pData = (BYTE*)NULL;
-        rItem.hItem = (HBITMAP)pItem->GetBitmap().GetHBITMAP();
-        pItem->m_vMenuData.afStyle = rItem.afStyle;
-        pItem->m_vMenuData.hItem = rItem.hItem;
+        pData = (BYTE*)pItem;
+        // vItem.hItem = ????
     }
     else
 #endif
@@ -357,21 +358,6 @@ bool wxMenu::DoInsertOrAppend(
                               ,(MPARAM)&rItem
                               ,(MPARAM)pData
                              );
-#if wxUSE_OWNER_DRAWN
-    if (pItem->IsOwnerDrawn())
-    {
-        BOOL                       rc;
-        MENUITEM                   vMenuItem;
-
-        ::WinSendMsg( GetHmenu()
-                     ,MM_QUERYITEM
-                     ,MPFROM2SHORT( (USHORT)pItem->GetId()
-                                   ,(USHORT)(FALSE)
-                                  )
-                     ,&vMenuItem
-                    );
-    }
-#endif
     if (rc == MIT_MEMERROR || rc == MIT_ERROR)
     {
         vError = ::WinGetLastError(vHabmain);
@@ -385,7 +371,7 @@ bool wxMenu::DoInsertOrAppend(
         //
         // If we're already attached to the menubar, we must update it
         //
-        if (IsAttached() && m_menuBar->IsAttached())
+        if (IsAttached())
         {
             m_menuBar->Refresh();
         }
@@ -444,7 +430,7 @@ wxMenuItem* wxMenu::DoRemove(
     if (n != wxNOT_FOUND)
     {
         delete m_vAccels[n];
-        m_vAccels.RemoveAt(n);
+        m_vAccels.Remove(n);
     }
 
 #endif // wxUSE_ACCEL
@@ -456,7 +442,7 @@ wxMenuItem* wxMenu::DoRemove(
                  ,MPFROM2SHORT(pItem->GetId(), TRUE)
                  ,(MPARAM)0
                 );
-    if (IsAttached() && m_menuBar->IsAttached())
+    if (IsAttached())
     {
         //
         // Otherwise, the chane won't be visible
@@ -555,20 +541,72 @@ bool wxMenu::OS2Command(
 
     if (vId != (WXWORD)idMenuTitle)
     {
-        SendEvent( vId
-                  ,(int)::WinSendMsg( GetHmenu()
-                                     ,MM_QUERYITEMATTR
-                                     ,(MPARAM)vId
-                                     ,(MPARAM)MIA_CHECKED
-                                    )
-                 );
+        wxCommandEvent              vEvent(wxEVT_COMMAND_MENU_SELECTED);
+
+        vEvent.SetEventObject(this);
+        vEvent.SetId(vId);
+        vEvent.SetInt(vId);
+        ProcessCommand(vEvent);
     }
     return TRUE;
 } // end of wxMenu::OS2Command
 
+bool wxMenu::ProcessCommand(
+  wxCommandEvent&                   rEvent
+)
+{
+    bool                            bProcessed = FALSE;
+
+#if wxUSE_MENU_CALLBACK
+    //
+    // Try a callback
+    //
+    if (m_callback)
+    {
+        (void)(*(m_callback))(*this, rEvent);
+        bProcessed = TRUE;
+    }
+#endif // wxUSE_MENU_CALLBACK
+
+    //
+    // Try the menu's event handler
+    //
+    if (!bProcessed && GetEventHandler())
+    {
+        bProcessed = GetEventHandler()->ProcessEvent(rEvent);
+    }
+
+    //
+    // Try the window the menu was popped up from (and up through the
+    // hierarchy)
+    wxWindow*                       pWin = GetInvokingWindow();
+
+    if (!bProcessed && pWin)
+        bProcessed = pWin->GetEventHandler()->ProcessEvent(rEvent);
+    return bProcessed;
+} // end of wxMenu::ProcessCommand
+
 // ---------------------------------------------------------------------------
 // other
 // ---------------------------------------------------------------------------
+
+void wxMenu::Attach(
+  wxMenuBar*                        pMenubar
+)
+{
+    //
+    // Menu can be in at most one menubar because otherwise they would both
+    // delete the menu pointer
+    //
+    wxASSERT_MSG(!m_menuBar, wxT("menu belongs to 2 menubars, expect a crash"));
+    m_menuBar = pMenubar;
+} // end of
+
+void wxMenu::Detach()
+{
+    wxASSERT_MSG( m_menuBar, wxT("can't detach menu if it's not attached") );
+    m_menuBar = NULL;
+} // end of wxMenu::Detach
 
 wxWindow* wxMenu::GetWindow() const
 {
@@ -579,47 +617,6 @@ wxWindow* wxMenu::GetWindow() const
 
     return NULL;
 } // end of wxMenu::GetWindow
-
-// recursive search for item by id
-wxMenuItem* wxMenu::FindItem(
-  int                               nItemId
-, ULONG                             hItem
-, wxMenu**                          ppItemMenu
-) const
-{
-    if ( ppItemMenu )
-        *ppItemMenu = NULL;
-
-    wxMenuItem*                     pItem = NULL;
-
-    for ( wxMenuItemList::Node *node = m_items.GetFirst();
-          node && !pItem;
-          node = node->GetNext() )
-    {
-        pItem = node->GetData();
-
-        if ( pItem->GetId() == nItemId && pItem->m_vMenuData.hItem == hItem)
-        {
-            if ( ppItemMenu )
-                *ppItemMenu = (wxMenu *)this;
-        }
-        else if ( pItem->IsSubMenu() )
-        {
-            pItem = pItem->GetSubMenu()->FindItem( nItemId
-                                                  ,hItem
-                                                  ,ppItemMenu
-                                                 );
-            if (pItem)
-                break;
-        }
-        else
-        {
-            // don't exit the loop
-            pItem = NULL;
-        }
-    }
-    return pItem;
-} // end of wxMenu::FindItem
 
 // ---------------------------------------------------------------------------
 // Menu Bar
@@ -930,6 +927,7 @@ bool wxMenuBar::Append(
     if (!wxMenuBarBase::Append(pMenu, Title))
         return FALSE;
 
+    pMenu->Attach(this);
     m_titles.Add(Title);
 
     if ( IsAttached() )
@@ -1092,25 +1090,4 @@ wxMenuItem* wxMenuBar::FindItem(
     return pItem;
 } // end of wxMenuBar::FindItem
 
-wxMenuItem* wxMenuBar::FindItem(
-  int                               nId
-, ULONG                             hItem
-, wxMenu**                          ppItemMenu
-) const
-{
-    if (ppItemMenu)
-        *ppItemMenu = NULL;
-
-    wxMenuItem*                     pItem = NULL;
-    size_t                          nCount = GetMenuCount();
-
-    for (size_t i = 0; !pItem && (i < nCount); i++)
-    {
-        pItem = m_menus[i]->FindItem( nId
-                                     ,hItem
-                                     ,ppItemMenu
-                                    );
-    }
-    return pItem;
-} // end of wxMenuBar::FindItem
 

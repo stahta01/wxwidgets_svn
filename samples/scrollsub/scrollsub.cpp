@@ -153,7 +153,7 @@ MyScrolledWindow::MyScrolledWindow( wxWindow *parent, wxWindowID id,
     
     SetTargetWindow( m_canvas );
 
-    SetBackgroundColour( wxT("WHEAT") );
+    SetBackgroundColour( "WHEAT" );
   
     SetCursor( wxCursor( wxCURSOR_HAND ) );
     
@@ -264,7 +264,7 @@ MyCanvas::MyCanvas( wxScrolledWindow *parent, MyTopLabels *top, MyRightLabels *r
     (void)new wxTextCtrl( this, -1, "Text I", wxPoint(0,100), wxSize(100,25) );
     (void)new wxTextCtrl( this, -1, "Text II", wxPoint(200,100), wxSize(100,25) );
 
-    SetBackgroundColour( wxT("WHEAT") );
+    SetBackgroundColour( "WHEAT" );
   
     SetCursor( wxCursor( wxCURSOR_IBEAM ) );
 }
@@ -308,7 +308,7 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
         // Has the region on screen been exposed?
 	    if (IsExposed(0,0,100,25))
 	    {
-	        wxLogMessage( wxT("Redraw first cell") );
+	        wxLogMessage( "Redraw first cell" );
             dc.DrawRectangle( 0, 0, 100, 25 );
 	        dc.DrawText( "First Cell", 5, 5 );
 	    }
@@ -323,7 +323,7 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
         // Has the region on screen been exposed?
 	    if (IsExposed(200,0,100,25))
 	    {
-	        wxLogMessage( wxT("Redraw second cell") );
+	        wxLogMessage( "Redraw second cell" );
             dc.DrawRectangle( 200, 0, 100, 25 );
 	        dc.DrawText( "Second Cell", 205, 5 );
 	    }
@@ -357,8 +357,8 @@ MyFrame::MyFrame()
                   wxPoint(20,20), wxSize(470,500) )
 {
     wxMenu *file_menu = new wxMenu();
-    file_menu->Append( ID_ABOUT, "&About...");
-    file_menu->Append( ID_FULL, "&Full screen on/off");
+    file_menu->Append( ID_ABOUT, "&About..");
+    file_menu->Append( ID_FULL, "&Full screen..");
     file_menu->Append( ID_QUIT, "E&xit\tAlt-X");
 
     wxMenuBar *menu_bar = new wxMenuBar();
@@ -392,7 +392,9 @@ void MyFrame::OnQuit( wxCommandEvent &WXUNUSED(event) )
 
 void MyFrame::OnFullScreen( wxCommandEvent &WXUNUSED(event) )
 {
-   ShowFullScreen( !IsFullScreen(), wxFULLSCREEN_NOBORDER|wxFULLSCREEN_NOCAPTION );
+#ifdef __MSW__
+   ShowFullScreen( TRUE, wxFULLSCREEN_NOBORDER|wxFULLSCREEN_NOCAPTION );
+#endif
 }
 
 void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )

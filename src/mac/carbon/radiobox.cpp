@@ -14,19 +14,13 @@
 //-------------------------------------------------------------------------------------
 
 #ifdef __GNUG__
-  #pragma implementation "radioboxbase.h"
-  #pragma implementation "radiobox.h"
+#pragma implementation "radiobox.h"
 #endif
-
-#include "wx/defs.h"
 
 #include "wx/radiobox.h"
-#include "wx/radiobut.h"
-#include "wx/mac/uma.h"
+#include <wx/mac/uma.h>
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxRadioBox, wxControl)
-#endif
 
 #pragma mark -
 #pragma mark ### Constructors & destructor ###
@@ -35,22 +29,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxRadioBox, wxControl)
 // 		¥ wxRadioBox()
 //-------------------------------------------------------------------------------------
 // Default constructor
-BEGIN_EVENT_TABLE(wxRadioBox, wxControl)
-EVT_RADIOBUTTON( -1 , wxRadioBox::OnRadioButton )
-END_EVENT_TABLE()
-
-void wxRadioBox::OnRadioButton( wxCommandEvent &outer )
-{
-  if ( outer.IsChecked() )
-  {
-    wxCommandEvent event(wxEVT_COMMAND_RADIOBOX_SELECTED, m_windowId);
-    int i = GetSelection() ;
-    event.SetInt( i );
-    event.SetString( GetString( i ) );
-    event.SetEventObject( this );
-    ProcessCommand(event);
-  }
-}
 
 wxRadioBox::wxRadioBox()
 {
@@ -115,22 +93,21 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 	Rect bounds ;
 	Str255 title ;
 	
-	MacPreControlCreate( parent , id ,  label , pos , size ,style, val , name , &bounds , title ) ;
+	MacPreControlCreate( parent , id ,  label , pos , size ,style, *((wxValidator*)NULL) , name , &bounds , title ) ;
 
-	m_macControl = ::NewControl( parent->GetMacRootWindow() , &bounds , title , false , 0 , 0 , 1, 
+	m_macControl = UMANewControl( parent->GetMacRootWindow() , &bounds , title , true , 0 , 0 , 1, 
 	  	kControlGroupBoxTextTitleProc , (long) this ) ;
 	
+	MacPostControlCreate() ;
+
     for (i = 0; i < n; i++)
     {
-        wxRadioButton *radBtn = new wxRadioButton(this, NewControlId(),choices[i],wxPoint(5,20*i+10),
-          wxDefaultSize , i == 0 ? wxRB_GROUP : 0 ) ;
-        if ( i == 0 )
-          m_radioButtonCycle = radBtn ;
-//        m_radioButtonCycle=radBtn->AddInCycle(m_radioButtonCycle);
+        wxRadioButton *radBtn = new wxRadioButton(this, NewControlId(),choices[i],wxPoint(5,20*i+10));
+        m_radioButtonCycle=radBtn->AddInCycle(m_radioButtonCycle);
     }
 
 	SetSelection(0);
-	MacPostControlCreate() ;
+	SetSize(pos.x,pos.y,size.x,size.y);
 
   return TRUE;
 }
@@ -180,6 +157,28 @@ void wxRadioBox::Enable(int item, bool enable)
     	}
 }
 
+
+//-------------------------------------------------------------------------------------
+// 		¥ FindString
+//-------------------------------------------------------------------------------------
+// Finds a button matching the given string, returning the position if found 
+// or -1 if not found
+
+int wxRadioBox::FindString(const wxString& s) const
+{
+    int i;
+    wxRadioButton *current;
+    
+    current=m_radioButtonCycle;
+    for (i = 0; i < m_noItems; i++)
+    {
+        if (s == current->GetLabel())
+            return i;
+    	current=current->NextInCycle();
+    }
+    return -1;
+}
+
 //-------------------------------------------------------------------------------------
 // 		¥ GetLabel()
 //-------------------------------------------------------------------------------------
@@ -195,7 +194,7 @@ wxString wxRadioBox::GetLabel() const
 //-------------------------------------------------------------------------------------
 // Returns the label for the given button
 
-wxString wxRadioBox::GetString(int item) const
+wxString wxRadioBox::GetLabel(int item) const
 {
    	int i;
     wxRadioButton *current;
@@ -232,6 +231,31 @@ int wxRadioBox::GetSelection() const
 }
 
 //-------------------------------------------------------------------------------------
+// 		¥ GetString
+//-------------------------------------------------------------------------------------
+// Find string for position
+
+wxString wxRadioBox::GetString(int item) const
+{
+
+    return GetLabel(item);
+}
+
+//-------------------------------------------------------------------------------------
+// 		¥ GetStringSelection
+//-------------------------------------------------------------------------------------
+// Returns the selected string
+
+wxString wxRadioBox::GetStringSelection () const
+{
+    int sel = GetSelection ();
+    if (sel > -1)
+        return this->GetString (sel);
+    else
+        return wxString("");
+}
+
+//-------------------------------------------------------------------------------------
 // 		¥ Number
 //-------------------------------------------------------------------------------------
 // Returns the number of buttons in the radiobox
@@ -254,7 +278,7 @@ void wxRadioBox::SetLabel(const wxString& label)
 //-------------------------------------------------------------------------------------
 // Sets the label of a given button
 
-void wxRadioBox::SetString(int item,const wxString& label)
+void wxRadioBox::SetLabel(int item,const wxString& label)
 {
    	int i;
     wxRadioButton *current;
@@ -291,6 +315,24 @@ void wxRadioBox::SetSelection(int item)
     	}
     current->SetValue(true);
     
+}
+
+//-------------------------------------------------------------------------------------
+// 		¥ SetStringSelection
+//-------------------------------------------------------------------------------------
+// Sets a button by passing the desired string. This does not cause 
+// wxEVT_COMMAND_RADIOBOX_SELECTED event to get emitted
+
+bool wxRadioBox::SetStringSelection (const wxString& s)
+{
+    int sel = FindString (s);
+    if (sel > -1)
+    {
+        SetSelection (sel);
+        return TRUE;
+    }
+    else
+        return FALSE;
 }
 
 //-------------------------------------------------------------------------------------
@@ -393,9 +435,9 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 	x_offset = x;
 	y_offset = y;
 	GetPosition(&x_current, &y_current);
-	if ((x == -1) && !(sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+	if ((x == -1) || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
 		x_offset = x_current;
-	if ((y == -1)&& !(sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
+	if ((y == -1) || (sizeFlags & wxSIZE_ALLOW_MINUS_ONE))
 		y_offset = y_current;
 
 // define size
@@ -413,15 +455,15 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 	maxHeight=-1;
 	for (i = 0 ; i < m_noItems; i++)
 		{
-		GetTextExtent(GetString(i), &eachWidth[i], &eachHeight[i]);
+		GetTextExtent(GetLabel(i), &eachWidth[i], &eachHeight[i]);
 		eachWidth[i] = (int)(eachWidth[i] + RADIO_SIZE);
 		eachHeight[i] = (int)((3*eachHeight[i])/2);
 		if (maxWidth<eachWidth[i]) maxWidth = eachWidth[i];
 		if (maxHeight<eachHeight[i]) maxHeight = eachHeight[i];
   		}
 
-	totHeight = GetRowCount() * (maxHeight + charHeight/2) + charHeight*3/2;
-	totWidth  = GetColumnCount() * (maxWidth + charWidth) + charWidth;
+	totHeight = GetNumVer() * (maxHeight + charHeight/2) + charHeight*3/2;
+	totWidth  = GetNumHor() * (maxWidth + charWidth) + charWidth;
 
     // only change our width/height if asked for
     if ( width == -1 )
@@ -448,7 +490,7 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 	
 	
 	x_start = charWidth;
-	y_start = 15 ;
+	y_start = charHeight*3/2;
 	x_offset = x_start;
 	y_offset = y_start;
 	
@@ -465,7 +507,7 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
       		else
       			{
 				x_offset = x_start;
-        		y_offset += maxHeight ; /*+ charHeight/2;*/
+        		y_offset += maxHeight + charHeight/2;
 				}
 			}
 
@@ -473,45 +515,18 @@ void wxRadioBox::DoSetSize(int x, int y, int width, int height, int sizeFlags)
 		current=current->NextInCycle();
 		
 		if (m_windowStyle & wxRA_SPECIFY_ROWS)
-			y_offset += maxHeight ; /*+ charHeight/2;*/
+			y_offset += maxHeight + charHeight/2;
 		else
 			x_offset += maxWidth + charWidth;
 		}
 }
 
-wxSize wxRadioBox::DoGetBestSize() const
-{
-    int charWidth, charHeight;
-    int maxWidth, maxHeight;
-    int eachWidth, eachHeight;
-    int totWidth, totHeight;
-
-    wxFont font = GetParent()->GetFont();
-    GetTextExtent(wxString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-                  &charWidth, &charHeight, NULL, NULL, &font);
-    charWidth /= 52;
-
-   maxWidth = -1;
-   maxHeight = -1;
-   for (int i = 0 ; i < m_noItems; i++)
-   {
-        GetTextExtent(GetString(i), &eachWidth, &eachHeight);
-        eachWidth  = (int)(eachWidth + RADIO_SIZE) ;
-        eachHeight = (int)((3 * eachHeight) / 2);
-        if (maxWidth < eachWidth)     maxWidth = eachWidth;
-        if (maxHeight < eachHeight)   maxHeight = eachHeight;
-    }
-
-    totHeight = GetRowCount() * (maxHeight + charHeight/2) + charHeight * 3/2;
-    totWidth  = GetColumnCount() * (maxWidth + charWidth) + charWidth;
-   return wxSize(totWidth, totHeight);
-}
 //-------------------------------------------------------------------------------------
 // 		¥ GetNumVer
 //-------------------------------------------------------------------------------------
 // return the number of buttons in the vertical direction
 
-int wxRadioBox::GetRowCount() const
+int wxRadioBox::GetNumVer() const
 {
     if ( m_windowStyle & wxRA_SPECIFY_ROWS )
     {
@@ -528,7 +543,7 @@ int wxRadioBox::GetRowCount() const
 //-------------------------------------------------------------------------------------
 // return the number of buttons in the horizontal direction
 
-int wxRadioBox::GetColumnCount() const
+int wxRadioBox::GetNumHor() const
 {
     if ( m_windowStyle & wxRA_SPECIFY_ROWS )
     {

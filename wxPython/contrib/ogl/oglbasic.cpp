@@ -85,11 +85,7 @@ static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     return target;
 }
 
-#if PYTHON_API_VERSION >= 1009
-    static char* wxStringErrorMsg = "String or Unicode type required";
-#else
-    static char* wxStringErrorMsg = "String type required";
-#endif
+static char* wxStringErrorMsg = "string type is required for parameter";
 
     WXSHAPE_IMP_CALLBACKS(wxPyShapeEvtHandler,wxShapeEvtHandler);
 
@@ -97,14 +93,6 @@ static PyObject* t_output_helper(PyObject* target, PyObject* o) {
 #ifdef __cplusplus
 extern "C" {
 #endif
-static void *SwigwxShapeRegionTowxObject(void *ptr) {
-    wxShapeRegion *src;
-    wxObject *dest;
-    src = (wxShapeRegion *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
 #define new_wxShapeRegion() (new wxShapeRegion())
 static PyObject *_wrap_new_wxShapeRegion(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -153,7 +141,7 @@ static PyObject *_wrap_wxShapeRegion_SetText(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -187,11 +175,11 @@ static PyObject *_wrap_wxShapeRegion_SetFont(PyObject *self, PyObject *args, PyO
     wxShapeRegion * _arg0;
     wxFont * _arg1;
     PyObject * _argo0 = 0;
-    PyObject * _obj1 = 0;
+    PyObject * _argo1 = 0;
     char *_kwnames[] = { "self","f", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxShapeRegion_SetFont",_kwnames,&_argo0,&_obj1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxShapeRegion_SetFont",_kwnames,&_argo0,&_argo1)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
@@ -200,26 +188,13 @@ static PyObject *_wrap_wxShapeRegion_SetFont(PyObject *self, PyObject *args, PyO
         return NULL;
         }
     }
-{
-    wxFont* temp;
-    if (_obj1) {
-        if (_obj1 == Py_None) { temp = NULL; }
-        else if (SWIG_GetPtrObj(_obj1, (void **) &temp,"_wxFont_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error, expected _wxFont_p.");
+    if (_argo1) {
+        if (_argo1 == Py_None) { _arg1 = NULL; }
+        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxFont_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxShapeRegion_SetFont. Expected _wxFont_p.");
         return NULL;
         }
     }
-    if (temp)
-        _arg1 = wxTheFontList->FindOrCreateFont(temp->GetPointSize(),
-                                                  temp->GetFamily(),
-                                                  temp->GetStyle(),
-                                                  temp->GetWeight(),
-                                                  temp->GetUnderlined(),
-                                                  temp->GetFaceName(),
-                                                  temp->GetEncoding());
-    else
-        _arg1 = NULL;
-}
 {
     wxPy_BEGIN_ALLOW_THREADS;
         wxShapeRegion_SetFont(_arg0,_arg1);
@@ -397,7 +372,7 @@ static PyObject *_wrap_wxShapeRegion_SetName(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -448,7 +423,7 @@ static PyObject *_wrap_wxShapeRegion_SetColour(PyObject *self, PyObject *args, P
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1000,7 +975,7 @@ static PyObject *_wrap_wxShapeRegion_SetPenColour(PyObject *self, PyObject *args
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -1143,14 +1118,6 @@ static PyObject *_wrap_wxShapeRegion_ClearText(PyObject *self, PyObject *args, P
     return _resultobj;
 }
 
-static void *SwigwxPyShapeEvtHandlerTowxObject(void *ptr) {
-    wxPyShapeEvtHandler *src;
-    wxObject *dest;
-    src = (wxPyShapeEvtHandler *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
 #define new_wxPyShapeEvtHandler(_swigarg0,_swigarg1) (new wxPyShapeEvtHandler(_swigarg0,_swigarg1))
 static PyObject *_wrap_new_wxPyShapeEvtHandler(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -1194,8 +1161,8 @@ static PyObject *_wrap_new_wxPyShapeEvtHandler(PyObject *self, PyObject *args, P
     return _resultobj;
 }
 
-#define wxPyShapeEvtHandler__setCallbackInfo(_swigobj,_swigarg0,_swigarg1)  (_swigobj->_setCallbackInfo(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxPyShapeEvtHandler__setCallbackInfo(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxPyShapeEvtHandler__setSelf(_swigobj,_swigarg0,_swigarg1)  (_swigobj->_setSelf(_swigarg0,_swigarg1))
+static PyObject *_wrap_wxPyShapeEvtHandler__setSelf(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxPyShapeEvtHandler * _arg0;
     PyObject * _arg1;
@@ -1206,12 +1173,12 @@ static PyObject *_wrap_wxPyShapeEvtHandler__setCallbackInfo(PyObject *self, PyOb
     char *_kwnames[] = { "self","self","_class", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxPyShapeEvtHandler__setCallbackInfo",_kwnames,&_argo0,&_obj1,&_obj2)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxPyShapeEvtHandler__setSelf",_kwnames,&_argo0,&_obj1,&_obj2)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
         else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxPyShapeEvtHandler_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxPyShapeEvtHandler__setCallbackInfo. Expected _wxPyShapeEvtHandler_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxPyShapeEvtHandler__setSelf. Expected _wxPyShapeEvtHandler_p.");
         return NULL;
         }
     }
@@ -1223,7 +1190,7 @@ static PyObject *_wrap_wxPyShapeEvtHandler__setCallbackInfo(PyObject *self, PyOb
 }
 {
     wxPy_BEGIN_ALLOW_THREADS;
-        wxPyShapeEvtHandler__setCallbackInfo(_arg0,_arg1,_arg2);
+        wxPyShapeEvtHandler__setSelf(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
 }    Py_INCREF(Py_None);
@@ -1301,6 +1268,7 @@ static PyObject *_wrap_wxPyShapeEvtHandler_GetShape(PyObject *self, PyObject *ar
     wxPyShapeEvtHandler * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxPyShapeEvtHandler_GetShape",_kwnames,&_argo0)) 
@@ -1317,7 +1285,13 @@ static PyObject *_wrap_wxPyShapeEvtHandler_GetShape(PyObject *self, PyObject *ar
         _result = (wxPyShape *)wxPyShapeEvtHandler_GetShape(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShape_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -1364,6 +1338,7 @@ static PyObject *_wrap_wxPyShapeEvtHandler_GetPreviousHandler(PyObject *self, Py
     wxPyShapeEvtHandler * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxPyShapeEvtHandler_GetPreviousHandler",_kwnames,&_argo0)) 
@@ -1380,7 +1355,13 @@ static PyObject *_wrap_wxPyShapeEvtHandler_GetPreviousHandler(PyObject *self, Py
         _result = (wxPyShapeEvtHandler *)wxPyShapeEvtHandler_GetPreviousHandler(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShapeEvtHandler_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -1391,6 +1372,7 @@ static PyObject *_wrap_wxPyShapeEvtHandler_CreateNewCopy(PyObject *self, PyObjec
     wxPyShapeEvtHandler * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxPyShapeEvtHandler_CreateNewCopy",_kwnames,&_argo0)) 
@@ -1407,7 +1389,13 @@ static PyObject *_wrap_wxPyShapeEvtHandler_CreateNewCopy(PyObject *self, PyObjec
         _result = (wxPyShapeEvtHandler *)wxPyShapeEvtHandler_CreateNewCopy(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShapeEvtHandler_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -2433,16 +2421,8 @@ static void *SwigwxPyShapeTowxPyShapeEvtHandler(void *ptr) {
     return (void *) dest;
 }
 
-static void *SwigwxPyShapeTowxObject(void *ptr) {
-    wxPyShape *src;
-    wxObject *dest;
-    src = (wxPyShape *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
-#define wxPyShape__setCallbackInfo(_swigobj,_swigarg0,_swigarg1)  (_swigobj->_setCallbackInfo(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxPyShape__setCallbackInfo(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxPyShape__setSelf(_swigobj,_swigarg0,_swigarg1)  (_swigobj->_setSelf(_swigarg0,_swigarg1))
+static PyObject *_wrap_wxPyShape__setSelf(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxPyShape * _arg0;
     PyObject * _arg1;
@@ -2453,12 +2433,12 @@ static PyObject *_wrap_wxPyShape__setCallbackInfo(PyObject *self, PyObject *args
     char *_kwnames[] = { "self","self","_class", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxPyShape__setCallbackInfo",_kwnames,&_argo0,&_obj1,&_obj2)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO:wxPyShape__setSelf",_kwnames,&_argo0,&_obj1,&_obj2)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
         else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxPyShape_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxPyShape__setCallbackInfo. Expected _wxPyShape_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxPyShape__setSelf. Expected _wxPyShape_p.");
         return NULL;
         }
     }
@@ -2470,7 +2450,7 @@ static PyObject *_wrap_wxPyShape__setCallbackInfo(PyObject *self, PyObject *args
 }
 {
     wxPy_BEGIN_ALLOW_THREADS;
-        wxPyShape__setCallbackInfo(_arg0,_arg1,_arg2);
+        wxPyShape__setSelf(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
 }    Py_INCREF(Py_None);
@@ -2657,6 +2637,7 @@ static PyObject *_wrap_wxPyShape_GetCanvas(PyObject *self, PyObject *args, PyObj
     wxPyShape * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxPyShape_GetCanvas",_kwnames,&_argo0)) 
@@ -2673,7 +2654,13 @@ static PyObject *_wrap_wxPyShape_GetCanvas(PyObject *self, PyObject *args, PyObj
         _result = (wxPyShapeCanvas *)wxPyShape_GetCanvas(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShapeCanvas_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -2947,6 +2934,7 @@ static PyObject *_wrap_wxPyShape_GetParent(PyObject *self, PyObject *args, PyObj
     wxPyShape * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxPyShape_GetParent",_kwnames,&_argo0)) 
@@ -2963,7 +2951,13 @@ static PyObject *_wrap_wxPyShape_GetParent(PyObject *self, PyObject *args, PyObj
         _result = (wxPyShape *)wxPyShape_GetParent(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShape_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -3010,6 +3004,7 @@ static PyObject *_wrap_wxPyShape_GetTopAncestor(PyObject *self, PyObject *args, 
     wxPyShape * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxPyShape_GetTopAncestor",_kwnames,&_argo0)) 
@@ -3026,7 +3021,13 @@ static PyObject *_wrap_wxPyShape_GetTopAncestor(PyObject *self, PyObject *args, 
         _result = (wxPyShape *)wxPyShape_GetTopAncestor(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShape_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -3243,6 +3244,7 @@ static PyObject *_wrap_wxPyShape_GetEventHandler(PyObject *self, PyObject *args,
     wxPyShape * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxPyShape_GetEventHandler",_kwnames,&_argo0)) 
@@ -3259,7 +3261,13 @@ static PyObject *_wrap_wxPyShape_GetEventHandler(PyObject *self, PyObject *args,
         _result = (wxPyShapeEvtHandler *)wxPyShape_GetEventHandler(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShapeEvtHandler_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -4266,11 +4274,11 @@ static PyObject *_wrap_wxPyShape_SetPen(PyObject *self, PyObject *args, PyObject
     wxPyShape * _arg0;
     wxPen * _arg1;
     PyObject * _argo0 = 0;
-    PyObject * _obj1 = 0;
+    PyObject * _argo1 = 0;
     char *_kwnames[] = { "self","pen", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxPyShape_SetPen",_kwnames,&_argo0,&_obj1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxPyShape_SetPen",_kwnames,&_argo0,&_argo1)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
@@ -4279,22 +4287,13 @@ static PyObject *_wrap_wxPyShape_SetPen(PyObject *self, PyObject *args, PyObject
         return NULL;
         }
     }
-{
-    wxPen* temp;
-    if (_obj1) {
-        if (_obj1 == Py_None) { temp = NULL; }
-        else if (SWIG_GetPtrObj(_obj1, (void **) &temp,"_wxPen_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error, expected _wxPen_p.");
+    if (_argo1) {
+        if (_argo1 == Py_None) { _arg1 = NULL; }
+        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxPen_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxPyShape_SetPen. Expected _wxPen_p.");
         return NULL;
         }
     }
-    if (temp)
-        _arg1 = wxThePenList->FindOrCreatePen(temp->GetColour(),
-                                                temp->GetWidth(),
-                                                temp->GetStyle());
-    else
-        _arg1 = NULL;
-}
 {
     wxPy_BEGIN_ALLOW_THREADS;
         wxPyShape_SetPen(_arg0,_arg1);
@@ -4311,11 +4310,11 @@ static PyObject *_wrap_wxPyShape_SetBrush(PyObject *self, PyObject *args, PyObje
     wxPyShape * _arg0;
     wxBrush * _arg1;
     PyObject * _argo0 = 0;
-    PyObject * _obj1 = 0;
+    PyObject * _argo1 = 0;
     char *_kwnames[] = { "self","brush", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxPyShape_SetBrush",_kwnames,&_argo0,&_obj1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxPyShape_SetBrush",_kwnames,&_argo0,&_argo1)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
@@ -4324,20 +4323,13 @@ static PyObject *_wrap_wxPyShape_SetBrush(PyObject *self, PyObject *args, PyObje
         return NULL;
         }
     }
-{
-    wxBrush* temp;
-    if (_obj1) {
-        if (_obj1 == Py_None) { temp = NULL; }
-        else if (SWIG_GetPtrObj(_obj1, (void **) &temp,"_wxBrush_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error, expected _wxBrush_p.");
+    if (_argo1) {
+        if (_argo1 == Py_None) { _arg1 = NULL; }
+        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxBrush_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxPyShape_SetBrush. Expected _wxBrush_p.");
         return NULL;
         }
     }
-    if (temp)
-        _arg1 = wxTheBrushList->FindOrCreateBrush(temp->GetColour(), temp->GetStyle());
-    else
-        _arg1 = NULL;
-}
 {
     wxPy_BEGIN_ALLOW_THREADS;
         wxPyShape_SetBrush(_arg0,_arg1);
@@ -4987,7 +4979,7 @@ static PyObject *_wrap_wxPyShape_AddText(PyObject *self, PyObject *args, PyObjec
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5143,7 +5135,7 @@ static PyObject *_wrap_wxPyShape_FormatText(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj2) && !PyUnicode_Check(_obj2)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj2, &tmpPtr, &tmpSize) == -1)
@@ -5235,11 +5227,11 @@ static PyObject *_wrap_wxPyShape_SetFont(PyObject *self, PyObject *args, PyObjec
     wxFont * _arg1;
     int  _arg2 = (int ) 0;
     PyObject * _argo0 = 0;
-    PyObject * _obj1 = 0;
+    PyObject * _argo1 = 0;
     char *_kwnames[] = { "self","font","regionId", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO|i:wxPyShape_SetFont",_kwnames,&_argo0,&_obj1,&_arg2)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO|i:wxPyShape_SetFont",_kwnames,&_argo0,&_argo1,&_arg2)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
@@ -5248,26 +5240,13 @@ static PyObject *_wrap_wxPyShape_SetFont(PyObject *self, PyObject *args, PyObjec
         return NULL;
         }
     }
-{
-    wxFont* temp;
-    if (_obj1) {
-        if (_obj1 == Py_None) { temp = NULL; }
-        else if (SWIG_GetPtrObj(_obj1, (void **) &temp,"_wxFont_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error, expected _wxFont_p.");
+    if (_argo1) {
+        if (_argo1 == Py_None) { _arg1 = NULL; }
+        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxFont_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxPyShape_SetFont. Expected _wxFont_p.");
         return NULL;
         }
     }
-    if (temp)
-        _arg1 = wxTheFontList->FindOrCreateFont(temp->GetPointSize(),
-                                                  temp->GetFamily(),
-                                                  temp->GetStyle(),
-                                                  temp->GetWeight(),
-                                                  temp->GetUnderlined(),
-                                                  temp->GetFaceName(),
-                                                  temp->GetEncoding());
-    else
-        _arg1 = NULL;
-}
 {
     wxPy_BEGIN_ALLOW_THREADS;
         wxPyShape_SetFont(_arg0,_arg1,_arg2);
@@ -5337,7 +5316,7 @@ static PyObject *_wrap_wxPyShape_SetTextColour(PyObject *self, PyObject *args, P
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5449,7 +5428,7 @@ static PyObject *_wrap_wxPyShape_SetRegionName(PyObject *self, PyObject *args, P
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5534,7 +5513,7 @@ static PyObject *_wrap_wxPyShape_GetRegionId(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5585,7 +5564,7 @@ static PyObject *_wrap_wxPyShape_NameRegions(PyObject *self, PyObject *args, PyO
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5746,6 +5725,7 @@ static PyObject *_wrap_wxPyShape_FindRegion(PyObject *self, PyObject *args, PyOb
     PyObject * _argo0 = 0;
     PyObject * _obj1 = 0;
     char *_kwnames[] = { "self","regionName", NULL };
+    char _ptemp[128];
 
     self = self;
 {
@@ -5764,7 +5744,7 @@ static PyObject *_wrap_wxPyShape_FindRegion(PyObject *self, PyObject *args, PyOb
 #if PYTHON_API_VERSION >= 1009
     char* tmpPtr; int tmpSize;
     if (!PyString_Check(_obj1) && !PyUnicode_Check(_obj1)) {
-        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
         return NULL;
     }
     if (PyString_AsStringAndSize(_obj1, &tmpPtr, &tmpSize) == -1)
@@ -5783,7 +5763,13 @@ static PyObject *_wrap_wxPyShape_FindRegion(PyObject *self, PyObject *args, PyOb
         _result = (wxPyShape *)wxPyShape_FindRegion(_arg0,*_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShape_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
 {
     PyObject *o;
     o = PyInt_FromLong((long) (*_arg2));
@@ -6845,6 +6831,7 @@ static PyObject *_wrap_wxPyShape_CreateNewCopy(PyObject *self, PyObject *args, P
     int tempbool1 = (int) TRUE;
     int tempbool2 = (int) TRUE;
     char *_kwnames[] = { "self","resetMapping","recompute", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O|ii:wxPyShape_CreateNewCopy",_kwnames,&_argo0,&tempbool1,&tempbool2)) 
@@ -6863,7 +6850,13 @@ static PyObject *_wrap_wxPyShape_CreateNewCopy(PyObject *self, PyObject *args, P
         _result = (wxPyShape *)wxPyShape_CreateNewCopy(_arg0,_arg1,_arg2);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxPyShape_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
 }
 
@@ -8274,7 +8267,7 @@ static PyMethodDef oglbasiccMethods[] = {
 	 { "wxPyShape_GetBoundingBoxMin", (PyCFunction) _wrap_wxPyShape_GetBoundingBoxMin, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyShape_GetBoundingBoxMax", (PyCFunction) _wrap_wxPyShape_GetBoundingBoxMax, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyShape_Destroy", (PyCFunction) _wrap_wxPyShape_Destroy, METH_VARARGS | METH_KEYWORDS },
-	 { "wxPyShape__setCallbackInfo", (PyCFunction) _wrap_wxPyShape__setCallbackInfo, METH_VARARGS | METH_KEYWORDS },
+	 { "wxPyShape__setSelf", (PyCFunction) _wrap_wxPyShape__setSelf, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyShapeEvtHandler_base_OnEndSize", (PyCFunction) _wrap_wxPyShapeEvtHandler_base_OnEndSize, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyShapeEvtHandler_base_OnBeginSize", (PyCFunction) _wrap_wxPyShapeEvtHandler_base_OnBeginSize, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyShapeEvtHandler_base_OnSizingEndDragLeft", (PyCFunction) _wrap_wxPyShapeEvtHandler_base_OnSizingEndDragLeft, METH_VARARGS | METH_KEYWORDS },
@@ -8310,7 +8303,7 @@ static PyMethodDef oglbasiccMethods[] = {
 	 { "wxPyShapeEvtHandler_GetShape", (PyCFunction) _wrap_wxPyShapeEvtHandler_GetShape, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyShapeEvtHandler_SetShape", (PyCFunction) _wrap_wxPyShapeEvtHandler_SetShape, METH_VARARGS | METH_KEYWORDS },
 	 { "wxPyShapeEvtHandler_Destroy", (PyCFunction) _wrap_wxPyShapeEvtHandler_Destroy, METH_VARARGS | METH_KEYWORDS },
-	 { "wxPyShapeEvtHandler__setCallbackInfo", (PyCFunction) _wrap_wxPyShapeEvtHandler__setCallbackInfo, METH_VARARGS | METH_KEYWORDS },
+	 { "wxPyShapeEvtHandler__setSelf", (PyCFunction) _wrap_wxPyShapeEvtHandler__setSelf, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxPyShapeEvtHandler", (PyCFunction) _wrap_new_wxPyShapeEvtHandler, METH_VARARGS | METH_KEYWORDS },
 	 { "wxShapeRegion_ClearText", (PyCFunction) _wrap_wxShapeRegion_ClearText, METH_VARARGS | METH_KEYWORDS },
 	 { "wxShapeRegion_GetHeight", (PyCFunction) _wrap_wxShapeRegion_GetHeight, METH_VARARGS | METH_KEYWORDS },
@@ -8370,6 +8363,8 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_size_t","_int",0},
     { "_size_t","_wxWindowID",0},
     { "_size_t","_uint",0},
+    { "_class_wxPyShapeEvtHandler","_class_wxPyShape",SwigwxPyShapeTowxPyShapeEvtHandler},
+    { "_class_wxPyShapeEvtHandler","_wxPyShape",SwigwxPyShapeTowxPyShapeEvtHandler},
     { "_uint","_wxCoord",0},
     { "_uint","_wxPrintQuality",0},
     { "_uint","_time_t",0},
@@ -8379,14 +8374,12 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_uint","_wxWindowID",0},
     { "_wxChar","_char",0},
     { "_char","_wxChar",0},
-    { "_struct_wxNativeFontInfo","_wxNativeFontInfo",0},
     { "_EBool","_wxCoord",0},
     { "_EBool","_wxPrintQuality",0},
     { "_EBool","_signed_int",0},
     { "_EBool","_int",0},
     { "_EBool","_wxWindowID",0},
     { "_unsigned_long","_long",0},
-    { "_wxNativeFontInfo","_struct_wxNativeFontInfo",0},
     { "_signed_int","_wxCoord",0},
     { "_signed_int","_wxPrintQuality",0},
     { "_signed_int","_EBool",0},
@@ -8399,9 +8392,6 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_unsigned_short","_wxDateTime_t",0},
     { "_unsigned_short","_WXTYPE",0},
     { "_unsigned_short","_short",0},
-    { "_wxObject","_wxPyShape",SwigwxPyShapeTowxObject},
-    { "_wxObject","_wxPyShapeEvtHandler",SwigwxPyShapeEvtHandlerTowxObject},
-    { "_wxObject","_wxShapeRegion",SwigwxShapeRegionTowxObject},
     { "_signed_short","_WXTYPE",0},
     { "_signed_short","_short",0},
     { "_unsigned_char","_byte",0},
@@ -8453,6 +8443,7 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxCoord","_size_t",0},
     { "_wxCoord","_time_t",0},
     { "_wxCoord","_wxPrintQuality",0},
+    { "_wxPyShapeEvtHandler","_class_wxPyShape",SwigwxPyShapeTowxPyShapeEvtHandler},
     { "_wxPyShapeEvtHandler","_wxPyShape",SwigwxPyShapeTowxPyShapeEvtHandler},
 {0,0,0}};
 

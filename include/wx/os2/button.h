@@ -17,77 +17,50 @@
 WXDLLEXPORT_DATA(extern const char*) wxButtonNameStr;
 
 // Pushbutton
-class WXDLLEXPORT wxButton: public wxButtonBase
+class WXDLLEXPORT wxButton: public wxControl
 {
- public:
-    inline wxButton() {}
-    inline wxButton( wxWindow*          pParent
-                    ,wxWindowID         vId
-                    ,const wxString&    rsLabel
-                    ,const wxPoint&     rPos = wxDefaultPosition
-                    ,const wxSize&      rSize = wxDefaultSize
-                    ,long               lStyle = 0
-#if wxUSE_VALIDATORS
-                    ,const wxValidator& rValidator = wxDefaultValidator
-#endif
-                    ,const wxString&    rsName = wxButtonNameStr
-                   )
-    {
-        Create( pParent
-               ,vId
-               ,rsLabel
-               ,rPos
-               ,rSize
-               ,lStyle
-#if wxUSE_VALIDATORS
-               ,rValidator
-#endif
-               ,rsName
-              );
-    }
-
-    bool Create( wxWindow*          pParent
-                ,wxWindowID         vId
-                ,const wxString&    rsLabel
-                ,const wxPoint&     rPos = wxDefaultPosition
-                ,const wxSize&      rSize = wxDefaultSize
-                ,long               lStyle = 0
-#if wxUSE_VALIDATORS
-                ,const wxValidator& rValidator = wxDefaultValidator
-#endif
-                ,const wxString&    rsName = wxButtonNameStr
-               );
-
-    virtual ~wxButton();
-
-    virtual void     SetDefault(void);
-    static wxSize    GetDefaultSize(void);
-    virtual void     Command(wxCommandEvent& rEvent);
-    virtual bool     OS2Command( WXUINT uParam
-                                ,WXWORD vId
-                               );
-    virtual WXHBRUSH OnCtlColor( WXHDC    hDC
-                                ,WXHWND   hWnd
-                                ,WXUINT   uCtlColor
-                                ,WXUINT   uMessage
-                                ,WXWPARAM wParam
-                                ,WXLPARAM lParam
-                               );
-    void          MakeOwnerDrawn(void);
-
-    virtual MRESULT WindowProc( WXUINT   uMsg
-                               ,WXWPARAM wParam
-                               ,WXLPARAM lParam
-                              );
-
-protected:
-
-    bool           SendClickEvent(void);
-    virtual wxSize DoGetBestSize(void) const;
-private:
   DECLARE_DYNAMIC_CLASS(wxButton)
-}; // end of CLASS wxButton
+ public:
+  inline wxButton() {}
+  inline wxButton(wxWindow *parent, wxWindowID id, const wxString& label,
+           const wxPoint& pos = wxDefaultPosition,
+           const wxSize& size = wxDefaultSize, long style = 0,
+#if wxUSE_VALIDATORS
+           const wxValidator& validator = wxDefaultValidator,
+#endif
+           const wxString& name = wxButtonNameStr)
+  {
+      Create(parent, id, label, pos, size, style, validator, name);
+  }
+
+  bool Create(wxWindow *parent, wxWindowID id, const wxString& label,
+           const wxPoint& pos = wxDefaultPosition,
+           const wxSize& size = wxDefaultSize, long style = 0,
+#if wxUSE_VALIDATORS
+           const wxValidator& validator = wxDefaultValidator,
+#endif
+           const wxString& name = wxButtonNameStr);
+
+  virtual ~wxButton();
+
+  virtual void SetDefault();
+
+  static wxSize GetDefaultSize();
+
+  virtual void Command(wxCommandEvent& event);
+  virtual bool OS2Command(WXUINT param, WXWORD id);
+  virtual WXHBRUSH OnCtlColor(WXHDC pDC,
+                              WXHWND pWnd,
+                              WXUINT nCtlColor,
+                              WXUINT message,
+                              WXWPARAM wParam,
+                              WXLPARAM lParam);
+protected:
+    // send a notification event, return TRUE if processed
+    bool SendClickEvent();
+
+    virtual wxSize DoGetBestSize() const;
+};
 
 #endif
     // _WX_BUTTON_H_
-

@@ -31,10 +31,6 @@
 #include  "wx/setup.h"
 #include  "wx/log.h"
 
-#if wxUSE_OLE
-
-#ifndef __CYGWIN10__
-
 #include <windows.h>
 
 // OLE
@@ -212,10 +208,3 @@ void wxLogRelease(const char *szInterface, ULONG cRef)
 
 #endif
   // wxUSE_DRAG_AND_DROP
-
-#endif
-  // __CYGWIN10__
-
-#endif
-  // wxUSE_OLE
-

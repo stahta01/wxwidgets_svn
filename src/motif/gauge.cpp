@@ -13,11 +13,7 @@
 #pragma implementation "gauge.h"
 #endif
 
-#ifdef __VMS__
-#include <wx/vms_x_fix.h>
-#endif
-
-# include "wx/gauge.h"
+#include "wx/gauge.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint

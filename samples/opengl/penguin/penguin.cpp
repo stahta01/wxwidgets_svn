@@ -30,15 +30,7 @@
 #endif
 
 #include "penguin.h"
-#ifdef __WXMAC__
-#  ifdef __DARWIN__
-#    include <OpenGL/glu.h>
-#  else
-#    include <glu.h>
-#  endif
-#else
-#  include <GL/glu.h>
-#endif
+#include <GL/glu.h>
 
 #define VIEW_ASPECT 1.3
 
@@ -57,7 +49,7 @@ bool MyApp::OnInit(void)
   menuBar->Append(fileMenu, "&File");
   frame->SetMenuBar(menuBar);
 
-  frame->m_canvas = new TestGLCanvas(frame, -1, wxPoint(0, 0), wxSize(200, 200), wxSUNKEN_BORDER);
+  frame->m_canvas = new TestGLCanvas(frame, -1, wxPoint(0, 0), wxSize(200, 200));
 
   /* Load file wiht mesh data */
   frame->m_canvas->LoadLWO( "penguin.lwo" );
@@ -155,18 +147,15 @@ void TestGLCanvas::OnPaint( wxPaintEvent& event )
 
 void TestGLCanvas::OnSize(wxSizeEvent& event)
 {
-    // this is also necessary to update the context on some platforms
-    wxGLCanvas::OnSize(event);
+    int width, height;
+    GetClientSize(& width, & height);
     
-    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
-		int w, h;
-		GetClientSize(&w, &h);
 #ifndef __WXMOTIF__
     if (GetContext())
 #endif
     {
         SetCurrent();
-        glViewport(0, 0, (GLint) w, (GLint) h);
+        glViewport(0, 0, width, height);
     }
 }
 

@@ -33,7 +33,7 @@
 
 #include "wx/setup.h"
 
-#if wxUSE_OLE && wxUSE_DRAG_AND_DROP
+#if wxUSE_DRAG_AND_DROP
 
 #include "wx/log.h"
 #include "wx/dnd.h"
@@ -222,8 +222,7 @@ wxDragResult wxDropSource::DoDragDrop(bool bAllowMove)
   }
   else {
     if ( FAILED(hr) ) {
-      wxLogApiError(wxT("DoDragDrop"), hr);
-      wxLogError(wxT("Drag & drop operation failed."));
+      wxLogSysError(wxT("Drag & drop operation failed."));
     }
     else {
       wxLogDebug(wxT("Unexpected success return code %08lx from DoDragDrop."),

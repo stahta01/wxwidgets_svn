@@ -4,9 +4,6 @@ from wxPython.stc import *
 
 #----------------------------------------------------------------------
 
-debug = 1
-
-
 demoText = """\
 
 This editor is provided by a class named wxStyledTextCtrl.  As
@@ -33,13 +30,14 @@ wxStyledTextEditor also supports setting markers in the margin...
 you want in your application.  Cut, Copy, Paste, Drag and Drop of
 text works, as well as virtually unlimited Undo and Redo
 capabilities, (right click to try it out.)
+
 """
 
 if wxPlatform == '__WXMSW__':
     face1 = 'Arial'
     face2 = 'Times New Roman'
     face3 = 'Courier New'
-    pb = 10
+    pb = 6
 else:
     face1 = 'Helvetica'
     face2 = 'Times'
@@ -55,46 +53,7 @@ class MySTC(wxStyledTextCtrl):
         wxStyledTextCtrl.__init__(self, parent, ID)
         self.log = log
 
-        EVT_STC_DO_DROP(self, ID, self.OnDoDrop)
-        EVT_STC_DRAG_OVER(self, ID, self.OnDragOver)
-        EVT_STC_START_DRAG(self, ID, self.OnStartDrag)
         EVT_STC_MODIFIED(self, ID, self.OnModified)
-
-
-    def OnStartDrag(self, evt):
-        self.log.write("OnStartDrag: %d, %s\n"
-                       % (evt.GetDragAllowMove(), evt.GetDragText()))
-
-        if debug and evt.GetPosition() < 250:
-            evt.SetDragAllowMove(false)     # you can prevent moving of text (only copy)
-            evt.SetDragText("DRAGGED TEXT") # you can change what is dragged
-            #evt.SetDragText("")             # or prevent the drag with empty text
-
-
-    def OnDragOver(self, evt):
-        self.log.write("OnDragOver: x,y=(%d, %d)  pos: %d  DragResult: %d\n"
-                       % (evt.GetX(), evt.GetY(), evt.GetPosition(), evt.GetDragResult()))
-
-        if debug and evt.GetPosition() < 250:
-            evt.SetDragResult(wxDragNone)   # prevent dropping at the begining of the buffer
-
-
-    def OnDoDrop(self, evt):
-        self.log.write("OnDoDrop: x,y=(%d, %d)  pos: %d  DragResult: %d\n"
-                       "\ttext: %s\n"
-                       % (evt.GetX(), evt.GetY(), evt.GetPosition(), evt.GetDragResult(),
-                          evt.GetDragText()))
-
-        if debug and evt.GetPosition() < 500:
-            evt.SetDragText("DROPPED TEXT")  # Can change text if needed
-            ##evt.SetDragResult(wxDragNone)  # Can also change the drag operation, but it
-                                             # is probably better to do it in OnDragOver so
-                                             # there is visual feedback
-
-            ##evt.SetPosition(25)            # Can also change position, but I'm not sure why
-                                             # you would want to...
-
-
 
 
     def OnModified(self, evt):
@@ -108,7 +67,6 @@ class MySTC(wxStyledTextCtrl):
                                   evt.GetLinesAdded(),
                                   evt.GetLength(),
                                   evt.GetText() ))
-
 
     def transModType(self, modType):
         st = ""
@@ -136,32 +94,20 @@ class MySTC(wxStyledTextCtrl):
 
 
 
-
 #----------------------------------------------------------------------
 
-_USE_PANEL = 1
-
 def runTest(frame, nb, log):
-    if not _USE_PANEL:
-        ed = p = MySTC(nb, -1, log)
-
-    else:
-        p = wxPanel(nb, -1)
-        ed = MySTC(p, -1, log)
-        s = wxBoxSizer(wxHORIZONTAL)
-        s.Add(ed, 1, wxEXPAND)
-        p.SetSizer(s)
-        p.SetAutoLayout(true)
+    ed = MySTC(nb, -1, log)
 
     ed.SetText(demoText)
     ed.EmptyUndoBuffer()
 
     # make some styles
-    ed.StyleSetSpec(wxSTC_STYLE_DEFAULT, "size:%d,face:%s" % (pb, face3))
-    ed.StyleSetSpec(1, "size:%d,bold,face:%s,fore:#0000FF" % (pb+2, face1))
-    ed.StyleSetSpec(2, "face:%s,italic,fore:#FF0000,size:%d" % (face2, pb))
-    ed.StyleSetSpec(3, "face:%s,bold,size:%d" % (face2, pb+2))
-    ed.StyleSetSpec(4, "face:%s,size:%d" % (face1, pb-1))
+    ed.StyleSetSpec(wxSTC_STYLE_DEFAULT, "size:%d,face:%s" % (pb+2, face3))
+    ed.StyleSetSpec(1, "size:%d,bold,face:%s,fore:#0000FF" % (pb+3, face1))
+    ed.StyleSetSpec(2, "face:%s,italic,fore:#FF0000,size:%d" % (face2, pb+2))
+    ed.StyleSetSpec(3, "face:%s,bold,size:%d" % (face2, pb+3))
+    ed.StyleSetSpec(4, "face:%s,size:%d" % (face1, pb))
 
 
     # now set some text to those styles...  Normally this would be
@@ -211,27 +157,8 @@ def runTest(frame, nb, log):
     ed.SetStyling(10, wxSTC_INDIC1_MASK)
     ed.SetStyling(10, wxSTC_INDIC2_MASK | wxSTC_INDIC1_MASK)
 
-    # some test stuff...
-    if debug:
-        print "GetTextLength(): ", ed.GetTextLength(), len(ed.GetText())
-        print "GetText(): ", repr(ed.GetText())
-        print
-        print "GetStyledText(98, 104): ", repr(ed.GetStyledText(98, 104)), len(ed.GetStyledText(98, 104))
-        print
-        print "GetCurLine(): ", repr(ed.GetCurLine())
-        ed.GotoPos(5)
-        print "GetCurLine(): ", repr(ed.GetCurLine())
-        print
-        print "GetLine(1): ", repr(ed.GetLine(1))
-        print
-        ed.SetSelection(25, 35)
-        print "GetSelectedText(): ", repr(ed.GetSelectedText())
-        print "GetTextRange(25, 35): ", repr(ed.GetTextRange(25, 35))
 
-
-        ed.GotoPos(0)
-
-    return p
+    return ed
 
 
 
@@ -240,7 +167,7 @@ def runTest(frame, nb, log):
 
 overview = """\
 <html><body>
-Once again, no docs yet.  <b>Sorry.</b>  But <a href="data/stc.h.html">this</a>
+Once again, no docs yet.  <b>Sorry.</b>  But <a href="data/stc.h">this</a>
 and <a href="http://www.scintilla.org/ScintillaDoc.html">this</a> should
 be helpful.
 </body><html>

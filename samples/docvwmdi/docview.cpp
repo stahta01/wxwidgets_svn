@@ -64,9 +64,7 @@ bool MyApp::OnInit(void)
           CLASSINFO(TextEditDocument), CLASSINFO(TextEditView));
 
   //// Create the main frame window
-  frame = new MyFrame((wxDocManager *) m_docManager, (wxFrame *) NULL,
-                      "DocView Demo", wxPoint(0, 0), wxSize(500, 400),
-                      wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE);
+  frame = new MyFrame((wxDocManager *) m_docManager, (wxFrame *) NULL, (const wxString) "DocView Demo", wxPoint(0, 0), wxSize(500, 400), wxDEFAULT_FRAME_STYLE);
 
   //// Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
@@ -123,11 +121,8 @@ int MyApp::OnExit(void)
 wxMDIChildFrame *MyApp::CreateChildFrame(wxDocument *doc, wxView *view, bool isCanvas)
 {
   //// Make a child frame
-  wxDocMDIChildFrame *subframe =
-      new wxDocMDIChildFrame(doc, view, GetMainFrame(), -1, "Child Frame",
-                             wxPoint(10, 10), wxSize(300, 300),
-                             wxDEFAULT_FRAME_STYLE |
-                             wxNO_FULL_REPAINT_ON_RESIZE);
+  wxDocMDIChildFrame *subframe = new wxDocMDIChildFrame(doc, view, GetMainFrame(), -1, "Child Frame",
+        wxPoint(10, 10), wxSize(300, 300), wxDEFAULT_FRAME_STYLE);
 
 #ifdef __WXMSW__
   subframe->SetIcon(wxString(isCanvas ? "chart" : "notepad"));

@@ -14,64 +14,59 @@
 
     #! find all our sources
     $project{"COMMONOBJS"} .= "parser.o ";
+    $project{"COMMONDEPS"} .= "parser.d ";
 
     foreach $file (sort keys %wxGeneric) {
         next if $wxGeneric{$file} =~ /\bR\b/;
 
         ($fileobj = $file) =~ s/cp?p?$/\o/;
+        ($filedep = $file) =~ s/cp?p?$/\d/;
 
         $project{"GTK_SOURCES"} .= "generic/" . $file . " ";
-        $project{"GUIOBJS"} .= $fileobj . " ";
-
-        #! also add it to the list of object files used by wxUniv if there
-        #! is no file with the same name among wxUniv own objects
-        my $filereal = $file;
-        if ( $file =~ /^([^.]+)g.cpp$/ ) {
-            $filereal = "$1.cpp";
-        }
-        if ( !exists $wxUNIV{$filereal} ) {
-            $project{"GUI_LOWLEVEL_OBJS"} .= $fileobj . " ";
-        }
+        $project{"GENERICOBJS"} .= $fileobj . " ";
+        $project{"GENERICDEPS"} .= $filedep . " "
     }
 
     foreach $file (sort keys %wxCommon) {
         next if $wxCommon{$file} =~ /\bR\b/;
 
         ($fileobj = $file) =~ s/cp?p?$/\o/;
+        ($filedep = $file) =~ s/cp?p?$/\d/;
 
         $project{"GTK_SOURCES"} .= "common/" . $file . " ";
         $project{"COMMONOBJS"} .= $fileobj . " ";
+        $project{"COMMONDEPS"} .= $filedep . " "
     }
 
     foreach $file (sort keys %wxGTK) {
         ($fileobj = $file) =~ s/cp?p?$/\o/;
+        ($filedep = $file) =~ s/cp?p?$/\d/;
 
         $project{"GTK_SOURCES"} .= "gtk/" . $file . " ";
         $project{"GUIOBJS"} .= $fileobj . " ";
-
-        if ( $wxGTK{$file} =~ /\bL\b/ ) {
-            $project{"GUI_LOWLEVEL_OBJS"} .= $fileobj . " ";
-        }
+        $project{"GUIDEPS"} .= $filedep . " "
     }
 
     foreach $file (sort keys %wxUNIX) {
         ($fileobj = $file) =~ s/cp?p?$/\o/;
+        ($filedep = $file) =~ s/cp?p?$/\d/;
 
         $project{"GTK_SOURCES"} .= "unix/" . $file . " ";
         $project{"UNIXOBJS"} .= $fileobj . " ";
+        $project{"UNIXDEPS"} .= $filedep . " "
     }
 
     foreach $file (sort keys %wxHTML) {
         ($fileobj = $file) =~ s/cp?p?$/\o/;
+        ($filedep = $file) =~ s/cp?p?$/\d/;
 
         $project{"GTK_SOURCES"} .= "html/" . $file . " ";
         $project{"HTMLOBJS"} .= $fileobj . " ";
+        $project{"HTMLDEPS"} .= $filedep . " "
     }
-
+    
     #! find all our headers
     foreach $file (sort keys %wxWXINCLUDE) {
-        next if $wxWXINCLUDE{$file} =~ /\bR\b/;
-
         $project{"GTK_HEADERS"} .= $file . " "
     }
 
@@ -106,15 +101,30 @@ ALL_HEADERS = \
 COMMONOBJS = \
 		#$ ExpandList("COMMONOBJS");
 
+COMMONDEPS = \
+		#$ ExpandList("COMMONDEPS");
+
+GENERICOBJS = \
+		#$ ExpandList("GENERICOBJS");
+
+GENERICDEPS = \
+		#$ ExpandList("GENERICDEPS");
+
 GUIOBJS = \
 		#$ ExpandList("GUIOBJS");
 
-GUI_LOWLEVEL_OBJS = \
-		#$ ExpandList("GUI_LOWLEVEL_OBJS");
+GUIDEPS = \
+		#$ ExpandList("GUIDEPS");
 
 UNIXOBJS = \
 		#$ ExpandList("UNIXOBJS");
 
+UNIXDEPS = \
+		#$ ExpandList("UNIXDEPS");
+
 HTMLOBJS = \
 		#$ ExpandList("HTMLOBJS");
+
+HTMLDEPS = \
+		#$ ExpandList("HTMLDEPS");
 

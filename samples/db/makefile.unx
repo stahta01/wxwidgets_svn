@@ -17,7 +17,7 @@ PROGRAM = dbtest
 
 CC = gcc
 
-OBJECTS = $(PROGRAM).o listdb.o
+OBJECTS = $(PROGRAM).o
 
 # implementation
 

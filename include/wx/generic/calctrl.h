@@ -17,7 +17,7 @@
 #define _WX_GENERIC_CALCTRL_H
 
 #include "wx/control.h"         // the base class
-#include "wx/dcclient.h"        // for wxPaintDC
+
 #include "wx/spinctrl.h"        // for wxSpinEvent
 
 class WXDLLEXPORT wxComboBox;
@@ -42,8 +42,10 @@ public:
                    const wxDateTime& date = wxDefaultDateTime,
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
-                   long style = wxCAL_SHOW_HOLIDAYS | wxWANTS_CHARS,
+                   long style = wxCAL_SHOW_HOLIDAYS,
                    const wxString& name = wxCalendarNameStr)
+        : wxControl(parent, id, pos, size,
+                    style | wxWANTS_CHARS, wxDefaultValidator, name)
     {
         Init();
 
@@ -55,7 +57,7 @@ public:
                 const wxDateTime& date = wxDefaultDateTime,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
-                long style = wxCAL_SHOW_HOLIDAYS | wxWANTS_CHARS,
+                long style = wxCAL_SHOW_HOLIDAYS,
                 const wxString& name = wxCalendarNameStr);
 
     virtual ~wxCalendarCtrl();
@@ -63,19 +65,9 @@ public:
     // set/get the current date
     // ------------------------
 
-    bool SetDate(const wxDateTime& date); // we need to be able to control if the event should be sent in SetDateAndNotify(...)
+    void SetDate(const wxDateTime& date);
     const wxDateTime& GetDate() const { return m_date; }
 
-    // set/get the range in which selection can occur
-    // ---------------------------------------------
-
-    bool SetLowerDateLimit(const wxDateTime& date = wxDefaultDateTime);
-    const wxDateTime& GetLowerDateLimit() const { return m_lowdate; }
-    bool SetUpperDateLimit(const wxDateTime& date = wxDefaultDateTime);
-    const wxDateTime& GetUpperDateLimit() const { return m_highdate; }
-
-    bool SetDateRange(const wxDateTime& lowerdate = wxDefaultDateTime, const wxDateTime& upperdate = wxDefaultDateTime);
-    
     // calendar mode
     // -------------
 
@@ -199,13 +191,6 @@ private:
     // is this date shown?
     bool IsDateShown(const wxDateTime& date) const;
 
-    // is this date in the given range?
-    bool IsDateInRange(const wxDateTime& date) const;
-    
-    // range helpers
-    bool ChangeYear(wxDateTime* target) const;
-    bool ChangeMonth(wxDateTime* target) const;
-
     // redraw the given date
     void RefreshDate(const wxDateTime& date);
 
@@ -249,16 +234,6 @@ private:
     wxControl *GetMonthControl() const;
     wxControl *GetYearControl() const;
 
-    // OnPaint helper-methods
-    
-    // Highlight the [fromdate : todate] range using pen and brush
-    void HighlightRange(wxPaintDC* dc, const wxDateTime& fromdate, const wxDateTime& todate, wxPen* pen, wxBrush* brush);
-    
-    // Get the "coordinates" for the date relative to the month currently displayed.
-    // using (day, week): upper left coord is (1, 1), lower right coord is (7, 6)
-    // if the date isn't visible (-1, -1) is put in (day, week) and false is returned
-    bool GetDateCoord(const wxDateTime& date, int *day, int *week) const;
-
     // the subcontrols
     wxStaticText *m_staticMonth;
     wxComboBox *m_comboMonth;
@@ -268,10 +243,6 @@ private:
 
     // the current selection
     wxDateTime m_date;
-
-    // the date-range
-    wxDateTime m_lowdate;
-    wxDateTime m_highdate;
 
     // default attributes
     wxColour m_colHighlightFg,
@@ -286,11 +257,7 @@ private:
 
     // the width and height of one column/row in the calendar
     wxCoord m_widthCol,
-            m_heightRow,
-            m_rowOffset;
-
-    wxRect m_leftArrowRect,
-            m_rightArrowRect;
+            m_heightRow;
 
     // the week day names
     wxString m_weekdays[7];

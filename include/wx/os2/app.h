@@ -12,33 +12,12 @@
 #ifndef _WX_APP_H_
 #define _WX_APP_H_
 
-#ifdef __WATCOMC__
-
-#include <sys/ioctl.h>
-#include <sys/select.h>
-
-#else
-
-#include <sys/time.h>
-#include <sys/types.h>
-
-#ifdef __EMX__
-#include <unistd.h>
-#else
-#include <utils.h>
-#undef BYTE_ORDER
-#include <types.h>
-#define INCL_ORDERS
-#endif
-
-#endif
-
 #include "wx/event.h"
 #include "wx/icon.h"
 
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxWindow;
-class WXDLLEXPORT wxApp;
+class WXDLLEXPORT wxApp ;
 class WXDLLEXPORT wxKeyEvent;
 class WXDLLEXPORT wxLog;
 
@@ -56,7 +35,6 @@ extern MRESULT EXPENTRY wxWndProc( HWND
                                   ,MPARAM
                                   ,MPARAM
                                  );
-
 
 // Represents the application. Derive OnInit and declare
 // a new App object to start application
@@ -76,7 +54,6 @@ public:
     virtual bool Initialized(void);
     virtual bool Pending(void) ;
     virtual void Dispatch(void);
-    virtual bool Yield(bool onlyIfNeeded = FALSE);
 
     virtual wxIcon GetStdIcon(int which) const;
 
@@ -99,11 +76,6 @@ public:
     void SetAuto3D(bool bFlag) { m_bAuto3D = bFlag; }
     bool GetAuto3D(void) const { return m_bAuto3D; }
 
-    int AddSocketHandler(int handle, int mask,
-                         void (*callback)(void*), void * gsock);
-    void RemoveSocketHandler(int handle);
-    void HandleSockets();
-
 protected:
     bool                            m_bShowOnInit;
     int                             m_nPrintMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
@@ -112,14 +84,6 @@ protected:
     //
     // PM-specific wxApp definitions */
     //
-private:
-    int                             m_maxSocketHandles;
-    int                             m_maxSocketNr;
-    int                             m_lastUsedHandle;
-    fd_set                          m_readfds;
-    fd_set                          m_writefds;
-    void*                           m_sockCallbackInfo;
-
 public:
 
     // Implementation
@@ -127,7 +91,6 @@ public:
     static void  CleanUp(void);
 
     static bool  RegisterWindowClasses(HAB vHab);
-    virtual void DoMessage(WXMSG *pMsg);
     virtual bool DoMessage(void);
     virtual bool ProcessMessage(WXMSG* pMsg);
     void         DeletePendingObjects(void);
@@ -135,12 +98,13 @@ public:
 
 public:
     int                             m_nCmdShow;
-    HMQ                             m_hMq;
 
 protected:
     bool                            m_bKeepGoing ;
 
     DECLARE_EVENT_TABLE()
+private:
+    HMQ                             m_hMq;
 };
 
 int WXDLLEXPORT wxEntry( int argc, char *argv[] );

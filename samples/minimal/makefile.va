@@ -9,36 +9,17 @@
 # Use FINAL=1 argument to nmake to build final version with no debug info.
 
 # Set WXDIR for your system
-WXDIR=$(WXWIN)
+WXDIR = $(WXWIN)
+
+# WXUSINGDLL=0
 
 !include $(WXDIR)\src\makeva.env
 
-#
-# Define which program this is and what it's path is and where to output to
-#
 PROGRAM=minimal
-THISDIR=$(WXWIN)\samples\$(PROGRAM)
-OPATH=$(THISDIR)\$D
+OBJECTS = $(PROGRAM).obj
 
-#
-# Make sure output directory is available
-#
-!if [md $(OPATH)]
+!if [md $D]
 !endif
-
-#
-# Standard definitions
-#
-PROGRC=$(THISDIR)\$(PROGRAM).rcO
-OBJECTS=$(OPATH)\$(PROGRAM).obj
-PROGRES=$(OPATH)\$(PROGRAM).res
-PROGTARGET=$(OPATH)\$(PROGRAM).exe
-
-.cpp{$OPATH}.obj:
-    @echo $<
-    icc @<<
-$(CPPFLAGS) /Fo$@ /Tp $<
-<<
 
 !include $(WXDIR)\src\makeprog.va
 

@@ -56,12 +56,7 @@ extern PyObject *SWIG_newvarlink(void);
 #define SWIG_name    "glcanvasc"
 
 #include "export.h"
-#ifdef __WXMSW__
-#include "myglcanvas.h"
-#else
 #include <wx/glcanvas.h>
-#endif
-
 
 
 static PyObject* t_output_helper(PyObject* target, PyObject* o) {
@@ -90,22 +85,10 @@ static PyObject* t_output_helper(PyObject* target, PyObject* o) {
     return target;
 }
 
-#if PYTHON_API_VERSION >= 1009
-    static char* wxStringErrorMsg = "String or Unicode type required";
-#else
-    static char* wxStringErrorMsg = "String type required";
-#endif
+static char* wxStringErrorMsg = "string type is required for parameter";
 #ifdef __cplusplus
 extern "C" {
 #endif
-static void *SwigwxGLContextTowxObject(void *ptr) {
-    wxGLContext *src;
-    wxObject *dest;
-    src = (wxGLContext *) ptr;
-    dest = (wxObject *) src;
-    return (void *) dest;
-}
-
 #define new_wxGLContext(_swigarg0,_swigarg1,_swigarg2) (new wxGLContext(_swigarg0,_swigarg1,_swigarg2))
 static PyObject *_wrap_new_wxGLContext(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -394,6 +377,7 @@ static PyObject *_wrap_wxGLContext_GetWindow(PyObject *self, PyObject *args, PyO
     wxGLContext * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxGLContext_GetWindow",_kwnames,&_argo0)) 
@@ -410,8 +394,30 @@ static PyObject *_wrap_wxGLContext_GetWindow(PyObject *self, PyObject *args, PyO
         _result = (wxWindow *)wxGLContext_GetWindow(_arg0);
 
     wxPy_END_ALLOW_THREADS;
-}{ _resultobj = wxPyMake_wxObject(_result); }
+}    if (_result) {
+        SWIG_MakePtr(_ptemp, (char *) _result,"_wxWindow_p");
+        _resultobj = Py_BuildValue("s",_ptemp);
+    } else {
+        Py_INCREF(Py_None);
+        _resultobj = Py_None;
+    }
     return _resultobj;
+}
+
+static void *SwigwxGLCanvasTowxScrolledWindow(void *ptr) {
+    wxGLCanvas *src;
+    wxScrolledWindow *dest;
+    src = (wxGLCanvas *) ptr;
+    dest = (wxScrolledWindow *) src;
+    return (void *) dest;
+}
+
+static void *SwigwxGLCanvasTowxPanel(void *ptr) {
+    wxGLCanvas *src;
+    wxPanel *dest;
+    src = (wxGLCanvas *) ptr;
+    dest = (wxPanel *) src;
+    return (void *) dest;
 }
 
 static void *SwigwxGLCanvasTowxWindow(void *ptr) {
@@ -427,14 +433,6 @@ static void *SwigwxGLCanvasTowxEvtHandler(void *ptr) {
     wxEvtHandler *dest;
     src = (wxGLCanvas *) ptr;
     dest = (wxEvtHandler *) src;
-    return (void *) dest;
-}
-
-static void *SwigwxGLCanvasTowxObject(void *ptr) {
-    wxGLCanvas *src;
-    wxObject *dest;
-    src = (wxGLCanvas *) ptr;
-    dest = (wxObject *) src;
     return (void *) dest;
 }
 
@@ -517,98 +515,6 @@ static PyObject *_wrap_new_wxGLCanvas(PyObject *self, PyObject *args, PyObject *
     }
 {
     delete [] _arg6;
-}
-    return _resultobj;
-}
-
-#define new_wxGLCanvasWithContext(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5,_swigarg6,_swigarg7,_swigarg8) (new wxGLCanvas(_swigarg0,_swigarg1,_swigarg2,_swigarg3,_swigarg4,_swigarg5,_swigarg6,_swigarg7,_swigarg8))
-static PyObject *_wrap_new_wxGLCanvasWithContext(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxGLCanvas * _result;
-    wxWindow * _arg0;
-    wxGLContext * _arg1 = (wxGLContext *) NULL;
-    wxWindowID  _arg2 = (wxWindowID ) -1;
-    wxPoint * _arg3 = (wxPoint *) &wxDefaultPosition;
-    wxSize * _arg4 = (wxSize *) &wxDefaultSize;
-    long  _arg5 = (long ) 0;
-    char * _arg6 = (char *) "GLCanvas";
-    int * _arg7 = (int *) NULL;
-    wxPalette * _arg8 = (wxPalette *) &wxNullPalette;
-    PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    wxPoint  temp;
-    PyObject * _obj3 = 0;
-    wxSize  temp0;
-    PyObject * _obj4 = 0;
-    int * temp1;
-    PyObject * _obj7 = 0;
-    PyObject * _argo8 = 0;
-    char *_kwnames[] = { "parent","shared","id","pos","size","style","name","attribList","palette", NULL };
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O|OiOOlsOO:new_wxGLCanvasWithContext",_kwnames,&_argo0,&_argo1,&_arg2,&_obj3,&_obj4,&_arg5,&_arg6,&_obj7,&_argo8)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of new_wxGLCanvasWithContext. Expected _wxWindow_p.");
-        return NULL;
-        }
-    }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_wxGLContext_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of new_wxGLCanvasWithContext. Expected _wxGLContext_p.");
-        return NULL;
-        }
-    }
-    if (_obj3)
-{
-    _arg3 = &temp;
-    if (! wxPoint_helper(_obj3, &_arg3))
-        return NULL;
-}
-    if (_obj4)
-{
-    _arg4 = &temp0;
-    if (! wxSize_helper(_obj4, &_arg4))
-        return NULL;
-}
-    if (_obj7)
-{
-    int i;
-    if (PySequence_Check(_obj7)) {
-        int size = PyObject_Length(_obj7);
-        temp1 = new int[size+1]; // (int*)malloc((size + 1) * sizeof(int));
-        for (i = 0; i < size; i++) {
-            temp1[i] = PyInt_AsLong(PySequence_GetItem(_obj7, i));
-        }
-        temp1[size] = 0;
-        _arg7 = temp1;
-    }
-}
-    if (_argo8) {
-        if (_argo8 == Py_None) { _arg8 = NULL; }
-        else if (SWIG_GetPtrObj(_argo8,(void **) &_arg8,"_wxPalette_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 9 of new_wxGLCanvasWithContext. Expected _wxPalette_p.");
-        return NULL;
-        }
-    }
-{
-    wxPy_BEGIN_ALLOW_THREADS;
-        _result = (wxGLCanvas *)new_wxGLCanvasWithContext(_arg0,_arg1,_arg2,*_arg3,*_arg4,_arg5,_arg6,_arg7,*_arg8);
-
-    wxPy_END_ALLOW_THREADS;
-}    if (_result) {
-        SWIG_MakePtr(_ptemp, (char *) _result,"_wxGLCanvas_p");
-        _resultobj = Py_BuildValue("s",_ptemp);
-    } else {
-        Py_INCREF(Py_None);
-        _resultobj = Py_None;
-    }
-{
-    delete [] _arg7;
 }
     return _resultobj;
 }
@@ -734,7 +640,6 @@ static PyMethodDef glcanvascMethods[] = {
 	 { "wxGLCanvas_SwapBuffers", (PyCFunction) _wrap_wxGLCanvas_SwapBuffers, METH_VARARGS | METH_KEYWORDS },
 	 { "wxGLCanvas_SetColour", (PyCFunction) _wrap_wxGLCanvas_SetColour, METH_VARARGS | METH_KEYWORDS },
 	 { "wxGLCanvas_SetCurrent", (PyCFunction) _wrap_wxGLCanvas_SetCurrent, METH_VARARGS | METH_KEYWORDS },
-	 { "new_wxGLCanvasWithContext", (PyCFunction) _wrap_new_wxGLCanvasWithContext, METH_VARARGS | METH_KEYWORDS },
 	 { "new_wxGLCanvas", (PyCFunction) _wrap_new_wxGLCanvas, METH_VARARGS | METH_KEYWORDS },
 	 { "wxGLContext_GetWindow", (PyCFunction) _wrap_wxGLContext_GetWindow, METH_VARARGS | METH_KEYWORDS },
 	 { "wxGLContext_GetPalette", (PyCFunction) _wrap_wxGLContext_GetPalette, METH_VARARGS | METH_KEYWORDS },
@@ -765,6 +670,8 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxPrintQuality","_EBool",0},
     { "_wxPrintQuality","_size_t",0},
     { "_wxPrintQuality","_time_t",0},
+    { "_class_wxEvtHandler","_class_wxGLCanvas",SwigwxGLCanvasTowxEvtHandler},
+    { "_class_wxEvtHandler","_wxGLCanvas",SwigwxGLCanvasTowxEvtHandler},
     { "_byte","_unsigned_char",0},
     { "_long","_unsigned_long",0},
     { "_long","_signed_long",0},
@@ -775,6 +682,8 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_size_t","_int",0},
     { "_size_t","_wxWindowID",0},
     { "_size_t","_uint",0},
+    { "_wxPanel","_class_wxGLCanvas",SwigwxGLCanvasTowxPanel},
+    { "_wxPanel","_wxGLCanvas",SwigwxGLCanvasTowxPanel},
     { "_uint","_wxCoord",0},
     { "_uint","_wxPrintQuality",0},
     { "_uint","_time_t",0},
@@ -784,14 +693,14 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_uint","_wxWindowID",0},
     { "_wxChar","_char",0},
     { "_char","_wxChar",0},
-    { "_struct_wxNativeFontInfo","_wxNativeFontInfo",0},
     { "_EBool","_wxCoord",0},
     { "_EBool","_wxPrintQuality",0},
     { "_EBool","_signed_int",0},
     { "_EBool","_int",0},
     { "_EBool","_wxWindowID",0},
     { "_unsigned_long","_long",0},
-    { "_wxNativeFontInfo","_struct_wxNativeFontInfo",0},
+    { "_class_wxPanel","_class_wxGLCanvas",SwigwxGLCanvasTowxPanel},
+    { "_class_wxPanel","_wxGLCanvas",SwigwxGLCanvasTowxPanel},
     { "_signed_int","_wxCoord",0},
     { "_signed_int","_wxPrintQuality",0},
     { "_signed_int","_EBool",0},
@@ -804,10 +713,12 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_unsigned_short","_wxDateTime_t",0},
     { "_unsigned_short","_WXTYPE",0},
     { "_unsigned_short","_short",0},
-    { "_wxObject","_wxGLCanvas",SwigwxGLCanvasTowxObject},
-    { "_wxObject","_wxGLContext",SwigwxGLContextTowxObject},
+    { "_class_wxWindow","_class_wxGLCanvas",SwigwxGLCanvasTowxWindow},
+    { "_class_wxWindow","_wxGLCanvas",SwigwxGLCanvasTowxWindow},
     { "_signed_short","_WXTYPE",0},
     { "_signed_short","_short",0},
+    { "_wxScrolledWindow","_class_wxGLCanvas",SwigwxGLCanvasTowxScrolledWindow},
+    { "_wxScrolledWindow","_wxGLCanvas",SwigwxGLCanvasTowxScrolledWindow},
     { "_unsigned_char","_byte",0},
     { "_unsigned_int","_wxCoord",0},
     { "_unsigned_int","_wxPrintQuality",0},
@@ -857,7 +768,11 @@ static struct { char *n1; char *n2; void *(*pcnv)(void *); } _swig_mapping[] = {
     { "_wxCoord","_size_t",0},
     { "_wxCoord","_time_t",0},
     { "_wxCoord","_wxPrintQuality",0},
+    { "_wxEvtHandler","_class_wxGLCanvas",SwigwxGLCanvasTowxEvtHandler},
     { "_wxEvtHandler","_wxGLCanvas",SwigwxGLCanvasTowxEvtHandler},
+    { "_class_wxScrolledWindow","_class_wxGLCanvas",SwigwxGLCanvasTowxScrolledWindow},
+    { "_class_wxScrolledWindow","_wxGLCanvas",SwigwxGLCanvasTowxScrolledWindow},
+    { "_wxWindow","_class_wxGLCanvas",SwigwxGLCanvasTowxWindow},
     { "_wxWindow","_wxGLCanvas",SwigwxGLCanvasTowxWindow},
 {0,0,0}};
 
@@ -870,22 +785,6 @@ SWIGEXPORT(void) initglcanvasc() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("glcanvasc", glcanvascMethods);
 	 d = PyModule_GetDict(m);
-	 PyDict_SetItemString(d,"WX_GL_RGBA", PyInt_FromLong((long) WX_GL_RGBA));
-	 PyDict_SetItemString(d,"WX_GL_BUFFER_SIZE", PyInt_FromLong((long) WX_GL_BUFFER_SIZE));
-	 PyDict_SetItemString(d,"WX_GL_LEVEL", PyInt_FromLong((long) WX_GL_LEVEL));
-	 PyDict_SetItemString(d,"WX_GL_DOUBLEBUFFER", PyInt_FromLong((long) WX_GL_DOUBLEBUFFER));
-	 PyDict_SetItemString(d,"WX_GL_STEREO", PyInt_FromLong((long) WX_GL_STEREO));
-	 PyDict_SetItemString(d,"WX_GL_AUX_BUFFERS", PyInt_FromLong((long) WX_GL_AUX_BUFFERS));
-	 PyDict_SetItemString(d,"WX_GL_MIN_RED", PyInt_FromLong((long) WX_GL_MIN_RED));
-	 PyDict_SetItemString(d,"WX_GL_MIN_GREEN", PyInt_FromLong((long) WX_GL_MIN_GREEN));
-	 PyDict_SetItemString(d,"WX_GL_MIN_BLUE", PyInt_FromLong((long) WX_GL_MIN_BLUE));
-	 PyDict_SetItemString(d,"WX_GL_MIN_ALPHA", PyInt_FromLong((long) WX_GL_MIN_ALPHA));
-	 PyDict_SetItemString(d,"WX_GL_DEPTH_SIZE", PyInt_FromLong((long) WX_GL_DEPTH_SIZE));
-	 PyDict_SetItemString(d,"WX_GL_STENCIL_SIZE", PyInt_FromLong((long) WX_GL_STENCIL_SIZE));
-	 PyDict_SetItemString(d,"WX_GL_MIN_ACCUM_RED", PyInt_FromLong((long) WX_GL_MIN_ACCUM_RED));
-	 PyDict_SetItemString(d,"WX_GL_MIN_ACCUM_GREEN", PyInt_FromLong((long) WX_GL_MIN_ACCUM_GREEN));
-	 PyDict_SetItemString(d,"WX_GL_MIN_ACCUM_BLUE", PyInt_FromLong((long) WX_GL_MIN_ACCUM_BLUE));
-	 PyDict_SetItemString(d,"WX_GL_MIN_ACCUM_ALPHA", PyInt_FromLong((long) WX_GL_MIN_ACCUM_ALPHA));
 
 
     wxClassInfo::CleanUpClasses();

@@ -32,7 +32,7 @@
 #include "wx/tooltip.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && (!defined(__GNUWIN32_OLD__) || defined(__MINGW32__))
     #include <commctrl.h>
 #endif
 
@@ -239,8 +239,6 @@ void wxToolTip::RelayEvent(WXMSG *msg)
 // ----------------------------------------------------------------------------
 // ctor & dtor
 // ----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxToolTip, wxObject)
 
 wxToolTip::wxToolTip(const wxString &tip)
          : m_text(tip)

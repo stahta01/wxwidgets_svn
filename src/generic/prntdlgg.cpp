@@ -28,6 +28,8 @@
     #pragma hdrstop
 #endif
 
+#include "wx/defs.h"
+
 #if wxUSE_PRINTING_ARCHITECTURE
 
 #ifndef WX_PRECOMP

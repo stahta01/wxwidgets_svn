@@ -4,7 +4,7 @@ import imagec
 from misc import *
 
 from gdi import *
-class wxImageHandlerPtr(wxObjectPtr):
+class wxImageHandlerPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -139,7 +139,7 @@ class wxTIFFHandler(wxTIFFHandlerPtr):
 
 
 
-class wxImagePtr(wxObjectPtr):
+class wxImagePtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -247,25 +247,6 @@ class wxImagePtr(wxObjectPtr):
     def Replace(self, *_args, **_kwargs):
         val = apply(imagec.wxImage_Replace,(self,) + _args, _kwargs)
         return val
-    def ConvertToMono(self, *_args, **_kwargs):
-        val = apply(imagec.wxImage_ConvertToMono,(self,) + _args, _kwargs)
-        if val: val = wxImagePtr(val) ; val.thisown = 1
-        return val
-    def SetOption(self, *_args, **_kwargs):
-        val = apply(imagec.wxImage_SetOption,(self,) + _args, _kwargs)
-        return val
-    def SetOptionInt(self, *_args, **_kwargs):
-        val = apply(imagec.wxImage_SetOptionInt,(self,) + _args, _kwargs)
-        return val
-    def GetOption(self, *_args, **_kwargs):
-        val = apply(imagec.wxImage_GetOption,(self,) + _args, _kwargs)
-        return val
-    def GetOptionInt(self, *_args, **_kwargs):
-        val = apply(imagec.wxImage_GetOptionInt,(self,) + _args, _kwargs)
-        return val
-    def HasOption(self, *_args, **_kwargs):
-        val = apply(imagec.wxImage_HasOption,(self,) + _args, _kwargs)
-        return val
     def CountColours(self, *_args, **_kwargs):
         val = apply(imagec.wxImage_CountColours,(self,) + _args, _kwargs)
         return val
@@ -283,6 +264,11 @@ class wxImage(wxImagePtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
+def wxNullImage(*_args, **_kwargs):
+    val = apply(imagec.wxNullImage,_args,_kwargs)
+    if val: val = wxImagePtr(val); val.thisown = 1
+    return val
+
 def wxEmptyImage(*_args, **_kwargs):
     val = apply(imagec.wxEmptyImage,_args,_kwargs)
     if val: val = wxImagePtr(val); val.thisown = 1
@@ -298,24 +284,11 @@ def wxImageFromBitmap(*_args, **_kwargs):
     if val: val = wxImagePtr(val); val.thisown = 1
     return val
 
-wxInitAllImageHandlers = imagec.wxInitAllImageHandlers
-
-def wxBitmapFromImage(*_args, **_kwargs):
-    val = apply(imagec.wxBitmapFromImage,_args,_kwargs)
-    if val: val = wxBitmapPtr(val); val.thisown = 1
-    return val
-
-wxImage_CanRead = imagec.wxImage_CanRead
-
 wxImage_AddHandler = imagec.wxImage_AddHandler
 
-wxImage_InsertHandler = imagec.wxImage_InsertHandler
-
-wxImage_RemoveHandler = imagec.wxImage_RemoveHandler
+wxInitAllImageHandlers = imagec.wxInitAllImageHandlers
 
 
 
 #-------------- VARIABLE WRAPPERS ------------------
 
-cvar = imagec.cvar
-wxNullImage = wxImagePtr(imagec.cvar.wxNullImage)

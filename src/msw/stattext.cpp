@@ -20,8 +20,6 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_STATTEXT
-
 #ifndef WX_PRECOMP
 #include "wx/event.h"
 #include "wx/app.h"
@@ -59,10 +57,7 @@ bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
 
   m_windowStyle = style;
 
-  long msStyle = WS_CHILD | WS_VISIBLE;
-
-  if ( m_windowStyle & wxCLIP_SIBLINGS )
-    msStyle |= WS_CLIPSIBLINGS;
+  long msStyle = WS_CHILD | WS_VISIBLE /* | WS_CLIPSIBLINGS */ ;
   if (m_windowStyle & wxALIGN_CENTRE)
     msStyle |= SS_CENTER;
   else if (m_windowStyle & wxALIGN_RIGHT)
@@ -91,7 +86,7 @@ bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
 
   SubclassWin(m_hWnd);
 
-  wxControl::SetFont(parent->GetFont());
+  SetFont(parent->GetFont());
   SetSize(x, y, width, height);
 
   return TRUE;
@@ -150,26 +145,8 @@ void wxStaticText::SetLabel(const wxString& label)
     if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
     {
         DoSetSize(-1, -1, -1, -1, wxSIZE_AUTO_WIDTH | wxSIZE_AUTO_HEIGHT);
-
-        Refresh();
     }
 }
-
-
-bool wxStaticText::SetFont(const wxFont& font)
-{
-    bool ret = wxControl::SetFont(font);
-
-    // adjust the size of the window to fit to the label unless autoresizing is
-    // disabled
-    if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
-    {
-        DoSetSize(-1, -1, -1, -1, wxSIZE_AUTO_WIDTH | wxSIZE_AUTO_HEIGHT);
-    }
-
-    return ret;
-}
-
 
 long wxStaticText::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 {
@@ -181,4 +158,4 @@ long wxStaticText::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
   return wxWindow::MSWWindowProc(nMsg, wParam, lParam);
 }
 
-#endif // wxUSE_STATTEXT
+

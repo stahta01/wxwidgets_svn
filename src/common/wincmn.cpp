@@ -35,7 +35,6 @@
     #include "wx/frame.h"
     #include "wx/defs.h"
     #include "wx/window.h"
-    #include "wx/control.h"
     #include "wx/checkbox.h"
     #include "wx/radiobut.h"
     #include "wx/textctrl.h"
@@ -53,10 +52,6 @@
 #if wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
 #endif // wxUSE_DRAG_AND_DROP
-
-#if wxUSE_HELP
-    #include "wx/cshelp.h"
-#endif // wxUSE_HELP
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -82,11 +77,6 @@ BEGIN_EVENT_TABLE(wxWindowBase, wxEvtHandler)
     EVT_SYS_COLOUR_CHANGED(wxWindowBase::OnSysColourChanged)
     EVT_INIT_DIALOG(wxWindowBase::OnInitDialog)
     EVT_MIDDLE_DOWN(wxWindowBase::OnMiddleClick)
-
-#if wxUSE_HELP
-    EVT_HELP(-1, wxWindowBase::OnHelp)
-#endif // wxUSE_HELP
-
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -114,6 +104,10 @@ void wxWindowBase::InitBase()
     // window is created enabled but it's not visible yet
     m_isShown = FALSE;
     m_isEnabled = TRUE;
+
+    // no client data (yet)
+    m_clientData = NULL;
+    m_clientDataType = ClientData_None;
 
     // the default event handler is just this window
     m_eventHandler = this;
@@ -161,9 +155,6 @@ void wxWindowBase::InitBase()
 #if wxUSE_CARET
     m_caret = (wxCaret *)NULL;
 #endif // wxUSE_CARET
-
-    // Whether we're using the current theme for this window (wxGTK only for now)
-    m_themeEnabled = FALSE;
 }
 
 // common part of window creation process
@@ -222,6 +213,16 @@ wxWindowBase::~wxWindowBase()
 
     wxASSERT_MSG( GetChildren().GetCount() == 0, wxT("children not destroyed") );
 
+    // make sure that there are no dangling pointers left pointing to us
+    wxPanel *panel = wxDynamicCast(GetParent(), wxPanel);
+    if ( panel )
+    {
+        if ( panel->GetLastFocus() == this )
+        {
+            panel->SetLastFocus((wxWindow *)NULL);
+        }
+    }
+
 #if wxUSE_CARET
     if ( m_caret )
         delete m_caret;
@@ -231,6 +232,10 @@ wxWindowBase::~wxWindowBase()
     if ( m_windowValidator )
         delete m_windowValidator;
 #endif // wxUSE_VALIDATORS
+
+    // we only delete object data, not untyped
+    if ( m_clientDataType == ClientData_Object )
+        delete m_clientObject;
 
 #if wxUSE_CONSTRAINTS
     // Have to delete constraints/sizer FIRST otherwise sizers may try to look
@@ -260,12 +265,6 @@ wxWindowBase::~wxWindowBase()
     if ( m_tooltip )
         delete m_tooltip;
 #endif // wxUSE_TOOLTIPS
-
-    // reset the dangling pointer our parent window may keep to us
-    if ( m_parent && m_parent->GetDefaultItem() == this )
-    {
-        m_parent->SetDefaultItem(NULL);
-    }
 }
 
 bool wxWindowBase::Destroy()
@@ -303,7 +302,6 @@ bool wxWindowBase::DestroyChildren()
 
         wxASSERT_MSG( child, wxT("children list contains empty nodes") );
 
-        child->Show(FALSE);
         delete child;
 
         wxASSERT_MSG( !GetChildren().Find(child),
@@ -385,33 +383,8 @@ void wxWindowBase::Centre(int direction)
     xNew += posParent.x;
     yNew += posParent.y;
 
-    // Base size of the visible dimensions of the display
-    // to take into account the taskbar
-    wxRect rect = wxGetClientDisplayRect();
-    wxSize size (rect.width,rect.height);
-
-    if (posParent.x >= 0)  // if parent is on the main display
-    {
-        if (xNew < 0)
-            xNew = 0;
-        else if (xNew+width > size.x)
-            xNew = size.x-width-1;
-    }
-    if (posParent.y >= 0)  // if parent is on the main display
-    {
-        if (yNew+height > size.y)
-            yNew = size.y-height-1;
-
-        // Make certain that the title bar is initially visible
-        // always, even if this would push the bottom of the
-        // dialog of the visible area of the display
-        if (yNew < 0)
-            yNew = 0;
-    }
-
-    // move the window to this position (keeping the old size but using
-    // SetSize() and not Move() to allow xNew and/or yNew to be -1)
-    SetSize(xNew, yNew, width, height, wxSIZE_ALLOW_MINUS_ONE);
+    // move the centre of this window to this position
+    Move(xNew, yNew);
 }
 
 // fits the window around the children
@@ -419,14 +392,7 @@ void wxWindowBase::Fit()
 {
     if ( GetChildren().GetCount() > 0 )
     {
-        wxSize size = DoGetBestSize();
-
-        // for compatibility with the old versions and because it really looks
-        // slightly more pretty like this, add a pad
-        size.x += 7;
-        size.y += 14;
-
-        SetClientSize(size);
+        SetClientSize(DoGetBestSize());
     }
     //else: do nothing if we have no children
 }
@@ -445,11 +411,7 @@ wxSize wxWindowBase::DoGetBestSize() const
               node = node->GetNext() )
         {
             wxWindow *win = node->GetData();
-            if ( win->IsTopLevel()
-#if wxUSE_STATUSBAR
-                    || wxDynamicCast(win, wxStatusBar)
-#endif // wxUSE_STATUSBAR
-               )
+            if ( win->IsTopLevel() || wxDynamicCast(win, wxStatusBar) )
             {
                 // dialogs and frames lie in different top level windows -
                 // don't deal with them here; as for the status bars, they
@@ -474,7 +436,8 @@ wxSize wxWindowBase::DoGetBestSize() const
                 maxY = wy + wh;
         }
 
-        return wxSize(maxX, maxY);
+        // leave a margin
+        return wxSize(maxX + 7, maxY + 14);
     }
     else
     {
@@ -482,12 +445,6 @@ wxSize wxWindowBase::DoGetBestSize() const
         // current one
         return GetSize();
     }
-}
-
-// by default the origin is not shifted
-wxPoint wxWindowBase::GetClientAreaOrigin() const
-{
-    return wxPoint(0, 0);
 }
 
 // set the min/max size of the window
@@ -717,20 +674,8 @@ void wxWindowBase::SetValidator(const wxValidator& validator)
 #endif // wxUSE_VALIDATORS
 
 // ----------------------------------------------------------------------------
-// update region stuff
+// update region testing
 // ----------------------------------------------------------------------------
-
-wxRect wxWindowBase::GetUpdateClientRect() const
-{
-    wxRegion rgnUpdate = GetUpdateRegion();
-    rgnUpdate.Intersect(GetClientRect());
-    wxRect rectUpdate = rgnUpdate.GetBox();
-    wxPoint ptOrigin = GetClientAreaOrigin();
-    rectUpdate.x -= ptOrigin.x;
-    rectUpdate.y -= ptOrigin.y;
-
-    return rectUpdate;
-}
 
 bool wxWindowBase::IsExposed(int x, int y) const
 {
@@ -894,64 +839,6 @@ void wxWindowBase::InitDialog()
     event.SetEventObject( this );
     GetEventHandler()->ProcessEvent(event);
 }
-
-// ----------------------------------------------------------------------------
-// context-sensitive help support
-// ----------------------------------------------------------------------------
-
-#if wxUSE_HELP
-
-// associate this help text with this window
-void wxWindowBase::SetHelpText(const wxString& text)
-{
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        helpProvider->AddHelp(this, text);
-    }
-}
-
-// associate this help text with all windows with the same id as this
-// one
-void wxWindowBase::SetHelpTextForId(const wxString& text)
-{
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        helpProvider->AddHelp(GetId(), text);
-    }
-}
-
-// get the help string associated with this window (may be empty)
-wxString wxWindowBase::GetHelpText() const
-{
-    wxString text;
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        text = helpProvider->GetHelp(this);
-    }
-
-    return text;
-}
-
-// show help for this window
-void wxWindowBase::OnHelp(wxHelpEvent& event)
-{
-    wxHelpProvider *helpProvider = wxHelpProvider::Get();
-    if ( helpProvider )
-    {
-        if ( helpProvider->ShowHelp(this) )
-        {
-            // skip the event.Skip() below
-            return;
-        }
-    }
-
-    event.Skip();
-}
-
-#endif // wxUSE_HELP
 
 // ----------------------------------------------------------------------------
 // tooltips
@@ -1269,7 +1156,7 @@ void wxWindowBase::SetConstraintSizes(bool recurse)
         while (node)
         {
             wxWindow *win = node->GetData();
-            if ( !win->IsTopLevel() && win->GetConstraints() )
+            if ( !win->IsTopLevel() )
                 win->SetConstraintSizes();
             node = node->GetNext();
         }
@@ -1347,23 +1234,6 @@ void wxWindowBase::GetClientSizeConstraint(int *w, int *h) const
         GetClientSize(w, h);
 }
 
-void wxWindowBase::AdjustForParentClientOrigin(int& x, int& y, int sizeFlags)
-{
-    // don't do it for the dialogs/frames - they float independently of their
-    // parent
-    if ( !IsTopLevel() )
-    {
-        wxWindow *parent = GetParent();
-        if ( !(sizeFlags & wxSIZE_NO_ADJUSTMENTS) && parent )
-        {
-            wxPoint pt(parent->GetClientAreaOrigin());
-            x += pt.x;
-            y += pt.y;
-        }
-    }
-}
-
-
 void wxWindowBase::GetPositionConstraint(int *x, int *y) const
 {
     wxLayoutConstraints *constr = GetConstraints();
@@ -1388,7 +1258,6 @@ void wxWindowBase::GetPositionConstraint(int *x, int *y) const
 // of control classes.
 void wxWindowBase::UpdateWindowUI()
 {
-#if wxUSE_CONTROLS
     wxUpdateUIEvent event(GetId());
     event.m_eventObject = this;
 
@@ -1399,21 +1268,19 @@ void wxWindowBase::UpdateWindowUI()
 
         if ( event.GetSetText() )
         {
-            wxControl *control = wxDynamicCastThis(wxControl);
+            wxControl *control = wxDynamicCast(this, wxControl);
             if ( control )
             {
-#if wxUSE_TEXTCTRL
                 wxTextCtrl *text = wxDynamicCast(control, wxTextCtrl);
                 if ( text )
                     text->SetValue(event.GetText());
                 else
-#endif // wxUSE_TEXTCTRL
                     control->SetLabel(event.GetText());
             }
         }
 
 #if wxUSE_CHECKBOX
-        wxCheckBox *checkbox = wxDynamicCastThis(wxCheckBox);
+        wxCheckBox *checkbox = wxDynamicCast(this, wxCheckBox);
         if ( checkbox )
         {
             if ( event.GetSetChecked() )
@@ -1422,7 +1289,7 @@ void wxWindowBase::UpdateWindowUI()
 #endif // wxUSE_CHECKBOX
 
 #if wxUSE_RADIOBTN
-        wxRadioButton *radiobtn = wxDynamicCastThis(wxRadioButton);
+        wxRadioButton *radiobtn = wxDynamicCast(this, wxRadioButton);
         if ( radiobtn )
         {
             if ( event.GetSetChecked() )
@@ -1430,7 +1297,6 @@ void wxWindowBase::UpdateWindowUI()
         }
 #endif // wxUSE_RADIOBTN
     }
-#endif // wxUSE_CONTROLS
 }
 
 // ----------------------------------------------------------------------------
@@ -1461,6 +1327,51 @@ wxPoint wxWindowBase::ConvertDialogToPixels(const wxPoint& pt)
         pt2.y = (int) ((pt.y * charHeight) / 8) ;
 
     return pt2;
+}
+
+// ----------------------------------------------------------------------------
+// client data
+// ----------------------------------------------------------------------------
+
+void wxWindowBase::DoSetClientObject( wxClientData *data )
+{
+    wxASSERT_MSG( m_clientDataType != ClientData_Void,
+                  wxT("can't have both object and void client data") );
+
+    if ( m_clientObject )
+        delete m_clientObject;
+
+    m_clientObject = data;
+    m_clientDataType = ClientData_Object;
+}
+
+wxClientData *wxWindowBase::DoGetClientObject() const
+{
+    // it's not an error to call GetClientObject() on a window which doesn't
+    // have client data at all - NULL will be returned
+    wxASSERT_MSG( m_clientDataType != ClientData_Void,
+                  wxT("this window doesn't have object client data") );
+
+    return m_clientObject;
+}
+
+void wxWindowBase::DoSetClientData( void *data )
+{
+    wxASSERT_MSG( m_clientDataType != ClientData_Object,
+                  wxT("can't have both object and void client data") );
+
+    m_clientData = data;
+    m_clientDataType = ClientData_Void;
+}
+
+void *wxWindowBase::DoGetClientData() const
+{
+    // it's not an error to call GetClientData() on a window which doesn't have
+    // client data at all - NULL will be returned
+    wxASSERT_MSG( m_clientDataType != ClientData_Object,
+                  wxT("this window doesn't have void client data") );
+
+    return m_clientData;
 }
 
 // ----------------------------------------------------------------------------
@@ -1495,7 +1406,6 @@ void wxWindowBase::OnInitDialog( wxInitDialogEvent &WXUNUSED(event) )
 // process Ctrl-Alt-mclick
 void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 {
-#if wxUSE_MSGDLG
     if ( event.ControlDown() && event.AltDown() )
     {
         // don't translate these strings
@@ -1503,8 +1413,7 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
         switch ( wxGetOsVersion() )
         {
             case wxMOTIF_X:     port = _T("Motif"); break;
-            case wxMAC:
-            case wxMAC_DARWIN:  port = _T("Mac"); break;
+            case wxMACINTOSH:   port = _T("Mac"); break;
             case wxBEOS:        port = _T("BeOS"); break;
             case wxGTK:
             case wxGTK_WIN32:
@@ -1541,7 +1450,6 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
                      (wxWindow *)this);
     }
     else
-#endif // wxUSE_MSGDLG
     {
         event.Skip();
     }
@@ -1554,45 +1462,5 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
 void wxWindowListNode::DeleteData()
 {
     delete (wxWindow *)GetData();
-}
-
-// ----------------------------------------------------------------------------
-// borders
-// ----------------------------------------------------------------------------
-
-wxBorder wxWindowBase::GetBorder() const
-{
-    wxBorder border = (wxBorder)(m_windowStyle & wxBORDER_MASK);
-    if ( border == wxBORDER_DEFAULT )
-    {
-        border = GetDefaultBorder();
-    }
-
-    return border;
-}
-
-wxBorder wxWindowBase::GetDefaultBorder() const
-{
-    return wxBORDER_NONE;
-}
-
-// ----------------------------------------------------------------------------
-// hit testing
-// ----------------------------------------------------------------------------
-
-wxHitTest wxWindowBase::DoHitTest(wxCoord x, wxCoord y) const
-{
-    // here we just check if the point is inside the window or not
-
-    // check the top and left border first
-    bool outside = x < 0 || y < 0;
-    if ( !outside )
-    {
-        // check the right and bottom borders too
-        wxSize size = GetSize();
-        outside = x >= size.x || y >= size.y;
-    }
-
-    return outside ? wxHT_WINDOW_OUTSIDE : wxHT_WINDOW_INSIDE;
 }
 

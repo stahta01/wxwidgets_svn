@@ -41,10 +41,11 @@
 
 #include "wx/tokenzr.h"
 
-// for MSVC5 and old w32api
-#ifndef HANGUL_CHARSET
-#    define HANGUL_CHARSET  129
-#endif
+// If 1, use the screen resolution to calculate font sizes.
+// This is OK for screen fonts but might have implications when the
+// same font is used for printing.
+// If 0, assume 96 DPI.
+#define wxUSE_SCREEN_DPI 1
 
 // ============================================================================
 // implementation
@@ -128,26 +129,7 @@ bool wxGetNativeFontEncoding(wxFontEncoding encoding,
             info->charset = ANSI_CHARSET;
             break;
 
-#if !defined(__WIN16__) && !defined(__WXMICROWIN__)
-
-        // The following four fonts are multi-byte charsets
-        case wxFONTENCODING_CP932:
-            info->charset = SHIFTJIS_CHARSET;
-            break;
-
-        case wxFONTENCODING_CP936:
-            info->charset = GB2312_CHARSET;
-            break;
-
-        case wxFONTENCODING_CP949:
-            info->charset = HANGUL_CHARSET;
-            break;
-
-        case wxFONTENCODING_CP950:
-            info->charset = CHINESEBIG5_CHARSET;
-            break;
-
-        // The rest are single byte encodings
+#if !defined(__WIN16__)
         case wxFONTENCODING_CP1250:
             info->charset = EASTEUROPE_CHARSET;
             break;
@@ -179,8 +161,6 @@ bool wxGetNativeFontEncoding(wxFontEncoding encoding,
         case wxFONTENCODING_CP874:
             info->charset = THAI_CHARSET;
             break;
-
-
 #endif // !Win16
 
         case wxFONTENCODING_CP437:
@@ -239,7 +219,7 @@ wxFontEncoding wxGetFontEncFromCharSet(int cs)
             fontEncoding = wxFONTENCODING_CP1252;
             break;
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#ifdef __WIN32__
         case EASTEUROPE_CHARSET:
             fontEncoding = wxFONTENCODING_CP1250;
             break;
@@ -271,23 +251,6 @@ wxFontEncoding wxGetFontEncFromCharSet(int cs)
         case THAI_CHARSET:
             fontEncoding = wxFONTENCODING_CP437;
             break;
-
-        case SHIFTJIS_CHARSET:
-            fontEncoding = wxFONTENCODING_CP932;
-            break;
-
-        case GB2312_CHARSET:
-            fontEncoding = wxFONTENCODING_CP936;
-            break;
-
-        case HANGUL_CHARSET:
-            fontEncoding = wxFONTENCODING_CP949;
-            break;
-
-        case CHINESEBIG5_CHARSET:
-            fontEncoding = wxFONTENCODING_CP950;
-            break;
-
 #endif // Win32
 
         case OEM_CHARSET:
@@ -376,28 +339,24 @@ void wxFillLogFont(LOGFONT *logFont, const wxFont *font)
             break;
     }
 
-    // VZ: I'm reverting this as we clearly must use the real screen
-    //     resolution instead of hardcoded one or it surely will fail to work
-    //     in some cases.
-    //
-    //     If there are any problems with this code, please let me know about
-    //     it instead of reverting this change, thanks!
-#if 1 // wxUSE_SCREEN_DPI
-    const int ppInch = ::GetDeviceCaps(ScreenHDC(), LOGPIXELSY);
-#else // 0
+#if wxUSE_SCREEN_DPI
+    HDC dc = ::GetDC(NULL);
+    static const int ppInch = ::GetDeviceCaps(dc, LOGPIXELSY);
+    ::ReleaseDC(NULL, dc);
+#else
     // New behaviour: apparently ppInch varies according to Large/Small Fonts
     // setting in Windows. This messes up fonts. So, set ppInch to a constant
     // 96 dpi.
     static const int ppInch = 96;
-#endif // 1/0
+#endif // 0/1
 
-    int pointSize = font->GetPointSize();
 #if wxFONT_SIZE_COMPATIBILITY
     // Incorrect, but compatible with old wxWindows behaviour
-    int nHeight = (pointSize*ppInch)/72;
+    int nHeight = (font->GetPointSize()*ppInch/72);
 #else
     // Correct for Windows compatibility
-    int nHeight = -(int)((pointSize*((double)ppInch)/72.0) + 0.5);
+//    int nHeight = - (font->GetPointSize()*ppInch/72);
+    int nHeight = - (int) ( (font->GetPointSize()*((double)ppInch)/72.0) + 0.5);
 #endif
 
     wxString facename = font->GetFaceName();
@@ -412,9 +371,7 @@ void wxFillLogFont(LOGFONT *logFont, const wxFont *font)
     wxFontEncoding encoding = font->GetEncoding();
     if ( !wxGetNativeFontEncoding(encoding, &info) )
     {
-#if wxUSE_FONTMAP
         if ( !wxTheFontMapper->GetAltForEncoding(encoding, &info) )
-#endif // wxUSE_FONTMAP
         {
             // unsupported encoding, replace with the default
             info.charset = ANSI_CHARSET;
@@ -446,10 +403,78 @@ void wxFillLogFont(LOGFONT *logFont, const wxFont *font)
 
 wxFont wxCreateFontFromLogFont(const LOGFONT *logFont)
 {
-    wxNativeFontInfo info;
+    // extract family from pitch-and-family
+    int lfFamily = logFont->lfPitchAndFamily;
+    if ( lfFamily & FIXED_PITCH )
+        lfFamily -= FIXED_PITCH;
+    if ( lfFamily & VARIABLE_PITCH )
+        lfFamily -= VARIABLE_PITCH;
 
-    info.lf = *logFont;
+    int fontFamily;
+    switch ( lfFamily )
+    {
+        case FF_ROMAN:
+            fontFamily = wxROMAN;
+            break;
 
-    return wxFont(info);
+        case FF_SWISS:
+            fontFamily = wxSWISS;
+            break;
+
+        case FF_SCRIPT:
+            fontFamily = wxSCRIPT;
+            break;
+
+        case FF_MODERN:
+            fontFamily = wxMODERN;
+            break;
+
+        case FF_DECORATIVE:
+            fontFamily = wxDECORATIVE;
+            break;
+
+        default:
+            fontFamily = wxSWISS;
+    }
+
+    // weight and style
+    int fontWeight = wxNORMAL;
+    switch ( logFont->lfWeight )
+    {
+        case FW_LIGHT:
+            fontWeight = wxLIGHT;
+            break;
+
+        default:
+        case FW_NORMAL:
+            fontWeight = wxNORMAL;
+            break;
+
+        case FW_BOLD:
+            fontWeight = wxBOLD;
+            break;
+    }
+
+    int fontStyle = logFont->lfItalic ? wxITALIC : wxNORMAL;
+
+    bool fontUnderline = logFont->lfUnderline != 0;
+
+    wxString fontFace = logFont->lfFaceName;
+
+    // remember that 1pt = 1/72inch
+    int height = abs(logFont->lfHeight);
+
+#if wxUSE_SCREEN_DPI
+    HDC dc = ::GetDC(NULL);
+    static const int ppInch = GetDeviceCaps(dc, LOGPIXELSY);
+    ::ReleaseDC(NULL, dc);
+#else
+    static const int ppInch = 96;
+#endif
+    int fontPoints = (int) (((72.0*((double)height))/(double) ppInch) + 0.5);
+
+    return wxFont(fontPoints, fontFamily, fontStyle,
+                  fontWeight, fontUnderline, fontFace,
+                  wxGetFontEncFromCharSet(logFont->lfCharSet));
 }
 

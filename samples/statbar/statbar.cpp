@@ -17,6 +17,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#ifdef __GNUG__
+    #pragma implementation "statbar.cpp"
+    #pragma interface "statbar.cpp"
+#endif
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -308,7 +313,7 @@ void MyFrame::DoCreateStatusBar(MyFrame::StatBarKind kind)
             break;
 
         default:
-            wxFAIL_MSG(wxT("unknown stat bar kind"));
+            wxFAIL_MSG("unknown stat bar kind");
     }
 
     GetStatusBar()->Show();
@@ -324,9 +329,9 @@ void MyFrame::OnSetStatusFields(wxCommandEvent& WXUNUSED(event))
 
     long nFields = wxGetNumberFromUser
                    (
-                    _T("Select the number of fields in the status bar"),
-                    _T("Fields:"),
-                    _T("wxWindows statusbar sample"),
+                    "Select the number of fields in the status bar",
+                    "Fields:",
+                    "wxWindows statusbar sample",
                     sb->GetFieldsCount(),
                     1, 5,
                     this
@@ -336,43 +341,23 @@ void MyFrame::OnSetStatusFields(wxCommandEvent& WXUNUSED(event))
     // SetFieldsCount() with the same number of fields should be ok
     if ( nFields != -1 )
     {
-        static const int widthsFor2Fields[] = { 200, -1 };
-        static const int widthsFor3Fields[] = { -1, -2, -1 };
-        static const int widthsFor4Fields[] = { 100, -1, 100, -2, 100 };
-
-        static const int *widthsAll[] =
+        // we set the widths only for 2 of them, otherwise let all the fields
+        // have equal width (the default behaviour)
+        const int *widths = NULL;
+        if ( nFields == 2 )
         {
-            NULL,               // 1 field: default
-            widthsFor2Fields,   // 2 fields: 1 fixed, 1 var
-            widthsFor3Fields,   // 3 fields: 3 var
-            widthsFor4Fields,   // 4 fields: 3 fixed, 2 vars
-            NULL                // 5 fields: default (all have same width)
-        };
+            static const int widthsFor2Fields[2] = { 200, -1 };
+            widths = widthsFor2Fields;
+        }
 
-        const int * const widths = widthsAll[nFields - 1];
         sb->SetFieldsCount(nFields, widths);
 
-        wxString s;
-        for ( long n = 0; n < nFields; n++ )
-        {
-            if ( widths )
-            {
-                if ( widths[n] > 0 )
-                    s.Printf(_T("fixed (%d)"), widths[n]);
-                else
-                    s.Printf(_T("variable (*%d)"), -widths[n]);
-            }
-            else
-            {
-                s = _T("default");
-            }
-
-            SetStatusText(s, n);
-        }
+        wxLogStatus(this,
+                    wxString::Format("Status bar now has %ld fields", nFields));
     }
     else
     {
-        wxLogStatus(this, wxT("Cancelled"));
+        wxLogStatus(this, "Cancelled");
     }
 }
 
@@ -461,9 +446,7 @@ MyStatusBar::MyStatusBar(wxWindow *parent)
 #ifdef USE_STATIC_BITMAP
     m_statbmp = new wxStaticBitmap(this, -1, wxIcon(green_xpm));
 #else
-    m_statbmp = new wxBitmapButton(this, -1, CreateBitmapForButton(),
-                                   wxDefaultPosition, wxDefaultSize,
-                                   wxBU_EXACTFIT);
+    m_statbmp = new wxBitmapButton(this, -1, CreateBitmapForButton());
 #endif
 
     m_timer.Start(1000);
@@ -513,7 +496,11 @@ void MyStatusBar::OnSize(wxSizeEvent& event)
     m_checkbox->SetSize(rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4);
 
     GetFieldRect(Field_Bitmap, rect);
+#ifdef USE_BUTTON_FOR_BITMAP
+    wxSize size(BITMAP_SIZE_X, BITMAP_SIZE_Y);
+#else
     wxSize size = m_statbmp->GetSize();
+#endif
 
     m_statbmp->Move(rect.x + (rect.width - size.x) / 2,
                     rect.y + (rect.height - size.y) / 2);

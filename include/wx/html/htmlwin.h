@@ -12,7 +12,7 @@
 #define _WX_HTMLWIN_H_
 
 #ifdef __GNUG__
-#pragma interface "htmlwin.h"
+#pragma interface
 #endif
 
 #include "wx/defs.h"
@@ -27,10 +27,6 @@
 #include "wx/filesys.h"
 #include "wx/html/htmlfilt.h"
 
-class wxHtmlProcessor;
-class wxHtmlWinModule;
-class wxHtmlHistoryArray;
-class wxHtmlProcessorList;
 
 //--------------------------------------------------------------------------------
 // wxHtmlWindow
@@ -43,195 +39,189 @@ class wxHtmlProcessorList;
 //                  SetPage(text) or LoadPage(filename).
 //--------------------------------------------------------------------------------
 
+
+// item of history list
+class WXDLLEXPORT HtmlHistoryItem : public wxObject
+{
+    public:
+        HtmlHistoryItem(const wxString& p, const wxString& a) {m_Page = p, m_Anchor = a, m_Pos = 0;}
+        int GetPos() const {return m_Pos;}
+        void SetPos(int p) {m_Pos = p;}
+        const wxString& GetPage() const {return m_Page;}
+        const wxString& GetAnchor() const {return m_Anchor;}
+
+    private:
+        wxString m_Page;
+        wxString m_Anchor;
+        int m_Pos;
+};
+
+
+WX_DECLARE_EXPORTED_OBJARRAY(HtmlHistoryItem, HtmlHistoryArray);
+
+class wxHtmlWinModule;
+
 class WXDLLEXPORT wxHtmlWindow : public wxScrolledWindow
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlWindow)
+    
     friend class wxHtmlWinModule;
 
-public:
-    wxHtmlWindow() : wxScrolledWindow() {}
-    wxHtmlWindow(wxWindow *parent, wxWindowID id = -1,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
-                 long style = wxHW_SCROLLBAR_AUTO,
-                 const wxString& name = wxT("htmlWindow"));
-    ~wxHtmlWindow();
+    public:
+        wxHtmlWindow() : wxScrolledWindow() {};
+        wxHtmlWindow(wxWindow *parent, wxWindowID id = -1,
+                     const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+                     long style = wxHW_SCROLLBAR_AUTO,
+                     const wxString& name = "htmlWindow");
+        ~wxHtmlWindow();
 
-    // Set HTML page and display it. !! source is HTML document itself,
-    // it is NOT address/filename of HTML document. If you want to
-    // specify document location, use LoadPage() istead
-    // Return value : FALSE if an error occured, TRUE otherwise
-    bool SetPage(const wxString& source);
-    
-    // Append to current page
-    bool AppendToPage(const wxString& source);
+        bool SetPage(const wxString& source);
+                // Set HTML page and display it. !! source is HTML document itself,
+                // it is NOT address/filename of HTML document. If you want to
+                // specify document location, use LoadPage() istead
+                // Return value : FALSE if an error occured, TRUE otherwise
 
-    // Load HTML page from given location. Location can be either
-    // a) /usr/wxGTK2/docs/html/wx.htm
-    // b) http://www.somewhere.uk/document.htm
-    // c) ftp://ftp.somesite.cz/pub/something.htm
-    // In case there is no prefix (http:,ftp:), the method
-    // will try to find it itself (1. local file, then http or ftp)
-    // After the page is loaded, the method calls SetPage() to display it.
-    // Note : you can also use path relative to previously loaded page
-    // Return value : same as SetPage
-    virtual bool LoadPage(const wxString& location);
+        bool LoadPage(const wxString& location);
+                // Load HTML page from given location. Location can be either
+                // a) /usr/wxGTK2/docs/html/wx.htm
+                // b) http://www.somewhere.uk/document.htm
+                // c) ftp://ftp.somesite.cz/pub/something.htm
+                // In case there is no prefix (http:,ftp:), the method
+                // will try to find it itself (1. local file, then http or ftp)
+                // After the page is loaded, the method calls SetPage() to display it.
+                // Note : you can also use path relative to previously loaded page
+                // Return value : same as SetPage
 
-    // Returns full location of opened page
-    wxString GetOpenedPage() const {return m_OpenedPage;}
-    // Returns anchor within opened page
-    wxString GetOpenedAnchor() const {return m_OpenedAnchor;}
-    // Returns <TITLE> of opened page or empty string otherwise
-    wxString GetOpenedPageTitle() const {return m_OpenedPageTitle;}
+        wxString GetOpenedPage() const {return m_OpenedPage;}
+                // Returns full location of opened page
+        wxString GetOpenedAnchor() const {return m_OpenedAnchor;}
+                // Returns anchor within opened page
+        wxString GetOpenedPageTitle() const {return m_OpenedPageTitle;}
+                // Returns <TITLE> of opened page or empty string otherwise
 
-    // Sets frame in which page title will  be displayed. Format is format of
-    // frame title, e.g. "HtmlHelp : %s". It must contain exactly one %s
-    void SetRelatedFrame(wxFrame* frame, const wxString& format);
-    wxFrame* GetRelatedFrame() const {return m_RelatedFrame;}
+        void SetRelatedFrame(wxFrame* frame, const wxString& format);
+                // sets frame in which page title will  be displayed. Format is format of
+                // frame title, e.g. "HtmlHelp : %s". It must contain exactly one %s
+        wxFrame* GetRelatedFrame() const {return m_RelatedFrame;}
 
-    // After(!) calling SetRelatedFrame, this sets statusbar slot where messages
-    // will be displayed. Default is -1 = no messages.
-    void SetRelatedStatusBar(int bar);
+        void SetRelatedStatusBar(int bar);
+                // after(!) calling SetRelatedFrame, this sets statusbar slot where messages
+                // will be displayed. Default is -1 = no messages.
 
-    // Sets fonts to be used when displaying HTML page.
-    void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes);
+        void SetFonts(wxString normal_face, wxString fixed_face, const int *sizes);
+                // sets fonts to be used when displaying HTML page.
 
-    // Sets the title of the window
-    // (depending on the information passed to SetRelatedFrame() method)
-    virtual void OnSetTitle(const wxString& title);
+        virtual void OnSetTitle(const wxString& title);
+                // Sets the title of the window
+                // (depending on the information passed to SetRelatedFrame() method)
 
-    // Sets space between text and window borders.
-    void SetBorders(int b) {m_Borders = b;}
+        void SetBorders(int b) {m_Borders = b;}
+                // Sets space between text and window borders.
 
-    // Saves custom settings into cfg config. it will use the path 'path'
-    // if given, otherwise it will save info into currently selected path.
-    // saved values : things set by SetFonts, SetBorders.
-    virtual void ReadCustomization(wxConfigBase *cfg, wxString path = wxEmptyString);
-    // ...
-    virtual void WriteCustomization(wxConfigBase *cfg, wxString path = wxEmptyString);
+        virtual void ReadCustomization(wxConfigBase *cfg, wxString path = wxEmptyString);
+                // saves custom settings into cfg config. it will use the path 'path'
+                // if given, otherwise it will save info into currently selected path.
+                // saved values : things set by SetFonts, SetBorders.
+        virtual void WriteCustomization(wxConfigBase *cfg, wxString path = wxEmptyString);
+                // ...
 
-    // Goes to previous/next page (in browsing history)
-    // Returns TRUE if successful, FALSE otherwise
-    bool HistoryBack();
-    bool HistoryForward();
-    bool HistoryCanBack();
-    bool HistoryCanForward();
-    // Resets history
-    void HistoryClear();
+        bool HistoryBack();
+        bool HistoryForward();
+                // Goes to previous/next page (in browsing history)
+                // Returns TRUE if successful, FALSE otherwise
+        void HistoryClear();
+                // Resets history
 
-    // Returns pointer to conteiners/cells structure.
-    // It should be used ONLY when printing
-    wxHtmlContainerCell* GetInternalRepresentation() const {return m_Cell;}
+        wxHtmlContainerCell* GetInternalRepresentation() const {return m_Cell;}
+                // Returns pointer to conteiners/cells structure.
+                // It should be used ONLY when printing
 
-    // Adds input filter
-    static void AddFilter(wxHtmlFilter *filter);
+        static void AddFilter(wxHtmlFilter *filter);
+                // Adds input filter
 
-    // Called when the mouse hovers over a cell: (x, y) are logical coords
-    //
-    // Default behaviour is to do nothing at all
-    virtual void OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y);
+        virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
+                // called when users clicked on hypertext link. Default behavior is to
+                // call LoadPage(loc)
 
-    // Called when user clicks on a cell. Default behavior is to call
-    // OnLinkClicked() if this cell corresponds to a hypertext link
-    virtual void OnCellClicked(wxHtmlCell *cell,
-                               wxCoord x, wxCoord y,
-                               const wxMouseEvent& event);
+        wxHtmlWinParser *GetParser() const { return m_Parser; }
+                // return a pointer to the parser.
 
-    // Called when user clicked on hypertext link. Default behavior is to
-    // call LoadPage(loc)
-    virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
+    protected:
+        bool ScrollToAnchor(const wxString& anchor);
+                // Scrolls to anchor of this name. (Anchor is #news
+                // or #features etc. it is part of address sometimes:
+                // http://www.ms.mff.cuni.cz/~vsla8348/wxhtml/index.html#news)
+                // Return value : TRUE if anchor exists, FALSE otherwise
 
-    // Returns a pointer to the parser.
-    wxHtmlWinParser *GetParser() const { return m_Parser; }
+        void CreateLayout();
+                // prepare layout (= fill m_PosX, m_PosY for fragments) based on actual size of
+                // window. This method also setup scrollbars
 
-    // Adds HTML processor to this instance of wxHtmlWindow:
-    void AddProcessor(wxHtmlProcessor *processor);
-    // Adds HTML processor to wxHtmlWindow class as whole:
-    static void AddGlobalProcessor(wxHtmlProcessor *processor);
+        void OnDraw(wxDC& dc);
+        void OnSize(wxSizeEvent& event);
+        void OnMouseEvent(wxMouseEvent& event);
+        void OnIdle(wxIdleEvent& event);
 
-    // what would we do with it?
-    virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
+        virtual wxHtmlFilter *GetDefaultFilter() {return new wxHtmlFilterPlainText;}
+	        // returns new filter (will be stored into m_DefaultFilter variable)
 
-protected:
-    // Scrolls to anchor of this name. (Anchor is #news
-    // or #features etc. it is part of address sometimes:
-    // http://www.ms.mff.cuni.cz/~vsla8348/wxhtml/index.html#news)
-    // Return value : TRUE if anchor exists, FALSE otherwise
-    bool ScrollToAnchor(const wxString& anchor);
+        static void CleanUpStatics();
+	        // cleans static variables
 
-    // Prepares layout (= fill m_PosX, m_PosY for fragments) based on
-    // actual size of window. This method also setup scrollbars
-    void CreateLayout();
 
-    void OnDraw(wxDC& dc);
-    void OnSize(wxSizeEvent& event);
-    void OnMouseEvent(wxMouseEvent& event);
-    void OnIdle(wxIdleEvent& event);
+    protected:
+        wxHtmlContainerCell *m_Cell;
+                // This is pointer to the first cell in parsed data.
+                // (Note: the first cell is usually top one = all other cells are sub-cells of this one)
+        wxHtmlWinParser *m_Parser;
+                // parser which is used to parse HTML input.
+                // Each wxHtmlWindow has it's own parser because sharing one global
+                // parser would be problematic (because of reentrancy)
+        wxString m_OpenedPage;
+                // contains name of actualy opened page or empty string if no page opened
+        wxString m_OpenedAnchor;
+                // contains name of current anchor within m_OpenedPage
+        wxString m_OpenedPageTitle;
+                // contains title of actualy opened page or empty string if no <TITLE> tag
+        wxFileSystem* m_FS;
+                // class for opening files (file system)
 
-    // Returns new filter (will be stored into m_DefaultFilter variable)
-    virtual wxHtmlFilter *GetDefaultFilter() {return new wxHtmlFilterPlainText;}
+        wxFrame *m_RelatedFrame;
+        wxString m_TitleFormat;
+        int m_RelatedStatusBar;
+                // frame in which page title should be displayed & number of it's statusbar
+                // reserved for usage with this html window
 
-    // cleans static variables
-    static void CleanUpStatics();
+        int m_Borders;
+                // borders (free space between text and window borders)
+                // defaults to 10 pixels.
 
-protected:
-    // This is pointer to the first cell in parsed data.
-    // (Note: the first cell is usually top one = all other cells are sub-cells of this one)
-    wxHtmlContainerCell *m_Cell;
-    // parser which is used to parse HTML input.
-    // Each wxHtmlWindow has it's own parser because sharing one global
-    // parser would be problematic (because of reentrancy)
-    wxHtmlWinParser *m_Parser;
-    // contains name of actualy opened page or empty string if no page opened
-    wxString m_OpenedPage;
-    // contains name of current anchor within m_OpenedPage
-    wxString m_OpenedAnchor;
-    // contains title of actualy opened page or empty string if no <TITLE> tag
-    wxString m_OpenedPageTitle;
-    // class for opening files (file system)
-    wxFileSystem* m_FS;
+        int m_Style;
 
-    wxFrame *m_RelatedFrame;
-    wxString m_TitleFormat;
-    // frame in which page title should be displayed & number of it's statusbar
-    // reserved for usage with this html window
-    int m_RelatedStatusBar;
+    private:
+        bool m_tmpMouseMoved;
+                // a flag indicated if mouse moved
+                // (if TRUE we will try to change cursor in last call to OnIdle)
+        wxHtmlLinkInfo *m_tmpLastLink;
+                // contains last link name
+        int m_tmpCanDrawLocks;
+                // if >0 contents of the window is not redrawn
+                // (in order to avoid ugly blinking)
 
-    // borders (free space between text and window borders)
-    // defaults to 10 pixels.
-    int m_Borders;
+        static wxList m_Filters;
+                // list of HTML filters
+        static wxHtmlFilter *m_DefaultFilter;
+                // this filter is used when no filter is able to read some file
 
-    int m_Style;
+        static wxCursor *s_cur_hand;
+        static wxCursor *s_cur_arrow;
 
-private:
-    // a flag indicated if mouse moved
-    // (if TRUE we will try to change cursor in last call to OnIdle)
-    bool m_tmpMouseMoved;
-    // contains last link name
-    wxHtmlLinkInfo *m_tmpLastLink;
-    // contains the last (terminal) cell which contained the mouse
-    wxHtmlCell *m_tmpLastCell;
-    // if >0 contents of the window is not redrawn
-    // (in order to avoid ugly blinking)
-    int m_tmpCanDrawLocks;
+        HtmlHistoryArray m_History;
+        int m_HistoryPos;
+                // browser history
+        bool m_HistoryOn;
+                // if this FLAG is false, items are not added to history
 
-    // list of HTML filters
-    static wxList m_Filters;
-    // this filter is used when no filter is able to read some file
-    static wxHtmlFilter *m_DefaultFilter;
-
-    static wxCursor *s_cur_hand;
-    static wxCursor *s_cur_arrow;
-
-    wxHtmlHistoryArray *m_History;
-    // browser history
-    int m_HistoryPos;
-    // if this FLAG is false, items are not added to history
-    bool m_HistoryOn;
-
-    // html processors array:
-    wxHtmlProcessorList *m_Processors;
-    static wxHtmlProcessorList *m_GlobalProcessors;
 
     DECLARE_EVENT_TABLE()
 };
@@ -240,4 +230,3 @@ private:
 #endif
 
 #endif // _WX_HTMLWIN_H_
-

@@ -14,7 +14,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -26,10 +26,6 @@
 
 #include <wx/wxexpr.h>
 
-#ifdef new
-#undef new
-#endif
-
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
 #include <fstream.h>
@@ -37,7 +33,7 @@
 #include <iostream>
 #include <fstream>
 #ifdef _MSC_VER
-//using namespace std;
+using namespace std;
 #endif
 #endif
 

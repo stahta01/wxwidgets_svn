@@ -11,10 +11,6 @@
 #pragma implementation "button.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_BUTTON
-
 #include "wx/button.h"
 
 #include <gdk/gdk.h>
@@ -107,7 +103,7 @@ bool wxButton::Create(  wxWindow *parent, wxWindowID id, const wxString &label,
 */
     
     m_widget = gtk_button_new_with_label("");
-
+    
     SetLabel( label );
 
 #if (GTK_MINOR_VERSION > 0)    
@@ -186,9 +182,8 @@ void wxButton::ApplyWidgetStyle()
 wxSize wxButton::DoGetBestSize() const
 {
     wxSize ret( wxControl::DoGetBestSize() );
+    ret.x += 6;
     if (ret.x < 80) ret.x = 80;
     return ret;
 }
-
-#endif // wxUSE_BUTTON
 

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------------------
 // Name:        dbbrowse.h
 // Purpose:     Through ODBC - Databases Browsen
-// Author:      Mark Johnson
+// Author:      Mark Johnson, mj10777@gmx.net
 // Modified by:
 // Created:     19991127
 // Copyright:   (c) Mark Johnson
@@ -12,37 +12,34 @@
 //----------------------------------------------------------------------------------------
 class MainFrame: public wxFrame
 {
-public:
-    MainFrame(wxFrame *frame, char *title,  const wxPoint& pos, const wxSize& size);
-    ~MainFrame(void);
-    
-public:
-    // menu callbacks
-    void OnAbout(wxCommandEvent& event);
-    void OnHelp(wxCommandEvent& event);
-    void OnQuit(wxCommandEvent& event);
-    //--------------------------------------------------------------------------------------
-    int DiffW, DiffH;                  // Needed the saving of Frame size
-    //--------------------------------------------------------------------------------------
-    DocSplitterWindow    *p_Splitter;  // for Document Views
-    MainDoc              *pDoc;        // Self made Document
-    wxHtmlHelpController *p_Help;      // Help System
+ public:
+  MainFrame(wxFrame *frame, char *title,  const wxPoint& pos, const wxSize& size);
+  ~MainFrame(void);
 
-    //--------------------------------------------------------------------------------------
-    DECLARE_EVENT_TABLE()
+ public:
+  // menu callbacks
+  void OnAbout(wxCommandEvent& event);
+  void OnHelp(wxCommandEvent& event);
+  void OnQuit(wxCommandEvent& event);
+  //--------------------------------------------------------------------------------------
+  int DiffW, DiffH;                  // Needed the saving of Frame size
+  //--------------------------------------------------------------------------------------
+  DocSplitterWindow    *p_Splitter;  // for Document Views
+  MainDoc              *pDoc;        // Self made Document
+  wxHtmlHelpController *p_Help;      // Help System
+  //--------------------------------------------------------------------------------------
+ DECLARE_EVENT_TABLE()
 };
-
 //----------------------------------------------------------------------------------------
 // Define a new application type
 //----------------------------------------------------------------------------------------
 class MainApp: public wxApp
 {
-public:
-    MainFrame *frame;                           // The one and only MainFrame
-    bool OnInit(void); // Programmstart
-    wxLocale m_locale; // locale we'll be using and language support - MUST be here !
+ public:
+  MainFrame *frame;                           // The one and only MainFrame
+  bool OnInit(void); // Programmstart
+  wxLocale m_locale; // locale we'll be using and language support - MUST be here !
 };
-
 //----------------------------------------------------------------------------------------
 // ID for the menu quit command
 //----------------------------------------------------------------------------------------

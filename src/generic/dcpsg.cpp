@@ -21,6 +21,8 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/setup.h"
+    #include "wx/defs.h"
 #endif // WX_PRECOMP
 
 #if wxUSE_PRINTING_ARCHITECTURE
@@ -37,7 +39,7 @@
 #include "wx/image.h"
 #include "wx/log.h"
 #include "wx/generic/dcpsg.h"
-#include "wx/printdlg.h"
+#include "wx/generic/prntdlgg.h"
 #include "wx/button.h"
 #include "wx/stattext.h"
 #include "wx/radiobox.h"
@@ -1174,9 +1176,7 @@ void wxPostScriptDC::DoDrawText( const wxString& text, wxCoord x, wxCoord y )
 
     GetTextExtent(text, &text_w, &text_h, &text_descent);
 
-    // VZ: this seems to be unnecessary, so taking it out for now, if it
-    //     doesn't create any problems, remove this comment entirely
-    //SetFont( m_font );
+    SetFont( m_font );
 
     if (m_textForegroundColour.Ok())
     {
@@ -1577,7 +1577,7 @@ bool wxPostScriptDC::StartDoc( const wxString& message )
         m_printData.SetFilename(filename);
     }
 
-    m_pstream = wxFopen( m_printData.GetFilename().fn_str(), wxT("w+") );
+    m_pstream = fopen( m_printData.GetFilename().fn_str(), "w+" );
 
     if (!m_pstream)
     {
@@ -1835,7 +1835,7 @@ bool wxPostScriptDC::DoBlit( wxCoord xdest, wxCoord ydest,
                            wxCoord fwidth, wxCoord fheight,
                            wxDC *source,
                            wxCoord xsrc, wxCoord ysrc,
-                           int rop, bool WXUNUSED(useMask), wxCoord WXUNUSED(xsrcMask), wxCoord WXUNUSED(ysrcMask) )
+                           int rop, bool WXUNUSED(useMask) )
 {
     wxCHECK_MSG( m_ok && m_pstream, FALSE, wxT("invalid postscript dc") );
 
@@ -2034,8 +2034,10 @@ void wxPostScriptDC::DoGetTextExtent(const wxString& string,
            - afmFile = fopen() may fail and in that case the next if branch
            MUST be executed - and it would not if there was "else" */
         {
-           afmName = wxGetDataDir();
+           afmName = wxINSTALL_PREFIX;
            afmName <<  wxFILE_SEP_PATH
+                   << wxT("share") << wxFILE_SEP_PATH
+                   << wxT("wx") << wxFILE_SEP_PATH
 #if defined(__LINUX__) || defined(__FREEBSD__)
                    << wxT("gs_afm") << wxFILE_SEP_PATH
 #else

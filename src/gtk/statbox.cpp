@@ -11,11 +11,9 @@
 #pragma implementation "statbox.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/statbox.h"
 
 #if wxUSE_STATBOX
-
-#include "wx/statbox.h"
 
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
@@ -47,22 +45,22 @@ bool wxStaticBox::Create( wxWindow *parent, wxWindowID id, const wxString &label
         !CreateBase( parent, id, pos, size, style, wxDefaultValidator, name ))
     {
         wxFAIL_MSG( wxT("wxStaticBox creation failed") );
-        return FALSE;
+	    return FALSE;
     }
 
     m_isStaticBox = TRUE;
-
+    
     if (label.IsEmpty())
         m_widget = gtk_frame_new( (char*) NULL );
     else
         m_widget = gtk_frame_new( m_label.mbc_str() );
 
     m_parent->DoAddChild( this );
-
+  
     PostCreation();
 
     SetLabel(label);
-
+  
     SetFont( parent->GetFont() );
 
     SetBackgroundColour( parent->GetBackgroundColour() );
@@ -86,4 +84,4 @@ void wxStaticBox::ApplyWidgetStyle()
     gtk_widget_set_style( m_widget, m_widgetStyle );
 }
 
-#endif // wxUSE_STATBOX
+#endif

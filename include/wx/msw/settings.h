@@ -32,9 +32,6 @@ public:
 
     // Get a system metric, e.g. scrollbar size
     static int GetSystemMetric(int index);
-
-    // Return true if the port has certain feature
-    static bool GetCapability(int index);
 };
 
 #endif

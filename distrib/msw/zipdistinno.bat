@@ -3,11 +3,10 @@ rem Zip up an external, generic + Windows distribution of wxWindows 2
 rem using Inno Setup + ScriptMaker
 set src=%wxwin
 set dest=%src\deliver
-set webfiles=c:\wx2dev\wxWebSite
 set inno=0
 
 Rem Set this to the required version
-set version=2.3.2
+set version=2.2.7
 
 if "%src" == "" goto usage
 if "%dest" == "" goto usage
@@ -26,30 +25,17 @@ pause
 
 erase %dest\wx*.zip
 erase %dest\*.htb
-erase %dest\ogl3*.zip
-erase %dest\contrib*.zip
-erase %dest\tex2rtf2*.zip
-erase %dest\mmedia*.zip
-erase %dest\jpeg*.zip
-erase %dest\tiff*.zip
-erase %dest\dialoged*.zip
-erase %dest\utils*.zip
-erase %dest\extradoc*.zip
-erase %dest\stc*.zip
-erase %dest\*-win32*.zip
-erase %dest\setup*.*
-erase %dest\*.txt
-erase %dest\make*
+erase %dest\ogl3-*.zip
+erase %dest\tex2rtf2-*.zip
+erase %dest\jpeg-*.zip
+erase %dest\tiff-*.zip
+erase %dest\dialoged-*.zip
+erase %dest\utils-*.zip
+erase %dest\extradoc-*.zip
+erase %dest\*-win32-*.zip
 
 if direxist %dest\wx erase /sxyz %dest\wx\
 if not direxist %dest mkdir %dest
-
-# Copy FAQ from wxWebSite CVS
-if not direxist %webfiles% echo Error - %webfiles% does not exist
-if not direxist %webfiles% goto end
-echo Copying FAQ and other files from %webfiles
-copy %webfiles%\site\faq*.htm %src\docs\html
-copy %webfiles%\site\platform.htm %src\docs\html
 
 cd %src
 echo Zipping...
@@ -63,22 +49,8 @@ Rem zip32 -@ -u %dest\wxMSW-%version%.zip < %src\distrib\msw\wx_chm.rsp
 Rem zip32 -@ -u %dest\wxMSW-%version%.zip  < %src\distrib\msw\jpeg.rsp
 Rem zip32 -@ -u %dest\wxMSW-%version%.zip < %src\distrib\msw\tiff.rsp
 
-echo Zipping wxMac distribution
-zip32 -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\generic.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\mac.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\cw.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\tiff.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\jpeg.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\tex2rtf.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\dialoged.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\ogl.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\xml.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\contrib.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\makefile.rsp
-
 Rem Below is the old-style separated-out format. This is retained only
 Rem for local use, and for creating wxMSW-xxx.zip.
-echo Zipping individual components
 zip32 -@ %dest\wxWindows-%version%-gen.zip < %src\distrib\msw\generic.rsp
 zip32 -@ -u %dest\wxWindows-%version%-gen.zip < %src\distrib\msw\makefile.rsp
 zip32 -@ %dest\wxWindows-%version%-msw.zip < %src\distrib\msw\msw.rsp
@@ -121,7 +93,7 @@ rem STC (Scintilla widget)
 zip32 -@ %dest\stc-%version%.zip < %src\distrib\msw\stc.rsp
 
 rem GLCanvas: obsolete, now in main library
-rem zip32 -@ %dest\glcanvas.zip < %src\distrib\msw\glcanvas.rsp
+rem zip32 -@ %dest\glcanvas-%version%.zip < %src\distrib\msw\glcanvas.rsp
 
 rem Tex2RTF
 zip32 -@ %dest\tex2rtf2-%version%.zip < %src\distrib\msw\tex2rtf.rsp
@@ -131,10 +103,6 @@ zip32 -@ %dest\jpeg-%version%.zip < %src\distrib\msw\jpeg.rsp
 
 rem TIFF source
 zip32 -@ %dest\tiff-%version%.zip < %src\distrib\msw\tiff.rsp
-
-zip32 -@ %dest\wxxrc-%version%.zip < %src\distrib\msw\xml.rsp
-
-zip32 -@ %dest\contrib-%version%.zip < %src\distrib\msw\contrib.rsp
 
 rem Dialog Editor source and binary
 erase %dest\dialoged_source.zip
@@ -148,14 +116,12 @@ zip32 -@ -u %dest\utils-%version%.zip < %src\distrib\msw\utilmake.rsp
 
 copy %src\docs\changes.txt %dest\changes-%version%.txt
 copy %src\docs\msw\install.txt %dest\install_msw-%version%.txt
-copy %src\docs\mac\install.txt %dest\install_mac-%version%.txt
 copy %src\docs\motif\install.txt %dest\install_motif-%version%.txt
 copy %src\docs\gtk\install.txt %dest\install_gtk-%version%.txt
 copy %src\docs\readme.txt %dest\readme-%version%.txt
 copy %src\docs\motif\readme.txt %dest\readme_motif-%version%.txt
 copy %src\docs\gtk\readme.txt %dest\readme_gtk-%version%.txt
 copy %src\docs\msw\readme.txt %dest\readme_msw-%version%.txt
-copy %src\docs\mac\readme.txt %dest\readme_mac-%version%.txt
 copy %src\docs\readme_vms.txt %dest\readme_vms-%version%.txt
 copy %src\docs\motif\makewxmotif %dest\makewxmotif-%version%
 copy %src\docs\gtk\makewxgtk %dest\makewxgtk-%version%
@@ -165,7 +131,7 @@ if "%inno" == "0" goto end
 
 :dounzip
 
-Rem Make dialoged-win32.zip and tex2rtf-win32.zip
+Rem Make dialoged-win32-%version%.zip and tex2rtf-win32-%version%.zip
 
 cd %src\bin
 
@@ -186,16 +152,12 @@ unzip32 -o ..\wxWindows-%version%-gen.zip
 unzip32 -o ..\wxWindows-%version%-vc.zip
 unzip32 -o ..\wxWindows-%version%-bc.zip
 unzip32 -o ..\wxWindows-%version%-HTMLHelp.zip
-unzip32 -o ..\extradoc-%version%.zip
+unzip32 -o ..\extradoc.zip
 Rem Need Word file, for Remstar DB classes
 unzip32 -o ..\wxWindows-%version%-Word.zip
 unzip32 -o ..\ogl3-%version%.zip
-unzip32 -o ..\mmedia-%version%.zip
-unzip32 -o ..\stc-%version%.zip
 unzip32 -o ..\jpeg-%version%.zip
 unzip32 -o ..\tiff-%version%.zip
-unzip32 -o ..\wxxrc-%version%.zip
-unzip32 -o ..\contrib-%version%.zip
 unzip32 -o ..\tex2rtf2-%version%.zip
 
 rem Now delete a few files that are unnecessary
@@ -205,11 +167,11 @@ erase /Y configure samples\configure samples\*.in demos\configure demos\*.in con
 erase /Y setup.h.in setup.h_vms
 erase /SY Makefile.in
 erase /Y docs\html\wxbook.htm docs\html\roadmap.htm
-Rem erase /Y contrib\docs\winhelp\mmedia.*
-Rem erase /Y contrib\docs\winhelp\stc.*
-Rem erase /Y contrib\docs\htmlhelp\mmedia.*
-Rem erase /Y contrib\docs\htmlhelp\stc.*
-Rem erase /Y contrib\docs\pdf\*.*
+erase /Y contrib\docs\winhelp\mmedia.*
+erase /Y contrib\docs\winhelp\stc.*
+erase /Y contrib\docs\htmlhelp\mmedia.*
+erase /Y contrib\docs\htmlhelp\stc.*
+erase /Y contrib\docs\pdf\*.*
 erase /sxzy contrib\docs\latex\ogl
 erase /Y src\mingegcs.bat
 erase /Y distrib

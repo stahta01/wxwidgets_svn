@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/font.cpp
+// Name:        font.cpp
 // Purpose:     wxFont class
 // Author:      Julian Smart
 // Modified by:
@@ -23,7 +23,6 @@
 
 #ifdef __VMS
 #pragma message disable nosimpint
-#include "wx/vms_x_fix.h"
 #endif
 #include <Xm/Xm.h>
 #ifdef __VMS
@@ -35,9 +34,9 @@
 #include "wx/font.h"
 #include "wx/gdicmn.h"
 #include "wx/utils.h"       // for wxGetDisplay()
-#include "wx/fontutil.h"    // for wxNativeFontInfo
+#include "wx/fontutil.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
+    IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -186,16 +185,10 @@ wxFontRefData::~wxFontRefData()
 // wxFont
 // ----------------------------------------------------------------------------
 
-wxFont::wxFont(const wxNativeFontInfo& info)
-{
-    Init();
-
-    (void)Create(info.pointSize, info.family, info.style, info.weight,
-                 info.underlined, info.faceName, info.encoding);
-}
-
 void wxFont::Init()
 {
+    if ( wxTheFontList )
+        wxTheFontList->Append(this);
 }
 
 bool wxFont::Create(int pointSize,
@@ -217,6 +210,8 @@ bool wxFont::Create(int pointSize,
 
 wxFont::~wxFont()
 {
+    if ( wxTheFontList )
+        wxTheFontList->DeleteObject(this);
 }
 
 // ----------------------------------------------------------------------------
@@ -408,4 +403,3 @@ WXFontList wxFont::GetFontList(double scale, WXDisplay* display) const
 
     return (f ? f->m_fontList : (WXFontList) 0);
 }
-

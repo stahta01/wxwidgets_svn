@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_FILEDLG
-
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/msgdlg.h"
@@ -195,7 +193,7 @@ wxString wxFileSelectorEx(const wxChar *title,
 
 wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
         const wxString& defaultDir, const wxString& defaultFileName, const wxString& wildCard,
-        long style, const wxPoint& WXUNUSED(pos))
+        long style, const wxPoint& pos)
 {
     m_message = message;
     m_dialogStyle = style;
@@ -331,8 +329,8 @@ int wxFileDialog::ShowModal()
 
     //== Execute FileDialog >>=================================================
 
-    bool success = (m_dialogStyle & wxSAVE ? GetSaveFileName(&of)
-                                           : GetOpenFileName(&of)) != 0;
+    bool success = (m_dialogStyle & wxSAVE) ? (GetSaveFileName(&of) != 0)
+                                            : (GetOpenFileName(&of) != 0);
 
     DWORD errCode = CommDlgExtendedError();
 
@@ -480,23 +478,20 @@ wxString wxDefaultFileSelector(bool load,
                                const wxChar *default_name,
                                wxWindow *parent)
 {
-    wxString prompt;
-    wxString str;
-    if (load)
-        str = _("Load %s file");
-    else
-        str = _("Save %s file");
-    prompt.Printf(str, what);
+  wxString prompt;
+  wxString str;
+  if (load) str = _("Load %s file");
+  else str = _("Save %s file");
+  prompt.Printf(str, what);
 
-    const wxChar *ext = extension;
-    if (*ext == wxT('.'))
-        ext++;
+  const wxChar *ext = extension;
+  if (*ext == wxT('.'))
+      ext++;
 
-    wxString wild;
-    wild.Printf(wxT("*.%s"), ext);
+  wxString wild;
+  wild.Printf(wxT("*.%s"), ext);
 
-    return wxFileSelector(prompt, NULL, default_name, ext, wild,
-                          load ? wxOPEN : wxSAVE, parent);
+  return wxFileSelector (prompt, NULL, default_name, ext, wild, 0, parent);
 }
 
 // Generic file load dialog
@@ -517,5 +512,4 @@ WXDLLEXPORT wxString wxSaveFileSelector(const wxChar *what,
     return wxDefaultFileSelector(FALSE, what, extension, default_name, parent);
 }
 
-#endif // wxUSE_FILEDLG
 

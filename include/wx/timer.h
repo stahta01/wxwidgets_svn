@@ -22,7 +22,7 @@
 #include "wx/longlong.h"
 #include "wx/event.h"
 
-#if wxUSE_GUI && wxUSE_TIMER
+#if wxUSE_GUI
 
 // ----------------------------------------------------------------------------
 // wxTimer
@@ -49,19 +49,23 @@ public:
     void SetOwner(wxEvtHandler *owner, int id = -1)
         { m_owner = owner; m_idTimer = id; }
 
-#ifdef __DARWIN__
-    virtual ~wxTimerBase() { }
-#endif
-
     // working with the timer
     // ----------------------
 
     // start the timer: if milliseconds == -1, use the same value as for the
     // last Start()
-    //
-    // it is now valid to call Start() multiple times: this just restarts the
-    // timer if it is already running
-    virtual bool Start(int milliseconds = -1, bool oneShot = FALSE);
+    virtual bool Start(int milliseconds = -1, bool oneShot = FALSE)
+    {
+        if ( milliseconds != -1 )
+        {
+            m_milli = milliseconds;
+        }
+
+        m_oneShot = oneShot;
+
+        return TRUE;
+    }
+
 
     // stop the timer
     virtual void Stop() = 0;
@@ -109,8 +113,8 @@ protected:
     #include "wx/motif/timer.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/timer.h"
-#elif defined(__WXMGL__)
-    #include "wx/mgl/timer.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/timer.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/timer.h"
 #elif defined(__WXPM__)
@@ -167,9 +171,6 @@ public:
     // accessors
     int GetInterval() const { return m_interval; }
 
-    // implement the base class pure virtual
-    virtual wxEvent *Clone() const { return new wxTimerEvent(*this); }
-
 private:
     int m_interval;
 
@@ -178,16 +179,13 @@ private:
 
 typedef void (wxEvtHandler::*wxTimerEventFunction)(wxTimerEvent&);
 
-#define EVT_TIMER(id, func) \
-    DECLARE_EVENT_TABLE_ENTRY( wxEVT_TIMER, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxTimerEventFunction) & func, NULL),
+#define EVT_TIMER(id, func) { wxEVT_TIMER, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxTimerEventFunction) & func, NULL},
 
-#endif // wxUSE_GUI && wxUSE_TIMER
+#endif // wxUSE_GUI
 
 // ----------------------------------------------------------------------------
 // wxStopWatch: measure time intervals with up to 1ms resolution
 // ----------------------------------------------------------------------------
-
-#if wxUSE_STOPWATCH
 
 class WXDLLEXPORT wxStopWatch
 {
@@ -210,9 +208,6 @@ private:
     long m_pause;         // the time of the last Pause() or 0
 };
 
-#endif // wxUSE_STOPWATCH
-
-#if wxUSE_LONGLONG
 
 // Starts a global timer
 // -- DEPRECATED: use wxStopWatch instead
@@ -221,8 +216,6 @@ void WXDLLEXPORT wxStartTimer();
 // Gets elapsed milliseconds since last wxStartTimer or wxGetElapsedTime
 // -- DEPRECATED: use wxStopWatch instead
 long WXDLLEXPORT wxGetElapsedTime(bool resetTimer = TRUE);
-
-#endif // wxUSE_LONGLONG
 
 // ----------------------------------------------------------------------------
 // global time functions
@@ -234,10 +227,8 @@ extern long WXDLLEXPORT wxGetLocalTime();
 // Get number of seconds since GMT 00:00:00, Jan 1st 1970.
 extern long WXDLLEXPORT wxGetUTCTime();
 
-#if wxUSE_LONGLONG
 // Get number of milliseconds since local time 00:00:00 Jan 1st 1970
 extern wxLongLong WXDLLEXPORT wxGetLocalTimeMillis();
-#endif // wxUSE_LONGLONG
 
 #define wxGetCurrentTime() wxGetLocalTime()
 

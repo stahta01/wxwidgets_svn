@@ -19,6 +19,9 @@
 #endif
 
 #include "wx/defs.h"
+
+#if wxUSE_CONFIG
+
 #include "wx/string.h"
 
 // ----------------------------------------------------------------------------
@@ -40,10 +43,6 @@
 #ifndef wxCONFIG_IMMUTABLE_PREFIX
   #define   wxCONFIG_IMMUTABLE_PREFIX   _T('!')
 #endif
-
-#if wxUSE_CONFIG
-
-#include "wx/string.h"
 
 /// should we use registry instead of configuration files under Windows?
 // (i.e. whether wxConfigBase::Create() will create a wxFileConfig (if it's
@@ -185,15 +184,12 @@ public:
   virtual bool Write(const wxString& key, const wxString& value) = 0;
   virtual bool Write(const wxString& key, long value) = 0;
 
-  // convenience functions
+  // Convenience functions
   virtual bool Write(const wxString& key, double value);
   virtual bool Write(const wxString& key, bool value);
+  virtual bool Write(const wxString& key, const wxChar *text ) ;
 
-  // we have to provide a separate version for C strings as otherwise they
-  // would be converted to bool and not to wxString as expected!
-  virtual bool Write(const wxString& key, const wxChar *value);
-
-  // permanently writes all changes
+    // permanently writes all changes
   virtual bool Flush(bool bCurrentOnly = FALSE) = 0;
 
   // renaming, all functions return FALSE on failure (probably because the new
@@ -303,19 +299,21 @@ private:
 
 #endif // wxUSE_CONFIG
 
+// ----------------------------------------------------------------------------
+// various helper global functions (defined even if !wxUSE_CONFIG)
+// ----------------------------------------------------------------------------
+
 /*
   Replace environment variables ($SOMETHING) with their values. The format is
   $VARNAME or ${VARNAME} where VARNAME contains alphanumeric characters and
   '_' only. '$' must be escaped ('\$') in order to be taken literally.
-*/
-
-WXDLLEXPORT wxString wxExpandEnvVars(const wxString &sz);
+ */
+extern WXDLLEXPORT wxString wxExpandEnvVars(const wxString &sz);
 
 /*
   Split path into parts removing '..' in progress
  */
-WXDLLEXPORT void wxSplitPath(wxArrayString& aParts, const wxChar *sz);
-
+extern WXDLLEXPORT void wxSplitPath(wxArrayString& aParts, const wxChar *sz);
 
 #endif
   // _WX_CONFIG_H_

@@ -231,14 +231,3 @@ int wxSystemSettings::GetSystemMetric(int index)
 	}
 }
 
-bool wxSystemSettings::GetCapability(int index)
-{
-    switch (index)
-    {
-        case wxSYS_CAN_ICONIZE_FRAME: 
-        case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-            return TRUE; break;
-        default:
-            return FALSE;
-    }
-}

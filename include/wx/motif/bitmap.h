@@ -27,7 +27,6 @@ class WXDLLEXPORT wxBitmap;
 class WXDLLEXPORT wxBitmapHandler;
 class WXDLLEXPORT wxIcon;
 class WXDLLEXPORT wxCursor;
-class WXDLLEXPORT wxImage;
 
 // A mask is a mono bitmap used for drawing bitmaps
 // transparently.
@@ -136,7 +135,7 @@ public:
 
   // Copy constructors
   wxBitmap(const wxBitmap& bitmap)
-  { Ref(bitmap); }
+  { Ref(bitmap); if ( wxTheBitmapList ) wxTheBitmapList->AddBitmap(this); }
 
   // Initialize with raw XBM data
   wxBitmap(const char bits[], int width, int height, int depth = 1);
@@ -156,10 +155,6 @@ public:
 
   // If depth is omitted, will create a bitmap compatible with the display
   wxBitmap(int width, int height, int depth = -1);
-
-  // Convert from wxImage:  
-  wxBitmap(const wxImage& image, int depth = -1) { (void)CreateFromImage(image, depth); }
-
   ~wxBitmap();
 
   virtual bool Create(int width, int height, int depth = -1);
@@ -169,8 +164,6 @@ public:
    
   virtual bool LoadFile(const wxString& name, long type = wxBITMAP_TYPE_XPM);
   virtual bool SaveFile(const wxString& name, int type, const wxPalette *cmap = NULL);
-    
-  wxImage ConvertToImage() const;
 
   bool Ok() const { return (M_BITMAPDATA && M_BITMAPDATA->m_ok); }
   int GetWidth() const { return (M_BITMAPDATA ? M_BITMAPDATA->m_width : 0); }
@@ -219,7 +212,6 @@ protected:
 
 protected:
     bool CreateFromXpm(const char **bits);
-    bool CreateFromImage(const wxImage& image, int depth);    
 };
 
 // Creates a bitmap with transparent areas drawn in

@@ -96,8 +96,8 @@ bool MyApp::OnInit()
 
     if ( !m_image.Ok() )
     {
-        wxLogError(wxT("Can't load the test image, please copy it to the ")
-                   wxT("program directory"));
+        wxLogError("Can't load the test image, please copy it to the "
+                   "program directory");
         return FALSE;
     }
 

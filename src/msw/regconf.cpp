@@ -16,13 +16,18 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#ifndef WX_PRECOMP
+  #include  "wx/defs.h"
+  #include  "wx/string.h"
+  #include  "wx/intl.h"
+#endif //WX_PRECOMP
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
   #include  "wx/string.h"
-  #include  "wx/intl.h"
 #endif //WX_PRECOMP
 
 #include "wx/event.h"
@@ -149,7 +154,6 @@ wxRegConfig::wxRegConfig(const wxString& appName, const wxString& vendorName,
   {
     wxLogNull nolog;
     m_keyGlobalRoot.Open();
-    m_keyGlobal.Open();
   }
 }
 
@@ -221,11 +225,7 @@ void wxRegConfig::SetPath(const wxString& strPath)
         {
             strFullPath.reserve(2*m_strPath.length());
 
-            strFullPath << m_strPath;
-            if ( strFullPath.Len() == 0 || 
-                 strFullPath.Last() != wxCONFIG_PATH_SEPARATOR )
-                strFullPath << wxCONFIG_PATH_SEPARATOR; 
-            strFullPath << strPath;
+            strFullPath << m_strPath << wxCONFIG_PATH_SEPARATOR << strPath;
         }
 
         // simplify it: we need to handle ".." here
@@ -476,7 +476,7 @@ bool wxRegConfig::GetNextEntry(wxString& str, long& lIndex) const
   return bOk;
 }
 
-size_t wxRegConfig::GetNumberOfEntries(bool WXUNUSED(bRecursive)) const
+size_t wxRegConfig::GetNumberOfEntries(bool bRecursive) const
 {
   size_t nEntries = 0;
 
@@ -493,7 +493,7 @@ size_t wxRegConfig::GetNumberOfEntries(bool WXUNUSED(bRecursive)) const
   return nEntries;
 }
 
-size_t wxRegConfig::GetNumberOfGroups(bool WXUNUSED(bRecursive)) const
+size_t wxRegConfig::GetNumberOfGroups(bool bRecursive) const
 {
   size_t nGroups = 0;
 
@@ -722,7 +722,7 @@ bool wxRegConfig::RenameGroup(const wxString& oldName, const wxString& newName)
 // ----------------------------------------------------------------------------
 // deleting
 // ----------------------------------------------------------------------------
-bool wxRegConfig::DeleteEntry(const wxString& value, bool WXUNUSED(bGroupIfEmptyAlso))
+bool wxRegConfig::DeleteEntry(const wxString& value, bool bGroupIfEmptyAlso)
 {
   wxConfigPathChanger path(this, value);
 

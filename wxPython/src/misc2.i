@@ -22,16 +22,7 @@
 #include <wx/fontenum.h>
 #include <wx/tipdlg.h>
 #include <wx/process.h>
-
-#if wxUSE_JOYSTICK || defined(__WXMSW__)
 #include <wx/joystick.h>
-#endif
-
-#if wxUSE_WAVE || defined(__WXMSW__)
-#include <wx/wave.h>
-#endif
-
-#include <wx/mimetype.h>
 %}
 
 //----------------------------------------------------------------------
@@ -46,7 +37,6 @@
 %import gdi.i
 %import events.i
 %import streams.i
-%import utils.i
 
 %{
     static wxString wxPyEmptyStr("");
@@ -122,14 +112,13 @@ bool wxColourDisplay();
 int wxDisplayDepth();
 int wxGetDisplayDepth();
 
-void   wxDisplaySize(int* OUTPUT, int* OUTPUT);
+void wxDisplaySize(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySize();
 
-void   wxDisplaySizeMM(int* OUTPUT, int* OUTPUT);
+#ifdef FOR_2_3
+void wxDisplaySizeMM(int* OUTPUT, int* OUTPUT);
 wxSize wxGetDisplaySizeMM();
-
-void   wxClientDisplayRect(int *OUTPUT, int *OUTPUT, int *OUTPUT, int *OUTPUT);
-wxRect wxGetClientDisplayRect();
+#endif
 
 void wxSetCursor(wxCursor& cursor);
 
@@ -142,13 +131,6 @@ wxWindow * wxFindWindowByName(const wxString& name, wxWindow *parent=NULL);
 void wxBeginBusyCursor(wxCursor *cursor = wxHOURGLASS_CURSOR);
 wxWindow * wxGetActiveWindow();
 
-wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt);
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt);
-
-#ifdef __WXMSW__
-bool wxCheckForInterrupt(wxWindow *wnd);
-void wxFlushEvents();
-#endif
 
 //---------------------------------------------------------------------------
 // Resource System
@@ -279,7 +261,7 @@ enum {
 //---------------------------------------------------------------------------
 // wxToolTip
 
-class wxToolTip : public wxObject {
+class wxToolTip {
 public:
     wxToolTip(const wxString &tip);
 
@@ -287,10 +269,18 @@ public:
     wxString GetTip();
     // *** Not in the "public" interface void SetWindow(wxWindow *win);
     wxWindow *GetWindow();
-
-    static void Enable(bool flag);
-    static void SetDelay(long milliseconds);
 };
+
+
+%inline %{
+    void wxToolTip_Enable(bool flag) {
+        wxToolTip::Enable(flag);
+    }
+
+    void wxToolTip_SetDelay(long milliseconds) {
+        wxToolTip::SetDelay(milliseconds);
+    }
+%}
 
 //----------------------------------------------------------------------
 
@@ -347,8 +337,8 @@ IMP_PYCALLBACK_BOOL_STRINGSTRING(wxPyFontEnumerator, wxFontEnumerator, OnFontEnc
 public:
     wxPyFontEnumerator();
     ~wxPyFontEnumerator();
-    void _setCallbackInfo(PyObject* self, PyObject* _class, bool incref);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxFontEnumerator, 0)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxFontEnumerator)"
 
     bool EnumerateFacenames(
         wxFontEncoding encoding = wxFONTENCODING_SYSTEM, // all
@@ -360,12 +350,18 @@ public:
     %addmethods {
         PyObject* GetEncodings() {
             wxArrayString* arr = self->GetEncodings();
-            return wxArrayString2PyList_helper(*arr);
+            PyObject* list = PyList_New(0);
+            for (size_t x=0; x<arr->GetCount(); x++)
+                PyList_Append(list, PyString_FromString((*arr)[x]));
+            return list;
         }
 
         PyObject* GetFacenames() {
             wxArrayString* arr = self->GetFacenames();
-            return wxArrayString2PyList_helper(*arr);
+            PyObject* list = PyList_New(0);
+            for (size_t x=0; x<arr->GetCount(); x++)
+                PyList_Append(list, PyString_FromString((*arr)[x]));
+            return list;
         }
     }
 };
@@ -388,35 +384,10 @@ public:
 
 //----------------------------------------------------------------------
 
-bool wxSafeYield(wxWindow* win=NULL);
 void wxPostEvent(wxEvtHandler *dest, wxEvent& event);
 void wxWakeUpIdle();
 
-
-#ifdef __WXMSW__
-void wxWakeUpMainThread();
-#endif
-
-void wxMutexGuiEnter();
-void wxMutexGuiLeave();
-
-
-class wxMutexGuiLocker  {
-public:
-    wxMutexGuiLocker();
-    ~wxMutexGuiLocker();
-};
-
-
-%inline %{
-    bool wxThread_IsMain() {
-#ifdef WXP_WITH_THREAD
-        return wxThread::IsMain();
-#else
-        return TRUE;
-#endif
-    }
-%}
+bool wxSafeYield(wxWindow* win=NULL);
 
 //----------------------------------------------------------------------
 
@@ -466,24 +437,18 @@ bool wxShowTip(wxWindow *parent, wxTipProvider *tipProvider, bool showAtStartup 
 
 %{
 #include <wx/generic/dragimgg.h>
+static wxPoint wxPyNullPoint;
 %}
 
-%name (wxDragImage) class wxGenericDragImage : public wxObject
+%name (wxDragImage) class wxGenericDragImage
 {
 public:
 
     wxGenericDragImage(const wxBitmap& image,
-                       const wxCursor& cursor = wxNullCursor);
-    %name(wxDragIcon)wxGenericDragImage(const wxIcon& image,
-                                        const wxCursor& cursor = wxNullCursor);
-    %name(wxDragString)wxGenericDragImage(const wxString& str,
-                                          const wxCursor& cursor = wxNullCursor);
-    %name(wxDragTreeItem)wxGenericDragImage(const wxTreeCtrl& treeCtrl, wxTreeItemId& id);
-    %name(wxDragListItem)wxGenericDragImage(const wxListCtrl& listCtrl, long id);
-
+                       const wxCursor& cursor = wxNullCursor,
+                       const wxPoint& hotspot = wxPyNullPoint);
     ~wxGenericDragImage();
 
-    void SetBackingBitmap(wxBitmap* bitmap);
     bool BeginDrag(const wxPoint& hotspot, wxWindow* window,
                    bool fullScreen = FALSE, wxRect* rect = NULL);
 
@@ -501,9 +466,49 @@ public:
 };
 
 
+// Alternate Constructors
+%new wxGenericDragImage* wxDragIcon(const wxIcon& image,
+                                   const wxCursor& cursor = wxNullCursor,
+                                   const wxPoint& hotspot = wxPyNullPoint);
+
+%new wxGenericDragImage* wxDragString(const wxString& str,
+                                      const wxCursor& cursor = wxNullCursor,
+                                      const wxPoint& hotspot = wxPyNullPoint);
+
+%new wxGenericDragImage* wxDragTreeItem(const wxTreeCtrl& treeCtrl, wxTreeItemId& id);
+
+%new wxGenericDragImage* wxDragListItem(const wxListCtrl& listCtrl, long id);
+
+
+%{
+
+wxGenericDragImage* wxDragIcon(const wxIcon& image,
+                               const wxCursor& cursor,
+                               const wxPoint& hotspot) {
+    return new wxGenericDragImage(image, cursor, hotspot);
+}
+
+wxGenericDragImage* wxDragString(const wxString& str,
+                                 const wxCursor& cursor,
+                                 const wxPoint& hotspot) {
+    return new wxGenericDragImage(str, cursor, hotspot);
+}
+
+wxGenericDragImage* wxDragTreeItem(const wxTreeCtrl& treeCtrl, wxTreeItemId& id) {
+    return new wxGenericDragImage(treeCtrl, id);
+}
+
+wxGenericDragImage* wxDragListItem(const wxListCtrl& listCtrl, long id) {
+    return new wxGenericDragImage(listCtrl, id);
+}
+
+%}
+
+
+
 //----------------------------------------------------------------------
 
-class wxPyTimer : public wxObject {
+class wxPyTimer {
 public:
     wxPyTimer(PyObject* notify);
     ~wxPyTimer();
@@ -514,21 +519,6 @@ public:
     void Start(int milliseconds=-1, int oneShot=FALSE);
     void Stop();
 };
-
-
-class wxStopWatch
-{
-public:
-    // ctor starts the stop watch
-    wxStopWatch();
-    void Start(long t = 0);
-    void Pause();
-    void Resume();
-
-    // get elapsed time since the last Start() or Pause() in milliseconds
-    long Time() const;
-};
-
 
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
@@ -574,24 +564,12 @@ public:
     static void SetTraceMask(wxTraceMask ulMask);
     static void AddTraceMask(const wxString& str);
     static void RemoveTraceMask(const wxString& str);
-    static void ClearTraceMasks();
-
-    static void SetTimestamp(const wxChar *ts);
-    static const wxChar *GetTimestamp();
 
     bool GetVerbose() const { return m_bVerbose; }
 
     static wxTraceMask GetTraceMask();
     static bool IsAllowedTraceMask(const char *mask);
 
-    // static void TimeStamp(wxString *str);
-    %addmethods {
-        wxString TimeStamp() {
-            wxString msg;
-            wxLog::TimeStamp(&msg);
-            return msg;
-        }
-    }
 };
 
 
@@ -639,17 +617,6 @@ public:
 };
 
 
-class wxLogChain : public wxLog
-{
-public:
-    wxLogChain(wxLog *logger);
-    void SetLog(wxLog *logger);
-    void PassMessages(bool bDoPass);
-    bool IsPassingMessages();
-    wxLog *GetOldLog();
-};
-
-
 unsigned long wxSysErrorCode();
 const char* wxSysErrorMsg(unsigned long nErrCode = 0);
 void wxLogFatalError(const char *szFormat);
@@ -663,55 +630,8 @@ void wxLogStatus(const char *szFormat);
 void wxLogSysError(const char *szFormat);
 
 
-%{
-// A Log class that can be derived from in wxPython
-class wxPyLog : public wxLog {
-public:
-    wxPyLog() : wxLog() {}
-
-    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t) {
-        bool found;
-        wxPyTState* state = wxPyBeginBlockThreads();
-        if ((found = wxPyCBH_findCallback(m_myInst, "DoLog")))
-            wxPyCBH_callCallback(m_myInst, Py_BuildValue("(isi)", level, szString, t));
-        wxPyEndBlockThreads(state);
-        if (! found)
-            wxLog::DoLog(level, szString, t);
-    }
-
-    virtual void DoLogString(const wxChar *szString, time_t t) {
-        bool found;
-        wxPyTState* state = wxPyBeginBlockThreads();
-        if ((found = wxPyCBH_findCallback(m_myInst, "DoLogString")))
-            wxPyCBH_callCallback(m_myInst, Py_BuildValue("(si)", szString, t));
-        wxPyEndBlockThreads(state);
-        if (! found)
-            wxLog::DoLogString(szString, t);
-    }
-
-    PYPRIVATE;
-};
-%}
-
-// Now tell SWIG about it
-class wxPyLog : public wxLog {
-public:
-    wxPyLog();
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxPyLog)"
-    %addmethods { void Destroy() { delete self; } }
-
-};
-
 
 //----------------------------------------------------------------------
-
-
-enum {
-    /* event type */
-    wxEVT_END_PROCESS
-};
-
 
 class wxProcessEvent : public wxEvent {
 public:
@@ -738,7 +658,6 @@ public:
 };
 
 IMP_PYCALLBACK_VOID_INTINT( wxPyProcess, wxProcess, OnTerminate);
-
 %}
 
 
@@ -747,8 +666,8 @@ public:
     wxPyProcess(wxEvtHandler *parent = NULL, int id = -1);
     %addmethods { void Destroy() { delete self; } }
 
-    void _setCallbackInfo(PyObject* self, PyObject* _class);
-    %pragma(python) addtomethod = "__init__:self._setCallbackInfo(self, wxProcess)"
+    void _setSelf(PyObject* self, PyObject* _class);
+    %pragma(python) addtomethod = "__init__:self._setSelf(self, wxProcess)"
 
     void base_OnTerminate(int pid, int status);
 
@@ -771,71 +690,10 @@ long wxExecute(const wxString& command,
 
 //----------------------------------------------------------------------
 
-%{
-#if !wxUSE_JOYSTICK && !defined(__WXMSW__)
-// A C++ stub class for wxJoystick for platforms that don't have it.
-class wxJoystick : public wxObject {
-public:
-    wxJoystick(int joystick = wxJOYSTICK1) {
-        wxPyTState* state = wxPyBeginBlockThreads();
-        PyErr_SetString(PyExc_NotImplementedError, "wxJoystick is not available on this platform.");
-        wxPyEndBlockThreads(state);
-    }
-    wxPoint GetPosition() { return wxPoint(-1,-1); }
-    int GetZPosition() { return -1; }
-    int GetButtonState() { return -1; }
-    int GetPOVPosition() { return -1; }
-    int GetPOVCTSPosition() { return -1; }
-    int GetRudderPosition() { return -1; }
-    int GetUPosition() { return -1; }
-    int GetVPosition() { return -1; }
-    int GetMovementThreshold() { return -1; }
-    void SetMovementThreshold(int threshold) {}
-
-    bool IsOk(void) { return FALSE; }
-    int GetNumberJoysticks() { return -1; }
-    int GetManufacturerId() { return -1; }
-    int GetProductId() { return -1; }
-    wxString GetProductName() { return ""; }
-    int GetXMin() { return -1; }
-    int GetYMin() { return -1; }
-    int GetZMin() { return -1; }
-    int GetXMax() { return -1; }
-    int GetYMax() { return -1; }
-    int GetZMax() { return -1; }
-    int GetNumberButtons() { return -1; }
-    int GetNumberAxes() { return -1; }
-    int GetMaxButtons() { return -1; }
-    int GetMaxAxes() { return -1; }
-    int GetPollingMin() { return -1; }
-    int GetPollingMax() { return -1; }
-    int GetRudderMin() { return -1; }
-    int GetRudderMax() { return -1; }
-    int GetUMin() { return -1; }
-    int GetUMax() { return -1; }
-    int GetVMin() { return -1; }
-    int GetVMax() { return -1; }
-
-    bool HasRudder() { return FALSE; }
-    bool HasZ() { return FALSE; }
-    bool HasU() { return FALSE; }
-    bool HasV() { return FALSE; }
-    bool HasPOV() { return FALSE; }
-    bool HasPOV4Dir() { return FALSE; }
-    bool HasPOVCTS() { return FALSE; }
-
-    bool SetCapture(wxWindow* win, int pollingFreq = 0) { return FALSE; }
-    bool ReleaseCapture() { return FALSE; }
-};
-#endif
-%}
-
-
-class wxJoystick : public wxObject {
+#ifdef __WXMSW__
+class wxJoystick {
 public:
     wxJoystick(int joystick = wxJOYSTICK1);
-    ~wxJoystick();
-
     wxPoint GetPosition();
     int GetZPosition();
     int GetButtonState();
@@ -882,451 +740,8 @@ public:
     bool SetCapture(wxWindow* win, int pollingFreq = 0);
     bool ReleaseCapture();
 };
-
-//----------------------------------------------------------------------
-
-%{
-#if !wxUSE_WAVE
-// A C++ stub class for wxWave for platforms that don't have it.
-class wxWave : public wxObject
-{
-public:
-    wxWave(const wxString& fileName, bool isResource = FALSE) {
-        wxPyTState* state = wxPyBeginBlockThreads();
-        PyErr_SetString(PyExc_NotImplementedError, "wxWave is not available on this platform.");
-        wxPyEndBlockThreads(state);
-    }
-    wxWave(int size, const wxByte* data) {
-        wxPyTState* state = wxPyBeginBlockThreads();
-        PyErr_SetString(PyExc_NotImplementedError, "wxWave is not available on this platform.");
-        wxPyEndBlockThreads(state);
-    }
-
-    ~wxWave() {}
-
-    bool  IsOk() const { return FALSE; }
-    bool  Play(bool async = TRUE, bool looped = FALSE) const { return FALSE; }
-};
-
 #endif
-%}
-
-class wxWave : public wxObject
-{
-public:
-  wxWave(const wxString& fileName, bool isResource = FALSE);
-  ~wxWave();
-
-  bool  IsOk() const;
-  bool  Play(bool async = TRUE, bool looped = FALSE) const;
-};
-
-%new wxWave* wxWaveData(const wxString& data);
-%{ // Implementations of some alternate "constructors"
-    wxWave* wxWaveData(const wxString& data) {
-        return new wxWave(data.Len(), (wxByte*)data.c_str());
-    }
-%}
-
 
 //----------------------------------------------------------------------
-
-enum wxMailcapStyle
-{
-    wxMAILCAP_STANDARD = 1,
-    wxMAILCAP_NETSCAPE = 2,
-    wxMAILCAP_KDE = 4,
-    wxMAILCAP_GNOME = 8,
-
-    wxMAILCAP_ALL = 15
-};
-
-
-
-class wxFileTypeInfo
-{
-public:
-    // ctors
-        // a normal item
-    wxFileTypeInfo(const char *mimeType,
-                   const char *openCmd,
-                   const char *printCmd,
-                   const char *desc);
-
-
-        // the array elements correspond to the parameters of the ctor above in
-        // the same order
-    %name(wxFileTypeInfoSequence)wxFileTypeInfo(const wxArrayString& sArray);
-
-        // invalid item - use this to terminate the array passed to
-        // wxMimeTypesManager::AddFallbacks
-    %name(wxNullFileTypeInfo)wxFileTypeInfo();
-
-
-    // test if this object can be used
-    bool IsValid() const;
-
-    // setters
-        // set the icon info
-    void SetIcon(const wxString& iconFile, int iconIndex = 0);
-
-        // set the short desc
-    void SetShortDesc(const wxString& shortDesc);
-
-    // accessors
-        // get the MIME type
-    const wxString& GetMimeType() const;
-        // get the open command
-    const wxString& GetOpenCommand() const;
-        // get the print command
-    const wxString& GetPrintCommand() const;
-        // get the short description (only used under Win32 so far)
-    const wxString& GetShortDesc() const;
-        // get the long, user visible description
-    const wxString& GetDescription() const;
-
-
-        // get the array of all extensions
-    //const wxArrayString& GetExtensions() const;
-    %addmethods {
-        PyObject* GetExtensions() {
-            wxArrayString& arr = (wxArrayString&)self->GetExtensions();
-            return wxArrayString2PyList_helper(arr);
-        }
-    }
-
-    int GetExtensionsCount() const;
-
-    // get the icon info
-    const wxString& GetIconFile() const;
-    int GetIconIndex() const;
-};
-
-
-
-
-class wxFileType
-{
-public:
-
-    // TODO: Make a wxPyMessageParameters with virtual GetParamValue...
-
-    // An object of this class must be passed to Get{Open|Print}Command. The
-    // default implementation is trivial and doesn't know anything at all about
-    // parameters, only filename and MIME type are used (so it's probably ok for
-    // Windows where %{param} is not used anyhow)
-    class MessageParameters
-    {
-    public:
-        // ctors
-        MessageParameters(const wxString& filename=wxPyEmptyStr,
-                          const wxString& mimetype=wxPyEmptyStr);
-
-        // accessors (called by GetOpenCommand)
-            // filename
-        const wxString& GetFileName() const;
-            // mime type
-        const wxString& GetMimeType() const;;
-
-        // override this function in derived class
-        virtual wxString GetParamValue(const wxString& name) const;
-
-        // virtual dtor as in any base class
-        virtual ~MessageParameters();
-    };
-
-
-    // ctor from static data
-    wxFileType(const wxFileTypeInfo& ftInfo);
-
-    // return the MIME type for this file type
-    %addmethods {
-        PyObject* GetMimeType() {
-            wxString str;
-            if (self->GetMimeType(&str))
-                return PyString_FromString(str.c_str());
-            else
-                RETURN_NONE();
-        }
-        PyObject* GetMimeTypes() {
-            wxArrayString arr;
-            if (self->GetMimeTypes(arr))
-                return wxArrayString2PyList_helper(arr);
-            else
-                RETURN_NONE();
-        }
-    }
-
-
-    // Get all extensions associated with this file type
-    %addmethods {
-        PyObject* GetExtensions() {
-            wxArrayString arr;
-            if (self->GetExtensions(arr))
-                return wxArrayString2PyList_helper(arr);
-            else
-                RETURN_NONE();
-        }
-    }
-
-
-    %addmethods {
-        // Get the icon corresponding to this file type
-        %new wxIcon* GetIcon() {
-            wxIcon icon;
-            if (self->GetIcon(&icon))
-                return new wxIcon(icon);
-            else
-                return NULL;
-        }
-
-        // Get the icon corresponding to this file type, the name of the file
-        // where this icon resides, and its index in this file if applicable.
-        PyObject* GetIconInfo() {
-            wxIcon icon;
-            wxString iconFile;
-            int iconIndex;
-            if (self->GetIcon(&icon, &iconFile, &iconIndex)) {
-                wxPyTState* state = wxPyBeginBlockThreads();
-                PyObject* tuple = PyTuple_New(3);
-                PyTuple_SetItem(tuple, 0, wxPyConstructObject(new wxIcon(icon),
-                                                              "wxIcon", TRUE));
-                PyTuple_SetItem(tuple, 1, PyString_FromString(iconFile.c_str()));
-                PyTuple_SetItem(tuple, 2, PyInt_FromLong(iconIndex));
-                wxPyEndBlockThreads(state);
-                return tuple;
-            }
-            else
-                RETURN_NONE();
-        }
-    }
-
-    %addmethods {
-        // get a brief file type description ("*.txt" => "text document")
-        PyObject* GetDescription() {
-            wxString str;
-            if (self->GetDescription(&str))
-                return PyString_FromString(str.c_str());
-            else
-                RETURN_NONE();
-        }
-    }
-
-
-    // get the command to open/execute the file of given type
-    %addmethods {
-        PyObject* GetOpenCommand(const wxString& filename,
-                                 const wxString& mimetype=wxPyEmptyStr) {
-            wxString str;
-            if (self->GetOpenCommand(&str, wxFileType::MessageParameters(filename, mimetype)))
-                return PyString_FromString(str.c_str());
-            else
-                RETURN_NONE();
-        }
-    }
-
-
-    // get the command to print the file of given type
-    %addmethods {
-        PyObject* GetPrintCommand(const wxString& filename,
-                                  const wxString& mimetype=wxPyEmptyStr) {
-            wxString str;
-            if (self->GetPrintCommand(&str, wxFileType::MessageParameters(filename, mimetype)))
-                return PyString_FromString(str.c_str());
-            else
-                RETURN_NONE();
-        }
-    }
-
-
-    // Get all commands defined for this file type
-    %addmethods {
-        PyObject* GetAllCommands(const wxString& filename,
-                                 const wxString& mimetype=wxPyEmptyStr) {
-            wxArrayString verbs;
-            wxArrayString commands;
-            if (self->GetAllCommands(&verbs, &commands,
-                                     wxFileType::MessageParameters(filename, mimetype))) {
-                wxPyTState* state = wxPyBeginBlockThreads();
-                PyObject* tuple = PyTuple_New(2);
-                PyTuple_SetItem(tuple, 0, wxArrayString2PyList_helper(verbs));
-                PyTuple_SetItem(tuple, 1, wxArrayString2PyList_helper(commands));
-                wxPyEndBlockThreads(state);
-                return tuple;
-            }
-            else
-                RETURN_NONE();
-        }
-    }
-
-
-    // set an arbitrary command, ask confirmation if it already exists and
-    // overwriteprompt is TRUE
-    bool SetCommand(const wxString& cmd, const wxString& verb,
-                    bool overwriteprompt = TRUE);
-
-    bool SetDefaultIcon(const wxString& cmd = wxEmptyString, int index = 0);
-
-
-    // remove the association for this filetype from the system MIME database:
-    // notice that it will only work if the association is defined in the user
-    // file/registry part, we will never modify the system-wide settings
-    bool Unassociate();
-
-    // operations
-        // expand a string in the format of GetOpenCommand (which may contain
-        // '%s' and '%t' format specificators for the file name and mime type
-        // and %{param} constructions).
-    static wxString ExpandCommand(const wxString& command,
-                                  const MessageParameters& params);
-
-    // dtor (not virtual, shouldn't be derived from)
-    ~wxFileType();
-
-};
-
-
-
-
-class wxMimeTypesManager
-{
-public:
-    // static helper functions
-    // -----------------------
-
-        // check if the given MIME type is the same as the other one: the
-        // second argument may contain wildcards ('*'), but not the first. If
-        // the types are equal or if the mimeType matches wildcard the function
-        // returns TRUE, otherwise it returns FALSE
-    static bool IsOfType(const wxString& mimeType, const wxString& wildcard);
-
-    // ctor
-    wxMimeTypesManager();
-
-    // loads data from standard files according to the mailcap styles
-    // specified: this is a bitwise OR of wxMailcapStyle values
-    //
-    // use the extraDir parameter if you want to look for files in another
-    // directory
-    void Initialize(int mailcapStyle = wxMAILCAP_STANDARD,
-                    const wxString& extraDir = wxEmptyString);
-
-    // and this function clears all the data from the manager
-    void ClearData();
-
-    // Database lookup: all functions return a pointer to wxFileType object
-    // whose methods may be used to query it for the information you're
-    // interested in. If the return value is !NULL, caller is responsible for
-    // deleting it.
-    // get file type from file extension
-    %new wxFileType *GetFileTypeFromExtension(const wxString& ext);
-
-    // get file type from MIME type (in format <category>/<format>)
-    %new wxFileType *GetFileTypeFromMimeType(const wxString& mimeType);
-
-    // other operations: return TRUE if there were no errors or FALSE if there
-    // were some unreckognized entries (the good entries are always read anyhow)
-    //
-
-        // read in additional file (the standard ones are read automatically)
-        // in mailcap format (see mimetype.cpp for description)
-        //
-        // 'fallback' parameter may be set to TRUE to avoid overriding the
-        // settings from other, previously parsed, files by this one: normally,
-        // the files read most recently would override the older files, but with
-        // fallback == TRUE this won't happen
-    bool ReadMailcap(const wxString& filename, bool fallback = FALSE);
-
-    // read in additional file in mime.types format
-    bool ReadMimeTypes(const wxString& filename);
-
-    // enumerate all known MIME types
-    %addmethods {
-        PyObject* EnumAllFileTypes() {
-            wxArrayString arr;
-            self->EnumAllFileTypes(arr);
-            return wxArrayString2PyList_helper(arr);
-        }
-    }
-
-    // these functions can be used to provide default values for some of the
-    // MIME types inside the program itself (you may also use
-    // ReadMailcap(filenameWithDefaultTypes, TRUE /* use as fallback */) to
-    // achieve the same goal, but this requires having this info in a file).
-    //
-    void AddFallback(const wxFileTypeInfo& ft);
-
-
-    // create or remove associations
-
-        // create a new association using the fields of wxFileTypeInfo (at least
-        // the MIME type and the extension should be set)
-        // if the other fields are empty, the existing values should be left alone
-    %new wxFileType *Associate(const wxFileTypeInfo& ftInfo);
-
-        // undo Associate()
-    bool Unassociate(wxFileType *ft) ;
-
-    // dtor (not virtual, shouldn't be derived from)
-    ~wxMimeTypesManager();
-};
-
-
-%readonly
-%{
-#if 0
-%}
-extern wxMimeTypesManager* wxTheMimeTypesManager;
-%{
-#endif
-%}
-%readwrite
-
-//----------------------------------------------------------------------
-
-%{
-#include <wx/docview.h>
-%}
-
-class wxFileHistory : public wxObject
-{
-public:
-    wxFileHistory(int maxFiles = 9);
-    ~wxFileHistory();
-
-    // Operations
-    void AddFileToHistory(const wxString& file);
-    void RemoveFileFromHistory(int i);
-    int GetMaxFiles() const;
-    void UseMenu(wxMenu *menu);
-
-    // Remove menu from the list (MDI child may be closing)
-    void RemoveMenu(wxMenu *menu);
-
-    void Load(wxConfigBase& config);
-    void Save(wxConfigBase& config);
-
-    void AddFilesToMenu();
-    %name(AddFilesToSingleMenu)void AddFilesToMenu(wxMenu* menu);
-
-    // Accessors
-    wxString GetHistoryFile(int i) const;
-
-    // A synonym for GetNoHistoryFiles
-    int GetCount() const;
-    int GetNoHistoryFiles() const;
-
-};
-
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-
-
-%init %{
-    wxPyPtrTypeMap_Add("wxFontEnumerator", "wxPyFontEnumerator");
-    wxPyPtrTypeMap_Add("wxDragImage", "wxGenericDragImage");
-    wxPyPtrTypeMap_Add("wxProcess", "wxPyProcess");
-%}
-
 //----------------------------------------------------------------------
 

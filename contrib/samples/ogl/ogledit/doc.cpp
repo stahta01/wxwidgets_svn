@@ -14,7 +14,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
 #pragma hdrstop
@@ -34,7 +34,7 @@
 #include "view.h"
 
 #if wxUSE_STD_IOSTREAM
-#include <ioswrap.h>
+#include <iostream.h>
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(DiagramDocument, wxDocument)
@@ -54,7 +54,7 @@ bool DiagramDocument::OnCloseDocument(void)
 }
 
 #if wxUSE_STD_IOSTREAM
-wxSTD ostream& DiagramDocument::SaveObject(wxSTD ostream& stream)
+ostream& DiagramDocument::SaveObject(ostream& stream)
 {
   wxDocument::SaveObject(stream);
   
@@ -69,7 +69,7 @@ wxSTD ostream& DiagramDocument::SaveObject(wxSTD ostream& stream)
   return stream;
 }
 
-wxSTD istream& DiagramDocument::LoadObject(wxSTD istream& stream)
+istream& DiagramDocument::LoadObject(istream& stream)
 {
   wxDocument::LoadObject(stream);
 

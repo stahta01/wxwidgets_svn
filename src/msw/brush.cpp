@@ -58,10 +58,14 @@ wxBrushRefData::~wxBrushRefData(void)
 // Brushes
 wxBrush::wxBrush(void)
 {
+  if ( wxTheBrushList )
+    wxTheBrushList->AddBrush(this);
 }
 
 wxBrush::~wxBrush()
 {
+    if (wxTheBrushList)
+        wxTheBrushList->RemoveBrush(this);
 }
 
 wxBrush::wxBrush(const wxColour& col, int Style)
@@ -74,6 +78,8 @@ wxBrush::wxBrush(const wxColour& col, int Style)
 
   RealizeResource();
 
+  if ( wxTheBrushList )
+    wxTheBrushList->AddBrush(this);
 }
 
 wxBrush::wxBrush(const wxBitmap& stipple)
@@ -90,6 +96,8 @@ wxBrush::wxBrush(const wxBitmap& stipple)
 
   RealizeResource();
 
+  if ( wxTheBrushList )
+    wxTheBrushList->AddBrush(this);
 }
 
 bool wxBrush::RealizeResource(void)
@@ -119,7 +127,6 @@ bool wxBrush::RealizeResource(void)
                       // - could choose white always for a quick solution
       break;
 ***/
-#ifndef __WXMICROWIN__
       case wxBDIAGONAL_HATCH:
         M_BRUSHDATA->m_hBrush = (WXHBRUSH) CreateHatchBrush(HS_BDIAGONAL,ms_colour) ;
         break ;
@@ -150,7 +157,6 @@ bool wxBrush::RealizeResource(void)
         else
           M_BRUSHDATA->m_hBrush = (WXHBRUSH) CreateSolidBrush(ms_colour) ;
         break ;
-#endif
       case wxSOLID:
       default:
         M_BRUSHDATA->m_hBrush = (WXHBRUSH) CreateSolidBrush(ms_colour) ;

@@ -16,8 +16,6 @@
 #pragma interface "wave.h"
 #endif
 
-#if wxUSE_WAVE
-
 #include "wx/object.h"
 
 class WXDLLEXPORT wxWave : public wxObject
@@ -45,6 +43,6 @@ private:
   int   m_waveLength;
   bool  m_isResource;
 };
-#endif
+
 #endif
 

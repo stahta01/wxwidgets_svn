@@ -34,63 +34,38 @@ elif not haveOpenGL:
         dlg.Destroy()
 
 
-
-
 else:
-    buttonDefs = {
-        wxNewId() : ('CubeCanvas',      'Cube'),
-        wxNewId() : ('ConeCanvas',      'Cone'),
-        }
-
-    class ButtonPanel(wxPanel):
-        def __init__(self, parent, log):
-            wxPanel.__init__(self, parent, -1)
-            self.log = log
-
-            box = wxBoxSizer(wxVERTICAL)
-            box.Add(20, 30)
-            keys = buttonDefs.keys()
-            keys.sort()
-            for k in keys:
-                text = buttonDefs[k][1]
-                btn = wxButton(self, k, text)
-                box.Add(btn, 0, wxALIGN_CENTER|wxALL, 15)
-                EVT_BUTTON(self, k, self.OnButton)
-
-            self.SetAutoLayout(true)
-            self.SetSizer(box)
-
-        def OnButton(self, evt):
-            canvasClassName = buttonDefs[evt.GetId()][0]
-            canvasClass = eval(canvasClassName)
-            frame = wxFrame(None, -1, canvasClassName, size=(400,400))
-            canvas = canvasClass(frame)
-            frame.Show(true)
-
-
-
     def runTest(frame, nb, log):
-        win = ButtonPanel(nb, log)
-        return win
+        win = wxFrame(frame, -1, "GL Demos", wxDefaultPosition, wxSize(300,300))
+        CubeCanvas(win)
+        #MySplitter(win)
+        frame.otherWin = win
+        win.Show(true)
+        return None
 
 
-
-    class MyCanvasBase(wxGLCanvas):
+    class MySplitter(wxSplitterWindow):
         def __init__(self, parent):
-            wxGLCanvas.__init__(self, parent, -1)
-            self.init = false
-            # initial mouse position
-            self.lastx = self.x = 30
-            self.lasty = self.y = 30
+            wxSplitterWindow.__init__(self, parent, -1)
+            cube = CubeCanvas(self)
+            cone = ConeCanvas(self)
+
+            self.SplitVertically(cube, cone)
+            self.SetSashPosition(300)
+
+
+
+    class CubeCanvas(wxGLCanvas):
+        def __init__(self, parent):
+            wxGLCanvas.__init__(self, parent, -1) #,
+                                #attribList=[GL_RED_BITS, 4, GL_DOUBLEBUFFER] )
             EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
             EVT_SIZE(self, self.OnSize)
             EVT_PAINT(self, self.OnPaint)
-            #EVT_LEFT_DOWN(self, self.OnMouseDown)  # needs fixing...
-            #EVT_LEFT_UP(self, self.OnMouseUp)
-            #EVT_MOTION(self, self.OnMouseMotion)
+            self.init = false
 
         def OnEraseBackground(self, event):
-            pass # Do nothing, to avoid flashing on MSW.
+            pass # Do nothing, to avoid flashing.
 
         def OnSize(self, event):
             size = self.GetClientSize()
@@ -98,49 +73,16 @@ else:
                 self.SetCurrent()
                 glViewport(0, 0, size.width, size.height)
 
+
         def OnPaint(self, event):
             dc = wxPaintDC(self)
+
             self.SetCurrent()
+
             if not self.init:
                 self.InitGL()
                 self.init = true
-            self.OnDraw()
 
-        def OnMouseDown(self, evt):
-            self.CaptureMouse()
-
-        def OnMouseUp(self, evt):
-            self.ReleaseMouse()
-
-        def OnMouseMotion(self, evt):
-            if evt.Dragging() and evt.LeftIsDown():
-                self.x, self.y = self.lastx, self.lasty
-                self.x, self.y = evt.GetPosition()
-                self.Refresh()
-
-
-
-
-    class CubeCanvas(MyCanvasBase):
-        def InitGL(self):
-            # set viewing projection
-            glMatrixMode(GL_PROJECTION);
-            glFrustum(-0.5, 0.5, -0.5, 0.5, 1.0, 3.0);
-
-            # position viewer
-            glMatrixMode(GL_MODELVIEW);
-            glTranslatef(0.0, 0.0, -2.0);
-
-            # position object
-            glRotatef(self.y, 1.0, 0.0, 0.0);
-            glRotatef(self.x, 0.0, 1.0, 0.0);
-
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_LIGHTING);
-            glEnable(GL_LIGHT0);
-
-
-        def OnDraw(self):
             # clear color and depth buffers
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -183,17 +125,46 @@ else:
             glVertex3f(-0.5, 0.5,-0.5)
             glEnd()
 
-            glRotatef(self.lasty - self.y, 1.0, 0.0, 0.0);
-            glRotatef(self.lastx - self.x, 0.0, 1.0, 0.0);
-
             self.SwapBuffers()
 
 
+        def InitGL(self):
+            # set viewing projection
+            glMatrixMode(GL_PROJECTION);
+            glFrustum(-0.5, 0.5, -0.5, 0.5, 1.0, 3.0);
+
+            # position viewer
+            glMatrixMode(GL_MODELVIEW);
+            glTranslatef(0.0, 0.0, -2.0);
+
+            # position object
+            glRotatef(30.0, 1.0, 0.0, 0.0);
+            glRotatef(30.0, 0.0, 1.0, 0.0);
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_LIGHTING);
+            glEnable(GL_LIGHT0);
 
 
 
-    class ConeCanvas(MyCanvasBase):
-        def InitGL( self ):
+    class ConeCanvas(wxGLCanvas):
+        def __init__(self, parent):
+            wxGLCanvas.__init__(self, parent, -1)
+            EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
+            EVT_SIZE(self, self.OnSize)
+            EVT_PAINT(self, self.OnPaint)
+            self.init = false
+
+        def OnEraseBackground(self, event):
+            pass # Do nothing, to avoid flashing.
+
+        def OnSize(self, event):
+            size = self.GetClientSize()
+            if self.GetContext():
+                self.SetCurrent()
+                glViewport(0, 0, size.width, size.height)
+
+        def GLInit( self ):
             glMatrixMode(GL_PROJECTION);
             # camera frustrum setup
             glFrustum(-0.5, 0.5, -0.5, 0.5, 1.0, 3.0);
@@ -213,7 +184,14 @@ else:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 
-        def OnDraw(self):
+        def OnPaint( self, event ):
+            dc = wxPaintDC(self)
+            if not self.init:
+                self.GLInit()
+                self.init = true
+
+            ### Tell system to use _this_ glcanvas for all commands
+            self.SetCurrent()
             # clear color and depth buffers
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             # position viewer
@@ -225,14 +203,13 @@ else:
             glRotate(30.0, 1.0, 0.0, 0.0);
             glRotate(30.0, 0.0, 1.0, 0.0);
 
+            ### From cone.py
             glTranslate(0, -1, 0)
             glRotate(250, 1, 0, 0)
             glutSolidCone(1, 2, 50, 10)
             glPopMatrix()
             # push into visible buffer
             self.SwapBuffers()
-
-
 
 
 #----------------------------------------------------------------------
@@ -256,7 +233,7 @@ overview = """\
 def _test():
     class MyApp(wxApp):
         def OnInit(self):
-            frame = wxFrame(None, -1, "GL Demos", wxDefaultPosition, wxSize(600,300))
+            frame = wxFrame(NULL, -1, "GL Demos", wxDefaultPosition, wxSize(600,300))
             #win = ConeCanvas(frame)
             MySplitter(frame)
             frame.Show(TRUE)

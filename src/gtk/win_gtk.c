@@ -9,11 +9,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////// */
 
-#ifdef VMS
-#define XCheckIfEvent XCHECKIFEVENT
+#ifdef __VMS
+#define gtk_widget_get_child_requisition gtk_widget_get_child_requisitio
+#define gtk_marshal_NONE__POINTER_POINTER gtk_marshal_NONE__POINTER_POINT
 #endif
 
-#include "wx/setup.h"
 #include "wx/gtk/win_gtk.h"
 #include "gtk/gtksignal.h"
 #include "gtk/gtkprivate.h"
@@ -160,12 +160,7 @@ gtk_pizza_class_init (GtkPizzaClass *klass)
     widget_class->set_scroll_adjustments_signal =
     gtk_signal_new ("set_scroll_adjustments",
                     GTK_RUN_LAST,
-
-#ifdef __WXGTK20__
-                    GTK_CLASS_TYPE(object_class),
-#else
                     object_class->type,
-#endif
                     GTK_SIGNAL_OFFSET (GtkPizzaClass, set_scroll_adjustments),
                     gtk_marshal_NONE__POINTER_POINTER,
                     GTK_TYPE_NONE, 2, GTK_TYPE_ADJUSTMENT, GTK_TYPE_ADJUSTMENT);
@@ -190,7 +185,7 @@ gtk_pizza_init (GtkPizza *pizza)
     pizza->height = 20;
 
     pizza->bin_window = NULL;
-
+    
     pizza->xoffset = 0;
     pizza->yoffset = 0;
 
@@ -251,7 +246,7 @@ gtk_pizza_set_clear (GtkPizza  *pizza,
     pizza->clear_on_draw = clear;
 }
 
-void
+void       
 gtk_pizza_set_filter (GtkPizza  *pizza,
                       gboolean   use)
 {
@@ -259,9 +254,9 @@ gtk_pizza_set_filter (GtkPizza  *pizza,
     g_return_if_fail (GTK_IS_PIZZA (pizza));
 
     pizza->use_filter = use;
-}
-
-void
+}	
+					
+void       
 gtk_pizza_set_external (GtkPizza  *pizza,
                         gboolean   expose)
 {
@@ -300,10 +295,8 @@ gtk_pizza_put (GtkPizza   *pizza,
     if (GTK_WIDGET_REALIZED (pizza))
       gtk_widget_set_parent_window (widget, pizza->bin_window);
 
-#ifndef __WXGTK20__ /* FIXME? */
     if (!IS_ONSCREEN (x, y))
        GTK_PRIVATE_SET_FLAG (widget, GTK_IS_OFFSCREEN);
-#endif
 
 /*
     if (GTK_WIDGET_REALIZED (pizza))
@@ -436,7 +429,7 @@ gtk_pizza_set_size (GtkPizza   *pizza,
     }
 }
 
-gint
+gint       
 gtk_pizza_child_resized  (GtkPizza   *pizza,
                           GtkWidget  *widget)
 {
@@ -459,10 +452,10 @@ gtk_pizza_child_resized  (GtkPizza   *pizza,
                     (child->height == widget->allocation.height));
         }
     }
-
+    
     return FALSE;
 }
-
+					
 static void
 gtk_pizza_map (GtkWidget *widget)
 {
@@ -484,11 +477,7 @@ gtk_pizza_map (GtkWidget *widget)
 
         if ( GTK_WIDGET_VISIBLE (child->widget) &&
             !GTK_WIDGET_MAPPED (child->widget) &&
-#ifdef __WXGTK20__
-            TRUE)
-#else
             !GTK_WIDGET_IS_OFFSCREEN (child->widget))
-#endif
         {
             gtk_widget_map (child->widget);
         }
@@ -521,20 +510,18 @@ gtk_pizza_realize (GtkWidget *widget)
     attributes.width = widget->allocation.width;
     attributes.height = widget->allocation.height;
 
-#ifndef __WXUNIVERSAL__
     if (pizza->shadow_type == GTK_MYSHADOW_NONE)
     {
         /* no border, no changes to sizes */
-    }
-    else if (pizza->shadow_type == GTK_MYSHADOW_THIN)
+    } else
+    if (pizza->shadow_type == GTK_MYSHADOW_THIN)
     {
         /* GTK_MYSHADOW_THIN == wxSIMPLE_BORDER */
         attributes.x += 1;
         attributes.y += 1;
         attributes.width -= 2;
         attributes.height -= 2;
-    }
-    else
+    } else
     {
         /* GTK_MYSHADOW_IN == wxSUNKEN_BORDER */
         /* GTK_MYSHADOW_OUT == wxRAISED_BORDER */
@@ -543,7 +530,6 @@ gtk_pizza_realize (GtkWidget *widget)
         attributes.width -= 4;
         attributes.height -= 4;
     }
-#endif /* __WXUNIVERSAL__ */
 
     /* minimal size */
     if (attributes.width < 2) attributes.width = 2;
@@ -552,7 +538,8 @@ gtk_pizza_realize (GtkWidget *widget)
     attributes.wclass = GDK_INPUT_OUTPUT;
     attributes.visual = gtk_widget_get_visual (widget);
     attributes.colormap = gtk_widget_get_colormap (widget);
-    attributes.event_mask = GDK_VISIBILITY_NOTIFY_MASK;
+    attributes.event_mask =
+       GDK_VISIBILITY_NOTIFY_MASK;
     attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
 
     widget->window = gdk_window_new(gtk_widget_get_parent_window (widget),
@@ -563,20 +550,21 @@ gtk_pizza_realize (GtkWidget *widget)
     attributes.y = 0;
 
     attributes.event_mask = gtk_widget_get_events (widget);
-    attributes.event_mask |= GDK_EXPOSURE_MASK              |
-                             GDK_POINTER_MOTION_MASK        |
-                             GDK_POINTER_MOTION_HINT_MASK   |
-                             GDK_BUTTON_MOTION_MASK         |
-                             GDK_BUTTON1_MOTION_MASK        |
-                             GDK_BUTTON2_MOTION_MASK        |
-                             GDK_BUTTON3_MOTION_MASK        |
-                             GDK_BUTTON_PRESS_MASK          |
-                             GDK_BUTTON_RELEASE_MASK        |
-                             GDK_KEY_PRESS_MASK             |
-                             GDK_KEY_RELEASE_MASK           |
-                             GDK_ENTER_NOTIFY_MASK          |
-                             GDK_LEAVE_NOTIFY_MASK          |
-                             GDK_FOCUS_CHANGE_MASK;
+    attributes.event_mask |=
+       GDK_EXPOSURE_MASK        |
+       GDK_POINTER_MOTION_MASK        |
+       GDK_POINTER_MOTION_HINT_MASK  |
+       GDK_BUTTON_MOTION_MASK        |
+       GDK_BUTTON1_MOTION_MASK        |
+       GDK_BUTTON2_MOTION_MASK        |
+       GDK_BUTTON3_MOTION_MASK        |
+       GDK_BUTTON_PRESS_MASK        |
+       GDK_BUTTON_RELEASE_MASK        |
+       GDK_KEY_PRESS_MASK        |
+       GDK_KEY_RELEASE_MASK        |
+       GDK_ENTER_NOTIFY_MASK        |
+       GDK_LEAVE_NOTIFY_MASK        |
+       GDK_FOCUS_CHANGE_MASK;
 
     pizza->bin_window = gdk_window_new(widget->window,
                                           &attributes, attributes_mask);
@@ -585,11 +573,6 @@ gtk_pizza_realize (GtkWidget *widget)
     widget->style = gtk_style_attach (widget->style, widget->window);
     gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
     gtk_style_set_background (widget->style, pizza->bin_window, GTK_STATE_NORMAL );
-    
-/*
-    gdk_window_set_back_pixmap( widget->window, NULL, FALSE );
-    gdk_window_set_back_pixmap( pizza->bin_window, NULL, FALSE );
-*/
 
     /* add filters for intercepting visibility and expose events */
     gdk_window_add_filter (widget->window, gtk_pizza_main_filter, pizza);
@@ -781,7 +764,7 @@ gtk_pizza_expose (GtkWidget      *widget,
             gtk_widget_event (child->widget, (GdkEvent*) &child_event);
         }
     }
-
+    
     return TRUE;
 }
 
@@ -829,9 +812,7 @@ gtk_pizza_remove (GtkContainer *container,
             /* security checks */
             g_return_if_fail (GTK_IS_WIDGET (widget));
 
-#ifndef __WXGTK20__
             GTK_PRIVATE_UNSET_FLAG (widget, GTK_IS_OFFSCREEN);
-#endif
 
             break;
         }
@@ -889,17 +870,13 @@ gtk_pizza_position_child (GtkPizza      *pizza,
                 gtk_widget_map (child->widget);
         }
 
-#ifndef __WXGTK20__
         if (GTK_WIDGET_IS_OFFSCREEN (child->widget))
             GTK_PRIVATE_UNSET_FLAG (child->widget, GTK_IS_OFFSCREEN);
-#endif
     }
     else
     {
-#ifndef __WXGTK20__
         if (!GTK_WIDGET_IS_OFFSCREEN (child->widget))
             GTK_PRIVATE_SET_FLAG (child->widget, GTK_IS_OFFSCREEN);
-#endif
 
         if (GTK_WIDGET_MAPPED (child->widget))
             gtk_widget_unmap (child->widget);
@@ -1195,29 +1172,29 @@ gtk_pizza_filter (GdkXEvent *gdk_xevent,
     GtkPizza *pizza;
 
     xevent = (XEvent *)gdk_xevent;
-
+    
     pizza = GTK_PIZZA (data);
-
+    
     if (!pizza->use_filter)
         return GDK_FILTER_CONTINUE;
 
     switch (xevent->type)
     {
-        case Expose:
-            if (xevent->xexpose.serial == pizza->configure_serial)
-            {
-                xevent->xexpose.x += pizza->scroll_x;
-                xevent->xexpose.y += pizza->scroll_y;
-            }
-            break;
+    case Expose:
+      if (xevent->xexpose.serial == pizza->configure_serial)
+        {
+          xevent->xexpose.x += pizza->scroll_x;
+          xevent->xexpose.y += pizza->scroll_y;
+        }
+      break;
 
-        case ConfigureNotify:
-            {
-                pizza->configure_serial = xevent->xconfigure.serial;
-                pizza->scroll_x = xevent->xconfigure.x;
-                pizza->scroll_y = xevent->xconfigure.y;
-            }
-            break;
+    case ConfigureNotify:
+        {
+          pizza->configure_serial = xevent->xconfigure.serial;
+          pizza->scroll_x = xevent->xconfigure.x;
+          pizza->scroll_y = xevent->xconfigure.y;
+        }
+      break;
     }
 
     return GDK_FILTER_CONTINUE;
@@ -1237,7 +1214,7 @@ gtk_pizza_main_filter (GdkXEvent *gdk_xevent,
 
     xevent = (XEvent *)gdk_xevent;
     pizza = GTK_PIZZA (data);
-
+    
     if (!pizza->use_filter)
         return GDK_FILTER_CONTINUE;
 
@@ -1257,7 +1234,7 @@ gtk_pizza_main_filter (GdkXEvent *gdk_xevent,
                 pizza->visibility = GDK_VISIBILITY_UNOBSCURED;
                 break;
         }
-
+        
         return GDK_FILTER_REMOVE;
     }
 

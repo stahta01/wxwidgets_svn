@@ -45,9 +45,6 @@
 // event table
 // ----------------------------------------------------------------------------
 
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
-
 BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
     EVT_SIZE(wxNotebook::OnSize)
@@ -73,6 +70,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxCommandEvent)
 void wxNotebook::Init()
 {
     m_tabView = (wxNotebookTabView*) NULL;
+    m_pImageList = NULL;
     m_nSelection = -1;
 }
 
@@ -128,6 +126,11 @@ wxNotebook::~wxNotebook()
 // ----------------------------------------------------------------------------
 // wxNotebook accessors
 // ----------------------------------------------------------------------------
+int wxNotebook::GetPageCount() const
+{
+    return m_aPages.Count();
+}
+
 int wxNotebook::GetRowCount() const
 {
     // TODO
@@ -152,7 +155,6 @@ int wxNotebook::SetSelection(int nPage)
     return 0;
 }
 
-#if 0
 void wxNotebook::AdvanceSelection(bool bForward)
 {
     int nSel = GetSelection();
@@ -162,7 +164,6 @@ void wxNotebook::AdvanceSelection(bool bForward)
     else
         SetSelection(nSel == 0 ? nMax : nSel - 1);
 }
-#endif
 
 bool wxNotebook::SetPageText(int nPage, const wxString& strText)
 {
@@ -214,21 +215,9 @@ bool wxNotebook::SetPageImage(int nPage, int nImage)
     return FALSE;
 }
 
-// set the size (the same for all pages)
-void wxNotebook::SetPageSize(const wxSize& size)
-{
-    // TODO
-}
-
-// set the padding between tabs (in pixels)
-void wxNotebook::SetPadding(const wxSize& padding)
-{
-    // TODO
-}
-
-// set the size of the tabs for wxNB_FIXEDWIDTH controls
-void wxNotebook::SetTabSize(const wxSize& sz)
-{
+void wxNotebook::SetImageList(wxImageList* imageList)
+{ 
+    m_pImageList = imageList;
     // TODO
 }
 
@@ -243,8 +232,8 @@ bool wxNotebook::DeletePage(int nPage)
 
     if (m_nSelection != -1)
     {
-        m_pages[m_nSelection]->Show(FALSE);
-        m_pages[m_nSelection]->Lower();
+        m_aPages[m_nSelection]->Show(FALSE);
+        m_aPages[m_nSelection]->Lower();
     }
 
     wxNotebookPage* pPage = GetPage(nPage);
@@ -254,10 +243,10 @@ bool wxNotebook::DeletePage(int nPage)
     m_tabView->RemoveTab((int) (long) pPage);
 #endif
 
-    m_pages.Remove(pPage);
-    delete pPage;
+    delete m_aPages[nPage];
+    m_aPages.Remove(nPage);
 
-    if (m_pages.GetCount() == 0)
+    if (m_aPages.GetCount() == 0)
     {
       m_nSelection = -1;
       m_tabView->SetTabSelection(-1, FALSE);
@@ -293,8 +282,8 @@ bool wxNotebook::RemovePage(int nPage)
 {
     wxCHECK( IS_VALID_PAGE(nPage), FALSE );
 
-    m_pages[nPage]->Show(FALSE);
-    //    m_pages[nPage]->Lower();
+    m_aPages[nPage]->Show(FALSE);
+    //    m_aPages[nPage]->Lower();
 
     wxNotebookPage* pPage = GetPage(nPage);
 #if defined (__WIN16__)
@@ -303,9 +292,9 @@ bool wxNotebook::RemovePage(int nPage)
     m_tabView->RemoveTab((int) (long) pPage);
 #endif
 
-    m_pages.Remove(pPage);
+    m_aPages.Remove(nPage);
 
-    if (m_pages.GetCount() == 0)
+    if (m_aPages.GetCount() == 0)
     {
       m_nSelection = -1;
       m_tabView->SetTabSelection(-1, TRUE);
@@ -350,7 +339,7 @@ int wxNotebook::FindPagePosition(wxNotebookPage* page) const
     int nPageCount = GetPageCount();
     int nPage;
     for ( nPage = 0; nPage < nPageCount; nPage++ )
-        if (m_pages[nPage] == page)
+        if (m_aPages[nPage] == page)
             return nPage;
     return -1;
 }
@@ -363,11 +352,20 @@ bool wxNotebook::DeleteAllPages()
     int nPageCount = GetPageCount();
     int nPage;
     for ( nPage = 0; nPage < nPageCount; nPage++ )
-        delete m_pages[nPage];
+        delete m_aPages[nPage];
 
-    m_pages.Clear();
+    m_aPages.Clear();
 
     return TRUE;
+}
+
+// add a page to the notebook
+bool wxNotebook::AddPage(wxNotebookPage *pPage,
+                         const wxString& strText,
+                         bool bSelect,
+                         int imageId)
+{
+    return InsertPage(GetPageCount(), pPage, strText, bSelect, imageId);
 }
 
 // same as AddPage() but does it at given position
@@ -390,7 +388,7 @@ bool wxNotebook::InsertPage(int nPage,
       pPage->Show(FALSE);
 
     // save the pointer to the page
-    m_pages.Insert(pPage, nPage);
+    m_aPages.Insert(pPage, nPage);
 
     if (bSelect)
     {
@@ -476,7 +474,7 @@ bool wxNotebook::RefreshLayout(bool force)
         rect.y = tabHeight + 4;
         rect.width = cw - 8;
         rect.height = ch - 4 - rect.y ;
-
+  
         m_tabView->SetViewRect(rect);
 
         m_tabView->LayoutTabs();
@@ -489,7 +487,7 @@ bool wxNotebook::RefreshLayout(bool force)
         rect.y = tabHeight + 4;
         rect.width = cw - 8;
         rect.height = ch - 4 - rect.y ;
-
+  
         m_tabView->SetViewRect(rect);
 
         m_tabView->LayoutTabs();
@@ -499,9 +497,9 @@ bool wxNotebook::RefreshLayout(bool force)
 
         // fit the notebook page to the tab control's display area
 
-        unsigned int nCount = m_pages.Count();
+        unsigned int nCount = m_aPages.Count();
         for ( unsigned int nPage = 0; nPage < nCount; nPage++ ) {
-            wxNotebookPage *pPage = m_pages[nPage];
+            wxNotebookPage *pPage = m_aPages[nPage];
             if (pPage->IsShown())
             {
                 wxRect clientRect = GetAvailableClientSize();
@@ -532,7 +530,7 @@ void wxNotebook::OnSetFocus(wxFocusEvent& event)
 {
     // set focus to the currently selected page if any
     if ( m_nSelection != -1 )
-        m_pages[m_nSelection]->SetFocus();
+        m_aPages[m_nSelection]->SetFocus();
 
     event.Skip();
 }
@@ -585,11 +583,11 @@ void wxNotebook::ChangePage(int nOldSel, int nSel)
     wxASSERT( nOldSel != nSel ); // impossible
 
     if ( nOldSel != -1 ) {
-        m_pages[nOldSel]->Show(FALSE);
-        m_pages[nOldSel]->Lower();
+        m_aPages[nOldSel]->Show(FALSE);
+        m_aPages[nOldSel]->Lower();
     }
 
-    wxNotebookPage *pPage = m_pages[nSel];
+    wxNotebookPage *pPage = m_aPages[nSel];
 
     wxRect clientRect = GetAvailableClientSize();
     pPage->SetSize(clientRect.x, clientRect.y, clientRect.width, clientRect.height);
@@ -636,7 +634,7 @@ wxRect wxNotebook::GetAvailableClientSize()
 /*
  * wxNotebookTabView
  */
-
+ 
 IMPLEMENT_CLASS(wxNotebookTabView, wxTabView)
 
 wxNotebookTabView::wxNotebookTabView(wxNotebook *notebook, long style): wxTabView(style)
@@ -658,7 +656,12 @@ void wxNotebookTabView::OnTabActivate(int activateId, int deactivateId)
   if (!m_notebook)
     return;
 
+// Because of name truncation!
+#if defined(__BORLANDC__) && defined(__WIN16__)
+  wxNotebookEvent event(wxEVT_COMMAND_NB_PAGE_CHANGED, m_notebook->GetId());
+#else
   wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_notebook->GetId());
+#endif
 
 #if defined (__WIN16__)
   int activatePos = activateId;

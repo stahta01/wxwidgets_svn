@@ -76,6 +76,7 @@ EXTRAOBJS=
 GENDIR  = $(WXDIR)/src/generic
 COMMDIR = $(WXDIR)/src/common
 HTMLDIR = $(WXDIR)/src/html
+XPMDIR  = $(WXDIR)/src/xpm
 PNGDIR  = $(WXDIR)/src/png
 JPEGDIR = $(WXDIR)/src/jpeg
 ZLIBDIR = $(WXDIR)/src/zlib
@@ -179,8 +180,20 @@ JPEGOBJS    = \
 		$(JPEGDIR)/jquant2.$(OBJSUFF) \
 		$(JPEGDIR)/jdmerge.$(OBJSUFF)
 
+XPMOBJECTS = 	$(XPMDIR)/crbuffri.o\
+		$(XPMDIR)/crdatfri.o\
+		$(XPMDIR)/create.o $(XPMDIR)/crifrbuf.o\
+		$(XPMDIR)/crifrdat.o\
+		$(XPMDIR)/data.o\
+		$(XPMDIR)/hashtab.o $(XPMDIR)/misc.o\
+		$(XPMDIR)/parse.o $(XPMDIR)/rdftodat.o\
+		$(XPMDIR)/rdftoi.o\
+		$(XPMDIR)/rgb.o $(XPMDIR)/scan.o\
+		$(XPMDIR)/simx.o $(XPMDIR)/wrffrdat.o\
+		$(XPMDIR)/wrffrp.o $(XPMDIR)/wrffri.o
+
 OBJECTS = $(MSWOBJS) $(COMMONOBJS) $(GENERICOBJS) $(HTMLOBJS) \
-	  $(JPEGOBJS) $(PNGOBJS) $(ZLIBOBJS)
+	  $(JPEGOBJS) $(PNGOBJS) $(ZLIBOBJS) # $(XPMOBJECTS)
 
 all:    $(OBJECTS) $(WXLIB)
 

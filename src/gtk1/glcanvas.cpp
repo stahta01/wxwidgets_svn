@@ -237,9 +237,9 @@ gtk_glcanvas_size_callback( GtkWidget *WXUNUSED(widget), GtkAllocation* alloc, w
 // wxGlCanvas
 //---------------------------------------------------------------------------
 
-IMPLEMENT_CLASS(wxGLCanvas, wxWindow)
+IMPLEMENT_CLASS(wxGLCanvas, wxScrolledWindow)
 
-BEGIN_EVENT_TABLE(wxGLCanvas, wxWindow)
+BEGIN_EVENT_TABLE(wxGLCanvas, wxScrolledWindow)
     EVT_SIZE(wxGLCanvas::OnSize)
 END_EVENT_TABLE()
 
@@ -291,15 +291,51 @@ bool wxGLCanvas::Create( wxWindow *parent,
     m_noExpose = TRUE;
     m_nativeSizeEvent = TRUE;
     
-    XVisualInfo *vi = NULL;
-    if (wxTheApp->m_glVisualInfo != NULL) {
-        vi = (XVisualInfo *) wxTheApp->m_glVisualInfo; 
-        m_canFreeVi = FALSE; // owned by wxTheApp - don't free upon destruction
-    } else {
-        vi = (XVisualInfo *) ChooseGLVisual(attribList);
-        m_canFreeVi = TRUE;
+    if (!attribList)
+    {
+        int data[] = { GLX_RGBA, 
+	               GLX_DOUBLEBUFFER, 
+		       GLX_DEPTH_SIZE, 1,  // use largest available depth buffer
+		       GLX_RED_SIZE, 1, 
+		       GLX_GREEN_SIZE, 1, 
+		       GLX_BLUE_SIZE, 1, 
+		       GLX_ALPHA_SIZE, 0, 
+		       None };
+	attribList = (int*) data;
     }
-    m_vi = vi;  // save for later use
+    else
+    {
+      int data[512], arg=0, p=0;
+       
+      while( (attribList[arg]!=0) && (p<512) )
+      {
+        switch( attribList[arg++] )
+        {
+          case WX_GL_RGBA: data[p++] = GLX_RGBA; break;
+          case WX_GL_DOUBLEBUFFER: data[p++] = GLX_DOUBLEBUFFER; break;
+          case WX_GL_DEPTH_SIZE: 
+            data[p++]=GLX_DEPTH_SIZE; data[p++]=attribList[arg++]; break;
+          case WX_GL_MIN_RED:
+            data[p++]=GLX_RED_SIZE; data[p++]=attribList[arg++]; break;
+          case WX_GL_MIN_GREEN:
+            data[p++]=GLX_GREEN_SIZE; data[p++]=attribList[arg++]; break;
+          case WX_GL_MIN_BLUE:
+            data[p++]=GLX_BLUE_SIZE; data[p++]=attribList[arg++]; break;
+          default:
+            break;
+        }
+      }       
+      data[p] = 0; 
+
+      attribList = (int*) data;
+    }
+    
+    
+    Display *dpy = GDK_DISPLAY();
+    
+    XVisualInfo *vi = glXChooseVisual( dpy, DefaultScreen(dpy), attribList );
+    
+    m_vi = vi;  // safe for later use
     
     wxCHECK_MSG( m_vi, FALSE, "required visual couldn't be found" );
 
@@ -309,7 +345,7 @@ bool wxGLCanvas::Create( wxWindow *parent,
     gtk_widget_push_colormap( colormap );
     gtk_widget_push_visual( visual );
 
-    wxWindow::Create( parent, id, pos, size, style, name );
+    wxScrolledWindow::Create( parent, id, pos, size, style, name );
 
     m_glWidget = m_wxwindow;
     
@@ -346,77 +382,8 @@ wxGLCanvas::~wxGLCanvas()
 {
     XVisualInfo *vi = (XVisualInfo *) m_vi;
     
-    if (vi && m_canFreeVi) XFree( vi );
+    if (vi) XFree( vi );
     if (m_glContext) delete m_glContext;
-}
-
-void* wxGLCanvas::ChooseGLVisual(int *attribList)
-{
-    int data[512];
-    if (!attribList)
-    {
-        // default settings if attriblist = 0
-        data[0] = GLX_RGBA;
-        data[1] = GLX_DOUBLEBUFFER;
-        data[2] = GLX_DEPTH_SIZE;   data[3] = 1;
-        data[4] = GLX_RED_SIZE;     data[5] = 1;
-        data[6] = GLX_GREEN_SIZE;   data[7] = 1;
-        data[8] = GLX_BLUE_SIZE;    data[9] = 1;
-        data[10] = GLX_ALPHA_SIZE;  data[11] = 0;
-        data[12] = None;
-
-	attribList = (int*) data;
-    }
-    else
-    {
-      int arg=0, p=0;
-       
-      while( (attribList[arg]!=0) && (p<510) )
-      {
-        switch( attribList[arg++] )
-        {
-          case WX_GL_RGBA: data[p++] = GLX_RGBA; break;
-          case WX_GL_BUFFER_SIZE:
-            data[p++]=GLX_BUFFER_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_LEVEL:
-            data[p++]=GLX_LEVEL; data[p++]=attribList[arg++]; break;
-          case WX_GL_DOUBLEBUFFER: data[p++] = GLX_DOUBLEBUFFER; break;
-          case WX_GL_STEREO: data[p++] = GLX_STEREO; break;
-          case WX_GL_AUX_BUFFERS:
-            data[p++]=GLX_AUX_BUFFERS; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_RED:
-            data[p++]=GLX_RED_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_GREEN:
-            data[p++]=GLX_GREEN_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_BLUE:
-            data[p++]=GLX_BLUE_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_ALPHA:
-            data[p++]=GLX_ALPHA_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_DEPTH_SIZE: 
-            data[p++]=GLX_DEPTH_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_STENCIL_SIZE: 
-            data[p++]=GLX_STENCIL_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_ACCUM_RED:
-            data[p++]=GLX_ACCUM_RED_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_ACCUM_GREEN:
-            data[p++]=GLX_ACCUM_GREEN_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_ACCUM_BLUE:
-            data[p++]=GLX_ACCUM_BLUE_SIZE; data[p++]=attribList[arg++]; break;
-          case WX_GL_MIN_ACCUM_ALPHA:
-            data[p++]=GLX_ACCUM_ALPHA_SIZE; data[p++]=attribList[arg++]; break;
-          default:
-            break;
-        }
-      }       
-      data[p] = 0; 
-
-      attribList = (int*) data;
-    }
-    
-    
-    Display *dpy = GDK_DISPLAY();
-    
-    return glXChooseVisual( dpy, DefaultScreen(dpy), attribList );
 }
 
 void wxGLCanvas::SwapBuffers()
@@ -426,6 +393,19 @@ void wxGLCanvas::SwapBuffers()
 
 void wxGLCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
 {
+    int width, height;
+    GetClientSize( &width, &height );
+    
+    if (m_glContext && GTK_WIDGET_REALIZED(m_glWidget) )
+    {
+        SetCurrent(); 
+	
+        glViewport(0, 0, (GLint)width, (GLint)height );
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glFrustum( -1.0, 1.0, -1.0, 1.0, 5.0, 15.0 );
+        glMatrixMode(GL_MODELVIEW);
+    }
 }
 
 void wxGLCanvas::SetCurrent()
@@ -451,26 +431,6 @@ void wxGLCanvas::OnInternalIdle()
     }
     
     wxWindow::OnInternalIdle();
-}
-
-
-
-//---------------------------------------------------------------------------
-// wxGLApp
-//---------------------------------------------------------------------------
-
-IMPLEMENT_CLASS(wxGLApp, wxApp)
-        
-wxGLApp::~wxGLApp()
-{
-    if (m_glVisualInfo) XFree(m_glVisualInfo);
-}
-
-bool wxGLApp::InitGLVisual(int *attribList)
-{
-    if (m_glVisualInfo) XFree(m_glVisualInfo);
-    m_glVisualInfo = wxGLCanvas::ChooseGLVisual(attribList);
-    return (m_glVisualInfo != NULL);
 }
 
 #endif

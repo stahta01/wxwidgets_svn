@@ -58,7 +58,7 @@
 
 wxResourceManager *wxResourceManager::sm_currentResourceManager = NULL;
 
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
 #include "bitmaps/load.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/new.xpm"
@@ -150,7 +150,7 @@ bool wxResourceManager::Initialize()
     windowsDir += "\\dialoged.ini" ;
     
     m_optionsResourceFilename = windowsDir;
-#elif defined(__WXGTK__) || defined(__WXMOTIF__) || (defined(__WXMAC__) && defined(__DARWIN__))
+#elif defined(__WXGTK__) || defined(__WXMOTIF__)
     wxGetHomeDir( &m_optionsResourceFilename );
     m_optionsResourceFilename += "/.dialogedrc";
 #else
@@ -165,8 +165,6 @@ bool wxResourceManager::Initialize()
 #endif
     
     m_popupMenu = new wxMenu;
-    m_popupMenu->Append(OBJECT_MENU_TITLE, "WIDGET TYPE");
-    m_popupMenu->AppendSeparator();
     m_popupMenu->Append(OBJECT_MENU_EDIT, "Edit properties");
     m_popupMenu->Append(OBJECT_MENU_DELETE, "Delete object");
     
@@ -175,7 +173,7 @@ bool wxResourceManager::Initialize()
 #ifdef __WXMSW__
         m_bitmapImage = new wxBitmap("WXWINBMP", wxBITMAP_TYPE_BMP_RESOURCE);
 #endif
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
         m_bitmapImage = new wxBitmap( wxwin_xpm );
 #endif
     }
@@ -769,7 +767,7 @@ wxToolBar *wxResourceManager::OnCreateToolBar(wxFrame *parent)
     wxBitmap ToolbarDistributeHorizBitmap("DISTHORIZTOOL");
     wxBitmap ToolbarDistributeVertBitmap("DISTVERTTOOL");
 #endif
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
     wxBitmap ToolbarLoadBitmap( load_xpm );
     wxBitmap ToolbarSaveBitmap( save_xpm);
     wxBitmap ToolbarNewBitmap( new_xpm );
@@ -2382,7 +2380,7 @@ void wxResourceEditorScrolledWindow::DrawTitle(wxDC& dc)
         {
             wxString str(res->GetTitle());
             int x, y;
-            GetViewStart(& x, & y);
+            ViewStart(& x, & y);
             
             wxFont font(10, wxSWISS, wxNORMAL, wxBOLD);
             dc.SetFont(font);
@@ -2404,13 +2402,8 @@ void ObjectMenuProc(wxMenu *menu, wxCommandEvent& event)
     if (!data)
         return;
     
-    switch (event.GetId())
+    switch (event.GetInt())
     {
-    case OBJECT_MENU_TITLE:
-        {
-            event.Skip();
-            break;
-        }
     case OBJECT_MENU_EDIT:
         {
             wxResourceManager::GetCurrentResourceManager()->EditWindow(data);
@@ -2418,20 +2411,8 @@ void ObjectMenuProc(wxMenu *menu, wxCommandEvent& event)
         }
     case OBJECT_MENU_DELETE:
         {
-            // Before deleting a dialog, give the user a last chance
-            // change their mind, in case they accidentally right
-            // clicked the dialog rather than the widget they were
-            // aiming for.
-            if (data->IsKindOf(CLASSINFO(wxPanel)))
-            {
-                wxString str(wxT("Deleting dialog : "));
-                str += data->GetName();
-                if (wxMessageBox(wxT("Are you sure?"), str, wxYES_NO | wxCENTRE) == wxNO)
-                    return;
-            }
-
             wxResourceManager::GetCurrentResourceManager()->DeselectItemIfNecessary(data);
-
+            
             wxResourceManager::GetCurrentResourceManager()->SaveInfoAndDeleteHandler(data);
             wxResourceManager::GetCurrentResourceManager()->DeleteResource(data);
             wxResourceManager::GetCurrentResourceManager()->DeleteWindow(data);

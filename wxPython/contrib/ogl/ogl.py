@@ -15,8 +15,6 @@ from events import *
 
 from streams import *
 
-from utils import *
-
 from mdi import *
 
 from frames import *
@@ -40,6 +38,8 @@ from printfw import *
 from sizers import *
 
 from filesys import *
+
+from utils import *
 
 from oglbasic import *
 
@@ -128,7 +128,6 @@ DIVISION_SIDE_BOTTOM = oglc.DIVISION_SIDE_BOTTOM
 #-------------- USER INCLUDE -----------------------
 
 
-# aliases
 wxShapeCanvas =       wxPyShapeCanvas
 wxShapeEvtHandler =   wxPyShapeEvtHandler
 wxShape =             wxPyShape
@@ -147,24 +146,20 @@ wxControlPoint =      wxPyControlPoint
 
 # Stuff these names into the wx namespace so wxPyConstructObject can find them
 import wx
-wx.wxArrowHeadPtr         = wxArrowHeadPtr
-wx.wxControlPointPtr      = wxPyControlPointPtr
-wx.wxDiagramPtr           = wxDiagramPtr
-wx.wxOGLConstraintPtr     = wxOGLConstraintPtr
-wx.wxPseudoMetaFilePtr    = wxPseudoMetaFile
-wx.wxPyBitmapShapePtr     = wxPyBitmapShapePtr
-wx.wxPyCircleShapePtr     = wxPyCircleShapePtr
-wx.wxPyCompositeShapePtr  = wxPyCompositeShapePtr
-wx.wxPyControlPointPtr    = wxPyControlPointPtr
-wx.wxPyDividedShapePtr    = wxPyDividedShapePtr
-wx.wxPyDivisionShapePtr   = wxPyDivisionShapePtr
-wx.wxPyDrawnShapePtr      = wxPyDrawnShapePtr
-wx.wxPyEllipseShapePtr    = wxPyEllipseShapePtr
-wx.wxPyLineShapePtr       = wxPyLineShapePtr
-wx.wxPyPolygonShapePtr    = wxPyPolygonShapePtr
-wx.wxPyRectangleShapePtr  = wxPyRectangleShapePtr
 wx.wxPyShapeCanvasPtr     = wxPyShapeCanvasPtr
 wx.wxPyShapeEvtHandlerPtr = wxPyShapeEvtHandlerPtr
 wx.wxPyShapePtr           = wxPyShapePtr
+wx.wxPyRectangleShapePtr  = wxPyRectangleShapePtr
+wx.wxPyBitmapShapePtr     = wxPyBitmapShapePtr
+wx.wxPyDrawnShapePtr      = wxPyDrawnShapePtr
+wx.wxPyCompositeShapePtr  = wxPyCompositeShapePtr
+wx.wxPyDividedShapePtr    = wxPyDividedShapePtr
+wx.wxPyDivisionShapePtr   = wxPyDivisionShapePtr
+wx.wxPyEllipseShapePtr    = wxPyEllipseShapePtr
+wx.wxPyCircleShapePtr     = wxPyCircleShapePtr
+wx.wxPyLineShapePtr       = wxPyLineShapePtr
+wx.wxPyPolygonShapePtr    = wxPyPolygonShapePtr
 wx.wxPyTextShapePtr       = wxPyTextShapePtr
 wx.wxShapeRegionPtr       = wxShapeRegionPtr
+wx.wxOGLConstraintPtr     = wxOGLConstraintPtr
+wx.wxControlPointPtr      = wxPyControlPointPtr

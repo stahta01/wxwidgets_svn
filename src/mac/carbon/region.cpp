@@ -14,12 +14,9 @@
 
 #include "wx/region.h"
 #include "wx/gdicmn.h"
-#include "wx/mac/uma.h"
 
-#if !USE_SHARED_LIBRARY
 	IMPLEMENT_DYNAMIC_CLASS(wxRegion, wxGDIObject)
 	IMPLEMENT_DYNAMIC_CLASS(wxRegionIterator, wxObject)
-#endif
 
 //-----------------------------------------------------------------------------
 // wxRegionRefData implementation
@@ -194,12 +191,11 @@ bool wxRegion::Combine(const wxRect& rect, wxRegionOp op)
 //-----------------------------------------------------------------------------
 
 // Outer bounds of region
-void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord& w, wxCoord& h) const
+void wxRegion::GetBox(long& x, long& y, long&w, long &h) const
 {
 	if (m_refData) 
 	{
-		Rect box ;
-		GetRegionBounds( M_REGION , &box ) ;
+		Rect box = (**M_REGION).rgnBBox ;
         x = box.left ;
         y = box.top ;
         w = box.right - box.left ;
@@ -213,7 +209,7 @@ void wxRegion::GetBox(wxCoord& x, wxCoord& y, wxCoord& w, wxCoord& h) const
 
 wxRect wxRegion::GetBox() const
 {
-    wxCoord x, y, w, h;
+    long x, y, w, h;
     GetBox(x, y, w, h);
     return wxRect(x, y, w, h);
 }
@@ -333,8 +329,7 @@ void wxRegionIterator::Reset(const wxRegion& region)
     {
     	// we cannot dissolve it into rects on mac
         m_rects = new wxRect[1];
-		Rect rect ;
-		GetRegionBounds( OTHER_M_REGION( region ) , &rect ) ;
+        Rect rect = (**OTHER_M_REGION( region )).rgnBBox ;
         m_rects[0].x = rect.left;
         m_rects[0].y = rect.top;
         m_rects[0].width = rect.right - rect.left;

@@ -15,9 +15,7 @@ program_dir = samples/caret
 
 PROGRAM=caret
 
-OBJECTS =$(PROGRAM).o
-DEPFILES=$(PROGRAM).d
+OBJECTS=$(PROGRAM).o
 
 include ../../src/makeprog.env
 
--include $(DEPFILES)

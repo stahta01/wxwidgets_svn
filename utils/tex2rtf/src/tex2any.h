@@ -34,13 +34,6 @@
 #define FORBID_WARN       1
 #define FORBID_ABSOLUTELY 2
 
-
-#ifdef __WXMSW__
-  const int MAX_LINE_BUFFER_SIZE = 600;
-#else
-  const int MAX_LINE_BUFFER_SIZE = 11000;
-#endif
-
 class TexMacroDef: public wxObject
 {
  public:
@@ -50,7 +43,7 @@ class TexMacroDef: public wxObject
   int forbidden;
   int macroId;
 
-  TexMacroDef(int the_id, const char *the_name, int n, bool ig, bool forbidLevel = FORBID_OK);
+  TexMacroDef(int the_id, char *the_name, int n, bool ig, bool forbidLevel = FORBID_OK);
   ~TexMacroDef(void);
 };
 
@@ -156,10 +149,10 @@ void SetCurrentOutput(FILE *fd);
 void SetCurrentOutputs(FILE *fd1, FILE *fd2);
 extern FILE *CurrentOutput1;
 extern FILE *CurrentOutput2;
-void AddMacroDef(int the_id, const char *name, int n, bool ignore = FALSE, bool forbidden = FALSE);
+void AddMacroDef(int the_id, char *name, int n, bool ignore = FALSE, bool forbidden = FALSE);
 void TexInitialize(int bufSize);
 void TexCleanUp(void);
-void TexOutput(const char *s, bool ordinaryText = FALSE);
+void TexOutput(char *s, bool ordinaryText = FALSE);
 char *GetArgData(TexChunk *chunk);
 char *GetArgData(void);             // Get the string for the current argument
 int GetNoArgs(void);                // Get the number of arguments for the current macro
@@ -216,8 +209,6 @@ extern bool winHelp;  // Output in Windows Help format if TRUE, linear otherwise
 extern bool isInteractive;
 extern bool runTwice;
 extern int convertMode;
-extern bool checkCurleyBraces;
-extern bool checkSyntax;
 extern bool stopRunning;
 extern int  mirrorMargins;
 extern bool headerRule;
@@ -350,10 +341,10 @@ void DefaultOnMacro(int macroId, int no_args, bool start);
 bool DefaultOnArgument(int macroId, int arg_no, bool start);
 
 // Called on error
-void OnError(const char *msg);
+void OnError(char *msg);
 
 // Called for information
-void OnInform(const char *msg);
+void OnInform(char *msg);
 
 // Special yield wrapper
 void Tex2RTFYield(bool force = FALSE);
@@ -396,9 +387,20 @@ class TexRef: public wxObject
   char *refFile;       // Reference filename (can be NULL)
   char *sectionNumber; // Section or figure number (as a string)
   char *sectionName; // name e.g. 'section'
-  TexRef(char *label, char *file, char *section, char *sectionN = NULL);
-  ~TexRef(void);
+  TexRef(char *label, char *file, char *section, char *sectionN = NULL)
+  {
+    refLabel = copystring(label);
+    refFile = file ? copystring(file) : (char*) NULL;
+    sectionNumber = section ? copystring(section) : copystring("??");
+    sectionName = sectionN ? copystring(sectionN) : copystring("??");
+  }
+  ~TexRef(void)
+  {
+    delete[] refLabel; delete[] refFile; delete[] sectionNumber; delete[] sectionName;
+  }
 };
+
+extern wxHashTable TexReferences;
 
 /*
  * Add a reference
@@ -509,7 +511,6 @@ class CustomMacro: public wxObject
     else
       macroBody = NULL;
   }
-  ~CustomMacro();
 };
 
 bool ReadCustomMacros(char *filename);

@@ -17,10 +17,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#endif
-
 #include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/app.h"
@@ -648,28 +644,6 @@ void wxDisplaySize(int *width, int *height)
         *height = DisplayHeight (dpy, DefaultScreen (dpy));
 }
 
-void wxDisplaySizeMM(int *width, int *height)
-{
-    Display *dpy = (Display*) wxGetDisplay();
-
-    if ( width )
-        *width = DisplayWidthMM(dpy, DefaultScreen (dpy));
-    if ( height )
-        *height = DisplayHeightMM(dpy, DefaultScreen (dpy));
-}
-
-void wxClientDisplayRect(int *x, int *y, int *width, int *height)
-{
-    // This is supposed to return desktop dimensions minus any window
-    // manager panels, menus, taskbars, etc.  If there is a way to do that
-    // for this platform please fix this function, otherwise it defaults
-    // to the entire desktop.
-    if (x) *x = 0;
-    if (y) *y = 0;
-    wxDisplaySize(width, height);
-}
-
-
 // Configurable display in Motif
 static WXDisplay *gs_currentDisplay = NULL;
 static wxString gs_displayName;
@@ -726,11 +700,6 @@ bool wxSetDisplay(const wxString& display_name)
 wxString wxGetDisplayName()
 {
     return gs_displayName;
-}
-
-wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
-{
-    return wxGenericFindWindowAtPoint(pt);
 }
 
 // ----------------------------------------------------------------------------
@@ -1173,7 +1142,7 @@ void wxAllocNearestColor(Display *d,Colormap cmp,XColor *xc)
     xc -> green = color_defs[pixel].green;
     xc -> blue = color_defs[pixel].blue;
     xc -> flags = DoRed | DoGreen | DoBlue;
-
+    
 /*  FIXME, TODO
     if (!XAllocColor(d,cmp,xc))
         cout << "wxAllocNearestColor : Warning : Cannot find nearest color !\n";

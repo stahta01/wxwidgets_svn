@@ -39,15 +39,11 @@
     #include "wx/msgdlg.h"
     #include "wx/textdlg.h"
     #include "wx/listbox.h"
-    #include "wx/filedlg.h"
-    #include "wx/choicdlg.h"
 #endif
 
 #include "wx/txtstrm.h"
 
 #include "wx/process.h"
-
-#include "wx/mimetype.h"
 
 #ifdef __WINDOWS__
     #include "wx/dde.h"
@@ -84,8 +80,6 @@ public:
     // event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
 
-    void OnKill(wxCommandEvent& event);
-
     void OnClear(wxCommandEvent& event);
 
     void OnSyncExec(wxCommandEvent& event);
@@ -93,8 +87,6 @@ public:
     void OnShell(wxCommandEvent& event);
     void OnExecWithRedirect(wxCommandEvent& event);
     void OnExecWithPipe(wxCommandEvent& event);
-
-    void OnFileExec(wxCommandEvent& event);
 
     void OnAbout(wxCommandEvent& event);
 
@@ -109,11 +101,6 @@ private:
     void ShowOutput(const wxString& cmd,
                     const wxArrayString& output,
                     const wxString& title);
-
-    void DoAsyncExec(const wxString& cmd);
-
-    // the PID of the last process we launched asynchronously
-    int m_pidLast;
 
     // last command we executed
     wxString m_cmdLast;
@@ -198,12 +185,10 @@ enum
 {
     // menu items
     Exec_Quit = 100,
-    Exec_Kill,
     Exec_ClearLog,
     Exec_SyncExec = 200,
     Exec_AsyncExec,
     Exec_Shell,
-    Exec_OpenFile,
     Exec_DDEExec,
     Exec_DDERequest,
     Exec_Redirect,
@@ -222,7 +207,6 @@ static const wxChar *DIALOG_TITLE = _T("Exec sample");
 // simple menu events like this the static method is much simpler.
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Exec_Quit,  MyFrame::OnQuit)
-    EVT_MENU(Exec_Kill,  MyFrame::OnKill)
     EVT_MENU(Exec_ClearLog,  MyFrame::OnClear)
 
     EVT_MENU(Exec_SyncExec, MyFrame::OnSyncExec)
@@ -230,8 +214,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Exec_Shell, MyFrame::OnShell)
     EVT_MENU(Exec_Redirect, MyFrame::OnExecWithRedirect)
     EVT_MENU(Exec_Pipe, MyFrame::OnExecWithPipe)
-
-    EVT_MENU(Exec_OpenFile, MyFrame::OnFileExec)
 
 #ifdef __WINDOWS__
     EVT_MENU(Exec_DDEExec, MyFrame::OnDDEExec)
@@ -283,8 +265,6 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
        : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
-    m_pidLast = 0;
-
 #ifdef __WXMAC__
     // we need this in order to allow the about menu relocation, since ABOUT is
     // not the default id of the about menu
@@ -293,9 +273,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
     // create a menu bar
     wxMenu *menuFile = new wxMenu(_T(""), wxMENU_TEAROFF);
-    menuFile->Append(Exec_Kill, _T("&Kill process...\tCtrl-K"),
-                     _T("Kill a process by PID"));
-    menuFile->AppendSeparator();
     menuFile->Append(Exec_ClearLog, _T("&Clear log\tCtrl-C"),
                      _T("Clear the log window"));
     menuFile->AppendSeparator();
@@ -314,9 +291,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     execMenu->Append(Exec_Pipe, _T("&Pipe through command...\tCtrl-P"),
                      _T("Pipe a string through a filter"));
 
-    execMenu->AppendSeparator();
-    execMenu->Append(Exec_OpenFile, _T("Open &file...\tCtrl-F"),
-                     _T("Launch the command to open this kind of files"));
 #ifdef __WINDOWS__
     execMenu->AppendSeparator();
     execMenu->Append(Exec_DDEExec, _T("Execute command via &DDE...\tCtrl-D"));
@@ -337,10 +311,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
     // create the listbox in which we will show misc messages as they come
     m_lbox = new wxListBox(this, -1);
-    wxFont font(12, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL,
-                wxFONTWEIGHT_NORMAL);
-    if ( font.Ok() )
-        m_lbox->SetFont(font);
 
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
@@ -349,9 +319,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 #endif // wxUSE_STATUSBAR
 }
 
-// ----------------------------------------------------------------------------
-// event handlers: file and help menu
-// ----------------------------------------------------------------------------
+
+// event handlers
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
@@ -366,128 +335,8 @@ void MyFrame::OnClear(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox(_T("Exec wxWindows Sample\n© 2000-2001 Vadim Zeitlin"),
+    wxMessageBox(_T("Exec sample\n© 2000 Vadim Zeitlin"),
                  _T("About Exec"), wxOK | wxICON_INFORMATION, this);
-}
-
-void MyFrame::OnKill(wxCommandEvent& WXUNUSED(event))
-{
-    long pid = wxGetNumberFromUser(_T("Please specify the process to kill"),
-                                   _T("Enter PID:"),
-                                   _T("Exec question"),
-                                   m_pidLast,
-                                   1, INT_MAX,
-                                   this);
-    if ( pid == -1 )
-    {
-        // cancelled
-        return;
-    }
-
-    static const wxString signalNames[] =
-    {
-        _T("Just test (SIGNONE)"),
-        _T("Hangup (SIGHUP)"),
-        _T("Interrupt (SIGINT)"),
-        _T("Quit (SIGQUIT)"),
-        _T("Illegal instruction (SIGILL)"),
-        _T("Trap (SIGTRAP)"),
-        _T("Abort (SIGABRT)"),
-        _T("Emulated trap (SIGEMT)"),
-        _T("FP exception (SIGFPE)"),
-        _T("Kill (SIGKILL)"),
-        _T("Bus (SIGBUS)"),
-        _T("Segment violation (SIGSEGV)"),
-        _T("System (SIGSYS)"),
-        _T("Broken pipe (SIGPIPE)"),
-        _T("Alarm (SIGALRM)"),
-        _T("Terminate (SIGTERM)"),
-    };
-
-    int sig = wxGetSingleChoiceIndex(_T("How to kill the process?"),
-                                     _T("Exec question"),
-                                     WXSIZEOF(signalNames), signalNames,
-                                     this);
-    switch ( sig )
-    {
-        default:
-            wxFAIL_MSG( _T("unexpected return value") );
-            // fall through
-
-        case -1:
-            // cancelled
-            return;
-
-        case wxSIGNONE:
-        case wxSIGHUP:
-        case wxSIGINT:
-        case wxSIGQUIT:
-        case wxSIGILL:
-        case wxSIGTRAP:
-        case wxSIGABRT:
-        case wxSIGEMT:
-        case wxSIGFPE:
-        case wxSIGKILL:
-        case wxSIGBUS:
-        case wxSIGSEGV:
-        case wxSIGSYS:
-        case wxSIGPIPE:
-        case wxSIGALRM:
-        case wxSIGTERM:
-            break;
-    }
-
-    if ( sig == 0 )
-    {
-        if ( wxProcess::Exists(pid) )
-            wxLogStatus(_T("Process %d is running."), pid);
-        else
-            wxLogStatus(_T("No process with pid = %d."), pid);
-    }
-    else // not SIGNONE
-    {
-        wxKillError rc = wxProcess::Kill(pid, (wxSignal)sig);
-        if ( rc == wxKILL_OK )
-        {
-            wxLogStatus(_T("Process %d killed with signal %d."), pid, sig);
-        }
-        else
-        {
-            static const wxChar *errorText[] =
-            {
-                _T(""), // no error
-                _T("signal not supported"),
-                _T("permission denied"),
-                _T("no such process"),
-                _T("unspecified error"),
-            };
-
-            wxLogStatus(_T("Failed to kill process %d with signal %d: %s"),
-                        pid, sig, errorText[rc]);
-        }
-    }
-}
-
-// ----------------------------------------------------------------------------
-// event handlers: exec menu
-// ----------------------------------------------------------------------------
-
-void MyFrame::DoAsyncExec(const wxString& cmd)
-{
-    wxProcess *process = new MyProcess(this, cmd);
-    m_pidLast = wxExecute(cmd, FALSE /* async */, process);
-    if ( !m_pidLast )
-    {
-        wxLogError(_T("Execution of '%s' failed."), cmd.c_str());
-
-        delete process;
-    }
-    else
-    {
-        wxLogStatus(_T("Process %ld (%s) launched."), m_pidLast, cmd.c_str());
-
-        m_cmdLast = cmd;
-    }
 }
 
 void MyFrame::OnSyncExec(wxCommandEvent& WXUNUSED(event))
@@ -517,7 +366,20 @@ void MyFrame::OnAsyncExec(wxCommandEvent& WXUNUSED(event))
     if ( !cmd )
         return;
 
-    DoAsyncExec(cmd);
+    wxProcess *process = new MyProcess(this, cmd);
+    long pid = wxExecute(cmd, FALSE /* async */, process);
+    if ( !pid )
+    {
+        wxLogError(_T("Execution of '%s' failed."), cmd.c_str());
+
+        delete process;
+    }
+    else
+    {
+        wxLogStatus(_T("Process %ld (%s) launched."), pid, cmd.c_str());
+
+        m_cmdLast = cmd;
+    }
 }
 
 void MyFrame::OnShell(wxCommandEvent& WXUNUSED(event))
@@ -628,43 +490,6 @@ void MyFrame::OnExecWithPipe(wxCommandEvent& WXUNUSED(event))
     m_cmdLast = cmd;
 }
 
-void MyFrame::OnFileExec(wxCommandEvent& event)
-{
-    static wxString s_filename;
-
-    wxString filename = wxLoadFileSelector(_T("file"), _T(""), s_filename);
-    if ( !filename )
-        return;
-
-    s_filename = filename;
-
-    wxString ext = filename.AfterFirst(_T('.'));
-    wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
-    if ( !ft )
-    {
-        wxLogError(_T("Impossible to determine the file type for extension '%s'"),
-                   ext.c_str());
-        return;
-    }
-
-    wxString cmd;
-    bool ok = ft->GetOpenCommand(&cmd,
-                                 wxFileType::MessageParameters(filename, _T("")));
-    delete ft;
-    if ( !ok )
-    {
-        wxLogError(_T("Impossible to find out how to open files of extension '%s'"),
-                   ext.c_str());
-        return;
-    }
-
-    DoAsyncExec(cmd);
-}
-
-// ----------------------------------------------------------------------------
-// DDE stuff
-// ----------------------------------------------------------------------------
-
 #ifdef __WINDOWS__
 
 bool MyFrame::GetDDEServer()
@@ -744,10 +569,6 @@ void MyFrame::OnDDERequest(wxCommandEvent& WXUNUSED(event))
 }
 
 #endif // __WINDOWS__
-
-// ----------------------------------------------------------------------------
-// various helpers
-// ----------------------------------------------------------------------------
 
 // input polling
 void MyFrame::OnIdle(wxIdleEvent& event)

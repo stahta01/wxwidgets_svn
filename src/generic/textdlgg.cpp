@@ -28,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TEXTDLG
-
 #ifndef WX_PRECOMP
     #include <stdio.h>
 
@@ -121,5 +119,3 @@ void wxTextEntryDialog::OnOK(wxCommandEvent& WXUNUSED(event) )
 
     EndModal(wxID_OK);
 }
-
-#endif // wxUSE_TEXTDLG

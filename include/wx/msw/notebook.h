@@ -15,19 +15,35 @@
   #pragma interface "notebook.h"
 #endif
 
-#if wxUSE_NOTEBOOK
-
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
 
 #include "wx/control.h"
+#include "wx/dynarray.h"
+
+// ----------------------------------------------------------------------------
+// types
+// ----------------------------------------------------------------------------
+
+// fwd declarations
+class WXDLLEXPORT wxImageList;
+class WXDLLEXPORT wxWindow;
+
+// array of notebook pages
+//typedef wxWindow WXDLLEXPORT wxNotebookPage;  // so far, any window can be a page
+typedef wxWindow wxNotebookPage;  // so far, any window can be a page
+
+WX_DEFINE_EXPORTED_ARRAY(wxNotebookPage *, wxArrayPages);
 
 // ----------------------------------------------------------------------------
 // wxNotebook
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxNotebook : public wxNotebookBase
+// FIXME this class should really derive from wxTabCtrl, but the interface is not
+//       exactly the same, so I can't do it right now and instead we reimplement
+//       part of wxTabCtrl here
+class WXDLLEXPORT wxNotebook : public wxControl
 {
 public:
   // ctors
@@ -48,6 +64,8 @@ public:
               const wxSize& size = wxDefaultSize,
               long style = 0,
               const wxString& name = "notebook");
+    // dtor
+  ~wxNotebook();
 
   // accessors
   // ---------
@@ -58,6 +76,8 @@ public:
     // selected one (or -1 on error)
     // NB: this function will _not_ generate wxEVT_NOTEBOOK_PAGE_xxx events
   int SetSelection(int nPage);
+    // cycle thru the tabs
+  void AdvanceSelection(bool bForward = TRUE);
     // get the currently selected page
   int GetSelection() const { return m_nSelection; }
 
@@ -72,6 +92,8 @@ public:
   // 3) set for each page it's image
     // associate image list with a control
   void SetImageList(wxImageList* imageList);
+    // get pointer (may be NULL) to the associated image list
+  wxImageList* GetImageList() const { return m_pImageList; }
 
     // sets/returns item's image index in the current image list
   int  GetPageImage(int nPage) const;
@@ -91,6 +113,8 @@ public:
   // ----------
     // remove one page from the notebook
   bool DeletePage(int nPage);
+    // remove one page from the notebook, without deleting
+  bool RemovePage(int nPage);
     // remove all pages
   bool DeleteAllPages();
     // adds a new page to the notebook (it will be deleted ny the notebook,
@@ -105,6 +129,8 @@ public:
                   const wxString& strText,
                   bool bSelect = FALSE,
                   int imageId = -1);
+    // get the panel which represents the given page
+  wxNotebookPage *GetPage(int nPage) { return m_aPages[nPage]; }
 
     // Windows-only at present. Also, you must use the wxNB_FIXEDWIDTH
     // style.
@@ -127,18 +153,16 @@ protected:
   // common part of all ctors
   void Init();
 
-  // remove one page from the notebook, without deleting
-  virtual wxNotebookPage *DoRemovePage(int nPage);
-
   // helper functions
   void ChangePage(int nOldSel, int nSel); // change pages
+
+  wxImageList  *m_pImageList; // we can have an associated image list
+  wxArrayPages  m_aPages;     // array of pages
 
   int m_nSelection;           // the current selection (-1 if none)
 
   DECLARE_DYNAMIC_CLASS(wxNotebook)
   DECLARE_EVENT_TABLE()
 };
-
-#endif // wxUSE_NOTEBOOK
 
 #endif // _NOTEBOOK_H

@@ -2,10 +2,7 @@
 // Name:        generic/wizard.cpp
 // Purpose:     generic implementation of wxWizard class
 // Author:      Vadim Zeitlin
-// Modified by: Robert Cavanaugh
-//              1) Added capability for wxWizardPage to accept resources
-//              2) Added "Help" button handler stub
-//              3) Fixed ShowPage() bug on displaying bitmaps
+// Modified by:
 // Created:     15.08.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -31,8 +28,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_WIZARDDLG
-
 #ifndef WX_PRECOMP
     #include "wx/dynarray.h"
     #include "wx/intl.h"
@@ -54,16 +49,9 @@ WX_DEFINE_ARRAY(wxPanel *, wxArrayPages);
 // event tables and such
 // ----------------------------------------------------------------------------
 
-DEFINE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGED)
-DEFINE_EVENT_TYPE(wxEVT_WIZARD_PAGE_CHANGING)
-DEFINE_EVENT_TYPE(wxEVT_WIZARD_CANCEL)
-DEFINE_EVENT_TYPE(wxEVT_WIZARD_HELP)
-
 BEGIN_EVENT_TABLE(wxWizard, wxDialog)
     EVT_BUTTON(wxID_CANCEL, wxWizard::OnCancel)
-    EVT_BUTTON(wxID_BACKWARD, wxWizard::OnBackOrNext)
-    EVT_BUTTON(wxID_FORWARD, wxWizard::OnBackOrNext)
-    EVT_BUTTON(wxID_HELP, wxWizard::OnHelp)
+    EVT_BUTTON(-1, wxWizard::OnBackOrNext)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxWizard, wxDialog)
@@ -79,23 +67,9 @@ IMPLEMENT_DYNAMIC_CLASS(wxWizardEvent, wxNotifyEvent)
 // wxWizardPage
 // ----------------------------------------------------------------------------
 
-wxWizardPage::wxWizardPage(wxWizard *parent,
-                           const wxBitmap& bitmap,
-                           const wxChar *resource)
-            : wxPanel(parent)
+wxWizardPage::wxWizardPage(wxWizard *parent, const wxBitmap& bitmap)
+            : wxPanel(parent), m_bitmap(bitmap)
 {
-    if ( resource != NULL )
-    {
-#if wxUSE_RESOURCES
-        if ( !LoadFromResource(this, resource) )
-        {
-            wxFAIL_MSG(wxT("wxWizardPage LoadFromResource failed!!!!"));
-        }
-#endif // wxUSE_RESOURCES
-    }
-
-    m_bitmap = bitmap;
-
     // initially the page is hidden, it's shown only when it becomes current
     Hide();
 }
@@ -117,30 +91,20 @@ wxWizardPage *wxWizardPageSimple::GetNext() const
 // generic wxWizard implementation
 // ----------------------------------------------------------------------------
 
-void wxWizard::Init()
-{
-    m_posWizard = wxDefaultPosition;
-    m_page = (wxWizardPage *)NULL;
-    m_btnPrev = m_btnNext = NULL;
-    m_statbmp = NULL;
-}
-
-bool wxWizard::Create(wxWindow *parent,
+wxWizard::wxWizard(wxWindow *parent,
                    int id,
                    const wxString& title,
                    const wxBitmap& bitmap,
                    const wxPoint& pos)
+        : m_posWizard(pos), m_bitmap(bitmap)
 {
-    m_posWizard = pos;
-    m_bitmap = bitmap ;
-
     // just create the dialog itself here, the controls will be created in
     // DoCreateControls() called later when we know our final size
     m_page = (wxWizardPage *)NULL;
     m_btnPrev = m_btnNext = NULL;
     m_statbmp = NULL;
 
-    return wxDialog::Create(parent, id, title, pos);
+    (void)wxDialog::Create(parent, id, title, pos);
 }
 
 void wxWizard::DoCreateControls()
@@ -219,24 +183,13 @@ void wxWizard::DoCreateControls()
 
     x = m_x + m_width - 3*sizeBtn.x - BUTTON_MARGIN;
     y += SEPARATOR_LINE_MARGIN;
-
-    if (GetExtraStyle() & wxWIZARD_EX_HELPBUTTON)
-    {
-        x -= sizeBtn.x;
-        x -= BUTTON_MARGIN ;
-
-        (void)new wxButton(this, wxID_HELP, _("&Help"), wxPoint(x, y), sizeBtn);
-        x += sizeBtn.x;
-        x += BUTTON_MARGIN ;
-    }
-
     m_btnPrev = new wxButton(this, wxID_BACKWARD, _("< &Back"), wxPoint(x, y), sizeBtn);
 
     x += sizeBtn.x;
     m_btnNext = new wxButton(this, wxID_FORWARD, _("&Next >"), wxPoint(x, y), sizeBtn);
 
     x += sizeBtn.x + BUTTON_MARGIN;
-    (void)new wxButton(this, wxID_CANCEL, _("&Cancel"), wxPoint(x, y), sizeBtn);
+    (void)new wxButton(this, wxID_CANCEL, _("Cancel"), wxPoint(x, y), sizeBtn);
 
     // position and size the dialog
     // ----------------------------
@@ -267,19 +220,9 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
     // button or not (initially the label is "Next")
     bool btnLabelWasNext = TRUE;
 
-    // Modified 10-20-2001 Robert Cavanaugh.
-    // Fixed bug for displaying a new bitmap
-    // in each *consecutive* page
+    // and this tells us whether we already had the default bitmap before
+    bool bmpWasDefault = TRUE;
 
-    // flag to indicate if this page uses a new bitmap
-    bool bmpIsDefault = TRUE;
-
-    // use these labels to determine if we need to change the bitmap
-    // for this page
-    wxBitmap   PreviousBitmap = wxNullBitmap;
-    wxBitmap   ThisBitmap = wxNullBitmap;
-
-    // check for previous page
     if ( m_page )
     {
         // send the event to the old page
@@ -294,15 +237,10 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
         m_page->Hide();
 
         btnLabelWasNext = m_page->GetNext() != (wxWizardPage *)NULL;
-
-        // Get the bitmap of the previous page (if it exists)
-        if(m_page->GetBitmap().Ok())
-    {
-            PreviousBitmap = m_page->GetBitmap();
-        }
+        bmpWasDefault = !m_page->GetBitmap().Ok();
     }
 
-    // set the new page
+    // set the new one
     m_page = page;
 
     // is this the end?
@@ -310,10 +248,11 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
     {
         // terminate successfully
         EndModal(wxID_OK);
+
         return TRUE;
     }
 
-    // send the change event to the new page now
+    // send the event to the new page now
     wxWizardEvent event(wxEVT_WIZARD_PAGE_CHANGED, GetId(), goingForward);
     (void)m_page->GetEventHandler()->ProcessEvent(event);
 
@@ -322,19 +261,9 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
     m_page->SetSize(m_x, m_y, m_width, m_height);
     m_page->Show();
 
-    // check if bitmap needs to be updated
-    // update default flag as well
-    if(m_page->GetBitmap().Ok())
-    {
-        ThisBitmap = m_page->GetBitmap();
-        bmpIsDefault = FALSE;
-    }
-
-    // change the bitmap if:
-    // 1) a default bitmap was selected in constructor
-    // 2) this page was constructed with a bitmap
-    // 3) this bitmap is not the previous bitmap
-    if( m_statbmp && (ThisBitmap != PreviousBitmap) )
+    // change the bitmap if necessary (and if we have it at all)
+    bool bmpIsDefault = !m_page->GetBitmap().Ok();
+    if ( m_statbmp && (bmpIsDefault != bmpWasDefault) )
     {
         wxBitmap bmp;
         if ( bmpIsDefault )
@@ -435,21 +364,6 @@ void wxWizard::OnBackOrNext(wxCommandEvent& event)
     (void)ShowPage(page, forward);
 }
 
-void wxWizard::OnHelp(wxCommandEvent& WXUNUSED(event))
-{
-    // this function probably can never be called when we don't have an active
-    // page, but a small extra check won't hurt
-    if(m_page != NULL)
-    {
-        // Create and send the help event to the specific page handler
-        // event data contains the active page so that context-sensitive
-        // help is possible
-        wxWizardEvent eventHelp(wxEVT_WIZARD_HELP, GetId(), TRUE, m_page);
-        (void)m_page->GetEventHandler()->ProcessEvent(eventHelp);
-    }
-}
-
-
 // ----------------------------------------------------------------------------
 // our public interface
 // ----------------------------------------------------------------------------
@@ -469,13 +383,9 @@ wxWizard *wxWizardBase::Create(wxWindow *parent,
 // wxWizardEvent
 // ----------------------------------------------------------------------------
 
-wxWizardEvent::wxWizardEvent(wxEventType type, int id, bool direction, wxWizardPage* page)
+wxWizardEvent::wxWizardEvent(wxEventType type, int id, bool direction)
              : wxNotifyEvent(type, id)
 {
-    // Modified 10-20-2001 Robert Cavanaugh
-    // add the active page to the event data
     m_direction = direction;
-    m_page = page;
 }
 
-#endif // wxUSE_WIZARDDLG

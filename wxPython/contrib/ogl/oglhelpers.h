@@ -108,7 +108,6 @@ wxList* wxPy_wxRealPoint_ListHelper(PyObject* pyList);
 // virtual callbacks into Python callbacks.
 
 class wxPyShapeCanvas : public wxShapeCanvas {
-    DECLARE_DYNAMIC_CLASS(wxPyShapeCanvas);
 public:
     wxPyShapeCanvas(wxWindow* parent = NULL, wxWindowID id = -1,
                     const wxPoint& pos = wxDefaultPosition,
@@ -131,7 +130,6 @@ public:
 
 
 class wxPyShapeEvtHandler : public wxShapeEvtHandler {
-    DECLARE_DYNAMIC_CLASS(wxPyShapeEvtHandler);
 public:
     wxPyShapeEvtHandler(wxShapeEvtHandler *prev = NULL, wxShape *shape = NULL)
         : wxShapeEvtHandler(prev, shape) {}
@@ -141,7 +139,6 @@ public:
 
 
 class wxPyShape : public wxShape {
-    DECLARE_ABSTRACT_CLASS(wxPyShape);
 public:
     wxPyShape(wxPyShapeCanvas *can = NULL)
         : wxShape(can) {}
@@ -152,7 +149,6 @@ public:
 
 
 class wxPyRectangleShape : public wxRectangleShape {
-    DECLARE_DYNAMIC_CLASS(wxPyRectangleShape);
 public:
     wxPyRectangleShape(double width = 0.0, double height = 0.0)
         : wxRectangleShape(width, height) {}
@@ -161,7 +157,6 @@ public:
 };
 
 class wxPyControlPoint : public wxControlPoint {
-    DECLARE_DYNAMIC_CLASS(wxPyControlPoint);
 public:
     wxPyControlPoint(wxPyShapeCanvas *the_canvas = NULL,
                      wxPyShape *object = NULL,
@@ -176,7 +171,6 @@ public:
 
 
 class wxPyBitmapShape : public wxBitmapShape {
-    DECLARE_DYNAMIC_CLASS(wxPyBitmapShape);
 public:
     wxPyBitmapShape() : wxBitmapShape() {}
 
@@ -186,7 +180,6 @@ public:
 
 
 class wxPyDrawnShape : public wxDrawnShape {
-    DECLARE_DYNAMIC_CLASS(wxPyDrawnShape);
 public:
     wxPyDrawnShape() : wxDrawnShape() {}
 
@@ -195,7 +188,6 @@ public:
 
 
 class wxPyCompositeShape : public wxCompositeShape {
-    DECLARE_DYNAMIC_CLASS(wxPyCompositeShape);
 public:
     wxPyCompositeShape() : wxCompositeShape() {}
 
@@ -204,7 +196,6 @@ public:
 
 
 class wxPyDividedShape : public wxDividedShape {
-    DECLARE_DYNAMIC_CLASS(wxPyDividedShape);
 public:
     wxPyDividedShape(double width = 0.0, double height = 0.0)
         : wxDividedShape(width, height) {}
@@ -214,7 +205,6 @@ public:
 
 
 class wxPyDivisionShape : public wxDivisionShape {
-    DECLARE_DYNAMIC_CLASS(wxPyDivisionShape);
 public:
     wxPyDivisionShape() : wxDivisionShape() {}
 
@@ -223,7 +213,6 @@ public:
 
 
 class wxPyEllipseShape : public wxEllipseShape {
-    DECLARE_DYNAMIC_CLASS(wxPyEllipseShape);
 public:
     wxPyEllipseShape(double width = 0.0, double height = 0.0)
         : wxEllipseShape(width, height) {}
@@ -233,7 +222,6 @@ public:
 
 
 class wxPyCircleShape : public wxCircleShape {
-    DECLARE_DYNAMIC_CLASS(wxPyCircleShape);
 public:
     wxPyCircleShape(double width = 0.0)
         : wxCircleShape(width) {}
@@ -243,7 +231,6 @@ public:
 
 
 class wxPyLineShape : public wxLineShape {
-    DECLARE_DYNAMIC_CLASS(wxPyLineShape);
 public:
     wxPyLineShape() : wxLineShape() {}
 
@@ -252,7 +239,6 @@ public:
 
 
 class wxPyPolygonShape : public wxPolygonShape {
-    DECLARE_DYNAMIC_CLASS(wxPyPolygonShape);
 public:
     wxPyPolygonShape() : wxPolygonShape() {}
 
@@ -261,7 +247,6 @@ public:
 
 
 class wxPyTextShape : public wxTextShape {
-    DECLARE_DYNAMIC_CLASS(wxPyTextShape);
 public:
     wxPyTextShape(double width = 0.0, double height = 0.0)
         : wxTextShape(width, height) {}
@@ -274,5 +259,4 @@ public:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 #endif
-
 

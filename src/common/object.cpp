@@ -42,15 +42,6 @@
 #if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
     // for wxObject::Dump
     #include "wx/ioswrap.h"
-    #if defined(__VISAGECPP__)
-    // help with VA debugging
-        #define DEBUG_PRINTF(NAME)   { static int raz=0; \
-          printf( #NAME " %i\n",raz); fflush(stdout);       \
-           raz++;                                        \
-         }
-    #else
-        #define DEBUG_PRINTF(NAME)
-    #endif
 #endif
 
 wxClassInfo wxObject::sm_classwxObject((wxChar *) wxT("wxObject"), (wxChar *) NULL, (wxChar *) NULL, (int ) sizeof(wxObject), (wxObjectConstructorFn) NULL);
@@ -99,8 +90,24 @@ bool wxObject::IsKindOf(wxClassInfo *info) const
         return FALSE;
 }
 
+wxObject *wxObject::Clone() const
+{
+    wxObject *object = GetClassInfo()->CreateObject();
+    CopyObject(*object);
+    return object;
+}
+
+#ifdef __WXDEBUG__
+void wxObject::CopyObject(wxObject& object_dest) const
+#else // !Debug
+void wxObject::CopyObject(wxObject& WXUNUSED(object_dest)) const
+#endif // Debug/!Debug
+{
+    wxASSERT(object_dest.GetClassInfo()->IsKindOf(GetClassInfo()));
+}
+
 #if wxUSE_STD_IOSTREAM && (defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT)
-void wxObject::Dump(wxSTD ostream& str)
+void wxObject::Dump(ostream& str)
 {
     if (GetClassInfo() && GetClassInfo()->GetClassName())
         str << GetClassInfo()->GetClassName();
@@ -120,19 +127,10 @@ void *wxObject::operator new (size_t size, wxChar * fileName, int lineNum)
     return wxDebugAlloc(size, fileName, lineNum, TRUE);
 }
 
-#if defined(__VISAGECPP__)
-#  if __DEBUG_ALLOC__
-void wxObject::operator delete (void * buf,const char * _fname, size_t _line)
-{
-    wxDebugFree(buf);
-}
-#  endif  //__DEBUG_ALLOC__
-#else
 void wxObject::operator delete (void * buf)
 {
     wxDebugFree(buf);
 }
-#endif // __VISAGECPP__
 
 // VC++ 6.0
 #if defined(__VISUALC__) && (__VISUALC__ >= 1200)
@@ -161,11 +159,7 @@ void wxObject::operator delete[] (void * buf)
  * Class info: provides run-time class type information.
  */
 
-wxClassInfo::wxClassInfo(const wxChar *cName,
-                         const wxChar *baseName1,
-                         const wxChar *baseName2,
-                         int sz,
-                         wxObjectConstructorFn constr)
+wxClassInfo::wxClassInfo(wxChar *cName, wxChar *baseName1, wxChar *baseName2, int sz, wxObjectConstructorFn constr)
 {
     m_className = cName;
     m_baseClassName1 = baseName1;
@@ -189,23 +183,21 @@ wxObject *wxClassInfo::CreateObject()
         return (wxObject *) NULL;
 }
 
-wxClassInfo *wxClassInfo::FindClass(const wxChar *c)
+wxClassInfo *wxClassInfo::FindClass(wxChar *c)
 {
     wxClassInfo *p = sm_first;
     while (p)
     {
-        if ( wxStrcmp(p->GetClassName(), c) == 0 )
-            break;
-
+        if (p && p->GetClassName() && wxStrcmp(p->GetClassName(), c) == 0)
+            return p;
         p = p->m_next;
     }
-
-    return p;
+    return (wxClassInfo *) NULL;
 }
 
 // Climb upwards through inheritance hierarchy.
 // Dual inheritance is catered for.
-bool wxClassInfo::IsKindOf(const wxClassInfo *info) const
+bool wxClassInfo::IsKindOf(wxClassInfo *info) const
 {
     if (info == NULL)
         return FALSE;
@@ -274,10 +266,6 @@ void wxClassInfo::CleanUpClasses()
 
 wxObject *wxCreateDynamicObject(const wxChar *name)
 {
-#if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
- DEBUG_PRINTF(wxObject *wxCreateDynamicObject)
-#endif
-
     if (wxClassInfo::sm_classTable)
     {
         wxClassInfo *info = (wxClassInfo *)wxClassInfo::sm_classTable->Get(name);
@@ -312,10 +300,6 @@ wxObject* wxCreateStoredObject( wxInputStream &stream )
 
 void wxObject::StoreObject( wxObjectOutputStream& stream )
 {
-#if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
- DEBUG_PRINTF(wxObject::StoreObject)
-#endif
-
     wxString obj_name = wxString(GetClassInfo()->GetClassName()) + "_Serialize";
     wxLibrary *lib = wxTheLibraries.LoadLibrary("wxserial");
 
@@ -341,10 +325,6 @@ void wxObject::StoreObject( wxObjectOutputStream& stream )
 
 void wxObject::LoadObject( wxObjectInputStream& stream )
 {
-#if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
- DEBUG_PRINTF(wxObject::LoadObject)
-#endif
-
     wxString obj_name = wxString(GetClassInfo()->GetClassName()) + "_Serialize";
     wxLibrary *lib = wxTheLibraries.LoadLibrary("wxserial");
 
@@ -372,10 +352,7 @@ void wxObject::LoadObject( wxObjectInputStream& stream )
 
 void wxObject::Ref(const wxObject& clone)
 {
-#if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
- DEBUG_PRINTF(wxObject::Ref)
-#endif
-     // delete reference to old data
+    // delete reference to old data
     UnRef();
     // reference new data
     if (clone.m_refData) {

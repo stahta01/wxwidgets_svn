@@ -25,7 +25,7 @@
 // ----------------------------------------------------------------------------
 
 // define off_t
-#if !defined(__WXMAC__) || defined(__UNIX__)
+#ifndef __WXMAC__
     #include  <sys/types.h>
 #else
     typedef long off_t;
@@ -66,8 +66,7 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 // ----------------------------------------------------------------------------
 
 // Microsoft compiler loves underscores, feed them to it
-#if defined( __VISUALC__ ) || wxCHECK_W32API_VERSION( 0, 5 ) \
-    || ( defined(__MWERKS__) && defined(__WXMSW__) )
+#ifdef  __VISUALC__
     // functions
     #define   wxClose      _close
     #define   wxRead       _read
@@ -169,15 +168,12 @@ WXDLLEXPORT void wxUnix2DosFilename(wxChar *s);
 #define Unix2DosFilename wxUnix2DosFilename
 
 #ifdef __WXMAC__
-WXDLLEXPORT wxString wxMacFSSpec2MacFilename( const FSSpec *spec ) ;
-WXDLLEXPORT void wxMacFilename2FSSpec( const char *path , FSSpec *spec ) ;
-#  ifndef __DARWIN__
-// Mac file names are POSIX (Unix style) under Darwin, so these are not needed
-WXDLLEXPORT wxString wxMacFSSpec2UnixFilename( const FSSpec *spec ) ;
-WXDLLEXPORT void wxUnixFilename2FSSpec( const char *path , FSSpec *spec ) ;
-WXDLLEXPORT wxString wxMac2UnixFilename( const char *s) ;
-WXDLLEXPORT wxString wxUnix2MacFilename( const char *s);
-#  endif
+  WXDLLEXPORT wxString wxMacFSSpec2MacFilename( const FSSpec *spec ) ;
+  WXDLLEXPORT wxString wxMacFSSpec2UnixFilename( const FSSpec *spec ) ;
+  WXDLLEXPORT void wxUnixFilename2FSSpec( const char *path , FSSpec *spec ) ;
+  WXDLLEXPORT void wxMacFilename2FSSpec( const char *path , FSSpec *spec ) ;
+  WXDLLEXPORT wxString wxMac2UnixFilename( const char *s) ;
+  WXDLLEXPORT wxString wxUnix2MacFilename( const char *s);
 #endif
 
 // Strip the extension, in situ
@@ -224,8 +220,7 @@ WXDLLEXPORT bool wxMatchWild(const wxString& pattern,  const wxString& text, boo
 WXDLLEXPORT bool wxConcatFiles(const wxString& file1, const wxString& file2, const wxString& file3);
 
 // Copy file1 to file2
-WXDLLEXPORT bool wxCopyFile(const wxString& file1, const wxString& file2,
-                            bool overwrite = TRUE);
+WXDLLEXPORT bool wxCopyFile(const wxString& file1, const wxString& file2);
 
 // Remove file
 WXDLLEXPORT bool wxRemoveFile(const wxString& file);
@@ -257,27 +252,16 @@ WXDLLEXPORT bool wxRmdir(const wxString& dir, int flags = 0);
 #define wxFILE_SEP_DSK        wxT(':')
 #define wxFILE_SEP_PATH_DOS   wxT('\\')
 #define wxFILE_SEP_PATH_UNIX  wxT('/')
-#define wxFILE_SEP_PATH_MAC   wxT(':')
-#define wxFILE_SEP_PATH_VMS   wxT('/') //This is the Unix way, but somtimes
-                                       //users will give the VMS native paths
-                                       //and than a ']' is needed.
-                                       //         Jouk
 
 // separator in the path list (as in PATH environment variable)
-// there is no PATH variable in Classic Mac OS so just use the
-// semicolon (it must be different from the file name separator)
 // NB: these are strings and not characters on purpose!
 #define wxPATH_SEP_DOS        wxT(";")
 #define wxPATH_SEP_UNIX       wxT(":")
-#define wxPATH_SEP_MAC        wxT(";")
 
 // platform independent versions
-#if defined(__UNIX__)
+#ifdef  __UNIX__
   #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_UNIX
   #define wxPATH_SEP          wxPATH_SEP_UNIX
-#elif defined(__MAC__)
-  #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_MAC
-  #define wxPATH_SEP          wxPATH_SEP_MAC
 #else   // Windows and OS/2
   #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_DOS
   #define wxPATH_SEP          wxPATH_SEP_DOS
@@ -285,9 +269,9 @@ WXDLLEXPORT bool wxRmdir(const wxString& dir, int flags = 0);
 
 // this is useful for wxString::IsSameAs(): to compare two file names use
 // filename1.IsSameAs(filename2, wxARE_FILENAMES_CASE_SENSITIVE)
-#if defined(__UNIX__) && !defined(__DARWIN__)
+#ifdef  __UNIX__
   #define wxARE_FILENAMES_CASE_SENSITIVE  TRUE
-#else   // Windows, Mac OS and OS/2
+#else   // Windows and OS/2
   #define wxARE_FILENAMES_CASE_SENSITIVE  FALSE
 #endif  // Unix/Windows
 

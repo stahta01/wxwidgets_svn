@@ -2,33 +2,7 @@
 import gdic
 
 from misc import *
-class wxGDIObjectPtr(wxObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxGDIObject(self)
-    def GetVisible(self, *_args, **_kwargs):
-        val = apply(gdic.wxGDIObject_GetVisible,(self,) + _args, _kwargs)
-        return val
-    def SetVisible(self, *_args, **_kwargs):
-        val = apply(gdic.wxGDIObject_SetVisible,(self,) + _args, _kwargs)
-        return val
-    def IsNull(self, *_args, **_kwargs):
-        val = apply(gdic.wxGDIObject_IsNull,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxGDIObject instance at %s>" % (self.this,)
-class wxGDIObject(wxGDIObjectPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(gdic.new_wxGDIObject,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
-class wxBitmapPtr(wxGDIObjectPtr):
+class wxBitmapPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -77,9 +51,6 @@ class wxBitmapPtr(wxGDIObjectPtr):
         val = apply(gdic.wxBitmap_GetSubBitmap,(self,) + _args, _kwargs)
         if val: val = wxBitmapPtr(val) ; val.thisown = 1
         return val
-    def CopyFromIcon(self, *_args, **_kwargs):
-        val = apply(gdic.wxBitmap_CopyFromIcon,(self,) + _args, _kwargs)
-        return val
     def __repr__(self):
         return "<C wxBitmap instance at %s>" % (self.this,)
     
@@ -98,13 +69,10 @@ class wxBitmap(wxBitmapPtr):
 
 
 
-class wxMaskPtr(wxObjectPtr):
+class wxMaskPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Destroy(self, *_args, **_kwargs):
-        val = apply(gdic.wxMask_Destroy,(self,) + _args, _kwargs)
-        return val
     def __repr__(self):
         return "<C wxMask instance at %s>" % (self.this,)
 class wxMask(wxMaskPtr):
@@ -115,7 +83,7 @@ class wxMask(wxMaskPtr):
 
 
 
-class wxIconPtr(wxGDIObjectPtr):
+class wxIconPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -146,9 +114,6 @@ class wxIconPtr(wxGDIObjectPtr):
     def SetDepth(self, *_args, **_kwargs):
         val = apply(gdic.wxIcon_SetDepth,(self,) + _args, _kwargs)
         return val
-    def CopyFromBitmap(self, *_args, **_kwargs):
-        val = apply(gdic.wxIcon_CopyFromBitmap,(self,) + _args, _kwargs)
-        return val
     def __repr__(self):
         return "<C wxIcon instance at %s>" % (self.this,)
     
@@ -167,7 +132,7 @@ class wxIcon(wxIconPtr):
 
 
 
-class wxCursorPtr(wxGDIObjectPtr):
+class wxCursorPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -186,124 +151,54 @@ class wxCursor(wxCursorPtr):
 
 
 
-class wxNativeFontInfoPtr :
+class wxFontPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def FromString(self, *_args, **_kwargs):
-        val = apply(gdic.wxNativeFontInfo_FromString,(self,) + _args, _kwargs)
-        return val
-    def ToString(self, *_args, **_kwargs):
-        val = apply(gdic.wxNativeFontInfo_ToString,(self,) + _args, _kwargs)
-        return val
-    def __str__(self, *_args, **_kwargs):
-        val = apply(gdic.wxNativeFontInfo___str__,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxNativeFontInfo instance at %s>" % (self.this,)
-class wxNativeFontInfo(wxNativeFontInfoPtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxFontMapperPtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxFontMapper(self)
-    def GetAltForEncoding(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontMapper_GetAltForEncoding,(self,) + _args, _kwargs)
-        return val
-    def IsEncodingAvailable(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontMapper_IsEncodingAvailable,(self,) + _args, _kwargs)
-        return val
-    def CharsetToEncoding(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontMapper_CharsetToEncoding,(self,) + _args, _kwargs)
-        return val
-    def SetDialogParent(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontMapper_SetDialogParent,(self,) + _args, _kwargs)
-        return val
-    def SetDialogTitle(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontMapper_SetDialogTitle,(self,) + _args, _kwargs)
-        return val
-    def SetConfig(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontMapper_SetConfig,(self,) + _args, _kwargs)
-        return val
-    def SetConfigPath(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontMapper_SetConfigPath,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxFontMapper instance at %s>" % (self.this,)
-class wxFontMapper(wxFontMapperPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(gdic.new_wxFontMapper,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
-class wxFontPtr(wxGDIObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxFont(self)
     def Ok(self, *_args, **_kwargs):
         val = apply(gdic.wxFont_Ok,(self,) + _args, _kwargs)
-        return val
-    def GetPointSize(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_GetPointSize,(self,) + _args, _kwargs)
-        return val
-    def GetFamily(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_GetFamily,(self,) + _args, _kwargs)
-        return val
-    def GetStyle(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_GetStyle,(self,) + _args, _kwargs)
-        return val
-    def GetWeight(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_GetWeight,(self,) + _args, _kwargs)
-        return val
-    def GetUnderlined(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_GetUnderlined,(self,) + _args, _kwargs)
         return val
     def GetFaceName(self, *_args, **_kwargs):
         val = apply(gdic.wxFont_GetFaceName,(self,) + _args, _kwargs)
         return val
+    def GetFamily(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_GetFamily,(self,) + _args, _kwargs)
+        return val
+    def GetPointSize(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_GetPointSize,(self,) + _args, _kwargs)
+        return val
+    def GetStyle(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_GetStyle,(self,) + _args, _kwargs)
+        return val
+    def GetUnderlined(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_GetUnderlined,(self,) + _args, _kwargs)
+        return val
+    def GetWeight(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_GetWeight,(self,) + _args, _kwargs)
+        return val
     def GetEncoding(self, *_args, **_kwargs):
         val = apply(gdic.wxFont_GetEncoding,(self,) + _args, _kwargs)
-        return val
-    def GetNativeFontInfo(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_GetNativeFontInfo,(self,) + _args, _kwargs)
-        if val: val = wxNativeFontInfoPtr(val) 
-        return val
-    def SetPointSize(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_SetPointSize,(self,) + _args, _kwargs)
-        return val
-    def SetFamily(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_SetFamily,(self,) + _args, _kwargs)
-        return val
-    def SetStyle(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_SetStyle,(self,) + _args, _kwargs)
-        return val
-    def SetWeight(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_SetWeight,(self,) + _args, _kwargs)
         return val
     def SetFaceName(self, *_args, **_kwargs):
         val = apply(gdic.wxFont_SetFaceName,(self,) + _args, _kwargs)
         return val
+    def SetFamily(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_SetFamily,(self,) + _args, _kwargs)
+        return val
+    def SetPointSize(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_SetPointSize,(self,) + _args, _kwargs)
+        return val
+    def SetStyle(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_SetStyle,(self,) + _args, _kwargs)
+        return val
     def SetUnderlined(self, *_args, **_kwargs):
         val = apply(gdic.wxFont_SetUnderlined,(self,) + _args, _kwargs)
         return val
+    def SetWeight(self, *_args, **_kwargs):
+        val = apply(gdic.wxFont_SetWeight,(self,) + _args, _kwargs)
+        return val
     def SetEncoding(self, *_args, **_kwargs):
         val = apply(gdic.wxFont_SetEncoding,(self,) + _args, _kwargs)
-        return val
-    def SetNativeFontInfo(self, *_args, **_kwargs):
-        val = apply(gdic.wxFont_SetNativeFontInfo,(self,) + _args, _kwargs)
         return val
     def GetFamilyString(self, *_args, **_kwargs):
         val = apply(gdic.wxFont_GetFamilyString,(self,) + _args, _kwargs)
@@ -323,36 +218,8 @@ class wxFont(wxFontPtr):
 
 
 
-def wxFontFromNativeInfo(*_args,**_kwargs):
-    val = wxFontPtr(apply(gdic.new_wxFontFromNativeInfo,_args,_kwargs))
-    val.thisown = 1
-    return val
 
-
-class wxFontListPtr(wxObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def AddFont(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontList_AddFont,(self,) + _args, _kwargs)
-        return val
-    def FindOrCreateFont(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontList_FindOrCreateFont,(self,) + _args, _kwargs)
-        if val: val = wxFontPtr(val) 
-        return val
-    def RemoveFont(self, *_args, **_kwargs):
-        val = apply(gdic.wxFontList_RemoveFont,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxFontList instance at %s>" % (self.this,)
-class wxFontList(wxFontListPtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxColourPtr(wxObjectPtr):
+class wxColourPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -390,42 +257,16 @@ class wxColour(wxColourPtr):
 
 
 
-class wxColourDatabasePtr(wxObjectPtr):
+class wxPenPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def FindColour(self, *_args, **_kwargs):
-        val = apply(gdic.wxColourDatabase_FindColour,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) 
-        return val
-    def FindName(self, *_args, **_kwargs):
-        val = apply(gdic.wxColourDatabase_FindName,(self,) + _args, _kwargs)
-        return val
-    def Append(self, *_args, **_kwargs):
-        val = apply(gdic.wxColourDatabase_Append,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxColourDatabase instance at %s>" % (self.this,)
-class wxColourDatabase(wxColourDatabasePtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxPenPtr(wxGDIObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxPen(self)
     def GetCap(self, *_args, **_kwargs):
         val = apply(gdic.wxPen_GetCap,(self,) + _args, _kwargs)
         return val
     def GetColour(self, *_args, **_kwargs):
         val = apply(gdic.wxPen_GetColour,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
+        if val: val = wxColourPtr(val) 
         return val
     def GetJoin(self, *_args, **_kwargs):
         val = apply(gdic.wxPen_GetJoin,(self,) + _args, _kwargs)
@@ -454,6 +295,9 @@ class wxPenPtr(wxGDIObjectPtr):
     def SetWidth(self, *_args, **_kwargs):
         val = apply(gdic.wxPen_SetWidth,(self,) + _args, _kwargs)
         return val
+    def GetDashes(self, *_args, **_kwargs):
+        val = apply(gdic.wxPen_GetDashes,(self,) + _args, _kwargs)
+        return val
     def SetDashes(self, *_args, **_kwargs):
         val = apply(gdic.wxPen_SetDashes,(self,) + _args, _kwargs)
         return val
@@ -467,59 +311,13 @@ class wxPen(wxPenPtr):
 
 
 
-class wxPyPenPtr(wxPenPtr):
+class wxBrushPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxPyPen(self)
-    def SetDashes(self, *_args, **_kwargs):
-        val = apply(gdic.wxPyPen_SetDashes,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxPyPen instance at %s>" % (self.this,)
-class wxPyPen(wxPyPenPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(gdic.new_wxPyPen,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
-class wxPenListPtr(wxObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def AddPen(self, *_args, **_kwargs):
-        val = apply(gdic.wxPenList_AddPen,(self,) + _args, _kwargs)
-        return val
-    def FindOrCreatePen(self, *_args, **_kwargs):
-        val = apply(gdic.wxPenList_FindOrCreatePen,(self,) + _args, _kwargs)
-        if val: val = wxPenPtr(val) 
-        return val
-    def RemovePen(self, *_args, **_kwargs):
-        val = apply(gdic.wxPenList_RemovePen,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxPenList instance at %s>" % (self.this,)
-class wxPenList(wxPenListPtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxBrushPtr(wxGDIObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxBrush(self)
     def GetColour(self, *_args, **_kwargs):
         val = apply(gdic.wxBrush_GetColour,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
+        if val: val = wxColourPtr(val) 
         return val
     def GetStipple(self, *_args, **_kwargs):
         val = apply(gdic.wxBrush_GetStipple,(self,) + _args, _kwargs)
@@ -550,30 +348,7 @@ class wxBrush(wxBrushPtr):
 
 
 
-class wxBrushListPtr(wxObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def AddBrush(self, *_args, **_kwargs):
-        val = apply(gdic.wxBrushList_AddBrush,(self,) + _args, _kwargs)
-        return val
-    def FindOrCreateBrush(self, *_args, **_kwargs):
-        val = apply(gdic.wxBrushList_FindOrCreateBrush,(self,) + _args, _kwargs)
-        if val: val = wxBrushPtr(val) 
-        return val
-    def RemoveBrush(self, *_args, **_kwargs):
-        val = apply(gdic.wxBrushList_RemoveBrush,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxBrushList instance at %s>" % (self.this,)
-class wxBrushList(wxBrushListPtr):
-    def __init__(self,this):
-        self.this = this
-
-
-
-
-class wxDCPtr(wxObjectPtr):
+class wxDCPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -715,7 +490,7 @@ class wxDCPtr(wxObjectPtr):
         return val
     def GetTextBackground(self, *_args, **_kwargs):
         val = apply(gdic.wxDC_GetTextBackground,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
+        if val: val = wxColourPtr(val) 
         return val
     def GetTextExtent(self, *_args, **_kwargs):
         val = apply(gdic.wxDC_GetTextExtent,(self,) + _args, _kwargs)
@@ -725,7 +500,7 @@ class wxDCPtr(wxObjectPtr):
         return val
     def GetTextForeground(self, *_args, **_kwargs):
         val = apply(gdic.wxDC_GetTextForeground,(self,) + _args, _kwargs)
-        if val: val = wxColourPtr(val) ; val.thisown = 1
+        if val: val = wxColourPtr(val) 
         return val
     def GetUserScale(self, *_args, **_kwargs):
         val = apply(gdic.wxDC_GetUserScale,(self,) + _args, _kwargs)
@@ -768,9 +543,6 @@ class wxDCPtr(wxObjectPtr):
         return val
     def SetClippingRegion(self, *_args, **_kwargs):
         val = apply(gdic.wxDC_SetClippingRegion,(self,) + _args, _kwargs)
-        return val
-    def SetClippingRegionAsRegion(self, *_args, **_kwargs):
-        val = apply(gdic.wxDC_SetClippingRegionAsRegion,(self,) + _args, _kwargs)
         return val
     def SetPalette(self, *_args, **_kwargs):
         val = apply(gdic.wxDC_SetPalette,(self,) + _args, _kwargs)
@@ -845,36 +617,8 @@ class wxDCPtr(wxObjectPtr):
     def ResetBoundingBox(self, *_args, **_kwargs):
         val = apply(gdic.wxDC_ResetBoundingBox,(self,) + _args, _kwargs)
         return val
-    def GetBoundingBox(self, *_args, **_kwargs):
-        val = apply(gdic.wxDC_GetBoundingBox,(self,) + _args, _kwargs)
-        return val
-    def _DrawPointList(self, *_args, **_kwargs):
-        val = apply(gdic.wxDC__DrawPointList,(self,) + _args, _kwargs)
-        return val
-    def _DrawLineList(self, *_args, **_kwargs):
-        val = apply(gdic.wxDC__DrawLineList,(self,) + _args, _kwargs)
-        return val
     def __repr__(self):
         return "<C wxDC instance at %s>" % (self.this,)
-    
-    def DrawPointList(self, points, pens=None):
-        if pens is None:
-           pens = []
-        elif isinstance(pens, wxPenPtr):
-           pens = [pens]
-        elif len(pens) != len(points):
-           raise ValueError('points and pens must have same length')
-        return self._DrawPointList(points, pens)
-
-    def DrawLineList(self, lines, pens=None):
-        if pens is None:
-           pens = []
-        elif isinstance(pens, wxPenPtr):
-           pens = [pens]
-        elif len(pens) != len(lines):
-           raise ValueError('lines and pens must have same length')
-        return self._DrawLineList(lines, pens)
-
 class wxDC(wxDCPtr):
     def __init__(self,this):
         self.this = this
@@ -964,7 +708,21 @@ class wxWindowDC(wxWindowDCPtr):
 
 
 
-class wxPalettePtr(wxGDIObjectPtr):
+class wxPostScriptDCPtr(wxDCPtr):
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def __repr__(self):
+        return "<C wxPostScriptDC instance at %s>" % (self.this,)
+class wxPostScriptDC(wxPostScriptDCPtr):
+    def __init__(self,*_args,**_kwargs):
+        self.this = apply(gdic.new_wxPostScriptDC,_args,_kwargs)
+        self.thisown = 1
+
+
+
+
+class wxPalettePtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -990,7 +748,7 @@ class wxPalette(wxPalettePtr):
 
 
 
-class wxImageListPtr(wxObjectPtr):
+class wxImageListPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -1034,129 +792,6 @@ class wxImageList(wxImageListPtr):
 
 
 
-class wxRegionPtr(wxGDIObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxRegion(self)
-    def Clear(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_Clear,(self,) + _args, _kwargs)
-        return val
-    def Contains(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_Contains,(self,) + _args, _kwargs)
-        return val
-    def ContainsPoint(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_ContainsPoint,(self,) + _args, _kwargs)
-        return val
-    def ContainsRect(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_ContainsRect,(self,) + _args, _kwargs)
-        return val
-    def ContainsRectDim(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_ContainsRectDim,(self,) + _args, _kwargs)
-        return val
-    def GetBox(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_GetBox,(self,) + _args, _kwargs)
-        if val: val = wxRectPtr(val) ; val.thisown = 1
-        return val
-    def Intersect(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_Intersect,(self,) + _args, _kwargs)
-        return val
-    def IntersectRect(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_IntersectRect,(self,) + _args, _kwargs)
-        return val
-    def IntersectRegion(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_IntersectRegion,(self,) + _args, _kwargs)
-        return val
-    def IsEmpty(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_IsEmpty,(self,) + _args, _kwargs)
-        return val
-    def Union(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_Union,(self,) + _args, _kwargs)
-        return val
-    def UnionRect(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_UnionRect,(self,) + _args, _kwargs)
-        return val
-    def UnionRegion(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_UnionRegion,(self,) + _args, _kwargs)
-        return val
-    def Subtract(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_Subtract,(self,) + _args, _kwargs)
-        return val
-    def SubtractRect(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_SubtractRect,(self,) + _args, _kwargs)
-        return val
-    def SubtractRegion(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_SubtractRegion,(self,) + _args, _kwargs)
-        return val
-    def Xor(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_Xor,(self,) + _args, _kwargs)
-        return val
-    def XorRect(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_XorRect,(self,) + _args, _kwargs)
-        return val
-    def XorRegion(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegion_XorRegion,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxRegion instance at %s>" % (self.this,)
-class wxRegion(wxRegionPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(gdic.new_wxRegion,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
-class wxRegionIteratorPtr(wxObjectPtr):
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def __del__(self,gdic=gdic):
-        if self.thisown == 1 :
-            gdic.delete_wxRegionIterator(self)
-    def GetX(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_GetX,(self,) + _args, _kwargs)
-        return val
-    def GetY(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_GetY,(self,) + _args, _kwargs)
-        return val
-    def GetW(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_GetW,(self,) + _args, _kwargs)
-        return val
-    def GetWidth(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_GetWidth,(self,) + _args, _kwargs)
-        return val
-    def GetH(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_GetH,(self,) + _args, _kwargs)
-        return val
-    def GetHeight(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_GetHeight,(self,) + _args, _kwargs)
-        return val
-    def GetRect(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_GetRect,(self,) + _args, _kwargs)
-        if val: val = wxRectPtr(val) ; val.thisown = 1
-        return val
-    def HaveRects(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_HaveRects,(self,) + _args, _kwargs)
-        return val
-    def Reset(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_Reset,(self,) + _args, _kwargs)
-        return val
-    def Next(self, *_args, **_kwargs):
-        val = apply(gdic.wxRegionIterator_Next,(self,) + _args, _kwargs)
-        return val
-    def __repr__(self):
-        return "<C wxRegionIterator instance at %s>" % (self.this,)
-class wxRegionIterator(wxRegionIteratorPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(gdic.new_wxRegionIterator,_args,_kwargs)
-        self.thisown = 1
-
-
-
-
 
 
 #-------------- FUNCTION WRAPPERS ------------------
@@ -1166,40 +801,19 @@ def wxEmptyBitmap(*_args, **_kwargs):
     if val: val = wxBitmapPtr(val); val.thisown = 1
     return val
 
-def wxBitmapFromXPMData(*_args, **_kwargs):
-    val = apply(gdic.wxBitmapFromXPMData,_args,_kwargs)
-    if val: val = wxBitmapPtr(val); val.thisown = 1
-    return val
-
-def wxBitmapFromIcon(*_args, **_kwargs):
-    val = apply(gdic.wxBitmapFromIcon,_args,_kwargs)
-    if val: val = wxBitmapPtr(val); val.thisown = 1
-    return val
-
-def wxBitmapFromBits(*_args, **_kwargs):
-    val = apply(gdic.wxBitmapFromBits,_args,_kwargs)
-    if val: val = wxBitmapPtr(val); val.thisown = 1
-    return val
-
 def wxMaskColour(*_args, **_kwargs):
     val = apply(gdic.wxMaskColour,_args,_kwargs)
     if val: val = wxMaskPtr(val); val.thisown = 1
-    return val
-
-def wxEmptyIcon(*_args, **_kwargs):
-    val = apply(gdic.wxEmptyIcon,_args,_kwargs)
-    if val: val = wxIconPtr(val); val.thisown = 1
-    return val
-
-def wxIconFromXPMData(*_args, **_kwargs):
-    val = apply(gdic.wxIconFromXPMData,_args,_kwargs)
-    if val: val = wxIconPtr(val); val.thisown = 1
     return val
 
 def wxStockCursor(*_args, **_kwargs):
     val = apply(gdic.wxStockCursor,_args,_kwargs)
     if val: val = wxCursorPtr(val); val.thisown = 1
     return val
+
+wxFont_GetDefaultEncoding = gdic.wxFont_GetDefaultEncoding
+
+wxFont_SetDefaultEncoding = gdic.wxFont_SetDefaultEncoding
 
 def wxNamedColour(*_args, **_kwargs):
     val = apply(gdic.wxNamedColour,_args,_kwargs)
@@ -1211,36 +825,10 @@ def wxMemoryDCFromDC(*_args, **_kwargs):
     if val: val = wxMemoryDCPtr(val); val.thisown = 1
     return val
 
-wxFontMapper_GetEncodingName = gdic.wxFontMapper_GetEncodingName
-
-wxFontMapper_GetEncodingDescription = gdic.wxFontMapper_GetEncodingDescription
-
-wxFontMapper_GetDefaultConfigPath = gdic.wxFontMapper_GetDefaultConfigPath
-
-wxFont_GetDefaultEncoding = gdic.wxFont_GetDefaultEncoding
-
-wxFont_SetDefaultEncoding = gdic.wxFont_SetDefaultEncoding
-
 
 
 #-------------- VARIABLE WRAPPERS ------------------
 
-wxFONTFAMILY_DEFAULT = gdic.wxFONTFAMILY_DEFAULT
-wxFONTFAMILY_DECORATIVE = gdic.wxFONTFAMILY_DECORATIVE
-wxFONTFAMILY_ROMAN = gdic.wxFONTFAMILY_ROMAN
-wxFONTFAMILY_SCRIPT = gdic.wxFONTFAMILY_SCRIPT
-wxFONTFAMILY_SWISS = gdic.wxFONTFAMILY_SWISS
-wxFONTFAMILY_MODERN = gdic.wxFONTFAMILY_MODERN
-wxFONTFAMILY_TELETYPE = gdic.wxFONTFAMILY_TELETYPE
-wxFONTFAMILY_MAX = gdic.wxFONTFAMILY_MAX
-wxFONTSTYLE_NORMAL = gdic.wxFONTSTYLE_NORMAL
-wxFONTSTYLE_ITALIC = gdic.wxFONTSTYLE_ITALIC
-wxFONTSTYLE_SLANT = gdic.wxFONTSTYLE_SLANT
-wxFONTSTYLE_MAX = gdic.wxFONTSTYLE_MAX
-wxFONTWEIGHT_NORMAL = gdic.wxFONTWEIGHT_NORMAL
-wxFONTWEIGHT_LIGHT = gdic.wxFONTWEIGHT_LIGHT
-wxFONTWEIGHT_BOLD = gdic.wxFONTWEIGHT_BOLD
-wxFONTWEIGHT_MAX = gdic.wxFONTWEIGHT_MAX
 wxFONTENCODING_SYSTEM = gdic.wxFONTENCODING_SYSTEM
 wxFONTENCODING_DEFAULT = gdic.wxFONTENCODING_DEFAULT
 wxFONTENCODING_ISO8859_1 = gdic.wxFONTENCODING_ISO8859_1
@@ -1258,7 +846,6 @@ wxFONTENCODING_ISO8859_12 = gdic.wxFONTENCODING_ISO8859_12
 wxFONTENCODING_ISO8859_13 = gdic.wxFONTENCODING_ISO8859_13
 wxFONTENCODING_ISO8859_14 = gdic.wxFONTENCODING_ISO8859_14
 wxFONTENCODING_ISO8859_15 = gdic.wxFONTENCODING_ISO8859_15
-wxFONTENCODING_ISO8859_MAX = gdic.wxFONTENCODING_ISO8859_MAX
 wxFONTENCODING_KOI8 = gdic.wxFONTENCODING_KOI8
 wxFONTENCODING_ALTERNATIVE = gdic.wxFONTENCODING_ALTERNATIVE
 wxFONTENCODING_BULGARIAN = gdic.wxFONTENCODING_BULGARIAN
@@ -1267,23 +854,9 @@ wxFONTENCODING_CP850 = gdic.wxFONTENCODING_CP850
 wxFONTENCODING_CP852 = gdic.wxFONTENCODING_CP852
 wxFONTENCODING_CP855 = gdic.wxFONTENCODING_CP855
 wxFONTENCODING_CP866 = gdic.wxFONTENCODING_CP866
-wxFONTENCODING_CP874 = gdic.wxFONTENCODING_CP874
-wxFONTENCODING_CP932 = gdic.wxFONTENCODING_CP932
-wxFONTENCODING_CP936 = gdic.wxFONTENCODING_CP936
-wxFONTENCODING_CP949 = gdic.wxFONTENCODING_CP949
-wxFONTENCODING_CP950 = gdic.wxFONTENCODING_CP950
 wxFONTENCODING_CP1250 = gdic.wxFONTENCODING_CP1250
 wxFONTENCODING_CP1251 = gdic.wxFONTENCODING_CP1251
 wxFONTENCODING_CP1252 = gdic.wxFONTENCODING_CP1252
-wxFONTENCODING_CP1253 = gdic.wxFONTENCODING_CP1253
-wxFONTENCODING_CP1254 = gdic.wxFONTENCODING_CP1254
-wxFONTENCODING_CP1255 = gdic.wxFONTENCODING_CP1255
-wxFONTENCODING_CP1256 = gdic.wxFONTENCODING_CP1256
-wxFONTENCODING_CP1257 = gdic.wxFONTENCODING_CP1257
-wxFONTENCODING_CP12_MAX = gdic.wxFONTENCODING_CP12_MAX
-wxFONTENCODING_UTF7 = gdic.wxFONTENCODING_UTF7
-wxFONTENCODING_UTF8 = gdic.wxFONTENCODING_UTF8
-wxFONTENCODING_UNICODE = gdic.wxFONTENCODING_UNICODE
 wxFONTENCODING_MAX = gdic.wxFONTENCODING_MAX
 cvar = gdic.cvar
 wxNORMAL_FONT = wxFontPtr(gdic.cvar.wxNORMAL_FONT)
@@ -1328,10 +901,6 @@ wxNullBrush = wxBrushPtr(gdic.cvar.wxNullBrush)
 wxNullPalette = wxPalettePtr(gdic.cvar.wxNullPalette)
 wxNullFont = wxFontPtr(gdic.cvar.wxNullFont)
 wxNullColour = wxColourPtr(gdic.cvar.wxNullColour)
-wxTheFontList = wxFontListPtr(gdic.cvar.wxTheFontList)
-wxThePenList = wxPenListPtr(gdic.cvar.wxThePenList)
-wxTheBrushList = wxBrushListPtr(gdic.cvar.wxTheBrushList)
-wxTheColourDatabase = wxColourDatabasePtr(gdic.cvar.wxTheColourDatabase)
 wxIMAGELIST_DRAW_NORMAL = gdic.wxIMAGELIST_DRAW_NORMAL
 wxIMAGELIST_DRAW_TRANSPARENT = gdic.wxIMAGELIST_DRAW_TRANSPARENT
 wxIMAGELIST_DRAW_SELECTED = gdic.wxIMAGELIST_DRAW_SELECTED
@@ -1339,6 +908,3 @@ wxIMAGELIST_DRAW_FOCUSED = gdic.wxIMAGELIST_DRAW_FOCUSED
 wxIMAGE_LIST_NORMAL = gdic.wxIMAGE_LIST_NORMAL
 wxIMAGE_LIST_SMALL = gdic.wxIMAGE_LIST_SMALL
 wxIMAGE_LIST_STATE = gdic.wxIMAGE_LIST_STATE
-wxOutRegion = gdic.wxOutRegion
-wxPartRegion = gdic.wxPartRegion
-wxInRegion = gdic.wxInRegion

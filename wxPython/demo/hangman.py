@@ -431,7 +431,7 @@ class MyApp(wxApp):
         else:
             defaultfile = ""
         wf = WordFetcher(defaultfile)
-        frame = MyFrame(None, wf)
+        frame = MyFrame(NULL, wf)
         self.SetTopWindow(frame)
         frame.Show(TRUE)
         return TRUE
