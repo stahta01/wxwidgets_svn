@@ -2,12 +2,12 @@
 // Name:        msgdlg.h
 // Purpose:     wxMessageDialog class. Use generic version if no
 //              platform-specific implementation.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MSGBOXDLG_H_
@@ -24,7 +24,7 @@
  * Message box dialog
  */
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxMessageBoxCaptionStr;
+WXDLLEXPORT_DATA(extern const char*) wxMessageBoxCaptionStr;
 
 class WXDLLEXPORT wxMessageDialog: public wxDialog
 {

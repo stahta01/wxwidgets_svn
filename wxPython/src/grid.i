@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // Name:        grid.i
 // Purpose:     SWIG definitions for the new wxGrid and related classes
 //
@@ -819,7 +819,7 @@ public:
     }
 
 
-    wxGridCellEditor* Clone() const {
+    wxGridCellEditor*Clone() const {
         wxGridCellEditor* rval = NULL;
         wxPyBeginBlockThreads();
         if (wxPyCBH_findCallback(m_myInst, "Clone")) {
@@ -883,7 +883,6 @@ public:
     DEC_PYCALLBACK__(StartingClick);
     DEC_PYCALLBACK__(Destroy);
     DEC_PYCALLBACK__STRING(SetParameters);
-    DEC_PYCALLBACK_STRING__constpure(GetValue);
 
     PYPRIVATE;
 };
@@ -897,7 +896,6 @@ IMP_PYCALLBACK__any(wxPyGridCellEditor, wxGridCellEditor, StartingKey, wxKeyEven
 IMP_PYCALLBACK__any(wxPyGridCellEditor, wxGridCellEditor, HandleReturn, wxKeyEvent);
 IMP_PYCALLBACK__(wxPyGridCellEditor, wxGridCellEditor, StartingClick);
 IMP_PYCALLBACK__(wxPyGridCellEditor, wxGridCellEditor, Destroy);
-IMP_PYCALLBACK_STRING__constpure(wxPyGridCellEditor, wxGridCellEditor, GetValue);
 
 %}
 
@@ -929,7 +927,6 @@ class wxGridCellTextEditor : public wxGridCellEditor
 public:
     wxGridCellTextEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -938,7 +935,6 @@ class wxGridCellNumberEditor : public wxGridCellTextEditor
 public:
     wxGridCellNumberEditor(int min = -1, int max = -1);
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -947,7 +943,6 @@ class wxGridCellFloatEditor : public wxGridCellTextEditor
 public:
     wxGridCellFloatEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -956,7 +951,6 @@ class wxGridCellBoolEditor : public wxGridCellEditor
 public:
     wxGridCellBoolEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 class wxGridCellChoiceEditor : public wxGridCellEditor
@@ -966,7 +960,6 @@ public:
                            const wxString* choices = NULL,
                            bool allowOthers = FALSE);
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -975,7 +968,6 @@ class wxGridCellEnumEditor : public wxGridCellChoiceEditor
 public:
     wxGridCellEnumEditor( const wxString& choices = wxPyEmptyString );
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -984,7 +976,6 @@ class wxGridCellAutoWrapStringEditor : public wxGridCellTextEditor
 public:
     wxGridCellAutoWrapStringEditor();
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
-    virtual wxString GetValue();
 };
 
 
@@ -1042,7 +1033,7 @@ public:
     wxColour GetBackgroundColour() const;
     wxFont GetFont() const;
     void GetAlignment(int *OUTPUT, int *OUTPUT) const;
-    void GetSize(int *num_rows, int *num_cols) const;
+    void GetSize(int *OUTPUT, int *OUTPUT) const;
     bool GetOverflow() const;
     wxGridCellRenderer *GetRenderer(wxGrid* grid, int row, int col) const;
     wxGridCellEditor *GetEditor(wxGrid* grid, int row, int col) const;
@@ -1560,8 +1551,7 @@ public:
     //
     void DrawTextRectangle( wxDC& dc, const wxString&, const wxRect&,
                             int horizontalAlignment = wxLEFT,
-                            int verticalAlignment = wxTOP,
-                            int textOrientation = wxHORIZONTAL );
+                            int verticalAlignment = wxTOP );
 
 //      // Split a string containing newline chararcters into an array of
 //      // strings and return the number of lines
@@ -1666,7 +1656,6 @@ public:
     wxFont   GetLabelFont();
     void     GetRowLabelAlignment( int *OUTPUT, int *OUTPUT );
     void     GetColLabelAlignment( int *OUTPUT, int *OUTPUT );
-    int      GetColLabelTextOrientation();
     wxString GetRowLabelValue( int row );
     wxString GetColLabelValue( int col );
     wxColour GetGridLineColour();
@@ -1681,7 +1670,6 @@ public:
     void     SetLabelFont( const wxFont& );
     void     SetRowLabelAlignment( int horiz, int vert );
     void     SetColLabelAlignment( int horiz, int vert );
-    void     SetColLabelTextOrientation( int textOrientation );
     void     SetRowLabelValue( int row, const wxString& );
     void     SetColLabelValue( int col, const wxString& );
     void     SetGridLineColour( const wxColour& );
@@ -1727,8 +1715,8 @@ public:
     wxColour GetCellTextColour( int row, int col );
     wxFont   GetDefaultCellFont();
     wxFont   GetCellFont( int row, int col );
-    void     GetDefaultCellAlignment( int *horiz, int *vert );
-    void     GetCellAlignment( int row, int col, int *horiz, int *vert );
+    void     GetDefaultCellAlignment( int *OUTPUT, int *OUTPUT );
+    void     GetCellAlignment( int row, int col, int *OUTPUT, int *OUTPUT );
     bool     GetDefaultCellOverflow();
     bool     GetCellOverflow( int row, int col );
     void     GetCellSize( int row, int col, int *OUTPUT, int *OUTPUT );
@@ -1754,18 +1742,16 @@ public:
     // and also set the grid size to just fit its contents
     void     AutoSize();
 
-    // autosize row height depending on label text
-    void     AutoSizeRowLabelSize( int row );
-
-    // autosize column width depending on label text
-    void     AutoSizeColLabelSize( int col );
-
-
     // column won't be resized to be lesser width - this must be called during
     // the grid creation because it won't resize the column if it's already
     // narrower than the minimal width
     void     SetColMinimalWidth( int col, int width );
     void     SetRowMinimalHeight( int row, int width );
+
+    void     SetColMinimalAcceptableWidth( int width );
+    void     SetRowMinimalAcceptableHeight( int width );
+    int      GetColMinimalAcceptableWidth() const;
+    int      GetRowMinimalAcceptableHeight() const;
 
     void     SetDefaultCellBackgroundColour( const wxColour& );
     void     SetCellBackgroundColour( int row, int col, const wxColour& );

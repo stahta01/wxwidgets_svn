@@ -37,7 +37,7 @@
 
 #ifndef NO_TEXT_WINDOW_STREAM
     #if wxUSE_STD_IOSTREAM
-        #include "wx/ioswrap.h"    // derivation: we need the full decls.
+        #include "wx/ioswrap.h"    // for iostream classes if we need them
     #else // !wxUSE_STD_IOSTREAM
         // can't compile this feature in if we don't use streams at all
         #define NO_TEXT_WINDOW_STREAM
@@ -305,10 +305,10 @@ protected:
     #include "wx/gtk/textctrl.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/textctrl.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/textctrl.h"
 #elif defined(__WXPM__)
     #include "wx/os2/textctrl.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/textctrl.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -329,9 +329,9 @@ END_DECLARE_EVENT_TYPES()
 class WXDLLEXPORT wxTextUrlEvent : public wxCommandEvent
 {
 public:
-    wxTextUrlEvent(int winid, const wxMouseEvent& evtMouse,
+    wxTextUrlEvent(int id, const wxMouseEvent& evtMouse,
                    long start, long end)
-        : wxCommandEvent(wxEVT_COMMAND_TEXT_URL, winid)
+        : wxCommandEvent(wxEVT_COMMAND_TEXT_URL, id)
         , m_evtMouse(evtMouse), m_start(start), m_end(end)
         { }
 

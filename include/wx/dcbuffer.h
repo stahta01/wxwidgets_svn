@@ -72,8 +72,6 @@ public:
         // to) is destroyed.
 
     void UnMask();
-
-    DECLARE_NO_COPY_CLASS(wxBufferedDC)
 };
 
 

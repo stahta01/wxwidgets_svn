@@ -25,11 +25,10 @@
 #define XtDisplay XTDISPLAY
 #endif
 
-#include "wx/settings.h"
+#include "wx/wx.h"
 #include "wx/app.h"
 #include "wx/timer.h"
 #include "wx/toolbar.h"
-#include "wx/frame.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -46,7 +45,6 @@
 #endif
 
 #include "wx/motif/private.h"
-#include "wx/motif/bmpmotif.h"
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -109,22 +107,14 @@ public:
     void SetWidget(Widget widget) { m_widget = widget; }
     Widget GetButtonWidget() const { return m_widget; }
 
-    Pixmap GetArmPixmap()
-    {
-        m_bitmapCache.SetBitmap( GetNormalBitmap() );
-        return (Pixmap)m_bitmapCache.GetArmPixmap( (WXWidget)m_widget );
-    }
+    void SetPixmap(Pixmap pixmap) { m_pixmap = pixmap; }
+    Pixmap GetPixmap() const { return m_pixmap; }
 
-    Pixmap GetInsensPixmap()
-    {
-        m_bitmapCache.SetBitmap( GetNormalBitmap() );
-        return (Pixmap)m_bitmapCache.GetInsensPixmap( (WXWidget)m_widget );
-    }
 protected:
     void Init();
 
     Widget m_widget;
-    wxBitmapCache m_bitmapCache;
+    Pixmap m_pixmap;
 };
 
 // ----------------------------------------------------------------------------
@@ -167,12 +157,15 @@ wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 void wxToolBarTool::Init()
 {
     m_widget = (Widget)0;
+    m_pixmap = (Pixmap)0;
 }
 
 wxToolBarTool::~wxToolBarTool()
 {
     if ( m_widget )
         XtDestroyWidget(m_widget);
+    // note: do not delete m_pixmap here because it will be deleted
+    //       by the base class when the bitmap is destroyed.
 }
 
 // ----------------------------------------------------------------------------
@@ -200,11 +193,18 @@ bool wxToolBar::Create(wxWindow *parent,
                        long style,
                        const wxString& name)
 {
-    if( !wxControl::CreateControl( parent, id, pos, size, style,
-                                   wxDefaultValidator, name ) )
-        return FALSE;
+    Init();
 
+    m_windowId = id;
+
+    SetName(name);
     m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
+    m_foregroundColour = parent->GetForegroundColour();
+    m_windowStyle = style;
+
+    SetParent(parent);
+
+    if (parent) parent->AddChild(this);
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -229,18 +229,11 @@ bool wxToolBar::Create(wxWindow *parent,
 
     m_mainWidget = (WXWidget) toolbar;
 
+    m_font = parent->GetFont();
     ChangeFont(FALSE);
 
-    wxPoint rPos = pos;
-    wxSize  rSize = size;
-
-    if( rPos.x == -1 ) rPos.x = 0;
-    if( rPos.y == -1 ) rPos.y = 0;
-    if( rSize.x == -1 && GetParent() )
-        rSize.x = GetParent()->GetSize().x;
-
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
-                  rPos.x, rPos.y, rSize.x, rSize.y);
+    SetCanAddEventHandler(TRUE);
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
 
     ChangeBackgroundColour();
 
@@ -261,8 +254,6 @@ bool wxToolBar::Realize()
         return TRUE;
     }
 
-    bool isVertical = GetWindowStyle() & wxTB_VERTICAL;
-
     // Separator spacing
     const int separatorSize = GetToolSeparation(); // 8;
     wxSize margins = GetToolMargins();
@@ -273,13 +264,13 @@ bool wxToolBar::Realize()
     int currentX = marginX;
     int currentY = marginY;
 
-    int buttonHeight = 0, buttonWidth = 0;
+    int buttonHeight = 0;
 
     int currentSpacing = 0;
 
     Widget button;
     Pixmap pixmap, insensPixmap;
-    wxBitmap bmp, insensBmp;
+    wxBitmap bmp;
 
     wxToolBarToolsList::Node *node = m_tools.GetFirst();
     while ( node )
@@ -293,32 +284,22 @@ bool wxToolBar::Realize()
                 wxControl* control = tool->GetControl();
                 wxSize sz = control->GetSize();
                 wxPoint pos = control->GetPosition();
-                // Allow a control to specify a y[x]-offset by setting
-                // its initial position, but still don't allow it to
-                // position itself above the top[left] margin.
-                int controlY = (pos.y > 0) ? pos.y : currentY;
-                int controlX = (pos.x > 0) ? pos.x : currentX;
-                control->Move( isVertical ? controlX : currentX,
-                               isVertical ? currentY : controlY );
-                if ( isVertical )
-                    currentY += sz.y + packing;
-                else
-                    currentX += sz.x + packing;
+                // Allow a control to specify a y-offset by setting its initial position,
+                // but still don't allow it to position itself above the top margin.
+                int controlY = (pos.y > 0) ? currentY + pos.y : currentY;
+                control->Move(currentX, controlY);
+                currentX += sz.x + packing;
 
                 break;
             }
             case wxTOOL_STYLE_SEPARATOR:
-                // skip separators for vertical toolbars
-                if( !isVertical )
-                {
-                    currentX += separatorSize;
-                }
+                currentX += separatorSize;
                 break;
 
             case wxTOOL_STYLE_BUTTON:
                 button = (Widget) 0;
 
-                if ( tool->CanBeToggled() && !tool->GetButtonWidget() )
+                if ( tool->CanBeToggled() )
                 {
                     button = XtVaCreateWidget("toggleButton",
                             xmToggleButtonWidgetClass, (Widget) m_mainWidget,
@@ -332,18 +313,14 @@ bool wxToolBar::Realize()
                             XmNmultiClick, XmMULTICLICK_KEEP,
                             XmNlabelType, XmPIXMAP,
                             NULL);
-                    XtAddCallback ((Widget) button,
-                                   XmNvalueChangedCallback,
-                                   (XtCallbackProc) wxToolButtonCallback,
-                                   (XtPointer) this);
+                    XtAddCallback ((Widget) button, XmNvalueChangedCallback, (XtCallbackProc) wxToolButtonCallback,
+                            (XtPointer) this);
 
                     XtVaSetValues ((Widget) button,
-                                   XmNselectColor,
-                                   m_backgroundColour.AllocColour
-                                       (XtDisplay((Widget) button)),
-                                   NULL);
+                            XmNselectColor, m_backgroundColour.AllocColour(XtDisplay((Widget) button)),
+                            NULL);
                 }
-                else if( !tool->GetButtonWidget() )
+                else
                 {
                     button = XtVaCreateWidget("button",
                             xmPushButtonWidgetClass, (Widget) m_mainWidget,
@@ -353,52 +330,31 @@ bool wxToolBar::Realize()
                             XmNlabelType, XmPIXMAP,
                             NULL);
                     XtAddCallback (button,
-                                   XmNactivateCallback,
-                                   (XtCallbackProc) wxToolButtonCallback,
-                                   (XtPointer) this);
+                            XmNactivateCallback, (XtCallbackProc) wxToolButtonCallback,
+                            (XtPointer) this);
                 }
 
-                if( !tool->GetButtonWidget() )
-                {
-                    wxDoChangeBackgroundColour((WXWidget) button,
-                                               m_backgroundColour, TRUE);
+                DoChangeBackgroundColour((WXWidget) button, m_backgroundColour, TRUE);
 
-                    tool->SetWidget(button);
-                }
-                else
-                {
-                    button = (Widget)tool->GetButtonWidget();
-                    XtVaSetValues( button,
-                                   XmNx, currentX, XmNy, currentY,
-                                   NULL );
-                }
+                tool->SetWidget(button);
 
                 // For each button, if there is a mask, we must create
                 // a new wxBitmap that has the correct background colour
                 // for the button. Otherwise the background will just be
                 // e.g. black if a transparent XPM has been loaded.
                 bmp = tool->GetNormalBitmap();
-                insensBmp = tool->GetDisabledBitmap();
-                if ( bmp.GetMask() || insensBmp.GetMask() )
+                if ( bmp.GetMask() )
                 {
                     int backgroundPixel;
                     XtVaGetValues(button, XmNbackground, &backgroundPixel,
-                                  NULL);
+                            NULL);
 
                     wxColour col;
                     col.SetPixel(backgroundPixel);
 
-                    if( bmp.Ok() && bmp.GetMask() )
-                    {
-                        bmp = wxCreateMaskedBitmap(bmp, col);
-                        tool->SetNormalBitmap(bmp);
-                    }
+                    bmp = wxCreateMaskedBitmap(bmp, col);
 
-                    if( insensBmp.Ok() && insensBmp.GetMask() )
-                    {
-                        insensBmp = wxCreateMaskedBitmap(insensBmp, col);
-                        tool->SetDisabledBitmap(insensBmp);
-                    }
+                    tool->SetNormalBitmap(bmp);
                 }
 
                 // Create a selected/toggled bitmap. If there isn't a 2nd
@@ -407,27 +363,61 @@ bool wxToolBar::Realize()
                 int backgroundPixel;
                 if ( tool->CanBeToggled() )
                     XtVaGetValues(button, XmNselectColor, &backgroundPixel,
-                                  NULL);
+                            NULL);
                 else
                     XtVaGetValues(button, XmNarmColor, &backgroundPixel,
-                                  NULL);
+                            NULL);
+
                 wxColour col;
                 col.SetPixel(backgroundPixel);
 
-                pixmap = (Pixmap) bmp.GetDrawable();
+                // FIXME: we use disabled bitmap as the bitmap for the toggled
+                //        state, we probably need a GetToggledBitmap() instead
+                wxBitmap bmpToggled = tool->GetDisabledBitmap();
+                if ( bmpToggled.Ok() && bmpToggled.GetMask())
                 {
-                    wxBitmap tmp = tool->GetDisabledBitmap();
-
-                    insensPixmap = tmp.Ok() ?
-                            (Pixmap)tmp.GetDrawable() :
-                            tool->GetInsensPixmap();
+                    // Use what's there
+                    wxBitmap newBitmap = wxCreateMaskedBitmap(bmpToggled, col);
+                    tool->SetDisabledBitmap(newBitmap);
                 }
-                
+                else
+                {
+                    // Use unselected bitmap
+                    if ( bmp.GetMask() )
+                    {
+                        wxBitmap newBitmap = wxCreateMaskedBitmap(bmp, col);
+                        tool->SetDisabledBitmap(newBitmap);
+                    }
+                    else
+                        tool->SetDisabledBitmap(bmp);
+                }
+
+                // FIXME: and here we should use GetDisabledBitmap()...
+                pixmap = (Pixmap) bmp.GetPixmap();
+                insensPixmap = (Pixmap) bmp.GetInsensPixmap();
+
                 if (tool->CanBeToggled())
                 {
                     // Toggle button
-                    Pixmap pixmap2 = tool->GetArmPixmap();
-                    Pixmap insensPixmap2 = tool->GetInsensPixmap();
+                    Pixmap pixmap2 = (Pixmap) 0;
+                    Pixmap insensPixmap2 = (Pixmap) 0;
+
+                    // If there's a bitmap for the toggled state, use it,
+                    // otherwise generate one.
+                    //
+                    // FIXME: see above
+                    if ( bmpToggled.Ok() )
+                    {
+                        pixmap2 = (Pixmap) bmpToggled.GetPixmap();
+                        insensPixmap2 = (Pixmap) bmpToggled.GetInsensPixmap();
+                    }
+                    else
+                    {
+                        pixmap2 = (Pixmap) bmp.GetArmPixmap(button);
+                        insensPixmap2 = XCreateInsensitivePixmap((Display*) wxGetDisplay(), pixmap2);
+                    }
+
+                    tool->SetPixmap(pixmap2);
 
                     XtVaSetValues (button,
                             XmNfillOnSelect, True,
@@ -440,7 +430,21 @@ bool wxToolBar::Realize()
                 }
                 else
                 {
-                    Pixmap pixmap2 = tool->GetArmPixmap();
+                    Pixmap pixmap2 = (Pixmap) 0;
+
+                    // If there's a bitmap for the armed state, use it,
+                    // otherwise generate one.
+                    if ( bmpToggled.Ok() )
+                    {
+                        pixmap2 = (Pixmap) bmpToggled.GetPixmap();
+                    }
+                    else
+                    {
+                        pixmap2 = (Pixmap) bmp.GetArmPixmap(button);
+
+                    }
+
+                    tool->SetPixmap(pixmap2);
 
                     // Normal button
                     XtVaSetValues(button,
@@ -458,12 +462,8 @@ bool wxToolBar::Realize()
                                   XmNwidth, &width,
                                   XmNheight, & height,
                                   NULL);
-                    if ( isVertical )
-                        currentY += height + packing;
-                    else
-                        currentX += width + packing;
+                    currentX += width + packing;
                     buttonHeight = wxMax(buttonHeight, height);
-                    buttonWidth = wxMax(buttonWidth, width);
                 }
 
                 XtAddEventHandler (button, EnterWindowMask | LeaveWindowMask,
@@ -476,9 +476,7 @@ bool wxToolBar::Realize()
         node = node->GetNext();
     }
 
-    SetSize( -1, -1,
-             isVertical ? buttonWidth + 2 * marginX : -1,
-             isVertical ? -1 : buttonHeight +  2*marginY );
+    SetSize(-1, -1, currentX, buttonHeight + 2*marginY);
 
     return TRUE;
 }
@@ -498,90 +496,9 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
     return TRUE;
 }
 
-bool wxToolBar::DoDeleteTool(size_t pos, wxToolBarToolBase *tool)
+bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
 {
     tool->Detach();
-
-    bool isVertical = GetWindowStyle() & wxTB_VERTICAL;
-    const int separatorSize = GetToolSeparation(); // 8;
-    int packing = GetToolPacking();
-    int offset = 0;
-
-    for( wxToolBarToolsList::Node *node = m_tools.GetFirst();
-         node; node = node->GetNext() )
-    {
-        wxToolBarTool *t = (wxToolBarTool*)node->GetData();
-
-        if( t == tool )
-        {
-            switch ( t->GetStyle() )
-            {
-            case wxTOOL_STYLE_CONTROL:
-            {
-                wxSize size = t->GetControl()->GetSize();
-                offset = isVertical ? size.y : size.x;
-                offset += packing;
-                break;
-            }       
-            case wxTOOL_STYLE_SEPARATOR:
-                offset = isVertical ? 0 : separatorSize;
-                break;
-            case wxTOOL_STYLE_BUTTON:
-            {
-                Widget w = t->GetButtonWidget();
-                Dimension width, height;
-
-                XtVaGetValues( w,
-                               XmNwidth, &width,
-                               XmNheight, &height,
-                               NULL );
-
-                offset = isVertical ? height : width;
-                offset += packing;
-                break;
-            }
-            }
-        }
-        else if( offset )
-        {
-            switch ( t->GetStyle() )
-            {
-            case wxTOOL_STYLE_CONTROL:
-            {
-                wxPoint pos = t->GetControl()->GetPosition();
-
-                if( isVertical )
-                    pos.y -= offset;
-                else
-                    pos.x -= offset;
-
-                t->GetControl()->Move( pos );
-                break;
-            }
-            case wxTOOL_STYLE_SEPARATOR:
-                break;
-            case wxTOOL_STYLE_BUTTON:
-            {
-                Dimension x, y;
-                XtVaGetValues( t->GetButtonWidget(),
-                               XmNx, &x,
-                               XmNy, &y,
-                               NULL );
-
-                if( isVertical )
-                    y -= offset;
-                else
-                    x -= offset;
-
-                XtVaSetValues( t->GetButtonWidget(),
-                               XmNx, x,
-                               XmNy, y,
-                               NULL );
-                break;
-            }
-            }
-        }
-    }
 
     return TRUE;
 }
@@ -604,38 +521,6 @@ void wxToolBar::DoSetToggle(wxToolBarToolBase * WXUNUSED(tool),
                             bool WXUNUSED(toggle))
 {
     // nothing to do
-}
-
-void wxToolBar::DoSetSize(int x, int y, int width, int height, int sizeFlags)
-{
-    int old_width, old_height;
-    GetSize(&old_width, &old_height);
-
-    // Correct width and height if needed.
-    if ( width == -1 || height == -1 )
-    {
-        wxSize defaultSize = GetSize();
-
-        if ( width == -1 )
-            width = defaultSize.x;
-        if ( height == -1 )
-            height = defaultSize.y;
-    }
-
-    wxToolBarBase::DoSetSize(x, y, width, height, sizeFlags);
-  
-    // We must refresh the frame size when the toolbar changes size
-    // otherwise the toolbar can be shown incorrectly
-    if ( old_width != width || old_height != height )
-    {
-        // But before we send the size event check it 
-        // we have a frame that is not being deleted.
-        wxFrame *frame = wxDynamicCast(GetParent(), wxFrame);
-        if ( frame && !frame->IsBeingDeleted() )
-        {
-            frame->SendSizeEvent();
-        }
-    }
 }
 
 // ----------------------------------------------------------------------------

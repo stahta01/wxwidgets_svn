@@ -21,7 +21,6 @@
 
 #include "wx/pen.h"
 #include "wx/bitmap.h"
-#include "wx/colour.h"
 #include "wx/mgl/private.h"
 
 //-----------------------------------------------------------------------------

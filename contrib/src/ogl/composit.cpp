@@ -24,7 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#include <wx/deprecated/wxexpr.h>
+#include <wx/wxexpr.h>
 
 #include <wx/ogl/basic.h>
 #include <wx/ogl/basicp.h>
@@ -74,18 +74,18 @@ wxCompositeShape::wxCompositeShape(): wxRectangleShape(10.0, 10.0)
 
 wxCompositeShape::~wxCompositeShape()
 {
-  wxNode *node = m_constraints.GetFirst();
+  wxNode *node = m_constraints.First();
   while (node)
   {
-    wxOGLConstraint *constraint = (wxOGLConstraint *)node->GetData();
+    wxOGLConstraint *constraint = (wxOGLConstraint *)node->Data();
     delete constraint;
-    node = node->GetNext();
+    node = node->Next();
   }
-  node = m_children.GetFirst();
+  node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
-    wxNode *next = node->GetNext();
+    wxShape *object = (wxShape *)node->Data();
+    wxNode *next = node->Next();
     object->Unlink();
     delete object;
     node = next;
@@ -113,13 +113,13 @@ void wxCompositeShape::OnDraw(wxDC& dc)
 
 void wxCompositeShape::OnDrawContents(wxDC& dc)
 {
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
     object->Draw(dc);
     object->DrawLinks(dc);
-    node = node->GetNext();
+    node = node->Next();
   }
   wxShape::OnDrawContents(dc);
 }
@@ -128,15 +128,15 @@ bool wxCompositeShape::OnMovePre(wxDC& dc, double x, double y, double oldx, doub
 {
   double diffX = x - oldx;
   double diffY = y - oldy;
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
 
     object->Erase(dc);
     object->Move(dc, object->GetX() + diffX, object->GetY() + diffY, display);
 
-    node = node->GetNext();
+    node = node->Next();
   }
   return TRUE;
 }
@@ -144,12 +144,12 @@ bool wxCompositeShape::OnMovePre(wxDC& dc, double x, double y, double oldx, doub
 void wxCompositeShape::OnErase(wxDC& dc)
 {
   wxRectangleShape::OnErase(dc);
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
     object->Erase(dc);
-    node = node->GetNext();
+    node = node->Next();
   }
 }
 
@@ -237,11 +237,11 @@ void wxCompositeShape::OnRightClick(double x, double y, int keys, int attachment
   // the division, so we can invoke a user interface for dealing with regions.
   if (keys & KEY_CTRL)
   {
-    wxNode *node = m_divisions.GetFirst();
+    wxNode *node = m_divisions.First();
     while (node)
     {
-      wxDivisionShape *division = (wxDivisionShape *)node->GetData();
-      wxNode *next = node->GetNext();
+      wxDivisionShape *division = (wxDivisionShape *)node->Data();
+      wxNode *next = node->Next();
       int attach = 0;
       double dist = 0.0;
       if (division->HitTest(x, y, &attach, &dist))
@@ -267,7 +267,7 @@ void wxCompositeShape::SetSize(double w, double h, bool recursive)
 
   if (!recursive) return;
 
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
 
   wxClientDC dc(GetCanvas());
   GetCanvas()->PrepareDC(dc);
@@ -275,7 +275,7 @@ void wxCompositeShape::SetSize(double w, double h, bool recursive)
   double xBound, yBound;
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
 
     // Scale the position first
     double newX = (double)(((object->GetX() - GetX())*xScale) + GetX());
@@ -289,7 +289,7 @@ void wxCompositeShape::SetSize(double w, double h, bool recursive)
     object->SetSize(object->GetFixedWidth() ? xBound : xScale*xBound,
                     object->GetFixedHeight() ? yBound : yScale*yBound);
 
-    node = node->GetNext();
+    node = node->Next();
   }
   SetDefaultRegionSize();
 }
@@ -317,11 +317,11 @@ void wxCompositeShape::RemoveChild(wxShape *child)
 
 void wxCompositeShape::DeleteConstraintsInvolvingChild(wxShape *child)
 {
-  wxNode *node = m_constraints.GetFirst();
+  wxNode *node = m_constraints.First();
   while (node)
   {
-    wxOGLConstraint *constraint = (wxOGLConstraint *)node->GetData();
-    wxNode *nextNode = node->GetNext();
+    wxOGLConstraint *constraint = (wxOGLConstraint *)node->Data();
+    wxNode *nextNode = node->Next();
 
     if ((constraint->m_constrainingObject == child) ||
         constraint->m_constrainedObjects.Member(child))
@@ -335,11 +335,11 @@ void wxCompositeShape::DeleteConstraintsInvolvingChild(wxShape *child)
 
 void wxCompositeShape::RemoveChildFromConstraints(wxShape *child)
 {
-  wxNode *node = m_constraints.GetFirst();
+  wxNode *node = m_constraints.First();
   while (node)
   {
-    wxOGLConstraint *constraint = (wxOGLConstraint *)node->GetData();
-    wxNode *nextNode = node->GetNext();
+    wxOGLConstraint *constraint = (wxOGLConstraint *)node->Data();
+    wxNode *nextNode = node->Next();
 
     if (constraint->m_constrainedObjects.Member(child))
       constraint->m_constrainedObjects.DeleteObject(child);
@@ -369,10 +369,10 @@ void wxCompositeShape::Copy(wxShape& copy)
   oglObjectCopyMapping.Append((long)this, &compositeCopy);
 
   // Copy the children
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
     wxShape *newObject = object->CreateNewCopy(FALSE, FALSE);
     if (newObject->GetId() == 0)
       newObject->SetId(wxNewId());
@@ -386,25 +386,25 @@ void wxCompositeShape::Copy(wxShape& copy)
 
     oglObjectCopyMapping.Append((long)object, newObject);
 
-    node = node->GetNext();
+    node = node->Next();
   }
 
   // Copy the constraints
-  node = m_constraints.GetFirst();
+  node = m_constraints.First();
   while (node)
   {
-    wxOGLConstraint *constraint = (wxOGLConstraint *)node->GetData();
+    wxOGLConstraint *constraint = (wxOGLConstraint *)node->Data();
 
-    wxShape *newConstraining = (wxShape *)(oglObjectCopyMapping.Find((long)constraint->m_constrainingObject)->GetData());
+    wxShape *newConstraining = (wxShape *)(oglObjectCopyMapping.Find((long)constraint->m_constrainingObject)->Data());
 
     wxList newConstrainedList;
-    wxNode *node2 = constraint->m_constrainedObjects.GetFirst();
+    wxNode *node2 = constraint->m_constrainedObjects.First();
     while (node2)
     {
-      wxShape *constrainedObject = (wxShape *)node2->GetData();
-      wxShape *newConstrained = (wxShape *)(oglObjectCopyMapping.Find((long)constrainedObject)->GetData());
+      wxShape *constrainedObject = (wxShape *)node2->Data();
+      wxShape *newConstrained = (wxShape *)(oglObjectCopyMapping.Find((long)constrainedObject)->Data());
       newConstrainedList.Append(newConstrained);
-      node2 = node2->GetNext();
+      node2 = node2->Next();
     }
 
     wxOGLConstraint *newConstraint = new wxOGLConstraint(constraint->m_constraintType, newConstraining,
@@ -417,14 +417,14 @@ void wxCompositeShape::Copy(wxShape& copy)
     newConstraint->SetSpacing(constraint->m_xSpacing, constraint->m_ySpacing);
     compositeCopy.m_constraints.Append(newConstraint);
 
-    node = node->GetNext();
+    node = node->Next();
   }
 
   // Now compositeCopy the division geometry
-  node = m_divisions.GetFirst();
+  node = m_divisions.First();
   while (node)
   {
-    wxDivisionShape *division = (wxDivisionShape *)node->GetData();
+    wxDivisionShape *division = (wxDivisionShape *)node->Data();
     wxNode *node1 = oglObjectCopyMapping.Find((long)division);
     wxNode *leftNode = NULL;
     wxNode *topNode = NULL;
@@ -440,17 +440,17 @@ void wxCompositeShape::Copy(wxShape& copy)
       bottomNode = oglObjectCopyMapping.Find((long)division->GetBottomSide());
     if (node1)
     {
-      wxDivisionShape *newDivision = (wxDivisionShape *)node1->GetData();
+      wxDivisionShape *newDivision = (wxDivisionShape *)node1->Data();
       if (leftNode)
-        newDivision->SetLeftSide((wxDivisionShape *)leftNode->GetData());
+        newDivision->SetLeftSide((wxDivisionShape *)leftNode->Data());
       if (topNode)
-        newDivision->SetTopSide((wxDivisionShape *)topNode->GetData());
+        newDivision->SetTopSide((wxDivisionShape *)topNode->Data());
       if (rightNode)
-        newDivision->SetRightSide((wxDivisionShape *)rightNode->GetData());
+        newDivision->SetRightSide((wxDivisionShape *)rightNode->Data());
       if (bottomNode)
-        newDivision->SetBottomSide((wxDivisionShape *)bottomNode->GetData());
+        newDivision->SetBottomSide((wxDivisionShape *)bottomNode->Data());
     }
-    node = node->GetNext();
+    node = node->Next();
   }
 }
 
@@ -484,23 +484,23 @@ wxOGLConstraint *wxCompositeShape::AddConstraint(int type, wxShape *constraining
 
 wxOGLConstraint *wxCompositeShape::FindConstraint(long cId, wxCompositeShape **actualComposite)
 {
-  wxNode *node = m_constraints.GetFirst();
+  wxNode *node = m_constraints.First();
   while (node)
   {
-    wxOGLConstraint *constraint = (wxOGLConstraint *)node->GetData();
+    wxOGLConstraint *constraint = (wxOGLConstraint *)node->Data();
     if (constraint->m_constraintId == cId)
     {
       if (actualComposite)
         *actualComposite = this;
       return constraint;
     }
-    node = node->GetNext();
+    node = node->Next();
   }
   // If not found, try children.
-  node = m_children.GetFirst();
+  node = m_children.First();
   while (node)
   {
-    wxShape *child = (wxShape *)node->GetData();
+    wxShape *child = (wxShape *)node->Data();
     if (child->IsKindOf(CLASSINFO(wxCompositeShape)))
     {
       wxOGLConstraint *constraint = ((wxCompositeShape *)child)->FindConstraint(cId, actualComposite);
@@ -511,7 +511,7 @@ wxOGLConstraint *wxCompositeShape::FindConstraint(long cId, wxCompositeShape **a
         return constraint;
       }
     }
-    node = node->GetNext();
+    node = node->Next();
   }
   return NULL;
 }
@@ -530,10 +530,10 @@ void wxCompositeShape::CalculateSize()
   double minY = (double)  999999.9;
 
   double w, h;
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
 
     // Recalculate size of composite objects because may not conform
     // to size it was set to - depends on the children.
@@ -549,7 +549,7 @@ void wxCompositeShape::CalculateSize()
     if ((object->GetY() - (h/2.0)) < minY)
       minY = (double)(object->GetY() - (h/2.0));
 
-    node = node->GetNext();
+    node = node->Next();
   }
   m_width = maxX - minX;
   m_height = maxY - minY;
@@ -580,21 +580,21 @@ bool wxCompositeShape::Constrain()
   CalculateSize();
 
   bool changed = FALSE;
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
     if (object->Constrain())
       changed = TRUE;
-    node = node->GetNext();
+    node = node->Next();
   }
 
-  node = m_constraints.GetFirst();
+  node = m_constraints.First();
   while (node)
   {
-    wxOGLConstraint *constraint = (wxOGLConstraint *)node->GetData();
+    wxOGLConstraint *constraint = (wxOGLConstraint *)node->Data();
     if (constraint->Evaluate()) changed = TRUE;
-    node = node->GetNext();
+    node = node->Next();
   }
   return changed;
 }
@@ -609,10 +609,10 @@ void wxCompositeShape::WriteAttributes(wxExpr *clause)
   // Output constraints as constraint1 = (...), constraint2 = (...), etc.
   int constraintNo = 1;
   char m_constraintNameBuf[20];
-  wxNode *node = m_constraints.GetFirst();
+  wxNode *node = m_constraints.First();
   while (node)
   {
-    wxOGLConstraint *constraint = (wxOGLConstraint *)node->GetData();
+    wxOGLConstraint *constraint = (wxOGLConstraint *)node->Data();
     sprintf(m_constraintNameBuf, "constraint%d", constraintNo);
 
     // Each constraint is stored in the form
@@ -626,42 +626,42 @@ void wxCompositeShape::WriteAttributes(wxExpr *clause)
     constraintExpr->Append(new wxExpr(constraint->m_constrainingObject->GetId()));
 
     wxExpr *objectList = new wxExpr(wxExprList);
-    wxNode *node1 = constraint->m_constrainedObjects.GetFirst();
+    wxNode *node1 = constraint->m_constrainedObjects.First();
     while (node1)
     {
-      wxShape *obj = (wxShape *)node1->GetData();
+      wxShape *obj = (wxShape *)node1->Data();
       objectList->Append(new wxExpr(obj->GetId()));
-      node1 = node1->GetNext();
+      node1 = node1->Next();
     }
     constraintExpr->Append(objectList);
 
     clause->AddAttributeValue(m_constraintNameBuf, constraintExpr);
 
-    node = node->GetNext();
+    node = node->Next();
     constraintNo ++;
   }
 
   // Write the ids of all the child images
   wxExpr *childrenExpr = new wxExpr(wxExprList);
-  node = m_children.GetFirst();
+  node = m_children.First();
   while (node)
   {
-    wxShape *child = (wxShape *)node->GetData();
+    wxShape *child = (wxShape *)node->Data();
     childrenExpr->Append(new wxExpr(child->GetId()));
-    node = node->GetNext();
+    node = node->Next();
   }
   clause->AddAttributeValue("children", childrenExpr);
 
   // Write the ids of all the division images
-  if (m_divisions.GetCount() > 0)
+  if (m_divisions.Number() > 0)
   {
     wxExpr *divisionsExpr = new wxExpr(wxExprList);
-    node = m_divisions.GetFirst();
+    node = m_divisions.First();
     while (node)
     {
-      wxShape *child = (wxShape *)node->GetData();
+      wxShape *child = (wxShape *)node->Data();
       divisionsExpr->Append(new wxExpr(child->GetId()));
-      node = node->GetNext();
+      node = node->Next();
     }
     clause->AddAttributeValue("divisions", divisionsExpr);
   }
@@ -777,13 +777,13 @@ wxDivisionShape *wxCompositeShape::OnCreateDivision()
 
 wxShape *wxCompositeShape::FindContainerImage()
 {
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *child = (wxShape *)node->GetData();
+    wxShape *child = (wxShape *)node->Data();
     if (!m_divisions.Member(child))
       return child;
-    node = node->GetNext();
+    node = node->Next();
   }
   return NULL;
 }
@@ -793,17 +793,17 @@ bool wxCompositeShape::ContainsDivision(wxDivisionShape *division)
 {
   if (m_divisions.Member(division))
     return TRUE;
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *child = (wxShape *)node->GetData();
+    wxShape *child = (wxShape *)node->Data();
     if (child->IsKindOf(CLASSINFO(wxCompositeShape)))
     {
       bool ans = ((wxCompositeShape *)child)->ContainsDivision(division);
       if (ans)
         return TRUE;
     }
-    node = node->GetNext();
+    node = node->Next();
   }
   return FALSE;
 }
@@ -879,13 +879,13 @@ bool wxDivisionShape::OnMovePre(wxDC& dc, double x, double y, double oldx, doubl
 {
   double diffX = x - oldx;
   double diffY = y - oldy;
-  wxNode *node = m_children.GetFirst();
+  wxNode *node = m_children.First();
   while (node)
   {
-    wxShape *object = (wxShape *)node->GetData();
+    wxShape *object = (wxShape *)node->Data();
     object->Erase(dc);
     object->Move(dc, object->GetX() + diffX, object->GetY() + diffY, display);
-    node = node->GetNext();
+    node = node->Next();
   }
   return TRUE;
 }
@@ -1084,13 +1084,13 @@ bool wxDivisionShape::Divide(int direction)
 
     // Anything adjoining the bottom of this division now adjoins the
     // bottom of the new division.
-    wxNode *node = compositeParent->GetDivisions().GetFirst();
+    wxNode *node = compositeParent->GetDivisions().First();
     while (node)
     {
-      wxDivisionShape *obj = (wxDivisionShape *)node->GetData();
+      wxDivisionShape *obj = (wxDivisionShape *)node->Data();
       if (obj->GetTopSide() == this)
         obj->SetTopSide(newDivision);
-      node = node->GetNext();
+      node = node->Next();
     }
     newDivision->SetTopSide(this);
     newDivision->SetBottomSide(m_bottomSide);
@@ -1135,13 +1135,13 @@ bool wxDivisionShape::Divide(int direction)
 
     // Anything adjoining the left of this division now adjoins the
     // left of the new division.
-    wxNode *node = compositeParent->GetDivisions().GetFirst();
+    wxNode *node = compositeParent->GetDivisions().First();
     while (node)
     {
-      wxDivisionShape *obj = (wxDivisionShape *)node->GetData();
+      wxDivisionShape *obj = (wxDivisionShape *)node->Data();
       if (obj->GetLeftSide() == this)
         obj->SetLeftSide(newDivision);
-      node = node->GetNext();
+      node = node->Next();
     }
     newDivision->SetTopSide(m_topSide);
     newDivision->SetBottomSide(m_bottomSide);
@@ -1253,17 +1253,17 @@ void wxDivisionShape::ResetControlPoints()
 
 void wxDivisionShape::ResetMandatoryControlPoints()
 {
-  if (m_controlPoints.GetCount() < 1)
+  if (m_controlPoints.Number() < 1)
     return;
 
   double maxX, maxY;
 
   GetBoundingBoxMax(&maxX, &maxY);
 /*
-  wxNode *node = m_controlPoints.GetFirst();
+  wxNode *node = m_controlPoints.First();
   while (node)
   {
-    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->GetData();
+    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->Data();
     if (control->type == CONTROL_POINT_HORIZONTAL)
     {
       control->xoffset = (double)(-maxX/2.0); control->m_yoffset = 0.0;
@@ -1272,31 +1272,31 @@ void wxDivisionShape::ResetMandatoryControlPoints()
     {
       control->xoffset = 0.0; control->m_yoffset = (double)(-maxY/2.0);
     }
-    node = node->GetNext();
+    node = node->Next();
   }
 */
-  wxNode *node = m_controlPoints.GetFirst();
+  wxNode *node = m_controlPoints.First();
   if ((m_handleSide == DIVISION_SIDE_LEFT) && node)
   {
-    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->GetData();
+    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->Data();
     control->m_xoffset = (double)(-maxX/2.0); control->m_yoffset = 0.0;
   }
 
   if ((m_handleSide == DIVISION_SIDE_TOP) && node)
   {
-    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->GetData();
+    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->Data();
     control->m_xoffset = 0.0; control->m_yoffset = (double)(-maxY/2.0);
   }
 
   if ((m_handleSide == DIVISION_SIDE_RIGHT) && node)
   {
-    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->GetData();
+    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->Data();
     control->m_xoffset = (double)(maxX/2.0); control->m_yoffset = 0.0;
   }
 
   if ((m_handleSide == DIVISION_SIDE_BOTTOM) && node)
   {
-    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->GetData();
+    wxDivisionControlPoint *control = (wxDivisionControlPoint *)node->Data();
     control->m_xoffset = 0.0; control->m_yoffset = (double)(maxY/2.0);
   }
 }
@@ -1512,10 +1512,10 @@ void wxDivisionControlPoint::OnEndDragLeft(double x, double y, int keys, int att
 bool wxDivisionShape::ResizeAdjoining(int side, double newPos, bool test)
 {
   wxCompositeShape *divisionParent = (wxCompositeShape *)GetParent();
-  wxNode *node = divisionParent->GetDivisions().GetFirst();
+  wxNode *node = divisionParent->GetDivisions().First();
   while (node)
   {
-    wxDivisionShape *division = (wxDivisionShape *)node->GetData();
+    wxDivisionShape *division = (wxDivisionShape *)node->Data();
     switch (side)
     {
       case DIVISION_SIDE_LEFT:
@@ -1561,7 +1561,7 @@ bool wxDivisionShape::ResizeAdjoining(int side, double newPos, bool test)
       default:
         break;
     }
-    node = node->GetNext();
+    node = node->Next();
   }
 
   return TRUE;

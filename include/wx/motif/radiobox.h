@@ -12,11 +12,13 @@
 #ifndef _WX_RADIOBOX_H_
 #define _WX_RADIOBOX_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "radiobox.h"
 #endif
 
 #include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxRadioBoxNameStr;
 
 // List box item
 class WXDLLEXPORT wxBitmap ;
@@ -71,9 +73,8 @@ public:
     virtual void ChangeFont(bool keepOriginalSize = TRUE);
     virtual void ChangeBackgroundColour();
     virtual void ChangeForegroundColour();
-    WXWidget* GetRadioButtons() const { return m_radioButtons; }
-    void SetSel(int i) { m_selectedButton = i; }
-    virtual WXWidget GetLabelWidget() const { return m_labelWidget; }
+    inline WXWidget* GetRadioButtons() const { return m_radioButtons; }
+    inline void SetSel(int i) { m_selectedButton = i; }
 
 protected:
     int               m_majorDim;
@@ -82,7 +83,6 @@ protected:
     int               m_selectedButton;
 
     WXWidget*         m_radioButtons;
-    WXWidget          m_labelWidget;
     wxString*         m_radioButtonLabels;
 
     virtual void DoSetSize(int x, int y,

@@ -156,7 +156,7 @@ private:
 
 const int ID_TOOLBAR = 500;
 
-static const long TOOLBAR_STYLE = wxTB_FLAT | wxTB_DOCKABLE | wxTB_TEXT;
+static const long TOOLBAR_STYLE = wxTB_FLAT | wxTB_DOCKABLE | wxTB_TEXT ;
 
 enum
 {
@@ -298,8 +298,8 @@ void MyFrame::RecreateToolbar()
     toolBar->AddTool(wxID_NEW, _T("New"), toolBarBitmaps[0], _T("New file"));
     toolBar->AddTool(wxID_OPEN, _T("Open"), toolBarBitmaps[1], _T("Open file"));
 
-    // the generic toolbar doesn't really support this
-#if (wxUSE_TOOLBAR_NATIVE && !USE_GENERIC_TBAR) && !defined(__WXX11__) || defined(__WXUNIVERSAL__)
+    // neither the generic nor Motif native toolbars really support this
+#if (wxUSE_TOOLBAR_NATIVE && !USE_GENERIC_TBAR) && !defined(__WXMOTIF__) && !defined(__WXX11__) && !defined(__WXMAC__)
     // adding a combo to a vertical toolbar is not very smart
     if ( m_horzToolbar )
     {
@@ -532,13 +532,8 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
     Close(TRUE);
 }
 
-void MyFrame::OnAbout(wxCommandEvent& event)
+void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    if ( event.IsChecked() )
-        m_textWindow->WriteText( _T("Help button down now.\n") );
-    else
-        m_textWindow->WriteText( _T("Help button up now.\n") );
-
     (void)wxMessageBox(_T("wxWindows toolbar sample"), _T("About wxToolBar"));
 }
 
@@ -547,6 +542,14 @@ void MyFrame::OnToolLeftClick(wxCommandEvent& event)
     wxString str;
     str.Printf( _T("Clicked on tool %d\n"), event.GetId());
     m_textWindow->WriteText( str );
+
+    if (event.GetId() == wxID_HELP)
+    {
+        if ( event.GetExtraLong() != 0 )
+            m_textWindow->WriteText( _T("Help button down now.\n") );
+        else
+            m_textWindow->WriteText( _T("Help button up now.\n") );
+    }
 
     if (event.GetId() == wxID_COPY)
     {

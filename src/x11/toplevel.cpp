@@ -248,7 +248,7 @@ wxTopLevelWindowX11::~wxTopLevelWindowX11()
     wxTopLevelWindows.DeleteObject(this);
 
     // If this is the last top-level window, exit.
-    if ( wxTheApp && (wxTopLevelWindows.GetCount() == 0) )
+    if ( wxTheApp && (wxTopLevelWindows.Number() == 0) )
     {
         wxTheApp->SetTopWindow(NULL);
 
@@ -402,13 +402,6 @@ void wxTopLevelWindowX11::SetIcons(const wxIconBundle& icons )
 
     DoSetIcon( icons.GetIcon( -1 ) );
     wxSetIconsX11( wxGlobalDisplay(), GetMainWindow(), icons );
-}
-
-bool wxTopLevelWindowX11::SetShape(const wxRegion& region)
-{
-    return wxDoSetShape( wxGlobalDisplay(),
-                         (Window)GetMainWindow(),
-                         region );
 }
 
 void wxTopLevelWindowX11::SetTitle(const wxString& title)
@@ -675,18 +668,12 @@ bool wxSetWMDecorations(Window w, long style)
 #if wxUSE_NANOX
     GR_WM_PROPERTIES wmProp;
 
-    wmProp.flags = 0;
-    wmProp.props = 0;
+    wmProp.props = GR_WM_PROPS_CLOSEBOX ;
+    wmProp.flags = GR_WM_FLAGS_PROPS ;
 
     if (style & wxRESIZE_BORDER)
     {
         wmProp.props |= GR_WM_PROPS_APPFRAME ;
-        wmProp.flags |= GR_WM_FLAGS_PROPS ;
-    }
-
-    if (style & wxCLOSE_BOX)
-    {
-        wmProp.props |= GR_WM_PROPS_CLOSEBOX ;
         wmProp.flags |= GR_WM_FLAGS_PROPS ;
     }
 
@@ -752,16 +739,15 @@ bool wxSetWMDecorations(Window w, long style)
     else
     {
         hints.decorations = MWM_DECOR_BORDER;
-        hints.functions = MWM_FUNC_MOVE;
+        hints.functions = MWM_FUNC_MOVE | MWM_FUNC_CLOSE;
 
         if ((style & wxCAPTION) != 0)
             hints.decorations |= MWM_DECOR_TITLE;
             
         if ((style & wxSYSTEM_MENU) != 0)
+        {
             hints.decorations |= MWM_DECOR_MENU;
-        
-        if ((style & wxCLOSE_BOX) != 0)
-            hints.functions |= MWM_FUNC_CLOSE;
+        }
         
         if ((style & wxMINIMIZE_BOX) != 0)
         {

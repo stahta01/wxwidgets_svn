@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -28,20 +28,24 @@
 
 #include "wx/setup.h"
 
+#include "wx/window.h"
 #include "wx/dcmemory.h"
 #include "wx/utils.h"
 #include "wx/intl.h"
+#include "wx/filedlg.h"
 #include "wx/app.h"
+#include "wx/msgdlg.h"
 #include "wx/image.h"
 #include "wx/log.h"
 #include "wx/generic/dcpsg.h"
+#include "wx/printdlg.h"
+#include "wx/button.h"
+#include "wx/stattext.h"
+#include "wx/radiobox.h"
+#include "wx/textctrl.h"
 #include "wx/prntbase.h"
 #include "wx/paper.h"
 #include "wx/filefn.h"
-#if WXWIN_COMPATIBILITY_2_2
-    #include "wx/window.h"
-    #include "wx/printdlg.h"
-#endif
 
 #include <math.h>
 
@@ -969,7 +973,6 @@ void wxPostScriptDC::SetFont( const wxFont& font )
     for (int i = 0; i < 100; i++)
         if (buffer[i] == ',') buffer[i] = '.';
     fprintf( m_pstream, buffer );
-
 #endif
 }
 
@@ -1271,7 +1274,7 @@ void wxPostScriptDC::DoDrawText( const wxString& text, wxCoord x, wxCoord y )
             sprintf( buffer,
                 "%.8f %.8f %.8f setrgbcolor\n",
                 redPS, greenPS, bluePS );
-            for (size_t i = 0; i < strlen(buffer); i++)
+            for (int i = 0; i < 100; i++)
                 if (buffer[i] == ',') buffer[i] = '.';
             fprintf( m_pstream, buffer );
 
@@ -1280,7 +1283,7 @@ void wxPostScriptDC::DoDrawText( const wxString& text, wxCoord x, wxCoord y )
             m_currentGreen = green;
         }
     }
-    
+
 #if wxUSE_PANGO
     int ps_dpi = 72;
     int pango_dpi = 600;
@@ -1364,7 +1367,6 @@ void wxPostScriptDC::DoDrawText( const wxString& text, wxCoord x, wxCoord y )
     // VZ: this seems to be unnecessary, so taking it out for now, if it
     //     doesn't create any problems, remove this comment entirely
     //SetFont( m_font );
-
 
     int size = m_font.GetPointSize();
 
@@ -1479,8 +1481,11 @@ void wxPostScriptDC::DoDrawRotatedText( const wxString& text, wxCoord x, wxCoord
 
     int size = m_font.GetPointSize();
 
+    long by = y + (long)floor( double(size) * 2.0 / 3.0 ); // approximate baseline
+
+    // FIXME only correct for 90 degrees
     fprintf(m_pstream, "%d %d moveto\n",
-            LogicalToDeviceX(x), LogicalToDeviceY(y));
+            LogicalToDeviceX((wxCoord)(x + size)), LogicalToDeviceY((wxCoord)by) );
 
     char buffer[100];
     sprintf(buffer, "%.8f rotate\n", angle);
@@ -1564,13 +1569,13 @@ void wxPostScriptDC::DoDrawSpline( wxList *points )
     double a, b, c, d, x1, y1, x2, y2, x3, y3;
     wxPoint *p, *q;
 
-    wxNode *node = points->GetFirst();
-    p = (wxPoint *)node->GetData();
+    wxNode *node = points->First();
+    p = (wxPoint *)node->Data();
     x1 = p->x;
     y1 = p->y;
 
-    node = node->GetNext();
-    p = (wxPoint *)node->GetData();
+    node = node->Next();
+    p = (wxPoint *)node->Data();
     c = p->x;
     d = p->y;
     x3 = a = (double)(x1 + c) / 2;
@@ -1586,9 +1591,9 @@ void wxPostScriptDC::DoDrawSpline( wxList *points )
     CalcBoundingBox( (wxCoord)x1, (wxCoord)y1 );
     CalcBoundingBox( (wxCoord)x3, (wxCoord)y3 );
 
-    while ((node = node->GetNext()) != NULL)
+    while ((node = node->Next()) != NULL)
     {
-        q = (wxPoint *)node->GetData();
+        q = (wxPoint *)node->Data();
 
         x1 = x3;
         y1 = y3;
@@ -1745,7 +1750,7 @@ bool wxPostScriptDC::StartDoc( const wxString& message )
     
     // fprintf( m_pstream, "%%%%Pages: %d\n", (wxPageNumber - 1) );
     
-    const char *paper;
+    char *paper = "A4";
     switch (m_printData.GetPaperId())
     {
        case wxPAPER_LETTER: paper = "Letter"; break;             // Letter: paper ""; 8 1/2 by 11 inches
@@ -2286,15 +2291,13 @@ void wxPostScriptDC::DoGetTextExtent(const wxString& string,
            /  the correct way would be to map the character names
            /  like 'adieresis' to corresp. positions of ISOEnc and read
            /  these values from AFM files, too. Maybe later ... */
-
-        // NB: casts to int are needed to suppress gcc 3.3 warnings
-        lastWidths[196] = lastWidths[(int)'A'];  // Ä
-        lastWidths[228] = lastWidths[(int)'a'];  // ä
-        lastWidths[214] = lastWidths[(int)'O'];  // Ö
-        lastWidths[246] = lastWidths[(int)'o'];  // ö
-        lastWidths[220] = lastWidths[(int)'U'];  // Ü
-        lastWidths[252] = lastWidths[(int)'u'];  // ü
-        lastWidths[223] = lastWidths[(int)251];  // ß
+        lastWidths[196] = lastWidths['A'];  // Ä
+        lastWidths[228] = lastWidths['a'];  // ä
+        lastWidths[214] = lastWidths['O'];  // Ö
+        lastWidths[246] = lastWidths['o'];  // ö
+        lastWidths[220] = lastWidths['U'];  // Ü
+        lastWidths[252] = lastWidths['u'];  // ü
+        lastWidths[223] = lastWidths[251];  // ß
 
         /* JC: calculate UnderlineThickness/UnderlinePosition */
 

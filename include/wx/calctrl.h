@@ -6,7 +6,7 @@
 // Created:     29.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -24,8 +24,6 @@
 #if wxUSE_CALENDARCTRL
 
 #include "wx/datetime.h"
-#include "wx/colour.h"
-#include "wx/font.h"
 
 // ----------------------------------------------------------------------------
 // wxCalendarCtrl flags

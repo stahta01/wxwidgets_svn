@@ -10,7 +10,7 @@
 // Created:     15.08.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_WIZARD_H_
@@ -28,8 +28,6 @@
 
     #include "wx/event.h"       // wxEVT_XXX constants
 #endif // WX_PRECOMP
-
-#include "wx/bitmap.h"
 
 // Extended style to specify a help button
 #define wxWIZARD_EX_HELPBUTTON   0x00000010
@@ -149,7 +147,6 @@ private:
                  *m_next;
 
     DECLARE_DYNAMIC_CLASS(wxWizardPageSimple)
-    DECLARE_NO_COPY_CLASS(wxWizardPageSimple)
 };
 
 // ----------------------------------------------------------------------------
@@ -245,7 +242,6 @@ private:
     wxWizardPage*    m_page;
 
     DECLARE_DYNAMIC_CLASS(wxWizardEvent)
-    DECLARE_NO_COPY_CLASS(wxWizardEvent)
 };
 
 // ----------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        frame.h
 // Purpose:     wxFrame class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -21,8 +21,8 @@
 #include "wx/accel.h"
 #include "wx/icon.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
-WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxToolBarNameStr;
 
 class WXDLLEXPORT wxMenuBar;
 class WXDLLEXPORT wxStatusBar;

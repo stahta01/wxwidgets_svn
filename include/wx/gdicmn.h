@@ -20,10 +20,13 @@
     #pragma interface "gdicmn.h"
 #endif
 
-#include "wx/setup.h"
+#include "wx/object.h"
 #include "wx/list.h"
+#include "wx/hash.h"
 #include "wx/string.h"
-#include "wx/fontenc.h"
+#include "wx/setup.h"
+#include "wx/colour.h"
+#include "wx/font.h"
 
 // ---------------------------------------------------------------------------
 // forward declarations
@@ -199,7 +202,9 @@ enum wxStockCursor
 class WXDLLEXPORT wxSize
 {
 public:
-    // members are public for compatibility, don't use them directly.
+    // members are public for compatibility (don't use them directly,
+    // especially that there names were chosen very unfortunately - they should
+    // have been called width and height)
     int x, y;
 
     // constructors

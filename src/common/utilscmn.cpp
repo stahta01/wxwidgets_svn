@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -133,14 +133,14 @@ wxRegisterId (long id)
     wxCurrentId = id + 1;
 }
 
-// ----------------------------------------------------------------------------
-// String <-> Number conversions (deprecated)
-// ----------------------------------------------------------------------------
-
-#if WXWIN_COMPATIBILITY_2_4
+// for GUI ports this is defined (without any real reason) in src/*/data.cpp
+// files
+#if !wxUSE_GUI
 
 WXDLLEXPORT_DATA(const wxChar *) wxFloatToStringStr = wxT("%.2f");
 WXDLLEXPORT_DATA(const wxChar *) wxDoubleToStringStr = wxT("%.2f");
+
+#endif // wxUSE_GUI
 
 void
 StringToFloat (const wxChar *s, float *number)
@@ -205,8 +205,6 @@ LongToString (long number)
   wxSprintf (buf, wxT("%ld"), number);
   return buf;
 }
-
-#endif // WXWIN_COMPATIBILITY_2_4
 
 // Array used in DecToHex conversion routine.
 static wxChar hexArray[] = wxT("0123456789ABCDEF");
@@ -442,10 +440,10 @@ wxWindow* wxFindWindowAtPoint(wxWindow* win, const wxPoint& pt)
       if (frame->GetToolBar())
         extraChildren.Append(frame->GetToolBar());
 
-      wxNode* node = extraChildren.GetFirst();
+      wxNode* node = extraChildren.First();
       while (node)
       {
-          wxWindow* child = (wxWindow*) node->GetData();
+          wxWindow* child = (wxWindow*) node->Data();
           wxWindow* foundWin = wxFindWindowAtPoint(child, pt);
           if (foundWin)
             return foundWin;
@@ -454,14 +452,14 @@ wxWindow* wxFindWindowAtPoint(wxWindow* win, const wxPoint& pt)
     }
     */
 
-    wxWindowList::Node  *node = win->GetChildren().GetLast();
+    wxNode* node = win->GetChildren().Last();
     while (node)
     {
-        wxWindow* child = node->GetData();
+        wxWindow* child = (wxWindow*) node->Data();
         wxWindow* foundWin = wxFindWindowAtPoint(child, pt);
         if (foundWin)
           return foundWin;
-        node = node->GetPrevious();
+        node = node->Previous();
     }
 
     wxPoint pos = win->GetPosition();
@@ -483,14 +481,14 @@ wxWindow* wxGenericFindWindowAtPoint(const wxPoint& pt)
     // Go backwards through the list since windows
     // on top are likely to have been appended most
     // recently.
-    wxWindowList::Node  *node = wxTopLevelWindows.GetLast();
+    wxNode* node = wxTopLevelWindows.Last();
     while (node)
     {
-        wxWindow* win = node->GetData();
+        wxWindow* win = (wxWindow*) node->Data();
         wxWindow* found = wxFindWindowAtPoint(win, pt);
         if (found)
             return found;
-        node = node->GetPrevious();
+        node = node->Previous();
     }
     return NULL;
 }
@@ -812,11 +810,13 @@ wxFont wxGetFontFromUser(wxWindow *parent, const wxFont& fontInit)
 // missing C RTL functions (FIXME shouldn't be here at all)
 // ----------------------------------------------------------------------------
 
-#if defined( __MWERKS__ ) && !defined(__MACH__)
+#ifdef __MWERKS__
+#if __MSL__ < 0x7000
 char *strdup(const char *s)
 {
         return strcpy( (char*) malloc( strlen( s ) + 1 ) , s ) ;
 }
+#endif
 int isascii( int c )
 {
         return ( c >= 0 && c < 128 ) ;
@@ -1078,7 +1078,6 @@ wxString wxGetCurrentDir()
 // wxDoExecuteWithCapture() helper: reads an entire stream into one array
 //
 // returns TRUE if ok, FALSE if error
-#if wxUSE_STREAMS
 static bool ReadAll(wxInputStream *is, wxArrayString& output)
 {
     wxCHECK_MSG( is, FALSE, _T("NULL stream in wxExecute()?") );
@@ -1107,7 +1106,6 @@ static bool ReadAll(wxInputStream *is, wxArrayString& output)
 
     return cont;
 }
-#endif // wxUSE_STREAMS
 
 // this is a private function because it hasn't a clean interface: the first
 // array is passed by reference, the second by pointer - instead we have 2

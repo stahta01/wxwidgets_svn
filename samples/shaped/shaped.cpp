@@ -43,7 +43,6 @@
 #endif
 
 #include "wx/dcclient.h"
-#include "wx/image.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -150,22 +149,20 @@ bool MyApp::OnInit()
 // frame constructor
 ShapedFrame::ShapedFrame()
        : wxFrame((wxFrame *)NULL, -1, wxEmptyString,
-                  wxDefaultPosition, wxSize(100, 100), //wxDefaultSize,
-                  0
-                  | wxFRAME_SHAPED
-                  | wxSIMPLE_BORDER
-                  | wxFRAME_NO_TASKBAR
-                  | wxSTAY_ON_TOP
-            )
+                 wxDefaultPosition, wxSize(100, 100), //wxDefaultSize,
+                 0
+                 | wxFRAME_SHAPED
+                 | wxSIMPLE_BORDER
+                 | wxFRAME_NO_TASKBAR
+                 | wxSTAY_ON_TOP
+           )
 {
     m_hasShape = FALSE;
-    m_bmp = wxBitmap("star.png", wxBITMAP_TYPE_PNG);
+    m_bmp = wxBitmap(wxT("star.png"), wxBITMAP_TYPE_PNG);
     SetSize(wxSize(m_bmp.GetWidth(), m_bmp.GetHeight()));
 #ifndef __WXMAC__
     // On wxMac the tooltip gets clipped by the window shape, YUCK!!
-#if wxUSE_TOOLTOP
     SetToolTip(wxT("Right-click to exit"));
-#endif
 #endif
 #ifndef __WXGTK__
     // On wxGTK we can't do this yet because the window hasn't been created
@@ -211,7 +208,7 @@ void ShapedFrame::OnLeftUp(wxMouseEvent& evt)
     {
         ReleaseMouse();
         //printf("Mouse released\n");
-}
+    }
 }
 
 void ShapedFrame::OnMouseMove(wxMouseEvent& evt)

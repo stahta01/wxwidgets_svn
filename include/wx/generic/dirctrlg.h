@@ -31,8 +31,6 @@
 //-----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxTextCtrl;
-class WXDLLEXPORT wxImageList;
-class WXDLLEXPORT wxHashTable;
 
 //-----------------------------------------------------------------------------
 // Extra styles for wxGenericDirCtrl
@@ -163,13 +161,9 @@ public:
     virtual void ReCreateTree();
     
 protected:
-    virtual void ExpandDir(wxTreeItemId parentId);
-    virtual void CollapseDir(wxTreeItemId parentId);
-    virtual const wxTreeItemId AddSection(const wxString& path, const wxString& name, int imageId = 0);
-    virtual wxTreeItemId AppendItem (const wxTreeItemId & parent,
-                const wxString & text,
-                int image = -1, int selectedImage = -1,
-                wxTreeItemData * data = NULL);
+    void ExpandDir(wxTreeItemId parentId);
+    void CollapseDir(wxTreeItemId parentId);
+    void AddSection(const wxString& path, const wxString& name, int imageId = 0);
     //void FindChildFiles(wxTreeItemId id, int dirFlags, wxArrayString& filenames);
 
     // Extract description and actual filter from overall filter string
@@ -178,6 +172,7 @@ protected:
 private:
     bool            m_showHidden;
     wxTreeItemId    m_rootId;
+    wxImageList*    m_imageList;
     wxString        m_defaultPath; // Starting path
     long            m_styleEx; // Extended style
     wxString        m_filter;  // Wildcards in same format as per wxFileDialog
@@ -189,7 +184,6 @@ private:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxGenericDirCtrl)
-    DECLARE_NO_COPY_CLASS(wxGenericDirCtrl)
 };
 
 //-----------------------------------------------------------------------------
@@ -229,7 +223,6 @@ protected:
 
     DECLARE_EVENT_TABLE()
     DECLARE_CLASS(wxDirFilterListCtrl)
-    DECLARE_NO_COPY_CLASS(wxDirFilterListCtrl)
 };
 
 #if !defined(__WXMSW__) && !defined(__WXMAC__) && !defined(__WXPM__)
@@ -239,42 +232,6 @@ protected:
 // Symbols for accessing individual controls
 #define wxID_TREECTRL          7000
 #define wxID_FILTERLISTCTRL    7001
-
-//-------------------------------------------------------------------------
-// wxFileIconsTable - use wxTheFileIconsTable which is created as necessary
-//-------------------------------------------------------------------------
-
-class WXDLLEXPORT wxFileIconsTable
-{
-public:
-    wxFileIconsTable();
-    ~wxFileIconsTable();
-
-    enum iconId_Type
-    {
-        folder,
-        folder_open,
-        computer,
-        drive,
-        cdrom,
-        floppy,
-        removeable,
-        file,
-        executable
-    };
-
-    int GetIconID(const wxString& extension, const wxString& mime = wxEmptyString);
-    wxImageList *GetSmallImageList();
-
-protected:
-    void Create();  // create on first use
-
-    wxImageList *m_smallImageList;
-    wxHashTable *m_HashTable;
-};
-
-// The global fileicons table
-WXDLLEXPORT_DATA(extern wxFileIconsTable *) wxTheFileIconsTable;
 
 #endif // wxUSE_DIRDLG
 

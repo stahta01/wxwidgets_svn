@@ -20,6 +20,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#include "wx/gdicmn.h"
 #include "wx/event.h"
 
 // ----------------------------------------------------------------------------
@@ -31,9 +32,6 @@ class WXDLLEXPORT wxWindow;
 class WXDLLEXPORT wxApp;
 class WXDLLEXPORT wxKeyEvent;
 class WXDLLEXPORT wxLog;
-class WXDLLEXPORT wxEventLoop;
-class WXDLLEXPORT wxXVisualInfo;
-class wxPerDisplayDataMap;
 
 // ----------------------------------------------------------------------------
 // the wxApp class for Motif - see wxAppBase for more details
@@ -45,7 +43,7 @@ class WXDLLEXPORT wxApp : public wxAppBase
         
 public:
     wxApp();
-    virtual ~wxApp();
+    ~wxApp() {}
     
     // override base class (pure) virtuals
     // -----------------------------------
@@ -73,6 +71,20 @@ public:
     // Returns TRUE if more idle time is requested.
     bool SendIdleEvents(wxWindow* win);
     
+    // Motif implementation.
+    
+    // Processes an X event.
+    virtual void ProcessXEvent(WXEvent* event);
+    
+    // Returns TRUE if an accelerator has been processed
+    virtual bool CheckForAccelerator(WXEvent* event);
+    
+    // Returns TRUE if a key down event has been processed
+    virtual bool CheckForKeyDown(WXEvent* event);
+    
+    // Returns TRUE if a key up event has been processed
+    virtual bool CheckForKeyUp(WXEvent* event);
+    
 protected:
     bool                  m_showOnInit;
     
@@ -85,26 +97,28 @@ public:
     
     // Motif-specific
     WXAppContext   GetAppContext() const { return m_appContext; }
-    WXWidget       GetTopLevelWidget();
+    WXWidget       GetTopLevelWidget() const { return m_topLevelWidget; }
     WXColormap     GetMainColormap(WXDisplay* display);
     WXDisplay*     GetInitialDisplay() const { return m_initialDisplay; }
-
-    void           SetTopLevelWidget(WXDisplay* display, WXWidget widget);
-
+    long           GetMaxRequestSize() const { return m_maxRequestSize; }
+    
     // This handler is called when a property change event occurs
     virtual void   HandlePropertyChange(WXEvent *event);
-
-    wxXVisualInfo* GetVisualInfo(WXDisplay* display);
-
-private:
-    wxEventLoop*    m_eventLoop;
+    
+public:
+    static long    sm_lastMessageTime;
+    int            m_nCmdShow;
+    
+protected:
+    bool                  m_keepGoing;
     
     // Motif-specific
     WXAppContext          m_appContext;
+    WXWidget              m_topLevelWidget;
     WXColormap            m_mainColormap;
     WXDisplay*            m_initialDisplay;
-    wxPerDisplayDataMap*  m_perDisplayData;
-
+    long                  m_maxRequestSize;
+    
     DECLARE_EVENT_TABLE()
 };
 

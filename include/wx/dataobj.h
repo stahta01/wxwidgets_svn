@@ -6,7 +6,7 @@
 // Created:     26.05.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows Team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DATAOBJ_H_BASE_
@@ -19,10 +19,8 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "wx/defs.h"
-
-#if wxUSE_DATAOBJ
-
 #include "wx/string.h"
 #include "wx/bitmap.h"
 #include "wx/list.h"
@@ -171,6 +169,8 @@ public:
     #include "wx/mac/dataobj.h"
 #elif defined(__WXPM__)
     #include "wx/os2/dataobj.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/dnd.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -447,8 +447,6 @@ private:
         { return(wxDataObjectSimple::GetDataHere(format, pBuf)); }
     bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf)
         { return(wxDataObjectSimple::SetData(format, nLen, pBuf)); }
-
-    DECLARE_NO_COPY_CLASS(wxCustomDataObject)
 };
 
 // ----------------------------------------------------------------------------
@@ -464,8 +462,6 @@ private:
         #include "wx/gtk/dataobj2.h"
     #elif defined(__WXX11__)
         #include "wx/x11/dataobj2.h"
-    #elif defined(__WXMOTIF__)
-        #include "wx/motif/dataobj2.h"
     #elif defined(__WXMAC__)
         #include "wx/mac/dataobj2.h"
     #elif defined(__WXPM__)
@@ -480,7 +476,5 @@ private:
         void SetURL(const wxString& url) { SetText(url); }
     };
 #endif // __WXMSW__/!__WXMSW__
-
-#endif // wxUSE_DATAOBJ
 
 #endif // _WX_DATAOBJ_H_BASE_

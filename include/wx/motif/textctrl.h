@@ -12,9 +12,12 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "textctrl.h"
 #endif
+
+WXDLLEXPORT_DATA(extern const char*) wxTextCtrlNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxEmptyString;
 
 // Single-line text item
 class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
@@ -84,6 +87,8 @@ public:
     virtual void GetSelection(long* from, long* to) const;
     virtual bool IsEditable() const ;
     
+    virtual bool LoadFile(const wxString& file);
+    virtual bool SaveFile(const wxString& file);
     virtual void WriteText(const wxString& text);
     virtual void AppendText(const wxString& text);
     virtual void DiscardEdits();
@@ -128,8 +133,7 @@ public:
     
 protected:
     wxString  m_fileName;
-
-    virtual wxSize DoGetBestSize() const;
+    
 public:
     // Motif-specific
     void*     m_tempCallbackStruct;

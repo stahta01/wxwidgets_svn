@@ -80,13 +80,6 @@
 // Required for wxPrintf() etc
 #include <stdarg.h>
 
-// Almost all compiler have strdup(), but not quite all: CodeWarrior under Mac
-// and VC++ for Windows CE don't provide it
-#if !(defined(__MWERKS__) && defined(__WXMAC__)) && !defined(__WXWINCE__)
-    // use #define, not inline wrapper, as it is tested with #ifndef below
-    #define wxStrdupA strdup
-#endif
-
 // non Unix compilers which do have wchar.h (but not tchar.h which is included
 // below and which includes wchar.h anyhow).
 // Actually MinGW has tchar.h, but it does not include wchar.h
@@ -146,10 +139,6 @@
     // VisualAge 4.0+ supports TCHAR
     #define wxHAVE_TCHAR_SUPPORT
 #endif // compilers with (good) TCHAR support
-
-#ifdef __MWERKS__
-    #define HAVE_WPRINTF
-#endif
 
 #ifdef wxHAVE_TCHAR_SUPPORT
     // get TCHAR definition if we've got it
@@ -280,7 +269,7 @@
     #define  wxStrcoll   _tcscoll
     #define  wxStrcpy    _tcscpy
     #define  wxStrcspn   _tcscspn
-    #define  wxStrdupW   _wcsdup        // notice the 'W'!
+    #define  wxStrdup    _tcsdup
     #define  wxStrftime  _tcsftime
     #define  wxStricmp   _tcsicmp
     #define  wxStrnicmp  _tcsnicmp
@@ -438,94 +427,7 @@
             #define wxNEED_WX_STDIO_H
             #define wxNEED_WX_STDLIB_H
             #define wxNEED_WX_TIME_H
-        #elif defined(__MWERKS__) && ( defined(macintosh) || defined(__MACH__) )
-            // ctype.h functions (wctype.h)
-            #define  wxIsalnum   iswalnum
-            #define  wxIsalpha   iswalpha
-            #define  wxIsctrl    iswcntrl
-            #define  wxIsdigit   iswdigit
-            #define  wxIsgraph   iswgraph
-            #define  wxIslower   iswlower
-            #define  wxIsprint   iswprint
-            #define  wxIspunct   iswpunct
-            #define  wxIsspace   iswspace
-            #define  wxIsupper   iswupper
-            #define  wxIsxdigit  iswxdigit
-            #define  wxTolower   towlower
-            #define  wxToupper   towupper
-
-            // string.h functions (wchar.h)
-            #define  wxStrcat    wcscat
-            #define  wxStrchr    wcschr
-            #define  wxStrcmp    wcscmp
-            #define  wxStrcoll   wcscoll
-            #define  wxStrcpy    wcscpy
-            #define  wxStrcspn   wcscspn
-            #define  wxStrlen_   wxWcslen // wxStrlen_() is used in wxStrlen()
-            #define  wxStrncat   wcsncat
-            #define  wxStrncmp   wcsncmp
-            #define  wxStrncpy   wcsncpy
-            #define  wxStrpbrk   wcspbrk
-            #define  wxStrrchr   wcsrchr
-            #define  wxStrspn    wcsspn
-            #define  wxStrstr    wcsstr
-            #define  wxStrtod    wcstod
-            #define  wxStrtol    wcstol
-            #define  wxStrtoul   wcstoul
-            #define  wxStrxfrm   wcsxfrm
-
-            #define  wxFgetc     fgetwc
-            #define  wxFgetchar  fgetwchar
-            #define  wxFgets     fgetws
-            #define  wxFputc     fputwc
-            #define  wxFputchar  fputwchar
-            #define  wxGetc      getwc
-            #define  wxGetchar   getwchar
-            #define  wxGets      getws
-            #define  wxUngetc    ungetwc
-
-            #define wxNEED_PRINTF_CONVERSION
-
-            #define  wxPutc      putwc
-            #define  wxPutchar   putwchar
-            #define  wxFputs     fputws
-            
-            // stdio.h functions
-            
-             #define wxNEED_WX_STDIO_H
-
-            // stdlib.h functions
-            #define  wxAtof      watof
-            #define  wxAtoi      watoi
-            #define  wxAtol      watol
-            #define  wxGetenv(a)    ((wxChar*)NULL)
-            #define  wxSystem(a)    ((int)NULL)
-
-            // time.h functions
-            #define  wxAsctime   wasciitime
-            #define  wxCtime     wctime
-            #define  wxStrftime  wcsftime
-
-            /*
-            #define wxNEED_FPUTWC
-
-            #include <stdio.h>
-
-            int wxFputs(const wxChar *ch, FILE *stream);
-            int wxPutc(wxChar ch, FILE *stream);
-
-            #define wxPuts(ws) wxFputs(ws, stdout)
-            #define wxPutchar(wch) wxPutc(wch, stdout)
-
-            // we need %s to %ls conversion for printf and scanf etc
-            #define wxNEED_PRINTF_CONVERSION
-            // glibc doesn't have wide char equivalents of the other stuff so
-            // use our own versions
-            #define wxNEED_WX_STDIO_H
-            #define wxNEED_WX_STDLIB_H
-            #define wxNEED_WX_TIME_H
-            */
-        #else // !metrowerks for apple
+        #else // !glibc
             #error  "Please define wide character functions for your environment"
         #endif
     #else // ASCII
@@ -557,7 +459,9 @@
         #define  wxStrcoll   strcoll
         #define  wxStrcpy    strcpy
         #define  wxStrcspn   strcspn
-
+        #if !defined(__MWERKS__) || !defined(__WXMAC__)
+            #define  wxStrdup    strdup
+        #endif
         // wxStricmp and wxStrnicmp are defined below
         #define  wxStrlen_   strlen // used in wxStrlen inline function
         #define  wxStrncat   strncat
@@ -633,7 +537,7 @@
             defined(__EMX__) || defined(__DJGPP__)
         #define wxStricmp stricmp
         #define wxStrnicmp strnicmp
-    #elif defined(__SYMANTEC__) || defined(__VISUALC__) || \
+    #elif defined(__SC__) || defined(__VISUALC__) || \
             (defined(__MWERKS__) && defined(__INTEL__))
         #define wxStricmp _stricmp
         #define wxStrnicmp _strnicmp
@@ -668,31 +572,11 @@ inline bool wxIsEmpty(const wxChar *p) { return !p || !*p; }
 // safe version of strlen() (returns 0 if passed NULL pointer)
 inline size_t wxStrlen(const wxChar *psz) { return psz ? wxStrlen_(psz) : 0; }
 
-// each of strdup() and wcsdup() may or may not be available but we need both
-// of them anyhow for wx/buffer.h so we define the missing one(s) in
-// wxchar.cpp and so we should always have both wxStrdupA and wxStrdupW
-// defined -- if this is somehow not the case in some situations, please
-// correct that and not the lines here
-#if wxUSE_UNICODE
-    #define wxStrdup wxStrdupW
-#else
-    #define wxStrdup wxStrdupA
-#endif
-
 WXDLLEXPORT bool wxOKlibc(); // for internal use
 
 // ----------------------------------------------------------------------------
 // printf() family saga
 // ----------------------------------------------------------------------------
-
-/*
-   For some systems vsnprintf() exists in the system libraries but not in the
-   headers, so we need to declare it ourselves to be able to use it.
- */
-#if defined(HAVE_VSNPRINTF) && !defined(HAVE_VSNPRINTF_DECL)
-    extern "C"
-    int vsnprintf(char *str, size_t size, const char *format, va_list ap);
-#endif // !HAVE_VSNPRINTF_DECL
 
 /*
    First of all, we always want to define safe snprintf() function to be used
@@ -705,10 +589,6 @@ WXDLLEXPORT bool wxOKlibc(); // for internal use
  */
 #ifndef wxVsnprintf_
     #if wxUSE_UNICODE
-        #if defined(__MWERKS__)
-            #define HAVE_WCSRTOMBS 1
-            #define HAVE_VSWPRINTF 1
-        #endif
         #if defined(HAVE__VSNWPRINTF)
             #define wxVsnprintf_    _vsnwprintf
         /* MinGW?MSVCRT has the wrong vswprintf */
@@ -856,12 +736,8 @@ WXDLLEXPORT bool wxOKlibc(); // for internal use
     WXDLLEXPORT size_t   wxStrxfrm(wxChar *dest, const wxChar *src, size_t n);
 #endif // wxNEED_WX_STRING_H
 
-#ifndef wxStrdupA
-WXDLLEXPORT char *wxStrdupA(const char *psz);
-#endif
-
-#ifndef wxStrdupW
-WXDLLEXPORT wchar_t *wxStrdupW(const wchar_t *pwz);
+#ifndef wxStrdup
+WXDLLEXPORT wxChar * wxStrdup(const wxChar *psz);
 #endif
 
 #ifndef wxStricmp
@@ -908,9 +784,6 @@ WXDLLEXPORT int      wxSystem(const wxChar *psz);
 
 // time.h functions
 #ifdef wxNEED_WX_TIME_H
-#if defined(__MWERKS__) && defined(macintosh)
-    #include <time.h> 
-#endif
     WXDLLEXPORT size_t wxStrftime(wxChar *s, size_t max,
                                   const wxChar *fmt, const struct tm *tm);
 #endif // wxNEED_WX_TIME_H

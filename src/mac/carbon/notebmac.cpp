@@ -1,17 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name:        notebook.cpp
 // Purpose:     implementation of wxNotebook
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifdef __GNUG__
-#pragma implementation "notebook.h"
-#endif
 
 // ============================================================================
 // declarations
@@ -20,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+#ifdef __GNUG__
+  #pragma implementation "notebook.h"
+#endif
+
 #include "wx/app.h"
 #include "wx/string.h"
 #include "wx/log.h"
@@ -43,12 +43,12 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
 
 BEGIN_EVENT_TABLE(wxNotebook, wxControl)
-EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
-EVT_MOUSE_EVENTS(wxNotebook::OnMouse)
+    EVT_NOTEBOOK_PAGE_CHANGED(-1, wxNotebook::OnSelChange)
+    EVT_MOUSE_EVENTS(wxNotebook::OnMouse)
 
-EVT_SIZE(wxNotebook::OnSize)
-EVT_SET_FOCUS(wxNotebook::OnSetFocus)
-EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
+    EVT_SIZE(wxNotebook::OnSize)
+    EVT_SET_FOCUS(wxNotebook::OnSetFocus)
+    EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxControl)
@@ -131,6 +131,7 @@ static inline int wxMacTabBottomMargin(long style)
     return wxMacTabMargin(style, wxNB_BOTTOM);
 }
 
+
 // ----------------------------------------------------------------------------
 // wxNotebook construction
 // ----------------------------------------------------------------------------
@@ -175,34 +176,34 @@ bool wxNotebook::Create(wxWindow *parent,
                         long style,
                         const wxString& name)
 {
-    Rect bounds ;
-    Str255 title ;
+	Rect bounds ;
+	Str255 title ;
 
-    MacPreControlCreate( parent , id ,  wxEmptyString , pos , size ,style, wxDefaultValidator , name , &bounds , title ) ;
+	MacPreControlCreate( parent , id ,  "" , pos , size ,style, wxDefaultValidator , name , &bounds , title ) ;
 
-    int tabstyle = kControlTabSmallNorthProc ;
-    if ( HasFlag(wxNB_LEFT) )
-        tabstyle = kControlTabSmallWestProc ;
-    else if ( HasFlag( wxNB_RIGHT ) )
-        tabstyle = kControlTabSmallEastProc ;
-    else if ( HasFlag( wxNB_BOTTOM ) )
-        tabstyle = kControlTabSmallSouthProc ;
+	int tabstyle = kControlTabSmallNorthProc ;
+	if ( HasFlag(wxNB_LEFT) )
+		tabstyle = kControlTabSmallWestProc ;
+	else if ( HasFlag( wxNB_RIGHT ) )
+		tabstyle = kControlTabSmallEastProc ;
+	else if ( HasFlag( wxNB_BOTTOM ) )
+		tabstyle = kControlTabSmallSouthProc ;
 
 
-    m_macControl = ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1,
-        tabstyle , (long) this ) ;
+	m_macControl = ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1,
+	  	tabstyle , (long) this ) ;
 
-    MacPostControlCreate() ;
-    return TRUE ;
+	MacPostControlCreate() ;
+	return TRUE ;
 }
 
 // dtor
 wxNotebook::~wxNotebook()
 {
-    m_macControl = NULL ;
+	m_macControl = NULL ;
 }
 
-wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage) const
+wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage)
 {
     wxSize sizeTotal = sizePage;
 
@@ -243,7 +244,7 @@ wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage) const
 
 void wxNotebook::SetPadding(const wxSize& padding)
 {
-    wxFAIL_MSG( wxT("wxNotebook::SetPadding not implemented") );
+   wxFAIL_MSG( wxT("wxNotebook::SetPadding not implemented") );
 }
 
 void wxNotebook::SetTabSize(const wxSize& sz)
@@ -258,11 +259,11 @@ void wxNotebook::SetPageSize(const wxSize& size)
 
 int wxNotebook::SetSelection(int nPage)
 {
-    if( !IS_VALID_PAGE(nPage) )
-        return m_nSelection ;
+  if( !IS_VALID_PAGE(nPage) )
+    return m_nSelection ;
 
     ChangePage(m_nSelection, nPage);
-    SetControl32BitValue( (ControlHandle) m_macControl , m_nSelection + 1 ) ;
+	SetControl32BitValue( (ControlHandle) m_macControl , m_nSelection + 1 ) ;
 
     Refresh();
     return m_nSelection;
@@ -299,7 +300,7 @@ bool wxNotebook::SetPageImage(int nPage, int nImage)
     wxCHECK_MSG( IS_VALID_PAGE(nPage), FALSE, _T("invalid notebook page") );
 
     wxCHECK_MSG( m_imageList && nImage < m_imageList->GetImageCount(), FALSE,
-        _T("invalid image index in SetPageImage()") );
+                 _T("invalid image index in SetPageImage()") );
 
     if ( nImage != m_images[nPage] )
     {
@@ -308,7 +309,7 @@ bool wxNotebook::SetPageImage(int nPage, int nImage)
         // changes, it won't
         m_images[nPage] = nImage;
 
-        MacSetupTabs() ;
+		MacSetupTabs() ;
     }
 
     return TRUE;
@@ -393,10 +394,10 @@ bool wxNotebook::InsertPage(int nPage,
 }
 
 /* Added by Mark Newsam
-* When a page is added or deleted to the notebook this function updates
-* information held in the m_macControl so that it matches the order
-* the user would expect.
-*/
+ * When a page is added or deleted to the notebook this function updates
+ * information held in the m_macControl so that it matches the order
+ * the user would expect.
+ */
 void wxNotebook::MacSetupTabs()
 {
     SetControl32BitMaximum( (ControlHandle) m_macControl , GetPageCount() ) ;
@@ -404,39 +405,45 @@ void wxNotebook::MacSetupTabs()
     wxNotebookPage *page;
     ControlTabInfoRec info;
 
+    OSStatus err = noErr ;
     for(int ii = 0; ii < GetPageCount(); ii++)
     {
         page = m_pages[ii];
         info.version = 0;
         info.iconSuiteID = 0;
-        wxMacStringToPascal( page->GetLabel() , info.name ) ;
-
+#if TARGET_CARBON
+		c2pstrcpy( (StringPtr) info.name , page->GetLabel() ) ;
+#else
+		strcpy( (char *) info.name , page->GetLabel() ) ;
+		c2pstr( (char *) info.name ) ;
+#endif
         SetControlData( (ControlHandle) m_macControl, ii+1, kControlTabInfoTag,
-            sizeof( ControlTabInfoRec) , (char*) &info ) ;
+                        sizeof( ControlTabInfoRec) , (char*) &info ) ;
         SetTabEnabled( (ControlHandle) m_macControl , ii+1 , true ) ;
-#if 0 // TARGET_CARBON
+
+#if TARGET_CARBON
         if ( GetImageList() && GetPageImage(ii) >= 0 && UMAGetSystemVersion() >= 0x1020 )
         {
-            // tab controls only support very specific types of images, therefore we are doing an odyssee
-            // accross the icon worlds (even Apple DTS did not find a shorter path)
-            // in order not to pollute the icon registry we put every icon into (OSType) 1 and immediately
-            // afterwards Unregister it (IconRef is ref counted, so it will stay on the tab even if we
-            // unregister it) in case this will ever lead to having the same icon everywhere add some kind
-            // of static counter
-            ControlButtonContentInfo info ;
-            wxMacCreateBitmapButton( &info , *GetImageList()->GetBitmap( GetPageImage(ii ) ) , kControlContentPictHandle) ;
-            IconFamilyHandle iconFamily = (IconFamilyHandle) NewHandle(0) ;
-            OSErr err = SetIconFamilyData( iconFamily, 'PICT' , (Handle) info.u.picture ) ;
+        	// tab controls only support very specific types of images, therefore we are doing an odyssee
+        	// accross the icon worlds (even Apple DTS did not find a shorter path)
+        	// in order not to pollute the icon registry we put every icon into (OSType) 1 and immediately
+        	// afterwards Unregister it (IconRef is ref counted, so it will stay on the tab even if we
+        	// unregister it) in case this will ever lead to having the same icon everywhere add some kind
+        	// of static counter
+        	ControlButtonContentInfo info ;
+        	wxMacCreateBitmapButton( &info , *GetImageList()->GetBitmap( GetPageImage(ii ) ) , kControlContentPictHandle) ;
+        	IconFamilyHandle iconFamily = (IconFamilyHandle) NewHandle(0) ;
+        	err = SetIconFamilyData( iconFamily, 'PICT' , (Handle) info.u.picture ) ;
             wxASSERT_MSG( err == noErr , "Error when adding bitmap" ) ;
-            IconRef iconRef ;
-            err = RegisterIconRefFromIconFamily( 'WXNG' , (OSType) 1 , iconFamily, &iconRef ) ;
+         	IconRef iconRef ;
+         	err = RegisterIconRefFromIconFamily( 'WXNG' , (OSType) 1 , iconFamily, &iconRef ) ;
             wxASSERT_MSG( err == noErr , "Error when adding bitmap" ) ;
-            info.contentType = kControlContentIconRef ;
-            info.u.iconRef = iconRef ;
-            SetControlData( (ControlHandle) m_macControl, ii+1,kControlTabImageContentTag,
-                sizeof( info ), (Ptr)&info );
+         	info.contentType = kControlContentIconRef ;
+         	info.u.iconRef = iconRef ;
+        	SetControlData( (ControlHandle) m_macControl, ii+1,kControlTabImageContentTag,
+                        sizeof( info ), (Ptr)&info );
             wxASSERT_MSG( err == noErr , "Error when setting icon on tab" ) ;
-               UnregisterIconRef( 'WXNG' , (OSType) 1 ) ;
+           	UnregisterIconRef( 'WXNG' , (OSType) 1 ) ;
             ReleaseIconRef( iconRef ) ;
             DisposeHandle( (Handle) iconFamily ) ;
         }
@@ -534,7 +541,7 @@ bool wxNotebook::DoPhase(int /* nPhase */)
 
 void wxNotebook::Command(wxCommandEvent& event)
 {
-    wxFAIL_MSG(wxT("wxNotebook::Command not implemented"));
+    wxFAIL_MSG("wxNotebook::Command not implemented");
 }
 
 // ----------------------------------------------------------------------------
@@ -570,77 +577,77 @@ void wxNotebook::ChangePage(int nOldSel, int nSel)
 
 void  wxNotebook::OnMouse( wxMouseEvent &event )
 {
-    if ( (ControlHandle) m_macControl == NULL )
-    {
-        event.Skip() ;
-        return ;
-    }
+   if ( (ControlHandle) m_macControl == NULL )
+   {
+      event.Skip() ;
+      return ;
+   }
 
-    if (event.GetEventType() == wxEVT_LEFT_DOWN || event.GetEventType() == wxEVT_LEFT_DCLICK )
-    {
-        int x = event.m_x ;
-        int y = event.m_y ;
+   if (event.GetEventType() == wxEVT_LEFT_DOWN || event.GetEventType() == wxEVT_LEFT_DCLICK )
+   {
+      int x = event.m_x ;
+      int y = event.m_y ;
 
-        MacClientToRootWindow( &x , &y ) ;
+      MacClientToRootWindow( &x , &y ) ;
 
-        ControlHandle   control ;
-        Point       localwhere ;
-        SInt16      controlpart ;
+      ControlHandle   control ;
+      Point       localwhere ;
+      SInt16      controlpart ;
 
-        localwhere.h = x ;
-        localwhere.v = y ;
+      localwhere.h = x ;
+      localwhere.v = y ;
 
-        short modifiers = 0;
+      short modifiers = 0;
 
-        if ( !event.m_leftDown && !event.m_rightDown )
-            modifiers  |= btnState ;
+      if ( !event.m_leftDown && !event.m_rightDown )
+	    modifiers  |= btnState ;
 
-        if ( event.m_shiftDown )
-            modifiers |= shiftKey ;
+      if ( event.m_shiftDown )
+	    modifiers |= shiftKey ;
 
-        if ( event.m_controlDown )
-            modifiers |= controlKey ;
+      if ( event.m_controlDown )
+	    modifiers |= controlKey ;
 
-        if ( event.m_altDown )
-            modifiers |= optionKey ;
+      if ( event.m_altDown )
+	    modifiers |= optionKey ;
 
-        if ( event.m_metaDown )
-            modifiers |= cmdKey ;
+      if ( event.m_metaDown )
+	    modifiers |= cmdKey ;
 
-        control = (ControlHandle) m_macControl ;
-        if ( control && ::IsControlActive( control ) )
-        {
-            {
-                wxNotebookEvent changing(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId,
-                    ::GetControl32BitValue(control) - 1, m_nSelection);
-                changing.SetEventObject(this);
-                GetEventHandler()->ProcessEvent(changing);
+      control = (ControlHandle) m_macControl ;
+      if ( control && ::IsControlActive( control ) )
+      {
+	    {
+            wxNotebookEvent changing(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId,
+ 				     ::GetControl32BitValue(control) - 1, m_nSelection);
+ 	        changing.SetEventObject(this);
+ 	        GetEventHandler()->ProcessEvent(changing);
 
-                if(changing.IsAllowed())
-                {
-                    controlpart = ::HandleControlClick(control, localwhere, modifiers,
-                        (ControlActionUPP) -1);
-                    wxTheApp->s_lastMouseDown = 0 ;
+ 	        if(changing.IsAllowed())
+ 	        {
+     	       controlpart = ::HandleControlClick(control, localwhere, modifiers,
+     						  (ControlActionUPP) -1);
+     	       wxTheApp->s_lastMouseDown = 0 ;
 
-                    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_windowId,
-                        ::GetControl32BitValue(control) - 1, m_nSelection);
-                    event.SetEventObject(this);
+     	       wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_windowId,
+     				     ::GetControl32BitValue(control) - 1, m_nSelection);
+     	       event.SetEventObject(this);
 
-                    GetEventHandler()->ProcessEvent(event);
-                }
-            }
-        }
-    }
+    	       GetEventHandler()->ProcessEvent(event);
+ 	        }
+ 	    }
+       }
+   }
 }
 
 
-void wxNotebook::MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool WXUNUSED( mouseStillDown ) )
+void wxNotebook::MacHandleControlClick( WXWidget control , wxInt16 controlpart )
 {
 #if 0
-    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_windowId , ::GetControl32BitValue((ControlHandle)m_macControl) - 1, m_nSelection);
-    event.SetEventObject(this);
+  wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_windowId , ::GetControl32BitValue((ControlHandle)m_macControl) - 1, m_nSelection);
+  event.SetEventObject(this);
 
-    ProcessEvent(event);
+  ProcessEvent(event);
 #endif
 }
 

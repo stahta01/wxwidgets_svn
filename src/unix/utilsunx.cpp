@@ -28,11 +28,6 @@
 
 #include "wx/wfstream.h"
 
-#if defined( __MWERKS__ ) && defined(__MACH__)
-#define WXWIN_OS_DESCRIPTION "MacOS X"
-#define HAVE_NANOSLEEP
-#endif
-
 // not only the statfs syscall is called differently depending on platform, but
 // one of its incarnations, statvfs(), takes different arguments under
 // different platforms and even different versions of the same system (Solaris
@@ -207,16 +202,6 @@ int wxKill(long pid, wxSignal sig, wxKillError *rc)
 long wxExecute( const wxString& command, int flags, wxProcess *process )
 {
     wxCHECK_MSG( !command.IsEmpty(), 0, wxT("can't exec empty command") );
-
-#if wxUSE_THREADS
-    // fork() doesn't mix well with POSIX threads: on many systems the program
-    // deadlocks or crashes for some reason. Probably our code is buggy and
-    // doesn't do something which must be done to allow this to work, but I
-    // don't know what yet, so for now just warn the user (this is the least we
-    // can do) about it
-    wxASSERT_MSG( wxThread::IsMain(),
-                    _T("wxExecute() can be called only from the main thread") );
-#endif // wxUSE_THREADS
 
     int argc = 0;
     wxChar *argv[WXEXECUTE_NARGS];
@@ -549,7 +534,7 @@ long wxExecute(wxChar **argv,
     wxChar **mb_argv = argv;
 #endif // Unicode/ANSI
 
-#if wxUSE_GUI && !(defined(__DARWIN__) && defined(__WXMAC__))
+#if wxUSE_GUI && !defined(__DARWIN__)
     // create pipes
     wxPipe pipeEndProcDetect;
     if ( !pipeEndProcDetect.Create() )
@@ -560,7 +545,7 @@ long wxExecute(wxChar **argv,
 
         return ERROR_RETURN_CODE;
     }
-#endif // wxUSE_GUI && !(defined(__DARWIN__) && defined(__WXMAC__))
+#endif // wxUSE_GUI && !defined(__DARWIN__)
 
     // pipes for inter process communication
     wxPipe pipeIn,      // stdin
@@ -611,9 +596,9 @@ long wxExecute(wxChar **argv,
                 if ( fd == pipeIn[wxPipe::Read]
                         || fd == pipeOut[wxPipe::Write]
                         || fd == pipeErr[wxPipe::Write]
-#if wxUSE_GUI && !(defined(__DARWIN__) && defined(__WXMAC__))
+#if wxUSE_GUI && !defined(__DARWIN__)
                         || fd == pipeEndProcDetect[wxPipe::Write]
-#endif // wxUSE_GUI && !(defined(__DARWIN__) && defined(__WXMAC__))
+#endif // wxUSE_GUI && !defined(__DARWIN__)
                    )
                 {
                     // don't close this one, we still need it
@@ -635,12 +620,12 @@ long wxExecute(wxChar **argv,
         }
 #endif // !__VMS
 
-#if wxUSE_GUI && !(defined(__DARWIN__) && defined(__WXMAC__))
+#if wxUSE_GUI && !defined(__DARWIN__)
         // reading side can be safely closed but we should keep the write one
         // opened
         pipeEndProcDetect.Detach(wxPipe::Write);
         pipeEndProcDetect.Close();
-#endif // wxUSE_GUI && !(defined(__DARWIN__) && defined(__WXMAC__))
+#endif // wxUSE_GUI && !defined(__DARWIN__)
 
         // redirect stdin, stdout and stderr
         if ( pipeIn.IsOk() )
@@ -658,12 +643,6 @@ long wxExecute(wxChar **argv,
         }
 
         execvp (*mb_argv, mb_argv);
-
-        fprintf(stderr, "execvp(");
-        // CS changed ppc to ppc_ as ppc is not available under mac os CW Mach-O
-        for ( char **ppc_ = mb_argv; *ppc_; ppc_++ )
-            fprintf(stderr, "%s%s", ppc_ == mb_argv ? "" : ", ", *ppc_);
-        fprintf(stderr, ") failed with error %d!\n", errno);
 
         // there is no return after successful exec()
         _exit(-1);
@@ -742,7 +721,7 @@ long wxExecute(wxChar **argv,
         }
 
 
-#if defined(__DARWIN__) && defined(__WXMAC__)
+#if defined(__DARWIN__)
         data->tag = wxAddProcessCallbackForPid(data,pid);
 #else
         data->tag = wxAddProcessCallback
@@ -752,7 +731,7 @@ long wxExecute(wxChar **argv,
                     );
 
         pipeEndProcDetect.Close();
-#endif // defined(__DARWIN__) && defined(__WXMAC__)
+#endif // defined(__DARWIN__)
 
         if ( flags & wxEXEC_SYNC )
         {

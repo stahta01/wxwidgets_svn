@@ -6,13 +6,13 @@
 // Created:     11.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MOTIF_MENUITEM_H
 #define _WX_MOTIF_MENUITEM_H
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "menuitem.h"
 #endif
 

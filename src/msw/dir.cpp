@@ -6,7 +6,7 @@
 // Created:     08.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -224,8 +224,6 @@ private:
     wxString m_filespec;
 
     int      m_flags;
-
-    DECLARE_NO_COPY_CLASS(wxDirData)
 };
 
 // ============================================================================

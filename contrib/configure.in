@@ -3,12 +3,6 @@ AC_REVISION($Id$)dnl
 
 AC_INIT(Makefile.in)
 
-dnl we need the values the main configure determined for us, so refuse
-dnl to run if we don't have them
-if test "x$wx_cv_path_ifs" = "x"; then
-    AC_MSG_ERROR([Please run configure from the top level directory.])
-fi
-
 dnl ---------------
 dnl MMedia specific
 dnl ---------------
@@ -54,28 +48,27 @@ dnl File output
 
 AC_OUTPUT([
             src/Makefile
-            src/deprecated/Makefile
             src/ogl/Makefile
             src/mmedia/Makefile
             src/stc/Makefile
             src/svg/Makefile	    
             src/xrc/Makefile
+            src/canvas/Makefile
             src/gizmos/Makefile
             src/plot/Makefile
             src/applet/Makefile
             src/fl/Makefile
             src/net/Makefile
             samples/Makefile
-            samples/deprecated/Makefile
-            samples/deprecated/proplist/Makefile
-            samples/deprecated/resource/Makefile
-            samples/deprecated/treelay/Makefile
             samples/mmedia/Makefile
             samples/ogl/Makefile
             samples/ogl/ogledit/Makefile
             samples/ogl/studio/Makefile
             samples/stc/Makefile
             samples/svg/Makefile
+            samples/canvas/Makefile
+            samples/canvas/test/Makefile
+            samples/canvas/simple/Makefile
             samples/gizmos/Makefile
             samples/gizmos/editlbox/Makefile
             samples/gizmos/dynsash/Makefile

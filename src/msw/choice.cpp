@@ -5,8 +5,8 @@
 // Modified by: Vadim Zeitlin to derive from wxChoiceBase
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -110,20 +110,6 @@ int wxChoice::DoAppend(const wxString& item)
     if ( n == CB_ERR )
     {
         wxLogLastError(wxT("SendMessage(CB_ADDSTRING)"));
-    }
-
-    return n;
-}
-
-int wxChoice::DoInsert(const wxString& item, int pos)
-{
-    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
-    wxCHECK_MSG((pos>=0) && (pos<=GetCount()), -1, wxT("invalid index"));
-
-    int n = (int)SendMessage(GetHwnd(), CB_INSERTSTRING, pos, (LONG)item.c_str());
-    if ( n == CB_ERR )
-    {
-        wxLogLastError(wxT("SendMessage(CB_INSERTSTRING)"));
     }
 
     return n;
@@ -407,11 +393,25 @@ bool wxChoice::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
 }
 
 WXHBRUSH wxChoice::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED(nCtlColor),
+#if wxUSE_CTL3D
+                               WXUINT message,
+                               WXWPARAM wParam,
+                               WXLPARAM lParam
+#else
                                WXUINT WXUNUSED(message),
                                WXWPARAM WXUNUSED(wParam),
                                WXLPARAM WXUNUSED(lParam)
+#endif
      )
 {
+#if wxUSE_CTL3D
+    if ( m_useCtl3D )
+    {
+        HBRUSH hbrush = Ctl3dCtlColorEx(message, wParam, lParam);
+        return (WXHBRUSH) hbrush;
+    }
+#endif // wxUSE_CTL3D
+
     HDC hdc = (HDC)pDC;
     if (GetParent()->GetTransparentBackground())
         SetBkMode(hdc, TRANSPARENT);

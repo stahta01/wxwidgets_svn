@@ -12,21 +12,20 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "dialog.h"
 #endif
 
-class WXDLLEXPORT wxEventLoop;
+WXDLLEXPORT_DATA(extern const char*) wxDialogNameStr;
 
 // Dialog boxes
 class WXDLLEXPORT wxDialog : public wxDialogBase
 {
     DECLARE_DYNAMIC_CLASS(wxDialog)
-
+        
 public:
     wxDialog();
-
-#if WXWIN_COMPATIBILITY_2
+    
     // Constructor with a modal flag, but no window id - the old convention
     wxDialog(wxWindow *parent,
         const wxString& title, bool modal,
@@ -37,8 +36,7 @@ public:
         long modalStyle = modal ? wxDIALOG_MODAL : wxDIALOG_MODELESS ;
         Create(parent, -1, title, wxPoint(x, y), wxSize(width, height), style|modalStyle, name);
     }
-#endif
-
+    
     // Constructor with no modal flag - the new convention.
     wxDialog(wxWindow *parent, wxWindowID id,
         const wxString& title,
@@ -49,68 +47,74 @@ public:
     {
         Create(parent, id, title, pos, size, style, name);
     }
-
+    
     bool Create(wxWindow *parent, wxWindowID id,
         const wxString& title, // bool modal = FALSE, // TODO make this a window style?
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_DIALOG_STYLE,
         const wxString& name = wxDialogNameStr);
-
+    
     ~wxDialog();
-
+    
     virtual bool Destroy();
-
-    virtual bool Show(bool show = TRUE);
-
+    
+    bool Show(bool show);
+    void Iconize(bool iconize);
+    void Raise();
+    void Lower();
+    
+    virtual bool IsIconized() const;
+    
+    virtual bool IsTopLevel() const { return TRUE; }
+    
     void SetTitle(const wxString& title);
-
+    wxString GetTitle() const ;
+    
     void SetModal(bool flag);
-
+    
     virtual bool IsModal() const
     { return ((GetWindowStyleFlag() & wxDIALOG_MODAL) == wxDIALOG_MODAL); }
-
+    
     virtual int ShowModal();
     virtual void EndModal(int retCode);
-
+    
     // Implementation
     virtual void ChangeFont(bool keepOriginalSize = TRUE);
     virtual void ChangeBackgroundColour();
     virtual void ChangeForegroundColour();
     inline WXWidget GetTopWidget() const { return m_mainWidget; }
     inline WXWidget GetClientWidget() const { return m_mainWidget; }
-
+    
     // Standard buttons
     void OnOK(wxCommandEvent& event);
     void OnApply(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
-
+    
+    void OnPaint(wxPaintEvent &event);
+    
     // Responds to colour changes
     void OnSysColourChanged(wxSysColourChangedEvent& event);
-
+    
+    //  bool OnClose();
     void OnCharHook(wxKeyEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
-
-private:
-    virtual bool DoCreate( wxWindow* parent, wxWindowID id,
-                           const wxString& title,
-                           const wxPoint& pos,
-                           const wxSize& size,
-                           long style,
-                           const wxString& name );
-    virtual void DoDestroy();
-
+    
+    // Responds to size changes
+    void OnSize(wxSizeEvent& event);
+    
+public:
     //// Motif-specific
     bool          m_modalShowing;
-    wxEventLoop*  m_eventLoop;
-
+    wxString      m_dialogTitle;
+    
 protected:
     virtual void DoSetSize(int x, int y,
         int width, int height,
         int sizeFlags = wxSIZE_AUTO);
-
+    
     virtual void DoSetClientSize(int width, int height);
-
+    
 private:
     DECLARE_EVENT_TABLE()
 };

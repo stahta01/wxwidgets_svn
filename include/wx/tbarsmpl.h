@@ -5,7 +5,7 @@
 // Modified by: VZ on 14.12.99 during wxToolBar classes reorganization
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ public:
     wxToolBarSimple() { Init(); }
 
     wxToolBarSimple(wxWindow *parent,
-                    wxWindowID winid,
+                    wxWindowID id,
                     const wxPoint& pos = wxDefaultPosition,
                     const wxSize& size = wxDefaultSize,
                     long style = wxNO_BORDER | wxTB_HORIZONTAL,
@@ -41,11 +41,11 @@ public:
     {
         Init();
 
-        Create(parent, winid, pos, size, style, name);
+        Create(parent, id, pos, size, style, name);
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID winid,
+                wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxNO_BORDER | wxTB_HORIZONTAL,
@@ -108,7 +108,7 @@ protected:
     // implement base class pure virtuals
     virtual wxToolBarToolBase *DoAddTool
                                (
-                                   int toolid,
+                                   int id,
                                    const wxString& label,
                                    const wxBitmap& bitmap,
                                    const wxBitmap& bmpDisabled,
@@ -127,7 +127,7 @@ protected:
     virtual void DoToggleTool(wxToolBarToolBase *tool, bool toggle);
     virtual void DoSetToggle(wxToolBarToolBase *tool, bool toggle);
 
-    virtual wxToolBarToolBase *CreateTool(int winid,
+    virtual wxToolBarToolBase *CreateTool(int id,
                                           const wxString& label,
                                           const wxBitmap& bmpNormal,
                                           const wxBitmap& bmpDisabled,

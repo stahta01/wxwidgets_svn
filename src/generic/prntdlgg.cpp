@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -33,6 +33,8 @@
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/dc.h"
+    #include "wx/app.h"
+    #include "wx/frame.h"
     #include "wx/stattext.h"
     #include "wx/statbox.h"
     #include "wx/button.h"
@@ -40,6 +42,7 @@
     #include "wx/textctrl.h"
     #include "wx/radiobox.h"
     #include "wx/filedlg.h"
+    #include "wx/choice.h"
     #include "wx/combobox.h"
     #include "wx/intl.h"
     #include "wx/sizer.h"
@@ -168,7 +171,7 @@ void wxGenericPrintDialog::Init(wxWindow * WXUNUSED(parent))
                                          2, choices,
                                          1, wxRA_VERTICAL);
         m_rangeRadioBox->SetSelection(1);
-
+	
         mainsizer->Add( m_rangeRadioBox, 0, wxLEFT|wxTOP|wxRIGHT, 10 );
     }
 
@@ -503,7 +506,7 @@ bool wxGenericPrintSetupDialog::TransferDataFromWindow()
         int selectedItem = m_paperTypeChoice->GetSelection();
         if (selectedItem != -1)
         {
-            wxPrintPaperType *paper = (wxPrintPaperType*)wxThePrintPaperDatabase->Item(selectedItem)->GetData();
+            wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Nth(selectedItem)->Data();
             if (paper != NULL)
               m_printData.SetPaperId( paper->GetId());
         }
@@ -521,13 +524,13 @@ wxComboBox *wxGenericPrintSetupDialog::CreatePaperTypeChoice(int *x, int *y)
         wxThePrintPaperDatabase->CreateDatabase();
     }
 */
-    size_t      n = wxThePrintPaperDatabase->GetCount();
-    wxString   *choices = new wxString [n];
-    size_t      sel = 0;
-
-    for (size_t i = 0; i < n; i++)
+    int n = wxThePrintPaperDatabase->Number();
+    wxString *choices = new wxString [n];
+    int sel = 0;
+    int i;
+    for (i = 0; i < n; i++)
     {
-        wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Item(i)->GetData();
+        wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Nth(i)->Data();
         choices[i] = paper->GetName();
         if (m_printData.GetPaperId() == paper->GetId())
             sel = i;
@@ -535,12 +538,10 @@ wxComboBox *wxGenericPrintSetupDialog::CreatePaperTypeChoice(int *x, int *y)
 
     int width = 250;
 
-    wxComboBox *choice = new wxComboBox( this,
-                                         wxPRINTID_PAPERSIZE,
-                                         _("Paper Size"),
-                                         wxPoint(*x, *y),
-                                         wxSize(width, -1),
-                                         n, choices );
+    wxComboBox *choice = new wxComboBox(this, wxPRINTID_PAPERSIZE,
+                                        _("Paper Size"),
+                                        wxPoint(*x, *y), wxSize(width, -1), n,
+        choices);
 
     //    SetFont(thisFont);
 
@@ -586,41 +587,31 @@ void wxGenericPageSetupDialog::OnPrinter(wxCommandEvent& WXUNUSED(event))
     TransferDataToWindow();
 }
 
-wxGenericPageSetupDialog::wxGenericPageSetupDialog( wxWindow *parent,
-                                                    wxPageSetupData* data)
-    : wxDialog( parent,
-                -1,
-                _("Page Setup"),
-                wxPoint(0, 0),
-                wxSize(600, 600),
-                wxDIALOG_MODAL|wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL )
+wxGenericPageSetupDialog::wxGenericPageSetupDialog(wxWindow *parent, wxPageSetupData* data):
+wxDialog(parent, -1, _("Page Setup"), wxPoint(0, 0), wxSize(600, 600), wxDIALOG_MODAL|wxDEFAULT_DIALOG_STYLE|wxTAB_TRAVERSAL)
 {
     if (data)
         m_pageData = *data;
-
+	
     int textWidth = 80;
-
+	
     wxBoxSizer *mainsizer = new wxBoxSizer( wxVERTICAL );
-
+    
     // 1) top
     wxStaticBoxSizer *topsizer = new wxStaticBoxSizer( 
       new wxStaticBox(this,wxPRINTID_STATIC, _("Paper size")), wxHORIZONTAL );
-
-    size_t      n = wxThePrintPaperDatabase->GetCount();
-    wxString   *choices = new wxString [n];
-
-    for (size_t i = 0; i < n; i++)
+    
+    int n = wxThePrintPaperDatabase->Number();
+    wxString *choices = new wxString [n];
+    int i;
+    for (i = 0; i < n; i++)
     {
-        wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Item(i)->GetData();
+        wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Nth(i)->Data();
         choices[i] = paper->GetName();
     }
 
-    m_paperTypeChoice = new wxComboBox( this,
-                                        wxPRINTID_PAPERSIZE,
-                                        _("Paper Size"),
-                                        wxDefaultPosition,
-                                        wxSize(300, -1),
-                                        n, choices );
+    m_paperTypeChoice = new wxComboBox(this, wxPRINTID_PAPERSIZE, _("Paper Size"),
+                                        wxDefaultPosition, wxSize(300, -1), n, choices);
     topsizer->Add( m_paperTypeChoice, 1, wxEXPAND|wxALL, 5 );
 //  m_paperTypeChoice->SetSelection(sel);
 
@@ -700,21 +691,16 @@ wxGenericPageSetupDialog::~wxGenericPageSetupDialog()
 {
 }
 
-static inline wxString IntToString( long value )
-{
-    return wxString::Format(wxT("%ld"), value);
-}
-
 bool wxGenericPageSetupDialog::TransferDataToWindow()
 {
     if (m_marginLeftText)
-        m_marginLeftText->SetValue(IntToString(m_pageData.GetMarginTopLeft().x));
+        m_marginLeftText->SetValue(IntToString((int) m_pageData.GetMarginTopLeft().x));
     if (m_marginTopText)
-        m_marginTopText->SetValue(IntToString(m_pageData.GetMarginTopLeft().y));
+        m_marginTopText->SetValue(IntToString((int) m_pageData.GetMarginTopLeft().y));
     if (m_marginRightText)
-        m_marginRightText->SetValue(IntToString(m_pageData.GetMarginBottomRight().x));
+        m_marginRightText->SetValue(IntToString((int) m_pageData.GetMarginBottomRight().x));
     if (m_marginBottomText)
-        m_marginBottomText->SetValue(IntToString(m_pageData.GetMarginBottomRight().y));
+        m_marginBottomText->SetValue(IntToString((int) m_pageData.GetMarginBottomRight().y));
 
     if (m_orientationRadioBox)
     {
@@ -774,7 +760,7 @@ bool wxGenericPageSetupDialog::TransferDataFromWindow()
         int selectedItem = m_paperTypeChoice->GetSelection();
         if (selectedItem != -1)
         {
-            wxPrintPaperType *paper = (wxPrintPaperType*)wxThePrintPaperDatabase->Item(selectedItem)->GetData();
+            wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Nth(selectedItem)->Data();
             if ( paper )
             {
                 m_pageData.SetPaperSize(wxSize(paper->GetWidth()/10, paper->GetHeight()/10));
@@ -796,24 +782,22 @@ wxComboBox *wxGenericPageSetupDialog::CreatePaperTypeChoice(int *x, int *y)
     }
 */
 
-    size_t      n = wxThePrintPaperDatabase->GetCount();
-    wxString   *choices = new wxString [n];
-
-    for (size_t i = 0; i < n; i++)
+    int n = wxThePrintPaperDatabase->Number();
+    wxString *choices = new wxString [n];
+    int i;
+    for (i = 0; i < n; i++)
     {
-        wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Item(i)->GetData();
+        wxPrintPaperType *paper = (wxPrintPaperType *)wxThePrintPaperDatabase->Nth(i)->Data();
         choices[i] = paper->GetName();
     }
 
     (void) new wxStaticText(this, wxPRINTID_STATIC, _("Paper size"), wxPoint(*x, *y));
     *y += 25;
 
-    wxComboBox *choice = new wxComboBox( this,
-                                         wxPRINTID_PAPERSIZE,
-                                         _("Paper Size"),
-                                         wxPoint(*x, *y),
-                                         wxSize(300, -1),
-                                         n, choices );
+    wxComboBox *choice = new wxComboBox(this, wxPRINTID_PAPERSIZE,
+                                        _("Paper Size"),
+                                        wxPoint(*x, *y), wxSize(300, -1), n,
+        choices);
     *y += 35;
     delete[] choices;
 

@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -161,14 +161,14 @@ wxSTD ostream& operator<<(wxSTD ostream& os, const wxString& str)
 #endif // WXSTRING_STATISTICS
 
 // ===========================================================================
-// wxStringData class deallocation
+// wxStringData core
 // ===========================================================================
 
 #if defined(__VISUALC__) && defined(_MT) && !defined(_DLL)
 #  pragma message (__FILE__ ": building with Multithreaded non DLL runtime has a performance impact on wxString!")
 void wxStringData::Free()
 {
-    free(this);
+   free(this);
 }
 #endif
 
@@ -621,7 +621,7 @@ wxString& wxString::operator=(const wchar_t *pwz)
 // ---------------------------------------------------------------------------
 
 // add something to this string
-bool wxString::ConcatSelf(size_t nSrcLen, const wxChar *pszSrcData)
+bool wxString::ConcatSelf(int nSrcLen, const wxChar *pszSrcData)
 {
   STATISTICS_ADD(SummandLength, nSrcLen);
 
@@ -2104,7 +2104,7 @@ static wxArrayString::CompareFunction gs_compareFunction = NULL;
 static bool gs_sortAscending = TRUE;
 
 // function which is called by quick sort
-extern "C" int wxC_CALLING_CONV     // LINKAGEMODE
+extern "C" int LINKAGEMODE
 wxStringCompareFunction(const void *first, const void *second)
 {
   wxString *strFirst = (wxString *)first;

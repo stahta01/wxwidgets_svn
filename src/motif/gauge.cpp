@@ -23,17 +23,12 @@
 #pragma message disable nosimpint
 #endif
 #include <Xm/Xm.h>
-#ifdef __WXMOTIF20__
-#include <Xm/Scale.h>
-#endif // __WXMOTIF20__
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
 #include "wx/motif/private.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
-
-#if !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()
 
 // XmGauge copyright notice:
 
@@ -84,7 +79,7 @@ XmGaugeSetValue(Widget w, int value);
 int
 XmGaugeGetValue(Widget w);
 
-#endif // !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()
+
 
 bool wxGauge::Create(wxWindow *parent, wxWindowID id,
                      int range,
@@ -94,14 +89,25 @@ bool wxGauge::Create(wxWindow *parent, wxWindowID id,
                      const wxValidator& validator,
                      const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, validator, name ) )
-        return false;
+    SetName(name);
+    SetValidator(validator);
+    m_rangeMax = range;
+    m_windowStyle = style;
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+
+    if (parent) parent->AddChild(this);
+
+    if ( id == -1 )
+        m_windowId = (int)NewControlId();
+    else
+        m_windowId = id;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
-    Arg args[7];
+    Arg args[4];
     int count = 4;
-    if (style & wxGA_HORIZONTAL)
+    if (style & wxHORIZONTAL)
     {
         XtSetArg (args[0], XmNorientation, XmHORIZONTAL);
         XtSetArg (args[1], XmNprocessingDirection, XmMAX_ON_RIGHT);
@@ -113,43 +119,27 @@ bool wxGauge::Create(wxWindow *parent, wxWindowID id,
     }
     XtSetArg(args[2], XmNminimum, 0);
     XtSetArg(args[3], XmNmaximum, range);
-#if wxCHECK_MOTIF_VERSION( 2, 0 ) && !wxCHECK_LESSTIF()
-    XtSetArg(args[4], XmNeditable, False); ++count;
-    XtSetArg(args[5], XmNslidingMode, XmTHERMOMETER); ++count;
-    // XtSetArg(args[6], XmNsliderVisual, XmFOREGROUND_COLOR ); ++count;
-    Widget gaugeWidget =
-        XtCreateManagedWidget("gauge", xmScaleWidgetClass,
-                              parentWidget, args, count);
-#else
-    Widget gaugeWidget =
-        XtCreateManagedWidget("gauge", xmGaugeWidgetClass,
-                              parentWidget, args, count);
-#endif
+    Widget gaugeWidget = XtCreateManagedWidget("gauge", xmGaugeWidgetClass, parentWidget, args, count);
     m_mainWidget = (WXWidget) gaugeWidget ;
 
     XtManageChild (gaugeWidget);
 
     int x = pos.x; int y = pos.y;
-    wxSize best = GetBestSize();
-    if( size.x != -1 ) best.x = size.x;
-    if( size.y != -1 ) best.y = size.y;
+    int width = size.x; int height = size.y;
+    if (width == -1)
+        width = 150;
+    if (height == -1)
+        height = 80;
 
+    m_font = parent->GetFont();
     ChangeFont(FALSE);
 
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, x, y,
-                  best.x, best.y);
+    SetCanAddEventHandler(TRUE);
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, x, y, width, height);
 
     ChangeBackgroundColour();
 
     return TRUE;
-}
-
-wxSize wxGauge::DoGetBestSize() const
-{
-    if( HasFlag(wxGA_HORIZONTAL) )
-        return wxSize( 100, 18 );
-    else
-        return wxSize( 18, 100 );
 }
 
 void wxGauge::SetShadowWidth(int w)
@@ -159,13 +149,19 @@ void wxGauge::SetShadowWidth(int w)
     XtVaSetValues((Widget) m_mainWidget, XmNshadowThickness, w, NULL);
 }
 
+void wxGauge::SetBezelFace(int WXUNUSED(w))
+{
+}
+
 void wxGauge::SetRange(int r)
 {
+    m_rangeMax = r;
     XtVaSetValues((Widget) m_mainWidget, XmNmaximum, r, NULL);
 }
 
 void wxGauge::SetValue(int pos)
 {
+    m_gaugePos = pos;
     XtVaSetValues((Widget) m_mainWidget, XmNvalue, pos, NULL);
 }
 
@@ -176,11 +172,17 @@ int wxGauge::GetShadowWidth() const
     return (int)w;
 }
 
+int wxGauge::GetBezelFace() const
+{
+    return 0;
+}
+
 int wxGauge::GetRange() const
 {
     int r;
     XtVaGetValues((Widget) m_mainWidget, XmNmaximum, &r, NULL);
     return (int)r;
+    //    return m_rangeMax;
 }
 
 int wxGauge::GetValue() const
@@ -188,19 +190,23 @@ int wxGauge::GetValue() const
     int pos;
     XtVaGetValues((Widget) m_mainWidget, XmNvalue, &pos, NULL);
     return pos;
+    //    return m_gaugePos;
 }
 
-void wxGauge::DoMoveWindow(int x, int y, int width, int height)
+void wxGauge::ChangeFont(bool keepOriginalSize)
 {
-    wxGaugeBase::DoMoveWindow( x, y, width, height );
-#ifdef __WXMOTIF20__
-    XtVaSetValues( (Widget)m_mainWidget,
-                   XmNscaleHeight, height,
-                   NULL );
-#endif
+    wxWindow::ChangeFont(keepOriginalSize);
 }
 
-#if !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()
+void wxGauge::ChangeBackgroundColour()
+{
+    wxWindow::ChangeBackgroundColour();
+}
+
+void wxGauge::ChangeForegroundColour()
+{
+    wxWindow::ChangeForegroundColour();
+}
 
 //// PRIVATE DECLARATIONS FOR XMGAUGE
 
@@ -773,5 +779,3 @@ XmGaugeGetValue(Widget w)
 
     return gw->gauge.value;
 }
-
-#endif // !wxCHECK_MOTIF_VERSION( 2, 0 ) || wxCHECK_LESSTIF()

@@ -78,7 +78,7 @@ ScanCodeCtrl::ScanCodeCtrl( wxWindow* parent, wxWindowID id, int code,
 
 void ScanCodeCtrl::OnKeyDown( wxKeyEvent& event )
 { wxString buf;
-  buf.Printf( "0x%04x", event.GetKeyCode() );
+  buf.Printf( "0x%04x", event.KeyCode() );
   SetValue( buf );
 }
 
@@ -357,7 +357,7 @@ void TestGLCanvas::Action( long code, unsigned long lasttime,
 
 void TestGLCanvas::OnKeyDown( wxKeyEvent& event )
 {
-    long evkey = event.GetKeyCode();
+    long evkey = event.KeyCode();
     if (evkey == 0) return;
 
     if (!m_TimeInitialized)

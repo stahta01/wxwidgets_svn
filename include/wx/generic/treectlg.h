@@ -6,7 +6,7 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997,1998 Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _GENERIC_TREECTRL_H_
@@ -207,9 +207,9 @@ public:
 #if WXWIN_COMPATIBILITY_2_2
         // deprecated:  Use GetItemParent instead.
     wxTreeItemId GetParent(const wxTreeItemId& item) const
-        { return GetItemParent( item ); }
+    	{ return GetItemParent( item ); }
 
-        // Expose the base class method hidden by the one above.
+    	// Expose the base class method hidden by the one above.
     wxWindow *GetParent() const { return wxScrolledWindow::GetParent(); }
 #endif  // WXWIN_COMPATIBILITY_2_2
 
@@ -376,9 +376,7 @@ protected:
 
     wxGenericTreeItem   *m_anchor;
     wxGenericTreeItem   *m_current,
-                        *m_key_current,
-                        // A hint to select a parent item after deleting a child
-                        *m_select_me;
+                        *m_key_current;
     unsigned short       m_indent;
     unsigned short       m_spacing;
     int                  m_lineHeight;
@@ -469,7 +467,6 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxGenericTreeCtrl)
-    DECLARE_NO_COPY_CLASS(wxGenericTreeCtrl)
 };
 
 #if !defined(__WXMSW__) || defined(__WIN16__) || defined(__WXUNIVERSAL__)

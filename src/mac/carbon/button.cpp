@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        button.cpp
 // Purpose:     wxButton
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -34,23 +34,23 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& label,
            const wxValidator& validator,
            const wxString& name)
 {
-    Rect bounds ;
-    Str255 title ;
+	Rect bounds ;
+	Str255 title ;
 
     if ( UMAHasAquaLayout() )
     {
         m_macHorizontalBorder = kMacOSXHorizontalBorder;
         m_macVerticalBorder = kMacOSXVerticalBorder;
     }
-    
-    MacPreControlCreate( parent , id ,  label , pos , size ,style, validator , name , &bounds , title ) ;
+	
+	MacPreControlCreate( parent , id ,  label , pos , size ,style, validator , name , &bounds , title ) ;
 
-    m_macControl = ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1, 
-          kControlPushButtonProc , (long) this ) ;
-    wxASSERT_MSG( (ControlHandle) m_macControl != NULL , wxT("No valid mac control") ) ;
-    
-    MacPostControlCreate() ;
-    
+	m_macControl = ::NewControl( MAC_WXHWND(parent->MacGetRootWindow()) , &bounds , title , false , 0 , 0 , 1, 
+	  	kControlPushButtonProc , (long) this ) ;
+	wxASSERT_MSG( (ControlHandle) m_macControl != NULL , "No valid mac control" ) ;
+	
+	MacPostControlCreate() ;
+
   return TRUE;
 }
 
@@ -65,19 +65,19 @@ void wxButton::SetDefault()
         parent->SetDefaultItem(this);
     }
 
-    Boolean inData;
-    if ( btnOldDefault && btnOldDefault->m_macControl )
-    {
-          inData = 0;
-        ::SetControlData( (ControlHandle) btnOldDefault->m_macControl , kControlButtonPart ,
-                           kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
-    }
-    if ( (ControlHandle) m_macControl )
-    {
-          inData = 1;
-        ::SetControlData(  (ControlHandle) m_macControl , kControlButtonPart ,
-                           kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
-    }
+	Boolean inData;
+	if ( btnOldDefault && btnOldDefault->m_macControl )
+	{
+  		inData = 0;
+		::SetControlData( (ControlHandle) btnOldDefault->m_macControl , kControlButtonPart ,
+						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
+	}
+	if ( (ControlHandle) m_macControl )
+	{
+  		inData = 1;
+		::SetControlData(  (ControlHandle) m_macControl , kControlButtonPart ,
+						   kControlPushButtonDefaultTag , sizeof( Boolean ) , (char*)(&inData) ) ;
+	}
 }
 
 wxSize wxButton::DoGetBestSize() const
@@ -85,7 +85,7 @@ wxSize wxButton::DoGetBestSize() const
   wxSize sz = GetDefaultSize() ;
   
   int wBtn = m_label.Length() * 8 + 12 + 2 * kMacOSXHorizontalBorder ;
-    
+	
   if (wBtn > sz.x) sz.x = wBtn;
   
   return sz ;
@@ -107,23 +107,23 @@ wxSize wxButton::GetDefaultSize()
 
 void wxButton::Command (wxCommandEvent & event)
 {
-    if ( (ControlHandle) m_macControl )
-    {
-        HiliteControl(  (ControlHandle) m_macControl , kControlButtonPart ) ;
-        unsigned long finalTicks ;
-        Delay( 8 , &finalTicks ) ;
-        HiliteControl(  (ControlHandle) m_macControl , 0 ) ;
-    }
+	if ( (ControlHandle) m_macControl )
+	{
+		HiliteControl(  (ControlHandle) m_macControl , kControlButtonPart ) ;
+		unsigned long finalTicks ;
+		Delay( 8 , &finalTicks ) ;
+		HiliteControl(  (ControlHandle) m_macControl , 0 ) ;
+	}
     ProcessCommand (event);
 }
 
-void wxButton::MacHandleControlClick( WXWidget WXUNUSED(control) , wxInt16 controlpart , bool WXUNUSED(mouseStillDown) ) 
+void wxButton::MacHandleControlClick( WXWidget control , wxInt16 controlpart ) 
 {
-    if ( controlpart != kControlNoPart )
-    {
-        wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, m_windowId );
-        event.SetEventObject(this);
-        ProcessCommand(event);
-    }
+  if ( controlpart != kControlNoPart )
+  {
+    wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, m_windowId );
+    event.SetEventObject(this);
+    ProcessCommand(event);
+  }
 }
 

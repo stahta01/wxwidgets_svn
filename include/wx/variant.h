@@ -21,15 +21,18 @@
 #include "wx/string.h"
 #include "wx/list.h"
 
-#if wxUSE_DATETIME
-    #include "wx/datetime.h"
-#endif // wxUSE_DATETIME
+#if wxUSE_TIMEDATE
+    #include "wx/time.h"
+    #include "wx/date.h"
+#endif // time/date
+
+#include "wx/datetime.h"
 
 #if wxUSE_ODBC
     #include "wx/db.h"  // will #include sqltypes.h
 #endif //ODBC
 
-#include "wx/iosfwrap.h"
+#include "wx/ioswrap.h"
 
 /*
  * wxVariantData stores the actual data in a wxVariant object,
@@ -67,8 +70,6 @@ public:
     virtual bool Read(wxString& str) = 0;
     // What type is it? Return a string name.
     virtual wxString GetType() const = 0;
-    // If it based on wxObject return the ClassInfo.
-    virtual wxClassInfo* GetValueClassInfo() { return NULL; }
 };
 
 /*
@@ -96,13 +97,15 @@ public:
     wxVariant(const wxChar* val, const wxString& name = wxEmptyString); // Necessary or VC++ assumes bool!
     wxVariant(const wxStringList& val, const wxString& name = wxEmptyString);
     wxVariant(const wxList& val, const wxString& name = wxEmptyString); // List of variants
+// For some reason, Watcom C++ can't link variant.cpp with time/date classes compiled
+#if wxUSE_TIMEDATE && !defined(__WATCOMC__)
+    wxVariant(const wxTime& val, const wxString& name = wxEmptyString); // Time
+    wxVariant(const wxDate& val, const wxString& name = wxEmptyString); // Date
+#endif
     wxVariant(void* ptr, const wxString& name = wxEmptyString); // void* (general purpose)
-    wxVariant(wxObject* ptr, const wxString& name = wxEmptyString); //wxObject 
     wxVariant(wxVariantData* data, const wxString& name = wxEmptyString); // User-defined data
 //TODO: Need to document
-#if wxUSE_DATETIME
     wxVariant(const wxDateTime& val, const wxString& name = wxEmptyString); // Date
-#endif // wxUSE_DATETIME
     wxVariant(const wxArrayString& val, const wxString& name = wxEmptyString); // String array
 #if wxUSE_ODBC
     wxVariant(const DATE_STRUCT* valptr, const wxString& name = wxEmptyString); // DateTime
@@ -119,11 +122,9 @@ public:
     void operator= (const wxVariant& variant);
 
 //TODO: Need to document
-#if wxUSE_DATETIME
     bool operator== (const wxDateTime& value) const;
     bool operator!= (const wxDateTime& value) const;
     void operator= (const wxDateTime& value) ;
-#endif // wxUSE_DATETIME
 
     bool operator== (const wxArrayString& value) const;
     bool operator!= (const wxArrayString& value) const;
@@ -166,6 +167,15 @@ public:
     bool operator== (const wxList& value) const;
     bool operator!= (const wxList& value) const;
     void operator= (const wxList& value) ;
+// For some reason, Watcom C++ can't link variant.cpp with time/date classes compiled
+#if wxUSE_TIMEDATE && !defined(__WATCOMC__)
+    bool operator== (const wxTime& value) const;
+    bool operator!= (const wxTime& value) const;
+    void operator= (const wxTime& value) ;
+    bool operator== (const wxDate& value) const;
+    bool operator!= (const wxDate& value) const;
+    void operator= (const wxDate& value) ;
+#endif
     bool operator== (void* value) const;
     bool operator!= (void* value) const;
     void operator= (void* value) ;
@@ -183,14 +193,14 @@ public:
     inline operator char () const {  return GetChar(); }
     inline operator long () const {  return GetLong(); }
     inline operator bool () const {  return GetBool(); }
+// For some reason, Watcom C++ can't link variant.cpp with time/date classes compiled
+#if wxUSE_TIMEDATE && !defined(__WATCOMC__)
+    inline operator wxTime () const {  return GetTime(); }
+    inline operator wxDate () const {  return GetDate(); }
+#endif
     inline operator void* () const {  return GetVoidPtr(); }
-    // No implicit conversion to wxObject, as that would really
-    //  confuse people between conversion to our contained data
-    //  and downcasting to see our base type.
 //TODO: Need to document
-#if wxUSE_DATETIME
     inline operator wxDateTime () const { return GetDateTime(); }
-#endif // wxUSE_DATETIME
 //TODO: End of Need to document
 
 // Accessors
@@ -209,7 +219,6 @@ public:
     wxString GetType() const;
 
     bool IsType(const wxString& type) const;
-    bool IsValueKindOf(const wxClassInfo* type) const;
 
     // Return the number of elements in a list
     int GetCount() const;
@@ -225,12 +234,14 @@ public:
     wxList& GetList() const ;
     wxStringList& GetStringList() const ;
 
+// For some reason, Watcom C++ can't link variant.cpp with time/date classes compiled
+#if wxUSE_TIMEDATE && !defined(__WATCOMC__)
+    wxTime GetTime() const ;
+    wxDate GetDate() const ;
+#endif
     void* GetVoidPtr() const ;
-    wxObject* GetWxObjectPtr()  ;
 //TODO: Need to document
-#if wxUSE_DATETIME
     wxDateTime GetDateTime() const ;
-#endif // wxUSE_DATETIME
     wxArrayString GetArrayString() const;
 //TODO: End of Need to document
 
@@ -264,10 +275,13 @@ public:
     bool Convert(double* value) const;
     bool Convert(wxString* value) const;
     bool Convert(char* value) const;
+// For some reason, Watcom C++ can't link variant.cpp with time/date classes compiled
+#if wxUSE_TIMEDATE && !defined(__WATCOMC__)
+    bool Convert(wxTime* value) const;
+    bool Convert(wxDate* value) const;
+#endif
 //TODO: Need to document
-#if wxUSE_DATETIME
     bool Convert(wxDateTime* value) const;
-#endif // wxUSE_DATETIME
 //TODO: End of Need to document
 
 // Attributes
@@ -275,14 +289,6 @@ protected:
     wxVariantData*  m_data;
     wxString        m_name;
 };
-
-//Since we want type safety wxVariant we need to fetch and dynamic_cast
-//in a seemingly safe way so the compiler can check, so we define 
-//a dynamic_cast /wxDynamicCast analogue.
-
-#define wxGetVariantCast(var,classname) \
-	((classname*)(var.IsValueKindOf(&classname::sm_class##classname) ?\
-		      var.GetWxObjectPtr() : NULL));
 
 extern wxVariant WXDLLEXPORT wxNullVariant;
 

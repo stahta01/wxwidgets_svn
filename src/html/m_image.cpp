@@ -35,7 +35,6 @@
 #include "wx/gifdecod.h"
 #include "wx/dynarray.h"
 #include "wx/log.h"
-#include "wx/artprov.h"
 
 #include <math.h>
 #include <float.h>
@@ -50,11 +49,11 @@ WX_DECLARE_OBJARRAY(int, CoordArray);
 WX_DEFINE_OBJARRAY(CoordArray);
 
 
-// ---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlImageMapAreaCell
-//                  0-width, 0-height cell that represents single area in
-//                  imagemap (it's GetLink is called from wxHtmlImageCell's)
-// ---------------------------------------------------------------------------
+//                  0-width, 0-height cell that represents single area in imagemap
+//                  (it's GetLink is called from wxHtmlImageCell's)
+//--------------------------------------------------------------------------------
 
 class wxHtmlImageMapAreaCell : public wxHtmlCell
 {
@@ -67,10 +66,6 @@ class wxHtmlImageMapAreaCell : public wxHtmlCell
     public:
         wxHtmlImageMapAreaCell( celltype t, wxString &coords, double pixel_scale = 1.0);
         virtual wxHtmlLinkInfo *GetLink( int x = 0, int y = 0 ) const;
-        void Draw(wxDC& WXUNUSED(dc),
-                  int WXUNUSED(x), int WXUNUSED(y),
-                  int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                  wxHtmlRenderingInfo& WXUNUSED(info)) {}
 };
 
 
@@ -243,10 +238,6 @@ class wxHtmlImageMapCell : public wxHtmlCell
     public:
         virtual wxHtmlLinkInfo *GetLink( int x = 0, int y = 0 ) const;
         virtual const wxHtmlCell *Find( int cond, const void *param ) const;
-        void Draw(wxDC& WXUNUSED(dc),
-                  int WXUNUSED(x), int WXUNUSED(y),
-                  int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                  wxHtmlRenderingInfo& WXUNUSED(info)) {}
 };
 
 
@@ -290,8 +281,7 @@ public:
                     double scale = 1.0, int align = wxHTML_ALIGN_BOTTOM,
                     const wxString& mapname = wxEmptyString);
     ~wxHtmlImageCell();
-    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-              wxHtmlRenderingInfo& info);
+    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
     virtual wxHtmlLinkInfo *GetLink(int x = 0, int y = 0) const;
 
     void SetImage(const wxImage& img);
@@ -313,8 +303,6 @@ private:
     double              m_scale;
     wxHtmlImageMapCell *m_imageMap;
     wxString            m_mapName;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlImageCell)
 };
 
 #if wxUSE_GIF && wxUSE_TIMER
@@ -329,16 +317,55 @@ class wxGIFTimer : public wxTimer
 
     private:
         wxHtmlImageCell *m_cell;
-
-    DECLARE_NO_COPY_CLASS(wxGIFTimer)
 };
 #endif
 
 
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlImageCell
-//----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
+/* XPM */
+static const char * broken_image_xpm[] = {
+"29 31 7 1",
+"   c None",
+".  c #808080",
+"+  c #FFFFFF",
+"@  c #C0C0C0",
+"#  c #000000",
+"$  c #333366",
+"%  c #B2B2B2",
+".....................        ",
+".+++++++++++++++++++..       ",
+".+++++++++++++++++++.@.      ",
+".++@@@@@@@@@@@@@@@@@.+@.     ",
+".++@@@@@@@@@@@@@@@@@.++@.    ",
+".++@@@@@.@@@@.@@@@@@.+++@.   ",
+".++@@@@@@@@@@@@@@@@@.++++@.  ",
+".++@@@@@@@@@@@@@@@@@.+++++@. ",
+".++@@.@@@@@@@@@@.@@@######## ",
+".++@@@@@@@@@@@@@@@@@@$$$$$$#.",
+".######@@@@@@@@@@@@@@@.....#.",
+"       ###@@@@@@@@@@@@@@@++#.",
+"          #####@@@@@@@@@@++#.",
+"              #@.@@@@@@@@++#.",
+"..             ###@@@@@@@++#.",
+".+....            #@@@@@@++#.",
+".++@@@...          ####@@++#.",
+".++@@@@@@..            #####.",
+".++@@@@@@@@...               ",
+".++@@@@@@%%%%@.              ",
+".++@@@@@@%%%%@@....          ",
+".++@@@@@@%%%%@@@@@@....      ",
+".++@@@@@@%%%%@@@@@@@@@@....  ",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++@@@@@@@@@@@@@@@@@@@@@@++#.",
+".++++++++++++++++++++++++++#.",
+".++++++++++++++++++++++++++#.",
+"############################."};
 
 wxHtmlImageCell::wxHtmlImageCell(wxWindow *window, wxFSFile *input,
                                  int w, int h, double scale, int align,
@@ -420,8 +447,7 @@ wxHtmlImageCell::wxHtmlImageCell(wxWindow *window, wxFSFile *input,
                 if ( m_bmpW == -1 ) m_bmpW = 31;
                 if ( m_bmpH == -1 ) m_bmpH = 33;
             }
-            m_bitmap = 
-                new wxBitmap(wxArtProvider::GetBitmap(wxART_MISSING_IMAGE));
+            m_bitmap = new wxBitmap(broken_image_xpm);
         }
     }
     //else: ignore the 0-sized images used sometimes on the Web pages
@@ -528,9 +554,7 @@ wxHtmlImageCell::~wxHtmlImageCell()
 }
 
 
-void wxHtmlImageCell::Draw(wxDC& dc, int x, int y,
-                           int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                           wxHtmlRenderingInfo& WXUNUSED(info))
+void wxHtmlImageCell::Draw(wxDC& dc, int x, int y, int WXUNUSED(view_y1), int WXUNUSED(view_y2))
 {
     if ( m_showFrame )
     {

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,11 +43,6 @@
 #include "wx/sysopt.h"
 #include "wx/dcprint.h"
 #include "wx/module.h"
-#include "wx/dynload.h"
-
-#ifdef wxHAVE_RAW_BITMAP
-#include "wx/rawbmp.h"
-#endif
 
 #include <string.h>
 #include <math.h>
@@ -60,10 +55,6 @@
 
 #ifndef __WIN32__
     #include <print.h>
-#endif
-
-#ifndef AC_SRC_ALPHA
-#define AC_SRC_ALPHA 1
 #endif
 
 /* Quaternary raster codes */
@@ -117,25 +108,6 @@ static const int MM_METRIC = 10;
 // convert degrees to radians
 static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
 
-// call AlphaBlend() to blit contents of hdcSrc to hdcDst using alpha
-//
-// NB: bmpSrc is the bitmap selected in hdcSrc, it is not really needed
-//     to pass it to this function but as we already have it at the point
-//     of call anyhow we do
-//
-// return true if we could draw the bitmap in one way or the other, false
-// otherwise
-static bool AlphaBlt(HDC hdcDst,
-                     int x, int y, int w, int h,
-                     HDC hdcSrc,
-                     const wxBitmap& bmpSrc);
-
-#ifdef wxHAVE_RAW_BITMAP
-// our (limited) AlphaBlend() replacement
-static void
-wxAlphaBlend(HDC hdcDst, int x, int y, int w, int h, const wxBitmap& bmp);
-#endif
-
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -158,30 +130,6 @@ private:
     COLORREF m_colFgOld, m_colBgOld;
 
     bool m_changed;
-};
-
-// this class saves the old stretch blit mode during its life time
-class StretchBltModeChanger
-{
-public:
-    StretchBltModeChanger(HDC hdc, int mode)
-        : m_hdc(hdc)
-    {
-        m_modeOld = ::SetStretchBltMode(m_hdc, mode);
-        if ( !m_modeOld )
-            wxLogLastError(_T("SetStretchBltMode"));
-    }
-
-    ~StretchBltModeChanger()
-    {
-        if ( !::SetStretchBltMode(m_hdc, m_modeOld) )
-            wxLogLastError(_T("SetStretchBltMode"));
-    }
-
-private:
-    const HDC m_hdc;
-
-    int m_modeOld;
 };
 
 // ===========================================================================
@@ -300,12 +248,10 @@ void wxDC::SelectOldObjects(WXHDC dc)
         if (m_oldBitmap)
         {
             ::SelectObject((HDC) dc, (HBITMAP) m_oldBitmap);
-#ifdef __WXDEBUG__
             if (m_selectedBitmap.Ok())
             {
                 m_selectedBitmap.SetSelectedInto(NULL);
             }
-#endif
         }
         m_oldBitmap = 0;
         if (m_oldPen)
@@ -674,7 +620,7 @@ void wxDC::DoDrawCheckMark(wxCoord x1, wxCoord y1,
     wxCoord x2 = x1 + width,
             y2 = y1 + height;
 
-#if defined(__WIN32__) && !defined(__SYMANTEC__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__) && !defined(__SC__) && !defined(__WXMICROWIN__)
     RECT rect;
     rect.left   = x1;
     rect.top    = y1;
@@ -968,15 +914,6 @@ void wxDC::DoDrawBitmap( const wxBitmap &bmp, wxCoord x, wxCoord y, bool useMask
 #if wxUSE_PALETTE
     HPALETTE oldPal = 0;
 #endif // wxUSE_PALETTE
-
-    if ( bmp.HasAlpha() )
-    {
-        MemoryHDC hdcMem;
-        SelectInHDC select(hdcMem, GetHbitmapOf(bmp));
-
-        if ( AlphaBlt(GetHdc(), x, y, width, height, hdcMem, bmp) )
-            return;
-    }
 
     if ( useMask )
     {
@@ -1796,26 +1733,17 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
                   int rop, bool useMask,
                   wxCoord xsrcMask, wxCoord ysrcMask)
 {
-    wxCHECK_MSG( source, FALSE, _T("wxDC::Blit(): NULL wxDC pointer") );
-
 #ifdef __WXMICROWIN__
     if (!GetHDC()) return FALSE;
 #endif
 
-    const wxBitmap& bmpSrc = source->m_selectedBitmap;
-    if ( bmpSrc.Ok() && bmpSrc.HasAlpha() )
-    {
-        if ( AlphaBlt(GetHdc(), xdest, ydest, width, height,
-                      GetHdcOf(*source), bmpSrc) )
-            return TRUE;
-    }
-
     wxMask *mask = NULL;
     if ( useMask )
     {
-        mask = bmpSrc.GetMask();
+        const wxBitmap& bmp = source->m_selectedBitmap;
+        mask = bmp.GetMask();
 
-        if ( !(bmpSrc.Ok() && mask && mask->GetMaskBitmap()) )
+        if ( !(bmp.Ok() && mask && mask->GetMaskBitmap()) )
         {
             // don't give assert here because this would break existing
             // programs - just silently ignore useMask parameter
@@ -1880,16 +1808,10 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
         if (wxSystemOptions::GetOptionInt(wxT("no-maskblt")) == 0)
 #endif
         {
-           success = ::MaskBlt
-                       (
-                            GetHdc(),
-                            xdest, ydest, width, height,
-                            GetHdcOf(*source),
-                            xsrc, ysrc,
-                            (HBITMAP)mask->GetMaskBitmap(),
-                            xsrcMask, ysrcMask,
-                            MAKEROP4(dwRop, DSTCOPY)
-                        ) != 0;
+           success = ::MaskBlt(GetHdc(), xdest, ydest, width, height,
+                            GetHdcOf(*source), xsrc, ysrc,
+                            (HBITMAP)mask->GetMaskBitmap(), xsrcMask, ysrcMask,
+                            MAKEROP4(dwRop, DSTCOPY)) != 0;
         }
 
         if ( !success )
@@ -1979,82 +1901,14 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
     }
     else // no mask, just BitBlt() it
     {
-        // if we already have a DIB, draw it using StretchDIBits(), otherwise
-        // use StretchBlt() if available and finally fall back to BitBlt()
-        const int caps = ::GetDeviceCaps(GetHdc(), RASTERCAPS);
-        if ( bmpSrc.Ok() && (caps & RC_STRETCHDIB) )
-        {
-            DIBSECTION ds;
-            wxZeroMemory(ds);
-
-            if ( ::GetObject(GetHbitmapOf(bmpSrc),
-                             sizeof(ds),
-                             &ds) == sizeof(ds) )
-            {
-                StretchBltModeChanger changeMode(GetHdc(), COLORONCOLOR);
-
-                if ( ::StretchDIBits(GetHdc(),
-                                     xdest, ydest,
-                                     width, height,
-                                     0, 0,
-                                     width, height,
-                                     ds.dsBm.bmBits,
-                                     (LPBITMAPINFO)&ds.dsBmih,
-                                     DIB_RGB_COLORS,
-                                     SRCCOPY
-                                     ) == (int)GDI_ERROR )
-                {
-                    wxLogLastError(wxT("StretchDIBits"));
-                }
-                else
-                {
-                    success = TRUE;
-                }
-            }
-        }
-
-        if ( !success && (caps & RC_STRETCHBLT) )
-        {
-            StretchBltModeChanger changeMode(GetHdc(), COLORONCOLOR);
-
-            if ( !::StretchBlt
-                    (
-                        GetHdc(),
-                        xdest, ydest, width, height,
-                        GetHdcOf(*source),
-                        xsrc, ysrc, width, height,
-                        dwRop
-                    ) )
-            {
-                wxLogLastError(_T("StretchBlt"));
-            }
-            else
-            {
-                success = TRUE;
-            }
-        }
-
+        success = ::BitBlt(GetHdc(), xdest, ydest,
+                           (int)width, (int)height,
+                           GetHdcOf(*source), xsrc, ysrc, dwRop) != 0;
         if ( !success )
         {
-            if ( !::BitBlt
-                    (
-                        GetHdc(),
-                        xdest, ydest,
-                        (int)width, (int)height,
-                        GetHdcOf(*source),
-                        xsrc, ysrc,
-                        dwRop
-                    ) )
-            {
-                wxLogLastError(_T("BitBlt"));
-            }
-            else
-            {
-                success = TRUE;
-            }
+            wxLogLastError(wxT("BitBlt"));
         }
     }
-
     ::SetTextColor(GetHdc(), old_textground);
     ::SetBkColor(GetHdc(), old_background);
 
@@ -2126,9 +1980,24 @@ void wxDC::SetLogicalScale(double x, double y)
     m_logicalScaleY = y;
 }
 
-// ----------------------------------------------------------------------------
-// DC caching
-// ----------------------------------------------------------------------------
+#if WXWIN_COMPATIBILITY
+void wxDC::DoGetTextExtent(const wxString& string, float *x, float *y,
+                         float *descent, float *externalLeading,
+                         wxFont *theFont, bool use16bit) const
+{
+#ifdef __WXMICROWIN__
+    if (!GetHDC()) return;
+#endif
+
+    wxCoord x1, y1, descent1, externalLeading1;
+    GetTextExtent(string, & x1, & y1, & descent1, & externalLeading1, theFont, use16bit);
+    *x = x1; *y = y1;
+    if (descent)
+        *descent = descent1;
+    if (externalLeading)
+        *externalLeading = externalLeading1;
+}
+#endif
 
 #if wxUSE_DC_CACHEING
 
@@ -2170,10 +2039,10 @@ wxDCCacheEntry::~wxDCCacheEntry()
 wxDCCacheEntry* wxDC::FindBitmapInCache(WXHDC dc, int w, int h)
 {
     int depth = ::GetDeviceCaps((HDC) dc, PLANES) * ::GetDeviceCaps((HDC) dc, BITSPIXEL);
-    wxNode* node = sm_bitmapCache.GetFirst();
+    wxNode* node = sm_bitmapCache.First();
     while (node)
     {
-        wxDCCacheEntry* entry = (wxDCCacheEntry*) node->GetData();
+        wxDCCacheEntry* entry = (wxDCCacheEntry*) node->Data();
 
         if (entry->m_depth == depth)
         {
@@ -2191,7 +2060,7 @@ wxDCCacheEntry* wxDC::FindBitmapInCache(WXHDC dc, int w, int h)
             return entry;
         }
 
-        node = node->GetNext();
+        node = node->Next();
     }
     WXHBITMAP hBitmap = (WXHBITMAP) ::CreateCompatibleBitmap((HDC) dc, w, h);
     if ( !hBitmap)
@@ -2206,10 +2075,10 @@ wxDCCacheEntry* wxDC::FindBitmapInCache(WXHDC dc, int w, int h)
 wxDCCacheEntry* wxDC::FindDCInCache(wxDCCacheEntry* notThis, WXHDC dc)
 {
     int depth = ::GetDeviceCaps((HDC) dc, PLANES) * ::GetDeviceCaps((HDC) dc, BITSPIXEL);
-    wxNode* node = sm_dcCache.GetFirst();
+    wxNode* node = sm_dcCache.First();
     while (node)
     {
-        wxDCCacheEntry* entry = (wxDCCacheEntry*) node->GetData();
+        wxDCCacheEntry* entry = (wxDCCacheEntry*) node->Data();
 
         // Don't return the same one as we already have
         if (!notThis || (notThis != entry))
@@ -2220,7 +2089,7 @@ wxDCCacheEntry* wxDC::FindDCInCache(wxDCCacheEntry* notThis, WXHDC dc)
             }
         }
 
-        node = node->GetNext();
+        node = node->Next();
     }
     WXHDC hDC = (WXHDC) ::CreateCompatibleDC((HDC) dc);
     if ( !hDC)
@@ -2265,143 +2134,6 @@ private:
 
 IMPLEMENT_DYNAMIC_CLASS(wxDCModule, wxModule)
 
-#endif // wxUSE_DC_CACHEING
+#endif
+    // wxUSE_DC_CACHEING
 
-// ----------------------------------------------------------------------------
-// alpha channel support
-// ----------------------------------------------------------------------------
-
-static bool AlphaBlt(HDC hdcDst,
-                     int x, int y, int width, int height,
-                     HDC hdcSrc,
-                     const wxBitmap& bmp)
-{
-    wxASSERT_MSG( bmp.Ok() && bmp.HasAlpha(), _T("AlphaBlt(): invalid bitmap") );
-    wxASSERT_MSG( hdcDst && hdcSrc, _T("AlphaBlt(): invalid HDC") );
-
-    // do we have AlphaBlend() and company in the headers?
-#ifdef AC_SRC_OVER
-    // yes, now try to see if we have it during run-time
-    typedef BOOL (WINAPI *AlphaBlend_t)(HDC,int,int,int,int,
-                                        HDC,int,int,int,int,
-                                        BLENDFUNCTION);
-
-    // bitmaps can be drawn only from GUI thread so there is no need to
-    // protect this static variable from multiple threads
-    static bool s_triedToLoad = FALSE;
-    static AlphaBlend_t pfnAlphaBlend = NULL;
-    if ( !s_triedToLoad )
-    {
-        s_triedToLoad = TRUE;
-
-        // don't give errors about the DLL being unavailable, we're
-        // prepared to handle this
-        wxLogNull nolog;
-
-        wxDynamicLibrary dll(_T("msimg32.dll"));
-        if ( dll.IsLoaded() )
-        {
-            pfnAlphaBlend = (AlphaBlend_t)dll.GetSymbol(_T("AlphaBlend"));
-            if ( pfnAlphaBlend )
-            {
-                // we must keep the DLL loaded if we want to be able to
-                // call AlphaBlend() so just never unload it at all, not a
-                // big deal
-                dll.Detach();
-            }
-        }
-    }
-
-    if ( pfnAlphaBlend )
-    {
-        BLENDFUNCTION bf;
-        bf.BlendOp = AC_SRC_OVER;
-        bf.BlendFlags = 0;
-        bf.SourceConstantAlpha = 0xff;
-        bf.AlphaFormat = AC_SRC_ALPHA;
-
-        if ( pfnAlphaBlend(hdcDst, x, y, width, height,
-                           hdcSrc, 0, 0, width, height,
-                           bf) )
-        {
-            // skip wxAlphaBlend() call below
-            return TRUE;
-        }
-
-        wxLogLastError(_T("AlphaBlend"));
-    }
-#endif // defined(AC_SRC_OVER)
-
-    // AlphaBlend() unavailable of failed: use our own (probably much slower)
-    // implementation
-#ifdef wxHAVE_RAW_BITMAP
-    wxAlphaBlend(hdcDst, x, y, width, height, bmp);
-
-    return TRUE;
-#else // !wxHAVE_RAW_BITMAP
-    // no wxAlphaBlend() neither, fall back to using simple BitBlt() (we lose
-    // alpha but at least something will be shown like this)
-    return FALSE;
-#endif // wxHAVE_RAW_BITMAP
-}
-
-
-// wxAlphaBlend: our fallback if ::AlphaBlend() is unavailable
-#ifdef wxHAVE_RAW_BITMAP
-
-static void
-wxAlphaBlend(HDC hdcDst, int xDst, int yDst, int w, int h, const wxBitmap& bmpSrc)
-{
-    // get the destination DC pixels
-    wxBitmap bmpDst(w, h, 32 /* force creating RGBA DIB */);
-    MemoryHDC hdcMem;
-    SelectInHDC select(hdcMem, GetHbitmapOf(bmpDst));
-
-    if ( !::BitBlt(hdcMem, 0, 0, w, h, hdcDst, 0, 0, SRCCOPY) )
-    {
-        wxLogLastError(_T("BitBlt"));
-    }
-
-    // combine them with the source bitmap using alpha
-    wxAlphaPixelData dataDst(bmpDst),
-                     dataSrc((wxBitmap &)bmpSrc);
-
-    wxCHECK_RET( dataDst && dataSrc,
-                    _T("failed to get raw data in wxAlphaBlend") );
-
-    wxAlphaPixelData::Iterator pDst(dataDst),
-                               pSrc(dataSrc);
-
-    for ( int y = 0; y < h; y++ )
-    {
-        wxAlphaPixelData::Iterator pDstRowStart = pDst,
-                                   pSrcRowStart = pSrc;
-
-        for ( int x = 0; x < w; x++ )
-        {
-            // note that source bitmap uses premultiplied alpha (as required by
-            // the real AlphaBlend)
-            const unsigned beta = 255 - pSrc.Alpha();
-
-            pDst.Red() = pSrc.Red() + (beta * pDst.Red() + 127) / 255;
-            pDst.Blue() = pSrc.Blue() + (beta * pDst.Blue() + 127) / 255;
-            pDst.Green() = pSrc.Green() + (beta * pDst.Green() + 127) / 255;
-
-            ++pDst;
-            ++pSrc;
-        }
-
-        pDst = pDstRowStart;
-        pSrc = pSrcRowStart;
-        pDst.OffsetY(dataDst, 1);
-        pSrc.OffsetY(dataSrc, 1);
-    }
-
-    // and finally blit them back to the destination DC
-    if ( !::BitBlt(hdcDst, xDst, yDst, w, h, hdcMem, 0, 0, SRCCOPY) )
-    {
-        wxLogLastError(_T("BitBlt"));
-    }
-}
-
-#endif // #ifdef wxHAVE_RAW_BITMAP

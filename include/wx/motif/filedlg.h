@@ -12,7 +12,7 @@
 #ifndef _WX_FILEDLG_H_
 #define _WX_FILEDLG_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "filedlg.h"
 #endif
 

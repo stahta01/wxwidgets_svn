@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -64,11 +64,6 @@
 #if defined(__WXMAC__)
   #include  "wx/mac/private.h"  // includes mac headers
 #endif
-
-#if defined(__MWERKS__) && wxUSE_UNICODE
-    #include <wtime.h>
-#endif
-
 
 // ----------------------------------------------------------------------------
 // non member functions
@@ -356,6 +351,7 @@ void WXDLLEXPORT wxLogSysError(long lErrCode, const wxChar *szFormat, ...)
 
 wxLog::wxLog()
 {
+    m_bHasMessages = FALSE;
 }
 
 wxChar *wxLog::SetLogBuffer( wxChar *buf, size_t size)
@@ -497,7 +493,8 @@ void wxLog::DoLogString(const wxChar *WXUNUSED(szString), time_t WXUNUSED(t))
 
 void wxLog::Flush()
 {
-    // nothing to do here
+    // remember that we don't have any more messages to show
+    m_bHasMessages = FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -709,21 +706,16 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
     fflush(m_fp);
 
     // under Windows, programs usually don't have stderr at all, so show the
-    // messages also under debugger (unless it's a console program which does
-    // have stderr or unless this is a file logger which doesn't use stderr at
-    // all)
+    // messages also under debugger - unless it's a console program
 #if defined(__WXMSW__) && wxUSE_GUI && !defined(__WXMICROWIN__)
-    if ( m_fp == stderr )
-    {
-        str += wxT("\r\n") ;
-        OutputDebugString(str.c_str());
-    }
+    str += wxT("\r\n") ;
+    OutputDebugString(str.c_str());
 #endif // MSW
-
 #if defined(__WXMAC__) && !defined(__DARWIN__) && wxUSE_GUI
     Str255 pstr ;
-    wxString output = str + wxT(";g") ;
-    wxMacStringToPascal( output.c_str() , pstr ) ;
+    strcpy( (char*) pstr , str.c_str() ) ;
+    strcat( (char*) pstr , ";g" ) ;
+    c2pstr( (char*) pstr ) ;
 
     Boolean running = false ;
 
@@ -752,7 +744,6 @@ void wxLogStderr::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 // ----------------------------------------------------------------------------
 
 #if wxUSE_STD_IOSTREAM
-#include "wx/ioswrap.h"
 wxLogStream::wxLogStream(wxSTD ostream *ostr)
 {
     if ( ostr == NULL )
@@ -802,7 +793,7 @@ void wxLogChain::Flush()
     if ( m_logOld )
         m_logOld->Flush();
 
-    // be careful to avoid infinite recursion
+    // be careful to avoid inifinite recursion
     if ( m_logNew && m_logNew != this )
         m_logNew->Flush();
 }

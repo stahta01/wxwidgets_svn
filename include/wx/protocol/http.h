@@ -6,7 +6,7 @@
 // Created:     August 1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 #ifndef _WX_HTTP_H
 #define _WX_HTTP_H
@@ -53,8 +53,6 @@ protected:
 
   // deletes the header value strings
   void ClearHeaders();
-
-    DECLARE_NO_COPY_CLASS(wxHTTP)
 };
 
 #endif // wxUSE_PROTOCOL_HTTP

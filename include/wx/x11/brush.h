@@ -12,19 +12,19 @@
 #ifndef _WX_BRUSH_H_
 #define _WX_BRUSH_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "brush.h"
 #endif
 
+#include "wx/gdicmn.h"
 #include "wx/gdiobj.h"
+#include "wx/bitmap.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
 class wxBrush;
-class wxColour;
-class wxBitmap;
 
 //-----------------------------------------------------------------------------
 // wxBrush

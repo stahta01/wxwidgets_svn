@@ -26,14 +26,12 @@
 #include "wx/html/htmlwin.h"
 #include "wx/filesys.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxHtmlWindowXmlHandler, wxXmlResourceHandler)
 
 wxHtmlWindowXmlHandler::wxHtmlWindowXmlHandler() 
 : wxXmlResourceHandler() 
 {
     XRC_ADD_STYLE(wxHW_SCROLLBAR_NEVER);
     XRC_ADD_STYLE(wxHW_SCROLLBAR_AUTO);
-    XRC_ADD_STYLE(wxHW_NO_SELECTION);
     AddWindowStyles();
 }
 

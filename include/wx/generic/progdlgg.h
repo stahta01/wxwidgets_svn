@@ -6,7 +6,7 @@
 // Created:     09.05.1999
 // RCS-ID:      $Id$
 // Copyright:   (c) Karsten Ballüder
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ////////////////////////////////////////////////////
 
 #ifndef __PROGDLGH_G__
@@ -124,8 +124,6 @@ private:
 private:
     // Virtual function hiding supression
     virtual void Update() { wxDialog::Update(); }
-
-    DECLARE_NO_COPY_CLASS(wxProgressDialog)
 };
 #endif
 

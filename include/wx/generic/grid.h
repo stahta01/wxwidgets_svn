@@ -11,6 +11,10 @@
 
 #include "wx/defs.h"
 
+#if !defined(wxUSE_NEW_GRID) || !(wxUSE_NEW_GRID)
+#include "wx/generic/gridg.h"
+#else
+
 #ifndef __WXGRID_H__
 #define __WXGRID_H__
 
@@ -356,10 +360,6 @@ public:
     // create a new object which is the copy of this one
     virtual wxGridCellEditor *Clone() const = 0;
 
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const = 0;
-
 protected:
     // the dtor is private because only DecRef() can delete us
     virtual ~wxGridCellEditor();
@@ -380,8 +380,6 @@ protected:
     // suppress the stupid gcc warning about the class having private dtor and
     // no friends
     friend class wxGridCellEditorDummyFriend;
-
-    DECLARE_NO_COPY_CLASS(wxGridCellEditor)
 };
 
 #if wxUSE_TEXTCTRL
@@ -413,9 +411,6 @@ public:
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellTextEditor; }
 
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 protected:
     wxTextCtrl *Text() const { return (wxTextCtrl *)m_control; }
 
@@ -452,9 +447,6 @@ public:
 
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellNumberEditor(m_min, m_max); }
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 
 protected:
     wxSpinCtrl *Spin() const { return (wxSpinCtrl *)m_control; }
@@ -530,9 +522,6 @@ public:
 
     virtual wxGridCellEditor *Clone() const
         { return new wxGridCellBoolEditor; }
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 
 protected:
     wxCheckBox *CBox() const { return (wxCheckBox *)m_control; }
@@ -569,16 +558,11 @@ public:
     virtual void SetParameters(const wxString& params);
 
     virtual wxGridCellEditor *Clone() const;
-    // DJC MAPTEK
-    // added GetValue so we can get the value which is in the control
-    virtual wxString GetValue() const;
 
 protected:
     wxComboBox *Combo() const { return (wxComboBox *)m_control; }
 
-// DJC - (MAPTEK) you at least need access to m_choices if you
-//                wish to override this class
-protected:
+private:
     wxString        m_startValue;
     wxArrayString   m_choices;
     bool            m_allowOthers;
@@ -647,8 +631,7 @@ public:
         m_vAlign = vAlign;
     }
     void SetSize(int num_rows, int num_cols);
-    void SetOverflow(bool allow = TRUE)
-        { m_overflow = allow ? Overflow : SingleCell; }
+    void SetOverflow( bool allow ) { m_overflow = allow; }
     void SetReadOnly(bool isReadOnly = TRUE)
         { m_isReadOnly = isReadOnly ? ReadOnly : ReadWrite; }
 
@@ -668,15 +651,13 @@ public:
     bool HasRenderer() const { return m_renderer != NULL; }
     bool HasEditor() const { return m_editor != NULL; }
     bool HasReadWriteMode() const { return m_isReadOnly != Unset; }
-    bool HasOverflowMode() const { return m_overflow != UnsetOverflow; }
 
     const wxColour& GetTextColour() const;
     const wxColour& GetBackgroundColour() const;
     const wxFont& GetFont() const;
     void GetAlignment(int *hAlign, int *vAlign) const;
     void GetSize(int *num_rows, int *num_cols) const;
-    bool GetOverflow() const
-        { return m_overflow != SingleCell; }
+    bool GetOverflow() const { return m_overflow; }
     wxGridCellRenderer *GetRenderer(wxGrid* grid, int row, int col) const;
     wxGridCellEditor *GetEditor(wxGrid* grid, int row, int col) const;
 
@@ -692,13 +673,6 @@ private:
         Unset = -1,
         ReadWrite,
         ReadOnly
-    };
-
-    enum wxAttrOverflowMode
-    {
-        UnsetOverflow = -1,
-        Overflow,
-        SingleCell
     };
 
     // the common part of all ctors
@@ -721,8 +695,7 @@ private:
              m_vAlign;
     int      m_sizeRows,
              m_sizeCols;
-
-    wxAttrOverflowMode  m_overflow;
+    bool     m_overflow;
 
     wxGridCellRenderer* m_renderer;
     wxGridCellEditor*   m_editor;
@@ -777,8 +750,6 @@ private:
     void InitData();
 
     wxGridCellAttrProviderData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxGridCellAttrProvider)
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -867,7 +838,6 @@ private:
     wxGridCellAttrProvider *m_attrProvider;
 
     DECLARE_ABSTRACT_CLASS( wxGridTableBase );
-    DECLARE_NO_COPY_CLASS(wxGridTableBase)
 };
 
 
@@ -911,8 +881,6 @@ private:
     int m_id;
     int m_comInt1;
     int m_comInt2;
-
-    DECLARE_NO_COPY_CLASS(wxGridTableMessage)
 };
 
 
@@ -1129,13 +1097,11 @@ public:
     //
     void DrawTextRectangle( wxDC& dc, const wxString&, const wxRect&,
                             int horizontalAlignment = wxALIGN_LEFT,
-                            int verticalAlignment = wxALIGN_TOP,
-                            int textOrientation = wxHORIZONTAL );
+                            int verticalAlignment = wxALIGN_TOP );
 
     void DrawTextRectangle( wxDC& dc, const wxArrayString& lines, const wxRect&,
                             int horizontalAlignment = wxALIGN_LEFT,
-                            int verticalAlignment = wxALIGN_TOP,
-                            int textOrientation = wxHORIZONTAL );
+                            int verticalAlignment = wxALIGN_TOP );
 
 
     // Split a string containing newline chararcters into an array of
@@ -1247,7 +1213,6 @@ public:
     wxFont   GetLabelFont() { return m_labelFont; }
     void     GetRowLabelAlignment( int *horiz, int *vert );
     void     GetColLabelAlignment( int *horiz, int *vert );
-    int      GetColLabelTextOrientation();
     wxString GetRowLabelValue( int row );
     wxString GetColLabelValue( int col );
     wxColour GetGridLineColour() { return m_gridLineColour; }
@@ -1262,7 +1227,6 @@ public:
     void     SetLabelFont( const wxFont& );
     void     SetRowLabelAlignment( int horiz, int vert );
     void     SetColLabelAlignment( int horiz, int vert );
-    void     SetColLabelTextOrientation( int textOrientation );
     void     SetRowLabelValue( int row, const wxString& );
     void     SetColLabelValue( int col, const wxString& );
     void     SetGridLineColour( const wxColour& );
@@ -1339,29 +1303,44 @@ public:
     // and also set the grid size to just fit its contents
     void     AutoSize();
 
-    // autosize row height depending on label text
-    void     AutoSizeRowLabelSize( int row );
-
-    // autosize column width depending on label text
-    void     AutoSizeColLabelSize( int col );
-
     // column won't be resized to be lesser width - this must be called during
     // the grid creation because it won't resize the column if it's already
     // narrower than the minimal width
     void     SetColMinimalWidth( int col, int width );
     void     SetRowMinimalHeight( int row, int width );
 
-    /*  These members can be used to query and modify the minimal
-     *  acceptable size of grid rows and columns. Call this function in
-     *  your code which creates the grid if you want to display cells
-     *  with a size smaller than the default acceptable minimum size.
-     *  Like the members SetColMinimalWidth and SetRowMinimalWidth,
-     *  the existing rows or columns will not be checked/resized.
+    /*  These two members can be used to query and modify the minimal
+     *  acceptable size of grid rows and columns. In the implementation of
+     *  wxGrid and related functions and classes these replace the macros
+     *  WXGRID_MIN_ROW_HEIGHT and WXGRID_MIN_COL_WIDTH. This allows users
+     *  to override these defaults to allow for grids with smaller cells.
+     *
+     *  These numbers are the lower boundaries for the arguments which are
+     *  passed to the two versions above for setting per row/column minimum
+     *  sizes. Like the members SetColMinimalWidth and SetRowMinimalWidth,
+     *  the two Set members below must be called during grid creation, because
+     *  the existing rows or columns will not be resized if necessary.
+     *
+     *  Notes:
+     *  * In order to keep backwards compatibility, these bits of state
+     *    information cannot be stored in member variables in the 2.4 series.
+     *    Hence the implementations of these functions use auxiliary static
+     *    functions which hold the numbers as static data (see grid.cpp).
+     *  * Those data are initialised to according to the values of the macros
+     *    WXGRID_MIN_ROW_HEIGHT and WXGRID_MIN_COL_WIDTH. This ensures 
+     *    complete backward compatibility. There is guaranteed to be no 
+     *    effect of this change, unless you actually call this function.
+     *  * In the 2.6 series, the behaviour of these functions will change. The
+     *    minimal acceptable height and width will be stored in member
+     *    variables, so calling these members only affects the class on which
+     *    they are called.
      */
     void     SetColMinimalAcceptableWidth( int width );
     void     SetRowMinimalAcceptableHeight( int width );
     int      GetColMinimalAcceptableWidth() const;
     int      GetRowMinimalAcceptableHeight() const;
+
+
 
     void     SetDefaultCellBackgroundColour( const wxColour& );
     void     SetCellBackgroundColour( int row, int col, const wxColour& );
@@ -1476,13 +1455,12 @@ public:
     void RegisterDataType(const wxString& typeName,
                           wxGridCellRenderer* renderer,
                           wxGridCellEditor* editor);
-    // DJC MAPTEK
-    virtual wxGridCellEditor* GetDefaultEditorForCell(int row, int col) const;
+    wxGridCellEditor* GetDefaultEditorForCell(int row, int col) const;
     wxGridCellEditor* GetDefaultEditorForCell(const wxGridCellCoords& c) const
         { return GetDefaultEditorForCell(c.GetRow(), c.GetCol()); }
-    virtual wxGridCellRenderer* GetDefaultRendererForCell(int row, int col) const;
-    virtual wxGridCellEditor* GetDefaultEditorForType(const wxString& typeName) const;
-    virtual wxGridCellRenderer* GetDefaultRendererForType(const wxString& typeName) const;
+    wxGridCellRenderer* GetDefaultRendererForCell(int row, int col) const;
+    wxGridCellEditor* GetDefaultEditorForType(const wxString& typeName) const;
+    wxGridCellRenderer* GetDefaultRendererForType(const wxString& typeName) const;
 
     // grid may occupy more space than needed for its rows/columns, this
     // function allows to set how big this extra space is
@@ -1698,7 +1676,6 @@ protected:
     void InitRowHeights();
 
     int        m_defaultRowHeight;
-    int        m_minAcceptableRowHeight;
     wxArrayInt m_rowHeights;
     wxArrayInt m_rowBottoms;
 
@@ -1706,7 +1683,6 @@ protected:
     void InitColWidths();
 
     int        m_defaultColWidth;
-    int        m_minAcceptableColWidth;
     wxArrayInt m_colWidths;
     wxArrayInt m_colRights;
 
@@ -1738,7 +1714,6 @@ protected:
     int        m_rowLabelVertAlign;
     int        m_colLabelHorizAlign;
     int        m_colLabelVertAlign;
-    int        m_colLabelTextOrientation;
 
     bool       m_defaultRowLabelValues;
     bool       m_defaultColLabelValues;
@@ -1892,7 +1867,6 @@ protected:
 
     DECLARE_DYNAMIC_CLASS( wxGrid )
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxGrid)
 };
 
 
@@ -2042,7 +2016,6 @@ private:
     wxControl* m_ctrl;
 
     DECLARE_DYNAMIC_CLASS(wxGridEditorCreatedEvent)
-    DECLARE_NO_COPY_CLASS(wxGridEditorCreatedEvent)
 };
 
 
@@ -2101,5 +2074,6 @@ extern const int wxEVT_GRID_CHANGE_SEL_LABEL;
 
 #endif
 
-#endif  // ifndef wxUSE_GRID
+#endif  // #ifndef __WXGRID_H__
 
+#endif  // ifndef wxUSE_NEW_GRID

@@ -6,7 +6,7 @@
 // Created:     07.05.02
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Vadim Zeitlin <vadim@wxwindows.org>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_BUILD_H_

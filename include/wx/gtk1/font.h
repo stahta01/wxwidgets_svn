@@ -3,7 +3,7 @@
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -94,22 +94,19 @@ public:
     virtual void SetFaceName( const wxString& faceName );
     virtual void SetUnderlined( bool underlined );
     virtual void SetEncoding(wxFontEncoding encoding);
+    virtual void SetNativeFontInfo( const wxNativeFontInfo& info );
 
     virtual void SetNoAntiAliasing( bool no = TRUE );
     virtual bool GetNoAntiAliasing();
-
+    
     // implementation from now on
     void Unshare();
 
-#ifndef __WXGTK20__
     GdkFont* GetInternalFont(float scale = 1.0) const;
-#endif
 
     // no data :-)
 
 protected:
-    virtual void DoSetNativeFontInfo( const wxNativeFontInfo& info );
-
     // common part of all ctors
     void Init();
 

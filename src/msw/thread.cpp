@@ -174,8 +174,6 @@ private:
     wxMutexError LockTimeout(DWORD milliseconds);
 
     HANDLE m_mutex;
-
-    DECLARE_NO_COPY_CLASS(wxMutexInternal)
 };
 
 // all mutexes are recursive under Win32 so we don't use mutexType
@@ -267,24 +265,13 @@ public:
     bool IsOk() const { return m_semaphore != NULL; }
 
     wxSemaError Wait() { return WaitTimeout(INFINITE); }
-
-    wxSemaError TryWait()
-    {
-        wxSemaError rc = WaitTimeout(0);
-        if ( rc == wxSEMA_TIMEOUT )
-            rc = wxSEMA_BUSY;
-
-        return rc;
-    }
-
+    wxSemaError TryWait() { return WaitTimeout(0); }
     wxSemaError WaitTimeout(unsigned long milliseconds);
 
     wxSemaError Post();
 
 private:
     HANDLE m_semaphore;
-
-    DECLARE_NO_COPY_CLASS(wxSemaphoreInternal)
 };
 
 wxSemaphoreInternal::wxSemaphoreInternal(int initialcount, int maxcount)
@@ -330,7 +317,7 @@ wxSemaError wxSemaphoreInternal::WaitTimeout(unsigned long milliseconds)
            return wxSEMA_NO_ERROR;
 
         case WAIT_TIMEOUT:
-           return wxSEMA_TIMEOUT;
+           return wxSEMA_BUSY;
 
         default:
             wxLogLastError(_T("WaitForSingleObject(semaphore)"));
@@ -549,8 +536,6 @@ private:
     wxThreadState m_state;      // state, see wxThreadState enum
     unsigned int  m_priority;   // thread priority in "wx" units
     DWORD         m_tid;        // thread id
-
-    DECLARE_NO_COPY_CLASS(wxThreadInternal)
 };
 
 THREAD_RETVAL THREAD_CALLCONV wxThreadInternal::WinThreadStart(void *param)
@@ -629,9 +614,6 @@ void wxThreadInternal::SetPriority(unsigned int priority)
 
 bool wxThreadInternal::Create(wxThread *thread, unsigned int stackSize)
 {
-    wxASSERT_MSG( m_state == STATE_NEW && !m_hThread,
-                    _T("Create()ing thread twice?") );
-
     // for compilers which have it, we should use C RTL function for thread
     // creation instead of Win32 API one because otherwise we will have memory
     // leaks if the thread uses C RTL (and most threads do)

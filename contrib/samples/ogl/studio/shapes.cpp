@@ -28,8 +28,7 @@
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in wx_setup.h!
 #endif
 
-#include <wx/deprecated/setup.h>
-#include <wx/deprecated/wxexpr.h>
+#include <wx/wxexpr.h>
 
 #include "studio.h"
 #include "doc.h"
@@ -706,6 +705,7 @@ bool csEvtHandler::EditProperties()
  * Diagram
  */
  
+#if wxUSE_PROLOGIO
 bool csDiagram::OnShapeSave(wxExprDatabase& db, wxShape& shape, wxExpr& expr)
 {
   wxDiagram::OnShapeSave(db, shape, expr);
@@ -724,6 +724,7 @@ bool csDiagram::OnShapeLoad(wxExprDatabase& db, wxShape& shape, wxExpr& expr)
   
   return TRUE;
 }
+#endif
 
 IMPLEMENT_DYNAMIC_CLASS(csThinRectangleShape, wxDrawnShape)
 

@@ -24,7 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#include <wx/deprecated/wxexpr.h>
+#include <wx/wxexpr.h>
 
 #ifdef new
 #undef new
@@ -62,7 +62,7 @@ BEGIN_EVENT_TABLE(wxShapeCanvas, wxScrolledWindow)
     EVT_MOUSE_EVENTS(wxShapeCanvas::OnMouseEvent)
 END_EVENT_TABLE()
 
-const wxChar* wxShapeCanvasNameStr = wxT("shapeCanvas");
+wxChar* wxShapeCanvasNameStr = wxT("shapeCanvas");
 
 // Object canvas
 wxShapeCanvas::wxShapeCanvas(wxWindow *parent, wxWindowID id,
@@ -397,10 +397,10 @@ wxShape *wxShapeCanvas::FindShape(double x, double y, int *attachment, wxClassIn
   //     the other objects
   // (b) to find the control points FIRST if they exist
 
-  wxNode *current = GetDiagram()->GetShapeList()->GetLast();
+  wxNode *current = GetDiagram()->GetShapeList()->Last();
   while (current)
   {
-    wxShape *object = (wxShape *)current->GetData();
+    wxShape *object = (wxShape *)current->Data();
 
     double dist;
     int temp_attachment;
@@ -430,13 +430,13 @@ wxShape *wxShapeCanvas::FindShape(double x, double y, int *attachment, wxClassIn
       }
     }
     if (current)
-      current = current->GetPrevious();
+      current = current->Previous();
   }
 
-  current = GetDiagram()->GetShapeList()->GetLast();
+  current = GetDiagram()->GetShapeList()->Last();
   while (current)
   {
-    wxShape *object = (wxShape *)current->GetData();
+    wxShape *object = (wxShape *)current->Data();
     double dist;
     int temp_attachment;
 
@@ -461,7 +461,7 @@ wxShape *wxShapeCanvas::FindShape(double x, double y, int *attachment, wxClassIn
       }
     }
     if (current)
-      current = current->GetPrevious();
+      current = current->Previous();
   }
 
   *attachment = nearest_attachment;

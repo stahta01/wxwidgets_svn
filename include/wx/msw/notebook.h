@@ -4,8 +4,8 @@
 // Author:      Robert Roebling
 // Modified by: Vadim Zeitlin for Windows version
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _NOTEBOOK_H
@@ -26,15 +26,6 @@
 // ----------------------------------------------------------------------------
 // wxNotebook
 // ----------------------------------------------------------------------------
-
-/*
- * Flags returned by HitTest
- */
-
-#define wxNB_HITTEST_NOWHERE           1
-#define wxNB_HITTEST_ONICON            2
-#define wxNB_HITTEST_ONLABEL           4
-#define wxNB_HITTEST_ONITEM            6
 
 class WXDLLEXPORT wxNotebook : public wxNotebookBase
 {
@@ -96,15 +87,17 @@ public:
     // set the padding between tabs (in pixels)
   void SetPadding(const wxSize& padding);
 
-    // Windows only: attempts to get colour for UX theme page background
-  wxColour GetThemeBackgroundColour();
-
   // operations
   // ----------
     // remove all pages
   bool DeleteAllPages();
-    // inserts a new page to the notebook (it will be deleted ny the notebook,
+    // adds a new page to the notebook (it will be deleted ny the notebook,
     // don't delete it yourself). If bSelect, this page becomes active.
+  bool AddPage(wxNotebookPage *pPage,
+               const wxString& strText,
+               bool bSelect = FALSE,
+               int imageId = -1);
+    // the same as AddPage(), but adds it at the specified position
   bool InsertPage(int nPage,
                   wxNotebookPage *pPage,
                   const wxString& strText,
@@ -115,14 +108,6 @@ public:
     // style.
   void SetTabSize(const wxSize& sz);
 
-    // Windows only: attempts to apply the UX theme page background to this page
-  void ApplyThemeBackground(wxWindow* window, const wxColour& colour);
-
-  // Hit test
-  int HitTest(const wxPoint& pt, long& flags);
-  // calculate the size of the notebook from the size of its page
-  virtual wxSize CalcSizeFromPage(const wxSize& sizePage) const;
-
   // callbacks
   // ---------
   void OnSize(wxSizeEvent& event);
@@ -132,15 +117,11 @@ public:
 
   // base class virtuals
   // -------------------
-
   virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
   virtual bool MSWOnScroll(int orientation, WXWORD nSBCode,
                            WXWORD pos, WXHWND control);
-
-#if wxUSE_CONSTRAINTS
   virtual void SetConstraintSizes(bool recurse = TRUE);
   virtual bool DoPhase(int nPhase);
-#endif // wxUSE_CONSTRAINTS
 
 protected:
   // common part of all ctors
@@ -152,17 +133,18 @@ protected:
   // remove one page from the notebook, without deleting
   virtual wxNotebookPage *DoRemovePage(int nPage);
 
-  // set the size of the given page to fit in the notebook
-  void AdjustPageSize(wxNotebookPage *page);
-
-
   // the current selection (-1 if none)
   int m_nSelection;
-
 
   DECLARE_DYNAMIC_CLASS(wxNotebook)
   DECLARE_EVENT_TABLE()
 };
+
+// Windows only: attempts to get colour for UX theme page background
+WXDLLEXPORT wxColour wxNotebookGetThemeBackgroundColour(wxNotebook* notebook);
+
+// Windows only: attempts to apply the UX theme page background to this page
+WXDLLEXPORT void wxNotebookApplyThemeBackground(wxNotebook* notebook, wxWindow* window, const wxColour& colour);
 
 #endif // wxUSE_NOTEBOOK
 

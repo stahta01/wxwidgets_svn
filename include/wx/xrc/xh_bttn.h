@@ -19,7 +19,6 @@
 
 class WXXMLDLLEXPORT wxButtonXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxButtonXmlHandler)
 public:
     wxButtonXmlHandler();
     virtual wxObject *DoCreateResource();

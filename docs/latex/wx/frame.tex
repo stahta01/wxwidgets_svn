@@ -24,14 +24,13 @@ application windows.
 
 \twocolwidtha{5cm}
 \begin{twocollist}\itemsep=0pt
-\twocolitem{\windowstyle{wxDEFAULT\_FRAME\_STYLE}}{Defined as {\bf wxMINIMIZE\_BOX \pipe wxMAXIMIZE\_BOX \pipe wxRESIZE\_BORDER \pipe wxSYSTEM\_MENU \pipe wxCAPTION \pipe wxCLOSE\_BOX}.}
+\twocolitem{\windowstyle{wxDEFAULT\_FRAME\_STYLE}}{Defined as {\bf wxMINIMIZE\_BOX \pipe wxMAXIMIZE\_BOX \pipe wxRESIZE\_BORDER \pipe wxSYSTEM\_MENU \pipe wxCAPTION}.}
 \twocolitem{\windowstyle{wxICONIZE}}{Display the frame iconized (minimized). Windows only. }
 \twocolitem{\windowstyle{wxCAPTION}}{Puts a caption on the frame.}
 \twocolitem{\windowstyle{wxMINIMIZE}}{Identical to {\bf wxICONIZE}. Windows only.}
 \twocolitem{\windowstyle{wxMINIMIZE\_BOX}}{Displays a minimize box on the frame.}
 \twocolitem{\windowstyle{wxMAXIMIZE}}{Displays the frame maximized. Windows only.}
 \twocolitem{\windowstyle{wxMAXIMIZE\_BOX}}{Displays a maximize box on the frame.}
-\twocolitem{\windowstyle{wxCLOSE\_BOX}}{Displays a close box on the frame.}
 \twocolitem{\windowstyle{wxSTAY\_ON\_TOP}}{Stay on top of all other windows,
 see also wxFRAME\_FLOAT\_ON\_PARENT. Windows only.}
 \twocolitem{\windowstyle{wxSYSTEM\_MENU}}{Displays a system menu.}
@@ -66,22 +65,6 @@ styles: {\tt wxDEFAULT\_FRAME\_STYLE \& (wxRESIZE\_BORDER \pipe wxRESIZE\_BOX \p
 % Note: the space after the tilde is necessary or Tex2RTF complains.
 
 See also \helpref{window styles overview}{windowstyles}.
-
-\wxheading{Default event processing}
-
-wxFrame processes the following events:
-
-\begin{twocollist}\itemsep=0pt
-\twocolitem{\helpref{wxEVT\_SIZE}{wxsizeevent}}{If the frame has exactly one
-child window, not counting the status and toolbar, this child is resized to
-take the entire frame client area. If two or more windows are present, they
-should be laid out explicitly either by manually handling wxEVT\_SIZE or using
-\helpref{sizers}{sizeroverview}}
-
-\twocolitem{\helpref{wxEVT\_MENU\_HIGHLIGHT}{wxmenuevent}}{The default
-implementation displays the \helpref{help string}{wxmenuitemgethelp} associated
-with the selected item in the first pane of the status bar, if there is one.}
-\end{twocollist}
 
 \wxheading{Remarks}
 
@@ -316,7 +299,7 @@ Iconizes or restores the frame.
 
 \wxheading{Parameters}
 
-\docparam{iconize}{If true, iconizes the frame; if false, shows and restores it.}
+\docparam{iconize}{If TRUE, iconizes the frame; if FALSE, shows and restores it.}
 
 \wxheading{See also}
 
@@ -326,7 +309,7 @@ Iconizes or restores the frame.
 
 \func{bool}{IsFullScreen}{\void}
 
-Returns true if the frame is in fullscreen mode.
+Returns TRUE if the frame is in fullscreen mode.
 
 \wxheading{See also}
 
@@ -336,13 +319,13 @@ Returns true if the frame is in fullscreen mode.
 
 \constfunc{bool}{IsIconized}{\void}
 
-Returns true if the frame is iconized.
+Returns TRUE if the frame is iconized.
 
 \membersection{wxFrame::IsMaximized}\label{wxframeismaximized}
 
 \constfunc{bool}{IsMaximized}{\void}
 
-Returns true if the frame is maximized.
+Returns TRUE if the frame is maximized.
 
 \membersection{wxFrame::Maximize}\label{wxframemaximize}
 
@@ -352,7 +335,7 @@ Maximizes or restores the frame.
 
 \wxheading{Parameters}
 
-\docparam{maximize}{If true, maximizes the frame, otherwise it restores it.}
+\docparam{maximize}{If TRUE, maximizes the frame, otherwise it restores it.}
 
 \wxheading{Remarks}
 
@@ -361,6 +344,13 @@ This function only works under Windows.
 \wxheading{See also}
 
 \helpref{wxFrame::Iconize}{wxframeiconize}
+
+\membersection{wxFrame::OnActivate}
+
+\func{void}{OnActivate}{\param{wxActivateEvent\&}{ event}}
+
+Called when a window is activated or deactivated (MS Windows
+only). See also \helpref{wxActivateEvent}{wxactivateevent}.
 
 \membersection{wxFrame::OnCreateStatusBar}\label{wxframeoncreatestatusbar}
 
@@ -424,6 +414,26 @@ implementation returns an instance of \helpref{wxToolBar}{wxtoolbar}.
 \wxheading{See also}
 
 \helpref{wxFrame::CreateToolBar}{wxframecreatetoolbar}, \helpref{wxToolBar}{wxtoolbar}.
+
+\membersection{wxFrame::OnMenuHighlight}\label{wxframeonmenuhighlight}
+
+\func{void}{OnMenuHighlight}{\param{wxMenuEvent\&}{ event}}
+
+The default implementation displays an appropriate help string
+in the status bar, if there is one.
+
+See \helpref{wxMenuEvent}{wxmenuevent}.
+
+\membersection{wxFrame::OnSize}\label{wxframeonsize}
+
+\func{void}{OnSize}{\param{wxSizeEvent\& }{event}}
+
+The default {\bf wxFrame::OnSize} implementation looks for a single subwindow,
+and if one is found, resizes it to fit
+inside the frame. Override this member if more complex behaviour
+is required (for example, if there are several subwindows).
+
+See \helpref{wxSizeEvent}{wxsizeevent}.
 
 \membersection{wxFrame::SendSizeEvent}\label{wxframesendsizeevent}
 
@@ -625,10 +635,9 @@ Sets the frame title.
 
 \func{bool}{ShowFullScreen}{\param{bool}{ show}, \param{long}{ style = wxFULLSCREEN\_ALL}}
 
-Depending on the value of {\it show} parameter the frame is either shown full
-screen or restored to its normal state. {\it style} is a bit list containing
-some or all of the following values, which indicate what elements of the frame
-to hide in full-screen mode:
+Passing TRUE to {\it shows} shows the frame full-screen, and passing FALSE restores the frame
+again. {\it style} is a bit list containing some or all of the following values, which
+indicate what elements of the frame to hide in full-screen mode:
 
 \begin{itemize}\itemsep=0pt
 \item wxFULLSCREEN\_NOMENUBAR
@@ -640,9 +649,6 @@ to hide in full-screen mode:
 \end{itemize}
 
 This function has not been tested with MDI frames.
-
-Note that showing a frame full screen also actually
-\helpref{Show()s}{wxwindowshow} if it hadn't been shown yet.
 
 \wxheading{See also}
 

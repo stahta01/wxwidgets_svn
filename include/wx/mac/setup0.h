@@ -3,10 +3,10 @@
 // Purpose:     Configuration for the library
 // Author:      Stefan Csomor
 // Modified by: Stefan Csomor
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SETUP_H_
@@ -47,20 +47,10 @@
 // This setting determines the compatibility with 2.0 API: set it to 1 to
 // enable it
 //
-// Default is 0.
+// Default is 1.
 //
 // Recommended setting: 0 (please update your code instead!)
-#define WXWIN_COMPATIBILITY_2_2 0
-
-// This setting determines the compatibility with 2.2 API: set it to 0 to
-// flag all cases of using deprecated functions.
-//
-// Default is 1 but please try building your code with 0 as the default will
-// change to 0 in the next version and the deprecated functions will disappear
-// in the version after it completely.
-//
-// Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 1
+#define WXWIN_COMPATIBILITY_2_2 1
 
 // in wxMSW version 2.1.11 and earlier, wxIcon always derives from wxBitmap,
 // but this is very dangerous because you can mistakenly pass an icon instead
@@ -305,6 +295,15 @@
 // Recommended setting: 1
 #define wxUSE_DATETIME      1
 
+// wxUSE_TIMEDATE enables compilation of the old wxDate and wxTime classes (not
+// the same as wxDateTime!). These classes are obsolete and shouldn't be used
+// in new code
+//
+// Default is 0
+//
+// Recommended setting: 0 unless you have legacy code which uses these classes
+#define wxUSE_TIMEDATE 0
+
 // Set wxUSE_TIMER to 1 to compile wxTimer class
 //
 // Default is 1
@@ -546,12 +545,20 @@
 // Recommended setting: 0 (use wxNotebook)
 #define wxUSE_TAB_DIALOG    0
 
-// wxGrid class
+// wxGrid class comes in two flavours: the original (pre wxWin 2.2) one and
+// the new, much imporved and enhanced version. The new version is backwards
+// compatible with the old one and should be used whenever possible, i.e. if
+// you set wxUSE_GRID to 1, set wxUSE_NEW_GRID to 1 too.
 //
-// Default is 1
+// Default is 1 for both options.
 //
-// Recommended setting: 1
+// Recommended setting: 1 for wxUSE_NEW_GRID, 0 if you have an old code using
+// wxGrid and 100% backwards compatibality (with all old wxGrid quirks) is
+// essential.
+//
+// WIN16/BC++ resets wxUSE_NEW_GRID to 0 because it exceeds the data limit.
 #define wxUSE_GRID         1
+#define wxUSE_NEW_GRID     1
 
 // wxProperty[Value/Form/List] classes, used by Dialog Editor
 #define wxUSE_PROPSHEET    0
@@ -570,14 +577,6 @@
 //
 // Recommended setting: 1 (can be safely set to 0, not used by the library)
 #define wxUSE_CARET         1
-
-// Use wxDisplay class: it allows enumerating all displays on a system and
-// working with them.
-//
-// Default is 0 because it isn't yet implemented on all platforms
-//
-// Recommended setting: 1 if you need it, can be safely set to 0 otherwise
-#define wxUSE_DISPLAY       0
 
 // Miscellaneous geometry code: needed for Canvas library
 #define wxUSE_GEOMETRY            1
@@ -753,6 +752,9 @@
 // OpenGL canvas
 #define wxUSE_GLCANVAS       0
 
+// wxTreeLayout class
+#define wxUSE_TREELAYOUT     1
+
 // ----------------------------------------------------------------------------
 // Data transfer
 // ----------------------------------------------------------------------------
@@ -810,6 +812,12 @@
 #define wxUSE_SPLINES     1
                                 // 0 for no splines
 
+// use wxExpr (a.k.a. PrologIO)
+#define wxUSE_PROLOGIO          0
+
+// Use .wxr resource mechanism (requires PrologIO library)
+#define wxUSE_WX_RESOURCES        0
+
 #define wxUSE_MOUSEWHEEL        1
                                 // Include mouse wheel support
 
@@ -837,7 +845,7 @@
 // that use the connection) should support forward only scrolling of cursors,
 // or both forward and backward support for backward scrolling cursors is
 // dependent on the data source as well as the ODBC driver being used.
-#define wxODBC_FWD_ONLY_CURSORS     1
+#define wxODBC_FWD_ONLY_CURSORS	 1
 
 // Default is 0.  Set to 1 to use the deprecated classes, enum types, function,
 // member variables.  With a setting of 1, full backward compatability with the
@@ -975,7 +983,7 @@
 //
 // Recommended setting: 1, only set it to 0 if your compiler doesn't have
 //                      or can't compile <richedit.h>
-#if defined(__WIN95__) && !defined(__WINE__) && !defined(__GNUWIN32_OLD__)
+#if defined(__WIN95__) && !defined(__TWIN32__) && !defined(__GNUWIN32_OLD__)
 #define wxUSE_RICHEDIT  1
 
 // TODO:  This should be ifdef'ed for any compilers that don't support
@@ -1086,6 +1094,16 @@
 #define wxUSE_OWNER_DRAWN 0
 #endif // __SALFORDC__
 
+#ifdef __TWIN32__
+
+#undef wxUSE_THREADS
+#define wxUSE_THREADS 0
+
+#undef wxUSE_ODBC
+#define wxUSE_ODBC 0
+
+#endif // __TWIN32__
+
 // BC++/Win16 can't cope with the amount of data in resource.cpp
 #if defined(__WIN16__) && defined(__BORLANDC__)
 #undef wxUSE_WX_RESOURCES
@@ -1093,6 +1111,10 @@
 
 #undef wxUSE_ODBC
 #define wxUSE_ODBC                0
+
+#undef wxUSE_NEW_GRID
+#define wxUSE_NEW_GRID            0
+#endif
 
 #if defined(__BORLANDC__) && (__BORLANDC__ < 0x500)
 // BC++ 4.0 can't compile JPEG library

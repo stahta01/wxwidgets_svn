@@ -22,7 +22,6 @@
 #include "wx/xrc/xh_scwin.h"
 #include "wx/scrolwin.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxScrolledWindowXmlHandler, wxXmlResourceHandler)
 
 wxScrolledWindowXmlHandler::wxScrolledWindowXmlHandler() 
 : wxXmlResourceHandler() 

@@ -76,6 +76,10 @@ extern "C" int _System bsdselect(int,
     WX_DEFINE_OBJARRAY(wxMsgArray);
 #endif // wxUSE_THREADS
 
+#if wxUSE_WX_RESOURCES
+    #include "wx/resource.h"
+#endif
+
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
 #endif // wxUSE_TOOLTIPS
@@ -266,6 +270,10 @@ bool wxApp::Initialize(
 
     wxInitializeStockLists();
     wxInitializeStockObjects();
+
+#if wxUSE_WX_RESOURCES
+    wxInitializeResourceSystem();
+#endif
 
     wxBitmap::InitStandardHandlers();
 
@@ -464,6 +472,10 @@ void wxApp::CleanUp()
     wxTheApp->DeletePendingObjects();
 
     wxModule::CleanUpModules();
+
+#if wxUSE_WX_RESOURCES
+    wxCleanUpResourceSystem();
+#endif
 
     wxDeleteStockObjects();
 
@@ -824,13 +836,13 @@ int wxApp::MainLoop()
         while (!Pending() && ProcessIdle())
         {
             HandleSockets();
-            wxUsleep(10000);
+            wxUsleep(10);
         }
         HandleSockets();
         if (Pending())
             DoMessage();
         else
-            wxUsleep(10000);
+            wxUsleep(10);
 
     }
     return (int)svCurrentMsg.mp1;

@@ -5,8 +5,8 @@
 // Modified by: 20.11.99 (VZ): don't derive from wxBitmap any more
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -39,6 +39,11 @@
 #endif
 
 #include "wx/msw/private.h"
+
+#if wxUSE_RESOURCE_LOADING_IN_MSW
+    #include "wx/msw/curico.h"
+    #include "wx/msw/curicop.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -92,7 +97,36 @@ wxIcon::~wxIcon()
 void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
 {
 #ifndef __WXMICROWIN__
-    HICON hicon = wxBitmapToHICON(bmp);
+#ifdef __WIN32__
+    wxMask *mask = bmp.GetMask();
+    if ( !mask )
+    {
+        // we must have a mask for an icon, so even if it's probably incorrect,
+        // do create it (grey is the "standard" transparent colour)
+        mask = new wxMask(bmp, *wxLIGHT_GREY);
+    }
+
+    ICONINFO iconInfo;
+    iconInfo.fIcon = TRUE;  // we want an icon, not a cursor
+    iconInfo.hbmMask = wxInvertMask((HBITMAP)mask->GetMaskBitmap());
+    iconInfo.hbmColor = GetHbitmapOf(bmp);
+
+    // black out the transparent area to preserve background colour, because
+    // Windows blits the original bitmap using SRCINVERT (XOR) after applying
+    // the mask to the dest rect.
+    {
+        MemoryHDC dcSrc, dcDst;
+        SelectInHDC selectMask(dcSrc, (HBITMAP)mask->GetMaskBitmap()),
+                    selectBitmap(dcDst, iconInfo.hbmColor);
+
+        if ( !::BitBlt(dcDst, 0, 0, bmp.GetWidth(), bmp.GetHeight(),
+                       dcSrc, 0, 0, SRCAND) )
+        {
+            wxLogLastError(_T("BitBlt"));
+        }
+    }
+
+    HICON hicon = ::CreateIconIndirect(&iconInfo);
     if ( !hicon )
     {
         wxLogLastError(wxT("CreateIconIndirect"));
@@ -102,7 +136,30 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
         SetHICON((WXHICON)hicon);
         SetSize(bmp.GetWidth(), bmp.GetHeight());
     }
-#endif // __WXMICROWIN__
+
+    if ( !bmp.GetMask() )
+    {
+        // we created the mask, now delete it
+        delete mask;
+    }
+
+    // delete the inverted mask bitmap we created as well
+    ::DeleteObject(iconInfo.hbmMask);
+#else // Win16
+    // there are some functions in curico.cpp which probably could be used
+    // here...
+    // This probably doesn't work.
+    HBITMAP hBitmap = (HBITMAP) bmp.GetHBITMAP();
+    HICON hIcon = MakeIconFromBitmap((HINSTANCE) wxGetInstance(), hBitmap);
+    if (hIcon)
+    {
+        SetHICON((WXHICON)hIcon);
+        SetSize(bmp.GetWidth(), bmp.GetHeight());
+    }
+
+//    wxFAIL_MSG("Bitmap to icon conversion (including use of XPMs for icons) not implemented");
+#endif // Win32/16
+#endif
 }
 
 void wxIcon::CreateIconFromXpm(const char **data)

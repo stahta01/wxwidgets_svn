@@ -145,32 +145,6 @@ is called, so do not delete it yourself.}
 This command can be used after the menu has been shown, as well as on initial
 creation of a menu or menubar.
 
-The {\it item} string for the normal menu items (not submenus or separators)
-may include the accelerator which can be used to activate the menu item
-from keyboard. The accelerator string follows the item label and is separated
-from it by a {\tt TAB} character ({\tt '$\backslash$t'}). Its general syntax is
-any combination of {\tt "CTRL"}, {\tt "ALT"} and {\tt "SHIFT"} strings (case
-doesn't matter) separated by either {\tt '-'} or {\tt '+'} characters and
-followed by the accelerator itself. The accelerator may be any alphanumeric
-character, any function key (from {\tt F1} to {\tt F12}) or one of the special
-characters listed in the table below (again, case doesn't matter):
-\begin{twocollist}\itemsep=0pt
-\twocolitem{{\tt DEL} or {\tt DELETE}}{Delete key}
-\twocolitem{{\tt INS} or {\tt INSERT}}{Insert key}
-\twocolitem{{\tt ENTER} or {\tt RETURN}}{Enter key}
-\twocolitem{{\tt PGUP}}{PageUp key}
-\twocolitem{{\tt PGDN}}{PageDown key}
-\twocolitem{{\tt LEFT}}{Left cursor arrow key}
-\twocolitem{{\tt RIGHT}}{Right cursor arrow key}
-\twocolitem{{\tt UP}}{Up cursor arrow key}
-\twocolitem{{\tt DOWN}}{Down cursor arrow key}
-\twocolitem{{\tt HOME}}{Home key}
-\twocolitem{{\tt END}}{End key}
-\twocolitem{{\tt SPACE}}{Space}
-\twocolitem{{\tt TAB}}{Tab key}
-\twocolitem{{\tt ESC} or {\tt ESCAPE}}{Escape key (Windows only)}
-\end{twocollist}
-
 \wxheading{See also}
 
 \helpref{wxMenu::AppendSeparator}{wxmenuappendseparator},\rtfsp
@@ -183,7 +157,7 @@ characters listed in the table below (again, case doesn't matter):
 \pythonnote{In place of a single overloaded method name, wxPython
 implements the following methods:\par
 \indented{2cm}{\begin{twocollist}
-\twocolitem{{\bf Append(id, string, helpStr="", checkable=false)}}{}
+\twocolitem{{\bf Append(id, string, helpStr="", checkable=FALSE)}}{}
 \twocolitem{{\bf AppendMenu(id, string, aMenu, helpStr="")}}{}
 \twocolitem{{\bf AppendItem(aMenuItem)}}{}
 \end{twocollist}}
@@ -245,7 +219,7 @@ Checks or unchecks the menu item.
 
 \docparam{id}{The menu item identifier.}
 
-\docparam{check}{If true, the item will be checked, otherwise it will be unchecked.}
+\docparam{check}{If TRUE, the item will be checked, otherwise it will be unchecked.}
 
 \wxheading{See also}
 
@@ -305,7 +279,7 @@ Enables or disables (greys out) a menu item.
 
 \docparam{id}{The menu item identifier.}
 
-\docparam{enable}{true to enable the menu item, false to disable it.}
+\docparam{enable}{TRUE to enable the menu item, FALSE to disable it.}
 
 \wxheading{See also}
 
@@ -479,7 +453,7 @@ Determines whether a menu item is checked.
 
 \wxheading{Return value}
 
-true if the menu item is checked, false otherwise.
+TRUE if the menu item is checked, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -497,7 +471,7 @@ Determines whether a menu item is enabled.
 
 \wxheading{Return value}
 
-true if the menu item is enabled, false otherwise.
+TRUE if the menu item is enabled, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -505,14 +479,13 @@ true if the menu item is enabled, false otherwise.
 
 \membersection{wxMenu::Prepend}\label{wxmenuprepend}
 
-\func{bool}{Prepend}{\param{wxMenuItem *}{item}}
+\func{bool}{Prepend}{\param{size\_t }{pos}, \param{wxMenuItem *}{item}}
 
 \func{void}{Prepend}{\param{int}{ id},\rtfsp
 \param{const wxString\& }{ item}, \param{const wxString\& }{helpString = ""},\rtfsp
 \param{wxItemKind}{ kind = wxITEM\_NORMAL}}
 
-Inserts the given {\it item} at the position $0$, i.e. before all the other
-existing items.
+Inserts the given {\it item} at the position $0$.
 
 \wxheading{See also}
 
@@ -722,7 +695,7 @@ Adds the item to the end of the menu bar.
 
 \wxheading{Return value}
 
-true on success, false if an error occurred.
+TRUE on success, FALSE if an error occurred.
 
 \wxheading{See also}
 
@@ -738,7 +711,7 @@ Checks or unchecks a menu item.
 
 \docparam{id}{The menu item identifier.}
 
-\docparam{check}{If true, checks the menu item, otherwise the item is unchecked.}
+\docparam{check}{If TRUE, checks the menu item, otherwise the item is unchecked.}
 
 \wxheading{Remarks}
 
@@ -755,7 +728,7 @@ Enables or disables (greys out) a menu item.
 
 \docparam{id}{The menu item identifier.}
 
-\docparam{enable}{true to enable the item, false to disable it.}
+\docparam{enable}{TRUE to enable the item, FALSE to disable it.}
 
 \wxheading{Remarks}
 
@@ -772,7 +745,7 @@ Enables or disables a whole menu.
 
 \docparam{pos}{The position of the menu, starting from zero.}
 
-\docparam{enable}{true to enable the menu, false to disable it.}
+\docparam{enable}{TRUE to enable the menu, FALSE to disable it.}
 
 \wxheading{Remarks}
 
@@ -917,7 +890,7 @@ position $0$ will insert it in the very beginning of it, inserting at position
 
 \wxheading{Return value}
 
-true on success, false if an error occurred.
+TRUE on success, FALSE if an error occurred.
 
 \wxheading{See also}
 
@@ -935,7 +908,7 @@ Determines whether an item is checked.
 
 \wxheading{Return value}
 
-true if the item was found and is checked, false otherwise.
+TRUE if the item was found and is checked, FALSE otherwise.
 
 \membersection{wxMenuBar::IsEnabled}\label{wxmenubarisenabled}
 
@@ -949,7 +922,7 @@ Determines whether an item is enabled.
 
 \wxheading{Return value}
 
-true if the item was found and is enabled, false otherwise.
+TRUE if the item was found and is enabled, FALSE otherwise.
 
 \membersection{wxMenuBar::Refresh}\label{wxmenubarrefresh}
 

@@ -151,11 +151,9 @@ void wxFileSelOk(Widget WXUNUSED(fs), XtPointer WXUNUSED(client_data), XmFileSel
 
 static wxString ParseWildCard( const wxString& wild )
 {
-#ifdef __WXDEBUG__
     static const wxChar* msg =
         _T("Motif file dialog does not understand this ")
         _T("wildcard syntax");
-#endif
 
     wxStringTokenizer tok( wild, _T("|") );
 
@@ -188,12 +186,12 @@ wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
 
 static void wxChangeListBoxColours(wxWindow* WXUNUSED(win), Widget widget)
 {
-    wxDoChangeBackgroundColour((WXWidget) widget, *wxWHITE);
+    wxWindow::DoChangeBackgroundColour((WXWidget) widget, *wxWHITE);
 
     // Change colour of the scrolled areas of the listboxes
     Widget listParent = XtParent (widget);
 #if 0
-    wxDoChangeBackgroundColour((WXWidget) listParent, *wxWHITE, TRUE);
+    wxWindow::DoChangeBackgroundColour((WXWidget) listParent, *wxWHITE, TRUE);
 #endif
 
     Widget hsb = (Widget) 0;
@@ -207,8 +205,8 @@ static void wxChangeListBoxColours(wxWindow* WXUNUSED(win), Widget widget)
     * function to change them (by default, taken from wxSystemSettings)
     */
     wxColour backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
-    wxDoChangeBackgroundColour((WXWidget) hsb, backgroundColour, TRUE);
-    wxDoChangeBackgroundColour((WXWidget) vsb, backgroundColour, TRUE);
+    wxWindow::DoChangeBackgroundColour((WXWidget) hsb, backgroundColour, TRUE);
+    wxWindow::DoChangeBackgroundColour((WXWidget) vsb, backgroundColour, TRUE);
 
     if (hsb)
       XtVaSetValues (hsb,
@@ -227,7 +225,9 @@ int wxFileDialog::ShowModal()
     //  static char fileBuf[512];
     Widget parentWidget = (Widget) 0;
     if (m_parent)
+    {
         parentWidget = (Widget) m_parent->GetTopWidget();
+    }
     else
         parentWidget = (Widget) wxTheApp->GetTopLevelWidget();
     // prepare the arg list
@@ -262,9 +262,7 @@ int wxFileDialog::ShowModal()
     Widget shell = XtParent(fileSel);
 
     if (!m_message.IsNull())
-        XtVaSetValues(shell,
-                      XmNtitle, wxConstCast(m_message.c_str(), char),
-                      NULL);
+        XtVaSetValues(shell, XmNtitle, (char*) (const char*) m_message, NULL);
 
     wxString entirePath("");
 
@@ -291,7 +289,7 @@ int wxFileDialog::ShowModal()
         else
             filter = wildCard;
 
-        XmTextSetString(filterWidget, wxConstCast(filter.c_str(), char));
+        XmTextSetString(filterWidget, (char*)filter.c_str());
         XmFileSelectionDoSearch(fileSel, NULL);
     }
 
@@ -308,8 +306,7 @@ int wxFileDialog::ShowModal()
 
     if (entirePath != "")
     {
-        XmTextSetString(selectionWidget,
-                        wxConstCast(entirePath.c_str(), char));
+        XmTextSetString(selectionWidget, (char*)entirePath.c_str());
     }
 
     XtAddCallback(fileSel, XmNcancelCallback, (XtCallbackProc)wxFileSelCancel, (XtPointer)NULL);
@@ -332,9 +329,9 @@ int wxFileDialog::ShowModal()
         XmNresizePolicy, XmRESIZE_NONE,
         NULL);
 #endif
-    //    wxDoChangeBackgroundColour((WXWidget) fileSel, m_backgroundColour);
-    wxDoChangeBackgroundColour((WXWidget) filterWidget, *wxWHITE);
-    wxDoChangeBackgroundColour((WXWidget) selectionWidget, *wxWHITE);
+    //    DoChangeBackgroundColour((WXWidget) fileSel, m_backgroundColour);
+    DoChangeBackgroundColour((WXWidget) filterWidget, *wxWHITE);
+    DoChangeBackgroundColour((WXWidget) selectionWidget, *wxWHITE);
 
     wxChangeListBoxColours(this, dirListWidget);
     wxChangeListBoxColours(this, fileListWidget);
@@ -347,25 +344,28 @@ int wxFileDialog::ShowModal()
     wxEndBusyCursor();
 
     XtAddGrab(XtParent(fileSel), TRUE, FALSE);
-    XtAppContext context = (XtAppContext) wxTheApp->GetAppContext();
     XEvent event;
     while (!m_fileSelectorReturned)
     {
-        XtAppNextEvent(context, &event);
-        XtDispatchEvent(&event);
+        XtAppProcessEvent((XtAppContext) wxTheApp->GetAppContext(), XtIMAll);
     }
     XtRemoveGrab(XtParent(fileSel));
 
-    // XmUpdateDisplay((Widget) wxTheApp->GetTopLevelWidget()); // Experimental
+    XmUpdateDisplay((Widget) wxTheApp->GetTopLevelWidget()); // Experimental
 
-    Display* display = XtDisplay(fileSel);
-
+    //  XtDestroyWidget(fileSel);
     XtUnmapWidget(XtParent(fileSel));
     XtDestroyWidget(XtParent(fileSel));
 
     // Now process all events, because otherwise
     // this might remain on the screen
-    wxFlushEvents(display);
+    XSync(XtDisplay((Widget) wxTheApp->GetTopLevelWidget()), FALSE);
+    while (XtAppPending((XtAppContext) wxTheApp->GetAppContext()))
+    {
+        XFlush(XtDisplay((Widget) wxTheApp->GetTopLevelWidget()));
+        XtAppNextEvent((XtAppContext) wxTheApp->GetAppContext(), &event);
+        XtDispatchEvent(&event);
+    }
 
     m_path = m_fileSelectorAnswer;
     m_fileName = wxFileNameFromPath(m_fileSelectorAnswer);
@@ -381,7 +381,7 @@ int wxFileDialog::ShowModal()
 static wxString
 wxDefaultFileSelector(bool load, const char *what, const char *extension, const char *default_name, wxWindow *parent)
 {
-    char *ext = wxConstCast(extension, char);
+    char *ext = (char *)extension;
 
     wxString prompt;
     wxString str;

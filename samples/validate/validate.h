@@ -5,21 +5,13 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-#   pragma interface
+// #pragma interface
 #endif
-
-#include "wx/app.h"
-#include "wx/combobox.h"
-#include "wx/dialog.h"
-#include "wx/dynarray.h"
-#include "wx/frame.h"
-#include "wx/listbox.h"
-#include "wx/string.h"
 
 // Define a new application type
 class MyApp : public wxApp
@@ -32,15 +24,11 @@ public:
 class MyFrame : public wxFrame
 {
 public:
-    MyFrame(wxFrame *frame, const char *title, int x, int y, int w, int h);
+    MyFrame(wxFrame *frame, const wxChar *title, int x, int y, int w, int h);
 
     void OnQuit(wxCommandEvent& event);
     void OnTestDialog(wxCommandEvent& event);
-    void OnToggleBell(wxCommandEvent& event);
-
-private:
-    wxListBox *m_listbox;
-    bool m_silent;
+    void OnSilent(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
@@ -48,41 +36,21 @@ private:
 class MyDialog : public wxDialog
 {
 public:
-    MyDialog(wxWindow *parent, const wxString& title,
-            const wxPoint& pos = wxDefaultPosition,
-            const wxSize& size = wxDefaultSize,
+    MyDialog(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
             const long style = wxDEFAULT_DIALOG_STYLE);
-    bool TransferDataToWindow();
-    wxTextCtrl *text;
-    wxComboBox *combobox;
 };
 
 class MyData
 {
 public:
-    MyData();
-    // These data members are designed for transfer to and from
-    // controls, via validators. For instance, a text control's
-    // transferred value is a string:
     wxString m_string;
-    // Listboxes may permit multiple selections, so their state
-    // is transferred to an integer-array class.
-    wxArrayInt m_listbox_choices;
-    bool m_checkbox_state;
-    // Comboboxes differ from listboxes--validators transfer
-    // the string entered in the combobox's text-edit field.
-    wxString m_combobox_choice;
-    int m_radiobox_choice;
+
+    MyData() { m_string = _T("My string"); }
 };
 
 #define VALIDATE_DIALOG_ID      200
 
-#define VALIDATE_TEST_DIALOG      2
-#define VALIDATE_TOGGLE_BELL      3
-
+#define VALIDATE_TEST_DIALOG    2
+#define VALIDATE_SILENT         3
 #define VALIDATE_TEXT           101
-#define VALIDATE_LIST           102
-#define VALIDATE_CHECK          103
-#define VALIDATE_COMBO          105
-#define VALIDATE_RADIO          106
 

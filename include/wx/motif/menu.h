@@ -12,7 +12,7 @@
 #ifndef _WX_MOTIF_MENU_H_
 #define _WX_MOTIF_MENU_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "menu.h"
 #endif
 
@@ -93,8 +93,7 @@ public:
     WXWidget GetHandle() const { return m_menuWidget; }
     
     bool IsTearOff() const { return (m_style & wxMENU_TEAROFF) != 0; }
-
-    void DestroyWidgetAndDetach();
+    
 public:
     // Motif-specific data
     int               m_numColumns;

@@ -12,17 +12,46 @@
 #ifndef _WX_CURSOR_H_
 #define _WX_CURSOR_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "cursor.h"
 #endif
 
-#include "wx/object.h"
-#include "wx/gdicmn.h"
+#include "wx/bitmap.h"
+#if wxUSE_IMAGE
+#include "wx/image.h"
+#endif
 
-class WXDLLEXPORT wxImage;
+
+
+/* Cursor for one display, so we can choose the correct one for
+* the current display.
+*/
+class wxXCursor : public wxObject
+{
+    DECLARE_DYNAMIC_CLASS(wxXCursor)
+        
+public:
+    WXDisplay*  m_display;
+    WXCursor    m_cursor;
+};
+
+class WXDLLEXPORT wxCursorRefData: public wxBitmapRefData
+{
+    friend class WXDLLEXPORT wxBitmap;
+    friend class WXDLLEXPORT wxCursor;
+public:
+    wxCursorRefData();
+    ~wxCursorRefData();
+    
+    wxList        m_cursors;  // wxXCursor objects, one per display
+    wxStockCursor m_cursorId; // wxWindows standard cursor id
+};
+
+#define M_CURSORDATA ((wxCursorRefData *)m_refData)
+#define M_CURSORHANDLERDATA ((wxCursorRefData *)bitmap->m_refData)
 
 // Cursor
-class WXDLLEXPORT wxCursor: public wxObject
+class WXDLLEXPORT wxCursor: public wxBitmap
 {
     DECLARE_DYNAMIC_CLASS(wxCursor)
         
@@ -32,9 +61,8 @@ public:
     // Copy constructors
     wxCursor(const wxCursor& cursor) { Ref(cursor); }
     
-    wxCursor(const char bits[], int width, int height,
-             int hotSpotX = -1, int hotSpotY = -1,
-             const char maskBits[] = NULL);
+    wxCursor(const char bits[], int width, int height, int hotSpotX = -1, int hotSpotY = -1,
+        const char maskBits[] = NULL);
     
     wxCursor(const wxString& name, long flags = wxBITMAP_TYPE_XBM,
         int hotSpotX = 0, int hotSpotY = 0);
@@ -46,24 +74,15 @@ public:
     wxCursor(wxStockCursor id);
     ~wxCursor();
     
-    virtual bool Ok() const;
+    virtual bool Ok() const { return ((m_refData != NULL) && M_CURSORDATA->m_ok); }
     
-    wxCursor& operator = (const wxCursor& cursor)
-        { if (*this == cursor) return (*this); Ref(cursor); return *this; }
-    bool operator == (const wxCursor& cursor) const
-        { return m_refData == cursor.m_refData; }
-    bool operator != (const wxCursor& cursor) const
-        { return m_refData != cursor.m_refData; }
-
+    wxCursor& operator = (const wxCursor& cursor) { if (*this == cursor) return (*this); Ref(cursor); return *this; }
+    bool operator == (const wxCursor& cursor) const { return m_refData == cursor.m_refData; }
+    bool operator != (const wxCursor& cursor) const { return m_refData != cursor.m_refData; }
+    
     // Motif-specific.
     // Create/get a cursor for the current display
     WXCursor GetXCursor(WXDisplay* display) ;
-private:
-    void Create(const char bits[], int width, int height,
-                int hotSpotX = -1, int hotSpotY = -1,
-                const char maskBits[] = NULL);
-    void Create(WXPixmap cursor, WXPixmap mask, int hotSpotX, int hotSpotY);
-
     // Make a cursor from standard id
     WXCursor MakeCursor(WXDisplay* display, wxStockCursor id);
 };

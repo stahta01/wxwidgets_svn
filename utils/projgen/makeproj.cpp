@@ -21,8 +21,7 @@
 #endif
 
 #include "wx/wx.h"
-#include "wx/deprecated/setup.h"
-#include "wx/deprecated/resource.h"
+#include "wx/resource.h"
 
 #if wxUSE_IOSTREAMH
 #include <iostream.h>

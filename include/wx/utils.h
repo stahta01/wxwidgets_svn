@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UTILSH__
@@ -57,8 +57,8 @@ class WXDLLEXPORT wxPoint;
 // ----------------------------------------------------------------------------
 
 // Useful buffer (FIXME VZ: To be removed!!!)
-// Now only needed in MSW port
-#if !defined(__WXMOTIF__) && !defined(__WXGTK__) && !defined(__WXX11__) && !defined(__WXMGL__) && !defined(__WXMAC__)
+// Now only needed in Mac and MSW ports
+#if !defined(__WXMOTIF__) && !defined(__WXGTK__) && !defined(__WXX11__) && !defined(__WXMGL__)
 WXDLLEXPORT_DATA(extern wxChar*) wxBuffer;
 #endif
 
@@ -127,9 +127,6 @@ WXDLLEXPORT long wxGetCurrentId();
 // Various conversions
 // ----------------------------------------------------------------------------
 
-// these functions are deprecated, use wxString methods instead!
-#if WXWIN_COMPATIBILITY_2_4
-
 WXDLLEXPORT_DATA(extern const wxChar*) wxFloatToStringStr;
 WXDLLEXPORT_DATA(extern const wxChar*) wxDoubleToStringStr;
 
@@ -141,8 +138,6 @@ WXDLLEXPORT void StringToInt(const wxChar *s, int *number);
 WXDLLEXPORT void StringToLong(const wxChar *s, long *number);
 WXDLLEXPORT wxChar* IntToString(int number);
 WXDLLEXPORT wxChar* LongToString(long number);
-
-#endif // WXWIN_COMPATIBILITY_2_4
 
 // Convert 2-digit hex number to decimal
 WXDLLEXPORT int wxHexToDec(const wxString& buf);

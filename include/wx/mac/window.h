@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        window.h
 // Purpose:     wxWindowMac class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_WINDOW_H_
@@ -38,7 +38,7 @@ class WXDLLEXPORT wxWindowMac: public wxWindowBase
     friend class wxPaintDC;
     
 public:
-    
+	
     wxWindowMac()
         : m_macBackgroundBrush()
         , m_macVisibleRegion()
@@ -155,7 +155,7 @@ public:
     void MacRootWindowToClient( int *x , int *y ) const ;
     void MacWindowToRootWindow( int *x , int *y ) const ;
     void MacRootWindowToWindow( int *x , int *y ) const ;
-    
+	
     virtual wxString MacGetToolTipString( wxPoint &where ) ;
 
     // simple accessors
@@ -163,19 +163,18 @@ public:
 
 //    WXHWND GetHWND() const { return m_hWnd; }
 //    void SetHWND(WXHWND hWnd) { m_hWnd = hWnd; }
-    virtual WXWidget GetHandle() const { return (WXWidget) NULL ; }
+	virtual WXWidget GetHandle() const { return (WXWidget) NULL ; }
 
+    bool GetUseCtl3D() const { return m_useCtl3D; }
     bool GetTransparentBackground() const { return m_backgroundTransparent; }
     void SetTransparent(bool t = TRUE) { m_backgroundTransparent = t; }
 
     // event handlers
     // --------------
-    void OnSetFocus(wxFocusEvent& event) ;
+	void OnSetFocus(wxFocusEvent& event) ;
     void OnNcPaint(wxNcPaintEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnIdle(wxIdleEvent& event);
-    void OnMouseEvent( wxMouseEvent &event ) ;
-
     void MacOnScroll(wxScrollEvent&event ) ;
     
     bool AcceptsFocus() const ;
@@ -234,7 +233,7 @@ public:
     static long          MacRemoveBordersFromStyle( long style ) ;
     virtual void         MacSuperChangedPosition() ;
     // the absolute coordinates of this item within the toplevel window may have changed
-    virtual void         MacUpdateDimensions() {}
+    virtual void		 MacUpdateDimensions() {}
     // the absolute coortinates of this window's root have changed
     virtual void         MacTopLevelWindowChangedPosition() ;
     virtual void         MacSuperShown( bool show ) ;
@@ -255,6 +254,8 @@ public:
     static wxWindowMac*  s_lastMouseWindow ;
 private:
 protected:
+//    RgnHandle            m_macUpdateRgn ;
+//    bool                 m_macEraseOnRedraw ;
     wxBrush              m_macBackgroundBrush ;
     wxRegion             m_macVisibleRegion ;
     int                  m_x ;
@@ -269,7 +270,18 @@ protected:
     void                 MacCreateScrollBars( long style ) ;
     void                 MacRepositionScrollBars() ;
 
-    bool                 m_backgroundTransparent ;
+    // additional (MSW specific) flags
+    bool                 m_useCtl3D:1; // Using CTL3D for this control
+    bool                 m_backgroundTransparent:1;
+    bool                 m_mouseInWindow:1;
+    bool                 m_doubleClickAllowed:1;
+    bool                 m_winCaptured:1;
+
+    // the size of one page for scrolling
+    int                  m_xThumbSize;
+    int                  m_yThumbSize;
+
+//    WXHMENU               m_hMenu; // Menu, if any
 
     // implement the base class pure virtuals
     virtual void DoClientToScreen( int *x, int *y ) const;

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -85,7 +85,6 @@ public:
 
 private:
     DECLARE_CLASS(wxPrinterBase)
-    DECLARE_NO_COPY_CLASS(wxPrinterBase)
 };
 
 /*
@@ -151,7 +150,6 @@ private:
 
 private:
     DECLARE_ABSTRACT_CLASS(wxPrintout)
-    DECLARE_NO_COPY_CLASS(wxPrintout)
 };
 
 /*
@@ -180,7 +178,6 @@ private:
 
     DECLARE_CLASS(wxPreviewCanvas)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewCanvas)
 };
 
 /*
@@ -192,7 +189,7 @@ class WXDLLEXPORT wxPreviewFrame: public wxFrame
 {
 public:
     wxPreviewFrame(wxPrintPreviewBase *preview,
-                   wxWindow *parent,
+                   wxFrame *parent,
                    const wxString& title = wxT("Print Preview"),
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
@@ -212,7 +209,6 @@ protected:
 private:
     DECLARE_CLASS(wxPreviewFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewFrame)
 };
 
 /*
@@ -293,7 +289,6 @@ protected:
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPreviewControlBar)
 };
 
 /*
@@ -382,8 +377,6 @@ protected:
 
 private:
     void Init(wxPrintout *printout, wxPrintout *printoutForPrinting);
-
-    DECLARE_NO_COPY_CLASS(wxPrintPreviewBase)
 };
 
 /*

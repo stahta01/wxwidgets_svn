@@ -6,7 +6,7 @@
 // Created:     06.01.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -74,7 +74,6 @@ private:
     wxPopupTransientWindow *m_popup;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPopupWindowHandler)
 };
 
 class wxPopupFocusHandler : public wxEvtHandler
@@ -105,7 +104,6 @@ private:
 #endif // __WXGTK__
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxPopupFocusHandler)
 };
 
 // ----------------------------------------------------------------------------

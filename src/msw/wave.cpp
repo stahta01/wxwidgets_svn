@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -70,7 +70,7 @@ bool wxWave::Create(const wxString& fileName, bool isResource)
     m_isResource = TRUE;
 
     HRSRC hresInfo;
-#if defined(__WIN32__)
+#if defined(__WIN32__) && !defined(__TWIN32__)
 #ifdef _UNICODE
     hresInfo = ::FindResourceW((HMODULE) wxhInstance, fileName, wxT("WAVE"));
 #else

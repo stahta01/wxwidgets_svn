@@ -11,7 +11,7 @@
 // Copyright:   (c) Julian Smart 1993
 //              (c) Guilhem Lavaux 1997, 1998
 //              (c) 2000 Guillermo Rodriguez <guille@iies.es>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ==========================================================================
@@ -89,7 +89,7 @@ static wxSockAddress *
 GetAddressFromName(const wxString& serverName, const wxString& host = _T(""))
 {
     // we always use INET sockets under non-Unix systems
-#if defined(__UNIX__) && !defined(__WXMAC__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WXMAC__)
     // under Unix, if the server name looks like a path, create a AF_UNIX
     // socket instead of AF_INET one
     if ( serverName.Find(_T('/')) != wxNOT_FOUND )

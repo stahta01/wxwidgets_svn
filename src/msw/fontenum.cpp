@@ -90,8 +90,6 @@ private:
 
     // the list of facenames we already found while enumerating facenames
     wxArrayString m_facenames;
-
-    DECLARE_NO_COPY_CLASS(wxFontEnumeratorHelper)
 };
 
 // ----------------------------------------------------------------------------
@@ -148,8 +146,14 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
     return TRUE;
 }
 
-#if defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ) && !wxUSE_NORLANDER_HEADERS
-    #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+#if defined(__WXWINE__)
+    #define wxFONTENUMPROC FONTENUMPROCEX
+#elif (defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ))
+    #if wxUSE_NORLANDER_HEADERS
+        #define wxFONTENUMPROC int(*)(const LOGFONT *, const TEXTMETRIC *, long unsigned int, LPARAM)
+    #else
+        #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+    #endif
 #else
     #define wxFONTENUMPROC FONTENUMPROC
 #endif

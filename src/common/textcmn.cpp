@@ -6,7 +6,7 @@
 // Created:     13.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -173,7 +173,7 @@ bool wxTextCtrlBase::SaveFile(const wxString& filename)
     }
 
 #if wxUSE_FFILE
-    wxFFile file(filename, _T("w"));
+    wxFFile file(filename, "w");
     if ( file.IsOpened() && file.Write(GetValue()) )
     {
         // it's not modified any longer
@@ -285,7 +285,7 @@ bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
 {
     // the generic version is unused in wxMSW
 #ifndef __WIN32__
-    wxChar ch = 0;
+    wxChar ch;
     int keycode = event.GetKeyCode();
     switch ( keycode )
     {
@@ -325,26 +325,6 @@ bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
         case WXK_DIVIDE:
         case WXK_NUMPAD_DIVIDE:
             ch = _T('/');
-            break;
-
-        case WXK_DELETE:
-        case WXK_NUMPAD_DELETE:
-            // delete the character at cursor
-            {
-                const long pos = GetInsertionPoint(),
-                           last = GetLastPosition();
-                if ( pos < last )
-                    Remove(pos, pos + 1);
-            }
-            break;
-
-        case WXK_BACK:
-            // delete the character before the cursor
-            {
-                const long pos = GetInsertionPoint();
-                if ( pos > 0 )
-                    Remove(pos - 1, pos);
-            }
             break;
 
         default:

@@ -1454,7 +1454,14 @@ void wxWindowOS2::SetDropTarget(
   wxDropTarget*                     pDropTarget
 )
 {
+    if (m_dropTarget != 0)
+    {
+        m_dropTarget->Revoke(m_hWnd);
+        delete m_dropTarget;
+    }
     m_dropTarget = pDropTarget;
+    if (m_dropTarget != 0)
+        m_dropTarget->Register(m_hWnd);
 } // end of wxWindowOS2::SetDropTarget
 #endif
 
@@ -3523,6 +3530,7 @@ bool wxWindowOS2::HandleDestroy()
 #if wxUSE_DRAG_AND_DROP
     if (m_dropTarget != NULL)
     {
+        m_dropTarget->Revoke(m_hWnd);
         delete m_dropTarget;
         m_dropTarget = NULL;
     }
@@ -3978,21 +3986,6 @@ void wxWindowOS2::OnSysColourChanged(
 // ---------------------------------------------------------------------------
 // painting
 // ---------------------------------------------------------------------------
-
-void wxWindow::OnPaint (
-  wxPaintEvent&                     rEvent
-)
-{
-    HDC                             hDC = (HDC)wxPaintDC::FindDCInCache((wxWindow*) rEvent.GetEventObject());
-
-    if (hDC != 0)
-    {
-        OS2DefWindowProc( (WXUINT)WM_PAINT
-                         ,(WXWPARAM)hDC
-                         ,(WXLPARAM)0
-                        );
-    }
-} // end of wxWindow::OnPaint
 
 bool wxWindowOS2::HandlePaint()
 {

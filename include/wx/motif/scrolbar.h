@@ -12,12 +12,16 @@
 #ifndef _WX_SCROLBAR_H_
 #define _WX_SCROLBAR_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "scrolbar.h"
 #endif
 
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxScrollBarNameStr;
+
 // Scrollbar item
-class WXDLLEXPORT wxScrollBar: public wxScrollBarBase
+class WXDLLEXPORT wxScrollBar: public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxScrollBar)
         
@@ -45,6 +49,7 @@ public:
     inline int GetThumbSize() const { return m_pageSize; }
     inline int GetPageSize() const { return m_viewSize; }
     inline int GetRange() const { return m_objectSize; }
+    inline bool IsVertical() const { return FALSE; }
 
     virtual void SetThumbPosition(int viewStart);
     virtual void SetScrollbar(int position, int thumbSize, int range, int pageSize,
@@ -55,6 +60,7 @@ public:
     // Implementation
     virtual void ChangeFont(bool keepOriginalSize = TRUE);
     virtual void ChangeBackgroundColour();
+    virtual void ChangeForegroundColour();
     
 protected:
     int m_pageSize;

@@ -6,7 +6,7 @@
 // Created:     26/04/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_NETWORK_ADDRESS_H
@@ -101,7 +101,7 @@ public:
 };
 #endif
 
-#if defined(__UNIX__) && !defined(__WINE__) && (!defined(__WXMAC__) || defined(__DARWIN__))
+#if defined(__UNIX__) && (!defined(__WXMAC__) || defined(__DARWIN__))
 #include <sys/socket.h>
 #ifndef __VMS__
 # include <sys/un.h>

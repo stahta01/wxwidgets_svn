@@ -30,8 +30,8 @@
  * Modification history:
  *
  * $Log$
- * Revision 1.6  2003/04/19 19:59:49  RD
- * Updated Scintilla to 1.52 (on the trunk this time too)
+ * Revision 1.5.2.2  2003/04/19 19:56:40  RD
+ * Updated Scintilla to 1.52
  *
  * Revision 1.9  2003/03/21 10:36:08  nyamatongwe
  * Detect patterns too long in regular expression search.

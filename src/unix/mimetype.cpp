@@ -6,7 +6,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 // known bugs; there may be others!! chris elliott, biol75@york.ac.uk 27 Mar 01
@@ -529,8 +529,7 @@ bool wxMimeTypesManagerImpl::WriteGnomeMimeFile(int index, bool delete_index)
 }
 
 
-void wxMimeTypesManagerImpl::LoadGnomeDataFromKeyFile(const wxString& filename,
-                                                      const wxArrayString& dirs)
+void wxMimeTypesManagerImpl::LoadGnomeDataFromKeyFile(const wxString& filename)
 {
     wxTextFile textfile(filename);
 #if defined(__WXGTK20__) && wxUSE_UNICODE
@@ -565,28 +564,9 @@ void wxMimeTypesManagerImpl::LoadGnomeDataFromKeyFile(const wxString& filename,
             wxString sTmp(pc);
             if (sTmp.Contains(wxT("=")) )
             {
-                // GNOME 1:
                 if (sTmp.Contains( wxT("icon-filename=") ) )
                 {
                     curIconFile = sTmp.AfterFirst(wxT('='));
-                }
-                // GNOME 2:
-                else if (sTmp.Contains( wxT("icon_filename=") ) )
-                {
-                    curIconFile = sTmp.AfterFirst(wxT('='));
-                    if (!wxFileExists(curIconFile))
-                    {
-                        size_t nDirs = dirs.GetCount();
-                        for (size_t nDir = 0; nDir < nDirs; nDir++)
-                        {
-                            wxString newFile;
-                            newFile.Printf(wxT("%s/pixmaps/document-icons/%s.png"),
-                                           dirs[nDir].c_str(),
-                                           curIconFile.c_str());
-                            if (wxFileExists(newFile))
-                                curIconFile = newFile;
-                        }
-                    }
                 }
                 else //: some other field,
                 {
@@ -731,8 +711,7 @@ void wxMimeTypesManagerImpl::LoadGnomeMimeTypesFromMimeFile(const wxString& file
 }
 
 
-void wxMimeTypesManagerImpl::LoadGnomeMimeFilesFromDir(
-                      const wxString& dirbase, const wxArrayString& dirs)
+void wxMimeTypesManagerImpl::LoadGnomeMimeFilesFromDir(const wxString& dirbase)
 {
     wxASSERT_MSG( !!dirbase && !wxEndsWithPathSeparator(dirbase),
                   _T("base directory shouldn't end with a slash") );
@@ -762,7 +741,7 @@ void wxMimeTypesManagerImpl::LoadGnomeMimeFilesFromDir(
     cont = dir.GetFirst(&filename, _T("*.keys"), wxDIR_FILES);
     while ( cont )
     {
-        LoadGnomeDataFromKeyFile(dirname + filename, dirs);
+        LoadGnomeDataFromKeyFile(dirname + filename);
 
         cont = dir.GetNext(&filename);
     }
@@ -773,6 +752,7 @@ void wxMimeTypesManagerImpl::LoadGnomeMimeFilesFromDir(
 
 void wxMimeTypesManagerImpl::GetGnomeMimeInfo(const wxString& sExtraDir)
 {
+
     wxArrayString dirs;
     dirs.Add(wxT("/usr/share"));
     dirs.Add(wxT("/usr/local/share"));
@@ -786,7 +766,7 @@ void wxMimeTypesManagerImpl::GetGnomeMimeInfo(const wxString& sExtraDir)
     size_t nDirs = dirs.GetCount();
     for ( size_t nDir = 0; nDir < nDirs; nDir++ )
     {
-        LoadGnomeMimeFilesFromDir(dirs[nDir], dirs);
+        LoadGnomeMimeFilesFromDir(dirs[nDir]);
     }
 }
 
@@ -941,9 +921,6 @@ void wxMimeTypesManagerImpl::LoadKDELinksForMimeSubtype(const wxString& dirbase,
     wxMimeTextFile file;
     if ( !file.Open(dirbase + filename) ) return;
 
-    wxLogTrace(TRACE_MIME, wxT("loading KDE file %s"),
-                           (dirbase+filename).c_str());
-    
     wxMimeTypeCommands * entry = new wxMimeTypeCommands;
     wxArrayString sExts;
     wxString mimetype, mime_desc, strIcon;
@@ -1014,7 +991,6 @@ void wxMimeTypesManagerImpl::LoadKDELinksForMimeSubtype(const wxString& dirbase,
     if ( nIndex != wxNOT_FOUND )
     {
         strIcon = file.GetCmd(nIndex);
-        wxLogTrace(TRACE_MIME, wxT("  icon %s"), strIcon.c_str());
         //it could be the real path, but more often a short name
         if (!wxFileExists(strIcon))
         {
@@ -1028,7 +1004,6 @@ void wxMimeTypesManagerImpl::LoadKDELinksForMimeSubtype(const wxString& dirbase,
                     if (wxFileExists(icondirs[nDir] + strIcon))
                     {
                         strIcon.Prepend(icondirs[nDir]);
-                        wxLogTrace(TRACE_MIME, wxT("  iconfile %s"), strIcon.c_str());
                         break;
                     }
             }
@@ -1067,9 +1042,6 @@ void wxMimeTypesManagerImpl::LoadKDELinksForMimeType(const wxString& dirbase,
     if ( !dir.IsOpened() )
         return;
 
-    wxLogTrace(TRACE_MIME, wxT("--- Loading from KDE directory %s  ---"),
-                           dirname.c_str());
-    
     dirname += _T('/');
 
     wxString filename;
@@ -2189,19 +2161,14 @@ bool wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
             else if ( strLHS == wxT("exts") ) {
                 strExtensions = strRHS;
             }
-            else if ( strLHS != _T("icon") )
-            {
+            else {
                 // this one is simply ignored: it usually refers to Netscape
                 // built in icons which are useless for us anyhow
-            }
-            else if ( !strLHS.StartsWith(_T("x-")) )
-            {
-                // we suppose that all fields starting with "X-" are
-                // unregistered extensions according to the standard practice,
-                // but it may be worth telling the user about other junk in
-                // his mime.types file
-                wxLogWarning(_("Unknown field in file %s, line %d: '%s'."),
-                             strFileName.c_str(), nLine + 1, strLHS.c_str());
+                if ( strLHS != _T("icon") )
+                {
+                    wxLogWarning(_("Unknown field in file %s, line %d: '%s'."),
+                                 strFileName.c_str(), nLine + 1, strLHS.c_str());
+                }
             }
 
             if ( !entryEnded ) {

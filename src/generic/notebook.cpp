@@ -33,7 +33,6 @@
 #include  "wx/generic/imaglist.h"
 #include  "wx/notebook.h"
 #include  "wx/dcclient.h"
-#include  "wx/generic/tabg.h"
 
 // ----------------------------------------------------------------------------
 // macros
@@ -65,27 +64,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxCommandEvent)
 // ============================================================================
 // implementation
 // ============================================================================
-
-// ============================================================================
-// Private class
-// ============================================================================
-
-// This reuses wxTabView to draw the tabs.
-class WXDLLEXPORT wxNotebookTabView: public wxTabView
-{
-DECLARE_DYNAMIC_CLASS(wxNotebookTabView)
-public:
-  wxNotebookTabView(wxNotebook* notebook, long style = wxTAB_STYLE_DRAW_BOX | wxTAB_STYLE_COLOUR_INTERIOR);
-  ~wxNotebookTabView(void);
-
-  // Called when a tab is activated
-  virtual void OnTabActivate(int activateId, int deactivateId);
-  // Allows vetoing
-  virtual bool OnTabPreActivate(int activateId, int deactivateId);
-
-protected:
-   wxNotebook*      m_notebook;
-};
 
 // ----------------------------------------------------------------------------
 // wxNotebook construction
@@ -524,19 +502,12 @@ bool wxNotebook::RefreshLayout(bool force)
         unsigned int nCount = m_pages.Count();
         for ( unsigned int nPage = 0; nPage < nCount; nPage++ ) {
             wxNotebookPage *pPage = m_pages[nPage];
-            wxRect clientRect = GetAvailableClientSize();
             if (pPage->IsShown())
             {
+                wxRect clientRect = GetAvailableClientSize();
                 pPage->SetSize(clientRect.x, clientRect.y, clientRect.width, clientRect.height);
                 if ( pPage->GetAutoLayout() )
                    pPage->Layout();
-            }
-            // MBN: this is probably just hiding a problem under the carpet,
-            // but: with OpenMotif 2.2 (not Lesstif), not moving the window
-            // may cause the tabs to be not clickable.
-            else
-            {
-                pPage->Move(clientRect.x, clientRect.y);
             }
         }
         Refresh();

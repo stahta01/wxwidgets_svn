@@ -32,16 +32,11 @@ class wxHtmlProcessor;
 class wxHtmlWinModule;
 class wxHtmlHistoryArray;
 class wxHtmlProcessorList;
-class WXDLLEXPORT wxHtmlWinAutoScrollTimer;
 
 
 // wxHtmlWindow flags:
 #define wxHW_SCROLLBAR_NEVER    0x0002
 #define wxHW_SCROLLBAR_AUTO     0x0004
-#define wxHW_NO_SELECTION       0x0008
-
-#define wxHW_DEFAULT_STYLE      wxHW_SCROLLBAR_AUTO
-
 
 // enums for wxHtmlWindow::OnOpeningURL
 enum wxHtmlOpeningStatus
@@ -51,16 +46,16 @@ enum wxHtmlOpeningStatus
     wxHTML_REDIRECT
 };
 
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlWindow
 //                  (This is probably the only class you will directly use.)
 //                  Purpose of this class is to display HTML page (either local
-//                  file or downloaded via HTTP protocol) in a window. Width of
-//                  window is constant - given in constructor - virtual height
-//                  is changed dynamicly depending on page size.  Once the
-//                  window is created you can set it's content by calling
+//                  file or downloaded via HTTP protocol) in a window. Width
+//                  of window is constant - given in constructor - virtual height
+//                  is changed dynamicly depending on page size.
+//                  Once the window is created you can set it's content by calling
 //                  SetPage(text) or LoadPage(filename).
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
 class WXDLLEXPORT wxHtmlWindow : public wxScrolledWindow
 {
@@ -72,7 +67,7 @@ public:
     wxHtmlWindow(wxWindow *parent, wxWindowID id = -1,
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
-                 long style = wxHW_DEFAULT_STYLE,
+                 long style = wxHW_SCROLLBAR_AUTO,
                  const wxString& name = wxT("htmlWindow"))
     {
         Init();
@@ -208,20 +203,10 @@ protected:
     // actual size of window. This method also setup scrollbars
     void CreateLayout();
 
-    void OnEraseBackground(wxEraseEvent& event);
-    void OnPaint(wxPaintEvent& event);
+    void OnDraw(wxDC& dc);
     void OnSize(wxSizeEvent& event);
-    void OnMouseMove(wxMouseEvent& event);
-    void OnMouseDown(wxMouseEvent& event);
-    void OnMouseUp(wxMouseEvent& event);
+    void OnMouseEvent(wxMouseEvent& event);
     void OnIdle(wxIdleEvent& event);
-#if wxUSE_CLIPBOARD
-    void OnKeyUp(wxKeyEvent& event);
-    void OnDoubleClick(wxMouseEvent& event);
-    void OnCopy(wxCommandEvent& event);
-    void OnMouseEnter(wxMouseEvent& event);
-    void OnMouseLeave(wxMouseEvent& event);
-#endif // wxUSE_CLIPBOARD
 
     // Returns new filter (will be stored into m_DefaultFilter variable)
     virtual wxHtmlFilter *GetDefaultFilter() {return new wxHtmlFilterPlainText;}
@@ -229,34 +214,9 @@ protected:
     // cleans static variables
     static void CleanUpStatics();
 
-    // Returns true if text selection is enabled (wxClipboard must be available
-    // and wxHW_NO_SELECTION not used)
-    bool IsSelectionEnabled() const;
-
-    enum ClipboardType
-    {
-        Primary,
-        Secondary
-    };
-
-    // Copies selection to clipboard if the clipboard support is available
-    void CopySelection(ClipboardType t = Secondary);
-
-#if wxUSE_CLIPBOARD
-    // Convert selection to text:
-    wxString SelectionToText();
-
-    // Helper functions to select parts of page:
-    void SelectWord(const wxPoint& pos);
-    void SelectLine(const wxPoint& pos);
-
-    // Automatic scrolling during selection:
-    void StopAutoScrolling();
-#endif // wxUSE_CLIPBOARD
-
 protected:
-    // This is pointer to the first cell in parsed data.  (Note: the first cell
-    // is usually top one = all other cells are sub-cells of this one)
+    // This is pointer to the first cell in parsed data.
+    // (Note: the first cell is usually top one = all other cells are sub-cells of this one)
     wxHtmlContainerCell *m_Cell;
     // parser which is used to parse HTML input.
     // Each wxHtmlWindow has it's own parser because sharing one global
@@ -283,30 +243,7 @@ protected:
 
     int m_Style;
 
-    // current text selection or NULL
-    wxHtmlSelection *m_selection;
-
-    // true if the user is dragging mouse to select text
-    bool m_makingSelection;
-
-#if wxUSE_CLIPBOARD
-    // time of the last doubleclick event, used to detect tripleclicks
-    // (tripleclicks are used to select whole line):
-    wxLongLong m_lastDoubleClick;
-
-    // helper class to automatically scroll the window if the user is selecting
-    // text and the mouse leaves wxHtmlWindow:
-    wxHtmlWinAutoScrollTimer *m_timerAutoScroll;
-#endif // wxUSE_CLIPBOARD
-
 private:
-    // window content for double buffered rendering:
-    wxBitmap *m_backBuffer;
-
-    // variables used when user is selecting text
-    wxPoint     m_tmpSelFromPos;
-    wxHtmlCell *m_tmpSelFromCell;
-
     // a flag indicated if mouse moved
     // (if TRUE we will try to change cursor in last call to OnIdle)
     bool m_tmpMouseMoved;
@@ -323,6 +260,9 @@ private:
     // this filter is used when no filter is able to read some file
     static wxHtmlFilter *m_DefaultFilter;
 
+    static wxCursor *s_cur_hand;
+    static wxCursor *s_cur_arrow;
+
     wxHtmlHistoryArray *m_History;
     // browser history
     int m_HistoryPos;
@@ -334,11 +274,10 @@ private:
     static wxHtmlProcessorList *m_GlobalProcessors;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlWindow)
 };
 
 
-#endif // wxUSE_HTML
+#endif
 
 #endif // _WX_HTMLWIN_H_
 

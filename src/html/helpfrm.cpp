@@ -35,11 +35,6 @@
     #include "wx/radiobox.h"
 #endif // WXPRECOMP
 
-#ifdef __WXMAC__
-    #include "wx/menu.h"
-    #include "wx/msgdlg.h"
-#endif
-
 #include "wx/html/helpfrm.h"
 #include "wx/html/helpctrl.h"
 #include "wx/textctrl.h"
@@ -113,15 +108,11 @@ class wxHtmlHelpHtmlWindow : public wxHtmlWindow
         virtual void OnLinkClicked(const wxHtmlLinkInfo& link)
         {
             wxHtmlWindow::OnLinkClicked(link);
-            const wxMouseEvent *e = link.GetEvent();
-            if (e == NULL || e->LeftUp())
-                m_Frame->NotifyPageChanged();
+            m_Frame->NotifyPageChanged();
         }
 
     private:
         wxHtmlHelpFrame *m_Frame;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpHtmlWindow)
 };
 
 
@@ -258,25 +249,6 @@ bool wxHtmlHelpFrame::Create(wxWindow* parent, wxWindowID id,
     GetPosition(&m_Cfg.x, &m_Cfg.y);
 
     SetIcon(wxArtProvider::GetIcon(wxART_HELP, wxART_HELP_BROWSER));
-
-    // On the Mac, each modeless frame must have a menubar.
-    // TODO: add more menu items, and perhaps add a style to show
-    // the menubar: compulsory on the Mac, optional elsewhere.
-#ifdef __WXMAC__
-    wxMenuBar* menuBar = new wxMenuBar;
-
-    wxMenu* fileMenu = new wxMenu;
-    fileMenu->Append(wxID_HTML_OPENFILE, _("&Open..."));
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_CLOSE, _("&Close"));
-
-    wxMenu* helpMenu = new wxMenu;
-    helpMenu->Append(wxID_ABOUT, _("&About..."));
-
-    menuBar->Append(fileMenu,_("File"));
-    menuBar->Append(helpMenu,_("Help"));
-    SetMenuBar(menuBar);
-#endif
 
     int notebook_page = 0;
 
@@ -1054,7 +1026,6 @@ Normal face<br>(and <u>underlined</u>. <i>Italic face.</i> \
     }
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrameOptionsDialog)
 };
 
 BEGIN_EVENT_TABLE(wxHtmlHelpFrameOptionsDialog, wxDialog)
@@ -1523,19 +1494,6 @@ void wxHtmlHelpFrame::OnCloseWindow(wxCloseEvent& evt)
     evt.Skip();
 }
 
-#ifdef __WXMAC__
-void wxHtmlHelpFrame::OnClose(wxCommandEvent& event)
-{
-    Close(TRUE);
-}
-
-void wxHtmlHelpFrame::OnAbout(wxCommandEvent& event)
-{
-    wxMessageBox(wxT("wxWindows HTML Help Viewer (c) 1998-2003, Vaclav Slavik et al"), wxT("HelpView"),
-        wxICON_INFORMATION|wxOK, this);
-}
-#endif
-
 BEGIN_EVENT_TABLE(wxHtmlHelpFrame, wxFrame)
     EVT_ACTIVATE(wxHtmlHelpFrame::OnActivate)
     EVT_TOOL_RANGE(wxID_HTML_PANEL, wxID_HTML_OPTIONS, wxHtmlHelpFrame::OnToolbar)
@@ -1551,11 +1509,6 @@ BEGIN_EVENT_TABLE(wxHtmlHelpFrame, wxFrame)
     EVT_BUTTON(wxID_HTML_INDEXBUTTONALL, wxHtmlHelpFrame::OnIndexAll)
     EVT_COMBOBOX(wxID_HTML_BOOKMARKSLIST, wxHtmlHelpFrame::OnBookmarksSel)
     EVT_CLOSE(wxHtmlHelpFrame::OnCloseWindow)
-#ifdef __WXMAC__
-    EVT_MENU(wxID_CLOSE, wxHtmlHelpFrame::OnClose)
-    EVT_MENU(wxID_ABOUT, wxHtmlHelpFrame::OnAbout)
-#endif
-
 END_EVENT_TABLE()
 
 #endif // wxUSE_WXHTML_HELP

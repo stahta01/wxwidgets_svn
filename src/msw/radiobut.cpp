@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -121,28 +121,28 @@ void wxRadioButton::SetValue(bool value)
         if ( !HasFlag(wxRB_GROUP) )
         {
             // ... turn off all radio buttons before it
-            for ( wxWindowList::Node *nodeBefore = nodeThis->GetPrevious();
-                  nodeBefore;
-                  nodeBefore = nodeBefore->GetPrevious() )
+        for ( wxWindowList::Node *nodeBefore = nodeThis->GetPrevious();
+              nodeBefore;
+              nodeBefore = nodeBefore->GetPrevious() )
+        {
+            wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
+                                               wxRadioButton);
+            if ( !btn )
             {
-                wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
-                                                   wxRadioButton);
-                if ( !btn )
-                {
                     // the radio buttons in a group must be consecutive, so
                     // there are no more of them
-                    break;
-                }
-
-                btn->SetValue(FALSE);
-
-                if ( btn->HasFlag(wxRB_GROUP) )
-                {
-                    // even if there are other radio buttons before this one,
-                    // they're not in the same group with us
-                    break;
-                }
+                break;
             }
+
+            btn->SetValue(FALSE);
+
+            if ( btn->HasFlag(wxRB_GROUP) )
+            {
+                // even if there are other radio buttons before this one,
+                // they're not in the same group with us
+                break;
+            }
+        }
         }
 
         // ... and also turn off all buttons after this one

@@ -6,7 +6,7 @@
 // Created:     29.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -60,7 +60,6 @@ private:
     wxCalendarCtrl *m_cal;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxMonthComboBox)
 };
 
 class wxYearSpinCtrl : public wxSpinCtrl
@@ -79,7 +78,6 @@ private:
     wxCalendarCtrl *m_cal;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxYearSpinCtrl)
 };
 
 // ----------------------------------------------------------------------------
@@ -153,7 +151,6 @@ wxYearSpinCtrl::wxYearSpinCtrl(wxCalendarCtrl *cal)
                            wxDefaultSize,
                            wxSP_ARROW_KEYS | wxCLIP_SIBLINGS,
                            -4300, 10000, cal->GetDate().GetYear())
-
 {
     m_cal = cal;
 }
@@ -762,39 +759,9 @@ void wxCalendarCtrl::DoMoveWindow(int x, int y, int width, int height)
     {
         wxSize sizeCombo = m_comboMonth->GetSize();
         wxSize sizeStatic = m_staticMonth->GetSize();
-        wxSize sizeSpin = m_spinYear->GetSize();
+
         int dy = (sizeCombo.y - sizeStatic.y) / 2;
-/*
-In the calender the size of the combobox for the year 
-is just defined by a margin from the month combobox to 
-the left border. While in wxUniv the year control can't 
-show all 4 digits, in wxMsw it show almost twice as 
-much. Instead the year should use it's best size and be 
-left aligned to the calendar. Just in case the month in 
-any language is longer than it has space in the 
-calendar it is shortend.This way the year always can 
-show the 4 digits. 
 
-This patch relies on the fact that a combobox has a 
-good best size implementation. This is not the case 
-with wxMSW but I don't know why.
-
-Otto Wyss
-*/
-
-#ifdef __WXUNIVERSAL__
-        if (sizeCombo.x + HORZ_MARGIN - sizeSpin.x > width)
-        {
-            m_comboMonth->SetSize(x, y, width - HORZ_MARGIN - sizeSpin.x, sizeCombo.y);
-        }
-        else
-        {
-            m_comboMonth->Move(x, y);
-        }
-        m_staticMonth->Move(x, y + dy);
-        m_spinYear->Move(x + width - sizeSpin.x, y);
-        m_staticYear->Move(x + width - sizeSpin.x, y + dy);
-#else
         m_comboMonth->Move(x, y);
         m_staticMonth->SetSize(x, y + dy, sizeCombo.x, sizeStatic.y);
 
@@ -802,7 +769,8 @@ Otto Wyss
 
         m_spinYear->SetSize(x + xDiff, y, width - xDiff, sizeCombo.y);
         m_staticYear->SetSize(x + xDiff, y + dy, width - xDiff, sizeStatic.y);
-#endif
+
+        wxSize sizeSpin = m_spinYear->GetSize();
         yDiff = wxMax(sizeSpin.y, sizeCombo.y) + VERT_MARGIN;
     }
     else // no controls on the top
@@ -1601,7 +1569,7 @@ void wxCalendarCtrl::OnYearChange(wxCommandEvent& event)
 void wxCalendarCtrl::OnChar(wxKeyEvent& event)
 {
     wxDateTime target;
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case _T('+'):
         case WXK_ADD:

@@ -6,7 +6,7 @@
 // Created:     20.09.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -78,33 +78,6 @@ wxFont *wxFontBase::New(int size,
 }
 
 /* static */
-wxFont *wxFontBase::New(int pointSize,
-                        wxFontFamily family,
-                        int flags,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return New
-           (
-                pointSize,
-                family,
-                flags & wxFONTFLAG_ITALIC
-                    ? wxFONTSTYLE_ITALIC
-                    : flags & wxFONTFLAG_SLANT
-                        ? wxFONTSTYLE_SLANT
-                        : wxFONTSTYLE_NORMAL,
-                flags & wxFONTFLAG_LIGHT
-                    ? wxFONTWEIGHT_LIGHT
-                    : flags & wxFONTFLAG_BOLD
-                        ? wxFONTWEIGHT_BOLD
-                        : wxFONTWEIGHT_NORMAL,
-                (flags & wxFONTFLAG_UNDERLINED) != 0,
-                face,
-                encoding
-           );
-}
-
-/* static */
 wxFont *wxFontBase::New(const wxNativeFontInfo& info)
 {
     return new wxFont(info);
@@ -144,7 +117,7 @@ wxNativeFontInfo *wxFontBase::GetNativeFontInfo() const
 #endif
 }
 
-void wxFontBase::DoSetNativeFontInfo(const wxNativeFontInfo& info)
+void wxFontBase::SetNativeFontInfo(const wxNativeFontInfo& info)
 {
 #ifdef wxNO_NATIVE_FONTINFO
     SetPointSize(info.pointSize);

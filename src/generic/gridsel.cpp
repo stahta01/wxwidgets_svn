@@ -30,7 +30,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GRID
+#if defined(wxUSE_NEW_GRID) && (wxUSE_NEW_GRID)
 
 #include "wx/generic/gridsel.h"
 
@@ -1083,4 +1083,3 @@ int wxGridSelection::BlockContain( int topRow1, int leftCol1,
 }
 
 #endif
-

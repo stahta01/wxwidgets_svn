@@ -112,7 +112,7 @@ bool wxXmlResource::Load(const wxString& filemask)
             wxFileName fn(fnd);
             if (fn.IsRelative())
             {
-                fn.MakeAbsolute();
+                fn.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
                 fnd = fn.GetFullPath();
             }
         }
@@ -143,7 +143,6 @@ bool wxXmlResource::Load(const wxString& filemask)
 }
 
 
-IMPLEMENT_ABSTRACT_CLASS(wxXmlResourceHandler, wxObject)
 
 void wxXmlResource::AddHandler(wxXmlResourceHandler *handler)
 {
@@ -284,21 +283,19 @@ static void ProcessPlatformProperty(wxXmlNode *node)
             while (tkn.HasMoreTokens())
             {
                 s = tkn.GetNextToken();
+                if (
 #ifdef __WXMSW__
-                if (s == wxT("win")) isok = true;
+                    s == wxString(wxT("win"))
+#elif defined(__UNIX__)
+                    s == wxString(wxT("unix"))
+#elif defined(__MAC__)
+                    s == wxString(wxT("mac"))
+#elif defined(__OS2__)
+                    s == wxString(wxT("os2"))
+#else
+                    FALSE
 #endif
-#ifdef __UNIX__
-                if (s == wxT("unix")) isok = true;
-#endif
-#ifdef __MAC__
-                if (s == wxT("mac")) isok = true;
-#endif
-#ifdef __OS2__
-                if (s == wxT("os2")) isok = true;
-#endif
-
-                if (isok)
-                    break;
+              ) isok = TRUE;
             }
         }
 
@@ -539,8 +536,14 @@ static void MergeNodes(wxXmlNode& dest, wxXmlNode& with)
 }
 
 wxObject *wxXmlResource::CreateResFromNode(wxXmlNode *node, wxObject *parent,
-                                           wxObject *instance,
-                                           wxXmlResourceHandler *handlerToUse)
+                                           wxObject *instance)
+{
+    return CreateResFromNode2(node, parent, instance);
+}
+
+wxObject *wxXmlResource::CreateResFromNode2(wxXmlNode *node, wxObject *parent,
+                                            wxObject *instance,
+                                            wxXmlResourceHandler *handlerToUse)
 {
     if (node == NULL) return NULL;
 
@@ -869,8 +872,7 @@ wxBitmap wxXmlResourceHandler::GetBitmap(const wxString& param,
     wxFSFile *fsfile = GetCurFileSystem().OpenFile(name);
     if (fsfile == NULL)
     {
-        wxLogError(_("XRC resource: Cannot create bitmap from '%s'."),
-                   name.c_str());
+        wxLogError(_("XRC resource: Cannot create bitmap from '%s'."), param.c_str());
         return wxNullBitmap;
     }
     wxImage img(*(fsfile->GetStream()));
@@ -1117,8 +1119,8 @@ void wxXmlResourceHandler::CreateChildren(wxObject *parent, bool this_hnd_only)
         if (n->GetType() == wxXML_ELEMENT_NODE &&
            (n->GetName() == wxT("object") || n->GetName() == wxT("object_ref")))
         {
-            m_resource->CreateResFromNode(n, parent, NULL,
-                                          this_hnd_only ? this : NULL);
+            m_resource->CreateResFromNode2(n, parent, NULL,
+                                           this_hnd_only ? this : NULL);
         }
         n = n->GetNext();
     }
@@ -1290,3 +1292,5 @@ void wxXmlInitResourceModule()
     module->Init();
     wxModule::RegisterModule(module);
 }
+
+

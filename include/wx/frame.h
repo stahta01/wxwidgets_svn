@@ -6,7 +6,7 @@
 // Created:     15.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FRAME_H_BASE_
@@ -44,7 +44,12 @@ class WXDLLEXPORT wxToolBar;
 // CreateXXXBar() is called.
 // ----------------------------------------------------------------------------
 
+// FIXME - temporary hack in absence of wxTLW !!
+#ifndef wxTopLevelWindowNative
+class WXDLLEXPORT wxFrameBase : public wxTopLevelWindowBase
+#else
 class WXDLLEXPORT wxFrameBase : public wxTopLevelWindow
+#endif
 {
 public:
     // construction
@@ -52,7 +57,7 @@ public:
     virtual ~wxFrameBase();
 
     wxFrame *New(wxWindow *parent,
-                 wxWindowID winid,
+                 wxWindowID id,
                  const wxString& title,
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
@@ -83,11 +88,11 @@ public:
 
 #ifdef WXWIN_COMPATIBILITY_2_2
     // call this to simulate a menu command
-    bool Command(int winid) { return ProcessCommand(winid); }
+    bool Command(int id) { return ProcessCommand(id); }
 #endif // WXWIN_COMPATIBILITY_2_2
 
     // process menu command: returns TRUE if processed
-    bool ProcessCommand(int winid);
+    bool ProcessCommand(int id);
 
     // status bar functions
     // --------------------
@@ -95,13 +100,13 @@ public:
     // create the main status bar by calling OnCreateStatusBar()
     virtual wxStatusBar* CreateStatusBar(int number = 1,
                                          long style = wxST_SIZEGRIP,
-                                         wxWindowID winid = 0,
+                                         wxWindowID id = 0,
                                          const wxString& name =
                                             wxStatusLineNameStr);
     // return a new status bar
     virtual wxStatusBar *OnCreateStatusBar(int number,
                                            long style,
-                                           wxWindowID winid,
+                                           wxWindowID id,
                                            const wxString& name);
     // get the main status bar
     virtual wxStatusBar *GetStatusBar() const { return m_frameStatusBar; }
@@ -125,11 +130,11 @@ public:
 #if wxUSE_TOOLBAR
     // create main toolbar bycalling OnCreateToolBar()
     virtual wxToolBar* CreateToolBar(long style = wxNO_BORDER|wxTB_HORIZONTAL,
-                                     wxWindowID winid = -1,
+                                     wxWindowID id = -1,
                                      const wxString& name = wxToolBarNameStr);
     // return a new toolbar
     virtual wxToolBar *OnCreateToolBar(long style,
-                                       wxWindowID winid,
+                                       wxWindowID id,
                                        const wxString& name );
 
     // get/set the main toolbar
@@ -198,7 +203,7 @@ protected:
 
     // show the help string for this menu item in the given status bar: the
     // status bar pointer can be NULL; return TRUE if help was shown
-    bool ShowMenuHelp(wxStatusBar *statbar, int helpid);
+    bool ShowMenuHelp(wxStatusBar *statbar, int id);
 
     wxStatusBar *m_frameStatusBar;
 #endif // wxUSE_STATUSBAR
@@ -215,7 +220,6 @@ protected:
 #endif // wxUSE_TOOLBAR
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxFrameBase)
 };
 
 // include the real class declaration
@@ -230,8 +234,6 @@ protected:
         #include "wx/motif/frame.h"
     #elif defined(__WXMAC__)
         #include "wx/mac/frame.h"
-    #elif defined(__WXCOCOA__)
-        #include "wx/cocoa/frame.h"
     #elif defined(__WXPM__)
         #include "wx/os2/frame.h"
     #endif

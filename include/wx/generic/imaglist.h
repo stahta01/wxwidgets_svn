@@ -4,7 +4,7 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,11 +16,9 @@
 #endif
 
 #include "wx/defs.h"
-#include "wx/list.h"
-
-class WXDLLEXPORT wxDC;
-class WXDLLEXPORT wxBitmap;
-class WXDLLEXPORT wxColour;
+#include "wx/gdicmn.h"
+#include "wx/bitmap.h"
+#include "wx/dc.h"
 
 /*
  * wxImageList is used for wxListCtrl, wxTreeCtrl. These controls refer to

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -775,7 +775,7 @@ bool wxDebugContext::PrintClasses(void)
   node = wxClassInfo::sm_classTable->Next();
   while (node)
   {
-    info = (wxClassInfo *)node->GetData();
+    info = (wxClassInfo *)node->Data();
     if (info->GetClassName())
     {
         wxString msg(info->GetClassName());

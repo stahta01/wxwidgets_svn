@@ -3,7 +3,7 @@
 # Author:	Julian Smart
 # Created:	1993
 # Updated:
-# Copyright:	
+# Copyright:	(c) 1993, AIAI, University of Edinburgh
 #
 # "%W% %G%"
 #
@@ -18,9 +18,9 @@ PROGRAM=ogledit
 FINAL=0
 
 !if "$(FINAL)" == "0"
-EXTRALIBS=$(WXDIR)\lib\ogld.lib $(WXDIR)\lib\wxdeprecatedd.lib
+EXTRALIBS=$(WXDIR)\lib\ogld.lib
 !else
-EXTRALIBS=$(WXDIR)\lib\ogl.lib $(WXDIR)\lib\wxdeprecated.lib
+EXTRALIBS=$(WXDIR)\lib\ogl.lib
 !endif
 
 OBJECTS = $(PROGRAM).obj doc.obj view.obj palette.obj

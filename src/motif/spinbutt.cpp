@@ -183,7 +183,7 @@ bool wxArrowButton::Create( wxSpinButton* parent, wxWindowID id,
                             ArrowDirection d,
                             const wxPoint& pos, const wxSize& size )
 {
-    int arrow_dir = XmARROW_UP;
+    int arrow_dir;
 
     switch( d )
     {
@@ -209,7 +209,6 @@ bool wxArrowButton::Create( wxSpinButton* parent, wxWindowID id,
         parentWidget,
         XmNarrowDirection, arrow_dir,
         XmNborderWidth, 0,
-        XmNshadowThickness, 0,
         NULL );
 
     XtAddCallback( (Widget) m_mainWidget,
@@ -224,8 +223,6 @@ bool wxArrowButton::Create( wxSpinButton* parent, wxWindowID id,
 
     AttachWidget( parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, size.x, size.y );
-
-    SetForegroundColour( parent->GetBackgroundColour() );
 
     return TRUE;
 }
@@ -367,7 +364,7 @@ void wxSpinButton::Increment( int delta )
 
 wxSize wxSpinButton::DoGetBestSize() const
 {
-    return IsVertical() ? wxSize( 20, 30 ) : wxSize( 30, 20 );
+    return IsVertical() ? wxSize( 24, 34 ) : wxSize( 34, 24 );
 }
 
 // Attributes

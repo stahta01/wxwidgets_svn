@@ -3,12 +3,12 @@
 // Purpose:     MDI (Multiple Document Interface) classes.
 //              This doesn't have to be implemented just like Windows,
 //              it could be a tabbed design as in wxGTK.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MDI_H_
@@ -20,8 +20,8 @@
 
 #include "wx/frame.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
-WXDLLEXPORT_DATA(extern const wxChar*) wxStatusLineNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxStatusLineNameStr;
 
 class WXDLLEXPORT wxMDIClientWindow;
 class WXDLLEXPORT wxMDIChildFrame;
@@ -54,10 +54,16 @@ public:
            long style = wxDEFAULT_FRAME_STYLE | wxVSCROLL | wxHSCROLL,
            const wxString& name = wxFrameNameStr);
 
+  void OnSize(wxSizeEvent& event);
   void OnActivate(wxActivateEvent& event);
   void OnSysColourChanged(wxSysColourChangedEvent& event);
 
   void SetMenuBar(wxMenuBar *menu_bar);
+
+  // Gets the size available for subwindows after menu size, toolbar size
+  // and status bar size have been subtracted. If you want to manage your own
+  // toolbar(s), don't call SetToolBar.
+  void DoGetClientSize(int *width, int *height) const;
 
   // Get the active MDI child window (Windows only)
   wxMDIChildFrame *GetActiveChild() const ;
@@ -155,11 +161,6 @@ class WXDLLEXPORT wxMDIClientWindow: public wxWindow
 
   // Note: this is virtual, to allow overridden behaviour.
   virtual bool CreateClient(wxMDIParentFrame *parent, long style = wxVSCROLL | wxHSCROLL);
-
-  // Gets the size available for subwindows after menu size, toolbar size
-  // and status bar size have been subtracted. If you want to manage your own
-  // toolbar(s), don't call SetToolBar.
-  void DoGetClientSize(int *width, int *height) const;
 
   // Explicitly call default scroll behaviour
   void OnScroll(wxScrollEvent& event);

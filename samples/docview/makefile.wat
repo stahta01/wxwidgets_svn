@@ -7,6 +7,6 @@
 # 
 # 
 PROGRAM = docview 
-OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj $(OUTPUTDIR)\doc.obj $(OUTPUTDIR)\view.obj 
+OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj 
 # 
 !include $(%WXWIN)\src\makeprog.wat 

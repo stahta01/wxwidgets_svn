@@ -1,16 +1,10 @@
-#
-# File:		makefile.vc
-# Author:	Michael Bedward
-# Created:	1999
-# Updated:	
-#
-# Makefile : Builds sample (VC++, WIN32)
-# Use FINAL=1 argument to nmake to build final version with no debug info.
+# Purpose: makefile for grid example (VC++ 32bit)
+# Created: 2000-03-15
 
 # Set WXDIR for your system
 WXDIR = $(WXWIN)
 
-PROGRAM=griddemo
+PROGRAM=grid
 OBJECTS = $(PROGRAM).obj
 
 !include $(WXDIR)\src\makeprog.vc

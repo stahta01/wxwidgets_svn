@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -155,10 +155,10 @@ public:
     void SetKeyInteger(long i) { m_key.integer = i; }
 
 #ifdef wxLIST_COMPATIBILITY
-    // compatibility methods, use Get* instead.
-    wxDEPRECATED( wxNode *Next() const );
-    wxDEPRECATED( wxNode *Previous() const );
-    wxDEPRECATED( wxObject *Data() const );
+    // compatibility methods
+    wxNode *Next() const { return (wxNode *)GetNext(); }
+    wxNode *Previous() const { return (wxNode *)GetPrevious(); }
+    wxObject *Data() const { return (wxObject *)GetData(); }
 #endif // wxLIST_COMPATIBILITY
 
 protected:
@@ -190,8 +190,6 @@ private:
 // -----------------------------------------------------------------------------
 // a double-linked list class
 // -----------------------------------------------------------------------------
-
-class wxList;
 
 class WXDLLEXPORT wxListBase : public wxObject
 {
@@ -234,14 +232,10 @@ public:
         { wxASSERT( m_count==0 ); m_keyType = keyType; }
 
 #ifdef wxLIST_COMPATIBILITY
-    // compatibility methods from old wxList
-    wxDEPRECATED( int Number() const );             // use GetCount instead.
-    wxDEPRECATED( wxNode *First() const );          // use GetFirst
-    wxDEPRECATED( wxNode *Last() const );           // use GetLast
-    wxDEPRECATED( wxNode *Nth(size_t n) const );    // use Item
-
-    // kludge for typesafe list migration in core classes.
-    wxDEPRECATED( operator wxList&() const );
+    int Number() const { return GetCount(); }
+    wxNode *First() const { return (wxNode *)GetFirst(); }
+    wxNode *Last() const { return (wxNode *)GetLast(); }
+    wxNode *Nth(size_t n) const { return (wxNode *)Item(n); }
 #endif // wxLIST_COMPATIBILITY
 
 protected:
@@ -508,9 +502,6 @@ private:
 
 #ifdef wxLIST_COMPATIBILITY
 
-// define this to make a lot of noise about use of the old wxList classes.
-//#define wxWARN_COMPAT_LIST_USE
-
 // -----------------------------------------------------------------------------
 // wxList compatibility class: in fact, it's a list of wxObjects
 // -----------------------------------------------------------------------------
@@ -520,12 +511,7 @@ WX_DECLARE_LIST_2(wxObject, wxObjectList, wxObjectListNode, class WXDLLEXPORT);
 class WXDLLEXPORT wxList : public wxObjectList
 {
 public:
-#ifdef wxWARN_COMPAT_LIST_USE
-    wxDEPRECATED( wxList(int key_type = wxKEY_NONE) );
-#else
-    wxList(int key_type = wxKEY_NONE);
-#endif
-
+    wxList(int key_type = wxKEY_NONE) : wxObjectList((wxKeyType)key_type) { }
     // this destructor is required for Darwin
    ~wxList() { }
 
@@ -552,13 +538,8 @@ class WXDLLEXPORT wxStringList : public wxStringListBase
 public:
     // ctors and such
         // default
-#ifdef wxWARN_COMPAT_LIST_USE
-    wxDEPRECATED( wxStringList() );
-    wxDEPRECATED( wxStringList(const wxChar *first ...) );
-#else
-    wxStringList();
+    wxStringList() { DeleteContents(TRUE); }
     wxStringList(const wxChar *first ...);
-#endif
 
         // copying the string list: the strings are copied, too (extremely
         // inefficient!)

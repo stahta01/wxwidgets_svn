@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -16,7 +16,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_SPLITTER
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
@@ -53,7 +52,7 @@ BEGIN_EVENT_TABLE(wxSplitterWindow, wxWindow)
     EVT_IDLE(wxSplitterWindow::OnIdle)
     EVT_MOUSE_EVENTS(wxSplitterWindow::OnMouseEvent)
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#ifdef __WXMSW__
     EVT_SET_CURSOR(wxSplitterWindow::OnSetCursor)
 #endif // wxMSW
 
@@ -205,7 +204,6 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
             m_oldX = x;
             m_oldY = y;
 
-            SetResizeCursor();
             return;
         }
     }
@@ -253,9 +251,6 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
                 m_windowOne = m_windowTwo;
                 m_windowTwo = (wxWindow *) NULL;
                 OnUnsplit(removedWindow);
-                wxSplitterEvent event(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
-                event.m_data.win = removedWindow;
-                (void)DoSendEvent(event);
                 SetSashPositionAndNotify(0);
             }
             else if ( posSashNew == GetWindowSize() )
@@ -264,9 +259,6 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
                 wxWindow *removedWindow = m_windowTwo;
                 m_windowTwo = (wxWindow *) NULL;
                 OnUnsplit(removedWindow);
-                wxSplitterEvent event(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
-                event.m_data.win = removedWindow;
-                (void)DoSendEvent(event);
                 SetSashPositionAndNotify(0);
             }
             else
@@ -281,7 +273,7 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
 
         SizeWindows();
     }  // left up && dragging
-    else if (event.Moving() && !event.Dragging())
+    else if ((event.Moving() || event.Leaving() || event.Entering()) && (m_dragMode == wxSPLIT_DRAG_NONE))
     {
         // Just change the cursor as required
         if ( SashHitTest(x, y) )
@@ -1054,8 +1046,6 @@ int wxSplitterWindow::OnSashPositionChanging(int newSashPosition)
 // the sash if the minimum pane size is zero.
 void wxSplitterWindow::OnDoubleClickSash(int x, int y)
 {
-    wxCHECK_RET(m_windowTwo, wxT("splitter: no window to remove"));
-
     // new code should handle events instead of using the virtual functions
     wxSplitterEvent event(wxEVT_COMMAND_SPLITTER_DOUBLECLICKED, this);
     event.m_data.pt.x = x;
@@ -1064,13 +1054,7 @@ void wxSplitterWindow::OnDoubleClickSash(int x, int y)
     {
         if ( GetMinimumPaneSize() == 0 || m_permitUnsplitAlways )
         {
-            wxWindow* win = m_windowTwo;
-            if ( Unsplit(win) )
-            {
-                wxSplitterEvent unsplitEvent(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
-                unsplitEvent.m_data.win = win;
-                (void)DoSendEvent(unsplitEvent);
-            }
+            Unsplit();
         }
     }
     //else: blocked by user
@@ -1078,11 +1062,16 @@ void wxSplitterWindow::OnDoubleClickSash(int x, int y)
 
 void wxSplitterWindow::OnUnsplit(wxWindow *winRemoved)
 {
-    // call this before calling the event handler which may delete the window
+    // do it before calling the event handler which may delete the window
     winRemoved->Show(FALSE);
+
+    wxSplitterEvent event(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
+    event.m_data.win = winRemoved;
+
+    (void)DoSendEvent(event);
 }
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#ifdef __WXMSW__
 
 // this is currently called (and needed) under MSW only...
 void wxSplitterWindow::OnSetCursor(wxSetCursorEvent& event)
@@ -1099,6 +1088,5 @@ void wxSplitterWindow::OnSetCursor(wxSetCursorEvent& event)
     //else: do nothing, in particular, don't call Skip()
 }
 
-#endif // wxUSE_SPLITTER
 #endif // wxMSW
 

@@ -29,7 +29,6 @@
     #include "wx/log.h"
     #include "wx/timer.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/combobox.h"
@@ -42,7 +41,7 @@
 #include "wx/sizer.h"
 
 #include "widgets.h"
-#if wxUSE_GAUGE
+#if 1
 #include "icons/gauge.xpm"
 
 // ----------------------------------------------------------------------------
@@ -272,7 +271,7 @@ void GaugeWidgetsPage::CreateGauge()
     {
         val = m_gauge->GetValue();
 
-        m_sizerGauge->Detach( m_gauge );
+        m_sizerGauge->Remove(m_gauge);
         delete m_gauge;
     }
 
@@ -402,4 +401,3 @@ void GaugeWidgetsPage::StopTimer()
 }
 
 #endif
-    // wxUSE_GAUGE

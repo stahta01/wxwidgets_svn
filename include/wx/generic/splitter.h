@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SPLITTERH_G__
@@ -215,7 +215,7 @@ public:
 
 protected:
     // event handlers
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
     void OnSetCursor(wxSetCursorEvent& event);
 #endif // wxMSW
 
@@ -285,7 +285,6 @@ private:
 
     DECLARE_DYNAMIC_CLASS(wxSplitterWindow)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSplitterWindow)
 };
 
 // ----------------------------------------------------------------------------

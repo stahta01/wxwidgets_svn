@@ -68,29 +68,40 @@ FORCE_LINK_ME(m_layout)
 
 class WXDLLEXPORT wxHtmlPageBreakCell : public wxHtmlCell
 {
-public:
+  public:
     wxHtmlPageBreakCell() {}
 
-    bool AdjustPagebreak(int* pagebreak,
-                         int* known_pagebreaks = NULL,
-                         int number_of_pages = 0) const;
-    void Draw(wxDC& WXUNUSED(dc),
-              int WXUNUSED(x), int WXUNUSED(y),
-              int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-              wxHtmlRenderingState& WXUNUSED(state)) {}
+// wx 2.5 will use this signature:
+//    bool AdjustPagebreak(int* pagebreak, int* known_pagebreaks = NULL, int number_of_pages = 0) const;
+    bool AdjustPagebreak(int* pagebreak) const;
 
-private:
+  private:
     DECLARE_NO_COPY_CLASS(wxHtmlPageBreakCell)
 };
 
 // Comparison routine for bsearch into an int* array of pagebreaks.
-extern "C" int wxCMPFUNC_CONV wxInteger_compare(void const* i0, void const* i1)
+static int integer_compare(void const* i0, void const* i1)
 {
     return *(int*)i0 - *(int*)i1;
 }
 
-bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, int* known_pagebreaks, int number_of_pages) const
+// wx 2.5 will use this signature:
+//   bool wxHtmlContainerCell::AdjustPagebreak(int *pagebreak, int* known_pagebreaks, int number_of_pages) const
+//
+// Workaround to backport html pagebreaks to 2.4.0:
+// Actually, we're passing a pointer to struct wxHtmlKludge, casting
+// that pointer to an int* . We don't need to do anything special
+// here because that struct's first element is an int* to 'pagebreak'.
+// Other struct members are addressed by casting that int* back to
+// wxHtmlKludge*; they don't get modified, so we don't have to pass
+// them back to the caller.
+bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak) const
 {
+    // Workaround to backport html pagebreaks to 2.4.0:
+    wxHtmlKludge* kludge = (wxHtmlKludge*)pagebreak;
+    int* known_pagebreaks = kludge->known_pagebreaks;
+    int number_of_pages = kludge->number_of_pages;
+
     // When we are counting pages, 'known_pagebreaks' is non-NULL.
     // That's the only time we change 'pagebreak'. Otherwise, pages
     // were already counted, 'known_pagebreaks' is NULL, and we don't
@@ -119,7 +130,7 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, int* known_pagebreaks,
     // zero plus one element for each page.
     int* where = (int*) bsearch(&total_height, known_pagebreaks,
                                 1 + number_of_pages, sizeof(int),
-                                wxInteger_compare);
+                                integer_compare);
     // Add a pagebreak only if there isn't one already set here.
     if(NULL != where)
         {
@@ -136,7 +147,7 @@ TAG_HANDLER_BEGIN(P, "P")
 
     TAG_HANDLER_PROC(tag)
     {
-        if (m_WParser->GetContainer()->GetFirstChild() != NULL)
+        if (m_WParser->GetContainer()->GetFirstCell() != NULL)
         {
             m_WParser->CloseContainer();
             m_WParser->OpenContainer();
@@ -177,7 +188,7 @@ TAG_HANDLER_BEGIN(CENTER, "CENTER")
         wxHtmlContainerCell *c = m_WParser->GetContainer();
 
         m_WParser->SetAlign(wxHTML_ALIGN_CENTER);
-        if (c->GetFirstChild() != NULL)
+        if (c->GetFirstCell() != NULL)
         {
             m_WParser->CloseContainer();
             m_WParser->OpenContainer();
@@ -190,7 +201,7 @@ TAG_HANDLER_BEGIN(CENTER, "CENTER")
             ParseInner(tag);
 
             m_WParser->SetAlign(old);
-            if (c->GetFirstChild() != NULL)
+            if (c->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -211,9 +222,9 @@ TAG_HANDLER_BEGIN(DIV, "DIV")
 
     TAG_HANDLER_PROC(tag)
     {
-        if(tag.HasParam(wxT("STYLE")))
+        if (tag.HasParam(wxT("STYLE")))
         {
-            if(tag.GetParam(wxT("STYLE")).IsSameAs(wxT("PAGE-BREAK-BEFORE:ALWAYS"), FALSE))
+            if (tag.GetParam(wxT("STYLE")).IsSameAs(wxString(wxT("PAGE-BREAK-BEFORE:ALWAYS")), FALSE))
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer()->InsertCell(new wxHtmlPageBreakCell);
@@ -227,11 +238,11 @@ TAG_HANDLER_BEGIN(DIV, "DIV")
                 return FALSE;
             }
         }
-        else if(tag.HasParam(wxT("ALIGN")))
+        else if (tag.HasParam(wxT("ALIGN")))
         {
             int old = m_WParser->GetAlign();
             wxHtmlContainerCell *c = m_WParser->GetContainer();
-            if (c->GetFirstChild() != NULL)
+            if (c->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -248,7 +259,7 @@ TAG_HANDLER_BEGIN(DIV, "DIV")
             ParseInner(tag);
 
             m_WParser->SetAlign(old);
-            if (c->GetFirstChild() != NULL)
+            if (c->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -279,7 +290,7 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
             if (wfr)
             {
                 const wxString& src = *m_WParser->GetSource();
-                wfr->OnSetTitle(src.Mid(tag.GetBeginPos(), 
+                wfr->OnSetTitle(src.Mid(tag.GetBeginPos(),
                                         tag.GetEndPos1()-tag.GetBeginPos()));
             }
         }

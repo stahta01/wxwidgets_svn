@@ -10,7 +10,7 @@
 #pragma old_argmatch on
 #endif
 
-#if (__MWERKS__ < 0x0900) || macintosh || __MACH__
+#if (__MWERKS__ < 0x0900) || macintosh
     #define __MAC__
     #define __WXMAC__
 #elif (__MWERKS__ >= 0x0900) && __INTEL__
@@ -42,21 +42,14 @@
 #elif defined( __WXMAC__)
     #define	USE_PRECOMPILED_MAC_HEADERS	0  /*Set to 0 if you don't want to use precompiled MacHeaders*/
     #define ACCESSOR_CALLS_ARE_FUNCTIONS 1
-	  #if defined( __WXDEBUG__ ) && !defined(__MACH__)
+    #ifdef __WXDEBUG__
         // otherwise the debugger looses all symbol information
         #define OPAQUE_TOOLBOX_STRUCTS 0
-	  #else
-    #define OPAQUE_TOOLBOX_STRUCTS 1
+    // #else
+        // enabling opaque toolbox structs under Classic will break access to contrlDefProc (control.cpp)
+        // #define OPAQUE_TOOLBOX_STRUCTS 1
     #endif
-    #ifdef __MACH__
-   	  #include <ansi_prefix.mach.h>
-   	  #include <msl_c_version.h>
-   	  #include <stdint.h>
-   	  #undef WCHAR_MAX
-   	  #include <machine/ansi.h>
-    #else
-      #include <ansi_prefix.mac.h>
-    #endif
+    #include <ansi_prefix.mac.h>
       /*
       #include <MacTypes.h>
 		#if UNIVERSAL_INTERFACES_VERSION < 0x0340

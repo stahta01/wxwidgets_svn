@@ -12,7 +12,7 @@
 #ifndef _WX_ICON_H_
 #define _WX_ICON_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "icon.h"
 #endif
 
@@ -31,7 +31,7 @@ public:
 
     // For compatibility with wxMSW where desired size is sometimes required to
     // distinguish between multiple icons in a resource.
-    wxIcon( const wxString& filename, wxBitmapType type = wxBITMAP_TYPE_XPM, 
+    wxIcon( const wxString& filename, int type = wxBITMAP_TYPE_XPM, 
             int WXUNUSED(desiredWidth)=-1, int WXUNUSED(desiredHeight)=-1 ) :
         wxBitmap(filename, type)
     {

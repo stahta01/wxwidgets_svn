@@ -24,7 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#include <wx/deprecated/wxexpr.h>
+#include <wx/wxexpr.h>
 
 #include <wx/ogl/basic.h>
 #include <wx/ogl/basicp.h>

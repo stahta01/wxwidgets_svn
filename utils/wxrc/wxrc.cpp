@@ -250,7 +250,6 @@ wxArrayString XmlResApp::PrepareTempFiles()
     return flist;
 }
 
-
 // Does 'node' contain filename information at all?
 static bool NodeContainsFilename(wxXmlNode *node)
 {
@@ -281,6 +280,7 @@ static bool NodeContainsFilename(wxXmlNode *node)
    
    return FALSE;
 }
+
 
 // find all files mentioned in structure, e.g. <bitmap>filename</bitmap>
 void XmlResApp::FindFilesInXML(wxXmlNode *node, wxArrayString& flist, const wxString& inputPath)
@@ -346,7 +346,7 @@ void XmlResApp::MakePackageZIP(const wxArrayString& flist)
     
     if (flagVerbose) 
         wxPrintf(_T("compressing ") + parOutput +  _T("...\n"));
-    
+
     wxString cwd = wxGetCwd();
     wxSetWorkingDirectory(parOutputPath);
     int execres = wxExecute(_T("zip -9 -j ") + 
@@ -370,7 +370,7 @@ static wxString FileToCppArray(wxString filename, int num)
     wxString output;
     wxString tmp;
     wxString snum;
-    wxFFile file(filename, wxT("rb"));
+    wxFFile file(filename, "rb");
     size_t lng = file.Length();
     
     snum.Printf(_T("%i"), num);
@@ -405,7 +405,7 @@ static wxString FileToCppArray(wxString filename, int num)
 
 void XmlResApp::MakePackageCPP(const wxArrayString& flist)
 {
-    wxFFile file(parOutput, wxT("wt"));
+    wxFFile file(parOutput, "wt");
     size_t i;
 
     if (flagVerbose) 
@@ -474,7 +474,7 @@ static wxString FileToPythonArray(wxString filename, int num)
     wxString output;
     wxString tmp;
     wxString snum;
-    wxFFile file(filename, wxT("rb"));
+    wxFFile file(filename, "rb");
     size_t lng = file.Length();
     
     snum.Printf(_T("%i"), num);
@@ -516,7 +516,7 @@ static wxString FileToPythonArray(wxString filename, int num)
 
 void XmlResApp::MakePackagePython(const wxArrayString& flist)
 {
-    wxFFile file(parOutput, wxT("wt"));
+    wxFFile file(parOutput, "wt");
     size_t i;
 
     if (flagVerbose) 
@@ -553,7 +553,7 @@ void XmlResApp::OutputGettext()
     
     wxFFile fout;
     if (!parOutput) fout.Attach(stdout);
-    else fout.Open(parOutput, wxT("wt"));
+    else fout.Open(parOutput, "wt");
     
     for (size_t i = 0; i < str.GetCount(); i++)
         fout.Write(_T("_(\"") + str[i] + _T("\");\n"));

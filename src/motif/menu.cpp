@@ -247,6 +247,8 @@ void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)
 
 wxString wxMenuBar::GetLabelTop(size_t pos) const
 {
+    wxString str;
+
     wxMenu *menu = GetMenu(pos);
     if ( menu )
     {
@@ -258,11 +260,17 @@ wxString wxMenuBar::GetLabelTop(size_t pos) const
                           XmNlabelString, &text,
                           NULL);
 
-            return wxXmStringToString( text );
+            char *s;
+            if ( XmStringGetLtoR(text, XmSTRING_DEFAULT_CHARSET, &s) )
+            {
+                str = s;
+
+                XtFree(s);
+            }
         }
     }
 
-    return wxEmptyString;
+    return str;
 }
 
 bool wxMenuBar::Append(wxMenu * menu, const wxString& title)
@@ -327,12 +335,12 @@ int wxMenuBar::FindMenuItem (const wxString& menuString, const wxString& itemStr
 {
     char buf1[200];
     char buf2[200];
-    wxStripMenuCodes (wxConstCast(menuString.c_str(), char), buf1);
+    wxStripMenuCodes ((char *)(const char *)menuString, buf1);
 
     size_t menuCount = GetMenuCount();
     for (size_t i = 0; i < menuCount; i++)
     {
-        wxStripMenuCodes (wxConstCast(m_titles[i].c_str(), char), buf2);
+        wxStripMenuCodes ((char *)(const char *)m_titles[i], buf2);
         if (strcmp (buf1, buf2) == 0)
             return m_menus[i]->FindItem (itemString);
     }
@@ -432,20 +440,28 @@ bool wxMenuBar::DestroyMenuBar()
     return TRUE;
 }
 
-// Since PopupMenu under Motif stills grab right mouse button events
-// after it was closed, we need to delete the associated widgets to
-// allow next PopUpMenu to appear...
-void wxMenu::DestroyWidgetAndDetach()
+//// Motif-specific
+static XtWorkProcId WorkProcMenuId;
+
+/* Since PopupMenu under Motif stills grab right mouse button events
+* after it was closed, we need to delete the associated widgets to
+* allow next PopUpMenu to appear...
+*/
+
+int PostDeletionOfMenu( XtPointer* clientData )
 {
-    if (GetMainWidget())
+    XtRemoveWorkProc(WorkProcMenuId);
+    wxMenu *menu = (wxMenu *)clientData;
+
+    if (menu->GetMainWidget())
     {
-        wxMenu *menuParent = GetParent();
+        wxMenu *menuParent = menu->GetParent();
         if ( menuParent )
         {
             wxMenuItemList::Node *node = menuParent->GetMenuItems().GetFirst();
             while ( node )
             {
-                if ( node->GetData()->GetSubMenu() == this )
+                if ( node->GetData()->GetSubMenu() == menu )
                 {
                     menuParent->GetMenuItems().DeleteNode(node);
 
@@ -456,11 +472,33 @@ void wxMenu::DestroyWidgetAndDetach()
             }
         }
 
-        DestroyMenu(TRUE);
+        menu->DestroyMenu(TRUE);
     }
 
     // Mark as no longer popped up
-    m_menuId = -1;
+    menu->m_menuId = -1;
+
+    return TRUE;
+}
+
+void
+wxMenuPopdownCallback(Widget WXUNUSED(w), XtPointer clientData,
+                      XtPointer WXUNUSED(ptr))
+{
+    wxMenu *menu = (wxMenu *)clientData;
+
+    // Added by JOREL Jean-Charles <jjorel@silr.ireste.fr>
+    /* Since Callbacks of MenuItems are not yet processed, we put a
+    * background job which will be done when system will be idle.
+    * What awful hack!! :(
+    */
+
+    WorkProcMenuId = XtAppAddWorkProc(
+        (XtAppContext) wxTheApp->GetAppContext(),
+        (XtWorkProc) PostDeletionOfMenu,
+        (XtPointer) menu );
+    // Apparently not found in Motif headers
+    //  XtVaSetValues( w, XmNpopupEnabled, XmPOPUP_DISABLED, NULL );
 }
 
 /*
@@ -480,12 +518,10 @@ WXWidget wxMenu::CreateMenu (wxMenuBar * menuBar, WXWidget parent, wxMenu * topM
     if (!pullDown)
     {
         menu = XmCreatePopupMenu ((Widget) parent, "popup", args, 2);
-#if 0
         XtAddCallback(menu,
             XmNunmapCallback,
             (XtCallbackProc)wxMenuPopdownCallback,
             (XtPointer)this);
-#endif
     }
     else
     {
@@ -644,21 +680,21 @@ void wxMenu::SetForegroundColour(const wxColour& col)
 
 void wxMenu::ChangeFont(bool keepOriginalSize)
 {
-    // Lesstif 0.87 hangs here, but 0.93 does not
-#if !wxCHECK_LESSTIF() || wxCHECK_LESSTIF_VERSION( 0, 93 )
+    // lesstif 0.87 hangs when setting XmNfontList
+#ifndef LESSTIF_VERSION
     if (!m_font.Ok() || !m_menuWidget)
         return;
 
-    WXFontType fontType = m_font.GetFontType(XtDisplay((Widget) m_menuWidget));
+    XmFontList fontList = (XmFontList) m_font.GetFontList(1.0, XtDisplay((Widget) m_menuWidget));
 
     XtVaSetValues ((Widget) m_menuWidget,
-                   wxFont::GetFontTag(), fontType,
-                   NULL);
+        XmNfontList, fontList,
+        NULL);
     if (m_buttonWidget)
     {
         XtVaSetValues ((Widget) m_buttonWidget,
-                       wxFont::GetFontTag(), fontType,
-                       NULL);
+            XmNfontList, fontList,
+            NULL);
     }
 
     for ( wxMenuItemList::Node *node = GetMenuItems().GetFirst();
@@ -669,8 +705,8 @@ void wxMenu::ChangeFont(bool keepOriginalSize)
         if (m_menuWidget && item->GetButtonWidget() && m_font.Ok())
         {
             XtVaSetValues ((Widget) item->GetButtonWidget(),
-                           wxFont::GetFontTag(), fontType,
-                           NULL);
+                XmNfontList, fontList,
+                NULL);
         }
         if (item->GetSubMenu())
             item->GetSubMenu()->ChangeFont(keepOriginalSize);

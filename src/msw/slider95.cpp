@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -33,7 +33,7 @@
 #include "wx/msw/slider95.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -72,9 +72,9 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
     SetBackgroundColour(parent->GetBackgroundColour()) ;
     SetForegroundColour(parent->GetForegroundColour()) ;
 
-    m_staticValue = (WXHWND) NULL;;
-    m_staticMin = (WXHWND) NULL;;
-    m_staticMax = (WXHWND) NULL;;
+    m_staticValue = (WXHWND) NULL;
+    m_staticMin = (WXHWND) NULL;
+    m_staticMax = (WXHWND) NULL;
     m_pageSize = 1;
     m_lineSize = 1;
     m_windowStyle = style;
@@ -128,6 +128,9 @@ bool wxSlider95::Create(wxWindow *parent, wxWindowID id,
     WXDWORD exStyle = 0;
 
     msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;    
+
+    if ( m_windowStyle & wxCLIP_SIBLINGS )
+        msStyle |= WS_CLIPSIBLINGS;
 
     if (m_windowStyle & wxSL_VERTICAL)
         msStyle = TBS_VERT | WS_CHILD | WS_VISIBLE | WS_TABSTOP ;

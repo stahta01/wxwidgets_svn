@@ -1,16 +1,12 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Free Software Foundation, Inc.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: wxWindows 2.3.3\n"
-"POT-Creation-Date: 2002-12-12 11:59+0100\n"
+"POT-Creation-Date: 2002-12-13 21:43+0100\n"
 "PO-Revision-Date: 2002-09-16 17:41--800\n"
 "Last-Translator: Hakki Dogusan <dogusanh@tr.net>\n"
 "Language-Team: Hakki Dogusan <dogusanh@tr.net>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-9\n"
+"Content-Type: text/plain; charset=ISO-8859-9\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/common/log.cpp:304
@@ -115,7 +111,7 @@ msgstr "%s: hatalý oluþturulmuþ kaynak dosyasiý."
 msgid "&Arrange Icons"
 msgstr "Si&mgeleri Düzenle"
 
-#: ../src/generic/wizard.cpp:271 ../src/generic/fdrepdlg.cpp:170
+#: ../src/generic/fdrepdlg.cpp:170 ../src/generic/wizard.cpp:271
 msgid "&Cancel"
 msgstr "Ýptal"
 
@@ -123,7 +119,7 @@ msgstr "Ýptal"
 msgid "&Cascade"
 msgstr "&Kademelendir"
 
-#: ../src/generic/tipdlg.cpp:210 ../src/generic/logg.cpp:491
+#: ../src/generic/logg.cpp:491 ../src/generic/tipdlg.cpp:210
 msgid "&Close"
 msgstr "&Kapat"
 
@@ -156,11 +152,11 @@ msgstr "&Yardým"
 msgid "&Log"
 msgstr "&Günlük"
 
-#: ../src/univ/themes/win32.cpp:4541
+#: ../src/univ/themes/win32.cpp:4539
 msgid "&Move"
 msgstr ""
 
-#: ../src/msw/mdi.cpp:193 ../src/generic/mdig.cpp:115
+#: ../src/generic/mdig.cpp:115 ../src/msw/mdi.cpp:193
 msgid "&Next"
 msgstr "&Sonraki"
 
@@ -177,13 +173,13 @@ msgstr "%Sonraki Ýpucu"
 msgid "&Paste"
 msgstr "tarih"
 
-#: ../src/msw/mdi.cpp:194 ../src/generic/mdig.cpp:116
+#: ../src/generic/mdig.cpp:116 ../src/msw/mdi.cpp:194
 #, fuzzy
 msgid "&Previous"
 msgstr "Önceki sayfa"
 
-#: ../src/msw/textctrl.cpp:1678 ../src/common/cmdproc.cpp:261
-#: ../src/common/cmdproc.cpp:272
+#: ../src/common/cmdproc.cpp:261 ../src/common/cmdproc.cpp:272
+#: ../src/msw/textctrl.cpp:1678
 msgid "&Redo"
 msgstr "Geri al iptal"
 
@@ -195,7 +191,7 @@ msgstr "Geri al iptal"
 msgid "&Replace"
 msgstr "&Deðiþtir"
 
-#: ../src/univ/themes/win32.cpp:4540
+#: ../src/univ/themes/win32.cpp:4538
 #, fuzzy
 msgid "&Restore"
 msgstr "Geri al iptal"
@@ -208,12 +204,12 @@ msgstr "Kay&det"
 msgid "&Show tips at startup"
 msgstr "%Baþlangýçta ipuçlarýný göster"
 
-#: ../src/univ/themes/win32.cpp:4543
+#: ../src/univ/themes/win32.cpp:4541
 #, fuzzy
 msgid "&Size"
 msgstr "Boyut"
 
-#: ../src/msw/textctrl.cpp:1677 ../src/common/cmdproc.cpp:267
+#: ../src/common/cmdproc.cpp:267 ../src/msw/textctrl.cpp:1677
 msgid "&Undo"
 msgstr "&Geri Al"
 
@@ -221,13 +217,13 @@ msgstr "&Geri Al"
 msgid "&Undo "
 msgstr "&Geri Al"
 
-#: ../src/msw/mdi.cpp:1328 ../src/msw/mdi.cpp:1335 ../src/msw/mdi.cpp:1365
 #: ../src/generic/mdig.cpp:295 ../src/generic/mdig.cpp:311
-#: ../src/generic/mdig.cpp:315
+#: ../src/generic/mdig.cpp:315 ../src/msw/mdi.cpp:1328 ../src/msw/mdi.cpp:1335
+#: ../src/msw/mdi.cpp:1360
 msgid "&Window"
 msgstr "&Pencere"
 
-#: ../src/msw/regconf.cpp:264 ../src/common/config.cpp:410
+#: ../src/common/config.cpp:410 ../src/msw/regconf.cpp:264
 #, c-format
 msgid "'%s' has extra '..', ignored."
 msgstr "'%s' içinde fazladan '..' var, gözardý edildi."
@@ -395,7 +391,7 @@ msgstr "Geçerli sayfayý yer imlerine ekle"
 msgid "Add to custom colours"
 msgstr "Tanýmlý renklere ekle"
 
-#: ../src/html/helpctrl.cpp:100
+#: ../src/html/helpctrl.cpp:95
 #, c-format
 msgid "Adding book %s"
 msgstr "%s kitabý ekleniyor"
@@ -404,9 +400,13 @@ msgstr "%s kitabý ekleniyor"
 msgid "All"
 msgstr "Tümü"
 
-#: ../src/generic/filedlgg.cpp:1062
+#: ../include/wx/defs.h:1806 ../src/generic/filedlgg.cpp:1062
 msgid "All files (*)|*"
 msgstr "Tüm dosyalar (*)|*"
+
+#: ../include/wx/defs.h:1803
+msgid "All files (*.*)|*.*"
+msgstr "Tüm dosyalar (*.*)|*.*"
 
 #: ../src/unix/dialup.cpp:362
 msgid "Already dialling ISP."
@@ -524,7 +524,7 @@ msgstr "C6 Zarf, 114 x 162 mm"
 msgid "C65 Envelope, 114 x 229 mm"
 msgstr "C65 Zarf, 114 x 229 mm"
 
-#: ../src/common/filefn.cpp:1383
+#: ../src/common/filefn.cpp:1369
 #, c-format
 msgid "Can not enumerate files '%s'"
 msgstr "'%s' dosyalarý sayýlamýyor"
@@ -556,7 +556,7 @@ msgstr "Ýþ parçacýðýnýn bitmesi beklenemiyor"
 msgid "Can't &Undo "
 msgstr "&Geri al yapýlamýyor"
 
-#: ../src/common/image.cpp:1315
+#: ../src/common/image.cpp:1319
 #, c-format
 msgid "Can't check image format of file '%s': file does not exist."
 msgstr "'%s' dosyasýnýn imaj biçemi kontrol edilemiyor: dosya yok."
@@ -683,12 +683,12 @@ msgstr "Ýþ parçacýðý önceliði ayarlanamýyor"
 msgid "Can't set value of '%s'"
 msgstr "'%s' nin deðeri deðiþtirilemiyor"
 
-#: ../src/gtk/fontdlg.cpp:144 ../src/gtk/filedlg.cpp:173
+#: ../src/common/dlgcmn.cpp:246 ../src/generic/dirdlgg.cpp:153
+#: ../src/generic/filedlgg.cpp:1181 ../src/generic/filedlgg.cpp:1200
+#: ../src/generic/fontdlgg.cpp:255 ../src/generic/prntdlgg.cpp:453
+#: ../src/generic/progdlgg.cpp:211 ../src/generic/proplist.cpp:511
+#: ../src/gtk/filedlg.cpp:173 ../src/gtk/fontdlg.cpp:144
 #: ../src/html/helpfrm.cpp:976 ../src/motif/msgdlg.cpp:182
-#: ../src/common/dlgcmn.cpp:246 ../src/generic/fontdlgg.cpp:255
-#: ../src/generic/proplist.cpp:511 ../src/generic/dirdlgg.cpp:153
-#: ../src/generic/progdlgg.cpp:211 ../src/generic/filedlgg.cpp:1181
-#: ../src/generic/filedlgg.cpp:1200 ../src/generic/prntdlgg.cpp:453
 msgid "Cancel"
 msgstr "Ýptal"
 
@@ -766,7 +766,7 @@ msgstr "Kaynaklar '%s' dosyasýndan yüklenemedi."
 msgid "Cannot open HTML document: %s"
 msgstr "%s HTML dökumaný açýlamýyor"
 
-#: ../src/html/helpdata.cpp:584
+#: ../src/html/helpdata.cpp:595
 #, c-format
 msgid "Cannot open HTML help book: %s"
 msgstr "%s HTML yardým kitapçýðý açýlamýyor"
@@ -851,12 +851,12 @@ msgstr "Kapat"
 msgid "Clear the log contents"
 msgstr "Günlük içeriðini temizle"
 
-#: ../src/common/prntbase.cpp:428 ../src/generic/proplist.cpp:506
-#: ../src/generic/progdlgg.cpp:358
+#: ../src/common/prntbase.cpp:428 ../src/generic/progdlgg.cpp:358
+#: ../src/generic/proplist.cpp:506
 msgid "Close"
 msgstr "Kapat"
 
-#: ../src/univ/themes/win32.cpp:4549
+#: ../src/univ/themes/win32.cpp:4547
 msgid "Close\tAlt-F4"
 msgstr ""
 
@@ -878,7 +878,7 @@ msgstr "Bilgisayar"
 msgid "Config entry name cannot start with '%c'."
 msgstr "Ayar bilgi adý '%c' ile baþlayamaz."
 
-#: ../src/gtk/filedlg.cpp:72 ../src/generic/filedlgg.cpp:1411
+#: ../src/generic/filedlgg.cpp:1411 ../src/gtk/filedlg.cpp:72
 msgid "Confirm"
 msgstr "Onayla"
 
@@ -941,7 +941,7 @@ msgstr ""
 msgid "Could not start document preview."
 msgstr "Döküman önizleme baþlatýlamadý."
 
-#: ../src/msw/printwin.cpp:252 ../src/generic/printps.cpp:198
+#: ../src/generic/printps.cpp:198 ../src/msw/printwin.cpp:252
 msgid "Could not start printing."
 msgstr "Yazdýrma baþlatýlamadý."
 
@@ -1082,7 +1082,7 @@ msgstr "Kaynaklarýnýza wx/msw/wx.rc'yi koymayý unuttunuz mu?"
 msgid "Did you know..."
 msgstr "Biliyor muydunuz..."
 
-#: ../src/common/filefn.cpp:1279
+#: ../src/common/filefn.cpp:1265
 #, c-format
 msgid "Directory '%s' couldn't be created"
 msgstr "'%s' dizini yaratýlamadý"
@@ -1109,6 +1109,7 @@ msgid "Display options dialog"
 msgstr "Seçenek penceresini göster"
 
 #: ../src/msw/mimetype.cpp:682
+#, c-format
 msgid ""
 "Do you want to overwrite the command used to %s files with extension \"%s"
 "\" ?\n"
@@ -1159,12 +1160,12 @@ msgid ""
 "Environment variables expansion failed: missing '%c' at position %d in '%s'."
 msgstr "Çevre deðiþkenleri açma baþarýsýz: eksik '%c', yer %d, '%s' içinde."
 
-#: ../src/gtk/fontdlg.cpp:71 ../src/gtk/filedlg.cpp:80
-#: ../src/generic/dirdlgg.cpp:298 ../src/generic/dirctrlg.cpp:704
-#: ../src/generic/dirctrlg.cpp:722 ../src/generic/dirctrlg.cpp:733
+#: ../src/generic/dirctrlg.cpp:704 ../src/generic/dirctrlg.cpp:722
+#: ../src/generic/dirctrlg.cpp:733 ../src/generic/dirdlgg.cpp:298
 #: ../src/generic/filedlgg.cpp:841 ../src/generic/filedlgg.cpp:942
 #: ../src/generic/filedlgg.cpp:956 ../src/generic/filedlgg.cpp:969
 #: ../src/generic/filedlgg.cpp:1365 ../src/generic/filedlgg.cpp:1418
+#: ../src/gtk/filedlg.cpp:80 ../src/gtk/fontdlg.cpp:71
 msgid "Error"
 msgstr "Hata"
 
@@ -1263,7 +1264,7 @@ msgstr "Kayýt deðeri '%s' kopyalanamadý"
 msgid "Failed to copy the contents of registry key '%s' to '%s'."
 msgstr "Kayýt anahtarý '%s''nin içeriði '%s''e kopyalanamadý"
 
-#: ../src/common/filefn.cpp:1131
+#: ../src/common/filefn.cpp:1117
 #, fuzzy, c-format
 msgid "Failed to copy the file '%s' to '%s'"
 msgstr "'%s' dosyasýna dokunulamadý"
@@ -1399,12 +1400,12 @@ msgstr "UTC sistem zamaný alýnamadý."
 msgid "Failed to get the local system time"
 msgstr "Yerel sistem zamaný alýnamadý"
 
-#: ../src/common/filefn.cpp:1512
+#: ../src/common/filefn.cpp:1498
 #, fuzzy
 msgid "Failed to get the working directory"
 msgstr "Dizin yaratýlamadý"
 
-#: ../src/univ/theme.cpp:122
+#: ../src/univ/theme.cpp:120
 msgid "Failed to initialize GUI: no built-in themes found."
 msgstr "GUI baþlatma baþarýsýz: gömülü tema yok."
 
@@ -1424,7 +1425,7 @@ msgstr ""
 "Ýþparçacýðýna baðlanýlamadý, olasý bellek sýzýntýsý bulundu - lütfen "
 "programý yeniden baþlatýnýz"
 
-#: ../src/msw/utils.cpp:723
+#: ../src/msw/utils.cpp:721
 #, c-format
 msgid "Failed to kill process %d"
 msgstr "%d iþi öldürülemedi"
@@ -1618,7 +1619,7 @@ msgstr "Kritik hata: çýkýlýyor"
 msgid "File %s does not exist."
 msgstr "'%s' dosyasý yok."
 
-#: ../src/gtk/filedlg.cpp:69 ../src/generic/filedlgg.cpp:1408
+#: ../src/generic/filedlgg.cpp:1408 ../src/gtk/filedlg.cpp:69
 #, c-format
 msgid "File '%s' already exists, do you really want to overwrite it?"
 msgstr "'%s' dosyasý zaten var, üstüne yazýlsýn mý?"
@@ -1770,9 +1771,9 @@ msgstr ""
 msgid "Hebrew (ISO-8859-8)"
 msgstr "Ýbranice (ISO-8859-8)"
 
-#: ../src/msw/mdi.cpp:1324 ../src/html/helpfrm.cpp:245
-#: ../src/common/dlgcmn.cpp:242 ../src/generic/proplist.cpp:516
-#: ../src/generic/mdig.cpp:308
+#: ../src/common/dlgcmn.cpp:242 ../src/generic/mdig.cpp:308
+#: ../src/generic/proplist.cpp:516 ../src/html/helpfrm.cpp:245
+#: ../src/msw/mdi.cpp:1324
 msgid "Help"
 msgstr "Yardým"
 
@@ -1879,17 +1880,17 @@ msgstr ""
 msgid "Impossible to get child process input"
 msgstr "Alt iþ girdisi alýnamýyor"
 
-#: ../src/common/filefn.cpp:1147
+#: ../src/common/filefn.cpp:1133
 #, c-format
 msgid "Impossible to get permissions for file '%s'"
 msgstr "'%s' dosyasý için izinler alýnamýyor"
 
-#: ../src/common/filefn.cpp:1161
+#: ../src/common/filefn.cpp:1147
 #, c-format
 msgid "Impossible to overwrite the file '%s'"
 msgstr "'%s' dosyasýnýn üstüne yazýlamýyor"
 
-#: ../src/common/filefn.cpp:1212
+#: ../src/common/filefn.cpp:1198
 #, c-format
 msgid "Impossible to set permissions for the file '%s'"
 msgstr "'%s' dosyasý için izinler konulamýyor"
@@ -1911,7 +1912,7 @@ msgstr "Geçersiz TIFF imaj indeksi."
 msgid "Invalid XRC resource '%s': doesn't have root node 'resource'."
 msgstr "Geçersiz '%s' XRC kaynaðý: 'resource' kök düðümü yok."
 
-#: ../src/common/appcmn.cpp:398
+#: ../src/common/appcmn.cpp:399
 #, c-format
 msgid "Invalid display mode specification '%s'."
 msgstr "Geçersiz '%s' görüntü durum tanýmý."
@@ -1979,8 +1980,8 @@ msgstr "Letter, 8 1/2 x 11 inç"
 msgid "Light"
 msgstr "Açýk"
 
-#: ../src/gtk/filedlg.cpp:249 ../src/msw/filedlg.cpp:555
-#: ../src/motif/filedlg.cpp:357 ../src/generic/filedlgg.cpp:1623
+#: ../src/generic/filedlgg.cpp:1623 ../src/gtk/filedlg.cpp:249
+#: ../src/motif/filedlg.cpp:357 ../src/msw/filedlg.cpp:555
 #, c-format
 msgid "Load %s file"
 msgstr "%s dosyasýný yükle"
@@ -2019,7 +2020,7 @@ msgstr ""
 "MS HTML Yardým kütüphanesi kurulu olmadýðý için yardým iþlevleri "
 "kullanýlamýyor. Lütfen kurunuz."
 
-#: ../src/univ/themes/win32.cpp:4547
+#: ../src/univ/themes/win32.cpp:4545
 msgid "Ma&ximize"
 msgstr ""
 
@@ -2041,7 +2042,7 @@ msgstr "Bellek VFS zaten '%s' dosyasýný içeriyor!"
 msgid "Metal theme"
 msgstr ""
 
-#: ../src/univ/themes/win32.cpp:4545
+#: ../src/univ/themes/win32.cpp:4543
 msgid "Mi&nimize"
 msgstr ""
 
@@ -2080,8 +2081,8 @@ msgstr "Yeni isim"
 msgid "Next page"
 msgstr "Sonraki sayfa"
 
-#: ../src/mac/msgdlg.cpp:78 ../src/motif/msgdlg.cpp:182
-#: ../src/common/dlgcmn.cpp:219
+#: ../src/common/dlgcmn.cpp:219 ../src/mac/msgdlg.cpp:78
+#: ../src/motif/msgdlg.cpp:182
 msgid "No"
 msgstr "Hayýr"
 
@@ -2166,12 +2167,12 @@ msgstr "Normal yazý tipi:"
 msgid "Note, 8 1/2 x 11 in"
 msgstr "Not, 8 1/2 x 11 inç"
 
-#: ../src/gtk/fontdlg.cpp:136 ../src/gtk/filedlg.cpp:167
-#: ../src/html/helpfrm.cpp:974 ../src/common/dlgcmn.cpp:225
-#: ../src/generic/fontdlgg.cpp:254 ../src/generic/proplist.cpp:499
-#: ../src/generic/dirdlgg.cpp:151 ../src/generic/filedlgg.cpp:1180
-#: ../src/generic/filedlgg.cpp:1191 ../src/generic/logg.cpp:739
-#: ../src/generic/prntdlgg.cpp:452
+#: ../src/common/dlgcmn.cpp:225 ../src/generic/dirdlgg.cpp:151
+#: ../src/generic/filedlgg.cpp:1180 ../src/generic/filedlgg.cpp:1191
+#: ../src/generic/fontdlgg.cpp:254 ../src/generic/logg.cpp:739
+#: ../src/generic/prntdlgg.cpp:452 ../src/generic/proplist.cpp:499
+#: ../src/gtk/filedlg.cpp:167 ../src/gtk/fontdlg.cpp:136
+#: ../src/html/helpfrm.cpp:974
 msgid "OK"
 msgstr "Tamam"
 
@@ -2179,7 +2180,7 @@ msgstr "Tamam"
 msgid "Open HTML document"
 msgstr "HTML dökümaný aç"
 
-#: ../src/generic/dirdlgg.cpp:298 ../src/generic/dirctrlg.cpp:733
+#: ../src/generic/dirctrlg.cpp:733 ../src/generic/dirdlgg.cpp:298
 #: ../src/generic/filedlgg.cpp:841 ../src/generic/filedlgg.cpp:969
 msgid "Operation not permitted."
 msgstr "Ýþleme izin verilmiyor."
@@ -2283,7 +2284,7 @@ msgstr "Boru yaratýlamadý"
 msgid "Please choose a valid font."
 msgstr "Lütfen geçerli bir yazý tipi seçiniz."
 
-#: ../src/gtk/filedlg.cpp:80 ../src/generic/filedlgg.cpp:1418
+#: ../src/generic/filedlgg.cpp:1418 ../src/gtk/filedlg.cpp:80
 msgid "Please choose an existing file."
 msgstr "Lütfen varolan bir dosya seçiniz."
 
@@ -2476,8 +2477,8 @@ msgstr "Sað boþluk (mm):"
 msgid "Roman"
 msgstr "Roman"
 
-#: ../src/gtk/filedlg.cpp:265 ../src/msw/filedlg.cpp:557
-#: ../src/motif/filedlg.cpp:359 ../src/generic/filedlgg.cpp:1638
+#: ../src/generic/filedlgg.cpp:1638 ../src/gtk/filedlg.cpp:265
+#: ../src/motif/filedlg.cpp:359 ../src/msw/filedlg.cpp:557
 #, c-format
 msgid "Save %s file"
 msgstr "%s dosyasýný kaydet"
@@ -2893,7 +2894,7 @@ msgstr "Kaynak ayrýþtýrýlýrken tanýmlanamayan %s biçimi."
 msgid "Unsupported clipboard format."
 msgstr "Desteklenmeyen pano biçemi."
 
-#: ../src/common/appcmn.cpp:380
+#: ../src/common/appcmn.cpp:383
 #, c-format
 msgid "Unsupported theme '%s'."
 msgstr "Desteklenmeyen tema '%s'."
@@ -2927,7 +2928,7 @@ msgstr "Görünümler"
 msgid "Waiting for subprocess termination failed"
 msgstr "Altiþ sonlandýrma beklemesi baþarýsýz"
 
-#: ../src/common/resource.cpp:124 ../src/common/docview.cpp:438
+#: ../src/common/docview.cpp:438 ../src/common/resource.cpp:124
 msgid "Warning"
 msgstr "Uyarý"
 
@@ -2959,15 +2960,15 @@ msgstr "Yalnýz tam kelimeler"
 msgid "Win32 theme"
 msgstr "Win32 temasý"
 
-#: ../src/msw/utils.cpp:983
+#: ../src/msw/utils.cpp:981
 msgid "Win32s on Windows 3.1"
 msgstr "Windows 3.1 üstünde Win32s"
 
-#: ../src/msw/utils.cpp:1015
+#: ../src/msw/utils.cpp:1013
 msgid "Windows 3.1"
 msgstr "Windows 3.1"
 
-#: ../src/msw/utils.cpp:987
+#: ../src/msw/utils.cpp:985
 #, c-format
 msgid "Windows 9%c"
 msgstr "Windows 9%c"
@@ -3058,8 +3059,8 @@ msgstr "XRC kaynaðý: Ýkieþlem '%s''den yaratýlamadý."
 msgid "XRC resource: Incorrect colour specification '%s' for property '%s'."
 msgstr "XRC kaynaðý: Hatalý '%s' renk tanýmý, '%s' özelliði için."
 
-#: ../src/mac/msgdlg.cpp:77 ../src/motif/msgdlg.cpp:182
-#: ../src/common/dlgcmn.cpp:214
+#: ../src/common/dlgcmn.cpp:214 ../src/mac/msgdlg.cpp:77
+#: ../src/motif/msgdlg.cpp:182
 msgid "Yes"
 msgstr "Evet"
 
@@ -3178,12 +3179,12 @@ msgstr "deðiþmez anahtar '%s''ý deðiþtirme denemesi gözardý edildi."
 msgid "binary"
 msgstr "ikili"
 
-#: ../src/common/fontcmn.cpp:548
+#: ../src/common/fontcmn.cpp:521
 #, fuzzy
 msgid "bold"
 msgstr "Kalýn"
 
-#: ../src/common/fontcmn.cpp:472
+#: ../src/common/fontcmn.cpp:445
 #, fuzzy
 msgid "bold "
 msgstr "Kalýn"
@@ -3243,7 +3244,7 @@ msgstr "dosya betimleyicisi %d üstündeki arama yeri alýnamýyor"
 msgid "can't load any font, aborting"
 msgstr "hiç yazýtipi yüklenemedi, durduruluyor"
 
-#: ../src/common/file.cpp:261 ../src/common/ffile.cpp:77
+#: ../src/common/ffile.cpp:77 ../src/common/file.cpp:261
 #, c-format
 msgid "can't open file '%s'"
 msgstr "'%s' dosyasý açýlamýyor"
@@ -3385,7 +3386,7 @@ msgstr "ondördüncü"
 msgid "fourth"
 msgstr "dördüncü"
 
-#: ../src/common/appcmn.cpp:319
+#: ../src/common/appcmn.cpp:322
 msgid "generate verbose log messages"
 msgstr "sözel günlük uyarýlarý üret"
 
@@ -3410,17 +3411,17 @@ msgstr "geçersiz eof() sonuç deðeri"
 msgid "invalid message box return value"
 msgstr "geçersiz ileti kutusu sonuç deðeri"
 
-#: ../src/common/fontcmn.cpp:488 ../src/common/fontcmn.cpp:552
+#: ../src/common/fontcmn.cpp:461 ../src/common/fontcmn.cpp:525
 #, fuzzy
 msgid "italic"
 msgstr "Eðik"
 
-#: ../src/common/fontcmn.cpp:544
+#: ../src/common/fontcmn.cpp:517
 #, fuzzy
 msgid "light"
 msgstr "Açýk"
 
-#: ../src/common/fontcmn.cpp:468
+#: ../src/common/fontcmn.cpp:441
 #, fuzzy
 msgid "light "
 msgstr "Açýk"
@@ -3455,7 +3456,7 @@ msgstr "dokuzuncu"
 msgid "no DDE error."
 msgstr "DDE yok hatasý."
 
-#: ../src/html/helpdata.cpp:574
+#: ../src/html/helpdata.cpp:575
 msgid "noname"
 msgstr "adsýz"
 
@@ -3491,7 +3492,7 @@ msgstr "yedinci"
 msgid "shift"
 msgstr "shift"
 
-#: ../src/common/appcmn.cpp:309
+#: ../src/common/appcmn.cpp:312
 msgid "show this help message"
 msgstr "bu yardým uyarýsýný göster"
 
@@ -3503,11 +3504,11 @@ msgstr "onaltýncý"
 msgid "sixth"
 msgstr "altýncý"
 
-#: ../src/common/appcmn.cpp:344
+#: ../src/common/appcmn.cpp:347
 msgid "specify display mode to use (e.g. 640x480-16)"
 msgstr "kullanýlacak görüntü biçimini belirleyiniz (ör. 640x480-16)"
 
-#: ../src/common/appcmn.cpp:330
+#: ../src/common/appcmn.cpp:333
 msgid "specify the theme to use"
 msgstr "kullanýlacak temayý belirleyiniz"
 
@@ -3547,12 +3548,12 @@ msgstr "yirminci"
 msgid "twentieth"
 msgstr "onikinci"
 
-#: ../src/common/fontcmn.cpp:540
+#: ../src/common/fontcmn.cpp:513
 #, fuzzy
 msgid "underlined"
 msgstr "Altçizgi"
 
-#: ../src/common/fontcmn.cpp:455
+#: ../src/common/fontcmn.cpp:428
 #, fuzzy
 msgid "underlined "
 msgstr "Altçizgi"
@@ -3651,9 +3652,6 @@ msgstr "dün"
 
 #~ msgid "<LINK> "
 #~ msgstr "<KISA YOL>"
-
-#~ msgid "All files (*.*)|*.*"
-#~ msgstr "Tüm dosyalar (*.*)|*.*"
 
 #~ msgid "Back"
 #~ msgstr "Geri"

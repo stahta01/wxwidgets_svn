@@ -531,7 +531,7 @@ bool wxXmlDocument::Load(wxInputStream& stream, const wxString& encoding)
     XML_SetDefaultHandler(parser, DefaultHnd);
     XML_SetUnknownEncodingHandler(parser, UnknownEncodingHnd, NULL);
 
-    bool ok = true;
+    bool ok = TRUE;
     do
     {
         size_t len = stream.Read(buf, BUFSIZE).LastRead();
@@ -541,7 +541,7 @@ bool wxXmlDocument::Load(wxInputStream& stream, const wxString& encoding)
             wxLogError(_("XML parsing error: '%s' at line %d"),
                        XML_ErrorString(XML_GetErrorCode(parser)),
                        XML_GetCurrentLineNumber(parser));
-            ok = false;
+            ok = FALSE;
             break;
         }
     } while (!done);

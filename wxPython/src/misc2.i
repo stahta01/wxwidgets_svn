@@ -379,6 +379,8 @@ public:
     void SetSize(const wxSize& size);
     void Show(int show = TRUE);
     void Hide();
+
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.IsOk()"
 };
 
 %inline %{
@@ -537,7 +539,7 @@ public:
     bool IsOneShot();
     bool IsRunning();
     void SetOwner(wxEvtHandler *owner, int id = -1);
-    void Start(int milliseconds=-1, int oneShot=FALSE);
+    bool Start(int milliseconds=-1, int oneShot=FALSE);
     void Stop();
 };
 
@@ -607,6 +609,8 @@ public:
     static void OnLog(unsigned long level, const wxString& szString, int t=0);
 
     virtual void Flush();
+    bool HasPendingMessages() const;
+
     static void FlushActive();
     static wxLog *GetActiveTarget();
     static wxLog *SetActiveTarget(wxLog *pLogger);
@@ -1048,6 +1052,8 @@ public:
 
     bool SetCapture(wxWindow* win, int pollingFreq = 0);
     bool ReleaseCapture();
+
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.IsOk()"
 };
 
 //----------------------------------------------------------------------
@@ -1081,11 +1087,13 @@ public:
 class wxWave : public wxObject
 {
 public:
-  wxWave(const wxString& fileName, bool isResource = FALSE);
-  ~wxWave();
+    wxWave(const wxString& fileName, bool isResource = FALSE);
+    ~wxWave();
 
-  bool  IsOk() const;
-  bool  Play(bool async = TRUE, bool looped = FALSE) const;
+    bool  IsOk() const;
+    bool  Play(bool async = TRUE, bool looped = FALSE) const;
+
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.IsOk()"
 };
 
 %new wxWave* wxWaveData(const wxString& data);
@@ -1396,7 +1404,7 @@ public:
     //
     // use the extraDir parameter if you want to look for files in another
     // directory
-    void Initialize(int mailcapStyle = wxMAILCAP_ALL,
+    void Initialize(int mailcapStyle = wxMAILCAP_STANDARD,
                     const wxString& extraDir = wxPyEmptyString);
 
     // and this function clears all the data from the manager
@@ -1520,7 +1528,6 @@ wxART_ERROR                = 'wxART_ERROR'
 wxART_QUESTION             = 'wxART_QUESTION'
 wxART_WARNING              = 'wxART_WARNING'
 wxART_INFORMATION          = 'wxART_INFORMATION'
-wxART_MISSING_IMAGE        = 'wxART_MISSING_IMAGE'
 "
 
 %{  // Python aware wxArtProvider
@@ -1690,6 +1697,19 @@ public:
 };
 
 //----------------------------------------------------------------------
+
+
+// %{
+// #if wxUSE_UNICODE
+// #define ADD_STRING(dict, str) \
+//     wxString tmp##str(str); \
+//     PyDict_SetItemString(dict, #str, \
+//                          PyUnicode_FromWideChar(tmp##str.c_str(), tmp##str.Len()))
+// #else
+// #define ADD_STRING(dict, str) \
+//     PyDict_SetItemString(d, #str, PyString_FromString(str))
+// #endif
+// %}
 
 
 %init %{

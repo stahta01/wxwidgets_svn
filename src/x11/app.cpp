@@ -27,13 +27,18 @@
 #include "wx/evtloop.h"
 #include "wx/timer.h"
 #include "wx/filename.h"
-#include "wx/hash.h"
 
 #include "wx/univ/theme.h"
 #include "wx/univ/renderer.h"
 
+#define ABS(a)	   (((a) < 0) ? -(a) : (a))
+
 #if wxUSE_THREADS
     #include "wx/thread.h"
+#endif
+
+#if wxUSE_WX_RESOURCES
+    #include "wx/resource.h"
 #endif
 
 #include "wx/x11/private.h"
@@ -115,6 +120,10 @@ bool wxApp::Initialize()
     wxInitializeStockLists();
     wxInitializeStockObjects();
 
+#if wxUSE_WX_RESOURCES
+    wxInitializeResourceSystem();
+#endif
+
     wxWidgetHashTable = new wxHashTable(wxKEY_INTEGER);
     wxClientWidgetHashTable = new wxHashTable(wxKEY_INTEGER);
 
@@ -132,6 +141,10 @@ void wxApp::CleanUp()
     wxClientWidgetHashTable = NULL;
 
     wxModule::CleanUpModules();
+
+#if wxUSE_WX_RESOURCES
+    wxCleanUpResourceSystem();
+#endif
 
     delete wxTheColourDatabase;
     wxTheColourDatabase = NULL;
@@ -225,7 +238,7 @@ int wxEntryStart( int& argc, char *argv[] )
 
     }
 
-    // X11 display stuff
+    // X11 display stuff    
     Display* xdisplay = XOpenDisplay( displayName );
     if (!xdisplay)
     {
@@ -237,7 +250,7 @@ int wxEntryStart( int& argc, char *argv[] )
         XSynchronize(xdisplay, True);
 
     wxApp::ms_display = (WXDisplay*) xdisplay;
-
+    
     XSelectInput( xdisplay, XDefaultRootWindow(xdisplay), PropertyChangeMask);
 
     // Misc.
@@ -246,7 +259,7 @@ int wxEntryStart( int& argc, char *argv[] )
 #if wxUSE_UNICODE
     // Glib's type system required by Pango
     g_type_init();
-#endif
+#endif    
 
     if (!wxApp::Initialize())
         return -1;
@@ -378,14 +391,19 @@ wxApp::wxApp()
     m_initialSize = wxDefaultSize;
 
 #if !wxUSE_NANOX
-    m_visualInfo = NULL;
+    m_visualColormap = NULL;
+    m_colorCube = NULL;
 #endif
 }
 
 wxApp::~wxApp()
 {
 #if !wxUSE_NANOX
-    delete m_visualInfo;
+    if (m_colorCube)
+        free( m_colorCube );
+
+    if (m_visualColormap)
+        delete [] (XColor*)m_visualColormap;
 #endif
 }
 
@@ -530,9 +548,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 
                 // Only erase background, paint in idle time.
                 win->SendEraseEvents();
-
-                // EXPERIMENT
-                //win->Update();
+                // win->Update();
             }
 
             return TRUE;
@@ -924,14 +940,14 @@ bool wxApp::SendIdleEvents(wxWindow* win)
     if (event.MoreRequested())
         needMore = TRUE;
 
-    wxWindowListNode* node = win->GetChildren().GetFirst();
+    wxNode* node = win->GetChildren().First();
     while (node)
     {
-        wxWindow* win = (wxWindow*) node->GetData();
+        wxWindow* win = (wxWindow*) node->Data();
         if (SendIdleEvents(win))
             needMore = TRUE;
 
-        node = node->GetNext();
+        node = node->Next();
     }
 
     win->OnInternalIdle();
@@ -941,10 +957,10 @@ bool wxApp::SendIdleEvents(wxWindow* win)
 
 void wxApp::DeletePendingObjects()
 {
-    wxNode *node = wxPendingDelete.GetFirst();
+    wxNode *node = wxPendingDelete.First();
     while (node)
     {
-        wxObject *obj = (wxObject *)node->GetData();
+        wxObject *obj = (wxObject *)node->Data();
 
         delete obj;
 
@@ -953,7 +969,25 @@ void wxApp::DeletePendingObjects()
 
         // Deleting one object may have deleted other pending
         // objects, so start from beginning of list again.
-        node = wxPendingDelete.GetFirst();
+        node = wxPendingDelete.First();
+    }
+}
+
+static void wxCalcPrecAndShift( unsigned long mask, int *shift, int *prec )
+{
+  *shift = 0;
+  *prec = 0;
+
+  while (!(mask & 0x1))
+    {
+      (*shift)++;
+      mask >>= 1;
+    }
+
+  while (mask & 0x1)
+    {
+      (*prec)++;
+      mask >>= 1;
     }
 }
 
@@ -973,8 +1007,99 @@ bool wxApp::OnInitGui()
     m_maxRequestSize = XMaxRequestSize( (Display*) wxApp::GetDisplay() );
 
 #if !wxUSE_NANOX
-    m_visualInfo = new wxXVisualInfo;
-    wxFillXVisualInfo( m_visualInfo, (Display*) wxApp::GetDisplay() );
+    // Get info about the current visual. It is enough
+    // to do this once here unless we support different
+    // visuals, displays and screens. Given that wxX11
+    // mostly for embedded things, that is no real
+    // limitation.
+    Display *xdisplay = (Display*) wxApp::GetDisplay();
+    int xscreen = DefaultScreen(xdisplay);
+    Visual* xvisual = DefaultVisual(xdisplay,xscreen);
+    int xdepth = DefaultDepth(xdisplay, xscreen);
+
+    XVisualInfo vinfo_template;
+    vinfo_template.visual = xvisual;
+    vinfo_template.visualid = XVisualIDFromVisual( xvisual );
+    vinfo_template.depth = xdepth;
+
+    int nitem = 0;
+    XVisualInfo *vi = XGetVisualInfo( xdisplay, VisualIDMask|VisualDepthMask, &vinfo_template, &nitem );
+    wxASSERT_MSG( vi, wxT("No visual info") );
+
+    m_visualType = vi->visual->c_class;
+    m_visualScreen = vi->screen;
+
+    m_visualRedMask = vi->red_mask;
+    m_visualGreenMask = vi->green_mask;
+    m_visualBlueMask = vi->blue_mask;
+
+    if (m_visualType != GrayScale && m_visualType != PseudoColor)
+    {
+        wxCalcPrecAndShift( m_visualRedMask, &m_visualRedShift, &m_visualRedPrec );
+        wxCalcPrecAndShift( m_visualGreenMask, &m_visualGreenShift, &m_visualGreenPrec );
+        wxCalcPrecAndShift( m_visualBlueMask, &m_visualBlueShift, &m_visualBluePrec );
+    }
+
+    m_visualDepth = xdepth;
+    if (xdepth == 16)
+        xdepth = m_visualRedPrec + m_visualGreenPrec + m_visualBluePrec;
+
+    m_visualColormapSize = vi->colormap_size;
+
+    XFree( vi );
+
+    if (m_visualDepth > 8)
+        return TRUE;
+
+    m_visualColormap = new XColor[m_visualColormapSize];
+    XColor* colors = (XColor*) m_visualColormap;
+
+    for (int i = 0; i < m_visualColormapSize; i++)
+	    colors[i].pixel = i;
+
+    XQueryColors( xdisplay, DefaultColormap(xdisplay,xscreen), colors, m_visualColormapSize );
+
+    m_colorCube = (unsigned char*)malloc(32 * 32 * 32);
+
+    for (int r = 0; r < 32; r++)
+    {
+        for (int g = 0; g < 32; g++)
+        {
+            for (int b = 0; b < 32; b++)
+            {
+                int rr = (r << 3) | (r >> 2);
+                int gg = (g << 3) | (g >> 2);
+                int bb = (b << 3) | (b >> 2);
+
+                int index = -1;
+
+                if (colors)
+                {
+                    int max = 3 * 65536;
+
+                    for (int i = 0; i < m_visualColormapSize; i++)
+                    {
+                        int rdiff = ((rr << 8) - colors[i].red);
+                        int gdiff = ((gg << 8) - colors[i].green);
+                        int bdiff = ((bb << 8) - colors[i].blue);
+                        int sum = ABS (rdiff) + ABS (gdiff) + ABS (bdiff);
+                        if (sum < max)
+                        {
+                            index = i; max = sum;
+                        }
+                    }
+                }
+                else
+                {
+                    // assume 8-bit true or static colors. this really exists
+                    index = (r >> (5 - m_visualRedPrec)) << m_visualRedShift;
+                    index |= (g >> (5 - m_visualGreenPrec)) << m_visualGreenShift;
+                    index |= (b >> (5 - m_visualBluePrec)) << m_visualBlueShift;
+                }
+                m_colorCube[ (r*1024) + (g*32) + b ] = index;
+            }
+        }
+    }
 #endif
 
     return TRUE;
@@ -991,9 +1116,9 @@ PangoContext* wxApp::GetPangoContext()
     static PangoContext *ret = NULL;
     if (ret)
         return ret;
-
+    
     Display *xdisplay = (Display*) wxApp::GetDisplay();
-
+    
 #if 1
     int xscreen = DefaultScreen(xdisplay);
     static int use_xft = -1;
@@ -1002,16 +1127,16 @@ PangoContext* wxApp::GetPangoContext()
         wxString val = wxGetenv( L"GDK_USE_XFT" );
         use_xft = (val == L"1");
     }
-
+  
     if (use_xft)
         ret = pango_xft_get_context( xdisplay, xscreen );
     else
 #endif
         ret = pango_x_get_context( xdisplay );
-
+        
     if (!PANGO_IS_CONTEXT(ret))
         wxLogError( wxT("No pango context.") );
-
+        
     return ret;
 }
 #endif
@@ -1112,7 +1237,7 @@ bool wxApp::Yield(bool onlyIfNeeded)
         // Call dispatch at least once so that sockets
         // can be tested
         wxTheApp->Dispatch();
-
+        
         while (wxTheApp && wxTheApp->Pending())
             wxTheApp->Dispatch();
 

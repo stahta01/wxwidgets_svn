@@ -20,9 +20,8 @@
     #pragma implementation "statline.h"
 #endif
 
-#include "wx/wxprec.h"
-#if wxUSE_STATLINE
 // For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -48,8 +47,6 @@ bool wxStaticLine::Create( wxWindow *parent,
                            long style,
                            const wxString &name)
 {
-    m_statbox = NULL;
-
     if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
@@ -63,10 +60,6 @@ bool wxStaticLine::Create( wxWindow *parent,
     return TRUE;
 }
 
-wxStaticLine::~wxStaticLine()
-{
-    delete m_statbox;
-}
 
 WXWidget wxStaticLine::GetMainWidget() const
 {
@@ -82,6 +75,3 @@ void wxStaticLine::DoMoveWindow(int x, int y, int width, int height)
 {
     m_statbox->SetSize(x, y, width, height);
 }
-
-#endif
-  // wxUSE_STATLINE

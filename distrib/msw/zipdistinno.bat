@@ -7,7 +7,7 @@ set webfiles=c:\wx2dev\wxWebSite
 set inno=0
 
 Rem Set this to the required version
-set version=2.4.0
+set version=2.4.1
 
 if "%src" == "" goto usage
 if "%dest" == "" goto usage
@@ -74,7 +74,6 @@ zip32 -u -@ %dest%\wxOS2-%version%.zip < %src%\distrib\msw\dialoged.rsp
 zip32 -u -@ %dest%\wxOS2-%version%.zip < %src%\distrib\msw\ogl.rsp
 zip32 -u -@ %dest%\wxOS2-%version%.zip < %src%\distrib\msw\xml.rsp
 zip32 -u -@ %dest%\wxOS2-%version%.zip < %src%\distrib\msw\contrib.rsp
-zip32 -u -@ %dest%\wxOS2-%version%.zip < %src%\distrib\msw\deprecated.rsp
 zip32 -u -@ %dest%\wxOS2-%version%.zip < %src%\distrib\msw\makefile.rsp
 
 Rem Rearchive under wxWindows-%version%
@@ -118,7 +117,6 @@ zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\ogl.rsp
 zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\xml.rsp
 zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\stc.rsp
 zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\contrib.rsp
-zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\deprecated.rsp
 zip32 -u -@ %dest%\wxMac-%version%.zip < %src%\distrib\msw\makefile.rsp
 
 zip32 -@ %dest%\wxWindows-%version%-CW-Mac.zip < %src%\distrib\msw\cw_mac.rsp
@@ -153,7 +151,6 @@ zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\jpeg.rsp
 zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\tiff.rsp
 zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\xml.rsp
 zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\contrib.rsp
-zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\deprecated.rsp
 zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\dialoged.rsp
 zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\utils.rsp
 zip32 -@ -u %dest\wxWindows-%version%-win.zip < %src\distrib\msw\utilmake.rsp

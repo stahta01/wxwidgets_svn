@@ -16,20 +16,13 @@
 #include "wx/utils.h"
 #include "wx/colour.h"
 
-#if defined( __cplusplus ) && defined( __VMS )
-#pragma message disable nosimpint
-#endif
 #include "X11/Xlib.h"
 #include "X11/Xatom.h"
 #include "X11/Xutil.h"
-#if defined( __cplusplus ) && defined( __VMS )
-#pragma message enable nosimpint
-#endif
 
 class wxMouseEvent;
 class wxKeyEvent;
 class wxWindow;
-class wxRegion;
 
 // ----------------------------------------------------------------------------
 // key events related functions
@@ -142,37 +135,5 @@ bool wxWindowIsVisible(Window win);
 #define XFontStructGetAscent(f) f->ascent
 #endif
 
-// ----------------------------------------------------------------------------
-// Misc functions
-// ----------------------------------------------------------------------------
-
-bool wxDoSetShape( Display* xdisplay, Window xwindow, const wxRegion& region );
-
-class WXDLLEXPORT wxXVisualInfo
-{
-public:
-    wxXVisualInfo();
-    ~wxXVisualInfo();
-    void Init( Display* dpy, XVisualInfo* visualInfo );
-
-    int                   m_visualType;   // TrueColor, DirectColor etc.
-    int                   m_visualDepth;
-    int                   m_visualColormapSize;
-    void                 *m_visualColormap;
-    int                   m_visualScreen;
-    unsigned long         m_visualRedMask;
-    unsigned long         m_visualGreenMask;
-    unsigned long         m_visualBlueMask;
-    int                   m_visualRedShift;
-    int                   m_visualGreenShift;
-    int                   m_visualBlueShift;
-    int                   m_visualRedPrec;
-    int                   m_visualGreenPrec;
-    int                   m_visualBluePrec;
-    
-    unsigned char        *m_colorCube;
-};
-
-bool wxFillXVisualInfo( wxXVisualInfo* vi, Display* dpy );
-
-#endif // _WX_PRIVX_H_
+#endif
+// _WX_PRIVX_H_

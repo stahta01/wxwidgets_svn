@@ -1073,7 +1073,7 @@ void wxFont::SetEncoding(
     RealizeResource();
 } // end of wxFont::SetEncoding
 
-void wxFont::DoSetNativeFontInfo(
+void wxFont::SetNativeFontInfo(
   const wxNativeFontInfo&           rInfo
 )
 {

@@ -7,7 +7,7 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997 Karsten Ballüder   &  Vadim Zeitlin
 //                       Ballueder@usa.net     <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _FILECONF_H
@@ -120,13 +120,11 @@ public:
                const wxString& vendorName = wxT(""),
                const wxString& localFilename = wxT(""),
                const wxString& globalFilename = wxT(""),
-               long style = wxCONFIG_USE_LOCAL_FILE,
-               wxMBConv& conv = wxConvUTF8);
+               long style = wxCONFIG_USE_LOCAL_FILE);
 
 #if wxUSE_STREAMS
     // ctor that takes an input stream.
-  wxFileConfig(wxInputStream &inStream,
-               wxMBConv& conv = wxConvUTF8);
+  wxFileConfig(wxInputStream &inStream);
 #endif // wxUSE_STREAMS
 
     // dtor will save unsaved data
@@ -209,13 +207,9 @@ private:
   wxFileConfigGroup *m_pRootGroup,      // the top (unnamed) group
                     *m_pCurrentGroup;   // the current group
 
-  wxMBConv   &m_conv;
-        
 #ifdef __UNIX__
   int m_umask;                    // the umask to use for file creation
 #endif // __UNIX__
-
-    DECLARE_NO_COPY_CLASS(wxFileConfig)
 };
 
 #endif

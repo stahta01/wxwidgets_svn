@@ -4,7 +4,6 @@
  * Authors: Guilhem Lavaux,
  *          Guillermo Rodriguez Garcia <guille@iies.es> (maintainer)
  * Purpose: GSocket main Unix-style file
- * Licence: The wxWindows licence
  * CVSID:   $Id$
  * -------------------------------------------------------------------------
  */

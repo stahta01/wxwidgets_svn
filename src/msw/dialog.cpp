@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -337,11 +337,6 @@ bool wxDialog::Show(bool show)
     }
 
     return TRUE;
-}
-
-void wxDialog::Raise()
-{
-    ::SetForegroundWindow(GetHwnd());
 }
 
 // a special version for Show(TRUE) for modal dialogs which returns return code

@@ -6,7 +6,7 @@
 // Created:     20.09.99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONT_H_BASE_
@@ -71,39 +71,6 @@ enum wxFontWeight
     wxFONTWEIGHT_MAX
 };
 
-// the font flag bits for the new font ctor accepting one combined flags word
-enum
-{
-    // no special flags: font with default weight/slant/anti-aliasing
-    wxFONTFLAG_DEFAULT          = 0,
-
-    // slant flags (default: no slant)
-    wxFONTFLAG_ITALIC           = 1 << 0,
-    wxFONTFLAG_SLANT            = 1 << 1,
-
-    // weight flags (default: medium)
-    wxFONTFLAG_LIGHT            = 1 << 2,
-    wxFONTFLAG_BOLD             = 1 << 3,
-
-    // anti-aliasing flag: force on or off (default: the current system default)
-    wxFONTFLAG_ANTIALIASED      = 1 << 4,
-    wxFONTFLAG_NOT_ANTIALIASED  = 1 << 5,
-
-    // underlined/strikethrough flags (default: no lines)
-    wxFONTFLAG_UNDERLINED       = 1 << 6,
-    wxFONTFLAG_STRIKETHROUGH    = 1 << 7,
-
-    // the mask of all currently used flags
-    wxFONTFLAG_MASK = wxFONTFLAG_ITALIC             |
-                      wxFONTFLAG_SLANT              |
-                      wxFONTFLAG_LIGHT              |
-                      wxFONTFLAG_BOLD               |
-                      wxFONTFLAG_ANTIALIASED        |
-                      wxFONTFLAG_NOT_ANTIALIASED    |
-                      wxFONTFLAG_UNDERLINED         |
-                      wxFONTFLAG_STRIKETHROUGH
-};
-
 // ----------------------------------------------------------------------------
 // wxFontBase represents a font object
 // ----------------------------------------------------------------------------
@@ -126,14 +93,6 @@ public:
         bool underlined = FALSE,    // not underlined by default
         const wxString& face = wxEmptyString,              // facename
         wxFontEncoding encoding = wxFONTENCODING_DEFAULT); // ISO8859-X, ...
-
-    // from the font components but using the font flags instead of separate
-    // parameters for each flag
-    static wxFont *New(int pointSize,
-                       wxFontFamily family,
-                       int flags = wxFONTFLAG_DEFAULT,
-                       const wxString& face = wxEmptyString,
-                       wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
     // from the (opaque) native font description object
     static wxFont *New(const wxNativeFontInfo& nativeFontDesc);
@@ -171,8 +130,7 @@ public:
     virtual void SetFaceName( const wxString& faceName ) = 0;
     virtual void SetUnderlined( bool underlined ) = 0;
     virtual void SetEncoding(wxFontEncoding encoding) = 0;
-    void SetNativeFontInfo(const wxNativeFontInfo& info)
-        { DoSetNativeFontInfo(info); }
+    virtual void SetNativeFontInfo(const wxNativeFontInfo& info);
 
     void SetNativeFontInfo(const wxString& info);
     void SetNativeFontInfoUserDesc(const wxString& info);
@@ -184,7 +142,7 @@ public:
     wxString GetWeightString() const;
 
     // Unofficial API, don't use
-    virtual void SetNoAntiAliasing( bool WXUNUSED(no) = TRUE ) {  }
+    virtual void SetNoAntiAliasing( bool no = TRUE ) {  }
     virtual bool GetNoAntiAliasing() { return FALSE; }
 
     // the default encoding is used for creating all fonts with default
@@ -196,10 +154,7 @@ protected:
     // get the internal data
     wxFontRefData *GetFontData() const
         { return (wxFontRefData *)m_refData; }
-
-    // the function called by both overloads of SetNativeFontInfo()
-    virtual void DoSetNativeFontInfo(const wxNativeFontInfo& info);
-
+    
 private:
     // the currently default encoding: by default, it's the default system
     // encoding, but may be changed by the application using
@@ -221,10 +176,10 @@ private:
     #include "wx/mgl/font.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/font.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/font.h"
 #elif defined(__WXPM__)
     #include "wx/os2/font.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/font.h"
 #endif
 
 // ----------------------------------------------------------------------------

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        toolbar.h
 // Purpose:     wxToolBar class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TOOLBAR_H_
@@ -21,7 +21,7 @@
 #include "wx/tbarbase.h"
 #include "wx/dynarray.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxToolBarNameStr;
 
 class WXDLLEXPORT wxToolBar: public wxToolBarBase
 {
@@ -31,13 +31,14 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
    * Public interface
    */
 
-   wxToolBar() { Init(); }
+   wxToolBar() : m_macToolHandles() { Init(); }
 
 
   inline wxToolBar(wxWindow *parent, wxWindowID id,
                    const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
                    long style = wxNO_BORDER|wxTB_HORIZONTAL,
                    const wxString& name = wxToolBarNameStr)
+      : m_macToolHandles()
   {
     Init();
     Create(parent, id, pos, size, style, name);
@@ -60,11 +61,11 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
 
   // Add all the buttons
 
-    virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
-    virtual wxString MacGetToolTipString( wxPoint &where ) ;
-    void OnPaint(wxPaintEvent& event) ;
-    void OnMouse(wxMouseEvent& event) ;
-    virtual void MacSuperChangedPosition() ;
+	virtual void MacHandleControlClick( WXWidget control , short controlpart ) ;
+	virtual wxString MacGetToolTipString( wxPoint &where ) ;
+	void OnPaint(wxPaintEvent& event) ;
+	void OnMouse(wxMouseEvent& event) ;
+	virtual void MacSuperChangedPosition() ;
 protected:
     // common part of all ctors
     void Init();
@@ -87,7 +88,9 @@ protected:
                                           const wxString& longHelp);
     virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
-    DECLARE_EVENT_TABLE()
+	wxArrayPtrVoid	m_macToolHandles ;
+
+	DECLARE_EVENT_TABLE()
 };
 
 #endif // wxUSE_TOOLBAR

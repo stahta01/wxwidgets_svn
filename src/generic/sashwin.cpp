@@ -8,7 +8,7 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -46,7 +46,7 @@ BEGIN_EVENT_TABLE(wxSashWindow, wxWindow)
     EVT_PAINT(wxSashWindow::OnPaint)
     EVT_SIZE(wxSashWindow::OnSize)
     EVT_MOUSE_EVENTS(wxSashWindow::OnMouseEvent)
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#ifdef __WXMSW__
     EVT_SET_CURSOR(wxSashWindow::OnSetCursor)
 #endif // wxMSW
 
@@ -617,9 +617,9 @@ void wxSashWindow::SizeWindows()
     int cw, ch;
     GetClientSize(&cw, &ch);
 
-    if (GetChildren().GetCount() == 1)
+    if (GetChildren().Number() == 1)
     {
-        wxWindow* child = GetChildren().GetFirst()->GetData();
+        wxWindow* child = (wxWindow*) (GetChildren().First()->Data());
 
         int x = 0;
         int y = 0;
@@ -658,7 +658,7 @@ void wxSashWindow::SizeWindows()
 
         child->SetSize(x, y, width, height);
     }
-    else if (GetChildren().GetCount() > 1)
+    else if (GetChildren().Number() > 1)
     {
         // Perhaps multiple children are themselves sash windows.
         // TODO: this doesn't really work because the subwindows sizes/positions
@@ -702,7 +702,7 @@ void wxSashWindow::SetSashVisible(wxSashEdgePosition edge, bool sash)
         m_sashes[edge].m_margin = 0;
 }
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#ifdef __WXMSW__
 
 // this is currently called (and needed) under MSW only...
 void wxSashWindow::OnSetCursor(wxSetCursorEvent& event)

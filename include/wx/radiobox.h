@@ -6,7 +6,7 @@
 // Created:     10.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_RADIOBOX_H_BASE_
@@ -21,6 +21,10 @@
 #include "wx/control.h"
 
 WXDLLEXPORT_DATA(extern const wxChar*) wxRadioBoxNameStr;
+
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
 
 // ----------------------------------------------------------------------------
 // wxRadioBoxBase is not a normal base class, but rather a mix-in because the
@@ -94,6 +98,10 @@ public:
 #endif // WXWIN_COMPATIBILITY_2_2
 };
 
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
+
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/radiobox.h"
 #elif defined(__WXMSW__)
@@ -104,10 +112,10 @@ public:
     #include "wx/gtk/radiobox.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/radiobox.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/radiobox.h"
 #elif defined(__WXPM__)
     #include "wx/os2/radiobox.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/radiobox.h"
 #endif
 
 #endif // wxUSE_RADIOBOX

@@ -29,7 +29,6 @@
     #include "wx/log.h"
     #include "wx/timer.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/radiobox.h"
@@ -543,7 +542,7 @@ void TextWidgetsPage::CreateText()
     {
         valueOld = m_text->GetValue();
 
-        m_sizerText->Detach( m_text );
+        m_sizerText->Remove(m_text);
         delete m_text;
     }
     else

@@ -3,7 +3,7 @@
 # Author:	Julian Smart
 # Created:	1993
 # Updated:
-# Copyright:	
+# Copyright:	(c) 1993, AIAI, University of Edinburgh
 #
 # "%W% %G%"
 #
@@ -23,7 +23,7 @@ LOCALDOCDIR=$(WXDIR)\contrib\docs\latex\gizmos
 
 !include $(WXDIR)\src\makevc.env
 
-OBJECTS = $(D)\multicell.obj $(D)\splittree.obj $(D)\editlbox.obj $(D)\dynamicsash.obj $(D)\ledctrl.obj $(D)\statpict.obj
+OBJECTS = $(D)\multicell.obj $(D)\splittree.obj $(D)\editlbox.obj $(D)\dynamicsash.obj $(D)\ledctrl.obj
 
 LIBTARGET=$(WXDIR)\lib\gizmos$(LIBEXT).lib
 

@@ -14,6 +14,9 @@
 
 %{
 #include "helpers.h"
+#ifdef OLD_GRID
+#include <wx/grid.h>
+#endif
 #include <wx/notebook.h>
 #include <wx/splitter.h>
 #include <wx/imaglist.h>
@@ -117,7 +120,7 @@ public:
                  const wxString& text,
                  int select = FALSE,
                  int imageId = -1);
-    bool InsertPage(int page,
+    bool InsertPage(int index,
                     /*wxNotebookPage*/ wxWindow *page,
                     const wxString& text,
                     bool select = FALSE,

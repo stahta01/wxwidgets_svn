@@ -11,10 +11,10 @@
 #include "wx/gtk/mdi.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/mdi.h"
-#elif defined(__WXCOCOA__)
-#include "wx/generic/mdig.h"
 #elif defined(__WXPM__)
 #include "wx/generic/mdig.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/mdi.h"
 #endif
 
 #endif

@@ -7,7 +7,7 @@
 // Created:     10.02.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_LONGLONG_H
@@ -60,10 +60,9 @@
 #elif defined(__BORLANDC__) && defined(__WIN32__) && (__BORLANDC__ >= 0x520)
     #define wxLongLong_t __int64
     #define wxLongLongSuffix i64
-    #define wxLongLongFmtSpec _T("Ld")
+    #define wxLongLongFmtSpec _T("I64")
 #elif (defined(SIZEOF_LONG_LONG) && SIZEOF_LONG_LONG >= 8)  || \
         defined(__MINGW32__) || \
-        defined(__GNUC__) || \
         defined(__CYGWIN__) || \
         defined(__WXMICROWIN__) || \
         (defined(__DJGPP__) && __DJGPP__ >= 2)
@@ -144,7 +143,7 @@
 // ----------------------------------------------------------------------------
 
 // we use iostream for wxLongLong output
-#include "wx/iosfwrap.h"
+#include "wx/ioswrap.h"
 
 #if wxUSE_LONGLONG_NATIVE
 

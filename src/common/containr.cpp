@@ -6,7 +6,7 @@
 // Created:     06.08.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -36,10 +36,6 @@
 
 #include "wx/containr.h"
 
-#ifdef __WXMAC__
-    #include "wx/scrolbar.h"
-#endif
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -51,50 +47,6 @@ wxControlContainer::wxControlContainer(wxWindow *winParent)
     m_winLastFocused =
     m_winTmpDefault =
     m_winDefault = NULL;
-}
-
-bool wxControlContainer::AcceptsFocus() const
-{
-    // if we're not shown or disabled, we can't accept focus
-    if ( m_winParent->IsShown() && m_winParent->IsEnabled() )
-    {
-        // otherwise we can accept focus either if we have no children at all
-        // (in this case we're probably not used as a container) or only when
-        // at least one child will accept focus
-        wxWindowList::Node *node = m_winParent->GetChildren().GetFirst();
-        if ( !node )
-            return TRUE;
-
-#ifdef __WXMAC__
-        // wxMac has eventually the two scrollbars as children, they don't count
-        // as real children in the algorithm mentioned above
-        bool hasRealChildren = false ;
-#endif
-        
-        while ( node )
-        {
-            wxWindow *child = node->GetData();
-
-            if ( child->AcceptsFocus() )
-            {
-                return TRUE;
-            }
-
-#ifdef __WXMAC__
-            wxScrollBar *sb = wxDynamicCast( child , wxScrollBar ) ;
-            if ( sb == NULL || !m_winParent->MacIsWindowScrollbar( sb ) )
-                hasRealChildren = true ;
-#endif
-            node = node->GetNext();
-        }
-        
-#ifdef __WXMAC__
-        if ( !hasRealChildren )
-            return TRUE ;
-#endif
-    }
-
-    return FALSE;
 }
 
 void wxControlContainer::SetLastFocus(wxWindow *win)
@@ -424,7 +376,7 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
                        _T("SetFocusToChild() => first child (0x%08lx)."),
                        (unsigned long)child->GetHandle());
 
-            *childLastFocused = child;
+            *childLastFocused = child;  // should be redundant, but it is not
             child->SetFocusFromKbd();
             return TRUE;
         }
@@ -434,4 +386,3 @@ bool wxSetFocusToChild(wxWindow *win, wxWindow **childLastFocused)
 
     return FALSE;
 }
-

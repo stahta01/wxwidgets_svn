@@ -1,16 +1,17 @@
-# Symantec C++ makefile
+# Purpose: makefile for grid example (Symantec C++)
+# Created: 2000-03-15
 
 WXDIR = $(WXWIN)
 WXLIB = $(WXDIR)\lib\wx.lib
 INCDIR = $(WXDIR)\include
 INCLUDE=$(INCDIR)
-TARGET=griddemo
+TARGET=grid
 
 include $(WXDIR)\src\makesc.env
 
-griddemo.exe: griddemo.obj $(DEFFILE) griddemo.res
+grid.exe: grid.obj $(DEFFILE) grid.res
 	*$(CC) $(LDFLAGS) -o$@ $** $(LIBS)
-    *$(RC) -k griddemo.res
+    *$(RC) -k grid.res
 
 sc32.def:
      echo EXETYPE NT > sc32.def

@@ -227,7 +227,7 @@ static int gtk_window_expose_callback( GtkWidget *widget, GdkEventExpose *gdk_ev
                         (char *)"base",
                         0, 0, -1, -1);
 
-    return FALSE;
+    return TRUE;
 }
 
 //-----------------------------------------------------------------------------
@@ -386,16 +386,13 @@ bool wxTopLevelWindowGTK::Create( wxWindow *parent,
     GTK_WIDGET_UNSET_FLAGS( m_mainWidget, GTK_CAN_FOCUS );
     gtk_container_add( GTK_CONTAINER(m_widget), m_mainWidget );
 
-    if (m_miniEdge == 0) // wxMiniFrame has its own version.
-    {
-       // For m_mainWidget themes
-       gtk_signal_connect( GTK_OBJECT(m_mainWidget), "expose_event",
+    // for m_mainWidget themes
+    gtk_signal_connect( GTK_OBJECT(m_mainWidget), "expose_event",
                 GTK_SIGNAL_FUNC(gtk_window_expose_callback), (gpointer)this );
 #ifndef __WXGTK20__
-       gtk_signal_connect( GTK_OBJECT(m_mainWidget), "draw",
+    gtk_signal_connect( GTK_OBJECT(m_mainWidget), "draw",
                 GTK_SIGNAL_FUNC(gtk_window_draw_callback), (gpointer)this );
 #endif
-    }
 
     // m_wxwindow only represents the client area without toolbar and menubar
     m_wxwindow = gtk_pizza_new();
@@ -451,17 +448,13 @@ bool wxTopLevelWindowGTK::Create( wxWindow *parent,
     else
     {
         m_gdkDecor = (long) GDK_DECOR_BORDER;
-        m_gdkFunc = (long) GDK_FUNC_MOVE;
+        m_gdkFunc = (long) GDK_FUNC_MOVE | GDK_FUNC_CLOSE;
 
         // All this is for Motif Window Manager "hints" and is supposed to be
         // recognized by other WMs as well.
         if ((style & wxCAPTION) != 0)
         {
             m_gdkDecor |= GDK_DECOR_TITLE;
-        }
-        if ((style & wxCLOSE_BOX) != 0)
-        {
-            m_gdkFunc |= GDK_FUNC_CLOSE;
         }
         if ((style & wxSYSTEM_MENU) != 0)
         {

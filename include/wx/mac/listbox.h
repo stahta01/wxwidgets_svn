@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        listbox.h
 // Purpose:     wxListBox class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -20,8 +20,6 @@
 // ----------------------------------------------------------------------------
 // simple types
 // ----------------------------------------------------------------------------
-#include  "wx/dynarray.h"
-
 
 #if wxUSE_OWNER_DRAWN
   class WXDLLEXPORT wxOwnerDrawn;
@@ -94,7 +92,7 @@ public:
     virtual void* DoGetItemClientData(int n) const;
     virtual void DoSetItemClientObject(int n, wxClientData* clientData);
     virtual wxClientData* DoGetItemClientObject(int n) const;
-    virtual void       DoSetSize(int x, int y,int width, int height,int sizeFlags = wxSIZE_AUTO ) ;
+    virtual void  	 DoSetSize(int x, int y,int width, int height,int sizeFlags = wxSIZE_AUTO ) ;
 
     // wxCheckListBox support
 #if wxUSE_OWNER_DRAWN
@@ -111,8 +109,8 @@ public:
     // Windows callbacks
 
     virtual void    SetupColours();
-    virtual void    MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
-       virtual bool MacCanFocus() const { return true ; }
+    virtual void    MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
+   	virtual bool MacCanFocus() const { return true ; }
     void OnChar(wxKeyEvent& event);
 
     void*           m_macList ;
@@ -123,9 +121,9 @@ public:
 protected:
     void            MacDestroy() ;
     void            MacDelete( int n ) ;
-    void            MacInsert( int n , const wxString& item) ;
-    void            MacAppend( const wxString& item) ;
-    void            MacSet( int n , const wxString& item ) ;
+    void            MacInsert( int n , const char * text) ;
+    void            MacAppend( const char * text) ;
+    void            MacSet( int n , const char *text ) ;
     void            MacClear() ;
     void            MacSetSelection( int n , bool select ) ;
     int             MacGetSelection() const ;
@@ -145,8 +143,8 @@ protected:
 
     int m_noItems;
     int m_selected;
-    wxString  m_typeIn ;
-    long      m_lastTypeIn ;
+	wxString  m_typeIn ;
+	long      m_lastTypeIn ;
 
     virtual wxSize DoGetBestSize() const;
 

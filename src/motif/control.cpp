@@ -64,32 +64,14 @@ bool wxControl::Create( wxWindow *parent,
     return ret;
 }
 
-bool wxControl::CreateControl(wxWindow *parent,
-                              wxWindowID id,
-                              const wxPoint& pos,
-                              const wxSize& size,
-                              long style,
-                              const wxValidator& validator,
-                              const wxString& name)
-{
-    if( !wxControlBase::CreateControl( parent, id, pos, size, style,
-                                       validator, name ) )
-        return FALSE;
-
-    m_backgroundColour = parent->GetBackgroundColour();
-    m_foregroundColour = parent->GetForegroundColour();
-    m_font = parent->GetFont();
-
-    return TRUE;
-}
-
 void wxControl::SetLabel(const wxString& label)
 {
     Widget widget = (Widget) GetLabelWidget() ;
     if (!widget)
         return;
 
-    wxXmString label_str(wxStripMenuCodes(label));
+    wxString buf(wxStripMenuCodes(label));
+    wxXmString label_str(buf);
 
     XtVaSetValues (widget,
         XmNlabelString, label_str(),
@@ -104,11 +86,23 @@ wxString wxControl::GetLabel() const
         return wxEmptyString;
 
     XmString text;
+    char *s;
     XtVaGetValues (widget,
         XmNlabelString, &text,
         NULL);
 
-    return wxXmStringToString( text );
+    if (XmStringGetLtoR (text, XmSTRING_DEFAULT_CHARSET, &s))
+    {
+        wxString str(s);
+        XtFree (s);
+        XmStringFree(text);
+        return str;
+    }
+    else
+    {
+      //        XmStringFree(text);
+        return wxEmptyString;
+    }
 }
 
 bool wxControl::ProcessCommand(wxCommandEvent & event)

@@ -85,10 +85,6 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\common\accesscmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\appcmn.cpp
 # End Source File
 # Begin Source File
@@ -149,10 +145,6 @@ SOURCE=.\common\ctrlsub.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common\datacmn.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\common\datetime.cpp
 # End Source File
 # Begin Source File
@@ -198,10 +190,6 @@ SOURCE=.\common\docmdi.cpp
 # Begin Source File
 
 SOURCE=.\common\docview.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\dpycmn.cpp
 # End Source File
 # Begin Source File
 
@@ -437,6 +425,10 @@ SOURCE=.\common\object.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\common\odbc.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\common\paper.cpp
 # End Source File
 # Begin Source File
@@ -466,6 +458,10 @@ SOURCE=.\common\radiocmn.cpp
 # Begin Source File
 
 SOURCE=.\common\regex.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\common\resource.cpp
 # End Source File
 # Begin Source File
 
@@ -518,10 +514,6 @@ SOURCE=.\common\string.cpp
 # Begin Source File
 
 SOURCE=.\common\sysopt.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\common\taskbarcmn.cpp
 # End Source File
 # Begin Source File
 
@@ -594,6 +586,10 @@ SOURCE=.\common\wincmn.cpp
 # Begin Source File
 
 SOURCE=.\common\wxchar.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\common\wxexpr.cpp
 # End Source File
 # Begin Source File
 
@@ -689,6 +685,10 @@ SOURCE=.\generic\helpext.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\generic\helphtml.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\generic\imaglist.cpp
 # End Source File
 # Begin Source File
@@ -733,6 +733,18 @@ SOURCE=.\generic\progdlgg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\generic\prop.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\generic\propform.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\generic\proplist.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\generic\sashwin.cpp
 # End Source File
 # Begin Source File
@@ -774,6 +786,10 @@ SOURCE=.\generic\tipwin.cpp
 # Begin Source File
 
 SOURCE=.\generic\treectlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\generic\treelay.cpp
 # End Source File
 # Begin Source File
 
@@ -880,6 +896,10 @@ SOURCE=.\msw\app.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\msw\ole\automtn.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\msw\bitmap.cpp
 # End Source File
 # Begin Source File
@@ -905,6 +925,10 @@ SOURCE=.\msw\cursor.cpp
 # Begin Source File
 
 SOURCE=.\msw\data.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\ole\dataobj.cpp
 # End Source File
 # Begin Source File
 
@@ -948,7 +972,11 @@ SOURCE=.\msw\dirdlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\display.cpp
+SOURCE=.\msw\ole\dropsrc.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\ole\droptgt.cpp
 # End Source File
 # Begin Source File
 
@@ -1012,7 +1040,7 @@ SOURCE=.\msw\mimetype.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\msw\minifram.cpp
+SOURCE=.\msw\ole\oleutils.cpp
 # End Source File
 # Begin Source File
 
@@ -1076,6 +1104,10 @@ SOURCE=.\msw\utilsexc.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\msw\ole\uuid.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\msw\volume.cpp
 # End Source File
 # Begin Source File
@@ -1098,35 +1130,6 @@ SOURCE=.\msw\gsockmsw.c
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 
-# Begin Group "OLE Files"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\msw\ole\automtn.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\dataobj.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\dropsrc.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\droptgt.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\oleutils.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\msw\ole\uuid.cpp
-# End Source File
-
-# End Group
 # End Group
 # Begin Group "Universal Files"
 
@@ -1323,10 +1326,6 @@ SOURCE=..\include\wx\accel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\access.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\app.h
 # End Source File
 # Begin Source File
@@ -1455,6 +1454,10 @@ SOURCE=..\include\wx\dataobj.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\date.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\datetime.h
 # End Source File
 # Begin Source File
@@ -1543,10 +1546,6 @@ SOURCE=..\include\wx\dirdlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\display.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\dnd.h
 # End Source File
 # Begin Source File
@@ -1584,6 +1583,10 @@ SOURCE=..\include\wx\encconv.h
 # Begin Source File
 
 SOURCE=..\include\wx\event.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\expr.h
 # End Source File
 # Begin Source File
 
@@ -1711,6 +1714,10 @@ SOURCE=..\include\wx\helpbase.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\helphtml.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\helpwin.h
 # End Source File
 # Begin Source File
@@ -1771,10 +1778,6 @@ SOURCE=..\include\wx\intl.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\iosfwrap.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\ioswrap.h
 # End Source File
 # Begin Source File
@@ -1828,10 +1831,6 @@ SOURCE=..\include\wx\log.h
 # Begin Source File
 
 SOURCE=..\include\wx\longlong.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wx\math.h
 # End Source File
 # Begin Source File
 
@@ -1899,6 +1898,10 @@ SOURCE=..\include\wx\object.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\odbc.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\ownerdrw.h
 # End Source File
 # Begin Source File
@@ -1947,6 +1950,18 @@ SOURCE=..\include\wx\progdlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\prop.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\propform.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\proplist.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\quantize.h
 # End Source File
 # Begin Source File
@@ -1959,15 +1974,15 @@ SOURCE=..\include\wx\radiobut.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\wx\rawbmp.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\wx\regex.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\include\wx\region.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\resource.h
 # End Source File
 # Begin Source File
 
@@ -2115,6 +2130,10 @@ SOURCE=..\include\wx\thread.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\time.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\timer.h
 # End Source File
 # Begin Source File
@@ -2231,6 +2250,10 @@ SOURCE=..\include\wx\wxchar.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\wx\wxexpr.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\include\wx\wxhtml.h
 # End Source File
 # Begin Source File
@@ -2321,6 +2344,10 @@ SOURCE=..\include\wx\generic\gridg.h
 # Begin Source File
 
 SOURCE=..\include\wx\generic\helpext.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wx\generic\helphtml.h
 # End Source File
 # Begin Source File
 

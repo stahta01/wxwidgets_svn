@@ -28,7 +28,6 @@
 #ifndef WX_PRECOMP
     #include "wx/log.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/radiobox.h"
@@ -42,7 +41,7 @@
 #include "wx/sizer.h"
 
 #include "widgets.h"
-#if wxUSE_SPINBTN
+#if 1
 #include "icons/spinbtn.xpm"
 
 // ----------------------------------------------------------------------------
@@ -286,13 +285,13 @@ void SpinBtnWidgetsPage::CreateSpin()
             val = valOld;
         }
 
-        m_sizerSpin->Detach( m_spinbtn );
-        m_sizerSpin->Detach( m_spinctrl );
+        m_sizerSpin->Remove(m_spinbtn);
+        m_sizerSpin->Remove(m_spinctrl);
 
         // there are 3 spacers left
-        m_sizerSpin->Remove( 0 );
-        m_sizerSpin->Remove( 0 );
-        m_sizerSpin->Remove( 0 );
+        m_sizerSpin->Remove((int)0);
+        m_sizerSpin->Remove((int)0);
+        m_sizerSpin->Remove((int)0);
 
         delete m_spinbtn;
         delete m_spinctrl;
@@ -428,4 +427,3 @@ void SpinBtnWidgetsPage::OnSpinCtrl(wxCommandEvent& event)
     wxLogMessage(_T("Spin control value changed, now %d"), value);
 }
 #endif
-    // wxUSE_SPINBTN

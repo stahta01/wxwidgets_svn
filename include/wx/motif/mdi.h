@@ -12,7 +12,7 @@
 #ifndef _WX_MDI_H_
 #define _WX_MDI_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "mdi.h"
 #endif
 
@@ -26,6 +26,9 @@ but wxMDIChildFrame::GetParent should return the parent frame.
 
 #include "wx/frame.h"
 #include "wx/notebook.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxFrameNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxStatusLineNameStr;
 
 class WXDLLEXPORT wxMDIClientWindow;
 class WXDLLEXPORT wxMDIChildFrame;
@@ -228,8 +231,6 @@ public:
     
     // Implementation
     void OnPageChanged(wxNotebookEvent& event);
-
-    int FindPage(const wxNotebookPage* page);
     
 protected:
     virtual void DoSetSize(int x, int y,
@@ -240,6 +241,7 @@ protected:
     void DoGetClientSize(int *width, int *height) const;
     void DoGetSize(int *width, int *height) const ;
     void DoGetPosition(int *x, int *y) const ;
+    
     
 private:
     DECLARE_EVENT_TABLE()

@@ -41,6 +41,11 @@ class WXDLLEXPORT wxDC;
 #define wxDragImage wxGenericDragImage
 #define sm_classwxDragImage sm_classwxGenericDragImage
 
+#elif defined(__WXSTUBS__)
+#include "wx/generic/dragimgg.h"
+#define wxDragImage wxGenericDragImage
+#define sm_classwxDragImage sm_classwxGenericDragImage
+
 #endif
 
 #endif // wxUSE_DRAGIMAGE

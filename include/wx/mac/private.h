@@ -5,20 +5,20 @@
 //              with "wx".
 // Author:      Stefan Csomor
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PRIVATE_H_
 #define _WX_PRIVATE_H_
 
 #include "wx/defs.h"
-#include "wx/app.h"
 
-#ifdef __DARWIN__
+#if defined(__POWERPC__) && defined(__DARWIN__)
 #    include <Carbon/Carbon.h>
+#    define TARGET_CARBON 1
 #else
 #    include <Quickdraw.h>
 #    include <Appearance.h>
@@ -50,14 +50,14 @@ public:
     GrafPtr GetCurrentPort() { return m_currentPort ; }
 
 private:
-    GrafPtr          m_currentPort ;
-    GrafPtr          m_oldPort ;
-    RgnHandle          m_clip ;
+    GrafPtr	      m_currentPort ;
+    GrafPtr	      m_oldPort ;
+    RgnHandle	      m_clip ;
     ThemeDrawingState m_drawingState ;
-    short          m_textFont ;
-    short          m_textSize ;
-    short          m_textStyle ;
-    short           m_textMode ;
+    short	      m_textFont ;
+    short	      m_textSize ;
+    short	      m_textStyle ;
+    short 	      m_textMode ;
 } ;
 
 class WXDLLEXPORT wxMacPortSetter
@@ -110,7 +110,6 @@ bool wxMacConvertEventToRecord( EventRef event , EventRecord *rec) ;
 // filefn.h
 WXDLLEXPORT wxString wxMacFSSpec2MacFilename( const FSSpec *spec ) ;
 WXDLLEXPORT void wxMacFilename2FSSpec( const char *path , FSSpec *spec ) ;
-WXDLLEXPORT void wxMacFilename2FSSpec( const wxChar *path , FSSpec *spec ) ;
 #  ifndef __DARWIN__
 // Mac file names are POSIX (Unix style) under Darwin, so these are not needed
 WXDLLEXPORT wxString wxMacFSSpec2UnixFilename( const FSSpec *spec ) ;
@@ -124,12 +123,12 @@ WXDLLEXPORT wxString wxMacFindFolder(short vRefNum,
                                      OSType folderType,
                                      Boolean createFolder);
 
-GWorldPtr         wxMacCreateGWorld( int width , int height , int depth ) ;
-void                 wxMacDestroyGWorld( GWorldPtr gw ) ;
-PicHandle         wxMacCreatePict( GWorldPtr gw , GWorldPtr mask = NULL ) ;
+GWorldPtr 	    wxMacCreateGWorld( int width , int height , int depth ) ;
+void 		        wxMacDestroyGWorld( GWorldPtr gw ) ;
+PicHandle 	    wxMacCreatePict( GWorldPtr gw , GWorldPtr mask = NULL ) ;
 CIconHandle     wxMacCreateCIcon(GWorldPtr image , GWorldPtr mask , short dstDepth , short iconSize  ) ;
-void                 wxMacSetColorTableEntry( CTabHandle newColors , int index , int red , int green ,  int blue ) ;
-CTabHandle         wxMacCreateColorTable( int numColors ) ;
+void 		        wxMacSetColorTableEntry( CTabHandle newColors , int index , int red , int green ,  int blue ) ;
+CTabHandle 	    wxMacCreateColorTable( int numColors ) ;
 void wxMacCreateBitmapButton( ControlButtonContentInfo*info , const wxBitmap& bitmap , int forceType = 0 ) ;
 
 #define MAC_WXCOLORREF(a) (*((RGBColor*)&(a)))
@@ -142,21 +141,6 @@ void wxMacCreateBitmapButton( ControlButtonContentInfo*info , const wxBitmap& bi
 #define MAC_WXRECPTR(a) ((Rect*)a)
 #define MAC_WXPOINTPTR(a) ((Point*)a)
 #define MAC_WXHMENU(a) ((MenuHandle)a)
-
-//---------------------------------------------------------------------------
-// wxMac string conversions
-//---------------------------------------------------------------------------
-
-void wxMacSetupConverters() ;
-void wxMacCleanupConverters() ;
-
-void wxMacStringToPascal( const wxString&from , StringPtr to ) ;
-wxString wxMacMakeStringFromPascal( ConstStringPtr from ) ;
-
-wxCharBuffer wxMacStringToCString( const wxString &from ) ;
-wxWCharBuffer wxMacStringToWString( const wxString &from ) ;
-wxString wxMacMakeStringFromCString( const char * from , int len ) ;
-wxString wxMacMakeStringFromCString( const char * from ) ;
 
 #if TARGET_CARBON
 
@@ -218,81 +202,6 @@ private:
     CFStringRef m_cfs;
     bool m_release ;                                                        
 } ;
-
-//  CFStringRef wxMacStringToCFString( const wxString &str ) ;
-//  wxString wxMacMakeStringFromCFString( CFStringRef cf ) ;
-#endif
-
-#if 0
-
-void wxMacConvertToPC( const char *from , char *to , int len ) ;
-void wxMacConvertFromPC( const char *from , char *to , int len ) ;
-void wxMacConvertToPC( const char *from , char *to , int len ) ;
-
-wxString wxMacMakeMacStringFromPC( const wxChar * p ) ;
-
-wxString wxMacMakePCStringFromMac( const wxChar * p ) ;
-
-
-// converts this c string into a wxString with optional mac 2 pc encoding
-wxString wxMacMakeStringFromMacString( const wxChar* from , bool mac2pcEncoding ) ;
-
-// converts this c string into a wxString with pc 2 mac encoding if s_macDefaultEncodingIsPC
-inline wxString wxMacMakeStringFromMacString( const wxChar* from  ) 
-  { return wxMacMakeStringFromMacString( from , wxApp::s_macDefaultEncodingIsPC ) ; }
-
-#if wxUSE_UNICODE
-
-wxString wxMacMakeMacStringFromPC( const char * p ) ;
-
-wxString wxMacMakePCStringFromMac( const char * p ) ;
-
-// converts this c string into a wxString with optional mac 2 pc encoding
-wxString wxMacMakeStringFromMacString( const char* from , bool mac2pcEncoding ) ;
-
-// converts this c string into a wxString with pc 2 mac encoding if s_macDefaultEncodingIsPC
-inline wxString wxMacMakeStringFromMacString( const char* from  ) 
-  { return wxMacMakeStringFromMacString( from , wxApp::s_macDefaultEncodingIsPC ) ; }
-
-#endif
-
-// converts this c string into a wxString with pc 2 mac encoding if s_macDefaultEncodingIsPC
-inline wxString wxMacMakeStringFromMacString( const wxString& from  ) 
-  { return wxApp::s_macDefaultEncodingIsPC ? 
-      wxMacMakeStringFromMacString( from.c_str() , true ) : from ; }
-
-// 
-// Pascal Strings
-//
-
-// converts this string into a pascal with optional pc 2 mac encoding
-void wxMacStringToPascal( const wxChar * from , StringPtr to , bool pc2macEncoding ) ;
-
-// converts this string into a pascal with pc 2 mac encoding if s_macDefaultEncodingIsPC
-inline void wxMacStringToPascal( const wxChar * from , StringPtr to ) 
-  { wxMacStringToPascal( from , to , wxApp::s_macDefaultEncodingIsPC ) ; }
-
-// converts this string into a pascal with optional mac 2 pc encoding
-wxString wxMacMakeStringFromPascal( ConstStringPtr from , bool mac2pcEncoding ) ;
-
-// converts this pascal string into a wxString with pc 2 mac encoding if s_macDefaultEncodingIsPC
-inline wxString wxMacMakeStringFromPascal( ConstStringPtr from  ) 
-  { return wxMacMakeStringFromPascal( from , wxApp::s_macDefaultEncodingIsPC ) ; }
-
-// 
-// CFStringRefs (Carbon only)
-//
-
-#if TARGET_CARBON
-// converts this string into a carbon foundation string with optional pc 2 mac encoding
-CFStringRef wxMacStringToCFString( const wxString &str , bool pc2macEncoding ) ;
-
-// converts this string into a carbon foundation string with optional pc 2 mac encoding
-inline CFStringRef wxMacStringToCFString( const wxString &str ) 
-  { return wxMacStringToCFString( str , wxApp::s_macDefaultEncodingIsPC ) ; }
-
-#endif //TARGET_CARBON
-
 #endif
 
 #endif

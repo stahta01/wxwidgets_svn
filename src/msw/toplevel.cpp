@@ -6,7 +6,7 @@
 // Created:     24.09.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -42,7 +42,7 @@
 
 #include "wx/msw/private.h"
 
-#include "wx/display.h"
+#include "wx/popupwin.h"
 
 #ifndef ICON_BIG
     #define ICON_BIG 1
@@ -191,7 +191,7 @@ WXDWORD wxTopLevelWindowMSW::MSWGetStyle(long style, WXDWORD *exflags) const
 
     if ( exflags )
     {
-#if !defined(__WIN16__) 
+#if !defined(__WIN16__) && !defined(__SC__)
         if ( !(GetExtraStyle() & wxTOPLEVEL_EX_DIALOG) )
         {
             if ( style & wxFRAME_TOOL_WINDOW )
@@ -414,8 +414,6 @@ bool wxTopLevelWindowMSW::Create(wxWindow *parent,
                                  long style,
                                  const wxString& name)
 {
-    bool ret = false;
-
     // init our fields
     Init();
 
@@ -460,20 +458,15 @@ bool wxTopLevelWindowMSW::Create(wxWindow *parent,
         if ( style & (wxRESIZE_BORDER | wxCAPTION) )
             dlgTemplate->style |= DS_MODALFRAME;
 
-        ret = CreateDialog(dlgTemplate, title, pos, size);
+        bool ret = CreateDialog(dlgTemplate, title, pos, size);
         free(dlgTemplate);
+
+        return ret;
     }
     else // !dialog
     {
-        ret = CreateFrame(title, pos, size);
+        return CreateFrame(title, pos, size);
     }
-
-    if ( ret && !(GetWindowStyleFlag() & wxCLOSE_BOX) )
-    {
-        EnableCloseButton(false);
-    }
-
-    return ret;
 }
 
 wxTopLevelWindowMSW::~wxTopLevelWindowMSW()
@@ -524,10 +517,7 @@ bool wxTopLevelWindowMSW::Show(bool show)
         }
         else // just show
         {
-           if ( GetWindowStyle() & wxFRAME_TOOL_WINDOW )
-               nShowCmd = SW_SHOWNA;
-           else
-               nShowCmd = SW_SHOW;
+            nShowCmd = SW_SHOW;
         }
     }
     else // hide
@@ -607,22 +597,18 @@ void wxTopLevelWindowMSW::Restore()
 
 bool wxTopLevelWindowMSW::ShowFullScreen(bool show, long style)
 {
-    if ( show == IsFullScreen() )
+    if (show)
     {
-        // nothing to do
-        return TRUE;
-    }
+        if (IsFullScreen())
+            return FALSE;
 
-    m_fsIsShowing = show;
-
-    if ( show )
-    {
+        m_fsIsShowing = TRUE;
         m_fsStyle = style;
 
         // zap the frame borders
 
         // save the 'normal' window style
-        m_fsOldWindowStyle = GetWindowLong(GetHwnd(), GWL_STYLE);
+        m_fsOldWindowStyle = GetWindowLong((HWND)GetHWND(), GWL_STYLE);
 
         // save the old position, width & height, maximize state
         m_fsOldSize = GetRect();
@@ -635,64 +621,44 @@ bool wxTopLevelWindowMSW::ShowFullScreen(bool show, long style)
         if (style & wxFULLSCREEN_NOBORDER)
             offFlags |= WS_BORDER | WS_THICKFRAME;
         if (style & wxFULLSCREEN_NOCAPTION)
-            offFlags |= WS_CAPTION | WS_SYSMENU;
+            offFlags |= (WS_CAPTION | WS_SYSMENU);
 
-        newStyle &= ~offFlags;
+        newStyle &= (~offFlags);
 
         // change our window style to be compatible with full-screen mode
-        ::SetWindowLong(GetHwnd(), GWL_STYLE, newStyle);
+        ::SetWindowLong((HWND)GetHWND(), GWL_STYLE, newStyle);
 
-        wxRect rect;
-#if wxUSE_DISPLAY
-        // resize to the size of the display containing us
-        int dpy = wxDisplay::GetFromWindow(this);
-        if ( dpy != wxNOT_FOUND )
-        {
-            rect = wxDisplay(dpy).GetGeometry();
-        }
-        else // fall back to the main desktop
-#else // wxUSE_DISPLAY
-        {
-            // resize to the size of the desktop
-            wxCopyRECTToRect(wxGetWindowRect(::GetDesktopWindow()), rect);
-        }
-#endif // wxUSE_DISPLAY
+        // resize to the size of the desktop
+        int width, height;
 
-        SetSize(rect);
+        RECT rect = wxGetWindowRect(::GetDesktopWindow());
+        width = rect.right - rect.left;
+        height = rect.bottom - rect.top;
+
+        SetSize(width, height);
 
         // now flush the window style cache and actually go full-screen
-        long flags = SWP_FRAMECHANGED;
+        SetWindowPos((HWND)GetHWND(), HWND_TOP, 0, 0, width, height, SWP_FRAMECHANGED);
 
-        // showing the frame full screen should also show it if it's still
-        // hidden
-        if ( !IsShown() )
-        {
-            // don't call wxWindow version to avoid flicker from calling
-            // ::ShowWindow() -- we're going to show the window at the correct
-            // location directly below -- but do call the wxWindowBase version
-            // to sync the internal m_isShown flag
-            wxWindowBase::Show();
-
-            flags |= SWP_SHOWWINDOW;
-        }
-
-        SetWindowPos(GetHwnd(), HWND_TOP,
-                     rect.x, rect.y, rect.width, rect.height,
-                     flags);
-
-        // finally send an event allowing the window to relayout itself &c
-        wxSizeEvent event(rect.GetSize(), GetId());
+        wxSizeEvent event(wxSize(width, height), GetId());
         GetEventHandler()->ProcessEvent(event);
-    }
-    else // stop showing full screen
-    {
-        Maximize(m_fsIsMaximized);
-        SetWindowLong(GetHwnd(),GWL_STYLE, m_fsOldWindowStyle);
-        SetWindowPos(GetHwnd(),HWND_TOP,m_fsOldSize.x, m_fsOldSize.y,
-            m_fsOldSize.width, m_fsOldSize.height, SWP_FRAMECHANGED);
-    }
 
-    return TRUE;
+        return TRUE;
+    }
+    else
+    {
+        if (!IsFullScreen())
+            return FALSE;
+
+        m_fsIsShowing = FALSE;
+
+        Maximize(m_fsIsMaximized);
+        SetWindowLong((HWND)GetHWND(),GWL_STYLE, m_fsOldWindowStyle);
+        SetWindowPos((HWND)GetHWND(),HWND_TOP,m_fsOldSize.x, m_fsOldSize.y,
+            m_fsOldSize.width, m_fsOldSize.height, SWP_FRAMECHANGED);
+
+        return TRUE;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -732,9 +698,9 @@ bool wxTopLevelWindowMSW::EnableCloseButton(bool enable)
     HMENU hmenu = ::GetSystemMenu(GetHwnd(), FALSE /* get it */);
     if ( !hmenu )
     {
-        // no system menu at all -- ok if we want to remove the close button
-        // anyhow, but bad if we want to show it
-        return !enable;
+        wxLogLastError(_T("GetSystemMenu"));
+
+        return FALSE;
     }
 
     // enabling/disabling the close item from it also automatically
@@ -828,12 +794,6 @@ void wxTopLevelWindowMSW::OnActivate(wxActivateEvent& event)
     {
         // remember the last focused child if it is our child
         m_winLastFocused = FindFocus();
-
-        if ( m_winLastFocused )
-        {
-            // let it know that it doesn't have focus any more
-            m_winLastFocused->HandleKillFocus((WXHWND)NULL);
-        }
 
         // so we NULL it out if it's a child from some other frame
         wxWindow *win = m_winLastFocused;

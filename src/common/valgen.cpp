@@ -44,13 +44,13 @@
   #include "wx/slider.h"
 #endif
 
- 
+#if wxUSE_SPINCTRL && !defined(__WIN16__)
   #include "wx/spinctrl.h"
-
-#if wxUSE_SPINBTN 
+#endif
+#if wxUSE_SPINBTN && !defined(__WIN16__)
   #include "wx/spinbutt.h"
 #endif
-#if wxUSE_CHECKLISTBOX 
+#if wxUSE_CHECKLISTBOX && !defined(__WIN16__)
   #include "wx/checklst.h"
 #endif
 
@@ -203,7 +203,6 @@ bool wxGenericValidator::TransferToWindow(void)
 #endif
 
     // string controls
-#if wxUSE_BUTTON
     if (m_validatorWindow->IsKindOf(CLASSINFO(wxButton)) )
     {
         wxButton* pControl = (wxButton*) m_validatorWindow;
@@ -213,7 +212,6 @@ bool wxGenericValidator::TransferToWindow(void)
             return TRUE;
         }
     } else
-#endif
 #if wxUSE_COMBOBOX
     if (m_validatorWindow->IsKindOf(CLASSINFO(wxComboBox)) )
     {
@@ -265,7 +263,6 @@ bool wxGenericValidator::TransferToWindow(void)
             return TRUE;
         }
     } else
-#if wxUSE_TEXTCTRL
     if (m_validatorWindow->IsKindOf(CLASSINFO(wxTextCtrl)) )
     {
         wxTextCtrl* pControl = (wxTextCtrl*) m_validatorWindow;
@@ -282,7 +279,6 @@ bool wxGenericValidator::TransferToWindow(void)
             return TRUE;
         }
     } else
-#endif
     // array controls
 #if wxUSE_CHECKLISTBOX && !defined(__WIN16__)
     // NOTE: wxCheckListBox is a wxListBox, so wxCheckListBox MUST come first:
@@ -432,7 +428,6 @@ bool wxGenericValidator::TransferFromWindow(void)
   } else
 #endif
   // string controls
-#if wxUSE_BUTTON
   if (m_validatorWindow->IsKindOf(CLASSINFO(wxButton)) )
   {
     wxButton* pControl = (wxButton*) m_validatorWindow;
@@ -441,8 +436,8 @@ bool wxGenericValidator::TransferFromWindow(void)
       *m_pString = pControl->GetLabel() ;
       return TRUE;
     }
-  } else
-#endif
+  }
+  else
 #if wxUSE_COMBOBOX
   if (m_validatorWindow->IsKindOf(CLASSINFO(wxComboBox)) )
   {
@@ -484,7 +479,6 @@ bool wxGenericValidator::TransferFromWindow(void)
       return TRUE;
     }
   } else
-#if wxUSE_TEXTCTRL
   if (m_validatorWindow->IsKindOf(CLASSINFO(wxTextCtrl)) )
   {
     wxTextCtrl* pControl = (wxTextCtrl*) m_validatorWindow;
@@ -499,7 +493,6 @@ bool wxGenericValidator::TransferFromWindow(void)
         return TRUE;
     }
   } else
-#endif
   // array controls
 #if wxUSE_CHECKLISTBOX
 #ifndef __WIN16__

@@ -10,7 +10,7 @@
 // Created:     07/07/1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -524,8 +524,6 @@ public:
 
     wxFTP *m_ftp;
     size_t m_ftpsize;
-
-    DECLARE_NO_COPY_CLASS(wxInputFTPStream)
 };
 
 class wxOutputFTPStream : public wxSocketOutputStream
@@ -560,8 +558,6 @@ public:
     }
 
     wxFTP *m_ftp;
-
-    DECLARE_NO_COPY_CLASS(wxOutputFTPStream)
 };
 
 wxSocketClient *wxFTP::GetPort()
@@ -894,7 +890,7 @@ wxList *wxFTP::GetList(const wxString& wildcard, bool details)
 {
  wxSocketBase *sock = GetPort();
  if (!sock)
-  return NULL;
+  return FALSE;
  wxList *file_list = new wxList;
  wxString line;
  // NLST : List of Filenames (including Directory's !)

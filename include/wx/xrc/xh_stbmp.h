@@ -20,7 +20,6 @@
 
 class WXXMLDLLEXPORT wxStaticBitmapXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxStaticBitmapXmlHandler)
 public:
     wxStaticBitmapXmlHandler();
     virtual wxObject *DoCreateResource();

@@ -32,7 +32,7 @@ class WXDLLEXPORT wxImage;
 class WXDLLEXPORT wxMask;
 class WXDLLEXPORT wxPalette;
 
-#if defined(__WXMGL__) || defined(__WXMAC__) || defined(__WXCOCOA__) || defined(__WXMOTIF__) || defined(__WXX11__)
+#if defined(__WXMGL__) || defined(__WXMAC__)
 // Only used by some ports
 // FIXME -- make all ports (but MSW which uses wxGDIImage) use these base classes
 
@@ -117,18 +117,8 @@ public:
                           const wxPalette *palette = (wxPalette *)NULL) const = 0;
     virtual bool LoadFile(const wxString &name, wxBitmapType type) = 0;
 
-    /*
-       If raw bitmap access is supported (see wx/rawbmp.h), the following
-       methods should be implemented:
-
-       virtual bool GetRawData(wxRawBitmapData *data) = 0;
-       virtual void UngetRawData(wxRawBitmapData *data) = 0;
-     */
-
-#if wxUSE_PALETTE
     virtual wxPalette *GetPalette() const = 0;
     virtual void SetPalette(const wxPalette& palette) = 0;
-#endif // wxUSE_PALETTE
 
 #if WXWIN_COMPATIBILITY
     wxPalette *GetColourMap() const { return GetPalette(); }
@@ -167,7 +157,7 @@ protected:
 #if defined(__WXMSW__)
 #include "wx/msw/bitmap.h"
 #elif defined(__WXMOTIF__)
-#include "wx/x11/bitmap.h"
+#include "wx/motif/bitmap.h"
 #elif defined(__WXGTK__)
 #include "wx/gtk/bitmap.h"
 #elif defined(__WXX11__)
@@ -176,10 +166,10 @@ protected:
 #include "wx/mgl/bitmap.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/bitmap.h"
-#elif defined(__WXCOCOA__)
-#include "wx/cocoa/bitmap.h"
 #elif defined(__WXPM__)
 #include "wx/os2/bitmap.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/bitmap.h"
 #endif
 
 #endif

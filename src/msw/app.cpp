@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -65,13 +65,17 @@
     WX_DEFINE_OBJARRAY(wxMsgArray);
 #endif // wxUSE_THREADS
 
+#if wxUSE_WX_RESOURCES
+    #include "wx/resource.h"
+#endif
+
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
 #endif // wxUSE_TOOLTIPS
 
 // OLE is used for drag-and-drop, clipboard, OLE Automation..., but some
 // compilers don't support it (missing headers, libs, ...)
-#if defined(__GNUWIN32_OLD__) || defined(__SYMANTEC__) || defined(__SALFORDC__)
+#if defined(__GNUWIN32_OLD__) || defined(__SC__) || defined(__SALFORDC__)
     #undef wxUSE_OLE
 
     #define  wxUSE_OLE 0
@@ -84,7 +88,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__WXMICROWIN__)) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__) || defined(__WXMICROWIN__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -151,11 +155,7 @@ HICON wxDEFAULT_MDIPARENTFRAME_ICON = (HICON) NULL;
 
 HBRUSH wxDisableButtonBrush = (HBRUSH) 0;
 
-#ifdef __DIGITALMARS__
-extern "C" LRESULT WXDLLEXPORT APIENTRY wxWndProc(HWND, UINT, WPARAM, LPARAM);
-#else
 LRESULT WXDLLEXPORT APIENTRY wxWndProc(HWND, UINT, WPARAM, LPARAM);
-#endif
 
 // FIXME wxUSE_ON_FATAL_EXCEPTION is only supported for VC++ now because it
 //       needs compiler support for Win32 SEH. Others (especially Borland)
@@ -191,7 +191,7 @@ END_EVENT_TABLE()
 bool wxApp::Initialize()
 {
     // the first thing to do is to check if we're trying to run an Unicode
-    // program under Win9x w/o MSLU emulation layer - if so, abort right now
+    // program under Win9x w/o MSLU emulation layer - if so, abort right now 
     // as it has no chance to work
 #if wxUSE_UNICODE && !wxUSE_UNICODE_MSLU
     if ( wxGetOsVersion() != wxWINDOWS_NT )
@@ -224,6 +224,10 @@ bool wxApp::Initialize()
 
     wxInitializeStockLists();
     wxInitializeStockObjects();
+
+#if wxUSE_WX_RESOURCES
+    wxInitializeResourceSystem();
+#endif
 
     wxBitmap::InitStandardHandlers();
 
@@ -507,6 +511,12 @@ void wxApp::CleanUp()
 
     wxModule::CleanUpModules();
 
+#if wxUSE_WX_RESOURCES
+    wxCleanUpResourceSystem();
+
+    //  wxDefaultResourceTable->ClearTable();
+#endif
+
     wxDeleteStockObjects();
 
     // Destroy all GDI lists, etc.
@@ -564,14 +574,13 @@ void wxApp::CleanUp()
 #endif
 
     delete wxWinHandleHash;
-    wxWinHandleHash = NULL; // Set to null in case anything later tries to ref it.
 
+    // GL: I'm annoyed ... I don't know where to put this and I don't want to
+    // create a module for that as it's part of the core.
     delete wxPendingEvents;
-    wxPendingEvents = NULL; // Set to null because wxAppBase::wxEvtHandler is destroyed later.
 
 #if wxUSE_THREADS
     delete wxPendingEventsLocker;
-    wxPendingEventsLocker = NULL; // Set to null because wxAppBase::wxEvtHandler is destroyed later.
     // If we don't do the following, we get an apparent memory leak
 #if wxUSE_VALIDATORS
     ((wxEvtHandler&) wxDefaultValidator).ClearEventLocker();
@@ -692,10 +701,8 @@ int wxEntry(WXHINSTANCE hInstance,
         // we can't simply double-click on the error message and get to that
         // line in the source. So VC++ at least, let's have a sensible default.
 #ifdef __VISUALC__
-#if wxUSE_LOG
         wxLog::SetTimestamp(NULL);
-#endif // wxUSE_LOG
-#endif // __VISUALC__
+#endif
 
         // init the app
         int retValue = wxEntryInitGui() && wxTheApp->OnInit() ? 0 : -1;
@@ -1131,31 +1138,33 @@ bool wxApp::SendIdleEvents()
 // Send idle event to window and all subwindows
 bool wxApp::SendIdleEvents(wxWindow* win)
 {
+    bool needMore = FALSE;
+
     wxIdleEvent event;
     event.SetEventObject(win);
     win->GetEventHandler()->ProcessEvent(event);
 
-    bool needMore = event.MoreRequested();
+    if (event.MoreRequested())
+        needMore = TRUE;
 
-    wxWindowList::Node *node = win->GetChildren().GetFirst();
-    while ( node )
+    wxNode* node = win->GetChildren().First();
+    while (node)
     {
-        wxWindow *win = node->GetData();
+        wxWindow* win = (wxWindow*) node->Data();
         if (SendIdleEvents(win))
             needMore = TRUE;
 
-        node = node->GetNext();
+        node = node->Next();
     }
-
     return needMore;
 }
 
 void wxApp::DeletePendingObjects()
 {
-    wxNode *node = wxPendingDelete.GetFirst();
+    wxNode *node = wxPendingDelete.First();
     while (node)
     {
-        wxObject *obj = node->GetData();
+        wxObject *obj = (wxObject *)node->Data();
 
         delete obj;
 
@@ -1164,7 +1173,7 @@ void wxApp::DeletePendingObjects()
 
         // Deleting one object may have deleted other pending
         // objects, so start from beginning of list again.
-        node = wxPendingDelete.GetFirst();
+        node = wxPendingDelete.First();
     }
 }
 
@@ -1185,17 +1194,6 @@ void wxApp::OnQueryEndSession(wxCloseEvent& event)
     }
 }
 
-typedef struct _WXADllVersionInfo
-{
-        DWORD cbSize;
-        DWORD dwMajorVersion;                   // Major version
-        DWORD dwMinorVersion;                   // Minor version
-        DWORD dwBuildNumber;                    // Build number
-        DWORD dwPlatformID;                     // DLLVER_PLATFORM_*
-} WXADLLVERSIONINFO;
-
-typedef HRESULT (CALLBACK* WXADLLGETVERSIONPROC)(WXADLLVERSIONINFO *);
-
 /* static */
 int wxApp::GetComCtl32Version()
 {
@@ -1215,25 +1213,17 @@ int wxApp::GetComCtl32Version()
 
         // do we have it?
         HMODULE hModuleComCtl32 = ::GetModuleHandle(wxT("COMCTL32"));
-        BOOL bFreeComCtl32 = FALSE ;
-        if(!hModuleComCtl32)
-        {
-            hModuleComCtl32 = ::LoadLibrary(wxT("COMCTL32.DLL")) ;
-            if(hModuleComCtl32)
-            {
-                bFreeComCtl32 = TRUE ;
-            }
-        }
 
         // if so, then we can check for the version
         if ( hModuleComCtl32 )
         {
             // try to use DllGetVersion() if available in _headers_
-                WXADLLGETVERSIONPROC pfnDllGetVersion = (WXADLLGETVERSIONPROC)
+            #ifdef DLLVER_PLATFORM_WINDOWS // defined in shlwapi.h
+                DLLGETVERSIONPROC pfnDllGetVersion = (DLLGETVERSIONPROC)
                     ::GetProcAddress(hModuleComCtl32, "DllGetVersion");
                 if ( pfnDllGetVersion )
                 {
-                    WXADLLVERSIONINFO dvi;
+                    DLLVERSIONINFO dvi;
                     dvi.cbSize = sizeof(dvi);
 
                     HRESULT hr = (*pfnDllGetVersion)(&dvi);
@@ -1250,6 +1240,7 @@ int wxApp::GetComCtl32Version()
                                             dvi.dwMinorVersion;
                     }
                 }
+            #endif
                 // DllGetVersion() unavailable either during compile or
                 // run-time, try to guess the version otherwise
                 if ( !s_verComCtl32 )
@@ -1288,11 +1279,6 @@ int wxApp::GetComCtl32Version()
                     }
                 }
         }
-
-        if(bFreeComCtl32)
-        {
-            ::FreeLibrary(hModuleComCtl32) ;
-        }
     }
 
     return s_verComCtl32;
@@ -1301,15 +1287,10 @@ int wxApp::GetComCtl32Version()
 
 void wxExit()
 {
-    if ( wxTheApp )
-    {
-        wxTheApp->ExitMainLoop();
-    }
-    else
-    {
-        // what else can we do?
-        exit(-1);
-    }
+    wxLogError(_("Fatal error: exiting"));
+
+    wxApp::CleanUp();
+    exit(0);
 }
 
 // Yield to incoming messages
@@ -1319,11 +1300,9 @@ bool wxApp::Yield(bool onlyIfNeeded)
     // MT-FIXME
     static bool s_inYield = FALSE;
 
-#if wxUSE_LOG
     // disable log flushing from here because a call to wxYield() shouldn't
     // normally result in message boxes popping up &c
     wxLog::Suspend();
-#endif // wxUSE_LOG
 
     if ( s_inYield )
     {
@@ -1354,10 +1333,8 @@ bool wxApp::Yield(bool onlyIfNeeded)
     // if there are pending events, we must process them.
     ProcessPendingEvents();
 
-#if wxUSE_LOG
     // let the logs be flashed again
     wxLog::Resume();
-#endif // wxUSE_LOG
 
     s_inYield = FALSE;
 
@@ -1404,6 +1381,6 @@ void wxWakeUpIdle()
 
 // For some reason, with MSVC++ 1.5, WinMain isn't linked in properly
 // if in a separate file. So include it here to ensure it's linked.
-#if (defined(__VISUALC__) && !defined(__WIN32__)) || (defined(__GNUWIN32__) && !defined(__WINE__) && !defined(WXMAKINGDLL))
+#if (defined(__VISUALC__) && !defined(__WIN32__)) || (defined(__GNUWIN32__) && !defined(__TWIN32__) && !defined(WXMAKINGDLL))
 #include "main.cpp"
 #endif

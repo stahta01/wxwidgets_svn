@@ -7,7 +7,7 @@
 // Created:     04.01.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CMDLINE_H_
@@ -185,11 +185,9 @@ public:
     // the value in the provided pointer
     bool Found(const wxString& name, long *value) const;
 
-#if wxUSE_DATETIME
     // returns TRUE if an option taking a date value was found and stores the
     // value in the provided pointer
     bool Found(const wxString& name, wxDateTime *value) const;
-#endif // wxUSE_DATETIME
 
     // gets the number of parameters found
     size_t GetParamCount() const;
@@ -211,8 +209,6 @@ private:
     void Init();
 
     struct wxCmdLineParserData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxCmdLineParser)
 };
 
 #else // !wxUSE_CMDLINE_PARSER

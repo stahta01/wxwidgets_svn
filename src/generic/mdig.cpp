@@ -6,7 +6,7 @@
 // Created:     29/07/2002
 // RCS-ID:      $Id$
 // Copyright:   (c) Hans Van Leemputten
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -51,9 +51,7 @@ enum MDI_MENU_ID
 IMPLEMENT_DYNAMIC_CLASS(wxGenericMDIParentFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(wxGenericMDIParentFrame, wxFrame)
-#if wxUSE_MENUS
     EVT_MENU (-1, wxGenericMDIParentFrame::DoHandleMenu)
-#endif
 END_EVENT_TABLE()
 
 wxGenericMDIParentFrame::wxGenericMDIParentFrame()

@@ -9,7 +9,6 @@
 #! Version: $Id$
 #!#############################################################################
 #${
-    use lib './lib';
     use wxVersion qw(GetVersion);
 
     #! include the code which parses filelist.txt file and initializes
@@ -68,7 +67,7 @@
     my %versions = GetVersion();
     my ($verMaj, $verMin) = ( $versions{'MAJOR'}, $versions{'MINOR'} );
     $project{"LINK_VERSION"} = "$verMaj.$verMin";
-    $project{"DLL_VERSION"} = "$verMaj$verMin" . $versions{'MICRO_IF_UNSTABLE'};
+    $project{"DLL_VERSION"} = "$verMaj$verMin";
 #$}
 # Microsoft Developer Studio Project File - Name="wxWindows" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
@@ -320,6 +319,12 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 #$ ExpandGlue("WXCOMMONSRCS", "# Begin Source File\n\nSOURCE=.\\common\\", "\n# End Source File\n# Begin Source File\n\nSOURCE=.\\common\\", "\n# End Source File\n");
 #$ ExpandGlue("WXCSRCS", "# Begin Source File\n\nSOURCE=.\\common\\", "\n# SUBTRACT CPP /YX /Yc /Yu\n# End Source File\n# Begin Source File\n\nSOURCE=.\\common\\", "\n# SUBTRACT CPP /YX /Yc /Yu\n# End Source File\n");
+# Begin Source File
+
+SOURCE=.\common\dosyacc.c
+# ADD CPP /W1 /D "USE_DEFINE" /D "IDE_INVOKED"
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
 # End Group
 # Begin Group "Generic Files"
 
@@ -338,6 +343,37 @@ LIB32=link.exe -lib
 
 SOURCE=.\msw\dummy.cpp
 # ADD CPP /Yc"wx/wxprec.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\version.rc
+
+!IF  "$(CFG)" == "wxWindows - Win32 Release Unicode DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug Unicode DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release Unicode"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug Unicode"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 #$ ExpandGlue("WXMSWSRCS", "# Begin Source File\n\nSOURCE=.\\msw\\", "\n# End Source File\n# Begin Source File\n\nSOURCE=.\\msw\\", "\n# End Source File\n");
 #$ ExpandGlue("WXMSWCSRCS", "# Begin Source File\n\nSOURCE=.\\msw\\", "\n# SUBTRACT CPP /YX /Yc /Yu\n# End Source File\n# Begin Source File\n\nSOURCE=.\\msw\\", "\n# SUBTRACT CPP /YX /Yc /Yu\n# End Source File\n");

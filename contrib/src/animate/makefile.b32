@@ -9,12 +9,9 @@
 
 WXDIR = $(WXWIN)
 
-LIBTARGET=anim
+LIBTARGET=$(WXDIR)\lib\anim.lib
 
-!include $(WXDIR)\src\makeb32.env
-
-OBJECTS = $(OBJ_PATH)\animate.obj
+OBJECTS = animate.obj
 
 !include $(WXDIR)\src\makelib.b32
 
-$(OBJ_PATH)\animate.obj : animate.cpp

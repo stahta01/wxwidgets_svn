@@ -6,7 +6,7 @@
 // Created:     10/21/99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -49,179 +49,158 @@
 // wxDataFormat
 // ----------------------------------------------------------------------------
 
-wxString wxDataFormat::GetId() const
+wxDataFormat::wxDataFormat()
 {
-    char                            zBuf[256];
-    wxString                        sRet;
+    m_vType = wxDF_INVALID;
+    m_vFormat = 0;
+}
 
-    ::WinQueryAtomName( ::WinQuerySystemAtomTable()
-                       ,m_uFormat
-                       ,zBuf
-                       ,256
-                      );
-    sRet = zBuf;
-    return sRet;
-} // end of wxDataFormat::GetId()
+wxDataFormat::wxDataFormat(
+  wxDataFormatId                    vType
+)
+{
+    PrepareFormats();
+    SetType(vType);
+}
 
-void wxDataFormat::SetId (
+wxDataFormat::wxDataFormat(
   const wxChar*                     zId
 )
 {
-    m_uFormat = ::WinAddAtom( ::WinQuerySystemAtomTable()
-                             ,zId
-                            );
-} // end of wxDataFormat::SetId
+    PrepareFormats();
+    SetId(zId);
+}
 
-class CIDataObject
-{
-public:
-    CIDataObject(wxDataObject* pDataObject);
-    ~CIDataObject();
-
-    //
-    // Operations on the DRAGITEM struct
-    //
-    bool GetData( const wxDataFormat& rFormat
-                 ,char*               pzBuffer
-                 ,ULONG               ulLen
-                );
-    void GetDataHere( const wxDataFormat& rFormat
-                     ,char*               pzBuffer
-                     ,ULONG               ulLen
-                    );
-    void QueryGetData(const wxDataFormat& rFormat);
-    void SetData( const wxDataFormat& rFormat
-                 ,char*               pzBuffer
-                );
-private:
-    wxDataObject*                   m_pDataObject;      // pointer to C++ class we belong to
-    DRAGITEM                        m_vDragItem;
-}; // end of CLASS CIDataObject
-
-bool CIDataObject::GetData (
-  const wxDataFormat&               rFormat
-, char*                             pzBuffer
-, ULONG                             ulLen
+wxDataFormat::wxDataFormat(
+  const wxString&                   rId
 )
 {
-    QueryGetData(rFormat);
-    if (rFormat.GetType() == wxDF_INVALID)
-        return FALSE;
+    PrepareFormats();
+    SetId(rId);
+}
 
-    ULONG                           ulSize = m_pDataObject->GetDataSize(rFormat);
+wxDataFormat::wxDataFormat(
+  NativeFormat                      vFormat
+)
+{
+    PrepareFormats();
+    SetId(vFormat);
+}
 
-    if (ulSize == 0)
+void wxDataFormat::SetType(
+  wxDataFormatId                    vType
+)
+{
+    m_vType = vType;
+
+    if (m_vType == wxDF_TEXT)
+        m_vFormat = 0;
+    else
+    if (m_vType == wxDF_BITMAP)
+        m_vFormat = 0;
+    else
+    if (m_vType == wxDF_FILENAME)
+        m_vFormat = 0;
+    else
     {
-        //
-        // It probably means that the method is just not implemented
-        //
-        return FALSE;
+       wxFAIL_MSG( wxT("invalid dataformat") );
     }
-    if (rFormat.GetType() == wxDF_PRIVATE)
-    {
-        //
-        // For custom formats, put the size with the data - alloc the
-        // space for it
-        //
-        ulSize += sizeof(ULONG);
-    }
+}
 
-    if (ulSize > ulLen) // not enough room to copy
-        return FALSE;
+wxDataFormatId wxDataFormat::GetType() const
+{
+    return m_vType;
+}
 
-    //
-    // Copy the data
-    //
-    GetDataHere( rFormat
-                ,pzBuffer
-                ,ulSize
-               );
-    return TRUE;
-} // end of CIDataObject::GetData
+wxString wxDataFormat::GetId() const
+{
+    wxString                        sRet("");  // TODO: gdk_atom_name( m_format ) );
+    return sRet;
+}
 
-void CIDataObject::GetDataHere(
-  const wxDataFormat&               rFormat
-, char*                             pzBuffer
-, ULONG                             WXUNUSED(ulLen)
+void wxDataFormat::SetId(
+  NativeFormat                      vFormat
 )
 {
-    m_pDataObject->GetDataHere( rFormat
-                               ,(void*)pzBuffer
-                              );
-} // end of CIDataObject::GetDataHere
+    m_vFormat = vFormat;
+// TODO:
+/*
+    if (m_format == g_textAtom)
+        m_type = wxDF_TEXT;
+    else
+    if (m_format == g_pngAtom)
+        m_type = wxDF_BITMAP;
+    else
+    if (m_format == g_fileAtom)
+        m_type = wxDF_FILENAME;
+    else
+        m_type = wxDF_PRIVATE;
+*/
+}
 
-void CIDataObject::QueryGetData (
-  const wxDataFormat&               rFormat
+void wxDataFormat::SetId(
+  const wxChar*                     zId
 )
 {
-    m_pDataObject->IsSupportedFormat(rFormat);
-} // end of CIDataObject::QueryGetData
+    wxString                        tmp(zId);
 
-void CIDataObject::SetData (
-  const wxDataFormat&               rFormat
-, char*                             pzBuffer
-)
+    m_vType = wxDF_PRIVATE;
+    m_vFormat = 0;// TODO: get the format gdk_atom_intern( wxMBSTRINGCAST tmp.mbc_str(), FALSE );
+}
+
+void wxDataFormat::PrepareFormats()
 {
-    ULONG                           ulSize;
-
-    switch (rFormat.GetType())
-    {
-        case wxDF_TEXT:
-        case wxDF_OEMTEXT:
-        case wxDF_FILENAME:
-        case wxDF_HTML:
-            ulSize = strlen((const char *)pzBuffer);
-            break;
-
-        case wxDF_UNICODETEXT:
-             ulSize = ::wcslen((const wchar_t *)pzBuffer);
-             break;
-
-        case wxDF_BITMAP:
-        case wxDF_METAFILE:
-        case wxDF_ENHMETAFILE:
-        case wxDF_TIFF:
-        case wxDF_DIB:
-            ulSize = 0; // pass via a handle
-            break;
-
-
-        case wxDF_SYLK:
-        case wxDF_DIF:
-        case wxDF_PALETTE:
-        case wxDF_PENDATA:
-        case wxDF_RIFF:
-        case wxDF_WAVE:
-        case wxDF_LOCALE:
-            //PUNT
-            break;
-
-        case wxDF_PRIVATE:
-            size_t*                 p = (size_t *)pzBuffer;
-
-            ulSize = *p++;
-            pzBuffer = (char*)p;
-            break;
-    }
-    m_pDataObject->SetData( rFormat
-                           ,ulSize
-                           ,(void*)pzBuffer
-                          );
-} // end of CIDataObject::SetData
+// TODO:
+/*
+    if (!g_textAtom)
+        g_textAtom = gdk_atom_intern( "STRING", FALSE );
+    if (!g_pngAtom)
+        g_pngAtom = gdk_atom_intern( "image/png", FALSE );
+    if (!g_fileAtom)
+        g_fileAtom = gdk_atom_intern( "file:ALL", FALSE );
+*/
+}
 
 //-------------------------------------------------------------------------
 // wxDataObject
 //-------------------------------------------------------------------------
 
-wxDataObject::wxDataObject ()
+wxDataObject::wxDataObject()
 {
-    m_pDataObject = new DRAGITEM;
-} // end of wxDataObject::wxDataObject
+}
 
-wxDataObject::~wxDataObject ()
+bool wxDataObject::IsSupportedFormat(
+  const wxDataFormat&               rFormat
+, Direction                         vDir
+) const
 {
-    delete m_pDataObject;
-} // end of wxDataObject::~wxDataObject
+    size_t                          nFormatCount = GetFormatCount(vDir);
+
+    if (nFormatCount == 1)
+    {
+        return rFormat == GetPreferredFormat();
+    }
+    else
+    {
+        wxDataFormat*               pFormats = new wxDataFormat[nFormatCount];
+        GetAllFormats( pFormats
+                      ,vDir
+                     );
+
+        size_t                      n;
+
+        for (n = 0; n < nFormatCount; n++)
+        {
+            if (pFormats[n] == rFormat)
+                break;
+        }
+
+        delete [] pFormats;
+
+        // found?
+        return n < nFormatCount;
+    }
+}
 
 // ----------------------------------------------------------------------------
 // wxFileDataObject

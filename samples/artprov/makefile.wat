@@ -6,7 +6,7 @@
 # 
 # 
 # 
-PROGRAM = arttest 
-OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj $(OUTPUTDIR)\artbrows.obj
+PROGRAM = artprov 
+OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj 
 # 
 !include $(%WXWIN)\src\makeprog.wat 

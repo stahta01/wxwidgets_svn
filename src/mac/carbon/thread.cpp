@@ -529,7 +529,7 @@ void wxThread::Sleep(unsigned long milliseconds)
     do
     {
         YieldToAnyThread();
-    } while( clock() - start < milliseconds /  1000.0 * CLOCKS_PER_SEC ) ;
+    } while( clock() - start < (milliseconds * CLOCKS_PER_SEC) / 1000 ) ;
 }
 
 int wxThread::GetCPUCount()
@@ -854,7 +854,7 @@ bool wxThreadModule::OnInit()
 #endif
     if ( !hasThreadManager )
     {
-        wxMessageBox( wxT("Error") , wxT("Thread Support is not available on this System") , wxOK ) ;
+        wxMessageBox( "Error" , "Thread Support is not available on this System" , wxOK ) ;
         return FALSE ;
     }
 
@@ -904,3 +904,5 @@ bool WXDLLEXPORT wxIsWaitingForThread()
 #include "wx/thrimpl.cpp"
 
 #endif // wxUSE_THREADS
+
+// vi:sts=4:sw=4:et

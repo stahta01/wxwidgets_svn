@@ -6,7 +6,7 @@
 // Created:     14.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_STATTEXT_H_
@@ -56,9 +56,7 @@ public:
     virtual void SetLabel(const wxString& label);
 
     virtual bool HasTransparentBackground() { return TRUE; }
-
-    virtual bool IsFocused() const { return FALSE; }
-
+    
 protected:
     // calculate the optimal size for the label
     virtual wxSize DoGetBestClientSize() const;

@@ -186,12 +186,9 @@ Adds a separator for spacing groups of tools.
 \param{const wxString\& }{longHelpString = ""},\rtfsp
 \param{wxObject* }{clientData = NULL}}
 
-\func{wxToolBarTool*}{AddTool}{\param{wxToolBarTool* }{tool}}
-
 Adds a tool to the toolbar. The first (short and most commonly used) version
 has fewer parameters than the full version at the price of not being able to
-specify some of the more rarely used button features. The last version allows
-to add an existing tool.
+specify some of the more rarely used button features.
 
 \wxheading{Parameters}
 
@@ -219,8 +216,6 @@ parent frame when the mouse pointer is inside the tool}
 
 \docparam{clientData}{An optional pointer to client data which can be
 retrieved later using \helpref{wxToolBar::GetToolClientData}{wxtoolbargettoolclientdata}.}
-
-\docparam{tool}{The tool to be added.}
 
 \wxheading{Remarks}
 
@@ -287,7 +282,7 @@ back later), you may use \helpref{RemoveTool}{wxtoolbarremovetool} instead.
 Note that it is unnecessary to call \helpref{Realize}{wxtoolbarrealize} for the
 change to take place, it will happen immediately.
 
-Returns true if the tool was deleted, false otherwise.
+Returns TRUE if the tool was deleted, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -310,7 +305,7 @@ Enables or disables the tool.
 
 \docparam{toolId}{Tool to enable or disable.}
 
-\docparam{enable}{If true, enables the tool, otherwise disables it.}
+\docparam{enable}{If TRUE, enables the tool, otherwise disables it.}
 
 {\bf NB:} This function should only be called after 
 \helpref{Realize}{wxtoolbarrealize}.
@@ -416,7 +411,7 @@ Called to determine whether a tool is enabled (responds to user input).
 
 \wxheading{Return value}
 
-true if the tool is enabled, false otherwise.
+TRUE if the tool is enabled, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -446,12 +441,6 @@ Returns the value used for packing tools.
 \wxheading{See also}
 
 \helpref{wxToolBar::SetToolPacking}{wxtoolbarsettoolpacking}
-
-\membersection{wxToolBar::GetToolPos}\label{wxtoolbargettoolpos}
-
-\constfunc{int}{GetToolPos}{\param{int }{toolId}}
-
-Returns the tool position in the toolbar, or wxNOT\_FOUND if the tool is not found.
 
 \membersection{wxToolBar::GetToolSeparation}\label{wxtoolbargettoolseparation}
 
@@ -490,7 +479,7 @@ Gets the on/off state of a toggle tool.
 
 \wxheading{Return value}
 
-true if the tool is toggled on, false otherwise.
+TRUE if the tool is toggled on, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -526,11 +515,8 @@ You must call \helpref{Realize}{wxtoolbarrealize} for the change to take place.
 
 \func{wxToolBarTool *}{InsertTool}{\param{size\_t }{pos},\rtfsp
 \param{int}{ toolId}, \param{const wxBitmap\&}{ bitmap1},\rtfsp
-\param{const wxBitmap\&}{ bitmap2 = wxNullBitmap}, \param{bool}{ isToggle = false},\rtfsp
+\param{const wxBitmap\&}{ bitmap2 = wxNullBitmap}, \param{bool}{ isToggle = FALSE},\rtfsp
 \param{wxObject* }{clientData = NULL}, \param{const wxString\& }{shortHelpString = ""}, \param{const wxString\& }{longHelpString = ""}}
-
-\func{wxToolBarTool *}{InsertTool}{\param{size\_t }{pos},\rtfsp
-\param{wxToolBarTool* }{tool}}
 
 Inserts the tool with the specified attributes into the toolbar at the given
 position.
@@ -556,11 +542,11 @@ you should use the EVT\_MENU or EVT\_TOOL macro instead.
 
 \docparam{toolId}{The identifier passed to \helpref{wxToolBar::AddTool}{wxtoolbaraddtool}.}
 
-\docparam{toggleDown}{true if the tool is a toggle and the toggle is down, otherwise is false.}
+\docparam{toggleDown}{TRUE if the tool is a toggle and the toggle is down, otherwise is FALSE.}
 
 \wxheading{Return value}
 
-If the tool is a toggle and this function returns false, the toggle
+If the tool is a toggle and this function returns FALSE, the toggle
 toggle state (internal and visual) will not be changed. This provides a way of
 specifying that toggle operations are not permitted in some circumstances.
 
@@ -779,7 +765,7 @@ Toggles a tool on or off. This does not cause any event to get emitted.
 
 \docparam{toolId}{Tool in question.}
 
-\docparam{toggle}{If true, toggles the tool on, otherwise toggles it off.}
+\docparam{toggle}{If TRUE, toggles the tool on, otherwise toggles it off.}
 
 \wxheading{Remarks}
 
@@ -788,3 +774,5 @@ Only applies to a tool that has been specified as a toggle tool.
 \wxheading{See also}
 
 \helpref{wxToolBar::GetToolState}{wxtoolbargettoolstate}
+
+

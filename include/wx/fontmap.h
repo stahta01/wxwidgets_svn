@@ -6,7 +6,7 @@
 // Created:     04.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONTMAPPER_H_
@@ -188,8 +188,6 @@ protected:
     
 private:
     static wxFontMapper *sm_instance;
-
-    DECLARE_NO_COPY_CLASS(wxFontMapper)
 };
 
 // ----------------------------------------------------------------------------
@@ -200,13 +198,6 @@ private:
 // do NOT use! This is for backward compatibility, use wxFontMapper::Get() instead
 #define wxTheFontMapper (wxFontMapper::Get())
 
-#else // !wxUSE_FONTMAP
-
-#if wxUSE_GUI
-    // wxEncodingToCodepage (utils.cpp) needs wxGetNativeFontEncoding
-    #include "wx/fontutil.h"
-#endif
-
-#endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
+#endif // wxUSE_FONTMAP
 
 #endif // _WX_FONTMAPPER_H_

@@ -6,7 +6,7 @@
 // Created:     14.07.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_FFILE_H_
@@ -42,13 +42,13 @@ public:
     // def ctor
   wxFFile() { m_fp = NULL; }
     // open specified file (may fail, use IsOpened())
-  wxFFile(const wxChar *filename, const wxChar *mode = _T("r"));
+  wxFFile(const wxChar *filename, const char *mode = "r");
     // attach to (already opened) file
   wxFFile(FILE *fp) { m_fp = fp; }
 
   // open/close
     // open a file (existing or not - the mode controls what happens)
-  bool Open(const wxChar *filename, const wxChar *mode = _T("r"));
+  bool Open(const wxChar *filename, const char *mode = "r");
     // closes the opened file (this is a NOP if not opened)
   bool Close();
 
@@ -67,7 +67,7 @@ public:
     // returns the number of bytes written
   size_t Write(const void *pBuf, size_t nCount);
     // returns true on success
-  bool Write(const wxString& s, wxMBConv& conv = wxConvUTF8)
+  bool Write(const wxString& s, wxMBConv& conv = wxConvLibc)
   {
       const wxWX2MBbuf buf = s.mb_str(conv);
       size_t size = strlen(buf);

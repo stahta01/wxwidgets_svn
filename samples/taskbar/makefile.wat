@@ -6,7 +6,7 @@
 # 
 # 
 # 
-PROGRAM = tbtest 
+PROGRAM = taskbar 
 OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj 
 # 
 !include $(%WXWIN)\src\makeprog.wat 

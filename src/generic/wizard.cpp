@@ -9,7 +9,7 @@
 // Created:     15.08.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -102,12 +102,10 @@ bool wxWizardPage::Create(wxWizard *parent,
     if ( resource != NULL )
     {
 #if wxUSE_WX_RESOURCES
-#if 0
-       if ( !LoadFromResource(this, resource) )
+        if ( !LoadFromResource(this, resource) )
         {
             wxFAIL_MSG(wxT("wxWizardPage LoadFromResource failed!!!!"));
         }
-#endif
 #endif // wxUSE_RESOURCES
     }
 
@@ -472,7 +470,7 @@ void wxWizard::OnBackOrNext(wxCommandEvent& event)
     // ask the current page first: notice that we do it before calling
     // GetNext/Prev() because the data transfered from the controls of the page
     // may change the value returned by these methods
-    if ( m_page && (!m_page->Validate() || !m_page->TransferDataFromWindow()) )
+    if ( m_page && !m_page->TransferDataFromWindow() )
     {
         // the page data is incorrect, don't do anything
         return;

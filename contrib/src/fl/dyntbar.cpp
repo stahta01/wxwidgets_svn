@@ -492,7 +492,7 @@ void wxDynamicToolBar::SetLayout( LayoutManagerBase* pLayout )
     Layout();
 }
 
-void wxDynamicToolBar::EnableTool(int toolIndex, bool enable )
+void wxDynamicToolBar::EnableTool(const int toolIndex, const bool enable )
 {
     wxDynToolInfo* pInfo = GetToolInfo( toolIndex );
 

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        slider.h
 // Purpose:     wxSlider class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SLIDER_H_
@@ -20,7 +20,7 @@
 #include "wx/slider.h"
 #include "wx/stattext.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxSliderNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxSliderNameStr;
 
 // Slider
 class WXDLLEXPORT wxSlider: public wxControl
@@ -87,12 +87,12 @@ public:
      virtual void   DoMoveWindow(int x, int y, int w, int h);
  
   void Command(wxCommandEvent& event);
-    void                     MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
-    virtual void            MacUpdateDimensions() ;
+	void 					MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
+	virtual void            MacUpdateDimensions() ;
 
-     wxStaticText*    m_macMinimumStatic ;
-     wxStaticText*    m_macMaximumStatic ;
-     wxStaticText*    m_macValueStatic ;
+ 	wxStaticText*	m_macMinimumStatic ;
+ 	wxStaticText*	m_macMaximumStatic ;
+ 	wxStaticText*	m_macValueStatic ;
 
   int           m_rangeMin;
   int           m_rangeMax;

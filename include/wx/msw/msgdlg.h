@@ -38,8 +38,6 @@ public:
         long style = wxOK|wxCENTRE, const wxPoint& pos = wxDefaultPosition);
 
     int ShowModal(void);
-
-    DECLARE_NO_COPY_CLASS(wxMessageDialog)
 };
 
 

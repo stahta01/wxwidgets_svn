@@ -12,7 +12,6 @@
 #  Common	/src/common
 #  MSW	/src/msw
 #  Mac	/src/mac for Mac OS X with Apple Developer Tools
-#  Cocoa        /src/cocoa
 #  Motif	/src/motif
 #  Univ	/src/univ or src/univ/themes
 #  Unix	/src/unix
@@ -56,7 +55,6 @@
 #  Socket	Socket file (currently doesn't compile under Win16)
 #  NotMSW	Not required for the MSW port
 #  NotMac	Not required for the MAC port under Mac OS X
-#  NotCocoa	Not required for the Cocoa port under Mac OS X
 #  NotMGL	Not required for the MGL port
 #  NotMicro	Not required for the MicroWindows port
 #  NotGTK	Not required for the GTK port
@@ -66,7 +64,6 @@
 #  NotUniv	Not required for the wxUniversal
 #  LowLevel	Low level GUI toolkit file, used by wxUniversal as well
 #  Theme	implements a wxUniv theme
-#  Motif	used by Motif, even if in another port's directory
 ###############################################################################
 
 # File name 	Type	Flags
@@ -89,6 +86,7 @@ grid.cpp	Generic
 gridctrl.cpp	Generic
 gridsel.cpp	Generic
 helpext.cpp	Generic	Generic
+helphtml.cpp	Generic	Generic
 imaglist.cpp	Generic	NotWin32
 laywin.cpp	Generic
 listctrl.cpp	Generic	NotWin32
@@ -102,13 +100,15 @@ panelg.cpp	Generic
 printps.cpp	Generic	NotMSW
 prntdlgg.cpp	Generic	NotMSW
 progdlgg.cpp	Generic
+prop.cpp	Generic
+propform.cpp	Generic
+proplist.cpp	Generic
 sashwin.cpp	Generic
 scrlwing.cpp	Generic
-selstore.cpp	Generic
 spinctlg.cpp	Generic
 splash.cpp	Generic
 splitter.cpp	Generic
-statline.cpp	Generic	NotMSW,NotGTK,NotOS2,NotMGL,NotX11,NotMac,NotCocoa,NotMicro
+statline.cpp	Generic	NotMSW,NotGTK,NotOS2,NotMGL,NotX11,NotMac,NotMicro
 statusbr.cpp	Generic	NotMGL,NotX11,NotMicro
 tabg.cpp	Generic	NotWin32,NotOS2
 tbarsmpl.cpp	Generic
@@ -117,13 +117,13 @@ timer.cpp	Generic	LowLevel,NotMSW,NotX,NotGTK,NotOS2,NotMac,NotMicro
 tipdlg.cpp	Generic
 tipwin.cpp	Generic
 treectlg.cpp	Generic
+treelay.cpp	Generic
 wizard.cpp	Generic
 
-accesscmn.cpp	Common
 appcmn.cpp	Common	Base
 artprov.cpp	Common
 artstd.cpp	Common
-bmpbase.cpp	Common	NotGTK,NotOS2,NotMSW,NotMicro
+bmpbase.cpp	Common	NotGTK,NotOS2,NotMSW,NotX,NotMicro
 choiccmn.cpp	Common
 clipcmn.cpp	Common
 clntdata.cpp	Common	Base
@@ -135,7 +135,6 @@ containr.cpp	Common
 cshelp.cpp	Common
 ctrlcmn.cpp	Common
 ctrlsub.cpp	Common
-datacmn.cpp	Common	Base
 datetime.cpp	Common	Base
 datstrm.cpp	Common	Base
 db.cpp	Common	Win32Only,Base
@@ -148,7 +147,6 @@ dndcmn.cpp	Common
 dobjcmn.cpp	Common
 docmdi.cpp	Common
 docview.cpp	Common
-dpycmn.cpp	Common
 dseldlg.cpp	Common
 dynarray.cpp	Common	Base
 dynlib.cpp	Common	Base
@@ -210,15 +208,17 @@ msgout.cpp	Common	Base
 mstream.cpp	Common	Base
 nbkbase.cpp	Common
 object.cpp	Common	Base
+odbc.cpp	Common	NotGTK,NotX,NotOS2
 paper.cpp	Common
 popupcmn.cpp	Common
 prntbase.cpp	Common
 process.cpp	Common	Win32Only,Base
 protocol.cpp	Common	Socket,Base
 quantize.cpp	Common
-radiocmn.cpp	Common
+radiocmn.cpp	Common	NotMac
 regex.cpp	Common	Base
 rgncmn.cpp	Common
+resource.cpp	Common
 sckaddr.cpp	Common	Socket,Base
 sckfile.cpp	Common	Socket,Base
 sckipc.cpp	Common	Socket,Base
@@ -231,12 +231,12 @@ strconv.cpp	Common	Base
 stream.cpp	Common	Base
 string.cpp	Common	Base
 sysopt.cpp	Common	Base
-taskbarcmn.cpp	Common	NotMac
 tbarbase.cpp	Common
 textbuf.cpp	Common	Base
 textcmn.cpp	Common
 textfile.cpp	Common	Base
 timercmn.cpp	Common	Base
+toplvcmn.cpp	Common
 tokenzr.cpp	Common	Base
 treebase.cpp	Common
 txtstrm.cpp	Common	Base
@@ -250,17 +250,16 @@ variant.cpp	Common	Base
 wfstream.cpp	Common	Base
 wincmn.cpp	Common
 wxchar.cpp	Common	Base
+wxexpr.cpp	Common
 xpmdecod.cpp	Common
 zipstrm.cpp	Common	Base
 zstream.cpp	Common	Base
 
-access.cpp	MSW
 gsocket.c	MSW	Socket,Base
 gsockmsw.c	MSW	Socket,Base
 accel.cpp	MSW
-access.cpp	MSW	OLE
 app.cpp	MSW	LowLevel
-automtn.cpp	MSW	OLE,LowLevel
+automtn.cpp	MSW	OLE
 bitmap.cpp	MSW	LowLevel
 bmpbuttn.cpp	MSW
 brush.cpp	MSW	LowLevel
@@ -274,9 +273,10 @@ colordlg.cpp	MSW
 colour.cpp	MSW	LowLevel
 combobox.cpp	MSW
 control.cpp	MSW
+curico.cpp	MSW
 cursor.cpp	MSW	LowLevel
 data.cpp	MSW	LowLevel
-dataobj.cpp	MSW	OLE,LowLevel
+dataobj.cpp	MSW	OLE
 dc.cpp	MSW	LowLevel
 dcclient.cpp	MSW	LowLevel
 dcmemory.cpp	MSW	LowLevel
@@ -286,12 +286,12 @@ dde.cpp	MSW	LowLevel,Base
 dialog.cpp	MSW
 dialup.cpp	MSW	LowLevel
 dib.cpp	MSW	LowLevel
+dibutils.cpp	MSW
 dir.cpp	MSW	Base
 dirdlg.cpp	MSW	Win32Only,LowLevel
-display.cpp	MSW	Win32Only,LowLevel
 dragimag.cpp	MSW
-dropsrc.cpp	MSW	OLE,LowLevel
-droptgt.cpp	MSW	OLE,LowLevel
+dropsrc.cpp	MSW	OLE
+droptgt.cpp	MSW	OLE
 enhmeta.cpp	MSW	Win32Only,LowLevel
 helpbest.cpp	MSW	Win32Only,LowLevel
 evtloop.cpp	MSW	LowLevel
@@ -305,6 +305,7 @@ fontenum.cpp	MSW	LowLevel
 fontutil.cpp	MSW	LowLevel
 frame.cpp	MSW
 gauge95.cpp	MSW	Win32Only
+gaugemsw.cpp	MSW	NotWin32
 gdiimage.cpp	MSW	LowLevel
 gdiobj.cpp	MSW	LowLevel
 glcanvas.cpp	MSW	LowLevel
@@ -322,12 +323,12 @@ menu.cpp	MSW
 menuitem.cpp	MSW
 metafile.cpp	MSW
 mimetype.cpp	MSW	Win32Only,Base
-minifram.cpp	MSW	LowLevel
+minifram.cpp	MSW
 msgdlg.cpp	MSW
 mslu.cpp	MSW
 nativdlg.cpp	MSW
 notebook.cpp	MSW	Win32Only
-oleutils.cpp	MSW	OLE,LowLevel
+oleutils.cpp	MSW	OLE
 ownerdrw.cpp	MSW
 palette.cpp	MSW	LowLevel
 pen.cpp	MSW	LowLevel
@@ -365,7 +366,7 @@ toplevel.cpp	MSW	LowLevel
 treectrl.cpp	MSW	Win32Only
 utils.cpp	MSW	Base,LowLevel
 utilsexc.cpp	MSW	Base,LowLevel
-uuid.cpp	MSW	OLE,LowLevel
+uuid.cpp	MSW	OLE
 uxtheme.cpp	MSW
 volume.cpp	MSW	Base
 wave.cpp	MSW	LowLevel
@@ -373,12 +374,11 @@ window.cpp	MSW	LowLevel
 
 dialup.cpp	Unix	NotMac
 dir.cpp	Unix	Base,NotMac
-fontenum.cpp	Unix	NotCocoa,NotMac,NotMGL,NotMicro
-fontutil.cpp	Unix	NotCocoa,NotMac,NotMGL,NotMicro
+fontenum.cpp	Unix	NotMac,NotMGL,NotMicro
+fontutil.cpp	Unix	NotMac,NotMGL,NotMicro
 gsocket.c	Unix	Base,NotMac
 mimetype.cpp	Unix	Base,NotMac,NotMicro
 snglinst.cpp	Unix	Base
-taskbarx11.cpp	Unix	NotCocoa,NotMac,NotMGL,NotMicro
 threadpsx.cpp	Unix	Base,NotMac
 utilsunx.cpp	Unix	Base
 utilsx11.cpp	Unix	NotMac,NotMGL,NotMicro
@@ -458,7 +458,6 @@ main.cpp	GTK	LowLevel
 mdi.cpp	GTK
 menu.cpp	GTK
 minifram.cpp	GTK
-msgdlg.cpp	GTK
 notebook.cpp	GTK
 pen.cpp	GTK	LowLevel
 popupwin.cpp	GTK	LowLevel
@@ -551,6 +550,7 @@ statbrma.cpp	Mac
 statlmac.cpp	Mac
 stattext.cpp	Mac
 tabctrl.cpp	Mac
+taskbar.cpp	Mac
 textctrl.cpp	Mac
 thread.cpp	Mac
 timer.cpp	Mac
@@ -563,62 +563,12 @@ utilsexc.cpp	Mac
 wave.cpp	Mac
 window.cpp	Mac
 
-# NS wrapper classes
-NSBox.mm	Cocoa
-NSButton.mm	Cocoa
-NSControl.mm	Cocoa
-NSMenu.mm	Cocoa
-NSPanel.mm	Cocoa
-NSTextField.mm	Cocoa
-NSView.mm	Cocoa
-NSWindow.mm	Cocoa
-# wx implementations
-app.mm	Cocoa
-bmpbuttn.mm	Cocoa
-bitmap.mm	Cocoa
-brush.cpp	Cocoa
-button.mm	Cocoa
-checkbox.mm	Cocoa
-checklst.mm	Cocoa
-choice.mm	Cocoa
-colour.cpp	Cocoa
-control.mm	Cocoa
-cursor.mm	Cocoa
-data.cpp	Cocoa
-dc.mm	Cocoa
-dcclient.mm	Cocoa
-dcmemory.cpp	Cocoa
-dcscreen.cpp	Cocoa
-dialog.mm	Cocoa
-font.cpp	Cocoa
-fontutil.cpp	Cocoa
-frame.mm	Cocoa
-gdiobj.cpp	Cocoa
-icon.cpp	Cocoa
-listbox.mm	Cocoa
-main.cpp	Cocoa
-menu.mm	Cocoa
-menuitem.mm	Cocoa
-pen.cpp	Cocoa
-radiobox.mm	Cocoa
-radiobut.mm	Cocoa
-region.cpp	Cocoa
-settings.cpp	Cocoa
-statbmp.mm	Cocoa
-statbox.mm	Cocoa
-statline2.mm	Cocoa
-stattext.mm	Cocoa
-textctrl.mm	Cocoa
-toplevel.mm	Cocoa
-utils.cpp	Cocoa
-utilsexc.cpp	Cocoa
-window.mm	Cocoa
-
 gsockmot.c	Motif	Socket
 accel.cpp	Motif
 app.cpp	Motif
+bitmap.cpp	Motif
 bmpbuttn.cpp	Motif
-bmpmotif.cpp	Motif
+brush.cpp	Motif
 button.cpp	Motif
 checkbox.cpp	Motif
 checklst.cpp	Motif
@@ -626,7 +576,6 @@ choice.cpp	Motif
 clipbrd.cpp	Motif
 colour.cpp	Motif
 combobox.cpp	Motif
-combobox_native.cpp	Motif
 control.cpp	Motif
 cursor.cpp	Motif
 data.cpp	Motif
@@ -636,7 +585,6 @@ dcclient.cpp	Motif
 dcmemory.cpp	Motif
 dcscreen.cpp	Motif
 dialog.cpp	Motif
-evtloop.cpp	Motif
 filedlg.cpp	Motif
 font.cpp	Motif
 frame.cpp	Motif
@@ -644,6 +592,7 @@ gauge.cpp	Motif
 gdiobj.cpp	Motif
 glcanvas.cpp	Motif
 icon.cpp	Motif
+joystick.cpp	Motif
 listbox.cpp	Motif
 main.cpp	Motif
 mdi.cpp	Motif
@@ -652,8 +601,10 @@ menuitem.cpp	Motif
 minifram.cpp	Motif
 msgdlg.cpp	Motif
 palette.cpp	Motif
+pen.cpp	Motif
 radiobox.cpp	Motif
 radiobut.cpp	Motif
+region.cpp	Motif
 scrolbar.cpp	Motif
 settings.cpp	Motif
 slider.cpp	Motif
@@ -664,15 +615,14 @@ stattext.cpp	Motif
 toolbar.cpp	Motif
 textctrl.cpp	Motif
 timer.cpp	Motif
-toplevel.cpp	Motif
 utils.cpp	Motif
 window.cpp	Motif
 
 gsockx11.c	X11	Socket
 nanox.c	X11
 app.cpp	X11
-bitmap.cpp	X11	Motif
-brush.cpp	X11	Motif
+bitmap.cpp	X11
+brush.cpp	X11
 clipbrd.cpp	X11
 colour.cpp	X11
 cursor.cpp	X11
@@ -692,14 +642,13 @@ joystick.cpp	X11
 main.cpp	X11
 minifram.cpp	X11
 palette.cpp	X11
-pen.cpp	X11	Motif
+pen.cpp	X11
 popupwin.cpp	X11
-region.cpp	X11	Motif
+region.cpp	X11
 reparent.cpp	X11
 settings.cpp	X11
 toplevel.cpp	X11
 utils.cpp	X11
-utilsx.cpp	X11	Motif
 window.cpp	X11
 
 accel.cpp	OS2
@@ -766,6 +715,7 @@ statbox.cpp	OS2
 statline.cpp	OS2
 stattext.cpp	OS2
 tabctrl.cpp	OS2
+taskbar.cpp	OS2
 textctrl.cpp	OS2
 timer.cpp	OS2
 thread.cpp	OS2
@@ -802,9 +752,7 @@ htmprint.cpp	HTML
 
 arrimpl.cpp	WXH	Base
 listimpl.cpp	WXH	Base
-access.h	WXH
 accel.h	WXH
-access.h	WXH
 app.h	WXH	Base
 artprov.h	WXH
 bitmap.h	WXH
@@ -837,6 +785,7 @@ cshelp.h	WXH
 ctrlsub.h	WXH
 cursor.h	WXH
 dataobj.h	WXH
+date.h	WXH	Base
 datetime.h	WXH	Base
 datetime.inl	WXH	Base
 datstrm.h	WXH	Base
@@ -858,7 +807,6 @@ dialup.h	WXH
 dir.h	WXH	Base
 dirctrl.h	WXH
 dirdlg.h	WXH
-display.h	WXH
 dnd.h	WXH
 docmdi.h	WXH
 docview.h	WXH
@@ -869,6 +817,7 @@ dynload.h	WXH	Base
 effects.h	WXH
 encconv.h	WXH	Base
 event.h	WXH	Base
+expr.h	WXH
 fdrepdlg.h	WXH
 features.h	WXH	Base
 ffile.h	WXH	Base
@@ -903,12 +852,14 @@ hash.h	WXH	Base
 hashmap.h	WXH	Base
 help.h	WXH
 helpbase.h	WXH
+helphtml.h	WXH
 helpwin.h	WXH
 icon.h	WXH
 iconbndl.h	WXH
 image.h	WXH
 imaggif.h	WXH
 imagiff.h	WXH
+imagxpm.h	WXH
 imagbmp.h	WXH
 imagpng.h	WXH
 imagpcx.h	WXH
@@ -918,7 +869,6 @@ imagtiff.h	WXH
 imagjpeg.h	WXH
 imaglist.h	WXH
 intl.h	WXH	Base
-iosfwrap.h	WXH	Base
 ioswrap.h	WXH	Base
 ipc.h	WXH	Base
 ipcbase.h	WXH	Base
@@ -933,7 +883,6 @@ listctrl.h	WXH
 listbase.h	WXH
 log.h	WXH	Base
 longlong.h	WXH	Base
-math.h	WXH	Base
 matrix.h	WXH
 mdi.h	WXH
 memory.h	WXH	Base
@@ -951,6 +900,7 @@ mslu.cpp	MSW
 mstream.h	WXH	Base
 notebook.h	WXH
 object.h	WXH	Base
+odbc.h	WXH
 ownerdrw.h	WXH
 palette.h	WXH
 panel.h	WXH
@@ -963,19 +913,21 @@ printdlg.h	WXH
 prntbase.h	WXH
 process.h	WXH	Base
 progdlg.h	WXH
+prop.h	WXH
+propform.h	WXH
+proplist.h	WXH
 quantize.h	WXH
 radiobox.h	WXH
 radiobut.h	WXH
-rawbmp.h	WXH
 regex.h	WXH	Base
 region.h	WXH
+resource.h	WXH
 sashwin.h	WXH
 sckaddr.h	WXH	Base
 sckipc.h	WXH	Base
 sckstrm.h	WXH	Base
 scrolbar.h	WXH
 scrolwin.h	WXH
-selstore.h	WXH
 settings.h	WXH
 sizer.h	WXH
 slider.h	WXH
@@ -1007,6 +959,7 @@ textfile.h	WXH	Base
 tglbtn.h	WXH
 thread.h	WXH	Base
 thrimpl.cpp	WXH	Base
+time.h	WXH	Base
 timer.h	WXH	Base
 tipdlg.h	WXH
 tipwin.h	WXH
@@ -1035,6 +988,7 @@ wx_cw.h	WXH
 wx_cw_cm.h	WXH
 wx_cw_d.h	WXH
 wxchar.h	WXH	Base
+wxexpr.h	WXH
 wxhtml.h	WXH
 wxprec.h	WXH	Base
 zipstrm.h	WXH	Base
@@ -1078,7 +1032,6 @@ mdi.h	GTKH
 menu.h	GTKH
 menuitem.h	GTKH
 minifram.h	GTKH
-msgdlg.h	GTKH
 notebook.h	GTKH
 pen.h	GTKH
 popupwin.h	GTKH
@@ -1177,6 +1130,7 @@ statline.h	MacH
 stattext.h	MacH
 statusbr.h	MacH
 tabctrl.h	MacH
+taskbar.h	MacH
 textctrl.h	MacH
 timer.h	MacH
 toolbar.h	MacH
@@ -1187,69 +1141,23 @@ uma.h	MacH
 wave.h	MacH
 window.h	MacH
 
-# NS wrapper classes
-NSBox.h	CocoaH
-NSButton.h	CocoaH
-NSControl.h	CocoaH
-NSMenu.h	CocoaH
-NSPanel.h	CocoaH
-NSTextField.h	CocoaH
-NSView.h	CocoaH
-NSWindow.h	CocoaH
-ObjcAssociate.h	CocoaH
-ObjcPose.h	CocoaH
-# wx implementations
-app.h	CocoaH
-bitmap.h	CocoaH
-bmpbuttn.h	CocoaH
-brush.h	CocoaH
-button.h	CocoaH
-checkbox.h	CocoaH
-checklst.h	CocoaH
-choice.h	CocoaH
-colour.h	CocoaH
-control.h	CocoaH
-cursor.h	CocoaH
-dc.h	CocoaH
-dcclient.h	CocoaH
-dcmemory.h	CocoaH
-dcscreen.h	CocoaH
-dialog.h	CocoaH
-font.h	CocoaH
-frame.h	CocoaH
-gdiobj.h	CocoaH
-icon.h	CocoaH
-listbox.h	CocoaH
-menu.h	CocoaH
-menuitem.h	CocoaH
-pen.h	CocoaH
-radiobox.h	CocoaH
-radiobut.h	CocoaH
-region.h	CocoaH
-statbmp.h	CocoaH
-statbox.h	CocoaH
-statline.h	CocoaH
-stattext.h	CocoaH
-textctrl.h	CocoaH
-toplevel.h	CocoaH
-window.h	CocoaH
-
 accel.h	MotifH
 app.h	MotifH
+bitmap.h	MotifH
 bmpbuttn.h	MotifH
-bmpmotif.h	MotifH
+brush.h	MotifH
 button.h	MotifH
 checkbox.h	MotifH
 checklst.h	MotifH
 choice.h	MotifH
 clipbrd.h	MotifH
+colordlg.h	MotifH
 colour.h	MotifH
 combobox.h	MotifH
 control.h	MotifH
 cursor.h	MotifH
 dataform.h	MotifH
 dataobj.h	MotifH
-dataobj2.h	MotifH
 dc.h	MotifH
 dcclient.h	MotifH
 dcmemory.h	MotifH
@@ -1259,22 +1167,28 @@ dialog.h	MotifH
 dnd.h	MotifH
 filedlg.h	MotifH
 font.h	MotifH
+fontdlg.h	MotifH
 frame.h	MotifH
 gauge.h	MotifH
 gdiobj.h	MotifH
 glcanvas.h	MotifH
 icon.h	MotifH
+joystick.h	MotifH
 listbox.h	MotifH
 mdi.h	MotifH
 menu.h	MotifH
 menuitem.h	MotifH
+metafile.h	MotifH
 minifram.h	MotifH
 msgdlg.h	MotifH
 palette.h	MotifH
+pen.h	MotifH
 print.h	MotifH
+printdlg.h	MotifH
 private.h	MotifH
 radiobox.h	MotifH
 radiobut.h	MotifH
+region.h	MotifH
 scrolbar.h	MotifH
 settings.h	MotifH
 slider.h	MotifH
@@ -1283,15 +1197,13 @@ statbmp.h	MotifH
 statbox.h	MotifH
 stattext.h	MotifH
 textctrl.h	MotifH
-tglbtn.h	MotifH
 timer.h	MotifH
 toolbar.h	MotifH
-toplevel.h	MotifH
 window.h	MotifH
 
 app.h	X11H
-bitmap.h	X11H	Motif
-brush.h	X11H	Motif
+bitmap.h	X11H
+brush.h	X11H
 clipbrd.h	X11H
 colour.h	X11H
 cursor.h	X11H
@@ -1311,11 +1223,10 @@ icon.h	X11H
 joystick.h	X11H
 minifram.h	X11H
 palette.h	X11H
-pen.h	X11H	Motif
+pen.h	X11H
 print.h	X11H
 private.h	X11H
-privx.h	X11H	Motif
-region.h	X11H	Motif
+region.h	X11H
 reparent.h	X11H
 textctrl.h	X11H
 toplevel.h	X11H
@@ -1343,7 +1254,6 @@ region.h	MGLH
 toplevel.h	MGLH
 window.h	MGLH
 
-access.h	MSWH
 accel.h	MSWH
 app.h	MSWH
 bitmap.h	MSWH
@@ -1359,6 +1269,8 @@ colordlg.h	MSWH
 colour.h	MSWH
 combobox.h	MSWH
 control.h	MSWH
+curico.h	MSWH
+curicop.h	MSWH
 cursor.h	MSWH
 dc.h	MSWH
 dcclient.h	MSWH
@@ -1368,6 +1280,7 @@ dcscreen.h	MSWH
 dde.h	MSWH	Base
 dialog.h	MSWH
 dib.h	MSWH
+dibutils.h	MSWH
 dirdlg.h	MSWH
 dragimag.h	MSWH
 enhmeta.h	MSWH	Win32Only
@@ -1377,6 +1290,7 @@ font.h	MSWH
 fontdlg.h	MSWH
 frame.h	MSWH
 gauge95.h	MSWH
+gaugemsw.h	MSWH
 gccpriv.h	MSWH	Base
 gdiimage.h	MSWH
 gdiobj.h	MSWH
@@ -1436,7 +1350,6 @@ wave.h	MSWH
 window.h	MSWH
 winundef.h	MSWH	Base
 
-access.h	MSWH	OLE
 automtn.h	MSWH	OLE
 dataform.h	MSWH	OLE
 dataobj.h	MSWH	OLE
@@ -1486,6 +1399,7 @@ dc.h	OS2H
 tabctrl.h	OS2H
 dcclient.h	OS2H
 print.h	OS2H
+taskbar.h	OS2H
 bmpbuttn.h	OS2H
 dcmemory.h	OS2H
 iniconf.h	OS2H
@@ -1547,7 +1461,6 @@ execute.h	UnixH
 fontutil.h	UnixH
 gsockunx.h	UnixH	Base
 mimetype.h	UnixH	Base
-taskbarx11.h	UnixH
 utilsx11.h	UnixH
 
 file.h	ProtoH	Base
@@ -1585,6 +1498,7 @@ grid.h	GenericH
 gridctrl.h	GenericH
 gridg.h	GenericH
 helpext.h	GenericH
+helphtml.h	GenericH
 imaglist.h	GenericH
 laywin.h	GenericH
 listctrl.h	GenericH	NotWin32
@@ -1601,7 +1515,7 @@ scrolwin.h	GenericH
 spinctlg.h	GenericH
 splash.h	GenericH
 splitter.h	GenericH
-statline.h	GenericH	NotMSW,NotMac,NotCocoa,NotMGL,NotMicro,NotGTK,NotX11,NotOS2,NotUniv
+statline.h	GenericH	NotMSW,NotMac,NotMGL,NotMicro,NotGTK,NotX11,NotOS2,NotUniv
 statusbr.h	GenericH
 tabg.h	GenericH	NotWin32
 textdlgg.h	GenericH

@@ -50,7 +50,7 @@ public:
     void SetId(const wxChar* pId);
 
     // implementation
-    wxDataFormatId GetType() const { return m_type; }
+    wxDataFormatId GetType() const;
     void SetType( wxDataFormatId type );
 
 private:

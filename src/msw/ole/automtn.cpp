@@ -24,11 +24,9 @@
 
 // Watcom C++ gives a linker error if this is compiled in.
 // With Borland C++, all samples crash if this is compiled in.
-#if wxUSE_OLE &&!defined(__WATCOMC__) && !(defined(__BORLANDC__) && (__BORLANDC__ < 0x520)) && !defined(__CYGWIN10__)
+#if wxUSE_OLE &&!defined(__WATCOMC__) && !(defined(__BORLANDC__) && (__BORLANDC__ < 0x520)) && !defined(__CYGWIN10__) && !defined(__WXWINE__)
 
-#define _FORCENAMELESSUNION
 #include "wx/log.h"
-#include "wx/msw/ole/oleutils.h"
 #include "wx/msw/ole/automtn.h"
 #include "wx/msw/private.h"
 
@@ -42,6 +40,39 @@
 #include <ole2ver.h>
 #include <oleauto.h>
 
+// wrapper around BSTR type (by Vadim Zeitlin)
+
+class WXDLLEXPORT BasicString
+{
+public:
+  // ctors & dtor
+  BasicString(const char *sz);
+ ~BasicString();
+
+  // accessors
+    // just get the string
+  operator BSTR() const { return m_wzBuf; }
+    // retrieve a copy of our string - caller must SysFreeString() it later!
+  BSTR Get() const { return SysAllocString(m_wzBuf); }
+
+private:
+  // @@@ not implemented (but should be)
+  BasicString(const BasicString&);
+  BasicString& operator=(const BasicString&);
+
+  OLECHAR *m_wzBuf;     // actual string
+};
+
+// Convert variants
+static bool ConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant) ;
+static bool ConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant) ;
+
+// Convert string to Unicode
+static BSTR ConvertStringToOle(const wxString& str);
+
+// Convert string from BSTR to wxString
+static wxString ConvertStringFromOle(BSTR bStr);
+
 // Verifies will fail if the needed buffer size is too large
 #define MAX_TIME_BUFFER_SIZE    128         // matches that in timecore.cpp
 #define MIN_DATE                (-657434L)  // about year 100
@@ -54,9 +85,7 @@
 static int rgMonthDays[13] =
 	{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
 
-#if wxUSE_DATETIME
-#include "wx/datetime.h"
-
+#if wxUSE_TIMEDATE
 static BOOL OleDateFromTm(WORD wYear, WORD wMonth, WORD wDay,
 	WORD wHour, WORD wMinute, WORD wSecond, DATE& dtDest);
 static BOOL TmFromOleDate(DATE dtSrc, struct tm& tmDest);
@@ -124,7 +153,7 @@ bool wxAutomationObject::Invoke(const wxString& member, int action,
 
 	int namedArgStringCount = namedArgCount + 1;
 	BSTR* argNames = new BSTR[namedArgStringCount];
-	argNames[0] = wxConvertStringToOle(member);
+	argNames[0] = ConvertStringToOle(member);
 
 	// Note that arguments are specified in reverse order
 	// (all totally logical; hey, we're dealing with OLE here.)
@@ -134,7 +163,7 @@ bool wxAutomationObject::Invoke(const wxString& member, int action,
 	{	
 		if (!INVOKEARG(i).GetName().IsNull())
 		{
-			argNames[(namedArgCount-j)] = wxConvertStringToOle(INVOKEARG(i).GetName());
+			argNames[(namedArgCount-j)] = ConvertStringToOle(INVOKEARG(i).GetName());
 			j ++;
 		}
 	}
@@ -154,8 +183,8 @@ bool wxAutomationObject::Invoke(const wxString& member, int action,
 	if (FAILED(hr)) 
 	{
 //		ShowException(szMember, hr, NULL, 0);
-	    delete[] argNames;
-	    delete[] dispIds;
+        delete[] argNames;
+        delete[] dispIds;
 		return FALSE;
 	}
 
@@ -173,7 +202,7 @@ bool wxAutomationObject::Invoke(const wxString& member, int action,
 	for (i = 0; i < noArgs; i++)
 	{
 		// Again, reverse args
-		if (!wxConvertVariantToOle(INVOKEARG((noArgs-1) - i), oleArgs[i]))
+		if (!ConvertVariantToOle(INVOKEARG((noArgs-1) - i), oleArgs[i]))
         {
 	        delete[] argNames;
 	        delete[] dispIds;
@@ -222,7 +251,7 @@ bool wxAutomationObject::Invoke(const wxString& member, int action,
 		if (vReturnPtr)
 		{
 			// Convert result to wxVariant form
-			wxConvertOleToVariant(vReturn, retValue);
+			ConvertOleToVariant(vReturn, retValue);
 			// Mustn't release the dispatch pointer
 			if (vReturn.vt == VT_DISPATCH)
 			{
@@ -504,7 +533,7 @@ bool wxAutomationObject::GetInstance(const wxString& classId) const
 	CLSID clsId;
 	IUnknown * pUnk = NULL;
 
-	wxBasicString unicodeName(classId.mb_str());
+	BasicString unicodeName(classId.mb_str());
 	
 	if (FAILED(CLSIDFromProgID((BSTR) unicodeName, &clsId))) 
 	{
@@ -536,7 +565,7 @@ bool wxAutomationObject::CreateInstance(const wxString& classId) const
 
 	CLSID clsId;
 
-	wxBasicString unicodeName(classId.mb_str());
+	BasicString unicodeName(classId.mb_str());
 	
 	if (FAILED(CLSIDFromProgID((BSTR) unicodeName, &clsId))) 
 	{
@@ -555,7 +584,7 @@ bool wxAutomationObject::CreateInstance(const wxString& classId) const
 }
 
 
-bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant)
+bool ConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant)
 {
 	ClearVariant(&oleVariant);
 	if (variant.IsNull())
@@ -599,11 +628,10 @@ bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant)
     {
         wxString str( variant.GetString() );
         oleVariant.vt = VT_BSTR;
-        oleVariant.bstrVal = wxConvertStringToOle(str);
+        oleVariant.bstrVal = ConvertStringToOle(str);
     }
 // For some reason, Watcom C++ can't link variant.cpp with time/date classes compiled
-// Now obsolete
-#if 0 // wxUSE_TIMEDATE && !defined(__WATCOMC__)
+#if wxUSE_TIMEDATE && !defined(__WATCOMC__)
     else if (type == wxT("date"))
     {
         wxDate date( variant.GetDate() );
@@ -620,17 +648,6 @@ bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant)
 
 		if (!OleDateFromTm(time.GetYear(), time.GetMonth(), time.GetDay(),
 			time.GetHour(), time.GetMinute(), time.GetSecond(), oleVariant.date))
-			return FALSE;
-    }
-#endif
-#if wxUSE_DATETIME
-    else if (type == wxT("datetime"))
-    {
-        wxDateTime date( variant.GetDateTime() );
-        oleVariant.vt = VT_DATE;
-
-		if (!OleDateFromTm(date.GetYear(), date.GetMonth(), date.GetDay(),
-				date.GetHour(), date.GetMinute(), date.GetSecond(), oleVariant.date))
 			return FALSE;
     }
 #endif
@@ -665,7 +682,7 @@ bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant)
 	    {
 		    // copy each string in the list of strings
             wxVariant eachVariant(variant[i]);
-            if (!wxConvertVariantToOle(eachVariant, * pvarg))
+            if (!ConvertVariantToOle(eachVariant, * pvarg))
             {
 			    // memory failure:  back out and free strings alloc'ed up to
 			    // now, and then the array itself.
@@ -697,26 +714,27 @@ bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& oleVariant)
 #define VT_TYPEMASK 0xfff
 #endif
 
-bool wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
+bool ConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
 {
 	switch (oleVariant.vt & VT_TYPEMASK)
 	{
 	case VT_BSTR:
 		{
-			wxString str(wxConvertStringFromOle(oleVariant.bstrVal));
+			wxString str(ConvertStringFromOle(oleVariant.bstrVal));
 			variant = str;
 			break;
 		}
 	case VT_DATE:
 		{
-#if wxUSE_DATETIME
+#if wxUSE_TIMEDATE
             struct tm tmTemp;
 			if (!TmFromOleDate(oleVariant.date, tmTemp))
 				return FALSE;
 
-			wxDateTime date(tmTemp.tm_yday, (wxDateTime::Month) tmTemp.tm_mon, tmTemp.tm_year, tmTemp.tm_hour, tmTemp.tm_min, tmTemp.tm_sec);
+			wxDate date(tmTemp.tm_yday, tmTemp.tm_mon, tmTemp.tm_year);
+			wxTime time(date, tmTemp.tm_hour, tmTemp.tm_min, tmTemp.tm_sec);
 
-			variant = date;
+			variant = time;
 #endif
 
             break;
@@ -775,7 +793,7 @@ bool wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
 			{
 				VARIANTARG& oleElement = pvdata[i];
 				wxVariant vElement;
-				if (!wxConvertOleToVariant(oleElement, vElement))
+				if (!ConvertOleToVariant(oleElement, vElement))
 					return FALSE;
 				
 				variant.Append(vElement);
@@ -806,7 +824,7 @@ bool wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
     return TRUE;
 }
 
-BSTR wxConvertStringToOle(const wxString& str)
+static BSTR ConvertStringToOle(const wxString& str)
 {
 /*
 	unsigned int len = strlen((const char*) str);
@@ -816,11 +834,11 @@ BSTR wxConvertStringToOle(const wxString& str)
 	for (i=0; i < len; i++)
 		s[i*2] = str[i];
 */
-	wxBasicString bstr(str.mb_str());
+	BasicString bstr(str.mb_str());
 	return bstr.Get();
 }
 
-wxString wxConvertStringFromOle(BSTR bStr)
+static wxString ConvertStringFromOle(BSTR bStr)
 {
 #if wxUSE_UNICODE
     wxString str(bStr);
@@ -835,50 +853,32 @@ wxString wxConvertStringFromOle(BSTR bStr)
 }
 
 // ----------------------------------------------------------------------------
-// wxBasicString
+// BasicString
 // ----------------------------------------------------------------------------
 
 // ctor takes an ANSI string and transforms it to Unicode
-wxBasicString::wxBasicString(const char *sz)
+BasicString::BasicString(const char *sz)
 {
-    Init(sz);
-}
+  // get the size of required buffer
+  UINT lenAnsi = strlen(sz);
+  #ifdef __MWERKS__
+  UINT lenWide = lenAnsi * 2 ;
+  #else
+  UINT lenWide = mbstowcs(NULL, sz, lenAnsi);
+  #endif
 
-// ctor takes an ANSI or Unicode string and transforms it to Unicode
-wxBasicString::wxBasicString(const wxString& str)
-{
-#if wxUSE_UNICODE
-    m_wzBuf = new OLECHAR[str.Length() + 1];
-    memcpy(m_wzBuf, str.c_str(), str.Length()*2);
-    m_wzBuf[str.Length()] = L'\0';
-#else
-    Init(str.c_str());
-#endif
-}
-
-// Takes an ANSI string and transforms it to Unicode
-void wxBasicString::Init(const char *sz)
-{
-    // get the size of required buffer
-    UINT lenAnsi = strlen(sz);
-#ifdef __MWERKS__
-    UINT lenWide = lenAnsi * 2 ;
-#else
-    UINT lenWide = mbstowcs(NULL, sz, lenAnsi);
-#endif
-    
-    if ( lenWide > 0 ) {
-        m_wzBuf = new OLECHAR[lenWide + 1];
-        mbstowcs(m_wzBuf, sz, lenAnsi);
-        m_wzBuf[lenWide] = L'\0';
-    }
-    else {
-        m_wzBuf = NULL;
-    }
+  if ( lenWide > 0 ) {
+    m_wzBuf = new OLECHAR[lenWide + 1];
+    mbstowcs(m_wzBuf, sz, lenAnsi);
+    m_wzBuf[lenWide] = L'\0';
+  }
+  else {
+    m_wzBuf = NULL;
+  }
 }
 
 // dtor frees memory
-wxBasicString::~wxBasicString()
+BasicString::~BasicString()
 {
   delete [] m_wzBuf;
 }

@@ -6,7 +6,7 @@
 // Created:     29.03.00
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONTENC_H_
@@ -78,10 +78,10 @@ enum wxFontEncoding
 
         // Japanese (see http://zsigri.tripod.com/fontboard/cjk/jis.html)
     wxFONTENCODING_SHIFT_JIS = wxFONTENCODING_CP932,  // Shift JIS
-    wxFONTENCODING_EUC_JP = wxFONTENCODING_UTF8 + 1,  // Extended Unix Codepage
-                                                      // for Japanese
+    wxFONTENCODING_EUC_JP = wxFONTENCODING_UTF8 + 1,  // Extended Unix Codepage for Japanese
 
-    wxFONTENCODING_UNICODE,         // Unicode (for wxEncodingConverter only)
+    wxFONTENCODING_UNICODE,         // Unicode - currently used only by
+                                    // wxEncodingConverter class
 
     wxFONTENCODING_MAX
 };
@@ -111,7 +111,7 @@ struct WXDLLEXPORT wxNativeEncodingInfo
     wxString facename;          // may be empty meaning "any"
     wxFontEncoding encoding;    // so that we know what this struct represents
 
-#if defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMAC__) || defined(__WXCOCOA__) // FIXME: __WXCOCOA__
+#if defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMAC__)
     wxNativeEncodingInfo()
         : facename()
         , encoding(wxFONTENCODING_SYSTEM)

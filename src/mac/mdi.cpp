@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        mdi.cpp
 // Purpose:     MDI classes
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -27,6 +27,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxMDIChildFrame, wxFrame)
 IMPLEMENT_DYNAMIC_CLASS(wxMDIClientWindow, wxWindow)
 
 BEGIN_EVENT_TABLE(wxMDIParentFrame, wxFrame)
+  EVT_SIZE(wxMDIParentFrame::OnSize)
   EVT_ACTIVATE(wxMDIParentFrame::OnActivate)
   EVT_SYS_COLOUR_CHANGED(wxMDIParentFrame::OnSysColourChanged)
 END_EVENT_TABLE()
@@ -70,33 +71,33 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
            long style,
            const wxString& name)
 {
-    m_clientWindow = NULL;
-    m_currentChild = NULL;
-    
-    // this style can be used to prevent a window from having the standard MDI
-    // "Window" menu
-    if ( style & wxFRAME_NO_WINDOW_MENU )
-    {
-        m_windowMenu = (wxMenu *)NULL;
-        style -= wxFRAME_NO_WINDOW_MENU ;
-    }
-    else // normal case: we have the window menu, so construct it
-    {
-        m_windowMenu = new wxMenu;
+  m_clientWindow = NULL;
+  m_currentChild = NULL;
+
+  // this style can be used to prevent a window from having the standard MDI
+  // "Window" menu
+  if ( style & wxFRAME_NO_WINDOW_MENU )
+  {
+      m_windowMenu = (wxMenu *)NULL;
+      style -= wxFRAME_NO_WINDOW_MENU ;
+  }
+  else // normal case: we have the window menu, so construct it
+  {
+      m_windowMenu = new wxMenu;
+
+      m_windowMenu->Append(IDM_WINDOWCASCADE, wxT("&Cascade"));
+      m_windowMenu->Append(IDM_WINDOWTILEHOR, wxT("Tile &Horizontally"));
+      m_windowMenu->Append(IDM_WINDOWTILEVERT, wxT("Tile &Vertically"));
+      m_windowMenu->AppendSeparator();
+      m_windowMenu->Append(IDM_WINDOWICONS, wxT("&Arrange Icons"));
+      m_windowMenu->Append(IDM_WINDOWNEXT, wxT("&Next"));
+  }
+
+  wxFrame::Create( parent , id , title , wxPoint( 2000 , 2000 ) , size , style , name ) ;
+  m_parentFrameActive = TRUE;
         
-        m_windowMenu->Append(IDM_WINDOWCASCADE, wxT("&Cascade"));
-        m_windowMenu->Append(IDM_WINDOWTILEHOR, wxT("Tile &Horizontally"));
-        m_windowMenu->Append(IDM_WINDOWTILEVERT, wxT("Tile &Vertically"));
-        m_windowMenu->AppendSeparator();
-        m_windowMenu->Append(IDM_WINDOWICONS, wxT("&Arrange Icons"));
-        m_windowMenu->Append(IDM_WINDOWNEXT, wxT("&Next"));
-    }
-    
-    wxFrame::Create( parent , id , title , wxPoint( 2000 , 2000 ) , size , style , name ) ;
-    m_parentFrameActive = TRUE;
-    
-    OnCreateClient();
-    
+  OnCreateClient();
+
     return TRUE;
 }
 
@@ -107,13 +108,13 @@ wxMDIParentFrame::~wxMDIParentFrame()
     m_frameToolBar = NULL;
     m_frameStatusBar = NULL;
     m_clientWindow = NULL ;
-    
+
     if (m_windowMenu)
     {
         delete m_windowMenu;
         m_windowMenu = (wxMenu*) NULL;
     }
-    
+
     if ( m_clientWindow )
     {
         delete m_clientWindow;
@@ -122,33 +123,54 @@ wxMDIParentFrame::~wxMDIParentFrame()
 }
 
 
+// Get size *available for subwindows* i.e. excluding menu bar.
+void wxMDIParentFrame::DoGetClientSize(int *x, int *y) const
+{
+	wxDisplaySize( x , y ) ;
+}
+
 void wxMDIParentFrame::SetMenuBar(wxMenuBar *menu_bar)
 {
-    wxFrame::SetMenuBar( menu_bar ) ;
+	wxFrame::SetMenuBar( menu_bar ) ;
+}
+
+void wxMDIParentFrame::OnSize(wxSizeEvent& event)
+{
+#if wxUSE_CONSTRAINTS
+    if (GetAutoLayout())
+      Layout();
+#endif
+    int x = 0;
+    int y = 0;
+    int width, height;
+    GetClientSize(&width, &height);
+
+    if ( GetClientWindow() )
+        GetClientWindow()->SetSize(x, y, width, height);
 }
 
 void wxMDIParentFrame::OnActivate(wxActivateEvent& event)
 {
-    if ( m_currentChild && event.GetActive() )
-    {
-        wxActivateEvent event(wxEVT_ACTIVATE, TRUE, m_currentChild->GetId());
-        event.SetEventObject( m_currentChild );
-        m_currentChild->GetEventHandler()->ProcessEvent(event) ;
-    }
-    else if ( event.GetActive() )
-    {
-        if ( m_frameMenuBar != NULL )
-        {
-            m_frameMenuBar->MacInstallMenuBar() ;
-        }
-        
-    }
+  if ( m_currentChild && event.GetActive() )
+  {
+    wxActivateEvent event(wxEVT_ACTIVATE, TRUE, m_currentChild->GetId());
+    event.SetEventObject( m_currentChild );
+    m_currentChild->GetEventHandler()->ProcessEvent(event) ;
+  }
+  else if ( event.GetActive() )
+  {
+  	  if ( m_frameMenuBar != NULL )
+	    {
+	    	  m_frameMenuBar->MacInstallMenuBar() ;
+	    }
+
+  }
 }
 
 // Returns the active MDI child window
 wxMDIChildFrame *wxMDIParentFrame::GetActiveChild() const
 {
-    return m_currentChild ;
+  return m_currentChild ;
 }
 
 // Create the client window class (don't Create the window,
@@ -163,7 +185,7 @@ wxMDIClientWindow *wxMDIParentFrame::OnCreateClient()
 void wxMDIParentFrame::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
     // TODO
-    
+
     // Propagate the event to the non-top-level children
     wxFrame::OnSysColourChanged(event);
 }
@@ -205,27 +227,27 @@ void wxMDIChildFrame::Init()
 }
 
 bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
-                             wxWindowID id,
-                             const wxString& title,
-                             const wxPoint& pos,
-                             const wxSize& size,
-                             long style,
-                             const wxString& name)
+           wxWindowID id,
+           const wxString& title,
+           const wxPoint& pos,
+           const wxSize& size,
+           long style,
+           const wxString& name)
 {
     SetName(name);
-    
+
     if ( id > -1 )
         m_windowId = id;
     else
         m_windowId = (int)NewControlId();
-    
+
     if (parent) parent->AddChild(this);
-    
-    MacCreateRealWindow( title, pos , size , MacRemoveBordersFromStyle(style) , name ) ;
-    
-    m_macWindowBackgroundTheme = kThemeBrushDocumentWindowBackground ;
-    SetThemeWindowBackground( (WindowRef) m_macWindow , m_macWindowBackgroundTheme , false ) ;
-    
+
+  	MacCreateRealWindow( title, pos , size , MacRemoveBordersFromStyle(style) , name ) ;
+  
+	m_macWindowBackgroundTheme = kThemeBrushDocumentWindowBackground ;
+	SetThemeWindowBackground( (WindowRef) m_macWindow , m_macWindowBackgroundTheme , false ) ;
+
     wxModelessWindows.Append(this);
     return FALSE;
 }
@@ -240,7 +262,7 @@ wxMDIChildFrame::~wxMDIChildFrame()
 
 void wxMDIChildFrame::SetMenuBar(wxMenuBar *menu_bar)
 {
-    return wxFrame::SetMenuBar( menu_bar ) ;
+	return wxFrame::SetMenuBar( menu_bar ) ;
 }
 
 // MDI operations
@@ -273,23 +295,17 @@ wxMDIClientWindow::~wxMDIClientWindow()
 
 bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
 {
-    
+
     m_windowId = (int)NewControlId();
-    
+
     if ( parent )
     {
-        parent->AddChild(this);
+       parent->AddChild(this);
     }
     m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
-    
+
     wxModelessWindows.Append(this);
     return TRUE;
-}
-
-// Get size *available for subwindows* i.e. excluding menu bar.
-void wxMDIClientWindow::DoGetClientSize(int *x, int *y) const
-{
-    wxDisplaySize( x , y ) ;
 }
 
 // Explicitly call default scroll behaviour

@@ -481,8 +481,6 @@ EVT_TEXT      (ID_SPINCTRL,             MyPanel::OnSpinCtrlText)
 #endif // wxUSE_SPINCTRL
 #if wxUSE_TOGGLEBTN
 EVT_TOGGLEBUTTON(ID_BUTTON_LABEL,       MyPanel::OnUpdateLabel)
-#else
-EVT_CHECKBOX(ID_BUTTON_LABEL,       MyPanel::OnUpdateLabel)
 #endif // wxUSE_TOGGLEBTN
 EVT_CHECKBOX  (ID_CHANGE_COLOUR,        MyPanel::OnChangeColour)
 EVT_BUTTON    (ID_BUTTON_TEST1,         MyPanel::OnTestButton)
@@ -812,7 +810,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     (void)new wxBitmapButton(panel, ID_BITMAP_BTN, bitmap, wxPoint(100, 20));
 
-#if defined(__WXMSW__) || defined(__WXMOTIF__)
+#ifdef __WXMSW__
     // test for masked bitmap display
     bitmap = wxBitmap(_T("test2.bmp"), wxBITMAP_TYPE_BMP);
     if (bitmap.Ok())
@@ -839,9 +837,6 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 #if wxUSE_TOGGLEBTN
     (void)new wxToggleButton(panel, ID_BUTTON_LABEL,
                              _T("&Toggle label"), wxPoint(250, 20));
-#else
-    (void)new wxCheckBox(panel, ID_BUTTON_LABEL,
-                         _T("&Toggle label"), wxPoint(250, 20));
 #endif // wxUSE_TOGGLEBTN
 
     m_label = new wxStaticText(panel, -1, _T("Label with some long text"),
@@ -1694,7 +1689,7 @@ void MyComboBox::OnChar(wxKeyEvent& event)
 {
     wxLogMessage(_T("MyComboBox::OnChar"));
 
-    if ( event.GetKeyCode() == 'w' )
+    if ( event.KeyCode() == 'w' )
         wxLogMessage(_T("MyComboBox: 'w' will be ignored."));
     else
         event.Skip();
@@ -1704,7 +1699,7 @@ void MyComboBox::OnKeyDown(wxKeyEvent& event)
 {
     wxLogMessage(_T("MyComboBox::OnKeyDown"));
 
-    if ( event.GetKeyCode() == 'w' )
+    if ( event.KeyCode() == 'w' )
         wxLogMessage(_T("MyComboBox: 'w' will be ignored."));
     else
         event.Skip();

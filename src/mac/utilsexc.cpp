@@ -1,16 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        utilsexec.cpp
 // Purpose:     Execution-related utilities
-// Author:      Stefan Csomor
-// Modified by: David Elliott
-// Created:     1998-01-01
+// Author:      AUTHOR
+// Modified by:
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-//#pragma implementation
+#pragma implementation
 #endif
 
 #include "wx/log.h"
@@ -19,9 +19,7 @@
 #include "wx/unix/execute.h"
 #include <unistd.h>
 #include <sys/wait.h>
-extern "C" {
 #include <mach/mach.h>
-}
 #include <CoreFoundation/CFMachPort.h>
 #endif
 
@@ -124,6 +122,6 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     CFRunLoopAddSource(CFRunLoopGetCurrent(),runloopsource,kCFRunLoopDefaultMode);
     CFRelease(runloopsource);
     wxLogDebug("Successfully added notification to the runloop");
-    return 0;
+   return 0;
 }
 #endif

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        choice.h
 // Purpose:     wxChoice class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CHOICE_H_
@@ -20,7 +20,7 @@
 
   #include  "wx/dynarray.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxChoiceNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxChoiceNameStr;
 
 WX_DEFINE_ARRAY( char * , wxChoiceDataArray ) ;
 
@@ -57,7 +57,6 @@ public:
 
   // implement base class pure virtuals
   virtual int DoAppend(const wxString& item);
-  virtual int DoInsert(const wxString& item, int pos);
   virtual void Delete(int n);
   virtual void Clear();
 
@@ -68,8 +67,24 @@ public:
   virtual int FindString(const wxString& s) const;
   virtual wxString GetString(int n) const ;
   virtual void SetString( int , const wxString& s ) ;
-    void        MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
+	void		MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
 
+/*
+  virtual void Append(const wxString& item);
+  // Added min Append and GetClientData
+  virtual void Append(const wxString& item, void *client_data);
+  virtual void *GetClientData(int index) const;
+  virtual inline void Select( int n ) { SetSelection( n ); }
+  virtual void SetSize(int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO);
+  virtual wxString GetStringSelection() const ;
+  virtual bool SetStringSelection(const wxString& sel);
+
+  // Mac specific
+  virtual void Command(wxCommandEvent& event);
+  void		MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
+
+  virtual inline int GetColumns() const { return 1 ; };
+*/
 protected:
     virtual wxSize DoGetBestSize() const ;
     virtual void DoSetItemClientData( int n, void* clientData );
@@ -83,8 +98,8 @@ protected:
 
   wxArrayString m_strings;
   wxChoiceDataArray m_datas ;
-  WXHMENU    m_macPopUpMenuHandle ;
+  WXHMENU	m_macPopUpMenuHandle ;
 };
 
 #endif
-    // _WX_CHOICE_H_
+	// _WX_CHOICE_H_

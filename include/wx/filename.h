@@ -6,7 +6,7 @@
 // Created:     28.12.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _WX_FILENAME_H_
@@ -175,17 +175,17 @@ public:
     bool IsOk() const { return !m_dirs.IsEmpty() || !m_name.IsEmpty(); }
 
         // does the file with this name exists?
-    bool FileExists() const;
+    bool FileExists();
     static bool FileExists( const wxString &file );
 
         // does the directory with this name exists?
-    bool DirExists() const;
+    bool DirExists();
     static bool DirExists( const wxString &dir );
 
         // VZ: also need: IsDirWritable(), IsFileExecutable() &c (TODO)
 
     // time functions
-#if wxUSE_DATETIME
+
         // set the file last access/mod and creation times
         // (any of the pointers may be NULL)
     bool SetTimes(const wxDateTime *dtAccess,
@@ -208,7 +208,6 @@ public:
         (void)GetTimes(NULL, &dtMod, NULL);
         return dtMod;
     }
-#endif // wxUSE_DATETIME
 
 #ifdef __WXMAC__
     bool MacSetTypeAndCreator( wxUint32 type , wxUint32 creator ) ;
@@ -272,9 +271,6 @@ public:
     bool MakeRelativeTo(const wxString& pathBase = _T(""),
                         wxPathFormat format = wxPATH_NATIVE);
 
-        // make the path absolute
-        //
-        // this may be done using another (than current) value of cwd
     bool MakeAbsolute(const wxString& cwd = wxEmptyString,
                       wxPathFormat format = wxPATH_NATIVE)
         { return Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE |
@@ -394,10 +390,9 @@ public:
     // deprecated methods, don't use any more
     // --------------------------------------
 
-#ifndef __DIGITALMARS__
     wxString GetPath( bool withSep, wxPathFormat format = wxPATH_NATIVE ) const
         { return GetPath(withSep ? wxPATH_GET_SEPARATOR : 0, format); }
-#endif
+
     wxString GetPathWithSep(wxPathFormat format = wxPATH_NATIVE ) const
         { return GetPath(wxPATH_GET_SEPARATOR, format); }
 

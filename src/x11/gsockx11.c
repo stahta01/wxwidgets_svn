@@ -2,7 +2,6 @@
  * Project: GSocket (Generic Socket) for WX
  * Name:    gsockmot.c
  * Purpose: GSocket: X11 part
- * Licence: The wxWindows licence
  * CVSID:   $Id$
  * ------------------------------------------------------------------------- */
 

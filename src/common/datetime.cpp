@@ -13,7 +13,7 @@
 //               so long as the above copyright and this permission statement
 //               are retained in all copies.
 //
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -82,14 +82,11 @@
 #include "wx/datetime.h"
 #include "wx/timer.h"           // for wxGetLocalTimeMillis()
 
-const long wxDateTime::TIME_T_FACTOR = 1000l;
-
 // ----------------------------------------------------------------------------
 // conditional compilation
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_STRPTIME) && defined(__GLIBC__) && \
-        ((__GLIBC__ == 2) && (__GLIBC_MINOR__ == 0))
+#if defined(HAVE_STRPTIME) && defined(__LINUX__)
     // glibc 2.0.7 strptime() is broken - the following snippet causes it to
     // crash (instead of just failing):
     //
@@ -100,17 +97,13 @@ const long wxDateTime::TIME_T_FACTOR = 1000l;
     #undef HAVE_STRPTIME
 #endif // broken strptime()
 
-#if defined(__MWERKS__) && wxUSE_UNICODE
-    #include <wtime.h>
-#endif
-
 #if !defined(WX_TIMEZONE) && !defined(WX_GMTOFF_IN_TM)
     #if defined(__BORLANDC__) || defined(__MINGW32__) || defined(__VISAGECPP__)
         #define WX_TIMEZONE _timezone
     #elif defined(__MWERKS__)
         long wxmw_timezone = 28800;
         #define WX_TIMEZONE wxmw_timezone
-    #elif defined(__DJGPP__) || defined(__WINE__)
+    #elif defined(__DJGPP__)
         #include <sys/timeb.h>
         #include <values.h>
         static long wxGetTimeZone()
@@ -343,7 +336,7 @@ static long GetTruncatedJDN(wxDateTime::wxDateTime_t day,
             - JDN_OFFSET;
 }
 
-// this function is a wrapper around strftime(3) adding error checking
+// this function is a wrapper around strftime(3)
 static wxString CallStrftime(const wxChar *format, const tm* tm)
 {
     wxChar buf[4096];
@@ -355,35 +348,6 @@ static wxString CallStrftime(const wxChar *format, const tm* tm)
 
     return wxString(buf);
 }
-
-#ifdef HAVE_STRPTIME
-
-// Unicode-friendly strptime() wrapper
-static const wxChar *
-CallStrptime(const wxChar *input, const char *fmt, tm *tm)
-{
-    // the problem here is that strptime() returns pointer into the string we
-    // passed to it while we're really interested in the pointer into the
-    // original, Unicode, string so we try to transform the pointer back
-#if wxUSE_UNICODE
-    wxCharBuffer inputMB(wxConvertWX2MB(input));
-#else // ASCII
-    const char * const inputMB = input;
-#endif // Unicode/Ascii
-
-    const char *result = strptime(inputMB, fmt, tm);
-    if ( !result )
-        return NULL;
-
-#if wxUSE_UNICODE
-    // FIXME: this is wrong in presence of surrogates &c
-    return input + (result - inputMB.data());
-#else // ASCII
-    return result;
-#endif // Unicode/Ascii
-}
-
-#endif // HAVE_STRPTIME
 
 // if year and/or month have invalid values, replace them with the current ones
 static void ReplaceDefaultYearMonthWithCurrent(int *year,
@@ -2951,13 +2915,12 @@ const wxChar *wxDateTime::ParseFormat(const wxChar *date,
 
             case _T('x'):       // locale default date representation
 #ifdef HAVE_STRPTIME
-                // try using strptime() -- it may fail even if the input is
+                // try using strptime() - it may fail even if the input is
                 // correct but the date is out of range, so we will fall back
-                // to our generic code anyhow
+                // to our generic code anyhow (FIXME !Unicode friendly)
                 {
                     struct tm tm;
-
-                    const wxChar *result = CallStrptime(input, "%x", &tm);
+                    const wxChar *result = strptime(input, "%x", &tm);
                     if ( result )
                     {
                         input = result;
@@ -3022,7 +2985,7 @@ const wxChar *wxDateTime::ParseFormat(const wxChar *date,
                 {
                     // use strptime() to do it for us (FIXME !Unicode friendly)
                     struct tm tm;
-                    input = CallStrptime(input, "%X", &tm);
+                    input = strptime(input, "%X", &tm);
                     if ( !input )
                     {
                         return (wxChar *)NULL;
@@ -3561,8 +3524,7 @@ const wxChar *wxDateTime::ParseTime(const wxChar *time)
         size_t len = timeString.length();
         if ( timeString.CmpNoCase(wxString(time, len)) == 0 )
         {
-            // casts required by DigitalMars
-            Set(stdTimes[n].hour, wxDateTime_t(0), wxDateTime_t(0));
+            Set(stdTimes[n].hour, 0, 0);
 
             return time + len;
         }

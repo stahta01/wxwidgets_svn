@@ -12,16 +12,19 @@
 #ifndef _WX_ICON_H_
 #define _WX_ICON_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "icon.h"
 #endif
 
 #include "wx/bitmap.h"
 
+#define M_ICONDATA ((wxBitmapRefData *)m_refData)
+#define M_ICONHANDLERDATA ((wxBitmapRefData *)bitmap->GetRefData())
+
 // Icon
 class WXDLLEXPORT wxIcon: public wxBitmap
 {
-    DECLARE_DYNAMIC_CLASS(wxIcon);
+    DECLARE_DYNAMIC_CLASS(wxIcon)
         
 public:
     wxIcon();
@@ -36,11 +39,11 @@ public:
     wxIcon(const char **data);
     wxIcon(char **data);
     
-    wxIcon(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_XPM,
+    wxIcon(const wxString& name, long flags = wxBITMAP_TYPE_XPM,
         int desiredWidth = -1, int desiredHeight = -1);
     ~wxIcon();
     
-    bool LoadFile(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_XPM,
+    bool LoadFile(const wxString& name, long flags = wxBITMAP_TYPE_XPM,
         int desiredWidth = -1, int desiredHeight = -1);
 
     // create from bitmap (which should have a mask unless it's monochrome):
@@ -48,12 +51,12 @@ public:
     // ctors, assignment operators...), but it's ok to have such function
     void CopyFromBitmap(const wxBitmap& bmp);
     
-    inline wxIcon& operator = (const wxIcon& icon)
-        { if (*this == icon) return (*this); Ref(icon); return *this; }
-    inline bool operator == (const wxIcon& icon) const
-        { return m_refData == icon.m_refData; }
-    inline bool operator != (const wxIcon& icon) const
-        { return m_refData != icon.m_refData; }
+    inline wxIcon& operator = (const wxIcon& icon) { if (*this == icon) return (*this); Ref(icon); return *this; }
+    inline bool operator == (const wxIcon& icon) const { return m_refData == icon.m_refData; }
+    inline bool operator != (const wxIcon& icon) const { return m_refData != icon.m_refData; }
+    
+    virtual bool Ok() const { return ((m_refData != NULL) && (M_ICONDATA->m_ok)); }
 };
 
-#endif // _WX_ICON_H_
+#endif
+// _WX_ICON_H_

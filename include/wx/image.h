@@ -18,9 +18,7 @@
 #include "wx/object.h"
 #include "wx/string.h"
 #include "wx/gdicmn.h"
-#if WXWIN_COMPATIBILITY_2_2
-#  include "wx/bitmap.h"
-#endif
+#include "wx/bitmap.h"
 #include "wx/hashmap.h"
 
 #if wxUSE_STREAMS
@@ -28,10 +26,6 @@
 #endif
 
 #if wxUSE_IMAGE
-
-// on some systems (Unixware 7.x) index is defined as a macro in the headers
-// which breaks the compilation below
-#undef index
 
 #define wxIMAGE_OPTION_FILENAME wxString(_T("FileName"))
 
@@ -41,7 +35,6 @@
 
 class WXDLLEXPORT wxImageHandler;
 class WXDLLEXPORT wxImage;
-class WXDLLEXPORT wxPalette;
 
 //-----------------------------------------------------------------------------
 // wxImageHandler
@@ -97,40 +90,22 @@ private:
 class WXDLLEXPORT wxImageHistogramEntry
 {
 public:
-    wxImageHistogramEntry() { index = value = 0; }
+    wxImageHistogramEntry() : index(0), value(0) {}
     unsigned long index;
     unsigned long value;
 };
 
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
+
 WX_DECLARE_EXPORTED_HASH_MAP(unsigned long, wxImageHistogramEntry,
                              wxIntegerHash, wxIntegerEqual,
-                             wxImageHistogramBase);
+                             wxImageHistogram);
 
-class WXDLLEXPORT wxImageHistogram : public wxImageHistogramBase
-{
-public:
-    wxImageHistogram() : wxImageHistogramBase(256) { }
-
-    // get the key in the histogram for the given RGB values
-    static unsigned long MakeKey(unsigned char r,
-                                 unsigned char g,
-                                 unsigned char b)
-    {
-        return (r << 16) | (g << 8) | b;
-    }
-
-    // find first colour that is not used in the image and has higher
-    // RGB values than RGB(startR, startG, startB)
-    //
-    // returns true and puts this colour in r, g, b (each of which may be NULL)
-    // on success or returns false if there are no more free colours
-    bool FindFirstUnusedColour(unsigned char *r,
-                               unsigned char *g,
-                               unsigned char *b,
-                               unsigned char startR = 1,
-                               unsigned char startG = 0,
-                               unsigned char startB = 0 ) const;
-};
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
 
 //-----------------------------------------------------------------------------
 // wxImage
@@ -140,7 +115,7 @@ class WXDLLEXPORT wxImage: public wxObject
 {
 public:
     wxImage();
-    wxImage( int width, int height, bool clear = true );
+    wxImage( int width, int height );
     wxImage( int width, int height, unsigned char* data, bool static_data = FALSE );
     wxImage( const wxString& name, long type = wxBITMAP_TYPE_ANY, int index = -1 );
     wxImage( const wxString& name, const wxString& mimetype, int index = -1 );
@@ -155,15 +130,15 @@ public:
 
 #if WXWIN_COMPATIBILITY_2_2 && wxUSE_GUI
     // conversion to/from wxBitmap (deprecated, use wxBitmap's methods instead):
-    wxDEPRECATED( wxImage(const wxBitmap &bitmap) );
-    wxDEPRECATED( wxBitmap ConvertToBitmap() const );
+    wxImage( const wxBitmap &bitmap );
+    wxBitmap ConvertToBitmap() const;
 #ifdef __WXGTK__
     wxBitmap ConvertToMonoBitmap( unsigned char red, unsigned char green, unsigned char blue ) const;
 #endif
 #endif
 
-    bool Create( int width, int height, bool clear = true );
-    bool Create( int width, int height, unsigned char* data, bool static_data = FALSE );
+    void Create( int width, int height );
+    void Create( int width, int height, unsigned char* data, bool static_data = FALSE );
     void Destroy();
 
     // creates an identical copy of the image (the = operator
@@ -206,9 +181,6 @@ public:
     unsigned char GetGreen( int x, int y ) const;
     unsigned char GetBlue( int x, int y ) const;
 
-    void SetAlpha(int x, int y, unsigned char alpha);
-    unsigned char GetAlpha(int x, int y);
-
     // find first colour that is not used in the image and has higher
     // RGB values than <startR,startG,startB>
     bool FindFirstUnusedColour( unsigned char *r, unsigned char *g, unsigned char *b,
@@ -243,15 +215,9 @@ public:
     int GetWidth() const;
     int GetHeight() const;
 
-    // these functions provide fastest access to wxImage data but should be
-    // used carefully as no checks are done
-    unsigned char *GetData() const;
-    void SetData( unsigned char *data );
-    void SetData( unsigned char *data, int new_width, int new_height );
-
-    unsigned char *GetAlpha() const;    // may return NULL!
-    bool HasAlpha() const { return GetAlpha() != NULL; }
-    void SetAlpha(unsigned char *alpha = NULL);
+    char unsigned *GetData() const;
+    void SetData( char unsigned *data );
+    void SetData( char unsigned *data, int new_width, int new_height );
 
     // Mask functions
     void SetMaskColour( unsigned char r, unsigned char g, unsigned char b );
@@ -279,8 +245,8 @@ public:
 
     // Computes the histogram of the image and fills a hash table, indexed
     // with integer keys built as 0xRRGGBB, containing wxImageHistogramEntry
-    // objects. Each of them contains an 'index' (useful to build a palette
-    // with the image colours) and a 'value', which is the number of pixels
+    // objects. Each of them contains an 'index' (useful to build a palette 
+    // with the image colours) and a 'value', which is the number of pixels 
     // in the image with that colour.
     // Returned value: # of entries in the histogram
     unsigned long ComputeHistogram( wxImageHistogram &h ) const;
@@ -305,8 +271,6 @@ public:
     static wxImageHandler *FindHandler( const wxString& extension, long imageType );
     static wxImageHandler *FindHandler( long imageType );
     static wxImageHandler *FindHandlerMime( const wxString& mimetype );
-
-    static wxString GetImageExtWildcard();
 
     static void CleanUpHandlers();
     static void InitStandardHandlers();

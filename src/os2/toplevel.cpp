@@ -6,7 +6,7 @@
 // Created:     30.12.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -37,9 +37,9 @@
     #include "wx/frame.h"
     #include "wx/control.h"
     #include "wx/containr.h"        // wxSetFocusToChild()
+    #include "wx/module.h"        // wxSetFocusToChild()
 #endif //WX_PRECOMP
 
-#include "wx/module.h"        // wxSetFocusToChild()
 #include "wx/os2/private.h"
 
 // ----------------------------------------------------------------------------

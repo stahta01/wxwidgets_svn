@@ -22,8 +22,6 @@
 #include "wx/xrc/xh_text.h"
 #include "wx/textctrl.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxTextCtrlXmlHandler, wxXmlResourceHandler)
-
 wxTextCtrlXmlHandler::wxTextCtrlXmlHandler() : wxXmlResourceHandler() 
 {
     XRC_ADD_STYLE(wxTE_PROCESS_ENTER);

@@ -79,6 +79,9 @@ protected:
 
 WX_DECLARE_EXPORTED_OBJARRAY(wxHtmlBookRecord, wxHtmlBookRecArray);
 
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
 
 struct wxHtmlContentsItem
 {
@@ -91,6 +94,10 @@ struct wxHtmlContentsItem
     // returns full filename of m_Page, i.e. with book's basePath prepended
     wxString GetFullPath() const { return m_Book->GetFullPath(m_Page); }
 };
+
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
 
 //------------------------------------------------------------------------------
 // wxHtmlSearchEngine
@@ -115,8 +122,6 @@ private:
     wxChar *m_Keyword;
     bool m_CaseSensitive;
     bool m_WholeWords;
-
-    DECLARE_NO_COPY_CLASS(wxHtmlSearchEngine)
 };
 
 
@@ -149,8 +154,6 @@ private:
     int m_CurIndex;  // where we are now
     int m_MaxIndex;  // number of files we search
     // For progress bar: 100*curindex/maxindex = % complete
-
-    DECLARE_NO_COPY_CLASS(wxHtmlSearchStatus)
 };
 
 class WXDLLEXPORT wxHtmlHelpData : public wxObject
@@ -209,8 +212,6 @@ protected:
     bool LoadCachedBook(wxHtmlBookRecord *book, wxInputStream *f);
     // Writes binary book
     bool SaveCachedBook(wxHtmlBookRecord *book, wxOutputStream *f);
-
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpData)
 };
 
 #endif

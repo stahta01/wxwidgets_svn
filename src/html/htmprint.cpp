@@ -79,6 +79,7 @@ void wxHtmlDCRenderer::SetSize(int width, int height)
 }
 
 
+
 void wxHtmlDCRenderer::SetHtmlText(const wxString& html, const wxString& basepath, bool isdir)
 {
     if (m_DC == NULL) return;
@@ -98,7 +99,12 @@ void wxHtmlDCRenderer::SetFonts(wxString normal_face, wxString fixed_face,
     m_Parser->SetFonts(normal_face, fixed_face, sizes);
     if (m_DC == NULL && m_Cells != NULL) m_Cells->Layout(m_Width);
 }
-
+// Backport note: this signature will be replaced in wx 2.5.
+// It just forwards to the new function for backward binary compatibility.
+int wxHtmlDCRenderer::Render(int x, int y, int from, int dont_render)
+{
+    return Render(x, y, from, dont_render, INT_MAX, NULL, 0);
+}
 
 int wxHtmlDCRenderer::Render(int x, int y, int from, int dont_render, int to, int *known_pagebreaks, int number_of_pages)
 {
@@ -107,22 +113,37 @@ int wxHtmlDCRenderer::Render(int x, int y, int from, int dont_render, int to, in
     if (m_Cells == NULL || m_DC == NULL) return 0;
 
     pbreak = (int)(from + m_Height);
-    while (m_Cells->AdjustPagebreak(&pbreak, known_pagebreaks, number_of_pages)) {}
+
+    // Temporary kludge for backporting html pagebreaks to 2.4.0;
+    // remove in 2.4.1 .
+    wxHtmlKludge kludge;
+    kludge.pbreak = pbreak;
+    kludge.known_pagebreaks = known_pagebreaks;
+    kludge.number_of_pages = number_of_pages;
+
+    while (m_Cells->AdjustPagebreak((int*)&kludge)) {}
+// wx 2.5 will use this:
+//    while (m_Cells->AdjustPagebreak(&pbreak, known_pagebreaks, number_of_pages)) {}
+
+    pbreak = kludge.pbreak;
+    // We don't need to copy back
+    //    kludge.number_of_pages or
+    //    kludge.known_pagebreaks
+    // because their values aren't changed by AdjustPagebreak().
+    // Thus, known_pagebreaks probably ought to be const.
+
     hght = pbreak - from;
     if(to < hght)
         hght = to;
 
     if (!dont_render)
     {
-        wxHtmlRenderingInfo rinfo;
-        wxDefaultHtmlRenderingStyle rstyle;
-        rinfo.SetStyle(&rstyle);
         m_DC->SetBrush(*wxWHITE_BRUSH);
+
         m_DC->SetClippingRegion(x, y, m_Width, hght);
         m_Cells->Draw(*m_DC,
-                      x, (y - from),
-                      y, pbreak + (y /*- from*/),
-                      rinfo);
+                        x, (y - from),
+                        y, pbreak + (y /*- from*/));
         m_DC->DestroyClippingRegion();
     }
 
@@ -374,7 +395,11 @@ void wxHtmlPrintout::RenderPage(wxDC *dc, int page)
 
     m_Renderer->Render((int) (ppmm_h * m_MarginLeft),
                          (int) (ppmm_v * (m_MarginTop + (m_HeaderHeight == 0 ? 0 : m_MarginSpace)) + m_HeaderHeight),
-                         m_PageBreaks[page-1], FALSE, m_PageBreaks[page]-m_PageBreaks[page-1]);
+                         m_PageBreaks[page-1], FALSE, m_PageBreaks[page]-m_PageBreaks[page-1]
+// Backporting note: we need to specify every argument for backporting (see
+// include/wx/htmprint.h), but wx 2.5 will be able to default the
+// last two arguments here.
+                         ,NULL, 0);
 
     m_RendererHdr->SetDC(dc, (double)ppiPrinterY / (double)ppiScreenY);
     if (m_Headers[page % 2] != wxEmptyString)
@@ -433,9 +458,9 @@ void wxHtmlPrintout::SetFonts(wxString normal_face, wxString fixed_face,
 //----------------------------------------------------------------------------
 
 
-wxHtmlEasyPrinting::wxHtmlEasyPrinting(const wxString& name, wxWindow *parentWindow)
+wxHtmlEasyPrinting::wxHtmlEasyPrinting(const wxString& name, wxFrame *parent_frame)
 {
-    m_ParentWindow = parentWindow;
+    m_Frame = parent_frame;
     m_Name = name;
     m_PrintData = new wxPrintData;
     m_PageSetupData = new wxPageSetupDialogData;
@@ -444,8 +469,6 @@ wxHtmlEasyPrinting::wxHtmlEasyPrinting(const wxString& name, wxWindow *parentWin
     m_PageSetupData->EnableMargins(TRUE);
     m_PageSetupData->SetMarginTopLeft(wxPoint(25, 25));
     m_PageSetupData->SetMarginBottomRight(wxPoint(25, 25));
-
-    SetFonts(wxEmptyString, wxEmptyString, NULL);
 }
 
 
@@ -513,7 +536,7 @@ bool wxHtmlEasyPrinting::DoPreview(wxHtmlPrintout *printout1, wxHtmlPrintout *pr
         return FALSE;
     }
 
-    wxPreviewFrame *frame = new wxPreviewFrame(preview, m_ParentWindow,
+    wxPreviewFrame *frame = new wxPreviewFrame(preview, m_Frame,
                                                m_Name + _(" Preview"),
                                                wxPoint(100, 100), wxSize(650, 500));
     frame->Centre(wxBOTH);
@@ -529,7 +552,7 @@ bool wxHtmlEasyPrinting::DoPrint(wxHtmlPrintout *printout)
     wxPrintDialogData printDialogData(*m_PrintData);
     wxPrinter printer(&printDialogData);
 
-    if (!printer.Print(m_ParentWindow, printout, TRUE))
+    if (!printer.Print(m_Frame, printout, TRUE))
     {
         return FALSE;
     }
@@ -543,7 +566,7 @@ bool wxHtmlEasyPrinting::DoPrint(wxHtmlPrintout *printout)
 void wxHtmlEasyPrinting::PrinterSetup()
 {
     wxPrintDialogData printDialogData(*m_PrintData);
-    wxPrintDialog printerDialog(m_ParentWindow, &printDialogData);
+    wxPrintDialog printerDialog(m_Frame, &printDialogData);
 
     printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
 
@@ -562,7 +585,7 @@ void wxHtmlEasyPrinting::PageSetup()
     }
 
     m_PageSetupData->SetPrintData(*m_PrintData);
-    wxPageSetupDialog pageSetupDialog(m_ParentWindow, m_PageSetupData);
+    wxPageSetupDialog pageSetupDialog(m_Frame, m_PageSetupData);
 
     if (pageSetupDialog.ShowModal() == wxID_OK)
     {
@@ -592,27 +615,10 @@ void wxHtmlEasyPrinting::SetFooter(const wxString& footer, int pg)
 }
 
 
-void wxHtmlEasyPrinting::SetFonts(wxString normal_face, wxString fixed_face,
-                                  const int *sizes)
-{
-    m_FontFaceNormal = normal_face;
-    m_FontFaceFixed = fixed_face;
-
-    if (sizes)
-    {
-        m_FontsSizes = m_FontsSizesArr;
-        for (int i = 0; i < 7; i++) m_FontsSizes[i] = sizes[i];
-    }
-    else
-        m_FontsSizes = NULL;
-}
-
 
 wxHtmlPrintout *wxHtmlEasyPrinting::CreatePrintout()
 {
     wxHtmlPrintout *p = new wxHtmlPrintout(m_Name);
-
-    p->SetFonts(m_FontFaceNormal, m_FontFaceFixed, m_FontsSizes);
 
     p->SetHeader(m_Headers[0], wxPAGE_EVEN);
     p->SetHeader(m_Headers[1], wxPAGE_ODD);

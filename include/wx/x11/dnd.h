@@ -11,7 +11,7 @@
 #ifndef _WX_DND_H_
 #define _WX_DND_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface
 #endif
 

@@ -6,7 +6,7 @@
 // Created:     05/25/99
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -69,13 +69,13 @@ void wxDCBase::DoDrawCheckMark(wxCoord x1, wxCoord y1,
 
 void wxDCBase::DrawLines(const wxList *list, wxCoord xoffset, wxCoord yoffset)
 {
-    int n = list->GetCount();
+    int n = list->Number();
     wxPoint *points = new wxPoint[n];
 
     int i = 0;
-    for ( wxNode *node = list->GetFirst(); node; node = node->GetNext(), i++ )
+    for ( wxNode *node = list->First(); node; node = node->Next(), i++ )
     {
-        wxPoint *point = (wxPoint *)node->GetData();
+        wxPoint *point = (wxPoint *)node->Data();
         points[i].x = point->x;
         points[i].y = point->y;
     }
@@ -90,13 +90,13 @@ void wxDCBase::DrawPolygon(const wxList *list,
                            wxCoord xoffset, wxCoord yoffset,
                            int fillStyle)
 {
-    int n = list->GetCount();
+    int n = list->Number();
     wxPoint *points = new wxPoint[n];
 
     int i = 0;
-    for ( wxNode *node = list->GetFirst(); node; node = node->GetNext(), i++ )
+    for ( wxNode *node = list->First(); node; node = node->Next(), i++ )
     {
-        wxPoint *point = (wxPoint *)node->GetData();
+        wxPoint *point = (wxPoint *)node->Data();
         points[i].x = point->x;
         points[i].y = point->y;
     }
@@ -131,9 +131,9 @@ void wxDCBase::DrawSpline(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, wxCoor
 
     DrawSpline(&point_list);
 
-    for( wxNode *node = point_list.GetFirst(); node; node = node->GetNext() )
+    for( wxNode *node = point_list.First(); node; node = node->Next() )
     {
-        wxPoint *p = (wxPoint *)node->GetData();
+        wxPoint *p = (wxPoint *)node->Data();
         delete p;
     }
 }
@@ -254,13 +254,13 @@ static bool wx_spline_add_point(double x, double y)
 static void wx_spline_draw_point_array(wxDCBase *dc)
 {
   dc->DrawLines(&wx_spline_point_list, 0, 0 );
-  wxNode *node = wx_spline_point_list.GetFirst();
+  wxNode *node = wx_spline_point_list.First();
   while (node)
   {
-    wxPoint *point = (wxPoint *)node->GetData();
+    wxPoint *point = (wxPoint *)node->Data();
     delete point;
     delete node;
-    node = wx_spline_point_list.GetFirst();
+    node = wx_spline_point_list.First();
   }
 }
 
@@ -272,14 +272,14 @@ void wxDCBase::DoDrawSpline( wxList *points )
     double           cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4;
     double           x1, y1, x2, y2;
 
-    wxNode *node = points->GetFirst();
-    p = (wxPoint *)node->GetData();
+    wxNode *node = points->First();
+    p = (wxPoint *)node->Data();
 
     x1 = p->x;
     y1 = p->y;
 
-    node = node->GetNext();
-    p = (wxPoint *)node->GetData();
+    node = node->Next();
+    p = (wxPoint *)node->Data();
 
     x2 = p->x;
     y2 = p->y;
@@ -290,9 +290,9 @@ void wxDCBase::DoDrawSpline( wxList *points )
 
     wx_spline_add_point(x1, y1);
 
-    while ((node = node->GetNext()) != NULL)
+    while ((node = node->Next()) != NULL)
     {
-        p = (wxPoint *)node->GetData();
+        p = (wxPoint *)node->Data();
         x1 = x2;
         y1 = y2;
         x2 = p->x;

@@ -6,7 +6,7 @@
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998-2002 wxWindows dev team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -47,22 +47,20 @@
 
 #include <ctype.h>
 
-#if !defined(__GNUWIN32__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__)
+#if !defined(__GNUWIN32__) && !defined(__WXWINE__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__)
     #include <direct.h>
 #ifndef __MWERKS__
     #include <dos.h>
 #endif
 #endif
 
-#if defined(__GNUWIN32__)
+#if defined(__GNUWIN32__) && !defined(__TWIN32__)
     #include <sys/unistd.h>
     #include <sys/stat.h>
 #endif
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
-#ifndef __UNIX__
-    #include <io.h>
-#endif
+#if defined(__WIN32__) && !defined(__WXWINE__) && !defined(__WXMICROWIN__)
+#include <io.h>
 
 #ifndef __GNUWIN32__
 #include <shellapi.h>
@@ -148,8 +146,6 @@ protected:
 
 protected:
     HANDLE m_hInput;
-
-    DECLARE_NO_COPY_CLASS(wxPipeInputStream)
 };
 
 class wxPipeOutputStream: public wxOutputStream
@@ -163,8 +159,6 @@ protected:
 
 protected:
     HANDLE m_hOutput;
-
-    DECLARE_NO_COPY_CLASS(wxPipeOutputStream)
 };
 
 // define this to let wxexec.cpp know that we know what we're doing
@@ -349,6 +343,10 @@ wxPipeInputStream::~wxPipeInputStream()
 
 bool wxPipeInputStream::CanRead() const
 {
+    // FIXME
+#ifdef __WXWINE__
+    return FALSE;
+#else // !Wine
     if ( !IsOpened() )
         return FALSE;
 
@@ -385,6 +383,7 @@ bool wxPipeInputStream::CanRead() const
     }
 
     return nAvailable != 0;
+#endif // Wine/!Wine
 }
 
 size_t wxPipeInputStream::OnSysRead(void *buffer, size_t len)
@@ -492,14 +491,6 @@ long wxExecute(const wxString& cmd, int flags, wxProcess *handler)
 {
     wxCHECK_MSG( !!cmd, 0, wxT("empty command in wxExecute") );
 
-#if wxUSE_THREADS
-    // for many reasons, the code below breaks down if it's called from another
-    // thread -- this could be fixed, but as Unix versions don't support this
-    // neither I don't want to waste time on this now
-    wxASSERT_MSG( wxThread::IsMain(),
-                    _T("wxExecute() can be called only from the main thread") );
-#endif // wxUSE_THREADS
-
     wxString command;
 
 #if wxUSE_IPC
@@ -594,7 +585,7 @@ long wxExecute(const wxString& cmd, int flags, wxProcess *handler)
         command = cmd;
     }
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) && !defined(__TWIN32__)
 
     // the IO redirection is only supported with wxUSE_STREAMS
     BOOL redirect = FALSE;

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart and Robert Roebling
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart, Markus Holzem, Robert Roebling
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -67,9 +67,7 @@ wxGenericMessageDialog::wxGenericMessageDialog( wxWindow *parent,
 {
     m_dialogStyle = style;
 
-#if wxUSE_STATIC_BITMAP
     bool is_pda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
-#endif
 
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
@@ -101,19 +99,15 @@ wxGenericMessageDialog::wxGenericMessageDialog( wxWindow *parent,
                 bitmap = wxArtProvider::GetIcon(wxART_QUESTION, wxART_MESSAGE_BOX);
                 break;
         }
-#if wxUSE_STATIC_BITMAP
         wxStaticBitmap *icon = new wxStaticBitmap(this, -1, bitmap);
         if (is_pda)
             topsizer->Add( icon, 0, wxTOP|wxLEFT|wxRIGHT | wxALIGN_LEFT, 10 );
         else
             icon_text->Add( icon, 0, wxCENTER );
-#endif
     }
 
     // 2) text
-#if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
     icon_text->Add( CreateTextSizer( message ), 0, wxCENTER | wxLEFT, 10 );
-#endif
 
     topsizer->Add( icon_text, 1, wxCENTER | wxLEFT|wxRIGHT|wxTOP, 10 );
 
@@ -123,9 +117,7 @@ wxGenericMessageDialog::wxGenericMessageDialog( wxWindow *parent,
 #endif
 
     // 4) buttons
-#if wxUSE_BUTTON
     topsizer->Add( CreateButtonSizer( style ), 0, wxCENTRE | wxALL, 10 );
- #endif
 
     SetAutoLayout( TRUE );
     SetSizer( topsizer );

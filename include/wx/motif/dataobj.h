@@ -10,7 +10,7 @@
 #ifndef _WX_MOTIF_DATAOBJ_H_
 #define _WX_MOTIF_DATAOBJ_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "dataobj.h"
 #endif
 

@@ -8,7 +8,7 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_SASHWIN_H_G_
@@ -138,7 +138,7 @@ public:
     // Adjusts the panes
     void OnSize(wxSizeEvent& event);
 
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#ifdef __WXMSW__
     // Handle cursor correctly
     void OnSetCursor(wxSetCursorEvent& event);
 #endif // wxMSW
@@ -193,7 +193,6 @@ private:
 private:
     DECLARE_DYNAMIC_CLASS(wxSashWindow)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSashWindow)
 };
 
 BEGIN_DECLARE_EVENT_TYPES()

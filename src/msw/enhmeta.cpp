@@ -6,7 +6,7 @@
 // Created:     13.01.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -193,7 +193,14 @@ wxEnhMetaFileDC::wxEnhMetaFileDC(const wxString& filename,
         rect.bottom = height;
 
         // CreateEnhMetaFile() wants them in HIMETRIC
+#ifdef __WXWINE__
+        LONG r, b;
+        PixelToHIMETRIC(&r, &b);
+        rect.right = r;
+        rect.bottom = b;
+#else
         PixelToHIMETRIC(&rect.right, &rect.bottom);
+#endif
         
         pRect = &rect;
     }
@@ -294,6 +301,10 @@ bool wxEnhMetaFileDataObject::GetDataHere(const wxDataFormat& format, void *buf)
     }
     else
     {
+#ifdef __WXWINE__
+        wxFAIL_MSG( _T("unsupported format") );
+        return FALSE;
+#else
         wxASSERT_MSG( format == wxDF_METAFILE, _T("unsupported format") );
 
         // convert to WMF
@@ -335,6 +346,7 @@ bool wxEnhMetaFileDataObject::GetDataHere(const wxDataFormat& format, void *buf)
         mfpict->yExt = sizeMF.y;
 
         PixelToHIMETRIC(&mfpict->xExt, &mfpict->yExt);
+#endif
     }
 
     return TRUE;
@@ -430,7 +442,6 @@ bool wxEnhMetaFileSimpleDataObject::SetData(size_t WXUNUSED(len),
 
     return TRUE;
 }
-
 
 #endif // wxUSE_DRAG_AND_DROP
 

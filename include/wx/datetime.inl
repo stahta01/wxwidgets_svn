@@ -35,6 +35,11 @@
 // wxDateTime construction
 // ----------------------------------------------------------------------------
 
+// only define this once, when included from datetime.cpp
+#ifdef wxDEFINE_TIME_CONSTANTS
+    const long wxDateTime::TIME_T_FACTOR = 1000l;
+#endif // wxDEFINE_TIME_CONSTANTS
+
 inline bool wxDateTime::IsInStdRange() const
 {
     return m_time >= 0l && (m_time / TIME_T_FACTOR) < LONG_MAX;

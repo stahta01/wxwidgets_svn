@@ -14,7 +14,7 @@
 
 #include "wx/object.h"
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "gdiobj.h"
 #endif
 

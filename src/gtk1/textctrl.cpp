@@ -1,3 +1,4 @@
+
 /////////////////////////////////////////////////////////////////////////////
 // Name:        textctrl.cpp
 // Purpose:
@@ -600,6 +601,7 @@ void wxTextCtrl::WriteText( const wxString &text )
         GtkTextIter iter;
         gtk_text_buffer_get_iter_at_mark( text_buffer, &iter,  gtk_text_buffer_get_insert( text_buffer ) );
         gtk_text_view_scroll_to_iter( GTK_TEXT_VIEW(m_text), &iter, 0.0, FALSE, 0.0, 1.0 );
+
 #else // GTK 1.x
         // After cursor movements, gtk_text_get_point() is wrong by one.
         gtk_text_set_point( GTK_TEXT(m_text), GET_EDITABLE_POS(m_text) );
@@ -1247,7 +1249,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
 {
     wxCHECK_RET( m_text != NULL, wxT("invalid text ctrl") );
 
-    if ((key_event.GetKeyCode() == WXK_RETURN) && (m_windowStyle & wxPROCESS_ENTER))
+    if ((key_event.KeyCode() == WXK_RETURN) && (m_windowStyle & wxPROCESS_ENTER))
     {
         wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
         event.SetEventObject(this);
@@ -1255,7 +1257,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
         if (GetEventHandler()->ProcessEvent(event)) return;
     }
 
-    if ((key_event.GetKeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
+    if ((key_event.KeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
     {
         // This will invoke the dialog default action, such
         // as the clicking the default button.

@@ -24,9 +24,7 @@
 #include <wx/wx.h>
 #endif
 
-#include <wx/deprecated/setup.h>
-#include <wx/deprecated/wxexpr.h>
-
+#include <wx/wxexpr.h>
 #include <wx/clipbrd.h>
 
 #ifdef __WXMSW__

@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        checkbox.h
 // Purpose:     wxCheckBox class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +37,7 @@ public:
             const wxString& name = wxCheckBoxNameStr);
     virtual void SetValue(bool);
     virtual bool GetValue() const;
-    virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown );
+    virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart );
     virtual void Command(wxCommandEvent& event);
 
     DECLARE_DYNAMIC_CLASS(wxCheckBox)

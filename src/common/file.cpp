@@ -7,7 +7,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -28,7 +28,7 @@
 #if wxUSE_FILE
 
 // standard
-#if defined(__WXMSW__) && !defined(__GNUWIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WXMSW__) && !defined(__GNUWIN32__) && !defined(__WXWINE__) && !defined(__WXMICROWIN__)
   #include  <io.h>
 
 #ifndef __SALFORDC__
@@ -56,7 +56,6 @@
 
 #elif (defined(__UNIX__) || defined(__GNUWIN32__))
     #include  <unistd.h>
-    #include  <sys/stat.h>
     #ifdef __GNUWIN32__
         #include <windows.h>
     #endif
@@ -91,10 +90,7 @@
 #include  <stdio.h>       // SEEK_xxx constants
 #include  <fcntl.h>       // O_RDONLY &c
 
-#ifndef __MWERKS__
-    #include  <sys/types.h>   // needed for stat
-    #include  <sys/stat.h>    // stat
-#elif defined(__MWERKS__) && ( defined(__WXMSW__) || defined(__MACH__) )
+#if !defined(__MWERKS__) || defined(__WXMSW__)
     #include  <sys/types.h>   // needed for stat
     #include  <sys/stat.h>    // stat
 #endif
@@ -204,7 +200,7 @@ bool wxFile::Create(const wxChar *szFileName, bool bOverwrite, int accessMode)
 {
     // if bOverwrite we create a new file or truncate the existing one,
     // otherwise we only create the new file and fail if it already exists
-#if defined(__WXMAC__) && !defined(__UNIX__) && !wxUSE_UNICODE
+#if defined(__WXMAC__) && !defined(__UNIX__)
     // Dominic Mazzoni [dmazzoni+@cs.cmu.edu] reports that open is still broken on the mac, so we replace
     // int fd = open(wxUnix2MacFilename( szFileName ), O_CREAT | (bOverwrite ? O_TRUNC : O_EXCL), access);
     int fd = creat( szFileName , accessMode);

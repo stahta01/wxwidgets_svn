@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -193,11 +193,11 @@ wxColourDatabase::wxColourDatabase (int type) : wxList (type)
 wxColourDatabase::~wxColourDatabase ()
 {
   // Cleanup Colour allocated in Initialize()
-  wxNode *node = GetFirst ();
+  wxNode *node = First ();
   while (node)
     {
-      wxColour *col = (wxColour *) node->GetData ();
-      wxNode *next = node->GetNext ();
+      wxColour *col = (wxColour *) node->Data ();
+      wxNode *next = node->Next ();
       delete col;
       node = next;
     }
@@ -330,16 +330,16 @@ wxColour *wxColourDatabase::FindColour(const wxString& colour)
     if ( !colName2.Replace(_T("GRAY"), _T("GREY")) )
         colName2.clear();
 
-    wxNode *node = GetFirst();
+    wxNode *node = First();
     while ( node )
     {
         const wxChar *key = node->GetKeyString();
         if ( colName == key || colName2 == key )
         {
-            return (wxColour *)node->GetData();
+            return (wxColour *)node->Data();
         }
 
-        node = node->GetNext();
+        node = node->Next();
     }
 
 #ifdef __WXMSW__
@@ -411,9 +411,9 @@ wxString wxColourDatabase::FindName (const wxColour& colour) const
     unsigned char green = colour.Green ();
     unsigned char blue = colour.Blue ();
 
-    for (wxNode * node = GetFirst (); node; node = node->GetNext ())
+    for (wxNode * node = First (); node; node = node->Next ())
     {
-        wxColour *col = (wxColour *) node->GetData ();
+        wxColour *col = (wxColour *) node->Data ();
 
         if (col->Red () == red && col->Green () == green && col->Blue () == blue)
         {
@@ -463,7 +463,8 @@ void wxInitializeStockObjects ()
 
 	GetThemeFont(kThemeSystemFont , GetApplicationScript() , fontName , &fontSize , &fontStyle ) ;
 	sizeFont = fontSize ;
-    wxSWISS_FONT = new wxFont (fontSize, wxSWISS, wxNORMAL, wxNORMAL , false , wxMacMakeStringFromPascal(fontName) );
+    p2cstrcpy( (char*) fontName , fontName ) ;
+    wxSWISS_FONT = new wxFont (fontSize, wxSWISS, wxNORMAL, wxNORMAL , false , fontName );
 #elif defined(__WXPM__)
   static const int sizeFont = 12;
 #else
@@ -484,7 +485,8 @@ void wxInitializeStockObjects ()
     wxNORMAL_FONT = new wxFont (sizeFont, wxMODERN, wxNORMAL, wxNORMAL);
     wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
 	GetThemeFont(kThemeSmallSystemFont , GetApplicationScript() , fontName , &fontSize , &fontStyle ) ;
-    wxSMALL_FONT = new wxFont (fontSize, wxSWISS, wxNORMAL, wxNORMAL , false , wxMacMakeStringFromPascal( fontName ) );
+    p2cstrcpy( (char*) fontName , fontName ) ;
+    wxSMALL_FONT = new wxFont (fontSize, wxSWISS, wxNORMAL, wxNORMAL , false , fontName );
 #else
   wxSMALL_FONT = new wxFont (sizeFont - 2, wxSWISS, wxNORMAL, wxNORMAL);
   wxITALIC_FONT = new wxFont (sizeFont, wxROMAN, wxITALIC, wxNORMAL);
@@ -586,11 +588,11 @@ wxBitmapList::wxBitmapList()
 
 wxBitmapList::~wxBitmapList ()
 {
-  wxNode *node = GetFirst ();
+  wxNode *node = First ();
   while (node)
     {
-      wxBitmap *bitmap = (wxBitmap *) node->GetData ();
-      wxNode *next = node->GetNext ();
+      wxBitmap *bitmap = (wxBitmap *) node->Data ();
+      wxNode *next = node->Next ();
       if (bitmap->GetVisible())
         delete bitmap;
       node = next;
@@ -600,11 +602,11 @@ wxBitmapList::~wxBitmapList ()
 // Pen and Brush lists
 wxPenList::~wxPenList ()
 {
-  wxNode *node = GetFirst ();
+  wxNode *node = First ();
   while (node)
     {
-      wxPen *pen = (wxPen *) node->GetData ();
-      wxNode *next = node->GetNext ();
+      wxPen *pen = (wxPen *) node->Data ();
+      wxNode *next = node->Next ();
       if (pen->GetVisible())
         delete pen;
       node = next;
@@ -623,9 +625,9 @@ void wxPenList::RemovePen (wxPen * pen)
 
 wxPen *wxPenList::FindOrCreatePen (const wxColour& colour, int width, int style)
 {
-    for (wxNode * node = GetFirst (); node; node = node->GetNext ())
+    for (wxNode * node = First (); node; node = node->Next ())
     {
-        wxPen *each_pen = (wxPen *) node->GetData ();
+        wxPen *each_pen = (wxPen *) node->Data ();
         if (each_pen &&
                 each_pen->GetVisible() &&
                 each_pen->GetWidth () == width &&
@@ -655,11 +657,11 @@ wxPen *wxPenList::FindOrCreatePen (const wxColour& colour, int width, int style)
 
 wxBrushList::~wxBrushList ()
 {
-  wxNode *node = GetFirst ();
+  wxNode *node = First ();
   while (node)
     {
-      wxBrush *brush = (wxBrush *) node->GetData ();
-      wxNode *next = node->GetNext ();
+      wxBrush *brush = (wxBrush *) node->Data ();
+      wxNode *next = node->Next ();
       if (brush && brush->GetVisible())
         delete brush;
       node = next;
@@ -673,9 +675,9 @@ void wxBrushList::AddBrush (wxBrush * brush)
 
 wxBrush *wxBrushList::FindOrCreateBrush (const wxColour& colour, int style)
 {
-    for (wxNode * node = GetFirst (); node; node = node->GetNext ())
+    for (wxNode * node = First (); node; node = node->Next ())
     {
-        wxBrush *each_brush = (wxBrush *) node->GetData ();
+        wxBrush *each_brush = (wxBrush *) node->Data ();
         if (each_brush &&
                 each_brush->GetVisible() &&
                 each_brush->GetStyle () == style &&
@@ -710,15 +712,15 @@ void wxBrushList::RemoveBrush (wxBrush * brush)
 
 wxFontList::~wxFontList ()
 {
-    wxNode *node = GetFirst ();
+    wxNode *node = First ();
     while (node)
     {
         // Only delete objects that are 'visible', i.e.
         // that have been created using FindOrCreate...,
         // where the pointers are expected to be shared
         // (and therefore not deleted by any one part of an app).
-        wxFont *font = (wxFont *) node->GetData ();
-        wxNode *next = node->GetNext ();
+        wxFont *font = (wxFont *) node->Data ();
+        wxNode *next = node->Next ();
         if (font->GetVisible())
             delete font;
         node = next;
@@ -745,9 +747,9 @@ wxFont *wxFontList::FindOrCreateFont(int pointSize,
 {
     wxFont *font = (wxFont *)NULL;
     wxNode *node;
-    for ( node = GetFirst(); node; node = node->GetNext() )
+    for ( node = First(); node; node = node->Next() )
     {
-        font = (wxFont *)node->GetData();
+        font = (wxFont *)node->Data();
         if ( font->GetVisible() &&
              font->Ok() &&
              font->GetPointSize () == pointSize &&
@@ -842,12 +844,12 @@ wxSize wxGetDisplaySizeMM()
 
 wxResourceCache::~wxResourceCache ()
 {
-    wxNode *node = GetFirst ();
+    wxNode *node = First ();
     while (node) {
-        wxObject *item = (wxObject *)node->GetData();
+        wxObject *item = (wxObject *)node->Data();
         delete item;
 
-        node = node->GetNext ();
+        node = node->Next ();
     }
 }
 

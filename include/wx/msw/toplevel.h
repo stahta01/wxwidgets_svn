@@ -58,7 +58,7 @@ public:
     virtual void SetIcons(const wxIconBundle& icons );
     virtual void Restore();
 
-    virtual bool SetShape(const wxRegion& region);
+    /*virtual*/ bool SetShape(const wxRegion& region);
 
     virtual bool Show(bool show = TRUE);
 
@@ -122,7 +122,6 @@ protected:
     wxWindow             *m_winLastFocused;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTopLevelWindowMSW)
 };
 
 // list of all frames and modeless dialogs

@@ -19,7 +19,6 @@
 
 class WXXMLDLLEXPORT wxCalendarCtrlXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxCalendarCtrlXmlHandler)
 public:
     wxCalendarCtrlXmlHandler();
     virtual wxObject *DoCreateResource();

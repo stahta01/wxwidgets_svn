@@ -83,8 +83,6 @@ public:
     // called immediately after the control is shown
     virtual void OnShow() = 0;
 
-    virtual wxCoord GetBestWidth() const {return 0; }
-
 protected:
     wxComboControl *m_combo;
 };
@@ -330,7 +328,6 @@ public:
 
 protected:
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, int pos);
     virtual void DoSetItemClientData(int n, void* clientData);
     virtual void* DoGetItemClientData(int n) const;
     virtual void DoSetItemClientObject(int n, wxClientData* clientData);

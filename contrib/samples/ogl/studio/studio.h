@@ -34,7 +34,7 @@ class csFrame;
 // Define a new application
 class csApp: public wxApp
 {
-    friend class csFrame;
+    friend csFrame;
 public:
     csApp();
     ~csApp();

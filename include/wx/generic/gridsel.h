@@ -11,7 +11,7 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_GRID
+#if defined(wxUSE_NEW_GRID) && (wxUSE_NEW_GRID)
 
 #ifndef __WXGRIDSEL_H__
 #define __WXGRIDSEL_H__
@@ -83,10 +83,7 @@ private:
     wxGrid::wxGridSelectionModes        m_selectionMode;
 
     friend class WXDLLEXPORT wxGrid;
-
-    DECLARE_NO_COPY_CLASS(wxGridSelection)
 };
 
 #endif  // #ifdef __WXGRIDSEL_H__
-#endif  // #ifndef wxUSE_GRID
-
+#endif  // #ifndef wxUSE_NEW_GRID

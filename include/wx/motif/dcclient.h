@@ -12,15 +12,15 @@
 #ifndef _WX_DCCLIENT_H_
 #define _WX_DCCLIENT_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "dcclient.h"
 #endif
 
 #include "wx/dc.h"
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // fwd declarations
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxWindowDC;
 class WXDLLEXPORT wxWindow;
@@ -78,7 +78,7 @@ public:
     virtual void DestroyClippingRegion();
     
     // Helper function for setting clipping
-    void SetDCClipping(WXRegion region);
+    void SetDCClipping();
     
     // implementation from now on
     // --------------------------
@@ -140,30 +140,24 @@ protected:
     virtual void DoDrawPolygon(int n, wxPoint points[],
         wxCoord xoffset, wxCoord yoffset,
         int fillStyle = wxODDEVEN_RULE);
-
-    void DoGetSize( int *width, int *height ) const;
-
-    // common part of constructors
-    void Init();
-
+    
     WXGC         m_gc;
     WXGC         m_gcBacking;
     WXDisplay*   m_display;
     wxWindow*    m_window;
-    // Pixmap for drawing on
-    WXPixmap     m_pixmap;
-    // Last clipping region set on th GC, this is the combination
-    // of paint clipping region and all user-defined clipping regions
-    WXRegion     m_clipRegion;
-
+    WXRegion     m_currentRegion; // Current clipping region (incl. paint clip region)
+    WXRegion     m_userRegion;    // User-defined clipping region
+    WXPixmap     m_pixmap;        // Pixmap for drawing on
+    
     // Not sure if we'll need all of these
     int          m_backgroundPixel;
     wxColour     m_currentColour;
+    //    int          m_currentBkMode;
     int          m_currentPenWidth ;
     int          m_currentPenJoin ;
     int          m_currentPenCap ;
     int          m_currentPenDashCount ;
-    wxX11Dash*   m_currentPenDash ;
+    wxMOTIFDash* m_currentPenDash ;
     wxBitmap     m_currentStipple ;
     int          m_currentStyle ;
     int          m_currentFill ;

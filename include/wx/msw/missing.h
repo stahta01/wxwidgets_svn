@@ -163,7 +163,7 @@ typedef struct tagNMLVDISPINFOW {
 #endif
 #endif
 
-#if ((defined(__WATCOMC__) && __WATCOMC__ >= 1200) || defined(__GNUWIN32__) || defined (__MINGW32__) || defined(__DIGITALMARS__) || defined (__BORLANDC__)) && !defined(HDN_GETDISPINFOW)
+#if ((defined(__WATCOMC__) && __WATCOMC__ >= 1200) || defined(__GNUWIN32__) || defined (__MINGW32__) || defined (__BORLANDC__)) && !defined(HDN_GETDISPINFOW)
 #define HDN_GETDISPINFOW (HDN_FIRST-29)
 #if !wxCHECK_W32API_VERSION(2, 2)
 typedef struct {
@@ -249,12 +249,18 @@ struct HH_AKLINK
     #define QS_ALLPOSTMESSAGE    0x0100
 #endif
 
-#ifndef WS_EX_CLIENTEDGE
-    #define WS_EX_CLIENTEDGE 0x00000200L
+#ifdef __WXWINE__
+#define LV_ITEMA LVITEMA
+#define LV_ITEMW LVITEMW
+#define LV_DISPINFOA NMLVDISPINFOA
+#define LV_DISPINFOW NMLVDISPINFOW
+
+#if wxUSE_UNICODE
+#define LV_FINDINFO LVFINDINFOW
+#else
+#define LV_FINDINFO LVFINDINFOA
 #endif
 
-#ifndef ENDSESSION_LOGOFF
-    #define ENDSESSION_LOGOFF    0x80000000
 #endif
 
 #endif

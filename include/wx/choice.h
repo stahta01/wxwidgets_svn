@@ -70,10 +70,10 @@ public:
     #include "wx/gtk/choice.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/choice.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/choice.h"
 #elif defined(__WXPM__)
     #include "wx/os2/choice.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/choice.h"
 #endif
 
 #endif // wxUSE_CHOICE

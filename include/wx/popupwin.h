@@ -6,7 +6,7 @@
 // Created:     06.01.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_POPUPWIN_H_BASE_
@@ -127,7 +127,6 @@ protected:
     wxPopupFocusHandler  *m_handlerFocus;
 
     DECLARE_DYNAMIC_CLASS(wxPopupTransientWindow)
-    DECLARE_NO_COPY_CLASS(wxPopupTransientWindow)
 };
 
 #if wxUSE_COMBOBOX && defined(__WXUNIVERSAL__)

@@ -166,12 +166,6 @@ private:
     friend class wxConditionInternal;
 };
 
-#ifdef HAVE_PTHREAD_MUTEXATTR_T
-// on some systems pthread_mutexattr_settype() is not in the headers (but it is
-// in the library, otherwise we wouldn't compile this code at all)
-extern "C" int pthread_mutexattr_settype(pthread_mutexattr_t *, int);
-#endif
-
 wxMutexInternal::wxMutexInternal(wxMutexType mutexType)
 {
     int err;
@@ -538,17 +532,8 @@ wxSemaError wxSemaphoreInternal::WaitTimeout(unsigned long milliseconds)
             return wxSEMA_TIMEOUT;
         }
 
-        switch ( m_cond.WaitTimeout(remainingTime) )
-        {
-            case wxCOND_TIMEOUT:
-                return wxSEMA_TIMEOUT;
-
-            default:
-                return wxSEMA_MISC_ERROR;
-
-            case wxCOND_NO_ERROR:
-                ;
-        }
+        if ( m_cond.Wait(remainingTime) != wxCOND_NO_ERROR )
+            return wxSEMA_MISC_ERROR;
     }
 
     m_count--;
@@ -1003,8 +988,8 @@ int wxThread::GetCPUCount()
         wxString s;
         if ( file.ReadAll(&s) )
         {
-            // (ab)use Replace() to find the number of "processor: num" strings
-            size_t count = s.Replace(_T("processor\t:"), _T(""));
+            // (ab)use Replace() to find the number of "processor" strings
+            size_t count = s.Replace(_T("processor"), _T(""));
             if ( count > 0 )
             {
                 return count;

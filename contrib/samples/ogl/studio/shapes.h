@@ -18,8 +18,7 @@
 
 #include <wx/docview.h>
 #include <wx/string.h>
-#include <wx/deprecated/setup.h>
-#include <wx/deprecated/wxexpr.h>
+#include <wx/wxexpr.h>
 
 #include <wx/ogl/ogl.h>
 #include <wx/ogl/basicp.h>
@@ -38,8 +37,10 @@ DECLARE_CLASS(csDiagram)
 public:
     csDiagram(csDiagramDocument* doc) { m_doc = doc; }
     ~csDiagram();
+#if wxUSE_PROLOGIO
     bool OnShapeSave(wxExprDatabase& db, wxShape& shape, wxExpr& expr);
     bool OnShapeLoad(wxExprDatabase& db, wxShape& shape, wxExpr& expr);
+#endif
 
     inline csDiagramDocument* GetDocument() const { return m_doc; }
     virtual void Redraw(wxDC& dc);

@@ -23,11 +23,22 @@
 #include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/app.h"
-#include "wx/dcmemory.h"
-#include "wx/bitmap.h"
-#include "wx/evtloop.h"
+#include "wx/msgdlg.h"
+#include "wx/cursor.h"
+#include "wx/window.h" // for wxTopLevelWindows
 
+#include <ctype.h>
+#include <stdarg.h>
+#include <dirent.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <errno.h>
+// #include <netdb.h>
+#include <signal.h>
 
 #if (defined(__SUNCC__) || defined(__CLCC__))
     #include <sysent.h>
@@ -39,10 +50,14 @@
 
 #include "wx/unix/execute.h"
 
+#ifdef __WXMOTIF__
 #include <Xm/Xm.h>
-#include <Xm/Frame.h>
-
 #include "wx/motif/private.h"
+#endif
+
+#ifdef __WXX11__
+#include "wx/x11/private.h"
+#endif
 
 #if wxUSE_RESOURCES
 #include "X11/Xresource.h"
@@ -66,9 +81,7 @@
     #define DEFAULT_XRESOURCE_DIR "/usr/lib/X11/app-defaults"
 #endif
 
-#if wxUSE_RESOURCES
 static char *GetIniFile (char *dest, const char *filename);
-#endif
 
 // ============================================================================
 // implementation
@@ -79,24 +92,70 @@ static char *GetIniFile (char *dest, const char *filename);
 // ----------------------------------------------------------------------------
 
 // Consume all events until no more left
-void wxFlushEvents(WXDisplay* wxdisplay)
+void wxFlushEvents()
 {
-    Display *display = (Display*)wxdisplay;
-    wxEventLoop evtLoop;
+    Display *display = (Display*) wxGetDisplay();
 
     XSync (display, FALSE);
 
-    while (evtLoop.Pending())
+#ifdef __WXMOTIF__   
+    // XtAppPending returns availability of events AND timers/inputs, which
+    // are processed via callbacks, so XtAppNextEvent will not return if
+    // there are no events. So added '& XtIMXEvent' - Sergey.
+    while (XtAppPending ((XtAppContext) wxTheApp->GetAppContext()) & XtIMXEvent)
     {
-        XFlush (display);
-        evtLoop.Dispatch();
+        XFlush (XtDisplay ((Widget) wxTheApp->GetTopLevelWidget()));
+        // Jan Lessner: works better when events are non-X events
+        XtAppProcessEvent((XtAppContext) wxTheApp->GetAppContext(), XtIMXEvent);
     }
+#endif
+#ifdef __WXX11__
+    // TODO for X11
+    // ??
+#endif
+}
+
+// Check whether this window wants to process messages, e.g. Stop button
+// in long calculations.
+bool wxCheckForInterrupt(wxWindow *wnd)
+{
+#ifdef __WXMOTIF__
+    wxCHECK_MSG( wnd, FALSE, "NULL window in wxCheckForInterrupt" );
+
+    Display *dpy=(Display*) wnd->GetXDisplay();
+    Window win=(Window) wnd->GetXWindow();
+    XEvent event;
+    XFlush(dpy);
+    if (wnd->GetMainWidget())
+    {
+        XmUpdateDisplay((Widget)(wnd->GetMainWidget()));
+    }
+
+    bool hadEvents = FALSE;
+    while( XCheckMaskEvent(dpy,
+                           ButtonPressMask|ButtonReleaseMask|ButtonMotionMask|
+                           PointerMotionMask|KeyPressMask|KeyReleaseMask,
+                           &event) )
+    {
+        if ( event.xany.window == win )
+        {
+            hadEvents = TRUE;
+
+            XtDispatchEvent(&event);
+        }
+    }
+
+    return hadEvents;
+#else
+    wxASSERT_MSG(FALSE, "wxCheckForInterrupt not yet implemented.");
+    return FALSE;
+#endif
 }
 
 // ----------------------------------------------------------------------------
 // wxExecute stuff
 // ----------------------------------------------------------------------------
-
+#ifdef __WXMOTIF__
 static void xt_notify_end_process(XtPointer data, int *WXUNUSED(fid),
                                   XtInputId *id)
 {
@@ -109,9 +168,11 @@ static void xt_notify_end_process(XtPointer data, int *WXUNUSED(fid),
 
     XtRemoveInput(*id);
 }
+#endif
 
 int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 {
+#ifdef __WXMOTIF__
     XtInputId id = XtAppAddInput((XtAppContext) wxTheApp->GetAppContext(),
                                  fd,
                                  (XtPointer *) XtInputReadMask,
@@ -119,6 +180,11 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
                                  (XtPointer) proc_data);
 
     return (int)id;
+#endif
+#ifdef __WXX11__
+    // TODO
+    return 0;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -129,29 +195,36 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 void wxBell()
 {
     // Use current setting for the bell
-    XBell (wxGlobalDisplay(), 0);
+    XBell ((Display*) wxGetDisplay(), 0);
 }
 
 int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
+#ifdef __WXMOTIF__
     // FIXME TODO
     // This code is WRONG!! Does NOT return the
     // Motif version of the libs but the X protocol
     // version!
-    Display *display = wxGlobalDisplay();
+    Display *display = XtDisplay ((Widget) wxTheApp->GetTopLevelWidget());
     if (majorVsn)
         *majorVsn = ProtocolVersion (display);
     if (minorVsn)
         *minorVsn = ProtocolRevision (display);
 
     return wxMOTIF_X;
+#endif
+#ifdef __WXX11__
+    if (majorVsn)
+        *majorVsn = 0;
+    if (minorVsn)
+        *minorVsn = 0;
+    return wxX11;
+#endif
 }
 
 // ----------------------------------------------------------------------------
 // Reading and writing resources (eg WIN.INI, .Xdefaults)
 // ----------------------------------------------------------------------------
-
-#if wxUSE_RESOURCES
 
 // Read $HOME for what it says is home, if not
 // read $USER or $LOGNAME for user name else determine
@@ -183,6 +256,8 @@ static char * GetIniFile (char *dest, const char *filename)
     return dest;
 }
 
+#if wxUSE_RESOURCES
+
 static char *GetResourcePath(char *buf, const char *name, bool create = FALSE)
 {
     if (create && wxFileExists (name) ) {
@@ -196,7 +271,7 @@ static char *GetResourcePath(char *buf, const char *name, bool create = FALSE)
         // Put in standard place for resource files if not absolute
         strcpy (buf, DEFAULT_XRESOURCE_DIR);
         strcat (buf, "/");
-        strcat (buf, wxFileNameFromPath (name).c_str());
+        strcat (buf, (const char*) wxFileNameFromPath (name));
     }
 
     if (create) {
@@ -258,9 +333,9 @@ bool wxWriteResource(const wxString& section, const wxString& entry, const wxStr
     }
 
     char resName[300];
-    strcpy (resName, section.c_str());
+    strcpy (resName, (const char*) section);
     strcat (resName, ".");
-    strcat (resName, entry.c_str());
+    strcat (resName, (const char*) entry);
 
     XrmPutStringResource (&database, resName, value);
     return TRUE;
@@ -291,7 +366,7 @@ bool wxGetResource(const wxString& section, const wxString& entry, char **value,
 {
     if (!wxResourceDatabase)
     {
-        Display *display = wxGlobalDisplay();
+        Display *display = (Display*) wxGetDisplay();
         wxXMergeDatabases (wxTheApp, display);
     }
 
@@ -404,7 +479,7 @@ void wxXMergeDatabases (wxApp * theApp, Display * display)
     wxString classname = theApp->GetClassName();
     char name[256];
     (void) strcpy (name, "/usr/lib/X11/app-defaults/");
-    (void) strcat (name, classname.c_str());
+    (void) strcat (name, (const char*) classname);
 
     /* Get application defaults file, if any */
     applicationDB = XrmGetFileDatabase (name);
@@ -503,8 +578,8 @@ void wxGetMousePosition( int* x, int* y )
 #else
     XMotionEvent xev;
     Window root, child;
-    XQueryPointer(wxGlobalDisplay(),
-                  DefaultRootWindow(wxGlobalDisplay()),
+    XQueryPointer((Display*) wxGetDisplay(),
+                  DefaultRootWindow((Display*) wxGetDisplay()),
                   &root, &child,
                   &(xev.x_root), &(xev.y_root),
                   &(xev.x),      &(xev.y),
@@ -523,7 +598,7 @@ bool wxColourDisplay()
 // Returns depth of screen
 int wxDisplayDepth()
 {
-    Display *dpy = wxGlobalDisplay();
+    Display *dpy = (Display*) wxGetDisplay();
 
     return DefaultDepth (dpy, DefaultScreen (dpy));
 }
@@ -531,7 +606,7 @@ int wxDisplayDepth()
 // Get size of display
 void wxDisplaySize(int *width, int *height)
 {
-    Display *dpy = wxGlobalDisplay();
+    Display *dpy = (Display*) wxGetDisplay();
 
     if ( width )
         *width = DisplayWidth (dpy, DefaultScreen (dpy));
@@ -541,7 +616,7 @@ void wxDisplaySize(int *width, int *height)
 
 void wxDisplaySizeMM(int *width, int *height)
 {
-    Display *dpy = wxGlobalDisplay();
+    Display *dpy = (Display*) wxGetDisplay();
 
     if ( width )
         *width = DisplayWidthMM(dpy, DefaultScreen (dpy));
@@ -569,9 +644,16 @@ WXDisplay *wxGetDisplay()
 {
     if (gs_currentDisplay)
         return gs_currentDisplay;
+#ifdef __WXMOTIF__
+    if (wxTheApp && wxTheApp->GetTopLevelWidget())
+        return XtDisplay ((Widget) wxTheApp->GetTopLevelWidget());
     else if (wxTheApp)
         return wxTheApp->GetInitialDisplay();
     return NULL;
+#endif
+#ifdef __WXX11__
+    return wxApp::GetDisplay();
+#endif
 }
 
 bool wxSetDisplay(const wxString& display_name)
@@ -586,12 +668,13 @@ bool wxSetDisplay(const wxString& display_name)
     }
     else
     {
+#ifdef __WXMOTIF__
         Cardinal argc = 0;
 
         Display *display = XtOpenDisplay((XtAppContext) wxTheApp->GetAppContext(),
-            display_name.c_str(),
-            wxTheApp->GetAppName().c_str(),
-            wxTheApp->GetClassName().c_str(),
+            (const char*) display_name,
+            (const char*) wxTheApp->GetAppName(),
+            (const char*) wxTheApp->GetClassName(),
             NULL,
 #if XtSpecificationRelease < 5
             0, &argc,
@@ -607,6 +690,18 @@ bool wxSetDisplay(const wxString& display_name)
         }
         else
             return FALSE;
+#endif
+#ifdef __WXX11__
+        Display* display = XOpenDisplay((char*) display_name.c_str());
+
+        if (display)
+        {
+            gs_currentDisplay = (WXDisplay*) display;
+            return TRUE;
+        }
+        else
+            return FALSE;
+#endif
     }
 }
 
@@ -1006,6 +1101,7 @@ wxString wxGetXEventName(XEvent& event)
 }
 #endif
 
+#ifdef __WXMOTIF__
 // ----------------------------------------------------------------------------
 // accelerators
 // ----------------------------------------------------------------------------
@@ -1016,7 +1112,6 @@ char wxFindMnemonic (const char *s)
     char mnem = 0;
     int len = strlen (s);
     int i;
-
     for (i = 0; i < len; i++)
     {
         if (s[i] == '&')
@@ -1034,18 +1129,19 @@ char wxFindMnemonic (const char *s)
     return mnem;
 }
 
-char* wxFindAccelerator( const char *s )
+char * wxFindAccelerator (const char *s)
 {
-#if 1
     // VZ: this function returns incorrect keysym which completely breaks kbd
     //     handling
     return NULL;
-#else
-    // The accelerator text is after the \t char.
-    s = strchr( s, '\t' );
 
-    if( !s ) return NULL;
-
+#if 0
+   // The accelerator text is after the \t char.
+    while (*s && *s != '\t')
+        s++;
+    if (*s == '\0')
+        return (NULL);
+    s++;
     /*
     Now we need to format it as X standard:
 
@@ -1056,68 +1152,65 @@ char* wxFindAccelerator( const char *s )
         Alt+k        --> Meta<Key>k
         Ctrl+Shift+A --> Ctrl Shift<Key>A
 
-        and handle Ctrl-N & similia
     */
 
     static char buf[256];
-
     buf[0] = '\0';
-    wxString tmp = s + 1; // skip TAB
-    size_t index = 0;
+    char *tmp = copystring (s);
+    s = tmp;
+    char *p = tmp;
 
-    while( index < tmp.length() )
+    while (1)
     {
-        size_t plus  = tmp.find( '+', index );
-        size_t minus = tmp.find( '-', index );
-
-        // neither '+' nor '-', add <Key>
-        if( plus == wxString::npos && minus == wxString::npos )
+        while (*p && *p != '+')
+            p++;
+        if (*p)
         {
-            strcat( buf, "<Key>" );
-            strcat( buf, tmp.c_str() + index );
-
-            return buf;
+            *p = '\0';
+            if (buf[0])
+                strcat (buf, " ");
+            if (strcmp (s, "Alt"))
+                strcat (buf, s);
+            else
+                strcat (buf, "Meta");
+            s = p++;
         }
-
-        // OK: npos is big and positive
-        size_t sep = wxMin( plus, minus );
-        wxString mod = tmp.substr( index, sep - index );
-
-        // Ctrl  -> Ctrl
-        // Shift -> Shift
-        // Alt   -> Meta
-        if( mod == "Alt" )
-            mod = "Meta";
-
-        if( buf[0] )
-            strcat( buf, " " );
-
-        strcat( buf, mod.c_str() );
-
-        index = sep + 1;
+        else
+        {
+            strcat (buf, "<Key>");
+            strcat (buf, s);
+            break;
+        }
     }
-
-    return NULL;
+    delete[]tmp;
+    return buf;
 #endif
 }
 
 XmString wxFindAcceleratorText (const char *s)
 {
-#if 1
     // VZ: this function returns incorrect keysym which completely breaks kbd
     //     handling
     return NULL;
-#else
-    // The accelerator text is after the \t char.
-    s = strchr( s, '\t' );
 
-    if( !s ) return NULL;
-
-    return wxStringToXmString( s + 1 ); // skip TAB!
+#if 0
+   // The accelerator text is after the \t char.
+    while (*s && *s != '\t')
+        s++;
+    if (*s == '\0')
+        return (NULL);
+    s++;
+    XmString text = XmStringCreateSimple ((char *)s);
+    return text;
 #endif
 }
 
+
+// These functions duplicate those in wxWindow, but are needed
+// for use outside of wxWindow (e.g. wxMenu, wxMenuBar).
+
 // Change a widget's foreground and background colours.
+
 void wxDoChangeForegroundColour(WXWidget widget, wxColour& foregroundColour)
 {
     // When should we specify the foreground, if it's calculated
@@ -1152,107 +1245,13 @@ void wxDoChangeBackgroundColour(WXWidget widget, wxColour& backgroundColour, boo
         NULL);
 }
 
-extern void wxDoChangeFont(WXWidget widget, wxFont& font)
-{
-    // Lesstif 0.87 hangs here, but 0.93 does not
-#if !wxCHECK_LESSTIF() || wxCHECK_LESSTIF_VERSION( 0, 93 )
-    Widget w = (Widget)widget;
-    XtVaSetValues( w,
-                   wxFont::GetFontTag(), font.GetFontType( XtDisplay(w) ),
-                   NULL );
 #endif
+    // __WXMOTIF__
 
-}
-
-wxString wxXmStringToString( const XmString& xmString )
+bool wxWindowIsVisible(Window win)
 {
-    char *txt;
-    if( XmStringGetLtoR( xmString, XmSTRING_DEFAULT_CHARSET, &txt ) )
-    {
-        wxString str(txt);
-        XtFree (txt);
-        return str;
-    }
+    XWindowAttributes wa;
+    XGetWindowAttributes(wxGlobalDisplay(), win, &wa);
 
-    return wxEmptyString;
-}
-
-XmString wxStringToXmString( const wxString& str )
-{
-    return XmStringCreateLtoR((char *)str.c_str(), XmSTRING_DEFAULT_CHARSET);
-}
-
-XmString wxStringToXmString( const char* str )
-{
-    return XmStringCreateLtoR((char *)str, XmSTRING_DEFAULT_CHARSET);
-}
-
-// ----------------------------------------------------------------------------
-// wxBitmap utility functions
-// ----------------------------------------------------------------------------
-
-// Creates a bitmap with transparent areas drawn in
-// the given colour.
-wxBitmap wxCreateMaskedBitmap(const wxBitmap& bitmap, wxColour& colour)
-{
-    wxBitmap newBitmap(bitmap.GetWidth(),
-                       bitmap.GetHeight(),
-                       bitmap.GetDepth());
-    wxMemoryDC destDC;
-    wxMemoryDC srcDC;
-
-    srcDC.SelectObject(bitmap);
-    destDC.SelectObject(newBitmap);
-
-    wxBrush brush(colour, wxSOLID);
-    // destDC.SetOptimization(FALSE);
-    destDC.SetBackground(brush);
-    destDC.Clear();
-    destDC.Blit(0, 0, bitmap.GetWidth(), bitmap.GetHeight(),
-                &srcDC, 0, 0, wxCOPY, TRUE);
-
-    return newBitmap;
-}
-
-// ----------------------------------------------------------------------------
-// Miscellaneous functions
-// ----------------------------------------------------------------------------
-
-WXWidget wxCreateBorderWidget( WXWidget parent, long style )
-{
-    Widget borderWidget = (Widget)NULL, parentWidget = (Widget)parent;
-
-    if (style & wxSIMPLE_BORDER)
-    {
-        borderWidget = XtVaCreateManagedWidget
-                                   (
-                                    "simpleBorder",
-                                    xmFrameWidgetClass, parentWidget,
-                                    XmNshadowType, XmSHADOW_ETCHED_IN,
-                                    XmNshadowThickness, 1,
-                                    NULL
-                                   );
-    }
-    else if (style & wxSUNKEN_BORDER)
-    {
-        borderWidget = XtVaCreateManagedWidget
-                                   (
-                                    "sunkenBorder",
-                                    xmFrameWidgetClass, parentWidget,
-                                    XmNshadowType, XmSHADOW_IN,
-                                    NULL
-                                   );
-    }
-    else if (style & wxRAISED_BORDER)
-    {
-        borderWidget = XtVaCreateManagedWidget
-                                   (
-                                    "raisedBorder",
-                                    xmFrameWidgetClass, parentWidget,
-                                    XmNshadowType, XmSHADOW_OUT,
-                                    NULL
-                                   );
-    }
-
-    return borderWidget;
+    return (wa.map_state == IsViewable);
 }

@@ -12,13 +12,15 @@
 #ifndef _WX_CONTROL_H_
 #define _WX_CONTROL_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "control.h"
 #endif
 
 #include "wx/window.h"
 #include "wx/list.h"
 #include "wx/validate.h"
+
+#define wxControlNameStr _T("control")
 
 // General item class
 class WXDLLEXPORT wxControl: public wxControlBase
@@ -63,16 +65,6 @@ public:
     bool InSetValue() const { return m_inSetValue; }
     
 protected:
-    // calls wxControlBase::CreateControl, also sets foreground, background and
-    // font to parent's values
-    bool CreateControl(wxWindow *parent,
-                       wxWindowID id,
-                       const wxPoint& pos,
-                       const wxSize& size,
-                       long style,
-                       const wxValidator& validator,
-                       const wxString& name);
-
 #if WXWIN_COMPATIBILITY
     wxFunction          m_callback;     // Callback associated with the window
 #endif // WXWIN_COMPATIBILITY

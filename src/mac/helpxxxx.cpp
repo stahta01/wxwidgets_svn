@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        helpxxxx.cpp
 // Purpose:     Help system: native implementation
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -47,7 +47,7 @@ bool wxXXXXHelpController::LoadFile(const wxString& file)
 bool wxXXXXHelpController::DisplayContents()
 {
     // TODO
-    return FALSE;
+	return FALSE;
 }
 
 bool wxXXXXHelpController::DisplaySection(int section)

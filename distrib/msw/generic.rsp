@@ -184,15 +184,15 @@ samples/makefile*
 samples/configure
 samples/configure.in
 
-samples/access/*.cpp
-samples/access/*.h
-samples/access/*.def
-samples/access/makefile*
-samples/access/*.xbm
-samples/access/*.xpm
-samples/access/*.ico
-samples/access/*.rc
-samples/access/*.pro
+samples/animate/*.cpp
+samples/animate/*.h
+samples/animate/*.def
+samples/animate/makefile*
+samples/animate/*.xbm
+samples/animate/*.xpm
+samples/animate/*.ico
+samples/animate/*.rc
+samples/animate/*.pro
 
 samples/artprov/*.cpp
 samples/artprov/*.h
@@ -295,19 +295,6 @@ samples/dialup/*.png
 samples/dialup/*.ico
 samples/dialup/*.txt
 samples/dialup/*.pro
-
-samples/display/*.cpp
-samples/display/*.h
-samples/display/makefile*
-samples/display/*.rc
-samples/display/*.def
-samples/display/*.bmp
-samples/display/*.xpm
-samples/display/*.xbm
-samples/display/*.png
-samples/display/*.ico
-samples/display/*.txt
-samples/display/*.pro
 
 samples/db/*.cpp
 samples/db/*.h
@@ -501,15 +488,6 @@ samples/help/doc/*.db
 samples/help/doc/*.tex
 samples/help/doc/*.gif
 samples/help/doc/*.map
-
-samples/htlbox/*.cpp
-samples/htlbox/*.h
-samples/htlbox/*.def
-samples/htlbox/makefile*
-samples/htlbox/*.xpm
-samples/htlbox/*.ico
-samples/htlbox/*.bmp
-samples/htlbox/*.rc
 
 samples/html/makefile*
 samples/html/*.txt
@@ -828,6 +806,18 @@ samples/multimon/*.ico
 samples/multimon/*.bmp
 samples/multimon/*.pro
 
+samples/newgrid/*.cpp
+samples/newgrid/*.h
+samples/newgrid/*.def
+samples/newgrid/*.rc
+samples/newgrid/*.txt
+samples/newgrid/makefile*
+samples/newgrid/*.xbm
+samples/newgrid/*.xpm
+samples/newgrid/*.ico
+samples/newgrid/*.bmp
+samples/newgrid/*.pro
+
 samples/notebook/*.cpp
 samples/notebook/*.h
 samples/notebook/makefile*
@@ -908,6 +898,17 @@ samples/printing/*.rc
 samples/printing/*.afm
 samples/printing/*.pro
 
+samples/proplist/*.cpp
+samples/proplist/*.h
+samples/proplist/*.def
+samples/proplist/makefile*
+samples/proplist/*.xbm
+samples/proplist/*.xpm
+samples/proplist/*.ico
+samples/proplist/*.bmp
+samples/proplist/*.rc
+samples/proplist/*.pro
+
 samples/propsize/*.cpp
 samples/propsize/*.h
 samples/propsize/*.def
@@ -918,6 +919,18 @@ samples/propsize/*.ico
 samples/propsize/*.bmp
 samples/propsize/*.rc
 samples/propsize/*.pro
+
+samples/resource/*.cpp
+samples/resource/*.h
+samples/resource/*.def
+samples/resource/*.rc
+samples/resource/*.txt
+samples/resource/*.wxr
+samples/resource/makefile*
+samples/resource/*.xbm
+samples/resource/*.xpm
+samples/resource/*.ico
+samples/resource/*.pro
 
 samples/rotate/*.cpp
 samples/rotate/*.h
@@ -1050,6 +1063,17 @@ samples/thread/*.png
 samples/thread/*.ico
 samples/thread/*.txt
 samples/thread/*.pro
+
+samples/treelay/*.cpp
+samples/treelay/*.h
+samples/treelay/makefile*
+samples/treelay/*.rc
+samples/treelay/*.def
+samples/treelay/*.ico
+samples/treelay/*.xpm
+samples/treelay/*.txt
+samples/treelay/*.bmp
+samples/treelay/*.pro
 
 samples/typetest/*.cpp
 samples/typetest/*.h

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +65,7 @@ public:
     // ------------
 
     wxToolBarToolBase(wxToolBarBase *tbar = (wxToolBarBase *)NULL,
-                      int toolid = wxID_SEPARATOR,
+                      int id = wxID_SEPARATOR,
                       const wxString& label = wxEmptyString,
                       const wxBitmap& bmpNormal = wxNullBitmap,
                       const wxBitmap& bmpDisabled = wxNullBitmap,
@@ -78,7 +78,7 @@ public:
           m_longHelpString(longHelpString)
     {
         m_tbar = tbar;
-        m_id = toolid;
+        m_id = id;
         m_clientData = clientData;
 
         m_bmpNormal = bmpNormal;
@@ -89,7 +89,7 @@ public:
         m_enabled = TRUE;
         m_toggled = FALSE;
 
-        m_toolStyle = toolid == wxID_SEPARATOR ? wxTOOL_STYLE_SEPARATOR
+        m_toolStyle = id == wxID_SEPARATOR ? wxTOOL_STYLE_SEPARATOR
                                            : wxTOOL_STYLE_BUTTON;
     }
 
@@ -234,8 +234,6 @@ protected:
     // short and long help strings
     wxString m_shortHelpString;
     wxString m_longHelpString;
-
-    DECLARE_NO_COPY_CLASS(wxToolBarToolBase)
 };
 
 // a list of toolbar tools
@@ -258,7 +256,7 @@ public:
     //
     // If bmpDisabled is wxNullBitmap, a shadowed version of the normal bitmap
     // is created and used as the disabled image.
-    wxToolBarToolBase *AddTool(int toolid,
+    wxToolBarToolBase *AddTool(int id,
                                const wxString& label,
                                const wxBitmap& bitmap,
                                const wxBitmap& bmpDisabled,
@@ -267,22 +265,22 @@ public:
                                const wxString& longHelp = wxEmptyString,
                                wxObject *data = NULL)
     {
-        return DoAddTool(toolid, label, bitmap, bmpDisabled, kind,
+        return DoAddTool(id, label, bitmap, bmpDisabled, kind,
                          shortHelp, longHelp, data);
     }
 
     // the most common AddTool() version
-    wxToolBarToolBase *AddTool(int toolid,
+    wxToolBarToolBase *AddTool(int id,
                                const wxString& label,
                                const wxBitmap& bitmap,
                                const wxString& shortHelp = wxEmptyString,
                                wxItemKind kind = wxITEM_NORMAL)
     {
-        return AddTool(toolid, label, bitmap, wxNullBitmap, kind, shortHelp);
+        return AddTool(id, label, bitmap, wxNullBitmap, kind, shortHelp);
     }
 
     // add a check tool, i.e. a tool which can be toggled
-    wxToolBarToolBase *AddCheckTool(int toolid,
+    wxToolBarToolBase *AddCheckTool(int id,
                                     const wxString& label,
                                     const wxBitmap& bitmap,
                                     const wxBitmap& bmpDisabled = wxNullBitmap,
@@ -290,13 +288,13 @@ public:
                                     const wxString& longHelp = wxEmptyString,
                                     wxObject *data = NULL)
     {
-        return AddTool(toolid, label, bitmap, bmpDisabled, wxITEM_CHECK,
+        return AddTool(id, label, bitmap, bmpDisabled, wxITEM_CHECK,
                        shortHelp, longHelp, data);
     }
 
     // add a radio tool, i.e. a tool which can be toggled and releases any
     // other toggled radio tools in the same group when it happens
-    wxToolBarToolBase *AddRadioTool(int toolid,
+    wxToolBarToolBase *AddRadioTool(int id,
                                     const wxString& label,
                                     const wxBitmap& bitmap,
                                     const wxBitmap& bmpDisabled = wxNullBitmap,
@@ -304,7 +302,7 @@ public:
                                     const wxString& longHelp = wxEmptyString,
                                     wxObject *data = NULL)
     {
-        return AddTool(toolid, label, bitmap, bmpDisabled, wxITEM_RADIO,
+        return AddTool(id, label, bitmap, bmpDisabled, wxITEM_RADIO,
                        shortHelp, longHelp, data);
     }
 
@@ -314,7 +312,7 @@ public:
     virtual wxToolBarToolBase *InsertTool
                                (
                                     size_t pos,
-                                    int toolid,
+                                    int id,
                                     const wxString& label,
                                     const wxBitmap& bitmap,
                                     const wxBitmap& bmpDisabled = wxNullBitmap,
@@ -323,9 +321,6 @@ public:
                                     const wxString& longHelp = wxEmptyString,
                                     wxObject *clientData = NULL
                                );
-
-    virtual wxToolBarToolBase *AddTool (wxToolBarToolBase *tool);
-    virtual wxToolBarToolBase *InsertTool (size_t pos, wxToolBarToolBase *tool);
 
     // add an arbitrary control to the toolbar, return TRUE if ok (notice that
     // the control will be deleted by the toolbar and that it will also adjust
@@ -336,7 +331,7 @@ public:
     virtual wxToolBarToolBase *InsertControl(size_t pos, wxControl *control);
     
     // get the control with the given id or return NULL
-    virtual wxControl *FindControl( int toolid );
+    virtual wxControl *FindControl( int id );
 
     // add a separator to the toolbar
     virtual wxToolBarToolBase *AddSeparator();
@@ -344,11 +339,11 @@ public:
 
     // remove the tool from the toolbar: the caller is responsible for actually
     // deleting the pointer
-    virtual wxToolBarToolBase *RemoveTool(int toolid);
+    virtual wxToolBarToolBase *RemoveTool(int id);
 
     // delete tool either by index or by position
     virtual bool DeleteToolByPos(size_t pos);
-    virtual bool DeleteTool(int toolid);
+    virtual bool DeleteTool(int id);
 
     // delete all tools
     virtual void ClearTools();
@@ -360,28 +355,25 @@ public:
     // tools state
     // -----------
 
-    virtual void EnableTool(int toolid, bool enable);
-    virtual void ToggleTool(int toolid, bool toggle);
+    virtual void EnableTool(int id, bool enable);
+    virtual void ToggleTool(int id, bool toggle);
 
     // Set this to be togglable (or not)
-    virtual void SetToggle(int toolid, bool toggle);
+    virtual void SetToggle(int id, bool toggle);
 
     // set/get tools client data (not for controls)
-    virtual wxObject *GetToolClientData(int toolid) const;
-    virtual void SetToolClientData(int toolid, wxObject *clientData);
-
-    // returns tool pos, or wxNOT_FOUND if tool isn't found
-    virtual int GetToolPos(int id) const;
+    virtual wxObject *GetToolClientData(int id) const;
+    virtual void SetToolClientData(int id, wxObject *clientData);
 
     // return TRUE if the tool is toggled
-    virtual bool GetToolState(int toolid) const;
+    virtual bool GetToolState(int id) const;
 
-    virtual bool GetToolEnabled(int toolid) const;
+    virtual bool GetToolEnabled(int id) const;
 
-    virtual void SetToolShortHelp(int toolid, const wxString& helpString);
-    virtual wxString GetToolShortHelp(int toolid) const;
-    virtual void SetToolLongHelp(int toolid, const wxString& helpString);
-    virtual wxString GetToolLongHelp(int toolid) const;
+    virtual void SetToolShortHelp(int id, const wxString& helpString);
+    virtual wxString GetToolShortHelp(int id) const;
+    virtual void SetToolLongHelp(int id, const wxString& helpString);
+    virtual wxString GetToolLongHelp(int id) const;
 
     // margins/packing/separation
     // --------------------------
@@ -435,7 +427,7 @@ public:
     // don't use in the new code!
     // --------------------------------------------------------------
 
-    wxToolBarToolBase *AddTool(int toolid,
+    wxToolBarToolBase *AddTool(int id,
                                const wxBitmap& bitmap,
                                const wxBitmap& bmpDisabled,
                                bool toggle = FALSE,
@@ -443,23 +435,23 @@ public:
                                const wxString& shortHelpString = wxEmptyString,
                                const wxString& longHelpString = wxEmptyString)
     {
-        return AddTool(toolid, wxEmptyString,
+        return AddTool(id, wxEmptyString,
                        bitmap, bmpDisabled,
                        toggle ? wxITEM_CHECK : wxITEM_NORMAL,
                        shortHelpString, longHelpString, clientData);
     }
 
-    wxToolBarToolBase *AddTool(int toolid,
+    wxToolBarToolBase *AddTool(int id,
                                const wxBitmap& bitmap,
                                const wxString& shortHelpString = wxEmptyString,
                                const wxString& longHelpString = wxEmptyString)
     {
-        return AddTool(toolid, wxEmptyString,
+        return AddTool(id, wxEmptyString,
                        bitmap, wxNullBitmap, wxITEM_NORMAL,
                        shortHelpString, longHelpString, NULL);
     }
 
-    wxToolBarToolBase *AddTool(int toolid,
+    wxToolBarToolBase *AddTool(int id,
                                const wxBitmap& bitmap,
                                const wxBitmap& bmpDisabled,
                                bool toggle,
@@ -469,13 +461,13 @@ public:
                                const wxString& shortHelp = wxEmptyString,
                                const wxString& longHelp = wxEmptyString)
     {
-        return DoAddTool(toolid, wxEmptyString, bitmap, bmpDisabled,
+        return DoAddTool(id, wxEmptyString, bitmap, bmpDisabled,
                          toggle ? wxITEM_CHECK : wxITEM_NORMAL,
                          shortHelp, longHelp, clientData, xPos, yPos);
     }
 
     wxToolBarToolBase *InsertTool(size_t pos,
-                                  int toolid,
+                                  int id,
                                   const wxBitmap& bitmap,
                                   const wxBitmap& bmpDisabled = wxNullBitmap,
                                   bool toggle = FALSE,
@@ -483,7 +475,7 @@ public:
                                   const wxString& shortHelp = wxEmptyString,
                                   const wxString& longHelp = wxEmptyString)
     {
-        return InsertTool(pos, toolid, wxEmptyString, bitmap, bmpDisabled,
+        return InsertTool(pos, id, wxEmptyString, bitmap, bmpDisabled,
                           toggle ? wxITEM_CHECK : wxITEM_NORMAL,
                           shortHelp, longHelp, clientData);
     }
@@ -494,14 +486,14 @@ public:
     // NB: these functions are deprecated, use EVT_TOOL_XXX() instead!
 
     // Only allow toggle if returns TRUE. Call when left button up.
-    virtual bool OnLeftClick(int toolid, bool toggleDown);
+    virtual bool OnLeftClick(int id, bool toggleDown);
 
     // Call when right button down.
-    virtual void OnRightClick(int toolid, long x, long y);
+    virtual void OnRightClick(int id, long x, long y);
 
     // Called when the mouse cursor enters a tool bitmap.
     // Argument is -1 if mouse is exiting the toolbar.
-    virtual void OnMouseEnter(int toolid);
+    virtual void OnMouseEnter(int id);
 
     // more deprecated functions
     // -------------------------
@@ -541,7 +533,7 @@ protected:
     // implemented by just calling InsertTool()
     virtual wxToolBarToolBase *DoAddTool
                                (
-                                   int toolid,
+                                   int id,
                                    const wxString& label,
                                    const wxBitmap& bitmap,
                                    const wxBitmap& bmpDisabled,
@@ -571,7 +563,7 @@ protected:
     virtual void DoSetToggle(wxToolBarToolBase *tool, bool toggle) = 0;
 
     // the functions to create toolbar tools
-    virtual wxToolBarToolBase *CreateTool(int toolid,
+    virtual wxToolBarToolBase *CreateTool(int id,
                                           const wxString& label,
                                           const wxBitmap& bmpNormal,
                                           const wxBitmap& bmpDisabled,
@@ -586,7 +578,7 @@ protected:
     // ----------------
 
     // find the tool by id
-    wxToolBarToolBase *FindById(int toolid) const;
+    wxToolBarToolBase *FindById(int id) const;
 
     // the list of all our tools
     wxToolBarToolsList m_tools;

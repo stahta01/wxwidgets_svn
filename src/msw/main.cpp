@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -72,11 +72,15 @@ HINSTANCE wxhInstance = 0;
 
 #if !defined(_WINDLL)
 
-#if defined(__WXMICROWIN__)
+#if defined(__WXWINE__)
+    #define HINSTANCE HINSTANCE__*
+
+    extern "C"
+#elif defined(__TWIN32__) || defined(__WXMICROWIN__)
     #define HINSTANCE HANDLE
 
     extern "C"
-#endif
+#endif // WINE
 
 int PASCAL WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,

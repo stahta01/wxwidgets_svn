@@ -3,7 +3,7 @@
 # Author:	Patrick Halke
 # Created:	1995
 # Updated:	
-# Copyright:	
+# Copyright:	(c) 1993, AIAI, University of Edinburgh
 #
 # "%W% %G%"
 #
@@ -12,7 +12,6 @@
 # WXWIN and BCCDIR are set by parent make
 
 WXDIR = $(WXWIN)
-EXTRALIBS=$(WXDIR)\lib\wxdeprecated.lib
 
 TARGET=dialoged
 OBJECTS = dialoged.obj reseditr.obj dlghndlr.obj reswrite.obj winprop.obj\

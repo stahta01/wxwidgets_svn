@@ -6,7 +6,7 @@
 // Created:     24/06/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PROCESSH__
@@ -128,7 +128,6 @@ protected:
     bool m_redirect;
 
     DECLARE_DYNAMIC_CLASS(wxProcess)
-    DECLARE_NO_COPY_CLASS(wxProcess)
 };
 
 // ----------------------------------------------------------------------------

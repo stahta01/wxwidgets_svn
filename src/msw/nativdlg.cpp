@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -34,7 +34,7 @@
     #include "wx/wx.h"
 #endif
 
-#if defined(__WIN95__)
+#if defined(__WIN95__) && !defined(__TWIN32__)
 #include "wx/spinbutt.h"
 #endif
 #include "wx/msw/private.h"
@@ -252,7 +252,7 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
     {
         win = new wxScrollBar;
     }
-#if defined(__WIN95__) && wxUSE_SPINBTN
+#if defined(__WIN95__) && !defined(__TWIN32__) && wxUSE_SPINBTN
     else if (str == wxT("MSCTLS_UPDOWN32"))
     {
         win = new wxSpinButton;

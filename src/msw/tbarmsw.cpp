@@ -5,8 +5,8 @@
 // Modified by: 13.12.99 by VZ during toolbar classes reorganization
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:   	wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:   	wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -33,6 +33,10 @@
 #endif
 
 #if wxUSE_TOOLBAR && defined(__WIN16__)
+
+#if !defined(__WIN32__) && !wxUSE_IMAGE_LOADING_IN_MSW
+    #error wxToolBar needs wxUSE_IMAGE_LOADING_IN_MSW under Win16
+#endif
 
 #if !defined(__GNUWIN32__) && !defined(__SALFORDC__)
     #include "malloc.h"
@@ -1099,16 +1103,20 @@ WXHBITMAP wxToolBar::CreateMappedBitmap(WXHINSTANCE WXUNUSED(hInstance), void *i
 
 WXHBITMAP wxToolBar::CreateMappedBitmap(WXHINSTANCE hInstance, WXHBITMAP hBitmap)
 {
-    HANDLE hDIB = wxDIB::ConvertFromBitmap((HBITMAP) hBitmap);
-    if ( !hDIB )
-        return 0;
-
-    WXHBITMAP newBitmap = CreateMappedBitmap(hInstance, GlobalPtr(hDIB));
-
+  HANDLE hDIB = wxBitmapToDIB((HBITMAP) hBitmap, 0);
+  if (hDIB)
+  {
+#ifdef __WINDOWS_386__
+    LPBITMAPINFOHEADER lpbmInfoHdr = (LPBITMAPINFOHEADER)MK_FP32(GlobalLock(hDIB));
+#else
+    LPBITMAPINFOHEADER lpbmInfoHdr = (LPBITMAPINFOHEADER)GlobalLock(hDIB);
+#endif
+    HBITMAP newBitmap = (HBITMAP) CreateMappedBitmap((WXHINSTANCE) wxGetInstance(), lpbmInfoHdr);
+    GlobalUnlock(hDIB);
     GlobalFree(hDIB);
-
-    return newBitmap;
+    return (WXHBITMAP) newBitmap;
+  }
+  return 0;
 }
 
-#endif // wxUSE_TOOLBAR
-
+#endif

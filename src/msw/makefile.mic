@@ -140,6 +140,7 @@ COMMONOBJS  = \
 		$(COMMDIR)/process.$(OBJSUFF) \
 		$(COMMDIR)/quantize.$(OBJSUFF) \
 		$(COMMDIR)/radiocmn.$(OBJSUFF) \
+		$(COMMDIR)/resource.$(OBJSUFF) \
 		$(COMMDIR)/sizer.$(OBJSUFF) \
 		$(COMMDIR)/statbar.$(OBJSUFF) \
 		$(COMMDIR)/strconv.$(OBJSUFF) \

@@ -112,10 +112,10 @@ void wxCommandProcessor::Store(wxCommand *command)
 {
     wxCHECK_RET( command, _T("no command in wxCommandProcessor::Store") );
 
-    if ( (int)m_commands.GetCount() == m_maxNoCommands )
+    if (m_commands.Number() == m_maxNoCommands)
     {
-        wxNode *firstNode = m_commands.GetFirst();
-        wxCommand *firstCommand = (wxCommand *)firstNode->GetData();
+        wxNode *firstNode = m_commands.First();
+        wxCommand *firstCommand = (wxCommand *)firstNode->Data();
         delete firstCommand;
         delete firstNode;
     }
@@ -126,18 +126,18 @@ void wxCommandProcessor::Store(wxCommand *command)
         ClearCommands();
     else
     {
-        wxNode *node = m_currentCommand->GetNext();
+        wxNode *node = m_currentCommand->Next();
         while (node)
         {
-            wxNode *next = node->GetNext();
-            delete (wxCommand *)node->GetData();
+            wxNode *next = node->Next();
+            delete (wxCommand *)node->Data();
             delete node;
             node = next;
         }
     }
 
     m_commands.Append(command);
-    m_currentCommand = m_commands.GetLast();
+    m_currentCommand = m_commands.Last();
     SetMenuStrings();
 }
 
@@ -148,7 +148,7 @@ bool wxCommandProcessor::Undo()
     {
         if ( UndoCommand(*command) )
         {
-            m_currentCommand = m_currentCommand->GetPrevious();
+            m_currentCommand = m_currentCommand->Previous();
             SetMenuStrings();
             return TRUE;
         }
@@ -165,18 +165,18 @@ bool wxCommandProcessor::Redo()
     if ( m_currentCommand )
     {
         // is there anything to redo?
-        if ( m_currentCommand->GetNext() )
+        if ( m_currentCommand->Next() )
         {
-            redoCommand = (wxCommand *)m_currentCommand->GetNext()->GetData();
-            redoNode = m_currentCommand->GetNext();
+            redoCommand = (wxCommand *)m_currentCommand->Next()->Data();
+            redoNode = m_currentCommand->Next();
         }
     }
     else // no current command, redo the first one
     {
-        if (m_commands.GetCount() > 0)
+        if (m_commands.Number() > 0)
         {
-            redoCommand = (wxCommand *)m_commands.GetFirst()->GetData();
-            redoNode = m_commands.GetFirst();
+            redoCommand = (wxCommand *)m_commands.First()->Data();
+            redoNode = m_commands.First();
         }
     }
 
@@ -202,13 +202,13 @@ bool wxCommandProcessor::CanUndo() const
 
 bool wxCommandProcessor::CanRedo() const
 {
-    if ((m_currentCommand != (wxNode*) NULL) && (m_currentCommand->GetNext() == (wxNode*) NULL))
+    if ((m_currentCommand != (wxNode*) NULL) && (m_currentCommand->Next() == (wxNode*) NULL))
         return FALSE;
 
-    if ((m_currentCommand != (wxNode*) NULL) && (m_currentCommand->GetNext() != (wxNode*) NULL))
+    if ((m_currentCommand != (wxNode*) NULL) && (m_currentCommand->Next() != (wxNode*) NULL))
         return TRUE;
 
-    if ((m_currentCommand == (wxNode*) NULL) && (m_commands.GetCount() > 0))
+    if ((m_currentCommand == (wxNode*) NULL) && (m_commands.Number() > 0))
         return TRUE;
 
     return FALSE;
@@ -216,7 +216,7 @@ bool wxCommandProcessor::CanRedo() const
 
 void wxCommandProcessor::Initialize()
 {
-    m_currentCommand = m_commands.GetLast();
+    m_currentCommand = m_commands.Last();
     SetMenuStrings();
 }
 
@@ -243,7 +243,7 @@ wxString wxCommandProcessor::GetUndoMenuLabel() const
     wxString buf;
     if (m_currentCommand)
     {
-        wxCommand *command = (wxCommand *)m_currentCommand->GetData();
+        wxCommand *command = (wxCommand *)m_currentCommand->Data();
         wxString commandName(command->GetName());
         if (commandName == wxT("")) commandName = _("Unnamed command");
         bool canUndo = command->CanUndo();
@@ -267,9 +267,9 @@ wxString wxCommandProcessor::GetRedoMenuLabel() const
     if (m_currentCommand)
     {
         // We can redo, if we're not at the end of the history.
-        if (m_currentCommand->GetNext())
+        if (m_currentCommand->Next())
         {
-            wxCommand *redoCommand = (wxCommand *)m_currentCommand->GetNext()->GetData();
+            wxCommand *redoCommand = (wxCommand *)m_currentCommand->Next()->Data();
             wxString redoCommandName(redoCommand->GetName());
             if (redoCommandName == wxT("")) redoCommandName = _("Unnamed command");
             buf = wxString(_("&Redo ")) + redoCommandName + m_redoAccelerator;
@@ -281,7 +281,7 @@ wxString wxCommandProcessor::GetRedoMenuLabel() const
     }
     else
     {
-        if (m_commands.GetCount() == 0)
+        if (m_commands.Number() == 0)
         {
             buf = _("&Redo") + m_redoAccelerator;
         }
@@ -289,7 +289,7 @@ wxString wxCommandProcessor::GetRedoMenuLabel() const
         {
             // currentCommand is NULL but there are commands: this means that
             // we've undone to the start of the list, but can redo the first.
-            wxCommand *redoCommand = (wxCommand *)m_commands.GetFirst()->GetData();
+            wxCommand *redoCommand = (wxCommand *)m_commands.First()->Data();
             wxString redoCommandName(redoCommand->GetName());
             if (redoCommandName == wxT("")) redoCommandName = _("Unnamed command");
             buf = wxString(_("&Redo ")) + redoCommandName + m_redoAccelerator;
@@ -300,13 +300,13 @@ wxString wxCommandProcessor::GetRedoMenuLabel() const
 
 void wxCommandProcessor::ClearCommands()
 {
-    wxNode *node = m_commands.GetFirst();
+    wxNode *node = m_commands.First();
     while (node)
     {
-        wxCommand *command = (wxCommand *)node->GetData();
+        wxCommand *command = (wxCommand *)node->Data();
         delete command;
         delete node;
-        node = m_commands.GetFirst();
+        node = m_commands.First();
     }
     m_currentCommand = (wxNode *) NULL;
 }

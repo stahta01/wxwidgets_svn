@@ -261,8 +261,6 @@ private:
   wxSockCbk     m_cbk;              // callback
   char         *m_cdata;            // callback data
 #endif // WXWIN_COMPATIBILITY
-
-    DECLARE_NO_COPY_CLASS(wxSocketBase)
 };
 
 
@@ -281,8 +279,6 @@ public:
   bool AcceptWith(wxSocketBase& socket, bool wait = TRUE);
 
   bool WaitForAccept(long seconds = -1, long milliseconds = 0);
-
-  DECLARE_NO_COPY_CLASS(wxSocketServer)
 };
 
 
@@ -301,8 +297,6 @@ public:
   virtual bool Connect(wxSockAddress& addr, bool wait = TRUE);
 
   bool WaitOnConnect(long seconds = -1, long milliseconds = 0);
-
-  DECLARE_NO_COPY_CLASS(wxSocketClient)
 };
 
 
@@ -329,7 +323,6 @@ public:
 /* TODO:
   bool Connect(wxSockAddress& addr);
 */
-  DECLARE_NO_COPY_CLASS(wxDatagramSocket)
 };
 
 

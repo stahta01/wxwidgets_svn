@@ -24,7 +24,6 @@
 
 class WXXMLDLLEXPORT wxGaugeXmlHandler : public wxXmlResourceHandler
 {
-	DECLARE_DYNAMIC_CLASS(wxGaugeXmlHandler)
     enum
     {
         wxGAUGE_DEFAULT_RANGE = 100

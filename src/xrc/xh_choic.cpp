@@ -23,8 +23,6 @@
 #include "wx/choice.h"
 #include "wx/intl.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxChoiceXmlHandler, wxXmlResourceHandler)
-
 wxChoiceXmlHandler::wxChoiceXmlHandler() 
 : wxXmlResourceHandler() , m_insideBox(FALSE)
 {

@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -202,8 +202,6 @@ private:
     inline size_t32 Swap(size_t32 ui) const;
 
     bool          m_bSwapped;   // wrong endianness?
-
-    DECLARE_NO_COPY_CLASS(wxMsgCatalogFile)
 };
 
 
@@ -611,11 +609,8 @@ bool wxLocale::Init(const wxChar *szName,
   {
     // the argument to setlocale()
     szLocale = szShort;
-
-    wxCHECK_MSG( szLocale, FALSE, _T("no locale to set in wxLocale::Init()") );
   }
-
-  m_pszOldLocale = wxStrdup(wxSetlocale(LC_ALL, szLocale));
+  m_pszOldLocale = wxSetlocale(LC_ALL, szLocale);
   if ( m_pszOldLocale == NULL )
     wxLogError(_("locale '%s' can not be set."), szLocale);
 
@@ -716,17 +711,6 @@ bool wxLocale::Init(int language, int flags)
         return FALSE;
     }
 #elif defined(__WIN32__)
-
-    #if wxUSE_UNICODE && (defined(__VISUALC__) || defined(__MINGW32__))
-        // NB: setlocale() from msvcrt.dll (used by VC++ and Mingw)
-        //     can't set locale to language that can only be written using
-        //     Unicode.  Therefore wxSetlocale call failed, but we don't want
-        //     to report it as an error -- so that at least message catalogs
-        //     can be used. Watch for code marked with
-        //     #ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS bellow.
-        #define SETLOCALE_FAILS_ON_UNICODE_LANGS
-    #endif
-    
     wxMB2WXbuf retloc = wxT("C");
     if (language != wxLANGUAGE_DEFAULT)
     {
@@ -737,58 +721,42 @@ bool wxLocale::Init(int language, int flags)
         }
         else
         {
-            int codepage = -1;
             wxUint32 lcid = MAKELCID(MAKELANGID(info->WinLang, info->WinSublang),
                                      SORT_DEFAULT);
-            SetThreadLocale(lcid);
-            // NB: we must translate LCID to CRT's setlocale string ourselves,
-            //     because SetThreadLocale does not modify change the
-            //     interpretation of setlocale(LC_ALL, "") call:
-            wxChar buffer[256];
-            buffer[0] = wxT('\0');
-            GetLocaleInfo(lcid, LOCALE_SENGLANGUAGE, buffer, 256);
-            locale << buffer;
-            if (GetLocaleInfo(lcid, LOCALE_SENGCOUNTRY, buffer, 256) > 0)
-                locale << wxT("_") << buffer;
-            if (GetLocaleInfo(lcid, LOCALE_IDEFAULTANSICODEPAGE, buffer, 256) > 0)
+            if (SetThreadLocale(lcid))
             {
-                codepage = wxAtoi(buffer);
-                if (codepage != 0)
-                    locale << wxT(".") << buffer;
-            }
-            if (locale.IsEmpty())
-            {
-                wxLogLastError(wxT("SetThreadLocale"));
-                wxLogError(wxT("Cannot set locale to language %s."), name.c_str());
-                return FALSE;
+                retloc = wxSetlocale(LC_ALL, wxEmptyString);
             }
             else
             {
-                retloc = wxSetlocale(LC_ALL, locale);
-#ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
-                if (codepage == 0 && (const wxChar*)retloc == NULL)
+                // Windows9X doesn't support SetThreadLocale, so we must
+                // translate LCID to CRT's setlocale string ourselves
+                locale.Empty();
+                if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
                 {
-                    retloc = wxT("C");
+                    wxChar buffer[256];
+                    buffer[0] = wxT('\0');
+                    GetLocaleInfo(lcid, LOCALE_SENGLANGUAGE, buffer, 256);
+                    locale << buffer;
+                    if (GetLocaleInfo(lcid, LOCALE_SENGCOUNTRY, buffer, 256) > 0)
+                        locale << wxT("_") << buffer;
                 }
-#endif
+                if (locale.IsEmpty())
+                {
+                    wxLogLastError(wxT("SetThreadLocale"));
+                    wxLogError(wxT("Cannot set locale to language %s."), name.c_str());
+                    return FALSE;
+                }
+                else
+                {
+                    retloc = wxSetlocale(LC_ALL, locale);
+                }
             }
         }
     }
     else
     {
         retloc = wxSetlocale(LC_ALL, wxEmptyString);
-#ifdef SETLOCALE_FAILS_ON_UNICODE_LANGS
-        if ((const wxChar*)retloc == NULL)
-        {
-            wxChar buffer[16];
-            if (GetLocaleInfo(LOCALE_USER_DEFAULT,
-                              LOCALE_IDEFAULTANSICODEPAGE, buffer, 16) > 0 &&
-                 wxStrcmp(buffer, wxT("0")) == 0)
-            {
-                retloc = wxT("C");
-            }
-        }
-#endif
     }
 
     if ( !retloc )
@@ -808,11 +776,8 @@ bool wxLocale::Init(int language, int flags)
     bool ret = Init(name, canonical, retloc,
                     (flags & wxLOCALE_LOAD_DEFAULT) != 0,
                     (flags & wxLOCALE_CONV_ENCODING) != 0);
-    free(szLocale);
-
-    if ( ret )
-        m_language = lang;
-
+    if (szLocale)
+        free(szLocale);
     return ret;
 #endif
 }
@@ -965,279 +930,279 @@ void wxLocale::AddCatalogLookupPathPrefix(const wxString& prefix)
         }
     }
 #elif defined(__WXMAC__)
-    const wxChar * lc = NULL ;
+    const char* lc = NULL ;
     long lang = GetScriptVariable( smSystemScript, smScriptLang) ;
     switch( GetScriptManagerVariable( smRegionCode ) ) {
       case verUS :
-        lc = wxT("en_US") ;
+        lc = "en_US" ;
         break ;
       case verFrance :
-        lc = wxT("fr_FR") ;
+        lc = "fr_FR" ;
         break ;
       case verBritain :
-        lc = wxT("en_GB") ;
+        lc = "en_GB" ;
         break ;
       case verGermany :
-        lc = wxT("de_DE") ;
+        lc = "de_DE" ;
         break ;
       case verItaly :
-        lc = wxT("it_IT") ;
+        lc = "it_IT" ;
         break ;
       case verNetherlands :
-        lc = wxT("nl_NL") ;
+        lc = "nl_NL" ;
         break ;
       case verFlemish :
-        lc = wxT("nl_BE") ;
+        lc = "nl_BE" ;
         break ;
       case verSweden :
-        lc = wxT("sv_SE" );
+        lc = "sv_SE" ;
         break ;
       case verSpain :
-        lc = wxT("es_ES" );
+        lc = "es_ES" ;
         break ;
       case verDenmark :
-        lc = wxT("da_DK") ;
+        lc = "da_DK" ;
         break ;
       case verPortugal :
-        lc = wxT("pt_PT") ;
+        lc = "pt_PT" ;
         break ;
       case verFrCanada:
-        lc = wxT("fr_CA") ;
+        lc = "fr_CA" ;
         break ;
       case verNorway:
-        lc = wxT("nb_NO") ;
+        lc = "no_NO" ;
         break ;
       case verIsrael:
-        lc = wxT("iw_IL") ;
+        lc = "iw_IL" ;
         break ;
       case verJapan:
-        lc = wxT("ja_JP") ;
+        lc = "ja_JP" ;
         break ;
       case verAustralia:
-        lc = wxT("en_AU") ;
+        lc = "en_AU" ;
         break ;
       case verArabic:
-        lc = wxT("ar") ;
+        lc = "ar" ;
         break ;
       case verFinland:
-        lc = wxT("fi_FI") ;
+        lc = "fi_FI" ;
         break ;
       case verFrSwiss:
-        lc = wxT("fr_CH") ;
+        lc = "fr_CH" ;
         break ;
       case verGrSwiss:
-        lc = wxT("de_CH") ;
+        lc = "de_CH" ;
         break ;
       case verGreece:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verIceland:
-        lc = wxT("is_IS") ;
+        lc = "is_IS" ;
         break ;
       case verMalta:
-        lc = wxT("mt_MT") ;
+        lc = "mt_MT" ;
         break ;
       case verCyprus:
       // _CY is not part of wx, so we have to translate according to the system language
         if ( lang == langGreek ) {
-          lc = wxT("el_GR") ;
+          lc = "el_GR" ;
         }
         else if ( lang == langTurkish ) {
-          lc = wxT("tr_TR") ;
+          lc = "tr_TR" ;
         }
         break ;
       case verTurkey:
-        lc = wxT("tr_TR") ;
+        lc = "tr_TR" ;
         break ;
       case verYugoCroatian:
-        lc = wxT("hr_HR") ;
+        lc = "hr_HR" ;
         break ;
       case verIndiaHindi:
-        lc = wxT("hi_IN") ;
+        lc = "hi_IN" ;
         break ;
       case verPakistanUrdu:
-        lc = wxT("ur_PK") ;
+        lc = "ur_PK" ;
         break ;
       case verTurkishModified:
-        lc = wxT("tr_TR") ;
+        lc = "tr_TR" ;
         break ;
       case verItalianSwiss:
-        lc = wxT("it_CH") ;
+        lc = "it_CH" ;
         break ;
       case verInternational:
-        lc = wxT("en") ;
+        lc = "en" ;
         break ;
       case verRomania:
-        lc = wxT("ro_RO") ;
+        lc = "ro_RO" ;
         break ;
       case verGreecePoly:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verLithuania:
-        lc = wxT("lt_LT") ;
+        lc = "lt_LT" ;
         break ;
       case verPoland:
-        lc = wxT("pl_PL") ;
+        lc = "pl_PL" ;
         break ;
       case verMagyar :
       case verHungary:
-        lc = wxT("hu_HU") ;
+        lc = "hu_HU" ;
         break ;
       case verEstonia:
-        lc = wxT("et_EE") ;
+        lc = "et_EE" ;
         break ;
       case verLatvia:
-        lc = wxT("lv_LV") ;
+        lc = "lv_LV" ;
         break ;
       case verSami:
         // not known
         break ;
       case verFaroeIsl:
-        lc = wxT("fo_FO") ;
+        lc = "fo_FO" ;
         break ;
       case verIran:
-        lc = wxT("fa_IR") ;
+        lc = "fa_IR" ;
         break ;
       case verRussia:
-        lc = wxT("ru_RU") ;
+        lc = "ru_RU" ;
         break ;
        case verIreland:
-        lc = wxT("ga_IE") ;
+        lc = "ga_IE" ;
         break ;
       case verKorea:
-        lc = wxT("ko_KR") ;
+        lc = "ko_KR" ;
         break ;
       case verChina:
-        lc = wxT("zh_CN") ;
+        lc = "zh_CN" ;
         break ;
       case verTaiwan:
-        lc = wxT("zh_TW") ;
+        lc = "zh_TW" ;
         break ;
       case verThailand:
-        lc = wxT("th_TH") ;
+        lc = "th_TH" ;
         break ;
       case verCzech:
-        lc = wxT("cs_CZ") ;
+        lc = "cs_CZ" ;
         break ;
       case verSlovak:
-        lc = wxT("sk_SK") ;
+        lc = "sk_SK" ;
         break ;
       case verBengali:
-        lc = wxT("bn") ;
+        lc = "bn" ;
         break ;
       case verByeloRussian:
-        lc = wxT("be_BY") ;
+        lc = "be_BY" ;
         break ;
       case verUkraine:
-        lc = wxT("uk_UA") ;
+        lc = "uk_UA" ;
         break ;
       case verGreeceAlt:
-        lc = wxT("el_GR") ;
+        lc = "el_GR" ;
         break ;
       case verSerbian:
-        lc = wxT("sr_YU") ;
+        lc = "sr_YU" ;
         break ;
       case verSlovenian:
-        lc = wxT("sl_SI") ;
+        lc = "sl_SI" ;
         break ;
       case verMacedonian:
-        lc = wxT("mk_MK") ;
+        lc = "mk_MK" ;
         break ;
       case verCroatia:
-        lc = wxT("hr_HR") ;
+        lc = "hr_HR" ;
         break ;
       case verBrazil:
-        lc = wxT("pt_BR ") ;
+        lc = "pt_BR " ;
         break ;
       case verBulgaria:
-        lc = wxT("bg_BG") ;
+        lc = "bg_BG" ;
         break ;
       case verCatalonia:
-        lc = wxT("ca_ES") ;
+        lc = "ca_ES" ;
         break ;
       case verScottishGaelic:
-        lc = wxT("gd") ;
+        lc = "gd" ;
         break ;
       case verManxGaelic:
-        lc = wxT("gv") ;
+        lc = "gv" ;
         break ;
       case verBreton:
-        lc = wxT("br") ;
+        lc = "br" ;
         break ;
       case verNunavut:
-        lc = wxT("iu_CA") ;
+        lc = "iu_CA" ;
         break ;
       case verWelsh:
-        lc = wxT("cy") ;
+        lc = "cy" ;
         break ;
       case verIrishGaelicScript:
-        lc = wxT("ga_IE") ;
+        lc = "ga_IE" ;
         break ;
       case verEngCanada:
-        lc = wxT("en_CA") ;
+        lc = "en_CA" ;
         break ;
       case verBhutan:
-        lc = wxT("dz_BT") ;
+        lc = "dz_BT" ;
         break ;
       case verArmenian:
-        lc = wxT("hy_AM") ;
+        lc = "hy_AM" ;
         break ;
       case verGeorgian:
-        lc = wxT("ka_GE") ;
+        lc = "ka_GE" ;
         break ;
       case verSpLatinAmerica:
-        lc = wxT("es_AR") ;
+        lc = "es_AR" ;
         break ;
       case verTonga:
-        lc = wxT("to_TO" );
+        lc = "to_TO" ;
         break ;
       case verFrenchUniversal:
-        lc = wxT("fr_FR") ;
+        lc = "fr_FR" ;
         break ;
       case verAustria:
-        lc = wxT("de_AT") ;
+        lc = "de_AT" ;
         break ;
       case verGujarati:
-        lc = wxT("gu_IN") ;
+        lc = "gu_IN" ;
         break ;
       case verPunjabi:
-        lc = wxT("pa") ;
+        lc = "pa" ;
         break ;
       case verIndiaUrdu:
-        lc = wxT("ur_IN") ;
+        lc = "ur_IN" ;
         break ;
       case verVietnam:
-        lc = wxT("vi_VN") ;
+        lc = "vi_VN" ;
         break ;
       case verFrBelgium:
-        lc = wxT("fr_BE") ;
+        lc = "fr_BE" ;
         break ;
       case verUzbek:
-        lc = wxT("uz_UZ") ;
+        lc = "uz_UZ" ;
         break ;
       case verSingapore:
-        lc = wxT("zh_SG") ;
+        lc = "zh_SG" ;
         break ;
       case verNynorsk:
-        lc = wxT("nn_NO") ;
+        lc = "nn_NO" ;
         break ;
       case verAfrikaans:
-        lc = wxT("af_ZA") ;
+        lc = "af_ZA" ;
         break ;
       case verEsperanto:
-        lc = wxT("eo") ;
+        lc = "eo" ;
         break ;
       case verMarathi:
-        lc = wxT("mr_IN") ;
+        lc = "mr_IN" ;
         break ;
       case verTibetan:
-        lc = wxT("bo") ;
+        lc = "bo" ;
         break ;
       case verNepal:
-        lc = wxT("ne_NP") ;
+        lc = "ne_NP" ;
         break ;
       case verGreenland:
-        lc = wxT("kl_GL") ;
+        lc = "kl_GL" ;
         break ;
       default :
         break ;
@@ -1436,7 +1401,7 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
 {
     CreateLanguagesDB();
 
-    const size_t count = ms_languagesDB->GetCount();
+    size_t count = ms_languagesDB->GetCount();
     for ( size_t i = 0; i < count; i++ )
     {
         if ( ms_languagesDB->Item(i).Language == lang )
@@ -1446,42 +1411,6 @@ const wxLanguageInfo *wxLocale::GetLanguageInfo(int lang)
     }
 
     return NULL;
-}
-
-/* static */
-const wxLanguageInfo *wxLocale::FindLanguageInfo(const wxString& locale)
-{
-    CreateLanguagesDB();
-
-    const wxLanguageInfo *infoRet = NULL;
-
-    const size_t count = ms_languagesDB->GetCount();
-    for ( size_t i = 0; i < count; i++ )
-    {
-        const wxLanguageInfo *info = &ms_languagesDB->Item(i);
-
-        if ( wxStricmp(locale, info->CanonicalName) == 0 ||
-                wxStricmp(locale, info->Description) == 0 )
-        {
-            // exact match, stop searching
-            infoRet = info;
-            break;
-        }
-
-        if ( wxStricmp(locale, info->CanonicalName.BeforeFirst(_T('_'))) == 0 )
-        {
-            // a match -- but maybe we'll find an exact one later, so continue
-            // looking
-            //
-            // OTOH, maybe we had already found a language match and in this
-            // case don't overwrite it becauce the entry for the default
-            // country always appears first in ms_languagesDB
-            if ( !infoRet )
-                infoRet = info;
-        }
-    }
-
-    return infoRet;
 }
 
 wxString wxLocale::GetSysName() const
@@ -1503,7 +1432,6 @@ wxLocale::~wxLocale()
     // restore old locale
     wxSetLocale(m_pOldLocale);
     wxSetlocale(LC_ALL, m_pszOldLocale);
-    free((wxChar *)m_pszOldLocale);     // const_cast
 }
 
 // get the translation of given string in current locale

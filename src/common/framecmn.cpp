@@ -4,7 +4,7 @@
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -39,6 +39,11 @@
 #endif
 #if wxUSE_STATUSBAR
     #include "wx/statusbr.h"
+#endif
+
+// FIXME - temporary hack in absence of wxTLW in all ports!
+#ifndef wxTopLevelWindowNative
+    #define wxTopLevelWindow wxTopLevelWindowBase
 #endif
 
 // ----------------------------------------------------------------------------
@@ -289,6 +294,18 @@ void wxFrameBase::PopStatusText(int number)
     m_frameStatusBar->PopStatusText(number);
 }
 
+void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
+{
+#if wxUSE_STATUSBAR
+    if ( m_statusBarPane < 0 ) return;
+    wxStatusBar* statbar = GetStatusBar();
+    if ( !statbar ) return;
+
+    wxString help = show ? text : wxString();
+    statbar->SetStatusText( help, m_statusBarPane );
+#endif // wxUSE_STATUSBAR
+}
+
 bool wxFrameBase::ShowMenuHelp(wxStatusBar *WXUNUSED(statbar), int menuId)
 {
 #if wxUSE_MENUS
@@ -318,19 +335,6 @@ bool wxFrameBase::ShowMenuHelp(wxStatusBar *WXUNUSED(statbar), int menuId)
 }
 
 #endif // wxUSE_STATUSBAR
-
-void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
-{
-#if wxUSE_STATUSBAR
-    if ( m_statusBarPane < 0 ) return;
-    wxStatusBar* statbar = GetStatusBar();
-    if ( !statbar ) return;
-
-    wxString help = show ? text : wxString();
-    statbar->SetStatusText( help, m_statusBarPane );
-#endif // wxUSE_STATUSBAR
-}
-
 
 // ----------------------------------------------------------------------------
 // toolbar stuff

@@ -28,10 +28,10 @@ enum
 #include "wx/generic/filedlgg.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/filedlg.h"
-#elif defined(__WXCOCOA__)
-#include "wx/generic/filedlgg.h"
 #elif defined(__WXPM__)
 #include "wx/os2/filedlg.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/filedlg.h"
 #endif
 
 #endif // wxUSE_FILEDLG

@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -71,7 +71,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(DIALOGS_FILES_OPEN,                    MyFrame::FilesOpen)
     EVT_MENU(DIALOGS_FILE_SAVE,                     MyFrame::FileSave)
     EVT_MENU(DIALOGS_DIR_CHOOSE,                    MyFrame::DirChoose)
-    EVT_MENU(DIALOGS_DIRNEW_CHOOSE,                 MyFrame::DirChooseNew)
 #if defined(__WXMSW__) || defined(__WXMAC__)
     EVT_MENU(DIALOGS_GENERIC_DIR_CHOOSE,            MyFrame::GenericDirChoose)
 #endif // wxMSW || wxMAC
@@ -143,8 +142,8 @@ bool MyApp::OnInit()
 
 #if defined(__WXMSW__) && wxTEST_GENERIC_DIALOGS_IN_MSW
   file_menu->Append(DIALOGS_CHOOSE_FONT_GENERIC, _T("Choose f&ont (generic)"));
-#endif
 
+#endif
   file_menu->AppendSeparator();
   file_menu->Append(DIALOGS_LOG_DIALOG, _T("&Log dialog\tCtrl-L"));
   file_menu->Append(DIALOGS_MESSAGE_BOX, _T("&Message box\tCtrl-M"));
@@ -161,12 +160,9 @@ bool MyApp::OnInit()
   file_menu->Append(DIALOGS_FILES_OPEN,  _T("Open &files\tCtrl-Q"));
   file_menu->Append(DIALOGS_FILE_SAVE,  _T("Sa&ve file\tCtrl-S"));
   file_menu->Append(DIALOGS_DIR_CHOOSE,  _T("&Choose a directory\tCtrl-D"));
-  file_menu->Append(DIALOGS_DIRNEW_CHOOSE,  _T("Choose a directory (with \"Ne&w\" button)\tShift-Ctrl-D"));
 #if defined(__WXMSW__) || defined(__WXMAC__)
   file_menu->Append(DIALOGS_GENERIC_DIR_CHOOSE,  _T("&Choose a directory (generic implementation)"));
 #endif // wxMSW || wxMAC
-  file_menu->AppendSeparator();
-
 #if wxUSE_PROGRESSDLG
   file_menu->Append(DIALOGS_PROGRESS, _T("Pro&gress dialog\tCtrl-G"));
 #endif // wxUSE_PROGRESSDLG
@@ -178,11 +174,9 @@ bool MyApp::OnInit()
   file_menu->Append(DIALOGS_REPLACE, _T("Find and &replace dialog\tShift-Ctrl-F"), _T(""), TRUE);
 #endif // wxUSE_FINDREPLDLG
   file_menu->AppendSeparator();
-
   file_menu->Append(DIALOGS_MODAL, _T("Mo&dal dialog\tCtrl-W"));
   file_menu->Append(DIALOGS_MODELESS, _T("Modeless &dialog\tCtrl-Z"), _T(""), TRUE);
   file_menu->AppendSeparator();
-
   file_menu->Append(wxID_EXIT, _T("E&xit\tAlt-X"));
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu, _T("&File"));
@@ -444,11 +438,10 @@ void MyFrame::MultiChoice(wxCommandEvent& WXUNUSED(event) )
     if ( count )
     {
         wxString msg;
-        msg.Printf(wxT("You selected %u items:\n"), (unsigned)count);
+        msg.Printf(wxT("You selected %u items:\n"), count);
         for ( size_t n = 0; n < count; n++ )
         {
-            msg += wxString::Format(wxT("\t%u: %u (%s)\n"),
-                                    (unsigned)n, (unsigned)selections[n],
+            msg += wxString::Format(wxT("\t%u: %u (%s)\n"), n, selections[n],
                                     choices[selections[n]].c_str());
         }
         wxLogMessage(msg);
@@ -530,7 +523,7 @@ void MyFrame::FilesOpen(wxCommandEvent& WXUNUSED(event) )
         for ( size_t n = 0; n < count; n++ )
         {
             s.Printf(_T("File %d: %s (%s)\n"),
-                     (int)n, paths[n].c_str(), filenames[n].c_str());
+                     n, paths[n].c_str(), filenames[n].c_str());
 
             msg += s;
         }
@@ -558,28 +551,18 @@ void MyFrame::FileSave(wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-void MyFrame::DoDirChoose(int style)
+void MyFrame::DirChoose(wxCommandEvent& WXUNUSED(event) )
 {
     // pass some initial dir to wxDirDialog
     wxString dirHome;
     wxGetHomeDir(&dirHome);
 
-    wxDirDialog dialog(this, _T("Testing directory picker"), dirHome, style);
+    wxDirDialog dialog(this, _T("Testing directory picker"), dirHome);
 
     if (dialog.ShowModal() == wxID_OK)
     {
         wxLogMessage(_T("Selected path: %s"), dialog.GetPath().c_str());
     }
-}
-
-void MyFrame::DirChoose(wxCommandEvent& WXUNUSED(event) )
-{
-    DoDirChoose(wxDD_DEFAULT_STYLE & ~wxDD_NEW_DIR_BUTTON);
-}
-
-void MyFrame::DirChooseNew(wxCommandEvent& WXUNUSED(event) )
-{
-    DoDirChoose(wxDD_DEFAULT_STYLE | wxDD_NEW_DIR_BUTTON);
 }
 
 #if defined(__WXMSW__) || defined(__WXMAC__)
@@ -924,13 +907,10 @@ MyModalDialog::MyModalDialog(wxWindow *parent)
 {
     wxBoxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
-    m_btnModal = new wxButton(this, -1, _T("&Modal dialog..."));
-    m_btnModeless = new wxButton(this, -1, _T("Mode&less dialog"));
+    m_btnFocused = new wxButton(this, -1, _T("Default button"));
     m_btnDelete = new wxButton(this, -1, _T("&Delete button"));
-
     wxButton *btnOk = new wxButton(this, wxID_CANCEL, _T("&Close"));
-    sizerTop->Add(m_btnModal, 0, wxALIGN_CENTER | wxALL, 5);
-    sizerTop->Add(m_btnModeless, 0, wxALIGN_CENTER | wxALL, 5);
+    sizerTop->Add(m_btnFocused, 0, wxALIGN_CENTER | wxALL, 5);
     sizerTop->Add(m_btnDelete, 0, wxALIGN_CENTER | wxALL, 5);
     sizerTop->Add(btnOk, 0, wxALIGN_CENTER | wxALL, 5);
 
@@ -940,28 +920,24 @@ MyModalDialog::MyModalDialog(wxWindow *parent)
     sizerTop->SetSizeHints(this);
     sizerTop->Fit(this);
 
-    m_btnModal->SetFocus();
-    m_btnModal->SetDefault();
+    m_btnFocused->SetFocus();
+    m_btnFocused->SetDefault();
 }
 
 void MyModalDialog::OnButton(wxCommandEvent& event)
 {
     if ( event.GetEventObject() == m_btnDelete )
     {
-        delete m_btnModal;
-        m_btnModal = NULL;
+        delete m_btnFocused;
+        m_btnFocused = NULL;
 
         m_btnDelete->Disable();
     }
-    else if ( event.GetEventObject() == m_btnModal )
+    else if ( event.GetEventObject() == m_btnFocused )
     {
         wxGetTextFromUser(_T("Dummy prompt"),
                           _T("Modal dialog called from dialog"),
                           _T(""), this);
-    }
-    else if ( event.GetEventObject() == m_btnModeless )
-    {
-        (new MyModelessDialog(this))->Show();
     }
     else
     {

@@ -7,7 +7,7 @@
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TIMER_H_BASE_
@@ -103,8 +103,6 @@ protected:
 
     int     m_milli;        // the timer interval
     bool    m_oneShot;      // TRUE if one shot
-
-    DECLARE_NO_COPY_CLASS(wxTimerBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -117,12 +115,14 @@ protected:
     #include "wx/motif/timer.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/timer.h"
-#elif defined(__WXX11__) || defined(__WXMGL__) || defined(__WXCOCOA__)
+#elif defined(__WXX11__) || defined(__WXMGL__)
     #include "wx/generic/timer.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/timer.h"
 #elif defined(__WXPM__)
     #include "wx/os2/timer.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/timer.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -205,21 +205,10 @@ public:
     void Start(long t0 = 0);
 
     // pause the stop watch
-    void Pause()
-    {
-        if ( !m_pauseCount++ )
-            m_pause = GetElapsedTime();
-    }
+    void Pause() { if ( !m_pauseCount++) m_pause = GetElapsedTime(); }
 
     // resume it
-    void Resume()
-    {
-        wxASSERT_MSG( m_pauseCount > 0,
-                      _T("Resuming stop watch which is not paused") );
-
-        if ( !--m_pauseCount )
-            Start(m_pause);
-    }
+    void Resume() { if ( !--m_pauseCount ) Start(m_pause); }
 
     // get elapsed time since the last Start() in milliseconds
     long Time() const;

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -174,11 +174,6 @@ bool wxIsClipboardFormatAvailable(wxDataFormat dataFormat)
     }
 }
 
-#ifdef __DIGITALMARS__
-extern "C" HGLOBAL wxDIB::ConvertFromBitmap(HBITMAP hbmp);
-#endif
-
-
 bool wxSetClipboardData(wxDataFormat dataFormat,
                         const void *data,
                         int width, int height)
@@ -225,13 +220,13 @@ bool wxSetClipboardData(wxDataFormat dataFormat,
 
         case wxDF_DIB:
             {
+#if wxUSE_IMAGE_LOADING_IN_MSW
                 wxBitmap *bitmap = (wxBitmap *)data;
-
-                HGLOBAL hDIB = wxDIB::ConvertFromBitmap(GetHbitmapOf(*bitmap));
-                if ( hDIB )
-                {
-                    handle = ::SetClipboardData(CF_DIB, hDIB);
-                }
+                HBITMAP hBitmap = (HBITMAP)bitmap->GetHBITMAP();
+                // NULL palette means to use the system one
+                HANDLE hDIB = wxBitmapToDIB(hBitmap, (HPALETTE)NULL);
+                handle = SetClipboardData(CF_DIB, hDIB);
+#endif // wxUSE_IMAGE_LOADING_IN_MSW
                 break;
             }
 
@@ -539,7 +534,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxClipboard, wxObject)
 wxClipboard::wxClipboard()
 {
     m_clearOnExit = FALSE;
-    m_isOpened = FALSE;
 }
 
 wxClipboard::~wxClipboard()
@@ -583,7 +577,6 @@ bool wxClipboard::Flush()
 bool wxClipboard::Open()
 {
     // OLE opens clipboard for us
-    m_isOpened = TRUE;
 #if wxUSE_OLE_CLIPBOARD
     return TRUE;
 #else
@@ -594,7 +587,7 @@ bool wxClipboard::Open()
 bool wxClipboard::IsOpened() const
 {
 #if wxUSE_OLE_CLIPBOARD
-    return m_isOpened;
+    return TRUE;
 #else
     return wxIsClipboardOpened();
 #endif
@@ -698,7 +691,6 @@ bool wxClipboard::AddData( wxDataObject *data )
 
 void wxClipboard::Close()
 {
-    m_isOpened = FALSE;
     // OLE closes clipboard for us
 #if !wxUSE_OLE_CLIPBOARD
     wxCloseClipboard();

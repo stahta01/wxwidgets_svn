@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -34,43 +34,58 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticText, wxControl)
 
-bool wxStaticText::Create(wxWindow *parent,
-                          wxWindowID id,
-                          const wxString& label,
-                          const wxPoint& pos,
-                          const wxSize& size,
-                          long style,
-                          const wxString& name)
+bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
+           const wxString& label,
+           const wxPoint& pos,
+           const wxSize& size,
+           long style,
+           const wxString& name)
 {
     // By default, a static text should have no border.
     if ((style & wxBORDER_MASK) == wxBORDER_DEFAULT)
         style |= wxBORDER_NONE;
 
-    if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return FALSE;
+  SetName(name);
+  if (parent) parent->AddChild(this);
 
-    if ( !MSWCreateControl(wxT("STATIC"), label, pos, size) )
-        return FALSE;
+  SetBackgroundColour(parent->GetBackgroundColour()) ;
+  SetForegroundColour(parent->GetForegroundColour()) ;
 
-    return TRUE;
-}
+  if ( id == -1 )
+    m_windowId = (int)NewControlId();
+  else
+  m_windowId = id;
 
-WXDWORD wxStaticText::MSWGetStyle(long style, WXDWORD *exstyle) const
-{
-    WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);
+  int x = pos.x;
+  int y = pos.y;
+  int width = size.x;
+  int height = size.y;
 
-    // translate the alignment flags to the Windows ones
-    //
-    // note that both wxALIGN_LEFT and SS_LEFT are equal to 0 so we shouldn't
-    // test for them using & operator
-    if ( style & wxALIGN_CENTRE )
-        msStyle |= SS_CENTER;
-    else if ( style & wxALIGN_RIGHT )
-        msStyle |= SS_RIGHT;
-    else
-        msStyle |= SS_LEFT;
+  m_windowStyle = style;
 
-    return msStyle;
+  WXDWORD exStyle = 0;
+  WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), & exStyle) ;
+
+  if (m_windowStyle & wxALIGN_CENTRE)
+    msStyle |= SS_CENTER;
+  else if (m_windowStyle & wxALIGN_RIGHT)
+    msStyle |= SS_RIGHT;
+  else
+    msStyle |= SS_LEFT;
+
+  m_hWnd = (WXHWND)::CreateWindowEx(exStyle, wxT("STATIC"), (const wxChar *)label,
+                         msStyle,
+                         0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)m_windowId,
+                         wxGetInstance(), NULL);
+
+  wxCHECK_MSG( m_hWnd, FALSE, wxT("Failed to create static ctrl") );
+
+  SubclassWin(m_hWnd);
+
+  wxControl::SetFont(parent->GetFont());
+  SetSize(x, y, width, height);
+
+  return TRUE;
 }
 
 wxSize wxStaticText::DoGetBestSize() const

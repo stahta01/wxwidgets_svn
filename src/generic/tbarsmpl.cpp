@@ -5,8 +5,8 @@
 // Modified by: VZ on 14.12.99 during wxToolBarSimple reorganization
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -86,7 +86,7 @@ public:
 
 IMPLEMENT_DYNAMIC_CLASS(wxToolBarSimple, wxToolBarBase)
 
-#if !wxUSE_TOOLBAR_NATIVE && !defined(__WXUNIVERSAL__)
+#if !defined(wxUSE_TOOLBAR_NATIVE) && !defined(__WXUNIVERSAL__)
     #include "wx/toolbar.h"
 
     IMPLEMENT_DYNAMIC_CLASS(wxToolBar, wxToolBarSimple)

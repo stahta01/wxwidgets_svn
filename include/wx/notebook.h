@@ -67,7 +67,7 @@ public:
     // ---------
 
     // get number of pages in the dialog
-    int GetPageCount() const { return (int) m_pages.GetCount(); }
+    int GetPageCount() const { return m_pages.GetCount(); }
 
     // get the panel which represents the given page
     wxNotebookPage *GetPage(int nPage) { return m_pages[nPage]; }
@@ -107,7 +107,7 @@ public:
     virtual void SetTabSize(const wxSize& sz) = 0;
 
     // calculate the size of the notebook from the size of its page
-    virtual wxSize CalcSizeFromPage(const wxSize& sizePage) const;
+    virtual wxSize CalcSizeFromPage(const wxSize& sizePage);
 
     // operations
     // ----------
@@ -118,8 +118,16 @@ public:
     // remove one page from the notebook, without deleting it
     virtual bool RemovePage(int nPage) { return DoRemovePage(nPage) != NULL; }
 
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
+
     // remove all pages and delete them
     virtual bool DeleteAllPages() { WX_CLEAR_ARRAY(m_pages); return TRUE; }
+
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
 
     // adds a new page to the notebook (it will be deleted by the notebook,
     // don't delete it yourself) and make it the current one if bSelect
@@ -153,10 +161,12 @@ public:
     }
 
 protected:
+    // calculate the best size of the notebook as the max of the best sizes of
+    // its pages
+    virtual wxSize DoGetBestSize() const;
+
     // remove the page and return a pointer to it
     virtual wxNotebookPage *DoRemovePage(int page);
-	// return the minimum size large enough to display the largest page entirely
-	virtual wxSize DoGetBestSize() const;
 
     // common part of all ctors
     void Init();
@@ -167,8 +177,6 @@ protected:
     wxArrayPages  m_pages;      // array of pages
     wxImageList  *m_imageList;  // we can have an associated image list
     bool m_ownsImageList;       // true if we must delete m_imageList
-
-    DECLARE_NO_COPY_CLASS(wxNotebookBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -278,10 +286,10 @@ typedef void (wxEvtHandler::*wxNotebookEventFunction)(wxNotebookEvent&);
     #include  "wx/gtk/notebook.h"
 #elif defined(__WXMAC__)
     #include  "wx/mac/notebook.h"
-#elif defined(__WXCOCOA__)
-    #include  "wx/generic/notebook.h"
 #elif defined(__WXPM__)
     #include  "wx/os2/notebook.h"
+#elif defined(__WXSTUBS__)
+    #include  "wx/stubs/notebook.h"
 #endif
 
 #endif // wxUSE_NOTEBOOK

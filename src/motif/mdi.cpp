@@ -21,7 +21,6 @@
 #include "wx/mdi.h"
 #include "wx/menu.h"
 #include "wx/settings.h"
-#include "wx/icon.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -391,6 +390,7 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
     XtAddEventHandler((Widget) m_mainWidget, ExposureMask,FALSE,
         wxUniversalRepaintProc, (XtPointer) this);
 
+    SetCanAddEventHandler(TRUE);
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
 
     ChangeBackgroundColour();
@@ -425,15 +425,8 @@ wxMDIChildFrame::~wxMDIChildFrame()
         wxMDIClientWindow* clientWindow = parentFrame->GetClientWindow();
 
         // Remove page if still there
-        {
-            int i = clientWindow->FindPage(this);
-
-            if (i != -1)
-            {
-                clientWindow->RemovePage(i);
-                clientWindow->Refresh();
-            }
-        }
+        if (clientWindow->RemovePage(this))
+            clientWindow->Refresh();
 
         // Set the selection to the first remaining page
         if (clientWindow->GetPageCount() > 0)
@@ -516,7 +509,7 @@ void wxMDIChildFrame::DoGetPosition(int *x, int *y) const
 
 bool wxMDIChildFrame::Show(bool show)
 {
-    SetVisibleStatus( show );
+    m_visibleStatus = show; /* show-&-hide fix */
     return wxWindow::Show(show);
 }
 
@@ -550,16 +543,11 @@ void wxMDIChildFrame::SetIcons(const wxIconBundle& icons)
 
 void wxMDIChildFrame::SetTitle(const wxString& title)
 {
-    wxTopLevelWindow::SetTitle( title );
+    m_title = title;
     wxMDIClientWindow* clientWindow = GetMDIParentFrame()->GetClientWindow();
-
-    // Remove page if still there
-    {
-        int i = clientWindow->FindPage(this);
-
-        if (i != -1)
-            clientWindow->SetPageText(i, title);
-    }
+    int pageNo = clientWindow->FindPagePosition(this);
+    if (pageNo > -1)
+        clientWindow->SetPageText(pageNo, title);
 }
 
 // MDI operations
@@ -645,22 +633,15 @@ bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
     if (success)
     {
         wxFont font(10, wxSWISS, wxNORMAL, wxNORMAL);
-        SetFont(font);
+        wxFont selFont(10, wxSWISS, wxNORMAL, wxBOLD);
+        GetTabView()->SetTabFont(font);
+        GetTabView()->SetSelectedTabFont(selFont);
+        GetTabView()->SetTabSize(120, 18);
+        GetTabView()->SetTabSelectionHeight(20);
         return TRUE;
     }
     else
         return FALSE;
-}
-
-int wxMDIClientWindow::FindPage(const wxNotebookPage* page)
-{
-    for (int i = GetPageCount() - 1; i >= 0; --i)
-    {
-        if (GetPage(i) == page)
-            return i;
-    }
-
-    return -1;
 }
 
 void wxMDIClientWindow::DoSetSize(int x, int y, int width, int height, int sizeFlags)

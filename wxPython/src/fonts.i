@@ -74,7 +74,6 @@ enum wxFontWeight
 };
 
 
-
 // font encodings
 enum wxFontEncoding
 {
@@ -116,7 +115,7 @@ enum wxFontEncoding
         // and for Windows
     wxFONTENCODING_CP874,           // WinThai
     wxFONTENCODING_CP932,           // Japanese (shift-JIS)
-    wxFONTENCODING_CP936,           // Chinese simplified (GB)
+    wxFONTENCODING_CP936,           // Chiniese simplified (GB)
     wxFONTENCODING_CP949,           // Korean (Hangul charset)
     wxFONTENCODING_CP950,           // Chinese (traditional - Big5)
     wxFONTENCODING_CP1250,          // WinLatin2
@@ -139,13 +138,14 @@ enum wxFontEncoding
 
         // Japanese (see http://zsigri.tripod.com/fontboard/cjk/jis.html)
     wxFONTENCODING_SHIFT_JIS = wxFONTENCODING_CP932,  // Shift JIS
-    wxFONTENCODING_EUC_JP = wxFONTENCODING_UTF8 + 1,  // Extended Unix Codepage
-                                                      // for Japanese
+    wxFONTENCODING_EUC_JP,          // Extended Unix Codepage for Japanese
 
-    wxFONTENCODING_UNICODE,         // Unicode (for wxEncodingConverter only)
+    wxFONTENCODING_UNICODE,         // Unicode - currently used only by
+                                    // wxEncodingConverter class
 
     wxFONTENCODING_MAX
 };
+
 
 
 //---------------------------------------------------------------------------
@@ -374,6 +374,7 @@ public:
     static wxFontEncoding GetDefaultEncoding();
     static void SetDefaultEncoding(wxFontEncoding encoding);
 
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 
@@ -739,9 +740,9 @@ public:
     %pragma(python) addtoclass = "
     def Init(self, *_args, **_kwargs):
         if type(_args[0]) in [type(''), type(u'')]:
-            val = apply(self.Init1, _args, _kwargs)
+            val = self.Init1(*_args, **_kwargs)
         else:
-            val = apply(self.Init2, _args, _kwargs)
+            val = self.Init2(*_args, **_kwargs)
         return val
     "
 
@@ -804,13 +805,6 @@ public:
     //
     // Returns NULL if no info found, pointer must *not* be deleted by caller
     static const wxLanguageInfo *GetLanguageInfo(int lang);
-
-    // Find the language for the given locale string which may be either a
-    // canonical ISO 2 letter language code ("xx"), a language code followed by
-    // the country code ("xx_XX") or a Windows full language name ("Xxxxx...")
-    //
-    // Returns NULL if no info found, pointer must *not* be deleted by caller
-    static const wxLanguageInfo *FindLanguageInfo(const wxString& locale);
 
     // Add custom language to the list of known languages.
     // Notes: 1) wxLanguageInfo contains platform-specific data
@@ -969,6 +963,7 @@ public:
     // equivalent encodings, regardless the platform, including itself.
     static wxFontEncodingArray GetAllEquivalents(wxFontEncoding enc);
 
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.IsOk()"
 };
 
 

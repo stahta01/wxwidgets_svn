@@ -113,7 +113,6 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS(wxSpinCtrl)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxSpinCtrl)
 };
 
 #endif // _WX_MSW_SPINCTRL_H_

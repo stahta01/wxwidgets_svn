@@ -6,7 +6,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _MIMETYPE_IMPL_H
@@ -44,8 +44,7 @@ public:
     bool GetExtensions(wxArrayString& extensions);
     bool GetMimeType(wxString *mimeType) const;
     bool GetMimeTypes(wxArrayString& mimeTypes) const;
-    bool GetIcon(wxIcon *icon, wxString *sCommand = NULL, int *iIndex = NULL,
-                 int iconSize = wxICON_LARGE) const;
+    bool GetIcon(wxIcon *icon, wxString *sCommand = NULL, int *iIndex = NULL) const;
     bool GetDescription(wxString *desc) const;
     bool GetOpenCommand(wxString *openCmd,
                         const wxFileType::MessageParameters& params) const;

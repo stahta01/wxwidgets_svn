@@ -20,7 +20,23 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/msw/gdiimage.h"
+// compatible (even if incorrect) behaviour by default: derive wxIcon from
+// wxBitmap
+#ifndef wxICON_IS_BITMAP
+    #define wxICON_IS_BITMAP 1
+#endif
+
+#if wxICON_IS_BITMAP
+    #include "wx/bitmap.h"
+
+    #define wxIconRefDataBase   wxBitmapRefData
+    #define wxIconBase          wxBitmap
+#else
+    #include "wx/msw/gdiimage.h"
+
+    #define wxIconRefDataBase   wxGDIImageRefData
+    #define wxIconBase          wxGDIImage
+#endif
 
 // ---------------------------------------------------------------------------
 // icon data
@@ -28,7 +44,7 @@
 
 // notice that although wxIconRefData inherits from wxBitmapRefData, it is not
 // a valid wxBitmapRefData
-class WXDLLEXPORT wxIconRefData : public wxGDIImageRefData
+class WXDLLEXPORT wxIconRefData : public wxIconRefDataBase
 {
 public:
     wxIconRefData() { }
@@ -41,7 +57,7 @@ public:
 // Icon
 // ---------------------------------------------------------------------------
 
-class WXDLLEXPORT wxIcon : public wxGDIImage
+class WXDLLEXPORT wxIcon : public wxIconBase
 {
 public:
     // ctors
@@ -55,7 +71,6 @@ public:
     wxIcon(const char bits[], int width, int height);
         // from XPM data
     wxIcon(const char **data) { CreateIconFromXpm(data); }
-
     wxIcon(char **data) { CreateIconFromXpm((const char **)data); }
         // from resource/file
     wxIcon(const wxString& name,

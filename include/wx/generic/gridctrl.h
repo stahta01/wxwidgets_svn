@@ -16,7 +16,7 @@
     #pragma interface "gridctrl.h"
 #endif
 
-#if wxUSE_GRID
+#if wxUSE_GRID || wxUSE_NEW_GRID
 
 #include "wx/grid.h"
 #include "wx/string.h"
@@ -24,8 +24,6 @@
 
 #define wxGRID_VALUE_CHOICEINT    _T("choiceint")
 #define wxGRID_VALUE_DATETIME     _T("datetime")
-
-#if wxUSE_DATETIME
 
 // the default renderer for the cells containing Time and dates..
 class WXDLLEXPORT wxGridCellDateTimeRenderer : public wxGridCellStringRenderer
@@ -61,7 +59,6 @@ protected:
     wxDateTime::TimeZone m_tz;
 };
 
-#endif // wxUSE_DATETIME
 
 // the default renderer for the cells containing Time and dates..
 class WXDLLEXPORT wxGridCellEnumRenderer : public wxGridCellStringRenderer
@@ -154,7 +151,7 @@ private:
 
 };
 
-#endif  // #if wxUSE_GRID
+#endif  // #if wxUSE_GRID || wxUSE_NEW_GRID
 
 #endif //_WX_GENERIC_GRIDCTRL_H_
 

@@ -16,12 +16,6 @@
 #pragma interface "ogldiag.h"
 #endif
 
-#include <wx/deprecated/setup.h>
-
-#if wxUSE_PROLOGIO
-#include <wx/deprecated/wxexpr.h>
-#endif
-
 #include <wx/ogl/basic.h>
 
 class wxDiagram: public wxObject
@@ -68,7 +62,7 @@ public:
   inline void SetMouseTolerance(int tol) { m_mouseTolerance = tol; }
   inline int GetMouseTolerance() const { return m_mouseTolerance; }
   inline wxList *GetShapeList() const { return m_shapeList; }
-  inline int GetCount() const { return m_shapeList->GetCount(); }
+  inline int GetCount() const { return m_shapeList->Number(); }
 
   // Make sure all text that should be centred, is centred.
   void RecentreAll(wxDC& dc);

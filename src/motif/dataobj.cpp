@@ -17,7 +17,6 @@
 
 #include "wx/dataobj.h"
 #include "wx/app.h"
-#include "wx/utils.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -26,15 +25,14 @@
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
-
-#include "wx/motif/private.h"
+#include "wx/utils.h"
 
 //-------------------------------------------------------------------------
 // global data
 //-------------------------------------------------------------------------
 
 Atom  g_textAtom        = 0;
-Atom  g_bitmapAtom      = 0;
+Atom  g_pngAtom         = 0;
 Atom  g_fileAtom        = 0;
 
 //-------------------------------------------------------------------------
@@ -88,7 +86,7 @@ void wxDataFormat::SetType( wxDataFormatId type )
         m_format = g_textAtom;
     else
     if (m_type == wxDF_BITMAP)
-        m_format = g_bitmapAtom;
+        m_format = g_pngAtom;
     else
     if (m_type == wxDF_FILENAME)
         m_format = g_fileAtom;
@@ -120,7 +118,7 @@ void wxDataFormat::SetId( NativeFormat format )
     if (m_format == g_textAtom)
         m_type = wxDF_TEXT;
     else
-    if (m_format == g_bitmapAtom)
+    if (m_format == g_pngAtom)
         m_type = wxDF_BITMAP;
     else
     if (m_format == g_fileAtom)
@@ -134,18 +132,17 @@ void wxDataFormat::SetId( const wxChar *id )
     PrepareFormats();
     m_type = wxDF_PRIVATE;
     wxString tmp( id );
-    m_format = XInternAtom( wxGlobalDisplay(),
-                            tmp.mbc_str(), FALSE );
+    m_format = XInternAtom( (Display*) wxGetDisplay(), wxMBSTRINGCAST tmp.mbc_str(), FALSE );  // what is the string cast for?
 }
 
 void wxDataFormat::PrepareFormats()
 {
     if (!g_textAtom)
-        g_textAtom = XInternAtom( wxGlobalDisplay(), "STRING", FALSE );
-    if (!g_bitmapAtom)
-        g_bitmapAtom = XInternAtom( wxGlobalDisplay(), "PIXMAP", FALSE );
+        g_textAtom = XInternAtom( (Display*) wxGetDisplay(), "STRING", FALSE );
+    if (!g_pngAtom)
+        g_pngAtom = XInternAtom( (Display*) wxGetDisplay(), "image/png", FALSE );
     if (!g_fileAtom)
-        g_fileAtom = XInternAtom( wxGlobalDisplay(), "file:ALL", FALSE );
+        g_fileAtom = XInternAtom( (Display*) wxGetDisplay(), "file:ALL", FALSE );
 }
 
 // ----------------------------------------------------------------------------
@@ -156,35 +153,56 @@ wxDataObject::~wxDataObject()
 {
 }
 
+#if 0
+
 // ----------------------------------------------------------------------------
-// wxBitmapDataObject
+// wxPrivateDataObject
 // ----------------------------------------------------------------------------
 
-size_t wxBitmapDataObject::GetDataSize() const
+IMPLEMENT_DYNAMIC_CLASS( wxPrivateDataObject, wxDataObject )
+
+void wxPrivateDataObject::Free()
 {
-    return sizeof(Pixmap);
+    if ( m_data )
+        free(m_data);
 }
 
-bool wxBitmapDataObject::GetDataHere(void* buf) const
+wxPrivateDataObject::wxPrivateDataObject()
 {
-    if( !GetBitmap().Ok() )
-        return false;
+    wxString id = wxT("application/");
+    id += wxTheApp->GetAppName();
 
-    (*(Pixmap*)buf) = (Pixmap)GetBitmap().GetDrawable();
+    m_format.SetId( id );
 
-    return true;
+    m_size = 0;
+    m_data = (void *)NULL;
 }
 
-bool wxBitmapDataObject::SetData(size_t len, const void* buf)
+void wxPrivateDataObject::SetData( const void *data, size_t size )
 {
-    if( len != sizeof(Pixmap) )
-        return false;
+    Free();
 
-    WXPixmap pixmap = (WXPixmap)*(Pixmap*)buf;
+    m_size = size;
+    m_data = malloc(size);
 
-    m_bitmap.Create( pixmap );
-
-    return true;
+    memcpy( m_data, data, size );
 }
+
+void wxPrivateDataObject::WriteData( void *dest ) const
+{
+    WriteData( m_data, dest );
+}
+
+size_t wxPrivateDataObject::GetSize() const
+{
+    return m_size;
+}
+
+void wxPrivateDataObject::WriteData( const void *data, void *dest ) const
+{
+    memcpy( dest, data, GetSize() );
+}
+
+#endif // 0
 
 #endif // wxUSE_CLIPBOARD

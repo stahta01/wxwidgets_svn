@@ -6,7 +6,7 @@
 // Created:     20/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -310,8 +310,12 @@ void *wxDllLoader::GetSymbol(wxDllType dllHandle, const wxString &name, bool *su
     CFragSymbolClass    symClass;
     Str255              symName;
 
-	wxMacStringToPascal( name.c_str() , symName ) ;
-
+#if TARGET_CARBON
+    c2pstrcpy( (StringPtr) symName, name );
+#else
+    strcpy( (char *) symName, name );
+    c2pstr( (char *) symName );
+#endif
     if( FindSymbol( ((CFragConnectionID)dllHandle), symName, &symAddress, &symClass ) == noErr )
         symbol = (void *)symAddress;
 
@@ -480,19 +484,15 @@ int dlclose(void *handle)
     return 0;
 }
 
-void *dlsym(void *handle, const char *symbol)
+void *dlsym(void *WXUNUSED(handle), const char *symbol)
 {
     void *addr;
-    
-    NSSymbol nsSymbol = NSLookupSymbolInModule( handle , symbol ) ;
 
-    if ( nsSymbol) 
-    {
-	    addr = NSAddressOfSymbol(nsSymbol);
+    if (NSIsSymbolNameDefined(symbol)) {
+	addr = NSAddressOfSymbol(NSLookupAndBindSymbol(symbol));
     }
-    else 
-    {
-	    addr = NULL;
+    else {
+	addr = NULL;
     }
     return addr;
 }

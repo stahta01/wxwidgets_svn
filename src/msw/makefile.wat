@@ -40,6 +40,9 @@ GENERICOBJS= $(OUTPUTDIR)\busyinfo.obj &
 	$(OUTPUTDIR)\numdlgg.obj &
 	$(OUTPUTDIR)\panelg.obj &
 	$(OUTPUTDIR)\progdlgg.obj &
+	$(OUTPUTDIR)\prop.obj &
+	$(OUTPUTDIR)\propform.obj &
+	$(OUTPUTDIR)\proplist.obj &
 	$(OUTPUTDIR)\sashwin.obj &
 	$(OUTPUTDIR)\scrlwing.obj &
 	$(OUTPUTDIR)\spinctlg.obj &
@@ -51,6 +54,7 @@ GENERICOBJS= $(OUTPUTDIR)\busyinfo.obj &
 	$(OUTPUTDIR)\tipdlg.obj &
 	$(OUTPUTDIR)\tipwin.obj &
 	$(OUTPUTDIR)\treectlg.obj &
+	$(OUTPUTDIR)\treelay.obj &
 	$(OUTPUTDIR)\wizard.obj
 
 # These are generic things that don't need to be compiled on MSW,
@@ -63,6 +67,7 @@ NONESSENTIALOBJS= $(OUTPUTDIR)\accel.obj &
 	$(OUTPUTDIR)\filedlgg.obj &
 	$(OUTPUTDIR)\fontdlgg.obj &
 	$(OUTPUTDIR)\helpext.obj &
+	$(OUTPUTDIR)\helphtml.obj &
 	$(OUTPUTDIR)\imaglist.obj &
 	$(OUTPUTDIR)\listctrl.obj &
 	$(OUTPUTDIR)\mdig.obj &
@@ -76,7 +81,7 @@ NONESSENTIALOBJS= $(OUTPUTDIR)\accel.obj &
 	$(OUTPUTDIR)\timer.obj
 
 COMMONOBJS = &
-	$(OUTPUTDIR)\accesscmn.obj &
+	$(OUTPUTDIR)\y_tab.obj &
 	$(OUTPUTDIR)\appcmn.obj &
 	$(OUTPUTDIR)\artprov.obj &
 	$(OUTPUTDIR)\artstd.obj &
@@ -91,7 +96,6 @@ COMMONOBJS = &
 	$(OUTPUTDIR)\cshelp.obj &
 	$(OUTPUTDIR)\ctrlcmn.obj &
 	$(OUTPUTDIR)\ctrlsub.obj &
-	$(OUTPUTDIR)\datacmn.obj &
 	$(OUTPUTDIR)\datetime.obj &
 	$(OUTPUTDIR)\datstrm.obj &
 	$(OUTPUTDIR)\db.obj &
@@ -104,7 +108,6 @@ COMMONOBJS = &
 	$(OUTPUTDIR)\dobjcmn.obj &
 	$(OUTPUTDIR)\docmdi.obj &
 	$(OUTPUTDIR)\docview.obj &
-	$(OUTPUTDIR)\dpycmn.obj &
 	$(OUTPUTDIR)\dseldlg.obj &
 	$(OUTPUTDIR)\dynarray.obj &
 	$(OUTPUTDIR)\dynlib.obj &
@@ -164,6 +167,7 @@ COMMONOBJS = &
 	$(OUTPUTDIR)\mstream.obj &
 	$(OUTPUTDIR)\nbkbase.obj &
 	$(OUTPUTDIR)\object.obj &
+	$(OUTPUTDIR)\odbc.obj &
 	$(OUTPUTDIR)\paper.obj &
 	$(OUTPUTDIR)\popupcmn.obj &
 	$(OUTPUTDIR)\prntbase.obj &
@@ -172,6 +176,7 @@ COMMONOBJS = &
 	$(OUTPUTDIR)\quantize.obj &
 	$(OUTPUTDIR)\radiocmn.obj &
 	$(OUTPUTDIR)\regex.obj &
+	$(OUTPUTDIR)\resource.obj &
 	$(OUTPUTDIR)\rgncmn.obj &
 	$(OUTPUTDIR)\sckaddr.obj &
 	$(OUTPUTDIR)\sckfile.obj &
@@ -185,7 +190,6 @@ COMMONOBJS = &
 	$(OUTPUTDIR)\stream.obj &
 	$(OUTPUTDIR)\string.obj &
 	$(OUTPUTDIR)\sysopt.obj &
-	$(OUTPUTDIR)\taskbarcmn.obj &
 	$(OUTPUTDIR)\tbarbase.obj &
 	$(OUTPUTDIR)\textbuf.obj &
 	$(OUTPUTDIR)\textcmn.obj &
@@ -205,12 +209,12 @@ COMMONOBJS = &
 	$(OUTPUTDIR)\wfstream.obj &
 	$(OUTPUTDIR)\wincmn.obj &
 	$(OUTPUTDIR)\wxchar.obj &
+	$(OUTPUTDIR)\wxexpr.obj &
 	$(OUTPUTDIR)\xpmdecod.obj &
 	$(OUTPUTDIR)\zipstrm.obj &
 	$(OUTPUTDIR)\zstream.obj
 
 MSWOBJS = $(OUTPUTDIR)\accel.obj &
-	$(OUTPUTDIR)\access.obj &
 	$(OUTPUTDIR)\app.obj &
 	$(OUTPUTDIR)\automtn.obj &
 	$(OUTPUTDIR)\bitmap.obj &
@@ -226,6 +230,7 @@ MSWOBJS = $(OUTPUTDIR)\accel.obj &
 	$(OUTPUTDIR)\colour.obj &
 	$(OUTPUTDIR)\combobox.obj &
 	$(OUTPUTDIR)\control.obj &
+	$(OUTPUTDIR)\curico.obj &
 	$(OUTPUTDIR)\cursor.obj &
 	$(OUTPUTDIR)\data.obj &
 	$(OUTPUTDIR)\dataobj.obj &
@@ -238,9 +243,9 @@ MSWOBJS = $(OUTPUTDIR)\accel.obj &
 	$(OUTPUTDIR)\dialog.obj &
 	$(OUTPUTDIR)\dialup.obj &
 	$(OUTPUTDIR)\dib.obj &
+	$(OUTPUTDIR)\dibutils.obj &
 	$(OUTPUTDIR)\dir.obj &
 	$(OUTPUTDIR)\dirdlg.obj &
-	$(OUTPUTDIR)\display.obj &
 	$(OUTPUTDIR)\dragimag.obj &
 	$(OUTPUTDIR)\dropsrc.obj &
 	$(OUTPUTDIR)\droptgt.obj &
@@ -379,9 +384,6 @@ cleanall:   clean
 $(OUTPUTDIR)\accel.obj:     $(MSWDIR)\accel.cpp
   *$(CXX) $(CXXFLAGS) $<
 
-$(OUTPUTDIR)\access.obj:     $(OLEDIR)\access.cpp
-  *$(CXX) $(CXXFLAGS) $<
-
 $(OUTPUTDIR)\app.obj:     $(MSWDIR)\app.cpp
   *$(CXX) $(CXXFLAGS) $<
 
@@ -427,6 +429,9 @@ $(OUTPUTDIR)\combobox.obj:     $(MSWDIR)\combobox.cpp
 $(OUTPUTDIR)\control.obj:     $(MSWDIR)\control.cpp
   *$(CXX) $(CXXFLAGS) $<
 
+$(OUTPUTDIR)\curico.obj:     $(MSWDIR)\curico.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
 $(OUTPUTDIR)\cursor.obj:     $(MSWDIR)\cursor.cpp
   *$(CXX) $(CXXFLAGS) $<
 
@@ -463,13 +468,13 @@ $(OUTPUTDIR)\dialup.obj:     $(MSWDIR)\dialup.cpp
 $(OUTPUTDIR)\dib.obj:     $(MSWDIR)\dib.cpp
   *$(CXX) $(CXXFLAGS) $<
 
+$(OUTPUTDIR)\dibutils.obj:     $(MSWDIR)\dibutils.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
 $(OUTPUTDIR)\dir.obj:     $(MSWDIR)\dir.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\dirdlg.obj:     $(MSWDIR)\dirdlg.cpp
-  *$(CXX) $(CXXFLAGS) $<
-
-$(OUTPUTDIR)\display.obj:     $(MSWDIR)\display.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\dragimag.obj:     $(MSWDIR)\dragimag.cpp
@@ -697,6 +702,9 @@ $(OUTPUTDIR)\utilsexc.obj:     $(MSWDIR)\utilsexc.cpp
 $(OUTPUTDIR)\uuid.obj:     $(OLEDIR)\uuid.cpp
   *$(CXX) $(CXXFLAGS) $<
 
+$(OUTPUTDIR)\uxtheme.obj:     $(MSWDIR)\uxtheme.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
 $(OUTPUTDIR)\volume.obj:     $(MSWDIR)\volume.cpp
   *$(CXX) $(CXXFLAGS) $<
 
@@ -710,9 +718,6 @@ $(OUTPUTDIR)\window.obj:     $(MSWDIR)\window.cpp
 
 ########################################################
 # Common objects (always compiled)
-
-$(OUTPUTDIR)\accesscmn.obj:     $(COMMDIR)\accesscmn.cpp
-  *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\appcmn.obj:     $(COMMDIR)\appcmn.cpp
   *$(CXX) $(CXXFLAGS) $<
@@ -756,9 +761,6 @@ $(OUTPUTDIR)\ctrlcmn.obj:     $(COMMDIR)\ctrlcmn.cpp
 $(OUTPUTDIR)\ctrlsub.obj:     $(COMMDIR)\ctrlsub.cpp
   *$(CXX) $(CXXFLAGS) $<
 
-$(OUTPUTDIR)\datacmn.obj:     $(COMMDIR)\datacmn.cpp
-  *$(CXX) $(CXXFLAGS) $<
-
 $(OUTPUTDIR)\datetime.obj:     $(COMMDIR)\datetime.cpp
   *$(CXX) $(CXXFLAGS) $<
 
@@ -793,9 +795,6 @@ $(OUTPUTDIR)\docmdi.obj:     $(COMMDIR)\docmdi.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\docview.obj:     $(COMMDIR)\docview.cpp
-  *$(CXX) $(CXXFLAGS) $<
-
-$(OUTPUTDIR)\dpycmn.obj:     $(COMMDIR)\dpycmn.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\dseldlg.obj:     $(COMMDIR)\dseldlg.cpp
@@ -975,6 +974,9 @@ $(OUTPUTDIR)\nbkbase.obj:     $(COMMDIR)\nbkbase.cpp
 $(OUTPUTDIR)\object.obj:     $(COMMDIR)\object.cpp
   *$(CXX) $(CXXFLAGS) $<
 
+$(OUTPUTDIR)\odbc.obj:     $(COMMDIR)\odbc.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
 $(OUTPUTDIR)\paper.obj:     $(COMMDIR)\paper.cpp
   *$(CXX) $(CXXFLAGS) $<
 
@@ -997,6 +999,9 @@ $(OUTPUTDIR)\radiocmn.obj:     $(COMMDIR)\radiocmn.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\regex.obj:     $(COMMDIR)\regex.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
+$(OUTPUTDIR)\resource.obj:     $(COMMDIR)\resource.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\rgncmn.obj:     $(COMMDIR)\rgncmn.cpp
@@ -1036,9 +1041,6 @@ $(OUTPUTDIR)\string.obj:     $(COMMDIR)\string.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\sysopt.obj:     $(COMMDIR)\sysopt.cpp
-  *$(CXX) $(CXXFLAGS) $<
-
-$(OUTPUTDIR)\taskbarcmn.obj:     $(COMMDIR)\taskbarcmn.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\tbarbase.obj:     $(COMMDIR)\tbarbase.cpp
@@ -1098,6 +1100,9 @@ $(OUTPUTDIR)\wincmn.obj:     $(COMMDIR)\wincmn.cpp
 $(OUTPUTDIR)\wxchar.obj:     $(COMMDIR)\wxchar.cpp
   *$(CXX) $(CXXFLAGS) $<
 
+$(OUTPUTDIR)\wxexpr.obj:     $(COMMDIR)\wxexpr.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
 $(OUTPUTDIR)\xpmdecod.obj:     $(COMMDIR)\xpmdecod.cpp
   *$(CXX) $(CXXFLAGS) $<
 
@@ -1109,6 +1114,14 @@ $(OUTPUTDIR)\zstream.obj:     $(COMMDIR)\zstream.cpp
 
 
 
+$(OUTPUTDIR)\y_tab.obj:     $(COMMDIR)\y_tab.c $(COMMDIR)\lex_yy.c
+  *$(CC) $(CFLAGS) -DUSE_DEFINE $(COMMDIR)\y_tab.c
+
+$(COMMDIR)\y_tab.c:     $(COMMDIR)\dosyacc.c
+        copy $(COMMDIR)\dosyacc.c $(COMMDIR)\y_tab.c
+
+$(COMMDIR)\lex_yy.c:    $(COMMDIR)\doslex.c
+    copy $(COMMDIR)\doslex.c $(COMMDIR)\lex_yy.c
 
 ########################################################
 # Generic objects (not always compiled, depending on
@@ -1159,6 +1172,15 @@ $(OUTPUTDIR)\panelg.obj:     $(GENDIR)\panelg.cpp
 $(OUTPUTDIR)\progdlgg.obj:     $(GENDIR)\progdlgg.cpp
   *$(CXX) $(CXXFLAGS) $<
 
+$(OUTPUTDIR)\prop.obj:     $(GENDIR)\prop.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
+$(OUTPUTDIR)\propform.obj:     $(GENDIR)\propform.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
+$(OUTPUTDIR)\proplist.obj:     $(GENDIR)\proplist.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
 $(OUTPUTDIR)\sashwin.obj:     $(GENDIR)\sashwin.cpp
   *$(CXX) $(CXXFLAGS) $<
 
@@ -1190,6 +1212,9 @@ $(OUTPUTDIR)\tipwin.obj:     $(GENDIR)\tipwin.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\treectlg.obj:     $(GENDIR)\treectlg.cpp
+  *$(CXX) $(CXXFLAGS) $<
+
+$(OUTPUTDIR)\treelay.obj:     $(GENDIR)\treelay.cpp
   *$(CXX) $(CXXFLAGS) $<
 
 $(OUTPUTDIR)\wizard.obj:     $(GENDIR)\wizard.cpp

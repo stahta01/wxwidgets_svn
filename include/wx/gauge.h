@@ -77,7 +77,9 @@ protected:
         #define wxGauge wxGauge95
         #define sm_classwxGauge sm_classwxGauge95
     #else // !__WIN95__
-        // Gauge no longer supported on 16-bit Windows
+        #include "wx/msw/gaugemsw.h"
+        #define wxGauge wxGaugeMSW
+        #define sm_classwxGauge sm_classwxGaugeMSW
     #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/gauge.h"
@@ -87,6 +89,8 @@ protected:
     #include "wx/mac/gauge.h"
 #elif defined(__WXPM__)
     #include "wx/os2/gauge.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/gauge.h"
 #endif
 
 #endif // wxUSE_GAUGE

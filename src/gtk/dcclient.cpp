@@ -3,7 +3,7 @@
 // Purpose:
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
-// Copyright:   (c) 1998 Robert Roebling, Chris Breeze
+// Copyright:   (c) 1998 Robert Roebling, Markus Holzem, Chris Breeze
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -298,7 +298,6 @@ wxWindowDC::wxWindowDC()
     m_owner = (wxWindow *)NULL;
 #ifdef __WXGTK20__
     m_context = (PangoContext *)NULL;
-    m_layout = (PangoLayout *)NULL;
     m_fontdesc = (PangoFontDescription *)NULL;
 #endif
 }
@@ -319,9 +318,9 @@ wxWindowDC::wxWindowDC( wxWindow *window )
 
     GtkWidget *widget = window->m_wxwindow;
 
-    // Some controls don't have m_wxwindow - like wxStaticBox, but the user
+    // some controls don't have m_wxwindow - like wxStaticBox, but the user
     // code should still be able to create wxClientDCs for them, so we will
-    // use the parent window here then.
+    // use the parent window here then
     if ( !widget )
     {
         window = window->GetParent();
@@ -332,17 +331,16 @@ wxWindowDC::wxWindowDC( wxWindow *window )
 
 #ifdef __WXGTK20__
     m_context = window->GtkGetPangoDefaultContext();
-    m_layout = pango_layout_new( m_context );
-    m_fontdesc = pango_font_description_copy( widget->style->font_desc );
+    m_fontdesc = widget->style->font_desc;
 #endif
 
     GtkPizza *pizza = GTK_PIZZA( widget );
     m_window = pizza->bin_window;
 
-    // Window not realized ?
+    /* not realized ? */
     if (!m_window)
     {
-         // Don't report problems as per MSW.
+         /* don't report problems */
          m_ok = TRUE;
 
          return;
@@ -365,13 +363,6 @@ wxWindowDC::wxWindowDC( wxWindow *window )
 wxWindowDC::~wxWindowDC()
 {
     Destroy();
-    
-#ifdef __WXGTK20__
-    if (m_layout)
-        g_object_unref( G_OBJECT( m_layout ) );
-    if (m_fontdesc)
-        pango_font_description_free( m_fontdesc );
-#endif
 }
 
 void wxWindowDC::SetUpDC()
@@ -402,6 +393,14 @@ void wxWindowDC::SetUpDC()
         m_textGC = wxGetPoolGC( m_window, wxTEXT_COLOUR );
         m_bgGC = wxGetPoolGC( m_window, wxBG_COLOUR );
     }
+
+#ifdef __WXGTK20__
+    if (m_isMemDC)
+    {
+        m_context = gdk_pango_context_get();
+        m_fontdesc = pango_context_get_font_description(m_context);
+    }
+#endif
 
     /* background colour */
     m_backgroundBrush = *wxWHITE_BRUSH;
@@ -695,28 +694,20 @@ void wxWindowDC::DoDrawLines( int n, wxPoint points[], wxCoord xoffset, wxCoord 
     if (m_pen.GetStyle() == wxTRANSPARENT) return;
     if (n <= 0) return;
 
-    GdkPoint *gpts = new GdkPoint[n];
-    if (! gpts)
-    {
-        wxFAIL_MSG( wxT("Cannot allocate PolyLine") );
-        return;
-    }
+    CalcBoundingBox( points[0].x + xoffset, points[0].y + yoffset );
 
-    for (int i = 0; i < n; i++) 
+    for (int i = 0; i < n-1; i++)
     {
         wxCoord x1 = XLOG2DEV(points[i].x + xoffset);
-        wxCoord y1 = YLOG2DEV(points[i].y + yoffset);
+        wxCoord x2 = XLOG2DEV(points[i+1].x + xoffset);
+        wxCoord y1 = YLOG2DEV(points[i].y + yoffset);     // oh, what a waste
+        wxCoord y2 = YLOG2DEV(points[i+1].y + yoffset);
 
-        CalcBoundingBox( x1 + xoffset, y1 + yoffset );
+        if (m_window)
+            gdk_draw_line( m_window, m_penGC, x1, y1, x2, y2 );
 
-        gpts[i].x = x1;
-        gpts[i].y = y1;
+        CalcBoundingBox( points[i+1].x + xoffset, points[i+1].y + yoffset );
     }
-
-    if (m_window)
-        gdk_draw_lines( m_window, m_penGC, gpts, n);
-
-    delete[] gpts;
 }
 
 void wxWindowDC::DoDrawPolygon( int n, wxPoint points[], wxCoord xoffset, wxCoord yoffset, int WXUNUSED(fillStyle) )
@@ -1435,24 +1426,26 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
     wxCHECK_RET( font, wxT("invalid font") );
 #endif
 
+#ifdef __WXGTK20__
+    wxCHECK_RET( m_context, wxT("no Pango context") );
+#endif
+
     x = XLOG2DEV(x);
     y = YLOG2DEV(y);
 
 #ifdef __WXGTK20__
-    wxCHECK_RET( m_context, wxT("no Pango context") );
-    wxCHECK_RET( m_layout, wxT("no Pango layout") );
-    wxCHECK_RET( m_fontdesc, wxT("no Pango font description") );
-
+    // TODO: the layout engine should be abstracted at a higher level!
+    PangoLayout *layout = pango_layout_new(m_context);
+    
 #if wxUSE_UNICODE
     const wxCharBuffer data = wxConvUTF8.cWC2MB( text );
 #else
     const wxWCharBuffer wdata = wxConvLocal.cMB2WC( text );
     const wxCharBuffer data = wxConvUTF8.cWC2MB( wdata );
 #endif
-    pango_layout_set_text( m_layout, (const char*) data, strlen( (const char*) data ));
 
-    int w,h;
-    
+    pango_layout_set_text( layout, (const char*)data, strlen((const char*)data) );
+
     if (m_scaleY != 1.0)
     {
          // If there is a user or actually any scale applied to
@@ -1465,41 +1458,35 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
          pango_font_description_set_size( m_fontdesc, (gint)size );
          
          // actually apply scaled font
-         pango_layout_set_font_description( m_layout, m_fontdesc );
-        
-         pango_layout_get_pixel_size( m_layout, &w, &h );
-         if ( m_backgroundMode == wxSOLID )
-         {
-            gdk_gc_set_foreground(m_textGC, m_textBackgroundColour.GetColor());
-            gdk_draw_rectangle(m_window, m_textGC, TRUE, x, y, w, h);
-            gdk_gc_set_foreground(m_textGC, m_textForegroundColour.GetColor());
-         }
+         pango_layout_set_font_description( layout, m_fontdesc );
          
          // Draw layout.
-         gdk_draw_layout( m_window, m_textGC, x, y, m_layout );
+         gdk_draw_layout( m_window, m_textGC, x, y, layout );
          
          // reset unscaled size
          pango_font_description_set_size( m_fontdesc, oldSize );
-         
-         // actually apply unscaled font
-         pango_layout_set_font_description( m_layout, m_fontdesc );
     }
     else
     {
-        pango_layout_get_pixel_size( m_layout, &w, &h );
-        if ( m_backgroundMode == wxSOLID )
-        {
-            gdk_gc_set_foreground(m_textGC, m_textBackgroundColour.GetColor());
-            gdk_draw_rectangle(m_window, m_textGC, TRUE, x, y, w, h);
-            gdk_gc_set_foreground(m_textGC, m_textForegroundColour.GetColor());
-        }
-        // Draw layout.
-        gdk_draw_layout( m_window, m_textGC, x, y, m_layout );
+         // actually apply font
+         pango_layout_set_font_description( layout, m_fontdesc );
+         
+         // Draw layout.
+         gdk_draw_layout( m_window, m_textGC, x, y, layout );
     }
-    
+
+#if 0
+    // Measure layout
+    int w,h;
+    pango_layout_get_pixel_size( m_layout, &w, &h );
+#else
+    int w = 10;
+    int h = 10;
+#endif
     wxCoord width = w;
     wxCoord height = h;
-    
+
+    g_object_unref( G_OBJECT( layout ) );
 #else // GTK+ 1.x
     wxCoord width = gdk_string_width( font, text.mbc_str() );
     wxCoord height = font->ascent + font->descent;
@@ -1523,6 +1510,7 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
     }
 #endif // GTK+ 2.0/1.x
 
+
     width = wxCoord(width / m_scaleX);
     height = wxCoord(height / m_scaleY);
     CalcBoundingBox (x + width, y + height);
@@ -1541,10 +1529,6 @@ void wxWindowDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord y, 
 
     if (!m_window) return;
 
-#ifdef __WXGTK20__
-    // implement later without GdkFont for GTK 2.0
-    return;
-#else
     GdkFont *font = m_font.GetInternalFont( m_scaleY );
 
     wxCHECK_RET( font, wxT("invalid font") );
@@ -1643,7 +1627,6 @@ void wxWindowDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord y, 
     // update the bounding box
     CalcBoundingBox(x + minX, y + minY);
     CalcBoundingBox(x + maxX, y + maxY);
-#endif
 }
 
 void wxWindowDC::DoGetTextExtent(const wxString &string,
@@ -1659,22 +1642,25 @@ void wxWindowDC::DoGetTextExtent(const wxString &string,
     }
     
 #ifdef __WXGTK20__
-    // Set new font description
+    // Create layout and set font description
+    PangoLayout *layout = pango_layout_new( m_context );
     if (theFont)
-        pango_layout_set_font_description( m_layout, theFont->GetNativeFontInfo()->description );
+        pango_layout_set_font_description( layout, theFont->GetNativeFontInfo()->description );
+    else
+        pango_layout_set_font_description( layout, m_fontdesc );
         
     // Set layout's text
 #if wxUSE_UNICODE
     const wxCharBuffer data = wxConvUTF8.cWC2MB( string );
-    pango_layout_set_text( m_layout, (const char*) data, strlen( (const char*) data ));
 #else
     const wxWCharBuffer wdata = wxConvLocal.cMB2WC( string );
     const wxCharBuffer data = wxConvUTF8.cWC2MB( wdata );
-    pango_layout_set_text( m_layout, (const char*) data, strlen( (const char*) data ));
 #endif
+    pango_layout_set_text( layout, (const char*) data, strlen((const char*)data) );
  
+    // Measure text.
     int w,h;
-    pango_layout_get_pixel_size( m_layout, &w, &h );
+    pango_layout_get_pixel_size( layout, &w, &h );
     
     if (width) (*width) = (wxCoord) w; 
     if (height) (*height) = (wxCoord) h;
@@ -1685,9 +1671,7 @@ void wxWindowDC::DoGetTextExtent(const wxString &string,
     }
     if (externalLeading) (*externalLeading) = 0;  // ??
     
-    // Reset old font description
-    if (theFont)
-        pango_layout_set_font_description( m_layout, m_fontdesc );
+    g_object_unref( G_OBJECT( layout ) );
 #else
     wxFont fontToUse = m_font;
     if (theFont) fontToUse = *theFont;
@@ -1703,9 +1687,13 @@ void wxWindowDC::DoGetTextExtent(const wxString &string,
 wxCoord wxWindowDC::GetCharWidth() const
 {
 #ifdef __WXGTK20__
-    pango_layout_set_text( m_layout, "H", 1 );
+    // There should be an easier way.
+    PangoLayout *layout = pango_layout_new(m_context);
+    pango_layout_set_font_description(layout, m_fontdesc);
+    pango_layout_set_text(layout, "H", 1 );
     int w,h;
-    pango_layout_get_pixel_size( m_layout, &w, &h );
+    pango_layout_get_pixel_size(layout, &w, &h);
+    g_object_unref( G_OBJECT( layout ) );
     return w;
 #else
     GdkFont *font = m_font.GetInternalFont( m_scaleY );
@@ -1718,9 +1706,13 @@ wxCoord wxWindowDC::GetCharWidth() const
 wxCoord wxWindowDC::GetCharHeight() const
 {
 #ifdef __WXGTK20__
-    pango_layout_set_text( m_layout, "H", 1 );
+    // There should be an easier way.
+    PangoLayout *layout = pango_layout_new(m_context);
+    pango_layout_set_font_description(layout, m_fontdesc);
+    pango_layout_set_text(layout, "H", 1);
     int w,h;
-    pango_layout_get_pixel_size( m_layout, &w, &h );
+    pango_layout_get_pixel_size(layout, &w, &h);
+    g_object_unref( G_OBJECT( layout ) );
     return h;
 #else
     GdkFont *font = m_font.GetInternalFont( m_scaleY );
@@ -1770,41 +1762,23 @@ void wxWindowDC::Clear()
 
 void wxWindowDC::SetFont( const wxFont &font )
 {
+    // It is common practice to set the font to wxNullFont, so
+    // don't consider it to be an error
+    //    wxCHECK_RET( font.Ok(), _T("invalid font in wxWindowDC::SetFont") );
+
     m_font = font;
-    
 #ifdef __WXGTK20__
     if (m_font.Ok())
     {
-        if (m_fontdesc)
-            pango_font_description_free( m_fontdesc );
-        
-        m_fontdesc = pango_font_description_copy( m_font.GetNativeFontInfo()->description );
-        
+        m_fontdesc = m_font.GetNativeFontInfo()->description;
    
         if (m_owner)
         {
-            PangoContext *oldContext = m_context;
-            
-            // We might want to use the X11 context for faster
-            // rendering on screen
             if (m_font.GetNoAntiAliasing())
                 m_context = m_owner->GtkGetPangoX11Context();
             else
                 m_context = m_owner->GtkGetPangoDefaultContext();
-                
-            // If we switch back/forth between different contexts
-            // we also have to create a new layout. I think so,
-            // at least, and it doesn't hurt to do it. 
-            if (oldContext != m_context)
-            {
-                if (m_layout)
-                    g_object_unref( G_OBJECT( m_layout ) );
-                
-                m_layout = pango_layout_new( m_context );
-            }
         }
-        
-        pango_layout_set_font_description( m_layout, m_fontdesc );
     }
 #endif
 }

@@ -6,7 +6,7 @@
 // Created:     28.06.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -67,7 +67,7 @@ void wxDialogBase::Init()
 #endif
 }
 
-#if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#if wxUSE_STATTEXT && wxUSE_TEXTCTRL
 
 wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
 {
@@ -164,7 +164,7 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
     return box;
 }
 
-#endif // wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#endif // wxUSE_STATTEXT && wxUSE_TEXTCTRL
 
 #if wxUSE_BUTTON
 

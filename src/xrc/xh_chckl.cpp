@@ -25,8 +25,6 @@
 #include "wx/checklst.h"
 #include "wx/intl.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxCheckListXmlHandler, wxXmlResourceHandler)
-
 wxCheckListXmlHandler::wxCheckListXmlHandler() 
 : wxXmlResourceHandler(), m_insideBox(FALSE)
 {
@@ -110,4 +108,3 @@ bool wxCheckListXmlHandler::CanHandle(wxXmlNode *node)
 }
 
 #endif
-

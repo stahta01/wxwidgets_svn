@@ -51,6 +51,7 @@ OBJECTS = \
 		gridctrl.obj,\
 		gridsel.obj,\
 		helpext.obj,\
+		helphtml.obj,\
 		imaglist.obj,\
 		laywin.obj,\
 		listctrl.obj,\
@@ -61,8 +62,10 @@ OBJECTS = \
 		printps.obj,\
 		prntdlgg.obj,\
 		progdlgg.obj,\
+		prop.obj,\
+		propform.obj,\
+		proplist.obj,\
 		sashwin.obj,\
-		selstore.obj,\
 		splitter.obj,\
 		tbarsmpl.obj,\
 		tabg.obj,\
@@ -88,6 +91,7 @@ SOURCES = \
 		gridctrl.cpp,\
 		gridsel.cpp,\
 		helpext.cpp,\
+		helphtml.cpp,\
 		imaglist.cpp,\
 		laywin.cpp,\
 		listctrl.cpp,\
@@ -100,8 +104,10 @@ SOURCES = \
 		printps.cpp,\
 		prntdlgg.cpp,\
 		progdlgg.cpp,\
+		prop.cpp,\
+		propform.cpp,\
+		proplist.cpp,\
 		sashwin.cpp,\
-		selstore.cpp,\
 		splitter.cpp,\
 		statline.cpp,\
 		statusbr.cpp,\
@@ -152,6 +158,7 @@ grid.obj : grid.cpp
 gridctrl.obj : gridctrl.cpp
 gridsel.obj : gridsel.cpp
 helpext.obj : helpext.cpp
+helphtml.obj : helphtml.cpp
 imaglist.obj : imaglist.cpp
 laywin.obj : laywin.cpp
 listctrl.obj : listctrl.cpp
@@ -164,10 +171,12 @@ panelg.obj : panelg.cpp
 printps.obj : printps.cpp
 prntdlgg.obj : prntdlgg.cpp
 progdlgg.obj : progdlgg.cpp
+prop.obj : prop.cpp
+propform.obj : propform.cpp
+proplist.obj : proplist.cpp
 scrlwing.obj : scrlwing.cpp
 spinctlg.obj : spinctlg.cpp
 sashwin.obj : sashwin.cpp
-selstore.obj : selstore.cpp
 splitter.obj : splitter.cpp
 statline.obj : statline.cpp
 statusbr.obj : statusbr.cpp

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        dcclient.h
 // Purpose:     wxClientDC, wxPaintDC and wxWindowDC classes
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DCCLIENT_H_
@@ -36,9 +36,6 @@ class WXDLLEXPORT wxWindowDC: public wxDC
   wxWindowDC(wxWindow *win);
 
   ~wxWindowDC(void);
-  virtual void DoGetSize( int *width, int *height ) const;
-  protected :
-    wxWindow     *m_window;
 };
 
 
@@ -53,7 +50,6 @@ class WXDLLEXPORT wxClientDC: public wxWindowDC
   wxClientDC(wxWindow *win);
 
   ~wxClientDC(void);
-  virtual void DoGetSize( int *width, int *height ) const;
 };
 
 class WXDLLEXPORT wxPaintDC: public wxWindowDC
@@ -67,7 +63,6 @@ class WXDLLEXPORT wxPaintDC: public wxWindowDC
   wxPaintDC(wxWindow *win);
 
   ~wxPaintDC(void);
-  virtual void DoGetSize( int *width, int *height ) const;
 };
 
 #endif

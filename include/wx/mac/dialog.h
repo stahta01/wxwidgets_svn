@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        dialog.h
 // Purpose:     wxDialog class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DIALOG_H_
@@ -18,7 +18,7 @@
 
 #include "wx/panel.h"
 
-WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxDialogNameStr;
 
 WXDLLEXPORT_DATA(extern const wxChar*) wxDialogNameStr;
 
@@ -65,7 +65,7 @@ public:
     ~wxDialog();
 
 //    virtual bool Destroy();
-    bool Show(bool show = true);
+    bool Show(bool show);
 
     void SetModal(bool flag);
     virtual bool IsModal() const;
@@ -87,6 +87,7 @@ public:
     // --------------
 
     // event handlers
+//    bool OnClose();
     void OnCharHook(wxKeyEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
 

@@ -6,7 +6,7 @@
 // Created:     August 1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -58,13 +58,13 @@ wxHTTP::~wxHTTP()
 void wxHTTP::ClearHeaders()
 {
   // wxString isn't a wxObject
-  wxNode *node = m_headers.GetFirst();
+  wxNode *node = m_headers.First();
   wxString *string;
 
   while (node) {
-    string = (wxString *)node->GetData();
+    string = (wxString *)node->Data();
     delete string;
-    node = node->GetNext();
+    node = node->Next();
   }
 
   m_headers.Clear();
@@ -92,7 +92,7 @@ void wxHTTP::SetHeader(const wxString& header, const wxString& h_data)
   if (!node)
     m_headers.Append(header, (wxObject *)(new wxString(h_data)));
   else {
-    wxString *str = (wxString *)node->GetData();
+    wxString *str = (wxString *)node->Data();
     (*str) = h_data;
   }
 }
@@ -108,16 +108,16 @@ wxString wxHTTP::GetHeader(const wxString& header)
   if (!node)
     return wxEmptyString;
 
-  return *((wxString *)node->GetData());
+  return *((wxString *)node->Data());
 }
 
 void wxHTTP::SendHeaders()
 {
-  wxNode *head = m_headers.GetFirst();
+  wxNode *head = m_headers.First();
 
   while (head)
   {
-    wxString *str = (wxString *)head->GetData();
+    wxString *str = (wxString *)head->Data();
 
     wxString buf;
     buf.Printf(wxT("%s: %s\r\n"), head->GetKeyString(), str->GetData());
@@ -125,7 +125,7 @@ void wxHTTP::SendHeaders()
     const wxWX2MBbuf cbuf = buf.mb_str();
     Write(cbuf, strlen(cbuf));
 
-    head = head->GetNext();
+    head = head->Next();
   }
 }
 
@@ -287,8 +287,6 @@ public:
 
 protected:
   size_t OnSysRead(void *buffer, size_t bufsize);
-
-    DECLARE_NO_COPY_CLASS(wxHTTPStream)
 };
 
 size_t wxHTTPStream::OnSysRead(void *buffer, size_t bufsize)

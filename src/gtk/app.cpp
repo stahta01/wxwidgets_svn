@@ -13,7 +13,6 @@
 
 #ifdef __VMS
 #include <vms_jackets.h>
-#undef ConnectionNumber
 #endif
 
 #include "wx/app.h"
@@ -28,6 +27,11 @@
 #include "wx/msgdlg.h"
 #include "wx/file.h"
 #include "wx/filename.h"
+
+#if wxUSE_WX_RESOURCES
+    #include "wx/resource.h"
+#endif
+
 #include "wx/module.h"
 #include "wx/image.h"
 
@@ -238,12 +242,8 @@ static gint wxapp_idle_callback( gpointer WXUNUSED(data) )
         // But repaint the assertion message if necessary
         if (wxTopLevelWindows.GetCount() > 0)
         {
-            wxWindow* win = (wxWindow*) wxTopLevelWindows.GetLast()->GetData();
-#ifdef __WXGTK20__
-            if (win->IsKindOf(CLASSINFO(wxMessageDialog)))
-#else
+            wxWindow* win = (wxWindow*) wxTopLevelWindows.Last()->Data();
             if (win->IsKindOf(CLASSINFO(wxGenericMessageDialog)))
-#endif
                 win->OnInternalIdle();
         }
         return TRUE;
@@ -367,7 +367,7 @@ static gint wxapp_poll_func( GPollFD *ufds, guint nfds, gint timeout )
 void wxapp_install_idle_handler()
 {
     // GD: this assert is raised when using the thread sample (which works)
-    //     so the test is probably not so easy. Can widget callbacks be
+    //     so the test is probably not so easy. Can widget callbacks be 
     //     triggered from child threads and, if so, for which widgets?
     // wxASSERT_MSG( wxThread::IsMain() || gs_WakeUpIdle, wxT("attempt to install idle handler from widget callback in child thread (should be exclusively from wxWakeUpIdle)") );
 
@@ -617,13 +617,13 @@ bool wxApp::CallInternalIdle( wxWindow* win )
 {
     win->OnInternalIdle();
 
-    wxWindowList::Node  *node = win->GetChildren().GetFirst();
+    wxNode* node = win->GetChildren().First();
     while (node)
     {
-        wxWindow    *win = node->GetData();
-
+        wxWindow* win = (wxWindow*) node->Data();
         CallInternalIdle( win );
-        node = node->GetNext();
+
+        node = node->Next();
     }
 
     return TRUE;
@@ -641,14 +641,14 @@ bool wxApp::SendIdleEvents( wxWindow* win )
     if (event.MoreRequested())
         needMore = TRUE;
 
-    wxWindowList::Node  *node = win->GetChildren().GetFirst();
+    wxNode* node = win->GetChildren().First();
     while (node)
     {
-        wxWindow    *win = node->GetData();
-
+        wxWindow* win = (wxWindow*) node->Data();
         if (SendIdleEvents(win))
             needMore = TRUE;
-        node = node->GetNext();
+
+        node = node->Next();
     }
 
     return needMore;
@@ -683,17 +683,17 @@ void wxApp::Dispatch()
 
 void wxApp::DeletePendingObjects()
 {
-    wxNode *node = wxPendingDelete.GetFirst();
+    wxNode *node = wxPendingDelete.First();
     while (node)
     {
-        wxObject *obj = (wxObject *)node->GetData();
+        wxObject *obj = (wxObject *)node->Data();
 
         delete obj;
 
         if (wxPendingDelete.Find(obj))
             delete node;
 
-        node = wxPendingDelete.GetFirst();
+        node = wxPendingDelete.First();
     }
 }
 
@@ -714,6 +714,10 @@ bool wxApp::Initialize()
     wxInitializeStockLists();
     wxInitializeStockObjects();
 
+#if wxUSE_WX_RESOURCES
+    wxInitializeResourceSystem();
+#endif
+
     wxModule::RegisterModules();
     if (!wxModule::InitializeModules())
         return FALSE;
@@ -729,6 +733,10 @@ void wxApp::CleanUp()
 {
     wxModule::CleanUpModules();
 
+#if wxUSE_WX_RESOURCES
+    wxCleanUpResourceSystem();
+#endif
+
     delete wxTheColourDatabase;
     wxTheColourDatabase = (wxColourDatabase*) NULL;
 
@@ -743,9 +751,7 @@ void wxApp::CleanUp()
 
 #if wxUSE_THREADS
     delete wxPendingEvents;
-    wxPendingEvents = NULL;
     delete wxPendingEventsLocker;
-    wxPendingEventsLocker = NULL;
 #endif
 
     // check for memory leaks

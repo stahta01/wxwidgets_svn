@@ -20,13 +20,6 @@
 
 #include <windows.h>
 
-
-#if defined (__WXWINCE__)
-    #include <wingdi.h>     // RGB, COLORREF
-    #include <winuser.h>    // Global Namespaces ::GetKeyState, ::GetWindowRect
-#endif
-
-
 #ifdef __WXMICROWIN__
     // Extra prototypes and symbols not defined by MicroWindows
     #include "wx/msw/microwin.h"
@@ -88,14 +81,11 @@ WXDLLEXPORT_DATA(extern HFONT) wxSTATUS_LINE_FONT;
 
 // this defines a CASTWNDPROC macro which casts a pointer to the type of a
 // window proc
-#if defined(__WXWINCE__)
-    typedef FARPROC WndProcCast;
-#elif defined(STRICT) || defined(__GNUC__)
+#if defined(STRICT) || defined(__GNUC__)
     typedef WNDPROC WndProcCast;
 #else
     typedef FARPROC WndProcCast;
 #endif
-
 
 #define CASTWNDPROC (WndProcCast)
 
@@ -184,6 +174,22 @@ extern LONG APIENTRY _EXPORT
   wxSubclassedGenericControlProc(WXHWND hWnd, WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
 // ---------------------------------------------------------------------------
+// constants which might miss from some compilers' headers
+// ---------------------------------------------------------------------------
+
+#if !defined(__WIN32__) && !defined(WS_EX_CLIENTEDGE)
+    #define WS_EX_CLIENTEDGE 0
+#endif
+
+#if defined(__WIN32__) && !defined(WS_EX_CLIENTEDGE)
+    #define WS_EX_CLIENTEDGE 0x00000200L
+#endif
+
+#ifndef ENDSESSION_LOGOFF
+    #define ENDSESSION_LOGOFF    0x80000000
+#endif
+
+// ---------------------------------------------------------------------------
 // useful macros and functions
 // ---------------------------------------------------------------------------
 
@@ -197,7 +203,6 @@ extern LONG APIENTRY _EXPORT
 #if wxUSE_GUI
 
 #include <wx/gdicmn.h>
-#include <wx/colour.h>
 
 // make conversion from wxColour and COLORREF a bit less painful
 inline COLORREF wxColourToRGB(const wxColour& c)
@@ -263,17 +268,6 @@ extern void PixelToHIMETRIC(LONG *x, LONG *y);
 // to invert the mask each time we pass one/get one to/from Windows
 extern HBITMAP wxInvertMask(HBITMAP hbmpMask, int w = 0, int h = 0);
 
-// Creates an icon or cursor depending from a bitmap
-//
-// The bitmap must be valid and it should have a mask. If it doesn't, a default
-// mask is created using light grey as the transparent colour.
-extern HICON wxBitmapToHICON(const wxBitmap& bmp);
-
-// Same requirments as above apply and the bitmap must also have the correct
-// size.
-extern
-HCURSOR wxBitmapToHCURSOR(const wxBitmap& bmp, int hotSpotX, int hotSpotY);
-
 // get (x, y) from DWORD - notice that HI/LOWORD can *not* be used because they
 // will fail on system with multiple monitors where the coords may be negative
 //
@@ -336,20 +330,6 @@ inline RECT wxGetClientRect(HWND hwnd)
 // small helper classes
 // ---------------------------------------------------------------------------
 
-// a template to make initializing Windows styructs less painful: it zeroes all
-// the struct fields and also sets cbSize member to the correct value (and so
-// can be only used with structures which have this member...)
-template <class T>
-struct WinStruct : public T
-{
-    WinStruct()
-    {
-        ::ZeroMemory(this, sizeof(T));
-        cbSize = sizeof(T);
-    }
-};
-
-
 // create an instance of this class and use it as the HDC for screen, will
 // automatically release the DC going out of scope
 class ScreenHDC
@@ -362,24 +342,20 @@ public:
 
 private:
     HDC m_hdc;
-
-    DECLARE_NO_COPY_CLASS(ScreenHDC)
 };
 
-// the same as ScreenHDC but for memory DCs: creates the HDC compatible with
-// the given one (screen by default) in ctor and destroys it in dtor
+// the same as ScreenHDC but for memory DCs: creates the HDC in ctor and
+// destroys it in dtor
 class MemoryHDC
 {
 public:
-    MemoryHDC(HDC hdc = 0) { m_hdc = ::CreateCompatibleDC(hdc); }
-   ~MemoryHDC() { ::DeleteDC(m_hdc); }
+    MemoryHDC() { m_hdc = ::CreateCompatibleDC(NULL); }
+   ~MemoryHDC() { ::DeleteDC(m_hdc);                  }
 
     operator HDC() const { return m_hdc; }
 
 private:
     HDC m_hdc;
-
-    DECLARE_NO_COPY_CLASS(MemoryHDC)
 };
 
 // a class which selects a GDI object into a DC in its ctor and deselects in
@@ -398,47 +374,6 @@ public:
 private:
    HDC m_hdc;
    HGDIOBJ m_hgdiobj;
-
-   DECLARE_NO_COPY_CLASS(SelectInHDC)
-};
-
-// when working with global pointers (which is unfortunately still necessary
-// sometimes, e.g. for clipboard) it is important to unlock them exactly as
-// many times as we lock them which just asks for using a "smart lock" class
-class GlobalPtr
-{
-public:
-    GlobalPtr(HGLOBAL hGlobal) : m_hGlobal(hGlobal)
-    {
-        m_ptr = ::GlobalLock(hGlobal);
-        if ( !m_ptr )
-        {
-            wxLogLastError(_T("GlobalLock"));
-        }
-    }
-
-    ~GlobalPtr()
-    {
-        if ( !::GlobalUnlock(m_hGlobal) )
-        {
-#ifdef __WXDEBUG__
-            // this might happen simply because the block became unlocked
-            DWORD dwLastError = ::GetLastError();
-            if ( dwLastError != NO_ERROR )
-            {
-                wxLogApiError(_T("GlobalUnlock"), dwLastError);
-            }
-#endif // __WXDEBUG__
-        }
-    }
-
-    operator void *() const { return m_ptr; }
-
-private:
-    HGLOBAL m_hGlobal;
-    void *m_ptr;
-
-    DECLARE_NO_COPY_CLASS(GlobalPtr)
 };
 
 // ---------------------------------------------------------------------------

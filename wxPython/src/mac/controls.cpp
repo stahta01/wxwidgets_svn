@@ -1924,7 +1924,7 @@ static PyObject *_wrap_new_wxCheckBox(PyObject *self, PyObject *args, PyObject *
     PyObject * _obj4 = 0;
     PyObject * _argo6 = 0;
     PyObject * _obj7 = 0;
-    char *_kwnames[] = { "parent","id","label","pos","size","style","val","name", NULL };
+    char *_kwnames[] = { "parent","id","label","pos","size","style","validator","name", NULL };
     char _ptemp[128];
 
     self = self;
@@ -2038,7 +2038,7 @@ static PyObject *_wrap_wxCheckBox_Create(PyObject *self, PyObject *args, PyObjec
     PyObject * _obj5 = 0;
     PyObject * _argo7 = 0;
     PyObject * _obj8 = 0;
-    char *_kwnames[] = { "self","parent","id","label","pos","size","style","val","name", NULL };
+    char *_kwnames[] = { "self","parent","id","label","pos","size","style","validator","name", NULL };
 
     self = self;
     if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOiO|OOlOO:wxCheckBox_Create",_kwnames,&_argo0,&_argo1,&_arg2,&_obj3,&_obj4,&_obj5,&_arg6,&_argo7,&_obj8)) 
@@ -9429,45 +9429,6 @@ static PyObject *_wrap_wxRadioBox_GetRowCount(PyObject *self, PyObject *args, Py
     return _resultobj;
 }
 
-#define wxRadioBox_GetNextItem(_swigobj,_swigarg0,_swigarg1,_swigarg2)  (_swigobj->GetNextItem(_swigarg0,_swigarg1,_swigarg2))
-static PyObject *_wrap_wxRadioBox_GetNextItem(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    int  _result;
-    wxRadioBox * _arg0;
-    int  _arg1;
-    wxDirection * _arg2;
-    long  _arg3;
-    PyObject * _argo0 = 0;
-    PyObject * _argo2 = 0;
-    char *_kwnames[] = { "self","item","dir","style", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiOl:wxRadioBox_GetNextItem",_kwnames,&_argo0,&_arg1,&_argo2,&_arg3)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxRadioBox_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxRadioBox_GetNextItem. Expected _wxRadioBox_p.");
-        return NULL;
-        }
-    }
-    if (_argo2) {
-        if (_argo2 == Py_None) { _arg2 = NULL; }
-        else if (SWIG_GetPtrObj(_argo2,(void **) &_arg2,"_wxDirection_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of wxRadioBox_GetNextItem. Expected _wxDirection_p.");
-        return NULL;
-        }
-    }
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (int )wxRadioBox_GetNextItem(_arg0,_arg1,*_arg2,_arg3);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
 #define wxRadioBox_GetSelection(_swigobj)  (_swigobj->GetSelection())
 static PyObject *_wrap_wxRadioBox_GetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -11117,7 +11078,38 @@ static PyObject *_wrap_wxSpinCtrl_SetValue(PyObject *self, PyObject *args, PyObj
     return _resultobj;
 }
 
+#define wxSpinCtrl_SetSelection(_swigobj,_swigarg0,_swigarg1)  (_swigobj->SetSelection(_swigarg0,_swigarg1))
+static PyObject *_wrap_wxSpinCtrl_SetSelection(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxSpinCtrl * _arg0;
+    long  _arg1;
+    long  _arg2;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","from","to", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oll:wxSpinCtrl_SetSelection",_kwnames,&_argo0,&_arg1,&_arg2)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxSpinCtrl_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxSpinCtrl_SetSelection. Expected _wxSpinCtrl_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    wxSpinCtrl_SetSelection(_arg0,_arg1,_arg2);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
 static PyMethodDef controlscMethods[] = {
+	 { "wxSpinCtrl_SetSelection", (PyCFunction) _wrap_wxSpinCtrl_SetSelection, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSpinCtrl_SetValue", (PyCFunction) _wrap_wxSpinCtrl_SetValue, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSpinCtrl_SetRange", (PyCFunction) _wrap_wxSpinCtrl_SetRange, METH_VARARGS | METH_KEYWORDS },
 	 { "wxSpinCtrl_GetValue", (PyCFunction) _wrap_wxSpinCtrl_GetValue, METH_VARARGS | METH_KEYWORDS },
@@ -11160,7 +11152,6 @@ static PyMethodDef controlscMethods[] = {
 	 { "wxRadioBox_GetCount", (PyCFunction) _wrap_wxRadioBox_GetCount, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_GetStringSelection", (PyCFunction) _wrap_wxRadioBox_GetStringSelection, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_GetSelection", (PyCFunction) _wrap_wxRadioBox_GetSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxRadioBox_GetNextItem", (PyCFunction) _wrap_wxRadioBox_GetNextItem, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_GetRowCount", (PyCFunction) _wrap_wxRadioBox_GetRowCount, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_GetColumnCount", (PyCFunction) _wrap_wxRadioBox_GetColumnCount, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_SetString", (PyCFunction) _wrap_wxRadioBox_SetString, METH_VARARGS | METH_KEYWORDS },

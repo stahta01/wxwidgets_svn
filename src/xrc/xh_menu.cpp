@@ -23,7 +23,6 @@
 #include "wx/menu.h"
 #include "wx/frame.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxMenuXmlHandler, wxXmlResourceHandler)
 
 wxMenuXmlHandler::wxMenuXmlHandler() : 
         wxXmlResourceHandler(), m_insideMenu(FALSE)
@@ -87,8 +86,8 @@ wxObject *wxMenuXmlHandler::DoCreateResource()
                                                GetText(wxT("help")), kind);
                                                
 #if wxCHECK_VERSION(2,3,0) || (defined(__WXMSW__) && wxUSE_OWNER_DRAWN)
-            if (HasParam(wxT("bitmap")))
-                mitem->SetBitmap(GetBitmap(wxT("bitmap"), wxART_MENU));
+                if (HasParam(wxT("bitmap")))
+                    mitem->SetBitmap(GetBitmap(wxT("bitmap"), wxART_MENU));
 #endif
             p_menu->Append(mitem);
             mitem->Enable(GetBool(wxT("enabled"), TRUE));
@@ -110,8 +109,6 @@ bool wxMenuXmlHandler::CanHandle(wxXmlNode *node)
                 IsOfClass(node, wxT("separator")))
            );
 }
-
-IMPLEMENT_DYNAMIC_CLASS(wxMenuBarXmlHandler, wxXmlResourceHandler)
 
 wxMenuBarXmlHandler::wxMenuBarXmlHandler() : wxXmlResourceHandler()
 {

@@ -7,7 +7,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MIMETYPE_H_
@@ -45,9 +45,6 @@ enum wxMailcapStyle
 
     wxMAILCAP_ALL = 15
 };
-
-#define wxICON_LARGE 0
-#define wxICON_SMALL 1
 
 /*
     TODO: would it be more convenient to have this class?
@@ -217,8 +214,7 @@ public:
         // in this file (Win-only) is in iconIndex
     bool GetIcon(wxIcon *icon,
                  wxString *iconFile = NULL,
-                 int *iconIndex = NULL,
-                 int iconSize = wxICON_LARGE) const;
+                 int *iconIndex = NULL) const;
         // get a brief file type description ("*.txt" => "text document")
     bool GetDescription(wxString *desc) const;
 
@@ -309,7 +305,7 @@ public:
     //
     // use the extraDir parameter if you want to look for files in another
     // directory
-    void Initialize(int mailcapStyle = wxMAILCAP_ALL,
+    void Initialize(int mailcapStyle = wxMAILCAP_STANDARD,
                     const wxString& extraDir = wxEmptyString);
 
     // and this function clears all the data from the manager

@@ -6,7 +6,7 @@
 // Created:     14.10.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -249,7 +249,11 @@ void wxStatusBarBase::FreeStacks()
 void wxStatusBarBase::PushStatusText(const wxString& text, int number)
 {
     wxListString* st = GetOrCreateStatusStack(number);
-    st->Insert(new wxString(GetStatusText(number)));
+    // Temporary variables used here to avoid an internal compiler error
+    // in VC++ 6 in _AFXDLL mode
+    wxString statusText(GetStatusText(number));
+    wxString* s = new wxString(statusText);
+    st->Insert(s);
     SetStatusText(text, number);
 }
 

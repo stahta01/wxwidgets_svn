@@ -6,7 +6,7 @@
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -32,12 +32,13 @@
 
 #include <windows.h>
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #else
     #include "wx/msw/gnuwin32/extra.h"
 #endif
 
+#include "wx/msw/dib.h"
 #include "wx/tabctrl.h"
 #include "wx/app.h"
 #include "wx/msw/private.h"
@@ -89,7 +90,7 @@ bool wxTabCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, cons
 
   m_windowId = (id < 0 ? NewControlId() : id);
 
-  long tabStyle = WS_CHILD | WS_VISIBLE;
+  long tabStyle = WS_CHILD;
   if (m_windowStyle & wxTC_MULTILINE)
     tabStyle |= TCS_MULTILINE;
   if (m_windowStyle & wxTC_RIGHTJUSTIFY)

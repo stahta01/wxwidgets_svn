@@ -225,9 +225,9 @@ public:
     bool MetaDown();
     bool AltDown();
     bool ShiftDown();
+    long KeyCode();
 
     long GetKeyCode();
-    %pragma(python) addtoclass = "KeyCode = GetKeyCode"
     bool HasModifiers();
 
     // get the raw key code (platform-dependent)

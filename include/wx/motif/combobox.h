@@ -12,11 +12,14 @@
 #ifndef _WX_COMBOBOX_H_
 #define _WX_COMBOBOX_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "combobox.h"
 #endif
 
 #include "wx/choice.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxComboBoxNameStr;
+WXDLLEXPORT_DATA(extern const char*) wxEmptyString;
 
 // Combobox item
 class WXDLLEXPORT wxComboBox: public wxChoice
@@ -24,7 +27,7 @@ class WXDLLEXPORT wxComboBox: public wxChoice
     DECLARE_DYNAMIC_CLASS(wxComboBox)
         
 public:
-    wxComboBox() { m_inSetSelection = false; }
+    inline wxComboBox() {}
     ~wxComboBox();
     
     inline wxComboBox(wxWindow *parent, wxWindowID id,
@@ -36,9 +39,7 @@ public:
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxComboBoxNameStr)
     {
-        m_inSetSelection = false;
-        Create(parent, id, value, pos, size, n, choices,
-               style, validator, name);
+        Create(parent, id, value, pos, size, n, choices, style, validator, name);
     }
     
     bool Create(wxWindow *parent, wxWindowID id,
@@ -50,17 +51,18 @@ public:
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxComboBoxNameStr);
     
-    // implementation of wxControlWithItems
-    virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, int pos);
+    // List functions
+    virtual void Append(const wxString& item);
     virtual void Delete(int n);
     virtual void Clear();
     virtual int GetSelection() const ;
     virtual void SetSelection(int n);
     virtual int FindString(const wxString& s) const;
     virtual wxString GetString(int n) const ;
-    virtual void SetString(int n, const wxString& s);
-
+    virtual wxString GetStringSelection() const ;
+    virtual bool SetStringSelection(const wxString& sel);
+    virtual inline int Number() const { return m_noStrings; }
+    
     // Text field functions
     virtual wxString GetValue() const ;
     virtual void SetValue(const wxString& value);
@@ -84,19 +86,11 @@ public:
     virtual void ChangeForegroundColour();
     WXWidget GetTopWidget() const { return m_mainWidget; }
     WXWidget GetMainWidget() const { return m_mainWidget; }
-
-    virtual wxSize DoGetBestSize() const;
+    
 protected:
     virtual void DoSetSize(int x, int y,
         int width, int height,
         int sizeFlags = wxSIZE_AUTO);
-private:
-    // only implemented for native combo box
-    void AdjustDropDownListSize();
-
-    // implementation detail, should really be private
-public:
-    bool m_inSetSelection;
 };
 
 #endif

@@ -49,8 +49,6 @@ private:
     wxDC*             m_printerDC;
     bool              m_destroyDC;
     wxWindow*         m_dialogParent;
-
-    DECLARE_NO_COPY_CLASS(wxPrintDialog)
 };
 
 class WXDLLEXPORT wxPageSetupDialog: public wxDialog
@@ -70,8 +68,6 @@ public:
 private:
     wxPageSetupData   m_pageSetupData;
     wxWindow*         m_dialogParent;
-
-    DECLARE_NO_COPY_CLASS(wxPageSetupDialog)
 };
 
 #endif // wxUSE_PRINTING_ARCHITECTURE

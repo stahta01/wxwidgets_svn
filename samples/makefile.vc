@@ -3,7 +3,7 @@
 # Author:	Julian Smart
 # Created:	1993
 # Updated:	
-# Copyright:	
+# Copyright:	(c) 1993, AIAI, University of Edinburgh
 #
 # "%W% %G%"
 #
@@ -68,6 +68,8 @@ all:
         nmake -f makefile.vc $(MAKEFLAGS)
         cd $(WXDIR)\samples\grid
         nmake -f makefile.vc $(MAKEFLAGS)
+        cd $(WXDIR)\samples\newgrid
+        nmake -f makefile.vc $(MAKEFLAGS)
         cd $(WXDIR)\samples\help
         nmake -f makefile.vc $(MAKEFLAGS)
 !if "$(PNGSETUP)"==""
@@ -90,10 +92,10 @@ all:
         nmake -f makefile.vc $(MAKEFLAGS)
         cd $(WXDIR)\samples\menu
         nmake -f makefile.vc $(MAKEFLAGS)
-!if "$(FINAL)" == "0"
-        cd $(WXDIR)\samples\memcheck
-        nmake -f makefile.vc $(MAKEFLAGS)
-!endif
+#!if "$(FINAL)" == "0"
+#        cd $(WXDIR)\samples\memcheck
+#        nmake -f makefile.vc $(MAKEFLAGS)
+#!endif
 !if "$(COMPIL)"==""
         cd $(WXDIR)\samples\mfc
         nmake -f makefile.vc $(MAKEFLAGS)
@@ -118,7 +120,11 @@ all:
         nmake -f makefile.vc $(MAKEFLAGS)
         cd $(WXDIR)\samples\printing
         nmake -f makefile.vc $(MAKEFLAGS)
+        cd $(WXDIR)\samples\proplist
+        nmake -f makefile.vc $(MAKEFLAGS)
         cd $(WXDIR)\samples\regtest
+        nmake -f makefile.vc $(MAKEFLAGS)
+        cd $(WXDIR)\samples\resource
         nmake -f makefile.vc $(MAKEFLAGS)
         cd $(WXDIR)\samples\rotate
         nmake -f makefile.vc $(MAKEFLAGS)
@@ -182,6 +188,8 @@ clean:
         nmake -f makefile.vc clean
         cd $(WXDIR)\samples\grid
         nmake -f makefile.vc clean
+        cd $(WXDIR)\samples\newgrid
+        nmake -f makefile.vc clean
         cd $(WXDIR)\samples\help
         nmake -f makefile.vc clean
         cd $(WXDIR)\samples\html
@@ -224,7 +232,11 @@ clean:
         nmake -f makefile.vc clean
         cd $(WXDIR)\samples\printing
         nmake -f makefile.vc clean
+        cd $(WXDIR)\samples\proplist
+        nmake -f makefile.vc clean
         cd $(WXDIR)\samples\regtest
+        nmake -f makefile.vc clean
+        cd $(WXDIR)\samples\resource
         nmake -f makefile.vc clean
         cd $(WXDIR)\samples\rotate
         nmake -f makefile.vc clean

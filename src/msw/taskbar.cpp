@@ -29,39 +29,43 @@
 #include "wx/menu.h"
 #endif
 
-#if defined(__WIN95__)
+#if defined(__WIN95__) && !defined(__TWIN32__)
 
 #include <windows.h>
 
 #include "wx/msw/winundef.h"
 
 #include <string.h>
-#include "wx/taskbar.h"
+#include "wx/msw/taskbar.h"
 #include "wx/msw/private.h"
 
-#ifdef __GNUWIN32_OLD__
-    #include "wx/msw/gnuwin32/extra.h"
+#ifndef __TWIN32__
+    #ifdef __GNUWIN32_OLD__
+        #include "wx/msw/gnuwin32/extra.h"
+    #endif
 #endif
 
 #ifdef __SALFORDC__
     #include <shellapi.h>
 #endif
 
-#include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxTaskBarIconList);
-
-LRESULT APIENTRY _EXPORT
-wxTaskBarIconWindowProc( HWND hWnd, unsigned msg, UINT wParam, LONG lParam );
+LRESULT APIENTRY _EXPORT wxTaskBarIconWindowProc( HWND hWnd, unsigned msg,
+                                     UINT wParam, LONG lParam );
 
 wxChar *wxTaskBarWindowClass = (wxChar*) wxT("wxTaskBarWindowClass");
 
-wxTaskBarIconList wxTaskBarIcon::sm_taskBarIcons;
+wxList wxTaskBarIcon::sm_taskBarIcons;
+bool   wxTaskBarIcon::sm_registeredClass = FALSE;
+UINT   wxTaskBarIcon::sm_taskbarMsg = 0;
 
-// initialized on demand
-UINT   gs_msgTaskbar = 0;
-UINT   gs_msgRestartTaskbar = 0;
+DEFINE_EVENT_TYPE( wxEVT_TASKBAR_MOVE )
+DEFINE_EVENT_TYPE( wxEVT_TASKBAR_LEFT_DOWN )
+DEFINE_EVENT_TYPE( wxEVT_TASKBAR_LEFT_UP )
+DEFINE_EVENT_TYPE( wxEVT_TASKBAR_RIGHT_DOWN )
+DEFINE_EVENT_TYPE( wxEVT_TASKBAR_RIGHT_UP )
+DEFINE_EVENT_TYPE( wxEVT_TASKBAR_LEFT_DCLICK )
+DEFINE_EVENT_TYPE( wxEVT_TASKBAR_RIGHT_DCLICK )
 
-#if WXWIN_COMPATIBILITY_2_4
 BEGIN_EVENT_TABLE(wxTaskBarIcon, wxEvtHandler)
     EVT_TASKBAR_MOVE         (wxTaskBarIcon::_OnMouseMove)
     EVT_TASKBAR_LEFT_DOWN    (wxTaskBarIcon::_OnLButtonDown)
@@ -71,43 +75,15 @@ BEGIN_EVENT_TABLE(wxTaskBarIcon, wxEvtHandler)
     EVT_TASKBAR_LEFT_DCLICK  (wxTaskBarIcon::_OnLButtonDClick)
     EVT_TASKBAR_RIGHT_DCLICK (wxTaskBarIcon::_OnRButtonDClick)
 END_EVENT_TABLE()
-#endif
 
 
 IMPLEMENT_DYNAMIC_CLASS(wxTaskBarIcon, wxEvtHandler)
 
-// ============================================================================
-// implementation
-// ============================================================================
 
-// ----------------------------------------------------------------------------
-// NotifyIconData: wrapper around NOTIFYICONDATA
-// ----------------------------------------------------------------------------
-
-struct NotifyIconData : public NOTIFYICONDATA
-{
-    NotifyIconData(WXHWND hwnd)
-    {
-        memset(this, 0, sizeof(NOTIFYICONDATA));
-        cbSize = sizeof(NOTIFYICONDATA);
-        hWnd = (HWND) hwnd;
-        uCallbackMessage = gs_msgTaskbar;
-        uFlags = NIF_MESSAGE;
-
-        // we use the same id for all taskbar icons as we don't need it to
-        // distinguish between them
-        uID = 99;
-    }
-};
-
-// ----------------------------------------------------------------------------
-// wxTaskBarIcon
-// ----------------------------------------------------------------------------
-
-wxTaskBarIcon::wxTaskBarIcon()
+wxTaskBarIcon::wxTaskBarIcon(void)
 {
     m_hWnd = 0;
-    m_iconAdded = false;
+    m_iconAdded = FALSE;
 
     AddObject(this);
 
@@ -115,7 +91,7 @@ wxTaskBarIcon::wxTaskBarIcon()
         m_hWnd = CreateTaskBarWindow();
 }
 
-wxTaskBarIcon::~wxTaskBarIcon()
+wxTaskBarIcon::~wxTaskBarIcon(void)
 {
     RemoveObject(this);
 
@@ -134,57 +110,71 @@ wxTaskBarIcon::~wxTaskBarIcon()
 // Operations
 bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
 {
-    if (!IsOk())
-        return false;
+    if (!IsOK())
+        return FALSE;
 
-    m_icon = icon;
-    m_strTooltip = tooltip;
+    NOTIFYICONDATA notifyData;
 
-    NotifyIconData notifyData(m_hWnd);
-
+    memset(&notifyData, 0, sizeof(notifyData));
+        notifyData.cbSize = sizeof(notifyData);
+        notifyData.hWnd = (HWND) m_hWnd;
+        notifyData.uCallbackMessage = sm_taskbarMsg;
+        notifyData.uFlags = NIF_MESSAGE ;
     if (icon.Ok())
     {
         notifyData.uFlags |= NIF_ICON;
-        notifyData.hIcon = GetHiconOf(icon);
+        notifyData.hIcon = (HICON) icon.GetHICON();
     }
 
-    if ( !tooltip.empty() )
+    if (((const wxChar*) tooltip != NULL) && (tooltip != wxT("")))
     {
-        notifyData.uFlags |= NIF_TIP;
-        lstrcpyn(notifyData.szTip, tooltip.c_str(), WXSIZEOF(notifyData.szTip));
+        notifyData.uFlags |= NIF_TIP ;
+                lstrcpyn(notifyData.szTip, WXSTRINGCAST tooltip, sizeof(notifyData.szTip));
     }
 
-    bool ok = Shell_NotifyIcon(m_iconAdded ? NIM_MODIFY
-                                           : NIM_ADD, &notifyData) != 0;
+    notifyData.uID = 99;
 
-    if ( !m_iconAdded && ok )
-        m_iconAdded = true;
-
-    return ok;
+    if (m_iconAdded)
+        return (Shell_NotifyIcon(NIM_MODIFY, & notifyData) != 0);
+    else
+    {
+        m_iconAdded = (Shell_NotifyIcon(NIM_ADD, & notifyData) != 0);
+        return m_iconAdded;
+    }
 }
 
-bool wxTaskBarIcon::RemoveIcon()
+bool wxTaskBarIcon::RemoveIcon(void)
 {
     if (!m_iconAdded)
-        return false;
+        return FALSE;
 
-    m_iconAdded = false;
+    NOTIFYICONDATA notifyData;
 
-    NotifyIconData notifyData(m_hWnd);
+    memset(&notifyData, 0, sizeof(notifyData));
+        notifyData.cbSize = sizeof(notifyData);
+        notifyData.hWnd = (HWND) m_hWnd;
+        notifyData.uCallbackMessage = sm_taskbarMsg;
+        notifyData.uFlags = NIF_MESSAGE;
+        notifyData.hIcon = 0 ; // hIcon;
+    notifyData.uID = 99;
+    m_iconAdded = FALSE;
 
-    return Shell_NotifyIcon(NIM_DELETE, &notifyData) != 0;
+    return (Shell_NotifyIcon(NIM_DELETE, & notifyData) != 0);
 }
 
-bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
+bool wxTaskBarIcon::PopupMenu(wxMenu *menu) //, int x, int y);
 {
-    static bool s_inPopup = false;
+    // OK, so I know this isn't thread-friendly, but
+    // what to do? We need this check.
+
+    static bool s_inPopup = FALSE;
 
     if (s_inPopup)
-        return false;
+        return FALSE;
 
-    s_inPopup = true;
+    s_inPopup = TRUE;
 
-    bool        rval = false;
+    bool        rval = FALSE;
     wxWindow*   win;
     int         x, y;
     wxGetMousePosition(&x, &y);
@@ -207,24 +197,44 @@ bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
     // Work around a WIN32 bug
     ::PostMessage ((HWND) win->GetHWND(),WM_NULL,0,0L);
 
-    win->PopEventHandler(false);
+    win->PopEventHandler(FALSE);
     win->Destroy();
     delete win;
 
-    s_inPopup = false;
+    s_inPopup = FALSE;
 
     return rval;
 }
 
-#if WXWIN_COMPATIBILITY_2_4
+
 // Overridables
-void wxTaskBarIcon::OnMouseMove(wxEvent&)         {}
-void wxTaskBarIcon::OnLButtonDown(wxEvent&)       {}
-void wxTaskBarIcon::OnLButtonUp(wxEvent&)         {}
-void wxTaskBarIcon::OnRButtonDown(wxEvent&)       {}
-void wxTaskBarIcon::OnRButtonUp(wxEvent&)         {}
-void wxTaskBarIcon::OnLButtonDClick(wxEvent&)     {}
-void wxTaskBarIcon::OnRButtonDClick(wxEvent&)     {}
+void wxTaskBarIcon::OnMouseMove(wxEvent&)
+{
+}
+
+void wxTaskBarIcon::OnLButtonDown(wxEvent&)
+{
+}
+
+void wxTaskBarIcon::OnLButtonUp(wxEvent&)
+{
+}
+
+void wxTaskBarIcon::OnRButtonDown(wxEvent&)
+{
+}
+
+void wxTaskBarIcon::OnRButtonUp(wxEvent&)
+{
+}
+
+void wxTaskBarIcon::OnLButtonDClick(wxEvent&)
+{
+}
+
+void wxTaskBarIcon::OnRButtonDClick(wxEvent&)
+{
+}
 
 void wxTaskBarIcon::_OnMouseMove(wxEvent& e)      { OnMouseMove(e);     }
 void wxTaskBarIcon::_OnLButtonDown(wxEvent& e)    { OnLButtonDown(e);   }
@@ -233,17 +243,17 @@ void wxTaskBarIcon::_OnRButtonDown(wxEvent& e)    { OnRButtonDown(e);   }
 void wxTaskBarIcon::_OnRButtonUp(wxEvent& e)      { OnRButtonUp(e);     }
 void wxTaskBarIcon::_OnLButtonDClick(wxEvent& e)  { OnLButtonDClick(e); }
 void wxTaskBarIcon::_OnRButtonDClick(wxEvent& e)  { OnRButtonDClick(e); }
-#endif
+
 
 wxTaskBarIcon* wxTaskBarIcon::FindObjectForHWND(WXHWND hWnd)
 {
-    wxTaskBarIconList::Node *node = sm_taskBarIcons.GetFirst();
+    wxNode*node = sm_taskBarIcons.First();
     while (node)
     {
-        wxTaskBarIcon *obj = node->GetData();
+        wxTaskBarIcon* obj = (wxTaskBarIcon*) node->Data();
         if (obj->GetHWND() == hWnd)
             return obj;
-        node = node->GetNext();
+        node = node->Next();
     }
     return NULL;
 }
@@ -260,40 +270,35 @@ void wxTaskBarIcon::RemoveObject(wxTaskBarIcon* obj)
 
 bool wxTaskBarIcon::RegisterWindowClass()
 {
-    static bool s_registered = false;
-
-    if ( s_registered )
-        return true;
-
-    // Taskbar restart msg will be sent to us if the icon needs to be redrawn
-    gs_msgRestartTaskbar = RegisterWindowMessage(wxT("TaskbarCreated"));
+    if (sm_registeredClass)
+        return TRUE;
 
     // Also register the taskbar message here
-    gs_msgTaskbar = ::RegisterWindowMessage(wxT("wxTaskBarIconMessage"));
+    sm_taskbarMsg = ::RegisterWindowMessage(wxT("wxTaskBarIconMessage"));
 
-    // set up and register window class
-    WNDCLASS wc;
+    WNDCLASS        wc;
+    bool        rc;
+
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+
+    /*
+     * set up and register window class
+     */
     wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = (WNDPROC) wxTaskBarIconWindowProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
-    wc.hInstance = wxGetInstance();
+    wc.hInstance = hInstance;
     wc.hIcon = 0;
     wc.hCursor = 0;
     wc.hbrBackground = 0;
     wc.lpszMenuName = NULL;
-    wc.lpszClassName = wxTaskBarWindowClass;
+    wc.lpszClassName = wxTaskBarWindowClass ;
+    rc = (::RegisterClass( &wc ) != 0);
 
-    if ( !::RegisterClass(&wc) )
-    {
-        wxLogLastError(_T("RegisterClass(taskbar icon)"));
+    sm_registeredClass = (rc != 0);
 
-        return false;
-    }
-
-    s_registered = true;
-
-    return true;
+    return( (rc != 0) );
 }
 
 WXHWND wxTaskBarIcon::CreateTaskBarWindow()
@@ -315,24 +320,11 @@ WXHWND wxTaskBarIcon::CreateTaskBarWindow()
     return (WXHWND) hWnd;
 }
 
-// ----------------------------------------------------------------------------
-// wxTaskBarIcon window proc
-// ----------------------------------------------------------------------------
-
-long wxTaskBarIcon::WindowProc(WXHWND hWnd,
-                               unsigned int msg,
-                               unsigned int wParam,
-                               long lParam)
+long wxTaskBarIcon::WindowProc( WXHWND hWnd, unsigned int msg, unsigned int wParam, long lParam )
 {
     wxEventType eventType = 0;
 
-    if (msg == gs_msgRestartTaskbar)   // does the icon need to be redrawn?
-    {
-        m_iconAdded = false;
-        SetIcon(m_icon, m_strTooltip);
-    }
-
-    if (msg != gs_msgTaskbar)
+    if (msg != sm_taskbarMsg)
         return DefWindowProc((HWND) hWnd, msg, wParam, lParam);
 
     switch (lParam)
@@ -367,22 +359,20 @@ long wxTaskBarIcon::WindowProc(WXHWND hWnd,
 
         default:
             break;
-    }
+        }
 
-    if (eventType)
-    {
+    if (eventType) {
         wxTaskBarIconEvent event(eventType, this);
 
         ProcessEvent(event);
     }
-
     return 0;
 }
 
-LRESULT APIENTRY _EXPORT
-wxTaskBarIconWindowProc(HWND hWnd, unsigned msg, UINT wParam, LONG lParam)
+LRESULT APIENTRY _EXPORT wxTaskBarIconWindowProc( HWND hWnd, unsigned msg,
+                                     UINT wParam, LONG lParam )
 {
-    wxTaskBarIcon *obj = wxTaskBarIcon::FindObjectForHWND((WXHWND) hWnd);
+    wxTaskBarIcon* obj = wxTaskBarIcon::FindObjectForHWND((WXHWND) hWnd);
     if (obj)
         return obj->WindowProc((WXHWND) hWnd, msg, wParam, lParam);
     else

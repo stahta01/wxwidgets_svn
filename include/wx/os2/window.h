@@ -371,8 +371,6 @@ public:
                                   ,WXMEASUREITEMSTRUCT* pItem
                                  );
 
-    virtual void OnPaint(wxPaintEvent& rEvent);
-
     // the rest are not virtual
     bool HandleCreate( WXLPCREATESTRUCT vCs
                       ,bool*            pMayCreate

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        tabctrl.h
 // Purpose:     wxTabCtrl class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TABCTRL_H_
@@ -38,7 +38,7 @@ class WXDLLEXPORT wxTabCtrl: public wxControl
     wxTabCtrl();
 
     inline wxTabCtrl(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-            long style = 0, const wxString& name = wxT("tabCtrl"))
+            long style = 0, const wxString& name = "tabCtrl")
     {
         Create(parent, id, pos, size, style, name);
     }
@@ -97,7 +97,7 @@ class WXDLLEXPORT wxTabCtrl: public wxControl
 // Operations
 
     bool Create(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-                long style = 0, const wxString& name = wxT("tabCtrl"));
+                long style = 0, const wxString& name = "tabCtrl");
 
     // Delete all items
     bool DeleteAllItems();

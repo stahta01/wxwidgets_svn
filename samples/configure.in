@@ -26,7 +26,6 @@ AC_SUBST(WX_TARGET_LIBRARY_GL)
 
 AC_OUTPUT([
             Makefile
-            access/Makefile
             artprov/Makefile
             caret/Makefile
             calendar/Makefile
@@ -66,16 +65,19 @@ AC_OUTPUT([
             mobile/styles/Makefile
             multimon/Makefile
             nativedlg/Makefile
+            newgrid/Makefile
             notebook/Makefile
             oleauto/Makefile
             ownerdrw/Makefile
             png/Makefile
             printing/Makefile
+            proplist/Makefile
             propsize/Makefile
             regtest/Makefile
+            resource/Makefile
             rotate/Makefile
             sashtest/Makefile
-            shaped/Makefile
+	    shaped/Makefile
             scroll/Makefile
             scrollsub/Makefile
             sockets/Makefile
@@ -86,6 +88,7 @@ AC_OUTPUT([
             thread/Makefile
             toolbar/Makefile
             treectrl/Makefile
+            treelay/Makefile
             typetest/Makefile
             validate/Makefile
             widgets/Makefile

@@ -12,11 +12,13 @@
 #ifndef _WX_RADIOBUT_H_
 #define _WX_RADIOBUT_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "radiobut.h"
 #endif
 
 #include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxRadioButtonNameStr;
 
 class WXDLLEXPORT wxRadioButton: public wxControl
 {
@@ -64,6 +66,42 @@ private:
 
     wxRadioButton *m_cycle;
 };
+
+// Not implemented
+#if 0
+class WXDLLEXPORT wxBitmap ;
+
+WXDLLEXPORT_DATA(extern const char*) wxBitmapRadioButtonNameStr;
+
+class WXDLLEXPORT wxBitmapRadioButton: public wxRadioButton
+{
+    DECLARE_DYNAMIC_CLASS(wxBitmapRadioButton)
+protected:
+    wxBitmap *theButtonBitmap;
+public:
+    inline wxBitmapRadioButton() { theButtonBitmap = NULL; }
+    inline wxBitmapRadioButton(wxWindow *parent, wxWindowID id,
+        const wxBitmap *label,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize, long style = 0,
+        const wxValidator& validator = wxDefaultValidator,
+        const wxString& name = wxBitmapRadioButtonNameStr)
+    {
+        Create(parent, id, label, pos, size, style, validator, name);
+    }
+    
+    bool Create(wxWindow *parent, wxWindowID id,
+        const wxBitmap *label,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize, long style = 0,
+        const wxValidator& validator = wxDefaultValidator,
+        const wxString& name = wxBitmapRadioButtonNameStr);
+    
+    virtual void SetLabel(const wxBitmap *label);
+    virtual void SetValue(bool val) ;
+    virtual bool GetValue() const ;
+};
+#endif
 
 #endif
 // _WX_RADIOBUT_H_

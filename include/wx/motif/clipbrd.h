@@ -12,19 +12,13 @@
 #ifndef _WX_CLIPBRD_H_
 #define _WX_CLIPBRD_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "clipbrd.h"
 #endif
 
 #if wxUSE_CLIPBOARD
 
-class wxDataObject;
-struct wxDataIdToDataObject;
-
 #include "wx/list.h"
-
-WX_DECLARE_LIST(wxDataObject, wxDataObjectList);
-WX_DECLARE_LIST(wxDataIdToDataObject, wxDataIdToDataObjectList);
 
 bool WXDLLEXPORT wxOpenClipboard();
 bool WXDLLEXPORT wxClipboardOpen();
@@ -71,15 +65,15 @@ public:
     // clears wxTheClipboard and the system's clipboard if possible
     virtual void Clear();
     
-    virtual void UsePrimarySelection(bool primary = true)
+    virtual void UsePrimarySelection(bool primary = TRUE)
     { m_usePrimary = primary; }
     
     // implementation from now on
+    
     bool              m_open;
-    wxDataObjectList  m_data;
+    wxList            m_data;
     bool              m_usePrimary;
-    wxDataIdToDataObjectList m_idToObject;
-
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 };

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -49,12 +49,17 @@
 
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#ifndef __TWIN32__
+
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #else
     #include "wx/msw/gnuwin32/extra.h"
 #endif
 
+#endif // __TWIN32__
+
+#include "wx/msw/dib.h"
 #include "wx/app.h"         // for GetComCtl32Version
 
 #if defined(__MWERKS__) && defined(__WXMSW__)
@@ -233,7 +238,7 @@ bool wxToolBar::Create(wxWindow *parent,
         return FALSE;
 
     // MSW-specific initialisation
-    if ( !MSWCreateToolbar(pos, size) )
+    if ( !MSWCreateToolbar(pos, size, style) )
         return FALSE;
 
     // set up the colors and fonts
@@ -243,9 +248,11 @@ bool wxToolBar::Create(wxWindow *parent,
     return TRUE;
 }
 
-bool wxToolBar::MSWCreateToolbar(const wxPoint& pos, const wxSize& size)
+bool wxToolBar::MSWCreateToolbar(const wxPoint& pos,
+                                 const wxSize& size,
+                                 long style)
 {
-    if ( !MSWCreateControl(TOOLBARCLASSNAME, _T(""), pos, size) )
+    if ( !MSWCreateControl(TOOLBARCLASSNAME, _T(""), pos, size, style) )
         return FALSE;
 
     // toolbar-specific post initialisation
@@ -269,7 +276,7 @@ void wxToolBar::Recreate()
 
     UnsubclassWin();
 
-    if ( !MSWCreateToolbar(pos, size) )
+    if ( !MSWCreateToolbar(pos, size, GetWindowStyle()) )
     {
         // what can we do?
         wxFAIL_MSG( _T("recreating the toolbar failed") );

@@ -26,6 +26,7 @@
 
 #include "wx/thread.h"
 #include "wx/dynarray.h"
+#include "wx/time.h"
 
 #include "wx/progdlg.h"
 
@@ -222,7 +223,7 @@ void *MyThread::Entry()
 {
     wxString text;
 
-    text.Printf(wxT("Thread 0x%lx started (priority = %u).\n"),
+    text.Printf(wxT("Thread 0x%x started (priority = %u).\n"),
                 GetId(), GetPriority());
     WriteText(text);
     // wxLogMessage(text); -- test wxLog thread safeness
@@ -233,14 +234,14 @@ void *MyThread::Entry()
         if ( TestDestroy() )
             break;
 
-        text.Printf(wxT("[%u] Thread 0x%lx here.\n"), m_count, GetId());
+        text.Printf(wxT("[%u] Thread 0x%x here.\n"), m_count, GetId());
         WriteText(text);
 
         // wxSleep() can't be called from non-GUI thread!
         wxThread::Sleep(1000);
     }
 
-    text.Printf(wxT("Thread 0x%lx finished.\n"), GetId());
+    text.Printf(wxT("Thread 0x%x finished.\n"), GetId());
     WriteText(text);
     // wxLogMessage(text); -- test wxLog thread safeness
 
@@ -685,13 +686,13 @@ void MyFrame::OnShowCPUs(wxCommandEvent& WXUNUSED(event))
         default:
             msg.Printf(wxT("This system has %d CPUs"), nCPUs);
     }
-
+            
     wxLogMessage(msg);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
-    wxMessageDialog dialog(this,
+    wxMessageDialog dialog(this, 
                            _T("wxWindows multithreaded application sample\n")
                            _T("(c) 1998 Julian Smart, Guilhem Lavaux\n")
                            _T("(c) 1999 Vadim Zeitlin\n")

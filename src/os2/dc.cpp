@@ -23,12 +23,12 @@
     #include "wx/log.h"
     #include "wx/icon.h"
     #include "wx/msgdlg.h"
+    #include "wx/module.h"
 #if wxUSE_STATUSBAR
     #include "wx/statusbr.h"
 #endif
 #endif
 
-#include "wx/module.h"
 #include "wx/dcprint.h"
 
 #include <string.h>
@@ -2887,5 +2887,18 @@ void wxDC::SetLogicalScale(
     m_logicalScaleY = dY;
 }; // end of wxDC::SetLogicalScale
 
-
+#if WXWIN_COMPATIBILITY
+void wxDC::DoGetTextExtent(const wxString& string, float *x, float *y,
+                         float *descent, float *externalLeading,
+                         wxFont *theFont, bool use16bit) const
+{
+    wxCoord x1, y1, descent1, externalLeading1;
+    GetTextExtent(string, & x1, & y1, & descent1, & externalLeading1, theFont, use16bit);
+    *x = x1; *y = y1;
+    if (descent)
+        *descent = descent1;
+    if (externalLeading)
+        *externalLeading = externalLeading1;
+}
+#endif
 

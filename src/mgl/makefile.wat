@@ -58,6 +58,7 @@ GENERICOBJS= accel.obj &
 	gridctrl.obj &
 	gridsel.obj &
 	helpext.obj &
+	helphtml.obj &
 	imaglist.obj &
 	laywin.obj &
 	listctrl.obj &
@@ -69,6 +70,9 @@ GENERICOBJS= accel.obj &
 	printps.obj &
 	prntdlgg.obj &
 	progdlgg.obj &
+	prop.obj &
+	propform.obj &
+	proplist.obj &
 	sashwin.obj &
 	scrlwing.obj &
 	spinctlg.obj &
@@ -81,11 +85,11 @@ GENERICOBJS= accel.obj &
 	tipdlg.obj &
 	tipwin.obj &
 	treectlg.obj &
+	treelay.obj &
 	wizard.obj
 
 COMMONOBJS = &
 	y_tab.obj &
-	accesscmn.obj &
 	appcmn.obj &
 	artprov.obj &
 	artstd.obj &
@@ -101,7 +105,6 @@ COMMONOBJS = &
 	cshelp.obj &
 	ctrlcmn.obj &
 	ctrlsub.obj &
-	datacmn.obj &
 	datetime.obj &
 	datstrm.obj &
 	db.obj &
@@ -114,7 +117,6 @@ COMMONOBJS = &
 	dobjcmn.obj &
 	docmdi.obj &
 	docview.obj &
-	dpycmn.obj &
 	dseldlg.obj &
 	dynarray.obj &
 	dynlib.obj &
@@ -174,6 +176,7 @@ COMMONOBJS = &
 	mstream.obj &
 	nbkbase.obj &
 	object.obj &
+	odbc.obj &
 	paper.obj &
 	popupcmn.obj &
 	prntbase.obj &
@@ -182,6 +185,7 @@ COMMONOBJS = &
 	quantize.obj &
 	radiocmn.obj &
 	regex.obj &
+	resource.obj &
 	rgncmn.obj &
 	sckaddr.obj &
 	sckfile.obj &
@@ -195,7 +199,6 @@ COMMONOBJS = &
 	stream.obj &
 	string.obj &
 	sysopt.obj &
-	taskbarcmn.obj &
 	tbarbase.obj &
 	textbuf.obj &
 	textcmn.obj &
@@ -215,6 +218,7 @@ COMMONOBJS = &
 	wfstream.obj &
 	wincmn.obj &
 	wxchar.obj &
+	wxexpr.obj &
 	xpmdecod.obj &
 	zipstrm.obj &
 	zstream.obj
@@ -531,9 +535,6 @@ win32.obj:     $(UNIVTHEMEDIR)\win32.cpp
 ########################################################
 # Common objects (always compiled)
 
-accesscmn.obj:     $(COMMDIR)\accesscmn.cpp
-  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
-
 appcmn.obj:     $(COMMDIR)\appcmn.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
@@ -579,9 +580,6 @@ ctrlcmn.obj:     $(COMMDIR)\ctrlcmn.cpp
 ctrlsub.obj:     $(COMMDIR)\ctrlsub.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
-datacmn.obj:     $(COMMDIR)\datacmn.cpp
-  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
-
 datetime.obj:     $(COMMDIR)\datetime.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
@@ -616,9 +614,6 @@ docmdi.obj:     $(COMMDIR)\docmdi.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 docview.obj:     $(COMMDIR)\docview.cpp
-  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
-
-dpycmn.obj:     $(COMMDIR)\dpycmn.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 dseldlg.obj:     $(COMMDIR)\dseldlg.cpp
@@ -798,6 +793,9 @@ nbkbase.obj:     $(COMMDIR)\nbkbase.cpp
 object.obj:     $(COMMDIR)\object.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
+odbc.obj:     $(COMMDIR)\odbc.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
 paper.obj:     $(COMMDIR)\paper.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
@@ -820,6 +818,9 @@ radiocmn.obj:     $(COMMDIR)\radiocmn.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 regex.obj:     $(COMMDIR)\regex.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
+resource.obj:     $(COMMDIR)\resource.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 rgncmn.obj:     $(COMMDIR)\rgncmn.cpp
@@ -859,9 +860,6 @@ string.obj:     $(COMMDIR)\string.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 sysopt.obj:     $(COMMDIR)\sysopt.cpp
-  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
-
-taskbarcmn.obj:     $(COMMDIR)\taskbarcmn.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 tbarbase.obj:     $(COMMDIR)\tbarbase.cpp
@@ -919,6 +917,9 @@ wincmn.obj:     $(COMMDIR)\wincmn.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 wxchar.obj:     $(COMMDIR)\wxchar.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
+wxexpr.obj:     $(COMMDIR)\wxexpr.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 xpmdecod.obj:     $(COMMDIR)\xpmdecod.cpp
@@ -1001,6 +1002,9 @@ gridsel.obj:     $(GENDIR)\gridsel.cpp
 helpext.obj:     $(GENDIR)\helpext.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
+helphtml.obj:     $(GENDIR)\helphtml.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
 imaglist.obj:     $(GENDIR)\imaglist.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
@@ -1032,6 +1036,15 @@ prntdlgg.obj:     $(GENDIR)\prntdlgg.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 progdlgg.obj:     $(GENDIR)\progdlgg.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
+prop.obj:     $(GENDIR)\prop.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
+propform.obj:     $(GENDIR)\propform.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
+proplist.obj:     $(GENDIR)\proplist.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 sashwin.obj:     $(GENDIR)\sashwin.cpp
@@ -1068,6 +1081,9 @@ tipwin.obj:     $(GENDIR)\tipwin.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 treectlg.obj:     $(GENDIR)\treectlg.cpp
+  *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
+
+treelay.obj:     $(GENDIR)\treelay.cpp
   *$(CCC) $(CPPFLAGS) $(IFLAGS) $<
 
 wizard.obj:     $(GENDIR)\wizard.cpp

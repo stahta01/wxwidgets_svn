@@ -20,6 +20,8 @@
 #include "wx/defs.h"
 
 #include "wx/button.h"
+#include "wx/utils.h"
+#include "wx/panel.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -44,13 +46,26 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& label,
                       const wxValidator& validator,
                       const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style, validator, name ) )
-        return false;
+    SetName(name);
+    SetValidator(validator);
+    m_windowStyle = style;
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+    m_font = parent->GetFont();
+
+    parent->AddChild((wxButton *)this);
+
+    if (id == -1)
+        m_windowId = NewControlId();
+    else
+        m_windowId = id;
 
     wxString label1(wxStripMenuCodes(label));
-    wxXmString text( label1 );
 
+    XmString text = XmStringCreateSimple ((char*) (const char*) label1);
     Widget parentWidget = (Widget) parent->GetClientWidget();
+
+    XmFontList fontList = (XmFontList) m_font.GetFontList(1.0, XtDisplay(parentWidget));
 
     /*
     * Patch Note (important)
@@ -64,55 +79,33 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& label,
     m_mainWidget = (WXWidget) XtVaCreateManagedWidget ("button",
         xmPushButtonWidgetClass,
         parentWidget,
-        wxFont::GetFontTag(), m_font.GetFontType(XtDisplay(parentWidget)),
-        XmNlabelString, text(),
-        XmNrecomputeSize, False,
-        // See comment for wxButton::SetDefault
-        // XmNdefaultButtonShadowThickness, 1, 
+        XmNfontList, fontList,
+        XmNlabelString, text,
+        //                  XmNdefaultButtonShadowThickness, 1, // See comment for wxButton::SetDefault
         NULL);
 
-    XtAddCallback ((Widget) m_mainWidget,
-                   XmNactivateCallback, (XtCallbackProc) wxButtonCallback,
-                   (XtPointer) this);
+    XmStringFree (text);
 
-    wxSize best = GetBestSize();
-    if( size.x != -1 ) best.x = size.x;
-    if( size.y != -1 ) best.y = size.y;
+    XtAddCallback ((Widget) m_mainWidget, XmNactivateCallback, (XtCallbackProc) wxButtonCallback,
+        (XtPointer) this);
 
-    AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
-                  pos.x, pos.y, best.x, best.y);
+    SetCanAddEventHandler(TRUE);
+    
+    int x = 0;  int y = 0;
+    wxFont new_font( parent->GetFont() );
+    GetTextExtent( label1, &x, &y, (int*)NULL, (int*)NULL, &new_font );
+
+    wxSize newSize = size;
+    if (newSize.x == -1) newSize.x = 30+x;
+    if (newSize.y == -1) newSize.y = 27+y;
+    SetSize( newSize.x, newSize.y );
+    
+    AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, newSize.x, newSize.y);
 
     ChangeBackgroundColour();
 
     return TRUE;
 }
-
-void wxButton::SetDefaultShadowThicknessAndResize()
-{
-    Widget buttonWidget = (Widget)GetMainWidget();
-    bool managed = XtIsManaged( buttonWidget );
-    if( managed )
-        XtUnmanageChild( buttonWidget );
-
-    XtVaSetValues( buttonWidget,
-                   XmNdefaultButtonShadowThickness, 1,
-                   NULL );
-
-    if( managed )
-        XtManageChild( buttonWidget );
-
-    // this can't currently be done, because user code that calls SetDefault
-    // will break otherwise
-#if 0
-    wxSize best = GetBestSize(), actual = GetSize();
-    if( best.x < actual.x ) best.x = actual.x;
-    if( best.y < actual.y ) best.y = actual.y;
-
-    if( best != actual )
-        SetSize( best );
-#endif
-}
-
 
 void wxButton::SetDefault()
 {
@@ -120,73 +113,40 @@ void wxButton::SetDefault()
     if ( parent )
         parent->SetDefaultItem(this);
 
-    // We initially do not set XmNdefaultShadowThickness, to have
-    // small buttons.  Unfortunately, buttons are now mis-aligned. We
-    // try to correct this now -- setting this ressource to 1 for each
-    // button in the same row.  Because it's very hard to find
-    // wxButton in the same row, correction is straighforward: we set
-    // resource for all wxButton in this parent (but not sub panels)
-
-    for (wxWindowList::Node * node = parent->GetChildren().GetFirst ();
-         node; node = node->GetNext ())
+    // We initially do not set XmNdefaultShadowThickness, to have small buttons.
+    // Unfortunately, buttons are now mis-aligned. We try to correct this
+    // now -- setting this ressource to 1 for each button in the same row.
+    // Because it's very hard to find wxButton in the same row,
+    // correction is straighforward: we set resource for all wxButton
+    // in this parent (but not sub panels)
+    for (wxNode * node = parent->GetChildren().First (); node; node = node->Next ())
     {
-        wxWindow *win = node->GetData ();
-        wxButton *item = wxDynamicCast(win, wxButton);
-        if (item)
-            item->SetDefaultShadowThicknessAndResize();
-    }
+        wxButton *item = (wxButton *) node->Data ();
+        if (item->IsKindOf(CLASSINFO(wxButton)))
+        {
+            bool managed = XtIsManaged((Widget) item->GetMainWidget());
+            if (managed)
+                XtUnmanageChild ((Widget) item->GetMainWidget());
 
-    XtVaSetValues ((Widget) parent->GetMainWidget(),
-                   XmNdefaultButton, (Widget) GetMainWidget(),
-                   NULL);
+            XtVaSetValues ((Widget) item->GetMainWidget(),
+                XmNdefaultButtonShadowThickness, 1,
+                NULL);
+
+            if (managed)
+                XtManageChild ((Widget) item->GetMainWidget());
+        }
+    } // while
+
+    //  XtVaSetValues((Widget)handle, XmNshowAsDefault, 1, NULL);
+    XtVaSetValues ((Widget) parent->GetMainWidget(), XmNdefaultButton, (Widget) GetMainWidget(), NULL);
 }
 
 /* static */
 wxSize wxButton::GetDefaultSize()
 {
     // TODO: check font size as in wxMSW ?  MB
-    // Note: this is the button size (text + margin + shadow + defaultBorder)
-    return wxSize(78,30);
-}
-
-wxSize wxButton::DoGetBestSize() const
-{
-    Dimension xmargin, ymargin, highlight, shadow, defThickness;
-
-    XtVaGetValues( (Widget)m_mainWidget,
-                   XmNmarginWidth, &xmargin,
-                   XmNmarginHeight, &ymargin,
-                   XmNhighlightThickness, &highlight,
-                   XmNshadowThickness, &shadow,
-                   XmNdefaultButtonShadowThickness, &defThickness,
-                   NULL );
-
-    int x = 0;  int y = 0;
-    GetTextExtent( GetLabel(), &x, &y );
-
-    int margin = highlight * 2 +
-        ( defThickness ? ( ( shadow + defThickness ) * 4 ) : ( shadow * 2 ) );
-    wxSize best( x + xmargin * 2 + margin,
-                 y + ymargin * 2 + margin );
-
-    // all buttons have at least the standard size unless the user explicitly
-    // wants them to be of smaller size and used wxBU_EXACTFIT style when
-    // creating the button
-    if( !HasFlag( wxBU_EXACTFIT ) )
-    {
-        wxSize def = GetDefaultSize();
-        int margin =  highlight * 2 +
-            ( defThickness ? ( shadow * 4 + defThickness * 4 ) : 0 );
-        def.x += margin;
-        def.y += margin;
-
-        if( def.x > best.x )
-            best.x = def.x;
-        if( def.y > best.y )
-            best.y = def.y;
-    }
-
-    return best;
+    //
+    return wxSize(80,26);
 }
 
 void wxButton::Command (wxCommandEvent & event)
@@ -205,3 +165,19 @@ void wxButtonCallback (Widget w, XtPointer clientData, XtPointer WXUNUSED(ptr))
     event.SetEventObject(item);
     item->ProcessCommand (event);
 }
+
+void wxButton::ChangeFont(bool keepOriginalSize)
+{
+    wxWindow::ChangeFont(keepOriginalSize);
+}
+
+void wxButton::ChangeBackgroundColour()
+{
+    DoChangeBackgroundColour(m_mainWidget, m_backgroundColour, TRUE);
+}
+
+void wxButton::ChangeForegroundColour()
+{
+    wxWindow::ChangeForegroundColour();
+}
+

@@ -79,8 +79,8 @@ wxPaletteRefData::~wxPaletteRefData()
 
     wxNode *node, *next;
 
-    for (node = m_palettes.GetFirst(); node; node = next) {
-        wxXPalette *c = (wxXPalette *)node->GetData();
+    for (node = m_palettes.First(); node; node = next) {
+        wxXPalette *c = (wxXPalette *)node->Data();
         unsigned long *pix_array = c->m_pix_array;
         Colormap cmap = (Colormap) c->m_cmap;
         bool destroyable = c->m_destroyable;
@@ -105,7 +105,7 @@ wxPaletteRefData::~wxPaletteRefData()
         if (destroyable)
             XFreeColormap(display, cmap);
 
-        next = node->GetNext();
+        next = node->Next();
         m_palettes.DeleteNode(node);
         delete c;
     }
@@ -191,27 +191,27 @@ bool wxPalette::GetRGB(int index, unsigned char *WXUNUSED(red), unsigned char *W
 
 WXColormap wxPalette::GetXColormap(WXDisplay* display) const
 {
-    if (!M_PALETTEDATA || (M_PALETTEDATA->m_palettes.GetCount() == 0))
+    if (!M_PALETTEDATA || (M_PALETTEDATA->m_palettes.Number() == 0))
         return wxTheApp->GetMainColormap(display);
 
-    wxNode* node = M_PALETTEDATA->m_palettes.GetFirst();
+    wxNode* node = M_PALETTEDATA->m_palettes.First();
     if (!display && node)
     {
-        wxXPalette* p = (wxXPalette*) node->GetData();
+        wxXPalette* p = (wxXPalette*) node->Data();
         return p->m_cmap;
     }
     while (node)
     {
-        wxXPalette* p = (wxXPalette*) node->GetData();
+        wxXPalette* p = (wxXPalette*) node->Data();
         if (p->m_display == display)
             return p->m_cmap;
 
-        node = node->GetNext();
+        node = node->Next();
     }
 
     /* Make a new one: */
     wxXPalette *c = new wxXPalette;
-    wxXPalette *first = (wxXPalette *)M_PALETTEDATA->m_palettes.GetFirst()->GetData();
+    wxXPalette *first = (wxXPalette *)M_PALETTEDATA->m_palettes.First()->Data();
     XColor xcol;
     int pix_array_n = first->m_pix_array_n;
 
@@ -321,9 +321,9 @@ unsigned long *wxPalette::GetXPixArray(WXDisplay *display, int *n)
         return (unsigned long*) 0;
     wxNode *node;
 
-    for (node = M_PALETTEDATA->m_palettes.GetFirst(); node; node = node->GetNext())
+    for (node = M_PALETTEDATA->m_palettes.First(); node; node = node->Next())
     {
-        wxXPalette *c = (wxXPalette *)node->GetData();
+        wxXPalette *c = (wxXPalette *)node->Data();
         if (c->m_display == display)
         {
             if (n)

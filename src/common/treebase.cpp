@@ -37,6 +37,7 @@
 #include "wx/dynarray.h"
 #include "wx/arrimpl.cpp"
 #include "wx/dcclient.h"
+#include "wx/msgdlg.h"
 
 
 // ----------------------------------------------------------------------------

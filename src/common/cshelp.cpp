@@ -56,8 +56,6 @@ public:
 
 //// Data
     wxContextHelp* m_contextHelp;
-
-    DECLARE_NO_COPY_CLASS(wxContextHelpEvtHandler)
 };
 
 // ============================================================================
@@ -417,7 +415,7 @@ bool wxHelpControllerHelpProvider::ShowHelp(wxWindowBase *window)
 // Convenience function for turning context id into wxString
 wxString wxContextId(int id)
 {
-    return wxString::Format(_T("%d"), id);
+    return wxString(IntToString(id));
 }
 
 // ----------------------------------------------------------------------------

@@ -45,8 +45,6 @@
 // wxGenericDirDialog
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxGenericDirDialog, wxDialog)
-
 static const int ID_DIRCTRL = 1000;
 static const int ID_TEXTCTRL = 1001;
 static const int ID_OK = 1002;
@@ -273,7 +271,7 @@ void wxGenericDirDialog::OnNew( wxCommandEvent& WXUNUSED(event) )
 
     wxString new_name( _("NewName") );
     wxString path( data->m_path );
-    if (!wxEndsWithPathSeparator(path))
+    if (path.Last() != wxFILE_SEP_PATH)
         path += wxFILE_SEP_PATH;
     path += new_name;
     if (wxFileExists(path))
@@ -287,7 +285,7 @@ void wxGenericDirDialog::OnNew( wxCommandEvent& WXUNUSED(event) )
             new_name += num;
 
             path = data->m_path;
-            if (!wxEndsWithPathSeparator(path))
+            if (path.Last() != wxFILE_SEP_PATH)
                 path += wxFILE_SEP_PATH;
             path += new_name;
             i++;

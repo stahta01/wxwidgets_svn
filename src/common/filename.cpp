@@ -6,7 +6,7 @@
 // Created:     28.12.2000
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Robert Roebling
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -107,16 +107,9 @@
 #endif
 
 #ifdef __MWERKS__
-#ifdef __MACH__
-#include <sys/types.h>
-#include <utime.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#else
 #include <stat.h>
 #include <unistd.h>
 #include <unix.h>
-#endif
 #endif
 
 #ifdef __WATCOMC__
@@ -201,7 +194,7 @@ private:
 // private functions
 // ----------------------------------------------------------------------------
 
-#if wxUSE_DATETIME && defined(__WIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__) && !defined(__WXMICROWIN__)
 
 // convert between wxDateTime and FILETIME which is a 64-bit value representing
 // the number of 100-nanosecond intervals since January 1, 1601.
@@ -248,7 +241,7 @@ static void ConvertWxToFileTime(FILETIME *ft, const wxDateTime& dt)
     }
 }
 
-#endif // wxUSE_DATETIME && __WIN32__
+#endif // __WIN32__
 
 // return a string with the volume par
 static wxString wxGetVolumeString(const wxString& volume, wxPathFormat format)
@@ -468,7 +461,7 @@ wxFileName wxFileName::DirName(const wxString& dir)
 // existence tests
 // ----------------------------------------------------------------------------
 
-bool wxFileName::FileExists() const
+bool wxFileName::FileExists()
 {
     return wxFileName::FileExists( GetFullPath() );
 }
@@ -478,7 +471,7 @@ bool wxFileName::FileExists( const wxString &file )
     return ::wxFileExists( file );
 }
 
-bool wxFileName::DirExists() const
+bool wxFileName::DirExists()
 {
     return wxFileName::DirExists( GetFullPath() );
 }
@@ -1626,8 +1619,6 @@ void wxFileName::SplitPath(const wxString& fullpath,
 // time functions
 // ----------------------------------------------------------------------------
 
-#if wxUSE_DATETIME
-
 bool wxFileName::SetTimes(const wxDateTime *dtAccess,
                           const wxDateTime *dtMod,
                           const wxDateTime *dtCreate)
@@ -1776,8 +1767,6 @@ bool wxFileName::GetTimes(wxDateTime *dtAccess,
     return FALSE;
 }
 
-#endif // wxUSE_DATETIME
-
 #ifdef __WXMAC__
 
 const short kMacExtensionMaxLength = 16 ;
@@ -1791,18 +1780,18 @@ public :
   }
   MacDefaultExtensionRecord( const MacDefaultExtensionRecord& from )
   {
-    wxStrcpy( m_ext , from.m_ext ) ;
+    strcpy( m_ext , from.m_ext ) ;
     m_type = from.m_type ;
     m_creator = from.m_creator ;
   }
-  MacDefaultExtensionRecord( const wxChar * extension , OSType type , OSType creator )
+  MacDefaultExtensionRecord( const char * extension , OSType type , OSType creator )
   {
-    wxStrncpy( m_ext , extension , kMacExtensionMaxLength ) ;
+    strncpy( m_ext , extension , kMacExtensionMaxLength ) ;
     m_ext[kMacExtensionMaxLength] = 0 ;
     m_type = type ;
     m_creator = creator ;
   }
-  wxChar m_ext[kMacExtensionMaxLength] ;
+  char m_ext[kMacExtensionMaxLength] ;
   OSType m_type ;
   OSType m_creator ;
 }  ;
@@ -1826,7 +1815,7 @@ static void MacEnsureDefaultExtensionsLoaded()
     // load the default extensions
     MacDefaultExtensionRecord defaults[1] =
     {
-      MacDefaultExtensionRecord( wxT("txt") , 'TEXT' , 'ttxt' ) ,
+      MacDefaultExtensionRecord( "txt" , 'TEXT' , 'ttxt' ) ,
 
     } ;
     // we could load the pc exchange prefs here too
@@ -1898,7 +1887,7 @@ void wxFileName::MacRegisterDefaultTypeAndCreator( const wxString& ext , wxUint3
   MacDefaultExtensionRecord rec ;
   rec.m_type = type ;
   rec.m_creator = creator ;
-  wxStrncpy( rec.m_ext , ext.Lower().c_str() , kMacExtensionMaxLength ) ;
+  strncpy( rec.m_ext , ext.Lower().c_str() , kMacExtensionMaxLength ) ;
   gMacDefaultExtensions.Add( rec ) ;
 }
 #endif

@@ -12,7 +12,7 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "colour.h"
 #endif
 

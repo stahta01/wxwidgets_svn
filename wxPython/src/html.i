@@ -187,6 +187,7 @@ public:
     int GetCharHeight();
     int GetCharWidth();
     wxHtmlWindow* GetWindow();
+    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
     %addmethods {
         void SetFonts(wxString normal_face, wxString fixed_face, PyObject* sizes=NULL) {
             int* temp = NULL;
@@ -389,7 +390,7 @@ public:
     void DrawInvisible(wxDC& dc, int x, int y);
     const wxHtmlCell* Find(int condition, const void* param);
 
-    bool AdjustPagebreak(int * pagebreak);
+    bool AdjustPagebreak(int* INOUT);
     void SetCanLiveOnPagebreak(bool can);
 
 };
@@ -650,9 +651,8 @@ public:
     // Return value : same as SetPage
     bool LoadPage(const wxString& location);
 
-    // TODO: (accept a string, convert to filename)
     // Loads HTML page from file
-    // bool LoadFile(const wxFileName& filename);
+    bool LoadFile(const wxString& filename);
 
     // Append to current page
     bool AppendToPage(const wxString& source);
@@ -744,6 +744,7 @@ public:
     void SetHtmlText(const wxString& html,
                      const wxString& basepath = wxPyEmptyString,
                      bool isdir = TRUE);
+    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
     %addmethods {
         void SetFonts(wxString normal_face, wxString fixed_face, PyObject* sizes=NULL) {
             int* temp = NULL;
@@ -777,6 +778,7 @@ public:
     void SetHtmlFile(const wxString &htmlfile);
     void SetHeader(const wxString& header, int pg = wxPAGE_ALL);
     void SetFooter(const wxString& footer, int pg = wxPAGE_ALL);
+    // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
     %addmethods {
         void SetFonts(wxString normal_face, wxString fixed_face, PyObject* sizes=NULL) {
             int* temp = NULL;
@@ -807,16 +809,6 @@ public:
     void PageSetup();
     void SetHeader(const wxString& header, int pg = wxPAGE_ALL);
     void SetFooter(const wxString& footer, int pg = wxPAGE_ALL);
-
-    %addmethods {
-        void SetFonts(wxString normal_face, wxString fixed_face, PyObject* sizes=NULL) {
-            int* temp = NULL;
-            if (sizes) temp = int_LIST_helper(sizes);
-            self->SetFonts(normal_face, fixed_face, temp);
-            if (temp)
-                delete [] temp;
-        }
-    }
 
     wxPrintData *GetPrintData() {return m_PrintData;}
     wxPageSetupDialogData *GetPageSetupData() {return m_PageSetupData;}

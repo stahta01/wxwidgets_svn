@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Julian Smart
-// Licence:   	wxWindows licence
+// Licence:   	wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_VALTEXTH__
@@ -18,7 +18,7 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_VALIDATORS && wxUSE_TEXTCTRL
+#if wxUSE_VALIDATORS
 
 #include "wx/textctrl.h"
 #include "wx/validate.h"
@@ -95,18 +95,10 @@ protected:
 
         return TRUE;
     }
-
-private:
-// Cannot use
-//  DECLARE_NO_COPY_CLASS(wxTextValidator)
-// because copy constructor is explicitly declared above;
-// but no copy assignment operator is defined, so declare
-// it private to prevent the compiler from defining it:
-    wxTextValidator& operator=(const wxTextValidator&);
 };
 
 #endif
-  // wxUSE_VALIDATORS && wxUSE_TEXTCTRL
+  // wxUSE_VALIDATORS
 
 #endif
   // _WX_VALTEXTH__

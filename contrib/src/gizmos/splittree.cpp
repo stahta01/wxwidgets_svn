@@ -113,6 +113,9 @@ void wxRemotelyScrolledTreeCtrl::SetScrollbars(int pixelsPerUnitX, int pixelsPer
     if (IsKindOf(CLASSINFO(wxGenericTreeCtrl)))
     {
         wxGenericTreeCtrl* win = (wxGenericTreeCtrl*) this;
+//        win->wxGenericTreeCtrl::SetScrollbars(pixelsPerUnitX, 0, noUnitsX, 0, xPos, 0, noRefresh);
+        // Don't refresh, or on wxGTK a portion of the window will be redrawn as if
+        // Y scrolling is at zero
         win->wxGenericTreeCtrl::SetScrollbars(pixelsPerUnitX, pixelsPerUnitY, noUnitsX, 0, xPos, 0, /* noRefresh */ TRUE);
 
         wxScrolledWindow* scrolledWindow = GetScrolledWindow();
@@ -311,7 +314,7 @@ void wxRemotelyScrolledTreeCtrl::AdjustRemoteScrollbars()
         if (scrolledWindow)
         {
             wxRect itemRect;
-            if (GetBoundingRect(GetFirstVisibleItem(), itemRect))
+            if (GetBoundingRect(GetRootItem(), itemRect))
             {
                 // Actually, the real height seems to be 1 less than reported
                 // (e.g. 16 instead of 16)
@@ -629,9 +632,9 @@ wxSplitterScrolledWindow::wxSplitterScrolledWindow(wxWindow* parent, wxWindowID 
 void wxSplitterScrolledWindow::OnSize(wxSizeEvent& event)
 {
     wxSize sz = GetClientSize();
-    if (GetChildren().GetFirst())
+    if (GetChildren().First())
     {
-        ((wxWindow*) GetChildren().GetFirst()->GetData())->SetSize(0, 0, sz.x, sz.y);
+        ((wxWindow*) GetChildren().First()->Data())->SetSize(0, 0, sz.x, sz.y);
     }
 }
 
@@ -682,10 +685,10 @@ void wxSplitterScrolledWindow::OnScroll(wxScrollWinEvent& event)
     }
 
     // Find targets in splitter window and send the event to them
-    wxWindowListNode* node = GetChildren().GetFirst();
+    wxNode* node = GetChildren().First();
     while (node)
     {
-        wxWindow* child = (wxWindow*) node->GetData();
+        wxWindow* child = (wxWindow*) node->Data();
         if (child->IsKindOf(CLASSINFO(wxSplitterWindow)))
         {
             wxSplitterWindow* splitter = (wxSplitterWindow*) child;
@@ -695,7 +698,7 @@ void wxSplitterScrolledWindow::OnScroll(wxScrollWinEvent& event)
                 splitter->GetWindow2()->ProcessEvent(event);
             break;
         }
-        node = node->GetNext();
+        node = node->Next();
     }
 
 #ifdef __WXMAC__

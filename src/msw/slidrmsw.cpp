@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:       wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:       wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -80,8 +80,11 @@ bool wxSliderMSW::Create(wxWindow *parent, wxWindowID id,
   int height = size.y;
 
   // non-Win95 implementation
-
+  
   long msStyle = SS_CENTER;
+
+   if ( m_windowStyle & wxCLIP_SIBLINGS )
+        msStyle |= WS_CLIPSIBLINGS;
 
   WXDWORD exStyle = 0;
   msStyle |= MSWGetStyle(GetWindowStyle(), & exStyle) ;
@@ -108,7 +111,7 @@ bool wxSliderMSW::Create(wxWindow *parent, wxWindowID id,
   else
     msStyle = SBS_HORZ | WS_CHILD | WS_VISIBLE | WS_TABSTOP ;
 
-  HWND scroll_bar = CreateWindowEx(exStyle, wxT("SCROLLBAR"), wxT(""),
+  HWND scroll_bar = CreateWindowEx(MakeExtendedStyle(m_windowStyle), wxT("SCROLLBAR"), wxT(""),
                          msStyle,
                          0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)m_windowId,
                          wxGetInstance(), NULL);

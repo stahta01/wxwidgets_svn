@@ -80,8 +80,9 @@ static void UnloadHtmlHelpLibrary()
 {
     if ( gs_htmlHelp )
     {
-        if (wxPluginManager::UnloadLibrary( _T("HHCTRL.OCX") ))
-            gs_htmlHelp = 0;
+        wxPluginManager::UnloadLibrary( _T("HHCTRL.OCX") );
+
+        gs_htmlHelp = 0;
     }
 }
 

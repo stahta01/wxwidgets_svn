@@ -2,11 +2,7 @@ WXDIR = $(WXWIN)
 PROGRAM = anitest
 
 OBJECTS = $(PROGRAM).obj
-!if "$(FINAL)" == "0"
-EXTRALIBS=$(WXDIR)\lib\animd.lib
-!else
-EXTRALIBS=$(WXDIR)\lib\anim.lib
-!endif
+EXTRALIBS = $(WXDIR)\lib\anim$(LIBEXT).lib
 EXTRAINC = -I$(WXDIR)\contrib\include
 
 !include $(WXDIR)\src\makeprog.vc

@@ -12,14 +12,16 @@
 #ifndef _WX_STATBMP_H_
 #define _WX_STATBMP_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "statbmp.h"
 #endif
 
-#include "wx/motif/bmpmotif.h"
+#include "wx/control.h"
 #include "wx/icon.h"
 
-class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
+WXDLLEXPORT_DATA(extern const char*) wxStaticBitmapNameStr;
+
+class WXDLLEXPORT wxStaticBitmap : public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxStaticBitmap)
         
@@ -51,13 +53,13 @@ public:
         return FALSE;
     }
     
-    wxBitmap GetBitmap() const { return m_messageBitmap; }
+    wxBitmap& GetBitmap() const { return (wxBitmap&) m_messageBitmap; }
     
     // for compatibility with wxMSW
-    wxIcon GetIcon() const
+    const wxIcon& GetIcon() const
     {
         // don't use wxDynamicCast, icons and bitmaps are really the same thing
-        return *(wxIcon*)&m_messageBitmap;
+        return (const wxIcon &)m_messageBitmap;
     }
     
     // for compatibility with wxMSW
@@ -66,7 +68,11 @@ public:
         SetBitmap( icon );
     }
     
+    // overriden base class virtuals
+    virtual bool AcceptsFocus() const { return FALSE; }
+    
     // Implementation
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
     virtual void ChangeBackgroundColour();
     virtual void ChangeForegroundColour();
     
@@ -76,7 +82,6 @@ protected:
 protected:
     wxBitmap m_messageBitmap;
     wxBitmap m_messageBitmapOriginal;
-    wxBitmapCache m_bitmapCache;
 };
 
 #endif

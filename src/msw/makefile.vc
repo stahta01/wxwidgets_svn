@@ -103,6 +103,9 @@ GENERICOBJS= $(GENDIR)\$D\busyinfo.obj \
 		$(GENDIR)\$D\numdlgg.obj \
 		$(GENDIR)\$D\panelg.obj \
 		$(GENDIR)\$D\progdlgg.obj \
+		$(GENDIR)\$D\prop.obj \
+		$(GENDIR)\$D\propform.obj \
+		$(GENDIR)\$D\proplist.obj \
 		$(GENDIR)\$D\sashwin.obj \
 		$(GENDIR)\$D\scrlwing.obj \
 		$(GENDIR)\$D\spinctlg.obj \
@@ -114,6 +117,7 @@ GENERICOBJS= $(GENDIR)\$D\busyinfo.obj \
 		$(GENDIR)\$D\tipdlg.obj \
 		$(GENDIR)\$D\tipwin.obj \
 		$(GENDIR)\$D\treectlg.obj \
+		$(GENDIR)\$D\treelay.obj \
 		$(GENDIR)\$D\wizard.obj
 
 # These are generic things that don't need to be compiled on MSW,
@@ -123,6 +127,7 @@ NONESSENTIALOBJS= $(GENDIR)\$D\colrdlgg.obj \
 		$(GENDIR)\$D\filedlgg.obj \
 		$(GENDIR)\$D\fontdlgg.obj \
 		$(GENDIR)\$D\helpext.obj \
+		$(GENDIR)\$D\helphtml.obj \
 		$(GENDIR)\$D\imaglist.obj \
 		$(GENDIR)\$D\listctrl.obj \
 		$(GENDIR)\$D\mdig.obj \
@@ -131,7 +136,7 @@ NONESSENTIALOBJS= $(GENDIR)\$D\colrdlgg.obj \
 		$(GENDIR)\$D\tabg.obj
 
 COMMONOBJS = \
-		$(COMMDIR)\$D\accesscmn.obj \
+		$(COMMDIR)\$D\y_tab.obj \
 		$(COMMDIR)\$D\appcmn.obj \
 		$(COMMDIR)\$D\artprov.obj \
 		$(COMMDIR)\$D\artstd.obj \
@@ -146,7 +151,6 @@ COMMONOBJS = \
 		$(COMMDIR)\$D\cshelp.obj \
 		$(COMMDIR)\$D\ctrlcmn.obj \
 		$(COMMDIR)\$D\ctrlsub.obj \
-		$(COMMDIR)\$D\datacmn.obj \
 		$(COMMDIR)\$D\datetime.obj \
 		$(COMMDIR)\$D\datstrm.obj \
 		$(COMMDIR)\$D\db.obj \
@@ -159,7 +163,6 @@ COMMONOBJS = \
 		$(COMMDIR)\$D\dobjcmn.obj \
 		$(COMMDIR)\$D\docmdi.obj \
 		$(COMMDIR)\$D\docview.obj \
-		$(COMMDIR)\$D\dpycmn.obj \
 		$(COMMDIR)\$D\dseldlg.obj \
 		$(COMMDIR)\$D\dynarray.obj \
 		$(COMMDIR)\$D\dynlib.obj \
@@ -219,6 +222,7 @@ COMMONOBJS = \
 		$(COMMDIR)\$D\mstream.obj \
 		$(COMMDIR)\$D\nbkbase.obj \
 		$(COMMDIR)\$D\object.obj \
+		$(COMMDIR)\$D\odbc.obj \
 		$(COMMDIR)\$D\paper.obj \
 		$(COMMDIR)\$D\popupcmn.obj \
 		$(COMMDIR)\$D\prntbase.obj \
@@ -227,6 +231,7 @@ COMMONOBJS = \
 		$(COMMDIR)\$D\quantize.obj \
 		$(COMMDIR)\$D\radiocmn.obj \
 		$(COMMDIR)\$D\regex.obj \
+		$(COMMDIR)\$D\resource.obj \
 		$(COMMDIR)\$D\rgncmn.obj \
 		$(COMMDIR)\$D\sckaddr.obj \
 		$(COMMDIR)\$D\sckfile.obj \
@@ -240,7 +245,6 @@ COMMONOBJS = \
 		$(COMMDIR)\$D\stream.obj \
 		$(COMMDIR)\$D\string.obj \
 		$(COMMDIR)\$D\sysopt.obj \
-		$(COMMDIR)\$D\taskbarcmn.obj \
 		$(COMMDIR)\$D\tbarbase.obj \
 		$(COMMDIR)\$D\textbuf.obj \
 		$(COMMDIR)\$D\textcmn.obj \
@@ -260,12 +264,12 @@ COMMONOBJS = \
 		$(COMMDIR)\$D\wfstream.obj \
 		$(COMMDIR)\$D\wincmn.obj \
 		$(COMMDIR)\$D\wxchar.obj \
+		$(COMMDIR)\$D\wxexpr.obj \
 		$(COMMDIR)\$D\xpmdecod.obj \
 		$(COMMDIR)\$D\zipstrm.obj \
 		$(COMMDIR)\$D\zstream.obj
 
 MSWOBJS = $(MSWDIR)\$D\accel.obj \
-		$(OLEDIR)\$D\access.obj \
 		$(MSWDIR)\$D\app.obj \
 		$(OLEDIR)\$D\automtn.obj \
 		$(MSWDIR)\$D\bitmap.obj \
@@ -281,6 +285,7 @@ MSWOBJS = $(MSWDIR)\$D\accel.obj \
 		$(MSWDIR)\$D\colour.obj \
 		$(MSWDIR)\$D\combobox.obj \
 		$(MSWDIR)\$D\control.obj \
+		$(MSWDIR)\$D\curico.obj \
 		$(MSWDIR)\$D\cursor.obj \
 		$(MSWDIR)\$D\data.obj \
 		$(OLEDIR)\$D\dataobj.obj \
@@ -293,9 +298,9 @@ MSWOBJS = $(MSWDIR)\$D\accel.obj \
 		$(MSWDIR)\$D\dialog.obj \
 		$(MSWDIR)\$D\dialup.obj \
 		$(MSWDIR)\$D\dib.obj \
+		$(MSWDIR)\$D\dibutils.obj \
 		$(MSWDIR)\$D\dir.obj \
 		$(MSWDIR)\$D\dirdlg.obj \
-		$(MSWDIR)\$D\display.obj \
 		$(MSWDIR)\$D\dragimag.obj \
 		$(OLEDIR)\$D\dropsrc.obj \
 		$(OLEDIR)\$D\droptgt.obj \
@@ -402,7 +407,7 @@ HTMLOBJS = $(HTMLDIR)\$D\helpctrl.obj \
 # Add $(HTMLOBJS) if wanting wxHTML classes
 OBJECTS = $(COMMONOBJS) $(GENERICOBJS) $(MSWOBJS) $(HTMLOBJS)
 
-ARCHINCDIR=$(WXDIR)\lib\$(_WXINC_BUILD)$(_WXINC_DLLSUFFIX)$(_WXINC_SUFFIX)$(LIBEXT)
+ARCHINCDIR=$(WXDIR)\lib\msw$(INCEXT)
 SETUP_H=$(ARCHINCDIR)\wx\setup.h
 
 # Normal, static library
@@ -562,6 +567,9 @@ $(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\fileconf.obj /c /Tp $(COMMDIR)\fileconf.cpp
 $(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\hash.obj /c /Tp $(COMMDIR)\hash.cpp
 <<
 	cl @<<
+$(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\resource.obj /c /Tp $(COMMDIR)\resource.cpp
+<<
+	cl @<<
 $(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\textfile.obj /c /Tp $(COMMDIR)\textfile.cpp
 <<
 	cl @<<
@@ -575,6 +583,9 @@ $(CPPFLAGS2) /Od /Fo$(GENDIR)\$D\gridsel.obj /c /Tp $(GENDIR)\gridsel.cpp
 <<
 	cl @<<
 $(CPPFLAGS2) /Od /Fo$(GENDIR)\$D\logg.obj /c /Tp $(GENDIR)\logg.cpp
+<<
+	cl @<<
+$(CPPFLAGS2) /Od /Fo$(GENDIR)\$D\proplist.obj /c /Tp $(GENDIR)\proplist.cpp
 <<
 	cl @<<
 $(CPPFLAGS2) /Od /Fo$(MSWDIR)\$D\clipbrd.obj /c /Tp $(MSWDIR)\clipbrd.cpp
@@ -626,7 +637,7 @@ $(CPPFLAGS2) /c $(COMMDIR)\unzip.c /Fo$@
 
 png:
     cd $(WXDIR)\src\png
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) UNICODE=0
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG)
     cd $(WXDIR)\src\msw
 
 clean_png:
@@ -636,7 +647,7 @@ clean_png:
 
 zlib:
     cd $(WXDIR)\src\zlib
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) UNICODE=0
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG)
     cd $(WXDIR)\src\msw
 
 clean_zlib:
@@ -646,7 +657,7 @@ clean_zlib:
 
 jpeg:
     cd $(WXDIR)\src\jpeg
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) UNICODE=0 all
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) all
     cd $(WXDIR)\src\msw
 
 clean_jpeg:
@@ -656,7 +667,7 @@ clean_jpeg:
 
 tiff:
     cd $(WXDIR)\src\tiff
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) UNICODE=0 all
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) all
     cd $(WXDIR)\src\msw
 
 clean_tiff:
@@ -666,7 +677,7 @@ clean_tiff:
 
 regex:
     cd $(WXDIR)\src\regex
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) UNICODE=0 all
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) all
     cd $(WXDIR)\src\msw
 
 clean_regex:
@@ -680,11 +691,11 @@ rcparser:
     cd $(WXDIR)\src\msw
 
 cleanall: clean clean_png clean_zlib clean_jpeg clean_tiff clean_regex
-        -erase ..\..\lib\$(WXLIBNAME).dll
-        -erase ..\..\lib\$(WXLIBNAME).lib
-        -erase ..\..\lib\$(WXLIBNAME).exp
-        -erase ..\..\lib\$(WXLIBNAME).pdb
-        -erase ..\..\lib\$(WXLIBNAME).ilk
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).dll
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).lib
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).exp
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).pdb
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).ilk
 
 
 clean: $(PERIPH_CLEAN_TARGET)
@@ -840,11 +851,11 @@ $(DOCDIR)\html\wx\wx.htm:         $(DOCDIR)\latex\wx\classes.tex $(DOCDIR)\latex
 
 $(DOCDIR)\htmlhelp\wx.chm : $(DOCDIR)\html\wx\wx.htm $(DOCDIR)\mshtml\wx\wx.htm $(DOCDIR)\mshtml\wx\wx.hhp
 	cd $(DOCDIR)\mshtml\wx
-    copy $(DOCDIR)\latex\wx\wx.css .
+	copy $(DOCDIR)\latex\wx\wx.css .
 	-hhc wx.hhp
-    -mkdir ..\..\htmlhelp
-    -erase $(DOCDIR)\htmlhelp\wx.chm
-    move wx.chm ..\..\htmlhelp
+	-mkdir ..\..\htmlhelp
+	-erase $(DOCDIR)\htmlhelp\wx.chm
+	move wx.chm ..\..\htmlhelp
 	cd $(THISDIR)
 
 $(WXDIR)\docs\latex\wx\manual.dvi:	$(DOCDIR)/latex/wx/body.tex $(DOCDIR)/latex/wx/manual.tex

@@ -656,7 +656,6 @@ ac_given_srcdir=$srcdir
 
 trap 'rm -fr `echo "
             Makefile
-            access/Makefile
             artprov/Makefile
             caret/Makefile
             calendar/Makefile
@@ -696,16 +695,19 @@ trap 'rm -fr `echo "
             mobile/styles/Makefile
             multimon/Makefile
             nativedlg/Makefile
+            newgrid/Makefile
             notebook/Makefile
             oleauto/Makefile
             ownerdrw/Makefile
             png/Makefile
             printing/Makefile
+            proplist/Makefile
             propsize/Makefile
             regtest/Makefile
+            resource/Makefile
             rotate/Makefile
             sashtest/Makefile
-            shaped/Makefile
+	    shaped/Makefile
             scroll/Makefile
             scrollsub/Makefile
             sockets/Makefile
@@ -716,6 +718,7 @@ trap 'rm -fr `echo "
             thread/Makefile
             toolbar/Makefile
             treectrl/Makefile
+            treelay/Makefile
             typetest/Makefile
             validate/Makefile
             widgets/Makefile
@@ -813,7 +816,6 @@ EOF
 cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"Makefile
-            access/Makefile
             artprov/Makefile
             caret/Makefile
             calendar/Makefile
@@ -853,16 +855,19 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             mobile/styles/Makefile
             multimon/Makefile
             nativedlg/Makefile
+            newgrid/Makefile
             notebook/Makefile
             oleauto/Makefile
             ownerdrw/Makefile
             png/Makefile
             printing/Makefile
+            proplist/Makefile
             propsize/Makefile
             regtest/Makefile
+            resource/Makefile
             rotate/Makefile
             sashtest/Makefile
-            shaped/Makefile
+	    shaped/Makefile
             scroll/Makefile
             scrollsub/Makefile
             sockets/Makefile
@@ -873,6 +878,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
             thread/Makefile
             toolbar/Makefile
             treectrl/Makefile
+            treelay/Makefile
             typetest/Makefile
             validate/Makefile
             widgets/Makefile

@@ -42,7 +42,6 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/palette.h"
 #endif
 
 #include "wx/image.h"

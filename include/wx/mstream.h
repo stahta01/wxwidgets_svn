@@ -40,8 +40,6 @@ protected:
 
 private:
     size_t m_length;
-
-    DECLARE_NO_COPY_CLASS(wxMemoryInputStream)
 };
 
 class WXDLLEXPORT wxMemoryOutputStream : public wxOutputStream
@@ -66,8 +64,6 @@ protected:
     size_t OnSysWrite(const void *buffer, size_t nbytes);
     off_t OnSysSeek(off_t pos, wxSeekMode mode);
     off_t OnSysTell() const;
-
-    DECLARE_NO_COPY_CLASS(wxMemoryOutputStream)
 };
 
 #endif

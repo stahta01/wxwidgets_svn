@@ -5,8 +5,8 @@
 // Modified by: Ron Lee
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -911,7 +911,7 @@ void wxScrolledWindow::OnChar(wxKeyEvent& event)
         yScrollOld = GetScrollPos(wxVERTICAL);
 
     int dsty;
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_PAGEUP:
         case WXK_PRIOR:

@@ -53,7 +53,7 @@
 // constants
 // ----------------------------------------------------------------------------
 
-static const int wxID_NEXT_TIP = 32000;  // whatever
+static const int wxID_NEXT_TIP = -100;  // whatever
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -115,7 +115,6 @@ private:
     wxCheckBox *m_checkbox;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTipDialog)
 };
 
 // ============================================================================

@@ -96,22 +96,45 @@ void wxNotebookBase::AssignImageList(wxImageList* imageList)
 // geometry
 // ----------------------------------------------------------------------------
 
-wxSize wxNotebookBase::CalcSizeFromPage(const wxSize& sizePage) const
+wxSize wxNotebookBase::CalcSizeFromPage(const wxSize& sizePage)
 {
-    // this is, of course, totally bogus -- but we must do something by
-    // default because not all ports implement this
+    // this was just taken from wxNotebookSizer::CalcMin() and is, of
+    // course, totally bogus - just like the original code was
     wxSize sizeTotal = sizePage;
-
+    
+    // Slightly less bogus, at least under Windows.
+    // We need to make getting tab size part of the wxWindows API.
+#ifdef __WXMSW__
+    wxSize tabSize(0, 0);
+    if (GetPageCount() > 0)
+    {
+        RECT rect;
+        TabCtrl_GetItemRect((HWND) GetHWND(), 0, & rect);
+        tabSize.x = rect.right - rect.left;
+        tabSize.y = rect.bottom - rect.top;
+    }
+    if ( HasFlag(wxNB_LEFT) || HasFlag(wxNB_RIGHT) )
+    {
+        sizeTotal.x += tabSize.x + 7;
+        sizeTotal.y += 7;
+    }
+    else
+    {
+        sizeTotal.x += 7;
+        sizeTotal.y += tabSize.y + 7;
+    }
+#else
     if ( HasFlag(wxNB_LEFT) || HasFlag(wxNB_RIGHT) )
     {
         sizeTotal.x += 90;
         sizeTotal.y += 10;
     }
-    else // tabs on top/bottom side
+    else
     {
         sizeTotal.x += 10;
         sizeTotal.y += 40;
     }
+#endif
 
     return sizeTotal;
 }
@@ -136,7 +159,7 @@ wxSize wxNotebookBase::DoGetBestSize() const
 
     // convert display area to window area, adding the size neccessary for the
     // tabs
-    return CalcSizeFromPage(bestSize);
+    return wxConstCast(this, wxNotebookBase)->CalcSizeFromPage(bestSize);
 }
 
 // ----------------------------------------------------------------------------

@@ -19,7 +19,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GRID
+#if wxUSE_GRID || wxUSE_NEW_GRID
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
@@ -32,8 +32,6 @@
 // ----------------------------------------------------------------------------
 // wxGridCellDateTimeRenderer
 // ----------------------------------------------------------------------------
-
-#if wxUSE_DATETIME
 
 // Enables a grid cell to display a formated date and or time
 
@@ -122,8 +120,6 @@ void wxGridCellDateTimeRenderer::SetParameters(const wxString& params){
     if (!params.IsEmpty())
         m_oformat=params;
 }
-
-#endif // wxUSE_DATETIME
 
 // ----------------------------------------------------------------------------
 // wxGridCellChoiceNumberRenderer

@@ -4,7 +4,7 @@
 // Created:     14.11.01
 // Author:      Morten Hanssen
 // Copyright:   (c) 2001 wxWindows team
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MEMTEXT_H
@@ -41,7 +41,7 @@ protected:
         { return TRUE; }
 
     virtual bool OnWrite(wxTextFileType WXUNUSED(typeNew),
-                         wxMBConv& WXUNUSED(conv) = wxConvUTF8)
+                         wxMBConv& WXUNUSED(conv) = wxConvLibc)
         { return TRUE; }
 };
 

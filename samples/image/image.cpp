@@ -24,21 +24,12 @@
 #include "wx/wfstream.h"
 #include "wx/quantize.h"
 
-#if wxUSE_CLIPBOARD
-    #include "wx/dataobj.h"
-    #include "wx/clipbrd.h"
-#endif // wxUSE_CLIPBOARD
-
 #include "smile.xbm"
 
 #if !defined(__WINDOWS__) || wxUSE_XPM_IN_MSW
     #include "smile.xpm"
 #endif
-#ifndef __VMS
-# include "wx/rawbmp.h"
 
-#define wxHAVE_RAW_BITMAP
-#endif
 
 // derived classes
 
@@ -123,15 +114,7 @@ public:
 
     void OnAbout( wxCommandEvent &event );
     void OnNewFrame( wxCommandEvent &event );
-#ifdef wxHAVE_RAW_BITMAP
-    void OnTestRawBitmap( wxCommandEvent &event );
-#endif // wxHAVE_RAW_BITMAP
     void OnQuit( wxCommandEvent &event );
-
-#if wxUSE_CLIPBOARD
-    void OnCopy(wxCommandEvent& event);
-    void OnPaste(wxCommandEvent& event);
-#endif // wxUSE_CLIPBOARD
 
     MyCanvas         *m_canvas;
 
@@ -146,24 +129,20 @@ public:
     MyImageFrame(wxFrame *parent, const wxBitmap& bitmap)
         : wxFrame(parent, -1, _T("Double click to save"),
                   wxDefaultPosition, wxDefaultSize,
-                  wxCAPTION | wxSYSTEM_MENU | wxCLOSE_BOX),
+                  wxCAPTION | wxSYSTEM_MENU),
                   m_bitmap(bitmap)
     {
         SetClientSize(bitmap.GetWidth(), bitmap.GetHeight());
     }
 
-    void OnEraseBackground(wxEraseEvent& WXUNUSED(event))
-    {
-        // do nothing here to be able to see how transparent images are shown
-    }
-
     void OnPaint(wxPaintEvent& WXUNUSED(event))
     {
         wxPaintDC dc( this );
-        dc.DrawBitmap( m_bitmap, 0, 0, TRUE /* use mask */ );
+        //TRUE for masked images
+        dc.DrawBitmap( m_bitmap, 0, 0, TRUE );
     }
 
-    void OnSave(wxMouseEvent& WXUNUSED(event))
+    void OnSave(wxCommandEvent& WXUNUSED(event))
     {
         wxImage image = m_bitmap.ConvertToImage();
 
@@ -241,80 +220,6 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-#ifdef wxHAVE_RAW_BITMAP
-
-#include "wx/rawbmp.h"
-
-class MyRawBitmapFrame : public wxFrame
-{
-public:
-    enum
-    {
-        BORDER = 15,
-        SIZE = 150,
-        REAL_SIZE = SIZE - 2*BORDER
-    };
-
-    MyRawBitmapFrame(wxFrame *parent)
-        : wxFrame(parent, -1, _T("Raw bitmaps (how exciting)")),
-          m_bitmap(SIZE, SIZE, 32)
-    {
-        SetClientSize(SIZE, SIZE);
-
-        wxAlphaPixelData data(m_bitmap,
-                              wxPoint(BORDER, BORDER),
-                              wxSize(REAL_SIZE, REAL_SIZE));
-        if ( !data )
-        {
-            wxLogError(_T("Failed to gain raw access to bitmap data"));
-            return;
-        }
-
-        data.UseAlpha();
-
-        wxAlphaPixelData::Iterator p(data);
-
-        for ( int y = 0; y < REAL_SIZE; ++y )
-        {
-            wxAlphaPixelData::Iterator rowStart = p;
-
-            int r = y < REAL_SIZE/3 ? 255 : 0,
-                g = (REAL_SIZE/3 <= y) && (y < 2*(REAL_SIZE/3)) ? 255 : 0,
-                b = 2*(REAL_SIZE/3) <= y ? 255 : 0;
-
-            for ( int x = 0; x < REAL_SIZE; ++x )
-            {
-                p.Red() = r;
-                p.Green() = g;
-                p.Blue() = b;
-                p.Alpha() =
-                    (wxAlphaPixelFormat::ChannelType)((x*255.)/REAL_SIZE);
-
-                ++p; // same as p.OffsetX(1)
-            }
-
-            p = rowStart;
-            p.OffsetY(data, 1);
-        }
-    }
-
-    void OnPaint(wxPaintEvent& WXUNUSED(event))
-    {
-        wxPaintDC dc( this );
-        dc.DrawText(_T("This is alpha and raw bitmap test"), 0, BORDER);
-        dc.DrawText(_T("This is alpha and raw bitmap test"), 0, SIZE/2 - BORDER);
-        dc.DrawText(_T("This is alpha and raw bitmap test"), 0, SIZE - 2*BORDER);
-        dc.DrawBitmap( m_bitmap, 0, 0, TRUE /* use mask */ );
-    }
-
-private:
-    wxBitmap m_bitmap;
-
-    DECLARE_EVENT_TABLE()
-};
-
-#endif // wxHAVE_RAW_BITMAP
-
 // MyApp
 
 class MyApp: public wxApp
@@ -332,18 +237,9 @@ IMPLEMENT_APP(MyApp)
 IMPLEMENT_DYNAMIC_CLASS(MyCanvas, wxScrolledWindow)
 
 BEGIN_EVENT_TABLE(MyImageFrame, wxFrame)
-    EVT_ERASE_BACKGROUND(MyImageFrame::OnEraseBackground)
-    EVT_PAINT(MyImageFrame::OnPaint)
-    EVT_LEFT_DCLICK(MyImageFrame::OnSave)
+  EVT_PAINT(MyImageFrame::OnPaint)
+  EVT_LEFT_DCLICK(MyImageFrame::OnSave)
 END_EVENT_TABLE()
-
-#ifdef wxHAVE_RAW_BITMAP
-
-BEGIN_EVENT_TABLE(MyRawBitmapFrame, wxFrame)
-    EVT_PAINT(MyRawBitmapFrame::OnPaint)
-END_EVENT_TABLE()
-
-#endif // wxHAVE_RAW_BITMAP
 
 BEGIN_EVENT_TABLE(MyCanvas, wxScrolledWindow)
   EVT_PAINT(MyCanvas::OnPaint)
@@ -408,8 +304,8 @@ MyCanvas::MyCanvas( wxWindow *parent, wxWindowID id,
 
     image.Destroy();
 
-    if ( image.LoadFile( dir + _T("test.png") ) )
-        my_square = new wxBitmap( image );
+    image.LoadFile( dir + _T("test.png") );
+    my_square = new wxBitmap( image );
 
     image.Destroy();
 
@@ -545,29 +441,28 @@ MyCanvas::MyCanvas( wxWindow *parent, wxWindowID id,
         else    
             my_horse_ani [i] = wxBitmap( image );
     }
-#endif // wxUSE_ICO_CUR
+    
+    
+#endif
 
     image.Destroy();
 
     // test image loading from stream
     wxFile file(dir + _T("horse.bmp"));
-    if ( file.IsOpened() )
+    off_t len = file.Length();
+    void *data = malloc(len);
+    if ( file.Read(data, len) != len )
+        wxLogError(_T("Reading bitmap file failed"));
+    else
     {
-        off_t len = file.Length();
-        void *data = malloc(len);
-        if ( file.Read(data, len) != len )
-            wxLogError(_T("Reading bitmap file failed"));
+        wxMemoryInputStream mis(data, len);
+        if ( !image.LoadFile(mis) )
+            wxLogError(wxT("Can't load BMP image from stream"));
         else
-        {
-            wxMemoryInputStream mis(data, len);
-            if ( !image.LoadFile(mis) )
-                wxLogError(wxT("Can't load BMP image from stream"));
-            else
-                my_horse_bmp2 = new wxBitmap( image );
-        }
-
-        free(data);
+            my_horse_bmp2 = new wxBitmap( image );
     }
+
+    free(data);
 }
 
 MyCanvas::~MyCanvas()
@@ -803,13 +698,9 @@ void MyCanvas::CreateAntiAliasedBitmap()
 
 // MyFrame
 
-enum
-{
-    ID_QUIT  = 108,
-    ID_ABOUT,
-    ID_NEW,
-    ID_SHOWRAW
-};
+const int ID_QUIT  = 108;
+const int ID_ABOUT = 109;
+const int ID_NEW = 110;
 
 IMPLEMENT_DYNAMIC_CLASS( MyFrame, wxFrame )
 
@@ -817,40 +708,21 @@ BEGIN_EVENT_TABLE(MyFrame,wxFrame)
   EVT_MENU    (ID_ABOUT, MyFrame::OnAbout)
   EVT_MENU    (ID_QUIT,  MyFrame::OnQuit)
   EVT_MENU    (ID_NEW,  MyFrame::OnNewFrame)
-#ifdef wxHAVE_RAW_BITMAP
-  EVT_MENU    (ID_SHOWRAW,  MyFrame::OnTestRawBitmap)
-#endif
-
-#if wxUSE_CLIPBOARD
-    EVT_MENU(wxID_COPY, MyFrame::OnCopy)
-    EVT_MENU(wxID_PASTE, MyFrame::OnPaste)
-#endif // wxUSE_CLIPBOARD
 END_EVENT_TABLE()
 
 MyFrame::MyFrame()
        : wxFrame( (wxFrame *)NULL, -1, _T("wxImage sample"),
                   wxPoint(20,20), wxSize(470,360) )
 {
+  wxMenu *file_menu = new wxMenu();
+  file_menu->Append( ID_NEW, _T("&Show image..."));
+  file_menu->AppendSeparator();
+  file_menu->Append( ID_ABOUT, _T("&About..."));
+  file_menu->AppendSeparator();
+  file_menu->Append( ID_QUIT, _T("E&xit"));
+
   wxMenuBar *menu_bar = new wxMenuBar();
-
-  wxMenu *menuImage = new wxMenu;
-  menuImage->Append( ID_NEW, _T("&Show any image...\tCtrl-O"));
-
-#ifdef wxHAVE_RAW_BITMAP
-  menuImage->Append( ID_SHOWRAW, _T("Test &raw bitmap...\tCtrl-R"));
-#endif
-  menuImage->AppendSeparator();
-  menuImage->Append( ID_ABOUT, _T("&About..."));
-  menuImage->AppendSeparator();
-  menuImage->Append( ID_QUIT, _T("E&xit\tCtrl-Q"));
-  menu_bar->Append(menuImage, _T("&Image"));
-
-#if wxUSE_CLIPBOARD
-  wxMenu *menuClipboard = new wxMenu;
-  menuClipboard->Append(wxID_COPY, _T("&Copy test image\tCtrl-C"));
-  menuClipboard->Append(wxID_PASTE, _T("&Paste image\tCtrl-V"));
-  menu_bar->Append(menuClipboard, _T("&Clipboard"));
-#endif // wxUSE_CLIPBOARD
+  menu_bar->Append(file_menu, _T("&File"));
 
   SetMenuBar( menu_bar );
 
@@ -892,50 +764,6 @@ void MyFrame::OnNewFrame( wxCommandEvent &WXUNUSED(event) )
 
     (new MyImageFrame(this, wxBitmap(image)))->Show();
 }
-
-#ifdef wxHAVE_RAW_BITMAP
-
-void MyFrame::OnTestRawBitmap( wxCommandEvent &event )
-{
-    (new MyRawBitmapFrame(this))->Show();
-}
-
-#endif // wxHAVE_RAW_BITMAP
-
-#if wxUSE_CLIPBOARD
-
-void MyFrame::OnCopy(wxCommandEvent& WXUNUSED(event))
-{
-    wxBitmapDataObject *dobjBmp = new wxBitmapDataObject;
-    dobjBmp->SetBitmap(*m_canvas->my_horse_png);
-
-    wxTheClipboard->Open();
-
-    if ( !wxTheClipboard->SetData(dobjBmp) )
-    {
-        wxLogError(_T("Failed to copy bitmap to clipboard"));
-    }
-
-    wxTheClipboard->Close();
-}
-
-void MyFrame::OnPaste(wxCommandEvent& WXUNUSED(event))
-{
-    wxBitmapDataObject dobjBmp;
-
-    wxTheClipboard->Open();
-    if ( !wxTheClipboard->GetData(dobjBmp) )
-    {
-        wxLogMessage(_T("No bitmap data in the clipboard"));
-    }
-    else
-    {
-        (new MyImageFrame(this, dobjBmp.GetBitmap()))->Show();
-    }
-    wxTheClipboard->Close();
-}
-
-#endif // wxUSE_CLIPBOARD
 
 //-----------------------------------------------------------------------------
 // MyApp

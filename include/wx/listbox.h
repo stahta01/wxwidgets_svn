@@ -109,8 +109,8 @@ public:
 protected:
     // NB: due to wxGTK implementation details, DoInsert() is implemented
     //     using DoInsertItems() and not the other way round
-    virtual int DoInsert(const wxString& item, int pos)
-        { InsertItems(1, &item, pos); return pos; }
+    void DoInsert(const wxString& item, int pos)
+        { InsertItems(1, &item, pos); }
 
     // to be implemented in derived classes
     virtual void DoInsertItems(const wxArrayString& items, int pos) = 0;
@@ -135,8 +135,8 @@ protected:
     #include "wx/mac/listbox.h"
 #elif defined(__WXPM__)
     #include "wx/os2/listbox.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/listbox.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/listbox.h"
 #endif
 
 #endif // wxUSE_LISTBOX

@@ -28,7 +28,6 @@
 #ifndef WX_PRECOMP
     #include "wx/log.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/radiobox.h"
@@ -289,7 +288,7 @@ void RadioWidgetsPage::CreateRadio()
     {
         sel = m_radio->GetSelection();
 
-        m_sizerRadio->Detach( m_radio );
+        m_sizerRadio->Remove(m_radio);
 
         delete m_radio;
     }

@@ -4,7 +4,6 @@
  * Authors: Guilhem Lavaux,
  *          Guillermo Rodriguez Garcia <guille@iies.es> (maintainer)
  * Purpose: GSocket main Unix file
- * Licence: The wxWindows licence
  * CVSID:   $Id$
  * -------------------------------------------------------------------------
  */
@@ -76,11 +75,6 @@ struct sockaddr_un
  */
 #ifndef INVALID_SOCKET
 #define INVALID_SOCKET -1
-#endif
-
-/* UnixWare reportedly needs this for FIONBIO definition */
-#ifdef __UNIXWARE__
-#include <sys/filio.h>
 #endif
 
 /*
@@ -1691,4 +1685,6 @@ GSocketError GAddress_UNIX_GetPath(GAddress *address, char *path, size_t sbuf)
 }
 
 #endif  /* wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__) */
+
+/* vi:sts=4:sw=4:et */
 

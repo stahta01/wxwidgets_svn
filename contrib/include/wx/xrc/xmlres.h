@@ -58,7 +58,7 @@ class wxXmlResourceModule;
 #define WX_XMLRES_CURRENT_VERSION_MINOR            3
 #define WX_XMLRES_CURRENT_VERSION_RELEASE          0
 #define WX_XMLRES_CURRENT_VERSION_REVISION         1
-#define WX_XMLRES_CURRENT_VERSION_STRING       _T("2.3.0.1")
+#define WX_XMLRES_CURRENT_VERSION_STRING    wxT("2.3.0.1")
 
 #define WX_XMLRES_CURRENT_VERSION \
                 (WX_XMLRES_CURRENT_VERSION_MAJOR * 256*256*256 + \
@@ -239,12 +239,19 @@ protected:
     // Helper function: finds a resource (calls UpdateResources) and returns a node containing it.
     wxXmlNode *DoFindResource(wxXmlNode *parent, const wxString& name, const wxString& classname, bool recursive);
 
+    // Creates a resource from information in the given node.
+    wxObject *CreateResFromNode(wxXmlNode *node, wxObject *parent,
+                                wxObject *instance = NULL);
+
     // Creates a resource from information in the given node
     // (Uses only 'handlerToUse' if != NULL)
-    wxObject *CreateResFromNode(wxXmlNode *node, wxObject *parent,
-                                wxObject *instance = NULL,
-                                wxXmlResourceHandler *handlerToUse = NULL);
-
+    //
+    // ATTENTION: Do *NOT* use this function, it will disappear in
+    //            wxWindows 2.5.0! It exists *only* as a hack to preserve
+    //            binary compatibility in 2.4.x branch.
+    wxObject *CreateResFromNode2(wxXmlNode *node, wxObject *parent,
+                                 wxObject *instance = NULL,
+                                 wxXmlResourceHandler *handlerToUse = NULL);
 private:
     long m_version;
 
@@ -302,7 +309,6 @@ private:
 
 class WXXMLDLLEXPORT wxXmlResourceHandler : public wxObject
 {
-DECLARE_ABSTRACT_CLASS(wxXmlResourceHandler)
 public:
     // Constructor.
     wxXmlResourceHandler();
@@ -473,13 +479,11 @@ public:
    Backward compatibility macros. Do *NOT* use, they may disappear in future
    versions of the XRC library!
    ------------------------------------------------------------------------- */
-#if WXWIN_COMPATIBILITY_2_4
-    #define ADD_STYLE         XRC_ADD_STYLE
-    #define wxTheXmlResource  wxXmlResource::Get()
-    #define XMLID             XRCID
-    #define XMLCTRL           XRCCTRL
-    #define GetXMLID          GetXRCID
-#endif
+#define ADD_STYLE         XRC_ADD_STYLE
+#define wxTheXmlResource  wxXmlResource::Get()
+#define XMLID             XRCID
+#define XMLCTRL           XRCCTRL
+#define GetXMLID          GetXRCID
 
 
 #endif // _WX_XMLRES_H_

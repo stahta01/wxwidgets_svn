@@ -50,8 +50,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl, wxControl)
 
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxSpinButton)
     EVT_CHAR(wxSpinCtrl::OnChar)
-    EVT_SPIN(-1, wxSpinCtrl::OnSpinChange)
     EVT_SET_FOCUS(wxSpinCtrl::OnSetFocus)
+    EVT_SPIN(-1, wxSpinCtrl::OnSpinChange)
 END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 // constants

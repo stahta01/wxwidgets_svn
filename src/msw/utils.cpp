@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -48,7 +48,7 @@
 
 #include "wx/timer.h"
 
-#if !defined(__GNUWIN32__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__)
+#if !defined(__GNUWIN32__) && !defined(__WXWINE__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__)
     #include <direct.h>
 
     #ifndef __MWERKS__
@@ -56,7 +56,7 @@
     #endif
 #endif  //GNUWIN32
 
-#if defined(__CYGWIN__)
+#if defined(__CYGWIN__) && !defined(__TWIN32__)
     #include <sys/unistd.h>
     #include <sys/stat.h>
     #include <sys/cygwin.h> // for cygwin_conv_to_full_win32_path()
@@ -78,10 +78,8 @@
     #include <lm.h>
 #endif // USE_NET_API
 
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
-    #ifndef __UNIX__
-        #include <io.h>
-    #endif
+#if defined(__WIN32__) && !defined(__WXWINE__) && !defined(__WXMICROWIN__)
+    #include <io.h>
 
     #ifndef __GNUWIN32__
         #include <shellapi.h>
@@ -147,7 +145,7 @@ static const wxChar eUSERID[]    = wxT("UserId");
 // Get hostname only (without domain name)
 bool wxGetHostName(wxChar *buf, int maxSize)
 {
-#if defined(__WIN32__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__) && !defined(__TWIN32__) && !defined(__WXMICROWIN__)
     DWORD nSize = maxSize;
     if ( !::GetComputerName(buf, &nSize) )
     {
@@ -173,14 +171,13 @@ bool wxGetHostName(wxChar *buf, int maxSize)
 // get full hostname (with domain name if possible)
 bool wxGetFullHostName(wxChar *buf, int maxSize)
 {
-#if defined(__WIN32__) && !defined(__WXMICROWIN__) && ! (defined(__GNUWIN32__) && !defined(__MINGW32__))
+#if defined(__WIN32__) && !defined(__TWIN32__) && !defined(__WXMICROWIN__) && ! (defined(__GNUWIN32__) && !defined(__MINGW32__))
     // TODO should use GetComputerNameEx() when available
 
     // the idea is that if someone had set wxUSE_SOCKETS to 0 the code
     // shouldn't use winsock.dll (a.k.a. ws2_32.dll) at all so only use this
     // code if we link with it anyhow
 #if wxUSE_SOCKETS
-
     WSADATA wsa;
     if ( WSAStartup(MAKEWORD(1, 1), &wsa) == 0 )
     {
@@ -216,7 +213,6 @@ bool wxGetFullHostName(wxChar *buf, int maxSize)
             return TRUE;
         }
     }
-
 #endif // wxUSE_SOCKETS
 
 #endif // Win32
@@ -227,7 +223,7 @@ bool wxGetFullHostName(wxChar *buf, int maxSize)
 // Get user ID e.g. jacs
 bool wxGetUserId(wxChar *buf, int maxSize)
 {
-#if defined(__WIN32__) && !defined(__win32s__) && !defined(__WXMICROWIN__)
+#if defined(__WIN32__) && !defined(__win32s__) && !defined(__TWIN32__) && !defined(__WXMICROWIN__)
     DWORD nSize = maxSize;
     if ( ::GetUserName(buf, &nSize) == 0 )
     {
@@ -366,7 +362,7 @@ const wxChar* wxGetHomeDir(wxString *pstr)
 {
   wxString& strDir = *pstr;
 
-  #if defined(__UNIX__)
+  #if defined(__UNIX__) && !defined(__TWIN32__)
     const wxChar *szHome = wxGetenv("HOME");
     if ( szHome == NULL ) {
       // we're homeless...
@@ -604,16 +600,14 @@ bool wxGetEnv(const wxString& var, wxString *value)
 {
 #ifdef __WIN16__
     const wxChar* ret = wxGetenv(var);
-    if ( !ret )
-        return FALSE;
-
-    if ( value )
+    if (ret)
     {
         *value = ret;
+        return TRUE;
     }
-
-    return TRUE;
-#else // Win32
+    else
+        return FALSE;
+#else
     // first get the size of the buffer
     DWORD dwRet = ::GetEnvironmentVariable(var, NULL, 0);
     if ( !dwRet )
@@ -629,7 +623,7 @@ bool wxGetEnv(const wxString& var, wxString *value)
     }
 
     return TRUE;
-#endif // Win16/32
+#endif
 }
 
 bool wxSetEnv(const wxString& var, const wxChar *value)
@@ -654,6 +648,8 @@ bool wxSetEnv(const wxString& var, const wxChar *value)
 // process management
 // ----------------------------------------------------------------------------
 
+#ifdef __WIN32__
+
 // structure used to pass parameters from wxKill() to wxEnumFindByPidProc()
 struct wxFindByPidParams
 {
@@ -664,8 +660,6 @@ struct wxFindByPidParams
 
     // the PID we're looking from
     DWORD pid;
-
-    DECLARE_NO_COPY_CLASS(wxFindByPidParams)
 };
 
 // wxKill helper: EnumWindows() callback which is used to find the first (top
@@ -689,8 +683,11 @@ BOOL CALLBACK wxEnumFindByPidProc(HWND hwnd, LPARAM lParam)
     return TRUE;
 }
 
+#endif // __WIN32__
+
 int wxKill(long pid, wxSignal sig, wxKillError *krc)
 {
+#ifdef __WIN32__
     // get the process handle to operate on
     HANDLE hProcess = ::OpenProcess(SYNCHRONIZE |
                                     PROCESS_TERMINATE |
@@ -827,19 +824,31 @@ int wxKill(long pid, wxSignal sig, wxKillError *krc)
 
     // the return code is the same as from Unix kill(): 0 if killed
     // successfully or -1 on error
-    //
-    // be careful to interpret rc correctly: for wxSIGNONE we return success if
-    // the process exists, for all the other sig values -- if it doesn't
-    if ( ok &&
-            ((sig == wxSIGNONE) == (rc == STILL_ACTIVE)) )
+    if ( sig == wxSIGNONE )
     {
-        if ( krc )
+        if ( ok && rc == STILL_ACTIVE )
         {
-            *krc = wxKILL_OK;
-        }
+            // there is such process => success
+            if ( krc )
+                *krc = wxKILL_OK;
 
-        return 0;
+            return 0;
+        }
     }
+    else // not SIGNONE
+    {
+        if ( ok && rc != STILL_ACTIVE )
+        {
+            // killed => success
+            if ( krc )
+                *krc = wxKILL_OK;
+
+            return 0;
+        }
+    }
+#else // Win16
+    wxFAIL_MSG( _T("not implemented") );
+#endif // Win32/Win16
 
     // error
     return -1;
@@ -880,6 +889,7 @@ bool wxShutdown(wxShutdownFlags wFlags)
         bOK = ::OpenProcessToken(GetCurrentProcess(),
                                  TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
                                  &hToken) != 0;
+#ifndef __WXWINE__
         if ( bOK )
         {
             TOKEN_PRIVILEGES tkp;
@@ -898,6 +908,7 @@ bool wxShutdown(wxShutdownFlags wFlags)
             // Cannot test the return value of AdjustTokenPrivileges.
             bOK = ::GetLastError() == ERROR_SUCCESS;
         }
+#endif
     }
 
     if ( bOK )
@@ -934,7 +945,7 @@ bool wxShutdown(wxShutdownFlags wFlags)
 // Get free memory in bytes, or -1 if cannot determine amount (e.g. on UNIX)
 long wxGetFreeMemory()
 {
-#if defined(__WIN32__) && !defined(__BORLANDC__)
+#if defined(__WIN32__) && !defined(__BORLANDC__) && !defined(__TWIN32__)
     MEMORYSTATUS memStatus;
     memStatus.dwLength = sizeof(MEMORYSTATUS);
     GlobalMemoryStatus(&memStatus);
@@ -1011,7 +1022,7 @@ wxString wxGetOsDescription()
 
 int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
-#if defined(__WIN32__) 
+#if defined(__WIN32__) && !defined(__SC__)
     static int ver = -1, major = -1, minor = -1;
 
     if ( ver == -1 )
@@ -1120,7 +1131,7 @@ void wxSleep(int nSecs)
     if (gs_inTimer)
         return;
     if (nSecs <= 0)
-         return;
+        return;
 
     wxTheSleepTimer = new wxSleepTimer;
     gs_inTimer = TRUE;
@@ -1316,11 +1327,7 @@ static HCURSOR gs_wxBusyCursor = 0;     // new, busy cursor
 static HCURSOR gs_wxBusyCursorOld = 0;  // old cursor
 static int gs_wxBusyCursorCount = 0;
 
-#ifdef __DIGITALMARS__
-extern "C" HCURSOR wxGetCurrentBusyCursor()
-#else
 extern HCURSOR wxGetCurrentBusyCursor()
-#endif
 {
     return gs_wxBusyCursor;
 }

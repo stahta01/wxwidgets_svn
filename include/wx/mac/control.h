@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        control.h
 // Purpose:     wxControl class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_CONTROL_H_
@@ -55,34 +55,34 @@ public:
    
    void OnEraseBackground(wxEraseEvent& event);
    
-   virtual bool             Enable(bool enable = TRUE) ;
-   virtual bool             Show(bool show = TRUE) ;
-
-   virtual void         MacRedrawControl () ;
-   virtual void      MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
-   virtual void             MacPreControlCreate( wxWindow *parent, wxWindowID id, wxString label ,
-                          const wxPoint& pos,
-                          const wxSize& size, long style,
-                          const wxValidator& validator,
-                          const wxString& name ,
-                          WXRECTPTR outBounds ,
-                          unsigned char* maclabel ) ;
-   virtual void         MacPostControlCreate() ;
-   virtual void         MacAdjustControlRect() ;
+   virtual bool	         Enable(bool enable = TRUE) ;
+   virtual bool	         Show(bool show = TRUE) ;
+   
+   virtual void		 MacRedrawControl () ;
+   virtual void 	 MacHandleControlClick( WXWidget control , short controlpart ) ;
+   virtual void	         MacPreControlCreate( wxWindow *parent, wxWindowID id, wxString label , 
+					      const wxPoint& pos,
+					      const wxSize& size, long style,
+					      const wxValidator& validator,
+					      const wxString& name ,
+					      WXRECTPTR outBounds ,
+					      unsigned char* maclabel ) ;
+   virtual void		 MacPostControlCreate() ;
+   virtual void		 MacAdjustControlRect() ;
    virtual WXWidget MacGetContainerForEmbedding() ;
-   virtual void      MacSuperChangedPosition() ;
-   virtual void      MacSuperEnabled( bool enabled ) ;
-   virtual void      MacSuperShown( bool show ) ;
-   virtual bool         MacCanFocus() const ;
-   virtual void         MacUpdateDimensions() ;
+   virtual void 	 MacSuperChangedPosition() ;
+   virtual void 	 MacSuperEnabled( bool enabled ) ;
+   virtual void 	 MacSuperShown( bool show ) ;
+   virtual bool		 MacCanFocus() const ;
+   virtual void		 MacUpdateDimensions() ;
    void*             MacGetControlAction() { return m_macControlAction ; }
    
-   virtual void       DoSetSize(int x, int y,int width, int height,int sizeFlags = wxSIZE_AUTO ) ;
-   void              OnKeyDown( wxKeyEvent &event ) ;
-   void                 OnMouseEvent( wxMouseEvent &event ) ;
-   void              OnPaint(wxPaintEvent& event) ;
-   virtual void         Refresh(bool eraseBack = TRUE, const wxRect *rect = NULL) ;
-   WXWidget     GetMacControl() { return m_macControl ;}
+   virtual void  	 DoSetSize(int x, int y,int width, int height,int sizeFlags = wxSIZE_AUTO ) ;
+   void 	         OnKeyDown( wxKeyEvent &event ) ;
+   void		         OnMouseEvent( wxMouseEvent &event ) ;
+   void 	         OnPaint(wxPaintEvent& event) ;
+   virtual void		 Refresh(bool eraseBack = TRUE, const wxRect *rect = NULL) ;
+   WXWidget	 GetMacControl() { return m_macControl ;}
 
 #if WXWIN_COMPATIBILITY
    virtual void SetButtonColour(const wxColour& WXUNUSED(col)) { }

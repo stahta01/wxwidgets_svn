@@ -6,7 +6,7 @@
 # 
 # 
 # 
-PROGRAM = pngdemo
+PROGRAM = png 
 OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj 
 # 
 !include $(%WXWIN)\src\makeprog.wat 

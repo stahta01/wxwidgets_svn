@@ -192,47 +192,46 @@ wxPrintPaperType *wxPrintPaperDatabase::FindPaperType(const wxString& name)
 {
     wxNode *node = Find(name);
     if (node)
-        return (wxPrintPaperType *)node->GetData();
+        return (wxPrintPaperType *)node->Data();
     else
         return (wxPrintPaperType *) NULL;
 }
 
 wxPrintPaperType *wxPrintPaperDatabase::FindPaperType(wxPaperSize id)
 {
-    wxNode *node = GetFirst();
+    wxNode *node = First();
     while (node)
     {
-        wxPrintPaperType* paperType = (wxPrintPaperType*) node->GetData();
+        wxPrintPaperType* paperType = (wxPrintPaperType*) node->Data();
         if (paperType->GetId() == id)
             return paperType;
-        node = node->GetNext();
+        node = node->Next();
     }
     return (wxPrintPaperType *) NULL;
 }
 
 wxPrintPaperType *wxPrintPaperDatabase::FindPaperTypeByPlatformId(int id)
 {
-    wxNode *node = GetFirst();
+    wxNode *node = First();
     while (node)
     {
-        wxPrintPaperType* paperType = (wxPrintPaperType*) node->GetData();
+        wxPrintPaperType* paperType = (wxPrintPaperType*) node->Data();
         if (paperType->GetPlatformId() == id)
             return paperType;
-        node = node->GetNext();
+        node = node->Next();
     }
     return (wxPrintPaperType *) NULL;
 }
 
 wxPrintPaperType *wxPrintPaperDatabase::FindPaperType(const wxSize& sz)
 {
-    wxNode *node = GetFirst();
+    wxNode *node = First();
     while (node)
     {
-        wxPrintPaperType* paperType = (wxPrintPaperType*) node->GetData();
-        wxSize paperSize = paperType->GetSize() ;
-        if ( abs( paperSize.x - sz.x ) < 10 && abs( paperSize.y - sz.y ) < 10 )
+        wxPrintPaperType* paperType = (wxPrintPaperType*) node->Data();
+        if (paperType->GetSize() == sz)
             return paperType;
-        node = node->GetNext();
+        node = node->Next();
     }
     return (wxPrintPaperType *) NULL;
 }

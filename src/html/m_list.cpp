@@ -43,8 +43,7 @@ class wxHtmlListmarkCell : public wxHtmlCell
         wxBrush m_Brush;
     public:
         wxHtmlListmarkCell(wxDC *dc, const wxColour& clr);
-        void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-                  wxHtmlRenderingInfo& info);
+        void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
 };
 
 wxHtmlListmarkCell::wxHtmlListmarkCell(wxDC* dc, const wxColour& clr) : wxHtmlCell(), m_Brush(clr, wxSOLID)
@@ -56,9 +55,7 @@ wxHtmlListmarkCell::wxHtmlListmarkCell(wxDC* dc, const wxColour& clr) : wxHtmlCe
 
 
 
-void wxHtmlListmarkCell::Draw(wxDC& dc, int x, int y,
-                              int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                              wxHtmlRenderingInfo& WXUNUSED(info))
+void wxHtmlListmarkCell::Draw(wxDC& dc, int x, int y, int WXUNUSED(view_y1), int WXUNUSED(view_y2))
 {
     dc.SetBrush(m_Brush);
     dc.DrawEllipse(x + m_PosX + m_Width / 3, y + m_PosY + m_Height / 3, 
@@ -133,7 +130,7 @@ TAG_HANDLER_BEGIN(OLULLI, "OL,UL,LI")
             else m_Numbering = 1;
 
             c = m_WParser->GetContainer();
-            if (c->GetFirstChild() != NULL)
+            if (c->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();

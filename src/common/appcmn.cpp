@@ -121,6 +121,9 @@ bool wxAppBase::OnInitGui()
 #ifdef __WXUNIVERSAL__
     if ( !wxTheme::Get() && !wxTheme::CreateDefault() )
         return FALSE;
+    wxArtProvider *art = wxTheme::Get()->GetArtProvider();
+    if ( art )
+        wxArtProvider::PushProvider(art);
 #endif // __WXUNIVERSAL__
 
     return TRUE;
@@ -212,10 +215,10 @@ void wxAppBase::ProcessPendingEvents()
     }
 
     // iterate until the list becomes empty
-    wxNode *node = wxPendingEvents->GetFirst();
+    wxNode *node = wxPendingEvents->First();
     while (node)
     {
-        wxEvtHandler *handler = (wxEvtHandler *)node->GetData();
+        wxEvtHandler *handler = (wxEvtHandler *)node->Data();
         delete node;
 
         // In ProcessPendingEvents(), new handlers might be add
@@ -224,7 +227,7 @@ void wxAppBase::ProcessPendingEvents()
         handler->ProcessPendingEvents();
         wxENTER_CRIT_SECT( *wxPendingEventsLocker );
 
-        node = wxPendingEvents->GetFirst();
+        node = wxPendingEvents->First();
     }
 
     wxLEAVE_CRIT_SECT( *wxPendingEventsLocker );
@@ -378,11 +381,10 @@ bool wxAppBase::OnCmdLineParsed(wxCmdLineParser& parser)
         if ( !theme )
         {
             wxLogError(_("Unsupported theme '%s'."), themeName.c_str());
+
             return FALSE;
         }
 
-        // Delete the defaultly created theme and set the new theme.
-        delete wxTheme::Get();
         wxTheme::Set(theme);
     }
 #endif // __WXUNIVERSAL__
@@ -395,6 +397,7 @@ bool wxAppBase::OnCmdLineParsed(wxCmdLineParser& parser)
         if ( wxSscanf(modeDesc.c_str(), _T("%ux%u-%u"), &w, &h, &bpp) != 3 )
         {
             wxLogError(_("Invalid display mode specification '%s'."), modeDesc.c_str());
+
             return FALSE;
         }
 
@@ -473,7 +476,6 @@ bool wxAppBase::CheckBuildOptions(const wxBuildOptions& opts)
 
 static void LINKAGEMODE SetTraceMasks()
 {
-#if wxUSE_LOG
     wxString mask;
     if ( wxGetEnv(wxT("WXTRACE"), &mask) )
     {
@@ -481,7 +483,6 @@ static void LINKAGEMODE SetTraceMasks()
         while ( tkn.HasMoreTokens() )
             wxLog::AddTraceMask(tkn.GetNextToken());
     }
-#endif // wxUSE_LOG
 }
 
 // wxASSERT() helper
@@ -559,7 +560,7 @@ void ShowAssertDialog(const wxChar *szFile,
 #else
         // send to stderr
         wxFprintf(stderr, wxT("%s\n"), szBuf);
-        fflush(stderr);
+        fflush(stderr); 
 #endif
         // He-e-e-e-elp!! we're asserting in a child thread
         wxTrap();

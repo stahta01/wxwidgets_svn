@@ -28,7 +28,6 @@
 #ifndef WX_PRECOMP
     #include "wx/log.h"
 
-    #include "wx/bitmap.h"
     #include "wx/button.h"
     #include "wx/checkbox.h"
     #include "wx/combobox.h"
@@ -352,7 +351,7 @@ void ListboxWidgetsPage::CreateLbox()
             items.Add(m_lbox->GetString(n));
         }
 
-        m_sizerLbox->Detach( m_lbox );
+        m_sizerLbox->Remove(m_lbox);
         delete m_lbox;
     }
 

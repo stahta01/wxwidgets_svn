@@ -26,11 +26,11 @@ struct WXDLLEXPORT _wxHashTable_NodeBase
     _wxHashTable_NodeBase() : m_nxt(0) {}
 
     _wxHashTable_NodeBase* m_nxt;
-
-// Cannot do this:
-//  DECLARE_NO_COPY_CLASS(_wxHashTable_NodeBase)
-// without rewriting the macros, which require a public copy constructor.
 };
+
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
 
 // private
 class WXDLLEXPORT _wxHashTableBase2
@@ -73,6 +73,10 @@ protected:
         return (void **)calloc(sz, sizeof(void*));
     }
 };
+
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
 
 #define _WX_DECLARE_HASHTABLE( VALUE_T, KEY_T, HASH_T, KEY_EX_T, KEY_EQ_T, CLASSNAME, CLASSEXP, SHOULD_GROW, SHOULD_SHRINK ) \
 CLASSEXP CLASSNAME : protected _wxHashTableBase2 \
@@ -181,7 +185,7 @@ public: \
     CLASSNAME( size_type sz = 10, const hasher& hfun = hasher(), \
                const key_equal& k_eq = key_equal(), \
                const key_extractor& k_ex = key_extractor() ) \
-        : m_tableBuckets( GetNextPrime( (unsigned long) sz ) ), \
+        : m_tableBuckets( GetNextPrime( sz ) ), \
           m_items( 0 ), \
           m_hasher( hfun ), \
           m_equals( k_eq ), \
@@ -254,7 +258,7 @@ public: \
         delete *node; \
         (*node) = temp; \
         if( SHOULD_SHRINK( m_tableBuckets, m_items ) ) \
-            ResizeTable( GetPreviousPrime( (unsigned long) m_tableBuckets ) - 1 ); \
+            ResizeTable( GetPreviousPrime( m_tableBuckets ) - 1 ); \
         return 1; \
     } \
  \
@@ -326,7 +330,7 @@ protected: \
  \
     void ResizeTable( size_t newSize ) \
     { \
-        newSize = GetNextPrime( (unsigned long)newSize ); \
+        newSize = GetNextPrime( newSize ); \
         Node** srcTable = m_table; \
         size_t srcBuckets = m_tableBuckets; \
         m_table = (Node**)AllocTable( newSize ); \
@@ -443,7 +447,7 @@ public:
 
     // TODO: this might not work well on architectures with 64 bit pointers but
     //       32 bit longs, we should use % ULONG_MAX there
-    unsigned long operator()( const void* k ) const { return (unsigned long)wxPtrToULong(k); }
+    unsigned long operator()( const void* k ) const { return (unsigned long)k; }
 
     wxPointerHash& operator=(const wxPointerHash&) { return *this; }
 };

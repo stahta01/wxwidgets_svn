@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        cursor.cpp
 // Purpose:     wxCursor class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -292,7 +292,13 @@ wxCursor::wxCursor(const wxString& cursor_file, long flags, int hotSpotX, int ho
     if ( flags == wxBITMAP_TYPE_MACCURSOR_RESOURCE )
     {
         Str255 theName ;
-		wxMacStringToPascal( cursor_file , theName ) ;
+
+    #if TARGET_CARBON
+        c2pstrcpy( (StringPtr) theName , cursor_file ) ;
+    #else
+        strcpy( (char *) theName , cursor_file ) ;
+        c2pstr( (char *) theName ) ;
+    #endif
         
         wxStAppResource resload ;
         Handle resHandle = ::GetNamedResource( 'crsr' , theName ) ;
@@ -338,42 +344,42 @@ wxCursor::wxCursor(const wxString& cursor_file, long flags, int hotSpotX, int ho
 // Cursors by stock number
 wxCursor::wxCursor(int cursor_type)
 {
-    m_refData = new wxCursorRefData;
-    
-    switch (cursor_type)
+  m_refData = new wxCursorRefData;
+  
+  switch (cursor_type)
     {
     case wxCURSOR_COPY_ARROW:
         M_CURSORDATA->m_themeCursor = kThemeCopyArrowCursor ;
         break;
     case wxCURSOR_WAIT:
         M_CURSORDATA->m_themeCursor = kThemeWatchCursor ;
-        break;
+      break;
     case wxCURSOR_IBEAM:
         M_CURSORDATA->m_themeCursor = kThemeIBeamCursor ;
-        break;
+      break;
     case wxCURSOR_CROSS:
         M_CURSORDATA->m_themeCursor = kThemeCrossCursor;
-        break;
+      break;
     case wxCURSOR_SIZENWSE:
-        {
-            wxStAppResource resload ;
+      {
+        wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorSizeNWSE);
-        }
-        break;
+      }
+      break;
     case wxCURSOR_SIZENESW:
-        {
-            wxStAppResource resload ;
+      {
+        wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorSizeNESW);
-        }
-        break;
+      }
+      break;
     case wxCURSOR_SIZEWE:
-        {
+      {
             M_CURSORDATA->m_themeCursor = kThemeResizeLeftRightCursor;
-        }
-        break;
+      }
+      break;
     case wxCURSOR_SIZENS:
-        {
-            wxStAppResource resload ;
+      {
+        wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorSizeNS);
         }
         break;
@@ -390,30 +396,30 @@ wxCursor::wxCursor(int cursor_type)
         break;
     case wxCURSOR_BULLSEYE:
         {
-            wxStAppResource resload ;
+          wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorBullseye);
         }
         break;
     case wxCURSOR_PENCIL:
         {
-            wxStAppResource resload ;
+          wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorPencil);
         }
         break;
     case wxCURSOR_MAGNIFIER:
         {
-            wxStAppResource resload ;
+          wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorMagnifier);
         }
         break;
     case wxCURSOR_NO_ENTRY:
         {
-            wxStAppResource resload ;
+          wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorNoEntry);
         }
         break;
     case wxCURSOR_WATCH:
-        {
+    {
             M_CURSORDATA->m_themeCursor = kThemeWatchCursor;
             break;
         }
@@ -451,10 +457,10 @@ wxCursor::wxCursor(int cursor_type)
         {
             wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorRightArrow);
-            break;
-        }
+      break;
+    }
     case wxCURSOR_SPRAYCAN:
-        {
+    {
             wxStAppResource resload ;
             M_CURSORDATA->m_hCursor = ::GetCursor(kwxCursorRoller);
             break;
@@ -489,7 +495,7 @@ void wxCursor::MacInstall() const
     else
     {
         SetThemeCursor( kThemeArrowCursor ) ;
-    }
+	}
 }
 
 wxCursor::~wxCursor()
@@ -499,7 +505,7 @@ wxCursor::~wxCursor()
 // Global cursor setting
 void wxSetCursor(const wxCursor& cursor)
 {
-    cursor.MacInstall() ;
+	cursor.MacInstall() ;
 }
 
 

@@ -27,8 +27,6 @@
 #include "wx/notebook.h"
 #include "wx/sizer.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxNotebookXmlHandler, wxXmlResourceHandler)
-
 wxNotebookXmlHandler::wxNotebookXmlHandler() 
 : wxXmlResourceHandler(), m_isInside(FALSE), m_notebook(NULL)
 {
@@ -52,8 +50,8 @@ wxObject *wxNotebookXmlHandler::DoCreateResource()
         {
             bool old_ins = m_isInside;
             m_isInside = FALSE;
-            wxObject *item = CreateResFromNode(n, m_notebook, NULL);
             m_isInside = old_ins;
+            wxObject *item = CreateResFromNode(n, m_notebook, NULL);
             wxWindow *wnd = wxDynamicCast(item, wxWindow);
 
             if (wnd)

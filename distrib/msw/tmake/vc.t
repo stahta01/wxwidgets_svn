@@ -152,6 +152,7 @@ GENERICOBJS= #$ ExpandList("WXGENERICOBJS");
 NONESSENTIALOBJS= #$ ExpandList("WXNONESSENTIALOBJS");
 
 COMMONOBJS = \
+		$(COMMDIR)\$D\y_tab.obj \
 		#$ ExpandList("WXCOMMONOBJS");
 
 MSWOBJS = #$ ExpandList("WXMSWOBJS");
@@ -163,7 +164,7 @@ HTMLOBJS = #$ ExpandList("WXHTMLOBJS");
 # Add $(HTMLOBJS) if wanting wxHTML classes
 OBJECTS = $(COMMONOBJS) $(GENERICOBJS) $(MSWOBJS) $(HTMLOBJS)
 
-ARCHINCDIR=$(WXDIR)\lib\$(_WXINC_BUILD)$(_WXINC_DLLSUFFIX)$(_WXINC_SUFFIX)$(LIBEXT)
+ARCHINCDIR=$(WXDIR)\lib\msw$(INCEXT)
 SETUP_H=$(ARCHINCDIR)\wx\setup.h
 
 # Normal, static library
@@ -323,6 +324,9 @@ $(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\fileconf.obj /c /Tp $(COMMDIR)\fileconf.cpp
 $(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\hash.obj /c /Tp $(COMMDIR)\hash.cpp
 <<
 	cl @<<
+$(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\resource.obj /c /Tp $(COMMDIR)\resource.cpp
+<<
+	cl @<<
 $(CPPFLAGS2) /Od /Fo$(COMMDIR)\$D\textfile.obj /c /Tp $(COMMDIR)\textfile.cpp
 <<
 	cl @<<
@@ -336,6 +340,9 @@ $(CPPFLAGS2) /Od /Fo$(GENDIR)\$D\gridsel.obj /c /Tp $(GENDIR)\gridsel.cpp
 <<
 	cl @<<
 $(CPPFLAGS2) /Od /Fo$(GENDIR)\$D\logg.obj /c /Tp $(GENDIR)\logg.cpp
+<<
+	cl @<<
+$(CPPFLAGS2) /Od /Fo$(GENDIR)\$D\proplist.obj /c /Tp $(GENDIR)\proplist.cpp
 <<
 	cl @<<
 $(CPPFLAGS2) /Od /Fo$(MSWDIR)\$D\clipbrd.obj /c /Tp $(MSWDIR)\clipbrd.cpp
@@ -387,7 +394,7 @@ $(CPPFLAGS2) /c $(COMMDIR)\unzip.c /Fo$@
 
 png:
     cd $(WXDIR)\src\png
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) UNICODE=0
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG)
     cd $(WXDIR)\src\msw
 
 clean_png:
@@ -397,7 +404,7 @@ clean_png:
 
 zlib:
     cd $(WXDIR)\src\zlib
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) UNICODE=0
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG)
     cd $(WXDIR)\src\msw
 
 clean_zlib:
@@ -407,7 +414,7 @@ clean_zlib:
 
 jpeg:
     cd $(WXDIR)\src\jpeg
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) UNICODE=0 all
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) all
     cd $(WXDIR)\src\msw
 
 clean_jpeg:
@@ -417,7 +424,7 @@ clean_jpeg:
 
 tiff:
     cd $(WXDIR)\src\tiff
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) UNICODE=0 all
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL)  CRTFLAG=$(CRTFLAG) all
     cd $(WXDIR)\src\msw
 
 clean_tiff:
@@ -427,7 +434,7 @@ clean_tiff:
 
 regex:
     cd $(WXDIR)\src\regex
-    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) UNICODE=0 all
+    nmake -f makefile.vc FINAL=$(FINAL) DLL=$(DLL) WXMAKINGDLL=$(WXMAKINGDLL) CRTFLAG=$(CRTFLAG) all
     cd $(WXDIR)\src\msw
 
 clean_regex:
@@ -441,11 +448,11 @@ rcparser:
     cd $(WXDIR)\src\msw
 
 cleanall: clean clean_png clean_zlib clean_jpeg clean_tiff clean_regex
-        -erase ..\..\lib\$(WXLIBNAME).dll
-        -erase ..\..\lib\$(WXLIBNAME).lib
-        -erase ..\..\lib\$(WXLIBNAME).exp
-        -erase ..\..\lib\$(WXLIBNAME).pdb
-        -erase ..\..\lib\$(WXLIBNAME).ilk
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).dll
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).lib
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).exp
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).pdb
+        -erase ..\..\lib\wx$(WXVERSION)$(LIBEXT).ilk
 
 
 clean: $(PERIPH_CLEAN_TARGET)
@@ -601,11 +608,11 @@ $(DOCDIR)\html\wx\wx.htm:         $(DOCDIR)\latex\wx\classes.tex $(DOCDIR)\latex
 
 $(DOCDIR)\htmlhelp\wx.chm : $(DOCDIR)\html\wx\wx.htm $(DOCDIR)\mshtml\wx\wx.htm $(DOCDIR)\mshtml\wx\wx.hhp
 	cd $(DOCDIR)\mshtml\wx
-    copy $(DOCDIR)\latex\wx\wx.css .
+	copy $(DOCDIR)\latex\wx\wx.css .
 	-hhc wx.hhp
-    -mkdir ..\..\htmlhelp
-    -erase $(DOCDIR)\htmlhelp\wx.chm
-    move wx.chm ..\..\htmlhelp
+	-mkdir ..\..\htmlhelp
+	-erase $(DOCDIR)\htmlhelp\wx.chm
+	move wx.chm ..\..\htmlhelp
 	cd $(THISDIR)
 
 $(WXDIR)\docs\latex\wx\manual.dvi:	$(DOCDIR)/latex/wx/body.tex $(DOCDIR)/latex/wx/manual.tex

@@ -5,8 +5,8 @@
 // Modified by: VZ at 11.12.99 (wxScrollableToolBar splitted off)
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -164,29 +164,10 @@ wxToolBarToolBase *wxToolBarBase::InsertTool(size_t pos,
     wxToolBarToolBase *tool = CreateTool(id, label, bitmap, bmpDisabled, kind,
                                          clientData, shortHelp, longHelp);
 
-    if ( !InsertTool(pos, tool) )
+    if ( !tool || !DoInsertTool(pos, tool) )
     {
         delete tool;
 
-        return NULL;
-    }
-
-    return tool;
-}
-
-wxToolBarToolBase *wxToolBarBase::AddTool(wxToolBarToolBase *tool)
-{
-    return InsertTool(GetToolsCount(), tool);
-}
-
-wxToolBarToolBase *
-wxToolBarBase::InsertTool(size_t pos, wxToolBarToolBase *tool)
-{
-    wxCHECK_MSG( pos <= GetToolsCount(), (wxToolBarToolBase *)NULL,
-                 _T("invalid position in wxToolBar::InsertTool()") );
-
-    if ( !tool || !DoInsertTool(pos, tool) )
-    {
         return NULL;
     }
 
@@ -213,12 +194,14 @@ wxToolBarToolBase *wxToolBarBase::InsertControl(size_t pos, wxControl *control)
 
     wxToolBarToolBase *tool = CreateTool(control);
 
-    if ( !InsertTool(pos, tool) )
+    if ( !tool || !DoInsertTool(pos, tool) )
     {
         delete tool;
 
         return NULL;
     }
+
+    m_tools.Insert(pos, tool);
 
     return tool;
 }
@@ -456,22 +439,6 @@ void wxToolBarBase::SetToolClientData(int id, wxObject *clientData)
     wxCHECK_RET( tool, _T("no such tool in wxToolBar::SetToolClientData") );
 
     tool->SetClientData(clientData);
-}
-
-int wxToolBarBase::GetToolPos(int id) const
-{
-    size_t pos = 0;
-    wxToolBarToolsList::Node *node;
-
-    for ( node = m_tools.GetFirst(); node; node = node->GetNext() )
-    {
-        if ( node->GetData()->GetId() == id )
-            return pos;
-
-        pos++;
-    }
-
-    return wxNOT_FOUND;
 }
 
 bool wxToolBarBase::GetToolState(int id) const

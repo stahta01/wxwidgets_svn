@@ -105,7 +105,7 @@ void wxMemoryDC::SelectObject( const wxBitmap& bitmap )
     
     if (m_bitmap.Ok() && (bitmap.GetDisplay() == m_display))
     {
-        m_pixmap = m_bitmap.GetDrawable();
+        m_pixmap = m_bitmap.GetPixmap();
         Display* display = (Display*) m_display;
         
         XGCValues gcvalues;

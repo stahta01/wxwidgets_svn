@@ -12,7 +12,7 @@
 #ifndef _WX_PRINT_H_
 #define _WX_PRINT_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "print.h"
 #endif
 

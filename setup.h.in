@@ -61,45 +61,39 @@
 /* Define this if your version of GTK+ is greater than 1.3 */
 #undef __WXGTK20__
 
-/* Define this if your version of Motif is greater than 2.0 */
-#undef __WXMOTIF20__
-
 /*
  * Define to 1 for Unix[-like] system
  */
 #define wxUSE_UNIX 0
 
 #undef __UNIX__
-
-#undef __AIX__
-#undef __BSD__
-#undef __DARWIN__
-#undef __EMX__
-#undef __FREEBSD__
-#undef __HPUX__
 #undef __LINUX__
+#undef __SGI__
+#undef __HPUX__
+#undef __SYSV__
+#undef __SVR4__
+#undef __AIX__
+#undef __SUN__
+#undef __SOLARIS__
+#undef __SUNOS__
+#undef __ALPHA__
+#undef __IA64__
+#undef __OSF__
+#undef __BSD__
+#undef __FREEBSD__
+#undef __DARWIN__
 #undef __NETBSD__
 #undef __OPENBSD__
-#undef __OSF__
-#undef __SGI__
-#undef __SOLARIS__
-#undef __SUN__
-#undef __SUNOS__
-#undef __SVR4__
-#undef __SYSV__
-#undef __ULTRIX__
-#undef __UNIXWARE__
 #undef __VMS__
-
-#undef __IA64__
-#undef __ALPHA__
+#undef __ULTRIX__
+#undef __DATA_GENERAL__
+#undef __EMX__
 
 /* NanoX (with wxX11) */
 #define wxUSE_NANOX 0
 
 /* PowerPC Darwin & Mac OS X */
 #undef __POWERPC__
-#undef TARGET_CARBON
 
 /* MS-DOS with DJGPP */
 #undef __DOS__
@@ -109,21 +103,12 @@
 #undef __WINDOWS__
 #endif
 
-#ifndef __WIN95__
-#undef __WIN95__
-#endif
 #ifndef __WIN32__
 #undef __WIN32__
 #endif
-#ifndef __GNUWIN32__
 #undef __GNUWIN32__
-#endif
-#ifndef STRICT
 #undef STRICT
-#endif
-#ifndef WINVER
 #undef WINVER
-#endif
 
 /* enable native status bar under Win32 */
 #if defined(__WIN95__) && !defined(__WXUNIVERSAL__)
@@ -136,7 +121,7 @@
 #endif
 
 /* enable rich edit under Win32 */
-#if defined(__WIN95__) && !defined(__WINE__) && !defined(__GNUWIN32_OLD__)
+#if defined(__WIN95__) && !defined(__TWIN32__) && !defined(__GNUWIN32_OLD__)
 #define wxUSE_RICHEDIT 1
 #else
 #define wxUSE_RICHEDIT 0
@@ -151,11 +136,6 @@
  * Define if your compiler supports the explicit keyword
  */
 #undef HAVE_EXPLICIT
-
-/*
- * Define if your compiler supports const_cast<>()
- */
-#undef HAVE_CONST_CAST
 
 /*
  * Use regex support
@@ -330,11 +310,6 @@
 #define wxUSE_DRAGIMAGE 0
 
 /*
- * Enable accessibility support
- */
-#define wxUSE_ACCESSIBILITY 0
-
-/*
  * Use property sheet classes
  */
 #define wxUSE_PROPSHEET 0
@@ -383,10 +358,6 @@
  */
 #define wxUSE_CHOICE 0
 /*
- * Use wxDisplay class
- */
-#define wxUSE_DISPLAY 0
-/*
  * Use this control
  */
 #define wxUSE_GAUGE 0
@@ -395,12 +366,12 @@
  */
 #define wxUSE_GRID 0
 /*
- * Use the new prototype wxGrid classes
- * (wxUSE_GRID must also be defined)
+ * Use this control
  */
 #define wxUSE_NEW_GRID 0
 /*
- * Use wxImageList class
+ * Use the new prototype wxGrid classes
+ * (wxUSE_GRID must also be defined)
  */
 #define wxUSE_IMAGLIST 0
 /*
@@ -776,10 +747,6 @@
  */
 #define WXWIN_COMPATIBILITY_2_2 0
 /*
- * Compatibility with 2.4 API
- */
-#define WXWIN_COMPATIBILITY_2_4 0
-/*
  * Enables debugging: memory tracing, assert, etc., contains debug level
  */
 #define WXDEBUG 0
@@ -992,9 +959,6 @@
 /* Define if you have vsnprintf() */
 #undef HAVE_VSNPRINTF
 
-/* Define if you have vsnprintf() declaration in the header */
-#undef HAVE_VSNPRINTF_DECL
-
 /* Define if you have usleep() */
 #undef HAVE_USLEEP
 
@@ -1148,8 +1112,6 @@
 /* Define this if you are using gtk and gdk contains support for X11R6 XIM */
 #undef HAVE_XIM
 
-/* Define this is you have X11/extensions/shape.h */
-#undef HAVE_XSHAPE
 
 /* -------------------------------------------------------------------------
    Win32 adjustments section

@@ -28,6 +28,7 @@
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in wx_setup.h!
 #endif
 
+#include <wx/wxexpr.h>
 #include "ogledit.h"
 #include "doc.h"
 #include "view.h"
@@ -91,7 +92,9 @@ wxOutputStream& DiagramDocument::SaveObject(wxOutputStream& stream)
   char buf[400];
   (void) wxGetTempFileName("diag", buf);
 
+#if wxUSE_PROLOGIO
   diagram.SaveFile(buf);
+#endif
 
   wxTransferFileToStream(buf, stream);
 
@@ -112,7 +115,11 @@ wxInputStream& DiagramDocument::LoadObject(wxInputStream& stream)
   wxTransferStreamToFile(stream, buf);
 
   diagram.DeleteAllShapes();
+
+#if wxUSE_PROLOGIO
   diagram.LoadFile(buf);
+#endif
+
   wxRemoveFile(buf);
 
   return stream;
@@ -547,6 +554,7 @@ void MyEvtHandler::OnEndSize(double x, double y)
  * Diagram
  */
  
+#if wxUSE_PROLOGIO
 bool MyDiagram::OnShapeSave(wxExprDatabase& db, wxShape& shape, wxExpr& expr)
 {
   wxDiagram::OnShapeSave(db, shape, expr);
@@ -567,6 +575,7 @@ bool MyDiagram::OnShapeLoad(wxExprDatabase& db, wxShape& shape, wxExpr& expr)
     delete[] label;
   return TRUE;
 }
+#endif
 
 /*
  * New shapes

@@ -12,7 +12,7 @@
 #ifndef _WX_TOOLBAR_H_
 #define _WX_TOOLBAR_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "toolbar.h"
 #endif
 
@@ -53,7 +53,7 @@ public:
     // find tool by widget
     wxToolBarToolBase *FindToolByWidget(WXWidget w) const;
     
-private:
+protected:
     // common part of all ctors
     void Init();
     
@@ -74,10 +74,7 @@ private:
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
     virtual wxToolBarToolBase *CreateTool(wxControl *control);
-
-    virtual void DoSetSize(int x, int y,
-                           int width, int height,
-                           int sizeFlags = wxSIZE_AUTO);
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxToolBar)
 };

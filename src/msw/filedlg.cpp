@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +43,7 @@
 
 #include "wx/msw/private.h"
 
-#if !defined(__WIN32__) || defined(__SALFORDC__)
+#if !defined(__WIN32__) || defined(__SALFORDC__) || defined(__WXWINE__)
     #include <commdlg.h>
 #endif
 

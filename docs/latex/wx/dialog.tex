@@ -51,6 +51,12 @@ below:
     }
 \end{verbatim}
 
+A dialog may be loaded from a wxWindows resource file (extension {\tt wxr}),
+which may itself be created by Dialog Editor. For details, see 
+\helpref{The wxWindows resource system}{resourceformats}, 
+\helpref{wxWindows resource functions}{resourcefuncs} 
+and the resource sample.
+
 An application can define an \helpref{wxCloseEvent}{wxcloseevent} handler for
 the dialog to respond to system close events.
 
@@ -59,10 +65,9 @@ the dialog to respond to system close events.
 \twocolwidtha{5cm}
 \begin{twocollist}\itemsep=0pt
 \twocolitem{\windowstyle{wxCAPTION}}{Puts a caption on the dialog box.}
-\twocolitem{\windowstyle{wxDEFAULT\_DIALOG\_STYLE}}{Equivalent to a combination of wxCAPTION, wxCLOSE\_BOX and wxSYSTEM\_MENU (the last one is not used under Unix)}
+\twocolitem{\windowstyle{wxDEFAULT\_DIALOG\_STYLE}}{Equivalent to a combination of wxCAPTION and wxSYSTEM\_MENU (the latter is not used under Unix)}
 \twocolitem{\windowstyle{wxRESIZE\_BORDER}}{Display a resizeable frame around the window.}
 \twocolitem{\windowstyle{wxSYSTEM\_MENU}}{Display a system menu.}
-\twocolitem{\windowstyle{wxCLOSE\_BOX}}{Displays a close box on the frame.}
 \twocolitem{\windowstyle{wxTHICK\_FRAME}}{Display a thick frame around the window.}
 \twocolitem{\windowstyle{wxSTAY\_ON\_TOP}}{The dialog stays on top of all other windows (Windows only).}
 \twocolitem{\windowstyle{wxNO\_3D}}{Under Windows, specifies that the child controls
@@ -86,7 +91,7 @@ See also \helpref{Generic window styles}{windowstyles}.
 
 \wxheading{See also}
 
-\helpref{wxDialog overview}{wxdialogoverview}, \helpref{wxFrame}{wxframe},\rtfsp
+\helpref{wxDialog overview}{wxdialogoverview}, \helpref{wxFrame}{wxframe}, \helpref{Resources}{resources},\rtfsp
 \helpref{Validator overview}{validatoroverview}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
@@ -205,31 +210,31 @@ Iconizes or restores the dialog. Windows only.
 
 \wxheading{Parameters}
 
-\docparam{iconize}{If true, iconizes the dialog box; if false, shows and restores it.}
+\docparam{iconize}{If TRUE, iconizes the dialog box; if FALSE, shows and restores it.}
 
 \wxheading{Remarks}
 
 Note that in Windows, iconization has no effect since dialog boxes cannot be
 iconized. However, applications may need to explicitly restore dialog
 boxes under Motif which have user-iconizable frames, and under Windows
-calling {\tt Iconize(false)} will bring the window to the front, as does
-\rtfsp{\tt Show(true)}.
+calling {\tt Iconize(FALSE)} will bring the window to the front, as does
+\rtfsp{\tt Show(TRUE)}.
 
 \membersection{wxDialog::IsIconized}\label{wxdialogisiconized}
 
 \constfunc{bool}{IsIconized}{\void}
 
-Returns true if the dialog box is iconized. Windows only.
+Returns TRUE if the dialog box is iconized. Windows only.
 
 \wxheading{Remarks}
 
-Always returns false under Windows since dialogs cannot be iconized.
+Always returns FALSE under Windows since dialogs cannot be iconized.
 
 \membersection{wxDialog::IsModal}\label{wxdialogismodal}
 
 \constfunc{bool}{IsModal}{\void}
 
-Returns true if the dialog box is modal, false otherwise.
+Returns TRUE if the dialog box is modal, FALSE otherwise.
 
 \membersection{wxDialog::OnCharHook}\label{wxdialogoncharhook}
 
@@ -268,7 +273,7 @@ The default handler for the wxID\_CANCEL identifier.
 \wxheading{Remarks}
 
 The function either calls {\bf EndModal(wxID\_CANCEL)} if the dialog is modal, or
-sets the return value to wxID\_CANCEL and calls {\bf Show(false)} if the dialog is modeless.
+sets the return value to wxID\_CANCEL and calls {\bf Show(FALSE)} if the dialog is modeless.
 
 \wxheading{See also}
 
@@ -284,8 +289,8 @@ The default handler for the wxID\_OK identifier.
 
 The function calls
 \rtfsp\helpref{wxWindow::Validate}{wxwindowvalidate}, then \helpref{wxWindow::TransferDataFromWindow}{wxwindowtransferdatafromwindow}.
-If this returns true, the function either calls {\bf EndModal(wxID\_OK)} if the dialog is modal, or
-sets the return value to wxID\_OK and calls {\bf Show(false)} if the dialog is modeless.
+If this returns TRUE, the function either calls {\bf EndModal(wxID\_OK)} if the dialog is modal, or
+sets the return value to wxID\_OK and calls {\bf Show(FALSE)} if the dialog is modeless.
 
 \wxheading{See also}
 
@@ -349,7 +354,7 @@ until the dialog is hidden) or modeless (control returns immediately).
 
 \wxheading{Parameters}
 
-\docparam{flag}{If true, the dialog will be modal, otherwise it will be modeless.}
+\docparam{flag}{If TRUE, the dialog will be modal, otherwise it will be modeless.}
 
 \membersection{wxDialog::SetReturnCode}\label{wxdialogsetreturncode}
 
@@ -389,8 +394,8 @@ Hides or shows the dialog.
 
 \wxheading{Parameters}
 
-\docparam{show}{If true, the dialog box is shown and brought to the front;
-otherwise the box is hidden. If false and the dialog is
+\docparam{show}{If TRUE, the dialog box is shown and brought to the front;
+otherwise the box is hidden. If FALSE and the dialog is
 modal, control is returned to the calling program.}
 
 \wxheading{Remarks}

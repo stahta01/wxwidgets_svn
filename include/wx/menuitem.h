@@ -6,7 +6,7 @@
 // Created:     25.10.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MENUITEM_H_BASE_
@@ -38,7 +38,7 @@ class WXDLLEXPORT wxMenuItemBase : public wxObject
 public:
     // creation
     static wxMenuItem *New(wxMenu *parentMenu = (wxMenu *)NULL,
-                           int itemid = wxID_SEPARATOR,
+                           int id = wxID_SEPARATOR,
                            const wxString& text = wxEmptyString,
                            const wxString& help = wxEmptyString,
                            wxItemKind kind = wxITEM_NORMAL,
@@ -49,10 +49,9 @@ public:
 
     // the menu we're in
     wxMenu *GetMenu() const { return m_parentMenu; }
-    void SetMenu(wxMenu* menu) { m_parentMenu = menu; }
 
     // get/set id
-    void SetId(int itemid) { m_id = itemid; }
+    void SetId(int id) { m_id = id; }
     int  GetId() const { return m_id; }
     bool IsSeparator() const { return m_id == wxID_SEPARATOR; }
 
@@ -110,13 +109,13 @@ public:
     const wxString& GetName() const { return GetText(); }
 
     static wxMenuItem *New(wxMenu *parentMenu,
-                           int itemid,
+                           int id,
                            const wxString& text,
                            const wxString& help,
                            bool isCheckable,
                            wxMenu *subMenu = (wxMenu *)NULL)
     {
-        return New(parentMenu, itemid, text, help,
+        return New(parentMenu, id, text, help,
                    isCheckable ? wxITEM_CHECK : wxITEM_NORMAL, subMenu);
     }
 
@@ -132,7 +131,7 @@ protected:
 
     // this ctor is for the derived classes only, we're never created directly
     wxMenuItemBase(wxMenu *parentMenu = (wxMenu *)NULL,
-                   int itemid = wxID_SEPARATOR,
+                   int id = wxID_SEPARATOR,
                    const wxString& text = wxEmptyString,
                    const wxString& help = wxEmptyString,
                    wxItemKind kind = wxITEM_NORMAL,
@@ -162,10 +161,10 @@ private:
     #include "wx/gtk/menuitem.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/menuitem.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/menuitem.h"
 #elif defined(__WXPM__)
     #include "wx/os2/menuitem.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/menuitem.h"
 #endif
 #endif // wxUSE_BASE_CLASSES_ONLY/!wxUSE_BASE_CLASSES_ONLY
 

@@ -6,7 +6,7 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Ove Kaaven, Robert Roebling, Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_WXSTRCONVH__
@@ -19,10 +19,6 @@
 #include "wx/defs.h"
 #include "wx/wxchar.h"
 #include "wx/buffer.h"
-
-#ifdef __DIGITALMARS__
-#include "typeinfo.h"
-#endif
 
 #if defined(__VISAGECPP__) && __IBMCPP__ >= 400
 #  undef __BSEXCPT__
@@ -150,7 +146,7 @@ WXDLLEXPORT_DATA(extern wxMBConv *) wxConvCurrent;
 // ----------------------------------------------------------------------------
 
 // filenames are multibyte on Unix and probably widechar on Windows?
-#if defined(__UNIX__) || defined(__BORLANDC__) || defined(__WXMAC__ )
+#if defined(__UNIX__) || defined(__BORLANDC__)
     #define wxMBFILES 1
 #else
     #define wxMBFILES 0
@@ -178,7 +174,8 @@ public:
     const char* cWX2MB(const char *psz) const { return psz; }
 };
 
-WXDLLEXPORT_DATA(extern wxMBConv) wxConvLibc, wxConvFile, wxConvLocal, wxConvISO8859_1, wxConvUTF8;
+WXDLLEXPORT_DATA(extern wxMBConv) wxConvLibc, wxConvFile, wxConvLocal,
+                                  wxConvISO8859_1, wxConvUTF8;
 WXDLLEXPORT_DATA(extern wxMBConv *) wxConvCurrent;
 
 #define wxFNCONV(name) name

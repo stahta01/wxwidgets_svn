@@ -27,7 +27,7 @@ public:
         , m_style(wxNORMAL)
         , m_weight(wxNORMAL)
         , m_underlined(FALSE)
-        , m_faceName(wxT("Geneva"))
+        , m_faceName("Geneva")
         , m_encoding(wxFONTENCODING_DEFAULT)
         , m_macFontNum(0)
         , m_macFontSize(0)
@@ -35,7 +35,7 @@ public:
         , m_macATSUFontID()
     {
         Init(10, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE,
-             wxT("Geneva"), wxFONTENCODING_DEFAULT);
+             "Geneva", wxFONTENCODING_DEFAULT);
     }
 
     wxFontRefData(const wxFontRefData& data)
@@ -81,9 +81,6 @@ public:
     }
 
     virtual ~wxFontRefData();
-    void SetNoAntiAliasing( bool no = TRUE ) { m_noAA = no; }
-    bool GetNoAntiAliasing() { return m_noAA; }
-    
 protected:
     // common part of all ctors
     void Init(int size,
@@ -103,15 +100,14 @@ protected:
     bool           m_underlined;
     wxString       m_faceName;
     wxFontEncoding m_encoding;
-    bool            m_noAA;      // No anti-aliasing
     
 public:
-    short       m_macFontNum;
-    short       m_macFontSize;
+    short	   m_macFontNum;
+    short	   m_macFontSize;
     unsigned char  m_macFontStyle;
     wxUint32       m_macATSUFontID;
 public:
-    void        MacFindFont() ;
+    void		MacFindFont() ;
 };
 // ----------------------------------------------------------------------------
 // wxFont
@@ -188,9 +184,6 @@ public:
 
     virtual bool RealizeResource();
 
-    // Unofficial API, don't use
-    virtual void SetNoAntiAliasing( bool noAA = TRUE ) ;
-    virtual bool GetNoAntiAliasing() ;
 protected:
     // common part of all ctors
     void Init();

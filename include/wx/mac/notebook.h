@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        notebook.h
 // Purpose:     MSW/GTK compatible notebook (a.k.a. property sheet)
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_NOTEBOOK_H_
@@ -48,14 +48,14 @@ public:
              const wxPoint& pos = wxDefaultPosition,
              const wxSize& size = wxDefaultSize,
              long style = 0,
-             const wxString& name = wxT("notebook"));
+             const wxString& name = "notebook");
     // Create() function
   bool Create(wxWindow *parent,
               wxWindowID id, 
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize,
               long style = 0,
-              const wxString& name = wxT("notebook"));
+              const wxString& name = "notebook");
     // dtor
   ~wxNotebook();
 
@@ -85,7 +85,7 @@ public:
   virtual void SetTabSize(const wxSize& sz);
    
     // calculate size for wxNotebookSizer
-  wxSize CalcSizeFromPage(const wxSize& sizePage) const;
+  wxSize CalcSizeFromPage(const wxSize& sizePage);
 
 /*
     // get number of pages in the dialog
@@ -135,7 +135,7 @@ public:
   virtual void Command(wxCommandEvent& event);
 protected:
     virtual wxNotebookPage *DoRemovePage(int page) ;
-    virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
+	virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart ) ;
   // common part of all ctors
   void Init();
 

@@ -20,11 +20,6 @@
 #include "wx/wx.h"
 #endif
 
-// the application icon (under Windows and OS/2 it is in resources)
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
-    #include "mondrian.xpm"
-#endif
-
 #include "wx/taskbar.h"
 #include "tbtest.h"
 
@@ -35,7 +30,9 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit(void)
 {
-    if (!m_taskBarIcon.SetIcon(wxICON(mondrian), wxT("wxTaskBarIcon Sample")))
+    wxIcon icon(wxT("mondrian_icon"));
+
+    if (!m_taskBarIcon.SetIcon(icon, wxT("wxTaskBarIcon Sample")))
         wxMessageBox(wxT("Could not set icon."));
 
     // Create the main frame window
@@ -102,8 +99,6 @@ BEGIN_EVENT_TABLE(MyTaskBarIcon, wxTaskBarIcon)
     EVT_MENU(PU_RESTORE, MyTaskBarIcon::OnMenuRestore)
     EVT_MENU(PU_EXIT,    MyTaskBarIcon::OnMenuExit)
     EVT_MENU(PU_NEW_ICON,MyTaskBarIcon::OnMenuSetNewIcon)
-    EVT_TASKBAR_RIGHT_UP     (MyTaskBarIcon::OnRButtonUp)
-    EVT_TASKBAR_LEFT_DCLICK  (MyTaskBarIcon::OnLButtonDClick)
 END_EVENT_TABLE()
 
 void MyTaskBarIcon::OnMenuRestore(wxCommandEvent& )
@@ -132,6 +127,22 @@ void MyTaskBarIcon::OnMenuSetNewIcon(wxCommandEvent&)
 }
 
 // Overridables
+void MyTaskBarIcon::OnMouseMove(wxEvent&)
+{
+}
+
+void MyTaskBarIcon::OnLButtonDown(wxEvent&)
+{
+}
+
+void MyTaskBarIcon::OnLButtonUp(wxEvent&)
+{
+}
+
+void MyTaskBarIcon::OnRButtonDown(wxEvent&)
+{
+}
+
 void MyTaskBarIcon::OnRButtonUp(wxEvent&)
 {
     wxMenu      menu;
@@ -148,6 +159,10 @@ void MyTaskBarIcon::OnRButtonUp(wxEvent&)
 void MyTaskBarIcon::OnLButtonDClick(wxEvent&)
 {
     dialog->Show(TRUE);
+}
+
+void MyTaskBarIcon::OnRButtonDClick(wxEvent&)
+{
 }
 
 

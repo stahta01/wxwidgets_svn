@@ -22,6 +22,9 @@
 #include <wx/fontutil.h>
 #include <wx/dcbuffer.h>
 #include <wx/iconbndl.h>
+#ifdef __WXMAC__
+#include <wx/mac/private.h>
+#endif
 %}
 
 //----------------------------------------------------------------------
@@ -56,10 +59,6 @@ public:
 };
 
 //---------------------------------------------------------------------------
-
-
-// TODO:  When the API stabalizes and is available on other platforms, add
-// wrappers for the new wxBitmap, wxRawBitmap, wxDIB stuff...
 
 class wxBitmap : public wxGDIObject
 {
@@ -105,6 +104,7 @@ public:
     void SetQuality(int q);
 #endif
 
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 
@@ -233,6 +233,7 @@ public:
 #endif
     void CopyFromBitmap(const wxBitmap& bmp);
 
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 
@@ -322,6 +323,7 @@ public:
     void SetDepth(int d);
     void SetSize(const wxSize& size);
 #endif
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 %name(wxStockCursor) %new wxCursor* wxPyStockCursor(int id);
@@ -334,11 +336,7 @@ public:
 %new wxCursor* wxCursorFromImage(const wxImage& image);
 %{
     wxCursor* wxCursorFromImage(const wxImage& image) {
-    #ifndef __WXMAC__
         return new wxCursor(image);
-    #else
-        return NULL;
-    #endif
     }
 %}
 
@@ -423,15 +421,15 @@ public:
             if ( !cName2.Replace(wxT("GRAY"), wxT("GREY")) )
                 cName2.clear();
 
-            wxNode *node = self->GetFirst();
+            wxNode *node = self->First();
             while ( node ) {
                 const wxChar *key = node->GetKeyString();
                 if ( cName == key || cName2 == key ) {
-                    wxColour* c = (wxColour *)node->GetData();
+                    wxColour* c = (wxColour *)node->Data();
                     c->Set(red, green, blue);
                     return;
                 }
-                node = node->GetNext();
+                node = node->Next();
             }
 
             // otherwise append the new colour
@@ -481,6 +479,8 @@ public:
     wxBitmap* GetStipple();
     void SetStipple(wxBitmap& stipple);
 #endif
+
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 
@@ -554,6 +554,13 @@ public:
     void SetColour(wxColour &colour);
     void SetStipple(wxBitmap& bitmap);
     void SetStyle(int style);
+
+#ifdef __WXMAC__
+    short GetMacTheme();
+    void SetMacTheme(short macThemeBrush);
+#endif
+
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 
@@ -712,6 +719,8 @@ public:
         void GetBoundingBox(int* OUTPUT, int* OUTPUT, int* OUTPUT, int* OUTPUT);
         // See below for implementation
     }
+
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 
 #ifdef __WXMSW__
     long GetHDC();
@@ -967,6 +976,7 @@ public:
 
     const wxString& GetFileName() const { return m_filename; }
 
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 // bool wxMakeMetaFilePlaceable(const wxString& filename,
@@ -993,6 +1003,8 @@ public:
     int GetPixel(byte red, byte green, byte blue);
     bool GetRGB(int pixel, byte* OUTPUT, byte* OUTPUT, byte* OUTPUT);
     bool Ok();
+
+    %pragma(python) addtoclass = "def __nonzero__(self): return self.Ok()"
 };
 
 //---------------------------------------------------------------------------
@@ -1083,7 +1095,7 @@ public:
     %name(XorRect)bool Xor(const wxRect& rect);
     %name(XorRegion)bool Xor(const wxRegion& region);
 
-    // Convert the region to a B&W bitmap with the black pixels being inside
+    // Convert the region to a B&W bitmap with the white pixels being inside
     // the region.
     wxBitmap ConvertToBitmap();
 

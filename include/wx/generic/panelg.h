@@ -50,7 +50,7 @@ public:
 
     // Constructor
     wxPanel(wxWindow *parent,
-            wxWindowID winid = -1,
+            wxWindowID id = -1,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
             long style = wxTAB_TRAVERSAL | wxNO_BORDER,
@@ -58,11 +58,11 @@ public:
     {
         Init();
 
-        Create(parent, winid, pos, size, style, name);
+        Create(parent, id, pos, size, style, name);
     }
 
     // Pseudo ctor
-    bool Create(wxWindow *parent, wxWindowID winid,
+    bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxTAB_TRAVERSAL | wxNO_BORDER,

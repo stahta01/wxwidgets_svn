@@ -12,7 +12,7 @@
 #ifndef _WX_X11_TOPLEVEL_H_
 #define _WX_X11_TOPLEVEL_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
     #pragma interface "toplevel.h"
 #endif
 
@@ -78,8 +78,6 @@ protected:
 
     // set the icon for the window
     void DoSetIcon( const wxIcon& icon );
-
-    virtual bool SetShape(const wxRegion& region);
 
     // For implementation purposes - sometimes decorations make the
     // client area smaller

@@ -5,7 +5,7 @@
 // Created:     01/02/97
 // Modified:    22/10/98 - almost total rewrite, simpler interface (VZ)
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -124,8 +124,6 @@ public:
 
 private:
     wxGenericTreeCtrl *m_owner;
-
-    DECLARE_NO_COPY_CLASS(wxTreeRenameTimer)
 };
 
 // control used for in-place edit
@@ -149,7 +147,6 @@ private:
     bool                m_finished;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTreeTextCtrl)
 };
 
 // timer used to clear wxGenericTreeCtrl::m_findPrefix if no key was pressed
@@ -166,8 +163,6 @@ public:
 
 private:
     wxGenericTreeCtrl *m_owner;
-
-    DECLARE_NO_COPY_CLASS(wxTreeFindTimer)
 };
 
 // a tree item
@@ -307,8 +302,6 @@ private:
                                           // children but has a [+] button
     int                 m_isBold      :1; // render the label in bold font
     int                 m_ownsAttr    :1; // delete attribute when done
-
-    DECLARE_NO_COPY_CLASS(wxGenericTreeItem)
 };
 
 // =============================================================================
@@ -734,7 +727,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxTreeCtrl, wxGenericTreeCtrl)
 
 void wxGenericTreeCtrl::Init()
 {
-    m_current = m_key_current = m_anchor = m_select_me = (wxGenericTreeItem *) NULL;
+    m_current = m_key_current = m_anchor = (wxGenericTreeItem *) NULL;
     m_hasFocus = FALSE;
     m_dirty = FALSE;
 
@@ -1322,7 +1315,7 @@ wxTreeItemId wxGenericTreeCtrl::FindItem(const wxTreeItemId& idParent,
         }
 
         // and try all the items (stop when we get to the one we started from)
-        while ( id != idParent && !GetItemText(id).Lower().StartsWith(prefix) )
+        while ( id.IsOk() && (id != idParent) && !GetItemText(id).Lower().StartsWith(prefix) )
         {
             id = GetNext(id);
         }
@@ -1487,30 +1480,12 @@ void wxGenericTreeCtrl::Delete(const wxTreeItemId& itemId)
     // don't keep stale pointers around!
     if ( IsDescendantOf(item, m_key_current) )
     {
-        // Don't silently change the selection:
-        // do it properly in idle time, so event
-        // handlers get called.
-        
-        // m_key_current = parent;
-        m_key_current = NULL;
-    }
-
-    // m_select_me records whether we need to select
-    // a different item, in idle time.
-    if ( m_select_me && IsDescendantOf(item, m_select_me) )
-    {
-        m_select_me = parent;
+        m_key_current = parent;
     }
 
     if ( IsDescendantOf(item, m_current) )
     {
-        // Don't silently change the selection:
-        // do it properly in idle time, so event
-        // handlers get called.
-        
-        // m_current = parent;
-        m_current = NULL;
-        m_select_me = parent;
+        m_current = parent;
     }
 
     // remove the item from the tree
@@ -1652,7 +1627,6 @@ void wxGenericTreeCtrl::Unselect()
         RefreshLine( m_current );
 
         m_current = NULL;
-        m_select_me = NULL;
     }
 }
 
@@ -1738,7 +1712,6 @@ void wxGenericTreeCtrl::SelectItemRange(wxGenericTreeItem *item1, wxGenericTreeI
 {
     // item2 is not necessary after item1
     wxGenericTreeItem *first=NULL, *last=NULL;
-    m_select_me = NULL;
 
     // choice first' and 'last' between item1 and item2
     if (item1->GetY()<item2->GetY())
@@ -1766,8 +1739,6 @@ void wxGenericTreeCtrl::SelectItem(const wxTreeItemId& itemId,
 {
     wxCHECK_RET( itemId.IsOk(), wxT("invalid tree item") );
 
-    m_select_me = NULL;
-    
     bool is_single=!(GetWindowStyleFlag() & wxTR_MULTIPLE);
     wxGenericTreeItem *item = (wxGenericTreeItem*) itemId.m_pItem;
 
@@ -2349,7 +2320,7 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
                 if (HasFlag(wxTR_AQUA_BUTTONS))
                 {
                     // This causes update problems, so disabling for now.
-#if 0 // def __WXMAC__
+#if 0 //#ifdef __WXMAC__
                     wxMacPortSetter helper(&dc) ;
                     wxMacWindowClipper clipper(this) ;
                     wxDC::MacSetupBackgroundForCurrentPort( MacGetBackgroundBrush() ) ;
@@ -2359,8 +2330,8 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
                     MacWindowToRootWindow( & loc_x , & loc_y ) ;
                     Rect bounds = { loc_y , loc_x , loc_y + 18 , loc_x + 12 } ;
                     ThemeButtonDrawInfo info = { kThemeStateActive , item->IsExpanded() ? kThemeDisclosureDown : kThemeDisclosureRight ,
-                        kThemeAdornmentNone }; 
-                    DrawThemeButton( &bounds, kThemeDisclosureButton , 
+                        kThemeAdornmentNone };
+                    DrawThemeButton( &bounds, kThemeDisclosureButton ,
                         &info , NULL , NULL , NULL , NULL ) ;
 #else
                     if (item->IsExpanded())
@@ -2600,7 +2571,7 @@ void wxGenericTreeCtrl::OnChar( wxKeyEvent &event )
     // home  : go to root
     // end   : go to last item without opening parents
     // alnum : start or continue searching for the item with this prefix
-    int keyCode = event.GetKeyCode();
+    int keyCode = event.KeyCode();
     switch ( keyCode )
     {
         case '+':
@@ -2845,6 +2816,7 @@ wxTreeItemId wxGenericTreeCtrl::HitTest(const wxPoint& point, int& flags)
     }
 
     wxGenericTreeItem *hit =  m_anchor->HitTest(CalcUnscrolledPosition(point),
+   //    wxGenericTreeItem *hit =  m_anchor->HitTest(point,
                                                 this, flags, 0);
     if (hit == NULL)
     {
@@ -3160,18 +3132,6 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
 
 void wxGenericTreeCtrl::OnIdle( wxIdleEvent &WXUNUSED(event) )
 {
-    // Check if we need to select the root item
-    // because nothing else has been selected.
-    // Delaying it means that we can invoke event handlers
-    // as required, when a first item is selected.
-    if (!HasFlag(wxTR_MULTIPLE) && !GetSelection().IsOk())
-    {
-        if (m_select_me)
-            SelectItem(m_select_me);
-        else if (GetRootItem().IsOk())
-            SelectItem(GetRootItem());
-    }
-
     /* after all changes have been done to the tree control,
      * we actually redraw the tree when everything is over */
 

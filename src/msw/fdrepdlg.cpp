@@ -37,7 +37,7 @@
 
 #include "wx/msw/private.h"
 
-#if !defined(__WIN32__) || defined(__SALFORDC__)
+#if !defined(__WIN32__) || defined(__SALFORDC__) || defined(__WXWINE__)
     #include <commdlg.h>
 #endif
 
@@ -102,8 +102,6 @@ private:
 
     // registered Message for Dialog
     static UINT ms_msgFindDialog;
-
-    DECLARE_NO_COPY_CLASS(wxFindReplaceDialogImpl)
 };
 
 UINT wxFindReplaceDialogImpl::ms_msgFindDialog = 0;
@@ -230,33 +228,9 @@ wxFindReplaceDialogImpl::~wxFindReplaceDialogImpl()
 LRESULT APIENTRY wxFindReplaceWindowProc(HWND hwnd, WXUINT nMsg,
                                          WPARAM wParam, LPARAM lParam)
 {
-#if wxUSE_UNICODE_MSLU
-    static unsigned long s_lastMsgFlags = 0;
-
-    // This flag helps us to identify the bogus ANSI message
-    // sent by UNICOWS.DLL (see below)
-    // while we're sending our message to the dialog
-    // we ignore possible messages sent in between
-    static bool s_blockMsg = false;
-#endif // wxUSE_UNICODE_MSLU
-
     if ( nMsg == wxFindReplaceDialogImpl::GetFindDialogMessage() )
     {
         FINDREPLACE *pFR = (FINDREPLACE *)lParam;
-
-#if wxUSE_UNICODE_MSLU
-        // This is a hack for a MSLU problem: Versions up to 1.0.4011
-        // of UNICOWS.DLL send the correct UNICODE item after button press
-        // and a bogus ANSI mode item right after this, so lets ignore
-        // the second bogus message
-        if ( s_lastMsgFlags == pFR->Flags )
-        {
-            s_lastMsgFlags = 0;
-            return 0;
-        }
-        s_lastMsgFlags = pFR->Flags;
-#endif // wxUSE_UNICODE_MSLU
-
         wxFindReplaceDialog *dialog = (wxFindReplaceDialog *)pFR->lCustData;
 
         // map flags from Windows
@@ -312,20 +286,8 @@ LRESULT APIENTRY wxFindReplaceWindowProc(HWND hwnd, WXUINT nMsg,
             event.SetReplaceString(pFR->lpstrReplaceWith);
         }
 
-#if wxUSE_UNICODE_MSLU
-        s_blockMsg = true;
-#endif // wxUSE_UNICODE_MSLU
-
         dialog->Send(event);
-
-#if wxUSE_UNICODE_MSLU
-        s_blockMsg = false;
-#endif // wxUSE_UNICODE_MSLU
     }
-#if wxUSE_UNICODE_MSLU
-    else if ( !s_blockMsg )
-        s_lastMsgFlags = 0;
-#endif // wxUSE_UNICODE_MSLU
 
     WNDPROC wndProc = (WNDPROC)::GetWindowLong(hwnd, GWL_USERDATA);
 

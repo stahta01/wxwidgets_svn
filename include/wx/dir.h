@@ -6,7 +6,7 @@
 // Created:     08.12.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_DIR_H_
@@ -54,25 +54,13 @@ class WXDLLEXPORT wxDirTraverser
 public:
     // called for each file found by wxDir::Traverse()
     //
-    // return wxDIR_STOP or wxDIR_CONTINUE from here (wxDIR_IGNORE doesn't
-    // make sense)
+    // return wxDIR_STOP or wxDIR_CONTINUE from here
     virtual wxDirTraverseResult OnFile(const wxString& filename) = 0;
 
     // called for each directory found by wxDir::Traverse()
     //
     // return one of the enum elements defined above
     virtual wxDirTraverseResult OnDir(const wxString& dirname) = 0;
-
-    // called for each directory which we couldn't open during our traversal
-    // of the directory tyree
-    //
-    // this method can also return either wxDIR_STOP, wxDIR_IGNORE or
-    // wxDIR_CONTINUE but the latter is treated specially: it means to retry
-    // opening the directory and so may lead to infinite loop if it is
-    // returned unconditionally, be careful with this!
-    //
-    // the base class version always returns wxDIR_IGNORE
-    virtual wxDirTraverseResult OnOpenError(const wxString& dirname);
 };
 
 // ----------------------------------------------------------------------------
@@ -144,8 +132,6 @@ private:
     friend class WXDLLEXPORT wxDirData;
 
     wxDirData *m_data;
-
-    DECLARE_NO_COPY_CLASS(wxDir)
 };
 
 #endif // _WX_DIR_H_

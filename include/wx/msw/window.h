@@ -6,7 +6,7 @@
 //              elimination of Default(), ...
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -212,6 +212,15 @@ public:
     wxWindow *FindItem(long id) const;
     wxWindow *FindItemByHWND(WXHWND hWnd, bool controlOnly = FALSE) const;
 
+    // Make a Windows extended style from the given wxWindows window style
+    // OBSOLETE: do not use. Use MSWGetStyle instead.
+    static WXDWORD MakeExtendedStyle(long style,
+                                     bool eliminateBorders = FALSE);
+
+    // Determine whether 3D effects are wanted
+    // OBSOLETE: do not use. Use MSWGetStyle instead.
+    WXDWORD Determine3DEffects(WXDWORD defaultBorderStyle, bool *want3D) const;
+
     // MSW only: TRUE if this control is part of the main control
     virtual bool ContainsHWND(WXHWND WXUNUSED(hWnd)) const { return FALSE; };
 
@@ -220,7 +229,7 @@ public:
     //
     // this is the function that should be overridden in the derived classes,
     // but you will mostly use MSWGetCreateWindowFlags() below
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const ;
+    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
     // get the MSW window flags corresponding to wxWindows ones
     //
@@ -323,7 +332,6 @@ public:
     bool HandleMinimize();
     bool HandleMaximize();
     bool HandleSize(int x, int y, WXUINT flag);
-    bool HandleSizing(wxRect& rect);
     bool HandleGetMinMaxInfo(void *mmInfo);
 
     bool HandleShow(bool show, int status);
@@ -361,9 +369,6 @@ public:
     bool HandleChar(WXWPARAM wParam, WXLPARAM lParam, bool isASCII = FALSE);
     bool HandleKeyDown(WXWPARAM wParam, WXLPARAM lParam);
     bool HandleKeyUp(WXWPARAM wParam, WXLPARAM lParam);
-#ifdef __WIN32__
-    int HandleMenuChar(int chAccel, WXLPARAM lParam);
-#endif
 
     bool HandleQueryDragIcon(WXHICON *hIcon);
 
@@ -479,7 +484,6 @@ private:
 
     // the (non-virtual) handlers for the events
     bool HandleMove(int x, int y);
-    bool HandleMoving(wxRect& rect);
     bool HandleJoystickEvent(WXUINT msg, int x, int y, WXUINT flags);
 
 #ifdef __WIN95__

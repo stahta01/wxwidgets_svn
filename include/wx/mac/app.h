@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        app.h
 // Purpose:     wxApp class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,10 +58,6 @@ class WXDLLEXPORT wxApp: public wxAppBase
     virtual void SetPrintMode(int mode) { m_printMode = mode; }
     virtual int GetPrintMode() const { return m_printMode; }
     
-#if wxUSE_GUI
-    // setting up all MacOS Specific Event-Handlers etc
-    virtual bool OnInitGui();
-#endif // wxUSE_GUI
     // implementation only
     void OnIdle(wxIdleEvent& event);
     void OnEndSession(wxCloseEvent& event);
@@ -90,31 +86,24 @@ public:
     static bool Initialize();
     static void CleanUp();
     
+    virtual bool OnInit();
     void DeletePendingObjects();
     bool IsExiting() { return !m_keepGoing ; }
-#if TARGET_CARBON
-    WXEVENTHANDLERREF    MacGetEventHandler() { return m_macEventHandler ; }
-    WXEVENTHANDLERREF    MacGetCurrentEventHandlerCallRef() { return m_macCurrentEventHandlerCallRef ; }
-#endif
-
+    
 public:
     static long           sm_lastMessageTime;
     static wxWindow*      s_captureWindow ;
     static int            s_lastMouseDown ; // 0 = none , 1 = left , 2 = right
     static WXHRGN         s_macCursorRgn ;
     static long           s_lastModifiers ;
+    WXEVENTREF            m_macCurrentEvent ;
     
     int                   m_nCmdShow;
     
-private:
+protected:
     bool                  m_keepGoing ;
 
     // mac specifics
-#if TARGET_CARBON
-    WXEVENTHANDLERREF      m_macEventHandler ;
-    WXEVENTHANDLERCALLREF      m_macCurrentEventHandlerCallRef ;
-#endif
-    WXEVENTREF            m_macCurrentEvent ;
 
 public:
     static bool           s_macDefaultEncodingIsPC ;
@@ -141,44 +130,44 @@ public:
     
     virtual void          MacSuspend( bool convertClipboard ) ;
     virtual void          MacResume( bool convertClipboard ) ;
+
     virtual void          MacConvertPrivateToPublicScrap() ;
     virtual void          MacConvertPublicToPrivateScrap() ;
-    
+
+    // event main methods
+
     void                  MacDoOneEvent() ;
-    WXEVENTREF            MacGetCurrentEvent() { return m_macCurrentEvent ; }
     void                  MacHandleOneEvent( WXEVENTREF ev ) ;
-#if !TARGET_CARBON
-    virtual void          MacHandleMenuSelect( int menuid , int menuitem ) ;
+    void                  MacHandleModifierEvents( WXEVENTREF ev ) ;
+    WXEVENTREF            MacGetCurrentEvent() { return m_macCurrentEvent ; }
+  
+    // primary events
+	
+    virtual void          MacHandleMouseDownEvent( WXEVENTREF ev ) ;
     virtual void          MacHandleMouseUpEvent( WXEVENTREF ev ) ;
-    virtual void          MacHandleOSEvent( WXEVENTREF ev ) ;
-    virtual void          MacHandleDiskEvent( WXEVENTREF ev ) ;
     virtual void          MacHandleActivateEvent( WXEVENTREF ev ) ;
     virtual void          MacHandleUpdateEvent( WXEVENTREF ev ) ;
-    virtual void          MacHandleMouseDownEvent( WXEVENTREF ev ) ;
-
-    void                  MacHandleModifierEvents( WXEVENTREF ev ) ;
-
     virtual void          MacHandleKeyDownEvent( WXEVENTREF ev ) ;
     virtual void          MacHandleKeyUpEvent( WXEVENTREF ev ) ;
+    virtual void          MacHandleDiskEvent( WXEVENTREF ev ) ;
+    virtual void          MacHandleOSEvent( WXEVENTREF ev ) ;
     virtual void          MacHandleHighLevelEvent( WXEVENTREF ev ) ;
+    virtual void          MacHandleMenuSelect( int menuid , int menuitem ) ;
     
-#endif
-
-    void                  MacHandleMenuCommand( wxUint32 command ) ;    
-    bool                    MacSendKeyDownEvent( wxWindow* focus , long keyval , long modifiers , long when , short wherex , short wherey ) ;
-    bool                    MacSendKeyUpEvent( wxWindow* focus , long keyval , long modifiers , long when , short wherex , short wherey ) ;
-
+    virtual bool          MacSendKeyDownEvent( wxWindow* focus , long keyval , long modifiers , long when , short wherex , short wherey ) ;
+    virtual bool          MacSendKeyUpEvent( wxWindow* focus , long keyval , long modifiers , long when , short wherex , short wherey ) ;
+    
     virtual short         MacHandleAEODoc(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEPDoc(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEOApp(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEQuit(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     
     // in response of an open-document apple event
-    virtual void         MacOpenFile(const wxString &fileName) ;
+    virtual void   	  MacOpenFile(const wxString &fileName) ;
     // in response of a print-document apple event
-    virtual void         MacPrintFile(const wxString &fileName) ;
+    virtual void   	  MacPrintFile(const wxString &fileName) ;
     // in response of a open-application apple event
-    virtual void         MacNewFile() ;
+    virtual void   	  MacNewFile() ;
 
     DECLARE_EVENT_TABLE()
 };
@@ -196,6 +185,44 @@ public:
 private:    
     short       m_currentRefNum ;
 } ;
+
+// TODO: add platform-specific arguments
+#ifndef __DARWIN__
+int WXDLLEXPORT wxEntry( int argc, char *argv[] , bool enterLoop = TRUE);
+#endif
+
+void wxMacConvertFromPCForControls( char * p ) ;
+
+void wxMacConvertToPC( const char *from , char *to , int len ) ;
+void wxMacConvertFromPC( const char *from , char *to , int len ) ;
+void wxMacConvertToPC( const char *from , char *to , int len ) ;
+void wxMacConvertFromPC( char * p ) ;
+void wxMacConvertFromPC( unsigned char *p ) ;
+wxString wxMacMakeMacStringFromPC( const char * p ) ;
+void wxMacConvertToPC( char * p ) ;
+void wxMacConvertToPC( unsigned char *p ) ;
+wxString wxMacMakePCStringFromMac( const char * p ) ;
+
+// converts this string into a pascal with optional pc 2 mac encoding
+void wxMacStringToPascal( const char * from , unsigned char* to , bool pc2macEncoding ) ;
+
+// converts this string into a pascal with pc 2 mac encoding if s_macDefaultEncodingIsPC
+inline void wxMacStringToPascal( const char * from , unsigned char*  to ) 
+  { wxMacStringToPascal( from , to , wxApp::s_macDefaultEncodingIsPC ) ; }
+
+// converts this string into a pascal with optional mac 2 pc encoding
+wxString wxMacMakeStringFromPascal( unsigned char*  from , bool mac2pcEncoding ) ;
+
+// converts this pascal string into a wxString with pc 2 mac encoding if s_macDefaultEncodingIsPC
+inline wxString wxMacMakeStringFromPascal( unsigned char*  from  ) 
+  { return wxMacMakeStringFromPascal( from , wxApp::s_macDefaultEncodingIsPC ) ; }
+
+// converts this c string into a wxString with optional mac 2 pc encoding
+wxString wxMacMakeStringFromMacString( const char* from , bool mac2pcEncoding ) ;
+
+// converts this c string into a wxString with pc 2 mac encoding if s_macDefaultEncodingIsPC
+inline wxString wxMacMakeStringFromMacString( const char* from  ) 
+  { return wxMacMakeStringFromMacString( from , wxApp::s_macDefaultEncodingIsPC ) ; }
 
 #endif
     // _WX_APP_H_

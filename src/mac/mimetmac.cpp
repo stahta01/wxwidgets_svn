@@ -6,7 +6,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef    __GNUG__
@@ -105,7 +105,7 @@ bool wxFileTypeImpl::GetDescription(wxString *desc) const
 
 size_t
 wxFileTypeImpl::GetAllCommands(wxArrayString * verbs, wxArrayString * commands,
-                   const wxFileType::MessageParameters& params) const
+			       const wxFileType::MessageParameters& params) const
 {
     wxFAIL_MSG( _T("wxFileTypeImpl::GetAllCommands() not yet implemented") );
     return 0;
@@ -129,66 +129,66 @@ wxMimeTypesManagerImpl::GetFileTypeFromExtension(const wxString& e)
 {
     wxString ext = e ;
     ext = ext.Lower() ;
-    if ( ext == wxT("txt") )
+    if ( ext == "txt" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("text/text"));
+        fileType->m_impl->SetFileType("text/text");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("htm") || ext == wxT("html") )
+    else if ( ext == "htm" || ext == "html" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("text/html"));
+        fileType->m_impl->SetFileType("text/html");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("gif") )
+    else if ( ext == "gif" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("image/gif"));
+        fileType->m_impl->SetFileType("image/gif");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("png" ))
+    else if ( ext == "png" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("image/png"));
+        fileType->m_impl->SetFileType("image/png");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("jpg" )|| ext == wxT("jpeg") )
+    else if ( ext == "jpg" || ext == "jpeg" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("image/jpeg"));
+        fileType->m_impl->SetFileType("image/jpeg");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("bmp") )
+    else if ( ext == "bmp" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("image/bmp"));
+        fileType->m_impl->SetFileType("image/bmp");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("tif") || ext == wxT("tiff") )
+    else if ( ext == "tif" || ext == "tiff" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("image/tiff"));
+        fileType->m_impl->SetFileType("image/tiff");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("xpm") )
+    else if ( ext == "xpm" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("image/xpm"));
+        fileType->m_impl->SetFileType("image/xpm");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }
-    else if ( ext == wxT("xbm") )
+    else if ( ext == "xbm" )
     {
         wxFileType *fileType = new wxFileType;
-        fileType->m_impl->SetFileType(wxT("image/xbm"));
+        fileType->m_impl->SetFileType("image/xbm");
         fileType->m_impl->SetExt(ext);
         return fileType;
     }

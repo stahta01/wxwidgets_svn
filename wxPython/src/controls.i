@@ -323,7 +323,7 @@ public:
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
                long style = 0,
-               const wxValidator& val = wxDefaultValidator,
+               const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxPyCheckBoxNameStr);
     %name(wxPreCheckBox)wxCheckBox();
 
@@ -331,7 +331,7 @@ public:
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
                long style = 0,
-               const wxValidator& val = wxDefaultValidator,
+               const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxPyCheckBoxNameStr);
 
     %pragma(python) addtomethod = "__init__:self._setOORInfo(self)"
@@ -1004,15 +1004,18 @@ public:
     int FindString(const wxString& string);
 
     wxString GetString(int n);
+
+#ifdef __WXGTK__
+    %name(GetItemLabel)wxString GetLabel( int item );
+    %name(SetItemLabel)void SetLabel( int item, const wxString& label );
+#else
     void SetString(int n, const wxString& label);
     %pragma(python) addtoclass = "
     GetItemLabel = GetString
     SetItemLabel = SetString
     "
-#ifndef __WXGTK__
     int GetColumnCount();
     int GetRowCount();
-    int GetNextItem(int item, wxDirection dir, long style);
 #endif
 
     int GetSelection();
@@ -1131,7 +1134,14 @@ public:
     int GetValue();
     void SetRange(int min, int max);
     void SetValue(int value);
-
+#ifdef __WXGTK__
+    %addmethods {
+        void SetSelection(long from, long to) {
+        }
+    }
+#else
+    void SetSelection(long from, long to);
+#endif
 };
 
 

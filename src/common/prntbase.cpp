@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -188,14 +188,7 @@ wxPreviewCanvas::wxPreviewCanvas(wxPrintPreviewBase *preview, wxWindow *parent,
 wxScrolledWindow(parent, -1, pos, size, style, name)
 {
     m_printPreview = preview;
-#ifdef __WXMAC__
-    // The app workspace colour is always white, but we should have
-    // a contrast with the page.
-    wxSystemColour colourIndex = wxSYS_COLOUR_3DDKSHADOW;
-#else
-    wxSystemColour colourIndex = wxSYS_COLOUR_APPWORKSPACE;
-#endif    
-    SetBackgroundColour(wxSystemSettings::GetColour(colourIndex));
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE));
 
     SetScrollbars(15, 18, 100, 100);
 }
@@ -225,14 +218,7 @@ void wxPreviewCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 // Responds to colour changes, and passes event on to children.
 void wxPreviewCanvas::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
-#ifdef __WXMAC__
-    // The app workspace colour is always white, but we should have
-    // a contrast with the page.
-    wxSystemColour colourIndex = wxSYS_COLOUR_3DDKSHADOW;
-#else
-    wxSystemColour colourIndex = wxSYS_COLOUR_APPWORKSPACE;
-#endif    
-    SetBackgroundColour(wxSystemSettings::GetColour(colourIndex));
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE));
     Refresh();
 
     // Propagate the event to the non-top-level children
@@ -299,7 +285,7 @@ void wxPreviewControlBar::OnPrint(wxCommandEvent& WXUNUSED(event))
 
 void wxPreviewControlBar::OnChar(wxKeyEvent &event)
 {
-   switch(event.GetKeyCode())
+   switch(event.KeyCode())
    {
    case WXK_NEXT:
       OnNext(); break;
@@ -411,6 +397,112 @@ void wxPreviewControlBar::CreateButtons()
 {
     SetSize(0, 0, 400, 40);
 
+#if wxUSE_CONSTRAINTS
+    /*
+    #ifdef __WXMSW__
+    int fontSize = 9;
+    #else
+    int fontSize = 10;
+    #endif
+
+      wxFont buttonFont(fontSize, wxSWISS, wxNORMAL, wxBOLD);
+      SetFont(buttonFont);
+    */
+
+    int buttonWidth = 60;
+    int buttonNavigation = 30;
+#ifdef __WXGTK__
+    int buttonHeight = -1;
+#else
+    int buttonHeight = 24;
+#endif
+
+    int x = 5;
+    int y = 5;
+
+#ifdef __WXMOTIF__
+    int gap = 15;
+#else
+    int gap = 5;
+#endif
+
+    m_closeButton = new wxButton(this, wxID_PREVIEW_CLOSE, _("Close"),
+        wxPoint(x, y), wxSize(buttonWidth, buttonHeight));
+
+    x += gap + buttonWidth;
+
+    if (m_buttonFlags & wxPREVIEW_PRINT)
+    {
+        m_printButton =  new wxButton(this, wxID_PREVIEW_PRINT, _("Print..."), wxPoint(x, y),
+            wxSize(buttonWidth, buttonHeight));
+        x += gap + buttonWidth;
+    }
+
+    if (m_buttonFlags & wxPREVIEW_FIRST)
+    {
+        m_firstPageButton = new wxButton(this, wxID_PREVIEW_FIRST, wxT("|<<"), wxPoint(x, y),
+            wxSize(buttonNavigation, buttonHeight));
+        x += gap + buttonNavigation;
+    }
+
+    if (m_buttonFlags & wxPREVIEW_PREVIOUS)
+    {
+        m_previousPageButton = new wxButton(this, wxID_PREVIEW_PREVIOUS, wxT("<<"), wxPoint(x, y),
+            wxSize(buttonNavigation, buttonHeight));
+        x += gap + buttonNavigation;
+    }
+
+    if (m_buttonFlags & wxPREVIEW_NEXT)
+    {
+        m_nextPageButton = new wxButton(this, wxID_PREVIEW_NEXT, wxT(">>"),
+            wxPoint(x, y), wxSize(buttonNavigation, buttonHeight));
+        x += gap + buttonNavigation;
+    }
+
+    if (m_buttonFlags & wxPREVIEW_LAST)
+    {
+        m_lastPageButton = new wxButton(this, wxID_PREVIEW_LAST, wxT(">>|"), wxPoint(x, y),
+            wxSize(buttonNavigation, buttonHeight));
+        x += gap + buttonNavigation;
+    }
+
+    if (m_buttonFlags & wxPREVIEW_GOTO)
+    {
+        m_gotoPageButton = new wxButton(this, wxID_PREVIEW_GOTO, _("Goto..."), wxPoint(x, y),
+            wxSize(buttonWidth, buttonHeight));
+        x += gap + buttonWidth;
+    }
+
+    if (m_buttonFlags & wxPREVIEW_ZOOM)
+    {
+        static const wxChar *choices[] =
+        {
+            wxT("10%"), wxT("15%"), wxT("20%"), wxT("25%"), wxT("30%"), wxT("35%"), wxT("40%"), wxT("45%"), wxT("50%"), wxT("55%"),
+            wxT("60%"), wxT("65%"), wxT("70%"), wxT("75%"), wxT("80%"), wxT("85%"), wxT("90%"), wxT("95%"), wxT("100%"), wxT("110%"),
+            wxT("120%"), wxT("150%"), wxT("200%")
+        };
+
+        int n = WXSIZEOF(choices);
+
+        wxString* strings = new wxString[n];
+        int i;
+        for (i = 0; i < n; i++ )
+           strings[i] = choices[i];
+
+        m_zoomControl = new wxChoice(this, wxID_PREVIEW_ZOOM,
+                                     wxPoint(x, y),
+                                     wxSize(100, -1),
+                                     n,
+                                     strings
+                                    );
+        delete[] strings;
+
+        SetZoomControl(m_printPreview->GetZoom());
+    }
+
+#else
+
+    // Use sizers (backported from wxWindows CVS head).
     wxBoxSizer *item0 = new wxBoxSizer( wxHORIZONTAL );
     
     int smallButtonWidth = 45;
@@ -471,6 +563,7 @@ void wxPreviewControlBar::CreateButtons()
 
     SetSizer(item0);
     item0->Fit(this);
+#endif
 }
 
 void wxPreviewControlBar::SetZoomControl(int zoom)
@@ -503,20 +596,13 @@ BEGIN_EVENT_TABLE(wxPreviewFrame, wxFrame)
     EVT_CLOSE(wxPreviewFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
-wxPreviewFrame::wxPreviewFrame(wxPrintPreviewBase *preview, wxWindow *parent, const wxString& title,
+wxPreviewFrame::wxPreviewFrame(wxPrintPreviewBase *preview, wxFrame *parent, const wxString& title,
                                const wxPoint& pos, const wxSize& size, long style, const wxString& name):
 wxFrame(parent, -1, title, pos, size, style, name)
 {
     m_printPreview = preview;
     m_controlBar = NULL;
     m_previewCanvas = NULL;
-
-    // Give the application icon
-#ifdef __WXMSW__
-    wxFrame* topFrame = wxDynamicCast(wxTheApp->GetTopWindow(), wxFrame);
-    if (topFrame)
-        SetIcon(topFrame->GetIcon());
-#endif    
 }
 
 wxPreviewFrame::~wxPreviewFrame()
@@ -525,11 +611,7 @@ wxPreviewFrame::~wxPreviewFrame()
 
 void wxPreviewFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 {
-    // MakeModal doesn't work on wxMac, especially when there
-    // are multiple top-level windows.
-#ifndef __WXMAC__
     MakeModal(FALSE);
-#endif    
 
     // Need to delete the printout and the print preview
     wxPrintout *printout = m_printPreview->GetPrintout();
@@ -548,25 +630,46 @@ void wxPreviewFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 void wxPreviewFrame::Initialize()
 {
     CreateStatusBar();
+
     CreateCanvas();
     CreateControlBar();
 
     m_printPreview->SetCanvas(m_previewCanvas);
     m_printPreview->SetFrame(this);
 
-    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
+    // Set layout constraints here
 
-    item0->Add( m_controlBar, 0, wxGROW|wxALIGN_CENTER_VERTICAL, 5 );
-    item0->Add( m_previewCanvas, 1, wxGROW|wxALIGN_CENTER_VERTICAL, 5 );
-
-    SetAutoLayout( TRUE );
-    SetSizer( item0 );
-
-    // MakeModal doesn't work on wxMac, especially when there
-    // are multiple top-level windows.
-#ifndef __WXMAC__
-    MakeModal(TRUE);
+    // Control bar constraints
+    wxLayoutConstraints *c1 = new wxLayoutConstraints;
+    //  int w, h;
+    //  m_controlBar->GetSize(&w, &h);
+    int h;
+#if (defined(__WXMSW__) || defined(__WXGTK__))
+    h = 40;
+#else
+    h = 60;
 #endif
+
+    c1->left.SameAs       (this, wxLeft);
+    c1->top.SameAs        (this, wxTop);
+    c1->right.SameAs      (this, wxRight);
+    c1->height.Absolute   (h);
+
+    m_controlBar->SetConstraints(c1);
+
+    // Canvas constraints
+    wxLayoutConstraints *c2 = new wxLayoutConstraints;
+
+    c2->left.SameAs       (this, wxLeft);
+    c2->top.Below         (m_controlBar);
+    c2->right.SameAs      (this, wxRight);
+    c2->bottom.SameAs     (this, wxBottom);
+
+    m_previewCanvas->SetConstraints(c2);
+
+    SetAutoLayout(TRUE);
+
+    MakeModal(TRUE);
 
     Layout();
 }

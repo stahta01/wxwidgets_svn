@@ -7,6 +7,7 @@
 #*****************************************************************************
 .first
 	define wx [--.include.wx]
+	set command $disk2:[joukj.com]bison.cld
 
 .ifdef __WXMOTIF__
 CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
@@ -44,6 +45,7 @@ LEX=flex
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
+		parser.obj,\
 		appcmn.obj,\
 		artprov.obj,\
 		artstd.obj,\
@@ -58,7 +60,6 @@ OBJECTS = \
 		cshelp.obj,\
 		ctrlcmn.obj,\
 		ctrlsub.obj,\
-		datacmn.obj,\
 		datetime.obj,\
 		datstrm.obj,\
 		db.obj,\
@@ -128,6 +129,7 @@ OBJECTS1=fs_inet.obj,\
 		process.obj,\
 		protocol.obj,\
 		quantize.obj,\
+		resource.obj,\
 		sckaddr.obj,\
 		sckfile.obj,\
 		sckipc.obj,\
@@ -153,7 +155,6 @@ OBJECTS1=fs_inet.obj,\
 		url.obj
 
 OBJECTS2=utilscmn.obj,\
-		rgncmn.obj,\
 		valgen.obj,\
 		validate.obj,\
 		valtext.obj,\
@@ -161,17 +162,16 @@ OBJECTS2=utilscmn.obj,\
 		wfstream.obj,\
 		wincmn.obj,\
 		wxchar.obj,\
+		wxexpr.obj,\
 		xpmdecod.obj,\
 		zipstrm.obj,\
 		zstream.obj
 
-OBJECTS_MOTIF=bmpbase.obj,gaugecmn.obj
-
 SOURCES = \
+		parser.y,\
 		appcmn.cpp,\
 		artprov.cpp,\
 		artstd.cpp,\
-		bmpbase.cpp,\
 		choiccmn.cpp,\
 		clipcmn.cpp,\
 		clntdata.cpp,\
@@ -183,7 +183,6 @@ SOURCES = \
 		cshelp.cpp,\
 		ctrlcmn.cpp,\
 		ctrlsub.cpp,\
-		datacmn.cpp,\
 		datetime.cpp,\
 		datstrm.cpp,\
 		db.cpp,\
@@ -212,7 +211,6 @@ SOURCES = \
 		fs_inet.cpp,\
 		fs_zip.cpp,\
 		ftp.cpp,\
-		gaugecmn.cpp,\
 		gdicmn.cpp,\
 		gifdecod.cpp,\
 		hash.cpp,\
@@ -253,7 +251,7 @@ SOURCES = \
 		process.cpp,\
 		protocol.cpp,\
 		quantize.cpp,\
-		rgncmn.cpp,\
+		resource.cpp,\
 		sckaddr.cpp,\
 		sckfile.cpp,\
 		sckipc.cpp,\
@@ -285,6 +283,7 @@ SOURCES = \
 		wfstream.cpp,\
 		wincmn.cpp,\
 		wxchar.cpp,\
+		wxexpr.cpp,\
 		xpmdecod.cpp,\
 		zipstrm.cpp,\
 		zstream.cpp
@@ -294,11 +293,9 @@ all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS1)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS2)
 .ifdef __WXMOTIF__
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_MOTIF)
 	library [--.lib]libwx_motif.olb $(OBJECTS)
 	library [--.lib]libwx_motif.olb $(OBJECTS1)
 	library [--.lib]libwx_motif.olb $(OBJECTS2)
-	library [--.lib]libwx_motif.olb $(OBJECTS_MOTIF)
 .else
 .ifdef __WXGTK__
 .ifdef __WXUNIVERSAL__
@@ -313,10 +310,28 @@ all : $(SOURCES)
 .endif
 .endif
 
+parser.obj : parser.c lexer.c
+parser.c : parser.y lexer.c
+	$(YACC) parser.y
+	pipe $(SED) -e "s;y_tab.c;parser.y;g" < y_tab.c | \
+	$(SED) -e "s/BUFSIZ/5000/g"            | \
+	$(SED) -e "s/YYLMAX 200/YYLMAX 5000/g" | \
+	$(SED) -e "s/yy/PROIO_yy/g"            | \
+	$(SED) -e "s/input/PROIO_input/g"      | \
+	$(SED) -e "s/unput/PROIO_unput/g"      > parser.c
+	delete y_tab.c;*
+
+lexer.c : lexer.l
+	$(LEX) lexer.l
+	pipe $(SED) -e "s;lexyy.c;lexer.l;g" < lexyy.c | \
+	$(SED) -e "s/yy/PROIO_yy/g"            | \
+	$(SED) -e "s/input/PROIO_input/g"      | \
+	$(SED) -e "s/unput/PROIO_unput/g"      > lexer.c
+	delete lexyy.c;*
+
 appcmn.obj : appcmn.cpp
 artprov.obj : artprov.cpp
 artstd.obj : artstd.cpp
-bmpbase.obj : bmpbase.cpp
 choiccmn.obj : choiccmn.cpp
 clipcmn.obj : clipcmn.cpp
 clntdata.obj : clntdata.cpp
@@ -328,7 +343,6 @@ containr.obj : containr.cpp
 cshelp.obj : cshelp.cpp
 ctrlcmn.obj : ctrlcmn.cpp
 ctrlsub.obj : ctrlsub.cpp
-datacmn.obj : datacmn.cpp
 datetime.obj : datetime.cpp
 datstrm.obj : datstrm.cpp
 db.obj : db.cpp
@@ -357,7 +371,6 @@ framecmn.obj : framecmn.cpp
 fs_inet.obj : fs_inet.cpp
 fs_zip.obj : fs_zip.cpp
 ftp.obj : ftp.cpp
-gaugecmn.obj : gaugecmn.cpp
 gdicmn.obj : gdicmn.cpp
 gifdecod.obj : gifdecod.cpp
 hash.obj : hash.cpp
@@ -398,7 +411,7 @@ prntbase.obj : prntbase.cpp
 process.obj : process.cpp
 protocol.obj : protocol.cpp
 quantize.obj : quantize.cpp
-rgncmn.obj : rgncmn.cpp
+resource.obj : resource.cpp
 sckaddr.obj : sckaddr.cpp
 sckfile.obj : sckfile.cpp
 sckipc.obj : sckipc.cpp
@@ -430,6 +443,7 @@ variant.obj : variant.cpp
 wfstream.obj : wfstream.cpp
 wincmn.obj : wincmn.cpp
 wxchar.obj : wxchar.cpp
+wxexpr.obj : wxexpr.cpp
 xpmdecod.obj : xpmdecod.cpp
 zipstrm.obj : zipstrm.cpp
 zstream.obj : zstream.cpp

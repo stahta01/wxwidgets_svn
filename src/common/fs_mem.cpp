@@ -38,7 +38,7 @@ class MemFSHashObj : public wxObject
             m_Data = new char[len];
             memcpy(m_Data, data, len);
             m_Len = len;
-            InitTime();
+            m_Time = wxDateTime::Now();
         }
 
         MemFSHashObj(wxMemoryOutputStream& stream)
@@ -46,7 +46,7 @@ class MemFSHashObj : public wxObject
             m_Len = stream.GetSize();
             m_Data = new char[m_Len];
             stream.CopyTo(m_Data, m_Len);
-            InitTime();
+            m_Time = wxDateTime::Now();
         }
 
         ~MemFSHashObj()
@@ -56,19 +56,7 @@ class MemFSHashObj : public wxObject
 
         char *m_Data;
         size_t m_Len;
-#if wxUSE_DATETIME
         wxDateTime m_Time;
-#endif // wxUSE_DATETIME
-
-    DECLARE_NO_COPY_CLASS(MemFSHashObj)
-
-    private:
-        void InitTime()
-        {
-#if wxUSE_DATETIME
-            m_Time = wxDateTime::Now();
-#endif // wxUSE_DATETIME            
-        }
 };
 
 
@@ -116,11 +104,8 @@ wxFSFile* wxMemoryFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString
         else return new wxFSFile(new wxMemoryInputStream(obj -> m_Data, obj -> m_Len),
                             location,
                             GetMimeTypeFromExt(location),
-                            GetAnchor(location)
-#if wxUSE_DATETIME
-                            , obj -> m_Time
-#endif // wxUSE_DATETIME                            
-                            );
+                            GetAnchor(location),
+                            obj -> m_Time);
     }
     else return NULL;
 }

@@ -4,7 +4,7 @@
 //              as a basic visual element of HTML page
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
-// Copyright:   (c) 1999-2003 Vaclav Slavik
+// Copyright:   (c) 1999 Vaclav Slavik
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -29,135 +29,21 @@ class WXDLLEXPORT wxHtmlLinkInfo;
 class WXDLLEXPORT wxHtmlCell;
 class WXDLLEXPORT wxHtmlContainerCell;
 
-
-// wxHtmlSelection is data holder with information about text selection.
-// Selection is defined by two positions (beginning and end of the selection)
-// and two leaf(!) cells at these positions.
-class WXDLLEXPORT wxHtmlSelection
+// Temporary kludge for backporting html pagebreaks to 2.4.0;
+// Do not use, this will NOT be part of wx 2.5!
+struct WXDLLEXPORT wxHtmlKludge
 {
-public:
-    wxHtmlSelection() 
-        : m_fromPos(wxDefaultPosition), m_toPos(wxDefaultPosition),
-          m_fromPrivPos(wxDefaultPosition), m_toPrivPos(wxDefaultPosition),
-          m_fromCell(NULL), m_toCell(NULL) {}
-
-    void Set(const wxPoint& fromPos, const wxHtmlCell *fromCell,
-             const wxPoint& toPos, const wxHtmlCell *toCell);
-    void Set(const wxHtmlCell *fromCell, const wxHtmlCell *toCell);
-    
-    const wxHtmlCell *GetFromCell() const { return m_fromCell; }
-    const wxHtmlCell *GetToCell() const { return m_toCell; }
-    
-    // these values are in absolute coordinates:
-    const wxPoint& GetFromPos() const { return m_fromPos; }
-    const wxPoint& GetToPos() const { return m_toPos; }
-    
-    // these are From/ToCell's private data
-    const wxPoint& GetFromPrivPos() const { return m_fromPrivPos; }
-    const wxPoint& GetToPrivPos() const { return m_toPrivPos; }
-    void SetFromPrivPos(const wxPoint& pos) { m_fromPrivPos = pos; }
-    void SetToPrivPos(const wxPoint& pos) { m_toPrivPos = pos; }
-    void ClearPrivPos() { m_toPrivPos = m_fromPrivPos = wxDefaultPosition; }
-
-    const bool IsEmpty() const 
-        { return m_fromPos == wxDefaultPosition && 
-                 m_toPos == wxDefaultPosition; }
-
-private:
-    wxPoint m_fromPos, m_toPos;
-    wxPoint m_fromPrivPos, m_toPrivPos;
-    const wxHtmlCell *m_fromCell, *m_toCell;
+    int pbreak;
+    int *known_pagebreaks;
+    int number_of_pages;
 };
 
-
-
-enum wxHtmlSelectionState
-{
-    wxHTML_SEL_OUT,     // currently rendered cell is outside the selection
-    wxHTML_SEL_IN,      // ... is inside selection
-    wxHTML_SEL_CHANGING // ... is the cell on which selection state changes
-};
-
-// Selection state is passed to wxHtmlCell::Draw so that it can render itself
-// differently e.g. when inside text selection or outside it.
-class WXDLLEXPORT wxHtmlRenderingState
-{
-public:
-    wxHtmlRenderingState() : m_selState(wxHTML_SEL_OUT) {}
-
-    void SetSelectionState(wxHtmlSelectionState s) { m_selState = s; }  
-    wxHtmlSelectionState GetSelectionState() const { return m_selState; }
-
-    void SetFgColour(const wxColour& c) { m_fgColour = c; }
-    const wxColour& GetFgColour() const { return m_fgColour; }
-    void SetBgColour(const wxColour& c) { m_bgColour = c; }
-    const wxColour& GetBgColour() const { return m_bgColour; }
-    
-private:
-    wxHtmlSelectionState  m_selState;
-    wxColour              m_fgColour, m_bgColour;
-};
-
-
-// HTML rendering customization. This class is used when rendering wxHtmlCells
-// as a callback:
-class WXDLLEXPORT wxHtmlRenderingStyle
-{
-public:
-    virtual wxColour GetSelectedTextColour(const wxColour& clr) = 0;
-    virtual wxColour GetSelectedTextBgColour(const wxColour& clr) = 0;
-};
-
-// Standard style:
-class WXDLLEXPORT wxDefaultHtmlRenderingStyle : public wxHtmlRenderingStyle
-{
-public:
-    virtual wxColour GetSelectedTextColour(const wxColour& clr);
-    virtual wxColour GetSelectedTextBgColour(const wxColour& clr);
-};
-
-
-// Information given to cells when drawing them. Contains rendering state,
-// selection information and rendering style object that can be used to
-// customize the output.
-class WXDLLEXPORT wxHtmlRenderingInfo
-{
-public:
-    wxHtmlRenderingInfo() : m_selection(NULL), m_style(NULL) {}
-
-    void SetSelection(wxHtmlSelection *s) { m_selection = s; }
-    wxHtmlSelection *GetSelection() const { return m_selection; }
-    
-    void SetStyle(wxHtmlRenderingStyle *style) { m_style = style; }
-    wxHtmlRenderingStyle& GetStyle() { return *m_style; }
-
-    wxHtmlRenderingState& GetState() { return m_state; }
-    
-protected:
-    wxHtmlSelection      *m_selection;
-    wxHtmlRenderingStyle *m_style;
-    wxHtmlRenderingState m_state;
-};
-
-
-// Flags for wxHtmlCell::FindCellByPos
-enum
-{
-    wxHTML_FIND_EXACT             = 1,
-    wxHTML_FIND_NEAREST_BEFORE    = 2,
-    wxHTML_FIND_NEAREST_AFTER     = 4
-};
-
-
-
-
-// ---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlCell
-//                  Internal data structure. It represents fragments of parsed
-//                  HTML page - a word, picture, table, horizontal line and so
-//                  on.  It is used by wxHtmlWindow to represent HTML page in
-//                  memory.
-// ---------------------------------------------------------------------------
+//                  Internal data structure. It represents fragments of parsed HTML
+//                  page - a word, picture, table, horizontal line and so on.
+//                  It is used by wxHtmlWindow to represent HTML page in memory.
+//--------------------------------------------------------------------------------
 
 
 class WXDLLEXPORT wxHtmlCell : public wxObject
@@ -178,43 +64,31 @@ public:
     const wxString& GetId() const { return m_id; }
     void SetId(const wxString& id) { m_id = id; }
 
-    // returns the link associated with this cell. The position is position
-    // within the cell so it varies from 0 to m_Width, from 0 to m_Height
-    virtual wxHtmlLinkInfo* GetLink(int WXUNUSED(x) = 0,
-                                    int WXUNUSED(y) = 0) const
+    // returns the link associated with this cell. The position is position within
+    // the cell so it varies from 0 to m_Width, from 0 to m_Height
+    virtual wxHtmlLinkInfo* GetLink(int WXUNUSED(x) = 0, int WXUNUSED(y) = 0) const
         { return m_Link; }
 
-    // Returns cursor to be used when mouse is over the cell:
-    virtual wxCursor GetCursor() const;
-
-    // return next cell among parent's cells
+    // members access methods
     wxHtmlCell *GetNext() const {return m_Next;}
-    // returns first child cell (if there are any, i.e. if this is container):
-    virtual wxHtmlCell* GetFirstChild() const { return NULL; }
 
     // members writing methods
     virtual void SetPos(int x, int y) {m_PosX = x, m_PosY = y;}
     void SetLink(const wxHtmlLinkInfo& link);
     void SetNext(wxHtmlCell *cell) {m_Next = cell;}
 
-    // 1. adjust cell's width according to the fact that maximal possible width
-    //    is w.  (this has sense when working with horizontal lines, tables
-    //    etc.)
-    // 2. prepare layout (=fill-in m_PosX, m_PosY (and sometime m_Height)
-    //    members) = place items to fit window, according to the width w
+    // 1. adjust cell's width according to the fact that maximal possible width is w.
+    //    (this has sense when working with horizontal lines, tables etc.)
+    // 2. prepare layout (=fill-in m_PosX, m_PosY (and sometime m_Height) members)
+    //    = place items to fit window, according to the width w
     virtual void Layout(int w);
 
     // renders the cell
-    virtual void Draw(wxDC& WXUNUSED(dc),
-                      int WXUNUSED(x), int WXUNUSED(y),
-                      int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-                      wxHtmlRenderingInfo& WXUNUSED(info)) {}
+    virtual void Draw(wxDC& WXUNUSED(dc), int WXUNUSED(x), int WXUNUSED(y), int WXUNUSED(view_y1), int WXUNUSED(view_y2)) {}
 
-    // proceed drawing actions in case the cell is not visible (scrolled out of
-    // screen).  This is needed to change fonts, colors and so on.
-    virtual void DrawInvisible(wxDC& WXUNUSED(dc),
-                               int WXUNUSED(x), int WXUNUSED(y),
-                               wxHtmlRenderingInfo& WXUNUSED(info)) {}
+    // proceed drawing actions in case the cell is not visible (scrolled out of screen).
+    // This is needed to change fonts, colors and so on
+    virtual void DrawInvisible(wxDC& WXUNUSED(dc), int WXUNUSED(x), int WXUNUSED(y)) {}
 
     // This method returns pointer to the FIRST cell for that
     // the condition
@@ -235,17 +109,17 @@ public:
     //       wxHtmlWidgetCell
     virtual void OnMouseClick(wxWindow *parent, int x, int y, const wxMouseEvent& event);
 
-    // This method used to adjust pagebreak position. The parameter is variable
-    // that contains y-coordinate of page break (= horizontal line that should
-    // not be crossed by words, images etc.). If this cell cannot be divided
+    // This method used to adjust pagebreak position. The parameter is
+    // variable that contains y-coordinate of page break (= horizontal line that
+    // should not be crossed by words, images etc.). If this cell cannot be divided
     // into two pieces (each one on another page) then it moves the pagebreak
     // few pixels up.
     //
     // Returned value : true if pagebreak was modified, false otherwise
     // Usage : while (container->AdjustPagebreak(&p)) {}
-    virtual bool AdjustPagebreak(int *pagebreak,
-                                 int *known_pagebreaks = NULL,
-                                 int number_of_pages = 0) const;
+    virtual bool AdjustPagebreak(int *pagebreak) const;
+// wx 2.5 will use this signature:
+//  virtual bool AdjustPagebreak(int *pagebreak, int *known_pagebreaks = NULL, int number_of_pages = 0) const;
 
     // Sets cell's behaviour on pagebreaks (see AdjustPagebreak). Default
     // is true - the cell can be split on two pages
@@ -261,37 +135,11 @@ public:
     // This if for internal usage only and may disappear in future versions!
     virtual bool IsTerminalCell() const { return TRUE; }
 
-    // Find a cell inside this cell positioned at the given coordinates
-    // (relative to this's positions). Returns NULL if no such cell exists.
-    // The flag can be used to specify whether to look for terminal or
-    // nonterminal cells or both. In either case, returned cell is deepest
-    // cell in cells tree that contains [x,y].
-    virtual wxHtmlCell *FindCellByPos(wxCoord x, wxCoord y,
-                                  unsigned flags = wxHTML_FIND_EXACT) const;
-
-    // Returns absolute position of the cell on HTML canvas
-    wxPoint GetAbsPos() const;
-
-    // Returns first (last) terminal cell inside this cell. It may return NULL,
-    // but it is rare -- only if there are no terminals in the tree.
-    virtual wxHtmlCell *GetFirstTerminal() const 
-        { return wxConstCast(this, wxHtmlCell); }
-    virtual wxHtmlCell *GetLastTerminal() const 
-        { return wxConstCast(this, wxHtmlCell); }
-
-    // Returns cell's depth, i.e. how far under the root cell it is
-    // (if it is the root, depth is 0)
-    unsigned GetDepth() const;
-    
-    // Returns true if the cell appears before 'cell' in natural order of
-    // cells (= as they are read). If cell A is (grand)parent of cell B,
-    // then both A.IsBefore(B) and B.IsBefore(A) always return true.
-    bool IsBefore(wxHtmlCell *cell) const;
-    
-    // Converts the cell into text representation. If sel != NULL then
-    // only part of the cell inside the selection is converted.
-    virtual wxString ConvertToText(wxHtmlSelection *WXUNUSED(sel)) const
-        { return wxEmptyString; }
+    // Find the terminal cell inside this cell at the given position (relative
+    // to this cell)
+    //
+    // Returns NULL if not found
+    virtual wxHtmlCell *FindCellByPos(wxCoord x, wxCoord y) const;
 
 protected:
     wxHtmlCell *m_Next;
@@ -309,38 +157,28 @@ protected:
             // true if this cell can be placed on pagebreak, false otherwise
     wxString m_id;
             // unique identifier of the cell, generated from "id" property of tags
-
-    DECLARE_NO_COPY_CLASS(wxHtmlCell)
 };
 
 
 
 
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // Inherited cells:
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
 
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlWordCell
 //                  Single word in input stream.
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
 class WXDLLEXPORT wxHtmlWordCell : public wxHtmlCell
 {
 public:
     wxHtmlWordCell(const wxString& word, wxDC& dc);
-    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-              wxHtmlRenderingInfo& info);
-    wxCursor GetCursor() const;
-    wxString ConvertToText(wxHtmlSelection *sel) const;
+    void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
 
 protected:
-    void SetSelectionPrivPos(wxDC& dc, wxHtmlSelection *s) const;
-    void Split(wxDC& dc,
-               const wxPoint& selFrom, const wxPoint& selTo,
-               unsigned& pos1, unsigned& pos2) const;
-    
     wxString m_Word;
 };
 
@@ -348,8 +186,11 @@ protected:
 
 
 
-// Container contains other cells, thus forming tree structure of rendering
-// elements. Basic code of layout algorithm is contained in this class.
+//--------------------------------------------------------------------------------
+// wxHtmlContainerCell
+//                  Container - it contains other cells. Basic of layout algorithm.
+//--------------------------------------------------------------------------------
+
 class WXDLLEXPORT wxHtmlContainerCell : public wxHtmlCell
 {
 public:
@@ -357,11 +198,11 @@ public:
     ~wxHtmlContainerCell();
 
     virtual void Layout(int w);
-    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-                      wxHtmlRenderingInfo& info);
-    virtual void DrawInvisible(wxDC& dc, int x, int y,
-                               wxHtmlRenderingInfo& info);
-    virtual bool AdjustPagebreak(int *pagebreak, int *known_pagebreaks = NULL, int number_of_pages = 0) const;
+    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
+    virtual void DrawInvisible(wxDC& dc, int x, int y);
+    virtual bool AdjustPagebreak(int *pagebreak) const;
+// wx 2.5 will use this signature:
+//  virtual bool AdjustPagebreak(int *pagebreak, int *known_pagebreaks = NULL, int number_of_pages = 0) const;
 
     // insert cell at the end of m_Cells list
     void InsertCell(wxHtmlCell *cell);
@@ -400,26 +241,14 @@ public:
     virtual void OnMouseClick(wxWindow *parent, int x, int y, const wxMouseEvent& event);
     virtual void GetHorizontalConstraints(int *left, int *right) const;
 
-    virtual wxHtmlCell* GetFirstChild() const { return m_Cells; }
-#if WXWIN_COMPATIBILITY_2_4
-    wxDEPRECATED( wxHtmlCell* GetFirstCell() const );
-#endif
+    // returns pointer to the first cell in container or NULL
+    wxHtmlCell* GetFirstCell() const {return m_Cells;}
 
     // see comment in wxHtmlCell about this method
     virtual bool IsTerminalCell() const { return FALSE; }
 
-    virtual wxHtmlCell *FindCellByPos(wxCoord x, wxCoord y,
-                                  unsigned flags = wxHTML_FIND_EXACT) const;
-    
-    virtual wxHtmlCell *GetFirstTerminal() const;
-    virtual wxHtmlCell *GetLastTerminal() const;
+    virtual wxHtmlCell *FindCellByPos(wxCoord x, wxCoord y) const;
 
-protected:
-    void UpdateRenderingStatePre(wxHtmlRenderingInfo& info,
-                                 wxHtmlCell *cell) const;
-    void UpdateRenderingStatePost(wxHtmlRenderingInfo& info,
-                                  wxHtmlCell *cell) const;
-    
 protected:
     int m_IndentLeft, m_IndentRight, m_IndentTop, m_IndentBottom;
             // indentation of subcells. There is always m_Indent pixels
@@ -443,31 +272,23 @@ protected:
     int m_LastLayout;
             // if != -1 then call to Layout may be no-op
             // if previous call to Layout has same argument
-
-    DECLARE_NO_COPY_CLASS(wxHtmlContainerCell)
 };
 
-#if WXWIN_COMPATIBILITY_2_4
-inline wxHtmlCell* wxHtmlContainerCell::GetFirstCell() const
-    { return GetFirstChild(); }
-#endif
 
 
 
 
-// ---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxHtmlColourCell
 //                  Color changer.
-// ---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
 class WXDLLEXPORT wxHtmlColourCell : public wxHtmlCell
 {
 public:
     wxHtmlColourCell(const wxColour& clr, int flags = wxHTML_CLR_FOREGROUND) : wxHtmlCell() {m_Colour = clr; m_Flags = flags;}
-    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-                      wxHtmlRenderingInfo& info);
-    virtual void DrawInvisible(wxDC& dc, int x, int y,
-                               wxHtmlRenderingInfo& info);
+    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
+    virtual void DrawInvisible(wxDC& dc, int x, int y);
 
 protected:
     wxColour m_Colour;
@@ -486,10 +307,8 @@ class WXDLLEXPORT wxHtmlFontCell : public wxHtmlCell
 {
 public:
     wxHtmlFontCell(wxFont *font) : wxHtmlCell() { m_Font = (*font); }
-    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-                      wxHtmlRenderingInfo& info);
-    virtual void DrawInvisible(wxDC& dc, int x, int y,
-                               wxHtmlRenderingInfo& info);
+    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
+    virtual void DrawInvisible(wxDC& dc, int x, int y);
 
 protected:
     wxFont m_Font;
@@ -516,18 +335,14 @@ public:
     // (w is percent of parent's width)
     wxHtmlWidgetCell(wxWindow *wnd, int w = 0);
     ~wxHtmlWidgetCell() { m_Wnd->Destroy(); }
-    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
-                      wxHtmlRenderingInfo& info);
-    virtual void DrawInvisible(wxDC& dc, int x, int y,
-                               wxHtmlRenderingInfo& info);
+    virtual void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2);
+    virtual void DrawInvisible(wxDC& dc, int x, int y);
     virtual void Layout(int w);
 
 protected:
     wxWindow* m_Wnd;
     int m_WidthFloat;
             // width float is used in adjustWidth (it is in percents)
-
-    DECLARE_NO_COPY_CLASS(wxHtmlWidgetCell)
 };
 
 
@@ -565,26 +380,6 @@ private:
     const wxHtmlCell *m_Cell;
 };
 
-
-
-// ----------------------------------------------------------------------------
-// wxHtmlTerminalCellsInterator
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxHtmlTerminalCellsInterator
-{
-public:
-    wxHtmlTerminalCellsInterator(const wxHtmlCell *from, const wxHtmlCell *to)
-        : m_to(to), m_pos(from) {}
-
-    operator bool() const { return m_pos != NULL; }
-    const wxHtmlCell* operator++();
-    const wxHtmlCell* operator->() const { return m_pos; }
-    const wxHtmlCell* operator*() const { return m_pos; }
-
-private:
-    const wxHtmlCell *m_to, *m_pos;
-};
 
 
 

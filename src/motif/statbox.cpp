@@ -26,7 +26,9 @@
 #pragma message disable nosimpint
 #endif
 #include <Xm/Frame.h>
+#include <Xm/Form.h>
 #include <Xm/Label.h>
+#include <Xm/LabelG.h>
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
@@ -39,40 +41,6 @@ BEGIN_EVENT_TABLE(wxStaticBox, wxControl)
 //EVT_ERASE_BACKGROUND(wxStaticBox::OnEraseBackground)
 END_EVENT_TABLE()
 
-// ----------------------------------------------------------------------------
-// wxXmSizeKeeper
-// ----------------------------------------------------------------------------
-
-// helper class to reduce code duplication
-class wxXmSizeKeeper
-{
-    Dimension m_x, m_y;
-    Widget m_widget;
-public:
-    wxXmSizeKeeper( Widget w )
-        : m_widget( w )
-    {
-        XtVaGetValues( m_widget,
-                       XmNwidth, &m_x,
-                       XmNheight, &m_y,
-                       NULL );
-    }
-
-    void Restore()
-    {
-        int x, y;
-
-        XtVaGetValues( m_widget,
-                       XmNwidth, &x,
-                       XmNheight, &y,
-                       NULL );
-        if( x != m_x || y != m_y )
-            XtVaSetValues( m_widget,
-                           XmNwidth, m_x,
-                           XmNheight, m_y,
-                           NULL );
-    }
-};
 
 /*
  * Static box
@@ -90,30 +58,41 @@ bool wxStaticBox::Create(wxWindow *parent, wxWindowID id,
            long style,
            const wxString& name)
 {
-    if( !CreateControl( parent, id, pos, size, style,
-                        wxDefaultValidator, name ) )
-        return false;
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+    m_font = parent->GetFont();
+
+    SetName(name);
+
+    if (parent) parent->AddChild(this);
+
+    if ( id == -1 )
+        m_windowId = (int)NewControlId();
+    else
+        m_windowId = id;
+
+    m_windowStyle = style;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
     m_mainWidget = XtVaCreateManagedWidget ("staticboxframe",
             xmFrameWidgetClass, parentWidget,
-            // MBN: why override default?
-            // XmNshadowType, XmSHADOW_IN,
+            XmNshadowType, XmSHADOW_IN,
+            //XmNmarginHeight, 0,
+            //XmNmarginWidth, 0,
             NULL);
 
     bool hasLabel = (!label.IsNull() && !label.IsEmpty()) ;
     if (hasLabel)
     {
-        WXFontType fontType = m_font.GetFontType( XtDisplay( parentWidget ) );
+        XmFontList fontList = (XmFontList) m_font.GetFontList(1.0, XtDisplay(parentWidget));
         wxString label1(wxStripMenuCodes(label));
         wxXmString text(label1);
-
-        m_labelWidget = (WXWidget) XtVaCreateManagedWidget ("staticboxlabel",
+        m_labelWidget = (WXWidget) XtVaCreateManagedWidget (label1.c_str(),
                 xmLabelWidgetClass, (Widget)m_mainWidget,
-                wxFont::GetFontTag(), fontType,                
+                XmNfontList, fontList,
                 XmNlabelString, text(),
-#if wxCHECK_MOTIF_VERSION( 2, 0 )
+#if (XmVersion > 1200)
                 XmNframeChildType, XmFRAME_TITLE_CHILD,
 #else
                 XmNchildType, XmFRAME_TITLE_CHILD,          
@@ -121,6 +100,7 @@ bool wxStaticBox::Create(wxWindow *parent, wxWindowID id,
                 NULL);
     }
     
+    SetCanAddEventHandler(TRUE);
     AttachWidget (parent, m_mainWidget, NULL, pos.x, pos.y, size.x, size.y);
     ChangeBackgroundColour();
 
@@ -136,11 +116,52 @@ wxStaticBox::~wxStaticBox()
    m_labelWidget = (WXWidget) 0;
 }
 
-void wxStaticBox::SetLabel( const wxString& label )
+void wxStaticBox::SetLabel(const wxString& label)
 {
-    wxXmSizeKeeper sk( (Widget)GetMainWidget() );
+    if (!m_labelWidget)
+        return;
 
-    wxStaticBoxBase::SetLabel( label );
+    if (!label.IsNull())
+    {
+        wxString label1(wxStripMenuCodes(label));
 
-    sk.Restore();
+        wxXmString text(label1);
+        XtVaSetValues ((Widget) m_labelWidget,
+                XmNlabelString, text(),
+                XmNlabelType, XmSTRING,
+                NULL);
+    }
 }
+
+wxString wxStaticBox::GetLabel() const
+{
+    if (!m_labelWidget)
+        return wxEmptyString;
+
+    XmString text = 0;
+    char *s;
+    XtVaGetValues ((Widget) m_labelWidget,
+            XmNlabelString, &text,
+            NULL);
+
+    if (!text)
+        return wxEmptyString;
+
+    if (XmStringGetLtoR (text, XmSTRING_DEFAULT_CHARSET, &s))
+    {
+        wxString str(s);
+        XtFree (s);
+        return str;
+    }
+    else
+    {
+        return wxEmptyString;
+    }
+}
+
+void wxStaticBox::ChangeFont(bool keepOriginalSize)
+{
+    wxWindow::ChangeFont(keepOriginalSize);
+}
+
+

@@ -62,8 +62,6 @@ public:
 
 protected:
     wxListBox  *m_listbox;
-
-    DECLARE_NO_COPY_CLASS(wxAnyChoiceDialog)
 };
 
 // ----------------------------------------------------------------------------

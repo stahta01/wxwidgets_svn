@@ -55,8 +55,6 @@ protected:
     class WXDLLEXPORT wxEventLoopImpl *m_impl;
     // the pointer to currently active loop
     static wxEventLoop *ms_activeLoop;
-
-    DECLARE_NO_COPY_CLASS(wxEventLoop)
 };
 
 #endif // _WX_EVTLOOP_H_

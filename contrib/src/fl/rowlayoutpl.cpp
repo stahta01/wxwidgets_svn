@@ -433,9 +433,6 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
     // look like total of mLetRatio's is 1.0, thus original
     // len. ratios are _preserved_:
 
-    if (pcntSum == 0.0)
-        pcntSum = 1.0;
-
     double unit = freeSpc / pcntSum;
 
     bool haveSquished = FALSE;
@@ -458,6 +455,9 @@ void cbRowLayoutPlugin::ApplyLengthRatios( cbRowInfo* pRow )
             }
         }
     }  // for
+
+    if (pcntSum == 0.0)
+        pcntSum = 1.0;
 
     if ( haveSquished )
         unit = freeSpc / pcntSum;

@@ -12,12 +12,16 @@
 #ifndef _WX_GAUGE_H_
 #define _WX_GAUGE_H_
 
-#if defined(__GNUG__) && !defined(__APPLE__)
+#ifdef __GNUG__
 #pragma interface "gauge.h"
 #endif
 
+#include "wx/control.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxGaugeNameStr;
+
 // Group box
-class WXDLLEXPORT wxGauge : public wxGaugeBase
+class WXDLLEXPORT wxGauge : public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxGauge)
         
@@ -44,18 +48,25 @@ public:
         const wxString& name = wxGaugeNameStr);
     
     void SetShadowWidth(int w);
+    void SetBezelFace(int w);
     void SetRange(int r);
     void SetValue(int pos);
     
     int GetShadowWidth() const ;
+    int GetBezelFace() const ;
     int GetRange() const ;
     int GetValue() const ;
     
     virtual void Command(wxCommandEvent& WXUNUSED(event)) {} ;
-
-private:
-    virtual wxSize DoGetBestSize() const;
-    virtual void DoMoveWindow(int x, int y, int width, int height);
+    
+    // Implementation
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
+    virtual void ChangeBackgroundColour();
+    virtual void ChangeForegroundColour();
+    
+protected:
+    int      m_rangeMax;
+    int      m_gaugePos;
 };
 
 #endif

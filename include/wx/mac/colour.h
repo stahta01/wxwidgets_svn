@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        colour.h
 // Purpose:     wxColour class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ public:
   wxColour( const wxString &colourName )
       : m_isInit(FALSE), m_red(0), m_blue(0), m_green(0)
       { InitFromName(colourName); }
-  wxColour( const wxChar *colourName )
+  wxColour( const char *colourName )
       : m_isInit(FALSE), m_red(0), m_blue(0), m_green(0)
       { InitFromName(colourName); }
 

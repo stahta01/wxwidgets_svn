@@ -6,7 +6,7 @@
 // Created:     23.09.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence (part of wxExtra library)
+// Licence:     wxWindows license (part of wxExtra library)
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef    __GNUG__
@@ -336,8 +336,7 @@ bool wxFileTypeImpl::GetMimeTypes(wxArrayString& mimeTypes) const
 
 bool wxFileTypeImpl::GetIcon(wxIcon *icon,
                              wxString *iconFile,
-                             int *iconIndex,
-                             int iconSize) const
+                             int *iconIndex) const
 {
 #if wxUSE_GUI
     wxString strIconKey;
@@ -368,12 +367,7 @@ bool wxFileTypeImpl::GetIcon(wxIcon *icon,
             // here we need C based counting!
             int nIndex = wxAtoi(strIndex);
 
-            HICON hIcon, hIconLarge, hIconSmall;
-            ExtractIconEx(strExpPath, nIndex, &hIconLarge, &hIconSmall, 1);
-
-            hIcon = (iconSize == wxICON_LARGE) ? hIconLarge : hIconSmall;
-
-
+            HICON hIcon = ExtractIcon(GetModuleHandle(NULL), strExpPath, nIndex);
             switch ( (int)hIcon ) {
                 case 0: // means no icons were found
                 case 1: // means no such file or it wasn't a DLL/EXE/OCX/ICO/...

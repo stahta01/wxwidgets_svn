@@ -53,7 +53,7 @@ from screen as soon as the maximum value of the progress meter has been
 reached.}
 \twocolitem{{\bf wxPD\_CAN\_ABORT}}{This flag tells the dialog that it should have a
 "Cancel" button which the user may press. If this happens, the next call to 
- \helpref{Update()}{wxprogressdialogupdate} will return false.}
+ \helpref{Update()}{wxprogressdialogupdate} will return FALSE.}
 \twocolitem{{\bf wxPD\_ELAPSED\_TIME}}{This flag tells the dialog that it should show elapsed time (since creating the dialog).}
 \twocolitem{{\bf wxPD\_ESTIMATED\_TIME}}{This flag tells the dialog that it should show estimated time.}
 \twocolitem{{\bf wxPD\_REMAINING\_TIME}}{This flag tells the dialog that it should show remaining time.}
@@ -85,7 +85,7 @@ Updates the dialog, setting the progress bar to the new value and, if
 given changes the message above it. Returns true unless the Cancel button
 has been pressed.
 
-If false is returned, the application can either immediately destroy the dialog
+If FALSE is returned, the application can either immediately destroy the dialog
 or ask the user for the confirmation and if the abort is not confirmed the
 dialog may be resumed with \helpref{Resume}{wxprogressdialogresume} function.
 

@@ -21,7 +21,6 @@
 
 class WXXMLDLLEXPORT wxRadioBoxXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxRadioBoxXmlHandler)
 public:
     wxRadioBoxXmlHandler();
     virtual wxObject *DoCreateResource();

@@ -5,7 +5,7 @@
 //              (based on GTK & MSW implementations)
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -563,7 +563,10 @@ void wxWindowMGL::Init()
 // Destructor
 wxWindowMGL::~wxWindowMGL()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent((wxWindow*)this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
     m_isBeingDeleted = TRUE;
 

@@ -21,7 +21,6 @@
 #include "wx/glcanvas.h"
 #include "wx/utils.h"
 #include "wx/app.h"
-#include "wx/log.h"
 
 #ifdef __VMS
 # pragma message disable nosimpint
@@ -144,7 +143,7 @@ void wxGLContext::SetColour(const char *colour)
 		if(!XAllocColor((Display*) m_window->GetXDisplay(),
                   (Colormap) wxTheApp->GetMainColormap(m_window->GetXDisplay()),
                   &exact_def)) {
-		    wxLogError("wxGLCanvas: cannot allocate color\n");
+		    wxDebugMsg("wxGLCanvas: cannot allocate color\n");
 		    return;
 		}
 		pix = the_colour->m_pixel = exact_def.pixel;
@@ -246,7 +245,7 @@ bool wxGLCanvas::Create( wxWindow *parent,
 
     // Check for the presence of the GLX extension
     if(!glXQueryExtension(display, NULL, NULL)) {
-	wxLogError("wxGLCanvas: GLX extension is missing\n");
+	wxDebugMsg("wxGLCanvas: GLX extension is missing\n");
 	return false;
     }
 

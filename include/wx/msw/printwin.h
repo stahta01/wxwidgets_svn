@@ -38,8 +38,6 @@ public:
 
 private:
     WXFARPROC     m_lpAbortProc;
-
-    DECLARE_NO_COPY_CLASS(wxWindowsPrinter)
 };
 
 // ---------------------------------------------------------------------------

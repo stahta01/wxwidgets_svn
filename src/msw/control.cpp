@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@
 
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -78,10 +78,11 @@ bool wxControl::Create(wxWindow *parent,
 bool wxControl::MSWCreateControl(const wxChar *classname,
                                  const wxString& label,
                                  const wxPoint& pos,
-                                 const wxSize& size)
+                                 const wxSize& size,
+                                 long style)
 {
     WXDWORD exstyle;
-    WXDWORD msStyle = MSWGetStyle(GetWindowStyle(), &exstyle);
+    WXDWORD msStyle = MSWGetStyle(style, &exstyle);
 
     return MSWCreateControl(classname, msStyle, pos, size, label, exstyle);
 }
@@ -96,7 +97,6 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
     // if no extended style given, determine it ourselves
     if ( exstyle == (WXDWORD)-1 )
     {
-//        exstyle = Determine3DEffects(WS_EX_CLIENTEDGE, &want3D);
         exstyle = 0;
         (void) MSWGetStyle(GetWindowStyle(), & exstyle) ;
     }
@@ -135,14 +135,6 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
 
         return FALSE;
     }
-
-#if wxUSE_CTL3D
-    if ( want3D )
-    {
-        Ctl3dSubclassCtl(GetHwnd());
-        m_useCtl3D = TRUE;
-    }
-#endif // wxUSE_CTL3D
 
     // install wxWindows window proc for this window
     SubclassWin(m_hWnd);
@@ -269,7 +261,7 @@ WXHBRUSH wxControl::OnCtlColor(WXHDC pDC, WXHWND WXUNUSED(pWnd), WXUINT WXUNUSED
 #endif // wxUSE_CTL3D
 
     HDC hdc = (HDC)pDC;
-    if (GetParent()->GetTransparentBackground() /* || (GetParent()->GetExtraStyle() & wxWS_EX_THEMED_BACKGROUND) */ )
+    if (GetParent()->GetTransparentBackground())
         SetBkMode(hdc, TRANSPARENT);
     else
         SetBkMode(hdc, OPAQUE);

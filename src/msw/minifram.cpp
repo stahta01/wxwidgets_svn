@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -45,8 +45,10 @@ IMPLEMENT_DYNAMIC_CLASS(wxMiniFrame, wxFrame)
 
 #include "wx/minifram.h"
 
-#ifdef __GNUWIN32_OLD__
-    #include "wx/msw/gnuwin32/extra.h"
+#ifndef __TWIN32__
+    #ifdef __GNUWIN32_OLD__
+        #include "wx/msw/gnuwin32/extra.h"
+    #endif
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxMiniFrame, wxFrame)

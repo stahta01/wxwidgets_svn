@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        radiobut.h
 // Purpose:     wxRadioButton class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_RADIOBUT_H_
@@ -44,7 +44,7 @@ public:
 
     // implementation 
     
-      virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ); 
+  	virtual void MacHandleControlClick( WXWidget control , wxInt16 controlpart ); 
     void Command(wxCommandEvent& event);
     wxRadioButton *AddInCycle(wxRadioButton *cycle);
     inline wxRadioButton *NextInCycle() {return m_cycle;}

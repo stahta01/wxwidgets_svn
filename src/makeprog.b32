@@ -5,43 +5,29 @@
 # Updated:	
 # Copyright:
 #
-# Include file for samples and utilities. Set TARGET, OBJECTS and 
-# TARGETDEF (if you want to include a DEF file in the build) before
-# including this file.
+# Include file for samples and utilities. Set TARGET and OBJECTS
+# before including this file.
 
 # WXWIN  set by parent make
 # BCCDIR set in makeb32.env
 
 WXDIR = $(WXWIN)
-
-!ifndef EXEDIR
-EXEDIR = BORL
-!endif
-
 !include $(WXDIR)\src\makeb32.env
 
 !if "$(wxUSE_GUI)" == "0"
 IMGLIBS=
 !else
-IMGLIBS= png_$(DEBUG_SUFFIX) jpeg_$(DEBUG_SUFFIX) tiff_$(DEBUG_SUFFIX)
-!endif
-
-!if "$(FINAL)" == "0"
-EX_LIBS=$(EXTRALIBS:.lib=_d.lib)
-!else
-EX_LIBS=$(EXTRALIBS)
+IMGLIBS= winpng jpeg tiff
 !endif
 
 !if "$(WXUSINGDLL)" == "1"
-LIBS=$(WXLIB) $(EX_LIBS) cw32mti import32 ole2w32 regex_$(DEBUG_SUFFIX) zlib_$(DEBUG_SUFFIX) $(IMGLIBS) 
+LIBS=$(WXLIB) $(EXTRALIBS) cw32mti import32 ole2w32 regex zlib $(IMGLIBS) odbc32
 !else
-LIBS=$(WXLIB) $(EX_LIBS) cw32mt import32 ole2w32 regex_$(DEBUG_SUFFIX) zlib_$(DEBUG_SUFFIX) $(IMGLIBS)
+LIBS=$(WXLIB) $(EXTRALIBS) cw32mt import32 ole2w32 regex zlib $(IMGLIBS) odbc32
 !endif
 
-!if "$(wxUSE_ODBC)" == "1"
-LIBS=$(LIBS) odbc32
-!endif
-
+# Note: you may need to remove some libraries for earlier versions of BC++, as below
+#LIBS=$(WXLIB) $(EXTRALIBS) cw32mt import32 ole2w32 winpng zlib tiff
 
 !if "$(wxUSE_GUI)" == "0"
 LINKOUT = /ap
@@ -51,12 +37,12 @@ LINKOUT = /aa
 
 !if "$(FINAL)" == "0"
 #LINKFLAGS=/v /c /Tpe $(LNKCFG) $(EXTRALINKFLAGS)
-LINKFLAGS=/v /c $(LINKOUT) -L$(WXLIBDIR);$(BCCDIR)\lib;$(BCCDIR)\lib\psdk $(EXTRALINKFLAGS)
+LINKFLAGS=/v /c $(LINKOUT) -L$(WXLIBDIR);$(WXLIBDIR2);$(BCCDIR)\lib;$(BCCDIR)\lib\psdk $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS= -v
 !else
 #LINKFLAGS=/Tpe +$(LNKCFG) $(EXTRALINKFLAGS)
-LINKFLAGS=$(LINKOUT) -L$(WXLIBDIR);$(BCCDIR)\lib;$(BCCDIR)\lib\psdk $(EXTRALINKFLAGS)
+LINKFLAGS=$(LINKOUT) -L$(WXLIBDIR);$(WXLIBDIR2);$(BCCDIR)\lib;$(BCCDIR)\lib\psdk $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS =
 !endif
@@ -67,49 +53,37 @@ CPPFLAGS=$(CPPFLAGS) $(DEBUG_FLAGS) $(OPT)
 TARGETRES = 
 STARTUP = c0x32.obj	
 !else
-TARGETRES = $(EXEDIR)\$(TARGET).res
+TARGETRES = $(TARGET).res
 STARTUP = c0w32.obj
 !endif
 
-EXE_TARGET=$(EXEDIR)\$(TARGET)
+all: $(TARGET).exe $(EXTRATARGETS)
 
-default : all
-
-maked: 
-    -if not exist $(EXEDIR)\nul mkdir $(EXEDIR)
-
-wx: $(EXE_TARGET).exe $(EXTRATARGETS)
-
-all: maked wx 
-
-
-$(EXE_TARGET).exe: $(OBJECTS) $(TARGETDEF) $(TARGETRES) 
-  $(LINK) $(LINKFLAGS) -j$(EXEDIR) @&&!
+$(TARGET).exe:	$(OBJECTS) $(TARGETRES)
+  $(LINK) $(LINKFLAGS) @&&!
 $(STARTUP) $(OBJECTS)
-$(EXE_TARGET)
+$(TARGET)
 nul
 $(LIBS)
-$(TARGETDEF)
+
 $(TARGETRES)
 !
 
-.path.obj=$(EXEDIR)
-
 .$(SRCSUFF).obj:
-	bcc32 $(CPPFLAGS) -c  -n$(EXEDIR) {$< }
+	bcc32 $(CPPFLAGS) -c {$< }
 
 .c.obj:
-	bcc32 $(CPPFLAGS) -P- -c -n$(EXEDIR) {$< }
+	bcc32 $(CPPFLAGS) -P- -c {$< }
 
-$(TARGETRES) :      $(TARGET).rc $(WXDIR)\include\wx\msw\wx.rc
-    brc32 -r /i$(BCCDIR)\include /i$(WXDIR)\include /i$(WXDIR)\contrib\include -fo$(EXEDIR)\$(<B).res $(TARGET)
+$(TARGET).res :      $(TARGET).rc $(WXDIR)\include\wx\msw\wx.rc
+    brc32 -r /i$(BCCDIR)\include /i$(WXDIR)\include /i$(WXDIR)\contrib\include $(TARGET)
 
 clean:
-        -$(RM) $(EXEDIR)\*.obj
-        -$(RM) $(EXEDIR)\*.exe
-        -$(RM) $(EXEDIR)\*.res
-        -$(RM) $(EXEDIR)\*.map
-        -$(RM) $(EXEDIR)\*.rws
-        -$(RM) $(EXEDIR)\*.tds
-        -$(RM) $(EXEDIR)\*.il?
+        -$(RM) *.obj
+        -$(RM) *.exe
+        -$(RM) *.res
+        -$(RM) *.map
+        -$(RM) *.rws
+        -$(RM) *.tds
+        -$(RM) *.il?
 

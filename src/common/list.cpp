@@ -5,8 +5,8 @@
 // Modified by: VZ at 16/11/98: WX_DECLARE_LIST() and typesafe lists added
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 ////////////////////////////////////////////////////////////////////////////////
 
 // =============================================================================
@@ -513,9 +513,9 @@ void wxListBase::Sort(const wxSortCompareFunction compfunc)
 
     // go through the list and put the pointers into the array
     wxNodeBase *node;
-    for ( node = GetFirst(); node; node = node->GetNext() )
+    for ( node = GetFirst(); node; node = node->Next() )
     {
-        *objPtr++ = node->GetData();
+        *objPtr++ = node->Data();
     }
 
     // sort the array
@@ -523,7 +523,7 @@ void wxListBase::Sort(const wxSortCompareFunction compfunc)
 
     // put the sorted pointers back into the list
     objPtr = objArray;
-    for ( node = GetFirst(); node; node = node->GetNext() )
+    for ( node = GetFirst(); node; node = node->Next() )
     {
         node->SetData(*objPtr++);
     }
@@ -539,33 +539,10 @@ void wxListBase::Sort(const wxSortCompareFunction compfunc)
 #ifdef wxLIST_COMPATIBILITY
 
 // -----------------------------------------------------------------------------
-// wxNodeBase deprecated methods
-// -----------------------------------------------------------------------------
-
-wxNode *wxNodeBase::Next() const { return (wxNode *)GetNext(); }
-wxNode *wxNodeBase::Previous() const { return (wxNode *)GetPrevious(); }
-wxObject *wxNodeBase::Data() const { return (wxObject *)GetData(); }
-
-// -----------------------------------------------------------------------------
-// wxListBase deprecated methods
-// -----------------------------------------------------------------------------
-
-int wxListBase::Number() const { return GetCount(); }
-wxNode *wxListBase::First() const { return (wxNode *)GetFirst(); }
-wxNode *wxListBase::Last() const { return (wxNode *)GetLast(); }
-wxNode *wxListBase::Nth(size_t n) const { return (wxNode *)Item(n); }
-wxListBase::operator wxList&() const { return *(wxList*)this; }
-
-// -----------------------------------------------------------------------------
 // wxList (a.k.a. wxObjectList)
 // -----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxList, wxObject)
-
-wxList::wxList( int key_type )
-    : wxObjectList( (wxKeyType)key_type )
-{
-}
 
 void wxObjectListNode::DeleteData()
 {
@@ -611,11 +588,6 @@ void wxStringList::DoCopy(const wxStringList& other)
     {
         Add(other.Item(n)->GetData());
     }
-}
-
-wxStringList::wxStringList()
-{
-    DeleteContents(TRUE);
 }
 
 // Variable argument list, terminated by a zero

@@ -1,17 +1,10 @@
-#
-# File:		makefile.b32
-# Author:	Michael Bedward
-# Created:	1999
-# Updated:	
-# Copyright:
-#
-# Makefile : Builds sample for 32-bit BC++
+# Purpose: makefile for grid example (BC++ 32bit)
+# Created: 2000-03-15
 
 WXDIR = $(WXWIN)
 
-TARGET=griddemo
-
-OBJECTS = griddemo.obj
+TARGET=grid
+OBJECTS = $(TARGET).obj
 
 !include $(WXDIR)\src\makeprog.b32
 

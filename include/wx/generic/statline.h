@@ -27,7 +27,7 @@ class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 
 public:
     // constructors and pseudo-constructors
-    wxStaticLine() { m_statbox = NULL; }
+    wxStaticLine() { }
 
     wxStaticLine( wxWindow *parent,
                   wxWindowID id,
@@ -38,8 +38,6 @@ public:
     {
         Create(parent, id, pos, size, style, name);
     }
-
-    virtual ~wxStaticLine();
 
     bool Create( wxWindow *parent,
                  wxWindowID id,

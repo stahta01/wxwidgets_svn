@@ -6,7 +6,7 @@
 // Created:     15.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -429,6 +429,10 @@ void wxControlRenderer::DrawLabel(const wxBitmap& bitmap,
         if ( bitmap.Ok() )
         {
             rectLabel.Inflate(-marginX, -marginY);
+            
+            // I don't know why this is necessary. RR.
+            rectLabel.x ++;
+            rectLabel.y ++;
         }
 
         wxControl *ctrl = wxStaticCast(m_window, wxControl);

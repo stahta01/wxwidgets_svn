@@ -108,11 +108,6 @@ public:
     virtual wxString GetTitle() const = 0;
      */
 
-    // Set the shape of the window to the given region.
-    // Returns TRUE if the platform supports this feature (and the
-    // operation is successful.)
-    virtual bool SetShape(const wxRegion& region) { return FALSE; }
-
     // old functions, use the new ones instead!
 #if WXWIN_COMPATIBILITY_2
     bool Iconized() const { return IsIconized(); }
@@ -175,15 +170,9 @@ protected:
 #elif defined(__WXMAC__)
     #include "wx/mac/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowMac
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/toplevel.h"
-    #define wxTopLevelWindowNative wxTopLevelWindowCocoa
 #elif defined(__WXPM__)
     #include "wx/os2/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowOS2
-#elif defined(__WXMOTIF__)
-    #include "wx/motif/toplevel.h"
-    #define wxTopLevelWindowNative wxTopLevelWindowMotif
 #endif
 
 #ifdef __WXUNIVERSAL__
@@ -196,7 +185,7 @@ protected:
             // construction
             wxTopLevelWindow() { Init(); }
             wxTopLevelWindow(wxWindow *parent,
-                       wxWindowID winid,
+                       wxWindowID id,
                        const wxString& title,
                        const wxPoint& pos = wxDefaultPosition,
                        const wxSize& size = wxDefaultSize,
@@ -204,7 +193,7 @@ protected:
                        const wxString& name = wxFrameNameStr)
             {
                 Init();
-                Create(parent, winid, title, pos, size, style, name);
+                Create(parent, id, title, pos, size, style, name);
             }
 
             DECLARE_DYNAMIC_CLASS(wxTopLevelWindow)

@@ -19,7 +19,6 @@
 
 class WXXMLDLLEXPORT wxListCtrlXmlHandler : public wxXmlResourceHandler
 {
-DECLARE_DYNAMIC_CLASS(wxListCtrlXmlHandler)
 public:
     wxListCtrlXmlHandler();
     virtual wxObject *DoCreateResource();

@@ -6,7 +6,7 @@
 # 
 # 
 # 
-PROGRAM = PROGRAM=dbtest
-OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj $(OUTPUTDIR)\listdb.obj 
+PROGRAM = db 
+OBJECTS = $(OUTPUTDIR)\$(PROGRAM).obj 
 # 
 !include $(%WXWIN)\src\makeprog.wat 

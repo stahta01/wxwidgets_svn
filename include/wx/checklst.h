@@ -38,10 +38,10 @@ public:
     #include "wx/gtk/checklst.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/checklst.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/checklst.h"
 #elif defined(__WXPM__)
     #include "wx/os2/checklst.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/checklst.h"
 #endif
 
 #endif // wxUSE_CHECKLISTBOX
