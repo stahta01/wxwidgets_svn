@@ -90,7 +90,7 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
-    m_mainWidget = XtVaCreateWidget ("radioboxframe",
+    m_mainWidget = XtVaCreateWidget ("radiobxoframe",
                                         xmFrameWidgetClass, parentWidget,
                                         XmNshadowType, XmSHADOW_IN,
                                         XmNresizeHeight, True,
@@ -114,11 +114,7 @@ bool wxRadioBox::Create(wxWindow *parent, wxWindowID id, const wxString& title,
 #endif
                                              XmNfontList, fontList,
                                              XmNlabelString, text(),
-// XmNframeChildType is not in Motif 1.2.
-// TODO: check this still looks OK for Motif 1.2.
-#if (XmVersion > 1200) || defined(LESSTIF_VERSION)
                                              XmNframeChildType, XmFRAME_TITLE_CHILD,
-#endif
                                              XmNchildVerticalAlignment, XmALIGNMENT_CENTER,
                                              NULL);
     }
