@@ -14,9 +14,8 @@ file or downloaded via HTTP protocol) in a window. The width
 of the window is constant - given in the constructor - and virtual height
 is changed dynamically depending on page size.
 Once the window is created you can set its content by calling 
-\helpref{SetPage(text)}{wxhtmlwindowsetpage},
-\helpref{LoadPage(filename)}{wxhtmlwindowloadpage} or
-\helpref{LoadFile}{wxhtmlwindowloadfile}.
+\helpref{SetPage(text)}{wxhtmlwindowsetpage} or 
+\helpref{LoadPage(filename)}{wxhtmlwindowloadpage}. 
 
 \wxheading{Note}
 
@@ -73,7 +72,7 @@ Appends HTML fragment to currently displayed text and refreshes the window.
 
 \wxheading{Return value}
 
-false if an error occurred, true otherwise.
+FALSE if an error occurred, TRUE otherwise.
 
 \membersection{wxHtmlWindow::GetInternalRepresentation}\label{wxhtmlwindowgetinternalrepresentation}
 
@@ -147,20 +146,6 @@ Clears history.
 
 Moves to next page in history.
 
-\membersection{wxHtmlWindow::LoadFile}\label{wxhtmlwindowloadfile}
-
-\func{virtual bool}{LoadFile}{\param{const wxFileName\& }{filename}}
-
-Loads HTML page from file and displays it.
-
-\wxheading{Return value}
-
-false if an error occurred, true otherwise
-
-\wxheading{See also}
-
-\helpref{LoadPage}{wxhtmlwindowloadpage}
-
 \membersection{wxHtmlWindow::LoadPage}\label{wxhtmlwindowloadpage}
 
 \func{virtual bool}{LoadPage}{\param{const wxString\& }{location}}
@@ -169,7 +154,7 @@ Unlike SetPage this function first loads HTML page from {\it location}
 and then displays it. See example:
 
 \begin{verbatim}
-htmlwin->LoadPage("help/myproject/index.htm");
+htmlwin -> SetPage("help/myproject/index.htm");
 \end{verbatim}
 
 \wxheading{Parameters}
@@ -178,11 +163,7 @@ htmlwin->LoadPage("help/myproject/index.htm");
 
 \wxheading{Return value}
 
-false if an error occurred, true otherwise
-
-\wxheading{See also}
-
-\helpref{LoadFile}{wxhtmlwindowloadfile}
+FALSE if an error occurred, TRUE otherwise
 
 \membersection{wxHtmlWindow::OnCellClicked}\label{wxhtmlwindowoncellclicked}
 
@@ -351,7 +332,7 @@ If you want to load a document from some location use
 
 \wxheading{Return value}
 
-false if an error occurred, true otherwise.
+FALSE if an error occurred, TRUE otherwise.
 
 \membersection{wxHtmlWindow::SetRelatedFrame}\label{wxhtmlwindowsetrelatedframe}
 

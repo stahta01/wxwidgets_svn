@@ -5,7 +5,7 @@ WXDIR = ..\..\..
 
 !include $(WXDIR)\src\makewat.env
 
-GIZMOSLIB = $(WXDIR)\lib\gizmos.lib
+GIZMOSLIB = $(WXDIR)\lib\gizmos_w.lib
 THISDIR = $(WXDIR)\contrib\src\gizmos
 OUTPUTDIR = $(THISDIR)\
 
@@ -20,5 +20,10 @@ $(GIZMOSLIB): $(OBJECTS)
 	*wlib /b /c /n /P=256 $(GIZMOSLIB) $(OBJECTS)
 
 clean:   .SYMBOLIC
-    -erase *.obj *.bak *.err *.pch $(GIZMOSLIB) *.lbc
+    -erase *.obj
+    -erase *.bak
+    -erase *.err 
+    -erase *.pch 
+    -erase $(GIZMOSLIB) 
+    -erase *.lbc
 

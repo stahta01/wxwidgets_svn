@@ -159,12 +159,12 @@ wxPropertyValue::wxPropertyValue(wxList *the_list)
   m_last = NULL;
   m_value.first = NULL;
 
-  wxNode *node = the_list->GetFirst();
+  wxNode *node = the_list->First();
   while (node)
   {
-    wxPropertyValue *expr = (wxPropertyValue *)node->GetData();
+    wxPropertyValue *expr = (wxPropertyValue *)node->Data();
     Append(expr);
-    node = node->GetNext();
+    node = node->Next();
   }
 
   delete the_list;
@@ -178,12 +178,12 @@ wxPropertyValue::wxPropertyValue(wxStringList *the_list)
   m_last = NULL;
   m_value.first = NULL;
 
-  wxStringList::Node *node = the_list->GetFirst();
+  wxNode *node = the_list->First();
   while (node)
   {
-    wxChar *s = node->GetData();
+    wxChar *s = (wxChar *)node->Data();
     Append(new wxPropertyValue(s));
-    node = node->GetNext();
+    node = node->Next();
   }
   delete the_list;
 }
@@ -939,14 +939,14 @@ wxPropertyValidator *wxPropertyView::FindPropertyValidator(wxProperty *property)
   if (property->GetValidator())
     return property->GetValidator();
 
-  wxNode *node = m_validatorRegistryList.GetFirst();
+  wxNode *node = m_validatorRegistryList.First();
   while (node)
   {
-    wxPropertyValidatorRegistry *registry = (wxPropertyValidatorRegistry *)node->GetData();
+    wxPropertyValidatorRegistry *registry = (wxPropertyValidatorRegistry *)node->Data();
     wxPropertyValidator *validator = registry->GetValidator(property->GetRole());
     if (validator)
       return validator;
-    node = node->GetNext();
+    node = node->Next();
   }
   return NULL;
 /*
@@ -989,7 +989,7 @@ wxProperty *wxPropertySheet::GetProperty(const wxString& name) const
   if (!node)
     return NULL;
   else
-    return (wxProperty *)node->GetData();
+    return (wxProperty *)node->Data();
 }
 
 bool wxPropertySheet::SetProperty(const wxString& name, const wxPropertyValue& value)
@@ -1008,7 +1008,7 @@ void wxPropertySheet::RemoveProperty(const wxString& name)
   wxNode *node = m_properties.Find(name);
   if(node)
   {
-    wxProperty *prop = (wxProperty *)node->GetData();
+    wxProperty *prop = (wxProperty *)node->Data();
      delete prop;
     m_properties.DeleteNode(node);
   }
@@ -1022,11 +1022,11 @@ bool wxPropertySheet::HasProperty(const wxString& name) const
 // Clear all properties
 void wxPropertySheet::Clear(void)
 {
-  wxNode *node = m_properties.GetFirst();
+  wxNode *node = m_properties.First();
   while (node)
   {
-    wxProperty *prop = (wxProperty *)node->GetData();
-    wxNode *next = node->GetNext();
+    wxProperty *prop = (wxProperty *)node->Data();
+    wxNode *next = node->Next();
     delete prop;
     delete node;
     node = next;
@@ -1036,12 +1036,12 @@ void wxPropertySheet::Clear(void)
 // Sets/clears the modified flag for each property value
 void wxPropertySheet::SetAllModified(bool flag)
 {
-  wxNode *node = m_properties.GetFirst();
+  wxNode *node = m_properties.First();
   while (node)
   {
-    wxProperty *prop = (wxProperty *)node->GetData();
+    wxProperty *prop = (wxProperty *)node->Data();
     prop->GetValue().SetModified(flag);
-    node = node->GetNext();
+    node = node->Next();
   }
 }
 
@@ -1077,7 +1077,7 @@ void wxPropertyValidatorRegistry::ClearRegistry(void)
   wxNode *node;
   while ((node = Next()) != NULL)
   {
-    delete (wxPropertyValidator *)node->GetData();
+    delete (wxPropertyValidator *)node->Data();
   }
 }
 

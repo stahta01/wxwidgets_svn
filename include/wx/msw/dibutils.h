@@ -88,7 +88,7 @@ PDIB        wxDibReadBitmapInfo(HFILE fh);
 #define wxDibFlipY(lpbi, y)       ((int)(lpbi)->biHeight-1-(y))
 
 //HACK for NT BI_BITFIELDS DIBs
-#ifdef __WIN32__
+#ifdef WIN32
     #define wxDibPtr(lpbi)            ((lpbi)->biCompression == BI_BITFIELDS \
                                        ? (LPVOID)(wxDibColors(lpbi) + 3) \
                                        : (LPVOID)(wxDibColors(lpbi) + (UINT)(lpbi)->biClrUsed))

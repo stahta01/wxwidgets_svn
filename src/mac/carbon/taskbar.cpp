@@ -1,13 +1,13 @@
 /////////////////////////////////////////////////////////////////////////
 // File:        taskbar.cpp
-// Purpose:        Implements wxTaskBarIcon class for manipulating icons on
+// Purpose:	    Implements wxTaskBarIcon class for manipulating icons on
 //              the task bar. Optional.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
 // Copyright:   (c)
-// Licence:       wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__

@@ -34,39 +34,60 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxStaticText, wxControl)
 
-bool wxStaticText::Create(wxWindow *parent,
-                          wxWindowID id,
-                          const wxString& label,
-                          const wxPoint& pos,
-                          const wxSize& size,
-                          long style,
-                          const wxString& name)
+bool wxStaticText::Create(wxWindow *parent, wxWindowID id,
+           const wxString& label,
+           const wxPoint& pos,
+           const wxSize& size,
+           long style,
+           const wxString& name)
 {
-    if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return FALSE;
+  SetName(name);
+  if (parent) parent->AddChild(this);
 
-    if ( !MSWCreateControl(wxT("STATIC"), label, pos, size) )
-        return FALSE;
+  SetBackgroundColour(parent->GetBackgroundColour()) ;
+  SetForegroundColour(parent->GetForegroundColour()) ;
 
-    return TRUE;
-}
+  if ( id == -1 )
+    m_windowId = (int)NewControlId();
+  else
+  m_windowId = id;
 
-WXDWORD wxStaticText::MSWGetStyle(long style, WXDWORD *exstyle) const
-{
-    WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);
+  int x = pos.x;
+  int y = pos.y;
+  int width = size.x;
+  int height = size.y;
 
-    // translate the alignment flags to the Windows ones
-    //
-    // note that both wxALIGN_LEFT and SS_LEFT are equal to 0 so we shouldn't
-    // test for them using & operator
-    if ( style & wxALIGN_CENTRE )
-        msStyle |= SS_CENTER;
-    else if ( style & wxALIGN_RIGHT )
-        msStyle |= SS_RIGHT;
-    else
-        msStyle |= SS_LEFT;
+  m_windowStyle = style;
 
-    return msStyle;
+  long msStyle = WS_CHILD | WS_VISIBLE;
+
+  if ( m_windowStyle & wxCLIP_SIBLINGS )
+    msStyle |= WS_CLIPSIBLINGS;
+  if (m_windowStyle & wxALIGN_CENTRE)
+    msStyle |= SS_CENTER;
+  else if (m_windowStyle & wxALIGN_RIGHT)
+    msStyle |= SS_RIGHT;
+  else
+    msStyle |= SS_LEFT;
+
+  // Even with extended styles, need to combine with WS_BORDER
+  // for them to look right.
+  if ( wxStyleHasBorder(m_windowStyle) )
+    msStyle |= WS_BORDER;
+
+  m_hWnd = (WXHWND)::CreateWindowEx(MakeExtendedStyle(m_windowStyle), wxT("STATIC"), (const wxChar *)label,
+                         msStyle,
+                         0, 0, 0, 0, (HWND) parent->GetHWND(), (HMENU)m_windowId,
+                         wxGetInstance(), NULL);
+
+  wxCHECK_MSG( m_hWnd, FALSE, wxT("Failed to create static ctrl") );
+
+  SubclassWin(m_hWnd);
+
+  wxControl::SetFont(parent->GetFont());
+  SetSize(x, y, width, height);
+
+  return TRUE;
 }
 
 wxSize wxStaticText::DoGetBestSize() const
@@ -76,15 +97,10 @@ wxSize wxStaticText::DoGetBestSize() const
     int widthTextMax = 0, widthLine,
         heightTextTotal = 0, heightLineDefault = 0, heightLine = 0;
 
-    bool lastWasAmpersand = FALSE;
-
     wxString curLine;
-    for ( const wxChar *pc = text; ; pc++ )
-    {
-        if ( *pc == wxT('\n') || *pc == wxT('\0') )
-        {
-            if ( !curLine )
-            {
+    for ( const wxChar *pc = text; ; pc++ ) {
+        if ( *pc == wxT('\n') || *pc == wxT('\0') ) {
+            if ( !curLine ) {
                 // we can't use GetTextExtent - it will return 0 for both width
                 // and height and an empty line should count in height
                 // calculation
@@ -95,44 +111,22 @@ wxSize wxStaticText::DoGetBestSize() const
 
                 heightTextTotal += heightLineDefault;
             }
-            else
-            {
+            else {
                 GetTextExtent(curLine, &widthLine, &heightLine);
                 if ( widthLine > widthTextMax )
                     widthTextMax = widthLine;
                 heightTextTotal += heightLine;
             }
 
-            if ( *pc == wxT('\n') )
-            {
+            if ( *pc == wxT('\n') ) {
                curLine.Empty();
             }
-            else
-            {
+            else {
                // the end of string
                break;
             }
         }
-        else
-        {
-            // we shouldn't take into account the '&' which just introduces the
-            // mnemonic characters and so are not shown on the screen -- except
-            // when it is preceded by another '&' in which case it stands for a
-            // literal ampersand
-            if ( *pc == _T('&') )
-            {
-                if ( !lastWasAmpersand )
-                {
-                    lastWasAmpersand = TRUE;
-
-                    // skip the statement adding pc to curLine below
-                    continue;
-                }
-
-                // it is a literal ampersand
-                lastWasAmpersand = FALSE;
-            }
-
+        else {
             curLine += *pc;
         }
     }

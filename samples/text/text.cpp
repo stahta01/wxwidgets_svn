@@ -424,7 +424,7 @@ bool MyTextCtrl::ms_logFocus = FALSE;
 void MyTextCtrl::LogKeyEvent(const wxChar *name, wxKeyEvent& event) const
 {
     wxString key;
-    long keycode = event.GetKeyCode();
+    long keycode = event.KeyCode();
     {
         switch ( keycode )
         {
@@ -696,7 +696,7 @@ void MyTextCtrl::OnKeyUp(wxKeyEvent& event)
 
 void MyTextCtrl::OnKeyDown(wxKeyEvent& event)
 {
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_F1:
             // show current position and text length

@@ -44,7 +44,12 @@ class WXDLLEXPORT wxToolBar;
 // CreateXXXBar() is called.
 // ----------------------------------------------------------------------------
 
+// FIXME - temporary hack in absence of wxTLW !!
+#ifndef wxTopLevelWindowNative
+class WXDLLEXPORT wxFrameBase : public wxTopLevelWindowBase
+#else
 class WXDLLEXPORT wxFrameBase : public wxTopLevelWindow
+#endif
 {
 public:
     // construction
@@ -215,7 +220,6 @@ protected:
 #endif // wxUSE_TOOLBAR
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxFrameBase)
 };
 
 // include the real class declaration

@@ -2,12 +2,16 @@
 
 WXDIR = ..\..\..
 
-EXTRACPPFLAGS=/Id:\libxml\libxml2-2.1.1
+#XMLDIR=
+!error modify makefile.wat to include the path to the XML library
+
+EXTRACPPFLAGS = -I$(WXDIR)\contrib\include;-I$(XMLDIR)\libxml2-2.1.1
 
 !include $(WXDIR)\src\makewat.env
 
-WXXMLLIB = $(WXDIR)\lib\wxxrc.lib
+WXXMLLIB = $(WXDIR)\lib\wxxrc_w.lib
 THISDIR = $(WXDIR)\contrib\src\xrc
+OUTPUTDIR = $(THISDIR)\
 
 NAME = wxxrc
 LNK = $(name).lnk
@@ -21,11 +25,16 @@ OBJECTS=xml.obj xmlres.obj xmlrsall.obj &
         xh_tree.obj xh_unkwn.obj xh_frame.obj xh_scwin.obj xh_split.obj
 
 
-all: $(WXXMLLIB)
+all: $(WXXMLLIB) .SYMBOLIC
 
 $(WXXMLLIB): $(OBJECTS)
 	*wlib /b /c /n /P=256 $(WXXMLLIB) $(OBJECTS)
 
 clean:   .SYMBOLIC
-    -erase *.obj *.bak *.err *.pch $(WXXMLLIB) *.lbc
+    -erase *.obj 
+    -erase *.bak 
+    -erase *.err 
+    -erase *.pch
+    -erase $(WXXMLLIB) 
+    -erase *.lbc
 

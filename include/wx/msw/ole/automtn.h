@@ -92,8 +92,6 @@ public:
 
 public:
     WXIDISPATCH*  m_dispatchPtr;
-
-    DECLARE_NO_COPY_CLASS(wxAutomationObject)
 };
 
 

@@ -76,7 +76,6 @@ private:
 #endif // !wxUSE_POPUPWIN
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTipWindowView)
 };
 
 // ============================================================================

@@ -17,6 +17,8 @@
 #include "wx/mac/printdlg.h"
 #elif defined(__WXPM__)
 #include "wx/generic/prntdlgg.h"
+#elif defined(__WXSTUBS__)
+#include "wx/generic/prntdlgg.h"
 #endif
 
 #if defined(__WXUNIVERSAL__) || (!defined(__WXMSW__) && !defined(__WXMAC__))

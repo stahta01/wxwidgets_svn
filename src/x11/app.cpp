@@ -27,7 +27,6 @@
 #include "wx/evtloop.h"
 #include "wx/timer.h"
 #include "wx/filename.h"
-#include "wx/hash.h"
 
 #include "wx/univ/theme.h"
 #include "wx/univ/renderer.h"

@@ -234,8 +234,6 @@ protected:
     // short and long help strings
     wxString m_shortHelpString;
     wxString m_longHelpString;
-
-    DECLARE_NO_COPY_CLASS(wxToolBarToolBase)
 };
 
 // a list of toolbar tools
@@ -323,9 +321,6 @@ public:
                                     const wxString& longHelp = wxEmptyString,
                                     wxObject *clientData = NULL
                                );
-
-    virtual wxToolBarToolBase *AddTool (wxToolBarToolBase *tool);
-    virtual wxToolBarToolBase *InsertTool (size_t pos, wxToolBarToolBase *tool);
 
     // add an arbitrary control to the toolbar, return TRUE if ok (notice that
     // the control will be deleted by the toolbar and that it will also adjust

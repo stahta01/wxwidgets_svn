@@ -64,7 +64,6 @@
 #  NotUniv	Not required for the wxUniversal
 #  LowLevel	Low level GUI toolkit file, used by wxUniversal as well
 #  Theme	implements a wxUniv theme
-#  Motif	used by Motif, even if in another port's directory
 ###############################################################################
 
 # File name 	Type	Flags
@@ -121,11 +120,10 @@ treectlg.cpp	Generic
 treelay.cpp	Generic
 wizard.cpp	Generic
 
-accesscmn.cpp	Common
 appcmn.cpp	Common	Base
 artprov.cpp	Common
 artstd.cpp	Common
-bmpbase.cpp	Common	NotGTK,NotOS2,NotMSW,NotMicro
+bmpbase.cpp	Common	NotGTK,NotOS2,NotMSW,NotX,NotMicro
 choiccmn.cpp	Common
 clipcmn.cpp	Common
 clntdata.cpp	Common	Base
@@ -149,7 +147,6 @@ dndcmn.cpp	Common
 dobjcmn.cpp	Common
 docmdi.cpp	Common
 docview.cpp	Common
-dpycmn.cpp	Common
 dseldlg.cpp	Common
 dynarray.cpp	Common	Base
 dynlib.cpp	Common	Base
@@ -238,6 +235,7 @@ textbuf.cpp	Common	Base
 textcmn.cpp	Common
 textfile.cpp	Common	Base
 timercmn.cpp	Common	Base
+toplvcmn.cpp	Common
 tokenzr.cpp	Common	Base
 treebase.cpp	Common
 txtstrm.cpp	Common	Base
@@ -256,13 +254,11 @@ xpmdecod.cpp	Common
 zipstrm.cpp	Common	Base
 zstream.cpp	Common	Base
 
-access.cpp	MSW
 gsocket.c	MSW	Socket,Base
 gsockmsw.c	MSW	Socket,Base
 accel.cpp	MSW
-access.cpp	MSW	OLE
 app.cpp	MSW	LowLevel
-automtn.cpp	MSW	OLE,LowLevel
+automtn.cpp	MSW	OLE
 bitmap.cpp	MSW	LowLevel
 bmpbuttn.cpp	MSW
 brush.cpp	MSW	LowLevel
@@ -279,7 +275,7 @@ control.cpp	MSW
 curico.cpp	MSW
 cursor.cpp	MSW	LowLevel
 data.cpp	MSW	LowLevel
-dataobj.cpp	MSW	OLE,LowLevel
+dataobj.cpp	MSW	OLE
 dc.cpp	MSW	LowLevel
 dcclient.cpp	MSW	LowLevel
 dcmemory.cpp	MSW	LowLevel
@@ -291,12 +287,11 @@ dialup.cpp	MSW	LowLevel
 dib.cpp	MSW	LowLevel
 dibutils.cpp	MSW
 dir.cpp	MSW	Base
-dirdlg.cpp	MSW	Win32Only,LowLevel
-display.cpp	MSW	Win32Only,LowLevel
+dirdlg.cpp	MSW	Win32Only
 dragimag.cpp	MSW
-dropsrc.cpp	MSW	OLE,LowLevel
-droptgt.cpp	MSW	OLE,LowLevel
-enhmeta.cpp	MSW	Win32Only,LowLevel
+dropsrc.cpp	MSW	OLE
+droptgt.cpp	MSW	OLE
+enhmeta.cpp	MSW	Win32Only
 helpbest.cpp	MSW	Win32Only,LowLevel
 evtloop.cpp	MSW	LowLevel
 fdrepdlg.cpp	MSW	Win32Only
@@ -327,12 +322,12 @@ menu.cpp	MSW
 menuitem.cpp	MSW
 metafile.cpp	MSW
 mimetype.cpp	MSW	Win32Only,Base
-minifram.cpp	MSW	LowLevel
+minifram.cpp	MSW
 msgdlg.cpp	MSW
 mslu.cpp	MSW
 nativdlg.cpp	MSW
 notebook.cpp	MSW	Win32Only
-oleutils.cpp	MSW	OLE,LowLevel
+oleutils.cpp	MSW	OLE
 ownerdrw.cpp	MSW
 palette.cpp	MSW	LowLevel
 pen.cpp	MSW	LowLevel
@@ -370,7 +365,7 @@ toplevel.cpp	MSW	LowLevel
 treectrl.cpp	MSW	Win32Only
 utils.cpp	MSW	Base,LowLevel
 utilsexc.cpp	MSW	Base,LowLevel
-uuid.cpp	MSW	OLE,LowLevel
+uuid.cpp	MSW	OLE
 volume.cpp	MSW	Base
 wave.cpp	MSW	LowLevel
 window.cpp	MSW	LowLevel
@@ -461,7 +456,6 @@ main.cpp	GTK	LowLevel
 mdi.cpp	GTK
 menu.cpp	GTK
 minifram.cpp	GTK
-msgdlg.cpp	GTK
 notebook.cpp	GTK
 pen.cpp	GTK	LowLevel
 popupwin.cpp	GTK	LowLevel
@@ -573,6 +567,7 @@ accel.cpp	Motif
 app.cpp	Motif
 bitmap.cpp	Motif
 bmpbuttn.cpp	Motif
+brush.cpp	Motif
 button.cpp	Motif
 checkbox.cpp	Motif
 checklst.cpp	Motif
@@ -580,7 +575,6 @@ choice.cpp	Motif
 clipbrd.cpp	Motif
 colour.cpp	Motif
 combobox.cpp	Motif
-combobox_native.cpp	Motif
 control.cpp	Motif
 cursor.cpp	Motif
 data.cpp	Motif
@@ -590,7 +584,6 @@ dcclient.cpp	Motif
 dcmemory.cpp	Motif
 dcscreen.cpp	Motif
 dialog.cpp	Motif
-evtloop.cpp	Motif
 filedlg.cpp	Motif
 font.cpp	Motif
 frame.cpp	Motif
@@ -607,6 +600,7 @@ menuitem.cpp	Motif
 minifram.cpp	Motif
 msgdlg.cpp	Motif
 palette.cpp	Motif
+pen.cpp	Motif
 radiobox.cpp	Motif
 radiobut.cpp	Motif
 region.cpp	Motif
@@ -620,7 +614,6 @@ stattext.cpp	Motif
 toolbar.cpp	Motif
 textctrl.cpp	Motif
 timer.cpp	Motif
-toplevel.cpp	Motif
 utils.cpp	Motif
 window.cpp	Motif
 
@@ -628,7 +621,7 @@ gsockx11.c	X11	Socket
 nanox.c	X11
 app.cpp	X11
 bitmap.cpp	X11
-brush.cpp	X11	Motif
+brush.cpp	X11
 clipbrd.cpp	X11
 colour.cpp	X11
 cursor.cpp	X11
@@ -648,7 +641,7 @@ joystick.cpp	X11
 main.cpp	X11
 minifram.cpp	X11
 palette.cpp	X11
-pen.cpp	X11	Motif
+pen.cpp	X11
 popupwin.cpp	X11
 region.cpp	X11
 reparent.cpp	X11
@@ -758,9 +751,7 @@ htmprint.cpp	HTML
 
 arrimpl.cpp	WXH	Base
 listimpl.cpp	WXH	Base
-access.h	WXH
 accel.h	WXH
-access.h	WXH
 app.h	WXH	Base
 artprov.h	WXH
 bitmap.h	WXH
@@ -815,7 +806,6 @@ dialup.h	WXH
 dir.h	WXH	Base
 dirctrl.h	WXH
 dirdlg.h	WXH
-display.h	WXH
 dnd.h	WXH
 docmdi.h	WXH
 docview.h	WXH
@@ -868,6 +858,7 @@ iconbndl.h	WXH
 image.h	WXH
 imaggif.h	WXH
 imagiff.h	WXH
+imagxpm.h	WXH
 imagbmp.h	WXH
 imagpng.h	WXH
 imagpcx.h	WXH
@@ -877,7 +868,6 @@ imagtiff.h	WXH
 imagjpeg.h	WXH
 imaglist.h	WXH
 intl.h	WXH	Base
-iosfwrap.h	WXH	Base
 ioswrap.h	WXH	Base
 ipc.h	WXH	Base
 ipcbase.h	WXH	Base
@@ -892,7 +882,6 @@ listctrl.h	WXH
 listbase.h	WXH
 log.h	WXH	Base
 longlong.h	WXH	Base
-math.h	WXH	Base
 matrix.h	WXH
 mdi.h	WXH
 memory.h	WXH	Base
@@ -1042,7 +1031,6 @@ mdi.h	GTKH
 menu.h	GTKH
 menuitem.h	GTKH
 minifram.h	GTKH
-msgdlg.h	GTKH
 notebook.h	GTKH
 pen.h	GTKH
 popupwin.h	GTKH
@@ -1156,6 +1144,7 @@ accel.h	MotifH
 app.h	MotifH
 bitmap.h	MotifH
 bmpbuttn.h	MotifH
+brush.h	MotifH
 button.h	MotifH
 checkbox.h	MotifH
 checklst.h	MotifH
@@ -1192,6 +1181,7 @@ metafile.h	MotifH
 minifram.h	MotifH
 msgdlg.h	MotifH
 palette.h	MotifH
+pen.h	MotifH
 print.h	MotifH
 printdlg.h	MotifH
 private.h	MotifH
@@ -1206,15 +1196,13 @@ statbmp.h	MotifH
 statbox.h	MotifH
 stattext.h	MotifH
 textctrl.h	MotifH
-tglbtn.h	MotifH
 timer.h	MotifH
 toolbar.h	MotifH
-toplevel.h	MotifH
 window.h	MotifH
 
 app.h	X11H
 bitmap.h	X11H
-brush.h	X11H	Motif
+brush.h	X11H
 clipbrd.h	X11H
 colour.h	X11H
 cursor.h	X11H
@@ -1234,7 +1222,7 @@ icon.h	X11H
 joystick.h	X11H
 minifram.h	X11H
 palette.h	X11H
-pen.h	X11H	Motif
+pen.h	X11H
 print.h	X11H
 private.h	X11H
 region.h	X11H
@@ -1265,7 +1253,6 @@ region.h	MGLH
 toplevel.h	MGLH
 window.h	MGLH
 
-access.h	MSWH
 accel.h	MSWH
 app.h	MSWH
 bitmap.h	MSWH
@@ -1362,7 +1349,6 @@ wave.h	MSWH
 window.h	MSWH
 winundef.h	MSWH	Base
 
-access.h	MSWH	OLE
 automtn.h	MSWH	OLE
 dataform.h	MSWH	OLE
 dataobj.h	MSWH	OLE

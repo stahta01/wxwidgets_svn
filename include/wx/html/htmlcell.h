@@ -146,8 +146,6 @@ protected:
             // true if this cell can be placed on pagebreak, false otherwise
     wxString m_id;
             // unique identifier of the cell, generated from "id" property of tags
-
-    DECLARE_NO_COPY_CLASS(wxHtmlCell)
 };
 
 
@@ -261,8 +259,6 @@ protected:
     int m_LastLayout;
             // if != -1 then call to Layout may be no-op
             // if previous call to Layout has same argument
-
-    DECLARE_NO_COPY_CLASS(wxHtmlContainerCell)
 };
 
 
@@ -334,8 +330,6 @@ protected:
     wxWindow* m_Wnd;
     int m_WidthFloat;
             // width float is used in adjustWidth (it is in percents)
-
-    DECLARE_NO_COPY_CLASS(wxHtmlWidgetCell)
 };
 
 

@@ -23,12 +23,9 @@
 #if wxUSE_PROPSHEET
 
 #ifndef WX_PRECOMP
-    #include "wx/choice.h"
-    #include "wx/checkbox.h"
-    #include "wx/slider.h"
-    #include "wx/msgdlg.h"
 #endif
 
+#include "wx/wx.h"
 #include "wx/propform.h"
 
 #include <ctype.h>
@@ -90,10 +87,10 @@ bool wxPropertyFormView::Check(void)
     if (!m_propertySheet)
         return FALSE;
 
-    wxNode *node = m_propertySheet->GetProperties().GetFirst();
+    wxNode *node = m_propertySheet->GetProperties().First();
     while (node)
     {
-        wxProperty *prop = (wxProperty *)node->GetData();
+        wxProperty *prop = (wxProperty *)node->Data();
         wxPropertyValidator *validator = FindPropertyValidator(prop);
         if (validator && validator->IsKindOf(CLASSINFO(wxPropertyFormValidator)))
         {
@@ -101,7 +98,7 @@ bool wxPropertyFormView::Check(void)
             if (!formValidator->OnCheckValue(prop, this, m_propertyWindow))
                 return FALSE;
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return TRUE;
 }
@@ -111,17 +108,17 @@ bool wxPropertyFormView::TransferToPropertySheet(void)
     if (!m_propertySheet)
         return FALSE;
 
-    wxNode *node = m_propertySheet->GetProperties().GetFirst();
+    wxNode *node = m_propertySheet->GetProperties().First();
     while (node)
     {
-        wxProperty *prop = (wxProperty *)node->GetData();
+        wxProperty *prop = (wxProperty *)node->Data();
         wxPropertyValidator *validator = FindPropertyValidator(prop);
         if (validator && validator->IsKindOf(CLASSINFO(wxPropertyFormValidator)))
         {
             wxPropertyFormValidator *formValidator = (wxPropertyFormValidator *)validator;
             formValidator->OnRetrieveValue(prop, this, m_propertyWindow);
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return TRUE;
 }
@@ -131,17 +128,17 @@ bool wxPropertyFormView::TransferToDialog(void)
     if (!m_propertySheet)
         return FALSE;
 
-    wxNode *node = m_propertySheet->GetProperties().GetFirst();
+    wxNode *node = m_propertySheet->GetProperties().First();
     while (node)
     {
-        wxProperty *prop = (wxProperty *)node->GetData();
+        wxProperty *prop = (wxProperty *)node->Data();
         wxPropertyValidator *validator = FindPropertyValidator(prop);
         if (validator && validator->IsKindOf(CLASSINFO(wxPropertyFormValidator)))
         {
             wxPropertyFormValidator *formValidator = (wxPropertyFormValidator *)validator;
             formValidator->OnDisplayValue(prop, this, m_propertyWindow);
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return TRUE;
 }
@@ -151,17 +148,17 @@ bool wxPropertyFormView::AssociateNames(void)
     if (!m_propertySheet || !m_propertyWindow)
         return FALSE;
 
-    wxWindowList::Node  *node = m_propertyWindow->GetChildren().GetFirst();
+    wxNode *node = m_propertyWindow->GetChildren().First();
     while (node)
     {
-        wxWindow *win = node->GetData();
-        if ( win->GetName() != wxEmptyString )
+        wxWindow *win = (wxWindow *)node->Data();
+        if (win->GetName() != wxT(""))
         {
             wxProperty *prop = m_propertySheet->GetProperty(win->GetName());
             if (prop)
                 prop->SetWindow(win);
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return TRUE;
 }
@@ -232,10 +229,10 @@ void wxPropertyFormView::OnCommand(wxWindow& win, wxCommandEvent& event)
     else
     {
         // Find a validator to route the command to.
-        wxNode *node = m_propertySheet->GetProperties().GetFirst();
+        wxNode *node = m_propertySheet->GetProperties().First();
         while (node)
         {
-            wxProperty *prop = (wxProperty *)node->GetData();
+            wxProperty *prop = (wxProperty *)node->Data();
             if (prop->GetWindow() && (prop->GetWindow() == &win))
             {
                 wxPropertyValidator *validator = FindPropertyValidator(prop);
@@ -246,7 +243,7 @@ void wxPropertyFormView::OnCommand(wxWindow& win, wxCommandEvent& event)
                     return;
                 }
             }
-            node = node->GetNext();
+            node = node->Next();
         }
     }
 }
@@ -271,10 +268,10 @@ void wxPropertyFormView::OnDoubleClick(wxControl *item)
         return;
 
     // Find a validator to route the command to.
-    wxNode *node = m_propertySheet->GetProperties().GetFirst();
+    wxNode *node = m_propertySheet->GetProperties().First();
     while (node)
     {
-        wxProperty *prop = (wxProperty *)node->GetData();
+        wxProperty *prop = (wxProperty *)node->Data();
         if (prop->GetWindow() && ((wxControl *)prop->GetWindow() == item))
         {
             wxPropertyValidator *validator = FindPropertyValidator(prop);
@@ -285,7 +282,7 @@ void wxPropertyFormView::OnDoubleClick(wxControl *item)
                 return;
             }
         }
-        node = node->GetNext();
+        node = node->Next();
     }
 }
 
@@ -719,12 +716,12 @@ bool wxStringFormValidator::OnDisplayValue(wxProperty *property, wxPropertyFormV
         if (lbox->GetCount() == 0 && m_strings)
         {
             // Try to initialize the listbox from 'strings'
-            wxStringList::Node  *node = m_strings->GetFirst();
+            wxNode *node = m_strings->First();
             while (node)
             {
-                wxChar *s = node->GetData();
+                wxChar *s = (wxChar *)node->Data();
                 lbox->Append(s);
-                node = node->GetNext();
+                node = node->Next();
             }
         }
         lbox->SetStringSelection(property->GetValue().StringValue());
@@ -743,12 +740,12 @@ bool wxStringFormValidator::OnDisplayValue(wxProperty *property, wxPropertyFormV
         {
             // Try to initialize the choice item from 'strings'
             // XView doesn't allow this kind of thing.
-            wxStringList::Node  *node = m_strings->GetFirst();
+            wxNode *node = m_strings->First();
             while (node)
             {
-                wxChar *s = node->GetData();
+                wxChar *s = (wxChar *)node->Data();
                 choice->Append(s);
-                node = node->GetNext();
+                node = node->Next();
             }
         }
         choice->SetStringSelection(property->GetValue().StringValue());

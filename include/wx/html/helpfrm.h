@@ -168,11 +168,6 @@ protected:
     void OnCloseWindow(wxCloseEvent& event);
     void OnActivate(wxActivateEvent& event);
 
-#ifdef __WXMAC__
-    void OnClose(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-#endif
-
     // Images:
     enum {
         IMG_Book = 0,
@@ -231,7 +226,6 @@ protected:
     int m_hfStyle;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrame)
 };
 
 #endif // wxUSE_WXHTML_HELP

@@ -775,7 +775,7 @@ bool wxDebugContext::PrintClasses(void)
   node = wxClassInfo::sm_classTable->Next();
   while (node)
   {
-    info = (wxClassInfo *)node->GetData();
+    info = (wxClassInfo *)node->Data();
     if (info->GetClassName())
     {
         wxString msg(info->GetClassName());

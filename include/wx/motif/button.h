@@ -16,10 +16,13 @@
 #pragma interface "button.h"
 #endif
 
+#include "wx/control.h"
+#include "wx/gdicmn.h"
+
 WXDLLEXPORT_DATA(extern const char*) wxButtonNameStr;
 
 // Pushbutton
-class WXDLLEXPORT wxButton: public wxButtonBase
+class WXDLLEXPORT wxButton: public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxButton)
         
@@ -48,9 +51,9 @@ public:
     static wxSize GetDefaultSize();
     
     // Implementation
-private:
-    virtual wxSize DoGetBestSize() const;
-    void SetDefaultShadowThicknessAndResize();
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
+    virtual void ChangeBackgroundColour();
+    virtual void ChangeForegroundColour();
 };
 
 #endif

@@ -18,11 +18,9 @@
 #define XtWindow XTWINDOW
 #endif
 
-#include "wx/tab.h"
 #include "wx/mdi.h"
 #include "wx/menu.h"
 #include "wx/settings.h"
-#include "wx/icon.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -511,7 +509,7 @@ void wxMDIChildFrame::DoGetPosition(int *x, int *y) const
 
 bool wxMDIChildFrame::Show(bool show)
 {
-    SetVisibleStatus( show );
+    m_visibleStatus = show; /* show-&-hide fix */
     return wxWindow::Show(show);
 }
 
@@ -545,7 +543,7 @@ void wxMDIChildFrame::SetIcons(const wxIconBundle& icons)
 
 void wxMDIChildFrame::SetTitle(const wxString& title)
 {
-    wxTopLevelWindow::SetTitle( title );
+    m_title = title;
     wxMDIClientWindow* clientWindow = GetMDIParentFrame()->GetClientWindow();
     int pageNo = clientWindow->FindPagePosition(this);
     if (pageNo > -1)

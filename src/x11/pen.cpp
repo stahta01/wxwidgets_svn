@@ -16,8 +16,6 @@
 #include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/pen.h"
-#include "wx/colour.h"
-#include "wx/bitmap.h"
 
 //-----------------------------------------------------------------------------
 // wxPen
@@ -49,7 +47,6 @@ public:
             m_dash = new
 */
         m_dash = data.m_dash;
-        m_stipple = data.m_stipple;
     }
 
     bool operator == (const wxPenRefData& data) const
@@ -67,7 +64,6 @@ public:
     int        m_capStyle;
     wxColour   m_colour;
     int        m_countDashes;
-    wxBitmap   m_stipple;
     wxX11Dash *m_dash;
 };
 
@@ -145,13 +141,6 @@ void wxPen::SetJoin( int joinStyle )
     M_PENDATA->m_joinStyle = joinStyle;
 }
 
-void wxPen::SetStipple( wxBitmap *stipple )
-{
-    AllocExclusive();
-    
-    M_PENDATA->m_stipple = *stipple;;
-}
-
 void wxPen::SetStyle( int style )
 {
     AllocExclusive();
@@ -215,11 +204,4 @@ wxColour &wxPen::GetColour() const
     wxCHECK_MSG( Ok(), wxNullColour, wxT("invalid pen") );
 
     return M_PENDATA->m_colour;
-}
-
-wxBitmap *wxPen::GetStipple() const
-{
-    wxCHECK_MSG( Ok(), &wxNullBitmap, wxT("invalid pen") );
-
-    return &M_PENDATA->m_stipple;
 }

@@ -45,8 +45,6 @@
 #include "wx/module.h"
 #include "wx/menuitem.h"
 #include "wx/log.h"
-#include "wx/evtloop.h"
-#include "wx/hash.h"
 
 #if  wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
@@ -174,23 +172,16 @@ void wxWindow::UnmanageAndDestroy(WXWidget widget)
     }
 }
 
-bool wxWindow::MapOrUnmap(WXWidget widget, bool domap)
+bool wxWindow::MapOrUnmap(WXWidget widget, bool map)
 {
     Widget w = (Widget)widget;
     if ( !w )
         return FALSE;
 
-    if ( domap )
+    if ( map )
         XtMapWidget(w);
     else
         XtUnmapWidget(w);
-
-    //   Rationale: a lot of common operations (including but not
-    // limited to moving, resizing and appending items to a listbox)
-    // unmamange the widget, do their work, then manage it again.
-    // This means that, for example adding an item to a listbox will show it,
-    // or that most controls are shown every time they are moved or resized!
-    XtSetMappedWhenManaged( w, domap );
 
     return TRUE;
 }
@@ -963,16 +954,16 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
         GetClientSize(& w, & h);
     }
 
-    wxWindowList::Node *cnode = m_children.GetFirst();
+    wxNode *cnode = m_children.First();
     while (cnode)
     {
-        wxWindow *child = cnode->GetData();
+        wxWindow *child = (wxWindow*) cnode->Data();
         int sx = 0;
         int sy = 0;
         child->GetSize( &sx, &sy );
         wxPoint pos( child->GetPosition() );
         child->SetSize( pos.x + dx, pos.y + dy, sx, sy, wxSIZE_ALLOW_MINUS_ONE );
-        cnode = cnode->GetNext();
+        cnode = cnode->Next();
     }
 
     int x1 = (dx >= 0) ? x : x - dx;
@@ -1081,10 +1072,10 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
 
     // Now send expose events
 
-    wxList::Node* node = updateRects.GetFirst();
+    wxNode* node = updateRects.First();
     while (node)
     {
-        wxRect* rect = (wxRect*) node->GetData();
+        wxRect* rect = (wxRect*) node->Data();
         XExposeEvent event;
 
         event.type = Expose;
@@ -1101,17 +1092,17 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
 
         XSendEvent(display, window, False, ExposureMask, (XEvent *)&event);
 
-        node = node->GetNext();
+        node = node->Next();
 
     }
 
     // Delete the update rects
-    node = updateRects.GetFirst();
+    node = updateRects.First();
     while (node)
     {
-        wxRect* rect = (wxRect*) node->GetData();
+        wxRect* rect = (wxRect*) node->Data();
         delete rect;
-        node = node->GetNext();
+        node = node->Next();
     }
 
     XmUpdateDisplay((Widget) GetMainWidget());
@@ -1153,8 +1144,6 @@ void wxWindow::DoSetToolTip(wxToolTip * WXUNUSED(tooltip))
 // popup menus
 // ----------------------------------------------------------------------------
 
-#if wxUSE_MENUS
-
 bool wxWindow::DoPopupMenu(wxMenu *menu, int x, int y)
 {
     Widget widget = (Widget) GetMainWidget();
@@ -1169,8 +1158,7 @@ bool wxWindow::DoPopupMenu(wxMenu *menu, int x, int y)
     if (menu->GetParent() && (menu->GetId() != -1))
         return FALSE;
 
-    if (menu->GetMainWidget())
-    {
+    if (menu->GetMainWidget()) {
         menu->DestroyMenu(TRUE);
     }
 
@@ -1219,6 +1207,7 @@ bool wxWindow::DoPopupMenu(wxMenu *menu, int x, int y)
     XmMenuPosition (menuWidget, &event);
     XtManageChild (menuWidget);
 
+    XEvent x_event;
     // The ID of a pop-up menu is 1 when active, and is set to 0 by the
     // idle-time destroy routine.
     // Waiting until this ID changes causes this function to block until
@@ -1226,18 +1215,28 @@ bool wxWindow::DoPopupMenu(wxMenu *menu, int x, int y)
     // In other words, once this routine returns, it is safe to delete
     // the menu object.
     // Ian Brown <ian.brown@printsoft.de>
-
-    wxEventLoop evtLoop;
-
     while (menu->GetId() == 1)
     {
-        wxDoEventLoopIteration( evtLoop );
-    }
+        XtAppNextEvent( (XtAppContext) wxTheApp->GetAppContext(), &x_event);
 
+        wxTheApp->ProcessXEvent((WXEvent*) & x_event);
+
+        if (XtAppPending( (XtAppContext) wxTheApp->GetAppContext() ) == 0)
+        {
+            if (!wxTheApp->ProcessIdle())
+            {
+#if wxUSE_THREADS
+                // leave the main loop to give other threads a chance to
+                // perform their GUI work
+                wxMutexGuiLeave();
+                wxUsleep(20);
+                wxMutexGuiEnter();
+#endif
+            }
+        }
+    }
     return TRUE;
 }
-
-#endif
 
 // ---------------------------------------------------------------------------
 // moving and resizing
@@ -1346,9 +1345,9 @@ void wxWindow::DoSetSizeIntr(int x, int y, int width, int height,
             y = oldY;
     }
 
-    if ( width <= 0 )
+    if ( width == -1 )
         width = oldW;
-    if ( height <= 0 )
+    if ( height == -1 )
         height = oldH;
 
     bool nothingChanged = (x == oldX) && (y == oldY) &&
@@ -1384,6 +1383,15 @@ void wxWindow::DoSetSizeIntr(int x, int y, int width, int height,
 
         if (managed)
             XtManageChild(widget);
+
+        // How about this bit. Maybe we don't need to generate size events
+        // all the time -- they'll be generated when the window is sized anyway.
+#if 0
+        wxSizeEvent sizeEvent(wxSize(width, height), GetId());
+        sizeEvent.SetEventObject(this);
+
+        GetEventHandler()->ProcessEvent(sizeEvent);
+#endif // 0
     }
 }
 
@@ -1712,7 +1720,6 @@ void wxWindow::OnIdle(wxIdleEvent& WXUNUSED(event))
 
 bool wxWindow::ProcessAccelerator(wxKeyEvent& event)
 {
-#if wxUSE_ACCEL
     if (!m_acceleratorTable.Ok())
         return FALSE;
 
@@ -1739,7 +1746,6 @@ bool wxWindow::ProcessAccelerator(wxKeyEvent& event)
             wxFrame* frame = wxDynamicCast(parent, wxFrame);
             if ( frame )
             {
-#if wxUSE_MENUS
                 // Try for a menu command
                 if (frame->GetMenuBar())
                 {
@@ -1754,7 +1760,6 @@ bool wxWindow::ProcessAccelerator(wxKeyEvent& event)
                         return frame->GetEventHandler()->ProcessEvent(commandEvent);
                     }
                 }
-#endif
             }
 
             // Find a child matching the command id
@@ -1776,7 +1781,6 @@ bool wxWindow::ProcessAccelerator(wxKeyEvent& event)
             return FALSE;
         } // matches event
     }// for
-#endif
 
     // We didn't match the key event against an accelerator.
     return FALSE;
@@ -1802,8 +1806,8 @@ bool wxAddWindowToTable(Widget w, wxWindow *win)
 
     wxWidgetHashTable->Put((long) w, win);
 
-    wxLogTrace("widget", "Widget 0x%p <-> window %p (%s)",
-               (WXWidget)w, win, win->GetClassInfo()->GetClassName());
+    wxLogTrace("widget", "Widget 0x%08x <-> window %p (%s)",
+               w, win, win->GetClassInfo()->GetClassName());
 
     return TRUE;
 }
@@ -1997,8 +2001,7 @@ static void wxCanvasEnterLeave(Widget drawingArea,
 }
 
 // Fix to make it work under Motif 1.0 (!)
-static void wxCanvasMotionEvent (Widget WXUNUSED(drawingArea),
-                                 XButtonEvent *WXUNUSED(event))
+static void wxCanvasMotionEvent (Widget WXUNUSED(drawingArea), XButtonEvent * WXUNUSED(event))
 {
 #if XmVersion <= 1000
     XmDrawingAreaCallbackStruct cbs;
@@ -2915,17 +2918,41 @@ void wxWindow::ChangeForegroundColour()
 }
 
 // Change a widget's foreground and background colours.
-void wxWindow::DoChangeForegroundColour(WXWidget widget,
-                                        wxColour& foregroundColour)
+void wxWindow::DoChangeForegroundColour(WXWidget widget, wxColour& foregroundColour)
 {
-    wxDoChangeForegroundColour( widget, foregroundColour );
+    // When should we specify the foreground, if it's calculated
+    // by wxComputeColours?
+    // Solution: say we start with the default (computed) foreground colour.
+    // If we call SetForegroundColour explicitly for a control or window,
+    // then the foreground is changed.
+    // Therefore SetBackgroundColour computes the foreground colour, and
+    // SetForegroundColour changes the foreground colour. The ordering is
+    // important.
+
+    Widget w = (Widget)widget;
+    XtVaSetValues(
+                  w,
+                  XmNforeground, foregroundColour.AllocColour(XtDisplay(w)),
+                  NULL
+                 );
 }
 
-void wxWindow::DoChangeBackgroundColour(WXWidget widget,
-                                        wxColour& backgroundColour,
-                                        bool changeArmColour)
+void wxWindow::DoChangeBackgroundColour(WXWidget widget, wxColour& backgroundColour, bool changeArmColour)
 {
-    wxDoChangeBackgroundColour( widget, backgroundColour, changeArmColour );
+    wxComputeColours (XtDisplay((Widget) widget), & backgroundColour,
+        (wxColour*) NULL);
+
+    XtVaSetValues ((Widget) widget,
+        XmNbackground, g_itemColors[wxBACK_INDEX].pixel,
+        XmNtopShadowColor, g_itemColors[wxTOPS_INDEX].pixel,
+        XmNbottomShadowColor, g_itemColors[wxBOTS_INDEX].pixel,
+        XmNforeground, g_itemColors[wxFORE_INDEX].pixel,
+        NULL);
+
+    if (changeArmColour)
+        XtVaSetValues ((Widget) widget,
+        XmNarmColor, g_itemColors[wxSELE_INDEX].pixel,
+        NULL);
 }
 
 bool wxWindow::SetBackgroundColour(const wxColour& col)
@@ -2959,7 +2986,12 @@ void wxWindow::ChangeFont(bool keepOriginalSize)
         int width, height, width1, height1;
         GetSize(& width, & height);
 
-        wxDoChangeFont( GetLabelWidget(), m_font );
+        // lesstif 0.87 hangs here
+#ifndef LESSTIF_VERSION
+        XtVaSetValues (w,
+            XmNfontList, (XmFontList) m_font.GetFontList(1.0, XtDisplay(w)),
+            NULL);
+#endif
 
         GetSize(& width1, & height1);
         if (keepOriginalSize && (width != width1 || height != height1))

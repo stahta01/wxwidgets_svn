@@ -854,7 +854,7 @@ TREE_EVENT_HANDLER(OnSelChanging)
 void LogKeyEvent(const wxChar *name, const wxKeyEvent& event)
 {
     wxString key;
-    long keycode = event.GetKeyCode();
+    long keycode = event.KeyCode();
     {
         switch ( keycode )
         {

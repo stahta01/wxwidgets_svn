@@ -2,12 +2,12 @@
 // Name:        fontdlg.h
 // Purpose:     wxFontDialog class. Use generic version if no
 //              platform-specific implementation.
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:     wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FONTDLG_H_

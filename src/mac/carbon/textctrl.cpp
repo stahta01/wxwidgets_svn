@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        textctrl.cpp
 // Purpose:     wxTextCtrl
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
+// Copyright:   (c) AUTHOR
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -216,7 +216,7 @@ static pascal void TPPaneDrawProc(ControlRef theControl, ControlPartCode thePart
             InvalWindowRect( GetControlOwner( theControl ) , &oldbounds ) ;
             SetRect(&varsp->fRFocusOutline, bounds.left, bounds.top, bounds.right, bounds.bottom);
             SetRect(&varsp->fRTextOutline, bounds.left, bounds.top, bounds.right, bounds.bottom);
-            SetRect(&varsp->fRTextArea, bounds.left + 2 , bounds.top + (varsp->fMultiline ? 0 : 2) , 
+            SetRect(&varsp->fRTextArea, bounds.left + (varsp->fMultiline ? 0 : 2) , bounds.top + (varsp->fMultiline ? 0 : 2) , 
                 bounds.right - (varsp->fMultiline ? 0 : 2), bounds.bottom - (varsp->fMultiline ? 0 : 2));
             RectRgn(varsp->fTextBackgroundRgn, &varsp->fRTextOutline);
             TXNSetFrameBounds(  varsp->fTXNRec, varsp->fRTextArea.top, varsp->fRTextArea.left, 
@@ -296,13 +296,7 @@ static pascal ControlPartCode TPPaneTrackingProc(ControlHandle theControl, Point
             case kmUPTextPart:
                 {   SetPort((**tpvars).fDrawingEnvironment);
                     wxMacWindowClipper clipper( wxFindControlFromMacControl(theControl ) ) ;
-#if !TARGET_CARBON 
                     TXNClick( varsp->fTXNRec, (const EventRecord*) wxTheApp->MacGetCurrentEvent());
-#else
-                    EventRecord rec ;
-                    ConvertEventRefToEventRecord( (EventRef) wxTheApp->MacGetCurrentEvent() , &rec ) ;
-                    TXNClick( varsp->fTXNRec, &rec );
-#endif
                 }
                 break;
             
@@ -533,7 +527,7 @@ OSStatus mUPOpenControl(ControlHandle theControl, long wxStyle )
     GetControlBounds(theControl, &bounds);
     SetRect(&varsp->fRFocusOutline, bounds.left, bounds.top, bounds.right, bounds.bottom);
     SetRect(&varsp->fRTextOutline, bounds.left, bounds.top, bounds.right, bounds.bottom);
-    SetRect(&varsp->fRTextArea, bounds.left + 2 , bounds.top + (varsp->fMultiline ? 0 : 2) , 
+    SetRect(&varsp->fRTextArea, bounds.left + (varsp->fMultiline ? 0 : 2) , bounds.top + (varsp->fMultiline ? 0 : 2) , 
         bounds.right - (varsp->fMultiline ? 0 : 2), bounds.bottom - (varsp->fMultiline ? 0 : 2));
         /* calculate the background region for the text.  In this case, it's kindof
         and irregular region because we're setting the scroll bar a little ways inside
@@ -556,7 +550,8 @@ OSStatus mUPOpenControl(ControlHandle theControl, long wxStyle )
             frameOptions |= kTXNAlwaysWrapAtViewEdgeMask ;
         else
         {
-            frameOptions |= kTXNAlwaysWrapAtViewEdgeMask ;
+            // in case entry becomes impossible, remove the comment on the line below
+            // frameOptions |= kTXNAlwaysWrapAtViewEdgeMask ;
             frameOptions |= kTXNWantHScrollBarMask ;
         }
             
@@ -662,15 +657,15 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
            const wxValidator& validator,
            const wxString& name)
 {
-    m_macTE = NULL ;
-    m_macTXN = NULL ;
-    m_macTXNvars = NULL ;
-    m_macUsesTXN = false ;
-    m_editable = true ;
-    
-    m_macUsesTXN = ! (style & wxTE_PASSWORD ) ; 
-    
-    m_macUsesTXN &= (TXNInitTextension != (void*) kUnresolvedCFragSymbolAddress) ;
+  m_macTE = NULL ;
+  m_macTXN = NULL ;
+  m_macTXNvars = NULL ;
+  m_macUsesTXN = false ;
+  m_editable = true ;
+
+  m_macUsesTXN = ! (style & wxTE_PASSWORD ) ; 
+
+  m_macUsesTXN &= (TXNInitTextension != (void*) kUnresolvedCFragSymbolAddress) ;
     
     // base initialization
     if ( !CreateBase(parent, id, pos, size, style, validator, name) )
@@ -735,6 +730,10 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
         m_macControl = NewControl(MAC_WXHWND(parent->MacGetRootWindow()), &bounds, "\p", true, featurSet, 0, featurSet, kControlUserPaneProc, 0);
             /* set up the mUP specific features and data */
         mUPOpenControl((ControlHandle) m_macControl, m_windowStyle );
+        if ( parent )
+        {
+            parent->MacGetTopLevelWindow()->MacInstallEventHandler() ;
+        }
     }
     MacPostControlCreate() ;
 
@@ -764,7 +763,7 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
         TXNShowSelection( (TXNObject) m_macTXN, kTXNShowStart);
     }
   
-    return TRUE;
+  return TRUE;
 }
 
 wxString wxTextCtrl::GetValue() const
@@ -774,21 +773,21 @@ wxString wxTextCtrl::GetValue() const
     OSStatus err ;
     if ( !m_macUsesTXN )
     {
-        err = ::GetControlDataSize((ControlHandle) m_macControl, 0,
+    	err = ::GetControlDataSize((ControlHandle) m_macControl, 0,
             ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag, &actualSize ) ;
        
-           if ( err )
-               return wxEmptyString ;
-           
-           if ( actualSize > 0 )
-           {
-            wxChar *ptr = result.GetWriteBuf(actualSize) ;
-            
-            ::GetControlData( (ControlHandle) m_macControl, 0,
-                ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag, 
-                actualSize , ptr , &actualSize ) ;
-            ptr[actualSize] = 0 ;
-            result.UngetWriteBuf(actualSize) ;
+       	if ( err )
+       		return wxEmptyString ;
+       	
+       	if ( actualSize > 0 )
+       	{
+	        wxChar *ptr = result.GetWriteBuf(actualSize) ;
+	        
+	        ::GetControlData( (ControlHandle) m_macControl, 0,
+	            ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag, 
+	            actualSize , ptr , &actualSize ) ;
+	        ptr[actualSize] = 0 ;
+	        result.UngetWriteBuf(actualSize) ;
         }
         
     }
@@ -804,14 +803,14 @@ wxString wxTextCtrl::GetValue() const
         else
         {
             actualSize = GetHandleSize( theText ) ;
-               if ( actualSize > 0 )
-               {
-                wxChar *ptr = result.GetWriteBuf(actualSize) ;
-                strncpy( ptr , *theText , actualSize ) ;
-                ptr[actualSize] = 0 ;
-                result.UngetWriteBuf( actualSize ) ;
-            }
-            DisposeHandle( theText ) ;
+	       	if ( actualSize > 0 )
+	       	{
+	        	wxChar *ptr = result.GetWriteBuf(actualSize) ;
+	            strncpy( ptr , *theText , actualSize ) ;
+	            ptr[actualSize] = 0 ;
+	            result.UngetWriteBuf( actualSize ) ;
+	        }
+	        DisposeHandle( theText ) ;
         }
     }
     
@@ -1090,42 +1089,42 @@ void wxTextCtrl::SetInsertionPointEnd()
 
 long wxTextCtrl::GetInsertionPoint() const
 {
-    long begin,end ;
-    GetSelection( &begin , &end ) ;
-    return begin ;
+  long begin,end ;
+  GetSelection( &begin , &end ) ;
+  return begin ;
 }
 
 long wxTextCtrl::GetLastPosition() const
 {
     if ( !m_macUsesTXN )
+  {
+    return (**((TEHandle) m_macTE)).teLength ;
+  }
+  else
+  {
+    Handle theText ;
+    long actualsize ;
+    OSErr err = TXNGetDataEncoded( (TXNObject) m_macTXN, kTXNStartOffset, kTXNEndOffset, &theText , kTXNTextData );
+        /* all done */
+    if ( err )
     {
-        return (**((TEHandle) m_macTE)).teLength ;
+      actualsize = 0 ;
     }
     else
     {
-        Handle theText ;
-        long actualsize ;
-        OSErr err = TXNGetDataEncoded( (TXNObject) m_macTXN, kTXNStartOffset, kTXNEndOffset, &theText , kTXNTextData );
-        /* all done */
-        if ( err )
-        {
-            actualsize = 0 ;
-        }
-        else
-        {
-            actualsize = GetHandleSize( theText ) ;
-            DisposeHandle( theText ) ;
-        }
-        return actualsize ;
+      actualsize = GetHandleSize( theText ) ;
+      DisposeHandle( theText ) ;
     }
+    return actualsize ;
+  }
 }
 
 void wxTextCtrl::Replace(long from, long to, const wxString& value)
 {
-    if ( !m_macUsesTXN )
-    {
+  if ( !m_macUsesTXN )
+  {
         ControlEditTextSelectionRec selection ;
-        
+   
         selection.selStart = from ;
         selection.selEnd = to ;
         ::SetControlData((ControlHandle)  m_macControl , 0, kControlEditTextSelectionTag , sizeof( selection ) , (char*) &selection ) ;
@@ -1141,7 +1140,7 @@ void wxTextCtrl::Replace(long from, long to, const wxString& value)
         TXNSetSelection( ((TXNObject) m_macTXN) , from , to ) ;
         TXNClear( ((TXNObject) m_macTXN) ) ;
         TXNSetData( ((TXNObject) m_macTXN), kTXNTextData,  (void*)value.c_str(), value.Length(),
-            kTXNUseCurrentSelection, kTXNUseCurrentSelection);
+        kTXNUseCurrentSelection, kTXNUseCurrentSelection);
         if ( !formerEditable )
             SetEditable( formerEditable ) ;
     }
@@ -1150,52 +1149,52 @@ void wxTextCtrl::Replace(long from, long to, const wxString& value)
 
 void wxTextCtrl::Remove(long from, long to)
 {
-    if ( !m_macUsesTXN )
-    {
-        ControlEditTextSelectionRec selection ;
-        
-        selection.selStart = from ;
-        selection.selEnd = to ;
-        ::SetControlData( (ControlHandle) m_macControl , 0, kControlEditTextSelectionTag , sizeof( selection ) , (char*) &selection ) ;
-        TEDelete( ((TEHandle) m_macTE) ) ;
-    }
-    else
-    {
-        bool formerEditable = IsEditable() ;
-        if ( !formerEditable )
-            SetEditable(true) ;
-        TXNSetSelection( ((TXNObject) m_macTXN) , from , to ) ; 
-        TXNClear( ((TXNObject) m_macTXN) ) ; 
-        if ( !formerEditable )
-            SetEditable( formerEditable ) ;
-    }
+  if ( !m_macUsesTXN )
+  {
+    ControlEditTextSelectionRec selection ;
+   
+    selection.selStart = from ;
+    selection.selEnd = to ;
+    ::SetControlData( (ControlHandle) m_macControl , 0, kControlEditTextSelectionTag , sizeof( selection ) , (char*) &selection ) ;
+    TEDelete( ((TEHandle) m_macTE) ) ;
+  }
+  else
+  {
+    bool formerEditable = IsEditable() ;
+    if ( !formerEditable )
+        SetEditable(true) ;
+    TXNSetSelection( ((TXNObject) m_macTXN) , from , to ) ; 
+    TXNClear( ((TXNObject) m_macTXN) ) ; 
+    if ( !formerEditable )
+        SetEditable( formerEditable ) ;
+  }
     Refresh() ;
 }
 
 void wxTextCtrl::SetSelection(long from, long to)
 {
-    
-    if ( !m_macUsesTXN )
-    {
-        ControlEditTextSelectionRec selection ;
-        selection.selStart = from ;
-        selection.selEnd = to ;
-        
-        TESetSelect( selection.selStart , selection.selEnd , ((TEHandle) m_macTE) ) ;
-        ::SetControlData((ControlHandle)  m_macControl , 0, kControlEditTextSelectionTag , sizeof( selection ) , (char*) &selection ) ;
-    }
-    else
-    {
-        STPTextPaneVars **tpvars;
+
+  if ( !m_macUsesTXN )
+  {
+   ControlEditTextSelectionRec selection ;
+   selection.selStart = from ;
+   selection.selEnd = to ;
+   
+   TESetSelect( selection.selStart , selection.selEnd , ((TEHandle) m_macTE) ) ;
+   ::SetControlData((ControlHandle)  m_macControl , 0, kControlEditTextSelectionTag , sizeof( selection ) , (char*) &selection ) ;
+  }
+  else
+  {
+    STPTextPaneVars **tpvars;
         /* set up our locals */
-        tpvars = (STPTextPaneVars **) GetControlReference((ControlHandle) m_macControl);
+    tpvars = (STPTextPaneVars **) GetControlReference((ControlHandle) m_macControl);
         /* and our drawing environment as the operation
         may force a redraw in the text area. */
-        SetPort((**tpvars).fDrawingEnvironment);
+    SetPort((**tpvars).fDrawingEnvironment);
         /* change the selection */
-        TXNSetSelection( (**tpvars).fTXNRec, from, to);
-        TXNShowSelection( (TXNObject) m_macTXN, kTXNShowStart);
-    }
+    TXNSetSelection( (**tpvars).fTXNRec, from, to);
+    TXNShowSelection( (TXNObject) m_macTXN, kTXNShowStart);
+  }
 }
 
 bool wxTextCtrl::LoadFile(const wxString& file)
@@ -1252,15 +1251,15 @@ void wxTextCtrl::Clear()
     {
         return ;
     }
-    if ( !m_macUsesTXN )
-    {
-        ::SetControlData((ControlHandle)  m_macControl, 0, ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag , 0 , (char*) ((const char*)NULL) ) ;
-    }
-    else
-    {
+  if ( !m_macUsesTXN )
+  {
+    ::SetControlData((ControlHandle)  m_macControl, 0, ( m_windowStyle & wxTE_PASSWORD ) ? kControlEditTextPasswordTag : kControlEditTextTextTag , 0 , (char*) ((const char*)NULL) ) ;
+  }
+  else
+  {
         TXNSetSelection( (TXNObject)m_macTXN , kTXNStartOffset , kTXNEndOffset ) ;
         TXNClear((TXNObject)m_macTXN); 
-    }
+  }
     Refresh() ;
 }
 
@@ -1349,8 +1348,8 @@ void wxTextCtrl::DiscardEdits()
 
 int wxTextCtrl::GetNumberOfLines() const
 {
-    // TODO change this if possible to reflect real lines
-    wxString content = GetValue() ;
+  // TODO change this if possible to reflect real lines
+  wxString content = GetValue() ;
     
     int count = 1;
     for (size_t i = 0; i < content.Length() ; i++)
@@ -1379,8 +1378,8 @@ void wxTextCtrl::ShowPosition(long pos)
 
 int wxTextCtrl::GetLineLength(long lineNo) const
 {
-    // TODO change this if possible to reflect real lines
-    wxString content = GetValue() ;
+  // TODO change this if possible to reflect real lines
+  wxString content = GetValue() ;
     
     // Find line first
     int count = 0;
@@ -1405,8 +1404,8 @@ int wxTextCtrl::GetLineLength(long lineNo) const
 
 wxString wxTextCtrl::GetLineText(long lineNo) const
 {
-    // TODO change this if possible to reflect real lines
-    wxString content = GetValue() ;
+  // TODO change this if possible to reflect real lines
+  wxString content = GetValue() ;
 
     // Find line first
     int count = 0;
@@ -1596,27 +1595,27 @@ bool  wxTextCtrl::Show(bool show)
 // standard handlers for standard edit menu events
 // ----------------------------------------------------------------------------
 
-void wxTextCtrl::OnCut(wxCommandEvent& WXUNUSED(event))
+void wxTextCtrl::OnCut(wxCommandEvent& event)
 {
     Cut();
 }
 
-void wxTextCtrl::OnCopy(wxCommandEvent& WXUNUSED(event))
+void wxTextCtrl::OnCopy(wxCommandEvent& event)
 {
     Copy();
 }
 
-void wxTextCtrl::OnPaste(wxCommandEvent& WXUNUSED(event))
+void wxTextCtrl::OnPaste(wxCommandEvent& event)
 {
     Paste();
 }
 
-void wxTextCtrl::OnUndo(wxCommandEvent& WXUNUSED(event))
+void wxTextCtrl::OnUndo(wxCommandEvent& event)
 {
     Undo();
 }
 
-void wxTextCtrl::OnRedo(wxCommandEvent& WXUNUSED(event))
+void wxTextCtrl::OnRedo(wxCommandEvent& event)
 {
     Redo();
 }

@@ -10,6 +10,8 @@
 #include "wx/mac/taskbar.h"
 #elif defined(__WXPM__)
 #include "wx/os2/taskbar.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/taskbar.h"
 #endif
 
 #endif

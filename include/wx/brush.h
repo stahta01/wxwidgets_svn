@@ -4,7 +4,7 @@
 #if defined(__WXMSW__)
 #include "wx/msw/brush.h"
 #elif defined(__WXMOTIF__)
-#include "wx/x11/brush.h"
+#include "wx/motif/brush.h"
 #elif defined(__WXGTK__)
 #include "wx/gtk/brush.h"
 #elif defined(__WXX11__)
@@ -15,6 +15,8 @@
 #include "wx/mac/brush.h"
 #elif defined(__WXPM__)
 #include "wx/os2/brush.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/brush.h"
 #endif
 
 #endif

@@ -41,7 +41,7 @@
 #include "wx/dcprint.h"
 #include "math.h"
 
-#if wxUSE_COMMON_DIALOGS
+#if wxUSE_COMMON_DIALOGS || defined(__WXWINE__)
     #include <commdlg.h>
 #endif
 
@@ -431,78 +431,45 @@ void wxPrinterDC::DoDrawBitmap(const wxBitmap &bmp,
 
     if ( ::GetDeviceCaps(GetHdc(), RASTERCAPS) & RC_STRETCHDIB )
     {
-#if wxUSE_DIB_FOR_BITMAP
-        if ( bmp.IsDIB() )
-        {
-            DIBSECTION dib;
-            if ( ::GetObject(GetHbitmapOf(bmp),
-                             sizeof(dib),
-                             &dib) == sizeof(dib) )
-            {
-                 if ( ::StretchDIBits
-                        (
-                            GetHdc(),
-                            x, y,
-                            width, height,
-                            0, 0,
-                            width, height,
-                            dib.dsBm.bmBits,
-                            (LPBITMAPINFO)&dib.dsBmih,
-                            DIB_RGB_COLORS,
-                            SRCCOPY
-                        ) == GDI_ERROR )
-                 {
-                    wxLogLastError(wxT("StretchDIBits"));
-                 }
-            }
-            else
-            {
-                wxLogLastError(wxT("GetObject"));
-            }
-        }
-        else
-#endif // wxUSE_DIB_FOR_BITMAP
-        {
-            BITMAPINFO *info = (BITMAPINFO *) malloc( sizeof( BITMAPINFOHEADER ) + 256 * sizeof(RGBQUAD ) );
-            memset( info, 0, sizeof( BITMAPINFOHEADER ) );
+        BITMAPINFO *info = (BITMAPINFO *) malloc( sizeof( BITMAPINFOHEADER ) + 256 * sizeof(RGBQUAD ) );
+        memset( info, 0, sizeof( BITMAPINFOHEADER ) );
 
 #if wxUSE_DRAWBITMAP_24BITS
-            int iBitsSize = (((width * 3) + 3 ) & ~3 ) * height;
+        int iBitsSize = (((width * 3) + 3 ) & ~3 ) * height;
 #else
-            int iBitsSize = ((width + 3 ) & ~3 ) * height ;
+        int iBitsSize = ((width + 3 ) & ~3 ) * height ;
 #endif
 
-            void* bits = malloc( iBitsSize );
+        void* bits = malloc( iBitsSize );
 
-            info->bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
-            info->bmiHeader.biWidth = width;
-            info->bmiHeader.biHeight = height;
-            info->bmiHeader.biPlanes = 1;
+        info->bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
+        info->bmiHeader.biWidth = width;
+        info->bmiHeader.biHeight = height;
+        info->bmiHeader.biPlanes = 1;
 #if wxUSE_DRAWBITMAP_24BITS
-            info->bmiHeader.biBitCount = 24;
+        info->bmiHeader.biBitCount = 24;
 #else
-            info->bmiHeader.biBitCount = 8;
-#endif
-            info->bmiHeader.biCompression = BI_RGB;
+        info->bmiHeader.biBitCount = 8;
+#endif        
+        info->bmiHeader.biCompression = BI_RGB;
 
-            ScreenHDC display;
-            if ( GetDIBits(display, GetHbitmapOf(bmp), 0,
-                        bmp.GetHeight(), bits, info,
-                        DIB_RGB_COLORS) )
+        ScreenHDC display;
+        if ( GetDIBits(display, GetHbitmapOf(bmp), 0,
+                       bmp.GetHeight(), bits, info,
+                       DIB_RGB_COLORS) )
+        {
+            if ( ::StretchDIBits(GetHdc(), x, y,
+                                 width, height,
+                                 0 , 0, width, height,
+                                 bits, info,
+                                 DIB_RGB_COLORS, SRCCOPY) == GDI_ERROR )
             {
-                if ( ::StretchDIBits(GetHdc(), x, y,
-                            width, height,
-                            0 , 0, width, height,
-                            bits, info,
-                            DIB_RGB_COLORS, SRCCOPY) == GDI_ERROR )
-                {
-                    wxLogLastError(wxT("StretchDIBits"));
-                }
+                wxLogLastError(wxT("StretchDIBits"));
             }
-
-            free(bits);
-            free(info);
         }
+
+        free(bits);
+        free(info);
     }
     else // no support for StretchDIBits()
     {
@@ -526,8 +493,9 @@ bool wxPrinterDC::DoBlit(wxCoord xdest, wxCoord ydest,
 
     if ( useMask )
     {
-        // If we are printing source colours are screen colours not printer
-        // colours and so we need copy the bitmap pixel by pixel.
+        // If we are printing source colours are screen colours
+        // not printer colours and so we need copy the bitmap
+        // pixel by pixel.
         RECT rect;
         HDC dc_src = GetHdcOf(*source);
         HDC dc_mask = ::CreateCompatibleDC(dc_src);
@@ -560,97 +528,66 @@ bool wxPrinterDC::DoBlit(wxCoord xdest, wxCoord ydest,
             wxBitmap& bmp = source->GetSelectedBitmap();
             int width = bmp.GetWidth(),
                 height = bmp.GetHeight();
-#if wxUSE_DIB_FOR_BITMAP
-            if ( bmp.IsDIB() )
-            {
-                DIBSECTION dib;
-                if( ::GetObject(GetHbitmapOf(bmp),
-                                sizeof(dib),
-                                &dib) == sizeof(dib) )
-                {
-                     if ( ::StretchDIBits
-                            (
-                                GetHdc(),
-                                xdest, ydest,
-                                width, height,
-                                xsrc, ysrc,
-                                width, height,
-                                dib.dsBm.bmBits,
-                                (LPBITMAPINFO)&dib.dsBmih,
-                                DIB_RGB_COLORS,
-                                SRCCOPY
-                            ) == GDI_ERROR )
-                     {
-                        wxLogLastError(wxT("StretchDIBits"));
-                     }
-                }
-                else
-                {
-                    wxLogLastError(wxT("GetObject"));
-                }
-            }
-            else
-#endif // wxUSE_DIB_FOR_BITMAP
-            {
-                BITMAPINFO *info = (BITMAPINFO *) malloc( sizeof( BITMAPINFOHEADER ) + 256 * sizeof(RGBQUAD ) );
+
+            BITMAPINFO *info = (BITMAPINFO *) malloc( sizeof( BITMAPINFOHEADER ) + 256 * sizeof(RGBQUAD ) );
 #if wxUSE_DRAWBITMAP_24BITS
-                int iBitsSize = (((width * 3) + 3 ) & ~3 ) * height;
+            int iBitsSize = (((width * 3) + 3 ) & ~3 ) * height;
 #else
-                int iBitsSize = ((width + 3 ) & ~3 ) * height ;
+            int iBitsSize = ((width + 3 ) & ~3 ) * height ;
 #endif
 
-                void* bits = malloc( iBitsSize );
+            void* bits = malloc( iBitsSize );
 
-                memset( info , 0 , sizeof( BITMAPINFOHEADER ) );
+            memset( info , 0 , sizeof( BITMAPINFOHEADER ) );
 
-                info->bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
-                info->bmiHeader.biWidth = width;
-                info->bmiHeader.biHeight = height;
-                info->bmiHeader.biPlanes = 1;
+            info->bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
+            info->bmiHeader.biWidth = width;
+            info->bmiHeader.biHeight = height;
+            info->bmiHeader.biPlanes = 1;
 #if wxUSE_DRAWBITMAP_24BITS
-                info->bmiHeader.biBitCount = 24;
+            info->bmiHeader.biBitCount = 24;
 #else
-                info->bmiHeader.biBitCount = 8;
+            info->bmiHeader.biBitCount = 8;
 #endif
-                info->bmiHeader.biCompression = BI_RGB;
+            info->bmiHeader.biCompression = BI_RGB;
 
-                ScreenHDC display;
-                if ( !::GetDIBits(display, GetHbitmapOf(bmp), 0,
-                            height, bits, info, DIB_RGB_COLORS) )
-                {
-                    wxLogLastError(wxT("GetDIBits"));
+            ScreenHDC display;
+            if ( !::GetDIBits(display, GetHbitmapOf(bmp), 0,
+                              height, bits, info, DIB_RGB_COLORS) )
+            {
+                wxLogLastError(wxT("GetDIBits"));
 
-                    success = FALSE;
-                }
-
-                if ( success )
-                {
-                    success = ::StretchDIBits(GetHdc(), xdest, ydest,
-                            width, height,
-                            xsrc, ysrc,
-                            width, height,
-                            bits, info ,
-                            DIB_RGB_COLORS,
-                            SRCCOPY) != GDI_ERROR;
-                    if ( !success )
-                    {
-                        wxLogLastError(wxT("StretchDIBits"));
-                    }
-                }
-
-                free(bits);
-                free(info);
+                success = FALSE;
             }
+
+            if ( success )
+            {
+                success = ::StretchDIBits(GetHdc(), xdest, ydest,
+                                          width, height,
+                                          xsrc, ysrc,
+                                          width, height,
+                                          bits, info ,
+                                          DIB_RGB_COLORS,
+                                          SRCCOPY) != GDI_ERROR;
+                if ( !success )
+                {
+                    wxLogLastError(wxT("StretchDIBits"));
+                }
+            }
+
+            free(bits);
+            free(info);
         }
         else // no support for StretchDIBits
         {
-            // as we are printing, source colours are screen colours not
-            // printer colours and so we need copy the bitmap pixel by pixel.
+            // as we are printing, source colours are screen colours not printer
+            // colours and so we need copy the bitmap pixel by pixel.
             HDC dc_src = GetHdcOf(*source);
             RECT rect;
             for (int y = 0; y < height; y++)
             {
-                // optimization: draw identical adjacent pixels together.
+                // This is Stefan Csomor's optimisation, where identical adjacent
+                // pixels are drawn together.
                 for (int x = 0; x < width; x++)
                 {
                     COLORREF col = ::GetPixel(dc_src, x, y);

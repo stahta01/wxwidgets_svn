@@ -18,10 +18,7 @@
 
 #if wxUSE_CLIPBOARD
 
-class wxDataObject;
-
 #include "wx/list.h"
-WX_DECLARE_LIST(wxDataObject, wxDataObjectList);
 
 bool WXDLLEXPORT wxOpenClipboard();
 bool WXDLLEXPORT wxClipboardOpen();
@@ -74,7 +71,7 @@ public:
     // implementation from now on
     
     bool              m_open;
-    wxDataObjectList  m_data;
+    wxList            m_data;
     bool              m_usePrimary;
     
 private:

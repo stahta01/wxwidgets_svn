@@ -70,7 +70,7 @@ wxSplashScreen::wxSplashScreen(const wxBitmap& bitmap, long splashStyle, int mil
 
     Show(TRUE);
     m_window->SetFocus();
-#if defined( __WXMSW__ ) || defined(__WXMAC__)
+#if defined(__WXMSW__) || defined(__WXMAC__)
     Update(); // Without this, you see a blank screen for an instant
 #else
     wxYieldIfNeeded(); // Should eliminate this
