@@ -517,7 +517,6 @@ public:
     bool Leaving() const { return (m_eventType == wxEVT_LEAVE_WINDOW); }
 
     // Find the position of the event
-    void GetPosition(long *xpos, long *ypos) const { *xpos = m_x; *ypos = m_y; }
     void Position(long *xpos, long *ypos) const { *xpos = m_x; *ypos = m_y; }
 
     // Find the position of the event
@@ -576,18 +575,18 @@ public:
     bool ShiftDown() const { return m_shiftDown; }
     long KeyCode() const { return m_keyCode; }
 
+#if WXWIN_COMPATIBILITY
     // Find the position of the event
-    void GetPosition(long *xpos, long *ypos) const
-        { *xpos = m_x; *ypos = m_y; }
-
-    wxPoint GetPosition() const
-        { return wxPoint(m_x, m_y); }
+    void Position(float *xpos, float *ypos) const
+        { *xpos = (float)m_x; *ypos = (float)m_y; }
 
     // Get X position
-    long GetX() const { return m_x; }
+    float GetX() const { return (float)m_x; }
 
     // Get Y position
-    long GetY() const { return m_y; }
+    float GetY() const { return (float)m_y; }
+
+#endif // WXWIN_COMPATIBILITY
 
 public:
     long          m_x;

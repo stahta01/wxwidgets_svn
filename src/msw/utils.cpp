@@ -299,11 +299,6 @@ class wxSleepTimer: public wxTimer
 
 static wxTimer *wxTheSleepTimer = NULL;
 
-void wxUsleep(unsigned long milliseconds)
-{
-    ::Sleep(milliseconds);
-}
-
 void wxSleep(int nSecs)
 {
 #if 0 // WIN32 hangs app

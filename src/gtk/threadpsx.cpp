@@ -410,7 +410,9 @@ void wxThread::Yield()
 
 void wxThread::Sleep(unsigned long milliseconds)
 {
-    wxUsleep(milliseconds);
+    // FIXME how to test for nanosleep() availability?
+
+    usleep(milliseconds * 1000); // usleep(3) wants microseconds
 }
 
 // -----------------------------------------------------------------------------

@@ -49,13 +49,13 @@ class WXDLLEXPORT wxFrame;
 #define   wxToLower(C)      (((C) >= 'A' && (C) <= 'Z')? (C) - 'A' + 'a': (C))
 
 // Return a string with the current date/time
-WXDLLEXPORT wxString wxNow();
+WXDLLEXPORT wxString wxNow(void);
 
 // Make a copy of this string using 'new'
 WXDLLEXPORT char* copystring(const char *s);
 
 // Generate a unique ID
-WXDLLEXPORT long wxNewId();
+WXDLLEXPORT long wxNewId(void);
 #define NewId wxNewId
 
 // Ensure subsequent IDs don't clash with this one
@@ -63,7 +63,7 @@ WXDLLEXPORT void wxRegisterId(long id);
 #define RegisterId wxRegisterId
 
 // Return the current ID
-WXDLLEXPORT long wxGetCurrentId();
+WXDLLEXPORT long wxGetCurrentId(void);
 
 // Useful buffer
 WXDLLEXPORT_DATA(extern char*) wxBuffer;
@@ -111,14 +111,11 @@ WXDLLEXPORT bool wxShell(const wxString& command = wxEmptyString);
 // Sleep for nSecs seconds under UNIX, do nothing under Windows
 WXDLLEXPORT void wxSleep(int nSecs);
 
-// Sleep for a given amount of milliseconds
-WXDLLEXPORT void wxUsleep(unsigned long milliseconds);
-
 // Get free memory in bytes, or -1 if cannot determine amount (e.g. on UNIX)
-WXDLLEXPORT long wxGetFreeMemory();
+WXDLLEXPORT long wxGetFreeMemory(void);
 
 // Consume all events until no more left
-WXDLLEXPORT void wxFlushEvents();
+WXDLLEXPORT void wxFlushEvents(void);
 
 /*
  * Network and username functions.
@@ -169,7 +166,7 @@ WXDLLEXPORT int wxFindMenuItemId(wxFrame *frame, const wxString& menuString, con
 #define wxMin(a,b)            (((a) < (b)) ? (a) : (b))
 
 // Yield to other apps/messages
-WXDLLEXPORT bool wxYield();
+WXDLLEXPORT bool wxYield(void);
 
 // Format a message on the standard error (UNIX) or the debugging
 // stream (Windows)
@@ -187,22 +184,20 @@ WXDLLEXPORT_DATA(extern wxCursor*) wxHOURGLASS_CURSOR;
 WXDLLEXPORT void wxBeginBusyCursor(wxCursor *cursor = wxHOURGLASS_CURSOR);
 
 // Restore cursor to normal
-WXDLLEXPORT void wxEndBusyCursor();
+WXDLLEXPORT void wxEndBusyCursor(void);
  
 // TRUE if we're between the above two calls
-WXDLLEXPORT bool wxIsBusy();
+WXDLLEXPORT bool wxIsBusy(void);
 
 // Convenience class so we can just create a wxBusyCursor object on the stack
 class WXDLLEXPORT wxBusyCursor
 {
-public:
-    wxBusyCursor(wxCursor* cursor = wxHOURGLASS_CURSOR)
-        { wxBeginBusyCursor(cursor); }
-   ~wxBusyCursor()
-        { wxEndBusyCursor(); }
+ public:
+    inline wxBusyCursor(wxCursor* cursor = wxHOURGLASS_CURSOR) { wxBeginBusyCursor(cursor); }
+    inline ~wxBusyCursor() { wxEndBusyCursor(); }
 };
 
-// Error message functions used by wxWindows
+/* Error message functions used by wxWindows */
 
 // Non-fatal error (continues)
 WXDLLEXPORT_DATA(extern const char*) wxInternalErrorStr;
