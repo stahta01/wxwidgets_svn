@@ -581,7 +581,13 @@ void wxComboBox::SetSelection(long from, long to)
       toChar = -1;
     }
 
-    if ( SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar)) == CB_ERR )
+    if (
+#ifdef __WIN32__
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)0, (LPARAM)MAKELONG(fromChar, toChar))
+#else // Win16
+    SendMessage(hWnd, CB_SETEDITSEL, (WPARAM)fromChar, (LPARAM)toChar)
+#endif
+        == CB_ERR )
     {
         wxLogDebug(_T("CB_SETEDITSEL failed"));
     }

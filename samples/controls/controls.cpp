@@ -45,9 +45,17 @@
     #include "icons/gauge.xpm"
 #endif
 
-#ifndef wxUSE_SPINBTN
+#ifdef __WIN16__
+    // Win16 doesn't have them
+    #ifdef wxUSE_SPINBTN
+    #undef wxUSE_SPINBTN
+    #endif
+    #define wxUSE_SPINBTN 0
+#else
+    #ifndef wxUSE_SPINBTN
     #define wxUSE_SPINBTN 1
-#endif
+    #endif
+#endif // __WIN16__
 
 #include "wx/progdlg.h"
 
@@ -785,7 +793,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     panel = new wxPanel(m_notebook);
 
-#if !defined(__WXMOTIF__) // wxStaticBitmap not working under Motif yet.
+#if !defined(__WXMOTIF__) && !defined(__WIN16__)  // wxStaticBitmap not working under Motif yet; and icons not allowed under WIN16.
     wxIcon icon = wxArtProvider::GetIcon(wxART_INFORMATION);
     (void) new wxStaticBitmap( panel, wxID_ANY, icon, wxPoint(10, 10) );
 

@@ -2914,9 +2914,9 @@ equivalent variable and GTK+ is version 1.2.3 or above.
             AC_MSG_RESULT([none])
         fi
 
-        CPPFLAGS="$CPPFLAGS $CPPFLAGS_PASCAL -I\${top_srcdir}/src/mac/carbon/morefilex -I/Developer/Headers/FlatCarbon"
+        CPPFLAGS="$CPPFLAGS $CPPFLAGS_PASCAL -I\${top_srcdir}/src/mac/morefilex -I/Developer/Headers/FlatCarbon"
 
-        TOOLKIT_VPATH="\${top_srcdir}/src/mac/carbon${PATH_IFS}\${top_srcdir}/src/mac/carbon/morefilex"
+        TOOLKIT_VPATH="\${top_srcdir}/src/mac${PATH_IFS}\${top_srcdir}/src/mac/morefilex"
         TOOLKIT=MAC
         dnl we can't call this MAC_DIST or autoconf thinks its a macro
         GUIDIST=MACX_DIST
@@ -3587,11 +3587,6 @@ if test "$wx_cv_sizeof_wchar_t" != "0"; then
         AC_DEFINE(HAVE_WCSLEN)
     fi
 
-    dnl HP-UX aCC needs this define to find mbstrtowcs() &c
-    if test "$USE_HPUX" = 1 -a "x$GCC" != "xyes"; then
-        CPPFLAGS="$CPPFLAGS -D_INCLUDE__STDC_A1_SOURCE "
-    fi
-
     dnl try to use wcsrtombs instead of wcstombs which is buggy in old GNU
     dnl libc versions if possible
     AC_CHECK_FUNCS(wcsrtombs)
@@ -4120,10 +4115,6 @@ if test "$TOOLKIT" != "MSW" -a "$USE_OS2" != 1; then
                 if test "x$GCC" != "xyes"; then
                     dnl see http://docs.hp.com/hpux/onlinedocs/2213/threads.htm
                     flag="$flag -D_RWSTD_MULTI_THREAD"
-
-                    dnl we also need -lcma for user threads (-lpthread is for
-                    dnl kernel threads only) according to Ian Brown
-                    LIBS="$LIBS -lcma"
                 fi
                 ;;
             *solaris* | alpha*-osf*)

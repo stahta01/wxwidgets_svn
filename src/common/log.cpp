@@ -721,7 +721,12 @@ static void wxLogWrap(FILE *f, const char *pszPrefix, const char *psz)
 unsigned long wxSysErrorCode()
 {
 #if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef  __WIN32__
     return ::GetLastError();
+#else   //WIN16
+    // TODO what to do on Windows 3.1?
+    return 0;
+#endif  //WIN16/32
 #else   //Unix
     return errno;
 #endif  //Win/Unix
@@ -734,6 +739,7 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
         nErrCode = wxSysErrorCode();
 
 #if defined(__WXMSW__) && !defined(__WXMICROWIN__)
+#ifdef  __WIN32__
     static wxChar s_szBuf[LOG_BUFFER_SIZE / 2];
 
     // get error message from system
@@ -765,7 +771,11 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
     }
 
     return s_szBuf;
-#else   // Unix-WXMICROWIN
+#else   //Win16
+    // TODO
+    return NULL;
+#endif // Win16/32
+#else   // Unix
 #if wxUSE_UNICODE
     static wxChar s_szBuf[LOG_BUFFER_SIZE / 2];
     wxConvCurrent->MB2WC(s_szBuf, strerror(nErrCode), WXSIZEOF(s_szBuf) -1);
@@ -773,7 +783,7 @@ const wxChar *wxSysErrorMsg(unsigned long nErrCode)
 #else
     return strerror((int)nErrCode);
 #endif
-#endif  // Win/Unix-WXMICROWIN
+#endif  // Win/Unix
 }
 
 #endif // wxUSE_LOG

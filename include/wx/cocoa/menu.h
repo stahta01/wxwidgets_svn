@@ -87,6 +87,8 @@ protected:
 // Implementation
 // ------------------------------------------------------------------------
 public:
+    wxMenuItemList m_items;             // the list of menu items
+
     // implement base class virtuals
     virtual bool Append(wxMenu *menu, const wxString &title);
     virtual bool Insert(size_t pos, wxMenu *menu, const wxString& title);

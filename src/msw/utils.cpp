@@ -107,6 +107,12 @@
 static const wxChar WX_SECTION[] = wxT("wxWindows");
 static const wxChar eUSERNAME[]  = wxT("UserName");
 
+// these are only used under Win16
+#if !defined(__WIN32__) && !defined(__WXMICROWIN__)
+static const wxChar eHOSTNAME[]  = wxT("HostName");
+static const wxChar eUSERID[]    = wxT("UserId");
+#endif // !Win32
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -232,7 +238,7 @@ bool wxGetUserId(wxChar *buf, int maxSize)
 {
 #if defined(__WXWINCE__)
     return FALSE;
-#elif defined(__WIN32__) && !defined(__WXMICROWIN__)
+#elif defined(__WIN32__) && !defined(__win32s__) && !defined(__WXMICROWIN__)
     DWORD nSize = maxSize;
     if ( ::GetUserName(buf, &nSize) == 0 )
     {
@@ -246,7 +252,7 @@ bool wxGetUserId(wxChar *buf, int maxSize)
     }
 
     return TRUE;
-#else   // __WXMICROWIN__
+#else   // Win16 or Win32s
     wxChar *user;
     const wxChar *default_id = wxT("anonymous");
 
@@ -463,7 +469,23 @@ bool wxDirExists(const wxString& dir)
 #elif defined(__WIN32__)
     DWORD attribs = GetFileAttributes(dir);
     return ((attribs != (DWORD)-1) && (attribs & FILE_ATTRIBUTE_DIRECTORY));
-#endif // Win32/__WXMICROWIN__
+#else // Win16
+    #ifdef __BORLANDC__
+        struct ffblk fileInfo;
+    #else
+        struct find_t fileInfo;
+    #endif
+    // In Borland findfirst has a different argument
+    // ordering from _dos_findfirst. But _dos_findfirst
+    // _should_ be ok in both MS and Borland... why not?
+    #ifdef __BORLANDC__
+        return (findfirst(dir, &fileInfo, _A_SUBDIR) == 0 &&
+               (fileInfo.ff_attrib & _A_SUBDIR) != 0);
+    #else
+        return (_dos_findfirst(dir, _A_SUBDIR, &fileInfo) == 0) &&
+               ((fileInfo.attrib & _A_SUBDIR) != 0);
+    #endif
+#endif // Win32/16
 }
 
 bool wxGetDiskSpace(const wxString& path, wxLongLong *pTotal, wxLongLong *pFree)
@@ -582,6 +604,17 @@ bool wxGetEnv(const wxString& var, wxString *value)
 {
 #ifdef __WXWINCE__
     return FALSE;
+#elif defined(__WIN16__)
+    const wxChar* ret = wxGetenv(var);
+    if ( !ret )
+        return FALSE;
+
+    if ( value )
+    {
+        *value = ret;
+    }
+
+    return TRUE;
 #else // Win32
     // first get the size of the buffer
     DWORD dwRet = ::GetEnvironmentVariable(var, NULL, 0);
@@ -598,7 +631,7 @@ bool wxGetEnv(const wxString& var, wxString *value)
     }
 
     return TRUE;
-#endif // WinCE/32
+#endif // Win16/32
 }
 
 bool wxSetEnv(const wxString& var, const wxChar *value)
@@ -897,6 +930,8 @@ bool wxShutdown(wxShutdownFlags wFlags)
     }
 
     return bOK;
+#else // Win16
+    return FALSE;
 #endif // Win32/16
 }
 
@@ -919,7 +954,11 @@ long wxGetFreeMemory()
 
 unsigned long wxGetProcessId()
 {
+#ifdef __WIN32__
     return ::GetCurrentProcessId();
+#else
+    return 0;
+#endif
 }
 
 // Emit a beeeeeep
@@ -930,6 +969,7 @@ void wxBell()
 
 wxString wxGetOsDescription()
 {
+#ifdef __WIN32__
     wxString str;
 
     OSVERSIONINFO info;
@@ -972,6 +1012,9 @@ wxString wxGetOsDescription()
     }
 
     return str;
+#else // Win16
+    return _("Windows 3.1");
+#endif // Win32/16
 }
 
 wxToolkitInfo& wxAppTraits::GetToolkitInfo()

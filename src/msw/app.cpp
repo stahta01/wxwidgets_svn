@@ -76,11 +76,6 @@
 
 #include "wx/msw/wrapcctl.h"
 
-// For MB_TASKMODAL
-#ifdef __WXWINCE__
-#include "wx/msw/wince/missing.h"
-#endif
-
 #if (!defined(__MINGW32__) || wxCHECK_W32API_VERSION( 2, 0 )) && \
     !defined(__CYGWIN__) && !defined(__DIGITALMARS__) && !defined(__WXWINCE__) && \
     (!defined(_MSC_VER) || (_MSC_VER > 1100))
@@ -281,6 +276,13 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 
 #if wxUSE_OLE || wxUSE_DRAG_AND_DROP
 
+#ifdef __WIN16__
+    // for OLE, enlarge message queue to be as large as possible
+    int iMsg = 96;
+    while (!SetMessageQueue(iMsg) && (iMsg -= 8))
+        ;
+#endif // Win16
+
 #if wxUSE_OLE
     // we need to initialize OLE library
 #ifdef __WXWINCE__
@@ -323,6 +325,13 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 #endif
 
     wxWinHandleHash = new wxWinHashTable(wxKEY_INTEGER, 100);
+
+    // This is to foil optimizations in Visual C++ that throw out dummy.obj.
+    // PLEASE DO NOT ALTER THIS.
+#if defined(__VISUALC__) && defined(__WIN16__) && !defined(WXMAKINGDLL)
+    extern char wxDummyChar;
+    if (wxDummyChar) wxDummyChar++;
+#endif
 
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
     wxSetKeyboardHook(TRUE);
@@ -540,10 +549,6 @@ wxApp::~wxApp()
     delete [] argv;
 }
 
-// ----------------------------------------------------------------------------
-// wxApp idle handling
-// ----------------------------------------------------------------------------
-
 void wxApp::OnIdle(wxIdleEvent& event)
 {
     wxAppBase::OnIdle(event);
@@ -574,10 +579,6 @@ void wxApp::WakeUpIdle()
     }
 }
 
-// ----------------------------------------------------------------------------
-// other wxApp event hanlders
-// ----------------------------------------------------------------------------
-
 void wxApp::OnEndSession(wxCloseEvent& WXUNUSED(event))
 {
     if (GetTopWindow())
@@ -594,10 +595,6 @@ void wxApp::OnQueryEndSession(wxCloseEvent& event)
             event.Veto(TRUE);
     }
 }
-
-// ----------------------------------------------------------------------------
-// miscellaneous
-// ----------------------------------------------------------------------------
 
 /* static */
 int wxApp::GetComCtl32Version()
@@ -737,43 +734,3 @@ bool wxApp::Yield(bool onlyIfNeeded)
     return TRUE;
 }
 
-#if wxUSE_EXCEPTIONS
-
-// ----------------------------------------------------------------------------
-// exception handling
-// ----------------------------------------------------------------------------
-
-bool wxApp::OnExceptionInMainLoop()
-{
-    // ask the user about what to do: use the Win32 API function here as it
-    // could be dangerous to use any wxWindows code in this state
-    switch (
-            ::MessageBox
-              (
-                NULL,
-                _T("An unhandled exception occurred. Press \"Abort\" to \
-terminate the program,\r\n\
-\"Retry\" to exit the program normally and \"Ignore\" to try to continue."),
-                _T("Unhandled exception"),
-                MB_ABORTRETRYIGNORE |
-                MB_ICONERROR| 
-                MB_TASKMODAL
-              )
-           )
-    {
-        case IDABORT:
-            throw;
-
-        default:
-            wxFAIL_MSG( _T("unexpected MessageBox() return code") );
-            // fall through
-
-        case IDRETRY:
-            return false;
-
-        case IDIGNORE:
-            return true;
-    }
-}
-
-#endif // wxUSE_EXCEPTIONS

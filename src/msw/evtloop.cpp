@@ -41,6 +41,11 @@
 
 #include "wx/msw/private.h"
 
+// For MB_TASKMODAL
+#ifdef __WXWINCE__
+#include "wx/msw/wince/missing.h"
+#endif
+
 #if wxUSE_THREADS
     #include "wx/thread.h"
 
@@ -72,6 +77,13 @@ public:
     void Exit(int exitcode) { m_exitcode = exitcode; m_shouldExit = true; }
     int GetExitCode() const { return m_exitcode; }
     bool ShouldExit() const { return m_shouldExit; }
+
+    enum wxCatchAllResponse {
+        catch_continue,
+        catch_exit,
+        catch_rethrow
+    };
+    wxCatchAllResponse OnCatchAll();
 
 private:
     // preprocess a message, return TRUE if processed (i.e. no further
@@ -210,7 +222,26 @@ bool wxEventLoopImpl::PreProcessMessage(MSG *msg)
 
 bool wxEventLoopImpl::SendIdleMessage()
 {
-    return wxTheApp && wxTheApp->ProcessIdle();
+    return wxTheApp->ProcessIdle();
+}
+
+// ----------------------------------------------------------------------------
+// wxEventLoopImpl exception handling
+// ----------------------------------------------------------------------------
+
+wxEventLoopImpl::wxCatchAllResponse wxEventLoopImpl::OnCatchAll()
+{
+    switch (::MessageBox(NULL, 
+            _T("An unhandled exception occurred. 'Abort' will terminate the program,\r\n\
+'Retry' will close the current dialog, 'Ignore' will try to continue."),
+            _T("Unhandled exception"), 
+            MB_ABORTRETRYIGNORE|MB_ICONERROR|MB_TASKMODAL))
+    {
+        case IDABORT: return catch_rethrow;
+        case IDRETRY: return catch_exit;
+        case IDIGNORE: return catch_continue;
+    }
+    return catch_rethrow;
 }
 
 // ============================================================================
@@ -250,70 +281,65 @@ int wxEventLoop::Run()
     // wxModalEventLoop depends on this (so we can't just use ON_BLOCK_EXIT or
     // something similar here)
 #if wxUSE_EXCEPTIONS
-    for ( ;; )
+    bool retryAfterException = false;
+    do {
+        retryAfterException=false;
+#endif
+    wxTRY
     {
-        try
+        for ( ;; )
         {
-#endif // wxUSE_EXCEPTIONS
+    #if wxUSE_THREADS
+            wxMutexGuiLeaveOrEnter();
+    #endif // wxUSE_THREADS
 
-            // this is the event loop itself
-            for ( ;; )
+            // generate and process idle events for as long as we don't have
+            // anything else to do
+            while ( !Pending() && m_impl->SendIdleMessage() )
+                ;
+
+            // if the "should exit" flag is set, the loop should terminate but
+            // not before processing any remaining messages so while Pending()
+            // returns true, do process them
+            if ( m_impl->ShouldExit() )
             {
-                #if wxUSE_THREADS
-                    wxMutexGuiLeaveOrEnter();
-                #endif // wxUSE_THREADS
+                while ( Pending() )
+                    Dispatch();
 
-                // generate and process idle events for as long as we don't
-                // have anything else to do
-                while ( !Pending() && m_impl->SendIdleMessage() )
-                    ;
-
-                // if the "should exit" flag is set, the loop should terminate
-                // but not before processing any remaining messages so while
-                // Pending() returns true, do process them
-                if ( m_impl->ShouldExit() )
-                {
-                    while ( Pending() )
-                        Dispatch();
-
-                    break;
-                }
-
-                // a message came or no more idle processing to do, sit in
-                // Dispatch() waiting for the next message
-                if ( !Dispatch() )
-                {
-                    // we got WM_QUIT
-                    break;
-                }
+                break;
             }
 
-#if wxUSE_EXCEPTIONS
-            // exit the outer loop as well
-            break;
-        }
-        catch ( ... )
-        {
-            try
+            // a message came or no more idle processing to do, sit in
+            // Dispatch() waiting for the next message
+            if ( !Dispatch() )
             {
-                if ( !wxTheApp || !wxTheApp->OnExceptionInMainLoop() )
-                {
+                // we got WM_QUIT
+                break;
+            }
+        }
+        }
+        wxCATCH_ALL( 
+            switch (m_impl->OnCatchAll()) {
+                case wxEventLoopImpl::catch_continue:
+                    retryAfterException=true;
+                    break;
+                case wxEventLoopImpl::catch_exit:
                     OnExit();
                     break;
-                }
-                //else: continue running the event loop
-            }
-            catch ( ... )
-            {
-                // OnException() throwed, possibly rethrowing the same
-                // exception again: very good, but we still need OnExit() to
-                // be called
-                OnExit();
-                throw;
-            }
-        }
+                case wxEventLoopImpl::catch_rethrow:
+                    OnExit();
+                    // should be replaced with wx macro, but
+                    // there is none yet. OTOH, wxCATCH_ALL isn't
+                    // expanded unless wxUSE_EXCEPTIONS, so its
+                    // safe to use throw here.
+                    throw;
+                default:
+                    break;
     }
-#endif // wxUSE_EXCEPTIONS
+        )
+#if wxUSE_EXCEPTIONS
+    } while (retryAfterException);
+#endif
 
     return m_impl->GetExitCode();
 }

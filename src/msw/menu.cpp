@@ -321,7 +321,7 @@ void wxMenu::UpdateAccel(wxMenuItem *item)
 
         if ( IsAttached() )
         {
-            GetMenuBar()->RebuildAccelTable();
+            m_menuBar->RebuildAccelTable();
         }
     }
     //else: it is a separator, they can't have accels, nothing to do
@@ -419,9 +419,9 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 #endif // __WIN32__
 
     // if we're already attached to the menubar, we must update it
-    if ( IsAttached() && GetMenuBar()->IsAttached() )
+    if ( IsAttached() && m_menuBar->IsAttached() )
     {
-        GetMenuBar()->Refresh();
+        m_menuBar->Refresh();
     }
 
     return TRUE;
@@ -532,10 +532,10 @@ wxMenuItem *wxMenu::DoRemove(wxMenuItem *item)
         wxLogLastError(wxT("RemoveMenu"));
     }
 
-    if ( IsAttached() && GetMenuBar()->IsAttached() )
+    if ( IsAttached() && m_menuBar->IsAttached() )
     {
         // otherwise, the chane won't be visible
-        GetMenuBar()->Refresh();
+        m_menuBar->Refresh();
     }
 
     // and from internal data structures
@@ -662,8 +662,8 @@ wxWindow *wxMenu::GetWindow() const
 {
     if ( m_invokingWindow != NULL )
         return m_invokingWindow;
-    else if ( GetMenuBar() != NULL)
-        return GetMenuBar()->GetFrame();
+    else if ( m_menuBar != NULL)
+        return m_menuBar->GetFrame();
 
     return NULL;
 }

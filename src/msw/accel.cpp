@@ -59,7 +59,10 @@ wxAcceleratorRefData::~wxAcceleratorRefData()
 {
   if (m_hAccel)
   {
+    // This function not available in WIN16
+#if !defined(__WIN16__)
     DestroyAcceleratorTable((HACCEL) m_hAccel);
+#endif
   }
   m_hAccel = 0 ;
 }
@@ -95,8 +98,10 @@ wxAcceleratorTable::wxAcceleratorTable(const wxString& resource)
 extern int wxCharCodeWXToMSW(int id, bool *isVirtual);
 
 // Create from an array
+#if !defined(__WIN16__)
 wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[])
 {
+    // Not available in WIN16
     m_refData = new wxAcceleratorRefData;
 
     ACCEL* arr = new ACCEL[n];
@@ -128,6 +133,14 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
 
     M_ACCELDATA->m_ok = (M_ACCELDATA->m_hAccel != 0);
 }
+#else // Win16
+wxAcceleratorTable::wxAcceleratorTable(int WXUNUSED(n), const wxAcceleratorEntry WXUNUSED(entries)[])
+{
+    // No, we simply gracefully degrade; we don't expect the
+    // developer to pepper their code with #ifdefs just for this.
+    // wxFAIL_MSG("not implemented");
+}
+#endif // Win32/16
 
 bool wxAcceleratorTable::Ok() const
 {

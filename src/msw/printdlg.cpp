@@ -39,6 +39,11 @@
 #include "wx/printdlg.h"
 #include "wx/dcprint.h"
 
+// Have to emulate page setup dialog for Win16
+#if !defined(__WIN95__)
+    #include "wx/generic/prntdlgg.h"
+#endif
+
 #include <stdlib.h>
 
 #include "wx/msw/private.h"

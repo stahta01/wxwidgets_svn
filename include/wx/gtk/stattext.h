@@ -58,7 +58,6 @@ public:
     void SetLabel( const wxString &label );
 
     bool SetFont( const wxFont &font );
-    bool SetForegroundColour( const wxColour& colour );
     
     // implementation
     // --------------

@@ -226,7 +226,7 @@
 // library without it if you have no use for it - this will result in a
 // somewhat smaller and faster operation.
 //
-// Threads are only supported under Win32.
+// This is ignored under Win16, threads are only supported under Win32.
 //
 // Default is 1
 //
@@ -928,10 +928,6 @@
 // If 1, enables provision of run-time type information.
 // NOW MANDATORY: don't change.
 #define wxUSE_DYNAMIC_CLASSES     1
-
-// Set to 0 for no libmspack
-#define wxUSE_LIBMSPACK     0
-
 
 #endif
     // _WX_SETUP_H_

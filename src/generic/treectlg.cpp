@@ -40,10 +40,6 @@
 
 #include "wx/renderer.h"
 
-#ifdef __WXMAC__
-    #include "wx/mac/private.h"
-#endif
-    
 // -----------------------------------------------------------------------------
 // array types
 // -----------------------------------------------------------------------------
@@ -681,7 +677,7 @@ BEGIN_EVENT_TABLE(wxGenericTreeCtrl,wxScrolledWindow)
     EVT_TREE_ITEM_GETTOOLTIP(-1, wxGenericTreeCtrl::OnGetToolTip)
 END_EVENT_TABLE()
 
-#if !defined(__WXMSW__) || defined(__WXUNIVERSAL__)
+#if !defined(__WXMSW__) || defined(__WIN16__) || defined(__WXUNIVERSAL__)
 /*
  * wxTreeCtrl has to be a real class or we have problems with
  * the run-time information.
@@ -734,17 +730,11 @@ void wxGenericTreeCtrl::Init()
     m_textCtrl = NULL;
 
     m_renameTimer = NULL;
-    m_freezeCount = 0;
-
     m_findTimer = NULL;
 
     m_lastOnSame = FALSE;
 
-#if defined( __WXMAC__ ) && __WXMAC_CARBON__
-    m_normalFont.MacCreateThemeFont( kThemeViewsFont ) ;
-#else
     m_normalFont = wxSystemSettings::GetFont( wxSYS_DEFAULT_GUI_FONT );
-#endif
     m_boldFont = wxFont(m_normalFont.GetPointSize(),
                         m_normalFont.GetFamily(),
                         m_normalFont.GetStyle(),
@@ -1908,12 +1898,8 @@ void wxGenericTreeCtrl::ScrollTo(const wxTreeItemId &item)
     // We have to call this here because the label in
     // question might just have been added and no screen
     // update taken place.
-    if (m_dirty) 
-#if defined( __WXMSW__ ) || defined(__WXMAC__)
-        Update();
-#else
-        wxYieldIfNeeded();
-#endif
+    if (m_dirty) wxYieldIfNeeded();
+
     wxGenericTreeItem *gitem = (wxGenericTreeItem*) item.m_pItem;
 
     // now scroll to the item
@@ -2845,11 +2831,7 @@ void wxGenericTreeCtrl::Edit( const wxTreeItemId& item )
     // question might just have been added and no screen
     // update taken place.
     if ( m_dirty )
-#if defined( __WXMSW__ ) || defined(__WXMAC__)
-        Update();
-#else
         wxYieldIfNeeded();
-#endif
 
     m_textCtrl = new wxTreeTextCtrl(this, itemEdit);
 
@@ -2906,9 +2888,7 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
     int flags = 0;
     wxGenericTreeItem *thisItem = m_anchor->HitTest(pt, this, flags, 0);
     wxGenericTreeItem *underMouse = thisItem;
-#if wxUSE_TOOLTIPS
     bool underMouseChanged = (underMouse != m_underMouse) ;
-#endif // wxUSE_TOOLTIPS
 
     if ((underMouse) &&
         (flags & wxTREE_HITTEST_ONITEMBUTTON) &&
@@ -3036,11 +3016,7 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
             // highlight the current drop target if any
             DrawDropEffect(m_dropTarget);
 
-#if defined( __WXMSW__ ) || defined(__WXMAC__)
-            Update();
-#else
             wxYieldIfNeeded();
-#endif
         }
     }
     else if ( (event.LeftUp() || event.RightUp()) && m_isDragging )
@@ -3071,11 +3047,7 @@ void wxGenericTreeCtrl::OnMouse( wxMouseEvent &event )
 
         SetCursor(m_oldCursor);
 
-#if defined( __WXMSW__ ) || defined(__WXMAC__)
-        Update();
-#else
         wxYieldIfNeeded();
-#endif
     }
     else
     {
@@ -3221,8 +3193,7 @@ void wxGenericTreeCtrl::OnInternalIdle()
      * we actually redraw the tree when everything is over */
 
     if (!m_dirty) return;
-    if (m_freezeCount) return;
-    
+
     m_dirty = FALSE;
 
     CalculatePositions();
@@ -3240,8 +3211,6 @@ void wxGenericTreeCtrl::CalculateSize( wxGenericTreeItem *item, wxDC &dc )
         dc.SetFont(attr->GetFont());
     else if ( item->IsBold() )
         dc.SetFont(m_boldFont);
-    else
-        dc.SetFont(m_normalFont);
 
     dc.GetTextExtent( item->GetText(), &text_w, &text_h );
     text_h+=2;
@@ -3333,7 +3302,6 @@ void wxGenericTreeCtrl::CalculatePositions()
 void wxGenericTreeCtrl::RefreshSubtree(wxGenericTreeItem *item)
 {
     if (m_dirty) return;
-    if (m_freezeCount) return;
 
     wxSize client = GetClientSize();
 
@@ -3350,7 +3318,6 @@ void wxGenericTreeCtrl::RefreshSubtree(wxGenericTreeItem *item)
 void wxGenericTreeCtrl::RefreshLine( wxGenericTreeItem *item )
 {
     if (m_dirty) return;
-    if (m_freezeCount) return;
 
     wxRect rect;
     CalcScrolledPosition(0, item->GetY(), NULL, &rect.y);
@@ -3362,8 +3329,6 @@ void wxGenericTreeCtrl::RefreshLine( wxGenericTreeItem *item )
 
 void wxGenericTreeCtrl::RefreshSelected()
 {
-    if (m_freezeCount) return;
-    
     // TODO: this is awfully inefficient, we should keep the list of all
     //       selected items internally, should be much faster
     if ( m_anchor )
@@ -3372,8 +3337,6 @@ void wxGenericTreeCtrl::RefreshSelected()
 
 void wxGenericTreeCtrl::RefreshSelectedUnder(wxGenericTreeItem *item)
 {
-    if (m_freezeCount) return;
-    
     if ( item->IsSelected() )
         RefreshLine(item);
 
@@ -3382,21 +3345,6 @@ void wxGenericTreeCtrl::RefreshSelectedUnder(wxGenericTreeItem *item)
     for ( size_t n = 0; n < count; n++ )
     {
         RefreshSelectedUnder(children[n]);
-    }
-}
-
-void wxGenericTreeCtrl::Freeze()
-{
-    m_freezeCount++;
-}
-
-void wxGenericTreeCtrl::Thaw()
-{
-    wxCHECK_RET( m_freezeCount > 0, _T("thawing unfrozen tree control?") );
-    
-    if ( !--m_freezeCount )
-    {
-        Refresh();
     }
 }
 
@@ -3409,8 +3357,6 @@ bool wxGenericTreeCtrl::SetBackgroundColour(const wxColour& colour)
     if ( !wxWindow::SetBackgroundColour(colour) )
         return FALSE;
 
-    if (m_freezeCount) return TRUE;
-    
     Refresh();
 
     return TRUE;
@@ -3421,8 +3367,6 @@ bool wxGenericTreeCtrl::SetForegroundColour(const wxColour& colour)
     if ( !wxWindow::SetForegroundColour(colour) )
         return FALSE;
 
-    if (m_freezeCount) return TRUE;
-    
     Refresh();
 
     return TRUE;

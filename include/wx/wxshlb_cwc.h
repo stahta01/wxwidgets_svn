@@ -30,14 +30,10 @@
 #ifdef __cplusplus
 	#if __POWERPC__
 		#include <wxshlb_Carbon++.mch>
-	#elif __MACH__
-		#include <wxshlb_Mach++.mch>
 	#endif
 #else
 	#if __POWERPC__
 		#include <wxshlb_Carbon.mch>
-	#elif __MACH__
-		#include <wxshlb_Mach.mch>
 	#endif
 #endif
 #endif

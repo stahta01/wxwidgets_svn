@@ -121,8 +121,8 @@ wxWindowBase::wxWindowBase()
     m_maxWidth =
     m_maxHeight = -1;
 
-    // window are created enabled and visible by default
-    m_isShown =
+    // window is created enabled but it's not visible yet
+    m_isShown = false;
     m_isEnabled = true;
 
     // the default event handler is just this window
@@ -192,7 +192,7 @@ wxWindowBase::wxWindowBase()
     m_maxVirtualWidth =
     m_maxVirtualHeight = -1;
 
-    m_windowVariant = wxWINDOW_VARIANT_NORMAL ;
+    m_windowVariant = wxWINDOW_VARIANT_DEFAULT ;
 
     // Whether we're using the current theme for this window (wxGTK only for now)
     m_themeEnabled = false;
@@ -650,6 +650,8 @@ void wxWindowBase::DoSetWindowVariant( wxWindowVariant variant )
             break ;
         case wxWINDOW_VARIANT_LARGE :
             font.SetPointSize( size * 5 / 4 ) ;
+            break ;
+        case wxWINDOW_VARIANT_DEFAULT :
             break ;
         default:
             wxFAIL_MSG(_T("unexpected window variant"));

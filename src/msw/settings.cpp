@@ -141,6 +141,8 @@ wxColour wxSystemSettingsNative::GetColour(wxSystemColour index)
         // all Windows version, for the other ones we have to check
         bool useDefault;
 
+        // none of the is supported under Win16 anyhow
+#ifdef __WIN32__
         int verMaj, verMin;
         wxGetOsVersion(&verMaj, &verMin);
         if ( verMaj < 4 )
@@ -173,6 +175,9 @@ wxColour wxSystemSettingsNative::GetColour(wxSystemColour index)
 				}
 			}
        }
+#else
+        useDefault = TRUE;
+#endif // __WIN32__
 
         if ( useDefault )
         {

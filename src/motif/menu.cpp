@@ -119,7 +119,7 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *pItem)
     if (m_menuWidget)
     {
         // this is a dynamic Append
-        pItem->CreateItem(m_menuWidget, GetMenuBar(), m_topLevelMenu);
+        pItem->CreateItem(m_menuWidget, m_menuBar, m_topLevelMenu);
     }
 
     if ( pItem->IsSubMenu() )
@@ -288,6 +288,8 @@ bool wxMenuBar::Append(wxMenu * menu, const wxString& title)
         wxCHECK_MSG( w, FALSE, wxT("failed to create menu") );
         menu->SetButtonWidget(w);
     }
+
+    //menu->SetMenuBar(this);
 
     m_titles.Add(title);
 
@@ -520,6 +522,7 @@ WXWidget wxMenu::CreateMenu (wxMenuBar * menuBar, WXWidget parent, wxMenu * topM
 
     m_menuWidget = (WXWidget) menu;
 
+    m_menuBar = menuBar;
     m_topLevelMenu = topMenu;
 
     for ( wxMenuItemList::compatibility_iterator node = GetMenuItems().GetFirst();

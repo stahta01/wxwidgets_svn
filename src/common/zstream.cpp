@@ -38,7 +38,11 @@
 #endif
 
 enum {
+#ifdef __WIN16__
+    ZSTREAM_BUFFER_SIZE = 4096
+#else
     ZSTREAM_BUFFER_SIZE = 16384
+#endif
 };
 
 //////////////////////
@@ -57,7 +61,12 @@ wxZlibInputStream::wxZlibInputStream(wxInputStream& stream, int flags)
     m_inflate = new z_stream_s;
 
     if (m_inflate) {
-      memset(m_inflate, 0, sizeof(z_stream_s));
+      m_inflate->zalloc = (alloc_func)0;
+      m_inflate->zfree = (free_func)0;
+      m_inflate->opaque = (voidpf)0;
+      m_inflate->avail_in = 0;
+      m_inflate->next_in = NULL;
+      m_inflate->next_out = NULL;
 
       wxASSERT((flags & ~(wxZLIB_ZLIB | wxZLIB_GZIP)) == 0);
  
@@ -166,7 +175,10 @@ wxZlibOutputStream::wxZlibOutputStream(wxOutputStream& stream,
      m_deflate = new z_stream_s;
 
      if (m_deflate) {
-        memset(m_deflate, 0, sizeof(z_stream_s));
+        m_deflate->zalloc = (alloc_func)0;
+        m_deflate->zfree = (free_func)0;
+        m_deflate->opaque = (voidpf)0;
+        m_deflate->avail_in = 0;
         m_deflate->next_out = m_z_buffer;
         m_deflate->avail_out = m_z_size;
 

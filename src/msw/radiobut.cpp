@@ -158,7 +158,9 @@ bool wxRadioButton::Create(wxWindow *parent,
 
 void wxRadioButton::SetValue(bool value)
 {
-    (void)::SendMessage(GetHwnd(), BM_SETCHECK, (value?BST_CHECKED:BST_UNCHECKED), 0L);
+    // BST_CHECKED is defined as 1, BST_UNCHECKED as 0, so we can just pass
+    // value as is (we don't use BST_XXX here as they're not defined for Win16)
+    (void)::SendMessage(GetHwnd(), BM_SETCHECK, (WPARAM)value, 0L);
 
     m_isChecked = value;
 
