@@ -28,8 +28,6 @@
 // undefine conflicting symbols which were defined in windows.h
 #include "wx/msw/winundef.h"
 
-#include "wx/log.h"
-
 class WXDLLEXPORT wxFont;
 class WXDLLEXPORT wxWindow;
 

@@ -280,8 +280,7 @@ public:
                                    const wxString& title,
                                    const wxIcon& icon,
                                    int flags,
-                                   int specialButton = 0,
-                                   int specialButtonFlags = 0);
+                                   int pressedButtons = 0);
     virtual void DrawFrameBorder(wxDC& dc,
                                  const wxRect& rect,
                                  int flags);
@@ -303,7 +302,6 @@ public:
     virtual wxRect GetFrameClientArea(const wxRect& rect, int flags) const;
     virtual wxSize GetFrameTotalSize(const wxSize& clientSize, int flags) const;
     virtual wxSize GetFrameIconSize() const;
-    virtual int HitTestFrame(const wxRect& rect, const wxPoint& pt, int flags) const;
 
     virtual void GetComboBitmaps(wxBitmap *bmpNormal,
                                  wxBitmap *bmpFocus,
@@ -1152,8 +1150,6 @@ wxInputHandler *wxWin32Theme::GetInputHandler(const wxString& control)
         else if ( control == wxINP_HANDLER_NOTEBOOK )
             handler = new wxStdNotebookInputHandler(GetDefaultInputHandler());
 #endif // wxUSE_NOTEBOOK
-        else if ( control == wxINP_HANDLER_TOPLEVEL )
-            handler = new wxStdFrameInputHandler(GetDefaultInputHandler());
         else
             handler = GetDefaultInputHandler();
 
@@ -3101,89 +3097,12 @@ int wxWin32Renderer::PixelToScrollbar(const wxScrollBar *scrollbar,
 // top level windows
 // ----------------------------------------------------------------------------
 
-int wxWin32Renderer::HitTestFrame(const wxRect& rect, const wxPoint& pt, int flags) const
-{
-    wxRect client = GetFrameClientArea(rect, flags);
-    
-    if ( client.Inside(pt) )
-        return wxHT_TOPLEVEL_CLIENT_AREA;
-    
-    if ( flags & wxTOPLEVEL_TITLEBAR )
-    {
-        wxRect client = GetFrameClientArea(rect, flags & ~wxTOPLEVEL_TITLEBAR);
-
-        if ( flags & wxTOPLEVEL_ICON )
-        {
-            if ( wxRect(client.GetPosition(), GetFrameIconSize()).Inside(pt) )
-                return wxHT_TOPLEVEL_ICON;
-        }
-        
-        wxRect btnRect(client.GetRight() - 2 - FRAME_BUTTON_WIDTH,
-                       client.GetTop() + (FRAME_TITLEBAR_HEIGHT-FRAME_BUTTON_HEIGHT)/2,
-                       FRAME_BUTTON_WIDTH, FRAME_BUTTON_HEIGHT);
-        
-        if ( flags & wxTOPLEVEL_BUTTON_CLOSE )
-        {
-            if ( btnRect.Inside(pt) )
-                return wxHT_TOPLEVEL_BUTTON_CLOSE;
-            btnRect.x -= FRAME_BUTTON_WIDTH + 2;
-        }
-        if ( flags & wxTOPLEVEL_BUTTON_MAXIMIZE )
-        {
-            if ( btnRect.Inside(pt) )
-                return wxHT_TOPLEVEL_BUTTON_MAXIMIZE;
-            btnRect.x -= FRAME_BUTTON_WIDTH;
-        }
-        if ( flags & wxTOPLEVEL_BUTTON_RESTORE )
-        {
-            if ( btnRect.Inside(pt) )
-                return wxHT_TOPLEVEL_BUTTON_RESTORE;
-            btnRect.x -= FRAME_BUTTON_WIDTH;
-        }
-        if ( flags & wxTOPLEVEL_BUTTON_ICONIZE )
-        {
-            if ( btnRect.Inside(pt) )
-                return wxHT_TOPLEVEL_BUTTON_ICONIZE;
-            btnRect.x -= FRAME_BUTTON_WIDTH;
-        }
-        if ( flags & wxTOPLEVEL_BUTTON_HELP )
-        {
-            if ( btnRect.Inside(pt) )
-                return wxHT_TOPLEVEL_BUTTON_HELP;
-            btnRect.x -= FRAME_BUTTON_WIDTH;
-        }
-
-        if ( pt.y >= client.y && pt.y < client.y + FRAME_TITLEBAR_HEIGHT )
-            return wxHT_TOPLEVEL_TITLEBAR;
-    }
-
-    if ( (flags & wxTOPLEVEL_BORDER) && !(flags & wxTOPLEVEL_MAXIMIZED) )
-    {
-        // we are certainly at one of borders, lets decide which one:
-        
-        int border = 0;
-        // dirty trick, relies on the way wxHT_TOPLEVEL_XXX are defined!
-        if ( pt.x < client.x )
-            border |= wxHT_TOPLEVEL_BORDER_W;
-        else if ( pt.x >= client.width + client.x )
-            border |= wxHT_TOPLEVEL_BORDER_E;
-        if ( pt.y < client.y )
-            border |= wxHT_TOPLEVEL_BORDER_N;
-        else if ( pt.y >= client.height + client.y )
-            border |= wxHT_TOPLEVEL_BORDER_S;
-        return border;
-    }
-    
-    return wxHT_NOWHERE;
-}
-
 void wxWin32Renderer::DrawFrameTitleBar(wxDC& dc,
                                         const wxRect& rect,
                                         const wxString& title,
                                         const wxIcon& icon,
                                         int flags,
-                                        int specialButton,
-                                        int specialButtonFlags)
+                                        int pressedButtons)
 {
     if ( (flags & wxTOPLEVEL_BORDER) && !(flags & wxTOPLEVEL_MAXIMIZED) )
     {
@@ -3198,42 +3117,32 @@ void wxWin32Renderer::DrawFrameTitleBar(wxDC& dc,
         
         wxRect client = GetFrameClientArea(rect, flags & ~wxTOPLEVEL_TITLEBAR);
         wxCoord x,y;
-        x = client.GetRight() - 2 - FRAME_BUTTON_WIDTH;
+        x = client.GetRight() -2 - FRAME_BUTTON_WIDTH;
         y = client.GetTop() + (FRAME_TITLEBAR_HEIGHT-FRAME_BUTTON_HEIGHT)/2;
         
-        if ( flags & wxTOPLEVEL_BUTTON_CLOSE )
+        if ( flags & wxTOPLEVEL_CLOSE_BUTTON )
         {
-            DrawFrameButton(dc, x, y, wxTOPLEVEL_BUTTON_CLOSE,
-                            (specialButton == wxTOPLEVEL_BUTTON_CLOSE) ?
-                            specialButtonFlags : 0);
+            DrawFrameButton(dc, x, y, wxTOPLEVEL_CLOSE_BUTTON);
             x -= FRAME_BUTTON_WIDTH + 2;
         }
-        if ( flags & wxTOPLEVEL_BUTTON_MAXIMIZE )
+        if ( flags & wxTOPLEVEL_MAXIMIZE_BUTTON )
         {
-            DrawFrameButton(dc, x, y, wxTOPLEVEL_BUTTON_MAXIMIZE,
-                            (specialButton == wxTOPLEVEL_BUTTON_MAXIMIZE) ?
-                            specialButtonFlags : 0);
+            DrawFrameButton(dc, x, y, wxTOPLEVEL_MAXIMIZE_BUTTON);
             x -= FRAME_BUTTON_WIDTH;
         }
-        if ( flags & wxTOPLEVEL_BUTTON_RESTORE )
+        if ( flags & wxTOPLEVEL_RESTORE_BUTTON )
         {
-            DrawFrameButton(dc, x, y, wxTOPLEVEL_BUTTON_RESTORE,
-                            (specialButton == wxTOPLEVEL_BUTTON_RESTORE) ?
-                            specialButtonFlags : 0);
+            DrawFrameButton(dc, x, y, wxTOPLEVEL_RESTORE_BUTTON);
             x -= FRAME_BUTTON_WIDTH;
         }
-        if ( flags & wxTOPLEVEL_BUTTON_ICONIZE )
+        if ( flags & wxTOPLEVEL_MINIMIZE_BUTTON )
         {
-            DrawFrameButton(dc, x, y, wxTOPLEVEL_BUTTON_ICONIZE,
-                            (specialButton == wxTOPLEVEL_BUTTON_ICONIZE) ?
-                            specialButtonFlags : 0);
+            DrawFrameButton(dc, x, y, wxTOPLEVEL_MINIMIZE_BUTTON);
             x -= FRAME_BUTTON_WIDTH;
         }
-        if ( flags & wxTOPLEVEL_BUTTON_HELP )
+        if ( flags & wxTOPLEVEL_HELP_BUTTON )
         {
-            DrawFrameButton(dc, x, y, wxTOPLEVEL_BUTTON_HELP,
-                            (specialButton == wxTOPLEVEL_BUTTON_HELP) ?
-                            specialButtonFlags : 0);
+            DrawFrameButton(dc, x, y, wxTOPLEVEL_HELP_BUTTON);
             x -= FRAME_BUTTON_WIDTH;
         }
     }
@@ -3292,11 +3201,8 @@ void wxWin32Renderer::DrawFrameIcon(wxDC& dc,
                                     const wxIcon& icon,
                                     int flags)
 {
-    if ( icon.Ok() )
-    {
-        wxRect r = GetFrameClientArea(rect, flags & ~wxTOPLEVEL_TITLEBAR);
-        dc.DrawIcon(icon, r.x, r.y);
-    }
+    wxRect r = GetFrameClientArea(rect, flags & ~wxTOPLEVEL_TITLEBAR);
+    dc.DrawIcon(icon, r.x, r.y);
 }
 
 void wxWin32Renderer::DrawFrameButton(wxDC& dc,
@@ -3305,33 +3211,24 @@ void wxWin32Renderer::DrawFrameButton(wxDC& dc,
                                       int flags)
 {
     wxRect r(x, y, FRAME_BUTTON_WIDTH, FRAME_BUTTON_HEIGHT);
-
+    
+    DrawShadedRect(dc, &r, m_penHighlight, m_penBlack);
+    DrawShadedRect(dc, &r, m_penLightGrey, m_penDarkGrey);
+    DrawBackground(dc, wxSCHEME_COLOUR(m_scheme, CONTROL), r);
+    
     size_t idx = 0;
     switch (button)
     {
-        case wxTOPLEVEL_BUTTON_CLOSE:    idx = FrameButton_Close; break;
-        case wxTOPLEVEL_BUTTON_MAXIMIZE: idx = FrameButton_Maximize; break;
-        case wxTOPLEVEL_BUTTON_ICONIZE: idx = FrameButton_Minimize; break;
-        case wxTOPLEVEL_BUTTON_RESTORE:  idx = FrameButton_Restore; break;
-        case wxTOPLEVEL_BUTTON_HELP:     idx = FrameButton_Help; break;
+        case wxTOPLEVEL_CLOSE_BUTTON:    idx = FrameButton_Close; break;
+        case wxTOPLEVEL_MAXIMIZE_BUTTON: idx = FrameButton_Maximize; break;
+        case wxTOPLEVEL_MINIMIZE_BUTTON: idx = FrameButton_Minimize; break;
+        case wxTOPLEVEL_RESTORE_BUTTON:  idx = FrameButton_Restore; break;
+        case wxTOPLEVEL_HELP_BUTTON:     idx = FrameButton_Help; break;
         default:
             wxFAIL_MSG(wxT("incorrect button specification"));
     }
     
-    if ( flags & wxCONTROL_PRESSED )    
-    {
-        DrawShadedRect(dc, &r, m_penBlack, m_penHighlight);
-        DrawShadedRect(dc, &r, m_penDarkGrey, m_penLightGrey);
-        DrawBackground(dc, wxSCHEME_COLOUR(m_scheme, CONTROL), r);
-        dc.DrawBitmap(m_bmpFrameButtons[idx], r.x+1, r.y+1, TRUE);
-    }
-    else
-    {
-        DrawShadedRect(dc, &r, m_penHighlight, m_penBlack);
-        DrawShadedRect(dc, &r, m_penLightGrey, m_penDarkGrey);
-        DrawBackground(dc, wxSCHEME_COLOUR(m_scheme, CONTROL), r);
-        dc.DrawBitmap(m_bmpFrameButtons[idx], r.x, r.y, TRUE);
-    }
+    dc.DrawBitmap(m_bmpFrameButtons[idx], r.x, r.y, TRUE);
 }
 
 

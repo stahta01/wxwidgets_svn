@@ -77,15 +77,11 @@
 #undef __OSF__
 #undef __BSD__
 #undef __FREEBSD__
-#undef __DARWIN__
 #undef __NETBSD__
 #undef __VMS__
 #undef __ULTRIX__
 #undef __DATA_GENERAL__
 #undef __EMX__
-
-/* PowerPC Darwin & Mac OS X */
-#undef __POWERPC__
 
 /* Stupid hack; __WINDOWS__ clashes with wx/defs.h */
 #ifndef __WINDOWS__
@@ -767,11 +763,6 @@
 #define wxUSE_ZIPSTREAM 0
 
 /*
- * wxPalette class
- */
-#define wxUSE_PALETTE 0
-
-/*
  * wxImage support
  */
 #define wxUSE_IMAGE 0
@@ -1014,31 +1005,7 @@
 /* Define if you have the <w32api.h> header file (mingw,cygwin).  */
 #undef HAVE_W32API_H
 
-/* Define if you have wcsrtombs() function */
-#undef HAVE_WCSRTOMBS
-
 /* Define this if you are using gtk and gdk contains support for X11R6 XIM */
 #undef HAVE_XIM
 
-
-/* --------------------------------------------------------*
- *  This stuff is static, it doesn't get modified directly
- *  by configure.
-*/
-
-#include "wx/chkconf.h"
-
-/*
-   define some constants identifying wxWindows version in more details than
-   just the version number
- */
-
-/* wxLogChain class available */
-#define wxHAS_LOG_CHAIN
-
-/* define this when wxDC::Blit() respects SetDeviceOrigin() in wxGTK */
-#undef wxHAS_WORKING_GTK_DC_BLIT
-
-
 #endif /* __WX_SETUP_H__ */
-

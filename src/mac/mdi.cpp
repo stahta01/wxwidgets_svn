@@ -17,7 +17,7 @@
 #include "wx/menu.h"
 #include "wx/settings.h"
 
-extern wxWindowList wxModelessWindows;
+extern wxList wxModelessWindows;
 
 #if !USE_SHARED_LIBRARY
 IMPLEMENT_DYNAMIC_CLASS(wxMDIParentFrame, wxFrame)

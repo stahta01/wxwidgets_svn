@@ -399,9 +399,9 @@ void MyFrame::MultiChoice(wxCommandEvent& WXUNUSED(event) )
 
 void MyFrame::FileOpen(wxCommandEvent& WXUNUSED(event) )
 {
-    wxFileDialog dialog(this, "Testing open file dialog",
-                        "", "",
-                        "C++ files (*.h;*.cpp)|*.h;*.cpp");
+//    wxFAIL_MSG( "Test assert" );
+
+    wxFileDialog dialog(this, "Testing open file dialog", "", "", "*.txt", 0);
 
     if (dialog.ShowModal() == wxID_OK)
     {

@@ -166,7 +166,7 @@ void wxDestroyMGL_WM()
 static void wxWindowPainter(window_t *wnd, MGLDC *dc)
 {
     wxWindowMGL *w = (wxWindow*) wnd->userData;
-    if ( w && !(w->GetWindowStyle() & wxTRANSPARENT_WINDOW) )
+    if (w && !(w->GetStyle() & wxTRANSPARENT_WINDOW))
     {
         MGLDevCtx ctx(dc);
         w->HandlePaint(&ctx);
@@ -178,11 +178,8 @@ static void wxWindowPainter(window_t *wnd, MGLDC *dc)
 static ibool wxWindowMouseHandler(window_t *wnd, event_t *e)
 {
     wxWindowMGL *win = (wxWindowMGL*)MGL_wmGetWindowUserData(wnd);
-    wxPoint where;
+    wxPoint where = win->ScreenToClient(wxPoint(e->where_x, e->where_y));
     
-    MGL_wmCoordGlobalToLocal(win->GetHandle(), 
-                             e->where_x, e->where_y, &where.x, &where.y);
-
     if ( !win->IsEnabled() ) return FALSE;
     
     wxEventType type = wxEVT_NULL;
@@ -228,10 +225,10 @@ static ibool wxWindowMouseHandler(window_t *wnd, event_t *e)
                 if ( g_windowUnderMouse )
                 {
                     wxMouseEvent event2(event);
-                    MGL_wmCoordGlobalToLocal(g_windowUnderMouse->GetHandle(), 
-                                             e->where_x, e->where_y, 
-                                             &event2.m_x, &event2.m_y);
-
+                    wxPoint where2 = g_windowUnderMouse->ScreenToClient(
+                                            wxPoint(e->where_x, e->where_y));
+                    event2.m_x = where2.x;
+                    event2.m_y = where2.y;
                     event2.SetEventObject(g_windowUnderMouse);
                     event2.SetEventType(wxEVT_LEAVE_WINDOW);
                     g_windowUnderMouse->GetEventHandler()->ProcessEvent(event2);
@@ -380,8 +377,6 @@ static long wxScanToKeyCode(event_t *event)
             break;
     }
 
-    #undef KEY
-
     return key;
 }
 
@@ -392,13 +387,12 @@ static long wxAsciiToKeyCode(event_t *event)
 
 static ibool wxWindowKeybHandler(window_t *wnd, event_t *e)
 {
+    wxEventType type = wxEVT_NULL;
     wxWindowMGL *win = (wxWindowMGL*)MGL_wmGetWindowUserData(wnd);
 
     if ( !win->IsEnabled() ) return FALSE;
 
-    wxPoint where;
-    MGL_wmCoordGlobalToLocal(win->GetHandle(), 
-                             e->where_x, e->where_y, &where.x, &where.y);
+    wxPoint where = win->ScreenToClient(wxPoint(e->where_x, e->where_y));
     
     wxKeyEvent event;
     event.SetEventObject(win);
@@ -522,11 +516,22 @@ bool wxWindowMGL::Create(wxWindow *parent,
                          long style,
                          const wxString& name)
 {
+    // FIXME_MGL -- temporary!
+    //wxCHECK_MSG( parent, FALSE, wxT("can't create wxWindow without parent") );
+
     if ( !CreateBase(parent, id, pos, size, style, wxDefaultValidator, name) )
         return FALSE;
 
-    if ( parent )
+    if ( parent ) // FIXME_MGL temporary
         parent->AddChild(this);
+    else
+        m_isShown=FALSE;// FIXME_MGL -- temporary, simulates wxTLW/wxFrame
+
+    if ( style & wxPOPUP_WINDOW )
+    {
+        // it is created hidden as other top level windows
+        m_isShown = FALSE;
+    }
 
     int x, y, w, h;
     x = pos.x, y = pos.y;
@@ -538,21 +543,10 @@ bool wxWindowMGL::Create(wxWindow *parent,
     h = HeightDefault(size.y);
     
     long mgl_style = 0;
-
     if ( !(style & wxNO_FULL_REPAINT_ON_RESIZE) )
-    {
         mgl_style |= MGL_WM_FULL_REPAINT_ON_RESIZE;
-    }
     if ( style & wxSTAY_ON_TOP )
-    {
         mgl_style |= MGL_WM_ALWAYS_ON_TOP;
-    }
-    if ( style & wxPOPUP_WINDOW )
-    {
-        mgl_style |=  MGL_WM_ALWAYS_ON_TOP;
-        // it is created hidden as other top level windows
-        m_isShown = FALSE;
-    }
 
     m_wnd = MGL_wmCreateWindow(g_winMng,
                                parent ? parent->GetHandle() : NULL,
@@ -566,7 +560,7 @@ bool wxWindowMGL::Create(wxWindow *parent,
 
     MGL_wmPushWindowEventHandler(m_wnd, wxWindowMouseHandler, EVT_MOUSEEVT, 0);
     MGL_wmPushWindowEventHandler(m_wnd, wxWindowKeybHandler, EVT_KEYEVT, 0);
-    
+
     return TRUE;
 }
 
@@ -592,7 +586,6 @@ void wxWindowMGL::SetFocus()
 
     if ( IsTopLevel() )
     {
-        // FIXME_MGL - this is wrong, see wxGTK!
         wxActivateEvent event(wxEVT_ACTIVATE, TRUE, GetId());
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
@@ -621,7 +614,6 @@ void wxWindowMGL::KillFocus()
 
     if ( IsTopLevel() )
     {
-        // FIXME_MGL - this is wrong, see wxGTK!
         wxActivateEvent event(wxEVT_ACTIVATE, FALSE, GetId());
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
@@ -798,21 +790,27 @@ void wxWindowMGL::DoGetPosition(int *x, int *y) const
 void wxWindowMGL::DoScreenToClient(int *x, int *y) const
 {
     int ax, ay;
-    MGL_wmCoordGlobalToLocal(m_wnd, 0, 0, &ax, &ay);
+    wxPoint co = GetClientAreaOrigin();
+
+    MGL_wmCoordGlobalToLocal(m_wnd, m_wnd->x, m_wnd->y, &ax, &ay);
+    ax -= co.x;
+    ay -= co.y;
     if (x)
-        (*x) += ax;
+        *x = ax;
     if (y)
-        (*y) += ay;
+        *y = ay;
 }
 
 void wxWindowMGL::DoClientToScreen(int *x, int *y) const
 {
     int ax, ay;
-    MGL_wmCoordLocalToGlobal(m_wnd, 0, 0, &ax, &ay);
+    wxPoint co = GetClientAreaOrigin();
+
+    MGL_wmCoordGlobalToLocal(m_wnd, m_wnd->x+co.x, m_wnd->y+co.y, &ax, &ay);
     if (x)
-        (*x) += ax;
+        *x = ax;
     if (y)
-        (*y) += ay;
+        *y = ay;
 }
 
 // Get size *available for subwindows* i.e. excluding menu bar etc.

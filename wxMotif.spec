@@ -4,7 +4,6 @@
 # Note that this is NOT a relocatable package
 %define pref /usr
 %define ver 2.3.1
-%define ver2 2.3
 %define rel 1
 
 Summary: The Motif/Lesstif port of the wxWindows library
@@ -46,7 +45,7 @@ OpenGl add-on library for wxMotif, the Motif/Lesstif port of the wxWindows libra
 
 %prep
 %setup -n wxMotif
-./configure --prefix=%{pref} --enable-soname --with-odbc --with-opengl --with-motif
+./configure --prefix=%{pref} --enable-burnt_name --with-odbc --with-opengl --with-motif
 
 %build
 if [ "$SMP" != "" ]; then
@@ -74,7 +73,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING.LIB INSTALL.txt LICENCE.txt README.txt SYMBOLS.txt TODO.txt
 %dir %{pref}/share/wx
 %{pref}/share/wx/*
-%attr(755, -, -) %{pref}/lib/libwx_motif-%{ver2}.*
+%attr(755, -, -) %{pref}/lib/libwx_motif.*
+%attr(755, -, -) %{pref}/lib/libwx_motif-2.1.*
 
 %files devel
 %defattr (644, root, root, 755)
@@ -82,7 +82,7 @@ rm -rf $RPM_BUILD_ROOT
 %{pref}/include/wx/*
 %dir %{pref}/lib/wx
 %{pref}/lib/wx/*
-%attr(755, -, -) %{pref}/bin/wxmotif-%{ver2}-config
+%attr(755, -, -) %{pref}/bin/wxmotif-config
 %attr(755, -, -) %{pref}/bin/wx-config
 
 %files gl

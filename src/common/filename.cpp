@@ -70,18 +70,18 @@ void wxFileName::Assign( const wxString& path,
 {
     wxStringTokenizer tn(path, GetPathSeparators(format),
                          wxTOKEN_RET_EMPTY_ALL);
-    int i = 0;
+    bool first = TRUE;
     m_dirs.Clear();
     while ( tn.HasMoreTokens() )
     {
         wxString token = tn.GetNextToken();
 
-        // If the path starts with a slash (or two for a network path),
-        // we need the first dir entry to be an empty for later reassembly.
-        if ((i < 2) || !token.IsEmpty())
+        // If the path starts with a slash, we need the first
+        // dir entry to be an empty for later reassembly.
+        if (first || !token.IsEmpty())
             m_dirs.Add( token );
 
-        i ++;
+        first = FALSE;
     }
 
     m_ext = ext;

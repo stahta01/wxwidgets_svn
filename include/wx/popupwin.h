@@ -55,8 +55,6 @@ public:
     #include "wx/msw/popupwin.h"
 #elif __WXGTK__
     #include "wx/gtk/popupwin.h"
-#elif __WXMGL__
-    #include "wx/mgl/popupwin.h"
 #else
     #error "wxPopupWindow is not supported under this platform."
 #endif

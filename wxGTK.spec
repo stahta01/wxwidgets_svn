@@ -1,7 +1,6 @@
 %define pref /usr
-%define ver 2.3.2
-%define ver2 2.3
-%define rel 0
+%define ver 2.3.1
+%define rel 1
 
 Summary: The GTK+ 1.2 port of the wxWindows library
 Name: wxGTK
@@ -23,7 +22,7 @@ Provides: wxwin
 # in addition, we should provide libwx_gtk as automatic generator only notices
 # libwx_gtk-%{ver}-%{rel}
 Provides: libwx_gtk.so
-Provides: libwx_gtk-%{ver2}.so
+Provides: libwx_gtk-2.3.so
 
 %description
 wxWindows is a free C++ library for cross-platform GUI development.
@@ -48,7 +47,7 @@ OpenGl add-on library for wxGTK, the GTK+ 1.2 port of the wxWindows library.
 
 %prep
 %setup -n wxGTK-%{ver}
-./configure --prefix=%{pref} --enable-soname --with-odbc --with-opengl
+./configure --prefix=%{pref} --enable-burnt_name --with-odbc --with-opengl
 
 %build
 if [ "$SMP" != "" ]; then
@@ -73,7 +72,8 @@ make prefix=$RPM_BUILD_ROOT%{pref} install
 %doc COPYING.LIB INSTALL.txt LICENCE.txt README.txt SYMBOLS.txt TODO.txt
 %dir %{pref}/share/wx
 %{pref}/share/wx/*
-%attr(755, root, root) %{pref}/lib/libwx_gtk-%{ver2}.*
+%attr(755, root, root) %{pref}/lib/libwx_gtk.*
+%attr(755, root, root) %{pref}/lib/libwx_gtk-2.3.*
 
 %files devel
 %defattr(-,root,root)
@@ -81,7 +81,7 @@ make prefix=$RPM_BUILD_ROOT%{pref} install
 %{pref}/include/wx/*
 %dir %{pref}/lib/wx
 %{pref}/lib/wx/*
-%attr(755, root, root) %{pref}/bin/wxgtk-%{ver2}-config
+%attr(755, root, root) %{pref}/bin/wxgtk-config
 %attr(755, root, root) %{pref}/bin/wx-config
 
 %files gl

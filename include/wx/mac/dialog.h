@@ -64,8 +64,12 @@ public:
 
     ~wxDialog();
 
-//    virtual bool Destroy();
+    virtual bool Destroy();
     bool Show(bool show);
+    void Iconize(bool iconize);
+    virtual bool IsIconized() const;
+
+    virtual bool IsTopLevel() const { return TRUE; }
 
     void SetModal(bool flag);
     virtual bool IsModal() const;
@@ -87,7 +91,7 @@ public:
     // --------------
 
     // event handlers
-//    bool OnClose();
+    bool OnClose();
     void OnCharHook(wxKeyEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
 
@@ -98,6 +102,10 @@ public:
 
     // Responds to colour changes
     void OnSysColourChanged(wxSysColourChangedEvent& event);
+
+    // override more base class virtuals
+    virtual void DoGetPosition(int *x, int *y) const;
+    virtual void DoSetClientSize(int width, int height);
 
     // show modal dialog and enter modal loop
     void DoShowModal();

@@ -25,11 +25,12 @@
 
 #include <wx/mac/uma.h>
 
-extern wxWindowList wxModelessWindows;
+extern wxList wxModelessWindows;
 extern wxList wxPendingDelete;
 
 #if !USE_SHARED_LIBRARY
 BEGIN_EVENT_TABLE(wxFrameMac, wxFrameBase)
+//  EVT_SIZE(wxFrameMac::OnSize)
   EVT_ACTIVATE(wxFrameMac::OnActivate)
  // EVT_MENU_HIGHLIGHT_ALL(wxFrameMac::OnMenuHighlight)
   EVT_SYS_COLOUR_CHANGED(wxFrameMac::OnSysColourChanged)
@@ -106,8 +107,15 @@ bool wxFrameMac::Create(wxWindow *parent,
 {
   SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_APPWORKSPACE));
 
-    if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style, name) )
-        return FALSE;
+  if ( id > -1 )
+    m_windowId = id;
+  else
+    m_windowId = (int)NewControlId();
+
+  if (parent) parent->AddChild(this);
+
+  if (!parent)
+    wxTopLevelWindows.Append(this);
 
   MacCreateRealWindow( title, pos , size , MacRemoveBordersFromStyle(style) , name ) ;
   
@@ -121,9 +129,23 @@ bool wxFrameMac::Create(wxWindow *parent,
 wxFrameMac::~wxFrameMac()
 {
   m_isBeingDeleted = TRUE;
+  wxTopLevelWindows.DeleteObject(this);
 
   DeleteAllBars();
 
+/* Check if it's the last top-level window */
+
+  if (wxTheApp && (wxTopLevelWindows.Number() == 0))
+  {
+    wxTheApp->SetTopWindow(NULL);
+
+    if (wxTheApp->GetExitOnFrameDelete())
+    {
+       wxTheApp->ExitMainLoop() ;
+    }
+  }
+
+  wxModelessWindows.DeleteObject(this);
 }
 
 
@@ -141,6 +163,39 @@ bool wxFrameMac::Enable(bool enable)
 	}
 
     return TRUE;
+}
+// Equivalent to maximize/restore in Windows
+void wxFrameMac::Maximize(bool maximize)
+{
+    // TODO
+}
+
+bool wxFrameMac::IsIconized() const
+{
+    // TODO
+    return FALSE;
+}
+
+void wxFrameMac::Iconize(bool iconize)
+{
+    // TODO
+}
+
+// Is the frame maximized?
+bool wxFrameMac::IsMaximized(void) const
+{
+    // TODO
+    return FALSE;
+}
+
+void wxFrameMac::Restore()
+{
+    // TODO
+}
+
+void wxFrameMac::SetIcon(const wxIcon& icon)
+{
+   wxFrameBase::SetIcon(icon);
 }
 
 wxStatusBar *wxFrameMac::OnCreateStatusBar(int number, long style, wxWindowID id,
@@ -194,39 +249,46 @@ void wxFrameMac::OnActivate(wxActivateEvent& event)
 {
     if ( !event.GetActive() )
     {
-       // remember the last focused child if it is our child
+       // remember the last focused child
         m_winLastFocused = FindFocus();
-
-        // so we NULL it out if it's a child from some other frame
-        wxWindow *win = m_winLastFocused;
-        while ( win )
+        while ( m_winLastFocused )
         {
-            if ( win->IsTopLevel() )
-            {
-                if ( win != this )
-                {
-                    m_winLastFocused = NULL;
-                }
-
+            if ( GetChildren().Find(m_winLastFocused) )
                 break;
-            }
 
-            win = win->GetParent();
+            m_winLastFocused = m_winLastFocused->GetParent();
         }
 
         event.Skip();
     }
 	else
 	{
-        // restore focus to the child which was last focused
-        wxWindow *parent = m_winLastFocused ? m_winLastFocused->GetParent()
-                                            : NULL;
-        if ( !parent )
-        {
-            parent = this;
-        }
+/*
+    for ( wxWindowList::Node *node = GetChildren().GetFirst();
+          node;
+          node = node->GetNext() )
+    {
+        // FIXME all this is totally bogus - we need to do the same as wxPanel,
+        //       but how to do it without duplicating the code?
 
-    	wxSetFocusToChild(parent, &m_winLastFocused);
+        // restore focus
+        wxWindow *child = node->GetData();
+
+        if ( !child->IsTopLevel() && child->AcceptsFocus()
+#if wxUSE_TOOLBAR
+             && !wxDynamicCast(child, wxToolBar)
+#endif // wxUSE_TOOLBAR
+#if wxUSE_STATUSBAR
+             && !wxDynamicCast(child, wxStatusBar)
+#endif // wxUSE_STATUSBAR
+           )
+        {
+            child->SetFocus();
+            break;
+        }
+    }
+   */
+    	wxSetFocusToChild(this, &m_winLastFocused);
 
 	    if ( m_frameMenuBar != NULL )
 	    {

@@ -251,8 +251,7 @@ public:
                                    const wxString& title,
                                    const wxIcon& icon,
                                    int flags,
-                                   int specialButton = 0,
-                                   int specialButtonFlags = 0) = 0;
+                                   int pressedButtons = 0) = 0;
                                    
     // draw frame borders
     virtual void DrawFrameBorder(wxDC& dc,
@@ -393,10 +392,6 @@ public:
     virtual wxSize GetFrameTotalSize(const wxSize& clientSize, int flags) const = 0;
     // get titlebar icon size
     virtual wxSize GetFrameIconSize() const = 0;
-    // returns one of wxHT_TOPLEVEL_XXX constants
-    virtual int HitTestFrame(const wxRect& rect,
-                             const wxPoint& pt,
-                             int flags) const = 0;
 
     // virtual dtor for any base class
     virtual ~wxRenderer();
@@ -627,10 +622,8 @@ public:
                                    const wxString& title,
                                    const wxIcon& icon,
                                    int flags,
-                                   int specialButton = 0,
-                                   int specialButtonFlag = 0)
-        { m_renderer->DrawFrameTitleBar(dc, rect, title, icon, flags, 
-                                        specialButton, specialButtonFlag); }
+                                   int pressedButtons = 0)
+        { m_renderer->DrawFrameTitleBar(dc, rect, title, icon, flags, pressedButtons); }
     virtual void DrawFrameBorder(wxDC& dc,
                                  const wxRect& rect,
                                  int flags)
@@ -730,10 +723,6 @@ public:
         { return m_renderer->GetFrameTotalSize(clientSize, flags); }
     virtual wxSize GetFrameIconSize() const
         { return m_renderer->GetFrameIconSize(); }
-    virtual int HitTestFrame(const wxRect& rect,
-                             const wxPoint& pt,
-                             int flags) const
-        { return m_renderer->HitTestFrame(rect, pt, flags); }
 
 protected:
     wxRenderer *m_renderer;

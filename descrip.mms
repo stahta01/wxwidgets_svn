@@ -21,7 +21,7 @@ all :
 	purge [...]
 	delete [...]*.obj;
 
-gtk : [.include.wx]setup.h
+gtk : setup.h
 	set default [.src.generic]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.common]
@@ -62,7 +62,7 @@ gtk : [.include.wx]setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [--]
 
-motif : [.include.wx]setup.h
+motif : setup.h
 	set default [.src.generic]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.common]
@@ -99,5 +99,5 @@ motif : [.include.wx]setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [--]
 
-[.include.wx]setup.h : setup.h_vms
-	copy setup.h_vms [.include.wx]setup.h
+setup.h : setup.h_vms
+	copy setup.h_vms setup.h

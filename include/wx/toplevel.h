@@ -30,40 +30,18 @@ WXDLLEXPORT_DATA(extern const wxChar*) wxFrameNameStr;
 
 class WXDLLEXPORT wxTopLevelWindowBase;
 
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
 // Dialogs are created in a special way
 #define wxTOPLEVEL_EX_DIALOG        0x00000008
 
 // Styles for ShowFullScreen
 // (note that wxTopLevelWindow only handles wxFULLSCREEN_NOBORDER and
 //  wxFULLSCREEN_NOCAPTION; the rest is handled by wxTopLevelWindow)
-enum
-{
-    wxFULLSCREEN_NOMENUBAR   = 0x0001,
-    wxFULLSCREEN_NOTOOLBAR   = 0x0002,
-    wxFULLSCREEN_NOSTATUSBAR = 0x0004,
-    wxFULLSCREEN_NOBORDER    = 0x0008,
-    wxFULLSCREEN_NOCAPTION   = 0x0010,
-    
-    wxFULLSCREEN_ALL         = wxFULLSCREEN_NOMENUBAR | wxFULLSCREEN_NOTOOLBAR | 
-                               wxFULLSCREEN_NOSTATUSBAR | wxFULLSCREEN_NOBORDER | 
-                               wxFULLSCREEN_NOCAPTION
-};
-
-// Flags for interactive frame manipulation functions (only in wxUniversal):
-enum
-{
-    wxINTERACTIVE_MOVE           = 0x00000001,
-    wxINTERACTIVE_RESIZE         = 0x00000002,
-    wxINTERACTIVE_RESIZE_S       = 0x00000010,
-    wxINTERACTIVE_RESIZE_N       = 0x00000020,
-    wxINTERACTIVE_RESIZE_W       = 0x00000040,
-    wxINTERACTIVE_RESIZE_E       = 0x00000080,
-    wxINTERACTIVE_WAIT_FOR_INPUT = 0x10000000
-};
+#define wxFULLSCREEN_NOMENUBAR      0x01
+#define wxFULLSCREEN_NOTOOLBAR      0x02
+#define wxFULLSCREEN_NOSTATUSBAR    0x04
+#define wxFULLSCREEN_NOBORDER       0x08
+#define wxFULLSCREEN_NOCAPTION      0x10
+#define wxFULLSCREEN_ALL            (wxFULLSCREEN_NOMENUBAR | wxFULLSCREEN_NOTOOLBAR | wxFULLSCREEN_NOSTATUSBAR | wxFULLSCREEN_NOBORDER | wxFULLSCREEN_NOCAPTION)
 
 // ----------------------------------------------------------------------------
 // wxTopLevelWindow: a top level (as opposed to child) window
@@ -74,10 +52,6 @@ class WXDLLEXPORT wxTopLevelWindowBase : public wxWindow
 public:
     // construction
     wxTopLevelWindowBase();
-
-#ifdef __DARWIN__
-    virtual ~wxTopLevelWindowBase() {}
-#endif
 
     // top level wnd state
     // --------------------
@@ -122,12 +96,6 @@ public:
     bool Iconized() const { return IsIconized(); }
 #endif // WXWIN_COMPATIBILITY_2
 
-    
-#ifdef __WXUNIVERSAL__
-    // move/resize the frame interactively, i.e. let the user do it
-    virtual void InteractiveMove(int flags = wxINTERACTIVE_MOVE);
-#endif
-
     // implementation only from now on
     // -------------------------------
 
@@ -142,6 +110,10 @@ public:
     // this should go away, but for now it's called from docview.cpp,
     // so should be there for all platforms
     void OnActivate(wxActivateEvent &WXUNUSED(event)) { }
+
+#ifdef __DARWIN__
+    virtual ~wxTopLevelWindowBase() {}
+#endif
 
 protected:
     // the frame client to screen translation should take account of the
@@ -173,9 +145,6 @@ protected:
 #elif defined(__WXMGL__)
     #include "wx/mgl/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowMGL
-#elif defined(__WXMAC__)
-    #include "wx/mac/toplevel.h"
-    #define wxTopLevelWindowNative wxTopLevelWindowMac
 #endif
 
 #ifdef __WXUNIVERSAL__

@@ -1483,11 +1483,8 @@ void wxQuantize::DoQuantize(unsigned w, unsigned h, unsigned char **in_rows, uns
 // TODO: somehow make use of the Windows system colours, rather than ignoring them for the
 // purposes of quantization.
 
-bool wxQuantize::Quantize(const wxImage& src, wxImage& dest,
-                          wxPalette** pPalette,
-                          int desiredNoColours,
-                          unsigned char** eightBitData,
-                          int flags)
+bool wxQuantize::Quantize(const wxImage& src, wxImage& dest, wxPalette** pPalette, int desiredNoColours,
+        unsigned char** eightBitData, int flags)
 
 {
     int i;
@@ -1562,7 +1559,6 @@ bool wxQuantize::Quantize(const wxImage& src, wxImage& dest,
     else
         delete[] data8bit;
 
-#if wxUSE_PALETTE
     // Make a wxWindows palette
     if (pPalette)
     {
@@ -1608,7 +1604,6 @@ bool wxQuantize::Quantize(const wxImage& src, wxImage& dest,
         delete[] g;
         delete[] b;
     }
-#endif // wxUSE_PALETTE
 
     return TRUE;
 }
@@ -1616,24 +1611,20 @@ bool wxQuantize::Quantize(const wxImage& src, wxImage& dest,
 // This version sets a palette in the destination image so you don't
 // have to manage it yourself.
 
-bool wxQuantize::Quantize(const wxImage& src,
-                          wxImage& dest,
-                          int desiredNoColours,
-                          unsigned char** eightBitData,
-                          int flags)
+bool wxQuantize::Quantize(const wxImage& src, wxImage& dest, int desiredNoColours,
+        unsigned char** eightBitData, int flags)
 {
     wxPalette* palette = NULL;
-    if ( !Quantize(src, dest, & palette, desiredNoColours, eightBitData, flags) )
-        return FALSE;
-
-#if wxUSE_PALETTE
-    if (palette)
+    if (Quantize(src, dest, & palette, desiredNoColours, eightBitData, flags))
     {
-        dest.SetPalette(* palette);
-        delete palette;
+        if (palette)
+        {
+            dest.SetPalette(* palette);
+            delete palette;
+        }
+        return TRUE;
     }
-#endif // wxUSE_PALETTE
-
-    return TRUE;
+    else
+        return FALSE;
 }
 

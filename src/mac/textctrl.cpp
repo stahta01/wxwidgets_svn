@@ -13,10 +13,6 @@
 #pragma implementation "textctrl.h"
 #endif
 
-#include "wx/defs.h"
-
-#if wxUSE_TEXTCTRL
-
 #ifdef __DARWIN__
   #include <sys/types.h>
   #include <sys/stat.h>
@@ -788,5 +784,3 @@ void wxTextCtrl::OnUpdateRedo(wxUpdateUIEvent& event)
     event.Enable( CanRedo() );
 }
 
-#endif
-    // wxUSE_TEXTCTRL

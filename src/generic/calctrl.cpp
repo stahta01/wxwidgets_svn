@@ -180,20 +180,14 @@ void wxCalendarCtrl::Init()
     m_colHeaderBg = *wxLIGHT_GREY;
 }
 
-bool wxCalendarCtrl::Create(wxWindow *parent,
-                            wxWindowID id,
+bool wxCalendarCtrl::Create(wxWindow * WXUNUSED(parent),
+                            wxWindowID WXUNUSED(id),
                             const wxDateTime& date,
-                            const wxPoint& pos,
+                            const wxPoint& WXUNUSED(pos),
                             const wxSize& size,
                             long style,
-                            const wxString& name)
+                            const wxString& WXUNUSED(name))
 {
-    if ( !wxControl::Create(parent, id, pos, size,
-                            style | wxWANTS_CHARS, wxDefaultValidator, name) )
-    {
-        return FALSE;
-    }
-
     // needed to get the arrow keys normally used for the dialog navigation
     SetWindowStyle(style | wxWANTS_CHARS);
 

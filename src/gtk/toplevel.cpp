@@ -379,11 +379,8 @@ bool wxTopLevelWindowGTK::Create( wxWindow *parent,
 
     m_widget = gtk_window_new( win_type );
 
-    if (m_parent && (GTK_IS_WINDOW(m_parent->m_widget)) &&
-        (HasFlag(wxFRAME_FLOAT_ON_PARENT) || (GetExtraStyle() & wxTOPLEVEL_EX_DIALOG)))
-    {
+    if ((m_parent) && (HasFlag(wxFRAME_FLOAT_ON_PARENT)) && (GTK_IS_WINDOW(m_parent->m_widget)))
         gtk_window_set_transient_for( GTK_WINDOW(m_widget), GTK_WINDOW(m_parent->m_widget) );
-    }
 
     if (!name.IsEmpty())
         gtk_window_set_wmclass( GTK_WINDOW(m_widget), name.mb_str(), name.mb_str() );
@@ -527,8 +524,7 @@ bool wxTopLevelWindowGTK::ShowFullScreen(bool show, long style )
 
     if (show)
     {
-        m_fsSaveGdkFunc = m_gdkFunc;
-        m_fsSaveGdkDecor = m_gdkDecor;
+        m_fsSaveStyle = m_windowStyle;
         m_fsSaveFlag = style;
         GetPosition( &m_fsSaveFrame.x, &m_fsSaveFrame.y );
         GetSize( &m_fsSaveFrame.width, &m_fsSaveFrame.height );
@@ -536,8 +532,7 @@ bool wxTopLevelWindowGTK::ShowFullScreen(bool show, long style )
         gtk_widget_hide( m_widget );
         gtk_widget_unrealize( m_widget );
 
-        m_gdkDecor = (long) GDK_DECOR_BORDER;
-        m_gdkFunc = (long) GDK_FUNC_MOVE;
+        m_windowStyle = wxSIMPLE_BORDER;
 
         int x;
         int y;
@@ -552,8 +547,7 @@ bool wxTopLevelWindowGTK::ShowFullScreen(bool show, long style )
         gtk_widget_hide( m_widget );
         gtk_widget_unrealize( m_widget );
 
-        m_gdkFunc = m_fsSaveGdkFunc;
-        m_gdkDecor = m_fsSaveGdkDecor;
+        m_windowStyle = m_fsSaveStyle;
 
         SetSize( m_fsSaveFrame.x, m_fsSaveFrame.y, m_fsSaveFrame.width, m_fsSaveFrame.height );
 

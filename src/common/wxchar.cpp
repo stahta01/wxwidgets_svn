@@ -41,10 +41,10 @@
 #endif
 
 #if defined(__WIN32__) && defined(wxNEED_WX_CTYPE_H)
-  #include <windef.h>
-  #include <winbase.h>
-  #include <winnls.h>
-  #include <winnt.h>
+#include <windef.h>
+#include <winbase.h>
+#include <winnls.h>
+#include <winnt.h>
 #endif
 
 #if wxUSE_WCHAR_T
@@ -58,8 +58,11 @@ size_t WXDLLEXPORT wxMB2WC(wchar_t *buf, const char *psz, size_t n)
     return mbstowcs(buf, psz, n);
   }
 
-  // assume that we have mbsrtowcs() too if we have wcsrtombs()
-#ifdef HAVE_WCSRTOMBS
+  // NB: GNU libc5 wcstombs() is completely broken, don't use it (it doesn't
+  //     honor the 3rd parameter, thus it will happily crash here).
+#if wxUSE_WCSRTOMBS
+  // don't know if it's really needed (or if we can pass NULL), but better safe
+  // than quick
   mbstate_t mbstate;
   return mbsrtowcs((wchar_t *) NULL, &psz, 0, &mbstate);
 #else  // !GNU libc
@@ -78,14 +81,18 @@ size_t WXDLLEXPORT wxWC2MB(char *buf, const wchar_t *pwz, size_t n)
     return wcstombs(buf, pwz, n);
   }
 
-#if HAVE_WCSRTOMBS
+  // NB: GNU libc5 wcstombs() is completely broken, don't use it (it doesn't
+  //     honor the 3rd parameter, thus it will happily crash here).
+#if wxUSE_WCSRTOMBS
+  // don't know if it's really needed (or if we can pass NULL), but better safe
+  // than quick
   mbstate_t mbstate;
   return wcsrtombs((char *) NULL, &pwz, 0, &mbstate);
 #else  // !GNU libc
   return wcstombs((char *) NULL, pwz, 0);
 #endif // GNU
 }
-#endif // wxUSE_WCHAR_T
+#endif
 
 bool WXDLLEXPORT wxOKlibc()
 {

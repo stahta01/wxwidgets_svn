@@ -329,6 +329,4 @@
 
 #endif
 
-#define wxUSE_PALETTE 0
-
 #endif // _WX_UNIV_SETUP_H_

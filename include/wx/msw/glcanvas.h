@@ -16,6 +16,10 @@
 #ifndef _WX_GLCANVAS_H_
 #define _WX_GLCANVAS_H_
 
+#include <wx/setup.h>
+
+#if wxUSE_GLCANVAS
+
 #include <wx/palette.h>
 #include <wx/scrolwin.h>
 
@@ -124,9 +128,11 @@ protected:
     wxPalette      m_palette;
     WXHDC          m_hDC;
 
-    DECLARE_EVENT_TABLE()
+DECLARE_EVENT_TABLE()
 };
 
+#endif
+    // wxUSE_GLCANVAS
 #endif
     // _WX_GLCANVAS_H_
 

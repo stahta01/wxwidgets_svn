@@ -355,8 +355,6 @@ bool wxBMPFileHandler::LoadFile(wxBitmap *bitmap,
 #if wxUSE_IMAGE_LOADING_IN_MSW
     wxPalette *palette = NULL;
     bool success = wxLoadIntoBitmap(WXSTRINGCAST name, bitmap, &palette) != 0;
-
-#if wxUSE_PALETTE
     if ( success && palette )
     {
         bitmap->SetPalette(*palette);
@@ -364,7 +362,6 @@ bool wxBMPFileHandler::LoadFile(wxBitmap *bitmap,
 
     // it was copied by the bitmap if it was loaded successfully
     delete palette;
-#endif // wxUSE_PALETTE
 
     return success;
 #else
@@ -378,15 +375,9 @@ bool wxBMPFileHandler::SaveFile(wxBitmap *bitmap,
                                 const wxPalette *pal)
 {
 #if wxUSE_IMAGE_LOADING_IN_MSW
-
-#if wxUSE_PALETTE
     wxPalette *actualPalette = (wxPalette *)pal;
     if ( !actualPalette )
         actualPalette = bitmap->GetPalette();
-#else
-    wxPalette *actualPalette = NULL;
-#endif // wxUSE_PALETTE
-
     return wxSaveBitmap(WXSTRINGCAST name, bitmap, actualPalette) != 0;
 #else
     return FALSE;

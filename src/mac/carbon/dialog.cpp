@@ -24,21 +24,19 @@
 // Lists to keep track of windows, so we can disable/enable them
 // for modal dialogs
 wxList wxModalDialogs;
-//wxList wxModelessWindows;  // Frames and modeless dialogs
+wxList wxModelessWindows;  // Frames and modeless dialogs
 extern wxList wxPendingDelete;
 
 #if !USE_SHARED_LIBRARY
-IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
+IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxPanel)
 
-BEGIN_EVENT_TABLE(wxDialog, wxTopLevelWindow)
+BEGIN_EVENT_TABLE(wxDialog, wxPanel)
+	EVT_SIZE(wxDialog::OnSize)
   EVT_BUTTON(wxID_OK, wxDialog::OnOK)
   EVT_BUTTON(wxID_APPLY, wxDialog::OnApply)
   EVT_BUTTON(wxID_CANCEL, wxDialog::OnCancel)
-
   EVT_CHAR_HOOK(wxDialog::OnCharHook)
-
   EVT_SYS_COLOUR_CHANGED(wxDialog::OnSysColourChanged)
-
   EVT_CLOSE(wxDialog::OnCloseWindow)
 END_EVENT_TABLE()
 
@@ -60,9 +58,15 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
 
   SetBackgroundColour(wxSystemSettings::GetSystemColour(wxSYS_COLOUR_3DFACE));
   
+  if (!parent)
+    wxTopLevelWindows.Append(this);
 
-  if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style, name) )
-        return FALSE;
+  if (parent) parent->AddChild(this);
+
+  if ( id == -1 )
+  	m_windowId = (int)NewControlId();
+  else
+	m_windowId = id;
 
 	MacCreateRealWindow( title , pos , size , MacRemoveBordersFromStyle(style)  , name ) ;
 
@@ -89,16 +93,29 @@ void wxDialog::SetModal(bool flag)
 wxDialog::~wxDialog()
 {
 	m_isBeingDeleted = TRUE ;
-  Show(FALSE);
+    wxTopLevelWindows.DeleteObject(this);
+
+  	Show(FALSE);
+
+    if ( !IsModal() )
+    	wxModelessWindows.DeleteObject(this);
+
+    // If this is the last top-level window, exit.
+    if (wxTheApp && (wxTopLevelWindows.Number() == 0))
+    {
+      wxTheApp->SetTopWindow(NULL);
+
+      if (wxTheApp->GetExitOnFrameDelete())
+      {
+       	wxTheApp->ExitMainLoop() ;
+      }
+    }
 }
 
-// By default, pressing escape cancels the dialog , on mac command-stop does the same thing
+// By default, pressing escape cancels the dialog
 void wxDialog::OnCharHook(wxKeyEvent& event)
 {
-  if (
-    ( event.m_keyCode == WXK_ESCAPE || 
-      ( event.m_keyCode == '.' && event.MetaDown() ) )
-     && FindWindow(wxID_CANCEL) )
+  if (event.m_keyCode == WXK_ESCAPE)
   {
 		// Behaviour changed in 2.0: we'll send a Cancel message
 		// to the dialog instead of Close.
@@ -112,6 +129,27 @@ void wxDialog::OnCharHook(wxKeyEvent& event)
   event.Skip();
 }
 
+void wxDialog::Iconize(bool WXUNUSED(iconize))
+{
+	// mac dialogs cannot be iconized
+}
+
+bool wxDialog::IsIconized() const
+{
+	// mac dialogs cannot be iconized
+    return FALSE;
+}
+
+void wxDialog::DoSetClientSize(int width, int height)
+{
+	wxWindow::DoSetClientSize( width , height ) ;
+}
+
+void wxDialog::DoGetPosition(int *x, int *y) const
+{
+	wxWindow::DoGetPosition( x , y ) ;
+}
+
 bool wxDialog::IsModal() const
 {
     return (GetWindowStyleFlag() & wxDIALOG_MODAL) != 0;
@@ -122,6 +160,7 @@ bool wxDialog::IsModalShowing() const
 {
     return wxModalDialogs.Find((wxDialog *)this) != NULL; // const_cast
 }
+
 
 extern bool s_macIsInModalLoop ;
 
@@ -264,6 +303,16 @@ void wxDialog::OnCloseWindow(wxCloseEvent& event)
     GetEventHandler()->ProcessEvent(cancelEvent); // This may close the dialog
 
     closing.DeleteObject(this);
+}
+
+// Destroy the window (delayed, if a managed window)
+bool wxDialog::Destroy()
+{
+    wxCHECK_MSG( !wxPendingDelete.Member(this), FALSE,
+                 _T("wxDialog destroyed twice") );
+
+    wxPendingDelete.Append(this);
+  return TRUE;
 }
 
 void wxDialog::OnSysColourChanged(wxSysColourChangedEvent& event)

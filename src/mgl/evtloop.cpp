@@ -74,6 +74,7 @@ private:
 void wxEventLoopImpl::Dispatch()
 {
     event_t evt;
+    ibool rc;
 
     MGL_wmUpdateDC(g_winMng);
     

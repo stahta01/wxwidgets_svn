@@ -28,7 +28,6 @@
 
 #include "wx/defs.h"
 #include "wx/toplevel.h"
-#include "wx/app.h"
 
 // ----------------------------------------------------------------------------
 // idle system
@@ -51,7 +50,6 @@ extern int g_openDialogs;
 
 void wxTopLevelWindowMGL::Init()
 {
-    m_isShown = FALSE;
     m_isIconized = FALSE;
     m_isMaximized = FALSE;
     m_fsIsShowing = FALSE;
@@ -76,14 +74,14 @@ bool wxTopLevelWindowMGL::Create(wxWindow *parent,
         if ( size.y == -1 )
             size.y = sizeDpy.y / 5;
     }
-    
-    wxWindow::Create(parent, id, pos, sizeOrig, style, name);
 
     wxTopLevelWindows.Append(this);
 
     m_title = title;
-    
-    // FIXME_MGL -- should activate itself when shown!
+
+
+    if (m_parent) 
+        m_parent->AddChild(this);
 
     return TRUE;
 }
@@ -176,7 +174,7 @@ void wxTopLevelWindowMGL::Restore()
 
 void wxTopLevelWindowMGL::Iconize(bool iconize)
 {
-    // FIXME_MGL - use wxDesktop for this
+    // FIXME_MGL
 }
 
 bool wxTopLevelWindowMGL::IsIconized() const

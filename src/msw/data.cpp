@@ -96,9 +96,7 @@ wxIcon    wxNullIcon;
 wxCursor  wxNullCursor;
 wxPen     wxNullPen;
 wxBrush   wxNullBrush;
-#if wxUSE_PALETTE
 wxPalette wxNullPalette;
-#endif // wxUSE_PALETTE
 wxFont    wxNullFont;
 wxColour  wxNullColour;
 
