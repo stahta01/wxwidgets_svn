@@ -8,23 +8,6 @@ from gdi import *
 from fonts import *
 
 from streams import *
-class wxImageHistogramPtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def FindFirstUnusedColour(self, *_args, **_kwargs):
-        val = imagec.wxImageHistogram_FindFirstUnusedColour(self, *_args, **_kwargs)
-        return val
-    def __repr__(self):
-        return "<%s.%s instance; proxy of C++ wxImageHistogram instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-class wxImageHistogram(wxImageHistogramPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = imagec.new_wxImageHistogram(*_args,**_kwargs)
-        self.thisown = 1
-
-
-
-
 class wxImageHandlerPtr(wxObjectPtr):
     def __init__(self,this):
         self.this = this
@@ -225,10 +208,6 @@ class wxImagePtr(wxObjectPtr):
         val = imagec.wxImage_Scale(self, *_args, **_kwargs)
         if val: val = wxImagePtr(val) ; val.thisown = 1
         return val
-    def ShrinkBy(self, *_args, **_kwargs):
-        val = imagec.wxImage_ShrinkBy(self, *_args, **_kwargs)
-        if val: val = wxImagePtr(val) ; val.thisown = 1
-        return val
     def Rescale(self, *_args, **_kwargs):
         val = imagec.wxImage_Rescale(self, *_args, **_kwargs)
         if val: val = wxImagePtr(val) 
@@ -244,15 +223,6 @@ class wxImagePtr(wxObjectPtr):
         return val
     def GetBlue(self, *_args, **_kwargs):
         val = imagec.wxImage_GetBlue(self, *_args, **_kwargs)
-        return val
-    def SetAlpha(self, *_args, **_kwargs):
-        val = imagec.wxImage_SetAlpha(self, *_args, **_kwargs)
-        return val
-    def GetAlpha(self, *_args, **_kwargs):
-        val = imagec.wxImage_GetAlpha(self, *_args, **_kwargs)
-        return val
-    def HasAlpha(self, *_args, **_kwargs):
-        val = imagec.wxImage_HasAlpha(self, *_args, **_kwargs)
         return val
     def FindFirstUnusedColour(self, *_args, **_kwargs):
         val = imagec.wxImage_FindFirstUnusedColour(self, *_args, **_kwargs)
@@ -298,29 +268,17 @@ class wxImagePtr(wxObjectPtr):
     def Paste(self, *_args, **_kwargs):
         val = imagec.wxImage_Paste(self, *_args, **_kwargs)
         return val
-    def GetData(self, *_args, **_kwargs):
-        val = imagec.wxImage_GetData(self, *_args, **_kwargs)
-        return val
-    def SetData(self, *_args, **_kwargs):
-        val = imagec.wxImage_SetData(self, *_args, **_kwargs)
-        return val
     def GetDataBuffer(self, *_args, **_kwargs):
         val = imagec.wxImage_GetDataBuffer(self, *_args, **_kwargs)
+        return val
+    def GetData(self, *_args, **_kwargs):
+        val = imagec.wxImage_GetData(self, *_args, **_kwargs)
         return val
     def SetDataBuffer(self, *_args, **_kwargs):
         val = imagec.wxImage_SetDataBuffer(self, *_args, **_kwargs)
         return val
-    def GetAlphaData(self, *_args, **_kwargs):
-        val = imagec.wxImage_GetAlphaData(self, *_args, **_kwargs)
-        return val
-    def SetAlphaData(self, *_args, **_kwargs):
-        val = imagec.wxImage_SetAlphaData(self, *_args, **_kwargs)
-        return val
-    def GetAlphaBuffer(self, *_args, **_kwargs):
-        val = imagec.wxImage_GetAlphaBuffer(self, *_args, **_kwargs)
-        return val
-    def SetAlphaBuffer(self, *_args, **_kwargs):
-        val = imagec.wxImage_SetAlphaBuffer(self, *_args, **_kwargs)
+    def SetData(self, *_args, **_kwargs):
+        val = imagec.wxImage_SetData(self, *_args, **_kwargs)
         return val
     def SetMaskColour(self, *_args, **_kwargs):
         val = imagec.wxImage_SetMaskColour(self, *_args, **_kwargs)
@@ -376,9 +334,6 @@ class wxImagePtr(wxObjectPtr):
         return val
     def CountColours(self, *_args, **_kwargs):
         val = imagec.wxImage_CountColours(self, *_args, **_kwargs)
-        return val
-    def ComputeHistogram(self, *_args, **_kwargs):
-        val = imagec.wxImage_ComputeHistogram(self, *_args, **_kwargs)
         return val
     def ConvertToBitmap(self, *_args, **_kwargs):
         val = imagec.wxImage_ConvertToBitmap(self, *_args, **_kwargs)
@@ -439,8 +394,6 @@ def wxBitmapFromImage(*_args, **_kwargs):
     val = imagec.wxBitmapFromImage(*_args,**_kwargs)
     if val: val = wxBitmapPtr(val); val.thisown = 1
     return val
-
-wxImageHistogram_MakeKey = imagec.wxImageHistogram_MakeKey
 
 wxImage_CanRead = imagec.wxImage_CanRead
 

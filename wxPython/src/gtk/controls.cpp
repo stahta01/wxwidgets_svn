@@ -9700,23 +9700,61 @@ static PyObject *_wrap_wxRadioBox_GetString(PyObject *self, PyObject *args, PyOb
     return _resultobj;
 }
 
-#define wxRadioBox_SetString(_swigobj,_swigarg0,_swigarg1)  (_swigobj->SetString(_swigarg0,_swigarg1))
-static PyObject *_wrap_wxRadioBox_SetString(PyObject *self, PyObject *args, PyObject *kwargs) {
+#define wxRadioBox_GetItemLabel(_swigobj,_swigarg0)  (_swigobj->GetLabel(_swigarg0))
+static PyObject *_wrap_wxRadioBox_GetItemLabel(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    wxString * _result;
+    wxRadioBox * _arg0;
+    int  _arg1;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self","item", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"Oi:wxRadioBox_GetItemLabel",_kwnames,&_argo0,&_arg1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxRadioBox_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxRadioBox_GetItemLabel. Expected _wxRadioBox_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = new wxString (wxRadioBox_GetItemLabel(_arg0,_arg1));
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}{
+#if wxUSE_UNICODE
+    _resultobj = PyUnicode_FromWideChar(_result->c_str(), _result->Len());
+#else
+    _resultobj = PyString_FromStringAndSize(_result->c_str(), _result->Len());
+#endif
+}
+{
+    delete _result;
+}
+    return _resultobj;
+}
+
+#define wxRadioBox_SetItemLabel(_swigobj,_swigarg0,_swigarg1)  (_swigobj->SetLabel(_swigarg0,_swigarg1))
+static PyObject *_wrap_wxRadioBox_SetItemLabel(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxRadioBox * _arg0;
     int  _arg1;
     wxString * _arg2;
     PyObject * _argo0 = 0;
     PyObject * _obj2 = 0;
-    char *_kwnames[] = { "self","n","label", NULL };
+    char *_kwnames[] = { "self","item","label", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiO:wxRadioBox_SetString",_kwnames,&_argo0,&_arg1,&_obj2)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OiO:wxRadioBox_SetItemLabel",_kwnames,&_argo0,&_arg1,&_obj2)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
         else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxRadioBox_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxRadioBox_SetString. Expected _wxRadioBox_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxRadioBox_SetItemLabel. Expected _wxRadioBox_p.");
         return NULL;
         }
     }
@@ -9727,7 +9765,7 @@ static PyObject *_wrap_wxRadioBox_SetString(PyObject *self, PyObject *args, PyOb
 }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxRadioBox_SetString(_arg0,_arg1,*_arg2);
+    wxRadioBox_SetItemLabel(_arg0,_arg1,*_arg2);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
@@ -11800,7 +11838,8 @@ static PyMethodDef controlscMethods[] = {
 	 { "wxRadioBox_GetCount", (PyCFunction) _wrap_wxRadioBox_GetCount, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_GetStringSelection", (PyCFunction) _wrap_wxRadioBox_GetStringSelection, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_GetSelection", (PyCFunction) _wrap_wxRadioBox_GetSelection, METH_VARARGS | METH_KEYWORDS },
-	 { "wxRadioBox_SetString", (PyCFunction) _wrap_wxRadioBox_SetString, METH_VARARGS | METH_KEYWORDS },
+	 { "wxRadioBox_SetItemLabel", (PyCFunction) _wrap_wxRadioBox_SetItemLabel, METH_VARARGS | METH_KEYWORDS },
+	 { "wxRadioBox_GetItemLabel", (PyCFunction) _wrap_wxRadioBox_GetItemLabel, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_GetString", (PyCFunction) _wrap_wxRadioBox_GetString, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_FindString", (PyCFunction) _wrap_wxRadioBox_FindString, METH_VARARGS | METH_KEYWORDS },
 	 { "wxRadioBox_EnableItem", (PyCFunction) _wrap_wxRadioBox_EnableItem, METH_VARARGS | METH_KEYWORDS },

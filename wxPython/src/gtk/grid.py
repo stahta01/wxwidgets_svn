@@ -368,9 +368,6 @@ class wxGridCellTextEditorPtr(wxGridCellEditorPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetValue(self, *_args, **_kwargs):
-        val = gridc.wxGridCellTextEditor_GetValue(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxGridCellTextEditor instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxGridCellTextEditor(wxGridCellTextEditorPtr):
@@ -386,9 +383,6 @@ class wxGridCellNumberEditorPtr(wxGridCellTextEditorPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetValue(self, *_args, **_kwargs):
-        val = gridc.wxGridCellNumberEditor_GetValue(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxGridCellNumberEditor instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxGridCellNumberEditor(wxGridCellNumberEditorPtr):
@@ -404,9 +398,6 @@ class wxGridCellFloatEditorPtr(wxGridCellTextEditorPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetValue(self, *_args, **_kwargs):
-        val = gridc.wxGridCellFloatEditor_GetValue(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxGridCellFloatEditor instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxGridCellFloatEditor(wxGridCellFloatEditorPtr):
@@ -422,9 +413,6 @@ class wxGridCellBoolEditorPtr(wxGridCellEditorPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetValue(self, *_args, **_kwargs):
-        val = gridc.wxGridCellBoolEditor_GetValue(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxGridCellBoolEditor instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxGridCellBoolEditor(wxGridCellBoolEditorPtr):
@@ -440,9 +428,6 @@ class wxGridCellChoiceEditorPtr(wxGridCellEditorPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetValue(self, *_args, **_kwargs):
-        val = gridc.wxGridCellChoiceEditor_GetValue(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxGridCellChoiceEditor instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxGridCellChoiceEditor(wxGridCellChoiceEditorPtr):
@@ -458,9 +443,6 @@ class wxGridCellEnumEditorPtr(wxGridCellChoiceEditorPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetValue(self, *_args, **_kwargs):
-        val = gridc.wxGridCellEnumEditor_GetValue(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxGridCellEnumEditor instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxGridCellEnumEditor(wxGridCellEnumEditorPtr):
@@ -476,9 +458,6 @@ class wxGridCellAutoWrapStringEditorPtr(wxGridCellTextEditorPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetValue(self, *_args, **_kwargs):
-        val = gridc.wxGridCellAutoWrapStringEditor_GetValue(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxGridCellAutoWrapStringEditor instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxGridCellAutoWrapStringEditor(wxGridCellAutoWrapStringEditorPtr):
@@ -1187,9 +1166,6 @@ class wxGridPtr(wxScrolledWindowPtr):
     def GetColLabelAlignment(self, *_args, **_kwargs):
         val = gridc.wxGrid_GetColLabelAlignment(self, *_args, **_kwargs)
         return val
-    def GetColLabelTextOrientation(self, *_args, **_kwargs):
-        val = gridc.wxGrid_GetColLabelTextOrientation(self, *_args, **_kwargs)
-        return val
     def GetRowLabelValue(self, *_args, **_kwargs):
         val = gridc.wxGrid_GetRowLabelValue(self, *_args, **_kwargs)
         return val
@@ -1230,9 +1206,6 @@ class wxGridPtr(wxScrolledWindowPtr):
         return val
     def SetColLabelAlignment(self, *_args, **_kwargs):
         val = gridc.wxGrid_SetColLabelAlignment(self, *_args, **_kwargs)
-        return val
-    def SetColLabelTextOrientation(self, *_args, **_kwargs):
-        val = gridc.wxGrid_SetColLabelTextOrientation(self, *_args, **_kwargs)
         return val
     def SetRowLabelValue(self, *_args, **_kwargs):
         val = gridc.wxGrid_SetRowLabelValue(self, *_args, **_kwargs)
@@ -1383,12 +1356,6 @@ class wxGridPtr(wxScrolledWindowPtr):
         return val
     def AutoSize(self, *_args, **_kwargs):
         val = gridc.wxGrid_AutoSize(self, *_args, **_kwargs)
-        return val
-    def AutoSizeRowLabelSize(self, *_args, **_kwargs):
-        val = gridc.wxGrid_AutoSizeRowLabelSize(self, *_args, **_kwargs)
-        return val
-    def AutoSizeColLabelSize(self, *_args, **_kwargs):
-        val = gridc.wxGrid_AutoSizeColLabelSize(self, *_args, **_kwargs)
         return val
     def SetColMinimalWidth(self, *_args, **_kwargs):
         val = gridc.wxGrid_SetColMinimalWidth(self, *_args, **_kwargs)

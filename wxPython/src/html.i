@@ -810,16 +810,6 @@ public:
     void SetHeader(const wxString& header, int pg = wxPAGE_ALL);
     void SetFooter(const wxString& footer, int pg = wxPAGE_ALL);
 
-    %addmethods {
-        void SetFonts(wxString normal_face, wxString fixed_face, PyObject* sizes=NULL) {
-            int* temp = NULL;
-            if (sizes) temp = int_LIST_helper(sizes);
-            self->SetFonts(normal_face, fixed_face, temp);
-            if (temp)
-                delete [] temp;
-        }
-    }
-
     wxPrintData *GetPrintData() {return m_PrintData;}
     wxPageSetupDialogData *GetPageSetupData() {return m_PageSetupData;}
 

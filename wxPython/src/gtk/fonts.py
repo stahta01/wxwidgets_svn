@@ -452,11 +452,6 @@ def wxLocale_GetLanguageInfo(*_args, **_kwargs):
     if val: val = wxLanguageInfoPtr(val)
     return val
 
-def wxLocale_FindLanguageInfo(*_args, **_kwargs):
-    val = fontsc.wxLocale_FindLanguageInfo(*_args,**_kwargs)
-    if val: val = wxLanguageInfoPtr(val)
-    return val
-
 wxLocale_AddLanguage = fontsc.wxLocale_AddLanguage
 
 wxEncodingConverter_GetPlatformEquivalents = fontsc.wxEncodingConverter_GetPlatformEquivalents

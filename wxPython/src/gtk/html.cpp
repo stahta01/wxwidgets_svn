@@ -6493,68 +6493,6 @@ static PyObject *_wrap_wxHtmlEasyPrinting_SetFooter(PyObject *self, PyObject *ar
     return _resultobj;
 }
 
-static void  wxHtmlEasyPrinting_SetFonts(wxHtmlEasyPrinting *self,wxString  normal_face,wxString  fixed_face,PyObject * sizes) {
-            int* temp = NULL;
-            if (sizes) temp = int_LIST_helper(sizes);
-            self->SetFonts(normal_face, fixed_face, temp);
-            if (temp)
-                delete [] temp;
-        }
-static PyObject *_wrap_wxHtmlEasyPrinting_SetFonts(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxHtmlEasyPrinting * _arg0;
-    wxString * _arg1;
-    wxString * _arg2;
-    PyObject * _arg3 = (PyObject *) NULL;
-    PyObject * _argo0 = 0;
-    PyObject * _obj1 = 0;
-    PyObject * _obj2 = 0;
-    PyObject * _obj3 = 0;
-    char *_kwnames[] = { "self","normal_face","fixed_face","sizes", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO|O:wxHtmlEasyPrinting_SetFonts",_kwnames,&_argo0,&_obj1,&_obj2,&_obj3)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlEasyPrinting_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlEasyPrinting_SetFonts. Expected _wxHtmlEasyPrinting_p.");
-        return NULL;
-        }
-    }
-{
-    _arg1 = wxString_in_helper(_obj1);
-    if (_arg1 == NULL)
-        return NULL;
-}
-{
-    _arg2 = wxString_in_helper(_obj2);
-    if (_arg2 == NULL)
-        return NULL;
-}
-    if (_obj3)
-{
-  _arg3 = _obj3;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxHtmlEasyPrinting_SetFonts(_arg0,*_arg1,*_arg2,_arg3);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-{
-    if (_obj1)
-        delete _arg1;
-}
-{
-    if (_obj2)
-        delete _arg2;
-}
-    return _resultobj;
-}
-
 #define wxHtmlEasyPrinting_GetPrintData(_swigobj)  (_swigobj->GetPrintData())
 static PyObject *_wrap_wxHtmlEasyPrinting_GetPrintData(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -6628,7 +6566,6 @@ static PyObject *_wrap_wxHtmlEasyPrinting_GetPageSetupData(PyObject *self, PyObj
 static PyMethodDef htmlcMethods[] = {
 	 { "wxHtmlEasyPrinting_GetPageSetupData", (PyCFunction) _wrap_wxHtmlEasyPrinting_GetPageSetupData, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_GetPrintData", (PyCFunction) _wrap_wxHtmlEasyPrinting_GetPrintData, METH_VARARGS | METH_KEYWORDS },
-	 { "wxHtmlEasyPrinting_SetFonts", (PyCFunction) _wrap_wxHtmlEasyPrinting_SetFonts, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_SetFooter", (PyCFunction) _wrap_wxHtmlEasyPrinting_SetFooter, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_SetHeader", (PyCFunction) _wrap_wxHtmlEasyPrinting_SetHeader, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_PageSetup", (PyCFunction) _wrap_wxHtmlEasyPrinting_PageSetup, METH_VARARGS | METH_KEYWORDS },

@@ -1564,20 +1564,19 @@ void wxPyTimer::Notify() {
 //---------------------------------------------------------------------------
 // Convert a wxList to a Python List
 
-PyObject* wxPy_ConvertList(wxListBase* listbase, const char* className) {
-    wxList*     list = (wxList*)listbase;  // this is probably bad...
+PyObject* wxPy_ConvertList(wxListBase* list, const char* className) {
     PyObject*   pyList;
     PyObject*   pyObj;
     wxObject*   wxObj;
-    wxNode*     node = list->GetFirst();
+    wxNode*     node = list->First();
 
     wxPyBeginBlockThreads();
     pyList = PyList_New(0);
     while (node) {
-        wxObj = node->GetData();
+        wxObj = node->Data();
         pyObj = wxPyMake_wxObject(wxObj); //wxPyConstructObject(wxObj, className);
         PyList_Append(pyList, pyObj);
-        node = node->GetNext();
+        node = node->Next();
     }
     wxPyEndBlockThreads();
     return pyList;

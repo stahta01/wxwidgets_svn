@@ -4275,6 +4275,7 @@ static PyObject *_wrap_wxPyTimer_SetOwner(PyObject *self, PyObject *args, PyObje
 #define wxPyTimer_Start(_swigobj,_swigarg0,_swigarg1)  (_swigobj->Start(_swigarg0,_swigarg1))
 static PyObject *_wrap_wxPyTimer_Start(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
+    bool  _result;
     wxPyTimer * _arg0;
     int  _arg1 = (int ) -1;
     int  _arg2 = (int ) FALSE;
@@ -4293,12 +4294,11 @@ static PyObject *_wrap_wxPyTimer_Start(PyObject *self, PyObject *args, PyObject 
     }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxPyTimer_Start(_arg0,_arg1,_arg2);
+    _result = (bool )wxPyTimer_Start(_arg0,_arg1,_arg2);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
+}    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
@@ -4618,6 +4618,34 @@ static PyObject *_wrap_wxLog_Flush(PyObject *self, PyObject *args, PyObject *kwa
     if (PyErr_Occurred()) return NULL;
 }    Py_INCREF(Py_None);
     _resultobj = Py_None;
+    return _resultobj;
+}
+
+#define wxLog_HasPendingMessages(_swigobj)  (_swigobj->HasPendingMessages())
+static PyObject *_wrap_wxLog_HasPendingMessages(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxLog * _arg0;
+    PyObject * _argo0 = 0;
+    char *_kwnames[] = { "self", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"O:wxLog_HasPendingMessages",_kwnames,&_argo0)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxLog_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxLog_HasPendingMessages. Expected _wxLog_p.");
+        return NULL;
+        }
+    }
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (bool )wxLog_HasPendingMessages(_arg0);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
@@ -9182,7 +9210,7 @@ static PyObject *_wrap_new_wxMimeTypesManager(PyObject *self, PyObject *args, Py
 static PyObject *_wrap_wxMimeTypesManager_Initialize(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxMimeTypesManager * _arg0;
-    int  _arg1 = (int ) (wxMAILCAP_ALL);
+    int  _arg1 = (int ) (wxMAILCAP_STANDARD);
     wxString * _arg2 = (wxString *) &wxPyEmptyString;
     PyObject * _argo0 = 0;
     PyObject * _obj2 = 0;
@@ -11216,6 +11244,7 @@ static PyMethodDef misc2cMethods[] = {
 	 { "wxLog_SetActiveTarget", (PyCFunction) _wrap_wxLog_SetActiveTarget, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_GetActiveTarget", (PyCFunction) _wrap_wxLog_GetActiveTarget, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_FlushActive", (PyCFunction) _wrap_wxLog_FlushActive, METH_VARARGS | METH_KEYWORDS },
+	 { "wxLog_HasPendingMessages", (PyCFunction) _wrap_wxLog_HasPendingMessages, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_Flush", (PyCFunction) _wrap_wxLog_Flush, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_OnLog", (PyCFunction) _wrap_wxLog_OnLog, METH_VARARGS | METH_KEYWORDS },
 	 { "wxLog_EnableLogging", (PyCFunction) _wrap_wxLog_EnableLogging, METH_VARARGS | METH_KEYWORDS },

@@ -22,8 +22,9 @@ class wxSizerItemPtr(wxObjectPtr):
     def DeleteWindows(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_DeleteWindows(self, *_args, **_kwargs)
         return val
-    def DetachSizer(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_DetachSizer(self, *_args, **_kwargs)
+    def GetPosition(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_GetPosition(self, *_args, **_kwargs)
+        if val: val = wxPointPtr(val) ; val.thisown = 1
         return val
     def GetSize(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_GetSize(self, *_args, **_kwargs)
@@ -35,13 +36,6 @@ class wxSizerItemPtr(wxObjectPtr):
         return val
     def SetDimension(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_SetDimension(self, *_args, **_kwargs)
-        return val
-    def GetMinSize(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_GetMinSize(self, *_args, **_kwargs)
-        if val: val = wxSizePtr(val) ; val.thisown = 1
-        return val
-    def SetInitSize(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_SetInitSize(self, *_args, **_kwargs)
         return val
     def SetRatioWH(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_SetRatioWH(self, *_args, **_kwargs)
@@ -64,23 +58,8 @@ class wxSizerItemPtr(wxObjectPtr):
     def IsSpacer(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_IsSpacer(self, *_args, **_kwargs)
         return val
-    def SetProportion(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_SetProportion(self, *_args, **_kwargs)
-        return val
-    def GetProportion(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_GetProportion(self, *_args, **_kwargs)
-        return val
-    def SetFlag(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_SetFlag(self, *_args, **_kwargs)
-        return val
-    def GetFlag(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_GetFlag(self, *_args, **_kwargs)
-        return val
-    def SetBorder(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_SetBorder(self, *_args, **_kwargs)
-        return val
-    def GetBorder(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_GetBorder(self, *_args, **_kwargs)
+    def IsShown(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_IsShown(self, *_args, **_kwargs)
         return val
     def GetWindow(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_GetWindow(self, *_args, **_kwargs)
@@ -94,30 +73,35 @@ class wxSizerItemPtr(wxObjectPtr):
     def SetSizer(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_SetSizer(self, *_args, **_kwargs)
         return val
-    def GetSpacer(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_GetSpacer(self, *_args, **_kwargs)
-        if val: val = wxSizePtr(val) 
+    def GetOption(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_GetOption(self, *_args, **_kwargs)
         return val
-    def SetSpacer(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_SetSpacer(self, *_args, **_kwargs)
+    def GetFlag(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_GetFlag(self, *_args, **_kwargs)
+        return val
+    def GetBorder(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_GetBorder(self, *_args, **_kwargs)
+        return val
+    def SetInitSize(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_SetInitSize(self, *_args, **_kwargs)
+        return val
+    def SetOption(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_SetOption(self, *_args, **_kwargs)
+        return val
+    def SetFlag(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_SetFlag(self, *_args, **_kwargs)
+        return val
+    def SetBorder(self, *_args, **_kwargs):
+        val = sizersc.wxSizerItem_SetBorder(self, *_args, **_kwargs)
         return val
     def Show(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_Show(self, *_args, **_kwargs)
-        return val
-    def IsShown(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_IsShown(self, *_args, **_kwargs)
-        return val
-    def GetPosition(self, *_args, **_kwargs):
-        val = sizersc.wxSizerItem_GetPosition(self, *_args, **_kwargs)
-        if val: val = wxPointPtr(val) ; val.thisown = 1
         return val
     def GetUserData(self, *_args, **_kwargs):
         val = sizersc.wxSizerItem_GetUserData(self, *_args, **_kwargs)
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxSizerItem instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-    SetOption = SetProportion
-    GetOption = GetProportion
 class wxSizerItem(wxSizerItemPtr):
     def __init__(self,this):
         self.this = this
@@ -428,18 +412,6 @@ class wxFlexGridSizerPtr(wxGridSizerPtr):
     def RemoveGrowableCol(self, *_args, **_kwargs):
         val = sizersc.wxFlexGridSizer_RemoveGrowableCol(self, *_args, **_kwargs)
         return val
-    def SetFlexibleDirection(self, *_args, **_kwargs):
-        val = sizersc.wxFlexGridSizer_SetFlexibleDirection(self, *_args, **_kwargs)
-        return val
-    def GetFlexibleDirection(self, *_args, **_kwargs):
-        val = sizersc.wxFlexGridSizer_GetFlexibleDirection(self, *_args, **_kwargs)
-        return val
-    def SetNonFlexibleGrowMode(self, *_args, **_kwargs):
-        val = sizersc.wxFlexGridSizer_SetNonFlexibleGrowMode(self, *_args, **_kwargs)
-        return val
-    def GetNonFlexibleGrowMode(self, *_args, **_kwargs):
-        val = sizersc.wxFlexGridSizer_GetNonFlexibleGrowMode(self, *_args, **_kwargs)
-        return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxFlexGridSizer instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
 class wxFlexGridSizer(wxFlexGridSizerPtr):
@@ -459,6 +431,3 @@ class wxFlexGridSizer(wxFlexGridSizerPtr):
 
 #-------------- VARIABLE WRAPPERS ------------------
 
-wxFLEX_GROWMODE_NONE = sizersc.wxFLEX_GROWMODE_NONE
-wxFLEX_GROWMODE_SPECIFIED = sizersc.wxFLEX_GROWMODE_SPECIFIED
-wxFLEX_GROWMODE_ALL = sizersc.wxFLEX_GROWMODE_ALL

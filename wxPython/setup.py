@@ -14,10 +14,10 @@ from distutils.command.install_data import install_data
 #----------------------------------------------------------------------
 
 VER_MAJOR        = 2      # The first three must match wxWindows
-VER_MINOR        = 5
-VER_RELEASE      = 0
-VER_SUBREL       = 0      # wxPython release num for x.y.z release of wxWindows
-VER_FLAGS        = "p1"   # release flags, such as prerelease num, unicode, etc.
+VER_MINOR        = 4
+VER_RELEASE      = 1
+VER_SUBREL       = 2      # wxPython release num for x.y.z release of wxWindows
+VER_FLAGS        = ""     # release flags, such as prerelease num, unicode, etc.
 
 DESCRIPTION      = "Cross platform GUI toolkit for Python"
 AUTHOR           = "Robin Dunn"
@@ -40,7 +40,7 @@ BUILD_OGL = 1      # If true, build the contrib/ogl extension module
 BUILD_STC = 1      # If true, build the contrib/stc extension module
 BUILD_XRC = 1      # XML based resource system
 BUILD_GIZMOS = 1   # Build a module for the gizmos contrib library
-BUILD_DLLWIDGET = 0# Build a module that enables unknown wx widgets
+BUILD_DLLWIDGET = 1# Build a module that enables unknown wx widgets
                    # to be loaded from a DLL and to be used from Python.
 
                    # Internet Explorer wrapper (experimental)
@@ -109,7 +109,7 @@ HYBRID = 1         # If set and not debug or FINAL, then build a
                    # wxWindows must have been built with /MD, not /MDd
                    # (using FINAL=hybrid will do it.)
 
-WXDLLVER = '250'   # Version part of wxWindows DLL name
+WXDLLVER = '24'   # Version part of wxWindows DLL name
 
 
 #----------------------------------------------------------------------
@@ -445,6 +445,7 @@ elif os.name == 'posix' and sys.platform[:6] == "darwin":
     lflags = lflags.split()
 
     NO_SCRIPTS = 1
+    BUILD_DLLWIDGET = 0
 
 
 #----------------------------------------------------------------------

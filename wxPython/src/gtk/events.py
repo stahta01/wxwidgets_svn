@@ -455,6 +455,9 @@ class wxKeyEventPtr(wxEventPtr):
     def ShiftDown(self, *_args, **_kwargs):
         val = eventsc.wxKeyEvent_ShiftDown(self, *_args, **_kwargs)
         return val
+    def KeyCode(self, *_args, **_kwargs):
+        val = eventsc.wxKeyEvent_KeyCode(self, *_args, **_kwargs)
+        return val
     def GetKeyCode(self, *_args, **_kwargs):
         val = eventsc.wxKeyEvent_GetKeyCode(self, *_args, **_kwargs)
         return val
@@ -536,7 +539,6 @@ class wxKeyEventPtr(wxEventPtr):
         raise AttributeError,name
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxKeyEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-    KeyCode = GetKeyCode
 class wxKeyEvent(wxKeyEventPtr):
     def __init__(self,*_args,**_kwargs):
         self.this = eventsc.new_wxKeyEvent(*_args,**_kwargs)

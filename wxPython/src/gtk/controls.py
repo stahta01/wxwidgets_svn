@@ -953,8 +953,11 @@ class wxRadioBoxPtr(wxControlPtr):
     def GetString(self, *_args, **_kwargs):
         val = controlsc.wxRadioBox_GetString(self, *_args, **_kwargs)
         return val
-    def SetString(self, *_args, **_kwargs):
-        val = controlsc.wxRadioBox_SetString(self, *_args, **_kwargs)
+    def GetItemLabel(self, *_args, **_kwargs):
+        val = controlsc.wxRadioBox_GetItemLabel(self, *_args, **_kwargs)
+        return val
+    def SetItemLabel(self, *_args, **_kwargs):
+        val = controlsc.wxRadioBox_SetItemLabel(self, *_args, **_kwargs)
         return val
     def GetSelection(self, *_args, **_kwargs):
         val = controlsc.wxRadioBox_GetSelection(self, *_args, **_kwargs)
@@ -979,10 +982,6 @@ class wxRadioBoxPtr(wxControlPtr):
         return val
     def __repr__(self):
         return "<%s.%s instance; proxy of C++ wxRadioBox instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
-    
-    GetItemLabel = GetString
-    SetItemLabel = SetString
-    
     Number = GetCount
 class wxRadioBox(wxRadioBoxPtr):
     def __init__(self,*_args,**_kwargs):

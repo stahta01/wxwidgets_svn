@@ -1303,34 +1303,6 @@ extern wxPyApp *wxPythonApp;
 
 //---------------------------------------------------------------------------
 
-#define DEC_PYCALLBACK_STRING__const(CBNAME)                  \
-    wxString CBNAME() const;                                  \
-    wxString base_##CBNAME() const;
-
-#define IMP_PYCALLBACK_STRING__const(CLASS, PCLASS, CBNAME)                     \
-    wxString CLASS::CBNAME() const {                                            \
-        wxString rval;                                                          \
-        bool found;                                                             \
-        wxPyBeginBlockThreads();                            \
-        if ((found = wxPyCBH_findCallback(m_myInst, #CBNAME))) {                \
-            PyObject* ro;                                                       \
-            ro = wxPyCBH_callCallbackObj(m_myInst, Py_BuildValue("()"));        \
-            if (ro) {                                                           \
-                rval = Py2wxString(ro);                                         \
-                Py_DECREF(ro);                                                  \
-            }                                                                   \
-        }                                                                       \
-        wxPyEndBlockThreads();                                                  \
-        if (! found)                                                            \
-            rval = PCLASS::CBNAME();                                            \
-        return rval;                                                            \
-    }                                                                           \
-    wxString CLASS::base_##CBNAME() const {                                     \
-        return PCLASS::CBNAME();                                                \
-    }
-
-//---------------------------------------------------------------------------
-
 #define DEC_PYCALLBACK_STRING__pure(CBNAME)             \
     wxString CBNAME()
 
@@ -1338,27 +1310,6 @@ extern wxPyApp *wxPythonApp;
     wxString CLASS::CBNAME() {                                                  \
         wxString rval;                                                          \
         wxPyBeginBlockThreads();                            \
-        if (wxPyCBH_findCallback(m_myInst, #CBNAME)) {                          \
-            PyObject* ro;                                                       \
-            ro = wxPyCBH_callCallbackObj(m_myInst, Py_BuildValue("()"));        \
-            if (ro) {                                                           \
-                rval = Py2wxString(ro);                                         \
-                Py_DECREF(ro);                                                  \
-            }                                                                   \
-        }                                                                       \
-        wxPyEndBlockThreads();                                                  \
-        return rval;                                                            \
-    }
-
-//---------------------------------------------------------------------------
-
-#define DEC_PYCALLBACK_STRING__constpure(CBNAME)             \
-    wxString CBNAME() const;
-
-#define IMP_PYCALLBACK_STRING__constpure(CLASS, PCLASS, CBNAME)                 \
-    wxString CLASS::CBNAME() const {                                            \
-        wxString rval;                                                          \
-        wxPyBeginBlockThreads();                                                \
         if (wxPyCBH_findCallback(m_myInst, #CBNAME)) {                          \
             PyObject* ro;                                                       \
             ro = wxPyCBH_callCallbackObj(m_myInst, Py_BuildValue("()"));        \

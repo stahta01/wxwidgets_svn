@@ -752,9 +752,6 @@ class wxHtmlEasyPrintingPtr(wxObjectPtr):
     def SetFooter(self, *_args, **_kwargs):
         val = htmlc.wxHtmlEasyPrinting_SetFooter(self, *_args, **_kwargs)
         return val
-    def SetFonts(self, *_args, **_kwargs):
-        val = htmlc.wxHtmlEasyPrinting_SetFonts(self, *_args, **_kwargs)
-        return val
     def GetPrintData(self, *_args, **_kwargs):
         val = htmlc.wxHtmlEasyPrinting_GetPrintData(self, *_args, **_kwargs)
         if val: val = wxPrintDataPtr(val) 

@@ -3328,15 +3328,15 @@ static void  wxColourDatabase_Append(wxColourDatabase *self,const wxString & nam
             if ( !cName2.Replace(wxT("GRAY"), wxT("GREY")) )
                 cName2.clear();
 
-            wxNode *node = self->GetFirst();
+            wxNode *node = self->First();
             while ( node ) {
                 const wxChar *key = node->GetKeyString();
                 if ( cName == key || cName2 == key ) {
-                    wxColour* c = (wxColour *)node->GetData();
+                    wxColour* c = (wxColour *)node->Data();
                     c->Set(red, green, blue);
                     return;
                 }
-                node = node->GetNext();
+                node = node->Next();
             }
 
             // otherwise append the new colour

@@ -57,7 +57,6 @@ wxART_ERROR                = 'wxART_ERROR'
 wxART_QUESTION             = 'wxART_QUESTION'
 wxART_WARNING              = 'wxART_WARNING'
 wxART_INFORMATION          = 'wxART_INFORMATION'
-wxART_MISSING_IMAGE        = 'wxART_MISSING_IMAGE'
 
 class wxSystemSettingsPtr :
     def __init__(self,this):
@@ -408,6 +407,9 @@ class wxLogPtr :
         self.thisown = 0
     def Flush(self, *_args, **_kwargs):
         val = misc2c.wxLog_Flush(self, *_args, **_kwargs)
+        return val
+    def HasPendingMessages(self, *_args, **_kwargs):
+        val = misc2c.wxLog_HasPendingMessages(self, *_args, **_kwargs)
         return val
     def GetVerbose(self, *_args, **_kwargs):
         val = misc2c.wxLog_GetVerbose(self, *_args, **_kwargs)

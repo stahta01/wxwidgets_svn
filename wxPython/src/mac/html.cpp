@@ -1314,7 +1314,7 @@ static void *SwigwxHtmlWinParserTowxObject(void *ptr) {
 static PyObject *_wrap_new_wxHtmlWinParser(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
     wxHtmlWinParser * _result;
-    wxHtmlWindow * _arg0 = (wxHtmlWindow *) NULL;
+    wxPyHtmlWindow * _arg0 = (wxPyHtmlWindow *) NULL;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "wnd", NULL };
     char _ptemp[128];
@@ -1324,8 +1324,8 @@ static PyObject *_wrap_new_wxHtmlWinParser(PyObject *self, PyObject *args, PyObj
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlWindow_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of new_wxHtmlWinParser. Expected _wxHtmlWindow_p.");
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxPyHtmlWindow_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of new_wxHtmlWinParser. Expected _wxPyHtmlWindow_p.");
         return NULL;
         }
     }
@@ -1469,7 +1469,7 @@ static PyObject *_wrap_wxHtmlWinParser_GetCharWidth(PyObject *self, PyObject *ar
 #define wxHtmlWinParser_GetWindow(_swigobj)  (_swigobj->GetWindow())
 static PyObject *_wrap_wxHtmlWinParser_GetWindow(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
-    wxHtmlWindow * _result;
+    wxPyHtmlWindow * _result;
     wxHtmlWinParser * _arg0;
     PyObject * _argo0 = 0;
     char *_kwnames[] = { "self", NULL };
@@ -1486,7 +1486,7 @@ static PyObject *_wrap_wxHtmlWinParser_GetWindow(PyObject *self, PyObject *args,
     }
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
-    _result = (wxHtmlWindow *)wxHtmlWinParser_GetWindow(_arg0);
+    _result = (wxPyHtmlWindow *)wxHtmlWinParser_GetWindow(_arg0);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
@@ -3231,11 +3231,12 @@ static PyObject *_wrap_wxHtmlCell_AdjustPagebreak(PyObject *self, PyObject *args
     wxHtmlCell * _arg0;
     int * _arg1;
     PyObject * _argo0 = 0;
-    PyObject * _argo1 = 0;
-    char *_kwnames[] = { "self","pagebreak", NULL };
+    int  temp;
+    PyObject * _obj1 = 0;
+    char *_kwnames[] = { "self","INOUT", NULL };
 
     self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxHtmlCell_AdjustPagebreak",_kwnames,&_argo0,&_argo1)) 
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxHtmlCell_AdjustPagebreak",_kwnames,&_argo0,&_obj1)) 
         return NULL;
     if (_argo0) {
         if (_argo0 == Py_None) { _arg0 = NULL; }
@@ -3244,13 +3245,10 @@ static PyObject *_wrap_wxHtmlCell_AdjustPagebreak(PyObject *self, PyObject *args
         return NULL;
         }
     }
-    if (_argo1) {
-        if (_argo1 == Py_None) { _arg1 = NULL; }
-        else if (SWIG_GetPtrObj(_argo1,(void **) &_arg1,"_int_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of wxHtmlCell_AdjustPagebreak. Expected _int_p.");
-        return NULL;
-        }
-    }
+{
+  temp = (int) PyInt_AsLong(_obj1);
+  _arg1 = &temp;
+}
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
     _result = (bool )wxHtmlCell_AdjustPagebreak(_arg0,_arg1);
@@ -3258,6 +3256,11 @@ static PyObject *_wrap_wxHtmlCell_AdjustPagebreak(PyObject *self, PyObject *args
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
 }    _resultobj = Py_BuildValue("i",_result);
+{
+    PyObject *o;
+    o = PyInt_FromLong((long) (*_arg1));
+    _resultobj = t_output_helper(_resultobj, o);
+}
     return _resultobj;
 }
 
@@ -4454,6 +4457,45 @@ static PyObject *_wrap_wxHtmlWindow_LoadPage(PyObject *self, PyObject *args, PyO
 {
     PyThreadState* __tstate = wxPyBeginAllowThreads();
     _result = (bool )wxHtmlWindow_LoadPage(_arg0,*_arg1);
+
+    wxPyEndAllowThreads(__tstate);
+    if (PyErr_Occurred()) return NULL;
+}    _resultobj = Py_BuildValue("i",_result);
+{
+    if (_obj1)
+        delete _arg1;
+}
+    return _resultobj;
+}
+
+#define wxHtmlWindow_LoadFile(_swigobj,_swigarg0)  (_swigobj->LoadFile(_swigarg0))
+static PyObject *_wrap_wxHtmlWindow_LoadFile(PyObject *self, PyObject *args, PyObject *kwargs) {
+    PyObject * _resultobj;
+    bool  _result;
+    wxPyHtmlWindow * _arg0;
+    wxString * _arg1;
+    PyObject * _argo0 = 0;
+    PyObject * _obj1 = 0;
+    char *_kwnames[] = { "self","filename", NULL };
+
+    self = self;
+    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OO:wxHtmlWindow_LoadFile",_kwnames,&_argo0,&_obj1)) 
+        return NULL;
+    if (_argo0) {
+        if (_argo0 == Py_None) { _arg0 = NULL; }
+        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxPyHtmlWindow_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlWindow_LoadFile. Expected _wxPyHtmlWindow_p.");
+        return NULL;
+        }
+    }
+{
+    _arg1 = wxString_in_helper(_obj1);
+    if (_arg1 == NULL)
+        return NULL;
+}
+{
+    PyThreadState* __tstate = wxPyBeginAllowThreads();
+    _result = (bool )wxHtmlWindow_LoadFile(_arg0,*_arg1);
 
     wxPyEndAllowThreads(__tstate);
     if (PyErr_Occurred()) return NULL;
@@ -6451,68 +6493,6 @@ static PyObject *_wrap_wxHtmlEasyPrinting_SetFooter(PyObject *self, PyObject *ar
     return _resultobj;
 }
 
-static void  wxHtmlEasyPrinting_SetFonts(wxHtmlEasyPrinting *self,wxString  normal_face,wxString  fixed_face,PyObject * sizes) {
-            int* temp = NULL;
-            if (sizes) temp = int_LIST_helper(sizes);
-            self->SetFonts(normal_face, fixed_face, temp);
-            if (temp)
-                delete [] temp;
-        }
-static PyObject *_wrap_wxHtmlEasyPrinting_SetFonts(PyObject *self, PyObject *args, PyObject *kwargs) {
-    PyObject * _resultobj;
-    wxHtmlEasyPrinting * _arg0;
-    wxString * _arg1;
-    wxString * _arg2;
-    PyObject * _arg3 = (PyObject *) NULL;
-    PyObject * _argo0 = 0;
-    PyObject * _obj1 = 0;
-    PyObject * _obj2 = 0;
-    PyObject * _obj3 = 0;
-    char *_kwnames[] = { "self","normal_face","fixed_face","sizes", NULL };
-
-    self = self;
-    if(!PyArg_ParseTupleAndKeywords(args,kwargs,"OOO|O:wxHtmlEasyPrinting_SetFonts",_kwnames,&_argo0,&_obj1,&_obj2,&_obj3)) 
-        return NULL;
-    if (_argo0) {
-        if (_argo0 == Py_None) { _arg0 = NULL; }
-        else if (SWIG_GetPtrObj(_argo0,(void **) &_arg0,"_wxHtmlEasyPrinting_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of wxHtmlEasyPrinting_SetFonts. Expected _wxHtmlEasyPrinting_p.");
-        return NULL;
-        }
-    }
-{
-    _arg1 = wxString_in_helper(_obj1);
-    if (_arg1 == NULL)
-        return NULL;
-}
-{
-    _arg2 = wxString_in_helper(_obj2);
-    if (_arg2 == NULL)
-        return NULL;
-}
-    if (_obj3)
-{
-  _arg3 = _obj3;
-}
-{
-    PyThreadState* __tstate = wxPyBeginAllowThreads();
-    wxHtmlEasyPrinting_SetFonts(_arg0,*_arg1,*_arg2,_arg3);
-
-    wxPyEndAllowThreads(__tstate);
-    if (PyErr_Occurred()) return NULL;
-}    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-{
-    if (_obj1)
-        delete _arg1;
-}
-{
-    if (_obj2)
-        delete _arg2;
-}
-    return _resultobj;
-}
-
 #define wxHtmlEasyPrinting_GetPrintData(_swigobj)  (_swigobj->GetPrintData())
 static PyObject *_wrap_wxHtmlEasyPrinting_GetPrintData(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject * _resultobj;
@@ -6586,7 +6566,6 @@ static PyObject *_wrap_wxHtmlEasyPrinting_GetPageSetupData(PyObject *self, PyObj
 static PyMethodDef htmlcMethods[] = {
 	 { "wxHtmlEasyPrinting_GetPageSetupData", (PyCFunction) _wrap_wxHtmlEasyPrinting_GetPageSetupData, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_GetPrintData", (PyCFunction) _wrap_wxHtmlEasyPrinting_GetPrintData, METH_VARARGS | METH_KEYWORDS },
-	 { "wxHtmlEasyPrinting_SetFonts", (PyCFunction) _wrap_wxHtmlEasyPrinting_SetFonts, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_SetFooter", (PyCFunction) _wrap_wxHtmlEasyPrinting_SetFooter, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_SetHeader", (PyCFunction) _wrap_wxHtmlEasyPrinting_SetHeader, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlEasyPrinting_PageSetup", (PyCFunction) _wrap_wxHtmlEasyPrinting_PageSetup, METH_VARARGS | METH_KEYWORDS },
@@ -6638,6 +6617,7 @@ static PyMethodDef htmlcMethods[] = {
 	 { "wxHtmlWindow_GetOpenedAnchor", (PyCFunction) _wrap_wxHtmlWindow_GetOpenedAnchor, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlWindow_GetOpenedPage", (PyCFunction) _wrap_wxHtmlWindow_GetOpenedPage, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlWindow_AppendToPage", (PyCFunction) _wrap_wxHtmlWindow_AppendToPage, METH_VARARGS | METH_KEYWORDS },
+	 { "wxHtmlWindow_LoadFile", (PyCFunction) _wrap_wxHtmlWindow_LoadFile, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlWindow_LoadPage", (PyCFunction) _wrap_wxHtmlWindow_LoadPage, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlWindow_SetPage", (PyCFunction) _wrap_wxHtmlWindow_SetPage, METH_VARARGS | METH_KEYWORDS },
 	 { "wxHtmlWindow__setCallbackInfo", (PyCFunction) _wrap_wxHtmlWindow__setCallbackInfo, METH_VARARGS | METH_KEYWORDS },
