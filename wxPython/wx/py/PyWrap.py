@@ -5,15 +5,14 @@ __author__ = "Patrick K. O'Brien <pobrien@orbtech.com>"
 __cvsid__ = "$Id$"
 __revision__ = "$Revision$"[11:-2]
 
-import wx
-from wx import py
-
 import os
 import sys
+import wx
+from wx.py.crust import CrustFrame
 
 def wrap(app):
     wx.InitAllImageHandlers()
-    frame = py.crust.CrustFrame()
+    frame = CrustFrame()
     frame.SetSize((750, 525))
     frame.Show(True)
     frame.shell.interp.locals['app'] = app

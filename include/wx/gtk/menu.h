@@ -48,9 +48,8 @@ public:
     // common part of Append and Insert
     bool GtkAppend(wxMenu *menu, const wxString& title);
 
-#ifndef __WXGTK20__
     GtkAccelGroup   *m_accel;
-#endif
+    GtkItemFactory  *m_factory;
     GtkWidget       *m_menubar;
     long             m_style;
     wxWindow        *m_invokingWindow;
@@ -88,6 +87,7 @@ public:
     GtkWidget       *m_menu;  // GtkMenu
     GtkWidget       *m_owner;
     GtkAccelGroup   *m_accel;
+    GtkItemFactory  *m_factory;
 
 private:
     // common code for all constructors:
@@ -96,7 +96,9 @@ private:
     // common part of Append and Insert
     bool GtkAppend(wxMenuItem *item);
 
-	GtkWidget *m_prevRadio;
+    // if the last menu item was a radio one, this field contains its path,
+    // otherwise it is empty
+    wxString m_pathLastRadio;
 
     DECLARE_DYNAMIC_CLASS(wxMenu)
 };

@@ -6,8 +6,6 @@ try:
 except NameError:
     __builtins__.True = 1==1
     __builtins__.False = 1==0
-    def bool(value): return not not value
-    __builtins__.bool = bool
 
 
 

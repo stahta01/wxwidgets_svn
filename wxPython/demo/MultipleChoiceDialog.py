@@ -14,9 +14,7 @@ def runTest(frame, nb, log):
                                 "m.s.d.", lst)
 
     if (dlg.ShowModal() == wx.ID_OK):
-        log.write("Selection: %s -> %s\n" % (dlg.GetValue(), dlg.GetValueString()))
-
-    dlg.Destroy()
+        print "Selection:", dlg.GetValue(), " -> ", dlg.GetValueString()
 
 #---------------------------------------------------------------------------
 

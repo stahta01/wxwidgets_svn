@@ -68,7 +68,7 @@ _treeList = [
 
     # dialogs from libraries
     ('More Dialogs', [
-        ##'ErrorDialogs',
+        'ErrorDialogs',
         'ImageBrowser',
         'MultipleChoiceDialog',
         'ScrolledMessageDialog',
@@ -76,7 +76,6 @@ _treeList = [
 
     # core controls
     ('Core Windows/Controls', [
-        'BitmapButton',
         'Button',
         'CheckBox',
         'CheckListBox',
@@ -174,7 +173,7 @@ _treeList = [
     ('Process and Events', [
         'EventManager',
         'KeyEvents',
-        ##'OOR',
+        'OOR',
         'Process',
         'PythonEvents',
         'Threads',
@@ -722,7 +721,6 @@ class wxPythonDemo(wx.Frame):
                 self.txt.Clear()
                 self.window = None
 
-        self.tree.SetFocus()
 
 
     #---------------------------------------------
