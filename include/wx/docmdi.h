@@ -18,7 +18,7 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_MDI_ARCHITECTURE
+#if wxUSE_MDI_ARCHITECTURE && wxUSE_DOC_VIEW_ARCHITECTURE
 
 #include "wx/docview.h"
 #include "wx/mdi.h"
@@ -49,7 +49,6 @@ protected:
 private:
     DECLARE_CLASS(wxDocMDIParentFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDocMDIParentFrame)
 };
 
 /*
@@ -83,7 +82,6 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_CLASS(wxDocMDIChildFrame)
-    DECLARE_NO_COPY_CLASS(wxDocMDIChildFrame)
 };
 
 #endif

@@ -82,8 +82,6 @@ private:
     wxScrollHelper *m_scrollHelper;
 
     bool m_hasDrawnWindow;
-
-    DECLARE_NO_COPY_CLASS(wxScrollHelperEvtHandler)
 };
 
 // ----------------------------------------------------------------------------
@@ -106,8 +104,6 @@ private:
     wxEventType m_eventType;
     int m_pos,
         m_orient;
-
-    DECLARE_NO_COPY_CLASS(wxAutoScrollTimer)
 };
 
 // ============================================================================
@@ -355,7 +351,7 @@ void wxScrollHelper::SetScrollbars(int pixelsPerUnitX,
 #else
     int x = noUnitsX * pixelsPerUnitX;
     int y = noUnitsY * pixelsPerUnitY;
-#endif    
+#endif
     m_targetWindow->SetVirtualSizeHints( x, y );
 
     // The above should arguably be deprecated, this however we still need.
@@ -956,7 +952,7 @@ void wxScrollHelper::HandleOnChar(wxKeyEvent& event)
         yScrollOld = m_yScrollPosition;
 
     int dsty;
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_PAGEUP:
         case WXK_PRIOR:

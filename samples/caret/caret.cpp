@@ -383,7 +383,7 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
 void MyCanvas::OnChar( wxKeyEvent &event )
 {
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_LEFT:
             PrevChar();
@@ -415,9 +415,9 @@ void MyCanvas::OnChar( wxKeyEvent &event )
             break;
 
         default:
-            if ( !event.AltDown() && wxIsprint(event.GetKeyCode()) )
+            if ( !event.AltDown() && wxIsprint(event.KeyCode()) )
             {
-                wxChar ch = (wxChar)event.GetKeyCode();
+                wxChar ch = (wxChar)event.KeyCode();
                 CharAt(m_xCaret, m_yCaret) = ch;
 
                 wxCaretSuspend cs(this);

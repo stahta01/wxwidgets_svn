@@ -81,9 +81,6 @@ public:
     }
 
     virtual ~wxFontRefData();
-    void SetNoAntiAliasing( bool no = TRUE ) { m_noAA = no; }
-    bool GetNoAntiAliasing() { return m_noAA; }
-    
 protected:
     // common part of all ctors
     void Init(int size,
@@ -103,7 +100,6 @@ protected:
     bool           m_underlined;
     wxString       m_faceName;
     wxFontEncoding m_encoding;
-    bool            m_noAA;      // No anti-aliasing
     
 public:
     short	   m_macFontNum;
@@ -188,9 +184,6 @@ public:
 
     virtual bool RealizeResource();
 
-    // Unofficial API, don't use
-    virtual void SetNoAntiAliasing( bool noAA = TRUE ) ;
-    virtual bool GetNoAntiAliasing() ;
 protected:
     // common part of all ctors
     void Init();

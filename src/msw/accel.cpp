@@ -41,8 +41,6 @@ public:
 protected:
     HACCEL      m_hAccel;
     bool        m_ok;
-
-    DECLARE_NO_COPY_CLASS(wxAcceleratorRefData)
 };
 
 #define M_ACCELDATA ((wxAcceleratorRefData *)m_refData)
@@ -96,7 +94,7 @@ wxAcceleratorTable::wxAcceleratorTable(const wxString& resource)
 extern int wxCharCodeWXToMSW(int id, bool *isVirtual);
 
 // Create from an array
-#if !defined(__WIN16__) && !defined(__TWIN32__)
+#if !defined(__WIN16__) && !defined(__TWIN32__) && !defined(__WXWINE__)
 wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[])
 {
     // Not available in WIN16

@@ -91,7 +91,7 @@ public:
     wxList& GetCommands() const { return (wxList&) m_commands; }
     wxCommand *GetCurrentCommand() const
     {
-        return (wxCommand *)(m_currentCommand ? m_currentCommand->GetData() : NULL);
+        return (wxCommand *)(m_currentCommand ? m_currentCommand->Data() : NULL);
     }
     int GetMaxCommands() const { return m_maxNoCommands; }
     virtual void ClearCommands();
@@ -123,7 +123,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxCommandProcessor)
-    DECLARE_NO_COPY_CLASS(wxCommandProcessor)
 };
 
 #endif // _WX_CMDPROC_H_

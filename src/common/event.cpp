@@ -570,12 +570,7 @@ wxKeyEvent::wxKeyEvent(const wxKeyEvent& evt)
     m_uniChar = evt.m_uniChar;
 #endif
 }
-
-long wxKeyEvent::KeyCode() const
-{
-    return m_keyCode;
-}
-
+    
 wxWindowCreateEvent::wxWindowCreateEvent(wxWindow *win)
 {
     SetEventType(wxEVT_CREATE);
@@ -633,19 +628,19 @@ wxEvtHandler::~wxEvtHandler()
 
     if (m_dynamicEvents)
     {
-        wxNode *node = m_dynamicEvents->GetFirst();
+        wxNode *node = m_dynamicEvents->First();
         while (node)
         {
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxEventTableEntry *entry = (wxEventTableEntry*)node->GetData();
+            wxEventTableEntry *entry = (wxEventTableEntry*)node->Data();
 #else // !WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->GetData();
+            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->Data();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
             if (entry->m_callbackUserData)
                 delete entry->m_callbackUserData;
             delete entry;
-            node = node->GetNext();
+            node = node->Next();
         }
         delete m_dynamicEvents;
     };
@@ -730,10 +725,10 @@ void wxEvtHandler::ProcessPendingEvents()
     wxENTER_CRIT_SECT( *m_eventsLocker);
 #endif
 
-    wxNode *node = m_pendingEvents->GetFirst();
+    wxNode *node = m_pendingEvents->First();
     while ( node )
     {
-        wxEvent *event = (wxEvent *)node->GetData();
+        wxEvent *event = (wxEvent *)node->Data();
         delete node;
 
         // In ProcessEvent, new events might get added and
@@ -751,7 +746,7 @@ void wxEvtHandler::ProcessPendingEvents()
         wxENTER_CRIT_SECT( *m_eventsLocker);
 #endif
 
-        node = m_pendingEvents->GetFirst();
+        node = m_pendingEvents->First();
     }
 
 #if defined(__VISAGECPP__)
@@ -996,13 +991,13 @@ bool wxEvtHandler::Disconnect( int id, int lastId, wxEventType eventType,
     if (!m_dynamicEvents)
         return FALSE;
 
-    wxNode *node = m_dynamicEvents->GetFirst();
+    wxNode *node = m_dynamicEvents->First();
     while (node)
     {
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxEventTableEntry *entry = (wxEventTableEntry*)node->GetData();
+            wxEventTableEntry *entry = (wxEventTableEntry*)node->Data();
 #else // !WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->GetData();
+            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->Data();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
         if ((entry->m_id == id) &&
@@ -1017,7 +1012,7 @@ bool wxEvtHandler::Disconnect( int id, int lastId, wxEventType eventType,
             delete entry;
             return TRUE;
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return FALSE;
 }
@@ -1029,13 +1024,13 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
 
     int commandId = event.GetId();
 
-    wxNode *node = m_dynamicEvents->GetFirst();
+    wxNode *node = m_dynamicEvents->First();
     while (node)
     {
 #if WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxEventTableEntry *entry = (wxEventTableEntry*)node->GetData();
+            wxEventTableEntry *entry = (wxEventTableEntry*)node->Data();
 #else // !WXWIN_COMPATIBILITY_EVENT_TYPES
-            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->GetData();
+            wxDynamicEventTableEntry *entry = (wxDynamicEventTableEntry*)node->Data();
 #endif // WXWIN_COMPATIBILITY_EVENT_TYPES/!WXWIN_COMPATIBILITY_EVENT_TYPES
 
         if (entry->m_fn)
@@ -1058,7 +1053,7 @@ bool wxEvtHandler::SearchDynamicEventTable( wxEvent& event )
                     return TRUE;
             }
         }
-        node = node->GetNext();
+        node = node->Next();
     }
     return FALSE;
 };

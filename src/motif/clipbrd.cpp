@@ -26,9 +26,6 @@
 #include "wx/clipbrd.h"
 #include "wx/dataobj.h"
 
-#include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxDataObjectList);
-
 #ifdef __VMS__
 #pragma message disable nosimpint
 #endif
@@ -256,12 +253,12 @@ wxClipboard::~wxClipboard()
 
 void wxClipboard::Clear()
 {
-    wxDataObjectList::Node* node = m_data.GetFirst();
+    wxNode* node = m_data.First();
     while (node)
     {
-        wxDataObject* data = node->GetData();
+        wxDataObject* data = (wxDataObject*) node->Data();
         delete data;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_data.Clear();
 }

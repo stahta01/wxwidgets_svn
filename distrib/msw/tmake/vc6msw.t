@@ -60,7 +60,7 @@
 	$project{"WXHTMLHEADERS"} .= $file . " "
     }
 
-    $project{"WXVERSION"} = "250";
+    $project{"WXVERSION"} = "233";
 #$}
 # Microsoft Developer Studio Project File - Name="wxWindows" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
@@ -336,6 +336,37 @@ SOURCE=.\common\dosyacc.c
 
 SOURCE=.\msw\dummy.cpp
 # ADD CPP /Yc"wx/wxprec.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\msw\version.rc
+
+!IF  "$(CFG)" == "wxWindows - Win32 Release Unicode DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug Unicode DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release Unicode"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug Unicode"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug DLL"
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "wxWindows - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 #$ ExpandGlue("WXMSWSRCS", "# Begin Source File\n\nSOURCE=.\\msw\\", "\n# End Source File\n# Begin Source File\n\nSOURCE=.\\msw\\", "\n# End Source File\n");
 #$ ExpandGlue("WXMSWCSRCS", "# Begin Source File\n\nSOURCE=.\\msw\\", "\n# SUBTRACT CPP /YX /Yc /Yu\n# End Source File\n# Begin Source File\n\nSOURCE=.\\msw\\", "\n# SUBTRACT CPP /YX /Yc /Yu\n# End Source File\n");

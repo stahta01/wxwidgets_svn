@@ -845,11 +845,9 @@ int GetIndex()
 void ReadPreferences()
 {
 #if wxUSE_RESOURCES
-#if wxUSE_RESOURCES
   wxGetResource("wxPoem", "FontSize", &pointSize);
   wxGetResource("wxPoem", "X", &XPos);
   wxGetResource("wxPoem", "Y", &YPos);
-#endif
 #endif
 }
 
@@ -859,11 +857,9 @@ void WritePreferences()
 #ifdef __WXMSW__
   TheMainWindow->GetPosition(&XPos, &YPos);
 #if wxUSE_RESOURCES
-#if wxUSE_RESOURCES
   wxWriteResource("wxPoem", "FontSize", pointSize);
   wxWriteResource("wxPoem", "X", XPos);
   wxWriteResource("wxPoem", "Y", YPos);
-#endif
 #endif
 #endif
 }

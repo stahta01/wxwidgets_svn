@@ -5,11 +5,11 @@
 # 
 #
 
-OUTPUTDIR = Watcom\
+WXDIR = $(%WXWIN)
 
 PROGRAM = minimal
-OBJECTS = $(OUTPUTDIR)$(PROGRAM).obj
+OBJECTS = $(PROGRAM).obj
 
-!include $(%WXWIN)\src\makeprog.wat
+!include $(WXDIR)\src\makeprog.wat
 
 

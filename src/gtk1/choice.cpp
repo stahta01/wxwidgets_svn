@@ -143,7 +143,7 @@ void wxChoice::DoSetItemClientData( int n, void* clientData )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid choice control") );
 
-    wxNode *node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_RET( node, wxT("invalid index in wxChoice::DoSetItemClientData") );
 
     node->SetData( (wxObject*) clientData );
@@ -153,17 +153,17 @@ void* wxChoice::DoGetItemClientData( int n ) const
 {
     wxCHECK_MSG( m_widget != NULL, NULL, wxT("invalid choice control") );
 
-    wxNode *node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_MSG( node, NULL, wxT("invalid index in wxChoice::DoGetItemClientData") );
 
-    return node->GetData();
+    return node->Data();
 }
 
 void wxChoice::DoSetItemClientObject( int n, wxClientData* clientData )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid choice control") );
 
-    wxNode *node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_RET( node, wxT("invalid index in wxChoice::DoSetItemClientObject") );
 
     // wxItemContainer already deletes data for us
@@ -175,11 +175,11 @@ wxClientData* wxChoice::DoGetItemClientObject( int n ) const
 {
     wxCHECK_MSG( m_widget != NULL, (wxClientData*) NULL, wxT("invalid choice control") );
 
-    wxNode *node = m_clientList.Item( n );
+    wxNode *node = m_clientList.Nth( n );
     wxCHECK_MSG( node, (wxClientData *)NULL,
                  wxT("invalid index in wxChoice::DoGetItemClientObject") );
 
-    return (wxClientData*) node->GetData();
+    return (wxClientData*) node->Data();
 }
 
 void wxChoice::Clear()
@@ -195,11 +195,11 @@ void wxChoice::Clear()
         // destroy the data (due to Robert's idea of using wxList<wxObject>
         // and not wxList<wxClientData> we can't just say
         // m_clientList.DeleteContents(TRUE) - this would crash!
-        wxNode *node = m_clientList.GetFirst();
+        wxNode *node = m_clientList.First();
         while ( node )
         {
-            delete (wxClientData *)node->GetData();
-            node = node->GetNext();
+            delete (wxClientData *)node->Data();
+            node = node->Next();
         }
     }
     m_clientList.Clear();
@@ -448,11 +448,14 @@ wxSize wxChoice::DoGetBestSize() const
     ret.x = 0;
     if ( m_widget )
     {
-        int width;
+        GdkFont *font = m_font.GetInternalFont();
+
+        wxCoord width;
         size_t count = GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
-            GetTextExtent( GetString(n), &width, NULL, NULL, NULL, &m_font );
+            // FIXME GTK 2.0
+            width = (wxCoord)gdk_string_width(font, wxGTK_CONV( GetString(n) ) );
             if ( width > ret.x )
                 ret.x = width;
         }

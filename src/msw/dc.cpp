@@ -132,30 +132,6 @@ private:
     bool m_changed;
 };
 
-// this class saves the old stretch blit mode during its life time
-class StretchBltModeChanger
-{
-public:
-    StretchBltModeChanger(HDC hdc, int mode)
-        : m_hdc(hdc)
-    {
-        m_modeOld = ::SetStretchBltMode(m_hdc, mode);
-        if ( !m_modeOld )
-            wxLogLastError(_T("SetStretchBltMode"));
-    }
-
-    ~StretchBltModeChanger()
-    {
-        if ( !::SetStretchBltMode(m_hdc, m_modeOld) )
-            wxLogLastError(_T("SetStretchBltMode"));
-    }
-
-private:
-    const HDC m_hdc;
-
-    int m_modeOld;
-};
-
 // ===========================================================================
 // implementation
 // ===========================================================================
@@ -1832,16 +1808,10 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
         if (wxSystemOptions::GetOptionInt(wxT("no-maskblt")) == 0)
 #endif
         {
-           success = ::MaskBlt
-                       (
-                            GetHdc(),
-                            xdest, ydest, width, height,
-                            GetHdcOf(*source),
-                            xsrc, ysrc,
-                            (HBITMAP)mask->GetMaskBitmap(),
-                            xsrcMask, ysrcMask,
-                            MAKEROP4(dwRop, DSTCOPY)
-                        ) != 0;
+           success = ::MaskBlt(GetHdc(), xdest, ydest, width, height,
+                            GetHdcOf(*source), xsrc, ysrc,
+                            (HBITMAP)mask->GetMaskBitmap(), xsrcMask, ysrcMask,
+                            MAKEROP4(dwRop, DSTCOPY)) != 0;
         }
 
         if ( !success )
@@ -1931,39 +1901,14 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
     }
     else // no mask, just BitBlt() it
     {
-        // use StretchBlt() if available
-        if ( ::GetDeviceCaps(GetHdc(), RASTERCAPS) & RC_STRETCHBLT )
-        {
-            StretchBltModeChanger changeMode(GetHdc(), COLORONCOLOR);
-
-            success = ::StretchBlt
-                        (
-                            GetHdc(),
-                            xdest, ydest, width, height,
-                            GetHdcOf(*source),
-                            xsrc, ysrc, width, height,
-                            dwRop
-                        ) != 0;
-        }
-        else
-        {
-            success = ::BitBlt
-                        (
-                            GetHdc(),
-                            xdest, ydest,
-                            (int)width, (int)height,
-                            GetHdcOf(*source),
-                            xsrc, ysrc,
-                            dwRop
-                        ) != 0;
-        }
-
+        success = ::BitBlt(GetHdc(), xdest, ydest,
+                           (int)width, (int)height,
+                           GetHdcOf(*source), xsrc, ysrc, dwRop) != 0;
         if ( !success )
         {
-            wxLogLastError(wxT("BitBlt/StretchBlt"));
+            wxLogLastError(wxT("BitBlt"));
         }
     }
-
     ::SetTextColor(GetHdc(), old_textground);
     ::SetBkColor(GetHdc(), old_background);
 
@@ -2034,6 +1979,25 @@ void wxDC::SetLogicalScale(double x, double y)
     m_logicalScaleX = x;
     m_logicalScaleY = y;
 }
+
+#if WXWIN_COMPATIBILITY
+void wxDC::DoGetTextExtent(const wxString& string, float *x, float *y,
+                         float *descent, float *externalLeading,
+                         wxFont *theFont, bool use16bit) const
+{
+#ifdef __WXMICROWIN__
+    if (!GetHDC()) return;
+#endif
+
+    wxCoord x1, y1, descent1, externalLeading1;
+    GetTextExtent(string, & x1, & y1, & descent1, & externalLeading1, theFont, use16bit);
+    *x = x1; *y = y1;
+    if (descent)
+        *descent = descent1;
+    if (externalLeading)
+        *externalLeading = externalLeading1;
+}
+#endif
 
 #if wxUSE_DC_CACHEING
 

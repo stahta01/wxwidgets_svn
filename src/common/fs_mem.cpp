@@ -57,8 +57,6 @@ class MemFSHashObj : public wxObject
         char *m_Data;
         size_t m_Len;
         wxDateTime m_Time;
-
-    DECLARE_NO_COPY_CLASS(MemFSHashObj)
 };
 
 

@@ -159,7 +159,7 @@ typedef struct tagNMLVDISPINFOW {
 #endif
 #endif
 
-#if ((defined(__WATCOMC__) && __WATCOMC__ >= 1200) || defined(__GNUWIN32__)) && !defined(HDN_GETDISPINFOW)
+#if (defined(__GNUWIN32__) || defined __BORLANDC__) && !defined(HDN_GETDISPINFOW)
 #define HDN_GETDISPINFOW (HDN_FIRST-29)
 typedef struct {
         NMHDR hdr;
@@ -241,6 +241,20 @@ struct HH_AKLINK
 
 #ifndef QS_ALLPOSTMESSAGE
     #define QS_ALLPOSTMESSAGE    0x0100
+#endif
+
+#ifdef __WXWINE__
+#define LV_ITEMA LVITEMA
+#define LV_ITEMW LVITEMW
+#define LV_DISPINFOA NMLVDISPINFOA
+#define LV_DISPINFOW NMLVDISPINFOW
+
+#if wxUSE_UNICODE
+#define LV_FINDINFO LVFINDINFOW
+#else
+#define LV_FINDINFO LVFINDINFOA
+#endif
+
 #endif
 
 #endif

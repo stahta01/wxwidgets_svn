@@ -224,8 +224,6 @@ private:
     wxString m_filespec;
 
     int      m_flags;
-
-    DECLARE_NO_COPY_CLASS(wxDirData)
 };
 
 // ============================================================================

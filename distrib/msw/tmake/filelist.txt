@@ -123,7 +123,7 @@ wizard.cpp	Generic
 appcmn.cpp	Common	Base
 artprov.cpp	Common
 artstd.cpp	Common
-bmpbase.cpp	Common	NotGTK,NotOS2,NotMSW,NotMicro
+bmpbase.cpp	Common	NotGTK,NotOS2,NotMSW,NotX,NotMicro
 choiccmn.cpp	Common
 clipcmn.cpp	Common
 clntdata.cpp	Common	Base
@@ -322,7 +322,7 @@ menu.cpp	MSW
 menuitem.cpp	MSW
 metafile.cpp	MSW
 mimetype.cpp	MSW	Win32Only,Base
-minifram.cpp	MSW	LowLevel
+minifram.cpp	MSW
 msgdlg.cpp	MSW
 mslu.cpp	MSW
 nativdlg.cpp	MSW
@@ -614,7 +614,6 @@ stattext.cpp	Motif
 toolbar.cpp	Motif
 textctrl.cpp	Motif
 timer.cpp	Motif
-toplevel.cpp	Motif
 utils.cpp	Motif
 window.cpp	Motif
 
@@ -1198,7 +1197,6 @@ stattext.h	MotifH
 textctrl.h	MotifH
 timer.h	MotifH
 toolbar.h	MotifH
-toplevel.h	MotifH
 window.h	MotifH
 
 app.h	X11H

@@ -26,7 +26,6 @@
 #include "wx/intl.h"
 #include "wx/app.h"
 #include "wx/settings.h"
-#include "wx/tokenzr.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -119,14 +118,6 @@ wxString wxFileSelectorEx(const char *title,
 wxString wxFileDialog::m_fileSelectorAnswer = "";
 bool wxFileDialog::m_fileSelectorReturned = FALSE;
 
-static void wxFileSelClose(Widget WXUNUSED(w),
-                           void* WXUNUSED(client_data),
-                           XmAnyCallbackStruct *WXUNUSED(call_data))
-{
-    wxFileDialog::m_fileSelectorAnswer = "";
-    wxFileDialog::m_fileSelectorReturned = TRUE;
-}
-
 void wxFileSelCancel( Widget WXUNUSED(fs), XtPointer WXUNUSED(client_data),
                      XmFileSelectionBoxCallbackStruct *WXUNUSED(cbs) )
 {
@@ -147,26 +138,6 @@ void wxFileSelOk(Widget WXUNUSED(fs), XtPointer WXUNUSED(client_data), XmFileSel
         }
         wxFileDialog::m_fileSelectorReturned = TRUE;
     }
-}
-
-static wxString ParseWildCard( const wxString& wild )
-{
-    static const wxChar* msg =
-        _T("Motif file dialog does not understand this ")
-        _T("wildcard syntax");
-
-    wxStringTokenizer tok( wild, _T("|") );
-
-    wxCHECK_MSG( tok.CountTokens() <= 2, _T("*.*"), msg );
-
-    if( tok.CountTokens() == 1 ) return wild;
-
-    // CountTokens == 2
-    tok.GetNextToken();
-    wxStringTokenizer tok2( tok.GetNextToken(), _T(";") );
-
-    wxCHECK_MSG( tok2.CountTokens() == 1, tok2.GetNextToken(), msg );
-    return tok2.GetNextToken();
 }
 
 wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
@@ -284,15 +255,13 @@ int wxFileDialog::ShowModal()
 
     if (m_wildCard != "")
     {
-        // return something understandable by Motif
-        wxString wildCard = ParseWildCard( m_wildCard );
-        wxString filter;
+        wxString filter("");
         if (m_dir != "")
-            filter = m_dir + wxString("/") + wildCard;
+            filter = m_dir + wxString("/") + m_wildCard;
         else
-            filter = wildCard;
+            filter = m_wildCard;
 
-        XmTextSetString(filterWidget, (char*)filter.c_str());
+        XmTextSetString(filterWidget, (char*) (const char*) filter);
         XmFileSelectionDoSearch(fileSel, NULL);
     }
 
@@ -312,8 +281,6 @@ int wxFileDialog::ShowModal()
 
     XtAddCallback(fileSel, XmNcancelCallback, (XtCallbackProc)wxFileSelCancel, (XtPointer)NULL);
     XtAddCallback(fileSel, XmNokCallback, (XtCallbackProc)wxFileSelOk, (XtPointer)NULL);
-    XtAddCallback(fileSel, XmNunmapCallback,
-                  (XtCallbackProc)wxFileSelClose, (XtPointer)this);
 
     //#if XmVersion > 1000
     // I'm not sure about what you mean with XmVersion.

@@ -140,7 +140,6 @@ private:
     static wxString ms_details;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogDialog)
 };
 
 BEGIN_EVENT_TABLE(wxLogDialog, wxDialog)
@@ -451,7 +450,6 @@ private:
     wxLogWindow *m_log;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxLogFrame)
 };
 
 BEGIN_EVENT_TABLE(wxLogFrame, wxFrame)
@@ -620,6 +618,8 @@ void wxLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
                 wxLog::DoLog(level, szString, t);
         }
     }
+
+    m_bHasMessages = TRUE;
 }
 
 void wxLogWindow::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
@@ -996,14 +996,14 @@ void wxLogDialog::OnDetails(wxCommandEvent& WXUNUSED(event))
     {
         m_btnDetails->SetLabel(ms_details + EXPAND_SUFFIX);
 
-        sizer->Detach( m_listctrl );
+        sizer->Remove(m_listctrl);
 
 #if wxUSE_STATLINE
-        sizer->Detach( m_statline );
+        sizer->Remove(m_statline);
 #endif // wxUSE_STATLINE
 
 #if wxUSE_FILE
-        sizer->Detach( m_btnSave );
+        sizer->Remove(m_btnSave);
 #endif // wxUSE_FILE
     }
     else // show details now
@@ -1146,7 +1146,7 @@ static int OpenLogFile(wxFile& file, wxString *pFilename)
 
 #endif // !(wxUSE_LOGGUI || wxUSE_LOGWINDOW)
 
-#if wxUSE_LOG && wxUSE_GUI && wxUSE_TEXTCTRL
+#if wxUSE_TEXTCTRL
 
 // ----------------------------------------------------------------------------
 // wxLogTextCtrl implementation
@@ -1173,6 +1173,6 @@ void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
     m_pTextCtrl->AppendText(msg);
 }
 
-#endif // wxUSE_LOG && wxUSE_GUI && wxUSE_TEXTCTRL
+#endif // wxUSE_TEXTCTRL
 
 // vi:sts=4:sw=4:et

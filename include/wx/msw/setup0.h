@@ -44,23 +44,13 @@
 // Recommended setting: 0 (please update your code instead!)
 #define WXWIN_COMPATIBILITY_2 0
 
-// This setting determines the compatibility with 2.2 API: set it to 1 to
-// enable it but please consider to update your code instead of doing it.
-//
-// Default is 0
-//
-// Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_2 1
-
 // This setting determines the compatibility with 2.2 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
-// Default is 1 but please try building your code with 0 as the default will
-// change to 0 in the next version and the deprecated functions will disappear
-// in the version after it completely.
+// Default is 1 but please try building your code with 0.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_4 1
+#define WXWIN_COMPATIBILITY_2_2 1
 
 // in wxMSW version 2.1.11 and earlier, wxIcon always derives from wxBitmap,
 // but this is very dangerous because you can mistakenly pass an icon instead
@@ -178,9 +168,7 @@
 // Default is 0
 //
 // Recommended setting: 0 (unless you only plan to use Windows NT/2000/XP)
-#ifndef wxUSE_UNICODE
-    #define wxUSE_UNICODE 0
-#endif
+#define wxUSE_UNICODE 0
 
 // Set wxUSE_UNICODE_MSLU to 1 if you want to compile wxWindows in Unicode mode
 // and be able to run compiled apps under Windows 9x as well as NT/2000/XP. This
@@ -646,10 +634,6 @@
 // wxDC cacheing implementation
 #define wxUSE_DC_CACHEING 1
 
-// Set this to 1 to enable the use of DIB's for wxBitmap to support
-// bitmaps > 16MB on Win95/98/Me.  Set to 0 to use DDB's only.
-#define wxUSE_DIB_FOR_BITMAP 0
-
 // ----------------------------------------------------------------------------
 // common dialogs
 // ----------------------------------------------------------------------------
@@ -1078,7 +1062,7 @@
 // ----------------------------------------------------------------------------
 
 #ifndef wxUSE_NORLANDER_HEADERS
-#if (defined(__WATCOMC__) && (__WATCOMC__ >= 1200)) || ((defined(__MINGW32__) || defined(__CYGWIN__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95))))
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95)))
 #   define wxUSE_NORLANDER_HEADERS 1
 #else
 #   define wxUSE_NORLANDER_HEADERS 0
@@ -1192,7 +1176,7 @@
 #define wxUSE_DEBUG_NEW_ALWAYS 0
 #endif
 
-#if defined(__WXMSW__) && (defined(__WATCOMC__) && __WATCOMC__ < 1200)
+#if defined(__WXMSW__) && defined(__WATCOMC__)
 /*
 #undef  wxUSE_GLCANVAS
 #define wxUSE_GLCANVAS 0

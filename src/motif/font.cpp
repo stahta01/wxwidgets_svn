@@ -177,12 +177,12 @@ void wxFontRefData::Init(int pointSize,
 
 wxFontRefData::~wxFontRefData()
 {
-    wxList::Node* node = m_fonts.GetFirst();
+    wxNode* node = m_fonts.First();
     while (node)
     {
-        wxXFont* f = (wxXFont*) node->GetData();
+        wxXFont* f = (wxXFont*) node->Data();
         delete f;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_fonts.Clear();
 }
@@ -500,13 +500,13 @@ wxXFont* wxFont::GetInternalFont(double scale, WXDisplay* display) const
     int pointSize = (M_FONTDATA->m_pointSize * 10 * intScale) / 100;
 
     // search existing fonts first
-    wxList::Node* node = M_FONTDATA->m_fonts.GetFirst();
+    wxNode* node = M_FONTDATA->m_fonts.First();
     while (node)
     {
-        wxXFont* f = (wxXFont*) node->GetData();
+        wxXFont* f = (wxXFont*) node->Data();
         if ((!display || (f->m_display == display)) && (f->m_scale == intScale))
             return f;
-        node = node->GetNext();
+        node = node->Next();
     }
 
     // not found, create a new one

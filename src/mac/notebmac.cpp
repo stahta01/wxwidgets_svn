@@ -9,10 +9,6 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef __GNUG__
-  #pragma implementation "notebook.h"
-#endif
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -20,6 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+#ifdef __GNUG__
+  #pragma implementation "notebook.h"
+#endif
+
 #include "wx/app.h"
 #include "wx/string.h"
 #include "wx/log.h"
@@ -355,6 +355,7 @@ void wxNotebook::MacSetupTabs()
     wxNotebookPage *page;
     ControlTabInfoRec info;
 
+    OSStatus err = noErr ;
     for(int ii = 0; ii < GetPageCount(); ii++)
     {
         page = m_pages[ii];

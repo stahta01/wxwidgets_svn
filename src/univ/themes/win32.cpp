@@ -1737,7 +1737,8 @@ void wxWin32Renderer::DrawHalfRect(wxDC& dc, wxRect *rect, const wxPen& pen)
                 rect->GetRight(), rect->GetBottom());
 
     // adjust the rect
-    rect->Inflate(-1);
+    rect->width--;
+    rect->height--;
 }
 
 void wxWin32Renderer::DrawShadedRect(wxDC& dc, wxRect *rect,
@@ -2769,9 +2770,6 @@ void wxWin32Renderer::DrawSliderTicks(wxDC& dc,
         // empty slider?
         return;
     }
-
-    // this would lead to an infinite loop below
-    wxCHECK_RET( step > 1, _T("invalid step in wxRenderer::DrawSliderTicks") );
 
     // the variable names correspond to horizontal case, but they can be used
     // for both orientations

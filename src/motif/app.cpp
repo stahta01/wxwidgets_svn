@@ -525,24 +525,24 @@ bool wxApp::SendIdleEvents(wxWindow* win)
     if (event.MoreRequested())
         needMore = TRUE;
 
-    wxWindowList::Node* node = win->GetChildren().GetFirst();
+    wxNode* node = win->GetChildren().First();
     while (node)
     {
-        wxWindow* win = node->GetData();
+        wxWindow* win = (wxWindow*) node->Data();
         if (SendIdleEvents(win))
             needMore = TRUE;
 
-        node = node->GetNext();
+        node = node->Next();
     }
     return needMore ;
 }
 
 void wxApp::DeletePendingObjects()
 {
-    wxNode *node = wxPendingDelete.GetFirst();
+    wxNode *node = wxPendingDelete.First();
     while (node)
     {
-        wxObject *obj = node->GetData();
+        wxObject *obj = (wxObject *)node->Data();
 
         delete obj;
 
@@ -551,7 +551,7 @@ void wxApp::DeletePendingObjects()
 
         // Deleting one object may have deleted other pending
         // objects, so start from beginning of list again.
-        node = wxPendingDelete.GetFirst();
+        node = wxPendingDelete.First();
     }
 }
 
@@ -566,9 +566,6 @@ static char *fallbackResources[] = {
 // Create an application context
 bool wxApp::OnInitGui()
 {
-    if( !wxAppBase::OnInitGui() )
-        return FALSE;
-
     XtToolkitInitialize() ;
     wxTheApp->m_appContext = (WXAppContext) XtCreateApplicationContext();
     XtAppSetFallbackResources((XtAppContext) wxTheApp->m_appContext, fallbackResources);

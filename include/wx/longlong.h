@@ -60,10 +60,9 @@
 #elif defined(__BORLANDC__) && defined(__WIN32__) && (__BORLANDC__ >= 0x520)
     #define wxLongLong_t __int64
     #define wxLongLongSuffix i64
-    #define wxLongLongFmtSpec _T("Ld")
+    #define wxLongLongFmtSpec _T("I64")
 #elif (defined(SIZEOF_LONG_LONG) && SIZEOF_LONG_LONG >= 8)  || \
         defined(__MINGW32__) || \
-        defined(__GNUC__) || \
         defined(__CYGWIN__) || \
         defined(__WXMICROWIN__) || \
         (defined(__DJGPP__) && __DJGPP__ >= 2)

@@ -17,9 +17,6 @@
 #endif
 
 #include "wx/defs.h"
-
-#if wxUSE_DOC_VIEW_ARCHITECTURE
-
 #include "wx/list.h"
 #include "wx/cmndata.h"
 #include "wx/string.h"
@@ -164,7 +161,6 @@ protected:
     
 private:
     DECLARE_ABSTRACT_CLASS(wxDocument)
-    DECLARE_NO_COPY_CLASS(wxDocument)
 };
 
 class WXDLLEXPORT wxView: public wxEvtHandler
@@ -225,10 +221,9 @@ protected:
     wxDocument*       m_viewDocument;
     wxString          m_viewTypeName;
     wxWindow*         m_viewFrame;
-
+    
 private:
     DECLARE_ABSTRACT_CLASS(wxView)
-    DECLARE_NO_COPY_CLASS(wxView)
 };
 
 // Represents user interface (and other) properties of documents and views
@@ -295,7 +290,6 @@ protected:
     
 private:
     DECLARE_CLASS(wxDocTemplate)
-    DECLARE_NO_COPY_CLASS(wxDocTemplate)
 };
 
 // One object of this class may be created in an application, to manage all
@@ -426,7 +420,6 @@ protected:
     static wxDocManager* sm_docManager;
 
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDocManager)
 };
 
 // ----------------------------------------------------------------------------
@@ -466,7 +459,6 @@ protected:
 private:
     DECLARE_CLASS(wxDocChildFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDocChildFrame)
 };
 
 // ----------------------------------------------------------------------------
@@ -500,7 +492,6 @@ protected:
 private:
     DECLARE_CLASS(wxDocParentFrame)
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxDocParentFrame)
 };
 
 // ----------------------------------------------------------------------------
@@ -524,7 +515,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxDocPrintout)
-    DECLARE_NO_COPY_CLASS(wxDocPrintout)
 };
 #endif // wxUSE_PRINTING_ARCHITECTURE
 
@@ -576,7 +566,6 @@ protected:
     
 private:
     DECLARE_DYNAMIC_CLASS(wxFileHistory)
-    DECLARE_NO_COPY_CLASS(wxFileHistory)
 };
 
 #if wxUSE_STD_IOSTREAM
@@ -589,8 +578,6 @@ bool WXDLLEXPORT wxTransferStreamToFile(wxSTD istream& stream, const wxString& f
 // converts from/to a stream to/from a temporary file.
 bool WXDLLEXPORT wxTransferFileToStream(const wxString& filename, wxOutputStream& stream);
 bool WXDLLEXPORT wxTransferStreamToFile(wxInputStream& stream, const wxString& filename);
-#endif // wxUSE_STD_IOSTREAM
-
-#endif // wxUSE_DOC_VIEW_ARCHITECTURE
+#endif
 
 #endif // _WX_DOCH__

@@ -103,7 +103,7 @@
     #elif defined(__MWERKS__)
         long wxmw_timezone = 28800;
         #define WX_TIMEZONE wxmw_timezone
-    #elif defined(__DJGPP__) || defined(__WINE__)
+    #elif defined(__DJGPP__)
         #include <sys/timeb.h>
         #include <values.h>
         static long wxGetTimeZone()

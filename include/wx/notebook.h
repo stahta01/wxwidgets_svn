@@ -165,8 +165,6 @@ protected:
     wxArrayPages  m_pages;      // array of pages
     wxImageList  *m_imageList;  // we can have an associated image list
     bool m_ownsImageList;       // true if we must delete m_imageList
-
-    DECLARE_NO_COPY_CLASS(wxNotebookBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -278,6 +276,8 @@ typedef void (wxEvtHandler::*wxNotebookEventFunction)(wxNotebookEvent&);
     #include  "wx/mac/notebook.h"
 #elif defined(__WXPM__)
     #include  "wx/os2/notebook.h"
+#elif defined(__WXSTUBS__)
+    #include  "wx/stubs/notebook.h"
 #endif
 
 #endif // wxUSE_NOTEBOOK

@@ -101,23 +101,23 @@ wxVariantDataList::~wxVariantDataList()
 void wxVariantDataList::SetValue(const wxList& value)
 {
     Clear();
-    wxNode* node = value.GetFirst();
+    wxNode* node = value.First();
     while (node)
     {
-        wxVariant* var = (wxVariant*) node->GetData();
+        wxVariant* var = (wxVariant*) node->Data();
         m_value.Append(new wxVariant(*var));
-        node = node->GetNext();
+        node = node->Next();
     }
 }
 
 void wxVariantDataList::Clear()
 {
-    wxNode* node = m_value.GetFirst();
+    wxNode* node = m_value.First();
     while (node)
     {
-        wxVariant* var = (wxVariant*) node->GetData();
+        wxVariant* var = (wxVariant*) node->Data();
         delete var;
-        node = node->GetNext();
+        node = node->Next();
     }
     m_value.Clear();
 }
@@ -129,12 +129,12 @@ void wxVariantDataList::Copy(wxVariantData& data)
     wxVariantDataList& listData = (wxVariantDataList&) data;
 
     listData.Clear();
-    wxNode* node = m_value.GetFirst();
+    wxNode* node = m_value.First();
     while (node)
     {
-        wxVariant* var = (wxVariant*) node->GetData();
+        wxVariant* var = (wxVariant*) node->Data();
         listData.m_value.Append(new wxVariant(*var));
-        node = node->GetNext();
+        node = node->Next();
     }
 }
 
@@ -143,16 +143,16 @@ bool wxVariantDataList::Eq(wxVariantData& data) const
     wxASSERT_MSG( (data.GetType() == wxT("list")), wxT("wxVariantDataList::Eq: argument mismatch") );
 
     wxVariantDataList& listData = (wxVariantDataList&) data;
-    wxNode* node1 = m_value.GetFirst();
-    wxNode* node2 = listData.GetValue().GetFirst();
+    wxNode* node1 = m_value.First();
+    wxNode* node2 = listData.GetValue().First();
     while (node1 && node2)
     {
-        wxVariant* var1 = (wxVariant*) node1->GetData();
-        wxVariant* var2 = (wxVariant*) node2->GetData();
+        wxVariant* var1 = (wxVariant*) node1->Data();
+        wxVariant* var2 = (wxVariant*) node2->Data();
         if ((*var1) != (*var2))
             return FALSE;
-        node1 = node1->GetNext();
-        node2 = node2->GetNext();
+        node1 = node1->Next();
+        node2 = node2->Next();
     }
     if (node1 || node2) return FALSE;
     return TRUE;
@@ -171,15 +171,15 @@ bool wxVariantDataList::Write(wxSTD ostream& str) const
 bool wxVariantDataList::Write(wxString& str) const
 {
     str = wxT("");
-    wxNode* node = m_value.GetFirst();
+    wxNode* node = m_value.First();
     while (node)
     {
-        wxVariant* var = (wxVariant*) node->GetData();
-        if (node != m_value.GetFirst())
+        wxVariant* var = (wxVariant*) node->Data();
+        if (node != m_value.First())
           str += wxT(" ");
         wxString str1;
         str += var->MakeString();
-        node = node->GetNext();
+        node = node->Next();
     }
 
     return TRUE;
@@ -252,16 +252,16 @@ bool wxVariantDataStringList::Eq(wxVariantData& data) const
     wxASSERT_MSG( (data.GetType() == wxT("stringlist")), wxT("wxVariantDataStringList::Eq: argument mismatch") );
 
     wxVariantDataStringList& listData = (wxVariantDataStringList&) data;
-    wxStringList::Node  *node1 = m_value.GetFirst();
-    wxStringList::Node  *node2 = listData.GetValue().GetFirst();
+    wxNode* node1 = m_value.First();
+    wxNode* node2 = listData.GetValue().First();
     while (node1 && node2)
     {
-        wxString str1 ( node1->GetData() );
-        wxString str2 ( node2->GetData() );
+        wxString str1 ((wxChar*) node1->Data());
+        wxString str2 ((wxChar*) node2->Data());
         if (str1 != str2)
             return FALSE;
-        node1 = node1->GetNext();
-        node2 = node2->GetNext();
+        node1 = node1->Next();
+        node2 = node2->Next();
     }
     if (node1 || node2) return FALSE;
     return TRUE;
@@ -279,15 +279,15 @@ bool wxVariantDataStringList::Write(wxSTD ostream& str) const
 
 bool wxVariantDataStringList::Write(wxString& str) const
 {
-    str.Empty();
-    wxStringList::Node  *node = m_value.GetFirst();
+    str = wxT("");
+    wxNode* node = m_value.First();
     while (node)
     {
-        wxChar* s = node->GetData();
-        if (node != m_value.GetFirst())
+        wxChar* s = (wxChar*) node->Data();
+        if (node != m_value.First())
           str += wxT(" ");
         str += s;
-        node = node->GetNext();
+        node = node->Next();
     }
 
     return TRUE;
@@ -857,7 +857,7 @@ public:
 #endif
     virtual bool Read(wxString& str);
     virtual wxString GetType() const { return wxT("time"); };
-    virtual wxVariantData* Clone() { return new wxVariantDataTime; }
+	virtual wxVariantData* Clone() { return new wxVariantDataTime; }
 
 protected:
     wxTime m_value;
@@ -939,7 +939,7 @@ public:
 #endif
     virtual bool Read(wxString& str);
     virtual wxString GetType() const { return wxT("date"); };
-    virtual wxVariantData* Clone() { return new wxVariantDataDate; }
+	virtual wxVariantData* Clone() { return new wxVariantDataDate; }
 
 protected:
     wxDate m_value;
@@ -1022,12 +1022,10 @@ public:
 #endif
     virtual bool Read(wxString& str);
     virtual wxString GetType() const { return wxT("void*"); };
-    virtual wxVariantData* Clone() { return new wxVariantDataVoidPtr; }
+	virtual wxVariantData* Clone() { return new wxVariantDataVoidPtr; }
 
 protected:
     void* m_value;
-
-    DECLARE_NO_COPY_CLASS(wxVariantDataVoidPtr)
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxVariantDataVoidPtr, wxVariantData)
@@ -1857,15 +1855,15 @@ wxVariant wxVariant::operator[] (size_t idx) const
     if (GetType() == wxT("list"))
     {
         wxVariantDataList* data = (wxVariantDataList*) m_data;
-        wxASSERT_MSG( (idx < (size_t) data->GetValue().GetCount()), wxT("Invalid index for array") );
-        return * (wxVariant*) (data->GetValue().Item(idx)->GetData());
+        wxASSERT_MSG( (idx < (size_t) data->GetValue().Number()), wxT("Invalid index for array") );
+        return * (wxVariant*) (data->GetValue().Nth(idx)->Data());
     }
     else if (GetType() == wxT("stringlist"))
     {
         wxVariantDataStringList* data = (wxVariantDataStringList*) m_data;
-        wxASSERT_MSG( (idx < (size_t) data->GetValue().GetCount()), wxT("Invalid index for array") );
+        wxASSERT_MSG( (idx < (size_t) data->GetValue().Number()), wxT("Invalid index for array") );
 
-        wxVariant variant( wxString( (wxChar*) (data->GetValue().Item(idx)->GetData()) ));
+        wxVariant variant( wxString( (wxChar*) (data->GetValue().Nth(idx)->Data()) ));
         return variant;
     }
     return wxNullVariant;
@@ -1879,9 +1877,9 @@ wxVariant& wxVariant::operator[] (size_t idx)
     wxASSERT_MSG( (GetType() == wxT("list")), wxT("Invalid type for array operator") );
 
     wxVariantDataList* data = (wxVariantDataList*) m_data;
-    wxASSERT_MSG( (idx < (size_t) data->GetValue().GetCount()), wxT("Invalid index for array") );
+    wxASSERT_MSG( (idx < (size_t) data->GetValue().Number()), wxT("Invalid index for array") );
 
-    return * (wxVariant*) (data->GetValue().Item(idx)->GetData());
+    return * (wxVariant*) (data->GetValue().Nth(idx)->Data());
 }
 
 // Return the number of elements in a list
@@ -1892,12 +1890,12 @@ int wxVariant::GetCount() const
     if (GetType() == wxT("list"))
     {
         wxVariantDataList* data = (wxVariantDataList*) m_data;
-        return data->GetValue().GetCount();
+        return data->GetValue().Number();
     }
     else if (GetType() == wxT("stringlist"))
     {
         wxVariantDataStringList* data = (wxVariantDataStringList*) m_data;
-        return data->GetValue().GetCount();
+        return data->GetValue().Number();
     }
     return 0;
 }
@@ -2083,13 +2081,13 @@ bool wxVariant::Member(const wxVariant& value) const
 {
     wxList& list = GetList();
 
-    wxNode* node = list.GetFirst();
+    wxNode* node = list.First();
     while (node)
     {
-        wxVariant* other = (wxVariant*) node->GetData();
+        wxVariant* other = (wxVariant*) node->Data();
         if (value == *other)
             return TRUE;
-        node = node->GetNext();
+        node = node->Next();
     }
     return FALSE;
 }
@@ -2099,9 +2097,9 @@ bool wxVariant::Delete(int item)
 {
     wxList& list = GetList();
 
-    wxASSERT_MSG( (item < (int) list.GetCount()), wxT("Invalid index to Delete") );
-    wxNode* node = list.Item(item);
-    wxVariant* variant = (wxVariant*) node->GetData();
+    wxASSERT_MSG( (item < list.Number()), wxT("Invalid index to Delete") );
+    wxNode* node = list.Nth(item);
+    wxVariant* variant = (wxVariant*) node->Data();
     delete variant;
     delete node;
     return TRUE;
@@ -2160,9 +2158,9 @@ bool wxVariant::Convert(bool* value) const
     {
         wxString val(((wxVariantDataString*)GetData())->GetValue());
         val.MakeLower();
-        if (val == wxT("TRUE") || val == wxT("yes"))
+        if (val == wxT("true") || val == wxT("yes"))
             *value = TRUE;
-        else if (val == wxT("FALSE") || val == wxT("no"))
+        else if (val == wxT("false") || val == wxT("no"))
             *value = FALSE;
         else
             return FALSE;
@@ -2248,8 +2246,8 @@ bool wxVariant::Convert(wxDateTime* value) const
     if (type == wxT("datetime"))
     {
         *value = ((wxVariantDataDateTime*)GetData())->GetValue();
-        return TRUE;
-    }
+    	return TRUE;
+    } 
     // Fallback to string conversion
     wxString val;
     return Convert(&val) && (value->ParseDate(val));

@@ -28,20 +28,24 @@
 
 #include "wx/setup.h"
 
+#include "wx/window.h"
 #include "wx/dcmemory.h"
 #include "wx/utils.h"
 #include "wx/intl.h"
+#include "wx/filedlg.h"
 #include "wx/app.h"
+#include "wx/msgdlg.h"
 #include "wx/image.h"
 #include "wx/log.h"
 #include "wx/generic/dcpsg.h"
+#include "wx/printdlg.h"
+#include "wx/button.h"
+#include "wx/stattext.h"
+#include "wx/radiobox.h"
+#include "wx/textctrl.h"
 #include "wx/prntbase.h"
 #include "wx/paper.h"
 #include "wx/filefn.h"
-#if WXWIN_COMPATIBILITY_2_2
-    #include "wx/window.h"
-    #include "wx/printdlg.h"
-#endif
 
 #include <math.h>
 
@@ -1549,13 +1553,13 @@ void wxPostScriptDC::DoDrawSpline( wxList *points )
     double a, b, c, d, x1, y1, x2, y2, x3, y3;
     wxPoint *p, *q;
 
-    wxNode *node = points->GetFirst();
-    p = (wxPoint *)node->GetData();
+    wxNode *node = points->First();
+    p = (wxPoint *)node->Data();
     x1 = p->x;
     y1 = p->y;
 
-    node = node->GetNext();
-    p = (wxPoint *)node->GetData();
+    node = node->Next();
+    p = (wxPoint *)node->Data();
     c = p->x;
     d = p->y;
     x3 = a = (double)(x1 + c) / 2;
@@ -1571,9 +1575,9 @@ void wxPostScriptDC::DoDrawSpline( wxList *points )
     CalcBoundingBox( (wxCoord)x1, (wxCoord)y1 );
     CalcBoundingBox( (wxCoord)x3, (wxCoord)y3 );
 
-    while ((node = node->GetNext()) != NULL)
+    while ((node = node->Next()) != NULL)
     {
-        q = (wxPoint *)node->GetData();
+        q = (wxPoint *)node->Data();
 
         x1 = x3;
         y1 = y3;

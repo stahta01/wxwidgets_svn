@@ -47,8 +47,6 @@ extern "C"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTIFFHandler,wxImageHandler)
 
-#if wxUSE_STREAMS
-
 extern "C"
 {
 
@@ -379,7 +377,8 @@ bool wxTIFFHandler::DoCanRead( wxInputStream& stream )
            (hdr[0] == 'M' && hdr[1] == 'M');
 }
 
-#endif  // wxUSE_STREAMS
 
-#endif  // wxUSE_LIBTIFF
+#endif
+   // wxUSE_LIBTIFF
+
 

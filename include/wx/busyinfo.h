@@ -46,8 +46,6 @@ public:
 
 private:
     wxInfoFrame *m_InfoFrame;
-
-    DECLARE_NO_COPY_CLASS(wxBusyInfo)
 };
 
 

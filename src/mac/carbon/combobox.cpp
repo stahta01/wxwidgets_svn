@@ -60,7 +60,7 @@ public:
 protected:
     void OnChar( wxKeyEvent& event )
     {
-        if ( event.GetKeyCode() == WXK_RETURN )
+        if ( event.KeyCode() == WXK_RETURN )
         {
             wxString value = GetValue();
 
@@ -205,7 +205,7 @@ void wxComboBox::DoMoveWindow(int x, int y, int width, int height) {
     }
     else
     {
-        wxCoord wText = width - POPUPWIDTH;
+        wxCoord wText = width - POPUPWIDTH - MARGIN ;
         m_text->SetSize(0, 0, wText, height);
         m_choice->SetSize(0 + wText + MARGIN, 0, POPUPWIDTH, -1);
     }    
@@ -462,7 +462,7 @@ bool wxComboBox::SetStringSelection(const wxString& sel)
         return FALSE;
 }
 
-void wxComboBox::MacHandleControlClick( WXWidget WXUNUSED(control) , wxInt16 WXUNUSED(controlpart) ) 
+void wxComboBox::MacHandleControlClick( WXWidget control , wxInt16 controlpart ) 
 {
     wxCommandEvent event(wxEVT_COMMAND_COMBOBOX_SELECTED, m_windowId );
     event.SetInt(GetSelection());

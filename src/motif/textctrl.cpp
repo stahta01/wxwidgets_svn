@@ -29,6 +29,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fstream.h>
 #include <ctype.h>
 
 #include "wx/textctrl.h"

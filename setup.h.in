@@ -748,10 +748,6 @@
  */
 #define WXWIN_COMPATIBILITY_2_2 0
 /*
- * Compatibility with 2.4 API
- */
-#define WXWIN_COMPATIBILITY_2_4 0
-/*
  * Enables debugging: memory tracing, assert, etc., contains debug level
  */
 #define WXDEBUG 0
@@ -885,9 +881,6 @@
 /* The type of 3rd argument to getsockname() - usually size_t or int */
 #undef SOCKLEN_T
 
-/* The type of statvfs(2) argument */
-#undef WX_STATFS_T
-
 /* The signal handler prototype */
 #undef wxTYPE_SA_HANDLER
 
@@ -963,9 +956,6 @@
 
 /* Define if you have vsnprintf() */
 #undef HAVE_VSNPRINTF
-
-/* Define if you have vsnprintf() declaration in the header */
-#undef HAVE_VSNPRINTF_DECL
 
 /* Define if you have usleep() */
 #undef HAVE_USLEEP

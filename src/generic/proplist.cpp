@@ -151,16 +151,16 @@ bool wxPropertyListView::UpdatePropertyList(bool clearEditArea)
     m_valueList->Clear();
     m_valueText->SetValue( wxT("") );
   }
-  wxNode *node = m_propertySheet->GetProperties().GetFirst();
+  wxNode *node = m_propertySheet->GetProperties().First();
 
   // Should sort them... later...
   while (node)
   {
-    wxProperty *property = (wxProperty *)node->GetData();
+    wxProperty *property = (wxProperty *)node->Data();
     wxString stringValueRepr(property->GetValue().GetStringRepresentation());
     wxString paddedString(MakeNameValueString(property->GetName(), stringValueRepr));
     m_propertyScrollingList->Append(paddedString.GetData(), (void *)property);
-    node = node->GetNext();
+    node = node->Next();
   }
   return TRUE;
 }
@@ -542,7 +542,7 @@ void wxPropertyListView::ShowListBoxControl(bool show)
         if (show)
             m_middleSizer->Prepend( m_valueList, 0, wxTOP|wxLEFT|wxRIGHT | wxEXPAND, 3 );
         else
-            m_middleSizer->Remove( (size_t) 0 );
+            m_middleSizer->Remove( 0 );
 
         m_propertyWindow->Layout();
     }
@@ -1196,20 +1196,18 @@ bool wxStringListValidator::OnPrepareControls(wxProperty *WXUNUSED(property), wx
   return TRUE;
 }
 
-bool wxStringListValidator::OnPrepareDetailControls( wxProperty *property,
-                                                     wxPropertyListView *view,
-                                                     wxWindow *WXUNUSED(parentWindow) )
+bool wxStringListValidator::OnPrepareDetailControls(wxProperty *property, wxPropertyListView *view, wxWindow *WXUNUSED(parentWindow))
 {
   if (view->GetValueList())
   {
     view->ShowListBoxControl(TRUE);
     view->GetValueList()->Enable(TRUE);
-    wxStringList::Node  *node = m_strings->GetFirst();
+    wxNode *node = m_strings->First();
     while (node)
     {
-      wxChar *s = node->GetData();
+      wxChar *s = (wxChar *)node->Data();
       view->GetValueList()->Append(s);
-      node = node->GetNext();
+      node = node->Next();
     }
     wxChar *currentString = property->GetValue().StringValue();
     view->GetValueList()->SetStringSelection(currentString);
@@ -1235,34 +1233,32 @@ bool wxStringListValidator::OnClearDetailControls(wxProperty *WXUNUSED(property)
 
 // Called when the property is double clicked. Extra functionality can be provided,
 // cycling through possible values.
-bool wxStringListValidator::OnDoubleClick( wxProperty *property,
-                                           wxPropertyListView *view,
-                                           wxWindow *WXUNUSED(parentWindow) )
+bool wxStringListValidator::OnDoubleClick(wxProperty *property, wxPropertyListView *view, wxWindow *WXUNUSED(parentWindow))
 {
   if (!view->GetValueText())
     return FALSE;
   if (!m_strings)
     return FALSE;
 
-  wxStringList::Node    *node = m_strings->GetFirst();
-  wxChar                *currentString = property->GetValue().StringValue();
+  wxNode *node = m_strings->First();
+  wxChar *currentString = property->GetValue().StringValue();
   while (node)
   {
-    wxChar *s = node->GetData();
+    wxChar *s = (wxChar *)node->Data();
     if (wxStrcmp(s, currentString) == 0)
     {
       wxChar *nextString = NULL;
-      if (node->GetNext())
-        nextString = node->GetNext()->GetData();
+      if (node->Next())
+        nextString = (wxChar *)node->Next()->Data();
       else
-        nextString = m_strings->GetFirst()->GetData();
+        nextString = (wxChar *)m_strings->First()->Data();
       property->GetValue() = wxString(nextString);
       view->DisplayProperty(property);
       view->UpdatePropertyDisplayInList(property);
       view->OnPropertyChanged(property);
       return TRUE;
     }
-    else node = node->GetNext();
+    else node = node->Next();
   }
   return TRUE;
 }
@@ -1525,9 +1521,7 @@ bool wxListOfStringsListValidator::OnDoubleClick(wxProperty *property, wxPropert
   return TRUE;
 }
 
-void wxListOfStringsListValidator::OnEdit( wxProperty *property,
-                                           wxPropertyListView *view,
-                                           wxWindow *parentWindow )
+void wxListOfStringsListValidator::OnEdit(wxProperty *property, wxPropertyListView *view, wxWindow *parentWindow)
 {
   // Convert property value to a list of strings for editing
   wxStringList *stringList = new wxStringList;
@@ -1548,13 +1542,13 @@ void wxListOfStringsListValidator::OnEdit( wxProperty *property,
   {
     wxPropertyValue& oldValue = property->GetValue();
     oldValue.ClearList();
-    wxStringList::Node  *node = stringList->GetFirst();
+    wxNode *node = stringList->First();
     while (node)
     {
-      wxChar *s = node->GetData();
+      wxChar *s = (wxChar *)node->Data();
       oldValue.Append(new wxPropertyValue(s));
 
-      node = node->GetNext();
+      node = node->Next();
     }
 
     view->DisplayProperty(property);
@@ -1704,13 +1698,13 @@ bool wxListOfStringsListValidator::EditStringList(wxWindow *parent, wxStringList
   c->height.AsIs();
   okButton->SetConstraints(c);
 
-  wxStringList::Node    *node = stringList->GetFirst();
+  wxNode *node = stringList->First();
   while (node)
   {
-    wxChar *str = node->GetData();
+    wxChar *str = (wxChar *)node->Data();
     // Save node as client data for each listbox item
     dialog->m_listBox->Append(str, (wxChar *)node);
-    node = node->GetNext();
+    node = node->Next();
   }
 
   dialog->SetClientSize(310, 305);
@@ -1751,7 +1745,7 @@ void wxPropertyStringListEditorDialog::OnDelete(wxCommandEvent& WXUNUSED(event))
     return;
 
   m_listBox->Delete(sel);
-  delete[] (wxChar *)node->GetData();
+  delete[] (wxChar *)node->Data();
   delete node;
   m_currentSelection = -1;
   m_stringText->SetValue(_T(""));
@@ -1764,7 +1758,7 @@ void wxPropertyStringListEditorDialog::OnAdd(wxCommandEvent& WXUNUSED(event))
   wxString initialText;
   wxNode *node = m_stringList->Add(initialText);
   m_listBox->Append(initialText, (void *)node);
-  m_currentSelection = m_stringList->GetCount() - 1;
+  m_currentSelection = m_stringList->Number() - 1;
   m_listBox->SetSelection(m_currentSelection);
   ShowCurrentSelection();
   m_stringText->SetFocus();
@@ -1812,11 +1806,11 @@ void wxPropertyStringListEditorDialog::SaveCurrentSelection()
     return;
 
   wxString txt(m_stringText->GetValue());
-  if (node->GetData())
-    delete[] (wxChar *)node->GetData();
+  if (node->Data())
+    delete[] (wxChar *)node->Data();
   node->SetData((wxObject *)wxStrdup(txt));
 
-  m_listBox->SetString(m_currentSelection, (wxChar *)node->GetData());
+  m_listBox->SetString(m_currentSelection, (wxChar *)node->Data());
 }
 
 void wxPropertyStringListEditorDialog::ShowCurrentSelection()
@@ -1827,7 +1821,7 @@ void wxPropertyStringListEditorDialog::ShowCurrentSelection()
     return;
   }
   wxNode *node = (wxNode *)m_listBox->wxListBox::GetClientData(m_currentSelection);
-  wxChar *txt = (wxChar *)node->GetData();
+  wxChar *txt = (wxChar *)node->Data();
   m_stringText->SetValue(txt);
   m_stringText->Enable(TRUE);
 }

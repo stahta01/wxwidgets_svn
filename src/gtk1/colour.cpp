@@ -160,7 +160,7 @@ void wxColour::InitFromName( const wxString &colourName )
     wxNode *node = (wxNode *) NULL;
     if ( (wxTheColourDatabase) && (node = wxTheColourDatabase->Find(colourName)) )
     {
-        wxColour *col = (wxColour*)node->GetData();
+        wxColour *col = (wxColour*)node->Data();
         UnRef();
         if (col) Ref( *col );
     }

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: wxWindows-2.4\n"
-"POT-Creation-Date: 2002-12-27 23:18+0100\n"
+"POT-Creation-Date: 2002-12-27 23:25+0100\n"
 "PO-Revision-Date: 2002-12-24 03:37+0100\n"
 "Last-Translator: Jonas Rydberg <jor@mindless.com>\n"
 "Language-Team: wxWindows translators <wx-translators@wxwindows.org>\n"
@@ -113,11 +113,11 @@ msgstr "Över&lappande"
 msgid "&Close"
 msgstr "&Stäng"
 
-#: ../src/msw/textctrl.cpp:1721
+#: ../src/msw/textctrl.cpp:1684
 msgid "&Copy"
 msgstr "K&opiera"
 
-#: ../src/msw/textctrl.cpp:1723
+#: ../src/msw/textctrl.cpp:1686
 msgid "&Delete"
 msgstr "&Ta bort"
 
@@ -141,7 +141,7 @@ msgstr "&Hjälp"
 msgid "&Log"
 msgstr "&Logga"
 
-#: ../src/univ/themes/win32.cpp:4541
+#: ../src/univ/themes/win32.cpp:4539
 msgid "&Move"
 msgstr "&Flytta"
 
@@ -157,7 +157,7 @@ msgstr "&Nästa >"
 msgid "&Next Tip"
 msgstr "&Nästa Tips"
 
-#: ../src/msw/textctrl.cpp:1722
+#: ../src/msw/textctrl.cpp:1685
 msgid "&Paste"
 msgstr "K&listra in"
 
@@ -166,7 +166,7 @@ msgid "&Previous"
 msgstr "&Föregående"
 
 #: ../src/common/cmdproc.cpp:279 ../src/common/cmdproc.cpp:286
-#: ../src/msw/textctrl.cpp:1718
+#: ../src/msw/textctrl.cpp:1681
 msgid "&Redo"
 msgstr "&Upprepa"
 
@@ -178,7 +178,7 @@ msgstr "&Upprepa "
 msgid "&Replace"
 msgstr "&Ersätt"
 
-#: ../src/univ/themes/win32.cpp:4540
+#: ../src/univ/themes/win32.cpp:4538
 msgid "&Restore"
 msgstr "&Återställ"
 
@@ -190,11 +190,11 @@ msgstr "&Spara..."
 msgid "&Show tips at startup"
 msgstr "&Visa tips vid start"
 
-#: ../src/univ/themes/win32.cpp:4543
+#: ../src/univ/themes/win32.cpp:4541
 msgid "&Size"
 msgstr "&Storlek"
 
-#: ../src/common/cmdproc.cpp:257 ../src/msw/textctrl.cpp:1717
+#: ../src/common/cmdproc.cpp:257 ../src/msw/textctrl.cpp:1680
 msgid "&Undo"
 msgstr "&Ångra"
 
@@ -204,7 +204,7 @@ msgstr "&Ångra "
 
 #: ../src/generic/mdig.cpp:295 ../src/generic/mdig.cpp:311
 #: ../src/generic/mdig.cpp:315 ../src/msw/mdi.cpp:1328 ../src/msw/mdi.cpp:1335
-#: ../src/msw/mdi.cpp:1365
+#: ../src/msw/mdi.cpp:1360
 msgid "&Window"
 msgstr "&Fönster"
 
@@ -509,7 +509,7 @@ msgstr "C6 Kuvert, 114 x 162 mm"
 msgid "C65 Envelope, 114 x 229 mm"
 msgstr "C65 Kuvert, 114 x 229 mm"
 
-#: ../src/common/filefn.cpp:1383
+#: ../src/common/filefn.cpp:1369
 #, c-format
 msgid "Can not enumerate files '%s'"
 msgstr "Kan inte räkna upp filerna \"%s\""
@@ -541,7 +541,7 @@ msgstr "Kan inte vänta på att tråden avslutas"
 msgid "Can't &Undo "
 msgstr "Kan inte &Ångra "
 
-#: ../src/common/image.cpp:1313
+#: ../src/common/image.cpp:1319
 #, c-format
 msgid "Can't check image format of file '%s': file does not exist."
 msgstr "Kan inte kontrollera bildformat för fil \"%s\": filen finns inte."
@@ -571,7 +571,7 @@ msgstr "Kan inte skapa registernyckel \"%s\""
 msgid "Can't create thread"
 msgstr "Kan inte skapa tråd"
 
-#: ../src/msw/window.cpp:3076
+#: ../src/msw/window.cpp:3062
 #, c-format
 msgid "Can't create window of class %s"
 msgstr "Kan inte skapa fönster av klass %s"
@@ -668,7 +668,7 @@ msgstr "Kan inte sätta värdet på \"%s\""
 msgid "Cancel"
 msgstr "Avbryt"
 
-#: ../contrib/src/xrc/xmlres.cpp:968 ../contrib/src/xrc/xmlres.cpp:1009
+#: ../contrib/src/xrc/xmlres.cpp:969 ../contrib/src/xrc/xmlres.cpp:1010
 msgid "Cannot convert dialog units: dialog unknown."
 msgstr "Kan inte konvertera dialogenheter: okänd dialog."
 
@@ -682,12 +682,12 @@ msgstr "Kan inte konvertera från kodning\"%s\"!"
 msgid "Cannot find active dialup connection: %s"
 msgstr "Kan inte hitta aktiv uppringningsanslutning: %s"
 
-#: ../contrib/src/xrc/xmlres.cpp:242
+#: ../contrib/src/xrc/xmlres.cpp:243
 #, c-format
 msgid "Cannot find container for unknown control '%s'."
 msgstr "Kan inte hitta behållare för okänd kontroll \"%s\"."
 
-#: ../contrib/src/xrc/xmlres.cpp:1023
+#: ../contrib/src/xrc/xmlres.cpp:1024
 #, c-format
 msgid "Cannot find font node '%s'."
 msgstr "Kan inte hitta typsnittsnod \"%s\"."
@@ -725,12 +725,12 @@ msgstr "Kan inte initialisera SciTech MGL!"
 msgid "Cannot initialize display."
 msgstr "Kan inte initialisera display."
 
-#: ../src/msw/volume.cpp:641
+#: ../src/msw/volume.cpp:634
 #, c-format
 msgid "Cannot load icon from '%s'."
 msgstr "Kan inte ladda ikon från \"%s\"."
 
-#: ../contrib/src/xrc/xmlres.cpp:355
+#: ../contrib/src/xrc/xmlres.cpp:356
 #, c-format
 msgid "Cannot load resources from file '%s'."
 msgstr "Kan inte ladda resurser från fil \"%s\"."
@@ -755,7 +755,7 @@ msgstr "Kan inte öppna URL \"%s\""
 msgid "Cannot open contents file: %s"
 msgstr "Kan inte öppna innehållsfil: %s"
 
-#: ../contrib/src/xrc/xmlres.cpp:329
+#: ../contrib/src/xrc/xmlres.cpp:330
 #, c-format
 msgid "Cannot open file '%s'."
 msgstr "Kan inte öppna fil \"%s\"."
@@ -769,12 +769,12 @@ msgstr "Kan inte öppna fil för PostScript-utskrift!"
 msgid "Cannot open index file: %s"
 msgstr "Kan inte öppna indexfil: %s"
 
-#: ../contrib/src/xrc/xmlres.cpp:956
+#: ../contrib/src/xrc/xmlres.cpp:957
 #, c-format
 msgid "Cannot parse coordinates from '%s'."
 msgstr "Kan inte tolka koordinater från \"%s\"."
 
-#: ../contrib/src/xrc/xmlres.cpp:997
+#: ../contrib/src/xrc/xmlres.cpp:998
 #, c-format
 msgid "Cannot parse dimension from '%s'."
 msgstr "Kan inte tolka dimension från \"%s\"."
@@ -783,7 +783,7 @@ msgstr "Kan inte tolka dimension från \"%s\"."
 msgid "Cannot print empty page."
 msgstr "Kan inte skriva ut tom sida."
 
-#: ../src/msw/volume.cpp:202 ../src/msw/volume.cpp:533
+#: ../src/msw/volume.cpp:195 ../src/msw/volume.cpp:526
 #, c-format
 msgid "Cannot read typename from '%s'!"
 msgstr "Kan inte läsa typnamn från \"%s\"!"
@@ -829,7 +829,7 @@ msgstr "Töm logginnehållet"
 msgid "Close"
 msgstr "Stäng"
 
-#: ../src/univ/themes/win32.cpp:4549
+#: ../src/univ/themes/win32.cpp:4547
 msgid "Close\tAlt-F4"
 msgstr "Stäng\tAlt-F4"
 
@@ -885,7 +885,7 @@ msgstr "Kunde inte hitta resursinkluderingsfil %s."
 msgid "Could not find tab for id"
 msgstr "Kunde inte hitta flik för id"
 
-#: ../src/msw/textctrl.cpp:2090
+#: ../src/msw/textctrl.cpp:2053
 #, c-format
 msgid "Could not load Rich Edit DLL '%s'"
 msgstr "Kunde inte ladda Rich Edit DLL \"%s\""
@@ -975,7 +975,7 @@ msgstr "Skapa katalog"
 msgid "Create new directory"
 msgstr "Skapa ny katalog"
 
-#: ../src/msw/textctrl.cpp:1720
+#: ../src/msw/textctrl.cpp:1683
 msgid "Cu&t"
 msgstr "&Klipp ut"
 
@@ -1049,7 +1049,7 @@ msgstr ""
 msgid "Did you know..."
 msgstr "Visste du att..."
 
-#: ../src/common/filefn.cpp:1279
+#: ../src/common/filefn.cpp:1265
 #, c-format
 msgid "Directory '%s' couldn't be created"
 msgstr "Katalogen \"%s\" kunde inte skapas"
@@ -1231,7 +1231,7 @@ msgstr "Kunde inte kopiera registervärde \"%s\""
 msgid "Failed to copy the contents of registry key '%s' to '%s'."
 msgstr "Kunde inte kopiera innehållet i registernyckel \"%s\" till \"%s\"."
 
-#: ../src/common/filefn.cpp:1131
+#: ../src/common/filefn.cpp:1117
 #, c-format
 msgid "Failed to copy the file '%s' to '%s'"
 msgstr "Kunde inte kopiera filen \"%s\" till \"%s\""
@@ -1361,11 +1361,11 @@ msgstr "Kunde inte hämta UTC-systemtiden."
 msgid "Failed to get the local system time"
 msgstr "Kunde inte hämta den lokala systemtiden"
 
-#: ../src/common/filefn.cpp:1512
+#: ../src/common/filefn.cpp:1498
 msgid "Failed to get the working directory"
 msgstr "Kunde inte hämta aktuell katalog"
 
-#: ../src/univ/theme.cpp:122
+#: ../src/univ/theme.cpp:120
 msgid "Failed to initialize GUI: no built-in themes found."
 msgstr "Kunde inte initialisera GUI: inget inbyggt tema hittades."
 
@@ -1385,7 +1385,7 @@ msgstr ""
 "Kunde inte slå ihop en tråd, möjlig minnesläcka hittad - var vänlig och "
 "starta om programmet"
 
-#: ../src/msw/utils.cpp:723
+#: ../src/msw/utils.cpp:721
 #, c-format
 msgid "Failed to kill process %d"
 msgstr "Kunde inte döda processen %d"
@@ -1395,7 +1395,7 @@ msgstr "Kunde inte döda processen %d"
 msgid "Failed to load image %d from file '%s'."
 msgstr "Kunde inte ladda bilden %d från fil \"%s\"."
 
-#: ../src/msw/volume.cpp:354
+#: ../src/msw/volume.cpp:347
 msgid "Failed to load mpr.dll."
 msgstr "Kunde inte ladda mpr.dll."
 
@@ -1814,7 +1814,7 @@ msgstr "Ogiltigt filspecifikation."
 msgid "Image and Mask have different sizes"
 msgstr "Bild och mask har olika storlekar"
 
-#: ../src/common/image.cpp:1065
+#: ../src/common/image.cpp:1067
 #, c-format
 msgid "Image file is not of type %d."
 msgstr "Bildfilen är inte av typen %d."
@@ -1831,17 +1831,17 @@ msgstr ""
 msgid "Impossible to get child process input"
 msgstr "Omöjligt att få barnprocessindata"
 
-#: ../src/common/filefn.cpp:1147
+#: ../src/common/filefn.cpp:1133
 #, c-format
 msgid "Impossible to get permissions for file '%s'"
 msgstr "Omöjligt att hämta rättigheter för fil \"%s\""
 
-#: ../src/common/filefn.cpp:1161
+#: ../src/common/filefn.cpp:1147
 #, c-format
 msgid "Impossible to overwrite the file '%s'"
 msgstr "Omöjligt att skriva över fil \"%s\""
 
-#: ../src/common/filefn.cpp:1212
+#: ../src/common/filefn.cpp:1198
 #, c-format
 msgid "Impossible to set permissions for the file '%s'"
 msgstr "Omöjligt att sätta rättigheter för filen \"%s\""
@@ -1858,12 +1858,12 @@ msgstr "Indiska (ISO-8859-12)"
 msgid "Invalid TIFF image index."
 msgstr "Ogiltigt TIFF-bildindex."
 
-#: ../contrib/src/xrc/xmlres.cpp:361
+#: ../contrib/src/xrc/xmlres.cpp:362
 #, c-format
 msgid "Invalid XRC resource '%s': doesn't have root node 'resource'."
 msgstr "Ogiltig XRC-resurs \"%s\": saknar rotnod \"resource\"."
 
-#: ../src/common/appcmn.cpp:398
+#: ../src/common/appcmn.cpp:399
 #, c-format
 msgid "Invalid display mode specification '%s'."
 msgstr "Ogiltig bildskärmslägesspecifikation \"%s\"."
@@ -1971,7 +1971,7 @@ msgstr ""
 "hjälpbiblioteket inte är installerat på den här maskinen. Vänligen "
 "installera det."
 
-#: ../src/univ/themes/win32.cpp:4547
+#: ../src/univ/themes/win32.cpp:4545
 msgid "Ma&ximize"
 msgstr "Ma&ximera"
 
@@ -1993,7 +1993,7 @@ msgstr "Minnes-VFS innehåller redan fil \"%s\"!"
 msgid "Metal theme"
 msgstr "Metalltema"
 
-#: ../src/univ/themes/win32.cpp:4545
+#: ../src/univ/themes/win32.cpp:4543
 msgid "Mi&nimize"
 msgstr "&Minimera"
 
@@ -2077,22 +2077,22 @@ msgstr ""
 "ett typsnitt att använda för denna kodning\n"
 "(annars kommer texten med denna kodning inte att visas korrekt)?"
 
-#: ../contrib/src/xrc/xmlres.cpp:556
+#: ../contrib/src/xrc/xmlres.cpp:557
 #, c-format
 msgid "No handler found for XML node '%s', class '%s'!"
 msgstr "Ingen hanterare hittades för XML-nod \"%s\", klass \"%s\"!"
 
-#: ../src/common/image.cpp:1047 ../src/common/image.cpp:1090
+#: ../src/common/image.cpp:1049 ../src/common/image.cpp:1092
 msgid "No handler found for image type."
 msgstr "Ingen hanterare hittades för bildtyp."
 
-#: ../src/common/image.cpp:1055 ../src/common/image.cpp:1098
-#: ../src/common/image.cpp:1132
+#: ../src/common/image.cpp:1057 ../src/common/image.cpp:1100
+#: ../src/common/image.cpp:1134
 #, c-format
 msgid "No image handler for type %d defined."
 msgstr "Ingen bildhanterare för typ %d är definierad."
 
-#: ../src/common/image.cpp:1116 ../src/common/image.cpp:1148
+#: ../src/common/image.cpp:1118 ../src/common/image.cpp:1150
 #, c-format
 msgid "No image handler for type %s defined."
 msgstr "Ingen bildhanterare för typ %s är definierad."
@@ -2363,7 +2363,7 @@ msgstr "Fråga"
 msgid "Read error on file '%s'"
 msgstr "Läsfel på fil \"%s\""
 
-#: ../contrib/src/xrc/xmlres.cpp:531
+#: ../contrib/src/xrc/xmlres.cpp:532
 #, c-format
 msgid "Referenced object node with ref=\"%s\" not found!"
 msgstr "Refererad objektnod med ref=\"%s\" hittades inte!"
@@ -2414,7 +2414,7 @@ msgstr "Ersätt &alla"
 msgid "Replace with:"
 msgstr "Ersätt med:"
 
-#: ../contrib/src/xrc/xmlres.cpp:378
+#: ../contrib/src/xrc/xmlres.cpp:379
 msgid "Resource files must have same version number!"
 msgstr "Resursfiler måste ha samma versionsnummer!"
 
@@ -2485,7 +2485,7 @@ msgstr "Avdelningar"
 msgid "Seek error on file '%s'"
 msgstr "Sökfel på fil \"%s\""
 
-#: ../src/msw/textctrl.cpp:1725
+#: ../src/msw/textctrl.cpp:1688
 msgid "Select &All"
 msgstr "Markera &allt"
 
@@ -2571,7 +2571,7 @@ msgstr "Statement, 5 1/2 x 8 1/2 tum"
 msgid "Status: "
 msgstr "Status: "
 
-#: ../contrib/src/xrc/xmlres.cpp:631
+#: ../contrib/src/xrc/xmlres.cpp:632
 #, c-format
 msgid "Subclass '%s' not found for resource '%s', not subclassing!"
 msgstr "Subklass \"%s\" hittades inte för resurs \"%s\", subklassar inte!"
@@ -2819,7 +2819,7 @@ msgstr "Okänd lång flagga \"%s\""
 msgid "Unknown option '%s'"
 msgstr "Okänd flagga \"%s\""
 
-#: ../contrib/src/xrc/xmlres.cpp:700
+#: ../contrib/src/xrc/xmlres.cpp:701
 msgid "Unknown style flag "
 msgstr "Okänd stilflagga"
 
@@ -2843,7 +2843,7 @@ msgstr "Okänd stil %s när resursen tolkades."
 msgid "Unsupported clipboard format."
 msgstr "Urklippsformatet stöds inte."
 
-#: ../src/common/appcmn.cpp:380
+#: ../src/common/appcmn.cpp:383
 #, c-format
 msgid "Unsupported theme '%s'."
 msgstr "Temat \"%s\" stöds inte."
@@ -2909,15 +2909,15 @@ msgstr "Endast hela ord"
 msgid "Win32 theme"
 msgstr "Win32 tema"
 
-#: ../src/msw/utils.cpp:983
+#: ../src/msw/utils.cpp:981
 msgid "Win32s on Windows 3.1"
 msgstr "Win32s på Windows 3.1"
 
-#: ../src/msw/utils.cpp:1015
+#: ../src/msw/utils.cpp:1013
 msgid "Windows 3.1"
 msgstr "Windows 3.1"
 
-#: ../src/msw/utils.cpp:987
+#: ../src/msw/utils.cpp:985
 #, c-format
 msgid "Windows 9%c"
 msgstr "Windows 9%c"
@@ -2993,17 +2993,17 @@ msgstr "XPM: Felaktigt pixeldata!"
 msgid "XPM: malformed colour definition '%s'!"
 msgstr "XPM: Felaktig färgdefinition \"%s\"!"
 
-#: ../contrib/src/xrc/xmlres.cpp:469
+#: ../contrib/src/xrc/xmlres.cpp:470
 #, c-format
 msgid "XRC resource '%s' (class '%s') not found!"
 msgstr "XRC-resurs \"%s\" (klass \"%s\") hittades inte!"
 
-#: ../contrib/src/xrc/xmlres.cpp:860 ../contrib/src/xrc/xmlres.cpp:871
+#: ../contrib/src/xrc/xmlres.cpp:861 ../contrib/src/xrc/xmlres.cpp:872
 #, c-format
 msgid "XRC resource: Cannot create bitmap from '%s'."
 msgstr "XRC-resurs: Kan inte skapa bild från \"%s\"."
 
-#: ../contrib/src/xrc/xmlres.cpp:820
+#: ../contrib/src/xrc/xmlres.cpp:821
 #, c-format
 msgid "XRC resource: Incorrect colour specification '%s' for property '%s'."
 msgstr "XRC-resurs: Felaktig färgspecifikation \"%s\" för egenskap \"%s\"."
@@ -3132,11 +3132,11 @@ msgstr "försök att ändra oföränderlig tangent \"%s\" ignorerad."
 msgid "binary"
 msgstr "binär"
 
-#: ../src/common/fontcmn.cpp:548
+#: ../src/common/fontcmn.cpp:521
 msgid "bold"
 msgstr "fet"
 
-#: ../src/common/fontcmn.cpp:472
+#: ../src/common/fontcmn.cpp:445
 msgid "bold "
 msgstr "fet"
 
@@ -3334,7 +3334,7 @@ msgstr "fjortonde"
 msgid "fourth"
 msgstr "fjärde"
 
-#: ../src/common/appcmn.cpp:319
+#: ../src/common/appcmn.cpp:322
 msgid "generate verbose log messages"
 msgstr "skapa mångordiga loggmeddelanden"
 
@@ -3354,15 +3354,15 @@ msgstr "ogiltigt eof() returvärde."
 msgid "invalid message box return value"
 msgstr "ogilitigt returvärde för meddelanderuta"
 
-#: ../src/common/fontcmn.cpp:488 ../src/common/fontcmn.cpp:552
+#: ../src/common/fontcmn.cpp:461 ../src/common/fontcmn.cpp:525
 msgid "italic"
 msgstr "kursiv"
 
-#: ../src/common/fontcmn.cpp:544
+#: ../src/common/fontcmn.cpp:517
 msgid "light"
 msgstr "tunn"
 
-#: ../src/common/fontcmn.cpp:468
+#: ../src/common/fontcmn.cpp:441
 msgid "light "
 msgstr "tunn"
 
@@ -3432,7 +3432,7 @@ msgstr "sjunde"
 msgid "shift"
 msgstr "skift"
 
-#: ../src/common/appcmn.cpp:309
+#: ../src/common/appcmn.cpp:312
 msgid "show this help message"
 msgstr "visa detta hjälpmeddelande"
 
@@ -3444,11 +3444,11 @@ msgstr "sextonde"
 msgid "sixth"
 msgstr "sjätte"
 
-#: ../src/common/appcmn.cpp:344
+#: ../src/common/appcmn.cpp:347
 msgid "specify display mode to use (e.g. 640x480-16)"
 msgstr "ange visningsläge att använda (t.ex. 640x480-16)"
 
-#: ../src/common/appcmn.cpp:330
+#: ../src/common/appcmn.cpp:333
 msgid "specify the theme to use"
 msgstr "ange temat som skall användas"
 
@@ -3488,11 +3488,11 @@ msgstr "tolfte"
 msgid "twentieth"
 msgstr "tjugonde"
 
-#: ../src/common/fontcmn.cpp:540
+#: ../src/common/fontcmn.cpp:513
 msgid "underlined"
 msgstr "understrykning"
 
-#: ../src/common/fontcmn.cpp:455
+#: ../src/common/fontcmn.cpp:428
 msgid "underlined "
 msgstr "understrykning"
 

@@ -1,26 +1,26 @@
-!include makewat.env
+WXDIR = $(%WXWIN)
 
-all: $(OUTPUTDIR) $(LIBTARGET)
+!include $(WXDIR)\src\makewat.env
 
-$(OUTPUTDIR):
-	@if not exist $^@ mkdir $^@
+WXLIB = $(WXDIR)\lib
+LNK = tmp.lbc
 
-# the name of the file containing the objects to be put in the library
-LBCFILE=$(OUTPUTDIR)$(LIBTARGET).lbc
+all: $(LIBTARGET)
+
 $(LIBTARGET) : $(OBJECTS)
-    %create $(LBCFILE)
-    @for %i in ( $(OBJECTS) ) do @%append $(LBCFILE) +%i
-    $(LIB) /b /c /n /p=512 $^@ @$(LBCFILE)
+    %create tmp.lbc
+    @for %i in ( $(OBJECTS) ) do @%append tmp.lbc +%i
+    wlib /b /c /n /p=512 $^@ @tmp.lbc
 
 clean:   .SYMBOLIC
-    -erase $(OUTPUTDIR)*.obj
-    -erase $(OUTPUTDIR)*.bak
-    -erase $(OUTPUTDIR)*.err
-    -erase $(OUTPUTDIR)*.pch
-    -erase $(OUTPUTDIR)*.lib
-    -erase $(OUTPUTDIR)*.lbc
-    -erase $(OUTPUTDIR)*.res
-    -erase $(OUTPUTDIR)*.exe
-    -erase $(OUTPUTDIR)*.lbc
+    -erase *.obj
+    -erase *.bak
+    -erase *.err
+    -erase *.pch
+    -erase *.lib
+    -erase *.lbc
+    -erase *.res
+    -erase *.exe
+    -erase *.lbc
     -erase $(LIBTARGET)
 

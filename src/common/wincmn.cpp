@@ -38,7 +38,6 @@
     #include "wx/control.h"
     #include "wx/checkbox.h"
     #include "wx/radiobut.h"
-    #include "wx/statbox.h"
     #include "wx/textctrl.h"
     #include "wx/settings.h"
     #include "wx/dialog.h"
@@ -204,17 +203,6 @@ bool wxWindowBase::CreateBase(wxWindowBase *parent,
     // when a new ctor is added which doesn't call InitWindow)
     wxASSERT_MSG( m_isWindow, wxT("Init() must have been called before!") );
 
-#if wxUSE_STATBOX
-    // wxGTK doesn't allow to create controls with static box as the parent so
-    // this will result in a crash when the program is ported to wxGTK so warn
-    // the user about it
-
-    // if you get this assert, the correct solution is to create the controls
-    // as siblings of the static box
-    wxASSERT_MSG( !parent || !wxDynamicCast(parent, wxStaticBox),
-                  _T("wxStaticBox can't be used as a window parent!") );
-#endif // wxUSE_STATBOX
-
     // generate a new id if the user doesn't care about it
     m_windowId = id == -1 ? NewControlId() : id;
 
@@ -286,7 +274,7 @@ wxWindowBase::~wxWindowBase()
 #endif // wxUSE_CONSTRAINTS
 
     if ( m_containingSizer )
-        m_containingSizer->Detach( (wxWindow*)this );
+        m_containingSizer->Remove((wxWindow*)this);
 
     if ( m_windowSizer )
         delete m_windowSizer;
@@ -1177,9 +1165,7 @@ bool wxWindowBase::TransferDataToWindow()
         if ( validator && !validator->TransferToWindow() )
         {
             wxLogWarning(_("Could not transfer data to window"));
-#if wxUSE_LOG
             wxLog::FlushActive();
-#endif // wxUSE_LOG
 
             return FALSE;
         }

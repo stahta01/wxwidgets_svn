@@ -95,7 +95,7 @@
 // compiler defects workarounds
 // ----------------------------------------------------------------------------
 
-#if defined(__VISUALC__) && !defined(WIN32) && !defined(__WXWINCE__)
+#if defined(__VISUALC__) && !defined(WIN32)
     // VC1.5 does not have LPTSTR type
 #define LPTSTR  LPSTR
 #define LPCTSTR LPCSTR
@@ -156,7 +156,7 @@
     #elif defined(__WATCOMC__) && (__WATCOMC__ >= 1100)
         // Watcom 11+ supports bool
         #define HAVE_BOOL
-    #elif defined(__GNUWIN32__) || defined(__MINGW32__) || defined(__CYGWIN__)
+    #elif defined(__GNUWIN32__)
         // Cygwin supports bool
         #define HAVE_BOOL
     #elif defined(__VISAGECPP__)
@@ -174,26 +174,35 @@
     typedef unsigned int bool;
 #endif // bool
 
-// deal with TRUE/true stuff: we assume that if the compiler supports bool, it
-// supports true/false as well and that, OTOH, if it does _not_ support bool,
-// it doesn't support these keywords (this is less sure, in particular VC++
-// 4.x could be a problem here)
-#ifndef HAVE_BOOL
-    #define true ((bool)1)
-    #define false ((bool)0)
-#endif
+#ifdef __cplusplus
+    // define boolean constants: don't use true/false here as not all compilers
+    // support them but also redefine TRUE which could have been defined as 1
+    // by previous headers: this would be incorrect as our TRUE is supposed to
+    // be of type bool, just like true, not int
+    //
+    // however if the user code absolutely needs TRUE to be defined in its own
+    // way, it can predefine WX_TRUE_DEFINED to prevent the redefinition here
+    #ifdef TRUE
+        #ifndef WX_TRUE_DEFINED
+            #undef TRUE
+            #undef FALSE
+        #endif
+    #endif
 
-// for backwards compatibility, also define TRUE and FALSE
-//
-// note that these definitions should work both in C++ and C code, so don't
-// use true/false below
-#ifndef TRUE
-    #define TRUE 1
-#endif
+    #ifndef TRUE
+        #define TRUE  ((bool)1)
+        #define FALSE ((bool)0)
+    #endif
+#else // !__cplusplus
+    // the definitions above don't work for C sources
+    #ifndef TRUE
+        #define TRUE 1
+    #endif
 
-#ifndef FALSE
-    #define FALSE 0
-#endif
+    #ifndef FALSE
+        #define FALSE 0
+    #endif
+#endif // C++/!C++
 
 typedef short int WXTYPE;
 
@@ -222,7 +231,7 @@ typedef int wxWindowID;
 
 // check for explicit keyword support
 #ifndef HAVE_EXPLICIT
-    #if defined(__VISUALC__) && (__VISUALC__ >= 1200)
+    #if defined(__VISUALC__) && (__VISUALC__ > 1200)
         // VC++ 6.0 has explicit (what about the earlier versions?)
         #define HAVE_EXPLICIT
     #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x0520)
@@ -245,7 +254,7 @@ typedef int wxWindowID;
 // ----------------------------------------------------------------------------
 
 // stdcall is used for all functions called by Windows under Windows
-#if defined(__WINDOWS__)
+#if defined(__WINDOWS__) && !defined(__WXWINE__)
     #if defined(__GNUWIN32__)
         #define wxSTDCALL __attribute__((stdcall))
     #else
@@ -380,15 +389,6 @@ class WXDLLEXPORT wxEvent;
 #    define ATTRIBUTE_PRINTF_4
 #    define ATTRIBUTE_PRINTF_5
 #  endif /* ATTRIBUTE_PRINTF */
-#endif
-
-// Macro to issue warning when using deprecated functions with gcc3 or MSVC7:
-#if wxCHECK_GCC_VERSION(3, 1)
-    #define wxDEPRECATED(x) x __attribute__ ((deprecated))
-#elif defined(__VISUALC__) && (__VISUALC__ >= 1300)
-    #define wxDEPRECATED(x) __declspec(deprecated) x
-#else
-    #define wxDEPRECATED(x) x
 #endif
 
 // everybody gets the assert and other debug macros
@@ -1922,7 +1922,7 @@ typedef WXHWND          WXWidget;
 typedef unsigned int    WXWPARAM;
 typedef long            WXLPARAM;
 
-#if !defined(__WIN32__) || defined(__GNUWIN32__) || defined(__WXMICROWIN__)
+#if !defined(__WIN32__) || defined(__GNUWIN32__) || defined(__WXWINE__) || defined(__WXMICROWIN__)
 typedef int             (*WXFARPROC)();
 #else
 typedef int             (__stdcall *WXFARPROC)();

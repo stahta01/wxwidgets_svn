@@ -124,8 +124,6 @@ private:
 private:
     // Virtual function hiding supression
     virtual void Update() { wxDialog::Update(); }
-
-    DECLARE_NO_COPY_CLASS(wxProgressDialog)
 };
 #endif
 

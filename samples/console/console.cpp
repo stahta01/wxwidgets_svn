@@ -81,7 +81,6 @@
     #define TEST_SOCKETS
     #define TEST_STREAMS
     #define TEST_STRINGS
-    #define TEST_TEXTSTREAM
     #define TEST_THREADS
     #define TEST_TIMER
     #define TEST_UNICODE
@@ -94,7 +93,7 @@
     #undef TEST_ALL
     static const bool TEST_ALL = TRUE;
 #else
-    #define TEST_TEXTSTREAM
+    #define TEST_DATETIME
 
     static const bool TEST_ALL = FALSE;
 #endif
@@ -1032,24 +1031,6 @@ static void TestFileNameMakeRelative()
             wxPrintf(_T("'%s'\n"), fn.GetFullPath(fni.format).c_str());
         }
     }
-}
-
-static void TestFileNameMakeAbsolute()
-{
-    wxPuts(_T("*** testing wxFileName::MakeAbsolute() ***"));
-
-    for ( size_t n = 0; n < WXSIZEOF(filenames); n++ )
-    {
-        const FileNameInfo& fni = filenames[n];
-        wxFileName fn(fni.fullname, fni.format);
-        
-        wxPrintf(_T("'%s' absolutized: "),
-               fn.GetFullPath(fni.format).c_str());
-        fn.MakeAbsolute();
-        wxPrintf(_T("'%s'\n"), fn.GetFullPath(fni.format).c_str());
-    }
-
-    wxPuts(_T(""));
 }
 
 static void TestFileNameComparison()
@@ -3189,7 +3170,7 @@ static void TestFtpWuFtpd()
         }
         else
         {
-            size_t size = in->GetSize();
+            size_t size = in->StreamSize();
             wxPrintf(_T("Reading file %s (%u bytes)..."), filename, size);
 
             wxChar *data = new wxChar[size];
@@ -3272,7 +3253,7 @@ static void TestFtpDownload()
     }
     else
     {
-        size_t size = in->GetSize();
+        size_t size = in->StreamSize();
         wxPrintf(_T("Reading file %s (%u bytes)..."), filename, size);
         fflush(stdout);
 
@@ -4645,12 +4626,8 @@ for n in range(20):
             wmon2 = dt.GetWeekOfMonth(wxDateTime::Sunday_First),
             dnum = dt.GetDayOfYear();
 
-        wxPrintf(_T("%s: the day number is %d"), d.FormatDate().c_str(), dnum);
-        if ( dnum == wn.dnum )
-        {
-            wxPrintf(_T(" (ok)"));
-        }
-        else
+        wxPrintf(_T("%s: the day number = %d"), d.FormatDate().c_str(), dnum);
+        if ( dnum != wn.dnum )
         {
             wxPrintf(_T(" (ERROR: should be %d)"), wn.dnum);
         }
@@ -4661,12 +4638,8 @@ for n in range(20):
             wxPrintf(_T(" (ERROR: should be %d)"), wn.wmon);
         }
 
-        wxPrintf(_T(" or %d"), wmon2);
-        if ( wmon2 == wn.wmon2 )
-        {
-            wxPrintf(_T(" (ok)"));
-        }
-        else
+        wxPrintf(_T(" (%d)"), wmon2);
+        if ( wmon2 != wn.wmon2 )
         {
             wxPrintf(_T(" (ERROR: should be %d)"), wn.wmon2);
         }
@@ -5174,45 +5147,6 @@ static void TestTimeCompatibility()
 #endif // 0
 
 #endif // TEST_DATETIME
-
-// ----------------------------------------------------------------------------
-// wxTextInput/OutputStream
-// ----------------------------------------------------------------------------
-
-#ifdef TEST_TEXTSTREAM
-
-#include "wx/txtstrm.h"
-#include "wx/wfstream.h"
-
-static void TestTextInputStream()
-{
-    wxPuts(_T("\n*** wxTextInputStream test ***"));
-
-    wxFileInputStream fsIn(_T("testdata.fc"));
-    if ( !fsIn.Ok() )
-    {
-        wxPuts(_T("ERROR: couldn't open file."));
-    }
-    else
-    {
-        wxTextInputStream tis(fsIn);
-
-        size_t line = 1;
-        for ( ;; )
-        {
-            const wxString s = tis.ReadLine();
-
-            // line could be non empty if the last line of the file isn't
-            // terminated with EOL
-            if ( fsIn.Eof() && s.empty() )
-                break;
-
-            wxPrintf(_T("Line %d: %s\n"), line++, s.c_str());
-        }
-    }
-}
-
-#endif // TEST_TEXTSTREAM
 
 // ----------------------------------------------------------------------------
 // threads
@@ -6447,7 +6381,6 @@ int main(int argc, char **argv)
     {
         TestFileNameConstruction();
         TestFileNameMakeRelative();
-        TestFileNameMakeAbsolute();
         TestFileNameSplit();
         TestFileNameTemp();
         TestFileNameCwd();
@@ -6583,10 +6516,6 @@ int main(int argc, char **argv)
     }
         TestMemoryStream();
 #endif // TEST_STREAMS
-
-#ifdef TEST_TEXTSTREAM
-    TestTextInputStream();
-#endif // TEST_TEXTSTREAM
 
 #ifdef TEST_THREADS
     int nCPUs = wxThread::GetCPUCount();

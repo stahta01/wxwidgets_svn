@@ -517,10 +517,7 @@ bool wxTopLevelWindowMSW::Show(bool show)
         }
         else // just show
         {
-           if ( GetWindowStyle() & wxFRAME_TOOL_WINDOW )
-               nShowCmd = SW_SHOWNA;
-           else
-               nShowCmd = SW_SHOW;
+            nShowCmd = SW_SHOW;
         }
     }
     else // hide
@@ -567,7 +564,7 @@ void wxTopLevelWindowMSW::Maximize(bool maximize)
     {
         // we can't maximize the hidden frame because it shows it as well, so
         // just remember that we should do it later in this case
-        m_maximizeOnShow = maximize;
+        m_maximizeOnShow = TRUE;
     }
 }
 
@@ -753,12 +750,6 @@ void wxTopLevelWindowMSW::OnActivate(wxActivateEvent& event)
     {
         // remember the last focused child if it is our child
         m_winLastFocused = FindFocus();
-
-        if ( m_winLastFocused )
-        {
-            // let it know that it doesn't have focus any more
-            m_winLastFocused->HandleKillFocus((WXHWND)NULL);
-        }
 
         // so we NULL it out if it's a child from some other frame
         wxWindow *win = m_winLastFocused;

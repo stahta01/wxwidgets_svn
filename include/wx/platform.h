@@ -14,42 +14,11 @@
 #ifndef _WX_PLATFORM_H_
 #define _WX_PLATFORM_H_
 
-
-/*
-    Codewarrior doesn't define any Windows symbols until some headers
-    are included
-*/
-#if __MWERKS__
-    #include <stddef.h>
-    #if defined(WIN32) || defined(_WIN32)
-        #ifndef WINVER
-            #define WINVER  0x0400
-        #endif
-    #endif
-#endif
-
-
 /*
    first define Windows symbols if they're not defined on the command line: we
    can autodetect everything we need if _WIN32 is defined
  */
-#if defined(__CYGWIN32__) && !defined(__WXMOTIF__) && !defined(__WXGTK__) \
-    && !defined(__WXX11__)
-    /* for Cygwin, default to wxMSW unless otherwise specified */
-    #ifndef __WXMSW__
-        #define __WXMSW__
-    #endif
-
-    #ifndef _WIN32
-        #define _WIN32
-    #endif
-
-    #ifndef WIN32
-        #define WIN32
-    #endif
-#endif
-
-#if defined(_WIN32) || defined(WIN32) || defined(__NT__) || defined(__WXWINCE__)
+#if defined(_WIN32) || defined(WIN32) || defined(__NT__)
     #ifndef __WXMSW__
         #define __WXMSW__
     #endif
@@ -70,9 +39,15 @@
     #endif
 #endif
 
-#ifdef __WINE__
+#ifdef __WXWINE__
+    #ifndef __WIN32__
+        #define __WIN32__
+    #endif
     #ifndef __WIN95__
         #define __WIN95__
+    #endif
+    #ifndef STRICT
+        #define STRICT
     #endif
 #endif /* WINE */
 
@@ -162,7 +137,7 @@
         #define __HPUX__
     #endif /* HP-UX */
 
-    #if defined(__CYGWIN__) || defined(__WINE__)
+    #if defined(__CYGWIN__)
         #if !defined(wxSIZE_T_IS_UINT)
             #define wxSIZE_T_IS_UINT
         #endif

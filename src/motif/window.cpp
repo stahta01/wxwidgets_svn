@@ -172,23 +172,16 @@ void wxWindow::UnmanageAndDestroy(WXWidget widget)
     }
 }
 
-bool wxWindow::MapOrUnmap(WXWidget widget, bool domap)
+bool wxWindow::MapOrUnmap(WXWidget widget, bool map)
 {
     Widget w = (Widget)widget;
     if ( !w )
         return FALSE;
 
-    if ( domap )
+    if ( map )
         XtMapWidget(w);
     else
         XtUnmapWidget(w);
-
-    //   Rationale: a lot of common operations (including but not
-    // limited to moving, resizing and appending items to a listbox)
-    // unmamange the widget, do their work, then manage it again.
-    // This means that, for example adding an item to a listbox will show it,
-    // or that most controls are shown every time they are moved or resized!
-    XtSetMappedWhenManaged( w, domap );
 
     return TRUE;
 }
@@ -961,16 +954,16 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
         GetClientSize(& w, & h);
     }
 
-    wxWindowList::Node *cnode = m_children.GetFirst();
+    wxNode *cnode = m_children.First();
     while (cnode)
     {
-        wxWindow *child = cnode->GetData();
+        wxWindow *child = (wxWindow*) cnode->Data();
         int sx = 0;
         int sy = 0;
         child->GetSize( &sx, &sy );
         wxPoint pos( child->GetPosition() );
         child->SetSize( pos.x + dx, pos.y + dy, sx, sy, wxSIZE_ALLOW_MINUS_ONE );
-        cnode = cnode->GetNext();
+        cnode = cnode->Next();
     }
 
     int x1 = (dx >= 0) ? x : x - dx;
@@ -1079,10 +1072,10 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
 
     // Now send expose events
 
-    wxList::Node* node = updateRects.GetFirst();
+    wxNode* node = updateRects.First();
     while (node)
     {
-        wxRect* rect = (wxRect*) node->GetData();
+        wxRect* rect = (wxRect*) node->Data();
         XExposeEvent event;
 
         event.type = Expose;
@@ -1099,17 +1092,17 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
 
         XSendEvent(display, window, False, ExposureMask, (XEvent *)&event);
 
-        node = node->GetNext();
+        node = node->Next();
 
     }
 
     // Delete the update rects
-    node = updateRects.GetFirst();
+    node = updateRects.First();
     while (node)
     {
-        wxRect* rect = (wxRect*) node->GetData();
+        wxRect* rect = (wxRect*) node->Data();
         delete rect;
-        node = node->GetNext();
+        node = node->Next();
     }
 
     XmUpdateDisplay((Widget) GetMainWidget());
@@ -1813,8 +1806,8 @@ bool wxAddWindowToTable(Widget w, wxWindow *win)
 
     wxWidgetHashTable->Put((long) w, win);
 
-    wxLogTrace("widget", "Widget 0x%p <-> window %p (%s)",
-               (WXWidget)w, win, win->GetClassInfo()->GetClassName());
+    wxLogTrace("widget", "Widget 0x%08x <-> window %p (%s)",
+               w, win, win->GetClassInfo()->GetClassName());
 
     return TRUE;
 }
@@ -2993,9 +2986,8 @@ void wxWindow::ChangeFont(bool keepOriginalSize)
         int width, height, width1, height1;
         GetSize(& width, & height);
 
-        // lesstif 0.87 hangs here, but 0.93 does not
-#if !defined(LESSTIF_VERSION) \
-    || (defined(LesstifVersion) && LesstifVersion >= 93)
+        // lesstif 0.87 hangs here
+#ifndef LESSTIF_VERSION
         XtVaSetValues (w,
             XmNfontList, (XmFontList) m_font.GetFontList(1.0, XtDisplay(w)),
             NULL);

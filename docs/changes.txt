@@ -1,80 +1,5 @@
-----------------------------
-wxWindows 2.5/2.6 Change Log
-----------------------------
-
-INCOMPATIBLE CHANGES SINCE 2.4.x
-================================
-
-OTHER CHANGES
-=============
-
-2.5.0
------
-
-All:
-
-- added wxDateSpan::operator==() and !=() (Lukasz Michalski)
-- use true/false throughout the library instead of TRUE/FALSE
-- wxStopWatch::Start() resumes the stop watch if paused, as per the docs
-
-All GUI ports:
-
-- implemented GetEditControl for wxGenericTreeCtrl (Peter Stieber)
-- improved contrib/utils/convertrc parsing (David J. Cooke)
-- fixed handling of URLs and filenames in wxFileSystem
-- implemented alignment for wxGrid bool editor and renderer
-- support wxListCtrl columns alignment for all platforms and not just MSW
-- Changed to type-safe wxSizerItemList for wxSizer child items.
-
-    Deprecated:
-
-        wxSizer::Remove( wxWindow* )
-            - it does not function as Remove would usually be expected to
-              and destroy the window, use Detach instead.
-
-        wxSizer::GetOption(),
-        wxSizer::SetOption()
-            - wxSizer 'option' parameter was renamed 'proportion' to better
-              reflect its action, use Get/SetProportion instead.
-
-        wxKeyEvent::KeyCode()
-            - use GetKeyCode instead.
-
-        wxList:: Number, First, Last, Nth
-            - use typesafe GetCount, GetFirst, GetLast, Item instead.
-
-        wxNode:: Next, Previous, Data
-            - use typesafe Get* instead.
-
-        wxListBase::operator wxList&()
-            - use typesafe lists instead.
-
-Unix:
-
-- fixed compilation on systems with zlib installed but < 1.1.3 version
-- fixed compilation on Solaris 7 with large files support enabled
-
-wxGTK:
-
-- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
-- made wxTextCtrl::EmulateKeyPress() work for Delete and Backspace
-- fixed wxTopLevelWindow::ShowFullScreen to work with kwin, IceWM and
-  window managers that support _NET_WM_STATE_FULLSCREEN
-
-wxMSW:
-
-- possibility to use DIBs for wxBitmap implementation (Derry Bryson)
-- wxStaticBitmap doesn't stretch its bitmap any longer (like other ports)
-- support for accelerator keys in the owner drawn menus (Derry Bryson)
-- wxCaret::SetSize() doesn't hide the caret any longer as it used to
-- wxCheckListBox::Check() doesn't send CHECKLISTBOX_TOGGLE event any more
-- fixed bug with wxTR_EDIT_LABELS not workign with wxTR_MULTIPLE
-- fixes for compilation with OpenWatcom compiler
-- fixed wxStaticText best size calculation (was wrong by '&' width)
-- fixed calling wxFrame::Maximize(FALSE) before the window is shown
-
-OLD CHANGES
-===========
+wxWindows 2 Change Log
+----------------------
 
 INCOMPATIBLE CHANGES SINCE 2.2.x
 ================================
@@ -251,6 +176,16 @@ OTHER CHANGES
 wxMSW:
 
 - fixed loss of client data in wxChoice::SetString()
+
+wxGTK:
+
+- fixed wxMenu::Remove (John Skiff and Benjamin Williams)
+
+All:
+
+- Improved contrib/utils/convertrc parsing (David J. Cooke)
+- Fixed handling of URLs and filenames in wxFileSystem
+- Implemented alignment for wxGrid bool editor and renderer
 
 2.3.4
 -----

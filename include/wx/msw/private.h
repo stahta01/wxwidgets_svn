@@ -20,13 +20,6 @@
 
 #include <windows.h>
 
-
-#if defined (__WXWINCE__)
-    #include <wingdi.h>     // RGB, COLORREF
-    #include <winuser.h>    // Global Namespaces ::GetKeyState, ::GetWindowRect
-#endif
-
-
 #ifdef __WXMICROWIN__
     // Extra prototypes and symbols not defined by MicroWindows
     #include "wx/msw/microwin.h"
@@ -88,14 +81,11 @@ WXDLLEXPORT_DATA(extern HFONT) wxSTATUS_LINE_FONT;
 
 // this defines a CASTWNDPROC macro which casts a pointer to the type of a
 // window proc
-#if defined(__WXWINCE__)
-    typedef FARPROC WndProcCast;
-#elif defined(STRICT) || defined(__GNUC__)
+#if defined(STRICT) || defined(__GNUC__)
     typedef WNDPROC WndProcCast;
 #else
     typedef FARPROC WndProcCast;
 #endif
-
 
 #define CASTWNDPROC (WndProcCast)
 
@@ -346,8 +336,6 @@ public:
 
 private:
     HDC m_hdc;
-
-    DECLARE_NO_COPY_CLASS(ScreenHDC)
 };
 
 // the same as ScreenHDC but for memory DCs: creates the HDC in ctor and
@@ -362,8 +350,6 @@ public:
 
 private:
     HDC m_hdc;
-
-    DECLARE_NO_COPY_CLASS(MemoryHDC)
 };
 
 // a class which selects a GDI object into a DC in its ctor and deselects in
@@ -382,8 +368,6 @@ public:
 private:
    HDC m_hdc;
    HGDIOBJ m_hgdiobj;
-
-    DECLARE_NO_COPY_CLASS(SelectInHDC)
 };
 
 // ---------------------------------------------------------------------------

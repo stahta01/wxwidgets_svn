@@ -202,8 +202,6 @@ private:
     inline size_t32 Swap(size_t32 ui) const;
 
     bool          m_bSwapped;   // wrong endianness?
-
-    DECLARE_NO_COPY_CLASS(wxMsgCatalogFile)
 };
 
 
@@ -611,8 +609,6 @@ bool wxLocale::Init(const wxChar *szName,
   {
     // the argument to setlocale()
     szLocale = szShort;
-
-    wxCHECK_MSG( szLocale, FALSE, _T("no locale to set in wxLocale::Init()") );
   }
   m_pszOldLocale = wxSetlocale(LC_ALL, szLocale);
   if ( m_pszOldLocale == NULL )
@@ -772,13 +768,9 @@ bool wxLocale::Init(int language, int flags)
 #endif
 
 #ifndef WX_NO_LOCALE_SUPPORT
-     wxChar *szLocale = retloc ? wxStrdup(retloc) : NULL;
-    bool ret = Init(name, canonical, retloc,
-                    (flags & wxLOCALE_LOAD_DEFAULT) != 0,
-                    (flags & wxLOCALE_CONV_ENCODING) != 0);
-    if (szLocale)
-        free(szLocale);
-    return ret;
+    return Init(name, canonical, retloc,
+                (flags & wxLOCALE_LOAD_DEFAULT) != 0,
+                (flags & wxLOCALE_CONV_ENCODING) != 0);
 #endif
 }
 

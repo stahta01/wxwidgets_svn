@@ -63,8 +63,6 @@ public:
 #endif // wxUSE_PALETTE
     wxArrayString   m_optionNames;
     wxArrayString   m_optionValues;
-
-    DECLARE_NO_COPY_CLASS(wxImageRefData)
 };
 
 wxImageRefData::wxImageRefData()
@@ -1008,9 +1006,8 @@ int wxImage::GetImageCount( const wxString &name, long type )
 #if wxUSE_STREAMS
   wxFileInputStream stream(name);
   if (stream.Ok())
-      return GetImageCount(stream, type);
+    return GetImageCount(stream, type);
 #endif
-
   return 0;
 }
 
@@ -1213,51 +1210,51 @@ bool wxImage::RemoveHandler( const wxString& name )
 
 wxImageHandler *wxImage::FindHandler( const wxString& name )
 {
-    wxNode *node = sm_handlers.GetFirst();
+    wxNode *node = sm_handlers.First();
     while (node)
     {
-        wxImageHandler *handler = (wxImageHandler*)node->GetData();
+        wxImageHandler *handler = (wxImageHandler*)node->Data();
         if (handler->GetName().Cmp(name) == 0) return handler;
 
-        node = node->GetNext();
+        node = node->Next();
     }
     return 0;
 }
 
 wxImageHandler *wxImage::FindHandler( const wxString& extension, long bitmapType )
 {
-    wxNode *node = sm_handlers.GetFirst();
+    wxNode *node = sm_handlers.First();
     while (node)
     {
-        wxImageHandler *handler = (wxImageHandler*)node->GetData();
+        wxImageHandler *handler = (wxImageHandler*)node->Data();
         if ( (handler->GetExtension().Cmp(extension) == 0) &&
             (bitmapType == -1 || handler->GetType() == bitmapType) )
             return handler;
-        node = node->GetNext();
+        node = node->Next();
     }
     return 0;
 }
 
 wxImageHandler *wxImage::FindHandler( long bitmapType )
 {
-    wxNode *node = sm_handlers.GetFirst();
+    wxNode *node = sm_handlers.First();
     while (node)
     {
-        wxImageHandler *handler = (wxImageHandler *)node->GetData();
+        wxImageHandler *handler = (wxImageHandler *)node->Data();
         if (handler->GetType() == bitmapType) return handler;
-        node = node->GetNext();
+        node = node->Next();
     }
     return 0;
 }
 
 wxImageHandler *wxImage::FindHandlerMime( const wxString& mimetype )
 {
-    wxNode *node = sm_handlers.GetFirst();
+    wxNode *node = sm_handlers.First();
     while (node)
     {
-        wxImageHandler *handler = (wxImageHandler *)node->GetData();
+        wxImageHandler *handler = (wxImageHandler *)node->Data();
         if (handler->GetMimeType().IsSameAs(mimetype, FALSE)) return handler;
-        node = node->GetNext();
+        node = node->Next();
     }
     return 0;
 }
@@ -1267,15 +1264,19 @@ void wxImage::InitStandardHandlers()
 #if wxUSE_STREAMS
     AddHandler(new wxBMPHandler);
 #endif // wxUSE_STREAMS
+
+#if wxUSE_XPM && !defined(__WXGTK__) && !defined(__WXMOTIF__)
+    AddHandler(new wxXPMHandler);
+#endif
 }
 
 void wxImage::CleanUpHandlers()
 {
-    wxNode *node = sm_handlers.GetFirst();
+    wxNode *node = sm_handlers.First();
     while (node)
     {
-        wxImageHandler *handler = (wxImageHandler *)node->GetData();
-        wxNode *next = node->GetNext();
+        wxImageHandler *handler = (wxImageHandler *)node->Data();
+        wxNode *next = node->Next();
         delete handler;
         delete node;
         node = next;

@@ -8,48 +8,30 @@
 
 WXDIR = ..\..
 EXTRACPPFLAGS=-i=..\zlib
-OUTPUTDIR=Watcom\
 
 !include $(WXDIR)\src\makewat.env
 
 WXLIB = $(WXDIR)\lib
 
-LIBTARGET = $(WXLIB)\png$(WATCOM_SUFFIX).lib
+LIBTARGET   = $(WXLIB)\png.lib
 
-OBJECTS = &
-    $(OUTPUTDIR)png.obj &
-    $(OUTPUTDIR)pngread.obj &
-    $(OUTPUTDIR)pngrtran.obj &
-    $(OUTPUTDIR)pngrutil.obj &
-    $(OUTPUTDIR)pngpread.obj &
-    $(OUTPUTDIR)pngtrans.obj &
-    $(OUTPUTDIR)pngwrite.obj &
-    $(OUTPUTDIR)pngwtran.obj &
-    $(OUTPUTDIR)pngwutil.obj &
-    $(OUTPUTDIR)pngerror.obj &
-    $(OUTPUTDIR)pngmem.obj &
-    $(OUTPUTDIR)pngwio.obj &
-    $(OUTPUTDIR)pngrio.obj &
-    $(OUTPUTDIR)pngget.obj &
-    $(OUTPUTDIR)pngset.obj
+OBJECTS = png.obj pngread.obj pngrtran.obj pngrutil.obj &
+ pngpread.obj pngtrans.obj pngwrite.obj pngwtran.obj pngwutil.obj &
+ pngerror.obj pngmem.obj pngwio.obj pngrio.obj pngget.obj pngset.obj
 
-all: $(OUTPUTDIR) $(LIBTARGET) .SYMBOLIC
+all:        $(OBJECTS) $(LIBTARGET)
 
-$(OUTPUTDIR):
-	@if not exist $^@ mkdir $^@
-
-LBCFILE=$(OUTPUTDIR)png.lbc
 $(LIBTARGET) : $(OBJECTS)
-    %create $(LBCFILE)
-    @for %i in ( $(OBJECTS) ) do @%append $(LBCFILE) +%i
-    wlib /q /b /c /n /p=512 $^@ @$(LBCFILE)
+    %create tmp.lbc
+    @for %i in ( $(OBJECTS) ) do @%append tmp.lbc +%i
+    wlib /b /c /n /p=512 $^@ @tmp.lbc
 
 clean:   .SYMBOLIC
-    -erase $(OUTPUTDIR)*.obj
+    -erase *.obj
     -erase $(LIBTARGET)
-    -erase $(OUTPUTDIR)*.pch
-    -erase $(OUTPUTDIR)*.err
-    -erase $(OUTPUTDIR)*.lbc
+    -erase *.pch
+    -erase *.err
+    -erase *.lbc
 
 cleanall:   clean
 

@@ -10,17 +10,17 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef __GNUG__
-#pragma implementation "menu.h"
-#pragma implementation "menuitem.h"
-#endif
-
 // ============================================================================
 // headers & declarations
 // ============================================================================
 
 // wxWindows headers
 // -----------------
+
+#ifdef __GNUG__
+#pragma implementation "menu.h"
+#pragma implementation "menuitem.h"
+#endif
 
 #include "wx/app.h"
 #include "wx/menu.h"
@@ -51,7 +51,8 @@ const short kwxMacAppleMenuId = 1 ;
 // ============================================================================
 // implementation
 // ============================================================================
-
+static void wxMenubarUnsetInvokingWindow( wxMenu *menu ) ;
+static void wxMenubarSetInvokingWindow( wxMenu *menu, wxWindow *win );
 
 // Menus
 
@@ -194,6 +195,12 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 			{
 				UMAInsertSubMenuItem(MAC_WXHMENU(m_hMenu), label , pos, pSubMenu->m_macMenuId);
 			}
+
+            // if adding a submenu to a menu already existing in the menu bar, we
+            // must set invoking window to allow processing events from this
+            // submenu
+            if ( m_invokingWindow )
+                wxMenubarSetInvokingWindow(pSubMenu, m_invokingWindow);
 		}
 		else
 		{
@@ -457,6 +464,7 @@ void wxMenuBar::Init()
 {
     m_eventHandler = this;
     m_menuBarFrame = NULL;
+    m_invokingWindow = (wxWindow*) NULL;
 }
 
 wxMenuBar::wxMenuBar()
@@ -557,30 +565,39 @@ void wxMenuBar::MacInstallMenuBar()
     }
 #endif
  
+    // clean-up the help menu before adding new items
+	MenuHandle mh = NULL ;
+	if ( UMAGetHelpMenu( &mh , &firstUserHelpMenuItem) == noErr )
+	{
+	    for ( int i = CountMenuItems( mh ) ; i >= firstUserHelpMenuItem ; --i )
+	    {
+	        DeleteMenuItem( mh , i ) ;
+	    }
+	}
+	else
+	{
+	    mh = NULL ;
+	}
+
+
    	for (size_t i = 0; i < m_menus.GetCount(); i++)
   	{
         Str255 	label;
-        wxMenuItemList::Node *node;
+        wxNode *node;
         wxMenuItem *item;
         int pos ;
     	wxMenu* menu = m_menus[i] , *subMenu = NULL ;
 
     	if( m_titles[i] == "?" || m_titles[i] == "&?"  || m_titles[i] == wxApp::s_macHelpMenuTitleName )
     	{
-			MenuHandle mh = NULL ;
-			if ( UMAGetHelpMenu( &mh , &firstUserHelpMenuItem) != noErr )
+			if ( mh == NULL )
 			{
 			    continue ;
 			}
-
-		    for ( int i = CountMenuItems( mh ) ; i >= firstUserHelpMenuItem ; --i )
-		    {
-		        DeleteMenuItem( mh , i ) ;
-		    }
 				
-		  	for (pos = 0 , node = menu->GetMenuItems().GetFirst(); node; node = node->GetNext(), pos++) 
+		  	for (pos = 0 , node = menu->GetMenuItems().First(); node; node = node->Next(), pos++) 
 	  		{
-	 			item = (wxMenuItem *)node->GetData();
+	 			item = (wxMenuItem *)node->Data();
 	 			subMenu = item->GetSubMenu() ;
 				if (subMenu)	 		
 				{
@@ -629,9 +646,9 @@ void wxMenuBar::MacInstallMenuBar()
 			UMASetMenuTitle( MAC_WXHMENU(menu->GetHMenu()) , label ) ;
 				wxArrayPtrVoid submenus ;
 				
-	  		for (pos = 0, node = menu->GetMenuItems().GetFirst(); node; node = node->GetNext(), pos++) 
+	  		for (pos = 0, node = menu->GetMenuItems().First(); node; node = node->Next(), pos++) 
   			{
-	 			item = (wxMenuItem *)node->GetData();
+	 			item = (wxMenuItem *)node->Data();
 	 			subMenu = item->GetSubMenu() ;
 				if (subMenu)	 		
 				{
@@ -642,12 +659,12 @@ void wxMenuBar::MacInstallMenuBar()
 			for ( size_t i = 0 ; i < submenus.GetCount() ; ++i )
 			{
 			    wxMenu* submenu = (wxMenu*) submenus[i] ;
-    	        wxMenuItemList::Node *subnode;
+    	        wxNode *subnode;
     	        wxMenuItem *subitem;
     	        int subpos ;
-                for ( subpos = 0 , subnode = submenu->GetMenuItems().GetFirst(); subnode; subnode = subnode->GetNext(), subpos++) 
+                for ( subpos = 0 , subnode = submenu->GetMenuItems().First(); subnode; subnode = subnode->Next(), subpos++) 
 		  		{
-  		 			subitem = (wxMenuItem *)subnode->GetData();
+  		 			subitem = (wxMenuItem *)subnode->Data();
   		 			wxMenu* itsSubMenu = subitem->GetSubMenu() ;
   					if (itsSubMenu)	 		
   					{
@@ -862,6 +879,11 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
         Refresh();
     }
 
+   // m_invokingWindow is set after wxFrame::SetMenuBar(). This call enables
+    // adding menu later on.
+    if (m_invokingWindow)
+        wxMenubarSetInvokingWindow( menu, m_invokingWindow );
+
     return TRUE;
 }
 
@@ -895,6 +917,7 @@ static void wxMenubarSetInvokingWindow( wxMenu *menu, wxWindow *win )
 
 void wxMenuBar::UnsetInvokingWindow()
 {
+    m_invokingWindow = (wxWindow*) NULL;
     wxMenuList::Node *node = m_menus.GetFirst();
     while (node)
     {
@@ -906,6 +929,7 @@ void wxMenuBar::UnsetInvokingWindow()
 
 void wxMenuBar::SetInvokingWindow(wxFrame *frame)
 {
+    m_invokingWindow = frame;
     wxMenuList::Node *node = m_menus.GetFirst();
     while (node)
     {

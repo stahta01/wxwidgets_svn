@@ -106,8 +106,6 @@ public:
 
 public:
   wxSocketState() : wxObject() {}
-
-    DECLARE_NO_COPY_CLASS(wxSocketState)
 };
 
 // ==========================================================================
@@ -834,11 +832,11 @@ void wxSocketBase::RestoreState()
   wxNode *node;
   wxSocketState *state;
 
-  node = m_states.GetLast();
+  node = m_states.Last();
   if (!node)
     return;
 
-  state = (wxSocketState *)node->GetData();
+  state = (wxSocketState *)node->Data();
 
   m_flags      = state->m_flags;
   m_notify     = state->m_notify;
