@@ -89,14 +89,7 @@ bool wxObject::IsKindOf(wxClassInfo *info) const
 
 wxObject *wxObject::Clone() const
 {
-    wxObject *object = GetClassInfo()->CreateObject();
-    CopyObject(*object);
-    return object;
-}
-
-void wxObject::CopyObject(wxObject& object_dest) const
-{
-    wxASSERT(object_dest.GetClassInfo()->IsKindOf(GetClassInfo()));
+    return GetClassInfo()->CreateObject();
 }
 
 #if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT

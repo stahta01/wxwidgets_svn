@@ -290,7 +290,7 @@ public:
     // exists only for optimization purposes
     bool IsCommandEvent() const { return m_isCommandEvent; }
 
-    void CopyObject(wxObject& object_dest) const;
+    wxObject *Clone() const;
 
 public:
     bool              m_skipped;
@@ -365,8 +365,6 @@ public:
 
     void SetInt(int i) { m_commandInt = i; }
     long GetInt() const { return m_commandInt ; }
-
-    void CopyObject(wxObject& obj) const;
 
 public:
     wxString          m_commandString; // String event argument
@@ -547,8 +545,6 @@ public:
     // Get Y position
     long GetY() const { return m_y; }
 
-    void CopyObject(wxObject& obj) const;
-
 public:
     long          m_x;
     long          m_y;
@@ -598,8 +594,6 @@ public:
     // Get Y position
     long GetY() const { return m_y; }
 
-    void CopyObject(wxObject& obj) const;
-
 public:
     long          m_x;
     long          m_y;
@@ -628,8 +622,6 @@ public:
         { m_eventType = wxEVT_SIZE; m_id = id; }
 
     wxSize GetSize() const { return m_size; }
-
-    void CopyObject(wxObject& obj) const;
 };
 
 // Move event class
@@ -651,8 +643,6 @@ public:
         { m_eventType = wxEVT_MOVE; m_id = id; }
 
     wxPoint GetPosition() const { return m_pos; }
-
-    void CopyObject(wxObject& obj) const;
 };
 
 // Paint event class
@@ -686,8 +676,6 @@ public:
     wxEraseEvent(int Id = 0, wxDC *dc = (wxDC *) NULL)
         { m_eventType = wxEVT_ERASE_BACKGROUND; m_id = Id; m_dc = dc; }
     wxDC *GetDC() const { return m_dc; }
-
-    void CopyObject(wxObject& obj) const;
 };
 
 // Focus event class
@@ -719,8 +707,6 @@ public:
     wxActivateEvent(wxEventType type = wxEVT_NULL, bool active = TRUE, int Id = 0)
         { m_eventType = type; m_active = active; m_id = Id; }
     bool GetActive() const { return m_active; }
-
-    void CopyObject(wxObject& obj) const;
 
 private:
     bool m_active;
@@ -754,14 +740,13 @@ class WXDLLEXPORT wxMenuEvent : public wxEvent
     DECLARE_DYNAMIC_CLASS(wxMenuEvent)
 
 public:
-    wxMenuEvent(wxEventType type = wxEVT_NULL, int id = 0)
-      { m_eventType = type; m_menuId = id; }
+  wxMenuEvent(wxEventType type = wxEVT_NULL, int id = 0)
+    { m_eventType = type; m_menuId = id; }
 
-    int GetMenuId() const { return m_menuId; }
+  int GetMenuId() const { return m_menuId; }
 
-    void CopyObject(wxObject& obj) const;
 private:
-    int m_menuId;
+  int m_menuId;
 };
 
 // Window close or session close event class
@@ -812,8 +797,6 @@ public:
     bool GetForce() const { return m_force; }
 #endif
 
-    void CopyObject(wxObject& obj) const;
-
 protected:
     bool m_loggingOff;
     bool m_veto, m_canVeto;
@@ -838,8 +821,6 @@ public:
 
     void SetShow(bool show) { m_show = show; }
     bool GetShow() const { return m_show; }
-
-    void CopyObject(wxObject& obj) const;
 
 protected:
     bool m_show;

@@ -61,8 +61,6 @@ class SockRequest
 };
 
 class wxSocketInternal;
-
-#if wxUSE_THREADS
 class SocketWaiter: public wxThread {
  public:
   SocketWaiter(wxSocketBase *socket, wxSocketInternal *internal);
@@ -102,8 +100,6 @@ class SocketRequester: public wxThread {
   wxSocketInternal *m_internal;
   int m_fd;
 };
-#endif
-  // wxUSE_THREADS
 
 class wxSocketInternal {
  public:
@@ -119,10 +115,12 @@ class wxSocketInternal {
 
   int GetFD() { return m_fd; }
   
-  void ResumeWaiter();
-  void StopWaiter();
-  void ResumeRequester();
-  void StopRequester();
+  void InitializeSocket();
+  void FinalizeSocket();
+  void PauseSocket();
+  void ResumeSocket();
+  void EnableWaiter();
+  void DisableWaiter();
 
   void QueueRequest(SockRequest *request, bool async);
   void WaitForEnd(SockRequest *request);
@@ -130,16 +128,13 @@ class wxSocketInternal {
   SockRequest *WaitForReq();
   void EndRequest(SockRequest *req);
  public:
-  wxSocketBase *m_socket;
-#if wxUSE_THREADS
-  wxMutex m_socket_locker, m_fd_locker, m_request_locker, m_end_requester;
+  wxMutex m_socket_locker, m_fd_locker, m_request_locker;
   wxCondition m_socket_cond;
+  wxSocketBase *m_socket;
   SocketWaiter *m_thread_waiter;
   SocketRequester *m_thread_requester;
-#endif
   wxList m_requests;
   int m_fd;
-  bool m_invalid_requester;
 };
 
 #endif

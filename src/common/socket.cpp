@@ -209,6 +209,8 @@ wxSocketBase::~wxSocketBase()
   // First, close the file descriptor.
   Close();
 
+  m_internal->FinalizeSocket();
+
   if (m_unread)
     free(m_unread);
   // Unregister from the handler database.
@@ -226,8 +228,8 @@ bool wxSocketBase::Close()
 {
   if (m_fd != INVALID_SOCKET) 
   {
-    if (m_notify_state == TRUE)
-      Notify(FALSE);
+    // Pause all running socket thread.
+    m_internal->PauseSocket();
 
     // Shutdown the connection.
     shutdown(m_fd, 2);
@@ -545,21 +547,18 @@ void wxSocketBase::SetNotify(wxRequestNotify flags)
 
   m_neededreq = flags;
   if (m_neededreq == 0)
-    m_internal->StopWaiter();
+    m_internal->DisableWaiter();
   else
     Notify(m_notify_state);
 }
 
 void wxSocketBase::Notify(bool notify)
 {
-  m_notify_state = notify;
-  if (m_fd == INVALID_SOCKET)
-    return;
-
   if (notify)
-    m_internal->ResumeWaiter();
+    m_internal->EnableWaiter();
   else
-    m_internal->StopWaiter();
+    m_internal->DisableWaiter();
+  m_notify_state = notify;
 }
 
 void wxSocketBase::OnRequest(wxRequestEvent req_evt)
@@ -575,7 +574,7 @@ void wxSocketBase::OnRequest(wxRequestEvent req_evt)
     // OldOnNotify(req_evt);
 
     // We disable the event reporting.
-    m_neededreq &= ~notify;
+    SetNotify(m_neededreq & ~notify);
   }
 }
 
@@ -587,14 +586,14 @@ wxSocketEvent::wxSocketEvent(int id)
   SetEventType(type);
 }
 
-void wxSocketEvent::CopyObject(wxObject& obj_d) const
+wxObject *wxSocketEvent::Clone() const
 {
-  wxSocketEvent *event = (wxSocketEvent *)&obj_d;
-
-  wxEvent::CopyObject(obj_d);
+  wxSocketEvent *event = (wxSocketEvent *)wxEvent::Clone();
 
   event->m_skevt = m_skevt;
   event->m_socket = m_socket;
+
+  return event;
 }
 
 void wxSocketBase::OldOnNotify(wxRequestEvent evt)
@@ -680,7 +679,7 @@ void wxSocketBase::WantBuffer(char *buffer, size_t nbytes,
   SockRequest *buf = new SockRequest;
 
   SaveState();
-  m_internal->StopWaiter(); 
+  m_internal->DisableWaiter(); 
   buf->buffer = buffer;
   buf->size = nbytes;
   buf->done = FALSE;
@@ -736,7 +735,7 @@ wxSocketServer::wxSocketServer(wxSockAddress& addr_man,
     return;
   }
 
-  Notify(TRUE);
+  m_internal->InitializeSocket();
 }
 
 // --------------------------------------------------------------
@@ -747,12 +746,8 @@ bool wxSocketServer::AcceptWith(wxSocketBase& sock)
 {
   int fd2;
 
-  m_internal->AcquireFD();
-  if ((fd2 = accept(m_fd, 0, 0)) < 0) {
-    m_internal->ReleaseFD();
+  if ((fd2 = accept(m_fd, 0, 0)) < 0)
     return FALSE;
-  }
-  m_internal->ReleaseFD();
 
   struct linger linger;
   linger.l_onoff = 0;
@@ -767,7 +762,7 @@ bool wxSocketServer::AcceptWith(wxSocketBase& sock)
   sock.m_fd = fd2;
   sock.m_connected = TRUE;
 
-  sock.m_internal->ResumeWaiter();
+  sock.m_internal->InitializeSocket();
 
   return TRUE;
 }
@@ -849,6 +844,10 @@ bool wxSocketClient::Connect(wxSockAddress& addr_man, bool WXUNUSED(wait) )
   if (connect(m_fd, remote, len) != 0)
     return FALSE;
 
+  // Initializes the background threads ...
+  // --------------------------------------
+  m_internal->InitializeSocket();
+
   // Enables bg events.
   // ------------------
   Notify(TRUE);
@@ -873,10 +872,11 @@ void wxSocketClient::OnRequest(wxRequestEvent evt)
   {
     if (m_connected) 
     {
-      m_neededreq &= ~REQ_CONNECT;
+      SetNotify(m_neededreq & ~REQ_CONNECT);
       return;
     }
     m_connected = TRUE;
+    OldOnNotify(EVT_CONNECT);
     return;
   }
   wxSocketBase::OnRequest(evt);

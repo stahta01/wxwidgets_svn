@@ -130,12 +130,7 @@ bool wxBitmapButton::Create( wxWindow *parent, wxWindowID id, const wxBitmap &bi
     m_label = "";
   
     m_widget = gtk_button_new();
-
-#if (GTK_MINOR_VERSION > 0)    
-    if (style & wxNO_BORDER)
-       gtk_button_set_relief( GTK_BUTTON(m_widget), GTK_RELIEF_NONE );
-#endif
-
+  
     if (m_bitmap.Ok())
     {
         GdkBitmap *mask = (GdkBitmap *) NULL;
@@ -146,10 +141,8 @@ bool wxBitmapButton::Create( wxWindow *parent, wxWindowID id, const wxBitmap &bi
         gtk_container_add( GTK_CONTAINER(m_widget), pixmap );
     }
   
-    int border = 10;
-    if (style & wxNO_BORDER) border = 4;
-    if (newSize.x == -1) newSize.x = m_bitmap.GetWidth()+border;
-    if (newSize.y == -1) newSize.y = m_bitmap.GetHeight()+border;
+    if (newSize.x == -1) newSize.x = m_bitmap.GetHeight()+10;
+    if (newSize.y == -1) newSize.y = m_bitmap.GetWidth()+10;
     SetSize( newSize.x, newSize.y );
   
     gtk_signal_connect( GTK_OBJECT(m_widget), "clicked", 
@@ -209,25 +202,25 @@ void wxBitmapButton::SetBitmap()
 
     wxBitmap the_one;
   
-    if (!m_isEnabled) 
+    if ( ! m_isEnabled ) 
         the_one = m_disabled;
     else 
     {
-        if (m_isSelected) 
+        if ( m_isSelected ) 
 	{
 	    the_one = m_selected;
 	}
         else 
 	{
-            if (m_hasFocus) 
+            if ( m_hasFocus ) 
 	        the_one = m_focus;
             else 
 	        the_one = m_bitmap;
         }
     }
 
-    if (!the_one.Ok()) the_one = m_bitmap;
-    if (!the_one.Ok()) return;
+    if ( ! the_one.Ok() ) the_one = m_bitmap;
+    if ( ! the_one.Ok() ) return;
   
     GtkButton *bin = GTK_BUTTON( m_widget );
     GtkPixmap *g_pixmap = GTK_PIXMAP( bin->child );

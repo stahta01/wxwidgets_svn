@@ -35,8 +35,7 @@
     #include "wx/dc.h"
     #include "wx/app.h"
     #include "wx/msgdlg.h"
-    #include "wx/intl.h"
-    #include "wx/progdlg.h"
+    #include <wx/intl.h>
 #endif
 
 #include "wx/generic/printps.h"
@@ -114,7 +113,6 @@ bool wxPostScriptPrinter::Print(wxWindow *parent, wxPrintout *printout, bool pro
     else
         m_printDialogData.EnablePageNumbers(FALSE);
 
-
     // Create a suitable device context
     wxDC *dc = (wxDC *) NULL;
     if (prompt)
@@ -167,15 +165,6 @@ bool wxPostScriptPrinter::Print(wxWindow *parent, wxPrintout *printout, bool pro
     // Create an abort window
     wxBeginBusyCursor();
 
-    // Open the progress bar dialog
-    wxProgressDialog *progressDialog = new wxProgressDialog (
-       printout->GetTitle(),
-       _("Printing..."),
-       maxPage-minPage,
-       parent,
-       /* disable parent only */ true,
-       /* show abort button */ true);
-    
     printout->OnBeginPrinting();
 
     bool keepGoing = TRUE;
@@ -203,22 +192,11 @@ bool wxPostScriptPrinter::Print(wxWindow *parent, wxPrintout *printout, bool pro
             }
             else
             {
-               wxString msg;
-               msg.Printf(_("Printing page %d..."), pn);
-               if(progressDialog->Update(pn-minPage, msg))
-               {
-                  dc->StartPage();
-                  printout->OnPrintPage(pn);
-                  dc->EndPage();
-               }
-               else
-               {
-                  sm_abortIt = true;
-                  keepGoing = false; //FIXME: do we need both?
-               }
+                dc->StartPage();
+                printout->OnPrintPage(pn);
+                dc->EndPage();
             }
         }
-        delete progressDialog;
         printout->OnEndDocument();
     }
 

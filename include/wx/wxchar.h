@@ -168,7 +168,32 @@ typedef  _TUCHAR     wxUChar;
 #undef wxUSE_WCHAR_T
 #define wxUSE_WCHAR_T 1
 
-#define wxNEED_WX_CTYPE_H
+#include <windef.h>
+#include <winbase.h>
+#include <winnls.h>
+#include <winnt.h>
+
+   // ctype.h functions
+inline WORD __wxMSW_ctype(wxChar ch)
+{
+  WORD ret;
+  GetStringTypeEx(LOCALE_USER_DEFAULT, CT_CTYPE1, &ch, 1, &ret);
+  return ret;
+}
+#define  wxIsalnum(x)  IsCharAlphaNumeric
+#define  wxIsalpha     IsCharAlpha
+#define  wxIsctrl(x)   (__wxMSW_ctype(x) & C1_CNTRL)
+#define  wxIsdigit(x)  (__wxMSW_ctype(x) & C1_DIGIT)
+#define  wxIsgraph(x)  (__wxMSW_ctype(x) & (C1_DIGIT|C1_PUNCT|C1_ALPHA))
+#define  wxIslower(x)  IsCharLower
+#define  wxIsprint(x)  (__wxMSW_ctype(x) & (C1_DIGIT|C1_SPACE|C1_PUNCT|C1_ALPHA))
+#define  wxIspunct(x)  (__wxMSW_ctype(x) & C1_PUNCT)
+#define  wxIsspace(x)  (__wxMSW_ctype(x) & C1_SPACE)
+#define  wxIsupper(x)  IsCharUpper
+#define  wxIsxdigit(x) (__wxMSW_ctype(x) & C1_XDIGIT)
+#define  wxTolower(x)  (wxChar)CharLower((LPTSTR)(x))
+#define  wxToupper(x)  (wxChar)CharUpper((LPTSTR)(x))
+
 // #define  wxStrtok    strtok_r // Borland C++ 4.52 doesn't have strtok_r
 #define wxNEED_WX_STRING_H
 #define wxNEED_WX_STDIO_H
@@ -186,7 +211,7 @@ typedef  _TUCHAR     wxUChar;
  #if defined(__VISUALC__) && (__VISUALC__ < 900)
   #define wxUSE_WCHAR_T 0 // wchar_t is not available for MSVC++ 1.5
  #elif defined(__UNIX__)
-  #if defined(HAVE_WCSTR_H) || defined(HAVE_WCHAR_H) || defined(__FreeBSD__)
+  #if defined(HAVE_WCSTR_H) || defined(HAVE_WCHAR_H)
    #define wxUSE_WCHAR_T 1
   #else
    #define wxUSE_WCHAR_T 0
@@ -200,16 +225,11 @@ typedef  _TUCHAR     wxUChar;
 #endif//wxUSE_UNICODE
 
 #if wxUSE_WCHAR_T
- #ifdef HAVE_WCSTR_H
-  #include <wcstr.h>
- #else
-  #ifndef __FreeBSD__
-   #include <wchar.h>
-  #else
-   #include <stdlib.h>
-   #define wxNEED_WCSLEN
-  #endif
- #endif
+#ifdef HAVE_WCSTR_H
+#include <wcstr.h>
+#else
+#include <wchar.h>
+#endif
 #endif
 
 // check whether we are doing Unicode
@@ -293,9 +313,6 @@ typedef unsigned char   wxUChar;
 #define wxUChar unsigned char
 #endif
 
-#ifdef __FreeBSD__
- #undef _T
-#endif
 #define _T(x)           x
 
    // ctype.h functions
@@ -449,16 +466,7 @@ size_t WXDLLEXPORT wxWC2MB(char *buf, const wchar_t *psz, size_t n);
 #define wxWC2WX wxWC2MB
 #define wxWX2WC wxMB2WC
 #endif
-#else
-// No wxUSE_WCHAR_T: we have to do something (JACS)
-#define wxMB2WC wxStrncpy
-#define wxWC2MB wxStrncpy
-#define wxMB2WX wxStrncpy
-#define wxWX2MB wxStrncpy
-#define wxWC2WX wxWC2MB
-#define wxWX2WC wxMB2WC
 #endif
-
 bool WXDLLEXPORT wxOKlibc(); // for internal use
 
 // if libc versions are not available, use replacements defined in wxchar.cpp
@@ -480,22 +488,6 @@ wxChar * WXDLLEXPORT wxSetlocale(int category, const wxChar *locale);
 
 #ifdef wxNEED_WCSLEN // for use in buffer.h
 size_t   WXDLLEXPORT wcslen(const wchar_t *s);
-#endif
-
-#ifdef wxNEED_WX_CTYPE_H
-int WXDLLEXPORT wxIsalnum(wxChar ch);
-int WXDLLEXPORT wxIsalpha(wxChar ch);
-int WXDLLEXPORT wxIsctrl(wxChar ch);
-int WXDLLEXPORT wxIsdigit(wxChar ch);
-int WXDLLEXPORT wxIsgraph(wxChar ch);
-int WXDLLEXPORT wxIslower(wxChar ch);
-int WXDLLEXPORT wxIsprint(wxChar ch);
-int WXDLLEXPORT wxIspunct(wxChar ch);
-int WXDLLEXPORT wxIsspace(wxChar ch);
-int WXDLLEXPORT wxIsupper(wxChar ch);
-int WXDLLEXPORT wxIsxdigit(wxChar ch);
-int WXDLLEXPORT wxTolower(wxChar ch);
-int WXDLLEXPORT wxToupper(wxChar ch);
 #endif
 
 #ifdef wxNEED_WX_STRING_H

@@ -64,6 +64,7 @@ public:
 protected:
     wxPrintDialogData     m_printDialogData;
     wxPrintout*           m_currentPrintout;
+
 public:
     static wxWindow*      sm_abortWindow;
     static bool           sm_abortIt;

@@ -70,7 +70,6 @@ LIB_CPP_SRC=\
  ../common/wxchar.cpp \
  ../common/socket.cpp \
  ../common/sckaddr.cpp \
- ../common/sckint.cpp \
  ../common/sckipc.cpp \
  ../common/protocol.cpp \
  ../common/ftp.cpp \

@@ -914,6 +914,11 @@ int wxApp::MainLoop()
 
 
         DoMessage();
+
+	// If they are pending events, we must process them.
+#if wxUSE_THREADS
+	ProcessPendingEvents();
+#endif
     }
 
     return s_currentMsg.wParam;
@@ -1019,10 +1024,6 @@ void wxApp::OnIdle(wxIdleEvent& event)
         event.RequestMore(TRUE);
     }
 
-    // If they are pending events, we must process them.
-#if wxUSE_THREADS
-    ProcessPendingEvents();
-#endif
     s_inOnIdle = FALSE;
 }
 
@@ -1178,10 +1179,6 @@ bool wxYield()
         if ( !wxTheApp->DoMessage() )
             break;
     }
-    // If they are pending events, we must process them.
-#if wxUSE_THREADS
-    wxTheApp->ProcessPendingEvents();
-#endif
 
     return TRUE;
 }

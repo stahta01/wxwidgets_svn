@@ -752,11 +752,10 @@ void wxPrintPreviewBase::SetZoom(int percent)
         delete m_previewBitmap;
         m_previewBitmap = NULL;
     }
-
+    RenderPage(m_currentPage);
 
     if (m_previewCanvas)
     {
-        RenderPage(m_currentPage);
         m_previewCanvas->Clear();
         m_previewCanvas->Refresh();
     }

@@ -262,8 +262,7 @@ public:
   wxSocketBase::wxRequestEvent SocketEvent() const { return m_skevt; }
   wxSocketBase *Socket() const { return m_socket; }
 
-  void CopyObject(wxObject& obj_d) const;
-
+  wxObject *Clone() const;
 public:
   wxSocketBase::wxRequestEvent m_skevt;
   wxSocketBase *m_socket;

@@ -192,8 +192,7 @@ class WXDLLEXPORT wxObject
   virtual ~wxObject(void);
 
   virtual wxClassInfo *GetClassInfo(void) const { return &sm_classwxObject; }
-  wxObject *Clone(void) const;
-  virtual void CopyObject(wxObject& object_dest) const;
+  virtual wxObject *Clone(void) const;
 
   bool IsKindOf(wxClassInfo *info) const;
 
