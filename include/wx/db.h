@@ -6,7 +6,7 @@
 // Author:      Doug Card
 // Modified by: George Tasker
 //              Bart Jourquin
-//              Mark Johnson, wxWindows@mj10777.de
+//              Mark Johnson
 // Mods:        Dec, 1998:
 //                -Added support for SQL statement logging and database cataloging
 //                     April, 1999

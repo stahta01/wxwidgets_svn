@@ -897,22 +897,28 @@ wxSize wxBoxSizer::CalcMin()
     {
         wxSizerItem *item = (wxSizerItem*) node->Data();
 
-        m_stretchable += item->GetOption();
-        
+        int weight = 1;
+        if (item->GetOption())
+            weight = item->GetOption();
+
         wxSize size( item->CalcMin() );
 
         if (m_orient == wxHORIZONTAL)
         {
-            m_minWidth += size.x;
+            m_minWidth += (size.x * weight);
             m_minHeight = wxMax( m_minHeight, size.y );
         }
         else
         {
-            m_minHeight += size.y;
+            m_minHeight += (size.y * weight);
             m_minWidth = wxMax( m_minWidth, size.x );
         }
 
-        if (item->GetOption() == 0)
+        if (item->GetOption())
+        {
+            m_stretchable += weight;
+        }
+        else
         {
             if (m_orient == wxVERTICAL)
             {
@@ -920,7 +926,7 @@ wxSize wxBoxSizer::CalcMin()
                 m_fixedWidth = wxMax( m_fixedWidth, size.x );
             }
             else
-            { 
+            {
                 m_fixedWidth += size.x;
                 m_fixedHeight = wxMax( m_fixedHeight, size.y );
             }

@@ -8,16 +8,14 @@
 .first
 	define wx [--.include.wx]
 
-CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)
-CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm
+CXX_DEFINE = /define=(__WXGTK__=1)
 
 .suffixes : .cpp
 
 .cpp.obj :
 	cxx $(CXXFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).cpp
 .c.obj :
-	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
+	cc $(CFLAGS)$(CXX_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
 	accel.obj,\
@@ -76,8 +74,9 @@ OBJECTS = \
 	tooltip.obj,\
 	utilsgtk.obj,\
 	utilsres.obj,\
+	window.obj,\
         win_gtk.obj,\
-	window.obj
+	wx_gtk_vmsjackets.obj
 
 SOURCES =\
 	accel.cpp,\
@@ -136,8 +135,9 @@ SOURCES =\
 	tooltip.cpp,\
 	utilsgtk.cpp,\
 	utilsres.cpp,\
+	window.cpp,\
         win_gtk.c,\
-	window.cpp
+	wx_gtk_vmsjackets.c
    
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -199,5 +199,7 @@ timer.obj : timer.cpp
 tooltip.obj : tooltip.cpp
 utilsgtk.obj : utilsgtk.cpp
 utilsres.obj : utilsres.cpp
-win_gtk.obj : win_gtk.c
 window.obj : window.cpp
+win_gtk.obj : win_gtk.c
+wx_gtk_vmsjackets.obj : wx_gtk_vmsjackets.c
+	cc $(CFLAGS)$(CXX_DEFINE) wx_gtk_vmsjackets.c/name=(as_is,short)

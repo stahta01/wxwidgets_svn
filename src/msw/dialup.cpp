@@ -38,10 +38,6 @@
     #include "wx/event.h"
 #endif
 
-#include "wx/timer.h"
-#include "wx/app.h"
-#include "wx/generic/choicdgg.h"
-
 #include "wx/msw/private.h"  // must be before #include "dynlib.h"
 
 #if !wxUSE_DYNLIB_CLASS
@@ -516,7 +512,7 @@ HRASCONN wxDialUpManagerMSW::FindActiveConnection()
         {
             // an error occured
             wxLogError(_("Cannot find active dialup connection: %s"),
-                       GetErrorString(dwRet).c_str());
+                       GetErrorString(dwRet));
             return 0;
         }
     }
@@ -637,7 +633,7 @@ void wxDialUpManagerMSW::OnDialProgress(RASCONNSTATE rasconnstate,
     if ( dwError )
     {
         wxLogError(_("Failed to establish dialup connection: %s"),
-                   GetErrorString(dwError).c_str());
+                   GetErrorString(dwError));
 
         // we should still call RasHangUp() if we got a non 0 connection
         if ( ms_hRasConnection )
@@ -696,8 +692,7 @@ size_t wxDialUpManagerMSW::GetISPNames(wxArrayString& names) const
         else if ( dwRet != 0 )
         {
             // some other error - abort
-            wxLogError(_("Failed to get ISP names: %s"),
-                       GetErrorString(dwRet).c_str());
+            wxLogError(_("Failed to get ISP names: %s"), GetErrorString(dwRet));
 
             free(rasEntries);
 
@@ -859,7 +854,7 @@ bool wxDialUpManagerMSW::Dial(const wxString& nameOfISP,
     {
         wxLogError(_("Failed to %s dialup connection: %s"),
                    async ? _("initiate") : _("establish"),
-                   GetErrorString(dwRet).c_str());
+                   GetErrorString(dwRet));
 
         // we should still call RasHangUp() if we got a non 0 connection
         if ( ms_hRasConnection )
@@ -931,7 +926,7 @@ bool wxDialUpManagerMSW::HangUp()
     if ( dwRet != 0 )
     {
         wxLogError(_("Failed to terminate the dialup connection: %s"),
-                   GetErrorString(dwRet).c_str());
+                   GetErrorString(dwRet));
     }
 
     ms_isConnected = FALSE;
@@ -1162,7 +1157,7 @@ bool wxDialUpManagerMSW::EnableAutoCheckOnlineStatus(size_t nSeconds)
         if ( dwRet != 0 )
         {
             wxLogDebug(wxT("RasConnectionNotification() failed: %s"),
-                       GetErrorString(dwRet).c_str());
+                       GetErrorString(dwRet));
 
             CleanUpThreadData();
         }

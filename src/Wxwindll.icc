@@ -122,7 +122,6 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "COMMON\\TEXTFILE.CPP"
       source type(cpp) "COMMON\\TIMERCMN.CPP"
       source type(cpp) "COMMON\\TOKENZR.CPP"
-      source type(cpp) "COMMON\\TREEBASE.CPP"
       source type(cpp) "COMMON\\TXTSTRM.CPP"
       option report(level, "E")
       {
@@ -179,7 +178,7 @@ option ProjectOptions = lang(longlong, "yes"),  gen(manglelinkagekeywordonlyfunc
       source type(cpp) "GENERIC\\TBARSMPL.CPP"
       source type(cpp) "GENERIC\\TEXTDLGG.CPP"
       source type(cpp) "GENERIC\\TIPDLG.CPP"
-      source type(cpp) "GENERIC\\TREECTLG.CPP"
+      source type(cpp) "GENERIC\\TREECTRL.CPP"
       source type(cpp) "GENERIC\\TREELAY.CPP"
       source type(cpp) "GENERIC\\WIZARD.CPP"
       source type(cpp) "HTML\\HELPCTRL.CPP"

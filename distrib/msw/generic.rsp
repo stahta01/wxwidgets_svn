@@ -603,7 +603,6 @@ samples/dnd/*.xpm
 samples/dnd/*.png
 samples/dnd/*.ico
 samples/dnd/*.txt
-samples/dnd/*.cur
 
 samples/tab/*.cpp
 samples/tab/*.h

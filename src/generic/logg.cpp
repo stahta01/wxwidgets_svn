@@ -196,11 +196,7 @@ void wxLogTextCtrl::DoLogString(const wxChar *szString, time_t WXUNUSED(t))
 {
     wxString msg;
     TimeStamp(&msg);
-#ifdef __WXMAC__
-    msg << szString << wxT('\r');
-#else
     msg << szString << wxT('\n');
-#endif
 
     m_pTextCtrl->AppendText(msg);
 }

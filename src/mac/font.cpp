@@ -18,9 +18,7 @@
 #include "wx/font.h"
 #include "wx/gdicmn.h"
 
-#if !USE_SHARED_LIBRARIES
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
-#endif
 
 
 
@@ -79,7 +77,7 @@ void wxFontRefData::MacFindFont()
 				::GetFNum( "\pTimes" , &m_macFontNum) ;
 				break ;
 			case wxSWISS :
-				::GetFNum( "\pGeneva" , &m_macFontNum) ;
+				::GetFNum( "\pHelvetica" , &m_macFontNum) ;
 				break ;
 			case wxMODERN :
 				::GetFNum( "\pMonaco" , &m_macFontNum) ;

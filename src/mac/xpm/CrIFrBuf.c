@@ -32,7 +32,7 @@
 *  Developed by Arnaud Le Hors                                                *
 \*****************************************************************************/
 
-#include "XpmI.h"
+#include "xpmi.h"
 
 LFUNC(OpenBuffer, void, (char *buffer, xpmData *mdata));
 

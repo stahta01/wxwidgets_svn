@@ -393,7 +393,8 @@ bool wxToolBar::Realize()
     wxMemoryDC dcAllButtons;
     wxBitmap bitmap(totalBitmapWidth, totalBitmapHeight);
     dcAllButtons.SelectObject(bitmap);
-    dcAllButtons.SetBackground(*wxLIGHT_GREY_BRUSH);
+    wxColour colTbar = wxSystemSettings::GetSystemColour(wxSYS_COLOUR_BTNFACE);
+    dcAllButtons.SetBackground(wxBrush(colTbar, wxSOLID));
     dcAllButtons.Clear();
 
     m_hBitmap = bitmap.GetHBITMAP();
@@ -433,8 +434,14 @@ bool wxToolBar::Realize()
             if ( bmp.Ok() )
             {
 #if USE_BITMAP_MASKS
-                // notice the last parameter: do use mask
-                dcAllButtons.DrawBitmap(tool->GetBitmap1(), x, 0, TRUE);
+                // blit the bitmap to the DC with the mask
+                wxBitmap bmpTool = tool->GetBitmap1();
+                if ( !bmpTool.GetMask() )
+                {
+                    // it doesn't have mask - create a default one
+                    bmpTool.SetMask(new wxMask(bmpTool, *wxLIGHT_GREY));
+                }
+                dcAllButtons.DrawBitmap(bmpTool, x, 0, TRUE);
 #else // !USE_BITMAP_MASKS
                 HBITMAP hbmp = GetHbitmapOf(bmp);
                 HBITMAP oldBitmap2 = (HBITMAP)::SelectObject(memoryDC2, hbmp);
@@ -471,10 +478,10 @@ bool wxToolBar::Realize()
     ::SelectObject(memoryDC, oldBitmap);
     ::DeleteDC(memoryDC);
     ::DeleteDC(memoryDC2);
-#endif // USE_BITMAP_MASKS/!USE_BITMAP_MASKS
 
     // Map to system colours
     wxMapBitmap(hBitmap, totalBitmapWidth, totalBitmapHeight);
+#endif // USE_BITMAP_MASKS/!USE_BITMAP_MASKS
 
     int bitmapId = 0;
 
@@ -1002,6 +1009,8 @@ long wxToolBar::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 // private functions
 // ----------------------------------------------------------------------------
 
+#if !USE_BITMAP_MASKS
+
 // These are the default colors used to map the bitmap colors to the current
 // system colors. Note that they are in BGR format because this is what Windows
 // wants (and not RGB)
@@ -1045,17 +1054,17 @@ void wxMapBitmap(HBITMAP hBitmap, int width, int height)
         for ( j = 0; j < height; j++)
         {
             COLORREF pixel = ::GetPixel(hdcMem, i, j);
-/*
-            BYTE red = GetRValue(pixel);
-            BYTE green = GetGValue(pixel);
-            BYTE blue = GetBValue(pixel);
-*/
-
             for ( k = 0; k < NUM_MAPS; k ++)
             {
-                if ( ColorMap[k].from == pixel )
+                int distance = 0 ;
+
+                distance = abs( GetRValue( pixel ) - GetRValue( ColorMap[k].from )) ;
+                distance = max( distance , abs(GetGValue(pixel ) - GetGValue( ColorMap[k].from ))) ;
+                distance = max( distance , abs(GetBValue(pixel ) - GetBValue( ColorMap[k].from ))) ;
+                if ( distance < 0x10 )
+                //if ( ColorMap[k].from == pixel )
                 {
-                    /* COLORREF actualPixel = */ ::SetPixel(hdcMem, i, j, ColorMap[k].to);
+                    ::SetPixel(hdcMem, i, j, ColorMap[k].to);
                     break;
                 }
             }
@@ -1068,6 +1077,8 @@ void wxMapBitmap(HBITMAP hBitmap, int width, int height)
   }
 
 }
+
+#endif // USE_BITMAP_MASKS
 
 // Some experiments...
 #if 0

@@ -21,10 +21,6 @@
     #pragma implementation "textctrl.h"
 #endif
 
-#ifdef __VMS
-#define XtParent XTPARENT
-#endif
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fstream.h>
@@ -304,7 +300,7 @@ bool wxTextCtrl::CanCut() const
     // Can cut if there's a selection
     long from, to;
     GetSelection(& from, & to);
-    return (from != to) && (IsEditable());
+    return (from != to) ;
 }
 
 bool wxTextCtrl::CanPaste() const

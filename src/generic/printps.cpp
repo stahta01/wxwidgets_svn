@@ -353,8 +353,8 @@ void wxPostScriptPrintPreview::DetermineScaling()
         m_previewPrintout->SetPPIPrinter(wxPostScriptDC::GetResolution(), wxPostScriptDC::GetResolution()); 
 
         wxSize sizeDevUnits(paper->GetSizeDeviceUnits());
-        sizeDevUnits.x = (wxCoord)((float)sizeDevUnits.x * wxPostScriptDC::GetResolution() / 72.0);
-        sizeDevUnits.y = (wxCoord)((float)sizeDevUnits.y * wxPostScriptDC::GetResolution() / 72.0);
+        sizeDevUnits.x = (wxCoord)((float)sizeDevUnits.x * wxPostScriptDC::GetResolution() / 72.0); //VST
+        sizeDevUnits.y = (wxCoord)((float)sizeDevUnits.y * wxPostScriptDC::GetResolution() / 72.0); //VST
         wxSize sizeTenthsMM(paper->GetSize());
         wxSize sizeMM(sizeTenthsMM.x / 10, sizeTenthsMM.y / 10);
 

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        filedlg.cpp
-// Purpose:     wxFileDialog 
+// Purpose:     wxFileDialog
 // Author:      AUTHOR
 // Modified by:
 // Created:     ??/??/98
@@ -19,9 +19,7 @@
 #include "wx/filedlg.h"
 #include "wx/intl.h"
 
-#if !USE_SHARED_LIBRARY
 IMPLEMENT_CLASS(wxFileDialog, wxDialog)
-#endif
 
 // begin wxmac
 
@@ -44,27 +42,6 @@ OSType gfiltersmac[] =
 	
 	'****'
 } ;
-
-// the data we need to pass to our standard file hook routine
-// includes a pointer to the dialog, a pointer to the standard
-// file reply record (so we can inspect the current selection)
-// and a copy of the "previous" file spec of the reply record
-// so we can see if the selection has changed
-
-const int kwxMacFileTypes = 10 ;
-
-struct OpenUserDataRec {
-	StandardFileReply	*sfrPtr;
-	FSSpec				oldSelectionFSSpec;
-	char				filter[kwxMacFileTypes][10] ;
-	OSType				filtermactypes[kwxMacFileTypes] ;
-	int					numfilters ;
-	DialogPtr			theDlgPtr;
-};
-typedef struct OpenUserDataRec
-	OpenUserDataRec, *OpenUserDataRecPtr;
-
-#if !TARGET_CARBON
 
 static void wxMacSetupStandardFile(short newVRefNum, long newDirID) 
 { 
@@ -119,6 +96,25 @@ enum {
 	kUseQuotes = true,			// parameter for SetButtonName
 	kDontUseQuotes = false
 };
+
+// the data we need to pass to our standard file hook routine
+// includes a pointer to the dialog, a pointer to the standard
+// file reply record (so we can inspect the current selection)
+// and a copy of the "previous" file spec of the reply record
+// so we can see if the selection has changed
+
+const int kwxMacFileTypes = 10 ;
+
+struct OpenUserDataRec {
+	StandardFileReply	*sfrPtr;
+	FSSpec				oldSelectionFSSpec;
+	char				filter[kwxMacFileTypes][10] ;
+	OSType				filtermactypes[kwxMacFileTypes] ;
+	int					numfilters ;
+	DialogPtr			theDlgPtr;
+};
+typedef struct OpenUserDataRec
+	OpenUserDataRec, *OpenUserDataRecPtr;
 
 static void GetLabelString(StringPtr theStr, short stringNum)
 {
@@ -189,7 +185,6 @@ static pascal Boolean SFGetFolderModalDialogFilter(DialogPtr theDlgPtr, EventRec
 		
 	return false;
 }
-#endif
 
 void ExtendedOpenFile( ConstStr255Param message , ConstStr255Param path , const char *filter , FileFilterYDUPP fileFilter, StandardFileReply *theSFR)
 {
@@ -209,7 +204,7 @@ void ExtendedOpenFile( ConstStr255Param message , ConstStr255Param path , const 
 	
 	// set initial contents of Select button to a space
 	
-	memcpy( theSFR->sfFile.name , "\p " , 2 ) ;
+	CopyPStr("\p ", theSFR->sfFile.name);
 	
 	// point the user data parameter at the reply record so we can get to it later
 	
@@ -245,8 +240,6 @@ void ExtendedOpenFile( ConstStr255Param message , ConstStr255Param path , const 
 		myData.numfilters = 0 ;
 	}
 	// display the dialog
-
-#if !TARGET_CARBON
 	
 	dlgHookUPP = NULL ;
 //	dlgHookUPP = NewDlgHookYDProc(SFGetFolderDialogHook);
@@ -270,8 +263,7 @@ void ExtendedOpenFile( ConstStr255Param message , ConstStr255Param path , const 
 					
 	DisposeRoutineDescriptor(dlgHookUPP);
 	DisposeRoutineDescriptor(myModalFilterUPP);
-#else
-#endif	
+	
 	// if cancel wasn't pressed and no fatal error occurred...
 	
 	if (theSFR->sfGood)
@@ -462,12 +454,8 @@ int wxFileDialog::ShowModal()
 	
 		strcpy((char *)filename, m_fileName) ;
 		c2pstr((char *)filename ) ;
-		#if !TARGET_CARBON
 		
 		StandardPutFile( prompt , filename , &reply ) ;
-	
-		#else
-		#endif
 		if ( reply.sfGood == false )
 		{
 			m_path = "" ;
@@ -491,17 +479,14 @@ int wxFileDialog::ShowModal()
 		strcpy((char *)path, m_path ) ;
 		c2pstr((char *)path ) ;
 
+		FileFilterYDUPP 	crossPlatformFileFilterUPP;
 		StandardFileReply	reply ;
-		FileFilterYDUPP crossPlatformFileFilterUPP = 0 ;
-		#if !TARGET_CARBON
 		crossPlatformFileFilterUPP = 
 			NewFileFilterYDProc(CrossPlatformFileFilter);
-		#endif
 
 		ExtendedOpenFile( prompt , path , m_wildCard , crossPlatformFileFilterUPP, &reply);
-		#if !TARGET_CARBON
-		DisposeFileFilterYDUPP(crossPlatformFileFilterUPP);
-		#endif
+	
+		DisposeRoutineDescriptor(crossPlatformFileFilterUPP);
 		if ( reply.sfGood == false )
 		{
 			m_path = "" ;

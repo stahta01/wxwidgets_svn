@@ -57,9 +57,6 @@ public:
     unsigned char   m_maskRed,m_maskGreen,m_maskBlue;
     bool            m_ok;
     bool            m_static;
-    wxPalette       m_palette;
-    wxArrayString   m_optionNames;
-    wxArrayString   m_optionValues;
 };
 
 wxImageRefData::wxImageRefData()
@@ -87,7 +84,7 @@ wxList wxImage::sm_handlers;
 
 #define M_IMGDATA ((wxImageRefData *)m_refData)
 
-IMPLEMENT_DYNAMIC_CLASS(wxImage, wxObject)
+    IMPLEMENT_DYNAMIC_CLASS(wxImage, wxObject)
 
 wxImage::wxImage()
 {
@@ -409,36 +406,9 @@ void wxImage::Paste( const wxImage &image, int x, int y )
             source_data += source_step;
             target_data += target_step;
         }
-        return;
     }
-    
-    if (!HasMask() && image.HasMask())
+    else
     {
-        unsigned char r = image.GetMaskRed();
-        unsigned char g = image.GetMaskGreen();
-        unsigned char b = image.GetMaskBlue();
-        
-        width *= 3;
-        unsigned char* source_data = image.GetData() + xx*3 + yy*3*image.GetWidth();
-        int source_step = image.GetWidth()*3;
-
-        unsigned char* target_data = GetData() + (x+xx)*3 + (y+yy)*3*M_IMGDATA->m_width;
-        int target_step = M_IMGDATA->m_width*3;
-        
-        for (int j = 0; j < height; j++)
-        {
-            for (int i = 0; i < width; i+=3)
-            {
-                if ((source_data[i]   != r) && 
-                    (source_data[i+1] != g) && 
-                    (source_data[i+2] != b))
-                {
-                    memcpy( target_data+i, source_data+i, 3 );
-                }
-            } 
-            source_data += source_step;
-            target_data += target_step;
-        }
     }
 }
 
@@ -640,80 +610,6 @@ int wxImage::GetHeight() const
     wxCHECK_MSG( Ok(), 0, wxT("invalid image") );
 
     return M_IMGDATA->m_height;
-}
-
-// Palette functions
-
-bool wxImage::HasPalette() const
-{
-    if (!Ok())
-        return FALSE;
-
-    return M_IMGDATA->m_palette.Ok();
-}
-
-const wxPalette& wxImage::GetPalette() const
-{
-    wxCHECK_MSG( Ok(), wxNullPalette, wxT("invalid image") );
-
-    return M_IMGDATA->m_palette;
-}
-
-void wxImage::SetPalette(const wxPalette& palette)
-{
-    wxCHECK_RET( Ok(), wxT("invalid image") );
-
-    M_IMGDATA->m_palette = palette;
-}
-
-// Option functions (arbitrary name/value mapping)
-void wxImage::SetOption(const wxString& name, const wxString& value)
-{
-    wxCHECK_RET( Ok(), wxT("invalid image") );
-
-    int idx = M_IMGDATA->m_optionNames.Index(name, FALSE);
-    if (idx == wxNOT_FOUND)
-    {
-        M_IMGDATA->m_optionNames.Add(name);
-        M_IMGDATA->m_optionValues.Add(value);
-    }
-    else
-    {
-        M_IMGDATA->m_optionNames[idx] = name;
-        M_IMGDATA->m_optionValues[idx] = value;
-    }
-}
-
-void wxImage::SetOption(const wxString& name, int value)
-{
-    wxString valStr;
-    valStr.Printf(wxT("%d"), value);
-    SetOption(name, valStr);
-}
-
-wxString wxImage::GetOption(const wxString& name) const
-{
-    wxCHECK_MSG( Ok(), wxEmptyString, wxT("invalid image") );
-
-    int idx = M_IMGDATA->m_optionNames.Index(name, FALSE);
-    if (idx == wxNOT_FOUND)
-        return wxEmptyString;
-    else
-        return M_IMGDATA->m_optionValues[idx];
-}
-
-int wxImage::GetOptionInt(const wxString& name) const
-{
-    wxCHECK_MSG( Ok(), 0, wxT("invalid image") );
-
-    return wxAtoi(GetOption(name));
-}
-
-bool wxImage::HasOption(const wxString& name) const
-{
-    wxCHECK_MSG( Ok(), FALSE, wxT("invalid image") );
-
-    return (M_IMGDATA->m_optionNames.Index(name, FALSE) != wxNOT_FOUND);
 }
 
 bool wxImage::LoadFile( const wxString& filename, long type )
@@ -1124,13 +1020,6 @@ wxBitmap wxImage::ConvertToBitmap() const
     hbitmap = ::CreateCompatibleBitmap( hdc, width, bmpHeight );
     ::SelectObject( memdc, hbitmap);
 
-    HPALETTE hOldPalette = 0;
-    if (GetPalette().Ok())
-    {
-        hOldPalette = ::SelectPalette(memdc, (HPALETTE) GetPalette().GetHPALETTE(), FALSE);
-        ::RealizePalette(memdc);
-    }
-
     // copy image data into DIB data and then into DDB (in a loop)
     unsigned char *data = GetData();
     int i, j, n;
@@ -1179,9 +1068,6 @@ wxBitmap wxImage::ConvertToBitmap() const
         //    ::DeleteDC( memdc );
     }
     bitmap.SetHBITMAP( (WXHBITMAP) hbitmap );
-
-    if (hOldPalette)
-        SelectPalette(memdc, hOldPalette, FALSE);
 
     // similarly, created an mono-bitmap for the possible mask
     if( HasMask() )

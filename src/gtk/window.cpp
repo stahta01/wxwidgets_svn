@@ -12,10 +12,6 @@
     #pragma implementation "window.h"
 #endif
 
-#ifdef __VMS
-#define XWarpPointer XWARPPOINTER
-#endif
-
 #include "wx/defs.h"
 #include "wx/window.h"
 #include "wx/dc.h"
@@ -278,23 +274,11 @@ gdk_window_warp_pointer (GdkWindow      *window,
                          gint            x,
                          gint            y)
 {
-#ifndef __WXGTK20__
   GdkWindowPrivate *priv;
-#endif
 
   if (!window)
     window = GDK_ROOT_PARENT();
 
-#ifdef __WXGTK20__
-  if (!GDK_WINDOW_DESTROYED(window))
-  {
-      XWarpPointer (GDK_WINDOW_XDISPLAY(window),
-                    None,              /* not source window -> move from anywhere */
-                    GDK_WINDOW_XID(window),  /* dest window */
-                    0, 0, 0, 0,        /* not source window -> move from anywhere */
-                    x, y );
-  }
-#else
   priv = (GdkWindowPrivate*) window;
 
   if (!priv->destroyed)
@@ -305,7 +289,6 @@ gdk_window_warp_pointer (GdkWindow      *window,
                     0, 0, 0, 0,        /* not source window -> move from anywhere */
                     x, y );
   }
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -356,16 +339,16 @@ static void draw_frame( GtkWidget *widget, wxWindow *win )
             GtkRequisition vscroll_req;
             vscroll_req.width = 2;
             vscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->vscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->vscrollbar)->klass )->size_request )
                 (scroll_window->vscrollbar, &vscroll_req );
 
             GtkRequisition hscroll_req;
             hscroll_req.width = 2;
             hscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->hscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->hscrollbar)->klass )->size_request )
                 (scroll_window->hscrollbar, &hscroll_req );
 
-            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(widget) );
+            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(widget)->klass );
 
             if (scroll_window->vscrollbar_visible)
             {
@@ -2168,7 +2151,7 @@ bool wxWindow::Create( wxWindow *parent, wxWindowID id,
 
     GtkScrolledWindow *scrolledWindow = GTK_SCROLLED_WINDOW(m_widget);
 
-    GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(m_widget) );
+    GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(m_widget)->klass );
     scroll_class->scrollbar_spacing = 0;
 
     gtk_scrolled_window_set_policy( scrolledWindow, GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
@@ -2657,16 +2640,16 @@ void wxWindow::DoSetClientSize( int width, int height )
             GtkRequisition vscroll_req;
             vscroll_req.width = 2;
             vscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->vscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->vscrollbar)->klass )->size_request )
                 (scroll_window->vscrollbar, &vscroll_req );
 
             GtkRequisition hscroll_req;
             hscroll_req.width = 2;
             hscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->hscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->hscrollbar)->klass )->size_request )
                 (scroll_window->hscrollbar, &hscroll_req );
 
-            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(m_widget) );
+            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(m_widget)->klass );
 
             if (scroll_window->vscrollbar_visible)
             {
@@ -2719,16 +2702,16 @@ void wxWindow::DoGetClientSize( int *width, int *height ) const
             GtkRequisition vscroll_req;
             vscroll_req.width = 2;
             vscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->vscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->vscrollbar)->klass )->size_request )
                 (scroll_window->vscrollbar, &vscroll_req );
 
             GtkRequisition hscroll_req;
             hscroll_req.width = 2;
             hscroll_req.height = 2;
-            (* GTK_WIDGET_CLASS( GTK_OBJECT_GET_CLASS(scroll_window->hscrollbar) )->size_request )
+            (* GTK_WIDGET_CLASS( GTK_OBJECT(scroll_window->hscrollbar)->klass )->size_request )
                 (scroll_window->hscrollbar, &hscroll_req );
 
-            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT_GET_CLASS(m_widget) );
+            GtkScrolledWindowClass *scroll_class = GTK_SCROLLED_WINDOW_CLASS( GTK_OBJECT(m_widget)->klass );
 
             if (scroll_window->vscrollbar_visible)
             {
@@ -3229,12 +3212,7 @@ GtkStyle *wxWindow::GetWidgetStyle()
     if (m_widgetStyle)
     {
         GtkStyle *remake = gtk_style_copy( m_widgetStyle );
-#ifdef __WXGTK20__
-        /* FIXME: is this necessary? */
-        _G_TYPE_IGC(remake, GtkObjectClass) = _G_TYPE_IGC(m_widgetStyle, GtkObjectClass);
-#else
         remake->klass = m_widgetStyle->klass;
-#endif
 
         gtk_style_unref( m_widgetStyle );
         m_widgetStyle = remake;
@@ -3247,12 +3225,7 @@ GtkStyle *wxWindow::GetWidgetStyle()
             def = gtk_widget_get_default_style();
 
         m_widgetStyle = gtk_style_copy( def );
-#ifdef __WXGTK20__
-        /* FIXME: is this necessary? */
-        _G_TYPE_IGC(m_widgetStyle, GtkObjectClass) = _G_TYPE_IGC(def, GtkObjectClass);
-#else
         m_widgetStyle->klass = def->klass;
-#endif
     }
 
     return m_widgetStyle;

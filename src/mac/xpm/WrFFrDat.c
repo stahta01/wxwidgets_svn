@@ -32,7 +32,7 @@
 *  Developed by Dan Greening dgreen@cs.ucla.edu / dgreen@sti.com              *
 \*****************************************************************************/
 
-#include "XpmI.h"
+#include "xpmi.h"
 
 int
 XpmWriteFileFromData(filename, data)

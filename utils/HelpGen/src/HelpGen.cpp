@@ -1939,9 +1939,6 @@ static const char *GetCurrentTime(const char *timeFormat)
 
 /*
    $Log$
-   Revision 1.11  2000/07/15 19:50:42  cvsuser
-   merged 2.2 branch
-
    Revision 1.10.2.2  2000/03/27 15:33:10  VZ
    don't trasnform output dir name to lower case
 

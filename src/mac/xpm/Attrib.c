@@ -32,7 +32,7 @@
 *  Developed by Arnaud Le Hors                                                *
 \*****************************************************************************/
 
-#include "XpmI.h"
+#include "xpmi.h"
 
 /* 3.2 backward compatibility code */
 LFUNC(CreateOldColorTable, int, (XpmColor *ct, int ncolors,

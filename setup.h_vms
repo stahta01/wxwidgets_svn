@@ -16,8 +16,6 @@
 #pragma interface
 #endif
 
-#include <wx/vms_x_fix.h>
-
 /* never undefine inline or const keywords for C++ compilation */
 #ifndef __cplusplus
 

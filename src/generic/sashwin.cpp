@@ -73,7 +73,6 @@ void wxSashWindow::Init()
     m_maximumPaneSizeY = 10000;
     m_sashCursorWE = new wxCursor(wxCURSOR_SIZEWE);
     m_sashCursorNS = new wxCursor(wxCURSOR_SIZENS);
-    m_mouseCaptured = FALSE;
 
     // Eventually, we'll respond to colour change messages
     InitColours();
@@ -107,7 +106,6 @@ void wxSashWindow::OnMouseEvent(wxMouseEvent& event)
     if (event.LeftDown())
     {
         CaptureMouse();
-        m_mouseCaptured = TRUE;
 
         if ( sashHit != wxSASH_NONE )
         {
@@ -146,10 +144,7 @@ void wxSashWindow::OnMouseEvent(wxMouseEvent& event)
     else if ( event.LeftUp() && m_dragMode == wxSASH_DRAG_LEFT_DOWN )
     {
         // Wasn't a proper drag
-        if (m_mouseCaptured)
-            ReleaseMouse();
-        m_mouseCaptured = FALSE;
-
+        ReleaseMouse();
         wxScreenDC::EndDrawingOnTop();
         m_dragMode = wxSASH_DRAG_NONE;
         m_draggingEdge = wxSASH_NONE;
@@ -158,10 +153,7 @@ void wxSashWindow::OnMouseEvent(wxMouseEvent& event)
     {
         // We can stop dragging now and see what we've got.
         m_dragMode = wxSASH_DRAG_NONE;
-        if (m_mouseCaptured)
-            ReleaseMouse();
-        m_mouseCaptured = FALSE;
-
+        ReleaseMouse();
         // Erase old tracker
         DrawSashTracker(m_draggingEdge, m_oldX, m_oldY);
 
@@ -281,9 +273,7 @@ void wxSashWindow::OnMouseEvent(wxMouseEvent& event)
     }
     else if ( event.LeftUp() )
     {
-        if (m_mouseCaptured)
-           ReleaseMouse();
-        m_mouseCaptured = FALSE;
+        ReleaseMouse();
     }
     else if (event.Moving() && !event.Dragging())
     {

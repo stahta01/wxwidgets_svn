@@ -239,9 +239,9 @@ int ParseUnitArgument(char *unitArg)
       if (strcmp(units, "in") == 0)
         conversionFactor = 72.0;
       else if (strcmp(units, "cm") == 0)
-        conversionFactor = (float)72.0/(float)2.51;
+        conversionFactor = 72.0/2.51;
       else if (strcmp(units, "mm") == 0)
-        conversionFactor = (float)72.0/(float)25.1;
+        conversionFactor = 72.0/25.1;
       else if (strcmp(units, "pt") == 0)
         conversionFactor = 1;
     }
@@ -528,10 +528,10 @@ void BibReadValue(istream& istr, char *buffer, bool ignoreBraces = TRUE,
   while (!istr.eof() && !stopping)
   {
 //    i ++;
-    if (i >= 4000)
+    if (i >= 2000)
     {
       char buf[100];
-      sprintf(buf, "Sorry, value > 4000 chars in bib file at line %ld, terminating.", BibLine);
+      sprintf(buf, "Sorry, value > 2000 chars in bib file at line %ld, terminating.", BibLine);
       wxFatalError(buf, "Tex2RTF Fatal Error");
     }
     istr.get(ch);
@@ -581,7 +581,7 @@ bool ReadBib(char *filename)
   OnInform("Reading .bib file...");
 
   char ch;
-  char fieldValue[4000];
+  char fieldValue[2000];
   char recordType[100];
   char recordKey[100];
   char recordField[100];

@@ -192,7 +192,7 @@ void wxGenericColourDialog::OnMouseEvent(wxMouseEvent& event)
 
 void wxGenericColourDialog::OnPaint(wxPaintEvent& event)
 {
-#if !defined(__WXMOTIF__) && !defined(__WXMAC__)
+#ifndef __WXMOTIF__
   wxDialog::OnPaint(event);
 #endif
 
@@ -294,6 +294,11 @@ void wxGenericColourDialog::InitializeColours(void)
 
   for (i = 0; i < 16; i++)
     customColours[i] =
+/*
+#ifndef __VMS__
+     (wxColour&)
+#endif
+*/
        colourData.GetCustomColour(i);
 
   singleCustomColour.Set(0, 0, 0);

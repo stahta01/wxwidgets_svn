@@ -30,11 +30,7 @@ gtk : setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.gtk]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [--.demos.bombs]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [--.samples.caret]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.minimal]
+	set default [--.samples.minimal]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 
 motif : setup.h
@@ -58,17 +54,11 @@ motif : setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.dialogs]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.drawing]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.image]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.mdi]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.menu]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.minimal]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.resource]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [--.utils.dialoged.src]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)

@@ -32,7 +32,7 @@
 *  Developed by Arnaud Le Hors                                                *
 \*****************************************************************************/
 
-#include "XpmI.h"
+#include "xpmi.h"
 
 /*
  * Init returned data to free safely later on

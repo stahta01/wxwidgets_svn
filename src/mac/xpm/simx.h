@@ -90,9 +90,7 @@ typedef struct {
 }      XImage;
 
 #elif macintosh
-#ifndef __MWERKS__
-#include <wx/wxprec.h>
-#endif
+
 /* define Mac types for X window types */
 
 typedef GDevice* Display;			/* this should be similar */

@@ -33,9 +33,6 @@
 #include "wx/tipdlg.h"
 #include "wx/progdlg.h"
 
-// New wxGenericDirCtrl
-#include "wx/dirctrl.h"
-
 #define wxTEST_GENERIC_DIALOGS_IN_MSW 0
 
 #if defined(__WXMSW__) && wxTEST_GENERIC_DIALOGS_IN_MSW
@@ -61,11 +58,9 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(DIALOGS_NUM_ENTRY,                     MyFrame::NumericEntry)
     EVT_MENU(DIALOGS_SINGLE_CHOICE,                 MyFrame::SingleChoice)
     EVT_MENU(DIALOGS_FILE_OPEN,                     MyFrame::FileOpen)
-    EVT_MENU(DIALOGS_FILE_OPEN2,                    MyFrame::FileOpen2)
     EVT_MENU(DIALOGS_FILES_OPEN,                    MyFrame::FilesOpen)
     EVT_MENU(DIALOGS_FILE_SAVE,                     MyFrame::FileSave)
     EVT_MENU(DIALOGS_DIR_CHOOSE,                    MyFrame::DirChoose)
-    EVT_MENU(DIALOGS_GENERIC_DIR_CHOOSE,            MyFrame::GenericDirChoose)
     EVT_MENU(DIALOGS_MODAL,                         MyFrame::ModalDlg)
     EVT_MENU(DIALOGS_MODELESS,                      MyFrame::ModelessDlg)
     EVT_MENU(DIALOGS_TIP,                           MyFrame::ShowTip)
@@ -131,11 +126,9 @@ bool MyApp::OnInit()
   file_menu->Append(DIALOGS_TIP,  "&Tip of the day\tCtrl-T");
   file_menu->AppendSeparator();
   file_menu->Append(DIALOGS_FILE_OPEN,  "&Open file\tCtrl-O");
-  file_menu->Append(DIALOGS_FILE_OPEN2,  "&Second open file\tCtrl-2");
   file_menu->Append(DIALOGS_FILES_OPEN,  "Open &files\tCtrl-Q");
   file_menu->Append(DIALOGS_FILE_SAVE,  "Sa&ve file\tCtrl-S");
   file_menu->Append(DIALOGS_DIR_CHOOSE,  "&Choose a directory\tCtrl-D");
-  file_menu->Append(DIALOGS_GENERIC_DIR_CHOOSE,  "&Choose a directory (generic implementation)");
 #if wxUSE_PROGRESSDLG
   file_menu->Append(DIALOGS_PROGRESS, "Pro&gress dialog\tCtrl-G");
 #endif // wxUSE_PROGRESSDLG
@@ -367,31 +360,6 @@ void MyFrame::FileOpen(wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-// this shows how to take advantage of specifying a default extension in the
-// call to wxFileSelector: it is remembered after each new call and the next
-// one will use it by default
-void MyFrame::FileOpen2(wxCommandEvent& WXUNUSED(event) )
-{
-    static wxString s_extDef;
-    wxString path = wxFileSelector(
-                                    _T("Select the file to load"),
-                                    _T(""), _T(""),
-                                    s_extDef,
-                                    _T("Waveform (*.wav)|*.wav|Plain text (*.txt)|*.txt|All files (*.*)|*.*"),
-                                    0,
-                                    this
-                                   );
-
-    if ( !path )
-        return;
-
-    // it is just a sample, would use wxSplitPath in real program
-    s_extDef = path.AfterLast(_T('.'));
-
-    wxLogMessage(_T("You selected the file '%s', remembered extension '%s'"),
-                 path, s_extDef);
-}
-
 void MyFrame::FilesOpen(wxCommandEvent& WXUNUSED(event) )
 {
     wxFileDialog dialog(this, "Testing open multiple file dialog",
@@ -450,21 +418,6 @@ void MyFrame::DirChoose(wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-void MyFrame::GenericDirChoose(wxCommandEvent& WXUNUSED(event) )
-{
-    // pass some initial dir to wxDirDialog
-    wxString dirHome;
-    wxGetHomeDir(&dirHome);
-
-    wxGenericDirDialog dialog(this, "Testing generic directory picker", dirHome);
-
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        wxMessageDialog dialog2(this, dialog.GetPath(), "Selected path");
-        dialog2.ShowModal();
-    }
-}
-
 void MyFrame::ModalDlg(wxCommandEvent& WXUNUSED(event))
 {
     MyModalDialog dlg(this);
@@ -473,7 +426,7 @@ void MyFrame::ModalDlg(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::ModelessDlg(wxCommandEvent& event)
 {
-    bool show = GetMenuBar()->IsChecked(event.GetId());
+    bool show = GetMenuBar()->IsChecked(event.GetInt());
 
     if ( show )
     {

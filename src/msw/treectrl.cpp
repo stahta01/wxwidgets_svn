@@ -46,8 +46,9 @@
 #include "wx/log.h"
 #include "wx/dynarray.h"
 #include "wx/imaglist.h"
+#include "wx/treectrl.h"
 #include "wx/settings.h"
-#include "wx/msw/treectrl.h"
+
 #include "wx/msw/dragimag.h"
 
 #ifdef __GNUWIN32_OLD__
@@ -518,10 +519,8 @@ bool wxTreeCtrl::Create(wxWindow *parent,
         return FALSE;
 
     DWORD wstyle = WS_VISIBLE | WS_CHILD | WS_TABSTOP |
-                   TVS_SHOWSELALWAYS /* | WS_CLIPSIBLINGS */;
+                   TVS_HASLINES | TVS_SHOWSELALWAYS /* | WS_CLIPSIBLINGS */;
 
-    if ((m_windowStyle & wxTR_NO_LINES) == 0)
-        wstyle |= TVS_HASLINES;
     if ( m_windowStyle & wxTR_HAS_BUTTONS )
         wstyle |= TVS_HASBUTTONS;
 
@@ -1102,7 +1101,7 @@ wxTreeItemId wxTreeCtrl::GetRootItem() const
 
 wxTreeItemId wxTreeCtrl::GetSelection() const
 {
-    wxCHECK_MSG( !(m_windowStyle & wxTR_MULTIPLE), (long)(WXHTREEITEM)0,
+    wxCHECK_MSG( !(m_windowStyle & wxTR_MULTIPLE), (WXHTREEITEM)0,
                  wxT("this only works with single selection controls") );
 
     return wxTreeItemId((WXHTREEITEM) TreeView_GetSelection(GetHwnd()));
@@ -1301,7 +1300,7 @@ wxTreeItemId wxTreeCtrl::AddRoot(const wxString& text,
                                  int image, int selectedImage,
                                  wxTreeItemData *data)
 {
-    return DoInsertItem(wxTreeItemId((long) (WXHTREEITEM) 0), (long)(WXHTREEITEM) 0,
+    return DoInsertItem(wxTreeItemId((WXHTREEITEM) 0), (WXHTREEITEM) 0,
                         text, image, selectedImage, data);
 }
 
@@ -1466,7 +1465,7 @@ void wxTreeCtrl::Unselect()
                   wxT("doesn't make sense, may be you want UnselectAll()?") );
 
     // just remove the selection
-    SelectItem(wxTreeItemId((long) (WXHTREEITEM) 0));
+    SelectItem(wxTreeItemId((WXHTREEITEM) 0));
 }
 
 void wxTreeCtrl::UnselectAll()
@@ -2256,11 +2255,6 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                     delete data; // can't be NULL here
 
                     m_itemsWithIndirectData.Remove(item);
-#if 0
-                    int iIndex = m_itemsWithIndirectData.Index(item);
-                    wxASSERT( iIndex != wxNOT_FOUND) ;
-                    m_itemsWithIndirectData.wxBaseArray::RemoveAt((size_t)iIndex);
-#endif
                 }
                 else
                 {
@@ -2328,6 +2322,19 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     }
 
     return processed;
+}
+
+// ----------------------------------------------------------------------------
+// Tree event
+// ----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxTreeEvent, wxNotifyEvent)
+
+wxTreeEvent::wxTreeEvent(wxEventType commandType, int id)
+           : wxNotifyEvent(commandType, id)
+{
+    m_code = 0;
+    m_itemOld = 0;
 }
 
 #endif // __WIN95__

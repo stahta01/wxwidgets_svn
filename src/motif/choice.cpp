@@ -13,11 +13,6 @@
 #pragma implementation "choice.h"
 #endif
 
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#define XtParent XTPARENT
-#endif
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/choice.h"
 #include "wx/utils.h"

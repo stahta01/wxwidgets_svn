@@ -90,8 +90,6 @@ void wxFrame::Init()
     m_nFsToolBarHeight   = 0;
     m_bFsIsMaximized     = FALSE;
     m_bFsIsShowing       = FALSE;
-    m_bIsShown           = FALSE;
-    m_pWinLastFocused    = (wxWindow *)NULL;
 
     //
     // Initialize SWP's
@@ -292,9 +290,9 @@ void wxFrame::DoSetClientSize(
     POINTL                          vPointl;
 
     vPointl.x = vRect2.xLeft;
-    vPointl.y  = vRect2.yTop;
+    vPoint.y  = vRect2.yTop;
 
-    ::WinSetWindowPos( hWnd
+    ::WinSetWindowPos( m_hFrame
                       ,HWND_TOP
                       ,vPointl.x
                       ,vPointl.y
@@ -353,7 +351,6 @@ void wxFrame::DoShowWindow(
 )
 {
     ::WinShowWindow(m_hFrame, (BOOL)bShowCmd);
-    m_bIconized = bShowCmd == SWP_MINIMIZE;
 } // end of wxFrame::DoShowWindow
 
 bool wxFrame::Show(
@@ -421,6 +418,7 @@ void wxFrame::Restore()
 bool wxFrame::IsIconized() const
 {
     SWP                             vSwp;
+    bool                            bIconic;
 
     ::WinQueryWindowPos(GetHwnd(), &vSwp);
 
@@ -612,65 +610,29 @@ void wxFrame::SetMenuBar(
     if (!pMenuBar)
     {
         DetachMenuBar();
-
-        //
-        // Actually remove the menu from the frame
-        //
-        m_hMenu = (WXHMENU)0;
-        InternalSetMenuBar();
+        return;
     }
-    else // set new non NULL menu bar
+
+    m_frameMenuBar = NULL;
+
+    // Can set a menubar several times.
+    // TODO: how to prevent a memory leak if you have a currently-unattached
+    // menubar? wxWindows assumes that the frame will delete the menu (otherwise
+    // there are problems for MDI).
+    if (pMenuBar->GetHMenu())
     {
-        m_frameMenuBar = NULL;
+        m_hMenu = pMenuBar->GetHMenu();
+    }
+    else
+    {
+        pMenuBar->Detach();
 
-        //
-        // Can set a menubar several times.
-        // TODO: how to prevent a memory leak if you have a currently-unattached
-        // menubar? wxWindows assumes that the frame will delete the menu (otherwise
-        // there are problems for MDI).
-        //
-        if (pMenuBar->GetHMenu())
-        {
-            m_hMenu = pMenuBar->GetHMenu();
-        }
-        else
-        {
-            pMenuBar->Detach();
-            m_hMenu = pMenuBar->Create();
-            if (!m_hMenu)
-                return;
-        }
-        InternalSetMenuBar();
-        m_frameMenuBar = pMenuBar;
-        pMenuBar->Attach(this);
+        m_hMenu = pMenuBar->Create();
+
+        if (!m_hMenu)
+            return;
     }
 
-    //
-    // Now resize the client to fit the new frame
-    //
-    WinQueryWindowPos(m_hFrame, &vSwp);
-    hTitlebar = WinWindowFromID(m_hFrame, FID_TITLEBAR);
-    WinQueryWindowPos(hTitlebar, &vSwpTitlebar);
-    hHScroll = WinWindowFromID(m_hFrame, FID_HORZSCROLL);
-    WinQueryWindowPos(hHScroll, &vSwpHScroll);
-    hVScroll = WinWindowFromID(m_hFrame, FID_VERTSCROLL);
-    WinQueryWindowPos(hVScroll, &vSwpVScroll);
-    hMenuBar = WinWindowFromID(m_hFrame, FID_MENU);
-    WinQueryWindowPos(hMenuBar, &vSwpMenu);
-    WinSetWindowPos( GetHwnd()
-                    ,HWND_TOP
-                    ,SV_CXSIZEBORDER/2
-                    ,(SV_CYSIZEBORDER/2) + vSwpHScroll.cy/2
-                    ,vSwp.cx - ((SV_CXSIZEBORDER + 1) + vSwpVScroll.cx)
-                    ,vSwp.cy - ((SV_CYSIZEBORDER + 1) + vSwpTitlebar.cy + vSwpMenu.cy + vSwpHScroll.cy/2)
-                    ,SWP_SIZE | SWP_MOVE
-                   );
-} // end of wxFrame::SetMenuBar
-
-void wxFrame::InternalSetMenuBar()
-{
-    ERRORID                         vError;
-    wxString                        sError;
     //
     // Set the parent and owner of the menubar to be the frame
     //
@@ -687,6 +649,14 @@ void wxFrame::InternalSetMenuBar()
         sError = wxPMErrorToStr(vError);
         wxLogError("Error setting parent for submenu. Error: %s\n", sError);
     }
+    InternalSetMenuBar();
+
+    m_frameMenuBar = pMenuBar;
+    pMenuBar->Attach(this);
+} // end of wxFrame::SetMenuBar
+
+void wxFrame::InternalSetMenuBar()
+{
     WinSendMsg((HWND)m_hFrame, WM_UPDATEFRAME, (MPARAM)FCF_MENU, (MPARAM)0);
 } // end of wxFrame::InternalSetMenuBar
 
@@ -720,122 +690,86 @@ bool wxFrame::ShowFullScreen(
 , long                              lStyle
 )
 {
-    if (bShow)
+    /*
+    // TODO
+    if (show)
     {
         if (IsFullScreen())
             return FALSE;
 
-        m_bFsIsShowing = TRUE;
-        m_lFsStyle = lStyle;
+        m_fsIsShowing = TRUE;
+        m_fsStyle = style;
 
-	    wxToolBar*                  pTheToolBar = GetToolBar();
-	    wxStatusBar*                pTheStatusBar = GetStatusBar();
+	     wxToolBar *theToolBar = GetToolBar();
+	     wxStatusBar *theStatusBar = GetStatusBar();
 
-        int                         nDummyWidth;
+        int dummyWidth;
 
-        if (pTheToolBar)
-            pTheToolBar->GetSize(&nDummyWidth, &m_nFsToolBarHeight);
-        if (pTheStatusBar)
-            pTheStatusBar->GetSize(&nDummyWidth, &m_nFsStatusBarHeight);
+        if (theToolBar)
+            theToolBar->GetSize(&dummyWidth, &m_fsToolBarHeight);
+        if (theStatusBar)
+            theStatusBar->GetSize(&dummyWidth, &m_fsStatusBarHeight);
 
-        //
-        // Zap the toolbar, menubar, and statusbar
-        //
-        if ((lStyle & wxFULLSCREEN_NOTOOLBAR) && pTheToolBar)
+        // zap the toolbar, menubar, and statusbar
+
+        if ((style & wxFULLSCREEN_NOTOOLBAR) && theToolBar)
         {
-            pTheToolBar->SetSize(-1,0);
-            pTheToolBar->Show(FALSE);
+            theToolBar->SetSize(-1,0);
+            theToolBar->Show(FALSE);
         }
 
-        if (lStyle & wxFULLSCREEN_NOMENUBAR)
-        {
-            ::WinSetParent(m_hMenu, m_hFrame, FALSE);
-            ::WinSetOwner(m_hMenu, m_hFrame);
-            ::WinSendMsg((HWND)m_hFrame, WM_UPDATEFRAME, (MPARAM)FCF_MENU, (MPARAM)0);
-        }
+        if (style & wxFULLSCREEN_NOMENUBAR)
+            SetMenu((HWND)GetHWND(), (HMENU) NULL);
 
-        //
         // Save the number of fields in the statusbar
-        //
-        if ((lStyle & wxFULLSCREEN_NOSTATUSBAR) && pTheStatusBar)
+        if ((style & wxFULLSCREEN_NOSTATUSBAR) && theStatusBar)
         {
-            m_nFsStatusBarFields = pTheStatusBar->GetFieldsCount();
+            m_fsStatusBarFields = theStatusBar->GetFieldsCount();
             SetStatusBar((wxStatusBar*) NULL);
-            delete pTheStatusBar;
+	         delete theStatusBar;
         }
         else
-            m_nFsStatusBarFields = 0;
+            m_fsStatusBarFields = 0;
 
-        //
-        // Zap the frame borders
-        //
+        // zap the frame borders
 
-        //
-        // Save the 'normal' window style
-        //
-        m_lFsOldWindowStyle = ::WinQueryWindowULong((HWND)GetHWND(), QWL_STYLE);
+        // save the 'normal' window style
+        m_fsOldWindowStyle = GetWindowLong((HWND)GetHWND(), GWL_STYLE);
 
-        //
-	    // Save the old position, width & height, maximize state
-        //
-        m_vFsOldSize = GetRect();
-        m_bFsIsMaximized = IsMaximized();
+	    // save the old position, width & height, maximize state
+        m_fsOldSize = GetRect();
+	     m_fsIsMaximized = IsMaximized();
 
-        //
-	     // Decide which window style flags to turn off
-        //
-        LONG                        lNewStyle = m_lFsOldWindowStyle;
-        LONG                        lOffFlags = 0;
+	    // decide which window style flags to turn off
+        LONG newStyle = m_fsOldWindowStyle;
+        LONG offFlags = 0;
 
-        if (lStyle & wxFULLSCREEN_NOBORDER)
-            lOffFlags |= FCF_BORDER;
-        if (lStyle & wxFULLSCREEN_NOCAPTION)
-            lOffFlags |= (FCF_TASKLIST | FCF_SYSMENU);
+        if (style & wxFULLSCREEN_NOBORDER)
+            offFlags |= WS_BORDER;
+        if (style & wxFULLSCREEN_NOCAPTION)
+            offFlags |= (WS_CAPTION | WS_SYSMENU);
 
-        lNewStyle &= (~lOffFlags);
+        newStyle &= (~offFlags);
 
-        //
-        // Change our window style to be compatible with full-screen mode
-        //
-        ::WinSetWindowULong((HWND)GetHWND(), QWL_STYLE, (ULONG)lNewStyle);
+        // change our window style to be compatible with full-screen mode
+        SetWindowLong((HWND)GetHWND(), GWL_STYLE, newStyle);
 
-        //
-        // Resize to the size of the desktop
-        int                         nWidth;
-        int                         nHeight;
+        // resize to the size of the desktop
+        int width, height;
 
-        RECTL                       vRect;
+        RECT rect;
+        ::GetWindowRect(GetDesktopWindow(), &rect);
+        width = rect.right - rect.left;
+        height = rect.bottom - rect.top;
 
-        ::WinQueryWindowRect(HWND_DESKTOP, &vRect);
-        nWidth = vRect.xRight - vRect.xLeft;
-        //
-        // Rmember OS/2 is backwards!
-        //
-        nHeight = vRect.yTop - vRect.yBottom;
+        SetSize(width, height);
 
-        SetSize( nWidth
-                ,nHeight
-               );
+        // now flush the window style cache and actually go full-screen
+        SetWindowPos((HWND)GetHWND(), HWND_TOP, 0, 0, width, height, SWP_FRAMECHANGED);
 
-        //
-        // Now flush the window style cache and actually go full-screen
-        //
-        ::WinSetWindowPos( (HWND) GetParent()->GetHWND()
-                          ,HWND_TOP
-                          ,0
-                          ,0
-                          ,nWidth
-                          ,nHeight
-                          ,SWP_SIZE | SWP_SHOW
-                         );
+        wxSizeEvent event(wxSize(width, height), GetId());
+        GetEventHandler()->ProcessEvent(event);
 
-        wxSizeEvent                 vEvent( wxSize( nWidth
-                                                   ,nHeight
-                                                  )
-                                           ,GetId()
-                                          );
-
-        GetEventHandler()->ProcessEvent(vEvent);
         return TRUE;
     }
     else
@@ -843,47 +777,35 @@ bool wxFrame::ShowFullScreen(
         if (!IsFullScreen())
             return FALSE;
 
-        m_bFsIsShowing = FALSE;
+        m_fsIsShowing = FALSE;
 
-        wxToolBar*                  pTheToolBar = GetToolBar();
+        wxToolBar *theToolBar = GetToolBar();
 
-        //
-        // Restore the toolbar, menubar, and statusbar
-        //
-        if (pTheToolBar && (m_lFsStyle & wxFULLSCREEN_NOTOOLBAR))
+        // restore the toolbar, menubar, and statusbar
+        if (theToolBar && (m_fsStyle & wxFULLSCREEN_NOTOOLBAR))
         {
-            pTheToolBar->SetSize(-1, m_nFsToolBarHeight);
-            pTheToolBar->Show(TRUE);
+            theToolBar->SetSize(-1, m_fsToolBarHeight);
+            theToolBar->Show(TRUE);
         }
 
-        if ((m_lFsStyle & wxFULLSCREEN_NOSTATUSBAR) && (m_nFsStatusBarFields > 0))
+        if ((m_fsStyle & wxFULLSCREEN_NOSTATUSBAR) && (m_fsStatusBarFields > 0))
         {
-            CreateStatusBar(m_nFsStatusBarFields);
+            CreateStatusBar(m_fsStatusBarFields);
             PositionStatusBar();
         }
 
-        if ((m_lFsStyle & wxFULLSCREEN_NOMENUBAR) && (m_hMenu != 0))
-        {
-            ::WinSetParent(m_hMenu, m_hFrame, FALSE);
-            ::WinSetOwner(m_hMenu, m_hFrame);
-            ::WinSendMsg((HWND)m_hFrame, WM_UPDATEFRAME, (MPARAM)FCF_MENU, (MPARAM)0);
-        }
-        Maximize(m_bFsIsMaximized);
+        if ((m_fsStyle & wxFULLSCREEN_NOMENUBAR) && (m_hMenu != 0))
+            SetMenu((HWND)GetHWND(), (HMENU)m_hMenu);
 
-        ::WinSetWindowULong( (HWND)GetHWND()
-                            ,QWL_STYLE
-                            ,(ULONG)m_lFsOldWindowStyle
-                           );
-        ::WinSetWindowPos( (HWND) GetParent()->GetHWND()
-                          ,HWND_TOP
-                          ,m_vFsOldSize.x
-                          ,m_vFsOldSize.y
-                          ,m_vFsOldSize.width
-                          ,m_vFsOldSize.height
-                          ,SWP_SIZE | SWP_SHOW
-                         );
+        Maximize(m_fsIsMaximized);
+        SetWindowLong((HWND)GetHWND(),GWL_STYLE, m_fsOldWindowStyle);
+        SetWindowPos((HWND)GetHWND(),HWND_TOP,m_fsOldSize.x, m_fsOldSize.y,
+            m_fsOldSize.width, m_fsOldSize.height, SWP_FRAMECHANGED);
+
         return TRUE;
     }
+*/
+    return TRUE;
 } // end of wxFrame::ShowFullScreen
 
 //

@@ -632,11 +632,7 @@ bool wxListCtrl::SetItem(wxListItem& info)
     // check whether it has any custom attributes
     if ( info.HasAttributes() )
     {
-        wxListItemAttr *attr;
-        attr = (wxListItemAttr*) m_attrs.Get(item.iItem);
-        if (attr == NULL)
-            m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
-        else *attr = *info.GetAttributes();
+        m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
 
         m_hasAnyAttr = TRUE;
     }
@@ -780,7 +776,7 @@ bool wxListCtrl::GetItemRect(long item, wxRect& rect, int code) const
     rect.x = rect2.left;
     rect.y = rect2.top;
     rect.width = rect2.right - rect2.left;
-    rect.height = rect2.bottom - rect2.top;
+    rect.height = rect2.bottom - rect2.left;
     return success;
 }
 
@@ -1128,11 +1124,7 @@ long wxListCtrl::InsertItem(wxListItem& info)
     // check whether it has any custom attributes
     if ( info.HasAttributes() )
     {
-        wxListItemAttr *attr;
-        attr = (wxListItemAttr*) m_attrs.Get(item.iItem);
-        if (attr == NULL)
-            m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
-        else *attr = *info.GetAttributes();
+        m_attrs.Put(item.iItem, (wxObject *)new wxListItemAttr(*info.GetAttributes()));
 
         m_hasAnyAttr = TRUE;
     }

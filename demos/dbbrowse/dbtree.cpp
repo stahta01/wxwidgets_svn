@@ -88,20 +88,16 @@ DBTree::DBTree(wxWindow *parent, const wxWindowID id,const wxPoint& pos, const w
  p_imageListNormal->Add(wxICON(DocOpen));
  SetImageList(p_imageListNormal);
  ct_BrowserDB = NULL;
- popupMenu1   = NULL;
- popupMenu2   = NULL;
 }
 //----------------------------------------------------------------------------------------
 DBTree::~DBTree()
 {
-//  delete (pDoc->db_Br+i_Which);
  // wxLogMessage("DBTree::~DBTree() - Vor  OnCloseDB()");
  (pDoc->db_Br+i_Which)->OnCloseDB(FALSE);
  // wxLogMessage("DBTree::~DBTree() - Nach OnCloseDB()");
  (pDoc->db_Br+i_Which)->db_BrowserDB = NULL;
  (pDoc->db_Br+i_Which)->ct_BrowserDB = NULL;
  (pDoc->db_Br+i_Which)->cl_BrowserDB = NULL;
-
  delete ct_BrowserDB;
  delete p_imageListNormal;
  if (popupMenu1)       // If the DSN has no Tables, then no delete should be done !

@@ -316,8 +316,6 @@ bool wxWindow::Create(wxWindow *parent, wxWindowID id,
     msflags |= WS_CHILD | WS_VISIBLE;
     if ( style & wxCLIP_CHILDREN )
         msflags |= WS_CLIPCHILDREN;
-    if ( style & wxCLIP_SIBLINGS )
-        msflags |= WS_CLIPSIBLINGS;
 
     bool want3D;
     WXDWORD exStyle = Determine3DEffects(WS_EX_CLIENTEDGE, &want3D);
@@ -992,13 +990,7 @@ void wxWindow::OnIdle(wxIdleEvent& event)
                 state |= MK_SHIFT;
             if ( wxIsCtrlDown() )
                 state |= MK_CONTROL;
-            if ( GetKeyState( VK_LBUTTON ) )
-                state |= MK_LBUTTON;
-            if ( GetKeyState( VK_MBUTTON ) )
-                state |= MK_MBUTTON;
-            if ( GetKeyState( VK_RBUTTON ) )
-                state |= MK_RBUTTON;
-  
+
             wxMouseEvent event(wxEVT_LEAVE_WINDOW);
             InitMouseEvent(event, pt.x, pt.y, state);
 
@@ -1337,7 +1329,8 @@ void wxWindow::AdjustForParentClientOrigin(int& x, int& y, int sizeFlags)
         if ( !(sizeFlags & wxSIZE_NO_ADJUSTMENTS) && parent )
         {
             wxPoint pt(parent->GetClientAreaOrigin());
-            x += pt.x; y += pt.y;
+            x += pt.x;
+            y += pt.y;
         }
     }
 }
@@ -2950,16 +2943,6 @@ bool wxWindow::HandlePaint()
     event.SetEventObject(this);
 
     return GetEventHandler()->ProcessEvent(event);
-}
-
-// Can be called from an application's OnPaint handler
-void wxWindow::OnPaint(wxPaintEvent& event)
-{
-    HDC hDC = (HDC) wxPaintDC::FindDCInCache((wxWindow*) event.GetEventObject());
-    if (hDC != 0)
-    {
-        MSWDefWindowProc(WM_PAINT, (WPARAM) hDC, 0);
-    }
 }
 
 bool wxWindow::HandleEraseBkgnd(WXHDC hdc)
