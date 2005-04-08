@@ -71,6 +71,8 @@ public:
                        long style = wxDEFAULT_DIALOG_STYLE,
                        const wxString& name = wxDialogNameStr);
 
+    void Init();
+
 //// Accessors
 
     // Set and get the notebook
@@ -98,18 +100,11 @@ public:
     // Adds the book control to the inner sizer.
     virtual void AddBookCtrl(wxSizer* sizer);
 
-    // Set the focus
-    void OnActivate(wxActivateEvent& event);
-
-private:
-    void Init();
-
 protected:
     wxBookCtrlBase* m_bookCtrl;
     wxSizer*        m_innerSizer; // sizer for extra space
 
     DECLARE_DYNAMIC_CLASS(wxPropertySheetDialog)
-    DECLARE_EVENT_TABLE()
 };
 
 #endif // _WX_PROPDLG_H_

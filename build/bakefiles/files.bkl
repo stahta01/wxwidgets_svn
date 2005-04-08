@@ -1078,7 +1078,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/motif/button.h
     wx/motif/checkbox.h
     wx/motif/checklst.h
-    wx/motif/chkconf.h
     wx/motif/choice.h
     wx/motif/clipbrd.h
     wx/motif/colour.h
@@ -1415,7 +1414,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/msw/blank.cur
     wx/msw/bullseye.cur
     wx/msw/clock.cur
-    wx/msw/cross.cur
     wx/msw/hand.cur
     wx/msw/heart.cur
     wx/msw/magnif1.cur

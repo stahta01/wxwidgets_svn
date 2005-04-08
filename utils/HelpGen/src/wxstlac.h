@@ -83,9 +83,7 @@ protected:\
 		value_type  mData;\
 	};\
 \
-public:\
 	typedef tree_node* node_ref_type;\
-protected:\
 \
 	node_ref_type   mpRoot;\
 	node_ref_type   mpLeftMost;\

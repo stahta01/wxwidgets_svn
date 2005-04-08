@@ -1304,7 +1304,7 @@ void wxDC::DoDrawBitmap(
     if (!IsKindOf(CLASSINFO(wxPrinterDC)))
     {
         HBITMAP                         hBitmap =  (HBITMAP)rBmp.GetHBITMAP();
-        HBITMAP                         hBitmapOld = NULLHANDLE;;
+        HBITMAP                         hBitmapOld;
         POINTL                          vPoint[4];
 
         vY = OS2Y(vY,rBmp.GetHeight());
@@ -2842,8 +2842,8 @@ void wxDC::DoGetSizeMM(
 wxSize wxDC::GetPPI() const
 {
     LONG                            lArray[CAPS_VERTICAL_RESOLUTION];
-    int                             nWidth = 0;
-    int                             nHeight = 0;
+    int                             nWidth;
+    int                             nHeight;
 
     if(::DevQueryCaps( m_hDC
                       ,CAPS_FAMILY

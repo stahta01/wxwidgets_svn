@@ -220,7 +220,7 @@ void wxVScrolledWindow::RefreshLine(size_t line)
     wxRect rect;
     rect.width = GetClientSize().x;
     rect.height = OnGetLineHeight(line);
-    for ( size_t n = GetVisibleBegin(); n < line; n++ )
+    for ( size_t n = GetFirstVisibleLine(); n < line; n++ )
     {
         rect.y += OnGetLineHeight(n);
     }
@@ -235,23 +235,21 @@ void wxVScrolledWindow::RefreshLines(size_t from, size_t to)
 
     // clump the range to just the visible lines -- it is useless to refresh
     // the other ones
-    if ( from < GetVisibleBegin() )
-        from = GetVisibleBegin();
+    if ( from < GetFirstVisibleLine() )
+        from = GetFirstVisibleLine();
 
-    if ( to >= GetVisibleEnd() )
-        to = GetVisibleEnd();
-    else
-        to++;
+    if ( to > GetLastVisibleLine() )
+        to = GetLastVisibleLine();
 
     // calculate the rect occupied by these lines on screen
     wxRect rect;
     rect.width = GetClientSize().x;
-    for ( size_t nBefore = GetVisibleBegin(); nBefore < from; nBefore++ )
+    for ( size_t nBefore = GetFirstVisibleLine(); nBefore < from; nBefore++ )
     {
         rect.y += OnGetLineHeight(nBefore);
     }
 
-    for ( size_t nBetween = from; nBetween < to; nBetween++ )
+    for ( size_t nBetween = from; nBetween <= to; nBetween++ )
     {
         rect.height += OnGetLineHeight(nBetween);
     }
@@ -269,8 +267,8 @@ void wxVScrolledWindow::RefreshAll()
 
 int wxVScrolledWindow::HitTest(wxCoord WXUNUSED(x), wxCoord y) const
 {
-    const size_t lineMax = GetVisibleEnd();
-    for ( size_t line = GetVisibleBegin(); line < lineMax; line++ )
+    const size_t lineMax = GetLastVisibleLine();
+    for ( size_t line = GetFirstVisibleLine(); line <= lineMax; line++ )
     {
         y -= OnGetLineHeight(line);
         if ( y < 0 )
@@ -307,8 +305,8 @@ bool wxVScrolledWindow::ScrollToLine(size_t line)
 
 
     // remember the currently shown lines for the refresh code below
-    size_t lineFirstOld = GetVisibleBegin(),
-           lineLastOld = GetVisibleEnd();
+    size_t lineFirstOld = GetFirstVisibleLine(),
+           lineLastOld = GetLastVisibleLine();
 
     m_lineFirst = line;
 
@@ -319,8 +317,8 @@ bool wxVScrolledWindow::ScrollToLine(size_t line)
 
     // finally refresh the display -- but only redraw as few lines as possible
     // to avoid flicker
-    if ( GetVisibleBegin() >= lineLastOld ||
-            GetVisibleEnd() <= lineFirstOld )
+    if ( GetFirstVisibleLine() > lineLastOld ||
+            GetLastVisibleLine() < lineFirstOld )
     {
         // the simplest case: we don't have any old lines left, just redraw
         // everything
@@ -328,7 +326,7 @@ bool wxVScrolledWindow::ScrollToLine(size_t line)
     }
     else // overlap between the lines we showed before and should show now
     {
-        ScrollWindow(0, GetLinesHeight(GetVisibleBegin(), lineFirstOld));
+        ScrollWindow(0, GetLinesHeight(GetFirstVisibleLine(), lineFirstOld));
     }
 
     return true;
@@ -352,14 +350,12 @@ bool wxVScrolledWindow::ScrollPages(int pages)
         int line;
         if ( pages > 0 )
         {
-            line = GetVisibleEnd();
-            if ( line )
-                line--;
+            line = GetLastVisibleLine();
             pages--;
         }
         else // pages < 0
         {
-            line = FindFirstFromBottom(GetVisibleBegin());
+            line = FindFirstFromBottom(GetFirstVisibleLine());
             pages++;
         }
 
@@ -408,9 +404,7 @@ void wxVScrolledWindow::OnScroll(wxScrollWinEvent& event)
     }
     else if ( evtType == wxEVT_SCROLLWIN_PAGEDOWN )
     {
-        lineFirstNew = GetVisibleEnd();
-        if ( lineFirstNew )
-            lineFirstNew--;
+        lineFirstNew = GetLastVisibleLine();
     }
     else if ( evtType == wxEVT_SCROLLWIN_THUMBRELEASE )
     {

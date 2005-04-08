@@ -28,10 +28,6 @@
     #define LVS_EX_FULLROWSELECT 0x00000020
 #endif
 
-#ifndef LVS_EX_LABELTIP
-    #define LVS_EX_LABELTIP 0x00004000
-#endif
-
 #ifndef LVS_OWNERDATA
     #define LVS_OWNERDATA 0x1000
 #endif
@@ -644,12 +640,8 @@ typedef struct {
     #define VK_OEM_PERIOD   0xBE
 #endif
 
-#ifndef WM_CONTEXTMENU
-    #define WM_CONTEXTMENU      0x007B
-#endif
-
 #ifndef WM_UPDATEUISTATE
-    #define WM_UPDATEUISTATE    0x0128
+    #define WM_UPDATEUISTATE    0x128
 #endif
 
 #ifndef UIS_INITIALIZE

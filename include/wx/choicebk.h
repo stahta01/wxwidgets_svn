@@ -76,9 +76,6 @@ public:
 
     virtual bool DeleteAllPages();
 
-    // returns the choice control
-    wxChoice* GetChoiceCtrl() const { return m_choice; }
-
 protected:
     virtual wxWindow *DoRemovePage(size_t page);
 

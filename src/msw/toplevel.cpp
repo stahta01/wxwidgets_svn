@@ -447,6 +447,10 @@ bool wxTopLevelWindowMSW::CreateFrame(const wxString& title,
 
     bool result = MSWCreate(wxCanvasClassName, title, pos, sz, flags, exflags);
 
+#ifdef __SMARTPHONE__
+    // Work around title non-display glitch
+    Show(false);
+#endif
     return result;
 }
 
@@ -544,8 +548,9 @@ bool wxTopLevelWindowMSW::Create(wxWindow *parent,
         );
     }
 
-    // Note: if we include PocketPC in this test, dialogs can fail to show up,
-    // for example the text entry dialog in the dialogs sample. Problem with Maximise()?
+    // Native look is full screen window on Smartphones and Standard SDK.
+    // TODO: check that we need this (if we're passing default values to ctor).
+    // Also check that there really is a difference between PocketPC and Smartphone in this regard.
 #if defined(__WXWINCE__) && (defined(__SMARTPHONE__) || defined(__WINCE_STANDARDSDK__))
     if ( style & wxMAXIMIZE )
     {

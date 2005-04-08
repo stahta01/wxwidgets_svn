@@ -591,7 +591,7 @@ bool DocGeneratorBase::SaveDocument( const char*    fname,
 {
     FILE* fp = fopen( fname, fopenOptions );
 
-    if ( !fp ) return 0;
+    if ( (int)fp == -1 ) return 0;
 
     ScriptStream stm;
 

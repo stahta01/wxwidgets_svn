@@ -30,12 +30,9 @@
     #include "wx/string.h"
     #include "wxstlvec.h"
 
-    #ifdef wxUSE_STD_STRING
-        using std::string;
-    #else
-        // FOR NOW:: quick n' dirty:
-        #define  string wxString
-    #endif
+    // FOR NOW:: quick n' dirty:
+
+    #define  string wxString
 
 #endif
 

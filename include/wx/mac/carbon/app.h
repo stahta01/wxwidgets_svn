@@ -22,7 +22,7 @@
 #include "wx/event.h"
 
 #ifdef __WXMAC_OSX__
-typedef struct __CFRunLoopSource * CFRunLoopSourceRef;
+#include <CoreFoundation/CFRunLoop.h>
 #endif
 
 class WXDLLEXPORT wxFrame;

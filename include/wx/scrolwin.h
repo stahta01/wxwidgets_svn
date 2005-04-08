@@ -175,9 +175,6 @@ protected:
     // delete the event handler we installed
     void DeleteEvtHandler();
 
-    double                m_scaleX;
-    double                m_scaleY;
-
     wxWindow             *m_win,
                          *m_targetWindow;
 
@@ -196,6 +193,9 @@ protected:
 
     bool                  m_xScrollingEnabled;
     bool                  m_yScrollingEnabled;
+
+    double                m_scaleX;
+    double                m_scaleY;
 
 #if wxUSE_MOUSEWHEEL
     int m_wheelRotation;

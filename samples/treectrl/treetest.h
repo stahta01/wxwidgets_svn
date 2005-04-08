@@ -86,9 +86,6 @@ public:
     void OnSelChanging(wxTreeEvent& event);
     void OnTreeKeyDown(wxTreeEvent& event);
     void OnItemActivated(wxTreeEvent& event);
-
-    void OnRMouseDown(wxMouseEvent& event);
-    void OnRMouseUp(wxMouseEvent& event);
     void OnRMouseDClick(wxMouseEvent& event);
 
     void GetItemsRecursively(const wxTreeItemId& idParent,

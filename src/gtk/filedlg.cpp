@@ -195,7 +195,7 @@ wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
 
         if ( style & wxSAVE )
         {
-            if ( !defaultDir.empty() )
+            if ( !defaultDir.IsEmpty() )
                 gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(m_widget),
                 wxConvFileName->cWX2MB(defaultDir));
 
@@ -204,10 +204,10 @@ wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
         }
         else
         {
-            if ( !defaultFileName.empty() )
+            if ( !defaultFileName.IsEmpty() )
             {
                 wxString dir;
-                if ( defaultDir.empty() )
+                if ( defaultDir.IsEmpty() )
                     dir = ::wxGetCwd();
                 else
                     dir = defaultDir;
@@ -216,7 +216,7 @@ wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
                     GTK_FILE_CHOOSER(m_widget),
                     wxConvFileName->cWX2MB( wxFileName(dir, defaultFileName).GetFullPath() ) );
             }
-            else if ( !defaultDir.empty() )
+            else if ( !defaultDir.IsEmpty() )
                 gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(m_widget),
                     wxConvFileName->cWX2MB(defaultDir) );
         }
@@ -354,7 +354,7 @@ void wxFileDialog::SetDirectory(const wxString& dir)
 #ifdef __WXGTK24__
     if (!gtk_check_version(2,4,0))
     {
-        if (wxDirExists(dir))
+        if (wxPathExists(dir))
         {
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(m_widget), wxConvFileName->cWX2MB(dir));
         }

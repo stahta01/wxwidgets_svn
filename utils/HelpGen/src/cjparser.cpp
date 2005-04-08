@@ -1621,11 +1621,7 @@ bool CJSourceParser::ParseNameAndRetVal( char*& cur, bool& isAMacro )
     if ( cur >= start )
     {
         string rettype = string( start, size_t( cur-start ) );
-        // FIXME just for now...
-        string::size_type pos = 0; 
-        string toerase("WXDLLEXPORT ");
-        while((pos = rettype.find(toerase, pos)) != string::npos)
-            rettype.erase(pos, toerase.length());
+        rettype.Replace("WXDLLEXPORT ", ""); // FIXME just for now...
         pOp->mRetType = rettype;
     }
 
@@ -1916,11 +1912,11 @@ void CJSourceParser::ParseMemberVar( char*& cur )
         if ( !pAttr )
             continue;
 
-        if ( pAttr->mType.empty() )
+        if ( !pAttr->mType )
             pAttr->mType = type;
         pAttr->mVisibility = mCurVis;
 
-        if ( !pAttr->mName.empty() )
+        if ( !!pAttr->mName )
             arrange_indirection_tokens_between( pAttr->mType, pAttr->mName );
     }
 

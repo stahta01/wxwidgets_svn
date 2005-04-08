@@ -546,7 +546,7 @@ static void Unique(wxZipMemory*& zm, size_t size)
 // Collection of weak references to entries
 
 WX_DECLARE_HASH_MAP(long, wxZipEntry*, wxIntegerHash,
-                    wxIntegerEqual, wx__OffsetZipEntryMap);
+                    wxIntegerEqual, _wxOffsetZipEntryMap);
 
 class wxZipWeakLinks
 {
@@ -560,7 +560,7 @@ public:
 
     wxZipWeakLinks *AddEntry(wxZipEntry *entry, wxFileOffset key);
     void RemoveEntry(wxFileOffset key)
-        { m_entries.erase((wx__OffsetZipEntryMap::key_type)key); }
+        { m_entries.erase((_wxOffsetZipEntryMap::key_type)key); }
     wxZipEntry *GetEntry(wxFileOffset key) const;
     bool IsEmpty() const { return m_entries.empty(); }
 
@@ -568,20 +568,20 @@ private:
     ~wxZipWeakLinks() { wxASSERT(IsEmpty()); }
 
     int m_ref;
-    wx__OffsetZipEntryMap m_entries;
+    _wxOffsetZipEntryMap m_entries;
 };
 
 wxZipWeakLinks *wxZipWeakLinks::AddEntry(wxZipEntry *entry, wxFileOffset key)
 {
-    m_entries[(wx__OffsetZipEntryMap::key_type)key] = entry;
+    m_entries[(_wxOffsetZipEntryMap::key_type)key] = entry;
     m_ref++;
     return this;
 }
 
 wxZipEntry *wxZipWeakLinks::GetEntry(wxFileOffset key) const
 {
-    wx__OffsetZipEntryMap::const_iterator it =
-        m_entries.find((wx__OffsetZipEntryMap::key_type)key);
+    _wxOffsetZipEntryMap::const_iterator it =
+        m_entries.find((_wxOffsetZipEntryMap::key_type)key);
     return it != m_entries.end() ?  it->second : NULL;
 }
 
@@ -684,7 +684,6 @@ wxString wxZipEntry::GetName(wxPathFormat format /*=wxPATH_NATIVE*/) const
 {
     bool isDir = IsDir() && !m_Name.empty();
 
-    // optimisations for common (and easy) cases
     switch (wxFileName::GetFormat(format)) {
         case wxPATH_DOS:
         {
@@ -1172,9 +1171,8 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 // Input stream
 
-// leave the default wxZipEntryPtr free for users
-wxDECLARE_SCOPED_PTR(wxZipEntry, wx__ZipEntryPtr)
-wxDEFINE_SCOPED_PTR (wxZipEntry, wx__ZipEntryPtr)
+wxDECLARE_SCOPED_PTR(wxZipEntry, _wxZipEntryPtr)
+wxDEFINE_SCOPED_PTR (wxZipEntry, _wxZipEntryPtr)
 
 // constructor
 //
@@ -1182,14 +1180,9 @@ wxZipInputStream::wxZipInputStream(wxInputStream& stream,
                                    wxMBConv& conv /*=wxConvLocal*/)
   : wxArchiveInputStream(stream, conv)
 {
-#if 1 //WXWIN_COMPATIBILITY_2_6
-    m_allowSeeking = false;
-#endif
     m_ffile = NULL;
     Init();
 }
-
-#if 1 //WXWIN_COMPATIBILITY_2_6
 
 // Compatibility constructor
 //
@@ -1200,8 +1193,7 @@ wxZipInputStream::wxZipInputStream(const wxString& archive,
     // no error messages
     wxLogNull nolog;
     Init();
-    m_allowSeeking = true;
-    wx__ZipEntryPtr entry;
+    _wxZipEntryPtr entry;
 
     if (m_ffile->Ok()) {
         do {
@@ -1220,8 +1212,6 @@ wxInputStream& wxZipInputStream::OpenFile(const wxString& archive)
     m_ffile = new wxFFileInputStream(archive);
     return *m_ffile;
 }
-
-#endif // WXWIN_COMPATIBILITY_2_6
 
 void wxZipInputStream::Init()
 {
@@ -1426,7 +1416,7 @@ wxZipEntry *wxZipInputStream::GetNextEntry()
     if (!IsOk())
         return NULL;
 
-    wx__ZipEntryPtr entry(new wxZipEntry(m_entry));
+    _wxZipEntryPtr entry(new wxZipEntry(m_entry));
     entry->m_backlink = m_weaklinks->AddEntry(entry.get(), entry->GetKey());
     return entry.release();
 }
@@ -1752,15 +1742,11 @@ size_t wxZipInputStream::OnSysRead(void *buffer, size_t size)
     return count;
 }
 
-#if 1 //WXWIN_COMPATIBILITY_2_6
-
 // Borrowed from VS's zip stream (c) 1999 Vaclav Slavik
 //
 wxFileOffset wxZipInputStream::OnSysSeek(wxFileOffset seek, wxSeekMode mode)
 {
-    // seeking works when the stream is created with the compatibility
-    // constructor
-    if (!m_allowSeeking)
+    if (!m_ffile)
         return wxInvalidOffset;
     if (!IsOpened())
         if ((AtHeader() && !DoOpen()) || !OpenDecompressor())
@@ -1818,14 +1804,12 @@ wxFileOffset wxZipInputStream::OnSysSeek(wxFileOffset seek, wxSeekMode mode)
     return pos;
 }
 
-#endif // WXWIN_COMPATIBILITY_2_6
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Output stream
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wx__ZipEntryList);
+WX_DEFINE_LIST(_wxZipEntryList);
 
 wxZipOutputStream::wxZipOutputStream(wxOutputStream& stream,
                                      int level      /*=-1*/,
@@ -1850,7 +1834,7 @@ wxZipOutputStream::wxZipOutputStream(wxOutputStream& stream,
 wxZipOutputStream::~wxZipOutputStream()
 {
     Close();
-    WX_CLEAR_LIST(wx__ZipEntryList, m_entries);
+    WX_CLEAR_LIST(_wxZipEntryList, m_entries);
     delete m_store;
     delete m_deflate;
     delete m_pending;
@@ -1879,7 +1863,7 @@ bool wxZipOutputStream::PutNextDirEntry(
 bool wxZipOutputStream::CopyEntry(wxZipEntry *entry,
                                   wxZipInputStream& inputStream)
 {
-    wx__ZipEntryPtr e(entry);
+    _wxZipEntryPtr e(entry);
 
     return
         inputStream.DoOpen(e.get(), true) &&
@@ -1946,18 +1930,14 @@ bool wxZipOutputStream::DoCreate(wxZipEntry *entry, bool raw /*=false*/)
 
     // and if this is the first entry test for seekability
     if (m_headerOffset == 0 && m_parent_o_stream->IsSeekable()) {
-#if wxUSE_LOG
         bool logging = wxLog::IsEnabled();
         wxLogNull nolog;
-#endif // wxUSE_LOG
         wxFileOffset here = m_parent_o_stream->TellO();
 
         if (here != wxInvalidOffset && here >= 4) {
             if (m_parent_o_stream->SeekO(here - 4) == here - 4) {
                 m_offsetAdjustment = here - 4;
-#if wxUSE_LOG
                 wxLog::EnableLogging(logging);
-#endif // wxUSE_LOG
                 m_parent_o_stream->SeekO(here);
             }
         }
@@ -2049,7 +2029,7 @@ bool wxZipOutputStream::CloseCompressor(wxOutputStream *comp)
 void wxZipOutputStream::CreatePendingEntry(const void *buffer, size_t size)
 {
     wxASSERT(IsOk() && m_pending && !m_comp);
-    wx__ZipEntryPtr spPending(m_pending);
+    _wxZipEntryPtr spPending(m_pending);
     m_pending = NULL;
 
     Buffer bufs[] = {
@@ -2090,7 +2070,7 @@ void wxZipOutputStream::CreatePendingEntry(const void *buffer, size_t size)
 void wxZipOutputStream::CreatePendingEntry()
 {
     wxASSERT(IsOk() && m_pending && !m_comp);
-    wx__ZipEntryPtr spPending(m_pending);
+    _wxZipEntryPtr spPending(m_pending);
     m_pending = NULL;
     m_lasterror = wxSTREAM_WRITE_ERROR;
 
@@ -2154,7 +2134,7 @@ bool wxZipOutputStream::Close()
     endrec.SetOffset(m_headerOffset);
     endrec.SetComment(m_Comment);
 
-    wx__ZipEntryList::iterator it;
+    _wxZipEntryList::iterator it;
     wxFileOffset size = 0;
 
     for (it = m_entries.begin(); it != m_entries.end(); ++it) {

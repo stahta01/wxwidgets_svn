@@ -1195,7 +1195,7 @@ bool wxRmdir(const wxString& dir, int WXUNUSED(flags))
 }
 
 // does the path exists? (may have or not '/' or '\\' at the end)
-bool wxDirExists(const wxChar *pszPathName)
+bool wxPathExists(const wxChar *pszPathName)
 {
     wxString strPath(pszPathName);
 

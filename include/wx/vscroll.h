@@ -118,26 +118,14 @@ public:
     size_t GetLineCount() const { return m_lineMax; }
 
     // get the first currently visible line
-    size_t GetVisibleBegin() const { return m_lineFirst; }
-
-    // get the first currently visible line
-    size_t GetVisibleEnd() const { return m_lineFirst + m_nVisible; }
-
-    // is this line currently visible?
-    bool IsVisible(size_t line) const
-        { return line >= GetVisibleBegin() && line < GetVisibleEnd(); }
-
-
-    // this is the same as GetVisibleBegin(), exists to match
-    // GetLastVisibleLine() and for backwards compatibility only
     size_t GetFirstVisibleLine() const { return m_lineFirst; }
 
     // get the last currently visible line
-    //
-    // this function is unsafe as it returns (size_t)-1 (i.e. a huge positive
-    // number) if the control is empty, use GetVisibleEnd() instead, this one
-    // is kept for backwards compatibility
-    size_t GetLastVisibleLine() const { return GetVisibleEnd() - 1; }
+    size_t GetLastVisibleLine() const { return m_lineFirst + m_nVisible - 1; }
+
+    // is this line currently visible?
+    bool IsVisible(size_t line) const
+        { return line >= m_lineFirst && line <= GetLastVisibleLine(); }
 
 
 protected:

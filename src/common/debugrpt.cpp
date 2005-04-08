@@ -51,7 +51,6 @@
 #if wxUSE_ZIPSTREAM
     #include "wx/wfstream.h"
     #include "wx/zipstrm.h"
-    #include "wx/ptr_scpd.h"
 #endif // wxUSE_ZIPSTREAM
 
 WX_CHECK_BUILD_OPTIONS("wxQA")
@@ -330,8 +329,8 @@ bool wxDebugReport::DoAddLoadedModules(wxXmlNode *nodeModules)
         if ( !path.empty() )
             nodeModule->AddProperty(_T("path"), path);
 
-        void *addr = NULL;
-        size_t len = 0;
+        void *addr;
+        size_t len;
         if ( info.GetAddress(&addr, &len) )
         {
             HexProperty(nodeModule, _T("address"), (unsigned long)addr);
@@ -549,10 +548,6 @@ bool wxDebugReport::DoProcess()
 
 #if wxUSE_ZIPSTREAM
 
-// leave the default name wxZipOutputStreamPtr free for users
-wxDECLARE_SCOPED_PTR(wxZipOutputStream, wxDbgZipOutputStreamPtr)
-wxDEFINE_SCOPED_PTR(wxZipOutputStream, wxDbgZipOutputStreamPtr)
-
 // ----------------------------------------------------------------------------
 // wxDebugReportCompress
 // ----------------------------------------------------------------------------
@@ -566,11 +561,7 @@ bool wxDebugReportCompress::DoProcess()
     // create the streams
     wxFileName fn(GetDirectory(), GetReportName(), _T("zip"));
     wxFFileOutputStream os(fn.GetFullPath(), _T("wb"));
-
-    // create this one on the heap as a workaround since otherwise the mingw
-    // 3.2.3 linker cannot find ~wxZipOutputStream() when building a dll
-    // version of the library.
-    wxDbgZipOutputStreamPtr zos(new wxZipOutputStream(os, 9));
+    wxZipOutputStream zos(os, 9);
 
     // add all files to the ZIP one
     wxString name, desc;
@@ -581,16 +572,16 @@ bool wxDebugReportCompress::DoProcess()
         wxZipEntry *ze = new wxZipEntry(name);
         ze->SetComment(desc);
 
-        if ( !zos->PutNextEntry(ze) )
+        if ( !zos.PutNextEntry(ze) )
             return false;
 
         wxFileName filename(fn.GetPath(), name);
         wxFFileInputStream is(filename.GetFullPath());
-        if ( !is.IsOk() || !zos->Write(is).IsOk() )
+        if ( !is.IsOk() || !zos.Write(is).IsOk() )
             return false;
     }
 
-    if ( !zos->Close() )
+    if ( !zos.Close() )
         return false;
 
     m_zipfile = fn.GetFullPath();

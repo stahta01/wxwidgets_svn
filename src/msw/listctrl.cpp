@@ -166,7 +166,7 @@ private:
 //
 // Solution:
 // Under MSW the only way to associate data with a List
-// item independent of its position in the list is to
+// item independant of its position in the list is to
 // store a pointer to it in its lParam attribute. However
 // user programs are already using this (via the
 // SetItemData() GetItemData() calls).
@@ -357,12 +357,12 @@ bool wxListCtrl::Create(wxWindow *parent,
     // versions of _some_ messages (notably LVN_GETDISPINFOA) in MSLU build
     wxSetCCUnicodeFormat(GetHwnd());
 
-    // for comctl32.dll v 4.70+ we want to have some non default extended
-    // styles because it's prettier (and also because wxGTK does it like this)
+    // for comctl32.dll v 4.70+ we want to have this attribute because it's
+    // prettier (and also because wxGTK does it like this)
     if ( InReportView() && wxApp::GetComCtl32Version() >= 470 )
     {
         ::SendMessage(GetHwnd(), LVM_SETEXTENDEDLISTVIEWSTYLE,
-                      0, LVS_EX_LABELTIP | LVS_EX_FULLROWSELECT);
+                      0, LVS_EX_FULLROWSELECT);
     }
 
     return true;

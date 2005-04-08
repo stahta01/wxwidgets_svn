@@ -798,7 +798,7 @@ public:
         // post increment operator
     wxULongLongWx& operator++(int) { return ++(*this); }
 
-        // subtraction
+        // substraction
     wxLongLongWx operator-(const wxULongLongWx& ll) const;
     wxULongLongWx& operator-=(const wxULongLongWx& ll);
 
