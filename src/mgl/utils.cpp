@@ -51,18 +51,14 @@ void wxBell()
 
 void wxSleep(int nSecs)
 {
-    wxMilliSleep(1000 * nSecs);
+    wxUsleep(1000 * nSecs);
 }
 
-void wxMilliSleep(unsigned long milliseconds)
+void wxUsleep(unsigned long milliseconds)
 {
     PM_sleep(milliseconds);
 }
 
-void wxMicroSleep(unsigned long microseconds)
-{
-    wxMilliSleep(microseconds/1000);
-}
 
 bool wxGetEnv(const wxString& var, wxString *value)
 {
@@ -145,7 +141,7 @@ bool wxGetFullHostName(wxChar *WXUNUSED(buf), int WXUNUSED(sz))
     return FALSE;
 }
 
-int wxKill(long WXUNUSED(pid), wxSignal WXUNUSED(sig), wxKillError *WXUNUSED(rc), int WXUNUSED(flags))
+int wxKill(long WXUNUSED(pid), wxSignal WXUNUSED(sig), wxKillError *WXUNUSED(rc))
 {
     wxFAIL_MSG( wxT("wxKill not implemented under MS-DOS!") );
     return 0;

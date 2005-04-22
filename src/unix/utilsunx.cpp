@@ -237,12 +237,6 @@ int wxKill(long pid, wxSignal sig, wxKillError *rc, int flags)
 
 #define WXEXECUTE_NARGS   127
 
-#if defined(__DARWIN__)
-long wxMacExecute(wxChar **argv,
-               int flags,
-               wxProcess *process);
-#endif
-
 long wxExecute( const wxString& command, int flags, wxProcess *process )
 {
     wxCHECK_MSG( !command.empty(), 0, wxT("can't exec empty command") );
@@ -313,18 +307,8 @@ long wxExecute( const wxString& command, int flags, wxProcess *process )
     } while(*cptr);
     argv[argc] = NULL;
 
-    long lRc;
-#if defined(__DARWIN__)
-    // wxMacExecute only executes app bundles.
-    // It returns -1 if the target is not an app bundle, thus falling through
-    // to the regular wxExecute for non app bundles.
-    lRc = wxMacExecute(argv, flags, process);
-    if( lRc != -1)
-        return lRc;
-#endif
-
     // do execute the command
-    lRc = wxExecute(argv, flags, process);
+    long lRc = wxExecute(argv, flags, process);
 
     // clean up
     argc = 0;
@@ -452,7 +436,7 @@ bool wxPipeInputStream::CanRead() const
 #ifdef __VMS
     #pragma message disable codeunreachable
 #endif
-               
+
 long wxExecute(wxChar **argv,
                int flags,
                wxProcess *process)
@@ -604,7 +588,7 @@ long wxExecute(wxChar **argv,
         }
 
         execvp (*mb_argv, mb_argv);
-       
+
         fprintf(stderr, "execvp(");
         // CS changed ppc to ppc_ as ppc is not available under mac os CW Mach-O
         for ( char **ppc_ = mb_argv; *ppc_; ppc_++ )
