@@ -37,6 +37,7 @@
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/panel.h"
+    #include "wx/caret.h"
 #endif
 
 #if wxUSE_DRAG_AND_DROP
@@ -48,7 +49,6 @@
 #include "wx/mgl/private.h"
 #include "wx/intl.h"
 #include "wx/dcscreen.h"
-#include "wx/caret.h"
 
 #include <mgraph.hpp>
 

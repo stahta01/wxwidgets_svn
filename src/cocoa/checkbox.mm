@@ -136,9 +136,4 @@ void wxCheckBox::Cocoa_wxNSButtonAction(void)
     Command(event);
 }
 
-void wxCheckBox::SetLabel(const wxString& s)
-{
-    wxAutoNSAutoreleasePool pool;
-    [GetNSButton() setTitle:wxNSStringWithWxString(s)];
-}
 #endif

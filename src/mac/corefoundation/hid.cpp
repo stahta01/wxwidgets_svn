@@ -294,12 +294,6 @@ bool wxHIDDevice::IsActive(int nIndex)
 	wxASSERT(m_pCookies[nIndex] != NULL);
 	IOHIDEventStruct Event;
 	(*m_ppDevice)->getElementValue(m_ppDevice, m_pCookies[nIndex], &Event);
-/*
-    wxString ss;
-    ss << _T("[") << (int) m_pCookies[nIndex] << _T("] = ") << Event.value << _T("  SIZE:") << Event.longValueSize;
-    
-    wxLogDebug(ss);
-*/
 	return !!Event.value;
 }
 	
@@ -353,46 +347,12 @@ void wxHIDKeyboard::BuildCookies(wxCFArray& Array)
 	InitCookies(500);
 	int i,
 		nUsage;
-    bool bEOTriggered = false;
 	for (i = 0; i < Array.Count(); ++i)
-	{        
+	{
 		CFNumberGetValue(
 			(CFNumberRef) CFDictionaryGetValue((CFDictionaryRef) Array[i], CFSTR(kIOHIDElementUsageKey)), 
 				kCFNumberLongType, &nUsage);
-		
-        //
-        // OK, this is strange - basically this kind of strange - 
-        // Starting from 0xEO these elements (like shift) appear twice in
-        // the array!  The ones at the end are bogus I guess - the funny part
-        // is that besides the fact that the ones at the front have a Unit
-        // and UnitExponent key with a value of 0 and a different cookie value,
-        // there is no discernable difference between the two... 
-        //
-        // Will the real shift please stand up?
-        //
-        // Something to spend a support request on, if I had one, LOL.
-        //
-        if(nUsage == 0xE0)
-        {
-            if(bEOTriggered)
-               break;
-            bEOTriggered = true;
-        }
-/*
-        wxString msg;
-        int cookie;
-        	CFNumberGetValue(
-				(CFNumberRef) CFDictionaryGetValue	( (CFDictionaryRef) Array[i]
-										, CFSTR(kIOHIDElementCookieKey)
-										),	
-				kCFNumberIntType,
-				&cookie
-				);
-
-        msg << wxT("KEY:") << nUsage << wxT("COOKIE:") << cookie;
-        wxLogDebug(msg);    	
-*/
-
+			
 		if (nUsage >= kHIDUsage_KeyboardA && nUsage <= kHIDUsage_KeyboardZ)
 			AddCookie(Array[i], 'A' + (nUsage - kHIDUsage_KeyboardA) );
 		else if (nUsage >= kHIDUsage_Keyboard1 && nUsage <= kHIDUsage_Keyboard9)
@@ -544,142 +504,7 @@ bool wxGetKeyState (wxKeyCode key)
         }
     }
     
-    switch(key)
-    {
-    case WXK_SHIFT:
-        return wxHIDModule::sm_keyboard->IsActive(WXK_SHIFT) ||
-               wxHIDModule::sm_keyboard->IsActive(WXK_RSHIFT);
-        break;
-	case WXK_ALT:
-        return wxHIDModule::sm_keyboard->IsActive(WXK_ALT) ||
-               wxHIDModule::sm_keyboard->IsActive(WXK_RALT);
-        break;
-	case WXK_CONTROL:
-        return wxHIDModule::sm_keyboard->IsActive(WXK_CONTROL) ||
-               wxHIDModule::sm_keyboard->IsActive(WXK_RCONTROL);
-        break;
-	case WXK_MENU:
-        return wxHIDModule::sm_keyboard->IsActive(WXK_MENU) ||
-               wxHIDModule::sm_keyboard->IsActive(WXK_RMENU);
-        break;
-    default:
-        return wxHIDModule::sm_keyboard->IsActive(key);
-        break;
-    }
-}
-
-//
-// TODO: Find a better file to put this in
-//
-#include "wx/intl.h"
-
-#ifdef __WXCOCOA__
-#include <CoreFoundation/CoreFoundation.h>
-#include <ApplicationServices/ApplicationServices.h>
-#else
-#include "wx/mac/private.h"
-#include "LaunchServices.h"
-#endif
-
-#include "wx/uri.h"
-#include "wx/mac/corefoundation/cfstring.h"
-
-long wxMacExecute(wxChar **argv,
-               int flags,
-               wxProcess *process)
-{
-    CFIndex cfiCount = 0;
-    //get count
-    for(wxChar** argvcopy = argv; *argvcopy != NULL ; ++argvcopy)
-    {
-        ++cfiCount;
-    }
-
-    if(cfiCount == 0) //no file to launch?
-    {
-        wxLogDebug(wxT("wxMacExecute No file to launch!"));
-        return -1;
-    }
-    
-    CFURLRef cfurlApp = CFURLCreateWithString(
-            kCFAllocatorDefault,
-            wxMacCFStringHolder(*argv++, wxLocale::GetSystemEncoding()),
-            NULL);
-    wxASSERT(cfurlApp);
-
-    CFBundleRef cfbApp = CFBundleCreate(kCFAllocatorDefault, cfurlApp);
-    if(!cfbApp)
-    {
-        wxLogDebug(wxT("wxMacExecute Bad bundle"));
-        CFRelease(cfurlApp);
-        return -1;
-    }
-    
-    
-    UInt32 dwBundleType, dwBundleCreator;
-    CFBundleGetPackageInfo(cfbApp, &dwBundleType, &dwBundleCreator);
-
-    //Only call wxMacExecute for .app bundles - others could be actual unix programs
-    if(dwBundleType != 'APPL')
-    {
-        CFRelease(cfurlApp);
-        return -1;
-    }
-    
-    //
-    // We have a good bundle - so let's launch it!
-    //
-    
-    CFMutableArrayRef cfaFiles = CFArrayCreateMutable(kCFAllocatorDefault, cfiCount - 1, NULL);
-            
-    wxASSERT(cfaFiles);
-    
-    if(--cfiCount)
-    {
-        for( ; *argv != NULL ; ++argv)
-        {
-//            wxLogDebug(*argv);
-            wxString sCurrentFile;
-            
-            if(wxURI(*argv).IsReference())
-                sCurrentFile = wxString(wxT("file://")) + *argv;
-            else
-                sCurrentFile = *argv;
-                
-            CFURLRef cfurlCurrentFile =   CFURLCreateWithString(
-                    kCFAllocatorDefault,
-                    wxMacCFStringHolder(sCurrentFile, wxLocale::GetSystemEncoding()),
-                    NULL);
-            wxASSERT(cfurlCurrentFile);
-
-            CFArrayAppendValue(
-                cfaFiles,
-                cfurlCurrentFile
-                            );
-        }
-    }
-    
-    LSLaunchURLSpec launchspec;
-    launchspec.appURL = cfurlApp;
-    launchspec.itemURLs = cfaFiles;
-    launchspec.passThruParams = NULL; //AEDesc* 
-    launchspec.launchFlags = kLSLaunchDefaults | kLSLaunchDontSwitch;  //TODO:  Possibly be smarter with flags
-    launchspec.asyncRefCon = NULL;
-    
-    OSStatus status = LSOpenFromURLSpec(&launchspec,
-                        NULL); //2nd is CFURLRef* really launched
-
-    //cleanup
-    CFRelease(cfurlApp);
-    CFRelease(cfaFiles);
-    
-    //check for error
-    if(status != noErr)
-    {
-        wxLogDebug(wxString::Format(wxT("wxMacExecute ERROR: %d")), (int)status);
-        return -1;
-    }
-    return 0; //success
+    return wxHIDModule::sm_keyboard->IsActive(key);
 }
 
 #endif //__DARWIN__

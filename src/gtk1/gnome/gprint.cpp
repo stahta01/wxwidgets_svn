@@ -76,8 +76,6 @@ public:
         (GnomePrintContext *pc, gdouble x, gdouble y), (pc, x, y), 0 )
     wxDL_METHOD_DEFINE( gint, gnome_print_lineto, 
         (GnomePrintContext *pc, gdouble x, gdouble y), (pc, x, y), 0 )
-    wxDL_METHOD_DEFINE( gint, gnome_print_arcto, 
-        (GnomePrintContext *pc, gdouble x, gdouble y, gdouble radius, gdouble angle1, gdouble angle2, gint direction ), (pc, x, y, radius, angle1, angle2, direction), 0 )
     wxDL_METHOD_DEFINE( gint, gnome_print_curveto, 
         (GnomePrintContext *pc, gdouble x1, gdouble y1, gdouble x2, gdouble y2, gdouble x3, gdouble y3), (pc, x1, y1, x2, y2, x3, y3), 0 )
     wxDL_METHOD_DEFINE( gint, gnome_print_closepath, 
@@ -104,8 +102,6 @@ public:
         (GnomePrintContext *pc, gdouble sx, gdouble sy), (pc, sx, sy), 0 )
     wxDL_METHOD_DEFINE( gint, gnome_print_rotate,
         (GnomePrintContext *pc, gdouble theta), (pc, theta), 0 )
-    wxDL_METHOD_DEFINE( gint, gnome_print_translate,
-        (GnomePrintContext *pc, gdouble x, gdouble y), (pc, x, y), 0 )
 
     wxDL_METHOD_DEFINE( gint, gnome_print_gsave,
         (GnomePrintContext *pc), (pc), 0 )
@@ -176,11 +172,11 @@ wxGnomePrintLibrary::wxGnomePrintLibrary()
 
     wxLogNull log;
     
-    m_gnome_print_lib = new wxDynamicLibrary( wxT("libgnomeprint-2-2.so.0") );
+    m_gnome_print_lib = new wxDynamicLibrary( wxT("libgnomeprint-2-2.so") );
     m_ok = m_gnome_print_lib->IsLoaded();
     if (!m_ok) return;    
     
-    m_gnome_printui_lib = new wxDynamicLibrary( wxT("libgnomeprintui-2-2.so.0") );
+    m_gnome_printui_lib = new wxDynamicLibrary( wxT("libgnomeprintui-2-2.so") );
     m_ok = m_gnome_printui_lib->IsLoaded();
     if (!m_ok) return;    
     
@@ -209,7 +205,6 @@ void wxGnomePrintLibrary::InitializeMethods()
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_moveto, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_lineto, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_curveto, success )
-    wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_arcto, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_closepath, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_stroke, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_fill, success )
@@ -223,7 +218,6 @@ void wxGnomePrintLibrary::InitializeMethods()
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_concat, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_scale, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_rotate, success )
-    wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_translate, success )
     
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_gsave, success )
     wxDL_METHOD_LOAD( m_gnome_print_lib, gnome_print_grestore, success )
@@ -882,47 +876,6 @@ void wxGnomePrintDC::DoDrawArc(wxCoord x1,wxCoord y1,wxCoord x2,wxCoord y2,wxCoo
 
 void wxGnomePrintDC::DoDrawEllipticArc(wxCoord x,wxCoord y,wxCoord w,wxCoord h,double sa,double ea)
 {
-    x += w/2;
-    y += h/2;
-
-    int xx = XLOG2DEV(x);
-    int yy = YLOG2DEV(y);
-
-    gs_lgp->gnome_print_gsave( m_gpc );        
-
-    gs_lgp->gnome_print_translate( m_gpc, xx, yy );
-    double scale = (double)YLOG2DEVREL(h) / (double) XLOG2DEVREL(w);
-    gs_lgp->gnome_print_scale( m_gpc, 1.0, scale );
-    
-    xx = 0;
-    yy = 0;
-
-    if (m_brush.GetStyle () != wxTRANSPARENT)
-    {
-        SetBrush( m_brush );
-        
-        gs_lgp->gnome_print_moveto ( m_gpc, xx, yy );
-        gs_lgp->gnome_print_arcto( m_gpc, xx, yy, 
-            XLOG2DEVREL(w)/2, sa, ea, 0 );
-        gs_lgp->gnome_print_moveto ( m_gpc, xx, yy );
-        
-        gs_lgp->gnome_print_fill( m_gpc );
-    }
-    
-    if (m_pen.GetStyle () != wxTRANSPARENT)
-    {
-        SetPen (m_pen);
-        
-        gs_lgp->gnome_print_arcto( m_gpc, xx, yy, 
-            XLOG2DEVREL(w)/2, sa, ea, 0 );
-        
-        gs_lgp->gnome_print_stroke( m_gpc );
-    }
-    
-    gs_lgp->gnome_print_grestore( m_gpc );
-        
-    CalcBoundingBox( x, y );
-    CalcBoundingBox( x+w, y+h );
 }
 
 void wxGnomePrintDC::DoDrawPoint(wxCoord x, wxCoord y)
@@ -939,7 +892,7 @@ void wxGnomePrintDC::DoDrawLines(int n, wxPoint points[], wxCoord xoffset, wxCoo
 
     int i;
     for ( i =0; i<n ; i++ )
-        CalcBoundingBox( points[i].x+xoffset, points[i].y+yoffset);
+        CalcBoundingBox( XLOG2DEV(points[i].x+xoffset), YLOG2DEV(points[i].y+yoffset));
 
     gs_lgp->gnome_print_moveto ( m_gpc, XLOG2DEV(points[0].x+xoffset), YLOG2DEV(points[0].y+yoffset) );
     
@@ -951,53 +904,10 @@ void wxGnomePrintDC::DoDrawLines(int n, wxPoint points[], wxCoord xoffset, wxCoo
 
 void wxGnomePrintDC::DoDrawPolygon(int n, wxPoint points[], wxCoord xoffset, wxCoord yoffset, int fillStyle)
 {
-    if (n==0) return;
-
-    if (m_brush.GetStyle () != wxTRANSPARENT)
-    {
-        SetBrush( m_brush );
-       
-        int x = points[0].x + xoffset;
-        int y = points[0].y + yoffset;
-        CalcBoundingBox( x, y );
-        gs_lgp->gnome_print_newpath( m_gpc );
-        gs_lgp->gnome_print_moveto( m_gpc, XLOG2DEV(x), YLOG2DEV(y) );
-        int i;
-        for (i = 1; i < n; i++)
-        {
-            int x = points[i].x + xoffset;
-            int y = points[i].y + yoffset;
-            gs_lgp->gnome_print_lineto( m_gpc, XLOG2DEV(x), YLOG2DEV(y) );
-            CalcBoundingBox( x, y );
-        }
-        gs_lgp->gnome_print_closepath( m_gpc );
-        gs_lgp->gnome_print_fill( m_gpc );
-    }
-
-    if (m_pen.GetStyle () != wxTRANSPARENT)
-    {
-        SetPen (m_pen);
-
-        int x = points[0].x + xoffset;
-        int y = points[0].y + yoffset;
-        gs_lgp->gnome_print_newpath( m_gpc );
-        gs_lgp->gnome_print_moveto( m_gpc, XLOG2DEV(x), YLOG2DEV(y) );
-        int i;
-        for (i = 1; i < n; i++)
-        {
-            int x = points[i].x + xoffset;
-            int y = points[i].y + yoffset;
-            gs_lgp->gnome_print_lineto( m_gpc, XLOG2DEV(x), YLOG2DEV(y) );
-            CalcBoundingBox( x, y );
-        }
-        gs_lgp->gnome_print_closepath( m_gpc );
-        gs_lgp->gnome_print_stroke( m_gpc );
-    }
 }
 
 void wxGnomePrintDC::DoDrawPolyPolygon(int n, int count[], wxPoint points[], wxCoord xoffset, wxCoord yoffset, int fillStyle)
 {
-    wxDC::DoDrawPolyPolygon( n, count, points, xoffset, yoffset, fillStyle );
 }
 
 void wxGnomePrintDC::DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
@@ -1161,60 +1071,6 @@ void wxGnomePrintDC::DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord 
 
 void wxGnomePrintDC::DoDrawSpline(wxList *points)
 {
-    SetPen (m_pen);
-
-    double c, d, x1, y1, x2, y2, x3, y3;
-    wxPoint *p, *q;
-
-    wxList::compatibility_iterator node = points->GetFirst();
-    p = (wxPoint *)node->GetData();
-    x1 = p->x;
-    y1 = p->y;
-
-    node = node->GetNext();
-    p = (wxPoint *)node->GetData();
-    c = p->x;
-    d = p->y;
-    x3 =
-         (double)(x1 + c) / 2;
-    y3 =
-         (double)(y1 + d) / 2;
-
-    gs_lgp->gnome_print_newpath( m_gpc );
-    gs_lgp->gnome_print_moveto( m_gpc, XLOG2DEV((wxCoord)x1), YLOG2DEV((wxCoord)y1) );
-    gs_lgp->gnome_print_lineto( m_gpc, XLOG2DEV((wxCoord)x3), YLOG2DEV((wxCoord)y3) );
-     
-    CalcBoundingBox( (wxCoord)x1, (wxCoord)y1 );
-    CalcBoundingBox( (wxCoord)x3, (wxCoord)y3 );
-
-    node = node->GetNext();
-    while (node)
-    {
-        q = (wxPoint *)node->GetData();
-
-        x1 = x3;
-        y1 = y3;
-        x2 = c;
-        y2 = d;
-        c = q->x;
-        d = q->y;
-        x3 = (double)(x2 + c) / 2;
-        y3 = (double)(y2 + d) / 2;
-
-        gs_lgp->gnome_print_curveto(m_gpc,
-            XLOG2DEV((wxCoord)x1), YLOG2DEV((wxCoord)y1),
-            XLOG2DEV((wxCoord)x2), YLOG2DEV((wxCoord)y2),
-            XLOG2DEV((wxCoord)x3), YLOG2DEV((wxCoord)y3) );
-
-        CalcBoundingBox( (wxCoord)x1, (wxCoord)y1 );
-        CalcBoundingBox( (wxCoord)x3, (wxCoord)y3 );
-
-        node = node->GetNext();
-    }
-    
-    gs_lgp->gnome_print_lineto ( m_gpc, XLOG2DEV((wxCoord)c), YLOG2DEV((wxCoord)d) );
-    
-    gs_lgp->gnome_print_stroke( m_gpc );
 }
 
 bool wxGnomePrintDC::DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,

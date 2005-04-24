@@ -146,8 +146,7 @@ class TestTreeCtrlPanel(wx.Panel):
         if item:
             self.log.WriteText("OnLeftDClick: %s\n" % self.tree.GetItemText(item))
             parent = self.tree.GetItemParent(item)
-            if parent.IsOk():
-                self.tree.SortChildren(parent)
+            self.tree.SortChildren(parent)
         event.Skip()
 
 

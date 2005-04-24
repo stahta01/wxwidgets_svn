@@ -3163,7 +3163,7 @@ class StyledTextCtrl(_core.Control):
         """
         LineDown(self)
 
-        Move caret down one line.
+        This is just a wrapper for ScrollLines(1).
         """
         return _stc.StyledTextCtrl_LineDown(*args, **kwargs)
 
@@ -3323,7 +3323,7 @@ class StyledTextCtrl(_core.Control):
         """
         PageUp(self)
 
-        Move caret one page up.
+        This is just a wrapper for ScrollPages(-1).
         """
         return _stc.StyledTextCtrl_PageUp(*args, **kwargs)
 
