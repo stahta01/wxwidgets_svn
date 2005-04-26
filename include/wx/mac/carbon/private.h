@@ -29,10 +29,9 @@
 #    include <LowMem.h>
 #    include <Gestalt.h>
 #    include <FixMath.h>
-#    include <CoreServices.h>
 #endif
 
-#if UNIVERSAL_INTERFACES_VERSION < 0x0342
+#if UNIVERSAL_INTERFACES_VERSION < 0x0340
     #error "please update to Apple's lastest universal headers from http://developer.apple.com/sdk/"
 #endif
 

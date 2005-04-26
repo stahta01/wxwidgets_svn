@@ -43,6 +43,10 @@
     #include  "wx/ownerdrw.h"
 #endif
 
+#ifdef __GNUWIN32_OLD__
+    #include "wx/msw/gnuwin32/extra.h"
+#endif
+
 #if wxUSE_EXTENDED_RTTI
 WX_DEFINE_FLAGS( wxListBoxStyle )
 

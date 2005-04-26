@@ -34,7 +34,11 @@
     #define _WIN32_IE 0x0600
 #endif // !defined(_WIN32_IE)
 
-#include <commctrl.h>
+#if defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__)
+    #include "wx/msw/gnuwin32/extra.h"
+#else
+    #include <commctrl.h>
+#endif
 
 // define things which might be missing from our commctrl.h
 #include "wx/msw/missing.h"

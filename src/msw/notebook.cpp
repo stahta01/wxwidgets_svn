@@ -42,7 +42,13 @@
 
 #include  <windowsx.h>
 
-#include <commctrl.h>
+#ifdef __GNUWIN32_OLD__
+    #include "wx/msw/gnuwin32/extra.h"
+#endif
+
+#if !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
 
 #include "wx/msw/winundef.h"
 
@@ -964,9 +970,8 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
         //
         wxWindow * const parent = GetParent();
 
-        // the wxObject* casts are required to avoid MinGW GCC 2.95.3 ICE
-        const bool isFromParent = event.GetEventObject() == (wxObject*) parent;
-        const bool isFromSelf = event.GetEventObject() == (wxObject*) this;
+        const bool isFromParent = event.GetEventObject() == parent;
+        const bool isFromSelf = event.GetEventObject() == this;
 
         if ( isFromParent || isFromSelf )
         {

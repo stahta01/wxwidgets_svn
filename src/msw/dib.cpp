@@ -48,6 +48,10 @@
     #include <memory.h>
 #endif
 
+#ifdef __GNUWIN32_OLD__
+    #include "wx/msw/gnuwin32/extra.h"
+#endif
+
 #include "wx/image.h"
 #include "wx/msw/dib.h"
 

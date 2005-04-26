@@ -437,9 +437,6 @@ ALL_BASE_SOURCES =  \
 	src/os2/thread.cpp \
 	src/os2/utils.cpp \
 	src/os2/utilsexc.cpp \
-	src/msdos/dir.cpp \
-	src/msdos/mimetype.cpp \
-	src/msdos/utilsdos.cpp \
 	src/common/event.cpp \
 	src/common/fs_mem.cpp \
 	src/common/msgout.cpp \
@@ -1227,7 +1224,6 @@ COND_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN___wxtiff___depname = \
 @COND_SHARED_0_USE_GUI_1_WXUSE_LIBTIFF_BUILTIN@	= install_wxtiff
 @COND_PLATFORM_MACOSX_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_unix.o
 @COND_PLATFORM_MACOS_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_apple.o
-@COND_PLATFORM_MSDOS_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_msdos.o
 @COND_PLATFORM_OS2_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_unix.o
 @COND_PLATFORM_UNIX_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_unix.o
 @COND_PLATFORM_WIN32_1@__TIFF_PLATFORM_SRC_OBJECTS = wxtiff_tif_win32.o
@@ -1249,10 +1245,10 @@ COND_WXUSE_EXPAT_BUILTIN___wxexpat___depname = \
 @COND_PLATFORM_UNIX_1@PLUGIN_VERSION0 = $(WX_RELEASE)
 @COND_PLATFORM_UNIX_0@PLUGVERDELIM = 
 @COND_PLATFORM_UNIX_1@PLUGVERDELIM = -
-@COND_BUILD_DEBUG_UNICODE_0@PLUGINSUFFIX = d
-@COND_BUILD_DEBUG_UNICODE_1@PLUGINSUFFIX = ud
 @COND_BUILD_RELEASE_UNICODE_0@PLUGINSUFFIX = 
+@COND_BUILD_DEBUG_UNICODE_0@PLUGINSUFFIX = d
 @COND_BUILD_RELEASE_UNICODE_1@PLUGINSUFFIX = u
+@COND_BUILD_DEBUG_UNICODE_1@PLUGINSUFFIX = ud
 @COND_TOOLKIT_WINCE@BASE_WINCE_SRC = src/msw/wince/time.cpp
 @COND_TOOLKIT_WINCE@BASE_WINCE_HDR = wx/msw/wince/time.h \
 @COND_TOOLKIT_WINCE@	wx/msw/wince/chkconf.h
@@ -1335,7 +1331,6 @@ COND_TOOLKIT_X11_BASE_MACOSX_HDR =  \
 	wx/mac/corefoundation/stdpaths.h
 @COND_TOOLKIT_X11@BASE_MACOSX_HDR = $(COND_TOOLKIT_X11_BASE_MACOSX_HDR)
 @COND_PLATFORM_MACOSX_1@BASE_PLATFORM_HDR = $(BASE_MACOSX_HDR)
-@COND_PLATFORM_MSDOS_1@BASE_PLATFORM_HDR = wx/msdos/mimetype.h
 COND_PLATFORM_UNIX_1_BASE_PLATFORM_HDR =  \
 	wx/unix/apptbase.h \
 	wx/unix/apptrait.h \
@@ -1935,6 +1930,7 @@ COND_TOOLKIT_MSW_GUI_HDR =  \
 	wx/msw/toplevel.h \
 	wx/msw/treectrl.h \
 	wx/msw/window.h \
+	wx/msw/gnuwin32/winresrc.h \
 	wx/msw/wx.manifest \
 	wx/msw/wx.rc \
 	wx/msw/colours.bmp \
@@ -2140,6 +2136,7 @@ COND_TOOLKIT_WINCE_GUI_HDR =  \
 	wx/msw/toplevel.h \
 	wx/msw/treectrl.h \
 	wx/msw/window.h \
+	wx/msw/gnuwin32/winresrc.h \
 	wx/msw/wx.manifest \
 	wx/msw/wx.rc \
 	wx/msw/colours.bmp \
@@ -2624,8 +2621,6 @@ COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS =  \
 	monodll_MoreFilesExtras.o \
 	monodll_Search.o
 @COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS)
-@COND_PLATFORM_MSDOS_1@__BASE_PLATFORM_SRC_OBJECTS = \
-@COND_PLATFORM_MSDOS_1@	monodll_dir.o monodll_mimetype.o monodll_utilsdos.o
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS =  \
 	monodll_dir.o \
 	monodll_mimetype.o \
@@ -2744,7 +2739,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS =  \
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS \
 @COND_PLATFORM_MACOSX_1@	= monodll_utilsunx.o
-@COND_PLATFORM_MSDOS_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS = 
 @COND_PLATFORM_UNIX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS \
 @COND_PLATFORM_UNIX_1@	= monodll_utilsunx.o
 @COND_PLATFORM_WIN32_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS \
@@ -4085,9 +4079,6 @@ COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_1 =  \
 	monolib_MoreFilesExtras.o \
 	monolib_Search.o
 @COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS_1 = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_1)
-@COND_PLATFORM_MSDOS_1@__BASE_PLATFORM_SRC_OBJECTS_1 \
-@COND_PLATFORM_MSDOS_1@	= monolib_dir.o monolib_mimetype.o \
-@COND_PLATFORM_MSDOS_1@	monolib_utilsdos.o
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS_1 =  \
 	monolib_dir.o \
 	monolib_mimetype.o \
@@ -4206,7 +4197,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_1 =  \
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS_1 = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_1)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_1 \
 @COND_PLATFORM_MACOSX_1@	= monolib_utilsunx.o
-@COND_PLATFORM_MSDOS_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_1 = 
 @COND_PLATFORM_UNIX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_1 \
 @COND_PLATFORM_UNIX_1@	= monolib_utilsunx.o
 @COND_PLATFORM_WIN32_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_1 \
@@ -5585,9 +5575,6 @@ COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_2 =  \
 	basedll_MoreFilesExtras.o \
 	basedll_Search.o
 @COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS_2 = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_2)
-@COND_PLATFORM_MSDOS_1@__BASE_PLATFORM_SRC_OBJECTS_2 \
-@COND_PLATFORM_MSDOS_1@	= basedll_dir.o basedll_mimetype.o \
-@COND_PLATFORM_MSDOS_1@	basedll_utilsdos.o
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS_2 =  \
 	basedll_dir.o \
 	basedll_mimetype.o \
@@ -5706,7 +5693,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_2 =  \
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS_2 = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_2)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_2 \
 @COND_PLATFORM_MACOSX_1@	= basedll_utilsunx.o
-@COND_PLATFORM_MSDOS_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_2 = 
 @COND_PLATFORM_UNIX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_2 \
 @COND_PLATFORM_UNIX_1@	= basedll_utilsunx.o
 @COND_PLATFORM_WIN32_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_2 \
@@ -5742,9 +5728,6 @@ COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_3 =  \
 	baselib_MoreFilesExtras.o \
 	baselib_Search.o
 @COND_PLATFORM_MACOS_1@__BASE_PLATFORM_SRC_OBJECTS_3 = $(COND_PLATFORM_MACOS_1___BASE_PLATFORM_SRC_OBJECTS_3)
-@COND_PLATFORM_MSDOS_1@__BASE_PLATFORM_SRC_OBJECTS_3 \
-@COND_PLATFORM_MSDOS_1@	= baselib_dir.o baselib_mimetype.o \
-@COND_PLATFORM_MSDOS_1@	baselib_utilsdos.o
 COND_PLATFORM_OS2_1___BASE_PLATFORM_SRC_OBJECTS_3 =  \
 	baselib_dir.o \
 	baselib_mimetype.o \
@@ -5863,7 +5846,6 @@ COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_3 =  \
 @COND_TOOLKIT_X11@__BASE_MACOSX_SRC_OBJECTS_3 = $(COND_TOOLKIT_X11___BASE_MACOSX_SRC_OBJECTS_3)
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_3 \
 @COND_PLATFORM_MACOSX_1@	= baselib_utilsunx.o
-@COND_PLATFORM_MSDOS_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_3 = 
 @COND_PLATFORM_UNIX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_3 \
 @COND_PLATFORM_UNIX_1@	= baselib_utilsunx.o
 @COND_PLATFORM_WIN32_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_3 \
@@ -5982,7 +5964,6 @@ COND_USE_SOSYMLINKS_1___coredll___so_symlinks_inst_cmd = rm -f \
 @COND_PLATFORM_WIN32_1@__coredll___win32rc = coredll_version_rc.o
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_4 \
 @COND_PLATFORM_MACOSX_1@	= coredll_utilsunx.o
-@COND_PLATFORM_MSDOS_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_4 = 
 @COND_PLATFORM_UNIX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_4 \
 @COND_PLATFORM_UNIX_1@	= coredll_utilsunx.o
 @COND_PLATFORM_WIN32_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_4 \
@@ -7176,7 +7157,6 @@ COND_MONOLITHIC_0_SHARED_0_USE_GUI_1___corelib___depname = \
 @COND_GCC_PCH_1@	= .pch/wxprec_corelib/wx/wxprec.h.gch
 @COND_PLATFORM_MACOSX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_5 \
 @COND_PLATFORM_MACOSX_1@	= corelib_utilsunx.o
-@COND_PLATFORM_MSDOS_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_5 = 
 @COND_PLATFORM_UNIX_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_5 \
 @COND_PLATFORM_UNIX_1@	= corelib_utilsunx.o
 @COND_PLATFORM_WIN32_1@__BASE_AND_GUI_PLATFORM_SRC_OBJECTS_5 \
@@ -9949,9 +9929,6 @@ wxtiff_tif_win32.o: $(srcdir)/src/tiff/tif_win32.c
 wxtiff_tif_apple.o: $(srcdir)/src/tiff/tif_apple.c
 	$(CCC) -c -o $@ $(WXTIFF_CFLAGS) $(srcdir)/src/tiff/tif_apple.c
 
-wxtiff_tif_msdos.o: $(srcdir)/src/tiff/tif_msdos.c
-	$(CCC) -c -o $@ $(WXTIFF_CFLAGS) $(srcdir)/src/tiff/tif_msdos.c
-
 wxtiff_tif_aux.o: $(srcdir)/src/tiff/tif_aux.c
 	$(CCC) -c -o $@ $(WXTIFF_CFLAGS) $(srcdir)/src/tiff/tif_aux.c
 
@@ -10335,9 +10312,6 @@ monodll_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $
 
 monodll_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(MONODLL_ODEP)
 	$(CCC) -c -o $@ $(MONODLL_CFLAGS) $(srcdir)/src/mac/carbon/morefile/Search.c
-
-monodll_utilsdos.o: $(srcdir)/src/msdos/utilsdos.cpp $(MONODLL_ODEP)
-	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/msdos/utilsdos.cpp
 
 monodll_event.o: $(srcdir)/src/common/event.cpp $(MONODLL_ODEP)
 	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/common/event.cpp
@@ -10837,9 +10811,6 @@ monodll_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_OS2_1@monodll_dir.o: $(srcdir)/src/os2/dir.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/os2/dir.cpp
 
-@COND_PLATFORM_MSDOS_1@monodll_dir.o: $(srcdir)/src/msdos/dir.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/msdos/dir.cpp
-
 @COND_PLATFORM_UNIX_1@monodll_dlunix.o: $(srcdir)/src/unix/dlunix.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/unix/dlunix.cpp
 
@@ -10884,9 +10855,6 @@ monodll_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONODLL_ODEP)
 
 @COND_PLATFORM_OS2_1@monodll_mimetype.o: $(srcdir)/src/os2/mimetype.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/os2/mimetype.cpp
-
-@COND_PLATFORM_MSDOS_1@monodll_mimetype.o: $(srcdir)/src/msdos/mimetype.cpp $(MONODLL_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/msdos/mimetype.cpp
 
 @COND_PLATFORM_UNIX_1@monodll_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONODLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONODLL_CXXFLAGS) $(srcdir)/src/unix/snglinst.cpp
@@ -13786,9 +13754,6 @@ monolib_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $
 monolib_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(MONOLIB_ODEP)
 	$(CCC) -c -o $@ $(MONOLIB_CFLAGS) $(srcdir)/src/mac/carbon/morefile/Search.c
 
-monolib_utilsdos.o: $(srcdir)/src/msdos/utilsdos.cpp $(MONOLIB_ODEP)
-	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/msdos/utilsdos.cpp
-
 monolib_event.o: $(srcdir)/src/common/event.cpp $(MONOLIB_ODEP)
 	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/common/event.cpp
 
@@ -14287,9 +14252,6 @@ monolib_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_OS2_1@monolib_dir.o: $(srcdir)/src/os2/dir.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/os2/dir.cpp
 
-@COND_PLATFORM_MSDOS_1@monolib_dir.o: $(srcdir)/src/msdos/dir.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/msdos/dir.cpp
-
 @COND_PLATFORM_UNIX_1@monolib_dlunix.o: $(srcdir)/src/unix/dlunix.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/unix/dlunix.cpp
 
@@ -14334,9 +14296,6 @@ monolib_sound_sdl.o: $(srcdir)/src/unix/sound_sdl.cpp $(MONOLIB_ODEP)
 
 @COND_PLATFORM_OS2_1@monolib_mimetype.o: $(srcdir)/src/os2/mimetype.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/os2/mimetype.cpp
-
-@COND_PLATFORM_MSDOS_1@monolib_mimetype.o: $(srcdir)/src/msdos/mimetype.cpp $(MONOLIB_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/msdos/mimetype.cpp
 
 @COND_PLATFORM_UNIX_1@monolib_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(MONOLIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(MONOLIB_CXXFLAGS) $(srcdir)/src/unix/snglinst.cpp
@@ -17239,9 +17198,6 @@ basedll_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $
 basedll_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(BASEDLL_ODEP)
 	$(CCC) -c -o $@ $(BASEDLL_CFLAGS) $(srcdir)/src/mac/carbon/morefile/Search.c
 
-basedll_utilsdos.o: $(srcdir)/src/msdos/utilsdos.cpp $(BASEDLL_ODEP)
-	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/msdos/utilsdos.cpp
-
 basedll_event.o: $(srcdir)/src/common/event.cpp $(BASEDLL_ODEP)
 	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/common/event.cpp
 
@@ -17311,9 +17267,6 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_OS2_1@basedll_dir.o: $(srcdir)/src/os2/dir.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/os2/dir.cpp
 
-@COND_PLATFORM_MSDOS_1@basedll_dir.o: $(srcdir)/src/msdos/dir.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/msdos/dir.cpp
-
 @COND_PLATFORM_UNIX_1@basedll_dlunix.o: $(srcdir)/src/unix/dlunix.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/unix/dlunix.cpp
 
@@ -17358,9 +17311,6 @@ basedll_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASEDLL_ODEP)
 
 @COND_PLATFORM_OS2_1@basedll_mimetype.o: $(srcdir)/src/os2/mimetype.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/os2/mimetype.cpp
-
-@COND_PLATFORM_MSDOS_1@basedll_mimetype.o: $(srcdir)/src/msdos/mimetype.cpp $(BASEDLL_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/msdos/mimetype.cpp
 
 @COND_PLATFORM_UNIX_1@basedll_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(BASEDLL_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASEDLL_CXXFLAGS) $(srcdir)/src/unix/snglinst.cpp
@@ -17791,9 +17741,6 @@ baselib_MoreFilesExtras.o: $(srcdir)/src/mac/carbon/morefile/MoreFilesExtras.c $
 baselib_Search.o: $(srcdir)/src/mac/carbon/morefile/Search.c $(BASELIB_ODEP)
 	$(CCC) -c -o $@ $(BASELIB_CFLAGS) $(srcdir)/src/mac/carbon/morefile/Search.c
 
-baselib_utilsdos.o: $(srcdir)/src/msdos/utilsdos.cpp $(BASELIB_ODEP)
-	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/msdos/utilsdos.cpp
-
 baselib_event.o: $(srcdir)/src/common/event.cpp $(BASELIB_ODEP)
 	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/common/event.cpp
 
@@ -17863,9 +17810,6 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_OS2_1@baselib_dir.o: $(srcdir)/src/os2/dir.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/os2/dir.cpp
 
-@COND_PLATFORM_MSDOS_1@baselib_dir.o: $(srcdir)/src/msdos/dir.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/msdos/dir.cpp
-
 @COND_PLATFORM_UNIX_1@baselib_dlunix.o: $(srcdir)/src/unix/dlunix.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/unix/dlunix.cpp
 
@@ -17910,9 +17854,6 @@ baselib_uma.o: $(srcdir)/src/mac/carbon/uma.cpp $(BASELIB_ODEP)
 
 @COND_PLATFORM_OS2_1@baselib_mimetype.o: $(srcdir)/src/os2/mimetype.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_OS2_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/os2/mimetype.cpp
-
-@COND_PLATFORM_MSDOS_1@baselib_mimetype.o: $(srcdir)/src/msdos/mimetype.cpp $(BASELIB_ODEP)
-@COND_PLATFORM_MSDOS_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/msdos/mimetype.cpp
 
 @COND_PLATFORM_UNIX_1@baselib_snglinst.o: $(srcdir)/src/unix/snglinst.cpp $(BASELIB_ODEP)
 @COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(BASELIB_CXXFLAGS) $(srcdir)/src/unix/snglinst.cpp
@@ -24372,6 +24313,8 @@ COCOA_DIST: ALL_GUI_DIST
 
 MSW_DIST: ALL_GUI_DIST
 	cp $(WXDIR)/wxWINE.spec $(DISTDIR)
+	mkdir $(DISTDIR)/include/wx/msw/gnuwin32
+	mkdir $(DISTDIR)/include/wx/msw/gnuwin32/gl
 	mkdir $(DISTDIR)/include/wx/msw/ole
 	mkdir $(DISTDIR)/include/wx/msw/wince
 	cp $(INCDIR)/wx/msw/*.h $(DISTDIR)/include/wx/msw
@@ -24379,6 +24322,9 @@ MSW_DIST: ALL_GUI_DIST
 	cp $(INCDIR)/wx/msw/*.ico $(DISTDIR)/include/wx/msw
 	cp $(INCDIR)/wx/msw/*.bmp $(DISTDIR)/include/wx/msw
 	cp $(INCDIR)/wx/msw/*.rc $(DISTDIR)/include/wx/msw
+	cp $(INCDIR)/wx/msw/gnuwin32/*.h $(DISTDIR)/include/wx/msw/gnuwin32
+	cp $(INCDIR)/wx/msw/gnuwin32/gl/*.h $(DISTDIR)/include/wx/msw/gnuwin32/gl
+	cp $(INCDIR)/wx/msw/gnuwin32/gl/*.def $(DISTDIR)/include/wx/msw/gnuwin32/gl
 	cp $(INCDIR)/wx/msw/ole/*.h $(DISTDIR)/include/wx/msw/ole
 	cp $(INCDIR)/wx/msw/wince/*.h $(DISTDIR)/include/wx/msw/wince
 	mkdir $(DISTDIR)/src/msw/ole
@@ -24392,11 +24338,16 @@ MSW_DIST: ALL_GUI_DIST
 MSW_ZIP_TEXT_DIST: ALL_GUI_DIST
 	cp $(WXDIR)/wxWINE.spec $(DISTDIR)
 	mkdir $(DISTDIR)/include/wx/msw
+	mkdir $(DISTDIR)/include/wx/msw/gnuwin32
+	mkdir $(DISTDIR)/include/wx/msw/gnuwin32/gl
 	mkdir $(DISTDIR)/include/wx/msw/ole
 	mkdir $(DISTDIR)/include/wx/msw/wince
 	cp $(INCDIR)/wx/msw/*.h $(DISTDIR)/include/wx/msw
 	cp $(INCDIR)/wx/msw/*.rc $(DISTDIR)/include/wx/msw
 	cp $(INCDIR)/wx/msw/wx.manifest $(DISTDIR)/include/wx/msw
+	cp $(INCDIR)/wx/msw/gnuwin32/*.h $(DISTDIR)/include/wx/msw/gnuwin32
+	cp $(INCDIR)/wx/msw/gnuwin32/gl/*.h $(DISTDIR)/include/wx/msw/gnuwin32/gl
+	cp $(INCDIR)/wx/msw/gnuwin32/gl/*.def $(DISTDIR)/include/wx/msw/gnuwin32/gl
 	cp $(INCDIR)/wx/msw/ole/*.h $(DISTDIR)/include/wx/msw/ole
 	cp $(INCDIR)/wx/msw/wince/*.h $(DISTDIR)/include/wx/msw/wince
 	mkdir $(DISTDIR)/src/msw

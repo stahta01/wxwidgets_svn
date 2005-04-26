@@ -101,12 +101,12 @@ extern wxPen*           g_oglTransparentPen;
 extern wxBrush*         g_oglWhiteBackgroundBrush;
 extern wxPen*           g_oglBlackForegroundPen;
 
-WXDLLIMPEXP_OGL wxFont*          oglMatchFont(int point_size);
+extern wxFont*          oglMatchFont(int point_size);
 
-WXDLLIMPEXP_OGL wxString         oglColourToHex(const wxColour& colour);
-WXDLLIMPEXP_OGL wxColour         oglHexToColour(const wxString& hex);
-WXDLLIMPEXP_OGL void             oglDecToHex(unsigned int dec, char *buf);
-WXDLLIMPEXP_OGL unsigned int     oglHexToDec(char* buf);
+extern wxString         oglColourToHex(const wxColour& colour);
+extern wxColour         oglHexToColour(const wxString& hex);
+extern void             oglDecToHex(unsigned int dec, char *buf);
+extern unsigned int     oglHexToDec(char* buf);
 
 
 #endif

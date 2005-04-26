@@ -107,7 +107,13 @@
     #include <windowsx.h>
 #endif
 
-#include <commctrl.h>
+#if (!defined(__GNUWIN32_OLD__) && !defined(__WXMICROWIN__) /* && !defined(__WXWINCE__) */ ) || defined(__CYGWIN10__)
+    #ifdef __WIN95__
+        #include <commctrl.h>
+    #endif
+#elif !defined(__WXMICROWIN__) && !defined(__WXWINCE__) // broken compiler
+    #include "wx/msw/gnuwin32/extra.h"
+#endif
 
 #include "wx/msw/missing.h"
 

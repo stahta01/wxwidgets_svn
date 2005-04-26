@@ -1044,10 +1044,8 @@ wxEvtHandler::~wxEvtHandler()
     // Remove us from wxPendingEvents if necessary.
     if(wxPendingEventsLocker)
         wxENTER_CRIT_SECT(*wxPendingEventsLocker);
-    if ( wxPendingEvents )
-    {
-        // Delete all occurences of this from the list of pending events
-        while (wxPendingEvents->DeleteObject(this)) { } // Do nothing
+    if ( wxPendingEvents ) {
+        wxPendingEvents->DeleteObject(this);
     }
     if(wxPendingEventsLocker)
         wxLEAVE_CRIT_SECT(*wxPendingEventsLocker);

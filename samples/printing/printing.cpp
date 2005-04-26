@@ -307,16 +307,15 @@ void MyFrame::Draw(wxDC& dc)
     dc.SetBrush(*wxCYAN_BRUSH);
     dc.SetPen(*wxRED_PEN);
 
-    dc.DrawRoundedRectangle(0, 20, 200, 80, 20);
+    dc.DrawRoundedRectangle(0, 30, 200, 100, 20);
 
-    dc.DrawText( wxT("Rectangle 200 by 80"), 40, 40);
+    dc.DrawText( wxT("Rectangle 200 by 100"), 40, 40);
 
     dc.SetPen( wxPen(*wxBLACK,0,wxDOT_DASH) );
     dc.DrawEllipse(50, 140, 100, 50);
     dc.SetPen(*wxRED_PEN);
 
     dc.DrawText( wxT("Test message: this is in 10 point text"), 10, 180);
-    
 
 #if wxUSE_UNICODE
     char *test = "Hebrew    שלום -- Japanese (日本語)";
@@ -324,34 +323,6 @@ void MyFrame::Draw(wxDC& dc)
     dc.DrawText( tmp, 10, 200 );
 #endif
 
-    wxPoint points[5];
-    points[0].x = 0;
-    points[0].y = 0;
-    points[1].x = 20;
-    points[1].y = 0;
-    points[2].x = 20;
-    points[2].y = 20;
-    points[3].x = 10;
-    points[3].y = 20;
-    points[4].x = 10;
-    points[4].y = -20;
-    dc.DrawPolygon( 5, points, 20, 250, wxODDEVEN_RULE );
-    dc.DrawPolygon( 5, points, 50, 250, wxWINDING_RULE );
-
-    dc.DrawEllipticArc( 80, 250, 60, 30, 0.0, 270.0 );
-
-    points[0].x = 150;
-    points[0].y = 250;
-    points[1].x = 180;
-    points[1].y = 250;
-    points[2].x = 180;
-    points[2].y = 220;
-    points[3].x = 200;
-    points[3].y = 220;
-    dc.DrawSpline( 4, points );
-
-    dc.DrawArc( 20,10, 10,10, 25,40 );
-        
     wxString str;
     int i = 0;
     str.Printf( wxT("---- Text at angle %d ----"), i );
@@ -516,14 +487,14 @@ void MyPrintout::DrawPageTwo(wxDC *dc)
 
     // Calculate conversion factor for converting millimetres into
     // logical units.
-    // There are approx. 25.4 mm to the inch. There are ppi
+    // There are approx. 25.1 mm to the inch. There are ppi
     // device units to the inch. Therefore 1 mm corresponds to
-    // ppi/25.4 device units. We also divide by the
+    // ppi/25.1 device units. We also divide by the
     // screen-to-printer scaling factor, because we need to
     // unscale to pass logical units to DrawLine.
 
     // Draw 50 mm by 50 mm L shape
-    float logUnitsFactor = (float)(ppiPrinterX/(scale*25.4));
+    float logUnitsFactor = (float)(ppiPrinterX/(scale*25.1));
     float logUnits = (float)(50*logUnitsFactor);
     dc->SetPen(* wxBLACK_PEN);
     dc->DrawLine(50, 250, (long)(50.0 + logUnits), 250);

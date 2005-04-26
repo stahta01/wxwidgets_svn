@@ -28,7 +28,11 @@
 
 #include "wx/msw/private.h"
 
-#include <commctrl.h>
+#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#else
+    #include "wx/msw/gnuwin32/extra.h"
+#endif
 
 #include "wx/tabctrl.h"
 #include "wx/app.h"

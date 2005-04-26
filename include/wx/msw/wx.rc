@@ -29,7 +29,11 @@
 // Version: $Id$
 /////////////////////////////////////////////////////////////////////////////
 
-#include <windows.h>
+#if (defined( __GNUWIN32__ ) && !defined(__TWIN32__)) || defined(__MWERKS__)
+    #include "wx/msw/gnuwin32/winresrc.h"
+#else
+    #include <windows.h>
+#endif
 
 #if defined(_WIN32_WCE)
     #include "wx/msw/wince/wince.rc"
