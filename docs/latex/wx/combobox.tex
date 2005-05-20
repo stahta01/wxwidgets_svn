@@ -8,7 +8,6 @@ A combobox permits a single selection only. Combobox items are numbered from zer
 
 \wxheading{Derived from}
 
-\helpref{wxControlWithItems}{wxcontrolwithitems}\\
 \helpref{wxControl}{wxcontrol}\\
 \helpref{wxWindow}{wxwindow}\\
 \helpref{wxEvtHandler}{wxevthandler}\\
@@ -36,12 +35,11 @@ See also \helpref{window styles overview}{windowstyles}.
 \twocolwidtha{7cm}
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\bf EVT\_COMBOBOX(id, func)}}{Process a wxEVT\_COMMAND\_COMBOBOX\_SELECTED event,
-when an item on the list is selected. Note that calling
-\helpref{GetValue}{wxcomboboxgetvalue} returns the new value of selection.}
+when an item on the list is selected.}
+\twocolitem{{\bf EVT\_TEXT\_ENTER(id, func)}}{Process a wxEVT\_COMMAND\_TEXT\_ENTER event,
+when return is pressed in the combobox.}
 \twocolitem{{\bf EVT\_TEXT(id, func)}}{Process a wxEVT\_COMMAND\_TEXT\_UPDATED event,
 when the combobox text changes.}
-\twocolitem{{\bf EVT\_TEXT\_ENTER(id, func)}}{Process a wxEVT\_COMMAND\_TEXT\_ENTER event,
-when <RETURN> is pressed in the combobox.}
 \end{twocollist}
 
 \wxheading{See also}
@@ -51,7 +49,7 @@ when <RETURN> is pressed in the combobox.}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxComboBox::wxComboBox}\label{wxcomboboxctor}
+\membersection{wxComboBox::wxComboBox}\label{wxcomboboxconstr}
 
 \func{}{wxComboBox}{\void}
 
@@ -60,11 +58,6 @@ Default constructor.
 \func{}{wxComboBox}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id},\rtfsp
 \param{const wxString\& }{value = ``"}, \param{const wxPoint\&}{ pos = wxDefaultPosition}, \param{const wxSize\&}{ size = wxDefaultSize},\rtfsp
 \param{int}{ n}, \param{const wxString }{choices[]},\rtfsp
-\param{long}{ style = 0}, \param{const wxValidator\& }{validator = wxDefaultValidator}, \param{const wxString\& }{name = ``comboBox"}}
-
-\func{}{wxComboBox}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id},\rtfsp
-\param{const wxString\& }{value}, \param{const wxPoint\&}{ pos}, \param{const wxSize\&}{ size},\rtfsp
-\param{const wxArrayString\& }{choices},\rtfsp
 \param{long}{ style = 0}, \param{const wxValidator\& }{validator = wxDefaultValidator}, \param{const wxString\& }{name = ``comboBox"}}
 
 Constructor, creating and showing a combobox.
@@ -103,11 +96,34 @@ a list of strings.}
 \perlnote{In wxPerl there is just an array reference in place of {\tt n}
 and {\tt choices}.}
 
-\membersection{wxComboBox::\destruct{wxComboBox}}\label{wxcomboboxdtor}
+\membersection{wxComboBox::\destruct{wxComboBox}}
 
 \func{}{\destruct{wxComboBox}}{\void}
 
 Destructor, destroying the combobox.
+
+\membersection{wxComboBox::Append}\label{wxcomboboxappend}
+
+\func{void}{Append}{\param{const wxString\& }{item}}
+
+Adds the item to the end of the combobox.
+
+\func{void}{Append}{\param{const wxString\& }{ item}, \param{void* }{clientData}}
+
+Adds the item to the end of the combobox, associating the given data
+with the item.
+
+\wxheading{Parameters}
+
+\docparam{item}{The string to add.}
+
+\docparam{clientData}{Client data to associate with the item.}
+
+\membersection{wxComboBox::Clear}\label{wxcomboboxclear}
+
+\func{void}{Clear}{\void}
+
+Clears all strings from the combobox.
 
 \membersection{wxComboBox::Create}\label{wxcomboboxcreate}
 
@@ -116,49 +132,9 @@ Destructor, destroying the combobox.
 \param{int}{ n}, \param{const wxString }{choices[]},\rtfsp
 \param{long}{ style = 0}, \param{const wxValidator\& }{validator = wxDefaultValidator}, \param{const wxString\& }{name = ``comboBox"}}
 
-\func{bool}{Create}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id},\rtfsp
-\param{const wxString\& }{value}, \param{const wxPoint\&}{ pos}, \param{const wxSize\&}{ size},\rtfsp
-\param{const wxArrayString\& }{choices},\rtfsp
-\param{long}{ style = 0}, \param{const wxValidator\& }{validator = wxDefaultValidator}, \param{const wxString\& }{name = ``comboBox"}}
-
 Creates the combobox for two-step construction. Derived classes
-should call or replace this function. See \helpref{wxComboBox::wxComboBox}{wxcomboboxctor}\rtfsp
+should call or replace this function. See \helpref{wxComboBox::wxComboBox}{wxcomboboxconstr}\rtfsp
 for further details.
-
-\membersection{wxComboBox::CanCopy}\label{wxcomboboxcancopy}
-
-\constfunc{bool}{CanCopy}{\void}
-
-Returns true if the combobox is editable and there is a text selection to copy to the clipboard.
-Only available on Windows.
-
-\membersection{wxComboBox::CanCut}\label{wxcomboboxcancut}
-
-\constfunc{bool}{CanCut}{\void}
-
-Returns true if the combobox is editable and there is a text selection to copy to the clipboard.
-Only available on Windows.
-
-\membersection{wxComboBox::CanPaste}\label{wxcomboboxcanpaste}
-
-\constfunc{bool}{CanPaste}{\void}
-
-Returns true if the combobox is editable and there is text on the clipboard that can be pasted into the
-text field. Only available on Windows.
-
-\membersection{wxComboBox::CanRedo}\label{wxcomboboxcanredo}
-
-\constfunc{bool}{CanRedo}{\void}
-
-Returns true if the combobox is editable and the last undo can be redone.
-Only available on Windows.
-
-\membersection{wxComboBox::CanUndo}\label{wxcomboboxcanundo}
-
-\constfunc{bool}{CanUndo}{\void}
-
-Returns true if the combobox is editable and the last edit can be undone.
-Only available on Windows.
 
 \membersection{wxComboBox::Copy}\label{wxcomboboxcopy}
 
@@ -172,6 +148,50 @@ Copies the selected text to the clipboard.
 
 Copies the selected text to the clipboard and removes the selection.
 
+\membersection{wxComboBox::Delete}\label{wxcomboboxdelete}
+
+\func{void}{Delete}{\param{int}{ n}}
+
+Deletes an item from the combobox.
+
+\wxheading{Parameters}
+
+\docparam{n}{The item to delete, starting from zero.}
+
+\membersection{wxComboBox::FindString}\label{wxcomboboxfindstring}
+
+\func{int}{FindString}{\param{const wxString\& }{string}}
+
+Finds a choice matching the given string.
+
+\wxheading{Parameters}
+
+\docparam{string}{The item to find.}
+
+\wxheading{Return value}
+
+The position if found, or -1 if not found.
+
+\membersection{wxComboBox::GetClientData}\label{wxcomboboxgetclientdata}
+
+\constfunc{void*}{GetClientData}{\param{int}{ n}}
+
+Returns a pointer to the client data associated with the given item (if any).
+
+\wxheading{Parameters}
+
+\docparam{n}{An item, starting from zero.}
+
+\wxheading{Return value}
+
+A pointer to the client data, or NULL if the item was not found.
+
+\membersection{wxComboBox::GetCount}\label{wxcomboboxgetcount}
+
+\constfunc{int}{GetCount}{\void}
+
+Returns the number of items in the combobox.
+
 \membersection{wxComboBox::GetInsertionPoint}\label{wxcomboboxgetinsertionpoint}
 
 \constfunc{long}{GetInsertionPoint}{\void}
@@ -180,9 +200,35 @@ Returns the insertion point for the combobox's text field.
 
 \membersection{wxComboBox::GetLastPosition}\label{wxcomboboxgetlastposition}
 
-\constfunc{virtual wxTextPos}{GetLastPosition}{\void}
+\constfunc{long}{GetLastPosition}{\void}
 
 Returns the last position in the combobox text field.
+
+\membersection{wxComboBox::GetSelection}\label{wxcomboboxgetselection}
+
+\constfunc{int}{GetSelection}{\void}
+
+Gets the position of the selected string, or -1 if there is no selection.
+
+\membersection{wxComboBox::GetString}\label{wxcomboboxgetstring}
+
+\constfunc{wxString}{GetString}{\param{int}{ n}}
+
+Returns the string at position {\it n}.
+
+\wxheading{Parameters}
+
+\docparam{n}{The item position, starting from zero.}
+
+\wxheading{Return value}
+
+The string if the item is found, otherwise the empty string.
+
+\membersection{wxComboBox::GetStringSelection}\label{wxcomboboxgetstringselection}
+
+\constfunc{wxString}{GetStringSelection}{\void}
+
+Gets the selected string.
 
 \membersection{wxComboBox::GetValue}\label{wxcomboboxgetvalue}
 
@@ -190,17 +236,23 @@ Returns the last position in the combobox text field.
 
 Returns the current value in the combobox text field.
 
+\membersection{wxComboBox::Number}\label{wxcomboboxnumber}
+
+\constfunc{int}{Number}{\void}
+
+{\bf Obsolescence note:} This method is obsolete and was replaced with 
+\helpref{GetCount}{wxcomboboxgetcount}, please use the new method in the new
+code. This method is only available if wxWidgets was compiled with 
+{\tt WXWIN\_COMPATIBILITY\_2\_2} defined and will disappear completely in
+future versions.
+
+Returns the number of items in the combobox list.
+
 \membersection{wxComboBox::Paste}\label{wxcomboboxpaste}
 
 \func{void}{Paste}{\void}
 
 Pastes text from the clipboard to the text field.
-
-\membersection{wxComboBox::Redo}\label{wxcomboboxredo}
-
-\func{void}{Redo}{\void}
-
-Redoes the last undo in the text field. Windows only.
 
 \membersection{wxComboBox::Replace}\label{wxcomboboxreplace}
 
@@ -228,6 +280,18 @@ Removes the text between the two positions in the combobox text field.
 
 \docparam{to}{The last position.}
 
+\membersection{wxComboBox::SetClientData}\label{wxcomboboxsetclientdata}
+
+\func{void}{SetClientData}{\param{int}{ n}, \param{void* }{data}}
+
+Associates the given client data pointer with the given item.
+
+\wxheading{Parameters}
+
+\docparam{n}{The zero-based item.}
+
+\docparam{data}{The client data.}
+
 \membersection{wxComboBox::SetInsertionPoint}\label{wxcomboboxsetinsertionpoint}
 
 \func{void}{SetInsertionPoint}{\param{long}{ pos}}
@@ -246,19 +310,39 @@ Sets the insertion point at the end of the combobox text field.
 
 \membersection{wxComboBox::SetSelection}\label{wxcomboboxsetselection}
 
+\func{void}{SetSelection}{\param{int}{ n}}
+
+Selects the given item in the combobox list. This does not cause a
+wxEVT\_COMMAND\_COMBOBOX\_SELECTED event to get emitted.
+
 \func{void}{SetSelection}{\param{long}{ from}, \param{long}{ to}}
 
 Selects the text between the two positions, in the combobox text field.
 
 \wxheading{Parameters}
 
+\docparam{n}{The zero-based item to select.}
+
 \docparam{from}{The first position.}
 
 \docparam{to}{The second position.}
 
-\pythonnote{This method is called {\tt SetMark} in wxPython, {\tt SetSelection}
-name is kept for
-\helpref{wxControlWithItems::SetSelection}{wxcontrolwithitemssetselection}.}
+\pythonnote{The second form of this method is called {\tt SetMark} in
+wxPython.}
+
+\membersection{wxComboBox::SetString}\label{wxcomboboxsetstring}
+
+\func{void}{SetString}{\param{int }{n}, \param{const wxString\& }{text}}
+
+Replaces the specified string in the control with another one.
+
+\wxheading{Parameters}
+
+\docparam{n}{The zero-based index of the string to replace}
+
+\docparam{text}{The new value for this item}
+
+{\bf NB:} This method is currently not implemented in wxGTK.
 
 \membersection{wxComboBox::SetValue}\label{wxcomboboxsetvalue}
 
@@ -273,9 +357,4 @@ the combobox choices list, otherwise the call to SetValue() is ignored.
 
 \docparam{text}{The text to set.}
 
-\membersection{wxComboBox::Undo}\label{wxcomboboxundo}
-
-\func{void}{Undo}{\void}
-
-Undoes the last edit in the text field. Windows only.
 

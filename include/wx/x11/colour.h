@@ -12,7 +12,7 @@
 #ifndef _WX_COLOUR_H_
 #define _WX_COLOUR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "colour.h"
 #endif
 
@@ -37,11 +37,11 @@ class wxColour;
 // wxColour
 //-----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxColour: public wxGDIObject
+class wxColour: public wxGDIObject
 {
 public:
     wxColour() { }
-
+  
     // Construct from RGB
     wxColour( unsigned char red, unsigned char green, unsigned char blue );
     wxColour( unsigned long colRGB ) { Set(colRGB); }
@@ -53,16 +53,13 @@ public:
     wxColour( const wxChar *colourName ) { InitFromName( wxString(colourName) ); }
 #endif
 
-    // Get colour from name or wxNullColour
-    static wxColour CreateByName(const wxString& name);
-
     wxColour( const wxColour& col ) { Ref(col); }
     wxColour& operator = ( const wxColour& col ) { Ref(col); return *this; }
 
     ~wxColour();
 
     bool Ok() const { return m_refData != NULL; }
-
+  
     bool operator == ( const wxColour& col ) const;
     bool operator != ( const wxColour& col ) const { return !(*this == col); }
 
@@ -81,18 +78,18 @@ public:
     unsigned char Blue() const;
 
     // Implementation part
-
+    
     void CalcPixel( WXColormap cmap );
     unsigned long GetPixel() const;
     WXColor *GetColor() const;
-
-    void InitFromName(const wxString& colourName);
 
 protected:
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
-
+    
+    // Helper functions
+    void InitFromName(const wxString& colourName);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxColour)

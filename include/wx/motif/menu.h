@@ -12,13 +12,12 @@
 #ifndef _WX_MOTIF_MENU_H_
 #define _WX_MOTIF_MENU_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "menu.h"
 #endif
 
 #include "wx/colour.h"
 #include "wx/font.h"
-#include "wx/arrstr.h"
 
 class wxFrame;
 
@@ -38,15 +37,23 @@ public:
     virtual ~wxMenu();
     
     // implement base class virtuals
-    virtual wxMenuItem* DoAppend(wxMenuItem *item);
-    virtual wxMenuItem* DoInsert(size_t pos, wxMenuItem *item);
-    virtual wxMenuItem* DoRemove(wxMenuItem *item);
+    virtual bool DoAppend(wxMenuItem *item);
+    virtual bool DoInsert(size_t pos, wxMenuItem *item);
+    virtual wxMenuItem *DoRemove(wxMenuItem *item);
     
     virtual void Break();
     
     virtual void SetTitle(const wxString& title);
     
     bool ProcessCommand(wxCommandEvent& event);
+    
+    wxMenu(const wxString& title, const wxFunction func)
+        : wxMenuBase(title)
+    {
+        Init();
+        
+        Callback(func);
+    }
     
     //// Motif-specific
     WXWidget GetButtonWidget() const { return m_buttonWidget; }
@@ -67,7 +74,7 @@ public:
     
     WXWidget CreateMenu(wxMenuBar *menuBar, WXWidget parent, wxMenu *topMenu,
         const wxString& title = wxEmptyString,
-        bool isPulldown = false);
+        bool isPulldown = FALSE);
     
     // For popups, need to destroy, then recreate menu for a different (or
     // possibly same) window, since the parent may change.
@@ -81,13 +88,12 @@ public:
     void SetBackgroundColour(const wxColour& colour);
     void SetForegroundColour(const wxColour& colour);
     void SetFont(const wxFont& colour);
-    void ChangeFont(bool keepOriginalSize = false);
+    void ChangeFont(bool keepOriginalSize = FALSE);
     
     WXWidget GetHandle() const { return m_menuWidget; }
     
     bool IsTearOff() const { return (m_style & wxMENU_TEAROFF) != 0; }
-
-    void DestroyWidgetAndDetach();
+    
 public:
     // Motif-specific data
     int               m_numColumns;
@@ -117,8 +123,7 @@ class wxMenuBar : public wxMenuBarBase
 public:
     wxMenuBar() { Init(); }
     wxMenuBar(long WXUNUSED(style)) { Init(); }
-    wxMenuBar(size_t n, wxMenu *menus[], const wxString titles[], long style = 0);
-    wxMenuBar(size_t n, wxMenu *menus[], const wxArrayString& titles, long style = 0);
+    wxMenuBar(int n, wxMenu *menus[], const wxString titles[]);
     virtual ~wxMenuBar();
     
     // implement base class (pure) virtuals
@@ -158,7 +163,7 @@ public:
     virtual bool SetBackgroundColour(const wxColour& colour);
     virtual bool SetForegroundColour(const wxColour& colour);
     virtual bool SetFont(const wxFont& colour);
-    void ChangeFont(bool keepOriginalSize = false);
+    void ChangeFont(bool keepOriginalSize = FALSE);
     
 public:
     // common part of all ctors

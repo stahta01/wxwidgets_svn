@@ -4,32 +4,33 @@
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
 // CVS-ID:      $Id$
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FS_ZIP_H_
 #define _WX_FS_ZIP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "fs_zip.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
 
 #if wxUSE_FILESYSTEM && wxUSE_FS_ZIP && wxUSE_STREAMS
 
 #include "wx/filesys.h"
-#include "wx/hashmap.h"
 
+class WXDLLEXPORT wxHashTableLong;
 
-WX_DECLARE_STRING_HASH_MAP(int, wxZipFilenameHashMap);
-
-
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxZipFSHandler
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxZipFSHandler : public wxFileSystemHandler
+class WXDLLEXPORT wxZipFSHandler : public wxFileSystemHandler
 {
     public:
         wxZipFSHandler();
@@ -41,14 +42,12 @@ class WXDLLIMPEXP_BASE wxZipFSHandler : public wxFileSystemHandler
 
     private:
         // these vars are used by FindFirst/Next:
-        class wxZipInputStream *m_Archive;
+        void *m_Archive;
         wxString m_Pattern, m_BaseDir, m_ZipFile;
         bool m_AllowDirs, m_AllowFiles;
-        wxZipFilenameHashMap *m_DirsFound;
+        wxHashTableLong *m_DirsFound;
 
         wxString DoFind();
-
-    DECLARE_NO_COPY_CLASS(wxZipFSHandler)
 };
 
 

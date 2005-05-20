@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "spinbutt.h"
     #pragma implementation "spinbutbase.h"
 #endif
@@ -39,8 +39,15 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 
+// Can't resolve reference to CreateUpDownControl in
+// TWIN32, but could probably use normal CreateWindow instead.
+#if defined(__WIN95__) && !defined(__TWIN32__)
+
 #include "wx/msw/private.h"
-#include "wx/msw/wrapcctl.h"
+
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
+    #include <commctrl.h>
+#endif
 
 // ============================================================================
 // implementation
@@ -50,65 +57,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxSpinButtonStyle )
-
-wxBEGIN_FLAGS( wxSpinButtonStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxBORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxFULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxSP_HORIZONTAL)
-    wxFLAGS_MEMBER(wxSP_VERTICAL)
-    wxFLAGS_MEMBER(wxSP_ARROW_KEYS)
-    wxFLAGS_MEMBER(wxSP_WRAP)
-
-wxEND_FLAGS( wxSpinButtonStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxSpinButton, wxControl,"wx/spinbut.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxSpinButton)
-    wxEVENT_RANGE_PROPERTY( Spin , wxEVT_SCROLL_TOP , wxEVT_SCROLL_ENDSCROLL , wxSpinEvent )
-
-    wxPROPERTY( Value , int , SetValue, GetValue, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( Min , int , SetMin, GetMin, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY( Max , int , SetMax, GetMax, 0 , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
-    wxPROPERTY_FLAGS( WindowStyle , wxSpinButtonStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , EMPTY_MACROVALUE , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxSpinButton)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_5( wxSpinButton , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size , long , WindowStyle )
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
-#endif
-
-
 
 // ----------------------------------------------------------------------------
 // wxSpinButton
@@ -122,7 +71,12 @@ bool wxSpinButton::Create(wxWindow *parent,
                           const wxString& name)
 {
     // basic initialization
-    m_windowId = (id == wxID_ANY) ? NewControlId() : id;
+    InitBase();
+
+    m_windowId = (id == -1) ? NewControlId() : id;
+
+    m_backgroundColour = parent->GetBackgroundColour() ;
+    m_foregroundColour = parent->GetForegroundColour() ;
 
     SetName(name);
 
@@ -181,7 +135,7 @@ bool wxSpinButton::Create(wxWindow *parent,
     {
         wxLogLastError(wxT("CreateUpDownControl"));
 
-        return false;
+        return FALSE;
     }
 
     if ( parent )
@@ -191,9 +145,7 @@ bool wxSpinButton::Create(wxWindow *parent,
 
     SubclassWin(m_hWnd);
 
-    SetBestSize(size);
-
-    return true;
+    return TRUE;
 }
 
 wxSpinButton::~wxSpinButton()
@@ -206,7 +158,18 @@ wxSpinButton::~wxSpinButton()
 
 wxSize wxSpinButton::DoGetBestSize() const
 {
-    return GetBestSpinnerSize( (GetWindowStyle() & wxSP_VERTICAL) != 0 );
+    if ( (GetWindowStyle() & wxSP_VERTICAL) != 0 )
+    {
+        // vertical control
+        return wxSize(GetSystemMetrics(SM_CXVSCROLL),
+                      2*GetSystemMetrics(SM_CYVSCROLL));
+    }
+    else
+    {
+        // horizontal control
+        return wxSize(2*GetSystemMetrics(SM_CXHSCROLL),
+                      GetSystemMetrics(SM_CYHSCROLL));
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -215,24 +178,16 @@ wxSize wxSpinButton::DoGetBestSize() const
 
 int wxSpinButton::GetValue() const
 {
-    int n;
 #ifdef UDM_GETPOS32
     if ( wxTheApp->GetComCtl32Version() >= 580 )
     {
         // use the full 32 bit range if available
-        n = ::SendMessage(GetHwnd(), UDM_GETPOS32, 0, 0);
+        return ::SendMessage(GetHwnd(), UDM_GETPOS32, 0, 0);
     }
-    else
 #endif // UDM_GETPOS32
-    {
-        // we're limited to 16 bit
-        n = (short)LOWORD(::SendMessage(GetHwnd(), UDM_GETPOS, 0, 0));
-    }
 
-    if (n < m_min) n = m_min;
-    if (n > m_max) n = m_max;
-
-    return n;
+    // we're limited to 16 bit
+    return (short)LOWORD(::SendMessage(GetHwnd(), UDM_GETPOS, 0, 0));
 }
 
 void wxSpinButton::SetValue(int val)
@@ -257,7 +212,7 @@ void wxSpinButton::SetRange(int minVal, int maxVal)
     wxSpinButtonBase::SetRange(minVal, maxVal);
 
 #ifdef UDM_SETRANGE32
-    if ( wxApp::GetComCtl32Version() >= 471 )
+    if ( wxTheApp->GetComCtl32Version() >= 471 )
     {
         // use the full 32 bit range if available
         ::SendMessage(GetHwnd(), UDM_SETRANGE32, minVal, maxVal);
@@ -273,12 +228,12 @@ void wxSpinButton::SetRange(int minVal, int maxVal)
 bool wxSpinButton::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
                                WXWORD pos, WXHWND control)
 {
-    wxCHECK_MSG( control, false, wxT("scrolling what?") )
+    wxCHECK_MSG( control, FALSE, wxT("scrolling what?") )
 
     if ( wParam != SB_THUMBPOSITION )
     {
         // probable SB_ENDSCROLL - we don't react to it
-        return false;
+        return FALSE;
     }
 
     wxSpinEvent event(wxEVT_SCROLL_THUMBTRACK, m_windowId);
@@ -293,7 +248,7 @@ bool wxSpinButton::MSWOnNotify(int WXUNUSED(idCtrl), WXLPARAM lParam, WXLPARAM *
     NM_UPDOWN *lpnmud = (NM_UPDOWN *)lParam;
 
     if (lpnmud->hdr.hwndFrom != GetHwnd()) // make sure it is the right control
-        return false;
+        return FALSE;
 
     wxSpinEvent event(lpnmud->iDelta > 0 ? wxEVT_SCROLL_LINEUP
                                          : wxEVT_SCROLL_LINEDOWN,
@@ -311,7 +266,11 @@ bool wxSpinButton::MSWOnNotify(int WXUNUSED(idCtrl), WXLPARAM lParam, WXLPARAM *
 bool wxSpinButton::MSWCommand(WXUINT WXUNUSED(cmd), WXWORD WXUNUSED(id))
 {
     // No command messages
-    return false;
+    return FALSE;
 }
 
-#endif // wxUSE_SPINBTN
+#endif // __WIN95__
+
+#endif
+    // wxUSE_SPINCTN
+

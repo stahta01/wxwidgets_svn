@@ -7,7 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "imagjpeg.h"
 #endif
 
@@ -35,14 +35,11 @@
 //     defining HAVE_BOOLEAN.
 #if defined(__WXMSW__) && (defined(__MWERKS__) || defined(__DIGITALMARS__) || (defined(__WATCOMC__) && __WATCOMC__ < 1200))
     #define HAVE_BOOLEAN
-    #include "wx/msw/wrapwin.h"
+    #include <windows.h>
 #endif
 
 extern "C"
 {
-    #if defined(__WXMSW__)
-        #define XMD_H
-    #endif
     #include "jpeglib.h"
 }
 
@@ -181,6 +178,7 @@ void wx_jpeg_io_src( j_decompress_ptr cinfo, wxInputStream& infile )
         cinfo->src = (struct jpeg_source_mgr *)
             (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
             sizeof(wx_source_mgr));
+        src = (wx_src_ptr) cinfo->src;
     }
     src = (wx_src_ptr) cinfo->src;
     src->pub.bytes_in_buffer = 0; /* forces fill_input_buffer on first read */
@@ -226,7 +224,7 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
       (cinfo.src->term_source)(&cinfo);
       jpeg_destroy_decompress(&cinfo);
       if (image->Ok()) image->Destroy();
-      return false;
+      return FALSE;
     }
 
     jpeg_create_decompress( &cinfo );
@@ -239,9 +237,9 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     if (!image->Ok()) {
         jpeg_finish_decompress( &cinfo );
         jpeg_destroy_decompress( &cinfo );
-        return false;
+        return FALSE;
     }
-    image->SetMask( false );
+    image->SetMask( FALSE );
     ptr = image->GetData();
     stride = cinfo.output_width * 3;
     tempbuf = (*cinfo.mem->alloc_sarray)
@@ -254,7 +252,7 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     }
     jpeg_finish_decompress( &cinfo );
     jpeg_destroy_decompress( &cinfo );
-    return true;
+    return TRUE;
 }
 
 typedef struct {
@@ -338,7 +336,7 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
          if (verbose)
             wxLogError(_("JPEG: Couldn't save image."));
          jpeg_destroy_compress(&cinfo);
-         return false;
+         return FALSE;
     }
 
     jpeg_create_compress(&cinfo);
@@ -356,42 +354,8 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     // 'Quality' is a number between 0 (terrible) and 100 (very good).
     // The default (in jcparam.c, jpeg_set_defaults) is 75,
     // and force_baseline is TRUE.
-    if (image->HasOption(wxIMAGE_OPTION_QUALITY))
-        jpeg_set_quality(&cinfo, image->GetOptionInt(wxIMAGE_OPTION_QUALITY), TRUE);
-
-    // set the resolution fields in the output file
-    UINT16 resX,
-           resY;
-    if ( image->HasOption(wxIMAGE_OPTION_RESOLUTIONX) &&
-         image->HasOption(wxIMAGE_OPTION_RESOLUTIONY) )
-    {
-        resX = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONX);
-        resY = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONY);
-    }
-    else if ( image->HasOption(wxIMAGE_OPTION_RESOLUTION) )
-    {
-        resX =
-        resY = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTION);
-    }
-    else
-    {
-        resX =
-        resY = 0;
-    }
-
-    if ( resX && resY )
-    {
-        cinfo.X_density = resX;
-        cinfo.Y_density = resY;
-    }
-
-    // sets the resolution unit field in the output file
-    // wxIMAGE_RESOLUTION_INCHES for inches
-    // wxIMAGE_RESOLUTION_CM for centimeters
-    if ( image->HasOption(wxIMAGE_OPTION_RESOLUTIONUNIT) )
-    {
-        cinfo.density_unit = (UINT8)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONUNIT);
-    }
+    if (image->HasOption(wxT("quality")))
+        jpeg_set_quality(&cinfo, image->GetOptionInt(wxT("quality")), TRUE);
 
     jpeg_start_compress(&cinfo, TRUE);
 
@@ -404,7 +368,7 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
 
-    return true;
+    return TRUE;
 }
 
 #ifdef __VISUALC__
@@ -416,7 +380,7 @@ bool wxJPEGHandler::DoCanRead( wxInputStream& stream )
     unsigned char hdr[2];
 
     if ( !stream.Read(hdr, WXSIZEOF(hdr)) )
-        return false;
+        return FALSE;
 
     return hdr[0] == 0xFF && hdr[1] == 0xD8;
 }

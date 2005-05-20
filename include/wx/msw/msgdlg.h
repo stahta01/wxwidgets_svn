@@ -1,18 +1,18 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/msgdlg.h
+// Name:        msgdlg.h
 // Purpose:     wxMessageDialog class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MSGBOXDLG_H_
 #define _WX_MSGBOXDLG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "msgdlg.h"
 #endif
 
@@ -23,22 +23,21 @@
  * Message box dialog
  */
 
-extern WXDLLEXPORT_DATA(const wxChar*) wxMessageBoxCaptionStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxMessageBoxCaptionStr;
 
-class WXDLLEXPORT wxMessageDialog: public wxDialog, public wxMessageDialogBase
+class WXDLLEXPORT wxMessageDialog: public wxDialog
 {
 DECLARE_DYNAMIC_CLASS(wxMessageDialog)
 protected:
     wxString    m_caption;
     wxString    m_message;
+    long        m_dialogStyle;
     wxWindow *  m_parent;
 public:
     wxMessageDialog(wxWindow *parent, const wxString& message, const wxString& caption = wxMessageBoxCaptionStr,
         long style = wxOK|wxCENTRE, const wxPoint& pos = wxDefaultPosition);
 
     int ShowModal(void);
-
-    DECLARE_NO_COPY_CLASS(wxMessageDialog)
 };
 
 

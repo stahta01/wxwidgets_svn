@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/pen.h
+// Name:        pen.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -11,7 +11,7 @@
 #ifndef __GTKPENH__
 #define __GTKPENH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -42,7 +42,7 @@ class wxPen: public wxGDIObject
 public:
     wxPen() { }
     
-    wxPen( const wxColour &colour, int width = 1, int style = wxSOLID );
+    wxPen( const wxColour &colour, int width, int style );
     ~wxPen();
     
     wxPen( const wxPen& pen )

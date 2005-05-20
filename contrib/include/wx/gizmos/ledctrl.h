@@ -5,7 +5,12 @@
     #pragma interface "wxLEDNumberCtrl.h"
 #endif
 
-#include "wx/gizmos/gizmos.h"
+#ifdef GIZMOISDLL
+#define GIZMODLLEXPORT WXDLLEXPORT
+#else
+#define GIZMODLLEXPORT
+#endif
+
 
 #include <wx/window.h>
 #include <wx/control.h>
@@ -33,18 +38,18 @@ enum wxLEDValueAlign
 // wxLEDNumberCtrl
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_GIZMOS wxLEDNumberCtrl : public wxControl
+class GIZMODLLEXPORT wxLEDNumberCtrl :	public wxControl
 {
 public:
     // Constructors.
     wxLEDNumberCtrl();
-    wxLEDNumberCtrl(wxWindow *parent, wxWindowID id = wxID_ANY,
+    wxLEDNumberCtrl(wxWindow *parent, wxWindowID id = -1,
                     const wxPoint& pos = wxDefaultPosition,
                     const wxSize& size = wxDefaultSize,
                     long style = wxLED_ALIGN_LEFT | wxLED_DRAW_FADED);
 
     // Create functions.
-    bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
+    bool Create(wxWindow *parent, wxWindowID id = -1,
                     const wxPoint& pos = wxDefaultPosition,
                     const wxSize& size = wxDefaultSize,
                     long style = 0);
@@ -53,9 +58,9 @@ public:
     bool GetDrawFaded() const { return m_DrawFaded; }
     const wxString &GetValue() const { return m_Value; }
 
-    void SetAlignment(wxLEDValueAlign Alignment, bool Redraw = true);
-    void SetDrawFaded(bool DrawFaded, bool Redraw = true);
-    void SetValue(const wxString &Value, bool Redraw = true);
+    void SetAlignment(wxLEDValueAlign Alignment, bool Redraw = TRUE);
+    void SetDrawFaded(bool DrawFaded, bool Redraw = TRUE);
+    void SetValue(const wxString &Value, bool Redraw = TRUE);
 
 private:
     // Members.

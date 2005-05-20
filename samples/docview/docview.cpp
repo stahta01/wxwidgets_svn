@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 #endif
 
 /*
-* Purpose:  Document/view architecture demo for wxWidgets class library
+* Purpose:  Document/view architecture demo for wxWindows class library
 *           Run with no arguments for multiple top-level windows, -single
 *           for a single window.
 */
@@ -40,15 +40,12 @@
 #include "docview.h"
 #include "doc.h"
 #include "view.h"
-#ifdef __WXMAC__
-#include "wx/filename.h"
-#endif
 
 MyFrame *frame = (MyFrame *) NULL;
 
 // In single window mode, don't have any child windows; use
 // main window.
-bool singleWindowMode = false;
+bool singleWindowMode = FALSE;
 
 IMPLEMENT_APP(MyApp)
 
@@ -67,7 +64,7 @@ bool MyApp::OnInit(void)
     {
         if (wxStrcmp(argv[1], _T("-single")) == 0)
         {
-            singleWindowMode = true;
+            singleWindowMode = TRUE;
         }
     }
     
@@ -77,9 +74,6 @@ bool MyApp::OnInit(void)
     //// Create a template relating drawing documents to their views
     (void) new wxDocTemplate(m_docManager, _T("Drawing"), _T("*.drw"), _T(""), _T("drw"), _T("Drawing Doc"), _T("Drawing View"),
         CLASSINFO(DrawingDocument), CLASSINFO(DrawingView));
-#ifdef __WXMAC__
-    wxFileName::MacRegisterDefaultTypeAndCreator( wxT("drw") , 'WXMB' , 'WXMA' ) ;
-#endif
     
     if (singleWindowMode)
     {
@@ -89,17 +83,12 @@ bool MyApp::OnInit(void)
         m_docManager->SetMaxDocsOpen(1);
     }
     else
-    {
         //// Create a template relating text documents to their views
-        (void) new wxDocTemplate(m_docManager, _T("Text"), _T("*.txt;*.text"), _T(""), _T("txt;text"), _T("Text Doc"), _T("Text View"),
+        (void) new wxDocTemplate(m_docManager, _T("Text"), _T("*.txt"), _T(""), _T("txt"), _T("Text Doc"), _T("Text View"),
         CLASSINFO(TextEditDocument), CLASSINFO(TextEditView));
-#ifdef __WXMAC__
-        wxFileName::MacRegisterDefaultTypeAndCreator( wxT("txt") , 'TEXT' , 'WXMA' ) ;
-#endif
-    }
     
     //// Create the main frame window
-    frame = new MyFrame(m_docManager, (wxFrame *) NULL, wxID_ANY, _T("DocView Demo"), wxPoint(0, 0), wxSize(500, 400), wxDEFAULT_FRAME_STYLE);
+    frame = new MyFrame(m_docManager, (wxFrame *) NULL, -1, _T("DocView Demo"), wxPoint(0, 0), wxSize(500, 400), wxDEFAULT_FRAME_STYLE);
     
     //// Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
@@ -155,10 +144,10 @@ bool MyApp::OnInit(void)
     frame->SetMenuBar(menu_bar);
     
     frame->Centre(wxBOTH);
-    frame->Show(true);
+    frame->Show(TRUE);
     
     SetTopWindow(frame);
-    return true;
+    return TRUE;
 }
 
 int MyApp::OnExit(void)
@@ -176,7 +165,7 @@ int MyApp::OnExit(void)
 wxFrame *MyApp::CreateChildFrame(wxDocument *doc, wxView *view, bool isCanvas)
 {
     //// Make a child frame
-    wxDocChildFrame *subframe = new wxDocChildFrame(doc, view, GetMainFrame(), wxID_ANY, _T("Child Frame"),
+    wxDocChildFrame *subframe = new wxDocChildFrame(doc, view, GetMainFrame(), -1, _T("Child Frame"),
         wxPoint(10, 10), wxSize(300, 300), wxDEFAULT_FRAME_STYLE);
     
 #ifdef __WXMSW__
@@ -269,7 +258,7 @@ MyCanvas *MyFrame::CreateCanvas(wxView *view, wxFrame *parent)
     // Give it scrollbars
     canvas->SetScrollbars(20, 20, 50, 50);
     canvas->SetBackgroundColour(*wxWHITE);
-    canvas->ClearBackground();
+    canvas->Clear();
     
     return canvas;
 }

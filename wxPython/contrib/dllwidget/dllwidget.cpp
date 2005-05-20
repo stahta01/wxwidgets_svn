@@ -35,7 +35,7 @@ wxDllWidget::wxDllWidget(wxWindow *parent,
                          long style)
     : wxPanel(parent, id, pos, size, wxTAB_TRAVERSAL | wxNO_BORDER,
               className + wxT("_container")),
-    m_widget(NULL), m_lib(NULL), m_controlAdded(false)
+    m_widget(NULL), m_lib(NULL), m_controlAdded(FALSE)
 {
     SetBackgroundColour(wxColour(255, 0, 255));
     if ( !!className )
@@ -53,10 +53,11 @@ void wxDllWidget::AddChild(wxWindowBase *child)
 
     wxPanel::AddChild(child);
 
-    m_controlAdded = true;
+    m_controlAdded = TRUE;
     wxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
     sizer->Add((wxWindow*)child, 1, wxEXPAND);
     SetSizer(sizer);
+    SetAutoLayout(TRUE);
     Layout();
 }
 
@@ -84,7 +85,7 @@ bool wxDllWidget::LoadWidget(const wxString& dll, const wxString& className,
     {
         delete m_lib;
         m_lib = NULL;
-        return false;
+        return FALSE;
     }
 
     DLL_WidgetFactory_t factory;
@@ -93,7 +94,7 @@ bool wxDllWidget::LoadWidget(const wxString& dll, const wxString& className,
     {
         delete m_lib;
         m_lib = NULL;
-        return false;
+        return FALSE;
     }
 
     if ( !factory(className, this, style, &m_widget, &m_cmdFunc) )
@@ -102,10 +103,10 @@ bool wxDllWidget::LoadWidget(const wxString& dll, const wxString& className,
         delete m_lib;
         m_lib = NULL;
         m_widget = NULL;
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 void wxDllWidget::UnloadWidget()

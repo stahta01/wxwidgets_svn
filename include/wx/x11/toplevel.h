@@ -12,7 +12,7 @@
 #ifndef _WX_X11_TOPLEVEL_H_
 #define _WX_X11_TOPLEVEL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "toplevel.h"
 #endif
 
@@ -71,8 +71,6 @@ public:
         { m_needResizeInIdle = set; }
     void SetConfigureGeometry( int x, int y, int width, int height )
         { m_x = x; m_y = y; m_width = width; m_height = height; }
-
-    virtual bool SetShape(const wxRegion& region);
     
 protected:
     // common part of all ctors

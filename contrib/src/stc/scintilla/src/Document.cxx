@@ -50,14 +50,13 @@ Document::Document() {
 	stylingBits = 5;
 	stylingBitsMask = 0x1F;
 	stylingMask = 0;
-	SetDefaultCharClasses(true);
+	SetWordChars(0);
 	endStyled = 0;
 	styleClock = 0;
 	enteredCount = 0;
 	enteredReadOnlyCount = 0;
 	tabInChars = 8;
 	indentInChars = 0;
-	actualIndentInChars = 8;
 	useTabs = true;
 	tabIndents = true;
 	backspaceUnindents = false;
@@ -207,7 +206,7 @@ int Document::GetLastChild(int lineParent, int level) {
 }
 
 int Document::GetFoldParent(int line) {
-	int level = GetLevel(line) & SC_FOLDLEVELNUMBERMASK;
+	int level = GetLevel(line);
 	int lineLook = line - 1;
 	while ((lineLook > 0) && (
 	            (!(GetLevel(lineLook) & SC_FOLDLEVELHEADERFLAG)) ||
@@ -380,9 +379,6 @@ bool Document::DeleteChars(int pos, int len) {
 	return !cb.IsReadOnly();
 }
 
-/**
- * Insert a styled string (char/style pairs) with a length.
- */
 bool Document::InsertStyledString(int position, char *s, int insertLength) {
 	if (cb.IsReadOnly() && enteredReadOnlyCount == 0) {
 		enteredReadOnlyCount++;
@@ -502,9 +498,6 @@ int Document::Redo() {
 	return newPos;
 }
 
-/**
- * Insert a single character.
- */
 bool Document::InsertChar(int pos, char ch) {
 	char chs[2];
 	chs[0] = ch;
@@ -512,16 +505,12 @@ bool Document::InsertChar(int pos, char ch) {
 	return InsertStyledString(pos*2, chs, 2);
 }
 
-/**
- * Insert a null terminated string.
- */
+// Insert a null terminated string
 bool Document::InsertString(int position, const char *s) {
 	return InsertString(position, s, strlen(s));
 }
 
-/**
- * Insert a string with a length.
- */
+// Insert a string with a length
 bool Document::InsertString(int position, const char *s, size_t insertLength) {
 	bool changed = false;
 	char *sWithStyle = new char[insertLength * 2];
@@ -653,7 +642,7 @@ int Document::FindColumn(int line, int column) {
 	int position = LineStart(line);
 	int columnCurrent = 0;
 	if ((line >= 0) && (line < LinesTotal())) {
-		while ((columnCurrent < column) && (position < Length())) {
+		while (columnCurrent < column) {
 			char ch = cb.CharAt(position);
 			if (ch == '\t') {
 				columnCurrent = NextTab(columnCurrent, tabInChars);
@@ -682,73 +671,43 @@ void Document::Indent(bool forwards, int lineBottom, int lineTop) {
 	}
 }
 
-// Convert line endings for a piece of text to a particular mode.
-// Stop at len or when a NUL is found.
-// Caller must delete the returned pointer.
-char *Document::TransformLineEnds(int *pLenOut, const char *s, size_t len, int eolMode) {
-	char *dest = new char[2 * len + 1];
-	const char *sptr = s;
-	char *dptr = dest;
-	for (size_t i = 0; (i < len) && (*sptr != '\0'); i++) {
-		if (*sptr == '\n' || *sptr == '\r') {
-			if (eolMode == SC_EOL_CR) {
-				*dptr++ = '\r';
-			} else if (eolMode == SC_EOL_LF) {
-				*dptr++ = '\n';
-			} else { // eolMode == SC_EOL_CRLF
-				*dptr++ = '\r';
-				*dptr++ = '\n';
-			}
-			if ((*sptr == '\r') && (i+1 < len) && (*(sptr+1) == '\n')) {
-				i++;
-				sptr++;
-			}
-			sptr++;
-		} else {
-			*dptr++ = *sptr++;
-		}
-	}
-	*dptr++ = '\0';
-	*pLenOut = (dptr - dest) - 1;
-	return dest;
-}
-
 void Document::ConvertLineEnds(int eolModeSet) {
 	BeginUndoAction();
-
 	for (int pos = 0; pos < Length(); pos++) {
 		if (cb.CharAt(pos) == '\r') {
-			if (cb.CharAt(pos + 1) == '\n') { 
-				// CRLF
-				if (eolModeSet == SC_EOL_CR) {
-					DeleteChars(pos + 1, 1); // Delete the LF
-				} else if (eolModeSet == SC_EOL_LF) {
-					DeleteChars(pos, 1); // Delete the CR
+			if (cb.CharAt(pos + 1) == '\n') {
+				if (eolModeSet != SC_EOL_CRLF) {
+					DeleteChars(pos, 2);
+					if (eolModeSet == SC_EOL_CR)
+						InsertString(pos, "\r", 1);
+					else
+						InsertString(pos, "\n", 1);
 				} else {
 					pos++;
 				}
-			} else { 
-				// CR
-				if (eolModeSet == SC_EOL_CRLF) {
-					InsertString(pos + 1, "\n", 1); // Insert LF
-					pos++;
-				} else if (eolModeSet == SC_EOL_LF) {
-					InsertString(pos, "\n", 1); // Insert LF
-					DeleteChars(pos + 1, 1); // Delete CR
+			} else {
+				if (eolModeSet != SC_EOL_CR) {
+					DeleteChars(pos, 1);
+					if (eolModeSet == SC_EOL_CRLF) {
+						InsertString(pos, "\r\n", 2);
+						pos++;
+					} else {
+						InsertString(pos, "\n", 1);
+					}
 				}
 			}
 		} else if (cb.CharAt(pos) == '\n') {
-			// LF
-			if (eolModeSet == SC_EOL_CRLF) {
-				InsertString(pos, "\r", 1); // Insert CR
-				pos++;
-			} else if (eolModeSet == SC_EOL_CR) {
-				InsertString(pos, "\r", 1); // Insert CR
-				DeleteChars(pos + 1, 1); // Delete LF
+			if (eolModeSet != SC_EOL_LF) {
+				DeleteChars(pos, 1);
+				if (eolModeSet == SC_EOL_CRLF) {
+					InsertString(pos, "\r\n", 2);
+					pos++;
+				} else {
+					InsertString(pos, "\r", 1);
+				}
 			}
 		}
 	}
-
 	EndUndoAction();
 }
 
@@ -802,7 +761,7 @@ int Document::ExtendWordSelect(int pos, int delta, bool onlyWordCharacters) {
 		while (pos < (Length()) && (WordCharClass(cb.CharAt(pos)) == ccStart))
 			pos++;
 	}
-	return MovePositionOutsideChar(pos, delta);
+	return pos;
 }
 
 /**
@@ -833,40 +792,6 @@ int Document::NextWordStart(int pos, int delta) {
 }
 
 /**
- * Find the end of the next word in either a forward (delta >= 0) or backwards direction
- * (delta < 0).
- * This is looking for a transition between character classes although there is also some
- * additional movement to transit white space.
- * Used by cursor movement by word commands.
- */
-int Document::NextWordEnd(int pos, int delta) {
-	if (delta < 0) {
-		if (pos > 0) {
-			charClassification ccStart = WordCharClass(cb.CharAt(pos-1));
-			if (ccStart != ccSpace) {
-				while (pos > 0 && WordCharClass(cb.CharAt(pos - 1)) == ccStart) {
-					pos--;
-				}
-			}
-			while (pos > 0 && WordCharClass(cb.CharAt(pos - 1)) == ccSpace) {
-				pos--;
-			}
-		}
-	} else {
-		while (pos < Length() && WordCharClass(cb.CharAt(pos)) == ccSpace) {
-			pos++;
-		}
-		if (pos < Length()) {
-			charClassification ccStart = WordCharClass(cb.CharAt(pos));
-			while (pos < Length() && WordCharClass(cb.CharAt(pos)) == ccStart) {
-				pos++;
-			}
-		}
-	}
-	return pos;
-}
-
-/**
  * Check that the character at the given position is a word or punctuation character and that
  * the previous character is of a different character class.
  */
@@ -884,7 +809,7 @@ bool Document::IsWordStartAt(int pos) {
  * the next character is of a different character class.
  */
 bool Document::IsWordEndAt(int pos) {
-	if (pos < Length()) {
+	if (pos < Length() - 1) {
 		charClassification ccPrev = WordCharClass(CharAt(pos-1));
 		return (ccPrev == ccWord || ccPrev == ccPunctuation) &&
 			(ccPrev != WordCharClass(CharAt(pos)));
@@ -1087,7 +1012,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 				}
 			}
 			pos += increment;
-			if (dbcsCodePage && (pos >= 0)) {
+			if (dbcsCodePage) {
 				// Ensure trying to match from start of character
 				pos = MovePositionOutsideChar(pos, increment, false);
 			}
@@ -1107,24 +1032,10 @@ const char *Document::SubstituteByPosition(const char *text, int *length) {
 		return 0;
 	unsigned int lenResult = 0;
 	for (int i = 0; i < *length; i++) {
-		if (text[i] == '\\') {
-			if (text[i + 1] >= '1' && text[i + 1] <= '9') {
-				unsigned int patNum = text[i + 1] - '0';
-				lenResult += pre->eopat[patNum] - pre->bopat[patNum];
-				i++;
-			} else {
-				switch (text[i + 1]) {
-				case 'a':
-				case 'b':
-				case 'f':
-				case 'n':
-				case 'r':
-				case 't':
-				case 'v':
-					i++;
-				}
-				lenResult++;
-			}
+		if ((text[i] == '\\') && (text[i + 1] >= '1' && text[i + 1] <= '9')) {
+			unsigned int patNum = text[i + 1] - '0';
+			lenResult += pre->eopat[patNum] - pre->bopat[patNum];
+			i++;
 		} else {
 			lenResult++;
 		}
@@ -1134,43 +1045,13 @@ const char *Document::SubstituteByPosition(const char *text, int *length) {
 		return 0;
 	char *o = substituted;
 	for (int j = 0; j < *length; j++) {
-		if (text[j] == '\\') {
-			if (text[j + 1] >= '1' && text[j + 1] <= '9') {
-				unsigned int patNum = text[j + 1] - '0';
-				unsigned int len = pre->eopat[patNum] - pre->bopat[patNum];
-				if (pre->pat[patNum])	// Will be null if try for a match that did not occur
-					memcpy(o, pre->pat[patNum], len);
-				o += len;
-				j++;
-			} else {
-				j++;
-				switch (text[j]) {
-				case 'a':
-					*o++ = '\a';
-					break;
-				case 'b':
-					*o++ = '\b';
-					break;
-				case 'f':
-					*o++ = '\f';
-					break;
-				case 'n':
-					*o++ = '\n';
-					break;
-				case 'r':
-					*o++ = '\r';
-					break;
-				case 't':
-					*o++ = '\t';
-					break;
-				case 'v':
-					*o++ = '\v';
-					break;
-				default:
-					*o++ = '\\';
-					j--;
-				}
-			}
+		if ((text[j] == '\\') && (text[j + 1] >= '1' && text[j + 1] <= '9')) {
+			unsigned int patNum = text[j + 1] - '0';
+			unsigned int len = pre->eopat[patNum] - pre->bopat[patNum];
+			if (pre->pat[patNum])	// Will be null if try for a match that did not occur
+				memcpy(o, pre->pat[patNum], len);
+			o += len;
+			j++;
 		} else {
 			*o++ = text[j];
 		}
@@ -1204,26 +1085,25 @@ void Document::ChangeCase(Range r, bool makeUpperCase) {
 	}
 }
 
-void Document::SetDefaultCharClasses(bool includeWordClass) {
-	// Initialize all char classes to default values
-	for (int ch = 0; ch < 256; ch++) {
+void Document::SetWordChars(unsigned char *chars) {
+	int ch;
+	for (ch = 0; ch < 256; ch++) {
 		if (ch == '\r' || ch == '\n')
 			charClass[ch] = ccNewLine;
 		else if (ch < 0x20 || ch == ' ')
 			charClass[ch] = ccSpace;
-		else if (includeWordClass && (ch >= 0x80 || isalnum(ch) || ch == '_'))
-			charClass[ch] = ccWord;
 		else
 			charClass[ch] = ccPunctuation;
 	}
-}
-
-void Document::SetCharClasses(const unsigned char *chars, charClassification newCharClass) {
-	// Apply the newCharClass to the specifed chars
 	if (chars) {
 		while (*chars) {
-			charClass[*chars] = newCharClass;
+			charClass[*chars] = ccWord;
 			chars++;
+		}
+	} else {
+		for (ch = 0; ch < 256; ch++) {
+			if (ch >= 0x80 || isalnum(ch) || ch == '_')
+				charClass[ch] = ccWord;
 		}
 	}
 }
@@ -1287,20 +1167,16 @@ bool Document::SetStyles(int length, char *styles) {
 
 bool Document::EnsureStyledTo(int pos) {
 	if (pos > GetEndStyled()) {
-		IncrementStyleClock();
+		styleClock++;
+		if (styleClock > 0x100000) {
+			styleClock = 0;
+		}
 		// Ask the watchers to style, and stop as soon as one responds.
 		for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++) {
 			watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
 		}
 	}
 	return pos <= GetEndStyled();
-}
-
-void Document::IncrementStyleClock() {
-	styleClock++;
-	if (styleClock > 0x100000) {
-		styleClock = 0;
-	}
 }
 
 bool Document::AddWatcher(DocWatcher *watcher, void *userData) {
@@ -1459,18 +1335,14 @@ int Document::WordPartRight(int pos) {
 	return pos;
 }
 
-bool IsLineEndChar(char c) {
-	return (c == '\n' || c == '\r');
-}
-
-int Document::ExtendStyleRange(int pos, int delta, bool singleLine) {
+int Document::ExtendStyleRange(int pos, int delta) {
 	int sStart = cb.StyleAt(pos);
 	if (delta < 0) {
-		while (pos > 0 && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsLineEndChar(cb.CharAt(pos))) )
+		while (pos > 0 && (cb.StyleAt(pos) == sStart))
 			pos--;
 		pos++;
 	} else {
-		while (pos < (Length()) && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsLineEndChar(cb.CharAt(pos))) )
+		while (pos < (Length()) && (cb.StyleAt(pos) == sStart))
 			pos++;
 	}
 	return pos;

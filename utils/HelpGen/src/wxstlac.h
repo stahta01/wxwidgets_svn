@@ -22,7 +22,7 @@
 #endif
 #include <memory.h>
 #include <limits.h>
-/* #include <new.h> */
+#include <new.h>
 
 // the below macro used internally (see actual interface after this macro)
 
@@ -83,9 +83,7 @@ protected:\
 		value_type  mData;\
 	};\
 \
-public:\
 	typedef tree_node* node_ref_type;\
-protected:\
 \
 	node_ref_type   mpRoot;\
 	node_ref_type   mpLeftMost;\

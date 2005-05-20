@@ -12,7 +12,7 @@
 #ifndef _WX_WINDOW_H_
 #define _WX_WINDOW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "window.h"
 #endif
 
@@ -57,15 +57,16 @@ public:
     virtual void Raise();
     virtual void Lower();
     
-    virtual bool Show( bool show = true );
-    virtual bool Enable( bool enable = true );
+    virtual bool Show( bool show = TRUE );
+    virtual bool Enable( bool enable = TRUE );
     
     virtual void SetFocus();
     
     virtual void WarpPointer(int x, int y);
     
-    virtual void Refresh( bool eraseBackground = true,
+    virtual void Refresh( bool eraseBackground = TRUE,
         const wxRect *rect = (const wxRect *) NULL );
+    virtual void Clear();
     
     virtual bool SetBackgroundColour( const wxColour &colour );
     virtual bool SetForegroundColour( const wxColour &colour );
@@ -83,21 +84,24 @@ public:
         const;
     
     virtual void SetScrollbar( int orient, int pos, int thumbVisible,
-        int range, bool refresh = true );
-    virtual void SetScrollPos( int orient, int pos, bool refresh = true );
+        int range, bool refresh = TRUE );
+    virtual void SetScrollPos( int orient, int pos, bool refresh = TRUE );
     virtual int GetScrollPos( int orient ) const;
     virtual int GetScrollThumb( int orient ) const;
     virtual int GetScrollRange( int orient ) const;
     virtual void ScrollWindow( int dx, int dy,
         const wxRect* rect = (wxRect *) NULL );
     
+    virtual void SetSizeHints(int minW, int minH,
+        int maxW = -1, int maxH = -1,
+        int incW = -1, int incH = -1);
 #if wxUSE_DRAG_AND_DROP
     virtual void SetDropTarget( wxDropTarget *dropTarget );
 #endif // wxUSE_DRAG_AND_DROP
     
     // Accept files for dragging
     virtual void DragAcceptFiles(bool accept);
-
+    
     // Get the unique identifier of a window
     virtual WXWidget GetHandle() const { return GetMainWidget(); }
     
@@ -109,8 +113,7 @@ public:
     
     // Get main widget for this window, e.g. a text widget
     virtual WXWidget GetMainWidget() const;
-    // Get the widget that corresponds to the label (for font setting,
-    // label setting etc.)
+    // Get the widget that corresponds to the label (for font setting, label setting etc.)
     virtual WXWidget GetLabelWidget() const;
     // Get the client widget for this window (something we can create other
     // windows on)
@@ -121,9 +124,14 @@ public:
     virtual WXWidget GetTopWidget() const;
     
     // Get the underlying X window and display
-    WXWindow GetClientXWindow() const;
     WXWindow GetXWindow() const;
     WXDisplay *GetXDisplay() const;
+    
+    // called from Motif callbacks - and should only be called from there
+    
+    void SetButton1(bool pressed) { m_button1Pressed = pressed; }
+    void SetButton2(bool pressed) { m_button2Pressed = pressed; }
+    void SetButton3(bool pressed) { m_button3Pressed = pressed; }
     
     void SetLastClick(int button, long timestamp)
     { m_lastButton = button; m_lastTS = timestamp; }
@@ -131,8 +139,8 @@ public:
     int GetLastClickedButton() const { return m_lastButton; }
     long GetLastClickTime() const { return m_lastTS; }
     
-    // Gives window a chance to do something in response to a size message,
-    // e.g. arrange status bar, toolbar etc.
+    // Gives window a chance to do something in response to a size message, e.g.
+    // arrange status bar, toolbar etc.
     virtual bool PreResize();
     
     // Generates a paint event
@@ -142,23 +150,51 @@ public:
     // (for wxWindowDC and Motif callbacks only)
     // -----------------------------------------
     
+    // read/write access to the update rect list
+    const wxRectList& GetUpdateRects() const { return m_updateRects; }
+    
     // Adds a recangle to the updates list
-    void AddUpdateRect(int x, int y, int w, int h);
+    void AddUpdateRect(int x, int y, int w, int h)
+    { m_updateRects.Append(new wxRect(x, y, w, h)); }
+    
+    // Empties the m_updateRects list
+    void ClearUpdateRects();
     
     void ClearUpdateRegion() { m_updateRegion.Clear(); }
     void SetUpdateRegion(const wxRegion& region) { m_updateRegion = region; }
     
-    // Process idle (send update events)
-    void OnInternalIdle();
+    // sets the fore/background colour for the given widget
+    static void DoChangeForegroundColour(WXWidget widget, wxColour& foregroundColour);
+    static void DoChangeBackgroundColour(WXWidget widget, wxColour& backgroundColour, bool changeArmColour = FALSE);
+    
+    // For implementation purposes - sometimes decorations make the client area
+    // smaller
+    virtual wxPoint GetClientAreaOrigin() const;
     
 protected:
+    // event handlers (not virtual by design)
+    void OnIdle(wxIdleEvent& event);
+    
+    wxWindow *GetChild(int number) const
+    { return GetChildren().Item(number)->GetData(); }
+    
     // Responds to colour changes: passes event on to children.
     void OnSysColourChanged(wxSysColourChangedEvent& event);
     
     // Motif-specific
     
+    // CanvasXXXSiize functions
+    void CanvasGetSize(int* width, int* height) const; // If have drawing area
+    void CanvasGetClientSize(int *width, int *height) const;
+    void CanvasGetPosition(int *x, int *y) const; // If have drawing area
+    void CanvasSetClientSize(int width, int size);
+    void CanvasSetSize(int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO);
+    
     void SetMainWidget(WXWidget w) { m_mainWidget = w; }
     
+    bool CanAddEventHandler() const { return m_canAddEventHandler; }
+    void SetCanAddEventHandler(bool flag) { m_canAddEventHandler = flag; }
+
     // See src/motif/window.cpp, near the top, for an explanation
     // why this is necessary
     void CanvasSetSizeIntr(int x, int y, int width, int height,
@@ -166,22 +202,6 @@ protected:
     void DoSetSizeIntr(int x, int y,
                        int width, int height,
                        int sizeFlags, bool fromCtor);
-
-    // for DoMoveWindowIntr flags
-    enum
-    {
-        wxMOVE_X = 1,
-        wxMOVE_Y = 2,
-        wxMOVE_WIDTH = 4,
-        wxMOVE_HEIGHT = 8
-    };
-
-    void DoMoveWindowIntr(int x, int y, int width, int height,
-                          int flags);
-
-    // helper function, to remove duplicate code, used in wxScrollBar
-    WXWidget DoCreateScrollBar(WXWidget parent, wxOrientation orientation,
-                               void (*callback)());
 public:
     WXPixmap GetBackingPixmap() const { return m_backingPixmap; }
     void SetBackingPixmap(WXPixmap pixmap) { m_backingPixmap = pixmap; }
@@ -191,8 +211,7 @@ public:
     void SetPixmapHeight(int h) { m_pixmapHeight = h; }
     
     // Change properties
-    // Change to the current font (often overridden)
-    virtual void ChangeFont(bool keepOriginalSize = true);
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);             // Change to the current font (often overridden)
     
     // Change background and foreground colour using current background colour
     // setting (Motif generates foreground based on background)
@@ -207,12 +226,12 @@ protected:
     bool DetachWidget(WXWidget widget);
     
     // How to implement accelerators. If we find a key event, translate to
-    // wxWidgets wxKeyEvent form. Find a widget for the window. Now find a
+    // wxWindows wxKeyEvent form. Find a widget for the window. Now find a
     // wxWindow for the widget. If there isn't one, go up the widget hierarchy
     // trying to find one. Once one is found, call ProcessAccelerator for the
-    // window. If it returns true (processed the event), skip the X event,
-    // otherwise carry on up the wxWidgets window hierarchy calling
-    // ProcessAccelerator. If all return false, process the X event as normal.
+    // window. If it returns TRUE (processed the event), skip the X event,
+    // otherwise carry on up the wxWindows window hierarchy calling
+    // ProcessAccelerator. If all return FALSE, process the X event as normal.
     // Eventually we can implement OnCharHook the same way, but concentrate on
     // accelerators for now. ProcessAccelerator must look at the current
     // accelerator table, and try to find what menu id or window (beneath it)
@@ -225,8 +244,8 @@ protected:
     // unmanage and destroy an X widget f it's !NULL (passing NULL is ok)
     void UnmanageAndDestroy(WXWidget widget);
     
-    // map or unmap an X widget (passing NULL is ok),
-    // returns true if widget was mapped/unmapped
+    // map or unmap an X widget (passing NULL is ok), returns TRUE if widget was
+    // mapped/unmapped
     bool MapOrUnmap(WXWidget widget, bool map);
     
     // scrolling stuff
@@ -253,10 +272,17 @@ protected:
     // --------------------
     
     bool m_needsRefresh:1;          // repaint backing store?
+    bool m_canAddEventHandler:1;    // ???
+    bool m_button1Pressed:1;
+    bool m_button2Pressed:1;
+    bool m_button3Pressed:1;
     
     // For double-click detection
-    long                  m_lastTS;           // last timestamp
-    unsigned              m_lastButton:2;     // last pressed button
+    long   m_lastTS;         // last timestamp
+    int    m_lastButton;     // last pressed button
+    
+    // List of wxRects representing damaged region
+    wxRectList m_updateRects;
     
 protected:
     WXWidget              m_mainWidget;
@@ -265,15 +291,17 @@ protected:
     WXWidget              m_borderWidget;
     WXWidget              m_scrolledWindow;
     WXWidget              m_drawingArea;
-    bool                  m_winCaptured:1;
+    bool                  m_winCaptured;
+    bool                  m_hScroll;
+    bool                  m_vScroll;
     WXPixmap              m_backingPixmap;
     int                   m_pixmapWidth;
     int                   m_pixmapHeight;
     int                   m_pixmapOffsetX;
     int                   m_pixmapOffsetY;
     
-    // Store the last scroll pos, since in wxWin the pos isn't set
-    // automatically by system
+    // Store the last scroll pos, since in wxWin the pos isn't set automatically
+    // by system
     int                   m_scrollPosX;
     int                   m_scrollPosY;
     
@@ -291,7 +319,7 @@ protected:
     virtual bool DoPopupMenu(wxMenu *menu, int x, int y);
     virtual void DoCaptureMouse();
     virtual void DoReleaseMouse();
-
+    
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip( wxToolTip *tip );
 #endif // wxUSE_TOOLTIPS
@@ -313,8 +341,7 @@ private:
 // undesired effects.
 //
 // Usage: create an instance of this class on the stack to disable the size
-// optimisation, it will be reenabled as soon as the object goes out
-// from scope.
+// optimisation, it will be reenabled as soon as the object goes out from scope.
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxNoOptimize

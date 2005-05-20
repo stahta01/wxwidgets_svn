@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 // Name:        ScintillaWX.h
-// Purpose:     A wxWidgets implementation of Scintilla.  A class derived
+// Purpose:     A wxWindows implementation of Scintilla.  A class derived
 //              from ScintillaBase that uses the "wx platform" defined in
 //              PlatWX.cpp.  This class is one end of a bridge between
 //              the wx world and the Scintilla world.  It needs a peer
@@ -48,6 +48,10 @@
 #include "Editor.h"
 #include "ScintillaBase.h"
 
+#include <wx/wx.h>
+#include <wx/dataobj.h>
+#include <wx/clipbrd.h>
+#include <wx/dnd.h>
 
 //----------------------------------------------------------------------
 
@@ -95,7 +99,6 @@ public:
     virtual void Initialise();
     virtual void Finalise();
     virtual void StartDrag();
-    virtual bool SetIdle(bool on);
     virtual void SetTicking(bool on);
     virtual void SetMouseCapture(bool on);
     virtual bool HaveMouseCapture();
@@ -123,8 +126,6 @@ public:
 
     virtual void CancelModes();
 
-    virtual void UpdateSystemCaret();
-
     // Event delegates
     void DoPaint(wxDC* dc, wxRect rect);
     void DoHScroll(int type, int pos);
@@ -139,9 +140,8 @@ public:
     void DoMiddleButtonUp(Point pt);
     void DoMouseWheel(int rotation, int delta, int linesPerAction, int ctrlDown, bool isPageScroll);
     void DoAddChar(int key);
-    int  DoKeyDown(const wxKeyEvent& event, bool* consumed);
+    int  DoKeyDown(int key, bool shift, bool ctrl, bool alt, bool meta, bool* consumed);
     void DoTick() { Tick(); }
-    void DoOnIdle(wxIdleEvent& evt);
 
 #if wxUSE_DRAG_AND_DROP
     bool DoDropText(long x, long y, const wxString& data);
@@ -162,8 +162,6 @@ public:
     void DoScrollToLine(int line);
     void DoScrollToColumn(int column);
     void ClipChildren(wxDC& dc, PRectangle rect);
-    void SetUseAntiAliasing(bool useAA);
-    bool GetUseAntiAliasing();
 
 private:
     bool                capturedMouse;
@@ -176,16 +174,7 @@ private:
 #endif
     int                 wheelRotation;
 
-    // For use in creating a system caret
-    bool HasCaretSizeChanged();
-    bool CreateSystemCaret();
-    bool DestroySystemCaret();
-#ifdef __WXMSW__
-    HBITMAP sysCaretBitmap;
-    int sysCaretWidth;
-    int sysCaretHeight;
-#endif
-    
+
     friend class wxSTCCallTip;
 };
 

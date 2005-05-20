@@ -88,7 +88,7 @@ wxCheckListBoxItem::wxCheckListBoxItem (
   wxCheckListBox*                   pParent
 , size_t                            nIndex
 )
-: wxOwnerDrawn( wxEmptyString
+: wxOwnerDrawn( ""
                ,TRUE // checkable
               )
 {
@@ -122,7 +122,7 @@ bool wxCheckListBoxItem::OnDrawItem (
     //
     // Unfortunately PM doesn't quite get the text position exact.  We need to alter
     // it down and to the right, just a little bit.  The coords in rRect are OS/2
-    // coords not wxWidgets coords.
+    // coords not wxWindows coords.
     //
     vRect.x += 5;
     vRect.y -= 3;
@@ -226,6 +226,9 @@ void wxCheckListBoxItem::Check (
         m_nIndex = (size_t)nIndex;
     }
 
+    HWND                            hWndListbox = (HWND)m_pParent->GetHWND();
+    RECTL                           rUpdate;
+    MRESULT                         mRc;
 
     wxCommandEvent                  vEvent( wxEVT_COMMAND_CHECKLISTBOX_TOGGLED
                                            ,m_pParent->GetId()
@@ -282,31 +285,6 @@ wxCheckListBox::wxCheckListBox (
            ,rSize
            ,nStrings
            ,asChoices
-           ,lStyle | wxLB_OWNERDRAW
-           ,rVal
-           ,rsName
-          );
-} // end of wxCheckListBox::wxCheckListBox
-
-wxCheckListBox::wxCheckListBox (
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, const wxArrayString&              asChoices
-, long                              lStyle
-, const wxValidator&                rVal
-, const wxString&                   rsName
-)
-              : wxListBox()
-{
-    wxCArrayString chs(asChoices);
-    Create( pParent
-           ,vId
-           ,rPos
-           ,rSize
-           ,chs.GetCount()
-           ,chs.GetStrings()
            ,lStyle | wxLB_OWNERDRAW
            ,rVal
            ,rsName
@@ -442,7 +420,7 @@ void wxCheckListBox::OnChar (
   wxKeyEvent&                       rEvent
 )
 {
-    if (rEvent.GetKeyCode() == WXK_SPACE)
+    if (rEvent.KeyCode() == WXK_SPACE)
         GetItem(GetSelection())->Toggle();
     else
         rEvent.Skip();
@@ -465,7 +443,7 @@ void wxCheckListBox::OnLeftClick (
                 ,&nParentHeight
                );
         vDc.SetFont(GetFont());
-        vHeight = (wxCoord)(vDc.GetCharHeight() * 2.5);
+        vHeight = vDc.GetCharHeight() * 2.5;
 
         //
         // This, of course, will not work if the LB is scrolled

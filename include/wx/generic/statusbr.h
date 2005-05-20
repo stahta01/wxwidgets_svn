@@ -5,61 +5,60 @@
 // Modified by: VZ at 05.02.00 to derive from wxStatusBarBase
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GENERIC_STATUSBR_H_
 #define _WX_GENERIC_STATUSBR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "statusbr.h"
 #endif
 
 #include "wx/pen.h"
 #include "wx/font.h"
 #include "wx/statusbr.h"
-#include "wx/arrstr.h"
 
-extern WXDLLEXPORT_DATA(const wxChar*) wxPanelNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxPanelNameStr;
 
 class WXDLLEXPORT wxStatusBarGeneric : public wxStatusBarBase
 {
 public:
   wxStatusBarGeneric() { Init(); }
   wxStatusBarGeneric(wxWindow *parent,
-              wxWindowID winid,
+              wxWindowID id,
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize,
-              long style = wxFULL_REPAINT_ON_RESIZE,
+              long style = 0,
               const wxString& name = wxPanelNameStr)
   {
       Init();
 
-      Create(parent, winid, pos, size, style, name);
+      Create(parent, id, pos, size, style, name);
   }
   wxStatusBarGeneric(wxWindow *parent,
-                     wxWindowID winid,
+                     wxWindowID id,
                      long style,
                      const wxString& name = wxPanelNameStr)
   {
       Init();
 
-      Create(parent, winid, style, name);
+      Create(parent, id, style, name);
   }
 
   virtual ~wxStatusBarGeneric();
 
-  bool Create(wxWindow *parent, wxWindowID winid,
+  bool Create(wxWindow *parent, wxWindowID id,
               const wxPoint& WXUNUSED(pos) = wxDefaultPosition,
               const wxSize& WXUNUSED(size) = wxDefaultSize,
-              long style = wxFULL_REPAINT_ON_RESIZE,
+              long style = 0,
               const wxString& name = wxPanelNameStr)
   {
-      return Create(parent, winid, style, name);
+      return Create(parent, id, style, name);
   }
 
-  bool Create(wxWindow *parent, wxWindowID winid,
+  bool Create(wxWindow *parent, wxWindowID id,
               long style,
               const wxString& name = wxPanelNameStr);
 
@@ -93,7 +92,7 @@ public:
   void SetBorderY(int y);
 
   void OnPaint(wxPaintEvent& event);
-
+  
   void OnLeftDown(wxMouseEvent& event);
   void OnRightDown(wxMouseEvent& event);
 
@@ -115,15 +114,16 @@ protected:
 
   int               m_borderX;
   int               m_borderY;
+  wxFont            m_defaultStatusBarFont;
   wxPen             m_mediumShadowPen;
   wxPen             m_hilightPen;
 
-  virtual wxSize DoGetBestSize() const;
-
 private:
   DECLARE_EVENT_TABLE()
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxStatusBarGeneric)
+  DECLARE_DYNAMIC_CLASS(wxStatusBarGeneric)
 };
 
 #endif
     // _WX_GENERIC_STATUSBR_H_
+
+// vi:sts=4:sw=4:et

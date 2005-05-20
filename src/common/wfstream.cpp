@@ -6,10 +6,10 @@
 // Created:     11/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "wfstream.h"
 #endif
 
@@ -20,13 +20,11 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_STREAMS
+#if wxUSE_STREAMS && wxUSE_FILE
 
 #include <stdio.h>
 #include "wx/stream.h"
 #include "wx/wfstream.h"
-
-#if wxUSE_FILE
 
 // ----------------------------------------------------------------------------
 // wxFileInputStream
@@ -36,26 +34,26 @@ wxFileInputStream::wxFileInputStream(const wxString& fileName)
   : wxInputStream()
 {
     m_file = new wxFile(fileName, wxFile::read);
-    m_file_destroy = true;
+    m_file_destroy = TRUE;
 }
 
 wxFileInputStream::wxFileInputStream()
   : wxInputStream()
 {
-    m_file_destroy = false;
+    m_file_destroy = FALSE;
     m_file = NULL;
 }
 
 wxFileInputStream::wxFileInputStream(wxFile& file)
 {
     m_file = &file;
-    m_file_destroy = false;
+    m_file_destroy = FALSE;
 }
 
 wxFileInputStream::wxFileInputStream(int fd)
 {
     m_file = new wxFile(fd);
-    m_file_destroy = true;
+    m_file_destroy = TRUE;
 }
 
 wxFileInputStream::~wxFileInputStream()
@@ -64,17 +62,17 @@ wxFileInputStream::~wxFileInputStream()
         delete m_file;
 }
 
-wxFileOffset wxFileInputStream::GetLength() const
+size_t wxFileInputStream::GetSize() const
 {
     return m_file->Length();
 }
 
 size_t wxFileInputStream::OnSysRead(void *buffer, size_t size)
 {
-    ssize_t ret = m_file->Read(buffer, size);
+    off_t ret = m_file->Read(buffer, size);
 
     // NB: we can't use a switch here because HP-UX CC doesn't allow
-    //     switching over long long (which size_t is in 64bit mode)
+    //     switching over long long (which off_t is in 64bit mode)
 
     if ( !ret )
     {
@@ -95,12 +93,12 @@ size_t wxFileInputStream::OnSysRead(void *buffer, size_t size)
     return ret;
 }
 
-wxFileOffset wxFileInputStream::OnSysSeek(wxFileOffset pos, wxSeekMode mode)
+off_t wxFileInputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
     return m_file->Seek(pos, mode);
 }
 
-wxFileOffset wxFileInputStream::OnSysTell() const
+off_t wxFileInputStream::OnSysTell() const
 {
     return m_file->Tell();
 }
@@ -112,7 +110,7 @@ wxFileOffset wxFileInputStream::OnSysTell() const
 wxFileOutputStream::wxFileOutputStream(const wxString& fileName)
 {
     m_file = new wxFile(fileName, wxFile::write);
-    m_file_destroy = true;
+    m_file_destroy = TRUE;
 
     if (!m_file->IsOpened())
     {
@@ -128,20 +126,20 @@ wxFileOutputStream::wxFileOutputStream(const wxString& fileName)
 wxFileOutputStream::wxFileOutputStream(wxFile& file)
 {
     m_file = &file;
-    m_file_destroy = false;
+    m_file_destroy = FALSE;
 }
 
 wxFileOutputStream::wxFileOutputStream()
                   : wxOutputStream()
 {
-    m_file_destroy = false;
+    m_file_destroy = FALSE;
     m_file = NULL;
 }
 
 wxFileOutputStream::wxFileOutputStream(int fd)
 {
     m_file = new wxFile(fd);
-    m_file_destroy = true;
+    m_file_destroy = TRUE;
 }
 
 wxFileOutputStream::~wxFileOutputStream()
@@ -162,12 +160,12 @@ size_t wxFileOutputStream::OnSysWrite(const void *buffer, size_t size)
     return ret;
 }
 
-wxFileOffset wxFileOutputStream::OnSysTell() const
+off_t wxFileOutputStream::OnSysTell() const
 {
     return m_file->Tell();
 }
 
-wxFileOffset wxFileOutputStream::OnSysSeek(wxFileOffset pos, wxSeekMode mode)
+off_t wxFileOutputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
     return m_file->Seek(pos, mode);
 }
@@ -178,36 +176,9 @@ void wxFileOutputStream::Sync()
     m_file->Flush();
 }
 
-wxFileOffset wxFileOutputStream::GetLength() const
+size_t wxFileOutputStream::GetSize() const
 {
     return m_file->Length();
-}
-
-// ----------------------------------------------------------------------------
-// wxTempFileOutputStream
-// ----------------------------------------------------------------------------
-
-wxTempFileOutputStream::wxTempFileOutputStream(const wxString& fileName)
-{
-    m_file = new wxTempFile(fileName);
-
-    if (!m_file->IsOpened())
-        m_lasterror = wxSTREAM_WRITE_ERROR;
-}
-
-wxTempFileOutputStream::~wxTempFileOutputStream()
-{
-    if (m_file->IsOpened())
-        Discard();
-    delete m_file;
-}
-
-size_t wxTempFileOutputStream::OnSysWrite(const void *buffer, size_t size)
-{
-    if (IsOk() && m_file->Write(buffer, size))
-        return size;
-    m_lasterror = wxSTREAM_WRITE_ERROR;
-    return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -220,39 +191,34 @@ wxFileStream::wxFileStream(const wxString& fileName)
     wxFileOutputStream::m_file = wxFileInputStream::m_file;
 }
 
-#endif //wxUSE_FILE
-
-#if wxUSE_FFILE
-
 // ----------------------------------------------------------------------------
 // wxFFileInputStream
 // ----------------------------------------------------------------------------
 
-wxFFileInputStream::wxFFileInputStream(const wxString& fileName,
-                                       const wxChar *mode)
-                  : wxInputStream()
+wxFFileInputStream::wxFFileInputStream(const wxString& fileName)
+  : wxInputStream()
 {
-    m_file = new wxFFile(fileName, mode);
-    m_file_destroy = true;
+    m_file = new wxFFile(fileName, "rb");
+    m_file_destroy = TRUE;
 }
 
 wxFFileInputStream::wxFFileInputStream()
-                  : wxInputStream()
+  : wxInputStream()
 {
+    m_file_destroy = FALSE;
     m_file = NULL;
-    m_file_destroy = false;
 }
 
 wxFFileInputStream::wxFFileInputStream(wxFFile& file)
 {
     m_file = &file;
-    m_file_destroy = false;
+    m_file_destroy = FALSE;
 }
 
 wxFFileInputStream::wxFFileInputStream(FILE *file)
 {
     m_file = new wxFFile(file);
-    m_file_destroy = true;
+    m_file_destroy = TRUE;
 }
 
 wxFFileInputStream::~wxFFileInputStream()
@@ -261,17 +227,18 @@ wxFFileInputStream::~wxFFileInputStream()
         delete m_file;
 }
 
-wxFileOffset wxFFileInputStream::GetLength() const
+size_t wxFFileInputStream::GetSize() const
 {
     return m_file->Length();
 }
 
 size_t wxFFileInputStream::OnSysRead(void *buffer, size_t size)
 {
-    ssize_t ret = m_file->Read(buffer, size);
+    off_t ret;
 
-    // It is not safe to call Eof() if the file is not opened.
-    if (!m_file->IsOpened() || m_file->Eof())
+    ret = m_file->Read(buffer, size);
+
+    if (m_file->Eof())
         m_lasterror = wxSTREAM_EOF;
     if (ret == wxInvalidOffset)
     {
@@ -282,12 +249,12 @@ size_t wxFFileInputStream::OnSysRead(void *buffer, size_t size)
     return ret;
 }
 
-wxFileOffset wxFFileInputStream::OnSysSeek(wxFileOffset pos, wxSeekMode mode)
+off_t wxFFileInputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
-    return m_file->Seek(pos, mode) ? m_file->Tell() : wxInvalidOffset;
+    return ( m_file->Seek(pos, mode) ? pos : wxInvalidOffset );
 }
 
-wxFileOffset wxFFileInputStream::OnSysTell() const
+off_t wxFFileInputStream::OnSysTell() const
 {
     return m_file->Tell();
 }
@@ -296,11 +263,10 @@ wxFileOffset wxFFileInputStream::OnSysTell() const
 // wxFFileOutputStream
 // ----------------------------------------------------------------------------
 
-wxFFileOutputStream::wxFFileOutputStream(const wxString& fileName,
-                                         const wxChar *mode)
+wxFFileOutputStream::wxFFileOutputStream(const wxString& fileName)
 {
-    m_file = new wxFFile(fileName, mode);
-    m_file_destroy = true;
+    m_file = new wxFFile(fileName, "w+b");
+    m_file_destroy = TRUE;
 
     if (!m_file->IsOpened())
     {
@@ -316,20 +282,20 @@ wxFFileOutputStream::wxFFileOutputStream(const wxString& fileName,
 wxFFileOutputStream::wxFFileOutputStream(wxFFile& file)
 {
     m_file = &file;
-    m_file_destroy = false;
+    m_file_destroy = FALSE;
 }
 
 wxFFileOutputStream::wxFFileOutputStream()
-                   : wxOutputStream()
+  : wxOutputStream()
 {
+    m_file_destroy = FALSE;
     m_file = NULL;
-    m_file_destroy = false;
 }
 
 wxFFileOutputStream::wxFFileOutputStream(FILE *file)
 {
     m_file = new wxFFile(file);
-    m_file_destroy = true;
+    m_file_destroy = TRUE;
 }
 
 wxFFileOutputStream::~wxFFileOutputStream()
@@ -344,22 +310,21 @@ wxFFileOutputStream::~wxFFileOutputStream()
 size_t wxFFileOutputStream::OnSysWrite(const void *buffer, size_t size)
 {
     size_t ret = m_file->Write(buffer, size);
-    // It is not safe to call Error() if the file is not opened.
-    if (!m_file->IsOpened() || m_file->Error())
+    if (m_file->Error())
         m_lasterror = wxSTREAM_WRITE_ERROR;
     else
         m_lasterror = wxSTREAM_NO_ERROR;
     return ret;
 }
 
-wxFileOffset wxFFileOutputStream::OnSysTell() const
+off_t wxFFileOutputStream::OnSysTell() const
 {
     return m_file->Tell();
 }
 
-wxFileOffset wxFFileOutputStream::OnSysSeek(wxFileOffset pos, wxSeekMode mode)
+off_t wxFFileOutputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
-    return m_file->Seek(pos, mode) ? m_file->Tell() : wxInvalidOffset;
+    return ( m_file->Seek(pos, mode) ? pos : wxInvalidOffset );
 }
 
 void wxFFileOutputStream::Sync()
@@ -368,7 +333,7 @@ void wxFFileOutputStream::Sync()
     m_file->Flush();
 }
 
-wxFileOffset wxFFileOutputStream::GetLength() const
+size_t wxFFileOutputStream::GetSize() const
 {
     return m_file->Length();
 }
@@ -383,7 +348,6 @@ wxFFileStream::wxFFileStream(const wxString& fileName)
     wxFFileOutputStream::m_file = wxFFileInputStream::m_file;
 }
 
-#endif //wxUSE_FFILE
-
-#endif // wxUSE_STREAMS
+#endif
+  // wxUSE_STREAMS && wxUSE_FILE
 

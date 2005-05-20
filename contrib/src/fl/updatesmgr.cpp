@@ -75,7 +75,7 @@ void cbSimpleUpdatesMgr::OnStartChanges()
         cbDockPane& pane = *panes[n];
         // store pane state
         pane.mUMgrData.StoreItemState( pane.mBoundsInParent );
-        pane.mUMgrData.SetDirty( false );
+        pane.mUMgrData.SetDirty( FALSE );
 
         for( size_t i = 0; i != pane.GetRowList().Count(); ++i )
         {
@@ -83,7 +83,7 @@ void cbSimpleUpdatesMgr::OnStartChanges()
 
             // store row state
             row.mUMgrData.StoreItemState( row.mBoundsInParent );
-            row.mUMgrData.SetDirty( false );
+            row.mUMgrData.SetDirty( FALSE );
 
             for( size_t k = 0; k != row.mBars.Count(); ++k )
             {
@@ -91,7 +91,7 @@ void cbSimpleUpdatesMgr::OnStartChanges()
 
                 // store bar state
                 bar.mUMgrData.StoreItemState( bar.mBoundsInParent );
-                bar.mUMgrData.SetDirty( false );
+                bar.mUMgrData.SetDirty( FALSE );
             }
         }
     }
@@ -102,23 +102,23 @@ void cbSimpleUpdatesMgr::OnFinishChanges()
     // nothing here, could be overriden by more sophisticated updates-managers
 }
 
-void cbSimpleUpdatesMgr::OnRowWillChange( cbRowInfo* WXUNUSED(pRow), cbDockPane* WXUNUSED(pInPane) )
+void cbSimpleUpdatesMgr::OnRowWillChange( cbRowInfo* pRow, cbDockPane* pInPane )
 {
     // -/-
 }
 
-void cbSimpleUpdatesMgr::OnBarWillChange( cbBarInfo* WXUNUSED(pBar), 
-                                          cbRowInfo* WXUNUSED(pInRow), cbDockPane* WXUNUSED(pInPane) )
+void cbSimpleUpdatesMgr::OnBarWillChange( cbBarInfo* pBar, 
+                                          cbRowInfo* pInRow, cbDockPane* pInPane )
 {
     // -/-
 }
 
-void cbSimpleUpdatesMgr::OnPaneMarginsWillChange( cbDockPane* WXUNUSED(pPane) )
+void cbSimpleUpdatesMgr::OnPaneMarginsWillChange( cbDockPane* pPane )
 {
     // -/-
 }
 
-void cbSimpleUpdatesMgr::OnPaneWillChange( cbDockPane* WXUNUSED(pPane) )
+void cbSimpleUpdatesMgr::OnPaneWillChange( cbDockPane* pPane )
 {
     // -/-
 }
@@ -163,7 +163,7 @@ void cbSimpleUpdatesMgr::UpdateNow()
 
             wxDC* pDc = NULL;
 
-            bool rowChanged = false;
+            bool rowChanged = FALSE;
 
             // FIXME:: the below should not be fixed
             cbBarInfo* barsToRepaint[256];
@@ -173,7 +173,7 @@ void cbSimpleUpdatesMgr::UpdateNow()
 
             if ( WasChanged( row.mUMgrData, row.mBoundsInParent ) )
             
-                rowChanged = true;
+                rowChanged = TRUE;
             else
                 for( size_t k = 0; k != row.mBars.Count(); ++k )
 
@@ -249,36 +249,36 @@ void cbSimpleUpdatesMgr::UpdateNow()
 
     // step #2 - do ordered refreshing and resizing of bar window objects now
 
-    wxNode* pNode     = mBarsToRefresh.GetFirst();
-    wxNode* pPaneNode = mPanesList.GetFirst();
+    wxNode* pNode     = mBarsToRefresh.First();
+    wxNode* pPaneNode = mPanesList.First();
 
     while( pNode )
     {
-        cbBarInfo*  pBar  = (cbBarInfo*) pNode->GetData();
-        cbDockPane* pPane = (cbDockPane*)pPaneNode->GetData();
+        cbBarInfo*  pBar  = (cbBarInfo*) pNode->Data();
+        cbDockPane* pPane = (cbDockPane*)pPaneNode->Data();
 
         pPane->SizeBar( pBar );
 
-        pNode     = pNode->GetNext();
-        pPaneNode = pPaneNode->GetNext();
+        pNode     = pNode->Next();
+        pPaneNode = pPaneNode->Next();
     }
 
-    pNode = mBarsToRefresh.GetFirst();
+    pNode = mBarsToRefresh.First();
 
     while( pNode )
     {
-        cbBarInfo* pBar = (cbBarInfo*)pNode->GetData();
+        cbBarInfo* pBar = (cbBarInfo*)pNode->Data();
 
         if ( pBar->mpBarWnd ) 
         {
             pBar->mpBarWnd->Refresh();
 
             // FIXME::
-            //info.mpBarWnd->Show(false);
-            //info.mpBarWnd->Show(true);
+            //info.mpBarWnd->Show(FALSE);
+            //info.mpBarWnd->Show(TRUE);
         }
 
-        pNode  = pNode->GetNext();
+        pNode  = pNode->Next();
     }
 
     if ( clientWindowChanged )

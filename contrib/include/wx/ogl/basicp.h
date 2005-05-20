@@ -6,7 +6,7 @@
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _OGL_BASICP_H_
@@ -16,10 +16,9 @@
 #pragma interface "basicp.h"
 #endif
 
-
 #define CONTROL_POINT_SIZE       6
 
-class WXDLLIMPEXP_OGL wxShapeTextLine: public wxObject
+class wxShapeTextLine: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxShapeTextLine)
 public:
@@ -41,13 +40,13 @@ protected:
    double        m_y;
 };
 
-class WXDLLIMPEXP_OGL wxShape;
-class WXDLLIMPEXP_OGL wxControlPoint: public wxRectangleShape
+class wxShape;
+class wxControlPoint: public wxRectangleShape
 {
  DECLARE_DYNAMIC_CLASS(wxControlPoint)
 
- friend class WXDLLIMPEXP_OGL wxShapeEvtHandler;
- friend class WXDLLIMPEXP_OGL wxShape;
+ friend class wxShapeEvtHandler;
+ friend class wxShape;
 
  public:
   wxControlPoint(wxShapeCanvas *the_canvas = NULL, wxShape *object = NULL, double size = 0.0, double the_xoffset = 0.0,
@@ -73,7 +72,7 @@ public:
   double         m_yoffset;
   wxShape*      m_shape;
   wxCursor*     m_oldCursor;
-  bool          m_eraseObject; // If true, erases object before dragging handle.
+  bool          m_eraseObject; // If TRUE, erases object before dragging handle.
 
 /*
  * Store original top-left, bottom-right coordinates
@@ -89,11 +88,11 @@ public:
   static double sm_controlPointDragPosY;
 };
 
-class WXDLLIMPEXP_OGL wxPolygonShape;
-class WXDLLIMPEXP_OGL wxPolygonControlPoint: public wxControlPoint
+class wxPolygonShape;
+class wxPolygonControlPoint: public wxControlPoint
 {
  DECLARE_DYNAMIC_CLASS(wxPolygonControlPoint)
-  friend class WXDLLIMPEXP_OGL wxPolygonShape;
+  friend class wxPolygonShape;
  public:
   wxPolygonControlPoint(wxShapeCanvas *the_canvas = NULL, wxShape *object = NULL, double size = 0.0, wxRealPoint *vertex = NULL,
     double the_xoffset = 0.0, double the_yoffset = 0.0);
@@ -124,7 +123,7 @@ public:
  *
  */
 
-class WXDLLIMPEXP_OGL wxShapeRegion: public wxObject
+class wxShapeRegion: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxShapeRegion)
 
@@ -138,7 +137,7 @@ class WXDLLIMPEXP_OGL wxShapeRegion: public wxObject
 
   // Accessors
   inline void SetText(const wxString& s)
-    { m_regionText = s; }
+    { m_regionText = s; m_formattedText.Append(new wxShapeTextLine(0,0,s));}
   void SetFont(wxFont *f);
   void SetMinSize(double w, double h);
   void SetSize(double w, double h);
@@ -157,7 +156,7 @@ class WXDLLIMPEXP_OGL wxShapeRegion: public wxObject
   inline int GetFormatMode() const { return m_formatMode; }
   inline wxString GetName() const { return m_regionName; }
   inline wxString GetColour() const { return m_textColour; }
-  wxColour GetActualColourObject();
+  wxColour *GetActualColourObject();
   inline wxList& GetFormattedText() { return m_formattedText; }
   inline wxString GetPenColour() const { return m_penColour; }
   inline int GetPenStyle() const { return m_penStyle; }
@@ -188,7 +187,7 @@ public:
   int                   m_formatMode;        // FORMAT_CENTRE_HORIZ | FORMAT_CENTRE_VERT | FORMAT_NONE
   wxString              m_regionName;
   wxString              m_textColour;
-  wxColour              m_actualColourObject; // For speed purposes
+  wxColour*             m_actualColourObject; // For speed purposes
 
   // New members for specifying divided rectangle division colour/style 30/6/94
   wxString              m_penColour;
@@ -201,7 +200,7 @@ public:
  * User-defined attachment point
  */
 
-class WXDLLIMPEXP_OGL wxAttachmentPoint: public wxObject
+class wxAttachmentPoint: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxAttachmentPoint)
 

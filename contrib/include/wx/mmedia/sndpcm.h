@@ -14,7 +14,6 @@
 #endif
 
 #include "wx/defs.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 
 //
@@ -24,7 +23,7 @@
 class wxSoundFormatPcm : public wxSoundFormatBase {
 public:
   wxSoundFormatPcm(wxUint32 srate = 22500, wxUint8 bps = 8,
-                   wxUint16 channels = 2, bool sign = true,
+                   wxUint16 channels = 2, bool sign = TRUE,
                    int order = wxLITTLE_ENDIAN); 
   ~wxSoundFormatPcm();
 

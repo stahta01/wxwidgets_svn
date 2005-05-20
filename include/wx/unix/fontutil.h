@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     05.11.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIX_FONTUTIL_H_

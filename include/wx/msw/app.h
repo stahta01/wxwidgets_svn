@@ -12,18 +12,18 @@
 #ifndef _WX_APP_H_
 #define _WX_APP_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "app.h"
 #endif
 
 #include "wx/event.h"
 #include "wx/icon.h"
 
-class WXDLLIMPEXP_CORE wxFrame;
-class WXDLLIMPEXP_CORE wxWindow;
-class WXDLLIMPEXP_CORE wxApp;
-class WXDLLIMPEXP_CORE wxKeyEvent;
-class WXDLLIMPEXP_BASE wxLog;
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxApp ;
+class WXDLLEXPORT wxKeyEvent;
+class WXDLLEXPORT wxLog;
 
 // Represents the application. Derive OnInit and declare
 // a new App object to start application
@@ -36,11 +36,13 @@ public:
     virtual ~wxApp();
 
     // override base class (pure) virtuals
-    virtual bool Initialize(int& argc, wxChar **argv);
-    virtual void CleanUp();
-
-    virtual bool Yield(bool onlyIfNeeded = false);
-    virtual void WakeUpIdle();
+    virtual int MainLoop();
+    virtual void ExitMainLoop();
+    virtual bool Initialized();
+    virtual bool Pending();
+    virtual void Dispatch();
+    virtual bool Yield(bool onlyIfNeeded = FALSE);
+    virtual bool ProcessIdle();
 
     virtual void SetPrintMode(int mode) { m_printMode = mode; }
     virtual int GetPrintMode() const { return m_printMode; }
@@ -50,27 +52,55 @@ public:
     void OnEndSession(wxCloseEvent& event);
     void OnQueryEndSession(wxCloseEvent& event);
 
-#if wxUSE_EXCEPTIONS
-    virtual bool OnExceptionInMainLoop();
-#endif // wxUSE_EXCEPTIONS
+    // Send idle event to all top-level windows.
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents();
 
-    // deprecated functions, use wxEventLoop directly instead
-#if WXWIN_COMPATIBILITY_2_4
-    wxDEPRECATED( void DoMessage(WXMSG *pMsg) );
-    wxDEPRECATED( bool DoMessage() );
-    wxDEPRECATED( bool ProcessMessage(WXMSG* pMsg) );
-#endif // WXWIN_COMPATIBILITY_2_4
+    // Send idle event to window and all subwindows
+    // Returns TRUE if more idle time is requested.
+    bool SendIdleEvents(wxWindow* win);
+
+    void SetAuto3D(bool flag) { m_auto3D = flag; }
+    bool GetAuto3D() const { return m_auto3D; }
 
 protected:
+    bool   m_showOnInit;
     int    m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
+    bool   m_auto3D ;   // Always use 3D controls, except where overriden
+
+    /* Windows-specific wxApp definitions */
 
 public:
+
     // Implementation
+    static bool Initialize();
+    static void CleanUp();
+
     static bool RegisterWindowClasses();
     static bool UnregisterWindowClasses();
 
+    // Convert Windows to argc, argv style
+    void ConvertToStandardCommandArgs(const char* p);
+
+    // message processing
+    // ------------------
+
+    // process the given message
+    virtual void DoMessage(WXMSG *pMsg);
+
+    // retrieve the next message from the queue and process it
+    virtual bool DoMessage();
+
+    // preprocess the message
+    virtual bool ProcessMessage(WXMSG* pMsg);
+
+    // idle processing
+    // ---------------
+
+    void DeletePendingObjects();
+
 #if wxUSE_RICHEDIT
-    // initialize the richedit DLL of (at least) given version, return true if
+    // initialize the richedit DLL of (at least) given version, return TRUE if
     // ok (Win95 has version 1, Win98/NT4 has 1 and 2, W2K has 3)
     static bool InitRichEdit(int version = 2);
 #endif // wxUSE_RICHEDIT
@@ -79,48 +109,22 @@ public:
     // wasn't found at all
     static int GetComCtl32Version();
 
-    // the SW_XXX value to be used for the frames opened by the application
-    // (currently seems unused which is a bug -- TODO)
-    static int m_nCmdShow;
+public:
+    int               m_nCmdShow;
 
 protected:
+    bool              m_keepGoing;
+
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxApp)
 };
 
-// ----------------------------------------------------------------------------
-// MSW-specific wxEntry() overload and IMPLEMENT_WXWIN_MAIN definition
-// ----------------------------------------------------------------------------
-
-// we need HINSTANCE declaration to define WinMain()
-#include "wx/msw/wrapwin.h"
-
-#ifndef SW_SHOWNORMAL
-    #define SW_SHOWNORMAL 1
-#endif
-
-// WinMain() is always ANSI, even in Unicode build, under normal Windows
-// but is always Unicode under CE
-#ifdef __WXWINCE__
-    typedef wchar_t *wxCmdLineArgType;
+#if !defined(_WINDLL) || (defined(_WINDLL) && defined(WXMAKINGDLL))
+int WXDLLEXPORT wxEntry(WXHINSTANCE hInstance, WXHINSTANCE hPrevInstance,
+                        char *lpszCmdLine, int nCmdShow, bool enterLoop = TRUE);
 #else
-    typedef char *wxCmdLineArgType;
+int WXDLLEXPORT wxEntry(WXHINSTANCE hInstance);
 #endif
 
-extern int WXDLLEXPORT
-wxEntry(HINSTANCE hInstance,
-        HINSTANCE hPrevInstance = NULL,
-        wxCmdLineArgType pCmdLine = NULL,
-        int nCmdShow = SW_SHOWNORMAL);
-
-#define IMPLEMENT_WXWIN_MAIN \
-    extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    \
-                                  HINSTANCE hPrevInstance,                \
-                                  wxCmdLineArgType lpCmdLine,             \
-                                  int nCmdShow)                           \
-    {                                                                     \
-        return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    \
-    }
-
-#endif // _WX_APP_H_
+#endif
+    // _WX_APP_H_
 

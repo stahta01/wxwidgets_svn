@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/motif/msgdlg.cpp
+// Name:        msgdlg.cpp
 // Purpose:     wxMessageDialog
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
-// RCS-ID:      $Id$
+// RCS-ID:      $$
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -13,16 +13,13 @@
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "msgdlg.h"
 #endif
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/defs.h"
 
@@ -41,7 +38,7 @@
 
 #include "wx/app.h"
 #include "wx/intl.h"
-#include "wx/msgdlg.h"
+#include "wx/motif/msgdlg.h"
 #include "wx/motif/private.h"
 
 // ----------------------------------------------------------------------------
@@ -108,26 +105,24 @@ wxMessageDialog::wxMessageDialog(wxWindow *parent,
 {
     m_caption = caption;
     m_message = message;
+    m_dialogStyle = style;
     m_parent = parent;
-    SetMessageDialogStyle(style);
 }
 
 int wxMessageDialog::ShowModal()
 {
     Widget (*dialogCreateFunction)(Widget, String, ArgList, Cardinal) = NULL;
-    const long style = GetMessageDialogStyle();
-
-    if ( style & wxYES_NO )
+    if ( m_dialogStyle & wxYES_NO )
     {
         // if we have [Yes], it must be a question
         dialogCreateFunction = XmCreateQuestionDialog;
     }
-    else if ( style & wxICON_STOP )
+    else if ( m_dialogStyle & wxICON_STOP )
     {
         // error dialog is the one with error icon...
         dialogCreateFunction = XmCreateErrorDialog;
     }
-    else if ( style & wxICON_EXCLAMATION )
+    else if ( m_dialogStyle & wxICON_EXCLAMATION )
     {
         // ...and the warning dialog too
         dialogCreateFunction = XmCreateWarningDialog;
@@ -182,11 +177,11 @@ int wxMessageDialog::ShowModal()
     Widget wBtnHelp = XmMessageBoxGetChild(wMsgBox, XmDIALOG_HELP_BUTTON);
     Widget wBtnCancel = XmMessageBoxGetChild(wMsgBox, XmDIALOG_CANCEL_BUTTON);
 
-    if ( style & wxYES_NO )
+    if ( m_dialogStyle & wxYES_NO )
     {
-        wxXmString yes(_("Yes")), no(_("No")), cancel(_("Cancel"));
+        wxXmString yes(_("Yes")), no(_("No")), cancel(_("Cancel"));            
 
-        if ( style & wxCANCEL )
+        if ( m_dialogStyle & wxCANCEL )
         {
             // use the cancel button for No and the help button for
             // Cancel  Yuk :-)  MB
@@ -210,7 +205,7 @@ int wxMessageDialog::ShowModal()
         // requested)
         //
         XtUnmanageChild(wBtnHelp);
-        if ( !(style & wxCANCEL ) ) XtUnmanageChild(wBtnCancel);
+        if ( !(m_dialogStyle & wxCANCEL ) ) XtUnmanageChild(wBtnCancel);
     }
 
     // set the callbacks for the message box buttons
@@ -240,7 +235,7 @@ int wxMessageDialog::ShowModal()
     }
 
     // translate the result if necessary
-    if ( style & wxYES_NO )
+    if ( m_dialogStyle & wxYES_NO )
     {
         if ( m_result == wxID_OK )
             m_result = wxID_YES;

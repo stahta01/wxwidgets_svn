@@ -6,13 +6,13 @@
 // Created:     1997
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_PROTO_FILE_H__
 #define __WX_PROTO_FILE_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "sckfile.h"
 #endif
 
@@ -23,8 +23,8 @@
 #include "wx/protocol/protocol.h"
 #include "wx/url.h"
 
-class WXDLLIMPEXP_NET wxFileProto: public wxProtocol {
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxFileProto)
+class WXDLLEXPORT wxFileProto: public wxProtocol {
+  DECLARE_DYNAMIC_CLASS(wxFileProto)
   DECLARE_PROTOCOL(wxFileProto)
 protected:
   wxProtocolError m_error;

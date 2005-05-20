@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "window.h"
 #endif
 
@@ -42,7 +42,6 @@
 #include "wx/log.h"
 #include "wx/fontutil.h"
 #include "wx/univ/renderer.h"
-#include "wx/hash.h"
 
 #if  wxUSE_DRAG_AND_DROP
     #include "wx/dnd.h"
@@ -62,6 +61,8 @@
 // global variables for this module
 // ----------------------------------------------------------------------------
 
+extern wxHashTable *wxWidgetHashTable;
+extern wxHashTable *wxClientWidgetHashTable;
 static wxWindow* g_captureWindow = NULL;
 static GC g_eraseGC;
 
@@ -97,6 +98,9 @@ END_EVENT_TABLE()
 
 void wxWindowX11::Init()
 {
+    // generic initializations first
+    InitBase();
+
     // X11-specific
     m_mainWindow = (WXWindow) 0;
     m_clientWindow = (WXWindow) 0;
@@ -106,6 +110,7 @@ void wxWindowX11::Init()
     m_winCaptured = FALSE;
     m_needsInputFocus = FALSE;
     m_isShown = TRUE;
+    m_isBeingDeleted = FALSE;
     m_lastTS = 0;
     m_lastButton = 0;
 }
@@ -117,7 +122,7 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
                       long style,
                       const wxString& name)
 {
-    wxCHECK_MSG( parent, FALSE, wxT("can't create wxWindow without parent") );
+    wxCHECK_MSG( parent, FALSE, "can't create wxWindow without parent" );
 
     CreateBase(parent, id, pos, size, style, wxDefaultValidator, name);
 
@@ -218,7 +223,7 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
             KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
             PropertyChangeMask | VisibilityChangeMask ;
 
-        if (!HasFlag( wxFULL_REPAINT_ON_RESIZE ))
+        if (HasFlag( wxNO_FULL_REPAINT_ON_RESIZE ))
         {
             xattributes_mask |= CWBitGravity;
             xattributes.bit_gravity = StaticGravity;
@@ -298,7 +303,7 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
             KeymapStateMask | FocusChangeMask | ColormapChangeMask | StructureNotifyMask |
             PropertyChangeMask | VisibilityChangeMask ;
 
-        if (!HasFlag( wxFULL_REPAINT_ON_RESIZE ))
+        if (HasFlag( wxNO_FULL_REPAINT_ON_RESIZE ))
         {
             xattributes_mask |= CWBitGravity;
             xattributes.bit_gravity = NorthWestGravity;
@@ -335,12 +340,18 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
 // Destructor
 wxWindowX11::~wxWindowX11()
 {
-    SendDestroyEvent();
+    // Send destroy event
+    wxWindowDestroyEvent destroyEvent((wxWindow*) this);
+    destroyEvent.SetId(GetId());
+    GetEventHandler()->ProcessEvent(destroyEvent);
 
     if (g_captureWindow == this)
         g_captureWindow = NULL;
 
     m_isBeingDeleted = TRUE;
+
+    if (m_parent)
+        m_parent->RemoveChild( this );
 
     DestroyChildren();
 
@@ -394,7 +405,7 @@ void wxWindowX11::SetFocus()
 }
 
 // Get the window with the focus
-wxWindow *wxWindowBase::DoFindFocus()
+wxWindow *wxWindowBase::FindFocus()
 {
     Window xfocus = (Window) 0;
     int revert = 0;
@@ -462,7 +473,7 @@ void wxWindowX11::DoCaptureMouse()
 {
     if ((g_captureWindow != NULL) && (g_captureWindow != this))
     {
-        wxASSERT_MSG(FALSE, wxT("Trying to capture before mouse released."));
+        wxASSERT_MSG(FALSE, "Trying to capture before mouse released.");
 
         // Core dump now
         int *tmp = NULL;
@@ -873,6 +884,13 @@ void wxWindowX11::DoSetClientSize(int width, int height)
     }
 }
 
+// For implementation purposes - sometimes decorations make the client area
+// smaller
+wxPoint wxWindowX11::GetClientAreaOrigin() const
+{
+    return wxPoint(0, 0);
+}
+
 void wxWindowX11::DoMoveWindow(int x, int y, int width, int height)
 {
     Window xwindow = (Window) m_mainWindow;
@@ -933,7 +951,7 @@ void wxWindowX11::DoMoveWindow(int x, int y, int width, int height)
 #endif
 }
 
-void wxWindowX11::DoSetSizeHints(int minW, int minH, int maxW, int maxH, int incW, int incH)
+void wxWindowX11::SetSizeHints(int minW, int minH, int maxW, int maxH, int incW, int incH)
 {
     m_minWidth = minW;
     m_minHeight = minH;
@@ -973,7 +991,7 @@ void wxWindowX11::DoSetSizeHints(int minW, int minH, int maxW, int maxH, int inc
 
 int wxWindowX11::GetCharHeight() const
 {
-    wxCHECK_MSG( m_font.Ok(), 0, wxT("valid window font needed") );
+    wxCHECK_MSG( m_font.Ok(), 0, "valid window font needed" );
 
 #if wxUSE_UNICODE
     // There should be an easier way.
@@ -1000,7 +1018,7 @@ int wxWindowX11::GetCharHeight() const
 
 int wxWindowX11::GetCharWidth() const
 {
-    wxCHECK_MSG( m_font.Ok(), 0, wxT("valid window font needed") );
+    wxCHECK_MSG( m_font.Ok(), 0, "valid window font needed" );
 
 #if wxUSE_UNICODE
     // There should be an easier way.
@@ -1147,6 +1165,14 @@ void wxWindowX11::Update()
     }
 }
 
+void wxWindowX11::Clear()
+{
+//    wxClientDC dc((wxWindow*) this);
+//    wxBrush brush(GetBackgroundColour(), wxSOLID);
+//    dc.SetBackground(brush);
+//    dc.Clear();
+}
+
 void wxWindowX11::SendEraseEvents()
 {
     if (m_clearRegion.IsEmpty()) return;
@@ -1237,7 +1263,7 @@ void wxWindowX11::SendNcPaintEvents()
 // Responds to colour changes: passes event on to children.
 void wxWindowX11::OnSysColourChanged(wxSysColourChangedEvent& event)
 {
-    wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    wxWindowList::Node *node = GetChildren().GetFirst();
     while ( node )
     {
         // Only propagate to non-top-level windows
@@ -1245,7 +1271,7 @@ void wxWindowX11::OnSysColourChanged(wxSysColourChangedEvent& event)
         if ( win->GetParent() )
         {
             wxSysColourChangedEvent event2;
-            event.SetEventObject(win);
+            event.m_eventObject = win;
             win->GetEventHandler()->ProcessEvent(event2);
         }
 
@@ -1263,8 +1289,7 @@ void wxWindowX11::OnInternalIdle()
 
     // This calls the UI-update mechanism (querying windows for
     // menu/toolbar/control state information)
-    if (wxUpdateUIEvent::CanUpdate((wxWindow*) this))
-        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    UpdateWindowUI();
 
     // Set the input focus if couldn't do it before
     if (m_needsInputFocus)
@@ -1284,17 +1309,20 @@ void wxWindowX11::OnInternalIdle()
 }
 
 // ----------------------------------------------------------------------------
-// function which maintain the global hash table mapping Widgets to wxWidgets
+// function which maintain the global hash table mapping Widgets to wxWindows
 // ----------------------------------------------------------------------------
 
-static bool DoAddWindowToTable(wxWindowHash *hash, Window w, wxWindow *win)
+bool wxAddWindowToTable(Window w, wxWindow *win)
 {
-    if ( !hash->insert(wxWindowHash::value_type(w, win)).second )
+    wxWindow *oldItem = NULL;
+    if ((oldItem = (wxWindow *)wxWidgetHashTable->Get ((long) w)))
     {
-        wxLogDebug( wxT("Widget table clash: new widget is 0x%08x, %s"),
-                    (unsigned int)w, win->GetClassInfo()->GetClassName());
+        wxLogDebug( wxT("Widget table clash: new widget is %ld, %s"),
+                    (long)w, win->GetClassInfo()->GetClassName());
         return FALSE;
     }
+
+    wxWidgetHashTable->Put((long) w, win);
 
     wxLogTrace( wxT("widget"), wxT("XWindow 0x%08x <-> window %p (%s)"),
                 (unsigned int) w, win, win->GetClassInfo()->GetClassName());
@@ -1302,52 +1330,51 @@ static bool DoAddWindowToTable(wxWindowHash *hash, Window w, wxWindow *win)
     return TRUE;
 }
 
-static inline wxWindow *DoGetWindowFromTable(wxWindowHash *hash, Window w)
-{
-    wxWindowHash::iterator i = hash->find(w);
-    return i == hash->end() ? NULL : i->second;
-}
-
-static inline void DoDeleteWindowFromTable(wxWindowHash *hash, Window w)
-{
-    wxLogTrace( wxT("widget"), wxT("XWindow 0x%08x deleted"), (unsigned int) w);
-
-    hash->erase(w);
-}
-
-// ----------------------------------------------------------------------------
-// public wrappers
-// ----------------------------------------------------------------------------
-
-bool wxAddWindowToTable(Window w, wxWindow *win)
-{
-    return DoAddWindowToTable(wxWidgetHashTable, w, win);
-}
-
 wxWindow *wxGetWindowFromTable(Window w)
 {
-    return DoGetWindowFromTable(wxWidgetHashTable, w);
+    return (wxWindow *)wxWidgetHashTable->Get((long) w);
 }
 
 void wxDeleteWindowFromTable(Window w)
 {
-    DoDeleteWindowFromTable(wxWidgetHashTable, w);
+    wxWidgetHashTable->Delete((long)w);
 }
+
+// ----------------------------------------------------------------------------
+// function which maintain the global hash table mapping client widgets
+// ----------------------------------------------------------------------------
 
 bool wxAddClientWindowToTable(Window w, wxWindow *win)
 {
-    return DoAddWindowToTable(wxClientWidgetHashTable, w, win);
+    wxWindow *oldItem = NULL;
+    if ((oldItem = (wxWindow *)wxClientWidgetHashTable->Get ((long) w)))
+    {
+        wxLogDebug( wxT("Client window table clash: new window is %ld, %s"),
+                    (long)w, win->GetClassInfo()->GetClassName());
+        return FALSE;
+    }
+
+    wxClientWidgetHashTable->Put((long) w, win);
+
+    wxLogTrace( wxT("widget"), wxT("XWindow 0x%08x <-> window %p (%s)"),
+                (unsigned int) w, win, win->GetClassInfo()->GetClassName());
+
+    return TRUE;
 }
 
 wxWindow *wxGetClientWindowFromTable(Window w)
 {
-    return DoGetWindowFromTable(wxClientWidgetHashTable, w);
+    return (wxWindow *)wxClientWidgetHashTable->Get((long) w);
 }
 
 void wxDeleteClientWindowFromTable(Window w)
 {
-    DoDeleteWindowFromTable(wxClientWidgetHashTable, w);
+    wxClientWidgetHashTable->Delete((long)w);
 }
+
+// ----------------------------------------------------------------------------
+// add/remove window from the table
+// ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 // X11-specific accessors
@@ -1568,7 +1595,7 @@ bool wxWindowX11::SetForegroundColour(const wxColour& col)
 wxWindow *wxGetActiveWindow()
 {
     // TODO
-    wxFAIL_MSG(wxT("Not implemented"));
+    wxFAIL_MSG("Not implemented");
     return NULL;
 }
 

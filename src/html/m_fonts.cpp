@@ -4,10 +4,10 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -35,8 +35,6 @@ TAG_HANDLER_BEGIN(FONT, "FONT" )
 
     TAG_HANDLER_VARS
         wxArrayString m_Faces;
-
-    TAG_HANDLER_CONSTR(FONT) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -75,16 +73,14 @@ TAG_HANDLER_BEGIN(FONT, "FONT" )
             {
                 wxFontEnumerator enu;
                 enu.EnumerateFacenames();
-                const wxArrayString *faces = enu.GetFacenames();
-                if ( faces )
-                    m_Faces = *faces;
+                m_Faces = *enu.GetFacenames();
             }
             wxStringTokenizer tk(tag.GetParam(wxT("FACE")), wxT(","));
             int index;
 
             while (tk.HasMoreTokens())
             {
-                if ((index = m_Faces.Index(tk.GetNextToken(), false)) != wxNOT_FOUND)
+                if ((index = m_Faces.Index(tk.GetNextToken(), FALSE)) != wxNOT_FOUND)
                 {
                     m_WParser->SetFontFace(m_Faces[index]);
                     m_WParser->GetContainer()->InsertCell(new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
@@ -110,7 +106,7 @@ TAG_HANDLER_BEGIN(FONT, "FONT" )
             m_WParser->SetActualColor(oldclr);
             m_WParser->GetContainer()->InsertCell(new wxHtmlColourCell(oldclr));
         }
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(FONT)
@@ -118,13 +114,11 @@ TAG_HANDLER_END(FONT)
 
 TAG_HANDLER_BEGIN(FACES_U, "U,STRIKE")
 
-    TAG_HANDLER_CONSTR(FACES_U) { }
-
     TAG_HANDLER_PROC(tag)
     {
         int underlined = m_WParser->GetFontUnderlined();
 
-        m_WParser->SetFontUnderlined(true);
+        m_WParser->SetFontUnderlined(TRUE);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
@@ -133,7 +127,7 @@ TAG_HANDLER_BEGIN(FACES_U, "U,STRIKE")
         m_WParser->SetFontUnderlined(underlined);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(FACES_U)
@@ -142,13 +136,12 @@ TAG_HANDLER_END(FACES_U)
 
 
 TAG_HANDLER_BEGIN(FACES_B, "B,STRONG")
-    TAG_HANDLER_CONSTR(FACES_B) { }
 
     TAG_HANDLER_PROC(tag)
     {
         int bold = m_WParser->GetFontBold();
 
-        m_WParser->SetFontBold(true);
+        m_WParser->SetFontBold(TRUE);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
@@ -157,7 +150,7 @@ TAG_HANDLER_BEGIN(FACES_B, "B,STRONG")
         m_WParser->SetFontBold(bold);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(FACES_B)
@@ -166,13 +159,12 @@ TAG_HANDLER_END(FACES_B)
 
 
 TAG_HANDLER_BEGIN(FACES_I, "I,EM,CITE,ADDRESS")
-    TAG_HANDLER_CONSTR(FACES_I) { }
 
     TAG_HANDLER_PROC(tag)
     {
         int italic = m_WParser->GetFontItalic();
 
-        m_WParser->SetFontItalic(true);
+        m_WParser->SetFontItalic(TRUE);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
@@ -181,7 +173,7 @@ TAG_HANDLER_BEGIN(FACES_I, "I,EM,CITE,ADDRESS")
         m_WParser->SetFontItalic(italic);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(FACES_I)
@@ -190,13 +182,12 @@ TAG_HANDLER_END(FACES_I)
 
 
 TAG_HANDLER_BEGIN(FACES_TT, "TT,CODE,KBD,SAMP")
-    TAG_HANDLER_CONSTR(FACES_TT) { }
 
     TAG_HANDLER_PROC(tag)
     {
         int fixed = m_WParser->GetFontFixed();
 
-        m_WParser->SetFontFixed(true);
+        m_WParser->SetFontFixed(TRUE);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
 
@@ -205,7 +196,7 @@ TAG_HANDLER_BEGIN(FACES_TT, "TT,CODE,KBD,SAMP")
         m_WParser->SetFontFixed(fixed);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(FACES_TT)
@@ -215,7 +206,6 @@ TAG_HANDLER_END(FACES_TT)
 
 
 TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
-    TAG_HANDLER_CONSTR(Hx) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -229,10 +219,10 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
         old_f = m_WParser->GetFontFixed();
         old_al = m_WParser->GetAlign();
 
-        m_WParser->SetFontBold(true);
-        m_WParser->SetFontItalic(false);
-        m_WParser->SetFontUnderlined(false);
-        m_WParser->SetFontFixed(false);
+        m_WParser->SetFontBold(TRUE);
+        m_WParser->SetFontItalic(FALSE);
+        m_WParser->SetFontUnderlined(FALSE);
+        m_WParser->SetFontFixed(FALSE);
 
         if (tag.GetName() == wxT("H1"))
                 m_WParser->SetFontSize(7);
@@ -243,20 +233,20 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
         else if (tag.GetName() == wxT("H4"))
         {
                 m_WParser->SetFontSize(5);
-                m_WParser->SetFontItalic(true);
-                m_WParser->SetFontBold(false);
+                m_WParser->SetFontItalic(TRUE);
+                m_WParser->SetFontBold(FALSE);
         }
         else if (tag.GetName() == wxT("H5"))
                 m_WParser->SetFontSize(4);
         else if (tag.GetName() == wxT("H6"))
         {
                 m_WParser->SetFontSize(4);
-                m_WParser->SetFontItalic(true);
-                m_WParser->SetFontBold(false);
+                m_WParser->SetFontItalic(TRUE);
+                m_WParser->SetFontBold(FALSE);
         }
 
         c = m_WParser->GetContainer();
-        if (c->GetFirstChild())
+        if (c->GetFirstCell())
         {
             m_WParser->CloseContainer();
             m_WParser->OpenContainer();
@@ -285,14 +275,13 @@ TAG_HANDLER_BEGIN(Hx, "H1,H2,H3,H4,H5,H6")
         c = m_WParser->GetContainer();
         c->SetIndent(m_WParser->GetCharHeight(), wxHTML_INDENT_TOP);
 
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(Hx)
 
 
 TAG_HANDLER_BEGIN(BIGSMALL, "BIG,SMALL")
-    TAG_HANDLER_CONSTR(BIGSMALL) { }
 
     TAG_HANDLER_PROC(tag)
     {
@@ -308,7 +297,7 @@ TAG_HANDLER_BEGIN(BIGSMALL, "BIG,SMALL")
         m_WParser->SetFontSize(oldsize);
         m_WParser->GetContainer()->InsertCell(
             new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(BIGSMALL)

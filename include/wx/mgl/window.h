@@ -14,7 +14,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "window.h"
 #endif
 
@@ -89,14 +89,22 @@ public:
     // Accept files for dragging
     virtual void DragAcceptFiles(bool accept);
 
+#if WXWIN_COMPATIBILITY
+    // event handlers
+        // Handle a control command
+    virtual void OnCommand(wxWindow& win, wxCommandEvent& event);
+
+        // Override to define new behaviour for default action (e.g. double
+        // clicking on a listbox)
+    virtual void OnDefaultAction(wxControl * WXUNUSED(initiatingItem)) { }
+#endif // WXWIN_COMPATIBILITY
+
     virtual WXWidget GetHandle() const { return m_wnd; }
     
     void SetMGLwindow_t(struct window_t *wnd);
 
     // implementation from now on
     // --------------------------
-    
-    void OnInternalIdle();
 
 protected:
     // the window handle
@@ -127,6 +135,8 @@ protected:
     // themselves inside the given rectangle
     virtual void DoMoveWindow(int x, int y, int width, int height);
     
+    void OnIdle(wxIdleEvent& event);
+
 private:
     // common part of all ctors
     void Init();

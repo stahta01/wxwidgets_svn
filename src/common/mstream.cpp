@@ -6,7 +6,7 @@
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "mstream.h"
 #endif
 
@@ -47,24 +47,8 @@ wxMemoryInputStream::wxMemoryInputStream(const void *data, size_t len)
     m_i_streambuf = new wxStreamBuffer(wxStreamBuffer::read);
     m_i_streambuf->SetBufferIO((void *)data, len); // const_cast
     m_i_streambuf->SetIntPosition(0); // seek to start pos
-    m_i_streambuf->Fixed(true);
+    m_i_streambuf->Fixed(TRUE);
 
-    m_length = len;
-}
-
-wxMemoryInputStream::wxMemoryInputStream(const wxMemoryOutputStream& stream)
-{
-    ssize_t len = (ssize_t)stream.GetLength();
-    if (len == wxInvalidOffset) {
-        m_i_streambuf = NULL;
-        m_lasterror = wxSTREAM_EOF;
-        return;
-    }
-    m_i_streambuf = new wxStreamBuffer(wxStreamBuffer::read);
-    m_i_streambuf->SetBufferIO(len); // create buffer
-    stream.CopyTo(m_i_streambuf->GetBufferStart(), len);
-    m_i_streambuf->SetIntPosition(0); // seek to start pos
-    m_i_streambuf->Fixed(true);
     m_length = len;
 }
 
@@ -76,15 +60,8 @@ wxMemoryInputStream::~wxMemoryInputStream()
 char wxMemoryInputStream::Peek()
 {
     char *buf = (char *)m_i_streambuf->GetBufferStart();
-    size_t pos = m_i_streambuf->GetIntPosition();
-    if ( pos == m_length )
-    {
-        m_lasterror = wxSTREAM_READ_ERROR;
 
-        return 0;
-    }
-
-    return buf[pos];
+    return buf[m_i_streambuf->GetIntPosition()];
 }
 
 bool wxMemoryInputStream::Eof() const
@@ -108,12 +85,12 @@ size_t wxMemoryInputStream::OnSysRead(void *buffer, size_t nbytes)
     return m_i_streambuf->GetIntPosition() - pos;
 }
 
-wxFileOffset wxMemoryInputStream::OnSysSeek(wxFileOffset pos, wxSeekMode mode)
+off_t wxMemoryInputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
     return m_i_streambuf->Seek(pos, mode);
 }
 
-wxFileOffset wxMemoryInputStream::OnSysTell() const
+off_t wxMemoryInputStream::OnSysTell() const
 {
     return m_i_streambuf->Tell();
 }
@@ -127,8 +104,8 @@ wxMemoryOutputStream::wxMemoryOutputStream(void *data, size_t len)
     m_o_streambuf = new wxStreamBuffer(wxStreamBuffer::write);
     if ( data )
         m_o_streambuf->SetBufferIO(data, len);
-    m_o_streambuf->Fixed(false);
-    m_o_streambuf->Flushable(false);
+    m_o_streambuf->Fixed(FALSE);
+    m_o_streambuf->Flushable(FALSE);
 }
 
 wxMemoryOutputStream::~wxMemoryOutputStream()
@@ -149,12 +126,12 @@ size_t wxMemoryOutputStream::OnSysWrite(const void *buffer, size_t nbytes)
     return newpos - oldpos;
 }
 
-wxFileOffset wxMemoryOutputStream::OnSysSeek(wxFileOffset pos, wxSeekMode mode)
+off_t wxMemoryOutputStream::OnSysSeek(off_t pos, wxSeekMode mode)
 {
     return m_o_streambuf->Seek(pos, mode);
 }
 
-wxFileOffset wxMemoryOutputStream::OnSysTell() const
+off_t wxMemoryOutputStream::OnSysTell() const
 {
     return m_o_streambuf->Tell();
 }

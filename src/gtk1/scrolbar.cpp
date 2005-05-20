@@ -8,19 +8,20 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "scrolbar.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_SCROLLBAR
 
 #include "wx/scrolbar.h"
 
 #include "wx/utils.h"
-#include "wx/math.h"
+
+#include <math.h>
+
 #include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
@@ -36,7 +37,6 @@ extern bool g_isIdle;
 
 extern bool   g_blockEventsOnDrag;
 extern bool   g_blockEventsOnScroll;
-static wxEventType g_currentUpDownEvent = wxEVT_NULL;
 
 static const float sensitivity = 0.02;
 
@@ -46,7 +46,6 @@ static const float sensitivity = 0.02;
 
 // FIXME: is GtkScrollType really passed to us as 2nd argument?
 
-extern "C" {
 static void gtk_scrollbar_callback( GtkAdjustment *adjust,
                                     SCROLLBAR_CBACK_ARG
                                     wxScrollBar *win )
@@ -68,16 +67,7 @@ static void gtk_scrollbar_callback( GtkAdjustment *adjust,
 
     int orient = win->HasFlag(wxSB_VERTICAL) ? wxVERTICAL : wxHORIZONTAL;
 
-    // throw a LINEUP / LINEDOWN event if necessary
-    if (g_currentUpDownEvent != wxEVT_NULL)
-    {
-        wxScrollEvent event( g_currentUpDownEvent, win->GetId(), value, orient );   
-        event.SetEventObject( win );
-        win->GetEventHandler()->ProcessEvent( event );
-      }
-    
-	// throw other event (wxEVT_SCROLL_THUMBTRACK)
-	wxScrollEvent event( command, win->GetId(), value, orient );
+    wxScrollEvent event( command, win->GetId(), value, orient );
     event.SetEventObject( win );
     win->GetEventHandler()->ProcessEvent( event );
 
@@ -87,57 +77,31 @@ static void gtk_scrollbar_callback( GtkAdjustment *adjust,
     win->ProcessEvent( cevent );
 */
 }
-}
 
 //-----------------------------------------------------------------------------
 // "button_press_event" from slider
 //-----------------------------------------------------------------------------
-extern "C" {
+
 static gint gtk_scrollbar_button_press_callback( GtkRange *widget,
                                                  GdkEventButton *gdk_event,
                                                  wxScrollBar *win )
 {
     if (g_isIdle) wxapp_install_idle_handler();
 
-    // check if a LINEUP/LINEDOWN event must be thrown
-    // I suppose here the size of scrollbar top/bottom buttons is 16px height
-    if (gdk_event->type == GDK_BUTTON_PRESS && gdk_event->button == 1)
-    {
-        int scroll_height, mouse_pos;
+//  g_blockEventsOnScroll = TRUE;  doesn't work in DialogEd
 
-        // get the mouse position when the click is done 
-        if (win->HasFlag(wxSB_VERTICAL))        
-        {   
-            scroll_height = GTK_WIDGET(widget)->allocation.height - 16;
-            mouse_pos = (int)gdk_event->y;
-        }
-        else
-        {
-            scroll_height = GTK_WIDGET(widget)->allocation.width - 16;
-            mouse_pos = (int)gdk_event->x;
-        }
-	
-        // compare mouse position to scrollbar height
-        if  (mouse_pos > scroll_height)
-            g_currentUpDownEvent = wxEVT_SCROLL_LINEDOWN;
-        else if (mouse_pos < 16)
-            g_currentUpDownEvent = wxEVT_SCROLL_LINEUP;
-      }
-
+    // FIXME: there is no slider field any more, what was meant here?
 #ifndef __WXGTK20__
-    // There is no slider field any more
     win->m_isScrolling = (gdk_event->window == widget->slider);
 #endif
 
     return FALSE;
-}
 }
 
 //-----------------------------------------------------------------------------
 // "button_release_event" from slider
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static gint
 gtk_scrollbar_button_release_callback( GtkRange *WXUNUSED(widget),
                                        GdkEventButton *WXUNUSED(gdk_event),
@@ -145,6 +109,8 @@ gtk_scrollbar_button_release_callback( GtkRange *WXUNUSED(widget),
 {
     if (g_isIdle)
         wxapp_install_idle_handler();
+
+//  g_blockEventsOnScroll = FALSE;
 
     if (win->m_isScrolling)
     {
@@ -159,11 +125,7 @@ gtk_scrollbar_button_release_callback( GtkRange *WXUNUSED(widget),
 
     win->m_isScrolling = FALSE;
 
-    // reset the LINEUP/LINEDOWN flag when the mouse button is released
-    g_currentUpDownEvent = wxEVT_NULL;
-
     return FALSE;
-}
 }
 
 //-----------------------------------------------------------------------------
@@ -203,10 +165,12 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
                         "value_changed",
                         (GtkSignalFunc) gtk_scrollbar_callback,
                         (gpointer) this );
+
     gtk_signal_connect( GTK_OBJECT(m_widget),
                         "button_press_event",
                         (GtkSignalFunc)gtk_scrollbar_button_press_callback,
                         (gpointer) this );
+
     gtk_signal_connect( GTK_OBJECT(m_widget),
                         "button_release_event",
                         (GtkSignalFunc)gtk_scrollbar_button_release_callback,
@@ -214,7 +178,13 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
+    PostCreation();
+
+    SetBestSize(size);
+
+    SetBackgroundColour( parent->GetBackgroundColour() );
+
+    Show( TRUE );
 
     return TRUE;
 }
@@ -360,16 +330,10 @@ bool wxScrollBar::IsOwnGtkWindow( GdkWindow *window )
            );
 }
 
-wxSize wxScrollBar::DoGetBestSize() const
+void wxScrollBar::ApplyWidgetStyle()
 {
-    return wxControl::DoGetBestSize();
-}
-
-// static
-wxVisualAttributes
-wxScrollBar::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
-{
-    return GetDefaultAttributesFromGTKWidget(gtk_vscrollbar_new);
+    SetWidgetStyle();
+    gtk_widget_set_style( m_widget, m_widgetStyle );
 }
 
 #endif

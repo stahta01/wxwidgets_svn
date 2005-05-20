@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="zlib" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 6.00 
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
@@ -106,6 +106,14 @@ SOURCE=.\gzio.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\infblock.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\infcodes.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\inffast.c
 # End Source File
 # Begin Source File
@@ -115,6 +123,10 @@ SOURCE=.\inflate.c
 # Begin Source File
 
 SOURCE=.\inftrees.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\infutil.c
 # End Source File
 # Begin Source File
 

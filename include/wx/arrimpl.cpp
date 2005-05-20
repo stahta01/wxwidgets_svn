@@ -22,7 +22,12 @@
 
 // needed to resolve the conflict between global T and macro parameter T
 
-#define _WX_ERROR_REMOVE2(x)     wxT("bad index in ") wxT(#x) wxT("::RemoveAt()")
+// VC++ can't cope with string concatenation in Unicode mode
+#if defined(wxUSE_UNICODE) && wxUSE_UNICODE
+#define _WX_ERROR_REMOVE2(x)     wxT("bad index in ::RemoveAt()")
+#else
+#define _WX_ERROR_REMOVE2(x)     wxT("bad index in " #x "::RemoveAt()")
+#endif
 
 // macro implements remaining (not inline) methods of template list
 // (it's private to this file)
@@ -35,7 +40,7 @@ name::~name()                                                                 \
                                                                               \
 void name::DoCopy(const name& src)                                            \
 {                                                                             \
-  for ( size_t ui = 0; ui < src.size(); ui++ )                                \
+  for ( size_t ui = 0; ui < src.Count(); ui++ )                               \
     Add(src[ui]);                                                             \
 }                                                                             \
                                                                               \
@@ -54,18 +59,18 @@ name::name(const name& src) : wxArrayPtrVoid()                                \
                                                                               \
 void name::DoEmpty()                                                          \
 {                                                                             \
-  for ( size_t ui = 0; ui < size(); ui++ )                                    \
-    delete (T*)base_array::operator[](ui);                                    \
+  for ( size_t ui = 0; ui < Count(); ui++ )                                   \
+    delete (T*)wxBaseArrayPtrVoid::Item(ui);                                  \
 }                                                                             \
                                                                               \
 void name::RemoveAt(size_t uiIndex, size_t nRemove)                           \
 {                                                                             \
-  wxCHECK_RET( uiIndex < size(), _WX_ERROR_REMOVE2(name) );                   \
+  wxCHECK_RET( uiIndex < Count(), _WX_ERROR_REMOVE2(name) );                  \
                                                                               \
   for (size_t i = 0; i < nRemove; i++ )                                       \
-    delete (T*)base_array::operator[](uiIndex + i);                           \
+    delete (T*)wxBaseArrayPtrVoid::Item(uiIndex + i);                         \
                                                                               \
-  base_array::erase(begin() + uiIndex, begin() + uiIndex + nRemove);          \
+  wxBaseArrayPtrVoid::RemoveAt(uiIndex, nRemove);                             \
 }                                                                             \
                                                                               \
 void name::Add(const T& item, size_t nInsert)                                 \
@@ -73,11 +78,11 @@ void name::Add(const T& item, size_t nInsert)                                 \
   if (nInsert == 0)                                                           \
     return;                                                                   \
   T* pItem = new T(item);                                                     \
-  size_t nOldSize = size();                                                   \
+  size_t nOldSize = GetCount();                                               \
   if ( pItem != NULL )                                                        \
-    base_array::insert(end(), nInsert, pItem);                                \
+    wxBaseArrayPtrVoid::Add(pItem, nInsert);                                  \
   for (size_t i = 1; i < nInsert; i++)                                        \
-    base_array::operator[](nOldSize + i) = new T(item);                       \
+    wxBaseArrayPtrVoid::Item(nOldSize + i) = new T(item);                     \
 }                                                                             \
                                                                               \
 void name::Insert(const T& item, size_t uiIndex, size_t nInsert)              \
@@ -86,18 +91,18 @@ void name::Insert(const T& item, size_t uiIndex, size_t nInsert)              \
     return;                                                                   \
   T* pItem = new T(item);                                                     \
   if ( pItem != NULL )                                                        \
-    base_array::insert(begin() + uiIndex, nInsert, pItem);                    \
+    wxBaseArrayPtrVoid::Insert(pItem, uiIndex, nInsert);                      \
   for (size_t i = 1; i < nInsert; i++)                                        \
-    base_array::operator[](uiIndex + i) = new T(item);                        \
+    wxBaseArrayPtrVoid::Item(uiIndex + i) = new T(item);                      \
 }                                                                             \
                                                                               \
 int name::Index(const T& Item, bool bFromEnd) const                           \
 {                                                                             \
   if ( bFromEnd ) {                                                           \
-    if ( size() > 0 ) {                                                       \
-      size_t ui = size() - 1;                                                 \
+    if ( Count() > 0 ) {                                                      \
+      size_t ui = Count() - 1;                                                \
       do {                                                                    \
-        if ( (T*)base_array::operator[](ui) == &Item )                        \
+        if ( (T*)wxBaseArrayPtrVoid::Item(ui) == &Item )                      \
           return ui;                                                          \
         ui--;                                                                 \
       }                                                                       \
@@ -105,8 +110,8 @@ int name::Index(const T& Item, bool bFromEnd) const                           \
     }                                                                         \
   }                                                                           \
   else {                                                                      \
-    for( size_t ui = 0; ui < size(); ui++ ) {                                 \
-      if( (T*)base_array::operator[](ui) == &Item )                           \
+    for( size_t ui = 0; ui < Count(); ui++ ) {                                \
+      if( (T*)wxBaseArrayPtrVoid::Item(ui) == &Item )                         \
         return ui;                                                            \
     }                                                                         \
   }                                                                           \

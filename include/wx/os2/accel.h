@@ -46,9 +46,9 @@ public:
 
     inline wxAcceleratorTable& operator = (const wxAcceleratorTable& rAccel)
     { if (*this == rAccel) return (*this); Ref(rAccel); return *this; };
-    inline bool operator== (const wxAcceleratorTable& rAccel) const
+    inline bool operator == (const wxAcceleratorTable& rAccel)
     { return m_refData == rAccel.m_refData; };
-    inline bool operator!= (const wxAcceleratorTable& rAccel) const
+    inline bool operator != (const wxAcceleratorTable& rAccel)
     { return m_refData != rAccel.m_refData; };
 
     bool Ok() const;
@@ -63,6 +63,5 @@ public:
 
 WXDLLEXPORT_DATA(extern wxAcceleratorTable) wxNullAcceleratorTable;
 
-WXDLLEXPORT wxString wxPMTextToLabel(const wxString& rsTitle);
 #endif
     // _WX_ACCEL_H_

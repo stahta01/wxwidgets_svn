@@ -52,8 +52,9 @@ BEGIN_EVENT_TABLE(csFrame, wxDocMDIParentFrame)
 END_EVENT_TABLE()
 
 // Define my frame constructor
-csFrame::csFrame(wxDocManager* manager, wxFrame *parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-  wxDocMDIParentFrame(manager, parent, id, title, pos, size, style, _T("frame"))
+csFrame::csFrame(wxDocManager* manager, wxFrame *parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size,
+	long style):
+  wxDocMDIParentFrame(manager, parent, id, title, pos, size, style, "frame")
 {
     CreateToolBar(wxNO_BORDER|wxTB_FLAT|wxTB_HORIZONTAL);
     wxGetApp().InitToolBar(GetToolBar());
@@ -70,31 +71,26 @@ csFrame::csFrame(wxDocManager* manager, wxFrame *parent, wxWindowID id, const wx
     SetAcceleratorTable(accel);
 }
 
-void csFrame::OnHelp(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnHelp(wxCommandEvent& event)
 {
-    wxHelpControllerBase* help;
-    help = wxGetApp().GetHelpController();
-    if (help)
-        help->DisplayContents();
+    wxGetApp().GetHelpController().DisplayContents();
 }
 
-void csFrame::OnSettings(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnSettings(wxCommandEvent& event)
 {
-#if wxUSE_WX_RESOURCES
     csSettingsDialog* dialog = new csSettingsDialog(this);
-    /* int ret = */ dialog->ShowModal();
+    int ret = dialog->ShowModal();
     dialog->Destroy();
-#endif // wxUSE_WX_RESOURCES
 }
 
-void csFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnQuit(wxCommandEvent& event)
 {
-      Close(true);
+      Close(TRUE);
 }
 
-void csFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void csFrame::OnAbout(wxCommandEvent& event)
 {
-      (void)wxMessageBox(_T("OGL Studio\n(c) 1999, Julian Smart"), _T("About OGL Studio"), wxICON_INFORMATION);
+      (void)wxMessageBox("OGL Studio\n(c) 1999, Julian Smart", "About OGL Studio", wxICON_INFORMATION);
 }
 
 void csFrame::OnSashDragPaletteWindow(wxSashEvent& event)
@@ -149,34 +145,35 @@ void csFrame::OnSize(wxSizeEvent& event)
 {
     wxLayoutAlgorithm layout;
     layout.LayoutMDIFrame(this);
-    event.Skip();
 }
 
 // Make sure the correct toolbars are showing for the active view
 void csFrame::OnIdle(wxIdleEvent& event)
 {
+    wxDocMDIParentFrame::OnIdle(event);
+
     wxSashLayoutWindow* paletteWin = wxGetApp().GetDiagramPaletteSashWindow();
     wxSashLayoutWindow* diagramToolBarWin = wxGetApp().GetDiagramToolBarSashWindow();
     if (!paletteWin || !diagramToolBarWin)
         return;
-    bool doLayout = false;
+    bool doLayout = FALSE;
     if (GetActiveChild())
     {
         if (!paletteWin->IsShown() || !diagramToolBarWin->IsShown())
         {
-            paletteWin->Show(true);
-            diagramToolBarWin->Show(true);
+            paletteWin->Show(TRUE);
+            diagramToolBarWin->Show(TRUE);
 
-            doLayout = true;
+            doLayout = TRUE;
         }
     }
     else
     {
         if (paletteWin->IsShown() || diagramToolBarWin->IsShown())
         {
-            paletteWin->Show(false);
-            diagramToolBarWin->Show(false);
-            doLayout = true;
+            paletteWin->Show(FALSE);
+            diagramToolBarWin->Show(FALSE);
+            doLayout = TRUE;
         }
     }
     if (doLayout)
@@ -190,7 +187,7 @@ void csFrame::OnIdle(wxIdleEvent& event)
         // window doesn't cause the proper refresh. Just refreshing the
         // client doesn't work (presumably because it's clipping the
         // children).
-        // FIXED in wxWidgets, by intercepting wxMDIClientWindow::DoSetSize
+        // FIXED in wxWindows, by intercepting wxMDIClientWindow::DoSetSize
         // and checking if the position has changed, before redrawing the
         // child windows.
 #if 0
@@ -204,13 +201,12 @@ void csFrame::OnIdle(wxIdleEvent& event)
 #endif
 #endif
     }
-    event.Skip();
 }
 
 // General handler for disabling items
 void csFrame::OnUpdateDisable(wxUpdateUIEvent& event)
 {
-    event.Enable(false);
+    event.Enable(FALSE);
 }
 
 void csFrame::OnSaveUpdate(wxUpdateUIEvent& event)

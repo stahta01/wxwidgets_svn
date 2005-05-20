@@ -5,11 +5,11 @@
 // Created:     2001/04/29
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "fontutil.h"
 #endif
 
@@ -20,12 +20,14 @@
     #pragma hdrstop
 #endif
 
-#include "wx/log.h"
-#include "wx/fontutil.h"
-#include "wx/encinfo.h"
-#include "wx/fontmap.h"
-#include "wx/tokenzr.h"
-#include "wx/hash.h"
+#ifndef WX_PRECOMP
+    #include "wx/log.h"
+    #include "wx/fontutil.h"
+    #include "wx/fontmap.h"
+    #include "wx/tokenzr.h"
+    #include "wx/hash.h"
+#endif // PCH
+
 
 #include "wx/listimpl.cpp"
 #include "wx/sysopt.h"

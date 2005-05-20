@@ -58,7 +58,7 @@ bool wxComboBox::OS2Command(
 
                 vEvent.SetInt(GetSelection());
                 vEvent.SetEventObject(this);
-                vEvent.SetString(GetStringSelection());
+                vEvent.SetString((char*)GetStringSelection().c_str());
                 ProcessCommand(vEvent);
             }
             break;
@@ -73,7 +73,7 @@ bool wxComboBox::OS2Command(
                     sValue = GetValue();
                 else
                     SetValue(sValue);
-                vEvent.SetString(GetValue());
+                vEvent.SetString((char*)GetValue().c_str());
                 vEvent.SetEventObject(this);
                 ProcessCommand(vEvent);
             }
@@ -81,28 +81,10 @@ bool wxComboBox::OS2Command(
     }
     //
     // There is no return value for the CBN_ notifications, so always return
-    // false from here to pass the message to DefWindowProc()
+    // FALSE from here to pass the message to DefWindowProc()
     //
-    return false;
+    return FALSE;
 } // end of wxComboBox::OS2Command
-
-bool wxComboBox::Create(
-  wxWindow*                         pParent
-, wxWindowID                        vId
-, const wxString&                   rsValue
-, const wxPoint&                    rPos
-, const wxSize&                     rSize
-, const wxArrayString&              asChoices
-, long                              lStyle
-, const wxValidator&                rValidator
-, const wxString&                   rsName
-)
-{
-    wxCArrayString chs(asChoices);
-
-    return Create(pParent, vId, rsValue, rPos, rSize, chs.GetCount(),
-                  chs.GetStrings(), lStyle, rValidator, rsName);
-}
 
 bool wxComboBox::Create(
   wxWindow*                         pParent
@@ -117,7 +99,7 @@ bool wxComboBox::Create(
 , const wxString&                   rsName
 )
 {
-    m_isShown = false;
+    m_isShown = FALSE;
 
     if (!CreateControl( pParent
                        ,vId
@@ -127,7 +109,7 @@ bool wxComboBox::Create(
                        ,rValidator
                        ,rsName
                       ))
-        return false;
+        return FALSE;
 
     //
     // Get the right style
@@ -147,10 +129,10 @@ bool wxComboBox::Create(
         lSstyle |= CBS_DROPDOWN;
 
 
-    if (!OS2CreateControl( _T("COMBOBOX")
+    if (!OS2CreateControl( "COMBOBOX"
                           ,lSstyle
                          ))
-        return false;
+        return FALSE;
 
     //
     // A choice/combobox normally has a white background (or other, depending
@@ -171,7 +153,7 @@ bool wxComboBox::Create(
             ,rSize.x
             ,rSize.y
            );
-    if (!rsValue.empty())
+    if (!rsValue.IsEmpty())
     {
         SetValue(rsValue);
     }
@@ -179,8 +161,8 @@ bool wxComboBox::Create(
                                                     ,(PFNWP)wxComboEditWndProc
                                                    );
     ::WinSetWindowULong(GetHwnd(), QWL_USER, (ULONG)this);
-    Show(true);
-    return true;
+    Show(TRUE);
+    return TRUE;
 } // end of wxComboBox::Create
 
 void wxComboBox::SetValue(
@@ -190,7 +172,7 @@ void wxComboBox::SetValue(
     if ( HasFlag(wxCB_READONLY) )
         SetStringSelection(rsValue);
     else
-        ::WinSetWindowText(GetHwnd(), (PSZ)rsValue.c_str());
+        ::WinSetWindowText(GetHwnd(), rsValue.c_str());
 } // end of wxComboBox::SetValue
 
 //
@@ -237,7 +219,7 @@ void wxComboBox::SetInsertionPoint(
 
 void wxComboBox::SetInsertionPointEnd()
 {
-    wxTextPos                       lPos = GetLastPosition();
+    long                            lPos = GetLastPosition();
 
     SetInsertionPoint(lPos);
 } // end of wxComboBox::SetInsertionPointEnd
@@ -254,8 +236,9 @@ long wxComboBox::GetInsertionPoint() const
    return lPos;
 } // end of wxComboBox::GetInsertionPoint
 
-wxTextPos wxComboBox::GetLastPosition() const
+long wxComboBox::GetLastPosition() const
 {
+    HWND                            hEditWnd = GetHwnd();
     long                            lLineLength = 0L;
     WNDPARAMS                       vParams;
 
@@ -287,6 +270,8 @@ void wxComboBox::Replace(
 {
 #if wxUSE_CLIPBOARD
     HWND                            hWnd = GetHwnd();
+    long                            lFromChar = lFrom;
+    long                            lToChar = lTo;
 
     //
     // Set selection and remove it
@@ -317,6 +302,8 @@ void wxComboBox::Remove(
 {
 #if wxUSE_CLIPBOARD
     HWND                            hWnd = GetHwnd();
+    long                            lFromChar = lFrom;
+    long                            lToChar = lTo;
 
     ::WinSendMsg(hWnd, EM_SETSEL, MPFROM2SHORT((USHORT)lFrom, (USHORT)lTo), 0);
     ::WinSendMsg(hWnd, EM_CUT, (MPARAM)0, (MPARAM)0);
@@ -329,12 +316,12 @@ void wxComboBox::SetSelection(
 )
 {
     HWND                            hWnd = GetHwnd();
-    long                            lFromChar = 0;
-    long                            lToChar   = 0;
+    long                            lFromChar = lFrom;
+    long                            lToChar = lTo;
 
     //
     // If from and to are both -1, it means
-    // (in wxWidgets) that all text should be selected.
+    // (in wxWindows) that all text should be selected.
     // This translates into Windows convention
     //
     if ((lFrom == -1L) && (lTo == -1L))
@@ -381,7 +368,7 @@ bool wxComboBox::ProcessEditMsg(
                 case KC_CHAR:
                     return (HandleChar( wParam
                                        ,lParam
-                                       ,true /* isASCII */
+                                       ,TRUE /* isASCII */
                                       ));
 
                 case KC_PREVDOWN:
@@ -403,7 +390,7 @@ bool wxComboBox::ProcessEditMsg(
                 return(HandleKillFocus((WXHWND)(HWND)wParam));
             break;
     }
-    return false;
+    return FALSE;
 } // end of WinGuiBase_CComboBox::ProcessEditMsg
 
 MRESULT EXPENTRY wxComboEditWndProc(

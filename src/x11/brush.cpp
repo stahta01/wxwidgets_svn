@@ -9,15 +9,13 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "brush.h"
 #endif
 
 #include "wx/setup.h"
 #include "wx/utils.h"
 #include "wx/brush.h"
-#include "wx/bitmap.h"
-#include "wx/colour.h"
 
 //-----------------------------------------------------------------------------
 // wxBrush

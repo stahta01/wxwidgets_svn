@@ -2,8 +2,7 @@
 // Name:        tex2rtf.cpp
 // Purpose:     Converts Latex to linear/WinHelp RTF, HTML, wxHelp.
 // Author:      Julian Smart
-// Modified by: Wlodzimiez ABX Skiba 2003/2004 Unicode support
-//              Ron Lee
+// Modified by:
 // Created:     7.9.93
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
@@ -21,40 +20,23 @@
 #pragma hdrstop
 #endif
 
-#if defined(__WXMSW__)
-    #include "wx/msw/wrapwin.h"
-#endif
-
 #ifndef WX_PRECOMP
-    #ifndef NO_GUI
-        #include "wx/menu.h"
-        #include "wx/textctrl.h"
-        #include "wx/filedlg.h"
-        #include "wx/msgdlg.h"
-        #include "wx/icon.h"
-    #endif
+#include "wx/wx.h"
 #endif
-
-#include "wx/log.h"
 
 #ifndef NO_GUI
-    #include "wx/timer.h"
-    #include "wx/help.h"
-    #include "wx/cshelp.h"
-    #include "wx/helphtml.h"
-    #ifdef __WXMSW__
-        #include "wx/msw/helpchm.h"
-    #else
-        #include "wx/html/helpctrl.h"
-    #endif
-#endif // !NO_GUI
+#include "wx/help.h"
+#include "wx/timer.h"
+#endif
 
+#if defined(NO_GUI) || defined(__UNIX__)
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
 #include <fstream.h>
 #else
 #include <iostream>
 #include <fstream>
+#endif
 #endif
 
 #include <ctype.h>
@@ -64,47 +46,62 @@
 #include "rtfutils.h"
 #include "symbols.h"
 
-#if (defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXX11__) || defined(__WXMGL__)) && !defined(NO_GUI)
+#if (defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__)) && !defined(NO_GUI)
 #include "tex2rtf.xpm"
 #endif
 
-#if !WXWIN_COMPATIBILITY_2_4
-static inline wxChar* copystring(const wxChar* s)
-    { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
-#endif
-
-const float versionNo = float(TEX2RTF_VERSION_NUMBER);
+const float versionNo = TEX2RTF_VERSION_NUMBER;
 
 TexChunk *currentMember = NULL;
-bool startedSections = false;
-wxChar *contentsString = NULL;
-bool suppressNameDecoration = false;
-bool OkToClose = true;
+bool startedSections = FALSE;
+char *contentsString = NULL;
+bool suppressNameDecoration = FALSE;
+bool OkToClose = TRUE;
 int passNumber = 1;
-unsigned long errorCount = 0;
+unsigned long errorCount = 0UL;
 
 #ifndef NO_GUI
 
-extern wxChar *BigBuffer;
-extern wxChar *TexFileRoot;
-extern wxChar *TexBibName;         // Bibliography output file name
-extern wxChar *TexTmpBibName;      // Temporary bibliography output file name
+extern char *BigBuffer;
+extern char *TexFileRoot;
+extern char *TexBibName;         // Bibliography output file name
+extern char *TexTmpBibName;      // Temporary bibliography output file name
 extern wxList ColourTable;
 extern TexChunk *TopLevel;
+extern char *PageStyle;
+extern char *BibliographyStyleString;
+extern char *DocumentStyleString;
+extern char *bitmapMethod;
+extern char *backgroundColourString;
+extern char *ContentsNameString;
+extern char *AbstractNameString;
+extern char *GlossaryNameString;
+extern char *ReferencesNameString;
+extern char *FiguresNameString;
+extern char *TablesNameString;
+extern char *FigureNameString;
+extern char *TableNameString;
+extern char *IndexNameString;
+extern char *ChapterNameString;
+extern char *SectionNameString;
+extern char *SubsectionNameString;
+extern char *SubsubsectionNameString;
+extern char *UpNameString;
+
+
 
 #if wxUSE_HELP
-wxHelpControllerBase *HelpInstance = NULL;
+wxHelpController *HelpInstance = NULL;
 #endif // wxUSE_HELP
 
 #ifdef __WXMSW__
-static wxChar *ipc_buffer = NULL;
-static wxChar Tex2RTFLastStatus[100];
+static char *ipc_buffer = NULL;
+static char Tex2RTFLastStatus[100];
 Tex2RTFServer *TheTex2RTFServer = NULL;
-#endif // __WXMSW__
+#endif
+#endif
 
-#endif // !NO_GUI
-
-wxChar *bulletFile = NULL;
+char *bulletFile = NULL;
 
 FILE *Contents = NULL;   // Contents page
 FILE *Chapters = NULL;   // Chapters (WinHelp RTF) or rest of file (linear RTF)
@@ -114,18 +111,18 @@ FILE *Subsubsections = NULL;
 FILE *Popups = NULL;
 FILE *WinHelpContentsFile = NULL;
 
-wxChar *InputFile = NULL;
-wxChar *OutputFile = NULL;
-wxChar *MacroFile = copystring(_T("tex2rtf.ini"));
+char *InputFile = NULL;
+char *OutputFile = NULL;
+char *MacroFile = copystring("tex2rtf.ini");
 
-wxChar *FileRoot = NULL;
-wxChar *ContentsName = NULL;    // Contents page from last time around
-wxChar *TmpContentsName = NULL; // Current contents page
-wxChar *TmpFrameContentsName = NULL; // Current frame contents page
-wxChar *WinHelpContentsFileName = NULL; // WinHelp .cnt file
-wxChar *RefFileName = NULL;         // Reference file name
+char *FileRoot = NULL;
+char *ContentsName = NULL;    // Contents page from last time around
+char *TmpContentsName = NULL; // Current contents page
+char *TmpFrameContentsName = NULL; // Current frame contents page
+char *WinHelpContentsFileName = NULL; // WinHelp .cnt file
+char *RefFileName = NULL;         // Reference file name
 
-wxChar *RTFCharset = copystring(_T("ansi"));
+char *RTFCharset = copystring("ansi");
 
 #ifdef __WXMSW__
 int BufSize = 100;             // Size of buffer in K
@@ -136,32 +133,34 @@ int BufSize = 500;
 bool Go(void);
 void ShowOptions(void);
 
-wxChar wxTex2RTFBuffer[1500];
+char wxTex2RTFBuffer[1500];
 
 #ifdef NO_GUI
-    IMPLEMENT_APP_CONSOLE(MyApp)
+
+int main(int argc, char **argv)
 #else
-    wxMenuBar *menuBar = NULL;
-    MyFrame *frame = NULL;
-    // DECLARE_APP(MyApp)
-    IMPLEMENT_APP(MyApp)
-#endif
+wxMenuBar *menuBar = NULL;
+MyFrame *frame = NULL;
+
+// DECLARE_APP(MyApp)
+IMPLEMENT_APP(MyApp)
 
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
+#endif
 {
   // Use default list of macros defined in tex2any.cc
   DefineDefaultMacros();
-  AddMacroDef(ltHARDY, _T("hardy"), 0);
+  AddMacroDef(ltHARDY, "hardy", 0);
 
-  FileRoot = new wxChar[300];
-  ContentsName = new wxChar[300];
-  TmpContentsName = new wxChar[300];
-  TmpFrameContentsName = new wxChar[300];
-  WinHelpContentsFileName = new wxChar[300];
-  RefFileName = new wxChar[300];
+  FileRoot = new char[300];
+  ContentsName = new char[300];
+  TmpContentsName = new char[300];
+  TmpFrameContentsName = new char[300];
+  WinHelpContentsFileName = new char[300];
+  RefFileName = new char[300];
 
-  WX_CLEAR_LIST(wxList,ColourTable);
+  ColourTable.DeleteContents(TRUE);
 
   int n = 1;
 
@@ -191,57 +190,57 @@ bool MyApp::OnInit()
     ShowOptions();
     exit(1);
   }
-#endif
 
+#endif
   if (InputFile)
   {
     TexPathList.EnsureFileAccessible(InputFile);
   }
   if (!InputFile || !OutputFile)
-    isInteractive = true;
+    isInteractive = TRUE;
 
   int i;
   for (i = n; i < argc;)
   {
-    if (wxStrcmp(argv[i], _T("-winhelp")) == 0)
+    if (strcmp(argv[i], "-winhelp") == 0)
     {
       i ++;
       convertMode = TEX_RTF;
-      winHelp = true;
+      winHelp = TRUE;
     }
 #ifndef NO_GUI
-    else if (wxStrcmp(argv[i], _T("-interactive")) == 0)
+    else if (strcmp(argv[i], "-interactive") == 0)
     {
       i ++;
-      isInteractive = true;
+      isInteractive = TRUE;
     }
 #endif
-    else if (wxStrcmp(argv[i], _T("-sync")) == 0)  // Don't yield
+    else if (strcmp(argv[i], "-sync") == 0)  // Don't yield
     {
       i ++;
-      isSync = true;
+      isSync = TRUE;
     }
-    else if (wxStrcmp(argv[i], _T("-rtf")) == 0)
+    else if (strcmp(argv[i], "-rtf") == 0)
     {
       i ++;
       convertMode = TEX_RTF;
     }
-    else if (wxStrcmp(argv[i], _T("-html")) == 0)
+    else if (strcmp(argv[i], "-html") == 0)
     {
       i ++;
       convertMode = TEX_HTML;
     }
-    else if (wxStrcmp(argv[i], _T("-xlp")) == 0)
+    else if (strcmp(argv[i], "-xlp") == 0)
     {
       i ++;
       convertMode = TEX_XLP;
     }
-    else if (wxStrcmp(argv[i], _T("-twice")) == 0)
+    else if (strcmp(argv[i], "-twice") == 0)
     {
       i ++;
-      runTwice = true;
+      runTwice = TRUE;
     }
-    else if (wxStrcmp(argv[i], _T("-macros")) == 0)
+    else if (strcmp(argv[i], "-macros") == 0)
     {
       i ++;
       if (i < argc)
@@ -250,60 +249,53 @@ bool MyApp::OnInit()
         i ++;
       }
     }
-    else if (wxStrcmp(argv[i], _T("-bufsize")) == 0)
+    else if (strcmp(argv[i], "-bufsize") == 0)
     {
       i ++;
       if (i < argc)
       {
-        BufSize = wxAtoi(argv[i]);
+        BufSize = atoi(argv[i]);
         i ++;
       }
     }
-    else if (wxStrcmp(argv[i], _T("-charset")) == 0)
+    else if (strcmp(argv[i], "-charset") == 0)
     {
       i ++;
       if (i < argc)
       {
-        wxChar *s = argv[i];
+        char *s = argv[i];
         i ++;
-        if (wxStrcmp(s, _T("ansi")) == 0 || wxStrcmp(s, _T("pc")) == 0 || wxStrcmp(s, _T("mac")) == 0 ||
-            wxStrcmp(s, _T("pca")) == 0)
+        if (strcmp(s, "ansi") == 0 || strcmp(s, "pc") == 0 || strcmp(s, "mac") == 0 ||
+            strcmp(s, "pca") == 0)
           RTFCharset = copystring(s);
         else
         {
-          OnError(_T("Incorrect argument for -charset"));
-          return false;
+          OnError("Incorrect argument for -charset");
+          return FALSE;
         }
       }
     }
-    else if (wxStrcmp(argv[i], _T("-checkcurlybraces")) == 0)
+    else if (strcmp(argv[i], "-checkcurleybraces") == 0)
     {
       i ++;
-      checkCurlyBraces = true;
+      checkCurleyBraces = TRUE;
     }
-    else if (wxStrcmp(argv[i], _T("-checkcurleybraces")) == 0)
-    {
-      // Support the old, incorrectly spelled version of -checkcurlybraces
-      // so that old scripts which run tex2rtf -checkcurleybraces still work.
-      i ++;
-      checkCurlyBraces = true;
-    }
-    else if (wxStrcmp(argv[i], _T("-checksyntax")) == 0)
+    else if (strcmp(argv[i], "-checksyntax") == 0)
     {
       i ++;
-      checkSyntax = true;
+      checkSyntax = TRUE;
     }
     else
     {
       wxString buf;
-      buf.Printf(_T("Invalid switch %s.\n"), argv[i]);
-      OnError((wxChar *)buf.c_str());
+      buf.Printf("Invalid switch %s.\n", argv[i]);
+      OnError((char *)buf.c_str());
+      i++;
 #ifdef NO_GUI
       ShowOptions();
       exit(1);
-#else
-      return false;
 #endif
+      return FALSE;
     }
   }
 
@@ -311,7 +303,12 @@ bool MyApp::OnInit()
   wxDDEInitialize();
   Tex2RTFLastStatus[0] = 0; // DDE connection return value
   TheTex2RTFServer = new Tex2RTFServer;
-  TheTex2RTFServer->Create(_T("TEX2RTF"));
+  TheTex2RTFServer->Create("TEX2RTF");
+#endif
+
+#if defined(__WXMSW__) && defined(__WIN16__)
+  // Limit to max Windows array size
+  if (BufSize > 64) BufSize = 64;
 #endif
 
   TexInitialize(BufSize);
@@ -321,13 +318,11 @@ bool MyApp::OnInit()
 
   if (isInteractive)
   {
-    wxChar buf[100];
+    char buf[100];
 
     // Create the main frame window
-    frame = new MyFrame(NULL, wxID_ANY, _T("Tex2RTF"), wxDefaultPosition, wxSize(400, 300));
-#if wxUSE_STATUSBAR
+    frame = new MyFrame(NULL, -1, "Tex2RTF", wxPoint(-1, -1), wxSize(400, 300));
     frame->CreateStatusBar(2);
-#endif // wxUSE_STATUSBAR
 
     // Give it an icon
     // TODO: uncomment this when we have tex2rtf.xpm
@@ -335,67 +330,63 @@ bool MyApp::OnInit()
 
     if (InputFile)
     {
-      wxSnprintf(buf, sizeof(buf), _T("Tex2RTF [%s]"), wxFileNameFromPath(InputFile));
+      sprintf(buf, "Tex2RTF [%s]", wxFileNameFromPath(InputFile));
       frame->SetTitle(buf);
     }
 
     // Make a menubar
     wxMenu *file_menu = new wxMenu;
-    file_menu->Append(TEX_GO, _T("&Go"), _T("Run converter"));
-    file_menu->Append(TEX_SET_INPUT, _T("Set &Input File"), _T("Set the LaTeX input file"));
-    file_menu->Append(TEX_SET_OUTPUT, _T("Set &Output File"), _T("Set the output file"));
+    file_menu->Append(TEX_GO, "&Go",                        "Run converter");
+    file_menu->Append(TEX_SET_INPUT, "Set &Input File",     "Set the LaTeX input file");
+    file_menu->Append(TEX_SET_OUTPUT, "Set &Output File",   "Set the output file");
     file_menu->AppendSeparator();
-    file_menu->Append(TEX_VIEW_LATEX, _T("View &LaTeX File"), _T("View the LaTeX input file"));
-    file_menu->Append(TEX_VIEW_OUTPUT, _T("View Output &File"), _T("View output file"));
-    file_menu->Append(TEX_SAVE_FILE, _T("&Save log file"), _T("Save displayed text into file"));
+    file_menu->Append(TEX_VIEW_LATEX, "View &LaTeX File",   "View the LaTeX input file");
+    file_menu->Append(TEX_VIEW_OUTPUT, "View Output &File", "View output file");
+    file_menu->Append(TEX_SAVE_FILE, "&Save log file", "Save displayed text into file");
     file_menu->AppendSeparator();
-    file_menu->Append(TEX_QUIT, _T("E&xit"), _T("Exit Tex2RTF"));
+    file_menu->Append(TEX_QUIT, "E&xit",                    "Exit Tex2RTF");
 
     wxMenu *macro_menu = new wxMenu;
 
-    macro_menu->Append(TEX_LOAD_CUSTOM_MACROS, _T("&Load Custom Macros"), _T("Load custom LaTeX macro file"));
-    macro_menu->Append(TEX_VIEW_CUSTOM_MACROS, _T("View &Custom Macros"), _T("View custom LaTeX macros"));
+    macro_menu->Append(TEX_LOAD_CUSTOM_MACROS, "&Load Custom Macros", "Load custom LaTeX macro file");
+    macro_menu->Append(TEX_VIEW_CUSTOM_MACROS, "View &Custom Macros", "View custom LaTeX macros");
 
     wxMenu *mode_menu = new wxMenu;
 
-    mode_menu->Append(TEX_MODE_RTF, _T("Output linear &RTF"), _T("Wordprocessor-compatible RTF"));
-    mode_menu->Append(TEX_MODE_WINHELP, _T("Output &WinHelp RTF"), _T("WinHelp-compatible RTF"));
-    mode_menu->Append(TEX_MODE_HTML, _T("Output &HTML"), _T("HTML World Wide Web hypertext file"));
-    mode_menu->Append(TEX_MODE_XLP, _T("Output &XLP"), _T("wxHelp hypertext help file"));
+    mode_menu->Append(TEX_MODE_RTF, "Output linear &RTF",   "Wordprocessor-compatible RTF");
+    mode_menu->Append(TEX_MODE_WINHELP, "Output &WinHelp RTF", "WinHelp-compatible RTF");
+    mode_menu->Append(TEX_MODE_HTML, "Output &HTML",        "HTML World Wide Web hypertext file");
+    mode_menu->Append(TEX_MODE_XLP, "Output &XLP",          "wxHelp hypertext help file");
 
     wxMenu *options_menu = new wxMenu;
 
-    options_menu->Append(TEX_OPTIONS_CURLY_BRACE, _T("Curly brace matching"), _T("Checks for mismatched curly braces"),true);
-    options_menu->Append(TEX_OPTIONS_SYNTAX_CHECKING, _T("Syntax checking"), _T("Syntax checking for common errors"),true);
+    options_menu->Append(TEX_OPTIONS_CURELY_BRACE, "Curley brace matching",   "Checks for mismatched curley braces",TRUE);
+    options_menu->Append(TEX_OPTIONS_SYNTAX_CHECKING, "Syntax checking", "Syntax checking for common errors",TRUE);
 
-    options_menu->Check(TEX_OPTIONS_CURLY_BRACE, checkCurlyBraces);
+    options_menu->Check(TEX_OPTIONS_CURELY_BRACE, checkCurleyBraces);
     options_menu->Check(TEX_OPTIONS_SYNTAX_CHECKING, checkSyntax);
 
     wxMenu *help_menu = new wxMenu;
 
-    help_menu->Append(TEX_HELP, _T("&Help"), _T("Tex2RTF Contents Page"));
-    help_menu->Append(TEX_ABOUT, _T("&About Tex2RTF"), _T("About Tex2RTF"));
+    help_menu->Append(TEX_HELP, "&Help", "Tex2RTF Contents Page");
+    help_menu->Append(TEX_ABOUT, "&About Tex2RTF", "About Tex2RTF");
 
     menuBar = new wxMenuBar;
-    menuBar->Append(file_menu, _T("&File"));
-    menuBar->Append(macro_menu, _T("&Macros"));
-    menuBar->Append(mode_menu, _T("&Conversion Mode"));
-    menuBar->Append(options_menu, _T("&Options"));
-    menuBar->Append(help_menu, _T("&Help"));
+    menuBar->Append(file_menu, "&File");
+    menuBar->Append(macro_menu, "&Macros");
+    menuBar->Append(mode_menu, "&Conversion Mode");
+    menuBar->Append(options_menu, "&Options");
+    menuBar->Append(help_menu, "&Help");
 
     frame->SetMenuBar(menuBar);
-    frame->textWindow = new wxTextCtrl(frame, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_MULTILINE);
+    frame->textWindow = new wxTextCtrl(frame, -1, "", wxPoint(-1, -1), wxSize(-1, -1), wxTE_READONLY|wxTE_MULTILINE);
 
-    (*frame->textWindow) << _T("Welcome to Tex2RTF.\n");
+    (*frame->textWindow) << "Welcome to Tex2RTF.\n";
 //    ShowOptions();
 
 #if wxUSE_HELP
-#if wxUSE_MS_HTML_HELP && !defined(__WXUNIVERSAL__)
-    HelpInstance = new wxCHMHelpController;
-#else
-    HelpInstance = new wxHtmlHelpController;
-#endif
-    HelpInstance->Initialize(_T("tex2rtf"));
+    HelpInstance = new wxHelpController();
+    HelpInstance->Initialize("tex2rtf");
 #endif // wxUSE_HELP
 
     /*
@@ -403,33 +394,23 @@ bool MyApp::OnInit()
      *
      */
 
-    wxString path = TexPathList.FindValidPath(MacroFile);
-    if (!path.empty())
-      ReadCustomMacros((wxChar *)path.c_str());
+    wxString path;
+    if ((path = TexPathList.FindValidPath(MacroFile)) != "")
+      ReadCustomMacros((char*) (const char*) path);
 
-#if wxUSE_STATUSBAR
-    wxStrcpy(buf, _T("In "));
-    switch (convertMode)
-    {
-      case TEX_RTF:
-        wxStrcat(buf, (winHelp) ? _T("WinHelp RTF") : _T("linear RTF"));
-        break;
-      case TEX_HTML:
-        wxStrcat(buf, _T("HTML"));
-        break;
-      case TEX_XLP:
-        wxStrcat(buf, _T("XLP"));
-        break;
-      default:
-        wxStrcat(buf, _T("unknown"));
-        break;
-    }
-    wxStrcat(buf, _T(" mode."));
+    strcpy(buf, "In ");
+
+    if (winHelp && (convertMode == TEX_RTF))
+      strcat(buf, "WinHelp RTF");
+    else if (!winHelp && (convertMode == TEX_RTF))
+      strcat(buf, "linear RTF");
+    else if (convertMode == TEX_HTML) strcat(buf, "HTML");
+    else if (convertMode == TEX_XLP) strcat(buf, "XLP");
+      strcat(buf, " mode.");
     frame->SetStatusText(buf, 1);
-#endif // wxUSE_STATUSBAR
 
-    frame->Show(true);
-    return true;
+    frame->Show(TRUE);
+    return TRUE;
   }
   else
 #endif // NO_GUI
@@ -439,42 +420,48 @@ bool MyApp::OnInit()
      *
      */
 
-    wxString path = TexPathList.FindValidPath(MacroFile);
-    if (!path.empty())
-      ReadCustomMacros((wxChar*)path.c_str());
+    wxString path;
+    if ((path = TexPathList.FindValidPath(MacroFile)) != "")
+      ReadCustomMacros((char*) (const char*) path);
 
     Go();
-    if (runTwice)
+    if (runTwice) 
     {
         Go();
     }
 #ifdef NO_GUI
-    return true;
+    return 0;
 #else
-    OnExit(); // Do cleanup since OnExit won't be called now
-    return false;
+    return FALSE;
 #endif
   }
+
+#ifndef NO_GUI
+  // Return the main frame window
+  return TRUE;
+#else
+  return 0;
+#endif
 }
 
 #ifndef NO_GUI
 int MyApp::OnExit()
 {
-  wxNode *node = CustomMacroList.GetFirst();
+  wxNode *node = CustomMacroList.First();
   while (node)
   {
-    CustomMacro *macro = (CustomMacro *)node->GetData();
+    CustomMacro *macro = (CustomMacro *)node->Data();
     delete macro;
     delete node;
-    node = CustomMacroList.GetFirst();
+    node = CustomMacroList.First();
   }
   MacroDefs.BeginFind();
-  wxHashTable::Node* mNode = MacroDefs.Next();
-  while (mNode)
+  node = MacroDefs.Next();
+  while (node)
   {
-    TexMacroDef* def = (TexMacroDef*) mNode->GetData();
+    TexMacroDef* def = (TexMacroDef*) node->Data();
     delete def;
-    mNode = MacroDefs.Next();
+    node = MacroDefs.Next();
   }
   MacroDefs.Clear();
 #ifdef __WXMSW__
@@ -592,25 +579,25 @@ int MyApp::OnExit()
 #endif
 void ShowOptions(void)
 {
-    wxChar buf[100];
-    wxSnprintf(buf, sizeof(buf), _T("Tex2RTF version %.2f"), versionNo);
+    char buf[100];
+    sprintf(buf, "Tex2RTF version %.2f", versionNo);
     OnInform(buf);
-    OnInform(_T("Usage: tex2rtf [input] [output] [switches]\n"));
-    OnInform(_T("where valid switches are"));
+    OnInform("Usage: tex2rtf [input] [output] [switches]\n");
+    OnInform("where valid switches are");
 #ifndef NO_GUI
-    OnInform(_T("    -interactive"));
+    OnInform("    -interactive");
 #endif
-    OnInform(_T("    -bufsize <size in K>"));
-    OnInform(_T("    -charset <pc | pca | ansi | mac> (default ansi)"));
-    OnInform(_T("    -twice"));
-    OnInform(_T("    -sync"));
-    OnInform(_T("    -checkcurlybraces"));
-    OnInform(_T("    -checksyntax"));
-    OnInform(_T("    -macros <filename>"));
-    OnInform(_T("    -winhelp"));
-    OnInform(_T("    -rtf"));
-    OnInform(_T("    -html"));
-    OnInform(_T("    -xlp\n"));
+    OnInform("    -bufsize <size in K>");
+    OnInform("    -charset <pc | pca | ansi | mac> (default ansi)");
+    OnInform("    -twice");
+    OnInform("    -sync");
+    OnInform("    -checkcurleybraces");
+    OnInform("    -checksyntax");
+    OnInform("    -macros <filename>");
+    OnInform("    -winhelp");
+    OnInform("    -rtf");
+    OnInform("    -html");
+    OnInform("    -xlp\n");
 }
 
 #ifndef NO_GUI
@@ -630,7 +617,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(TEX_MODE_WINHELP, MyFrame::OnModeWinHelp)
     EVT_MENU(TEX_MODE_HTML, MyFrame::OnModeHTML)
     EVT_MENU(TEX_MODE_XLP, MyFrame::OnModeXLP)
-    EVT_MENU(TEX_OPTIONS_CURLY_BRACE, MyFrame::OnOptionsCurlyBrace)
+    EVT_MENU(TEX_OPTIONS_CURELY_BRACE, MyFrame::OnOptionsCurleyBrace)
     EVT_MENU(TEX_OPTIONS_SYNTAX_CHECKING, MyFrame::OnOptionsSyntaxChecking)
     EVT_MENU(TEX_HELP, MyFrame::OnHelp)
     EVT_MENU(TEX_ABOUT, MyFrame::OnAbout)
@@ -641,12 +628,12 @@ MyFrame::MyFrame(wxFrame *frame, wxWindowID id, const wxString& title, const wxP
   wxFrame(frame, id, title, pos, size)
 {}
 
-void MyFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
+void MyFrame::OnCloseWindow(wxCloseEvent& event)
 {
   if (!stopRunning && !OkToClose)
   {
-    stopRunning = true;
-    runTwice = false;
+    stopRunning = TRUE;
+    runTwice = FALSE;
     return;
   }
   else if (OkToClose)
@@ -655,191 +642,175 @@ void MyFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
   }
 }
 
-void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnExit(wxCommandEvent& event)
 {
   Close();
 //    this->Destroy();
 }
 
-void MyFrame::OnGo(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnGo(wxCommandEvent& event)
 {
       passNumber = 1;
       errorCount = 0;
-      menuBar->EnableTop(0, false);
-      menuBar->EnableTop(1, false);
-      menuBar->EnableTop(2, false);
-      menuBar->EnableTop(3, false);
+      menuBar->EnableTop(0, FALSE);
+      menuBar->EnableTop(1, FALSE);
+      menuBar->EnableTop(2, FALSE);
+      menuBar->EnableTop(3, FALSE);
       textWindow->Clear();
-      Tex2RTFYield(true);
+      Tex2RTFYield(TRUE);
       Go();
 
       if (stopRunning)
       {
-#if wxUSE_STATUSBAR
-        SetStatusText(_T("Build aborted!"));
-#endif // wxUSE_STATUSBAR
+        SetStatusText("Build aborted!");
         wxString errBuf;
-        errBuf.Printf(_T("\nErrors encountered during this pass: %lu\n"), errorCount);
-        OnInform((wxChar *)errBuf.c_str());
+        errBuf.Printf("\nErrors encountered during this pass: %lu\n", errorCount);
+        OnInform((char *)errBuf.c_str());
       }
 
 
       if (runTwice && !stopRunning)
       {
-        Tex2RTFYield(true);
+        Tex2RTFYield(TRUE);
         Go();
       }
-      menuBar->EnableTop(0, true);
-      menuBar->EnableTop(1, true);
-      menuBar->EnableTop(2, true);
-      menuBar->EnableTop(3, true);
+      menuBar->EnableTop(0, TRUE);
+      menuBar->EnableTop(1, TRUE);
+      menuBar->EnableTop(2, TRUE);
+      menuBar->EnableTop(3, TRUE);
 }
 
-void MyFrame::OnSetInput(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnSetInput(wxCommandEvent& event)
 {
-      ChooseInputFile(true);
+      ChooseInputFile(TRUE);
 }
 
-void MyFrame::OnSetOutput(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnSetOutput(wxCommandEvent& event)
 {
-      ChooseOutputFile(true);
+      ChooseOutputFile(TRUE);
 }
 
-void MyFrame::OnSaveFile(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnSaveFile(wxCommandEvent& event)
 {
-      wxString s = wxFileSelector(_T("Save text to file"), _T(""), _T(""), _T("txt"), _T("*.txt"));
-      if (s != _T(""))
+      wxString s = wxFileSelector("Save text to file", "", "", "txt", "*.txt");
+      if (s != "")
       {
         textWindow->SaveFile(s);
-#if wxUSE_STATUSBAR
-        wxChar buf[350];
-        wxSnprintf(buf, sizeof(buf), _T("Saved text to %s"), (const wxChar*) s.c_str());
+        char buf[350];
+        sprintf(buf, "Saved text to %s", (const char*) s);
         frame->SetStatusText(buf, 0);
-#endif // wxUSE_STATUSBAR
       }
 }
 
-void MyFrame::OnViewOutput(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnViewOutput(wxCommandEvent& event)
 {
       ChooseOutputFile();
       if (OutputFile && wxFileExists(OutputFile))
       {
         textWindow->LoadFile(OutputFile);
-        wxChar buf[300];
+        char buf[300];
         wxString str(wxFileNameFromPath(OutputFile));
-        wxSnprintf(buf, sizeof(buf), _T("Tex2RTF [%s]"), (const wxChar*) str.c_str());
+        sprintf(buf, "Tex2RTF [%s]", (const char*) str);
         frame->SetTitle(buf);
       }
 }
 
-void MyFrame::OnViewLatex(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnViewLatex(wxCommandEvent& event)
 {
       ChooseInputFile();
       if (InputFile && wxFileExists(InputFile))
       {
         textWindow->LoadFile(InputFile);
-        wxChar buf[300];
+        char buf[300];
         wxString str(wxFileNameFromPath(OutputFile));
-        wxSnprintf(buf, sizeof(buf), _T("Tex2RTF [%s]"), (const wxChar*) str.c_str());
+        sprintf(buf, "Tex2RTF [%s]", (const char*) str);
         frame->SetTitle(buf);
       }
 }
 
-void MyFrame::OnLoadMacros(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnLoadMacros(wxCommandEvent& event)
 {
       textWindow->Clear();
-      wxString s = wxFileSelector(_T("Choose custom macro file"), wxPathOnly(MacroFile), wxFileNameFromPath(MacroFile), _T("ini"), _T("*.ini"));
-      if (!s.empty() && wxFileExists(s))
+      wxString s = wxFileSelector("Choose custom macro file", wxPathOnly(MacroFile), wxFileNameFromPath(MacroFile), "ini", "*.ini");
+      if (s != "" && wxFileExists(s))
       {
         MacroFile = copystring(s);
-        ReadCustomMacros((wxChar *)s.c_str());
+        ReadCustomMacros((char*) (const char*) s);
         ShowCustomMacros();
       }
 }
 
-void MyFrame::OnShowMacros(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnShowMacros(wxCommandEvent& event)
 {
       textWindow->Clear();
-      Tex2RTFYield(true);
+      Tex2RTFYield(TRUE);
       ShowCustomMacros();
 }
 
-void MyFrame::OnModeRTF(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnModeRTF(wxCommandEvent& event)
 {
       convertMode = TEX_RTF;
-      winHelp = false;
+      winHelp = FALSE;
       InputFile = NULL;
       OutputFile = NULL;
-#if wxUSE_STATUSBAR
-      SetStatusText(_T("In linear RTF mode."), 1);
-#endif // wxUSE_STATUSBAR
+      SetStatusText("In linear RTF mode.", 1);
 }
 
-void MyFrame::OnModeWinHelp(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnModeWinHelp(wxCommandEvent& event)
 {
       convertMode = TEX_RTF;
-      winHelp = true;
+      winHelp = TRUE;
       InputFile = NULL;
       OutputFile = NULL;
-#if wxUSE_STATUSBAR
-      SetStatusText(_T("In WinHelp RTF mode."), 1);
-#endif // wxUSE_STATUSBAR
+      SetStatusText("In WinHelp RTF mode.", 1);
 }
 
-void MyFrame::OnModeHTML(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnModeHTML(wxCommandEvent& event)
 {
       convertMode = TEX_HTML;
-      winHelp = false;
+      winHelp = FALSE;
       InputFile = NULL;
       OutputFile = NULL;
-#if wxUSE_STATUSBAR
-      SetStatusText(_T("In HTML mode."), 1);
-#endif // wxUSE_STATUSBAR
+      SetStatusText("In HTML mode.", 1);
 }
 
-void MyFrame::OnModeXLP(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnModeXLP(wxCommandEvent& event)
 {
       convertMode = TEX_XLP;
       InputFile = NULL;
       OutputFile = NULL;
-#if wxUSE_STATUSBAR
-      SetStatusText(_T("In XLP mode."), 1);
-#endif // wxUSE_STATUSBAR
+      SetStatusText("In XLP mode.", 1);
 }
 
-void MyFrame::OnOptionsCurlyBrace(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnOptionsCurleyBrace(wxCommandEvent& event)
 {
-    checkCurlyBraces = !checkCurlyBraces;
-#if wxUSE_STATUSBAR
-    if (checkCurlyBraces)
+    checkCurleyBraces = !checkCurleyBraces;
+    if (checkCurleyBraces)
     {
-        SetStatusText(_T("Checking curly braces: YES"), 1);
+        SetStatusText("Checking curley braces: YES", 1);
     }
     else
     {
-        SetStatusText(_T("Checking curly braces: NO"), 1);
+        SetStatusText("Checking curley braces: NO", 1);
     }
-#endif // wxUSE_STATUSBAR
 }
 
 
-void MyFrame::OnOptionsSyntaxChecking(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnOptionsSyntaxChecking(wxCommandEvent& event)
 {
     checkSyntax = !checkSyntax;
-#if wxUSE_STATUSBAR
     if (checkSyntax)
     {
-        SetStatusText(_T("Checking syntax: YES"), 1);
+        SetStatusText("Checking syntax: YES", 1);
     }
     else
     {
-        SetStatusText(_T("Checking syntax: NO"), 1);
+        SetStatusText("Checking syntax: NO", 1);
     }
-#endif // wxUSE_STATUSBAR
 }
 
 
-void MyFrame::OnHelp(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnHelp(wxCommandEvent& event)
 {
 #if wxUSE_HELP
       HelpInstance->LoadFile();
@@ -847,28 +818,28 @@ void MyFrame::OnHelp(wxCommandEvent& WXUNUSED(event))
 #endif // wxUSE_HELP
 }
 
-void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnAbout(wxCommandEvent& event)
 {
-      wxChar buf[300];
+      char buf[300];
 #ifdef __WIN32__
-      wxChar *platform = _T(" (32-bit)");
+      char *platform = " (32-bit)";
 #else
 #ifdef __WXMSW__
-      wxChar *platform = _T(" (16-bit)");
+      char *platform = " (16-bit)";
 #else
-      wxChar *platform = _T("");
+      char *platform = "";
 #endif
 #endif
-      wxSnprintf(buf, sizeof(buf), _T("Tex2RTF Version %.2f%s\nLaTeX to RTF, WinHelp, and HTML Conversion\n\n(c) Julian Smart, George Tasker and others, 1999-2002"), versionNo, platform);
-      wxMessageBox(buf, _T("About Tex2RTF"));
+      sprintf(buf, "Tex2RTF Version %.2f%s\nLaTeX to RTF, WinHelp, and HTML Conversion\n\n(c) Julian Smart, George Tasker and others, 1999-2002", versionNo, platform);
+      wxMessageBox(buf, "About Tex2RTF");
 }
 
 void ChooseInputFile(bool force)
 {
   if (force || !InputFile)
   {
-    wxString s = wxFileSelector(_T("Choose LaTeX input file"), wxPathOnly(InputFile), wxFileNameFromPath(InputFile), _T("tex"), _T("*.tex"));
-    if (!s.empty())
+    wxString s = wxFileSelector("Choose LaTeX input file", wxPathOnly(InputFile), wxFileNameFromPath(InputFile), "tex", "*.tex");
+    if (s != "")
     {
       // Different file, so clear index entries.
       ClearKeyWordTable();
@@ -879,8 +850,8 @@ void ChooseInputFile(bool force)
       InputFile = copystring(s);
       wxString str = wxFileNameFromPath(InputFile);
       wxString buf;
-      buf.Printf(_T("Tex2RTF [%s]"), str.c_str());
-      frame->SetTitle((wxChar *)buf.c_str());
+      buf.Printf("Tex2RTF [%s]", str.c_str());
+      frame->SetTitle((char *)buf.c_str());
       OutputFile = NULL;
     }
   }
@@ -888,9 +859,9 @@ void ChooseInputFile(bool force)
 
 void ChooseOutputFile(bool force)
 {
-  wxChar extensionBuf[10];
-  wxChar wildBuf[10];
-  wxStrcpy(wildBuf, _T("*."));
+  char extensionBuf[10];
+  char wildBuf[10];
+  strcpy(wildBuf, "*.");
   wxString path;
   if (OutputFile)
     path = wxPathOnly(OutputFile);
@@ -901,28 +872,33 @@ void ChooseOutputFile(bool force)
   {
     case TEX_RTF:
     {
-      wxStrcpy(extensionBuf, _T("rtf"));
-      wxStrcat(wildBuf, _T("rtf"));
+      strcpy(extensionBuf, "rtf");
+      strcat(wildBuf, "rtf");
       break;
     }
     case TEX_XLP:
     {
-      wxStrcpy(extensionBuf, _T("xlp"));
-      wxStrcat(wildBuf, _T("xlp"));
+      strcpy(extensionBuf, "xlp");
+      strcat(wildBuf, "xlp");
       break;
     }
     case TEX_HTML:
     {
-      wxStrcpy(extensionBuf, _T("html"));
-      wxStrcat(wildBuf, _T("html"));
+#if defined(__WXMSW__) && defined(__WIN16__)
+      strcpy(extensionBuf, "htm");
+      strcat(wildBuf, "htm");
+#else
+      strcpy(extensionBuf, "html");
+      strcat(wildBuf, "html");
+#endif
       break;
     }
   }
   if (force || !OutputFile)
   {
-    wxString s = wxFileSelector(_T("Choose output file"), path, wxFileNameFromPath(OutputFile),
+    wxString s = wxFileSelector("Choose output file", path, wxFileNameFromPath(OutputFile),
                    extensionBuf, wildBuf);
-    if (!s.empty())
+    if (s != "")
       OutputFile = copystring(s);
   }
 }
@@ -936,15 +912,15 @@ bool Go(void)
 #endif
 
   if (!InputFile || !OutputFile || stopRunning)
-    return false;
+    return FALSE;
 
 #ifndef NO_GUI
   if (isInteractive)
   {
-    wxChar buf[300];
+    char buf[300];
     wxString str = wxFileNameFromPath(InputFile);
 
-    wxSnprintf(buf, sizeof(buf), _T("Tex2RTF [%s]"), (const wxChar*) str);
+    sprintf(buf, "Tex2RTF [%s]", (const char*) str);
     frame->SetTitle(buf);
   }
 
@@ -952,7 +928,7 @@ bool Go(void)
 #endif
 
   // Find extension-less filename
-  wxStrcpy(FileRoot, OutputFile);
+  strcpy(FileRoot, OutputFile);
   StripExtension(FileRoot);
 
   if (truncateFilenames && convertMode == TEX_HTML)
@@ -960,24 +936,24 @@ bool Go(void)
     // Truncate to five characters. This ensures that
     // we can generate DOS filenames such as thing999. But 1000 files
     // may not be enough, of course...
-    wxChar* sName = wxFileNameFromPath( FileRoot);  // this Julian's method is non-destructive reference
+    char* sName = wxFileNameFromPath( FileRoot);  // this Julian's method is non-destructive reference
 
     if(sName)
-      if(wxStrlen( sName) > 5)
+      if(strlen( sName) > 5)
         sName[5] = '\0';  // that should do!
   }
 
-  wxSnprintf(ContentsName, 300, _T("%s.con"), FileRoot);
-  wxSnprintf(TmpContentsName, 300, _T("%s.cn1"), FileRoot);
-  wxSnprintf(TmpFrameContentsName, 300, _T("%s.frc"), FileRoot);
-  wxSnprintf(WinHelpContentsFileName, 300, _T("%s.cnt"), FileRoot);
-  wxSnprintf(RefFileName, 300, _T("%s.ref"), FileRoot);
+  sprintf(ContentsName, "%s.con", FileRoot);
+  sprintf(TmpContentsName, "%s.cn1", FileRoot);
+  sprintf(TmpFrameContentsName, "%s.frc", FileRoot);
+  sprintf(WinHelpContentsFileName, "%s.cnt", FileRoot);
+  sprintf(RefFileName, "%s.ref", FileRoot);
 
   TexPathList.EnsureFileAccessible(InputFile);
   if (!bulletFile)
   {
-    wxString s = TexPathList.FindValidPath(_T("bullet.bmp"));
-    if (!s.empty())
+    wxString s = TexPathList.FindValidPath("bullet.bmp");
+    if (s != "")
     {
       wxString str = wxFileNameFromPath(s);
       bulletFile = copystring(str);
@@ -987,32 +963,32 @@ bool Go(void)
   if (wxFileExists(RefFileName))
     ReadTexReferences(RefFileName);
 
-  bool success = false;
+  bool success = FALSE;
 
   if (InputFile && OutputFile)
   {
     if (!wxFileExists(InputFile))
     {
-      OnError(_T("Cannot open input file!"));
+      OnError("Cannot open input file!");
       TexCleanUp();
-      return false;
+      return FALSE;
     }
-#if !defined(NO_GUI) && wxUSE_STATUSBAR
+#ifndef NO_GUI
     if (isInteractive)
     {
       wxString buf;
-      buf.Printf(_T("Working, pass %d...Click CLOSE to abort"), passNumber);
-      frame->SetStatusText((wxChar *)buf.c_str());
+      buf.Printf("Working, pass %d...Click CLOSE to abort", passNumber);
+      frame->SetStatusText((char *)buf.c_str());
     }
 #endif
-    OkToClose = false;
-    OnInform(_T("Reading LaTeX file..."));
+    OkToClose = FALSE;
+    OnInform("Reading LaTeX file...");
     TexLoadFile(InputFile);
 
     if (stopRunning)
     {
-        OkToClose = true;
-        return false;
+        OkToClose = TRUE;
+        return FALSE;
     }
 
     switch (convertMode)
@@ -1036,116 +1012,115 @@ bool Go(void)
   }
   if (stopRunning)
   {
-    OnInform(_T("*** Aborted by user."));
-    success = false;
-    stopRunning = false;
-    OkToClose = true;
+    OnInform("*** Aborted by user.");
+    success = FALSE;
+    stopRunning = FALSE;
+    OkToClose = TRUE;
   }
 
   if (success)
   {
     WriteTexReferences(RefFileName);
     TexCleanUp();
-    startedSections = false;
+    startedSections = FALSE;
 
     wxString buf;
 #ifndef NO_GUI
     long tim = wxGetElapsedTime();
-    buf.Printf(_T("Finished PASS #%d in %ld seconds.\n"), passNumber, (long)(tim/1000.0));
-    OnInform((wxChar *)buf.c_str());
+    buf.Printf("Finished PASS #%d in %ld seconds.\n", passNumber, (long)(tim/1000.0));
+    OnInform((char *)buf.c_str());
 
     if (errorCount)
     {
-        buf.Printf(_T("Errors encountered during this pass: %lu\n"), errorCount);
-        OnInform((wxChar *)buf.c_str());
+        buf.Printf("Errors encountered during this pass: %lu\n", errorCount);
+        OnInform((char *)buf.c_str());
     }
 
-#if wxUSE_STATUSBAR
     if (isInteractive)
     {
-      buf.Printf(_T("Done, %d %s."), passNumber, (passNumber > 1) ? _T("passes") : _T("pass"));
-      frame->SetStatusText((wxChar *)buf.c_str());
+      buf.Printf("Done, %d %s.", passNumber, (passNumber > 1) ? "passes" : "pass");
+      frame->SetStatusText((char *)buf.c_str());
     }
-#endif // wxUSE_STATUSBAR
 #else
-    buf.Printf(_T("Done, %d %s."), passNumber, (passNumber > 1) ? _T("passes") : _T("pass"));
-    OnInform((wxChar *)buf.c_str());
+    buf.Printf("Done, %d %s.", passNumber, (passNumber > 1) ? "passes" : "pass");
+    OnInform((char *)buf.c_str());
     if (errorCount)
     {
-        buf.Printf(_T("Errors encountered during this pass: %lu\n"), errorCount);
-        OnInform((wxChar *)buf.c_str());
+        buf.Printf("Errors encountered during this pass: %lu\n", errorCount);
+        OnInform((char *)buf.c_str());
     }
 #endif
     passNumber ++;
     errorCount = 0;
-    OkToClose = true;
-    return true;
+    OkToClose = TRUE;
+    return TRUE;
   }
 
   TexCleanUp();
-  startedSections = false;
+  startedSections = FALSE;
 
-#if !defined(NO_GUI) && wxUSE_STATUSBAR
-  frame->SetStatusText(_T("Aborted by user."));
+#ifndef NO_GUI
+  frame->SetStatusText("Aborted by user.");
 #endif // GUI
 
-  OnInform(_T("Sorry, unsuccessful."));
-  OkToClose = true;
-  return false;
+  OnInform("Sorry, unsuccessful.");
+  OkToClose = TRUE;
+  return FALSE;
 }
 
-void OnError(const wxChar *msg)
+void OnError(const char *msg)
 {
-    wxString msg_string = msg;
-    errorCount++;
+  errorCount++;
 
 #ifdef NO_GUI
-    wxSTD cerr << "Error: " << msg_string.mb_str() << "\n";
-    wxSTD cerr.flush();
+  wxSTD cerr << "Error: " << msg << "\n";
+  wxSTD cerr.flush();
 #else
-    if (isInteractive && frame)
-    {
-        (*frame->textWindow) << _T("Error: ") << msg << _T("\n");
-    }
-    else
-    {
-#if defined(__UNIX__)
-        wxSTD cerr << "Error: " << msg_string.mb_str() << "\n";
-        wxSTD cerr.flush();
-#elif defined(__WXMSW__)
-        wxLogError(msg);
+  if (isInteractive && frame)
+    (*frame->textWindow) << "Error: " << msg << "\n";
+  else
+#ifdef __UNIX__
+  {
+    wxSTD cerr << "Error: " << msg << "\n";
+    wxSTD cerr.flush();
+  }
 #endif
-    }
 
-    Tex2RTFYield(true);
+#ifdef __WXMSW__
+    wxLogError(msg);
+#endif
+  Tex2RTFYield(TRUE);
 #endif // NO_GUI
 }
 
-void OnInform(const wxChar *msg)
+void OnInform(const char *msg)
 {
-    wxString msg_string = msg;
 #ifdef NO_GUI
-    wxSTD cout << msg_string.mb_str() << "\n";
-    wxSTD cout.flush();
+  wxSTD cout << msg << "\n";
+  wxSTD cout.flush();
 #else
-    if (isInteractive && frame)
-    {
-       (*frame->textWindow) << msg << _T("\n");
-    }
-    else
-    {
-#if defined(__UNIX__)
-        wxSTD cout << msg_string.mb_str() << "\n";
-        wxSTD cout.flush();
-#elif defined(__WXMSW__)
-        wxLogInfo(msg);
+  if (isInteractive && frame)
+    (*frame->textWindow) << msg << "\n";
+/* This whole block of code is just wrong I think.  It would behave
+   completely wrong under anything other than MSW due to the ELSE
+	with no statement, and the cout calls would fail under MSW, as
+	the code in this block is compiled if !NO_GUI This code has been 
+	here since v1.1 of this file too. - gt
+  else
+#ifdef __WXMSW__
+  {
+    wxSTD cout << msg << "\n";
+    wxSTD cout.flush();
+  }
 #endif
-    }
-
-    if (isInteractive)
-    {
-        Tex2RTFYield(true);
-    }
+#ifdef __WXMSW__
+    {}
+#endif
+*/
+  if (isInteractive)
+  {
+    Tex2RTFYield(TRUE);
+  }
 #endif // NO_GUI
 }
 
@@ -1178,20 +1153,20 @@ bool OnArgument(int macroId, int arg_no, bool start)
     case TEX_RTF:
     {
       return RTFOnArgument(macroId, arg_no, start);
-      // break;
+      break;
     }
     case TEX_XLP:
     {
       return XLPOnArgument(macroId, arg_no, start);
-      // break;
+      break;
     }
     case TEX_HTML:
     {
       return HTMLOnArgument(macroId, arg_no, start);
-      // break;
+      break;
     }
   }
-  return true;
+  return TRUE;
 }
 
 /*
@@ -1205,10 +1180,10 @@ bool OnArgument(int macroId, int arg_no, bool start)
 
 wxConnectionBase *Tex2RTFServer::OnAcceptConnection(const wxString& topic)
 {
-  if (topic == _T("TEX2RTF"))
+  if (topic == "TEX2RTF")
   {
     if (!ipc_buffer)
-      ipc_buffer = new wxChar[1000];
+      ipc_buffer = new char[1000];
 
     return new Tex2RTFConnection(ipc_buffer, 4000);
   }
@@ -1220,21 +1195,25 @@ wxConnectionBase *Tex2RTFServer::OnAcceptConnection(const wxString& topic)
   * Connection
   */
 
-Tex2RTFConnection::Tex2RTFConnection(wxChar *buf, int size):wxDDEConnection(buf, size)
+Tex2RTFConnection::Tex2RTFConnection(char *buf, int size):wxDDEConnection(buf, size)
 {
 }
 
-bool SplitCommand(wxChar *data, wxChar *firstArg, wxChar *secondArg)
+Tex2RTFConnection::~Tex2RTFConnection(void)
+{
+}
+
+bool SplitCommand(char *data, char *firstArg, char *secondArg)
 {
   firstArg[0] = 0;
   secondArg[0] = 0;
   int i = 0;
-  bool stop = false;
+  bool stop = FALSE;
   // Find first argument (command name)
   while (!stop)
   {
     if (data[i] == ' ' || data[i] == 0)
-      stop = true;
+      stop = TRUE;
     else
     {
       firstArg[i] = data[i];
@@ -1255,86 +1234,86 @@ bool SplitCommand(wxChar *data, wxChar *firstArg, wxChar *secondArg)
     }
     secondArg[j] = 0;
   }
-  return true;
+  return TRUE;
 }
 
-bool Tex2RTFConnection::OnExecute(const wxString& WXUNUSED(topic), wxChar *data, int WXUNUSED(size), wxIPCFormat WXUNUSED(format))
+bool Tex2RTFConnection::OnExecute(const wxString& topic, char *data, int size, int format)
 {
-  wxStrcpy(Tex2RTFLastStatus, _T("OK"));
+  strcpy(Tex2RTFLastStatus, "OK");
 
-  wxChar firstArg[50];
-  wxChar secondArg[300];
+  char firstArg[50];
+  char secondArg[300];
   if (SplitCommand(data, firstArg, secondArg))
   {
-    bool hasArg = (wxStrlen(secondArg) > 0);
-    if (wxStrcmp(firstArg, _T("INPUT")) == 0 && hasArg)
+    bool hasArg = (strlen(secondArg) > 0);
+    if (strcmp(firstArg, "INPUT") == 0 && hasArg)
     {
       if (InputFile) delete[] InputFile;
       InputFile = copystring(secondArg);
       if (frame)
       {
-        wxChar buf[100];
+        char buf[100];
         wxString str = wxFileNameFromPath(InputFile);
-        wxSnprintf(buf, sizeof(buf), _T("Tex2RTF [%s]"), (const wxChar*) str);
+        sprintf(buf, "Tex2RTF [%s]", (const char*) str);
         frame->SetTitle(buf);
       }
     }
-    else if (wxStrcmp(firstArg, _T("OUTPUT")) == 0 && hasArg)
+    else if (strcmp(firstArg, "OUTPUT") == 0 && hasArg)
     {
       if (OutputFile) delete[] OutputFile;
       OutputFile = copystring(secondArg);
     }
-    else if (wxStrcmp(firstArg, _T("GO")) == 0)
+    else if (strcmp(firstArg, "GO") == 0)
     {
-      wxStrcpy(Tex2RTFLastStatus, _T("WORKING"));
+      strcpy(Tex2RTFLastStatus, "WORKING");
       if (!Go())
-        wxStrcpy(Tex2RTFLastStatus, _T("CONVERSION ERROR"));
+        strcpy(Tex2RTFLastStatus, "CONVERSION ERROR");
       else
-        wxStrcpy(Tex2RTFLastStatus, _T("OK"));
+        strcpy(Tex2RTFLastStatus, "OK");
     }
-    else if (wxStrcmp(firstArg, _T("EXIT")) == 0)
+    else if (strcmp(firstArg, "EXIT") == 0)
     {
       if (frame) frame->Close();
     }
-    else if (wxStrcmp(firstArg, _T("MINIMIZE")) == 0 || wxStrcmp(firstArg, _T("ICONIZE")) == 0)
+    else if (strcmp(firstArg, "MINIMIZE") == 0 || strcmp(firstArg, "ICONIZE") == 0)
     {
       if (frame)
-        frame->Iconize(true);
+        frame->Iconize(TRUE);
     }
-    else if (wxStrcmp(firstArg, _T("SHOW")) == 0 || wxStrcmp(firstArg, _T("RESTORE")) == 0)
+    else if (strcmp(firstArg, "SHOW") == 0 || strcmp(firstArg, "RESTORE") == 0)
     {
       if (frame)
       {
-        frame->Iconize(false);
-        frame->Show(true);
+        frame->Iconize(FALSE);
+        frame->Show(TRUE);
       }
     }
     else
     {
       // Try for a setting
-      wxStrcpy(Tex2RTFLastStatus, RegisterSetting(firstArg, secondArg, false));
-#if !defined(NO_GUI) && wxUSE_STATUSBAR
-      if (frame && wxStrcmp(firstArg, _T("conversionMode")) == 0)
+      strcpy(Tex2RTFLastStatus, RegisterSetting(firstArg, secondArg, FALSE));
+#ifndef NO_GUI
+      if (frame && strcmp(firstArg, "conversionMode") == 0)
       {
-        wxChar buf[100];
-        wxStrcpy(buf, _T("In "));
+        char buf[100];
+        strcpy(buf, "In ");
 
         if (winHelp && (convertMode == TEX_RTF))
-          wxStrcat(buf, _T("WinHelp RTF"));
+          strcat(buf, "WinHelp RTF");
         else if (!winHelp && (convertMode == TEX_RTF))
-          wxStrcat(buf, _T("linear RTF"));
-        else if (convertMode == TEX_HTML) wxStrcat(buf, _T("HTML"));
-        else if (convertMode == TEX_XLP) wxStrcat(buf, _T("XLP"));
-          wxStrcat(buf, _T(" mode."));
+          strcat(buf, "linear RTF");
+        else if (convertMode == TEX_HTML) strcat(buf, "HTML");
+        else if (convertMode == TEX_XLP) strcat(buf, "XLP");
+          strcat(buf, " mode.");
         frame->SetStatusText(buf, 1);
       }
 #endif
     }
   }
-  return true;
+  return TRUE;
 }
 
-wxChar *Tex2RTFConnection::OnRequest(const wxString& WXUNUSED(topic), const wxString& WXUNUSED(item), int *WXUNUSED(size), wxIPCFormat WXUNUSED(format))
+char *Tex2RTFConnection::OnRequest(const wxString& topic, const wxString& item, int *size, int format)
 {
   return Tex2RTFLastStatus;
 }

@@ -9,12 +9,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "mdi.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #ifdef __VMS
 #define XtDisplay XTDISPLAY
@@ -24,7 +21,6 @@
 #include "wx/mdi.h"
 #include "wx/menu.h"
 #include "wx/settings.h"
-#include "wx/icon.h"
 
 #ifdef __VMS__
 #pragma message disable nosimpint
@@ -106,10 +102,10 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
         int w, h;
         GetClientSize(& w, & h);
         m_clientWindow->SetSize(0, 0, w, h);
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 wxMDIParentFrame::~wxMDIParentFrame()
@@ -232,11 +228,11 @@ bool wxMDIParentFrame::ProcessEvent(wxEvent& event)
     // Stops the same event being processed repeatedly
     static wxEventType inEvent = wxEVT_NULL;
     if (inEvent == event.GetEventType())
-        return false;
+        return FALSE;
 
     inEvent = event.GetEventType();
 
-    bool res = false;
+    bool res = FALSE;
     if (m_activeChild && event.IsKindOf(CLASSINFO(wxCommandEvent)))
     {
         res = m_activeChild->GetEventHandler()->ProcessEvent(event);
@@ -277,7 +273,7 @@ void wxMDIParentFrame::Cascade()
     // TODO
 }
 
-void wxMDIParentFrame::Tile(wxOrientation WXUNUSED(orient))
+void wxMDIParentFrame::Tile()
 {
     // TODO
 }
@@ -367,7 +363,7 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
     wxMDIChildFrame* oldActiveChild = parent->GetActiveChild();
     if (oldActiveChild)
     {
-        wxActivateEvent event(wxEVT_ACTIVATE, false, oldActiveChild->GetId());
+        wxActivateEvent event(wxEVT_ACTIVATE, FALSE, oldActiveChild->GetId());
         event.SetEventObject( oldActiveChild );
         oldActiveChild->GetEventHandler()->ProcessEvent(event);
     }
@@ -391,9 +387,10 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
         XmNresizePolicy, XmRESIZE_NONE,
         NULL);
 
-    XtAddEventHandler((Widget) m_mainWidget, ExposureMask,False,
+    XtAddEventHandler((Widget) m_mainWidget, ExposureMask,FALSE,
         wxUniversalRepaintProc, (XtPointer) this);
 
+    SetCanAddEventHandler(TRUE);
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
 
     ChangeBackgroundColour();
@@ -402,21 +399,21 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
 
     SetTitle(title);
 
-    clientWindow->AddPage(this, title, true);
+    clientWindow->AddPage(this, title, TRUE);
     clientWindow->Refresh();
 
     // Positions the toolbar and status bar -- but we don't have any.
     //    PreResize();
 
     wxModelessWindows.Append(this);
-    return true;
+    return TRUE;
 }
 
 
 wxMDIChildFrame::~wxMDIChildFrame()
 {
     if (m_mainWidget)
-      XtRemoveEventHandler((Widget) m_mainWidget, ExposureMask,False,
+      XtRemoveEventHandler((Widget) m_mainWidget, ExposureMask,FALSE,
         wxUniversalRepaintProc, (XtPointer) this);
 
     if (GetMDIParentFrame())
@@ -428,15 +425,8 @@ wxMDIChildFrame::~wxMDIChildFrame()
         wxMDIClientWindow* clientWindow = parentFrame->GetClientWindow();
 
         // Remove page if still there
-        {
-            int i = clientWindow->FindPage(this);
-
-            if (i != -1)
-            {
-                clientWindow->RemovePage(i);
-                clientWindow->Refresh();
-            }
-        }
+        if (clientWindow->RemovePage(this))
+            clientWindow->Refresh();
 
         // Set the selection to the first remaining page
         if (clientWindow->GetPageCount() > 0)
@@ -463,12 +453,12 @@ void wxMDIChildFrame::OnRaise()
 
     if (oldActiveChild)
     {
-        wxActivateEvent event(wxEVT_ACTIVATE, false, oldActiveChild->GetId());
+        wxActivateEvent event(wxEVT_ACTIVATE, FALSE, oldActiveChild->GetId());
         event.SetEventObject( oldActiveChild );
         oldActiveChild->GetEventHandler()->ProcessEvent(event);
     }
 
-    wxActivateEvent event(wxEVT_ACTIVATE, true, this->GetId());
+    wxActivateEvent event(wxEVT_ACTIVATE, TRUE, this->GetId());
     event.SetEventObject( this );
     this->GetEventHandler()->ProcessEvent(event);
 }
@@ -480,7 +470,7 @@ void wxMDIChildFrame::OnLower()
 
     if (oldActiveChild == this)
     {
-        wxActivateEvent event(wxEVT_ACTIVATE, false, oldActiveChild->GetId());
+        wxActivateEvent event(wxEVT_ACTIVATE, FALSE, oldActiveChild->GetId());
         event.SetEventObject( oldActiveChild );
         oldActiveChild->GetEventHandler()->ProcessEvent(event);
     }
@@ -491,7 +481,7 @@ void wxMDIChildFrame::OnLower()
 #endif
 
 // Set the client size (i.e. leave the calculation of borders etc.
-// to wxWidgets)
+// to wxWindows)
 void wxMDIChildFrame::DoSetClientSize(int width, int height)
 {
     wxWindow::DoSetClientSize(width, height);
@@ -519,7 +509,7 @@ void wxMDIChildFrame::DoGetPosition(int *x, int *y) const
 
 bool wxMDIChildFrame::Show(bool show)
 {
-    SetVisibleStatus( show );
+    m_visibleStatus = show; /* show-&-hide fix */
     return wxWindow::Show(show);
 }
 
@@ -553,16 +543,11 @@ void wxMDIChildFrame::SetIcons(const wxIconBundle& icons)
 
 void wxMDIChildFrame::SetTitle(const wxString& title)
 {
-    wxTopLevelWindow::SetTitle( title );
+    m_title = title;
     wxMDIClientWindow* clientWindow = GetMDIParentFrame()->GetClientWindow();
-
-    // Remove page if still there
-    {
-        int i = clientWindow->FindPage(this);
-
-        if (i != -1)
-            clientWindow->SetPageText(i, title);
-    }
+    int pageNo = clientWindow->FindPagePosition(this);
+    if (pageNo > -1)
+        clientWindow->SetPageText(pageNo, title);
 }
 
 // MDI operations
@@ -578,14 +563,14 @@ void wxMDIChildFrame::Iconize(bool WXUNUSED(iconize))
 
 bool wxMDIChildFrame::IsIconized() const
 {
-    return false;
+    return FALSE;
 }
 
 // Is it maximized? Always maximized under Motif, using the
 // tabbed MDI implementation.
 bool wxMDIChildFrame::IsMaximized(void) const
 {
-    return true;
+    return TRUE;
 }
 
 void wxMDIChildFrame::Restore()
@@ -618,7 +603,7 @@ void wxMDIChildFrame::Lower(void)
     wxWindow::Raise();
 }
 
-void wxMDIChildFrame::DoSetSizeHints(int WXUNUSED(minW), int WXUNUSED(minH), int WXUNUSED(maxW), int WXUNUSED(maxH), int WXUNUSED(incW), int WXUNUSED(incH))
+void wxMDIChildFrame::SetSizeHints(int WXUNUSED(minW), int WXUNUSED(minH), int WXUNUSED(maxW), int WXUNUSED(maxH), int WXUNUSED(incW), int WXUNUSED(incH))
 {
 }
 
@@ -648,22 +633,15 @@ bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
     if (success)
     {
         wxFont font(10, wxSWISS, wxNORMAL, wxNORMAL);
-        SetFont(font);
-        return true;
+        wxFont selFont(10, wxSWISS, wxNORMAL, wxBOLD);
+        GetTabView()->SetTabFont(font);
+        GetTabView()->SetSelectedTabFont(selFont);
+        GetTabView()->SetTabSize(120, 18);
+        GetTabView()->SetTabSelectionHeight(20);
+        return TRUE;
     }
     else
-        return false;
-}
-
-int wxMDIClientWindow::FindPage(const wxNotebookPage* page)
-{
-    for (int i = GetPageCount() - 1; i >= 0; --i)
-    {
-        if (GetPage(i) == page)
-            return i;
-    }
-
-    return -1;
+        return FALSE;
 }
 
 void wxMDIClientWindow::DoSetSize(int x, int y, int width, int height, int sizeFlags)
@@ -705,7 +683,7 @@ void wxMDIClientWindow::OnPageChanged(wxNotebookEvent& event)
         wxMDIChildFrame* oldChild = (wxMDIChildFrame*) GetPage(event.GetOldSelection());
         if (oldChild)
         {
-            wxActivateEvent event(wxEVT_ACTIVATE, false, oldChild->GetId());
+            wxActivateEvent event(wxEVT_ACTIVATE, FALSE, oldChild->GetId());
             event.SetEventObject( oldChild );
             oldChild->GetEventHandler()->ProcessEvent(event);
         }
@@ -715,7 +693,7 @@ void wxMDIClientWindow::OnPageChanged(wxNotebookEvent& event)
         wxMDIChildFrame* activeChild = (wxMDIChildFrame*) GetPage(event.GetSelection());
         if (activeChild)
         {
-            wxActivateEvent event(wxEVT_ACTIVATE, true, activeChild->GetId());
+            wxActivateEvent event(wxEVT_ACTIVATE, TRUE, activeChild->GetId());
             event.SetEventObject( activeChild );
             activeChild->GetEventHandler()->ProcessEvent(event);
 

@@ -1,16 +1,17 @@
+#
+# Throbber.py - Cliff Wells <clifford.wells@attbi.com>
+#
 
-import  wx
-import  wx.lib.throbber as  throb
-
+from wxPython.wx import *
+from wxPython.lib.rcsizer import RowColSizer
+from wxPython.lib.throbber import Throbber, __doc__ as docString
 import throbImages # this was created using a modified version of img2py
-
-from wx.lib.throbber import __doc__ as docString
 
 #----------------------------------------------------------------------
 
-class TestPanel(wx.Panel):
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
-        wx.Panel.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
         self.log = log
 
         # create the throbbers
@@ -33,90 +34,83 @@ class TestPanel(wx.Panel):
                   for i in throbImages.index
                   if i not in ['eclouds', 'logo']]
 
-        self.throbbers['plain']['throbber'] = \
-            throb.Throbber(self, -1, images, size=(36, 36),frameDelay = 0.1)
-                                                
-        self.throbbers['reverse']['throbber'] = \
-            throb.Throbber(self, -1, images, frameDelay = 0.07)
-
+        self.throbbers['plain']['throbber'] = Throbber(self, -1,
+                                                       images, size=(36, 36),
+                                                       frameDelay = 0.1)
+        self.throbbers['reverse']['throbber'] = Throbber(self, -1, images, #size=(36, 36),
+                                                         frameDelay = 0.07)
         self.throbbers['reverse']['throbber'].Reverse()
-
-        self.throbbers['autoreverse']['throbber'] = \
-            throb.Throbber(self, -1, images, frameDelay = 0.1, reverse = True)
-
+        self.throbbers['autoreverse']['throbber'] = Throbber(self, -1,
+                                                             images, #size=(36, 36),
+                                                             frameDelay = 0.1,
+                                                             reverse = True)
         self.throbbers['autoreverse']['throbber'].sequence.append(0)
+        self.throbbers['label']['throbber'] = Throbber(self, -1,
+                                                       images, #size=(36, 36),
+                                                       frameDelay = 0.1,
+                                                       label = 'Label')
+        self.throbbers['label']['throbber'].SetFont(wxFont(pointSize = 10,
+                                                           family = wxDEFAULT,
+                                                           style = wxNORMAL,
+                                                           weight = wxBOLD))
+        self.throbbers['overlay']['throbber'] = Throbber(self, -1,
+                                                         images, #size=(36, 36),
+                                                         frameDelay = 0.1,
+                                                         overlay = throbImages.catalog['logo'].getBitmap())
+        self.throbbers['overlay+text']['throbber'] = Throbber(self, -1,
+                                                              images, #size=(36, 36),
+                                                              frameDelay = 0.1,
+                                                              overlay = throbImages.catalog['logo'].getBitmap(),
+                                                              label = "Python!")
+        self.throbbers['overlay+text']['throbber'].SetFont(wxFont(pointSize = 8,
+                                                                  family = wxDEFAULT,
+                                                                  style = wxNORMAL,
+                                                                  weight = wxBOLD))
 
-        self.throbbers['label']['throbber'] = \
-            throb.Throbber(self, -1, images, frameDelay = 0.1, label = 'Label')
-
-        self.throbbers['label']['throbber'].SetFont(wx.Font(
-            pointSize = 10, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD
-            ))
-
-        self.throbbers['overlay']['throbber'] = \
-            throb.Throbber(
-                self, -1, images, frameDelay = 0.1, 
-                overlay = throbImages.catalog['logo'].getBitmap()
-                )
-
-        self.throbbers['overlay+text']['throbber'] = \
-            throb.Throbber(
-                self, -1, images, frameDelay = 0.1, 
-                overlay = throbImages.catalog['logo'].getBitmap(), label = "Python!"
-                )
-
-        self.throbbers['overlay+text']['throbber'].SetFont(wx.Font(
-            pointSize = 8, family = wx.DEFAULT, style = wx.NORMAL, weight = wx.BOLD
-            ))
 
         # this throbber is created using a single, composite image
-        self.otherThrobber = throb.Throbber(
-            self, -1, throbImages.catalog['eclouds'].getBitmap(), frameDelay = 0.15, 
-            frames = 12, frameWidth = 48, label = "Stop"
-            )
+        self.otherThrobber = Throbber(self, -1,
+                                      throbImages.catalog['eclouds'].getBitmap(), #size=(48, 48),
+                                      frameDelay = 0.15,
+                                      frames = 12,
+                                      frameWidth = 48,
+                                      label = "Stop")
 
 
-        self.otherThrobber.Bind(wx.EVT_LEFT_DOWN, self.OnClickThrobber)
+        EVT_LEFT_DOWN(self.otherThrobber, self.OnClickThrobber)
 
-        box = wx.BoxSizer(wx.VERTICAL)
-        sizer = wx.GridBagSizer()
-        box.Add(sizer, 1, wx.EXPAND|wx.ALL, 5)
+        box = wxBoxSizer(wxVERTICAL)
+        sizer = RowColSizer()
+        box.Add(sizer, 1, wxEXPAND|wxALL, 5)
         sizer.AddGrowableCol(1)
 
-        sizer.Add(self.otherThrobber, (0, 2), (4, 1),flag = wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.otherThrobber, row = 0, col = 2, rowspan = 4, flag = wxALIGN_CENTER_VERTICAL)
 
         row = 2
-
         # use a list so we can keep our order
         for t in ['plain', 'reverse', 'autoreverse', 'label', 'overlay', 'overlay+text']:
-            sizer.Add(
-                self.throbbers[t]['throbber'], (row, 0), (1, 1), 
-                flag = wx.ALIGN_CENTER|wx.ALL, border=2
-                )
-
-            sizer.Add(
-                wx.StaticText(self, -1, self.throbbers[t]['text']), 
-                (row, 1), flag = wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT
-                )
-
+            sizer.Add(self.throbbers[t]['throbber'], row = row, col = 0, flag = wxALIGN_CENTER|wxALL, border=2)
+            sizer.Add(wxStaticText(self, -1, self.throbbers[t]['text']), row = row, col = 1,
+                      flag = wxALIGN_CENTER_VERTICAL | wxALIGN_LEFT)
             row += 1
 
         # start and stop buttons
-        startButton = wx.Button(self, -1, "Start")
-        self.Bind(wx.EVT_BUTTON, self.OnStartAnimation, startButton)
+        startButton = wxButton(self, -1, "Start")
+        EVT_BUTTON(self, startButton.GetId(), self.OnStartAnimation)
+        stopButton = wxButton(self, -1, "Stop")
+        EVT_BUTTON(self, stopButton.GetId(), self.OnStopAnimation)
 
-        stopButton = wx.Button(self, -1, "Stop")
-        self.Bind(wx.EVT_BUTTON, self.OnStopAnimation, stopButton)
-
-        buttonBox = wx.BoxSizer(wx.HORIZONTAL)
+        buttonBox = wxBoxSizer(wxHORIZONTAL)
         buttonBox.AddMany([
-            (startButton, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5),
-            (stopButton, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 5),
+            (startButton, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5),
+            (stopButton, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5),
             ])
 
-        sizer.Add(
-            buttonBox, (len(self.throbbers) + 3, 0), (1, 3), flag = wx.ALIGN_CENTER
-            )
+        sizer.Add(buttonBox,
+                  row = len(self.throbbers) + 3,
+                  col = 0,
+                  colspan = 3,
+                  flag = wxALIGN_CENTER)
 
         self.SetSizer(box)
         self.SetAutoLayout(True)
@@ -126,11 +120,10 @@ class TestPanel(wx.Panel):
 
         for t in self.throbbers.keys():
             self.throbbers[t]['throbber'].Start()
-
         self.otherThrobber.Start()
         self.otherThrobber.Reverse()
 
-        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        EVT_WINDOW_DESTROY(self, self.OnDestroy)
 
     def OnDestroy(self, event):
         self.log.write("got destroy event")
@@ -161,8 +154,13 @@ class TestPanel(wx.Panel):
 #----------------------------------------------------------------------
 
 def runTest(frame, nb, log):
-    win = TestPanel(nb, log)
-    return win
+    if wxPlatform == "__WXMAC__":
+        wxMessageBox("This demo currently fails on the Mac.",
+                     "Sorry")
+        return
+    else:
+        win = TestPanel(nb, log)
+        return win
 
 #----------------------------------------------------------------------
 
@@ -179,4 +177,4 @@ overview = """<html><body>
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])

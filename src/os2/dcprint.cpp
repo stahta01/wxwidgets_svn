@@ -19,7 +19,6 @@
 
 #ifndef WX_PRECOMP
 #include "wx/app.h"
-#include "wx/math.h"
 #endif
 
 #include "wx/string.h"
@@ -27,6 +26,7 @@
 #include "wx/window.h"
 #include "wx/os2/private.h"
 #include "wx/dcprint.h"
+#include "math.h"
 
 #if wxUSE_PRINTING_ARCHITECTURE
 
@@ -42,6 +42,7 @@ wxPrinterDC::wxPrinterDC(
 , int                               nOrientation
 )
 {
+    LONG            lType = 0;
     DEVOPENSTRUC    vDevOpen = { (char*)rsDeviceName.c_str()
                                 ,(char*)rsDriverName.c_str()
                                 ,NULL
@@ -232,7 +233,7 @@ void wxPrinterDC::EndPage()
 //    if (m_hDC)
 //        ::EndPage((HDC) m_hDC);
 } // end of wxPrinterDC::EndPage
-#if 0
+
 // Returns default device and port names
 static bool wxGetDefaultDeviceName(
   wxString&                         rsDeviceName
@@ -294,7 +295,6 @@ static bool wxGetDefaultDeviceName(
 */
     return(TRUE);
 } // end of wxGetDefaultDeviceName
-#endif
 
 // Gets an HDC for the specified printer configuration
 WXHDC WXDLLEXPORT wxGetPrinterDC(
@@ -356,8 +356,8 @@ void wxPrinterDC::DoDrawBitmap(
 {
     wxCHECK_RET( rBmp.Ok(), _T("invalid bitmap in wxPrinterDC::DrawBitmap") );
 
-//    int                             nWidth  = rBmp.GetWidth();
-//    int                             nHeight = rBmp.GetHeight();
+    int                             nWidth  = rBmp.GetWidth();
+    int                             nHeight = rBmp.GetHeight();
 
     // TODO:
 

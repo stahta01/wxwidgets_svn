@@ -2,17 +2,9 @@
 # Changelist:	2003-02-25 - Juergen Ulbts - update from wxWindows 2.5.x/HEAD branch
 #
 
-
-THISDIR = $+ $(%cdrive):$(%cwd) $-
-# set OUTPUTDIR to the directory to be used for the .obj files created during
-# the build (under $THISDIR)
-!ifndef OUTPUTDIR
-OUTPUTDIR=$(THISDIR)\$(BASEDIRPREFIX)$(CONFIGURATION)Watcom
-# no trailing slash for win98
-!endif
+OUTPUTDIR= $+ $(%cdrive):$(%cwd)\WATCOM $-
 
 !include $(WXDIR)\src\makewat.env
-
 
 
 all: MAKDIR $(LIBTARGET) .SYMBOLIC

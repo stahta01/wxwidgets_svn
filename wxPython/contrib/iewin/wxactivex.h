@@ -352,7 +352,7 @@ protected:
     FuncXArray      m_events;
     MemberIdList    m_eventsIdx;
 
-    WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+    long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 };
 
 // events
@@ -382,8 +382,8 @@ const wxEventType& RegisterActiveXEvent(DISPID event);
 
 typedef void (wxEvtHandler::*wxActiveXEventFunction)(wxActiveXEvent&);
 
-#define EVT_ACTIVEX(id, eventName, fn) DECLARE_EVENT_TABLE_ENTRY(RegisterActiveXEvent(wxT(eventName)), id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxActiveXEventFunction, & fn ), (wxObject *) NULL ),
-#define EVT_ACTIVEX_DISPID(id, eventDispId, fn) DECLARE_EVENT_TABLE_ENTRY(RegisterActiveXEvent(eventDispId), id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxActiveXEventFunction, & fn ), (wxObject *) NULL ),
+#define EVT_ACTIVEX(id, eventName, fn) DECLARE_EVENT_TABLE_ENTRY(RegisterActiveXEvent(wxT(eventName)), id, -1, (wxObjectEventFunction) (wxEventFunction) (wxActiveXEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_ACTIVEX_DISPID(id, eventDispId, fn) DECLARE_EVENT_TABLE_ENTRY(RegisterActiveXEvent(eventDispId), id, -1, (wxObjectEventFunction) (wxEventFunction) (wxActiveXEventFunction) & fn, (wxObject *) NULL ),
 
 //util
 bool MSWVariantToVariant(VARIANTARG& va, wxVariant& vx);

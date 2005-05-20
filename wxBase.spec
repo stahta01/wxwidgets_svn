@@ -1,35 +1,19 @@
 %define pref /usr
-%define ver  2.6.0
-%define ver2 2.6
-%define rel  1
+%define ver 2.4.2
+%define ver2 2.4
+%define rel 1
 
-# Configurable settings (use --with(out) unicode on rpmbuild command line):
-%define unicode 0
-%{?_with_unicode: %{expand: %%define unicode 1}}
-%{?_without_unicode: %{expand: %%define unicode 0}}
-
-%if %{unicode}
-    %define name         wx-base-unicode
-    %define wxconfig     base-unicode-release-%{ver2}
-    %define wxconfiglink wxbaseu-%{ver2}-config
-%else
-    %define name         wx-base
-    %define wxconfig     base-ansi-release-%{ver2}
-    %define wxconfiglink wxbase-%{ver2}-config
-%endif
-
-Summary: wxBase library - non-GUI support classes of wxWidgets toolkit
-Name: %{name}
+Summary: wxBase library - non-GUI support classes of wxWindows toolkit
+Name: wxBase
 Version: %{ver}
 Release: %{rel}
-License: wxWindows Licence
+Copyright: wxWindows Licence
 Group: Development/Libraries
 Source: wxBase-%{ver}.tar.bz2
-URL: http://www.wxwidgets.org
+URL: http://www.wxwindows.org
 Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Prefix: %{pref}
-BuildRoot: %{_tmppath}/%{name}-root
-Provides: wxBase
+BuildRoot: /var/tmp/%{name}-root
 
 %description
 wxBase is a collection of C++ classes providing basic data structures (strings,
@@ -43,8 +27,7 @@ the following platforms: Win32, generic Unix (Linux, FreeBSD, Solaris, HP-UX,
 %package devel
 Summary: wxBase headers needed for developping with wxBase
 Group: Development/Libraries
-Requires: %{name} = %{ver}
-Provides: wxBase-devel
+Requires: wxBase = %{ver}
 
 %description devel
 Header files for wxBase. You need them to develop programs using wxBase.
@@ -52,40 +35,29 @@ Header files for wxBase. You need them to develop programs using wxBase.
 %package static
 Summary: wxBase static libraries
 Group: Development/Libraries
-Requires: %{name}-devel = %{ver}
 
 %description static
 Static libraries for wxBase. You need them if you want to link statically against wxBase.
 
 %prep
-%setup -q -n wxBase-%{ver}
+%setup -n wxBase-%{ver}
 
 %build
 if [ "$SMP" != "" ]; then
-    export MAKE="make -j$SMP"
+  export MAKE="make -j$SMP"
 else
-    export MAKE="make"
+  export MAKE="make"
 fi
 
 mkdir obj-shared
 cd obj-shared
-../configure --prefix=%{pref} --disable-gui \
-%if %{unicode}
-                              --enable-unicode
-%else
-                              --with-odbc
-%endif
+../configure --prefix=%{pref} --enable-soname --disable-gui --disable-std_iostreams
 $MAKE
 cd ..
 
 mkdir obj-static
 cd obj-static
-../configure --prefix=%{pref} --disable-gui --disable-shared \
-%if %{unicode}
-                              --enable-unicode
-%else
-                              --with-odbc
-%endif
+../configure --prefix=%{pref} --disable-shared --disable-gui --disable-std_iostreams
 $MAKE
 cd ..
 
@@ -106,37 +78,34 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/ldconfig
 
 %post devel
-# link wx-config when you install RPM.
-ln -sf %{_libdir}/wx/config/%{wxconfig} %{_bindir}/wx-config
-# link wx-config with explicit name.
-ln -sf %{_libdir}/wx/config/%{wxconfig} %{_bindir}/%{wxconfiglink}
-/sbin/ldconfig
-
-%postun devel
-/sbin/ldconfig
+# Install wx-config if there isn't any
+if test ! -f %{_bindir}/wx-config ; then
+    ln -sf wxbase-%{ver2}-config %{_bindir}/wx-config
+fi
 
 %preun devel
+# Remove wx-config if it points to this package
 if test -f %{_bindir}/wx-config -a -f /usr/bin/md5sum ; then
-    SUM1=`md5sum %{_libdir}/wx/config/%{wxconfig} | cut -c 0-32`
-    SUM2=`md5sum %{_bindir}/wx-config | cut -c 0-32`  
-    if test "x$SUM1" = "x$SUM2" ; then
-        rm -f %{_bindir}/wx-config
-    fi
+  SUM1=`md5sum %{_bindir}/wxbase-%{ver2}-config | cut -c 0-32`
+  SUM2=`md5sum %{_bindir}/wx-config | cut -c 0-32`
+  if test "x$SUM1" = "x$SUM2" ; then
+    rm -f %{_bindir}/wx-config
+  fi
 fi
-rm -f %{_bindir}/%{wxconfiglink}
 
 %files -f wxstd.lang
 %defattr (-,root,root)
 %doc COPYING.LIB *.txt
-%{_libdir}/libwx_base*-%{ver2}.so.*
+%{_libdir}/libwx_base*so.*
 
 %files devel
 %defattr (-,root,root)
-%dir %{_includedir}/wx-%{ver2}
-%{_includedir}/wx-%{ver2}/*
-%{_libdir}/libwx_base*-%{ver2}.so
+%dir %{_includedir}/wx
+%{_includedir}/wx/*
+%{_libdir}/libwx_base*.so
 %dir %{_libdir}/wx
 %{_libdir}/wx/*
+%{_bindir}/wxbase-%{ver2}-config
 %{_datadir}/aclocal/*.m4
 
 %files static

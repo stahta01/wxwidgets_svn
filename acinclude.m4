@@ -8,20 +8,6 @@ dnl
 dnl Version: $Id$
 dnl ---------------------------------------------------------------------------
 
-
-dnl ===========================================================================
-dnl Objective-C(++) related macros
-dnl ===========================================================================
-m4_define([AC_WX_LANG_OBJECTIVEC],
-[AC_LANG(C)
-ac_ext=m
-])
-
-m4_define([AC_WX_LANG_OBJECTIVECPLUSPLUS],
-[AC_LANG(C++)
-ac_ext=mm
-])
-
 dnl ===========================================================================
 dnl macros to find the a file in the list of include/lib paths
 dnl ===========================================================================
@@ -102,11 +88,14 @@ dnl WX_CPP_NEW_HEADERS checks whether the compiler has "new" <iostream> header
 dnl or only the old <iostream.h> one - it may be generally assumed that if
 dnl <iostream> exists, the other "new" headers (without .h) exist too.
 dnl
-dnl call WX_CPP_NEW_HEADERS(actiof-if-true, action-if-false)
+dnl call WX_CPP_NEW_HEADERS(actiof-if-true, action-if-false-or-cross-compiling)
 dnl ---------------------------------------------------------------------------
 
 AC_DEFUN([WX_CPP_NEW_HEADERS],
 [
+  if test "$cross_compiling" = "yes"; then
+    ifelse([$2], , :, [$2])
+  else
     AC_LANG_SAVE
     AC_LANG_CPLUSPLUS
 
@@ -119,6 +108,7 @@ AC_DEFUN([WX_CPP_NEW_HEADERS],
     fi
 
     AC_LANG_RESTORE
+  fi
 ])
 
 dnl ---------------------------------------------------------------------------
@@ -437,44 +427,7 @@ AC_DEFUN([WX_VERSIONED_SYMBOLS],
         else
           wx_cv_version_script=no
         fi
-
-        dnl There's a problem in some old linkers with --version-script that
-        dnl can cause linking to fail when you have objects with vtables in
-        dnl libs 3 deep.  This is known to happen in netbsd and openbsd with
-        dnl ld 2.11.2.
-        dnl 
-        dnl To test for this we need to make some shared libs and
-        dnl unfortunately we can't be sure of the right way to do that. If the
-        dnl first two compiles don't succeed then it looks like the test isn't
-        dnl working and the result is ignored, but if OTOH the first two
-        dnl succeed but the third does not then the bug has been detected and
-        dnl the --version-script flag is dropped.
-        if test $wx_cv_version_script = yes
-        then
-          echo "struct B { virtual ~B() { } }; \
-                struct D : public B { }; \
-                void F() { D d; }" > conftest.cpp
-
-          if AC_TRY_COMMAND([
-                $CXX -shared -fPIC -o conftest1.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
-                -Wl,--version-script,conftest.sym >/dev/null 2>/dev/null]) &&
-             AC_TRY_COMMAND([
-                $CXX -shared -fPIC -o conftest2.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
-                -Wl,--version-script,conftest.sym conftest1.output >/dev/null 2>/dev/null])
-          then
-            if AC_TRY_COMMAND([
-                  $CXX -shared -fPIC -o conftest3.output $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.cpp
-                  -Wl,--version-script,conftest.sym conftest2.output conftest1.output >/dev/null 2>/dev/null])
-            then
-              wx_cv_version_script=yes
-            else
-              wx_cv_version_script=no
-            fi
-          fi
-        fi
-
         rm -f conftest.output conftest.stderr conftest.sym conftest.cpp
-        rm -f conftest1.output conftest2.output conftest3.output
       ])
       if test $wx_cv_version_script = yes ; then
         LDFLAGS_VERSIONING="-Wl,--version-script,$1"
@@ -627,80 +580,3 @@ if test "$enable_largefile" != no; then
     AC_MSG_RESULT($wx_largefile)
 fi
 ])
-
-
-dnl Available from the GNU Autoconf Macro Archive at:
-dnl http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_const_cast.html
-dnl
-AC_DEFUN([AC_CXX_CONST_CAST],
-[AC_CACHE_CHECK(whether the compiler supports const_cast<>,
-ac_cv_cxx_const_cast,
-[AC_LANG_SAVE
- AC_LANG_CPLUSPLUS
- AC_TRY_COMPILE(,[int x = 0;const int& y = x;int& z = const_cast<int&>(y);return z;],
- ac_cv_cxx_const_cast=yes, ac_cv_cxx_const_cast=no)
- AC_LANG_RESTORE
-])
-if test "$ac_cv_cxx_const_cast" = yes; then
-  AC_DEFINE(HAVE_CONST_CAST,,[define if the compiler supports const_cast<>])
-fi
-])
-
-dnl http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_reinterpret_cast.html
-AC_DEFUN([AC_CXX_REINTERPRET_CAST],
-[AC_CACHE_CHECK(whether the compiler supports reinterpret_cast<>,
-ac_cv_cxx_reinterpret_cast,
-[AC_LANG_SAVE
- AC_LANG_CPLUSPLUS
- AC_TRY_COMPILE([#include <typeinfo>
-class Base { public : Base () {} virtual void f () = 0;};
-class Derived : public Base { public : Derived () {} virtual void f () {} };
-class Unrelated { public : Unrelated () {} };
-int g (Unrelated&) { return 0; }],[
-Derived d;Base& b=d;Unrelated& e=reinterpret_cast<Unrelated&>(b);return g(e);],
- ac_cv_cxx_reinterpret_cast=yes, ac_cv_cxx_reinterpret_cast=no)
- AC_LANG_RESTORE
-])
-if test "$ac_cv_cxx_reinterpret_cast" = yes; then
-  AC_DEFINE(HAVE_REINTERPRET_CAST,,
-            [define if the compiler supports reinterpret_cast<>])
-fi
-])
-
-dnl and http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_static_cast.html
-AC_DEFUN([AC_CXX_STATIC_CAST],
-[AC_CACHE_CHECK(whether the compiler supports static_cast<>,
-ac_cv_cxx_static_cast,
-[AC_LANG_SAVE
- AC_LANG_CPLUSPLUS
- AC_TRY_COMPILE([#include <typeinfo>
-class Base { public : Base () {} virtual void f () = 0; };
-class Derived : public Base { public : Derived () {} virtual void f () {} };
-int g (Derived&) { return 0; }],[
-Derived d; Base& b = d; Derived& s = static_cast<Derived&> (b); return g (s);],
- ac_cv_cxx_static_cast=yes, ac_cv_cxx_static_cast=no)
- AC_LANG_RESTORE
-])
-if test "$ac_cv_cxx_static_cast" = yes; then
-  AC_DEFINE(HAVE_STATIC_CAST,, [define if the compiler supports static_cast<>])
-fi
-])
-
-dnl http://autoconf-archive.cryp.to/ac_cxx_dynamic_cast.html
-AC_DEFUN([AC_CXX_DYNAMIC_CAST],
-[AC_CACHE_CHECK(whether the compiler supports dynamic_cast<>,
-ac_cv_cxx_dynamic_cast,
-[AC_LANG_SAVE
- AC_LANG_CPLUSPLUS
- AC_TRY_COMPILE([#include <typeinfo>
-class Base { public : Base () {} virtual void f () = 0;};
-class Derived : public Base { public : Derived () {} virtual void f () {} };],[
-Derived d; Base& b=d; return dynamic_cast<Derived*>(&b) ? 0 : 1;],
- ac_cv_cxx_dynamic_cast=yes, ac_cv_cxx_dynamic_cast=no)
- AC_LANG_RESTORE
-])
-if test "$ac_cv_cxx_dynamic_cast" = yes; then
-  AC_DEFINE(HAVE_DYNAMIC_CAST,,[define if the compiler supports dynamic_cast<>])
-fi
-])
-

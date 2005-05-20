@@ -19,7 +19,6 @@
 #include "wx/xrc/xh_dlg.h"
 #include "wx/xrc/xh_bttn.h"
 #include "wx/xrc/xh_chckb.h"
-#include "wx/xrc/xh_tglbtn.h"
 #include "wx/xrc/xh_gauge.h"
 #include "wx/xrc/xh_html.h"
 #include "wx/xrc/xh_spin.h"
@@ -30,12 +29,9 @@
 #include "wx/xrc/xh_combo.h"
 #include "wx/xrc/xh_chckl.h"
 #include "wx/xrc/xh_choic.h"
-#include "wx/xrc/xh_datectrl.h"
 #include "wx/xrc/xh_sizer.h"
 #include "wx/xrc/xh_stbmp.h"
 #include "wx/xrc/xh_notbk.h"
-#include "wx/xrc/xh_listbk.h"
-#include "wx/xrc/xh_choicbk.h"
 #include "wx/xrc/xh_text.h"
 #include "wx/xrc/xh_listb.h"
 #include "wx/xrc/xh_toolb.h"
@@ -54,6 +50,5 @@
 #include "wx/xrc/xh_split.h"
 #include "wx/xrc/xh_wizrd.h"
 #include "wx/xrc/xh_statbar.h"
-#include "wx/xrc/xh_mdi.h"
 
-#endif // _WX_XH_ALL_H_
+#endif // _WX_XMLRES_H_

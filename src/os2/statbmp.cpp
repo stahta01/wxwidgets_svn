@@ -16,7 +16,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/dcclient.h"
 #include "wx/window.h"
 #include "wx/os2/private.h"
 
@@ -97,6 +96,8 @@ bool wxStaticBitmap::Create(
 
     int                             nX= rPos.x;
     int                             nY = rPos.y;
+    int                             nWidth = rSize.x;
+    int                             nHeight = rSize.y;
     char                            zId[16];
 
     m_windowStyle = lStyle;
@@ -109,7 +110,7 @@ bool wxStaticBitmap::Create(
     int                             nWinstyle = SS_ICON;
 
     m_hWnd = (WXHWND)::WinCreateWindow( pParent->GetHWND()
-                                       ,(PSZ)wxCanvasClassName
+                                       ,wxCanvasClassName
                                        ,zId
                                        ,nWinstyle | WS_VISIBLE
                                        ,0,0,0,0
@@ -162,6 +163,7 @@ void wxStaticBitmap::OnPaint (
 )
 {
     wxPaintDC                       vDc(this);
+    int                             i;
     wxBitmap*                       pBitmap;
 
     if (m_pImage->IsKindOf(CLASSINFO(wxIcon)))

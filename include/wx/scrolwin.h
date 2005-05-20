@@ -22,7 +22,6 @@ class WXDLLEXPORT wxTimer;
 // wxScrolledWindow and wxScrolledControl. It is a mix-in: just derive from it
 // to implement scrolling in your class.
 // ----------------------------------------------------------------------------
-#if !defined(__WXGTK__) || defined(__WXUNIVERSAL__)
 
 class WXDLLEXPORT wxScrollHelper
 {
@@ -36,7 +35,7 @@ public:
     virtual void SetScrollbars(int pixelsPerUnitX, int pixelsPerUnitY,
                                int noUnitsX, int noUnitsY,
                                int xPos = 0, int yPos = 0,
-                               bool noRefresh = false );
+                               bool noRefresh = FALSE );
 
     // scroll to the given (in logical coords) position
     virtual void Scroll(int x, int y);
@@ -52,9 +51,9 @@ public:
     virtual void GetScrollPixelsPerUnit(int *pixelsPerUnitX,
                                         int *pixelsPerUnitY) const;
 
-    // Enable/disable Windows scrolling in either direction. If true, wxWidgets
+    // Enable/disable Windows scrolling in either direction. If TRUE, wxWindows
     // scrolls the canvas and only a bit of the canvas is invalidated; no
-    // Clear() is necessary. If false, the whole canvas is invalidated and a
+    // Clear() is necessary. If FALSE, the whole canvas is invalidated and a
     // Clear() is necessary. Disable for when the scroll increment is used to
     // actually scroll a non-constant distance
     virtual void EnableScrolling(bool x_scrolling, bool y_scrolling);
@@ -122,7 +121,7 @@ public:
     // stop the timer, so it will be called repeatedly and will typically
     // return different values depending on the current mouse position
     //
-    // the base class version just returns true
+    // the base class version just returns TRUE
     virtual bool SendAutoScrollEvents(wxScrollWinEvent& event) const;
 
     // the methods to be called from the window event handlers
@@ -142,12 +141,12 @@ public:
 
 #if WXWIN_COMPATIBILITY_2_2
     // Compatibility only, don't use
-    wxDEPRECATED( void ViewStart(int *x, int *y) const );
+    void ViewStart(int *x, int *y) const { GetViewStart( x, y ); }
 #endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
     // get pointer to our scroll rect if we use it or NULL
-    const wxRect *GetScrollRect() const
+    const wxRect *GetRect() const
     {
         return m_rectToScroll.width != 0 ? &m_rectToScroll : NULL;
     }
@@ -175,9 +174,6 @@ protected:
     // delete the event handler we installed
     void DeleteEvtHandler();
 
-    double                m_scaleX;
-    double                m_scaleY;
-
     wxWindow             *m_win,
                          *m_targetWindow;
 
@@ -197,16 +193,15 @@ protected:
     bool                  m_xScrollingEnabled;
     bool                  m_yScrollingEnabled;
 
+    double                m_scaleX;
+    double                m_scaleY;
+
 #if wxUSE_MOUSEWHEEL
     int m_wheelRotation;
 #endif // wxUSE_MOUSEWHEEL
 
     wxScrollHelperEvtHandler *m_handler;
-
-    DECLARE_NO_COPY_CLASS(wxScrollHelper)
 };
-
-#endif
 
 // ----------------------------------------------------------------------------
 // wxScrolledWindow: a wxWindow which knows how to scroll
@@ -222,17 +217,17 @@ protected:
     public:
         wxScrolledWindow() { }
         wxScrolledWindow(wxWindow *parent,
-                         wxWindowID winid = wxID_ANY,
+                         wxWindowID id = -1,
                          const wxPoint& pos = wxDefaultPosition,
                          const wxSize& size = wxDefaultSize,
                          long style = wxScrolledWindowStyle,
                          const wxString& name = wxPanelNameStr)
-            : wxGenericScrolledWindow(parent, winid, pos, size, style, name)
+            : wxGenericScrolledWindow(parent, id, pos, size, style, name)
         {
         }
 
     private:
-        DECLARE_DYNAMIC_CLASS_NO_COPY(wxScrolledWindow)
+        DECLARE_CLASS(wxScrolledWindow)
     };
 
     #define wxSCROLLED_WINDOW_IS_GENERIC 1
@@ -241,3 +236,4 @@ protected:
 #endif
     // _WX_SCROLWIN_H_BASE_
 
+// vi:sts=4:sw=4:et

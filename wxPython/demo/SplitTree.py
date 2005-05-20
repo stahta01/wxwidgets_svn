@@ -1,42 +1,26 @@
-# 11/13/2003 - Jeff Grimmett (grimmtooth@softhome.net)
-#
-# o Updated for wx namespace
-#
-# 11/26/2003 - Jeff Grimmett (grimmtooth@softhome.net)
-#
-# o Bigtime errors on startup. Blows up with a program error.
-#   Error:
-#
-#   21:04:11: Debug: ..\..\src\msw\treectrl.cpp(1508): assert "IsVisible(item)" 
-#   failed: The item you call GetNextVisible() for must be visible itself!
-#
-#   I suspect this error is in the lib itself.
-#
+from wxPython.wx import *
+from wxPython.gizmos import *
 
-import  wx
-import  wx.gizmos as gizmos
-
-import  images
+import images
 
 #----------------------------------------------------------------------
 
-class TestTree(gizmos.RemotelyScrolledTreeCtrl):
-    def __init__(self, parent, style=wx.TR_HAS_BUTTONS):
-        gizmos.RemotelyScrolledTreeCtrl.__init__(self, parent, -1, style=style)
+class TestTree(wxRemotelyScrolledTreeCtrl):
+    def __init__(self, parent, ID, pos=wxDefaultPosition, size=wxDefaultSize,
+                 style=wxTR_HAS_BUTTONS):
+        wxRemotelyScrolledTreeCtrl.__init__(self, parent, ID, pos, size, style)
 
         # make an image list
         im1 = im2 = -1
-        self.il = wx.ImageList(16, 16)
+        self.il = wxImageList(16, 16)
         im1 = self.il.Add(images.getFolder1Bitmap())
         im2 = self.il.Add(images.getFile1Bitmap())
         self.SetImageList(self.il)
 
         # Add some items
         root = self.AddRoot("Root")
-
         for i in range(30):
             item = self.AppendItem(root, "Item %d" % i, im1)
-
             for j in range(10):
                 child = self.AppendItem(item, "Child %d" % j, im2)
 
@@ -44,34 +28,31 @@ class TestTree(gizmos.RemotelyScrolledTreeCtrl):
 
 
 
-class TestValueWindow(gizmos.TreeCompanionWindow):
-    def __init__(self, parent, style=0):
-        gizmos.TreeCompanionWindow.__init__(self, parent, -1, style=style)
+class TestValueWindow(wxTreeCompanionWindow):
+    def __init__(self, parent, ID, pos=wxDefaultPosition, size=wxDefaultSize, style=0):
+        wxTreeCompanionWindow.__init__(self, parent, ID, pos, size, style)
         self.SetBackgroundColour("WHITE")
+        EVT_ERASE_BACKGROUND(self, self.OEB)
+
+    def OEB(self, evt):
+        pass
 
     # This method is called to draw each item in the value window
     def DrawItem(self, dc, itemId, rect):
         tree = self.GetTreeCtrl()
-
         if tree:
             text = "This is "
             parent = tree.GetItemParent(itemId)
-
             if parent.IsOk():
                 ptext = tree.GetItemText(parent)
                 text = text + ptext + " --> "
-
             text = text + tree.GetItemText(itemId)
-            pen = wx.Pen(
-                wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT), 
-                1, wx.SOLID
-                )
-
+            pen = wxPen(wxSystemSettings_GetSystemColour(wxSYS_COLOUR_3DLIGHT), 1, wxSOLID)
             dc.SetPen(pen)
-            dc.SetBrush(wx.Brush(self.GetBackgroundColour(), wx.SOLID))
+            dc.SetBrush(wxBrush(self.GetBackgroundColour(), wxSOLID))
             dc.DrawRectangle(rect.x, rect.y, rect.width+1, rect.height+1)
             dc.SetTextForeground("BLACK")
-            dc.SetBackgroundMode(wx.TRANSPARENT)
+            dc.SetBackgroundMode(wxTRANSPARENT)
             tw, th = dc.GetTextExtent(text)
             x = 5
             y = rect.y + max(0, (rect.height - th) / 2)
@@ -79,48 +60,41 @@ class TestValueWindow(gizmos.TreeCompanionWindow):
 
 
 
-class TestPanel(wx.Panel):
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
-        wx.Panel.__init__(self, parent, -1, size=(640,480))
+        wxPanel.__init__(self, parent, -1)
         self.log = log
 
-        scroller = gizmos.SplitterScrolledWindow(
-            self, -1, style=wx.NO_BORDER | wx.CLIP_CHILDREN | wx.VSCROLL
-            )
-
-        splitter = gizmos.ThinSplitterWindow(
-            scroller, -1, style=wx.SP_3DBORDER | wx.CLIP_CHILDREN
-            )
-            
+        scroller = wxSplitterScrolledWindow(self, -1, #(50,50), (350, 250),
+                                      style=wxNO_BORDER | wxCLIP_CHILDREN | wxVSCROLL)
+        splitter = wxThinSplitterWindow(scroller, -1, style=wxSP_3DBORDER | wxCLIP_CHILDREN)
         splitter.SetSashSize(2)
-        tree = TestTree(splitter, style = wx.TR_HAS_BUTTONS |
-                                          wx.TR_NO_LINES |
-                                          wx.TR_ROW_LINES |
-                                          #wx.TR_HIDE_ROOT |
-                                          wx.NO_BORDER )
+        tree = TestTree(splitter, -1, style = wxTR_HAS_BUTTONS |
+                                              wxTR_NO_LINES |
+                                              wxTR_ROW_LINES |
+                                              #wxTR_HIDE_ROOT |
+                                              wxNO_BORDER )
+        valueWindow = TestValueWindow(splitter, -1, style=wxNO_BORDER)
 
-        valueWindow = TestValueWindow(splitter, style=wx.NO_BORDER)
-
-        wx.CallAfter(splitter.SplitVertically, tree, valueWindow, 150)
+        splitter.SplitVertically(tree, valueWindow, 150)
         scroller.SetTargetWindow(tree)
         scroller.EnableScrolling(False, False)
 
         valueWindow.SetTreeCtrl(tree)
         tree.SetCompanionWindow(valueWindow)
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(scroller, 1, wx.EXPAND|wx.ALL, 25)
+        sizer = wxBoxSizer(wxVERTICAL)
+        sizer.Add(scroller, 1, wxEXPAND|wxALL, 25)
+        self.SetAutoLayout(True)
         self.SetSizer(sizer)
-        self.Layout()
+
 
 #----------------------------------------------------------------------
 
 def runTest(frame, nb, log):
-    if wx.Platform == "__WXMAC__":
-        from Main import MessagePanel
-        win = MessagePanel(nb, 'This demo currently fails on the Mac. The problem is being looked into...',
-                           'Sorry', wx.ICON_WARNING)
-        return win
+    if wxPlatform == "__WXMAC__":
+        wxMessageBox("This demo currently fails on the Mac. The problem is being looked into...", "Sorry")
+        return
 
     win = TestPanel(nb, log)
     return win
@@ -129,11 +103,14 @@ def runTest(frame, nb, log):
 #----------------------------------------------------------------------
 
 
+
+
+
 overview = """\
 This demo shows a collection of classes that were designed to operate
 together and provide a tree control with additional columns for each
-item.  The classes are wx.RemotelyScrolledTreeCtrl, wx.TreeCompanionWindow,
-wx.ThinSplitterWindow, and wx.SplitterScrolledWindow, some of which may
+item.  The classes are wxRemotelyScrolledTreeCtrl, wxTreeCompanionWindow,
+wxThinSplitterWindow, and wxSplitterScrolledWindow, some of which may
 also be useful by themselves.
 """
 
@@ -142,5 +119,5 @@ also be useful by themselves.
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])
 

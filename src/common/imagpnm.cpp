@@ -7,7 +7,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "imagpnm.h"
 #endif
 
@@ -70,15 +70,15 @@ bool wxPNMHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
     {
         case wxT('2'):
             if (verbose) wxLogError(_("Loading Grey Ascii PNM image is not yet implemented."));
-            return false;
+            return FALSE;
         case wxT('5'):
             if (verbose) wxLogError(_("Loading Grey Raw PNM image is not yet implemented."));
-            return false;
-        case wxT('3'):
-        case wxT('6'): break;
+            return FALSE;
+        case wxT('3'): 
+	case wxT('6'): break;
         default:
             if (verbose) wxLogError(_("PNM: File format is not recognized."));
-            return false;
+            return FALSE;
     }
 
     text_stream.ReadLine(); // for the \n
@@ -94,7 +94,7 @@ bool wxPNMHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
     {
         if (verbose)
            wxLogError( _("PNM: Couldn't allocate memory.") );
-        return false;
+        return FALSE;
     }
 
    if (c=='3') // Ascii RBG
@@ -110,14 +110,14 @@ bool wxPNMHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
             if ( !buf_stream )
               {
                 if (verbose) wxLogError(_("PNM: File seems truncated."));
-                return false;
+                return FALSE;
               }
           }
       }
     if (c=='6') // Raw RGB
       buf_stream.Read( ptr, 3*width*height );
 
-    image->SetMask( false );
+    image->SetMask( FALSE );
 
     const wxStreamError err = buf_stream.GetLastError();
     return err == wxSTREAM_NO_ERROR || err == wxSTREAM_EOF;
@@ -146,11 +146,11 @@ bool wxPNMHandler::DoCanRead( wxInputStream& stream )
         {
             case '3':
             case '6':
-                return true;
+                return TRUE;
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 

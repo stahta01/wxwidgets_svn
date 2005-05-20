@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "fontdlg.h"
 #endif
 
@@ -37,12 +37,17 @@
 #endif
 
 #include "wx/fontdlg.h"
-#include "wx/msw/wrapcdlg.h"
 
+#if !defined(__WIN32__) || defined(__SALFORDC__) || defined(__WXWINE__)
+#include <windows.h>
+#include <commdlg.h>
+#endif
+
+#include "wx/msw/private.h"
 #include "wx/cmndata.h"
 #include "wx/log.h"
-#include "wx/math.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -62,8 +67,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxFontDialog, wxDialog)
 
 int wxFontDialog::ShowModal()
 {
-    // It should be OK to always use GDI simulations
-    DWORD flags = CF_SCREENFONTS /* | CF_NOSIMULATIONS */ ;
+    DWORD flags = CF_SCREENFONTS | CF_NOSIMULATIONS;
 
     LOGFONT logFont;
 
@@ -75,22 +79,29 @@ int wxFontDialog::ShowModal()
         chooseFontStruct.hwndOwner = GetHwndOf(m_parent);
     chooseFontStruct.lpLogFont = &logFont;
 
-    if ( m_fontData.m_initialFont.Ok() )
+    if ( m_fontData.initialFont.Ok() )
     {
         flags |= CF_INITTOLOGFONTSTRUCT;
-        wxFillLogFont(&logFont, &m_fontData.m_initialFont);
+        wxFillLogFont(&logFont, &m_fontData.initialFont);
     }
 
-    if ( m_fontData.m_fontColour.Ok() )
+    if ( m_fontData.fontColour.Ok() )
     {
-        chooseFontStruct.rgbColors = wxColourToRGB(m_fontData.m_fontColour);
+        chooseFontStruct.rgbColors = wxColourToRGB(m_fontData.fontColour);
+
+        // need this for the colour to be taken into account
+        flags |= CF_EFFECTS;
     }
 
     // CF_ANSIONLY flag is obsolete for Win32
     if ( !m_fontData.GetAllowSymbols() )
     {
+#ifdef __WIN16__
+      flags |= CF_ANSIONLY;
+#else // Win32
       flags |= CF_SELECTSCRIPT;
       logFont.lfCharSet = ANSI_CHARSET;
+#endif // Win16/32
     }
 
     if ( m_fontData.GetEnableEffects() )
@@ -98,10 +109,10 @@ int wxFontDialog::ShowModal()
     if ( m_fontData.GetShowHelp() )
       flags |= CF_SHOWHELP;
 
-    if ( m_fontData.m_minSize != 0 || m_fontData.m_maxSize != 0 )
+    if ( m_fontData.minSize != 0 || m_fontData.maxSize != 0 )
     {
-        chooseFontStruct.nSizeMin = m_fontData.m_minSize;
-        chooseFontStruct.nSizeMax = m_fontData.m_maxSize;
+        chooseFontStruct.nSizeMin = m_fontData.minSize;
+        chooseFontStruct.nSizeMax = m_fontData.maxSize;
         flags |= CF_LIMITSIZE;
     }
 
@@ -109,8 +120,8 @@ int wxFontDialog::ShowModal()
 
     if ( ChooseFont(&chooseFontStruct) != 0 )
     {
-        wxRGBToColour(m_fontData.m_fontColour, chooseFontStruct.rgbColors);
-        m_fontData.m_chosenFont = wxCreateFontFromLogFont(&logFont);
+        wxRGBToColour(m_fontData.fontColour, chooseFontStruct.rgbColors);
+        m_fontData.chosenFont = wxCreateFontFromLogFont(&logFont);
         m_fontData.EncodingInfo().facename = logFont.lfFaceName;
         m_fontData.EncodingInfo().charset = logFont.lfCharSet;
 

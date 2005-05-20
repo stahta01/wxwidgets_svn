@@ -1,0 +1,6 @@
+*.py
+*.pyc
+*.pyd
+.DS_Store
+locale
+wxc.pyd.manifest

@@ -4,7 +4,7 @@
 // Date: 08/11/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999, 2000
 // CVSID: $Id$
-// wxWindows licence
+// Licence: wxWindows licence
 // --------------------------------------------------------------------------
 #include "wx/wxprec.h"
 
@@ -79,7 +79,7 @@ wxSoundStream& wxSoundRouterStream::Write(const void *buffer, wxUint32 len)
 // sound driver using the specified format. If this fails, it uses personnal
 // codec converters: for the moment there is a PCM converter (PCM to PCM:
 // with optional resampling, ...), an ULAW converter (ULAW to PCM), a G72X
-// converter (G72X to PCM). If nothing works, it returns false.
+// converter (G72X to PCM). If nothing works, it returns FALSE.
 // --------------------------------------------------------------------------
 bool wxSoundRouterStream::SetSoundFormat(const wxSoundFormatBase& format)
 {
@@ -90,12 +90,12 @@ bool wxSoundRouterStream::SetSoundFormat(const wxSoundFormatBase& format)
     if (m_sndio->SetSoundFormat(format)) {
         // We are lucky, it is working.
         wxSoundStream::SetSoundFormat(m_sndio->GetSoundFormat());
-        return true;
+        return TRUE;
     }
     
     switch(format.GetType()) {
         case wxSOUND_NOFORMAT:
-            return false;
+            return FALSE;
         case wxSOUND_PCM:
             m_router = new wxSoundStreamPcm(*m_sndio);
             m_router->SetSoundFormat(format);
@@ -113,11 +113,11 @@ bool wxSoundRouterStream::SetSoundFormat(const wxSoundFormatBase& format)
             m_router->SetSoundFormat(format);
             break;
         default:
-            return false;
+            return FALSE;
         
     }
     wxSoundStream::SetSoundFormat(m_router->GetSoundFormat());
-    return true;
+    return TRUE;
 }
 
 // --------------------------------------------------------------------------
@@ -140,19 +140,19 @@ bool wxSoundRouterStream::StartProduction(int evt)
 {
     if (!m_router) {
         if (m_sndio->StartProduction(evt))
-            return true;
+            return TRUE;
         
         m_snderror = m_sndio->GetError();
         m_lastcount = m_sndio->GetLastAccess();
-        return false;
+        return FALSE;
     }
     
     if (m_router->StartProduction(evt))
-        return true;
+        return TRUE;
     
     m_snderror = m_router->GetError();
     m_lastcount = m_router->GetLastAccess();
-    return false;
+    return FALSE;
 } 
 
 // --------------------------------------------------------------------------
@@ -162,19 +162,19 @@ bool wxSoundRouterStream::StopProduction()
 {
     if (!m_router) {
         if (m_sndio->StopProduction())
-            return true;
+            return TRUE;
         
         m_snderror = m_sndio->GetError();
         m_lastcount = m_sndio->GetLastAccess();
-        return false;
+        return FALSE;
     }
     
     if (m_router->StopProduction())
-        return true;
+        return TRUE;
     
     m_snderror = m_router->GetError();
     m_lastcount = m_router->GetLastAccess();
-    return false;
+    return FALSE;
 }
 
 // --------------------------------------------------------------------------
@@ -188,7 +188,7 @@ wxSoundFileStream::wxSoundFileStream(wxInputStream& stream,
 {
     m_length = 0;
     m_bytes_left = 0;
-    m_prepared = false;
+    m_prepared = FALSE;
 }
 
 wxSoundFileStream::wxSoundFileStream(wxOutputStream& stream,
@@ -198,7 +198,7 @@ wxSoundFileStream::wxSoundFileStream(wxOutputStream& stream,
 {
   m_length = 0;
   m_bytes_left = 0;
-  m_prepared = false;
+  m_prepared = FALSE;
 }
 
 wxSoundFileStream::~wxSoundFileStream()
@@ -210,51 +210,51 @@ wxSoundFileStream::~wxSoundFileStream()
 bool wxSoundFileStream::Play()
 {
   if (m_state != wxSOUND_FILE_STOPPED)
-    return false;
+    return FALSE;
 
   if (!m_prepared)
     if (!PrepareToPlay())
-      return false;
+      return FALSE;
 
   m_state = wxSOUND_FILE_PLAYING;
 
   if (!StartProduction(wxSOUND_OUTPUT))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 bool wxSoundFileStream::Record(wxUint32 time)
 {
   if (m_state != wxSOUND_FILE_STOPPED)
-    return false;
+    return FALSE;
 
   if (!PrepareToRecord(time))
-    return false;
+    return FALSE;
 
   FinishPreparation(m_sndformat->GetBytesFromTime(time));
 
   m_state = wxSOUND_FILE_RECORDING;
   if (!StartProduction(wxSOUND_INPUT))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 bool wxSoundFileStream::Stop()
 {
   if (m_state == wxSOUND_FILE_STOPPED)
-    return false;
+    return FALSE;
 
   if (!StopProduction())
-    return false;
+    return FALSE;
 
-  m_prepared = false;
+  m_prepared = FALSE;
 
   if (m_state == wxSOUND_FILE_RECORDING)
     if (!FinishRecording()) {
       m_state = wxSOUND_FILE_STOPPED;
-      return false;
+      return FALSE;
     }
 
   if (m_input)
@@ -264,35 +264,35 @@ bool wxSoundFileStream::Stop()
     m_output->SeekO(0, wxFromStart);
  
   m_state = wxSOUND_FILE_STOPPED;
-  return true;
+  return TRUE;
 }
 
 bool wxSoundFileStream::Pause()
 {
   if (m_state == wxSOUND_FILE_PAUSED || m_state == wxSOUND_FILE_STOPPED)
-    return false;
+    return FALSE;
 
   if (!StopProduction())
-    return false;
+    return FALSE;
 
   m_oldstate = m_state;
   m_state = wxSOUND_FILE_PAUSED;
-  return true;
+  return TRUE;
 }
 
 bool wxSoundFileStream::Resume()
 {
   if (m_state == wxSOUND_FILE_PLAYING || m_state == wxSOUND_FILE_RECORDING ||
       m_state == wxSOUND_FILE_STOPPED)
-    return false;
+    return FALSE;
 
   if (!StartProduction( (m_oldstate == wxSOUND_FILE_PLAYING) ?
                              wxSOUND_OUTPUT : wxSOUND_INPUT))
-    return false;
+    return FALSE;
 
   m_state = m_oldstate;
 
-  return true;
+  return TRUE;
 }
 
 wxSoundStream& wxSoundFileStream::Read(void *buffer, wxUint32 len)
@@ -322,9 +322,9 @@ bool wxSoundFileStream::StartProduction(int evt)
   m_sndio->SetEventHandler(this);
 
   if (!m_codec.StartProduction(evt))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 bool wxSoundFileStream::StopProduction()
@@ -335,7 +335,7 @@ bool wxSoundFileStream::StopProduction()
 void wxSoundFileStream::FinishPreparation(wxUint32 len)
 {
   m_bytes_left = m_length = len;
-  m_prepared = true;
+  m_prepared = TRUE;
 }
 
 wxString wxSoundFileStream::GetCodecName() const

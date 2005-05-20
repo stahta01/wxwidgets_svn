@@ -6,7 +6,7 @@
 // Created:     16.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "checklst.h"
 #endif
 
@@ -28,7 +28,7 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_CHECKLISTBOX && wxUSE_OWNER_DRAWN
+#if wxUSE_OWNER_DRAWN
 
 #ifndef WX_PRECOMP
     #include "wx/object.h"
@@ -47,10 +47,8 @@
 #include "wx/ownerdrw.h"
 #include "wx/checklst.h"
 
-#include "wx/msw/wrapwin.h"
+#include <windows.h>
 #include <windowsx.h>
-
-#include "wx/msw/private.h"
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -63,64 +61,7 @@
 // implementation
 // ============================================================================
 
-
-#if wxUSE_EXTENDED_RTTI
-WX_DEFINE_FLAGS( wxCheckListBoxStyle )
-
-wxBEGIN_FLAGS( wxCheckListBoxStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxBORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxFULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxLB_SINGLE)
-    wxFLAGS_MEMBER(wxLB_MULTIPLE)
-    wxFLAGS_MEMBER(wxLB_EXTENDED)
-    wxFLAGS_MEMBER(wxLB_HSCROLL)
-    wxFLAGS_MEMBER(wxLB_ALWAYS_SB)
-    wxFLAGS_MEMBER(wxLB_NEEDED_SB)
-    wxFLAGS_MEMBER(wxLB_SORT)
-    wxFLAGS_MEMBER(wxLB_OWNERDRAW)
-
-wxEND_FLAGS( wxCheckListBoxStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxCheckListBox, wxListBox,"wx/checklst.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxCheckListBox)
-    wxEVENT_PROPERTY( Toggle , wxEVT_COMMAND_CHECKLISTBOX_TOGGLED , wxCommandEvent )
-    wxPROPERTY_FLAGS( WindowStyle , wxCheckListBoxStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , EMPTY_MACROVALUE , wxLB_OWNERDRAW /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxCheckListBox)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_4( wxCheckListBox , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size )
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox, wxListBox)
-#endif
 
 // ----------------------------------------------------------------------------
 // declaration and implementation of wxCheckListBoxItem class
@@ -137,7 +78,7 @@ public:
   virtual bool OnDrawItem(wxDC& dc, const wxRect& rc, wxODAction act, wxODStatus stat);
 
   // simple accessors and operations
-  bool IsChecked() const { return m_bChecked; }
+  bool IsChecked() const  { return m_bChecked;        }
 
   void Check(bool bCheck);
   void Toggle() { Check(!IsChecked()); }
@@ -145,17 +86,15 @@ public:
   void SendEvent();
 
 private:
-
-    DECLARE_NO_COPY_CLASS(wxCheckListBoxItem)
   bool            m_bChecked;
   wxCheckListBox *m_pParent;
-  size_t          m_nIndex;
+  size_t            m_nIndex;
 };
 
 wxCheckListBoxItem::wxCheckListBoxItem(wxCheckListBox *pParent, size_t nIndex)
-                  : wxOwnerDrawn(wxEmptyString, true)   // checkable
+                  : wxOwnerDrawn(wxEmptyString, TRUE)   // checkable
 {
-  m_bChecked = false;
+  m_bChecked = FALSE;
   m_pParent  = pParent;
   m_nIndex   = nIndex;
 
@@ -166,6 +105,14 @@ wxCheckListBoxItem::wxCheckListBoxItem(wxCheckListBox *pParent, size_t nIndex)
   // fix appearance
   SetMarginWidth(GetDefaultMarginWidth());
 }
+
+/*
+ * JACS - I've got the owner-draw stuff partially working with WIN16,
+ * with a really horrible-looking cross for wxCheckListBox instead of a
+ * check - could use a bitmap check-mark instead, defined in wx.rc.
+ * Also there's a refresh problem whereby it doesn't always draw the
+ * check until you click to the right of it, which is OK for WIN32.
+ */
 
 bool wxCheckListBoxItem::OnDrawItem(wxDC& dc, const wxRect& rc,
                                     wxODAction act, wxODStatus stat)
@@ -201,17 +148,29 @@ bool wxCheckListBoxItem::OnDrawItem(wxDC& dc, const wxRect& rc,
       HBITMAP hbmpOld = (HBITMAP)SelectObject(hdcMem, hbmpCheck);
 
       // then draw a check mark into it
-
+#if defined(__WIN32__) && !defined(__SYMANTEC__)
       RECT rect;
       rect.left   = 0;
       rect.top    = 0;
       rect.right  = nCheckWidth;
       rect.bottom = nCheckHeight;
 
-#ifdef __WXWINCE__
-      DrawFrameControl(hdcMem, &rect, DFC_BUTTON, DFCS_BUTTONCHECK);
-#else
       DrawFrameControl(hdcMem, &rect, DFC_MENU, DFCS_MENUCHECK);
+#else
+      // In WIN16, draw a cross
+      HPEN blackPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+      HPEN whiteBrush = (HPEN)GetStockObject(WHITE_BRUSH);
+      HPEN hPenOld = (HPEN)::SelectObject(hdcMem, blackPen);
+      HPEN hBrushOld = (HPEN)::SelectObject(hdcMem, whiteBrush);
+      ::SetROP2(hdcMem, R2_COPYPEN);
+      Rectangle(hdcMem, 0, 0, nCheckWidth, nCheckHeight);
+      MoveTo(hdcMem, 0, 0);
+      LineTo(hdcMem, nCheckWidth, nCheckHeight);
+      MoveTo(hdcMem, nCheckWidth, 0);
+      LineTo(hdcMem, 0, nCheckHeight);
+      ::SelectObject(hdcMem, hPenOld);
+      ::SelectObject(hdcMem, hBrushOld);
+      ::DeleteObject(blackPen);
 #endif
 
       // finally copy it to screen DC and clean up
@@ -249,10 +208,10 @@ bool wxCheckListBoxItem::OnDrawItem(wxDC& dc, const wxRect& rc,
     }
     */
 
-    return true;
+    return TRUE;
   }
 
-  return false;
+  return FALSE;
 }
 
 // change the state of the item and redraw it
@@ -273,15 +232,26 @@ void wxCheckListBoxItem::Check(bool check)
 
     HWND hwndListbox = (HWND)m_pParent->GetHWND();
 
-    RECT rcUpdate;
+    #ifdef __WIN32__
+        RECT rcUpdate;
 
-    if ( ::SendMessage(hwndListbox, LB_GETITEMRECT,
-                       m_nIndex, (LPARAM)&rcUpdate) == LB_ERR )
-    {
-        wxLogDebug(wxT("LB_GETITEMRECT failed"));
-    }
+        if ( ::SendMessage(hwndListbox, LB_GETITEMRECT,
+                           m_nIndex, (LPARAM)&rcUpdate) == LB_ERR )
+        {
+            wxLogDebug(wxT("LB_GETITEMRECT failed"));
+        }
+    #else // Win16
+        // FIXME this doesn't work if the listbox is scrolled!
+        size_t nHeight = m_pParent->GetItemHeight();
+        size_t y = m_nIndex * nHeight;
+        RECT rcUpdate ;
+        rcUpdate.left   = 0 ;
+        rcUpdate.top    = y ;
+        rcUpdate.right  = GetDefaultMarginWidth() ;
+        rcUpdate.bottom = y + nHeight ;
+    #endif  // Win32/16
 
-    ::InvalidateRect(hwndListbox, &rcUpdate, FALSE);
+    InvalidateRect(hwndListbox, &rcUpdate, FALSE);
 }
 
 // send an "item checked" event
@@ -322,15 +292,6 @@ wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
     Create(parent, id, pos, size, nStrings, choices, style, val, name);
 }
 
-wxCheckListBox::wxCheckListBox(wxWindow *parent, wxWindowID id,
-                               const wxPoint& pos, const wxSize& size,
-                               const wxArrayString& choices,
-                               long style, const wxValidator& val,
-                               const wxString& name)
-{
-    Create(parent, id, pos, size, choices, style, val, name);
-}
-
 bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
                             const wxPoint& pos, const wxSize& size,
                             int n, const wxString choices[],
@@ -341,15 +302,6 @@ bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
                              style | wxLB_OWNERDRAW, validator, name);
 }
 
-bool wxCheckListBox::Create(wxWindow *parent, wxWindowID id,
-                            const wxPoint& pos, const wxSize& size,
-                            const wxArrayString& choices,
-                            long style,
-                            const wxValidator& validator, const wxString& name)
-{
-    return wxListBox::Create(parent, id, pos, size, choices,
-                             style | wxLB_OWNERDRAW, validator, name);
-}
 
 // misc overloaded methods
 // -----------------------
@@ -375,7 +327,7 @@ bool wxCheckListBox::SetFont( const wxFont &font )
 
     wxListBox::SetFont(font);
 
-    return true;
+    return TRUE;
 }
 
 // create/retrieve item
@@ -401,10 +353,10 @@ bool wxCheckListBox::MSWOnMeasure(WXMEASUREITEMSTRUCT *item)
     // add place for the check mark
     pStruct->itemWidth += wxOwnerDrawn::GetDefaultMarginWidth();
 
-    return true;
+    return TRUE;
   }
 
-  return false;
+  return FALSE;
 }
 
 // check items
@@ -412,7 +364,7 @@ bool wxCheckListBox::MSWOnMeasure(WXMEASUREITEMSTRUCT *item)
 
 bool wxCheckListBox::IsChecked(size_t uiIndex) const
 {
-    wxCHECK_MSG( uiIndex < (size_t)GetCount(), false, _T("bad wxCheckListBox index") );
+    wxCHECK_MSG( uiIndex < (size_t)GetCount(), FALSE, _T("bad wxCheckListBox index") );
 
     return GetItem(uiIndex)->IsChecked();
 }
@@ -438,7 +390,7 @@ void wxCheckListBox::OnKeyDown(wxKeyEvent& event)
         Clear
     } oper;
 
-    switch ( event.GetKeyCode() )
+    switch ( event.KeyCode() )
     {
         case WXK_SPACE:
             oper = Toggle;
@@ -532,6 +484,7 @@ void wxCheckListBox::OnLeftClick(wxMouseEvent& event)
 
 int wxCheckListBox::DoHitTestItem(wxCoord x, wxCoord y) const
 {
+  #ifdef __WIN32__
     int nItem = (int)::SendMessage
                              (
                               (HWND)GetHWND(),
@@ -539,17 +492,12 @@ int wxCheckListBox::DoHitTestItem(wxCoord x, wxCoord y) const
                               0,
                               MAKELPARAM(x, y)
                              );
+  #else // Win16
+    // FIXME this doesn't work when the listbox is scrolled!
+    int nItem = y / m_nItemHeight;
+  #endif // Win32/16
 
   return nItem >= m_noItems ? wxNOT_FOUND : nItem;
-}
-
-
-wxSize wxCheckListBox::DoGetBestSize() const
-{
-    wxSize best = wxListBox::DoGetBestSize();
-    best.x += wxOwnerDrawn::GetDefaultMarginWidth();  // add room for the checkbox
-    CacheBestSize(best);
-    return best;
 }
 
 #endif

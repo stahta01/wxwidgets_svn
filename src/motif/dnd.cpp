@@ -7,12 +7,9 @@
 // Licence:   	wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dnd.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/setup.h"
 
@@ -51,14 +48,14 @@ wxDropTarget::~wxDropTarget()
 bool wxTextDropTarget::OnDrop( long x, long y, const void *data, size_t WXUNUSED(size) )
 {
   OnDropText( x, y, (const char*)data );
-  return true;
+  return TRUE;
 }
 
 bool wxTextDropTarget::OnDropText( long x, long y, const char *psz )
 {
   wxLogDebug( "Got dropped text: %s.", psz );
   wxLogDebug( "At x: %d, y: %d.", (int)x, (int)y );
-  return true;
+  return TRUE;
 }
 
 size_t wxTextDropTarget::GetFormatCount() const
@@ -84,7 +81,7 @@ bool wxFileDropTarget::OnDropFiles( long x, long y, size_t nFiles, const char * 
   {
     wxLogDebug( aszFiles[i] );
   }
-  return true;
+  return TRUE;
 }
 
 bool wxFileDropTarget::OnDrop(long x, long y, const void *data, size_t size )
@@ -95,7 +92,7 @@ bool wxFileDropTarget::OnDrop(long x, long y, const void *data, size_t size )
   for (i = 0; i < size; i++)
     if (text[i] == 0) number++;
 
-  if (number == 0) return true;    
+  if (number == 0) return TRUE;    
     
   char **files = new char*[number];
   
@@ -143,7 +140,7 @@ wxDropSource::wxDropSource( wxWindow *win )
 wxDropSource::wxDropSource( wxDataObject &data, wxWindow *win )
 {
 #if 0
-  g_blockEventsOnDrag = true;
+  g_blockEventsOnDrag = TRUE;
   
   m_window = win;
   m_widget = win->m_widget;
@@ -182,7 +179,7 @@ wxDragResult wxDropSource::DoDragDrop( int WXUNUSED(flags) )
   
   UnregisterWindow();
   
-  g_blockEventsOnDrag = false;
+  g_blockEventsOnDrag = FALSE;
   
   return m_retValue;
 #endif

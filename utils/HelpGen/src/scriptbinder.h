@@ -28,12 +28,8 @@
 	#include "wxstlvec.h"
 	#include "wx/string.h"
 	
-	#ifdef wxUSE_STD_STRING
-		using std::string;
-	#else
-		// FIXME:: dirty!
-		typedef wxString string;
-	#endif
+	// FIXME:: dirty!
+	typedef wxString string;
 
 #endif
 
@@ -331,7 +327,7 @@ protected:
 	// return FALSE, if something has gone wrong and
 	// document cannot be saved now
 
-	virtual bool OnSaveDocument( ScriptStream& WXUNUSED(stm) ) 
+	virtual bool OnSaveDocument( ScriptStream& stm ) 
 		{ return 1; }
 
 	// override this method to provide reference to

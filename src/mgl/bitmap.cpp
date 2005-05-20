@@ -6,7 +6,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "bitmap.h"
 #endif
 
@@ -317,7 +317,7 @@ wxBitmap::wxBitmap(const wxImage& image, int depth)
 
 wxImage wxBitmap::ConvertToImage() const
 {
-    wxCHECK_MSG( Ok(), wxImage(), wxT("invalid bitmap") );
+    wxCHECK_MSG( Ok(), FALSE, wxT("invalid bitmap") );
 
     int width, height;
     width = GetWidth();

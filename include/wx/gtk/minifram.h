@@ -10,7 +10,7 @@
 #ifndef __GTKMINIFRAMEH__
 #define __GTKMINIFRAMEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -56,7 +56,6 @@ public:
             long style = wxDEFAULT_FRAME_STYLE | wxTINY_CAPTION_HORIZ,
             const wxString& name = wxFrameNameStr);
 
-    virtual void SetTitle( const wxString &title );
  // implementation
  
     bool   m_isDragging;

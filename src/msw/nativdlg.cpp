@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation
 #endif
 
@@ -34,7 +34,7 @@
     #include "wx/wx.h"
 #endif
 
-#if defined(__WIN95__)
+#if defined(__WIN95__) && !defined(__TWIN32__)
 #include "wx/spinbutt.h"
 #endif
 #include "wx/msw/private.h"
@@ -61,7 +61,7 @@ bool wxWindow::LoadNativeDialog(wxWindow* parent, wxWindowID& id)
                                     (DLGPROC) wxDlgProc);
 
     if ( !m_hWnd )
-        return false;
+        return FALSE;
 
     SubclassWin(GetHWND());
 
@@ -74,17 +74,18 @@ bool wxWindow::LoadNativeDialog(wxWindow* parent, wxWindowID& id)
     HWND hWndNext;
     hWndNext = ::GetWindow((HWND) m_hWnd, GW_CHILD);
 
+    wxWindow* child = NULL;
     if (hWndNext)
-        CreateWindowFromHWND(this, (WXHWND) hWndNext);
+        child = CreateWindowFromHWND(this, (WXHWND) hWndNext);
 
     while (hWndNext != (HWND) NULL)
     {
         hWndNext = ::GetWindow(hWndNext, GW_HWNDNEXT);
         if (hWndNext)
-            CreateWindowFromHWND(this, (WXHWND) hWndNext);
+            child = CreateWindowFromHWND(this, (WXHWND) hWndNext);
     }
 
-    return true;
+    return TRUE;
 }
 
 bool wxWindow::LoadNativeDialog(wxWindow* parent, const wxString& name)
@@ -98,7 +99,7 @@ bool wxWindow::LoadNativeDialog(wxWindow* parent, const wxString& name)
                                     (DLGPROC)wxDlgProc);
 
     if ( !m_hWnd )
-        return false;
+        return FALSE;
 
     SubclassWin(GetHWND());
 
@@ -111,17 +112,18 @@ bool wxWindow::LoadNativeDialog(wxWindow* parent, const wxString& name)
     HWND hWndNext;
     hWndNext = ::GetWindow((HWND) m_hWnd, GW_CHILD);
 
+    wxWindow* child = NULL;
     if (hWndNext)
-        CreateWindowFromHWND(this, (WXHWND) hWndNext);
+        child = CreateWindowFromHWND(this, (WXHWND) hWndNext);
 
     while (hWndNext != (HWND) NULL)
     {
         hWndNext = ::GetWindow(hWndNext, GW_HWNDNEXT);
         if (hWndNext)
-            CreateWindowFromHWND(this, (WXHWND) hWndNext);
+            child = CreateWindowFromHWND(this, (WXHWND) hWndNext);
     }
 
-    return true;
+    return TRUE;
 }
 
 // ---------------------------------------------------------------------------
@@ -133,7 +135,7 @@ wxWindow* wxWindow::GetWindowChild1(wxWindowID id)
     if ( m_windowId == id )
         return this;
 
-    wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+    wxWindowList::Node *node = GetChildren().GetFirst();
     while ( node )
     {
         wxWindow* child = node->GetData();
@@ -185,32 +187,25 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
     if (str == wxT("BUTTON"))
     {
         int style1 = (style & 0xFF);
-#if wxUSE_CHECKBOX
         if ((style1 == BS_3STATE) || (style1 == BS_AUTO3STATE) || (style1 == BS_AUTOCHECKBOX) ||
             (style1 == BS_CHECKBOX))
         {
             win = new wxCheckBox;
         }
-        else
-#endif
-#if wxUSE_RADIOBTN
-        if ((style1 == BS_AUTORADIOBUTTON) || (style1 == BS_RADIOBUTTON))
+        else if ((style1 == BS_AUTORADIOBUTTON) || (style1 == BS_RADIOBUTTON))
         {
             win = new wxRadioButton;
         }
-        else
-#endif
 #if wxUSE_BMPBUTTON
 #if defined(__WIN32__) && defined(BS_BITMAP)
-        if (style & BS_BITMAP)
+        else if (style & BS_BITMAP)
         {
             // TODO: how to find the bitmap?
             win = new wxBitmapButton;
             wxLogError(wxT("Have not yet implemented bitmap button as BS_BITMAP button."));
         }
-        else
 #endif
-        if (style1 == BS_OWNERDRAW)
+        else if (style1 == BS_OWNERDRAW)
         {
             // TODO: how to find the bitmap?
             // TODO: can't distinguish between bitmap button and bitmap static.
@@ -220,34 +215,25 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
             // with a switch in the drawing code. Call default proc if BS_BITMAP.
             win = new wxBitmapButton;
         }
-        else
 #endif
-#if wxUSE_BUTTON
-        if ((style1 == BS_PUSHBUTTON) || (style1 == BS_DEFPUSHBUTTON))
+        else if ((style1 == BS_PUSHBUTTON) || (style1 == BS_DEFPUSHBUTTON))
         {
             win = new wxButton;
         }
-        else
-#endif
-#if wxUSE_STATBOX
-        if (style1 == BS_GROUPBOX)
+        else if (style1 == BS_GROUPBOX)
         {
             win = new wxStaticBox;
         }
         else
-#endif
         {
             wxLogError(wxT("Don't know what kind of button this is: id = %ld"),
                        id);
         }
     }
-#if wxUSE_COMBOBOX
     else if (str == wxT("COMBOBOX"))
     {
         win = new wxComboBox;
     }
-#endif
-#if wxUSE_TEXTCTRL
     // TODO: Problem if the user creates a multiline - but not rich text - text control,
     // since wxWin assumes RichEdit control for this. Should have m_isRichText in
     // wxTextCtrl. Also, convert as much of the window style as is necessary
@@ -258,20 +244,15 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
     {
         win = new wxTextCtrl;
     }
-#endif
-#if wxUSE_LISTBOX
     else if (str == wxT("LISTBOX"))
     {
         win = new wxListBox;
     }
-#endif
-#if wxUSE_SCROLLBAR
     else if (str == wxT("SCROLLBAR"))
     {
         win = new wxScrollBar;
     }
-#endif
-#if defined(__WIN95__) && wxUSE_SPINBTN
+#if defined(__WIN95__) && !defined(__TWIN32__) && wxUSE_SPINBTN
     else if (str == wxT("MSCTLS_UPDOWN32"))
     {
         win = new wxSpinButton;
@@ -284,16 +265,11 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
         win = new wxSlider;
     }
 #endif // wxUSE_SLIDER
-#if wxUSE_STATTEXT
     else if (str == wxT("STATIC"))
     {
         int style1 = (style & 0xFF);
 
-        if ((style1 == SS_LEFT) || (style1 == SS_RIGHT)
-#ifndef __WXWINCE__
-            || (style1 == SS_SIMPLE)
-#endif
-            )
+        if ((style1 == SS_LEFT) || (style1 == SS_RIGHT) || (style1 == SS_SIMPLE))
             win = new wxStaticText;
 #if wxUSE_STATBMP
 #if defined(__WIN32__) && defined(BS_BITMAP)
@@ -305,9 +281,8 @@ wxWindow* wxWindow::CreateWindowFromHWND(wxWindow* parent, WXHWND hWnd)
             wxLogError(wxT("Please make SS_BITMAP statics into owner-draw buttons."));
         }
 #endif
-#endif /* wxUSE_STATBMP */
+#endif	/* wxUSE_STATBMP */
     }
-#endif
     else
     {
         wxString msg(wxT("Don't know how to convert from Windows class "));

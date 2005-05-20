@@ -11,7 +11,7 @@
 #ifndef __GTKTOPLEVELH__
 #define __GTKTOPLEVELH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "toplevel.h"
 #endif
 
@@ -60,13 +60,9 @@ public:
     virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
     virtual bool IsFullScreen() const { return m_fsIsShowing; };
 
-    virtual bool SetShape(const wxRegion& region);
+    /*virtual*/ bool SetShape(const wxRegion& region);
 
     virtual bool Show(bool show = TRUE);
-
-    virtual void Raise();
-
-    virtual bool IsActive();
 
     virtual void SetTitle( const wxString &title );
     virtual wxString GetTitle() const { return m_title; }
@@ -83,6 +79,9 @@ public:
     // move the window to the specified location and resize it: this is called
     // from both DoSetSize() and DoSetClientSize()
     virtual void DoMoveWindow(int x, int y, int width, int height);
+
+    // set the icon for this window
+    void DoSetIcon( const wxIcon& icon );
 
     // GTK callbacks
     virtual void GtkOnSize( int x, int y, int width, int height );

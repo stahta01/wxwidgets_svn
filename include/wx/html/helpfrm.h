@@ -12,7 +12,7 @@
 #ifndef _WX_HELPFRM_H_
 #define _WX_HELPFRM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "helpfrm.h"
 #endif
 
@@ -20,7 +20,6 @@
 
 #if wxUSE_WXHTML_HELP
 
-#include "wx/helpbase.h"
 #include "wx/html/helpdata.h"
 #include "wx/window.h"
 #include "wx/frame.h"
@@ -35,10 +34,8 @@
 #include "wx/html/htmlwin.h"
 #include "wx/html/htmprint.h"
 
-class WXDLLIMPEXP_CORE wxButton;
-class WXDLLIMPEXP_CORE wxTextCtrl;
-class WXDLLIMPEXP_CORE wxTreeEvent;
-class WXDLLIMPEXP_CORE wxTreeCtrl;
+class WXDLLEXPORT wxButton;
+class WXDLLEXPORT wxTextCtrl;
 
 
 // style flags for the Help Frame
@@ -70,12 +67,10 @@ struct wxHtmlHelpFrameCfg
     bool navig_on;
 };
 
-struct wxHtmlHelpMergedIndexItem;
-class wxHtmlHelpMergedIndex;
 
-class WXDLLIMPEXP_CORE wxHelpControllerBase;
+class WXDLLEXPORT wxHelpControllerBase;
 
-class WXDLLIMPEXP_HTML wxHtmlHelpFrame : public wxFrame
+class WXDLLEXPORT wxHtmlHelpFrame : public wxFrame
 {
     DECLARE_DYNAMIC_CLASS(wxHtmlHelpFrame)
 
@@ -115,16 +110,15 @@ public:
     // Displays help window and focuses index.
     bool DisplayIndex();
 
-    // Searches for keyword. Returns true and display page if found, return
-    // false otherwise
+    // Searches for keyword. Returns TRUE and display page if found, return
+    // FALSE otherwise
     // Syntax of keyword is Altavista-like:
     // * words are separated by spaces
     //   (but "\"hello world\"" is only one world "hello world")
     // * word may be pretended by + or -
     //   (+ : page must contain the word ; - : page can't contain the word)
     // * if there is no + or - before the word, + is default
-    bool KeywordSearch(const wxString& keyword,
-                       wxHelpSearchMode mode = wxHELP_SEARCH_ALL);
+    bool KeywordSearch(const wxString& keyword);
 
     void UseConfig(wxConfigBase *config, const wxString& rootpath = wxEmptyString)
         {
@@ -141,10 +135,10 @@ public:
 
     // call this to let wxHtmlHelpFrame know page changed
     void NotifyPageChanged();
-
+    
     // Refreshes Contents and Index tabs
     void RefreshLists();
-
+    
 protected:
     void Init(wxHtmlHelpData* data = NULL);
 
@@ -156,10 +150,6 @@ protected:
 
     // Add books to search choice panel
     void CreateSearch();
-
-    // Updates "merged index" structure that combines indexes of all books
-    // into better searchable structure
-    void UpdateMergedIndex();
 
     // Add custom buttons to toolbar
     virtual void AddToolbarButtons(wxToolBar *toolBar, int style);
@@ -177,11 +167,6 @@ protected:
     void OnBookmarksSel(wxCommandEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
     void OnActivate(wxActivateEvent& event);
-
-#ifdef __WXMAC__
-    void OnClose(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-#endif
 
     // Images:
     enum {
@@ -240,12 +225,7 @@ protected:
 
     int m_hfStyle;
 
-private:
-    void DisplayIndexItem(const wxHtmlHelpMergedIndexItem *it);
-    wxHtmlHelpMergedIndex *m_mergedIndex;
-
     DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrame)
 };
 
 #endif // wxUSE_WXHTML_HELP

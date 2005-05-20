@@ -11,7 +11,7 @@
 #ifndef __GTKPOPUPWINH__
 #define __GTKPOPUPWINH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "popupwin.h"
 #endif
 
@@ -27,7 +27,7 @@ class wxPopupWindow: public wxPopupWindowBase
 {
 public:
     wxPopupWindow() { }
-    virtual ~wxPopupWindow() ;
+    virtual ~wxPopupWindow() { }
 
     wxPopupWindow(wxWindow *parent, int flags = wxBORDER_NONE)
         { (void)Create(parent, flags); }

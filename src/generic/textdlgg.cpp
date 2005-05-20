@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "textdlgg.h"
 #endif
 
@@ -52,20 +52,6 @@
 
 static const int wxID_TEXT = 3000;
 
-// ---------------------------------------------------------------------------
-// macros
-// ---------------------------------------------------------------------------
-
-/* Macro for avoiding #ifdefs when value have to be different depending on size of
-   device we display on - take it from something like wxDesktopPolicy in the future
- */
-
-#if defined(__SMARTPHONE__)
-    #define wxLARGESMALL(large,small) small
-#else
-    #define wxLARGESMALL(large,small) large
-#endif
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -86,7 +72,7 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
                                      const wxString& value,
                                      long style,
                                      const wxPoint& pos)
-                 : wxDialog(parent, wxID_ANY, caption, pos, wxDefaultSize,
+                 : wxDialog(parent, -1, caption, pos, wxDefaultSize,
                             wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
                    m_value(value)
 {
@@ -97,16 +83,14 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
 
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
-#if wxUSE_STATTEXT
     // 1) text message
-    topsizer->Add( CreateTextSizer( message ), 0, wxALL, wxLARGESMALL(10,0) );
-#endif        
+    topsizer->Add( CreateTextSizer( message ), 0, wxALL, 10 );
 
     // 2) text ctrl
     m_textctrl = new wxTextCtrl(this, wxID_TEXT, value,
-                                wxDefaultPosition, wxSize(300, wxDefaultCoord),
+                                wxDefaultPosition, wxSize(300, -1),
                                 style & ~wxTextEntryDialogStyle);
-    topsizer->Add( m_textctrl, style & wxTE_MULTILINE ? 1 : 0, wxEXPAND | wxLEFT|wxRIGHT, wxLARGESMALL(15,0) );
+    topsizer->Add( m_textctrl, 1, wxEXPAND | wxLEFT|wxRIGHT, 15 );
 
 #if wxUSE_VALIDATORS
     wxTextValidator validator( wxFILTER_NONE, &m_value );
@@ -114,35 +98,22 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
 #endif
   // wxUSE_VALIDATORS
 
-    // smart phones does not support or do not waste space for wxButtons
-#ifdef __SMARTPHONE__
-
-    SetRightMenu(wxID_CANCEL, _("Cancel"));
-
-#else // __SMARTPHONE__/!__SMARTPHONE__
-
 #if wxUSE_STATLINE
     // 3) static line
-    topsizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+    topsizer->Add( new wxStaticLine( this, -1 ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
 #endif
 
     // 4) buttons
-    topsizer->Add( CreateButtonSizer( style ), 0, wxEXPAND | wxALL, 10 );
+    topsizer->Add( CreateButtonSizer( style ), 0, wxCENTRE | wxALL, 10 );
 
-#endif // !__SMARTPHONE__
-
-    SetAutoLayout( true );
+    SetAutoLayout( TRUE );
     SetSizer( topsizer );
 
-#if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
 
-    if ( style & wxCENTRE )
-        Centre( wxBOTH );
-#endif
+    Centre( wxBOTH );
 
-    m_textctrl->SetSelection(-1, -1);
     m_textctrl->SetFocus();
 
     wxEndBusyCursor();
@@ -151,7 +122,7 @@ wxTextEntryDialog::wxTextEntryDialog(wxWindow *parent,
 void wxTextEntryDialog::OnOK(wxCommandEvent& WXUNUSED(event) )
 {
 #if wxUSE_VALIDATORS
-    if( Validate() && TransferDataFromWindow() )
+    if( Validate() && TransferDataFromWindow() ) 
     {
         EndModal( wxID_OK );
     }
@@ -184,23 +155,5 @@ void wxTextEntryDialog::SetTextValidator( wxTextValidator& validator )
 
 #endif
   // wxUSE_VALIDATORS
-
-// ----------------------------------------------------------------------------
-// wxPasswordEntryDialog
-// ----------------------------------------------------------------------------
-
-IMPLEMENT_CLASS(wxPasswordEntryDialog, wxTextEntryDialog)
-
-wxPasswordEntryDialog::wxPasswordEntryDialog(wxWindow *parent,
-                                     const wxString& message,
-                                     const wxString& caption,
-                                     const wxString& value,
-                                     long style,
-                                     const wxPoint& pos)
-                 : wxTextEntryDialog(parent, message, caption, value,
-                                     style | wxTE_PASSWORD, pos)
-{
-    // Only change from wxTextEntryDialog is the password style
-}
 
 #endif // wxUSE_TEXTDLG

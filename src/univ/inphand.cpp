@@ -6,7 +6,7 @@
 // Created:     18.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "inphand.h"
 #endif
 
@@ -44,19 +44,19 @@
 bool wxInputHandler::HandleMouseMove(wxInputConsumer * WXUNUSED(consumer),
                                      const wxMouseEvent& WXUNUSED(event))
 {
-    return false;
+    return FALSE;
 }
 
 bool wxInputHandler::HandleFocus(wxInputConsumer *WXUNUSED(consumer),
                                  const wxFocusEvent& WXUNUSED(event))
 {
-    return false;
+    return FALSE;
 }
 
 bool wxInputHandler::HandleActivation(wxInputConsumer *WXUNUSED(consumer),
                                       bool WXUNUSED(activated))
 {
-    return false;
+    return FALSE;
 }
 
 wxInputHandler::~wxInputHandler()

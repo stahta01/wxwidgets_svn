@@ -9,4 +9,10 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// We don't put main() in the library any more. GD.
+#include "wx/app.h"
+
+int main(int argc, char* argv[])
+{
+    return wxEntry(argc, argv);
+}
+

@@ -99,7 +99,7 @@ bool MyApp::OnInit()
                               wxICON_ERROR | wxYES_NO | wxCANCEL ) != wxYES )
             {
                 // no server
-                return false;
+                return FALSE;
             }
 
             the_connection = (MyConnection *)my_client->MakeConnection(hostName, service, _T("IPC TEST"));
@@ -110,9 +110,9 @@ bool MyApp::OnInit()
         wxMessageBox(_T("StartAdvise failed"), _T("Client Demo Error"));
 
     // Create the main frame window
-    (new MyFrame(NULL, _T("Client")))->Show(true);
+    (new MyFrame(NULL, _T("Client")))->Show(TRUE);
 
-    return true;
+    return TRUE;
 }
 
 int MyApp::OnExit()
@@ -131,7 +131,7 @@ int MyApp::OnExit()
 
 // Define my frame constructor
 MyFrame::MyFrame(wxFrame *frame, const wxString& title)
-        : wxFrame(frame, wxID_ANY, title, wxDefaultPosition, wxSize(300, 200))
+        : wxFrame(frame, -1, title, wxDefaultPosition, wxSize(300, 200))
 {
     // Give it an icon
     SetIcon(wxICON(mondrian));
@@ -160,21 +160,21 @@ MyFrame::MyFrame(wxFrame *frame, const wxString& title)
     the_list->Append(_T("Fruit"));
 }
 
-void MyFrame::OnExecute(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnExecute(wxCommandEvent& event)
 {
     if (the_connection)
         if (!the_connection->Execute(_T("Hello from the client!")))
             wxMessageBox(_T("Execute failed"), _T("Client Demo Error"));
 }
 
-void MyFrame::OnPoke(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnPoke(wxCommandEvent& event)
 {
     if (the_connection)
         if (!the_connection->Poke(_T("An item"), _T("Some data to poke at the server!")))
             wxMessageBox(_T("Poke failed"), _T("Client Demo Error"));
 }
 
-void MyFrame::OnRequest(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnRequest(wxCommandEvent& event)
 {
     if (the_connection)
     {
@@ -186,7 +186,7 @@ void MyFrame::OnRequest(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnExit(wxCommandEvent& event)
 {
     Close();
 }
@@ -196,15 +196,15 @@ wxConnectionBase *MyClient::OnMakeConnection()
     return new MyConnection;
 }
 
-bool MyConnection::OnAdvise(const wxString& WXUNUSED(topic), const wxString& WXUNUSED(item), wxChar *data, int WXUNUSED(size), wxIPCFormat WXUNUSED(format))
+bool MyConnection::OnAdvise(const wxString& topic, const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
     if (the_list)
     {
         int n = the_list->FindString(data);
-        if (n > wxNOT_FOUND)
+        if (n > -1)
             the_list->SetSelection(n);
     }
-    return true;
+    return TRUE;
 }
 
 bool MyConnection::OnDisconnect()

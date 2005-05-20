@@ -57,8 +57,8 @@ public:
     wxString GetId() const;
     void SetId(const wxChar *format);
 
-    // returns true if the format is one of those defined in wxDataFormatId
-    bool IsStandard() const { return m_format > 0 && m_format < wxDF_PRIVATE; }
+    // returns TRUE if the format is one of those defined in wxDataFormatId
+    bool IsStandard() const { return m_format > 0 && m_format < wxDF_MAX; }
 
 private:
     NativeFormat m_format;

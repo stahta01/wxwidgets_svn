@@ -11,7 +11,7 @@
 #ifndef __GTKGAUGEH__
 #define __GTKGAUGEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -75,21 +75,18 @@ public:
     int GetRange() const;
     int GetValue() const;
 
-    bool IsVertical() const { return HasFlag(wxGA_VERTICAL); }
-    
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation
     // -------------
+
+    void ApplyWidgetStyle();
 
     // the max and current gauge values
     int m_rangeMax,
         m_gaugePos;
 
     // obsolete functions, don't use
-#if WXWIN_COMPATIBILITY_2_2
-    bool GetProgressBar() const { return true; }
+#ifdef WXWIN_COMPATIBILITY_2_2
+    bool GetProgressBar() const { return TRUE; }
 #endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
@@ -98,10 +95,6 @@ protected:
 
     // set the gauge value to the value of m_gaugePos
     void DoSetGauge();
-
-    virtual wxSize DoGetBestSize() const;
-
-    virtual wxVisualAttributes GetDefaultAttributes() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxGauge)

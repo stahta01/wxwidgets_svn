@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     16.05.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@
 
 // CreateDialog
 
-#if defined(CreateDialog)
+#ifdef CreateDialog
     #undef CreateDialog
 
     inline HWND CreateDialog(HINSTANCE hInstance,
@@ -39,30 +39,6 @@
             return CreateDialogW(hInstance, pTemplate, hwndParent, pDlgProc);
         #else
             return CreateDialogA(hInstance, pTemplate, hwndParent, pDlgProc);
-        #endif
-    }
-#endif
-
-// CreateWindow
-
-#if defined(CreateWindow)
-    #undef CreateWindow
-
-    inline HWND CreateWindow(LPCTSTR lpClassName,
-                             LPCTSTR lpWndClass,
-                             DWORD dwStyle,
-                             int x, int y, int w, int h,
-                             HWND hWndParent,
-                             HMENU hMenu,
-                             HINSTANCE hInstance,
-                             LPVOID lpParam)
-    {
-        #ifdef _UNICODE
-            return CreateWindowW(lpClassName, lpWndClass, dwStyle, x, y, w, h,
-                                 hWndParent, hMenu, hInstance, lpParam);
-        #else
-            return CreateWindowA(lpClassName, lpWndClass, dwStyle, x, y, w, h,
-                                 hWndParent, hMenu, hInstance, lpParam);
         #endif
     }
 #endif
@@ -302,7 +278,6 @@
 #endif // LoadBitmap
 
 // LoadLibrary
-
 #ifdef LoadLibrary
     #undef LoadLibrary
     #ifdef _UNICODE
@@ -340,12 +315,7 @@
     #undef IsMaximized
     inline BOOL IsMaximized(HWND hwnd)
     {
-#ifdef __WXWINCE__
-        wxUnusedVar(hwnd);
-        return FALSE;
-#else
         return IsZoomed(hwnd);
-#endif
     }
 #endif
 
@@ -355,12 +325,7 @@
     #undef GetFirstChild
     inline HWND GetFirstChild(HWND hwnd)
     {
-#ifdef __WXWINCE__
-        wxUnusedVar(hwnd);
-        return 0;
-#else
         return GetTopWindow(hwnd);
-#endif
     }
 #endif
 
@@ -415,16 +380,6 @@
 #ifdef Yield
     #undef Yield
 #endif
-
-
-#if defined(__WXWINCE__) && defined(DrawIcon) //#ifdef DrawIcon
-    #undef DrawIcon
-    inline BOOL DrawIcon(HDC hdc, int x, int y, HICON hicon)
-    {
-        return DrawIconEx(hdc,x,y,hicon,0,0,0,NULL, DI_NORMAL) ;
-    }
-#endif
-
 
 // GetWindowProc
 //ifdef GetWindowProc

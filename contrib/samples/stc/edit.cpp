@@ -25,12 +25,12 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all 'standard' wxWidgets headers)
+// need because it includes almost all 'standard' wxWindows headers)
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
 
-//! wxWidgets headers
+//! wxWindows headers
 #include <wx/file.h>     // raw file io support
 #include <wx/filename.h> // filename support
 
@@ -100,8 +100,8 @@ BEGIN_EVENT_TABLE (Edit, wxStyledTextCtrl)
     EVT_MENU (myID_CONVERTCRLF,        Edit::OnConvertEOL)
     EVT_MENU (myID_CONVERTLF,          Edit::OnConvertEOL)
     // stc
-    EVT_STC_MARGINCLICK (wxID_ANY,     Edit::OnMarginClick)
-    EVT_STC_CHARADDED (wxID_ANY,       Edit::OnCharAdded)
+    EVT_STC_MARGINCLICK (-1,           Edit::OnMarginClick)
+    EVT_STC_CHARADDED (-1,             Edit::OnCharAdded)
 END_EVENT_TABLE()
 
 Edit::Edit (wxWindow *parent, wxWindowID id,
@@ -110,7 +110,7 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
             long style)
     : wxStyledTextCtrl (parent, id, pos, size, style) {
 
-    m_filename = wxEmptyString;
+    m_filename = _T("");
 
     m_LineNrID = 0;
     m_DividerID = 1;
@@ -132,10 +132,10 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
                  wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
     wxFont font (10, wxMODERN, wxNORMAL, wxNORMAL);
     StyleSetFont (wxSTC_STYLE_DEFAULT, font);
-    StyleSetForeground (wxSTC_STYLE_DEFAULT, *wxBLACK);
-    StyleSetBackground (wxSTC_STYLE_DEFAULT, *wxWHITE);
+    StyleSetForeground (wxSTC_STYLE_DEFAULT, wxColour (_T("BLACK")));
+    StyleSetBackground (wxSTC_STYLE_DEFAULT, wxColour (_T("WHITE")));
     StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour (_T("DARK GREY")));
-    StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
+    StyleSetBackground (wxSTC_STYLE_LINENUMBER, wxColour (_T("WHITE")));
     StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour (_T("DARK GREY")));
     InitializePrefs (DEFAULT_LANGUAGE);
 
@@ -156,6 +156,8 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
     // miscelaneous
     m_LineNrMargin = TextWidth (wxSTC_STYLE_LINENUMBER, _T("_999999"));
     m_FoldingMargin = 16;
+    SetMarginWidth (m_LineNrID,
+                    g_CommonPrefs.lineNumberEnable? m_LineNrMargin: 0);
     CmdKeyClear (wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
     SetLayoutCache (wxSTC_CACHE_PAGE);
 
@@ -339,7 +341,7 @@ void Edit::OnMarginClick (wxStyledTextEvent &event) {
 }
 
 void Edit::OnCharAdded (wxStyledTextEvent &event) {
-    char chr = (char)event.GetKey();
+    char chr = event.GetKey();
     int currentLine = GetCurrentLine();
     // Change this if support for mac files with \r is needed
     if (chr == '\n') {
@@ -366,7 +368,7 @@ wxString Edit::DeterminePrefs (const wxString &filename) {
         curInfo = &g_LanguagePrefs [languageNr];
         wxString filepattern = curInfo->filepattern;
         filepattern.Lower();
-        while (!filepattern.empty()) {
+        while (!filepattern.IsEmpty()) {
             wxString cur = filepattern.BeforeFirst (';');
             if ((cur == filename) ||
                 (cur == (filename.BeforeLast ('.') + _T(".*"))) ||
@@ -405,8 +407,9 @@ bool Edit::InitializePrefs (const wxString &name) {
     // set margin for line numbers
     SetMarginType (m_LineNrID, wxSTC_MARGIN_NUMBER);
     StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour (_T("DARK GREY")));
-    StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
-    SetMarginWidth (m_LineNrID, 0); // start out not visible
+    StyleSetBackground (wxSTC_STYLE_LINENUMBER, wxColour (_T("WHITE")));
+    SetMarginWidth (m_LineNrID,
+                    g_CommonPrefs.lineNumberEnable? m_LineNrMargin: 0);
 
     // default fonts for all styles!
     int Nr;
@@ -455,7 +458,7 @@ bool Edit::InitializePrefs (const wxString &name) {
     // folding
     SetMarginType (m_FoldingID, wxSTC_MARGIN_SYMBOL);
     SetMarginMask (m_FoldingID, wxSTC_MASK_FOLDERS);
-    StyleSetBackground (m_FoldingID, *wxWHITE);
+    StyleSetBackground (m_FoldingID, wxColour (_T("WHITE")));
     SetMarginWidth (m_FoldingID, 0);
     SetMarginSensitive (m_FoldingID, false);
     if (g_CommonPrefs.foldEnable) {
@@ -506,7 +509,7 @@ bool Edit::LoadFile () {
 
     // get filname
     if (!m_filename) {
-        wxFileDialog dlg (this, _T("Open file"), wxEmptyString, wxEmptyString,
+        wxFileDialog dlg (this, _T("Open file"), _T(""), _T(""),
                           _T("Any file (*)|*"), wxOPEN | wxFILE_MUST_EXIST | wxCHANGE_DIR);
         if (dlg.ShowModal() != wxID_OK) return false;
         m_filename = dlg.GetPath();
@@ -519,7 +522,7 @@ bool Edit::LoadFile () {
 bool Edit::LoadFile (const wxString &filename) {
 
     // load file in edit and clear undo
-    if (!filename.empty()) m_filename = filename;
+    if (!filename.IsEmpty()) m_filename = filename;
 //     wxFile file (m_filename);
 //     if (!file.IsOpened()) return false;
     ClearAll ();
@@ -532,9 +535,9 @@ bool Edit::LoadFile (const wxString &filename) {
 //         InsertText (0, buf);
 //     }
 //     file.Close();
-
+    
     wxStyledTextCtrl::LoadFile(m_filename);
-
+    
     EmptyUndoBuffer();
 
     // determine lexer language
@@ -551,7 +554,7 @@ bool Edit::SaveFile () {
 
     // get filname
     if (!m_filename) {
-        wxFileDialog dlg (this, _T("Save file"), wxEmptyString, wxEmptyString, _T("Any file (*)|*"),
+        wxFileDialog dlg (this, _T("Save file"), _T(""), _T(""), _T("Any file (*)|*"),
                           wxSAVE | wxOVERWRITE_PROMPT);
         if (dlg.ShowModal() != wxID_OK) return false;
         m_filename = dlg.GetPath();
@@ -567,7 +570,7 @@ bool Edit::SaveFile (const wxString &filename) {
     if (!Modified()) return true;
 
 //     // save edit in file and clear undo
-//     if (!filename.empty()) m_filename = filename;
+//     if (!filename.IsEmpty()) m_filename = filename;
 //     wxFile file (m_filename, wxFile::write);
 //     if (!file.IsOpened()) return false;
 //     wxString buf = GetText();
@@ -580,7 +583,7 @@ bool Edit::SaveFile (const wxString &filename) {
 //     return true;
 
     return wxStyledTextCtrl::SaveFile(filename);
-
+    
 }
 
 bool Edit::Modified () {
@@ -595,7 +598,7 @@ bool Edit::Modified () {
 
 EditProperties::EditProperties (Edit *edit,
                                 long style)
-        : wxDialog (edit, wxID_ANY, wxEmptyString,
+        : wxDialog (edit, -1, wxEmptyString,
                     wxDefaultPosition, wxDefaultSize,
                     style | wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {
 
@@ -606,74 +609,74 @@ EditProperties::EditProperties (Edit *edit,
     // fullname
     wxBoxSizer *fullname = new wxBoxSizer (wxHORIZONTAL);
     fullname->Add (10, 0);
-    fullname->Add (new wxStaticText (this, wxID_ANY, _("Full filename"),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    fullname->Add (new wxStaticText (this, -1, _("Full filename"),
+                                     wxDefaultPosition, wxSize(80, -1)),
                    0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL);
-    fullname->Add (new wxStaticText (this, wxID_ANY, edit->GetFilename()),
+    fullname->Add (new wxStaticText (this, -1, edit->GetFilename()),
                    0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL);
 
     // text info
     wxGridSizer *textinfo = new wxGridSizer (4, 0, 2);
-    textinfo->Add (new wxStaticText (this, wxID_ANY, _("Language"),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    textinfo->Add (new wxStaticText (this, -1, _("Language"),
+                                     wxDefaultPosition, wxSize(80, -1)),
                    0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT, 4);
-    textinfo->Add (new wxStaticText (this, wxID_ANY, edit->m_language->name),
+    textinfo->Add (new wxStaticText (this, -1, edit->m_language->name),
                    0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxRIGHT, 4);
-    textinfo->Add (new wxStaticText (this, wxID_ANY, _("Lexer-ID: "),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    textinfo->Add (new wxStaticText (this, -1, _("Lexer-ID: "),
+                                     wxDefaultPosition, wxSize(80, -1)),
                    0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT, 4);
     text = wxString::Format (_T("%d"), edit->GetLexer());
-    textinfo->Add (new wxStaticText (this, wxID_ANY, text),
+    textinfo->Add (new wxStaticText (this, -1, text),
                    0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxRIGHT, 4);
-    wxString EOLtype = wxEmptyString;
+    wxString EOLtype = _T("");
     switch (edit->GetEOLMode()) {
         case wxSTC_EOL_CR: {EOLtype = _T("CR (Unix)"); break; }
         case wxSTC_EOL_CRLF: {EOLtype = _T("CRLF (Windows)"); break; }
         case wxSTC_EOL_LF: {EOLtype = _T("CR (Macintosh)"); break; }
     }
-    textinfo->Add (new wxStaticText (this, wxID_ANY, _("Line endings"),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    textinfo->Add (new wxStaticText (this, -1, _("Line endings"),
+                                     wxDefaultPosition, wxSize(80, -1)),
                    0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT, 4);
-    textinfo->Add (new wxStaticText (this, wxID_ANY, EOLtype),
+    textinfo->Add (new wxStaticText (this, -1, EOLtype),
                    0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxRIGHT, 4);
 
     // text info box
     wxStaticBoxSizer *textinfos = new wxStaticBoxSizer (
-                     new wxStaticBox (this, wxID_ANY, _("Informations")),
+                     new wxStaticBox (this, -1, _("Informations")),
                      wxVERTICAL);
     textinfos->Add (textinfo, 0, wxEXPAND);
     textinfos->Add (0, 6);
 
     // statistic
     wxGridSizer *statistic = new wxGridSizer (4, 0, 2);
-    statistic->Add (new wxStaticText (this, wxID_ANY, _("Total lines"),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    statistic->Add (new wxStaticText (this, -1, _("Total lines"),
+                                     wxDefaultPosition, wxSize(80, -1)),
                     0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT, 4);
     text = wxString::Format (_T("%d"), edit->GetLineCount());
-    statistic->Add (new wxStaticText (this, wxID_ANY, text),
+    statistic->Add (new wxStaticText (this, -1, text),
                     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxRIGHT, 4);
-    statistic->Add (new wxStaticText (this, wxID_ANY, _("Total chars"),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    statistic->Add (new wxStaticText (this, -1, _("Total chars"),
+                                     wxDefaultPosition, wxSize(80, -1)),
                     0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT, 4);
     text = wxString::Format (_T("%d"), edit->GetTextLength());
-    statistic->Add (new wxStaticText (this, wxID_ANY, text),
+    statistic->Add (new wxStaticText (this, -1, text),
                     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxRIGHT, 4);
-    statistic->Add (new wxStaticText (this, wxID_ANY, _("Current line"),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    statistic->Add (new wxStaticText (this, -1, _("Current line"),
+                                     wxDefaultPosition, wxSize(80, -1)),
                     0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT, 4);
     text = wxString::Format (_T("%d"), edit->GetCurrentLine());
-    statistic->Add (new wxStaticText (this, wxID_ANY, text),
+    statistic->Add (new wxStaticText (this, -1, text),
                     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxRIGHT, 4);
-    statistic->Add (new wxStaticText (this, wxID_ANY, _("Current pos"),
-                                     wxDefaultPosition, wxSize(80, wxDefaultCoord)),
+    statistic->Add (new wxStaticText (this, -1, _("Current pos"),
+                                     wxDefaultPosition, wxSize(80, -1)),
                     0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxLEFT, 4);
     text = wxString::Format (_T("%d"), edit->GetCurrentPos());
-    statistic->Add (new wxStaticText (this, wxID_ANY, text),
+    statistic->Add (new wxStaticText (this, -1, text),
                     0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxRIGHT, 4);
 
     // char/line statistics
     wxStaticBoxSizer *statistics = new wxStaticBoxSizer (
-                     new wxStaticBox (this, wxID_ANY, _("Statistics")),
+                     new wxStaticBox (this, -1, _("Statistics")),
                      wxVERTICAL);
     statistics->Add (statistic, 0, wxEXPAND);
     statistics->Add (0, 6);
@@ -756,18 +759,16 @@ void EditPrint::GetPageInfo (int *minPage, int *maxPage, int *selPageFrom, int *
                          page.y);
 
     // get margins informations and convert to printer pixels
-    wxPoint pt = g_pageSetupData->GetMarginTopLeft();
-    int left = pt.x;
-    int top = pt.y;
-    pt = g_pageSetupData->GetMarginBottomRight();
-    int right = pt.x;
-    int bottom = pt.y;
-
+    int  top = 25; // default 25
+    int  bottom = 25; // default 25
+    int  left = 20; // default 20
+    int  right = 20; // default 20
+    wxPoint (top, left) = g_pageSetupData->GetMarginTopLeft();
+    wxPoint (bottom, right) = g_pageSetupData->GetMarginBottomRight();
     top = static_cast<int> (top * ppiScr.y / 25.4);
     bottom = static_cast<int> (bottom * ppiScr.y / 25.4);
     left = static_cast<int> (left * ppiScr.x / 25.4);
     right = static_cast<int> (right * ppiScr.x / 25.4);
-
     m_printRect = wxRect (left,
                           top,
                           page.x - (left + right),

@@ -5,11 +5,11 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "bmpbuttn.h"
 #endif
 
@@ -29,114 +29,53 @@
 #endif
 
 #include "wx/msw/private.h"
-#include "wx/image.h"
 
-// ----------------------------------------------------------------------------
-// macros
-// ----------------------------------------------------------------------------
-
-#if wxUSE_EXTENDED_RTTI
-
-WX_DEFINE_FLAGS( wxBitmapButtonStyle )
-
-wxBEGIN_FLAGS( wxBitmapButtonStyle )
-    // new style border flags, we put them first to
-    // use them for streaming out
-    wxFLAGS_MEMBER(wxBORDER_SIMPLE)
-    wxFLAGS_MEMBER(wxBORDER_SUNKEN)
-    wxFLAGS_MEMBER(wxBORDER_DOUBLE)
-    wxFLAGS_MEMBER(wxBORDER_RAISED)
-    wxFLAGS_MEMBER(wxBORDER_STATIC)
-    wxFLAGS_MEMBER(wxBORDER_NONE)
-
-    // old style border flags
-    wxFLAGS_MEMBER(wxSIMPLE_BORDER)
-    wxFLAGS_MEMBER(wxSUNKEN_BORDER)
-    wxFLAGS_MEMBER(wxDOUBLE_BORDER)
-    wxFLAGS_MEMBER(wxRAISED_BORDER)
-    wxFLAGS_MEMBER(wxSTATIC_BORDER)
-    wxFLAGS_MEMBER(wxBORDER)
-
-    // standard window styles
-    wxFLAGS_MEMBER(wxTAB_TRAVERSAL)
-    wxFLAGS_MEMBER(wxCLIP_CHILDREN)
-    wxFLAGS_MEMBER(wxTRANSPARENT_WINDOW)
-    wxFLAGS_MEMBER(wxWANTS_CHARS)
-    wxFLAGS_MEMBER(wxFULL_REPAINT_ON_RESIZE)
-    wxFLAGS_MEMBER(wxALWAYS_SHOW_SB )
-    wxFLAGS_MEMBER(wxVSCROLL)
-    wxFLAGS_MEMBER(wxHSCROLL)
-
-    wxFLAGS_MEMBER(wxBU_AUTODRAW)
-    wxFLAGS_MEMBER(wxBU_LEFT)
-    wxFLAGS_MEMBER(wxBU_RIGHT)
-    wxFLAGS_MEMBER(wxBU_TOP)
-    wxFLAGS_MEMBER(wxBU_BOTTOM)
-wxEND_FLAGS( wxBitmapButtonStyle )
-
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxBitmapButton, wxButton,"wx/bmpbuttn.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxBitmapButton)
-    wxPROPERTY_FLAGS( WindowStyle , wxBitmapButtonStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , EMPTY_MACROVALUE, 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxBitmapButton)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_5( wxBitmapButton , wxWindow* , Parent , wxWindowID , Id , wxBitmap , Bitmap , wxPoint , Position , wxSize , Size )
-
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton, wxButton)
-#endif
-
-BEGIN_EVENT_TABLE(wxBitmapButton, wxBitmapButtonBase)
-    EVT_SYS_COLOUR_CHANGED(wxBitmapButton::OnSysColourChanged)
-END_EVENT_TABLE()
-
-/*
-TODO PROPERTIES :
-
-long "style" , wxBU_AUTODRAW
-bool "default" , 0
-bitmap "selected" ,
-bitmap "focus" ,
-bitmap "disabled" ,
-*/
 
 #define BUTTON_HEIGHT_FACTOR (EDIT_CONTROL_FACTOR * 1.1)
 
-bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
-    const wxBitmap& bitmap,
-    const wxPoint& pos,
-    const wxSize& size, long style,
-    const wxValidator& wxVALIDATOR_PARAM(validator),
-    const wxString& name)
+bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id, const wxBitmap& bitmap,
+           const wxPoint& pos,
+           const wxSize& size, long style,
+           const wxValidator& validator,
+           const wxString& name)
 {
-    m_bmpNormal = bitmap;
-    SetName(name);
+  m_bmpNormal = bitmap;
+  SetName(name);
 
 #if wxUSE_VALIDATORS
-    SetValidator(validator);
+  SetValidator(validator);
 #endif // wxUSE_VALIDATORS
 
-    parent->AddChild(this);
+  parent->AddChild(this);
 
-    m_backgroundColour = parent->GetBackgroundColour();
-    m_foregroundColour = parent->GetForegroundColour();
-    m_windowStyle = style;
+  m_backgroundColour = parent->GetBackgroundColour();
+  m_foregroundColour = parent->GetForegroundColour();
+  m_windowStyle = style;
 
-    if ( style & wxBU_AUTODRAW )
-    {
-        m_marginX = wxDEFAULT_BUTTON_MARGIN;
-        m_marginY = wxDEFAULT_BUTTON_MARGIN;
-    }
+  if ( style & wxBU_AUTODRAW )
+  {
+    m_marginX = wxDEFAULT_BUTTON_MARGIN;
+    m_marginY = wxDEFAULT_BUTTON_MARGIN;
+  }
 
-    if (id == wxID_ANY)
-        m_windowId = NewControlId();
-    else
-        m_windowId = id;
+  int x = pos.x;
+  int y = pos.y;
+  int width = size.x;
+  int height = size.y;
 
-    long msStyle = WS_VISIBLE | WS_TABSTOP | WS_CHILD | BS_OWNERDRAW ;
+  if (id == -1)
+    m_windowId = NewControlId();
+  else
+    m_windowId = id;
+
+  if ( width == -1 && bitmap.Ok())
+    width = bitmap.GetWidth() + 2*m_marginX;
+
+  if ( height == -1 && bitmap.Ok())
+    height = bitmap.GetHeight() + 2*m_marginY;
+
+	long msStyle = WS_VISIBLE | WS_TABSTOP | WS_CHILD | BS_OWNERDRAW ;
 
     if ( m_windowStyle & wxCLIP_SIBLINGS )
         msStyle |= WS_CLIPSIBLINGS;
@@ -152,10 +91,11 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
         msStyle |= BS_BOTTOM;
 #endif
 
-    m_hWnd = (WXHWND) CreateWindowEx(
+  m_hWnd = (WXHWND)CreateWindowEx
+                   (
                     0,
                     wxT("BUTTON"),
-                    wxEmptyString,
+                    wxT(""),
                     msStyle,
                     0, 0, 0, 0,
                     GetWinHwnd(parent),
@@ -164,40 +104,14 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
                     NULL
                    );
 
-    // Subclass again for purposes of dialog editing mode
-    SubclassWin(m_hWnd);
+  // Subclass again for purposes of dialog editing mode
+  SubclassWin(m_hWnd);
 
-    SetPosition(pos);
-    SetBestSize(size);
+  SetFont(parent->GetFont());
 
-    return true;
-}
+  SetSize(x, y, width, height);
 
-bool wxBitmapButton::SetBackgroundColour(const wxColour& colour)
-{
-    if ( !wxBitmapButtonBase::SetBackgroundColour(colour) )
-    {
-        // didn't change
-        return false;
-    }
-
-    // invalidate the brush, it will be recreated the next time it's needed
-    m_brushDisabled = wxNullBrush;
-
-    return true;
-}
-
-void wxBitmapButton::OnSysColourChanged(wxSysColourChangedEvent& event)
-{
-    m_brushDisabled = wxNullBrush;
-
-    if ( !IsEnabled() )
-    {
-        // this change affects our current state
-        Refresh();
-    }
-
-    event.Skip();
+  return TRUE;
 }
 
 // VZ: should be at the very least less than wxDEFAULT_BUTTON_MARGIN
@@ -205,13 +119,13 @@ void wxBitmapButton::OnSysColourChanged(wxSysColourChangedEvent& event)
 
 bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 {
-#ifndef __WXWINCE__
+#if defined(__WIN95__)
     long style = GetWindowLong((HWND) GetHWND(), GWL_STYLE);
     if (style & BS_BITMAP)
     {
         // Let default procedure draw the bitmap, which is defined
         // in the Windows resource.
-        return false;
+        return FALSE;
     }
 #endif
 
@@ -235,7 +149,7 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
         bitmap = &m_bmpNormal;
 
     if ( !bitmap->Ok() )
-        return false;
+        return FALSE;
 
     // centre the bitmap in the control area
     int x      = lpDIS->rcItem.left;
@@ -245,8 +159,8 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     int wBmp   = bitmap->GetWidth();
     int hBmp   = bitmap->GetHeight();
 
-    int x1,y1;
-
+	int x1,y1;
+	
     if(m_windowStyle & wxBU_LEFT)
         x1 = x + (FOCUS_MARGIN+1);
     else if(m_windowStyle & wxBU_RIGHT)
@@ -278,8 +192,8 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
 
     // draw the bitmap
     wxDC dst;
-    dst.SetHDC((WXHDC) hDC, false);
-    dst.DrawBitmap(*bitmap, x1, y1, true);
+    dst.SetHDC((WXHDC) hDC, FALSE);
+    dst.DrawBitmap(*bitmap, x1, y1, TRUE);
 
     // draw focus / disabled state, if auto-drawing
     if ( (state & ODS_DISABLED) && autoDraw )
@@ -287,7 +201,7 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
         DrawButtonDisable((WXHDC) hDC,
                           lpDIS->rcItem.left, lpDIS->rcItem.top,
                           lpDIS->rcItem.right, lpDIS->rcItem.bottom,
-                          true);
+                          TRUE);
     }
     else if ( (state & ODS_FOCUS) && autoDraw )
     {
@@ -299,15 +213,14 @@ bool wxBitmapButton::MSWOnDraw(WXDRAWITEMSTRUCT *item)
                         isSelected);
     }
 
-    return true;
+    return TRUE;
 }
 
 // GRG Feb/2000, support for bmp buttons with Win95/98 standard LNF
 
 #if defined(__WIN95__)
 
-void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
-    int right, int bottom, bool sel )
+void wxBitmapButton::DrawFace( WXHDC dc, int left, int top, int right, int bottom, bool sel )
 {
     HPEN oldp;
     HPEN penHiLight;
@@ -336,21 +249,20 @@ void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
 
     // draw the border
     oldp = (HPEN) SelectObject( (HDC) dc, sel? penDkShadow : penHiLight);
-
-    wxDrawLine((HDC) dc, left, top, right-1, top);
-    wxDrawLine((HDC) dc, left, top+1, left, bottom-1);
+    MoveToEx((HDC) dc, left, top, NULL); LineTo((HDC) dc, right-1, top);
+    MoveToEx((HDC) dc, left, top+1, NULL); LineTo((HDC) dc, left, bottom-1);
 
     SelectObject( (HDC) dc, sel? penShadow : penLight);
-    wxDrawLine((HDC) dc, left+1, top+1, right-2, top+1);
-    wxDrawLine((HDC) dc, left+1, top+2, left+1, bottom-2);
+    MoveToEx((HDC) dc, left+1, top+1, NULL); LineTo((HDC) dc, right-2, top+1);
+    MoveToEx((HDC) dc, left+1, top+2, NULL); LineTo((HDC) dc, left+1, bottom-2);
 
     SelectObject( (HDC) dc, sel? penLight : penShadow);
-    wxDrawLine((HDC) dc, left+1, bottom-2, right-1, bottom-2);
-    wxDrawLine((HDC) dc, right-2, bottom-3, right-2, top);
+    MoveToEx((HDC) dc, left+1, bottom-2, NULL); LineTo((HDC) dc, right-1, bottom-2);
+    MoveToEx((HDC) dc, right-2, bottom-3, NULL); LineTo((HDC) dc, right-2, top);
 
     SelectObject( (HDC) dc, sel? penHiLight : penDkShadow);
-    wxDrawLine((HDC) dc, left, bottom-1, right+2, bottom-1);
-    wxDrawLine((HDC) dc, right-1, bottom-2, right-1, top-1);
+    MoveToEx((HDC) dc, left, bottom-1, NULL); LineTo((HDC) dc, right+2, bottom-1);
+    MoveToEx((HDC) dc, right-1, bottom-2, NULL); LineTo((HDC) dc, right-1, top-1);
 
     // delete allocated resources
     SelectObject((HDC) dc,oldp);
@@ -363,8 +275,7 @@ void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
 
 #else
 
-void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
-    int right, int bottom, bool sel )
+void wxBitmapButton::DrawFace( WXHDC dc, int left, int top, int right, int bottom, bool sel )
 {
     HPEN oldp;
     HPEN penBorder;
@@ -428,8 +339,7 @@ void wxBitmapButton::DrawFace( WXHDC dc, int left, int top,
 #endif // defined(__WIN95__)
 
 
-void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right,
-    int bottom, bool WXUNUSED(sel) )
+void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right, int bottom, bool sel )
 {
     RECT rect;
     rect.left = left;
@@ -443,36 +353,21 @@ void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right,
     if ( sel )
         OffsetRect( &rect, 1, 1 );
 */
-
+	(void)sel;
     DrawFocusRect( (HDC) dc, &rect );
 }
 
-void
-wxBitmapButton::DrawButtonDisable( WXHDC dc,
-                                   int left, int top, int right, int bottom,
-                                   bool with_marg )
+extern HBRUSH wxDisableButtonBrush;
+void wxBitmapButton::DrawButtonDisable( WXHDC dc, int left, int top, int right, int bottom, bool with_marg )
 {
-    if ( !m_brushDisabled.Ok() )
-    {
-        // draw a bitmap with two black and two background colour pixels
-        wxBitmap bmp(2, 2);
-        wxMemoryDC dc;
-        dc.SelectObject(bmp);
-        dc.SetPen(*wxBLACK_PEN);
-        dc.DrawPoint(0, 0);
-        dc.DrawPoint(1, 1);
-        dc.SetPen(GetBackgroundColour());
-        dc.DrawPoint(0, 1);
-        dc.DrawPoint(1, 0);
+    HBRUSH  old = (HBRUSH) SelectObject( (HDC) dc, wxDisableButtonBrush );
 
-        m_brushDisabled = wxBrush(bmp);
-    }
-
-    SelectInHDC selectBrush((HDC)dc, GetHbrushOf(m_brushDisabled));
-
-    // ROP for "dest |= pattern" operation -- as it doesn't have a standard
-    // name, give it our own
-    static const DWORD PATTERNPAINT = 0xFA0089UL;
+    // VZ: what's this?? there is no such ROP AFAIK
+#ifdef __SALFORDC__
+    DWORD dwRop = 0xFA0089L;
+#else
+    DWORD dwRop = 0xFA0089UL;
+#endif
 
     if ( with_marg )
     {
@@ -482,7 +377,9 @@ wxBitmapButton::DrawButtonDisable( WXHDC dc,
         bottom -= 2 * m_marginY;
     }
 
-    ::PatBlt( (HDC) dc, left, top, right, bottom, PATTERNPAINT);
+    ::PatBlt( (HDC) dc, left, top, right, bottom, dwRop);
+
+    ::SelectObject( (HDC) dc, old );
 }
 
 void wxBitmapButton::SetDefault()
@@ -490,19 +387,4 @@ void wxBitmapButton::SetDefault()
     wxButton::SetDefault();
 }
 
-wxSize wxBitmapButton::DoGetBestSize() const
-{
-    if ( m_bmpNormal.Ok() )
-    {
-        wxSize best(m_bmpNormal.GetWidth() + 2*m_marginX,
-                      m_bmpNormal.GetHeight() + 2*m_marginY);
-        CacheBestSize(best);
-        return best;
-    }
-
-    // no idea what our best size should be, defer to the base class
-    return wxBitmapButtonBase::DoGetBestSize();
-}
-
 #endif // wxUSE_BMPBUTTON
-

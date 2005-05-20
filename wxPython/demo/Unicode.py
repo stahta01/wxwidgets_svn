@@ -1,5 +1,6 @@
 
-import  wx
+
+from wxPython.wx import *
 
 #----------------------------------------------------------------------
 
@@ -40,22 +41,22 @@ rus_utf8 = ('\xd0\x9f\xd0\xb8\xd1\x82\xd0\xbe\xd0\xbd - \xd0\xbb\xd1\x83\xd1\x87
 
 #----------------------------------------------------------------------
 
-class TestPanel(wx.Panel):
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
         self.log = log
-        wx.Panel.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
 
-        box = wx.BoxSizer(wx.VERTICAL)
+        box = wxBoxSizer(wxVERTICAL)
 
-        if not wx.USE_UNICODE:
+        if not wxUSE_UNICODE:
             self.AddLine(box)
             self.AddText(box, "Sorry, this wxPython was not built with Unicode support.",
-                         font = wx.Font(12, wx.SWISS, wx.NORMAL, wx.BOLD))
+                         font = wxFont(12, wxSWISS, wxNORMAL, wxBOLD))
             self.AddLine(box)
 
         else:
             f = self.GetFont()
-            font = wx.Font(14, f.GetFamily(), f.GetStyle(), wx.BOLD, False,
+            font = wxFont(14, f.GetFamily(), f.GetStyle(), wxBOLD, False,
                           f.GetFaceName(), f.GetEncoding())
 
             self.AddLine(box)
@@ -76,32 +77,32 @@ class TestPanel(wx.Panel):
             self.AddLine(box)
 
 
-        border = wx.BoxSizer(wx.VERTICAL)
-        border.Add(box, 1, wx.EXPAND|wx.ALL, 10)
+        border = wxBoxSizer(wxVERTICAL)
+        border.Add(box, 1, wxEXPAND|wxALL, 10)
         self.SetAutoLayout(True)
         self.SetSizer(border)
 
 
     def AddLine(self, sizer):
-        sizer.Add(wx.StaticLine(self, -1), 0, wx.EXPAND)
+        sizer.Add(wxStaticLine(self, -1), 0, wxEXPAND)
 
     def AddText(self, sizer, text1, text2='', lang='', font=None):
         # create some controls
-        lang  = wx.StaticText(self, -1, lang)
-        text1 = wx.StaticText(self, -1, text1)
-        text2 = wx.StaticText(self, -1, text2, style=wx.ALIGN_RIGHT)
+        lang  = wxStaticText(self, -1, lang)
+        text1 = wxStaticText(self, -1, text1)
+        text2 = wxStaticText(self, -1, text2, style=wxALIGN_RIGHT)
         if font is not None:
             text1.SetFont(font)
 
         # put them in a sizer
-        row = wx.BoxSizer(wx.HORIZONTAL)
+        row = wxBoxSizer(wxHORIZONTAL)
         row.Add(lang)
-        row.Add((15,10))
-        row.Add(text1, 1, wx.EXPAND)
+        row.Add(15,10)
+        row.Add(text1, 1, wxEXPAND)
         row.Add(text2)
 
         # put the row in the main sizer
-        sizer.Add(row, 0, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(row, 0, wxEXPAND|wxALL, 5)
 
 
 #----------------------------------------------------------------------
@@ -145,5 +146,5 @@ and then pass the unicode to the wxPython method.
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])
 

@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univchecklst.h"
 #endif
 
@@ -55,35 +55,6 @@ void wxCheckListBox::Init()
 {
 }
 
-wxCheckListBox::wxCheckListBox(wxWindow *parent,
-                               wxWindowID id,
-                               const wxPoint &pos,
-                               const wxSize &size,
-                               const wxArrayString& choices,
-                               long style,
-                               const wxValidator& validator,
-                               const wxString &name)
-{
-    Init();
-
-    Create(parent, id, pos, size, choices, style, validator, name);
-}
-
-bool wxCheckListBox::Create(wxWindow *parent,
-                            wxWindowID id,
-                            const wxPoint &pos,
-                            const wxSize &size,
-                            const wxArrayString& choices,
-                            long style,
-                            const wxValidator& validator,
-                            const wxString &name)
-{
-    wxCArrayString chs(choices);
-
-    return Create(parent, id, pos, size, chs.GetCount(), chs.GetStrings(),
-                  style, validator, name);
-}
-
 bool wxCheckListBox::Create(wxWindow *parent,
                             wxWindowID id,
                             const wxPoint &pos,
@@ -96,11 +67,11 @@ bool wxCheckListBox::Create(wxWindow *parent,
 {
     if ( !wxListBox::Create(parent, id, pos, size,
                             n, choices, style, validator, name) )
-        return false;
+        return FALSE;
 
     CreateInputHandler(wxINP_HANDLER_CHECKLISTBOX);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -109,7 +80,7 @@ bool wxCheckListBox::Create(wxWindow *parent,
 
 bool wxCheckListBox::IsChecked(size_t item) const
 {
-    wxCHECK_MSG( item < m_checks.GetCount(), false,
+    wxCHECK_MSG( item < m_checks.GetCount(), FALSE,
                  _T("invalid index in wxCheckListBox::IsChecked") );
 
     return m_checks[item] != 0;
@@ -148,7 +119,7 @@ int wxCheckListBox::DoAppend(const wxString& item)
     int pos = wxListBox::DoAppend(item);
 
     // the item is initially unchecked
-    m_checks.Insert(false, pos);
+    m_checks.Insert(FALSE, pos);
 
     return pos;
 }
@@ -160,7 +131,7 @@ void wxCheckListBox::DoInsertItems(const wxArrayString& items, int pos)
     size_t count = items.GetCount();
     for ( size_t n = 0; n < count; n++ )
     {
-        m_checks.Insert(false, pos + n);
+        m_checks.Insert(FALSE, pos + n);
     }
 }
 
@@ -172,7 +143,7 @@ void wxCheckListBox::DoSetItems(const wxArrayString& items, void **clientData)
     size_t count = items.GetCount();
     for ( size_t n = 0; n < count; n++ )
     {
-        m_checks.Add(false);
+        m_checks.Add(FALSE);
     }
 }
 
@@ -227,7 +198,7 @@ bool wxCheckListBox::PerformAction(const wxControlAction& action,
         return wxListBox::PerformAction(action, numArg, strArg);
     }
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -273,7 +244,7 @@ bool wxStdCheckListboxInputHandler::HandleMouse(wxInputConsumer *consumer,
         {
             lbox->PerformAction(wxACTION_CHECKLISTBOX_TOGGLE, item);
 
-            return true;
+            return TRUE;
         }
     }
 

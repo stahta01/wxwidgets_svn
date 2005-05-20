@@ -6,7 +6,7 @@
 // Created:     10/17/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -148,7 +148,9 @@ long wxExecute(
     ULONG                           ulExecFlag;
     PSZ                             zArgs = NULL;
     PSZ                             zEnvs = NULL;
+    ULONG                           ulWindowId;
     APIRET                          rc;
+    PFNWP                           pOldProc;
     TID                             vTID;
 
     if (flags & wxEXEC_SYNC)
@@ -231,10 +233,7 @@ long wxExecute(
 
     while (*ppArgv != NULL)
     {
-        wxString                    sArg((wxChar*)(*ppArgv++));
-
-
-        sCommand << sArg.c_str() << ' ';
+        sCommand << *ppArgv++ << ' ';
     }
     sCommand.RemoveLast();
     return wxExecute( sCommand
@@ -266,7 +265,7 @@ bool wxGetFullHostName(
     strncpy(zBuf, zComputer, nMaxSize);
     zBuf[nMaxSize] = _T('\0');
 #else
-    strcpy((char*)zBuf, "noname");
+    strcpy(zBuf, "noname");
 #endif
     return *zBuf ? TRUE : FALSE;
     return TRUE;

@@ -57,7 +57,8 @@ class DoodleFrame(wx.Frame):
         box.Add(self.doodle, 1, wx.EXPAND)
 
         # Tell the frame that it should layout itself in response to
-        # size events using this sizer.
+        # size events.
+        self.SetAutoLayout(True)
         self.SetSizer(box)
 
 
@@ -106,12 +107,12 @@ class DoodleFrame(wx.Frame):
         menuBar.Append(menu2, "&Help")
         self.SetMenuBar(menuBar)
 
-        self.Bind(wx.EVT_MENU,   self.OnMenuOpen, id=idOPEN)
-        self.Bind(wx.EVT_MENU,   self.OnMenuSave, id=idSAVE)
-        self.Bind(wx.EVT_MENU, self.OnMenuSaveAs, id=idSAVEAS)
-        self.Bind(wx.EVT_MENU,  self.OnMenuClear, id=idCLEAR)
-        self.Bind(wx.EVT_MENU,   self.OnMenuExit, id=idEXIT)
-        self.Bind(wx.EVT_MENU,  self.OnMenuAbout, id=idABOUT)
+        wx.EVT_MENU(self, idOPEN,   self.OnMenuOpen)
+        wx.EVT_MENU(self, idSAVE,   self.OnMenuSave)
+        wx.EVT_MENU(self, idSAVEAS, self.OnMenuSaveAs)
+        wx.EVT_MENU(self, idCLEAR,  self.OnMenuClear)
+        wx.EVT_MENU(self, idEXIT,   self.OnMenuExit)
+        wx.EVT_MENU(self, idABOUT,  self.OnMenuAbout)
 
 
 
@@ -180,7 +181,7 @@ class ControlPanel(wx.Panel):
     BMP_BORDER = 3
 
     def __init__(self, parent, ID, doodle):
-        wx.Panel.__init__(self, parent, ID, style=wx.RAISED_BORDER, size=(20,20))
+        wx.Panel.__init__(self, parent, ID, style=wx.RAISED_BORDER)
 
         numCols = 4
         spacing = 4
@@ -201,7 +202,7 @@ class ControlPanel(wx.Panel):
             b = buttons.GenBitmapToggleButton(self, k, bmp, size=btnSize )
             b.SetBezelWidth(1)
             b.SetUseFocusIndicator(False)
-            self.Bind(wx.EVT_BUTTON, self.OnSetColour, b)
+            wx.EVT_BUTTON(self, k, self.OnSetColour)
             cGrid.Add(b, 0)
             self.clrBtns[colours[k]] = b
         self.clrBtns[colours[keys[0]]].SetToggle(True)
@@ -216,7 +217,7 @@ class ControlPanel(wx.Panel):
             b = buttons.GenToggleButton(self, x, str(x), size=btnSize)
             b.SetBezelWidth(1)
             b.SetUseFocusIndicator(False)
-            self.Bind(wx.EVT_BUTTON, self.OnSetThickness, b)
+            wx.EVT_BUTTON(self, x, self.OnSetThickness)
             tGrid.Add(b, 0)
             self.thknsBtns[x] = b
         self.thknsBtns[1].SetToggle(True)
@@ -294,9 +295,9 @@ class ColourIndicator(wx.Window):
     def __init__(self, parent):
         wx.Window.__init__(self, parent, -1, style=wx.SUNKEN_BORDER)
         self.SetBackgroundColour(wx.WHITE)
-        self.SetSize( (45, 45) )
+        self.SetSize( (-1, 45) )
         self.colour = self.thickness = None
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        wx.EVT_PAINT(self, self.OnPaint)
 
 
     def Update(self, colour, thickness):
@@ -398,5 +399,5 @@ class DoodleApp(wx.App):
 #----------------------------------------------------------------------
 
 if __name__ == '__main__':
-    app = DoodleApp(redirect=True)
+    app = DoodleApp(0)
     app.MainLoop()

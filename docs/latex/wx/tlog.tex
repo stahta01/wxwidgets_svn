@@ -35,7 +35,10 @@ message box to inform the user about it.
 \item{\bf wxLogWarning} for warnings - they are also normally shown to the
 user, but don't interrupt the program work.
 \item{\bf wxLogMessage} is for all normal, informational messages. They also
-appear in a message box by default (but it can be changed, see below).
+appear in a message box by default (but it can be changed, see below). Notice
+that the standard behaviour is to not show informational messages if there are
+any errors later - the logic being that the later error messages make the
+informational messages preceding them meaningless.
 \item{\bf wxLogVerbose} is for verbose output. Normally, it is suppressed, but
 might be activated if the user wishes to know more details about the program
 progress (another, but possibly confusing name for the same function is {\bf
@@ -88,6 +91,7 @@ You can also redirect the {\it wxLogXXX} calls to {\it cout} by just writing:
 Finally, there is also a possibility to redirect the output sent to {\it cout} 
 to a \helpref{wxTextCtrl}{wxtextctrl} by using the 
 \helpref{wxStreamToTextRedirector}{wxstreamtotextredirector} class.
+
 \item{\bf Flexibility} The output of wxLog functions can be redirected or
 suppressed entirely based on their importance, which is either impossible or
 difficult to do with traditional methods. For example, only error messages, or
@@ -148,7 +152,7 @@ suppress output of {\it wxLogXXX()} functions. As an example, trying to open a
 non-existing file will usually provoke an error message, but if for some
 reasons it is unwanted, just use this construction:
 
-{\small%
+{\small
 \begin{verbatim}
   wxFile file;
 
@@ -161,7 +165,7 @@ reasons it is unwanted, just use this construction:
   
   wxLogMessage("..."); // ok
 \end{verbatim}
-}%
+}
 \end{itemize}
 
 The log targets can also be combined: for example you may wish to redirect the

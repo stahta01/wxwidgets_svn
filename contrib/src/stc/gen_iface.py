@@ -21,7 +21,6 @@ H_TEMPLATE    = os.path.abspath('./stc.h.in')
 CPP_TEMPLATE  = os.path.abspath('./stc.cpp.in')
 H_DEST        = os.path.abspath('../../include/wx/stc/stc.h')
 CPP_DEST      = os.path.abspath('./stc.cpp')
-DOCSTR_DEST   = os.path.abspath('../../../wxPython/contrib/stc/_stc_gendocs.i')
 
 
 # Value prefixes to convert
@@ -36,7 +35,7 @@ valPrefixes = [('SCI_', ''),
                ('SCWS_', 'WS_'),
 ]
 
-# Message function values that should have a CMD_ constant generated
+# Message function values that should have a CMD_ constant as well
 cmdValues = [ (2300, 2349),
               2011,
               2013,
@@ -45,13 +44,8 @@ cmdValues = [ (2300, 2349),
               (2395, 2396),
               2404,
               (2413, 2416),
-              (2426, 2442),
-              (2450, 2455),
+              (2450, 2454),
             ]
-
-
-# Should a funciton be also generated for the CMDs?
-FUNC_FOR_CMD = True
 
 
 # Map some generic typenames to wx types, using return value syntax
@@ -93,14 +87,6 @@ methodOverrideMap = {
                        '''void %s(const wxMemoryBuffer& data) {
                           SendMsg(%s, data.GetDataLen(), (long)data.GetData());''',
                        0),
-
-    'AppendText' : (0,
-                 'void %s(const wxString& text);',
-
-                 '''void %s(const wxString& text) {
-                    wxWX2MBbuf buf = (wxWX2MBbuf)wx2stc(text);
-                    SendMsg(%s, strlen(buf), (long)(const char*)buf);''',
-                 0),
 
     'GetViewWS' : ( 'GetViewWhiteSpace', 0, 0, 0),
     'SetViewWS' : ( 'SetViewWhiteSpace', 0, 0, 0),
@@ -229,8 +215,7 @@ methodOverrideMap = {
     'SetSelBack' : ('SetSelBackground', 0, 0, 0),
     'SetCaretFore' : ('SetCaretForeground', 0, 0, 0),
     'StyleSetFont' : ('StyleSetFaceName', 0, 0, 0),
-    'StyleSetCharacterSet' : (None, 0, 0, 0),
-    
+
     'AssignCmdKey' :
     ('CmdKeyAssign',
      'void %s(int key, int modifiers, int cmd);',
@@ -290,7 +275,6 @@ methodOverrideMap = {
     'AutoCGetDropRestOfWord' : ('AutoCompGetDropRestOfWord', 0,0,0),
     'AutoCGetTypeSeparator' : ('AutoCompGetTypeSeparator', 0, 0, 0),
     'AutoCSetTypeSeparator' : ('AutoCompSetTypeSeparator', 0, 0, 0),
-    'AutoCGetCurrent'       : ('AutoCompGetCurrent', 0, 0, 0),
 
     'RegisterImage' :
     (0,
@@ -346,14 +330,14 @@ methodOverrideMap = {
                int    startPos,
                int    endPos,
                wxDC*  draw,
-               wxDC*  target, 
+               wxDC*  target,  // Why does it use two? Can they be the same?
                wxRect renderRect,
                wxRect pageRect);''',
      ''' int %s(bool   doDraw,
                 int    startPos,
                 int    endPos,
                 wxDC*  draw,
-                wxDC*  target, 
+                wxDC*  target,  // Why does it use two? Can they be the same?
                 wxRect renderRect,
                 wxRect pageRect) {
              RangeToFormat fr;
@@ -511,11 +495,6 @@ methodOverrideMap = {
          return SendMsg(%s, strlen(buf), (long)(const char*)buf);''',
      0),
 
-    # not sure what to do about these yet
-    'TargetAsUTF8' :       ( None, 0, 0, 0),
-    'SetLengthForEncode' : ( None, 0, 0, 0),
-    'EncodedFromUTF8' :    ( None, 0, 0, 0),
-    
 
     'GetDocPointer' :
     (0,
@@ -569,7 +548,7 @@ methodOverrideMap = {
 
     'GrabFocus' : (None, 0, 0, 0),
 
-    # Rename some that would otherwise hide the wxWindow methods
+    # Rename some that woudl otherwise hid the wxWindow methods
     'SetFocus'  : ('SetSTCFocus', 0, 0, 0),
     'GetFocus'  : ('GetSTCFocus', 0, 0, 0),
     'SetCursor' : ('SetSTCCursor', 0, 0, 0),
@@ -578,13 +557,74 @@ methodOverrideMap = {
     'LoadLexerLibrary' : (None, 0,0,0),
 
 
+
+    # Remove all methods that are key commands since they can be
+    # executed with CmdKeyExecute
+    'LineDown' : (None, 0, 0, 0),
+    'LineDownExtend' : (None, 0, 0, 0),
+    'LineUp' : (None, 0, 0, 0),
+    'LineUpExtend' : (None, 0, 0, 0),
+    'CharLeft' : (None, 0, 0, 0),
+    'CharLeftExtend' : (None, 0, 0, 0),
+    'CharRight' : (None, 0, 0, 0),
+    'CharRightExtend' : (None, 0, 0, 0),
+    'WordLeft' : (None, 0, 0, 0),
+    'WordLeftExtend' : (None, 0, 0, 0),
+    'WordRight' : (None, 0, 0, 0),
+    'WordRightExtend' : (None, 0, 0, 0),
+    'Home' : (None, 0, 0, 0),
+    'HomeExtend' : (None, 0, 0, 0),
+    'LineEnd' : (None, 0, 0, 0),
+    'LineEndExtend' : (None, 0, 0, 0),
+    'DocumentStart' : (None, 0, 0, 0),
+    'DocumentStartExtend' : (None, 0, 0, 0),
+    'DocumentEnd' : (None, 0, 0, 0),
+    'DocumentEndExtend' : (None, 0, 0, 0),
+    'PageUp' : (None, 0, 0, 0),
+    'PageUpExtend' : (None, 0, 0, 0),
+    'PageDown' : (None, 0, 0, 0),
+    'PageDownExtend' : (None, 0, 0, 0),
+    'EditToggleOvertype' : (None, 0, 0, 0),
+    'Cancel' : (None, 0, 0, 0),
+    'DeleteBack' : (None, 0, 0, 0),
+    'Tab' : (None, 0, 0, 0),
+    'BackTab' : (None, 0, 0, 0),
+    'NewLine' : (None, 0, 0, 0),
+    'FormFeed' : (None, 0, 0, 0),
+    'VCHome' : (None, 0, 0, 0),
+    'VCHomeExtend' : (None, 0, 0, 0),
+    'ZoomIn' : (None, 0, 0, 0),
+    'ZoomOut' : (None, 0, 0, 0),
+    'DelWordLeft' : (None, 0, 0, 0),
+    'DelWordRight' : (None, 0, 0, 0),
+    'LineCut' : (None, 0, 0, 0),
+    'LineDelete' : (None, 0, 0, 0),
+    'LineTranspose' : (None, 0, 0, 0),
+    'LowerCase' : (None, 0, 0, 0),
+    'UpperCase' : (None, 0, 0, 0),
+    'LineScrollDown' : (None, 0, 0, 0),
+    'LineScrollUp' : (None, 0, 0, 0),
+    'DeleteBackNotLine' : (None, 0, 0, 0),
+    'HomeWrap' : (None, 0, 0, 0),
+    'HomeWrapExtend' : (None, 0, 0, 0),
+    'LineEndWrap' : (None, 0, 0, 0),
+    'LineEndWrapExtend' : (None, 0, 0, 0),
+    'VCHomeWrap' : (None, 0, 0, 0),
+    'VCHomeWrapExtend' : (None, 0, 0, 0),
+    'ParaDown' : (None, 0, 0, 0),
+    'ParaDownExtend' : (None, 0, 0, 0),
+    'ParaUp' : (None, 0, 0, 0),
+    'ParaUpExtend' : (None, 0, 0, 0),
+
+
+
     '' : ('', 0, 0, 0),
 
     }
 
 #----------------------------------------------------------------------------
 
-def processIface(iface, h_tmplt, cpp_tmplt, h_dest, cpp_dest, docstr_dest):
+def processIface(iface, h_tmplt, cpp_tmplt, h_dest, cpp_dest):
     curDocStrings = []
     values = []
     methods = []
@@ -631,7 +671,7 @@ def processIface(iface, h_tmplt, cpp_tmplt, h_dest, cpp_dest, docstr_dest):
     data = {}
     data['VALUES'] = processVals(values)
     data['CMDS']   = processVals(cmds)
-    defs, imps, docstrings = processMethods(methods)
+    defs, imps = processMethods(methods)
     data['METHOD_DEFS'] = defs
     data['METHOD_IMPS'] = imps
 
@@ -646,7 +686,6 @@ def processIface(iface, h_tmplt, cpp_tmplt, h_dest, cpp_dest, docstr_dest):
     # write out destination files
     open(h_dest, 'w').write(h_text)
     open(cpp_dest, 'w').write(cpp_text)
-    open(docstr_dest, 'w').write(docstrings)
 
 
 
@@ -667,7 +706,6 @@ def processVals(values):
 def processMethods(methods):
     defs = []
     imps = []
-    dstr = []
 
     for retType, name, number, param1, param2, docs in methods:
         retType = retTypeMap.get(retType, retType)
@@ -678,11 +716,6 @@ def processMethods(methods):
         if name is None:
             continue
 
-        # Build docstrings
-        st = 'DocStr(wxStyledTextCtrl::%s,\n' \
-             '"%s", "");\n' % (name, '\n'.join(docs))
-        dstr.append(st)
-        
         # Build the method definition for the .h file
         if docs:
             defs.append('')
@@ -716,7 +749,7 @@ def processMethods(methods):
         imps.append(theImp)
 
 
-    return '\n'.join(defs), '\n'.join(imps), '\n'.join(dstr)
+    return string.join(defs, '\n'), string.join(imps, '\n')
 
 
 #----------------------------------------------------------------------------
@@ -820,12 +853,9 @@ def parseFun(line, methods, docs, values):
     for v in cmdValues:
         if (type(v) == type(()) and v[0] <= num <= v[1]) or v == num:
             parseVal('CMD_%s=%s' % (string.upper(name), number), values, docs)
-            
-            # if we are not also doing a function for CMD values, then
-            # just return, otherwise fall through to the append blow.
-            if not FUNC_FOR_CMD:
-                return
-                
+
+    #if retType == 'void' and not param1 and not param2:
+
     methods.append( (retType, name, number, param1, param2, tuple(docs)) )
 
 
@@ -836,7 +866,7 @@ def main(args):
     # TODO: parse command line args to replace default input/output files???
 
     # Now just do it
-    processIface(IFACE, H_TEMPLATE, CPP_TEMPLATE, H_DEST, CPP_DEST, DOCSTR_DEST)
+    processIface(IFACE, H_TEMPLATE, CPP_TEMPLATE, H_DEST, CPP_DEST)
 
 
 

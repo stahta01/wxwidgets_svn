@@ -7,13 +7,13 @@
 // Created:     10.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TIPWIN_H_
 #define _WX_TIPWIN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "tipwin.h"
 #endif
 
@@ -28,7 +28,6 @@
 
     #define wxTipWindowBase wxFrame
 #endif
-#include "wx/arrstr.h"
 
 class WXDLLEXPORT wxTipWindowView;
 
@@ -93,8 +92,6 @@ private:
     DECLARE_EVENT_TABLE()
 
     friend class wxTipWindowView;
-
-    DECLARE_NO_COPY_CLASS(wxTipWindow)
 };
 
 #endif // wxUSE_TIPWINDOW

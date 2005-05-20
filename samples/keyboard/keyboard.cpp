@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        keyboard.cpp
-// Purpose:     Keyboard wxWidgets sample
+// Purpose:     Keyboard wxWindows sample
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     07.04.02
@@ -25,13 +25,9 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers)
+// need because it includes almost all "standard" wxWindows headers)
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
-#endif
-
-#if !wxUSE_LOG
-#   error You must set wxUSE_LOG to 1 in setup.h
 #endif
 
 // ----------------------------------------------------------------------------
@@ -76,7 +72,7 @@ private:
     class TextWindow *m_winText;
     wxListBox *m_lboxLog;
 
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 };
 
@@ -116,7 +112,7 @@ private:
         }
     }
 
-    virtual void DoLogString(const wxChar *szString, time_t WXUNUSED(t))
+    virtual void DoLogString(const wxChar *szString, time_t t)
     {
         wxString msg;
         TimeStamp(&msg);
@@ -141,11 +137,11 @@ class TextWindow : public wxWindow
 {
 public:
     TextWindow(wxWindow *parent)
-        : wxWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+        : wxWindow(parent, -1, wxDefaultPosition, wxDefaultSize,
                    wxRAISED_BORDER)
     {
-        m_skip = true;
-        m_showRaw = false;
+        m_skip = TRUE;
+        m_showRaw = FALSE;
 
         SetBackgroundColour(*wxBLUE);
     }
@@ -158,7 +154,7 @@ protected:
     void OnKeyUp(wxKeyEvent& event) { LogEvent(_T("Key up"), event); }
     void OnChar(wxKeyEvent& event) { LogEvent(_T("Char"), event); }
 
-    void OnPaint(wxPaintEvent& WXUNUSED(event))
+    void OnPaint(wxPaintEvent& event)
     {
         wxPaintDC dc(this);
         dc.SetTextForeground(*wxWHITE);
@@ -205,10 +201,10 @@ enum
 };
 
 // ----------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
-// the event tables connect the wxWidgets events with the functions (event
+// the event tables connect the wxWindows events with the functions (event
 // handlers) which process them. It can be also done at run-time, but for the
 // simple menu events like this the static method is much simpler.
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -222,7 +218,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_SIZE(MyFrame::OnSize)
 END_EVENT_TABLE()
 
-// Create a new application object: this macro will allow wxWidgets to create
+// Create a new application object: this macro will allow wxWindows to create
 // the application object during program execution (it's better than using a
 // static object for many reasons) and also declares the accessor function
 // wxGetApp() which will return the reference of the right type (i.e. MyApp and
@@ -241,17 +237,17 @@ IMPLEMENT_APP(MyApp)
 bool MyApp::OnInit()
 {
     // create the main application window
-    MyFrame *frame = new MyFrame(_T("Keyboard wxWidgets App"),
+    MyFrame *frame = new MyFrame(_T("Keyboard wxWindows App"),
                                  wxPoint(50, 50), wxSize(450, 340));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
-    frame->Show(true);
+    frame->Show(TRUE);
 
     // success: wxApp::OnRun() will be called which will enter the main message
-    // loop and the application will run. If we returned false here, the
+    // loop and the application will run. If we returned FALSE here, the
     // application would exit immediately.
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -260,7 +256,7 @@ bool MyApp::OnInit()
 
 // frame constructor
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style)
-       : wxFrame(NULL, wxID_ANY, title, pos, size, style),
+       : wxFrame(NULL, -1, title, pos, size, style),
          m_winText(NULL)
 {
 #if wxUSE_MENUS
@@ -288,15 +284,15 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
 
-    menuBar->Check(Keyboard_Skip, true);
+    menuBar->Check(Keyboard_Skip, TRUE);
 
 #ifndef wxHAS_RAW_KEY_CODES
-    menuBar->Enable(Keyboard_ShowRaw, false);
+    menuBar->Enable(Keyboard_ShowRaw, FALSE);
 #endif // !wxHAS_RAW_KEY_CODES
 #endif // wxUSE_MENUS
 
     m_winText = new TextWindow(this);
-    m_lboxLog = new wxListBox(this, wxID_ANY);
+    m_lboxLog = new wxListBox(this, -1);
 
     m_logTarget = new LboxLogger(m_lboxLog, wxLog::GetActiveTarget());
     wxLog::SetActiveTarget(m_logTarget);
@@ -304,7 +300,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
-    SetStatusText(_T("Welcome to wxWidgets!"));
+    SetStatusText(_T("Welcome to wxWindows!"));
 #endif // wxUSE_STATUSBAR
 }
 
@@ -312,19 +308,19 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    // true is to force the frame to close
-    Close(true);
+    // TRUE is to force the frame to close
+    Close(TRUE);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    wxString msg = _T("Demonstrates keyboard event processing in wxWidgets\n")
-                   _T("(c) 2002 Vadim Zeitlin");
+    wxString msg = _T("Demonstrates keyboard event processing in wxWindows\n")
+                   _T("© 2002 Vadim Zeitlin");
 
     wxMessageBox(msg, _T("About wxKeyboard"), wxOK | wxICON_INFORMATION, this);
 }
 
-void MyFrame::OnClear(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnClear(wxCommandEvent& event)
 {
     m_lboxLog->Clear();
 }
@@ -356,7 +352,7 @@ void MyFrame::OnSize(wxSizeEvent& WXUNUSED(event))
 void TextWindow::LogEvent(const wxChar *name, wxKeyEvent& event)
 {
     wxString key;
-    long keycode = event.GetKeyCode();
+    long keycode = event.KeyCode();
     switch ( keycode )
     {
         case WXK_BACK: key = _T("BACK"); break;

@@ -7,23 +7,23 @@
 // Created:     29/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_FILEH__
 #define _WX_FILEH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "file.h"
 #endif
 
-#include  "wx/defs.h"
+#ifndef WX_PRECOMP
+  #include  "wx/string.h"
+  #include  "wx/filefn.h"
+  #include  "wx/strconv.h"
+#endif
 
 #if wxUSE_FILE
-
-#include  "wx/string.h"
-#include  "wx/filefn.h"
-#include  "wx/strconv.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -53,8 +53,7 @@
 // NB: for space efficiency this class has no virtual functions, including
 //     dtor which is _not_ virtual, so it shouldn't be used as a base class.
 // ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_BASE wxFile
+class WXDLLEXPORT wxFile
 {
 public:
   // more file constants
@@ -68,7 +67,7 @@ public:
   // ----------------
     // check whether a regular file by this name exists
   static bool Exists(const wxChar *name);
-    // check whether we can access the given file in given mode
+    // check whetther we can access the given file in given mode
     // (only read and write make sense here)
   static bool Access(const wxChar *name, OpenMode mode);
 
@@ -84,7 +83,7 @@ public:
   // open/close
     // create a new file (with the default value of bOverwrite, it will fail if
     // the file already exists, otherwise it will overwrite it and succeed)
-  bool Create(const wxChar *szFileName, bool bOverwrite = false,
+  bool Create(const wxChar *szFileName, bool bOverwrite = FALSE,
               int access = wxS_DEFAULT);
   bool Open(const wxChar *szFileName, OpenMode mode = read,
             int access = wxS_DEFAULT);
@@ -96,12 +95,12 @@ public:
   int  fd() const { return m_fd; }
 
   // read/write (unbuffered)
-    // returns number of bytes read or wxInvalidOffset on error
-  ssize_t Read(void *pBuf, size_t nCount);
+    // returns number of bytes read or ofsInvalid on error
+  off_t Read(void *pBuf, off_t nCount);
     // returns the number of bytes written
   size_t Write(const void *pBuf, size_t nCount);
     // returns true on success
-  bool Write(const wxString& s, wxMBConv& conv = wxConvUTF8)
+  bool Write(const wxString& s, wxMBConv& conv = wxConvLocal)
   {
       const wxWX2MBbuf buf = s.mb_str(conv);
       size_t size = strlen(buf);
@@ -110,15 +109,15 @@ public:
     // flush data not yet written
   bool Flush();
 
-  // file pointer operations (return wxInvalidOffset on failure)
-    // move ptr ofs bytes related to start/current offset/end of file
-  wxFileOffset Seek(wxFileOffset ofs, wxSeekMode mode = wxFromStart);
+  // file pointer operations (return ofsInvalid on failure)
+    // move ptr ofs bytes related to start/current off_t/end of file
+  off_t Seek(off_t ofs, wxSeekMode mode = wxFromStart);
     // move ptr to ofs bytes before the end
-  wxFileOffset SeekEnd(wxFileOffset ofs = 0) { return Seek(ofs, wxFromEnd); }
-    // get current offset
-  wxFileOffset Tell() const;
+  off_t SeekEnd(off_t ofs = 0) { return Seek(ofs, wxFromEnd); }
+    // get current off_t
+  off_t Tell() const;
     // get current file length
-  wxFileOffset Length() const;
+  off_t Length() const;
 
   // simple accessors
     // is file opened?
@@ -127,8 +126,6 @@ public:
   bool Eof() const;
     // has an error occured?
   bool Error() const { return m_error; }
-    // type such as disk or pipe
-  wxFileKind GetKind() const { return wxGetFileKind(m_fd); }
 
   // dtor closes the file if opened
   ~wxFile() { Close(); }
@@ -151,8 +148,7 @@ private:
 // file (and close this one) or call Discard() to cancel the modification. If
 // you call neither of them, dtor will call Discard().
 // ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_BASE wxTempFile
+class WXDLLEXPORT wxTempFile
 {
 public:
   // ctors
@@ -166,18 +162,10 @@ public:
 
   // is the file opened?
   bool IsOpened() const { return m_file.IsOpened(); }
-    // get current file length
-  wxFileOffset Length() const { return m_file.Length(); }
-    // move ptr ofs bytes related to start/current offset/end of file
-  wxFileOffset Seek(wxFileOffset ofs, wxSeekMode mode = wxFromStart)
-    { return m_file.Seek(ofs, mode); }
-    // get current offset
-  wxFileOffset Tell() const { return m_file.Tell(); }
 
   // I/O (both functions return true on success, false on failure)
-  bool Write(const void *p, size_t n) { return m_file.Write(p, n) == n; }
-  bool Write(const wxString& str, wxMBConv& conv = wxConvUTF8)
-    { return m_file.Write(str, conv); }
+  bool Write(const void *p, size_t n) { return m_file.Write(p, n) != 0; }
+  bool Write(const wxString& str, wxMBConv& conv = wxConvLibc) { return m_file.Write(str, conv); }
 
   // different ways to close the file
     // validate changes and delete the old file of name m_strName

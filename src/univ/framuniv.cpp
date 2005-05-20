@@ -17,7 +17,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univframe.h"
 #endif
 
@@ -32,7 +32,6 @@
 #ifndef WX_PRECOMP
     #include "wx/frame.h"
     #include "wx/statusbr.h"
-    #include "wx/settings.h"
     #include "wx/toolbar.h"
 #endif // WX_PRECOMP
 
@@ -42,7 +41,6 @@
 
 BEGIN_EVENT_TABLE(wxFrame, wxFrameBase)
     EVT_SIZE(wxFrame::OnSize)
-    EVT_SYS_COLOUR_CHANGED(wxFrame::OnSysColourChanged)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxTopLevelWindow)
@@ -59,22 +57,9 @@ bool wxFrame::Create(wxWindow *parent,
                 long style,
                 const wxString& name)
 {
-    if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style, name) )
-        return false;
-
-    SetOwnBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE));
-
-    return true;
+    return wxTopLevelWindow::Create(parent, id, title, pos, size, style, name);
 }
 
-// Responds to colour changes, and passes event on to children.
-void wxFrame::OnSysColourChanged(wxSysColourChangedEvent& event)
-{
-    SetOwnBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE));
-    Refresh();
-
-    event.Skip();
-}
 
 // ----------------------------------------------------------------------------
 // menu support
@@ -120,7 +105,7 @@ void wxFrame::PositionMenuBar()
 #endif // wxUSE_TOOLBAR
 
         m_frameMenuBar->SetSize(0,
-#ifdef __WXPM__   // FIXME -- remove this, make wxOS2/Univ behave as
+#ifdef __WXPM__	 // FIXME -- remove this, make wxOS2/Univ behave as
                  //          the rest of the world!!!
                                 GetClientSize().y - heightMbar - heightTbar,
 #else
@@ -151,7 +136,7 @@ void wxFrame::PositionStatusBar()
     if ( m_frameStatusBar )
     {
         wxSize size = GetClientSize();
-        m_frameStatusBar->SetSize(0, size.y, size.x, wxDefaultCoord);
+        m_frameStatusBar->SetSize(0, size.y, size.x, -1);
     }
 }
 
@@ -274,9 +259,7 @@ void wxFrame::DoSetClientSize(int width, int height)
 #if wxUSE_TOOLBAR
     if ( m_frameToolBar )
     {
-#if wxUSE_STATUSBAR
         height += m_frameStatusBar->GetSize().y;
-#endif // wxUSE_STATUSBAR
 
         if ( m_frameToolBar->GetWindowStyleFlag() & wxTB_VERTICAL )
             width += m_frameToolBar->GetSize().x;
@@ -334,10 +317,10 @@ int wxFrame::GetMinHeight() const
 bool wxFrame::Enable(bool enable)
 {
     if (!wxFrameBase::Enable(enable))
-        return false;
+    	return FALSE;
 #ifdef __WXMICROWIN__
     if (m_frameMenuBar)
         m_frameMenuBar->Enable(enable);
 #endif
-    return true;
+    return TRUE;
 }

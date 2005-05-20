@@ -10,7 +10,7 @@
 #ifndef __GTKCONTROLH__
 #define __GTKCONTROLH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -28,13 +28,6 @@ class wxControl;
 //-----------------------------------------------------------------------------
 // wxControl
 //-----------------------------------------------------------------------------
-
-// C-linkage function pointer types for GetDefaultAttributesFromGTKWidget
-extern "C" {
-    typedef GtkWidget* (*wxGtkWidgetNew_t)(void);
-    typedef GtkWidget* (*wxGtkWidgetNewFromStr_t)(const gchar*);
-    typedef GtkWidget* (*wxGtkWidgetNewFromAdj_t)(GtkAdjustment*);
-}
 
 class wxControl : public wxControlBase
 {
@@ -59,39 +52,12 @@ public:
     // char (the one immediately after '&') into m_chAccel (TODO not yet)
     virtual void SetLabel( const wxString &label );
     virtual wxString GetLabel() const;
-    
-    virtual wxVisualAttributes GetDefaultAttributes() const;
 
 protected:
     virtual wxSize DoGetBestSize() const;
-    void PostCreation(const wxSize& size);
-
 #ifdef __WXGTK20__
     wxString PrepareLabelMnemonics( const wxString &label ) const;
 #endif
-
-    // These are used by GetDefaultAttributes
-    static wxVisualAttributes
-        GetDefaultAttributesFromGTKWidget(GtkWidget* widget,
-                                          bool useBase = false,
-                                          int state = -1);
-    static wxVisualAttributes
-        GetDefaultAttributesFromGTKWidget(wxGtkWidgetNew_t,
-                                          bool useBase = false,
-                                          int state = -1);
-    static wxVisualAttributes
-        GetDefaultAttributesFromGTKWidget(wxGtkWidgetNewFromStr_t,
-                                          bool useBase = false,
-                                          int state = -1);
-
-    static wxVisualAttributes
-        GetDefaultAttributesFromGTKWidget(wxGtkWidgetNewFromAdj_t,
-                                          bool useBase = false,
-                                          int state = -1);
-
-    // Widgets that use the style->base colour for the BG colour should
-    // override this and return true.
-    virtual bool UseGTKStyleBase() const { return false; }
 
     wxString   m_label;
     char       m_chAccel;  // enabled to avoid breaking binary compatibility later on

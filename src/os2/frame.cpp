@@ -51,6 +51,7 @@
 // globals
 // ----------------------------------------------------------------------------
 
+extern wxWindowList wxModelessWindows;
 extern wxList WXDLLEXPORT wxPendingDelete;
 
 #if wxUSE_MENUS_NATIVE
@@ -141,6 +142,7 @@ bool wxFrame::Create(
                                   ,rsName
                                  ))
         return FALSE;
+    wxModelessWindows.Append(this);
     return TRUE;
 } // end of wxFrame::Create
 
@@ -171,13 +173,15 @@ void wxFrame::DoGetClientSize(
 
 //
 // Set the client size (i.e. leave the calculation of borders etc.
-// to wxWidgets)
+// to wxWindows)
 //
 void wxFrame::DoSetClientSize(
   int                               nWidth
 , int                               nHeight
 )
 {
+    wxStatusBar*                    pStatusBar = GetStatusBar();
+
     //
     // Statusbars are not part of the OS/2 Client but parent frame
     // so no statusbar consideration
@@ -213,6 +217,8 @@ wxStatusBar* wxFrame::OnCreateStatusBar(
 )
 {
     wxStatusBar*                    pStatusBar = NULL;
+    SWP                             vSwp;
+    ERRORID                         vError;
     wxString                        sError;
 
     pStatusBar = wxFrameBase::OnCreateStatusBar( nNumber
@@ -231,7 +237,7 @@ wxStatusBar* wxFrame::OnCreateStatusBar(
     // Set the height according to the font and the border size
     //
     vDC.SetFont(pStatusBar->GetFont()); // Screws up the menues for some reason
-    vDC.GetTextExtent( wxT("X")
+    vDC.GetTextExtent( "X"
                       ,NULL
                       ,&nY
                      );
@@ -275,6 +281,7 @@ void wxFrame::PositionStatusBar()
         int                         nY;
         int                         nStatbarWidth;
         int                         nStatbarHeight;
+        HWND                        hWndClient;
         RECTL                       vRect;
         RECTL                       vFRect;
 
@@ -304,7 +311,7 @@ void wxFrame::PositionStatusBar()
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(_T("Error setting parent for StautsBar. Error: %s\n"), sError.c_str());
+            wxLogError("Error setting parent for StautsBar. Error: %s\n", sError.c_str());
             return;
         }
     }
@@ -348,7 +355,17 @@ void wxFrame::SetMenuBar(
   wxMenuBar*                        pMenuBar
 )
 {
+    ERRORID                         vError;
     wxString                        sError;
+    HWND                            hTitlebar = NULLHANDLE;
+    HWND                            hHScroll = NULLHANDLE;
+    HWND                            hVScroll = NULLHANDLE;
+    HWND                            hMenuBar = NULLHANDLE;
+    SWP                             vSwp;
+    SWP                             vSwpTitlebar;
+    SWP                             vSwpVScroll;
+    SWP                             vSwpHScroll;
+    SWP                             vSwpMenu;
 
     if (!pMenuBar)
     {
@@ -367,7 +384,7 @@ void wxFrame::SetMenuBar(
         //
         // Can set a menubar several times.
         // TODO: how to prevent a memory leak if you have a currently-unattached
-        // menubar? wxWidgets assumes that the frame will delete the menu (otherwise
+        // menubar? wxWindows assumes that the frame will delete the menu (otherwise
         // there are problems for MDI).
         //
         if (pMenuBar->GetHMenu())
@@ -437,14 +454,14 @@ void wxFrame::InternalSetMenuBar()
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Error setting parent for submenu. Error: %s\n"), sError.c_str());
+        wxLogError("Error setting parent for submenu. Error: %s\n", sError.c_str());
     }
 
     if (!::WinSetOwner(m_hMenu, m_hFrame))
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Error setting parent for submenu. Error: %s\n"), sError.c_str());
+        wxLogError("Error setting parent for submenu. Error: %s\n", sError.c_str());
     }
     ::WinSendMsg(m_hFrame, WM_UPDATEFRAME, (MPARAM)FCF_MENU, (MPARAM)0);
 } // end of wxFrame::InternalSetMenuBar
@@ -721,8 +738,10 @@ void wxFrame::PositionToolBar()
     if (!pToolBar)
         return;
 
+    HWND                            hWndClient;
     RECTL                           vRect;
     RECTL                           vFRect;
+    SWP                             vSwp;
     wxPoint                         vPos;
 
     ::WinQueryWindowRect(m_hFrame, &vRect);
@@ -779,10 +798,6 @@ void wxFrame::IconizeChildFrames(
   bool                              bIconize
 )
 {
-  // FIXME: Generic MDI does not use Frames for the Childs, so this does _not_
-  //        work. Possibly, the right thing is simply to eliminate this
-  //        functions and all the calls to it from within this file.
-#if 0
     for (wxWindowList::Node* pNode = GetChildren().GetFirst();
          pNode;
          pNode = pNode->GetNext() )
@@ -814,7 +829,6 @@ void wxFrame::IconizeChildFrames(
                 pFrame->Iconize(bIconize);
         }
     }
-#endif
 } // end of wxFrame::IconizeChildFrames
 
 WXHICON wxFrame::GetDefaultIcon() const
@@ -885,6 +899,7 @@ bool wxFrame::HandlePaint()
 
             if (hIcon)
             {
+                HWND                            hWndClient;
                 RECTL                           vRect3;
 
                 ::WinQueryWindowRect(GetHwnd(), &vRect3);
@@ -1212,6 +1227,7 @@ MRESULT EXPENTRY wxFrameWndProc(
     //
 
     MRESULT                         rc = (MRESULT)0;
+    bool                            bProcessed = FALSE;
 
     //
     // Stop right here if we don't have a valid handle in our wxWindow object.
@@ -1309,6 +1325,8 @@ MRESULT wxFrame::OS2WindowProc(
 
         case WM_SIZE:
             {
+                SHORT               nScxold = SHORT1FROMMP(wParam); // Old horizontal size.
+                SHORT               nScyold = SHORT2FROMMP(wParam); // Old vertical size.
                 SHORT               nScxnew = SHORT1FROMMP(lParam); // New horizontal size.
                 SHORT               nScynew = SHORT2FROMMP(lParam); // New vertical size.
 

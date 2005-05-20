@@ -39,7 +39,7 @@ public:
         RGNRECT                     vRgnData;
         PRECTL                      pRect = NULL;
 
-        vRgnData.ulDirection = RECTDIR_LFRT_TOPBOT;
+	vRgnData.ulDirection = RECTDIR_LFRT_TOPBOT;
         if (::GpiQueryRegionRects( rData.m_hPS      // Pres space
                                   ,rData.m_hRegion  // Handle of region to query
                                   ,NULL             // Return all RECTs
@@ -439,6 +439,7 @@ wxRegionContain wxRegion::Contains(
 , wxCoord                           y
 ) const
 {
+    bool                            bOK = FALSE;
     POINTL                          vPoint;
 
     vPoint.x = x;

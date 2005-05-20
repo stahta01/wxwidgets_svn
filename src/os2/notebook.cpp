@@ -14,10 +14,9 @@
 
 #if wxUSE_NOTEBOOK
 
-// wxWidgets
+// wxWindows
 #ifndef WX_PRECOMP
   #include "wx/app.h"
-  #include "wx/dcclient.h"
   #include "wx/string.h"
   #include "wx/settings.h"
 #endif  // WX_PRECOMP
@@ -137,8 +136,8 @@ bool wxNotebook::Create(
     //
     // Notebook, so explicitly specify 0 as last parameter
     //
-    if (!OS2CreateControl( wxT("NOTEBOOK")
-                          ,wxEmptyString
+    if (!OS2CreateControl( "NOTEBOOK"
+                          ,_T("")
                           ,rPos
                           ,rSize
                           ,lStyle | wxTAB_TRAVERSAL
@@ -158,7 +157,7 @@ WXDWORD wxNotebook::OS2GetStyle (
                                                                         ,pdwExstyle
                                                                        );
 
-    dwTabStyle |= WS_TABSTOP | BKS_SOLIDBIND | BKS_ROUNDEDTABS | BKS_TABTEXTCENTER | BKS_TABBEDDIALOG;
+    dwTabStyle |= WS_TABSTOP | BKS_SOLIDBIND | BKS_ROUNDEDTABS | BKS_TABTEXTCENTER;
 
     if (lStyle & wxNB_BOTTOM)
         dwTabStyle |= BKS_MAJORTABBOTTOM | BKS_BACKPAGESBL;
@@ -187,8 +186,11 @@ WXDWORD wxNotebook::OS2GetStyle (
 // wxNotebook accessors
 // ----------------------------------------------------------------------------
 
-size_t wxNotebook::GetPageCount() const
+int wxNotebook::GetPageCount() const
 {
+    int                             nPageInternal = m_pages.Count();
+    int                             nPageAPI = (int)::WinSendMsg(GetHWND(), BKM_QUERYPAGECOUNT, (MPARAM)0, (MPARAM)BKA_END);
+
     //
     // Consistency check
     //
@@ -206,12 +208,12 @@ int wxNotebook::GetRowCount() const
 } // end of wxNotebook::GetRowCount
 
 int wxNotebook::SetSelection(
-  size_t                            nPage
+  int                               nPage
 )
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, wxT("notebook page out of range") );
 
-    if (nPage != (size_t)m_nSelection)
+    if (nPage != m_nSelection)
     {
         wxNotebookEvent             vEvent( wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING
                                            ,m_windowId
@@ -229,6 +231,8 @@ int wxNotebook::SetSelection(
             vEvent.SetEventType(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED);
             GetEventHandler()->ProcessEvent(vEvent);
 
+            ULONG                   ulPageId = (ULONG)m_alPageId[nPage];
+
             ::WinSendMsg( GetHWND()
                          ,BKM_TURNTOPAGE
                          ,MPFROMLONG((ULONG)m_alPageId[nPage])
@@ -241,11 +245,15 @@ int wxNotebook::SetSelection(
 } // end of wxNotebook::SetSelection
 
 bool wxNotebook::SetPageText(
-  size_t                            nPage
+  int                               nPage
 , const wxString&                   rsStrText
 )
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), FALSE, wxT("notebook page out of range") );
+
+
+    ULONG                           ulPageId = (ULONG)m_alPageId[nPage];
+
     return (bool)::WinSendMsg( m_hWnd
                               ,BKM_SETTABTEXT
                               ,MPFROMLONG((ULONG)m_alPageId[nPage])
@@ -254,7 +262,7 @@ bool wxNotebook::SetPageText(
 } // end of wxNotebook::SetPageText
 
 wxString wxNotebook::GetPageText (
-  size_t                            nPage
+  int                               nPage
 ) const
 {
     BOOKTEXT                        vBookText;
@@ -264,6 +272,9 @@ wxString wxNotebook::GetPageText (
 
     wxCHECK_MSG( IS_VALID_PAGE(nPage), wxT(""), wxT("notebook page out of range") );
 
+
+    ULONG                           ulPageId = (ULONG)m_alPageId[nPage];
+
     memset(&vBookText, '\0', sizeof(BOOKTEXT));
     vBookText.textLen = 0; // This will get the length
     ulRc = LONGFROMMR(::WinSendMsg( m_hWnd
@@ -271,16 +282,16 @@ wxString wxNotebook::GetPageText (
                                    ,MPFROMLONG((ULONG)m_alPageId[nPage])
                                    ,MPFROMP(&vBookText)
                                   ));
-    if (ulRc == (ULONG)BOOKERR_INVALID_PARAMETERS || ulRc == 0L)
+    if (ulRc == BOOKERR_INVALID_PARAMETERS || ulRc == 0L)
     {
-        if (ulRc == (ULONG)BOOKERR_INVALID_PARAMETERS)
+        if (ulRc == BOOKERR_INVALID_PARAMETERS)
         {
             wxLogError(wxT("Invalid Page Id for page text querry."));
         }
         return wxEmptyString;
     }
     vBookText.textLen = ulRc + 1; // To get the null terminator
-    vBookText.pString = (char*)zBuf;
+    vBookText.pString = zBuf;
 
     //
     // Now get the actual text
@@ -290,7 +301,7 @@ wxString wxNotebook::GetPageText (
                                    ,MPFROMLONG((ULONG)m_alPageId[nPage])
                                    ,MPFROMP(&vBookText)
                                   ));
-    if (ulRc == (ULONG)BOOKERR_INVALID_PARAMETERS || ulRc == 0L)
+    if (ulRc == BOOKERR_INVALID_PARAMETERS || ulRc == 0L)
     {
         return wxEmptyString;
     }
@@ -298,12 +309,12 @@ wxString wxNotebook::GetPageText (
         ulRc = 255L;
 
     vBookText.pString[ulRc] = '\0';
-    sStr = (wxChar*)vBookText.pString;
+    sStr = vBookText.pString;
     return sStr;
 } // end of wxNotebook::GetPageText
 
 int wxNotebook::GetPageImage (
-  size_t                            nPage
+  int                               nPage
 ) const
 {
     wxCHECK_MSG( IS_VALID_PAGE(nPage), -1, wxT("notebook page out of range") );
@@ -315,16 +326,19 @@ int wxNotebook::GetPageImage (
 } // end of wxNotebook::GetPageImage
 
 bool wxNotebook::SetPageImage (
-  size_t                            nPage
+  int                               nPage
 , int                               nImage
 )
 {
-    wxBitmap                        vBitmap = (wxBitmap)m_imageList->GetBitmap(nImage);
+    wxBitmap*                       pBitmap = (wxBitmap*)m_imageList->GetBitmap(nImage);
+
+
+    ULONG                           ulPageId = (ULONG)m_alPageId[nPage];
 
     return (bool)::WinSendMsg( GetHWND()
                               ,BKM_SETTABBITMAP
                               ,MPFROMLONG((ULONG)m_alPageId[nPage])
-                              ,(MPARAM)vBitmap.GetHBITMAP()
+                              ,(MPARAM)pBitmap->GetHBITMAP()
                              );
 } // end of wxNotebook::SetPageImage
 
@@ -346,7 +360,22 @@ void wxNotebook::SetPageSize (
   const wxSize&                     rSize
 )
 {
-    SetSize(rSize);
+    RECTL                           vRect;
+
+    //
+    // Transform the page size into the notebook size
+    //
+    vRect.xLeft   = vRect.yTop = 0;
+    vRect.xRight  = rSize.x;
+    vRect.yBottom = rSize.y;
+
+
+    //
+    // And now set it
+    //
+    SetSize( vRect.xRight - vRect.xLeft
+            ,vRect.yBottom - vRect.yTop
+           );
 } // end of wxNotebook::SetPageSize
 
 void wxNotebook::SetPadding (
@@ -379,13 +408,16 @@ void wxNotebook::SetTabSize (
 // Remove one page from the notebook, without deleting
 //
 wxNotebookPage* wxNotebook::DoRemovePage (
-  size_t                            nPage
+  int                               nPage
 )
 {
     wxNotebookPage*                 pPageRemoved = wxNotebookBase::DoRemovePage(nPage);
 
     if (!pPageRemoved)
         return NULL;
+
+
+    ULONG                           ulPageId = (ULONG)m_alPageId[nPage];
 
     ::WinSendMsg( GetHWND()
                  ,BKM_DELETEPAGE
@@ -406,14 +438,14 @@ wxNotebookPage* wxNotebook::DoRemovePage (
         //
         int                         nSelNew;
 
-        if (m_nSelection == (int)GetPageCount())
+        if (m_nSelection == GetPageCount())
         {
             //
             // Last page deleted, make the new last page the new selection
             //
             nSelNew = m_nSelection - 1;
         }
-        else if (nPage <= (size_t)m_nSelection)
+        else if (nPage <= m_nSelection)
         {
             //
             // We must show another page, even if it has the same index
@@ -488,7 +520,7 @@ bool wxNotebook::AddPage (
 // Same as AddPage() but does it at given position
 //
 bool wxNotebook::InsertPage (
-  size_t                            nPage
+  int                               nPage
 , wxNotebookPage*                   pPage
 , const wxString&                   rsStrText
 , bool                              bSelect
@@ -563,7 +595,7 @@ bool wxNotebook::InsertPage (
     // If the inserted page is before the selected one, we must update the
     // index of the selected page
     //
-    if (nPage <= (size_t)m_nSelection)
+    if (nPage <= m_nSelection)
     {
         //
         // One extra page added
@@ -591,7 +623,7 @@ bool wxNotebook::InsertPage (
 
     vDC.GetTextExtent(rsStrText, &nTextX, &nTextY);
     nTextY *= 2;
-    nTextX  = (wxCoord)(nTextX * 1.3);
+    nTextX *= 1.3;
     if (nTextX > m_nTabSize)
     {
         m_nTabSize = nTextX;
@@ -656,9 +688,6 @@ bool wxNotebook::InsertPage (
 
     if (nSelNew != -1)
         SetSelection(nSelNew);
-
-    InvalidateBestSize();
-
     return TRUE;
 } // end of wxNotebook::InsertPage
 
@@ -669,6 +698,20 @@ void wxNotebook::OnSize(
   wxSizeEvent&                      rEvent
 )
 {
+    int                             nPage;
+    int                             nCount = (int)m_pages.Count();
+
+    for (nPage = 0; nPage < nCount; nPage++)
+    {
+        if (m_nSelection == nPage)
+            m_pages[nPage]->Refresh();
+        else
+            ::WinSetWindowPos(m_pages[nPage]->GetHWND()
+                              ,NULLHANDLE
+                              ,0,0,0,0
+                              ,SWP_HIDE
+                             );
+    }
     rEvent.Skip();
 } // end of wxNotebook::OnSize
 
@@ -688,7 +731,7 @@ void wxNotebook::OnSelChange (
 
         for (nSel = 0; nSel < nPageCount; nSel++)
         {
-            if (ulOS2Sel == (ULONG)m_alPageId[nSel])
+            if (ulOS2Sel == m_alPageId[nSel])
             {
                 bFound = TRUE;
                 break;
@@ -706,7 +749,7 @@ void wxNotebook::OnSelChange (
 
         for (nSel = 0; nSel < nPageCount; nSel++)
         {
-            if (ulOS2Sel == (ULONG)m_alPageId[nSel])
+            if (ulOS2Sel == m_alPageId[nSel])
             {
                 bFound = TRUE;
                 break;

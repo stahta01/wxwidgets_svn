@@ -6,7 +6,7 @@
 // Created:     10.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univradiobut.h"
 #endif
 
@@ -60,12 +60,12 @@ bool wxRadioButton::Create(wxWindow *parent,
                         const wxString &name)
 {
     if ( !wxCheckBox::Create(parent, id, label, pos, size, style,
-                             validator, name) )
+                             wxDefaultValidator, name) )
     {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -78,7 +78,7 @@ void wxRadioButton::OnCheck()
     // find the radio button which is the first in the group, i.e. the one
     // with wxRB_GROUP style
     const wxWindowList& siblings = GetParent()->GetChildren();
-    wxWindowList::compatibility_iterator nodeStart = siblings.Find(this);
+    wxWindowList::Node *nodeStart = siblings.Find(this);
     while ( nodeStart )
     {
         // stop if we found a radio button with wxRB_GROUP style or it we
@@ -134,7 +134,7 @@ void wxRadioButton::ClearValue()
 {
     if ( IsChecked() )
     {
-        SetValue(false);
+        SetValue(FALSE);
     }
 }
 

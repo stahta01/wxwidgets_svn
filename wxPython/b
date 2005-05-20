@@ -1,11 +1,4 @@
-#!/bin/bash
-
-# Are we using bash on win32?  If so source that file and then exit.
-if [ "$OSTYPE" = "cygwin" ]; then
-    source b.win32
-    exit
-fi
-
+#!/bin/sh
 
 function getpyver {
     if [ "$1" = "15" ]; then
@@ -18,8 +11,6 @@ function getpyver {
 	PYVER=2.2
     elif [ "$1" = "23" ]; then
 	PYVER=2.3
-    elif [ "$1" = "24" ]; then
-	PYVER=2.4
     else
 	echo You must specify Python version as first parameter.
         exit
@@ -33,22 +24,8 @@ python$PYVER -c "import sys;print '\n', sys.version, '\n'"
 
 
 SETUP="python$PYVER -u setup.py"
-FLAGS="USE_SWIG=1 SWIG=/opt/swig/bin/swig" 
+FLAGS="USE_SWIG=1 IN_CVS_TREE=1" # BUILD_GLCANVAS=0"
 OTHERFLAGS=""
-PORTFLAGS=""
-
-
-
-if [ "$1" = "gtk1" -o "$1" = "gtk" ]; then 
-    PORTFLAGS="WXPORT=gtk UNICODE=0"
-    shift
-elif [ "$1" = "gtk2" ]; then 
-    PORTFLAGS="WXPORT=gtk2 UNICODE=1"
-    shift
-fi
-
-FLAGS="$FLAGS $PORTFLAGS"
-
 
 
 
@@ -56,16 +33,17 @@ FLAGS="$FLAGS $PORTFLAGS"
 if [ "$1" =  "c" ]; then
     shift
     CMD="$SETUP $FLAGS $OTHERFLAGS clean $*"
-    OTHERCMD="rm -f wx/*.so"
+    OTHERCMD="rm -f wxPython/*.so"
 
 # "d" --> clean extension modules only
 elif [ "$1" = "d" ]; then
     shift
-    CMD="rm -f wx/*.so"
+    CMD="rm -f wxPython/*.so"
 
 # "t" --> touch *.i files
 elif [ "$1" = "t" ]; then
     shift
+    #CMD="set CMD=touch src\*.i; touch contrib\glcanvas\*.i; touch contrib\ogl\*.i; touch contrib\stc\*.i"
     CMD='find . -name "*.i" | xargs touch'
 
 # "i" --> install
@@ -136,12 +114,10 @@ fi
 
 echo $CMD
 eval $CMD
-RC=$?
 
-if [ "$RC" = "0" -a  "$OTHERCMD" != "" ]; then
+
+if [ "$OTHERCMD" != "" ]; then
     echo $OTHERCMD
     $OTHERCMD
-    RC=$?
 fi
 
-exit $RC

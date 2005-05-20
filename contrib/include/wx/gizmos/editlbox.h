@@ -12,11 +12,17 @@
 #define __WX_EDITLBOX_H__
 
 #if defined(__GNUG__) && !defined(__APPLE__)
-    #pragma interface "editlbox.h"
+	#pragma interface "editlbox.h"
 #endif
 
 #include "wx/panel.h"
-#include "wx/gizmos/gizmos.h"
+
+#ifdef GIZMOISDLL
+#define GIZMODLLEXPORT WXDLLEXPORT
+#else
+#define GIZMODLLEXPORT
+#endif
+
 
 class WXDLLEXPORT wxBitmapButton;
 class WXDLLEXPORT wxListCtrl;
@@ -29,9 +35,9 @@ class WXDLLEXPORT wxListEvent;
 // This class provides a composite control that lets the
 // user easily enter list of strings
 
-class WXDLLIMPEXP_GIZMOS wxEditableListBox : public wxPanel
+class GIZMODLLEXPORT wxEditableListBox : public wxPanel
 {
-    DECLARE_CLASS(wxEditableListBox)
+	DECLARE_CLASS(wxEditableListBox);
 
 public:
     wxEditableListBox(wxWindow *parent, wxWindowID id,

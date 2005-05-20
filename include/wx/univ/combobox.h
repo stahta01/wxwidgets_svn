@@ -20,7 +20,7 @@
    down list, not just a wxListBox.
 
    So we define a base wxComboControl which can use any control as pop down
-   list and wxComboBox deriving from it which implements the standard wxWidgets
+   list and wxComboBox deriving from it which implements the standard wxWindows
    combobox API. wxComboControl needs to be told somehow which control to use
    and this is done by SetPopupControl(). However, we need something more than
    just a wxControl in this method as, for example, we need to call
@@ -36,7 +36,7 @@
 #ifndef _WX_UNIV_COMBOBOX_H_
 #define _WX_UNIV_COMBOBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univcombobox.h"
 #endif
 
@@ -77,13 +77,11 @@ public:
     // called before showing the control to set the initial selection - notice
     // that the text passed to this method might not correspond to any valid
     // item (if the user edited it directly), in which case the method should
-    // just return false but not emit any errors
+    // just return FALSE but not emit any errors
     virtual bool SetSelection(const wxString& value) = 0;
 
     // called immediately after the control is shown
     virtual void OnShow() = 0;
-
-    virtual wxCoord GetBestWidth() const {return 0; }
 
 protected:
     wxComboControl *m_combo;
@@ -137,7 +135,7 @@ public:
     void ShowPopup();
     void HidePopup();
 
-    // return true if the popup is currently shown
+    // return TRUE if the popup is currently shown
     bool IsPopupShown() const { return m_isPopupShown; }
 
     // get the popup window containing the popup control
@@ -159,8 +157,8 @@ public:
     virtual void OnDismiss();
 
     // forward these functions to all subcontrols
-    virtual bool Enable(bool enable = true);
-    virtual bool Show(bool show = true);
+    virtual bool Enable(bool enable = TRUE);
+    virtual bool Show(bool show = TRUE);
 
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip( wxToolTip *tip );
@@ -221,7 +219,7 @@ public:
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
                int n = 0,
-               const wxString choices[] = (const wxString *) NULL,
+               const wxString *choices = (const wxString *) NULL,
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxComboBoxNameStr)
@@ -231,15 +229,6 @@ public:
         (void)Create(parent, id, value, pos, size, n, choices,
                      style, validator, name);
     }
-    wxComboBox(wxWindow *parent,
-               wxWindowID id,
-               const wxString& value,
-               const wxPoint& pos,
-               const wxSize& size,
-               const wxArrayString& choices,
-               long style = 0,
-               const wxValidator& validator = wxDefaultValidator,
-               const wxString& name = wxComboBoxNameStr);
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -251,15 +240,7 @@ public:
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxComboBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxString& value,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxComboBoxNameStr);
+
 
     virtual ~wxComboBox();
 
@@ -277,22 +258,11 @@ public:
     virtual void SetInsertionPoint(long pos);
     virtual void SetInsertionPointEnd();
     virtual long GetInsertionPoint() const;
-    virtual wxTextPos GetLastPosition() const;
+    virtual long GetLastPosition() const;
     virtual void Replace(long from, long to, const wxString& value);
     virtual void Remove(long from, long to);
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
-    virtual bool IsEditable() const;
-
-    virtual void Undo();
-    virtual void Redo();
-    virtual void SelectAll();
-
-    virtual bool CanCopy() const;
-    virtual bool CanCut() const;
-    virtual bool CanPaste() const;
-    virtual bool CanUndo() const;
-    virtual bool CanRedo() const;
 
     // wxControlWithItems methods
     virtual void Clear();
@@ -301,14 +271,63 @@ public:
     virtual wxString GetString(int n) const;
     virtual void SetString(int n, const wxString& s);
     virtual int FindString(const wxString& s) const;
-    virtual void SetSelection(int n);
+    virtual void Select(int n);
     virtual int GetSelection() const;
+    void SetSelection(int n) { Select(n); }
 
-    wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
+    void SetStringSelection(const wxString& s) {  }
+
+    // we have to redefine these functions here to avoid ambiguities in classes
+    // deriving from us which would arise otherwise because we inherit these
+    // methods (with different signatures) from both wxItemContainer via
+    // wxComboBoxBase (with "int n" parameter) and from wxEvtHandler via
+    // wxControl and wxComboControl (without)
+    //
+    // hopefully, a smart compiler can optimize away these simple inline
+    // wrappers so we don't suffer much from this
+
+    void SetClientData(void *data)
+    {
+        wxControl::SetClientData(data);
+    }
+
+    void *GetClientData() const
+    {
+        return wxControl::GetClientData();
+    }
+
+    void SetClientObject(wxClientData *data)
+    {
+        wxControl::SetClientObject(data);
+    }
+
+    wxClientData *GetClientObject() const
+    {
+        return wxControl::GetClientObject();
+    }
+
+    void SetClientData(int n, void* clientData)
+    {
+        wxItemContainer::SetClientData(n, clientData);
+    }
+
+    void* GetClientData(int n) const
+    {
+        return wxItemContainer::GetClientData(n);
+    }
+
+    void SetClientObject(int n, wxClientData* clientData)
+    {
+        wxItemContainer::SetClientObject(n, clientData);
+    }
+
+    wxClientData* GetClientObject(int n) const
+    {
+        return wxItemContainer::GetClientObject(n);
+    }
 
 protected:
     virtual int DoAppend(const wxString& item);
-    virtual int DoInsert(const wxString& item, int pos);
     virtual void DoSetItemClientData(int n, void* clientData);
     virtual void* DoGetItemClientData(int n) const;
     virtual void DoSetItemClientObject(int n, wxClientData* clientData);

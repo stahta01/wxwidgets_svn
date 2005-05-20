@@ -5,26 +5,18 @@
 // Modified by:
 // Created:     04.12.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
+// Copyright:   (c) wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_LISTBASE_H_BASE_
 #define _WX_LISTBASE_H_BASE_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 //    #pragma interface "listctrlbase.h"
 #endif
 
-#include "wx/defs.h"
-
 #if wxUSE_LISTCTRL
-
-#include "wx/colour.h"
-#include "wx/font.h"
-#include "wx/gdicmn.h"
-
-#include "wx/event.h"
 
 // ----------------------------------------------------------------------------
 // types
@@ -89,11 +81,6 @@ typedef int (wxCALLBACK *wxListCtrlCompare)(long item1, long item2, long sortDat
 #define wxLIST_STATE_FOCUSED        0x0002
 #define wxLIST_STATE_SELECTED       0x0004
 #define wxLIST_STATE_CUT            0x0008      // MSW only
-#define wxLIST_STATE_DISABLED       0x0010      // OS2 only
-#define wxLIST_STATE_FILTERED       0x0020      // OS2 only
-#define wxLIST_STATE_INUSE          0x0040      // OS2 only
-#define wxLIST_STATE_PICKED         0x0080      // OS2 only
-#define wxLIST_STATE_SOURCE         0x0100      // OS2 only
 
 // Hit test flags, used in HitTest
 #define wxLIST_HITTEST_ABOVE            0x0001  // Above the client area.
@@ -227,29 +214,18 @@ public:
     void ClearAttributes() { if ( m_attr ) { delete m_attr; m_attr = NULL; } }
 
     // setters
-    void SetMask(long mask)
-        { m_mask = mask; }
-    void SetId(long id)
-        { m_itemId = id; }
-    void SetColumn(int col)
-        { m_col = col; }
-    void SetState(long state)
-        { m_mask |= wxLIST_MASK_STATE; m_state = state; m_stateMask |= state; }
-    void SetStateMask(long stateMask)
-        { m_stateMask = stateMask; }
-    void SetText(const wxString& text)
-        { m_mask |= wxLIST_MASK_TEXT; m_text = text; }
-    void SetImage(int image)
-        { m_mask |= wxLIST_MASK_IMAGE; m_image = image; }
-    void SetData(long data)
-        { m_mask |= wxLIST_MASK_DATA; m_data = data; }
-    void SetData(void *data)
-        { m_mask |= wxLIST_MASK_DATA; m_data = wxPtrToUInt(data); }
+    void SetMask(long mask) { m_mask = mask; }
+    void SetId(long id) { m_itemId = id; }
+    void SetColumn(int col) { m_col = col; }
+    void SetState(long state) { m_state = state; m_stateMask |= state; }
+    void SetStateMask(long stateMask) { m_stateMask = stateMask; }
+    void SetText(const wxString& text) { m_text = text; }
+    void SetImage(int image) { m_image = image; }
+    void SetData(long data) { m_data = data; }
+    void SetData(void *data) { m_data = (long)data; }
 
-    void SetWidth(int width)
-        { m_mask |= wxLIST_MASK_WIDTH; m_width = width; }
-    void SetAlign(wxListColumnFormat align)
-        { m_mask |= wxLIST_MASK_FORMAT; m_format = align; }
+    void SetWidth(int width) { m_width = width; }
+    void SetAlign(wxListColumnFormat align) { m_format = align; }
 
     void SetTextColour(const wxColour& colText)
         { Attributes().SetTextColour(colText); }
@@ -265,7 +241,7 @@ public:
     long GetState() const { return m_state & m_stateMask; }
     const wxString& GetText() const { return m_text; }
     int GetImage() const { return m_image; }
-    wxUIntPtr GetData() const { return m_data; }
+    long GetData() const { return m_data; }
 
     int GetWidth() const { return m_width; }
     wxListColumnFormat GetAlign() const { return (wxListColumnFormat)m_format; }
@@ -294,15 +270,11 @@ public:
     long            m_stateMask;// Which flags of m_state are valid (uses same flags)
     wxString        m_text;     // The label/header text
     int             m_image;    // The zero-based index into an image list
-    wxUIntPtr       m_data;     // App-defined data
+    long            m_data;     // App-defined data
 
     // For columns only
     int             m_format;   // left, right, centre
     int             m_width;    // width of column
-
-#ifdef __WXPM__
-    int             m_miniImage; // handle to the mini image for OS/2
-#endif
 
 protected:
     // creates m_attr if we don't have it yet
@@ -344,15 +316,14 @@ private:
 class WXDLLEXPORT wxListEvent : public wxNotifyEvent
 {
 public:
-    wxListEvent(wxEventType commandType = wxEVT_NULL, int winid = 0)
-        : wxNotifyEvent(commandType, winid)
+    wxListEvent(wxEventType commandType = wxEVT_NULL, int id = 0)
+        : wxNotifyEvent(commandType, id)
         , m_code(0)
         , m_oldItemIndex(0)
         , m_itemIndex(0)
         , m_col(0)
         , m_pointDrag()
         , m_item()
-        , m_editCancelled(false)
         { }
 
     wxListEvent(const wxListEvent& event)
@@ -363,7 +334,6 @@ public:
         , m_col(event.m_col)
         , m_pointDrag(event.m_pointDrag)
         , m_item(event.m_item)
-        , m_editCancelled(event.m_editCancelled)
         { }
 
     int GetKeyCode() const { return m_code; }
@@ -380,10 +350,6 @@ public:
     // for wxEVT_COMMAND_LIST_CACHE_HINT only
     long GetCacheFrom() const { return m_oldItemIndex; }
     long GetCacheTo() const { return m_itemIndex; }
-
-    // was label editing canceled? (for wxEVT_COMMAND_LIST_END_LABEL_EDIT only)
-    bool IsEditCancelled() const { return m_editCancelled; }
-    void SetEditCanceled(bool editCancelled) { m_editCancelled = editCancelled; }
 
 #if WXWIN_COMPATIBILITY_2_2
     // these methods don't do anything at all
@@ -405,11 +371,8 @@ public:
 
     wxListItem    m_item;
 
-protected:
-    bool          m_editCancelled;
-
 private:
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxListEvent)
+    DECLARE_DYNAMIC_CLASS(wxListEvent)
 };
 
 // ----------------------------------------------------------------------------
@@ -423,10 +386,8 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_END_LABEL_EDIT, 703)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ITEM, 704)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS, 705)
-#if WXWIN_COMPATIBILITY_2_4
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_GET_INFO, 706)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_SET_INFO, 707)
-#endif
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_SELECTED, 708)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_ITEM_DESELECTED, 709)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_LIST_KEY_DOWN, 710)
@@ -445,41 +406,31 @@ END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxListEventFunction)(wxListEvent&);
 
-#define wxListEventHandler(func) \
-    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxListEventFunction, &func)
+#define EVT_LIST_BEGIN_DRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_BEGIN_DRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_BEGIN_RDRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_BEGIN_RDRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_BEGIN_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_BEGIN_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_END_LABEL_EDIT(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_END_LABEL_EDIT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_DELETE_ITEM(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_DELETE_ITEM, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_DELETE_ALL_ITEMS(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_DELETE_ALL_ITEMS, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_GET_INFO(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_GET_INFO, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_SET_INFO(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_SET_INFO, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_KEY_DOWN(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_KEY_DOWN, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_INSERT_ITEM(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_INSERT_ITEM, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
 
-#define wx__DECLARE_LISTEVT(evt, id, fn) \
-    wx__DECLARE_EVT1(wxEVT_COMMAND_LIST_ ## evt, id, wxListEventHandler(fn))
+#define EVT_LIST_COL_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_COL_RIGHT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_COL_BEGIN_DRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_BEGIN_DRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_COL_DRAGGING(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_DRAGGING, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_COL_END_DRAG(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_COL_END_DRAG, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
 
-#define EVT_LIST_BEGIN_DRAG(id, fn) wx__DECLARE_LISTEVT(BEGIN_DRAG, id, fn)
-#define EVT_LIST_BEGIN_RDRAG(id, fn) wx__DECLARE_LISTEVT(BEGIN_RDRAG, id, fn)
-#define EVT_LIST_BEGIN_LABEL_EDIT(id, fn) wx__DECLARE_LISTEVT(BEGIN_LABEL_EDIT, id, fn)
-#define EVT_LIST_END_LABEL_EDIT(id, fn) wx__DECLARE_LISTEVT(END_LABEL_EDIT, id, fn)
-#define EVT_LIST_DELETE_ITEM(id, fn) wx__DECLARE_LISTEVT(DELETE_ITEM, id, fn)
-#define EVT_LIST_DELETE_ALL_ITEMS(id, fn) wx__DECLARE_LISTEVT(DELETE_ALL_ITEMS, id, fn)
-#define EVT_LIST_KEY_DOWN(id, fn) wx__DECLARE_LISTEVT(KEY_DOWN, id, fn)
-#define EVT_LIST_INSERT_ITEM(id, fn) wx__DECLARE_LISTEVT(INSERT_ITEM, id, fn)
+#define EVT_LIST_ITEM_SELECTED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_SELECTED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_ITEM_DESELECTED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_DESELECTED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, NULL ),
+#define EVT_LIST_ITEM_RIGHT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_LIST_ITEM_MIDDLE_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_MIDDLE_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_LIST_ITEM_ACTIVATED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
+#define EVT_LIST_ITEM_FOCUSED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_ITEM_FOCUSED, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
 
-#define EVT_LIST_COL_CLICK(id, fn) wx__DECLARE_LISTEVT(COL_CLICK, id, fn)
-#define EVT_LIST_COL_RIGHT_CLICK(id, fn) wx__DECLARE_LISTEVT(COL_RIGHT_CLICK, id, fn)
-#define EVT_LIST_COL_BEGIN_DRAG(id, fn) wx__DECLARE_LISTEVT(COL_BEGIN_DRAG, id, fn)
-#define EVT_LIST_COL_DRAGGING(id, fn) wx__DECLARE_LISTEVT(COL_DRAGGING, id, fn)
-#define EVT_LIST_COL_END_DRAG(id, fn) wx__DECLARE_LISTEVT(COL_END_DRAG, id, fn)
-
-#define EVT_LIST_ITEM_SELECTED(id, fn) wx__DECLARE_LISTEVT(ITEM_SELECTED, id, fn)
-#define EVT_LIST_ITEM_DESELECTED(id, fn) wx__DECLARE_LISTEVT(ITEM_DESELECTED, id, fn)
-#define EVT_LIST_ITEM_RIGHT_CLICK(id, fn) wx__DECLARE_LISTEVT(ITEM_RIGHT_CLICK, id, fn)
-#define EVT_LIST_ITEM_MIDDLE_CLICK(id, fn) wx__DECLARE_LISTEVT(ITEM_MIDDLE_CLICK, id, fn)
-#define EVT_LIST_ITEM_ACTIVATED(id, fn) wx__DECLARE_LISTEVT(ITEM_ACTIVATED, id, fn)
-#define EVT_LIST_ITEM_FOCUSED(id, fn) wx__DECLARE_LISTEVT(ITEM_FOCUSED, id, fn)
-
-#define EVT_LIST_CACHE_HINT(id, fn) wx__DECLARE_LISTEVT(CACHE_HINT, id, fn)
-
-
-#if WXWIN_COMPATIBILITY_2_4
-#define EVT_LIST_GET_INFO(id, fn) wx__DECLARE_LISTEVT(GET_INFO, id, fn)
-#define EVT_LIST_SET_INFO(id, fn) wx__DECLARE_LISTEVT(SET_INFO, id, fn)
-#endif
+#define EVT_LIST_CACHE_HINT(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_LIST_CACHE_HINT, id, -1, (wxObjectEventFunction) (wxEventFunction) (wxListEventFunction) & fn, (wxObject *) NULL ),
 
 #endif // wxUSE_LISTCTRL
 

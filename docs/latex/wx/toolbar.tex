@@ -6,11 +6,14 @@ The name wxToolBar is defined to be a synonym for one of the following classes:
 \item {\bf wxToolBar95} The native Windows 95 toolbar. Used on Windows 95, NT 4 and above.
 \item {\bf wxToolBarMSW} A Windows implementation. Used on 16-bit Windows.
 \item {\bf wxToolBarGTK} The GTK toolbar.
+\item {\bf wxToolBarSimple} A simple implementation, with scrolling.
+Used on platforms with no native toolbar control, or where scrolling is required.
 \end{itemize}
 
 Note that the base class {\bf wxToolBarBase} defines
 automatic scrolling management functionality which is similar
 to \helpref{wxScrolledWindow}{wxscrolledwindow}, so please refer to this class also.
+Not all toolbars support scrolling, but wxToolBarSimple does.
 
 \wxheading{Derived from}
 
@@ -23,58 +26,37 @@ wxToolBarBase\\
 \wxheading{Include files}
 
 <wx/toolbar.h> (to allow wxWidgets to select an appropriate toolbar class)\\
-<wx/tbarbase.h> (the base class)
+<wx/tbarbase.h> (the base class)\\
+<wx/tbarmsw.h> (the non-Windows 95 Windows toolbar class)\\
+<wx/tbar95.h> (the Windows 95/98 toolbar class)\\
+<wx/tbarsmpl.h> (the generic simple toolbar class)
 
 \wxheading{Remarks}
 
 You may also create a toolbar that is managed by the frame, by
-calling \helpref{wxFrame::CreateToolBar}{wxframecreatetoolbar}. Under Pocket PC,
-you should {\it always} use this function for creating the toolbar
-to be managed by the frame, so that wxWidgets can use a combined
-menubar and toolbar. Where you manage your own toolbars, create a wxToolBar
-as usual.
+calling \helpref{wxFrame::CreateToolBar}{wxframecreatetoolbar}.
 
-The meaning of a "separator" is a vertical line under Windows and simple space under GTK+.
+Due to the use of native toolbars on the various platforms, certain adaptions will
+often have to be made in order to get optimal look on all platforms as some platforms
+ignore the values for explicit placement and use their own layout and the meaning
+of a "separator" is a vertical line under Windows95 vs. simple space under GTK etc.
 
-{\bf wxToolBar95:} Note that this toolbar paints tools to reflect system-wide colours.
-If you use more than 16 colours in your tool bitmaps, you may wish to suppress
-this behaviour, otherwise system colours in your bitmaps will inadvertently be
-mapped to system colours. To do this, set the {\tt msw.remap} system option
-before creating the toolbar:
-
-\begin{verbatim}
-  wxSystemOptions::SetOption(wxT("msw.remap"), 0);
-\end{verbatim}
-
-If you wish to use 32-bit images (which include an alpha channel for transparency)
-use:
-
-\begin{verbatim}
-  wxSystemOptions::SetOption(wxT("msw.remap"), 2);
-\end{verbatim}
-
-then colour remapping is switched off, and a transparent background used. But only
-use this option under Windows XP with true colour:
-
-\begin{verbatim}
-  (wxTheApp->GetComCtl32Version() >= 600 && ::wxDisplayDepth() >= 32)
-\end{verbatim}
+{\bf wxToolBar95:} Note that this toolbar paints tools to reflect user-selected colours.
 
 \wxheading{Window styles}
 
 \twocolwidtha{5cm}
 \begin{twocollist}\itemsep=0pt
-\twocolitem{\windowstyle{wxTB\_FLAT}}{Gives the toolbar a flat look (Windows and GTK only).}
-\twocolitem{\windowstyle{wxTB\_DOCKABLE}}{Makes the toolbar floatable and dockable (GTK only).}
-\twocolitem{\windowstyle{wxTB\_HORIZONTAL}}{Specifies horizontal layout (default).}
-\twocolitem{\windowstyle{wxTB\_VERTICAL}}{Specifies vertical layout.}
-\twocolitem{\windowstyle{wxTB\_TEXT}}{Shows the text in the toolbar buttons; by default only icons are shown.}
+\twocolitem{\windowstyle{wxTB\_FLAT}}{Gives the toolbar a flat look ('coolbar' or 'flatbar' style). Windows 95 and GTK 1.2 only.}
+\twocolitem{\windowstyle{wxTB\_DOCKABLE}}{Makes the toolbar floatable and dockable. GTK only.}
+\twocolitem{\windowstyle{wxTB\_HORIZONTAL}}{Specifies horizontal layout.}
+\twocolitem{\windowstyle{wxTB\_VERTICAL}}{Specifies vertical layout (not available for the GTK and Windows 95
+toolbar).}
+\twocolitem{\windowstyle{wxTB\_3DBUTTONS}}{Gives wxToolBarSimple a mild 3D look to its buttons.}
+\twocolitem{\windowstyle{wxTB\_TEXT}}{Show the text in the toolbar buttons; by default only icons are shown.}
 \twocolitem{\windowstyle{wxTB\_NOICONS}}{Specifies no icons in the toolbar buttons; by default they are shown.}
-\twocolitem{\windowstyle{wxTB\_NODIVIDER}}{Specifies no divider (border) above the toolbar (Windows only).}
-\twocolitem{\windowstyle{wxTB\_NOALIGN}}{Specifies no alignment with the parent window (Windows only, not very useful).}
-\twocolitem{\windowstyle{wxTB\_HORZ\_LAYOUT}}{Shows the text and the icons alongside, not vertically stacked (Windows and GTK
-2 only). This style must be used with wxTB\_TEXT.}
-\twocolitem{\windowstyle{wxTB\_HORZ\_TEXT}}{Combination of wxTB\_HORZ\_LAYOUT and wxTB\_TEXT.}
+\twocolitem{\windowstyle{wxTB\_NODIVIDER}}{Specifies no divider above the toolbar; by default it is shown. Windows only.}
+\twocolitem{\windowstyle{wxTB\_NOALIGN}}{Specifies no alignment with the parent window. Windows only.}
 \end{twocollist}
 
 See also \helpref{window styles overview}{windowstyles}. Note that the Win32
@@ -83,13 +65,20 @@ native toolbar ignores {\tt wxTB\_NOICONS} style. Also, toggling the
 
 \wxheading{Event handling}
 
-The toolbar class emits menu commands in the same way that a frame menubar does,
+The toolbar class emits menu commands in the same was that a frame menubar does,
 so you can use one EVT\_MENU macro for both a menu item and a toolbar button.
 The event handler functions take a wxCommandEvent argument. For most event macros,
 the identifier of the tool is passed, but for EVT\_TOOL\_ENTER the toolbar
-window identifier is passed and the tool identifier is retrieved from the wxCommandEvent.
-This is because the identifier may be -1 when the mouse moves off a tool, and -1 is not
+window is passed and the tool id is retrieved from the wxCommandEvent.
+This is because the id may be -1 when the mouse moves off a tool, and -1 is not
 allowed as an identifier in the event system.
+
+Note that tool commands (and UI update events for tools) are first sent to
+the focus window within the frame that contains the toolbar. If no window within the frame has the focus,
+then the events are sent directly to the toolbar (and up the hierarchy to the
+frame, depending on where the application has put its event handlers). This allows command and UI update
+handling to be processed by specific windows and controls, and not necessarily
+by the application frame.
 
 \twocolwidtha{7cm}
 \begin{twocollist}\itemsep=0pt
@@ -97,8 +86,9 @@ allowed as an identifier in the event system.
 (a synonym for wxEVT\_COMMAND\_MENU\_SELECTED). Pass the id of the tool.}
 \twocolitem{{\bf EVT\_MENU(id, func)}}{The same as EVT\_TOOL.}
 \twocolitem{{\bf EVT\_TOOL\_RANGE(id1, id2, func)}}{Process a wxEVT\_COMMAND\_TOOL\_CLICKED event
-for a range of identifiers. Pass the ids of the tools.}
+for a range id identifiers. Pass the ids of the tools.}
 \twocolitem{{\bf EVT\_MENU\_RANGE(id1, id2, func)}}{The same as EVT\_TOOL\_RANGE.}
+
 \twocolitem{{\bf EVT\_TOOL\_RCLICKED(id, func)}}{Process a wxEVT\_COMMAND\_TOOL\_RCLICKED event.
 Pass the id of the tool.}
 \twocolitem{{\bf EVT\_TOOL\_RCLICKED\_RANGE(id1, id2, func)}}{Process a wxEVT\_COMMAND\_TOOL\_RCLICKED event
@@ -155,7 +145,7 @@ tools.
 You may also create a toolbar that is managed by the frame, by
 calling \helpref{wxFrame::CreateToolBar}{wxframecreatetoolbar}.
 
-\membersection{wxToolBar::\destruct{wxToolBar}}\label{wxtoolbardtor}
+\membersection{wxToolBar::\destruct{wxToolBar}}
 
 \func{void}{\destruct{wxToolBar}}{\void}
 
@@ -181,13 +171,13 @@ Adds a separator for spacing groups of tools.
 
 \membersection{wxToolBar::AddTool}\label{wxtoolbaraddtool}
 
-\func{wxToolBarToolBase*}{AddTool}{\param{int}{ toolId},\rtfsp
+\func{wxToolBarTool*}{AddTool}{\param{int}{ toolId},\rtfsp
 \param{const wxString\&}{ label},\rtfsp
 \param{const wxBitmap\&}{ bitmap1},\rtfsp
 \param{const wxString\& }{shortHelpString = ""},\rtfsp
 \param{wxItemKind}{ kind = wxITEM\_NORMAL}}
 
-\func{wxToolBarToolBase*}{AddTool}{\param{int}{ toolId},\rtfsp
+\func{wxToolBarTool*}{AddTool}{\param{int}{ toolId},\rtfsp
 \param{const wxString\&}{ label},\rtfsp
 \param{const wxBitmap\&}{ bitmap1},\rtfsp
 \param{const wxBitmap\&}{ bitmap2 = wxNullBitmap},\rtfsp
@@ -196,12 +186,9 @@ Adds a separator for spacing groups of tools.
 \param{const wxString\& }{longHelpString = ""},\rtfsp
 \param{wxObject* }{clientData = NULL}}
 
-\func{wxToolBarToolBase*}{AddTool}{\param{wxToolBarToolBase* }{tool}}
-
 Adds a tool to the toolbar. The first (short and most commonly used) version
 has fewer parameters than the full version at the price of not being able to
-specify some of the more rarely used button features. The last version allows
-you to add an existing tool.
+specify some of the more rarely used button features.
 
 \wxheading{Parameters}
 
@@ -214,11 +201,13 @@ toggled) or wxITEM\_RADIO for a checkable tool which makes part of a radio
 group of tools each of which is automatically unchecked whenever another button
 in the group is checked}
 
-\docparam{bitmap1}{The primary tool bitmap.}
+\docparam{bitmap1}{The primary tool bitmap for toggle and button tools.}
 
-\docparam{bitmap2}{The bitmap used when the tool is disabled. If it is equal to
-wxNullBitmap, the disabled bitmap is automatically generated by greing the
-normal one.}
+\docparam{bitmap2}{The second bitmap specifies the on-state bitmap for a toggle
+tool. If this is wxNullBitmap, either an inverted version of the primary bitmap is
+used for the on-state of a toggle tool (monochrome displays) or a black
+border is drawn around the tool (colour displays) or the pixmap is shown
+as a pressed button (GTK). }
 
 \docparam{shortHelpString}{This string is used for the tools tooltip}
 
@@ -227,8 +216,6 @@ parent frame when the mouse pointer is inside the tool}
 
 \docparam{clientData}{An optional pointer to client data which can be
 retrieved later using \helpref{wxToolBar::GetToolClientData}{wxtoolbargettoolclientdata}.}
-
-\docparam{tool}{The tool to be added.}
 
 \wxheading{Remarks}
 
@@ -246,7 +233,7 @@ order to have the tools appear.
 
 \membersection{wxToolBar::AddCheckTool}\label{wxtoolbaraddchecktool}
 
-\func{wxToolBarToolBase*}{AddCheckTool}{\param{int}{ toolId},\rtfsp
+\func{wxToolBarTool*}{AddCheckTool}{\param{int}{ toolId},\rtfsp
 \param{const wxString\&}{ label},\rtfsp
 \param{const wxBitmap\&}{ bitmap1},\rtfsp
 \param{const wxBitmap\&}{ bitmap2},\rtfsp
@@ -263,7 +250,7 @@ as in \helpref{wxToolBar::AddTool}{wxtoolbaraddtool}.
 
 \membersection{wxToolBar::AddRadioTool}\label{wxtoolbaraddradiotool}
 
-\func{wxToolBarToolBase*}{AddRadioTool}{\param{int}{ toolId},\rtfsp
+\func{wxToolBarTool*}{AddRadioTool}{\param{int}{ toolId},\rtfsp
 \param{const wxString\&}{ label},\rtfsp
 \param{const wxBitmap\&}{ bitmap1},\rtfsp
 \param{const wxBitmap\&}{ bitmap2},\rtfsp
@@ -295,7 +282,7 @@ back later), you may use \helpref{RemoveTool}{wxtoolbarremovetool} instead.
 Note that it is unnecessary to call \helpref{Realize}{wxtoolbarrealize} for the
 change to take place, it will happen immediately.
 
-Returns true if the tool was deleted, false otherwise.
+Returns TRUE if the tool was deleted, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -318,14 +305,15 @@ Enables or disables the tool.
 
 \docparam{toolId}{Tool to enable or disable.}
 
-\docparam{enable}{If true, enables the tool, otherwise disables it.}
+\docparam{enable}{If TRUE, enables the tool, otherwise disables it.}
 
 {\bf NB:} This function should only be called after 
 \helpref{Realize}{wxtoolbarrealize}.
 
 \wxheading{Remarks}
 
-Some implementations will change the visible state of the tool to indicate that it is disabled.
+For wxToolBarSimple, does nothing. Some other implementations
+will change the visible state of the tool to indicate that it is disabled.
 
 \wxheading{See also}
 
@@ -334,7 +322,7 @@ Some implementations will change the visible state of the tool to indicate that 
 
 \membersection{wxToolBar::FindById}\label{wxtoolbarfindbyid}
 
-\func{wxToolBarToolBase*}{FindById}{\param{int }{id}}
+\func{wxToolBarTool*}{FindById}{\param{int }{id}}
 
 Returns a pointer to the tool identified by {\it id} or
 NULL if no corresponding tool is found.
@@ -348,7 +336,7 @@ NULL if no corresponding control is found.
 
 \membersection{wxToolBar::FindToolForPosition}\label{wxtoolbarfindtoolforposition}
 
-\constfunc{wxToolBarToolBase*}{FindToolForPosition}{\param{const float}{ x}, \param{const float}{ y}}
+\constfunc{wxToolBarTool*}{FindToolForPosition}{\param{const float}{ x}, \param{const float}{ y}}
 
 Finds a tool for the given mouse position.
 
@@ -430,7 +418,7 @@ Called to determine whether a tool is enabled (responds to user input).
 
 \wxheading{Return value}
 
-true if the tool is enabled, false otherwise.
+TRUE if the tool is enabled, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -460,12 +448,6 @@ Returns the value used for packing tools.
 \wxheading{See also}
 
 \helpref{wxToolBar::SetToolPacking}{wxtoolbarsettoolpacking}
-
-\membersection{wxToolBar::GetToolPos}\label{wxtoolbargettoolpos}
-
-\constfunc{int}{GetToolPos}{\param{int }{toolId}}
-
-Returns the tool position in the toolbar, or {\tt wxNOT\_FOUND} if the tool is not found.
 
 \membersection{wxToolBar::GetToolSeparation}\label{wxtoolbargettoolseparation}
 
@@ -504,7 +486,7 @@ Gets the on/off state of a toggle tool.
 
 \wxheading{Return value}
 
-true if the tool is toggled on, false otherwise.
+TRUE if the tool is toggled on, FALSE otherwise.
 
 \wxheading{See also}
 
@@ -512,7 +494,7 @@ true if the tool is toggled on, false otherwise.
 
 \membersection{wxToolBar::InsertControl}\label{wxtoolbarinsertcontrol}
 
-\func{wxToolBarToolBase *}{InsertControl}{\param{size\_t }{pos}, \param{wxControl *}{control}}
+\func{wxToolBarTool *}{InsertControl}{\param{size\_t }{pos}, \param{wxControl *}{control}}
 
 Inserts the control into the toolbar at the given position.
 
@@ -525,7 +507,7 @@ You must call \helpref{Realize}{wxtoolbarrealize} for the change to take place.
 
 \membersection{wxToolBar::InsertSeparator}\label{wxtoolbarinsertseparator}
 
-\func{wxToolBarToolBase *}{InsertSeparator}{\param{size\_t }{pos}}
+\func{wxToolBarTool *}{InsertSeparator}{\param{size\_t }{pos}}
 
 Inserts the separator into the toolbar at the given position.
 
@@ -538,13 +520,10 @@ You must call \helpref{Realize}{wxtoolbarrealize} for the change to take place.
 
 \membersection{wxToolBar::InsertTool}\label{wxtoolbarinserttool}
 
-\func{wxToolBarToolBase *}{InsertTool}{\param{size\_t }{pos},\rtfsp
+\func{wxToolBarTool *}{InsertTool}{\param{size\_t }{pos},\rtfsp
 \param{int}{ toolId}, \param{const wxBitmap\&}{ bitmap1},\rtfsp
-\param{const wxBitmap\&}{ bitmap2 = wxNullBitmap}, \param{bool}{ isToggle = false},\rtfsp
+\param{const wxBitmap\&}{ bitmap2 = wxNullBitmap}, \param{bool}{ isToggle = FALSE},\rtfsp
 \param{wxObject* }{clientData = NULL}, \param{const wxString\& }{shortHelpString = ""}, \param{const wxString\& }{longHelpString = ""}}
-
-\func{wxToolBarToolBase *}{InsertTool}{\param{size\_t }{pos},\rtfsp
-\param{wxToolBarToolBase* }{tool}}
 
 Inserts the tool with the specified attributes into the toolbar at the given
 position.
@@ -570,11 +549,11 @@ you should use the EVT\_MENU or EVT\_TOOL macro instead.
 
 \docparam{toolId}{The identifier passed to \helpref{wxToolBar::AddTool}{wxtoolbaraddtool}.}
 
-\docparam{toggleDown}{true if the tool is a toggle and the toggle is down, otherwise is false.}
+\docparam{toggleDown}{TRUE if the tool is a toggle and the toggle is down, otherwise is FALSE.}
 
 \wxheading{Return value}
 
-If the tool is a toggle and this function returns false, the toggle
+If the tool is a toggle and this function returns FALSE, the toggle
 toggle state (internal and visual) will not be changed. This provides a way of
 specifying that toggle operations are not permitted in some circumstances.
 
@@ -638,9 +617,12 @@ A typical use of this member might be to pop up a menu.
 
 This function should be called after you have added tools.
 
+If you are using absolute positions for your tools when using a wxToolBarSimple object,
+do not call this function. You must call it at all other times.
+
 \membersection{wxToolBar::RemoveTool}\label{wxtoolbarremovetool}
 
-\func{wxToolBarToolBase *}{RemoveTool}{\param{int }{id}}
+\func{wxToolBarTool *}{RemoveTool}{\param{int }{id}}
 
 Removes the given tool from the toolbar but doesn't delete it. This allows to
 insert/add this tool back to this (or another) toolbar later.
@@ -651,13 +633,6 @@ change to take place, it will happen immediately.
 \wxheading{See also}
 
 \helpref{DeleteTool}{wxtoolbardeletetool}
-
-\membersection{wxToolBar::SetBitmapResource}\label{wxtoolbarsetbitmapresource}
-
-\func{void}{SetBitmapResource}{\param{int }{resourceId}}
-
-Sets the bitmap resource identifier for specifying tool bitmaps as indices
-into a custom bitmap. Windows CE only.
 
 \membersection{wxToolBar::SetMargins}\label{wxtoolbarsetmargins}
 
@@ -797,7 +772,7 @@ Toggles a tool on or off. This does not cause any event to get emitted.
 
 \docparam{toolId}{Tool in question.}
 
-\docparam{toggle}{If true, toggles the tool on, otherwise toggles it off.}
+\docparam{toggle}{If TRUE, toggles the tool on, otherwise toggles it off.}
 
 \wxheading{Remarks}
 
@@ -806,4 +781,5 @@ Only applies to a tool that has been specified as a toggle tool.
 \wxheading{See also}
 
 \helpref{wxToolBar::GetToolState}{wxtoolbargettoolstate}
+
 

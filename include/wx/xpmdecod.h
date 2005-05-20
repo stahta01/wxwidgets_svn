@@ -10,15 +10,15 @@
 #ifndef _WX_XPMDECOD_H_
 #define _WX_XPMDECOD_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "xpmdecod.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
 
-class WXDLLIMPEXP_CORE wxImage;
-class WXDLLIMPEXP_BASE wxInputStream;
+class WXDLLEXPORT wxImage;
+class WXDLLEXPORT wxInputStream;
 
 // --------------------------------------------------------------------------
 // wxXPMDecoder class

@@ -6,13 +6,13 @@
 // Created:     13.01.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MSW_ENHMETA_H_
 #define _WX_MSW_ENHMETA_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "enhmeta.h"
 #endif
 
@@ -31,7 +31,7 @@ class WXDLLEXPORT wxEnhMetaFile : public wxObject
 public:
     wxEnhMetaFile(const wxString& file = wxEmptyString) : m_filename(file)
         { Init(); }
-    wxEnhMetaFile(const wxEnhMetaFile& metafile) : wxObject()
+    wxEnhMetaFile(const wxEnhMetaFile& metafile)
         { Init(); Assign(metafile); }
     wxEnhMetaFile& operator=(const wxEnhMetaFile& metafile)
         { Free(); Assign(metafile); return *this; }
@@ -61,7 +61,7 @@ public:
     void SetHENHMETAFILE(WXHANDLE hMF) { Free(); m_hMF = hMF; }
 
 protected:
-    void Init();
+    void Init() { m_hMF = 0; }
     void Free();
     void Assign(const wxEnhMetaFile& mf);
 
@@ -91,7 +91,7 @@ public:
     wxEnhMetaFile *Close();
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxEnhMetaFileDC)
+    DECLARE_DYNAMIC_CLASS(wxEnhMetaFileDC)
 };
 
 #if wxUSE_DRAG_AND_DROP
@@ -128,8 +128,6 @@ public:
 
 protected:
     wxEnhMetaFile m_metafile;
-
-    DECLARE_NO_COPY_CLASS(wxEnhMetaFileDataObject)
 };
 
 
@@ -160,19 +158,8 @@ public:
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
 
-    virtual size_t GetDataSize(const wxDataFormat& WXUNUSED(format)) const
-        { return GetDataSize(); }
-    virtual bool GetDataHere(const wxDataFormat& WXUNUSED(format),
-                             void *buf) const
-        { return GetDataHere(buf); }
-    virtual bool SetData(const wxDataFormat& WXUNUSED(format),
-                         size_t len, const void *buf)
-        { return SetData(len, buf); }
-
 protected:
     wxEnhMetaFile m_metafile;
-
-    DECLARE_NO_COPY_CLASS(wxEnhMetaFileSimpleDataObject)
 };
 
 #endif // wxUSE_DRAG_AND_DROP

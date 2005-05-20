@@ -12,7 +12,7 @@
 #ifndef _WX_TEXTCTRL_H_
 #define _WX_TEXTCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "textctrl.h"
 #endif
 
@@ -74,7 +74,6 @@ public:
     virtual bool LoadFile(const wxString& file);
 
     // clears the dirty flag
-    virtual void MarkDirty();
     virtual void DiscardEdits();
 
     virtual void SetMaxLength(unsigned long len);
@@ -93,7 +92,6 @@ public:
     // controls)
     virtual bool SetStyle(long start, long end, const wxTextAttr& style);
     virtual bool SetDefaultStyle(const wxTextAttr& style);
-    virtual bool GetStyle(long position, wxTextAttr& style);
 #endif // wxUSE_RICHEDIT
 
     // translate between the position (which is just an index in the text ctrl
@@ -103,13 +101,6 @@ public:
     virtual bool PositionToXY(long pos, long *x, long *y) const;
 
     virtual void ShowPosition(long pos);
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt, long *pos) const;
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt,
-                                            wxTextCoord *col,
-                                            wxTextCoord *row) const
-    {
-        return wxTextCtrlBase::HitTest(pt, col, row);
-    }
 
     // Clipboard operations
     virtual void Copy();
@@ -131,15 +122,10 @@ public:
     virtual void SetInsertionPoint(long pos);
     virtual void SetInsertionPointEnd();
     virtual long GetInsertionPoint() const;
-    virtual wxTextPos GetLastPosition() const;
+    virtual long GetLastPosition() const;
 
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
-
-    // Caret handling (Windows only)
-
-    bool ShowNativeCaret(bool show = true);
-    bool HideNativeCaret() { return ShowNativeCaret(false); }
 
     // Implementation from now on
     // --------------------------
@@ -148,7 +134,14 @@ public:
 
     virtual void Command(wxCommandEvent& event);
     virtual bool MSWCommand(WXUINT param, WXWORD id);
-    virtual WXHBRUSH MSWControlColor(WXHDC hDC, WXHWND hWnd);
+    virtual WXHBRUSH OnCtlColor(WXHDC pDC, WXHWND pWnd, WXUINT nCtlColor,
+            WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
+
+    // In WIN16, need to override normal erasing because
+    // Ctl3D doesn't use the wxWindows background colour.
+#ifdef __WIN16__
+    void OnEraseBackground(wxEraseEvent& event);
+#endif
 
 #if wxUSE_RICHEDIT
     virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
@@ -188,18 +181,14 @@ public:
 
     // Show a context menu for Rich Edit controls (the standard
     // EDIT control has one already)
-    void OnContextMenu(wxContextMenuEvent& event);
-
-    // be sure the caret remains invisible if the user
-    // called HideNativeCaret() before
-    void OnSetFocus(wxFocusEvent& event);
+    void OnRightClick(wxMouseEvent& event);
 
 protected:
     // common part of all ctors
     void Init();
 
     // intercept WM_GETDLGCODE
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+    virtual long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 
     // call this to increase the size limit (will do nothing if the current
     // limit is big enough)
@@ -208,21 +197,20 @@ protected:
     // false if we hit the limit set by SetMaxLength() and so didn't change it
     bool AdjustSpaceLimit();
 
-#if wxUSE_RICHEDIT && (!wxUSE_UNICODE || wxUSE_UNICODE_MSLU)
+#if wxUSE_RICHEDIT
     // replace the selection or the entire control contents with the given text
     // in the specified encoding
-    bool StreamIn(const wxString& value, wxFontEncoding encoding, bool selOnly);
-
-    // get the contents of the control out as text in the given encoding
-    wxString StreamOut(wxFontEncoding encoding, bool selOnly = false) const;
+    bool StreamIn(const wxString& value,
+                  wxFontEncoding encoding,
+                  bool selOnly);
 #endif // wxUSE_RICHEDIT
 
     // replace the contents of the selection or of the entire control with the
     // given text
-    void DoWriteText(const wxString& text, bool selectionOnly = true);
+    void DoWriteText(const wxString& text, bool selectionOnly = TRUE);
 
     // set the selection possibly without scrolling the caret into view
-    void DoSetSelection(long from, long to, bool scrollCaret = true);
+    void DoSetSelection(long from, long to, bool scrollCaret = TRUE);
 
     // return true if there is a non empty selection in the control
     bool HasSelection() const;
@@ -231,7 +219,7 @@ protected:
     // position
     long GetLengthOfLineContainingPos(long pos) const;
 
-    // send TEXT_UPDATED event, return true if it was handled, false otherwise
+    // send TEXT_UPDATED event, return TRUE if it was handled, FALSE otherwise
     bool SendUpdateEvent();
 
     // override some base class virtuals
@@ -247,19 +235,15 @@ protected:
     int m_verRichEdit;
 #endif // wxUSE_RICHEDIT
 
-    // number of EN_UPDATE events sent by Windows when we change the controls
-    // text ourselves: we want this to be exactly 1
-    int m_updatesCount;
-
-    virtual wxVisualAttributes GetDefaultAttributes() const;
+    // if TRUE, SendUpdateEvent() will eat the next event (see comments in the
+    // code as to why this is needed)
+    bool m_suppressNextUpdate;
 
 private:
     DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxTextCtrl)
+    DECLARE_DYNAMIC_CLASS(wxTextCtrl)
 
     wxMenu* m_privateContextMenu;
-
-    bool m_isNativeCaretShown;
 };
 
 #endif

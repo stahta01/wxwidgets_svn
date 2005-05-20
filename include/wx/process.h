@@ -6,13 +6,13 @@
 // Created:     24/06/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_PROCESSH__
 #define _WX_PROCESSH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "process.h"
 #endif
 
@@ -39,11 +39,11 @@ enum
 // function will be called when the process terminates.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxProcess : public wxEvtHandler
+class WXDLLEXPORT wxProcess : public wxEvtHandler
 {
 public:
     // kill the process with the given PID
-    static wxKillError Kill(int pid, wxSignal sig = wxSIGTERM, int flags = wxKILL_NOCHILDREN);
+    static wxKillError Kill(int pid, wxSignal sig = wxSIGTERM);
 
     // test if the given process exists
     static bool Exists(int pid);
@@ -59,10 +59,10 @@ public:
 
 
     // ctors
-    wxProcess(wxEvtHandler *parent = (wxEvtHandler *) NULL, int nId = wxID_ANY)
-        { Init(parent, nId, wxPROCESS_DEFAULT); }
+    wxProcess(wxEvtHandler *parent = (wxEvtHandler *) NULL, int id = -1)
+        { Init(parent, id, wxPROCESS_DEFAULT); }
 
-    wxProcess(int flags) { Init(NULL, wxID_ANY, flags); }
+    wxProcess(int flags) { Init(NULL, -1, flags); }
 
     virtual ~wxProcess();
 
@@ -72,7 +72,7 @@ public:
     // call this before passing the object to wxExecute() to redirect the
     // launched process stdin/stdout, then use GetInputStream() and
     // GetOutputStream() to get access to them
-    void Redirect() { m_redirect = true; }
+    void Redirect() { m_redirect = TRUE; }
     bool IsRedirected() const { return m_redirect; }
 
     // detach from the parent - should be called by the parent if it's deleted
@@ -88,10 +88,10 @@ public:
     // close the output stream indicating that nothing more will be written
     void CloseOutput() { delete m_outputStream; m_outputStream = NULL; }
 
-    // return true if the child process stdout is not closed
+    // return TRUE if the child process stdout is not closed
     bool IsInputOpened() const;
 
-    // return true if any input is available on the child process stdout/err
+    // return TRUE if any input is available on the child process stdout/err
     bool IsInputAvailable() const;
     bool IsErrorAvailable() const;
 
@@ -107,7 +107,8 @@ public:
 
     // for backwards compatibility only, don't use
 #if WXWIN_COMPATIBILITY_2_2
-    wxDEPRECATED( wxProcess(wxEvtHandler *parent, bool redirect) );
+    wxProcess(wxEvtHandler *parent, bool redirect)
+        { Init(parent, -1, redirect ? wxPROCESS_REDIRECT : wxPROCESS_DEFAULT); }
 #endif // WXWIN_COMPATIBILITY_2_2
 
 protected:
@@ -127,7 +128,6 @@ protected:
     bool m_redirect;
 
     DECLARE_DYNAMIC_CLASS(wxProcess)
-    DECLARE_NO_COPY_CLASS(wxProcess)
 };
 
 // ----------------------------------------------------------------------------
@@ -135,13 +135,13 @@ protected:
 // ----------------------------------------------------------------------------
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_END_PROCESS, 440)
+    DECLARE_EVENT_TYPE(wxEVT_END_PROCESS, 440)
 END_DECLARE_EVENT_TYPES()
 
-class WXDLLIMPEXP_BASE wxProcessEvent : public wxEvent
+class WXDLLEXPORT wxProcessEvent : public wxEvent
 {
 public:
-    wxProcessEvent(int nId = 0, int pid = 0, int exitcode = 0) : wxEvent(nId)
+    wxProcessEvent(int id = 0, int pid = 0, int exitcode = 0) : wxEvent(id)
     {
         m_eventType = wxEVT_END_PROCESS;
         m_pid = pid;
@@ -162,15 +162,17 @@ public:
     int m_pid,
         m_exitcode;
 
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxProcessEvent)
+    DECLARE_DYNAMIC_CLASS(wxProcessEvent)
 };
 
 typedef void (wxEvtHandler::*wxProcessEventFunction)(wxProcessEvent&);
 
-#define wxProcessEventHandler(func) \
-    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxProcessEventFunction, &func)
-
 #define EVT_END_PROCESS(id, func) \
-   wx__DECLARE_EVT1(wxEVT_END_PROCESS, id, wxProcessEventHandler(func))
+   DECLARE_EVENT_TABLE_ENTRY( \
+           wxEVT_END_PROCESS, id, -1, \
+           (wxObjectEventFunction) \
+           (wxEventFunction) \
+           (wxProcessEventFunction) & func, NULL),
 
-#endif // _WX_PROCESSH__
+#endif
+    // _WX_PROCESSH__

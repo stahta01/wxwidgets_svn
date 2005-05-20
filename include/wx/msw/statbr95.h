@@ -12,7 +12,7 @@
 #ifndef   _STATBR95_H
 #define   _STATBR95_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "statbr95.h"
 #endif
 
@@ -24,7 +24,7 @@ public:
     // ctors and such
     wxStatusBar95();
     wxStatusBar95(wxWindow *parent,
-                  wxWindowID id = wxID_ANY,
+                  wxWindowID id = -1,
                   long style = wxST_SIZEGRIP,
                   const wxString& name = wxEmptyString)
     {
@@ -32,7 +32,7 @@ public:
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 long style = wxST_SIZEGRIP,
                 const wxString& name = wxEmptyString);
 
@@ -47,9 +47,6 @@ public:
 
     // set status line fields' widths
     virtual void SetStatusWidths(int n, const int widths_field[]);
-
-    // set status line fields' styles
-    virtual void SetStatusStyles(int n, const int styles[]);
 
     // sets the minimal vertical size of the status bar
     virtual void SetMinHeight(int height);
@@ -69,7 +66,7 @@ protected:
     void DoMoveWindow(int x, int y, int width, int height);
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxStatusBar95)
+    DECLARE_DYNAMIC_CLASS(wxStatusBar95);
 };
 
 #endif  // wxUSE_NATIVE_STATUSBAR

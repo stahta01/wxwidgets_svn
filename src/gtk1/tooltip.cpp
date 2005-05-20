@@ -7,21 +7,20 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "tooltip.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/setup.h"
 
 #if wxUSE_TOOLTIPS
 
-#include "wx/tooltip.h"
 #include "wx/window.h"
+#include "wx/tooltip.h"
 
 #include "wx/gtk/private.h"
+
+extern GdkFont *GtkGetDefaultGuiFont();
 
 //-----------------------------------------------------------------------------
 // global data

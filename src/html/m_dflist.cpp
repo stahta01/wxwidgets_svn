@@ -4,10 +4,10 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 1999 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -36,8 +36,6 @@ FORCE_LINK_ME(m_dflist)
 
 TAG_HANDLER_BEGIN(DEFLIST, "DL,DT,DD" )
 
-    TAG_HANDLER_CONSTR(DEFLIST) { }
-
     TAG_HANDLER_PROC(tag)
     {
         wxHtmlContainerCell *c;
@@ -45,7 +43,7 @@ TAG_HANDLER_BEGIN(DEFLIST, "DL,DT,DD" )
 
         if (tag.GetName() == wxT("DL"))
         {
-            if (m_WParser->GetContainer()->GetFirstChild() != NULL)
+            if (m_WParser->GetContainer()->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
@@ -54,14 +52,14 @@ TAG_HANDLER_BEGIN(DEFLIST, "DL,DT,DD" )
 
             ParseInner(tag);
 
-            if (m_WParser->GetContainer()->GetFirstChild() != NULL)
+            if (m_WParser->GetContainer()->GetFirstCell() != NULL)
             {
                 m_WParser->CloseContainer();
                 m_WParser->OpenContainer();
             }
             m_WParser->GetContainer()->SetIndent(m_WParser->GetCharHeight(), wxHTML_INDENT_TOP);
 
-            return true;
+            return TRUE;
         }
         else if (tag.GetName() == wxT("DT"))
         {
@@ -69,14 +67,14 @@ TAG_HANDLER_BEGIN(DEFLIST, "DL,DT,DD" )
             c = m_WParser->OpenContainer();
             c->SetAlignHor(wxHTML_ALIGN_LEFT);
             c->SetMinHeight(m_WParser->GetCharHeight());
-            return false;
+            return FALSE;
         }
         else // "DD"
         {
             m_WParser->CloseContainer();
             c = m_WParser->OpenContainer();
             c->SetIndent(5 * m_WParser->GetCharWidth(), wxHTML_INDENT_LEFT);
-            return false;
+            return FALSE;
         }
     }
 

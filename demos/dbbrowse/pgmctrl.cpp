@@ -43,9 +43,9 @@
 //----------------------------------------------------------------------------------------
 //-- Global functions --------------------------------------------------------------------
 //----------------------------------------------------------------------------------------
-static inline const wxChar *bool2String(bool b)
+static inline const char *bool2String(bool b)
 {
-    return b ? wxEmptyString : _T("not ");
+    return b ? "" : "not ";
 }
 
 //----------------------------------------------------------------------------------------
@@ -70,17 +70,23 @@ PgmCtrl::PgmCtrl(wxWindow *parent) : wxTreeCtrl(parent)
 PgmCtrl::PgmCtrl(wxWindow *parent, const wxWindowID id,const wxPoint& pos, const wxSize& size, long style)
 : wxTreeCtrl(parent, id, pos, size, style)
 {
-    const int image_size = 16;
     // Make an image list containing small icons
-    p_imageListNormal = new wxImageList(image_size, image_size, true);
+    p_imageListNormal = new wxImageList(16, 16, TRUE);
     // should correspond to TreeIc_xxx enum
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(aLogo)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DsnClosed)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DsnOpen)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DocClosed)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(DocOpen)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(FolderClosed)).ConvertToImage().Rescale(image_size, image_size)));
-    p_imageListNormal->Add(wxBitmap(wxBitmap(wxICON(FolderOpen)).ConvertToImage().Rescale(image_size, image_size)));
+#if defined(__WXMSW__) && defined(__WIN16__)
+    // This is required in 16-bit Windows mode only because we can't load a specific (16x16)
+    // icon image, so it comes out stretched
+    p_imageListNormal->Add(wxBitmap("bitmap1", wxBITMAP_TYPE_BMP_RESOURCE));
+    p_imageListNormal->Add(wxBitmap("bitmap2", wxBITMAP_TYPE_BMP_RESOURCE));
+#else
+    p_imageListNormal->Add(wxICON(aLogo));
+    p_imageListNormal->Add(wxICON(DsnClosed));
+    p_imageListNormal->Add(wxICON(DsnOpen));
+    p_imageListNormal->Add(wxICON(DocClosed));
+    p_imageListNormal->Add(wxICON(DocOpen));
+    p_imageListNormal->Add(wxICON(FolderClosed));
+    p_imageListNormal->Add(wxICON(FolderOpen));
+#endif
     SetImageList(p_imageListNormal);
 }
 
@@ -88,7 +94,7 @@ PgmCtrl::PgmCtrl(wxWindow *parent, const wxWindowID id,const wxPoint& pos, const
 PgmCtrl::~PgmCtrl()
 {
     delete p_imageListNormal;
-    delete popupMenu1;
+    delete popupMenu1;  
 }
 
 //----------------------------------------------------------------------------------------
@@ -103,26 +109,26 @@ int  PgmCtrl::OnPopulate()
     int i;
     double dTmp = 1234567.89;
     Temp0.Printf(_("%s Functions"),p_ProgramCfg->GetAppName().c_str());
-    Root   = AddRoot(Temp0,TreeIc_Logo,TreeIc_Logo, new TreeData(_T("Root")));
+    Root   = AddRoot(Temp0,TreeIc_Logo,TreeIc_Logo, new TreeData("Root"));
     //---------------------------------------------------------------------------------------
-    Folder = AppendItem(Root, _("Program settings")   ,TreeIc_FolderClosed, TreeIc_FolderOpen, new TreeData(_T("Settings")));
-    p_ProgramCfg->Read(_T("/Local/langid"),&Temp0); p_ProgramCfg->Read(_T("/Local/language"),&Temp2);
+    Folder = AppendItem(Root, _("Program settings")   ,TreeIc_FolderClosed, TreeIc_FolderOpen, new TreeData("Settings"));
+    p_ProgramCfg->Read("/Local/langid",&Temp0); p_ProgramCfg->Read("/Local/language",&Temp2);
     Temp1.Printf(_("locale (%s) ; Language (%s) ; Number(%2.2f)"),Temp0.c_str(), Temp2.c_str(), dTmp); Temp0.Empty();  Temp2.Empty();
-    Docu   = AppendItem(Folder, Temp1,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData(_T("Setting Language")));
-    p_ProgramCfg->Read(_T("/Paths/Work"),&Temp0); Temp1.Printf(_("Work Path : %s"),Temp0.c_str()); Temp0.Empty();
-    Docu   = AppendItem(Folder,Temp1,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData(_T("Path Work")));
-    Docu   = AppendItem(Folder, _("Change the language to English") ,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData(_T("Language English")));
-    Docu   = AppendItem(Folder, _("Change the language to German")  ,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData(_T("Language German")));
-    Docu   = AppendItem(Folder, _("Delete all wxConfigBase Entry's"),TreeIc_DocClosed,TreeIc_DocOpen,new TreeData(_T("wxConfigBase Delete")));
-    Folder = AppendItem(Root, _T("ODBC DSN"),TreeIc_FolderClosed,TreeIc_FolderOpen,new TreeData(_T("ODBC-DSN")));
+    Docu   = AppendItem(Folder, Temp1,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData("Setting Language"));
+    p_ProgramCfg->Read("/Paths/Work",&Temp0); Temp1.Printf(_("Work Path : %s"),Temp0.c_str()); Temp0.Empty();
+    Docu   = AppendItem(Folder,Temp1,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData("Path Work"));
+    Docu   = AppendItem(Folder, _("Change the language to English") ,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData("Language English"));
+    Docu   = AppendItem(Folder, _("Change the language to German")  ,TreeIc_DocClosed,TreeIc_DocOpen,new TreeData("Language German"));
+    Docu   = AppendItem(Folder, _("Delete all wxConfigBase Entry's"),TreeIc_DocClosed,TreeIc_DocOpen,new TreeData("wxConfigBase Delete"));
+    Folder = AppendItem(Root, "ODBC DSN",TreeIc_FolderClosed,TreeIc_FolderOpen,new TreeData("ODBC-DSN"));
     for (i=0;i<pDoc->i_DSN;i++)
     {
-        Temp0.Printf(_T("ODBC-%s"),(pDoc->p_DSN+i)->Dsn.c_str());
+        Temp0.Printf("ODBC-%s",(pDoc->p_DSN+i)->Dsn.c_str());
         Docu   = AppendItem(Folder,(pDoc->p_DSN+i)->Dsn ,TreeIc_DsnClosed,TreeIc_DsnOpen, new TreeData(Temp0));
     }
     //---------------------------------------------------------------------------------------
     popupMenu1 = NULL;
-    popupMenu1 = new wxMenu;
+    popupMenu1 = new wxMenu("");
     popupMenu1->Append(PGMCTRL_ODBC_USER, _("Set Username and Password"));
     // popupMenu1->AppendSeparator();
     //---------------------------------------------------------------------------------------
@@ -137,33 +143,31 @@ void PgmCtrl::OnSelChanged(wxMouseEvent& WXUNUSED(event))
 {
     int i;
     Temp0.Empty();   Temp1.Empty();
-#if wxUSE_STATUSBAR
     pDoc->p_MainFrame->SetStatusText(Temp0,0);
-#endif // wxUSE_STATUSBAR
     // Get the Information that we need
     wxTreeItemId itemId = GetSelection();
     TreeData *item = (TreeData *)GetItemData(itemId);
     if (item != NULL )
     {
         int Treffer = 0;
-        Temp1.Printf(_T("%s"),item->m_desc.c_str());
+        Temp1.Printf("%s",item->m_desc.c_str());
         //--------------------------------------------------------------------------------------
-        if (Temp1 == _T("Language English"))
+        if (Temp1 == "Language English")
         {
-            Temp0 = _T("std");
-            p_ProgramCfg->Write(_T("/Local/langid"),Temp0);
+            Temp0 = "std";
+            p_ProgramCfg->Write("/Local/langid",Temp0);
             Temp0 = _("-I-> After a programm restart, the language will be changed to English.");
             wxMessageBox(Temp0);
         }
-        if (Temp1 == _T("Language German"))
+        if (Temp1 == "Language German")
         {
-            Temp0 = _T("de");
-            p_ProgramCfg->Write(_T("/Local/langid"),Temp0);
+            Temp0 = "de";
+            p_ProgramCfg->Write("/Local/langid",Temp0);
             Temp0 = _("-I-> After a programm restart, the language will be changed to German.");
             wxMessageBox(Temp0);
         }
         //--------------------------------------------------------------------------------------
-        if (Temp1 == _T("wxConfigBase Delete"))
+        if (Temp1 == "wxConfigBase Delete")
         {
             if (p_ProgramCfg->DeleteAll()) // Default Diretory for wxFileSelector
                 Temp0 = _("-I-> wxConfigBase.p_ProgramCfg->DeleteAll() was succesfull.");
@@ -173,7 +177,7 @@ void PgmCtrl::OnSelChanged(wxMouseEvent& WXUNUSED(event))
             Treffer++;
         }
         //--------------------------------------------------------------------------------------
-        if (Temp1.Contains(_T("ODBC-")))
+        if (Temp1.Contains("ODBC-"))
         {
             Temp1 = Temp1.Mid(5,wxSTRING_MAXLEN);
             for (i=0;i<pDoc->i_DSN;i++)
@@ -189,15 +193,16 @@ void PgmCtrl::OnSelChanged(wxMouseEvent& WXUNUSED(event))
         if (Treffer == 0)
         {
             //-------------------------------------------------------------------------------------
-            Temp0.Printf(_("Item '%s': %sselected, %sexpanded, %sbold, %u children (%u immediately under this item)."),
+            Temp0.Printf(_("Item '%s': %sselected, %sexpanded, %sbold,"
+                "%u children (%u immediately under this item)."),
                 item->m_desc.c_str(),
                 bool2String(IsSelected(itemId)),
                 bool2String(IsExpanded(itemId)),
                 bool2String(IsBold(itemId)),
                 GetChildrenCount(itemId),
                 GetChildrenCount(itemId));
-            LogBuf.Printf(_T("-I-> PgmCtrl::OnSelChanged - %s"),Temp0.c_str());
-            wxLogMessage( _T("%s"), LogBuf.c_str() );
+            LogBuf.Printf("-I-> PgmCtrl::OnSelChanged - %s",Temp0.c_str());
+            wxLogMessage( "%s", LogBuf.c_str() );
             //-------------------------------------------------------------------------------------
         }
     }
@@ -215,9 +220,9 @@ void PgmCtrl::OnRightSelect(wxTreeEvent& WXUNUSED(event))
     if ( item != NULL )
     {
         int Treffer = 0;
-        Temp1.Printf(_T("%s"),item->m_desc.c_str());
+        Temp1.Printf("%s",item->m_desc.c_str());
         //--------------------------------------------------------------------------------------
-        if (Temp1.Contains(_T("ODBC-")))
+        if (Temp1.Contains("ODBC-"))
         {
             Temp1 = Temp1.Mid(5,wxSTRING_MAXLEN);
             for (i=0;i<pDoc->i_DSN;i++)
@@ -262,7 +267,7 @@ void PgmCtrl::OnUserPassword(wxCommandEvent& WXUNUSED(event))
     // wxMessageBox(SaveDSN);
     int i;
     //--------------------------------------------
-    DlgUser *p_Dlg = new DlgUser(this,pDoc,wxEmptyString);
+    DlgUser *p_Dlg = new DlgUser(this,pDoc,"");
     //-------------------------------------------
     for (i=0;i<pDoc->i_DSN;i++)
     {
@@ -278,14 +283,14 @@ void PgmCtrl::OnUserPassword(wxCommandEvent& WXUNUSED(event))
             //--------------------
             // Temp0.Printf("i(%d) ; s_DSN(%s) ; s_User(%s) ; s_Password(%s)",i,p_Dlg.s_DSN,p_Dlg.s_User,p_Dlg.s_Password);
             // wxMessageBox(Temp0);
-            bool OK = false;
+            bool OK = FALSE;
             if (p_Dlg->ShowModal() == wxID_OK)
             {
                 (pDoc->p_DSN+i)->Usr = p_Dlg->s_User;
                 (pDoc->p_DSN+i)->Pas = p_Dlg->s_Password;
                 (pDoc->db_Br+i)->UserName  = (pDoc->p_DSN+i)->Usr;
                 (pDoc->db_Br+i)->Password  = (pDoc->p_DSN+i)->Pas;
-                OK = true;
+                OK = TRUE;
             }
             delete p_Dlg;
             if (!OK)

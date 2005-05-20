@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "imaglist.h"
 #endif
 
@@ -42,12 +42,11 @@
 
 #include "wx/log.h"
 #include "wx/intl.h"
-#include "wx/image.h"
 
 #include "wx/msw/imaglist.h"
 #include "wx/msw/private.h"
 
-#if defined(__WIN95__) && !(defined(__GNUWIN32_OLD__) && !defined(__CYGWIN10__))
+#if defined(__WIN95__) && !((defined(__GNUWIN32_OLD__) || defined(__TWIN32__)) && !defined(__CYGWIN10__))
     #include <commctrl.h>
 #endif
 
@@ -86,17 +85,12 @@ bool wxImageList::Create(int width, int height, bool mask, int initial)
     UINT flags = 0;
 
     // set appropriate color depth
-#ifdef __WXWINCE__
-    flags |= ILC_COLOR;
-#else
     int dd = wxDisplayDepth();
-
-    if (dd <= 4)       flags |= ILC_COLOR;   // 16 color
-    else if (dd <= 8)  flags |= ILC_COLOR8;  // 256 color
-    else if (dd <= 16) flags |= ILC_COLOR16; // 64k hi-color
-    else if (dd <= 24) flags |= ILC_COLOR24; // 16m truecolor
-    else if (dd <= 32) flags |= ILC_COLOR32; // 16m truecolor
-#endif
+    if (dd <= 4)       flags |= ILC_COLOR;	// 16 color
+    else if (dd <= 8)  flags |= ILC_COLOR8;	// 256 color
+    else if (dd <= 16) flags |= ILC_COLOR16;	// 64k hi-color
+    else if (dd <= 24) flags |= ILC_COLOR24;	// 16m truecolor
+    else if (dd <= 32) flags |= ILC_COLOR32;	// 16m truecolor
 
     if ( mask )
         flags |= ILC_MASK;
@@ -168,6 +162,10 @@ int wxImageList::Add(const wxBitmap& bitmap, const wxBitmap& mask)
 // 'bitmap'.
 int wxImageList::Add(const wxBitmap& bitmap, const wxColour& maskColour)
 {
+#ifdef __TWIN32__
+    wxFAIL_MSG(_T("ImageList_AddMasked not implemented in TWIN32"));
+    return -1;
+#else
     int index = ImageList_AddMasked(GetHImageList(),
                                     GetHbitmapOf(bitmap),
                                     wxColourToRGB(maskColour));
@@ -177,6 +175,7 @@ int wxImageList::Add(const wxBitmap& bitmap, const wxColour& maskColour)
     }
 
     return index;
+#endif
 }
 
 // Adds a bitmap and mask from an icon.
@@ -197,6 +196,10 @@ int wxImageList::Add(const wxIcon& icon)
 bool wxImageList::Replace(int index,
                           const wxBitmap& bitmap, const wxBitmap& mask)
 {
+#ifdef __TWIN32__
+    wxFAIL_MSG(_T("ImageList_Replace not implemented in TWIN32"));
+    return FALSE;
+#else
     HBITMAP hbmpMask = GetMaskForImage(bitmap, mask);
 
     bool ok = ImageList_Replace(GetHImageList(), index,
@@ -209,6 +212,7 @@ bool wxImageList::Replace(int index,
     ::DeleteObject(hbmpMask);
 
     return ok;
+#endif
 }
 
 // Replaces a bitmap and mask from an icon.
@@ -226,6 +230,10 @@ bool wxImageList::Replace(int i, const wxIcon& icon)
 // Removes the image at the given index.
 bool wxImageList::Remove(int index)
 {
+#ifdef __TWIN32__
+    wxFAIL_MSG(_T("ImageList_Replace not implemented in TWIN32"));
+    return FALSE;
+#else
     bool ok = ImageList_Remove(GetHImageList(), index) != 0;
     if ( !ok )
     {
@@ -233,6 +241,7 @@ bool wxImageList::Remove(int index)
     }
 
     return ok;
+#endif
 }
 
 // Remove all images
@@ -247,11 +256,11 @@ bool wxImageList::RemoveAll()
         (void)Remove(0);
     }
 
-    return true;
+    return TRUE;
 }
 
 // Draws the given image on a dc at the specified position.
-// If 'solidBackground' is true, Draw sets the image list background
+// If 'solidBackground' is TRUE, Draw sets the image list background
 // colour to the background colour of the wxDC, to speed up
 // drawing by eliminating masked drawing where possible.
 bool wxImageList::Draw(int index,
@@ -260,16 +269,20 @@ bool wxImageList::Draw(int index,
                        int flags,
                        bool solidBackground)
 {
+#ifdef __TWIN32__
+    wxFAIL_MSG(_T("ImageList_Replace not implemented in TWIN32"));
+    return FALSE;
+#else
     HDC hDC = GetHdcOf(dc);
-    wxCHECK_MSG( hDC, false, _T("invalid wxDC in wxImageList::Draw") );
+    wxCHECK_MSG( hDC, FALSE, _T("invalid wxDC in wxImageList::Draw") );
 
     COLORREF clr = CLR_NONE;    // transparent by default
     if ( solidBackground )
     {
-        const wxBrush& brush = dc.GetBackground();
-        if ( brush.Ok() )
+        wxBrush *brush = & dc.GetBackground();
+        if ( brush && brush->Ok() )
         {
-            clr = wxColourToRGB(brush.GetColour());
+            clr = wxColourToRGB(brush->GetColour());
         }
     }
 
@@ -292,62 +305,7 @@ bool wxImageList::Draw(int index,
     }
 
     return ok;
-}
-
-// Get the bitmap
-wxBitmap wxImageList::GetBitmap(int index) const
-{
-    int bmp_width = 0, bmp_height = 0;
-    GetSize(index, bmp_width, bmp_height);
-
-    wxBitmap bitmap(bmp_width, bmp_height);
-    wxMemoryDC dc;
-    dc.SelectObject(bitmap);
-
-    // draw it the first time to find a suitable mask colour
-    ((wxImageList*)this)->Draw(index, dc, 0, 0, wxIMAGELIST_DRAW_TRANSPARENT);
-    dc.SelectObject(wxNullBitmap);
-
-    // find the suitable mask colour
-    wxImage image = bitmap.ConvertToImage();
-    unsigned char r = 0, g = 0, b = 0;
-    image.FindFirstUnusedColour(&r, &g, &b);
-
-    // redraw whole image and bitmap in the mask colour
-    image.Create(bmp_width, bmp_height);
-    image.Replace(0, 0, 0, r, g, b);
-    bitmap = wxBitmap(image);
-
-    // redraw icon over the mask colour to actually draw it
-    dc.SelectObject(bitmap);
-    ((wxImageList*)this)->Draw(index, dc, 0, 0, wxIMAGELIST_DRAW_TRANSPARENT);
-    dc.SelectObject(wxNullBitmap);
-
-    // get the image, set the mask colour and convert back to get transparent bitmap
-    image = bitmap.ConvertToImage();
-    image.SetMaskColour(r, g, b);
-    bitmap = wxBitmap(image);
-    
-    return bitmap;
-}
-
-// Get the icon
-wxIcon wxImageList::GetIcon(int index) const
-{
-    HICON hIcon = ImageList_ExtractIcon(0, GetHImageList(), index);
-    if (hIcon)
-    {
-        wxIcon icon;
-        icon.SetHICON((WXHICON)hIcon);
-        
-        int iconW, iconH;
-        GetSize(index, iconW, iconH);
-        icon.SetSize(iconW, iconH);
-        
-        return icon;
-    }
-    else               
-        return wxNullIcon;
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -358,7 +316,7 @@ static HBITMAP GetMaskForImage(const wxBitmap& bitmap, const wxBitmap& mask)
 {
     HBITMAP hbmpMask;
     wxMask *pMask;
-    bool deleteMask = false;
+    bool deleteMask = FALSE;
 
     if ( mask.Ok() )
     {
@@ -379,13 +337,13 @@ static HBITMAP GetMaskForImage(const wxBitmap& bitmap, const wxBitmap& mask)
 
             pMask = new wxMask(bitmap, col);
 
-            deleteMask = true;
+            deleteMask = TRUE;
         }
 
         hbmpMask = (HBITMAP)pMask->GetMaskBitmap();
     }
 
-    // windows mask convention is opposite to the wxWidgets one
+    // windows mask convention is opposite to the wxWindows one
     HBITMAP hbmpMaskInv = wxInvertMask(hbmpMask);
 
     if ( deleteMask )

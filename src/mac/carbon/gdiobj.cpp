@@ -1,19 +1,17 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        gdiobj.cpp
 // Purpose:     wxGDIObject class
-// Author:      Stefan Csomor
+// Author:      AUTHOR
 // Modified by:
-// Created:     1998-01-01
+// Created:     ??/??/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Stefan Csomor
-// Licence:       wxWindows licence
+// Copyright:   (c) AUTHOR
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "gdiobj.h"
 #endif
-
-#include "wx/wxprec.h"
 
 #include "wx/gdiobj.h"
 

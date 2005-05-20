@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/msw/tbarmsw.h
-// Purpose:     wxToolBar for older Windowses
+// Purpose:     wxToolBar for Win16
 // Author:      Julian Smart
 // Modified by: 13.12.99 by VZ during toolbar classes reorganization
 // Created:     01/02/97
@@ -12,7 +12,7 @@
 #ifndef _WX_TBARMSW_H_
 #define _WX_TBARMSW_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "tbarmsw.h"
 #endif
 
@@ -20,12 +20,12 @@
 
 #include "wx/tbarbase.h"
 
-extern WXDLLEXPORT_DATA(const wxChar*) wxButtonBarNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxButtonBarNameStr;
 
 class WXDLLEXPORT wxMemoryDC;
 
 // ----------------------------------------------------------------------------
-// wxToolBar for older Windowses
+// wxToolBar for Win16
 // ----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxToolBar : public wxToolBarBase
@@ -61,7 +61,7 @@ public:
                                        const wxBitmap& pushedBitmap,
                                        bool toggle,
                                        wxCoord xPos,
-                                       wxCoord yPos = wxDefaultCoord,
+                                       wxCoord yPos = -1,
                                        wxObject *clientData = NULL,
                                        const wxString& helpString1 = wxEmptyString,
                                        const wxString& helpString2 = wxEmptyString);
@@ -76,7 +76,7 @@ public:
     // implementation only from now on
     // -------------------------------
 
-    // Handle wxWidgets events
+    // Handle wxWindows events
     void OnPaint(wxPaintEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
 

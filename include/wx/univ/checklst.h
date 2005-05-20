@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_CHECKLST_H_
 #define _WX_UNIV_CHECKLST_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univchecklst.h"
 #endif
 
@@ -37,7 +37,7 @@ public:
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
                    int nStrings = 0,
-                   const wxString choices[] = NULL,
+                   const wxString *choices = NULL,
                    long style = 0,
                    const wxValidator& validator = wxDefaultValidator,
                    const wxString& name = wxListBoxNameStr)
@@ -46,36 +46,20 @@ public:
 
         Create(parent, id, pos, size, nStrings, choices, style, validator, name);
     }
-    wxCheckListBox(wxWindow *parent,
-                   wxWindowID id,
-                   const wxPoint& pos,
-                   const wxSize& size,
-                   const wxArrayString& choices,
-                   long style = 0,
-                   const wxValidator& validator = wxDefaultValidator,
-                   const wxString& name = wxListBoxNameStr);
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 int nStrings = 0,
-                const wxString choices[] = (const wxString *) NULL,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxListBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
+                const wxString *choices = NULL,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxListBoxNameStr);
 
     // implement check list box methods
     virtual bool IsChecked(size_t item) const;
-    virtual void Check(size_t item, bool check = true);
+    virtual void Check(size_t item, bool check = TRUE);
 
     // and input handling
     virtual bool PerformAction(const wxControlAction& action,

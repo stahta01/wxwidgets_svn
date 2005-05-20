@@ -4,7 +4,7 @@
 //
 // Author:      Robin Dunn
 //
-// Created:     1-July-1997
+// Created:     7/1/97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 by Total Control Software
 // Licence:     wxWindows license
@@ -13,8 +13,8 @@
 
 #undef DEBUG
 #include <Python.h>
-#include "wx/wxPython/wxPython_int.h"
-#include "wx/wxPython/pyistream.h"
+#include "helpers.h"
+#include "pyistream.h"
 
 #ifdef __WXMSW__
 #include <wx/msw/private.h>
@@ -23,45 +23,37 @@
 #endif
 
 #ifdef __WXGTK__
-#include <gdk/gdk.h>
-#include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkprivate.h>
 #include <wx/gtk/win_gtk.h>
-#define GetXWindow(wxwin) (wxwin)->m_wxwindow ? \
-                              GDK_WINDOW_XWINDOW(GTK_PIZZA((wxwin)->m_wxwindow)->bin_window) : \
-                              GDK_WINDOW_XWINDOW((wxwin)->m_widget->window)
-#include <locale.h>
-#endif
-
-#ifdef __WXX11__
-#include "wx/x11/privx.h"
-#define GetXWindow(wxwin)   ((Window)(wxwin)->GetHandle())
 #endif
 
 #ifdef __WXMAC__
 #include <wx/mac/private.h>
 #endif
 
-#include <wx/clipbrd.h>
-#include <wx/mimetype.h>
-#include <wx/image.h>
-
 //----------------------------------------------------------------------
 
-#if PYTHON_API_VERSION < 1009 && wxUSE_UNICODE
+#if PYTHON_API_VERSION <= 1007 && wxUSE_UNICODE
 #error Python must support Unicode to use wxWindows Unicode
 #endif
 
 //----------------------------------------------------------------------
 
+#ifdef __WXGTK__
+int  WXDLLEXPORT wxEntryStart( int& argc, char** argv );
+#else
+int  WXDLLEXPORT wxEntryStart( int argc, char** argv );
+#endif
+int  WXDLLEXPORT wxEntryInitGui();
+void WXDLLEXPORT wxEntryCleanup();
+
 wxPyApp* wxPythonApp = NULL;  // Global instance of application object
-bool wxPyDoCleanup = false;
-bool wxPyDoingCleanup = false;
+bool wxPyDoCleanup = FALSE;
+bool wxPyDoingCleanup = FALSE;
 
 
 #ifdef WXP_WITH_THREAD
-#if !wxPyUSE_GIL_STATE
 struct wxPyThreadState {
     unsigned long  tid;
     PyThreadState* tstate;
@@ -77,19 +69,12 @@ WX_DEFINE_OBJARRAY(wxPyThreadStateArray);
 
 wxPyThreadStateArray* wxPyTStates = NULL;
 wxMutex*              wxPyTMutex = NULL;
-
-#endif
 #endif
 
-
-#define DEFAULTENCODING_SIZE 64
-static char wxPyDefaultEncoding[DEFAULTENCODING_SIZE] = "ascii";
 
 static PyObject* wxPython_dict = NULL;
+static PyObject* wxPyPtrTypeMap = NULL;
 static PyObject* wxPyAssertionError = NULL;
-static PyObject* wxPyNoAppError = NULL;
-
-PyObject* wxPyPtrTypeMap = NULL;
 
 
 #ifdef __WXMSW__             // If building for win32...
@@ -97,18 +82,17 @@ PyObject* wxPyPtrTypeMap = NULL;
 // This gets run when the DLL is loaded.  We just need to save a handle.
 //----------------------------------------------------------------------
 
-extern "C"
 BOOL WINAPI DllMain(
     HINSTANCE   hinstDLL,    // handle to DLL module
     DWORD       fdwReason,   // reason for calling function
     LPVOID      lpvReserved  // reserved
    )
 {
-    // If wxPython is embedded in another wxWidgets app then
-    // the instance has already been set.
+    // If wxPython is embedded in another wxWindows app then
+    // the inatance has already been set.
     if (! wxGetInstance())
         wxSetInstance(hinstDLL);
-    return true;
+    return TRUE;
 }
 #endif
 
@@ -121,19 +105,16 @@ IMPLEMENT_ABSTRACT_CLASS(wxPyApp, wxApp);
 
 wxPyApp::wxPyApp() {
     m_assertMode = wxPYAPP_ASSERT_EXCEPTION;
-    m_startupComplete = false;
 }
 
 
 wxPyApp::~wxPyApp() {
-    wxPythonApp = NULL;
-    wxApp::SetInstance(NULL);
 }
 
 
-// This one isn't acutally called...  We fake it with _BootstrapApp
+// This one isn't acutally called...  We fake it with __wxStart()
 bool wxPyApp::OnInit() {
-    return false;
+    return FALSE;
 }
 
 
@@ -142,6 +123,10 @@ int  wxPyApp::MainLoop() {
 
     DeletePendingObjects();
     bool initialized = wxTopLevelWindows.GetCount() != 0;
+#ifdef __WXGTK__
+    m_initialized = initialized;
+#endif
+
     if (initialized) {
         if ( m_exitOnFrameDelete == Later ) {
             m_exitOnFrameDelete = Yes;
@@ -155,22 +140,22 @@ int  wxPyApp::MainLoop() {
 
 
 bool wxPyApp::OnInitGui() {
-    bool rval=true;
+    bool rval=TRUE;
     wxApp::OnInitGui();  // in this case always call the base class version
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    // wxPyBeginBlockThreads();  *** only called from within __wxStart so we already have the GIL
     if (wxPyCBH_findCallback(m_myInst, "OnInitGui"))
         rval = wxPyCBH_callCallback(m_myInst, Py_BuildValue("()"));
-    wxPyEndBlockThreads(blocked);
+    // wxPyEndBlockThreads();    ***
     return rval;
 }
 
 
 int wxPyApp::OnExit() {
     int rval=0;
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     if (wxPyCBH_findCallback(m_myInst, "OnExit"))
         rval = wxPyCBH_callCallback(m_myInst, Py_BuildValue("()"));
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
     wxApp::OnExit();  // in this case always call the base class version
     return rval;
 }
@@ -182,23 +167,9 @@ void wxPyApp::OnAssert(const wxChar *file,
                      const wxChar *cond,
                      const wxChar *msg) {
 
-    // if we're not fully initialized then just log the error
-    if (! m_startupComplete) {
-        wxString buf;
-        buf.Alloc(4096);
-        buf.Printf(wxT("%s(%d): assert \"%s\" failed"),
-                   file, line, cond);
-        if (msg != NULL) {
-            buf += wxT(": ");
-            buf += msg;
-        }
-        wxLogDebug(buf);
-        return;
-    }
-
     // If the OnAssert is overloaded in the Python class then call it...
     bool found;
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     if ((found = wxPyCBH_findCallback(m_myInst, "OnAssert"))) {
         PyObject* fso = wx2PyString(file);
         PyObject* cso = wx2PyString(file);
@@ -213,7 +184,7 @@ void wxPyApp::OnAssert(const wxChar *file,
         Py_DECREF(cso);
         Py_DECREF(mso);
     }
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
 
     // ...otherwise do our own thing with it
     if (! found) {
@@ -232,11 +203,11 @@ void wxPyApp::OnAssert(const wxChar *file,
             }
 
             // set the exception
-            wxPyBlock_t blocked = wxPyBeginBlockThreads();
+            wxPyBeginBlockThreads();
             PyObject* s = wx2PyString(buf);
             PyErr_SetObject(wxPyAssertionError, s);
             Py_DECREF(s);
-            wxPyEndBlockThreads(blocked);
+            wxPyEndBlockThreads();
 
             // Now when control returns to whatever API wrapper was called from
             // Python it should detect that an exception is set and will return
@@ -264,45 +235,15 @@ void wxPyApp::OnAssert(const wxChar *file,
 }
 #endif
 
-    // For catching Apple Events
-void wxPyApp::MacOpenFile(const wxString &fileName)
-{
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    if (wxPyCBH_findCallback(m_myInst, "MacOpenFile")) {
-        PyObject* s = wx2PyString(fileName);
-        wxPyCBH_callCallback(m_myInst, Py_BuildValue("(O)", s));
-        Py_DECREF(s);
-    }
-    wxPyEndBlockThreads(blocked);
-}
 
-void wxPyApp::MacPrintFile(const wxString &fileName)
-{
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    if (wxPyCBH_findCallback(m_myInst, "MacPrintFile")) {
-        PyObject* s = wx2PyString(fileName);
-        wxPyCBH_callCallback(m_myInst, Py_BuildValue("(O)", s));
-        Py_DECREF(s);
-    }
-    wxPyEndBlockThreads(blocked);
+/*static*/
+bool wxPyApp::GetMacDefaultEncodingIsPC() {
+#ifdef __WXMAC__
+    return s_macDefaultEncodingIsPC;
+#else
+    return 0;
+#endif
 }
-
-void wxPyApp::MacNewFile()
-{
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    if (wxPyCBH_findCallback(m_myInst, "MacNewFile"))
-        wxPyCBH_callCallback(m_myInst, Py_BuildValue("()"));
-    wxPyEndBlockThreads(blocked);
-}
-
-void wxPyApp::MacReopenApp()
-{
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    if (wxPyCBH_findCallback(m_myInst, "MacReopenApp"))
-        wxPyCBH_callCallback(m_myInst, Py_BuildValue("()"));
-    wxPyEndBlockThreads(blocked);
-}
-
 
 /*static*/
 bool wxPyApp::GetMacSupportPCMenuShortcuts() {
@@ -350,6 +291,13 @@ wxString wxPyApp::GetMacHelpMenuTitleName() {
 }
 
 /*static*/
+void wxPyApp::SetMacDefaultEncodingIsPC(bool val) {
+#ifdef __WXMAC__
+    s_macDefaultEncodingIsPC = val;
+#endif
+}
+
+/*static*/
 void wxPyApp::SetMacSupportPCMenuShortcuts(bool val) {
 #ifdef __WXMAC__
     s_macSupportPCMenuShortcuts = val;
@@ -385,121 +333,11 @@ void wxPyApp::SetMacHelpMenuTitleName(const wxString& val) {
 }
 
 
-// This finishes the initialization of wxWindows and then calls the OnInit
-// that should be present in the derived (Python) class.
-void wxPyApp::_BootstrapApp()
-{
-    static      bool haveInitialized = false;
-    bool        result;
-    wxPyBlock_t     blocked;
-    PyObject*   retval = NULL;
-    PyObject*   pyint  = NULL;
-
-
-    // Only initialize wxWidgets once
-    if (! haveInitialized) {
-
-        // Get any command-line args passed to this program from the sys module
-        int    argc = 0;
-        char** argv = NULL;
-        blocked = wxPyBeginBlockThreads();
-        
-        PyObject* sysargv = PySys_GetObject("argv");
-        PyObject* executable = PySys_GetObject("executable");
-        
-        if (sysargv != NULL && executable != NULL) {
-            argc = PyList_Size(sysargv) + 1;
-            argv = new char*[argc+1];
-            argv[0] = strdup(PyString_AsString(executable));
-            int x;
-            for(x=1; x<argc; x++) {
-                PyObject *pyArg = PyList_GetItem(sysargv, x-1);
-                argv[x] = strdup(PyString_AsString(pyArg));
-            }
-            argv[argc] = NULL;
-        }
-        wxPyEndBlockThreads(blocked);
-
-        // Initialize wxWidgets
-        result = wxEntryStart(argc, argv);
-        // wxApp takes ownership of the argv array, don't delete it here
-
-        blocked = wxPyBeginBlockThreads();
-        if (! result)  {
-            PyErr_SetString(PyExc_SystemError,
-                            "wxEntryStart failed, unable to initialize wxWidgets!"
-#ifdef __WXGTK__
-                            "  (Is DISPLAY set properly?)"
-#endif
-                );
-            goto error;
-        }
-
-        // On wxGTK the locale will be changed to match the system settings,
-        // but Python before 2.4 needs to have LC_NUMERIC set to "C" in order
-        // for the floating point conversions and such to work right.
-#if defined(__WXGTK__) && PY_VERSION_HEX < 0x02040000
-        setlocale(LC_NUMERIC, "C");
-#endif
-
-        wxSystemOptions::SetOption(wxT("mac.textcontrol-use-mlte"), 1);
-        
-        // The stock objects were all NULL when they were loaded into
-        // SWIG generated proxies, so re-init those now...
-        wxPy_ReinitStockObjects(3);
-
-        wxPyEndBlockThreads(blocked);
-        haveInitialized = true;
-    }
-    else {
-        this->argc = 0;
-        this->argv = NULL;
-    }
-    
-
-    // It's now ok to generate exceptions for assertion errors.
-    wxPythonApp->SetStartupComplete(true);
-
-    // Call the Python wxApp's OnInit function
-    blocked = wxPyBeginBlockThreads();
-    if (wxPyCBH_findCallback(m_myInst, "OnInit")) {
-
-        PyObject* method = m_myInst.GetLastFound();
-        PyObject* argTuple = PyTuple_New(0);
-        retval = PyEval_CallObject(method, argTuple);
-        Py_DECREF(argTuple);
-        Py_DECREF(method);
-        if (retval == NULL)
-            goto error;
-
-        pyint = PyNumber_Int(retval);
-        if (! pyint) {
-            PyErr_SetString(PyExc_TypeError, "OnInit should return a boolean value");
-            goto error;
-        }
-        result = PyInt_AS_LONG(pyint);
-    }
-    else {
-        // Is it okay if there is no OnInit?  Probably so...
-        result = true;
-    }
-
-    if (! result) {
-        PyErr_SetString(PyExc_SystemExit, "OnInit returned false, exiting...");
-    }
-
- error:
-    Py_XDECREF(retval);
-    Py_XDECREF(pyint);
-
-    wxPyEndBlockThreads(blocked);
-};
 
 //---------------------------------------------------------------------
 //----------------------------------------------------------------------
 
 
-#if 0
 static char* wxPyCopyCString(const wxChar* src)
 {
     wxWX2MBbuf buff = (wxWX2MBbuf)wxConvCurrent->cWX2MB(src);
@@ -532,85 +370,153 @@ static wxChar* wxPyCopyWString(const wxChar *src)
     return copystring(src);
 }
 #endif
-#endif
 
-
-inline const char* dropwx(const char* name) {
-    if (name[0] == 'w' && name[1] == 'x')
-        return name+2;
-    else
-        return name;
-}
 
 //----------------------------------------------------------------------
 
-// This function is called when the wx._core_ module is imported to do some
-// initial setup.  (Before there is a wxApp object.)  The rest happens in
-// wxPyApp::_BootstrapApp
-void __wxPyPreStart(PyObject* moduleDict)
+// This is where we pick up the first part of the wxEntry functionality...
+// The rest is in __wxStart and  __wxCleanup.  This function is called when
+// wxcmodule is imported.  (Before there is a wxApp object.)
+void __wxPreStart(PyObject* moduleDict)
 {
 
 #ifdef __WXMSW__
-//     wxCrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF
-//                     | _CRTDBG_CHECK_ALWAYS_DF
-//                     | _CRTDBG_DELAY_FREE_MEM_DF
-//         );
+//    wxCrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF);
 #endif
 
 #ifdef WXP_WITH_THREAD
-#if wxPyUSE_GIL_STATE
-    PyEval_InitThreads();
-#else
     PyEval_InitThreads();
     wxPyTStates = new wxPyThreadStateArray;
     wxPyTMutex = new wxMutex;
-
-    // Save the current (main) thread state in our array
-    PyThreadState* tstate = wxPyBeginAllowThreads();
-    wxPyEndAllowThreads(tstate);
-#endif
 #endif
 
     // Ensure that the build options in the DLL (or whatever) match this build
-    wxApp::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, "wxPython");
+    wxApp::CheckBuildOptions(wxBuildOptions());
 
-    // Init the stock objects to a non-NULL value so SWIG doesn't create them as None
-    wxPy_ReinitStockObjects(1);
+    wxPyAssertionError = PyErr_NewException("wxPython.wxc.wxPyAssertionError",
+                                            PyExc_AssertionError, NULL);
+    PyDict_SetItemString(moduleDict, "wxPyAssertionError", wxPyAssertionError);
 
-    wxInitAllImageHandlers();
+
+    // Bail out if there is already a wxApp created.  This means that the
+    // toolkit has already been initialized, as in embedding wxPython in
+    // a C++ wxWindows app, so we don't need to call wxEntryStart.
+    if (wxTheApp != NULL) {
+        return;
+    }
+    wxPyDoCleanup = TRUE;
+
+    int argc = 0;
+    char** argv = NULL;
+    PyObject* sysargv = PySys_GetObject("argv");
+    if (sysargv != NULL) {
+        argc = PyList_Size(sysargv);
+        argv = new char*[argc+1];
+        int x;
+        for(x=0; x<argc; x++) {
+	    PyObject *item = PyList_GetItem(sysargv, x);
+            argv[x] = wxPyCopyCString(Py2wxString(item));
+	}
+        argv[argc] = NULL;
+    }
+
+    wxEntryStart(argc, argv);
+    delete [] argv;
 }
 
 
+// Start the user application, user App's OnInit method is a parameter here
+PyObject* __wxStart(PyObject* /* self */, PyObject* args)
+{
+    PyObject*   onInitFunc = NULL;
+    PyObject*   arglist;
+    PyObject*   result;
+    long        bResult;
 
-void __wxPyCleanup() {
-    wxPyDoingCleanup = true;
+    if (!PyArg_ParseTuple(args, "O", &onInitFunc))
+        return NULL;
+
+    // This is the next part of the wxEntry functionality...
+    int argc = 0;
+    wxChar** argv = NULL;
+    PyObject* sysargv = PySys_GetObject("argv");
+    if (sysargv != NULL) {
+        argc = PyList_Size(sysargv);
+        argv = new wxChar*[argc+1];
+        int x;
+        for(x=0; x<argc; x++) {
+            PyObject *pyArg = PyList_GetItem(sysargv, x);
+            argv[x] = wxPyCopyWString(Py2wxString(pyArg));
+        }
+        argv[argc] = NULL;
+    }
+
+    wxPythonApp->argc = argc;
+    wxPythonApp->argv = argv;
+
+    wxEntryInitGui();
+
+    // Call the Python App's OnInit function
+    arglist = PyTuple_New(0);
+    result = PyEval_CallObject(onInitFunc, arglist);
+    Py_DECREF(arglist);
+    if (!result) {      // an exception was raised.
+        return NULL;
+    }
+
+    PyObject* pyint = PyNumber_Int(result);
+    if (! pyint) {
+        PyErr_SetString(PyExc_TypeError, "OnInit should return a boolean value");
+        goto error;
+    }
+    bResult = PyInt_AS_LONG(pyint);
+    if (! bResult) {
+        PyErr_SetString(PyExc_SystemExit, "OnInit returned FALSE, exiting...");
+        goto error;
+    }
+
+#ifdef __WXGTK__
+    wxTheApp->m_initialized = (wxTopLevelWindows.GetCount() > 0);
+#endif
+
+    Py_DECREF(result);
+    Py_DECREF(pyint);
+    Py_INCREF(Py_None);
+    return Py_None;
+
+ error:
+    Py_XDECREF(result);
+    Py_XDECREF(pyint);
+    return NULL;
+}
+
+
+void __wxCleanup() {
+    wxPyDoingCleanup = TRUE;
     if (wxPyDoCleanup) {
-        wxPyDoCleanup = false;
+        wxPyDoCleanup = FALSE;
         wxEntryCleanup();
     }
 #ifdef WXP_WITH_THREAD
-#if !wxPyUSE_GIL_STATE
     delete wxPyTMutex;
     wxPyTMutex = NULL;
     wxPyTStates->Empty();
     delete wxPyTStates;
     wxPyTStates = NULL;
 #endif
-#endif
 }
 
 
-// Save a reference to the dictionary of the wx._core module, and inject
-// a few more things into it.
-PyObject* __wxPySetDictionary(PyObject* /* self */, PyObject* args)
+
+
+PyObject* __wxSetDictionary(PyObject* /* self */, PyObject* args)
 {
 
     if (!PyArg_ParseTuple(args, "O", &wxPython_dict))
         return NULL;
 
     if (!PyDict_Check(wxPython_dict)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "_wxPySetDictionary must have dictionary object!");
+        PyErr_SetString(PyExc_TypeError, "_wxSetDictionary must have dictionary object!");
         return NULL;
     }
 
@@ -618,37 +524,21 @@ PyObject* __wxPySetDictionary(PyObject* /* self */, PyObject* args)
         wxPyPtrTypeMap = PyDict_New();
     PyDict_SetItemString(wxPython_dict, "__wxPyPtrTypeMap", wxPyPtrTypeMap);
 
-    // Create an exception object to use for wxASSERTions
-    wxPyAssertionError = PyErr_NewException("wx._core.PyAssertionError",
-                                            PyExc_AssertionError, NULL);
-    PyDict_SetItemString(wxPython_dict, "PyAssertionError", wxPyAssertionError);
-
-    // Create an exception object to use when the app object hasn't been created yet
-    wxPyNoAppError = PyErr_NewException("wx._core.PyNoAppError",
-                                        PyExc_RuntimeError, NULL);
-    PyDict_SetItemString(wxPython_dict, "PyNoAppError", wxPyNoAppError);
-
-
 
 #ifdef __WXMOTIF__
 #define wxPlatform "__WXMOTIF__"
-#define wxPlatName "wxMotif"
 #endif
 #ifdef __WXX11__
 #define wxPlatform "__WXX11__"
-#define wxPlatName "wxX11"
 #endif
 #ifdef __WXGTK__
 #define wxPlatform "__WXGTK__"
-#define wxPlatName "wxGTK"
 #endif
-#ifdef __WXMSW__
+#if defined(__WIN32__) || defined(__WXMSW__)
 #define wxPlatform "__WXMSW__"
-#define wxPlatName "wxMSW"
 #endif
 #ifdef __WXMAC__
 #define wxPlatform "__WXMAC__"
-#define wxPlatName "wxMac"
 #endif
 
 #ifdef __WXDEBUG__
@@ -657,262 +547,32 @@ PyObject* __wxPySetDictionary(PyObject* /* self */, PyObject* args)
     int wxdebug = 0;
 #endif
 
-    // These should be deprecated in favor of the PlatformInfo tuple built below...
-    PyDict_SetItemString(wxPython_dict, "Platform", PyString_FromString(wxPlatform));
-    PyDict_SetItemString(wxPython_dict, "USE_UNICODE", PyInt_FromLong(wxUSE_UNICODE));
+    PyDict_SetItemString(wxPython_dict, "wxPlatform", PyString_FromString(wxPlatform));
+    PyDict_SetItemString(wxPython_dict, "wxUSE_UNICODE", PyInt_FromLong(wxUSE_UNICODE));
     PyDict_SetItemString(wxPython_dict, "__WXDEBUG__", PyInt_FromLong(wxdebug));
 
-    // Make a tuple of strings that gives more info about the platform.
-    PyObject* PlatInfo = PyList_New(0);
-    PyObject* obj;
-
-#define _AddInfoString(st) \
-    obj = PyString_FromString(st); \
-    PyList_Append(PlatInfo, obj); \
-    Py_DECREF(obj)
-
-    _AddInfoString(wxPlatform);
-    _AddInfoString(wxPlatName);
-#if wxUSE_UNICODE
-    _AddInfoString("unicode");
-#else
-    _AddInfoString("ansi");
-#endif
-#ifdef __WXGTK__
-#ifdef __WXGTK20__
-    _AddInfoString("gtk2");
-#else
-    _AddInfoString("gtk1");
-#endif
-#endif
-#ifdef __WXDEBUG__
-    _AddInfoString("wx-assertions-on");
-#else
-    _AddInfoString("wx-assertions-off");
-#endif
-
-#undef _AddInfoString
-
-    PyObject* PlatInfoTuple = PyList_AsTuple(PlatInfo);
-    Py_DECREF(PlatInfo);
-    PyDict_SetItemString(wxPython_dict, "PlatformInfo", PlatInfoTuple);
-
-    RETURN_NONE();
-}
-
-
-//---------------------------------------------------------------------------
-
-// Python's PyInstance_Check does not return True for instances of new-style
-// classes.  This should get close enough for both new and old classes but I
-// should re-evaluate the need for doing instance checks...
-bool wxPyInstance_Check(PyObject* obj) {
-    return PyObject_HasAttrString(obj, "__class__") != 0;
-}
-
-
-// This one checks if the object is an instance of a SWIG proxy class (it has
-// a .this attribute)
-bool wxPySwigInstance_Check(PyObject* obj) {
-    return PyObject_HasAttrString(obj, "this") != 0;
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 //---------------------------------------------------------------------------
-
-// The stock objects are no longer created when the wx._core_ module is
-// imported, but only after the app object has been created.  The
-// wxPy_ReinitStockObjects function will be called 3 times to pass the stock
-// objects though various stages of evolution:
-//
-//   pass 1: Set all the pointers to a non-NULL value so the Python proxy
-//           object will be created (otherwise SWIG will just use None.)
-//
-//   pass 2: After the module has been imported and the python proxys have
-//           been created, then set the __class__ to be _wxPyUnbornObject so
-//           it will catch any access to the object and will raise an exception.
-//
-//   pass 3: Finally, from BootstrapApp patch things up so the stock objects
-//           can be used.
-
-
-PyObject* __wxPyFixStockObjects(PyObject* /* self */, PyObject* args)
-{
-    wxPy_ReinitStockObjects(2);
-    RETURN_NONE();
-}
-
-
-static void rsoPass2(const char* name)
-{
-    static PyObject* unbornObjectClass = NULL;
-    PyObject* obj;
-
-    if (unbornObjectClass == NULL) {
-        unbornObjectClass = PyDict_GetItemString(wxPython_dict, "_wxPyUnbornObject");
-        Py_INCREF(unbornObjectClass);
-    }
-
-    // Find the object instance
-    obj = PyDict_GetItemString(wxPython_dict, (char*)dropwx(name));
-    wxCHECK_RET(obj != NULL, wxT("Unable to find stock object"));
-    wxCHECK_RET(wxPySwigInstance_Check(obj), wxT("Not a swig instance"));
-
-    // Change its class
-    PyObject_SetAttrString(obj, "__class__",  unbornObjectClass);
-
-}
-
-static void rsoPass3(const char* name, const char* classname, void* ptr)
-{
-    PyObject* obj;
-    PyObject* classobj;
-    PyObject* ptrobj;
-
-    // Find the object instance
-    obj = PyDict_GetItemString(wxPython_dict, (char*)dropwx(name));
-    wxCHECK_RET(obj != NULL, wxT("Unable to find stock object"));
-    wxCHECK_RET(wxPySwigInstance_Check(obj), wxT("Not a swig instance"));
-
-    // Find the class object and put it back in the instance
-    classobj = PyDict_GetItemString(wxPython_dict, (char*)dropwx(classname));
-    wxCHECK_RET(classobj != NULL, wxT("Unable to find stock class object"));
-    PyObject_SetAttrString(obj, "__class__",  classobj);
-
-    // Rebuild the .this swigified pointer with the new value of the C++ pointer
-    ptrobj = wxPyMakeSwigPtr(ptr, wxString(classname, *wxConvCurrent));
-    PyObject_SetAttrString(obj, "this", ptrobj);
-    Py_DECREF(ptrobj);
-}
-
-
-
-void wxPy_ReinitStockObjects(int pass)
-{
-
-    // If there is already an App object then wxPython is probably embedded in
-    // a wx C++ application, so there is no need to do all this.
-    static bool embedded = false;
-    if ((pass == 1 || pass == 2) && wxTheApp) {
-        embedded = true;
-        return;
-    }
-    if (pass == 3 && embedded)
-        return;
-
-
-#define REINITOBJ(name, classname) \
-    if (pass == 1) { name = (classname*)0xC0C0C0C0; } \
-    else if (pass == 2) { rsoPass2(#name); } \
-    else if (pass == 3) { rsoPass3(#name, #classname, (void*)name); }
-
-
-#define REINITOBJ2(name, classname) \
-    if (pass == 1) { } \
-    else if (pass == 2) { rsoPass2(#name); } \
-    else if (pass == 3) { rsoPass3(#name, #classname, (void*)&name); }
-
-
-    REINITOBJ(wxNORMAL_FONT, wxFont);
-    REINITOBJ(wxSMALL_FONT, wxFont);
-    REINITOBJ(wxITALIC_FONT, wxFont);
-    REINITOBJ(wxSWISS_FONT, wxFont);
-
-    REINITOBJ(wxRED_PEN, wxPen);
-    REINITOBJ(wxCYAN_PEN, wxPen);
-    REINITOBJ(wxGREEN_PEN, wxPen);
-    REINITOBJ(wxBLACK_PEN, wxPen);
-    REINITOBJ(wxWHITE_PEN, wxPen);
-    REINITOBJ(wxTRANSPARENT_PEN, wxPen);
-    REINITOBJ(wxBLACK_DASHED_PEN, wxPen);
-    REINITOBJ(wxGREY_PEN, wxPen);
-    REINITOBJ(wxMEDIUM_GREY_PEN, wxPen);
-    REINITOBJ(wxLIGHT_GREY_PEN, wxPen);
-
-    REINITOBJ(wxBLUE_BRUSH, wxBrush);
-    REINITOBJ(wxGREEN_BRUSH, wxBrush);
-    REINITOBJ(wxWHITE_BRUSH, wxBrush);
-    REINITOBJ(wxBLACK_BRUSH, wxBrush);
-    REINITOBJ(wxTRANSPARENT_BRUSH, wxBrush);
-    REINITOBJ(wxCYAN_BRUSH, wxBrush);
-    REINITOBJ(wxRED_BRUSH, wxBrush);
-    REINITOBJ(wxGREY_BRUSH, wxBrush);
-    REINITOBJ(wxMEDIUM_GREY_BRUSH, wxBrush);
-    REINITOBJ(wxLIGHT_GREY_BRUSH, wxBrush);
-
-    REINITOBJ(wxBLACK, wxColour);
-    REINITOBJ(wxWHITE, wxColour);
-    REINITOBJ(wxRED, wxColour);
-    REINITOBJ(wxBLUE, wxColour);
-    REINITOBJ(wxGREEN, wxColour);
-    REINITOBJ(wxCYAN, wxColour);
-    REINITOBJ(wxLIGHT_GREY, wxColour);
-
-    REINITOBJ(wxSTANDARD_CURSOR, wxCursor);
-    REINITOBJ(wxHOURGLASS_CURSOR, wxCursor);
-    REINITOBJ(wxCROSS_CURSOR, wxCursor);
-
-    REINITOBJ2(wxNullBitmap, wxBitmap);
-    REINITOBJ2(wxNullIcon, wxIcon);
-    REINITOBJ2(wxNullCursor, wxCursor);
-    REINITOBJ2(wxNullPen, wxPen);
-    REINITOBJ2(wxNullBrush, wxBrush);
-    REINITOBJ2(wxNullPalette, wxPalette);
-    REINITOBJ2(wxNullFont, wxFont);
-    REINITOBJ2(wxNullColour, wxColour);
-
-    REINITOBJ(wxTheFontList, wxFontList);
-    REINITOBJ(wxThePenList, wxPenList);
-    REINITOBJ(wxTheBrushList, wxBrushList);
-    REINITOBJ(wxTheColourDatabase, wxColourDatabase);
-
-
-    REINITOBJ2(wxDefaultValidator, wxValidator);
-    REINITOBJ2(wxNullImage, wxImage);
-    REINITOBJ2(wxNullAcceleratorTable, wxAcceleratorTable);
-
-#undef REINITOBJ
-#undef REINITOBJ2
-}
-
-//---------------------------------------------------------------------------
-
-// Check for existence of a wxApp, setting an exception if there isn't one.
-// This doesn't need to aquire the GIL because it should only be called from
-// an %exception before the lock is released.
-
-bool wxPyCheckForApp() {
-    if (wxTheApp != NULL)
-        return true;
-    else {
-        PyErr_SetString(wxPyNoAppError, "The wx.App object must be created first!");
-        return false;
-    }
-}
-
-//---------------------------------------------------------------------------
-
-void wxPyUserData_dtor(wxPyUserData* self) {
-    if (! wxPyDoingCleanup) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
-        Py_DECREF(self->m_obj);
-        self->m_obj = NULL;
-        wxPyEndBlockThreads(blocked);
-    }
-}
-
 
 void wxPyClientData_dtor(wxPyClientData* self) {
     if (! wxPyDoingCleanup) {           // Don't do it during cleanup as Python
                                         // may have already garbage collected the object...
-        if (self->m_incRef) {
-            wxPyBlock_t blocked = wxPyBeginBlockThreads();
-            Py_DECREF(self->m_obj);
-            wxPyEndBlockThreads(blocked);
-        }
-        self->m_obj = NULL;
+        wxPyBeginBlockThreads();
+        Py_DECREF(self->m_obj);
+        wxPyEndBlockThreads();
     }
 }
 
+void wxPyUserData_dtor(wxPyUserData* self) {
+    if (! wxPyDoingCleanup) {
+        wxPyBeginBlockThreads();
+        Py_DECREF(self->m_obj);
+        wxPyEndBlockThreads();
+    }
+}
 
 
 // This is called when an OOR controled object is being destroyed.  Although
@@ -922,27 +582,22 @@ void wxPyClientData_dtor(wxPyClientData* self) {
 // the now bogus pointer... So to try and prevent this we'll do a little black
 // magic and change the class of the python instance to a class that will
 // raise an exception for any attempt to call methods with it.  See
-// _wxPyDeadObject in _core_ex.py for the implementation of this class.
+// _wxPyDeadObject in _extras.py for the implementation of this class.
 void wxPyOORClientData_dtor(wxPyOORClientData* self) {
 
     static PyObject* deadObjectClass = NULL;
 
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     if (deadObjectClass == NULL) {
         deadObjectClass = PyDict_GetItemString(wxPython_dict, "_wxPyDeadObject");
-        // TODO:  Can not wxASSERT here because inside a wxPyBeginBlock Threads,
-        // will lead to a deadlock when it tries to aquire the GIL again.
-        //wxASSERT_MSG(deadObjectClass != NULL, wxT("Can't get _wxPyDeadObject class!"));
+        wxASSERT_MSG(deadObjectClass != NULL, wxT("Can't get _wxPyDeadObject class!"));
         Py_INCREF(deadObjectClass);
     }
 
 
-    // Only if there is more than one reference to the object and we are
-    // holding the OOR reference:
-    if ( !wxPyDoingCleanup && self->m_obj->ob_refcnt > 1 && self->m_incRef) {
-        // bool isInstance = wxPyInstance_Check(self->m_obj);
-        // TODO same here
-        //wxASSERT_MSG(isInstance, wxT("m_obj not an instance!?!?!"));
+    // Only if there is more than one reference to the object
+    if ( !wxPyDoingCleanup && self->m_obj->ob_refcnt > 1 ) {
+        wxASSERT_MSG(PyInstance_Check(self->m_obj), wxT("m_obj not an instance!?!?!"));
 
         // Call __del__, if there is one.
         PyObject* func = PyObject_GetAttrString(self->m_obj, "__del__");
@@ -954,26 +609,19 @@ void wxPyOORClientData_dtor(wxPyOORClientData* self) {
         if (PyErr_Occurred())
             PyErr_Clear();      // just ignore it for now
 
+        // Clear the instance's dictionary
+        PyInstanceObject* inst = (PyInstanceObject*)self->m_obj;
+        PyDict_Clear(inst->in_dict);
 
-        PyObject* dict = PyObject_GetAttrString(self->m_obj, "__dict__");
-        if (dict) {
-            // Clear the instance's dictionary
-            PyDict_Clear(dict);
-
-            // put the name of the old class into the instance, and then reset the
-            // class to be the dead class.
-            PyObject* klass = PyObject_GetAttrString(self->m_obj, "__class__");
-            PyObject* name =  PyObject_GetAttrString(klass, "__name__");
-            PyDict_SetItemString(dict, "_name", name);
-            PyObject_SetAttrString(self->m_obj, "__class__",  deadObjectClass);
-            //Py_INCREF(deadObjectClass);
-            Py_DECREF(klass);
-            Py_DECREF(name);
-        }
+        // put the name of the old class into the instance, and then reset the
+        // class to be the dead class.
+        PyDict_SetItemString(inst->in_dict, "_name", inst->in_class->cl_name);
+        inst->in_class = (PyClassObject*)deadObjectClass;
+        Py_INCREF(deadObjectClass);
     }
 
-    // m_obj is DECREF'd in the base class dtor...
-    wxPyEndBlockThreads(blocked);
+    // m_obj is DECREF's in the base class dtor...
+    wxPyEndBlockThreads();
 }
 
 
@@ -997,58 +645,65 @@ void wxPyPtrTypeMap_Add(const char* commonName, const char* ptrName) {
 
 
 
+PyObject* wxPyClassExists(const wxString& className) {
 
-PyObject*  wxPyMake_wxObject(wxObject* source, bool setThisOwn, bool checkEvtHandler) {
+    PyObject* item;
+    wxString  name(className);
+    char      buff[64];               // should always be big enough...
+
+    if (!className)
+        return NULL;
+
+    // Try the name as-is first
+    sprintf(buff, "%sPtr", (const char*)name.mbc_str());
+    PyObject* classobj = PyDict_GetItemString(wxPython_dict, buff);
+
+    // if not found see if there is a mapped name for it
+    if ( ! classobj) {
+        if ((item = PyDict_GetItemString(wxPyPtrTypeMap, (char*)(const char*)name.mbc_str())) != NULL) {
+            name = wxString(PyString_AsString(item), *wxConvCurrent);
+            sprintf(buff, "%sPtr", (const char*)name.mbc_str());
+            classobj = PyDict_GetItemString(wxPython_dict, buff);
+        }
+    }
+
+    return classobj;  // returns NULL if not found
+}
+
+
+PyObject*  wxPyMake_wxObject(wxObject* source, bool checkEvtHandler) {
     PyObject* target = NULL;
-    bool      isEvtHandler = false;
-    bool      isSizer = false;
+    bool      isEvtHandler = FALSE;
 
     if (source) {
         // If it's derived from wxEvtHandler then there may
         // already be a pointer to a Python object that we can use
         // in the OOR data.
         if (checkEvtHandler && wxIsKindOf(source, wxEvtHandler)) {
-            isEvtHandler = true;
+            isEvtHandler = TRUE;
             wxEvtHandler* eh = (wxEvtHandler*)source;
             wxPyOORClientData* data = (wxPyOORClientData*)eh->GetClientObject();
             if (data) {
                 target = data->m_obj;
-                if (target)
-                    Py_INCREF(target);
+                Py_INCREF(target);
             }
         }
 
-        // Also check for wxSizer
-        if (!target && wxIsKindOf(source, wxSizer)) {
-            isSizer = true;
-            wxSizer* sz = (wxSizer*)source;
-            wxPyOORClientData* data = (wxPyOORClientData*)sz->GetClientObject();
-            if (data) {
-                target = data->m_obj;
-                if (target)
-                    Py_INCREF(target);
-            }
-        }
-        
         if (! target) {
-            // Otherwise make it the old fashioned way by making a new shadow
-            // object and putting this pointer in it.  Look up the class
-            // heirarchy until we find a class name that is located in the
-            // python module.
-            const wxClassInfo* info   = source->GetClassInfo();
-            wxString           name   = info->GetClassName();
-            bool               exists = wxPyCheckSwigType(name);
-            while (info && !exists) {
-                info = info->GetBaseClass1();
-                name = info->GetClassName();
-                exists = wxPyCheckSwigType(name);
+            // Otherwise make it the old fashioned way by making a
+            // new shadow object and putting this pointer in it.
+            wxClassInfo* info  = source->GetClassInfo();
+            wxString     name  = info->GetClassName();
+            PyObject*    klass = wxPyClassExists(name);
+            while (info && !klass) {
+                name = (wxChar*)info->GetBaseClassName1();
+                info = wxClassInfo::FindClass(name);
+                klass = wxPyClassExists(name);
             }
             if (info) {
-                target = wxPyConstructObject((void*)source, name, setThisOwn);
+                target = wxPyConstructObject(source, name, klass, FALSE);
                 if (target && isEvtHandler)
                     ((wxEvtHandler*)source)->SetClientObject(new wxPyOORClientData(target));
-                if (target && isSizer)
-                    ((wxSizer*)source)->SetClientObject(new wxPyOORClientData(target));
             } else {
                 wxString msg(wxT("wxPython class not found for "));
                 msg += source->GetClassInfo()->GetClassName();
@@ -1063,9 +718,86 @@ PyObject*  wxPyMake_wxObject(wxObject* source, bool setThisOwn, bool checkEvtHan
 }
 
 
-PyObject*  wxPyMake_wxSizer(wxSizer* source, bool setThisOwn) {
+PyObject*  wxPyMake_wxSizer(wxSizer* source) {
+    PyObject* target = NULL;
 
-    return wxPyMake_wxObject(source, setThisOwn);
+    if (source && wxIsKindOf(source, wxSizer)) {
+        // If it's derived from wxSizer then there may
+        // already be a pointer to a Python object that we can use
+        // in the OOR data.
+        wxSizer* sz = (wxSizer*)source;
+        wxPyOORClientData* data = (wxPyOORClientData*)sz->GetClientObject();
+        if (data) {
+            target = data->m_obj;
+            Py_INCREF(target);
+        }
+    }
+    if (! target) {
+        target = wxPyMake_wxObject(source, FALSE);
+        if (target != Py_None)
+            ((wxSizer*)source)->SetClientObject(new wxPyOORClientData(target));
+    }
+    return target;
+}
+
+
+
+//---------------------------------------------------------------------------
+
+PyObject* wxPyConstructObject(void* ptr,
+                              const wxString& className,
+                              PyObject* klass,
+                              int setThisOwn) {
+
+    PyObject* obj;
+    PyObject* arg;
+    PyObject* item;
+    wxString  name(className);
+    char      swigptr[64];      // should always be big enough...
+    char      buff[64];
+
+    if ((item = PyDict_GetItemString(wxPyPtrTypeMap, (char*)(const char*)name.mbc_str())) != NULL) {
+        name = wxString(PyString_AsString(item), *wxConvCurrent);
+    }
+    sprintf(buff, "_%s_p", (const char*)name.mbc_str());
+    SWIG_MakePtr(swigptr, ptr, buff);
+
+    arg = Py_BuildValue("(s)", swigptr);
+    obj = PyInstance_New(klass, arg, NULL);
+    Py_DECREF(arg);
+
+    if (setThisOwn) {
+        PyObject* one = PyInt_FromLong(1);
+        PyObject_SetAttrString(obj, "thisown", one);
+        Py_DECREF(one);
+    }
+
+    return obj;
+}
+
+
+PyObject* wxPyConstructObject(void* ptr,
+                              const wxString& className,
+                              int setThisOwn) {
+    if (!ptr) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    char    buff[64];               // should always be big enough...
+    sprintf(buff, "%sPtr", (const char*)className.mbc_str());
+
+    wxASSERT_MSG(wxPython_dict, wxT("wxPython_dict is not set yet!!"));
+
+    PyObject* classobj = PyDict_GetItemString(wxPython_dict, buff);
+    if (! classobj) {
+        wxString msg(wxT("wxPython class not found for "));
+        msg += className;
+        PyErr_SetString(PyExc_NameError, msg.mbc_str());
+        return NULL;
+    }
+
+    return wxPyConstructObject(ptr, className, classobj, setThisOwn);
 }
 
 
@@ -1073,28 +805,25 @@ PyObject*  wxPyMake_wxSizer(wxSizer* source, bool setThisOwn) {
 
 
 #ifdef WXP_WITH_THREAD
-#if !wxPyUSE_GIL_STATE
-
 inline
 unsigned long wxPyGetCurrentThreadId() {
     return wxThread::GetCurrentId();
 }
 
-static wxPyThreadState gs_shutdownTState;
-
+static PyThreadState* gs_shutdownTState;
 static
-wxPyThreadState* wxPyGetThreadState() {
+PyThreadState* wxPyGetThreadState() {
     if (wxPyTMutex == NULL) // Python is shutting down...
-        return &gs_shutdownTState;
+        return gs_shutdownTState;
 
     unsigned long ctid = wxPyGetCurrentThreadId();
-    wxPyThreadState* tstate = NULL;
+    PyThreadState* tstate = NULL;
 
     wxPyTMutex->Lock();
     for(size_t i=0; i < wxPyTStates->GetCount(); i++) {
         wxPyThreadState& info = wxPyTStates->Item(i);
         if (info.tid == ctid) {
-            tstate = &info;
+            tstate = info.tstate;
             break;
         }
     }
@@ -1103,11 +832,10 @@ wxPyThreadState* wxPyGetThreadState() {
     return tstate;
 }
 
-
 static
 void wxPySaveThreadState(PyThreadState* tstate) {
     if (wxPyTMutex == NULL) { // Python is shutting down, assume a single thread...
-        gs_shutdownTState.tstate = tstate;
+        gs_shutdownTState = tstate;
         return;
     }
     unsigned long ctid = wxPyGetCurrentThreadId();
@@ -1119,12 +847,11 @@ void wxPySaveThreadState(PyThreadState* tstate) {
             if (info.tstate != tstate)
                 wxLogMessage("*** tstate mismatch!???");
 #endif
-            info.tstate = tstate;    // allow for transient tstates
+            // info.tstate = tstate;    *** DO NOT update existing ones???
             // Normally it will never change, but apparently COM callbacks
             // (i.e. ActiveX controls) will (incorrectly IMHO) use a transient
             // tstate which will then be garbage the next time we try to use
             // it...
-
             wxPyTMutex->Unlock();
             return;
         }
@@ -1135,8 +862,6 @@ void wxPySaveThreadState(PyThreadState* tstate) {
 }
 
 #endif
-#endif
-
 
 
 // Calls from Python to wxWindows code are wrapped in calls to these
@@ -1145,9 +870,7 @@ void wxPySaveThreadState(PyThreadState* tstate) {
 PyThreadState* wxPyBeginAllowThreads() {
 #ifdef WXP_WITH_THREAD
     PyThreadState* saved = PyEval_SaveThread();  // Py_BEGIN_ALLOW_THREADS;
-#if !wxPyUSE_GIL_STATE
     wxPySaveThreadState(saved);
-#endif
     return saved;
 #else
     return NULL;
@@ -1165,49 +888,19 @@ void wxPyEndAllowThreads(PyThreadState* saved) {
 // Calls from wxWindows back to Python code, or even any PyObject
 // manipulations, PyDECREF's and etc. are wrapped in calls to these functions:
 
-wxPyBlock_t wxPyBeginBlockThreads() {
+void wxPyBeginBlockThreads() {
 #ifdef WXP_WITH_THREAD
-    if (! Py_IsInitialized()) {
-        return (wxPyBlock_t)0;
-    }
-#if wxPyUSE_GIL_STATE
-    PyGILState_STATE state = PyGILState_Ensure();
-    return state;
-#else
-    PyThreadState *current = _PyThreadState_Current;
-
-    // Only block if there wasn't already a tstate, or if the current one is
-    // not the one we are wanting to change to.  This should prevent deadlock
-    // if there are nested calls to wxPyBeginBlockThreads
-    wxPyBlock_t blocked = false;
-    wxPyThreadState* tstate = wxPyGetThreadState();
-    if (current != tstate->tstate) {
-        PyEval_RestoreThread(tstate->tstate);
-        blocked = true;
-    }
-    return blocked;
-#endif
-#else
-    return (wxPyBlock_t)0;
+    PyThreadState* tstate = wxPyGetThreadState();
+    PyEval_RestoreThread(tstate);
 #endif
 }
 
 
-void wxPyEndBlockThreads(wxPyBlock_t blocked) {
+void wxPyEndBlockThreads() {
 #ifdef WXP_WITH_THREAD
-    if (! Py_IsInitialized()) {
-        return;
-    }            
-#if wxPyUSE_GIL_STATE
-    PyGILState_Release(blocked);
-#else
-    // Only unblock if we blocked in the last call to wxPyBeginBlockThreads.
-    // The value of blocked passed in needs to be the same as that returned
-    // from wxPyBeginBlockThreads at the same nesting level.
-    if ( blocked ) {
-        PyEval_SaveThread();
-    }
-#endif
+    // Is there any need to save it again?
+    // PyThreadState* tstate =
+    PyEval_SaveThread();
 #endif
 }
 
@@ -1228,12 +921,11 @@ bool wxPyInputStream::eof() {
     if (m_wxis)
         return m_wxis->Eof();
     else
-        return true;
+        return TRUE;
 }
 
 wxPyInputStream::~wxPyInputStream() {
-    if (m_wxis)
-        delete m_wxis;
+    /* do nothing */
 }
 
 
@@ -1246,9 +938,9 @@ PyObject* wxPyInputStream::read(int size) {
 
     // check if we have a real wxInputStream to work with
     if (!m_wxis) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
+        wxPyBeginBlockThreads();
         PyErr_SetString(PyExc_IOError, "no valid C-wxInputStream");
-        wxPyEndBlockThreads(blocked);
+        wxPyEndBlockThreads();
         return NULL;
     }
 
@@ -1265,7 +957,7 @@ PyObject* wxPyInputStream::read(int size) {
     }
 
     // error check
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     wxStreamError err = m_wxis->GetLastError();
     if (err != wxSTREAM_NO_ERROR && err != wxSTREAM_EOF) {
         PyErr_SetString(PyExc_IOError,"IOError in wxInputStream");
@@ -1274,7 +966,7 @@ PyObject* wxPyInputStream::read(int size) {
         // We use only strings for the streams, not unicode
         obj = PyString_FromStringAndSize(buf, buf.GetDataLen());
     }
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
     return obj;
 }
 
@@ -1287,9 +979,9 @@ PyObject* wxPyInputStream::readline(int size) {
 
     // check if we have a real wxInputStream to work with
     if (!m_wxis) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
+        wxPyBeginBlockThreads();
         PyErr_SetString(PyExc_IOError,"no valid C-wxInputStream");
-        wxPyEndBlockThreads(blocked);
+        wxPyEndBlockThreads();
         return NULL;
     }
 
@@ -1300,7 +992,7 @@ PyObject* wxPyInputStream::readline(int size) {
     }
 
     // errorcheck
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     wxStreamError err = m_wxis->GetLastError();
     if (err != wxSTREAM_NO_ERROR && err != wxSTREAM_EOF) {
         PyErr_SetString(PyExc_IOError,"IOError in wxInputStream");
@@ -1309,7 +1001,7 @@ PyObject* wxPyInputStream::readline(int size) {
         // We use only strings for the streams, not unicode
         obj = PyString_FromStringAndSize((char*)buf.GetData(), buf.GetDataLen());
     }
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
     return obj;
 }
 
@@ -1319,21 +1011,19 @@ PyObject* wxPyInputStream::readlines(int sizehint) {
 
     // check if we have a real wxInputStream to work with
     if (!m_wxis) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
+        wxPyBeginBlockThreads();
         PyErr_SetString(PyExc_IOError,"no valid C-wxInputStream");
-        wxPyEndBlockThreads(blocked);
+        wxPyEndBlockThreads();
         return NULL;
     }
 
     // init list
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     pylist = PyList_New(0);
-    wxPyEndBlockThreads(blocked);
-
     if (!pylist) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
+        wxPyBeginBlockThreads();
         PyErr_NoMemory();
-        wxPyEndBlockThreads(blocked);
+        wxPyEndBlockThreads();
         return NULL;
     }
 
@@ -1342,24 +1032,24 @@ PyObject* wxPyInputStream::readlines(int sizehint) {
     for (i=0; (m_wxis->CanRead()) && ((sizehint < 0) || (i < sizehint));) {
         PyObject* s = this->readline();
         if (s == NULL) {
-            wxPyBlock_t blocked = wxPyBeginBlockThreads();
+            wxPyBeginBlockThreads();
             Py_DECREF(pylist);
-            wxPyEndBlockThreads(blocked);
+            wxPyEndBlockThreads();
             return NULL;
         }
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
+        wxPyBeginBlockThreads();
         PyList_Append(pylist, s);
         i += PyString_Size(s);
-        wxPyEndBlockThreads(blocked);
+        wxPyEndBlockThreads();
     }
 
     // error check
     wxStreamError err = m_wxis->GetLastError();
     if (err != wxSTREAM_NO_ERROR && err != wxSTREAM_EOF) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
+        wxPyBeginBlockThreads();
         Py_DECREF(pylist);
         PyErr_SetString(PyExc_IOError,"IOError in wxInputStream");
-        wxPyEndBlockThreads(blocked);
+        wxPyEndBlockThreads();
         return NULL;
     }
 
@@ -1385,31 +1075,18 @@ wxPyCBInputStream::wxPyCBInputStream(PyObject *r, PyObject *s, PyObject *t, bool
     : wxInputStream(), m_read(r), m_seek(s), m_tell(t), m_block(block)
 {}
 
-wxPyCBInputStream::wxPyCBInputStream(const wxPyCBInputStream& other)
-{
-    m_read  = other.m_read;
-    m_seek  = other.m_seek;
-    m_tell  = other.m_tell;
-    m_block = other.m_block;
-    Py_INCREF(m_read);
-    Py_INCREF(m_seek);
-    Py_INCREF(m_tell);
-}
-
 
 wxPyCBInputStream::~wxPyCBInputStream() {
-    wxPyBlock_t blocked;
-    if (m_block) blocked = wxPyBeginBlockThreads();
+    if (m_block) wxPyBeginBlockThreads();
     Py_XDECREF(m_read);
     Py_XDECREF(m_seek);
     Py_XDECREF(m_tell);
-    if (m_block) wxPyEndBlockThreads(blocked);
+    if (m_block) wxPyEndBlockThreads();
 }
 
 
 wxPyCBInputStream* wxPyCBInputStream::create(PyObject *py, bool block) {
-    wxPyBlock_t blocked;
-    if (block) blocked = wxPyBeginBlockThreads();
+    if (block) wxPyBeginBlockThreads();
 
     PyObject* read = getMethod(py, "read");
     PyObject* seek = getMethod(py, "seek");
@@ -1420,21 +1097,17 @@ wxPyCBInputStream* wxPyCBInputStream::create(PyObject *py, bool block) {
         Py_XDECREF(read);
         Py_XDECREF(seek);
         Py_XDECREF(tell);
-        if (block) wxPyEndBlockThreads(blocked);
+        if (block) wxPyEndBlockThreads();
         return NULL;
     }
 
-    if (block) wxPyEndBlockThreads(blocked);
+    if (block) wxPyEndBlockThreads();
     return new wxPyCBInputStream(read, seek, tell, block);
 }
 
 
 wxPyCBInputStream* wxPyCBInputStream_create(PyObject *py, bool block) {
     return wxPyCBInputStream::create(py, block);
-}
-
-wxPyCBInputStream* wxPyCBInputStream_copy(wxPyCBInputStream* other) {
-    return new wxPyCBInputStream(*other);
 }
 
 PyObject* wxPyCBInputStream::getMethod(PyObject* py, char* name) {
@@ -1449,16 +1122,16 @@ PyObject* wxPyCBInputStream::getMethod(PyObject* py, char* name) {
 }
 
 
-wxFileOffset wxPyCBInputStream::GetLength() const {
+size_t wxPyCBInputStream::GetSize() const {
     wxPyCBInputStream* self = (wxPyCBInputStream*)this; // cast off const
     if (m_seek && m_tell) {
-        wxFileOffset temp = self->OnSysTell();
-        wxFileOffset ret = self->OnSysSeek(0, wxFromEnd);
+        off_t temp = self->OnSysTell();
+        off_t ret = self->OnSysSeek(0, wxFromEnd);
         self->OnSysSeek(temp, wxFromStart);
         return ret;
     }
     else
-        return wxInvalidOffset;
+        return 0;
 }
 
 
@@ -1466,7 +1139,7 @@ size_t wxPyCBInputStream::OnSysRead(void *buffer, size_t bufsize) {
     if (bufsize == 0)
         return 0;
 
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     PyObject* arglist = Py_BuildValue("(i)", bufsize);
     PyObject* result = PyEval_CallObject(m_read, arglist);
     Py_DECREF(arglist);
@@ -1484,7 +1157,7 @@ size_t wxPyCBInputStream::OnSysRead(void *buffer, size_t bufsize) {
     }
     else
         m_lasterror = wxSTREAM_READ_ERROR;
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
     return o;
 }
 
@@ -1493,42 +1166,39 @@ size_t wxPyCBInputStream::OnSysWrite(const void *buffer, size_t bufsize) {
     return 0;
 }
 
-
-wxFileOffset wxPyCBInputStream::OnSysSeek(wxFileOffset off, wxSeekMode mode) {
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
-    PyObject* arglist = PyTuple_New(2);
-
-    if (sizeof(wxFileOffset) > sizeof(long))
-        // wxFileOffset is a 64-bit value...
-        PyTuple_SET_ITEM(arglist, 0, PyLong_FromLongLong(off));
-    else
-        PyTuple_SET_ITEM(arglist, 0, PyInt_FromLong(off));
-
-    PyTuple_SET_ITEM(arglist, 1, PyInt_FromLong(mode));
-
-
+off_t wxPyCBInputStream::OnSysSeek(off_t off, wxSeekMode mode) {
+    wxPyBeginBlockThreads();
+#ifdef _LARGE_FILES
+    // off_t is a 64-bit value...
+    PyObject* arglist = Py_BuildValue("(Li)", off, mode);
+#else
+    PyObject* arglist = Py_BuildValue("(ii)", off, mode);
+#endif
     PyObject* result = PyEval_CallObject(m_seek, arglist);
     Py_DECREF(arglist);
     Py_XDECREF(result);
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
     return OnSysTell();
 }
 
 
-wxFileOffset wxPyCBInputStream::OnSysTell() const {
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+off_t wxPyCBInputStream::OnSysTell() const {
+    wxPyBeginBlockThreads();
     PyObject* arglist = Py_BuildValue("()");
     PyObject* result = PyEval_CallObject(m_tell, arglist);
     Py_DECREF(arglist);
-    wxFileOffset o = 0;
+    off_t o = 0;
     if (result != NULL) {
+#ifdef _LARGE_FILES
         if (PyLong_Check(result))
             o = PyLong_AsLongLong(result);
         else
-            o = PyInt_AsLong(result);
+#else
+        o = PyInt_AsLong(result);
+#endif
         Py_DECREF(result);
     };
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
     return o;
 }
 
@@ -1547,14 +1217,12 @@ wxPyCallback::wxPyCallback(const wxPyCallback& other) {
 }
 
 wxPyCallback::~wxPyCallback() {
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     Py_DECREF(m_func);
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
 }
 
 
-#define wxPy_PRECALLINIT     "_preCallInit"
-#define wxPy_POSTCALLCLEANUP "_postCallCleanup"
 
 // This function is used for all events destined for Python event handlers.
 void wxPyCallback::EventThunker(wxEvent& event) {
@@ -1563,9 +1231,9 @@ void wxPyCallback::EventThunker(wxEvent& event) {
     PyObject*       result;
     PyObject*       arg;
     PyObject*       tuple;
-    bool            checkSkip = false;
+    bool            checkSkip = FALSE;
 
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     wxString className = event.GetClassInfo()->GetClassName();
 
     // If the event is one of these types then pass the original
@@ -1582,65 +1250,32 @@ void wxPyCallback::EventThunker(wxEvent& event) {
         arg = wxPyConstructObject((void*)&event, className);
     }
 
-    if (!arg) {
-        PyErr_Print();
+    // Call the event handler, passing the event object
+    tuple = PyTuple_New(1);
+    PyTuple_SET_ITEM(tuple, 0, arg);  // steals ref to arg
+    result = PyEval_CallObject(func, tuple);
+    if ( result ) {
+        Py_DECREF(result);   // result is ignored, but we still need to decref it
+        PyErr_Clear();       // Just in case...
     } else {
-        // "intern" the pre/post method names to speed up the HasAttr
-        static PyObject* s_preName  = NULL;
-        static PyObject* s_postName = NULL;
-        if (s_preName == NULL) {
-            s_preName  = PyString_FromString(wxPy_PRECALLINIT);
-            s_postName = PyString_FromString(wxPy_POSTCALLCLEANUP);
-        }
+        PyErr_Print();
+    }
 
-        // Check if the event object needs some preinitialization
-        if (PyObject_HasAttr(arg, s_preName)) {
-            result = PyObject_CallMethodObjArgs(arg, s_preName, arg, NULL);
-            if ( result ) {
-                Py_DECREF(result);   // result is ignored, but we still need to decref it
-                PyErr_Clear();       // Just in case...
-            } else {
-                PyErr_Print();
-            }
-        }
-
-        // Call the event handler, passing the event object
-        tuple = PyTuple_New(1);
-        PyTuple_SET_ITEM(tuple, 0, arg);  // steals ref to arg
-        result = PyEval_CallObject(func, tuple);
+    if ( checkSkip ) {
+        // if the event object was one of our special types and
+        // it had been cloned, then we need to extract the Skipped
+        // value from the original and set it in the clone.
+        result = PyObject_CallMethod(arg, "GetSkipped", "");
         if ( result ) {
-            Py_DECREF(result);   // result is ignored, but we still need to decref it
-            PyErr_Clear();       // Just in case...
+            event.Skip(PyInt_AsLong(result));
+            Py_DECREF(result);
         } else {
             PyErr_Print();
         }
-
-        // Check if the event object needs some post cleanup
-        if (PyObject_HasAttr(arg, s_postName)) {
-            result = PyObject_CallMethodObjArgs(arg, s_postName, arg, NULL);
-            if ( result ) {
-                Py_DECREF(result);   // result is ignored, but we still need to decref it
-                PyErr_Clear();       // Just in case...
-            } else {
-                PyErr_Print();
-            }
-        }
-
-        if ( checkSkip ) {
-            // if the event object was one of our special types and
-            // it had been cloned, then we need to extract the Skipped
-            // value from the original and set it in the clone.
-            result = PyObject_CallMethod(arg, "GetSkipped", "");
-            if ( result ) {
-                event.Skip(PyInt_AsLong(result));
-                Py_DECREF(result);
-            } else {
-                PyErr_Print();
-            }
-        }
-        Py_DECREF(tuple);
     }
-    wxPyEndBlockThreads(blocked);
+
+    Py_DECREF(tuple);
+    wxPyEndBlockThreads();
 }
 
 
@@ -1686,6 +1321,7 @@ PyObject* PyFindClassWithAttr(PyObject *klass, PyObject *name)
 
     if (PyType_Check(klass)) {      // new style classes
         // This code is borrowed/adapted from _PyType_Lookup in typeobject.c
+        // (TODO: This part is not tested yet, so I'm not sure it is correct...)
         PyTypeObject* type = (PyTypeObject*)klass;
         PyObject *mro, *res, *base, *dict;
         /* Look in tp_dict of types in MRO */
@@ -1760,7 +1396,7 @@ bool wxPyCallbackHelper::findCallback(const char* name) const {
         // not from a base class...
         if (PyMethod_Check(method) &&
             (klass = PyMethod_GetDefiningClass(method, (char*)name)) != NULL &&
-            ((klass == m_class) || PyObject_IsSubclass(klass, m_class))) {
+            ((klass == m_class) || PyClass_IsSubclass(klass, m_class))) {
 
             // ...then we'll save a pointer to the method so callCallback can call it.
             self->m_lastFound = method;
@@ -1775,7 +1411,7 @@ bool wxPyCallbackHelper::findCallback(const char* name) const {
 
 int wxPyCallbackHelper::callCallback(PyObject* argTuple) const {
     PyObject*   result;
-    int         retval = false;
+    int         retval = FALSE;
 
     result = callCallbackObj(argTuple);
     if (result) {                       // Assumes an integer return type...
@@ -1787,7 +1423,7 @@ int wxPyCallbackHelper::callCallback(PyObject* argTuple) const {
 }
 
 // Invoke the Python callable object, returning the raw PyObject return
-// value.  Caller should DECREF the return value and also manage the GIL.
+// value.  Caller should DECREF the return value and also call PyEval_SaveThread.
 PyObject* wxPyCallbackHelper::callCallbackObj(PyObject* argTuple) const {
     PyObject* result;
 
@@ -1825,10 +1461,10 @@ PyObject* wxPyCBH_callCallbackObj(const wxPyCallbackHelper& cbh, PyObject* argTu
 
 void wxPyCBH_delete(wxPyCallbackHelper* cbh) {
     if (cbh->m_incRef) {
-        wxPyBlock_t blocked = wxPyBeginBlockThreads();
+        wxPyBeginBlockThreads();
         Py_XDECREF(cbh->m_self);
         Py_XDECREF(cbh->m_class);
-        wxPyEndBlockThreads(blocked);
+        wxPyEndBlockThreads();
     }
 }
 
@@ -1842,26 +1478,26 @@ void wxPyCBH_delete(wxPyCallbackHelper* cbh) {
 wxPyEvtSelfRef::wxPyEvtSelfRef() {
     //m_self = Py_None;         // **** We don't do normal ref counting to prevent
     //Py_INCREF(m_self);        //      circular loops...
-    m_cloned = false;
+    m_cloned = FALSE;
 }
 
 wxPyEvtSelfRef::~wxPyEvtSelfRef() {
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     if (m_cloned)
         Py_DECREF(m_self);
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
 }
 
 void wxPyEvtSelfRef::SetSelf(PyObject* self, bool clone) {
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     if (m_cloned)
         Py_DECREF(m_self);
     m_self = self;
     if (clone) {
         Py_INCREF(m_self);
-        m_cloned = true;
+        m_cloned = TRUE;
     }
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
 }
 
 PyObject* wxPyEvtSelfRef::GetSelf() const {
@@ -1874,15 +1510,15 @@ IMPLEMENT_ABSTRACT_CLASS(wxPyEvent, wxEvent);
 IMPLEMENT_ABSTRACT_CLASS(wxPyCommandEvent, wxCommandEvent);
 
 
-wxPyEvent::wxPyEvent(int winid, wxEventType commandType)
-    : wxEvent(winid, commandType) {
+wxPyEvent::wxPyEvent(int id)
+    : wxEvent(id) {
 }
 
 
 wxPyEvent::wxPyEvent(const wxPyEvent& evt)
     : wxEvent(evt)
 {
-    SetSelf(evt.m_self, true);
+    SetSelf(evt.m_self, TRUE);
 }
 
 
@@ -1898,7 +1534,7 @@ wxPyCommandEvent::wxPyCommandEvent(wxEventType commandType, int id)
 wxPyCommandEvent::wxPyCommandEvent(const wxPyCommandEvent& evt)
     : wxCommandEvent(evt)
 {
-    SetSelf(evt.m_self, true);
+    SetSelf(evt.m_self, TRUE);
 }
 
 
@@ -1908,27 +1544,65 @@ wxPyCommandEvent::~wxPyCommandEvent() {
 
 
 
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
+
+wxPyTimer::wxPyTimer(PyObject* callback) {
+    func = callback;
+    Py_INCREF(func);
+}
+
+wxPyTimer::~wxPyTimer() {
+    wxPyBeginBlockThreads();
+    Py_DECREF(func);
+    wxPyEndBlockThreads();
+}
+
+void wxPyTimer::Notify() {
+    if (!func || func == Py_None) {
+        wxTimer::Notify();
+    }
+    else {
+        wxPyBeginBlockThreads();
+
+        PyObject*   result;
+        PyObject*   args = Py_BuildValue("()");
+
+        result = PyEval_CallObject(func, args);
+        Py_DECREF(args);
+        if (result) {
+            Py_DECREF(result);
+            PyErr_Clear();
+        } else {
+            PyErr_Print();
+        }
+
+        wxPyEndBlockThreads();
+    }
+}
+
+
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-// Convert a wxList to a Python List, only works for lists of wxObjects
+// Convert a wxList to a Python List
 
-PyObject* wxPy_ConvertList(wxListBase* listbase) {
-    wxList*     list = (wxList*)listbase;  // this is probably bad...
+PyObject* wxPy_ConvertList(wxListBase* list, const char* className) {
     PyObject*   pyList;
     PyObject*   pyObj;
     wxObject*   wxObj;
-    wxNode*     node = list->GetFirst();
+    wxNode*     node = list->First();
 
-    wxPyBlock_t blocked = wxPyBeginBlockThreads();
+    wxPyBeginBlockThreads();
     pyList = PyList_New(0);
     while (node) {
-        wxObj = node->GetData();
-        pyObj = wxPyMake_wxObject(wxObj,false);
+        wxObj = node->Data();
+        pyObj = wxPyMake_wxObject(wxObj); //wxPyConstructObject(wxObj, className);
         PyList_Append(pyList, pyObj);
-        node = node->GetNext();
+        node = node->Next();
     }
-    wxPyEndBlockThreads(blocked);
+    wxPyEndBlockThreads();
     return pyList;
 }
 
@@ -1940,15 +1614,26 @@ long wxPyGetWinHandle(wxWindow* win) {
     return (long)win->GetHandle();
 #endif
 
-#if defined(__WXGTK__) || defined(__WXX11)
-    return (long)GetXWindow(win);
+    
+    // Find and return the actual X-Window.
+#ifdef __WXGTK__
+    if (win->m_wxwindow) {
+#ifdef __WXGTK20__
+        return (long) GDK_WINDOW_XWINDOW(GTK_PIZZA(win->m_wxwindow)->bin_window);
+#else
+        GdkWindowPrivate* bwin = (GdkWindowPrivate*)GTK_PIZZA(win->m_wxwindow)->bin_window;
+        if (bwin) {
+            return (long)bwin->xwindow;
+        }
+#endif
+    }
 #endif
 
+    
 #ifdef __WXMAC__
-    //return (long)MAC_WXHWND(win->MacGetTopLevelWindowRef());
-    return (long)win->GetHandle();
+    return (long)MAC_WXHWND(win->MacGetRootWindow());
 #endif
-
+    
     return 0;
 }
 
@@ -1956,47 +1641,50 @@ long wxPyGetWinHandle(wxWindow* win) {
 // Some helper functions for typemaps in my_typemaps.i, so they won't be
 // included in every file over and over again...
 
-wxString* wxString_in_helper(PyObject* source) {
-    wxString* target = NULL;
+#if PYTHON_API_VERSION >= 1009
+    static char* wxStringErrorMsg = "String or Unicode type required";
+#else
+    static char* wxStringErrorMsg = "String type required";
+#endif
 
+
+wxString* wxString_in_helper(PyObject* source) {
+    wxString* target;
+#if PYTHON_API_VERSION >= 1009  // Have Python unicode API
     if (!PyString_Check(source) && !PyUnicode_Check(source)) {
-        PyErr_SetString(PyExc_TypeError, "String or Unicode type required");
+        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
         return NULL;
     }
 #if wxUSE_UNICODE
-    PyObject* uni = source;
-    if (PyString_Check(source)) {
-        uni = PyUnicode_FromEncodedObject(source, wxPyDefaultEncoding, "strict");
-        if (PyErr_Occurred()) return NULL;
-    }
-    target = new wxString();
-    size_t len = PyUnicode_GET_SIZE(uni);
-    if (len) {
-        PyUnicode_AsWideChar((PyUnicodeObject*)uni, target->GetWriteBuf(len), len);
-        target->UngetWriteBuf(len);
-    }
-
-    if (PyString_Check(source))
-        Py_DECREF(uni);
-#else
-    // Convert to a string object if it isn't already, then to wxString
-    PyObject* str = source;
     if (PyUnicode_Check(source)) {
-        str = PyUnicode_AsEncodedString(source, wxPyDefaultEncoding, "strict");
-        if (PyErr_Occurred()) return NULL;
+        target = new wxString();
+        size_t len = PyUnicode_GET_SIZE(source);
+        if (len) {
+            PyUnicode_AsWideChar((PyUnicodeObject*)source, target->GetWriteBuf(len), len);
+            target->UngetWriteBuf();
+        }
+    } else {
+        // It is a string, get pointers to it and transform to unicode
+        char* tmpPtr; int tmpSize;
+        PyString_AsStringAndSize(source, &tmpPtr, &tmpSize);
+        target = new wxString(tmpPtr, *wxConvCurrent, tmpSize);
     }
-    else if (!PyString_Check(source)) {
-        str = PyObject_Str(source);
-        if (PyErr_Occurred()) return NULL;
-    }
+#else
     char* tmpPtr; int tmpSize;
-    PyString_AsStringAndSize(str, &tmpPtr, &tmpSize);
+    if (PyString_AsStringAndSize(source, &tmpPtr, &tmpSize) == -1) {
+        PyErr_SetString(PyExc_TypeError, "Unable to convert string");
+        return NULL;
+    }
     target = new wxString(tmpPtr, tmpSize);
-
-    if (!PyString_Check(source))
-        Py_DECREF(str);
 #endif // wxUSE_UNICODE
 
+#else  // No Python unicode API (1.5.2)
+    if (!PyString_Check(source)) {
+        PyErr_SetString(PyExc_TypeError, wxStringErrorMsg);
+        return NULL;
+    }
+    target = new wxString(PyString_AS_STRING(source), PyString_GET_SIZE(source));
+#endif
     return target;
 }
 
@@ -2005,41 +1693,45 @@ wxString* wxString_in_helper(PyObject* source) {
 wxString Py2wxString(PyObject* source)
 {
     wxString target;
+    bool     doDecRef = FALSE;
+
+#if PYTHON_API_VERSION >= 1009  // Have Python unicode API
+    if (!PyString_Check(source) && !PyUnicode_Check(source)) {
+        // Convert to String if not one already...  (TODO: Unicode too?)
+        source = PyObject_Str(source);
+        doDecRef = TRUE;
+    }
 
 #if wxUSE_UNICODE
-    // Convert to a unicode object, if not already, then to a wxString
-    PyObject* uni = source;
-    if (!PyUnicode_Check(source)) {
-        uni = PyUnicode_FromEncodedObject(source, wxPyDefaultEncoding, "strict");
-        if (PyErr_Occurred()) return wxEmptyString;  // TODO:  should we PyErr_Clear?
-    }
-    size_t len = PyUnicode_GET_SIZE(uni);
-    if (len) {
-        PyUnicode_AsWideChar((PyUnicodeObject*)uni, target.GetWriteBuf(len), len);
-        target.UngetWriteBuf();
-    }
-
-    if (!PyUnicode_Check(source))
-        Py_DECREF(uni);
-#else
-    // Convert to a string object if it isn't already, then to wxString
-    PyObject* str = source;
     if (PyUnicode_Check(source)) {
-        str = PyUnicode_AsEncodedString(source, wxPyDefaultEncoding, "strict");
-        if (PyErr_Occurred()) return wxEmptyString;    // TODO:  should we PyErr_Clear?
+        size_t len = PyUnicode_GET_SIZE(source);
+        if (len) {
+            PyUnicode_AsWideChar((PyUnicodeObject*)source, target.GetWriteBuf(len), len);
+            target.UngetWriteBuf();
+        }
+    } else {
+        // It is a string, get pointers to it and transform to unicode
+        char* tmpPtr; int tmpSize;
+        PyString_AsStringAndSize(source, &tmpPtr, &tmpSize);
+        target = wxString(tmpPtr, *wxConvCurrent, tmpSize);
     }
-    else if (!PyString_Check(source)) {
-        str = PyObject_Str(source);
-        if (PyErr_Occurred()) return wxEmptyString;    // TODO:  should we PyErr_Clear?
-    }
+#else
     char* tmpPtr; int tmpSize;
-    PyString_AsStringAndSize(str, &tmpPtr, &tmpSize);
+    PyString_AsStringAndSize(source, &tmpPtr, &tmpSize);
     target = wxString(tmpPtr, tmpSize);
-
-    if (!PyString_Check(source))
-        Py_DECREF(str);
 #endif // wxUSE_UNICODE
 
+#else  // No Python unicode API (1.5.2)
+    if (!PyString_Check(source)) {
+        // Convert to String if not one already...
+        source = PyObject_Str(source);
+        doDecRef = TRUE;
+    }
+    target = wxString(PyString_AS_STRING(source), PyString_GET_SIZE(source));
+#endif
+
+    if (doDecRef)
+        Py_DECREF(source);
     return target;
 }
 
@@ -2056,17 +1748,6 @@ PyObject* wx2PyString(const wxString& src)
     return str;
 }
 
-
-
-void wxSetDefaultPyEncoding(const char* encoding)
-{
-    strncpy(wxPyDefaultEncoding, encoding, DEFAULTENCODING_SIZE);
-}
-
-const char* wxGetDefaultPyEncoding()
-{
-    return wxPyDefaultEncoding;
-}
 
 //----------------------------------------------------------------------
 
@@ -2175,7 +1856,7 @@ static inline bool wxPointFromObjects(PyObject* o1, PyObject* o2, wxPoint* point
         point->y = (int)PyFloat_AS_DOUBLE(o2);
         return true;
     }
-    if (wxPySwigInstance_Check(o1) || wxPySwigInstance_Check(o2)) {  // TODO: Why???
+    if (PyInstance_Check(o1) || PyInstance_Check(o2)) {
         // Disallow instances because they can cause havok
         return false;
     }
@@ -2233,9 +1914,9 @@ wxPoint* wxPoint_LIST_helper(PyObject* source, int *count) {
                 goto error2;
             }
         }
-        else if (wxPySwigInstance_Check(o)) {
+        else if (PyInstance_Check(o)) {
             wxPoint* pt;
-            if (! wxPyConvertSwigPtr(o, (void **)&pt, wxT("wxPoint"))) {
+            if (SWIG_GetPtrObj(o, (void **)&pt, "_wxPoint_p")) {
                 goto error2;
             }
             temp[x] = *pt;
@@ -2287,10 +1968,10 @@ wxBitmap** wxBitmap_LIST_helper(PyObject* source) {
     }
     for (int x=0; x<count; x++) {
         PyObject* o = PyList_GetItem(source, x);
-        if (wxPySwigInstance_Check(o)) {
+        if (PyInstance_Check(o)) {
             wxBitmap*    pt;
-            if (! wxPyConvertSwigPtr(o, (void **) &pt, wxT("wxBitmap"))) {
-                PyErr_SetString(PyExc_TypeError,"Expected wxBitmap.");
+            if (SWIG_GetPtrObj(o, (void **) &pt,"_wxBitmap_p")) {
+                PyErr_SetString(PyExc_TypeError,"Expected _wxBitmap_p.");
                 return NULL;
             }
             temp[x] = pt;
@@ -2351,10 +2032,10 @@ wxAcceleratorEntry* wxAcceleratorEntry_LIST_helper(PyObject* source) {
     }
     for (int x=0; x<count; x++) {
         PyObject* o = PyList_GetItem(source, x);
-        if (wxPySwigInstance_Check(o)) {
+        if (PyInstance_Check(o)) {
             wxAcceleratorEntry* ae;
-            if (! wxPyConvertSwigPtr(o, (void **) &ae, wxT("wxAcceleratorEntry"))) {
-                PyErr_SetString(PyExc_TypeError,"Expected wxAcceleratorEntry.");
+            if (SWIG_GetPtrObj(o, (void **) &ae,"_wxAcceleratorEntry_p")) {
+                PyErr_SetString(PyExc_TypeError,"Expected _wxAcceleratorEntry_p.");
                 return NULL;
             }
             temp[x] = *ae;
@@ -2387,11 +2068,11 @@ wxPen** wxPen_LIST_helper(PyObject* source) {
     }
     for (int x=0; x<count; x++) {
         PyObject* o = PyList_GetItem(source, x);
-        if (wxPySwigInstance_Check(o)) {
+        if (PyInstance_Check(o)) {
             wxPen*  pt;
-            if (! wxPyConvertSwigPtr(o, (void **)&pt, wxT("wxPen"))) {
+            if (SWIG_GetPtrObj(o, (void **) &pt,"_wxPen_p")) {
                 delete temp;
-                PyErr_SetString(PyExc_TypeError,"Expected wxPen.");
+                PyErr_SetString(PyExc_TypeError,"Expected _wxPen_p.");
                 return NULL;
             }
             temp[x] = pt;
@@ -2411,7 +2092,7 @@ bool wxPy2int_seq_helper(PyObject* source, int* i1, int* i2) {
     PyObject *o1, *o2;
 
     if (!PySequence_Check(source) || PySequence_Length(source) != 2)
-        return false;
+        return FALSE;
 
     if (isFast) {
         o1 = PySequence_Fast_GET_ITEM(source, 0);
@@ -2429,7 +2110,7 @@ bool wxPy2int_seq_helper(PyObject* source, int* i1, int* i2) {
         Py_DECREF(o1);
         Py_DECREF(o2);
     }
-    return true;
+    return TRUE;
 }
 
 
@@ -2438,7 +2119,7 @@ bool wxPy4int_seq_helper(PyObject* source, int* i1, int* i2, int* i3, int* i4) {
     PyObject *o1, *o2, *o3, *o4;
 
     if (!PySequence_Check(source) || PySequence_Length(source) != 4)
-        return false;
+        return FALSE;
 
     if (isFast) {
         o1 = PySequence_Fast_GET_ITEM(source, 0);
@@ -2464,62 +2145,84 @@ bool wxPy4int_seq_helper(PyObject* source, int* i1, int* i2, int* i3, int* i4) {
         Py_DECREF(o3);
         Py_DECREF(o4);
     }
-    return true;
+    return TRUE;
 }
 
 
 //----------------------------------------------------------------------
 
-bool wxPySimple_typecheck(PyObject* source, const wxChar* classname, int seqLen)
-{
-    void* ptr;
+bool wxSize_helper(PyObject* source, wxSize** obj) {
 
-    if (wxPySwigInstance_Check(source) &&
-        wxPyConvertSwigPtr(source, (void **)&ptr, classname))
-        return true;
+    // If source is an object instance then it may already be the right type
+    if (PyInstance_Check(source)) {
+        wxSize* ptr;
+        if (SWIG_GetPtrObj(source, (void **)&ptr, "_wxSize_p"))
+            goto error;
+        *obj = ptr;
+        return TRUE;
+    }
+    // otherwise a 2-tuple of integers is expected
+    else if (PySequence_Check(source) && PyObject_Length(source) == 2) {
+        PyObject* o1 = PySequence_GetItem(source, 0);
+        PyObject* o2 = PySequence_GetItem(source, 1);
+        if (!PyNumber_Check(o1) || !PyNumber_Check(o2)) {
+            Py_DECREF(o1);
+            Py_DECREF(o2);
+            goto error;
+        }
+        **obj = wxSize(PyInt_AsLong(o1), PyInt_AsLong(o2));
+        Py_DECREF(o1);
+        Py_DECREF(o2);
+        return TRUE;
+    }
 
-    PyErr_Clear();
-    if (PySequence_Check(source) && PySequence_Length(source) == seqLen)
-        return true;
-
-    return false;
+ error:
+    PyErr_SetString(PyExc_TypeError, "Expected a 2-tuple of integers or a wxSize object.");
+    return FALSE;
 }
 
-bool wxSize_helper(PyObject* source, wxSize** obj)
-{
-    if (source == Py_None) {
-        **obj = wxSize(-1,-1);
-        return true;
-    }
-    return wxPyTwoIntItem_helper(source, obj, wxT("wxSize"));
-}
 
+bool wxPoint_helper(PyObject* source, wxPoint** obj) {
 
-bool wxPoint_helper(PyObject* source, wxPoint** obj)
-{
-    if (source == Py_None) {
-        **obj = wxPoint(-1,-1);
-        return true;
+    // If source is an object instance then it may already be the right type
+    if (PyInstance_Check(source)) {
+        wxPoint* ptr;
+        if (SWIG_GetPtrObj(source, (void **)&ptr, "_wxPoint_p"))
+            goto error;
+        *obj = ptr;
+        return TRUE;
     }
-    return wxPyTwoIntItem_helper(source, obj, wxT("wxPoint"));
+    // otherwise a length-2 sequence of integers is expected
+    if (PySequence_Check(source) && PySequence_Length(source) == 2) {
+        PyObject* o1 = PySequence_GetItem(source, 0);
+        PyObject* o2 = PySequence_GetItem(source, 1);
+        // This should really check for integers, not numbers -- but that would break code.
+        if (!PyNumber_Check(o1) || !PyNumber_Check(o2)) {
+            Py_DECREF(o1);
+            Py_DECREF(o2);
+            goto error;
+        }
+        **obj = wxPoint(PyInt_AsLong(o1), PyInt_AsLong(o2));
+        Py_DECREF(o1);
+        Py_DECREF(o2);
+        return TRUE;
+    }
+ error:
+    PyErr_SetString(PyExc_TypeError, "Expected a 2-tuple of integers or a wxPoint object.");
+    return FALSE;
 }
 
 
 
 bool wxRealPoint_helper(PyObject* source, wxRealPoint** obj) {
 
-    if (source == Py_None) {
-        **obj = wxRealPoint(-1,-1);
-        return true;
-    }
-
     // If source is an object instance then it may already be the right type
-    if (wxPySwigInstance_Check(source)) {
+    if (PyInstance_Check(source)) {
         wxRealPoint* ptr;
-        if (! wxPyConvertSwigPtr(source, (void **)&ptr, wxT("wxRealPoint")))
+        if (SWIG_GetPtrObj(source, (void **)&ptr, "_wxRealPoint_p"))
             goto error;
         *obj = ptr;
-        return true;
+        return TRUE;
     }
     // otherwise a 2-tuple of floats is expected
     else if (PySequence_Check(source) && PyObject_Length(source) == 2) {
@@ -2533,30 +2236,26 @@ bool wxRealPoint_helper(PyObject* source, wxRealPoint** obj) {
         **obj = wxRealPoint(PyFloat_AsDouble(o1), PyFloat_AsDouble(o2));
         Py_DECREF(o1);
         Py_DECREF(o2);
-        return true;
+        return TRUE;
     }
 
  error:
     PyErr_SetString(PyExc_TypeError, "Expected a 2-tuple of floats or a wxRealPoint object.");
-    return false;
+    return FALSE;
 }
+
 
 
 
 bool wxRect_helper(PyObject* source, wxRect** obj) {
 
-    if (source == Py_None) {
-        **obj = wxRect(-1,-1,-1,-1);
-        return true;
-    }
-
     // If source is an object instance then it may already be the right type
-    if (wxPySwigInstance_Check(source)) {
+    if (PyInstance_Check(source)) {
         wxRect* ptr;
-        if (! wxPyConvertSwigPtr(source, (void **)&ptr, wxT("wxRect")))
+        if (SWIG_GetPtrObj(source, (void **)&ptr, "_wxRect_p"))
             goto error;
         *obj = ptr;
-        return true;
+        return TRUE;
     }
     // otherwise a 4-tuple of integers is expected
     else if (PySequence_Check(source) && PyObject_Length(source) == 4) {
@@ -2578,30 +2277,25 @@ bool wxRect_helper(PyObject* source, wxRect** obj) {
         Py_DECREF(o2);
         Py_DECREF(o3);
         Py_DECREF(o4);
-        return true;
+        return TRUE;
     }
 
  error:
     PyErr_SetString(PyExc_TypeError, "Expected a 4-tuple of integers or a wxRect object.");
-    return false;
+    return FALSE;
 }
 
 
 
 bool wxColour_helper(PyObject* source, wxColour** obj) {
 
-    if (source == Py_None) {
-        **obj = wxNullColour;
-        return true;
-    }
-
     // If source is an object instance then it may already be the right type
-    if (wxPySwigInstance_Check(source)) {
+    if (PyInstance_Check(source)) {
         wxColour* ptr;
-        if (! wxPyConvertSwigPtr(source, (void **)&ptr, wxT("wxColour")))
+        if (SWIG_GetPtrObj(source, (void **)&ptr, "_wxColour_p"))
             goto error;
         *obj = ptr;
-        return true;
+        return TRUE;
     }
     // otherwise check for a string
     else if (PyString_Check(source) || PyUnicode_Check(source)) {
@@ -2614,11 +2308,11 @@ bool wxColour_helper(PyObject* source, wxColour** obj) {
             spec.Mid(5,2).ToLong(&blue,  16);
 
             **obj = wxColour(red, green, blue);
-            return true;
+            return TRUE;
         }
         else {                                       // it's a colour name
             **obj = wxColour(spec);
-            return true;
+            return TRUE;
         }
     }
     // last chance: 3-tuple of integers is expected
@@ -2636,63 +2330,46 @@ bool wxColour_helper(PyObject* source, wxColour** obj) {
         Py_DECREF(o1);
         Py_DECREF(o2);
         Py_DECREF(o3);
-        return true;
+        return TRUE;
     }
 
  error:
     PyErr_SetString(PyExc_TypeError,
                     "Expected a wxColour object or a string containing a colour name or '#RRGGBB'.");
-    return false;
-}
-
-
-bool wxColour_typecheck(PyObject* source) {
-
-    if (wxPySimple_typecheck(source, wxT("wxColour"), 3))
-        return true;
-
-    if (PyString_Check(source) || PyUnicode_Check(source))
-        return true;
-
-    return false;
+    return FALSE;
 }
 
 
 
-bool wxPoint2D_helper(PyObject* source, wxPoint2D** obj) {
-
-    if (source == Py_None) {
-        **obj = wxPoint2D(-1,-1);
-        return true;
-    }
-
+bool wxPoint2DDouble_helper(PyObject* source, wxPoint2DDouble** obj) {
     // If source is an object instance then it may already be the right type
-    if (wxPySwigInstance_Check(source)) {
-        wxPoint2D* ptr;
-        if (! wxPyConvertSwigPtr(source, (void **)&ptr, wxT("wxPoint2D")))
+    if (PyInstance_Check(source)) {
+        wxPoint2DDouble* ptr;
+        if (SWIG_GetPtrObj(source, (void **)&ptr, "_wxPoint2DDouble_p"))
             goto error;
         *obj = ptr;
-        return true;
+        return TRUE;
     }
     // otherwise a length-2 sequence of floats is expected
     if (PySequence_Check(source) && PySequence_Length(source) == 2) {
         PyObject* o1 = PySequence_GetItem(source, 0);
         PyObject* o2 = PySequence_GetItem(source, 1);
-        // This should really check for floats, not numbers -- but that would break code.
+        // This should really check for integers, not numbers -- but that would break code.
         if (!PyNumber_Check(o1) || !PyNumber_Check(o2)) {
             Py_DECREF(o1);
             Py_DECREF(o2);
             goto error;
         }
-        **obj = wxPoint2D(PyFloat_AsDouble(o1), PyFloat_AsDouble(o2));
+        **obj = wxPoint2DDouble(PyFloat_AsDouble(o1), PyFloat_AsDouble(o2));
         Py_DECREF(o1);
         Py_DECREF(o2);
-        return true;
+        return TRUE;
     }
  error:
-    PyErr_SetString(PyExc_TypeError, "Expected a 2-tuple of floats or a wxPoint2D object.");
-    return false;
+    PyErr_SetString(PyExc_TypeError, "Expected a 2-tuple of floats or a wxPoint2DDouble object.");
+    return FALSE;
 }
+
 
 
 //----------------------------------------------------------------------

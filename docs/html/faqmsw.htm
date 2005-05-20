@@ -1,3 +1,4 @@
+
 <HTML>
 
 <HEAD>
@@ -44,10 +45,6 @@ See also <a href="faq.htm">top-level FAQ page</a>.
 <li><a href="#shortcutproblem">Why are menu hotkeys or shortcuts not working in my application?</a></li>
 <li><a href="#regconfig">Why can I not write to the HKLM part of the registry with wxRegConfig?</a></li>
 <li><a href="#access">Is MS Active Accessibility supported?</a></li>
-<li><a href="#dspfmt">Why does Visual C++ complain about corrupted project files?</a></li>
-<li><a href="#crtmismatch">Visual C++ gives errors about multiply defined symbols, what can I do?</a></li>
-<li><a href="#directx">Why do I get compilation errors when using wxWidgets with DirectShow?</a></li>
-<li><a href="#handlewm">How do I handle Windows messages in my wxWidgets program?</a></li>
 </ul>
 <hr>
 
@@ -78,7 +75,13 @@ without ever needing a copy of Microsoft Windows. See the Technical Note on the 
 
 <h3><a name="wince">What about Windows CE?</a></h3>
 
-This port is largely complete. For further information, see the <a href="http://www.wxwidgets.org/embedded.htm#wxwince">wxEmbedded</a> page.<P>
+This is under consideration, though we need to get wxWidgets Unicode-aware first.
+There are other interesting issues, such as how to combine the menubar and toolbar APIs
+as Windows CE requires. But there&#39;s no doubt that it will be possible, albeit
+by mostly cutting down wxWidgets 2 API functionality, and adding a few classes here
+and there. Since wxWidgets for 2 produces small binaries (less than 300K for
+the statically-linked &#39;minimal&#39; sample), shoehorning wxWidgets 2 into a Windows CE device&#39;s limited
+storage should not be a problem.<P>
 
 <h3><a name="winxp">What do I need to do for Windows XP?</a></h3>
 
@@ -134,17 +137,18 @@ Please see the wxWidgets 2 for Windows install.txt file for up-to-date informati
 currently the following are known to work:<P>
 
 <ul>
-<li>Visual C++ 1.5, 4.0, 5.0, 6.0, 7.0, 7.1
-<li>Borland C++ 4.5, 5.0, 5.5
-<li>Borland C++Builder 1.0, 3.0, X
-<li>Watcom C++ 10.6 (Win32), OpenWatcom 1.0
-<li>Cygwin (using configure)
+<li>Visual C++ 1.5, 4.0, 5.0, 6.0
+<li>Borland C++ 4.5, 5.0
+<li>Borland C++Builder 1.0, 3.0
+<li>Watcom C++ 10.6 (WIN32)
+<li>Cygwin b20
 <li>Mingw32
-<li>MetroWerks CodeWarrior (many versions)
-<li>Digital Mars 8.34+
+<li>MetroWerks CodeWarrior 4
 </ul>
 <P>
 
+There is a linking problem with Symantec C++ which I hope someone can help solve.
+<P>
 
 <h3><a name="bestcompiler">Which is the best compiler to use with wxWidgets 2?</a></h3>
 
@@ -174,20 +178,24 @@ wxWidgets.
 
 <h3><a name="unicode">Is Unicode supported?</a></h3>
 
-Yes, Unicode is fully supported under Windows NT/2000 and there is limited
-support for it under Windows 9x using <a
-href="http://www.microsoft.com/globaldev/handson/dev/mslu_announce.mspx">MSLU</a>.
-<p>
+Yes, Unicode is fully supported under Windows NT/2000 (Windows 9x don&#39;t
+have Unicode support anyhow).
 
 <h3><a name="doublebyte">Does wxWidgets support double byte fonts (Chinese/Japanese/Korean etc.)?</a></h3>
 
-For Japanese under Win2000, it seems that wxWidgets has no problems to work
-with double byte char sets (meaning DBCS, not Unicode). First you have to
-install Japanese support on your Win2K system and choose for ANSI translation
-<tt>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Nls\CodePage=932</tt>
-(default is 1252 for Western). Then you can see all the Japanese letters in
-wxWidgets applications.
-<p>
+An answer from <a href="mailto:goedde@logosoft.de">Klaus Goedde</a>:<p>
+
+"For Japanese under Win2000, it seems that wxWidgets has no problems to work with double byte char sets
+(I mean DBCS, that&#39;s not Unicode). First you have to install Japanese support on your Win2K system
+and choose for ANSI translation 
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Nls\CodePage=932 (default is 1252 for Western).
+Then you can see all the funny Japanese letters under wxWidgets too.<P>
+
+In a wxTextCtrl control you have to set the window style "wxTE_RICH", otherwise this control shows the wrong 
+letters.
+
+I don&#39;t now whether it works on non W2K systems, because I&#39;m just starting using wxWidgets."
+<P>
 
 <h3><a name="dll">Can you compile wxWidgets 2 as a DLL?</a></h3>
 
@@ -226,7 +234,7 @@ you need to configure wxWidgets to compile without debugging information: see
 docs/msw/install.txt for details. You may find that using configure instead
 of makefile.g95 is easier, particularly since you can maintain debug and
 release versions of the library simultaneously, in different directories.
-Also, run &#39;strip&#39; after linking to remove all traces of debug info.
+Also, run 'strip' after linking to remove all traces of debug info.
 <P>
 
 <H3><a name="mfc">Is wxWidgets compatible with MFC?</a></H3>
@@ -239,7 +247,7 @@ functionality using MFC.<P>
 
 When you build the wxWidgets library, setup.h is copied
 from include/wx/msw/setup.h to e.g. lib/mswd/wx/setup.h (the path
-depends on the configuration you&#39;re building). So you need to add
+depends on the configuration you're building). So you need to add
 this include path if building using the static Debug library:<P>
 
 lib/mswd<P>
@@ -322,10 +330,6 @@ Code&#39; (and no others). This will then work.<P>
 
 <H3><a name="makefiles">How are the wxWidgets makefiles edited under Windows?</a></H3>
 
-wxWidgets 2.5.x and above uses Bakefile to generate makefiles, which
-is described in technical note 16 under docs/tech in your distribution.
-For 2.4.x, the following explanation applies.<P>
-
 As of wxWidgets 2.1, there is a new system written by Vadim Zeitlin, that
 generates the makefiles from templates using tmake.<P>
 
@@ -341,7 +345,7 @@ example) and regenerate the makefile using tmake.<P>
 
 tmake can be found at
 <a href="http://www.troll.no/freebies/tmake.html" target=_new>www.troll.no/freebies/tmake.html</a>.
-It&#39;s a Perl5 program and so it needs Perl (doh). There is a binary for
+It&#39;s a Perl5 program and so it needs Perl (doh). There is a binary for 
 Windows (available from the same page), but I haven&#39;t used it, so
 I don&#39;t know if it works as flawlessly as "perl tmake" does (note
 for people knowing Perl: don&#39;t try to run tmake with -w, it won&#39;t
@@ -350,7 +354,7 @@ just go to distrib/msw/tmake and type<P>
 
 <pre>tmake -t b32 wxwin.pro -o ../../src/msw/makefile.b32</pre><P>
 
-The makefiles are untested - I don&#39;t have any of Borland, Watcom or
+The makefiles are untested - I don&#39;t have any of Borland, Watcom  or
 Symantec and I don&#39;t have enough diskspace to recompile even with
 VC6 using makefiles. The new makefiles are as close as possible to the
 old ones, but not closer: in fact, there has been many strange things
@@ -457,7 +461,7 @@ First, you can use wxRegKey directly, for example:
     regKey.SetName(idName);
 
     {
-        wxLogNull dummy;
+        wxLogNull dummy; 
         if (!regKey.Create())
         {
             idName = wxT("HKEY_CURRENT_USER\\SOFTWARE\\My Company\\My Product\\Stuff\\");
@@ -501,73 +505,6 @@ This is being worked on. Please see <a href="http://www.wxwidgets.org/access.htm
 for the current status.
 
 <P>
-
-
-<h3><a name="#dspfmt">Why does Visual C++ complain about corrupted project files?</a></h3>
-
-If you have downloaded the wxWidgets sources from the cvs using a Unix cvs
-client or downloaded a daily snapshot in <tt>.tar.gz</tt> format, it is likely
-that the project files have Unix line endings (LF) instead of the DOS ones (CR
-LF). However all versions of Visual C++ up to and including 7.1 can only open
-the files with the DOS line endings, so you must transform the files to this
-format using any of the thousands ways to do it.
-<p>
-Of course, another possibility is to always use only the Windows cvs client
-and to avoid this problem completely.
-<p>
-
-<h3><a name="#crtmismatch">Visual C++ gives errors about multiply defined symbols, what can I do?</a></h3>
-
-If you get errors like this
-
-<pre>
-MSVCRTD.lib(MSVCRTD.dll) : error LNK2005: _xxxxxx already defined in LIBCD.lib(yyyyy.obj)
-</pre>
-
-when linking your project, this means that you used different versions of CRT
-(C Run-Time) library for wxWindows (or possibly another library) and the main
-project. Visual C++ provides static or dynamic and multithread safe or not
-versions of CRT for each of debug and release builds, for a total of 8
-libraries. You can choose among them by going to the "Code generation"
-page/subitem of the "C++" tab/item in the project proprieties dialog in VC6/7.
-<p>
-To avoid problems, you <strong>must</strong> use the same one for all
-components of your project. wxWindows uses multithread safe DLL version of the
-CRT which is a good choice but may be problematic when distributing your
-applications if you don&#39;t include the CRT DLL in your installation -- in this
-case you may decide to switch to using a static CRT version. If you build with
-<tt>wxUSE_THREADS == 0</tt> you may also use the non MT-safe version as it is
-slightly smaller and faster.
-<p>
-But the most important thing is to use the <strong>same</strong> CRT setting for
-all components of your project.
-
-<h3><a name="#directx">Why do I get compilation erros when using wxWidgets with DirectShow?</a></h3>
-
-If you get errors when including Microsoft DirectShow or DirectDraw headers,
-the following message from Peter Whaite could help:
-<blockquote>
-&gt; This causes compilation errors within DirectShow:
-&gt;
-&gt; wxutil.h(125) : error C2065: &#39;EXECUTE_ASSERT&#39; : undeclared identifier
-&gt; amfilter.h(1099) : error C2065: &#39;ASSERT&#39; : undeclared identifier
-
-The reason for this is that __WXDEBUG__ is also used by the DXSDK (9.0
-in my case) to &#39;#pragma once&#39; the contents of
-DXSDK/Samples/C++/DirectShow/BaseClasses/wxdebug.h. So if __WXDEBUG__
-is defined, then wxdebug.h doesn&#39;t get included, and the assert macros
-don&#39;t get defined. You have to #undef __WXDEBUG__ before including the
-directshow baseclass&#39;s &lt;streams.h&gt;.
-</blockquote>
-
-
-<h3><a name="#handlewm">How do I handle Windows messages in my wxWidgets program?</a></h3>
-
-To handle a Windows message you need to override a virtual
-<tt>MSWWindowProc()</tt> method in a wxWindow-derived class. You should then
-test if <tt>nMsg</tt> parameter is the message you need to process and perform
-the necessary action if it is or call the base class method otherwise.
-
 
 </font>
 

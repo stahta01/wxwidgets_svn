@@ -12,10 +12,6 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 
-#ifdef __GNUG__
-    #pragma interface "tree.h"
-#endif
-
 #include "wx/wx.h"
 #include "wx/gizmos/splittree.h"
 
@@ -48,12 +44,12 @@ public:
 protected:
     wxRemotelyScrolledTreeCtrl*        m_tree;
     wxThinSplitterWindow*   m_splitter;
-    wxSplitterScrolledWindow* m_scrolledWindow;
-    //wxScrolledWindow* m_scrolledWindow;
-    TestValueWindow*        m_valueWindow;
+	wxSplitterScrolledWindow* m_scrolledWindow;
+	//wxScrolledWindow* m_scrolledWindow;
+    TestValueWindow*		m_valueWindow;
 
 private:
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 };
 
@@ -71,27 +67,27 @@ enum
 
 #define idTREE_CTRL         2000
 #define idSPLITTER_WINDOW   2001
-#define idVALUE_WINDOW      2002
-#define idMAIN_FRAME        2003
+#define idVALUE_WINDOW		2002
+#define idMAIN_FRAME		2003
 #define idSCROLLED_WINDOW   2004
 
 class TestTree: public wxRemotelyScrolledTreeCtrl
 {
-    DECLARE_CLASS(TestTree)
+	DECLARE_CLASS(TestTree)
 public:
     TestTree(wxWindow* parent, wxWindowID id, const wxPoint& pt = wxDefaultPosition,
         const wxSize& sz = wxDefaultSize, long style = wxTR_HAS_BUTTONS);
-    ~TestTree();
+	~TestTree();
 
     DECLARE_EVENT_TABLE()
 protected:
-    wxImageList* m_imageList;
+	wxImageList*	m_imageList;
 };
 
 class TestValueWindow: public wxTreeCompanionWindow
 {
 public:
-    TestValueWindow(wxWindow* parent, wxWindowID id = wxID_ANY,
+    TestValueWindow(wxWindow* parent, wxWindowID id = -1,
       const wxPoint& pos = wxDefaultPosition,
       const wxSize& sz = wxDefaultSize,
       long style = 0);
@@ -99,7 +95,7 @@ public:
 //// Overrides
 
 //// Events
-
+    
 //// Data members
 protected:
 

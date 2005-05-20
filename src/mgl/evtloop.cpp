@@ -4,14 +4,14 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001-2002 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "evtloop.h"
 #endif
 
@@ -97,7 +97,9 @@ void wxEventLoopImpl::Dispatch()
 
 bool wxEventLoopImpl::SendIdleEvent()
 {
-    return wxTheApp->ProcessIdle();
+    wxIdleEvent event;
+
+    return wxTheApp->ProcessEvent(event) && event.MoreRequested();
 }
 
 // ============================================================================
@@ -108,11 +110,16 @@ bool wxEventLoopImpl::SendIdleEvent()
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
+wxEventLoop *wxEventLoop::ms_activeLoop = NULL;
 
 wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
+}
+
+bool wxEventLoop::IsRunning() const
+{
+    return m_impl != NULL;
 }
 
 int wxEventLoop::Run()

@@ -1,4 +1,5 @@
-#include "../sample.rc"
+mondrian ICON "mondrian.ico"
+#include "wx/msw/wx.rc"
 
 dnd_copy CURSOR "dnd_copy.cur"
 dnd_move CURSOR "dnd_move.cur"

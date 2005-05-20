@@ -18,8 +18,8 @@
 // ----------------------------------------------------------------------------
 
 #if defined(__GNUG__) && !defined(__APPLE__)
-    #pragma implementation
-    #pragma interface
+    #pragma implementation "shaped.cpp"
+    #pragma interface "shaped.cpp"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -42,8 +42,8 @@
     #include "wx/image.h"
 #endif
 
-#include "wx/dcclient.h"
 #include "wx/image.h"
+#include "wx/dcclient.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -85,16 +85,16 @@ private:
     wxBitmap m_bmp;
     wxPoint  m_delta;
 
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 };
 
 
 // ----------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
-// the event tables connect the wxWidgets events with the functions (event
+// the event tables connect the wxWindows events with the functions (event
 // handlers) which process them. It can be also done at run-time, but for the
 // simple menu events like this the static method is much simpler.
 BEGIN_EVENT_TABLE(ShapedFrame, wxFrame)
@@ -112,7 +112,7 @@ BEGIN_EVENT_TABLE(ShapedFrame, wxFrame)
 END_EVENT_TABLE()
 
 
-// Create a new application object: this macro will allow wxWidgets to create
+// Create a new application object: this macro will allow wxWindows to create
 // the application object during program execution (it's better than using a
 // static object for many reasons) and also declares the accessor function
 // wxGetApp() which will return the reference of the right type (i.e. MyApp and
@@ -134,13 +134,13 @@ bool MyApp::OnInit()
 
     // Create the main application window
     ShapedFrame *frame = new ShapedFrame();
-    frame->Show(true);
+    frame->Show(TRUE);
     SetTopWindow(frame);
 
     // success: wxApp::OnRun() will be called which will enter the main message
-    // loop and the application will run. If we returned false here, the
+    // loop and the application will run. If we returned FALSE here, the
     // application would exit immediately.
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -149,23 +149,21 @@ bool MyApp::OnInit()
 
 // frame constructor
 ShapedFrame::ShapedFrame()
-       : wxFrame((wxFrame *)NULL, wxID_ANY, wxEmptyString,
-                  wxDefaultPosition, wxSize(100, 100), //wxDefaultSize,
-                  0
-                  | wxFRAME_SHAPED
-                  | wxSIMPLE_BORDER
-                  | wxFRAME_NO_TASKBAR
-                  | wxSTAY_ON_TOP
-            )
+       : wxFrame((wxFrame *)NULL, -1, wxEmptyString,
+                 wxDefaultPosition, wxSize(100, 100), //wxDefaultSize,
+                 0
+                 | wxFRAME_SHAPED
+                 | wxSIMPLE_BORDER
+                 | wxFRAME_NO_TASKBAR
+                 | wxSTAY_ON_TOP
+           )
 {
-    m_hasShape = false;
-    m_bmp = wxBitmap(_T("star.png"), wxBITMAP_TYPE_PNG);
+    m_hasShape = FALSE;
+    m_bmp = wxBitmap(wxT("star.png"), wxBITMAP_TYPE_PNG);
     SetSize(wxSize(m_bmp.GetWidth(), m_bmp.GetHeight()));
 #ifndef __WXMAC__
     // On wxMac the tooltip gets clipped by the window shape, YUCK!!
-#if wxUSE_TOOLTOP
     SetToolTip(wxT("Right-click to exit"));
-#endif
 #endif
 #ifndef __WXGTK__
     // On wxGTK we can't do this yet because the window hasn't been created
@@ -182,13 +180,13 @@ void ShapedFrame::SetWindowShape()
     m_hasShape = SetShape(region);
 }
 
-void ShapedFrame::OnDoubleClick(wxMouseEvent& WXUNUSED(evt))
+void ShapedFrame::OnDoubleClick(wxMouseEvent& evt)
 {
     if (m_hasShape)
     {
         wxRegion region;
         SetShape(region);
-        m_hasShape = false;
+        m_hasShape = FALSE;
     }
     else
         SetWindowShape();
@@ -205,7 +203,7 @@ void ShapedFrame::OnLeftDown(wxMouseEvent& evt)
     m_delta = wxPoint(dx, dy);
 }
 
-void ShapedFrame::OnLeftUp(wxMouseEvent& WXUNUSED(evt))
+void ShapedFrame::OnLeftUp(wxMouseEvent& evt)
 {
     if (HasCapture())
     {
@@ -225,18 +223,18 @@ void ShapedFrame::OnMouseMove(wxMouseEvent& evt)
     }
 }
 
-void ShapedFrame::OnExit(wxMouseEvent& WXUNUSED(evt))
+void ShapedFrame::OnExit(wxMouseEvent& evt)
 {
     Close();
 }
 
-void ShapedFrame::OnPaint(wxPaintEvent& WXUNUSED(evt))
+void ShapedFrame::OnPaint(wxPaintEvent& evt)
 {
     wxPaintDC dc(this);
-    dc.DrawBitmap(m_bmp, 0, 0, true);
+    dc.DrawBitmap(m_bmp, 0, 0, TRUE);
 }
 
-void ShapedFrame::OnWindowCreate(wxWindowCreateEvent& WXUNUSED(evt))
+void ShapedFrame::OnWindowCreate(wxWindowCreateEvent& evt)
 {
     SetWindowShape();
 }

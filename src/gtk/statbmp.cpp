@@ -7,12 +7,11 @@
 // Licence:           wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "statbmp.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_STATBMP
 
@@ -38,14 +37,24 @@ wxStaticBitmap::wxStaticBitmap( wxWindow *parent, wxWindowID id, const wxBitmap 
     Create( parent, id, bitmap, pos, size, style, name );
 }
 
-#ifndef __WXGTK20__
-// empty bitmap, so that we can create GtkPixmap widget:
-static char * bogus_xpm[] = {
-"2 2 1 1",
-" 	c None",
-"  ",
-"  "};
-#endif
+void wxStaticBitmap::CreatePixmapWidget()
+{
+    wxCHECK_RET( m_bitmap.Ok(), wxT("should only be called if we have a bitmap") );
+
+    GdkBitmap *mask = (GdkBitmap *) NULL;
+    if ( m_bitmap.GetMask() )
+        mask = m_bitmap.GetMask()->GetBitmap();
+    m_widget = gtk_pixmap_new( m_bitmap.GetPixmap(), mask );
+
+    // insert GTK representation
+    (*m_parent->m_insertCallback)(m_parent, this);
+
+    gtk_widget_show( m_widget );
+
+    m_focusWidget = m_widget;
+
+    PostCreation();
+}
 
 bool wxStaticBitmap::Create( wxWindow *parent, wxWindowID id, const wxBitmap &bitmap,
                              const wxPoint &pos, const wxSize &size,
@@ -56,62 +65,61 @@ bool wxStaticBitmap::Create( wxWindow *parent, wxWindowID id, const wxBitmap &bi
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, wxDefaultValidator, name ))
     {
-        wxFAIL_MSG( wxT("wxStaticBitmap creation failed") );
-        return false;
+        wxFAIL_MSG( wxT("wxXX creation failed") );
+    return FALSE;
     }
 
-    m_bitmap = bitmap;
-
-#ifdef __WXGTK20__
-    m_widget = gtk_image_new();
-#else
-    wxBitmap bmp(bitmap.Ok() ? bitmap : wxBitmap(bogus_xpm));
-    m_widget = gtk_pixmap_new(bmp.GetPixmap(), NULL);
-#endif
-
-    if (bitmap.Ok())
-        SetBitmap(bitmap);
-
-    PostCreation(size);
-    m_parent->DoAddChild( this );
-
-    return true;
-}
-
-void wxStaticBitmap::SetBitmap( const wxBitmap &bitmap )
-{
     m_bitmap = bitmap;
 
     if (m_bitmap.Ok())
     {
         GdkBitmap *mask = (GdkBitmap *) NULL;
-        if (m_bitmap.GetMask())
+        if ( m_bitmap.GetMask() )
             mask = m_bitmap.GetMask()->GetBitmap();
-    
-#ifdef __WXGTK20__
-        if (m_bitmap.HasPixbuf())
-        {
-            gtk_image_set_from_pixbuf(GTK_IMAGE(m_widget),
-                                      m_bitmap.GetPixbuf());
-        }
-        else
-            gtk_image_set_from_pixmap(GTK_IMAGE(m_widget),
-                                      m_bitmap.GetPixmap(), mask);
-#else
-        gtk_pixmap_set(GTK_PIXMAP(m_widget), m_bitmap.GetPixmap(), mask);
-#endif
+        m_widget = gtk_pixmap_new( m_bitmap.GetPixmap(), mask );
 
-        InvalidateBestSize();
-        SetSize(GetBestSize());
+        SetBestSize( size );
     }
+    else
+    {
+        m_widget = gtk_label_new( "Bitmap" );
+        
+        m_focusWidget = m_widget;
+
+        PostCreation();
+    }
+
+    m_parent->DoAddChild( this );
+
+    Show( TRUE );
+
+    return TRUE;
 }
 
-// static
-wxVisualAttributes
-wxStaticBitmap::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
+void wxStaticBitmap::SetBitmap( const wxBitmap &bitmap )
 {
-    // TODO: overload to allow using gtk_pixmap_new?
-    return GetDefaultAttributesFromGTKWidget(gtk_label_new);
+    bool hasWidget = m_bitmap.Ok();
+    m_bitmap = bitmap;
+
+    if (m_bitmap.Ok())
+    {
+        if (!hasWidget)
+        {
+            gtk_widget_destroy( m_widget );
+
+            /* recreate m_widget because we've created a label
+               and not a bitmap above */
+            CreatePixmapWidget();
+        }
+        else
+        {
+            GdkBitmap *mask = (GdkBitmap *) NULL;
+            if (m_bitmap.GetMask()) mask = m_bitmap.GetMask()->GetBitmap();
+            gtk_pixmap_set( GTK_PIXMAP(m_widget), m_bitmap.GetPixmap(), mask );
+        }
+
+        SetBestSize(wxSize(bitmap.GetWidth(), bitmap.GetHeight()));
+    }
 }
 
 #endif // wxUSE_STATBMP

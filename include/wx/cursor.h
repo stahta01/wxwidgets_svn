@@ -12,9 +12,7 @@
 #ifndef _WX_CURSOR_H_BASE_
 #define _WX_CURSOR_H_BASE_
 
-#if defined(__WXPALMOS__)
-#include "wx/palmos/cursor.h"
-#elif defined(__WXMSW__)
+#if defined(__WXMSW__)
 #include "wx/msw/cursor.h"
 #elif defined(__WXMOTIF__)
 #include "wx/motif/cursor.h"
@@ -26,10 +24,10 @@
 #include "wx/mgl/cursor.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/cursor.h"
-#elif defined(__WXCOCOA__)
-#include "wx/cocoa/cursor.h"
 #elif defined(__WXPM__)
 #include "wx/os2/cursor.h"
+#elif defined(__WXSTUBS__)
+#include "wx/stubs/cursor.h"
 #endif
 
 #include "wx/utils.h"
@@ -51,6 +49,9 @@
    interfere with the state of wxIsBusy() -- RL
 
 */
+
+#if wxUSE_GUI
+
 class wxBusyCursorSuspender
 {
 public:
@@ -69,5 +70,7 @@ public:
         }
     }
 };
+#endif
+
 #endif
     // _WX_CURSOR_H_BASE_

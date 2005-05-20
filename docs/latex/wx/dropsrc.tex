@@ -23,8 +23,7 @@ enum wxDragResult
     wxDragError,    // error prevented the d&d operation from completing
     wxDragNone,     // drag target didn't accept the data
     wxDragCopy,     // the data was successfully copied
-    wxDragMove,     // the data was successfully moved (MSW only)
-    wxDragLink,     // operation is a drag-link
+    wxDragMove,     // the data was successfully moved
     wxDragCancel    // the operation was cancelled by user (not an error)
 };
 \end{verbatim}
@@ -38,9 +37,9 @@ enum wxDragResult
 
 \membersection{wxDropSource::wxDropSource}\label{wxdropsourcewxdropsource}
 
-\func{}{wxDropSource}{\param{wxWindow*}{ win = NULL},\param{const wxIconOrCursor\& }{iconCopy = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconMove = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconNone = wxNullIconOrCursor}}
+\func{}{wxDropSource}{\param{wxWindow*}{ win = NULL},\param{const wxIconOrCursor\& }{iconCopy = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconCopy = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconNone = wxNullIconOrCursor}}
 
-\func{}{wxDropSource}{\param{wxDataObject\&}{ data}, \param{wxWindow*}{ win = NULL},\param{const wxIconOrCursor\& }{iconCopy = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconMove = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconNone = wxNullIconOrCursor}}
+\func{}{wxDropSource}{\param{wxDataObject\&}{ data}, \param{wxWindow*}{ win = NULL},\param{const wxIconOrCursor\& }{iconCopy = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconCopy = wxNullIconOrCursor}, \param{const wxIconOrCursor\& }{iconNone = wxNullIconOrCursor}}
 
 The constructors for wxDataObject.
 
@@ -93,17 +92,11 @@ operation}.
 \wxheading{Return value}
 
 Returns the operation requested by the user, may be {\tt wxDragCopy}, {\tt
-wxDragMove}, {\tt wxDragLink}, {\tt wxDragCancel} or {\tt wxDragNone} if an error occurred.
-
-\membersection{wxDropSource::GetDataObject}\label{wxdropsourcegetdataobject}
-
-\func{wxDataObject *}{GetDataObject}{\void}
-
-Returns the wxDataObject object that has been assigned previously.
+wxDragMove}, {\tt wxDragCancel} or {\tt wxDragNone} if an error occured.
 
 \membersection{wxDropSource::GiveFeedback}\label{wxdropsourcegivefeedback}
 
-\func{virtual bool}{GiveFeedback}{\param{wxDragResult }{effect}}
+\func{virtual bool}{GiveFeedback}{\param{wxDragResult }{effect}, \param{bool }{scrolling}}
 
 Overridable: you may give some custom UI feedback during the drag and drop operation
 in this function. It is called on each mouse move, so your implementation must not be too
@@ -111,24 +104,12 @@ slow.
 
 \wxheading{Parameters}
 
-\docparam{effect}{The effect to implement. One of {\tt wxDragCopy}, {\tt wxDragMove}, {\tt wxDragLink} and {\tt wxDragNone}. }
+\docparam{effect}{The effect to implement. One of wxDragCopy, wxDragMove and wxDragNone. }
 
-\docparam{scrolling}{true if the window is scrolling. MSW only. }
+\docparam{scrolling}{TRUE if the window is scrolling. MSW only. }
 
 \wxheading{Return value}
 
-Return false if you want default feedback, or true if you implement your own
+Return FALSE if you want default feedback, or TRUE if you implement your own
 feedback. The return values is ignored under GTK.
-
-\membersection{wxDropSource::SetCursor}\label{wxdropsourcesetcursor}
-
-\func{void}{SetCursor}{\param{wxDragResult }{res}, \param{const wxCursor\& }{cursor}}
-
-Set the icon to use for a certain drag result.
-
-\wxheading{Parameters}
-
-\docparam{res}{The drag result to set the icon for. }
-
-\docparam{cursor}{The ion to show when this drag result occurs. }
 

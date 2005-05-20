@@ -4,10 +4,10 @@
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
@@ -31,13 +31,12 @@ FORCE_LINK_ME(m_style)
 
 
 TAG_HANDLER_BEGIN(STYLE, "STYLE")
-    TAG_HANDLER_CONSTR(STYLE) { }
 
     TAG_HANDLER_PROC(WXUNUSED(tag))
     {
         // VS: Ignore styles for now. We must have this handler present,
         //     because CSS style text would be rendered verbatim otherwise
-        return true;
+        return TRUE;
     }
 
 TAG_HANDLER_END(STYLE)

@@ -48,22 +48,18 @@
 // headers
 // -----------------------------------------------------------------------------
 
-// wxWidgets
+// wxWindows
 #include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
-#if wxUSE_UNICODE
-    #error "HelpGen doesn't build in Unicode mode"
+#if wxUSE_GUI
+    #error "This is a console program and can be only compiled using wxBase"
 #endif
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/dynarray.h"
-    #include "wx/app.h"
+    #include "wx/wx.h"
 #endif // WX_PRECOMP
 
 #include "wx/file.h"
@@ -77,15 +73,37 @@
 #include <stdio.h>
 #include <time.h>
 
+// argh, Windows defines this
+#ifdef GetCurrentTime
+#undef GetCurrentTime
+#endif
+
+// -----------------------------------------------------------------------------
+// global vars
+// -----------------------------------------------------------------------------
+
+class HelpGenApp: public wxApp
+{
+public:
+    HelpGenApp() {};
+
+    // don't let wxWin parse our cmd line, we do it ourselves
+    virtual bool OnInit() { return TRUE; }
+
+    virtual int OnRun();
+};
+
+// IMPLEMENT_APP(HelpGenApp);
+
 // -----------------------------------------------------------------------------
 // private functions
 // -----------------------------------------------------------------------------
 
 // return the label for the given function name (i.e. argument of \label)
-static wxString MakeLabel(const wxChar *classname, const wxChar *funcname = NULL);
+static wxString MakeLabel(const char *classname, const char *funcname = NULL);
 
 // return the whole \helpref{arg}{arg_label} string
-static wxString MakeHelpref(const wxChar *argument);
+static wxString MakeHelpref(const char *argument);
 
 // [un]quote special TeX characters (in place)
 static void TeXFilter(wxString* str);
@@ -96,7 +114,7 @@ static wxString GetAllComments(const spContext& ctx);
 
 // get the string with current time (returns pointer to static buffer)
 // timeFormat is used for the call of strftime(3)
-static const char *GetCurrentTimeFormatted(const char *timeFormat);
+static const char *GetCurrentTime(const char *timeFormat);
 
 // get the string containing the program version
 static const wxString GetVersionString();
@@ -140,7 +158,7 @@ struct FunctionDocEntry
                 return 1;
             }
 
-            wxString dtorname = wxString(_T("~")) + classname;
+            wxString dtorname = wxString('~') + classname;
 
             // there is only one dtor, so the logic here is simpler
             if ( (*pp1)->name == dtorname ) {
@@ -151,7 +169,7 @@ struct FunctionDocEntry
             }
 
             // two normal methods
-            return wxStrcmp((*pp1)->name, (*pp2)->name);
+            return strcmp((*pp1)->name, (*pp2)->name);
         }
     }
 
@@ -194,17 +212,17 @@ public:
     bool FlushAll()
     {
         if ( m_text.empty() )
-            return true;
+            return TRUE;
 
         if ( !Write(m_text) ) {
-            wxLogError(_T("Failed to output generated documentation."));
+            wxLogError("Failed to output generated documentation.");
 
-            return false;
+            return FALSE;
         }
 
         m_text.clear();
 
-        return true;
+        return TRUE;
     }
 
 private:
@@ -226,22 +244,22 @@ public:
     // already have)
     bool AddNamesFromFile(const wxString& filename);
 
-    // return true if we ignore this function
+    // return TRUE if we ignore this function
     bool IgnoreMethod(const wxString& classname,
                       const wxString& funcname) const
     {
         if ( IgnoreClass(classname) )
-            return true;
+            return TRUE;
 
         IgnoreListEntry ignore(classname, funcname);
 
         return m_ignore.Index(&ignore) != wxNOT_FOUND;
     }
 
-    // return true if we ignore this class entirely
+    // return TRUE if we ignore this class entirely
     bool IgnoreClass(const wxString& classname) const
     {
-        IgnoreListEntry ignore(classname, _T(""));
+        IgnoreListEntry ignore(classname, "");
 
         return m_ignore.Index(&ignore) != wxNOT_FOUND;
     }
@@ -263,10 +281,8 @@ protected:
                                         IgnoreListEntry *second);
 
     // for efficiency, let's sort it
-public: // FIXME: macro requires it
     WX_DEFINE_SORTED_ARRAY(IgnoreListEntry *, ArrayNamesToIgnore);
 
-protected:
     ArrayNamesToIgnore m_ignore;
 
 private:
@@ -324,7 +340,7 @@ protected:
     wxTeXFile m_file;           // file we're writing to now
 
     // state variables
-    bool m_inClass,         // true after file successfully opened
+    bool m_inClass,         // TRUE after file successfully opened
          m_inTypesSection,  // enums & typedefs go there
          m_inMethodSection, // functions go here
          m_isFirstParam;    // first parameter of current function?
@@ -370,10 +386,10 @@ public:
     DocManager(bool checkParamNames);
     ~DocManager();
 
-    // returns false on failure
+    // returns FALSE on failure
     bool ParseTeXFile(const wxString& filename);
 
-    // returns false if there were any differences
+    // returns FALSE if there were any differences
     bool DumpDifferences(spContext *ctxTop) const;
 
     // get our `ignore' object
@@ -385,7 +401,7 @@ protected:
 
     // returns the length of 'match' if the string 'str' starts with it or 0
     // otherwise
-    static size_t TryMatch(const wxChar *str, const wxChar *match);
+    static size_t TryMatch(const char *str, const char *match);
 
     // skip spaces: returns pointer to first non space character (also
     // updates the value of m_line)
@@ -400,12 +416,12 @@ protected:
     }
 
     // skips characters until the next 'c' in '*pp' unless it ends before in
-    // which case false is returned and pp points to '\0', otherwise true is
+    // which case FALSE is returned and pp points to '\0', otherwise TRUE is
     // returned and pp points to 'c'
     bool SkipUntil(const char **pp, char c);
 
     // the same as SkipUntil() but only spaces are skipped: on first non space
-    // character different from 'c' the function stops and returns false
+    // character different from 'c' the function stops and returns FALSE
     bool SkipSpaceUntil(const char **pp, char c);
 
     // extract the string between {} and modify '*pp' to point at the
@@ -426,8 +442,6 @@ protected:
     // information about all functions documented in the TeX file(s)
     // -------------------------------------------------------------
 
-public: // Note: Sun C++ 5.5 requires TypeInfo and ParamInfo to be public
-
     // info about a type: for now stored as text string, but must be parsed
     // further later (to know that "char *" == "char []" - TODO)
     class TypeInfo
@@ -443,8 +457,6 @@ public: // Note: Sun C++ 5.5 requires TypeInfo and ParamInfo to be public
     private:
         wxString m_type;
     };
-
-    friend class ParamInfo; // for access to TypeInfo
 
     // info abotu a function parameter
     class ParamInfo
@@ -467,8 +479,7 @@ public: // Note: Sun C++ 5.5 requires TypeInfo and ParamInfo to be public
         wxString m_value;     // default value
     };
 
-public: // FIXME: macro requires it
-    WX_DEFINE_ARRAY_PTR(ParamInfo *, ArrayParamInfo);
+    WX_DEFINE_ARRAY(ParamInfo *, ArrayParamInfo);
 
     // info about a function
     struct MethodInfo
@@ -510,10 +521,9 @@ public: // FIXME: macro requires it
         ArrayParamInfo m_params;
     };
 
-    WX_DEFINE_ARRAY_PTR(MethodInfo *, ArrayMethodInfo);
-    WX_DEFINE_ARRAY_PTR(ArrayMethodInfo *, ArrayMethodInfos);
+    WX_DEFINE_ARRAY(MethodInfo *, ArrayMethodInfo);
+    WX_DEFINE_ARRAY(ArrayMethodInfo *, ArrayMethodInfos);
 
-private:
     // first array contains the names of all classes we found, the second has a
     // pointer to the array of methods of the given class at the same index as
     // the class name appears in m_classes
@@ -532,12 +542,10 @@ private:
 // implementation
 // =============================================================================
 
-static char **g_argv = NULL;
-
 // this function never returns
 static void usage()
 {
-    wxString prog = g_argv[0];
+    wxString prog = wxTheApp->argv[0];
     wxString basename = prog.AfterLast('/');
 #ifdef __WXMSW__
     if ( !basename )
@@ -573,18 +581,8 @@ static void usage()
     exit(1);
 }
 
-int main(int argc, char **argv)
+int HelpGenApp::OnRun()
 {
-    g_argv = argv;
-
-    wxInitializer initializer;
-    if ( !initializer )
-    {
-        fprintf(stderr, "Failed to initialize the wxWidgets library, aborting.");
-
-        return -1;
-    }
-
     enum
     {
         Mode_None,
@@ -599,8 +597,8 @@ int main(int argc, char **argv)
     wxArrayString filesH, filesTeX;
     wxString directoryOut,      // directory for 'dmup' output
              ignoreFile;        // file with classes/functions to ignore
-    bool overwrite = false,     // overwrite existing files during 'dump'?
-         paramNames = false;    // check param names during 'diff'?
+    bool overwrite = FALSE,     // overwrite existing files during 'dump'?
+         paramNames = FALSE;    // check param names during 'diff'?
 
     for ( int current = 1; current < argc ; current++ ) {
         // all options have one letter
@@ -614,7 +612,7 @@ int main(int argc, char **argv)
 
                     case 'q':
                         // be quiet
-                        wxLog::GetActiveTarget()->SetVerbose(false);
+                        wxLog::GetActiveTarget()->SetVerbose(FALSE);
                         continue;
 
                     case 'H':
@@ -647,7 +645,7 @@ int main(int argc, char **argv)
                             break;
                         }
 
-                        paramNames = true;
+                        paramNames = TRUE;
                         continue;
 
                     case 'f':
@@ -657,7 +655,7 @@ int main(int argc, char **argv)
                             break;
                         }
 
-                        overwrite = true;
+                        overwrite = TRUE;
                         continue;
 
                     case 'o':
@@ -675,7 +673,7 @@ int main(int argc, char **argv)
                         }
 
                         directoryOut = argv[current];
-                        if ( !directoryOut.IsEmpty() ) {
+                        if ( !!directoryOut ) {
                             // terminate with a '/' if it doesn't have it
                             switch ( directoryOut.Last() ) {
                                 case '/':
@@ -735,7 +733,7 @@ int main(int argc, char **argv)
     // create a parser object and a visitor derivation
     CJSourceParser parser;
     HelpGenVisitor visitor(directoryOut, overwrite);
-    if ( !ignoreFile.IsEmpty() && mode == Mode_Dump )
+    if ( !!ignoreFile && mode == Mode_Dump )
         visitor.GetIgnoreHandler().AddNamesFromFile(ignoreFile);
 
     spContext *ctxTop = NULL;
@@ -767,7 +765,7 @@ int main(int argc, char **argv)
             wxLogError("Can't complete diff.");
 
             // failure
-            return false;
+            return FALSE;
         }
 
         DocManager docman(paramNames);
@@ -781,13 +779,28 @@ int main(int argc, char **argv)
             }
         }
 
-        if ( !ignoreFile.IsEmpty() )
+        if ( !!ignoreFile )
             docman.GetIgnoreHandler().AddNamesFromFile(ignoreFile);
 
         docman.DumpDifferences(ctxTop);
     }
 
     return 0;
+}
+
+int main(int argc, char **argv)
+{
+    wxInitializer initializer;
+    if ( !initializer )
+    {
+        fprintf(stderr, "Failed to initialize the wxWindows library, aborting.");
+
+        return -1;
+    }
+	HelpGenApp app;
+	app.argc = argc;
+	app.argv = argv;
+	return app.OnRun();
 }
 
 // -----------------------------------------------------------------------------
@@ -807,7 +820,7 @@ void HelpGenVisitor::Reset()
 {
     m_inClass =
     m_inTypesSection =
-    m_inMethodSection = false;
+    m_inMethodSection = FALSE;
 
     m_classname =
     m_funcName =
@@ -844,7 +857,7 @@ void HelpGenVisitor::InsertEnumDocs()
 void HelpGenVisitor::InsertDataStructuresHeader()
 {
     if ( !m_inTypesSection ) {
-        m_inTypesSection = true;
+        m_inTypesSection = TRUE;
 
         m_file.WriteVerbatim("\\wxheading{Data structures}\n\n");
     }
@@ -853,7 +866,7 @@ void HelpGenVisitor::InsertDataStructuresHeader()
 void HelpGenVisitor::InsertMethodsHeader()
 {
     if ( !m_inMethodSection ) {
-        m_inMethodSection = true;
+        m_inMethodSection = TRUE;
 
         m_file.WriteVerbatim( "\\latexignore{\\rtfignore{\\wxheading{Members}}}\n\n");
     }
@@ -881,42 +894,40 @@ void HelpGenVisitor::CloseFunction()
 
 void HelpGenVisitor::CloseClass()
 {
-    CloseFunction();
+	CloseFunction();
 
-    if ( m_inClass )
-    {
+    if ( m_inClass ) {
         size_t count = m_arrayFuncDocs.GetCount();
-        if ( count )
-        {
-            size_t n;
+        if ( count ) {
+			size_t n;
             FunctionDocEntry::classname = m_classname;
 
             m_arrayFuncDocs.Sort(FunctionDocEntry::Compare);
 
-            // Now examine each first line and if it's been seen, cut it
-            // off (it's a duplicate \membersection)
-            wxHashTable membersections(wxKEY_STRING);
+			// Now examine each first line and if it's been seen, cut it
+			// off (it's a duplicate \membersection)
+			wxHashTable membersections(wxKEY_STRING);
 
             for ( n = 0; n < count; n++ )
-            {
+			{
                 wxString section(m_arrayFuncDocs[n].text);
 
-                // Strip leading whitespace
-                int pos = section.Find("\\membersection");
-                if (pos > -1)
-                {
-                    section = section.Mid(pos);
-                }
+				// Strip leading whitespace
+				int pos = section.Find("\\membersection");
+				if (pos > -1)
+				{
+					section = section.Mid(pos);
+				}
 
-                wxString ms(section.BeforeFirst(wxT('\n')));
-                if (membersections.Get(ms))
-                {
-                    m_arrayFuncDocs[n].text = section.AfterFirst(wxT('\n'));
-                }
-                else
-                {
-                    membersections.Put(ms, & membersections);
-                }
+				wxString ms(section.BeforeFirst(wxT('\n')));
+				if (membersections.Get(ms))
+				{
+					m_arrayFuncDocs[n].text = section.AfterFirst(wxT('\n'));
+				}
+				else
+				{
+					membersections.Put(ms, & membersections);
+				}
             }
 
             for ( n = 0; n < count; n++ ) {
@@ -926,10 +937,10 @@ void HelpGenVisitor::CloseClass()
             m_arrayFuncDocs.Empty();
         }
 
-        m_inClass = false;
+        m_inClass = FALSE;
         m_classname.clear();
     }
-    m_file.FlushAll();
+	m_file.FlushAll();
 }
 
 void HelpGenVisitor::EndVisit()
@@ -941,32 +952,32 @@ void HelpGenVisitor::EndVisit()
     m_fileHeader.Empty();
 
     m_file.FlushAll();
-    if (m_file.IsOpened())
-    {
-        m_file.Flush();
-        m_file.Close();
-    }
+	if (m_file.IsOpened())
+	{
+		m_file.Flush();
+		m_file.Close();
+	}
 
     wxLogVerbose("%s: finished generating for the current file.",
-                 GetCurrentTimeFormatted("%H:%M:%S"));
+                 GetCurrentTime("%H:%M:%S"));
 }
 
 void HelpGenVisitor::VisitFile( spFile& file )
 {
     m_fileHeader = file.mFileName;
     wxLogVerbose("%s: started generating docs for classes from file '%s'...",
-                 GetCurrentTimeFormatted("%H:%M:%S"), m_fileHeader.c_str());
+                 GetCurrentTime("%H:%M:%S"), m_fileHeader.c_str());
 }
 
 void HelpGenVisitor::VisitClass( spClass& cl )
 {
     CloseClass();
 
-    if (m_file.IsOpened())
-    {
-        m_file.Flush();
-        m_file.Close();
-    }
+	if (m_file.IsOpened())
+	{
+		m_file.Flush();
+		m_file.Close();
+	}
 
     wxString name = cl.GetName();
 
@@ -1006,7 +1017,7 @@ void HelpGenVisitor::VisitClass( spClass& cl )
     }
 
     m_inMethodSection =
-    m_inTypesSection = false;
+    m_inTypesSection = FALSE;
 
     wxLogInfo("Created new file '%s' for class '%s'.",
               filename.c_str(), name.c_str());
@@ -1022,7 +1033,7 @@ void HelpGenVisitor::VisitClass( spClass& cl )
                   "\\section{\\class{%s}}\\label{%s}\n\n",
                   GetVersionString().c_str(),
                   m_fileHeader.c_str(),
-                  GetCurrentTimeFormatted("%d/%b/%y %H:%M:%S"),
+                  GetCurrentTime("%d/%b/%y %H:%M:%S"),
                   name.c_str(),
                   wxString(name).MakeLower().c_str());
 
@@ -1034,7 +1045,7 @@ void HelpGenVisitor::VisitClass( spClass& cl )
     // if the header includes other headers they must be related to it... try to
     // automatically generate the "See also" clause
     if ( !m_headers.IsEmpty() ) {
-        // correspondence between wxWidgets headers and class names
+        // correspondence between wxWindows headers and class names
         static const char *headers[] = {
             "object",
             "defs",
@@ -1110,7 +1121,7 @@ void HelpGenVisitor::VisitClass( spClass& cl )
         derived << "No base class";
     }
     else {
-        bool first = true;
+        bool first = TRUE;
         for ( StrListT::const_iterator i = baseClasses.begin();
               i != baseClasses.end();
               i++ ) {
@@ -1119,7 +1130,7 @@ void HelpGenVisitor::VisitClass( spClass& cl )
                 derived << "\\\\\n";
             }
             else {
-                first = false;
+                first = FALSE;
             }
 
             wxString baseclass = *i;
@@ -1143,7 +1154,7 @@ void HelpGenVisitor::VisitClass( spClass& cl )
     InsertTypedefDocs();
     InsertEnumDocs();
 
-    //m_file.Flush();
+	//m_file.Flush();
 }
 
 void HelpGenVisitor::VisitEnumeration( spEnumeration& en )
@@ -1276,7 +1287,7 @@ void HelpGenVisitor::VisitOperation( spOperation& op )
 
     // save state info
     m_funcName = funcname;
-    m_isFirstParam = true;
+    m_isFirstParam = TRUE;
 
     m_textStoredFunctionComment = GetAllComments(op);
 
@@ -1290,19 +1301,19 @@ void HelpGenVisitor::VisitOperation( spOperation& op )
         funcname = dtor;
     }
 
-    m_textFunc.Printf("\n"
-        "\\membersection{%s::%s}\\label{%s}\n",
-        m_classname.c_str(), funcname.c_str(),
-        MakeLabel(m_classname, funcname).c_str());
+	m_textFunc.Printf("\n"
+		"\\membersection{%s::%s}\\label{%s}\n",
+		m_classname.c_str(), funcname.c_str(),
+		MakeLabel(m_classname, funcname).c_str());
 
-    wxString func;
-    func.Printf("\n"
+	wxString func;
+	func.Printf("\n"
                       "\\%sfunc{%s%s}{%s}{",
                       op.mIsConstant ? "const" : "",
                       op.mIsVirtual ? "virtual " : "",
                       op.mRetType.c_str(),
                       funcname.c_str());
-    m_textFunc += func;
+	m_textFunc += func;
 }
 
 void HelpGenVisitor::VisitParameter( spParameter& param )
@@ -1311,7 +1322,7 @@ void HelpGenVisitor::VisitParameter( spParameter& param )
         return;
 
     if ( m_isFirstParam ) {
-        m_isFirstParam = false;
+        m_isFirstParam = FALSE;
     }
     else {
         m_textFunc << ", ";
@@ -1414,11 +1425,11 @@ bool DocManager::ParseTeXFile(const wxString& filename)
 
     wxFile file(m_filename, wxFile::read);
     if ( !file.IsOpened() )
-        return false;
+        return FALSE;
 
     off_t len = file.Length();
     if ( len == wxInvalidOffset )
-        return false;
+        return FALSE;
 
     char *buf = new char[len + 1];
     buf[len] = '\0';
@@ -1426,18 +1437,18 @@ bool DocManager::ParseTeXFile(const wxString& filename)
     if ( file.Read(buf, len) == wxInvalidOffset ) {
         delete [] buf;
 
-        return false;
+        return FALSE;
     }
 
     // reinit everything
     m_line = 1;
 
     wxLogVerbose("%s: starting to parse doc file '%s'.",
-                 GetCurrentTimeFormatted("%H:%M:%S"), m_filename.c_str());
+                 GetCurrentTime("%H:%M:%S"), m_filename.c_str());
 
     // the name of the class from the last "\membersection" command: we assume
     // that the following "\func" or "\constfunc" always documents a method of
-    // this class (and it should always be like that in wxWidgets documentation)
+    // this class (and it should always be like that in wxWindows documentation)
     wxString classname;
 
     for ( const char *current = buf; current - buf < len; current++ ) {
@@ -1532,7 +1543,7 @@ bool DocManager::ParseTeXFile(const wxString& filename)
         TeXUnfilter(&returnType);
 
         current++;
-        if ( !SkipSpaceUntil(&current, '{') ) {
+        if ( !SkipSpaceUntil(&current, '{') ) { 
             wxLogWarning("file %s(%d): '{' expected after return type",
                          m_filename.c_str(), m_line);
 
@@ -1552,8 +1563,8 @@ bool DocManager::ParseTeXFile(const wxString& filename)
         current = funcEnd + 1;
 
         // trim spaces from both sides
-        funcName.Trim(false);
-        funcName.Trim(true);
+        funcName.Trim(FALSE);
+        funcName.Trim(TRUE);
 
         // special cases: '$...$' may be used for LaTeX inline math, remove the
         // '$'s
@@ -1604,7 +1615,7 @@ bool DocManager::ParseTeXFile(const wxString& filename)
 
         wxArrayString paramNames, paramTypes, paramValues;
 
-        bool isVararg = false;
+        bool isVararg = FALSE;
 
         current++; // skip '\\'
         lenMatch = TryMatch(current, "void");
@@ -1636,7 +1647,7 @@ bool DocManager::ParseTeXFile(const wxString& filename)
                     // vararg function?
                     wxString paramText = ExtractStringBetweenBraces(&current);
                     if ( paramText == "..." ) {
-                        isVararg = true;
+                        isVararg = TRUE;
                     }
                     else {
                         wxLogWarning("Parameters of '%s::%s' are in "
@@ -1720,22 +1731,22 @@ bool DocManager::ParseTeXFile(const wxString& filename)
     delete [] buf;
 
     wxLogVerbose("%s: finished parsing doc file '%s'.\n",
-                 GetCurrentTimeFormatted("%H:%M:%S"), m_filename.c_str());
+                 GetCurrentTime("%H:%M:%S"), m_filename.c_str());
 
-    return true;
+    return TRUE;
 }
 
 bool DocManager::DumpDifferences(spContext *ctxTop) const
 {
     typedef MMemberListT::const_iterator MemberIndex;
 
-    bool foundDiff = false;
+    bool foundDiff = FALSE;
 
     // flag telling us whether the given class was found at all in the header
     size_t nClass, countClassesInDocs = m_classes.GetCount();
     bool *classExists = new bool[countClassesInDocs];
     for ( nClass = 0; nClass < countClassesInDocs; nClass++ ) {
-        classExists[nClass] = false;
+        classExists[nClass] = FALSE;
     }
 
     // ctxTop is normally an spFile
@@ -1754,7 +1765,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
         int index = m_classes.Index(nameClass);
         if ( index == wxNOT_FOUND ) {
             if ( !m_ignoreNames.IgnoreClass(nameClass) ) {
-                foundDiff = true;
+                foundDiff = TRUE;
 
                 wxLogError("Class '%s' is not documented at all.",
                            nameClass.c_str());
@@ -1764,7 +1775,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
             continue;
         }
         else {
-            classExists[index] = true;
+            classExists[index] = TRUE;
         }
 
         // array of method descriptions for this class
@@ -1774,7 +1785,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
         // flags telling if we already processed given function
         bool *methodExists = new bool[countMethods];
         for ( nMethod = 0; nMethod < countMethods; nMethod++ ) {
-            methodExists[nMethod] = false;
+            methodExists[nMethod] = FALSE;
         }
 
         wxArrayString aOverloadedMethods;
@@ -1797,7 +1808,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
 
             if ( aMethodsWithSameName.IsEmpty() && ctxMethod->IsPublic() ) {
                 if ( !m_ignoreNames.IgnoreMethod(nameClass, nameMethod) ) {
-                    foundDiff = true;
+                    foundDiff = TRUE;
 
                     wxLogError("'%s::%s' is not documented.",
                                nameClass.c_str(),
@@ -1809,7 +1820,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
             }
             else if ( aMethodsWithSameName.GetCount() == 1 ) {
                 index = (size_t)aMethodsWithSameName[0u];
-                methodExists[index] = true;
+                methodExists[index] = TRUE;
 
                 if ( m_ignoreNames.IgnoreMethod(nameClass, nameMethod) )
                     continue;
@@ -1864,8 +1875,8 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
                         spParameter *ctxParam = (spParameter *)ctx;
                         const ParamInfo& param = method.GetParam(nParam);
                         if ( m_checkParamNames &&
-                             (param.GetName() != ctxParam->mName.c_str()) ) {
-                            foundDiff = true;
+                             (param.GetName() != ctxParam->mName) ) {
+                            foundDiff = TRUE;
 
                             wxLogError("Parameter #%d of '%s::%s' should be "
                                        "'%s' and not '%s'.",
@@ -1879,7 +1890,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
                         }
 
                         if ( param.GetType() != ctxParam->mType ) {
-                            foundDiff = true;
+                            foundDiff = TRUE;
 
                             wxLogError("Type of parameter '%s' of '%s::%s' "
                                        "should be '%s' and not '%s'.",
@@ -1892,7 +1903,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
                             continue;
                         }
 
-                        if ( param.GetDefValue() != ctxParam->mInitVal.c_str() ) {
+                        if ( param.GetDefValue() != ctxParam->mInitVal ) {
                             wxLogWarning("Default value of parameter '%s' of "
                                          "'%s::%s' should be '%s' and not "
                                          "'%s'.",
@@ -1915,7 +1926,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
                     // mark all methods with this name as existing
                     for ( nMethod = 0; nMethod < countMethods; nMethod++ ) {
                         if ( methods[nMethod]->GetName() == nameMethod )
-                            methodExists[nMethod] = true;
+                            methodExists[nMethod] = TRUE;
                     }
 
                     aOverloadedMethods.Add(nameMethod);
@@ -1934,7 +1945,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
             if ( !methodExists[nMethod] ) {
                 const wxString& nameMethod = methods[nMethod]->GetName();
                 if ( !m_ignoreNames.IgnoreMethod(nameClass, nameMethod) ) {
-                    foundDiff = true;
+                    foundDiff = TRUE;
 
                     wxLogError("'%s::%s' is documented but doesn't exist.",
                                nameClass.c_str(),
@@ -1949,7 +1960,7 @@ bool DocManager::DumpDifferences(spContext *ctxTop) const
     // check that all classes we found in the docs really exist
     for ( nClass = 0; nClass < countClassesInDocs; nClass++ ) {
         if ( !classExists[nClass] ) {
-            foundDiff = true;
+            foundDiff = TRUE;
 
             wxLogError("Class '%s' is documented but doesn't exist.",
                        m_classes[nClass].c_str());
@@ -1985,11 +1996,11 @@ bool IgnoreNamesHandler::AddNamesFromFile(const wxString& filename)
 {
     wxFile file(filename, wxFile::read);
     if ( !file.IsOpened() )
-        return false;
+        return FALSE;
 
     off_t len = file.Length();
     if ( len == wxInvalidOffset )
-        return false;
+        return FALSE;
 
     char *buf = new char[len + 1];
     buf[len] = '\0';
@@ -1997,7 +2008,7 @@ bool IgnoreNamesHandler::AddNamesFromFile(const wxString& filename)
     if ( file.Read(buf, len) == wxInvalidOffset ) {
         delete [] buf;
 
-        return false;
+        return FALSE;
     }
 
     wxString line;
@@ -2034,7 +2045,7 @@ bool IgnoreNamesHandler::AddNamesFromFile(const wxString& filename)
 
     delete [] buf;
 
-    return true;
+    return TRUE;
 }
 
 // -----------------------------------------------------------------------------
@@ -2122,7 +2133,7 @@ static wxString MakeHelpref(const char *argument)
 static void TeXFilter(wxString* str)
 {
     // TeX special which can be quoted (don't include backslash nor braces as
-    // we generate them
+    // we generate them 
     static wxRegEx reNonSpecialSpecials("[#$%&_]"),
                    reAccents("[~^]");
 
@@ -2137,12 +2148,12 @@ static void TeXFilter(wxString* str)
 static void TeXUnfilter(wxString* str)
 {
     // FIXME may be done much more quickly
-    str->Trim(true);
-    str->Trim(false);
+    str->Trim(TRUE);
+    str->Trim(FALSE);
 
     // undo TeXFilter
     static wxRegEx reNonSpecialSpecials("\\\\([#$%&_{}])"),
-                   reAccents("\\\\verb\\|([~^])\\|");
+                   reAccents("\\\\verb|([~^])|");
 
     reNonSpecialSpecials.ReplaceAll(str, "\\1");
     reAccents.ReplaceAll(str, "\\1");
@@ -2158,7 +2169,7 @@ static wxString GetAllComments(const spContext& ctx)
         wxString comment = (*i)->GetText();
 
         // don't take comments like "// ----------" &c
-        comment.Trim(false);
+        comment.Trim(FALSE);
         if ( !!comment &&
               comment == wxString(comment[0u], comment.length() - 1) + '\n' )
             comments << "\n";
@@ -2169,7 +2180,7 @@ static wxString GetAllComments(const spContext& ctx)
     return comments;
 }
 
-static const char *GetCurrentTimeFormatted(const char *timeFormat)
+static const char *GetCurrentTime(const char *timeFormat)
 {
     static char s_timeBuffer[128];
     time_t timeNow;
@@ -2192,48 +2203,11 @@ static const wxString GetVersionString()
 
 /*
    $Log$
-   Revision 1.36  2005/04/07 19:54:58  MW
-   Workarounds to allow compilation by Sun C++ 5.5
-
-   Revision 1.35  2004/12/12 11:03:31  VZ
-   give an error message if we're built in Unicode mode (in response to bug 1079224)
-
-   Revision 1.34  2004/11/23 09:53:31  JS
+   Revision 1.22.2.2  2004/11/23 09:54:12  JS
    Changed GPL to wxWindows Licence
 
-   Revision 1.33  2004/11/12 03:30:07  RL
-
-   Cruft cleanup from MJW, strip the tabs out of sound.cpp
-
-   Revision 1.32  2004/11/10 21:02:58  VZ
-   new set of fixes for problems due to huge files support: drop wxFileSize_t, use wxFileOffset only, make wxInvalidOffset an int (main part of the patch 1063498)
-
-   Revision 1.31  2004/10/05 15:38:29  ABX
-   Warning fixes found under hardest mode of OpenWatcom. Seems clean in Borland, MinGW and DMC.
-
-   Revision 1.30  2004/06/18 19:25:50  ABX
-   Small step in making HelpGen up to date unicode application.
-
-   Revision 1.29  2004/06/17 19:00:22  ABX
-   Warning fixes. Code cleanup. Whitespaces and tabs removed.
-
-   Revision 1.28  2004/05/25 11:19:57  JS
-   More name changes
-
-   Revision 1.27  2003/10/13 17:21:30  MBN
-     Compilation fixes.
-
-   Revision 1.26  2003/09/29 15:18:35  MBN
-     (Blind) compilation fix for Sun compiler.
-
-   Revision 1.25  2003/09/03 17:39:27  MBN
-     Compilation fixes.
-
-   Revision 1.24  2003/08/13 22:59:37  VZ
-   compilation fix
-
-   Revision 1.23  2003/06/13 17:05:43  VZ
-   quote '|' inside regexes (fixes dump mode); fixed crash due to strange HelpGenApp code
+   Revision 1.22.2.1  2004/05/29 20:23:33  DS
+   blind compilation fix for first warning and error reported by "i686-pc-linux-gnu+RH" tinderbox compilation
 
    Revision 1.22  2002/01/21 21:18:50  JS
    Now adds 'include file' heading
@@ -2334,7 +2308,7 @@ static const wxString GetVersionString()
     date: 1999/01/08 17:45:55;  author: VZ;  state: Exp;
 
     HelpGen is a prototype of the tool for automatic generation of the .tex files
-    for wxWidgets documentation from C++ headers
+    for wxWindows documentation from C++ headers
 */
 
 /* vi: set tw=80 et ts=4 sw=4: */

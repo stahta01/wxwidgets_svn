@@ -36,7 +36,7 @@ public:
     // it is deleted, it should delete us as well
     void SetAutoDelete();
 
-    // return true if we support this format in "Get" direction
+    // return TRUE if we support this format in "Get" direction
     bool IsSupportedFormat(const wxDataFormat& format) const
         { return wxDataObjectBase::IsSupported(format, Get); }
 
@@ -58,8 +58,6 @@ public:
     virtual size_t GetBufferOffset( const wxDataFormat& format );
 private:
     IDataObject *m_pIDataObject; // pointer to the COM interface
-
-    DECLARE_NO_COPY_CLASS(wxDataObject)
 };
 
 #endif  //_WX_MSW_OLE_DATAOBJ_H

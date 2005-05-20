@@ -4,12 +4,12 @@
 // Author:      Robert Roebling
 // Created:     01/02/97
 // Id:
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
+// Licence:       wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "paletteg.h"
 #endif
 
@@ -72,7 +72,7 @@ wxPalette::wxPalette(int n, const unsigned char *red, const unsigned char *green
 }
 
 wxPalette::wxPalette(const wxPalette& palette)
-    : wxPaletteBase()
+    : wxGDIObject()
 {
     Ref(palette);
 }
@@ -122,14 +122,14 @@ bool wxPalette::Create(int n,
         e->blue = blue[i];
     }
 
-    return true;
+    return TRUE;
 }
 
 int wxPalette::GetPixel( const unsigned char red,
                          const unsigned char green,
                          const unsigned char blue ) const
 {
-    if (!m_refData) return false;
+    if (!m_refData) return FALSE;
 
     int closest = 0;
     double d,distance = 1000.0; // max. dist is 256
@@ -152,14 +152,14 @@ bool wxPalette::GetRGB(int pixel,
                        unsigned char *green,
                        unsigned char *blue) const
 {
-    if (!m_refData) return false;
-    if (pixel >= M_PALETTEDATA->m_count) return false;
+    if (!m_refData) return FALSE;
+    if (pixel >= M_PALETTEDATA->m_count) return FALSE;
 
     wxPaletteEntry& p = M_PALETTEDATA->m_entries[pixel];
     if (red) *red = p.red;
     if (green) *green = p.green;
     if (blue) *blue = p.blue;
-    return true;
+    return TRUE;
 }
 
 #endif // wxUSE_PALETTE

@@ -145,8 +145,6 @@ static inline bool isStringState(int state) {
 	case SCE_HPA_STRING:
 	case SCE_HPHP_HSTRING:
 	case SCE_HPHP_SIMPLESTRING:
-	case SCE_HPHP_HSTRING_VARIABLE:
-	case SCE_HPHP_COMPLEX_VARIABLE:
 		bResult = true;
 		break;
 	default :
@@ -314,7 +312,7 @@ static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &key
 // Called when in a PHP word
 static void classifyWordHTPHP(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	char chAttr = SCE_HPHP_DEFAULT;
-	bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.' && start+1 <= end && IsADigit(styler[start+1]));
+	bool wordIsNumber = IsADigit(styler[start]);
 	if (wordIsNumber)
 		chAttr = SCE_HPHP_NUMBER;
 	else {
@@ -418,21 +416,7 @@ static bool isPHPStringState(int state) {
 	return
 	    (state == SCE_HPHP_HSTRING) ||
 	    (state == SCE_HPHP_SIMPLESTRING) ||
-	    (state == SCE_HPHP_HSTRING_VARIABLE) ||
-	    (state == SCE_HPHP_COMPLEX_VARIABLE);
-}
-
-static int FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, int i, const int lengthDoc, Accessor &styler) {
-	int j;
-	phpStringDelimiter[0] = '\n';
-	for (j = i; j < lengthDoc && styler[j] != '\n' && styler[j] != '\r'; j++) {
-		if (j - i < phpStringDelimiterSize - 2)
-			phpStringDelimiter[j-i+1] = styler[j];
-		else
-			i++;
-	}
-	phpStringDelimiter[j-i+1] = '\0';
-	return j;
+	    (state == SCE_HPHP_HSTRING_VARIABLE);
 }
 
 static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
@@ -448,8 +432,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	styler.StartAt(startPos, STYLE_MAX);
 	char prevWord[200];
 	prevWord[0] = '\0';
-	char phpStringDelimiter[200]; // PHP is not limited in length, we are
-	phpStringDelimiter[0] = '\0';
 	int StateToPrint = initStyle;
 	int state = stateForPrintState(StateToPrint);
 
@@ -460,12 +442,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			length++;
 		}
 		state = SCE_H_DEFAULT;
-	}
-	// String can be heredoc, must find a delimiter first
-	while (startPos > 0 && isPHPStringState(state) && state != SCE_HPHP_SIMPLESTRING) {
-		startPos--;
-		length++;
-		state = styler.StyleAt(startPos);
 	}
 	styler.StartAt(startPos, STYLE_MAX);
 
@@ -637,10 +613,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		         (state != SCE_HPHP_COMMENT) &&
 		         (ch == '<') &&
 		         (chNext == '?')) {
-			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
-			if (scriptLanguage != eScriptPHP && isStringState(state)) continue;
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
+			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
 			i++;
 			visibleChars++;
 			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2, i + 10);
@@ -955,8 +930,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
 			}
-			if (ch != '#' && !(isascii(ch) && isalnum(ch))	// Should check that '#' follows '&', but it is unlikely anyway...
-				&& ch != '.' && ch != '-' && ch != '_' && ch != ':') { // valid in XML
+			if (ch != '#' && !(isascii(ch) && isalnum(ch))) {	// Should check that '#' follows '&', but it is unlikely anyway...
 				styler.ColourTo(i, SCE_H_TAGUNKNOWN);
 				state = SCE_H_DEFAULT;
 			}
@@ -1480,10 +1454,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					state = SCE_HPHP_COMMENTLINE;
 				} else if (ch == '\"') {
 					state = SCE_HPHP_HSTRING;
-					strcpy(phpStringDelimiter, "\"");
-				} else if (styler.Match(i, "<<<")) {
-					state = SCE_HPHP_HSTRING;
-					i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler);
 				} else if (ch == '\'') {
 					state = SCE_HPHP_SIMPLESTRING;
 				} else if (ch == '$' && IsPhpWordStart(chNext)) {
@@ -1496,7 +1466,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_NUMBER:
-			if (!IsADigit(ch) && ch != '.' && ch != 'e' && ch != 'E' && (ch != '-' || (chPrev != 'e' && chPrev != 'E'))) {
+			if (!IsADigit(ch)) {
 				styler.ColourTo(i - 1, SCE_HPHP_NUMBER);
 				if (isoperator(ch))
 					state = SCE_HPHP_OPERATOR;
@@ -1526,19 +1496,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_HSTRING:
-			if (ch == '\\' && (phpStringDelimiter[0] == '\"' || chNext == '$' || chNext == '{')) {
+			if (ch == '\\') {
 				// skip the next char
 				i++;
-			} else if (((ch == '{' && chNext == '$') || (ch == '$' && chNext == '{'))
-				&& IsPhpWordStart(chNext2)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_HPHP_COMPLEX_VARIABLE;
 			} else if (ch == '$' && IsPhpWordStart(chNext)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HPHP_HSTRING_VARIABLE;
-			} else if (styler.Match(i, phpStringDelimiter)) {
-				if (strlen(phpStringDelimiter) > 1)
-					i += strlen(phpStringDelimiter) - 1;
+			} else if (ch == '\"') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
 			}
@@ -1559,16 +1523,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_HSTRING;
 			}
 			break;
-		case SCE_HPHP_COMPLEX_VARIABLE:
-			if (ch == '}') {
-				styler.ColourTo(i, StateToPrint);
-				state = SCE_HPHP_HSTRING;
-			}
-			break;
 		case SCE_HPHP_OPERATOR:
 		case SCE_HPHP_DEFAULT:
 			styler.ColourTo(i - 1, StateToPrint);
-			if (IsADigit(ch) || (ch == '.' && IsADigit(chNext))) {
+			if (IsADigit(ch)) {
 				state = SCE_HPHP_NUMBER;
 			} else if (iswordstart(ch)) {
 				state = SCE_HPHP_WORD;
@@ -1582,10 +1540,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_COMMENTLINE;
 			} else if (ch == '\"') {
 				state = SCE_HPHP_HSTRING;
-				strcpy(phpStringDelimiter, "\"");
-			} else if (styler.Match(i, "<<<")) {
-				state = SCE_HPHP_HSTRING;
-				i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler);
 			} else if (ch == '\'') {
 				state = SCE_HPHP_SIMPLESTRING;
 			} else if (ch == '$' && IsPhpWordStart(chNext)) {
@@ -1721,8 +1675,7 @@ static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
 	} else if (sc.state == SCE_H_ENTITY) {
 		if (sc.ch == ';') {
 			sc.ForwardSetState(SCE_H_DEFAULT);
-		} else if (sc.ch != '#' && (sc.ch < 0x80) && !isalnum(sc.ch)	// Should check that '#' follows '&', but it is unlikely anyway...
-			&& sc.ch != '.' && sc.ch != '-' && sc.ch != '_' && sc.ch != ':') { // valid in XML
+		} else if (sc.ch != '#' && (sc.ch < 0x80) && !isalnum(sc.ch)) {	// Should check that '#' follows '&', but it is unlikely anyway...
 			sc.ChangeState(SCE_H_TAGUNKNOWN);
 			sc.SetState(SCE_H_DEFAULT);
 		}

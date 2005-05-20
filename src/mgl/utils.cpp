@@ -18,7 +18,6 @@
 #include "wx/string.h"
 
 #include "wx/intl.h"
-#include "wx/apptrait.h"
 #include "wx/log.h"
 #include "wx/process.h"
 
@@ -43,6 +42,124 @@ void wxBell()
 {
     // FIXME_MGL
 }
+
+
+#ifdef __DOS__
+// VS: this should be in utilsdos.cpp, but since there will hardly ever
+//     be a non-MGL MS-DOS port...
+
+void wxSleep(int nSecs)
+{
+    wxUsleep(1000 * nSecs);
+}
+
+void wxUsleep(unsigned long milliseconds)
+{
+    PM_sleep(milliseconds);
+}
+
+
+bool wxGetEnv(const wxString& var, wxString *value)
+{
+    // wxGetenv is defined as getenv()
+    wxChar *p = wxGetenv(var);
+    if ( !p )
+        return FALSE;
+
+    if ( value )
+        *value = p;
+
+    return TRUE;
+}
+
+bool wxSetEnv(const wxString& variable, const wxChar *value)
+{
+    wxString s = variable;
+    if ( value )
+        s << _T('=') << value;
+
+    // transform to ANSI
+    const char *p = s.mb_str();
+
+    // the string will be free()d by libc
+    char *buf = (char *)malloc(strlen(p) + 1);
+    strcpy(buf, p);
+
+    return putenv(buf) == 0;
+}
+
+const wxChar* wxGetHomeDir(wxString *home)
+{
+    *home = wxT(".");
+    return home->c_str();
+}
+
+const wxChar* wxGetUserHomeDir(wxString *home)
+{
+    *home = wxT(".");
+    return home->c_str();
+}
+
+#if wxUSE_UNICODE
+const wxMB2WXbuf wxGetUserHome(const wxString &user)
+#else // just for binary compatibility -- there is no 'const' here
+wxChar *wxGetUserHome(const wxString &user)
+#endif
+{
+    return wxT(".");
+}
+
+void wxFatalError(const wxString &msg, const wxString &title)
+{
+    if (!title.IsNull()) 
+        wxFprintf( stderr, wxT("%s "), WXSTRINGCAST(title));
+    PM_fatalError(msg.c_str());
+}
+
+bool wxGetUserId(wxChar *WXUNUSED(buf), int WXUNUSED(sz))
+{
+    wxFAIL_MSG( wxT("wxGetUserId not implemented under MS-DOS!") );
+    return FALSE;
+}
+
+bool wxGetUserName(wxChar *WXUNUSED(buf), int WXUNUSED(sz))
+{
+    wxFAIL_MSG( wxT("wxGetUserName not implemented under MS-DOS!") );
+    return FALSE;
+}
+
+bool wxGetHostName(wxChar *WXUNUSED(buf), int WXUNUSED(sz))
+{
+    wxFAIL_MSG( wxT("wxGetHostName not implemented under MS-DOS!") );
+    return FALSE;
+}
+
+bool wxGetFullHostName(wxChar *WXUNUSED(buf), int WXUNUSED(sz))
+{
+    wxFAIL_MSG( wxT("wxGetFullHostName not implemented under MS-DOS!") );
+    return FALSE;
+}
+
+int wxKill(long WXUNUSED(pid), wxSignal WXUNUSED(sig), wxKillError *WXUNUSED(rc))
+{
+    wxFAIL_MSG( wxT("wxKill not implemented under MS-DOS!") );
+    return 0;
+}
+
+long wxExecute(const wxString& WXUNUSED(command), int WXUNUSED(flags), wxProcess *WXUNUSED(process))
+{
+    wxFAIL_MSG( wxT("wxExecute not implemented under MS-DOS!") );
+    return 0;
+}
+
+long wxExecute(char **WXUNUSED(argv), int WXUNUSED(flags), wxProcess *WXUNUSED(process))
+{
+    wxFAIL_MSG( wxT("wxExecute not implemented under MS-DOS!") );
+    return 0;
+}
+
+
+#endif
 
 // ----------------------------------------------------------------------------
 // display characterstics
@@ -90,55 +207,26 @@ int wxDisplayDepth()
     return g_displayDC->getBitsPerPixel();
 }
 
-#if wxUSE_GUI
-
-wxToolkitInfo& wxGUIAppTraits::GetToolkitInfo()
+int wxGetOsVersion(int *majorVsn, int *minorVsn)
 {
-    static wxToolkitInfo info;
-    info.shortName = _T("mgluniv");
-    info.name = _T("wxMGL");
-    info.versionMajor = MGL_RELEASE_MAJOR;
-    info.versionMinor = MGL_RELEASE_MINOR;
-    info.os = wxGTK;
+    if ( majorVsn )
+        *majorVsn = MGL_RELEASE_MAJOR;
+    if ( minorVsn )
+        *minorVsn = MGL_RELEASE_MINOR;
+
 #if defined(__UNIX__)
-    info.os = wxMGL_UNIX;
+    return wxMGL_UNIX;
 #elif defined(__OS2__)
-    info.os = wxMGL_OS2;
+    return wxMGL_OS2;
 #elif defined(__WIN32__)
-    info.os = wxMGL_WIN32;
+    return wxMGL_WIN32;
 #elif defined(__DOS__)
-    info.os = wxMGL_DOS;
+    return wxMGL_DOS;
 #else
     #error Platform not supported by wxMGL!
 #endif
-    return info;
 }
 
-#endif
-
-#if 0
-wxToolkitInfo& wxConsoleAppTraits::GetToolkitInfo()
-{
-    static wxToolkitInfo info;
-    info.shortName = _T("mglbase");
-    info.versionMajor = MGL_RELEASE_MAJOR;
-    info.versionMinor = MGL_RELEASE_MINOR;
-    info.name = _T("wxBase");
-    info.os = wxGTK;
-#if defined(__UNIX__)
-    info.os = wxMGL_UNIX;
-#elif defined(__OS2__)
-    info.os = wxMGL_OS2;
-#elif defined(__WIN32__)
-    info.os = wxMGL_WIN32;
-#elif defined(__DOS__)
-    info.os = wxMGL_DOS;
-#else
-    #error Platform not supported by wxMGL!
-#endif
-    return info;
-}
-#endif
 
 void wxGetMousePosition(int* x, int* y)
 {

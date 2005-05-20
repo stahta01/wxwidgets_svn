@@ -12,7 +12,7 @@
 #ifndef _WX_DCPRINT_H_
 #define _WX_DCPRINT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "dcprint.h"
 #endif
 
@@ -24,7 +24,7 @@ public:
     DECLARE_CLASS(wxPrinterDC)
         
     // Create a printer DC
-    wxPrinterDC(const wxString& driver, const wxString& device, const wxString& output, bool interactive = true, int orientation = wxPORTRAIT);
+    wxPrinterDC(const wxString& driver, const wxString& device, const wxString& output, bool interactive = TRUE, int orientation = wxPORTRAIT);
     
     ~wxPrinterDC();
 };

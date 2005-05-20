@@ -12,11 +12,9 @@
 #ifndef _WX_UNIV_NOTEBOOK_H_
 #define _WX_UNIV_NOTEBOOK_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univnotebook.h"
 #endif
-
-#include "wx/arrstr.h"
 
 class WXDLLEXPORT wxSpinButton;
 
@@ -46,7 +44,7 @@ public:
                const wxPoint& pos = wxDefaultPosition,
                const wxSize& size = wxDefaultSize,
                long style = 0,
-               const wxString& name = wxNotebookNameStr)
+               const wxString& name = wxNOTEBOOK_NAME)
     {
         Init();
 
@@ -59,7 +57,7 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
-                const wxString& name = wxNotebookNameStr);
+                const wxString& name = wxNOTEBOOK_NAME);
 
     // dtor
     virtual ~wxNotebook();
@@ -67,46 +65,48 @@ public:
     // implement wxNotebookBase pure virtuals
     // --------------------------------------
 
-    virtual int SetSelection(size_t nPage);
+    virtual int SetSelection(int nPage);
     virtual int GetSelection() const { return m_sel; }
 
-    virtual bool SetPageText(size_t nPage, const wxString& strText);
-    virtual wxString GetPageText(size_t nPage) const;
+    virtual bool SetPageText(int nPage, const wxString& strText);
+    virtual wxString GetPageText(int nPage) const;
 
-    virtual int GetPageImage(size_t nPage) const;
-    virtual bool SetPageImage(size_t nPage, int nImage);
+    virtual int GetPageImage(int nPage) const;
+    virtual bool SetPageImage(int nPage, int nImage);
 
     virtual void SetPageSize(const wxSize& size);
     virtual void SetPadding(const wxSize& padding);
     virtual void SetTabSize(const wxSize& sz);
 
-    virtual wxSize CalcSizeFromPage(const wxSize& sizePage) const;
+    virtual wxSize CalcSizeFromPage(const wxSize& sizePage);
 
     virtual bool DeleteAllPages();
 
-    virtual bool InsertPage(size_t nPage,
+    virtual bool InsertPage(int nPage,
                             wxNotebookPage *pPage,
                             const wxString& strText,
-                            bool bSelect = false,
+                            bool bSelect = FALSE,
                             int imageId = -1);
 
     // style tests
     // -----------
 
-    // return true if all tabs have the same width
-    bool FixedSizeTabs() const { return HasFlag(wxNB_FIXEDWIDTH); }
+    // return TRUE if all tabs have the same width
+    bool FixedSizeTabs() const
+        { return GetWindowStyle() & wxNB_FIXEDWIDTH != 0; }
 
     // return wxTOP/wxBOTTOM/wxRIGHT/wxLEFT
     wxDirection GetTabOrientation() const;
 
-    // return true if the notebook has tabs at the sidesand not at the top (or
+    // return TRUE if the notebook has tabs at the sidesand not at the top (or
     // bottom) as usual
     bool IsVertical() const;
 
     // hit testing
     // -----------
 
-    virtual int HitTest(const wxPoint& pt, long *flags = NULL) const;
+    // return the tab at this position or -1 if none
+    int HitTest(const wxPoint& pt) const;
 
     // input handling
     // --------------
@@ -119,7 +119,7 @@ public:
     void RefreshCurrent();
 
 protected:
-    virtual wxNotebookPage *DoRemovePage(size_t nPage);
+    virtual wxNotebookPage *DoRemovePage(int nPage);
 
     // drawing
     virtual void DoDraw(wxControlRenderer *renderer);
@@ -155,7 +155,7 @@ protected:
     void PositionSpinBtn();
 
     // refresh the given tab only
-    void RefreshTab(int page, bool forceSelected = false);
+    void RefreshTab(int page, bool forceSelected = FALSE);
 
     // refresh all tabs
     void RefreshAllTabs();
@@ -180,7 +180,7 @@ protected:
     wxCoord GetTabWidth(int page) const
         { return FixedSizeTabs() ? m_widthMax : m_widths[page]; }
 
-    // return true if the tab has an associated image
+    // return TRUE if the tab has an associated image
     bool HasImage(int page) const
         { return m_imageList && m_images[page] != -1; }
 
@@ -193,6 +193,9 @@ protected:
 
     // get our client size from the page size
     wxSize GetSizeForPage(const wxSize& size) const;
+
+    // change thep age and send events about it (can be vetoed by user code)
+    void ChangePage(int nPage);
 
     // scroll the tabs so that the first page shown becomes the given one
     void ScrollTo(int page);

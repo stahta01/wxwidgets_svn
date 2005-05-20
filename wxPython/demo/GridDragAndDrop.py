@@ -1,20 +1,19 @@
-
 """
 Example showing how to make a grid a drop target for files.
 
 """
 
-import  wx
-import  wx.grid as gridlib
+from wxPython.wx import *
+from wxPython.grid import *
 
 #---------------------------------------------------------------------------
 # Set VIRTUAL to 1 to use a virtual grid
-VIRTUAL = 1
-#---------------------------------------------------------------------------
 
-class GridFileDropTarget(wx.FileDropTarget):
+VIRTUAL = 1
+
+class GridFileDropTarget(wxFileDropTarget):
     def __init__(self, grid):
-        wx.FileDropTarget.__init__(self)
+        wxFileDropTarget.__init__(self)
         self.grid = grid
 
     def OnDropFiles(self, x, y, filenames):
@@ -38,9 +37,9 @@ class GridFileDropTarget(wx.FileDropTarget):
 
 
 
-class FooTable(gridlib.PyGridTableBase):
+class FooTable(wxPyGridTableBase):
     def __init__(self):
-        gridlib.PyGridTableBase.__init__(self)
+        wxPyGridTableBase.__init__(self)
         self.dropTargets = {(0,0):"Drag",
                             (1,0):"A",
                             (2,0):"File",
@@ -55,12 +54,12 @@ class FooTable(gridlib.PyGridTableBase):
         return self.dropTargets.get((row, col), "")
 
 
-class SimpleGrid(gridlib.Grid):
+
+class SimpleGrid(wxGrid):
     def __init__(self, parent, log):
-        gridlib.Grid.__init__(self, parent, -1)
+        wxGrid.__init__(self, parent, -1)
         self.log = log
         self.moveTo = None
-
         if VIRTUAL:
             self.table = FooTable()
             self.SetTable(self.table)
@@ -77,12 +76,13 @@ class SimpleGrid(gridlib.Grid):
         if VIRTUAL:
             self.table.dropTargets[row, col] = value
         else:
-            gridlib.Grid.SetCellValue(self, row, col, value)
+            wxGrid.SetCellValue(self, row, col, value)
 
 
-class TestFrame(wx.Frame):
+
+class TestFrame(wxFrame):
     def __init__(self, parent, log):
-        wx.Frame.__init__(self, parent, -1, "DragAndDrop Grid", size=(640,480))
+        wxFrame.__init__(self, parent, -1, "DragAndDrop Grid", size=(640,480))
         grid = SimpleGrid(self, log)
 
 
@@ -91,7 +91,7 @@ class TestFrame(wx.Frame):
 
 if __name__ == '__main__':
     import sys
-    app = wx.PySimpleApp()
+    app = wxPySimpleApp()
     frame = TestFrame(None, sys.stdout)
     frame.Show(True)
     app.MainLoop()
