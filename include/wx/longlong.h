@@ -7,13 +7,13 @@
 // Created:     10.02.99
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_LONGLONG_H
 #define _WX_LONGLONG_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "longlong.h"
 #endif
 
@@ -38,20 +38,71 @@
 // decide upon which class we will use
 // ----------------------------------------------------------------------------
 
-#ifndef wxLongLong_t
+// to avoid compilation problems on 64bit machines with ambiguous method calls
+// we will need to define this
+#undef wxLongLongIsLong
+
+// NB: we #define and not typedef wxLongLong_t because we want to be able to
+//     use 'unsigned wxLongLong_t' as well and because we use "#ifdef
+//     wxLongLong_t" below
+
+// first check for generic cases which are long on 64bit machine and "long
+// long", then check for specific compilers
+#if defined(SIZEOF_LONG) && (SIZEOF_LONG == 8)
+    #define wxLongLong_t long
+    #define wxLongLongSuffix l
+    #define wxLongLongFmtSpec _T("l")
+    #define wxLongLongIsLong
+#elif (defined(__VISUALC__) && defined(__WIN32__)) || defined( __VMS__ )
+    #define wxLongLong_t __int64
+    #define wxLongLongSuffix i64
+    #define wxLongLongFmtSpec _T("I64")
+#elif defined(__BORLANDC__) && defined(__WIN32__) && (__BORLANDC__ >= 0x520)
+    #define wxLongLong_t __int64
+    #define wxLongLongSuffix i64
+    #define wxLongLongFmtSpec _T("I64")
+#elif (defined(SIZEOF_LONG_LONG) && SIZEOF_LONG_LONG >= 8)  || \
+        defined(__MINGW32__) || \
+        defined(__CYGWIN__) || \
+        defined(__WXMICROWIN__) || \
+        (defined(__DJGPP__) && __DJGPP__ >= 2)
+    #define wxLongLong_t long long
+    #define wxLongLongSuffix ll
+    #if defined(__MINGW32__)
+      #define wxLongLongFmtSpec _T("I64")
+    #else
+    #define wxLongLongFmtSpec _T("ll")
+    #endif
+#elif defined(__MWERKS__)
+    #if __option(longlong)
+        #define wxLongLong_t long long
+        #define wxLongLongSuffix ll
+        #define wxLongLongFmtSpec _T("ll")
+    #else
+        #error "The 64 bit integer support in CodeWarrior has been disabled."
+        #error "See the documentation on the 'longlong' pragma."
+    #endif
+#elif defined(__VISAGECPP__) && __IBMCPP__ >= 400
+    #define wxLongLong_t long long
+#else // no native long long type
     // both warning and pragma warning are not portable, but at least an
     // unknown pragma should never be an error -- except that, actually, some
     // broken compilers don't like it, so we have to disable it in this case
     // <sigh>
-    #if !(defined(__WATCOMC__) || defined(__VISAGECPP__))
-        #pragma warning "Your compiler does not appear to support 64 bit "\
-                        "integers, using emulation class instead.\n" \
-                        "Please report your compiler version to " \
-                        "wx-dev@lists.wxwidgets.org!"
-    #endif
+#if !(defined(__WATCOMC__) || defined(__VISAGECPP__))
+    #pragma warning "Your compiler does not appear to support 64 bit "\
+                    "integers, using emulation class instead.\n" \
+                    "Please report your compiler version to " \
+                    "wx-dev@lists.wxwindows.org!"
+#endif
 
     #define wxUSE_LONGLONG_WX 1
 #endif // compiler
+
+// this macro allows to definea 64 bit constant in a portable way
+#define wxMakeLongLong(x, s) x ## s
+#define wxMakeLongLong2(x, s) wxMakeLongLong(x, s)
+#define wxLL(x) wxMakeLongLong2(x, wxLongLongSuffix)
 
 // the user may predefine wxUSE_LONGLONG_NATIVE and/or wxUSE_LONGLONG_NATIVE
 // to disable automatic testing (useful for the test program which defines
@@ -63,8 +114,8 @@
         #define wxUSE_LONGLONG_NATIVE 0
     #endif
 
-    class WXDLLIMPEXP_BASE wxLongLongWx;
-    class WXDLLIMPEXP_BASE wxULongLongWx;
+    class WXDLLEXPORT wxLongLongWx;
+    class WXDLLEXPORT wxULongLongWx;
 #if defined(__VISUALC__) && !defined(__WIN32__)
     #define wxLongLong wxLongLongWx
     #define wxULongLong wxULongLongWx
@@ -82,8 +133,8 @@
 
 #ifndef wxUSE_LONGLONG_WX
     #define wxUSE_LONGLONG_WX 0
-    class WXDLLIMPEXP_BASE wxLongLongNative;
-    class WXDLLIMPEXP_BASE wxULongLongNative;
+    class WXDLLEXPORT wxLongLongNative;
+    class WXDLLEXPORT wxULongLongNative;
     typedef wxLongLongNative wxLongLong;
     typedef wxULongLongNative wxULongLong;
 #endif
@@ -96,11 +147,11 @@
 // ----------------------------------------------------------------------------
 
 // we use iostream for wxLongLong output
-#include "wx/iosfwrap.h"
+#include "wx/ioswrap.h"
 
 #if wxUSE_LONGLONG_NATIVE
 
-class WXDLLIMPEXP_BASE wxLongLongNative
+class WXDLLEXPORT wxLongLongNative
 {
 public:
     // ctors
@@ -115,9 +166,6 @@ public:
         m_ll = ((wxLongLong_t) hi) << 32;
         m_ll |= (wxLongLong_t) lo;
     }
-#if wxUSE_LONGLONG_WX
-    wxLongLongNative(wxLongLongWx ll);
-#endif
 
     // default copy ctor is ok
 
@@ -127,10 +175,6 @@ public:
         // from native 64 bit integer
     wxLongLongNative& operator=(wxLongLong_t ll)
         { m_ll = ll; return *this; }
-#if wxUSE_LONGLONG_WX
-    wxLongLongNative& operator=(wxLongLongWx ll);
-#endif
-
 
         // from double: this one has an explicit name because otherwise we
         // would have ambiguity with "ll = int" and also because we don't want
@@ -301,32 +345,28 @@ public:
 
 #if wxUSE_STD_IOSTREAM
         // input/output
-    friend WXDLLIMPEXP_BASE
-    wxSTD ostream& operator<<(wxSTD ostream&, const wxLongLongNative&);
+    friend wxSTD ostream& operator<<(wxSTD ostream&, const wxLongLongNative&);
 #endif
-
-    friend WXDLLIMPEXP_BASE
-    wxString& operator<<(wxString&, const wxLongLongNative&);
 
 private:
     wxLongLong_t  m_ll;
 };
 
 
-class WXDLLIMPEXP_BASE wxULongLongNative
+class WXDLLEXPORT wxULongLongNative
 {
 public:
     // ctors
         // default ctor initializes to 0
     wxULongLongNative() : m_ll(0) { }
         // from long long
-    wxULongLongNative(wxULongLong_t ll) : m_ll(ll) { }
+    wxULongLongNative(unsigned wxLongLong_t ll) : m_ll(ll) { }
         // from 2 longs
     wxULongLongNative(unsigned long hi, unsigned long lo) : m_ll(0)
     {
         // assign first to avoid precision loss!
-        m_ll = ((wxULongLong_t) hi) << 32;
-        m_ll |= (wxULongLong_t) lo;
+        m_ll = ((unsigned wxLongLong_t) hi) << 32;
+        m_ll |= (unsigned wxLongLong_t) lo;
     }
 
     // default copy ctor is ok
@@ -335,7 +375,7 @@ public:
 
     // assignment operators
         // from native 64 bit integer
-    wxULongLongNative& operator=(wxULongLong_t ll)
+    wxULongLongNative& operator=(unsigned wxLongLong_t ll)
         { m_ll = ll; return *this; }
 
     // assignment operators from wxULongLongNative is ok
@@ -349,7 +389,7 @@ public:
         { return (unsigned long)m_ll; }
 
         // convert to native ulong long
-    wxULongLong_t GetValue() const { return m_ll; }
+    unsigned wxLongLong_t GetValue() const { return m_ll; }
 
         // convert to ulong with range checking in the debug mode (only!)
     unsigned long ToULong() const
@@ -367,9 +407,9 @@ public:
     wxULongLongNative& operator+=(const wxULongLongNative& ll)
         { m_ll += ll.m_ll; return *this; }
 
-    wxULongLongNative operator+(const wxULongLong_t ll) const
+    wxULongLongNative operator+(const unsigned wxLongLong_t ll) const
         { return wxULongLongNative(m_ll + ll); }
-    wxULongLongNative& operator+=(const wxULongLong_t ll)
+    wxULongLongNative& operator+=(const unsigned wxLongLong_t ll)
         { m_ll += ll; return *this; }
 
         // pre increment
@@ -386,9 +426,9 @@ public:
     wxULongLongNative& operator-=(const wxULongLongNative& ll)
         { m_ll -= ll.m_ll; return *this; }
 
-    wxULongLongNative operator-(const wxULongLong_t ll) const
+    wxULongLongNative operator-(const unsigned wxLongLong_t ll) const
         { return wxULongLongNative(m_ll - ll); }
-    wxULongLongNative& operator-=(const wxULongLong_t ll)
+    wxULongLongNative& operator-=(const unsigned wxLongLong_t ll)
         { m_ll -= ll; return *this; }
 
         // pre decrement
@@ -488,22 +528,18 @@ public:
 
 #if wxUSE_STD_IOSTREAM
         // input/output
-    friend WXDLLIMPEXP_BASE
-    wxSTD ostream& operator<<(wxSTD ostream&, const wxULongLongNative&);
+    friend wxSTD ostream& operator<<(wxSTD ostream&, const wxULongLongNative&);
 #endif
 
-    friend WXDLLIMPEXP_BASE
-    wxString& operator<<(wxString&, const wxULongLongNative&);
-
 private:
-    wxULongLong_t  m_ll;
+    unsigned wxLongLong_t  m_ll;
 };
 
 #endif // wxUSE_LONGLONG_NATIVE
 
 #if wxUSE_LONGLONG_WX
 
-class WXDLLIMPEXP_BASE wxLongLongWx
+class WXDLLEXPORT wxLongLongWx
 {
 public:
     // ctors
@@ -638,10 +674,6 @@ public:
     // comparison
     bool operator==(const wxLongLongWx& ll) const
         { return m_lo == ll.m_lo && m_hi == ll.m_hi; }
-#if wxUSE_LONGLONG_NATIVE
-    bool operator==(const wxLongLongNative& ll) const
-        { return m_lo == ll.GetLo() && m_hi == ll.GetHi(); }
-#endif
     bool operator!=(const wxLongLongWx& ll) const
         { return !(*this == ll); }
     bool operator<(const wxLongLongWx& ll) const;
@@ -684,12 +716,8 @@ public:
     void *asArray() const;
 
 #if wxUSE_STD_IOSTREAM
-    friend WXDLLIMPEXP_BASE
-    wxSTD ostream& operator<<(wxSTD ostream&, const wxLongLongWx&);
+    friend wxSTD ostream& operator<<(wxSTD ostream&, const wxLongLongWx&);
 #endif // wxUSE_STD_IOSTREAM
-
-    friend WXDLLIMPEXP_BASE
-    wxString& operator<<(wxString&, const wxLongLongWx&);
 
 private:
     // long is at least 32 bits, so represent our 64bit number as 2 longs
@@ -708,7 +736,7 @@ private:
 };
 
 
-class WXDLLIMPEXP_BASE wxULongLongWx
+class WXDLLEXPORT wxULongLongWx
 {
 public:
     // ctors
@@ -738,14 +766,6 @@ public:
 
         Check();
 #endif // wxLONGLONG_TEST_MODE
-    }
-
-    // from signed to unsigned
-    wxULongLongWx(wxLongLongWx ll)
-    {
-        wxASSERT(ll.GetHi() >= 0);
-        m_hi = (unsigned long)ll.GetHi();
-        m_lo = ll.GetLo();
     }
 
     // default copy ctor is ok in both cases
@@ -798,8 +818,8 @@ public:
         // post increment operator
     wxULongLongWx& operator++(int) { return ++(*this); }
 
-        // subtraction
-    wxLongLongWx operator-(const wxULongLongWx& ll) const;
+        // subraction (FIXME: should return wxLongLong)
+    wxULongLongWx operator-(const wxULongLongWx& ll) const;
     wxULongLongWx& operator-=(const wxULongLongWx& ll);
 
         // pre decrement operator
@@ -870,12 +890,8 @@ public:
     void *asArray() const;
 
 #if wxUSE_STD_IOSTREAM
-    friend WXDLLIMPEXP_BASE
-    wxSTD ostream& operator<<(wxSTD ostream&, const wxULongLongWx&);
+    friend wxSTD ostream& operator<<(wxSTD ostream&, const wxULongLongWx&);
 #endif // wxUSE_STD_IOSTREAM
-
-    friend WXDLLIMPEXP_BASE
-    wxString& operator<<(wxString&, const wxULongLongWx&);
 
 private:
     // long is at least 32 bits, so represent our 64bit number as 2 longs
@@ -889,7 +905,7 @@ private:
         wxASSERT( (m_ll >> 32) == m_hi && (unsigned long)m_ll == m_lo );
     }
 
-    wxULongLong_t m_ll;
+    unsigned wxLongLong_t m_ll;
 #endif // wxLONGLONG_TEST_MODE
 };
 
@@ -921,10 +937,10 @@ inline bool operator!=(unsigned long l, const wxULongLong& ull) { return ull != 
 
 inline wxULongLong operator+(unsigned long l, const wxULongLong& ull) { return ull + l; }
 
-inline wxLongLong operator-(unsigned long l, const wxULongLong& ull)
+// FIXME: this should return wxLongLong
+inline wxULongLong operator-(unsigned long l, const wxULongLong& ull)
 {
-    wxULongLong ret = wxULongLong(l) - ull;
-    return wxLongLong((long)ret.GetHi(),ret.GetLo());
+    return wxULongLong(l) - ull;
 }
 
 #endif // _WX_LONGLONG_H

@@ -5,7 +5,7 @@
 
 \section{\class{wxHtmlParser}}\label{wxhtmlparser}
 
-Classes derived from this handle the {\bf generic} parsing of HTML documents: it scans
+This class handles the {\bf generic} parsing of HTML document: it scans
 the document and divide it into blocks of tags (where one block
 consists of beginning and ending tag and of text between these
 two tags).
@@ -145,8 +145,7 @@ of {\it OpenURL} in derived class.
 
 \wxheading{Parameters}
 
-\docparam{type}{Indicates type of the resource. Is one of:
-
+\docparam{type}{Indicates type of the resource. Is one of
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\bf wxHTML\_URL\_PAGE}}{Opening a HTML page.}
 \twocolitem{{\bf wxHTML\_URL\_IMAGE}}{Opening an image.}
@@ -187,6 +186,8 @@ The method does these things:
 \end{enumerate}
 
 You shouldn't use InitParser, DoParsing, GetProduct or DoneParser directly.
+
+
 
 \membersection{wxHtmlParser::PushTagHandler}\label{wxhtmlparserpushtaghandler}
 

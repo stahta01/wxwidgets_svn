@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mgl/pen.h
+// Name:        pen.h
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -11,7 +11,7 @@
 #ifndef __WX_PEN_H__
 #define __WX_PEN_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "pen.h"
 #endif
 
@@ -36,7 +36,7 @@ class WXDLLEXPORT wxPen: public wxGDIObject
 {
 public:
     wxPen() {}
-    wxPen(const wxColour &colour, int width = 1, int style = wxSOLID);
+    wxPen(const wxColour &colour, int width, int style);
     wxPen(const wxBitmap& stipple, int width);
     wxPen(const wxPen& pen);
     ~wxPen() {}

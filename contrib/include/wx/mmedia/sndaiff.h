@@ -3,6 +3,7 @@
 // Purpose:
 // Date: 08/11/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999
+// License:    wxWindows license
 // CVSID: $Id$
 // License:    wxWindows license
 // --------------------------------------------------------------------------
@@ -15,7 +16,6 @@
 
 #include "wx/defs.h"
 #include "wx/stream.h"
-#include "wx/mmedia/defs.h"
 #include "wx/mmedia/sndbase.h"
 #include "wx/mmedia/sndcodec.h"
 #include "wx/mmedia/sndfile.h"
@@ -24,7 +24,7 @@
 // AIFF codec
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundAiff: public wxSoundFileStream {
+class WXDLLEXPORT wxSoundAiff: public wxSoundFileStream {
 public:
     wxSoundAiff(wxInputStream& stream, wxSoundStream& io_sound);
     wxSoundAiff(wxOutputStream& stream, wxSoundStream& io_sound);

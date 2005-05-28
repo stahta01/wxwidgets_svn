@@ -198,18 +198,16 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 
 	if (ac.chooseSingle && (listType == 0)) {
 		if (list && !strchr(list, ac.GetSeparator())) {
-			const char *typeSep = strchr(list, ac.GetTypesep());
-			size_t lenInsert = (typeSep) ? (typeSep-list) : strlen(list);
 			if (ac.ignoreCase) {
 				SetEmptySelection(currentPos - lenEntered);
 				pdoc->DeleteChars(currentPos, lenEntered);
 				SetEmptySelection(currentPos);
-				pdoc->InsertString(currentPos, list, lenInsert);
-				SetEmptySelection(currentPos + lenInsert);
+				pdoc->InsertString(currentPos, list);
+				SetEmptySelection(currentPos + static_cast<int>(strlen(list)));
 			} else {
 				SetEmptySelection(currentPos);
-				pdoc->InsertString(currentPos, list + lenEntered, lenInsert - lenEntered);
-				SetEmptySelection(currentPos + lenInsert - lenEntered);
+				pdoc->InsertString(currentPos, list + lenEntered);
+				SetEmptySelection(currentPos + static_cast<int>(strlen(list + lenEntered)));
 			}
 			return;
 		}
@@ -280,9 +278,9 @@ void ScintillaBase::AutoCompleteMoveToCurrentWord() {
 	char wordCurrent[1000];
 	int i;
 	int startWord = ac.posStart - ac.startLen;
-	for (i = startWord; i < currentPos && i - startWord < 1000; i++)
+	for (i = startWord; i < currentPos; i++)
 		wordCurrent[i - startWord] = pdoc->CharAt(i);
-	wordCurrent[Platform::Minimum(i - startWord, 999)] = '\0';
+	wordCurrent[i - startWord] = '\0';
 	ac.Select(wordCurrent);
 }
 
@@ -297,7 +295,7 @@ void ScintillaBase::AutoCompleteCharacterAdded(char ch) {
 }
 
 void ScintillaBase::AutoCompleteCharacterDeleted() {
-	if (currentPos < ac.posStart - ac.startLen) {
+	if (currentPos <= ac.posStart - ac.startLen) {
 		ac.Cancel();
 	} else if (ac.cancelAtStartPos && (currentPos <= ac.posStart)) {
 		ac.Cancel();
@@ -314,8 +312,6 @@ void ScintillaBase::AutoCompleteCompleted() {
 		ac.lb->GetValue(item, selected, sizeof(selected));
 	}
 	ac.Cancel();
-	if (item == -1)
-		return;
 
 	if (listType > 0) {
 		userListSelected = selected;
@@ -349,20 +345,15 @@ void ScintillaBase::AutoCompleteCompleted() {
 	pdoc->EndUndoAction();
 }
 
-int ScintillaBase::AutoCompleteGetCurrent() {
-	return ac.lb->GetSelection();
-}
-
 void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 	AutoCompleteCancel();
 	pt.y += vs.lineHeight;
 	PRectangle rc = ct.CallTipStart(currentPos, pt,
-		defn,
-		vs.styles[STYLE_DEFAULT].fontName,
-		vs.styles[STYLE_DEFAULT].sizeZoomed,
-		CodePage(),
-		vs.styles[STYLE_DEFAULT].characterSet,
-		wMain);
+									defn,
+									vs.styles[STYLE_DEFAULT].fontName,
+									vs.styles[STYLE_DEFAULT].sizeZoomed,
+									IsUnicodeMode(),
+									wMain);
 	// If the call-tip window would be out of the client
 	// space, adjust so it displays above the text.
 	PRectangle rcClient = GetClientRectangle();
@@ -506,9 +497,6 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		ac.Select(reinterpret_cast<char *>(lParam));
 		break;
 
-	case SCI_AUTOCGETCURRENT:
-		return AutoCompleteGetCurrent();
-
 	case SCI_AUTOCSETCANCELATSTART:
 		ac.cancelAtStartPos = wParam != 0;
 		break;
@@ -569,7 +557,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return ac.GetTypesep();
 
 	case SCI_CALLTIPSHOW:
-		CallTipShow(LocationFromPosition(wParam),
+		CallTipShow(LocationFromPosition(wParam), 
 			reinterpret_cast<const char *>(lParam));
 		break;
 

@@ -12,7 +12,7 @@
 #ifndef _WX_PRINTWIN_H_
 #define _WX_PRINTWIN_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "printwin.h"
 #endif
 
@@ -32,14 +32,12 @@ public:
 
     virtual bool Print(wxWindow *parent,
                        wxPrintout *printout,
-                       bool prompt = true);
+                       bool prompt = TRUE);
     virtual wxDC* PrintDialog(wxWindow *parent);
     virtual bool Setup(wxWindow *parent);
 
 private:
     WXFARPROC     m_lpAbortProc;
-
-    DECLARE_NO_COPY_CLASS(wxWindowsPrinter)
 };
 
 // ---------------------------------------------------------------------------
@@ -49,6 +47,8 @@ private:
 
 class WXDLLEXPORT wxWindowsPrintPreview : public wxPrintPreviewBase
 {
+    DECLARE_CLASS(wxWindowsPrintPreview)
+
 public:
     wxWindowsPrintPreview(wxPrintout *printout,
                           wxPrintout *printoutForPrinting = NULL,
@@ -60,9 +60,6 @@ public:
 
     virtual bool Print(bool interactive);
     virtual void DetermineScaling();
-
-private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxWindowsPrintPreview)
 };
 
 #endif

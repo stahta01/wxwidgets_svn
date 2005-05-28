@@ -2,14 +2,14 @@
 // Name:        datstrm.cpp
 // Purpose:     Data stream classes
 // Author:      Guilhem Lavaux
-// Modified by: Mickael Gilabert
+// Modified by:
 // Created:     28/06/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Guilhem Lavaux
-// Licence:     wxWindows licence
+// Licence:   	wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "datstrm.h"
 #endif
 
@@ -30,11 +30,15 @@
 
 #if wxUSE_UNICODE
 wxDataInputStream::wxDataInputStream(wxInputStream& s, wxMBConv& conv)
-  : m_input(&s), m_be_order(false), m_conv(conv)
+  : m_input(&s), m_be_order(FALSE), m_conv(conv)
 #else
 wxDataInputStream::wxDataInputStream(wxInputStream& s)
-  : m_input(&s), m_be_order(false)
+  : m_input(&s), m_be_order(FALSE)
 #endif
+{
+}
+
+wxDataInputStream::~wxDataInputStream()
 {
 }
 
@@ -106,97 +110,20 @@ wxString wxDataInputStream::ReadString()
   if (len > 0)
   {
 #if wxUSE_UNICODE
-    wxCharBuffer tmp(len + 1);
-    m_input->Read(tmp.data(), len);
-    tmp.data()[len] = '\0';
-    wxString ret(m_conv.cMB2WX(tmp.data()));
+    char *tmp = new char[len + 1];
+    m_input->Read(tmp, len);
+    tmp[len] = 0;
+    wxString ret( (const wxChar*) m_conv.cMB2WX(tmp) );
+    delete[] tmp;
 #else
     wxString ret;
-    m_input->Read( wxStringBuffer(ret, len), len);
+    m_input->Read( ret.GetWriteBuf(len), len);
+    ret.UngetWriteBuf();
 #endif
     return ret;
   }
   else
     return wxEmptyString;
-}
-
-void wxDataInputStream::Read64(wxUint64 *buffer, size_t size)
-{
-  m_input->Read(buffer, size * 8);
-
-  if (m_be_order)
-  {
-    for (wxUint32 i=0; i<size; i++)
-    {
-      wxUint64 v = wxUINT64_SWAP_ON_LE(*buffer);
-      *(buffer++) = v;
-    }
-  }
-  else
-  {
-    for (wxUint32 i=0; i<size; i++)
-    {
-      wxUint64 v = wxUINT64_SWAP_ON_BE(*buffer);
-      *(buffer++) = v;
-    }
-  }
-}
-
-void wxDataInputStream::Read32(wxUint32 *buffer, size_t size)
-{
-  m_input->Read(buffer, size * 4);
-
-  if (m_be_order)
-  {
-    for (wxUint32 i=0; i<size; i++)
-    {
-      wxUint32 v = wxUINT32_SWAP_ON_LE(*buffer);
-      *(buffer++) = v;
-    }
-  }
-else
-  {
-    for (wxUint32 i=0; i<size; i++)
-    {
-      wxUint32 v = wxUINT32_SWAP_ON_BE(*buffer);
-      *(buffer++) = v;
-    }
-  }
-}
-
-void wxDataInputStream::Read16(wxUint16 *buffer, size_t size)
-{
-  m_input->Read(buffer, size * 2);
-
-  if (m_be_order)
-  {
-    for (wxUint32 i=0; i<size; i++)
-    {
-      wxUint16 v = wxUINT16_SWAP_ON_LE(*buffer);
-      *(buffer++) = v;
-    }
-  }
-  else
-  {
-    for (wxUint32 i=0; i<size; i++)
-    {
-      wxUint16 v = wxUINT16_SWAP_ON_BE(*buffer);
-      *(buffer++) = v;
-    }
-  }
-}
-
-void wxDataInputStream::Read8(wxUint8 *buffer, size_t size)
-{
-  m_input->Read(buffer, size);
-}
-
-void wxDataInputStream::ReadDouble(double *buffer, size_t size)
-{
-  for (wxUint32 i=0; i<size; i++)
-  {
-    *(buffer++) = ReadDouble();
-  }
 }
 
 wxDataInputStream& wxDataInputStream::operator>>(wxString& s)
@@ -265,11 +192,15 @@ wxDataInputStream& wxDataInputStream::operator>>(float& f)
 
 #if wxUSE_UNICODE
 wxDataOutputStream::wxDataOutputStream(wxOutputStream& s, wxMBConv& conv)
-  : m_output(&s), m_be_order(false), m_conv(conv)
+  : m_output(&s), m_be_order(FALSE), m_conv(conv)
 #else
 wxDataOutputStream::wxDataOutputStream(wxOutputStream& s)
-  : m_output(&s), m_be_order(false)
+  : m_output(&s), m_be_order(FALSE)
 #endif
+{
+}
+
+wxDataOutputStream::~wxDataOutputStream()
 {
 }
 
@@ -335,91 +266,12 @@ void wxDataOutputStream::WriteDouble(double d)
 #if wxUSE_APPLE_IEEE
   ConvertToIeeeExtended(d, (unsigned char *)buf);
 #else
-#if !defined(__VMS__) && !defined(__GNUG__)
+#ifndef __VMS__
 # pragma warning "wxDataOutputStream::WriteDouble() not using IeeeExtended - will not work!"
 #endif
    buf[0] = '\0';
 #endif
   m_output->Write(buf, 10);
-}
-
-void wxDataOutputStream::Write64(const wxUint64 *buffer, size_t size)
-{
-  if (m_be_order)
-  {
-    for (wxUint32 i=0; i<size ;i++)
-    {
-      wxUint64 i64 = wxUINT64_SWAP_ON_LE(*buffer);
-      buffer++;
-      m_output->Write(&i64, 8);
-    }
-  }
-  else
-  {
-    for (wxUint32 i=0; i<size ;i++)
-    {
-      wxUint64 i64 = wxUINT64_SWAP_ON_BE(*buffer);
-      buffer++;
-      m_output->Write(&i64, 8);
-    }
-  }
-}
-
-void wxDataOutputStream::Write32(const wxUint32 *buffer, size_t size)
-{
-  if (m_be_order)
-  {
-    for (wxUint32 i=0; i<size ;i++)
-    {
-      wxUint32 i32 = wxUINT32_SWAP_ON_LE(*buffer);
-      buffer++;
-      m_output->Write(&i32, 4);
-    }
-  }
-  else
-  {
-    for (wxUint32 i=0; i<size ;i++)
-    {
-      wxUint32 i32 = wxUINT32_SWAP_ON_BE(*buffer);
-      buffer++;
-      m_output->Write(&i32, 4);
-    }
-  }
-}
-
-void wxDataOutputStream::Write16(const wxUint16 *buffer, size_t size)
-{
-  if (m_be_order)
-  {
-    for (wxUint32 i=0; i<size ;i++)
-    {
-      wxUint16 i16 = wxUINT16_SWAP_ON_LE(*buffer);
-      buffer++;
-      m_output->Write(&i16, 2);
-    }
-  }
-  else
-  {
-    for (wxUint32 i=0; i<size ;i++)
-    {
-      wxUint16 i16 = wxUINT16_SWAP_ON_BE(*buffer);
-      buffer++;
-      m_output->Write(&i16, 2);
-    }
-  }
-}
-
-void wxDataOutputStream::Write8(const wxUint8 *buffer, size_t size)
-{
-  m_output->Write(buffer, size);
-}
-
-void wxDataOutputStream::WriteDouble(const double *buffer, size_t size)
-{
-  for (wxUint32 i=0; i<size; i++)
-  {
-    WriteDouble(*(buffer++));
-  }
 }
 
 wxDataOutputStream& wxDataOutputStream::operator<<(const wxChar *string)

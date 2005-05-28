@@ -1,4 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
 // Name:        univ/themes/win32.cpp
 // Purpose:     wxUniversal theme implementing Win32-like LNF
 // Author:      Vadim Zeitlin
@@ -6,7 +5,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -33,16 +32,13 @@
     #include "wx/dcmemory.h"
 
     #include "wx/button.h"
-    #include "wx/bmpbuttn.h"
     #include "wx/listbox.h"
     #include "wx/checklst.h"
     #include "wx/combobox.h"
     #include "wx/scrolbar.h"
     #include "wx/slider.h"
     #include "wx/textctrl.h"
-    #include "wx/listbox.h"
     #include "wx/toolbar.h"
-    #include "wx/statusbr.h"
 
     #ifdef __WXMSW__
         // for COLOR_* constants
@@ -56,7 +52,6 @@
 #include "wx/menu.h"
 #include "wx/artprov.h"
 #include "wx/toplevel.h"
-#include "wx/image.h"
 
 #include "wx/univ/scrtimer.h"
 #include "wx/univ/renderer.h"
@@ -85,10 +80,6 @@ static const size_t WIDTH_STATUSBAR_GRIP_BAND = 4;
 static const size_t STATUSBAR_GRIP_SIZE =
     WIDTH_STATUSBAR_GRIP_BAND*NUM_STATUSBAR_GRIP_BANDS;
 
-static const wxCoord SLIDER_MARGIN = 6; // margin around slider
-static const wxCoord SLIDER_THUMB_LENGTH = 18;
-static const wxCoord SLIDER_TICK_LENGTH = 6;
-
 enum IndicatorType
 {
     IndicatorType_Check,
@@ -111,7 +102,6 @@ enum IndicatorStatus
 {
     IndicatorStatus_Checked,
     IndicatorStatus_Unchecked,
-    IndicatorStatus_Undeterminated,
     IndicatorStatus_Max
 };
 
@@ -245,8 +235,7 @@ public:
                                    const wxString& label,
                                    const wxBitmap& bitmap,
                                    const wxRect& rect,
-                                   int flags = 0,
-                                   long style = 0);
+                                   int flags);
     virtual void DrawTextLine(wxDC& dc,
                               const wxString& text,
                               const wxRect& rect,
@@ -264,25 +253,21 @@ public:
 
     virtual void DrawSliderShaft(wxDC& dc,
                                  const wxRect& rect,
-                                 int lenThumb,
                                  wxOrientation orient,
                                  int flags = 0,
-                                 long style = 0,
                                  wxRect *rectShaft = NULL);
     virtual void DrawSliderThumb(wxDC& dc,
                                  const wxRect& rect,
                                  wxOrientation orient,
-                                 int flags = 0,
-                                 long style = 0);
+                                 int flags = 0);
     virtual void DrawSliderTicks(wxDC& dc,
                                  const wxRect& rect,
-                                 int lenThumb,
+                                 const wxSize& sizeThumb,
                                  wxOrientation orient,
                                  int start,
                                  int end,
                                  int step = 1,
-                                 int flags = 0,
-                                 long style = 0);
+                                 int flags = 0);
 
     virtual void DrawMenuBarItem(wxDC& dc,
                                  const wxRect& rect,
@@ -304,7 +289,7 @@ public:
     virtual void DrawStatusField(wxDC& dc,
                                  const wxRect& rect,
                                  const wxString& label,
-                                 int flags = 0, int style = 0);
+                                 int flags = 0);
 
     // titlebars
     virtual void DrawFrameTitleBar(wxDC& dc,
@@ -381,14 +366,11 @@ public:
     virtual wxSize GetTabIndent() const { return wxSize(2, 2); }
     virtual wxSize GetTabPadding() const { return wxSize(6, 5); }
 
-    virtual wxCoord GetSliderDim() const { return SLIDER_THUMB_LENGTH + 2*BORDER_THICKNESS; }
-    virtual wxCoord GetSliderTickLen() const { return SLIDER_TICK_LENGTH; }
+    virtual wxCoord GetSliderDim() const { return 20; }
+    virtual wxCoord GetSliderTickLen() const { return 4; }
     virtual wxRect GetSliderShaftRect(const wxRect& rect,
-                                      int lenThumb,
-                                      wxOrientation orient,
-                                      long style = 0) const;
+                                      wxOrientation orient) const;
     virtual wxSize GetSliderThumbSize(const wxRect& rect,
-                                      int lenThumb,
                                       wxOrientation orient) const;
     virtual wxSize GetProgressBarStep() const { return wxSize(16, 32); }
 
@@ -447,7 +429,7 @@ protected:
     void DrawSunkenBorder(wxDC& dc, wxRect *rect);
 
     // draw the border used for scrollbar arrows
-    void DrawArrowBorder(wxDC& dc, wxRect *rect, bool isPressed = false);
+    void DrawArrowBorder(wxDC& dc, wxRect *rect, bool isPressed = FALSE);
 
     // public DrawArrow()s helper
     void DrawArrow(wxDC& dc, const wxRect& rect,
@@ -473,7 +455,7 @@ protected:
     void DrawLine(wxDC& dc,
                   wxCoord x1, wxCoord y1,
                   wxCoord x2, wxCoord y2,
-                  bool transpose = false)
+                  bool transpose = FALSE)
     {
         if ( transpose )
             dc.DrawLine(y1, x1, y2, x2);
@@ -555,8 +537,7 @@ public:
 protected:
     virtual bool IsAllowedButton(int button) { return button == 1; }
 
-    virtual void Highlight(wxScrollBar * WXUNUSED(scrollbar),
-                           bool WXUNUSED(doIt))
+    virtual void Highlight(wxScrollBar *scrollbar, bool doIt)
     {
         // we don't highlight anything
     }
@@ -629,7 +610,7 @@ public:
                              const wxMouseEvent& event);
 
     virtual bool HandleActivation(wxInputConsumer *consumer, bool activated);
-
+                             
     void PopupSystemMenu(wxTopLevelWindow *window, const wxPoint& pos) const;
 
 private:
@@ -664,7 +645,7 @@ protected:
 // wxWin32Theme
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY_PTR(wxInputHandler *, wxArrayHandlers);
+WX_DEFINE_ARRAY(wxInputHandler *, wxArrayHandlers);
 
 class wxWin32Theme : public wxTheme
 {
@@ -682,7 +663,7 @@ private:
     wxInputHandler *GetDefaultInputHandler();
 
     wxWin32Renderer *m_renderer;
-
+    
     wxWin32ArtProvider *m_artProvider;
 
     // the names of the already created handlers and the handlers themselves
@@ -1011,54 +992,6 @@ static const char *unchecked_item_xpm[] = {
 "wwwwwwwwwwwww"
 };
 
-static const char *undetermined_xpm[] = {
-/* columns rows colors chars-per-pixel */
-"13 13 5 1",
-"A c #030303",
-"B c #838383",
-"C c #C3C3C3",
-"D c #FBFBFB",
-"E c #DBDBDB",
-/* pixels */
-"BBBBBBBBBBBBD",
-"BAAAAAAAAAAED",
-"BACDCDCDCDCED",
-"BADCDCDCDBDED",
-"BACDCDCDBBCED",
-"BADBDCEBBBDED",
-"BACBBDBBBDCED",
-"BADBBBBBDCDED",
-"BACDBBBDCDCED",
-"BADCDBDCDCDED",
-"BACDCDCDCDCED",
-"BEEEEEEEEEEED",
-"DDDDDDDDDDDDD"
-};
-
-static const char *pressed_undetermined_xpm[] = {
-/* columns rows colors chars-per-pixel */
-"13 13 5 1",
-"A c #040404",
-"B c #848484",
-"C c #C4C4C4",
-"D c #FCFCFC",
-"E c #DCDCDC",
-/* pixels */
-"BBBBBBBBBBBBD",
-"BAAAAAAAAAAED",
-"BACCCCCCCCCCD",
-"BACCCCCCCACED",
-"BACCCCCCAACED",
-"BACACCCAAACED",
-"BACAACAAACCED",
-"BACAAAAACCCED",
-"BACCAAACCCCCD",
-"BACCCACCCCCED",
-"BACCCCCCCCCED",
-"BEEEEEEEEEEED",
-"DDDDDDDDDDDDD"
-};
-
 static const char *checked_radio_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "12 12 6 1",
@@ -1185,40 +1118,40 @@ static const char **
     // checkboxes first
     {
         // normal state
-        { checked_xpm, unchecked_xpm, undetermined_xpm },
+        { checked_xpm, unchecked_xpm },
 
         // pressed state
-        { pressed_checked_xpm, pressed_unchecked_xpm, pressed_undetermined_xpm },
+        { pressed_checked_xpm, pressed_unchecked_xpm },
 
         // disabled state
-        { pressed_disabled_checked_xpm, pressed_unchecked_xpm, pressed_disabled_checked_xpm },
+        { pressed_disabled_checked_xpm, pressed_unchecked_xpm },
     },
 
     // radio
     {
         // normal state
-        { checked_radio_xpm, unchecked_radio_xpm, NULL },
+        { checked_radio_xpm, unchecked_radio_xpm },
 
         // pressed state
-        { pressed_checked_radio_xpm, pressed_unchecked_radio_xpm, NULL },
+        { pressed_checked_radio_xpm, pressed_unchecked_radio_xpm },
 
         // disabled state
-        { pressed_disabled_checked_radio_xpm, pressed_unchecked_radio_xpm, NULL },
+        { pressed_disabled_checked_radio_xpm, pressed_unchecked_radio_xpm },
     },
 
     // menu
     {
         // normal state
-        { checked_menu_xpm, NULL, NULL },
+        { checked_menu_xpm, NULL },
 
         // selected state
-        { selected_checked_menu_xpm, NULL, NULL },
+        { selected_checked_menu_xpm, NULL },
 
         // disabled state
-        { disabled_checked_menu_xpm, NULL, NULL },
+        { disabled_checked_menu_xpm, NULL },
 
         // disabled selected state
-        { selected_disabled_checked_menu_xpm, NULL, NULL },
+        { selected_disabled_checked_menu_xpm, NULL },
     }
 };
 
@@ -1384,32 +1317,21 @@ wxColour wxWin32ColourScheme::GetBackground(wxWindow *win) const
         col = win->GetBackgroundColour();
     }
 
-    if ( !win->ShouldInheritColours() )
+    if ( win->IsContainerWindow() )
     {
         wxTextCtrl *text = wxDynamicCast(win, wxTextCtrl);
-#if wxUSE_LISTBOX
-        wxListBox* listBox = wxDynamicCast(win, wxListBox);
-#endif
-        if ( text
-#if wxUSE_LISTBOX
-         || listBox
-#endif
-          )
+        if ( text )
         {
-            if ( !win->IsEnabled() ) // not IsEditable()
+            if ( !text->IsEnabled() ) // not IsEditable()
                 col = Get(CONTROL);
-            else
-            {
-                if ( !col.Ok() )
-                {
-                    // doesn't depend on the state
-                    col = Get(WINDOW);
-                }
-            }
+            //else: execute code below
         }
 
-        if (!col.Ok())
-            col = Get(CONTROL); // Most controls should be this colour, not WINDOW
+        if ( !col.Ok() )
+        {
+            // doesn't depend on the state
+            col = Get(WINDOW);
+        }
     }
     else
     {
@@ -1815,7 +1737,8 @@ void wxWin32Renderer::DrawHalfRect(wxDC& dc, wxRect *rect, const wxPen& pen)
                 rect->GetRight(), rect->GetBottom());
 
     // adjust the rect
-    rect->Inflate(-1);
+    rect->width--;
+    rect->height--;
 }
 
 void wxWin32Renderer::DrawShadedRect(wxDC& dc, wxRect *rect,
@@ -1945,7 +1868,7 @@ wxRect wxWin32Renderer::GetBorderDimensions(wxBorder border) const
             break;
 
         default:
-        {
+        { 
             // char *crash = NULL;
             // *crash = 0;
             wxFAIL_MSG(_T("unknown border type"));
@@ -1969,7 +1892,7 @@ wxRect wxWin32Renderer::GetBorderDimensions(wxBorder border) const
 
 bool wxWin32Renderer::AreScrollbarsInsideBorder() const
 {
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -2336,7 +2259,7 @@ void wxWin32Renderer::DrawCheckItem(wxDC& dc,
     }
 
     dc.DrawBitmap(bmp, rect.x, rect.y + (rect.height - bmp.GetHeight()) / 2 - 1,
-                  true /* use mask */);
+                  TRUE /* use mask */);
 
     wxRect rectLabel = rect;
     int bmpWidth = bmp.GetWidth();
@@ -2365,9 +2288,7 @@ wxBitmap wxWin32Renderer::GetIndicator(IndicatorType indType, int flags)
 
     IndicatorStatus indStatus = flags & wxCONTROL_CHECKED
                                     ? IndicatorStatus_Checked
-                                    : ( flags & wxCONTROL_UNDETERMINED
-                                          ? IndicatorStatus_Undeterminated
-                                          : IndicatorStatus_Unchecked );
+                                    : IndicatorStatus_Unchecked;
 
     wxBitmap bmp = m_bmpIndicators[indType][indState][indStatus];
     if ( !bmp.Ok() )
@@ -2419,7 +2340,7 @@ void wxWin32Renderer::DrawCheckOrRadioButton(wxDC& dc,
         rectLabel.SetRight(rect.GetRight());
     }
 
-    dc.DrawBitmap(bitmap, xBmp, yBmp, true /* use mask */);
+    dc.DrawBitmap(bitmap, xBmp, yBmp, TRUE /* use mask */);
 
     DoDrawLabel(
                 dc, label, rectLabel,
@@ -2476,10 +2397,9 @@ void wxWin32Renderer::DrawToolBarButton(wxDC& dc,
                                         const wxString& label,
                                         const wxBitmap& bitmap,
                                         const wxRect& rectOrig,
-                                        int flags,
-                                        long style)
+                                        int flags)
 {
-    if (style == wxTOOL_STYLE_BUTTON)
+    if ( !label.empty() || bitmap.Ok() )
     {
         wxRect rect = rectOrig;
         rect.Deflate(BORDER_THICKNESS);
@@ -2495,7 +2415,7 @@ void wxWin32Renderer::DrawToolBarButton(wxDC& dc,
 
         dc.DrawLabel(label, bitmap, rect, wxALIGN_CENTRE);
     }
-    else if (style == wxTOOL_STYLE_SEPARATOR)
+    else // a separator
     {
         // leave a small gap aroudn the line, also account for the toolbar
         // border itself
@@ -2503,7 +2423,6 @@ void wxWin32Renderer::DrawToolBarButton(wxDC& dc,
                          rectOrig.y + 2*BORDER_THICKNESS,
                          rectOrig.GetBottom() - BORDER_THICKNESS);
     }
-    // don't draw wxTOOL_STYLE_CONTROL
 }
 
 // ----------------------------------------------------------------------------
@@ -2521,9 +2440,7 @@ void wxWin32Renderer::DrawTextLine(wxDC& dc,
     StandardDrawTextLine(dc, text, rect, selStart, selEnd, flags);
 }
 
-void
-wxWin32Renderer::DrawLineWrapMark(wxDC& WXUNUSED(dc),
-                                  const wxRect& WXUNUSED(rect))
+void wxWin32Renderer::DrawLineWrapMark(wxDC& dc, const wxRect& rect)
 {
     // we don't draw them
 }
@@ -2540,23 +2457,13 @@ void wxWin32Renderer::DrawTab(wxDC& dc,
                               int flags,
                               int indexAccel)
 {
-    #define SELECT_FOR_VERTICAL(X,Y) ( isVertical ? Y : X )
-    #define REVERSE_FOR_VERTICAL(X,Y) \
-        SELECT_FOR_VERTICAL(X,Y)      \
-        ,                             \
-        SELECT_FOR_VERTICAL(Y,X)
-
     wxRect rect = rectOrig;
-
-    bool isVertical = ( dir == wxLEFT ) || ( dir == wxRIGHT );
 
     // the current tab is drawn indented (to the top for default case) and
     // bigger than the other ones
     const wxSize indent = GetTabIndent();
     if ( flags & wxCONTROL_SELECTED )
     {
-        rect.Inflate( SELECT_FOR_VERTICAL( indent.x , 0),
-                      SELECT_FOR_VERTICAL( 0, indent.y ));
         switch ( dir )
         {
             default:
@@ -2564,228 +2471,153 @@ void wxWin32Renderer::DrawTab(wxDC& dc,
                 // fall through
 
             case wxTOP:
+                rect.Inflate(indent.x, 0);
                 rect.y -= indent.y;
-                // fall through
+                rect.height += indent.y;
+                break;
+
             case wxBOTTOM:
+                rect.Inflate(indent.x, 0);
                 rect.height += indent.y;
                 break;
 
             case wxLEFT:
-                rect.x -= indent.x;
-                // fall through
             case wxRIGHT:
-                rect.width += indent.x;
+                wxFAIL_MSG(_T("TODO"));
                 break;
         }
     }
 
     // draw the text, image and the focus around them (if necessary)
-    wxRect rectLabel( REVERSE_FOR_VERTICAL(rect.x,rect.y),
-                      REVERSE_FOR_VERTICAL(rect.width,rect.height)
-                    );
+    wxRect rectLabel = rect;
     rectLabel.Deflate(1, 1);
-    if ( isVertical )
-    {
-        // draw it horizontally into memory and rotate for screen
-        wxMemoryDC dcMem;
-        wxBitmap bitmapRotated,
-                 bitmapMem( rectLabel.x + rectLabel.width,
-                            rectLabel.y + rectLabel.height );
-        dcMem.SelectObject(bitmapMem);
-        dcMem.SetBackground(dc.GetBackground());
-        dcMem.SetFont(dc.GetFont());
-        dcMem.SetTextForeground(dc.GetTextForeground());
-        dcMem.Clear();
-        bitmapRotated = wxBitmap( wxImage( bitmap.ConvertToImage() ).Rotate90(dir==wxLEFT) );
-        DrawButtonLabel(dcMem, label, bitmapRotated, rectLabel,
-                        flags, wxALIGN_CENTRE, indexAccel);
-        dcMem.SelectObject(wxNullBitmap);
-        bitmapMem = bitmapMem.GetSubBitmap(rectLabel);
-        bitmapMem = wxBitmap(wxImage(bitmapMem.ConvertToImage()).Rotate90(dir==wxRIGHT));
-        dc.DrawBitmap(bitmapMem, rectLabel.y, rectLabel.x, false);
-    }
-    else
-    {
-        DrawButtonLabel(dc, label, bitmap, rectLabel,
-                        flags, wxALIGN_CENTRE, indexAccel);
-    }
+    DrawButtonLabel(dc, label, bitmap, rectLabel,
+                    flags, wxALIGN_CENTRE, indexAccel);
 
     // now draw the tab border itself (maybe use DrawRoundedRectangle()?)
     static const wxCoord CUTOFF = 2; // radius of the rounded corner
-    wxCoord x = SELECT_FOR_VERTICAL(rect.x,rect.y),
-            y = SELECT_FOR_VERTICAL(rect.y,rect.x),
-            x2 = SELECT_FOR_VERTICAL(rect.GetRight(),rect.GetBottom()),
-            y2 = SELECT_FOR_VERTICAL(rect.GetBottom(),rect.GetRight());
+    wxCoord x = rect.x,
+            y = rect.y,
+            x2 = rect.GetRight(),
+            y2 = rect.GetBottom();
 
     // FIXME: all this code will break if the tab indent or the border width,
     //        it is tied to the fact that both of them are equal to 2
     switch ( dir )
     {
         default:
-            // default is top
-        case wxLEFT:
-            // left orientation looks like top but IsVertical makes x and y reversed
         case wxTOP:
-            // top is not vertical so use coordinates in written order
             dc.SetPen(m_penHighlight);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x, y2),
-                        REVERSE_FOR_VERTICAL(x, y + CUTOFF));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x, y + CUTOFF),
-                        REVERSE_FOR_VERTICAL(x + CUTOFF, y));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x + CUTOFF, y),
-                        REVERSE_FOR_VERTICAL(x2 - CUTOFF + 1, y));
+            dc.DrawLine(x, y2, x, y + CUTOFF);
+            dc.DrawLine(x, y + CUTOFF, x + CUTOFF, y);
+            dc.DrawLine(x + CUTOFF, y, x2 - CUTOFF + 1, y);
 
             dc.SetPen(m_penBlack);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2, y2),
-                        REVERSE_FOR_VERTICAL(x2, y + CUTOFF));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2, y + CUTOFF),
-                        REVERSE_FOR_VERTICAL(x2 - CUTOFF, y));
+            dc.DrawLine(x2, y2, x2, y + CUTOFF);
+            dc.DrawLine(x2, y + CUTOFF, x2 - CUTOFF, y);
 
             dc.SetPen(m_penDarkGrey);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2 - 1, y2),
-                        REVERSE_FOR_VERTICAL(x2 - 1, y + CUTOFF - 1));
+            dc.DrawLine(x2 - 1, y2, x2 - 1, y + CUTOFF - 1);
 
             if ( flags & wxCONTROL_SELECTED )
             {
                 dc.SetPen(m_penLightGrey);
 
                 // overwrite the part of the border below this tab
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y2 + 1),
-                            REVERSE_FOR_VERTICAL(x2 - 1, y2 + 1));
+                dc.DrawLine(x + 1, y2 + 1, x2 - 1, y2 + 1);
 
                 // and the shadow of the tab to the left of us
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y + CUTOFF + 1),
-                            REVERSE_FOR_VERTICAL(x + 1, y2 + 1));
+                dc.DrawLine(x + 1, y + CUTOFF + 1, x + 1, y2 + 1);
             }
             break;
 
-        case wxRIGHT:
-            // right orientation looks like bottom but IsVertical makes x and y reversed
         case wxBOTTOM:
-            // bottom is not vertical so use coordinates in written order
             dc.SetPen(m_penHighlight);
             // we need to continue one pixel further to overwrite the corner of
             // the border for the selected tab
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x, y - (flags & wxCONTROL_SELECTED ? 1 : 0)),
-                        REVERSE_FOR_VERTICAL(x, y2 - CUTOFF));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x, y2 - CUTOFF),
-                        REVERSE_FOR_VERTICAL(x + CUTOFF, y2));
+            dc.DrawLine(x, y - (flags & wxCONTROL_SELECTED ? 1 : 0),
+                        x, y2 - CUTOFF);
+            dc.DrawLine(x, y2 - CUTOFF, x + CUTOFF, y2);
 
             dc.SetPen(m_penBlack);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x + CUTOFF, y2),
-                        REVERSE_FOR_VERTICAL(x2 - CUTOFF + 1, y2));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2, y),
-                        REVERSE_FOR_VERTICAL(x2, y2 - CUTOFF));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2, y2 - CUTOFF),
-                        REVERSE_FOR_VERTICAL(x2 - CUTOFF, y2));
+            dc.DrawLine(x + CUTOFF, y2, x2 - CUTOFF + 1, y2);
+            dc.DrawLine(x2, y, x2, y2 - CUTOFF);
+            dc.DrawLine(x2, y2 - CUTOFF, x2 - CUTOFF, y2);
 
             dc.SetPen(m_penDarkGrey);
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x + CUTOFF, y2 - 1),
-                        REVERSE_FOR_VERTICAL(x2 - CUTOFF + 1, y2 - 1));
-            dc.DrawLine(REVERSE_FOR_VERTICAL(x2 - 1, y),
-                        REVERSE_FOR_VERTICAL(x2 - 1, y2 - CUTOFF + 1));
+            dc.DrawLine(x + CUTOFF, y2 - 1, x2 - CUTOFF + 1, y2 - 1);
+            dc.DrawLine(x2 - 1, y, x2 - 1, y2 - CUTOFF + 1);
 
             if ( flags & wxCONTROL_SELECTED )
             {
                 dc.SetPen(m_penLightGrey);
 
                 // overwrite the part of the (double!) border above this tab
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y - 1),
-                            REVERSE_FOR_VERTICAL(x2 - 1, y - 1));
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y - 2),
-                            REVERSE_FOR_VERTICAL(x2 - 1, y - 2));
+                dc.DrawLine(x + 1, y - 1, x2 - 1, y - 1);
+                dc.DrawLine(x + 1, y - 2, x2 - 1, y - 2);
 
                 // and the shadow of the tab to the left of us
-                dc.DrawLine(REVERSE_FOR_VERTICAL(x + 1, y2 - CUTOFF),
-                            REVERSE_FOR_VERTICAL(x + 1, y - 1));
+                dc.DrawLine(x + 1, y2 - CUTOFF, x + 1, y - 1);
             }
             break;
-    }
 
-    #undef SELECT_FOR_VERTICAL
-    #undef REVERSE_FOR_VERTICAL
+        case wxLEFT:
+        case wxRIGHT:
+            wxFAIL_MSG(_T("TODO"));
+    }
 }
 
 // ----------------------------------------------------------------------------
 // slider
 // ----------------------------------------------------------------------------
 
-wxSize
-wxWin32Renderer::GetSliderThumbSize(const wxRect& WXUNUSED(rect),
-                                    int lenThumb,
-                                    wxOrientation orient) const
+wxSize wxWin32Renderer::GetSliderThumbSize(const wxRect& rect,
+                                           wxOrientation orient) const
 {
     wxSize size;
-    wxCoord width  = wxMax (lenThumb, SLIDER_THUMB_LENGTH) / 2;
-    wxCoord height = wxMax (lenThumb, SLIDER_THUMB_LENGTH);
 
-    if (orient == wxHORIZONTAL)
+    wxRect rectShaft = GetSliderShaftRect(rect, orient);
+    if ( orient == wxHORIZONTAL )
     {
-        size.x = width;
-        size.y = height;
+        size.y = rect.height - 6;
+        size.x = wxMin(size.y / 2, rectShaft.width);
     }
-    else
-    { // == wxVERTICAL
-        size.x = height;
-        size.y = width;
+    else // vertical
+    {
+        size.x = rect.width - 6;
+        size.y = wxMin(size.x / 2, rectShaft.height);
     }
 
     return size;
 }
 
 wxRect wxWin32Renderer::GetSliderShaftRect(const wxRect& rectOrig,
-                                           int lenThumb,
-                                           wxOrientation orient,
-                                           long style) const
+                                           wxOrientation orient) const
 {
-    bool transpose = (orient == wxVERTICAL);
-    bool left  = ((style & wxSL_AUTOTICKS) != 0) &
-                 (((style & wxSL_TOP) != 0) & !transpose |
-                  ((style & wxSL_LEFT) != 0) & transpose |
-                  ((style & wxSL_BOTH) != 0));
-    bool right = ((style & wxSL_AUTOTICKS) != 0) &
-                 (((style & wxSL_BOTTOM) != 0) & !transpose |
-                  ((style & wxSL_RIGHT) != 0) & transpose |
-                  ((style & wxSL_BOTH) != 0));
+    static const wxCoord SLIDER_MARGIN = 6;
 
     wxRect rect = rectOrig;
 
-    wxSize sizeThumb = GetSliderThumbSize (rect, lenThumb, orient);
-
-    if (orient == wxHORIZONTAL) {
-        rect.x += SLIDER_MARGIN;
-        if (left & right)
-        {
-            rect.y += wxMax ((rect.height - 2*BORDER_THICKNESS) / 2, sizeThumb.y/2);
-        }
-        else if (left)
-        {
-            rect.y += wxMax ((rect.height - 2*BORDER_THICKNESS - sizeThumb.y/2), sizeThumb.y/2);
-        }
-        else
-        {
-            rect.y += sizeThumb.y/2;
-        }
-        rect.width -= 2*SLIDER_MARGIN;
+    if ( orient == wxHORIZONTAL )
+    {
+        // make the rect of minimal width and centre it
         rect.height = 2*BORDER_THICKNESS;
+        rect.y = rectOrig.y + (rectOrig.height - rect.height) / 2;
+        if ( rect.y < 0 )
+            rect.y = 0;
+
+        // leave margins on the sides
+        rect.Deflate(SLIDER_MARGIN, 0);
     }
-    else
-    { // == wxVERTICAL
-        rect.y += SLIDER_MARGIN;
-        if (left & right)
-        {
-            rect.x += wxMax ((rect.width - 2*BORDER_THICKNESS) / 2, sizeThumb.x/2);
-        }
-        else if (left)
-        {
-            rect.x += wxMax ((rect.width - 2*BORDER_THICKNESS - sizeThumb.x/2), sizeThumb.x/2);
-        }
-        else
-        {
-            rect.x += sizeThumb.x/2;
-        }
+    else // vertical
+    {
+        // same as above but in other direction
         rect.width = 2*BORDER_THICKNESS;
-        rect.height -= 2*SLIDER_MARGIN;
+        rect.x = rectOrig.x + (rectOrig.width - rect.width) / 2;
+        if ( rect.x < 0 )
+            rect.x = 0;
+
+        rect.Deflate(0, SLIDER_MARGIN);
     }
 
     return rect;
@@ -2793,37 +2625,19 @@ wxRect wxWin32Renderer::GetSliderShaftRect(const wxRect& rectOrig,
 
 void wxWin32Renderer::DrawSliderShaft(wxDC& dc,
                                       const wxRect& rectOrig,
-                                      int lenThumb,
                                       wxOrientation orient,
                                       int flags,
-                                      long style,
                                       wxRect *rectShaft)
 {
-    /*    show shaft geometry
-
-             shaft
-        +-------------+
-        |             |
-        |     XXX     |  <-- x1
-        |     XXX     |
-        |     XXX     |
-        |     XXX     |
-        |     XXX     |  <-- x2
-        |             |
-        +-------------+
-
-              ^ ^
-              | |
-             y1 y2
-    */
-
-    if (flags & wxCONTROL_FOCUSED) {
+    if ( flags & wxCONTROL_FOCUSED )
+    {
         DrawFocusRect(dc, rectOrig);
     }
 
-    wxRect rect = GetSliderShaftRect(rectOrig, lenThumb, orient, style);
+    wxRect rect = GetSliderShaftRect(rectOrig, orient);
 
-    if (rectShaft) *rectShaft = rect;
+    if ( rectShaft )
+        *rectShaft = rect;
 
     DrawSunkenBorder(dc, &rect);
 }
@@ -2831,31 +2645,26 @@ void wxWin32Renderer::DrawSliderShaft(wxDC& dc,
 void wxWin32Renderer::DrawSliderThumb(wxDC& dc,
                                       const wxRect& rect,
                                       wxOrientation orient,
-                                      int flags,
-                                      long style)
+                                      int flags)
 {
-    /*    show thumb geometry
+    /*
+       we are drawing a shape of this form
 
-             H       <--- y1
-           H H B
-         H     H B
-       H         H B <--- y3
-       H         D B
-       H         D B
-       H         D B
-       H         D B   where H is hightlight colour
-       H         D B         D    dark grey
-       H         D B         B    black
-       H         D B
-       H         D B
-       H         D B <--- y4
-         H     D B
-           H D B
-             B       <--- y2
+       HHHHHHB <--- y
+       H    DB
+       H    DB
+       H    DB   where H is hightlight colour
+       H    DB         D    dark grey
+       H    DB         B    black
+       H    DB
+       H    DB <--- y3
+        H  DB
+         HDB
+          B    <--- y2
 
-       ^     ^     ^
-       |     |     |
-       x1    x3    x2
+       ^  ^  ^
+       |  |  |
+       x x3  x2
 
        The interior of this shape is filled with the hatched brush if the thumb
        is pressed.
@@ -2863,81 +2672,51 @@ void wxWin32Renderer::DrawSliderThumb(wxDC& dc,
 
     DrawBackground(dc, wxNullColour, rect, flags);
 
-    bool transpose = (orient == wxVERTICAL);
-    bool left  = ((style & wxSL_AUTOTICKS) != 0) &
-                 (((style & wxSL_TOP) != 0) & !transpose |
-                  ((style & wxSL_LEFT) != 0) & transpose) &
-                 ((style & wxSL_BOTH) == 0);
-    bool right = ((style & wxSL_AUTOTICKS) != 0) &
-                 (((style & wxSL_BOTTOM) != 0) & !transpose |
-                  ((style & wxSL_RIGHT) != 0) & transpose) &
-                 ((style & wxSL_BOTH) == 0);
+    bool transpose = orient == wxVERTICAL;
 
+    wxCoord x, y, x2, y2;
+    if ( transpose )
+    {
+        x = rect.y;
+        y = rect.x;
+        x2 = rect.GetBottom();
+        y2 = rect.GetRight();
+    }
+    else
+    {
+        x = rect.x;
+        y = rect.y;
+        x2 = rect.GetRight();
+        y2 = rect.GetBottom();
+    }
+
+    // the size of the pointed part of the thumb
     wxCoord sizeArrow = (transpose ? rect.height : rect.width) / 2;
-    wxCoord c = ((transpose ? rect.height : rect.width) - 2*sizeArrow);
 
-    wxCoord x1, x2, x3, y1, y2, y3, y4;
-    x1 = (transpose ? rect.y : rect.x);
-    x2 = (transpose ? rect.GetBottom() : rect.GetRight());
-    x3 = (x1-1+c) + sizeArrow;
-    y1 = (transpose ? rect.x : rect.y);
-    y2 = (transpose ? rect.GetRight() : rect.GetBottom());
-    y3 = (left  ? (y1-1+c) + sizeArrow : y1);
-    y4 = (right ? (y2+1-c) - sizeArrow : y2);
-
-    dc.SetPen(m_penBlack);
-    if (left) {
-        DrawLine(dc, x3+1-c, y1, x2, y3, transpose);
-    }
-    DrawLine(dc, x2, y3, x2, y4, transpose);
-    if (right)
-    {
-        DrawLine(dc, x3+1-c, y2, x2, y4, transpose);
-    }
-    else
-    {
-        DrawLine(dc, x1, y2, x2, y2, transpose);
-    }
-
-    dc.SetPen(m_penDarkGrey);
-    DrawLine(dc, x2-1, y3+1, x2-1, y4-1, transpose);
-    if (right) {
-        DrawLine(dc, x3+1-c, y2-1, x2-1, y4, transpose);
-    }
-    else
-    {
-        DrawLine(dc, x1+1, y2-1, x2-1, y2-1, transpose);
-    }
+    wxCoord x3 = x + sizeArrow,
+            y3 = y2 - sizeArrow;
 
     dc.SetPen(m_penHighlight);
-    if (left)
-    {
-        DrawLine(dc, x1, y3, x3, y1, transpose);
-        DrawLine(dc, x3+1-c, y1+1, x2-1, y3, transpose);
-    }
-    else
-    {
-        DrawLine(dc, x1, y1, x2, y1, transpose);
-    }
-    DrawLine(dc, x1, y3, x1, y4, transpose);
-    if (right)
-    {
-        DrawLine(dc, x1, y4, x3+c, y2+c, transpose);
-    }
+    DrawLine(dc, x, y, x2, y, transpose);
+    DrawLine(dc, x, y + 1, x, y2 - sizeArrow, transpose);
+    DrawLine(dc, x, y3, x3, y2, transpose);
 
-    if (flags & wxCONTROL_PRESSED) {
+    dc.SetPen(m_penBlack);
+    DrawLine(dc, x3, y2, x2, y3, transpose);
+    DrawLine(dc, x2, y3, x2, y - 1, transpose);
+
+    dc.SetPen(m_penDarkGrey);
+    DrawLine(dc, x3, y2 - 1, x2 - 1, y3, transpose);
+    DrawLine(dc, x2 - 1, y3, x2 - 1, y, transpose);
+
+    if ( flags & wxCONTROL_PRESSED )
+    {
         // TODO: MSW fills the entire area inside, not just the rect
         wxRect rectInt = rect;
         if ( transpose )
-        {
-            rectInt.SetLeft(y3);
-            rectInt.SetRight(y4);
-        }
+            rectInt.SetRight(y3);
         else
-        {
-            rectInt.SetTop(y3);
-            rectInt.SetBottom(y4);
-        }
+            rectInt.SetBottom(y3);
         rectInt.Deflate(2);
 
 #if !defined(__WXMGL__)
@@ -2979,80 +2758,70 @@ void wxWin32Renderer::DrawSliderThumb(wxDC& dc,
 
 void wxWin32Renderer::DrawSliderTicks(wxDC& dc,
                                       const wxRect& rect,
-                                      int lenThumb,
+                                      const wxSize& sizeThumb,
                                       wxOrientation orient,
                                       int start,
                                       int end,
                                       int step,
-                                      int WXUNUSED(flags),
-                                      long style)
+                                      int flags)
 {
-    /*    show ticks geometry
+    if ( end == start )
+    {
+        // empty slider?
+        return;
+    }
 
-        left        right
-        ticks shaft ticks
-        ----   XX   ----  <-- x1
-        ----   XX   ----
-        ----   XX   ----
-        ----   XX   ----  <-- x2
+    // the variable names correspond to horizontal case, but they can be used
+    // for both orientations
+    wxCoord x1, x2, y1, y2, len, widthThumb;
+    if ( orient == wxHORIZONTAL )
+    {
+        x1 = rect.GetLeft();
+        x2 = rect.GetRight();
 
-        ^  ^        ^  ^
-        |  |        |  |
-        y3 y1       y2 y4
-    */
+        // draw from bottom to top to leave one pixel space between the ticks
+        // and the slider as Windows do
+        y1 = rect.GetBottom();
+        y2 = rect.GetTop();
 
-    // empty slider?
-    if (end == start) return;
+        len = rect.width;
 
-    bool transpose = (orient == wxVERTICAL);
-    bool left  = ((style & wxSL_AUTOTICKS) != 0) &
-                 (((style & wxSL_TOP) != 0) & !transpose |
-                  ((style & wxSL_LEFT) != 0) & transpose |
-                  ((style & wxSL_BOTH) != 0));
-    bool right = ((style & wxSL_AUTOTICKS) != 0) &
-                 (((style & wxSL_BOTTOM) != 0) & !transpose |
-                  ((style & wxSL_RIGHT) != 0) & transpose |
-                  ((style & wxSL_BOTH) != 0));
+        widthThumb = sizeThumb.x;
+    }
+    else // vertical
+    {
+        x1 = rect.GetTop();
+        x2 = rect.GetBottom();
 
-    // default thumb size
-    wxSize sizeThumb = GetSliderThumbSize (rect, 0, orient);
-    wxCoord defaultLen = (transpose ? sizeThumb.x : sizeThumb.y);
+        y1 = rect.GetRight();
+        y2 = rect.GetLeft();
 
-    // normal thumb size
-    sizeThumb = GetSliderThumbSize (rect, lenThumb, orient);
-    wxCoord widthThumb  = (transpose ? sizeThumb.y : sizeThumb.x);
+        len = rect.height;
 
-    wxRect rectShaft = GetSliderShaftRect (rect, lenThumb, orient, style);
+        widthThumb = sizeThumb.y;
+    }
 
-    wxCoord x1, x2, y1, y2, y3, y4 , len;
-    x1 = (transpose ? rectShaft.y : rectShaft.x) + widthThumb/2;
-    x2 = (transpose ? rectShaft.GetBottom() : rectShaft.GetRight()) - widthThumb/2;
-    y1 = (transpose ? rectShaft.x : rectShaft.y) - defaultLen/2;
-    y2 = (transpose ? rectShaft.GetRight() : rectShaft.GetBottom()) + defaultLen/2;
-    y3 = (transpose ? rect.x : rect.y);
-    y4 = (transpose ? rect.GetRight() : rect.GetBottom());
-    len = x2 - x1;
+    // the first tick should be positioned in such way that a thumb drawn in
+    // the first position points down directly to it
+    x1 += widthThumb / 2;
+    x2 -= widthThumb / 2;
+
+    // this also means that we have slightly less space for the ticks in
+    // between the first and the last
+    len -= widthThumb;
 
     dc.SetPen(m_penBlack);
 
     int range = end - start;
-    for ( int n = 0; n < range; n += step ) {
+    for ( int n = 0; n < range; n += step )
+    {
         wxCoord x = x1 + (len*n) / range;
 
-        if (left & (y1 > y3)) {
-            DrawLine(dc, x, y1, x, y3, orient == wxVERTICAL);
-        }
-        if (right & (y4 > y2)) {
-            DrawLine(dc, x, y2, x, y4, orient == wxVERTICAL);
-        }
+        DrawLine(dc, x, y1, x, y2, orient == wxVERTICAL);
     }
+
     // always draw the line at the end position
-    if (left & (y1 > y3)) {
-        DrawLine(dc, x2, y1, x2, y3, orient == wxVERTICAL);
-    }
-    if (right & (y4 > y2)) {
-        DrawLine(dc, x2, y2, x2, y4, orient == wxVERTICAL);
-    }
+    DrawLine(dc, x2, y1, x2, y2, orient == wxVERTICAL);
 }
 
 // ----------------------------------------------------------------------------
@@ -3249,7 +3018,7 @@ wxMenuGeometryInfo *wxWin32Renderer::GetMenuGeometry(wxWindow *win,
             widthAccelMax = 0,
             widthBmpMax = MENU_LEFT_MARGIN;
 
-    for ( wxMenuItemList::compatibility_iterator node = menu.GetMenuItems().GetFirst();
+    for ( wxMenuItemList::Node *node = menu.GetMenuItems().GetFirst();
           node;
           node = node->GetNext() )
     {
@@ -3335,7 +3104,7 @@ wxSize wxWin32Renderer::GetStatusBarBorders(wxCoord *borderBetweenFields) const
 void wxWin32Renderer::DrawStatusField(wxDC& dc,
                                       const wxRect& rect,
                                       const wxString& label,
-                                      int flags, int style /*=0*/)
+                                      int flags)
 {
     wxRect rectIn;
 
@@ -3351,15 +3120,9 @@ void wxWin32Renderer::DrawStatusField(wxDC& dc,
                 y2 = rect.GetBottom();
 
         // draw the upper left part of the rect normally
-        if (style != wxSB_FLAT)
-        {
-            if (style == wxSB_RAISED)
-                dc.SetPen(m_penHighlight);
-            else
-                dc.SetPen(m_penDarkGrey);
-            dc.DrawLine(rect.GetLeft(), rect.GetTop(), rect.GetLeft(), y2);
-            dc.DrawLine(rect.GetLeft() + 1, rect.GetTop(), x2, rect.GetTop());
-        }
+        dc.SetPen(m_penDarkGrey);
+        dc.DrawLine(rect.GetLeft(), rect.GetTop(), rect.GetLeft(), y2);
+        dc.DrawLine(rect.GetLeft() + 1, rect.GetTop(), x2, rect.GetTop());
 
         // draw the grey stripes of the grip
         size_t n;
@@ -3379,16 +3142,9 @@ void wxWin32Renderer::DrawStatusField(wxDC& dc,
         }
 
         // draw the remaining rect boundaries
-        if (style != wxSB_FLAT)
-        {
-            if (style == wxSB_RAISED)
-                dc.SetPen(m_penDarkGrey);
-            else
-                dc.SetPen(m_penHighlight);
-            ofs -= WIDTH_STATUSBAR_GRIP_BAND;
-            dc.DrawLine(x2, rect.GetTop(), x2, y2 - ofs + 1);
-            dc.DrawLine(rect.GetLeft(), y2, x2 - ofs + 1, y2);
-        }
+        ofs -= WIDTH_STATUSBAR_GRIP_BAND;
+        dc.DrawLine(x2, rect.GetTop(), x2, y2 - ofs + 1);
+        dc.DrawLine(rect.GetLeft(), y2, x2 - ofs + 1, y2);
 
         rectIn = rect;
         rectIn.Deflate(1);
@@ -3397,10 +3153,7 @@ void wxWin32Renderer::DrawStatusField(wxDC& dc,
     }
     else // normal pane
     {
-        if (style == wxSB_RAISED)
-            DrawBorder(dc, wxBORDER_RAISED, rect, flags, &rectIn);
-        else if (style != wxSB_FLAT)
-            DrawBorder(dc, wxBORDER_STATIC, rect, flags, &rectIn);
+        DrawBorder(dc, wxBORDER_STATIC, rect, flags, &rectIn);
     }
 
     rectIn.Deflate(STATBAR_BORDER_X, STATBAR_BORDER_Y);
@@ -3414,7 +3167,7 @@ void wxWin32Renderer::DrawStatusField(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 void wxWin32Renderer::GetComboBitmaps(wxBitmap *bmpNormal,
-                                      wxBitmap * WXUNUSED(bmpFocus),
+                                      wxBitmap *bmpFocus,
                                       wxBitmap *bmpPressed,
                                       wxBitmap *bmpDisabled)
 {
@@ -3455,7 +3208,7 @@ void wxWin32Renderer::GetComboBitmaps(wxBitmap *bmpNormal,
 void wxWin32Renderer::DoDrawBackground(wxDC& dc,
                                        const wxColour& col,
                                        const wxRect& rect,
-                                       wxWindow * WXUNUSED(window))
+                                       wxWindow *window )
 {
     wxBrush brush(col, wxSOLID);
     dc.SetBrush(brush);
@@ -3466,8 +3219,8 @@ void wxWin32Renderer::DoDrawBackground(wxDC& dc,
 void wxWin32Renderer::DrawBackground(wxDC& dc,
                                      const wxColour& col,
                                      const wxRect& rect,
-                                     int WXUNUSED(flags),
-                                     wxWindow *window)
+                                     int flags,
+                                     wxWindow *window )
 {
     // just fill it with the given or default bg colour
     wxColour colBg = col.Ok() ? col : wxSCHEME_COLOUR(m_scheme, CONTROL);
@@ -3528,7 +3281,7 @@ void wxWin32Renderer::DrawArrow(wxDC& dc,
         x--;
 
     // draw it
-    dc.DrawBitmap(bmp, x, y, true /* use mask */);
+    dc.DrawBitmap(bmp, x, y, TRUE /* use mask */);
 }
 
 void wxWin32Renderer::DrawArrowButton(wxDC& dc,
@@ -3543,9 +3296,9 @@ void wxWin32Renderer::DrawArrowButton(wxDC& dc,
 }
 
 void wxWin32Renderer::DrawScrollbarThumb(wxDC& dc,
-                                         wxOrientation WXUNUSED(orient),
+                                         wxOrientation orient,
                                          const wxRect& rect,
-                                         int WXUNUSED(flags))
+                                         int flags)
 {
     // we don't use the flags, the thumb never changes appearance
     wxRect rectThumb = rect;
@@ -3554,7 +3307,7 @@ void wxWin32Renderer::DrawScrollbarThumb(wxDC& dc,
 }
 
 void wxWin32Renderer::DrawScrollbarShaft(wxDC& dc,
-                                         wxOrientation WXUNUSED(orient),
+                                         wxOrientation orient,
                                          const wxRect& rectBar,
                                          int flags)
 {
@@ -3737,6 +3490,7 @@ void wxWin32Renderer::DrawFrameTitleBar(wxDC& dc,
             DrawFrameButton(dc, x, y, wxTOPLEVEL_BUTTON_HELP,
                             (specialButton == wxTOPLEVEL_BUTTON_HELP) ?
                             specialButtonFlags : 0);
+            x -= FRAME_BUTTON_WIDTH;
         }
     }
 }
@@ -3878,14 +3632,14 @@ void wxWin32Renderer::DrawFrameButton(wxDC& dc,
         DrawShadedRect(dc, &r, m_penBlack, m_penHighlight);
         DrawShadedRect(dc, &r, m_penDarkGrey, m_penLightGrey);
         DrawBackground(dc, wxSCHEME_COLOUR(m_scheme, CONTROL), r);
-        dc.DrawBitmap(m_bmpFrameButtons[idx], r.x+1, r.y+1, true);
+        dc.DrawBitmap(m_bmpFrameButtons[idx], r.x+1, r.y+1, TRUE);
     }
     else
     {
         DrawShadedRect(dc, &r, m_penHighlight, m_penBlack);
         DrawShadedRect(dc, &r, m_penLightGrey, m_penDarkGrey);
         DrawBackground(dc, wxSCHEME_COLOUR(m_scheme, CONTROL), r);
-        dc.DrawBitmap(m_bmpFrameButtons[idx], r.x, r.y, true);
+        dc.DrawBitmap(m_bmpFrameButtons[idx], r.x, r.y, TRUE);
     }
 }
 
@@ -3932,7 +3686,7 @@ wxSize wxWin32Renderer::GetFrameTotalSize(const wxSize& clientSize,
 
 wxSize wxWin32Renderer::GetFrameMinSize(int flags) const
 {
-    wxSize s;
+    wxSize s(0, 0);
 
     if ( (flags & wxTOPLEVEL_BORDER) && !(flags & wxTOPLEVEL_MAXIMIZED) )
     {
@@ -3974,168 +3728,289 @@ wxSize wxWin32Renderer::GetFrameIconSize() const
 // standard icons
 // ----------------------------------------------------------------------------
 
+/* Copyright (c) Julian Smart */
 static char *error_xpm[]={
-"32 32 5 1",
-". c None",
-"# c #800000",
-"b c #808080",
-"a c #ff0000",
-"c c #ffffff",
-"...........########.............",
-"........###aaaaaaaa###..........",
-".......#aaaaaaaaaaaaaa#.........",
-".....##aaaaaaaaaaaaaaaa##.......",
-"....#aaaaaaaaaaaaaaaaaaaa#......",
-"...#aaaaaaaaaaaaaaaaaaaaaa#.....",
-"...#aaaaaaaaaaaaaaaaaaaaaa#b....",
-"..#aaaaaacaaaaaaaaaacaaaaaa#b...",
-".#aaaaaacccaaaaaaaacccaaaaaa#...",
-".#aaaaacccccaaaaaacccccaaaaa#b..",
-".#aaaaaacccccaaaacccccaaaaaa#bb.",
-"#aaaaaaaacccccaacccccaaaaaaaa#b.",
-"#aaaaaaaaaccccccccccaaaaaaaaa#b.",
-"#aaaaaaaaaaccccccccaaaaaaaaaa#bb",
-"#aaaaaaaaaaaccccccaaaaaaaaaaa#bb",
-"#aaaaaaaaaaaccccccaaaaaaaaaaa#bb",
-"#aaaaaaaaaaccccccccaaaaaaaaaa#bb",
-"#aaaaaaaaaccccccccccaaaaaaaaa#bb",
-"#aaaaaaaacccccaacccccaaaaaaaa#bb",
-".#aaaaaacccccaaaacccccaaaaaa#bbb",
-".#aaaaacccccaaaaaacccccaaaaa#bbb",
-".#aaaaaacccaaaaaaaacccaaaaaa#bb.",
-"..#aaaaaacaaaaaaaaaacaaaaaa#bbb.",
-"...#aaaaaaaaaaaaaaaaaaaaaa#bbbb.",
-"...#aaaaaaaaaaaaaaaaaaaaaa#bbb..",
-"....#aaaaaaaaaaaaaaaaaaaa#bbb...",
-".....##aaaaaaaaaaaaaaaa##bbbb...",
-"......b#aaaaaaaaaaaaaa#bbbbb....",
-".......b###aaaaaaaa###bbbbb.....",
-".........bb########bbbbbb.......",
-"..........bbbbbbbbbbbbbb........",
-".............bbbbbbbb..........."};
+/* columns rows colors chars-per-pixel */
+"32 32 70 1",
+"- c #BF0101",
+"b c #361F1F",
+"& c #C08484",
+"X c #BF3333",
+"# c #C08181",
+"% c #C01111",
+"d c #C51515",
+"s c #551818",
+"O c #C07E7E",
+": c #C00E0E",
+"u c #E28A8A",
+"2 c #C81F1F",
+"8 c #FFFFFF",
+"p c #E59494",
+"< c #BB0101",
+"y c #DA6A6A",
+"A c #4C4C4C",
+"9 c #F7DFDF",
+"@ c #BF5353",
+"w c #FAE9E9",
+"F c #272727",
+"5 c #D24A4A",
+". c #C06363",
+"n c #BF8282",
+"7 c #F2C9C9",
+"t c #C09292",
+"M c #3E3E3E",
+"x c #4D4D4D",
+"4 c #CA2A2A",
+"h c #E79F9F",
+"* c #C05454",
+"D c #711212",
+"V c #737373",
+"$ c #BF3232",
+"N c #900B0B",
+"6 c #BD0303",
+"3 c #DF7F7F",
+"K c #6F1212",
+"C c #BD0000",
+"m c #950909",
+"P c #8A8A8A",
+"j c #D75F5F",
+"  c None",
+"e c #F4D4D4",
+"S c #BF2020",
+"L c #747474",
+"G c #842C2C",
+"c c #ECB4B4",
+"l c #2E2121",
+"g c #BF7E7E",
+"k c #9B0808",
+"= c #BF0505",
+"a c #B10303",
+"q c #7E2020",
+"1 c #642222",
+"J c #676767",
+"B c #322020",
+"; c #C00303",
+"i c #242424",
+"o c #C00000",
+"> c #BF1F1F",
+", c #842B2B",
+"f c #701212",
+"0 c #BE0000",
+"r c #960909",
+"H c #686868",
+"v c #BC0000",
+"Z c #671414",
+"+ c #C02020",
+"z c #CD3535",
+/* pixels */
+"                                ",
+"                                ",
+"            .XoooOO             ",
+"         .+ooooooooo@#          ",
+"        $oooooooooooo%&         ",
+"      *=-ooooooooooooo;:        ",
+"     *oooooooooooooooooo>       ",
+"     =ooooooooooooooooooo,      ",
+"    $-ooooooooooooooooooo<1     ",
+"   .oooooo2334ooo533oooooo6     ",
+"   +ooooooo789oo2883oooooo0q    ",
+"   oooooooo2w83o78eoooooooor    ",
+"  toooooooooy88u884oooooooori   ",
+"  Xooooooooooe888poooooooooas   ",
+"  ooooooooooo4889doooooooooof   ",
+"  ooooooooooo588w2oooooooooofi  ",
+"  oooooooooodw8887oooooooooofi  ",
+"  goooooooooh8w588jooooooookli  ",
+"  tooooooooz885op8wdooooooorix  ",
+"   oooooood98cood98cooooooori   ",
+"   @oooooop8w2ooo5885ooooovbi   ",
+"   n%ooooooooooooooooooooomiM   ",
+"    &;oooooooooooooooooooNBiV   ",
+"     :ooooooooooooooooooCZiA    ",
+"     nSooooooooooooooooCDiF     ",
+"      nG<oooooooooooooNZiiH     ",
+"        160ooooooooovmBiFH      ",
+"         nqrraoookrrbiiA        ",
+"          nJisKKKliiiML         ",
+"             nPiiix             ",
+"                                ",
+"                                "
+};
 
+/* Copyright (c) Julian Smart */
 static char *info_xpm[]={
-"32 32 6 1",
-". c None",
-"d c #000000",
-"c c #0000ff",
-"# c #808080",
-"a c #c0c0c0",
-"b c #ffffff",
-"...........########.............",
-"........###abbbbbba###..........",
-"......##abbbbbbbbbbbba##........",
-".....#abbbbbbbbbbbbbbbba#.......",
-"....#bbbbbbbaccccabbbbbbbd......",
-"...#bbbbbbbbccccccbbbbbbbbd.....",
-"..#bbbbbbbbbccccccbbbbbbbbbd....",
-".#abbbbbbbbbaccccabbbbbbbbbad...",
-".#bbbbbbbbbbbbbbbbbbbbbbbbbbd#..",
-"#abbbbbbbbbbbbbbbbbbbbbbbbbbad#.",
-"#bbbbbbbbbbcccccccbbbbbbbbbbbd#.",
-"#bbbbbbbbbbbbcccccbbbbbbbbbbbd##",
-"#bbbbbbbbbbbbcccccbbbbbbbbbbbd##",
-"#bbbbbbbbbbbbcccccbbbbbbbbbbbd##",
-"#bbbbbbbbbbbbcccccbbbbbbbbbbbd##",
-"#abbbbbbbbbbbcccccbbbbbbbbbbad##",
-".#bbbbbbbbbbbcccccbbbbbbbbbbd###",
-".#abbbbbbbbbbcccccbbbbbbbbbad###",
-"..#bbbbbbbbcccccccccbbbbbbbd###.",
-"...dbbbbbbbbbbbbbbbbbbbbbbd####.",
-"....dbbbbbbbbbbbbbbbbbbbbd####..",
-".....dabbbbbbbbbbbbbbbbad####...",
-"......ddabbbbbbbbbbbbadd####....",
-".......#dddabbbbbbaddd#####.....",
-"........###dddabbbd#######......",
-"..........####dbbbd#####........",
-".............#dbbbd##...........",
-"...............dbbd##...........",
-"................dbd##...........",
-".................dd##...........",
-"..................###...........",
-"...................##..........."};
+/* columns rows colors chars-per-pixel */
+"32 32 17 1",
+"* c #A1A3FB",
+"X c #FFFFFF",
+"O c #191EF4",
+"= c #777AF9",
+": c #4D51F7",
+"  c None",
+"- c #2328F5",
+"+ c #4247F6",
+"; c #C1C2FC",
+". c #C0C0C0",
+"& c #E0E1FE",
+"% c #242424",
+"> c #2D32F5",
+"o c #CBCCFD",
+"# c #0309F3",
+"@ c #8C8FFA",
+"$ c #EAEBFE",
+/* pixels */
+"          .......               ",
+"       ...XXXXXXX...            ",
+"     ..XXXXXXXXXXXXX..          ",
+"    .XXXXXXXXXXXXXXXXX.         ",
+"   .XXXXXXXXoO+XXXXXXXX.        ",
+"  .XXXXXXXXX@#OXXXXXXXXX.       ",
+" .XXXXXXXXXX$@oXXXXXXXXXX.      ",
+" .XXXXXXXXXXXXXXXXXXXXXXX.%     ",
+" .XXXXXXXXX&*=-XXXXXXXXXX.%%    ",
+".XXXXXXXXXX;:#>XXXXXXXXXXX.%    ",
+".XXXXXXXXXXX;#+XXXXXXXXXXX.%    ",
+".XXXXXXXXXXX;#+XXXXXXXXXXX.%%   ",
+" .XXXXXXXXXX;#+XXXXXXXXXX.%%%   ",
+" .XXXXXXXXXX;#+XXXXXXXXXX.%%%   ",
+" .XXXXXXXXXX;#+XXXXXXXXXX.%%    ",
+"  .XXXXXXXX*-##+XXXXXXXX.%%%    ",
+"   .XXXXXXXXXXXXXXXXXXX.%%%%    ",
+"    .XXXXXXXXXXXXXXXXX.%%%%     ",
+"     ..XXXXXXXXXXXXX..%%%%      ",
+"      %...XXXXXXXX..%%%%%       ",
+"       %%%..XXXXXX.%%%%%        ",
+"         %%%.XXXXX.%%%          ",
+"            %.XXXX.%%           ",
+"              .XXX.%%           ",
+"               .XX.%%           ",
+"                .X.%%           ",
+"                 ..%%           ",
+"                  .%%           ",
+"                   %%           ",
+"                    %           ",
+"                                ",
+"                                "
+};
 
+/* Copyright (c) Julian Smart */
 static char *question_xpm[]={
-"32 32 6 1",
-". c None",
-"c c #000000",
-"d c #0000ff",
-"# c #808080",
-"a c #c0c0c0",
-"b c #ffffff",
-"...........########.............",
-"........###abbbbbba###..........",
-"......##abbbbbbbbbbbba##........",
-".....#abbbbbbbbbbbbbbbba#.......",
-"....#bbbbbbbbbbbbbbbbbbbbc......",
-"...#bbbbbbbaddddddabbbbbbbc.....",
-"..#bbbbbbbadabbddddabbbbbbbc....",
-".#abbbbbbbddbbbbddddbbbbbbbac...",
-".#bbbbbbbbddddbbddddbbbbbbbbc#..",
-"#abbbbbbbbddddbaddddbbbbbbbbac#.",
-"#bbbbbbbbbaddabddddbbbbbbbbbbc#.",
-"#bbbbbbbbbbbbbadddbbbbbbbbbbbc##",
-"#bbbbbbbbbbbbbdddbbbbbbbbbbbbc##",
-"#bbbbbbbbbbbbbddabbbbbbbbbbbbc##",
-"#bbbbbbbbbbbbbddbbbbbbbbbbbbbc##",
-"#abbbbbbbbbbbbbbbbbbbbbbbbbbac##",
-".#bbbbbbbbbbbaddabbbbbbbbbbbc###",
-".#abbbbbbbbbbddddbbbbbbbbbbac###",
-"..#bbbbbbbbbbddddbbbbbbbbbbc###.",
-"...cbbbbbbbbbaddabbbbbbbbbc####.",
-"....cbbbbbbbbbbbbbbbbbbbbc####..",
-".....cabbbbbbbbbbbbbbbbac####...",
-"......ccabbbbbbbbbbbbacc####....",
-".......#cccabbbbbbaccc#####.....",
-"........###cccabbbc#######......",
-"..........####cbbbc#####........",
-".............#cbbbc##...........",
-"...............cbbc##...........",
-"................cbc##...........",
-".................cc##...........",
-"..................###...........",
-"...................##..........."};
+/* columns rows colors chars-per-pixel */
+"32 32 16 1",
+"O c #A3A3FF",
+"X c #FFFFFF",
+"% c #CACAFF",
+"- c #4141FF",
+"= c #6060FF",
+"* c #2B2BFF",
+"@ c #B5B5FF",
+"  c None",
+"# c #1616FF",
+"+ c #8181FF",
+"$ c #0000FF",
+". c #C0C0C0",
+"; c #5555FF",
+": c #242424",
+"o c #E7E7FF",
+"& c #7575FF",
+/* pixels */
+"          .......               ",
+"       ...XXXXXXX...            ",
+"     ..XXXXXXXXXXXXX..          ",
+"    .XXXXXXoO++@XXXXXX.         ",
+"   .XXXXXXO#$$$$#%XXXXX.        ",
+"  .XXXXXX@$$#&&#$#oXXXXX.       ",
+" .XXXXXXX*$$%XX%$$=XXXXXX.      ",
+" .XXXXXXX+-;XXXX$$-XXXXXX.:     ",
+" .XXXXXXXXXXXXX+$$&XXXXXX.::    ",
+".XXXXXXXXXXXXo;$$*oXXXXXXX.:    ",
+".XXXXXXXXXXXo*$$*oXXXXXXXX.:    ",
+".XXXXXXXXXXX+$$*oXXXXXXXXX.::   ",
+" .XXXXXXXXXX-$$oXXXXXXXXX.:::   ",
+" .XXXXXXXXXXX--XXXXXXXXXX.:::   ",
+" .XXXXXXXXXXXXXXXXXXXXXXX.::    ",
+"  .XXXXXXXXX-$$XXXXXXXXX.:::    ",
+"   .XXXXXXXX-$$XXXXXXXX.::::    ",
+"    .XXXXXXXO++XXXXXXX.::::     ",
+"     ..XXXXXXXXXXXXX..::::      ",
+"      :...XXXXXXXX..:::::       ",
+"       :::..XXXXXX.:::::        ",
+"         :::.XXXXX.:::          ",
+"            :.XXXX.::           ",
+"              .XXX.::           ",
+"               .XX.::           ",
+"                .X.::           ",
+"                 ..::           ",
+"                  .::           ",
+"                   ::           ",
+"                    :           ",
+"                                ",
+"                                "
+};
 
+/* Copyright (c) Julian Smart */
 static char *warning_xpm[]={
-"32 32 6 1",
-". c None",
-"c c #000000",
-"# c #808000",
-"d c #808080",
-"b c #c0c0c0",
-"a c #ffff00",
-".............###................",
-"............#aabc...............",
-"...........#aaaabcd.............",
-"...........#aaaaacdd............",
-"..........#aaaaaabcdd...........",
-"..........#aaaaaaacdd...........",
-".........#aaaaaaaabcdd..........",
-".........#aaaaaaaaacdd..........",
-"........#aaaaaaaaaabcdd.........",
-"........#aaabcccbaaacdd.........",
-".......#aaaacccccaaabcdd........",
-".......#aaaacccccaaaacdd........",
-"......#aaaaacccccaaaabcdd.......",
-"......#aaaaacccccaaaaacdd.......",
-".....#aaaaaacccccaaaaabcdd......",
-".....#aaaaaa#ccc#aaaaaacdd......",
-"....#aaaaaaabcccbaaaaaabcdd.....",
-"....#aaaaaaaacccaaaaaaaacdd.....",
-"...#aaaaaaaaa#c#aaaaaaaabcdd....",
-"...#aaaaaaaaabcbaaaaaaaaacdd....",
-"..#aaaaaaaaaaacaaaaaaaaaabcdd...",
-"..#aaaaaaaaaaaaaaaaaaaaaaacdd...",
-".#aaaaaaaaaaabccbaaaaaaaaabcdd..",
-".#aaaaaaaaaaaccccaaaaaaaaaacdd..",
-"#aaaaaaaaaaaaccccaaaaaaaaaabcdd.",
-"#aaaaaaaaaaaabccbaaaaaaaaaaacdd.",
-"#aaaaaaaaaaaaaaaaaaaaaaaaaaacddd",
-"#aaaaaaaaaaaaaaaaaaaaaaaaaabcddd",
-".#aaaaaaaaaaaaaaaaaaaaaaaabcdddd",
-"..#ccccccccccccccccccccccccddddd",
-"....ddddddddddddddddddddddddddd.",
-".....ddddddddddddddddddddddddd.."};
+/* columns rows colors chars-per-pixel */
+"48 48 9 1",
+"@ c Black",
+"o c #A6A800",
+"+ c #8A8C00",
+"$ c #B8BA00",
+"  c None",
+"O c #6E7000",
+"X c #DCDF00",
+". c #C00000",
+"# c #373800",
+/* pixels */
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                      .                         ",
+"                     ...                        ",
+"                     ...                        ",
+"                    .....                       ",
+"                   ...X..                       ",
+"                   ..XXX..                      ",
+"                  ...XXX...                     ",
+"                  ..XXXXX..                     ",
+"                 ..XXXXXX...                    ",
+"                ...XXoO+XX..                    ",
+"                ..XXXO@#XXX..                   ",
+"               ..XXXXO@#XXX...                  ",
+"              ...XXXXO@#XXXX..                  ",
+"              ..XXXXXO@#XXXX...                 ",
+"             ...XXXXXo@OXXXXX..                 ",
+"            ...XXXXXXo@OXXXXXX..                ",
+"            ..XXXXXXX$@OXXXXXX...               ",
+"           ...XXXXXXXX@XXXXXXXX..               ",
+"          ...XXXXXXXXXXXXXXXXXX...              ",
+"          ..XXXXXXXXXXOXXXXXXXXX..              ",
+"         ...XXXXXXXXXO@#XXXXXXXXX..             ",
+"         ..XXXXXXXXXXX#XXXXXXXXXX...            ",
+"        ...XXXXXXXXXXXXXXXXXXXXXXX..            ",
+"       ...XXXXXXXXXXXXXXXXXXXXXXXX...           ",
+"       ..............................           ",
+"       ..............................           ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                ",
+"                                                "
+};
 
 wxBitmap wxWin32ArtProvider::CreateBitmap(const wxArtID& id,
                                           const wxArtClient& WXUNUSED(client),
@@ -4162,9 +4037,8 @@ static inline int GetTextBorderWidth()
     return 1;
 }
 
-wxRect
-wxWin32Renderer::GetTextTotalArea(const wxTextCtrl * WXUNUSED(text),
-                                  const wxRect& rect) const
+wxRect wxWin32Renderer::GetTextTotalArea(const wxTextCtrl *text,
+                                         const wxRect& rect) const
 {
     wxRect rectTotal = rect;
 
@@ -4177,10 +4051,9 @@ wxWin32Renderer::GetTextTotalArea(const wxTextCtrl * WXUNUSED(text),
     return rectTotal;
 }
 
-wxRect
-wxWin32Renderer::GetTextClientArea(const wxTextCtrl * WXUNUSED(text),
-                                   const wxRect& rect,
-                                   wxCoord *extraSpaceBeyond) const
+wxRect wxWin32Renderer::GetTextClientArea(const wxTextCtrl *text,
+                                          const wxRect& rect,
+                                          wxCoord *extraSpaceBeyond) const
 {
     wxRect rectText = rect;
 
@@ -4218,12 +4091,6 @@ void wxWin32Renderer::AdjustSize(wxSize *size, const wxWindow *window)
     }
 #endif // wxUSE_SCROLLBAR/!wxUSE_SCROLLBAR
 
-#if wxUSE_BMPBUTTON
-    if ( wxDynamicCast(window, wxBitmapButton) )
-    {
-        // do nothing
-    } else
-#endif // wxUSE_BMPBUTTON
 #if wxUSE_BUTTON
     if ( wxDynamicCast(window, wxButton) )
     {
@@ -4237,18 +4104,6 @@ void wxWin32Renderer::AdjustSize(wxSize *size, const wxWindow *window)
                 size->y = heightBtn;
             else
                 size->y += 9;
-        }
-
-        // for compatibility with other ports, the buttons default size is never
-        // less than the standard one, but not when display not PDAs.
-        if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
-        {
-            if ( !(window->GetWindowStyle() & wxBU_EXACTFIT) )
-            {
-                wxSize szDef = wxButton::GetDefaultSize();
-                if ( size->x < szDef.x )
-                    size->x = szDef.x;
-            }
         }
 
         // no border width adjustments for buttons
@@ -4275,11 +4130,11 @@ wxWin32InputHandler::wxWin32InputHandler(wxWin32Renderer *renderer)
     m_renderer = renderer;
 }
 
-bool wxWin32InputHandler::HandleKey(wxInputConsumer * WXUNUSED(control),
-                                    const wxKeyEvent& WXUNUSED(event),
-                                    bool WXUNUSED(pressed))
+bool wxWin32InputHandler::HandleKey(wxInputConsumer *control,
+                                    const wxKeyEvent& event,
+                                    bool pressed)
 {
-    return false;
+    return FALSE;
 }
 
 bool wxWin32InputHandler::HandleMouse(wxInputConsumer *control,
@@ -4295,11 +4150,11 @@ bool wxWin32InputHandler::HandleMouse(wxInputConsumer *control,
         {
             win->SetFocus();
 
-            return true;
+            return TRUE;
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -4311,7 +4166,7 @@ wxWin32ScrollBarInputHandler(wxWin32Renderer *renderer,
                              wxInputHandler *handler)
         : wxStdScrollBarInputHandler(renderer, handler)
 {
-    m_scrollPaused = false;
+    m_scrollPaused = FALSE;
     m_interval = 0;
 }
 
@@ -4320,7 +4175,7 @@ bool wxWin32ScrollBarInputHandler::OnScrollTimer(wxScrollBar *scrollbar,
 {
     // stop if went beyond the position of the original click (this can only
     // happen when we scroll by pages)
-    bool stop = false;
+    bool stop = FALSE;
     if ( action == wxACTION_SCROLL_PAGE_DOWN )
     {
         stop = m_renderer->HitTestScrollbar(scrollbar, m_ptStartScrolling)
@@ -4338,7 +4193,7 @@ bool wxWin32ScrollBarInputHandler::OnScrollTimer(wxScrollBar *scrollbar,
 
         scrollbar->Refresh();
 
-        return false;
+        return FALSE;
     }
 
     return wxStdScrollBarInputHandler::OnScrollTimer(scrollbar, action);
@@ -4371,12 +4226,12 @@ bool wxWin32ScrollBarInputHandler::HandleMouseMove(wxInputConsumer *control,
     // mouse move events normally - only do it while mouse is captured (i.e.
     // when we're dragging the thumb or pressing on something)
     if ( !m_winCapture )
-        return false;
+        return FALSE;
 
     if ( event.Entering() )
     {
         // we're not interested in this at all
-        return false;
+        return FALSE;
     }
 
     wxScrollBar *scrollbar = wxStaticCast(control->GetInputWindow(), wxScrollBar);
@@ -4388,20 +4243,20 @@ bool wxWin32ScrollBarInputHandler::HandleMouseMove(wxInputConsumer *control,
         if ( event.Leaving() )
         {
             // it surely didn't
-            return false;
+            return FALSE;
         }
 
         ht = m_renderer->HitTestScrollbar(scrollbar, event.GetPosition());
         if ( ht == m_htLast )
         {
             // yes it did, resume scrolling
-            m_scrollPaused = false;
+            m_scrollPaused = FALSE;
             if ( m_timerScroll )
             {
                 // we were scrolling by line/page, restart timer
                 m_timerScroll->Start(m_interval);
 
-                Press(scrollbar, true);
+                Press(scrollbar, TRUE);
             }
             else // we were dragging the thumb
             {
@@ -4409,7 +4264,7 @@ bool wxWin32ScrollBarInputHandler::HandleMouseMove(wxInputConsumer *control,
                 HandleThumbMove(scrollbar, m_eventLastDrag);
             }
 
-            return true;
+            return TRUE;
         }
     }
     else // normal case, scrolling hasn't been paused
@@ -4461,10 +4316,10 @@ bool wxWin32ScrollBarInputHandler::HandleMouseMove(wxInputConsumer *control,
                 // pause scrolling
                 m_interval = m_timerScroll->GetInterval();
                 m_timerScroll->Stop();
-                m_scrollPaused = true;
+                m_scrollPaused = TRUE;
 
                 // unpress the arrow
-                Press(scrollbar, false);
+                Press(scrollbar, FALSE);
             }
             else // we were dragging the thumb
             {
@@ -4477,7 +4332,7 @@ bool wxWin32ScrollBarInputHandler::HandleMouseMove(wxInputConsumer *control,
                 HandleThumbMove(scrollbar, m_eventStartDrag);
             }
 
-            return true;
+            return TRUE;
         }
     }
 
@@ -4514,15 +4369,15 @@ bool wxWin32CheckboxInputHandler::HandleKey(wxInputConsumer *control,
                 break;
         }
 
-        if ( !action.IsEmpty() )
+        if ( !!action )
         {
             control->PerformAction(action);
 
-            return true;
+            return TRUE;
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -4556,7 +4411,7 @@ bool wxWin32TextCtrlInputHandler::HandleKey(wxInputConsumer *control,
         {
             control->PerformAction(action);
 
-            return true;
+            return TRUE;
         }
     }
 
@@ -4571,7 +4426,7 @@ wxWin32StatusBarInputHandler::
 wxWin32StatusBarInputHandler(wxInputHandler *handler)
     : wxStdInputHandler(handler)
 {
-    m_isOnGrip = false;
+    m_isOnGrip = FALSE;
 }
 
 bool wxWin32StatusBarInputHandler::IsOnGrip(wxWindow *statbar,
@@ -4583,7 +4438,7 @@ bool wxWin32StatusBarInputHandler::IsOnGrip(wxWindow *statbar,
         wxTopLevelWindow *
             parentTLW = wxDynamicCast(statbar->GetParent(), wxTopLevelWindow);
 
-        wxCHECK_MSG( parentTLW, false,
+        wxCHECK_MSG( parentTLW, FALSE,
                      _T("the status bar should be a child of a TLW") );
 
         // a maximized window can't be resized anyhow
@@ -4601,7 +4456,7 @@ bool wxWin32StatusBarInputHandler::IsOnGrip(wxWindow *statbar,
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 bool wxWin32StatusBarInputHandler::HandleMouse(wxInputConsumer *consumer,
@@ -4624,7 +4479,7 @@ bool wxWin32StatusBarInputHandler::HandleMouse(wxInputConsumer *consumer,
 
                     statbar->SetCursor(m_cursorOld);
 
-                    return true;
+                    return TRUE;
                 }
             }
         }
@@ -4664,21 +4519,19 @@ class wxWin32SystemMenuEvtHandler : public wxEvtHandler
 {
 public:
     wxWin32SystemMenuEvtHandler(wxWin32FrameInputHandler *handler);
-
+    
     void Attach(wxInputConsumer *consumer);
     void Detach();
-
+    
 private:
     DECLARE_EVENT_TABLE()
     void OnSystemMenu(wxCommandEvent &event);
     void OnCloseFrame(wxCommandEvent &event);
     void OnClose(wxCloseEvent &event);
-
+   
     wxWin32FrameInputHandler *m_inputHnd;
     wxTopLevelWindow         *m_wnd;
-#if wxUSE_ACCEL
     wxAcceleratorTable        m_oldAccelTable;
-#endif
 };
 
 wxWin32SystemMenuEvtHandler::wxWin32SystemMenuEvtHandler(
@@ -4694,26 +4547,22 @@ void wxWin32SystemMenuEvtHandler::Attach(wxInputConsumer *consumer)
 
     m_wnd = wxStaticCast(consumer->GetInputWindow(), wxTopLevelWindow);
     m_wnd->PushEventHandler(this);
-
-#if wxUSE_ACCEL
-    // VS: This code relies on using generic implementation of
+    
+    // VS: This code relies on using generic implementation of 
     //     wxAcceleratorTable in wxUniv!
     wxAcceleratorTable table = *m_wnd->GetAcceleratorTable();
     m_oldAccelTable = table;
     table.Add(wxAcceleratorEntry(wxACCEL_ALT, WXK_SPACE, wxID_SYSTEM_MENU));
     table.Add(wxAcceleratorEntry(wxACCEL_ALT, WXK_F4, wxID_CLOSE_FRAME));
     m_wnd->SetAcceleratorTable(table);
-#endif
 }
 
 void wxWin32SystemMenuEvtHandler::Detach()
 {
     if ( m_wnd )
     {
-#if wxUSE_ACCEL
         m_wnd->SetAcceleratorTable(m_oldAccelTable);
-#endif
-        m_wnd->RemoveEventHandler(this);
+        m_wnd->RemoveEventHandler(this); 
         m_wnd = NULL;
     }
 }
@@ -4734,16 +4583,10 @@ void wxWin32SystemMenuEvtHandler::OnSystemMenu(wxCommandEvent &WXUNUSED(event))
     pt.x = -pt.x + border;
     pt.y = -pt.y + border + FRAME_TITLEBAR_HEIGHT;
 
-#if wxUSE_ACCEL
     wxAcceleratorTable table = *m_wnd->GetAcceleratorTable();
     m_wnd->SetAcceleratorTable(wxNullAcceleratorTable);
-#endif
-
     m_inputHnd->PopupSystemMenu(m_wnd, pt);
-
-#if wxUSE_ACCEL
     m_wnd->SetAcceleratorTable(table);
-#endif
 }
 
 void wxWin32SystemMenuEvtHandler::OnCloseFrame(wxCommandEvent &WXUNUSED(event))
@@ -4789,17 +4632,17 @@ bool wxWin32FrameInputHandler::HandleMouse(wxInputConsumer *consumer,
             tlw->PerformAction(wxACTION_TOPLEVEL_BUTTON_CLICK,
                                tlw->IsMaximized() ? wxTOPLEVEL_BUTTON_RESTORE
                                                   : wxTOPLEVEL_BUTTON_MAXIMIZE);
-            return true;
+            return TRUE;
         }
         else if ( tlw->GetWindowStyle() & wxSYSTEM_MENU )
         {
             if ( (event.LeftDown() && hit == wxHT_TOPLEVEL_ICON) ||
-                 (event.RightDown() &&
-                      (hit == wxHT_TOPLEVEL_TITLEBAR ||
+                 (event.RightDown() && 
+                      (hit == wxHT_TOPLEVEL_TITLEBAR || 
                        hit == wxHT_TOPLEVEL_ICON)) )
             {
                 PopupSystemMenu(tlw, event.GetPosition());
-                return true;
+                return TRUE;
             }
         }
     }
@@ -4807,7 +4650,7 @@ bool wxWin32FrameInputHandler::HandleMouse(wxInputConsumer *consumer,
     return wxStdFrameInputHandler::HandleMouse(consumer, event);
 }
 
-void wxWin32FrameInputHandler::PopupSystemMenu(wxTopLevelWindow *window,
+void wxWin32FrameInputHandler::PopupSystemMenu(wxTopLevelWindow *window, 
                                                const wxPoint& pos) const
 {
     wxMenu *menu = new wxMenu;
@@ -4823,25 +4666,25 @@ void wxWin32FrameInputHandler::PopupSystemMenu(wxTopLevelWindow *window,
         menu->Append(wxID_MAXIMIZE_FRAME , _("Ma&ximize"));
     menu->AppendSeparator();
     menu->Append(wxID_CLOSE_FRAME, _("Close\tAlt-F4"));
-
+    
     if ( window->GetWindowStyle() & wxMAXIMIZE_BOX )
     {
         if ( window->IsMaximized() )
         {
-            menu->Enable(wxID_MAXIMIZE_FRAME, false);
-            menu->Enable(wxID_MOVE_FRAME, false);
+            menu->Enable(wxID_MAXIMIZE_FRAME, FALSE);
+            menu->Enable(wxID_MOVE_FRAME, FALSE);
             if ( window->GetWindowStyle() & wxRESIZE_BORDER )
-                menu->Enable(wxID_RESIZE_FRAME, false);
+                menu->Enable(wxID_RESIZE_FRAME, FALSE);
         }
         else
-            menu->Enable(wxID_RESTORE_FRAME, false);
+            menu->Enable(wxID_RESTORE_FRAME, FALSE);
     }
 
     window->PopupMenu(menu, pos);
     delete menu;
 }
 
-bool wxWin32FrameInputHandler::HandleActivation(wxInputConsumer *consumer,
+bool wxWin32FrameInputHandler::HandleActivation(wxInputConsumer *consumer, 
                                                 bool activated)
 {
     if ( consumer->GetInputWindow()->GetWindowStyle() & wxSYSTEM_MENU )

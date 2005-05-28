@@ -5,18 +5,18 @@
 // Modified by:
 // Created:     05.11.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-// General note: this header is private to wxWidgets and is not supposed to be
+// General note: this header is private to wxWindows and is not supposed to be
 // included by user code. The functions declared here are implemented in
 // msw/fontutil.cpp for Windows, unix/fontutil.cpp for GTK/Motif &c.
 
 #ifndef _WX_FONTUTIL_H_
 #define _WX_FONTUTIL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "fontutil.h"
 #endif
 
@@ -27,10 +27,9 @@
 #include "wx/font.h"        // for wxFont and wxFontEncoding
 
 #if defined(__WXMSW__)
-    #include "wx/msw/wrapwin.h"
+    #include <windows.h>
+    #include "wx/msw/winundef.h"
 #endif
-
-struct WXDLLEXPORT wxNativeEncodingInfo;
 
 #if defined(_WX_X_FONTLIKE)
 
@@ -92,7 +91,7 @@ private:
     inline bool HasElements() const;
 
 public:
-    // init the elements from an XLFD, return true if ok
+    // init the elements from an XLFD, return TRUE if ok
     bool FromXFontName(const wxString& xFontName);
 
     // return false if we were never initialized with a valid XLFD
@@ -135,58 +134,11 @@ public:
     // default ctor (default copy ctor is ok)
     wxNativeFontInfo() { Init(); }
 
-#if wxUSE_PANGO
-private:
-    void Init(const wxNativeFontInfo& info);
-    void Free();
-
-public:
-    wxNativeFontInfo(const wxNativeFontInfo& info) { Init(info); }
-    ~wxNativeFontInfo() { Free(); }
-
-    wxNativeFontInfo& operator=(const wxNativeFontInfo& info)
-    {
-        Free();
-        Init(info);
-        return *this;
-    }
-#endif // wxUSE_PANGO
-
     // reset to the default state
     void Init();
 
-    // init with the parameters of the given font
-    void InitFromFont(const wxFont& font)
-    {
-        // translate all font parameters
-        SetStyle((wxFontStyle)font.GetStyle());
-        SetWeight((wxFontWeight)font.GetWeight());
-        SetUnderlined(font.GetUnderlined());
-#if defined(__WXMSW__)
-        if ( font.IsUsingSizeInPixels() )
-            SetPixelSize(font.GetPixelSize());
-        else
-        SetPointSize(font.GetPointSize());
-#else
-        SetPointSize(font.GetPointSize());
-#endif
-
-        // set the family/facename
-        SetFamily((wxFontFamily)font.GetFamily());
-        const wxString& facename = font.GetFaceName();
-        if ( !facename.empty() )
-        {
-            SetFaceName(facename);
-        }
-
-        // deal with encoding now (it may override the font family and facename
-        // so do it after setting them)
-        SetEncoding(font.GetEncoding());
-    }
-
     // accessors and modifiers for the font elements
     int GetPointSize() const;
-    wxSize GetPixelSize() const;
     wxFontStyle GetStyle() const;
     wxFontWeight GetWeight() const;
     bool GetUnderlined() const;
@@ -195,7 +147,6 @@ public:
     wxFontEncoding GetEncoding() const;
 
     void SetPointSize(int pointsize);
-    void SetPixelSize(const wxSize& pixelSize);
     void SetStyle(wxFontStyle style);
     void SetWeight(wxFontWeight weight);
     void SetUnderlined(bool underlined);
@@ -220,13 +171,13 @@ public:
 // ----------------------------------------------------------------------------
 
 // translate a wxFontEncoding into native encoding parameter (defined above),
-// returning true if an (exact) macth could be found, false otherwise (without
+// returning TRUE if an (exact) macth could be found, FALSE otherwise (without
 // attempting any substitutions)
 extern bool wxGetNativeFontEncoding(wxFontEncoding encoding,
                                     wxNativeEncodingInfo *info);
 
 // test for the existence of the font described by this facename/encoding,
-// return true if such font(s) exist, false otherwise
+// return TRUE if such font(s) exist, FALSE otherwise
 extern bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
 
 // ----------------------------------------------------------------------------

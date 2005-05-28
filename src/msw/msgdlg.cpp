@@ -1,15 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/msgdlg.cpp
+// Name:        msgdlg.cpp
 // Purpose:     wxMessageDialog
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "msgdlg.h"
 #endif
 
@@ -30,11 +30,6 @@
 
 #include "wx/msw/private.h"
 
-// For MB_TASKMODAL
-#ifdef __WXWINCE__
-#include "wx/msw/wince/missing.h"
-#endif
-
 IMPLEMENT_CLASS(wxMessageDialog, wxDialog)
 
 wxMessageDialog::wxMessageDialog(wxWindow *parent,
@@ -45,8 +40,8 @@ wxMessageDialog::wxMessageDialog(wxWindow *parent,
 {
     m_caption = caption;
     m_message = message;
+    m_dialogStyle = style;
     m_parent = parent;
-    SetMessageDialogStyle(style);
 }
 
 int wxMessageDialog::ShowModal()
@@ -68,37 +63,34 @@ int wxMessageDialog::ShowModal()
 
     // translate wx style in MSW
     unsigned int msStyle = MB_OK;
-    const long wxStyle = GetMessageDialogStyle();
-    if (wxStyle & wxYES_NO)
+    if (m_dialogStyle & wxYES_NO)
     {
-#if !(defined(__SMARTPHONE__) && defined(__WXWINCE__))
-        if (wxStyle & wxCANCEL)
+        if (m_dialogStyle & wxCANCEL)
             msStyle = MB_YESNOCANCEL;
         else
-#endif // !(__SMARTPHONE__ && __WXWINCE__)
             msStyle = MB_YESNO;
 
-        if (wxStyle & wxNO_DEFAULT)
+        if (m_dialogStyle & wxNO_DEFAULT)
             msStyle |= MB_DEFBUTTON2;
     }
 
-    if (wxStyle & wxOK)
+    if (m_dialogStyle & wxOK)
     {
-        if (wxStyle & wxCANCEL)
+        if (m_dialogStyle & wxCANCEL)
             msStyle = MB_OKCANCEL;
         else
             msStyle = MB_OK;
     }
-    if (wxStyle & wxICON_EXCLAMATION)
+    if (m_dialogStyle & wxICON_EXCLAMATION)
         msStyle |= MB_ICONEXCLAMATION;
-    else if (wxStyle & wxICON_HAND)
+    else if (m_dialogStyle & wxICON_HAND)
         msStyle |= MB_ICONHAND;
-    else if (wxStyle & wxICON_INFORMATION)
+    else if (m_dialogStyle & wxICON_INFORMATION)
         msStyle |= MB_ICONINFORMATION;
-    else if (wxStyle & wxICON_QUESTION)
+    else if (m_dialogStyle & wxICON_QUESTION)
         msStyle |= MB_ICONQUESTION;
 
-    if ( wxStyle & wxSTAY_ON_TOP )
+    if ( m_dialogStyle & wxSTAY_ON_TOP )
         msStyle |= MB_TOPMOST;
 
     if (hWnd)

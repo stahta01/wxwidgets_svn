@@ -16,7 +16,7 @@
 // headers
 // ---------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dc.h"
 #endif
 
@@ -33,12 +33,12 @@
 #endif
 
 #include "wx/fontutil.h"
-#include "wx/encinfo.h"
 #include "wx/fontmap.h"
 #include "wx/mgl/private.h"
 #include "wx/log.h"
 
 #include <string.h>
+#include <math.h>
 #include <mgraph.hpp>
 
 
@@ -47,6 +47,16 @@
 // constants
 //-----------------------------------------------------------------------------
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+const double mm2inches      = 0.0393700787402;
+const double inches2mm      = 25.4;
+const double mm2twips       = 56.6929133859;
+const double twips2mm       = 0.0176388888889;
+const double mm2pt          = 2.83464566929;
+const double pt2mm          = 0.352777777778;
 const double RAD2DEG        = 180.0 / M_PI;
 
 
@@ -57,8 +67,8 @@ const double RAD2DEG        = 180.0 / M_PI;
 const ushort STIPPLE_wxDOT        = 0x5555/* - - - - - - - -*/;
 const ushort STIPPLE_wxLONG_DASH  = 0xF0F0/*    ----    ----*/;
 const ushort STIPPLE_wxSHORT_DASH = 0xCCCC/*--  --  --  --  */;
-const ushort STIPPLE_wxDOT_DASH   = 0x3939/*  ---  -  ---  -*/;
-const ushort STIPPLE_wxSOLID      = 0xFFFF/*----------------*/;
+const ushort STIPPLE_wxDOT_DASH   = 0x3939/*  ---  -  ---  -*/;        
+const ushort STIPPLE_wxSOLID      = 0xFFFF/*----------------*/;        
 
 #define PATTERN_ROW(b7,b6,b5,b4,b3,b2,b1,b0) \
             ((b7 << 7) | (b6 << 6) | (b5 << 5) | (b4 << 4) | \
@@ -158,14 +168,14 @@ wxDC::wxDC()
 
     m_penSelected = m_brushSelected = FALSE;
     m_downloadedPatterns[0] = m_downloadedPatterns[1] = FALSE;
-
+    
     m_mglFont = NULL;
 }
 
 
 wxDC::~wxDC()
 {
-    if (m_OwnsMGLDC)
+    if (m_OwnsMGLDC) 
         delete m_MGLDC;
 }
 
@@ -175,11 +185,11 @@ void wxDC::SetMGLDC(MGLDevCtx *mgldc, bool OwnsMGLDC)
         delete m_MGLDC;
     m_MGLDC = mgldc;
     m_OwnsMGLDC = OwnsMGLDC;
-    m_ok = TRUE;
+	m_ok = TRUE;
 
     if ( !m_globalClippingRegion.IsNull() )
         SetClippingRegion(m_globalClippingRegion);
-
+    
     InitializeMGLDC();
 }
 
@@ -233,9 +243,9 @@ void wxDC::DoSetClippingRegionAsRegion(const wxRegion& region)
         DestroyClippingRegion();
         return;
     }
-
+   
     wxRegion rg(region);
-
+    
     // check if the DC is scaled or moved, and if yes, then
     // convert rg to device coordinates:
     if ( m_deviceOriginX != 0 || m_deviceOriginY != 0 ||
@@ -243,16 +253,16 @@ void wxDC::DoSetClippingRegionAsRegion(const wxRegion& region)
          XLOG2DEVREL(500) != 500 || YLOG2DEVREL(500) != 500 )
     {
         region_t *mrg = rg.GetMGLRegion().rgnPointer();
-        span_t *s;
-        segment_t *p;
-        for (s = mrg->spans; s; s = s->next)
+	    span_t *s;
+	    segment_t *p;
+	    for (s = mrg->spans; s; s = s->next) 
         {
-            s->y = YLOG2DEV(s->y);
-            for (p = s->seg; p; p = p->next)
-                p->x = XLOG2DEV(p->x);
+		    s->y = YLOG2DEV(s->y);
+		    for (p = s->seg; p; p = p->next)
+			    p->x = XLOG2DEV(p->x);
         }
     }
-
+    
     if ( !m_currentClippingRegion.IsNull() )
         m_currentClippingRegion.Intersect(rg);
     else
@@ -267,7 +277,7 @@ void wxDC::DoSetClippingRegionAsRegion(const wxRegion& region)
 void wxDC::DestroyClippingRegion()
 {
     wxCHECK_RET( Ok(), wxT("invalid dc") );
-
+    
     if ( !m_globalClippingRegion.IsNull() )
     {
         m_MGLDC->setClipRegion(m_globalClippingRegion.GetMGLRegion());
@@ -277,7 +287,7 @@ void wxDC::DestroyClippingRegion()
     else
     {
         m_MGLDC->setClipRect(MGLRect(0, 0, m_MGLDC->sizex()+1, m_MGLDC->sizey()+1));
-        ResetClipping();
+        m_clipping = FALSE;
         m_currentClippingRegion.Clear();
     }
 }
@@ -322,7 +332,7 @@ void wxDC::Clear()
     }
 }
 
-extern bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y,
+extern bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y, 
                           const wxColour & col, int style);
 
 bool wxDC::DoFloodFill(wxCoord x, wxCoord y,
@@ -336,7 +346,7 @@ bool wxDC::DoGetPixel(wxCoord x, wxCoord y, wxColour *col) const
     wxCHECK_MSG( col, FALSE, _T("NULL colour parameter in wxDC::GetPixel"));
 
     uchar r, g, b;
-    m_MGLDC->unpackColorFast(m_MGLDC->getPixel(XLOG2DEV(x), YLOG2DEV(y)),
+    m_MGLDC->unpackColorFast(m_MGLDC->getPixel(XLOG2DEV(x), YLOG2DEV(y)), 
                              r, g, b);
     col->Set(r, g, b);
     return TRUE;
@@ -352,7 +362,7 @@ void wxDC::DoCrossHair(wxCoord x, wxCoord y)
         int h = 0;
         GetSize(&w, &h);
         m_MGLDC->makeCurrent(); // will go away with MGL6.0
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
         wxCoord xx = XLOG2DEV(x);
         wxCoord yy = YLOG2DEV(y);
@@ -370,9 +380,9 @@ void wxDC::DoDrawLine(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2)
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
         m_MGLDC->makeCurrent(); // will go away with MGL6.0
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
-        m_MGLDC->lineExt(XLOG2DEV(x1) + m_penOfsX, YLOG2DEV(y1) + m_penOfsY,
+        m_MGLDC->lineExt(XLOG2DEV(x1) + m_penOfsX, YLOG2DEV(y1) + m_penOfsY, 
                       XLOG2DEV(x2) + m_penOfsX, YLOG2DEV(y2) + m_penOfsY,FALSE);
         CalcBoundingBox(x1, y1);
         CalcBoundingBox(x2, y2);
@@ -426,17 +436,17 @@ void wxDC::DoDrawArc(wxCoord x1, wxCoord y1,
     m_MGLDC->makeCurrent(); // will go away with MGL6.0
     if ( m_brush.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_brushSelected )
+        if ( !m_brushSelected ) 
             SelectBrush();
         m_MGLDC->fillEllipseArc(xxc, yyc, r, r, alpha1, alpha2);
-    }
+    }    
 
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
          SelectPen();
         m_MGLDC->ellipseArc(xxc + m_penOfsX, yyc + m_penOfsY, r, r, alpha1, alpha2);
-    }
+    }    
 
     CalcBoundingBox(xc - r, yc - r);
     CalcBoundingBox(xc + r, yc + r);
@@ -449,7 +459,7 @@ void wxDC::DoDrawPoint(wxCoord x, wxCoord y)
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
         m_MGLDC->makeCurrent(); // will go away with MGL6.0
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
         m_MGLDC->pixel(XLOG2DEV(x), YLOG2DEV(y));
         CalcBoundingBox(x, y);
@@ -460,9 +470,9 @@ void wxDC::DoDrawPolygon(int n, wxPoint points[], wxCoord xoffset, wxCoord yoffs
 {
     wxCHECK_RET( Ok(), wxT("invalid dc") );
 
-    wxCoord xxoffset = XLOG2DEVREL(xoffset),
+    wxCoord xxoffset = XLOG2DEVREL(xoffset), 
             yyoffset = YLOG2DEVREL(yoffset);
-    MGLPoint *cpoints = new MGLPoint[n+1];
+    MGLPoint *cpoints = new MGLPoint[n+1];   
     for (int i = 0; i < n; i++)
     {
         CalcBoundingBox(points[i].x + xoffset, points[i].y + yoffset);
@@ -481,7 +491,7 @@ void wxDC::DoDrawPolygon(int n, wxPoint points[], wxCoord xoffset, wxCoord yoffs
 
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
         if (m_penOfsX != 0 || m_penOfsY != 0)
         {
@@ -505,7 +515,7 @@ void wxDC::DoDrawLines(int n, wxPoint points[], wxCoord xoffset, wxCoord yoffset
     {
         MGLPoint *cpoints = new MGLPoint[n];
         m_MGLDC->makeCurrent(); // will go away with MGL6.0
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
         for (int i = 0; i < n; i++)
         {
@@ -529,33 +539,33 @@ void wxDC::DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
 
     if ( ww == 0 || hh == 0 ) return;
 
-    if ( ww < 0 )
+    if ( ww < 0 ) 
     {
-        ww = -ww;
+        ww = -ww; 
         xx = xx - ww;
     }
-    if ( hh < 0 )
+    if ( hh < 0 ) 
     {
-        hh = -hh;
-        yy = yy - hh;
+        hh = -hh; 
+        yy = yy - hh; 
     }
 
     m_MGLDC->makeCurrent(); // will go away with MGL6.0
     if ( m_brush.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_brushSelected )
+        if ( !m_brushSelected ) 
             SelectBrush();
         m_MGLDC->fillRect(xx, yy, xx + ww, yy + hh);
-    }
+    }    
 
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
 
-        m_MGLDC->rect(xx + m_penOfsX, yy + m_penOfsY,
+        m_MGLDC->rect(xx + m_penOfsX, yy + m_penOfsY, 
                       xx + ww + m_penOfsX, yy + hh + m_penOfsY);
-    }
+    }    
 
     CalcBoundingBox(x, y);
     CalcBoundingBox(x + width, y + height);
@@ -565,7 +575,7 @@ void wxDC::DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord h
 {
     wxCHECK_RET( Ok(), wxT("invalid dc") );
 
-    if ( radius < 0.0 )
+    if ( radius < 0.0 ) 
         radius = -radius * ((width < height) ? width : height);
 
     wxCoord xx = XLOG2DEV(x);
@@ -575,15 +585,15 @@ void wxDC::DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord h
     wxCoord rr = XLOG2DEVREL((wxCoord)radius);
 
     // CMB: handle -ve width and/or height
-    if ( ww < 0 )
+    if ( ww < 0 ) 
     {
-        ww = -ww;
-        xx = xx - ww;
+        ww = -ww; 
+        xx = xx - ww; 
     }
-    if ( hh < 0 )
-    {
-        hh = -hh;
-        yy = yy - hh;
+    if ( hh < 0 ) 
+    { 
+        hh = -hh; 
+        yy = yy - hh; 
     }
 
     // CMB: if radius is zero use DrawRectangle() instead to avoid
@@ -607,7 +617,7 @@ void wxDC::DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord h
     m_MGLDC->makeCurrent(); // will go away with MGL6.0
     if ( m_brush.GetStyle() != wxTRANSPARENT )
     {
-        if (!m_brushSelected)
+        if (!m_brushSelected) 
             SelectBrush();
         m_MGLDC->fillRect(xx+rr, yy, xx+ww-rr, yy+hh);
         m_MGLDC->fillRect(xx, yy+rr, xx+ww, yy+hh-rr);
@@ -615,20 +625,20 @@ void wxDC::DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord h
         m_MGLDC->fillEllipseArc(xx+ww-rr, yy+rr, rr, rr, 0, 90);
         m_MGLDC->fillEllipseArc(xx+rr, yy+hh-rr, rr, rr, 180, 270);
         m_MGLDC->fillEllipseArc(xx+ww-rr, yy+hh-rr, rr, rr, 270, 0);
-    }
+    }   
 
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
         xx += m_penOfsX;
         yy += m_penOfsY;
-        m_MGLDC->line(xx+rr+1, yy, xx+ww-rr, yy);
+        m_MGLDC->line(xx+rr+1, yy, xx+ww-rr, yy);       
         m_MGLDC->ellipseArc(xx+ww-rr, yy+rr, rr, rr, 0, 90);
         m_MGLDC->line(xx+ww, yy+rr+1, xx+ww, yy+hh-rr);
         m_MGLDC->ellipseArc(xx+ww-rr, yy+hh-rr, rr, rr, 270, 0);
         m_MGLDC->line(xx+ww-rr, yy+hh, xx+rr+1, yy+hh);
-        m_MGLDC->ellipseArc(xx+rr, yy+hh-rr, rr, rr, 180, 270);
+        m_MGLDC->ellipseArc(xx+rr, yy+hh-rr, rr, rr, 180, 270);       
         m_MGLDC->line(xx, yy+hh-rr, xx, yy+rr+1);
         m_MGLDC->ellipseArc(xx+rr, yy+rr, rr, rr, 90, 180);
     }
@@ -651,13 +661,13 @@ void wxDC::DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord height)
             SelectBrush();
         MGLRect rect(XLOG2DEV(x), YLOG2DEV(y), XLOG2DEV(x2), YLOG2DEV(y2));
         m_MGLDC->fillEllipse(rect);
-    }
+    }    
 
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
-        MGLRect rect(XLOG2DEV(x) + m_penOfsX, YLOG2DEV(y) + m_penOfsY,
+        MGLRect rect(XLOG2DEV(x) + m_penOfsX, YLOG2DEV(y) + m_penOfsY, 
                      XLOG2DEV(x2) + m_penOfsX, YLOG2DEV(y2) + m_penOfsY);
         m_MGLDC->ellipse(rect);
     }
@@ -679,16 +689,16 @@ void wxDC::DoDrawEllipticArc(wxCoord x,wxCoord y,wxCoord w,wxCoord h,double sa,d
         if (!m_brushSelected) SelectBrush();
         MGLRect rect(XLOG2DEV(x), YLOG2DEV(y), XLOG2DEV(x2), YLOG2DEV(y2));
         m_MGLDC->fillEllipseArc(rect, (int)sa, (int)ea);
-    }
+    }    
 
     if ( m_pen.GetStyle() != wxTRANSPARENT )
     {
-        if ( !m_penSelected )
+        if ( !m_penSelected ) 
             SelectPen();
-        MGLRect rect(XLOG2DEV(x) + m_penOfsX, YLOG2DEV(y) + m_penOfsY,
+        MGLRect rect(XLOG2DEV(x) + m_penOfsX, YLOG2DEV(y) + m_penOfsY, 
                      XLOG2DEV(x2) + m_penOfsX, YLOG2DEV(y2) + m_penOfsY);
         m_MGLDC->ellipseArc(rect, (int)sa, (int)ea);
-    }
+    }    
 
     CalcBoundingBox(x, y);
     CalcBoundingBox(x2, y2);
@@ -715,7 +725,7 @@ bool wxDC::SelectMGLFont()
 
         m_mglFont = m_font.GetMGLfont_t(scale, antialiased);
         wxCHECK_MSG( m_mglFont, FALSE, wxT("invalid font") );
-
+        
         m_MGLDC->useFont(m_mglFont);
         wxLogTrace("mgl_font", "useFont(%p)", m_mglFont);
 
@@ -747,7 +757,7 @@ void wxDC::DrawAnyText(const wxString& text, wxCoord x, wxCoord y)
     // Render the text:
     wxCoord xx = XLOG2DEV(x);
     wxCoord yy = YLOG2DEV(y);
-
+    
     m_MGLDC->setLineStyle(MGL_LINE_STIPPLE);
     m_MGLDC->setLineStipple(0xFFFF);
     m_MGLDC->setPenSize(1, 1);
@@ -759,9 +769,9 @@ void wxDC::DrawAnyText(const wxString& text, wxCoord x, wxCoord y)
     const char *c_text = text.c_str();
 #endif
 
-#if 1
-    // FIXME_MGL - this is a temporary hack in absence of proper
-    //             implementation of solid text background in MGL. Once
+#if 1 
+    // FIXME_MGL - this is a temporary hack in absence of proper 
+    //             implementation of solid text background in MGL. Once 
     //             the bug in MGL is fixed, this code should be nuked
     //             immediately. Note that the code is not 100% correct;
     //             it only works with wxCOPY logical function
@@ -779,9 +789,9 @@ void wxDC::DrawAnyText(const wxString& text, wxCoord x, wxCoord y)
             m_textForegroundColour.Green(), m_textForegroundColour.Blue()));
     m_MGLDC->setBackColor(m_MGLDC->packColorFast(m_textBackgroundColour.Red(),
             m_textBackgroundColour.Green(), m_textBackgroundColour.Blue()));
-
+    
     m_MGLDC->drawStr(xx, yy, c_text);
-
+    
     // Render underline:
     if ( m_font.GetUnderlined() )
     {
@@ -807,7 +817,7 @@ void wxDC::DoDrawRotatedText(const wxString& text,
                              double angle)
 {
     m_MGLDC->makeCurrent(); // will go away with MGL6.0
-
+    
     if ( angle == 0 )
     {
         DoDrawText(text, x, y);
@@ -825,9 +835,9 @@ void wxDC::DoDrawRotatedText(const wxString& text,
         wxFAIL_MSG(wxT("wxMGL only supports rotated text with angle 0,90,180 or 270"));
         return;
     }
-
+    
     DrawAnyText(text, x, y);
-
+    
     // Restore default:
     m_MGLDC->setTextDirection(MGL_RIGHT_DIR);
 }
@@ -874,61 +884,61 @@ void wxDC::SelectMGLFatPen(int style, int flag)
     // switch between pens and brushes, we take advantage of MGL's ability
     // to have multiple (pix)pattern_t's loaded. We always download pen
     // to 0th slot and brush to 1st slot.
-    if ( flag == wxMGL_SELECT_FROM_PEN )
+    if ( flag == wxMGL_SELECT_FROM_PEN ) 
         slot = 0;
     else
         slot = 1;
 
-    // compute pen's width:
+    // compute pen's width:    
     if ( m_pen.GetWidth() <= 1 )
     {
         wx = wy = 1;
         m_penOfsX = m_penOfsY = 0;
     }
     else
-    {
+    { 
         wx = (int)(0.5 + fabs((double) XLOG2DEVREL(m_pen.GetWidth())));
         wy = (int)(0.5 + fabs((double) YLOG2DEVREL(m_pen.GetWidth())));
         m_penOfsX = -wx/2;
         m_penOfsY = -wy/2;
     }
-
+    
     // find pen's type:
     penstyle = MGL_BITMAP_TRANSPARENT;
     switch (style)
     {
-        case wxBDIAGONAL_HATCH:  pattern = &PATTERN_wxBDIAGONAL_HATCH;
-                                 penstyle = MGL_BITMAP_TRANSPARENT;
+        case wxBDIAGONAL_HATCH:  pattern = &PATTERN_wxBDIAGONAL_HATCH;  
+                                 penstyle = MGL_BITMAP_TRANSPARENT; 
                                  break;
-        case wxCROSSDIAG_HATCH:  pattern = &PATTERN_wxCROSSDIAG_HATCH;
-                                 penstyle = MGL_BITMAP_TRANSPARENT;
+        case wxCROSSDIAG_HATCH:  pattern = &PATTERN_wxCROSSDIAG_HATCH;  
+                                 penstyle = MGL_BITMAP_TRANSPARENT; 
                                  break;
         case wxFDIAGONAL_HATCH:  pattern = &PATTERN_wxFDIAGONAL_HATCH;
-                                 penstyle = MGL_BITMAP_TRANSPARENT;
+                                 penstyle = MGL_BITMAP_TRANSPARENT; 
                                  break;
         case wxCROSS_HATCH:      pattern = &PATTERN_wxCROSS_HATCH;
-                                 penstyle = MGL_BITMAP_TRANSPARENT;
+                                 penstyle = MGL_BITMAP_TRANSPARENT; 
                                  break;
         case wxHORIZONTAL_HATCH: pattern = &PATTERN_wxHORIZONTAL_HATCH;
-                                 penstyle = MGL_BITMAP_TRANSPARENT;
+                                 penstyle = MGL_BITMAP_TRANSPARENT; 
                                  break;
         case wxVERTICAL_HATCH:   pattern = &PATTERN_wxVERTICAL_HATCH;
-                                 penstyle = MGL_BITMAP_TRANSPARENT;
+                                 penstyle = MGL_BITMAP_TRANSPARENT; 
                                  break;
-
+        
         case wxSTIPPLE:
-            if ( flag == wxMGL_SELECT_FROM_PEN )
+            if ( flag == wxMGL_SELECT_FROM_PEN ) 
                 pixPattern = (pixpattern24_t*) m_pen.GetPixPattern();
             else
                 pixPattern = (pixpattern24_t*) m_brush.GetPixPattern();
             penstyle = MGL_PIXMAP;
             break;
-
+            
         case wxSTIPPLE_MASK_OPAQUE:
             pattern = (pattern_t*) m_brush.GetMaskPattern();
             penstyle = MGL_BITMAP_OPAQUE;
             break;
-
+            
         case wxSOLID:
         default:
             penstyle = MGL_BITMAP_SOLID; break;
@@ -945,14 +955,14 @@ void wxDC::SelectMGLFatPen(int style, int flag)
         }
         m_MGLDC->usePenBitmapPattern(slot);
     }
-
+    
     if ( pixPattern )
     {
         if ( !m_downloadedPatterns[slot] )
         {
             pixpattern_t pix;
             int x, y, c;
-
+            
             switch (GetDepth())
             {
                 case 8:
@@ -995,7 +1005,7 @@ void wxDC::SelectMGLFatPen(int style, int flag)
         }
         m_MGLDC->usePenPixmapPattern(slot);
     }
-
+    
     m_MGLDC->setLineStyle(MGL_LINE_PENSTYLE);
     m_MGLDC->setPenStyle(penstyle);
     m_MGLDC->setPenSize(wy, wx);
@@ -1020,7 +1030,7 @@ void wxDC::SelectPen()
         case wxDOT_DASH:
             SelectMGLStipplePen(m_pen.GetStyle());
             break;
-
+            
         case wxBDIAGONAL_HATCH:
         case wxCROSSDIAG_HATCH:
         case wxFDIAGONAL_HATCH:
@@ -1053,7 +1063,7 @@ void wxDC::SelectBrush()
 
     wxColour fg, bg;
     m_MGLDC->makeCurrent(); // will go away with MGL6.0
-
+    
     if ( m_brush.GetStyle() == wxSTIPPLE_MASK_OPAQUE )
     {
         fg = m_textForegroundColour;
@@ -1094,7 +1104,7 @@ void wxDC::SetBrush(const wxBrush& brush)
 void wxDC::SetPalette(const wxPalette& palette)
 {
     wxCHECK_RET( Ok(), wxT("invalid dc") );
-
+    
     if ( palette == wxNullPalette )
     {
         if ( m_oldPalette.Ok() )
@@ -1108,7 +1118,7 @@ void wxDC::SetPalette(const wxPalette& palette)
     m_palette = palette;
 
     int cnt = m_palette.GetColoursCount();
-    palette_t *pal = m_palette.GetMGLpalette_t();
+    palette_t *pal = m_palette.GetMGLpalette_t();   
     m_MGLDC->setPalette(pal, cnt, 0);
     m_MGLDC->realizePalette(cnt, 0, TRUE);
 }
@@ -1227,18 +1237,18 @@ void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
                            wxFont *theFont) const
 {
     wxFont oldFont;
-
+    
     if ( theFont != NULL )
     {
         oldFont = m_font;
         wxConstCast(this, wxDC)->SetFont(*theFont);
     }
-
+    
     wxCurrentDCSwitcher switcher(m_MGLDC);
     if ( !wxConstCast(this, wxDC)->SelectMGLFont() ) return;
 
     if ( x )
-        // VS: YDEV is corrent, it should *not* be XDEV, because font's are
+        // VS: YDEV is corrent, it should *not* be XDEV, because font's are 
         //     only scaled according to m_scaleY
         *x = YDEV2LOGREL(m_MGLDC->textWidth(string.c_str()));
     if ( y )
@@ -1262,14 +1272,14 @@ void wxDC::ComputeScaleAndOrigin()
 {
     double newX = m_logicalScaleX * m_userScaleX;
     double newY = m_logicalScaleY * m_userScaleY;
-
+    
     // make sure font will be reloaded before drawing:
     if ( newY != m_scaleY )
         m_mglFont = NULL;
     // make sure m_penOfs{X,Y} will be reevaluated before drawing:
     if ( newY != m_scaleY || newX != m_scaleX )
         m_penSelected = FALSE;
-
+    
     m_scaleX = newX, m_scaleY = newY;
 }
 
@@ -1398,7 +1408,7 @@ void wxDC::DoGetSizeMM(int *width, int *height) const
 
 wxSize wxDC::GetPPI() const
 {
-    return wxSize(int(double(m_mm_to_pix_x) * inches2mm),
+    return wxSize(int(double(m_mm_to_pix_x) * inches2mm), 
                   int(double(m_mm_to_pix_y) * inches2mm));
 }
 
@@ -1415,7 +1425,7 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
 {
     wxCHECK_MSG( Ok(), FALSE, wxT("invalid dc") );
     wxCHECK_MSG( source, FALSE, wxT("invalid source dc") );
-
+    
     // transform the source DC coords to the device ones
     xsrc = source->LogicalToDeviceX(xsrc);
     ysrc = source->LogicalToDeviceY(ysrc);
@@ -1449,7 +1459,7 @@ bool wxDC::DoBlit(wxCoord xdest, wxCoord ydest,
     else
     {
         m_MGLDC->makeCurrent(); // will go away with MGL6.0
-        m_MGLDC->bitBlt(*source->GetMGLDC(),
+        m_MGLDC->bitBlt(*source->GetMGLDC(), 
                         xsrc, ysrc, xsrc + ww, ysrc + hh,
                         xx, yy, LogicalFunctionToMGLRop(rop));
     }
@@ -1476,8 +1486,8 @@ void wxDC::DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y)
 
 
 static inline void DoBitBlt(const wxBitmap& src, MGLDevCtx *dst,
-                            int sx, int sy, int sw, int sh,
-                            int dx, int dy, int dw, int dh,
+                            int sx, int sy, int sw, int sh, 
+                            int dx, int dy, int dw, int dh, 
                             int rop, bool useStretching, bool putSection)
 {
     bitmap_t *bmp = src.GetMGLbitmap_t();
@@ -1493,12 +1503,12 @@ static inline void DoBitBlt(const wxBitmap& src, MGLDevCtx *dst,
         if (!putSection)
             dst->stretchBitmap(dx, dy, dx + dw, dy + dh, bmp, rop);
         else
-            dst->stretchBitmapSection(sx, sy, sx + sw, sy + sh,
+            dst->stretchBitmapSection(sx, sy, sx + sw, sy + sh, 
                                       dx, dy, dx + dw, dy + dh, bmp, rop);
     }
 }
 
-void wxDC::DoDrawSubBitmap(const wxBitmap &bmp,
+void wxDC::DoDrawSubBitmap(const wxBitmap &bmp, 
                            wxCoord x, wxCoord y, wxCoord w, wxCoord h,
                            wxCoord destx, wxCoord desty, int rop, bool useMask)
 {
@@ -1512,9 +1522,9 @@ void wxDC::DoDrawSubBitmap(const wxBitmap &bmp,
     wxCoord dy = YLOG2DEV(desty);
     wxCoord dw = XLOG2DEVREL(w);
     wxCoord dh = YLOG2DEVREL(h);
-
+    
     m_MGLDC->makeCurrent(); // will go away with MGL6.0
-
+    
     bool useStretching = ((w != dw) || (h != dh));
     bool putSection = (w != bmp.GetWidth() || h != bmp.GetHeight());
     MGL_writeModeType mglRop = (MGL_writeModeType)LogicalFunctionToMGLRop(rop);
@@ -1530,29 +1540,29 @@ void wxDC::DoDrawSubBitmap(const wxBitmap &bmp,
     if ( useMask && bmp.GetMask() )
     {
         // Since MGL does not support masks directly (in MGL, mask is handled
-        // in same way as in wxImage, i.e. there is one "key" color), we
+        // in same way as in wxImage, i.e. there is one "key" color), we 
         // simulate masked bitblt in 6 steps (same as in MSW):
         //
-        // 1. Create a temporary bitmap and copy the destination area into it.
-        // 2. Copy the source area into the temporary bitmap using the
+        // 1. Create a temporary bitmap and copy the destination area into it. 
+        // 2. Copy the source area into the temporary bitmap using the 
         //    specified logical function.
-        // 3. Set the masked area in the temporary bitmap to BLACK by ANDing
-        //    the mask bitmap with the temp bitmap with the foreground colour
+        // 3. Set the masked area in the temporary bitmap to BLACK by ANDing 
+        //    the mask bitmap with the temp bitmap with the foreground colour 
         //    set to WHITE and the bg colour set to BLACK.
         // 4. Set the unmasked area in the destination area to BLACK by
-        //    ANDing the mask bitmap with the destination area with the
+        //    ANDing the mask bitmap with the destination area with the 
         //    foreground colour set to BLACK and the background colour set
-        //    to WHITE.
-        // 5. OR the temporary bitmap with the destination area.
-        // 6. Delete the temporary bitmap.
-        //
-        // This sequence of operations ensures that the source's transparent
+        //    to WHITE.  
+        // 5. OR the temporary bitmap with the destination area.  
+        // 6. Delete the temporary bitmap. 
+        // 
+        // This sequence of operations ensures that the source's transparent 
         // area need not be black, and logical functions are supported.
 
         wxBitmap *mask = bmp.GetMask()->GetBitmap();
 
         MGLMemoryDC *temp;
-
+        
         if ( GetDepth() <= 8 )
         {
             temp = new MGLMemoryDC(dw, dh, GetDepth(), NULL);
@@ -1566,28 +1576,28 @@ void wxDC::DoDrawSubBitmap(const wxBitmap &bmp,
             m_MGLDC->getPixelFormat(pf);
             temp = new MGLMemoryDC(dw, dh, GetDepth(), &pf);
         }
-
+        
         wxCHECK_RET( temp->isValid(), wxT("cannot create temporary dc") );
-
+        
         temp->bitBlt(*m_MGLDC, dx, dy, dx + dw, dy + dh, 0, 0, MGL_REPLACE_MODE);
 
-        DoBitBlt(bmp, temp, x, y, w, h, 0, 0, dw, dh, mglRop,
+        DoBitBlt(bmp, temp, x, y, w, h, 0, 0, dw, dh, mglRop, 
                  useStretching, putSection);
 
         mask->SetMonoPalette(wxColour(0,0,0), wxColour(255,255,255));
-        DoBitBlt(*mask, temp, x, y, w, h, 0, 0, dw, dh, MGL_R2_MASKSRC,
+        DoBitBlt(*mask, temp, x, y, w, h, 0, 0, dw, dh, MGL_R2_MASKSRC, 
                  useStretching, putSection);
-        DoBitBlt(*mask, m_MGLDC, x, y, w, h, dx, dy, dw, dh, MGL_R2_MASKNOTSRC,
+        DoBitBlt(*mask, m_MGLDC, x, y, w, h, dx, dy, dw, dh, MGL_R2_MASKNOTSRC, 
                  useStretching, putSection);
 
         m_MGLDC->bitBlt(*temp, 0, 0, dw, dh, dx, dy, MGL_OR_MODE);
-
+        
         delete temp;
     }
-
+    
     else
     {
-        DoBitBlt(bmp, m_MGLDC, x, y, w, h, dx, dy, dw, dh, mglRop,
+        DoBitBlt(bmp, m_MGLDC, x, y, w, h, dx, dy, dw, dh, mglRop, 
                  useStretching, putSection);
     }
 }

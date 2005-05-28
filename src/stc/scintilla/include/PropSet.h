@@ -39,14 +39,12 @@ protected:
 		return ret;
 	}
 	static bool IncludesVar(const char *value, const char *key);
-
 public:
 	PropSet *superPS;
 	PropSet();
 	~PropSet();
 	void Set(const char *key, const char *val, int lenKey=-1, int lenVal=-1);
 	void Set(const char *keyVal);
-	void Unset(const char *key, int lenKey=-1);
 	void SetMultiple(const char *s);
 	SString Get(const char *key);
 	SString GetExpanded(const char *key);
@@ -58,11 +56,6 @@ public:
 	char *ToString();	// Caller must delete[] the return value
 	bool GetFirst(char **key, char **val);
 	bool GetNext(char **key, char **val);
-
-private:
-	// copy-value semantics not implemented	
-	PropSet(const PropSet &copy);
-	void operator=(const PropSet &assign);
 };
 
 /**
@@ -87,21 +80,14 @@ public:
 	char *Allocate(int size);
 	void SetFromAllocated();
 	bool InList(const char *s);
-	const char *GetNearestWord(const char *wordStart, int searchLen,
-		bool ignoreCase = false, SString wordCharacters="", int wordIndex = -1);
-	char *GetNearestWords(const char *wordStart, int searchLen,
-		bool ignoreCase=false, char otherSeparator='\0', bool exactLen=false);
+	const char *GetNearestWord(const char *wordStart, int searchLen = -1,
+		bool ignoreCase = false, SString wordCharacters="");
+	char *GetNearestWords(const char *wordStart, int searchLen=-1,
+		bool ignoreCase=false, char otherSeparator='\0');
 };
 
 inline bool IsAlphabetic(unsigned int ch) {
 	return ((ch >= 'A') && (ch <= 'Z')) || ((ch >= 'a') && (ch <= 'z'));
 }
-
-
-#ifdef _MSC_VER
-// Visual C++ doesn't like the private copy idiom for disabling
-// the default copy constructor and operator=, but it's fine.
-#pragma warning(disable: 4511 4512)
-#endif
 
 #endif

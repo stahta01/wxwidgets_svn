@@ -7,12 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "statbox.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
+#include "wx/defs.h"
 
 #if wxUSE_STATBOX
 
@@ -66,7 +65,9 @@ bool wxStaticBox::Create( wxWindow *parent,
 
     m_parent->DoAddChild( this );
 
-    PostCreation(size);
+    PostCreation();
+
+    InheritAttributes();
 
     // need to set non default alignment?
     gfloat xalign;
@@ -78,7 +79,9 @@ bool wxStaticBox::Create( wxWindow *parent,
         xalign = 0.0;
 
     if ( xalign )
-        gtk_frame_set_label_align(GTK_FRAME( m_widget ), xalign, 0.5);
+        gtk_frame_set_label_align(GTK_FRAME( m_widget ), xalign, 0.0);
+
+    Show( TRUE );
 
     return TRUE;
 }
@@ -91,19 +94,10 @@ void wxStaticBox::SetLabel( const wxString &label )
                          m_label.empty() ? (char *)NULL : (const char*) wxGTK_CONV( m_label ) );
 }
 
-void wxStaticBox::DoApplyWidgetStyle(GtkRcStyle *style)
+void wxStaticBox::ApplyWidgetStyle()
 {
-    gtk_widget_modify_style(m_widget, style);
-#ifdef __WXGTK20__
-    gtk_widget_modify_style(GTK_FRAME(m_widget)->label_widget, style);
-#endif
-}
-
-// static
-wxVisualAttributes
-wxStaticBox::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
-{
-    return GetDefaultAttributesFromGTKWidget(gtk_frame_new);
+    SetWidgetStyle();
+    gtk_widget_set_style( m_widget, m_widgetStyle );
 }
 
 #endif // wxUSE_STATBOX

@@ -11,7 +11,7 @@
 #ifndef __BMPBUTTONH__
 #define __BMPBUTTONH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -61,14 +61,13 @@ public:
     void NotFocus();
     void StartSelect();
     void EndSelect();
-    void DoApplyWidgetStyle(GtkRcStyle *style);
+    void ApplyWidgetStyle();
 
     bool         m_hasFocus:1;
     bool         m_isSelected:1;
 
 protected:
     virtual void OnSetBitmap();
-    virtual wxSize DoGetBestSize() const;
 
     void Init();
 

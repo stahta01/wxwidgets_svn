@@ -13,12 +13,9 @@
 // per-user file, which can be edited using a Windows-control-panel clone.
 // Also they should be documented better. Some are very MS Windows-ish.
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "settings.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/settings.h"
 #include "wx/gdicmn.h"
@@ -32,8 +29,6 @@
 #ifdef __VMS__
 #pragma message enable nosimpint
 #endif
-
-#include "wx/x11/privx.h"
 
 // To correctly read the resources from the database, we create a
 // sample widget. This has the application shell as the parent and
@@ -165,7 +160,7 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
     {
         case wxSYS_SYSTEM_FIXED_FONT:
         {
-            return wxFont(12, wxMODERN, wxNORMAL, wxNORMAL, false);
+            return wxFont(12, wxMODERN, wxNORMAL, wxNORMAL, FALSE);
             break;
         }
         case wxSYS_DEVICE_DEFAULT_FONT:
@@ -173,7 +168,7 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
         case wxSYS_DEFAULT_GUI_FONT:
         default:
         {
-            return wxFont(12, wxSWISS, wxNORMAL, wxNORMAL, false);
+            return wxFont(12, wxSWISS, wxNORMAL, wxNORMAL, FALSE);
             break;
         }
     }
@@ -182,59 +177,90 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
 }
 
 // Get a system metric, e.g. scrollbar size
-int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(win))
+int wxSystemSettingsNative::GetMetric(wxSystemMetric index)
 {
     int return_value = 0;
 
     switch ( index)
     {
-        case wxSYS_HSCROLL_Y:
-        case wxSYS_VSCROLL_X:
-            return 15;
-            
+        case wxSYS_MOUSE_BUTTONS:
+            // TODO
+        case wxSYS_BORDER_X:
+            // TODO
+        case wxSYS_BORDER_Y:
+            // TODO
+        case wxSYS_CURSOR_X:
+            // TODO
+        case wxSYS_CURSOR_Y:
+            // TODO
+        case wxSYS_DCLICK_X:
+            // TODO
+        case wxSYS_DCLICK_Y:
+            // TODO
+        case wxSYS_DRAG_X:
+            // TODO
+        case wxSYS_DRAG_Y:
+            // TODO
+        case wxSYS_EDGE_X:
+            // TODO
+        case wxSYS_EDGE_Y:
+            // TODO
+        case wxSYS_HSCROLL_ARROW_X:
+            // TODO
+        case wxSYS_HSCROLL_ARROW_Y:
+            // TODO
+        case wxSYS_HTHUMB_X:
+            // TODO
+        case wxSYS_ICON_X:
+            // TODO
+        case wxSYS_ICON_Y:
+            // TODO
+        case wxSYS_ICONSPACING_X:
+            // TODO
+        case wxSYS_ICONSPACING_Y:
+            // TODO
+        case wxSYS_WINDOWMIN_X:
+            // TODO
+        case wxSYS_WINDOWMIN_Y:
+            break;
         case wxSYS_SCREEN_X:
-            return_value = DisplayWidth( wxGlobalDisplay(), 0 );
+            return_value = DisplayWidth( (Display*)wxGetDisplay(), 0 );
             break;
         case wxSYS_SCREEN_Y:
-            return_value = DisplayHeight( wxGlobalDisplay(), 0 );
+            return_value = DisplayHeight( (Display*)wxGetDisplay(), 0 );
             break;
-
-        // TODO case wxSYS_MOUSE_BUTTONS:
-        // TODO case wxSYS_BORDER_X:
-        // TODO case wxSYS_BORDER_Y:
-        // TODO case wxSYS_CURSOR_X:
-        // TODO case wxSYS_CURSOR_Y:
-        // TODO case wxSYS_DCLICK_X:
-        // TODO case wxSYS_DCLICK_Y:
-        // TODO case wxSYS_DRAG_X:
-        // TODO case wxSYS_DRAG_Y:
-        // TODO case wxSYS_EDGE_X:
-        // TODO case wxSYS_EDGE_Y:
-        // TODO case wxSYS_HSCROLL_ARROW_X:
-        // TODO case wxSYS_HSCROLL_ARROW_Y:
-        // TODO case wxSYS_HTHUMB_X:
-        // TODO case wxSYS_ICON_X:
-        // TODO case wxSYS_ICON_Y:
-        // TODO case wxSYS_ICONSPACING_X:
-        // TODO case wxSYS_ICONSPACING_Y:
-        // TODO case wxSYS_WINDOWMIN_X:
-        // TODO case wxSYS_WINDOWMIN_Y:
-        // TODO case wxSYS_FRAMESIZE_X:
-        // TODO case wxSYS_FRAMESIZE_Y:
-        // TODO case wxSYS_SMALLICON_X:
-        // TODO case wxSYS_SMALLICON_Y:
-        // TODO case wxSYS_VSCROLL_ARROW_X:
-        // TODO case wxSYS_VSCROLL_ARROW_Y:
-        // TODO case wxSYS_VTHUMB_Y:
-        // TODO case wxSYS_CAPTION_Y:
-        // TODO case wxSYS_MENU_Y:
-        // TODO case wxSYS_NETWORK_PRESENT:
-        // TODO case wxSYS_PENWINDOWS_PRESENT:
-        // TODO case wxSYS_SHOW_SOUNDS:
-        // TODO case wxSYS_SWAP_BUTTONS:
-
+        case wxSYS_FRAMESIZE_X:
+            // TODO
+        case wxSYS_FRAMESIZE_Y:
+            // TODO
+        case wxSYS_SMALLICON_X:
+            // TODO
+        case wxSYS_SMALLICON_Y:
+            // TODO
+        case wxSYS_HSCROLL_Y:
+            // TODO
+        case wxSYS_VSCROLL_X:
+            // TODO
+        case wxSYS_VSCROLL_ARROW_X:
+            // TODO
+        case wxSYS_VSCROLL_ARROW_Y:
+            // TODO
+        case wxSYS_VTHUMB_Y:
+            // TODO
+        case wxSYS_CAPTION_Y:
+            // TODO
+        case wxSYS_MENU_Y:
+            // TODO
+        case wxSYS_NETWORK_PRESENT:
+            // TODO
+        case wxSYS_PENWINDOWS_PRESENT:
+            // TODO
+        case wxSYS_SHOW_SOUNDS:
+            // TODO
+        case wxSYS_SWAP_BUTTONS:
+            // TODO
         default:
-            return_value = -1; // unsuported metric
+            ;
     }
 
     return return_value;
@@ -246,9 +272,9 @@ bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
     {
         case wxSYS_CAN_ICONIZE_FRAME:
         case wxSYS_CAN_DRAW_FRAME_DECORATIONS:
-            return true;
+            return TRUE;
 
         default:
-            return false;
+            return FALSE;
     }
 }

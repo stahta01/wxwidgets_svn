@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        erase.cpp
-// Purpose:     Erase wxWidgets sample
+// Purpose:     Erase wxWindows sample
 // Author:      Robert Roebling
 // Modified by:
 // Created:     04/01/98
@@ -18,8 +18,8 @@
 // ----------------------------------------------------------------------------
 
 #if defined(__GNUG__) && !defined(__APPLE__)
-    #pragma implementation
-    #pragma interface
+    #pragma implementation "erase.cpp"
+    #pragma interface "erase.cpp"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -30,7 +30,7 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers)
+// need because it includes almost all "standard" wxWindows headers)
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
@@ -54,51 +54,34 @@ public:
 };
 
 
-class MyCanvas : public wxScrolledWindow
-{
-public:
-    MyCanvas( wxFrame *parent );
-
-    void UseBuffer(bool useBuffer) { m_useBuffer = useBuffer; Refresh(); }
-    void EraseBg(bool eraseBg) { m_eraseBg = eraseBg; Refresh(); }
-
-private:
-    void OnPaint( wxPaintEvent &event );
-    void OnChar( wxKeyEvent &event );
-    void OnEraseBackground( wxEraseEvent &event );
-
-    void DoPaint(wxDC& dc);
-
-
-    wxBitmap    m_bitmap;
-    wxString    m_text;
-
-    // use wxMemoryDC in OnPaint()?
-    bool m_useBuffer;
-
-    // paint custom background in OnEraseBackground()?
-    bool m_eraseBg;
-
-
-    DECLARE_EVENT_TABLE()
-};
-
 class MyFrame : public wxFrame
 {
 public:
-    MyFrame();
+    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 
-    void OnUseBuffer(wxCommandEvent& event);
-    void OnEraseBg(wxCommandEvent& event);
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
 
 private:
-    MyCanvas *m_canvas;
-
     DECLARE_EVENT_TABLE()
 };
 
+
+class MyCanvas : public wxScrolledWindow
+{
+public:
+    MyCanvas( MyFrame *parent );
+
+    void OnPaint( wxPaintEvent &event );
+    void OnChar( wxKeyEvent &event );
+    void OnEraseBackground( wxEraseEvent &event );
+
+    wxBitmap    m_bitmap;
+    wxString    m_text;
+
+private:
+    DECLARE_EVENT_TABLE()
+};
 
 // ----------------------------------------------------------------------------
 // constants
@@ -107,10 +90,7 @@ private:
 enum
 {
     // menu items
-    Erase_Menu_UseBuffer = 100,
-    Erase_Menu_EraseBg,
-    Erase_Menu_Exit = wxID_EXIT,
-    Erase_Menu_About = wxID_ABOUT
+    ID_MENU_QUIT = 1,
 };
 
 
@@ -122,11 +102,12 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame;
+    MyFrame *frame = new MyFrame(_T("Erase sample"),
+                                 wxPoint(50, 50), wxSize(450, 340));
 
-    frame->Show(true);
+    frame->Show(TRUE);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -134,28 +115,22 @@ bool MyApp::OnInit()
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(Erase_Menu_UseBuffer,  MyFrame::OnUseBuffer)
-    EVT_MENU(Erase_Menu_EraseBg,  MyFrame::OnEraseBg)
-    EVT_MENU(Erase_Menu_Exit,  MyFrame::OnQuit)
-    EVT_MENU(Erase_Menu_About, MyFrame::OnAbout)
+    EVT_MENU(ID_MENU_QUIT,  MyFrame::OnQuit)
+    EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
 END_EVENT_TABLE()
 
 // frame constructor
-MyFrame::MyFrame()
-       : wxFrame(NULL, wxID_ANY, _T("Erase sample"),
-                 wxPoint(50, 50), wxSize(450, 340))
+MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+       : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
     SetIcon(wxICON(mondrian));
 
     wxMenu *menuFile = new wxMenu(_T(""), wxMENU_TEAROFF);
-    menuFile->AppendCheckItem(Erase_Menu_UseBuffer, _T("&Use memory DC\tCtrl-M"));
-    menuFile->AppendCheckItem(Erase_Menu_EraseBg, _T("Custom &background\tCtrl-B"));
-    menuFile->AppendSeparator();
-    menuFile->Append(Erase_Menu_Exit, _T("E&xit\tAlt-X"), _T("Quit this program"));
-
 
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(Erase_Menu_About, _T("&About...\tCtrl-A"), _T("Show about dialog"));
+    helpMenu->Append(wxID_ABOUT, _T("&About...\tCtrl-A"), _T("Show about dialog"));
+
+    menuFile->Append(ID_MENU_QUIT, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     wxMenuBar *menuBar = new wxMenuBar();
     menuBar->Append(menuFile, _T("&File"));
@@ -166,26 +141,16 @@ MyFrame::MyFrame()
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
-    SetStatusText(_T("Welcome to wxWidgets erase sample!"));
+    SetStatusText(_T("Welcome to wxWindows erase sample!"));
 #endif // wxUSE_STATUSBAR
 
-    m_canvas = new MyCanvas( this );
+    (void)new MyCanvas( this );
 }
 
-
-void MyFrame::OnUseBuffer(wxCommandEvent& event)
-{
-    m_canvas->UseBuffer(event.IsChecked());
-}
-
-void MyFrame::OnEraseBg(wxCommandEvent& event)
-{
-    m_canvas->EraseBg(event.IsChecked());
-}
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
@@ -201,20 +166,17 @@ BEGIN_EVENT_TABLE(MyCanvas, wxScrolledWindow)
     EVT_ERASE_BACKGROUND(  MyCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
-MyCanvas::MyCanvas( wxFrame *parent )
-        : wxScrolledWindow( parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                            wxScrolledWindowStyle | wxSUNKEN_BORDER )
+MyCanvas::MyCanvas( MyFrame *parent )
+        : wxScrolledWindow( parent, -1, wxDefaultPosition, wxDefaultSize,
+                            wxScrolledWindowStyle |
+                            wxNO_FULL_REPAINT_ON_RESIZE|
+                            wxSUNKEN_BORDER )
 {
-    m_eraseBg =
-    m_useBuffer = false;
-
     SetScrollbars( 10, 10, 40, 100, 0, 0 );
 
     m_bitmap = wxBitmap( wxICON(mondrian) );
 
-    new wxStaticBitmap( this, wxID_ANY, m_bitmap, wxPoint(80,20) );
-
-    SetFocusIgnoringChildren();
+    new wxStaticBitmap( this, -1, m_bitmap, wxPoint(80,20) );
 }
 
 void MyCanvas::OnChar( wxKeyEvent &event )
@@ -236,20 +198,24 @@ void MyCanvas::OnChar( wxKeyEvent &event )
         case WXK_RIGHT: m_text += wxT( "<RIGHT>" ); break;
         case WXK_DOWN: m_text += wxT( "<DOWN>" ); break;
         case WXK_RETURN: m_text += wxT( "<ENTER>" ); break;
-        default: m_text += (wxChar)event.m_keyCode; break;
+        default: m_text += event.m_keyCode; break;
     }
+    
 }
 
-void MyCanvas::DoPaint(wxDC& dc)
+void MyCanvas::OnPaint( wxPaintEvent &event )
 {
-    dc.SetBrush( *wxBLACK_BRUSH );
-    dc.DrawRectangle( 10,10,200,50 );
+    wxPaintDC dc(this);
+    PrepareDC( dc );
 
-    dc.DrawBitmap( m_bitmap, 10, 20, true );
+    dc.SetBrush( *wxBLACK_BRUSH );
+    dc.DrawRectangle( 0,0,200,50 );
+
+    dc.DrawBitmap( m_bitmap, 10, 20, TRUE );
 
     dc.SetTextForeground(*wxBLUE);
     dc.DrawText(_T("This text is drawn from OnPaint"), 65, 65);
-
+    
     wxString tmp;
     tmp.Printf( _T("Hit any key to display more text: %s"), m_text.c_str() );
     int w,h;
@@ -305,58 +271,26 @@ void MyCanvas::DoPaint(wxDC& dc)
 #endif // 0
 }
 
-void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
-{
-    wxPaintDC dcWin(this);
-    PrepareDC( dcWin );
-
-    if ( m_useBuffer )
-    {
-        const wxSize size = GetClientSize();
-        wxMemoryDC dc;
-        wxBitmap bmp(size.x, size.y);
-        dc.SelectObject(bmp);
-        dc.Blit(0, 0, size.x, size.y, &dcWin, 0, 0);
-        dc.DrawText(_T("(copy of background)"), 5, 120 );
-
-        DoPaint(dc);
-
-        dcWin.Blit(0, 0, size.x, size.y, &dc, 0, 0);
-    }
-    else
-    {
-        DoPaint(dcWin);
-    }
-}
-
 void MyCanvas::OnEraseBackground( wxEraseEvent& event )
 {
-    if ( !m_eraseBg )
-    {
-        event.Skip();
-        return;
-    }
-
     wxDC& dc = *event.GetDC();
     dc.SetPen(*wxGREEN_PEN);
 
-    PrepareDC( dc );
-
-    // clear any junk currently displayed
+    // this line is needed, otherwise the junk is left on win the background
     dc.Clear();
 
-    const wxSize size = GetClientSize();
-    for ( int x = 0; x < size.x; x += 15 )
+    wxSize size = GetClientSize();
+    for ( int x = 0; x < size.x; x+= 10 )
     {
         dc.DrawLine(x, 0, x, size.y);
     }
 
-    for ( int y = 0; y < size.y; y += 15 )
+    for ( int y = 0; y < size.y; y+= 10 )
     {
         dc.DrawLine(0, y, size.x, y);
     }
 
     dc.SetTextForeground(*wxRED);
-    dc.DrawText(_T("This text is drawn from OnEraseBackground"), 60, 160);
+    dc.DrawText(_T("This text is drawn from OnEraseBackground"), 60, 60);
 }
 

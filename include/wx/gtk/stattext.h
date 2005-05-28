@@ -11,7 +11,7 @@
 #ifndef __GTKSTATICTEXTH__
 #define __GTKSTATICTEXTH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -58,19 +58,13 @@ public:
     void SetLabel( const wxString &label );
 
     bool SetFont( const wxFont &font );
-    bool SetForegroundColour( const wxColour& colour );
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
     
     // implementation
     // --------------
+    
+    void ApplyWidgetStyle();
 
 protected:
-    virtual void DoSetSize(int x, int y,
-                           int width, int height,
-                           int sizeFlags = wxSIZE_AUTO);
-                           
     virtual wxSize DoGetBestSize() const;
 
     DECLARE_DYNAMIC_CLASS(wxStaticText)

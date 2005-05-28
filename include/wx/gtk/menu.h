@@ -10,7 +10,7 @@
 #ifndef __GTKMENUH__
 #define __GTKMENUH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "menu.h"
 #endif
 
@@ -24,7 +24,7 @@ public:
     // ctors
     wxMenuBar();
     wxMenuBar(long style);
-    wxMenuBar(size_t n, wxMenu *menus[], const wxString titles[], long style = 0);
+    wxMenuBar(int n, wxMenu *menus[], const wxString titles[]);
     virtual ~wxMenuBar();
 
     // implement base class (pure) virtuals
@@ -46,18 +46,15 @@ public:
     void UnsetInvokingWindow( wxWindow *win );
 
     // common part of Append and Insert
-    bool GtkAppend(wxMenu *menu, const wxString& title, int pos=-1);
+    bool GtkAppend(wxMenu *menu, const wxString& title);
 
-#ifndef __WXGTK20__
     GtkAccelGroup   *m_accel;
-#endif
+    GtkItemFactory  *m_factory;
     GtkWidget       *m_menubar;
     long             m_style;
     wxWindow        *m_invokingWindow;
 
 private:
-    void Init(size_t n, wxMenu *menus[], const wxString titles[], long style);
-
     DECLARE_DYNAMIC_CLASS(wxMenuBar)
 };
 
@@ -77,11 +74,22 @@ public:
     virtual ~wxMenu();
 
     // implement base class virtuals
-    virtual wxMenuItem* DoAppend(wxMenuItem *item);
-    virtual wxMenuItem* DoInsert(size_t pos, wxMenuItem *item);
-    virtual wxMenuItem* DoRemove(wxMenuItem *item);
+    virtual bool DoAppend(wxMenuItem *item);
+    virtual bool DoInsert(size_t pos, wxMenuItem *item);
+    virtual wxMenuItem *DoRemove(wxMenuItem *item);
 
     // TODO: virtual void SetTitle(const wxString& title);
+
+    // compatibility only
+#if wxUSE_MENU_CALLBACK
+    wxMenu(const wxString& title, const wxFunction func)
+        : wxMenuBase(title)
+    {
+        Init();
+
+        Callback(func);
+    }
+#endif // WXWIN_COMPATIBILITY_2
 
     // implementation
     int FindMenuIdByMenuItem( GtkWidget *menuItem ) const;
@@ -90,15 +98,18 @@ public:
     GtkWidget       *m_menu;  // GtkMenu
     GtkWidget       *m_owner;
     GtkAccelGroup   *m_accel;
+    GtkItemFactory  *m_factory;
 
 private:
     // common code for all constructors:
     void Init();
 
-    // common part of Append (if pos == -1)  and Insert
-    bool GtkAppend(wxMenuItem *item, int pos=-1);
+    // common part of Append and Insert
+    bool GtkAppend(wxMenuItem *item);
 
-	GtkWidget *m_prevRadio;
+    // if the last menu item was a radio one, this field contains its path,
+    // otherwise it is empty
+    wxString m_pathLastRadio;
 
     DECLARE_DYNAMIC_CLASS(wxMenu)
 };

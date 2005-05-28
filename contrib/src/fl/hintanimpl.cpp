@@ -6,7 +6,7 @@
 // Created:     9/11/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Aleksandras Gluchovas
-// Licence:     wxWindows license
+// Licence:       wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -45,12 +45,12 @@ cbHintAnimationPlugin::cbHintAnimationPlugin(void)
 
     : mpScrDc( NULL ),
       mpAnimTimer( 0 ),
-      mAnimStarted( false ),
+      mAnimStarted( FALSE ),
       
       mMorphDelay    ( 5   ),
       mMaxFrames     ( 20   ),
       mInClientHintBorder( 4 ),
-      mAccelerationOn( true )
+      mAccelerationOn( TRUE )
 {}
 
 cbHintAnimationPlugin::cbHintAnimationPlugin( wxFrameLayout* pPanel, int paneMask )
@@ -58,12 +58,12 @@ cbHintAnimationPlugin::cbHintAnimationPlugin( wxFrameLayout* pPanel, int paneMas
     : cbPluginBase( pPanel, paneMask ),
       mpScrDc( NULL ),
       mpAnimTimer( 0 ),
-      mAnimStarted( false ),
+      mAnimStarted( FALSE ),
 
       mMorphDelay    ( 5   ),
       mMaxFrames     ( 20   ),
       mInClientHintBorder( 4 ),
-      mAccelerationOn( true )
+      mAccelerationOn( TRUE )
 {}
 
 cbHintAnimationPlugin::~cbHintAnimationPlugin()
@@ -83,7 +83,7 @@ void cbHintAnimationPlugin::OnDrawHintRect( cbDrawHintRectEvent& event )
 
         mPrevRect = event.mRect;
 
-        mStopPending = false;
+        mStopPending = FALSE;
     }
 
     if ( !event.mEraseRect )
@@ -113,7 +113,7 @@ void cbHintAnimationPlugin::OnDrawHintRect( cbDrawHintRectEvent& event )
 
         mpAnimTimer->Init( this, mAnimStarted );
 
-        mAnimStarted = true;
+        mAnimStarted = TRUE;
     }
     else
     if ( !mAnimStarted )
@@ -132,7 +132,7 @@ void cbHintAnimationPlugin::OnDrawHintRect( cbDrawHintRectEvent& event )
 
         if ( event.mLastTime && mpAnimTimer ) 
         {
-            mStopPending = true;
+            mStopPending = TRUE;
 
             if ( mpAnimTimer->mPrevMorphed.x != POS_UNDEFINED )
 
@@ -298,9 +298,9 @@ void cbHintAnimTimer::Notify(void)
 
         mpPl->FinishTracking();
 
-        mpPl->mStopPending = false;
+        mpPl->mStopPending = FALSE;
         mpPl->mpAnimTimer  = NULL;
-        mpPl->mAnimStarted = false;
+        mpPl->mAnimStarted = FALSE;
 
         mPrevMorphed.x = POS_UNDEFINED;
 
@@ -338,7 +338,7 @@ void cbHintAnimTimer::Notify(void)
         
         mpPl->FinishTracking();
         mpPl->mpAnimTimer  = NULL;
-        mpPl->mAnimStarted = false;
+        mpPl->mAnimStarted = FALSE;
 
         mPrevMorphed.x = POS_UNDEFINED;
 
@@ -392,6 +392,6 @@ bool cbHintAnimTimer::Init( cbHintAnimationPlugin* pAnimPl, bool reinit )
 
         Start( mpPl->mMorphDelay );
 
-    return true;
+    return TRUE;
 }
 

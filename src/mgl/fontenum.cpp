@@ -15,7 +15,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "fontenum.h"
 #endif
 
@@ -32,7 +32,6 @@
 #include "wx/utils.h"
 
 #include "wx/fontenum.h"
-#include "wx/encinfo.h"
 #include "wx/fontutil.h"
 
 #include <mgraph.h>

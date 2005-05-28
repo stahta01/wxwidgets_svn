@@ -6,7 +6,7 @@
 %% Created:     04.04.00
 %% RCS-ID:      $Id$
 %% Copyright:   (c) Vadim Zeitlin
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxTimeSpan}}\label{wxtimespan}
@@ -28,7 +28,7 @@ No base class
 
 \latexignore{\rtfignore{\wxheading{Function groups}}}
 
-\membersection{Static functions}\label{timespanstaticfunctions}
+\membersection{Static functions}
 
 \helpref{Seconds}{wxtimespanseconds}\\
 \helpref{Second}{wxtimespansecond}\\
@@ -41,11 +41,11 @@ No base class
 \helpref{Weeks}{wxtimespanweeks}\\
 \helpref{Week}{wxtimespanweek}
 
-\membersection{Constructors}\label{timespanconstructors}
+\membersection{Constructors}
 
 \helpref{wxTimeSpan}{wxtimespanctor}
 
-\membersection{Accessors}\label{timespanaccessors}
+\membersection{Accessors}
 
 \helpref{GetSeconds}{wxtimespangetseconds}\\
 \helpref{GetMinutes}{wxtimespangetminutes}\\
@@ -54,16 +54,16 @@ No base class
 \helpref{GetWeeks}{wxtimespangetweeks}\\
 \helpref{GetValue}{wxtimespangetvalue}
 
-\membersection{Operations}\label{timespanoperations}
+\membersection{Operations}
 
 \helpref{Add}{wxtimespanadd}\\
-\helpref{Subtract}{wxtimespansubtract}\\
+\helpref{Substract}{wxtimespansubstract}\\
 \helpref{Multiply}{wxtimespanmultiply}\\
 \helpref{Negate}{wxtimespannegate}\\
 \helpref{Neg}{wxtimespanneg}\\
 \helpref{Abs}{wxtimespanabs}
 
-\membersection{Tests}\label{timespantests}
+\membersection{Tests}
 
 \helpref{IsNull}{wxtimespanisnull}\\
 \helpref{IsPositive}{wxtimespanispositive}\\
@@ -72,7 +72,7 @@ No base class
 \helpref{IsLongerThan}{wxtimespanislongerthan}\\
 \helpref{IsShorterThan}{wxtimespanisshorterthan}
 
-\membersection{Formatting time spans}\label{timespanformatting}
+\membersection{Formatting time spans}
 
 \helpref{Format}{wxtimespanformat}
 
@@ -115,7 +115,7 @@ Returns the timespan for one day.
 
 \membersection{wxTimeSpan::Format}\label{wxtimespanformat}
 
-\func{wxString}{Format}{\param{const wxChar * }{format = wxDefaultTimeSpanFormat}}
+\func{wxString}{Format}{\param{const wxChar * }{format = "\%H:\%M:\%S"}}
 
 Returns the string containing the formatted representation of the time span.
 The following format specifiers are allowed after \%:
@@ -202,40 +202,40 @@ Returns the timespan for one hour.
 
 \constfunc{bool}{IsEqualTo}{\param{const wxTimeSpan\& }{ts}}
 
-Returns {\tt true} if two timespans are equal.
+Returns {\tt TRUE} if two timespans are equal.
 
 \membersection{wxTimeSpan::IsLongerThan}\label{wxtimespanislongerthan}
 
 \constfunc{bool}{IsLongerThan}{\param{const wxTimeSpan\& }{ts}}
 
 Compares two timespans: works with the absolute values, i.e. -2
-hours is longer than 1 hour. Also, it will return {\tt false} if
+hours is longer than 1 hour. Also, it will return {\tt FALSE} if
 the timespans are equal in absolute value.
 
 \membersection{wxTimeSpan::IsNegative}\label{wxtimespanisnegative}
 
 \constfunc{bool}{IsNegative}{\void}
 
-Returns {\tt true} if the timespan is negative.
+Returns {\tt TRUE} if the timespan is negative.
 
 \membersection{wxTimeSpan::IsNull}\label{wxtimespanisnull}
 
 \constfunc{bool}{IsNull}{\void}
 
-Returns {\tt true} if the timespan is empty.
+Returns {\tt TRUE} if the timespan is empty.
 
 \membersection{wxTimeSpan::IsPositive}\label{wxtimespanispositive}
 
 \constfunc{bool}{IsPositive}{\void}
 
-Returns {\tt true} if the timespan is positive.
+Returns {\tt TRUE} if the timespan is positive.
 
 \membersection{wxTimeSpan::IsShorterThan}\label{wxtimespanisshorterthan}
 
 \constfunc{bool}{IsShorterThan}{\param{const wxTimeSpan\& }{ts}}
 
 Compares two timespans: works with the absolute values, i.e. 1
-hour is shorter than -2 hours. Also, it will return {\tt false} if
+hour is shorter than -2 hours. Also, it will return {\tt FALSE} if
 the timespans are equal in absolute value.
 
 \membersection{wxTimeSpan::Minutes}\label{wxtimespanminutes}
@@ -264,7 +264,7 @@ Multiplies timespan by a scalar.
 
 \constfunc{wxTimeSpan}{Negate}{\void}
 
-Returns timespan with inverted sign.
+Returns timespan with inversed sign.
 
 \membersection{wxTimeSpan::Neg}\label{wxtimespanneg}
 
@@ -286,11 +286,11 @@ Returns the timespan for the given number of seconds.
 
 Returns the timespan for one second.
 
-\membersection{wxTimeSpan::Subtract}\label{wxtimespansubtract}
+\membersection{wxTimeSpan::Substract}\label{wxtimespansubstract}
 
-\constfunc{wxTimeSpan}{Subtract}{\param{const wxTimeSpan\&}{diff}}
+\constfunc{wxTimeSpan}{Substract}{\param{const wxTimeSpan\&}{diff}}
 
-\func{wxTimeSpan\&}{Subtract}{\param{const wxTimeSpan\& }{diff}}
+\func{wxTimeSpan\&}{Substract}{\param{const wxTimeSpan\& }{diff}}
 
 \func{wxTimeSpan\&}{operator$-=$}{\param{const wxTimeSpan\&}{diff}}
 

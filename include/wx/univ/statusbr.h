@@ -12,12 +12,11 @@
 #ifndef _WX_UNIV_STATUSBR_H_
 #define _WX_UNIV_STATUSBR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univstatusbr.h"
 #endif
 
 #include "wx/univ/inpcons.h"
-#include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
 // wxStatusBar: a window near the bottom of the frame used for status info
@@ -30,7 +29,7 @@ public:
     wxStatusBarUniv() { Init(); }
 
     wxStatusBarUniv(wxWindow *parent,
-                    wxWindowID id = wxID_ANY,
+                    wxWindowID id = -1,
                     long style = 0,
                     const wxString& name = wxPanelNameStr)
     {
@@ -40,7 +39,7 @@ public:
     }
 
     bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 long style = 0,
                 const wxString& name = wxPanelNameStr);
 

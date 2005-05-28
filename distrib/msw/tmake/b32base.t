@@ -18,7 +18,7 @@
 
         $isCFile = $file =~ /\.c$/;
         $file =~ s/cp?p?$/obj/;
-        $obj = "\$(OBJ_PATH)\\" . $file . " ";
+        $obj = "\$(MSWDIR)\\" . $file . " ";
         $project{"WXCOMMONOBJS"} .= $obj;
         $project{"WXCOBJS"} .= $obj if $isCFile;
     }
@@ -30,7 +30,7 @@
 
         my $isOleObj = $wxMSW{$file} =~ /\bO\b/;
         $file =~ s/cp?p?$/obj/;
-        my $obj = "\$(OBJ_PATH)\\" . $file . " ";
+        my $obj = "\$(MSWDIR)\\" . $file . " ";
 
         $project{"WXMSWOBJS"} .= $obj;
         if ( $isOleObj ) {
@@ -43,7 +43,7 @@
     foreach $file (sort keys %wxBase) {
         $isCFile = $file =~ /\.c$/;
         $file =~ s/cp?p?$/obj/;
-        $project{"WXCOMMONOBJS"} .= "\$(OBJ_PATH)\\" . $file . " ";
+        $project{"WXCOMMONOBJS"} .= "\$(MSWDIR)\\" . $file . " ";
         $project{"WXCOBJS"} .= $obj if $isCFile;
     }
 #$}
@@ -92,7 +92,7 @@ PERIPH_CLEAN_TARGET=clean_zlib clean_regex $(PERIPH_CLEAN_TARGET)
 DUMMY=dummy
 !else
 DUMMY=dummydll
-LIBS= cw32mti import32 ole2w32 odbc32 zlib regex
+LIBS= cw32mti import32 ole2w32 odbc32 zlib winpng jpeg tiff regex
 !endif
 
 LIBTARGET=$(WXLIB)
@@ -114,12 +114,9 @@ OBJECTS = $(COMMONOBJS) $(MSWOBJS)
 
 default:    wx
 
-wx:    $(ARCHINCDIR)\wx makesetuph makearchsetuph makeoutdir $(CFG) $(DUMMY).obj $(OBJECTS) $(PERIPH_TARGET) $(LIBTARGET)
+wx:    $(ARCHINCDIR)\wx makesetuph makearchsetuph $(CFG) $(DUMMY).obj $(OBJECTS) $(PERIPH_TARGET) $(LIBTARGET)
 
 all:    wx
-
-makeoutdir:
-    -mkdir $(OBJ_PATH)
 
 # Copy the in-CVS setup0.h to setup.h if necessary
 makesetuph:
@@ -135,12 +132,12 @@ makearchsetuph:
 $(ARCHINCDIR)\wx:
     -mkdir $(ARCHINCDIR)
     -mkdir $(ARCHINCDIR)\wx
-    -erase $(CFG)
+    -$(RM) $(CFG)
 
 !if "$(DLL)" == "0"
 
 $(LIBTARGET): $(DUMMY).obj $(OBJECTS)
-    -erase $(WXLIB)
+    -$(RM) $(WXLIB)
     tlib "$(WXLIB)" /P1024 @&&!
 +$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
 !
@@ -148,8 +145,8 @@ $(LIBTARGET): $(DUMMY).obj $(OBJECTS)
 !else
 
 $(LIBTARGET): $(DUMMY).obj $(OBJECTS)
-    -erase $(WXLIB)
-    -erase $(WXDLL)
+    -$(RM) $(WXLIB)
+    -$(RM) $(WXDLL)
         $(LINK) $(LINK_FLAGS) /L$(WXLIBDIR);$(BCCDIR)\lib;$(BCCDIR)\lib\psdk /v @&&!
 c0d32.obj $(OBJECTS)
 $(WXLIBDIR)\$(WXLIBNAME)
@@ -171,11 +168,9 @@ version.res:
     my @objs = split;
     foreach (@objs) {
         $text .= $_ . ": ";
+        if ( $project{"WXOLEOBJS"} =~ /\Q$_/ ) { s/MSWDIR/OLEDIR/; }
         $suffix = $project{"WXCOBJS"} =~ /\Q$_/ ? "c" : '$(SRCSUFF)';
         s/obj$/$suffix/;
-        s/OBJ_PATH/MSWDIR/;
-        if ( $project{"WXOLEOBJS"} =~ /\Q$_/ ) { s/MSWDIR/OLEDIR/; }
- 
         $text .= $_ . "\n\n";
     }
 #$}
@@ -189,7 +184,7 @@ version.res:
     foreach (@objs) {
         $text .= $_ . ": ";
         $suffix = $project{"WXCOBJS"} =~ /\Q$_/ ? "c" : '$(SRCSUFF)';
-        s/OBJ_PATH/COMMDIR/;
+        s/MSWDIR/COMMDIR/;
         s/obj$/$suffix/;
         $text .= $_ . "\n\n";
     }
@@ -211,7 +206,15 @@ all_execs:
     ${MAKE} -f makefile.b32 all_execs
     cd $(WXDIR)\src\msw
 
+png:    $(CFG)
+        cd $(WXDIR)\src\png
+        ${MAKE} -f makefile.b32 wxUSE_GUI=0
+        cd $(WXDIR)\src\msw
 
+clean_png:
+        cd $(WXDIR)\src\png
+        ${MAKE} -f makefile.b32 clean
+        cd $(WXDIR)\src\msw
 
 zlib:   $(CFG)
         cd $(WXDIR)\src\zlib
@@ -223,6 +226,15 @@ clean_zlib:
         ${MAKE} -f makefile.b32 clean
         cd $(WXDIR)\src\msw
 
+jpeg:    $(CFG)
+        cd $(WXDIR)\src\jpeg
+        ${MAKE} -f makefile.b32 wxUSE_GUI=0
+        cd $(WXDIR)\src\msw
+
+clean_jpeg:
+        cd $(WXDIR)\src\jpeg
+        ${MAKE} -f makefile.b32 clean
+        cd $(WXDIR)\src\msw
 
 regex:   $(CFG)
         cd $(WXDIR)\src\regex
@@ -234,7 +246,15 @@ clean_regex:
         ${MAKE} -f makefile.b32 clean
         cd $(WXDIR)\src\msw
 
+tiff:   $(CFG)
+        cd $(WXDIR)\src\tiff
+        ${MAKE} -f makefile.b32 wxUSE_GUI=0 lib
+        cd $(WXDIR)\src\msw
 
+clean_tiff:
+        cd $(WXDIR)\src\tiff
+        ${MAKE} -f makefile.b32 clean
+        cd $(WXDIR)\src\msw
 
 $(CFG): makebase.b32
     copy &&!
@@ -265,21 +285,16 @@ $(WIN95FLAG)
 ! $(CFG)
 
 clean: $(PERIPH_CLEAN_TARGET)
-    -$(RM) $(WXLIBDIR)\*.tds
-    -$(RM) $(WXLIBDIR)\*.il?
-    -$(RM) $(OBJ_PATH)\*.obj
-    -$(RM) $(OBJ_PATH)\*.pch
-    -$(RM) $(OBJ_PATH)\*.csm
-    -$(RM) $(OBJ_PATH)\"wx32.#??"
+    -$(RM) $(WXLIBDIR)\wx.tds
+    -$(RM) $(WXLIBDIR)\wx.il?
+    -$(RM) *.obj
+    -$(RM) *.pch
+    -$(RM) *.csm
+    -$(RM) "wx32.#??"
 
-cleancfg:
-    -$(RM) $(OBJ_PATH)\*.cfg
-
-
-cleanall: clean cleancfg
-
+cleanall: clean
 
 self:
     cd $(WXWIN)\distrib\msw\tmake
-    perl -S tmake -tb32base wxwin.pro -o makebase.b32
-    copy makebase.b32 $(WXWIN)\src\msw
+    tmake -t $(MFTYPE) wxwin.pro -o makefile.$(MFTYPE)
+    copy makefile.$(MFTYPE) $(WXWIN)\src\msw

@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "gridctrl.h"
 #endif
 
@@ -19,7 +19,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_GRID
+#if wxUSE_GRID || wxUSE_NEW_GRID
 
 #ifndef WX_PRECOMP
     #include "wx/textctrl.h"
@@ -32,8 +32,6 @@
 // ----------------------------------------------------------------------------
 // wxGridCellDateTimeRenderer
 // ----------------------------------------------------------------------------
-
-#if wxUSE_DATETIME
 
 // Enables a grid cell to display a formated date and or time
 
@@ -60,7 +58,7 @@ wxString wxGridCellDateTimeRenderer::GetString(wxGrid& grid, int row, int col)
 {
     wxGridTableBase *table = grid.GetTable();
 
-    bool hasDatetime = false;
+    bool hasDatetime = FALSE;
     wxDateTime val;
     wxString text;
     if ( table->CanGetValueAs(row, col, wxGRID_VALUE_DATETIME) )
@@ -69,7 +67,7 @@ wxString wxGridCellDateTimeRenderer::GetString(wxGrid& grid, int row, int col)
 
         if (tempval){
             val = *((wxDateTime *)tempval);
-            hasDatetime = true;
+            hasDatetime = TRUE;
             delete (wxDateTime *)tempval;
         }
 
@@ -122,8 +120,6 @@ void wxGridCellDateTimeRenderer::SetParameters(const wxString& params){
     if (!params.IsEmpty())
         m_oformat=params;
 }
-
-#endif // wxUSE_DATETIME
 
 // ----------------------------------------------------------------------------
 // wxGridCellChoiceNumberRenderer
@@ -344,7 +340,7 @@ wxGridCellAutoWrapStringRenderer::GetTextLines(wxGrid& grid,
 
     dc.SetFont(attr.GetFont());
     wxStringTokenizer tk(data , _T(" \n\t\r"));
-    wxString thisline = wxEmptyString;
+    wxString thisline(wxT(""));
 
     while ( tk.HasMoreTokens() )
     {

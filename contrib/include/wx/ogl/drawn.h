@@ -6,7 +6,7 @@
 // Created:     12/07/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _OGL_DRAWN_H_
@@ -16,12 +16,13 @@
 #pragma interface "drawn.h"
 #endif
 
+#include <wx/ogl/basic.h>
 
 #define oglMETAFLAGS_OUTLINE         1
 #define oglMETAFLAGS_ATTACHMENTS     2
 
-class WXDLLIMPEXP_OGL wxDrawnShape;
-class WXDLLIMPEXP_OGL wxPseudoMetaFile: public wxObject
+class wxDrawnShape;
+class wxPseudoMetaFile: public wxObject
 {
  DECLARE_DYNAMIC_CLASS(wxPseudoMetaFile)
  public:
@@ -73,7 +74,7 @@ class WXDLLIMPEXP_OGL wxPseudoMetaFile: public wxObject
   inline wxList& GetOps() const { return (wxList&) m_ops; }
 
   // Is this a valid (non-empty) metafile?
-  inline bool IsValid() const { return (m_ops.GetCount() > 0); }
+  inline bool IsValid() const { return (m_ops.Number() > 0); }
 
 public:
   /// Set of functions for drawing into a pseudo metafile.
@@ -100,8 +101,8 @@ public:
   virtual void SetClippingRect(const wxRect& rect);
   virtual void DestroyClippingRect();
 
-  virtual void SetPen(wxPen* pen, bool isOutline = false);     // TODO: eventually, just store GDI object attributes, not actual
-  virtual void SetBrush(wxBrush* brush, bool isFill = false);  // pens/brushes etc.
+  virtual void SetPen(wxPen* pen, bool isOutline = FALSE);     // TODO: eventually, just store GDI object attributes, not actual
+  virtual void SetBrush(wxBrush* brush, bool isFill = FALSE);  // pens/brushes etc.
   virtual void SetFont(wxFont* font);
   virtual void SetTextColour(const wxColour& colour);
   virtual void SetBackgroundColour(const wxColour& colour);
@@ -129,7 +130,7 @@ public:
 #define oglDRAWN_ANGLE_180      2
 #define oglDRAWN_ANGLE_270      3
 
-class WXDLLIMPEXP_OGL wxDrawnShape: public wxRectangleShape
+class wxDrawnShape: public wxRectangleShape
 {
  DECLARE_DYNAMIC_CLASS(wxDrawnShape)
  public:
@@ -155,7 +156,7 @@ class WXDLLIMPEXP_OGL wxDrawnShape: public wxRectangleShape
   // Get current rotation
   inline double GetRotation() const { return m_rotation; }
 
-  void SetSize(double w, double h, bool recursive = true);
+  void SetSize(double w, double h, bool recursive = TRUE);
   bool LoadFromMetaFile(const wxString& filename);
 
   inline void SetSaveToFile(bool save) { m_saveToFile = save; }
@@ -188,8 +189,8 @@ class WXDLLIMPEXP_OGL wxDrawnShape: public wxRectangleShape
   virtual void SetClippingRect(const wxRect& rect);
   virtual void DestroyClippingRect();
 
-  virtual void SetDrawnPen(wxPen* pen, bool isOutline = false);     // TODO: eventually, just store GDI object attributes, not actual
-  virtual void SetDrawnBrush(wxBrush* brush, bool isFill = false);  // pens/brushes etc.
+  virtual void SetDrawnPen(wxPen* pen, bool isOutline = FALSE);     // TODO: eventually, just store GDI object attributes, not actual
+  virtual void SetDrawnBrush(wxBrush* brush, bool isFill = FALSE);  // pens/brushes etc.
   virtual void SetDrawnFont(wxFont* font);
   virtual void SetDrawnTextColour(const wxColour& colour);
   virtual void SetDrawnBackgroundColour(const wxColour& colour);

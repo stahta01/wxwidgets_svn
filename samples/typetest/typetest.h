@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        typetest.h
-// Purpose:     Types wxWidgets sample
+// Purpose:     Types wxWindows sample
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
@@ -25,6 +25,10 @@ public:
     bool OnInit();
     int OnExit() { delete m_mimeDatabase; return wxApp::OnExit(); }
 
+#if wxUSE_TIMEDATE
+    void DoDateDemo(wxCommandEvent& event);
+#endif // wxUSE_TIMEDATE
+    void DoTimeDemo(wxCommandEvent& event);
     void DoVariantDemo(wxCommandEvent& event);
     void DoByteOrderDemo(wxCommandEvent& event);
     void DoStreamDemo(wxCommandEvent& event);

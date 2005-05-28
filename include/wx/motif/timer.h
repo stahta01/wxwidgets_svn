@@ -12,7 +12,7 @@
 #ifndef _WX_TIMER_H_
 #define _WX_TIMER_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "timer.h"
 #endif
 
@@ -26,7 +26,7 @@ public:
     { Init(); }
     ~wxTimer();
     
-    virtual bool Start(int milliseconds = -1, bool oneShot = false);
+    virtual bool Start(int milliseconds = -1, bool oneShot = FALSE);
     virtual void Stop();
     
     virtual bool IsRunning() const { return m_id != 0; }

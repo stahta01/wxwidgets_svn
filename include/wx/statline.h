@@ -28,7 +28,7 @@
 // ----------------------------------------------------------------------------
 
 // the default name for objects of class wxStaticLine
-extern WXDLLEXPORT_DATA(const wxChar*) wxStaticTextNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxStaticTextNameStr;
 
 // ----------------------------------------------------------------------------
 // wxStaticLine - a line in a dialog
@@ -47,7 +47,7 @@ public:
     static int GetDefaultSize() { return 2; }
 
     // overriden base class virtuals
-    virtual bool AcceptsFocus() const { return false; }
+    virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:
     // set the right size for the right dimension
@@ -56,12 +56,12 @@ protected:
         wxSize sizeReal(size);
         if ( IsVertical() )
         {
-            if ( size.x == wxDefaultCoord )
+            if ( size.x == -1 )
                 sizeReal.x = GetDefaultSize();
         }
         else
         {
-            if ( size.y == wxDefaultCoord )
+            if ( size.y == -1 )
                 sizeReal.y = GetDefaultSize();
         }
 
@@ -72,8 +72,6 @@ protected:
     {
         return AdjustSize(wxDefaultSize);
     }
-
-    DECLARE_NO_COPY_CLASS(wxStaticLineBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -90,8 +88,6 @@ protected:
     #include "wx/os2/statline.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/statline.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/statline.h"
 #else // use generic implementation for all other platforms
     #include "wx/generic/statline.h"
 #endif

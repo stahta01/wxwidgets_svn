@@ -48,16 +48,15 @@ toolkit.
 If compiling from CVS, please copy include/wx/univ/setup0.h
 to include/wx/univ/setup.h before following these steps.
 
-a) Using Visual C++ 6.0/7.x
+a) Using Visual C++ 6.0
 
-   Follow wxMSW instructions but make sure to choose one of the "Universal" 
-   configurations before building.
+   Simply open the src/wxUniv.dsw file in DevStudio and build it.
+   Then open the widgetsUniv.dsp file in samples/widgets to build
+   the widgets sample.
 
 b) Cygwin
 
    Please refer to the Unix section below
-
-** the instructions may be out of date as for wxWidgets 2.5.2+ **
 
 c) Other compilers
    Borland: 
@@ -74,13 +73,6 @@ compiler you use.
 Note that you can use the wxUniversal classes, wxMSW and MicroWindows (from
 Century Software) to build a different variant of wxUniversal than that
 documented here. Please see docs/univ/readme.txt for further information.
-Note that this port is not up-to-date and probably needs work
-to compile.
-
-Note that by default, wxUniv under MSW uses PostScript printing,
-not Windows printing. To change to Windows printing, set
-wxUSE_POSTSCRIPT_ARCHITECTURE_IN_MSW to 0 in include/wx/univ/setup.h
-before compiling.
 
 3. Installing under Unix
 ------------------------
@@ -112,20 +104,20 @@ at once by setting the environment variable WXTHEME to the theme name.
 5. Documentation and support
 ----------------------------
 
-Please note that wxUniversal is not as mature as the other wxWidgets ports
+ Please note that wxUniversal is not as mature as the other wxWidgets ports
 and is currently officially in alpha stage. In particular, it is not really
 intended for the end users but rather for developers at the current stage and
 this is why we don't provide any binaries for it.
 
-There is no separate documentation for wxUniversal, please refer to wxWidgets
+ There is no separate documentation for wxUniversal, please refer to wxWidgets
 documentation instead.
 
-Support for wxUniversal is available from the same places as for wxWidgets
+ Support for wxUniversal is available from the same places as for wxWidgets
 itself, namely:
 
 * Usenet newsgroup comp.soft-sys.wxwindows
 
-* Mailing lists: see http://lists.wxwindows.org/ for more information
+* Mailing lists: see http://lists.wxwidgets.org/ for more information
 
 * WWW page: http://www.wxwidgets.org/
 
@@ -135,6 +127,6 @@ itself, namely:
                                                                  Vadim Zeitlin
 
 
-This file is accurate for the version 2.3.4 of wxUniversal. It was last
+This file is accurate for the version 2.4.0 of wxUniversal. It was last
 modified on Apr 15, 2002.
 

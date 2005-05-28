@@ -11,7 +11,7 @@
 #ifndef __GTKDCH__
 #define __GTKDCH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -25,7 +25,6 @@ class wxDC;
 // constants
 //-----------------------------------------------------------------------------
 
-#ifndef MM_TEXT
 #define MM_TEXT         0
 #define MM_ISOTROPIC    1
 #define MM_ANISOTROPIC  2
@@ -34,7 +33,6 @@ class wxDC;
 #define MM_TWIPS        5
 #define MM_POINTS       6
 #define MM_METRIC       7
-#endif
 
 //-----------------------------------------------------------------------------
 // wxDC
@@ -48,10 +46,13 @@ public:
 
     void SetColourMap( const wxPalette& palette ) { SetPalette(palette); };
 
+    // the first two must be overridden and called
+    virtual void DestroyClippingRegion();
+
     // Resolution in pixels per logical inch
     virtual wxSize GetPPI() const;
 
-    virtual bool StartDoc( const wxString& WXUNUSED(message) ) { return true; }
+    virtual bool StartDoc( const wxString& WXUNUSED(message) ) { return TRUE; }
     virtual void EndDoc() { }
     virtual void StartPage() { }
     virtual void EndPage() { }

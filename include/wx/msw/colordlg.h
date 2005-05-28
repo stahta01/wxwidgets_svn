@@ -12,7 +12,7 @@
 #ifndef _WX_COLORDLG_H_
 #define _WX_COLORDLG_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "colordlg.h"
 #endif
 
@@ -54,7 +54,7 @@ protected:
 
     wxPoint             m_pos;
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxColourDialog)
+    DECLARE_DYNAMIC_CLASS(wxColourDialog)
 };
 
 #endif

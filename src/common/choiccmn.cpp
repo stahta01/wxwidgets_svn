@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     26.07.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "choicebase.h"
 #endif
 
@@ -44,12 +44,27 @@ wxChoiceBase::~wxChoiceBase()
 }
 
 // ----------------------------------------------------------------------------
+// selection
+// ----------------------------------------------------------------------------
+
+bool wxChoiceBase::SetStringSelection(const wxString& s)
+{
+    int sel = FindString(s);
+    wxCHECK_MSG( sel != -1, FALSE,
+                 wxT("invalid string in wxChoice::SetStringSelection") );
+
+    Select(sel);
+
+    return TRUE;
+}
+
+// ----------------------------------------------------------------------------
 // misc
 // ----------------------------------------------------------------------------
 
 void wxChoiceBase::Command(wxCommandEvent& event)
 {
-    SetSelection(event.GetInt());
+    SetSelection(event.m_commandInt);
     (void)ProcessEvent(event);
 }
 

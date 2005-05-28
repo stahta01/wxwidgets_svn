@@ -6,13 +6,13 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_IMAGLIST_H_
 #define _WX_IMAGLIST_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "imaglist.h"
 #endif
 
@@ -62,7 +62,7 @@ public:
   // Specify the width and height of the images in the list,
   // whether there are masks associated with them (e.g. if creating images
   // from icons), and the initial size of the list.
-  wxImageList(int width, int height, bool mask = true, int initialCount = 1)
+  wxImageList(int width, int height, bool mask = TRUE, int initialCount = 1)
   {
     Create(width, height, mask, initialCount);
   }
@@ -85,7 +85,7 @@ public:
   // width, height specify the size of the images in the list (all the same).
   // mask specifies whether the images have masks or not.
   // initialNumber is the initial number of images to reserve.
-  bool Create(int width, int height, bool mask = true, int initialNumber = 1);
+  bool Create(int width, int height, bool mask = TRUE, int initialNumber = 1);
 
   // Adds a bitmap, and optionally a mask bitmap.
   // Note that wxImageList creates *new* bitmaps, so you may delete
@@ -123,18 +123,12 @@ public:
   bool RemoveAll();
 
   // Draws the given image on a dc at the specified position.
-  // If 'solidBackground' is true, Draw sets the image list background
+  // If 'solidBackground' is TRUE, Draw sets the image list background
   // colour to the background colour of the wxDC, to speed up
   // drawing by eliminating masked drawing where possible.
   bool Draw(int index, wxDC& dc, int x, int y,
             int flags = wxIMAGELIST_DRAW_NORMAL,
-            bool solidBackground = false);
-
-  // Get a bitmap
-  wxBitmap GetBitmap(int index) const;
-
-  // Get an icon
-  wxIcon GetIcon(int index) const;
+            bool solidBackground = FALSE);
 
   // TODO: miscellaneous functionality
 /*
@@ -197,10 +191,10 @@ public:
 
   1) Starting to drag:
 
-  wxImageList *dragImageList = new wxImageList(16, 16, true);
+  wxImageList *dragImageList = new wxImageList(16, 16, TRUE);
   dragImageList->Add(myDragImage); // Provide an image to combine with the current cursor
   dragImageList->BeginDrag(0, wxPoint(0, 0));
-  wxShowCursor(false);        // wxShowCursor not yet implemented in wxWin
+  wxShowCursor(FALSE);        // wxShowCursor not yet implemented in wxWin
   myWindow->CaptureMouse();
 
   2) Dragging:
@@ -216,7 +210,7 @@ public:
 
   dragImageList->EndDrag();
   myWindow->ReleaseMouse();
-  wxShowCursor(true);
+  wxShowCursor(TRUE);
 */
 
 #endif

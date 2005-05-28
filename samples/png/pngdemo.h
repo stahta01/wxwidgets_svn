@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -19,7 +19,7 @@
 class MyApp: public wxApp
 {
   public:
-    MyApp(void){};
+    MyApp(void) ;
     bool OnInit(void);
 };
 
@@ -46,7 +46,7 @@ class MyCanvas: public wxScrolledWindow
 {
   public:
     MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size);
-    ~MyCanvas(void){};
+    ~MyCanvas(void) ;
 
     void OnPaint(wxPaintEvent& event);
 DECLARE_EVENT_TABLE()

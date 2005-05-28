@@ -12,23 +12,17 @@
 #ifndef _WX_WXMMSTREAM_H__
 #define _WX_WXMMSTREAM_H__
 
-#include "wx/defs.h"
+#include "wx/stream.h"
 
 #if wxUSE_STREAMS
 
-#include "wx/stream.h"
-
-class WXDLLIMPEXP_BASE wxMemoryOutputStream;
-
-class WXDLLIMPEXP_BASE wxMemoryInputStream : public wxInputStream
+class WXDLLEXPORT wxMemoryInputStream : public wxInputStream
 {
 public:
     wxMemoryInputStream(const void *data, size_t length);
-    wxMemoryInputStream(const wxMemoryOutputStream& stream);
     virtual ~wxMemoryInputStream();
-    virtual wxFileOffset GetLength() const { return m_length; }
+    virtual size_t GetSize() const { return m_length; }
     virtual bool Eof() const;
-    virtual bool IsSeekable() const { return true; }
 
     char Peek();
 
@@ -41,23 +35,20 @@ protected:
     wxStreamBuffer *m_i_streambuf;
 
     size_t OnSysRead(void *buffer, size_t nbytes);
-    wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode);
-    wxFileOffset OnSysTell() const;
+    off_t OnSysSeek(off_t pos, wxSeekMode mode);
+    off_t OnSysTell() const;
 
 private:
     size_t m_length;
-
-    DECLARE_NO_COPY_CLASS(wxMemoryInputStream)
 };
 
-class WXDLLIMPEXP_BASE wxMemoryOutputStream : public wxOutputStream
+class WXDLLEXPORT wxMemoryOutputStream : public wxOutputStream
 {
 public:
     // if data is !NULL it must be allocated with malloc()
     wxMemoryOutputStream(void *data = NULL, size_t length = 0);
     virtual ~wxMemoryOutputStream();
-    virtual wxFileOffset GetLength() const { return m_o_streambuf->GetLastAccess(); }
-    virtual bool IsSeekable() const { return true; }
+    virtual size_t GetSize() const { return m_o_streambuf->GetLastAccess(); }
 
     size_t CopyTo(void *buffer, size_t len) const;
 
@@ -71,10 +62,8 @@ protected:
 
 protected:
     size_t OnSysWrite(const void *buffer, size_t nbytes);
-    wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode);
-    wxFileOffset OnSysTell() const;
-
-    DECLARE_NO_COPY_CLASS(wxMemoryOutputStream)
+    off_t OnSysSeek(off_t pos, wxSeekMode mode);
+    off_t OnSysTell() const;
 };
 
 #endif

@@ -10,13 +10,12 @@
 #ifndef __GTKAPPH__
 #define __GTKAPPH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
 #include "wx/frame.h"
 #include "wx/icon.h"
-#include "wx/strconv.h"
 
 //-----------------------------------------------------------------------------
 // classes
@@ -42,13 +41,24 @@ public:
     virtual bool OnInitGui();
 
     // override base class (pure) virtuals
+    virtual int MainLoop();
+    virtual void ExitMainLoop();
+    virtual bool Initialized();
+    virtual bool Pending();
+    virtual void Dispatch();
     virtual bool Yield(bool onlyIfNeeded = FALSE);
-    virtual void WakeUpIdle();
+    virtual bool ProcessIdle();
 
-    virtual bool Initialize(int& argc, wxChar **argv);
-    virtual void CleanUp();
+    // implementation only from now on
+    void OnIdle( wxIdleEvent &event );
+    bool SendIdleEvents();
+    bool SendIdleEvents( wxWindow* win );
 
+    static bool Initialize();
     static bool InitialzeVisual();
+    static void CleanUp();
+
+    void DeletePendingObjects();
 
 #ifdef __WXDEBUG__
     virtual void OnAssert(const wxChar *file, int line, const wxChar *cond, const wxChar *msg);
@@ -56,27 +66,33 @@ public:
     bool IsInAssert() const { return m_isInAssert; }
 #endif // __WXDEBUG__
 
+    bool            m_initialized;
+
     gint            m_idleTag;
-    void RemoveIdleTag();
-    
+#if wxUSE_THREADS
+    gint            m_wakeUpTimerTag;
+#endif
     unsigned char  *m_colorCube;
 
     // Used by the the wxGLApp and wxGLCanvas class for GL-based X visual
-    // selection.
-    void           *m_glVisualInfo; // this is actually an XVisualInfo*
-    void           *m_glFBCInfo; // this is actually an GLXFBConfig*
+    // selection; this is actually an XVisualInfo*
+    void           *m_glVisualInfo;
     // This returns the current visual: either that used by wxRootWindow
     // or the XVisualInfo* for SGI.
     GdkVisual      *GetGdkVisual();
-    
+
 private:
     // true if we're inside an assert modal dialog
 #ifdef __WXDEBUG__
     bool m_isInAssert;
 #endif // __WXDEBUG__
 
+    bool CallInternalIdle( wxWindow* win );
+
     DECLARE_DYNAMIC_CLASS(wxApp)
     DECLARE_EVENT_TABLE()
 };
+
+int WXDLLEXPORT wxEntry( int argc, char *argv[] );
 
 #endif // __GTKAPPH__

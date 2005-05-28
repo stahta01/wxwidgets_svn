@@ -11,7 +11,7 @@
 #ifndef __GTKRADIOBOXH__
 #define __GTKRADIOBOXH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -41,21 +41,6 @@ public:
 
         Create( parent, id, title, pos, size, n, choices, majorDim, style, val, name );
     }
-    wxRadioBox(wxWindow *parent,
-               wxWindowID id,
-               const wxString& title,
-               const wxPoint& pos,
-               const wxSize& size,
-               const wxArrayString& choices,
-               int majorDim = 1,
-               long style = wxRA_HORIZONTAL,
-               const wxValidator& val = wxDefaultValidator,
-               const wxString& name = wxRadioBoxNameStr)
-    {
-        Init();
-
-        Create( parent, id, title, pos, size, choices, majorDim, style, val, name );
-    }
 
     virtual ~wxRadioBox();
     bool Create(wxWindow *parent,
@@ -69,16 +54,6 @@ public:
                 long style = wxRA_HORIZONTAL,
                 const wxValidator& val = wxDefaultValidator,
                 const wxString& name = wxRadioBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxString& title,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
-                int majorDim = 0,
-                long style = wxRA_HORIZONTAL,
-                const wxValidator& val = wxDefaultValidator,
-                const wxString& name = wxRadioBoxNameStr);
 
     int FindString( const wxString& s) const;
     void SetSelection( int n );
@@ -87,29 +62,29 @@ public:
     wxString GetString( int n ) const;
     void SetString( int n, const wxString& label );
 
-    virtual bool Show( int item, bool show = true );
-    virtual bool Enable( int item, bool enable = true );
+    void Show( int item, bool show );
+    void Enable( int item, bool enable );
 
     virtual wxString GetStringSelection() const;
     virtual bool SetStringSelection( const wxString& s );
 
     int GetCount() const;
+    int GetNumberOfRowsOrCols() const;
+    void SetNumberOfRowsOrCols( int n );
 
     // for compatibility only, don't use these methods in new code!
 #if WXWIN_COMPATIBILITY_2_2
-    wxDEPRECATED( int Number() const );
-    wxDEPRECATED( wxString GetLabel(int n) const );
-    wxDEPRECATED( void SetLabel( int item, const wxString& label ) );
+    int Number() const { return GetCount(); }
+    wxString GetLabel(int n) const { return GetString(n); }
+    void SetLabel( int item, const wxString& label )
+        { SetString(item, label); }
 #endif // WXWIN_COMPATIBILITY_2_2
 
     // we have to override those to avoid virtual function name hiding
     virtual wxString GetLabel() const { return wxControl::GetLabel(); }
     virtual void SetLabel( const wxString& label );
-    virtual bool Show( bool show = true );
-    virtual bool Enable( bool enable = true );
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
+    virtual bool Show( bool show = TRUE );
+    virtual bool Enable( bool enable = TRUE );
 
     // implementation
     // --------------
@@ -118,11 +93,13 @@ public:
     void GtkDisableEvents();
     void GtkEnableEvents();
     bool IsOwnGtkWindow( GdkWindow *window );
-    void DoApplyWidgetStyle(GtkRcStyle *style);
+    void ApplyWidgetStyle();
 #if wxUSE_TOOLTIPS
     void ApplyToolTip( GtkTooltips *tips, const wxChar *tip );
 #endif // wxUSE_TOOLTIPS
+    wxSize LayoutItems();
 
+    virtual void DoSetSize( int x, int y, int width, int height, int sizeFlags = wxSIZE_AUTO );
     virtual void OnInternalIdle();
 
     bool             m_hasFocus,
@@ -133,10 +110,6 @@ public:
 protected:
     // common part of all ctors
     void Init();
-
-    // check that the index is valid
-    // FIXME: remove once GTK will derive from wxRadioBoxBase
-    inline bool IsValid(int n) const { return n >= 0 && n < GetCount(); }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxRadioBox)

@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     20.02.01
 // RCS-ID:      $Id$
-// Copyright:   (c) 2001 wxWidgets team
-// License:     wxWindows licence
+// Copyright:   (c) 2001 wxWindows team
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dseldlg.h"
 #endif
 

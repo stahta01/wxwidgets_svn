@@ -57,7 +57,7 @@ class WXDLLEXPORT wxMetafile: public wxGDIObject
   inline wxMetafile(const wxMetafile& metafile)
   { Ref(metafile); }
 
-  wxMetafile(const wxString& file = wxEmptyString);
+  wxMetafile(const wxString& file = "");
   ~wxMetafile(void);
 
   // After this is called, the metafile cannot be used for anything
@@ -74,12 +74,9 @@ class WXDLLEXPORT wxMetafile: public wxGDIObject
   void SetWindowsMappingMode(int mm);
 
   // Operators
-  inline wxMetafile& operator = (const wxMetafile& metafile)
-      { if (*this == metafile) return (*this); Ref(metafile); return *this; }
-  inline bool operator== (const wxMetafile& metafile) const
-      { return m_refData == metafile.m_refData; }
-  inline bool operator!= (const wxMetafile& metafile) const
-      { return m_refData != metafile.m_refData; }
+  inline wxMetafile& operator = (const wxMetafile& metafile) { if (*this == metafile) return (*this); Ref(metafile); return *this; }
+  inline bool operator == (const wxMetafile& metafile) { return m_refData == metafile.m_refData; }
+  inline bool operator != (const wxMetafile& metafile) { return m_refData != metafile.m_refData; }
 
 protected:
 };
@@ -91,7 +88,7 @@ class WXDLLEXPORT wxMetafileDC: public wxDC
  public:
   // Don't supply origin and extent
   // Supply them to wxMakeMetaFilePlaceable instead.
-  wxMetafileDC(const wxString& file = wxEmptyString);
+  wxMetafileDC(const wxString& file = "");
 
   // Supply origin and extent (recommended).
   // Then don't need to supply them to wxMakeMetaFilePlaceable.

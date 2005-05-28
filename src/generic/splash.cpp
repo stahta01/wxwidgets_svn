@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "splash.h"
 #endif
 
@@ -22,17 +22,11 @@
 
 #if wxUSE_SPLASH
 
-#ifdef __WXGTK20__
-    #include <gtk/gtk.h>
-#endif
-
 #ifndef WX_PRECOMP
 #include "wx/dcmemory.h"
-#include "wx/dcclient.h"
 #endif
 
 #include "wx/splash.h"
-
 
 /*
  * wxSplashScreen
@@ -53,21 +47,13 @@ END_EVENT_TABLE()
  */
 
 wxSplashScreen::wxSplashScreen(const wxBitmap& bitmap, long splashStyle, int milliseconds, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style):
-    wxFrame(parent, id, wxEmptyString, wxPoint(0,0), wxSize(100, 100), style)
+    wxFrame(parent, id, wxEmptyString, wxPoint(0, 0), wxSize(100, 100), style)
 {
-    // At least for GTK+ 2.0, this hint is not available.
-#if defined(__WXGTK20__)
-#if GTK_CHECK_VERSION(2,2,0)
-    gtk_window_set_type_hint(GTK_WINDOW(m_widget),
-                             GDK_WINDOW_TYPE_HINT_SPLASHSCREEN);
-#endif
-#endif
-
     m_window = NULL;
     m_splashStyle = splashStyle;
     m_milliseconds = milliseconds;
 
-    m_window = new wxSplashScreenWindow(bitmap, this, wxID_ANY, pos, size, wxNO_BORDER);
+    m_window = new wxSplashScreenWindow(bitmap, this, -1, pos, size, wxNO_BORDER);
 
     SetClientSize(bitmap.GetWidth(), bitmap.GetHeight());
 
@@ -79,12 +65,12 @@ wxSplashScreen::wxSplashScreen(const wxBitmap& bitmap, long splashStyle, int mil
     if (m_splashStyle & wxSPLASH_TIMEOUT)
     {
         m_timer.SetOwner(this, wxSPLASH_TIMER_ID);
-        m_timer.Start(milliseconds, true);
+        m_timer.Start(milliseconds, TRUE);
     }
 
-    Show(true);
+    Show(TRUE);
     m_window->SetFocus();
-#if defined( __WXMSW__ ) || defined(__WXMAC__)
+#if defined(__WXMSW__) || defined(__WXMAC__)
     Update(); // Without this, you see a blank screen for an instant
 #else
     wxYieldIfNeeded(); // Should eliminate this
@@ -98,7 +84,7 @@ wxSplashScreen::~wxSplashScreen()
 
 void wxSplashScreen::OnNotify(wxTimerEvent& WXUNUSED(event))
 {
-    Close(true);
+    Close(TRUE);
 }
 
 void wxSplashScreen::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
@@ -195,12 +181,12 @@ void wxSplashScreenWindow::OnEraseBackground(wxEraseEvent& event)
 void wxSplashScreenWindow::OnMouseEvent(wxMouseEvent& event)
 {
     if (event.LeftDown() || event.RightDown())
-        GetParent()->Close(true);
+        GetParent()->Close(TRUE);
 }
 
 void wxSplashScreenWindow::OnChar(wxKeyEvent& WXUNUSED(event))
 {
-    GetParent()->Close(true);
+    GetParent()->Close(TRUE);
 }
 
 #endif // wxUSE_SPLASH

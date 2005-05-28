@@ -5,7 +5,7 @@
 // Created:     06.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ===========================================================================
@@ -87,10 +87,10 @@ public:
     wxMetalRenderer(wxRenderer *renderer, wxColourScheme* scheme);
 
     virtual void DrawButtonSurface(wxDC& dc,
-                                   const wxColour& WXUNUSED(col),
+                                   const wxColour& col,
                                    const wxRect& rect,
-                                   int WXUNUSED(flags))
-        { DrawMetal(dc, rect); }
+                                   int flags )
+        { DrawMetal( dc, rect ); }
 
     virtual void DrawScrollbarThumb(wxDC& dc,
                                     wxOrientation orient,
@@ -122,7 +122,7 @@ protected:
     void DrawShadedRect(wxDC& dc, wxRect *rect,
                         const wxPen& pen1, const wxPen& pen2);
 
-    void DrawArrowBorder(wxDC& dc, wxRect *rect, bool isPressed = false);
+    void DrawArrowBorder(wxDC& dc, wxRect *rect, bool isPressed = FALSE);
 
     void DrawArrow(wxDC& dc, const wxRect& rect,
                    wxArrowDirection arrowDir, wxArrowStyle arrowStyle);
@@ -141,7 +141,7 @@ private:
 // wxMetalTheme
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY_PTR(wxInputHandler *, wxArrayHandlers);
+WX_DEFINE_ARRAY(wxInputHandler *, wxArrayHandlers);
 
 class wxMetalTheme : public wxTheme
 {
@@ -163,7 +163,7 @@ private:
 private:
     wxTheme *m_win32Theme;
     wxMetalRenderer *m_renderer;
-
+    
     WX_DECLARE_THEME(Metal)
 };
 
@@ -406,9 +406,9 @@ wxMetalRenderer::wxMetalRenderer(wxRenderer *renderer, wxColourScheme *scheme)
 }
 
 void wxMetalRenderer::DrawScrollbarThumb(wxDC& dc,
-                                         wxOrientation WXUNUSED(orient),
+                                         wxOrientation orient,
                                          const wxRect& rect,
-                                         int WXUNUSED(flags))
+                                         int flags)
 {
     // we don't use the flags, the thumb never changes appearance
     wxRect rectThumb = rect;
@@ -417,15 +417,15 @@ void wxMetalRenderer::DrawScrollbarThumb(wxDC& dc,
 }
 
 void wxMetalRenderer::DrawScrollbarShaft(wxDC& dc,
-                                         wxOrientation WXUNUSED(orient),
+                                         wxOrientation orient,
                                          const wxRect& rectBar,
-                                         int WXUNUSED(flags))
+                                         int flags)
 {
-    DrawMetal(dc, rectBar);
+    DrawMetal( dc, rectBar );
 }
 
 void wxMetalRenderer::GetComboBitmaps(wxBitmap *bmpNormal,
-                                      wxBitmap * WXUNUSED(bmpFocus),
+                                      wxBitmap *bmpFocus,
                                       wxBitmap *bmpPressed,
                                       wxBitmap *bmpDisabled)
 {
@@ -575,7 +575,7 @@ void wxMetalRenderer::DrawArrow(wxDC& dc,
         x--;
 
     // draw it
-    dc.DrawBitmap(bmp, x, y, true /* use mask */);
+    dc.DrawBitmap(bmp, x, y, TRUE /* use mask */);
 }
 
 // ----------------------------------------------------------------------------
@@ -587,7 +587,7 @@ void wxMetalRenderer::DrawMetal(wxDC &dc, const wxRect &rect )
     dc.SetPen(*wxTRANSPARENT_PEN);
     for (int y = rect.y; y < rect.height+rect.y; y++)
     {
-       unsigned char intens = (unsigned char)(230 + 80 * (rect.y-y) / rect.height);
+       int intens = 230 + 80 * (rect.y-y) / rect.height;
        dc.SetBrush( wxBrush( wxColour(intens,intens,intens), wxSOLID ) );
        dc.DrawRectangle( rect.x, y, rect.width, 1 );
     }

@@ -12,7 +12,7 @@
 #ifndef _WX_GENERIC_PANEL_H_
 #define _WX_GENERIC_PANEL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "panelg.h"
 #endif
 
@@ -25,7 +25,7 @@
 
 class WXDLLEXPORT wxControlContainer;
 
-extern WXDLLEXPORT_DATA(const wxChar*) wxPanelNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxPanelNameStr;
 
 // ----------------------------------------------------------------------------
 // wxPanel contains other controls and implements TAB traversal between them
@@ -45,12 +45,12 @@ public:
     {
         Init();
 
-        Create(parent, wxID_ANY, wxPoint(x, y), wxSize(width, height), style, name);
+        Create(parent, -1, wxPoint(x, y), wxSize(width, height), style, name);
     }
 
     // Constructor
     wxPanel(wxWindow *parent,
-            wxWindowID winid = wxID_ANY,
+            wxWindowID id = -1,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
             long style = wxTAB_TRAVERSAL | wxNO_BORDER,
@@ -58,11 +58,11 @@ public:
     {
         Init();
 
-        Create(parent, winid, pos, size, style, name);
+        Create(parent, id, pos, size, style, name);
     }
 
     // Pseudo ctor
-    bool Create(wxWindow *parent, wxWindowID winid,
+    bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxTAB_TRAVERSAL | wxNO_BORDER,
@@ -73,15 +73,18 @@ public:
     // implementation from now on
     // --------------------------
 
+        // responds to colour changes
+    void OnSysColourChanged(wxSysColourChangedEvent& event);
+
         // calls layout for layout constraints and sizers
     void OnSize(wxSizeEvent& event);
 
     virtual void InitDialog();
 
 #ifdef __WXUNIVERSAL__
-    virtual bool IsCanvasWindow() const { return true; }
+    virtual bool IsCanvasWindow() const { return TRUE; }
+    virtual bool ProvidesBackground() const { return TRUE; }
 #endif
-
 
     WX_DECLARE_CONTROL_CONTAINER();
 
@@ -90,7 +93,7 @@ protected:
     void Init();
 
 private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxPanel)
+    DECLARE_DYNAMIC_CLASS(wxPanel)
     DECLARE_EVENT_TABLE()
 };
 

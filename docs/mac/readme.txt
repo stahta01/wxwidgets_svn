@@ -1,4 +1,4 @@
-Welcome to wxWidgets/Mac 2.6.0
+Welcome to wxWidgets/Mac 2
 
 More Information is available from the wxWidgets project home page at
 
@@ -21,4 +21,3 @@ claim to be suitable for any special or general purpose.
 Regards,
 
 Stefan Csomor
-

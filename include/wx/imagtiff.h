@@ -10,34 +10,32 @@
 #ifndef _WX_IMAGTIFF_H_
 #define _WX_IMAGTIFF_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "imagtiff.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/image.h"
+
 
 //-----------------------------------------------------------------------------
 // wxTIFFHandler
 //-----------------------------------------------------------------------------
 
 #if wxUSE_LIBTIFF
-
-#include "wx/image.h"
-
-// defines for wxImage::SetOption
-#define wxIMAGE_OPTION_BITSPERSAMPLE               wxString(_T("BitsPerSample"))
-#define wxIMAGE_OPTION_SAMPLESPERPIXEL             wxString(_T("SamplesPerPixel"))
-#define wxIMAGE_OPTION_COMPRESSION                 wxString(_T("Compression"))
-#define wxIMAGE_OPTION_IMAGEDESCRIPTOR             wxString(_T("ImageDescriptor"))
-
 class WXDLLEXPORT wxTIFFHandler: public wxImageHandler
 {
 public:
-    wxTIFFHandler();
+    inline wxTIFFHandler()
+    {
+        m_name = wxT("TIFF file");
+        m_extension = wxT("tif");
+        m_type = wxBITMAP_TYPE_TIF;
+        m_mime = wxT("image/tiff");
+    }
 
 #if wxUSE_STREAMS
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
-    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
     virtual bool DoCanRead( wxInputStream& stream );
     virtual int GetImageCount( wxInputStream& stream );
 #endif
@@ -45,8 +43,9 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxTIFFHandler)
 };
+#endif
 
-#endif // wxUSE_LIBTIFF
 
-#endif // _WX_IMAGTIFF_H_
+#endif
+  // _WX_IMAGTIFF_H_
 

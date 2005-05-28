@@ -24,7 +24,7 @@
 Tool layout item.
 */
 
-class WXDLLIMPEXP_FL wxToolLayoutItem : public wxObject
+class WXFL_DECLSPEC wxToolLayoutItem : public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxToolLayoutItem)
 
@@ -33,19 +33,19 @@ public:
     bool      mIsSeparator;
 };
 
-class WXDLLIMPEXP_FL wxDynToolInfo;
+class WXFL_DECLSPEC wxDynToolInfo;
 
 typedef wxToolLayoutItem* wxToolLayoutItemPtrT;
 typedef wxDynToolInfo*    wxDynToolInfoPtrT;
 
-WXFL_DEFINE_ARRAY_PTR( wxToolLayoutItemPtrT, wxLayoutItemArrayT  );
-WXFL_DEFINE_ARRAY_PTR( wxDynToolInfoPtrT,    wxDynToolInfoArrayT );
+WXFL_DEFINE_ARRAY( wxToolLayoutItemPtrT, wxLayoutItemArrayT  );
+WXFL_DEFINE_ARRAY( wxDynToolInfoPtrT,    wxDynToolInfoArrayT );
 
 /*
 This is a base class for layout algorithm implementations.
 */
 
-class WXDLLIMPEXP_FL LayoutManagerBase
+class WXFL_DECLSPEC LayoutManagerBase
 {
 public:
         // Constructor.
@@ -64,7 +64,7 @@ BagLayout lays out items in left-to-right order from
 top to bottom.
 */
 
-class WXDLLIMPEXP_FL BagLayout : public LayoutManagerBase
+class WXFL_DECLSPEC BagLayout : public LayoutManagerBase
 {
 public:
         // Constructor.
@@ -79,7 +79,7 @@ public:
 This class holds dynamic toolbar item information.
 */
 
-class WXDLLIMPEXP_FL wxDynToolInfo : public wxToolLayoutItem
+class WXFL_DECLSPEC wxDynToolInfo : public wxToolLayoutItem
 {
     DECLARE_DYNAMIC_CLASS(wxDynToolInfo)
 
@@ -99,7 +99,7 @@ public:
 wxDynamicToolBar manages containment and layout of tool windows.
 */
 
-class WXDLLIMPEXP_FL wxDynamicToolBar : public wxToolBarBase
+class WXFL_DECLSPEC wxDynamicToolBar : public wxToolBarBase
 {
 protected:
     friend class wxDynamicToolBarSerializer;
@@ -148,35 +148,25 @@ public:
     virtual void AddTool( int toolIndex,
                               const wxString& imageFileName,
                               wxBitmapType imageFileType = wxBITMAP_TYPE_BMP,
-                              const wxString& labelText = wxT(""), bool alignTextRight = false,
-                              bool isFlat = true );
+                              const wxString& labelText = wxT(""), bool alignTextRight = FALSE,
+                              bool isFlat = TRUE );
         // Adds a tool. See the documentation for wxToolBar for details.
 
     virtual void AddTool( int toolIndex, wxBitmap labelBmp,
-                              const wxString& labelText = wxT(""), bool alignTextRight = false,
-                              bool isFlat = true );
-
-        // Unhide method from parent.
-
-    virtual wxToolBarToolBase *AddTool (wxToolBarToolBase *tool)
-                              { return wxToolBarBase::AddTool(tool); };
+                              const wxString& labelText = wxT(""), bool alignTextRight = FALSE,
+                              bool isFlat = TRUE );
 
     // Method from wxToolBarBase (for compatibility), only
     // the first two arguments are valid.
     // See the documentation for wxToolBar for details.
 
     virtual wxToolBarToolBase *AddTool(const int toolIndex, const wxBitmap& bitmap, const wxBitmap& pushedBitmap = wxNullBitmap,
-               const bool toggle = false, const long xPos = wxDefaultCoord, const long yPos = wxDefaultCoord, wxObject *clientData = NULL,
+               const bool toggle = FALSE, const long xPos = -1, const long yPos = -1, wxObject *clientData = NULL,
                const wxString& helpString1 = wxT(""), const wxString& helpString2 = wxT(""));
 
         // Adds a separator. See the documentation for wxToolBar for details.
 
-    virtual void AddSeparator( wxWindow* pSepartorWnd );
-
-        // Unhide method from parent.
-
-    virtual wxToolBarToolBase *AddSeparator()
-                              { return wxToolBarBase::AddSeparator(); };
+    virtual void AddSeparator( wxWindow* pSepartorWnd = NULL );
 
         // Returns tool information for the given tool index.
 
@@ -209,7 +199,7 @@ public:
 
         // Enables or disables the given tool.
 
-    virtual void EnableTool(int toolIndex, bool enable = true);
+    virtual void EnableTool(const int toolIndex, const bool enable = TRUE);
 
         // Responds to size events, calling Layout.
 

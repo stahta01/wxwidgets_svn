@@ -18,8 +18,9 @@
 
 #include <wx/docview.h>
 #include <wx/string.h>
+#include <wx/wxexpr.h>
 
-#include <wx/ogl/ogl.h> // base header of OGL, includes and adjusts wx/deprecated/setup.h
+#include <wx/ogl/ogl.h>
 
 /*
  * csSymbol

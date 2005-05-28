@@ -8,7 +8,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "iconbndl.h"
 #endif
 
@@ -24,10 +24,9 @@
     #include "wx/icon.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/bitmap.h"
 #endif
 
-#if wxUSE_IMAGE && !defined(_WX_IMAGE_H_)
+#ifndef _WX_IMAGE_H_
     #include "wx/image.h"
 #endif
 
@@ -54,13 +53,8 @@ void wxIconBundle::DeleteIcons()
     m_icons.Empty();
 }
 
-#if wxUSE_IMAGE
 void wxIconBundle::AddIcon( const wxString& file, long type )
-#else
-void wxIconBundle::AddIcon( const wxString& WXUNUSED(file), long WXUNUSED(type) )
-#endif
 {
-#if wxUSE_IMAGE
     size_t count = wxImage::GetImageCount( file, type );
     size_t i;
     wxImage image;
@@ -79,7 +73,6 @@ void wxIconBundle::AddIcon( const wxString& WXUNUSED(file), long WXUNUSED(type) 
         AddIcon( *tmp );
         delete tmp;
     }
-#endif
 }
 
 const wxIcon& wxIconBundle::GetIcon( const wxSize& size ) const

@@ -7,7 +7,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "settings.h"
 #endif
 
@@ -78,7 +78,7 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
     }
 }
 
-int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(win))
+int wxSystemSettingsNative::GetMetric(wxSystemMetric index)
 {
     int val;
     
@@ -95,7 +95,8 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
             return 15; 
             break;
         default:
-            return -1;  // unsupported metric
+            wxCHECK_MSG(index, 0, wxT("wxSystemSettings::GetMetric not fully implemented"));
+            return 0;
     }
 }
 

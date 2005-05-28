@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/wfstream.h
+// Name:        wfstream.h
 // Purpose:     File stream classes
 // Author:      Guilhem Lavaux
 // Modified by:
@@ -12,13 +12,13 @@
 #ifndef _WX_WXFSTREAM_H__
 #define _WX_WXFSTREAM_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "wfstream.h"
 #endif
 
 #include "wx/defs.h"
 
-#if wxUSE_STREAMS
+#if wxUSE_STREAMS && wxUSE_FILE
 
 #include "wx/object.h"
 #include "wx/string.h"
@@ -26,179 +26,135 @@
 #include "wx/file.h"
 #include "wx/ffile.h"
 
-#if wxUSE_FILE
-
 // ----------------------------------------------------------------------------
 // wxFileStream using wxFile
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFileInputStream : public wxInputStream
-{
-public:
-    wxFileInputStream(const wxString& ifileName);
-    wxFileInputStream(wxFile& file);
-    wxFileInputStream(int fd);
-    ~wxFileInputStream();
+class WXDLLEXPORT wxFileInputStream: public wxInputStream {
+ public:
+  wxFileInputStream(const wxString& ifileName);
+  wxFileInputStream(wxFile& file);
+  wxFileInputStream(int fd);
+  ~wxFileInputStream();
 
-    wxFileOffset GetLength() const;
+  size_t GetSize() const;
 
-    bool Ok() const { return m_file->IsOpened(); }
-    bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
+  bool Ok() const { return m_file->IsOpened(); }
 
-protected:
-    wxFileInputStream();
+ protected:
+  wxFileInputStream();
 
-    size_t OnSysRead(void *buffer, size_t size);
-    wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode);
-    wxFileOffset OnSysTell() const;
+  size_t OnSysRead(void *buffer, size_t size);
+  off_t OnSysSeek(off_t pos, wxSeekMode mode);
+  off_t OnSysTell() const;
 
-protected:
-    wxFile *m_file;
-    bool m_file_destroy;
-
-    DECLARE_NO_COPY_CLASS(wxFileInputStream)
+ protected:
+  wxFile *m_file;
+  bool m_file_destroy;
 };
 
-class WXDLLIMPEXP_BASE wxFileOutputStream : public wxOutputStream
-{
-public:
-    wxFileOutputStream(const wxString& fileName);
-    wxFileOutputStream(wxFile& file);
-    wxFileOutputStream(int fd);
-    virtual ~wxFileOutputStream();
+class WXDLLEXPORT wxFileOutputStream: public wxOutputStream {
+ public:
+  wxFileOutputStream(const wxString& fileName);
+  wxFileOutputStream(wxFile& file);
+  wxFileOutputStream(int fd);
+  virtual ~wxFileOutputStream();
 
-    void Sync();
-    bool Close() { return m_file_destroy ? m_file->Close() : true; }
-    wxFileOffset GetLength() const;
+  // To solve an ambiguity on GCC
+//  inline wxOutputStream& Write(const void *buffer, size_t size)
+//     { return wxOutputStream::Write(buffer, size); }
 
-    bool Ok() const { return m_file->IsOpened(); }
-    bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
+  void Sync();
+  size_t GetSize() const;
 
-protected:
-    wxFileOutputStream();
+  bool Ok() const { return m_file->IsOpened(); }
 
-    size_t OnSysWrite(const void *buffer, size_t size);
-    wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode);
-    wxFileOffset OnSysTell() const;
+ protected:
+  wxFileOutputStream();
 
-protected:
-    wxFile *m_file;
-    bool m_file_destroy;
+  size_t OnSysWrite(const void *buffer, size_t size);
+  off_t OnSysSeek(off_t pos, wxSeekMode mode);
+  off_t OnSysTell() const;
 
-    DECLARE_NO_COPY_CLASS(wxFileOutputStream)
+ protected:
+  wxFile *m_file;
+  bool m_file_destroy;
 };
 
-class WXDLLIMPEXP_BASE wxTempFileOutputStream : public wxOutputStream
-{
-public:
-    wxTempFileOutputStream(const wxString& fileName);
-    virtual ~wxTempFileOutputStream();
-
-    bool Close() { return Commit(); }
-    virtual bool Commit() { return m_file->Commit(); }
-    virtual void Discard() { m_file->Discard(); }
-
-    wxFileOffset GetLength() const { return m_file->Length(); }
-    bool IsSeekable() const { return true; }
-
-protected:
-    size_t OnSysWrite(const void *buffer, size_t size);
-    wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode)
-        { return m_file->Seek(pos, mode); }
-    wxFileOffset OnSysTell() const { return m_file->Tell(); }
-
-private:
-    wxTempFile *m_file;
-
-    DECLARE_NO_COPY_CLASS(wxTempFileOutputStream)
+class WXDLLEXPORT wxFileStream: public wxFileInputStream, public wxFileOutputStream {
+ public:
+  wxFileStream(const wxString& fileName);
 };
-
-class WXDLLIMPEXP_BASE wxFileStream : public wxFileInputStream,
-                                      public wxFileOutputStream
-{
-public:
-    wxFileStream(const wxString& fileName);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxFileStream)
-};
-
-#endif //wxUSE_FILE
-
-#if wxUSE_FFILE
 
 // ----------------------------------------------------------------------------
 // wxFFileStream using wxFFile
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxFFileInputStream : public wxInputStream
-{
-public:
-    wxFFileInputStream(const wxString& fileName, const wxChar *mode = _T("rb"));
-    wxFFileInputStream(wxFFile& file);
-    wxFFileInputStream(FILE *file);
-    ~wxFFileInputStream();
+class WXDLLEXPORT wxFFileInputStream: public wxInputStream {
+ public:
+  wxFFileInputStream(const wxString& ifileName);
+  wxFFileInputStream(wxFFile& file);
+  wxFFileInputStream(FILE *file);
+  ~wxFFileInputStream();
 
-    wxFileOffset GetLength() const;
+  size_t GetSize() const;
 
-    bool Ok() const { return m_file->IsOpened(); }
-    bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
+  bool Ok() const { return m_file->IsOpened(); }
 
-protected:
-    wxFFileInputStream();
+ protected:
+  wxFFileInputStream();
 
-    size_t OnSysRead(void *buffer, size_t size);
-    wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode);
-    wxFileOffset OnSysTell() const;
+  size_t OnSysRead(void *buffer, size_t size);
+  off_t OnSysSeek(off_t pos, wxSeekMode mode);
+  off_t OnSysTell() const;
 
-protected:
-    wxFFile *m_file;
-    bool m_file_destroy;
-
-    DECLARE_NO_COPY_CLASS(wxFFileInputStream)
+ protected:
+  wxFFile *m_file;
+  bool m_file_destroy;
 };
 
-class WXDLLIMPEXP_BASE wxFFileOutputStream : public wxOutputStream
-{
-public:
-    wxFFileOutputStream(const wxString& fileName, const wxChar *mode = _T("w+b"));
-    wxFFileOutputStream(wxFFile& file);
-    wxFFileOutputStream(FILE *file);
-    virtual ~wxFFileOutputStream();
+class WXDLLEXPORT wxFFileOutputStream: public wxOutputStream {
+ public:
+  wxFFileOutputStream(const wxString& fileName);
+  wxFFileOutputStream(wxFFile& file);
+  wxFFileOutputStream(FILE *file);
+  virtual ~wxFFileOutputStream();
 
-    void Sync();
-    bool Close() { return m_file_destroy ? m_file->Close() : true; }
-    wxFileOffset GetLength() const;
+  // To solve an ambiguity on GCC
+//  inline wxOutputStream& Write(const void *buffer, size_t size)
+//     { return wxOutputStream::Write(buffer, size); }
 
-    bool Ok() const { return m_file->IsOpened(); }
-    bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
+  void Sync();
+  size_t GetSize() const;
 
-protected:
-    wxFFileOutputStream();
+  bool Ok() const { return m_file->IsOpened(); }
 
-    size_t OnSysWrite(const void *buffer, size_t size);
-    wxFileOffset OnSysSeek(wxFileOffset pos, wxSeekMode mode);
-    wxFileOffset OnSysTell() const;
+ protected:
+  wxFFileOutputStream();
 
-protected:
-    wxFFile *m_file;
-    bool m_file_destroy;
+  size_t OnSysWrite(const void *buffer, size_t size);
+  off_t OnSysSeek(off_t pos, wxSeekMode mode);
+  off_t OnSysTell() const;
 
-    DECLARE_NO_COPY_CLASS(wxFFileOutputStream)
+ protected:
+  wxFFile *m_file;
+  bool m_file_destroy;
 };
 
-class WXDLLIMPEXP_BASE wxFFileStream : public wxFFileInputStream,
-                                       public wxFFileOutputStream
-{
-public:
-    wxFFileStream(const wxString& fileName);
-
-private:
-    DECLARE_NO_COPY_CLASS(wxFFileStream)
+class WXDLLEXPORT wxFFileStream: public wxFFileInputStream, public wxFFileOutputStream {
+ public:
+  wxFFileStream(const wxString& fileName);
 };
+#endif
+  // wxUSE_STREAMS && wxUSE_FILE
 
-#endif //wxUSE_FFILE
+#endif
+  // _WX_WXFSTREAM_H__
 
-#endif // wxUSE_STREAMS
 
-#endif // _WX_WXFSTREAM_H__
+
+
+
+
+
+

@@ -104,6 +104,7 @@ COMMONOBJS = cmndata.obj \
 
 # Can't compile these yet under Salford C++
 #  mimetype.obj \
+#  odbc.obj \
 #  db.obj \
 #  dbtable.obj \
 
@@ -140,6 +141,7 @@ MSWOBJS = \
   fontdlg.obj \
   frame.obj \
   gauge95.obj \
+  gaugemsw.obj \
   gdiobj.obj \
   helpwin.obj \
   icon.obj \
@@ -323,6 +325,9 @@ frame.obj:     $(MSWDIR)\frame.cpp
 
 gauge95.obj:     $(MSWDIR)\gauge95.cpp
   $(CCC) $(CPPFLAGS) $(IFLAGS) $(MSWDIR)\gauge95.cpp /BINARY gauge95.obj
+
+gaugemsw.obj:     $(MSWDIR)\gaugemsw.cpp
+  $(CCC) $(CPPFLAGS) $(IFLAGS) $(MSWDIR)\gaugemsw.cpp /BINARY gaugemsw.obj
 
 gdiobj.obj:     $(MSWDIR)\gdiobj.cpp
   $(CCC) $(CPPFLAGS) $(IFLAGS) $(MSWDIR)\gdiobj.cpp /BINARY gdiobj.obj
@@ -577,6 +582,9 @@ module.obj:     $(COMMDIR)\module.cpp
 
 object.obj:     $(COMMDIR)\object.cpp
   $(CCC) $(CPPFLAGS) $(IFLAGS) $(COMMDIR)\object.cpp /BINARY object.obj
+
+odbc.obj:     $(COMMDIR)\odbc.cpp
+  $(CCC) $(CPPFLAGS) $(IFLAGS) $(COMMDIR)\odbc.cpp /BINARY odbc.obj
 
 prntbase.obj:     $(COMMDIR)\prntbase.cpp
   $(CCC) $(CPPFLAGS) $(IFLAGS) $(COMMDIR)\prntbase.cpp /BINARY prntbase.obj

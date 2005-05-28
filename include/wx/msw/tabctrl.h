@@ -6,19 +6,19 @@
 // Created:     01/02/97
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TABCTRL_H_
 #define _WX_TABCTRL_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "tabctrl.h"
 #endif
 
-class WXDLLIMPEXP_CORE wxImageList;
+class wxImageList;
 
-// extern WXDLLEXPORT_DATA(const wxChar*) wxToolBarNameStr;
+// WXDLLEXPORT_DATA(extern const wxChar*) wxToolBarNameStr;
 
 /*
  * Flags returned by HitTest
@@ -124,7 +124,6 @@ protected:
     wxImageList*    m_imageList;
 
 DECLARE_EVENT_TABLE()
-    DECLARE_NO_COPY_CLASS(wxTabCtrl)
 };
 
 class WXDLLEXPORT wxTabEvent : public wxNotifyEvent
@@ -150,15 +149,15 @@ private:
     int m_nSel,     // currently selected page
         m_nOldSel;  // previously selected page
 
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxTabEvent)
+    DECLARE_DYNAMIC_CLASS(wxTabEvent)
 };
 
 typedef void (wxEvtHandler::*wxTabEventFunction)(wxTabEvent&);
 
 #define EVT_TAB_SEL_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_COMMAND_TAB_SEL_CHANGED, \
-  id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxTabEventFunction, & fn ), NULL),
+  id, -1, (wxObjectEventFunction) (wxEventFunction) (wxTabEventFunction) & fn, NULL),
 #define EVT_TAB_SEL_CHANGING(id, fn) DECLARE_EVENT_TABLE_ENTRY(wxEVT_COMMAND_TAB_SEL_CHANGING, \
-  id, wxID_ANY, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxTabEventFunction, & fn ), NULL),
+  id, -1, (wxObjectEventFunction) (wxEventFunction) (wxTabEventFunction) & fn, NULL),
 
 #endif
     // _WX_TABCTRL_H_

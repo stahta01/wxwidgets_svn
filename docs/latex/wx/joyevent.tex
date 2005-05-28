@@ -22,7 +22,6 @@ functions that take a wxJoystickEvent argument.
 \twocolitem{{\bf EVT\_JOY\_BUTTON\_UP(func)}}{Process a wxEVT\_JOY\_BUTTON\_UP event.}
 \twocolitem{{\bf EVT\_JOY\_MOVE(func)}}{Process a wxEVT\_JOY\_MOVE event.}
 \twocolitem{{\bf EVT\_JOY\_ZMOVE(func)}}{Process a wxEVT\_JOY\_ZMOVE event.}
-\twocolitem{{\bf EVT\_JOYSTICK\_EVENTS(func)}}{Processes all joystick events.}
 \end{twocollist}%
 
 \wxheading{See also}
@@ -31,7 +30,7 @@ functions that take a wxJoystickEvent argument.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxJoystickEvent::wxJoystickEvent}\label{wxjoystickeventctor}
+\membersection{wxJoystickEvent::wxJoystickEvent}
 
 \func{}{wxJoystickEvent}{\param{WXTYPE}{ eventType = 0}, \param{int}{ state = 0},
  \param{int}{ joystick = wxJOYSTICK1}, \param{int }{change = 0}}
@@ -42,7 +41,7 @@ Constructor.
 
 \constfunc{bool}{ButtonDown}{\param{int}{ button = wxJOY\_BUTTON\_ANY}}
 
-Returns true if the event was a down event from the specified button (or any button).
+Returns TRUE if the event was a down event from the specified button (or any button).
 
 \wxheading{Parameters}
 
@@ -53,7 +52,7 @@ indicate any button down event.}
 
 \constfunc{bool}{ButtonIsDown}{\param{int}{ button = wxJOY\_BUTTON\_ANY}}
 
-Returns true if the specified button (or any button) was in a down state.
+Returns TRUE if the specified button (or any button) was in a down state.
 
 \wxheading{Parameters}
 
@@ -64,7 +63,7 @@ indicate any button down event.}
 
 \constfunc{bool}{ButtonUp}{\param{int}{ button = wxJOY\_BUTTON\_ANY}}
 
-Returns true if the event was an up event from the specified button (or any button).
+Returns TRUE if the event was an up event from the specified button (or any button).
 
 \wxheading{Parameters}
 
@@ -107,17 +106,17 @@ Returns the z position of the joystick event.
 
 \constfunc{bool}{IsButton}{\void}
 
-Returns true if this was a button up or down event ({\it not} 'is any button down?').
+Returns TRUE if this was a button up or down event ({\it not} 'is any button down?').
 
 \membersection{wxJoystickEvent::IsMove}\label{wxjoystickeventismove}
 
 \constfunc{bool}{IsMove}{\void}
 
-Returns true if this was an x, y move event.
+Returns TRUE if this was an x, y move event.
 
 \membersection{wxJoystickEvent::IsZMove}\label{wxjoystickeventiszmove}
 
 \constfunc{bool}{IsZMove}{\void}
 
-Returns true if this was a z move event.
+Returns TRUE if this was a z move event.
 

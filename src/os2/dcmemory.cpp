@@ -81,7 +81,7 @@ bool wxMemoryDC::CreateCompatible(
             m_ok = TRUE;
             m_bOwnsDC = TRUE;
             //
-            // Set the wxWidgets color table
+            // Set the wxWindows color table
             //
             ::GpiCreateLogColorTable( m_hPS
                                      ,0L
@@ -153,10 +153,9 @@ void wxMemoryDC::SelectObject(
         //
         // Bmps drawn to are upside down, so flip it before committing
         //
-        POINTL                      vPoint[4] = { {0, m_vSelectedBitmap.GetHeight()}
-                                                 ,{m_vSelectedBitmap.GetWidth(), 0}
-                                                 ,{0, 0}
-                                                 ,{m_vSelectedBitmap.GetWidth(), m_vSelectedBitmap.GetHeight()}
+        POINTL                      vPoint[4] = { 0, m_vSelectedBitmap.GetHeight(),
+                                                  m_vSelectedBitmap.GetWidth(), 0,
+                                                  0, 0, m_vSelectedBitmap.GetWidth(), m_vSelectedBitmap.GetHeight()
                                                 };
 
 

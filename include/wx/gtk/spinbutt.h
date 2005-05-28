@@ -11,7 +11,7 @@
 #ifndef _WX_GTK_SPINBUTT_H_
 #define _WX_GTK_SPINBUTT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -46,13 +46,11 @@ public:
     virtual int GetMin() const;
     virtual int GetMax() const;
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-    
     // implementation
     void OnSize( wxSizeEvent &event );
 
     bool IsOwnGtkWindow( GdkWindow *window );
+    void ApplyWidgetStyle();
 
     GtkAdjustment  *m_adjust;
     float           m_oldPos;

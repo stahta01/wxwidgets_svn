@@ -11,7 +11,6 @@ from distutils.core import setup
 import py2exe
 
 setup( name = "superdoodle",
-       #console = ["superdoodle.py"]
-       windows = ["superdoodle.py"] #, "doodle.py"]
+       scripts = ["superdoodle.py"]
        )
 

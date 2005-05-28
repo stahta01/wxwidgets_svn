@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     09/17/99
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +35,10 @@ END_EVENT_TABLE()
 // Item members
 wxControl::wxControl()
 {
+
+#if WXWIN_COMPATIBILITY
+  m_callback = 0;
+#endif // WXWIN_COMPATIBILITY
 } // end of wxControl::wxControl
 
 bool wxControl::Create(
@@ -99,44 +103,41 @@ bool wxControl::OS2CreateControl(
 , WXDWORD                           dwExstyle
 )
 {
+    bool                            bWant3D = FALSE;
+
     //
     // Doesn't do anything at all under OS/2
     //
     if (dwExstyle == (WXDWORD)-1)
     {
-        dwExstyle = 0;
-	(void) OS2GetStyle(GetWindowStyle(), &dwExstyle);
+        dwExstyle = Determine3DEffects(WS_EX_CLIENTEDGE, &bWant3D);
     }
     //
-    // All controls should have these styles (wxWidgets creates all controls
+    // All controls should have these styles (wxWindows creates all controls
     // visible by default)
     //
     if (m_isShown )
         dwStyle |= WS_VISIBLE;
 
     wxWindow*                       pParent = GetParent();
-    PSZ                             zClass = "";
+    PSZ                             zClass;
 
     if (!pParent)
         return FALSE;
 
-    if ((wxStrcmp(zClassname, _T("COMBOBOX"))) == 0)
+    if ((strcmp(zClassname, "COMBOBOX")) == 0)
         zClass = WC_COMBOBOX;
-    else if ((wxStrcmp(zClassname, _T("STATIC"))) == 0)
+    else if ((strcmp(zClassname, "STATIC")) == 0)
         zClass = WC_STATIC;
-    else if ((wxStrcmp(zClassname, _T("BUTTON"))) == 0)
+    else if ((strcmp(zClassname, "BUTTON")) == 0)
         zClass = WC_BUTTON;
-    else if ((wxStrcmp(zClassname, _T("NOTEBOOK"))) == 0)
+    else if ((strcmp(zClassname, "NOTEBOOK")) == 0)
         zClass = WC_NOTEBOOK;
-    else if ((wxStrcmp(zClassname, _T("CONTAINER"))) == 0)
-        zClass = WC_CONTAINER;
     dwStyle |= WS_VISIBLE;
-
-    wxString                        sLabel = ::wxPMTextToLabel(rsLabel);
 
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
                                        ,(PSZ)zClass              // Window class
-                                       ,(PSZ)sLabel.c_str()      // Initial Text
+                                       ,(PSZ)rsLabel.c_str()     // Initial Text
                                        ,(ULONG)dwStyle           // Style flags
                                        ,(LONG)0                  // X pos of origin
                                        ,(LONG)0                  // Y pos of origin
@@ -163,14 +164,9 @@ bool wxControl::OS2CreateControl(
     SubclassWin(m_hWnd);
 
     //
-    // Controls use the same colours as their parent dialog by default
+    // Controls use the same font and colours as their parent dialog by default
     //
     InheritAttributes();
-    //
-    // All OS/2 ctrls use the small font
-    //
-    SetFont(*wxSMALL_FONT);
-
     SetXComp(0);
     SetYComp(0);
     SetSize( rPos.x
@@ -188,6 +184,16 @@ wxSize wxControl::DoGetBestSize() const
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
+#if WXWIN_COMPATIBILITY
+    if ( m_callback )
+    {
+        (void)(*m_callback)(this, event);
+
+        return TRUE;
+    }
+    else
+#endif // WXWIN_COMPATIBILITY
+
     return GetEventHandler()->ProcessEvent(event);
 }
 
@@ -246,15 +252,6 @@ WXDWORD wxControl::OS2GetStyle(
     }
     return dwStyle;
 } // end of wxControl::OS2GetStyle
-
-void wxControl::SetLabel(
-  const wxString&                   rsLabel
-)
-{
-    wxString                        sLabel = ::wxPMTextToLabel(rsLabel);
-
-    ::WinSetWindowText(GetHwnd(), (PSZ)sLabel.c_str());
-} // end of wxControl::SetLabel
 
 // ---------------------------------------------------------------------------
 // global functions

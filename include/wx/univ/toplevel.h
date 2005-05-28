@@ -11,7 +11,7 @@
 #ifndef __WX_UNIV_TOPLEVEL_H__
 #define __WX_UNIV_TOPLEVEL_H__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univtoplevel.h"
 #endif
 
@@ -143,6 +143,8 @@ public:
     virtual int GetMinWidth() const;
     virtual int GetMinHeight() const;
 
+    virtual bool ProvidesBackground() const { return TRUE; }
+    
 protected:
     // handle titlebar button click event
     virtual void ClickTitleBarButton(long button);
@@ -156,12 +158,12 @@ protected:
     void Init();
 
     void RefreshTitleBar();
-    void OnNcPaint(wxNcPaintEvent& event);
+    void OnNcPaint(wxPaintEvent& event);
     void OnSystemMenu(wxCommandEvent& event);
 
-    // true if wxTLW should render decorations (aka titlebar) itself
+    // TRUE if wxTLW should render decorations (aka titlebar) itself
     static int ms_drawDecorations;
-    // true if wxTLW can be iconized
+    // TRUE if wxTLW can be iconized
     static int ms_canIconize;
     // true for currently active frame
     bool m_isActive:1;

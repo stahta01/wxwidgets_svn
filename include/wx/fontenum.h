@@ -13,12 +13,11 @@
 #ifndef _WX_FONTENUM_H_
 #define _WX_FONTENUM_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "fontenum.h"
 #endif
 
-#include "wx/fontenc.h"
-#include "wx/arrstr.h"
+#include "wx/font.h"
 
 // ----------------------------------------------------------------------------
 // wxFontEnumerator enumerates all available fonts on the system or only the
@@ -33,60 +32,58 @@ public:
     // start enumerating font facenames (either all of them or those which
     // support the given encoding) - will result in OnFacename() being
     // called for each available facename (until they are exhausted or
-    // OnFacename returns false)
+    // OnFacename returns FALSE)
     virtual bool EnumerateFacenames
                  (
                     wxFontEncoding encoding = wxFONTENCODING_SYSTEM, // all
-                    bool fixedWidthOnly = false
+                    bool fixedWidthOnly = FALSE
                  );
 
     // enumerate the different encodings either for given font facename or for
     // all facenames - will result in OnFontEncoding() being called for each
     // available (facename, encoding) couple
-    virtual bool EnumerateEncodings(const wxString& facename = wxEmptyString);
+    virtual bool EnumerateEncodings(const wxString& facename = wxT(""));
 
     // callbacks which are called after one of EnumerateXXX() functions from
-    // above is invoked - all of them may return false to stop enumeration or
-    // true to continue with it
+    // above is invoked - all of them may return FALSE to stop enumeration or
+    // TRUE to continue with it
 
     // called by EnumerateFacenames
     virtual bool OnFacename(const wxString& facename)
-        {
+        { 
             if (m_Facenames == NULL) m_Facenames = new wxArrayString;
             m_Facenames -> Add(facename);
-            return true;
+            return TRUE;
         }
 
     // called by EnumerateEncodings
     virtual bool OnFontEncoding(const wxString& WXUNUSED(facename),
                                 const wxString& encoding)
-        {
+        { 
             if (m_Encodings == NULL) m_Encodings = new wxArrayString;
             m_Encodings -> Add(encoding);
-            return true;
+            return TRUE;
         }
-
+        
     // convenience function that returns array of facenames. Cannot be called
     // before EnumerateFacenames.
-    wxArrayString *GetFacenames()
+    wxArrayString *GetFacenames() 
         { return m_Facenames; }
 
     // convenience function that returns array of encodings.
     // Cannot be called before EnumerateEncodings.
-    wxArrayString *GetEncodings()
+    wxArrayString *GetEncodings() 
         { return m_Encodings; }
-
+        
     // virtual dtor for the base class
-    virtual ~wxFontEnumerator()
-        {
+    virtual ~wxFontEnumerator() 
+        { 
             if (m_Facenames) delete m_Facenames;
             if (m_Encodings) delete m_Encodings;
         }
-
+    
 private:
     wxArrayString *m_Facenames, *m_Encodings;
-
-    DECLARE_NO_COPY_CLASS(wxFontEnumerator)
 };
 
 #endif // _WX_FONTENUM_H_

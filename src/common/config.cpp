@@ -7,13 +7,13 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1997 Karsten Ballüder   Ballueder@usa.net
 //                       Vadim Zeitlin      <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "confbase.h"
 #endif
 
@@ -30,7 +30,6 @@
 #include "wx/config.h"
 #include "wx/intl.h"
 #include "wx/log.h"
-#include "wx/arrstr.h"
 
 #if wxUSE_CONFIG && ((wxUSE_FILE && wxUSE_TEXTFILE) || wxUSE_CONFIG_NATIVE)
 
@@ -39,9 +38,9 @@
 #include "wx/textfile.h"
 #include "wx/utils.h"
 #include "wx/utils.h"
-#include "wx/math.h"
 
 #include <stdlib.h>
+#include <math.h>
 #include <ctype.h>
 #include <limits.h>     // for INT_MAX
 
@@ -50,7 +49,7 @@
 // ----------------------------------------------------------------------------
 
 wxConfigBase *wxConfigBase::ms_pConfig     = NULL;
-bool          wxConfigBase::ms_bAutoCreate = true;
+bool          wxConfigBase::ms_bAutoCreate = TRUE;
 
 // ============================================================================
 // implementation
@@ -69,13 +68,12 @@ wxConfigBase::wxConfigBase(const wxString& appName,
                            long style)
             : m_appName(appName), m_vendorName(vendorName), m_style(style)
 {
-    m_bExpandEnvVars = true;
-    m_bRecordDefaults = false;
+    m_bExpandEnvVars = TRUE;
+    m_bRecordDefaults = FALSE;
 }
 
 wxConfigBase::~wxConfigBase()
 {
-    // required here for Darwin
 }
 
 wxConfigBase *wxConfigBase::Set(wxConfigBase *pConfig)
@@ -90,9 +88,11 @@ wxConfigBase *wxConfigBase::Create()
   if ( ms_bAutoCreate && ms_pConfig == NULL ) {
     ms_pConfig =
     #if defined(__WXMSW__) && wxUSE_CONFIG_NATIVE
+      #ifdef __WIN32__
         new wxRegConfig(wxTheApp->GetAppName(), wxTheApp->GetVendorName());
-    #elif defined(__WXPALMOS__) && wxUSE_CONFIG_NATIVE
-        new wxPrefConfig(wxTheApp->GetAppName());
+      #else  //WIN16
+        new wxIniConfig(wxTheApp->GetAppName(), wxTheApp->GetVendorName());
+      #endif
     #else // either we're under Unix or wish to use files even under Windows
       new wxFileConfig(wxTheApp->GetAppName());
     #endif
@@ -109,21 +109,21 @@ wxConfigBase *wxConfigBase::Create()
 #define IMPLEMENT_READ_FOR_TYPE(name, type, deftype, extra)                 \
     bool wxConfigBase::Read(const wxString& key, type *val) const           \
     {                                                                       \
-        wxCHECK_MSG( val, false, _T("wxConfig::Read(): NULL parameter") );  \
+        wxCHECK_MSG( val, FALSE, _T("wxConfig::Read(): NULL parameter") );  \
                                                                             \
         if ( !DoRead##name(key, val) )                                      \
-            return false;                                                   \
+            return FALSE;                                                   \
                                                                             \
         *val = extra(*val);                                                 \
                                                                             \
-        return true;                                                        \
+        return TRUE;                                                        \
     }                                                                       \
                                                                             \
     bool wxConfigBase::Read(const wxString& key,                            \
                             type *val,                                      \
                             deftype defVal) const                           \
     {                                                                       \
-        wxCHECK_MSG( val, false, _T("wxConfig::Read(): NULL parameter") );  \
+        wxCHECK_MSG( val, FALSE, _T("wxConfig::Read(): NULL parameter") );  \
                                                                             \
         bool read = DoRead##name(key, val);                                 \
         if ( !read )                                                        \
@@ -154,32 +154,32 @@ IMPLEMENT_READ_FOR_TYPE(Bool, bool, bool, bool)
 // but can be overridden in the derived ones
 bool wxConfigBase::DoReadInt(const wxString& key, int *pi) const
 {
-    wxCHECK_MSG( pi, false, _T("wxConfig::Read(): NULL parameter") );
+    wxCHECK_MSG( pi, FALSE, _T("wxConfig::Read(): NULL parameter") );
 
     long l;
     if ( !DoReadLong(key, &l) )
-        return false;
+        return FALSE;
 
     wxASSERT_MSG( l < INT_MAX, _T("overflow in wxConfig::DoReadInt") );
 
     *pi = (int)l;
 
-    return true;
+    return TRUE;
 }
 
 bool wxConfigBase::DoReadBool(const wxString& key, bool* val) const
 {
-    wxCHECK_MSG( val, false, _T("wxConfig::Read(): NULL parameter") );
+    wxCHECK_MSG( val, FALSE, _T("wxConfig::Read(): NULL parameter") );
 
     long l;
     if ( !DoReadLong(key, &l) )
-        return false;
+        return FALSE;
 
     wxASSERT_MSG( l == 0 || l == 1, _T("bad bool value in wxConfig::DoReadInt") );
 
     *val = l != 0;
 
-    return true;
+    return TRUE;
 }
 
 bool wxConfigBase::DoReadDouble(const wxString& key, double* val) const
@@ -190,7 +190,7 @@ bool wxConfigBase::DoReadDouble(const wxString& key, double* val) const
         return str.ToDouble(val);
     }
 
-    return false;
+    return FALSE;
 }
 
 // string reading helper
@@ -236,42 +236,25 @@ wxConfigPathChanger::wxConfigPathChanger(const wxConfigBase *pContainer,
   wxString strPath = strEntry.BeforeLast(wxCONFIG_PATH_SEPARATOR);
 
   // except in the special case of "/keyname" when there is nothing before "/"
-  if ( strPath.empty() &&
-       ((!strEntry.empty()) && strEntry[0] == wxCONFIG_PATH_SEPARATOR) )
+  if ( strPath.IsEmpty() &&
+       ((!strEntry.IsEmpty()) && strEntry[0] == wxCONFIG_PATH_SEPARATOR) )
   {
     strPath = wxCONFIG_PATH_SEPARATOR;
   }
 
-  if ( !strPath.empty() )
-  {
-    if ( m_pContainer->GetPath() != strPath )
-    {
-        // do change the path
-        m_bChanged = true;
-
-        /* JACS: work around a memory bug that causes an assert
-           when using wxRegConfig, related to reference-counting.
-           Can be reproduced by removing (const wxChar*) below and
-           adding the following code to the config sample OnInit under
-           Windows:
-
-           pConfig->SetPath(wxT("MySettings"));
-           pConfig->SetPath(wxT(".."));
-           int value;
-           pConfig->Read(_T("MainWindowX"), & value);
-        */
-        m_strOldPath = (const wxChar*) m_pContainer->GetPath();
-        if ( *m_strOldPath.c_str() != wxCONFIG_PATH_SEPARATOR )
-          m_strOldPath += wxCONFIG_PATH_SEPARATOR;
-        m_pContainer->SetPath(strPath);
-    }
-
-    // in any case, use the just the name, not full path
+  if ( !strPath.IsEmpty() ) {
+    // do change the path
+    m_bChanged = TRUE;
     m_strName = strEntry.AfterLast(wxCONFIG_PATH_SEPARATOR);
+    m_strOldPath = m_pContainer->GetPath();
+    if ( m_strOldPath.Len() == 0 || 
+         m_strOldPath.Last() != wxCONFIG_PATH_SEPARATOR )
+        m_strOldPath += wxCONFIG_PATH_SEPARATOR;
+    m_pContainer->SetPath(strPath);
   }
   else {
     // it's a name only, without path - nothing to do
-    m_bChanged = false;
+    m_bChanged = FALSE;
     m_strName = strEntry;
   }
 }
@@ -293,24 +276,23 @@ wxConfigPathChanger::~wxConfigPathChanger()
 // understands both Unix and Windows (but only under Windows) environment
 // variables expansion: i.e. $var, $(var) and ${var} are always understood
 // and in addition under Windows %var% is also.
-
-// don't change the values the enum elements: they must be equal
-// to the matching [closing] delimiter.
-enum Bracket
-{
-  Bracket_None,
-  Bracket_Normal  = ')',
-  Bracket_Curly   = '}',
-#ifdef  __WXMSW__
-  Bracket_Windows = '%',    // yeah, Windows people are a bit strange ;-)
-#endif
-  Bracket_Max
-};
-
 wxString wxExpandEnvVars(const wxString& str)
 {
   wxString strResult;
   strResult.Alloc(str.Len());
+
+  // don't change the values the enum elements: they must be equal
+  // to the matching [closing] delimiter.
+  enum Bracket
+  {
+    Bracket_None,
+    Bracket_Normal  = ')',
+    Bracket_Curly   = '}',
+#ifdef  __WXMSW__
+    Bracket_Windows = '%',    // yeah, Windows people are a bit strange ;-)
+#endif
+    Bracket_Max
+  };
 
   size_t m;
   for ( size_t n = 0; n < str.Len(); n++ ) {
@@ -353,11 +335,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
           wxString strVarName(str.c_str() + n + 1, m - n - 1);
 
-#ifdef __WXWINCE__
-          const wxChar *pszValue = NULL;
-#else
           const wxChar *pszValue = wxGetenv(strVarName);
-#endif
           if ( pszValue != NULL ) {
             strResult += pszValue;
           }
@@ -373,7 +351,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
           // check the closing bracket
           if ( bracket != Bracket_None ) {
-            if ( m == str.Len() || str[m] != (wxChar)bracket ) {
+            if ( m == str.Len() || str[m] != (char)bracket ) {
               // under MSW it's common to have '%' characters in the registry
               // and it's annoying to have warnings about them each time, so
               // ignroe them silently if they are not used for env vars
@@ -381,8 +359,8 @@ wxString wxExpandEnvVars(const wxString& str)
               // under Unix, OTOH, this warning could be useful for the user to
               // understand why isn't the variable expanded as intended
               #ifndef __WXMSW__
-                wxLogWarning(_("Environment variables expansion failed: missing '%c' at position %u in '%s'."),
-                             (char)bracket, (unsigned int) (m + 1), str.c_str());
+                wxLogWarning(_("Environment variables expansion failed: missing '%c' at position %d in '%s'."),
+                             (char)bracket, m + 1, str.c_str());
               #endif // __WXMSW__
             }
             else {
@@ -399,8 +377,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
       case '\\':
         // backslash can be used to suppress special meaning of % and $
-        if ( n != str.Len() - 1 &&
-                (str[n + 1] == wxT('%') || str[n + 1] == wxT('$')) ) {
+        if ( n != str.Len() && (str[n + 1] == wxT('%') || str[n + 1] == wxT('$')) ) {
           strResult += str[++n];
 
           break;
@@ -418,7 +395,7 @@ wxString wxExpandEnvVars(const wxString& str)
 // this function is used to properly interpret '..' in path
 void wxSplitPath(wxArrayString& aParts, const wxChar *sz)
 {
-  aParts.clear();
+  aParts.Empty();
 
   wxString strCurrent;
   const wxChar *pc = sz;
@@ -429,15 +406,15 @@ void wxSplitPath(wxArrayString& aParts, const wxChar *sz)
       }
       else if ( strCurrent == wxT("..") ) {
         // go up one level
-        if ( aParts.size() == 0 )
+        if ( aParts.IsEmpty() )
           wxLogWarning(_("'%s' has extra '..', ignored."), sz);
         else
-          aParts.erase(aParts.end() - 1);
+          aParts.Remove(aParts.Count() - 1);
 
         strCurrent.Empty();
       }
-      else if ( !strCurrent.empty() ) {
-        aParts.push_back(strCurrent);
+      else if ( !strCurrent.IsEmpty() ) {
+        aParts.Add(strCurrent);
         strCurrent.Empty();
       }
       //else:

@@ -6,7 +6,7 @@
 %% Created:     08.06.01
 %% RCS-ID:      $Id$
 %% Copyright:   (c) 2001 Vadim Zeitlin
-%% License:     wxWindows license
+%% License:     wxWidgets license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{\class{wxSingleInstanceChecker}}\label{wxsingleinstancechecker}
@@ -15,7 +15,7 @@ wxSingleInstanceChecker class allows to check that only a single instance of a
 program is running. To do it, you should create an object of this class. As
 long as this object is alive, calls to 
 \helpref{IsAnotherRunning()}{wxsingleinstancecheckerisanotherrunning} from
-other processes will return {\tt true}.
+other processes will return {\tt TRUE}.
 
 As the object should have the life span as big as possible, it makes sense to
 create it either as a global or in \helpref{wxApp::OnInit}{wxapponinit}. For
@@ -30,12 +30,12 @@ bool MyApp::OnInit()
     {
         wxLogError(_("Another program instance is already running, aborting."));
 
-        return false;
+        return FALSE;
     }
 
     ... more initializations ...
 
-    return true;
+    return TRUE;
 }
 
 int MyApp::OnExit()
@@ -99,26 +99,17 @@ create the lock file in under Unix (default is
 
 \wxheading{Return value}
 
-Returns {\tt false} if initialization failed, it doesn't mean that another
+Returns {\tt FALSE} if initialization failed, it doesn't mean that another
 instance is running - use 
 \helpref{IsAnotherRunning()}{wxsingleinstancecheckerisanotherrunning} to check
 for it.
-
-\wxheading{Note}
-
-One of possible reasons while Create may fail on Unix is that the lock file
-used for checking already exists but was not created by the user.
-Therefore applications shouldn't treat failure of this function as fatal
-condition, because doing so would open them to the possibility of a Denial of
-Service attack. Instead, they should alert the user about the problem and
-offer to continue execution without checking if another instance is running.
 
 \membersection{wxSingleInstanceChecker::IsAnotherRunning}\label{wxsingleinstancecheckerisanotherrunning}
 
 \constfunc{bool}{IsAnotherRunning}{\void}
 
-Returns {\tt true} if another copy of this program is already running, {\tt
-false} otherwise.
+Returns {\tt TRUE} if another copy of this program is already running, {\tt
+FALSE} otherwise.
 
 \membersection{wxSingleInstanceChecker::\destruct{wxSingleInstanceChecker}}\label{wxsingleinstancecheckerdtor}
 

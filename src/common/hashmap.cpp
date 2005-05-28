@@ -9,7 +9,7 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "hashmap.h"
 #endif
 
@@ -59,8 +59,6 @@ unsigned long wxStringHash::charStringHash( const char* k )
     return hash + (hash << 15);
 }
 #endif
-
-#if !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
 /* from SGI STL */
 const unsigned long _wxHashTableBase2::ms_primes[prime_count] =
@@ -153,4 +151,3 @@ _wxHashTable_NodeBase* _wxHashTableBase2::DummyProcessNode(_wxHashTable_NodeBase
     return node;
 }
 
-#endif // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)

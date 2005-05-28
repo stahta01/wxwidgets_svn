@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univscrarrow.h"
 #endif
 
@@ -170,7 +170,7 @@ bool wxScrollArrows::HandleMouseMove(const wxMouseEvent& event) const
         arrow = m_control->HitTest(event.GetPosition());
     }
 
-    if ( m_captureData && m_captureData->m_timerScroll)
+    if ( m_captureData )
     {
         // the mouse is captured, we may want to pause scrolling if it goes
         // outside the arrow or to resume it if we had paused it before
@@ -181,27 +181,27 @@ bool wxScrollArrows::HandleMouseMove(const wxMouseEvent& event) const
             if ( arrow == m_captureData->m_arrowPressed )
             {
                 // resume now
-                m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, true);
+                m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, TRUE);
                 timer->Start();
 
-                return true;
+                return TRUE;
             }
         }
-        else // if ( 1 ) FIXME: m_control->ShouldPauseScrolling() )
+        else if ( 1 ) //FIXME: m_control->ShouldPauseScrolling() )
         {
             // we may want to stop it
             if ( arrow != m_captureData->m_arrowPressed )
             {
                 // stop as the mouse left the arrow
                 m_control->SetArrowFlag(m_captureData->m_arrowPressed,
-                                        wxCONTROL_PRESSED, false);
+                                        wxCONTROL_PRESSED, FALSE);
                 timer->Stop();
 
-                return true;
+                return TRUE;
             }
         }
 
-        return false;
+        return FALSE;
     }
 
     // reset the wxCONTROL_CURRENT flag for the arrows which don't have the
@@ -209,7 +209,7 @@ bool wxScrollArrows::HandleMouseMove(const wxMouseEvent& event) const
     UpdateCurrentFlag(Arrow_First, arrow);
     UpdateCurrentFlag(Arrow_Second, arrow);
 
-    // return true if it was really an event for an arrow
+    // return TRUE if it was really an event for an arrow
     return !event.Leaving() && arrow != Arrow_None;
 }
 
@@ -219,7 +219,7 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
     if ( btn == -1 )
     {
         // we only care about button press/release events
-        return false;
+        return FALSE;
     }
 
     if ( event.ButtonDown() || event.ButtonDClick() )
@@ -230,13 +230,13 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
             if ( arrow == Arrow_None )
             {
                 // mouse pressed over something else
-                return false;
+                return FALSE;
             }
 
             if ( m_control->GetArrowState(arrow) & wxCONTROL_DISABLED )
             {
                 // don't allow to press disabled arrows
-                return true;
+                return TRUE;
             }
 
             wxConstCast(this, wxScrollArrows)->m_captureData =
@@ -246,23 +246,11 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
             m_captureData->m_window = m_control->GetWindow();
             m_captureData->m_window->CaptureMouse();
 
-            // start scrolling                       
-            wxScrollArrowTimer *tmpTimerScroll =
+            // start scrolling
+            m_captureData->m_timerScroll =
                 new wxScrollArrowTimer(m_control, arrow);
 
-            // Because in some cases wxScrollArrowTimer can cause 
-            // m_captureData to be destructed we need to test if it 
-            // is still valid before using.
-            if (m_captureData)
-            {
-                m_captureData->m_timerScroll = tmpTimerScroll;
-
-                m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, true);
-            }
-            else
-            {
-                delete tmpTimerScroll;
-            }
+            m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, TRUE);
         }
         //else: mouse already captured, nothing to do
     }
@@ -274,14 +262,14 @@ bool wxScrollArrows::HandleMouse(const wxMouseEvent& event) const
         delete m_captureData;
         wxConstCast(this, wxScrollArrows)->m_captureData = NULL;
 
-        m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, false);
+        m_control->SetArrowFlag(arrow, wxCONTROL_PRESSED, FALSE);
     }
     else
     {
         // we don't process this
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 

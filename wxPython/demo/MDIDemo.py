@@ -1,42 +1,35 @@
+#!/usr/bin/env python
 
-import  wx
+from wxPython.wx import *
+from wxScrolledWindow import MyCanvas
 
-# Importing ScrolledWindow demo to make use of the MyCanvas 
-# class defined within.
-import  ScrolledWindow 
-import  images
-
+import images
 SHOW_BACKGROUND = 1
 
 #----------------------------------------------------------------------
-ID_New  = wx.NewId()
-ID_Exit = wx.NewId()
-#----------------------------------------------------------------------
 
-class MyParentFrame(wx.MDIParentFrame):
+class MyParentFrame(wxMDIParentFrame):
     def __init__(self):
-        wx.MDIParentFrame.__init__(self, None, -1, "MDI Parent", size=(600,400))
+        wxMDIParentFrame.__init__(self, None, -1, "MDI Parent", size=(600,400))
 
         self.winCount = 0
-        menu = wx.Menu()
-        menu.Append(ID_New, "&New Window")
+        menu = wxMenu()
+        menu.Append(5000, "&New Window")
         menu.AppendSeparator()
-        menu.Append(ID_Exit, "E&xit")
+        menu.Append(5001, "E&xit")
 
-        menubar = wx.MenuBar()
+        menubar = wxMenuBar()
         menubar.Append(menu, "&File")
         self.SetMenuBar(menubar)
 
         self.CreateStatusBar()
 
-        self.Bind(wx.EVT_MENU, self.OnNewWindow, id=ID_New)
-        self.Bind(wx.EVT_MENU, self.OnExit, id=ID_Exit)
+        EVT_MENU(self, 5000, self.OnNewWindow)
+        EVT_MENU(self, 5001, self.OnExit)
 
         if SHOW_BACKGROUND:
             self.bg_bmp = images.getGridBGBitmap()
-            self.GetClientWindow().Bind(
-                wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground
-                )
+            EVT_ERASE_BACKGROUND(self.GetClientWindow(), self.OnEraseBackground)
 
 
     def OnExit(self, evt):
@@ -45,46 +38,42 @@ class MyParentFrame(wx.MDIParentFrame):
 
     def OnNewWindow(self, evt):
         self.winCount = self.winCount + 1
-        win = wx.MDIChildFrame(self, -1, "Child Window: %d" % self.winCount)
-        canvas = ScrolledWindow.MyCanvas(win)
+        win = wxMDIChildFrame(self, -1, "Child Window: %d" % self.winCount)
+        canvas = MyCanvas(win)
         win.Show(True)
 
 
     def OnEraseBackground(self, evt):
         dc = evt.GetDC()
-
         if not dc:
-            dc = wx.ClientDC(self.GetClientWindow())
+            dc = wxClientDC(self.GetClientWindow())
 
         # tile the background bitmap
         sz = self.GetClientSize()
         w = self.bg_bmp.GetWidth()
         h = self.bg_bmp.GetHeight()
         x = 0
-        
         while x < sz.width:
             y = 0
-
             while y < sz.height:
                 dc.DrawBitmap(self.bg_bmp, x, y)
                 y = y + h
-
             x = x + w
 
 
 #----------------------------------------------------------------------
 
 if __name__ == '__main__':
-    class MyApp(wx.App):
+    class MyApp(wxApp):
         def OnInit(self):
-            wx.InitAllImageHandlers()
+            wxInitAllImageHandlers()
             frame = MyParentFrame()
             frame.Show(True)
             self.SetTopWindow(frame)
             return True
 
 
-    app = MyApp(False)
+    app = MyApp(0)
     app.MainLoop()
 
 

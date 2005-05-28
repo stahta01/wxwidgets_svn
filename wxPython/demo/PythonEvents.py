@@ -1,39 +1,24 @@
 
-import  sys
-
-import  wx
-
-#----------------------------------------------------------------------
-
-# This shows the new 'official' way to do custom events as derived
-# from the wxPython 2.5 migration guide.
-
-#######################################################\
-#  *** Old and busted ***                              |
-#                                                      |
-# myEVT_BUTTON_CLICKPOS = wx.NewEventType()            |
-#                                                      |
-# def EVT_BUTTON_CLICKPOS(win, id, func):              |
-#     win.Connect(id, -1, myEVT_BUTTON_CLICKPOS, func) |
-#######################################################/
-
-#############################\
-#   *** The new Hottness *** |
-#############################/
-myEVT_BUTTON_CLICKPOS = wx.NewEventType()
-EVT_BUTTON_CLICKPOS = wx.PyEventBinder(myEVT_BUTTON_CLICKPOS, 1)
+from wxPython.wx import *
+import sys
 
 #----------------------------------------------------------------------
 
+myEVT_BUTTON_CLICKPOS = wxNewEventType()
 
-class MyEvent(wx.PyCommandEvent):
+def EVT_BUTTON_CLICKPOS(win, id, func):
+    win.Connect(id, -1, myEVT_BUTTON_CLICKPOS, func)
+
+
+
+class MyEvent(wxPyCommandEvent):
     def __init__(self, evtType, id):
-        wx.PyCommandEvent.__init__(self, evtType, id)
+        wxPyCommandEvent.__init__(self, evtType, id)
         self.myVal = None
 
     #def __del__(self):
     #    print '__del__'
-    #    wx.PyCommandEvent.__del__(self)
+    #    wxPyCommandEvent.__del__(self)
 
     def SetMyVal(self, val):
         self.myVal = val
@@ -42,10 +27,11 @@ class MyEvent(wx.PyCommandEvent):
         return self.myVal
 
 
-class MyButton(wx.Button):
+
+class MyButton(wxButton):
     def __init__(self, parent, id, txt, pos):
-        wx.Button.__init__(self, parent, id, txt, pos)
-        self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
+        wxButton.__init__(self, parent, id, txt, pos)
+        EVT_LEFT_DOWN(self, self.OnLeftDown)
 
     def OnLeftDown(self, event):
         pt = event.GetPosition()
@@ -58,21 +44,17 @@ class MyButton(wx.Button):
 
 
 
-class TestPanel(wx.Panel):
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
-        wx.Panel.__init__(self, parent, -1)
+        wxPanel.__init__(self, parent, -1)
         self.log = log
 
-        b = MyButton(self, -1, " Click me ", (30,30))
-        self.Bind(wx.EVT_BUTTON, self.OnClick, id=b.GetId())
-        
-        # This is our custom event binder created above.
-        self.Bind(EVT_BUTTON_CLICKPOS, self.OnMyEvent, id=b.GetId())
+        b = MyButton(self, -1, " Click me ", wxPoint(30,30))
+        EVT_BUTTON(self, b.GetId(), self.OnClick)
+        EVT_BUTTON_CLICKPOS(self, b.GetId(), self.OnMyEvent)
 
-        wx.StaticText(
-            self, -1, "Please see the Overview and Demo Code for details...",
-            (30, 80)
-            )
+        wxStaticText(self, -1, "Please see the Overview and Demo Code for details...",
+                     wxPoint(30, 80))
 
 
     def OnClick(self, event):
@@ -92,17 +74,19 @@ def runTest(frame, nb, log):
 #----------------------------------------------------------------------
 
 
-overview = """\
-This demo is a contrived example of defining an event class in wxPython and 
-sending it up the containment hierarchy for processing.
 
-V2.5 note: this demo also shows the new style of creating event binders that
-is required if you used the *.Bind() method of setting up event handlers.
+
+overview = """\
+This demo is a contrived example of defining an event class in wxPython and sending it up the containment hierarchy for processing.
 """
+
+
+
+
 
 
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])
 

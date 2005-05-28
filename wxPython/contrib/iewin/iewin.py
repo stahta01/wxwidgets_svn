@@ -1,181 +1,170 @@
 # This file was created automatically by SWIG.
-# Don't modify this file, modify the SWIG interface instead.
+import iewinc
 
-import _iewin
+from misc import *
 
-def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
-    if (name == "this"):
-        if isinstance(value, class_type):
-            self.__dict__[name] = value.this
-            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
-            del value.thisown
-            return
-    method = class_type.__swig_setmethods__.get(name,None)
-    if method: return method(self,value)
-    if (not static) or hasattr(self,name) or (name == "thisown"):
-        self.__dict__[name] = value
-    else:
-        raise AttributeError("You cannot add attributes to %s" % self)
+from misc2 import *
 
-def _swig_setattr(self,class_type,name,value):
-    return _swig_setattr_nondynamic(self,class_type,name,value,0)
+from windows import *
 
-def _swig_getattr(self,class_type,name):
-    method = class_type.__swig_getmethods__.get(name,None)
-    if method: return method(self)
-    raise AttributeError,name
+from gdi import *
 
-import types
-try:
-    _object = types.ObjectType
-    _newclass = 1
-except AttributeError:
-    class _object : pass
-    _newclass = 0
-del types
+from fonts import *
 
+from clip_dnd import *
 
-def _swig_setattr_nondynamic_method(set):
-    def set_attr(self,name,value):
-        if hasattr(self,name) or (name in ("this", "thisown")):
-            set(self,name,value)
-        else:
-            raise AttributeError("You cannot add attributes to %s" % self)
-    return set_attr
+from events import *
 
+from streams import *
 
-import _core
-wx = _core 
-__docfilter__ = wx.__DocFilter(globals()) 
-import warnings
-warnings.warn("This module is deprecated.  Please use the wx.lib.iewin module instead.",    
-              DeprecationWarning, stacklevel=2)
+from utils import *
 
-class MSHTMLEvent(_core.NotifyEvent):
-    """Proxy of C++ MSHTMLEvent class"""
-    def __repr__(self):
-        return "<%s.%s; proxy of C++ wxMSHTMLEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
-    def __init__(self, *args, **kwargs):
-        """__init__(self, wxEventType commandType=wxEVT_NULL, int id=0) -> MSHTMLEvent"""
-        newobj = _iewin.new_MSHTMLEvent(*args, **kwargs)
-        self.this = newobj.this
-        self.thisown = 1
-        del newobj.thisown
-    def GetText1(*args, **kwargs):
-        """GetText1(self) -> String"""
-        return _iewin.MSHTMLEvent_GetText1(*args, **kwargs)
+from mdi import *
 
-    def GetLong1(*args, **kwargs):
-        """GetLong1(self) -> long"""
-        return _iewin.MSHTMLEvent_GetLong1(*args, **kwargs)
+from frames import *
 
-    def GetLong2(*args, **kwargs):
-        """GetLong2(self) -> long"""
-        return _iewin.MSHTMLEvent_GetLong2(*args, **kwargs)
+from stattool import *
 
+from controls import *
 
-class MSHTMLEventPtr(MSHTMLEvent):
-    def __init__(self, this):
+from controls2 import *
+
+from windows2 import *
+
+from cmndlgs import *
+
+from windows3 import *
+
+from image import *
+
+from printfw import *
+
+from sizers import *
+
+from filesys import *
+import wx
+
+def EVT_MSHTML_BEFORENAVIGATE2(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2, func)
+
+def EVT_MSHTML_NEWWINDOW2(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_NEWWINDOW2, func)
+
+def EVT_MSHTML_DOCUMENTCOMPLETE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE, func)
+
+def EVT_MSHTML_PROGRESSCHANGE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_PROGRESSCHANGE, func)
+
+def EVT_MSHTML_STATUSTEXTCHANGE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE, func)
+
+def EVT_MSHTML_TITLECHANGE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_TITLECHANGE, func)
+
+class wxMSHTMLEventPtr(wxNotifyEventPtr):
+    def __init__(self,this):
         self.this = this
-        if not hasattr(self,"thisown"): self.thisown = 0
-        self.__class__ = MSHTMLEvent
-_iewin.MSHTMLEvent_swigregister(MSHTMLEventPtr)
-
-wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2 = _iewin.wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2
-wxEVT_COMMAND_MSHTML_NEWWINDOW2 = _iewin.wxEVT_COMMAND_MSHTML_NEWWINDOW2
-wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE = _iewin.wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE
-wxEVT_COMMAND_MSHTML_PROGRESSCHANGE = _iewin.wxEVT_COMMAND_MSHTML_PROGRESSCHANGE
-wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE = _iewin.wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE
-wxEVT_COMMAND_MSHTML_TITLECHANGE = _iewin.wxEVT_COMMAND_MSHTML_TITLECHANGE
-EVT_MSHTML_BEFORENAVIGATE2      = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2, 1)
-EVT_MSHTML_NEWWINDOW2           = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_NEWWINDOW2, 1)
-EVT_MSHTML_DOCUMENTCOMPLETE     = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE, 1)
-EVT_MSHTML_PROGRESSCHANGE       = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_PROGRESSCHANGE, 1)
-EVT_MSHTML_STATUSTEXTCHANGE     = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE, 1)
-EVT_MSHTML_TITLECHANGE          = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_TITLECHANGE, 1)
-
-IEHTML_REFRESH_NORMAL = _iewin.IEHTML_REFRESH_NORMAL
-IEHTML_REFRESH_IFEXPIRED = _iewin.IEHTML_REFRESH_IFEXPIRED
-IEHTML_REFRESH_CONTINUE = _iewin.IEHTML_REFRESH_CONTINUE
-IEHTML_REFRESH_COMPLETELY = _iewin.IEHTML_REFRESH_COMPLETELY
-class IEHtmlWin(_core.Window):
-    """Proxy of C++ IEHtmlWin class"""
+        self.thisown = 0
+    def GetText1(self, *_args, **_kwargs):
+        val = iewinc.wxMSHTMLEvent_GetText1(self, *_args, **_kwargs)
+        return val
+    def GetLong1(self, *_args, **_kwargs):
+        val = iewinc.wxMSHTMLEvent_GetLong1(self, *_args, **_kwargs)
+        return val
+    def GetLong2(self, *_args, **_kwargs):
+        val = iewinc.wxMSHTMLEvent_GetLong2(self, *_args, **_kwargs)
+        return val
     def __repr__(self):
-        return "<%s.%s; proxy of C++ wxIEHtmlWin instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
-    def __init__(self, *args, **kwargs):
-        """
-        __init__(self, Window parent, int id=-1, Point pos=DefaultPosition, 
-            Size size=DefaultSize, long style=0, String name=PanelNameStr) -> IEHtmlWin
-        """
-        newobj = _iewin.new_IEHtmlWin(*args, **kwargs)
-        self.this = newobj.this
+        return "<%s.%s instance; proxy of C++ wxMSHTMLEvent instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
+class wxMSHTMLEvent(wxMSHTMLEventPtr):
+    def __init__(self,*_args,**_kwargs):
+        self.this = iewinc.new_wxMSHTMLEvent(*_args,**_kwargs)
         self.thisown = 1
-        del newobj.thisown
-        self._setOORInfo(self)
-
-    def LoadUrl(*args, **kwargs):
-        """LoadUrl(self, String ??)"""
-        return _iewin.IEHtmlWin_LoadUrl(*args, **kwargs)
-
-    def LoadString(*args, **kwargs):
-        """LoadString(self, String html) -> bool"""
-        return _iewin.IEHtmlWin_LoadString(*args, **kwargs)
-
-    def LoadStream(*args, **kwargs):
-        """LoadStream(self, InputStream is) -> bool"""
-        return _iewin.IEHtmlWin_LoadStream(*args, **kwargs)
-
-    Navigate = LoadUrl 
-    def SetCharset(*args, **kwargs):
-        """SetCharset(self, String charset)"""
-        return _iewin.IEHtmlWin_SetCharset(*args, **kwargs)
-
-    def SetEditMode(*args, **kwargs):
-        """SetEditMode(self, bool seton)"""
-        return _iewin.IEHtmlWin_SetEditMode(*args, **kwargs)
-
-    def GetEditMode(*args, **kwargs):
-        """GetEditMode(self) -> bool"""
-        return _iewin.IEHtmlWin_GetEditMode(*args, **kwargs)
-
-    def GetStringSelection(*args, **kwargs):
-        """GetStringSelection(self, bool asHTML=False) -> String"""
-        return _iewin.IEHtmlWin_GetStringSelection(*args, **kwargs)
-
-    def GetText(*args, **kwargs):
-        """GetText(self, bool asHTML=False) -> String"""
-        return _iewin.IEHtmlWin_GetText(*args, **kwargs)
-
-    def GoBack(*args, **kwargs):
-        """GoBack(self) -> bool"""
-        return _iewin.IEHtmlWin_GoBack(*args, **kwargs)
-
-    def GoForward(*args, **kwargs):
-        """GoForward(self) -> bool"""
-        return _iewin.IEHtmlWin_GoForward(*args, **kwargs)
-
-    def GoHome(*args, **kwargs):
-        """GoHome(self) -> bool"""
-        return _iewin.IEHtmlWin_GoHome(*args, **kwargs)
-
-    def GoSearch(*args, **kwargs):
-        """GoSearch(self) -> bool"""
-        return _iewin.IEHtmlWin_GoSearch(*args, **kwargs)
-
-    def RefreshPage(*args, **kwargs):
-        """RefreshPage(self, int level) -> bool"""
-        return _iewin.IEHtmlWin_RefreshPage(*args, **kwargs)
-
-    def Stop(*args, **kwargs):
-        """Stop(self) -> bool"""
-        return _iewin.IEHtmlWin_Stop(*args, **kwargs)
 
 
-class IEHtmlWinPtr(IEHtmlWin):
-    def __init__(self, this):
+
+
+class wxIEHtmlWinPtr(wxWindowPtr):
+    def __init__(self,this):
         self.this = this
-        if not hasattr(self,"thisown"): self.thisown = 0
-        self.__class__ = IEHtmlWin
-_iewin.IEHtmlWin_swigregister(IEHtmlWinPtr)
+        self.thisown = 0
+    def LoadUrl(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_LoadUrl(self, *_args, **_kwargs)
+        return val
+    def LoadString(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_LoadString(self, *_args, **_kwargs)
+        return val
+    def LoadStream(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_LoadStream(self, *_args, **_kwargs)
+        return val
+    def SetCharset(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_SetCharset(self, *_args, **_kwargs)
+        return val
+    def SetEditMode(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_SetEditMode(self, *_args, **_kwargs)
+        return val
+    def GetEditMode(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_GetEditMode(self, *_args, **_kwargs)
+        return val
+    def GetStringSelection(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_GetStringSelection(self, *_args, **_kwargs)
+        return val
+    def GetText(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_GetText(self, *_args, **_kwargs)
+        return val
+    def GoBack(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_GoBack(self, *_args, **_kwargs)
+        return val
+    def GoForward(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_GoForward(self, *_args, **_kwargs)
+        return val
+    def GoHome(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_GoHome(self, *_args, **_kwargs)
+        return val
+    def GoSearch(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_GoSearch(self, *_args, **_kwargs)
+        return val
+    def RefreshPage(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_RefreshPage(self, *_args, **_kwargs)
+        return val
+    def Stop(self, *_args, **_kwargs):
+        val = iewinc.wxIEHtmlWin_Stop(self, *_args, **_kwargs)
+        return val
+    def __repr__(self):
+        return "<%s.%s instance; proxy of C++ wxIEHtmlWin instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this)
+    Navigate = LoadUrl
+class wxIEHtmlWin(wxIEHtmlWinPtr):
+    def __init__(self,*_args,**_kwargs):
+        self.this = iewinc.new_wxIEHtmlWin(*_args,**_kwargs)
+        self.thisown = 1
 
 
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+
+wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2 = iewinc.wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2
+wxEVT_COMMAND_MSHTML_NEWWINDOW2 = iewinc.wxEVT_COMMAND_MSHTML_NEWWINDOW2
+wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE = iewinc.wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE
+wxEVT_COMMAND_MSHTML_PROGRESSCHANGE = iewinc.wxEVT_COMMAND_MSHTML_PROGRESSCHANGE
+wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE = iewinc.wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE
+wxEVT_COMMAND_MSHTML_TITLECHANGE = iewinc.wxEVT_COMMAND_MSHTML_TITLECHANGE
+wxIEHTML_REFRESH_NORMAL = iewinc.wxIEHTML_REFRESH_NORMAL
+wxIEHTML_REFRESH_IFEXPIRED = iewinc.wxIEHTML_REFRESH_IFEXPIRED
+wxIEHTML_REFRESH_CONTINUE = iewinc.wxIEHTML_REFRESH_CONTINUE
+wxIEHTML_REFRESH_COMPLETELY = iewinc.wxIEHTML_REFRESH_COMPLETELY
+
+
+#-------------- USER INCLUDE -----------------------
+
+# Stuff these names into the wx namespace so wxPyConstructObject can find them
+
+wx.wxMSHTMLEventPtr  = wxMSHTMLEventPtr
+wx.wxIEHtmlWinPtr    = wxIEHtmlWinPtr

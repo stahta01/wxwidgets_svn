@@ -12,7 +12,7 @@
 #ifndef _WX_CURSOR_H_
 #define _WX_CURSOR_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "cursor.h"
 #endif
 

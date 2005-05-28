@@ -40,14 +40,12 @@ class WXDLLEXPORT wxButton;
 // constants
 // ---------------------------------------------------------------------------
 
-#if WXWIN_COMPATIBILITY_2_4
-// they're unused by wxWidgets...
+// FIXME does anybody use those? they're unused by wxWindows...
 enum
 {
     wxKEY_SHIFT = 1,
     wxKEY_CTRL  = 2
 };
-#endif
 
 // ---------------------------------------------------------------------------
 // wxWindow declaration for OS/2 PM
@@ -94,17 +92,18 @@ public:
     virtual wxString GetTitle(void) const;
     virtual void     Raise(void);
     virtual void     Lower(void);
-    virtual bool     Show(bool bShow = true);
-    virtual bool     Enable(bool bEnable = true);
+    virtual bool     Show(bool bShow = TRUE);
+    virtual bool     Enable(bool bEnable = TRUE);
     virtual void     SetFocus(void);
     virtual void     SetFocusFromKbd(void);
     virtual bool     Reparent(wxWindow* pNewParent);
     virtual void     WarpPointer( int x
                                  ,int y
                                 );
-    virtual void     Refresh( bool          bEraseBackground = true
+    virtual void     Refresh( bool          bEraseBackground = TRUE
                              ,const wxRect* pRect = (const wxRect *)NULL
                             );
+    virtual void     Clear(void);
     virtual void     Freeze(void);
     virtual void     Update(void);
     virtual void     Thaw(void);
@@ -131,11 +130,11 @@ public:
                                   ,int  nPos
                                   ,int  nThumbVisible
                                   ,int  nRange
-                                  ,bool bRefresh = true
+                                  ,bool bRefresh = TRUE
                                  );
     virtual void     SetScrollPos( int  nOrient
                                   ,int  nPos
-                                  ,bool bRefresh = true
+                                  ,bool bRefresh = TRUE
                                  );
     virtual int      GetScrollPos(int nOrient) const;
     virtual int      GetScrollThumb(int nOrient) const;
@@ -153,6 +152,47 @@ public:
 
     // Accept files for dragging
     virtual void DragAcceptFiles(bool bAccept);
+
+#if WXWIN_COMPATIBILITY
+    // Set/get scroll attributes
+    virtual void SetScrollRange( int  nOrient
+                                ,int  nRange
+                                ,bool bRefresh = TRUE
+                               );
+    virtual void SetScrollPage( int  nOrient
+                               ,int  nPage
+                               ,bool bRefresh = TRUE
+                              );
+    virtual int  OldGetScrollRange(int nOrient) const;
+    virtual int  GetScrollPage(int nOrient) const;
+
+    //
+    // event handlers
+    //
+        // Handle a control command
+    virtual void OnCommand( wxWindow&       rWin
+                           ,wxCommandEvent& rEvent
+                          );
+
+        // Override to define new behaviour for default action (e.g. double
+        // clicking on a listbox)
+    virtual void OnDefaultAction(wxControl* WXUNUSED(pInitiatingItem)) { }
+#endif // WXWIN_COMPATIBILITY
+
+#if wxUSE_CARET && WXWIN_COMPATIBILITY
+    void CreateCaret( int nWidth
+                     ,int nHeight
+                    );
+    void CreateCaret(const wxBitmap* pBitmap);
+    void DestroyCaret(void);
+    void ShowCaret(bool bShow);
+    void SetCaretPos( int nX
+                     ,int nY
+                    );
+    void GetCaretPos( int* pX
+                     ,int* pY
+                    ) const;
+#endif // wxUSE_CARET
 
 #ifndef __WXUNIVERSAL__
     // Native resource loading (implemented in src/os2/nativdlg.cpp)
@@ -178,7 +218,7 @@ public:
     virtual WXWidget GetHandle(void) const { return GetHWND(); }
     bool             GetUseCtl3D(void) const { return m_bUseCtl3D; }
     bool             GetTransparentBackground(void) const { return m_bBackgroundTransparent; }
-    void             SetTransparent(bool bT = true) { m_bBackgroundTransparent = bT; }
+    void             SetTransparent(bool bT = TRUE) { m_bBackgroundTransparent = bT; }
 
     // event handlers
     // --------------
@@ -188,6 +228,10 @@ public:
 
 public:
 
+    // For implementation purposes - sometimes decorations make the client area
+    // smaller
+    virtual wxPoint GetClientAreaOrigin(void) const;
+
     // Windows subclassing
     void SubclassWin(WXHWND hWnd);
     void UnsubclassWin(void);
@@ -195,24 +239,28 @@ public:
     WXFARPROC OS2GetOldWndProc(void) const { return m_fnOldWndProc; }
     void OS2SetOldWndProc(WXFARPROC fnProc) { m_fnOldWndProc = fnProc; }
     //
-    // Return true if the window is of a standard (i.e. not wxWidgets') class
+    // Return TRUE if the window is of a standard (i.e. not wxWindows') class
     //
     bool IsOfStandardClass(void) const { return m_fnOldWndProc != NULL; }
 
     wxWindow* FindItem(long lId) const;
     wxWindow* FindItemByHWND( WXHWND hWnd
-                             ,bool   bControlOnly = false
+                             ,bool   bControlOnly = FALSE
                             ) const;
 
-    // Make a Windows extended style from the given wxWidgets window style ?? applicable to OS/2??
+    // Make a Windows extended style from the given wxWindows window style ?? applicable to OS/2??
     static WXDWORD MakeExtendedStyle( long lStyle
-                                     ,bool bEliminateBorders = true
+                                     ,bool bEliminateBorders = TRUE
                                     );
+    // Determine whether 3D effects are wanted
+    WXDWORD Determine3DEffects( WXDWORD dwDefaultBorderStyle
+                               ,bool*   pbWant3D
+                              ) const;
 
-    // PM only: true if this control is part of the main control
-    virtual bool ContainsHWND(WXHWND WXUNUSED(hWnd)) const { return false; };
+    // PM only: TRUE if this control is part of the main control
+    virtual bool ContainsHWND(WXHWND WXUNUSED(hWnd)) const { return FALSE; };
 
-    // translate wxWidgets style flags for this control into the PM style
+    // translate wxWindows style flags for this control into the PM style
     // and optional extended style for the corresponding native control
     //
     // this is the function that should be overridden in the derived classes,
@@ -221,7 +269,7 @@ public:
                                 ,WXDWORD* pdwExstyle = NULL
                                ) const;
 
-    // get the MSW window flags corresponding to wxWidgets ones
+    // get the MSW window flags corresponding to wxWindows ones
     //
     // the functions returns the flags (WS_XXX) directly and puts the ext
     // (WS_EX_XXX) flags into the provided pointer if not NULL
@@ -232,9 +280,9 @@ public:
     // get the HWND to be used as parent of this window with CreateWindow()
     virtual WXHWND OS2GetParent(void) const;
 
-    // returns true if the window has been created
+    // returns TRUE if the window has been created
     bool         OS2Create( PSZ            zClass
-                           ,const wxChar*  zTitle
+                           ,const char*    zTitle
                            ,WXDWORD        dwStyle
                            ,const wxPoint& rPos
                            ,const wxSize&  rSize
@@ -245,6 +293,13 @@ public:
     virtual bool OS2Command( WXUINT uParam
                             ,WXWORD nId
                            );
+
+#if WXWIN_COMPATIBILITY
+    wxObject*    GetChild(int nNumber) const;
+    virtual void OS2DeviceToLogical( float* pfX
+                                    ,float* pfY
+                                   ) const;
+#endif // WXWIN_COMPATIBILITY
 
 #ifndef __WXUNIVERSAL__
     // Create an appropriate wxWindow from a HWND
@@ -291,7 +346,7 @@ public:
 
     // ------------------------------------------------------------------------
     // internal handlers for OS2 messages: all handlers return a boolen value:
-    // true means that the handler processed the event and false that it didn't
+    // TRUE means that the handler processed the event and FALSE that it didn't
     // ------------------------------------------------------------------------
 
     // there are several cases where we have virtual functions for PM
@@ -315,8 +370,6 @@ public:
     virtual long OS2OnMeasureItem( int                  nId
                                   ,WXMEASUREITEMSTRUCT* pItem
                                  );
-
-    virtual void OnPaint(wxPaintEvent& rEvent);
 
     // the rest are not virtual
     bool HandleCreate( WXLPCREATESTRUCT vCs
@@ -367,7 +420,7 @@ public:
                         );
     bool HandleChar( WXWPARAM wParam
                     ,WXLPARAM lParam
-                    ,bool     bIsASCII = false
+                    ,bool     bIsASCII = FALSE
                    );
     bool HandleKeyDown( WXWPARAM wParam
                        ,WXLPARAM lParam
@@ -414,6 +467,11 @@ public:
                                 ,WXWPARAM wParam
                                 ,WXLPARAM lParam
                                );
+
+#if WXWIN_COMPATIBILITY
+    void SetShowing(bool bShow) { (void)Show(show); }
+    bool IsUserEnabled(void) const { return IsEnabled(); }
+#endif // WXWIN_COMPATIBILITY
 
     // Responds to colour changes: passes event on to children.
     void OnSysColourChanged(wxSysColourChangedEvent& rEvent);
@@ -573,19 +631,5 @@ WXDLLEXPORT int wxCharCodeOS2ToWX(int nKeySym);
 WXDLLEXPORT int wxCharCodeWXToOS2( int   nId
                                   ,bool* pbIsVirtual
                                  );
-
-// ----------------------------------------------------------------------------
-// global objects
-// ----------------------------------------------------------------------------
-
-// notice that this hash must be defined after wxWindow declaration as it
-// needs to "see" its dtor and not just forward declaration
-#include "wx/hash.h"
-
-// pseudo-template HWND <-> wxWindow hash table
-WX_DECLARE_HASH(wxWindowOS2, wxWindowList, wxWinHashTable);
-
-extern wxWinHashTable *wxWinHandleHash;
-
 #endif
     // _WX_WINDOW_H_

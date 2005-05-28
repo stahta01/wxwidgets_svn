@@ -1,22 +1,21 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        textdlgg.h
-// Purpose:     wxTextEntryDialog class
+// Purpose:     wxStatusBar class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
-// Licence:     wxWindows licence
+// Copyright:   (c) Julian Smart and Markus Holzem
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __TEXTDLGH_G__
 #define __TEXTDLGH_G__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
     #pragma interface "textdlgg.h"
 #endif
 
-#if wxUSE_TEXTDLG
 #include "wx/defs.h"
 
 #include "wx/dialog.h"
@@ -27,8 +26,8 @@
 
 class WXDLLEXPORT wxTextCtrl;
 
-extern WXDLLEXPORT_DATA(const wxChar*) wxGetTextFromUserPromptStr;
-extern WXDLLEXPORT_DATA(const wxChar*) wxGetPasswordFromUserPromptStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxGetTextFromUserPromptStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 
 #define wxTextEntryDialogStyle (wxOK | wxCANCEL | wxCENTRE | wxWS_EX_VALIDATE_RECURSIVELY)
 
@@ -67,25 +66,6 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxTextEntryDialog)
-    DECLARE_NO_COPY_CLASS(wxTextEntryDialog)
-};
-
-// ----------------------------------------------------------------------------
-// wxPasswordEntryDialog: dialog with password control, [ok] and [cancel]
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxPasswordEntryDialog : public wxTextEntryDialog
-{
-public:
-    wxPasswordEntryDialog(wxWindow *parent,
-                      const wxString& message,
-                      const wxString& caption = wxGetPasswordFromUserPromptStr,
-                      const wxString& value = wxEmptyString,
-                      long style = wxTextEntryDialogStyle,
-                      const wxPoint& pos = wxDefaultPosition);
-private:
-    DECLARE_DYNAMIC_CLASS(wxPasswordEntryDialog)
-    DECLARE_NO_COPY_CLASS(wxPasswordEntryDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -97,20 +77,15 @@ wxGetTextFromUser(const wxString& message,
                   const wxString& caption = wxGetTextFromUserPromptStr,
                   const wxString& default_value = wxEmptyString,
                   wxWindow *parent = (wxWindow *) NULL,
-                  wxCoord x = wxDefaultCoord,
-                  wxCoord y = wxDefaultCoord,
-                  bool centre = true);
+                  int x = -1,
+                  int y = -1,
+                  bool centre = TRUE);
 
 wxString WXDLLEXPORT
 wxGetPasswordFromUser(const wxString& message,
-                      const wxString& caption = wxGetPasswordFromUserPromptStr,
+                      const wxString& caption = wxGetTextFromUserPromptStr,
                       const wxString& default_value = wxEmptyString,
-                      wxWindow *parent = (wxWindow *) NULL,
-                      wxCoord x = wxDefaultCoord,
-                      wxCoord y = wxDefaultCoord,
-                      bool centre = true);
+                      wxWindow *parent = (wxWindow *) NULL);
 
-#endif
-    // wxUSE_TEXTDLG
 #endif
     // __TEXTDLGH_G__

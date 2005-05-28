@@ -25,19 +25,19 @@ See the example application in {\tt samples/docview}.
 
 \helpref{Document/view overview}{docviewoverview}, \helpref{wxMDIChildFrame}{wxmdichildframe}
 
-\membersection{wxDocMDIChildFrame::m\_childDocument}\label{wxdocmdichildframemchilddocument}
+\membersection{wxDocMDIChildFrame::m\_childDocument}
 
 \member{wxDocument*}{m\_childDocument}
 
 The document associated with the frame.
 
-\membersection{wxDocMDIChildFrame::m\_childView}\label{wxdocmdichildframemchildview}
+\membersection{wxDocMDIChildFrame::m\_childView}
 
 \member{wxView*}{m\_childView}
 
 The view associated with the frame.
 
-\membersection{wxDocMDIChildFrame::wxDocMDIChildFrame}\label{wxdocmdichildframector}
+\membersection{wxDocMDIChildFrame::wxDocMDIChildFrame}
 
 \func{}{wxDocMDIChildFrame}{\param{wxDocument* }{doc}, \param{wxView* }{view}, \param{wxFrame* }{parent},
  \param{wxWindowID}{ id}, \param{const wxString\& }{title}, \param{const wxPoint\&}{ pos = wxDefaultPosition},
@@ -46,25 +46,25 @@ The view associated with the frame.
 
 Constructor.
 
-\membersection{wxDocMDIChildFrame::\destruct{wxDocMDIChildFrame}}\label{wxdocmdichildframedtor}
+\membersection{wxDocMDIChildFrame::\destruct{wxDocMDIChildFrame}}
 
 \func{}{\destruct{wxDocMDIChildFrame}}{\void}
 
 Destructor.
 
-\membersection{wxDocMDIChildFrame::GetDocument}\label{wxdocmdichildframegetdocument}
+\membersection{wxDocMDIChildFrame::GetDocument}
 
 \constfunc{wxDocument*}{GetDocument}{\void}
 
 Returns the document associated with this frame.
 
-\membersection{wxDocMDIChildFrame::GetView}\label{wxdocmdichildframegetview}
+\membersection{wxDocMDIChildFrame::GetView}
 
 \constfunc{wxView*}{GetView}{\void}
 
 Returns the view associated with this frame.
 
-\membersection{wxDocMDIChildFrame::OnActivate}\label{wxdocmdichildframeonactivate}
+\membersection{wxDocMDIChildFrame::OnActivate}
 
 \func{void}{OnActivate}{\param{wxActivateEvent}{ event}}
 
@@ -72,19 +72,19 @@ Sets the currently active view to be the frame's view. You may need
 to override (but still call) this function in order to set the keyboard
 focus for your subwindow.
 
-\membersection{wxDocMDIChildFrame::OnCloseWindow}\label{wxdocmdichildframeonclosewindow}
+\membersection{wxDocMDIChildFrame::OnCloseWindow}
 
 \func{void}{OnCloseWindow}{\param{wxCloseEvent\&}{ event}}
 
 Closes and deletes the current view and document.
 
-\membersection{wxDocMDIChildFrame::SetDocument}\label{wxdocmdichildframesetdocument}
+\membersection{wxDocMDIChildFrame::SetDocument}
 
 \func{void}{SetDocument}{\param{wxDocument *}{doc}}
 
 Sets the document for this frame.
 
-\membersection{wxDocMDIChildFrame::SetView}\label{wxdocmdichildframesetview}
+\membersection{wxDocMDIChildFrame::SetView}
 
 \func{void}{SetView}{\param{wxView *}{view}}
 

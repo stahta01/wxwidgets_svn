@@ -6,16 +6,19 @@ This class manages up to two subwindows. The current view can be
 split into two programmatically (perhaps from a menu command), and unsplit
 either programmatically or via the wxSplitterWindow user interface.
 
+Appropriate 3D shading for the Windows 95 user interface is an option -
+this is also recommended for GTK. Optionally, the sash can be made to
+look more like the native control under MacOS X.
+
 \wxheading{Window styles}
 
 \begin{twocollist}\itemsep=0pt
 \twocolitem{\windowstyle{wxSP\_3D}}{Draws a 3D effect border and sash.}
 \twocolitem{\windowstyle{wxSP\_3DSASH}}{Draws a 3D effect sash.}
-\twocolitem{\windowstyle{wxSP\_3DBORDER}}{Synonym for wxSP\_BORDER.}
-\twocolitem{\windowstyle{wxSP\_BORDER}}{Draws a standard border.}
-\twocolitem{\windowstyle{wxSP\_NOBORDER}}{No border (default).}
-\twocolitem{\windowstyle{wxSP\_NO\_XP\_THEME}}{Under Windows XP, switches off the attempt to draw the
-splitter using Windows XP theming, so the borders and sash will take on the pre-XP look.}
+\twocolitem{\windowstyle{wxSP\_3DBORDER}}{Draws a 3D effect border.}
+\twocolitem{\windowstyle{wxSP\_FULLSASH}}{Draws the ends of the sash (so the window can be used without a border).}
+\twocolitem{\windowstyle{wxSP\_BORDER}}{Draws a thin black border around the window.}
+\twocolitem{\windowstyle{wxSP\_NOBORDER}}{No border, and a black sash.}
 \twocolitem{\windowstyle{wxSP\_PERMIT\_UNSPLIT}}{Always allow to
 unsplit, even with the minimum pane size other than zero.}
 \twocolitem{\windowstyle{wxSP\_LIVE\_UPDATE}}{Don't draw XOR line but resize the child windows immediately.}
@@ -64,7 +67,7 @@ Processes a wxEVT\_COMMAND\_SPLITTER\_DOUBLECLICKED event.}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxSplitterWindow::wxSplitterWindow}\label{wxsplitterwindowctor}
+\membersection{wxSplitterWindow::wxSplitterWindow}\label{wxsplitterwindowconstr}
 
 \func{}{wxSplitterWindow}{\void}
 
@@ -106,7 +109,7 @@ create and delete the second pane on demand.
 \helpref{wxSplitterWindow::SplitHorizontally}{wxsplitterwindowsplithorizontally},\rtfsp
 \helpref{wxSplitterWindow::Create}{wxsplitterwindowcreate}
 
-\membersection{wxSplitterWindow::\destruct{wxSplitterWindow}}\label{wxsplitterwindowdtor}
+\membersection{wxSplitterWindow::\destruct{wxSplitterWindow}}
 
 \func{}{\destruct{wxSplitterWindow}}{\void}
 
@@ -114,11 +117,11 @@ Destroys the wxSplitterWindow and its children.
 
 \membersection{wxSplitterWindow::Create}\label{wxsplitterwindowcreate}
 
-\func{bool}{Create}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id}, \rtfsp
+\func{bool}{Create}{\param{wxWindow*}{ parent}, \param{wxWindowID}{ id}, \param{int }{x},\rtfsp
 \param{const wxPoint\& }{point = wxDefaultPosition}, \param{const wxSize\& }{size = wxDefaultSize},\rtfsp
 \param{long }{style=wxSP\_3D}, \param{const wxString\&}{ name = "splitterWindow"}}
 
-Creation function, for two-step construction. See \helpref{wxSplitterWindow::wxSplitterWindow}{wxsplitterwindowctor} for
+Creation function, for two-step construction. See \helpref{wxSplitterWindow::wxSplitterWindow}{wxsplitterwindowconstr} for
 details.
 
 \membersection{wxSplitterWindow::GetMinimumPaneSize}\label{wxsplitterwindowgetminimumpanesize}
@@ -130,16 +133,6 @@ Returns the current minimum pane size (defaults to zero).
 \wxheading{See also}
 
 \helpref{wxSplitterWindow::SetMinimumPaneSize}{wxsplitterwindowsetminimumpanesize}
-
-\membersection{wxSplitterWindow::GetSashGravity}\label{wxsplitterwindowgetsashgravity}
-
-\func{double}{GetSashGravity}{\void}
-
-Returns the current sash gravity.
-
-\wxheading{See also}
-
-\helpref{wxSplitterWindow::SetSashGravity}{wxsplitterwindowsetsashgravity}
 
 \membersection{wxSplitterWindow::GetSashPosition}\label{wxsplitterwindowgetsashposition}
 
@@ -178,8 +171,7 @@ Returns the right/bottom pane.
 
 \func{void}{Initialize}{\param{wxWindow* }{window}}
 
-Initializes the splitter window to have one pane.  The child window is
-shown if it is currently hidden.
+Initializes the splitter window to have one pane.
 
 \wxheading{Parameters}
 
@@ -198,7 +190,7 @@ This should be called if you wish to initially view only a single pane in the sp
 
 \constfunc{bool}{IsSplit}{\void}
 
-Returns true if the window is split, false otherwise.
+Returns TRUE if the window is split, FALSE otherwise.
 
 \membersection{wxSplitterWindow::OnDoubleClickSash}\label{wxsplitterwindowondoubleclicksash}
 
@@ -243,7 +235,7 @@ may wish to delete the window.
 \func{virtual bool}{OnSashPositionChange}{\param{int }{newSashPosition}}
 
 Application-overridable function called when the sash position is changed by 
-user. It may return false to prevent the change or true to allow it.
+user. It may return FALSE to prevent the change or TRUE to allow it.
 
 \wxheading{Parameters}
 
@@ -266,8 +258,8 @@ windows or only one.
 
 Both parameters should be non-NULL and {\it winOld} must specify one of the
 windows managed by the splitter. If the parameters are incorrect or the window
-couldn't be replaced, false is returned. Otherwise the function will return
-true, but please notice that it will not delete the replaced window and you
+couldn't be replaced, FALSE is returned. Otherwise the function will return
+TRUE, but please notice that it will not delete the replaced window and you
 may wish to do it yourself.
 
 \wxheading{See also}
@@ -280,40 +272,9 @@ may wish to do it yourself.
 \helpref{wxSplitterWindow::SplitVertically}{wxsplitterwindowsplitvertically}\\
 \helpref{wxSplitterWindow::SplitHorizontally}{wxsplitterwindowsplithorizontally}
 
-\membersection{wxSplitterWindow::SetSashGravity}\label{wxsplitterwindowsetsashgravity}
-
-\func{void}{SetSashGravity}{\param{double }{gravity}}
-
-Sets the sash gravity. 
-
-\wxheading{Parameters}
-
-\docparam{gravity}{The sash gravity. Value between 0.0 and 1.0.}
-
-
-\wxheading{Remarks}
-Gravity is real factor which controls position of sash while resizing wxSplitterWindow.
-Gravity tells wxSplitterWindow how much will left/top window grow while resizing.
-
-Example values:
-\begin{itemize}\itemsep=0pt
-\item{ 0.0  - only the bottom/right window is automaticaly resized}
-\item{ 0.5  - both windows grow by equal size}
-\item{ 1.0  - only left/top window grows}
-\end{itemize}
-
-Gravity should be real value betwwen 0.0 and 1.0.
-
-Default value of sash gravity is 0.0. That value is compatible with previous 
-(before gravity was introduced) behaviour of wxSplitterWindow.
-
-\wxheading{See also}
-
-\helpref{wxSplitterWindow::GetSashGravity}{wxsplitterwindowgetsashgravity}
-
 \membersection{wxSplitterWindow::SetSashPosition}\label{wxsplitterwindowsetsashposition}
 
-\func{void}{SetSashPosition}{\param{int }{position}, \param{const bool}{ redraw = true}}
+\func{void}{SetSashPosition}{\param{int }{position}, \param{const bool}{ redraw = TRUE}}
 
 Sets the sash position.
 
@@ -321,7 +282,7 @@ Sets the sash position.
 
 \docparam{position}{The sash position in pixels.}
 
-\docparam{redraw}{If true, resizes the panes and redraws the sash and border.}
+\docparam{redraw}{If TRUE, resizes the panes and redraws the sash and border.}
 
 \wxheading{Remarks}
 
@@ -330,15 +291,6 @@ Does not currently check for an out-of-range value.
 \wxheading{See also}
 
 \helpref{wxSplitterWindow::GetSashPosition}{wxsplitterwindowgetsashposition}
-
-\membersection{wxSplitterWindow::SetSashSize}\label{wxsplitterwindowsetsashsize}
-
-\func{void}{SetSashSize}{\param{int }{size}}
-
-Sets the sash size. Normally, the sash size is determined according to the metrics
-of each platform, but the application can override this, for example to show
-a thin sash that the user is not expected to drag. If {\it size} is more -1,
-the custom sash size will be used.
 
 \membersection{wxSplitterWindow::SetMinimumPaneSize}\label{wxsplitterwindowsetminimumpanesize}
 
@@ -386,8 +338,7 @@ Only sets the internal variable; does not update the display.
 \func{bool}{SplitHorizontally}{\param{wxWindow* }{window1}, \param{wxWindow* }{window2},
  \param{int}{ sashPosition = 0}}
 
-Initializes the top and bottom panes of the splitter window.  The
-child windows are shown if they are currently hidden.
+Initializes the top and bottom panes of the splitter window.
 
 \wxheading{Parameters}
 
@@ -402,7 +353,7 @@ to choose the default position (half of the total window height).}
 
 \wxheading{Return value}
 
-true if successful, false otherwise (the window was already split).
+TRUE if successful, FALSE otherwise (the window was already split).
 
 \wxheading{Remarks}
 
@@ -420,8 +371,7 @@ window is not currently split using \helpref{IsSplit}{wxsplitterwindowissplit}.
 \func{bool}{SplitVertically}{\param{wxWindow* }{window1}, \param{wxWindow* }{window2},
  \param{int}{ sashPosition = 0}}
 
-Initializes the left and right panes of the splitter window.  The
-child windows are shown if they are currently hidden.
+Initializes the left and right panes of the splitter window.
 
 \wxheading{Parameters}
 
@@ -436,7 +386,7 @@ to choose the default position (half of the total window width).}
 
 \wxheading{Return value}
 
-true if successful, false otherwise (the window was already split).
+TRUE if successful, FALSE otherwise (the window was already split).
 
 \wxheading{Remarks}
 
@@ -460,7 +410,7 @@ Unsplits the window.
 
 \wxheading{Return value}
 
-true if successful, false otherwise (the window was not split).
+TRUE if successful, FALSE otherwise (the window was not split).
 
 \wxheading{Remarks}
 
@@ -471,18 +421,4 @@ which can be overridden for the desired behaviour. By default, the pane being re
 
 \helpref{wxSplitterWindow::SplitHorizontally}{wxsplitterwindowsplithorizontally}, \helpref{wxSplitterWindow::SplitVertically}{wxsplitterwindowsplitvertically},\rtfsp
 \helpref{wxSplitterWindow::IsSplit}{wxsplitterwindowissplit}, \helpref{wxSplitterWindow::OnUnsplit}{wxsplitterwindowonunsplit}
-
-\membersection{wxSplitterWindow::UpdateSize}\label{wxsplitterwindowupdatesize}
-
-\func{void}{UpdateSize}{\void}
-
-Causes any pending sizing of the sash and child panes to take place
-immediately.
-
-Such resizing normally takes place in idle time, in order
-to wait for layout to be completed. However, this can cause
-unacceptable flicker as the panes are resized after the window has been
-shown. To work around this, you can perform window layout (for
-example by sending a size event to the parent window), and then
-call this function, before showing the top-level window.
 

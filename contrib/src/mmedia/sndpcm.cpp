@@ -4,7 +4,7 @@
 // Date: 08/11/1999
 // Author: Guilhem Lavaux <lavaux@easynet.fr> (C) 1999
 // CVSID: $Id$
-// wxWindows licence
+// Licence: wxWindows licence
 // --------------------------------------------------------------------------
 #ifdef __GNUG__
 #pragma implementation "sndpcm.cpp"
@@ -89,7 +89,7 @@ bool wxSoundFormatPcm::operator!=(const wxSoundFormatBase& format) const
   wxSoundFormatPcm *format2 = (wxSoundFormatPcm *)&format;
 
   if (format.GetType() != wxSOUND_PCM)
-    return true;
+    return TRUE;
 
   return ( (m_srate != format2->m_srate) ||
            (m_bps != format2->m_bps) ||

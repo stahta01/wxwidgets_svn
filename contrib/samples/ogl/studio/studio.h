@@ -14,13 +14,6 @@
 
 #include <wx/docmdi.h>
 #include <wx/help.h>
-#include <wx/cshelp.h>
-#include <wx/helphtml.h>
-#ifdef __WXMSW__
-    #include <wx/msw/helpchm.h>
-#else
-    #include <wx/html/helpctrl.h>
-#endif
 
 #include <wx/ogl/ogl.h>
 #include <wx/ogl/canvas.h>
@@ -41,7 +34,7 @@ class csFrame;
 // Define a new application
 class csApp: public wxApp
 {
-    friend class csFrame;
+    friend csFrame;
 public:
     csApp();
     ~csApp();
@@ -67,7 +60,7 @@ public:
     void CreateDiagramToolBar(wxFrame* parent);
 
     wxMDIChildFrame *CreateChildFrame(wxDocument *doc, wxView *view, wxMenu** editMenu);
-    csCanvas *CreateCanvas(wxView *view, wxMDIChildFrame *parent);
+    csCanvas *CreateCanvas(wxView *view, wxFrame *parent);
 
     // Fill out the project tree control
     void FillProjectTreeCtrl();
@@ -88,7 +81,7 @@ public:
     wxMenu* GetShapeEditMenu() const { return m_shapeEditMenu; }
     wxDiagramClipboard& GetDiagramClipboard() const { return (wxDiagramClipboard&) m_diagramClipboard; }
     wxDocManager* GetDocManager() const { return m_docManager; }
-    wxHelpControllerBase* GetHelpController() const { return m_helpController; }
+    wxHelpController& GetHelpController() const { return (wxHelpController&) m_helpController; }
 
     int GetGridStyle() const { return m_gridStyle; }
     void SetGridStyle(int style) { m_gridStyle = style; }
@@ -119,7 +112,7 @@ protected:
     csDiagramClipboard      m_diagramClipboard;
 
     // Help instance
-    wxHelpControllerBase*   m_helpController;
+    wxHelpController        m_helpController;
 };
 
 DECLARE_APP(csApp)

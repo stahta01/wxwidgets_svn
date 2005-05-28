@@ -3,22 +3,30 @@
 // Purpose:
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
-// Copyright:   (c) 1998 Robert Roebling
+// Copyright:   (c) 1998 Robert Roebling, Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dc.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/dc.h"
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+
+//-----------------------------------------------------------------------------
+// constants
+//-----------------------------------------------------------------------------
+
+#define mm2inches        0.0393700787402
+#define inches2mm        25.4
+#define mm2twips         56.6929133859
+#define twips2mm         0.0176388888889
+#define mm2pt            2.83464566929
+#define pt2mm            0.352777777778
 
 //-----------------------------------------------------------------------------
 // wxDC
@@ -52,6 +60,11 @@ void wxDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord hei
     m_clipY1 = y;
     m_clipX2 = x + width;
     m_clipY2 = y + height;
+}
+
+void wxDC::DestroyClippingRegion()
+{
+    m_clipping = FALSE;
 }
 
 // ---------------------------------------------------------------------------
@@ -106,7 +119,7 @@ void wxDC::SetMapMode( int mode )
           break;
     }
     m_mappingMode = mode;
-
+    
 /*  we don't do this mega optimisation
     if (mode != wxMM_TEXT)
     {

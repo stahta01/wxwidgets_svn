@@ -18,85 +18,49 @@ wxOutputStream is an abstract base class which may not be used directly.
 % -----------
 % ctor & dtor
 % -----------
-
-\membersection{wxOutputStream::wxOutputStream}\label{wxoutputstreamctor}
+\membersection{wxOutputStream::wxOutputStream}
 
 \func{}{wxOutputStream}{\void}
 
 Creates a dummy wxOutputStream object.
 
-
-\membersection{wxOutputStream::\destruct{wxOutputStream}}\label{wxoutputstreamdtor}
+\membersection{wxOutputStream::\destruct{wxOutputStream}}
 
 \func{}{\destruct{wxOutputStream}}{\void}
 
 Destructor.
 
-
-\membersection{wxOutputStream::Close}\label{wxoutputstreamclose}
-
-\func{bool}{Close}{\void}
-
-Closes the stream, returning {\tt false} if an error occurs. The
-stream is closed implicitly in the destructor if Close() is not
-called explicitly.
-
-If this stream wraps another stream or some other resource such
-as a file, then the underlying resource is closed too if it is owned
-by this stream, or left open otherwise.
-
-
-\membersection{wxOutputStream::LastWrite}\label{wxoutputstreamlastwrite}
+\membersection{wxOutputStream::LastWrite}
 
 \constfunc{size\_t}{LastWrite}{\void}
 
-Returns the number of bytes written during the last 
-\helpref{Write()}{wxoutputstreamwrite}. It may return $0$ even if there is no
-error on the stream if it is only temporarily impossible to write to it.
+Returns the number of bytes written during the last Write().
 
-
-\membersection{wxOutputStream::PutC}\label{wxoutputstreamputc}
+\membersection{wxOutputStream::PutC}
 
 \func{void}{PutC}{\param{char}{ c}}
 
 Puts the specified character in the output queue and increments the
 stream position.
 
+\membersection{wxOutputStream::SeekO}
 
-\membersection{wxOutputStream::SeekO}\label{wxoutputstreamseeko}
-
-\func{off\_t}{SeekO}{\param{off\_t}{ pos}, \param{wxSeekMode}{ mode = wxFromStart}}
+\func{off\_t}{SeekO}{\param{off\_t}{ pos}, \param{wxSeekMode}{ mode}}
 
 Changes the stream current position.
 
-\wxheading{Parameters}
-
-\docparam{pos}{Offset to seek to.}
-
-\docparam{mode}{One of {\bf wxFromStart}, {\bf wxFromEnd}, {\bf wxFromCurrent}.}
-
-\wxheading{Return value}
-
-The new stream position or wxInvalidOffset on error.
-
-
-\membersection{wxOutputStream::TellO}\label{wxoutputstreamtello}
+\membersection{wxOutputStream::TellO}
 
 \constfunc{off\_t}{TellO}{\void}
 
 Returns the current stream position.
 
-
-\membersection{wxOutputStream::Write}\label{wxoutputstreamwrite}
+\membersection{wxOutputStream::Write}
 
 \func{wxOutputStream\&}{Write}{\param{const void *}{buffer}, \param{size\_t}{ size}}
 
-Writes up to the specified amount of bytes using the data of {\it buffer}. Note
-that not all data can always be written so you must check the number of bytes
-really written to the stream using \helpref{LastWrite()}{wxoutputstreamlastwrite} 
-when this function returns. In some cases (for example a write end of a pipe
-which is currently full) it is even possible that there is no errors and zero
-bytes have been written.
+Writes the specified amount of bytes using the data of {\it buffer}. 
+{\it WARNING!} The buffer absolutely needs to have at least the specified size.
 
 This function returns a reference on the current object, so the user can test
 any states of the stream right away.

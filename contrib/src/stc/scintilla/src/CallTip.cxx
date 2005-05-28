@@ -48,10 +48,6 @@ void CallTip::RefreshColourPalette(Palette &pal, bool want) {
 	pal.WantFind(colourLight, want);
 }
 
-static bool IsArrowCharacter(char ch) {
-	return (ch == 0) || (ch == '\001') || (ch == '\002');
-}
-
 void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 	int posStart, int posEnd, int ytext, PRectangle rcClient,
 	bool highlight, bool draw) {
@@ -60,7 +56,7 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 	int maxEnd = 0;
 	int ends[10];
 	for (int i=0;i<len;i++) {
-		if (IsArrowCharacter(s[i])) {
+		if (s[i] <= '\002') {
 			if (i > 0)
 				ends[maxEnd++] = i;
 			ends[maxEnd++] = i+1;
@@ -72,7 +68,7 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 	for (int seg = 0; seg<maxEnd; seg++) {
 		int endSeg = ends[seg];
 		if (endSeg > startSeg) {
-			if (IsArrowCharacter(s[startSeg])) {
+			if (s[startSeg] <= '\002') {
 				xEnd = x + widthArrow;
 				offsetMain = xEnd;
 				if (draw) {
@@ -214,7 +210,7 @@ void CallTip::MouseClick(Point pt) {
 
 PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
                                  const char *faceName, int size,
-                                 int codePage_, int characterSet, Window &wParent) {
+                                 int codePage_, Window &wParent) {
 	clickPlace = 0;
 	if (val)
 		delete []val;
@@ -234,7 +230,7 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	inCallTipMode = true;
 	posStartCallTip = pos;
 	int deviceHeight = surfaceMeasure->DeviceHeightFont(size);
-	font.Create(faceName, characterSet, deviceHeight, false, false);
+	font.Create(faceName, SC_CHARSET_DEFAULT, deviceHeight, false, false);
 	// Look for multiple lines in the text
 	// Only support \n here - simply means container must avoid \r!
 	int numLines = 1;

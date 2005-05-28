@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     09.02.01
 // RCS-ID:      $Id$
-// Copyright:   (c) 1996-2001 Vadim Zeitlin
+// Copyright:   (c) 1996-2001 wxWindows team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -22,29 +22,7 @@
 
 #include "wx/control.h"
 
-// ----------------------------------------------------------------------------
-// wxSlider flags
-// ----------------------------------------------------------------------------
-
-#define wxSL_HORIZONTAL      wxHORIZONTAL /* 0x0004 */
-#define wxSL_VERTICAL        wxVERTICAL   /* 0x0008 */
-
-#define wxSL_TICKS           0x0010
-#define wxSL_AUTOTICKS       wxSL_TICKS // we don't support manual ticks
-#define wxSL_LABELS          0x0020
-#define wxSL_LEFT            0x0040
-#define wxSL_TOP             0x0080
-#define wxSL_RIGHT           0x0100
-#define wxSL_BOTTOM          0x0200
-#define wxSL_BOTH            0x0400
-#define wxSL_SELRANGE        0x0800
-#define wxSL_INVERSE         0x1000
-
-// obsolete
-#define wxSL_NOTIFY_DRAG     0x0000
-
-
-extern WXDLLEXPORT_DATA(const wxChar*) wxSliderNameStr;
+WXDLLEXPORT_DATA(extern const wxChar*) wxSliderNameStr;
 
 // ----------------------------------------------------------------------------
 // wxSliderBase: define wxSlider interface
@@ -64,7 +42,6 @@ public:
              const wxValidator& validator = wxDefaultValidator,
              const wxString& name = wxSliderNameStr);
     */
-    wxSliderBase() { }
 
     // get/set the current slider value (should be in range)
     virtual int GetValue() const = 0;
@@ -74,8 +51,6 @@ public:
     virtual void SetRange(int minValue, int maxValue) = 0;
     virtual int GetMin() const = 0;
     virtual int GetMax() const = 0;
-    void SetMin( int minValue ) { SetRange( minValue , GetMax() ) ; }
-    void SetMax( int maxValue ) { SetRange( GetMin() , maxValue ) ; }
 
     // the line/page size is the increment by which the slider moves when
     // cursor arrow key/page up or down are pressed (clicking the mouse is like
@@ -101,20 +76,6 @@ public:
     virtual int GetSelEnd() const { return GetMin(); }
     virtual int GetSelStart() const { return GetMax(); }
     virtual void SetSelection(int WXUNUSED(min), int WXUNUSED(max)) { }
-
-protected:
-
-    // adjust value according to wxSL_INVERSE style
-    virtual int ValueInvertOrNot(int value) const
-    {
-        if (HasFlag(wxSL_INVERSE))
-            return (GetMax() + GetMin()) - value;
-        else
-            return value;
-    }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxSliderBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -124,22 +85,25 @@ private:
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/slider.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/slider95.h"
-    #if WXWIN_COMPATIBILITY_2_4
-         #define wxSlider95 wxSlider
-    #endif
+    #ifdef __WIN95__
+        #include "wx/msw/slider95.h"
+        #define wxSlider wxSlider95
+        #define sm_classwxSlider sm_classwxSlider95
+    #else // Win16
+        #include "wx/msw/slidrmsw.h"
+        #define wxSlider wxSliderMSW
+        #define sm_classwxSlider sm_classwxSliderMSW
+    #endif // Win32/Win16
 #elif defined(__WXMOTIF__)
     #include "wx/motif/slider.h"
 #elif defined(__WXGTK__)
     #include "wx/gtk/slider.h"
 #elif defined(__WXMAC__)
     #include "wx/mac/slider.h"
-#elif defined(__WXCOCOA__)
-    #include "wx/cocoa/slider.h"
 #elif defined(__WXPM__)
     #include "wx/os2/slider.h"
-#elif defined(__WXPALMOS__)
-    #include "wx/palmos/slider.h"
+#elif defined(__WXSTUBS__)
+    #include "wx/stubs/slider.h"
 #endif
 
 #endif // wxUSE_SLIDER

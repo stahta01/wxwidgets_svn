@@ -10,14 +10,15 @@
 #ifndef _WX_IMAGE_H_
 #define _WX_IMAGE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "image.h"
 #endif
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 #include "wx/object.h"
 #include "wx/string.h"
 #include "wx/gdicmn.h"
+#include "wx/bitmap.h"
 #include "wx/hashmap.h"
 
 #if wxUSE_STREAMS
@@ -26,32 +27,7 @@
 
 #if wxUSE_IMAGE
 
-// on some systems (Unixware 7.x) index is defined as a macro in the headers
-// which breaks the compilation below
-#undef index
-
-#define wxIMAGE_OPTION_QUALITY  wxString(_T("quality"))
 #define wxIMAGE_OPTION_FILENAME wxString(_T("FileName"))
-
-#define wxIMAGE_OPTION_RESOLUTION            wxString(_T("Resolution"))
-#define wxIMAGE_OPTION_RESOLUTIONX           wxString(_T("ResolutionX"))
-#define wxIMAGE_OPTION_RESOLUTIONY           wxString(_T("ResolutionY"))
-
-#define wxIMAGE_OPTION_RESOLUTIONUNIT        wxString(_T("ResolutionUnit"))
-
-// constants used with wxIMAGE_OPTION_RESOLUTIONUNIT
-enum
-{
-    wxIMAGE_RESOLUTION_INCHES = 1,
-    wxIMAGE_RESOLUTION_CM = 2
-};
-
-// alpha channel values: fully transparent, default threshold separating
-// transparent pixels from opaque for a few functions dealing with alpha and
-// fully opaque
-const unsigned char wxIMAGE_ALPHA_TRANSPARENT = 0;
-const unsigned char wxIMAGE_ALPHA_THRESHOLD = 0x80;
-const unsigned char wxIMAGE_ALPHA_OPAQUE = 0xff;
 
 //-----------------------------------------------------------------------------
 // classes
@@ -59,7 +35,6 @@ const unsigned char wxIMAGE_ALPHA_OPAQUE = 0xff;
 
 class WXDLLEXPORT wxImageHandler;
 class WXDLLEXPORT wxImage;
-class WXDLLEXPORT wxPalette;
 
 //-----------------------------------------------------------------------------
 // wxImageHandler
@@ -69,12 +44,12 @@ class WXDLLEXPORT wxImageHandler: public wxObject
 {
 public:
     wxImageHandler()
-        : m_name(wxEmptyString), m_extension(wxEmptyString), m_mime(), m_type(0)
+        : m_name(wxT("")), m_extension(wxT("")), m_mime(), m_type(0)
         { }
 
 #if wxUSE_STREAMS
-    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
-    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=TRUE, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=TRUE );
 
     virtual int GetImageCount( wxInputStream& stream );
 
@@ -115,40 +90,22 @@ private:
 class WXDLLEXPORT wxImageHistogramEntry
 {
 public:
-    wxImageHistogramEntry() { index = value = 0; }
+    wxImageHistogramEntry() : index(0), value(0) {}
     unsigned long index;
     unsigned long value;
 };
 
+#ifdef __BORLANDC__
+#   pragma option -w-inl
+#endif
+
 WX_DECLARE_EXPORTED_HASH_MAP(unsigned long, wxImageHistogramEntry,
                              wxIntegerHash, wxIntegerEqual,
-                             wxImageHistogramBase);
+                             wxImageHistogram);
 
-class WXDLLEXPORT wxImageHistogram : public wxImageHistogramBase
-{
-public:
-    wxImageHistogram() : wxImageHistogramBase(256) { }
-
-    // get the key in the histogram for the given RGB values
-    static unsigned long MakeKey(unsigned char r,
-                                 unsigned char g,
-                                 unsigned char b)
-    {
-        return (r << 16) | (g << 8) | b;
-    }
-
-    // find first colour that is not used in the image and has higher
-    // RGB values than RGB(startR, startG, startB)
-    //
-    // returns true and puts this colour in r, g, b (each of which may be NULL)
-    // on success or returns false if there are no more free colours
-    bool FindFirstUnusedColour(unsigned char *r,
-                               unsigned char *g,
-                               unsigned char *b,
-                               unsigned char startR = 1,
-                               unsigned char startG = 0,
-                               unsigned char startB = 0 ) const;
-};
+#ifdef __BORLANDC__
+#   pragma option -w.inl
+#endif
 
 //-----------------------------------------------------------------------------
 // wxImage
@@ -157,14 +114,11 @@ public:
 class WXDLLEXPORT wxImage: public wxObject
 {
 public:
-    wxImage(){}
-    wxImage( int width, int height, bool clear = true );
-    wxImage( int width, int height, unsigned char* data, bool static_data = false );
-    wxImage( int width, int height, unsigned char* data, unsigned char* alpha, bool static_data = false );
+    wxImage();
+    wxImage( int width, int height );
+    wxImage( int width, int height, unsigned char* data, bool static_data = FALSE );
     wxImage( const wxString& name, long type = wxBITMAP_TYPE_ANY, int index = -1 );
     wxImage( const wxString& name, const wxString& mimetype, int index = -1 );
-    wxImage( const char** xpmData );
-    wxImage( char** xpmData );
 
 #if wxUSE_STREAMS
     wxImage( wxInputStream& stream, long type = wxBITMAP_TYPE_ANY, int index = -1 );
@@ -174,10 +128,17 @@ public:
     wxImage( const wxImage& image );
     wxImage( const wxImage* image );
 
-    bool Create( int width, int height, bool clear = true );
-    bool Create( int width, int height, unsigned char* data, bool static_data = false );
-    bool Create( int width, int height, unsigned char* data, unsigned char* alpha, bool static_data = false );
-    bool Create( const char** xpmData );
+#if WXWIN_COMPATIBILITY_2_2 && wxUSE_GUI
+    // conversion to/from wxBitmap (deprecated, use wxBitmap's methods instead):
+    wxImage( const wxBitmap &bitmap );
+    wxBitmap ConvertToBitmap() const;
+#ifdef __WXGTK__
+    wxBitmap ConvertToMonoBitmap( unsigned char red, unsigned char green, unsigned char blue ) const;
+#endif
+#endif
+
+    void Create( int width, int height );
+    void Create( int width, int height, unsigned char* data, bool static_data = FALSE );
     void Destroy();
 
     // creates an identical copy of the image (the = operator
@@ -185,14 +146,7 @@ public:
     wxImage Copy() const;
 
     // return the new image with size width*height
-    wxImage GetSubImage( const wxRect& rect) const;
-
-    // Paste the image or part of this image into an image of the given size at the pos
-    //  any newly exposed areas will be filled with the rgb colour
-    //  by default if r = g = b = -1 then fill with this image's mask colour or find and
-    //  set a suitable mask colour
-    wxImage Size( const wxSize& size, const wxPoint& pos,
-                  int r = -1, int g = -1, int b = -1 ) const;
+    wxImage GetSubImage( const wxRect& ) const;
 
     // pastes image into this instance and takes care of
     // the mask colour and out of bounds problems
@@ -206,35 +160,26 @@ public:
     // rescales the image in place
     wxImage& Rescale( int width, int height ) { return *this = Scale(width, height); }
 
-    // resizes the image in place
-    wxImage& Resize( const wxSize& size, const wxPoint& pos,
-                     int r = -1, int g = -1, int b = -1 ) { return *this = Size(size, pos, r, g, b); }
-
     // Rotates the image about the given point, 'angle' radians.
     // Returns the rotated image, leaving this image intact.
     wxImage Rotate(double angle, const wxPoint & centre_of_rotation,
-                   bool interpolating = true, wxPoint * offset_after_rotation = (wxPoint*) NULL) const;
+                   bool interpolating = TRUE, wxPoint * offset_after_rotation = (wxPoint*) NULL) const;
 
-    wxImage Rotate90( bool clockwise = true ) const;
-    wxImage Mirror( bool horizontally = true ) const;
+    wxImage Rotate90( bool clockwise = TRUE ) const;
+    wxImage Mirror( bool horizontally = TRUE ) const;
 
     // replace one colour with another
     void Replace( unsigned char r1, unsigned char g1, unsigned char b1,
                   unsigned char r2, unsigned char g2, unsigned char b2 );
 
-    // convert to monochrome image (<r,g,b> will be replaced by white,
-    // everything else by black)
+    // convert to monochrome image (<r,g,b> will be replaced by white, everything else by black)
     wxImage ConvertToMono( unsigned char r, unsigned char g, unsigned char b ) const;
 
     // these routines are slow but safe
     void SetRGB( int x, int y, unsigned char r, unsigned char g, unsigned char b );
-    void SetRGB( const wxRect& rect, unsigned char r, unsigned char g, unsigned char b );
     unsigned char GetRed( int x, int y ) const;
     unsigned char GetGreen( int x, int y ) const;
     unsigned char GetBlue( int x, int y ) const;
-
-    void SetAlpha(int x, int y, unsigned char alpha);
-    unsigned char GetAlpha(int x, int y) const;
 
     // find first colour that is not used in the image and has higher
     // RGB values than <startR,startG,startB>
@@ -244,22 +189,6 @@ public:
     // Set image's mask to the area of 'mask' that has <r,g,b> colour
     bool SetMaskFromImage(const wxImage & mask,
                           unsigned char mr, unsigned char mg, unsigned char mb);
-
-    // converts image's alpha channel to mask, if it has any, does nothing
-    // otherwise:
-    bool ConvertAlphaToMask(unsigned char threshold = wxIMAGE_ALPHA_THRESHOLD);
-
-    // This method converts an image where the original alpha
-    // information is only available as a shades of a colour
-    // (actually shades of grey) typically when you draw anti-
-    // aliased text into a bitmap. The DC drawinf routines
-    // draw grey values on the black background although they
-    // actually mean to draw white with differnt alpha values.
-    // This method reverses it, assuming a black (!) background
-    // and white text (actually only the red channel is read).
-    // The method will then fill up the whole image with the
-    // colour given.
-    bool ConvertColourToAlpha( unsigned char r, unsigned char g, unsigned char b );
 
     static bool CanRead( const wxString& name );
     static int GetImageCount( const wxString& name, long type = wxBITMAP_TYPE_ANY );
@@ -286,31 +215,16 @@ public:
     int GetWidth() const;
     int GetHeight() const;
 
-    // these functions provide fastest access to wxImage data but should be
-    // used carefully as no checks are done
-    unsigned char *GetData() const;
-    void SetData( unsigned char *data, bool static_data=false );
-    void SetData( unsigned char *data, int new_width, int new_height, bool static_data=false );
-
-    unsigned char *GetAlpha() const;    // may return NULL!
-    bool HasAlpha() const { return GetAlpha() != NULL; }
-    void SetAlpha(unsigned char *alpha = NULL, bool static_data=false);
-    void InitAlpha();
-
-    // return true if this pixel is masked or has alpha less than specified
-    // threshold
-    bool IsTransparent(int x, int y,
-                       unsigned char threshold = wxIMAGE_ALPHA_THRESHOLD) const;
+    char unsigned *GetData() const;
+    void SetData( char unsigned *data );
+    void SetData( char unsigned *data, int new_width, int new_height );
 
     // Mask functions
     void SetMaskColour( unsigned char r, unsigned char g, unsigned char b );
-    // Get the current mask colour or find a suitable colour
-    // returns true if using current mask colour
-    bool GetOrFindMaskColour( unsigned char *r, unsigned char *g, unsigned char *b ) const;
     unsigned char GetMaskRed() const;
     unsigned char GetMaskGreen() const;
     unsigned char GetMaskBlue() const;
-    void SetMask( bool mask = true );
+    void SetMask( bool mask = TRUE );
     bool HasMask() const;
 
 #if wxUSE_PALETTE
@@ -331,8 +245,8 @@ public:
 
     // Computes the histogram of the image and fills a hash table, indexed
     // with integer keys built as 0xRRGGBB, containing wxImageHistogramEntry
-    // objects. Each of them contains an 'index' (useful to build a palette
-    // with the image colours) and a 'value', which is the number of pixels
+    // objects. Each of them contains an 'index' (useful to build a palette 
+    // with the image colours) and a 'value', which is the number of pixels 
     // in the image with that colour.
     // Returned value: # of entries in the histogram
     unsigned long ComputeHistogram( wxImageHistogram &h ) const;
@@ -358,19 +272,11 @@ public:
     static wxImageHandler *FindHandler( long imageType );
     static wxImageHandler *FindHandlerMime( const wxString& mimetype );
 
-    static wxString GetImageExtWildcard();
-
     static void CleanUpHandlers();
     static void InitStandardHandlers();
 
 protected:
     static wxList   sm_handlers;
-
-    // return the index of the point with the given coordinates or -1 if the
-    // image is invalid of the coordinates are out of range
-    //
-    // note that index must be multiplied by 3 when using it with RGB array
-    long XYToIndex(int x, int y) const;
 
 private:
     friend class WXDLLEXPORT wxImageHandler;
@@ -381,7 +287,7 @@ private:
 
 extern void WXDLLEXPORT wxInitAllImageHandlers();
 
-extern WXDLLEXPORT_DATA(wxImage)    wxNullImage;
+WXDLLEXPORT_DATA(extern wxImage)    wxNullImage;
 
 //-----------------------------------------------------------------------------
 // wxImage handlers

@@ -47,31 +47,6 @@ public:
               );
     }
 
-    inline wxRadioBox( wxWindow*            pParent
-                      ,wxWindowID           vId
-                      ,const wxString&      rsTitle
-                      ,const wxPoint&       rPos
-                      ,const wxSize&        rSize
-                      ,const wxArrayString& asChoices
-                      ,int                  nMajorDim = 0
-                      ,long                 lStyle = wxRA_HORIZONTAL
-                      ,const wxValidator&   rVal = wxDefaultValidator
-                      ,const wxString&      rsName = wxRadioBoxNameStr
-                     )
-    {
-        Create( pParent
-               ,vId
-               ,rsTitle
-               ,rPos
-               ,rSize
-               ,asChoices
-               ,nMajorDim
-               ,lStyle
-               ,rVal
-               ,rsName
-              );
-    }
-
     ~wxRadioBox();
 
     bool Create( wxWindow*          pParent
@@ -87,22 +62,12 @@ public:
                 ,const wxString&    rsName = wxRadioBoxNameStr
                );
 
-    bool Create( wxWindow*            pParent
-                ,wxWindowID           vId
-                ,const wxString&      rsTitle
-                ,const wxPoint&       rPos
-                ,const wxSize&        rSize
-                ,const wxArrayString& asChoices
-                ,int                  nMajorDim = 0
-                ,long                 lStyle = wxRA_HORIZONTAL
-                ,const wxValidator&   rVal = wxDefaultValidator
-                ,const wxString&      rsName = wxRadioBoxNameStr
-               );
-
     void             Command(wxCommandEvent& rEvent);
     bool             ContainsHWND(WXHWND hWnd) const;
-    virtual bool     Enable(bool bEnable = true);
-    virtual bool     Enable(int  nItem, bool bEnable = true);
+    virtual bool     Enable(bool bEnable = TRUE);
+    void             Enable( int  nItem
+                            ,bool bEnable
+                           );
     int              FindString(const wxString& sStr) const;
 
     virtual WXHBRUSH OnCtlColor( WXHDC    hDC
@@ -116,8 +81,10 @@ public:
                                 ,WXWORD wId
                                );
     void             SendNotificationEvent(void);
-    virtual bool     Show(int  nItem, bool bShow = true);
-    virtual bool     Show(bool bShow = true);
+    virtual void     Show( int  nItem
+                          ,bool bShow =  TRUE
+                         ) ;
+    bool             Show(bool bShow);
     MRESULT          WindowProc( WXUINT   uMsg
                                 ,WXWPARAM wParam
                                 ,WXLPARAM lParam

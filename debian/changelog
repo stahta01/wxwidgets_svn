@@ -1,113 +1,81 @@
-wxwidgets2.6 (2.6.0) unstable; urgency=low
+wxwindows2.4 (2.4.3.1) unstable; urgency=high
 
-  * 8 ... 9 ... 10.  Here it comes, ready or not...
-  * make install includes archive.h now.  Closes: #294998
+  * This one is for Sarge.
+  * Restore some symbols inadvertantly removed before the last snapshot.
+    We are going to tolerate the newly added symbols that should have
+    resulted in an soname change.  Not as a habit though.
+  * Restore the static builds for sarge, we can't be easily certain
+    of no package, or no build script they use, doing something
+    stupid that relies on them, even tangentially.  Too late to
+    test that now, so be on notice, its a sign-o-the-times for etch.
+  * New artwork.  See below.
 
- -- Ron Lee <ron@debian.org>  Wed, 13 Apr 2005 01:15:05 +0930
+ -- Ron Lee <ron@debian.org>  Wed, 25 May 2005 11:36:49 +0930
 
-wxwidgets2.5 (2.5.5.1) unstable; urgency=low
+wxwindows2.4 (2.4.3) unstable; urgency=medium
 
-  * Last chance.
-  * Conflict with wxwin2.4-i18n.  Due to inertia, it really
-    does.  Sorry if you are not a gringo and want both 2.4 and
-    2.5 apps localised on the same machine.  Maybe for 2.6.1.
-    Bitch upstream if you want it fixed.
-  * Don't package the static libs anymore for wxGTK.
-    Blame drepper for encouraging their obsolescence  If you dare.
-  * Trim the configure options to reflect the new defaults.
+  * Really should be high urgency, as this resolves more licence
+    trouble found in 2.4.2.6.1, but we are well frozen and the
+    changes are extensive where not major, so I'm a little more
+    cautious of pushing this through as hard as the last upload.
+    - Much of the artwork has been replaced by images from a known
+      good source.
+    - Many files with missing or wrong licence/attribution have been
+      amended or replaced.
+    - The afm files have been removed as they are GPL and it is not
+      clear they can be (universally) distributed with wx under its
+      more relaxed licence.  We should source these via a dependency
+      on some other Debian package.  Printing with wx2.4 may be
+      affected without those files.
+      The most promising option is probably to backport the printing
+      code from 2.6 but that cannot be considered even remotely viable
+      for sarge.  My apologies to the clear-felling industry while we
+      sort this one out.
+    Many thanks to all the people who found and reported potential for
+    trouble, and who lent their support to ensure it would be fixed.
 
- -- Ron Lee <ron@debian.org>  Mon, 11 Apr 2005 22:43:58 +0930
+  * The library package names themselves now incorporate the soname,
+    this should have been done long ago (per common best practice),
+    but this branch again feigned stability well.
+    We're going to need this for clean upgrades if more changes are
+    made after the freeze.  Provides the old package names at present
+    for compatibility with existing dependent packages, but may simply
+    conflict/replace or ignore them in future if and as required.
 
-wxwidgets2.5 (2.5.4.0) unstable; urgency=low
+    Correction: we cannot seamlessly make this transition at present,
+    since some dependent packages use a versioned dependency which
+    ignores the virtual package that would be provided.  Take out its
+    teeth again until we can.
 
-  * Experimental snapshot.
-  * More bakefile bogosity manually patched.  Closes: #294998
-  * Fix stray conflicts with 2.4.  Closes: #287623
-  * Fixes lack of version checking in wxPython examples.
-    Closes: #287772
-  * Fixes FTBFS on ppc.  Closes: #285186
-  * Enable gnomeprint, Closes: #284943 satisfactorily I hope.
+  * Drop support for the 'universal' builds.  In 2.4 they have always
+    been universally useless to us, no need to keep the cruft for them
+    any longer.
+  * Drop the static builds also, time is proving them worse than useless
+    and there is already sufficient danger to be found in wx build
+    combinations without encouraging trouble down that avenue too.
 
- -- Ron Lee <ron@debian.org>  Sun, 13 Feb 2005 16:52:38 +1030
+      Neither of these two prunings affect any existing package,
+      but both are consistent with existing long term plans.
 
-wxwidgets2.5 (2.5.3.3) unstable; urgency=low
+ -- Ron Lee <ron@debian.org>  Fri, 20 May 2005 11:42:40 +0930
 
-  * Experimental snapshot.
+wxwindows2.4 (2.4.2.6.1) unstable; urgency=high
 
- -- Ron Lee <ron@debian.org>  Tue,  8 Feb 2005 12:30:45 +1030
+  * High urgency because this removes some source files we appear
+    not to have permssion to distribute.  Fortunately their removal
+    does not effect any of the existing package binaries.  This must
+    propagate through the archive before we freeze.  Closes: #306013
+  * Remove typo apostrophe in control.in  Closes: #268527
+  * There are no other changes in this otherwise unintended release,
+    it should have no effect on dependent packages.
 
-wxwidgets2.5 (2.5.3.2) unstable; urgency=low
+ -- Ron Lee <ron@debian.org>  Sun, 24 Apr 2005 01:14:56 +0930
 
-  * This time, really now.
-    A snapshot that is actually ready for wider release.
-    Thanks to all who've been patient.  We know who you are.
-  * Update path to wxPython site-packages, build them with
-    --no_rpath since we will install the in tree build.
+wxwindows2.4 (2.4.2.7) unstable; urgency=low
 
- -- Ron Lee <ron@debian.org>  Thu, 11 Nov 2004 11:01:00 +1030
+  * vapourware bugfix release...
 
-wxwidgets2.5 (2.5.3.1) unstable; urgency=low
-
-  * Functioning concurrent installs for both the C++ libs
-    and wxPython along with legacy support for existing 2.4
-    users mean we can now safely introduce this release to
-    unstable without an adverse effect on existing users.
-
- -- Ron Lee <ron@debian.org>  Sun, 31 Oct 2004 15:54:46 +1030
-
-wxwidgets2.5 (2.5.3.0) experimental; urgency=low
-
-  * Experimental prerelease.
-
- -- Ron Lee <ron@debian.org>  Wed, 22 Sep 2004 03:29:56 +0930
-
-wxwidgets2.5 (2.5.2.3) experimental; urgency=low
-
-  * Greatly improved concurrent installs.  We can now install
-    a much wider range of builds without conflicting and select
-    between them without the need to go changing symlinks or
-    the suite of applications you have installed.
-  * Contrib is dead.  Long live contrib.
-    Better multi-library builds have made contrib more or less
-    obsolete.  This is the big crunch before the boom.  Everything
-    useful out of contrib has been moved back into the main package.
-    Later we will split many out again along the lines of shared
-    dependencies, so a minimal wx install really can remain minimal
-    without losing any future potential.
-
- -- Ron Lee <ron@debian.org>  Sat, 18 Sep 2004 00:59:01 +0930
-
-wxwidgets2.5 (2.5.1.1) experimental; urgency=low
-
-  * The s/ndow/dget/g release.
-  * Yes, the name has changed and the terrorists have won again.
-    Having a name too similar to Lindows apparently makes us a
-    liability to the illusion their assailants will want to project
-    in court.  Eleven or so years of unbroken, unquestioned usage
-    was not nearly so interesting to these people as the fact we
-    were a soft target and easy to deprive of due process.
-  * wxGTK is now built with gtk2 and unicode support.
-  * wxBase is no longer a separate package, it is built with the
-    GUI libs which now depend on it.  We might split it out again
-    one day if there is a need for that.
-  * Added support for GNU/K*BSD (thanks again to Robert Millan).
-  * Non-core functionality is now provided by separate libraries
-    rather than simply being built into a single behemoth unit.
-    Of course, given the way these things work, almost none of
-    them are actually smaller, and the load time is unlikely to
-    improve either, but the logical separation may be beneficial.
-  * Removed many elements of the build scripts that are no longer
-    required due to improvements and changes elsewhere.
-  * Added README.examples for people who think these are packaged
-    as demos instead of as extended documentation.
-
- -- Ron Lee <ron@debian.org>  Fri, 27 Feb 2004 17:00:29 +1030
-
-wxwindows2.5 (2.5.0) unstable; urgency=low
-
-  * New beginnings.  Back to development flavored chaos again.
-
- -- Ron Lee <ron@debian.org>  Thu, 19 Dec 2002 01:08:50 -0800
+ -- Ron Lee <ron@debian.org>  Thu,  2 Dec 2004 01:30:28 +1030
 
 wxwindows2.4 (2.4.2.6) unstable; urgency=high
 
@@ -170,7 +138,7 @@ wxwindows2.4 (2.4.2.4) unstable; urgency=low
   * Enabled iostream support despite my opinion of this c++ 'feature'.
     Closes: #211050
   * Event handling for menus with bitmaps fixed.  Closes: #214788
-  * Includes fixes for wxHTTP and wxURL parsing. Closes: #211023, #213600
+  * Includes fixed from cvs for wxHTTP and wxURL. Closes: #211023, #213600
 
  -- Ron Lee <ron@debian.org>  Sat, 25 Oct 2003 13:48:07 +0930
 

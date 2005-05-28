@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        event.cpp
-// Purpose:     wxWidgets sample demonstrating different event usage
+// Purpose:     wxWindows sample demonstrating different event usage
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     31.01.01
@@ -32,7 +32,7 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWidgets headers)
+// need because it includes almost all "standard" wxWindows headers)
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
@@ -59,8 +59,8 @@ DEFINE_EVENT_TYPE(wxEVT_MY_CUSTOM_COMMAND)
 // it may also be convenient to define an event table macro for this event type
 #define EVT_MY_CUSTOM_COMMAND(id, fn) \
     DECLARE_EVENT_TABLE_ENTRY( \
-        wxEVT_MY_CUSTOM_COMMAND, id, wxID_ANY, \
-        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        wxEVT_MY_CUSTOM_COMMAND, id, -1, \
+        (wxObjectEventFunction)(wxEventFunction)(wxCommandEventFunction)&fn, \
         (wxObject *) NULL \
     ),
 
@@ -107,7 +107,7 @@ protected:
     size_t m_nPush;
 
 private:
-    // any class wishing to process wxWidgets events must use this macro
+    // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE()
 };
 
@@ -159,10 +159,10 @@ enum
 };
 
 // ----------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
-// the event tables connect the wxWidgets events with the functions (event
+// the event tables connect the wxWindows events with the functions (event
 // handlers) which process them. It can be also done at run-time, but for the
 // simple menu events like this the static method is much simpler.
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -178,18 +178,17 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
     EVT_UPDATE_UI(Event_Pop, MyFrame::OnUpdateUIPop)
 
-    EVT_MY_CUSTOM_COMMAND(wxID_ANY, MyFrame::OnProcessCustom)
+    EVT_MY_CUSTOM_COMMAND(-1, MyFrame::OnProcessCustom)
 
-    // the line below would also work if OnProcessCustom() were defined as
-    // taking a wxEvent (as required by EVT_CUSTOM) and not wxCommandEvent
-    //EVT_CUSTOM(wxEVT_MY_CUSTOM_COMMAND, wxID_ANY, MyFrame::OnProcessCustom)
+    // this would also work:
+    //EVT_CUSTOM(wxEVT_MY_CUSTOM_COMMAND, -1, MyFrame::OnProcessCustom)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MyEvtHandler, wxEvtHandler)
     EVT_MENU(Event_Test, MyEvtHandler::OnTest)
 END_EVENT_TABLE()
 
-// Create a new application object: this macro will allow wxWidgets to create
+// Create a new application object: this macro will allow wxWindows to create
 // the application object during program execution (it's better than using a
 // static object for many reasons) and also declares the accessor function
 // wxGetApp() which will return the reference of the right type (i.e. MyApp and
@@ -208,17 +207,17 @@ IMPLEMENT_APP(MyApp)
 bool MyApp::OnInit()
 {
     // create the main application window
-    MyFrame *frame = new MyFrame(_T("Event wxWidgets Sample"),
+    MyFrame *frame = new MyFrame(_T("Event wxWindows Sample"),
                                  wxPoint(50, 50), wxSize(600, 340));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
-    frame->Show(true);
+    frame->Show(TRUE);
 
     // success: wxApp::OnRun() will be called which will enter the main message
-    // loop and the application will run. If we returned false here, the
+    // loop and the application will run. If we returned FALSE here, the
     // application would exit immediately.
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -227,7 +226,7 @@ bool MyApp::OnInit()
 
 // frame constructor
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-       : wxFrame((wxFrame *)NULL, wxID_ANY, title, pos, size)
+       : wxFrame((wxFrame *)NULL, -1, title, pos, size)
 {
     // init members
     m_nPush = 0;
@@ -242,7 +241,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     wxMenu *menuEvent = new wxMenu;
     menuEvent->Append(Event_Connect, _T("&Connect\tCtrl-C"),
                      _T("Connect or disconnect the dynamic event handler"),
-                     true /* checkable */);
+                     TRUE /* checkable */);
     menuEvent->Append(Event_Dynamic, _T("&Dynamic event\tCtrl-D"),
                       _T("Dynamic event sample - only works after Connect"));
     menuEvent->AppendSeparator();
@@ -266,7 +265,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 #if wxUSE_STATUSBAR
     CreateStatusBar(3);
-    SetStatusText(_T("Welcome to wxWidgets event sample"));
+    SetStatusText(_T("Welcome to wxWindows event sample"));
     SetStatusText(_T("Dynamic: off"), Status_Dynamic);
     SetStatusText(_T("Push count: 0"), Status_Push);
 #endif // wxUSE_STATUSBAR
@@ -278,7 +277,7 @@ MyFrame::~MyFrame()
     // crashes!
     while ( m_nPush-- != 0 )
     {
-        PopEventHandler(true /* delete handler */);
+        PopEventHandler(TRUE /* delete handler */);
     }
 }
 
@@ -288,14 +287,14 @@ MyFrame::~MyFrame()
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    // true is to force the frame to close
-    Close(true);
+    // TRUE is to force the frame to close
+    Close(TRUE);
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxMessageBox( wxT("Event sample shows different ways of using events\n")
-                  wxT("(c) 2001 Vadim Zeitlin"),
+                  wxT("© 2001 Vadim Zeitlin"),
                   wxT("About Event Sample"), wxOK | wxICON_INFORMATION, this );
 }
 
@@ -318,24 +317,20 @@ void MyFrame::OnConnect(wxCommandEvent& event)
     if ( event.IsChecked() )
     {
         // disconnect
-        Connect(Event_Dynamic, wxID_ANY, wxEVT_COMMAND_MENU_SELECTED,
+        Connect(Event_Dynamic, -1, wxEVT_COMMAND_MENU_SELECTED,
                 (wxObjectEventFunction)
                 (wxEventFunction)
                 (wxCommandEventFunction)&MyFrame::OnDynamic);
 
-#if wxUSE_STATUSBAR
         SetStatusText(_T("You can now use \"Dynamic\" item in the menu"));
         SetStatusText(_T("Dynamic: on"), Status_Dynamic);
-#endif // wxUSE_STATUSBAR
     }
     else // connect
     {
-        Disconnect(Event_Dynamic, wxID_ANY, wxEVT_COMMAND_MENU_SELECTED);
+        Disconnect(Event_Dynamic, -1, wxEVT_COMMAND_MENU_SELECTED);
 
-#if wxUSE_STATUSBAR
         SetStatusText(_T("You can no more use \"Dynamic\" item in the menu"));
         SetStatusText(_T("Dynamic: off"), Status_Dynamic);
-#endif // wxUSE_STATUSBAR
     }
 }
 
@@ -347,24 +342,20 @@ void MyFrame::OnPushEventHandler(wxCommandEvent& WXUNUSED(event))
 {
     PushEventHandler(new MyEvtHandler(++m_nPush));
 
-#if wxUSE_STATUSBAR
     SetStatusText(wxString::Format(_T("Push count: %u"), m_nPush), Status_Push);
-#endif // wxUSE_STATUSBAR
 }
 
 void MyFrame::OnPopEventHandler(wxCommandEvent& WXUNUSED(event))
 {
     wxCHECK_RET( m_nPush, _T("this command should be disabled!") );
 
-    PopEventHandler(true /* delete handler */);
+    PopEventHandler(TRUE /* delete handler */);
     m_nPush--;
 
-#if wxUSE_STATUSBAR
     SetStatusText(wxString::Format(_T("Push count: %u"), m_nPush), Status_Push);
-#endif // wxUSE_STATUSBAR
 }
 
-void MyFrame::OnTest(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnTest(wxCommandEvent& event)
 {
     wxLogMessage(_T("This is the test event handler in the main frame"));
 }
@@ -378,14 +369,14 @@ void MyFrame::OnUpdateUIPop(wxUpdateUIEvent& event)
 // custom event methods
 // ----------------------------------------------------------------------------
 
-void MyFrame::OnFireCustom(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnFireCustom(wxCommandEvent& event)
 {
     wxCommandEvent eventCustom(wxEVT_MY_CUSTOM_COMMAND);
 
     wxPostEvent(this, eventCustom);
 }
 
-void MyFrame::OnProcessCustom(wxCommandEvent& WXUNUSED(event))
+void MyFrame::OnProcessCustom(wxCommandEvent& event)
 {
     wxLogMessage(_T("Got a custom event!"));
 }

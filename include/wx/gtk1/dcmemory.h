@@ -11,7 +11,7 @@
 #ifndef __GTKDCMEMORYH__
 #define __GTKDCMEMORYH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -43,7 +43,6 @@ public:
     // and everything else as drawing 1.
     virtual void SetPen( const wxPen &pen );
     virtual void SetBrush( const wxBrush &brush );
-    virtual void SetBackground( const wxBrush &brush );
     virtual void SetTextForeground( const wxColour &col );
     virtual void SetTextBackground( const wxColour &col );
 

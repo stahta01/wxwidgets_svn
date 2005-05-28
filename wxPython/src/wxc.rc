@@ -1,3 +1,4 @@
+aa_wxpicon ICON "wxp.ico"
 #include "wx/msw/wx.rc"
 
 

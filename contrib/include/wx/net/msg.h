@@ -9,27 +9,19 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_MSG_H_
-#define _WX_MSG_H_
-
-#ifdef WXMAKINGDLL_NETUTILS
-    #define WXDLLIMPEXP_NETUTILS WXEXPORT
-    #define WXDLLIMPEXP_DATA_NETUTILS(type) WXEXPORT type
-#elif defined(WXUSINGDLL)
-    #define WXDLLIMPEXP_NETUTILS WXIMPORT
-    #define WXDLLIMPEXP_DATA_NETUTILS(type) WXIMPORT type
-#else // not making nor using DLL
-    #define WXDLLIMPEXP_NETUTILS
-    #define WXDLLIMPEXP_DATA_NETUTILS(type) type
+#if defined(__GNUG__) && !defined(__APPLE__)
+#pragma interface "msg.h"
 #endif
 
+#ifndef _WX_MSG_H_
+#define _WX_MSG_H_
 
 /*
  * wxMailMessage
  * Encapsulates an email message
  */
 
-class WXDLLIMPEXP_NETUTILS wxMailMessage
+class wxMailMessage
 {
 public:
 

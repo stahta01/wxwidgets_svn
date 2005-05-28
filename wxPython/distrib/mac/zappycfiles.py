@@ -10,10 +10,11 @@ doit = 1
 def main():
 	if not sys.argv[1:]:
 		if os.name == 'mac':
-			import EasyDialogs
-			dir = EasyDialogs.AskFolder(message='Directory to zap pyc files in')
-			if not dir:
+			import macfs
+			fss, ok = macfs.GetDirectory('Directory to zap pyc files in')
+			if not ok:
 				sys.exit(0)
+			dir = fss.as_pathname()
 			zappyc(dir)
 		else:
 			print 'Usage: zappyc dir ...'

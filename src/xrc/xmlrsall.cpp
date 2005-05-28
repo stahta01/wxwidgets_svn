@@ -7,9 +7,9 @@
 // Copyright:   (c) 2000 Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
-
+ 
 // -- Already done in xmlres.cpp
-//#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+//#ifdef __GNUG__
 //#pragma implementation "xmlres.h"
 //#endif
 
@@ -19,8 +19,6 @@
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#if wxUSE_XRC
 
 #include "wx/xrc/xmlres.h"
 #include "wx/xrc/xh_all.h"
@@ -34,7 +32,6 @@ void wxXmlResource::InitAllHandlers()
     AddHandler(new wxDialogXmlHandler);
     AddHandler(new wxPanelXmlHandler);
     AddHandler(new wxSizerXmlHandler);
-    AddHandler(new wxStdDialogButtonSizerXmlHandler);
     AddHandler(new wxButtonXmlHandler);
     AddHandler(new wxBitmapButtonXmlHandler);
     AddHandler(new wxStaticTextXmlHandler);
@@ -59,19 +56,16 @@ void wxXmlResource::InitAllHandlers()
 #endif
 #if wxUSE_CHECKBOX
     AddHandler(new wxCheckBoxXmlHandler);
-#endif
-#if wxUSE_TOGGLEBTN
-    AddHandler(new wxToggleButtonXmlHandler);
-#endif
+#endif    
 #if wxUSE_HTML
     AddHandler(new wxHtmlWindowXmlHandler);
-#endif
+#endif    
 #if wxUSE_SPINBTN
     AddHandler(new wxSpinButtonXmlHandler);
-#endif
+#endif    
 #if wxUSE_SPINCTRL
     AddHandler(new wxSpinCtrlXmlHandler);
-#endif
+#endif    
 #if wxUSE_SCROLLBAR
     AddHandler(new wxScrollBarXmlHandler);
 #endif
@@ -84,12 +78,6 @@ void wxXmlResource::InitAllHandlers()
 #endif
 #if wxUSE_NOTEBOOK
     AddHandler(new wxNotebookXmlHandler);
-#endif
-#if wxUSE_LISTBOOK
-    AddHandler(new wxListbookXmlHandler);
-#endif
-#if wxUSE_CHOICEBOOK
-    AddHandler(new wxChoicebookXmlHandler);
 #endif
     AddHandler(new wxTextCtrlXmlHandler);
 #if wxUSE_LISTBOX
@@ -114,12 +102,4 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_STATUSBAR
     AddHandler(new wxStatusBarXmlHandler);
 #endif
-#if wxUSE_DATEPICKCTRL
-    AddHandler(new wxDateCtrlXmlHandler);
-#endif
-#if wxUSE_MDI
-    AddHandler(new wxMdiXmlHandler);
-#endif
 }
-
-#endif // wxUSE_XRC

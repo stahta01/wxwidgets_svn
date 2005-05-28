@@ -11,7 +11,7 @@
 #ifndef __GTKICONH__
 #define __GTKICONH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -38,17 +38,12 @@ public:
 
     // For compatibility with wxMSW where desired size is sometimes required to
     // distinguish between multiple icons in a resource.
-    wxIcon( const wxString& filename, wxBitmapType type = wxBITMAP_TYPE_XPM,
+    wxIcon( const wxString& filename, int type = wxBITMAP_TYPE_XPM,
             int WXUNUSED(desiredWidth)=-1, int WXUNUSED(desiredHeight)=-1 ) :
         wxBitmap(filename, type)
     {
     }
     wxIcon( char **bits, int width=-1, int height=-1 );
-
-    wxIcon(const wxIconLocation& loc)
-        : wxBitmap(loc.GetFileName(), wxBITMAP_TYPE_ANY)
-    {
-    }
 
     wxIcon& operator=(const wxIcon& icon);
     bool operator==(const wxIcon& icon) const { return m_refData == icon.m_refData; }

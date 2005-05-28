@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="tiff" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 6.00 
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
@@ -8,12 +8,12 @@ CFG=tiff - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "tiff.mak".
+!MESSAGE NMAKE /f "TiffVC.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "tiff.mak" CFG="tiff - Win32 Debug"
+!MESSAGE NMAKE /f "TiffVC.mak" CFG="tiff - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /w /W0 /O1 /Ob2 /I "../include" /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D "__WXMSW__" /D "__WIN95__" /D "__WIN32__" /D WINVER=0x0400 /D "STRICT" /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MD /W1 /O1 /Ob2 /I "../include" /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D "__WXMSW__" /D "__WIN95__" /D "__WIN32__" /D WINVER=0x0400 /D "STRICT" /Yu"wx/wxprec.h" /FD /c
 # ADD BASE RSC /l 0x809
 # ADD RSC /l 0x809
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /w /W0 /Zi /Od /I "../include" /I ".." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D "__WXMSW__" /D DEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "__WIN32__" /D WINVER=0x0400 /D "STRICT" /Yu"wx/wxprec.h" /FD /c
+# ADD CPP /nologo /MDd /W1 /Zi /Od /I "../include" /I ".." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D "__WXMSW__" /D DEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "__WIN32__" /D WINVER=0x0400 /D "STRICT" /Yu"wx/wxprec.h" /FD /c
 # ADD BASE RSC /l 0x809
 # ADD RSC /l 0x809
 BSC32=bscmake.exe
@@ -118,22 +118,6 @@ SOURCE=.\tif_close.c
 # Begin Source File
 
 SOURCE=.\tif_codec.c
-
-!IF  "$(CFG)" == "tiff - Win32 Release"
-
-# ADD CPP /I ".."
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "tiff - Win32 Debug"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\tif_color.c
 
 !IF  "$(CFG)" == "tiff - Win32 Release"
 
@@ -246,22 +230,6 @@ SOURCE=.\tif_dumpmode.c
 # Begin Source File
 
 SOURCE=.\tif_error.c
-
-!IF  "$(CFG)" == "tiff - Win32 Release"
-
-# ADD CPP /I ".."
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "tiff - Win32 Debug"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\tif_extension.c
 
 !IF  "$(CFG)" == "tiff - Win32 Release"
 

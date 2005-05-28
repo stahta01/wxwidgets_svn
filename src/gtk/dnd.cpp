@@ -7,12 +7,9 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dnd.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/dnd.h"
 #include "wx/log.h"
@@ -65,49 +62,81 @@ static const wxChar *TRACE_DND = _T("dnd");
 // standard icons
 //----------------------------------------------------------------------------
 
-/* XPM */
+/* Copyright (c) Julian Smart */
 static const char * page_xpm[] = {
-/* width height ncolors chars_per_pixel */
-"32 32 5 1",
-/* colors */
-"         s None        c None",
-".        c black",
-"X        c wheat",
-"o        c tan",
-"O        c #6699FF",
+/* columns rows colors chars-per-pixel */
+"32 32 37 1",
+"5 c #7198D9",
+", c #769CDA",
+"2 c #DCE6F6",
+"i c #FFFFFF",
+"e c #779DDB",
+": c #9AB6E4",
+"9 c #EAF0FA",
+"- c #B1C7EB",
+"$ c #6992D7",
+"y c #F7F9FD",
+"= c #BED0EE",
+"q c #F0F5FC",
+"; c #A8C0E8",
+"@ c #366BC2",
+"  c None",
+"u c #FDFEFF",
+"8 c #5987D3",
+"* c #C4D5F0",
+"7 c #7CA0DC",
+"O c #487BCE",
+"< c #6B94D7",
+"& c #CCDAF2",
+"> c #89A9DF",
+"3 c #5584D1",
+"w c #82A5DE",
+"1 c #3F74CB",
+"+ c #3A70CA",
+". c #3569BF",
+"% c #D2DFF4",
+"# c #3366BB",
+"r c #F5F8FD",
+"0 c #FAFCFE",
+"4 c #DFE8F7",
+"X c #5E8AD4",
+"o c #5282D0",
+"t c #B8CCEC",
+"6 c #E5EDF9",
 /* pixels */
-"    ...................         ",
-"    .XXXXXXXXXXXXXXXXX..        ",
-"    .XXXXXXXXXXXXXXXXX.o.       ",
-"    .XXXXXXXXXXXXXXXXX.oo.      ",
-"    .XXXXXXXXXXXXXXXXX.ooo.     ",
-"    .XXXXXXXXXXXXXXXXX.oooo.    ",
-"    .XXXXXXXXXXXXXXXXX.......   ",
-"    .XXXXXOOOOOOOOOOXXXooooo.   ",
-"    .XXXXXXXXXXXXXXXXXXooooo.   ",
-"    .XXXXXOOOOOOOOOOXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXXOOOOOOOOOXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXOOOOOOOOOOXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXOOOOOOOOOOXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXXOOOOOOOOOXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXOOOOOOOOOOXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXOOOOOOOOOOXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXOOOOOOOOOOXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXOOOOOOOXXXXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .XXXXXXXXXXXXXXXXXXXXXXX.   ",
-"    .........................   "};
+"                                ",
+"                                ",
+"                                ",
+"                                ",
+"                                ",
+"       .XXXooOO++@#             ",
+"       $%&*=-;::>,<1            ",
+"       $2%&*=-;::><:3           ",
+"       $42%&*=-;::<&:3          ",
+"       56477<<<<8<<9&:X         ",
+"       59642%&*=-;<09&:5        ",
+"       5q9642%&*=-<<<<<#        ",
+"       5qqw777<<<<<88:>+        ",
+"       erqq9642%&*=t;::+        ",
+"       eyrqq9642%&*=t;:O        ",
+"       eyywwww777<<<<t;O        ",
+"       e0yyrqq9642%&*=to        ",
+"       e00yyrqq9642%&*=o        ",
+"       eu0wwwwwww777<&*X        ",
+"       euu00yyrqq9642%&X        ",
+"       eiuu00yyrqq9642%X        ",
+"       eiiwwwwwwwwww742$        ",
+"       eiiiuu00yyrqq964$        ",
+"       eiiiiuu00yyrqq96$        ",
+"       eiiiiiuu00yyrqq95        ",
+"       eiiiiiiuu00yyrqq5        ",
+"       eeeeeeeeeeeeee55e        ",
+"                                ",
+"                                ",
+"                                ",
+"                                ",
+"                                "
+};
 
 
 // ============================================================================
@@ -115,7 +144,7 @@ static const char * page_xpm[] = {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// convert between GTK+ and wxWidgets DND constants
+// convert between GTK+ and wxWindows DND constants
 // ----------------------------------------------------------------------------
 
 static wxDragResult ConvertFromGTK(long action)
@@ -139,7 +168,6 @@ static wxDragResult ConvertFromGTK(long action)
 // "drag_leave"
 // ----------------------------------------------------------------------------
 
-extern "C" {
 static void target_drag_leave( GtkWidget *WXUNUSED(widget),
                                GdkDragContext *context,
                                guint WXUNUSED(time),
@@ -161,13 +189,11 @@ static void target_drag_leave( GtkWidget *WXUNUSED(widget),
     /* after this, invalidate the drop_target's GdkDragContext */
     drop_target->SetDragContext( (GdkDragContext*) NULL );
 }
-}
 
 // ----------------------------------------------------------------------------
 // "drag_motion"
 // ----------------------------------------------------------------------------
 
-extern "C" {
 static gboolean target_drag_motion( GtkWidget *WXUNUSED(widget),
                                     GdkDragContext *context,
                                     gint x,
@@ -190,9 +216,6 @@ static gboolean target_drag_motion( GtkWidget *WXUNUSED(widget),
     // only good if we don't have our own preferences - but also the actions
     // field
     wxDragResult result;
-    if (drop_target->GetDefaultAction() == wxDragNone)
-    {
-        // use default action set by wxDropSource::DoDragDrop()
     if ( (gs_flagsForDrag & wxDrag_DefaultMove) == wxDrag_DefaultMove &&
             (context->actions & GDK_ACTION_MOVE ) )
     {
@@ -209,21 +232,6 @@ static gboolean target_drag_motion( GtkWidget *WXUNUSED(widget),
             // we're requested to move but we can't
             result = wxDragCopy;
         }
-    }
-    }
-    else if (drop_target->GetDefaultAction() == wxDragMove &&
-                (context->actions & GDK_ACTION_MOVE))
-    {
-       result = wxDragMove;
-    }
-    else
-    {
-        if (context->actions & GDK_ACTION_COPY)
-            result = wxDragCopy;
-        else if (context->actions & GDK_ACTION_MOVE)
-            result = wxDragMove;
-        else
-            result = wxDragNone;
     }
 
     if (drop_target->m_firstMotion)
@@ -259,13 +267,11 @@ static gboolean target_drag_motion( GtkWidget *WXUNUSED(widget),
 
     return ret;
 }
-}
 
 // ----------------------------------------------------------------------------
 // "drag_drop"
 // ----------------------------------------------------------------------------
 
-extern "C" {
 static gboolean target_drag_drop( GtkWidget *widget,
                                   GdkDragContext *context,
                                   gint x,
@@ -360,13 +366,11 @@ static gboolean target_drag_drop( GtkWidget *widget,
 
     return ret;
 }
-}
 
 // ----------------------------------------------------------------------------
 // "drag_data_received"
 // ----------------------------------------------------------------------------
 
-extern "C" {
 static void target_drag_data_received( GtkWidget *WXUNUSED(widget),
                                        GdkDragContext *context,
                                        gint x,
@@ -396,7 +400,7 @@ static void target_drag_data_received( GtkWidget *WXUNUSED(widget),
        this is only valid for the duration of this call */
     drop_target->SetDragData( data );
 
-    wxDragResult result = ConvertFromGTK(context->action);
+    wxDragResult result = ConvertFromGTK(context->suggested_action);
 
     if ( wxIsDragResultOk( drop_target->OnData( x, y, result ) ) )
     {
@@ -415,7 +419,6 @@ static void target_drag_data_received( GtkWidget *WXUNUSED(widget),
 
     /* after this, invalidate the drop_target's drag data */
     drop_target->SetDragData( (GtkSelectionData*) NULL );
-}
 }
 
 //----------------------------------------------------------------------------
@@ -569,7 +572,6 @@ void wxDropTarget::RegisterWidget( GtkWidget *widget )
 // "drag_data_get"
 //----------------------------------------------------------------------------
 
-extern "C" {
 static void
 source_drag_data_get  (GtkWidget          *WXUNUSED(widget),
                        GdkDragContext     *WXUNUSED(context),
@@ -635,13 +637,11 @@ source_drag_data_get  (GtkWidget          *WXUNUSED(widget),
 
     delete[] d;
 }
-}
 
 //----------------------------------------------------------------------------
 // "drag_data_delete"
 //----------------------------------------------------------------------------
 
-extern "C" {
 static void source_drag_data_delete( GtkWidget *WXUNUSED(widget),
                                      GdkDragContext *context,
                                      wxDropSource *WXUNUSED(drop_source) )
@@ -651,13 +651,11 @@ static void source_drag_data_delete( GtkWidget *WXUNUSED(widget),
 
     // printf( "Drag source: drag_data_delete\n" );
 }
-}
 
 //----------------------------------------------------------------------------
 // "drag_begin"
 //----------------------------------------------------------------------------
 
-extern "C" {
 static void source_drag_begin( GtkWidget          *WXUNUSED(widget),
                                GdkDragContext     *WXUNUSED(context),
                                wxDropSource       *WXUNUSED(drop_source) )
@@ -667,13 +665,11 @@ static void source_drag_begin( GtkWidget          *WXUNUSED(widget),
 
     // printf( "Drag source: drag_begin.\n" );
 }
-}
 
 //----------------------------------------------------------------------------
 // "drag_end"
 //----------------------------------------------------------------------------
 
-extern "C" {
 static void source_drag_end( GtkWidget          *WXUNUSED(widget),
                              GdkDragContext     *WXUNUSED(context),
                              wxDropSource       *drop_source )
@@ -684,13 +680,11 @@ static void source_drag_end( GtkWidget          *WXUNUSED(widget),
 
     drop_source->m_waiting = FALSE;
 }
-}
 
 //-----------------------------------------------------------------------------
 // "configure_event" from m_iconWindow
 //-----------------------------------------------------------------------------
 
-extern "C" {
 static gint
 gtk_dnd_window_configure_callback( GtkWidget *WXUNUSED(widget), GdkEventConfigure *WXUNUSED(event), wxDropSource *source )
 {
@@ -700,7 +694,6 @@ gtk_dnd_window_configure_callback( GtkWidget *WXUNUSED(widget), GdkEventConfigur
     source->GiveFeedback( ConvertFromGTK(source->m_dragContext->action) );
 
     return 0;
-}
 }
 
 //---------------------------------------------------------------------------

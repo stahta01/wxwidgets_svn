@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +58,7 @@ class MyChild: public wxMDIChildFrame
 {
 public:
     MyCanvas *canvas;
-    MyChild(wxMDIParentFrame *parent, const wxString& title);
+    MyChild(wxMDIParentFrame *parent, const wxString& title, const wxPoint& pos, const wxSize& size, const long style);
     ~MyChild();
 
     void OnActivate(wxActivateEvent& event);

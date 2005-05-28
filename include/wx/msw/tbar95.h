@@ -9,17 +9,16 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_MSW_TBAR95_H_
-#define _WX_MSW_TBAR95_H_
+#ifndef _WX_TBAR95_H_
+#define _WX_TBAR95_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "tbar95.h"
 #endif
 
 #if wxUSE_TOOLBAR
 
 #include "wx/dynarray.h"
-#include "wx/imaglist.h"
 
 class WXDLLEXPORT wxToolBar : public wxToolBarBase
 {
@@ -68,7 +67,6 @@ public:
 
     void OnMouseEvent(wxMouseEvent& event);
     void OnSysColourChanged(wxSysColourChangedEvent& event);
-    void OnEraseBackground(wxEraseEvent& event);
 
     void SetFocus() {}
 
@@ -78,8 +76,8 @@ protected:
     // common part of all ctors
     void Init();
 
-    // create the native toolbar control
-    bool MSWCreateToolbar(const wxPoint& pos, const wxSize& size);
+    // create the toolbar control
+    bool MSWCreateToolbar(const wxPoint& pos, const wxSize& size, long style);
 
     // recreate the control completely
     void Recreate();
@@ -103,7 +101,7 @@ protected:
     virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     // override WndProc mainly to process WM_SIZE
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+    virtual long MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 
     // return the appropriate size and flags for the toolbar control
     virtual wxSize DoGetBestSize() const;
@@ -117,17 +115,8 @@ protected:
     // should be called whenever the toolbar size changes
     void UpdateSize();
 
-    // create m_disabledImgList (but doesn't fill it), set it to NULL if it is
-    // unneeded
-    void CreateDisabledImageList();
-
-
     // the big bitmap containing all bitmaps of the toolbar buttons
     WXHBITMAP m_hBitmap;
-
-    // the image list with disabled images, may be NULL if we use
-    // system-provided versions of them
-    wxImageList *m_disabledImgList;
 
     // the total number of toolbar elements
     size_t m_nButtons;
@@ -138,10 +127,9 @@ protected:
 private:
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxToolBar)
-    DECLARE_NO_COPY_CLASS(wxToolBar)
 };
 
 #endif // wxUSE_TOOLBAR
 
-#endif // _WX_MSW_TBAR95_H_
-
+#endif
+    // _WX_TBAR95_H_

@@ -27,31 +27,21 @@ static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');
 }
 
-static inline bool IsAWordStart(const int ch) {
+inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
-static inline bool IsANumberChar(const int ch) {
-	// Not exactly following number definition (several dots are seen as OK, etc.)
-	// but probably enough in most cases.
-	return (ch < 0x80) &&
-	        (isdigit(ch) || toupper(ch) == 'E' ||
-             ch == '.' || ch == '-' || ch == '+');
-}
-
-static inline bool IsLuaOperator(int ch) {
-	if (ch >= 0x80 || isalnum(ch)) {
+inline bool isLuaOperator(char ch) {
+	if (isalnum(ch))
 		return false;
-	}
 	// '.' left out as it is used to make up numbers
 	if (ch == '*' || ch == '/' || ch == '-' || ch == '+' ||
 		ch == '(' || ch == ')' || ch == '=' ||
 		ch == '{' || ch == '}' || ch == '~' ||
 		ch == '[' || ch == ']' || ch == ';' ||
 		ch == '<' || ch == '>' || ch == ',' ||
-		ch == '.' || ch == '^' || ch == '%' || ch == ':') {
+		ch == '.' || ch == '^' || ch == '%' || ch == ':')
 		return true;
-	}
 	return false;
 }
 
@@ -134,11 +124,14 @@ static void ColouriseLuaDoc(
 			sc.SetState(SCE_LUA_DEFAULT);
 		} else if (sc.state == SCE_LUA_NUMBER) {
 			// We stop the number definition on non-numerical non-dot non-eE non-sign char
-			if (!IsANumberChar(sc.ch)) {
-				sc.SetState(SCE_LUA_DEFAULT);
+			if (!(isdigit(sc.ch) || sc.ch == '.' ||
+				  toupper(sc.ch) == 'E' || sc.ch == '-' || sc.ch == '+')) {
+					// Not exactly following number definition (several dots are seen as OK, etc.)
+					// but probably enough in most cases.
+					sc.SetState(SCE_LUA_DEFAULT);
 			}
 		} else if (sc.state == SCE_LUA_IDENTIFIER) {
-			if (!IsAWordChar(sc.ch) || sc.Match('.', '.')) {
+			if (!IsAWordChar(sc.ch)) {
 				char s[100];
 				sc.GetCurrent(s, sizeof(s));
 				if (keywords.InList(s)) {
@@ -240,7 +233,7 @@ static void ColouriseLuaDoc(
 				sc.Forward();
 			} else if (sc.atLineStart && sc.Match('$')) {
 				sc.SetState(SCE_LUA_PREPROCESSOR);	// Obsolete since Lua 4.0, but still in old code
-			} else if (IsLuaOperator(static_cast<char>(sc.ch))) {
+			} else if (isLuaOperator(static_cast<char>(sc.ch))) {
 				sc.SetState(SCE_LUA_OPERATOR);
 			}
 		}

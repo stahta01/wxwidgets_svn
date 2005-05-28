@@ -6,13 +6,13 @@
 // Created:     11.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_MOTIF_MENUITEM_H
 #define _WX_MOTIF_MENUITEM_H
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "menuitem.h"
 #endif
 
@@ -38,14 +38,16 @@ public:
     
     // accessors (some more are inherited from wxOwnerDrawn or are below)
     virtual void SetText(const wxString& label);
-    virtual void Enable(bool enable = true);
-    virtual void Check(bool check = true);
+    virtual void Enable(bool enable = TRUE);
+    virtual void Check(bool check = TRUE);
     // included SetBitmap and GetBitmap as copied from the GTK include file
     // I'm not sure if this works but it silences the linker in the
     // menu sample.
     //     JJ
     virtual void SetBitmap(const wxBitmap& bitmap) { m_bitmap = bitmap; }
     virtual const wxBitmap& GetBitmap() const { return m_bitmap; }
+    
+    void DeleteSubMenu();
     
     // implementation from now on
     void CreateItem (WXWidget menu, wxMenuBar * menuBar, wxMenu * topMenu);

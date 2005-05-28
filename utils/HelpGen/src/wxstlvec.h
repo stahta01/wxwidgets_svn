@@ -186,7 +186,7 @@ protected:\
 \
 protected:\
 \
-	inline void quick_sort(int WXUNUSED(low), int WXUNUSED(hi)) \
+	inline void quick_sort(int low, int hi) \
 	{\
 	}\
 \
@@ -337,7 +337,7 @@ public:\
 \
 	inline const_reference back() const { return (*(mpEnd-1)); }\
 \
-	inline void reserve(size_type WXUNUSED(n)) {}\
+	inline void reserve(size_type n) {}\
 \
 	inline void push_back(const value_type& x)\
 	{\
@@ -558,11 +558,11 @@ protected:\
 \
 protected:\
 \
-	inline void quick_sort(int WXUNUSED(low), int WXUNUSED(hi)) \
+	inline void quick_sort(int low, int hi) \
 	{\
 	}\
 \
-	inline void DestructRange( iterator WXUNUSED(first), iterator WXUNUSED(last))\
+	inline void DestructRange( iterator first, iterator last )\
 	{\
 	}\
 \
@@ -702,7 +702,7 @@ public:\
 \
 	inline const_reference back() const { return (*(mpEnd-1)); }\
 \
-	inline void reserve(size_type WXUNUSED(n)) {}\
+	inline void reserve(size_type n) {}\
 \
 	inline void push_back(const value_type& x)\
 	{\

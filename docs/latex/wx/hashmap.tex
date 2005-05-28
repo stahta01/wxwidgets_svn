@@ -2,8 +2,8 @@
 
 This is a simple, type-safe, and reasonably efficient hash map class,
 whose interface is a subset of the interface of STL containers. In
-particular, the interface is modeled after std::map, and the various,
-non standard, std::hash\_map.
+particular, the interface is modelled after std::map, and the various,
+non standard, std::hash_map.
 
 \wxheading{Example}
 
@@ -48,7 +48,7 @@ non standard, std::hash\_map.
                                 CLASSNAME ); // name of the class
 \end{verbatim}
 
-Declares a hash map class named CLASSNAME, with {\tt wxString} keys
+Declares an hash map class named CLASSNAME, with {\tt wxString} keys
 and VALUE\_T values.
 
 \begin{verbatim}
@@ -56,7 +56,7 @@ and VALUE\_T values.
                                  CLASSNAME ); // name of the class
 \end{verbatim}
 
-Declares a hash map class named CLASSNAME, with {\tt void*} keys
+Declares an hash map class named CLASSNAME, with {\tt void*} keys
 and VALUE\_T values.
 
 \begin{verbatim}
@@ -77,7 +77,7 @@ and their unsigned counterparts ), {\tt wxStringHash} for strings
 Similarly three equality predicates:
 {\tt wxIntegerEqual}, {\tt wxStringEqual}, {\tt wxPointerEqual} are provided.
 
-Using this you could declare a hash map mapping {\tt int} values
+Using this you could declare an hash map mapping {\tt int} values
 to {\tt wxString} like this:
 
 \begin{verbatim}
@@ -130,13 +130,11 @@ you used in the class declaration.
 \twocolitem{wxHashMap::mapped\_type}{Type of the values stored in the hash map}
 \twocolitem{wxHashMap::value\_type}{Equivalent to
 {\tt struct \{ key\_type first; mapped\_type second \};} }
-\twocolitem{wxHashMap::iterator}{Used to enumerate all the elements in a hash
+\twocolitem{wxHashMap::iterator}{Used to enumerate all the elements in an hash
 map; it is similar to a {\tt value\_type*}}
 \twocolitem{wxHashMap::const\_iterator}{Used to enumerate all the elements
 in a constant hash map; it is similar to a {\tt const value\_type*}}
 \twocolitem{wxHashMap::size\_type}{Used for sizes}
-\twocolitem{wxHashMap::Insert\_Result}{The return value for
-\helpref{insert()}{wxhashmapinsert}}
 \end{twocollist}
 
 \wxheading{Iterators}
@@ -154,18 +152,18 @@ means that you can't use {\tt --it}, {\tt it + 3}, {\tt it1 - it2}.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxHashMap::wxHashMap}\label{wxhashmapctor}
+\membersection{wxHashMap::wxHashMap}
 
 \func{}{wxHashMap}{\param{size\_type}{ size = 10}}
 
-The size parameter is just a hint, the table will resize automatically
+The size parameter is just an hint, the table will resize automatically
 to preserve performance.
 
 \func{}{wxHashMap}{\param{const wxHashMap\&}{ map}}
 
 Copy constructor.
 
-\membersection{wxHashMap::begin}\label{wxhashmapbegin}
+\membersection{wxHashMap::begin}
 
 \constfunc{const\_iterator}{begin}{}
 
@@ -174,26 +172,26 @@ Copy constructor.
 Returns an iterator pointing at the first element of the hash map.
 Please remember that hash maps do not guarantee ordering.
 
-\membersection{wxHashMap::clear}\label{wxhashmapclear}
+\membersection{wxHashMap::clear}
 
 \func{void}{clear}{}
 
 Removes all elements from the hash map.
 
-\membersection{wxHashMap::count}\label{wxhashmapcount}
+\membersection{wxHashMap::count}
 
 \constfunc{size\_type}{count}{\param{const key\_type\&}{ key}}
 
 Counts the number of elements with the given key present in the map.
-This function returns only 0 or 1.
+This function can actually return 0 or 1.
 
-\membersection{wxHashMap::empty}\label{wxhashmapempty}
+\membersection{wxHashMap::empty}
 
 \constfunc{bool}{empty}{}
 
-Returns true if the hash map does not contain any elements, false otherwise.
+Returns TRUE if the hash map does not contain any element, FALSE otherwise.
 
-\membersection{wxHashMap::end}\label{wxhashmapend}
+\membersection{wxHashMap::end}
 
 \constfunc{const\_iterator}{end}{}
 
@@ -202,11 +200,11 @@ Returns true if the hash map does not contain any elements, false otherwise.
 Returns an iterator pointing at the one-after-the-last element of the hash map.
 Please remember that hash maps do not guarantee ordering.
 
-\membersection{wxHashMap::erase}\label{wxhashmaperase}
+\membersection{wxHashMap::erase}
 
 \func{size\_type}{erase}{\param{const key\_type\&}{ key}}
 
-Erases the element with the given key, and returns the number of elements
+Erases the element with the given key, and returns the number of element
 erased (either 0 or 1).
 
 \func{void}{erase}{\param{iterator}{ it}}
@@ -216,7 +214,7 @@ erased (either 0 or 1).
 Erases the element pointed to by the iterator. After the deletion
 the iterator is no longer valid and must not be used.
 
-\membersection{wxHashMap::find}\label{wxhashmapfind}
+\membersection{wxHashMap::find}
 
 \func{iterator}{find}{\param{const key\_type\&}{ key}}
 
@@ -226,26 +224,23 @@ If an element with the given key is present, the functions returns
 an iterator pointing at that element, otherwise an invalid iterator
 is returned (i.e. hashmap.find( non\_existent\_key ) == hashmap.end()).
 
-\membersection{wxHashMap::insert}\label{wxhashmapinsert}
+\membersection{wxHashMap::insert}
 
-\func{Insert\_Result}{insert}{\param{const value\_type\&}{ v}}
+\func{void}{insert}{\param{const value\_type\&}{ v}}
 
-Inserts the given value in the hash map. The return value is
-equivalent to a \texttt{std::pair<wxHashMap::iterator, bool>};
-the iterator points to the inserted element, the boolean value
-is \texttt{true} if \texttt{v} was actually inserted.
+Inserts the given value in the hash map.
 
-\membersection{wxHashMap::operator[]}\label{wxhashmapbracket}
+\membersection{wxHashMap::operator[]}
 
 \func{mapped\_type\&}{operator[]}{\param{const key\_type\&}{ key}}
 
-Use the key as an array subscript. The only difference is that if the
+Use it as an array subscript. The only difference is that if the
 given key is not present in the hash map, an element with the
 default {\tt value\_type()} is inserted in the table.
 
-\membersection{wxHashMap::size}\label{wxhashmapsize}
+\membersection{wxHashMap::size}
 
 \constfunc{size\_type}{size}{}
 
-Returns the number of elements in the map.
+Returns the numbers of elements in the map.
 

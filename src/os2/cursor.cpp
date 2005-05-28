@@ -20,10 +20,10 @@
 #include "wx/app.h"
 #include "wx/cursor.h"
 #include "wx/icon.h"
+#include "wx/resource.h"
 #endif
 
 #include "wx/os2/private.h"
-#include "wx/os2/wxrsc.h"
 #include "wx/image.h"
 
 #include "assert.h"
@@ -135,7 +135,6 @@ wxCursor::wxCursor(
                                                                   );
             break;
 
-        case wxCURSOR_WATCH:
         case wxCURSOR_WAIT:
             pRefData->m_hCursor = (WXHCURSOR) ::WinQuerySysPointer( HWND_DESKTOP
                                                                    ,(ULONG)SPTR_WAIT
@@ -221,10 +220,10 @@ wxCursor::wxCursor(
             break;
 
         case wxCURSOR_NO_ENTRY:
-            pRefData->m_hCursor = (WXHCURSOR) ::WinQuerySysPointer( HWND_DESKTOP
-                                                                   ,(ULONG)SPTR_ILLEGAL
-                                                                   ,FALSE
-                                                                  );
+            pRefData->m_hCursor = (WXHCURSOR) ::WinLoadPointer( HWND_DESKTOP
+                                                               ,0
+                                                               ,(ULONG)wxCURSOR_NO_ENTRY
+                                                              );
             break;
 
         case wxCURSOR_LEFT_BUTTON:
@@ -253,6 +252,13 @@ wxCursor::wxCursor(
                                                                    ,(ULONG)SPTR_SIZE
                                                                    ,FALSE
                                                                   );
+            break;
+
+        case wxCURSOR_WATCH:
+            pRefData->m_hCursor = (WXHCURSOR) ::WinLoadPointer( HWND_DESKTOP
+                                                               ,0
+                                                               ,(ULONG)wxCURSOR_WATCH
+                                                              );
             break;
 
         case wxCURSOR_SPRAYCAN:
@@ -305,9 +311,6 @@ wxCursor::wxCursor(
                                                                   );
             break;
     }
-    //
-    // No need to destroy the stock cursors
-    //
     ((wxCursorRefData *)m_refData)->m_bDestroyCursor = FALSE;
 } // end of wxCursor::wxCursor
 

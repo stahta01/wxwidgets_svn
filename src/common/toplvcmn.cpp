@@ -4,7 +4,7 @@
 // Author:      Julian Smart, Vadim Zeitlin
 // Created:     01/02/97
 // Id:          $Id$
-// Copyright:   (c) 1998 Robert Roebling and Julian Smart
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart and Markus Holzem
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +16,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "toplevelbase.h"
 #endif
 
@@ -46,7 +46,10 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-IMPLEMENT_DYNAMIC_CLASS(wxTopLevelWindow, wxWindow)
+// FIXME: some platforms don't have wxTopLevelWindow yet
+#ifdef wxTopLevelWindowNative
+    IMPLEMENT_DYNAMIC_CLASS(wxTopLevelWindow, wxWindow)
+#endif
 
 // ----------------------------------------------------------------------------
 // construction/destruction
@@ -54,8 +57,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxTopLevelWindow, wxWindow)
 
 wxTopLevelWindowBase::wxTopLevelWindowBase()
 {
-    // Unlike windows, top level windows are created hidden by default.
-    m_isShown = false;
 }
 
 wxTopLevelWindowBase::~wxTopLevelWindowBase()
@@ -82,18 +83,7 @@ bool wxTopLevelWindowBase::Destroy()
     if ( !wxPendingDelete.Member(this) )
         wxPendingDelete.Append(this);
 
-    if (wxTopLevelWindows.GetCount() > 1)
-    {
-        // Hide it immediately. This should
-        // not be done if this TLW is the
-        // only one left since we then would
-        // risk not to get any idle events
-        // at all anymore during which we
-        // could delete any pending events.
-        Hide();
-    }
-
-    return true;
+    return TRUE;
 }
 
 bool wxTopLevelWindowBase::IsLastBeforeExit() const
@@ -109,12 +99,6 @@ bool wxTopLevelWindowBase::IsLastBeforeExit() const
 // wxTopLevelWindow geometry
 // ----------------------------------------------------------------------------
 
-void wxTopLevelWindowBase::GetRectForTopLevelChildren(int *x, int *y, int *w, int *h)
-{
-    GetPosition(x,y);
-    GetSize(w,h);
-}
-
 wxSize wxTopLevelWindowBase::GetMaxSize() const
 {
     wxSize  size( GetMaxWidth(), GetMaxHeight() );
@@ -122,35 +106,11 @@ wxSize wxTopLevelWindowBase::GetMaxSize() const
 
     wxClientDisplayRect( 0, 0, &w, &h );
 
-    if( size.GetWidth() == wxDefaultCoord )
+    if( size.GetWidth() == -1 )
         size.SetWidth( w );
 
-    if( size.GetHeight() == wxDefaultCoord )
+    if( size.GetHeight() == -1 )
         size.SetHeight( h );
-
-    return size;
-}
-
-/* static */
-wxSize wxTopLevelWindowBase::GetDefaultSize()
-{
-    wxSize size = wxGetClientDisplayRect().GetSize();
-
-    // create proportionally bigger windows on small screens
-    if ( size.x >= 1024 )
-        size.x = 400;
-    else if ( size.x >= 800 )
-        size.x = 300;
-    else if ( size.x >= 320 )
-        size.x = 240;
-
-    if ( size.y >= 768 )
-        size.y = 250;
-    else if ( size.y > 200 )
-    {
-        size.y *= 2;
-        size.y /= 3;
-    }
 
     return size;
 }
@@ -193,7 +153,7 @@ void wxTopLevelWindowBase::DoClientToScreen(int *x, int *y) const
 
 // default resizing behaviour - if only ONE subwindow, resize to fill the
 // whole client area
-void wxTopLevelWindowBase::DoLayout()
+void wxTopLevelWindowBase::OnSize(wxSizeEvent& WXUNUSED(event))
 {
     // if we're using constraints or sizers - do use them
     if ( GetAutoLayout() )
@@ -204,7 +164,7 @@ void wxTopLevelWindowBase::DoLayout()
     {
         // do we have _exactly_ one child?
         wxWindow *child = (wxWindow *)NULL;
-        for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+        for ( wxWindowList::Node *node = GetChildren().GetFirst();
               node;
               node = node->GetNext() )
         {
@@ -258,22 +218,4 @@ bool wxTopLevelWindowBase::SendIconizeEvent(bool iconized)
     return GetEventHandler()->ProcessEvent(event);
 }
 
-// do the window-specific processing after processing the update event
-void wxTopLevelWindowBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
-{
-    if ( event.GetSetEnabled() )
-        Enable(event.GetEnabled());
-
-    if ( event.GetSetText() )
-    {
-        if ( event.GetText() != GetTitle() )
-            SetTitle(event.GetText());
-    }
-}
-
-void wxTopLevelWindowBase::RequestUserAttention(int WXUNUSED(flags))
-{
-    // it's probably better than do nothing, isn't it?
-    Raise();
-}
-
+// vi:sts=4:sw=4:et

@@ -11,7 +11,7 @@
 #ifndef _WX_MSW_STATLINE_H_
 #define _WX_MSW_STATLINE_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface
 #endif
 
@@ -21,14 +21,16 @@
 
 class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 {
+    DECLARE_DYNAMIC_CLASS(wxStaticLine)
+
 public:
     // constructors and pseudo-constructors
     wxStaticLine() { }
 
     wxStaticLine( wxWindow *parent,
-                  wxWindowID id = wxID_ANY,
-                  const wxPoint& pos = wxDefaultPosition,
-                  const wxSize& size = wxDefaultSize,
+                  wxWindowID id,
+                  const wxPoint &pos = wxDefaultPosition,
+                  const wxSize &size = wxDefaultSize,
                   long style = wxLI_HORIZONTAL,
                   const wxString &name = wxStaticTextNameStr )
     {
@@ -36,20 +38,18 @@ public:
     }
 
     bool Create( wxWindow *parent,
-                 wxWindowID id = wxID_ANY,
-                 const wxPoint& pos = wxDefaultPosition,
-                 const wxSize& size = wxDefaultSize,
+                 wxWindowID id,
+                 const wxPoint &pos = wxDefaultPosition,
+                 const wxSize &size = wxDefaultSize,
                  long style = wxLI_HORIZONTAL,
                  const wxString &name = wxStaticTextNameStr );
 
     // overriden base class virtuals
-    virtual bool AcceptsFocus() const { return false; }
+    virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:
     // usually overridden base class virtuals
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxStaticLine)
 };
 
 #endif // _WX_MSW_STATLINE_H_

@@ -41,7 +41,7 @@ Example of use:
     {
     public:
         MyWindow(wxWindow *parent, long style)
-            : wxWindow(parent, wxID_ANY) {}
+            : wxWindow(parent, -1) {}
 
         int HandleCommand(int cmd, const wxString& param)
         {
@@ -75,7 +75,7 @@ class wxDllWidget : public wxPanel
 {
 public:
     wxDllWidget(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
+                wxWindowID id = -1,
                 const wxString& dllName = wxEmptyString,
                 const wxString& className = wxEmptyString,
                 const wxPoint& pos = wxDefaultPosition,
@@ -132,12 +132,12 @@ private:
         { \
             *classInst = new widget(parent, style); \
             *cmdFunc = SendCommandTo##widget; \
-            return true; \
+            return TRUE; \
         }
 
 
 #define END_WIDGET_LIBRARY() \
-       return false; \
+       return FALSE; \
     }
 
 #endif // __DLLWIDGET_H__

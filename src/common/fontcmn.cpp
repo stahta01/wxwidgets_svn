@@ -5,8 +5,8 @@
 // Modified by:
 // Created:     20.09.99
 // RCS-ID:      $Id$
-// Copyright:   (c) wxWidgets team
-// Licence:     wxWindows licence
+// Copyright:   (c) wxWindows team
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "fontbase.h"
 #endif
 
@@ -29,19 +29,11 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/dc.h"
-    #include "wx/font.h"
-    #include "wx/intl.h"
-    #include "wx/dcscreen.h"
+#include "wx/font.h"
+#include "wx/intl.h"
 #endif // WX_PRECOMP
 
 #include "wx/gdicmn.h"
-
-#if defined(__WXMSW__)
-  #include  "wx/msw/private.h"  // includes windows.h for LOGFONT
-  #include  "wx/msw/winundef.h"
-#endif
-
 #include "wx/fontutil.h" // for wxNativeFontInfo
 #include "wx/fontmap.h"
 
@@ -50,61 +42,6 @@
 // ============================================================================
 // implementation
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// helper functions
-// ----------------------------------------------------------------------------
-
-static void AdjustFontSize(wxFont& font, wxDC& dc, const wxSize& pixelSize)
-{
-    int currentSize = font.GetPointSize();
-    int largestGood = 0;
-    int smallestBad = 0;
-
-    bool initialGoodFound = false;
-    bool initialBadFound = false;
-
-    while (currentSize > 0)
-    {
-        dc.SetFont(font);
-
-        // if currentSize (in points) results in a font that is smaller
-        // than required by pixelSize it is considered a good size
-        if (dc.GetCharHeight() <= pixelSize.GetHeight() &&
-                (!pixelSize.GetWidth() ||
-                 dc.GetCharWidth() <= pixelSize.GetWidth()))
-        {
-            largestGood = currentSize;
-            initialGoodFound = true;
-        }
-        else
-        {
-            smallestBad = currentSize;
-            initialBadFound = true;
-        }
-        if (!initialGoodFound)
-        {
-            currentSize /= 2;
-        }
-        else if (!initialBadFound)
-        {
-            currentSize *= 2;
-        }
-        else
-        {
-            int distance = smallestBad - largestGood;
-            if (distance == 1)
-                break;
-
-            currentSize = largestGood + distance / 2;
-        }
-
-        font.SetPointSize(currentSize);
-    }
-
-    if (currentSize != largestGood)
-        font.SetPointSize(largestGood);
-}
 
 // ----------------------------------------------------------------------------
 // wxFontBase
@@ -140,89 +77,6 @@ wxFont *wxFontBase::New(int size,
     return new wxFont(size, family, style, weight, underlined, face, encoding);
 }
 
-static inline int flags2Style(int flags)
-{
-    return flags & wxFONTFLAG_ITALIC
-                    ? wxFONTSTYLE_ITALIC
-                    : flags & wxFONTFLAG_SLANT
-                        ? wxFONTSTYLE_SLANT
-                        : wxFONTSTYLE_NORMAL;
-}
-
-static inline int flags2Weight(int flags)
-{
-    return flags & wxFONTFLAG_LIGHT
-                    ? wxFONTWEIGHT_LIGHT
-                    : flags & wxFONTFLAG_BOLD
-                        ? wxFONTWEIGHT_BOLD
-                        : wxFONTWEIGHT_NORMAL;
-}
-
-static inline bool flags2Underlined(int flags)
-{
-    return (flags & wxFONTFLAG_UNDERLINED) != 0;
-}
-
-/* static */
-wxFont *wxFontBase::New(int pointSize,
-                        wxFontFamily family,
-                        int flags,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return New(pointSize, family, flags2Style(flags), flags2Weight(flags),
-               flags2Underlined(flags), face, encoding);
-}
-
-/* static */
-wxFont *wxFontBase::New(const wxSize& pixelSize,
-                        int family,
-                        int style,
-                        int weight,
-                        bool underlined,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-#if defined(__WXMSW__)
-    return new wxFont(pixelSize, family, style, weight, underlined,
-                      face, encoding);
-#else
-    wxFont *self = New(10, family, style, weight, underlined, face, encoding);
-    wxScreenDC dc;
-    AdjustFontSize(*(wxFont *)self, dc, pixelSize);
-    return self;
-#endif
-}
-
-/* static */
-wxFont *wxFontBase::New(const wxSize& pixelSize,
-                        wxFontFamily family,
-                        int flags,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return New(pixelSize, family, flags2Style(flags), flags2Weight(flags),
-               flags2Underlined(flags), face, encoding);
-}
-
-wxSize wxFontBase::GetPixelSize() const
-{
-    wxScreenDC dc;
-    dc.SetFont(*(wxFont *)this);
-    return wxSize(dc.GetCharWidth(), dc.GetCharHeight());
-}
-
-bool wxFontBase::IsUsingSizeInPixels() const
-{
-    return false;
-}
-
-void wxFontBase::SetPixelSize( const wxSize& pixelSize )
-{
-    wxScreenDC dc;
-    AdjustFontSize(*(wxFont *)this, dc, pixelSize);
-}
-
 /* static */
 wxFont *wxFontBase::New(const wxNativeFontInfo& info)
 {
@@ -244,7 +98,26 @@ bool wxFontBase::IsFixedWidth() const
     return GetFamily() == wxFONTFAMILY_TELETYPE;
 }
 
-void wxFontBase::DoSetNativeFontInfo(const wxNativeFontInfo& info)
+wxNativeFontInfo *wxFontBase::GetNativeFontInfo() const
+{
+#ifdef wxNO_NATIVE_FONTINFO
+    wxNativeFontInfo *fontInfo = new wxNativeFontInfo();
+
+    fontInfo->SetPointSize(GetPointSize());
+    fontInfo->SetFamily((wxFontFamily)GetFamily());
+    fontInfo->SetStyle((wxFontStyle)GetStyle());
+    fontInfo->SetWeight((wxFontWeight)GetWeight());
+    fontInfo->SetUnderlined(GetUnderlined());
+    fontInfo->SetFaceName(GetFaceName());
+    fontInfo->SetEncoding(GetEncoding());
+
+    return fontInfo;
+#else
+    return (wxNativeFontInfo *)NULL;
+#endif
+}
+
+void wxFontBase::SetNativeFontInfo(const wxNativeFontInfo& info)
 {
 #ifdef wxNO_NATIVE_FONTINFO
     SetPointSize(info.pointSize);
@@ -262,10 +135,11 @@ void wxFontBase::DoSetNativeFontInfo(const wxNativeFontInfo& info)
 wxString wxFontBase::GetNativeFontInfoDesc() const
 {
     wxString fontDesc;
-    const wxNativeFontInfo *fontInfo = GetNativeFontInfo();
+    wxNativeFontInfo *fontInfo = GetNativeFontInfo();
     if ( fontInfo )
     {
         fontDesc = fontInfo->ToString();
+        delete fontInfo;
     }
 
     return fontDesc;
@@ -274,10 +148,11 @@ wxString wxFontBase::GetNativeFontInfoDesc() const
 wxString wxFontBase::GetNativeFontInfoUserDesc() const
 {
     wxString fontDesc;
-    const wxNativeFontInfo *fontInfo = GetNativeFontInfo();
+    wxNativeFontInfo *fontInfo = GetNativeFontInfo();
     if ( fontInfo )
     {
         fontDesc = fontInfo->ToUserString();
+        delete fontInfo;
     }
 
     return fontDesc;
@@ -397,42 +272,42 @@ bool wxNativeFontInfo::FromString(const wxString& s)
 
     token = tokenizer.GetNextToken();
     if ( !token.ToLong(&l) )
-        return false;
+        return FALSE;
     pointSize = (int)l;
 
     token = tokenizer.GetNextToken();
     if ( !token.ToLong(&l) )
-        return false;
+        return FALSE;
     family = (wxFontFamily)l;
 
     token = tokenizer.GetNextToken();
     if ( !token.ToLong(&l) )
-        return false;
+        return FALSE;
     style = (wxFontStyle)l;
 
     token = tokenizer.GetNextToken();
     if ( !token.ToLong(&l) )
-        return false;
+        return FALSE;
     weight = (wxFontWeight)l;
 
     token = tokenizer.GetNextToken();
     if ( !token.ToLong(&l) )
-        return false;
+        return FALSE;
     underlined = l != 0;
 
     faceName = tokenizer.GetNextToken();
 
 #ifndef __WXMAC__
     if( !faceName )
-        return false;
+        return FALSE;
 #endif
 
     token = tokenizer.GetNextToken();
     if ( !token.ToLong(&l) )
-        return false;
+        return FALSE;
     encoding = (wxFontEncoding)l;
 
-    return true;
+    return TRUE;
 }
 
 wxString wxNativeFontInfo::ToString() const
@@ -454,11 +329,11 @@ wxString wxNativeFontInfo::ToString() const
 
 void wxNativeFontInfo::Init()
 {
-    pointSize = 0;
+    pointSize = wxNORMAL_FONT->GetPointSize();
     family = wxFONTFAMILY_DEFAULT;
     style = wxFONTSTYLE_NORMAL;
     weight = wxFONTWEIGHT_NORMAL;
-    underlined = false;
+    underlined = FALSE;
     faceName.clear();
     encoding = wxFONTENCODING_DEFAULT;
 }
@@ -603,7 +478,7 @@ wxString wxNativeFontInfo::ToUserString() const
     wxFontEncoding enc = GetEncoding();
     if ( enc != wxFONTENCODING_DEFAULT && enc != wxFONTENCODING_SYSTEM )
     {
-        desc << _T(' ') << wxFontMapper::GetEncodingName(enc);
+        desc << _T(' ') << wxFontMapper::Get()->GetEncodingName(enc);
     }
 #endif // wxUSE_FONTMAP
 
@@ -632,12 +507,12 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
         wxString token = tokenizer.GetNextToken();
 
         // normalize it
-        token.Trim(true).Trim(false).MakeLower();
+        token.Trim(TRUE).Trim(FALSE).MakeLower();
 
         // look for the known tokens
         if ( token == _T("underlined") || token == _("underlined") )
         {
-            SetUnderlined(true);
+            SetUnderlined(TRUE);
         }
         else if ( token == _T("light") || token == _("light") )
         {
@@ -656,7 +531,7 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
             SetPointSize(size);
         }
 #if wxUSE_FONTMAP
-        else if ( (encoding = wxFontMapper::Get()->CharsetToEncoding(token, false))
+        else if ( (encoding = wxFontMapper::Get()->CharsetToEncoding(token, FALSE))
                     != wxFONTENCODING_DEFAULT )
         {
             SetEncoding(encoding);
@@ -691,7 +566,7 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
         SetFaceName(face);
     }
 
-    return true;
+    return TRUE;
 }
 
 #endif // generic or wxMSW or wxOS2

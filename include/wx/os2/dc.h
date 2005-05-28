@@ -13,6 +13,7 @@
 #define _WX_DC_H_
 
 #include "wx/defs.h"
+//#include "wx/dc.h"
 
 // ---------------------------------------------------------------------------
 // macros
@@ -178,6 +179,7 @@ public:
     HPS             GetHPS(void) const { return m_hPS; }
     void            SetHPS(HPS hPS)
     {
+        HDC                         hDC = ::GpiQueryDevice(hPS);
         m_hPS = hPS;
     }
     const wxBitmap& GetSelectedBitmap(void) const { return m_vSelectedBitmap; }
@@ -300,6 +302,17 @@ protected:
                                      ,wxCoord vWidth
                                      ,wxCoord vHeight
                                     );
+    virtual void DoGetClippingRegion( wxCoord* pX
+                                     ,wxCoord* pY
+                                     ,wxCoord* pWidth
+                                     ,wxCoord* pHeight)
+    {
+        GetClippingBox( pX
+                       ,pY
+                       ,pWidth
+                       ,pHeight
+                      );
+    }
 
     virtual void DoGetSize( int* pWidth
                            ,int* pHeight

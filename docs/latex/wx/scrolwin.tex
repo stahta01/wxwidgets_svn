@@ -47,11 +47,10 @@ As with all windows, an application can draw onto a wxScrolledWindow using
 a \helpref{device context}{dcoverview}.
 
 You have the option of handling the OnPaint handler
-or overriding the \helpref{OnDraw}{wxscrolledwindowondraw} function, which is
-passed a pre-scrolled device context (prepared by 
-\helpref{DoPrepareDC}{wxscrolledwindowdopreparedc}).
+or overriding the \helpref{OnDraw}{wxscrolledwindowondraw} function, which is passed
+a pre-scrolled device context (prepared by \helpref{PrepareDC}{wxscrolledwindowpreparedc}).
 
-If you don't wish to calculate your own scrolling, you must call DoPrepareDC when not drawing from
+If you don't wish to calculate your own scrolling, you must call PrepareDC when not drawing from
 within OnDraw, to set the device origin for the device context according to the current
 scroll position.
 
@@ -98,13 +97,11 @@ to build your own scroll behaviour.
 
 \wxheading{See also}
 
-\helpref{wxScrollBar}{wxscrollbar}, \helpref{wxClientDC}{wxclientdc},\\
-\helpref{wxPaintDC}{wxpaintdc}, \helpref{wxVScrolledWindow}{wxvscrolledwindow}
+\helpref{wxScrollBar}{wxscrollbar}, \helpref{wxClientDC}{wxclientdc}, \helpref{wxPaintDC}{wxpaintdc}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
-\membersection{wxScrolledWindow::wxScrolledWindow}\label{wxscrolledwindowctor}
+\membersection{wxScrolledWindow::wxScrolledWindow}\label{wxscrolledwindowconstr}
 
 \func{}{wxScrolledWindow}{\void}
 
@@ -138,13 +135,11 @@ The window is initially created without visible scrollbars.
 Call \helpref{wxScrolledWindow::SetScrollbars}{wxscrolledwindowsetscrollbars} to
 specify how big the virtual window size should be.
 
-
-\membersection{wxScrolledWindow::\destruct{wxScrolledWindow}}\label{wxscrolledwindowdtor}
+\membersection{wxScrolledWindow::\destruct{wxScrolledWindow}}
 
 \func{}{\destruct{wxScrolledWindow}}{\void}
 
 Destructor.
-
 
 \membersection{wxScrolledWindow::CalcScrolledPosition}\label{wxscrolledwindowcalcscrolledposition}
 
@@ -169,7 +164,6 @@ parameters and returns xx and yy as a tuple of values.}
 \perlnote{In wxPerl this method takes two parameters and returns a
 2-element list {\tt ( xx, yy )}.}
 
-
 \membersection{wxScrolledWindow::CalcUnscrolledPosition}\label{wxscrolledwindowcalcunscrolledposition}
 
 \constfunc{void}{CalcUnscrolledPosition}{
@@ -193,7 +187,6 @@ parameters and returns xx and yy as a tuple of values.}
 \perlnote{In wxPerl this method takes two parameters and returns a
 2-element list {\tt ( xx, yy )}.}
 
-
 \membersection{wxScrolledWindow::Create}\label{wxscrolledwindowcreate}
 
 \func{bool}{Create}{\param{wxWindow*}{ parent}, \param{wxWindowID }{id = -1},\rtfsp
@@ -201,9 +194,8 @@ parameters and returns xx and yy as a tuple of values.}
 \param{long}{ style = wxHSCROLL \pipe wxVSCROLL}, \param{const wxString\& }{name = ``scrolledWindow"}}
 
 Creates the window for two-step construction. Derived classes
-should call or replace this function. See \helpref{wxScrolledWindow::wxScrolledWindow}{wxscrolledwindowctor}\rtfsp
+should call or replace this function. See \helpref{wxScrolledWindow::wxScrolledWindow}{wxscrolledwindowconstr}\rtfsp
 for details.
-
 
 \membersection{wxScrolledWindow::EnableScrolling}\label{wxscrolledwindowenablescrolling}
 
@@ -219,15 +211,14 @@ is disabled.
 
 \wxheading{Parameters}
 
-\docparam{xScrolling}{If true, enables physical scrolling in the x direction.}
+\docparam{xScrolling}{If TRUE, enables physical scrolling in the x direction.}
 
-\docparam{yScrolling}{If true, enables physical scrolling in the y direction.}
+\docparam{yScrolling}{If TRUE, enables physical scrolling in the y direction.}
 
 \wxheading{Remarks}
 
 Physical scrolling may not be available on all platforms. Where it is available, it is enabled
 by default.
-
 
 \membersection{wxScrolledWindow::GetScrollPixelsPerUnit}\label{wxscrolledwindowgetscrollpixelsperunit}
 
@@ -253,7 +244,6 @@ parameters and returns a tuple of values for xUnit and yUnit.}
 
 \perlnote{In wxPerl this method takes no parameters and returns a
 2-element list {\tt ( xUnit, yUnit )}.}
-
 
 \membersection{wxScrolledWindow::GetViewStart}\label{wxscrolledwindowgetviewstart}
 
@@ -286,7 +276,6 @@ parameters and returns a tuple of values for x and y.}
 \perlnote{In wxPerl this method takes no parameters and returns a
 2-element list {\tt ( x, y )}.}
 
-
 \membersection{wxScrolledWindow::GetVirtualSize}\label{wxscrolledwindowgetvirtualsize}
 
 \constfunc{void}{GetVirtualSize}{\param{int* }{x}, \param{int* }{y}}
@@ -317,22 +306,20 @@ parameters and returns a tuple of values for x and y.}
 \perlnote{In wxPerl this method takes no parameters and returns a
 2-element list {\tt ( x, y )}.}
 
-
 \membersection{wxScrolledWindow::IsRetained}\label{wxscrolledwindowisretained}
 
 \constfunc{bool}{IsRetained}{\void}
 
-Motif only: true if the window has a backing bitmap.
+Motif only: TRUE if the window has a backing bitmap.
 
+\membersection{wxScrolledWindow::PrepareDC}\label{wxscrolledwindowpreparedc}
 
-\membersection{wxScrolledWindow::DoPrepareDC}\label{wxscrolledwindowdopreparedc}
-
-\func{void}{DoPrepareDC}{\param{wxDC\& }{dc}}
+\func{void}{PrepareDC}{\param{wxDC\& }{dc}}
 
 Call this function to prepare the device context for drawing a scrolled image. It
 sets the device origin according to the current scroll position.
 
-DoPrepareDC is called automatically within the default wxScrolledWindow::OnPaint event
+PrepareDC is called automatically within the default wxScrolledWindow::OnPaint event
 handler, so your \helpref{wxScrolledWindow::OnDraw}{wxscrolledwindowondraw} override
 will be passed a 'pre-scrolled' device context. However, if you wish to draw from
 outside of OnDraw (via OnPaint), or you wish to implement OnPaint yourself, you must
@@ -342,7 +329,7 @@ call this function yourself. For example:
 void MyWindow::OnEvent(wxMouseEvent& event)
 {
   wxClientDC dc(this);
-  DoPrepareDC(dc);
+  PrepareDC(dc);
 
   dc.SetPen(*wxBLACK_PEN);
   float x, y;
@@ -356,29 +343,17 @@ void MyWindow::OnEvent(wxMouseEvent& event)
 }
 \end{verbatim}
 
-
 \membersection{wxScrolledWindow::OnDraw}\label{wxscrolledwindowondraw}
 
 \func{virtual void}{OnDraw}{\param{wxDC\& }{dc}}
 
 Called by the default paint event handler to allow the application to define
-painting behaviour without having to worry about calling 
-\helpref{wxScrolledWindow::DoPrepareDC}{wxscrolledwindowdopreparedc}.
+painting behaviour without having to worry about calling
+\helpref{wxScrolledWindow::PrepareDC}{wxscrolledwindowpreparedc}.
 
 Instead of overriding this function you may also just process the paint event
-in the derived class as usual, but then you will have to call DoPrepareDC()
+in the derived class as usual, but then you will have to call PrepareDC()
 yourself.
-
-
-\membersection{wxScrolledWindow::PrepareDC}\label{wxscrolledwindowpreparedc}
-
-\func{void}{PrepareDC}{\param{wxDC\& }{dc}}
-
-This function is for backwards compatibility only and simply calls 
-\helpref{DoPrepareDC}{wxscrolledwindowdopreparedc} now. Notice that it is 
-\emph{not} called by the default paint event handle (DoPrepareDC() is), so
-overriding this method in your derived class is useless.
-
 
 \membersection{wxScrolledWindow::Scroll}\label{wxscrolledwindowscroll}
 
@@ -404,13 +379,12 @@ that direction).
 \helpref{wxScrolledWindow::SetScrollbars}{wxscrolledwindowsetscrollbars},\rtfsp
 \helpref{wxScrolledWindow::GetScrollPixelsPerUnit}{wxscrolledwindowgetscrollpixelsperunit}
 
-
 \membersection{wxScrolledWindow::SetScrollbars}\label{wxscrolledwindowsetscrollbars}
 
 \func{void}{SetScrollbars}{\param{int}{ pixelsPerUnitX}, \param{int}{ pixelsPerUnitY},\rtfsp
 \param{int}{ noUnitsX}, \param{int}{ noUnitsY},\rtfsp
 \param{int }{xPos = 0}, \param{int}{ yPos = 0},\rtfsp
-\param{bool }{noRefresh = false}}
+\param{bool }{noRefresh = FALSE}}
 
 Sets up vertical and/or horizontal scrollbars.
 
@@ -428,7 +402,7 @@ Sets up vertical and/or horizontal scrollbars.
 
 \docparam{yPos}{Position to initialize the scrollbars in the vertical direction, in scroll units.}
 
-\docparam{noRefresh}{Will not refresh window if true.}
+\docparam{noRefresh}{Will not refresh window if TRUE.}
 
 \wxheading{Remarks}
 
@@ -459,14 +433,12 @@ adjusting the scrollbars appropriately.
 
 \helpref{wxWindow::SetVirtualSize}{wxwindowsetvirtualsize}
 
-
 \membersection{wxScrolledWindow::SetScrollRate}\label{wxscrolledwindowsetscrollrate}
 
 \func{void}{SetScrollRate}{\param{int}{ xstep}, \param{int}{ ystep}}
 
-Set the horizontal and vertical scrolling increment only. See the pixelsPerUnit
+Set the horizontal and vertical scrolling increment only.  See the pixelsPerUnit
 parameter in SetScrollbars.
-
 
 \membersection{wxScrolledWindow::SetTargetWindow}\label{wxscrolledwindowsettargetwindow}
 

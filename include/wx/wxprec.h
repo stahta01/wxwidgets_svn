@@ -14,17 +14,8 @@
 
 // check if to use precompiled headers: do it for most Windows compilers unless
 // explicitly disabled by defining NOPCH
-#if ( defined(__WXMSW__) && \
-       ( defined(__BORLANDC__)    || \
-         defined(__VISUALC__)     || \
-         defined(__DIGITALMARS__) || \
-         defined(__WATCOMC__) ) ) || \
-      defined(__VISAGECPP__) || \
-      defined(__MWERKS__)
-
-    // If user did not request NOCPH and we're not building using configure
-    // then assume user wants precompiled headers.
-    #if !defined(NOPCH) && !defined(__WX_SETUP_H__)
+#if ((defined(__BORLANDC__) || defined(__VISUALC__) || defined(__DIGITALMARS__) || defined(__WATCOMC__)) && defined(__WXMSW__)) || defined(__VISAGECPP__) || defined(__MWERKS__)
+    #if !defined(NOPCH)
         #define WX_PRECOMP
     #endif
 #endif
@@ -41,8 +32,13 @@
 #include "wx/wxchar.h"
 
 // include standard Windows headers
-#if defined(__WXMSW__)
-    #include "wx/msw/wrapwin.h"
+#if defined(__WXMSW__) && !wxUSE_MFC
+    #ifndef STRICT
+        #define STRICT 1
+    #endif
+
+    #include <windows.h>
+    #include "wx/msw/winundef.h"
 #endif
 
 // include the most common wx headers

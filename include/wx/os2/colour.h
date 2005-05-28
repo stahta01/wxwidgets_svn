@@ -41,7 +41,7 @@ public:
     // Implicit conversion from the colour name
     //
     wxColour(const wxString& rColourName) { InitFromName(rColourName); }
-    wxColour(const wxChar *zColourName) { InitFromName(zColourName); }
+    wxColour(const char* zColourName) { InitFromName(zColourName); }
 
     //
     // Copy ctors and assignment operators
@@ -83,6 +83,16 @@ public:
     //
     bool Ok(void) const {return m_bIsInit; }
 
+    //
+    // Let's remove this inelegant function
+    //
+#if WXWIN_COMPATIBILITY
+    void Get( unsigned char* pRed
+             ,unsigned char* pGreen
+             ,unsigned char* pBlue
+            ) const;
+#endif
+
     unsigned char Red(void) const { return m_cRed; }
     unsigned char Green(void) const { return m_cGreen; }
     unsigned char Blue(void) const { return m_cBlue; }
@@ -92,24 +102,17 @@ public:
     //
     bool operator == (const wxColour& rColour) const
     {
-        return (m_bIsInit == rColour.m_bIsInit
-                && m_cRed   == rColour.m_cRed
-                && m_cGreen == rColour.m_cGreen
-                && m_cBlue  == rColour.m_cBlue
+        return (m_cRed   == rColour.m_cRed &&
+                m_cGreen == rColour.m_cGreen &&
+                m_cBlue  == rColour.m_cBlue
                );
     }
-
     bool operator != (const wxColour& rColour) const { return !(*this == rColour); }
 
+    void       InitFromName(const wxString& rCol);
     WXCOLORREF GetPixel(void) const { return m_vPixel; };
 
-    void InitFromName(const wxString& rCol);
-
 private:
-
-    // Helper function
-    void Init();
-
     bool                            m_bIsInit;
     unsigned char                   m_cRed;
     unsigned char                   m_cBlue;

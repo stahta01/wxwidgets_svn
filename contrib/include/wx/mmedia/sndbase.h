@@ -14,7 +14,6 @@
 #endif
 
 #include "wx/defs.h"
-#include "wx/mmedia/defs.h"
 
 // ------------------------------------------------------------------------
 // DEFINITIONS
@@ -78,7 +77,7 @@ typedef enum {
   wxSOUND_NOTSTARTED
 } wxSoundError;
 
-class WXDLLIMPEXP_MMEDIA wxSoundStream;
+class WXDLLEXPORT wxSoundStream;
 
 // ---------------------
 // wxSoundCallback(stream, evt, cdata): C callback for sound event.
@@ -94,7 +93,7 @@ typedef void (*wxSoundCallback)(wxSoundStream *stream, int evt,
 // Base class for sound format specification
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundFormatBase {
+class WXDLLEXPORT wxSoundFormatBase {
  public:
   wxSoundFormatBase();
   virtual ~wxSoundFormatBase();
@@ -114,7 +113,7 @@ class WXDLLIMPEXP_MMEDIA wxSoundFormatBase {
 // Base class for sound streams
 //
 
-class WXDLLIMPEXP_MMEDIA wxSoundStream {
+class WXDLLEXPORT wxSoundStream {
  public:
   wxSoundStream();
   virtual ~wxSoundStream();
@@ -126,7 +125,7 @@ class WXDLLIMPEXP_MMEDIA wxSoundStream {
   // Returns the best size for IO calls
   virtual wxUint32 GetBestSize() const { return 1024; }
 
-  // SetSoundFormat returns true when the format can be handled.
+  // SetSoundFormat returns TRUE when the format can be handled.
   virtual bool SetSoundFormat(const wxSoundFormatBase& format);
 
   // GetSoundFormat returns the current sound format.
@@ -147,7 +146,7 @@ class WXDLLIMPEXP_MMEDIA wxSoundStream {
   wxUint32 GetLastAccess() const { return m_lastcount; }
 
   // This is only useful for device (I think).
-  virtual bool QueueFilled() const { return true; }
+  virtual bool QueueFilled() const { return TRUE; }
 
  protected:
   // Current sound format

@@ -6,14 +6,14 @@
 // Created:     14.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "inpcons.h"
 #endif
 
@@ -66,13 +66,13 @@ void wxInputConsumer::CreateInputHandler(const wxString& inphandler)
 
 void wxInputConsumer::OnKeyDown(wxKeyEvent& event)
 {
-    if ( !m_inputHandler || !m_inputHandler->HandleKey(this, event, true) )
+    if ( !m_inputHandler || !m_inputHandler->HandleKey(this, event, TRUE) )
         event.Skip();
 }
 
 void wxInputConsumer::OnKeyUp(wxKeyEvent& event)
 {
-    if ( !m_inputHandler || !m_inputHandler->HandleKey(this, event, false) )
+    if ( !m_inputHandler || !m_inputHandler->HandleKey(this, event, FALSE) )
         event.Skip();
 }
 
@@ -80,8 +80,7 @@ void wxInputConsumer::OnMouse(wxMouseEvent& event)
 {
     if ( m_inputHandler )
     {
-        if ( event.Moving() || event.Dragging() ||
-                event.Entering() || event.Leaving() )
+        if ( event.Moving() || event.Entering() || event.Leaving() )
         {
             if ( m_inputHandler->HandleMouseMove(this, event) )
                 return;
@@ -100,10 +99,10 @@ void wxInputConsumer::OnMouse(wxMouseEvent& event)
 // the actions
 // ----------------------------------------------------------------------------
 
-bool wxInputConsumer::PerformAction(const wxControlAction& WXUNUSED(action),
-                                    long WXUNUSED(numArg),
-                                    const wxString& WXUNUSED(strArg))
+bool wxInputConsumer::PerformAction(const wxControlAction& action,
+                                    long numArg,
+                                    const wxString& strArg)
 {
-    return false;
+    return FALSE;
 }
 

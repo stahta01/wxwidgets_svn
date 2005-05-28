@@ -6,14 +6,14 @@
 // Created:     03.04.98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // headers
 // ============================================================================
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "textfile.h"
 #endif
 
@@ -97,30 +97,30 @@ bool wxTextFile::OnRead(wxMBConv& conv)
     char *strBuf, *strPtr, *strEnd;
     char ch, chLast = '\0';
     char buf[1024];
-    size_t nRead;
+    int n, nRead;
 
     strPtr = strBuf = new char[1024];
     strEnd = strBuf + 1024;
 
-    do
+    do 
     {
         nRead = m_file.Read(buf, WXSIZEOF(buf));
-        if ( nRead == (size_t)wxInvalidOffset )
+        if ( nRead == wxInvalidOffset ) 
         {
             // read error (error message already given in wxFile::Read)
             delete[] strBuf;
-            return false;
+            return FALSE;
         }
 
-        for (size_t n = 0; n < nRead; n++)
+        for (n = 0; n < nRead; n++)
         {
             ch = buf[n];
-            switch ( ch )
+            switch ( ch ) 
             {
                 case '\n':
                     // Dos/Unix line termination
                     *strPtr = '\0';
-                    AddLine(wxString(strBuf, conv),
+                    AddLine(wxString(strBuf, conv), 
                             chLast == '\r' ? wxTextFileType_Dos
                                            : wxTextFileType_Unix);
                     strPtr = strBuf;
@@ -128,7 +128,7 @@ bool wxTextFile::OnRead(wxMBConv& conv)
                     break;
 
                 case '\r':
-                    if ( chLast == '\r' )
+                    if ( chLast == '\r' ) 
                     {
                         // Mac empty line
                         AddLine(wxEmptyString, wxTextFileType_Mac);
@@ -147,7 +147,7 @@ bool wxTextFile::OnRead(wxMBConv& conv)
                         strPtr = strBuf;
                         *(strPtr++) = ch;
                     }
-                    else
+                    else 
                     {
                         // add to the current line
                         *(strPtr++) = ch;
@@ -168,15 +168,15 @@ bool wxTextFile::OnRead(wxMBConv& conv)
     } while ( nRead == WXSIZEOF(buf) );
 
     // anything in the last line?
-    if ( strPtr != strBuf )
+    if ( strPtr != strBuf ) 
     {
         *strPtr = '\0';
-        AddLine(wxString(strBuf, conv),
+        AddLine(wxString(strBuf, conv), 
                 wxTextFileType_None); // no line terminator
     }
 
     delete[] strBuf;
-    return true;
+    return TRUE;
 }
 
 
@@ -194,7 +194,7 @@ bool wxTextFile::OnWrite(wxTextFileType typeNew, wxMBConv& conv)
 
     if ( !fileTmp.IsOpened() ) {
         wxLogError(_("can't write buffer '%s' to disk."), m_strBufferName.c_str());
-        return false;
+        return FALSE;
     }
 
     size_t nCount = GetLineCount();

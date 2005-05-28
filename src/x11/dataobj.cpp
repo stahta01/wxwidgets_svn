@@ -7,13 +7,11 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dataobj.h"
 #endif
 
 #include "wx/defs.h"
-
-#if wxUSE_DATAOBJ
 
 #include "wx/dataobj.h"
 #include "wx/mstream.h"
@@ -380,6 +378,4 @@ void wxBitmapDataObject::DoConvertToPng()
     handler.SaveFile( &image, mstream );
 #endif
 }
-
-#endif // wxUSE_DATAOBJ
 

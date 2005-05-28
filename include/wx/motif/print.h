@@ -12,7 +12,7 @@
 #ifndef _WX_PRINT_H_
 #define _WX_PRINT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "print.h"
 #endif
 
@@ -30,7 +30,7 @@ public:
     wxPrinter(wxPrintData *data = NULL);
     ~wxPrinter();
     
-    virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = true);
+    virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = TRUE);
     virtual bool PrintDialog(wxWindow *parent);
     virtual bool Setup(wxWindow *parent);
 };

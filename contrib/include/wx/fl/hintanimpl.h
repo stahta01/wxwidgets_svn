@@ -20,13 +20,13 @@
 
 #include "wx/timer.h"
 
-class WXDLLIMPEXP_FL cbHintAnimTimer;
+class WXFL_DECLSPEC cbHintAnimTimer;
 
 /*
 A plugin to draw animated hints when the user drags a pane.
 */
 
-class WXDLLIMPEXP_FL cbHintAnimationPlugin : public cbPluginBase
+class WXFL_DECLSPEC cbHintAnimationPlugin : public cbPluginBase
 {
     DECLARE_DYNAMIC_CLASS( cbHintAnimationPlugin )
 protected:
@@ -55,8 +55,8 @@ public:
 
     int    mInClientHintBorder; // default: 4 pixels
 
-    bool   mAccelerationOn;     // true, if morph accelerates, otherwise morph
-                                // speed is constant. Default: true
+    bool   mAccelerationOn;     // TRUE, if morph accelerates, otherwise morph
+                                // speed is constant. Default: TRUE
 
     // TBD:: get/set methods for above members
 
@@ -101,7 +101,7 @@ public:
 A private helper class.
 */
 
-struct WXDLLIMPEXP_FL MorphInfoT
+struct WXFL_DECLSPEC MorphInfoT
 {
     wxPoint mFrom;
     wxPoint mTill;
@@ -111,7 +111,7 @@ struct WXDLLIMPEXP_FL MorphInfoT
 A private helper class.
 */
 
-class WXDLLIMPEXP_FL cbHintAnimTimer : public wxTimer 
+class WXFL_DECLSPEC cbHintAnimTimer : public wxTimer 
 {
 protected:
 

@@ -47,9 +47,7 @@ private:
     // event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
-#if wxUSE_LOG
     void OnLogs(wxCommandEvent& event);
-#endif // wxUSE_LOG
     void OnBrowser(wxCommandEvent& event);
     void OnPlugProvider(wxCommandEvent& event);
     
@@ -70,14 +68,12 @@ enum
 };
 
 // ----------------------------------------------------------------------------
-// event tables and other macros for wxWidgets
+// event tables and other macros for wxWindows
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(ID_Quit,         MyFrame::OnQuit)
-#if wxUSE_LOG
     EVT_MENU(ID_Logs,         MyFrame::OnLogs)
-#endif // wxUSE_LOG
     EVT_MENU(wxID_ABOUT,      MyFrame::OnAbout)
     EVT_MENU(ID_Browser,      MyFrame::OnBrowser)
     EVT_MENU(ID_PlugProvider, MyFrame::OnPlugProvider)
@@ -99,8 +95,8 @@ bool MyApp::OnInit()
     // create the main application window
     MyFrame *frame = new MyFrame(_T("wxArtProvider sample"),
                                  wxPoint(50, 50), wxSize(450, 340));
-    frame->Show(true);
-    return true;
+    frame->Show(TRUE);
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -145,7 +141,7 @@ wxBitmap MyArtProvider::CreateBitmap(const wxArtID& id,
 
 // frame constructor
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style)
-       : wxFrame(NULL, wxID_ANY, title, pos, size, style)
+       : wxFrame(NULL, -1, title, pos, size, style)
 {
     SetIcon(wxICON(mondrian));
 
@@ -159,9 +155,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
     menuFile->AppendCheckItem(ID_PlugProvider, _T("&Plug-in art provider"), _T("Enable custom art provider"));   
     menuFile->AppendSeparator();
 
-#if wxUSE_LOG
     menuFile->Append(ID_Logs, _T("&Logging test"), _T("Show some logging output"));
-#endif // wxUSE_LOG
     menuFile->Append(ID_Browser, _T("&Resources browser"), _T("Browse all available icons"));
     menuFile->AppendSeparator();
 
@@ -181,11 +175,10 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    // true is to force the frame to close
-    Close(true);
+    // TRUE is to force the frame to close
+    Close(TRUE);
 }
 
-#if wxUSE_LOG
 void MyFrame::OnLogs(wxCommandEvent& WXUNUSED(event))
 {
     wxLogMessage(_T("Some information."));
@@ -195,7 +188,6 @@ void MyFrame::OnLogs(wxCommandEvent& WXUNUSED(event))
     wxLog::GetActiveTarget()->Flush();
     wxLogMessage(_T("Check/uncheck 'File/Plug-in art provider' and try again."));
 }
-#endif // wxUSE_LOG
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {

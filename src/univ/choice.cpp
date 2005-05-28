@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univchoice.h"
 #endif
 
@@ -31,45 +31,19 @@
 
 #ifndef WX_PRECOMP
     #include "wx/choice.h"
-    #include "wx/arrstr.h"
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
 
 BEGIN_EVENT_TABLE(wxChoice, wxComboBox)
-    EVT_COMBOBOX(wxID_ANY, wxChoice::OnComboBox)
+    EVT_COMBOBOX(-1, wxChoice::OnComboBox)
 END_EVENT_TABLE()
-
-wxChoice::wxChoice(wxWindow *parent, wxWindowID id,
-                   const wxPoint& pos,
-                   const wxSize& size,
-                   const wxArrayString& choices,
-                   long style,
-                   const wxValidator& validator,
-                   const wxString& name)
-{
-    Create(parent, id, pos, size, choices, style, validator, name);
-}
-
-bool wxChoice::Create(wxWindow *parent, wxWindowID id,
-                      const wxPoint& pos,
-                      const wxSize& size,
-                      const wxArrayString& choices,
-                      long style,
-                      const wxValidator& validator,
-                      const wxString& name)
-{
-    wxCArrayString chs(choices);
-
-    return Create(parent, id, pos, size, chs.GetCount(), chs.GetStrings(),
-                  style, validator, name);
-}
 
 bool wxChoice::Create(wxWindow *parent, wxWindowID id,
                       const wxPoint& pos,
                       const wxSize& size,
                       int n, const wxString choices[],
-                      long WXUNUSED(style),
+                      long style,
                       const wxValidator& validator,
                       const wxString& name)
 {

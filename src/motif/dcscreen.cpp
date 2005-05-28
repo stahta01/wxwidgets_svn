@@ -9,12 +9,9 @@
 // Licence:   	wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma implementation "dcscreen.h"
 #endif
-
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
 
 #include "wx/window.h"
 #include "wx/frame.h"
@@ -63,7 +60,7 @@ wxScreenDC::wxScreenDC()
         &gcvalues);
     
     m_backgroundPixel = (int) gcvalues.background;
-    m_ok = true;
+    m_ok = TRUE;
 }
 
 wxScreenDC::~wxScreenDC()
@@ -88,7 +85,7 @@ bool wxScreenDC::StartDrawingOnTop(wxWindow* window)
 bool wxScreenDC::StartDrawingOnTop(wxRect* rect)
 {
     if (sm_overlayWindow)
-        return false;
+        return FALSE;
     
     Display *dpy = (Display*) wxGetDisplay();
     Pixmap screenPixmap = RootWindow(dpy, DefaultScreen(dpy));
@@ -118,10 +115,10 @@ bool wxScreenDC::StartDrawingOnTop(wxRect* rect)
     if (sm_overlayWindow)
     {
         XMapWindow(dpy, (Window) sm_overlayWindow);
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }
 
 bool wxScreenDC::EndDrawingOnTop()
@@ -130,8 +127,8 @@ bool wxScreenDC::EndDrawingOnTop()
     {
         XDestroyWindow((Display*) wxGetDisplay(), (Window) sm_overlayWindow);
         sm_overlayWindow = 0;
-        return true;
+        return TRUE;
     }
     else
-        return false;
+        return FALSE;
 }

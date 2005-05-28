@@ -11,31 +11,34 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-%module(package="wx") iewin
+%module iewin
 
 %{
-#include "wx/wxPython/wxPython.h"
-#include "wx/wxPython/pyclasses.h"
-#include "wx/wxPython/pyistream.h"    
-
+#include "wxPython.h"
 #include "IEHtmlWin.h"
+#include "pyistream.h"
 %}
 
 //---------------------------------------------------------------------------
 
-%import core.i
-%pythoncode { wx = _core }
-%pythoncode { __docfilter__ = wx.__DocFilter(globals()) }
-%pythoncode {
-    import warnings
-    warnings.warn("This module is deprecated.  Please use the wx.lib.iewin module instead.",    
-                  DeprecationWarning, stacklevel=2)
-}
+%include typemaps.i
+%include my_typemaps.i
 
-MAKE_CONST_WXSTRING_NOSWIG(PanelNameStr);
+%extern wx.i
+%extern windows.i
+%extern _defs.i
+%extern misc.i
+%extern events.i
+%extern streams.i
 
-%include _iewin_rename.i
+%pragma(python) code = "import wx"
 
+//---------------------------------------------------------------------------
+
+%{
+    // Put some wx default wxChar* values into wxStrings.
+    DECLARE_DEF_STRING(PanelNameStr);
+%}
 
 //---------------------------------------------------------------------------
 
@@ -59,14 +62,25 @@ enum {
 };
 
 
-%pythoncode {    
-EVT_MSHTML_BEFORENAVIGATE2      = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2, 1)
-EVT_MSHTML_NEWWINDOW2           = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_NEWWINDOW2, 1)
-EVT_MSHTML_DOCUMENTCOMPLETE     = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE, 1)
-EVT_MSHTML_PROGRESSCHANGE       = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_PROGRESSCHANGE, 1)
-EVT_MSHTML_STATUSTEXTCHANGE     = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE, 1)
-EVT_MSHTML_TITLECHANGE          = wx.PyEventBinder(wxEVT_COMMAND_MSHTML_TITLECHANGE, 1)
-}
+%pragma(python) code = "
+def EVT_MSHTML_BEFORENAVIGATE2(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_BEFORENAVIGATE2, func)
+
+def EVT_MSHTML_NEWWINDOW2(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_NEWWINDOW2, func)
+
+def EVT_MSHTML_DOCUMENTCOMPLETE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_DOCUMENTCOMPLETE, func)
+
+def EVT_MSHTML_PROGRESSCHANGE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_PROGRESSCHANGE, func)
+
+def EVT_MSHTML_STATUSTEXTCHANGE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_STATUSTEXTCHANGE, func)
+
+def EVT_MSHTML_TITLECHANGE(win, id, func):
+    win.Connect(id, -1, wxEVT_COMMAND_MSHTML_TITLECHANGE, func)
+"
 
 //---------------------------------------------------------------------------
 
@@ -78,13 +92,9 @@ enum wxIEHtmlRefreshLevel {
 };
 
 
-MustHaveApp(wxIEHtmlWin);
-
-class wxIEHtmlWin : public wxWindow /* wxActiveX */ 
+class wxIEHtmlWin : public wxWindow /* wxActiveX */
 {
 public:
-    %pythonAppend wxIEHtmlWin      "self._setOORInfo(self)"
-    
     wxIEHtmlWin(wxWindow * parent, wxWindowID id = -1,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
@@ -95,19 +105,19 @@ public:
     bool LoadString(wxString html);
     bool LoadStream(wxInputStream *is);
 
-    %pythoncode { Navigate = LoadUrl }
+    %pragma(python) addtoclass = "Navigate = LoadUrl"
 
     void SetCharset(wxString charset);
     void SetEditMode(bool seton);
     bool GetEditMode();
-    wxString GetStringSelection(bool asHTML = false);
-    wxString GetText(bool asHTML = false);
+    wxString GetStringSelection(bool asHTML = FALSE);
+    wxString GetText(bool asHTML = FALSE);
 
     bool GoBack();
     bool GoForward();
     bool GoHome();
     bool GoSearch();
-    %Rename(RefreshPage, bool,  Refresh(wxIEHtmlRefreshLevel level));
+    %name(RefreshPage)bool Refresh(wxIEHtmlRefreshLevel level);
     bool Stop();
 
 };
@@ -115,4 +125,15 @@ public:
 
 //---------------------------------------------------------------------------
 
+%init %{
 
+    wxClassInfo::CleanUpClasses();
+    wxClassInfo::InitializeClasses();
+
+%}
+
+//----------------------------------------------------------------------
+
+%pragma(python) include="_iewinextras.py";
+
+//---------------------------------------------------------------------------

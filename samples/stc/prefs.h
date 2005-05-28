@@ -20,9 +20,9 @@
 // headers
 //----------------------------------------------------------------------------
 
-//! wxWidgets headers
+//! wxWindows headers
 
-//! wxWidgets/contrib headers
+//! wxWindows/contrib headers
 #include <wx/stc/stc.h>  // styled text control
 
 //! application headers

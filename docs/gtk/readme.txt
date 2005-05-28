@@ -1,44 +1,40 @@
 
-   Welcome to wxWidgets 2.6 for GTK+
+   Welcome to wxWidgets/Gtk 2.4
 
-You have downloaded version 2.6 of the GTK+ port of the 
+you have downloaded version 2.4 of the GTK port of the 
 wxWidgets GUI library.
 
-wxWidgets no longer supports GTK 1.0.x (as did some early
-snapshots) and support for GTK 1.2.x will be phased out
-over time. Nearly all work is now done on GTK 2.0.x and
-quite a few of the enhancements of GTK+ 2.2.x and even
-GTK 2.4.x are used. 
+wxWidgets no longer supports GTK 1.0 (as did some early
+snapshots) so that you will need GTK 1.2 when using it.
+GTK 1.2.6 or above is recommended although some programs 
+will work with GTK 1.2.3 onwards. There is now support
+for GTK 2.0.
 
-More info about the wxWidgets project (including all the
-other ports and version of wxWidgets) can be found at the
-main wxWidgets homepage at:
+More info about the wxWidgets project (and the Windows
+and Motif ports in particular) can be found at Julian's 
+homepage at:
 
-                  http://www.wxwidgets.org
+  http://www.wxwidgets.org
   
 Information on how to install can be found in the file 
 INSTALL.txt, but if you cannot wait, this should work on
 many systems:
 
-    mkdir build_gtk
-    cd build_gtk
-    ../configure --with-gtk=2
-    make
-    su <type root password>
-    make install
-    ldconfig
+./configure --with-gtk
+make
+su <type root password>
+make install
+ldconfig
+exit
 
-In order to use wxGTK with GTK 1.2 you need to use --with-gtk=1
-configure option. To build the library in Unicode mode (all
-strings will be wide strings and so on) you need to configure
-with GTK 2.0 and add --enable-unicode.
+In order to use wxGTK with GTK 2.0 and its unicode
+support, you need to configure
 
-Please note that it is strongly advised to build the library in
-a separate directory, as shown above, as it allows you to have
-different builds of it (for example with and without debug) in
-parallel. If you build in the source directory, don't forget to
-do "make clean" before changing the configuration!
+./configure --with-gtk --enable-gtk2 --enable-unicode
+etc.
 
+So far, support for GTK 2.0 has only been tested on
+Linux with glibc 2.2.
 
 When you run into problems, please read the INSTALL.txt and 
 follow those instructions. If you still don't have any success,
@@ -47,18 +43,25 @@ A DESCRIPTION OF YOUR SYSTEM AND YOUR PROBLEM, SUCH AS YOUR
 VERSION OF GTK, WXGTK, WHAT DISTRIBUTION YOU USE AND WHAT ERROR 
 WAS REPORTED. I know this has no effect, but I tried...
 
+The library produced by the install process will be called 
+libwx_gtk.a (static) and libwx_gtk-2.2.so.0.0.0 (shared) so 
+that once a binary incompatible version of wxWidgets/Gtk comes 
+out we'll augment the library version number to avoid linking 
+problems.
+
 Please send problems concerning installation, feature requests, 
-bug reports or comments to the wxWidgets users list. These can
-be found at http://www.wxwidgets.org and more specifically at 
-http://lists.wxwidgets.org.
+bug reports or comments to the wxWidgets users list. Information 
+on how to subscribe is available from my homepage.
 
 Do NOT send any comments directly to me.
 
-wxWidgets doesn't come with any guarantee whatsoever. It 
+wxWidgets/Gtk doesn't come with any guarantee whatsoever. It 
 might crash your harddisk or destroy your monitor. It doesn't 
 claim to be suitable for any special or general purpose.
 
   Regards,
 
     Robert Roebling
+
+
 

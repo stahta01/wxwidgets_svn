@@ -130,12 +130,12 @@ members for getting to the next or previous node.
 
 \wxheading{See also}
 
-\helpref{wxNode}{wxnode},
+\helpref{wxNode}{wxnode}, \helpref{wxStringList}{wxstringlist},
 \helpref{wxArray}{wxarray}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-\membersection{wxList::wxList}\label{wxlistctor}
+\membersection{wxList::wxList}
 
 \func{}{wxList}{\void}
 
@@ -155,7 +155,7 @@ and indicates what sort of keying is required (if any).
 The variable-length argument list constructor must be supplied with a
 terminating NULL.
 
-\membersection{wxList::\destruct{wxList}}\label{wxlistdtor}
+\membersection{wxList::\destruct{wxList}}
 
 \func{}{\destruct{wxList}}{\void}
 
@@ -184,33 +184,27 @@ The key string is copied and stored by the list implementation.
 \func{void}{Clear}{\void}
 
 Clears the list (but does not delete the client data stored with each node
-unless you called DeleteContents({\tt true}), in which case it deletes data).
+unless you called DeleteContents({\tt TRUE}), in which case it deletes data).
 
 \membersection{wxList::DeleteContents}\label{wxlistdeletecontents}
 
 \func{void}{DeleteContents}{\param{bool}{ destroy}}
 
-If {\it destroy} is {\tt true}, instructs the list to call {\it delete} on the client contents of
-a node whenever the node is destroyed. The default is {\tt false}.
+If {\it destroy} is {\tt TRUE}, instructs the list to call {\it delete} on the client contents of
+a node whenever the node is destroyed. The default is {\tt FALSE}.
 
 \membersection{wxList::DeleteNode}\label{wxlistdeletenode}
 
 \func{bool}{DeleteNode}{\param{wxNode<T> *}{node}}
 
-Deletes the given node from the list, returning {\tt true} if successful.
+Deletes the given node from the list, returning {\tt TRUE} if successful.
 
 \membersection{wxList::DeleteObject}\label{wxlistdeleteobject}
 
 \func{bool}{DeleteObject}{\param{T *}{object}}
 
 Finds the given client {\it object} and deletes the appropriate node from the list, returning
-{\tt true} if successful. The application must delete the actual object separately.
-
-\membersection{wxList::Erase}\label{wxlisterase}
-
-\func{void}{Erase}{\param{wxNode<T> *}{node}}
-
-Removes element at given position.
+{\tt TRUE} if successful. The application must delete the actual object separately.
 
 \membersection{wxList::Find}\label{wxlistfind}
 
@@ -248,7 +242,7 @@ Returns the last node in the list (NULL if the list is empty).
 
 \func{int}{IndexOf}{\param{T*}{ obj }}
 
-Returns the index of {\it obj} within the list or {\tt wxNOT\_FOUND} if {\it obj} 
+Returns the index of {\it obj} within the list or wxNOT\_FOUND if {\it obj} 
 is not found in the list.
 
 \membersection{wxList::Insert}\label{wxlistinsert}
@@ -272,7 +266,7 @@ Inserts the object before the given {\it node}.
 
 \constfunc{bool}{IsEmpty}{\void}
 
-Returns {\tt true} if the list is empty, {\tt false} otherwise.
+Returns {\tt TRUE} if the list is empty, {\tt FALSE} otherwise.
 
 % Use different label name to avoid clashing with wxListItem label
 \membersection{wxList::Item}\label{wxlistitemfunc}

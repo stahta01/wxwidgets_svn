@@ -6,7 +6,7 @@
 // Created:     10/17/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -56,12 +56,13 @@ void wxToolTip::Create(
 )
 {
     ULONG                           lStyle = ES_READONLY | ES_MARGIN | ES_CENTER;
+    wxColour                        vColor;
     LONG                            lColor;
     char                            zFont[128];
 
     m_hWnd = ::WinCreateWindow( HWND_DESKTOP
                                ,WC_ENTRYFIELD
-                               ,(PSZ)rsTip.c_str()
+                               ,rsTip.c_str()
                                ,lStyle
                                ,0, 0, 0, 0
                                ,NULLHANDLE
@@ -71,9 +72,9 @@ void wxToolTip::Create(
                                ,NULL
                               );
     if (!m_hWnd)
-        wxLogError(_T("Unable to create tooltip window"));
+        wxLogError("Unable to create tooltip window");
 
-    wxColour                        vColor( wxT("YELLOW") );
+    vColor.InitFromName("YELLOW");
     lColor = (LONG)vColor.GetPixel();
     ::WinSetPresParam( m_hWnd
                       ,PP_BACKGROUNDCOLOR

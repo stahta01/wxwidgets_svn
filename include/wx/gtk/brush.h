@@ -11,7 +11,7 @@
 #ifndef __GTKBRUSHH__
 #define __GTKBRUSHH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -31,26 +31,26 @@ class wxBrush;
 // wxBrush
 //-----------------------------------------------------------------------------
 
-class wxBrush: public wxBrushBase
+class wxBrush: public wxGDIObject
 {
 public:
     wxBrush() { }
-
-    wxBrush( const wxColour &colour, int style = wxSOLID );
+    
+    wxBrush( const wxColour &colour, int style );
     wxBrush( const wxBitmap &stippleBitmap );
     ~wxBrush();
-
+    
     wxBrush( const wxBrush &brush )
-        : wxBrushBase()
+        : wxGDIObject()
         { Ref(brush); }
     wxBrush& operator = ( const wxBrush& brush ) { Ref(brush); return *this; }
-
+    
     bool Ok() const { return m_refData != NULL; }
-
+    
     bool operator == ( const wxBrush& brush ) const;
     bool operator != (const wxBrush& brush) const { return !(*this == brush); }
 
-    virtual int GetStyle() const;
+    int GetStyle() const;
     wxColour &GetColour() const;
     wxBitmap *GetStipple() const;
 
@@ -63,7 +63,7 @@ private:
     // ref counting code
     virtual wxObjectRefData *CreateRefData() const;
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
-
+    
     DECLARE_DYNAMIC_CLASS(wxBrush)
 };
 

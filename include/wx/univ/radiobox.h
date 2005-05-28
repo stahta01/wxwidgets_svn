@@ -6,13 +6,13 @@
 // Created:     11.09.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_RADIOBOX_H_
 #define _WX_UNIV_RADIOBOX_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univradiobox.h"
 #endif
 
@@ -21,7 +21,7 @@ class WXDLLEXPORT wxRadioButton;
 #include "wx/statbox.h"
 #include "wx/dynarray.h"
 
-WX_DEFINE_EXPORTED_ARRAY_PTR(wxRadioButton *, wxArrayRadioButtons);
+WX_DEFINE_ARRAY(wxRadioButton *, wxArrayRadioButtons);
 
 // ----------------------------------------------------------------------------
 // wxRadioBox: a box full of radio buttons
@@ -50,16 +50,6 @@ public:
         (void)Create(parent, id, title, pos, size, n, choices,
                      majorDim, style, val, name);
     }
-    wxRadioBox(wxWindow *parent,
-               wxWindowID id,
-               const wxString& title,
-               const wxPoint& pos,
-               const wxSize& size,
-               const wxArrayString& choices,
-               int majorDim = 0,
-               long style = wxRA_SPECIFY_COLS,
-               const wxValidator& val = wxDefaultValidator,
-               const wxString& name = wxRadioBoxNameStr);
 
     bool Create(wxWindow *parent,
                 wxWindowID id,
@@ -67,16 +57,6 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 int n = 0, const wxString *choices = NULL,
-                int majorDim = 0,
-                long style = wxRA_SPECIFY_COLS,
-                const wxValidator& val = wxDefaultValidator,
-                const wxString& name = wxRadioBoxNameStr);
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxString& title,
-                const wxPoint& pos,
-                const wxSize& size,
-                const wxArrayString& choices,
                 int majorDim = 0,
                 long style = wxRA_SPECIFY_COLS,
                 const wxValidator& val = wxDefaultValidator,
@@ -95,17 +75,14 @@ public:
     virtual wxString GetString(int n) const;
     virtual void SetString(int n, const wxString& label);
 
-    virtual bool Enable(int n, bool enable = true);
-    virtual bool Show(int n, bool show = true);
+    virtual void Enable(int n, bool enable = TRUE);
+    virtual void Show(int n, bool show = TRUE);
 
     // we also override the wxControl methods to avoid virtual function hiding
-    virtual bool Enable(bool enable = true);
-    virtual bool Show(bool show = true);
+    virtual bool Enable(bool enable = TRUE);
+    virtual bool Show(bool show = TRUE);
     virtual wxString GetLabel() const;
     virtual void SetLabel(const wxString& label);
-
-    // we inherit a version returning false from wxStaticBox, override it again
-    virtual bool AcceptsFocus() const { return true; }
 
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip( wxToolTip *tip );
@@ -131,6 +108,9 @@ protected:
 
     // common part of all ctors
     void Init();
+
+    // check that the index is valid
+    bool IsValid(int n) const { return n >= 0 && n < GetCount(); }
 
     // sets m_majorDim and calculate m_numCols and m_numRows
     void SetMajorDim(int majorDim);

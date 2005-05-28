@@ -6,7 +6,7 @@
 // Created:     28.06.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "dialogbase.h"
 #endif
 
@@ -56,8 +56,7 @@ WX_DELEGATE_TO_CONTROL_CONTAINER(wxDialogBase)
 void wxDialogBase::Init()
 {
     m_returnCode = 0;
-    m_affirmativeId = wxID_OK;
-    
+
     // the dialogs have this flag on by default to prevent the events from the
     // dialog controls from reaching the parent frame which is usually
     // undesirable and can lead to unexpected and hard to find bugs
@@ -68,14 +67,14 @@ void wxDialogBase::Init()
 #endif
 }
 
-#if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#if wxUSE_STATTEXT && wxUSE_TEXTCTRL
 
 wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
 {
     bool is_pda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
-
+    
     wxString text = message;
-
+    
     // I admit that this is complete bogus, but it makes
     // message boxes work for pda screens temporarily..
     int max_width = -1;
@@ -84,8 +83,8 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
         max_width = wxSystemSettings::GetMetric( wxSYS_SCREEN_X ) - 25;
         text += wxT('\n');
     }
-
-
+    
+    
     wxBoxSizer *box = new wxBoxSizer( wxVERTICAL );
 
     // get line height for empty lines
@@ -102,11 +101,11 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
         switch ( text[pos] )
         {
             case wxT('\n'):
-                if (!line.empty())
+                if (!line.IsEmpty())
                 {
-                    wxStaticText *s = new wxStaticText( this, wxID_ANY, line );
+                    wxStaticText *s = new wxStaticText( this, -1, line );
                     box->Add( s );
-                    line = wxEmptyString;
+                    line = wxT("");
                 }
                 else
                 {
@@ -115,7 +114,7 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
                 break;
 
             case wxT('&'):
-                // this is used as accel mnemonic prefix in the wxWidgets
+                // this is used as accel mnemonic prefix in the wxWindows
                 // controls but in the static messages created by
                 // CreateTextSizer() (used by wxMessageBox, for example), we
                 // don't want this special meaning, so we need to quote it
@@ -126,109 +125,129 @@ wxSizer *wxDialogBase::CreateTextSizer( const wxString& message )
             default:
                 if (text[pos] == wxT(' '))
                     last_space = pos;
-
+                    
                 line += message[pos];
-
+                
                 if (is_pda)
                 {
                     int width = 0;
                     GetTextExtent( line, &width, (int*)NULL, (int*)NULL, (int*)NULL, &font );
-
+   
                     if (width > max_width)
                     {
                         // exception if there was no previous space
                         if (last_space == 0)
                             last_space = pos;
-
+                            
                         int diff = pos-last_space;
                         int len = line.Len();
                         line.Remove( len-diff, diff );
-
-                        wxStaticText *s = new wxStaticText( this, wxID_ANY, line );
+                        
+                        wxStaticText *s = new wxStaticText( this, -1, line );
                         box->Add( s );
-
+                        
                         pos = last_space;
                         last_space = 0;
-                        line = wxEmptyString;
+                        line = wxT("");
                     }
                 }
         }
     }
 
     // remaining text behind last '\n'
-    if (!line.empty())
+    if (!line.IsEmpty())
     {
-        wxStaticText *s2 = new wxStaticText( this, wxID_ANY, line );
+        wxStaticText *s2 = new wxStaticText( this, -1, line );
         box->Add( s2 );
     }
 
     return box;
 }
 
-#endif // wxUSE_STATTEXT // && wxUSE_TEXTCTRL
+#endif // wxUSE_STATTEXT && wxUSE_TEXTCTRL
 
 #if wxUSE_BUTTON
 
 wxSizer *wxDialogBase::CreateButtonSizer( long flags )
 {
-#ifdef __SMARTPHONE__
-    wxDialog* dialog = (wxDialog*) this;
-    if (flags & wxOK){
-        dialog->SetLeftMenu(wxID_OK);
+    bool is_pda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
+    
+    wxBoxSizer *box = NULL;
+    
+    // If we have a PDA screen, put yes/no button over 
+    // all other buttons, otherwise on the left side.
+    if (is_pda)
+        box = new wxBoxSizer( wxVERTICAL );
+    else
+        box = new wxBoxSizer( wxHORIZONTAL );
+        
+    wxBoxSizer *inner_yes_no = NULL;
+    
+    // Only create sizer containing yes/no
+    // if it is actually required
+    if ( (flags & wxYES_NO) != 0 )
+    {
+        inner_yes_no = new wxBoxSizer( wxHORIZONTAL );
+        box->Add( inner_yes_no, 0, wxBOTTOM, 10 );
     }
+    
+    wxBoxSizer *inner_rest = new wxBoxSizer( wxHORIZONTAL );
+    box->Add( inner_rest, 0, 0, 0 );
 
-    if (flags & wxCANCEL){
-        dialog->SetRightMenu(wxID_CANCEL);
-    }
-
-    if (flags & wxYES){
-        dialog->SetLeftMenu(wxID_YES);
-    }
-
-    if (flags & wxNO){
-        dialog->SetLeftMenu(wxID_NO);
-    }
-    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    return sizer;
+#if defined(__WXMSW__) || defined(__WXMAC__)
+    static const int margin = 6;
 #else
-    return CreateStdDialogButtonSizer( flags );
+    static const int margin = 10;
 #endif
-}
 
-wxStdDialogButtonSizer *wxDialogBase::CreateStdDialogButtonSizer( long flags )
-{
-    wxStdDialogButtonSizer *sizer = new wxStdDialogButtonSizer();
-    wxButton *ok = NULL;
-    wxButton *yes = NULL;
-    wxButton *no = NULL;
+    wxButton *ok = (wxButton *) NULL;
+    wxButton *cancel = (wxButton *) NULL;
+    wxButton *yes = (wxButton *) NULL;
+    wxButton *no = (wxButton *) NULL;
 
-    if (flags & wxOK){
-        ok = new wxButton(this, wxID_OK);
-        sizer->AddButton(ok);
+    // always show an OK button, unless we have both YES and NO
+    if ( (flags & wxYES_NO) != wxYES_NO )
+        flags |= wxOK;
+
+    if (flags & wxYES)
+    {
+        yes = new wxButton( this, wxID_YES, _("Yes"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        inner_yes_no->Add( yes, 0, wxLEFT|wxRIGHT, margin );
+    }
+    if (flags & wxNO)
+    {
+        no = new wxButton( this, wxID_NO, _("No"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        inner_yes_no->Add( no, 0, wxLEFT|wxRIGHT, margin );
     }
 
-    if (flags & wxCANCEL){
-        wxButton *cancel = new wxButton(this, wxID_CANCEL);
-        sizer->AddButton(cancel);
+    if (flags & wxOK)
+    {
+        ok = new wxButton( this, wxID_OK, _("OK"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        inner_rest->Add( ok, 0, wxLEFT|wxRIGHT, margin );
     }
 
-    if (flags & wxYES){
-        yes = new wxButton(this, wxID_YES);
-        sizer->AddButton(yes);
+    if (flags & wxFORWARD)
+        inner_rest->Add( new wxButton( this, wxID_FORWARD, _("Forward"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+
+    if (flags & wxBACKWARD)
+        inner_rest->Add( new wxButton( this, wxID_BACKWARD, _("Backward"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+
+    if (flags & wxSETUP)
+        inner_rest->Add( new wxButton( this, wxID_SETUP, _("Setup"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+
+    if (flags & wxMORE)
+        inner_rest->Add( new wxButton( this, wxID_MORE, _("More..."),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+
+    if (flags & wxHELP)
+        inner_rest->Add( new wxButton( this, wxID_HELP, _("Help"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS  ), 0, wxLEFT|wxRIGHT, margin );
+
+    if (flags & wxCANCEL)
+    {
+        cancel = new wxButton( this, wxID_CANCEL, _("Cancel"),wxDefaultPosition,wxDefaultSize,wxCLIP_SIBLINGS );
+        inner_rest->Add( cancel, 0, wxLEFT|wxRIGHT, margin );
     }
 
-    if (flags & wxNO){
-        no = new wxButton(this, wxID_NO);
-        sizer->AddButton(no);
-    }
-
-    if (flags & wxHELP){
-        wxButton *help = new wxButton(this, wxID_HELP);
-        sizer->AddButton(help);
-    }
-
-    sizer->Realize();
-
+    // choose the default button
     if (flags & wxNO_DEFAULT)
     {
         if (no)
@@ -250,14 +269,8 @@ wxStdDialogButtonSizer *wxDialogBase::CreateStdDialogButtonSizer( long flags )
             yes->SetFocus();
         }
     }
-    
-    if (flags & wxOK)
-        SetAffirmativeId(wxID_OK);
-    else if (flags & wxYES)
-        SetAffirmativeId(wxID_YES);
 
-    return sizer;
+    return box;
 }
-
 
 #endif // wxUSE_BUTTON

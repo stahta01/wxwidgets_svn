@@ -27,7 +27,9 @@
 #endif
 
 #include "wx/artprov.h"
-#include "wx/image.h"
+
+// For the purposes of forcing this module to link
+char g_ArtProviderModule = 0;
 
 // ----------------------------------------------------------------------------
 // wxDefaultArtProvider
@@ -47,6 +49,23 @@ protected:
 // Standard macro for getting a resource from XPM file:
 #define ART(artId, xpmRc) \
     if ( id == artId ) return wxBitmap(xpmRc##_xpm);
+
+// Compatibility hack to use wxApp::GetStdIcon of overriden by the user
+#if WXWIN_COMPATIBILITY_2_2
+    #define GET_STD_ICON_FROM_APP(iconId) \
+        if ( client == wxART_MESSAGE_BOX ) \
+        { \
+            wxIcon icon = wxTheApp->GetStdIcon(iconId); \
+            if ( icon.Ok() ) \
+            { \
+                wxBitmap bmp; \
+                bmp.CopyFromIcon(icon); \
+                return bmp; \
+            } \
+        }
+#else
+    #define GET_STD_ICON_FROM_APP(iconId)
+#endif
 
 // There are two ways of getting the standard icon: either via XPMs or via
 // wxIcon ctor. This depends on the platform:
@@ -68,6 +87,7 @@ protected:
 #define ART_MSGBOX(artId, iconId, xpmRc) \
     if ( id == artId ) \
     { \
+        GET_STD_ICON_FROM_APP(iconId) \
         CREATE_STD_ICON(#iconId, xpmRc) \
     }
 
@@ -77,14 +97,15 @@ protected:
 
 /*static*/ void wxArtProvider::InitStdProvider()
 {
+    // NB: A few notes about this function:
+    //     (1) it is in artstd.cpp and not in artprov.cpp on purpose. I wanted
+    //         to avoid declaring wxDefaultArtProvider in any public header as
+    //         it is only an implementation detail
+    //     (2) other default art providers (e.g. GTK one) should NOT be added
+    //         here. Instead, add them in port-specific initialialization code
+
     wxArtProvider::PushProvider(new wxDefaultArtProvider);
 }
-
-#if !defined(__WXGTK20__) || defined(__WXUNIVERSAL__)
-/*static*/ void wxArtProvider::InitNativeProvider()
-{
-}
-#endif
 
 
 // ----------------------------------------------------------------------------
@@ -114,7 +135,6 @@ protected:
     #include "../../art/htmpage.xpm"
 #endif // wxUSE_HTML
 
-#include "../../art/missimg.xpm"
 #include "../../art/addbookm.xpm"
 #include "../../art/delbookm.xpm"
 #include "../../art/back.xpm"
@@ -130,35 +150,22 @@ protected:
 #include "../../art/repview.xpm"
 #include "../../art/listview.xpm"
 #include "../../art/new_dir.xpm"
-#include "../../art/harddisk.xpm"
-#include "../../art/cdrom.xpm"
-#include "../../art/floppy.xpm"
-#include "../../art/removable.xpm"
 #include "../../art/folder.xpm"
-#include "../../art/folder_open.xpm"
 #include "../../art/dir_up.xpm"
 #include "../../art/exefile.xpm"
 #include "../../art/deffile.xpm"
 #include "../../art/tick.xpm"
 #include "../../art/cross.xpm"
 
-#include "../../art/filesave.xpm"
-#include "../../art/filesaveas.xpm"
-#include "../../art/copy.xpm"
-#include "../../art/cut.xpm"
-#include "../../art/paste.xpm"
-#include "../../art/delete.xpm"
-#include "../../art/new.xpm"
-#include "../../art/undo.xpm"
-#include "../../art/redo.xpm"
-#include "../../art/quit.xpm"
-#include "../../art/find.xpm"
-#include "../../art/findrepl.xpm"
-
-
 #undef static
 
-wxBitmap wxDefaultArtProvider_CreateBitmap(const wxArtID& id)
+// ----------------------------------------------------------------------------
+// CreateBitmap routine
+// ----------------------------------------------------------------------------
+
+wxBitmap wxDefaultArtProvider::CreateBitmap(const wxArtID& id,
+                                            const wxArtClient& client,
+                                            const wxSize& WXUNUSED(size))
 {
     // wxMessageBox icons:
     ART_MSGBOX(wxART_ERROR,       wxICON_ERROR,       error)
@@ -174,7 +181,6 @@ wxBitmap wxDefaultArtProvider_CreateBitmap(const wxArtID& id)
     ART(wxART_HELP_FOLDER,                         htmfoldr)
     ART(wxART_HELP_PAGE,                           htmpage)
 #endif // wxUSE_HTML
-    ART(wxART_MISSING_IMAGE,                       missimg)
     ART(wxART_ADD_BOOKMARK,                        addbookm)
     ART(wxART_DEL_BOOKMARK,                        delbookm)
     ART(wxART_GO_BACK,                             back)
@@ -190,69 +196,12 @@ wxBitmap wxDefaultArtProvider_CreateBitmap(const wxArtID& id)
     ART(wxART_REPORT_VIEW,                         repview)
     ART(wxART_LIST_VIEW,                           listview)
     ART(wxART_NEW_DIR,                             new_dir)
-    ART(wxART_HARDDISK,                            harddisk)
-    ART(wxART_FLOPPY,                              floppy)
-    ART(wxART_CDROM,                               cdrom)
-    ART(wxART_REMOVABLE,                           removable)
     ART(wxART_FOLDER,                              folder)
-    ART(wxART_FOLDER_OPEN,                         folder_open)
     ART(wxART_GO_DIR_UP,                           dir_up)
     ART(wxART_EXECUTABLE_FILE,                     exefile)
     ART(wxART_NORMAL_FILE,                         deffile)
     ART(wxART_TICK_MARK,                           tick)
     ART(wxART_CROSS_MARK,                          cross)
 
-    ART(wxART_FILE_SAVE,                           filesave)  
-    ART(wxART_FILE_SAVE_AS,                        filesaveas)        
-    ART(wxART_COPY,                                copy)
-    ART(wxART_CUT,                                 cut)
-    ART(wxART_PASTE,                               paste)
-    ART(wxART_DELETE,                              delete)
-    ART(wxART_UNDO,                                undo)
-    ART(wxART_REDO,                                redo)
-    ART(wxART_QUIT,                                quit)
-    ART(wxART_FIND,                                find)
-    ART(wxART_FIND_AND_REPLACE,                    findrepl)
-    ART(wxART_NEW,                                 new)
-       
-        
     return wxNullBitmap;
-}
-
-// ----------------------------------------------------------------------------
-// CreateBitmap routine
-// ----------------------------------------------------------------------------
-
-wxBitmap wxDefaultArtProvider::CreateBitmap(const wxArtID& id,
-                                            const wxArtClient& client,
-                                            const wxSize& reqSize)
-{
-    wxBitmap bmp = wxDefaultArtProvider_CreateBitmap(id);
-
-#if wxUSE_IMAGE
-    if (bmp.Ok())
-    {
-        // fit into transparent image with desired size hint from the client
-        if (reqSize == wxDefaultSize)
-        {
-            // find out if there is a desired size for this client
-            wxSize bestSize = GetSizeHint(client);
-            if (bestSize != wxDefaultSize)
-            {
-                int bmp_w = bmp.GetWidth();
-                int bmp_h = bmp.GetHeight();
-                // want default size but it's smaller, paste into transparent image
-                if ((bmp_h < bestSize.x) && (bmp_w < bestSize.y))
-                {
-                    wxPoint offset((bestSize.x - bmp_w)/2, (bestSize.y - bmp_h)/2);
-                    wxImage img = bmp.ConvertToImage();
-                    img.Resize(bestSize, offset);
-                    bmp = wxBitmap(img);
-                }
-            }
-        }
-    }
-#endif // wxUSE_IMAGE
-
-    return bmp;
 }

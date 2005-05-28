@@ -6,13 +6,13 @@
 // Created:     14.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_UNIV_STATTEXT_H_
 #define _WX_UNIV_STATTEXT_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma interface "univstattext.h"
 #endif
 
@@ -27,7 +27,7 @@ public:
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize)
     {
-        Create(parent, wxID_ANY, label, pos, size, 0, wxStaticTextNameStr);
+        Create(parent, -1, label, pos, size, 0, wxStaticTextNameStr);
     }
 
     // full form
@@ -55,8 +55,8 @@ public:
 
     virtual void SetLabel(const wxString& label);
 
-    virtual bool IsFocused() const { return false; }
-
+    virtual bool HasTransparentBackground() { return TRUE; }
+    
 protected:
     // calculate the optimal size for the label
     virtual wxSize DoGetBestClientSize() const;

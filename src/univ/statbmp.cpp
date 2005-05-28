@@ -6,7 +6,7 @@
 // Created:     25.08.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -17,7 +17,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
     #pragma implementation "univstatbmp.h"
 #endif
 
@@ -58,7 +58,7 @@ bool wxStaticBitmap::Create(wxWindow *parent,
                             const wxString &name)
 {
     if ( !wxControl::Create(parent, id, pos, size, style, wxDefaultValidator, name) )
-        return false;
+        return FALSE;
 
     // set bitmap first
     SetBitmap(label);
@@ -66,7 +66,7 @@ bool wxStaticBitmap::Create(wxWindow *parent,
     // and adjust our size to fit it after this
     SetBestSize(size);
 
-    return true;
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------

@@ -11,7 +11,7 @@
 #ifndef __GTKRADIOBUTTONH__
 #define __GTKRADIOBUTTONH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -49,15 +49,12 @@ public:
     virtual bool GetValue() const;
     virtual bool Enable( bool enable = TRUE );
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
     // implementation
 
     virtual bool IsRadioButton() const { return TRUE; }
 
     GSList *m_radioButtonGroup;
-    void DoApplyWidgetStyle(GtkRcStyle *style);
+    void ApplyWidgetStyle();
     bool IsOwnGtkWindow( GdkWindow *window );
     void OnInternalIdle();
 

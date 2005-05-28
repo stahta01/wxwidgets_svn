@@ -1,86 +1,77 @@
 
-import  wx
-
-import  images
+from wxPython.wx import *
+import images
 
 #----------------------------------------------------------------------
 
 text = """\
 
-Right-click on any bare area of this panel (or Ctrl-click on the Mac)
-to show a popup menu.  Then look at the code for this sample.  Notice
-how the PopupMenu method is similar to the ShowModal method of a
-wx.Dialog in that it doesn't return until the popup menu has been
-dismissed.  The event handlers for the popup menu items can either be
-attached to the menu itself, or to the window that invokes PopupMenu.
+Right-click on the panel (or Ctrl-click on the Mac) to show a popup
+menu.  Then look at the code for this sample.  Notice how the
+PopupMenu method is similar to the ShowModal method of a wxDialog in
+that it doesn't return until the popup menu has been dismissed.  The
+event handlers for the popup menu items can either be attached to the
+menu itself, or to the window that invokes PopupMenu.
 """
 
 #----------------------------------------------------------------------
 
-class TestPanel(wx.Panel):
+class TestPanel(wxPanel):
     def __init__(self, parent, log):
         self.log = log
-        wx.Panel.__init__(self, parent, -1)
-        box = wx.BoxSizer(wx.VERTICAL)
+        wxPanel.__init__(self, parent, -1)
+        box = wxBoxSizer(wxVERTICAL)
 
         # Make and layout the controls
         fs = self.GetFont().GetPointSize()
-        bf = wx.Font(fs+4, wx.SWISS, wx.NORMAL, wx.BOLD)
-        nf = wx.Font(fs+2, wx.SWISS, wx.NORMAL, wx.NORMAL)
+        bf = wxFont(fs+4, wxSWISS, wxNORMAL, wxBOLD)
+        nf = wxFont(fs+2, wxSWISS, wxNORMAL, wxNORMAL)
 
-        t = wx.StaticText(self, -1, "PopupMenu")
+        t = wxStaticText(self, -1, "PopupMenu")
         t.SetFont(bf)
-        box.Add(t, 0, wx.CENTER|wx.ALL, 5)
-        self.Bind(wx.EVT_RIGHT_UP, self.OnRightClick)
+        box.Add(t, 0, wxCENTER|wxALL, 5)
 
+        box.Add(wxStaticLine(self, -1), 0, wxEXPAND)
+        box.Add(10,20)
 
-        box.Add(wx.StaticLine(self, -1), 0, wx.EXPAND)
-        box.Add((10,20))
-
-        t = wx.StaticText(self, -1, text)
+        t = wxStaticText(self, -1, text)
         t.SetFont(nf)
-        box.Add(t, 0, wx.CENTER|wx.ALL, 5)
+        box.Add(t, 0, wxCENTER|wxALL, 5)
 
         self.SetSizer(box)
 
-        self.Bind(wx.EVT_RIGHT_UP, self.OnRightClick)
+        EVT_RIGHT_UP(self, self.OnRightClick)
 
 
     def OnRightClick(self, event):
         self.log.WriteText("OnRightClick\n")
 
         # only do this part the first time so the events are only bound once
-        #
-        # Yet another anternate way to do IDs. Some prefer them up top to
-        # avoid clutter, some prefer them close to the object of interest
-        # for clarity. 
         if not hasattr(self, "popupID1"):
-            self.popupID1 = wx.NewId()
-            self.popupID2 = wx.NewId()
-            self.popupID3 = wx.NewId()
-            self.popupID4 = wx.NewId()
-            self.popupID5 = wx.NewId()
-            self.popupID6 = wx.NewId()
-            self.popupID7 = wx.NewId()
-            self.popupID8 = wx.NewId()
-            self.popupID9 = wx.NewId()
-
-            self.Bind(wx.EVT_MENU, self.OnPopupOne, id=self.popupID1)
-            self.Bind(wx.EVT_MENU, self.OnPopupTwo, id=self.popupID2)
-            self.Bind(wx.EVT_MENU, self.OnPopupThree, id=self.popupID3)
-            self.Bind(wx.EVT_MENU, self.OnPopupFour, id=self.popupID4)
-            self.Bind(wx.EVT_MENU, self.OnPopupFive, id=self.popupID5)
-            self.Bind(wx.EVT_MENU, self.OnPopupSix, id=self.popupID6)
-            self.Bind(wx.EVT_MENU, self.OnPopupSeven, id=self.popupID7)
-            self.Bind(wx.EVT_MENU, self.OnPopupEight, id=self.popupID8)
-            self.Bind(wx.EVT_MENU, self.OnPopupNine, id=self.popupID9)
+            self.popupID1 = wxNewId()
+            self.popupID2 = wxNewId()
+            self.popupID3 = wxNewId()
+            self.popupID4 = wxNewId()
+            self.popupID5 = wxNewId()
+            self.popupID6 = wxNewId()
+            self.popupID7 = wxNewId()
+            self.popupID8 = wxNewId()
+            self.popupID9 = wxNewId()
+            EVT_MENU(self, self.popupID1, self.OnPopupOne)
+            EVT_MENU(self, self.popupID2, self.OnPopupTwo)
+            EVT_MENU(self, self.popupID3, self.OnPopupThree)
+            EVT_MENU(self, self.popupID4, self.OnPopupFour)
+            EVT_MENU(self, self.popupID5, self.OnPopupFive)
+            EVT_MENU(self, self.popupID6, self.OnPopupSix)
+            EVT_MENU(self, self.popupID7, self.OnPopupSeven)
+            EVT_MENU(self, self.popupID8, self.OnPopupEIght)
+            EVT_MENU(self, self.popupID9, self.OnPopupNine)
 
         # make a menu
-        menu = wx.Menu()
+        menu = wxMenu()
         # Show how to put an icon in the menu
-        item = wx.MenuItem(menu, self.popupID1,"One")
-        bmp = images.getSmilesBitmap()
-        item.SetBitmap(bmp)
+        item = wxMenuItem(menu, self.popupID1,"One")
+        item.SetBitmap(images.getSmilesBitmap())
         menu.AppendItem(item)
         # add some other items
         menu.Append(self.popupID2, "Two")
@@ -89,7 +80,7 @@ class TestPanel(wx.Panel):
         menu.Append(self.popupID5, "Five")
         menu.Append(self.popupID6, "Six")
         # make a submenu
-        sm = wx.Menu()
+        sm = wxMenu()
         sm.Append(self.popupID8, "sub item 1")
         sm.Append(self.popupID9, "sub item 1")
         menu.AppendMenu(self.popupID7, "Test Submenu", sm)
@@ -122,7 +113,7 @@ class TestPanel(wx.Panel):
     def OnPopupSeven(self, event):
         self.log.WriteText("Popup seven\n")
 
-    def OnPopupEight(self, event):
+    def OnPopupEIght(self, event):
         self.log.WriteText("Popup eight\n")
 
     def OnPopupNine(self, event):
@@ -153,5 +144,5 @@ overview = """<html><body>
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])])
 

@@ -6,7 +6,7 @@
 // Created:     11.11.97
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef   _MENUITEM_H
@@ -47,8 +47,8 @@ public:
     //
     wxMenuItem( wxMenu*         pParentMenu = NULL
                ,int             nId = wxID_SEPARATOR
-               ,const wxString& rStrName = wxEmptyString
-               ,const wxString& rWxHelp = wxEmptyString
+               ,const wxString& rStrName = ""
+               ,const wxString& rWxHelp = ""
                ,wxItemKind      eKind = wxITEM_NORMAL
                ,wxMenu*         pSubMenu = NULL
               );

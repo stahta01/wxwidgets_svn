@@ -1,36 +1,28 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/wave.h
-// Purpose:     wxSound compatibility header
-// Author:      Vaclav Slavik
+// Purpose:     wxWave base header
+// Author:      Julian Smart
 // Modified by:
-// Created:     2004/02/01
+// Created:
+// Copyright:   (c) Julian Smart
 // RCS-ID:      $Id$
-// Copyright:   (c) 2004, Vaclav Slavik
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_WAVE_H_BASE_
 #define _WX_WAVE_H_BASE_
 
-#include "wx/defs.h"
-
-#if wxUSE_SOUND
-
-#if WXWIN_COMPATIBILITY_2_4
-#if defined(__DMC__) || defined(__BORLANDC__)
-    #pragma message "wx/wave.h header is deprecated, use wx/sound.h and wxSound"
-#elif defined(__WATCOMC__) || defined(__VISUALC__)
-    #pragma message ("wx/wave.h header is deprecated, use wx/sound.h and wxSound")
-#else
-    #warning "wx/wave.h header is deprecated, use wx/sound.h and wxSound"
-#endif
-    #include "wx/sound.h"
-    // wxSound used to be called wxWave before wxWidgets 2.5.1:
-    typedef wxSound wxWave;
-#else
-    #error "wx/wave.h is only available in compatibility mode"
+#if defined(__WXMSW__)
+#include "wx/msw/wave.h"
+#elif defined(__WXGTK__)
+#include "wx/gtk/wave.h"
+#elif defined(__WXMAC__)
+#include "wx/mac/wave.h"
+#elif defined(__WXPM__)
+#include "wx/os2/wave.h"
+#elif defined(__WXMAC__)
+#include "wx/mac/wave.h"
 #endif
 
 #endif
-
-#endif
+    // _WX_TREECTRL_H_BASE_

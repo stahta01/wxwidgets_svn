@@ -3,7 +3,6 @@
 ._demo.py
 .emacs.desktop
 .gdb_history
-.setup
 .setup.bat
 .setup.sh
 b.bat

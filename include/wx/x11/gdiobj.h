@@ -14,7 +14,7 @@
 
 #include "wx/object.h"
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "gdiobj.h"
 #endif
 

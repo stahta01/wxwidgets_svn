@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
-// Copyright:   (c) Julian Smart
+// Copyright:   (c) Julian Smart and Markus Holzem
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +24,11 @@
 #   error You must set wxUSE_JOYSTICK to 1 in setup.h
 #endif
 
-#include "wx/sound.h"
+#if !wxUSE_STATUSBAR
+#   error You must set wxUSE_STATUSBAR to 1 in setup.h
+#endif
+
+#include "wx/wave.h"
 #include "wx/joystick.h"
 
 #include "joytest.h"
@@ -39,7 +43,6 @@ long ypos = -1;
 
 int winNumber = 1;
 
-int nButtons = 0;
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit()
 {
@@ -47,15 +50,13 @@ bool MyApp::OnInit()
     if (!stick.IsOk())
     {
         wxMessageBox(_T("No joystick detected!"));
-        return false;
+        return FALSE;
     }
 
-#if wxUSE_SOUND
-    m_fire.Create(_T("buttonpress.wav"));
-#endif // wxUSE_SOUND
+#if wxUSE_WAVE
+    m_fire.Create(_T("gun.wav"));
+#endif // wxUSE_WAVE
 
-    m_minX = stick.GetXMin();
-    m_minY = stick.GetYMin();
     m_maxX = stick.GetXMax();
     m_maxY = stick.GetYMax();
 
@@ -84,17 +85,14 @@ bool MyApp::OnInit()
     // Associate the menu bar with the frame
     frame->SetMenuBar(menu_bar);
 
-#if wxUSE_STATUSBAR
     frame->CreateStatusBar();
-    frame->SetStatusText(wxString::Format(wxT("Device [%s] (PID:[%i] MID:[%i]) Ready... # of joysticks:[%i]"), stick.GetProductName().c_str(), stick.GetProductId(), stick.GetManufacturerId(), stick.GetNumberJoysticks()));
-#endif // wxUSE_STATUSBAR
 
     frame->CenterOnScreen();
-    frame->Show(true);
+    frame->Show(TRUE);
 
     SetTopWindow(frame);
 
-    return true;
+    return TRUE;
 }
 
 BEGIN_EVENT_TABLE(MyCanvas, wxScrolledWindow)
@@ -103,17 +101,16 @@ END_EVENT_TABLE()
 
 // Define a constructor for my canvas
 MyCanvas::MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size):
-    wxScrolledWindow(parent, wxID_ANY, pos, size, wxSUNKEN_BORDER)
+    wxScrolledWindow(parent, -1, pos, size, wxSUNKEN_BORDER)
 {
-    m_stick = new wxJoystick(wxJOYSTICK1);
-    nButtons = m_stick->GetNumberButtons();
-    m_stick->SetCapture(this, 10);
+    wxJoystick joystick(wxJOYSTICK1);
+    joystick.SetCapture(this);
 }
 
 MyCanvas::~MyCanvas()
 {
-    m_stick->ReleaseCapture();
-    delete m_stick;
+    wxJoystick joystick(wxJOYSTICK1);
+    joystick.ReleaseCapture();
 }
 
 void MyCanvas::OnJoystickEvent(wxJoystickEvent& event)
@@ -122,26 +119,12 @@ void MyCanvas::OnJoystickEvent(wxJoystickEvent& event)
 
     wxPoint pt(event.GetPosition());
 
-    // if negative positions are possible then shift everything up
-    int xmin = wxGetApp().m_minX;
-    int xmax = wxGetApp().m_maxX;
-    int ymin = wxGetApp().m_minY;
-    int ymax = wxGetApp().m_maxY;
-    if (xmin < 0) {
-        xmax += abs(xmin);
-        pt.x += abs(xmin);
-    }
-    if (ymin < 0) {
-        ymax += abs(ymin);
-        pt.y += abs(ymin);
-    }
-
     // Scale to canvas size
     int cw, ch;
     GetSize(&cw, &ch);
 
-    pt.x = (long) (((double)pt.x/(double)xmax) * cw);
-    pt.y = (long) (((double)pt.y/(double)ymax) * ch);
+    pt.x = (long) (((double)pt.x/(double)wxGetApp().m_maxX) * cw);
+    pt.y = (long) (((double)pt.y/(double)wxGetApp().m_maxY) * ch);
 
     if (xpos > -1 && ypos > -1 && event.IsMove() && event.ButtonIsDown())
     {
@@ -152,30 +135,20 @@ void MyCanvas::OnJoystickEvent(wxJoystickEvent& event)
     xpos = pt.x;
     ypos = pt.y;
 
-#if wxUSE_STATUSBAR
     wxString buf;
     if (event.ButtonDown())
-        buf.Printf(_T("Joystick (%d, %d) #%i Fire!"), pt.x, pt.y, event.GetButtonChange());
+        buf.Printf(_T("Joystick (%d, %d) Fire!"), pt.x, pt.y);
     else
-        buf.Printf(_T("Joystick (%d, %d)  "), pt.x, pt.y);
-
-/*
-    for(int i = 0; i < nButtons; ++i)
-    {
-        buf += wxString(wxT("[")) +
-        ((event.GetButtonState() & (1 << i)) ? wxT("Y") : wxT("N")) + wxString(wxT("]"));
-    }
-*/
+        buf.Printf(_T("Joystick (%d, %d)"), pt.x, pt.y);
 
     frame->SetStatusText(buf);
-#endif // wxUSE_STATUSBAR
 
-#if wxUSE_SOUND
+#if wxUSE_WAVE
     if (event.ButtonDown() && wxGetApp().m_fire.IsOk())
     {
         wxGetApp().m_fire.Play();
     }
-#endif // wxUSE_SOUND
+#endif // wxUSE_WAVE
 }
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
@@ -184,14 +157,19 @@ END_EVENT_TABLE()
 
 MyFrame::MyFrame(wxFrame *parent, const wxString& title, const wxPoint& pos,
     const wxSize& size, const long style)
-    : wxFrame(parent, wxID_ANY, title, pos, size, style)
+    : wxFrame(parent, -1, title, pos, size, style)
 {
     canvas = new MyCanvas(this);
 }
 
-void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+MyFrame::~MyFrame()
 {
-    Close(true);
+    // Empty
+}
+
+void MyFrame::OnQuit(wxCommandEvent& event)
+{
+    Close(TRUE);
 }
 
 void MyFrame::OnActivate(wxActivateEvent& event)

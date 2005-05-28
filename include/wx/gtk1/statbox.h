@@ -11,7 +11,7 @@
 #ifndef __GTKSTATICBOXH__
 #define __GTKSTATICBOXH__
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface
 #endif
 
@@ -40,16 +40,12 @@ public:
 
     virtual void SetLabel( const wxString &label );
 
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
     // implementation
+
+    virtual void ApplyWidgetStyle();
 
     virtual bool IsTransparentForMouse() const { return TRUE; }
 
-protected:
-    void DoApplyWidgetStyle(GtkRcStyle *style);
-    
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
 };

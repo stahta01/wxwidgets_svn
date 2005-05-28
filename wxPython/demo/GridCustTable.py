@@ -1,26 +1,28 @@
-
-import  wx
-import  wx.grid as gridlib
+from wxPython.wx import *
+from wxPython.grid import *
 
 #---------------------------------------------------------------------------
 
-class CustomDataTable(gridlib.PyGridTableBase):
+class CustomDataTable(wxPyGridTableBase):
+    """
+    """
+
     def __init__(self, log):
-        gridlib.PyGridTableBase.__init__(self)
+        wxPyGridTableBase.__init__(self)
         self.log = log
 
         self.colLabels = ['ID', 'Description', 'Severity', 'Priority', 'Platform',
                           'Opened?', 'Fixed?', 'Tested?', 'TestFloat']
 
-        self.dataTypes = [gridlib.GRID_VALUE_NUMBER,
-                          gridlib.GRID_VALUE_STRING,
-                          gridlib.GRID_VALUE_CHOICE + ':only in a million years!,wish list,minor,normal,major,critical',
-                          gridlib.GRID_VALUE_NUMBER + ':1,5',
-                          gridlib.GRID_VALUE_CHOICE + ':all,MSW,GTK,other',
-                          gridlib.GRID_VALUE_BOOL,
-                          gridlib.GRID_VALUE_BOOL,
-                          gridlib.GRID_VALUE_BOOL,
-                          gridlib.GRID_VALUE_FLOAT + ':6,2',
+        self.dataTypes = [wxGRID_VALUE_NUMBER,
+                          wxGRID_VALUE_STRING,
+                          wxGRID_VALUE_CHOICE + ':only in a million years!,wish list,minor,normal,major,critical',
+                          wxGRID_VALUE_NUMBER + ':1,5',
+                          wxGRID_VALUE_CHOICE + ':all,MSW,GTK,other',
+                          wxGRID_VALUE_BOOL,
+                          wxGRID_VALUE_BOOL,
+                          wxGRID_VALUE_BOOL,
+                          wxGRID_VALUE_FLOAT + ':6,2',
                           ]
 
         self.data = [
@@ -44,7 +46,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
         try:
             return not self.data[row][col]
         except IndexError:
-            return True
+            return true
 
     # Get/Set values in the table.  The Python version of these
     # methods can handle any data-type, (as long as the Editor and
@@ -65,10 +67,9 @@ class CustomDataTable(gridlib.PyGridTableBase):
             self.SetValue(row, col, value)
 
             # tell the grid we've added a row
-            msg = gridlib.GridTableMessage(self,            # The table
-                    gridlib.GRIDTABLE_NOTIFY_ROWS_APPENDED, # what we did to it
-                    1                                       # how many
-                    )
+            msg = wxGridTableMessage(self,                             # The table
+                                     wxGRIDTABLE_NOTIFY_ROWS_APPENDED, # what we did to it
+                                     1)                                # how many
 
             self.GetView().ProcessTableMessage(msg)
 
@@ -92,7 +93,7 @@ class CustomDataTable(gridlib.PyGridTableBase):
     def CanGetValueAs(self, row, col, typeName):
         colType = self.dataTypes[col].split(':')[0]
         if typeName == colType:
-            return True
+            return true
         else:
             return False
 
@@ -107,22 +108,23 @@ class CustomDataTable(gridlib.PyGridTableBase):
 
 
 
-class CustTableGrid(gridlib.Grid):
+class CustTableGrid(wxGrid):
     def __init__(self, parent, log):
-        gridlib.Grid.__init__(self, parent, -1)
+        wxGrid.__init__(self, parent, -1)
 
         table = CustomDataTable(log)
 
         # The second parameter means that the grid is to take ownership of the
         # table and will destroy it when done.  Otherwise you would need to keep
         # a reference to it and call it's Destroy method later.
-        self.SetTable(table, True)
+        self.SetTable(table, true)
 
         self.SetRowLabelSize(0)
         self.SetMargins(0,0)
         self.AutoSizeColumns(False)
 
-        gridlib.EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDClick)
+        EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDClick)
+
 
 
     # I do this because I don't like the default behaviour of not starting the
@@ -134,21 +136,17 @@ class CustTableGrid(gridlib.Grid):
 
 #---------------------------------------------------------------------------
 
-class TestFrame(wx.Frame):
+class TestFrame(wxFrame):
     def __init__(self, parent, log):
-
-        wx.Frame.__init__(
-            self, parent, -1, "Custom Table, data driven Grid  Demo", size=(640,480)
-            )
-
-        p = wx.Panel(self, -1, style=0)
+        wxFrame.__init__(self, parent, -1, "Custom Table, data driven Grid  Demo", size=(640,480))
+        p = wxPanel(self, -1, style=0)
         grid = CustTableGrid(p, log)
-        b = wx.Button(p, -1, "Another Control...")
+        b = wxButton(p, -1, "Another Control...")
         b.SetDefault()
-        self.Bind(wx.EVT_BUTTON, self.OnButton, b)
-        b.Bind(wx.EVT_SET_FOCUS, self.OnButtonFocus)
-        bs = wx.BoxSizer(wx.VERTICAL)
-        bs.Add(grid, 1, wx.GROW|wx.ALL, 5)
+        EVT_BUTTON(self, b.GetId(), self.OnButton)
+        EVT_SET_FOCUS(b, self.OnButtonFocus)
+        bs = wxBoxSizer(wxVERTICAL)
+        bs.Add(grid, 1, wxGROW|wxALL, 5)
         bs.Add(b)
         p.SetSizer(bs)
 
@@ -163,9 +161,9 @@ class TestFrame(wx.Frame):
 
 if __name__ == '__main__':
     import sys
-    app = wx.PySimpleApp()
+    app = wxPySimpleApp()
     frame = TestFrame(None, sys.stdout)
-    frame.Show(True)
+    frame.Show(true)
     app.MainLoop()
 
 

@@ -6,7 +6,7 @@
 // Created:     30.12.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// License:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -31,16 +31,15 @@
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/toplevel.h"
-    #include "wx/dialog.h"
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/frame.h"
     #include "wx/control.h"
     #include "wx/containr.h"        // wxSetFocusToChild()
+    #include "wx/module.h"        // wxSetFocusToChild()
 #endif //WX_PRECOMP
 
-#include "wx/module.h"        // wxSetFocusToChild()
 #include "wx/os2/private.h"
 
 // ----------------------------------------------------------------------------
@@ -52,7 +51,10 @@
 // globals
 // ----------------------------------------------------------------------------
 
-// the name of the default wxWidgets class
+// list of all frames and modeless dialogs
+wxWindowList wxModelessWindows;
+
+// the name of the default wxWindows class
 extern void          wxAssociateWinWithHandle( HWND         hWnd
                                               ,wxWindowOS2* pWin
                                              );
@@ -74,8 +76,8 @@ END_EVENT_TABLE()
 // Dialog window proc
 MRESULT EXPENTRY wxDlgProc( HWND WXUNUSED(hWnd)
                            ,UINT uMessage
-                           ,void * WXUNUSED(wParam)
-                           ,void * WXUNUSED(lParam)
+                           ,MPARAM WXUNUSED(wParam)
+                           ,MPARAM WXUNUSED(lParam)
                           )
 {
     switch(uMessage)
@@ -165,7 +167,7 @@ void wxTopLevelWindowOS2::OnActivate(
         //
         // Restore focus to the child which was last focused
         //
-        wxLogTrace(_T("focus"), _T("wxTLW %08lx activated."), m_hWnd);
+        wxLogTrace(_T("focus"), _T("wxTLW %08x activated."), m_hWnd);
 
         wxWindow*                   pParent = m_pWinLastFocused ? m_pWinLastFocused->GetParent()
                                                                 : NULL;
@@ -204,7 +206,7 @@ void wxTopLevelWindowOS2::OnActivate(
         }
 
         wxLogTrace(_T("focus"),
-                   _T("wxTLW %08lx deactivated, last focused: %08lx."),
+                   _T("wxTLW %08x deactivated, last focused: %08x."),
                    m_hWnd,
                    m_pWinLastFocused ? GetHwndOf(m_pWinLastFocused)
                                      : NULL);
@@ -363,7 +365,7 @@ bool wxTopLevelWindowOS2::CreateDialog(
     {
         wxFAIL_MSG(wxT("Did you forget to include wx/os2/wx.rc in your resources?"));
 
-        wxLogSysError(wxT("Can't create dialog using template '%ld'"), ulDlgTemplate);
+        wxLogSysError(wxT("Can't create dialog using template '%ul'"), ulDlgTemplate);
 
         return FALSE;
     }
@@ -413,7 +415,7 @@ bool wxTopLevelWindowOS2::CreateDialog(
         nX = (vSizeDpy.x - nWidth) / 2;
         nY = (vSizeDpy.y - nHeight) / 2;
     }
-    m_backgroundColour.Set(wxString(wxT("LIGHT GREY")));
+    m_backgroundColour.Set(wxString("LIGHT GREY"));
 
     LONG                            lColor = (LONG)m_backgroundColour.GetPixel();
 
@@ -498,7 +500,7 @@ bool wxTopLevelWindowOS2::CreateFrame(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Error creating frame. Error: %s\n"), sError.c_str());
+        wxLogError("Error creating frame. Error: %s\n", sError.c_str());
         return FALSE;
     }
 
@@ -510,7 +512,7 @@ bool wxTopLevelWindowOS2::CreateFrame(
     wxAssociateWinWithHandle(m_hWnd, this);
     wxAssociateWinWithHandle(m_hFrame, this);
 
-    m_backgroundColour.Set(wxString(wxT("MEDIUM GREY")));
+    m_backgroundColour.Set(wxString("MEDIUM GREY"));
 
     LONG                            lColor = (LONG)m_backgroundColour.GetPixel();
 
@@ -522,7 +524,7 @@ bool wxTopLevelWindowOS2::CreateFrame(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Error creating frame. Error: %s\n"), sError.c_str());
+        wxLogError("Error creating frame. Error: %s\n", sError.c_str());
         return FALSE;
     }
 
@@ -559,7 +561,7 @@ bool wxTopLevelWindowOS2::CreateFrame(
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(_T("Error sizing frame. Error: %s\n"), sError.c_str());
+        wxLogError("Error sizing frame. Error: %s\n", sError.c_str());
         return FALSE;
     }
     lStyle =  ::WinQueryWindowULong( m_hWnd
@@ -578,7 +580,7 @@ bool wxTopLevelWindowOS2::Create(
 , wxWindowID                        vId
 , const wxString&                   rsTitle
 , const wxPoint&                    rPos
-, const wxSize&                     rSizeOrig
+, const wxSize&                     rSize
 , long                              lStyle
 , const wxString&                   rsName
 )
@@ -590,19 +592,6 @@ bool wxTopLevelWindowOS2::Create(
     m_windowStyle = lStyle;
     SetName(rsName);
     m_windowId = vId == -1 ? NewControlId() : vId;
-
-    // always create a frame of some reasonable, even if arbitrary, size (at
-    // least for MSW compatibility)
-    wxSize rSize = rSizeOrig;
-    if ( rSize.x == -1 || rSize.y == -1 )
-    {
-        wxSize sizeDpy = wxGetDisplaySize();
-        if ( rSize.x == -1 )
-            rSize.x = sizeDpy.x / 3;
-        if ( rSize.y == -1 )
-            rSize.y = sizeDpy.y / 5;
-    }
-
     wxTopLevelWindows.Append(this);
     if (pParent)
         pParent->AddChild(this);
@@ -640,6 +629,9 @@ bool wxTopLevelWindowOS2::Create(
 
 wxTopLevelWindowOS2::~wxTopLevelWindowOS2()
 {
+    if (wxModelessWindows.Find(this))
+        wxModelessWindows.DeleteObject(this);
+
     //
     // After destroying an owned window, Windows activates the next top level
     // window in Z order but it may be different from our owner (to reproduce
@@ -724,6 +716,7 @@ bool wxTopLevelWindowOS2::Show(
 {
     int                             nShowCmd;
     SWP                             vSwp;
+    RECTL                           vRect;
 
     if (bShow != IsShown() )
     {
@@ -813,6 +806,7 @@ void wxTopLevelWindowOS2::Maximize(
 
 bool wxTopLevelWindowOS2::IsMaximized() const
 {
+    bool                            bIconic;
 
     ::WinQueryWindowPos(m_hFrame, (PSWP)&m_vSwp);
     return (m_vSwp.fl & SWP_MAXIMIZE);
@@ -1087,7 +1081,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
             static const wxChar*    zHIDDEN_PARENT_CLASS = _T("wxTLWHiddenParent");
 
             if (!::WinRegisterClass( wxGetInstance()
-                                    ,(PSZ)zHIDDEN_PARENT_CLASS
+                                    ,zHIDDEN_PARENT_CLASS
                                     ,NULL
                                     ,0
                                     ,sizeof(ULONG)
@@ -1101,7 +1095,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
             }
         }
         m_shWnd = ::WinCreateWindow( HWND_DESKTOP
-                                    ,(PSZ)m_szClassName
+                                    ,m_szClassName
                                     ,""
                                     ,0L
                                     ,(LONG)0L

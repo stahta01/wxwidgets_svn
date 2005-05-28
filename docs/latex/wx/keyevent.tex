@@ -78,115 +78,75 @@ functions that take a wxKeyEvent argument.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
-\membersection{wxKeyEvent::m\_altDown}\label{wxkeyeventmaltdown}
+\membersection{wxKeyEvent::m\_altDown}
 
 \member{bool}{m\_altDown}
 
-true if the Alt key is pressed down.
+TRUE if the Alt key is pressed down.
 
-
-\membersection{wxKeyEvent::m\_controlDown}\label{wxkeyeventmcontroldown}
+\membersection{wxKeyEvent::m\_controlDown}
 
 \member{bool}{m\_controlDown}
 
-true if control is pressed down.
+TRUE if control is pressed down.
 
-
-\membersection{wxKeyEvent::m\_keyCode}\label{wxkeyeventmkeycode}
+\membersection{wxKeyEvent::m\_keyCode}
 
 \member{long}{m\_keyCode}
 
 Virtual keycode. See \helpref{Keycodes}{keycodes} for a list of identifiers.
 
-
-\membersection{wxKeyEvent::m\_metaDown}\label{wxkeyeventmmetadown}
+\membersection{wxKeyEvent::m\_metaDown}
 
 \member{bool}{m\_metaDown}
 
-true if the Meta key is pressed down.
+TRUE if the Meta key is pressed down.
 
-
-\membersection{wxKeyEvent::m\_shiftDown}\label{wxkeyeventmshiftdown}
+\membersection{wxKeyEvent::m\_shiftDown}
 
 \member{bool}{m\_shiftDown}
 
-true if shift is pressed down.
+TRUE if shift is pressed down.
 
-
-\membersection{wxKeyEvent::m\_x}\label{wxkeyeventmx}
+\membersection{wxKeyEvent::m\_x}
 
 \member{int}{m\_x}
 
 X position of the event.
 
-
-\membersection{wxKeyEvent::m\_y}\label{wxkeyeventmy}
+\membersection{wxKeyEvent::m\_y}
 
 \member{int}{m\_y}
 
 Y position of the event.
 
-
-\membersection{wxKeyEvent::wxKeyEvent}\label{wxkeyeventctor}
+\membersection{wxKeyEvent::wxKeyEvent}
 
 \func{}{wxKeyEvent}{\param{WXTYPE}{ keyEventType}}
 
 Constructor. Currently, the only valid event types are wxEVT\_CHAR and wxEVT\_CHAR\_HOOK.
 
-
-\membersection{wxKeyEvent::AltDown}\label{wxkeyeventaltdown}
+\membersection{wxKeyEvent::AltDown}
 
 \constfunc{bool}{AltDown}{\void}
 
-Returns true if the Alt key was down at the time of the key event.
+Returns TRUE if the Alt key was down at the time of the key event.
 
-
-\membersection{wxKeyEvent::CmdDown}\label{wxkeyeventcmddown}
-
-\constfunc{bool}{CmdDown}{\void}
-
-"Cmd" is a pseudo key which is the same as Control for PC and Unix platforms
-but the special "Apple" (a.k.a as "Command") key under Macs: it makes often
-sense to use it instead of, say, ControlDown() because Cmd key is used for the
-same thing under Mac as Ctrl elsewhere (but Ctrl still exists, just not used
-for this purpose under Mac). So for non-Mac platforms this is the same as 
-\helpref{ControlDown()}{wxkeyeventcontroldown} and under Mac this is the same
-as \helpref{MetaDown()}{wxkeyeventmetadown}.
-
-
-\membersection{wxKeyEvent::ControlDown}\label{wxkeyeventcontroldown}
+\membersection{wxKeyEvent::ControlDown}
 
 \constfunc{bool}{ControlDown}{\void}
 
-Returns true if the control key was down at the time of the key event.
+Returns TRUE if the control key was down at the time of the key event.
 
-
-\membersection{wxKeyEvent::GetKeyCode}\label{wxkeyeventgetkeycode}
+\membersection{wxKeyEvent::GetKeyCode}
 
 \constfunc{int}{GetKeyCode}{\void}
 
 Returns the virtual key code. ASCII events return normal ASCII values,
 while non-ASCII events return values such as {\bf WXK\_LEFT} for the
-left cursor key. See \helpref{Keycodes}{keycodes} for a full list of
-the virtual key codes.
+left cursor key. See \helpref{Keycodes}{keycodes} for a full list of the virtual key codes.
 
-Note that in Unicode build, the returned value is meaningful only if the
-user entered a character that can be represented in current locale's default
-charset. You can obtain the corresponding Unicode character using
-\helpref{GetUnicodeKey}{wxkeyeventgetunicodekey}.
-
-
-\membersection{wxKeyEvent::GetPosition}\label{wxkeyeventgetposition}
-
-\constfunc{wxPoint}{GetPosition}{\void}
-
-\constfunc{void}{GetPosition}{\param{long *}{x}, \param{long *}{y}}
-
-Obtains the position (in client coordinates) at which the key was pressed.
-
-
-\membersection{wxKeyEvent::GetRawKeyCode}\label{wxkeyeventgetrawkeycode}
+\membersection{wxKeyEvent::GetRawKeyCode}
 
 \constfunc{wxUint32}{GetRawKeyCode}{\void}
 
@@ -196,8 +156,7 @@ which should only be used in advanced applications.
 {\bf NB:} Currently the raw key codes are not supported by all ports, use
 {\tt\#ifdef wxHAS\_RAW\_KEY\_CODES} to determine if this feature is available.
 
-
-\membersection{wxKeyEvent::GetRawKeyFlags}\label{wxkeyeventgetrawkeyflags}
+\membersection{wxKeyEvent::GetRawKeyFlags}
 
 \constfunc{wxUint32}{GetRawKeyFlags}{\void}
 
@@ -207,53 +166,46 @@ platform-dependent and should only be used in advanced applications.
 {\bf NB:} Currently the raw key flags are not supported by all ports, use
 {\tt \#ifdef wxHAS\_RAW\_KEY\_CODES} to determine if this feature is available.
 
-
-\membersection{wxKeyEvent::GetUnicodeKey}\label{wxkeyeventgetunicodekey}
-
-\constfunc{wxChar}{GetUnicodeKey}{\void}
-
-Returns the Unicode character corresponding to this key event.
-
-This function is only available in Unicode build, i.e. when
-\texttt{wxUSE\_UNICODE} is $1$.
-
-
-\membersection{wxKeyEvent::GetX}\label{wxkeyeventgetx}
+\membersection{wxKeyEvent::GetX}
 
 \constfunc{long}{GetX}{\void}
 
 Returns the X position (in client coordinates) of the event.
 
-
-\membersection{wxKeyEvent::GetY}\label{wxkeyeventgety}
+\membersection{wxKeyEvent::GetY}
 
 \constfunc{long}{GetY}{\void}
 
-Returns the Y (in client coordinates) position of the event.
+Returns the Y position (in client coordinates) of the event.
 
+\membersection{wxKeyEvent::MetaDown}
 
-\membersection{wxKeyEvent::HasModifiers}\label{wxkeyeventhasmodifiers}
+\constfunc{bool}{MetaDown}{\void}
+
+Returns TRUE if the Meta key was down at the time of the key event.
+
+\membersection{wxKeyEvent::GetPosition}
+
+\constfunc{wxPoint}{GetPosition}{\void}
+
+\constfunc{void}{GetPosition}{\param{long *}{x}, \param{long *}{y}}
+
+Obtains the position (in client coordinates) at which the key was pressed.
+
+\membersection{wxKeyEvent::HasModifiers}
 
 \constfunc{bool}{HasModifiers}{\void}
 
-Returns true if either {\sc Ctrl} or {\sc Alt} keys was down
+Returns TRUE if either {\sc Ctrl} or {\sc Alt} keys was down
 at the time of the key event. Note that this function does not take into
 account neither {\sc Shift} nor {\sc Meta} key states (the reason for ignoring
 the latter is that it is common for {\sc NumLock} key to be configured as
 {\sc Meta} under X but the key presses even while {\sc NumLock} is on should
 be still processed normally).
 
-
-\membersection{wxKeyEvent::MetaDown}\label{wxkeyeventmetadown}
-
-\constfunc{bool}{MetaDown}{\void}
-
-Returns true if the Meta key was down at the time of the key event.
-
-
 \membersection{wxKeyEvent::ShiftDown}\label{wxkeyeventshiftdown}
 
 \constfunc{bool}{ShiftDown}{\void}
 
-Returns true if the shift key was down at the time of the key event.
+Returns TRUE if the shift key was down at the time of the key event.
 

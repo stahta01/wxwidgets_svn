@@ -12,12 +12,17 @@
 #ifndef _WX_BUTTON_H_
 #define _WX_BUTTON_H_
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
+#ifdef __GNUG__
 #pragma interface "button.h"
 #endif
 
+#include "wx/control.h"
+#include "wx/gdicmn.h"
+
+WXDLLEXPORT_DATA(extern const char*) wxButtonNameStr;
+
 // Pushbutton
-class WXDLLEXPORT wxButton: public wxButtonBase
+class WXDLLEXPORT wxButton: public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxButton)
         
@@ -25,7 +30,7 @@ public:
     wxButton() { }
     wxButton(wxWindow *parent,
         wxWindowID id,
-        const wxString& label = wxEmptyString,
+        const wxString& label,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0,
         const wxValidator& validator = wxDefaultValidator,
@@ -34,8 +39,7 @@ public:
         Create(parent, id, label, pos, size, style, validator, name);
     }
     
-    bool Create(wxWindow *parent, wxWindowID id,
-        const wxString& label = wxEmptyString,
+    bool Create(wxWindow *parent, wxWindowID id, const wxString& label,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0,
         const wxValidator& validator = wxDefaultValidator,
@@ -47,10 +51,9 @@ public:
     static wxSize GetDefaultSize();
     
     // Implementation
-private:
-    virtual wxSize DoGetBestSize() const;
-    wxSize OldGetBestSize() const;
-    void SetDefaultShadowThicknessAndResize();
+    virtual void ChangeFont(bool keepOriginalSize = TRUE);
+    virtual void ChangeBackgroundColour();
+    virtual void ChangeForegroundColour();
 };
 
 #endif

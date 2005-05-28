@@ -6,7 +6,7 @@
 // Created:     10/12/99
 // RCS-ID:      $Id$
 // Copyright:   (c) David Webster
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
@@ -24,11 +24,11 @@
   #include "wx/dcmemory.h"
   #include "wx/menu.h"
   #include "wx/utils.h"
+  #include "wx/settings.h"
 #endif
 
 #if wxUSE_OWNER_DRAWN
 
-#include "wx/settings.h"
 #include "wx/ownerdrw.h"
 #include "wx/menuitem.h"
 
@@ -111,7 +111,7 @@ bool wxOwnerDrawn::OnMeasureItem(
     // Add space at the end of the menu for the submenu expansion arrow
     // this will also allow offsetting the accel string from the right edge
     //
-    *pWidth = (size_t)(*pWidth + GetDefaultMarginWidth() * 1.5);
+    *pWidth += GetDefaultMarginWidth() * 1.5;
 
     //
     // JACS: items still look too tightly packed, so adding 5 pixels.
@@ -214,7 +214,7 @@ bool wxOwnerDrawn::OnDrawItem(
     //
     if (eStatus & wxODSelected)
     {
-        wxColour                        vCol2(wxT("WHITE"));
+        wxColour                        vCol2("WHITE");
         vColBack.Set( (unsigned char)0
                      ,(unsigned char)0
                      ,(unsigned char)160
@@ -246,7 +246,7 @@ bool wxOwnerDrawn::OnDrawItem(
         // Fall back to default colors if none explicitly specified
         //
         vRef = ::WinQuerySysColor( HWND_DESKTOP
-                                  ,SYSCLR_MENU  // we are using gray for all our window backgrounds in wxWidgets
+                                  ,SYSCLR_MENU  // we are using gray for all our window backgrounds in wxWindows
                                   ,0L
                                  );
         vColBack.Set( GetRValue(vRef)
@@ -300,10 +300,10 @@ bool wxOwnerDrawn::OnDrawItem(
     //
     // Display main text and accel text separately to allign better
     //
-    wxString                        sTgt = wxT("\t");
+    wxString                        sTgt = "\t";
     wxString                        sFullString = m_strName; // need to save the original text
     wxString                        sAccel;
-    int                             nIndex;
+    size_t                          nIndex;
     size_t                          nWidth;
     size_t                          nCharWidth;
     size_t                          nHeight;
@@ -324,7 +324,7 @@ bool wxOwnerDrawn::OnDrawItem(
     //
     // Deal with the mneumonic character
     //
-    sTgt = wxT("~");
+    sTgt = "~";
     nIndex = sFullString.Find(sTgt.c_str());
     if (nIndex != -1)
     {
@@ -336,12 +336,12 @@ bool wxOwnerDrawn::OnDrawItem(
                           ,(long *)&nWidth
                           ,(long *)&nHeight
                          );
-        sTmp = sFullString[(size_t)(nIndex + 1)];
+        sTmp = sFullString[nIndex + 1];
         rDC.GetTextExtent( sTmp
                           ,(long *)&nCharWidth
                           ,(long *)&nHeight
                          );
-        sFullString.Replace(sTgt.c_str(), wxEmptyString, TRUE);
+        sFullString.Replace(sTgt.c_str(), "", TRUE);
     }
 
     //
@@ -464,6 +464,11 @@ bool wxOwnerDrawn::OnDrawItem(
 
             if (eStatus & wxODSelected)
             {
+                RECT                vRectBmp = { rRect.x
+                                                ,rRect.y
+                                                ,rRect.x + GetMarginWidth() - 1
+                                                ,rRect.y + m_nHeight - 1
+                                               };
                 POINTL              vPnt1 = {rRect.x + 1, rRect.y + 3}; // Leave a little background border
                 POINTL              vPnt2 = {rRect.x + GetMarginWidth(), rRect.y + m_nHeight - 3};
 

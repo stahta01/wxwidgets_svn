@@ -97,11 +97,11 @@
 //---------------------------------------------------------------------------
 // These are prototypes of some helper functions found in ogl.i
 
-wxList* wxPy_wxListHelper(PyObject* pyList, const wxChar* className);
+wxList* wxPy_wxListHelper(PyObject* pyList, char* className);
 wxList* wxPy_wxRealPoint_ListHelper(PyObject* pyList);
 PyObject* wxPyMake_wxShapeEvtHandler(wxShapeEvtHandler* source);
-PyObject* wxPy_ConvertShapeList(wxListBase* list);
-PyObject* wxPy_ConvertRealPointList(wxListBase* list);
+PyObject* wxPy_ConvertShapeList(wxListBase* list, const char* className);
+
 
 
 //---------------------------------------------------------------------------
@@ -147,12 +147,6 @@ class wxPyShape : public wxShape {
 public:
     wxPyShape(wxPyShapeCanvas *can = NULL)
         : wxShape(can) {}
-
-    virtual void GetBoundingBoxMin(double *width, double *height)
-    {
-        if (width) *width = 0.0;
-        if (height) *height = 0.0;
-    }
 
     WXSHAPE_DEC_CALLBACKS();
 
