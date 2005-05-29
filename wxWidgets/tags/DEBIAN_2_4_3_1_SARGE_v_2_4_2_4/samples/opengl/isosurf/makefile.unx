@@ -1,0 +1,35 @@
+#
+# File:		makefile.unx
+# Author:	Julian Smart
+# Created:	1998
+# Updated:	
+# Copyright:	(c) 1998 Julian Smart
+#
+# "%W% %G%"
+#
+# Makefile for isosurf example (UNIX).
+
+PROGRAM=isosurf
+
+CXX = $(shell wx-config --cxx)
+
+OBJECTS = $(PROGRAM).o
+
+# implementation
+
+.SUFFIXES:	.o .cpp
+
+.cpp.o :
+	$(CXX) -c `wx-config --cxxflags` -o $@ $<
+
+all: $(PROGRAM) isosurf.dat
+
+$(PROGRAM):	$(OBJECTS)
+	$(CXX) -o $(PROGRAM) $(OBJECTS) `wx-config --gl-libs`
+
+clean: 
+	rm -f *.o $(PROGRAM)
+
+isosurf.dat:	isosurf.dat.gz
+	gzip -c -d isosurf.dat.gz > isosurf.dat
+
